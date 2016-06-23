@@ -65,4 +65,5 @@ aes-ml:
 clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
 	rm -rf $ *.cmx *.o *.cmi *~ *.cmo *.exe $(CHACHA_ODIR) $(POLY_ODIR) $(AES_ODIR) \
-		$(addprefix $(LIB_DIR)/ml/,*.cmx *.o *.cmi *~ *.cmo) ml/*~ $(CODE_DIR)/*~
+		$(addprefix $(LIB_DIR)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
+		$(addprefix ml/,*.cmx *.o *.cmi *~ *.cmo) $(CODE_DIR)/*~
