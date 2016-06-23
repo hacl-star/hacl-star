@@ -1,5 +1,7 @@
 all:
-	make -C symetric
+	$(MAKE) -C symetric
+	$(MAKE) -C ec
 
 clean:
-	make -C symetric clean
+	$(MAKE) -C symetric clean
+	$(MAKE) -C ec clean
