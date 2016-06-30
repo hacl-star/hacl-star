@@ -30,6 +30,10 @@ poly-ver:
 aes-ver:
 	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES) Crypto.AES.fst --lax
 
+# AEAD targets
+aead-ver:
+	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES) chacha.fst parameters.fst bigint.fst bignum.fst poly.fst --lax AEAD.ChaCha20_Poly1305.fst
+
 # Cleaning
 clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
