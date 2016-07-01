@@ -25,8 +25,8 @@ let logxor a b = a lxor b
 let logor a b = a lor b
 let lognot a = lnot a
 
-let shift_left a s = a lsl s
-let shift_right a s = a lsr s
+let shift_left a s = (a lsl s) land mask
+let shift_right a s = (a lsr s) land mask
 
 let rotate_left a s = ((a lsl s) land mask) + ((a lsr (32-s)) land mask)
 let rotate_right a s = ((a lsl (32-s)) land mask) + ((a lsr s) land mask)

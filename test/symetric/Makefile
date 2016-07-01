@@ -11,8 +11,8 @@ LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lem
 CODE_DIR=../../crypto/symetric
 CODE_DIR_HST=../../crypto_hst/symetric
 
-OPTIONS_OCAML=--lax --codegen OCaml --universes --no_location_info --use_native_int
-OPTIONS_OCAML_HST=--lax --codegen OCaml --universes --no_location_info
+OPTIONS_OCAML=--lax --codegen OCaml --no_location_info --use_native_int
+OPTIONS_OCAML_HST=--lax --codegen OCaml --no_location_info
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -20-26
@@ -23,7 +23,7 @@ REALIZED_ML=$(addsuffix .mli,$(REALIZED_MLI)) $(addsuffix .ml,$(REALIZED_MLI) $(
 NO_CODEGEN=$(addprefix --no_extract , SInt $(REALIZED_MODULE))
 # OCaml HST variables
 REALIZED_MLI_HST=Hacl_UInt8 Hacl_UInt32 Hacl_UInt64
-REALIZED_HST=Hacl_Cast Hacl_SBuffer
+REALIZED_HST=FStar_HyperStack FStar_HST Hacl_Cast Hacl_SBuffer
 REALIZED_MODULE_HST=$(subst _,., $(REALIZED_HST))
 REALIZED_ML_HST=$(addsuffix .mli,$(REALIZED_MLI_HST)) $(addsuffix .ml,$(REALIZED_MLI_HST) $(REALIZED_HST))
 NO_CODEGEN_HST=$(addprefix --no_extract , $(REALIZED_MODULE_HST))
@@ -48,11 +48,11 @@ AES_ODIR=aes
 
 .PHONY: chacha-ml poly-ml aes-ml chacha-hst-ml
 
-all: chacha-ml poly-ml aes-ml #chacha-hst-ml
+all: chacha-ml poly-ml aes-ml chacha-hst-ml
 
 # OCaml extracton of CHACHA20
 chacha-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml PRIMS_DIR=native_int
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all PRIMS_DIR=native_int
 	mkdir -p $(CHACHA_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML) $(LIB_FILES) $(CHACHA_FSTAR) --odir $(CHACHA_ODIR) 
 	$(OCAMLOPT) -I $(ULIB_ML)/native_int -I $(LIB_DIR)/ml -I $(CHACHA_ODIR) $(addprefix $(LIB_DIR)/ml/,$(REALIZED_ML)) \
@@ -61,7 +61,7 @@ chacha-ml:
 
 # OCaml extracton of POLY1305
 poly-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml PRIMS_DIR=native_int
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all PRIMS_DIR=native_int
 	mkdir -p $(POLY_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML) $(LIB_FILES) $(POLY_FSTAR) --odir $(POLY_ODIR) #2> /dev/null
 	$(OCAMLOPT) -I $(ULIB_ML)/native_int -I $(LIB_DIR)/ml -I $(POLY_ODIR) $(addprefix $(LIB_DIR)/ml/,$(REALIZED_ML)) \
@@ -70,7 +70,7 @@ poly-ml:
 
 # OCaml extraction of AES
 aes-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml PRIMS_DIR=native_int
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all PRIMS_DIR=native_int
 	mkdir -p $(AES_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML) $(LIB_FILES) $(AES_FSTAR) --odir $(AES_ODIR) 
 	$(OCAMLOPT) -I $(ULIB_ML)/native_int -I $(LIB_DIR)/ml -I $(AES_ODIR) $(addprefix $(LIB_DIR)/ml/,$(REALIZED_ML)) \
@@ -79,11 +79,16 @@ aes-ml:
 
 # OCaml extracton of CHACHA20
 chacha-hst-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
 	mkdir -p $(CHACHA_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR) 
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CHACHA_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha20.ml -o test_chacha20.exe 
+	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe 
+	./test_chacha20.exe
+
+compile:
+	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CHACHA_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe 
 	./test_chacha20.exe
 
 # Cleaning

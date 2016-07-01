@@ -28,7 +28,7 @@ let equation_4 x2 z2 x3 z3 x1 = (x1 ^* (((x3 ^- z3) ^* (x2^+z2)) ^- ((x3 ^+ z3) 
 val double_and_add': two_p:point -> two_p_plus_q:point -> p:point -> p_plus_q:point -> q:point ->
   ST unit
     (requires (fun h ->
-      (Live h two_p) /\ (Live h two_p_plus_q)
+      (Live h two_p) /\ (Live h two_p_plus_q) /\ (pointOf h p <> pointOf h p_plus_q)
       /\ (OnCurve h p) /\ (OnCurve h p_plus_q) /\ (OnCurve h q)
     ))
     (ensures (fun h0 _ h1 ->
@@ -102,7 +102,7 @@ val double_and_add:
   two_p:point -> two_p_plus_q:point -> p:point -> p_plus_q:point -> q:point -> 
   ST unit
     (requires (fun h -> 
-      (Live h two_p) /\ (Live h two_p_plus_q)
+      (Live h two_p) /\ (Live h two_p_plus_q) /\ (pointOf h p <> pointOf h p_plus_q)
       /\ (OnCurve h p) /\ (OnCurve h p_plus_q) /\ (OnCurve h q)
       ))
     (ensures (fun h0 _ h1 -> 

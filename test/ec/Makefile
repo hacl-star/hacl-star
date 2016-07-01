@@ -8,7 +8,7 @@ LIB_FILES=$(addprefix $(LIB_DIR)/, axioms.fst intlib.fst IntLibLemmas.fst sint.f
 
 CODE_DIR=../../crypto/ec
 
-OPTIONS_OCAML=--lax --codegen OCaml --universes --no_location_info --use_native_int
+OPTIONS_OCAML=--lax --codegen OCaml --no_location_info --use_native_int
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -I $(ULIB_ML)/native_int -w -20-26
@@ -30,7 +30,7 @@ all: curve-ml
 
 # Curve25519 extraction to OCaml
 curve-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml PRIMS_DIR=native_int
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all PRIMS_DIR=native_int
 	mkdir -p $(CURVE_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML) $(LIB_FILES) $(CURVE_25519_FSTAR) --odir $(CURVE_ODIR)
 	@sed -i 's/(Obj.magic ((fun pp ppq p pq q n ctr b scalar/(((fun pp ppq p pq q n ctr b scalar/g' $(CURVE_ODIR)/Curve_Ladder.ml

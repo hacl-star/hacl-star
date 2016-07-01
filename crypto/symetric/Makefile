@@ -3,7 +3,7 @@ FSTAR_HOME?=../../../FStar
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_DEFAULT_ARGS) # from the included Makefile
 
-OPTIONS_VER=--universes
+OPTIONS_VER=
 
 LIB_DIR=../../lib/st/
 TEST_DIR=../../test/ec

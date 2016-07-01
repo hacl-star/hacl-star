@@ -237,6 +237,10 @@ let small_step_core pp ppq p pq q n ctr b scalar =
   swap_conditional p pq mask; 
   let h = ST.get() in
   small_step_core_lemma_1 h0 h pp ppq p pq q;
+  (* 
+     In a proper scalar multiplication context, we are garantied that p <> pq
+  *)
+  admitP(pointOf p <> pointOf pq);
   double_and_add pp ppq p pq q; 
   let h2 = ST.get() in
   swap_conditional pp ppq mask; 
@@ -663,8 +667,9 @@ let live_lemma_0 h0 h1 p = ()
 
 (* 
    As for Montgomery curves for which only the "x" coordinate is used, one cannot check that a 
-   point is actually on the curve, we rely on the fact that is the input has been properly trimmed
-   as indicated in the RFC for both Curve25519 and Curve448, is does not influence the computation.
+   point is actually on the curve, we rely on the fact that is the input secret has been properly 
+   trimmed as indicated in the RFC for both Curve25519 and Curve448, is does not influence the 
+   computation.
 *)
 val montgomery_ladder:
   res:point -> n:serialized{Distinct2 n res} -> q:point{Distinct2 n q /\ Distinct res q} ->
@@ -716,8 +721,8 @@ let montgomery_ladder res n q =
   let h2 = ST.get() in
   admitP(NtimesQ (formula_4 h2 n 0) (pointOf h2 q) h2 inf p);
   admitP(Serialized h2 n);
-  big_step n two_p two_p_plus_q inf p q 0;
   admit(); // Must reduce the timeout
+  big_step n two_p two_p_plus_q inf p q 0;
   let h3 = ST.get() in
   admitP (Live h3 res);
   // Copy result to output

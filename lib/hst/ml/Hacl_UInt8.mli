@@ -1,7 +1,7 @@
 type uint8
 type t
        
-val n:int
+val n:Prims.int
        
 val zero:uint8
 val one:uint8
@@ -40,13 +40,13 @@ val op_Hat_Amp:uint8 -> uint8 -> uint8
 val op_Hat_Bar:uint8 -> uint8 -> uint8
 val op_Hat_Hat:uint8 -> uint8 -> uint8
 
-val of_int: int -> uint8
+val of_int: Prims.int -> uint8
 val of_string: string -> uint8
                                 
 val eq:uint8 -> uint8 -> uint8
 val gte:uint8 -> uint8 -> uint8
 
 (* Only for realization purposes, not in F* library *)
-val uint_to_t:int -> uint8
-val to_int:uint8 -> int
+val uint_to_t:Prims.int -> uint8
+val to_int:uint8 -> Prims.int
 val to_string: uint8 -> string

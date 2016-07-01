@@ -1,6 +1,6 @@
 open Char
 
-let n = 8
+let n = Prims.parse_int "8"
 
 type uint8 = int
 type t = uint8
@@ -26,8 +26,8 @@ let logxor a b =  ( a lxor  b)
 let logor a b =  ( a lor  b)
 let lognot a =  (lnot ( a land 255))
 
-let shift_left a s = a lsl s
-let shift_right a s = a lsr s
+let shift_left a s = (a lsl s) land 255
+let shift_right a s = (a lsr s) land 255
 
 let rotate_left a s =  ((( a lsl s) + ( a lsr (8-s))) land 255)
 let rotate_right a s =  ((( a lsl (8-s)) + ( a lsr s)) land 255)
@@ -64,8 +64,8 @@ let of_string s =
   let x = int_of_string s in
   if x >= 256 || x < 0 then failwith "Wrong constant"
   else x 
-let of_int s = s land 255
+let of_int s = Z.to_int (Z.logand s (Z.of_int 255))
                                                              
 let to_string s = string_of_int s
-let to_int s = s
-let uint_to_t s = s
+let to_int s = Z.of_int s
+let uint_to_t s = Z.to_int s

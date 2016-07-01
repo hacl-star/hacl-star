@@ -42,19 +42,19 @@ let quarter_round m a b c d =
   upd m a (index m a +%^ index m b);
   upd m d (index m d ^^ index m a);
   let (tmp:u32) = index m d in 
-  upd m d (tmp <<< UInt32.uint_to_t 16); 
+  upd m d (tmp <<< 16ul); 
   upd m c (index m c +%^ index m d); 
   upd m b (index m b ^^ index m c); 
   let tmp = index m b in
-  upd m b (tmp <<< UInt32.uint_to_t 12);
+  upd m b (tmp <<< 12ul);
   upd m a (index m a +%^ index m b); 
   upd m d (index m d ^^ index m a); 
   let tmp = index m d in
-  upd m d (tmp <<< UInt32.uint_to_t 8);
+  upd m d (tmp <<< 8ul);
   upd m c (index m c +%^ index m d); 
   upd m b (index m b ^^ index m c); 
   let tmp = index m b in
-  upd m b (tmp <<< UInt32.uint_to_t 7)
+  upd m b (tmp <<< 7ul)
  
 (* Chacha20 block function *)
 val column_round: m:uint32s{length m = 16} -> STL unit
@@ -85,10 +85,10 @@ let uint32_of_bytes (b:bytes{length b >= 4}) =
   let b1 = (index b 1ul) in
   let b2 = (index b 2ul) in
   let b3 = (index b 3ul) in
-  let r = (op_Less_Less_Hat (uint8_to_uint32 b3) 24ul)
-	+%^ (op_Less_Less_Hat (uint8_to_uint32 b2) 16ul)
-	+%^ (op_Less_Less_Hat (uint8_to_uint32 b1) 8ul)
-	+%^ uint8_to_uint32 b0 in
+  let r = (op_Less_Less_Hat (sint8_to_sint32 b3) 24ul)
+	+%^ (op_Less_Less_Hat (sint8_to_sint32 b2) 16ul)
+	+%^ (op_Less_Less_Hat (sint8_to_sint32 b1) 8ul)
+	+%^ sint8_to_sint32 b0 in
   (* TODO *)
   assume (v r = UInt8.v b0 * pow2 8 * UInt8.v b1  + pow2 16 * UInt8.v b2 + pow2 24 * UInt8.v b3);
   r
@@ -108,10 +108,10 @@ let rec bytes_of_uint32s output m len =
     begin
       let l = UInt32.sub len 1ul in
       let x = index m l in
-      let b0 = uint32_to_uint8 (x &^ 255ul) in
-      let b1 = uint32_to_uint8 ((x ^>> 8ul) &^ 255ul) in
-      let b2 = uint32_to_uint8 ((x ^>> 16ul) &^ 255ul) in
-      let b3 = uint32_to_uint8 ((x ^>> 24ul) &^ 255ul) in
+      let b0 = sint32_to_sint8 (x &^ uint32_to_sint32 255ul) in
+      let b1 = sint32_to_sint8 ((x ^>> 8ul) &^ uint32_to_sint32 255ul) in
+      let b2 = sint32_to_sint8 ((x ^>> 16ul) &^ uint32_to_sint32 255ul) in
+      let b3 = sint32_to_sint8 ((x ^>> 24ul) &^ uint32_to_sint32 255ul) in
       let l4 = l ^* 4ul in
       upd output l4 b0; 
       upd output (UInt32.add l4 1ul) b1;
@@ -134,10 +134,10 @@ let rec xor_bytes output in1 in2 len =
   if len =^ 0ul then ()
   else
     begin
-      let i = len -^ 1ul in 
+      let i = UInt32.sub len 1ul in 
       let in1i = index in1 i in
       let in2i = index in2 i in
-      let oi = UInt8.logxor in1i in2i in
+      let oi = Hacl.UInt8.logxor in1i in2i in
       upd output i oi; 
       let h1 = HST.get() in
       no_upd_lemma_1 h0 h1 output in1;
@@ -148,17 +148,17 @@ let rec xor_bytes output in1 in2 len =
 // TODO 
 (* #set-options "--lax" *)
 
-val initialize_state: state:uint32s{length state = 16} -> 
-  key:bytes{length key = 32 /\ disjoint state key} -> counter:u32 -> 
+val initialize_state: state:uint32s{length state = 16} ->
+  key:bytes{length key = 32 /\ disjoint state key} -> counter:s32 ->
   nonce:bytes{length nonce = 12 /\ disjoint key nonce /\ disjoint state nonce} -> STL unit
   (requires (fun h -> live h state /\ live h key /\ live h nonce))
   (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let initialize_state state key counter nonce =
   (* Constant part *)
-  upd state 0ul 0x61707865ul;
-  upd state 1ul 0x3320646eul;
-  upd state 2ul 0x79622d32ul;
-  upd state 3ul 0x6b206574ul;
+  upd state 0ul (uint32_to_sint32 0x61707865ul);
+  upd state 1ul (uint32_to_sint32 0x3320646eul);
+  upd state 2ul (uint32_to_sint32 0x79622d32ul);
+  upd state 3ul (uint32_to_sint32 0x6b206574ul);
   (* Key part *)
   let k0 = sub key 0ul  4ul in 
   let k1 = sub key 4ul  4ul in 
@@ -190,7 +190,7 @@ let initialize_state state key counter nonce =
   upd state 10ul (uint32_of_bytes k6);
   upd state 11ul (uint32_of_bytes k7);
   (* Block counter part *)
-  upd state 12ul counter; 
+  upd state 12ul counter;
   (* Update with nonces *)
   upd state 13ul (uint32_of_bytes n0);
   upd state 14ul (uint32_of_bytes n1);
@@ -245,7 +245,7 @@ let lemma_chacha20_block (output:bytes) (state:uint32s{frameOf output <> frameOf
 
 val chacha20_block: output:bytes{length output = 64} -> 
   state:uint32s{length state = 16 /\ frameOf state <> frameOf output} ->
-  key:bytes{length key = 32 /\ disjoint state key /\ disjoint output key} -> counter:u32 -> 
+  key:bytes{length key = 32 /\ disjoint state key /\ disjoint output key} -> counter:s32 -> 
   nonce:bytes{length nonce = 12 /\ disjoint key nonce /\ disjoint state nonce /\ disjoint nonce output} -> STL unit
     (requires (fun h -> live h state /\ live h output /\ live h key /\ live h nonce))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h1 state /\ modifies_2 output state h0 h1 ))
@@ -258,7 +258,7 @@ let chacha20_block output m key counter nonce =
   let h1 = HST.get() in
   cut(modifies_1 m h0' h1);
   (* Initial state *) 
-  let m0 = create 0ul 16ul in
+  let m0 = create (uint32_to_sint32 0ul) 16ul in
   let h2 = HST.get() in
   cut(modifies_0 h1 h2);
   blit m 0ul m0 0ul 16ul;
@@ -306,7 +306,7 @@ let chacha20_block output m key counter nonce =
 
 val chacha20_encrypt_loop: 
   state:uint32s{length state = 16} -> key:bytes{length key = 32 /\ disjoint state key} -> 
-  counter:u32 -> nonce:bytes{length nonce = 12 /\ disjoint state nonce /\ disjoint key nonce} -> 
+  counter:s32 -> nonce:bytes{length nonce = 12 /\ disjoint state nonce /\ disjoint key nonce} -> 
   plaintext:bytes{disjoint state plaintext /\ disjoint key plaintext /\ disjoint nonce plaintext} -> 
   ciphertext:bytes{frameOf state <> frameOf ciphertext /\ disjoint key ciphertext /\ disjoint nonce ciphertext /\ disjoint plaintext ciphertext} -> j:u32 -> max:u32{v j <= v max /\ v counter + v max < pow2 n} -> 
   STL unit
@@ -320,10 +320,10 @@ let rec chacha20_encrypt_loop state key counter nonce plaintext ciphertext j max
     begin
       (* Generate new state for block *)
       let cipher_block = sub ciphertext 0ul 64ul in
-      let ciphertext' = sub ciphertext 64ul (64ul ^* (max -^ j -^ 1ul)) in
+      let ciphertext' = sub ciphertext 64ul (UInt32.mul 64ul (UInt32.sub (UInt32.sub max j) 1ul)) in
       let plain_block = sub plaintext 0ul 64ul in
-      let plaintext' = sub plaintext 64ul (64ul ^* (max -^ j -^ 1ul)) in
-      chacha20_block cipher_block state key (counter +^ j) nonce; 
+      let plaintext' = sub plaintext 64ul (UInt32.mul 64ul (UInt32.sub (UInt32.sub max j) 1ul)) in
+      chacha20_block cipher_block state key (counter +^ (uint32_to_sint32 j)) nonce; 
 	(** Lemmas **)
 	let h1 = HST.get() in
 	(* aux_lemma plain_block cipher_block state; *)
@@ -346,7 +346,7 @@ let rec chacha20_encrypt_loop state key counter nonce plaintext ciphertext j max
 	(* (\* eq_lemma h0 h2 ciphertext' (only cipher_block ++ state);  *\) *)
 	(** End lemmas **)
       (* Apply Chacha20 to the next blocks *)
-      chacha20_encrypt_loop state key counter nonce plaintext' ciphertext' (j +^ 1ul) max;
+      chacha20_encrypt_loop state key counter nonce plaintext' ciphertext' (UInt32.add j 1ul) max;
 	(** Lemmas **)
 	let h3 = HST.get() in
 	(* aux_lemma'' state cipher_block; *)
@@ -358,11 +358,11 @@ let rec chacha20_encrypt_loop state key counter nonce plaintext ciphertext j max
 	(** End lemmas **)
     end
 
-let op_Hat_Slash a b = op_Slash_Hat a b
-let op_Hat_Percent a b = op_Percent_Hat a b
+let op_Hat_Slash a b = UInt32.div a b
+let op_Hat_Percent a b = UInt32.rem a b
 
 val chacha20_encrypt: 
-  ciphertext:bytes -> key:bytes{length key = 32 /\ disjoint ciphertext key} -> counter:u32 -> 
+  ciphertext:bytes -> key:bytes{length key = 32 /\ disjoint ciphertext key} -> counter:s32 -> 
   nonce:bytes{length nonce = 12 /\ disjoint ciphertext nonce /\ disjoint key nonce} -> 
   plaintext:bytes{disjoint ciphertext plaintext /\ disjoint key plaintext /\ disjoint nonce plaintext} -> len:u32{length ciphertext >= v len /\ length plaintext >= v len /\ v counter + v len / 64 < pow2 32} -> STL unit
     (requires (fun h -> live h ciphertext /\ live h key /\ live h nonce /\ live h plaintext))
@@ -371,7 +371,7 @@ let chacha20_encrypt ciphertext key counter nonce plaintext len =
   push_frame ();
   let h0 = HST.get() in
   (* Allocate the internal state *)
-  let state = create 0ul 16ul  in
+  let state = create (uint32_to_sint32 0ul) 16ul  in
   (* Compute number of iterations *)
   let max = (len ^/ 64ul) in 
   let rem = len ^% 64ul in
@@ -403,12 +403,12 @@ let chacha20_encrypt ciphertext key counter nonce plaintext len =
 	(* eq_lemma h1 h2 nonce (only ciphertext ++ state);  *)
 	(** End lemmas **)
       (* Apply Chacha20 to last block *)
-      let cipher_block = create 0uy 64ul in
-      let cipher_block' = sub ciphertext (max ^* 64ul) (len -^ (max ^* 64ul)) in
-      let plain_block = sub plaintext (max ^* 64ul) (len -^ (max ^* 64ul)) in
+      let cipher_block = create (uint8_to_sint8 0uy) 64ul in
+      let cipher_block' = sub ciphertext (UInt32.mul max 64ul) rem in
+      let plain_block = sub plaintext (UInt32.mul max 64ul) rem in
       (* let cipher_block' = offset ciphertext (max*64) in *)
       (* let plain_block = offset plaintext (max*64) in *)
-      chacha20_block cipher_block state key (counter +^ max) nonce; 
+      chacha20_block cipher_block state key (counter +^ (uint32_to_sint32 max)) nonce; 
 	(** Lemmas **)
 	let h3 = HST.get() in
 	(* cut (v rem < 64 /\ length cipher_block >= v rem /\ v len = Prims.op_Addition (v max * 64) (v rem));  *)
