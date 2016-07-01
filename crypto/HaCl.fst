@@ -41,10 +41,10 @@ val hacl_secretbox: alg:aead_alg -> output:ciphertext -> input:bytes -> len:nat{
 assume val hacl_secretbox_open': alg:aead_alg -> input:ciphertext -> len:nat{len = length input} -> n:nonce{length n = aeadRealIVSize alg} -> k:key{length k = aeadKeySize alg} -> Tot (output:bytes{length output = len})
 
 val hacl_secretbox_open: alg:aead_alg -> output:bytes -> input:ciphertext -> len:nat{len = length input} -> n:nonce{length n = aeadRealIVSize alg} -> k:key{length k = aeadKeySize alg} 
-  -> STL int (retcode:int)
-          (requires (fun h -> live h output /\ live h input /\ live h n /\ live h k))
-          (ensures  (fun h0 r h1 -> live h1 output /\ live h1 input /\ live h1 n /\ live h1 k
-                               /\ modifies_1 output h0 h1 /\ output = (hacl_secretbox_open' alg input len n k)))
+  -> STL (retcode:int)
+        (requires (fun h -> live h output /\ live h input /\ live h n /\ live h k))
+        (ensures  (fun h0 r h1 -> live h1 output /\ live h1 input /\ live h1 n /\ live h1 k
+                             /\ modifies_1 output h0 h1 /\ output = (hacl_secretbox_open' alg input len n k)))
 
 
 ////////////////////////////////////////////////////////////////// 
