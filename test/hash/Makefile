@@ -18,8 +18,8 @@ REALIZED_MODULE=$(subst _,., $(REALIZED))
 REALIZED_ML=$(addsuffix .mli,$(REALIZED_MLI)) $(addsuffix .ml,$(REALIZED_MLI) $(REALIZED))
 NO_CODEGEN=$(addprefix --no_extract , SInt $(REALIZED_MODULE))
 
-SHA1_FSTAR=$(addprefix $(CODE_DIR)/, \ # TODO: add F* code module for HASH functions. e.g.: hash.fst
-	)
+SHA1_FSTAR=$(addprefix $(CODE_DIR)/, ) # TODO: add F* code module for HASH functions. e.g.: hash.fst
+
 SHA1_EXTRACTED= # TODO: add extracted module names to compile
 
 # TODO: add same variables for other SHA, HMAC etc.
@@ -28,12 +28,12 @@ SHA1_ODIR=sha1
 
 .PHONY: sha1-ml # TOOD: add other relevant targets
 
-all: sha1-ml
+all: #sha1-ml # TODO: complete the target and uncomment
 
 # SHA1 extraction to OCaml
 sha1-ml:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml PRIMS_DIR=native_int
-	mkdir -p $(_ODIR)
+	mkdir -p $(SHA1_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML) $(LIB_FILES) $(SHA1_FSTAR) --odir $(SHA1_ODIR)
 	$(OCAMLOPT) -I $(LIB_DIR)/ml -I $(SHA1_ODIR) $(addprefix $(LIB_DIR)/ml/,$(REALIZED_ML)) \
 	  $(addprefix $(SHA1_ODIR)/,$(SHA1_EXTRACTED)) ml/test_sha1.ml -o test_sha1.exe
