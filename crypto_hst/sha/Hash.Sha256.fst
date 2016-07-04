@@ -228,17 +228,15 @@ let init whash =
 
 
 (* Step 3 : Perform logical operations on the working variables *)
-// BB.TODO: Modifies_3 clause
-// BB.TODO: Seems that t1 and t2 are only uint32
 val update_inner_loop : (ws    :uint32s { length ws = 64 }) ->
                         (whash :uint32s { length whash = 8 /\ disjoint whash ws}) ->
                         (t     :u32{v t <= 64}) ->
-                        (t1    :uint32s { length t1 = 1 /\ disjoint t1 ws /\ disjoint t1 whash}) ->
-                        (t2    :uint32s { length t2 = 1 /\ disjoint t2 ws /\ disjoint t2 whash /\ disjoint t2 t1}) ->
-                        (k     :uint32s { length k = 64 /\ disjoint k ws /\ disjoint k whash /\ disjoint k t1 /\ disjoint k t2})
+                        (t1    :u32) ->
+                        (t2    :u32) ->
+                        (k     :uint32s { length k = 64 /\ disjoint k ws /\ disjoint k whash })
                         -> STL unit
-                             (requires (fun h -> live h ws /\ live h whash /\ live h t1 /\ live h t2 /\ live h k ))
-                             (ensures  (fun h0 r h1 -> live h1 ws /\ live h1 whash /\ live h1 t1 /\ live h1 t2 /\ live h1 k))
+                             (requires (fun h -> live h ws /\ live h whash /\ live h k ))
+                             (ensures  (fun h0 r h1 -> live h1 ws /\ live h1 whash /\ live h1 k /\ modifies_1 whash h0 h1))
 
 let rec update_inner_loop ws whash t t1 t2 k =
   if lt t 64ul then begin
@@ -248,12 +246,9 @@ let rec update_inner_loop ws whash t t1 t2 k =
     let v0 = _Sigma1 (index whash 4ul) in
     let v1 = _Ch (index whash 4ul) (index whash 5ul) (index whash 6ul) in
     let _t1 = add_mod _h (add_mod v0 (add_mod v1 (add_mod _kt _wt))) in
-    upd t1 0ul _t1;
     let z0 = _Sigma0 (index whash 0ul) in
     let z1 = _Maj (index whash 0ul) (index whash 1ul) (index whash 2ul) in
     let _t2 = add_mod z0 z1 in
-    upd t2 0ul _t2;
-
     let _d = (index whash 3ul) in
     upd whash 7ul (index whash 6ul);
     upd whash 6ul (index whash 5ul);
@@ -263,22 +258,20 @@ let rec update_inner_loop ws whash t t1 t2 k =
     upd whash 2ul (index whash 1ul);
     upd whash 1ul (index whash 0ul);
     upd whash 0ul (add_mod _t1 _t2);
-    update_inner_loop ws whash (t +^ 1ul) t1 t2 k end
+    update_inner_loop ws whash (t +^ 1ul) _t1 _t2 k end
   else ()
 
-// BB.TODO: Add modifies_4 clause
-// BB.TODO: Looks like t1 and t2 are u32
 val update_step : (whash :uint32s { length whash = 8 }) ->
                   (wdata :uint32s { disjoint whash wdata }) ->
                   (ws    :uint32s { length ws = 64 /\ disjoint ws whash /\ disjoint ws wdata }) ->
                   (rounds:u32) ->
                   (i     :u32) ->
-                  (t1    :uint32s { length t1 = 1 /\ disjoint t1 whash /\ disjoint t1 wdata /\ disjoint t1 ws}) ->
-                  (t2    :uint32s { length t2 = 1 /\ disjoint t2 whash /\ disjoint t2 wdata /\ disjoint t2 ws /\ disjoint t2 t1}) ->
-                  (k     :uint32s { length k = 64 /\ disjoint k whash /\ disjoint k wdata /\ disjoint k ws /\ disjoint k t1 /\ disjoint k t2})
+                  (t1    :u32) ->
+                  (t2    :u32) ->
+                  (k     :uint32s { length k = 64 /\ disjoint k whash /\ disjoint k wdata /\ disjoint k ws})
                   -> STL unit
-                       (requires (fun h -> live h whash /\ live h wdata /\ live h ws /\ live h t1 /\ live h t2 /\ live h k))
-                       (ensures  (fun h0 r h1 -> live h1 whash /\ live h1 wdata /\ live h1 ws /\ live h1 t1 /\ live h1 t2 /\ live h1 k))
+                       (requires (fun h -> live h whash /\ live h wdata /\ live h ws /\ live h k))
+                       (ensures  (fun h0 r h1 -> live h1 whash /\ live h1 wdata /\ live h1 ws /\ live h1 k /\ modifies_2 whash ws h0 h1))
 
 let rec update_step ihash wdata ws rounds i t1 t2 k =
   if lt i rounds then begin
@@ -286,8 +279,7 @@ let rec update_step ihash wdata ws rounds i t1 t2 k =
     let wblock = sub wdata pos 16ul in
 
     (* Step 1 : Scheduling function for sixty-four 32 bit words *)
-    let ia = 0ul in
-    wsched_define ws wblock ia;
+    wsched_define ws wblock 0ul;
 
     (* Step 2 : Initialize the eight working variables *)
     let whash = create 0ul 8ul in
@@ -301,34 +293,17 @@ let rec update_step ihash wdata ws rounds i t1 t2 k =
     upd whash 7ul (index ihash 7ul);
 
     (* Step 3 : Perform logical operations on the working variables *)
-    let ib = 0ul in
-    update_inner_loop ws whash ib t1 t2 k;
+    update_inner_loop ws whash 0ul t1 t2 k;
 
     (* Step 4 : Compute the ith intermediate hash value *)
-    let x01 = index whash 0ul in
-    let x02 = index ihash 0ul in
-    let x11 = index whash 1ul in
-    let x12 = index ihash 1ul in
-    let x21 = index whash 2ul in
-    let x22 = index ihash 2ul in
-    let x31 = index whash 3ul in
-    let x32 = index ihash 3ul in
-    let x41 = index whash 4ul in
-    let x42 = index ihash 4ul in
-    let x51 = index whash 5ul in
-    let x52 = index ihash 5ul in
-    let x61 = index whash 6ul in
-    let x62 = index ihash 6ul in
-    let x71 = index whash 7ul in
-    let x72 = index ihash 7ul in
-    upd ihash 0ul (add_mod x01 x02);
-    upd ihash 1ul (add_mod x11 x12);
-    upd ihash 2ul (add_mod x21 x22);
-    upd ihash 3ul (add_mod x31 x32);
-    upd ihash 4ul (add_mod x41 x42);
-    upd ihash 5ul (add_mod x51 x52);
-    upd ihash 6ul (add_mod x61 x62);
-    upd ihash 7ul (add_mod x71 x72);
+    upd ihash 0ul (add_mod (index whash 0ul) (index ihash 0ul));
+    upd ihash 1ul (add_mod (index whash 1ul) (index ihash 1ul));
+    upd ihash 2ul (add_mod (index whash 2ul) (index ihash 2ul));
+    upd ihash 3ul (add_mod (index whash 3ul) (index ihash 3ul));
+    upd ihash 4ul (add_mod (index whash 4ul) (index ihash 4ul));
+    upd ihash 5ul (add_mod (index whash 5ul) (index ihash 5ul));
+    upd ihash 6ul (add_mod (index whash 6ul) (index ihash 6ul));
+    upd ihash 7ul (add_mod (index whash 7ul) (index ihash 7ul));
     update_step ihash wdata ws rounds (i +^ 1ul) t1 t2 k end
   else ()
 
@@ -346,14 +321,12 @@ val update : (whash  :uint32s { length whash = 8 }) ->
 let update whash wdata rounds =
   (* Define working variables *)
   let i = 0ul in
-  let t1 = create 0ul 1ul in
-  let t2 = create 0ul 1ul in
   (* Scheduling function *)
   let ws = create 0ul 64ul in
   (* Initialize constant *)
   let k = k_init () in
   (* Perform function *)
-  update_step whash wdata ws rounds i t1 t2 k
+  update_step whash wdata ws rounds i 0ul 0ul k
 
 
 (* Compute the final value of the hash from the last hash value *)
