@@ -9,7 +9,7 @@ type t = _t
 
 let n = n
 
-let v = v
+let v (a:t) : GTot int = v a
 let add = add
 let add_underspec = add_underspec
 let add_mod = add_mod
@@ -54,5 +54,4 @@ let op_Less_Equal_Hat = gte
 type byte = t
 
 let of_string = of_string
-let to_int (a:t) : GTot int = v a
 let uint_to_t = uint_to_t

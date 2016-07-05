@@ -11,15 +11,16 @@ module HS = FStar.HyperStack
 
 #set-options "--lax"
 
-let u8  = UInt8.t
-let u32 = UInt32.t
-let u64 = UInt64.t
+let s8  = Hacl.UInt8.t
+let s32 = Hacl.UInt32.t
+let s64 = Hacl.UInt64.t
+let u32 = FStar.UInt32.t
 
 private type buffer (a:Type) = buffer a
 
-private type _u8s  = buffer u8
-private type _u32s = buffer u32
-private type _u64s = buffer u64
+private type _u8s  = buffer s8
+private type _u32s = buffer s32
+private type _u64s = buffer s64
 
 type u8s  = _u8s
 type u32s = _u32s
