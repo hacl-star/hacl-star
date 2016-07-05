@@ -53,18 +53,22 @@ sha1-ml:
 	  $(addprefix $(SHA1_ODIR)/,$(SHA1_EXTRACTED)) ml/test_sha1.ml -o test_sha1.exe
 	./test_sha1.exe
 
-sha2-ml:
+sha256-ml:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
 	mkdir -p $(SHA2_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML) $(LIB_FILES_HST) $(SHA2_FSTAR_HST) --odir $(SHA2_ODIR)
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(SHA2_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) ml/test_sha256.ml -o test_sha2.exe
-	./test_sha2.exe
+	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) ml/test_sha256.ml -o test_sha256.exe
+	./test_sha256.exe
 
-sha2-compile:
+sha256-pretty:
+	camlp4 pa_o.cmo pr_o.cmo $(SHA2_ODIR)/Hash_Sha256.ml > $(SHA2_ODIR)/X-pretty.ml
+	mv $(SHA2_ODIR)/X-pretty.ml $(SHA2_ODIR)/Hash_Sha256.ml
+
+sha256-compile:
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(SHA2_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) ml/test_sha256.ml -o test_sha2.exe
-	./test_sha2.exe
+	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) ml/test_sha256.ml -o test_sha256.exe
+	./test_sha256.exe
 
 # Cleaning
 clean:
