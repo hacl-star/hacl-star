@@ -8,10 +8,8 @@ LIB_FILES=$(addprefix $(LIB_DIR)/, axioms.fst intlib.fst IntLibLemmas.fst sint.f
 LIB_DIR_HST=../../lib/hst
 LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.SBuffer.fst Hacl.Cast.fst)
 
-CODE_DIR=../../crypto/sha
-CODE_DIR_HST=../../crypto_hst/sha
-
 OPTIONS_OCAML=--lax --codegen OCaml --no_location_info
+
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -I $(ULIB_ML)/native_int -w -20-26
@@ -27,31 +25,22 @@ REALIZED_MODULE_HST=$(subst _,., $(REALIZED_HST))
 REALIZED_ML_HST=$(addsuffix .mli,$(REALIZED_MLI_HST)) $(addsuffix .ml,$(REALIZED_MLI_HST) $(REALIZED_HST))
 NO_CODEGEN_HST=$(addprefix --no_extract , $(REALIZED_MODULE_HST))
 
-SHA1_FSTAR_HST=$(addprefix $(CODE_DIR)/, ) # TODO: add F* code module for HASH functions. e.g.: hash.fst
+
+# Module
+CODE_DIR=../../crypto/sha
+CODE_DIR_HST=../../crypto_hst/sha
 
 SHA2_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/, Hash.Sha256.fst)
-
 SHA2_EXTRACTED_HST=Hash_Sha256.ml
 
-SHA1_EXTRACTED= # TODO: add extracted module names to compile
 
-# TODO: add same variables for other SHA, HMAC etc.
+# Output
+SHA2_ODIR=sha256
 
-SHA1_ODIR=sha1
-SHA2_ODIR=sha2
 
-.PHONY: sha1-ml # TOOD: add other relevant targets
+.PHONY: sha256-ml sha256-compile
 
-all: #sha1-ml # TODO: complete the target and uncomment
-
-# SHA1 extraction to OCaml
-sha1-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml PRIMS_DIR=native_int
-	mkdir -p $(SHA1_ODIR)
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML) $(LIB_FILES) $(SHA1_FSTAR) --odir $(SHA1_ODIR)
-	$(OCAMLOPT) -I $(LIB_DIR)/ml -I $(SHA1_ODIR) $(addprefix $(LIB_DIR)/ml/,$(REALIZED_ML)) \
-	  $(addprefix $(SHA1_ODIR)/,$(SHA1_EXTRACTED)) ml/test_sha1.ml -o test_sha1.exe
-	./test_sha1.exe
+all: sha256-ml
 
 sha256-ml:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
@@ -60,10 +49,6 @@ sha256-ml:
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(SHA2_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
 	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) ml/test_sha256.ml -o test_sha256.exe
 	./test_sha256.exe
-
-sha256-pretty:
-	camlp4 pa_o.cmo pr_o.cmo $(SHA2_ODIR)/Hash_Sha256.ml > $(SHA2_ODIR)/X-pretty.ml
-	mv $(SHA2_ODIR)/X-pretty.ml $(SHA2_ODIR)/Hash_Sha256.ml
 
 sha256-compile:
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(SHA2_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
@@ -76,4 +61,4 @@ clean:
 	$(MAKE) -C $(LIB_DIR) clean
 	$(MAKE) -C $(LIB_DIR_HST) clean
 	@rm -f $(addprefix ml/, *.cmx *.o *.cmi *~) *~ *.exe
-	@rm -rf $(SHA1_ODIR) $(SHA2_ODIR)
+	@rm -rf $(SHA2_ODIR)

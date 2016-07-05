@@ -40,9 +40,9 @@ HMAC_SHA256_ODIR=hmac_sha256
 
 
 
-.PHONY: hmac-sha256-ml
+.PHONY: hmac-sha256-ml hmac-sha256-compile
 
-all:
+all: hmac-sha256-ml
 
 hmac-sha256-ml:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml

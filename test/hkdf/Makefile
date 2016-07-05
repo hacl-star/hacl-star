@@ -42,9 +42,9 @@ HKDF_SHA256_ODIR=hkdf_sha256
 
 
 
-.PHONY: hmac-sha256-ml
+.PHONY: hkdf-sha256-ml hkdf-sha256-compile
 
-all:
+all: hkdf-sha256-ml
 
 hkdf-sha256-ml:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
@@ -62,7 +62,6 @@ hkdf-sha256-compile:
      $(addprefix $(HKDF_SHA256_ODIR)/,$(HMAC_SHA256_EXTRACTED_HST)) \
 	  $(addprefix $(HKDF_SHA256_ODIR)/,$(HKDF_SHA256_EXTRACTED_HST)) ml/test_hkdf_sha256.ml -o test_hkdf_sha256.exe
 	./test_hkdf_sha256.exe
-
 
 # Cleaning
 clean:
