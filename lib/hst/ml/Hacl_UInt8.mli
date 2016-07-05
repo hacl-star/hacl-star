@@ -1,5 +1,6 @@
 type uint8
-type t
+type t = uint8
+type byte = uint8
        
 val n:Prims.int
        
@@ -43,8 +44,8 @@ val op_Hat_Hat:uint8 -> uint8 -> uint8
 val of_int: Prims.int -> uint8
 val of_string: string -> uint8
                                 
-val eq:uint8 -> uint8 -> uint8
-val gte:uint8 -> uint8 -> uint8
+val eq_mask:uint8 -> uint8 -> uint8
+val gte_mask:uint8 -> uint8 -> uint8
 
 (* Only for realization purposes, not in F* library *)
 val uint_to_t:Prims.int -> uint8
