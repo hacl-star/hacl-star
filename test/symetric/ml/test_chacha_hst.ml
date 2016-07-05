@@ -65,5 +65,9 @@ let _ =
   print_string "Expected ciphertext:\n";
   print_string expected;
   print_string "Got ciphertext:\n";
-  print_bytes ciphertext
-              (*  print_array state *)
+  print_bytes ciphertext;
+  let ok = "6e2e359a2568f98041ba0728dd0d6981e97e7aec1d4360c20a27afccfd9fae0bf91b65c5524733ab8f593dabcd62b3571639d624e65152ab8f530c359f0861d807ca0dbf500d6a6156a38e088a22b65e52bc514d16ccf806818ce91ab77937365af90bbf74a35be6b40b8eedf2785e42874d" in
+  for i = 0 to 113 do
+    if not(Hacl_UInt8.to_string_hex (index ciphertext i) = String.sub ok (2*i) 2) then
+      failwith (Printf.sprintf "Ciphertext differs at byte %d: %s %s\n" i (Hacl_UInt8.to_string_hex (index ciphertext i)) (String.sub ok (2*i) 2)) 
+  done

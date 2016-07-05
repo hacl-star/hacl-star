@@ -66,5 +66,12 @@ let _ =
   print_string "Expected ciphertext:\n";
   print_string expected;
   print_string "Got ciphertext:\n";
-  print_bytes ciphertext
+  print_bytes ciphertext;
+  let ok = "6e2e359a2568f98041ba0728dd0d6981e97e7aec1d4360c20a27afccfd9fae0bf91b65c5524733ab8f593dabcd62b3571639d624e65152ab8f530c359f0861d807ca0dbf500d6a6156a38e088a22b65e52bc514d16ccf806818ce91ab77937365af90bbf74a35be6b40b8eedf2785e42874d" in
+  let to_string_hex x = Printf.sprintf "%02x" (SInt_UInt8.to_int x) in
+  for i = 0 to 113 do
+    if not(to_string_hex (SBuffer.index 0 ciphertext i) = String.sub ok (2*i) 2) then
+      failwith (Printf.sprintf "Ciphertext differs at byte %d: %s %s\n" i (to_string_hex (SBuffer.index 0 ciphertext i)) (String.sub ok (2*i) 2)) 
+  done
+
               (*  print_array state *)

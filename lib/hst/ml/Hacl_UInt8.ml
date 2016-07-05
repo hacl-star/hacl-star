@@ -4,6 +4,7 @@ let n = Prims.parse_int "8"
 
 type uint8 = int
 type t = uint8
+type byte = uint8
            
 let (zero:uint8) = 0
 let (one:uint8) = 1
@@ -32,20 +33,8 @@ let shift_right a s = (a lsr s) land 255
 let rotate_left a s =  ((( a lsl s) + ( a lsr (8-s))) land 255)
 let rotate_right a s =  ((( a lsl (8-s)) + ( a lsr s)) land 255)
 
-let gte x y = (lnot((x - y) asr 7)) land 255
-
-(* let eq a b = *)
-(*   let a = lnot(a lxor b) in *)
-(*   let a = a land (a lsl 32) in *)
-(*   let a = a land (a lsl 16) in *)
-(*   let a = a land (a lsl 8) in *)
-(*   let a = a land (a lsl 8) in *)
-(*   let a = a land (a lsl 4) in *)
-(*   let a = a land (a lsl 2) in *)
-(*   let a = a land (a lsl 1) in *)
-(*   (a asr 62) land 255 *)
-
-let eq x y = gte x y land gte y x
+let gte_mask x y = (lnot((x - y) asr 7)) land 255
+let eq_mask x y = gte_mask x y land gte_mask y x
                                            
 let op_Hat_Plus = add
 let op_Hat_Subtraction = sub
