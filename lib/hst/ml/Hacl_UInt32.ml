@@ -32,7 +32,6 @@ let rotate_left a s = ((a lsl s) land mask) + ((a lsr (32-s)) land mask)
 let rotate_right a s = ((a lsl (32-s)) land mask) + ((a lsr s) land mask)
 
 let of_uint32 s = s
-let of_string s = int_of_string s
                                 
 let eq a b =
   let a = lnot(a lxor b) in
@@ -73,4 +72,6 @@ let of_int s = Z.to_int (Z.logand s mask)
 let uint_to_t s = of_int s
                                                              
 let to_string s = string_of_int s
+let to_string_hex s = Printf.sprintf "%08x" s
+
 let to_int s = Z.of_int s

@@ -23,16 +23,20 @@ let s8 = Hacl.UInt8.t
 let uint32s = Hacl.SBuffer.u32s
 let bytes = Hacl.SBuffer.u8s
 
-#set-options "--lax"
+//#set-options "--lax"
 
 // Missing functions
-val rotate_right: s32 -> u32 -> Tot s32
+assume MaxU32: pow2 32 = 4294967296
+
+val rotate_right: s32 -> b:u32{v b <= 32} -> Tot s32
 let rotate_right a b =
-  (Hacl.UInt32.shift_right a b) +^ (Hacl.UInt32.shift_left a (UInt32.sub 32ul b))
+  (Hacl.UInt32.shift_right a b) |^ (Hacl.UInt32.shift_left a (UInt32.sub 32ul b))
 
 let op_At_Amp (a:s64) (s:s64) : Tot s64 = Hacl.UInt64.logand a s
 
-val be_bytes_of_sint64: bytes -> s64 -> St unit
+#set-options "--lax"
+
+val be_bytes_of_sint64: bytes -> s64 -> STL unit (requires (fun h -> True)) (ensures (fun h0 _ h1 -> True))
 let be_bytes_of_sint64 output x =
  let b0 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 56ul) @& uint64_to_sint64 255UL) in
  let b1 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 48ul) @& uint64_to_sint64 255UL) in
@@ -97,6 +101,8 @@ let rec be_uint32s_of_bytes u b len =
 
 let op_Hat_Greater_Greater (a:s32) (b:u32) : Tot s32 = Hacl.UInt32.shift_right a b
 
+#reset-options
+
 val be_bytes_of_uint32s: output:bytes -> m:uint32s{disjoint output m} -> len:u32{v len <=length output /\ v len<=op_Multiply 4 (length m)} -> STL unit
   (requires (fun h -> live h output /\ live h m))
   (ensures (fun h0 _ h1 -> live h0 output /\ live h0 m /\ live h1 output /\ live h1 m
@@ -113,7 +119,7 @@ let rec be_bytes_of_uint32s output m len =
       let b2 = sint32_to_sint8 ((x ^>> 8ul)  &^ uint32_to_sint32 255ul) in
       let b3 = sint32_to_sint8 ((x)          &^ uint32_to_sint32 255ul) in
       let l4 = UInt32.sub len 4ul in
-      upd output l4 b0; 
+      upd output l4 b0;
       upd output (UInt32.add l4 1ul) b1;
       upd output (UInt32.add l4 2ul) b2;
       upd output (UInt32.add l4 3ul) b3;
@@ -419,7 +425,7 @@ val finish: (hash  :bytes   { length hash = 32 }) ->
                  (requires (fun h -> live h hash /\ live h whash))
                  (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 whash /\ modifies_1 hash h0 h1))
 
-let finish hash whash = be_bytes_of_uint32s hash whash 8ul
+let finish hash whash = be_bytes_of_uint32s hash whash 32ul
 
 (* Compute the sha256 hash of some bytes *)
 val sha2: (hash:bytes { length hash = 32 }) ->

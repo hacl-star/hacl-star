@@ -50,3 +50,4 @@ val gte:uint8 -> uint8 -> uint8
 val uint_to_t:Prims.int -> uint8
 val to_int:uint8 -> Prims.int
 val to_string: uint8 -> string
+val to_string_hex: uint8 -> string

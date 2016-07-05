@@ -67,5 +67,6 @@ let of_string s =
 let of_int s = Z.to_int (Z.logand s (Z.of_int 255))
                                                              
 let to_string s = string_of_int s
+let to_string_hex s = Printf.sprintf "%02x" s
 let to_int s = Z.of_int s
 let uint_to_t s = Z.to_int s

@@ -56,4 +56,5 @@ val gte:uint32 -> uint32 -> uint32
 (* Only for realization purposes, does not exists in F* library *)
 val to_int: uint32 -> Prims.int
 val to_string: uint32 -> string
+val to_string_hex: uint32 -> string
 val uint_to_t:Prims.int -> uint32

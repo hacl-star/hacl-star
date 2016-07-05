@@ -58,12 +58,18 @@ sha2-ml:
 	mkdir -p $(SHA2_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML) $(LIB_FILES_HST) $(SHA2_FSTAR_HST) --odir $(SHA2_ODIR)
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(SHA2_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) -c #ml/test_sha256.ml -o test_sha2.exe
-#	./test_sha2.exe
+	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) ml/test_sha256.ml -o test_sha2.exe
+	./test_sha2.exe
+
+sha2-compile:
+	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(SHA2_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) ml/test_sha256.ml -o test_sha2.exe
+	./test_sha2.exe
 
 # Cleaning
 clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
 	$(MAKE) -C $(LIB_DIR) clean
+	$(MAKE) -C $(LIB_DIR_HST) clean
 	@rm -f $(addprefix ml/, *.cmx *.o *.cmi *~) *~ *.exe
-	@rm -rf $(SHA1_ODIR)
+	@rm -rf $(SHA1_ODIR) $(SHA2_ODIR)
