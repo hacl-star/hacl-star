@@ -1,5 +1,5 @@
 # FStar variables
-FSTAR_HOME=../..
+FSTAR_HOME?=../..
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_DEFAULT_ARGS) # from the included Makefile
 
