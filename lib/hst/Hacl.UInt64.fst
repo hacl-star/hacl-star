@@ -52,7 +52,7 @@ let op_Greater_Equal_Hat = gte
 let op_Less_Hat = gt
 let op_Less_Equal_Hat = gte
 type byte = t
-let to_string = to_string
+
 let of_string = of_string
-let to_int = v
+let to_int (a:t) : GTot int = v a
 let uint_to_t = uint_to_t

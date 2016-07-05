@@ -17,129 +17,213 @@ module U32 = Hacl.UInt32
 
 let u32 = FStar.UInt32.t
 let u64 = FStar.UInt64.t
+let s64 = Hacl.UInt64.t
 let s32 = Hacl.UInt32.t
 let s8 = Hacl.UInt8.t
-let uint32s = u32s
-let bytes = u8s
-
+let uint32s = Hacl.SBuffer.u32s
+let bytes = Hacl.SBuffer.u8s
 
 #set-options "--lax"
 
-
 // Missing functions
-assume val rotate_right: u32 -> u32 -> Tot u32
-assume val be_bytes_of_uint64: bytes -> u64 -> St unit
-assume val uint64_of_uint32: u32 -> Tot u64
-assume val be_uint32s_of_bytes:uint32s -> bytes -> u32 -> St unit
-assume val be_bytes_of_uint32s:bytes -> uint32s -> u32 -> St unit
+val rotate_right: s32 -> u32 -> Tot s32
+let rotate_right a b =
+  (Hacl.UInt32.shift_right a b) +^ (Hacl.UInt32.shift_left a (UInt32.sub 32ul b))
 
+let op_At_Amp (a:s64) (s:s64) : Tot s64 = Hacl.UInt64.logand a s
+
+val be_bytes_of_sint64: bytes -> s64 -> St unit
+let be_bytes_of_sint64 output x =
+ let b0 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 56ul) @& uint64_to_sint64 255UL) in
+ let b1 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 48ul) @& uint64_to_sint64 255UL) in
+ let b2 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 40ul) @& uint64_to_sint64 255UL) in
+ let b3 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 64ul) @& uint64_to_sint64 255UL) in
+ let b4 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 24ul) @& uint64_to_sint64 255UL) in
+ let b5 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 16ul) @& uint64_to_sint64 255UL) in
+ let b6 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 8ul)  @& uint64_to_sint64 255UL) in
+ let b7 = sint64_to_sint8 ((x)                              @& uint64_to_sint64 255UL) in
+ upd output 0ul b0; 
+ upd output (1ul) b1;
+ upd output (2ul) b2;
+ upd output (3ul) b3;
+ upd output (4ul) b4;
+ upd output (5ul) b5;
+ upd output (6ul) b6;
+ upd output (7ul) b7
+
+let op_At_At_Amp = UInt64.logand
+
+val be_bytes_of_uint64: bytes -> u64 -> St unit
+let be_bytes_of_uint64 output x =
+ let b0 = uint64_to_sint8 ((UInt64.shift_right x 56ul) @@& 255UL) in
+ let b1 = uint64_to_sint8 ((UInt64.shift_right x 48ul) @@& 255UL) in
+ let b2 = uint64_to_sint8 ((UInt64.shift_right x 40ul) @@& 255UL) in
+ let b3 = uint64_to_sint8 ((UInt64.shift_right x 64ul) @@& 255UL) in
+ let b4 = uint64_to_sint8 ((UInt64.shift_right x 24ul) @@& 255UL) in
+ let b5 = uint64_to_sint8 ((UInt64.shift_right x 16ul) @@& 255UL) in
+ let b6 = uint64_to_sint8 ((UInt64.shift_right x 8ul)  @@& 255UL) in
+ let b7 = uint64_to_sint8 ((x)                         @@& 255UL) in
+ upd output 0ul b0; 
+ upd output (1ul) b1;
+ upd output (2ul) b2;
+ upd output (3ul) b3;
+ upd output (4ul) b4;
+ upd output (5ul) b5;
+ upd output (6ul) b6;
+ upd output (7ul) b7
+
+val be_uint32_of_bytes: b:bytes{length b >= 4} -> STL s32
+  (requires (fun h -> live h b))
+  (ensures (fun h0 r h1 -> h0 == h1 /\ live h0 b))
+let be_uint32_of_bytes (b:bytes{length b >= 4}) =
+  let b0 = (index b 0ul) in
+  let b1 = (index b 1ul) in
+  let b2 = (index b 2ul) in
+  let b3 = (index b 3ul) in
+  let r = (sint8_to_sint32 b3)
+	+%^ (op_Less_Less_Hat (sint8_to_sint32 b2) 8ul)
+	+%^ (op_Less_Less_Hat (sint8_to_sint32 b1) 16ul)
+	+%^ (op_Less_Less_Hat (sint8_to_sint32 b0) 24ul) in
+  r
+
+val be_uint32s_of_bytes:uint32s -> bytes -> u32 -> St unit
+let rec be_uint32s_of_bytes u b len = 
+  if UInt32.eq len 0ul then ()
+  else (
+    let l4 = UInt32.div len 4ul in
+    upd u (UInt32.sub l4 1ul) (be_uint32_of_bytes (sub b (UInt32.sub len 4ul) 4ul));
+    be_uint32s_of_bytes u b (UInt32.sub len 4ul)
+  )
+
+let op_Hat_Greater_Greater (a:s32) (b:u32) : Tot s32 = Hacl.UInt32.shift_right a b
+
+val be_bytes_of_uint32s: output:bytes -> m:uint32s{disjoint output m} -> len:u32{v len <=length output /\ v len<=op_Multiply 4 (length m)} -> STL unit
+  (requires (fun h -> live h output /\ live h m))
+  (ensures (fun h0 _ h1 -> live h0 output /\ live h0 m /\ live h1 output /\ live h1 m
+    /\ modifies_1 output h0 h1 ))
+let rec be_bytes_of_uint32s output m len =
+  if len =^ 0ul then ()
+  else 
+    begin
+      let l4 = UInt32.div len 4ul in
+      let l = UInt32.sub l4 1ul in
+      let x = index m l in
+      let b0 = sint32_to_sint8 ((x ^>> 24ul) &^ uint32_to_sint32 255ul) in
+      let b1 = sint32_to_sint8 ((x ^>> 16ul) &^ uint32_to_sint32 255ul) in
+      let b2 = sint32_to_sint8 ((x ^>> 8ul)  &^ uint32_to_sint32 255ul) in
+      let b3 = sint32_to_sint8 ((x)          &^ uint32_to_sint32 255ul) in
+      let l4 = UInt32.sub len 4ul in
+      upd output l4 b0; 
+      upd output (UInt32.add l4 1ul) b1;
+      upd output (UInt32.add l4 2ul) b2;
+      upd output (UInt32.add l4 3ul) b3;
+      be_bytes_of_uint32s output m l4
+    end
 
 (* [FIPS 180-4] section 4.1.2 *)
-val _Ch: x:u32 -> y:u32 -> z:u32 -> Tot u32
+val _Ch: x:s32 -> y:s32 -> z:s32 -> Tot s32
 let _Ch x y z = logxor (logand x y) (logand (lognot x) z)
 
-val _Maj: x:u32 -> y:u32 -> z:u32 -> Tot u32
+val _Maj: x:s32 -> y:s32 -> z:s32 -> Tot s32
 let _Maj x y z = logxor (logand x y) (logxor (logand x z) (logand y z))
 
-val _Sigma0: x:u32 -> Tot u32
+val _Sigma0: x:s32 -> Tot s32
 let _Sigma0 x = logxor (rotate_right x 2ul) (logxor (rotate_right x 13ul) (rotate_right x 22ul))
 
-val _Sigma1: x:u32 -> Tot u32
+val _Sigma1: x:s32 -> Tot s32
 let _Sigma1 x = logxor (rotate_right x 6ul) (logxor (rotate_right x 11ul) (rotate_right x 25ul))
 
-val _sigma0: x:u32 -> Tot u32
+val _sigma0: x:s32 -> Tot s32
 let _sigma0 x = logxor (rotate_right x 7ul) (logxor (rotate_right x 18ul) (shift_right x 3ul))
 
-val _sigma1: x:u32 -> Tot u32
+val _sigma1: x:s32 -> Tot s32
 let _sigma1 x = logxor (rotate_right x 17ul) (logxor (rotate_right x 19ul) (shift_right x 10ul))
-
 
 (* [FIPS 180-4] section 4.2.2 *)
 
-val k_init: unit -> St (uint32s)
-let k_init () =
-  let k = create 0ul 64ul  in
-  upd k 0ul  0x428a2f98ul;
-  upd k 1ul  0x71374491ul;
-  upd k 2ul  0xb5c0fbcful;
-  upd k 3ul  0xe9b5dba5ul;
-  upd k 4ul  0x3956c25bul;
-  upd k 5ul  0x59f111f1ul;
-  upd k 6ul  0x923f82a4ul;
-  upd k 7ul  0xab1c5ed5ul;
-  upd k 8ul  0xd807aa98ul;
-  upd k 9ul  0x12835b01ul;
-  upd k 10ul 0x243185beul;
-  upd k 11ul 0x550c7dc3ul;
-  upd k 12ul 0x72be5d74ul;
-  upd k 13ul 0x80deb1feul;
-  upd k 14ul 0x9bdc06a7ul;
-  upd k 15ul 0xc19bf174ul;
-  upd k 16ul 0xe49b69c1ul;
-  upd k 17ul 0xefbe4786ul;
-  upd k 18ul 0x0fc19dc6ul;
-  upd k 19ul 0x240ca1ccul;
-  upd k 20ul 0x2de92c6ful;
-  upd k 21ul 0x4a7484aaul;
-  upd k 22ul 0x5cb0a9dcul;
-  upd k 23ul 0x76f988daul;
-  upd k 24ul 0x983e5152ul;
-  upd k 25ul 0xa831c66dul;
-  upd k 26ul 0xb00327c8ul;
-  upd k 27ul 0xbf597fc7ul;
-  upd k 28ul 0xc6e00bf3ul;
-  upd k 29ul 0xd5a79147ul;
-  upd k 30ul 0x06ca6351ul;
-  upd k 31ul 0x14292967ul;
-  upd k 32ul 0x27b70a85ul;
-  upd k 33ul 0x2e1b2138ul;
-  upd k 34ul 0x4d2c6dfcul;
-  upd k 35ul 0x53380d13ul;
-  upd k 36ul 0x650a7354ul;
-  upd k 37ul 0x766a0abbul;
-  upd k 38ul 0x81c2c92eul;
-  upd k 39ul 0x92722c85ul;
-  upd k 40ul 0xa2bfe8a1ul;
-  upd k 41ul 0xa81a664bul;
-  upd k 42ul 0xc24b8b70ul;
-  upd k 43ul 0xc76c51a3ul;
-  upd k 44ul 0xd192e819ul;
-  upd k 45ul 0xd6990624ul;
-  upd k 46ul 0xf40e3585ul;
-  upd k 47ul 0x106aa070ul;
-  upd k 48ul 0x19a4c116ul;
-  upd k 49ul 0x1e376c08ul;
-  upd k 50ul 0x2748774cul;
-  upd k 51ul 0x34b0bcb5ul;
-  upd k 52ul 0x391c0cb3ul;
-  upd k 53ul 0x4ed8aa4aul;
-  upd k 54ul 0x5b9cca4ful;
-  upd k 55ul 0x682e6ff3ul;
-  upd k 56ul 0x748f82eeul;
-  upd k 57ul 0x78a5636ful;
-  upd k 58ul 0x84c87814ul;
-  upd k 59ul 0x8cc70208ul;
-  upd k 60ul 0x90befffaul;
-  upd k 61ul 0xa4506cebul;
-  upd k 62ul 0xbef9a3f7ul;
-  upd k 63ul 0xc67178f2ul;
-  k
-
+val k_init: uint32s -> STL unit (requires (fun _ -> True)) (ensures (fun h0 _ h1 -> True))
+let k_init k =
+  upd k 0ul (uint32_to_sint32  0x428a2f98ul);
+  upd k 1ul (uint32_to_sint32  0x71374491ul);
+  upd k 2ul (uint32_to_sint32  0xb5c0fbcful);
+  upd k 3ul (uint32_to_sint32  0xe9b5dba5ul);
+  upd k 4ul (uint32_to_sint32  0x3956c25bul);
+  upd k 5ul (uint32_to_sint32  0x59f111f1ul);
+  upd k 6ul (uint32_to_sint32  0x923f82a4ul);
+  upd k 7ul (uint32_to_sint32  0xab1c5ed5ul);
+  upd k 8ul (uint32_to_sint32  0xd807aa98ul);
+  upd k 9ul (uint32_to_sint32  0x12835b01ul);
+  upd k 10ul (uint32_to_sint32 0x243185beul);
+  upd k 11ul (uint32_to_sint32 0x550c7dc3ul);
+  upd k 12ul (uint32_to_sint32 0x72be5d74ul);
+  upd k 13ul (uint32_to_sint32 0x80deb1feul);
+  upd k 14ul (uint32_to_sint32 0x9bdc06a7ul);
+  upd k 15ul (uint32_to_sint32 0xc19bf174ul);
+  upd k 16ul (uint32_to_sint32 0xe49b69c1ul);
+  upd k 17ul (uint32_to_sint32 0xefbe4786ul);
+  upd k 18ul (uint32_to_sint32 0x0fc19dc6ul);
+  upd k 19ul (uint32_to_sint32 0x240ca1ccul);
+  upd k 20ul (uint32_to_sint32 0x2de92c6ful);
+  upd k 21ul (uint32_to_sint32 0x4a7484aaul);
+  upd k 22ul (uint32_to_sint32 0x5cb0a9dcul);
+  upd k 23ul (uint32_to_sint32 0x76f988daul);
+  upd k 24ul (uint32_to_sint32 0x983e5152ul);
+  upd k 25ul (uint32_to_sint32 0xa831c66dul);
+  upd k 26ul (uint32_to_sint32 0xb00327c8ul);
+  upd k 27ul (uint32_to_sint32 0xbf597fc7ul);
+  upd k 28ul (uint32_to_sint32 0xc6e00bf3ul);
+  upd k 29ul (uint32_to_sint32 0xd5a79147ul);
+  upd k 30ul (uint32_to_sint32 0x06ca6351ul);
+  upd k 31ul (uint32_to_sint32 0x14292967ul);
+  upd k 32ul (uint32_to_sint32 0x27b70a85ul);
+  upd k 33ul (uint32_to_sint32 0x2e1b2138ul);
+  upd k 34ul (uint32_to_sint32 0x4d2c6dfcul);
+  upd k 35ul (uint32_to_sint32 0x53380d13ul);
+  upd k 36ul (uint32_to_sint32 0x650a7354ul);
+  upd k 37ul (uint32_to_sint32 0x766a0abbul);
+  upd k 38ul (uint32_to_sint32 0x81c2c92eul);
+  upd k 39ul (uint32_to_sint32 0x92722c85ul);
+  upd k 40ul (uint32_to_sint32 0xa2bfe8a1ul);
+  upd k 41ul (uint32_to_sint32 0xa81a664bul);
+  upd k 42ul (uint32_to_sint32 0xc24b8b70ul);
+  upd k 43ul (uint32_to_sint32 0xc76c51a3ul);
+  upd k 44ul (uint32_to_sint32 0xd192e819ul);
+  upd k 45ul (uint32_to_sint32 0xd6990624ul);
+  upd k 46ul (uint32_to_sint32 0xf40e3585ul);
+  upd k 47ul (uint32_to_sint32 0x106aa070ul);
+  upd k 48ul (uint32_to_sint32 0x19a4c116ul);
+  upd k 49ul (uint32_to_sint32 0x1e376c08ul);
+  upd k 50ul (uint32_to_sint32 0x2748774cul);
+  upd k 51ul (uint32_to_sint32 0x34b0bcb5ul);
+  upd k 52ul (uint32_to_sint32 0x391c0cb3ul);
+  upd k 53ul (uint32_to_sint32 0x4ed8aa4aul);
+  upd k 54ul (uint32_to_sint32 0x5b9cca4ful);
+  upd k 55ul (uint32_to_sint32 0x682e6ff3ul);
+  upd k 56ul (uint32_to_sint32 0x748f82eeul);
+  upd k 57ul (uint32_to_sint32 0x78a5636ful);
+  upd k 58ul (uint32_to_sint32 0x84c87814ul);
+  upd k 59ul (uint32_to_sint32 0x8cc70208ul);
+  upd k 60ul (uint32_to_sint32 0x90befffaul);
+  upd k 61ul (uint32_to_sint32 0xa4506cebul);
+  upd k 62ul (uint32_to_sint32 0xbef9a3f7ul);
+  upd k 63ul (uint32_to_sint32 0xc67178f2ul)
 
 (* [FIPS 180-4] section 5.1.1 *)
+
+let op_At_Plus (a:u32) (b:u32) : Tot u32 = UInt32.add_mod a b
+let op_At_Subtraction (a:u32) (b:u32) : Tot u32 = UInt32.sub_mod a b
+let op_At_Slash (a:u32) (b:u32) : Tot u32 = UInt32.div a b
 
 (* Compute the number of 512 bit blocks to store data (56 bytes) and padding (8 bytes) *)
 (* l + 1 + k ≡ 448 mod 512 *)
 val nblocks: u32 -> Tot (n:u32{gte n 1ul})
-let nblocks x = ((x +^ 8ul) -^ (rem (x +^ 8ul) 64ul))/^64ul +^ 1ul
-
+let nblocks x = ((x @+ 8ul) @- (UInt32.rem (x @+ 8ul) 64ul))@/64ul @+ 1ul
 
 (* Compute the pad length *)
 val pad_length: u32 -> Tot (n:u32{lte n 64ul})
 let pad_length rlen =
-  if lt (rem rlen 64ul) 56ul then 56ul -^ (rem rlen 64ul)
-  else 64ul +^ 56ul -^ (rem rlen 64ul)
-
+  if lt (UInt32.rem rlen 64ul) 56ul then 56ul @- (UInt32.rem rlen 64ul)
+  else 64ul @+ 56ul @- (UInt32.rem rlen 64ul)
 
 (* Pad the data and return a buffer of uint32 for subsequent treatment *)
 val pad: (pdata :bytes) ->
@@ -151,20 +235,19 @@ val pad: (pdata :bytes) ->
 let pad pdata rdata rlen =
   // Value of the raw data length in bits represented as UInt64
   let rlen_64 =
-    let v = create 0uy 8ul in
-    let v64 = uint64_of_uint32 (mul_mod rlen 8ul) in
+    let v = create (uint8_to_sint8 0uy) 8ul in
+    let v64 = Int.Cast.uint32_to_uint64 (UInt32.mul_mod rlen 8ul) in
     be_bytes_of_uint64 v v64;
     v
   in
   // Compute the padding length
   let rplen = pad_length rlen in
   // Generate the padding
-  let rpad = create 0uy rplen in
-  upd rpad 0ul 80uy;
+  let rpad = create (uint8_to_sint8 0uy) rplen in
+  upd rpad 0ul (uint8_to_sint8 80uy);
   blit rdata 0ul pdata 0ul rlen;
   blit rpad 0ul pdata rlen rplen;
-  blit rlen_64 0ul pdata (rlen +^ rplen) 8ul
-
+  blit rlen_64 0ul pdata (rlen @+ rplen) 8ul
 
 (* Store function to handle pdata as a sequence of words *)
 val store : (wdata :uint32s) ->
@@ -190,12 +273,12 @@ val wsched_define: (ws     :uint32s { length ws = 64 }) ->
 let rec wsched_define ws wblock t =
   if lt t 16ul then begin
     upd ws t (index wblock t);
-    wsched_define ws wblock (t +^ 1ul) end
+    wsched_define ws wblock (t @+ 1ul) end
   else if lt t 64ul then begin
-    let _t16 = index ws (t-^16ul) in
-    let _t15 = index ws (t-^15ul) in
-    let _t7 = index ws (t-^7ul) in
-    let _t2 = index ws (t-^2ul) in
+    let _t16 = index ws (t@-16ul) in
+    let _t15 = index ws (t@-15ul) in
+    let _t7 = index ws (t@-7ul) in
+    let _t2 = index ws (t@-2ul) in
 
     let v0 = _sigma1 _t2 in
     let v1 = _sigma0 _t15 in
@@ -204,7 +287,7 @@ let rec wsched_define ws wblock t =
                      (add_mod _t7
                               (add_mod v1 _t16)))
     in upd ws t v;
-    wsched_define ws wblock (t +^ 1ul) end
+    wsched_define ws wblock (t @+ 1ul) end
   else ()
 
 
@@ -217,22 +300,21 @@ val init : (whash :uint32s { length whash = 8 })
                  (ensures  (fun h0 r h1 -> live h1 whash /\ modifies_1 whash h0 h1))
 
 let init whash =
-  upd whash 0ul 0x6a09e667ul;
-  upd whash 1ul 0xbb67ae85ul;
-  upd whash 2ul 0x3c6ef372ul;
-  upd whash 3ul 0xa54ff53aul;
-  upd whash 4ul 0x510e527ful;
-  upd whash 5ul 0x9b05688cul;
-  upd whash 6ul 0x1f83d9abul;
-  upd whash 7ul 0x5be0cd19ul
-
+  upd whash 0ul (uint32_to_sint32 0x6a09e667ul);
+  upd whash 1ul (uint32_to_sint32 0xbb67ae85ul);
+  upd whash 2ul (uint32_to_sint32 0x3c6ef372ul);
+  upd whash 3ul (uint32_to_sint32 0xa54ff53aul);
+  upd whash 4ul (uint32_to_sint32 0x510e527ful);
+  upd whash 5ul (uint32_to_sint32 0x9b05688cul);
+  upd whash 6ul (uint32_to_sint32 0x1f83d9abul);
+  upd whash 7ul (uint32_to_sint32 0x5be0cd19ul)
 
 (* Step 3 : Perform logical operations on the working variables *)
 val update_inner_loop : (ws    :uint32s { length ws = 64 }) ->
                         (whash :uint32s { length whash = 8 /\ disjoint whash ws}) ->
                         (t     :u32{v t <= 64}) ->
-                        (t1    :u32) ->
-                        (t2    :u32) ->
+                        (t1    :s32) ->
+                        (t2    :s32) ->
                         (k     :uint32s { length k = 64 /\ disjoint k ws /\ disjoint k whash })
                         -> STL unit
                              (requires (fun h -> live h ws /\ live h whash /\ live h k ))
@@ -258,7 +340,7 @@ let rec update_inner_loop ws whash t t1 t2 k =
     upd whash 2ul (index whash 1ul);
     upd whash 1ul (index whash 0ul);
     upd whash 0ul (add_mod _t1 _t2);
-    update_inner_loop ws whash (t +^ 1ul) _t1 _t2 k end
+    update_inner_loop ws whash (t @+ 1ul) _t1 _t2 k end
   else ()
 
 val update_step : (whash :uint32s { length whash = 8 }) ->
@@ -266,8 +348,8 @@ val update_step : (whash :uint32s { length whash = 8 }) ->
                   (ws    :uint32s { length ws = 64 /\ disjoint ws whash /\ disjoint ws wdata }) ->
                   (rounds:u32) ->
                   (i     :u32) ->
-                  (t1    :u32) ->
-                  (t2    :u32) ->
+                  (t1    :s32) ->
+                  (t2    :s32) ->
                   (k     :uint32s { length k = 64 /\ disjoint k whash /\ disjoint k wdata /\ disjoint k ws})
                   -> STL unit
                        (requires (fun h -> live h whash /\ live h wdata /\ live h ws /\ live h k))
@@ -275,14 +357,14 @@ val update_step : (whash :uint32s { length whash = 8 }) ->
 
 let rec update_step ihash wdata ws rounds i t1 t2 k =
   if lt i rounds then begin
-    let pos = mul_mod i 16ul in
+    let pos = UInt32.mul_mod i 16ul in
     let wblock = sub wdata pos 16ul in
 
     (* Step 1 : Scheduling function for sixty-four 32 bit words *)
     wsched_define ws wblock 0ul;
 
     (* Step 2 : Initialize the eight working variables *)
-    let whash = create 0ul 8ul in
+    let whash = create (uint32_to_sint32 0ul) 8ul in
     upd whash 0ul (index ihash 0ul);
     upd whash 1ul (index ihash 1ul);
     upd whash 2ul (index ihash 2ul);
@@ -304,7 +386,7 @@ let rec update_step ihash wdata ws rounds i t1 t2 k =
     upd ihash 5ul (add_mod (index whash 5ul) (index ihash 5ul));
     upd ihash 6ul (add_mod (index whash 6ul) (index ihash 6ul));
     upd ihash 7ul (add_mod (index whash 7ul) (index ihash 7ul));
-    update_step ihash wdata ws rounds (i +^ 1ul) t1 t2 k end
+    update_step ihash wdata ws rounds (i @+ 1ul) t1 t2 k end
   else ()
 
 
@@ -322,11 +404,12 @@ let update whash wdata rounds =
   (* Define working variables *)
   let i = 0ul in
   (* Scheduling function *)
-  let ws = create 0ul 64ul in
+  let ws = create (uint32_to_sint32 0ul) 64ul in
   (* Initialize constant *)
-  let k = k_init () in
+  let k = create (uint32_to_sint32 0ul) 64ul  in
+  k_init k;
   (* Perform function *)
-  update_step whash wdata ws rounds i 0ul 0ul k
+  update_step whash wdata ws rounds i (uint32_to_sint32 0ul) (uint32_to_sint32 0ul) k
 
 
 (* Compute the final value of the hash from the last hash value *)
@@ -338,22 +421,20 @@ val finish: (hash  :bytes   { length hash = 32 }) ->
 
 let finish hash whash = be_bytes_of_uint32s hash whash 8ul
 
-
 (* Compute the sha256 hash of some bytes *)
-val sha265: (hash:bytes { length hash = 32 }) ->
+val sha2: (hash:bytes { length hash = 32 }) ->
             (data:bytes { disjoint hash data }) ->
             (len:u32    { length data = v len })
             -> STL unit
                  (requires (fun h -> live h hash /\ live h data))
                  (ensures  (fun h0 r h1 -> live h1 data /\ live h1 hash /\ modifies_1 hash h0 h1))
-
-let sha256 hash data len =
-  let whash = create 0ul 8ul in
-  let plen = len +^ (pad_length len) +^ 8ul in
-  let rounds = nblocks plen -^ 1ul in
-  let pdata = create 0uy plen in
-  let wlen = div plen 4ul in
-  let wdata = create 0ul wlen in
+let sha2 hash data len =
+  let whash = create (uint32_to_sint32 0ul) 8ul in
+  let plen = len @+ (pad_length len) @+ 8ul in
+  let rounds = nblocks plen @- 1ul in
+  let pdata = create (uint8_to_sint8 0uy) plen in
+  let wlen = UInt32.div plen 4ul in
+  let wdata = create (uint32_to_sint32 0ul) wlen in
   init whash;
   pad pdata data len;
   store wdata pdata plen;

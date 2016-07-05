@@ -1,4 +1,5 @@
 type uint64 = Stdint.Uint64.t
+type t = uint64
 type uint128 = Stdint.uint128
 type native_int = uint64
 type limb = uint64

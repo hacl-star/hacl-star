@@ -17,9 +17,9 @@ let sint32_to_sint8  (a:s32) : (s8) = Hacl_UInt8.of_string (Hacl_UInt32.to_strin
 let sint64_to_sint32 (a:s64) : (s32) = Hacl_UInt32.of_string (Hacl_UInt64.to_string (Hacl_UInt64.logand a (Hacl_UInt64.of_string "4294967295")))
 let sint64_to_sint8  (a:s64) : (s8)  = Hacl_UInt8.of_string (Hacl_UInt64.to_string (Hacl_UInt64.logand a(Hacl_UInt64.of_string "255")))
 
-let uint32_to_sint64 (a:u64) : s64 = Hacl_UInt64.of_string (FStar_UInt64.to_string a)
-let uint32_to_sint32 (a:u64) : s32 = Hacl_UInt32.of_string (FStar_UInt64.to_string (FStar_UInt64.rem a (FStar_UInt64.of_string "4294967295")))
-let uint32_to_sint8  (a:u64) : s8  = Hacl_UInt8.of_string  (FStar_UInt64.to_string (FStar_UInt64.rem a (FStar_UInt64.of_string "255")))
+let uint64_to_sint64 (a:u64) : s64 = Hacl_UInt64.of_string (FStar_UInt64.to_string a)
+let uint64_to_sint32 (a:u64) : s32 = Hacl_UInt32.of_string (FStar_UInt64.to_string (FStar_UInt64.rem a (FStar_UInt64.of_string "4294967295")))
+let uint64_to_sint8  (a:u64) : s8  = Hacl_UInt8.of_string  (FStar_UInt64.to_string (FStar_UInt64.rem a (FStar_UInt64.of_string "255")))
 
 let uint32_to_sint64 (a:u32) : s64 = Hacl_UInt64.of_string (string_of_int a)
 let uint32_to_sint32 (a:u32) : s32 = Hacl_UInt32.of_string (string_of_int a)

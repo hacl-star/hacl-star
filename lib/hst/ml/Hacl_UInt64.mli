@@ -1,4 +1,5 @@
 type uint64
+type t = uint64
 type uint128
 
 type limb = uint64
