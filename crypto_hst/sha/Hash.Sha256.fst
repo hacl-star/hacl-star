@@ -25,10 +25,6 @@ let bytes = Hacl.SBuffer.u8s
 
 
 
-#set-options "--lax"
-
-
-
 assume MaxU32: pow2 32 = 4294967296
 
 val rotate_right: s32 -> b:u32{v b <= 32} -> Tot s32
@@ -447,14 +443,14 @@ let finish hash whash = be_bytes_of_uint32s hash whash 32ul
 
 
 (* Compute the sha256 hash of some bytes *)
-val sha2: (hash:bytes { length hash = 32 }) ->
+val sha256: (hash:bytes { length hash = 32 }) ->
             (data:bytes { disjoint hash data }) ->
             (len:u32    { length data = v len })
             -> STL unit
                  (requires (fun h -> live h hash /\ live h data))
                  (ensures  (fun h0 r h1 -> live h1 data /\ live h1 hash /\ modifies_1 hash h0 h1))
 
-let sha2 hash data len =
+let sha256 hash data len =
   let whash = create (uint32_to_sint32 0ul) 8ul in
   let plen = len @+ (pad_length len) @+ 8ul in
   let rounds = nblocks plen @- 1ul in
