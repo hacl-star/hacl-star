@@ -30,8 +30,14 @@ let _ =
   print plaintext;
   keyExpansion key w sbox;
   cipher ciphertext plaintext w sbox;
-  print_string "Resulting ciphertext:\n";  
+  print_string "Resulting ciphertext:\n";
   print ciphertext;
+  let ok = "8ea2b7ca516745bfeafc49904b496089" in
+  let to_string_hex x = Printf.sprintf "%02x" (SInt_UInt8.to_int x) in
+  for i = 0 to 15 do
+    if not(to_string_hex (index 0 ciphertext i) = String.sub ok (2*i) 2) then
+      failwith (Printf.sprintf "Ciphertext differs at byte %d: %s %s\n" i (to_string_hex (index 0 ciphertext i)) (String.sub ok (2*i) 2)) 
+  done;
   inv_cipher plaintext2 ciphertext w inv_sbox;
   print_string "Decrypted plaintext:\n";  
   print plaintext2

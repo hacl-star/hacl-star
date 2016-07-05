@@ -52,7 +52,7 @@ AES_ODIR=aes
 
 .PHONY: chacha-ml poly-ml aes-ml chacha-hst-ml
 
-all: chacha-ml poly-ml aes-ml chacha-hst-ml
+all: chacha-ml poly-ml aes-ml chacha-hst-ml aes-hst-ml
 
 # OCaml extracton of CHACHA20
 chacha-ml:

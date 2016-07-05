@@ -33,6 +33,11 @@ let _ =
   cipher ciphertext plaintext w sbox;
   print_string "Resulting ciphertext:\n";  
   print ciphertext;
+  let expected = "8ea2b7ca516745bfeafc49904b496089" in
+  for i = 0 to 15 do
+    if not(to_string_hex (index ciphertext i) = String.sub expected (2*i) 2) then
+      failwith (Printf.sprintf "Ciphertext differs at byte %d: %s %s\n" i (to_string_hex (index ciphertext i)) (String.sub expected (2*i) 2)) 
+  done;
   inv_cipher plaintext2 ciphertext w inv_sbox;
   print_string "Decrypted plaintext:\n";  
   print plaintext2
