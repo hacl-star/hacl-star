@@ -4,6 +4,7 @@ open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
 open FStar.HST
+open FStar.Buffer
 open FStar.UInt32
 open Hacl.Cast
 open Hacl.UInt8
@@ -27,7 +28,8 @@ let uint32s = Hacl.SBuffer.u32s
 let bytes = Hacl.SBuffer.u8s
 
 
-
+assume MaxU8: pow2 8 = 256
+assume MaxU32: pow2 32 = 4294967296
 
 val xor_bytes: output:bytes -> in1:bytes -> in2:bytes{disjoint in1 in2 /\ disjoint in1 output /\ disjoint in2 output} -> len:u32{v len <= length output /\ v len <= length in1 /\ v len <= length in2} -> STL unit
   (requires (fun h -> live h output /\ live h in1 /\ live h in2))
@@ -67,7 +69,7 @@ let bl = 64ul
 val wrap_key : (okey:bytes{ length okey = v bl}) -> (key:bytes {disjoint okey key}) -> (keylen :u32 { length key = v keylen })
                -> STL unit
                      (requires (fun h -> live h okey /\ live h key))
-                     (ensures  (fun h0 _ h1 -> live h1 okey /\ live h1 key))
+                     (ensures  (fun h0 _ h1 -> live h1 okey /\ live h1 key /\ modifies_1 okey h0 h1))
 
 let wrap_key okey key keylen =
   if gt keylen bl then
