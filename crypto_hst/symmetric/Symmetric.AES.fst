@@ -1,4 +1,4 @@
-module Symetric.AES
+module Symmetric.AES
 
 open FStar.Mul
 open FStar.Ghost

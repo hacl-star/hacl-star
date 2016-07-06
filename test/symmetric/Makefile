@@ -9,8 +9,8 @@ LIB_FILES=$(addprefix $(LIB_DIR)/, axioms.fst intlib.fst IntLibLemmas.fst sint.f
 LIB_DIR_HST=../../lib/hst
 LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.SBuffer.fst Hacl.Cast.fst)
 
-CODE_DIR=../../crypto/symetric
-CODE_DIR_HST=../../crypto_hst/symetric
+CODE_DIR=../../crypto/symmetric
+CODE_DIR_HST=../../crypto_hst/symmetric
 
 OPTIONS_OCAML=--lax --codegen OCaml --no_location_info --use_native_int
 OPTIONS_OCAML_HST=--lax --codegen OCaml --no_location_info
@@ -37,14 +37,14 @@ AES_FSTAR=$(addprefix $(CODE_DIR)/,Crypto.AES.fst)
 
 # FStar HST files
 CHACHA_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Chacha.fst)
-AES_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Symetric.AES.fst)
+AES_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Symmetric.AES.fst)
 
 CHACHA_EXTRACTED=Chacha.ml
 POLY_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Parameters.ml Bigint.ml Bignum.ml Poly.ml
 AES_EXTRACTED=Crypto_AES.ml
 
 CHACHA_EXTRACTED_HST=Chacha.ml
-AES_EXTRACTED_HST=Symetric_AES.ml
+AES_EXTRACTED_HST=Symmetric_AES.ml
 
 CHACHA_ODIR=chacha20
 POLY_ODIR=poly1305
