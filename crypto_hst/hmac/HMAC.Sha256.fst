@@ -55,7 +55,6 @@ let rec xor_bytes output in1 in2 len =
 
 (* Operators *)
 let op_At_Plus (a:u32) (b:u32) : Tot u32 = UInt32.add_mod a b
-let op_Star (a:Type0) (b:Type0) : Tot Type0 = Prims.tuple2 a b
 
 
 (* Define parameters *)
@@ -63,13 +62,12 @@ let hash = Hash.Sha256.sha256
 let hl = 32ul
 let bl = 64ul
 
-#set-options "--lax"
 
 (* Define a function to wrap the key length after bl bits *)
-val wrap_key : (nkey:bytes{ length nkey = v hl}) -> (key:bytes {disjoint nkey key}) -> (keylen :u32 { length key = v keylen })
+val wrap_key : (okey:bytes{ length okey = v bl}) -> (key:bytes {disjoint okey key}) -> (keylen :u32 { length key = v keylen })
                -> STL unit
-                     (requires (fun h -> live h nkey /\ live h key))
-                     (ensures  (fun h0 _ h1 -> live h1 nkey /\ live h1 key))
+                     (requires (fun h -> live h okey /\ live h key))
+                     (ensures  (fun h0 _ h1 -> live h1 okey /\ live h1 key))
 
 let wrap_key okey key keylen =
   if gt keylen bl then
@@ -94,17 +92,14 @@ let hmac_sha256 mac key keylen data datalen =
   let opad = create (uint8_to_sint8 0x5cuy) bl in
 
   (* Create the wrapped key location *)
-  let okeylen = bl in
-  let okey = create (uint8_to_sint8 0uy) okeylen in
+  let okey = create (uint8_to_sint8 0uy) bl in
 
   (* Step 1: make sure the key has the proper length *)
   wrap_key okey key keylen;
-  let s1 = create (uint8_to_sint8 0uy) bl in
-  blit okey 0ul s1 0ul okeylen;
 
   (* Step 2: xor "result of step 1" with ipad *)
   let s2 = create (uint8_to_sint8 0uy) bl in
-  xor_bytes s2 s1 ipad bl;
+  xor_bytes s2 okey ipad bl;
 
   (* Step 3: append data to "result of step 2" *)
   let s3 = create (uint8_to_sint8 0uy) (bl @+ datalen) in
@@ -117,7 +112,7 @@ let hmac_sha256 mac key keylen data datalen =
 
   (* Step 5: xor "result of step 1" with opad *)
   let s5 = create (uint8_to_sint8 0uy) bl in
-  xor_bytes s5 s1 opad bl;
+  xor_bytes s5 okey opad bl;
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   let s6 = create (uint8_to_sint8 0uy) (hl @+ bl) in
