@@ -27,8 +27,6 @@ let uint32s = Hacl.SBuffer.u32s
 let bytes = Hacl.SBuffer.u8s
 
 
-#set-options "--lax"
-
 
 
 val xor_bytes: output:bytes -> in1:bytes -> in2:bytes{disjoint in1 in2 /\ disjoint in1 output /\ disjoint in2 output} -> len:u32{v len <= length output /\ v len <= length in1 /\ v len <= length in2} -> STL unit
@@ -66,17 +64,16 @@ let bl = 64ul
 
 
 (* Define a function to wrap the key length after bl bits *)
-// BB.TODO: Uncomment the specification
-//val wrap_key : (key    :bytes) ->
-//               (keylen :u32 { length key = v keylen })
-//               -> St (okey:bytes * okeylen:u32)
-let wrap_key key keylen =
+val wrap_key : (okey:bytes{ length okey = v bl}) -> (key:bytes {disjoint okey key}) -> (keylen :u32 { length key = v keylen })
+               -> STL unit
+                     (requires (fun h -> live h okey /\ live h key))
+                     (ensures  (fun h0 _ h1 -> live h1 okey /\ live h1 key))
+
+let wrap_key okey key keylen =
   if gt keylen bl then
-    let nkey = create (uint8_to_sint8 0uy) hl in
-    hash nkey key keylen;
-    nkey,hl
+    hash okey key keylen
   else
-    key,keylen
+    blit key 0ul okey 0ul keylen
 
 
 (* Define the main function *)
@@ -94,14 +91,15 @@ let hmac_sha256 mac key keylen data datalen =
   let ipad = create (uint8_to_sint8 0x36uy) bl in
   let opad = create (uint8_to_sint8 0x5cuy) bl in
 
+  (* Create the wrapped key location *)
+  let okey = create (uint8_to_sint8 0uy) bl in
+
   (* Step 1: make sure the key has the proper length *)
-  let okey,okeylen = wrap_key key keylen in
-  let s1 = create (uint8_to_sint8 0uy) bl in
-  blit okey 0ul s1 0ul okeylen;
+  wrap_key okey key keylen;
 
   (* Step 2: xor "result of step 1" with ipad *)
   let s2 = create (uint8_to_sint8 0uy) bl in
-  xor_bytes s2 s1 ipad bl;
+  xor_bytes s2 okey ipad bl;
 
   (* Step 3: append data to "result of step 2" *)
   let s3 = create (uint8_to_sint8 0uy) (bl @+ datalen) in
@@ -114,7 +112,7 @@ let hmac_sha256 mac key keylen data datalen =
 
   (* Step 5: xor "result of step 1" with opad *)
   let s5 = create (uint8_to_sint8 0uy) bl in
-  xor_bytes s5 s1 opad bl;
+  xor_bytes s5 okey opad bl;
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   let s6 = create (uint8_to_sint8 0uy) (hl @+ bl) in
