@@ -1,6 +1,6 @@
 open Hacl_UInt8
 open Hacl_SBuffer
-open Symetric_AES
+open Symmetric_AES
 
 let print (b:u8s) =
   for i = 0 to (Array.length b.content - 1) do
