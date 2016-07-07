@@ -443,7 +443,7 @@ let finish hash whash = be_bytes_of_uint32s hash whash 32ul
 
 
 (* Compute the sha256 hash of some bytes *)
-val sha256: (hash:bytes { length hash = 32 }) ->
+val sha256: (hash:bytes { length hash >= 32 }) ->
             (data:bytes { disjoint hash data }) ->
             (len:u32    { length data = v len })
             -> STL unit
