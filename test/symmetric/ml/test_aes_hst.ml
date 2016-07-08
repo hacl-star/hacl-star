@@ -41,4 +41,3 @@ let _ =
   inv_cipher plaintext2 ciphertext w inv_sbox;
   print_string "Decrypted plaintext:\n";  
   print plaintext2
-  

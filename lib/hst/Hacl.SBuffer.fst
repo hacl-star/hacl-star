@@ -67,7 +67,7 @@ let modifies_buf rid buffs h h' = modifies_buf rid buffs h h'
 
 let disjoint_only_lemma #t #t' b b' = disjoint_only_lemma #t #t' b b'
 
-let modifies_trans #rid bufs h0 h1 h2 = modifies_trans #rid bufs h0 h1 h2
+let modifies_trans rid bufs h0 h1 h2 = modifies_trans rid bufs h0 h1 h2
 
 let modifies_sub rid bufs subbufs h0 h1 = modifies_sub rid bufs subbufs h0 h1
 

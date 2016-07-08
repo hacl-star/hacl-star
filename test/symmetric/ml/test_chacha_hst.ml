@@ -1,4 +1,4 @@
-open Chacha
+open Chacha20
 open Char
 open Hacl_SBuffer
 open Hacl_Cast

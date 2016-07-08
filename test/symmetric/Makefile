@@ -36,14 +36,14 @@ POLY_FSTAR=$(addprefix $(CODE_DIR)/,parameters.fst bigint.fst bignum.fst poly.fs
 AES_FSTAR=$(addprefix $(CODE_DIR)/,Crypto.AES.fst)
 
 # FStar HST files
-CHACHA_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Chacha.fst)
+CHACHA_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Chacha20.fst)
 AES_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Symmetric.AES.fst)
 
 CHACHA_EXTRACTED=Chacha.ml
 POLY_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Parameters.ml Bigint.ml Bignum.ml Poly.ml
 AES_EXTRACTED=Crypto_AES.ml
 
-CHACHA_EXTRACTED_HST=Chacha.ml
+CHACHA_EXTRACTED_HST=Chacha20.ml
 AES_EXTRACTED_HST=Symmetric_AES.ml
 
 CHACHA_ODIR=chacha20
