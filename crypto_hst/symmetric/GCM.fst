@@ -10,6 +10,8 @@ open Hacl.SBuffer
 open Symmetric.AES
 
 module U32 = FStar.UInt32
+type s8 = Hacl.UInt8.t
+type u32 = U32.t
 
 #set-options "--lax"
 
@@ -72,7 +74,7 @@ let rec apply_mask_loop a m msk dep =
     let i = U32.sub dep 1ul in
     let ai = index a i in
     let x = logand ai msk in
-    upd a i x;
+    upd m i x;
     apply_mask_loop a m msk i
   end
 
@@ -80,6 +82,12 @@ private val apply_mask: a:u8s{length a = U32.v nb} ->
     m:u8s{length m = U32.v nb} ->
     msk:s8 -> Stl unit
 let apply_mask a m msk = apply_mask_loop a m msk nb
+
+private val ith_bit_mask: num:s8 -> i:u32{U32.v i < 8} -> Tot s8
+let ith_bit_mask num i =
+  let proj = shift_right (uint8_to_sint8 128uy) i in
+  let res = logand num proj in
+  eq_mask res proj
 
 private val gf128_mul_loop: a:u8s{length a = U32.v nb} ->
     b:u8s{length b = U32.v nb} ->
@@ -89,20 +97,16 @@ private val gf128_mul_loop: a:u8s{length a = U32.v nb} ->
     Stl unit
 let rec gf128_mul_loop a b r m dep =
   if U32.eq dep (U32.mul nb 8ul) then () else begin
-    let s8_1 = uint8_to_sint8 1uy in
-    let i = U32.sub dep 1ul in
-    let iblk = U32.div dep 8ul in
-    let ibit = U32.rem dep 8ul in
-    let num = index b iblk in
-    let msk = eq_mask num (shift_left s8_1 (U32.sub 7ul ibit)) in
+    let num = index b (U32.div dep 8ul) in
+    let msk = ith_bit_mask num (U32.rem dep 8ul) in
     apply_mask a m msk;
     gf128_add r m;
-    let num = index a 7ul in
-    let msk = eq_mask num s8_1 in
+    let num = index a 15ul in
+    let msk = ith_bit_mask num 7ul in
     gf128_shift_right a;
     let num = index a 0ul in
-    upd a 7ul (logxor num (logand msk r_mul));
-    gf128_mul_loop a b r m i
+    upd a 0ul (logxor num (logand msk r_mul));
+    gf128_mul_loop a b r m (U32.add dep 1ul)
   end
 
 val gf128_mul: a:u8s{length a = U32.v nb} ->
@@ -112,7 +116,7 @@ let gf128_mul a b =
   push_frame();
   let r = create (uint8_to_sint8 0uy) nb in
   let m = create (uint8_to_sint8 0uy) nb in
-  gf128_mul_loop a b r m (U32.mul nb 8ul);
+  gf128_mul_loop a b r m 0ul;
   blit r 0ul a 0ul nb;
   pop_frame()
 
@@ -159,19 +163,21 @@ let rec encrypt_loop #k alg ciphertext tag key auth_key counter plaintext len de
     push_frame();
     let last = create (uint8_to_sint8 0uy) nb in
     blit plaintext dep last 0ul (U32.sub len dep);
-    let cnt = U32.add (U32.div dep nb) 1ul in
+    let cnt = U32.add (U32.div dep nb) 2ul in
     update_counter counter cnt;
     let ci = create (uint8_to_sint8 0uy) nb in
     alg key counter ci;
     gf128_add ci last;
-    blit ci 0ul ciphertext dep nb;
-    gf128_add tag ci;
+    blit ci 0ul ciphertext dep (U32.sub len dep);
+    let hci = create (uint8_to_sint8 0uy) nb in
+    blit ci 0ul hci 0ul (U32.sub len dep);
+    gf128_add tag hci;
     gf128_mul tag auth_key;
     pop_frame()
   end else begin
     let next = U32.add dep nb in
     let pi = sub plaintext dep nb in
-    let cnt = U32.add (U32.div dep nb) 1ul in
+    let cnt = U32.add (U32.div dep nb) 2ul in
     update_counter counter cnt;
     push_frame();
     let ci = create (uint8_to_sint8 0uy) nb in
@@ -218,10 +224,10 @@ let encrypt #k alg ciphertext tag key iv ad adlen plaintext len =
   blit iv 0ul counter 0ul 12ul;
   encrypt_loop #k alg ciphertext cur_tag key auth_key counter plaintext len 0ul;
   let len_info = create (uint8_to_sint8 0uy) nb in
-  mk_len_info len_info adlen len;
+  mk_len_info len_info (U32.mul adlen 8ul) (U32.mul len 8ul);
   gf128_add cur_tag len_info;
   gf128_mul cur_tag auth_key;
-  let cnt = 0ul in
+  let cnt = 1ul in
   update_counter counter cnt;
   let c0 = create (uint8_to_sint8 0uy) nb in
   alg key counter c0;
