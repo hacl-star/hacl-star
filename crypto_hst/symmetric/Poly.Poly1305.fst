@@ -5,11 +5,13 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.HST
 open FStar.Ghost
+open FStar.Buffer
 open Math.Axioms
 open Math.Lib
 open Math.Lemmas
-open FStar.UInt64
-open FStar.Buffer
+open Hacl.UInt64
+open Hacl.Cast
+open Hacl.SBuffer
 open Poly.Bigint
 open Poly.Parameters
 open Poly.Bignum
@@ -20,19 +22,16 @@ module U64 = FStar.UInt64
 module HS = FStar.HyperStack
 
 let u32 = UInt32.t
+let s32 = Hacl.UInt32.t
+let s64 = Hacl.UInt64.t
 
 let w: u32 -> Tot int = U32.v
 
-let op_Plus_Bar = U32.add
-let op_Subtraction_Bar = U32.sub
-let op_Hat_Star = U64.mul
-let op_Hat_Less_Less = U64.op_Less_Less_Hat
-let op_Hat_Greater_Greater = U64.op_Greater_Greater_Hat
-let op_Hat_Subtraction = U64.op_Subtraction_Hat
-let op_Hat_Amp = U64.op_Amp_Hat
+let op_Plus_Bar : u32 -> u32 -> Tot u32 = U32.add
+let op_Subtraction_Bar : u32 -> u32 -> Tot u32 = U32.sub
 
-let op_Hat_Bar_Hat = U32.op_Bar_Hat
-let op_Bar_Less_Less = U32.op_Less_Less_Hat
+let op_Bar_Less_Less : s32 -> u32 -> Tot s32 = Hacl.UInt32.op_Less_Less_Hat
+let op_Hat_Bar_Hat : s32 -> s32 -> Tot s32 = Hacl.UInt32.op_Bar_Hat
 
 let heap = HS.mem
 
@@ -102,8 +101,8 @@ let aux_lemma_1 x =
 
 (* Bigint to bytes serializing function *)
 val num_to_le_bytes: s:bytes{length s >= 16} -> b:bigint{disjoint b s} -> ST unit
-  (requires (fun h -> norm h b /\ Buffer.live h s))
-  (ensures (fun h0 _ h1 -> Buffer.live h1 s /\ modifies_1 s h0 h1))
+  (requires (fun h -> norm h b (* /\ Buffer.live h s *)))
+  (ensures (fun h0 _ h1 -> (* Buffer.live h1 s /\  *)modifies_1 s h0 h1))
 let num_to_le_bytes s b =
   let h0 = HST.get() in
   let b0 = index b 0ul in
@@ -111,40 +110,40 @@ let num_to_le_bytes s b =
   let b2 = index b 2ul in
   let b3 = index b 3ul in
   let b4 = index b 4ul in 
-  upd s 0ul (Int.Cast.uint64_to_uint8 b0);  // 0 
-  upd s 1ul (Int.Cast.uint64_to_uint8 (b0 ^>> 8ul)); //8
-  upd s 2ul (Int.Cast.uint64_to_uint8 (b0 ^>> 16ul)); //16
-  upd s 3ul (U8.add_mod (Int.Cast.uint64_to_uint8 (b0 ^>> 24ul)) // 24 
-			       (Int.Cast.uint64_to_uint8 (b1 ^<< 2ul))); 
-  upd s 4ul (Int.Cast.uint64_to_uint8 (b1 ^>> 6ul)); // 32
-  upd s 5ul (Int.Cast.uint64_to_uint8 (b1 ^>> 14ul)); // 40
-  upd s 6ul (U8.add_mod (Int.Cast.uint64_to_uint8 (b1 ^>> 22ul)) 
-			       (Int.Cast.uint64_to_uint8 (b2 ^<< 4ul))); // 48
-  upd s 7ul (Int.Cast.uint64_to_uint8 (b2 ^>> 4ul)); // 56
-  upd s 8ul (Int.Cast.uint64_to_uint8 (b2 ^>> 12ul)); // 64
-  upd s 9ul (U8.add_mod (Int.Cast.uint64_to_uint8 (b2 ^>> 20ul)) 
-			       (Int.Cast.uint64_to_uint8 (b3 ^<< 6ul))); // 72
-  upd s 10ul (Int.Cast.uint64_to_uint8 (b3 ^>> 2ul)); // 80 
-  upd s 11ul (Int.Cast.uint64_to_uint8 (b3 ^>> 10ul)); // 88
+  upd s 0ul (sint64_to_sint8 b0);  // 0 
+  upd s 1ul (sint64_to_sint8 (b0 ^>> (8ul))); //8
+  upd s 2ul (sint64_to_sint8 (b0 ^>> (16ul))); //16
+  upd s 3ul (Hacl.UInt8.add_mod (sint64_to_sint8 (b0 ^>> (24ul))) // 24 
+			       (sint64_to_sint8 (b1 ^<< (2ul)))); 
+  upd s 4ul (sint64_to_sint8 (b1 ^>> (6ul))); // 32
+  upd s 5ul (sint64_to_sint8 (b1 ^>> (14ul))); // 40
+  upd s 6ul (Hacl.UInt8.add_mod (sint64_to_sint8 (b1 ^>> (22ul))) 
+			       (sint64_to_sint8 (b2 ^<< (4ul)))); // 48
+  upd s 7ul (sint64_to_sint8 (b2 ^>> (4ul))); // 56
+  upd s 8ul (sint64_to_sint8 (b2 ^>> (12ul))); // 64
+  upd s 9ul (Hacl.UInt8.add_mod (sint64_to_sint8 (b2 ^>> (20ul)))
+			       (sint64_to_sint8 (b3 ^<< (6ul)))); // 72
+  upd s 10ul (sint64_to_sint8 (b3 ^>> (2ul))); // 80 
+  upd s 11ul (sint64_to_sint8 (b3 ^>> (10ul))); // 88
   let h = HST.get() in
-  cut (Buffer.live h s /\ modifies_1 s h0 h); 
-  upd s 12ul (Int.Cast.uint64_to_uint8 (b3 ^>> 18ul)); // 96
-  upd s 13ul (Int.Cast.uint64_to_uint8 (b4)); // 104
-  upd s 14ul (Int.Cast.uint64_to_uint8 (b4 ^>> 8ul)); // 112 
-  upd s 15ul (Int.Cast.uint64_to_uint8 (b4 ^>> 16ul)); // 120 
+  (* cut (Buffer.live h s /\ modifies_1 s h0 h);  *)
+  upd s 12ul (sint64_to_sint8 (b3 ^>> (18ul))); // 96
+  upd s 13ul (sint64_to_sint8 (b4)); // 104
+  upd s 14ul (sint64_to_sint8 (b4 ^>> (8ul))); // 112 
+  upd s 15ul (sint64_to_sint8 (b4 ^>> (16ul))); // 120 
   ()
 
-let uint32_of_sbytes (s:bytes{length s >= 4}) : STL u32
+let s32_of_sbytes (s:bytes{length s >= 4}) : STL s32
   (requires (fun h -> Buffer.live h s))
   (ensures (fun h0 b h1 -> h0 == h1 ))
   = let s0 = index s 0ul in
-    let s0 = Int.Cast.uint8_to_uint32 s0 in
+    let s0 = sint8_to_sint32 s0 in
     let s1 = index s 1ul in
-    let s1 = Int.Cast.uint8_to_uint32 s1 in
+    let s1 = sint8_to_sint32 s1 in
     let s2 = index s 2ul in
-    let s2 = Int.Cast.uint8_to_uint32 s2 in
+    let s2 = sint8_to_sint32 s2 in
     let s3 = index s 3ul in
-    let s3 = Int.Cast.uint8_to_uint32 s3 in
+    let s3 = sint8_to_sint32 s3 in
     (s0 ^|^ (s1 |<< 8ul) ^|^ (s2 |<< 16ul) ^|^ (s3 |<< 24ul))
 
 (* Bytes to bigint deserializing functions *)
@@ -156,21 +155,21 @@ let le_bytes_to_num b s =
   (* IntLibLemmas.pow2_increases 63 26; *)
   (* IntLibLemmas.pow2_increases 63 32; *)
   (* IntLibLemmas.pow2_increases 26 24; *)
-  let mask_26 = U64.sub (1UL ^<< 26ul) 1UL in 
+  let mask_26 = (uint64_to_sint64 1UL ^<< 26ul) ^- uint64_to_sint64 1UL in 
   (* cut (v mask_26 = v one * pow2 26 - v one /\ v one = 1);  *)
   cut (v mask_26 = pow2 26 - 1); 
   let s0 = sub s 0ul  4ul in
   let s1 = sub s 4ul  4ul in
   let s2 = sub s 8ul  4ul in
   let s3 = sub s 12ul 4ul in
-  let n0 =  (uint32_of_sbytes s0) in 
-  let n1 =  (uint32_of_sbytes s1) in
-  let n2 =  (uint32_of_sbytes s2) in
-  let n3 =  (uint32_of_sbytes s3) in 
-  let n0 = Int.Cast.uint32_to_uint64 n0 in
-  let n1 = Int.Cast.uint32_to_uint64 n1 in
-  let n2 = Int.Cast.uint32_to_uint64 n2 in
-  let n3 = Int.Cast.uint32_to_uint64 n3 in
+  let n0 =  (s32_of_sbytes s0) in 
+  let n1 =  (s32_of_sbytes s1) in
+  let n2 =  (s32_of_sbytes s2) in
+  let n3 =  (s32_of_sbytes s3) in 
+  let n0 = sint32_to_sint64 n0 in
+  let n1 = sint32_to_sint64 n1 in
+  let n2 = sint32_to_sint64 n2 in
+  let n3 = sint32_to_sint64 n3 in
   (* ulogand_lemma_4 #63 n0 26 mask_26; *)
   (* ulogand_lemma_4 #63 (n1 ^<< 6) 26 mask_26;  *)
   (* ulogand_lemma_4 #63 (n2 ^<< 12) 26 mask_26;  *)
@@ -202,7 +201,7 @@ let add_and_multiply acc block r =
   let h0 = HST.get() in
   fsum' acc block; 
   let h1 = HST.get() in
-  let tmp = create 0UL (U32.mul 2ul nlength-|1ul) in 
+  let tmp = create (uint64_to_sint64 0UL) (U32.mul 2ul nlength-|1ul) in 
   let h2 = HST.get() in 
   cut (forall (i:nat). {:pattern (v (get h2 acc i))} i < norm_length ==> v (get h2 acc i) = v (get h1 acc i));
   cut (forall (i:nat). {:pattern (v (get h1 acc i))} i < norm_length ==> v (get h1 acc i) = v (get h0 acc (i+0)) + v (get h0 block (i+0)));
@@ -232,15 +231,15 @@ val clamp: r:bytes{length r = 16} -> ST unit
   (requires (fun h -> Buffer.live h r))
   (ensures (fun h0 _ h1 -> Buffer.live h1 r /\ modifies_1 r h0 h1))
 let clamp r =
-  let mask_15 = 15uy in
-  let mask_252 = 252uy in
-  upd r 3ul  (U8.op_Amp_Hat (index r 3ul ) mask_15);
-  upd r 7ul  (U8.op_Amp_Hat (index r 7ul ) mask_15);
-  upd r 11ul (U8.op_Amp_Hat (index r 11ul) mask_15);
-  upd r 15ul (U8.op_Amp_Hat (index r 15ul) mask_15);
-  upd r 4ul  (U8.op_Amp_Hat (index r 4ul ) mask_252);
-  upd r 8ul  (U8.op_Amp_Hat (index r 8ul ) mask_252);
-  upd r 12ul (U8.op_Amp_Hat (index r 12ul) mask_252);
+  let mask_15 = (uint8_to_sint8 15uy) in
+  let mask_252 = (uint8_to_sint8 252uy) in
+  upd r 3ul  (Hacl.UInt8.op_Amp_Hat (index r 3ul ) mask_15);
+  upd r 7ul  (Hacl.UInt8.op_Amp_Hat (index r 7ul ) mask_15);
+  upd r 11ul (Hacl.UInt8.op_Amp_Hat (index r 11ul) mask_15);
+  upd r 15ul (Hacl.UInt8.op_Amp_Hat (index r 15ul) mask_15);
+  upd r 4ul  (Hacl.UInt8.op_Amp_Hat (index r 4ul ) mask_252);
+  upd r 8ul  (Hacl.UInt8.op_Amp_Hat (index r 8ul ) mask_252);
+  upd r 12ul (Hacl.UInt8.op_Amp_Hat (index r 12ul) mask_252);
   ()
 
 #reset-options "--z3timeout 20"
@@ -259,13 +258,13 @@ let rec poly1305_step msg acc r ctr =
     let msg = offset msg 16ul in
     //    let n, msg = SBytes.split msg 16 in 
     let h = HST.get() in
-    let block = create 0UL nlength in 
+    let block = create (uint64_to_sint64 0UL) nlength in 
     let h' = HST.get() in
     le_bytes_to_num block n; 
     let b4 = index block 4ul in
     (* IntLibLemmas.pow2_doubles 24; IntLibLemmas.pow2_increases 26 25; *)
     (* IntLibLemmas.pow2_increases 63 26;  *)
-    upd block 4ul (b4 +^ (1UL ^<< 24ul)); 
+    upd block 4ul (b4 +^ ((uint64_to_sint64 1UL) ^<< 24ul)); 
     let h1 = HST.get() in
     (* eq_lemma h0 h1 r (empty);  *)
     (* eq_lemma h0 h1 acc empty; *)
@@ -296,11 +295,11 @@ let poly1305_last msg acc r len =
   let l = U32.rem len 16ul in
   if U32.eq l 0ul then ()
   else (
-    let n = create 0uy 16ul in
+    let n = create (uint8_to_sint8 0uy) 16ul in
     blit msg (len -| l) n 0ul l; 
-    upd n l 1uy;
+    upd n l (uint8_to_sint8 1uy);
     let h1 = HST.get() in
-    let block = create 0UL nlength in 
+    let block = create (uint64_to_sint64 0UL) nlength in 
     let h2 = HST.get() in
     le_bytes_to_num block n; 
     let b4 = index block 4ul in
@@ -327,20 +326,20 @@ let poly1305_mac hash msg len key =
   let h0 = HST.get() in
   let r' = sub key 0ul 16ul in
   let s = sub key 16ul 16ul in
-  let r = create 0uy 16ul in
+  let r = create (uint8_to_sint8 0uy) 16ul in
   blit r' 0ul r 0ul 16ul;
   let h0' = HST.get() in
   clamp r; 
   let h0'' = HST.get() in
-  let bigint_r = create 0UL nlength in
-  let bigint_s = create 0UL nlength in 
+  let bigint_r = create (uint64_to_sint64 0UL) nlength in
+  let bigint_s = create (uint64_to_sint64 0UL) nlength in 
   le_bytes_to_num bigint_r r; 
   let h1 = HST.get() in
   disjoint_only_lemma s r; 
   le_bytes_to_num bigint_s s; 
   let h2 = HST.get() in
   cut (modifies_1 r h0'' h2); 
-  let acc = create 0UL nlength in 
+  let acc = create (uint64_to_sint64 0UL) nlength in 
   let h2' = HST.get() in
   let ctr = U32.div len 16ul in
   let rest = U32.rem len 16ul in 

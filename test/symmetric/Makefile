@@ -37,6 +37,7 @@ AES_FSTAR=$(addprefix $(CODE_DIR)/,Crypto.AES.fst)
 
 # FStar HST files
 CHACHA_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Chacha20.fst)
+POLY_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Poly.Parameters.fst Poly.Bigint.fst Poly.Bignum.fst Poly.Poly1305.fst)
 AES_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Symmetric.AES.fst)
 
 CHACHA_EXTRACTED=Chacha.ml
@@ -44,6 +45,7 @@ POLY_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axi
 AES_EXTRACTED=Crypto_AES.ml
 
 CHACHA_EXTRACTED_HST=Chacha20.ml
+POLY_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Poly_Parameters.ml Poly_Bigint.ml Poly_Bignum.ml Poly_Poly1305.ml
 AES_EXTRACTED_HST=Symmetric_AES.ml
 
 CHACHA_ODIR=chacha20
@@ -52,7 +54,7 @@ AES_ODIR=aes
 
 .PHONY: chacha-ml poly-ml aes-ml chacha-hst-ml
 
-all: chacha-ml poly-ml aes-ml chacha-hst-ml aes-hst-ml
+all: chacha-ml poly-ml aes-ml chacha-hst-ml aes-hst-ml poly-hst-ml
 
 # OCaml extracton of CHACHA20
 chacha-ml:
@@ -89,6 +91,14 @@ chacha-hst-ml:
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CHACHA_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
 	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe 
 	./test_chacha20.exe
+
+poly-hst-ml:
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
+	mkdir -p $(POLY_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(POLY_FSTAR_HST) --odir $(POLY_ODIR) 
+	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(POLY_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+	  $(addprefix $(POLY_ODIR)/,$(POLY_EXTRACTED_HST)) ml/test_poly1305_hst.ml -o test_poly.exe 
+	./test_poly.exe
 
 # OCaml extracton of AES
 aes-hst-ml:

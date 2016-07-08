@@ -4,9 +4,9 @@ open FStar.UInt8
 open FStar.UInt128
 open FStar.UInt64
 open FStar.HST
-open FStar.Buffer
 open FStar.Mul
 open FStar.Ghost
+open Hacl.SBuffer
 open Math.Axioms
 open Math.Lib
 open Poly.Parameters
@@ -26,9 +26,9 @@ val byte_templ: template
 let byte_templ = fun x -> 8
 
 (* Big integer types *)
-type bigint = b:buffer u64{length b >= norm_length}
-type bigint_wide = b:buffer u128{length b >= norm_length}
-type bytes = buffer u8
+type bigint = b:u64s{length b >= norm_length}
+(* type bigint_wide = b:buffer u128{length b >= norm_length} *)
+type bytes = u8s
 
 (* Normalized big integer type *)
 let norm (h:heap) (b:bigint) : GTot Type0 =
@@ -36,15 +36,15 @@ let norm (h:heap) (b:bigint) : GTot Type0 =
   /\ (forall (i:nat). {:pattern (v (get h b i))} i < norm_length ==>  v (get h b i) < pow2 (templ i))
 
 (* Normalized big integer type *)
-let norm_wide (h:heap) (b:bigint_wide) : GTot Type0 =
-  live h b /\ length b >= norm_length 
-  /\ (forall (i:nat). {:pattern (UInt128.v (get h b i))} i < norm_length ==>  UInt128.v (get h b i) < pow2 (templ i))
+(* let norm_wide (h:heap) (b:bigint_wide) : GTot Type0 = *)
+(*   live h b /\ length b >= norm_length  *)
+(*   /\ (forall (i:nat). {:pattern (UInt128.v (get h b i))} i < norm_length ==>  UInt128.v (get h b i) < pow2 (templ i)) *)
 
 let null (h:heap) (b:bigint) : GTot Type0 =
   live h b /\ (forall (n:nat). {:pattern (v (get h b n))} n < length b ==> v (get h b n) = 0)
 
-let null_wide (h:heap) (b:bigint_wide) : GTot Type0 =
-  live h b /\ (forall (n:nat). {:pattern (UInt128.v (get h b n))} n < length b ==> UInt128.v (get h b n) = 0)
+(* let null_wide (h:heap) (b:bigint_wide) : GTot Type0 = *)
+(*   live h b /\ (forall (n:nat). {:pattern (UInt128.v (get h b n))} n < length b ==> UInt128.v (get h b n) = 0) *)
 
 let filled (h:heap) (b:bigint) : GTot Type0 =
   live h b /\ length b >= norm_length /\ 
@@ -64,21 +64,21 @@ let rec eval h  b n =
   | 0 -> 0
   | _ -> pow2 (bitweight templ (n-1)) * v (get h b (n-1)) + eval h  b (n-1)
 
-val eval_wide: h:heap -> b:bigint_wide{live h b} -> n:nat{n <= length b} -> GTot nat
-let rec eval_wide h b n =
-  match n with
-  | 0 -> 0
-  | _ -> pow2 (bitweight templ (n-1)) * UInt128.v (get h b (n-1)) + eval_wide h  b (n-1)
+(* val eval_wide: h:heap -> b:bigint_wide{live h b} -> n:nat{n <= length b} -> GTot nat *)
+(* let rec eval_wide h b n = *)
+(*   match n with *)
+(*   | 0 -> 0 *)
+(*   | _ -> pow2 (bitweight templ (n-1)) * UInt128.v (get h b (n-1)) + eval_wide h  b (n-1) *)
 
 let eval_def h (b:bigint{live h b}) (n:nat{n<=length b}) : Lemma 
   ((n = 0 ==> eval h b n = 0)
     /\ (n <> 0 ==> eval h b n = pow2 (bitweight templ (n-1)) * v (get h b (n-1)) + eval h b (n-1)))
   = ()
 
-let eval_wide_def h (b:bigint_wide{live h b}) (n:nat{n<=length b}) : Lemma 
-  ((n = 0 ==> eval_wide h b n = 0)
-    /\ (n <> 0 ==> eval_wide h b n = pow2 (bitweight templ (n-1)) * UInt128.v (get h b (n-1)) + eval_wide h b (n-1)))
-  = ()
+(* let eval_wide_def h (b:bigint_wide{live h b}) (n:nat{n<=length b}) : Lemma  *)
+(*   ((n = 0 ==> eval_wide h b n = 0) *)
+(*     /\ (n <> 0 ==> eval_wide h b n = pow2 (bitweight templ (n-1)) * UInt128.v (get h b (n-1)) + eval_wide h b (n-1))) *)
+(*   = () *)
 
 val eval_bytes : h:heap -> b:bytes{live h b} -> n:nat{n <= length b} -> GTot nat
 let rec eval_bytes h b n =
@@ -93,12 +93,12 @@ let rec maxValue h  b l =
   | _ -> if maxValue h  b (l-1) > v (get h  b (l-1)) then maxValue h  b (l-1)
 	 else v (get h  b (l-1))
 
-val maxValue_wide: h:heap -> b:bigint_wide{live h  b} -> l:pos{l <= length  b} -> GTot nat
-let rec maxValue_wide h  b l = 
-  match l with
-  | 1 -> UInt128.v (get h  b 0)
-  | _ -> if maxValue_wide h  b (l-1) > UInt128.v (get h  b (l-1)) then maxValue_wide h  b (l-1)
-	 else UInt128.v (get h  b (l-1))
+(* val maxValue_wide: h:heap -> b:bigint_wide{live h  b} -> l:pos{l <= length  b} -> GTot nat *)
+(* let rec maxValue_wide h  b l =  *)
+(*   match l with *)
+(*   | 1 -> UInt128.v (get h  b 0) *)
+(*   | _ -> if maxValue_wide h  b (l-1) > UInt128.v (get h  b (l-1)) then maxValue_wide h  b (l-1) *)
+(* 	 else UInt128.v (get h  b (l-1)) *)
 
 val maxValue_lemma_aux: h:heap -> b:bigint{live h b} -> l:pos{l<=length b} ->
   Lemma (forall (i:nat). i < l ==> v (get h b i) <= maxValue h b l)

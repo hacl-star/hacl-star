@@ -52,24 +52,24 @@ val op_Hat_Hat:uint64 -> uint64 -> uint64
 
 val op_Hat_Star_Hat: uint64 -> uint64 -> uint128
                   
-val op_Hat_Hat_Plus: uint128 -> uint128 -> uint128
-val op_Hat_Hat_Plus_Percent: uint128 -> uint128 -> uint128
-val op_Hat_Hat_Subtraction: uint128 -> uint128 -> uint128
-val op_Hat_Hat_Subtraction_Percent: uint128 -> uint128 -> uint128
-val op_Hat_Hat_Star: uint128 -> uint128 -> uint128
-val op_Hat_Hat_Star_Percent: uint128 -> uint128 -> uint128
-val op_Hat_Hat_Less_Less:uint128 -> u32 -> uint128
-val op_Hat_Hat_Greater_Greater:uint128 -> u32 -> uint128
-val op_Hat_Hat_Amp:uint128 -> uint128 -> uint128
-val op_Hat_Hat_Bar:uint128 -> uint128 -> uint128
-val op_Hat_Hat_Hat:uint128 -> uint128 -> uint128
+val op_Plus_Hat: uint64 -> uint64 -> uint64
+val op_Plus_Hat_Percent: uint64 -> uint64 -> uint64
+val op_Subtraction_Hat: uint64 -> uint64 -> uint64
+val op_Subtraction_Hat_Percent: uint64 -> uint64 -> uint64
+val op_Star_Hat: uint64 -> uint64 -> uint64
+val op_Star_Hat_Percent: uint64 -> uint64 -> uint64
+val op_Less_Less_Hat:uint64 -> u32 -> uint64
+val op_Greater_Greater_Hat:uint64 -> u32 -> uint64
+val op_Amp_Hat:uint64 -> uint64 -> uint64
+val op_Bar_Hat:uint64 -> uint64 -> uint64
+val op_Hat_Hat:uint64 -> uint64 -> uint64
 
 val of_string: string -> uint64
 (* val uint128_of_int: int -> uint128 *)
 (* val uint128_of_string: string -> uint128 *)
                         
-val eq:uint64 -> uint64 -> uint64
-val gte:uint64 -> uint64 -> uint64
+val eq_mask:uint64 -> uint64 -> uint64
+val gte_mask:uint64 -> uint64 -> uint64
 
 (* Only for realization purposes, does not exists in F* library *)
 val to_string: uint64 -> string

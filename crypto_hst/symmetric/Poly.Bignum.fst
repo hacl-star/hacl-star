@@ -4,11 +4,13 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.HST
 open FStar.Ghost
+open FStar.Buffer
 open Math.Axioms
 open Math.Lib
 open Math.Lemmas
-open FStar.UInt64
-open FStar.Buffer
+open Hacl.UInt64
+open Hacl.Cast
+open Hacl.SBuffer
 open Poly.Bigint
 open Poly.Parameters
 
@@ -17,15 +19,11 @@ module U64 = FStar.UInt64
 module HS = FStar.HyperStack
 
 let u32 = UInt32.t
-
+let s64 = Hacl.UInt64.t
 let w: u32 -> Tot int = U32.v
 
 let op_Plus_Bar = U32.add
 let op_Subtraction_Bar = U32.sub
-let op_Hat_Less_Less = U64.op_Less_Less_Hat
-let op_Hat_Greater_Greater = U64.op_Greater_Greater_Hat
-let op_Hat_Subtraction = U64.op_Subtraction_Hat
-let op_Hat_Amp = U64.op_Amp_Hat
 
 let heap = HS.mem
 
@@ -65,15 +63,6 @@ let isSum (h0:heap) (h1:heap) (a_idx:nat) (b_idx:nat) (len:nat) (ctr:nat) (a:big
   live h0 a /\ live h1 a /\ a_idx+len <= length a /\ live h0 b /\ b_idx+len <= length b
   /\ (forall (i:nat). {:pattern (v (get h1 a (i+a_idx)))} (i>= ctr /\ i<len) ==> 
 	v (get h1 a (i+a_idx)) = v (get h0 a (i+a_idx)) + v (get h0 b (i+b_idx)))
-
-(* I have no idea why that fails *)
-val op_Plus_Hat: a:U64.t -> b:U64.t -> Pure U64.t (requires (v a + v b < pow2 64 /\ v a + v b >= 0))
-							 (ensures (fun c -> v c = v a + v b))
-let op_Plus_Hat a b = admit(); FStar.UInt64.op_Plus_Hat a b
-
-val op_Hat_Star: a:U64.t -> b:U64.t -> Pure U64.t (requires (v a * v b < pow2 64 /\ v a * v b >= 0))
-							 (ensures (fun c -> v c = v a * v b))
-let op_Hat_Star a b = admit(); FStar.UInt64.op_Star_Hat a b
 
 (* More specialized than the "no_upd_lemma_1" from FStar.Buffer.fst *)
 let eq_lemma_1 h0 h1 (a:bigint) (b:bigint) : Lemma 
@@ -159,7 +148,7 @@ let fsum' a b =
 #set-options "--lax" // OK
 
 val scalar_multiplication_lemma: h0:heap -> h1:heap -> a:bigint{live h0 a} -> 
-  b:bigint{live h1 b} -> s:u64 -> len:nat{len <= length a /\ len <= length b} ->
+  b:bigint{live h1 b} -> s:s64 -> len:nat{len <= length a /\ len <= length b} ->
   Lemma 
     (requires (forall (i:nat). {:pattern (v (get h1 b i))} i < len ==> v (get h0 a i) * v s = v (get h1 b i)))
     (ensures (eval h0 a len * v s = eval h1 b len)) 
@@ -174,7 +163,7 @@ let rec scalar_multiplication_lemma h0 h1 a b s len =
     distributivity_add_left (pow2 (bitweight templ (len-1)) * v (get h0 a (len-1))) (eval h0 a (len-1)) (v s); 
     paren_mul_left (pow2 (bitweight templ (len-1))) (v (get h0 a (len-1))) (v s)
 
-let scalarProduct (h0:heap) (h1:heap) (ctr:nat) (a:bigint) (s:u64) (res:bigint) : GTot Type0 =
+let scalarProduct (h0:heap) (h1:heap) (ctr:nat) (a:bigint) (s:s64) (res:bigint) : GTot Type0 =
   live h0 a /\ live h1 res /\ ctr <= norm_length
   /\ (forall (i:nat). {:pattern (v (get h1 res i))} i < ctr ==> v (get h1 res i) = v (get h0 a i) * v s)
 
@@ -188,7 +177,7 @@ let equalSub (ha:heap) (a:bigint) (a_idx:nat) (hb:heap) (b:bigint) (b_idx:nat) (
 let lemma_helper_01 (ctr:u32): Lemma (forall (i:nat). {:pattern (w ctr+i-1)} w ctr + i - 1 = w ctr - 1 + i)
   = ()
 
-let lemma_helper_02 h0 h2 (a:bigint{live h0 a}) (res:bigint{live h2 res}) (ctr:u32{w ctr <= norm_length /\ w ctr > 0}) (s:u64) : Lemma
+let lemma_helper_02 h0 h2 (a:bigint{live h0 a}) (res:bigint{live h2 res}) (ctr:u32{w ctr <= norm_length /\ w ctr > 0}) (s:s64) : Lemma
   (requires (
     (forall (i:nat). {:pattern (v (get h2 res i))} i < w ctr - 1 ==> v (get h2 res i) = v (get h0 a i) * v s)
     /\ v (get h2 res (w ctr - 1)) = v (get h0 a (w ctr - 1)) * v s))
@@ -198,7 +187,7 @@ let lemma_helper_02 h0 h2 (a:bigint{live h0 a}) (res:bigint{live h2 res}) (ctr:u
 #reset-options "--z3timeout 200"
 #set-options "--lax" // OK
 
-val scalar_multiplication_aux: res:bigint -> a:bigint{disjoint res a} -> s:u64 -> ctr:u32 -> STL unit
+val scalar_multiplication_aux: res:bigint -> a:bigint{disjoint res a} -> s:s64 -> ctr:u32 -> STL unit
   (requires (fun h -> live h res /\ live h a /\ w ctr <= norm_length
     /\ (forall (i:nat). {:pattern (v (get h a i))} i < w ctr ==> v (get h a i) * v s < pow2 64) ))
   (ensures (fun h0 _ h1 -> scalarProduct h0 h1 (w ctr) a s res 
@@ -236,7 +225,7 @@ let rec scalar_multiplication_aux res a s ctr =
 
 #reset-options
 
-val scalar_multiplication: res:bigint -> a:bigint{disjoint res a} -> s:u64 -> STL unit
+val scalar_multiplication: res:bigint -> a:bigint{disjoint res a} -> s:s64 -> STL unit
   (requires (fun h -> live h res /\ live h a
     /\ (forall (i:nat). {:pattern (v (get h a i))} i < norm_length ==> v (get h a i) * v s < pow2 64) ))
   (ensures (fun h0 _ h1 -> scalarProduct h0 h1 norm_length a s res 
@@ -944,7 +933,7 @@ let multiplication c a b =
   eq_lemma_fresh h_init h0 a;
   eq_lemma_fresh h_init h0 b;
   eq_lemma_fresh h_init h0 c;
-  let tmp = create (U64.of_string "0") nlength in 
+  let tmp = create (uint64_to_sint64 0UL) nlength in 
   let h1 = HST.get() in
   eq_lemma_0 h0 h1 a; 
   eq_lemma_0 h0 h1 b; 
@@ -969,13 +958,9 @@ let modulo_lemma a b = ()
 let satisfiesModuloConstraints (h:heap) (b:bigint) : GTot Type0 = 
   live h b /\ length b >= 2*norm_length-1 && maxValue h b (2*norm_length-1) * 6 < pow2 62
 
-(* Just like the other operators *)
-val op_At_Less_Less: a:u64 -> s:u32{w s <= 32} -> Tot (b:u64{v b = (pow2 (w s) * v a) % pow2 64})
-let op_At_Less_Less a s = admit(); UInt64.op_Less_Less_Hat a s 
-
-val times_5: x:u64{5 * v x < pow2 64} -> Tot (y:u64{v y = 5 * v x})
+val times_5: x:s64{5 * v x < pow2 64} -> Tot (y:s64{v y = 5 * v x})
 let times_5 x = 
-  let z = x @<< 2ul in
+  let z = x ^<< 2ul in
   x +^ z
   
 let reducible (h:heap) (b:bigint) (ctr:nat{ctr < norm_length-1}) : GTot Type0 =
@@ -1229,15 +1214,12 @@ let auxiliary_lemma_2 bip1 c =
 (* TODO: move somewhere more appropriate *)
 assume MaxUint32: FStar.UInt.max_int 32 = 4294967295
 
-val op_At_Subtraction: a:u64 -> b:u64{v a >= v b} -> Tot (c:u64{v c = v a - v b})
-let op_At_Subtraction a b = admit(); U64.op_Subtraction_Hat a b
-
-val mod2_26: a:u64 -> Tot (b:u64{v b = v a % pow2 26})
+val mod2_26: a:s64 -> Tot (b:s64{v b = v a % pow2 26})
 let mod2_26 a = 
   admit(); // TODO
-  let mask = shift_left 1uL 26ul in
+  let mask = shift_left (uint64_to_sint64 1UL) 26ul in
   Math.Lib.pow2_increases_lemma 64 26;
-  let mask = mask @- 1uL in
+  let mask = mask ^- (uint64_to_sint64 1UL) in
   let res = a &^ mask in
   (* SInt.ulogand_lemma_4 #64 a 26 mask; *)
   res
@@ -1400,7 +1382,7 @@ let rec carry2 b =
   Math.Lib.pow2_increases_lemma 63 41;
   carry_top_to_0 b;
   let h1 = HST.get() in
-  upd b nlength (U64.of_string "0");
+  upd b nlength (uint64_to_sint64 0UL);
   let h2 = HST.get() in
   eval_eq_lemma h1 h2 b b norm_length;
   cut ( eval h2 b (norm_length+1) = eval h1 b (norm_length)); 
@@ -1447,7 +1429,7 @@ let last_carry b =
   upd b 0ul (b0 +^ btop_5); 
   let h1 = HST.get() in
   freduce_degree_lemma h0 h1 b 0;
-  upd b nlength (U64.of_string "0");
+  upd b nlength (uint64_to_sint64 0UL);
   let h2 = HST.get() in
   eval_eq_lemma h1 h2 b b norm_length;
   cut (eval h2 b (norm_length+1) = eval h1 b norm_length);
@@ -1483,7 +1465,7 @@ let modulo b =
   let h0 = HST.get() in
   freduce_degree b; 
   let h1 = HST.get() in
-  upd b nlength (U64.of_string "0");
+  upd b nlength (uint64_to_sint64 0UL);
   let h2 = HST.get() in
   eval_eq_lemma h1 h2 b b norm_length;
   cut (eval h2 b (norm_length+1) = eval h1 b norm_length);
@@ -1501,7 +1483,7 @@ val freduce_coefficients: b:bigint -> ST unit
     /\ modifies_1 b h0 h1))
 let freduce_coefficients b = 
   let h0 = HST.get() in
-  let tmp = create (U64.of_string "0") (U32.mul 2ul nlength-|1ul) in
+  let tmp = create (uint64_to_sint64 0UL) (U32.mul 2ul nlength-|1ul) in
   let h1 = HST.get() in
   eq_lemma_0 h0 h1 b;
   eval_eq_lemma h0 h1 b b norm_length; 
@@ -1529,18 +1511,18 @@ val finalize: b:bigint -> ST unit
     /\ modifies_1 b h0 h1
     /\ eval h1 b norm_length = eval h0 b norm_length % reveal prime))
 let finalize b =
-  let mask_26 = U64.sub ((U64.of_string "1") ^<< 26ul) (U64.of_string "1") in
-  let mask2_26m5 = U64.sub mask_26 (U64.of_string "1" ^<< 2ul) in
+  let mask_26 = ((uint64_to_sint64 1UL) ^<< 26ul) ^- (uint64_to_sint64 1UL) in
+  let mask2_26m5 = mask_26 ^- (uint64_to_sint64 1UL ^<< 2ul) in
   let b0 = index b 0ul in
   let b1 = index b 1ul in
   let b2 = index b 2ul in
   let b3 = index b 3ul in
   let b4 = index b 4ul in
-  let mask = U64.eq_mask b4 mask_26 in
-  let mask = U64.eq_mask b3 mask_26 ^& mask in 
-  let mask = U64.eq_mask b2 mask_26 ^& mask in 
-  let mask = U64.eq_mask b1 mask_26 ^& mask in 
-  let mask = U64.gte_mask b0 mask2_26m5 ^& mask in 
+  let mask = Hacl.UInt64.eq_mask b4 mask_26 in
+  let mask = Hacl.UInt64.eq_mask b3 mask_26 ^& mask in 
+  let mask = Hacl.UInt64.eq_mask b2 mask_26 ^& mask in 
+  let mask = Hacl.UInt64.eq_mask b1 mask_26 ^& mask in 
+  let mask = Hacl.UInt64.gte_mask b0 mask2_26m5 ^& mask in 
   upd b 0ul (b0 ^- (mask ^& mask2_26m5));
   upd b 1ul (b1 ^- (b1 ^& mask));
   upd b 2ul (b2 ^- (b2 ^& mask));

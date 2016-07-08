@@ -41,6 +41,19 @@ val op_Hat_Amp:uint8 -> uint8 -> uint8
 val op_Hat_Bar:uint8 -> uint8 -> uint8
 val op_Hat_Hat:uint8 -> uint8 -> uint8
 
+val op_Plus_Hat: uint8 -> uint8 -> uint8
+val op_Subtraction_Hat: uint8 -> uint8 -> uint8
+val op_Star_Hat: uint8 -> uint8 -> uint8
+val op_Plus_Hat_Percent: uint8 -> uint8 -> uint8
+val op_Subtraction_Hat_Percent: uint8 -> uint8 -> uint8
+val op_Star_Hat_Percent: uint8 -> uint8 -> uint8
+val op_Slash_Hat:uint8 -> uint8 -> uint8
+val op_Less_Less_Hat:uint8 -> int -> uint8
+val op_Greater_Greater_Hat:uint8 -> int -> uint8
+val op_Amp_Hat:uint8 -> uint8 -> uint8
+val op_Bar_Hat:uint8 -> uint8 -> uint8
+val op_Hat_Hat:uint8 -> uint8 -> uint8
+
 val of_int: Prims.int -> uint8
 val of_string: string -> uint8
                                 
