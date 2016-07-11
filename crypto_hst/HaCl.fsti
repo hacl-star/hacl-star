@@ -14,6 +14,10 @@ val hacl_hash: alg:hash_alg -> hash:bytes{length hash = hashSize alg} -> data:by
         (requires (fun h -> live h hash /\ live h data))
         (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 data /\ modifies_1 hash h0 h1 /\ hash = (hacl_hash' alg data len)))
 
+val hacl_hash_sha256: hash:bytes{length hash = hashSize alg} -> data:bytes -> len:nat{len = length data} 
+  -> STL (retcode:int)
+        (requires (fun h -> live h hash /\ live h data))
+        (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 data /\ modifies_1 hash h0 h1 /\ hash = (hacl_hash_sha256' data len)))
 
 ////////////////////////////////////////////////////////////////// 
 //
