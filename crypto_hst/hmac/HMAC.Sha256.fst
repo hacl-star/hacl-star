@@ -94,7 +94,7 @@ let wrap_key okey key keylen =
     blit key 0ul okey 0ul keylen
 
 
-#reset-options "--z3timeout 100"
+#reset-options "--z3timeout 3600"
 
 
 (* Define the main function *)
@@ -259,4 +259,5 @@ let hmac_sha256 mac key keylen data datalen =
   pop_frame();
     let hfin = HST.get () in
     assert(modifies_1 mac hinit hfin);
-    assume (equal_domains hinit hfin)
+    assume (equal_domains hinit hfin);
+    assert(live hfin mac)
