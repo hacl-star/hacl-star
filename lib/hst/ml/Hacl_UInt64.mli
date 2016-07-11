@@ -8,6 +8,9 @@ type wide = uint128
 type u32 = int
              
 val n:Prims.int
+
+(* Placeholder, implemented by "failwith" *)
+val v: uint64 -> Prims.int
         
 val zero:uint64
 val one:uint64

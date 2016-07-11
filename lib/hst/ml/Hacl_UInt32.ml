@@ -9,6 +9,8 @@ let (ones:uint32) = -1
 
 let bits = 32
 let mask = ((1 lsl 32) - 1)
+
+let v (x:uint32) : Prims.int = failwith "Ghost function, cannot be called in concrete code"           
              
 (* Standard operators *)
 let add a b = (a + b) land mask  

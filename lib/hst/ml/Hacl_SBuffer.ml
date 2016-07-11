@@ -22,10 +22,12 @@ type uint32 = int
 type u8s = Hacl_UInt8.uint8 buffer
 type u32s = Hacl_UInt32.uint32 buffer 
 type u64s = Hacl_UInt64.uint64 buffer 
-
-type u8 = Hacl_UInt8.t                                  
-type u32 = Hacl_UInt32.t                                  
-type u64 = Hacl_UInt64.uint64
+type u128s = Hacl_UInt128.t buffer
+                               
+type s8 = Hacl_UInt8.t                                  
+type s32 = Hacl_UInt32.t                                  
+type s64 = Hacl_UInt64.uint64
+type s128 = Hacl_UInt128.t
                 
 let create init len = {content = Array.make len init; idx = 0; length = len}
 let index b n = Array.get b.content (n+b.idx)
