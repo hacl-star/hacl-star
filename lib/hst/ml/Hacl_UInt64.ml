@@ -88,19 +88,17 @@ let op_Hat_Amp = logand
 let op_Hat_Bar = logor
 let op_Hat_Hat = logxor
 
-let op_Hat_Hat_Less_Less = shift_left_wide
-let op_Hat_Hat_Greater_Greater = shift_right_wide
-let op_Hat_Hat_Plus = add_wide
-let op_Hat_Hat_Plus_Percent = add_mod_wide
-let op_Hat_Hat_Subtraction = sub_wide
-let op_Hat_Hat_Subtraction_Percent = sub_mod_wide
-let op_Hat_Hat_Star = mul_wide_wide
-let op_Hat_Hat_Star_Percent = mul_mod_wide
-let op_Hat_Hat_Hat = logxor_wide
-let op_Hat_Hat_Amp = logand_wide
-let op_Hat_Hat_Bar = logor_wide
-let op_Hat_Less_Less_Less = rotate_left_wide
-let op_Hat_Greater_Greater_Greater = rotate_right_wide
+let op_Less_Less_Hat = shift_left
+let op_Greater_Greater_Hat = shift_right
+let op_Plus_Hat = add
+let op_Plus_Hat_Percent = add_mod
+let op_Subtraction_Hat = sub
+let op_Subtraction_Hat_Percent = sub_mod
+let op_Star_Hat = mul
+let op_Star_Hat_Percent = mul_mod
+let op_Hat_Hat = logxor
+let op_Amp_Hat = logand
+let op_Bar_Hat = logor
                    
 (* let to_uint8 s = Stdint.Uint64.to_int s land 255 *)
 (* let of_uint8 s = Stdint.Uint64.of_int s *)
@@ -109,7 +107,7 @@ let op_Hat_Greater_Greater_Greater = rotate_right_wide
 let wide_to_limb s = Stdint.Uint64.of_uint128 s
 let limb_to_wide s = Stdint.Uint128.of_uint64 s
 
-let eq x y =
+let eq_mask x y =
   let a = Stdint.Uint64.lognot (Stdint.Uint64.logxor x y) in
   let a = Stdint.Uint64.logand a (Stdint.Uint64.shift_left a 32) in
   let a = Stdint.Uint64.logand a (Stdint.Uint64.shift_left a 16) in
@@ -121,7 +119,7 @@ let eq x y =
   let r = Stdint.Int64.shift_right r 63 in
   Stdint.Uint64.of_int64 r
 
-let gte x y =
+let gte_mask x y =
   let a = Stdint.Int128.of_uint64 x in
   let b = Stdint.Int128.of_uint64 y in
   let a = Stdint.Int128.shift_right (Stdint.Int128.sub a b) 127 in

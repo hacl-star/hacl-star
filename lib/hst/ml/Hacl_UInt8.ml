@@ -49,6 +49,19 @@ let op_Hat_Amp = logand
 let op_Hat_Hat = logxor
 let op_Hat_Bar = logor
 
+let op_Plus_Hat = add
+let op_Subtraction_Hat = sub
+let op_Star_Hat = mul
+let op_Slash_Hat = div
+let op_Plus_Hat_Percent = add_mod
+let op_Star_Hat_Percent = mul_mod
+let op_Subtraction_Hat_Percent = sub_mod
+let op_Less_Less_Hat = shift_left
+let op_Greater_Greater_Hat = shift_right
+let op_Amp_Hat = logand
+let op_Hat_Hat = logxor
+let op_Bar_Hat = logor
+
 let of_string s =
   let x = int_of_string s in
   if x >= 256 || x < 0 then failwith "Wrong constant"

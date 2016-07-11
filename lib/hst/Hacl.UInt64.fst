@@ -53,5 +53,26 @@ let op_Less_Hat = gt
 let op_Less_Equal_Hat = gte
 type byte = t
 
+let op_Hat_Plus= add
+let op_Hat_Plus_Question= add_underspec
+let op_Hat_Plus_Percent= add_mod
+let op_Hat_Subtraction= sub
+let op_Hat_Subtraction_Question= sub_underspec
+let op_Hat_Subtraction_Percent= sub_mod
+let op_Hat_Star= mul
+let op_Hat_Star_Question= mul_underspec
+let op_Hat_Star_Percent= mul_mod
+let op_Hat_Slash= div
+let op_Hat_Percent= rem
+let op_Hat_Amp= logand
+let op_Hat_Bar= logor
+let op_Hat_Less_Less= shift_left
+let op_Hat_Greater_Greater= shift_right
+let op_Hat_Equal= eq
+let op_Hat_Greater= gt
+let op_Hat_Greater_Equal= gte
+let op_Hat_Less= gt
+let op_Hat_Less_Equal= gte
+
 let of_string = of_string
 let uint_to_t = uint_to_t
