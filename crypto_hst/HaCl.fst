@@ -26,6 +26,9 @@ let hacl_hash alg hash data len =
 //  | SHA512 -> sha512 hash data len
 
 
+let hacl_hash_sha256 hash data len =
+  sha256 hash data len
+
 
 ////////////////////////////////////////////////////////////////// 
 //
