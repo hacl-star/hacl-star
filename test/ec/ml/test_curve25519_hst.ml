@@ -11,7 +11,7 @@ let template_donna = fun x -> 26 - (x mod 2)
 let template_448 = fun x -> 56
 
 let zero = Hacl_UInt64.of_string "0"
-let one = Hacl_UInt64.of_string "1"     
+let one = Hacl_UInt64.of_string "1"
 
 let norm_length = Z.to_int norm_length
                                 
@@ -185,8 +185,23 @@ let test4 () =
   print_string "\nString output: \n";
   print_string output_string;
   print_string "\n"
-	       
-		  
+
 let _ =
   test4 ()
-  
+
+(* let scalar1 = "a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4" *)
+(* let scalar2 = "4b66e9d4d1b4673c5ad22691957d6af5c11b6421e0ea01d42ca4169e7918ba0d" *)
+
+(* let input1 = "e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c" *)
+(* let input2 = "e5210f12786811d3f4b7959d0538ae2c31dbe7106fc03c3efc4cd549c715a493" *)
+
+(* let import_from_string scalar_string = *)
+(*   let bytes = Array.init 32 (fun i -> Hacl_UInt8.of_string ("0x" ^ (String.sub scalar_string (2*i) 2))) in *)
+(*   {content = bytes; idx=0; length = 32} *)
+
+(* let _ = *)
+(*   let scalar = import_from_string scalar1 in *)
+(*   let qx = import_from_string input1 in *)
+(*   let output = {content = Array.create 32 (Hacl_UInt8.of_string "0"); idx=0; length = 32} in *)
+(*   Curve_Curve25519.exp output qx scalar; *)
+(*   Array.iter (fun x -> print_string ((Hacl_UInt8.to_string x) ^ " ")) (scalar.content)   *)
