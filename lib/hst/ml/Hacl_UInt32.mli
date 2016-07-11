@@ -3,6 +3,9 @@ type t = uint32
            
 val n:Prims.int
 
+(* Placeholder, implemented by failwith *)
+val v: uint32 -> Prims.int
+        
 val zero:uint32
 val one:uint32
 val ones:uint32

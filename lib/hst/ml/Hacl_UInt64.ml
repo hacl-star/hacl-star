@@ -9,6 +9,8 @@ type u32 = int
 
 let n = Prims.parse_int "8"
 
+let v (x:uint64) : Prims.int = failwith "Ghost function, cannot be called in concrete code"
+                        
 let (zero:uint64) = Stdint.Uint64.zero
 let (one:uint64) = Stdint.Uint64.one
 let (ones:uint64) = Stdint.Uint64.pred zero

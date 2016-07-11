@@ -14,6 +14,8 @@ module HS = FStar.HyperStack
 let s8  = Hacl.UInt8.t
 let s32 = Hacl.UInt32.t
 let s64 = Hacl.UInt64.t
+let s128 = Hacl.UInt128.t
+
 let u32 = FStar.UInt32.t
 
 type buffer (a:Type) = buffer a
@@ -21,10 +23,12 @@ type buffer (a:Type) = buffer a
 type _u8s  = buffer s8
 type _u32s = buffer s32
 type _u64s = buffer s64
+type _u128s = buffer s128
 
 type u8s  = _u8s
 type u32s = _u32s
 type u64s = _u64s
+type u128s = _u128s
 
 let contains #a h (b:buffer a) = contains #a h b
 let sel #a h (b:buffer a{contains h b}) = sel #a h b
