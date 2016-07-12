@@ -251,7 +251,7 @@ let fsum a b =
   let h0 = HST.get() in
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *)
   Curve.Fsum.fsum' a b; 
-  let tmp = create (S128.of_string "0") (9ul) in 
+  let tmp = create (S128.of_string "0") (UInt32.sub (UInt32.mul nlength 2ul) 1ul) in 
   let h1 = HST.get() in
   copy_to_bigint_wide tmp a; 
   cut (forall (i:nat). {:pattern (v (get h1 a i))} i < norm_length ==> v (get h1 a i) = v (get h0 a i) + v (get h0 b i));

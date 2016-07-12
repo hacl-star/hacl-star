@@ -1,4 +1,4 @@
-module Curve.Curve25519
+module Curve.P256
 
 open FStar.HST
 open Hacl.UInt8
@@ -9,17 +9,13 @@ open Curve.Bignum
 open Curve.Crecip
 open Curve.Ladder
 
-#set-options "--lax"
-
 let op_Hat_Greater_Greater : s64 -> UInt32.t -> Tot s64 = Hacl.UInt64.shift_right
 
 val format_scalar: scalar:u8s{length scalar >= 32} -> STL unit
   (requires (fun h -> live h scalar))
   (ensures  (fun h0 _ h1 -> modifies_1 scalar h0 h1 /\ live h1 scalar))
 let format_scalar scalar =
-  upd scalar 0ul ((index scalar 0ul) &^ (uint8_to_sint8 248uy));
-  upd scalar 31ul ((index scalar 31ul) &^ (uint8_to_sint8 127uy));
-  upd scalar 31ul ((index scalar 31ul) |^ (uint8_to_sint8 64uy))
+  upd scalar 0ul (uint8_to_sint8 0uy)
 
 open Hacl.UInt64
 
@@ -27,7 +23,6 @@ val expand: output:Curve.Bigint.bigint -> input:u8s{length input >= 32} -> STL u
   (requires (fun h -> live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand output input =
-  let mask = Hacl.UInt64.of_string "0x7ffffffffffff" in
   let i0 = index input 0ul in
   let i1 = index input 1ul in
   let i2 = index input 2ul in
@@ -92,21 +87,22 @@ let expand output input =
   let i29 = (sint8_to_sint64 (i29)) in
   let i30 = (sint8_to_sint64 (i30)) in
   let i31 = (sint8_to_sint64 (i31)) in
-  let o0 = (i0 +^ (i1 <<^ 8ul) +^ (i2 <<^ 16ul) +^ (i3 <<^ 24ul)
-  	   +^ (i4 <<^ 32ul) +^ (i5 <<^ 40ul) +^ ((i6 <<^ 48ul) &^ mask)) in
-  let o1 = (i6 ^>> 3ul) +^ (i7 <<^ 5ul) +^ (i8 <<^ 13ul) +^ (i9 <<^ 21ul)
-  	   +^ (i10 <<^ 29ul) +^ (i11 <<^ 37ul) +^ ((i12 <<^ 45ul) &^ mask) in
-  let o2 = (i12 ^>> 6ul) +^ (i13 <<^ 2ul) +^ (i14 <<^ 10ul) +^ (i15 <<^ 18ul)
-  	   +^ (i16 <<^ 26ul) +^ (i17 <<^ 34ul) +^ (i18 <<^ 42ul) +^ ((i19 <<^ 50ul) &^ mask) in
-  let o3 = (i19 ^>> 1ul) +^ (i20 <<^ 7ul) +^ (i21 <<^ 15ul) +^ (i22 <<^ 23ul)
-  	   +^ (i23 <<^ 31ul) +^ (i24 <<^ 39ul) +^ ((i25 <<^ 47ul) &^ mask) in
-  let o4 = (i25 ^>> 4ul) +^ (i26 <<^ 4ul) +^ (i27 <<^ 12ul) +^ (i28 <<^ 20ul) 
-  	   +^ (i29 <<^ 28ul) +^ (i30 <<^ 36ul) +^ ((i31 <<^ 44ul) &^ mask) in
+  let o0 = i0 +^ (i1 <<^ 8ul) +^ (i2 <<^ 16ul) +^ (i3 <<^ 24ul) in
+  let o1 = i4 +^ (i5 <<^ 8ul) +^ (i6 <<^ 16ul) +^ (i7 <<^ 24ul) in
+  let o2 = i8 +^ (i9 <<^ 8ul) +^ (i10 <<^ 16ul) +^ (i11 <<^ 24ul) in
+  let o3 = i12 +^ (i13 <<^ 8ul) +^ (i14 <<^ 16ul) +^ (i15 <<^ 24ul) in
+  let o4 = i16 +^ (i17 <<^ 8ul) +^ (i18 <<^ 16ul) +^ (i19 <<^ 24ul) in
+  let o5 = i20 +^ (i21 <<^ 8ul) +^ (i22 <<^ 16ul) +^ (i23 <<^ 24ul) in
+  let o6 = i24 +^ (i25 <<^ 8ul) +^ (i26 <<^ 16ul) +^ (i27 <<^ 24ul) in
+  let o7 = i28 +^ (i29 <<^ 8ul) +^ (i30 <<^ 16ul) +^ (i31 <<^ 24ul) in
   upd output 0ul o0;
   upd output 1ul o1;
   upd output 2ul o2;
   upd output 3ul o3;
   upd output 4ul o4; 
+  upd output 5ul o5;
+  upd output 6ul o6;
+  upd output 7ul o7;
   () // Without this unit the extraction to OCaml breaks
 
 val contract: output:u8s{length output >= 32} -> input:Curve.Bigint.bigint{disjoint output input}  -> STL unit
@@ -118,45 +114,56 @@ let contract output input =
   let i2 = index input 2ul in
   let i3 = index input 3ul in
   let i4 = index input 4ul in
-  
+  let i5 = index input 5ul in
+  let i6 = index input 6ul in
+  let i7 = index input 7ul in
   upd output 0ul (sint64_to_sint8 (i0 ^>> 0ul));
   upd output 1ul (sint64_to_sint8 (i0 ^>> 8ul));
   upd output 2ul (sint64_to_sint8 (i0 ^>> 16ul));
   upd output 3ul (sint64_to_sint8 (i0 ^>> 24ul));
-  upd output 4ul (sint64_to_sint8 (i0 ^>> 32ul));
-  upd output 5ul (sint64_to_sint8 (i0 ^>> 40ul));
-  upd output 6ul (sint64_to_sint8 ((i0 ^>> 48ul) +^ (i1 <<^ 3ul)));
-  upd output 7ul (sint64_to_sint8 (i1 ^>> 5ul));
-  upd output 8ul (sint64_to_sint8 (i1 ^>> 13ul));
-  upd output 9ul (sint64_to_sint8 (i1 ^>> 21ul));
-  upd output 10ul (sint64_to_sint8 (i1 ^>> 29ul));
-  upd output 11ul (sint64_to_sint8 (i1 ^>> 37ul));
-  upd output 12ul (sint64_to_sint8 ((i1 ^>> 45ul) +^ (i2 <<^ 6ul)));
-  upd output 13ul (sint64_to_sint8 (i2 ^>> 2ul));
-  upd output 14ul (sint64_to_sint8 (i2 ^>> 10ul));
-  upd output 15ul (sint64_to_sint8 (i2 ^>> 18ul));
-  upd output 16ul (sint64_to_sint8 (i2 ^>> 26ul));
-  upd output 17ul (sint64_to_sint8 (i2 ^>> 34ul));
-  upd output 18ul (sint64_to_sint8 (i2 ^>> 42ul));
-  upd output 19ul (sint64_to_sint8 ((i2 ^>> 50ul) +^ (i3 <<^ 1ul)));
-  upd output 20ul (sint64_to_sint8 (i3 ^>> 7ul));
-  upd output 21ul (sint64_to_sint8 (i3 ^>> 15ul));
-  upd output 22ul (sint64_to_sint8 (i3 ^>> 23ul));
-  upd output 23ul (sint64_to_sint8 (i3 ^>> 31ul));
-  upd output 24ul (sint64_to_sint8 (i3 ^>> 39ul));
-  upd output 25ul (sint64_to_sint8 ((i3 ^>> 47ul) +^ (i4 <<^ 4ul)));
-  upd output 26ul (sint64_to_sint8 (i4 ^>> 4ul));
-  upd output 27ul (sint64_to_sint8 (i4 ^>> 12ul));
-  upd output 28ul (sint64_to_sint8 (i4 ^>> 20ul));
-  upd output 29ul (sint64_to_sint8 (i4 ^>> 28ul));
-  upd output 30ul (sint64_to_sint8 (i4 ^>> 36ul));
-  upd output 31ul (sint64_to_sint8 (i4 ^>> 44ul))
 
-val exp: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
+  upd output 4ul (sint64_to_sint8 (i1 ^>> 0ul));
+  upd output 5ul (sint64_to_sint8 (i1 ^>> 8ul));
+  upd output 6ul (sint64_to_sint8 (i1 ^>> 16ul));
+  upd output 7ul (sint64_to_sint8 (i1 ^>> 24ul));
+
+  upd output 8ul (sint64_to_sint8 (i2 ^>> 0ul));
+  upd output 9ul (sint64_to_sint8 (i2 ^>> 8ul));
+  upd output 10ul (sint64_to_sint8 (i2 ^>> 16ul));
+  upd output 11ul (sint64_to_sint8 (i2 ^>> 24ul));
+
+  upd output 12ul (sint64_to_sint8 (i3 ^>> 0ul));
+  upd output 13ul (sint64_to_sint8 (i3 ^>> 8ul));
+  upd output 14ul (sint64_to_sint8 (i3 ^>> 16ul));
+  upd output 15ul (sint64_to_sint8 (i3 ^>> 24ul));
+
+  upd output 16ul (sint64_to_sint8 (i4 ^>> 0ul));
+  upd output 17ul (sint64_to_sint8 (i4 ^>> 8ul));
+  upd output 18ul (sint64_to_sint8 (i4 ^>> 16ul));
+  upd output 19ul (sint64_to_sint8 (i4 ^>> 24ul));
+
+  upd output 20ul (sint64_to_sint8 (i5 ^>> 0ul));
+  upd output 21ul (sint64_to_sint8 (i5 ^>> 8ul));
+  upd output 22ul (sint64_to_sint8 (i5 ^>> 16ul));
+  upd output 23ul (sint64_to_sint8 (i5 ^>> 24ul));
+
+  upd output 24ul (sint64_to_sint8 (i6 ^>> 0ul));
+  upd output 25ul (sint64_to_sint8 (i6 ^>> 8ul));
+  upd output 26ul (sint64_to_sint8 (i6 ^>> 16ul));
+  upd output 27ul (sint64_to_sint8 (i6 ^>> 24ul));
+
+  upd output 28ul (sint64_to_sint8 (i7 ^>> 0ul));
+  upd output 29ul (sint64_to_sint8 (i7 ^>> 8ul));
+  upd output 30ul (sint64_to_sint8 (i7 ^>> 16ul));
+  upd output 31ul (sint64_to_sint8 (i7 ^>> 24ul));
+  ()
+
+val exp: output:u8s{length output >= 64} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
+  q_y:u8s{length q_y >= 32 /\ disjoint q_y output} ->
   pk:u8s{length pk >= 32 /\ disjoint pk output} -> STL unit
   (requires (fun h -> live h output /\ live h q_x /\ live h pk))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
-let exp output q_x scalar =
+let exp output q_x q_y scalar =
   push_frame();
 
   (* Allocate *)
@@ -170,12 +177,15 @@ let exp output q_x scalar =
   let resy = create zero nlength in
   let resz = create zero nlength in
   let zrecip = create zero nlength in
+  let zrecip2 = create zero nlength in
+  let zrecip3 = create zero nlength in
     
   (* Format scalar *)
   format_scalar scalar;
 
   (* Create basepoint *)
   expand qx q_x;
+  expand qy q_y;
   upd qz 0ul one;
   let basepoint = Curve.Point.Point qx qy qz in
 
@@ -187,7 +197,12 @@ let exp output q_x scalar =
 
   (* Get the affine coordinates back *)
   crecip' zrecip (Curve.Point.get_z res);
-  fmul resy resx zrecip;
-  contract output resy;
-
+  fsquare zrecip2 zrecip;
+  fmul zrecip3 zrecip zrecip2;
+  fmul qx resx zrecip2;
+  fmul qy resy zrecip3;
+  let x = Hacl.SBuffer.sub output 0ul 32ul in
+  let y = Hacl.SBuffer.sub output 32ul 32ul in
+  contract x qx;
+  contract y qy;
   pop_frame()
