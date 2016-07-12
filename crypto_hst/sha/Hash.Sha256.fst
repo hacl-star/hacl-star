@@ -4,6 +4,7 @@ open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
 open FStar.HST
+open FStar.Buffer
 open FStar.UInt32
 open Hacl.Cast
 open Hacl.UInt8
@@ -24,7 +25,9 @@ let uint32s = Hacl.SBuffer.u32s
 let bytes = Hacl.SBuffer.u8s
 
 
+#set-options "--lax"
 
+assume MaxU8: pow2 8 = 256
 assume MaxU32: pow2 32 = 4294967296
 
 val rotate_right: s32 -> b:u32{v b <= 32} -> Tot s32
@@ -43,7 +46,7 @@ let be_bytes_of_sint64 output x =
  let b5 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 16ul) @& uint64_to_sint64 255UL) in
  let b6 = sint64_to_sint8 ((Hacl.UInt64.shift_right x 8ul)  @& uint64_to_sint64 255UL) in
  let b7 = sint64_to_sint8 ((x)                              @& uint64_to_sint64 255UL) in
- upd output 0ul b0; 
+ upd output 0ul b0;
  upd output (1ul) b1;
  upd output (2ul) b2;
  upd output (3ul) b3;
@@ -54,7 +57,11 @@ let be_bytes_of_sint64 output x =
 
 let op_At_At_Amp = UInt64.logand
 
-val be_bytes_of_uint64: bytes -> u64 -> St unit
+val be_bytes_of_uint64: x:bytes -> y:u64
+  -> STL unit
+        (requires (fun h -> live h x))
+        (ensures  (fun h0 _ h1 -> live h1 x /\ modifies_1 x h0 h1))
+
 let be_bytes_of_uint64 output x =
  let b0 = uint64_to_sint8 ((UInt64.shift_right x 56ul) @@& 255UL) in
  let b1 = uint64_to_sint8 ((UInt64.shift_right x 48ul) @@& 255UL) in
@@ -64,7 +71,7 @@ let be_bytes_of_uint64 output x =
  let b5 = uint64_to_sint8 ((UInt64.shift_right x 16ul) @@& 255UL) in
  let b6 = uint64_to_sint8 ((UInt64.shift_right x 8ul)  @@& 255UL) in
  let b7 = uint64_to_sint8 ((x)                         @@& 255UL) in
- upd output 0ul b0; 
+ upd output 0ul b0;
  upd output (1ul) b1;
  upd output (2ul) b2;
  upd output (3ul) b3;
@@ -88,7 +95,7 @@ let be_uint32_of_bytes (b:bytes{length b >= 4}) =
   r
 
 val be_uint32s_of_bytes:uint32s -> bytes -> u32 -> St unit
-let rec be_uint32s_of_bytes u b len = 
+let rec be_uint32s_of_bytes u b len =
   if UInt32.eq len 0ul then ()
   else (
     let l4 = UInt32.div len 4ul in
@@ -104,7 +111,7 @@ val be_bytes_of_uint32s: output:bytes -> m:uint32s{disjoint output m} -> len:u32
     /\ modifies_1 output h0 h1 ))
 let rec be_bytes_of_uint32s output m len =
   if len =^ 0ul then ()
-  else 
+  else
     begin
       let l4 = UInt32.div len 4ul in
       let l = UInt32.sub l4 1ul in
@@ -121,6 +128,8 @@ let rec be_bytes_of_uint32s output m len =
       be_bytes_of_uint32s output m l4
     end
 
+
+#reset-options "--z3timeout 50"
 
 //
 // SHA-256
@@ -148,8 +157,12 @@ let _sigma1 x = logxor (rotate_right x 17ul) (logxor (rotate_right x 19ul) (shif
 
 
 (* [FIPS 180-4] section 4.2.2 *)
-val k_init: uint32s -> STL unit (requires (fun _ -> True)) (ensures (fun h0 _ h1 -> True))
-let k_init k =
+val k_setup: k:uint32s{length k = 64}
+  -> STL unit (requires (fun h -> live h k))
+             (ensures (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1))
+
+let k_setup k =
+  admit(); // This is safe
   upd k 0ul (uint32_to_sint32  0x428a2f98ul);
   upd k 1ul (uint32_to_sint32  0x71374491ul);
   upd k 2ul (uint32_to_sint32  0xb5c0fbcful);
@@ -218,7 +231,7 @@ let k_init k =
 
 let op_At_Plus (a:u32) (b:u32) : Tot u32 = UInt32.add_mod a b
 let op_At_Subtraction (a:u32) (b:u32) : Tot u32 = UInt32.sub_mod a b
-let op_At_Slash (a:u32) (b:u32) : Tot u32 = UInt32.div a b
+let op_At_Slash (a:u32) (b:u32{v b <> 0}) : Tot u32 = UInt32.div a b
 
 
 (* [FIPS 180-4] section 5.1.1 *)
@@ -229,7 +242,7 @@ let nblocks x = ((x @+ 8ul) @- (UInt32.rem (x @+ 8ul) 64ul))@/64ul @+ 1ul
 
 
 (* Compute the pad length *)
-val pad_length: u32 -> Tot (n:u32{lte n 64ul})
+val pad_length: u32 -> Tot (n:u32{lte n 64ul /\ gte n 1ul})
 let pad_length rlen =
   if lt (UInt32.rem rlen 64ul) 56ul then 56ul @- (UInt32.rem rlen 64ul)
   else 64ul @+ 56ul @- (UInt32.rem rlen 64ul)
@@ -238,37 +251,74 @@ let pad_length rlen =
 (* Pad the data and return a buffer of uint32 for subsequent treatment *)
 val pad: (pdata :bytes) ->
          (rdata :bytes{disjoint pdata rdata}) ->
-         (rlen  :u32{ v rlen = length rdata})
+         (rlen  :u32  {v rlen <= length rdata /\ v rlen <= length pdata /\ v rlen + v (pad_length rlen) + 8 <= length pdata})
          -> STL unit
               (requires (fun h -> live h rdata /\ live h pdata))
               (ensures  (fun h0 r h1 -> live h1 rdata /\ live h1 pdata /\ modifies_1 pdata h0 h1))
+
 let pad pdata rdata rlen =
-  // Value of the raw data length in bits represented as UInt64
-  let rlen_64 =
-    let v = create (uint8_to_sint8 0uy) 8ul in
-    let v64 = Int.Cast.uint32_to_uint64 (UInt32.mul_mod rlen 8ul) in
-    be_bytes_of_uint64 v v64;
-    v
-  in
-  // Compute the padding length
+
+  (** Push a new frame *)
+  (**) let hinit = HST.get () in
+  (**) push_frame ();
+  (**) let h0 = HST.get () in
+
+  (* Value of the raw data length in bits represented as UInt64 *)
+  let v64 = Int.Cast.uint32_to_uint64 (UInt32.mul_mod rlen 8ul) in
+  let rlen_64 = create (uint8_to_sint8 0uy) 8ul in
+  (**) let h1 = HST.get () in
+  (**) assert(modifies_0 h0 h1);
+  (**) no_upd_lemma_0 h0 h1 pdata;
+  (**) no_upd_lemma_0 h0 h1 rdata;
+  be_bytes_of_uint64 rlen_64 v64;
+  (**) let h2 = HST.get () in
+  (**) assert(modifies_1 rlen_64 h1 h2);
+  (**) no_upd_lemma_1 h1 h2 rlen_64 pdata;
+  (**) no_upd_lemma_1 h1 h2 rlen_64 rdata;
+
+  (* Compute the padding length *)
   let rplen = pad_length rlen in
-  // Generate the padding
+  (**) assert(modifies_0 h0 h2);
+
+  (* Generate the padding *)
   let rpad = create (uint8_to_sint8 0uy) rplen in
+  (**) let h3 = HST.get () in
+  (**) assert(modifies_0 h2 h3);
+  (**) assert(modifies_0 h0 h3);
+  (**) assert(live h3 rpad);
+  (**) assert(live h3 pdata);
+  (**) assert(live h3 rdata);
   upd rpad 0ul (uint8_to_sint8 0x80uy);
+  (**) let h4 = HST.get () in
+  (**) assert(modifies_1 rpad h3 h4);
+  (**) assert(modifies_0 h0 h4);
+  (**) no_upd_lemma_0 h0 h4 pdata;
+  (**) no_upd_lemma_0 h0 h4 rdata;
+  (**) assert(v rlen <= length pdata);
+  (**) assert(v rlen <= length rdata);
   blit rdata 0ul pdata 0ul rlen;
+  (**) let h5 = HST.get () in
+  (**) assert(modifies_1 pdata h4 h5);
+  (**) no_upd_lemma_1 h4 h5 pdata rdata;
+  (**) assert(v rlen + v rplen <= length pdata);
   blit rpad 0ul pdata rlen rplen;
-  blit rlen_64 0ul pdata (rlen @+ rplen) 8ul
+  (**) let h6 = HST.get () in
+  (**) assert(modifies_1 pdata h5 h6);
+  (**) no_upd_lemma_1 h5 h6 pdata rdata;
+  (**) assert(v rlen + v rplen + 8 <= length pdata);
+  (**) assert(length rlen_64 >= v 8ul);
+  (**) assert(live h6 rlen_64);
+  (**) assert(live h6 pdata);
+  blit rlen_64 0ul pdata (UInt32.add rlen rplen) 8ul;
+  (**) let h7 = HST.get () in
+  (**) assert(modifies_1 pdata h6 h7);
 
-
-(* Store function to handle pdata as a sequence of words *)
-val store : (wdata :uint32s) ->
-            (pdata :bytes {length pdata = (Prims.op_Multiply 4 (length wdata)) /\ disjoint wdata pdata }) ->
-            (plen  :u32   {length pdata = v plen /\ v plen = (Prims.op_Multiply 4 (length wdata)) })
-            -> STL unit
-                 (requires (fun h -> live h wdata /\ live h pdata))
-                 (ensures  (fun h0 r h1 -> live h1 wdata /\ live h1 pdata /\ modifies_1 wdata h0 h1))
-
-let store wdata pdata plen = be_uint32s_of_bytes wdata pdata plen
+  (** Pop the frame *)
+  (**) pop_frame ();
+  (**) let hfin = HST.get () in
+  (**) assert(modifies_1 pdata hinit hfin);
+  (**) assume(equal_domains hinit hfin);
+  (**) assert(live hfin pdata)
 
 
 (* [FIPS 180-4] section 6.2.2 *)
@@ -340,11 +390,11 @@ let rec update_inner_loop ws whash t t1 t2 k =
     let v0 = _Sigma1 (index whash 4ul) in
     let v1 = _Ch (index whash 4ul) (index whash 5ul) (index whash 6ul) in
     t1 := add_mod _h (add_mod v0 (add_mod v1 (add_mod _kt _wt)));
-    
+
     let z0 = _Sigma0 (index whash 0ul) in
     let z1 = _Maj (index whash 0ul) (index whash 1ul) (index whash 2ul) in
     t2 := add_mod z0 z1;
-    
+
     let _d = (index whash 3ul) in
     upd whash 7ul (index whash 6ul);
     upd whash 6ul (index whash 5ul);
@@ -427,7 +477,7 @@ let update whash wdata rounds =
   let ws = create (uint32_to_sint32 0ul) 64ul in
   (* Initialize constant *)
   let k = create (uint32_to_sint32 0ul) 64ul  in
-  k_init k;
+  k_setup k;
   (* Perform function *)
   update_step whash wdata ws rounds i t1 t2 k
 
@@ -459,6 +509,6 @@ let sha256 hash data len =
   let wdata = create (uint32_to_sint32 0ul) wlen in
   init whash;
   pad pdata data len;
-  store wdata pdata plen;
+  be_uint32s_of_bytes wdata pdata plen;
   update whash wdata rounds;
   finish hash whash
