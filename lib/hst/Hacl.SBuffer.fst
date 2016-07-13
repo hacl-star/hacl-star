@@ -87,48 +87,55 @@ let modifies_2 (#a:Type) (#a':Type) (b:buffer a) (b':buffer a') h0 h1 = modifies
 
 let modifies_region rid bufs h0 h1 = modifies_region rid bufs h0 h1
 
-(** Concrete getters and setters **)
-let create #a (init:a) (len:u32) : ST (buffer a)
-     (requires (fun h -> True))
-     (ensures (fun (h0:mem) b h1 -> ~(contains h0 b)
-       /\ live h1 b /\ idx b = 0 /\ length b = v len /\ frameOf b = h0.tip
-       /\ modifies_region h1.tip Set.empty h0 h1
-       /\ sel h1 b = Seq.create (v len) init
-       ))
-  = create #a init len
+let create = create 
+let index = index
+let upd = upd
+let sub = sub
+let offset = offset
+let blit = blit
 
-let index #a (b:buffer a) (n:u32{v n<length b}) : STL a
-     (requires (fun h -> live h b))
-     (ensures (fun h0 z h1 -> live h0 b /\ h1 == h0 /\ z == get h0 b (v n) ))
-  = index #a b n
+(* (\** Concrete getters and setters **\) *)
+(* let create #a (init:a) (len:u32) : ST (buffer a) *)
+(*      (requires (fun h -> True)) *)
+(*      (ensures (fun (h0:mem) b h1 -> ~(contains h0 b) *)
+(*        /\ live h1 b /\ idx b = 0 /\ length b = v len /\ frameOf b = h0.tip *)
+(*        /\ modifies_region h1.tip Set.empty h0 h1 *)
+(*        /\ sel h1 b = Seq.create (v len) init *)
+(*        )) *)
+(*   = create #a init len *)
 
-val upd: #a:Type -> b:buffer a -> n:u32 -> z:a -> STL unit
-  (requires (fun h -> live h b /\ v n < length b))
-  (ensures (fun h0 _ h1 -> live h0 b /\ live h1 b /\ v n < length b
-    /\ modifies_1 b h0 h1
-    /\ sel h1 b = Seq.upd (sel h0 b) (idx b + v n) z))
-let upd #a b n z = upd #a b n z
+(* let index #a (b:buffer a) (n:u32{v n<length b}) : STL a *)
+(*      (requires (fun h -> live h b)) *)
+(*      (ensures (fun h0 z h1 -> live h0 b /\ h1 == h0 /\ z == get h0 b (v n) )) *)
+(*   = index #a b n *)
 
-(* Could be made Total with a couple changes in the spec *)
-let sub #a (b:buffer a) (i:u32) (len:u32{v len <= length b /\ v i + v len <= length b}) : STL (buffer a)
-     (requires (fun h -> live h b))
-     (ensures (fun h0 b' h1 -> content b = content b' /\ idx b' = idx b + v i /\ length b' = v len /\ (h0 == h1)))
-  = sub #a b i len
+(* (\* val upd: #a:Type -> b:buffer a -> n:u32 -> z:a -> STL unit *\) *)
+(* (\*   (requires (fun h -> live h b /\ v n < length b)) *\) *)
+(* (\*   (ensures (fun h0 _ h1 -> live h0 b /\ live h1 b /\ v n < length b *\) *)
+(* (\*     /\ modifies_1 b h0 h1 *\) *)
+(* (\*     /\ sel h1 b = Seq.upd (sel h0 b) (idx b + v n) z)) *\) *)
+(* (\* let upd #a b n z = upd #a b n z *\) *)
 
-let offset #a (b:buffer a) (i:u32{v i <= length b}) : STL (buffer a)
-  (requires (fun h -> live h b))
-  (ensures (fun h0 b' h1 -> content b' = content b /\ idx b' = idx b + v i /\ length b' = length b - v i
-    /\ h0 == h1))
-  = offset #a b i
+(* (\* Could be made Total with a couple changes in the spec *\) *)
+(* let sub #a (b:buffer a) (i:u32) (len:u32{v len <= length b /\ v i + v len <= length b}) : STL (buffer a) *)
+(*      (requires (fun h -> live h b)) *)
+(*      (ensures (fun h0 b' h1 -> content b = content b' /\ idx b' = idx b + v i /\ length b' = v len /\ (h0 == h1))) *)
+(*   = sub #a b i len *)
 
-val blit: #t:Type -> a:buffer t -> idx_a:u32{v idx_a <= length a} -> b:buffer t{disjoint a b} ->
-  idx_b:u32{v idx_b <= length b} -> len:u32{v idx_a+v len <= length a /\ v idx_b+v len <= length b} -> STL unit
-    (requires (fun h -> live h a /\ live h b))
-    (ensures (fun h0 _ h1 -> live h0 b /\ live h0 a /\ live h1 b /\ live h1 a
-      /\ (forall (i:nat). {:pattern (get h1 b (v idx_b+i))} i < v len ==> get h1 b (v idx_b+i) = get h0 a (v idx_a+i))
-      /\ (forall (i:nat). {:pattern (get h1 b i)} ((i >= v idx_b + v len /\ i < length b) \/ i < v idx_b) ==> get h1 b i = get h0 b i)
-      /\ modifies_1 b h0 h1 ))
-let blit #t a idx_a b idx_b len = blit #t a idx_a b idx_b len
+(* let offset #a (b:buffer a) (i:u32{v i <= length b}) : STL (buffer a) *)
+(*   (requires (fun h -> live h b)) *)
+(*   (ensures (fun h0 b' h1 -> content b' = content b /\ idx b' = idx b + v i /\ length b' = length b - v i *)
+(*     /\ h0 == h1)) *)
+(*   = offset #a b i *)
+
+(* val blit: #t:Type -> a:buffer t -> idx_a:u32{v idx_a <= length a} -> b:buffer t{disjoint a b} -> *)
+(*   idx_b:u32{v idx_b <= length b} -> len:u32{v idx_a+v len <= length a /\ v idx_b+v len <= length b} -> STL unit *)
+(*     (requires (fun h -> live h a /\ live h b)) *)
+(*     (ensures (fun h0 _ h1 -> live h0 b /\ live h0 a /\ live h1 b /\ live h1 a *)
+(*       /\ (forall (i:nat). {:pattern (get h1 b (v idx_b+i))} i < v len ==> get h1 b (v idx_b+i) = get h0 a (v idx_a+i)) *)
+(*       /\ (forall (i:nat). {:pattern (get h1 b i)} ((i >= v idx_b + v len /\ i < length b) \/ i < v idx_b) ==> get h1 b i = get h0 b i) *)
+(*       /\ modifies_1 b h0 h1 )) *)
+(* let blit #t a idx_a b idx_b len = blit #t a idx_a b idx_b len *)
 
 val upd_lemma: #t:Type -> ha:mem -> hb:mem -> a:buffer t -> ctr:u32 -> x:t -> Lemma (True)
 val no_upd_lemma: #t:Type -> ha:mem -> hb:mem -> a:buffer t -> bufs:(Set.set abuffer) -> Lemma (True)
@@ -138,11 +145,11 @@ let no_upd_lemma #t ha hb a bufs = ()
 val no_upd_lemma_1: #t:Type -> #t':Type -> h0:mem -> h1:mem -> a:buffer t -> b:buffer t' -> Lemma
   (requires (live h0 b /\ disjoint a b /\ modifies_1 a h0 h1))
   (ensures  (live h0 b /\ live h1 b /\ equal h0 b h1 b))
-  [SMTPat (modifies_1 a h0 h1); SMTPat (live h0 b); SMTPat (disjoint a b)]
+  (* [SMTPat (modifies_1 a h0 h1); SMTPat (live h0 b); SMTPat (disjoint a b)] *)
 let no_upd_lemma_1 #t #t' h0 h1 a b = no_upd_lemma_1 #t #t' h0 h1 a b
 
 val no_upd_lemma_2: #t:Type -> #t':Type -> #t'':Type -> h0:mem -> h1:mem -> a:buffer t -> a':buffer t' -> b:buffer t'' -> Lemma
   (requires (live h0 b /\ disjoint a b /\ disjoint a' b /\ modifies_2 a a' h0 h1))
   (ensures  (live h0 b /\ live h1 b /\ equal h0 b h1 b))
-  [SMTPat (modifies_1 a h0 h1); SMTPat (live h0 b); SMTPat (disjoint a b)]
+  (* [SMTPat (modifies_1 a h0 h1); SMTPat (live h0 b); SMTPat (disjoint a b)] *)
 let no_upd_lemma_2 #t #t' #t'' h0 h1 a a' b = no_upd_lemma_2 #t #t' #t'' h0 h1 a a' b

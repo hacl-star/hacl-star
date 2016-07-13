@@ -4,6 +4,8 @@ open FStar.UInt64
 
 module U64 = FStar.UInt64
 
+assume MaxUInt64: pow2 64 = 0xffffffffffffffff
+
 private type _t = U64.t
 type t = _t
 

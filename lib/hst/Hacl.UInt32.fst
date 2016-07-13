@@ -4,6 +4,8 @@ open FStar.UInt32
 
 module U32 = FStar.UInt32
 
+assume MaxUint32: pow2 32 = 4294967296
+
 private type _t = U32.t
 type t = _t
 

@@ -4,6 +4,8 @@ open FStar.UInt8
 
 module U8 = FStar.UInt8
 
+assume MaxUInt8: pow2 8 = 256
+
 private type _t = U8.t
 type t = _t
 
