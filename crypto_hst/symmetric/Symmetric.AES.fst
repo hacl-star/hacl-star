@@ -8,8 +8,6 @@ open Hacl.UInt8
 open Hacl.Cast
 open Hacl.SBuffer
 
-#set-options "--lax"
-
 // Parameters for AES-256 
 let nk = 8ul
 let nb = 4ul
@@ -24,12 +22,12 @@ let op_Hat_Bar (a:byte) (b:byte) : Tot byte = logor  a b
 let op_Hat_Star_Percent (a:byte) (b:byte) : Tot byte = mul_mod a b
 
 (* U32 operators *)
-let op_At_Plus (a:UInt32.t) (b:UInt32.t) : Tot UInt32.t = UInt32.add a b
-let op_At_Subtraction (a:UInt32.t) (b:UInt32.t) : Tot UInt32.t = UInt32.sub a b
-let op_At_Star (a:UInt32.t) (b:UInt32.t) : Tot UInt32.t = UInt32.mul a b
-let op_At_Slash (a:UInt32.t) (b:UInt32.t) : Tot UInt32.t = UInt32.div a b
-let op_At_Equals (a:UInt32.t) (b:UInt32.t) : Tot bool = UInt32.eq a b
-let op_At_Percent (a:UInt32.t) (b:UInt32.t) : Tot UInt32.t = UInt32.rem a b
+let op_At_Plus = UInt32.add
+let op_At_Subtraction = UInt32.sub
+let op_At_Star = UInt32.mul
+let op_At_Slash = UInt32.div
+let op_At_Equals = UInt32.eq
+let op_At_Percent = UInt32.rem
 
 val xtime: b:byte -> Tot byte
 let xtime b =
@@ -46,8 +44,11 @@ let multiply a b =
   ^^ (xtime (xtime (xtime (xtime (xtime (xtime a))))) ^*% ((b ^>> 6ul) ^& (uint8_to_sint8 1uy)))
   ^^ (xtime (xtime (xtime (xtime (xtime (xtime (xtime a)))))) ^*% ((b ^>> 7ul) ^& (uint8_to_sint8 1uy))))
 
+#set-options "--lax"
 
-val mk_sbox: sbox:u8s{length sbox = 64} -> St unit
+val mk_sbox: sbox:u8s{length sbox = 256} -> STL unit
+  (requires (fun h -> live h sbox))
+  (ensures  (fun h0 _ h1 -> live h1 sbox /\ modifies_1 sbox h0 h1))
 let mk_sbox sbox = 
   upd sbox 0ul   (uint8_to_sint8 0x63uy); upd sbox 1ul   (uint8_to_sint8 0x7cuy); upd sbox 2ul   (uint8_to_sint8 0x77uy); upd sbox 3ul   (uint8_to_sint8 0x7buy); 
   upd sbox 4ul   (uint8_to_sint8 0xf2uy); upd sbox 5ul   (uint8_to_sint8 0x6buy); upd sbox 6ul   (uint8_to_sint8 0x6fuy); upd sbox 7ul   (uint8_to_sint8 0xc5uy); 
@@ -114,7 +115,9 @@ let mk_sbox sbox =
   upd sbox 248ul (uint8_to_sint8 0x41uy); upd sbox 249ul (uint8_to_sint8 0x99uy); upd sbox 250ul (uint8_to_sint8 0x2duy); upd sbox 251ul (uint8_to_sint8 0x0fuy); 
   upd sbox 252ul (uint8_to_sint8 0xb0uy); upd sbox 253ul (uint8_to_sint8 0x54uy); upd sbox 254ul (uint8_to_sint8 0xbbuy); upd sbox 255ul (uint8_to_sint8 0x16uy)
 
-val mk_inv_sbox: sbox:u8s{length sbox = 64} -> St unit
+val mk_inv_sbox: sbox:u8s{length sbox = 256} -> STL unit
+  (requires (fun h -> live h sbox))
+  (ensures  (fun h0 _ h1 -> live h1 sbox /\ modifies_1 sbox h0 h1))
 let mk_inv_sbox sbox = 
   upd sbox 0ul   (uint8_to_sint8 0x52uy); upd sbox 1ul   (uint8_to_sint8 0x09uy); upd sbox 2ul   (uint8_to_sint8 0x6auy); upd sbox 3ul   (uint8_to_sint8 0xd5uy); 
   upd sbox 4ul   (uint8_to_sint8 0x30uy); upd sbox 5ul   (uint8_to_sint8 0x36uy); upd sbox 6ul   (uint8_to_sint8 0xa5uy); upd sbox 7ul   (uint8_to_sint8 0x38uy); 
@@ -181,16 +184,26 @@ let mk_inv_sbox sbox =
   upd sbox 248ul (uint8_to_sint8 0xe1uy); upd sbox 249ul (uint8_to_sint8 0x69uy); upd sbox 250ul (uint8_to_sint8 0x14uy); upd sbox 251ul (uint8_to_sint8 0x63uy); 
   upd sbox 252ul (uint8_to_sint8 0x55uy); upd sbox 253ul (uint8_to_sint8 0x21uy); upd sbox 254ul (uint8_to_sint8 0x0cuy); upd sbox 255ul (uint8_to_sint8 0x7duy)
 
-val access: sbox:u8s -> idx:byte -> St byte
+#reset-options
+
+val access: sbox:u8s{length sbox = 256} -> idx:byte -> STL byte
+  (requires (fun h -> live h sbox))
+  (ensures  (fun h0 _ h1 -> h1 == h0))
 let access sbox i =
-  let rec access_aux: u8s -> byte -> UInt32.t -> byte -> St byte = fun sbox i ctr tmp -> 
+  let rec access_aux: sb:u8s{length sb = 256} -> byte -> ctr:UInt32.t{UInt32.v ctr <= 256} -> byte -> STL byte 
+    (requires (fun h -> live h sb))
+    (ensures  (fun h0 _ h1 -> h1 == h0))
+    = fun sbox i ctr tmp -> 
     if ctr @= 256ul then tmp 
     else let mask = eq_mask i (uint32_to_sint8 ctr) in
 	 let tmp = tmp ^| (mask ^& index sbox ctr) in
 	 access_aux sbox i (UInt32.add ctr 1ul) tmp in
   access_aux sbox i 0ul (uint8_to_sint8 0uy)
 
-val subBytes_aux_sbox: state:u8s -> u8s -> ctr:UInt32.t -> St unit
+val subBytes_aux_sbox: state:u8s{length state >= 16} -> sbox:u8s{length sbox = 256 /\ disjoint state sbox} -> 
+  ctr:UInt32.t{UInt32.v ctr <= 16} -> STL unit
+  (requires (fun h -> live h state /\ live h sbox))
+  (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let rec subBytes_aux_sbox state sbox ctr =
   if ctr @= 16ul then ()
   else 
@@ -201,11 +214,15 @@ let rec subBytes_aux_sbox state sbox ctr =
     subBytes_aux_sbox state sbox (UInt32.add ctr 1ul)
   end
 
-val subBytes_sbox: state:u8s -> u8s -> St unit
+val subBytes_sbox: state:u8s{length state >= 16} -> sbox:u8s{length sbox = 256 /\ disjoint state sbox} -> STL unit
+  (requires (fun h -> live h state /\ live h sbox))
+  (ensures  (fun h0 _ h1 -> modifies_1 state h0 h1 /\ live h1 state))
 let subBytes_sbox state sbox =
   subBytes_aux_sbox state sbox 0ul
 
-val shiftRows: state:u8s{length state = 16} -> St unit
+val shiftRows: state:u8s{length state >= 16} -> STL unit
+  (requires (fun h -> live h state))
+  (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let shiftRows state =
   let i = 1ul in
   let tmp = index state i in
@@ -228,7 +245,12 @@ let shiftRows state =
   upd state (i@+4ul)  tmp; 
   ()
        
-val mixColumns: u8s -> St unit
+#reset-options "--z3timeout 20"
+#set-options "--lax"
+
+val mixColumns: state:u8s{length state >= 16} -> STL unit
+  (requires (fun h -> live h state))
+  (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let mixColumns state =
   let c = 0ul in
   let s0 = index state (0ul@+(4ul@*c)) in
@@ -268,7 +290,9 @@ let mixColumns state =
   upd state ((4ul@*c)@+3ul) (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2);
   ()
 
-val addRoundKey: u8s -> u8s -> UInt32.t -> St unit
+#reset-options
+
+val addRoundKey: state:u8s{length state >= 16} -> w:u8s -> round:UInt32.t -> St unit
 let addRoundKey state w round =
   let c = 0ul in
   let s0 = index state ((4ul@*c)@+0ul) in

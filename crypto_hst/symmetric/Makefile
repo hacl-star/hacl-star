@@ -4,10 +4,14 @@ FSTAR=$(FSTAR_HOME)/bin/fstar.exe
 
 OPTIONS_VER=--include ../../lib/hst --use_hints
 
-# LIB_FILES=$(addprefix $(LIB_DIR), axioms.fst intlib.fst IntLibLemmas.fst sint.fst sbuffer.fst SInt.UInt8.fst SInt.UInt32.fst SInt.UInt63.fst SInt.UInt64.fst SInt.Cast.fst SBytes.fst)
+LIB_FILES=Hacl.Cast.fst Hacl.SBuffer.fst Hacl.UInt128.fst Hacl.UInt64.fst Hacl.UInt32.fst Hacl.UInt8.fst Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst
+
+import-lib:
+	@cp $(addprefix ../../lib/hst/, $(LIB_FILES)) .
 
 verify:
-	$(FSTAR) $(OPTIONS_VER) Chacha20.fst
+	make clean
+	$(FSTAR) $(OPTIONS_VER) Chacha20.fst --z3timeout 20
 
 clean:
-	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx)
+	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(LIB_FILES)
