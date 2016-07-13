@@ -245,110 +245,168 @@ let shiftRows state =
   upd state (i@+4ul)  tmp; 
   ()
        
-#reset-options "--z3timeout 20"
+#reset-options "--z3timeout 10"
 #set-options "--lax"
+
+val mixColumns_0: state:u8s{length state >= 16} -> STL unit
+  (requires (fun h -> live h state))
+  (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+let mixColumns_0 state =
+  let c = 0ul in
+  let s0 = index state (0ul@+(4ul@*c)) in
+  let s1 = index state (1ul@+(4ul@*c)) in
+  let s2 = index state (2ul@+(4ul@*c)) in
+  let s3 = index state (3ul@+(4ul@*c)) in
+  upd state ((4ul@*c)@+0ul) (multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
+  upd state ((4ul@*c)@+1ul) (multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
+  upd state ((4ul@*c)@+2ul) (multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
+  upd state ((4ul@*c)@+3ul) (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2)
+
+(* #reset-options *)
+
+val mixColumns_1: state:u8s{length state >= 16} -> STL unit
+  (requires (fun h -> live h state))
+  (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+let mixColumns_1 state =
+  let c = 1ul in
+  let s0 = index state (0ul@+(4ul@*c)) in
+  let s1 = index state (1ul@+(4ul@*c)) in
+  let s2 = index state (2ul@+(4ul@*c)) in
+  let s3 = index state (3ul@+(4ul@*c)) in
+  upd state ((4ul@*c)@+0ul) (multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
+  upd state ((4ul@*c)@+1ul) (multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
+  upd state ((4ul@*c)@+2ul) (multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
+  upd state ((4ul@*c)@+3ul) (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2)
+
+(* #reset-options *)
+
+val mixColumns_2: state:u8s{length state >= 16} -> STL unit
+  (requires (fun h -> live h state))
+  (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+let mixColumns_2 state =
+  let c = 2ul in
+  let s0 = index state (0ul@+(4ul@*c)) in
+  let s1 = index state (1ul@+(4ul@*c)) in
+  let s2 = index state (2ul@+(4ul@*c)) in
+  let s3 = index state (3ul@+(4ul@*c)) in
+  upd state ((4ul@*c)@+0ul) (multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
+  upd state ((4ul@*c)@+1ul) (multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
+  upd state ((4ul@*c)@+2ul) (multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
+  upd state ((4ul@*c)@+3ul) (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2)
+
+(* #reset-options *)
+
+val mixColumns_3: state:u8s{length state >= 16} -> STL unit
+  (requires (fun h -> live h state))
+  (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+let mixColumns_3 state =
+  let c = 3ul in
+  let s0 = index state (0ul@+(4ul@*c)) in
+  let s1 = index state (1ul@+(4ul@*c)) in
+  let s2 = index state (2ul@+(4ul@*c)) in
+  let s3 = index state (3ul@+(4ul@*c)) in
+  upd state ((4ul@*c)@+0ul) (multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
+  upd state ((4ul@*c)@+1ul) (multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
+  upd state ((4ul@*c)@+2ul) (multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
+  upd state ((4ul@*c)@+3ul) (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2)
+
+#reset-options
 
 val mixColumns: state:u8s{length state >= 16} -> STL unit
   (requires (fun h -> live h state))
   (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let mixColumns state =
+  mixColumns_0 state;
+  mixColumns_1 state;
+  mixColumns_2 state;
+  mixColumns_3 state
+
+#reset-options "--z3timeout 10"
+
+val addRoundKey_0: state:u8s{length state >= 16} -> w:u8s{length w >= 16 * (UInt32.v nr+1) /\ disjoint state w} -> round:UInt32.t{UInt32.v round <= UInt32.v nr}  -> STL unit
+    (requires (fun h -> live h state /\ live h w))
+    (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+let addRoundKey_0 state w round =
   let c = 0ul in
-  let s0 = index state (0ul@+(4ul@*c)) in
-  let s1 = index state (1ul@+(4ul@*c)) in
-  let s2 = index state (2ul@+(4ul@*c)) in
-  let s3 = index state (3ul@+(4ul@*c)) in
-  upd state ((4ul@*c)@+0ul) (multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
-  upd state ((4ul@*c)@+1ul) (multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
-  upd state ((4ul@*c)@+2ul) (multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
-  upd state ((4ul@*c)@+3ul) (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2);
+  let s0 = index state ((4ul@*c)@+0ul) in
+  let s1 = index state ((4ul@*c)@+1ul) in
+  let s2 = index state ((4ul@*c)@+2ul) in
+  let s3 = index state ((4ul@*c)@+3ul) in
+  let w0 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+0ul) in
+  let w1 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+1ul) in
+  let w2 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+2ul) in
+  let w3 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+3ul) in
+  upd state ((4ul@*c)@+0ul) (s0 ^^ w0);
+  upd state ((4ul@*c)@+1ul) (s1 ^^ w1);
+  upd state ((4ul@*c)@+2ul) (s2 ^^ w2);
+  upd state ((4ul@*c)@+3ul) (s3 ^^ w3)
+
+val addRoundKey_1: state:u8s{length state >= 16} -> w:u8s{length w >= 16 * (UInt32.v nr+1) /\ disjoint state w} -> round:UInt32.t{UInt32.v round <= UInt32.v nr}  -> STL unit
+    (requires (fun h -> live h state /\ live h w))
+    (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+let addRoundKey_1 state w round =
   let c = 1ul in
-  let s0 = index state (0ul@+(4ul@*c)) in
-  let s1 = index state (1ul@+(4ul@*c)) in
-  let s2 = index state (2ul@+(4ul@*c)) in
-  let s3 = index state (3ul@+(4ul@*c)) in
-  upd state ((4ul@*c)@+0ul) (multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
-  upd state ((4ul@*c)@+1ul) (multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
-  upd state ((4ul@*c)@+2ul) (multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
-  upd state ((4ul@*c)@+3ul) (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2);
+  let s0 = index state ((4ul@*c)@+0ul) in
+  let s1 = index state ((4ul@*c)@+1ul) in
+  let s2 = index state ((4ul@*c)@+2ul) in
+  let s3 = index state ((4ul@*c)@+3ul) in
+  let w0 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+0ul) in
+  let w1 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+1ul) in
+  let w2 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+2ul) in
+  let w3 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+3ul) in
+  upd state ((4ul@*c)@+0ul) (s0 ^^ w0);
+  upd state ((4ul@*c)@+1ul) (s1 ^^ w1);
+  upd state ((4ul@*c)@+2ul) (s2 ^^ w2);
+  upd state ((4ul@*c)@+3ul) (s3 ^^ w3)
+
+val addRoundKey_2: state:u8s{length state >= 16} -> w:u8s{length w >= 16 * (UInt32.v nr+1) /\ disjoint state w} -> round:UInt32.t{UInt32.v round <= UInt32.v nr}  -> STL unit
+    (requires (fun h -> live h state /\ live h w))
+    (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+let addRoundKey_2 state w round =
   let c = 2ul in
-  let s0 = index state (0ul@+(4ul@*c)) in
-  let s1 = index state (1ul@+(4ul@*c)) in
-  let s2 = index state (2ul@+(4ul@*c)) in
-  let s3 = index state (3ul@+(4ul@*c)) in
-  upd state ((4ul@*c)@+0ul) (multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
-  upd state ((4ul@*c)@+1ul) (multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
-  upd state ((4ul@*c)@+2ul) (multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
-  upd state ((4ul@*c)@+3ul) (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2);
+  let s0 = index state ((4ul@*c)@+0ul) in
+  let s1 = index state ((4ul@*c)@+1ul) in
+  let s2 = index state ((4ul@*c)@+2ul) in
+  let s3 = index state ((4ul@*c)@+3ul) in
+  let w0 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+0ul) in
+  let w1 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+1ul) in
+  let w2 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+2ul) in
+  let w3 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+3ul) in
+  upd state ((4ul@*c)@+0ul) (s0 ^^ w0);
+  upd state ((4ul@*c)@+1ul) (s1 ^^ w1);
+  upd state ((4ul@*c)@+2ul) (s2 ^^ w2);
+  upd state ((4ul@*c)@+3ul) (s3 ^^ w3)
+
+val addRoundKey_3: state:u8s{length state >= 16} -> w:u8s{length w >= 16 * (UInt32.v nr+1) /\ disjoint state w} -> round:UInt32.t{UInt32.v round <= UInt32.v nr}  -> STL unit
+    (requires (fun h -> live h state /\ live h w))
+    (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+let addRoundKey_3 state w round =
   let c = 3ul in
-  let s0 = index state (0ul@+(4ul@*c)) in
-  let s1 = index state (1ul@+(4ul@*c)) in
-  let s2 = index state (2ul@+(4ul@*c)) in
-  let s3 = index state (3ul@+(4ul@*c)) in
-  upd state ((4ul@*c)@+0ul) (multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
-  upd state ((4ul@*c)@+1ul) (multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
-  upd state ((4ul@*c)@+2ul) (multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
-  upd state ((4ul@*c)@+3ul) (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2);
-  ()
+  let s0 = index state ((4ul@*c)@+0ul) in
+  let s1 = index state ((4ul@*c)@+1ul) in
+  let s2 = index state ((4ul@*c)@+2ul) in
+  let s3 = index state ((4ul@*c)@+3ul) in
+  let w0 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+0ul) in
+  let w1 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+1ul) in
+  let w2 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+2ul) in
+  let w3 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+3ul) in
+  upd state ((4ul@*c)@+0ul) (s0 ^^ w0);
+  upd state ((4ul@*c)@+1ul) (s1 ^^ w1);
+  upd state ((4ul@*c)@+2ul) (s2 ^^ w2);
+  upd state ((4ul@*c)@+3ul) (s3 ^^ w3)
 
-#reset-options
-
-val addRoundKey: state:u8s{length state >= 16} -> w:u8s -> round:UInt32.t -> St unit
+val addRoundKey: state:u8s{length state >= 16} -> w:u8s{length w >= 16 * (UInt32.v nr+1) /\ disjoint state w} -> round:UInt32.t{UInt32.v round <= UInt32.v nr}  -> STL unit
+    (requires (fun h -> live h state /\ live h w))
+    (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let addRoundKey state w round =
-  let c = 0ul in
-  let s0 = index state ((4ul@*c)@+0ul) in
-  let s1 = index state ((4ul@*c)@+1ul) in
-  let s2 = index state ((4ul@*c)@+2ul) in
-  let s3 = index state ((4ul@*c)@+3ul) in
-  let w0 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+0ul) in
-  let w1 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+1ul) in
-  let w2 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+2ul) in
-  let w3 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+3ul) in
-  upd state ((4ul@*c)@+0ul) (s0 ^^ w0);
-  upd state ((4ul@*c)@+1ul) (s1 ^^ w1);
-  upd state ((4ul@*c)@+2ul) (s2 ^^ w2);
-  upd state ((4ul@*c)@+3ul) (s3 ^^ w3);
-  let c = 1ul in
-  let s0 = index state ((4ul@*c)@+0ul) in
-  let s1 = index state ((4ul@*c)@+1ul) in
-  let s2 = index state ((4ul@*c)@+2ul) in
-  let s3 = index state ((4ul@*c)@+3ul) in
-  let w0 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+0ul) in
-  let w1 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+1ul) in
-  let w2 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+2ul) in
-  let w3 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+3ul) in
-  upd state ((4ul@*c)@+0ul) (s0 ^^ w0);
-  upd state ((4ul@*c)@+1ul) (s1 ^^ w1);
-  upd state ((4ul@*c)@+2ul) (s2 ^^ w2);
-  upd state ((4ul@*c)@+3ul) (s3 ^^ w3);
-  let c = 2ul in
-  let s0 = index state ((4ul@*c)@+0ul) in
-  let s1 = index state ((4ul@*c)@+1ul) in
-  let s2 = index state ((4ul@*c)@+2ul) in
-  let s3 = index state ((4ul@*c)@+3ul) in
-  let w0 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+0ul) in
-  let w1 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+1ul) in
-  let w2 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+2ul) in
-  let w3 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+3ul) in
-  upd state ((4ul@*c)@+0ul) (s0 ^^ w0);
-  upd state ((4ul@*c)@+1ul) (s1 ^^ w1);
-  upd state ((4ul@*c)@+2ul) (s2 ^^ w2);
-  upd state ((4ul@*c)@+3ul) (s3 ^^ w3);
-  let c = 3ul in
-  let s0 = index state ((4ul@*c)@+0ul) in
-  let s1 = index state ((4ul@*c)@+1ul) in
-  let s2 = index state ((4ul@*c)@+2ul) in
-  let s3 = index state ((4ul@*c)@+3ul) in
-  let w0 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+0ul) in
-  let w1 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+1ul) in
-  let w2 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+2ul) in
-  let w3 = index w (((4ul@*round)@*nb)@+(4ul@*c)@+3ul) in
-  upd state ((4ul@*c)@+0ul) (s0 ^^ w0);
-  upd state ((4ul@*c)@+1ul) (s1 ^^ w1);
-  upd state ((4ul@*c)@+2ul) (s2 ^^ w2);
-  upd state ((4ul@*c)@+3ul) (s3 ^^ w3);
-  ()
+  addRoundKey_0 state w round;
+  addRoundKey_1 state w round;
+  addRoundKey_2 state w round;
+  addRoundKey_3 state w round
 
-val cipher_loop: state:u8s -> w:u8s -> u8s -> round:UInt32.t -> St unit
+val cipher_loop: state:u8s{length state >= 16} -> w:u8s{length w >= 16 * (UInt32.v nr+1) /\ disjoint state w} -> sbox:u8s{length sbox = 256 /\ disjoint sbox state} -> round:UInt32.t{UInt32.v round <= UInt32.v nr} -> STL unit
+  (requires (fun h -> live h state /\ live h w /\ live h sbox))
+  (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let rec cipher_loop state w sbox round = 
   if round = 14ul then ()
   else begin
@@ -359,19 +417,35 @@ let rec cipher_loop state w sbox round =
     cipher_loop state w sbox (round@+1ul)
   end
 
-val cipher: out:u8s{length out = 4 * UInt32.v nb} -> input:u8s{length input = 4*UInt32.v nb} -> w:u8s{length w = 4 * (UInt32.v nr+1)} -> sbox:u8s{length sbox = 256} -> St unit
-let cipher out input w sbox =
-  let state = create (uint8_to_sint8 0uy) (4ul@*nb) in
-  blit input 0ul state 0ul (4ul@*nb);
+#reset-options
+
+val cipher_body: state:u8s{length state >= 4 * UInt32.v nb} -> out:u8s{length out >= 4 * UInt32.v nb} -> input:u8s{length input >= 4*UInt32.v nb} -> w:u8s{length w >= 16 * (UInt32.v nr+1)} -> sbox:u8s{length sbox = 256} -> STL unit
+  (requires (fun h -> live h state /\ live h out /\ live h input /\ live h w /\ live h sbox
+    /\ disjoint out input /\ disjoint out w /\ disjoint out sbox /\ disjoint state out
+    /\ disjoint state input /\ disjoint state w /\ disjoint state sbox))
+  (ensures  (fun h0 _ h1 -> live h1 state /\ live h1 out /\ modifies_2 out state h0 h1))
+let cipher_body state out input w sbox =
+  blit input 0ul state 0ul (4ul@*nb); 
   addRoundKey state w 0ul;
   cipher_loop state w sbox 1ul;
   subBytes_sbox state sbox;
   shiftRows state;
   addRoundKey state w nr;
-  blit state 0ul out 0ul (4ul@*nb);
-  ()
+  blit state 0ul out 0ul (4ul@*nb)
 
-val rotWord: word:u8s{length word = 4} -> St unit
+val cipher: out:u8s{length out >= 4 * UInt32.v nb} -> input:u8s{length input >= 4*UInt32.v nb} -> w:u8s{length w >= 16 * (UInt32.v nr+1)} -> sbox:u8s{length sbox = 256} -> STL unit
+  (requires (fun h -> live h out /\ live h input /\ live h w /\ live h sbox
+    /\ disjoint out input /\ disjoint out w /\ disjoint out sbox))
+  (ensures  (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1))
+let cipher out input w sbox =
+  push_frame();
+  let state = create (uint8_to_sint8 0uy) (4ul@*nb) in
+  cipher_body state out input w sbox;
+  pop_frame()
+
+val rotWord: word:u8s{length word >= 4} -> STL unit
+  (requires (fun h -> live h word))
+  (ensures  (fun h0 _ h1 -> live h1 word /\ modifies_1 word h0 h1))
 let rotWord word =
   let w0 = index word 0ul in
   let w1 = index word 1ul in
@@ -383,7 +457,9 @@ let rotWord word =
   upd word 3ul w0;
   ()
   
-val subWord: word:u8s{length word = 4} -> sbox:u8s -> St unit
+val subWord: word:u8s{length word = 4} -> sbox:u8s{length sbox = 256} -> STL unit
+  (requires (fun h -> live h word /\ live h sbox /\ disjoint word sbox))
+  (ensures  (fun h0 _ h1 -> live h1 word /\ modifies_1 word h0 h1))
 let subWord word sbox =
   let w0 = index word 0ul in
   let w1 = index word 1ul in
@@ -395,15 +471,17 @@ let subWord word sbox =
   upd word 3ul (access sbox w3);
   ()  
   
-val rcon: UInt32.t -> byte -> Tot byte
+val rcon: i:UInt32.t{UInt32.v i >= 1} -> byte -> Tot byte (decreases (UInt32.v i))
 let rec rcon i tmp =
-  if i = 1ul then tmp
+  if UInt32.eq i 1ul then tmp
   else begin
     let tmp = multiply (uint8_to_sint8 0x2uy) tmp in    
     rcon (i@-1ul) tmp
   end
 
-val keyExpansion_aux: u8s -> u8s -> u8s -> u8s -> UInt32.t -> St unit
+#set-options "--lax"
+
+val keyExpansion_aux: key:u8s -> w:u8s -> temp:u8s -> sbox:u8s -> i:UInt32.t -> Stl unit
 let rec keyExpansion_aux key w temp sbox i =
   if i @= 240ul then ()
   else begin
