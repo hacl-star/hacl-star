@@ -237,10 +237,9 @@ let small_step_core pp ppq p pq q n ctr b scalar =
   swap_conditional p pq mask; 
   let h = ST.get() in
   small_step_core_lemma_1 h0 h pp ppq p pq q;
-  (* 
-     In a proper scalar multiplication context, we are garantied that p <> pq
-  *)
-  admitP(pointOf p <> pointOf pq);
+  (* We are garantied that p <> pq provided
+     that the initial point is not Inf *)
+  admitP(True /\ pointOf h p <> pointOf h pq);
   double_and_add pp ppq p pq q; 
   let h2 = ST.get() in
   swap_conditional pp ppq mask; 
@@ -675,7 +674,7 @@ val montgomery_ladder:
   res:point -> n:serialized{Distinct2 n res} -> q:point{Distinct2 n q /\ Distinct res q} ->
   ST unit
     (requires (fun h -> 
-      (Live h res) /\ (Serialized h n) /\ (OnCurve h q)
+      (Live h res) /\ (Serialized h n) /\ (OnCurve h q) /\ is_Finite (pointOf h q)
     ))
     (ensures (fun h0 _ h1 -> 
       Live h0 res /\ Serialized h0 n /\ OnCurve h0 q /\ OnCurve h1 res
