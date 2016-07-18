@@ -46,7 +46,7 @@ let be_bytes_of_sint64 output x =
  upd output (6ul) b6;
  upd output (7ul) b7
 
-let op_At_At_Amp = UInt64.logand
+let op_At_At_Amp = FStar.UInt64.logand
 
 val be_bytes_of_uint64: x:bytes -> y:u64
   -> STL unit
@@ -54,13 +54,13 @@ val be_bytes_of_uint64: x:bytes -> y:u64
         (ensures  (fun h0 _ h1 -> live h1 x /\ modifies_1 x h0 h1))
 
 let be_bytes_of_uint64 output x =
- let b0 = uint64_to_sint8 ((UInt64.shift_right x 56ul) @@& 255UL) in
- let b1 = uint64_to_sint8 ((UInt64.shift_right x 48ul) @@& 255UL) in
- let b2 = uint64_to_sint8 ((UInt64.shift_right x 40ul) @@& 255UL) in
- let b3 = uint64_to_sint8 ((UInt64.shift_right x 32ul) @@& 255UL) in
- let b4 = uint64_to_sint8 ((UInt64.shift_right x 24ul) @@& 255UL) in
- let b5 = uint64_to_sint8 ((UInt64.shift_right x 16ul) @@& 255UL) in
- let b6 = uint64_to_sint8 ((UInt64.shift_right x 8ul)  @@& 255UL) in
+ let b0 = uint64_to_sint8 ((FStar.UInt64.shift_right x 56ul) @@& 255UL) in
+ let b1 = uint64_to_sint8 ((FStar.UInt64.shift_right x 48ul) @@& 255UL) in
+ let b2 = uint64_to_sint8 ((FStar.UInt64.shift_right x 40ul) @@& 255UL) in
+ let b3 = uint64_to_sint8 ((FStar.UInt64.shift_right x 32ul) @@& 255UL) in
+ let b4 = uint64_to_sint8 ((FStar.UInt64.shift_right x 24ul) @@& 255UL) in
+ let b5 = uint64_to_sint8 ((FStar.UInt64.shift_right x 16ul) @@& 255UL) in
+ let b6 = uint64_to_sint8 ((FStar.UInt64.shift_right x 8ul)  @@& 255UL) in
  let b7 = uint64_to_sint8 ((x)                         @@& 255UL) in
  upd output 0ul b0;
  upd output (1ul) b1;
@@ -87,11 +87,11 @@ let be_uint32_of_bytes (b:bytes{length b >= 4}) =
 
 val be_uint32s_of_bytes:uint32s -> bytes -> u32 -> St unit
 let rec be_uint32s_of_bytes u b len =
-  if UInt32.eq len 0ul then ()
+  if FStar.UInt32.eq len 0ul then ()
   else (
-    let l4 = UInt32.div len 4ul in
-    upd u (UInt32.sub l4 1ul) (be_uint32_of_bytes (sub b (UInt32.sub len 4ul) 4ul));
-    be_uint32s_of_bytes u b (UInt32.sub len 4ul)
+    let l4 = FStar.UInt32.div len 4ul in
+    upd u (FStar.UInt32.sub l4 1ul) (be_uint32_of_bytes (sub b (FStar.UInt32.sub len 4ul) 4ul));
+    be_uint32s_of_bytes u b (FStar.UInt32.sub len 4ul)
   )
 
 let op_Hat_Greater_Greater (a:s32) (b:u32) : Tot s32 = Hacl.UInt32.shift_right a b
@@ -104,17 +104,17 @@ let rec be_bytes_of_uint32s output m len =
   if len =^ 0ul then ()
   else
     begin
-      let l4 = UInt32.div len 4ul in
-      let l = UInt32.sub l4 1ul in
+      let l4 = FStar.UInt32.div len 4ul in
+      let l = FStar.UInt32.sub l4 1ul in
       let x = index m l in
       let b0 = sint32_to_sint8 ((x ^>> 24ul) &^ uint32_to_sint32 255ul) in
       let b1 = sint32_to_sint8 ((x ^>> 16ul) &^ uint32_to_sint32 255ul) in
       let b2 = sint32_to_sint8 ((x ^>> 8ul)  &^ uint32_to_sint32 255ul) in
       let b3 = sint32_to_sint8 ((x)          &^ uint32_to_sint32 255ul) in
-      let l4 = UInt32.sub len 4ul in
+      let l4 = FStar.UInt32.sub len 4ul in
       upd output l4 b0;
-      upd output (UInt32.add l4 1ul) b1;
-      upd output (UInt32.add l4 2ul) b2;
-      upd output (UInt32.add l4 3ul) b3;
+      upd output (FStar.UInt32.add l4 1ul) b1;
+      upd output (FStar.UInt32.add l4 2ul) b2;
+      upd output (FStar.UInt32.add l4 3ul) b3;
       be_bytes_of_uint32s output m l4
     end
