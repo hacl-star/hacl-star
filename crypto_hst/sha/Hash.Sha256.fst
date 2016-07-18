@@ -157,67 +157,20 @@ val pad: (pdata :bytes) ->
 
 let pad pdata rdata rlen =
 
-  (** Push a new frame *)
-  (**) let hinit = HST.get () in
-  (**) push_frame ();
-  (**) let h0 = HST.get () in
-
   (* Value of the raw data length in bits represented as UInt64 *)
   let v64 = Int.Cast.uint32_to_uint64 (UInt32.mul_mod rlen 8ul) in
   let rlen_64 = create (uint8_to_sint8 0uy) 8ul in
-  (**) let h1 = HST.get () in
-  (**) assert(modifies_0 h0 h1);
-  (**) no_upd_lemma_0 h0 h1 pdata;
-  (**) no_upd_lemma_0 h0 h1 rdata;
   be_bytes_of_uint64 rlen_64 v64;
-  (**) let h2 = HST.get () in
-  (**) assert(modifies_1 rlen_64 h1 h2);
-  (**) no_upd_lemma_1 h1 h2 rlen_64 pdata;
-  (**) no_upd_lemma_1 h1 h2 rlen_64 rdata;
 
   (* Compute the padding length *)
   let rplen = pad_length rlen in
-  (**) assert(modifies_0 h0 h2);
 
   (* Generate the padding *)
   let rpad = create (uint8_to_sint8 0uy) rplen in
-  (**) let h3 = HST.get () in
-  (**) assert(modifies_0 h2 h3);
-  (**) assert(modifies_0 h0 h3);
-  (**) assert(live h3 rpad);
-  (**) assert(live h3 pdata);
-  (**) assert(live h3 rdata);
   upd rpad 0ul (uint8_to_sint8 0x80uy);
-  (**) let h4 = HST.get () in
-  (**) assert(modifies_1 rpad h3 h4);
-  (**) assert(modifies_0 h0 h4);
-  (**) no_upd_lemma_0 h0 h4 pdata;
-  (**) no_upd_lemma_0 h0 h4 rdata;
-  (**) assert(v rlen <= length pdata);
-  (**) assert(v rlen <= length rdata);
   blit rdata 0ul pdata 0ul rlen;
-  (**) let h5 = HST.get () in
-  (**) assert(modifies_1 pdata h4 h5);
-  (**) no_upd_lemma_1 h4 h5 pdata rdata;
-  (**) assert(v rlen + v rplen <= length pdata);
   blit rpad 0ul pdata rlen rplen;
-  (**) let h6 = HST.get () in
-  (**) assert(modifies_1 pdata h5 h6);
-  (**) no_upd_lemma_1 h5 h6 pdata rdata;
-  (**) assert(v rlen + v rplen + 8 <= length pdata);
-  (**) assert(length rlen_64 >= v 8ul);
-  (**) assert(live h6 rlen_64);
-  (**) assert(live h6 pdata);
-  blit rlen_64 0ul pdata (UInt32.add rlen rplen) 8ul;
-  (**) let h7 = HST.get () in
-  (**) assert(modifies_1 pdata h6 h7);
-
-  (** Pop the frame *)
-  (**) pop_frame ();
-  (**) let hfin = HST.get () in
-  (**) assert(modifies_1 pdata hinit hfin);
-  (**) assume(equal_domains hinit hfin);
-  (**) assert(live hfin pdata)
+  blit rlen_64 0ul pdata (UInt32.add rlen rplen) 8ul
 
 
 (* [FIPS 180-4] section 6.2.2 *)
@@ -249,8 +202,6 @@ let rec wsched_define ws wblock t =
     wsched_define ws wblock (t @+ 1ul) end
   else ()
 
-
-#reset-options "--lax"
 
 (* [FIPS 180-4] section 5.3.3 *)
 (* Define the initial hash value *)
