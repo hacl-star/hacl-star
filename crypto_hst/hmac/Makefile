@@ -6,6 +6,10 @@ FSTAR=$(FSTAR_HOME)/bin/fstar.exe
 LIB_DIR_HST=../../lib/hst
 LIB_FILES_HST= Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst
 
+# Utils 
+UTILS_DIR_HST=../utils
+UTILS_FILES_HST= Hacl.Operations.fst Hacl.Conversions.fst
+
 
 # Dependencies
 SHA256_DIR=../sha
@@ -18,13 +22,15 @@ all: lax
 
 prepare:
 	cp $(LIB_DIR_HST)/*.fst .
+	cp $(UTILS_DIR_HST)/*.fst .
 #	cp $(SHA256_DIR)/$(SHA256_HST) . # Use the checked in version in HMAC that assumes the top level SHA 256
 
 lax: prepare
-	$(FSTAR) --lax HMAC.Sha256.fst
+	$(FSTAR) --lax HMAC.SHA2.fst
 
 ver:
-	$(FSTAR) HMAC.Sha256.fst
+	$(FSTAR) HMAC.SHA2.fst
 
 clean:
-	rm -f *~ $(LIB_FILES_HST) # $(SHA256_HST)
+	rm -f *~ $(LIB_FILES_HST) $(UTILS_FILES_HST) # $(SHA256_HST)
+

@@ -1,4 +1,4 @@
-module HMAC.Sha256.D
+module HMAC.SHA2
 
 open FStar.Mul
 open FStar.Ghost
@@ -10,8 +10,8 @@ open Hacl.Cast
 open Hacl.UInt8
 open Hacl.UInt32
 open Hacl.SBuffer
-
-open Hash.Sha256
+open Hacl.Operations
+open Hacl.Conversions
 
 
 (* Define base types *)
@@ -22,25 +22,6 @@ let s32 = Hacl.UInt32.t
 let s8 = Hacl.UInt8.t
 let uint32s = Hacl.SBuffer.u32s
 let bytes = Hacl.SBuffer.u8s
-
-
-(* Define helper xor function *)
-val xor_bytes: output:bytes -> in1:bytes{disjoint in1 output} -> 
-  len:u32{v len <= length output /\ v len <= length in1} -> STL unit
-  (requires (fun h -> live h output /\ live h in1))
-  (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
-    /\ modifies_1 output h0 h1 ))
-let rec xor_bytes output in1 len =
-  if len =^ 0ul then ()
-  else
-    begin
-      let i    = len @- 1ul in
-      let in1i = index in1 i in
-      let oi   = index output i in
-      let oi   = Hacl.UInt8.logxor in1i oi in
-      upd output i oi;
-      xor_bytes output in1 i
-    end
 
 
 (* Define operators *)
@@ -67,18 +48,18 @@ let wrap_key okey key keylen =
 
 
 (* Define the internal function *)
-val hmac_sha256' :(memb    :bytes) ->
-                  (mac     :bytes { length mac = v hl /\ disjoint mac memb }) ->
-                  (key     :bytes { disjoint key memb }) ->
-                  (keylen  :u32   { length key = v keylen }) ->
-                  (data    :bytes { disjoint data memb /\ disjoint mac data }) ->
-                  (datalen :u32   { length data = v datalen /\ v datalen + v bl <= pow2 32 
-                                  /\ length memb = v bl + v bl + v bl + (v bl + v datalen) + (v bl + v hl)})
-                  -> STL unit
-                        (requires (fun h -> live h memb /\ live h mac /\ live h data /\ live h key))
-                        (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 mac /\ modifies_2 memb mac h0 h1))
+val hmac_core' : (memb    :bytes) ->
+                 (mac     :bytes { length mac = v hl /\ disjoint mac memb }) ->
+                 (key     :bytes { disjoint key memb }) ->
+                 (keylen  :u32   { length key = v keylen }) ->
+                 (data    :bytes { disjoint data memb /\ disjoint mac data }) ->
+                 (datalen :u32   { length data = v datalen /\ v datalen + v bl <= pow2 32 
+                                 /\ length memb = v bl + v bl + v bl + (v bl + v datalen) + (v bl + v hl)})
+                 -> STL unit
+                       (requires (fun h -> live h memb /\ live h mac /\ live h data /\ live h key))
+                       (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 mac /\ modifies_2 memb mac h0 h1))
                         
-let hmac_sha256' memb mac key keylen data datalen =
+let hmac_core' memb mac key keylen data datalen =
   
   (* Define ipad and opad *)
   (**) let h0 = HST.get() in
@@ -129,6 +110,31 @@ let hmac_sha256' memb mac key keylen data datalen =
 
 
 (* Define the main function *)
+val hmac_core : (mac     :bytes { length mac = v hl }) ->
+                (key     :bytes { disjoint key mac }) ->
+                (keylen  :u32   { length key = v keylen }) ->
+                (data    :bytes { disjoint mac data }) ->
+                (datalen :u32   {5 * v bl + v hl + v datalen < pow2 32 /\ length data = v datalen /\ v datalen + v bl <= pow2 32})
+                -> STL unit
+                      (requires (fun h -> live h mac /\ live h data /\ live h key))
+                      (ensures  (fun h0 r h1 -> live h1 mac /\ modifies_1 mac h0 h1))
+
+let hmac_core mac key keylen data datalen =
+
+  (** Push a new frame *)
+  (**) push_frame();
+
+  let memblen = bl @+ bl @+ bl @+ (bl @+ datalen) @+ (bl @+ hl) in
+  let memb = create (uint8_to_sint8 0uy) memblen in
+
+  hmac_core' memb mac key keylen data datalen;
+  
+  (** Pop the current frame *)
+  (**) pop_frame()
+
+
+
+(* Exposing SHA2-256 for test vectors *)
 val hmac_sha256 : (mac     :bytes { length mac = v hl }) ->
                   (key     :bytes { disjoint key mac }) ->
                   (keylen  :u32   { length key = v keylen }) ->
@@ -138,15 +144,4 @@ val hmac_sha256 : (mac     :bytes { length mac = v hl }) ->
                         (requires (fun h -> live h mac /\ live h data /\ live h key))
                         (ensures  (fun h0 r h1 -> live h1 mac /\ modifies_1 mac h0 h1))
 
-let hmac_sha256 mac key keylen data datalen =
-
-  (** Push a new frame *)
-  (**) push_frame();
-
-  let memblen = bl @+ bl @+ bl @+ (bl @+ datalen) @+ (bl @+ hl) in
-  let memb = create (uint8_to_sint8 0uy) memblen in
-
-  hmac_sha256' memb mac key keylen data datalen;
-  
-  (** Pop the current frame *)
-  (**) pop_frame()
+let hmac_sha256 mac key keylen data datalen = hmac_core mac key keylen data datalen
