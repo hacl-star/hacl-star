@@ -27,10 +27,10 @@ let rec xor_bytes output in1 len =
   if len =^ 0ul then ()
   else
     begin
-      let i    = Hacl.UInt32.sub_mod len 1ul in
-      let in1i = index in1 i in
-      let oi   = index output i in
+      let i    = FStar.UInt32.sub_mod len 1ul in
+      let in1i = Hacl.SBuffer.index in1 i in
+      let oi   = Hacl.SBuffer.index output i in
       let oi   = Hacl.UInt8.logxor in1i oi in
-      upd output i oi;
+      Hacl.SBuffer.upd output i oi;
       xor_bytes output in1 i
     end
