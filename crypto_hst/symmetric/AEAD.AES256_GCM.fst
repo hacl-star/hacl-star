@@ -1,5 +1,6 @@
 module AEAD.AES256_GCM
 
+open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
 open FStar.HST
@@ -11,18 +12,27 @@ open GCM
 
 module U32 = FStar.UInt32
 
-#set-options "--lax"
+(* #set-options "--lax" *)
 
 (* Block cipher function AES256 *)
 
 private val aes256: key:u8s{length key = 32} -> input:u8s{length input = 16} ->
-    out:u8s{length out = 16} -> Stl unit
+    out:u8s{length out = 16} -> STL unit
+      (requires (fun h -> live h key /\ live h input /\ live h out 
+	/\ disjoint key input /\ disjoint key out /\ disjoint input out))
+      (ensures  (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1))
+
+let lemma_aux_001 (w:u8s{length w >= 240}) : Lemma (length w >= 4 * UInt32.v Symmetric.AES.nb * (UInt32.v nr+1)) = ()
+
+#reset-options "--z3timeout 5"
 
 let aes256 key input out =
   push_frame();
-  let w = create (uint8_to_sint8 0uy) 240ul in
-  let sbox = create (uint8_to_sint8 0uy) 256ul in
-  let inv_sbox = create (uint8_to_sint8 0uy) 256ul in
+  let tmp = create (uint8_to_sint8 0uy) 752ul in
+  let w = sub tmp 0ul 240ul in
+  let sbox = sub tmp 240ul 256ul in
+  let inv_sbox = sub tmp 496ul 256ul in
+  lemma_aux_001 w;
   mk_sbox sbox;
   mk_inv_sbox inv_sbox;
   keyExpansion key w sbox;
