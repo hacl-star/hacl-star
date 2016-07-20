@@ -69,3 +69,4 @@ let upd #t b i v = upd #t b i v
 let sub #t b x y = sub #t b x y
 let offset #t b i = offset #t b i
 let blit #a = blit #a
+let fill #a = fill #a
