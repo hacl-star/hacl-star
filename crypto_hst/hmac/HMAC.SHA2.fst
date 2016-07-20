@@ -14,6 +14,7 @@ open Hacl.Operations
 open Hacl.Conversions
 
 
+
 (* Define base types *)
 let u32 = FStar.UInt32.t
 let u64 = FStar.UInt64.t
@@ -48,19 +49,19 @@ let wrap_key okey key keylen =
 
 
 (* Define the internal function *)
-val hmac_core' : (memb    :bytes) ->
-                 (mac     :bytes { length mac = v hl /\ disjoint mac memb }) ->
-                 (key     :bytes { disjoint key memb }) ->
-                 (keylen  :u32   { length key = v keylen }) ->
-                 (data    :bytes { disjoint data memb /\ disjoint mac data }) ->
-                 (datalen :u32   { length data = v datalen /\ v datalen + v bl <= pow2 32 
-                                 /\ length memb = v bl + v bl + v bl + (v bl + v datalen) + (v bl + v hl)})
-                 -> STL unit
-                       (requires (fun h -> live h memb /\ live h mac /\ live h data /\ live h key))
-                       (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 mac /\ modifies_2 memb mac h0 h1))
-                        
+val hmac_core' :(memb    :bytes) ->
+                  (mac     :bytes { length mac = v hl /\ disjoint mac memb }) ->
+                  (key     :bytes { disjoint key memb }) ->
+                  (keylen  :u32   { length key = v keylen }) ->
+                  (data    :bytes { disjoint data memb /\ disjoint mac data }) ->
+                  (datalen :u32   { length data = v datalen /\ v datalen + v bl <= pow2 32
+                                  /\ length memb = v bl + v bl + v bl + (v bl + v datalen) + (v bl + v hl)})
+                  -> STL unit
+                        (requires (fun h -> live h memb /\ live h mac /\ live h data /\ live h key))
+                        (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 mac /\ modifies_2 memb mac h0 h1))
+
 let hmac_core' memb mac key keylen data datalen =
-  
+
   (* Define ipad and opad *)
   (**) let h0 = HST.get() in
   let ipad = sub memb 0ul bl in
@@ -81,23 +82,23 @@ let hmac_core' memb mac key keylen data datalen =
   let s2 = ipad in
 
   (* Step 3: append data to "result of step 2" *)
-  FStar.Buffer.blit s2 0ul s3 0ul bl; 
+  FStar.Buffer.blit s2 0ul s3 0ul bl;
   FStar.Buffer.blit data 0ul s3 bl datalen;
-  
+
   (* Step 4: apply H to "result of step 3" *)
   let s4 = s2 in
   hash s4 s3 (bl @+ datalen);
- 
+
   (* Step 5: xor "result of step 1" with opad *)
   xor_bytes okey opad bl;
   let s5 = okey in
-  
+
   (* Step 6: append "result of step 4" to "result of step 5" *)
   FStar.Buffer.blit s5 0ul s6 0ul bl;
   FStar.Buffer.blit s4 0ul s6 bl hl;
   (**) let h1 = HST.get() in
   (**) assert(modifies_1 memb h0 h1);
-  
+
   (* Step 7: apply H to "result of step 6" *)
   hash mac s6 (bl @+ hl);
   (**) let h2 = HST.get() in
@@ -111,13 +112,13 @@ let hmac_core' memb mac key keylen data datalen =
 
 (* Define the main function *)
 val hmac_core : (mac     :bytes { length mac = v hl }) ->
-                (key     :bytes { disjoint key mac }) ->
-                (keylen  :u32   { length key = v keylen }) ->
-                (data    :bytes { disjoint mac data }) ->
-                (datalen :u32   {5 * v bl + v hl + v datalen < pow2 32 /\ length data = v datalen /\ v datalen + v bl <= pow2 32})
-                -> STL unit
-                      (requires (fun h -> live h mac /\ live h data /\ live h key))
-                      (ensures  (fun h0 r h1 -> live h1 mac /\ modifies_1 mac h0 h1))
+                  (key     :bytes { disjoint key mac }) ->
+                  (keylen  :u32   { length key = v keylen }) ->
+                  (data    :bytes { disjoint mac data }) ->
+                  (datalen :u32   {5 * v bl + v hl + v datalen < pow2 32 /\ length data = v datalen /\ v datalen + v bl <= pow2 32})
+                  -> STL unit
+                        (requires (fun h -> live h mac /\ live h data /\ live h key))
+                        (ensures  (fun h0 r h1 -> live h1 mac /\ modifies_1 mac h0 h1))
 
 let hmac_core mac key keylen data datalen =
 
@@ -128,10 +129,9 @@ let hmac_core mac key keylen data datalen =
   let memb = create (uint8_to_sint8 0uy) memblen in
 
   hmac_core' memb mac key keylen data datalen;
-  
+
   (** Pop the current frame *)
   (**) pop_frame()
-
 
 
 (* Exposing SHA2-256 for test vectors *)
