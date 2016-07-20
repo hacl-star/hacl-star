@@ -68,4 +68,4 @@ let index #t b i = index #t b i
 let upd #t b i v = upd #t b i v
 let sub #t b x y = sub #t b x y
 let offset #t b i = offset #t b i
-let blit #a x xi y xi l = blit #a x xi y xi l
+let blit #a = blit #a

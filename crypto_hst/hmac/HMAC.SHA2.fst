@@ -60,6 +60,7 @@ val hmac_core' :(memb    :bytes) ->
                         (requires (fun h -> live h memb /\ live h mac /\ live h data /\ live h key))
                         (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 mac /\ modifies_2 memb mac h0 h1))
 
+
 let hmac_core' memb mac key keylen data datalen =
 
   (* Define ipad and opad *)
@@ -82,8 +83,8 @@ let hmac_core' memb mac key keylen data datalen =
   let s2 = ipad in
 
   (* Step 3: append data to "result of step 2" *)
-  FStar.Buffer.blit s2 0ul s3 0ul bl;
-  FStar.Buffer.blit data 0ul s3 bl datalen;
+  blit s2 0ul s3 0ul bl;
+  blit data 0ul s3 bl datalen;
 
   (* Step 4: apply H to "result of step 3" *)
   let s4 = s2 in
@@ -94,13 +95,15 @@ let hmac_core' memb mac key keylen data datalen =
   let s5 = okey in
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
-  FStar.Buffer.blit s5 0ul s6 0ul bl;
-  FStar.Buffer.blit s4 0ul s6 bl hl;
+  blit s5 0ul s6 0ul bl;
+  blit s4 0ul s6 bl hl;
+
   (**) let h1 = HST.get() in
   (**) assert(modifies_1 memb h0 h1);
 
   (* Step 7: apply H to "result of step 6" *)
   hash mac s6 (bl @+ hl);
+
   (**) let h2 = HST.get() in
   (**) assert(modifies_2 memb mac h0 h2);
   (**) assert(live h2 memb);

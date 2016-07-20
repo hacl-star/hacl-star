@@ -29,7 +29,7 @@ SHA256_EXTRACTED_HST=Hacl_Operations.ml Hacl_Conversions.ml Hash_Sha256.ml
 # Module
 CODE_DIR_HST=../../crypto_hst/hmac
 HMAC_SHA256_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/, HMAC.SHA2.fst)
-HMAC_SHA256_EXTRACTED_HST=Hacl_Operations.ml Hacl_Conversions.ml HMAC_SHA2.ml
+HMAC_SHA256_EXTRACTED_HST=HMAC_SHA2.ml
 
 # Output
 HMAC_SHA256_ODIR=hmac_sha256
