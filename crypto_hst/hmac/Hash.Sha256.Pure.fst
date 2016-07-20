@@ -23,8 +23,8 @@ assume val init : unit -> Tot (state:uint32s)
 assume val update : (state:uint32s) -> (data:bytes) -> (len:u32{length data = v len})
   -> Tot (state :uint32s)
 
-assume val finish : (hash:bytes{length hash >= v hashsize}) -> (state:uint32s)
-  -> Tot (Prims.tuple2 (hash:bytes{length hash >= v hashsize}) (state:uint32s))
+assume val finish : (state:uint32s)
+  -> Tot (Prims.tuple2 (hash:bytes{length hash = v hashsize}) (state:uint32s))
 
 assume val sha256 : (data:bytes) -> (len:u32{length data = v len})
-  -> Tot (hash:bytes{length hash >= v hashsize})
+  -> Tot (hash:bytes{length hash = v hashsize})
