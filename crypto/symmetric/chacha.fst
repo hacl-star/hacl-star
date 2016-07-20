@@ -20,10 +20,10 @@ val aux_lemma': #t:pos -> a:buffer t -> #t':pos -> b:buffer t' ->
 let aux_lemma' #t a #t' b = ()
 
 val aux_lemma'': #t:pos -> a:buffer t -> #t':pos -> a':buffer t' -> 
-  Lemma (Set.equal (only a ++ a') (only a' ++ a))
+  Lemma (TSet.equal (only a ++ a') (only a' ++ a))
 let aux_lemma'' #t a #t' a' = ()  
 
-val empty_lemma: #t:pos -> b:buffer t -> Lemma (Set.equal (empty ++ b) (only b))
+val empty_lemma: #t:pos -> b:buffer t -> Lemma (TSet.equal (empty ++ b) (only b))
 let empty_lemma #t b = ()
 
 (* Chacha 20 code *)

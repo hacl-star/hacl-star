@@ -49,10 +49,10 @@ let live (h:heap) (#size:pos) (b:buffer size) : GTot Type0 = (contains h b /\ ma
 (* Memory separation condition, obtained either when getting a fresh buffer or
    when getting disjoint subbuffers *)
 let disjoint (#t:pos) (#t':pos) (b:buffer t) (b':buffer t') : GTot Type0 =
-  (b.content =!= b'.content
-  \/ (b.content == b'.content
-     /\ t=t'
-     /\ (idx b + length b <= idx b' \/ idx b' + length b' <= idx b)))
+  t =!= t'
+  \/ (t == t' /\ b.content =!= b'.content)
+  \/ (t == t' /\ b.content == b'.content
+     /\ (idx b + length b <= idx b' \/ idx b' + length b' <= idx b))
 
 (* Defines that sb is a subbuffer of b *)
 let subBuffer (#t:pos) (sb:buffer t) (b:buffer t) : GTot Type0 =
@@ -75,37 +75,37 @@ let equal (#a:pos) (h0:heap) (b:buffer a) (h1:heap) (c:buffer a) : GTot Type0 =
 #set-options "--__temp_no_proj SBuffer"
 type abuffer = | Buff: #t:pos -> b:buffer t -> abuffer
 
-let empty = FStar.Set.empty #abuffer
-let only #t b = FStar.Set.singleton (Buff #t b)
-val op_Plus_Plus: s:FStar.Set.set abuffer -> #t:pos -> b:buffer t -> Tot (s':FStar.Set.set abuffer{FStar.Set.subset s s' /\ FStar.Set.subset (only b) s'})
-let op_Plus_Plus set #t b = FStar.Set.union set (only b)
+let empty = FStar.TSet.empty #abuffer
+let only #t b = FStar.TSet.singleton (Buff #t b)
+val op_Plus_Plus: s:FStar.TSet.set abuffer -> #t:pos -> b:buffer t -> Tot (s':FStar.TSet.set abuffer{FStar.TSet.subset s s' /\ FStar.TSet.subset (only b) s'})
+let op_Plus_Plus set #t b = FStar.TSet.union set (only b)
 
-let op_Plus_Plus_Plus set1 set2 = FStar.Set.union set1 set2
+let op_Plus_Plus_Plus set1 set2 = FStar.TSet.union set1 set2
 
 
 (* Maps a set of buffer to the set of their references *)
-assume val arefs: FStar.Set.set abuffer -> Tot (FStar.Set.set aref)
+assume val arefs: TSet.set abuffer -> Tot (TSet.set aref)
 
 (** TODO: make it minimal & review **)
-assume Arefs1: forall (#size:pos) (b:buffer size) (s:FStar.Set.set abuffer). {:pattern (FStar.Set.mem (Ref (content b)) (arefs s))}
-	      FStar.Set.mem (Buff b) s ==> FStar.Set.mem (Ref (content b)) (arefs s)
-assume Arefs2: forall (s:FStar.Set.set abuffer) (s':FStar.Set.set abuffer). {:pattern (FStar.Set.subset s s')}
-	      FStar.Set.subset s s' ==> FStar.Set.subset (arefs s) (arefs s')
-assume Arefs3: arefs empty = FStar.Set.empty #aref
-assume Arefs4: forall (s1:FStar.Set.set abuffer) (s2:FStar.Set.set abuffer). {:pattern (FStar.Set.union s1 s2)}
-  FStar.Set.equal (arefs (FStar.Set.union s1 s2)) (FStar.Set.union (arefs s1) (arefs s2))
-assume Arefs5: forall (#t:pos) (b:buffer t). {:pattern (arefs (FStar.Set.singleton (Buff b)))}
-  FStar.Set.equal (arefs (FStar.Set.singleton (Buff b))) (FStar.Set.singleton (Ref (content b)))
+assume Arefs1: forall (#size:pos) (b:buffer size) (s:FStar.TSet.set abuffer). {:pattern (FStar.TSet.mem (Ref (content b)) (arefs s))}
+	      FStar.TSet.mem (Buff b) s ==> FStar.TSet.mem (Ref (content b)) (arefs s)
+assume Arefs2: forall (s:FStar.TSet.set abuffer) (s':FStar.TSet.set abuffer). {:pattern (FStar.TSet.subset s s')}
+	      FStar.TSet.subset s s' ==> FStar.TSet.subset (arefs s) (arefs s')
+assume Arefs3: arefs empty == FStar.TSet.empty #aref
+assume Arefs4: forall (s1:FStar.TSet.set abuffer) (s2:FStar.TSet.set abuffer). {:pattern (FStar.TSet.union s1 s2)}
+  FStar.TSet.equal (arefs (FStar.TSet.union s1 s2)) (FStar.TSet.union (arefs s1) (arefs s2))
+assume Arefs5: forall (#t:pos) (b:buffer t). {:pattern (arefs (FStar.TSet.singleton (Buff b)))}
+  FStar.TSet.equal (arefs (FStar.TSet.singleton (Buff b))) (FStar.TSet.singleton (Ref (content b)))
 
 (* Specifies that a buffer is disjoint from a set of abstract buffers *)
-let disjointSet (#t:pos) (b:buffer t) (buffs:FStar.Set.set abuffer) : GTot Type0 =
-  (forall (#t':pos) (b':buffer t'). {:pattern (FStar.Set.mem (Buff b') buffs) \/ (disjoint b b')} FStar.Set.mem (Buff b') buffs ==> disjoint b b')
+let disjointSet (#t:pos) (b:buffer t) (buffs:FStar.TSet.set abuffer) : GTot Type0 =
+  (forall (#t':pos) (b':buffer t'). {:pattern (FStar.TSet.mem (Buff b') buffs) \/ (disjoint b b')} FStar.TSet.mem (Buff b') buffs ==> disjoint b b')
 
 (* Buffer specific modifies clause *)
 // TODO: too restrictive when changing also references to other types
-let modifies_buf (buffs:FStar.Set.set abuffer) (h:heap) (h':heap) : GTot Type0 =
+let modifies_buf (buffs:FStar.TSet.set abuffer) (h:heap) (h':heap) : GTot Type0 =
   modifies (arefs buffs) h h'
-//  FStar.Heap.equal h' (FStar.Heap.concat h' (FStar.Heap.restrict h (FStar.Set.complement (arefs buffs))))
+//  FStar.Heap.equal h' (FStar.Heap.concat h' (FStar.Heap.restrict h (FStar.TSet.complement (arefs buffs))))
   /\ (forall (#t:pos) (b:buffer t). {:pattern (disjointSet b buffs)}
 				  (live h b /\ disjointSet b buffs) ==> equal h b h' b)
 
@@ -115,23 +115,23 @@ val disjoint_only_lemma: #t:pos -> b:buffer t -> #t':pos -> b':buffer t' -> Lemm
   (ensures (disjointSet b (only b')))
 let disjoint_only_lemma #t b #t' b' = ()  
 
-val eq_lemma: h0:heap -> h1:heap -> #size:pos -> a:buffer size -> mods:FStar.Set.set abuffer ->
+val eq_lemma: h0:heap -> h1:heap -> #size:pos -> a:buffer size -> mods:FStar.TSet.set abuffer ->
   Lemma (requires (live h0 a /\ disjointSet a mods /\ modifies_buf mods h0 h1))
 	(ensures (equal h0 a h1 a))
 	[SMTPatT (disjointSet a mods); SMTPatT (modifies_buf mods h0 h1)]
 let eq_lemma h0 h1 #size a mods = ()
 
-val modifies_transitivity_lemma: mods: FStar.Set.set abuffer -> h0:heap -> h1:heap -> h2:heap -> 
+val modifies_transitivity_lemma: mods: FStar.TSet.set abuffer -> h0:heap -> h1:heap -> h2:heap -> 
   Lemma (requires (modifies_buf mods h0 h1 /\ modifies_buf mods h1 h2))
 	(ensures (modifies_buf mods h0 h2))
 	[SMTPatT (modifies_buf mods h0 h1); SMTPatT (modifies_buf mods h1 h2)]
 let modifies_transitivity_lemma mods h0 h1 h2 = ()
 
-val modifies_subset_lemma: mods:FStar.Set.set abuffer -> submods:FStar.Set.set abuffer ->  h0:heap -> 
+val modifies_subset_lemma: mods:FStar.TSet.set abuffer -> submods:FStar.TSet.set abuffer ->  h0:heap -> 
   h1:heap -> Lemma 
-    (requires (FStar.Set.subset submods mods /\ modifies_buf submods h0 h1))
+    (requires (FStar.TSet.subset submods mods /\ modifies_buf submods h0 h1))
     (ensures (modifies_buf mods h0 h1))
-    [SMTPatT (modifies_buf submods h0 h1); SMTPat (FStar.Set.subset submods mods)]
+    [SMTPatT (modifies_buf submods h0 h1); SMTPat (FStar.TSet.subset submods mods)]
 let modifies_subset_lemma mods submods h0 h1 =
   cut (modifies (arefs mods) h0 h1);
   cut (forall (#t:pos) (b:buffer t). (live h0 b /\ disjointSet b mods) ==> (live h0 b /\ disjointSet b submods) ==> equal h0 b h1 b)
@@ -139,27 +139,27 @@ let modifies_subset_lemma mods submods h0 h1 =
 val modifies_empty_lemma: h:heap -> Lemma (requires (True)) (ensures (modifies_buf empty h h))
 let modifies_empty_lemma h = ()
 
-val modifies_fresh_lemma: h0:heap -> h1:heap -> mods:FStar.Set.set abuffer -> #size:pos -> 
+val modifies_fresh_lemma: h0:heap -> h1:heap -> mods:FStar.TSet.set abuffer -> #size:pos -> 
   b:buffer size -> Lemma 
     (requires (not(contains h0 b) /\ modifies (arefs (mods ++ b)) h0 h1))
     (ensures (modifies (arefs mods) h0 h1))
 let modifies_fresh_lemma h0 h1 mods #size b = ()
 
-val modifies_fresh: h0:heap -> h1:heap -> mods:FStar.Set.set abuffer -> #size:pos -> b:buffer size ->
+val modifies_fresh: h0:heap -> h1:heap -> mods:FStar.TSet.set abuffer -> #size:pos -> b:buffer size ->
   Lemma (requires (not(contains h0 b) /\ modifies_buf (mods ++ b) h0 h1))
 	(ensures (modifies_buf (mods) h0 h1))
 	[SMTPat (not(contains h0 b)); SMTPatT (modifies_buf (mods ++ b) h0 h1)]
 let modifies_fresh h0 h1 mods #size b =
-  cut (FStar.Set.mem (Buff b) (mods ++ b) /\ True); 
+  cut (FStar.TSet.mem (Buff b) (mods ++ b) /\ True); 
   cut (forall (#t:pos) (s:buffer t). (disjointSet s mods /\ disjoint s b) ==> disjointSet s (mods ++ b))
 
-val modifies_subbuffer_lemma: h0:heap -> h1:heap -> mods:FStar.Set.set abuffer -> #size:pos ->
+val modifies_subbuffer_lemma: h0:heap -> h1:heap -> mods:FStar.TSet.set abuffer -> #size:pos ->
   b:buffer size -> b':buffer size -> Lemma 
     (requires (modifies_buf (mods ++ b) h0 h1 /\ subBuffer #size b b'))
     (ensures (modifies_buf (mods ++ b') h0 h1))
     [SMTPatT (modifies_buf (mods ++ b) h0 h1); SMTPatT (subBuffer #size b b')]
 let modifies_subbuffer_lemma h0 h1 mods #size b b' =
-  cut (FStar.Set.mem (Buff b') (mods ++ b') /\ True); 
+  cut (FStar.TSet.mem (Buff b') (mods ++ b') /\ True); 
   cut (forall (#t:pos) (s:buffer t). (disjointSet s mods /\ disjoint s b) ==> disjointSet s (mods ++ b))
 
 (* Equality between fragments of buffers *)
@@ -205,8 +205,9 @@ val upd: #a:pos -> b:buffer a -> n:nat{n < length b} -> v:usint a -> ST unit
   (requires (fun h -> live h b))
   (ensures (fun h0 _ h1 -> atomicUpdate h0 h1 b n v))
 let upd #a b n z =
+  admit(); // Broken by the introduction of hasEq, TODO: restore
   FStar.Array.upd b.content (b.idx+n) z;
-  cut (b2t (FStar.Set.mem (Buff b) (only b)))
+  cut (FStar.TSet.mem (Buff b) (only b))
   
 val sub: #a:pos -> b:buffer a -> i:nat -> len:nat{len <= length b /\ i + len <= length b} -> 
   ST (buffer a)

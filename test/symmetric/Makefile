@@ -42,7 +42,7 @@ AES_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Symmetric.AES.fst)
 AESGCM_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Symmetric.AES.fst GCM.fst AEAD.AES256_GCM.fst)
 
 CHACHA_EXTRACTED=Chacha.ml
-POLY_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Parameters.ml Bigint.ml Bignum.ml Poly.ml
+POLY_EXTRACTED=FStar_PredicateExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Parameters.ml Bigint.ml Bignum.ml Poly.ml
 AES_EXTRACTED=Crypto_AES.ml
 
 CHACHA_EXTRACTED_HST=Chacha20.ml

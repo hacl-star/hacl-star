@@ -63,7 +63,7 @@ let aux_lemma_1 x = IntLibLemmas.div_pow2_inequality (v x) 32
 
 val aux_lemma_2: b:bigint -> Lemma (requires (True)) (ensures ((arefs (only b)) = !{content b})) 
 let aux_lemma_2 b = 
-  FStar.Set.lemma_equal_intro (arefs (only b)) !{content b};
+  FStar.TSet.lemma_equal_intro (arefs (only b)) !{content b};
   cut (True /\ arefs (only b) = !{content b})
 
 val aux_lemma_3: h0:heap -> h1:heap -> b:bigint -> Lemma (requires (modifies (arefs (only b)) h0 h1))
