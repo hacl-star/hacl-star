@@ -7,7 +7,7 @@ open Hacl.SBuffer
 (* Define base types *)
 let u32 = FStar.UInt32.t
 let uint32s = Hacl.SBuffer.u32s
-let bytes = Hacl.SBuffer.u8s
+let bytes = Seq.seq Hacl.UInt8.t
 
 
 (* Define algorithm parameters *)
@@ -18,6 +18,7 @@ let blocksize = bl
 
 
 (* Define SHA2 functions *)
+(*
 assume val init : unit -> Tot (state:uint32s)
 
 assume val update : (state:uint32s) -> (data:bytes) -> (len:u32{length data = v len})
@@ -25,6 +26,7 @@ assume val update : (state:uint32s) -> (data:bytes) -> (len:u32{length data = v 
 
 assume val finish : (state:uint32s)
   -> Tot (Prims.tuple2 (hash:bytes{length hash = v hashsize}) (state:uint32s))
+*)
 
-assume val sha256 : (data:bytes) -> (len:u32{length data = v len})
-  -> Tot (hash:bytes{length hash = v hashsize})
+assume val sha256 : (data:bytes) -> (len:u32{Seq.length data = v len})
+  -> Tot (hash:bytes{Seq.length hash = v hashsize})
