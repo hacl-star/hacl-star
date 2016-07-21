@@ -27,9 +27,13 @@ prepare:
 
 lax: prepare
 	$(FSTAR) --lax HMAC.fst
+	$(FSTAR) --lax HMAC.Pure.fst
+	$(FSTAR) --lax HMAC.Pure.2.fst
 
 ver:
 	$(FSTAR) HMAC.fst
+	$(FSTAR) HMAC.Pure.fst
+	$(FSTAR) HMAC.Pure.2.fst
 
 clean:
 	rm -f *~ $(LIB_FILES_HST) $(UTILS_FILES_HST) # $(SHA256_HST)
