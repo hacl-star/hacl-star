@@ -4,6 +4,7 @@ open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
 open FStar.HST
+open FStar.Buffer
 open FStar.UInt32
 open Hacl.Cast
 open Hacl.UInt8
@@ -11,7 +12,7 @@ open Hacl.UInt32
 open Hacl.SBuffer
 
 open Hash.Sha256
-open HMAC.Sha256
+open HMAC.SHA2
 
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack

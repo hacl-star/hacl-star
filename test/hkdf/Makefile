@@ -3,10 +3,13 @@ FSTAR_HOME?=../../../FStar
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_DEFAULT_ARGS) # from the included Makefile
 
+HACL_DIR_HST=../../crypto_hst/utils
+HACL_FILES_HST= $(addprefix $(HACL_DIR_HST)/, Hacl.Operations.fst Hacl.Conversions.fst)
+
 LIB_DIR=../../lib/st
 LIB_FILES=$(addprefix $(LIB_DIR)/, axioms.fst intlib.fst IntLibLemmas.fst sint.fst sbuffer.fst SInt.UInt8.fst SInt.UInt32.fst SInt.UInt63.fst SInt.UInt64.fst SInt.Cast.fst SBytes.fst)
 LIB_DIR_HST=../../lib/hst
-LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst)
+LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst) $(HACL_FILES_HST)
 
 OPTIONS_OCAML=--lax --codegen OCaml --no_location_info
 
@@ -28,9 +31,9 @@ NO_CODEGEN_HST=$(addprefix --no_extract , $(REALIZED_MODULE_HST))
 
 # Dependencies
 SHA256_FSTAR_HST=../../crypto_hst/sha/Hash.Sha256.fst
-SHA256_EXTRACTED_HST=Hash_Sha256.ml
-HMAC_SHA256_FSTAR_HST=../../crypto_hst/hmac/HMAC.Sha256.fst
-HMAC_SHA256_EXTRACTED_HST=HMAC_Sha256.ml
+SHA256_EXTRACTED_HST=Hacl_Operations.ml Hacl_Conversions.ml Hash_Sha256.ml
+HMAC_SHA256_FSTAR_HST=../../crypto_hst/hmac/HMAC.SHA2.fst
+HMAC_SHA256_EXTRACTED_HST=HMAC_SHA2.ml
 
 # Module
 CODE_DIR_HST=../../crypto_hst/hkdf
