@@ -8,7 +8,7 @@ LIB_FILES_HST= Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.
 
 # Utils 
 UTILS_DIR_HST=../utils
-UTILS_FILES_HST= Hacl.Operations.fst Hacl.Conversions.fst
+UTILS_FILES_HST= Hacl.Operations.fst Hacl.Operations.Pure.fst Hacl.Conversions.fst
 
 
 # Dependencies
@@ -26,10 +26,10 @@ prepare:
 #	cp $(SHA256_DIR)/$(SHA256_HST) . # Use the checked in version in HMAC that assumes the top level SHA 256
 
 lax: prepare
-	$(FSTAR) --lax HMAC.SHA2.fst
+	$(FSTAR) --lax HMAC.fst
 
 ver:
-	$(FSTAR) HMAC.SHA2.fst
+	$(FSTAR) HMAC.fst
 
 clean:
 	rm -f *~ $(LIB_FILES_HST) $(UTILS_FILES_HST) # $(SHA256_HST)

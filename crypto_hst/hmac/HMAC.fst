@@ -1,4 +1,4 @@
-module HMAC.SHA2
+module HMAC
 
 open FStar.Mul
 open FStar.Ghost

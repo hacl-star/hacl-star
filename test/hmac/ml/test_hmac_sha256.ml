@@ -1,6 +1,6 @@
 open Char
 open Hacl_SBuffer
-open HMAC_SHA2
+open HMAC
 open Hacl_Cast
        
 let from_string s =
