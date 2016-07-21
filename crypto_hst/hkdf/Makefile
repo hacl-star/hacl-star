@@ -11,7 +11,7 @@ LIB_FILES_HST= Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.
 SHA256_DIR=../sha
 SHA256_HST=Hash.Sha256.fst
 HMAC_SHA256_DIR=../hmac
-HMAC_SHA256_HST=HMAC.Sha256.fst
+HMAC_SHA256_HST=HMAC.SHA2.fst
 
 
 .PHONY: prepare lax ver clean
@@ -24,7 +24,7 @@ prepare:
 	cp $(HMAC_SHA256_DIR)/$(HMAC_SHA256_HST) .
 
 lax: prepare
-	$(FSTAR) --lax HKDF.Sha256.fst
+	$(FSTAR) --lax HKDF.Sha256.fst --include ../utils
 
 ver:
 	$(FSTAR) HKDF.Sha256.fst

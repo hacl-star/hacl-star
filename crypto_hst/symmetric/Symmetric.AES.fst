@@ -384,6 +384,7 @@ val keyExpansion_aux_0:w:u8s{length w >= 16 * (UInt32.v nr+1)} -> temp:u8s{lengt
     /\ disjoint w temp /\ disjoint w sbox /\ disjoint temp sbox))
   (ensures  (fun h0 _ h1 -> live h1 temp /\ modifies_1 temp h0 h1))
 let keyExpansion_aux_0 w temp sbox j =
+  let h0 = HST.get() in
   let i = 4ul @* j in
   lemma_aux_000 i;
   blit w (i@-4ul) temp 0ul 4ul;
@@ -395,7 +396,10 @@ let keyExpansion_aux_0 w temp sbox j =
     upd temp 0ul z
   ) else if (((i@/4ul) @% nk) @= 4ul) then (
     subWord temp sbox
-  )
+  );
+  let h1 = HST.get() in
+  assert(live h1 temp);
+  assert(modifies_1 temp h0 h1)
 
 val keyExpansion_aux_1: w:u8s{length w >= 16 * (UInt32.v nr+1)} -> temp:u8s{length temp >= 4} -> sbox:u8s{length sbox = 256} -> i:UInt32.t{UInt32.v i < 60 /\ UInt32.v i >= UInt32.v nk} -> STL unit
   (requires (fun h -> live h w /\ live h temp /\ live h sbox

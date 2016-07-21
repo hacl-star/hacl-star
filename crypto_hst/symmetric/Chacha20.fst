@@ -13,6 +13,8 @@ open Hacl.SBuffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
+#reset-options "--max_fuel 0 --initial_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3timeout 50"
+
 (* Public machine integer types *)
 let u32 = UInt32.t
 let u8 = UInt8.t
@@ -45,10 +47,10 @@ val quarter_round: m:u32s{length m = 16} ->
 let quarter_round m a b c d =
   upd m a (index m a +%^ index m b);
   upd m d (index m d ^^ index m a);
-  let (tmp:u32) = index m d in 
-  upd m d (tmp <<< UInt32.uint_to_t 16); 
+  let tmp = index m d in 
+  upd m d (tmp <<< UInt32.uint_to_t 16);
   upd m c (index m c +%^ index m d); 
-  upd m b (index m b ^^ index m c); 
+  upd m b (index m b ^^ index m c);
   let tmp = index m b in
   upd m b (tmp <<< UInt32.uint_to_t 12);
   upd m a (index m a +%^ index m b); 
@@ -189,6 +191,7 @@ let initialize_state state key counter nonce =
   let n0 =  (s32_of_bytes n0) in
   let n1 =  (s32_of_bytes n1) in
   let n2 =  (s32_of_bytes n2) in
+  let h0 = HST.get() in
   (* Constant part *)
   upd state 0ul (uint32_to_sint32 0x61707865ul);
   upd state 1ul (uint32_to_sint32 0x3320646eul);
@@ -208,12 +211,16 @@ let initialize_state state key counter nonce =
   (* Update with nonces *)
   upd state 13ul (n0);
   upd state 14ul (n1);
-  upd state 15ul (n2)
+  upd state 15ul (n2);
+  let h1 = HST.get() in
+  assert(modifies_1 state h0 h1);
+  assert(live h1 state)
 
 val sum_matrixes: new_state:u32s{length new_state >= 16} -> old_state:u32s{length old_state >= 16 /\ disjoint new_state old_state} -> STL unit
   (requires (fun h -> live h new_state /\ live h old_state))
   (ensures (fun h0 _ h1 -> live h1 new_state /\ modifies_1 new_state h0 h1))
 let sum_matrixes m m0 =
+  let h0 = HST.get() in
   upd m 0ul (index m 0ul +%^ index m0 0ul);
   upd m 1ul (index m 1ul +%^ index m0 1ul);
   upd m 2ul (index m 2ul +%^ index m0 2ul);
@@ -230,7 +237,9 @@ let sum_matrixes m m0 =
   upd m 13ul (index m 13ul +%^ index m0 13ul);
   upd m 14ul (index m 14ul +%^ index m0 14ul);
   upd m 15ul (index m 15ul +%^ index m0 15ul);
-  ()
+  let h1 = HST.get() in
+  assert(modifies_1 m h0 h1);
+  assert(live h1 m)
 
 val chacha20_block: output:bytes -> 
   state:u32s{length state >= 32 /\ disjoint state output} ->
@@ -315,6 +324,7 @@ let chacha20_encrypt_body state ciphertext key counter nonce plaintext len =
     begin 
       let cipher_block = sub ciphertext (64ul |* max) rem in 
       let plain_block = sub plaintext (64ul |* max) rem in 
+      let h = HST.get() in
       chacha20_block cipher_block state key (counter +^ (uint32_to_sint32 max)) nonce rem;
       xor_bytes_2 cipher_block plain_block rem
     end
