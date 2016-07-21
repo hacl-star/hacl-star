@@ -10,8 +10,10 @@ import-lib:
 	@cp $(addprefix ../../lib/hst/, $(LIB_FILES)) .
 
 verify:
-	make clean
 	$(FSTAR) $(OPTIONS_VER) Chacha20.fst --z3timeout 20
+
+aes:
+	$(FSTAR) $(OPTIONS_VER) Symmetric.AES.fst --z3timeout 5
 
 clean:
 	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(LIB_FILES)
