@@ -4,9 +4,10 @@ open FStar.HyperStack
 open FStar.HST
 open FStar.Buffer
 open FStar.UInt32
-
+open Hacl.Cast
 
 (* Define base types *)
+let u8 = FStar.UInt8.t
 let u32 = FStar.UInt32.t
 let s32 = Hacl.UInt32.t
 let bytes = Hacl.SBuffer.u8s
@@ -34,3 +35,22 @@ let rec xor_bytes output in1 len =
       Hacl.SBuffer.upd output i oi;
       xor_bytes output in1 i
     end
+
+
+val setall_aux: (b:bytes) -> (l:u32{length b = v l}) -> (x:u8) -> (pos:u32{v pos <= length b /\ v pos < pow2 32}) 
+  -> STL unit
+        (requires (fun h -> live h b))
+        (ensures  (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1)) 
+    
+let rec setall_aux b l v pos =
+  if lt pos l then begin
+    Hacl.SBuffer.upd b pos (uint8_to_sint8 v);
+    setall_aux b l v (FStar.UInt32.add pos 1ul)  end
+  else ()
+
+
+val setall: (b:bytes) -> (l:u32{length b = v l}) -> (x:u8)
+  -> STL unit
+        (requires (fun h -> live h b))
+        (ensures  (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1))
+let setall b l v = setall_aux b l v 0ul
