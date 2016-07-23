@@ -65,8 +65,12 @@ let hmac_core' memb mac key keylen data datalen =
 
   (* Define ipad and opad *)
   (**) let h0 = HST.get() in
+
+  (* Set initial values for ipad and opad *)
   let ipad = sub memb 0ul bl in
+  setall ipad bl 0x36uy;
   let opad = sub memb bl bl in
+  setall opad bl 0x5cuy;
 
   (* Create the wrapped key location *)
   let okey = sub memb (bl @+ bl) bl in

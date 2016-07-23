@@ -49,8 +49,10 @@ let hmac_core' memb key keylen data datalen =
   
   (* Define ipad and opad *)
   let ipad = Seq.slice memb 0 (v bl) in
+  let ipad = setall ipad (v bl) 0x36uy in
   let opad = Seq.slice memb (v bl) (2 * v bl) in
-
+  let opad = setall opad (v bl) 0x5cuy in
+  
   (* Create the wrapped key location *)
   let okey = Seq.slice memb (2 * v bl) (3 * v bl) in
   
