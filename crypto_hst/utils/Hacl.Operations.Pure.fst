@@ -24,4 +24,4 @@ assume val xor_bytes: a:bytes -> b:bytes -> len:u32{v len <= Seq.length a /\ v l
   -> Tot (output:bytes{Seq.length output = v len})
 
 
-assume val setall: (b:bytes) -> (l:u32{Seq.length b = v l}) -> (x:u8) -> Tot (bf:bytes)
+assume val setall: (b:bytes) -> (l:nat{Seq.length b = l}) -> (x:u8) -> Tot (bf:bytes{Seq.length bf = l})
