@@ -35,7 +35,7 @@ let rotate_right a s = ((a lsl (32-s)) land mask) + ((a lsr s) land mask)
 
 let of_uint32 s = s
                                 
-let eq a b =
+let eq_mask a b =
   let a = lnot(a lxor b) in
   let a = a land (a lsl 16) in
   let a = a land (a lsl 8) in
@@ -44,7 +44,7 @@ let eq a b =
   let a = a land (a lsl 1) in
   (a asr 31) land mask
 
-let gte x y = (lnot((x - y) asr 31)) land mask
+let gte_mask x y = (lnot((x - y) asr 31)) land mask
 
 let op_Hat_Plus = add
 let op_Hat_Subtraction = sub
