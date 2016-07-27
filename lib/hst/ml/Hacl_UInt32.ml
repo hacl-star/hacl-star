@@ -45,6 +45,7 @@ let eq_mask a b =
   (a asr 31) land mask
 
 let gte_mask x y = (lnot((x - y) asr 31)) land mask
+let lt_mask x y = lnot (gte_mask x y)
 
 let op_Hat_Plus = add
 let op_Hat_Subtraction = sub

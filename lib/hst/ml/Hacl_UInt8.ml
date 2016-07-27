@@ -35,6 +35,7 @@ let rotate_right a s =  ((( a lsl (8-s)) + ( a lsr s)) land 255)
 
 let gte_mask x y = (lnot((x - y) asr 7)) land 255
 let eq_mask x y = gte_mask x y land gte_mask y x
+let lt_mask x y = lnot (gte_mask x y)
                                            
 let op_Hat_Plus = add
 let op_Hat_Subtraction = sub

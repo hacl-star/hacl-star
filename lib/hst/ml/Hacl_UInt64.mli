@@ -73,6 +73,8 @@ val of_string: string -> uint64
                         
 val eq_mask:uint64 -> uint64 -> uint64
 val gte_mask:uint64 -> uint64 -> uint64
+val lt_mask:uint64 -> uint64 -> uint64
+
 
 (* Only for realization purposes, does not exists in F* library *)
 val to_string: uint64 -> string

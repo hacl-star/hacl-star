@@ -55,6 +55,7 @@ val of_string: string -> uint32
                         
 val eq_mask:uint32 -> uint32 -> uint32
 val gte_mask:uint32 -> uint32 -> uint32
+val lt_mask:uint32 -> uint32 -> uint32
 
 (* Only for realization purposes, does not exists in F* library *)
 val to_int: uint32 -> Prims.int

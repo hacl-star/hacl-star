@@ -50,7 +50,8 @@ let shift_left  (a:uint128) (b:u32) : uint128 = Stdint.Uint128.shift_left a b
 let eq_mask x y = if x = y then Stdint.Uint128.pred Stdint.Uint128.zero else Stdint.Uint128.zero
 (* TODO *)
 let gte_mask x y = if x >= y then Stdint.Uint128.pred Stdint.Uint128.zero else Stdint.Uint128.zero
-                                                                                 
+let lt_mask x y = lnot (gte_mask x y)
+
 (* Infix notations *)
 let op_Plus_Hat = add
 let op_Plus_Question_Hat = add_underspec

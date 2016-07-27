@@ -32,6 +32,7 @@ let shift_right = shift_right
 let shift_left = shift_left
 assume val eq_mask: a:t -> b:t -> Tot (c:t{(v a = v b <==> v c = pow2 n - 1) /\ (v a <> v b <==> v c = 0)})
 assume val gte_mask: a:t -> b:t -> Tot (c:t{(v a >= v b <==> v c = pow2 n - 1) /\ (v a < v b <==> v c = 0)})
+assume val lt_mask: a:t -> b:t -> Tot (c:t{(v a < v b <==> v c = pow2 n - 1) /\ (v a >= v b <==> v c = 0)})
 let op_Plus_Hat = add
 let op_Plus_Question_Hat = add_underspec
 let op_Plus_Percent_Hat = add_mod
