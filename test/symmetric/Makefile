@@ -57,7 +57,7 @@ AESGCM_ODIR=aesgcm
 
 .PHONY: chacha-ml poly-ml aes-ml chacha-hst-ml
 
-all: chacha-ml poly-ml aes-ml chacha-hst-ml aes-hst-ml aes-gcm-hst-ml poly-hst-ml
+all: chacha-hst-ml aes-hst-ml aes-gcm-hst-ml poly-hst-ml # chacha-ml poly-ml aes-ml 
 
 # OCaml extracton of CHACHA20
 chacha-ml:
