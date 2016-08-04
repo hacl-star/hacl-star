@@ -127,7 +127,7 @@ let gte_mask x y =
   let a = Stdint.Int128.shift_right (Stdint.Int128.sub a b) 127 in
   Stdint.Uint64.of_int128 a
 
-let lt_mask x y = lnot (gte_mask x y)
+let lt_mask x y = lognot (gte_mask x y)
 
 let of_string s = Stdint.Uint64.of_string s
 let uint_to_t (s:Prims.int) : uint64 = Stdint.Uint64.of_string (Z.to_string s)
