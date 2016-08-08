@@ -1,13 +1,7 @@
-module HaCl
+module Hacl
 
-open HaCl.Base
-
-//open Hash.Sha1
-//open Hash.Sha224
-open Hash.Sha256
-//open Hash.Sha384
-//open Hash.Sha512
-
+open Hacl.Constants
+open Hacl.Core
 
 
 ////////////////////////////////////////////////////////////////// 
@@ -15,19 +9,19 @@ open Hash.Sha256
 // Hashing functions
 //
 
-assume val hacl_hash': alg:hash_alg -> data:bytes -> len:bytes{len = length data} -> Tot (hash:bytes{length hash = hashSize alg})
+let hash alg output data len = Hacl.Core.hash alg output data len
+  
+let hash_sha2_256 output data len =
+  Hacl.Core.hash SHA2_256 output data len
+  
+let hash_sha2_512 output data len =
+  Hacl.Core.hash SHA2_512 output data len
 
-let hacl_hash alg hash data len =
-  match alg with
-//  | SHA1 -> sha1 hash data len
-//  | SHA224 -> sha224 hash data len
-  | SHA256 -> sha256 hash data len 
-//  | SHA384 -> sha384 hash data len 
-//  | SHA512 -> sha512 hash data len
-
-
-let hacl_hash_sha256 hash data len =
-  sha256 hash data len
+let hash_sha3_256 output data len =
+  Hacl.Core.hash SHA3_256 output data len
+  
+let hash_sha3_512 output data len =
+  Hacl.Core.hash SHA3_512 output data len
 
 
 ////////////////////////////////////////////////////////////////// 

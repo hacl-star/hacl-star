@@ -1,7 +1,9 @@
-module HaCl
+module Hacl
 
 open FStar.HyperStack
-open HaCl.Base
+open FStar.HST
+
+open Hacl.Constants
 
 
 ////////////////////////////////////////////////////////////////// 
@@ -9,16 +11,36 @@ open HaCl.Base
 // Hashing functions
 //
 
-val hacl_hash: alg:hash_alg -> hash:bytes{length hash = hashSize alg} -> data:bytes -> len:nat{len = length data} 
+val hash: alg:hash_alg -> hash:bytes{length hash = hashSize alg} -> data:bytes -> len:nat{len = length data} 
   -> STL (retcode:int)
         (requires (fun h -> live h hash /\ live h data))
-        (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 data /\ modifies_1 hash h0 h1 /\ hash = (hacl_hash' alg data len)))
+        (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 data /\ modifies_1 hash h0 h1 
+                             /\ sel h1 hash = (Hacl.Core.Pure.hash alg data len)))
 
-val hacl_hash_sha256: hash:bytes{length hash = hashSize alg} -> data:bytes -> len:nat{len = length data} 
+val hash_sha2_256: hash:bytes{length hash = hashSize SHA2_256} -> data:bytes -> len:nat{len = length data} 
   -> STL (retcode:int)
         (requires (fun h -> live h hash /\ live h data))
-        (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 data /\ modifies_1 hash h0 h1 /\ hash = (hacl_hash_sha256' data len)))
+        (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 data /\ modifies_1 hash h0 h1 
+                             /\ sel h1 hash = (Hacl.Core.Pure.hash_sha2_256 data len)))
 
+val hash_sha2_512: hash:bytes{length hash = hashSize SHA2_512} -> data:bytes -> len:nat{len = length data} 
+  -> STL (retcode:int)
+        (requires (fun h -> live h hash /\ live h data))
+        (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 data /\ modifies_1 hash h0 h1 
+                             /\ sel h1 hash = (Hacl.Core.Pure.hash_sha2_512 data len)))
+
+val hash_sha3_256: hash:bytes{length hash = hashSize SHA3_256} -> data:bytes -> len:nat{len = length data} 
+  -> STL (retcode:int)
+        (requires (fun h -> live h hash /\ live h data))
+        (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 data /\ modifies_1 hash h0 h1 
+                             /\ sel h1 hash = (Hacl.Core.Pure.hash_sha3_256 data len)))
+
+val hash_sha3_512: hash:bytes{length hash = hashSize SHA3_256} -> data:bytes -> len:nat{len = length data} 
+  -> STL (retcode:int)
+        (requires (fun h -> live h hash /\ live h data))
+        (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 data /\ modifies_1 hash h0 h1 
+                             /\ sel h1 hash = (Hacl.Core.Pure.hash_sha3_512 data len)))
+        
 ////////////////////////////////////////////////////////////////// 
 //
 // Authenticated encryption functions for secret-key cryptography
