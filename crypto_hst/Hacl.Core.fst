@@ -139,3 +139,43 @@ let hkdf_expand alg okm prk prklen info infolen l =
   | HMAC_SHA3_256 -> Hkdf.hmac_sha3_256 okm prk prklen info infolen l
   | HMAC_SHA3_384 -> Hkdf.hmac_sha3_384 okm prk prklen info infolen l
   | HMAC_SHA3_512 -> Hkdf.hmac_sha3_512 okm prk prklen info infolen l
+
+
+
+//////////////////////////////////////////////////////////////////
+//
+//  Other mathematical operations
+//
+
+let maths_gf128_add a b = GCM.gf128_add a b
+let maths_gf128_mul a b = GCM.gf128_mul a b
+
+
+//////////////////////////////////////////////////////////////////
+//
+// Other message authentication functions
+//
+
+let mac_poly1305 hash msg len key =
+  poly1305_mac hash msg len key
+
+
+//////////////////////////////////////////////////////////////////
+//
+// Other schemes and AEAD functions
+//
+
+let symmetric_chacha20_encrypt ciphertext key counter nonce plaintext len = 
+  Chacha20.chacha20_encrypt ciphertext key counter nonce plaintext len
+
+let symmetric_chacha20_decrypt plaintext key counter nonce ciphertext len = 
+  Chacha20.chacha20_decrypt plaintext key counter nonce ciphertext len
+
+
+let aead_aes256_gcm_encrypt ciphertext tag key iv plaintext len ad adlen =
+  AEAD.AES256_GCM.aead_encrypt ciphertext tag key iv plaintext len ad adlen
+
+let aead_aes256_gcm_decrypt plaintext tag key iv ciphertext len ad adlen =
+  AEAD.AES256_GCM.aead_decrypt plaintext tag key iv ciphertext len ad adlen
+
+
