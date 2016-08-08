@@ -1,4 +1,4 @@
-module HaCl.Base
+module Hacl.Constants
 
 open Platform.Bytes
 
