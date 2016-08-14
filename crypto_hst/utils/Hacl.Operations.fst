@@ -134,7 +134,7 @@ let rec setall' buf buflen x pos =
   else ()
 
 
-val setall: (buf:bytes) -> (buflen:u32{length buf = v buflen}) -> (x:u8)
+val setall: (buf:bytes) -> (buflen:u32{length buf = v buflen}) -> (x:s8)
   -> STL unit
         (requires (fun h -> live h buf))
         (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1))
