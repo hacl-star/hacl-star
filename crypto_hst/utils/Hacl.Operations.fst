@@ -212,7 +212,7 @@ let setmask3 mask masklen b1 b2 b3 pos1 pos2 = setmask3' mask masklen b1 b2 b3 p
 // Copymask
 //
 
-val copymask': buf:bytes -> bufstart:s32 -> bufstop:s32{v bufstart < v bufstop} -> out:bytes{disjoint out buf} -> masklen:u32{v masklen = length out /\ v masklen = length buf /\ v bufstop < v masklen} -> i:u32{v i <= v masklen}
+val copymask': buf:bytes -> bufstart:s32 -> bufstop:s32{v bufstart <= v bufstop} -> out:bytes{disjoint out buf} -> masklen:u32{v masklen = length out /\ v masklen = length buf /\ v bufstop <= v masklen} -> i:u32{v i <= v masklen}
   -> STL unit
         (requires (fun h -> live h buf /\ live h out))
         (ensures  (fun h0 _ h1 -> live h1 buf /\ live h1 out /\ modifies_1 out h0 h1))
@@ -233,9 +233,9 @@ let rec copymask' buf bufstart bufstop out masklen i =
   else ()
 
 
-val copymask: buf:bytes -> bufstart:s32 -> bufstop:s32{v bufstart < v bufstop} -> out:bytes{disjoint out buf} -> masklen:u32{v masklen = length out /\ v masklen = length buf /\ v bufstop < v masklen}
+val copymask: buf:bytes -> bufstart:s32 -> bufstop:s32{v bufstart <= v bufstop} -> out:bytes{disjoint out buf} -> masklen:u32{v masklen = length out /\ v masklen = length buf /\ v bufstop <= v masklen}
   -> STL unit
         (requires (fun h -> live h buf /\ live h out))
-        (ensures  (fun h0 _ h1 -> live h1 buf /\ live h1 out /\ modifies_1 out h0 h1))
+        (ensures  (fun h0 _ h1 -> live h0 out /\ live h1 out /\ modifies_1 out h0 h1))
 
 let rec copymask buf bufstart bufstop out masklen = copymask' buf bufstart bufstop out masklen 0ul
