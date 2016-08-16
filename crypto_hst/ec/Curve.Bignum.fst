@@ -79,8 +79,8 @@ let rec copy_to_bigint' output b idx len ctr =
     cut (v cast = vv bi /\ True); 
     upd output (idx+|ctr) cast; 
     let h1 = HST.get() in
-    no_upd_lemma h0 h1 b (only output); 
-    upd_lemma h0 h1 output (idx+|ctr) cast; 
+    (* no_upd_lemma h0 h1 b (only output);  *)
+    (* upd_lemma h0 h1 output (idx+|ctr) cast;  *)
     copy_to_bigint' output b idx len (ctr+|1ul)
   end
 
@@ -135,8 +135,8 @@ let rec copy_to_bigint_wide' output b idx len ctr =
     cut (vv cast = v bi /\ True);
     upd output (idx+|ctr) cast;
     let h1 = HST.get() in
-    no_upd_lemma h0 h1 b (only output);
-    upd_lemma h0 h1 output (idx+|ctr) cast;
+    (* no_upd_lemma h0 h1 b (only output); *)
+    (* upd_lemma h0 h1 output (idx+|ctr) cast; *)
     copy_to_bigint_wide' output b idx len (ctr+|1ul)
   end
 
@@ -181,7 +181,7 @@ let rec erase b idx len ctr =
   else begin
     upd b (idx+|ctr) (Hacl.Cast.uint64_to_sint64 0uL); 
     let h1 = HST.get() in
-    upd_lemma h0 h1 b (idx+|ctr) 0uL;
+    (* upd_lemma h0 h1 b (idx+|ctr) 0uL; *)
     erase b idx len (ctr+|1ul)
   end
 
@@ -201,14 +201,14 @@ let rec erase_wide b idx len ctr =
   else begin
     upd b (idx+|ctr) (Hacl.UInt128.of_string "0"); 
     let h1 = HST.get() in
-    upd_lemma h0 h1 b (idx+|ctr) (Hacl.UInt128.of_string "0");
+    (* upd_lemma h0 h1 b (idx+|ctr) (Hacl.UInt128.of_string "0"); *)
     erase_wide b idx len (ctr+|1ul)
   end
 
 let modifies_2 c tmp h0 h1 =
   HyperHeap.modifies_just (Set.union (Set.singleton (frameOf c)) (Set.singleton (frameOf tmp))) h0.h h1.h
-  /\ modifies_buf (frameOf c) (only c ++ tmp) h0 h1
-  /\ modifies_buf (frameOf tmp) (only c ++ tmp) h0 h1
+  (* /\ modifies_buf (frameOf c) (only c ++ tmp) h0 h1 *)
+  (* /\ modifies_buf (frameOf tmp) (only c ++ tmp) h0 h1 *)
   /\ h0.tip = h1.tip
 
 val modulo: output:bigint -> input:bigint_wide{disjoint input output} -> STL unit
@@ -300,7 +300,7 @@ let fdifference a b =
   Curve.Modulo.add_big_zero b';
   let h2 = HST.get() in
   cut (modifies_1 b' h0 h2); 
-  no_upd_lemma h0 h2 a (only b'); 
+  (* no_upd_lemma h0 h2 a (only b');  *)
   cut (norm h2 a); 
   Curve.Fdifference.fdifference' a b'; 
   let h3 = HST.get() in
@@ -367,8 +367,8 @@ let fmul res a b =
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *)
   let tmp = create (S128.of_string "0") (U32.mul 2ul nlength-|1ul) in
   let h1 = HST.get() in  
-  no_upd_lemma h0 h1 a !{};
-  no_upd_lemma h0 h1 b !{};
+  (* no_upd_lemma h0 h1 a !{}; *)
+  (* no_upd_lemma h0 h1 b !{}; *)
   norm_lemma_2 h1 a; norm_lemma_2 h1 b; 
   (* norm_lemma_3 h1 a; norm_lemma_3 h1 b; *)
   Curve.Fproduct.multiplication tmp a b; 

@@ -38,7 +38,7 @@ let fdifference_aux_1 a b ctr =
   let ai = index a i in 
   let bi = index b i in 
   assert(i >= ctr /\ i < norm_length); 
-  gcut(fun _ -> v (get h0 b i) >= v (get h0 a i)); 
+  cut(v (get h0 b i) >= v (get h0 a i)); 
   let z = bi ^- ai in 
   upd a i z;
   let h1 = ST.get() in

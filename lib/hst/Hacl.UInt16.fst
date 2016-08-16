@@ -1,8 +1,8 @@
-module Hacl.UInt32
+module Hacl.UInt16
 (* This module generated automatically using [mk_int.sh] *)
 
-open FStar.UInt32
-module U = FStar.UInt32
+open FStar.UInt16
+module U = FStar.UInt16
 open FStar.Mul
 
 (* NOTE: anything that you fix/update here should be reflected in [Hacl.IntN.fstp], which is mostly

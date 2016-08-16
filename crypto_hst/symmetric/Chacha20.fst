@@ -16,8 +16,8 @@ module HS = FStar.HyperStack
 #reset-options "--max_fuel 0 --initial_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3timeout 50"
 
 (* Public machine integer types *)
-let u32 = UInt32.t
-let u8 = UInt8.t
+let u32 = FStar.UInt32.t
+let u8 = FStar.UInt8.t
 
 (* Secret machine integer types *)
 let s32 = Hacl.UInt32.t
@@ -32,16 +32,16 @@ let op_Bar_Percent = UInt32.rem
 let op_Bar_Slash = UInt32.div
 
 (* 'Rotate' operators, to inline *)
-let op_Greater_Greater_Greater (a:s32) (s:u32{v s <= 32}) : Tot s32 =
-  let (m:u32{v m = 32}) = 32ul in
+let op_Greater_Greater_Greater (a:s32) (s:u32{FStar.UInt32.v s <= 32}) : Tot s32 =
+  let (m:u32{FStar.UInt32.v m = 32}) = 32ul in
   (op_Greater_Greater_Hat a s) |^ (a <<^ (m |- s))
-let op_Less_Less_Less (a:s32) (s:u32{v s <= 32}) : Tot s32 =
-  let (m:u32{v m = 32}) = 32ul in  
+let op_Less_Less_Less (a:s32) (s:u32{FStar.UInt32.v s <= 32}) : Tot s32 =
+  let (m:u32{FStar.UInt32.v m = 32}) = 32ul in  
   (op_Less_Less_Hat a s) |^ (op_Greater_Greater_Hat a (m |- s))
 
 (* Chacha 20 code *)
 val quarter_round: m:u32s{length m = 16} -> 
-  a:u32{v a < 16} -> b:u32{v b<16} -> c:u32{v c<16} -> d:u32{v d<16} -> STL unit 
+  a:u32{FStar.UInt32.v a < 16} -> b:u32{FStar.UInt32.v b<16} -> c:u32{FStar.UInt32.v c<16} -> d:u32{FStar.UInt32.v d<16} -> STL unit 
   (requires (fun h -> live h m)) 
   (ensures (fun h0 _ h1 -> live h1 m /\ modifies_1 m h0 h1))
 let quarter_round m a b c d =
@@ -97,10 +97,10 @@ let s32_of_bytes (b:bytes{length b >= 4}) =
 
 let op_Hat_Greater_Greater: a:s32 -> s:u32 -> Pure s32
   (requires True)
-  (ensures (fun c -> v c = v a / (pow2 (v s))))
+  (ensures (fun c -> v c = v a / (pow2 (FStar.UInt32.v s))))
   = op_Greater_Greater_Hat
 
-val bytes_of_u32s: output:bytes -> m:u32s{disjoint output m} -> len:u32{v len <=length output /\ v len<=op_Multiply 4 (length m)} -> STL unit
+val bytes_of_u32s: output:bytes -> m:u32s{disjoint output m} -> len:u32{FStar.UInt32.v len <=length output /\ FStar.UInt32.v len<=op_Multiply 4 (length m)} -> STL unit
   (requires (fun h -> live h output /\ live h m))
   (ensures (fun h0 _ h1 -> live h0 output /\ live h0 m /\ live h1 output /\ live h1 m
     /\ modifies_1 output h0 h1 ))
@@ -145,7 +145,7 @@ let rec bytes_of_u32s output m l =
     end
 
 val xor_bytes_2: output:bytes -> in1:bytes{disjoint in1 output} -> 
-  len:u32{v len <= length output /\ v len <= length in1} -> STL unit
+  len:u32{FStar.UInt32.v len <= length output /\ FStar.UInt32.v len <= length in1} -> STL unit
   (requires (fun h -> live h output /\ live h in1))
   (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
     /\ modifies_1 output h0 h1 ))
@@ -245,7 +245,7 @@ val chacha20_block: output:bytes ->
   state:u32s{length state >= 32 /\ disjoint state output} ->
   key:bytes{length key = 32 /\ disjoint state key /\ disjoint output key} -> counter:s32 -> 
   nonce:bytes{length nonce = 12 /\ disjoint state nonce /\ disjoint output nonce} ->
-  len:u32{v len <= 64 /\ length output >= v len} ->
+  len:u32{FStar.UInt32.v len <= 64 /\ length output >= FStar.UInt32.v len} ->
   STL unit
     (requires (fun h -> live h state /\ live h output /\ live h key /\ live h nonce))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h1 state /\ modifies_2 output state h0 h1 ))
@@ -283,10 +283,10 @@ val chacha20_encrypt_loop:
   state:u32s{length state >= 32} -> key:bytes{length key = 32 /\ disjoint state key} -> 
   counter:s32 -> nonce:bytes{length nonce = 12 /\ disjoint state nonce (* /\ disjoint key nonce *)} -> 
   plaintext:bytes{disjoint state plaintext (* /\ disjoint key plaintext /\ disjoint nonce plaintext *)} -> 
-  ciphertext:bytes{disjoint state ciphertext /\ disjoint key ciphertext /\ disjoint nonce ciphertext /\ disjoint plaintext ciphertext} -> j:u32 -> max:u32{v j <= v max /\ Hacl.UInt32.v counter + v max < pow2 n} ->
+  ciphertext:bytes{disjoint state ciphertext /\ disjoint key ciphertext /\ disjoint nonce ciphertext /\ disjoint plaintext ciphertext} -> j:u32 -> max:u32{FStar.UInt32.v j <= FStar.UInt32.v max /\ Hacl.UInt32.v counter + FStar.UInt32.v max < pow2 n} ->
   STL unit
     (requires (fun h -> live h state /\ live h key /\ live h nonce /\ live h plaintext  /\ live h ciphertext
-      /\ length plaintext >= (v max-v j) * 64  /\ length ciphertext >= (v max-v j) * 64 ))
+      /\ length plaintext >= (FStar.UInt32.v max-FStar.UInt32.v j) * 64  /\ length ciphertext >= (FStar.UInt32.v max-FStar.UInt32.v j) * 64 ))
     (ensures (fun h0 _ h1 -> live h1 ciphertext /\ live h1 state /\ modifies_2 ciphertext state h0 h1 ))
 let rec chacha20_encrypt_loop state key counter nonce plaintext ciphertext j max =
   if j =^ max then ()
@@ -311,7 +311,7 @@ val chacha20_encrypt_body:
   counter:s32 -> 
   nonce:bytes{length nonce = 12 /\ disjoint ciphertext nonce /\ disjoint state nonce (* /\ disjoint key nonce *)} -> 
   plaintext:bytes{disjoint ciphertext plaintext /\ disjoint state plaintext} -> 
-  len:u32{length ciphertext >= v len /\ length plaintext >= v len /\ Hacl.UInt32.v counter + v len / 64 < pow2 32} -> STL unit
+  len:u32{length ciphertext >= FStar.UInt32.v len /\ length plaintext >= FStar.UInt32.v len /\ Hacl.UInt32.v counter + FStar.UInt32.v len / 64 < pow2 32} -> STL unit
     (requires (fun h -> live h state /\ live h ciphertext /\ live h key /\ live h nonce /\ live h plaintext))
     (ensures (fun h0 _ h1 -> live h1 ciphertext /\ live h1 state /\ modifies_2 ciphertext state h0 h1))
 let chacha20_encrypt_body state ciphertext key counter nonce plaintext len =
@@ -333,7 +333,7 @@ val chacha20_encrypt:
   ciphertext:bytes -> key:bytes{length key = 32 /\ disjoint ciphertext key} -> counter:s32 -> 
   nonce:bytes{length nonce = 12 /\ disjoint ciphertext nonce /\ disjoint key nonce} -> 
   plaintext:bytes{disjoint ciphertext plaintext /\ disjoint key plaintext /\ disjoint nonce plaintext} -> 
-  len:u32{length ciphertext >= v len /\ length plaintext >= v len /\ v counter + v len / 64 < pow2 32} -> STL unit
+  len:u32{length ciphertext >= FStar.UInt32.v len /\ length plaintext >= FStar.UInt32.v len /\ v counter + FStar.UInt32.v len / 64 < pow2 32} -> STL unit
     (requires (fun h -> live h ciphertext /\ live h key /\ live h nonce /\ live h plaintext))
     (ensures (fun h0 _ h1 -> live h1 ciphertext /\ modifies_1 ciphertext h0 h1))
 let chacha20_encrypt ciphertext key counter nonce plaintext len = 

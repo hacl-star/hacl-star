@@ -1,6 +1,6 @@
 all:
 	$(MAKE) -C symmetric
-# $(MAKE) -C ec
+	$(MAKE) -C ec
 	$(MAKE) -C hash
 	$(MAKE) -C hmac
 	$(MAKE) -C hkdf

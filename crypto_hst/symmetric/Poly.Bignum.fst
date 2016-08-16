@@ -91,8 +91,8 @@ let rec fsum_index a a_idx b b_idx len ctr =
   if U32.eq len ctr then ()
   else begin
       let i = ctr in
-      let (ai:U64.t) = index a (i+|a_idx) in 
-      let (bi:U64.t) = index b (i+|b_idx) in 
+      let (ai:Hacl.UInt64.t) = index a (i+|a_idx) in
+      let (bi:Hacl.UInt64.t) = index b (i+|b_idx) in 
       let z = ai +^ bi in
       upd a (a_idx+|i) z; 
       let h1 = HST.get() in
@@ -199,7 +199,7 @@ let rec scalar_multiplication_aux res a s ctr =
   else begin
     let i = ctr -| 1ul in
     let ai = index a i in
-    let resi = ai ^* s in
+    let resi = ai *^ s in
     upd res i resi; 
     let h1 = HST.get() in
     eq_lemma_1 h0 h1 res a;
@@ -427,16 +427,16 @@ let aux_lemma_4 () = ()
 #reset-options "--z3timeout 20"
 #set-options "--lax" // OK
 
-val aux_lemma_41: b:u64{v b < pow2 26} -> Lemma (forall (a:u64). (v a < pow2 27 /\ v b < pow2 26) ==> (v a * v b < pow2 53))
+val aux_lemma_41: b:s64{v b < pow2 26} -> Lemma (forall (a:s64). (v a < pow2 27 /\ v b < pow2 26) ==> (v a * v b < pow2 53))
 let aux_lemma_41 b = 
-  cut (forall (a:u64). v a < pow2 27 ==> v a * v b < pow2 27 * pow2 26); 
+  cut (forall (a:s64). v a < pow2 27 ==> v a * v b < pow2 27 * pow2 26); 
   Math.Lib.pow2_exp_lemma 27 26;
   ()
   
 #reset-options
 #set-options "--lax" // OK
 
-val aux_lemma_42: h:heap -> a:bigint{bound27 h a} -> z:u64{v z < pow2 26} -> Lemma (forall (i:nat). i < norm_length ==> v (get h a i) * v z < pow2 53)
+val aux_lemma_42: h:heap -> a:bigint{bound27 h a} -> z:s64{v z < pow2 26} -> Lemma (forall (i:nat). i < norm_length ==> v (get h a i) * v z < pow2 53)
 let aux_lemma_42 h a z = 
   cut (forall (i:nat). {:pattern (get h a i)} i < norm_length ==> (v (get h a i) < pow2 27)); 
   aux_lemma_41 z; 
@@ -960,7 +960,7 @@ let satisfiesModuloConstraints (h:heap) (b:bigint) : GTot Type0 =
 
 val times_5: x:s64{5 * v x < pow2 64} -> Tot (y:s64{v y = 5 * v x})
 let times_5 x = 
-  let z = x ^<< 2ul in
+  let z = x <<^ 2ul in
   x +^ z
   
 let reducible (h:heap) (b:bigint) (ctr:nat{ctr < norm_length-1}) : GTot Type0 =
@@ -1199,13 +1199,13 @@ let helper_lemma_4 a b c size =
     end
   else ()
 
-val auxiliary_lemma_1': bip1:u64 -> c:u64 -> Lemma
+val auxiliary_lemma_1': bip1:s64 -> c:s64 -> Lemma
     (requires (v bip1 < pow2 62 /\ v c < pow2 (64 - 26)))
     (ensures (v bip1 + v c < pow2 64)) 
 let auxiliary_lemma_1' bip1 c =
   helper_lemma_4 (v bip1) (v c) 26 64
 
-val auxiliary_lemma_2: bip1:u64 -> c:u64 -> Lemma
+val auxiliary_lemma_2: bip1:s64 -> c:s64 -> Lemma
     (requires (v bip1 < pow2 26 /\ v c < pow2 15))
     (ensures (v bip1 + v c < pow2 27)) 
 let auxiliary_lemma_2 bip1 c =
@@ -1219,7 +1219,7 @@ let mod2_26 a =
   admit(); // TODO
   let mask = shift_left (uint64_to_sint64 1UL) 26ul in
   Math.Lib.pow2_increases_lemma 64 26;
-  let mask = mask ^- (uint64_to_sint64 1UL) in
+  let mask = mask -^ (uint64_to_sint64 1UL) in
   let res = a &^ mask in
   (* SInt.ulogand_lemma_4 #64 a 26 mask; *)
   res
@@ -1261,7 +1261,7 @@ let rec carry b i =
     let ri = mod2_26 bi in
     upd b i ri;
     let h1 = HST.get() in
-    let c = (bi ^>> 26ul) in
+    let c = (bi >>^ 26ul) in
     cut (v c = (v bi) / (pow2 26));
     Math.Lib.pow2_div_lemma 64 26;
     (* TODO *)
@@ -1318,7 +1318,7 @@ let lemma_aux a b =
   ()
 
 (* TODO: express in terms of % properties *)
-assume val lemma_aux_2: a:u64 -> Lemma ((v a < pow2 26+pow2 15 /\ v a >= pow2 26) ==> v a % pow2 26 < pow2 15)
+assume val lemma_aux_2: a:s64 -> Lemma ((v a < pow2 26+pow2 15 /\ v a >= pow2 26) ==> v a % pow2 26 < pow2 15)
 
 #reset-options "--z3timeout 100"
 #set-options "--lax" // OK
@@ -1338,7 +1338,7 @@ let rec carry2_aux b i =
     cut (v ri < pow2 (templ (w i))); 
     upd b i ri; 
     let h1 = HST.get() in
-    let c = (bi ^>> 26ul) in
+    let c = (bi >>^ 26ul) in
     // In the spec of >>, TODO
     assume(v c < 2); 
     let bip1 = index b (i+|1ul) in
@@ -1391,7 +1391,7 @@ let rec carry2 b =
   cut (v ri < pow2 26); 
   upd b 0ul ri; 
   let h3 = HST.get() in
-  let c = (bi ^>> 26ul) in
+  let c = (bi >>^ 26ul) in
   cut (v bi < pow2 41); 
   // In the spec of >>, TODO
   assume (v c < pow2 15); 
@@ -1438,7 +1438,7 @@ let last_carry b =
 //  assert(v ri < pow2 26); 
   upd b 0ul ri; 
   let h3 = HST.get() in
-  let c = (bi ^>> 26ul) in
+  let c = (bi >>^ 26ul) in
   cut (v bi < pow2 26 + 5); 
   cut (v bi >= pow2 26 ==> v (get h3 b 1) < pow2 15); 
   // In the spec of >>, TODO
@@ -1511,21 +1511,21 @@ val finalize: b:bigint -> ST unit
     /\ modifies_1 b h0 h1
     /\ eval h1 b norm_length = eval h0 b norm_length % reveal prime))
 let finalize b =
-  let mask_26 = ((uint64_to_sint64 1UL) ^<< 26ul) ^- (uint64_to_sint64 1UL) in
-  let mask2_26m5 = mask_26 ^- (uint64_to_sint64 1UL ^<< 2ul) in
+  let mask_26 = ((uint64_to_sint64 1UL) <<^ 26ul) -^ (uint64_to_sint64 1UL) in
+  let mask2_26m5 = mask_26 -^ (uint64_to_sint64 1UL <<^ 2ul) in
   let b0 = index b 0ul in
   let b1 = index b 1ul in
   let b2 = index b 2ul in
   let b3 = index b 3ul in
   let b4 = index b 4ul in
   let mask = Hacl.UInt64.eq_mask b4 mask_26 in
-  let mask = Hacl.UInt64.eq_mask b3 mask_26 ^& mask in 
-  let mask = Hacl.UInt64.eq_mask b2 mask_26 ^& mask in 
-  let mask = Hacl.UInt64.eq_mask b1 mask_26 ^& mask in 
-  let mask = Hacl.UInt64.gte_mask b0 mask2_26m5 ^& mask in 
-  upd b 0ul (b0 ^- (mask ^& mask2_26m5));
-  upd b 1ul (b1 ^- (b1 ^& mask));
-  upd b 2ul (b2 ^- (b2 ^& mask));
-  upd b 3ul (b3 ^- (b3 ^& mask));
-  upd b 4ul (b4 ^- (b4 ^& mask));
+  let mask = Hacl.UInt64.eq_mask b3 mask_26 &^ mask in 
+  let mask = Hacl.UInt64.eq_mask b2 mask_26 &^ mask in 
+  let mask = Hacl.UInt64.eq_mask b1 mask_26 &^ mask in 
+  let mask = Hacl.UInt64.gte_mask b0 mask2_26m5 &^ mask in 
+  upd b 0ul (b0 -^ (mask &^ mask2_26m5));
+  upd b 1ul (b1 -^ (b1 &^ mask));
+  upd b 2ul (b2 -^ (b2 &^ mask));
+  upd b 3ul (b3 -^ (b3 &^ mask));
+  upd b 4ul (b4 -^ (b4 &^ mask));
   ()

@@ -42,7 +42,7 @@ let rec fsum_index a a_idx b b_idx len ctr =
       let i = ctr in
       let ai = index a (i+a_idx) in 
       let bi = index b (i+b_idx) in 
-      gcut(fun _ -> (v (get h0 a (i+a_idx)) + v (get h0 b (i+b_idx)) < pow2 platform_size));
+      cut((v (get h0 a (i+a_idx)) + v (get h0 b (i+b_idx)) < pow2 platform_size));
       let z = ai ^+ bi in 
       upd a (a_idx+i) z; 
       let h1 = ST.get() in

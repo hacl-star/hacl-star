@@ -6,14 +6,15 @@ open FStar.UInt64
 open FStar.HST
 open FStar.Mul
 open FStar.Ghost
+open Hacl.UInt64
 open Hacl.SBuffer
 open Math.Axioms
 open Math.Lib
 open Poly.Parameters
 
-let u8 = UInt8.t
-let u64  = UInt64.t
-let u128 = UInt128.t
+let u8 = FStar.UInt8.t
+let u64  = FStar.UInt64.t
+let u128 = FStar.UInt128.t
 let heap = HyperStack.mem
 
 (*** Types ***) 
@@ -84,7 +85,7 @@ val eval_bytes : h:heap -> b:bytes{live h b} -> n:nat{n <= length b} -> GTot nat
 let rec eval_bytes h b n =
   match n with
   | 0 -> 0
-  | _ -> pow2 (bitweight byte_templ (n-1)) * UInt8.v (get h b (n-1)) + eval_bytes h b (n-1)
+  | _ -> pow2 (bitweight byte_templ (n-1)) * Hacl.UInt8.v (get h b (n-1)) + eval_bytes h b (n-1)
 
 val maxValue: h:heap -> b:bigint{live h  b} -> l:pos{l <= length  b} -> GTot nat
 let rec maxValue h  b l = 

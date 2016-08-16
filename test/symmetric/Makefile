@@ -14,6 +14,7 @@ CODE_DIR_HST=../../crypto_hst/symmetric
 
 OPTIONS_OCAML=--lax --codegen OCaml --no_location_info --use_native_int
 OPTIONS_OCAML_HST=--lax --codegen OCaml --no_location_info
+OPTIONS_KREMLIN=--lax --codegen Kremlin
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -20-26
@@ -94,6 +95,14 @@ chacha-hst-ml:
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CHACHA_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
 	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe 
 	./test_chacha20.exe
+
+chacha-c:
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
+	mkdir -p $(CHACHA_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_KREMLIN) $(LIB_FILES_HST) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR) 
+	# $(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CHACHA_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+	#   $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe 
+	# ./test_chacha20.exe
 
 poly-hst-ml:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
