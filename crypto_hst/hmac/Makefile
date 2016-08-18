@@ -26,7 +26,7 @@ prepare:
 	cp $(SHA256_DIR)/$(SHA256_HST) .
 
 lax: prepare
-	#$(FSTAR) --lax HMAC.fst
+	$(FSTAR) --lax HMAC.fst
 	$(FSTAR) --lax HMAC.B.fst
 	#$(FSTAR) --lax HMAC.Pure.fst
 	#$(FSTAR) --lax HMAC.Pure.2.fst
