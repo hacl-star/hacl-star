@@ -45,6 +45,10 @@ sha256-ml:
 	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) ml/test_sha256.ml -o test_sha256.exe
 	./test_sha256.exe
 
+sha256-pretty:
+	cp sha256/Hash_Sha256.ml sha256/X.ml
+	camlp4 pa_o.cmo pr_o.cmo sha256/X.ml > sha256/Hash_Sha256.ml
+
 sha256-compile:
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(SHA2_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
 	  $(addprefix $(SHA2_ODIR)/,$(SHA2_EXTRACTED_HST)) ml/test_sha256.ml -o test_sha256.exe
