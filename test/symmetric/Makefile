@@ -12,6 +12,13 @@ LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lem
 CODE_DIR=../../crypto/symmetric
 CODE_DIR_HST=../../crypto_hst/symmetric
 
+KREMLIN_DIR=../../../kremlin
+KREMLIN=$(KREMLIN_DIR)/Kremlin.native
+KREMLIN_LIB=$(KREMLIN_DIR)/kremlib
+KREMLIN_ARGS=
+KREMLIN_OBJS=kremlib.o testlib.o haclib.o
+C_COMP=gcc -I$(LIB_DIR_HST)/c/
+
 OPTIONS_OCAML=--lax --codegen OCaml --no_location_info --use_native_int
 OPTIONS_OCAML_HST=--lax --codegen OCaml --no_location_info
 OPTIONS_KREMLIN=--lax --codegen Kremlin
@@ -50,6 +57,8 @@ CHACHA_EXTRACTED_HST=Chacha20.ml
 POLY_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Poly_Parameters.ml Poly_Bigint.ml Poly_Bignum.ml Poly_Poly1305.ml
 AES_EXTRACTED_HST=Symmetric_AES.ml
 AESGCM_EXTRACTED_HST=Symmetric_AES.ml GCM.ml AEAD_AES256_GCM.ml
+
+CHACHA_EXTRACTED_C=Chacha20.c
 
 CHACHA_ODIR=chacha20
 POLY_ODIR=poly1305
@@ -96,13 +105,22 @@ chacha-hst-ml:
 	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe 
 	./test_chacha20.exe
 
+# C extraction of CHACHA20
 chacha-c:
+	$(C_COMP) -c $(KREMLIN_LIB)/kremlib.c
+	$(C_COMP) -c $(KREMLIN_DIR)/test/testlib.c
+	$(C_COMP) -c $(LIB_DIR_HST)/c/haclib.c
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
 	mkdir -p $(CHACHA_ODIR)
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_KREMLIN) $(LIB_FILES_HST) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR) 
-	# $(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CHACHA_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	#   $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe 
-	# ./test_chacha20.exe
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_KREMLIN) $(LIB_FILES_HST) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR)
+	$(KREMLIN) -write out.krml $(KREMLIN_ARGS) -add-include \"haclib.h\"
+	$(C_COMP) $(KREMLIN_OBJS) $(LIB_DIR_HST)/c/haclib.h ./c/test_chacha.c -o test_chacha.out
+	./test_chacha.out
+
+chacha-exe:
+	$(KREMLIN) -write out.krml $(KREMLIN_ARGS) -add-include \"haclib.h\"
+	$(C_COMP) $(KREMLIN_OBJS) $(LIB_DIR_HST)/c/haclib.h ./c/test_chacha.c -o test_chacha.out
+	./test_chacha.out
 
 poly-hst-ml:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
@@ -138,7 +156,7 @@ compile:
 # Cleaning
 clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
-	rm -rf $ *.cmx *.o *.cmi *~ *.cmo *.exe $(CHACHA_ODIR) $(POLY_ODIR) $(AES_ODIR) $(AESGCM_ODIR) \
+	rm -rf *.c *.out *.cmx *.o *.cmi *~ *.cmo *.exe *.krml $(CHACHA_ODIR) $(POLY_ODIR) $(AES_ODIR) $(AESGCM_ODIR) \
 		$(addprefix $(LIB_DIR)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
 		$(addprefix $(LIB_DIR_HST)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
 		$(addprefix ml/,*.cmx *.o *.cmi *~ *.cmo) $(CODE_DIR)/*~
