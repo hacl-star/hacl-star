@@ -10,22 +10,22 @@ let (ones:uint32) = -1
 let bits = 32
 let mask = ((1 lsl 32) - 1)
 
-let v (x:uint32) : Prims.int = failwith "Ghost function, cannot be called in concrete code"           
-             
+let v (x:uint32) : Prims.int = failwith "Ghost function, cannot be called in concrete code"
+
 (* Standard operators *)
 let add a b = (a + b) land mask  
 let add_mod a b = (a + b) land mask
-let sub a b = a - b
-let sub_mod a b = a - b
-let mul a b = a * b
-let mul_mod a b = a * b
+let sub a b = (a - b) land mask
+let sub_mod a b = (a - b) land mask
+let mul a b = (a * b) land mask
+let mul_mod a b = (a * b) land mask
 let div a b = a / b
 let rem a b = a mod b
 
 let logand a b = a land b 
 let logxor a b = a lxor b
 let logor a b = a lor b
-let lognot a = lnot a
+let lognot a = (lnot a) land mask
 
 let shift_left a s = (a lsl s) land mask
 let shift_right a s = (a lsr s) land mask
