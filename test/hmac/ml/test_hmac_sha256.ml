@@ -1,37 +1,18 @@
 open Char
 open Hacl_SBuffer
-open HMAC
 open Hacl_Cast
-       
-let from_string s =
-  let b = create (Hacl_UInt8.of_string "0") (String.length s) in
-  for i = 0 to (String.length s - 1) do
-    upd b i (uint8_to_sint8 (code (String.get s i)))
-  done;
-  b
+open Hacl_Utils
 
-let from_bytestring s =
-  let b = create (Hacl_UInt8.of_string "0") ((String.length s) / 2) in
-  for i = 0 to ((String.length s / 2) - 1) do
-    upd b i (uint8_to_sint8 (int_of_string ("0x" ^ (String.sub s (2*i) 2))))
-  done;
-  b
 
-let print_bytes (s:Hacl_UInt8.uint8 Hacl_SBuffer.buffer) : unit =
-  for i = 0 to Array.length s.content - 1 do
-    print_string (Hacl_UInt8.to_string_hex (Hacl_SBuffer.index s i))
-  done;
-  print_string "\n"
 
-let print_uint32s (s:Hacl_UInt32.uint32 Hacl_SBuffer.buffer) : unit =
-  for i = 0 to Array.length s.content - 1 do
-    print_string (Hacl_UInt32.to_string_hex (index s i))
-  done;
-  print_string "\n"
+
 
 (* Tests from RFC 4231 *)
-
 let _ =
+
+  Printf.printf "#####################################################\n";
+  Printf.printf "    HMAC.B: Non-incremental & Non-length hidding     \n";
+  Printf.printf "#####################################################\n";
   let mac = create (uint8_to_sint8 0) 32 in
 
   (* Test 1 *)
@@ -43,7 +24,7 @@ let _ =
 
   let expected = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7" in
 
-  hmac_sha256 mac (from_string key) keylen (from_string data) datalen;
+  HMAC_B.hmac_sha256 mac (from_string_block key HMAC_B.blocksize) keylen (from_string_block data HMAC_B.blocksize) datalen;
   Printf.printf "Result   :";
   print_bytes mac;
   Printf.printf "Expected :%s\n\n" expected;
@@ -57,7 +38,7 @@ let _ =
 
   let expected = "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843" in
 
-  hmac_sha256 mac (from_string key) keylen (from_string data) datalen;
+  HMAC_B.hmac_sha256 mac (from_string_block key HMAC_B.blocksize) keylen (from_string_block data HMAC_B.blocksize) datalen;
   Printf.printf "Result   :";
   print_bytes mac;
   Printf.printf "Expected :%s\n\n" expected;
@@ -71,7 +52,7 @@ let _ =
 
   let expected = "773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe" in
 
-  hmac_sha256 mac (from_string key) keylen (from_string data) datalen;
+  HMAC_B.hmac_sha256 mac (from_string_block key HMAC_B.blocksize) keylen (from_string_block data HMAC_B.blocksize) datalen;
   Printf.printf "Result   :";
   print_bytes mac;
   Printf.printf "Expected :%s\n\n" expected;
@@ -110,7 +91,7 @@ let _ =
 
   let expected = "82558a389a443c0ea4cc819899f2083a85f0faa3e578f8077a2e3ff46729665b" in
 
-  hmac_sha256 mac (from_string key) keylen (from_string data) datalen;
+  HMAC_B.hmac_sha256 mac (from_string_block key HMAC_B.blocksize) keylen (from_string_block data HMAC_B.blocksize) datalen;
   Printf.printf "Result   :";
   print_bytes mac;
   Printf.printf "Expected :%s\n\n" expected;
@@ -124,10 +105,10 @@ let _ =
 
   let expected = "a3b6167473100ee06e0c796c2955552b" in
 
-  hmac_sha256 mac (from_string key) keylen (from_string data) datalen;
+  HMAC_B.hmac_sha256 mac (from_string_block key HMAC_B.blocksize) keylen (from_string_block data HMAC_B.blocksize) datalen;
   let res = sub mac 0 16 in
   Printf.printf "Result (truncation at 128) :";
-  print_bytes res;
+  print_l_bytes res 16;
   Printf.printf "Expected                   :%s\n\n" expected;
 
 
@@ -140,7 +121,7 @@ let _ =
 
   let expected = "60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54" in
 
-  hmac_sha256 mac (from_string key) keylen (from_string data) datalen;
+  HMAC_B.hmac_sha256 mac (from_string_block key (10 * HMAC_B.blocksize)) keylen (from_string_block data (3 * HMAC_B.blocksize)) datalen;
   Printf.printf "Result   :";
   print_bytes mac;
   Printf.printf "Expected :%s\n\n" expected;
@@ -154,7 +135,7 @@ let _ =
 
   let expected = "9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2" in
 
-  hmac_sha256 mac (from_string key) keylen (from_string data) datalen;
+  HMAC_B.hmac_sha256 mac (from_string_block key (10 * HMAC_B.blocksize)) keylen (from_string_block data (3 * HMAC_B.blocksize)) datalen;
   Printf.printf "Result   :";
   print_bytes mac;
   Printf.printf "Expected :%s\n\n" expected
