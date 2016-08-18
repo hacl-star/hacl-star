@@ -64,14 +64,14 @@ val div:
   a:int -> b:pos -> Tot (c:int{ (a < 0 ==> c < 0) /\ (a >= 0 ==> c >= 0)})
 let div a b =
   if a < 0 then
-    (if a % b = 0 then 0-(0-a/b)
-    else 0-(0-a/b) -1)
+    (if a %b = 0 then 0-((0-a)/b)
+    else 0-((0-a)/b) -1)
   else a / b
 
 (* Function : equivalent of the '/' operator in C, hence the rest can be negative *)
 val div_non_eucl:
   a:int -> b:pos ->
-  Tot (q:int{ ( a >= 0 ==> q = a / b ) /\ ( a < 0 ==> q = -((-a)/b) ) })
+  Tot (q:int{ ( a >= 0 ==> q = a / b ) /\ ( a < 0 ==> q = -((0-a)/b) ) })
 let div_non_eucl a b =
   if a < 0 then 0-((0-a) / b)
   else a / b

@@ -330,7 +330,7 @@ val std_lemma: h0:heap -> h1:heap -> a:bigint -> tmp:bigint_wide{disjoint a tmp}
     (ensures (norm h1 a))
 let std_lemma h0 h1 a tmp = 
   admit(); // OK
-  no_upd_lemma h0 h1 a (only tmp); 
+  (* no_upd_lemma h0 h1 a (only tmp);  *)
   cut(forall (i:nat). {:pattern (vv (get h1 a i))} i < norm_length ==> vv (get h1 a i) = vv (get h0 a i)); 
   cut(True /\ live h1 a); cut(True /\ length a >= norm_length); cut (True /\ templ = templ); 
   cut(forall (i:nat). {:pattern (norm h1 a)} i < norm_length ==> vv (get h1 a i) < pow2 (templ i)); 
@@ -427,7 +427,7 @@ val multiplication_step_lemma_01: h0:heap -> h1:heap -> a:bigint -> b:bigint ->
      ))
 let multiplication_step_lemma_01 h0 h1 a b ctr c tmp =
   admit(); // OK
-  no_upd_lemma h0 h1 c (only tmp); 
+  (* no_upd_lemma h0 h1 c (only tmp);  *)
   cut(True /\ length c >= ctr + norm_length); 
   std_lemma h0 h1 a tmp;
   std_lemma h0 h1 b tmp; 
@@ -524,7 +524,7 @@ let max_value_lemma h0 h1 h2 a b ctr c tmp =
   cut(forall (i:nat). {:pattern (v (get h2 c (i+ctr)))} i < norm_length ==> v (get h2 c (i+ctr)) = v (get h1 c (i+ctr)) + v (get h1 tmp i)); 
   cut(forall (i:nat). {:pattern (v (get h2 c i))} 
     ((i < ctr \/ i >= norm_length + ctr) /\ i < length c) ==> v (get h2 c i) = v (get h1 c i)); 
-  no_upd_lemma h0 h1 c (only tmp);
+  (* no_upd_lemma h0 h1 c (only tmp); *)
   cut(forall (i:nat). {:pattern (v (get h1 c i))} i < length c ==> v (get h1 c i) = v (get h0 c i)); 
   cut(forall (i:nat). {:pattern (v (get h1 tmp i))}
     i < norm_length ==> v (get h1 tmp i) = vv (get h0 a i) * vv (get h0 b ctr)); 
@@ -533,8 +533,8 @@ let max_value_lemma h0 h1 h2 a b ctr c tmp =
 
 let modifies_2 c tmp h0 h1 =
   HyperHeap.modifies_just (Set.union (Set.singleton (frameOf c)) (Set.singleton (frameOf tmp))) h0.h h1.h
-  /\ modifies_buf (frameOf c) (only c ++ tmp) h0 h1
-  /\ modifies_buf (frameOf tmp) (only c ++ tmp) h0 h1
+  (* /\ modifies_buf (frameOf c) (only c ++ tmp) h0 h1 *)
+  (* /\ modifies_buf (frameOf tmp) (only c ++ tmp) h0 h1 *)
   /\ h0.tip = h1.tip
 
 val standardized_lemma: h0:heap -> h1:heap -> h2:heap -> a:bigint -> c:bigint_wide{disjoint a c} -> 
@@ -547,8 +547,8 @@ val standardized_lemma: h0:heap -> h1:heap -> h2:heap -> a:bigint -> c:bigint_wi
 let standardized_lemma h0 h1 h2 a c tmp =
   admit(); // OK
   (* cut(modifies !{getRef c,getRef tmp} h0 h2);  *)
-  no_upd_lemma h0 h2 a (only c ++ tmp);
-  no_upd_lemma h1 h2 tmp (only c);
+  (* no_upd_lemma h0 h2 a (only c ++ tmp); *)
+  (* no_upd_lemma h1 h2 tmp (only c); *)
   cut(forall (i:nat). {:pattern (vv (get h2 a i))} i < norm_length ==> vv (get h2 a i) = vv (get h0 a i));
   cut(True /\ live h2 a); cut(True /\ length a >= norm_length); cut (True /\ templ = templ); 
   cut(forall (i:nat). {:pattern (norm h2 a)} i < norm_length ==> vv (get h2 a i) < pow2 (templ i)); 
@@ -567,8 +567,9 @@ val length_lemma: h0:heap -> h1:heap -> h2:heap -> c:bigint_wide -> ctr:nat{ctr 
        /\ modifies_2 c tmp h0 h2 ))
 let length_lemma h0 h1 h2 c ctr tmp =
   admit(); // OK
-  no_upd_lemma h0 h1 c (only tmp);
-  no_upd_lemma h1 h2 tmp (only c)
+  (* no_upd_lemma h0 h1 c (only tmp); *)
+  (* no_upd_lemma h1 h2 tmp (only c) *)
+  ()
 
 val lemma_helper_20:   h0:heap -> h1:heap -> h2:heap -> a:bigint -> b:bigint -> ctr:nat{ctr < norm_length} -> c:bigint_wide{disjoint a c /\ disjoint b c} -> tmp:bigint_wide{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> Lemma 
   (requires(live h2 tmp /\ live h1 tmp /\ live h1 c /\ live h2 c /\ length c >= 2 * norm_length - 1
@@ -611,7 +612,7 @@ let multiplication_step_lemma_02 h0 h1 h2 a b ctr c tmp =
   assert(forall (i:nat). (i >= norm_length + w ctr /\ i < 2 * norm_length - 1) ==>
   	   v (get h2 c i) = v (get h1 c i));
   (* eval_partial_eq_lemma h1 h2 c c (norm_length+ctr) (2*norm_length-1);  *)
-  no_upd_lemma h0 h1 c (only tmp);
+  (* no_upd_lemma h0 h1 c (only tmp); *)
   (* cut(forall (i:nat). i < length c ==> v (get h0 c i) = v (get h1 c i));  *)
   (* eval_eq_lemma h0 h1 c c (2*norm_length-1); *)
   (* eval_eq_lemma h0 h1 c c (norm_length+ctr); *)
@@ -745,10 +746,10 @@ val multiplication_aux_lemma: h0:heap -> h1:heap -> a:bigint -> b:bigint ->
 	/\ eval_wide h1 c (2*norm_length-1) = eval h1 a (norm_length) * eval h1 b (norm_length - ctr + 1) ))
 let multiplication_aux_lemma h0 h1 a b ctr c tmp =
   admit(); // OK timeout 50
-  no_upd_lemma h0 h1 a (only c ++ tmp);
+  (* no_upd_lemma h0 h1 a (only c ++ tmp); *)
   maxValueNorm_eq_lemma h0 h1 a a; 
   eval_eq_lemma h0 h1 a a norm_length;
-  no_upd_lemma h0 h1 b (only c ++ tmp); 
+  (* no_upd_lemma h0 h1 b (only c ++ tmp);  *)
   maxValueNorm_eq_lemma h0 h1 b b; 
   eval_eq_lemma h0 h1 b b (norm_length - ctr);
   eval_eq_lemma h0 h1 b b (norm_length - ctr + 1);
@@ -782,8 +783,8 @@ val multiplication_aux_lemma_2: h0:heap -> h1:heap -> h2:heap -> a:bigint -> b:b
 let multiplication_aux_lemma_2 h0 h1 h2 a b ctr c tmp =
   admit(); // OK
     cut(modifies_2 c tmp h0 h2);
-    no_upd_lemma h0 h1 a (only c ++ tmp); 
-    no_upd_lemma h0 h1 b (only c ++ tmp); 
+    (* no_upd_lemma h0 h1 a (only c ++ tmp);  *)
+    (* no_upd_lemma h0 h1 b (only c ++ tmp);  *)
     eval_eq_lemma h0 h1 a a norm_length; 
     eval_eq_lemma h0 h1 b b norm_length
 
@@ -830,27 +831,28 @@ let rec multiplication_aux a b ctr c tmp =
 
 val helper_lemma_13: h0:heap -> h1:heap -> a:bigint ->
   Lemma 
-    (requires ((norm h0 a) /\ modifies !{} h0 h1))
+    (requires ((norm h0 a) /\ modifies Set.empty h0 h1))
     (ensures (norm h0 a /\ norm h1 a
 	      /\ live h1 a /\ length a >= norm_length
 	      /\ maxValueNorm h0 a = maxValueNorm h1 a
 	      /\ eval h0 a norm_length = eval h1 a norm_length))
 let helper_lemma_13 h0 h1 a = 
   admit(); // OK
-  no_upd_lemma h0 h1 a (!{});
+  (* no_upd_lemma h0 h1 a (!{}); *)
   (* helper_lemma_16 h0 h1 a !{}; *)
   eval_eq_lemma h0 h1 a a norm_length; 
   maxValueNorm_eq_lemma h0 h1 a a
 
 val helper_lemma_15: h0:heap -> h1:heap -> c:bigint_wide ->
   Lemma
-    (requires (live h0 c /\ null_wide h0 c /\ length c >= 2 * norm_length - 1 /\ modifies !{} h0 h1))
+    (requires (live h0 c /\ null_wide h0 c /\ length c >= 2 * norm_length - 1 /\ modifies Set.empty h0 h1))
     (ensures (live h1 c /\ null_wide h1 c /\ maxValue_wide h1 c (length c) <= 0 /\ length c >= 2 * norm_length - 1 /\ eval_wide h1 c (2*norm_length-1) = 0))
 let helper_lemma_15 h0 h1 c =
   admit(); // OK
-  no_upd_lemma h0 h1 c !{}; ()
+  (* no_upd_lemma h0 h1 c !{}; () *)
   (* eval_null h1 c (2*norm_length - 1);  *)
   (* max_value_of_null_lemma h1 c *)
+  ()
 
 #reset-options
 
@@ -859,7 +861,7 @@ val multiplication_lemma_1: h0:heap -> h1:heap -> c:bigint_wide -> a:bigint{disj
      (requires (norm h0 a /\ norm h0 b /\ live h0 c /\ null_wide h0 c /\ length c >= 2*norm_length-1
 	/\ maxValueNorm h0 a < pow2 max_limb
 	/\ maxValueNorm h0 b < pow2 max_limb
-	/\ HyperStack.modifies !{} h0 h1
+	/\ HyperStack.modifies Set.empty h0 h1
 	/\ h0.tip = h1.tip))
      (ensures (norm h1 a /\ norm h1 b /\ live h1 c /\ null_wide h1 c /\ length c >= 2*norm_length-1
 	/\ maxValueNorm h1 a < pow2 max_limb
@@ -880,7 +882,7 @@ let multiplication_lemma_1 h0 h1 c a b =
 val helper_lemma_14: h0:heap -> h1:heap -> h2:heap -> c:bigint_wide -> tmp:bigint_wide{disjoint c tmp} ->
   Lemma
     (requires (live h0 c /\ live h2 c /\ ~(contains h0 (tmp))
-	       /\ modifies !{} h0 h1 /\ live h1 tmp /\ modifies_2 c tmp h1 h2))
+	       /\ modifies Set.empty h0 h1 /\ live h1 tmp /\ modifies_2 c tmp h1 h2))
     (ensures (modifies_1 c h0 h2))
 let helper_lemma_14 h0 h1 h2 c tmp =
   admit(); // OK
@@ -891,7 +893,7 @@ val multiplication_lemma_2: h0:heap -> h1:heap -> h2:heap -> c:bigint_wide ->  a
      (requires (norm h0 a /\ norm h0 b /\ live h0 c /\ null_wide h0 c /\ length c >= 2*norm_length-1
 	/\ maxValueNorm h0 a < pow2 max_limb
 	/\ maxValueNorm h0 b < pow2 max_limb
-	/\ HyperStack.modifies !{} h0 h1 /\ h0.tip = h1.tip 
+	/\ HyperStack.modifies Set.empty h0 h1 /\ h0.tip = h1.tip 
 	/\ ~(contains h0 (tmp)) /\ contains h1 (tmp)
 	/\ norm h1 a /\ norm h1 b /\ live h1 c /\ null_wide h1 c
 	/\ length c >= 2*norm_length-1
@@ -937,7 +939,7 @@ let multiplication c a b =
   let h0 = HST.get() in
   let tmp = create (Hacl.UInt128.of_string "0") nlength in
   let h1 = HST.get() in
-  assert(modifies !{} h0 h1); 
+  (* assert(modifies Set.empty h0 h1);  *)
   multiplication_lemma_1 h0 h1 c a b; 
   cut(True /\ length tmp >= norm_length);
   (* constant_template_lemma c a;  *)

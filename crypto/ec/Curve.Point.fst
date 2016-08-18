@@ -43,10 +43,10 @@ let to_apoint h p =
 type onCurve (h:heap) (p:point) = True
 //  wellFormed h p /\ CurvePoint (to_apoint h p)
 
-val refs: p:point -> GTot (FStar.Set.set abuffer)
+val refs: p:point -> GTot (FStar.TSet.set abuffer)
 let refs p = (only (get_x p) ++ (get_y p) ++ (get_z p))
 
-val erefs: p:point -> Tot (erased (FStar.Set.set abuffer))//(FStar.Ghost.erased (FStar.Set.set FStar.Heap.aref))
+val erefs: p:point -> Tot (erased (FStar.TSet.set abuffer))//(FStar.Ghost.erased (FStar.Set.set FStar.Heap.aref))
 let erefs p = FStar.Ghost.hide (only (get_x p) ++ (get_y p) ++ (get_z p))
 
 //let op_Plus_Plus_Plus a b = FStar.Set.union a b
@@ -98,7 +98,7 @@ let rec swap_conditional_aux' a b swap ctr =
   match norm_length - ctr with
   | 0 -> ()
   | _ ->
-    gassume (fun _ -> ctr < norm_length); 
+    assume (ctr < norm_length); 
     let ai = index a ctr in 
     let bi = index b ctr in 
     let y = ai ^^ bi in 
@@ -106,8 +106,8 @@ let rec swap_conditional_aux' a b swap ctr =
     let ai' = x ^^ ai in
     let bi' = x ^^ bi in
     // Definition of the bitwise operations
-    gassume (fun _ -> v swap = 0 ==> (v ai' = v ai /\ v bi' = v bi));
-    gassume (fun _ -> v swap = IntLib.pow2 platform_size - 1 ==> (v ai' = v bi /\ v bi' = v ai)); 
+    assume (v swap = 0 ==> (v ai' = v ai /\ v bi' = v bi));
+    assume (v swap = IntLib.pow2 platform_size - 1 ==> (v ai' = v bi /\ v bi' = v ai)); 
     upd a ctr ai'; 
     let h2 = ST.get() in
     upd b ctr bi'; 
@@ -118,12 +118,12 @@ let rec swap_conditional_aux' a b swap ctr =
     eq_lemma h2 h3 a (only b); 
     swap_conditional_aux' a b swap (ctr+1); 
     let h1 = ST.get() in
-    gassume (fun _-> forall (i:nat). (i >= ctr + 1 /\ i < norm_length) ==> 
+    assume (forall (i:nat). (i >= ctr + 1 /\ i < norm_length) ==> 
       ((v swap = 0 ==> (v (get h1 a i) = v (get h0 a i) 
 	         /\ v (get h1 b i) = v (get h0 b i)))
        /\ (v swap = IntLib.pow2 platform_size - 1 ==> (v (get h1 a i) = v (get h0 b i) 
 					       /\ v (get h1 b i) = v (get h0 a i)))));
-    gassume (fun _ -> forall (i:nat). {:pattern (get h1 a i) \/ (get h1 b i)} 0+i = i); 
+    assume (forall (i:nat). {:pattern (get h1 a i) \/ (get h1 b i)} 0+i = i); 
     cut (forall (i:nat). {:pattern (get h1 a i)} i < ctr ==> v (get h1 a i) = v (get h3 a i)); 
     cut (forall (i:nat). {:pattern (get h1 b i)} i < ctr ==> v (get h1 b i) = v (get h3 b i));
     ()
@@ -155,14 +155,14 @@ let rec swap_conditional_aux a b swap ctr =
   let h1 = ST.get() in 
   swap_conditional_aux_lemma h0 h1 a b swap  
 
-val norm_lemma: h0:heap -> h1:heap -> b:bigint{norm h0 b} -> mods:FStar.Set.set abuffer ->
-  Lemma (requires (modifies_buf mods h0 h1 /\ not(FStar.Set.mem (Buff b) mods)))
+val norm_lemma: h0:heap -> h1:heap -> b:bigint{norm h0 b} -> mods:FStar.TSet.set abuffer ->
+  Lemma (requires (modifies_buf mods h0 h1 /\ ~(FStar.TSet.mem (Buff b) mods)))
 	(ensures (norm h1 b /\ valueOf h1 b = valueOf h0 b))
 let norm_lemma h0 h1 b mods =
   eval_eq_lemma h0 h1 b b norm_length
 
-val enorm_lemma: h0:heap -> h1:heap -> b:bigint{norm h0 b} -> mods:erased (FStar.Set.set abuffer) ->
-  Lemma (requires (modifies_buf (reveal mods) h0 h1 /\ not(FStar.Set.mem (Buff b) (reveal mods))))
+val enorm_lemma: h0:heap -> h1:heap -> b:bigint{norm h0 b} -> mods:erased (FStar.TSet.set abuffer) ->
+  Lemma (requires (modifies_buf (reveal mods) h0 h1 /\ ~(FStar.TSet.mem (Buff b) (reveal mods))))
 	(ensures (norm h1 b /\ valueOf h1 b = valueOf h0 b))
 let enorm_lemma h0 h1 b mods =
   eval_eq_lemma h0 h1 b b norm_length
@@ -346,8 +346,8 @@ let swap_conditional a b is_swap =
   swap_conditional_aux (get_y a) (get_y b) is_swap 0;
   let h2 = ST.get() in
   let mods = (hide (only (get_x a) ++ (get_x b) ++ (get_y a) ++ (get_y b))) in
-  gcut(fun _ -> modifies_buf (reveal mods) h0 h2); 
-  gcut(fun _ -> not(FStar.Set.mem (Buff (get_z b)) (reveal mods)) /\ not(FStar.Set.mem (Buff (get_z a)) (reveal mods))); 
+  cut(modifies_buf (reveal mods) h0 h2); 
+  cut(~(FStar.TSet.mem (Buff (get_z b)) (reveal mods)) /\ ~(FStar.TSet.mem (Buff (get_z a)) (reveal mods))); 
   enorm_lemma h0 h2 (get_z a) mods;
   enorm_lemma h0 h2 (get_z b) mods;
   swap_conditional_aux (get_z a) (get_z b) is_swap 0;
@@ -355,8 +355,8 @@ let swap_conditional a b is_swap =
 //  swap_conditional_lemma h0 h1 h2 h3 a b is_swap;
   ()
 
-val bignum_live_lemma: h0:heap -> h1:heap -> b:bigint{Bignum.Bigint.live h0 b} -> mods:FStar.Set.set abuffer ->
-  Lemma (requires (modifies_buf mods h0 h1 /\ not(FStar.Set.mem (Buff b) mods)))
+val bignum_live_lemma: h0:heap -> h1:heap -> b:bigint{Bignum.Bigint.live h0 b} -> mods:FStar.TSet.set abuffer ->
+  Lemma (requires (modifies_buf mods h0 h1 /\ ~(FStar.TSet.mem (Buff b) mods)))
 	(ensures (Bignum.Bigint.live h1 b))
 let bignum_live_lemma h0 h1 b mods = 
   ()
@@ -413,15 +413,15 @@ val swap:
 let swap a b = 
   copy b a
 
-val on_curve_lemma: h0:heap -> h1:heap -> a:point -> mods:erased (FStar.Set.set abuffer) -> Lemma
-  (requires (onCurve h0 a /\ modifies_buf (reveal mods) h0 h1 /\ FStar.Set.intersect (reveal mods) (refs a) = !{}))
+val on_curve_lemma: h0:heap -> h1:heap -> a:point -> mods:erased (FStar.TSet.set abuffer) -> Lemma
+  (requires (onCurve h0 a /\ modifies_buf (reveal mods) h0 h1 /\ FStar.TSet.intersect (reveal mods) (refs a) = !{}))
   (ensures (onCurve h0 a /\ onCurve h1 a 
 //    /\ pointOf h1 a = pointOf h0 a
     )) 
 let on_curve_lemma h0 h1 a mods = 
-  cut(True /\ FStar.Set.mem (Buff (get_x a)) (refs a));
-  cut(True /\ FStar.Set.mem (Buff (get_y a)) (refs a));
-  cut(True /\ FStar.Set.mem (Buff (get_z a)) (refs a));
+  cut(True /\ FStar.TSet.mem (Buff (get_x a)) (refs a));
+  cut(True /\ FStar.TSet.mem (Buff (get_y a)) (refs a));
+  cut(True /\ FStar.TSet.mem (Buff (get_z a)) (refs a));
   norm_lemma h0 h1 (get_x a) (reveal mods);
   norm_lemma h0 h1 (get_y a) (reveal mods);
   norm_lemma h0 h1 (get_z a) (reveal mods); 
@@ -429,18 +429,18 @@ let on_curve_lemma h0 h1 a mods =
   eval_eq_lemma h0 h1 (get_y a) (get_y a) norm_length;
   eval_eq_lemma h0 h1 (get_z a) (get_z a) norm_length
 
-val live_lemma: h0:heap -> h1:heap -> a:point -> mods:erased (FStar.Set.set abuffer) -> Lemma
-  (requires (live h0 a /\ modifies_buf (reveal mods) h0 h1 /\ FStar.Set.intersect (reveal mods) (refs a) = !{}))
+val live_lemma: h0:heap -> h1:heap -> a:point -> mods:erased (FStar.TSet.set abuffer) -> Lemma
+  (requires (live h0 a /\ modifies_buf (reveal mods) h0 h1 /\ FStar.TSet.intersect (reveal mods) (refs a) = !{}))
   (ensures (live h1 a)) 
 let live_lemma h0 h1 a mods = 
-  cut(True /\ FStar.Set.mem (Buff (get_x a)) (refs a));
-  cut(True /\ FStar.Set.mem (Buff (get_y a)) (refs a));
-  cut(True /\ FStar.Set.mem (Buff (get_z a)) (refs a))
+  cut(True /\ FStar.TSet.mem (Buff (get_x a)) (refs a));
+  cut(True /\ FStar.TSet.mem (Buff (get_y a)) (refs a));
+  cut(True /\ FStar.TSet.mem (Buff (get_z a)) (refs a))
 
 
-val distinct_lemma: a:point -> b:point{distinct a b} -> Lemma (requires (True)) (ensures (FStar.Set.intersect (refs a) (refs b) = !{})) 
+val distinct_lemma: a:point -> b:point{distinct a b} -> Lemma (requires (True)) (ensures (FStar.TSet.intersect (refs a) (refs b) = !{})) 
 let distinct_lemma a b = 
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect (refs a) (refs b)) !{}
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect (refs a) (refs b)) !{}
 
 val distinct_commutative: a:point -> b:point -> Lemma 
   (requires (True)) (ensures (distinct a b <==> distinct b a)) [SMTPatT (distinct a b)]

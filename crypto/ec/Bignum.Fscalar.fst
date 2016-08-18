@@ -43,25 +43,25 @@ let rec scalar_multiplication_aux res a s ctr =
   | 0 -> ()
   | _ -> let i = ctr - 1 in 
          let ai = index a i in
-	 gcut (fun _ -> v (get h0 a i) * v s < pow2 63);
+	 cut (v (get h0 a i) * v s < pow2 63);
 	 let resi = ai ^*^ s in
 	 upd res i resi; 
 	 let h1 = ST.get() in
 	 eq_lemma h0 h1 a (only res);
 	 scalar_multiplication_aux res a s i; 
 	 let h2 = ST.get() in
-	 gcut (fun _ -> modifies_buf (only res) h0 h1); gcut (fun _ -> equal h0 a h2 a); 	 
+	 cut (modifies_buf (only res) h0 h1); cut (equal h0 a h2 a); 	 
 	 cut (forall (i:nat). {:pattern (v (get h2 res (ctr+i-1)))} i < length res - ctr + 1 ==> v (get h2 res (ctr-1 + i)) = v (get h1 res (ctr-1+i)));  
 	 cut (forall (i:nat). {:pattern (v (get h2 res (ctr+(i-1))))} i < length res - ctr + 1 ==> v (get h2 res (ctr+i-1)) = v (get h1 res (ctr+i-1)));  
 	 cut (forall (i:nat). {:pattern (get h2 res (ctr+i))} i < length res - ctr ==> v (get h2 res (ctr-1+(i+1))) = v (get h1 res (ctr-1+i+1)));  
-	 gcut (fun _ -> equalSub h1 res ctr h2 res ctr (length res - ctr)); 
+	 cut (equalSub h1 res ctr h2 res ctr (length res - ctr)); 
 	 cut (forall (i:nat). {:pattern (v (get h2 res i))} i < ctr - 1 ==> v (get h2 res i) = v (get h1 a i) * v s); 
 	 cut (forall (i:nat). {:pattern (v (get h1 res i))} (i < length res /\ i <> ctr-1) ==> v (get h1 res i) = v (get h0 res i)); 
-	 gcut (fun _ -> v (get h2 res (ctr-1+0)) = v (get h0 a (ctr-1)) * v s); 
+	 cut (v (get h2 res (ctr-1+0)) = v (get h0 a (ctr-1)) * v s); 
 	 cut (forall (i:nat). i < ctr ==> v (get h2 res i) = v (get h0 a i) * v s); 
-	 gcut (fun _ -> scalarProduct h0 h2 ctr a s res); 
-	 gcut (fun _ -> equal h0 a h2 a); 
-	 gcut (fun _ -> equalSub h0 res ctr h1 res ctr (length res - ctr))
+	 cut (scalarProduct h0 h2 ctr a s res); 
+	 cut (equal h0 a h2 a); 
+	 cut (equalSub h0 res ctr h1 res ctr (length res - ctr))
 
 val scalar_multiplication: res:bigint_wide -> a:bigint{disjoint res a} -> s:limb -> ST unit
   (requires (fun h -> live h res /\ live h a

@@ -66,7 +66,7 @@ assume val aux_lemma': a:nat -> n:nat{n <= 32} -> Lemma (requires True) (ensures
 (*     IntLibLemmas.modulo_lemma a (pow2 26) *)
 (*   else () *)
 
-val aux_lemma: x:u64{v x < pow2 32} -> y:u64{v y < pow2 32} -> n:nat{n >= 7 /\ n < 32} -> Lemma
+val aux_lemma: x:s64{v x < pow2 32} -> y:s64{v y < pow2 32} -> n:nat{n >= 7 /\ n < 32} -> Lemma
   (requires (True))
   (ensures (Math.Lib.div (v x) (pow2 n) + (((v y * pow2 (32 - n)) % pow2 63) % pow2 26) < pow2 26)) 
 let aux_lemma x y n =
@@ -81,7 +81,7 @@ let aux_lemma x y n =
   (* IntLibLemmas.pow2_disjoint_ranges a b n1 n2; *)
   ()
 
-val aux_lemma_1: x:u64{v x < pow2 32} -> Lemma (requires (True)) (ensures (v (x ^>> 8ul) < pow2 24)) 
+val aux_lemma_1: x:s64{v x < pow2 32} -> Lemma (requires (True)) (ensures (v (x >>^ 8ul) < pow2 24)) 
 let aux_lemma_1 x = 
   (* IntLibLemmas.div_pow2_inequality (v x) 32; *)
   ()
@@ -111,26 +111,26 @@ let num_to_le_bytes s b =
   let b3 = index b 3ul in
   let b4 = index b 4ul in 
   upd s 0ul (sint64_to_sint8 b0);  // 0 
-  upd s 1ul (sint64_to_sint8 (b0 ^>> (8ul))); //8
-  upd s 2ul (sint64_to_sint8 (b0 ^>> (16ul))); //16
-  upd s 3ul (Hacl.UInt8.add_mod (sint64_to_sint8 (b0 ^>> (24ul))) // 24 
-			       (sint64_to_sint8 (b1 ^<< (2ul)))); 
-  upd s 4ul (sint64_to_sint8 (b1 ^>> (6ul))); // 32
-  upd s 5ul (sint64_to_sint8 (b1 ^>> (14ul))); // 40
-  upd s 6ul (Hacl.UInt8.add_mod (sint64_to_sint8 (b1 ^>> (22ul))) 
-			       (sint64_to_sint8 (b2 ^<< (4ul)))); // 48
-  upd s 7ul (sint64_to_sint8 (b2 ^>> (4ul))); // 56
-  upd s 8ul (sint64_to_sint8 (b2 ^>> (12ul))); // 64
-  upd s 9ul (Hacl.UInt8.add_mod (sint64_to_sint8 (b2 ^>> (20ul)))
-			       (sint64_to_sint8 (b3 ^<< (6ul)))); // 72
-  upd s 10ul (sint64_to_sint8 (b3 ^>> (2ul))); // 80 
-  upd s 11ul (sint64_to_sint8 (b3 ^>> (10ul))); // 88
+  upd s 1ul (sint64_to_sint8 (b0 >>^ (8ul))); //8
+  upd s 2ul (sint64_to_sint8 (b0 >>^ (16ul))); //16
+  upd s 3ul (Hacl.UInt8.add_mod (sint64_to_sint8 (b0 >>^ (24ul))) // 24 
+			       (sint64_to_sint8 (b1 <<^ (2ul)))); 
+  upd s 4ul (sint64_to_sint8 (b1 >>^ (6ul))); // 32
+  upd s 5ul (sint64_to_sint8 (b1 >>^ (14ul))); // 40
+  upd s 6ul (Hacl.UInt8.add_mod (sint64_to_sint8 (b1 >>^ (22ul))) 
+			       (sint64_to_sint8 (b2 <<^ (4ul)))); // 48
+  upd s 7ul (sint64_to_sint8 (b2 >>^ (4ul))); // 56
+  upd s 8ul (sint64_to_sint8 (b2 >>^ (12ul))); // 64
+  upd s 9ul (Hacl.UInt8.add_mod (sint64_to_sint8 (b2 >>^ (20ul)))
+			       (sint64_to_sint8 (b3 <<^ (6ul)))); // 72
+  upd s 10ul (sint64_to_sint8 (b3 >>^ (2ul))); // 80 
+  upd s 11ul (sint64_to_sint8 (b3 >>^ (10ul))); // 88
   let h = HST.get() in
   (* cut (Buffer.live h s /\ modifies_1 s h0 h);  *)
-  upd s 12ul (sint64_to_sint8 (b3 ^>> (18ul))); // 96
+  upd s 12ul (sint64_to_sint8 (b3 >>^ (18ul))); // 96
   upd s 13ul (sint64_to_sint8 (b4)); // 104
-  upd s 14ul (sint64_to_sint8 (b4 ^>> (8ul))); // 112 
-  upd s 15ul (sint64_to_sint8 (b4 ^>> (16ul))); // 120 
+  upd s 14ul (sint64_to_sint8 (b4 >>^ (8ul))); // 112 
+  upd s 15ul (sint64_to_sint8 (b4 >>^ (16ul))); // 120 
   ()
 
 let s32_of_sbytes (s:bytes{length s >= 4}) : STL s32
@@ -155,7 +155,7 @@ let le_bytes_to_num b s =
   (* IntLibLemmas.pow2_increases 63 26; *)
   (* IntLibLemmas.pow2_increases 63 32; *)
   (* IntLibLemmas.pow2_increases 26 24; *)
-  let mask_26 = (uint64_to_sint64 1UL ^<< 26ul) ^- uint64_to_sint64 1UL in 
+  let mask_26 = (uint64_to_sint64 1UL <<^ 26ul) -^ uint64_to_sint64 1UL in 
   (* cut (v mask_26 = v one * pow2 26 - v one /\ v one = 1);  *)
   cut (v mask_26 = pow2 26 - 1); 
   let s0 = sub s 0ul  4ul in
@@ -171,18 +171,18 @@ let le_bytes_to_num b s =
   let n2 = sint32_to_sint64 n2 in
   let n3 = sint32_to_sint64 n3 in
   (* ulogand_lemma_4 #63 n0 26 mask_26; *)
-  (* ulogand_lemma_4 #63 (n1 ^<< 6) 26 mask_26;  *)
-  (* ulogand_lemma_4 #63 (n2 ^<< 12) 26 mask_26;  *)
-  (* ulogand_lemma_4 #63 (n3 ^<< 18) 26 mask_26;   *)
+  (* ulogand_lemma_4 #63 (n1 <<^ 6) 26 mask_26;  *)
+  (* ulogand_lemma_4 #63 (n2 <<^ 12) 26 mask_26;  *)
+  (* ulogand_lemma_4 #63 (n3 <<^ 18) 26 mask_26;   *)
   aux_lemma n0 n1 26; 
   aux_lemma n1 n2 20;
   aux_lemma n2 n3 14;  
   aux_lemma_1 n3; 
-  let n0' = n0 ^& mask_26 in
-  let n1' = (n0 ^>> 26ul) +^ ((n1 ^<< 6ul) ^& mask_26) in 
-  let n2' = (n1 ^>> 20ul) +^ ((n2 ^<< 12ul) ^& mask_26) in
-  let n3' = (n2 ^>> 14ul) +^ ((n3 ^<< 18ul) ^& mask_26) in 
-  let n4' = (n3 ^>> 8ul) in 
+  let n0' = n0 &^ mask_26 in
+  let n1' = (n0 >>^ 26ul) +^ ((n1 <<^ 6ul) &^ mask_26) in 
+  let n2' = (n1 >>^ 20ul) +^ ((n2 <<^ 12ul) &^ mask_26) in
+  let n3' = (n2 >>^ 14ul) +^ ((n3 <<^ 18ul) &^ mask_26) in 
+  let n4' = (n3 >>^ 8ul) in 
   upd b 0ul n0'; 
   upd b 1ul n1';
   upd b 2ul n2'; 
@@ -264,7 +264,7 @@ let rec poly1305_step msg acc r ctr =
     let b4 = index block 4ul in
     (* IntLibLemmas.pow2_doubles 24; IntLibLemmas.pow2_increases 26 25; *)
     (* IntLibLemmas.pow2_increases 63 26;  *)
-    upd block 4ul (b4 +^ ((uint64_to_sint64 1UL) ^<< 24ul)); 
+    upd block 4ul (b4 +^ ((uint64_to_sint64 1UL) <<^ 24ul)); 
     let h1 = HST.get() in
     (* eq_lemma h0 h1 r (empty);  *)
     (* eq_lemma h0 h1 acc empty; *)

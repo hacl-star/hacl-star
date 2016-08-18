@@ -87,9 +87,9 @@ val small_step_core_lemma_1: h0:heap -> h1:heap -> pp:point -> ppq:point{distinc
   (requires (modifies_buf (refs p +++ refs pq) h0 h1 /\ onCurve h0 q /\ live h0 pp /\ live h0 ppq))
   (ensures (live h1 pp /\ live h1 ppq /\ onCurve h1 q)) 
 let small_step_core_lemma_1 h0 h1 pp ppq p pq q =
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect (refs p +++ refs pq) (refs pp)) !{};  
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect (refs p +++ refs pq) (refs ppq)) !{}; 
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect (refs p +++ refs pq) (refs q)) !{}; 
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect (refs p +++ refs pq) (refs pp)) !{};  
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect (refs p +++ refs pq) (refs ppq)) !{}; 
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect (refs p +++ refs pq) (refs q)) !{}; 
   live_lemma h0 h1 pp (hide (refs p +++ refs pq)); 
   live_lemma h0 h1 ppq (hide ((refs p +++ refs pq)));
   on_curve_lemma h0 h1 q (hide (refs p +++ refs pq))
@@ -247,7 +247,7 @@ val small_step_lemma_1 : h0:heap -> h1:heap -> h2:heap ->
 //	       /\ pointOf h2 q == pointOf h0 q /\ pointOf h1 q == pointOf h0 q
 	       )) 
 let small_step_lemma_1 h0 h1 h2 pp ppq p pq q =
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect (refs pp +++ refs ppq +++ refs p +++ refs pq) (refs q)) !{}; 
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect (refs pp +++ refs ppq +++ refs p +++ refs pq) (refs q)) !{}; 
   on_curve_lemma h0 h2 q (hide (refs pp +++ refs ppq +++ refs p +++ refs pq));
   on_curve_lemma h0 h1 q (hide (refs pp +++ refs ppq +++ refs p +++ refs pq))
 
@@ -261,7 +261,7 @@ val small_step_lemma_2 : h0:heap -> h1:heap -> h2:heap -> h3:heap ->
        /\ modifies_buf (refs pp +++ refs ppq +++ refs p +++ refs pq) h2 h3))
      (ensures (onCurve h3 q /\ modifies_buf (refs pp +++ refs ppq +++ refs p +++ refs pq) h0 h3)) 
 let small_step_lemma_2 h0 h1 h2 h3 pp ppq p pq q =
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect (refs pp +++ refs ppq +++ refs p +++ refs pq) (refs q)) !{}; 
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect (refs pp +++ refs ppq +++ refs p +++ refs pq) (refs q)) !{}; 
   cut (modifies_buf (refs pp +++ refs ppq +++ refs p +++ refs pq) h0 h3);
   on_curve_lemma h0 h3 q (hide (refs pp +++ refs ppq +++ refs p +++ refs pq))
 
@@ -317,15 +317,15 @@ let rec small_step pp ppq p pq q n ctr b scalar =
 // TODO
 assume val formula_4: h:heap -> n:bytes{serialized h n} -> ctr:nat{ctr<=bytes_length} -> Tot (z:erased nat{reveal z = (valueOfBytes h n / pow2 ((bytes_length-ctr)*8))})
 
-let distinct2 (n:bytes) (p:point) = (not(FStar.Set.mem (Buff n) (refs p)))
+let distinct2 (n:bytes) (p:point) = (~(FStar.TSet.mem (Buff n) (refs p)))
 
-val serialized_lemma: h0:heap -> h1:heap -> n:bytes{serialized h0 n} -> mods:FStar.Set.set abuffer{FStar.Set.intersect mods (only n) = !{}} -> Lemma
+val serialized_lemma: h0:heap -> h1:heap -> n:bytes{serialized h0 n} -> mods:FStar.TSet.set abuffer{FStar.TSet.intersect mods (only n) = !{}} -> Lemma
   (requires (modifies_buf mods h0 h1))
   (ensures (serialized h1 n /\ valueOfBytes h1 n = valueOfBytes h0 n))
 let serialized_lemma h0 h1 n mods =
-  FStar.Set.lemma_equal_intro (only n) (FStar.Set.singleton (Buff n)); 
-  cut (True /\ FStar.Set.mem (Buff n) (only n)); 
-  cut( not(FStar.Set.mem (Buff n) mods) /\ True); 
+  FStar.TSet.lemma_equal_intro (only n) (FStar.TSet.singleton (Buff n)); 
+  cut (True /\ FStar.TSet.mem (Buff n) (only n)); 
+  cut( ~(FStar.TSet.mem (Buff n) mods) /\ True); 
   eq_lemma h0 h1 n mods; 
   assert(forall (i:nat). {:pattern (getValue h1 n i)} i < bytes_length ==> v (getValue h1 n i) = v (getValue h1 n i));  
   eval_eq_lemma h0 h1 n n bytes_length
@@ -350,8 +350,8 @@ val big_step_lemma_1: h0:heap -> h1:heap ->
     )) 
 let big_step_lemma_1 h0 h1 n pp ppq p pq q ctr b =
   let mods = (refs pp +++ refs ppq +++ refs p +++ refs pq) in
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect mods (only n)) empty; 
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect mods (refs q)) empty; 
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect mods (only n)) empty; 
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect mods (refs q)) empty; 
   serialized_lemma h0 h1 n mods; 
   on_curve_lemma h0 h1 q (hide mods);
 //  admitP(reveal (formula_4 h0 n (ctr+1)) = reveal (formula_0 (formula_4 h0 n ctr) b) /\ True)
@@ -384,8 +384,8 @@ val big_step_lemma_2: h0:heap -> h1:heap -> h2:heap ->
     )) 
 let big_step_lemma_2 h0 h1 h2 n pp ppq p pq q ctr byte = 
   let mods = (refs pp +++ refs ppq +++ refs p +++ refs pq) in
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect mods (only n)) empty; 
-  FStar.Set.lemma_equal_intro (FStar.Set.intersect mods (refs q)) empty; 
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect mods (only n)) empty; 
+  FStar.TSet.lemma_equal_intro (FStar.TSet.intersect mods (refs q)) empty; 
   serialized_lemma h0 h1 n mods; 
   on_curve_lemma h0 h1 q (hide mods)
 

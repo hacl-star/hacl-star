@@ -12,9 +12,11 @@ open Math.Lib
 open Curve.Parameters
 
 (* Non secret integers *)
-let u32 = UInt32.t
+let u32 = FStar.UInt32.t
 
 let heap = HyperStack.mem
+
+let only = FStar.TSet.singleton
 
 (*** Types ***) 
 
@@ -38,13 +40,13 @@ let norm (h:heap) (b:bigint) : GTot Type0 =
 (* Normalized big integer type *)
 let norm_wide (h:heap) (b:bigint_wide) : GTot Type0 =
   live h b /\ length b >= norm_length 
-  /\ (forall (i:nat). {:pattern (UInt128.v (get h b i))} i < norm_length ==>  UInt128.v (get h b i) < pow2 (templ i))
+  /\ (forall (i:nat). {:pattern (Hacl.UInt128.v (get h b i))} i < norm_length ==>  Hacl.UInt128.v (get h b i) < pow2 (templ i))
 
 let null (h:heap) (b:bigint) : GTot Type0 =
   live h b /\ (forall (n:nat). {:pattern (v (get h b n))} n < length b ==> v (get h b n) = 0)
 
 let null_wide (h:heap) (b:bigint_wide) : GTot Type0 =
-  live h b /\ (forall (n:nat). {:pattern (UInt128.v (get h b n))} n < length b ==> UInt128.v (get h b n) = 0)
+  live h b /\ (forall (n:nat). {:pattern (Hacl.UInt128.v (get h b n))} n < length b ==> Hacl.UInt128.v (get h b n) = 0)
 
 let filled (h:heap) (b:bigint) : GTot Type0 =
   live h b /\ length b >= norm_length /\ 
@@ -68,7 +70,7 @@ val eval_wide: h:heap -> b:bigint_wide{live h b} -> n:nat{n <= length b} -> GTot
 let rec eval_wide h b n =
   match n with
   | 0 -> 0
-  | _ -> pow2 (bitweight templ (n-1)) * UInt128.v (get h b (n-1)) + eval_wide h  b (n-1)
+  | _ -> pow2 (bitweight templ (n-1)) * Hacl.UInt128.v (get h b (n-1)) + eval_wide h  b (n-1)
 
 let eval_def h (b:bigint{live h b}) (n:nat{n<=length b}) : Lemma 
   ((n = 0 ==> eval h b n = 0)
@@ -77,14 +79,14 @@ let eval_def h (b:bigint{live h b}) (n:nat{n<=length b}) : Lemma
 
 let eval_wide_def h (b:bigint_wide{live h b}) (n:nat{n<=length b}) : Lemma 
   ((n = 0 ==> eval_wide h b n = 0)
-    /\ (n <> 0 ==> eval_wide h b n = pow2 (bitweight templ (n-1)) * UInt128.v (get h b (n-1)) + eval_wide h b (n-1)))
+    /\ (n <> 0 ==> eval_wide h b n = pow2 (bitweight templ (n-1)) * Hacl.UInt128.v (get h b (n-1)) + eval_wide h b (n-1)))
   = ()
 
 val eval_bytes : h:heap -> b:bytes{live h b} -> n:nat{n <= length b} -> GTot nat
 let rec eval_bytes h b n =
   match n with
   | 0 -> 0
-  | _ -> pow2 (bitweight byte_templ (n-1)) * UInt8.v (get h b (n-1)) + eval_bytes h b (n-1)
+  | _ -> pow2 (bitweight byte_templ (n-1)) * Hacl.UInt8.v (get h b (n-1)) + eval_bytes h b (n-1)
 
 val maxValue: h:heap -> b:bigint{live h  b} -> l:pos{l <= length  b} -> GTot nat
 let rec maxValue h  b l = 
@@ -96,9 +98,9 @@ let rec maxValue h  b l =
 val maxValue_wide: h:heap -> b:bigint_wide{live h  b} -> l:pos{l <= length  b} -> GTot nat
 let rec maxValue_wide h  b l = 
   match l with
-  | 1 -> UInt128.v (get h  b 0)
-  | _ -> if maxValue_wide h  b (l-1) > UInt128.v (get h  b (l-1)) then maxValue_wide h  b (l-1)
-	 else UInt128.v (get h  b (l-1))
+  | 1 -> Hacl.UInt128.v (get h  b 0)
+  | _ -> if maxValue_wide h  b (l-1) > Hacl.UInt128.v (get h  b (l-1)) then maxValue_wide h  b (l-1)
+	 else Hacl.UInt128.v (get h  b (l-1))
 
 val maxValue_lemma_aux: h:heap -> b:bigint{live h b} -> l:pos{l<=length b} ->
   Lemma (forall (i:nat). i < l ==> v (get h b i) <= maxValue h b l)

@@ -141,7 +141,7 @@ val kPrime: unit -> STL (bigint_large)
     /\ v (get h1 b 1) = pow2 32 - 1
     /\ v (get h1 b 2) = 0
     /\ v (get h1 b 3) = pow2 64 - pow2 32 + 1
-    /\ modifies !{} h0 h1))
+    /\ modifies Set.empty h0 h1))
 let kPrime () =
   //@@
   let a = create (Hacl.UInt128.of_string "0") 4ul in
@@ -191,7 +191,7 @@ val zero_110: unit -> STL bigint_large
     /\ v (get h1 b 1) = pow2 110 + pow2 32 - 1
     /\ v (get h1 b 2) = pow2 64 - pow2 46
     /\ v (get h1 b 3) = pow2 64 - pow2 32
-    /\ modifies !{} h0 h1))
+    /\ modifies Set.empty h0 h1))
 let zero_110 () =
   //@@
   (* lemma_helper_10 (); *)
