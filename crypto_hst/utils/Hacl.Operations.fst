@@ -157,7 +157,7 @@ let setmask1 b l v = setall' b l v 0ul
 // Setmask2
 //
 
-val setmask2': mask:bytes -> masklen:u32{v masklen = SB.length mask /\ v masklen < pow2 32} -> byteval1:s8 -> byteval2:s8 -> posi:s32{v posi <= v masklen} -> i:u32{v i >= 0 /\ v i <= v masklen}
+val setmask2': mask:bytes -> masklen:u32{v masklen = SB.length mask /\ v masklen < pow2 32} -> byteval1:s8 -> byteval2:s8 -> posi:s32{S32.v posi <= v masklen} -> i:u32{v i >= 0 /\ v i <= v masklen}
   -> STL unit
         (requires (fun h -> live h mask))
         (ensures  (fun h0 _ h1 -> live h1 mask /\ modifies_1 mask h0 h1))
@@ -172,7 +172,7 @@ let rec setmask2' mask masklen b1 b2 posi i =
     setmask2' mask masklen b1 b2 posi (U32.add i 1ul)
   else ()
 
-val setmask2: mask:bytes -> masklen:u32{v masklen = SB.length mask /\ v masklen < pow2 32} -> byteval1:s8 -> byteval2:s8 -> posi:s32{v posi <= v masklen}
+val setmask2: mask:bytes -> masklen:u32{v masklen = SB.length mask /\ v masklen < pow2 32} -> byteval1:s8 -> byteval2:s8 -> posi:s32{S32.v posi <= v masklen}
   -> STL unit
         (requires (fun h -> live h mask))
         (ensures  (fun h0 _ h1 -> live h1 mask /\ modifies_1 mask h0 h1))
@@ -183,7 +183,7 @@ let setmask2 mask masklen b1 b2 posi = setmask2' mask masklen b1 b2 posi 0ul
 // Setmask3
 //
 
-val setmask3': mask:bytes -> masklen:u32{v masklen = SB.length mask /\ v masklen < pow2 32} -> byteval1:s8 -> byteval2:s8 -> byteval3:s8 -> posi1:s32{v posi1 <= v masklen} -> posi2:s32{v posi1 < v posi2 /\ v posi2 <= v masklen} -> i:u32{v i >= 0 /\ v i <= v masklen}
+val setmask3': mask:bytes -> masklen:u32{v masklen = SB.length mask /\ v masklen < pow2 32} -> byteval1:s8 -> byteval2:s8 -> byteval3:s8 -> posi1:s32{S32.v posi1 <= v masklen} -> posi2:s32{S32.v posi1 < S32.v posi2 /\ S32.v posi2 <= v masklen} -> i:u32{v i >= 0 /\ v i <= v masklen}
   -> STL unit
         (requires (fun h -> live h mask))
         (ensures  (fun h0 _ h1 -> live h1 mask /\ modifies_1 mask h0 h1))
@@ -201,7 +201,7 @@ let rec setmask3' mask masklen b1 b2 b3 posi1 posi2 i =
     setmask3' mask masklen b1 b2 b3 posi1 posi2 (U32.add i 1ul)
   else ()
 
-val setmask3: mask:bytes -> masklen:u32{v masklen = SB.length mask /\ v masklen < pow2 32} -> byteval1:s8 -> byteval2:s8 -> byteval3:s8 -> posi1:s32{v posi1 <= v masklen} -> posi2:s32{v posi1 < v posi2 /\ v posi2 <= v masklen}
+val setmask3: mask:bytes -> masklen:u32{v masklen = SB.length mask /\ v masklen < pow2 32} -> byteval1:s8 -> byteval2:s8 -> byteval3:s8 -> posi1:s32{S32.v posi1 <= v masklen} -> posi2:s32{S32.v posi1 < S32.v posi2 /\ S32.v posi2 <= v masklen}
   -> STL unit
         (requires (fun h -> live h mask))
         (ensures  (fun h0 _ h1 -> live h1 mask /\ modifies_1 mask h0 h1))
@@ -212,7 +212,7 @@ let setmask3 mask masklen b1 b2 b3 posi1 posi2 = setmask3' mask masklen b1 b2 b3
 // Copymask
 //
 
-val copymask': buf:bytes -> bufstart:s32 -> bufstop:s32{v bufstart <= v bufstop} -> out:bytes{disjoint out buf} -> masklen:u32{v masklen = length out /\ v masklen = length buf /\ v bufstop <= v masklen} -> i:u32{v i <= v masklen}
+val copymask': buf:bytes -> bufstart:s32 -> bufstop:s32{S32.v bufstart <= S32.v bufstop} -> out:bytes{disjoint out buf} -> masklen:u32{v masklen = length out /\ v masklen = length buf /\ S32.v bufstop <= v masklen} -> i:u32{v i <= v masklen}
   -> STL unit
         (requires (fun h -> live h buf /\ live h out))
         (ensures  (fun h0 _ h1 -> live h1 buf /\ live h1 out /\ modifies_1 out h0 h1))
@@ -233,7 +233,7 @@ let rec copymask' buf bufstart bufstop out masklen i =
   else ()
 
 
-val copymask: buf:bytes -> bufstart:s32 -> bufstop:s32{v bufstart <= v bufstop} -> out:bytes{disjoint out buf} -> masklen:u32{v masklen = length out /\ v masklen = length buf /\ v bufstop <= v masklen}
+val copymask: buf:bytes -> bufstart:s32 -> bufstop:s32{S32.v bufstart <= S32.v bufstop} -> out:bytes{disjoint out buf} -> masklen:u32{v masklen = length out /\ v masklen = length buf /\ S32.v bufstop <= v masklen}
   -> STL unit
         (requires (fun h -> live h buf /\ live h out))
         (ensures  (fun h0 _ h1 -> live h0 out /\ live h1 out /\ modifies_1 out h0 h1))

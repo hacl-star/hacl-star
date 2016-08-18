@@ -118,20 +118,21 @@ let be_bytes_of_uint32 output x =
  upd output 3ul b3
 
 
-val be_uint32_of_bytes: b:bytes{length b >= 4}
+val be_sint32_of_bytes: b:bytes{length b >= 4}
   -> STL s32
         (requires (fun h -> live h b))
         (ensures (fun h0 r h1 -> live h1 b /\ modifies_1 b h0 h1))
 
-let be_uint32_of_bytes b =
+let be_sint32_of_bytes b =
   let b0 = index b 0ul in
   let b1 = index b 1ul in
   let b2 = index b 2ul in
   let b3 = index b 3ul in
-  let r = (sint8_to_sint32 b3)
-	+%^ (op_Less_Less_Hat (sint8_to_sint32 b2) 8ul)
-	+%^ (op_Less_Less_Hat (sint8_to_sint32 b1) 16ul)
-	+%^ (op_Less_Less_Hat (sint8_to_sint32 b0) 24ul) in
+  let r =
+    S32.add_mod (S32.add_mod (S32.add_mod (sint8_to_sint32 b3)
+                                          (S32.op_Less_Less_Hat (sint8_to_sint32 b2) 8ul))
+	                          (S32.op_Less_Less_Hat (sint8_to_sint32 b1) 16ul))
+                (S32.op_Less_Less_Hat (sint8_to_sint32 b0) 24ul) in
   r
 
 
@@ -143,13 +144,13 @@ let rec be_uint32s_of_bytes u b len =
   if U32.eq len 0ul then ()
   else (
     let l4 = U32.div len 4ul in
-    upd u (U32.sub l4 1ul) (be_uint32_of_bytes (sub b (U32.sub len 4ul) 4ul));
+    upd u (U32.sub l4 1ul) (be_sint32_of_bytes (sub b (U32.sub len 4ul) 4ul));
     be_uint32s_of_bytes u b (U32.sub len 4ul)
   )
 
 let op_Hat_Greater_Greater (a:s32) (b:u32) : Tot s32 = S32.shift_right a b
 
-val be_bytes_of_uint32s: output:bytes -> m:uint32s{disjoint output m} -> len:u32{v len <=length output /\ v len<=op_Multiply 4 (length m)} -> STL unit
+val be_bytes_of_uint32s: output:bytes -> m:uint32s{disjoint output m} -> len:u32{U32.v len <= length output /\ U32.v len <= Prims.op_Multiply 4 (SB.length m)} -> STL unit
   (requires (fun h -> live h output /\ live h m))
   (ensures (fun h0 _ h1 -> live h0 output /\ live h0 m /\ live h1 output /\ live h1 m
     /\ modifies_1 output h0 h1 ))
