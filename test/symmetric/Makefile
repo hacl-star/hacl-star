@@ -12,7 +12,7 @@ LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lem
 CODE_DIR=../../crypto/symmetric
 CODE_DIR_HST=../../crypto_hst/symmetric
 
-KREMLIN_DIR=../../../kremlin
+KREMLIN_DIR=../../../fork/kremlin
 KREMLIN=$(KREMLIN_DIR)/Kremlin.native
 KREMLIN_LIB=$(KREMLIN_DIR)/kremlib
 KREMLIN_ARGS=
