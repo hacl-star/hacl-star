@@ -9,11 +9,11 @@ type u32 = FStar_UInt32.t
 type u64 = FStar_UInt64.uint64
 
              
-let sint8_to_sint64 (a:s8) : (s128) = Hacl_UInt128.of_string (Hacl_UInt8.to_string a)
+let sint8_to_sint128 (a:s8) : (s128) = Hacl_UInt128.of_string (Hacl_UInt8.to_string a)
 let sint8_to_sint64 (a:s8) : (s64) = Hacl_UInt64.of_string (Hacl_UInt8.to_string a)
 let sint8_to_sint32 (a:s8) : (s32) = Hacl_UInt32.of_string (Hacl_UInt8.to_string a)
 
-let sint32_to_sint64 (a:s32) : (s128) = Hacl_UInt128.of_string (Hacl_UInt32.to_string a)
+let sint32_to_sint128 (a:s32) : (s128) = Hacl_UInt128.of_string (Hacl_UInt32.to_string a)
 let sint32_to_sint64 (a:s32) : (s64) = Hacl_UInt64.of_string (Hacl_UInt32.to_string a)
 let sint32_to_sint8  (a:s32) : (s8) = Hacl_UInt8.of_string (Hacl_UInt32.to_string (Hacl_UInt32.logand a(Hacl_UInt32.of_string "255")))
 
