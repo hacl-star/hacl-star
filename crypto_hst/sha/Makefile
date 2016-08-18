@@ -4,7 +4,7 @@ FSTAR=$(FSTAR_HOME)/bin/fstar.exe
 
 # Libraries
 LIB_DIR_HST=../../lib/hst
-LIB_FILES_HST= Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst
+LIB_FILES_HST= Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst
 
 # Utils
 UTILS_DIR_HST=../utils
