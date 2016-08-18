@@ -16,7 +16,7 @@ OPTIONS_OCAML=--lax --codegen OCaml --no_location_info
 OCAMLOPT := $(OCAMLOPT) -I $(ULIB_ML)/native_int -w -20-26
 
 REALIZED_MLI_HST=Hacl_UInt8 Hacl_UInt32 Hacl_UInt64 Hacl_UInt128
-REALIZED_HST=FStar_HyperStack FStar_HST Hacl_Cast Hacl_SBuffer
+REALIZED_HST=FStar_HyperStack FStar_HST Hacl_Cast Hacl_SBuffer Hacl_Utils
 REALIZED_MODULE_HST=$(subst _,., $(REALIZED_HST))
 REALIZED_ML_HST=$(addsuffix .mli,$(REALIZED_MLI_HST)) $(addsuffix .ml,$(REALIZED_MLI_HST) $(REALIZED_HST))
 NO_CODEGEN_HST=$(addprefix --no_extract , $(REALIZED_MODULE_HST))
