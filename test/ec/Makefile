@@ -37,10 +37,10 @@ CURVE_25519_FSTAR=$(addprefix $(CODE_DIR)/,Bignum.Parameters.fst Bignum.Bigint.f
 CURVE_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/, Math.Definitions.fst Math.Field.fst Math.Curve.fst Curve.Parameters.fst Curve.Bigint.fst Curve.Fsum.fst Curve.FsumWide.fst Curve.Fdifference.fst Curve.Fscalar.fst Curve.Fproduct.fst Curve.Modulo.fst Curve.Bignum.fst Curve.Crecip.fst Curve.Point.fst Curve.AddAndDouble.fst Curve.Ladder.fst)
 
 # Extracted OCaml files
-CURVE_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Bignum_Parameters.ml Bignum_Bigint.ml Bignum_Fsum.ml Bignum_FsumWide.ml Bignum_Fdifference.ml Bignum_Fscalar.ml Bignum_Fproduct.ml Bignum_Modulo.ml Bignum_Core.ml Curve_Point.ml Curve_AddAndDouble.ml Curve_Ladder.ml
+CURVE_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Bignum_Parameters.ml Bignum_Bigint.ml Bignum_Fsum.ml Bignum_FsumWide.ml Bignum_Fdifference.ml Bignum_Fscalar.ml Bignum_Fproduct.ml Bignum_Modulo.ml Bignum_Core.ml Curve_Point.ml Curve_AddAndDouble.ml Curve_Ladder.ml
 
 # Extracted OCaml HST files
-CURVE_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_Seq.ml FStar_Ghost.ml Math_Axioms.ml Math_Lib.ml Math_Lemmas.ml Math_Definitions.ml Math_Field.ml Math_Curve.ml Curve_Parameters.ml Curve_Bigint.ml Curve_Fsum.ml Curve_FsumWide.ml Curve_Fdifference.ml Curve_Fscalar.ml Curve_Fproduct.ml Curve_Modulo.ml Curve_Bignum.ml Curve_Crecip.ml Curve_Point.ml Curve_AddAndDouble.ml Curve_Ladder.ml
+CURVE_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Math_Axioms.ml Math_Lib.ml Math_Lemmas.ml Math_Definitions.ml Math_Field.ml Math_Curve.ml Curve_Parameters.ml Curve_Bigint.ml Curve_Fsum.ml Curve_FsumWide.ml Curve_Fdifference.ml Curve_Fscalar.ml Curve_Fproduct.ml Curve_Modulo.ml Curve_Bignum.ml Curve_Crecip.ml Curve_Point.ml Curve_AddAndDouble.ml Curve_Ladder.ml
 
 CURVE25519_FSTAR=$(CURVE_FSTAR_HST) $(CODE_DIR_HST)/Curve.Curve25519.fst
 P256_FSTAR=$(CURVE_FSTAR_HST) $(CODE_DIR_HST)/Curve.P256.fst

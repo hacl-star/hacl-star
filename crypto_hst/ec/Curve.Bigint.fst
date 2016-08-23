@@ -18,7 +18,7 @@ let heap = HyperStack.mem
 
 let only = FStar.TSet.singleton
 
-(*** Types ***) 
+(* ** Types ** *) 
 
 (* Maps the index of the integer data to the theoretic bit size of the cell *)
 let template : Type = (nat -> Tot pos)

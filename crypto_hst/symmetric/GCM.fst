@@ -22,12 +22,12 @@ type cipher_alg (k: pos) = key:u8s{length key = k} ->
     (ensures (fun h0 _ h1 -> live h1 key /\ live h1 input /\ live h1 out
         /\ modifies_1 out h0 h1))
 
-(** Every block of message is regarded as an element in Galois field GF(2^128), **)
-(** it is represented as 16 bytes. The following several functions are basic    **)
-(** operations in this field.                                                   **)
-(** gf128_add: addition. Equivalent to bitxor.                                  **)
-(** gf128_shift_right: shift right by 1 bit. Used in multiplication.            **)
-(** gf128_mul: multiplication. Achieved by combining 128 additions.             **)
+(* * Every block of message is regarded as an element in Galois field GF(2^128), **)
+(* * it is represented as 16 bytes. The following several functions are basic    **)
+(* * operations in this field.                                                   **)
+(* * gf128_add: addition. Equivalent to bitxor.                                  **)
+(* * gf128_shift_right: shift right by 1 bit. Used in multiplication.            **)
+(* * gf128_mul: multiplication. Achieved by combining 128 additions.             **)
 
 (* Every function "func_name_loop" is a helper for function "func_name". *)
 private val gf128_add_loop: a:u8s{length a = 16} ->
@@ -353,8 +353,8 @@ let encrypt_body #k alg ciphertext tag key nonce cnt ad adlen plaintext len =
   pop_frame();
   authenticate #k alg ciphertext tag key nonce cnt ad adlen len
 
-(** In GCM, an initialization vector is used to generate a 96-bit nonce, and can have any length. **)
-(** This version only allows 96-bit iv. This needs to be fixed.                                   **)
+(* * In GCM, an initialization vector is used to generate a 96-bit nonce, and can have any length. **)
+(* * This version only allows 96-bit iv. This needs to be fixed.                                   **)
 val encrypt: #k:pos -> alg:cipher_alg k ->
     ciphertext:u8s ->
     tag:u8s{length tag = 16 /\ disjoint ciphertext tag} ->
@@ -371,10 +371,10 @@ val encrypt: #k:pos -> alg:cipher_alg k ->
 let encrypt #k alg ciphertext tag key iv ad adlen plaintext len =
   encrypt_body #k alg ciphertext tag key iv 1ul ad adlen plaintext len
 
-(** This is an incomplete decrypt function. The main idea is to compute tag first. **)
-(** If the result is compatible with the tag that user gives, then it will decrypt **)
-(** the ciphertext. Otherwise it will refuse to decrypt. The current GCM uses      **)
-(** encrypt function to decrypt and let the user check the tag himself.            **)
+(* * This is an incomplete decrypt function. The main idea is to compute tag first. **)
+(* * If the result is compatible with the tag that user gives, then it will decrypt **)
+(* * the ciphertext. Otherwise it will refuse to decrypt. The current GCM uses      **)
+(* * encrypt function to decrypt and let the user check the tag himself.            **)
 (*
 val decrypt_body: #k:pos -> alg:cipher_alg k ->
     plaintext:u8s ->

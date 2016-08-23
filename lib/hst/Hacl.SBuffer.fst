@@ -34,7 +34,7 @@ let contains = contains
 let sel = sel
 let max_length = max_length
 let length = length
-let length' = length'
+(* let length' = length' *)
 let idx  = idx
 let content = content
 let as_ref = as_ref
@@ -44,7 +44,7 @@ let frameOf = frameOf
 (* Liveness condition, necessary for any computation on the buffer *)
 let live = live
 
-let getValue = getValue
+(* let getValue = getValue *)
 let get = get
 let as_seq = as_seq
 let equal = equal

@@ -54,7 +54,7 @@ POLY_EXTRACTED=FStar_PredicateExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axio
 AES_EXTRACTED=Crypto_AES.ml
 
 CHACHA_EXTRACTED_HST=Chacha20.ml
-POLY_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Poly_Parameters.ml Poly_Bigint.ml Poly_Bignum.ml Poly_Poly1305.ml
+POLY_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Poly_Parameters.ml Poly_Bigint.ml Poly_Bignum.ml Poly_Poly1305.ml
 AES_EXTRACTED_HST=Symmetric_AES.ml
 AESGCM_EXTRACTED_HST=Symmetric_AES.ml GCM.ml AEAD_AES256_GCM.ml
 
