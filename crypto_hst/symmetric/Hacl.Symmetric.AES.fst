@@ -189,21 +189,21 @@ let mk_inv_sbox sbox =
   sbox.(216ul) <- (uint8_to_sint8 0x2duy); sbox.(217ul) <- (uint8_to_sint8 0xe5uy); sbox.(218ul) <- (uint8_to_sint8 0x7auy); sbox.(219ul) <- (uint8_to_sint8 0x9fuy); 
   sbox.(220ul) <- (uint8_to_sint8 0x93uy); sbox.(221ul) <- (uint8_to_sint8 0xc9uy); sbox.(222ul) <- (uint8_to_sint8 0x9cuy); sbox.(223ul) <- (uint8_to_sint8 0xefuy); 
   sbox.(224ul) <- (uint8_to_sint8 0xa0uy); sbox.(225ul) <- (uint8_to_sint8 0xe0uy); sbox.(226ul) <- (uint8_to_sint8 0x3buy); sbox.(227ul) <- (uint8_to_sint8 0x4duy); 
-  sbox.(228ul) <- (uint8_to_sint8 0xaeuy); sbox.(229ul) <- (uint8_to_sint8 0x2auy); sbox.(230ul) <- (uint8_to_sint8 0xf5uy); sbox.(231ul) <- (uint8_to_sint8 0xb0uy); 
-  sbox.(232ul) <- (uint8_to_sint8 0xc8uy); sbox.(233ul) <- (uint8_to_sint8 0xebuy); sbox.(234ul) <- (uint8_to_sint8 0xbbuy); sbox.(235ul) <- (uint8_to_sint8 0x3cuy); 
-  sbox.(236ul) <- (uint8_to_sint8 0x83uy); sbox.(237ul) <- (uint8_to_sint8 0x53uy); sbox.(238ul) <- (uint8_to_sint8 0x99uy); sbox.(239ul) <- (uint8_to_sint8 0x61uy); 
-  sbox.(240ul) <- (uint8_to_sint8 0x17uy); sbox.(241ul) <- (uint8_to_sint8 0x2buy); sbox.(242ul) <- (uint8_to_sint8 0x04uy); sbox.(243ul) <- (uint8_to_sint8 0x7euy); 
-  sbox.(244ul) <- (uint8_to_sint8 0xbauy); sbox.(245ul) <- (uint8_to_sint8 0x77uy); sbox.(246ul) <- (uint8_to_sint8 0xd6uy); sbox.(247ul) <- (uint8_to_sint8 0x26uy); 
-  sbox.(248ul) <- (uint8_to_sint8 0xe1uy); sbox.(249ul) <- (uint8_to_sint8 0x69uy); sbox.(250ul) <- (uint8_to_sint8 0x14uy); sbox.(251ul) <- (uint8_to_sint8 0x63uy); 
+  sbox.(228ul) <- (uint8_to_sint8 0xaeuy); sbox.(229ul) <- (uint8_to_sint8 0x2auy); sbox.(230ul) <- (uint8_to_sint8 0xf5uy); sbox.(231ul) <- (uint8_to_sint8 0xb0uy);
+  sbox.(232ul) <- (uint8_to_sint8 0xc8uy); sbox.(233ul) <- (uint8_to_sint8 0xebuy); sbox.(234ul) <- (uint8_to_sint8 0xbbuy); sbox.(235ul) <- (uint8_to_sint8 0x3cuy);
+  sbox.(236ul) <- (uint8_to_sint8 0x83uy); sbox.(237ul) <- (uint8_to_sint8 0x53uy); sbox.(238ul) <- (uint8_to_sint8 0x99uy); sbox.(239ul) <- (uint8_to_sint8 0x61uy);
+  sbox.(240ul) <- (uint8_to_sint8 0x17uy); sbox.(241ul) <- (uint8_to_sint8 0x2buy); sbox.(242ul) <- (uint8_to_sint8 0x04uy); sbox.(243ul) <- (uint8_to_sint8 0x7euy);
+  sbox.(244ul) <- (uint8_to_sint8 0xbauy); sbox.(245ul) <- (uint8_to_sint8 0x77uy); sbox.(246ul) <- (uint8_to_sint8 0xd6uy); sbox.(247ul) <- (uint8_to_sint8 0x26uy);
+  sbox.(248ul) <- (uint8_to_sint8 0xe1uy); sbox.(249ul) <- (uint8_to_sint8 0x69uy); sbox.(250ul) <- (uint8_to_sint8 0x14uy); sbox.(251ul) <- (uint8_to_sint8 0x63uy);
   sbox.(252ul) <- (uint8_to_sint8 0x55uy); sbox.(253ul) <- (uint8_to_sint8 0x21uy); sbox.(254ul) <- (uint8_to_sint8 0x0cuy); sbox.(255ul) <- (uint8_to_sint8 0x7duy)
 
 #reset-options
 
-let rec access_aux: sb:u8s{length sb = 256} -> byte -> ctr:UInt32.t{UInt32.v ctr <= 256} -> byte -> STL byte 
+let rec access_aux: sb:u8s{length sb = 256} -> byte -> ctr:UInt32.t{UInt32.v ctr <= 256} -> byte -> STL byte
   (requires (fun h -> live h sb))
   (ensures  (fun h0 _ h1 -> h1 == h0))
-  = fun sbox i ctr tmp -> 
-  if U32 (ctr =^ 256ul) then tmp 
+  = fun sbox i ctr tmp ->
+  if U32 (ctr =^ 256ul) then tmp
   else let mask = eq_mask i (uint32_to_sint8 ctr) in
        let tmp = tmp |^ (mask &^ sbox.(ctr)) in
        access_aux sbox i (U32 (ctr +^ 1ul)) tmp
@@ -214,13 +214,13 @@ val access: sbox:u8s{length sbox = 256} -> idx:byte -> STL byte
 let access sbox i =
   access_aux sbox i 0ul (uint8_to_sint8 0uy)
 
-val subBytes_aux_sbox: state:u8s{length state >= 4 * UInt32.v nb} -> sbox:u8s{length sbox = 256 /\ disjoint state sbox} -> 
+val subBytes_aux_sbox: state:u8s{length state >= 4 * UInt32.v nb} -> sbox:u8s{length sbox = 256 /\ disjoint state sbox} ->
   ctr:UInt32.t{UInt32.v ctr <= 16} -> STL unit
   (requires (fun h -> live h state /\ live h sbox))
   (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let rec subBytes_aux_sbox state sbox ctr =
   if U32 (ctr =^ 16ul) then ()
-  else 
+  else
   begin
     let si = state.(ctr) in
     let si' = access sbox si in
@@ -241,23 +241,23 @@ let shiftRows state =
   let open FStar.UInt32 in
   let i = 1ul in
   let tmp = state.(i) in
-  state.(i)       <- state.((i+^4ul)); 
-  state.(i+^4ul)  <- state.((i+^8ul)); 
-  state.(i+^8ul)  <- state.((i+^12ul)); 
+  state.(i)       <- state.((i+^4ul));
+  state.(i+^4ul)  <- state.((i+^8ul));
+  state.(i+^8ul)  <- state.((i+^12ul));
   state.(i+^12ul) <- tmp;
   let i = 2ul in
   let tmp = state.(i) in
-  state.(i)      <- state.((i+^8ul)); 
-  state.(i+^8ul) <- tmp; 
+  state.(i)      <- state.((i+^8ul));
+  state.(i+^8ul) <- tmp;
   let tmp = state.(i+^4ul) in
-  state.(i+^4ul)  <- state.((i+^12ul)); 
+  state.(i+^4ul)  <- state.((i+^12ul));
   state.(i+^12ul) <- tmp;
   let i = 3ul in
   let tmp = state.(i) in
-  state.(i)       <- state.((i+^12ul)); 
+  state.(i)       <- state.((i+^12ul));
   state.(i+^12ul) <- state.((i+^8ul));
-  state.(i+^8ul)  <- state.((i+^4ul)); 
-  state.(i+^4ul)  <- tmp; 
+  state.(i+^8ul)  <- state.((i+^4ul));
+  state.(i+^4ul)  <- tmp;
   ()
 
 #reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
@@ -326,7 +326,7 @@ let rec cipher_loop state w sbox round =
     subBytes_sbox state sbox;
     shiftRows state;
     mixColumns state;
-    addRoundKey state w round; 
+    addRoundKey state w round;
     cipher_loop state w sbox (round+^1ul)
   end
 
@@ -370,7 +370,7 @@ let rotWord word =
   word.(2ul) <- w3;
   word.(3ul) <- w0;
   ()
-  
+
 val subWord: word:u8s{length word >= 4} -> sbox:u8s{length sbox = 256} -> STL unit
   (requires (fun h -> live h word /\ live h sbox /\ disjoint word sbox))
   (ensures  (fun h0 _ h1 -> live h1 word /\ modifies_1 word h0 h1))
@@ -383,14 +383,14 @@ let subWord word sbox =
   word.(1ul) <- (access sbox w1);
   word.(2ul) <- (access sbox w2);
   word.(3ul) <- (access sbox w3);
-  ()  
-  
+  ()
+
 val rcon: i:UInt32.t{UInt32.v i >= 1} -> byte -> Tot byte (decreases (UInt32.v i))
 let rec rcon i tmp =
   let open FStar.UInt32 in
   if i =^ 1ul then tmp
   else begin
-    let tmp = multiply (uint8_to_sint8 0x2uy) tmp in    
+    let tmp = multiply (uint8_to_sint8 0x2uy) tmp in
     rcon (i-^1ul) tmp
   end
 
@@ -484,31 +484,31 @@ let invShiftRows state =
   let open FStar.UInt32 in
   let i = 3ul in
   let tmp = state.(i) in
-  state.(i)       <- (state.(i+^4ul)); 
-  state.(i+^4ul)  <- (state.(i+^8ul)); 
-  state.(i+^8ul)  <- (state.(i+^12ul)); 
+  state.(i)       <- (state.(i+^4ul));
+  state.(i+^4ul)  <- (state.(i+^8ul));
+  state.(i+^8ul)  <- (state.(i+^12ul));
   state.(i+^12ul) <- tmp;
   let i = 2ul in
   let tmp = state.(i) in
-  state.(i)       <- (state.(i+^8ul)); 
-  state.(i+^8ul)  <- tmp; 
+  state.(i)       <- (state.(i+^8ul));
+  state.(i+^8ul)  <- tmp;
   let tmp = state.(i+^4ul) in
-  state.(i+^4ul)  <- (state.(i+^12ul)); 
+  state.(i+^4ul)  <- (state.(i+^12ul));
   state.(i+^12ul) <- tmp;
   let i = 1ul in
   let tmp = state.(i) in
-  state.(i)       <- (state.(i+^12ul)); 
+  state.(i)       <- (state.(i+^12ul));
   state.(i+^12ul) <- (state.(i+^8ul));
-  state.(i+^8ul)  <- (state.(i+^4ul)); 
-  state.(i+^4ul)  <- tmp; 
+  state.(i+^8ul)  <- (state.(i+^4ul));
+  state.(i+^4ul)  <- tmp;
   ()
 
 val invSubBytes_aux_sbox: state:u8s{length state >= 4 * UInt32.v nb} -> sbox:u8s{length sbox = 256} -> ctr:UInt32.t{UInt32.v ctr <= 16} -> STL unit
   (requires (fun h -> live h state /\ live h sbox /\ disjoint state sbox))
   (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let rec invSubBytes_aux_sbox state sbox ctr =
-  if ctr = 16ul then () 
-  else begin 
+  if ctr = 16ul then ()
+  else begin
     let si = state.(ctr) in
     let si' = access sbox si in
     state.(ctr) <- si';
@@ -518,10 +518,10 @@ let rec invSubBytes_aux_sbox state sbox ctr =
 val invSubBytes_sbox: state:u8s{length state >= 4 * UInt32.v nb} -> sbox:u8s{length sbox = 256} -> STL unit
   (requires (fun h -> live h state /\ live h sbox /\ disjoint state sbox))
   (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
-let invSubBytes_sbox state sbox = 
+let invSubBytes_sbox state sbox =
   invSubBytes_aux_sbox state sbox 0ul
 
-#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
 
 val invMixColumns_: state:u8s{length state >= 4 * UInt32.v nb} -> c:UInt32.t{UInt32.v c < 4} -> STL unit
   (requires (fun h -> live h state))
@@ -532,13 +532,13 @@ let invMixColumns_ state c =
   let s1 = state.(1ul+^(4ul*^c)) in
   let s2 = state.(2ul+^(4ul*^c)) in
   let s3 = state.(3ul+^(4ul*^c)) in
-  state.((4ul*^c)+^0ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s0 ^^ multiply (uint8_to_sint8 0xbuy) s1 
+  state.((4ul*^c)+^0ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s0 ^^ multiply (uint8_to_sint8 0xbuy) s1
 	       ^^ multiply (uint8_to_sint8 0xduy) s2 ^^ multiply (uint8_to_sint8 0x9uy) s3));
-  state.((4ul*^c)+^1ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s1 ^^ multiply (uint8_to_sint8 0xbuy) s2 
+  state.((4ul*^c)+^1ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s1 ^^ multiply (uint8_to_sint8 0xbuy) s2
 	       ^^ multiply (uint8_to_sint8 0xduy) s3 ^^ multiply (uint8_to_sint8 0x9uy) s0));
-  state.((4ul*^c)+^2ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s2 ^^ multiply (uint8_to_sint8 0xbuy) s3 
+  state.((4ul*^c)+^2ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s2 ^^ multiply (uint8_to_sint8 0xbuy) s3
 	       ^^ multiply (uint8_to_sint8 0xduy) s0 ^^ multiply (uint8_to_sint8 0x9uy) s1));
-  state.((4ul*^c)+^3ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s3 ^^ multiply (uint8_to_sint8 0xbuy) s0 
+  state.((4ul*^c)+^3ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s3 ^^ multiply (uint8_to_sint8 0xbuy) s0
 	       ^^ multiply (uint8_to_sint8 0xduy) s1 ^^ multiply (uint8_to_sint8 0x9uy) s2))
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
