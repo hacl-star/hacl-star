@@ -71,3 +71,6 @@ let offset #t b i = offset #t b i
 
 let blit (#t:Type) (a:buffer t) aidx (b:buffer t) bidx len = blit a aidx b bidx len
 let fill #a = fill #a
+
+let op_Array_Assignment #a b n z = op_Array_Assignment #a b n z
+let op_Array_Access     #a b n   = op_Array_Access #a b n

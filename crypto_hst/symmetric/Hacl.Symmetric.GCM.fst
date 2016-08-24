@@ -1,4 +1,4 @@
-module GCM
+module Hacl.Symmetric.GCM
 
 open FStar.Mul
 open FStar.Ghost

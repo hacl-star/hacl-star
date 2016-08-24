@@ -44,9 +44,9 @@ val op_Hat_Hat:uint8 -> uint8 -> uint8
 val op_Plus_Hat: uint8 -> uint8 -> uint8
 val op_Subtraction_Hat: uint8 -> uint8 -> uint8
 val op_Star_Hat: uint8 -> uint8 -> uint8
-val op_Plus_Hat_Percent: uint8 -> uint8 -> uint8
-val op_Subtraction_Hat_Percent: uint8 -> uint8 -> uint8
-val op_Star_Hat_Percent: uint8 -> uint8 -> uint8
+val op_Plus_Percent_Hat: uint8 -> uint8 -> uint8
+val op_Subtraction_Percent_Hat: uint8 -> uint8 -> uint8
+val op_Star_Percent_Hat: uint8 -> uint8 -> uint8
 val op_Slash_Hat:uint8 -> uint8 -> uint8
 val op_Less_Less_Hat:uint8 -> int -> uint8
 val op_Greater_Greater_Hat:uint8 -> int -> uint8

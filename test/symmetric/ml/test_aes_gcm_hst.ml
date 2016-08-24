@@ -1,7 +1,7 @@
 open Hacl_UInt8
 open Hacl_SBuffer
-open AEAD_AES256_GCM
-open GCM
+open Hacl_AEAD_AES256GCM
+open Hacl_Symmetric_GCM
 
 let zero = Hacl_Cast.uint8_to_sint8 0
 

@@ -1,4 +1,4 @@
-module AEAD.AES256_GCM
+module Hacl.AEAD.AES256GCM
 
 open FStar.Mul
 open FStar.Ghost
@@ -7,8 +7,8 @@ open FStar.HST
 open Hacl.UInt8
 open Hacl.Cast
 open Hacl.SBuffer
-open Symmetric.AES
-open GCM
+open Hacl.Symmetric.AES
+open Hacl.Symmetric.GCM
 
 module U32 = FStar.UInt32
 
@@ -52,6 +52,6 @@ val aead_encrypt: ciphertext:u8s ->
     (ensures (fun h0 _ h1 -> live h1 ciphertext /\ live h1 tag /\ live h1 key /\ live h1 iv /\ live h1 plaintext /\ live h1 ad
       /\ modifies_2 ciphertext tag h0 h1))
 let aead_encrypt ciphertext tag key iv plaintext len ad adlen =
-    GCM.encrypt #32 aes256 ciphertext tag key iv ad adlen plaintext len
+    Hacl.Symmetric.GCM.encrypt #32 aes256 ciphertext tag key iv ad adlen plaintext len
 
 (* TODO: AEAD decrypt function *)

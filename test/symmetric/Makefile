@@ -44,21 +44,21 @@ POLY_FSTAR=$(addprefix $(CODE_DIR)/,parameters.fst bigint.fst bignum.fst poly.fs
 AES_FSTAR=$(addprefix $(CODE_DIR)/,Crypto.AES.fst)
 
 # FStar HST files
-CHACHA_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Chacha20.fst)
+CHACHA_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.Chacha20.fst)
 POLY_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Poly.Parameters.fst Poly.Bigint.fst Poly.Bignum.fst Poly.Poly1305.fst)
-AES_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Symmetric.AES.fst)
-AESGCM_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Symmetric.AES.fst GCM.fst AEAD.AES256_GCM.fst)
+AES_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.AES.fst)
+AESGCM_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.AES.fst Hacl.Symmetric.GCM.fst Hacl.AEAD.AES256GCM.fst)
 
 CHACHA_EXTRACTED=Chacha.ml
 POLY_EXTRACTED=FStar_PredicateExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Parameters.ml Bigint.ml Bignum.ml Poly.ml
 AES_EXTRACTED=Crypto_AES.ml
 
-CHACHA_EXTRACTED_HST=Chacha20.ml
+CHACHA_EXTRACTED_HST=Hacl_Symmetric_Chacha20.ml
 POLY_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Poly_Parameters.ml Poly_Bigint.ml Poly_Bignum.ml Poly_Poly1305.ml
-AES_EXTRACTED_HST=Symmetric_AES.ml
-AESGCM_EXTRACTED_HST=Symmetric_AES.ml GCM.ml AEAD_AES256_GCM.ml
+AES_EXTRACTED_HST=Hacl_Symmetric_AES.ml
+AESGCM_EXTRACTED_HST=Hacl_Symmetric_AES.ml Hacl_Symmetric_GCM.ml Hacl_AEAD_AES256GCM.ml
 
-CHACHA_EXTRACTED_C=Chacha20.c
+CHACHA_EXTRACTED_C=Hacl_Symmetric_Chacha20.c
 
 CHACHA_ODIR=chacha20
 POLY_ODIR=poly1305
