@@ -5,13 +5,6 @@ open Math.Axioms
 
 (** Useful mathematical fonctions **)
 
-(* Function : power of 2 *)
-val pow2:
-  n:nat -> Tot pos
-let rec pow2 n =
-  if n = 0 then 1
-  else 2 * pow2 (n-1)
-
 (* Function : power of x *)
 val powx : x:int -> n:nat -> Tot int
 let rec powx x n =
