@@ -33,14 +33,9 @@ let bytes = Hacl.SBuffer.u8s
 
 
 (* Define operators *)
-let op_Hat_At_Amp (a:s64) (s:s64) : Tot s64 = S64.logand a s
-let op_Hat_Greater_Greater (a:s32) (b:u32) : Tot s32 = S32.shift_right a b
-
 let op_At_Plus (a:u32) (b:u32{U32.v a + U32.v b < pow2 32}) : Tot u32 = U32.add a b
 let op_At_Subtraction (a:u32) (b:u32{U32.v a - U32.v b < pow2 32 /\ U32.v a - U32.v b >= 0}) : Tot u32 = U32.sub a b
 let op_At_Percent (a:u32) (b:u32{U32.v b <> 0}) : Tot u32 = U32.rem a b
-let op_At_Plus_Percent (a:u32) (b:u32) : Tot u32 = U32.add_mod a b
-let op_At_Subtraction_Percent (a:u32) (b:u32) : Tot u32 = U32.sub_mod a b
 let op_At_Slash (a:u32) (b:u32{U32.v b <> 0}) : Tot u32 = U32.div a b
 
 
@@ -406,7 +401,7 @@ val update' : (memb  :bytes{length memb >= U32.v blocksize}) ->
               (state :uint32s{length state = U32.v size_state /\ disjoint state memb}) ->
               (data  :bytes{length data >= U32.v blocksize /\ (length data) % (U32.v blocksize) = 0
                            /\ disjoint state memb /\ disjoint state data }) ->
-              (len   :s32) ->
+              (len   :s32{S32.v len <= length data}) ->
               (rounds:u32{U32.v rounds * U32.v blocksize < pow2 32}) ->
               (i     :u32{U32.v i >= 0})
               -> STL unit
@@ -455,8 +450,8 @@ let rec update' memb state data len rounds i =
 (* [FIPS 180-4] section 6.2.2 *)
 (* Update running hash function *)
 val update : (state :uint32s{length state = U32.v size_state}) ->
-              (data  :bytes {length data >= U32.v blocksize /\ (length data) % (U32.v blocksize) = 0 /\ disjoint state data}) ->
-              (len   :u32{U32.v len + 8 < pow2 32 /\ U32.v len <= length data})
+             (data  :bytes {length data >= U32.v blocksize /\ (length data) % (U32.v blocksize) = 0 /\ disjoint state data}) ->
+             (len   :u32{U32.v len + 8 < pow2 32 /\ U32.v len <= length data})
               -> STL unit
                     (requires (fun h -> live h state /\ live h data))
                     (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
