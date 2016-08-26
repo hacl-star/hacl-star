@@ -24,26 +24,13 @@ val lognot:uint128 -> uint128
 
 val shift_left:uint128 -> u32 -> uint128
 val shift_right:uint128 -> u32 -> uint128
-
-val op_Hat_Plus: uint128 -> uint128 -> uint128
-val op_Hat_Subtraction: uint128 -> uint128 -> uint128
-val op_Hat_Star: uint128 -> uint128 -> uint128
-val op_Hat_Plus_Percent: uint128 -> uint128 -> uint128
-val op_Hat_Subtraction_Percent: uint128 -> uint128 -> uint128
-val op_Hat_Star_Percent: uint128 -> uint128 -> uint128
-val op_Hat_Slash:uint128 -> uint128 -> uint128
-val op_Hat_Less_Less:uint128 -> u32 -> uint128
-val op_Hat_Greater_Greater:uint128 -> u32 -> uint128
-val op_Hat_Amp:uint128 -> uint128 -> uint128
-val op_Hat_Bar:uint128 -> uint128 -> uint128
-val op_Hat_Hat:uint128 -> uint128 -> uint128
                   
 val op_Plus_Hat: uint128 -> uint128 -> uint128
-val op_Plus_Hat_Percent: uint128 -> uint128 -> uint128
+val op_Plus_Percent_Hat: uint128 -> uint128 -> uint128
 val op_Subtraction_Hat: uint128 -> uint128 -> uint128
-val op_Subtraction_Hat_Percent: uint128 -> uint128 -> uint128
+val op_Subtraction_Percent_Hat: uint128 -> uint128 -> uint128
 val op_Star_Hat: uint128 -> uint128 -> uint128
-val op_Star_Hat_Percent: uint128 -> uint128 -> uint128
+val op_Star_Percent_Hat: uint128 -> uint128 -> uint128
 val op_Less_Less_Hat:uint128 -> u32 -> uint128
 val op_Greater_Greater_Hat:uint128 -> u32 -> uint128
 val op_Amp_Hat:uint128 -> uint128 -> uint128
