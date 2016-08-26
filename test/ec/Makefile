@@ -46,7 +46,6 @@ CURVE25519_FSTAR=$(CURVE_FSTAR_HST) $(CODE_DIR_HST)/Curve.Curve25519.fst
 P256_FSTAR=$(CURVE_FSTAR_HST) $(CODE_DIR_HST)/Curve.P256.fst
 CURVE448_FSTAR=$(CURVE_FSTAR_HST) $(CODE_DIR_HST)/Curve.Curve448.fst
 
-# CURVE25519_EXTRACTED=$(CURVE_EXTRACTED_HST) Curve_Curve25519.ml
 P256_EXTRACTED=$(CURVE_EXTRACTED_HST) Curve_P256.ml
 CURVE448_EXTRACTED=$(CURVE_EXTRACTED_HST) Curve_Curve448.ml
 
@@ -72,13 +71,14 @@ CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_
 	Hacl_EC_Curve25519_Crecip.ml \
 	Hacl_EC_Curve25519.ml
 
-.PHONY: curve-ml curve25519 curve448 p256
+.PHONY: curve25519-test
 
-all: curve25519 curve448 #curve-ml
+all: curve25519-test
 
 ml-lib:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml all
 
+# Curve25519 extraction to OCaml
 curve25519-extract: ml-lib
 	@mkdir -p $(CURVE25519_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(CURVE25519_FSTAR) \
@@ -92,6 +92,48 @@ curve25519-compile: curve25519-extract
 	  	$(addprefix $(CURVE25519_ODIR)/,$(CURVE25519_EXTRACTED)) \
 		ml/test_curve25519_hst.ml -o test_curve25519.exe
 
+curve25519-test: curve25519-compile
+	./test_curve25519.exe
+
+# Cleaning
+clean:
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
+	$(MAKE) -C $(LIB_DIR) clean
+	$(MAKE) -C $(LIB_DIR_HST) clean
+	@rm -f $(addprefix ml/, *.cmx *.o *.cmi *~) *~ *.exe
+	@rm -rf $(CURVE25519_ODIR) $(CURVE448_ODIR) $(P256_ODIR)
+
+# Curve448 HST extraction to OCaml
+# curve448:
+# 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
+# 	@mkdir -p $(CURVE448_ODIR)
+# 	@cp $(CODE_DIR_HST)/curve_specific/Curve448.Parameters.fst $(CODE_DIR_HST)/Curve.Parameters.fst
+# 	@cp $(CODE_DIR_HST)/curve_specific/Curve448.Modulo.fst $(CODE_DIR_HST)/Curve.Modulo.fst
+# 	@cp $(CODE_DIR_HST)/curve_specific/Curve448.Crecip.fst $(CODE_DIR_HST)/Curve.Crecip.fst
+# 	@cp $(CODE_DIR_HST)/curve_specific/Curve.AddAndDoubleM.fst $(CODE_DIR_HST)/Curve.AddAndDouble.fst
+# 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(CURVE448_FSTAR) --odir $(CURVE448_ODIR)
+# 	@rm $(addprefix $(CODE_DIR_HST)/Curve., Parameters.fst Modulo.fst Crecip.fst AddAndDouble.fst)
+# 	@sed -i 's/(Obj.magic ((fun pp ppq p pq q n ctr b scalar/(((fun pp ppq p pq q n ctr b scalar/g' $(CURVE448_ODIR)/Curve_Ladder.ml
+# 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CURVE448_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+# 	  $(addprefix $(CURVE448_ODIR)/,$(CURVE448_EXTRACTED)) ml/test_curve448.ml -o test_curve448.exe
+# 	./test_curve448.exe
+
+# P256 HST extraction to OCaml
+# p256:
+# 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
+# 	@mkdir -p $(P256_ODIR)
+# 	@cp $(CODE_DIR_HST)/curve_specific/P256.Parameters.fst $(CODE_DIR_HST)/Curve.Parameters.fst
+# 	@cp $(CODE_DIR_HST)/curve_specific/P256.Modulo.fst $(CODE_DIR_HST)/Curve.Modulo.fst
+# 	@cp $(CODE_DIR_HST)/curve_specific/P256.Crecip.fst $(CODE_DIR_HST)/Curve.Crecip.fst
+# 	@cp $(CODE_DIR_HST)/curve_specific/Curve.AddAndDoubleW.fst $(CODE_DIR_HST)/Curve.AddAndDouble.fst
+# 	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(P256_FSTAR) --odir $(P256_ODIR)
+# 	@rm $(addprefix $(CODE_DIR_HST)/Curve., Parameters.fst Modulo.fst Crecip.fst AddAndDouble.fst)
+# 	@sed -i 's/(Obj.magic ((fun pp ppq p pq q n ctr b scalar/(((fun pp ppq p pq q n ctr b scalar/g' $(P256_ODIR)/Curve_Ladder.ml
+# 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(P256_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+# 	  $(addprefix $(P256_ODIR)/,$(P256_EXTRACTED)) ml/test_p256.ml -o test_p256.exe
+# #	./test_p256.exe
+
+
 # Curve25519 extraction to OCaml
 # curve-ml:
 # 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all PRIMS_DIR=native_int
@@ -103,56 +145,3 @@ curve25519-compile: curve25519-extract
 # 	$(OCAMLOPT) -I $(ULIB_ML)/native_int -I $(LIB_DIR)/ml -I $(CURVE25519_ODIR) $(addprefix $(LIB_DIR)/ml/,$(REALIZED_ML)) \
 # 	  $(addprefix $(CURVE25519_ODIR)/,$(CURVE_EXTRACTED)) ml/test_curve25519.ml -o test_curve25519.exe
 # 	./test_curve25519.exe
-
-# Curve25519 HST extraction to OCaml
-curve25519:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
-	@mkdir -p $(CURVE25519_ODIR)
-	@cp $(CODE_DIR_HST)/curve_specific/Curve25519.Parameters.fst $(CODE_DIR_HST)/Curve.Parameters.fst
-	@cp $(CODE_DIR_HST)/curve_specific/Curve25519.Modulo.fst $(CODE_DIR_HST)/Curve.Modulo.fst
-	@cp $(CODE_DIR_HST)/curve_specific/Curve25519.Crecip.fst $(CODE_DIR_HST)/Curve.Crecip.fst
-	@cp $(CODE_DIR_HST)/curve_specific/Curve.AddAndDoubleM.fst $(CODE_DIR_HST)/Curve.AddAndDouble.fst
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(CURVE25519_FSTAR) --odir $(CURVE25519_ODIR)
-	@rm $(addprefix $(CODE_DIR_HST)/Curve., Parameters.fst Modulo.fst Crecip.fst AddAndDouble.fst)
-	@sed -i 's/(Obj.magic ((fun pp ppq p pq q n ctr b scalar/(((fun pp ppq p pq q n ctr b scalar/g' $(CURVE25519_ODIR)/Curve_Ladder.ml
-	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CURVE25519_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(CURVE25519_ODIR)/,$(CURVE25519_EXTRACTED)) ml/test_curve25519_hst.ml -o test_curve25519.exe
-	./test_curve25519.exe
-
-# Curve448 HST extraction to OCaml
-curve448:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
-	@mkdir -p $(CURVE448_ODIR)
-	@cp $(CODE_DIR_HST)/curve_specific/Curve448.Parameters.fst $(CODE_DIR_HST)/Curve.Parameters.fst
-	@cp $(CODE_DIR_HST)/curve_specific/Curve448.Modulo.fst $(CODE_DIR_HST)/Curve.Modulo.fst
-	@cp $(CODE_DIR_HST)/curve_specific/Curve448.Crecip.fst $(CODE_DIR_HST)/Curve.Crecip.fst
-	@cp $(CODE_DIR_HST)/curve_specific/Curve.AddAndDoubleM.fst $(CODE_DIR_HST)/Curve.AddAndDouble.fst
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(CURVE448_FSTAR) --odir $(CURVE448_ODIR)
-	@rm $(addprefix $(CODE_DIR_HST)/Curve., Parameters.fst Modulo.fst Crecip.fst AddAndDouble.fst)
-	@sed -i 's/(Obj.magic ((fun pp ppq p pq q n ctr b scalar/(((fun pp ppq p pq q n ctr b scalar/g' $(CURVE448_ODIR)/Curve_Ladder.ml
-	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CURVE448_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(CURVE448_ODIR)/,$(CURVE448_EXTRACTED)) ml/test_curve448.ml -o test_curve448.exe
-	./test_curve448.exe
-
-# P256 HST extraction to OCaml
-p256:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
-	@mkdir -p $(P256_ODIR)
-	@cp $(CODE_DIR_HST)/curve_specific/P256.Parameters.fst $(CODE_DIR_HST)/Curve.Parameters.fst
-	@cp $(CODE_DIR_HST)/curve_specific/P256.Modulo.fst $(CODE_DIR_HST)/Curve.Modulo.fst
-	@cp $(CODE_DIR_HST)/curve_specific/P256.Crecip.fst $(CODE_DIR_HST)/Curve.Crecip.fst
-	@cp $(CODE_DIR_HST)/curve_specific/Curve.AddAndDoubleW.fst $(CODE_DIR_HST)/Curve.AddAndDouble.fst
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(P256_FSTAR) --odir $(P256_ODIR)
-	@rm $(addprefix $(CODE_DIR_HST)/Curve., Parameters.fst Modulo.fst Crecip.fst AddAndDouble.fst)
-	@sed -i 's/(Obj.magic ((fun pp ppq p pq q n ctr b scalar/(((fun pp ppq p pq q n ctr b scalar/g' $(P256_ODIR)/Curve_Ladder.ml
-	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(P256_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(P256_ODIR)/,$(P256_EXTRACTED)) ml/test_p256.ml -o test_p256.exe
-	# ./test_p256.exe
-
-# Cleaning
-clean:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
-	$(MAKE) -C $(LIB_DIR) clean
-	$(MAKE) -C $(LIB_DIR_HST) clean
-	@rm -f $(addprefix ml/, *.cmx *.o *.cmi *~) *~ *.exe
-	@rm -rf $(CURVE25519_ODIR) $(CURVE448_ODIR) $(P256_ODIR)
