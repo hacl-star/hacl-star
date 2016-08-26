@@ -245,7 +245,7 @@ val pad: (output :bytes{length output = U32.v blocksize}) ->
               (ensures  (fun h0 r h1 -> live h1 output /\ modifies_1 output h0 h1))
 
 let pad output data len encodedlen =
-  (** Push frame *)
+  (* Push frame *)
   (**) push_frame ();
 
   (* BB.FUTURE: Because of the inherent limitations of the buffer
@@ -257,7 +257,7 @@ let pad output data len encodedlen =
   (* Call the padding function *)
   pad' memb output data len encodedlen;
 
-  (** Pop frame *)
+  (* Pop frame *)
   (**) admit(); // BB.TODO: Improve perf. (trivial)
   (**) pop_frame()
 
@@ -458,7 +458,7 @@ val update : (state :uint32s{length state = U32.v size_state}) ->
 
 let update state data len =
 
-  (** Push frame *)
+  (* Push frame *)
   (**) push_frame();
 
   let memblen = blocksize in
@@ -470,7 +470,7 @@ let update state data len =
   (* Perform updates for all blocks except the last *)
   update' memb state data (uint32_to_sint32 len) rounds 0ul;
 
-  (** Pop frame *)
+  (* Pop frame *)
   (**) pop_frame()
   
 
@@ -521,7 +521,7 @@ val finish_1: (state :uint32s{length state = U32.v size_state})
 
 let finish_1 state =
 
-  (** Push frame *)
+  (* Push frame *)
   (**) push_frame();
 
   (* Allocate the memory required to flatten wblock *)
@@ -530,7 +530,7 @@ let finish_1 state =
 
   finish_1' memb state;
 
-  (** Pop frame *)
+  (* Pop frame *)
   (**) admit(); // BB.TODO: Improve perf. (trivial)
   (**) pop_frame()
 
@@ -588,7 +588,7 @@ val sha256: (hash :bytes{ length hash >= U32.v hashsize}) ->
 
 let sha256 hash data len =
 
-  (** Push frame *)
+  (* Push frame *)
   (**) push_frame();
 
   (* Allocate the memory block for the underlying function *)
@@ -598,6 +598,6 @@ let sha256 hash data len =
   (* Call the sha256 function *)
   sha256' memb hash data len ;
 
-  (** Pop frame *)
+  (* Pop frame *)
   (**) admit(); // BB.TODO: Improve perf. (trivial)
   (**) pop_frame()
