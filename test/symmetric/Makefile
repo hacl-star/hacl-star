@@ -45,18 +45,18 @@ AES_FSTAR=$(addprefix $(CODE_DIR)/,Crypto.AES.fst)
 
 # FStar HST files
 CHACHA_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.Chacha20.fst)
-POLY_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Poly.Parameters.fst Poly.Bigint.fst Poly.Bignum.fst Poly.Poly1305.fst)
 AES_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.AES.fst)
 AESGCM_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.AES.fst Hacl.Symmetric.GCM.fst Hacl.AEAD.AES256GCM.fst)
+POLY1305_FSTAR=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.Poly1305.fst)
 
 CHACHA_EXTRACTED=Chacha.ml
 POLY_EXTRACTED=FStar_PredicateExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Parameters.ml Bigint.ml Bignum.ml Poly.ml
 AES_EXTRACTED=Crypto_AES.ml
 
 CHACHA_EXTRACTED_HST=Hacl_Symmetric_Chacha20.ml
-POLY_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Poly_Parameters.ml Poly_Bigint.ml Poly_Bignum.ml Poly_Poly1305.ml
 AES_EXTRACTED_HST=Hacl_Symmetric_AES.ml
 AESGCM_EXTRACTED_HST=Hacl_Symmetric_AES.ml Hacl_Symmetric_GCM.ml Hacl_AEAD_AES256GCM.ml
+POLY1305_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Utils.ml Hacl_Symmetric_Poly1305_Parameters.ml Hacl_Symmetric_Poly1305_Bigint.ml Hacl_Symmetric_Poly1305_Bignum.ml Hacl_Symmetric_Poly1305.ml
 
 CHACHA_EXTRACTED_C=Hacl_Symmetric_Chacha20.c
 
@@ -67,7 +67,92 @@ AESGCM_ODIR=aesgcm
 
 .PHONY: chacha-ml poly-ml aes-ml chacha-hst-ml
 
-all: chacha-hst-ml aes-hst-ml aes-gcm-hst-ml poly-hst-ml # chacha-ml poly-ml aes-ml 
+all: chacha-test aes-test aes-gcm-test poly-test #chacha-hst-ml aes-hst-ml aes-gcm-hst-ml poly-hst-ml # chacha-ml poly-ml aes-ml
+
+ml-lib:
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml all
+
+# OCaml extracton of CHACHA20
+chacha-extract: ml-lib
+	mkdir -p $(CHACHA_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR)
+
+chacha-compile: chacha-extract
+	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CHACHA_ODIR) \
+	  $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe
+
+chacha-test: chacha-compile
+	./test_chacha20.exe
+
+# OCaml extracton of POLY1305
+poly-extract: ml-lib
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
+	mkdir -p $(POLY_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(POLY1305_FSTAR) --odir $(POLY_ODIR) --include $(CODE_DIR_HST)
+
+poly-compile: poly-extract
+	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(POLY_ODIR) \
+		$(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+	  	$(addprefix $(POLY_ODIR)/,$(POLY1305_EXTRACTED)) ml/test_poly1305_hst.ml -o test_poly.exe
+
+poly-test: poly-compile
+	./test_poly.exe
+
+# OCaml extracton of AES
+aes-extract: ml-lib
+	mkdir -p $(AES_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(AES_FSTAR_HST) --odir $(AES_ODIR)
+
+aes-compile: aes-extract
+	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(AES_ODIR) \
+	  $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+	  $(addprefix $(AES_ODIR)/,$(AES_EXTRACTED_HST)) ml/test_aes_hst.ml -o test_aes.exe 
+
+aes-test: aes-compile
+	./test_aes.exe
+
+# OCaml extracton of AES256GCM
+aes-gcm-extract: ml-lib
+	mkdir -p $(AESGCM_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(AESGCM_FSTAR_HST) --odir $(AESGCM_ODIR) 
+
+aes-gcm-compile: aes-gcm-extract
+	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(AESGCM_ODIR) \
+	  $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+	  $(addprefix $(AESGCM_ODIR)/,$(AESGCM_EXTRACTED_HST)) ml/test_aes_gcm_hst.ml -o test_aes_gcm.exe
+
+aes-gcm-test: aes-gcm-compile
+	./test_aes_gcm.exe
+
+# Cleaning
+clean:
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
+	rm -rf *.c *.out *.cmx *.o *.cmi *~ *.cmo *.exe *.krml $(CHACHA_ODIR) $(POLY_ODIR) $(AES_ODIR) $(AESGCM_ODIR) \
+		$(addprefix $(LIB_DIR)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
+		$(addprefix $(LIB_DIR_HST)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
+		$(addprefix ml/,*.cmx *.o *.cmi *~ *.cmo) $(CODE_DIR)/*~
+
+# C extraction of CHACHA20
+chacha-c:
+	$(C_COMP) -c $(KREMLIN_LIB)/kremlib.c
+	$(C_COMP) -c $(KREMLIN_DIR)/test/testlib.c
+	$(C_COMP) -c $(LIB_DIR_HST)/c/haclib.c
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
+	mkdir -p $(CHACHA_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_KREMLIN) $(LIB_FILES_HST) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR)
+	$(KREMLIN) -write out.krml $(KREMLIN_ARGS) -add-include \"haclib.h\"
+	$(C_COMP) $(KREMLIN_OBJS) $(LIB_DIR_HST)/c/haclib.h ./c/test_chacha.c -o test_chacha.out
+	./test_chacha.out
+
+chacha-exe:
+	$(KREMLIN) -write out.krml $(KREMLIN_ARGS) -add-include \"haclib.h\"
+	$(C_COMP) $(KREMLIN_OBJS) $(LIB_DIR_HST)/c/haclib.h ./c/test_chacha.c -o test_chacha.out
+	./test_chacha.out
+
+#########################################################################
+#                                 Old code                              #
+#########################################################################
 
 # OCaml extracton of CHACHA20
 chacha-ml:
@@ -96,67 +181,4 @@ aes-ml:
 	  $(addprefix $(AES_ODIR)/,$(AES_EXTRACTED)) ml/test_aes.ml -o test_aes.exe
 	./test_aes.exe
 
-# OCaml extracton of CHACHA20
-chacha-hst-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
-	mkdir -p $(CHACHA_ODIR)
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR) 
-	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CHACHA_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe 
-	./test_chacha20.exe
-
-# C extraction of CHACHA20
-chacha-c:
-	$(C_COMP) -c $(KREMLIN_LIB)/kremlib.c
-	$(C_COMP) -c $(KREMLIN_DIR)/test/testlib.c
-	$(C_COMP) -c $(LIB_DIR_HST)/c/haclib.c
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
-	mkdir -p $(CHACHA_ODIR)
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_KREMLIN) $(LIB_FILES_HST) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR)
-	$(KREMLIN) -write out.krml $(KREMLIN_ARGS) -add-include \"haclib.h\"
-	$(C_COMP) $(KREMLIN_OBJS) $(LIB_DIR_HST)/c/haclib.h ./c/test_chacha.c -o test_chacha.out
-	./test_chacha.out
-
-chacha-exe:
-	$(KREMLIN) -write out.krml $(KREMLIN_ARGS) -add-include \"haclib.h\"
-	$(C_COMP) $(KREMLIN_OBJS) $(LIB_DIR_HST)/c/haclib.h ./c/test_chacha.c -o test_chacha.out
-	./test_chacha.out
-
-poly-hst-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
-	mkdir -p $(POLY_ODIR)
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(POLY_FSTAR_HST) --odir $(POLY_ODIR) 
-	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(POLY_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(POLY_ODIR)/,$(POLY_EXTRACTED_HST)) ml/test_poly1305_hst.ml -o test_poly.exe 
-	./test_poly.exe
-
-# OCaml extracton of AES
-aes-hst-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
-	mkdir -p $(AES_ODIR)
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(AES_FSTAR_HST) --odir $(AES_ODIR) 
-	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(AES_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(AES_ODIR)/,$(AES_EXTRACTED_HST)) ml/test_aes_hst.ml -o test_aes.exe 
-	./test_aes.exe
-
-# OCaml extracton of AES256GCM
-aes-gcm-hst-ml:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean all
-	mkdir -p $(AESGCM_ODIR)
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(AESGCM_FSTAR_HST) --odir $(AESGCM_ODIR) 
-	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(AESGCM_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(AESGCM_ODIR)/,$(AESGCM_EXTRACTED_HST)) ml/test_aes_gcm_hst.ml -o test_aes_gcm.exe 
-	./test_aes_gcm.exe
-
-compile:
-	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(CHACHA_ODIR) $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
-	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe 
-	./test_chacha20.exe
-
-# Cleaning
-clean:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
-	rm -rf *.c *.out *.cmx *.o *.cmi *~ *.cmo *.exe *.krml $(CHACHA_ODIR) $(POLY_ODIR) $(AES_ODIR) $(AESGCM_ODIR) \
-		$(addprefix $(LIB_DIR)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
-		$(addprefix $(LIB_DIR_HST)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
-		$(addprefix ml/,*.cmx *.o *.cmi *~ *.cmo) $(CODE_DIR)/*~
+#########################################################################

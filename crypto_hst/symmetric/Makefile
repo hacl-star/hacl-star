@@ -13,11 +13,19 @@ all: chacha aes
 import-lib:
 	@cp $(addprefix ../../lib/hst/, $(LIB_FILES)) .
 
-chacha:
-	$(FSTAR) $(OPTIONS_VER) Hacl.Symmetric.Chacha20.fst --z3timeout 20
+chacha: Hacl.Symmetric.Chacha20.fst-ver
 
-aes:
-	$(FSTAR) $(OPTIONS_VER) Hacl.Symmetric.AES.fst --z3timeout 20
+aes: Hacl.Symmetric.AES.fst-ver
+
+poly: $(addsuffix -ver, \
+		Utils.fst \
+		Hacl.Symmetric.Poly1305.Bigint.fst \
+		Hacl.Symmetric.Poly1305.Bignum.fst \
+		Hacl.Symmetric.Poly1305.fst)
+
+%-ver: %
+	$(FSTAR) $(OPTIONS_VER) $^ --z3timeout 50
+
 
 clean:
 	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(LIB_FILES)

@@ -1,4 +1,4 @@
-open Poly_Poly1305
+open Hacl_Symmetric_Poly1305
 open Char
 open Hacl_SBuffer
 

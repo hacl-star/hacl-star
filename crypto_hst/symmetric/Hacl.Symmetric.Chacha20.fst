@@ -102,7 +102,7 @@ val bytes_of_u32s: output:bytes -> m:u32s{disjoint output m} -> len:u32{FStar.UI
   (ensures (fun h0 _ h1 -> live h0 output /\ live h0 m /\ live h1 output /\ live h1 m
     /\ modifies_1 output h0 h1 ))
 let rec bytes_of_u32s output m l =
-  if UInt32.gt l 0ul then
+  if U32 (l >^ 0ul) then
     begin
     let rem = U32 (l %^ 4ul) in
     if U32 (rem >^ 0ul) then

@@ -29,6 +29,11 @@ type s32 = Hacl_UInt32.t
 type s64 = Hacl_UInt64.uint64
 type s128 = Hacl_UInt128.t
 
+type u8 = FStar_UInt8.t
+type u32 = FStar_UInt32.t
+type u64 = FStar_UInt64.uint64
+type u128 = FStar_UInt128.t
+
 let create init len = {content = Array.make len init; idx = 0; length = len}
 let index b n = Array.get b.content (n+b.idx)
 let upd (b:'a buffer) (n:int) (v:'a) = Array.set b.content (n+b.idx) v
