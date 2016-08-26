@@ -1,10 +1,10 @@
-open Curve_Parameters
+open Hacl_EC_Curve25519_Parameters
 open Hacl_UInt64
 open Big_int
 open Stdint
 open Hacl_SBuffer
-open Curve_Bignum
-open Curve_Point
+open Hacl_EC_Curve25519_Bignum
+open Hacl_EC_Curve25519_Point
 
 let scalar1 = "a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4"
 let scalar2 = "4b66e9d4d1b4673c5ad22691957d6af5c11b6421e0ea01d42ca4169e7918ba0d"
@@ -28,7 +28,7 @@ let _ =
   let scalar = import_from_string scalar1 in
   let qx = import_from_string input1 in
   let output = {content = Array.create 32 (Hacl_UInt8.of_string "0"); idx=0; length = 32} in
-  Curve_Curve25519.exp output qx scalar;
+  Hacl_EC_Curve25519.exp output qx scalar;
   print_string "Got:\n";
   print_bytes output;
   print_string ("Expected:\n" ^ expected1 ^ "\n");
@@ -39,7 +39,7 @@ let _ =
   print_string "Testing scalar 2 and input 2:\n";
   let scalar = import_from_string scalar2 in
   let qx = import_from_string input2 in
-  Curve_Curve25519.exp output qx scalar;
+  Hacl_EC_Curve25519.exp output qx scalar;
   print_string "Got:\n";
   print_bytes output;
   print_string ("Expected:\n" ^ expected2 ^ "\n");
