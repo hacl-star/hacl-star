@@ -222,13 +222,13 @@ let rec copymask' buf bufstart bufstop out masklen i =
     let c1 = sint32_to_sint8 (S32.gte_mask (uint32_to_sint32 i) bufstart) in
     let c2 = sint32_to_sint8 (S32.gte_mask (uint32_to_sint32 i) bufstop) in
     let nc2 = S8.lognot c2 in
+    let mask = S8.logand c1 nc2 in
     let bout = SB.index out i in
     let bbuf = SB.index buf i in
-    let r1 = S8.logand bout (S8.logand (S8.lognot c1) (S8.lognot c2)) in
-    let r2 = S8.logand bbuf (S8.logand c1 (S8.lognot c2)) in
-    let r3 = S8.logand bout (S8.logand c1 c2) in
-    let b = S8.logor r1 (S8.logor r2 r3) in
-    SB.upd out i b;
+    let r1 = S8.logand bbuf mask in
+    let r2 = S8.logand bout (S8.lognot mask) in
+    let r = S8.logor r1 r2 in
+    SB.upd out i r;
     copymask' buf bufstart bufstop out masklen (U32.add i 1ul)
   else ()
 
