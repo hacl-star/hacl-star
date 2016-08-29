@@ -65,6 +65,7 @@ val double_and_add:
 (* //	       (x1 ^* (((x3 ^- z3) ^* (x2^+z2)) ^- ((x3 ^+ z3) ^* (x2 ^- z2))) ^^ 2) *)
 (* 	)) *)
 let double_and_add two_p two_p_plus_q p p_plus_q q =
+  (* TODO *)
   let hinit = HST.get() in
   push_frame();
   let h0 = HST.get() in
