@@ -223,7 +223,7 @@ let rec ghash_loop tag auth_key str len dep =
     ghash_loop tag auth_key str len next
   end
 
-#reset-options "--initial_fuel 0 --max_fuel 0"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 (* A hash function used in authentication. It will authenticate additional data first, *)
 (* then ciphertext and at last length information. The result is stored in tag.        *)
@@ -318,6 +318,8 @@ let authenticate #k alg ciphertext tag key nonce cnt ad adlen len =
   let tmp = create (uint8_to_sint8 0uy) 48ul in
   auth_body #k alg ciphertext tag key nonce cnt ad adlen len tmp;
   pop_frame()
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 private val encrypt_loop: #k:pos -> alg:cipher_alg k ->
     ciphertext:u8s ->

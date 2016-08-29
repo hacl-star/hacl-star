@@ -135,9 +135,10 @@ val maxValue_eq_lemma:
     (requires (equal ha a hb b /\ l > 0 /\ l <= length a)) 
     (ensures (equal ha a hb b /\ l > 0 /\ l <= length a /\ l <= length b /\ maxValue ha a l = maxValue hb b l))
 let rec maxValue_eq_lemma ha hb a b l =
+  FStar.Buffer.Quantifiers.eq_lemma ha a hb b;
   match l with
   | 1 -> ()
-  | _ -> cut (v (get ha a (l-1)) = v (get hb b (l-1)));
+  | _ -> assert (v (get ha a (l-1)) = v (get hb b (l-1)));
          maxValue_eq_lemma ha hb a b (l-1)
   
 val maxValueNorm_eq_lemma: 

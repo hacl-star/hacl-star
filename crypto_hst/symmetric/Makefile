@@ -4,7 +4,7 @@ FSTAR=$(FSTAR_HOME)/bin/fstar.exe
 
 LIB_DIR=../../lib/hst
 
-OPTIONS_VER=--include $(LIB_DIR) --initial_fuel 0 --max_fuel 0
+OPTIONS_VER=--include $(LIB_DIR) --use_hints
 
 LIB_FILES=Hacl.Cast.fst Hacl.SBuffer.fst Hacl.UInt128.fst Hacl.UInt64.fst Hacl.UInt32.fst Hacl.UInt8.fst Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst
 
@@ -28,7 +28,7 @@ gcm: Hacl.Symmetric.GCM.fst-ver
 aead-aes256-gcm: aes gcm Hacl.AEAD.AES256GCM.fst-ver
 
 %-ver: %
-	$(FSTAR) $(OPTIONS_VER) $^ --z3timeout 50
+	$(FSTAR) $(OPTIONS_VER) $^
 
 
 clean:

@@ -26,22 +26,6 @@ let nk = 8ul
 let nb = 4ul
 let nr = 14ul
 
-(* (\* S8 operators *\) *)
-(* let op_Hat_Less_Less (a:byte) (b:UInt32.t) : Tot byte = shift_left a b *)
-(* let op_Hat_Greater_Greater (a:byte) (b:UInt32.t) : Tot byte = shift_right a b *)
-(* let op_Hat_Hat (a:byte) (b:byte) : Tot byte = logxor a b *)
-(* let op_Hat_Amp (a:byte) (b:byte) : Tot byte = logand a b *)
-(* let op_Hat_Bar (a:byte) (b:byte) : Tot byte = logor  a b *)
-(* let op_Hat_Star_Percent (a:byte) (b:byte) : Tot byte = mul_mod a b *)
-
-(* (\* U32 operators *\) *)
-(* let op_At_Plus = UInt32.add *)
-(* let op_At_Subtraction = UInt32.sub *)
-(* let op_At_Star = UInt32.mul *)
-(* let op_At_Slash = UInt32.div *)
-(* let op_At_Equals = UInt32.eq *)
-(* let op_At_Percent = UInt32.rem *)
-
 val xtime: b:byte -> Tot byte
 let xtime b =
   (b <<^ 1ul) ^^ (((b >>^ 7ul) &^ (uint8_to_sint8 1uy)) *%^ (uint8_to_sint8 0x1buy))
@@ -574,6 +558,8 @@ let rec inv_cipher_loop state w sbox round =
   end
 
 let lemma_002 (w:u8s) : Lemma (requires (length w >= 4 * UInt32.v nb * (UInt32.v nr + 1))) (ensures (length w >= 16 * (UInt32.v nr + 1))) = ()
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
 
 val inv_cipher: out:u8s{length out = 4 * UInt32.v nb} -> input:u8s{length input = 4* UInt32.v nb} -> w:u8s{length w >= 4 * UInt32.v nb * (UInt32.v nr+1)} -> sbox:u8s{length sbox = 256} -> STL unit
   (requires (fun h -> live h out /\ live h input /\ live h w /\ live h sbox
