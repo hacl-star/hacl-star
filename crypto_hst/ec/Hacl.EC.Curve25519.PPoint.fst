@@ -1,4 +1,4 @@
-module Hacl.EC.Curve25519.Point
+module Hacl.EC.Curve25519.PPoint
 
 open FStar.Mul
 open FStar.HST
@@ -51,9 +51,11 @@ type distinct (a:point) (b:point) =
   /\ disjoint (get_y a) (get_x b) /\ disjoint (get_y a) (get_y b) /\ disjoint (get_y a) (get_z b)
   /\ disjoint (get_z a) (get_x b) /\ disjoint (get_z a) (get_y b) /\ disjoint (get_z a) (get_z b)
 
-let op_Plus_Plus_Plus = TSet.union
+let op_Plus_Plus (#a:Type) (s:TSet.set a) (s':TSet.set a) : GTot (TSet.set a) = TSet.union s s'
 
-let refs p : GTot (TSet.set Heap.aref) = arefs (only (get_x p) ++ only (get_y p) ++ (only (get_z p)))
+val refs: p:point -> GTot (TSet.set Heap.aref)
+let refs p = arefs (only (get_x p) ++ only (get_y p) ++ (only (get_z p)))
+
 
 val make: bigint -> bigint -> bigint -> Tot point
 let make x y z = Point x y z
@@ -193,7 +195,7 @@ val swap_conditional:
       /\ HS.modifies_ref (frame_of a) (refs a ++ refs b) h0 h1
       /\ prop_1 h0 h1 a b))
       (* (onCurve h0 a /\ onCurve h0 b) /\ (onCurve h1 a /\ onCurve h1 b) *)
-      (* (\* /\ modifies (refs a +++ refs b) h0 h1  *\) *)
+      (* (\* /\ modifies (refs a ++ refs b) h0 h1  *\) *)
       (* /\ (v is_swap = 0 ==>  *)
       (* 	  ((pointOf h1 a) == (pointOf h0 a) /\ (pointOf h1 b) == (pointOf h0 b))) *)
       (* /\ (v is_swap = pow2 platform_size - 1 ==>  *)
@@ -225,14 +227,13 @@ let swap_conditional a b is_swap =
   helper_lemma (get_x a) (get_x b);
   helper_lemma (get_y a) (get_y b);
   helper_lemma (get_z a) (get_z b);
-  let s = (refs a ++ refs b) in
-  helper_lemma_2 (frame_of a) h0 h1 (arefs (only (get_x a) ++ only (get_x b))) s;
-  helper_lemma_2 (frame_of a) h1 h2 (arefs (only (get_y a) ++ only (get_y b))) s;
-  helper_lemma_2 (frame_of a) h2 h3 (arefs (only (get_z a) ++ only (get_z b))) s;
-  helper_lemma_3 (frame_of a) h0 h1 h2 s;
-  helper_lemma_3 (frame_of a) h0 h2 h3 s;
+  helper_lemma_2 (frame_of a) h0 h1 (arefs (only (get_x a) ++ only (get_x b))) (refs a ++ refs b);
+  helper_lemma_2 (frame_of a) h1 h2 (arefs (only (get_y a) ++ only (get_y b))) (refs a ++ refs b);
+  helper_lemma_2 (frame_of a) h2 h3 (arefs (only (get_z a) ++ only (get_z b))) (refs a ++ refs b);
+  helper_lemma_3 (frame_of a) h0 h1 h2 (refs a ++ refs b);
+  helper_lemma_3 (frame_of a) h0 h2 h3 (refs a ++ refs b);
   helper_lemma_4 (frame_of a) h0 h1 h2 h3 a b;
-  assert(HS.modifies_ref (frame_of a) s h0 h3);
+  assert(HS.modifies_ref (frame_of a) (refs a ++ refs b) h0 h3);
   ()
 
 val helper_lemma': #t:Type -> a:buffer t -> Lemma
@@ -319,14 +320,13 @@ let copy a b =
   helper_lemma' (get_x a);
   helper_lemma' (get_y a);
   helper_lemma' (get_z a);
-  let s = (refs a) in
-  helper_lemma_2 (frame_of a) h0 h1 (arefs (only (get_x a))) s;
-  helper_lemma_2 (frame_of a) h1 h2 (arefs (only (get_y a))) s;
-  helper_lemma_2 (frame_of a) h2 h3 (arefs (only (get_z a))) s;
-  helper_lemma_3 (frame_of a) h0 h1 h2 s;
-  helper_lemma_3 (frame_of a) h0 h2 h3 s;
+  helper_lemma_2 (frame_of a) h0 h1 (arefs (only (get_x a))) (refs a);
+  helper_lemma_2 (frame_of a) h1 h2 (arefs (only (get_y a))) (refs a);
+  helper_lemma_2 (frame_of a) h2 h3 (arefs (only (get_z a))) (refs a);
+  helper_lemma_3 (frame_of a) h0 h1 h2 (refs a);
+  helper_lemma_3 (frame_of a) h0 h2 h3 (refs a);
   helper_lemma_4' (frame_of a) h0 h1 h2 h3 a;
-  assert(HS.modifies_ref (frame_of a) s h0 h3);
+  assert(HS.modifies_ref (frame_of a) (refs a) h0 h3);
   ()
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
@@ -396,10 +396,9 @@ let swap_both a b c d =
   (* on_curve_lemma h1 h2 c (erefs d); *)
   (* live_lemma h1 h2 a (erefs d); *)
   (* live_lemma h1 h2 b (erefs d) *)
-  let s = (refs a ++ refs b ++ refs c ++ refs d) in
-  helper_lemma_2 (frame_of a) h0 h1 (refs c) s;
-  helper_lemma_2 (frame_of a) h1 h2 (refs d) s;
-  helper_lemma_3 (frame_of a) h0 h1 h2 s;
+  helper_lemma_2 (frame_of a) h0 h1 (refs c) (refs a ++ refs b ++ refs c ++ refs d);
+  helper_lemma_2 (frame_of a) h1 h2 (refs d) (refs a ++ refs b ++ refs c ++ refs d);
+  helper_lemma_3 (frame_of a) h0 h1 h2 (refs a ++ refs b ++ refs c ++ refs d);
   ()
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
@@ -411,7 +410,7 @@ val copy2: p':point -> q':point{distinct p' q' /\ same_frame_2 p' q'} ->
       (* live h p' /\ live h q' /\ onCurve h p /\ onCurve h q )) *)
     (ensures (fun h0 _ h1 -> live h1 p' /\ live h1 q' /\ live h1 p /\ live h1 q
       /\ HS.modifies_one (frame_of p) h0 h1
-      /\ HS.modifies_ref (frame_of p) (refs p' +++ refs q') h0 h1 ))
+      /\ HS.modifies_ref (frame_of p) (refs p' ++ refs q') h0 h1 ))
       (* onCurve h1 p' /\ onCurve h1 q' /\ onCurve h1 p /\ onCurve h1 q  *)
       (* /\ onCurve h0 p /\ onCurve h0 q *)
       (* (\* /\ (modifies (FStar.Set.union (refs p') (refs q')) h0 h1) *\) *)
@@ -441,10 +440,9 @@ let copy2 p' q' p q =
   (* on_curve_lemma h1 h2 p' (erefs q');  *)
   (* on_curve_lemma h1 h2 p (erefs q');  *)
   (* on_curve_lemma h1 h2 q (erefs q') *)
-  let s = (refs p' ++ refs q') in
-  helper_lemma_2 (frame_of p) h0 h1 (refs p') s;
-  helper_lemma_2 (frame_of p) h1 h2 (refs q') s;
-  helper_lemma_3 (frame_of p) h0 h1 h2 s;
+  helper_lemma_2 (frame_of p) h0 h1 (refs p') (refs p' ++ refs q');
+  helper_lemma_2 (frame_of p) h1 h2 (refs q') (refs p' ++ refs q');
+  helper_lemma_3 (frame_of p) h0 h1 h2 (refs p' ++ refs q');
   ()
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
