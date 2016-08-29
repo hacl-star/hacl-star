@@ -1,8 +1,15 @@
-module Curve.Parameters
+module Hacl.EC.Curve25519.Parameters
 
 open Math.Lib
 open FStar.Mul
 open FStar.Ghost
+
+
+(* This HAS to go in some more appropriate place *)
+assume MaxUInt8 : pow2 8 = 256
+assume MaxUInt32: pow2 32 = 4294967296
+assume MaxUInt64: pow2 64 > 0xfffffffffffffff
+assume MaxUInt128: pow2 128 > pow2 64
 
 val prime: erased pos
 let prime = hide (pow2 255 - 19)

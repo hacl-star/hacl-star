@@ -1,45 +1,27 @@
-module Curve.Modulo
-
-(* 64/128 bits *)
+module Hacl.EC.Curve25519.Bignum.Modulo.Lemmas
 
 open FStar.Mul
 open FStar.HST
 open FStar.HyperStack
 open FStar.Ghost
-open Hacl.Cast
-open Hacl.UInt128
+open Hacl.UInt64
 open Hacl.SBuffer
 open Math.Lib
-open Math.Field
-open Curve.Parameters
-open Curve.Bigint
+open Hacl.EC.Curve25519.Parameters
+open Hacl.EC.Curve25519.Bigint
 
-module U32 = FStar.UInt32
-module S64 = Hacl.UInt64
-module S128 = Hacl.UInt128
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
+(* Module abbreviations *)
+module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
-let w: u32 -> Tot int = U32.v
-let vv: s64 -> GTot int = S64.v
-
-let op_Plus_Bar = U32.add
-let op_Subtraction_Bar = U32.sub
-
-let heap = HS.mem
-
-let op_Bar_Amp (x:s128) (y:s128) : Tot s128 = Hacl.UInt128.logand x y
-let op_Bar_Greater_Greater (x:s128) (y:u32) : Tot s128 = Hacl.UInt128.shift_right x y
-let op_Bar_Less_Less (x:s128) (y:u32) : Tot s128 = Hacl.UInt128.shift_left x y
-let op_Bar_Plus (x:s128) (y:s128) : Tot s128 = Hacl.UInt128.add x y
-let op_Bar_Star (x:s128) (y:s128) : Tot s128 = Hacl.UInt128.mul x y
-
-// Because the details from parameters.fst are not imported although needed for proofs here
-(* assume Templ_lemma: forall (i:nat). {:pattern (templ i)} templ i = 51 *)
-(* assume Platform_size_lemma: platform_size = 64 *)
-(* assume PrimeValue: reveal prime = (pow2 255 - 19) *)
-(* assume NormLengthValue: norm_length = 5 *)
-(* assume Ndiff: ndiff = 53 *)
-(* assume Ndiff': ndiff' = 51 *)
+module U8  = FStar.UInt8
+module U32 = FStar.UInt32
+module H8  = Hacl.UInt8
+module H32  = Hacl.UInt32
+module H64  = Hacl.UInt64
 
 assume val prime_modulo_lemma: unit -> Lemma (pow2 255 % (reveal prime) = 19)
 

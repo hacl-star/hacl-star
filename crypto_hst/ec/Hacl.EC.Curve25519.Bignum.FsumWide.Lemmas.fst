@@ -1,4 +1,4 @@
-module Curve.FsumWide
+module Hacl.EC.Curve25519.Bignum.FsumWide.Lemmas
 
 open FStar.Mul
 open FStar.HST

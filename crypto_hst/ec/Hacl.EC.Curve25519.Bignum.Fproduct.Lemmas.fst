@@ -1,26 +1,27 @@
-module Curve.Fproduct
+module Hacl.EC.Curve25519.Bignum.Fproduct.Lemmas
 
 open FStar.Mul
 open FStar.HST
 open FStar.HyperStack
 open FStar.Ghost
-open Hacl.UInt128
+open Hacl.UInt64
 open Hacl.SBuffer
 open Math.Lib
-open Curve.Parameters
-open Curve.Bigint
+open Hacl.EC.Curve25519.Parameters
+open Hacl.EC.Curve25519.Bigint
 
-#set-options "--lax"
 
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
+(* Module abbreviations *)
+module HH = FStar.HyperHeap
+module HS = FStar.HyperStack
+
+module U8  = FStar.UInt8
 module U32 = FStar.UInt32
-module S64 = Hacl.UInt64
-
-let w: u32 -> Tot int = U32.v
-
-let vv: s64 -> GTot int = Hacl.UInt64.v
-
-let op_Plus_Bar = U32.add
-let op_Subtraction_Bar = U32.sub
+module H8  = Hacl.UInt8
+module H32  = Hacl.UInt32
+module H64  = Hacl.UInt64
 
 (* Lemma : additivity property of the "bitweight" function if the template is normalized *)
 val bitweight_lemma_1: t:template{forall (n:nat). t n = t 0} -> i:nat -> Lemma (bitweight t i = i * (t 0))

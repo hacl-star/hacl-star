@@ -1,31 +1,28 @@
-module Curve.Point
+module Hacl.EC.Curve25519.Point.Lemmas
 
 open FStar.Mul
 open FStar.HST
 open FStar.HyperStack
 open FStar.Ghost
-open FStar.Buffer
+open Hacl.UInt64
 open Hacl.SBuffer
 open Math.Lib
-open Math.Field
-open Math.Curve
-open Curve.Parameters
-open Curve.Bigint
-open Curve.Bignum
-open Hacl.UInt64
+open Hacl.EC.Curve25519.Parameters
+open Hacl.EC.Curve25519.Bigint
 
-module U32 = FStar.UInt32
-module S64 = Hacl.UInt64
-module S128 = Hacl.UInt128
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
+(* Module abbreviations *)
+module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
-let w: u32 -> Tot int = U32.v
-let vv: s128 -> GTot int = S128.v
-
-let op_Plus_Bar = U32.add
-let op_Subtraction_Bar = U32.sub
-
-let heap = HS.mem
+module U8  = FStar.UInt8
+module U32 = FStar.UInt32
+module H8  = Hacl.UInt8
+module H32  = Hacl.UInt32
+module H64  = Hacl.UInt64
+module H128  = Hacl.UInt128
 
 type point = | Point: x:bigint -> y:bigint -> z:bigint -> point
 

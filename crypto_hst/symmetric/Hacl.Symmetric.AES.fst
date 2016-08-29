@@ -400,6 +400,8 @@ let lemma_aux_000 (i:UInt32.t{UInt32.v i < 240 /\ UInt32.v i >= 4 * UInt32.v nk}
   (let open FStar.UInt32 in
     (4 * v nk <= pow2 32 - 1 /\ v (i+^0ul) >= v (4ul *^ nk) /\ v (i+^1ul) >= v (4ul *^ nk) /\ v (i+^2ul) >= v (4ul *^ nk) /\ v (i+^3ul) >= v (4ul *^ nk) /\ v ((i/^4ul)/^nk) >= 1)) = ()
 
+#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
+
 val keyExpansion_aux_0:w:u8s{length w >= 16 * (UInt32.v nr+1)} -> temp:u8s{length temp >= 4} -> sbox:u8s{length sbox = 256} -> i:UInt32.t{UInt32.v i < 60 /\ UInt32.v i >= UInt32.v nk} -> STL unit
   (requires (fun h -> live h w /\ live h temp /\ live h sbox
     /\ disjoint w temp /\ disjoint w sbox /\ disjoint temp sbox))
@@ -423,6 +425,8 @@ let keyExpansion_aux_0 w temp sbox j =
   let h1 = HST.get() in
   assert(live h1 temp);
   assert(modifies_1 temp h0 h1)
+
+#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
 
 val keyExpansion_aux_1: w:u8s{length w >= 16 * (UInt32.v nr+1)} -> temp:u8s{length temp >= 4} -> sbox:u8s{length sbox = 256} -> i:UInt32.t{UInt32.v i < 60 /\ UInt32.v i >= UInt32.v nk} -> STL unit
   (requires (fun h -> live h w /\ live h temp /\ live h sbox
@@ -475,7 +479,6 @@ let keyExpansion key w sbox =
   keyExpansion_aux w temp sbox nk;
   pop_frame()
 
-#reset-options "--initial_fuel 0 --max_fuel 0"
 
 val invShiftRows: state:u8s{length state >= 4 * UInt32.v nb} -> STL unit
   (requires (fun h -> live h state))

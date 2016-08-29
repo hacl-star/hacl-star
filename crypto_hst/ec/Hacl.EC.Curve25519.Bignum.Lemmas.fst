@@ -1,4 +1,4 @@
-module Curve.Bignum
+module Hacl.EC.Curve25519.Bignum.Lemmas
 
 open FStar.Mul
 open FStar.HST
@@ -7,24 +7,21 @@ open FStar.Ghost
 open Hacl.UInt64
 open Hacl.SBuffer
 open Math.Lib
-open Math.Field
-open Curve.Parameters
-open Curve.Bigint
+open Hacl.EC.Curve25519.Bigint
 
-module U32 = FStar.UInt32
 
-module S64 = Hacl.UInt64
-module S128 = Hacl.UInt128
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
+(* Module abbreviations *)
+module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
-let w: u32 -> Tot int = U32.v
-let vv: s128 -> GTot int  = S128.v
-
-let op_Plus_Bar = U32.add
-let op_Subtraction_Bar = U32.sub
-
-let heap = HS.mem
+module U8  = FStar.UInt8
+module U32 = FStar.UInt32
+module H8  = Hacl.UInt8
+module H32  = Hacl.UInt32
+module H64  = Hacl.UInt64
+module H128  = Hacl.UInt128
 
 assume val nat_to_felem: x:nat{x < reveal prime} -> GTot felem
 assume val felem_to_nat: felem -> GTot (x:nat{x < reveal prime})

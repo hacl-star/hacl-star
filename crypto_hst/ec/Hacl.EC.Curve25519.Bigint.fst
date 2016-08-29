@@ -1,4 +1,4 @@
-module Curve.Bigint
+module Hacl.EC.Curve25519.Bigint
 
 open FStar.Mul
 open FStar.HST
@@ -9,16 +9,26 @@ open Hacl.UInt64
 open Hacl.SBuffer
 open Math.Axioms
 open Math.Lib
-open Curve.Parameters
+open Hacl.EC.Curve25519.Parameters
+
+(* Module abbreviations *)
+module B  = Hacl.SBuffer
+module HH = FStar.HyperHeap
+module HS = FStar.HyperStack
+
+module U8   = FStar.UInt8
+module U32  = FStar.UInt32
+module U64  = FStar.UInt64
+module H8   = Hacl.UInt8
+module H32  = Hacl.UInt32
+module H64  = Hacl.UInt64
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* Non secret integers *)
-let u32 = FStar.UInt32.t
-
 let heap = HyperStack.mem
 
-let only = FStar.TSet.singleton
-
-(* ** Types ** *) 
+(* Types *) 
 
 (* Maps the index of the integer data to the theoretic bit size of the cell *)
 let template : Type = (nat -> Tot pos)
@@ -58,7 +68,11 @@ let rec bitweight t n =
   | 0 -> 0
   | _ -> t (n-1) + bitweight t (n-1)
 
+#reset-options "--initial_fuel 1 --max_fuel 1"
+
 let bitweight_def t n : Lemma ((n = 0 ==> bitweight t n = 0) /\ (n > 0 ==> bitweight t n = bitweight t (n-1) + t (n-1))) = ()
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
 val eval : h:heap -> b:bigint{live h b} -> n:nat{n <= length b} -> GTot nat
 let rec eval h  b n =
@@ -72,6 +86,8 @@ let rec eval_wide h b n =
   | 0 -> 0
   | _ -> pow2 (bitweight templ (n-1)) * Hacl.UInt128.v (get h b (n-1)) + eval_wide h  b (n-1)
 
+#reset-options "--initial_fuel 1 --max_fuel 1"
+
 let eval_def h (b:bigint{live h b}) (n:nat{n<=length b}) : Lemma 
   ((n = 0 ==> eval h b n = 0)
     /\ (n <> 0 ==> eval h b n = pow2 (bitweight templ (n-1)) * v (get h b (n-1)) + eval h b (n-1)))
@@ -81,6 +97,8 @@ let eval_wide_def h (b:bigint_wide{live h b}) (n:nat{n<=length b}) : Lemma
   ((n = 0 ==> eval_wide h b n = 0)
     /\ (n <> 0 ==> eval_wide h b n = pow2 (bitweight templ (n-1)) * Hacl.UInt128.v (get h b (n-1)) + eval_wide h b (n-1)))
   = ()
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
 val eval_bytes : h:heap -> b:bytes{live h b} -> n:nat{n <= length b} -> GTot nat
 let rec eval_bytes h b n =
@@ -102,19 +120,27 @@ let rec maxValue_wide h  b l =
   | _ -> if maxValue_wide h  b (l-1) > Hacl.UInt128.v (get h  b (l-1)) then maxValue_wide h  b (l-1)
 	 else Hacl.UInt128.v (get h  b (l-1))
 
+#reset-options "--initial_fuel 1 --max_fuel 1"
+
 val maxValue_lemma_aux: h:heap -> b:bigint{live h b} -> l:pos{l<=length b} ->
   Lemma (forall (i:nat). i < l ==> v (get h b i) <= maxValue h b l)
 let rec maxValue_lemma_aux h b l = match l with | 1 -> () | _ -> maxValue_lemma_aux h b (l-1)
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
 val maxValue_lemma: h:heap -> b:bigint{live h b /\ length b > 0} ->
   Lemma (requires (True)) 
 	(ensures (forall (i:nat). {:pattern (v (get h b i))} i < length b ==> v (get h b i) <= maxValue h b (length b)))
 let rec maxValue_lemma h b = maxValue_lemma_aux h b (length b)
 
+#reset-options "--initial_fuel 1 --max_fuel 1"
+
 val maxValue_bound_lemma_aux: h:heap -> b:bigint{live h b /\ length b > 0} -> l:pos{l<=length b} -> 
   bound:nat ->  Lemma (requires (forall (i:nat). i < l ==> v (get h b i) <= bound))
 	             (ensures (maxValue h b l <= bound))
 let rec maxValue_bound_lemma_aux h b l bound = match l with | 1 -> () | _ -> maxValue_bound_lemma_aux h b (l-1) bound
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
 val maxValue_bound_lemma: h:heap -> b:bigint{live h b /\ length b > 0} -> bound:nat ->  
   Lemma (requires (forall (i:nat). i < length b ==> v (get h b i) <= bound))
@@ -123,6 +149,8 @@ let maxValue_bound_lemma h b bound = maxValue_bound_lemma_aux h b (length b) bou
 
 val maxValueNorm: h:heap -> b:bigint{live h  b /\ length  b >= norm_length} -> GTot nat
 let maxValueNorm h  b = maxValue h b norm_length
+
+#reset-options "--initial_fuel 1 --max_fuel 1"
 
 val maxValueIdx: h:heap ->b:bigint{live h  b} -> l:pos{l<=length  b} -> GTot nat
 let rec maxValueIdx h  b l = 
@@ -139,13 +167,17 @@ let rec maxValue_eq_lemma ha hb a b l =
   | 1 -> ()
   | _ -> cut (v (get ha a (l-1)) = v (get hb b (l-1)));
          maxValue_eq_lemma ha hb a b (l-1)
-  
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
 val maxValueNorm_eq_lemma: 
   ha:heap -> hb:heap -> a:bigint{ live ha a /\ length a >= norm_length }  -> b:bigint{ live hb b /\ length b >= norm_length } -> 
   Lemma 
     (requires (equal ha a hb b)) 
     (ensures (maxValueNorm ha a = maxValueNorm hb b))
 let maxValueNorm_eq_lemma ha hb a b = maxValue_eq_lemma ha hb a b norm_length
+
+#reset-options "--initial_fuel 1 --max_fuel 1"
 
 val eval_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} -> b:bigint{live hb b} ->
   len:nat{ (len <= length a) /\ (len <= length b) } -> Lemma
@@ -156,24 +188,23 @@ let rec eval_eq_lemma ha hb a b len =
   | 0 -> ()
   | _ -> eval_eq_lemma ha hb a b (len-1)
 
-#reset-options "--z3timeout 100"
-#set-options "--lax"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 200"
 
 val eval_partial_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} ->  b:bigint{live hb b} -> 
   ctr:nat -> len:nat{ ctr <= len /\ len <= length a /\ len <= length b} -> Lemma
     (requires (live ha a /\ live hb b
-      /\ (forall (i:nat). i < len-ctr ==> get ha a (ctr+i) = get hb b (ctr+i)) ))
+      /\ (forall (i:nat). i < len-ctr ==> get ha a (ctr+i) == get hb b (ctr+i)) ))
     (ensures ( eval ha a len - eval ha a ctr = eval hb b len - eval hb b ctr ))
 let rec eval_partial_eq_lemma ha hb a b ctr len =
   if len = ctr then ()
-  else 
+  else
     begin
       eval_def ha a len;
       eval_def hb b len;
       eval_partial_eq_lemma ha hb a b ctr (len-1)
-    end     	 
+    end
 
-#reset-options
+#reset-options "--initial_fuel 1 --max_fuel 1"
 
 val eval_null: h:heap -> b:bigint{live h b} -> len:nat{len <= length b} -> Lemma
     (requires (forall (i:nat). {:pattern (v (get h b i))} i < len ==> v (get h b i) = 0))

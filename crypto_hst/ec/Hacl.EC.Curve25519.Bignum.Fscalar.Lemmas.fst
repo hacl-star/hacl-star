@@ -1,4 +1,4 @@
-module Curve.Fscalar
+module Hacl.EC.Curve25519.Bignum.Fscalar.Lemmas
 
 open FStar.Mul
 open FStar.HST
@@ -7,8 +7,8 @@ open FStar.Ghost
 open Hacl.UInt64
 open Hacl.SBuffer
 open Math.Lib
-open Curve.Parameters
-open Curve.Bigint
+open Hacl.EC.Curve25519.Parameters
+open Hacl.EC.Curve25519.Bigint
 
 #set-options "--lax"
 

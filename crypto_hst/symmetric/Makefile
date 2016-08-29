@@ -8,7 +8,7 @@ OPTIONS_VER=--include $(LIB_DIR) --initial_fuel 0 --max_fuel 0
 
 LIB_FILES=Hacl.Cast.fst Hacl.SBuffer.fst Hacl.UInt128.fst Hacl.UInt64.fst Hacl.UInt32.fst Hacl.UInt8.fst Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst
 
-all: chacha aes
+all: chacha poly aead-aes256-gcm
 
 import-lib:
 	@cp $(addprefix ../../lib/hst/, $(LIB_FILES)) .
@@ -22,6 +22,10 @@ poly: $(addsuffix -ver, \
 		Hacl.Symmetric.Poly1305.Bigint.fst \
 		Hacl.Symmetric.Poly1305.Bignum.fst \
 		Hacl.Symmetric.Poly1305.fst)
+
+gcm: Hacl.Symmetric.GCM.fst-ver
+
+aead-aes256-gcm: aes gcm Hacl.AEAD.AES256GCM.fst-ver
 
 %-ver: %
 	$(FSTAR) $(OPTIONS_VER) $^ --z3timeout 50

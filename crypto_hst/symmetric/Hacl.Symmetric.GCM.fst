@@ -11,7 +11,12 @@ open Hacl.SBuffer
 module U32 = FStar.UInt32
 type u32 = FStar.UInt32.t
 
-#set-options "--z3timeout 10 --max_fuel 1"
+assume MaxUInt8 : pow2 8 = 256
+assume MaxUInt32: pow2 32 = 4294967296
+assume MaxUInt64: pow2 64 > 0xfffffffffffffff
+assume MaxUInt128: pow2 128 > pow2 64
+
+#set-options "--z3timeout 10 --max_fuel 0 --initial_fuel 0"
 
 (* Define a type for all 16-byte block cipher algorithm *)
 type cipher_alg (k: pos) = key:u8s{length key = k} ->
@@ -37,12 +42,12 @@ private val gf128_add_loop: a:u8s{length a = 16} ->
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 b /\ modifies_1 a h0 h1))
 let rec gf128_add_loop a b dep =
-  if U32.eq dep 0ul then () else begin
-    let i = U32.sub dep 1ul in
-    let ai = index a i in
-    let bi = index b i in
-    let x = logxor ai bi in
-    upd a i x;
+  if U32 (dep =^ 0ul) then () else begin
+    let i = U32 (dep -^ 1ul) in
+    let ai = a.(i) in
+    let bi = b.(i) in
+    let x = ai ^^ bi in
+    a.(i) <- x;
     gf128_add_loop a b i
   end
 
@@ -61,15 +66,15 @@ private val gf128_shift_right_loop: a:u8s{length a = 16} ->
     (ensures (fun h0 _ h1 -> live h1 a /\ modifies_1 a h0 h1))
 let rec gf128_shift_right_loop a dep =
   if U32.eq dep 0ul then begin
-    let ai = index a 0ul in
+    let ai = a.(0ul) in
     let x = shift_right ai 1ul in
-    upd a 0ul x
+    a.(0ul) <- x
   end else begin
-    let i = U32.sub dep 1ul in
-    let hd = index a i in
-    let tl = index a dep in
-    let x = add (shift_left hd 7ul) (shift_right tl 1ul) in
-    upd a dep x;
+    let i = U32 (dep -^ 1ul) in
+    let hd = a.(i) in
+    let tl = a.(dep) in
+    let x = (hd <<^ 7ul) +%^ (tl >>^ 1ul) in
+    a.(dep) <- x;
     gf128_shift_right_loop a i
   end
 
@@ -92,11 +97,12 @@ private val apply_mask_loop: a:u8s{length a = 16} ->
     (requires (fun h -> live h a /\ live h m))
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 m /\ modifies_1 m h0 h1))
 let rec apply_mask_loop a m msk dep =
-  if U32.eq dep 0ul then () else begin
-    let i = U32.sub dep 1ul in
-    let ai = index a i in
-    let x = logand ai msk in
-    upd m i x;
+  if U32 (dep =^ 0ul) then () 
+  else begin
+    let i = U32 (dep -^ 1ul) in
+    let ai = a.(i) in
+    let x = ai &^ msk in
+    m.(i) <- x;
     apply_mask_loop a m msk i
   end
 
@@ -124,16 +130,16 @@ let rec gf128_mul_loop a b tmp dep =
   if U32.eq dep 128ul then () else begin
     let r = sub tmp 0ul 16ul in
     let m = sub tmp 16ul 16ul in
-    let num = index b (U32.div dep 8ul) in
+    let num = b.(U32 (dep /^ 8ul)) in
     let msk = ith_bit_mask num (U32.rem dep 8ul) in
     apply_mask a m msk;
     gf128_add r m;
-    let num = index a 15ul in
+    let num = a.(15ul) in
     let msk = ith_bit_mask num 7ul in
     gf128_shift_right a;
-    let num = index a 0ul in
-    upd a 0ul (logxor num (logand msk r_mul));
-    gf128_mul_loop a b tmp (U32.add dep 1ul)
+    let num = a.(0ul) in
+    a.(0ul) <- (num ^^ (logand msk r_mul));
+    gf128_mul_loop a b tmp (U32 (dep +^ 1ul))
   end
 
 (* In place multiplication. Calculate "a * b" and store the result in a.    *)
@@ -159,25 +165,43 @@ private val mk_len_info: len_info:u8s{length len_info = 16} ->
     (ensures (fun h0 _ h1 -> live h1 len_info /\ modifies_1 len_info h0 h1))
 let mk_len_info len_info len_1 len_2 =
   let last = shift_left (uint32_to_sint8 len_1) 3ul in
+  let open FStar.UInt32 in
   upd len_info 7ul last;
-  let len_1 = U32.shift_right len_1 5ul in
+  let len_1 = len_1 >>^ 5ul in
   upd len_info 6ul (uint32_to_sint8 len_1);
-  let len_1 = U32.shift_right len_1 8ul in
+  let len_1 = len_1 >>^ 8ul in
   upd len_info 5ul (uint32_to_sint8 len_1);
-  let len_1 = U32.shift_right len_1 8ul in
+  let len_1 = len_1 >>^ 8ul in
   upd len_info 4ul (uint32_to_sint8 len_1);
-  let len_1 = U32.shift_right len_1 8ul in
+  let len_1 = len_1 >>^ 8ul in
   upd len_info 3ul (uint32_to_sint8 len_1);
-  let last = shift_left (uint32_to_sint8 len_2) 3ul in
+  let last = Hacl.UInt8 (uint32_to_sint8 len_2 <<^ 3ul) in
   upd len_info 15ul last;
-  let len_2 = U32.shift_right len_2 5ul in
+  let len_2 = len_2 >>^ 5ul in
   upd len_info 14ul (uint32_to_sint8 len_2);
-  let len_2 = U32.shift_right len_2 8ul in
+  let len_2 = len_2 >>^ 8ul in
   upd len_info 13ul (uint32_to_sint8 len_2);
-  let len_2 = U32.shift_right len_2 8ul in
+  let len_2 = len_2 >>^ 8ul in
   upd len_info 12ul (uint32_to_sint8 len_2);
-  let len_2 = U32.shift_right len_2 8ul in
+  let len_2 = len_2 >>^ 8ul in
   upd len_info 11ul (uint32_to_sint8 len_2)
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+
+private val ghash_loop_: tag:u8s{length tag = 16} ->
+    auth_key:u8s{length auth_key = 16 /\ disjoint tag auth_key} ->
+    str:u8s{disjoint tag str /\ disjoint auth_key tag} ->
+    len:u32{length str = U32.v len} ->
+    dep:u32{U32.v dep <= U32.v len} -> STL unit
+    (requires (fun h -> U32.v len - U32.v dep <= 16 /\ live h tag /\ live h auth_key /\ live h str))
+    (ensures (fun h0 _ h1 -> live h1 tag /\ live h1 auth_key /\ live h1 str /\ modifies_1 tag h0 h1))
+let ghash_loop_ tag auth_key str len dep =
+  push_frame();
+  let last = create (uint8_to_sint8 0uy) 16ul in
+  blit str dep last 0ul (U32 (len -^ dep));
+  gf128_add tag last;
+  gf128_mul tag auth_key;
+  pop_frame()
 
 (* WARNING: can only pass lax check and may have issues with constant time. *)
 private val ghash_loop: tag:u8s{length tag = 16} ->
@@ -189,13 +213,8 @@ private val ghash_loop: tag:u8s{length tag = 16} ->
     (ensures (fun h0 _ h1 -> live h1 tag /\ live h1 auth_key /\ live h1 str /\ modifies_1 tag h0 h1))
 let rec ghash_loop tag auth_key str len dep =
   (* Appending zeros if the last block is not a complete one. *)
-  if U32.gte 16ul (U32.sub len dep) then begin
-    push_frame();
-    let last = create (uint8_to_sint8 0uy) 16ul in
-    blit str dep last 0ul (U32.sub len dep);
-    gf128_add tag last;
-    gf128_mul tag auth_key;
-    pop_frame()
+  if U32 (16ul >=^ (len -^ dep)) then begin
+    ghash_loop_ tag auth_key str len dep
   end else begin
     let next = U32.add dep 16ul in
     let si = sub str dep 16ul in
@@ -203,6 +222,8 @@ let rec ghash_loop tag auth_key str len dep =
     gf128_mul tag auth_key;
     ghash_loop tag auth_key str len next
   end
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* A hash function used in authentication. It will authenticate additional data first, *)
 (* then ciphertext and at last length information. The result is stored in tag.        *)
@@ -218,14 +239,19 @@ val ghash: auth_key:u8s{length auth_key = 16} ->
     (ensures (fun h0 _ h1 -> live h1 auth_key /\ live h1 ad /\ live h1 ciphertext /\ live h1 tag
         /\ modifies_1 tag h0 h1))
 let ghash auth_key ad adlen ciphertext len tag =
+  push_frame();
+  let h0 = HST.get() in
+  let len_info = create (uint8_to_sint8 0uy) 16ul in
+  mk_len_info len_info adlen len;
+  let h1 = HST.get() in
+  assert(modifies_0 h0 h1);
   fill tag (uint8_to_sint8 0uy) 16ul;
   ghash_loop tag auth_key ad adlen 0ul;
   ghash_loop tag auth_key ciphertext len 0ul;
-  push_frame();
-  let len_info = create (uint8_to_sint8 0uy) 16ul in
-  mk_len_info len_info adlen len;
   gf128_add tag len_info;
   gf128_mul tag auth_key;
+  let h2 = HST.get() in
+  assert(modifies_1 tag h1 h2);
   pop_frame()
 
 (* Update the counter, replace last 4 bytes of counter with num. *)
@@ -235,12 +261,13 @@ private val update_counter: counter:u8s{length counter = 16} ->
     (requires (fun h -> live h counter))
     (ensures (fun h0 _ h1 -> live h1 counter /\ modifies_1 counter h0 h1))
 let update_counter counter num =
+  let open FStar.UInt32 in
   upd counter 15ul (uint32_to_sint8 num);
-  let num = U32.shift_right num 8ul in
+  let num = num >>^ 8ul in
   upd counter 14ul (uint32_to_sint8 num);
-  let num = U32.shift_right num 8ul in
+  let num = num >>^ 8ul in
   upd counter 13ul (uint32_to_sint8 num);
-  let num = U32.shift_right num 8ul in
+  let num = num >>^ 8ul in
   upd counter 12ul (uint32_to_sint8 num)
 
 (* WARNING: may have issues with constant time. *)
@@ -306,16 +333,16 @@ private val encrypt_loop: #k:pos -> alg:cipher_alg k ->
         /\ modifies_2 ciphertext tmp h0 h1))
 let rec encrypt_loop #k alg ciphertext key cnt plaintext len tmp dep =
   (* Appending zeros if the last block is not a complete one. *)
-  if U32.gte 16ul (U32.sub len dep) then begin
+  if U32 (16ul >=^ (len -^ dep)) then begin
     let h0 = HST.get() in
     let counter = sub tmp 0ul 16ul in
     update_counter counter cnt;
     let last = sub tmp 16ul 16ul in
-    blit plaintext dep last 0ul (U32.sub len dep);
+    blit plaintext dep last 0ul (U32 (len -^ dep));
     let ci = sub tmp 32ul 16ul in
     alg key counter ci;
     gf128_add ci last;
-    blit ci 0ul ciphertext dep (U32.sub len dep);
+    blit ci 0ul ciphertext dep (U32 (len -^ dep));
     let h1 = HST.get() in
     assert(live h1 ciphertext /\ live h1 key /\ live h1 plaintext /\ live h1 tmp /\ modifies_2 ciphertext tmp h0 h1)
   end else begin
@@ -326,10 +353,12 @@ let rec encrypt_loop #k alg ciphertext key cnt plaintext len tmp dep =
     let ci = sub ciphertext dep 16ul in
     alg key counter ci;
     gf128_add ci pi;
-    encrypt_loop #k alg ciphertext key (U32.add_mod cnt 1ul) plaintext len tmp (U32.add dep 16ul);
+    encrypt_loop #k alg ciphertext key (U32 (cnt +%^ 1ul)) plaintext len tmp (U32 (dep +^ 16ul));
     let h1 = HST.get() in
     assert(live h1 ciphertext /\ live h1 key /\ live h1 plaintext /\ live h1 tmp /\ modifies_2 ciphertext tmp h0 h1)
   end
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 private val encrypt_body: #k:pos -> alg:cipher_alg k ->
     ciphertext:u8s ->
@@ -349,9 +378,11 @@ let encrypt_body #k alg ciphertext tag key nonce cnt ad adlen plaintext len =
   push_frame();
   let tmp = create (uint8_to_sint8 0uy) 48ul in
   blit nonce 0ul tmp 0ul 12ul;
-  encrypt_loop #k alg ciphertext key (U32.add_mod cnt 1ul) plaintext len tmp 0ul;
-  pop_frame();
-  authenticate #k alg ciphertext tag key nonce cnt ad adlen len
+  encrypt_loop #k alg ciphertext key (U32 (cnt +%^ 1ul)) plaintext len tmp 0ul;
+  authenticate #k alg ciphertext tag key nonce cnt ad adlen len;
+  pop_frame()
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* * In GCM, an initialization vector is used to generate a 96-bit nonce, and can have any length. **)
 (* * This version only allows 96-bit iv. This needs to be fixed.                                   **)

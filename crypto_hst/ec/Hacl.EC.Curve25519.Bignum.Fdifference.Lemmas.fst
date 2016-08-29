@@ -1,4 +1,4 @@
-module Curve.Fdifference
+module Hacl.EC.Curve25519.Bignum.Fdifference.Lemmas
 
 open FStar.Mul
 open FStar.HST
@@ -7,8 +7,21 @@ open FStar.Ghost
 open Hacl.UInt64
 open Hacl.SBuffer
 open Math.Lib
-open Curve.Parameters
-open Curve.Bigint
+open Hacl.EC.Curve25519.Parameters
+open Hacl.EC.Curve25519.Bigint
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
+(* Module abbreviations *)
+module HH = FStar.HyperHeap
+module HS = FStar.HyperStack
+
+module U8  = FStar.UInt8
+module U32 = FStar.UInt32
+module H8  = Hacl.UInt8
+module H32  = Hacl.UInt32
+module H64  = Hacl.UInt64
 
 #set-options "--lax"
 
