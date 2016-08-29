@@ -193,7 +193,6 @@ val fsum: a:bigint -> b:bigint{disjoint a b} -> STStack unit
     ))
 let fsum a b =
   push_frame ();
-  (* admit(); // TODO *)
   (* let h0 = HST.get() in *)
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *)
   let tmp = create (Hacl.UInt128.of_string "0") (UInt32.sub (UInt32.mul nlength 2ul) 1ul) in
@@ -211,7 +210,7 @@ let fsum a b =
   modulo a tmp;
   (* let h1 = HST.get() in *)
   (* assert(valueOf h1 a = valueOf_wide h2 tmp);  *)
-  (* cut (True /\ eval h1 a norm_length % reveal prime = (eval h0 a norm_length + eval h0 b norm_length) % reveal prime); // TODO *)
+  (* cut (True /\ eval h1 a norm_length % reveal prime = (eval h0 a norm_length + eval h0 b norm_length) % reveal prime);  *)
   (* fsum_lemma h0 h1 a a b; *)
   (* cut(modifies_1 a h0 h1); *)
   pop_frame()
@@ -227,7 +226,6 @@ val fdifference: a:bigint -> b:bigint{disjoint a b} -> STStack unit
     ))
 let fdifference a b =
   push_frame ();
-  (* admit(); // TODO *)
   (* let h0 = HST.get() in *)
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b; *)
   let b' = create (Hacl.Cast.uint64_to_sint64 0uL) nlength in
@@ -265,7 +263,6 @@ val fscalar:
   ))
 let fscalar res b s =
   push_frame ();
-  (* admit(); // TODO *)
   (* let h0 = HST.get() in *)
   (* standardized_eq_norm h0 b;  *)
   let tmp = create (Hacl.UInt128.of_string "0") (U32 (2ul *^ nlength -^ 1ul)) in
@@ -288,7 +285,6 @@ val fmul: res:bigint -> a:bigint{disjoint res a} -> b:bigint{disjoint res b} -> 
     ))
 let fmul res a b =
   push_frame ();
-  (* admit(); // TODO *)
   (* let h0 = HST.get() in *)
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *)
   let tmp = create (Hacl.UInt128.of_string "0") (U32 (2ul *^ nlength -^ 1ul)) in
