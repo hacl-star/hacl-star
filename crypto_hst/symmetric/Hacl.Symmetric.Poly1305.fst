@@ -157,9 +157,9 @@ let clamp r =
 (* *        Polynomial computation step           *)
 (* * ******************************************** *)
 
-(** 
+(**
     Runs "Acc = ((Acc+block)*r) % p." on the accumulator, the well formatted block of the message
-    and the clamped part of the key 
+    and the clamped part of the key
     *)
 val add_and_multiply: acc:elemB -> block:elemB{disjoint acc block} -> r:elemB{disjoint acc r /\ disjoint block r} -> STL unit
   (requires (fun h -> live h block /\ live h acc /\ live h r))
@@ -174,7 +174,7 @@ let add_and_multiply acc block r =
   pop_frame()
 
 (**
-   Sets the accumulator to the value '0' 
+   Sets the accumulator to the value '0'
    *)
 val zeroB: a:elemB -> STL unit
   (requires (fun h -> live h a))
@@ -226,7 +226,7 @@ let poly1305_init acc r key =
    Update function:
    - takes a ghost log
    - takes a message block, appends '1' to it and formats it to bigint format
-   - runs acc = ((acc*block)+r) % p 
+   - runs acc = ((acc*block)+r) % p
    *)
 val poly1305_update:
   msg:wordB{length msg >= 16} ->
@@ -245,10 +245,10 @@ let poly1305_update msg acc r =
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* Loop over Poly1305_update *)
-val poly1305_loop: 
-  msg:bytes -> 
+val poly1305_loop:
+  msg:bytes ->
   acc:elemB{disjoint msg acc} ->
-  r:elemB{disjoint msg r /\ disjoint acc r} -> 
+  r:elemB{disjoint msg r /\ disjoint acc r} ->
   ctr:u32{length msg >= 16 * U32.v ctr} ->
   STL unit
     (requires (fun h -> B.live h msg /\ live h acc /\ live h r))
@@ -270,7 +270,7 @@ let poly1305_last_word msg n len =
   blit msg 0ul n 0ul len;
   upd n len (uint8_to_sint8 1uy)
 
-val poly1305_last_block: n:wordB{length n = 16} -> acc:elemB{disjoint n acc} -> 
+val poly1305_last_block: n:wordB{length n = 16} -> acc:elemB{disjoint n acc} ->
   r:elemB{disjoint n r /\ disjoint acc r} -> STStack unit
   (requires (fun h -> B.live h n /\ live h acc /\ live h r))
   (ensures  (fun h0 _ h1 -> live h1 acc /\ modifies_1 acc h0 h1))
@@ -294,7 +294,7 @@ let poly1305_last_ msg acc r len =
   pop_frame()
 
 (**
-   Performs the last step if there is an incomplete block 
+   Performs the last step if there is an incomplete block
    NB: Not relevant for AEAD-ChachaPoly which only uses complete blocks of 16 bytes, hence
        only the 'update' and 'loop' functions are necessary there
    *)
@@ -308,6 +308,8 @@ let poly1305_last msg acc r len =
   else (
     poly1305_last_ msg acc r len
   )
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
 
 val add_word: a:wordB{length a = 16} -> b:wordB{length b = 16 /\ disjoint a b} -> STL unit
   (requires (fun h -> B.live h a /\ B.live h b))
@@ -326,21 +328,29 @@ let add_word a b =
   let z1 = a48 +%^ b48 +%^ (z0 >>^ 32ul) in
   let z2 = a812 +%^ b812 +%^ (z1 >>^ 32ul) in
   let z3 = a1216 +%^ b1216 +%^ (z2 >>^ 32ul) in
-  bytes_of_uint32 (B.sub a 0ul 4ul) (sint64_to_sint32 z0);
-  bytes_of_uint32 (B.sub a 4ul 4ul) (sint64_to_sint32 z1);
-  bytes_of_uint32 (B.sub a 8ul 4ul) (sint64_to_sint32 z2);
-  bytes_of_uint32 (B.sub a 12ul 4ul) (sint64_to_sint32 z3)
+  let a04   = B.sub a 0ul  4ul in
+  let a48   = B.sub a 4ul  4ul in
+  let a812  = B.sub a 8ul  4ul in
+  let a1216 = B.sub a 12ul 4ul in
+  assert(a `includes` a04);  assert(a `includes` a48);
+  assert(a `includes` a812); assert(a `includes` a1216);
+  bytes_of_uint32 a04   (sint64_to_sint32 z0);
+  bytes_of_uint32 a48   (sint64_to_sint32 z1);
+  bytes_of_uint32 a812  (sint64_to_sint32 z2);
+  bytes_of_uint32 a1216 (sint64_to_sint32 z3)
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 (* Finish function, with final accumulator value *)
-val poly1305_finish: 
-  tag:wordB{length tag = 16} -> 
-  acc:elemB -> 
+val poly1305_finish:
+  tag:wordB{length tag = 16} ->
+  acc:elemB ->
   s:wordB{length s = 16} -> STL unit
-  (requires (fun h -> B.live h tag /\ live h acc /\ B.live h s 
+  (requires (fun h -> B.live h tag /\ live h acc /\ B.live h s
     /\ disjoint tag acc /\ disjoint tag s /\ disjoint acc s))
   (ensures  (fun h0 _ h1 -> modifies_2 tag acc h0 h1 /\ live h1 acc /\ B.live h1 tag
   ))
-let poly1305_finish tag acc s =  
+let poly1305_finish tag acc s =
   trunc1305 acc tag;
   add_word tag s
 
@@ -364,7 +374,7 @@ let poly1305_mac tag msg len key =
   poly1305_init acc r key;
   (* Compute the number of 'plain' blocks *)
   let ctr = U32.div len 16ul in
-  let rest = U32.rem len 16ul in 
+  let rest = U32.rem len 16ul in
   (* Run the poly1305_update function ctr times *)
   poly1305_loop msg acc r ctr;
   (* Run the poly1305_update function one more time on the incomplete block *)
