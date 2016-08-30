@@ -278,16 +278,16 @@ let exp output q_x scalar =
   (* Create basepoint *)
   expand qx q_x;
   upd qz 0ul one;
-  let basepoint = Hacl.EC.Curve25519.Point.make qx qy qz in
+  let basepoint = Hacl.EC.Curve25519.PPoint.make qx qy qz in
 
   (* Point to store the result *)
-  let res = Hacl.EC.Curve25519.Point.make resx resy resz in
+  let res = Hacl.EC.Curve25519.PPoint.make resx resy resz in
 
   (* Ladder *)
   montgomery_ladder res scalar basepoint;
 
   (* Get the affine coordinates back *)
-  crecip' zrecip (Hacl.EC.Curve25519.Point.get_z res);
+  crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res);
   fmul resy resx zrecip;
   contract output resy;
 

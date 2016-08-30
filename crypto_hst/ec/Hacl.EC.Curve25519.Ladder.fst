@@ -11,7 +11,7 @@ open Math.Lib
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 open Hacl.EC.Curve25519.Bignum
-open Hacl.EC.Curve25519.Point
+open Hacl.EC.Curve25519.PPoint
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
@@ -42,7 +42,8 @@ let nth_bit byte idx =
   (* and_one_lemma (S8.shift_right byte (7-idx)); *)
   bit
 
-type distinct2 (n:bytes) (p:point) = FStar.Buffer.disjoint_from_bufs n (refs p)
+type distinct2 (n:bytes) (p:point) =
+  disjoint n (get_x p) /\ disjoint n (get_y p) /\ disjoint n (get_z p)
 
 (* TODO *)
 #reset-options "--lax"
@@ -60,18 +61,17 @@ val small_step_exit:
        (* /\ (nTimesQ n (pointOf h q) h p p_plus_q)  *)
      ))
      (ensures (fun h0 _ h1 -> live h1 two_p /\ live h1 two_p_plus_q /\ live h1 p /\ live h1 p_plus_q
-       /\ modifies_bufs_and_refs (refs two_p +++ refs two_p_plus_q +++ refs p +++ refs p_plus_q)
-				 TSet.empty h0 h1
+       /\ HS.modifies_one (frame_of p) h0 h1
+       /\ HS.modifies_ref (frame_of p) (refs two_p ++ refs two_p_plus_q ++ refs p ++ refs p_plus_q) h0 h1 ))
        (* (onCurve h0 p) /\ (onCurve h0 p_plus_q) /\ (onCurve h0 q) *)
        (* /\ (onCurve h1 two_p) /\ (onCurve h1 two_p_plus_q) /\ (live h1 p) /\ (live h1 p_plus_q) /\ (onCurve h1 q)  *)
        (* /\ (modifies (refs two_p +++ refs two_p_plus_q +++ refs p +++ refs p_plus_q) h0 h1) *)
        // Formula_0 replaces (scalar * pow2 8 + byte)
        (* /\ (nTimesQ  (formula_0 scalar byte) (pointOf h0 q) h1 two_p two_p_plus_q) *)
-     ))     
 let small_step_exit pp ppq p pq q n byte scalar =
   (* admit(); // OK *)
   (* let h0 = HST.get() in *)
-  Hacl.EC.Curve25519.Point.copy2 pp ppq p pq;
+  Hacl.EC.Curve25519.PPoint.copy2 pp ppq p pq;
   (* let h1 = HST.get() in *)
   (* distinct_lemma q p; distinct_lemma q pq; distinct_lemma q pp; distinct_lemma q ppq; *)
   (* let s = (erefs pp +*+ erefs ppq +*+ erefs p +*+ erefs pq) in *)
@@ -92,8 +92,8 @@ val small_step_core:
    STStack unit
      (requires (fun h -> live h two_p /\ live h two_p_plus_q /\ live h p /\ live h q /\ live h p_plus_q))
      (ensures (fun h0 _ h1 -> live h1 two_p /\ live h1 two_p_plus_q /\ live h1 p /\ live h1 p_plus_q
-       /\ modifies_bufs_and_refs (refs two_p +++ refs two_p_plus_q +++ refs p +++ refs p_plus_q)
-				 TSet.empty h0 h1))
+       /\ HS.modifies_one (frame_of p) h0 h1
+       /\ HS.modifies_ref (frame_of p) (refs two_p ++ refs two_p_plus_q ++ refs p ++ refs p_plus_q) h0 h1 ))
      (* (requires (fun h ->  *)
      (*   (live h two_p) /\ (live h two_p_plus_q) /\ (onCurve h p) /\ (onCurve h p_plus_q) /\ (onCurve h q) *)
      (*   /\ (nTimesQ n (pointOf h q) h p p_plus_q)  *)
@@ -144,8 +144,8 @@ val small_step: two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q} -
    scalar:erased nat(* {reveal n = reveal scalar * (pow2 (w ctr)) + (S8.v b / (pow2 (8-w ctr)))} *) -> STStack unit
      (requires (fun h -> live h two_p /\ live h two_p_plus_q /\ live h p /\ live h q /\ live h p_plus_q))
      (ensures (fun h0 _ h1 -> live h1 two_p /\ live h1 two_p_plus_q /\ live h1 p /\ live h1 p_plus_q
-       /\ modifies_bufs_and_refs (refs two_p +++ refs two_p_plus_q +++ refs p +++ refs p_plus_q)
-				 TSet.empty h0 h1))
+       /\ HS.modifies_one (frame_of p) h0 h1
+       /\ HS.modifies_ref (frame_of p) (refs two_p ++ refs two_p_plus_q ++ refs p ++ refs p_plus_q) h0 h1 ))
      (* (requires (fun h -> live h two_p /\ live h two_p_plus_q /\ onCurve h p /\ onCurve h p_plus_q *)
      (*   /\ onCurve h q /\ nTimesQ n (pointOf h q) h p p_plus_q )) *)
      (* (ensures (fun h0 _ h1 -> onCurve h0 p /\ onCurve h0 p_plus_q /\ onCurve h0 q *)
@@ -192,8 +192,8 @@ val big_step:
    ctr:u32{U32.v ctr<=bytes_length} -> STL unit
      (requires (fun h -> live h pp /\ live h ppq /\ live h p /\ live h q /\ live h pq))
      (ensures (fun h0 _ h1 -> live h1 pp /\ live h1 ppq /\ live h1 p /\ live h1 pq
-       /\ modifies_bufs_and_refs (refs pp +++ refs ppq +++ refs p +++ refs pq)
-				 TSet.empty h0 h1))
+       /\ HS.modifies_one (frame_of p) h0 h1
+       /\ HS.modifies_ref (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1 ))
     (* (requires (fun h -> live h pp /\ live h ppq /\ onCurve h p /\ onCurve h pq /\ onCurve h q *)
     (*   /\ nTimesQ (formula_4 h n (w ctr)) (pointOf h q) h p pq )) *)
     (* (ensures (fun h0 _ h1 -> live h0 pp /\ live h0 ppq /\ onCurve h0 p /\ onCurve h0 pq /\ onCurve h0 q *)
@@ -224,7 +224,8 @@ val montgomery_ladder:
   STStack unit
     (requires (fun h -> live h res /\ live h q))
       (* live h res /\ onCurve h q )) *)
-    (ensures (fun h0 _ h1 -> live h1 res /\ modifies_bufs_and_refs (refs res) TSet.empty h0 h1))
+    (ensures (fun h0 _ h1 -> live h1 res
+      /\ modifies_3 (get_x res) (get_y res) (get_z res) h0 h1))
     (* live h0 res /\ onCurve h0 q /\ onCurve h1 res *)
     (*   (\* /\ (modifies (refs res) h0 h1)  *\) *)
     (*   /\ (pointOf h1 res = (valueOfBytes h0 n +* (pointOf h0 q)))  )) *)

@@ -278,7 +278,6 @@ val freduce_coefficients:
     (* /\ eval_wide h1 b norm_length % reveal prime = eval_wide h0 b norm_length % reveal prime *)
   ))
 let freduce_coefficients b =
-  (* admit(); // TODO *)
   (* let h = HST.get() in *)
   let open Hacl.UInt128 in
   b.(nlength) <- (of_string "0");

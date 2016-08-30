@@ -65,7 +65,7 @@ CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_
 	Hacl_EC_Curve25519_Bignum_Fproduct.ml \
 	Hacl_EC_Curve25519_Bignum_Modulo.ml \
 	Hacl_EC_Curve25519_Bignum.ml \
-	Hacl_EC_Curve25519_Point.ml \
+	Hacl_EC_Curve25519_PPoint.ml \
 	Hacl_EC_Curve25519_AddAndDouble.ml \
 	Hacl_EC_Curve25519_Ladder.ml \
 	Hacl_EC_Curve25519_Crecip.ml \
