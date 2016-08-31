@@ -26,7 +26,7 @@ module H64  = Hacl.UInt64
 
 val scalar_multiplication_tr_1: 
   res:bigint_wide -> a:bigint{disjoint res a} -> s:s64 -> 
-  ctr:u32{U32.v ctr<norm_length} -> STStack unit
+  ctr:u32{U32.v ctr<norm_length} -> Stack unit
      (requires (fun h -> live h a /\ live h res
        (* (live h res) /\ (live h a) /\ (length a >= norm_length) /\ (length res >= norm_length) *)
        (* /\ (forall (i:nat). (i >= w ctr /\ i < norm_length) ==> v (get h a i) * v s < pow2 platform_wide) *)
@@ -44,7 +44,7 @@ let rec scalar_multiplication_tr_1 res a s ctr =
     let z = Hacl.UInt128.mul_wide ai s in
     res.(ctr) <- z
 
-val scalar_multiplication_tr: res:bigint_wide -> a:bigint{disjoint res a} -> s:s64 -> ctr:u32{U32.v ctr<=norm_length} -> STStack unit
+val scalar_multiplication_tr: res:bigint_wide -> a:bigint{disjoint res a} -> s:s64 -> ctr:u32{U32.v ctr<=norm_length} -> Stack unit
      (requires (fun h -> live h res /\ live h a
        (* (live h res) /\ (live h a) /\ (length a >= norm_length) /\ (length res >= norm_length) *)
        (* /\ (forall (i:nat). (i >= w ctr /\ i < norm_length) ==> v (get h a i) * v s < pow2 platform_wide) *)

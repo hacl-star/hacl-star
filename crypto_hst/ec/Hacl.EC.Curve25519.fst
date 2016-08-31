@@ -24,7 +24,7 @@ module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
-val format_scalar: scalar:u8s{length scalar >= 32} -> STStack unit
+val format_scalar: scalar:u8s{length scalar >= 32} -> Stack unit
   (requires (fun h -> live h scalar))
   (ensures  (fun h0 _ h1 -> modifies_1 scalar h0 h1 /\ live h1 scalar))
 let format_scalar scalar =
@@ -32,7 +32,7 @@ let format_scalar scalar =
   scalar.(31ul) <- (scalar.(31ul) &^ (uint8_to_sint8 127uy));
   scalar.(31ul) <- (scalar.(31ul) |^ (uint8_to_sint8 64uy))
 
-val expand_0: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> STStack unit
+val expand_0: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_0 output input =
@@ -56,7 +56,7 @@ let expand_0 output input =
   	   +%^ (i4 <<^ 32ul) +%^ (i5 <<^ 40ul) +%^ ((i6 <<^ 48ul) &^ mask)) in
   output.(0ul) <- o0
 
-val expand_1: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> STStack unit
+val expand_1: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_1 output input =
@@ -81,7 +81,7 @@ let expand_1 output input =
   output.(1ul) <- o1;
   () // Without this unit the extraction to OCaml breaks
 
-val expand_2: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> STStack unit
+val expand_2: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_2 output input =
@@ -108,7 +108,7 @@ let expand_2 output input =
   output.(2ul) <- o2;
   () // Without this unit the extraction to OCaml breaks
 
-val expand_3: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> STStack unit
+val expand_3: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_3 output input =
@@ -133,7 +133,7 @@ let expand_3 output input =
   output.(3ul) <- o3;
   () // Without this unit the extraction to OCaml breaks
 
-val expand_4: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> STStack unit
+val expand_4: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_4 output input =
@@ -158,7 +158,7 @@ let expand_4 output input =
   output.(4ul) <- o4; 
   () // Without this unit the extraction to OCaml breaks
 
-val expand: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> STStack unit
+val expand: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand output input =

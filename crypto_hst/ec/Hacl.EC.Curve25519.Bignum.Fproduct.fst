@@ -26,7 +26,7 @@ module H64  = Hacl.UInt64
 val multiplication_step_0: a:bigint -> b:bigint ->
   ctr:u32{U32.v ctr<norm_length /\ U32.v ctr<2*norm_length-1} ->
   c:bigint_wide{disjoint a c /\ disjoint b c} ->
-  tmp:bigint_wide{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> STStack unit
+  tmp:bigint_wide{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> Stack unit
      (requires (fun h -> live h a /\ live h b /\ live h c /\ live h tmp /\ length c >= 2*norm_length-1
        (* norm h a /\ norm h b /\ live h c /\ live h tmp *)
        (*  /\ length c >= 2*norm_length -1 *)
@@ -63,7 +63,7 @@ let multiplication_step_0 a b ctr c tmp =
 val multiplication_step_p1:
   a:bigint -> b:bigint -> ctr:u32{U32.v ctr<norm_length} ->
   c:bigint_wide{disjoint a c /\ disjoint b c} ->
-  tmp:bigint_wide{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> STStack unit
+  tmp:bigint_wide{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> Stack unit
      (requires (fun h -> live h a /\ live h b /\ live h c /\ live h tmp /\ length c >= 2*norm_length-1
         (* /\ norm h a /\ norm h b /\ live h c /\ live h tmp *)
         (* /\ length c >= 2*norm_length -1 *)
@@ -164,7 +164,7 @@ let rec multiplication_aux a b ctr c tmp =
 val multiplication:
   c:bigint_wide ->
   a:bigint{disjoint c a} ->
-  b:bigint{disjoint c b} -> STStack unit
+  b:bigint{disjoint c b} -> Stack unit
     (requires (fun h -> live h c /\ live h a /\ live h b /\ length c >= 2*norm_length-1
      (* norm h a /\ norm h b /\ live h c /\ null_wide h c /\ length c >= 2*norm_length-1 *)
      (* 	/\ maxValueNorm h a < pow2 max_limb *)

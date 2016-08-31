@@ -26,7 +26,7 @@ module H64  = Hacl.UInt64
 (* #reset-options *)
 val fdifference_aux_1:
   a:bigint ->
-  b:bigint{disjoint a b} -> ctr:u32{U32.v ctr < norm_length} -> STStack unit
+  b:bigint{disjoint a b} -> ctr:u32{U32.v ctr < norm_length} -> Stack unit
     (requires (fun h -> live h a /\ live h b
       (* /\ norm_length <= length a /\ norm_length <= length b *)
       (*         /\ (forall (i:nat{ i >= U32.v ctr /\ i < norm_length}). v (get h b i) >= v (get h a i)) *)
@@ -59,7 +59,7 @@ let fdifference_aux_1 a b ctr =
   (* () *)
 
 val fdifference_aux:
-  a:bigint -> b:bigint{disjoint a b} -> ctr:u32{U32.v ctr <= norm_length } -> STStack unit
+  a:bigint -> b:bigint{disjoint a b} -> ctr:u32{U32.v ctr <= norm_length } -> Stack unit
     (requires (fun h -> live h a /\ live h b
       (* /\ (forall (i:nat). (i >= U32.v ctr /\ i < norm_length) ==> (v (get h b i) >= v (get h a i))) *)
     ))
@@ -86,7 +86,7 @@ let rec fdifference_aux a b ctr =
       (* fdifference_aux_2 h0 h1 h2 a b (U32.v ctr) *)
   end
 
-val fdifference': a:bigint -> b:bigint{disjoint a b} -> STStack unit
+val fdifference': a:bigint -> b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> live h a /\ live h b
       (* /\norm h a /\ filled h b *)
     ))
