@@ -3,8 +3,11 @@ module Hacl.Operations
 open FStar.HyperStack
 open FStar.HST
 open FStar.Buffer
+open FStar.Buffer.Quantifiers
 open FStar.UInt32
 open Hacl.Cast
+
+
 
 (* Module aliases *)
 module U32 = FStar.UInt32
@@ -21,8 +24,7 @@ let s32 = Hacl.UInt32.t
 let bytes = Hacl.SBuffer.u8s
 
 
-
-
+#set-options "--z3timeout 10"
 
 //
 // Word rotations
@@ -33,141 +35,119 @@ let rotate_right (a:s32) (b:u32{v b <= 32}) : Tot s32 =
   S32.logor (S32.shift_right a b) (S32.shift_left a (U32.sub 32ul b))
 
 
-#set-options "--lax"
+//
+// Inplace NOT of a buffer
+//
+
+val not_bytes: buf:bytes -> len:u32{v len <= length buf}
+  -> STL unit
+        (requires (fun h -> live h buf))
+        (ensures  (fun h0 _ h1 -> live h0 buf /\ live h1 buf /\ modifies_1 buf h0 h1
+                  /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 buf) i)}
+                              (i < (U32.v len)) ==> (Seq.index (FB.as_seq h1 buf) i
+                                                   == S8.lognot (Seq.index (FB.as_seq h0 buf) i)))
+                  /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 buf) i)}
+                              (i >= (U32.v len) /\ i < length buf) ==> (Seq.index (FB.as_seq h1 buf) i
+                                                                     == (Seq.index (FB.as_seq h0 buf) i)))))
+
+let rec not_bytes buf len =
+  if len =^ 0ul then ()
+  else begin
+    let i = U32.sub len 1ul in
+    let r = S8.lognot (SB.index buf i) in
+    SB.upd buf i r;
+    not_bytes buf i end
+
 
 //
 // Inplace XOR of two buffers
 //
 
-val xor_bytes: output:bytes -> in1:bytes{disjoint in1 output} ->
-  len:u32{v len <= length output /\ v len <= length in1} -> STL unit
-  (requires (fun h -> live h output /\ live h in1))
-  (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
-    /\ modifies_1 output h0 h1 ))
-let rec xor_bytes output in1 len =
-  if len =^ 0ul then ()
-  else
-    begin
-      let i    = U32.sub_mod len 1ul in
-      let in1i = SB.index in1 i in
-      let oi   = SB.index output i in
-      let oi   = S8.logxor in1i oi in
-      SB.upd output i oi;
-      xor_bytes output in1 i
-    end
-
-#reset-options "--z3timeout 10"
-
-val lemma_x2: #a:Type -> h:mem -> b:buffer a{live h b} -> i:u32{v i < length b} 
-  -> Lemma (requires (True)) 
-          (ensures  (Seq.index (FB.as_seq h b) (U32.v i) == FB.get h b (U32.v i)))
-          [SMTPat (Seq.index (FB.as_seq h b) (U32.v i))]
-
-let lemma_x2 #a h b i = () 
-
-val xor_bytes2: output:bytes -> input:bytes{disjoint input output} -> len:u32{v len <= length output /\ v len <= length input} 
+val xor_bytes: output:bytes -> input:bytes{disjoint input output} -> len:u32{v len <= length output /\ v len <= length input}
   -> STL unit
-        (requires (fun h -> 
-                  (live h output /\ live h input)))
-        (ensures  (fun h0 _ h1 -> 
-                  (live h0 output /\ live h0 input) 
+        (requires (fun h -> live h output /\ live h input))
+        (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 input
                   /\ (live h1 output /\ live h1 input /\ modifies_1 output h0 h1)
-                  /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 output) i)} 
-                              i < (U32.v len) ==> (Seq.index (FB.as_seq h1 output) i
-                                                 == S8.logxor (Seq.index (FB.as_seq h0 output) i)
-                                                              (Seq.index (FB.as_seq h0 input) i)))
                   /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 output) i)}
-                              (i < 0 /\ i >= (U32.v len)) ==> (Seq.index (FB.as_seq h1 output) i 
-                                                           == (Seq.index (FB.as_seq h0 output) i)))))
+                              (i < (U32.v len)) ==> (Seq.index (FB.as_seq h1 output) i
+                                                   == S8.logxor (Seq.index (FB.as_seq h0 output) i)
+                                                                (Seq.index (FB.as_seq h0 input) i)))
+                  /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 output) i)}
+                              (i >= (U32.v len) /\ i < length output) ==> (Seq.index (FB.as_seq h1 output) i
+                                                                       == (Seq.index (FB.as_seq h0 output) i)))))
 
-open FStar.Buffer.Quantifiers
-
-let rec xor_bytes2 output input len =
+let rec xor_bytes output input len =
   if len =^ 0ul then ()
   else begin
     let i = U32.sub len 1ul in
     let r = S8.logxor (SB.index output i) (SB.index input i) in
     SB.upd output i r;
-    xor_bytes2 output input i end
+    xor_bytes output input i end
 
 
 //
 // Inplace AND of two buffers
 //
 
-val and_bytes: output:bytes -> in1:bytes{disjoint in1 output} ->
-  len:u32{v len <= length output /\ v len <= length in1} -> STL unit
-  (requires (fun h -> live h output /\ live h in1))
-  (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
-    /\ modifies_1 output h0 h1 ))
-let rec and_bytes output in1 len =
+val and_bytes: output:bytes -> input:bytes{disjoint input output} -> len:u32{v len <= length output /\ v len <= length input}
+  -> STL unit
+        (requires (fun h -> live h output /\ live h input))
+        (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 input
+                  /\ (live h1 output /\ live h1 input /\ modifies_1 output h0 h1)
+                  /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 output) i)}
+                              (i < (U32.v len)) ==> (Seq.index (FB.as_seq h1 output) i
+                                                   == S8.logand (Seq.index (FB.as_seq h0 output) i)
+                                                                (Seq.index (FB.as_seq h0 input) i)))
+                  /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 output) i)}
+                              (i >= (U32.v len) /\ i < length output) ==> (Seq.index (FB.as_seq h1 output) i
+                                                                       == (Seq.index (FB.as_seq h0 output) i)))))
+
+let rec and_bytes output input len =
   if len =^ 0ul then ()
-  else
-    begin
-      let i    = U32.sub_mod len 1ul in
-      let in1i = SB.index in1 i in
-      let oi   = SB.index output i in
-      let oi   = S8.logand in1i oi in
-      SB.upd output i oi;
-      and_bytes output in1 i
-    end
+  else begin
+    let i = U32.sub len 1ul in
+    let r = S8.logand (SB.index output i) (SB.index input i) in
+    SB.upd output i r;
+    and_bytes output input i end
+
 
 //
 // Inplace OR of two buffers
 //
 
-val or_bytes: output:bytes -> in1:bytes{disjoint in1 output} ->
-  len:u32{v len <= length output /\ v len <= length in1} -> STL unit
-  (requires (fun h -> live h output /\ live h in1))
-  (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
-    /\ modifies_1 output h0 h1 ))
-let rec or_bytes output in1 len =
+val or_bytes: output:bytes -> input:bytes{disjoint input output} -> len:u32{v len <= length output /\ v len <= length input}
+  -> STL unit
+        (requires (fun h -> live h output /\ live h input))
+        (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 input
+                  /\ (live h1 output /\ live h1 input /\ modifies_1 output h0 h1)
+                  /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 output) i)}
+                              (i < (U32.v len)) ==> (Seq.index (FB.as_seq h1 output) i
+                                                   == S8.logor (Seq.index (FB.as_seq h0 output) i)
+                                                                (Seq.index (FB.as_seq h0 input) i)))
+                  /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 output) i)}
+                              (i >= (U32.v len) /\ i < length output) ==> (Seq.index (FB.as_seq h1 output) i
+                                                                       == (Seq.index (FB.as_seq h0 output) i)))))
+
+let rec or_bytes output input len =
   if len =^ 0ul then ()
-  else
-    begin
-      let i    = U32.sub_mod len 1ul in
-      let in1i = SB.index in1 i in
-      let oi   = SB.index output i in
-      let oi   = S8.logor in1i oi in
-      SB.upd output i oi;
-      or_bytes output in1 i
-    end
+  else begin
+    let i = U32.sub len 1ul in
+    let r = S8.logor (SB.index output i) (SB.index input i) in
+    SB.upd output i r;
+    or_bytes output input i end
 
-
-//
-// Inplace NOR of two buffers
-//
-
-val nor_bytes: output:bytes -> in1:bytes{disjoint in1 output} ->
-  len:u32{v len <= length output /\ v len <= length in1} -> STL unit
-  (requires (fun h -> live h output /\ live h in1))
-  (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
-    /\ modifies_1 output h0 h1 ))
-let rec nor_bytes output in1 len =
-  if len =^ 0ul then ()
-  else
-    begin
-      let i    = U32.sub_mod len 1ul in
-      let in1i = SB.index in1 i in
-      let oi   = SB.index output i in
-      let oi   = S8.lognot (S8.logor in1i oi) in
-      SB.upd output i oi;
-      nor_bytes output in1 i
-    end
-
-#reset-options
 
 //
 // Setall
 //
 
 val setall_aux: #t:Type -> b:buffer t -> z:t -> len:U32.t -> ctr:U32.t -> STL unit
-  (requires (fun h -> 
+  (requires (fun h ->
             (live h b)
             /\ (U32.v len = Seq.length (FB.as_seq h b))
             /\ (U32.v ctr <= U32.v len)
             /\ (forall (i:nat). i < (U32.v ctr) ==> Seq.index (FB.as_seq h b) i == z)))
-  (ensures  (fun h0 _ h1 -> 
+  (ensures  (fun h0 _ h1 ->
             (live h0 b /\ live h1 b /\ modifies_1 b h0 h1)
             /\ (U32.v len = Seq.length (FB.as_seq h1 b))
             /\ (U32.v ctr <= U32.v len)
@@ -181,10 +161,10 @@ let rec setall_aux #t b z len ctr =
     setall_aux #t b z len (ctr +^ 1ul) end
 
 val setall: #t:Type -> b:buffer t -> z:t -> len:U32.t -> STL unit
-  (requires (fun h -> 
+  (requires (fun h ->
             (live h b)
             /\ (U32.v len = Seq.length (FB.as_seq h b))))
-  (ensures  (fun h0 _ h1 -> 
+  (ensures  (fun h0 _ h1 ->
             (live h0 b /\ live h1 b /\ modifies_1 b h0 h1)
             /\ (U32.v len = Seq.length (FB.as_seq h1 b))
             /\ (Seq.length (FB.as_seq h0 b) = Seq.length (FB.as_seq h1 b))
