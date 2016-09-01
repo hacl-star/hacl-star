@@ -52,7 +52,7 @@ let rec copy_to_bigint' output b idx len ctr =
 val copy_to_bigint:
   output:bigint ->
   input:bigint_wide{disjoint input output} ->
-  STStack unit
+  Stack unit
     (requires (fun h -> live h output /\ live h input
       (* /\ norm_wide h input *)
     ))
@@ -77,7 +77,7 @@ let copy_to_bigint output b =
   (* cut (modifies_1 output h0 h1) *)
 
 val copy_to_bigint_wide': output:bigint_wide -> input:bigint{disjoint input output} -> idx:u32 ->
-  len:u32 -> ctr:u32{U32.v ctr <= U32.v len} -> STStack unit
+  len:u32 -> ctr:u32{U32.v ctr <= U32.v len} -> Stack unit
     (requires (fun h -> live h output /\ live h input /\ U32.v idx+U32.v len <= length output /\ U32.v idx+U32.v len<=length input
       (* /\ (forall (i:nat). i < w ctr ==> vv (get h output (w idx+i)) = v (get h input (w idx+i))) *)
     ))
@@ -101,7 +101,7 @@ let rec copy_to_bigint_wide' output b idx len ctr =
     copy_to_bigint_wide' output b idx len (U32 (ctr +^ 1ul))
   end
 
-val copy_to_bigint_wide: output:bigint_wide -> input:bigint{disjoint input output} -> STStack unit
+val copy_to_bigint_wide: output:bigint_wide -> input:bigint{disjoint input output} -> Stack unit
     (requires (fun h -> live h output /\ live h input))
     (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1
       (* live h0 output /\ live h1 output *)
@@ -121,7 +121,7 @@ let copy_to_bigint_wide output b =
   (* cut (eval h0 b norm_length % reveal prime = eval_wide h1 output norm_length % reveal prime /\ True);  *)
   (* cut (live h1 output); cut(live h0 b) *)
 
-val erase: b:bigint -> idx:u32 -> len:u32 -> ctr:u32{U32.v ctr <= U32.v len} -> STStack unit
+val erase: b:bigint -> idx:u32 -> len:u32 -> ctr:u32{U32.v ctr <= U32.v len} -> Stack unit
     (requires (fun h -> live h b /\ length b >= U32.v idx+U32.v len
       (* /\ (forall (i:nat). {:pattern (v (get h b i))} (i>= w idx /\ i < w idx+w ctr) ==> v (get h b i) = 0) *)
     ))
@@ -142,7 +142,7 @@ let rec erase b idx len ctr =
     erase b idx len (U32 (ctr +^ 1ul))
   end
 
-val erase_wide: b:bigint_wide -> idx:u32 -> len:u32 -> ctr:u32{U32.v ctr <= U32.v len} -> STStack unit
+val erase_wide: b:bigint_wide -> idx:u32 -> len:u32 -> ctr:u32{U32.v ctr <= U32.v len} -> Stack unit
     (requires (fun h -> live h b /\ length b >= U32.v idx+U32.v len
       (* /\ (forall (i:nat). {:pattern (vv (get h b i))} (i>= w idx /\ i < w idx+w ctr) ==> vv (get h b i) = 0) *)
     ))
@@ -164,7 +164,7 @@ let rec erase_wide b idx len ctr =
     erase_wide b idx len (U32 (ctr +^ 1ul))
   end
 
-val modulo: output:bigint -> input:bigint_wide{disjoint input output} -> STStack unit
+val modulo: output:bigint -> input:bigint_wide{disjoint input output} -> Stack unit
     (requires (fun h -> live h input /\ live h output (* /\ satisfies_modulo_constraints h input *)
       /\ length input >= 2*norm_length - 1 ))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h1 input /\ modifies_2 output input h0 h1
@@ -182,7 +182,7 @@ let modulo output b =
   (* standardized_eq_norm h b; *)
   copy_to_bigint output b
 
-val fsum: a:bigint -> b:bigint{disjoint a b} -> STStack unit
+val fsum: a:bigint -> b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> live h a /\ live h b
       (* /\(norm h a) /\ (norm h b)  *)
     ))
@@ -215,7 +215,7 @@ let fsum a b =
   (* cut(modifies_1 a h0 h1); *)
   pop_frame()
 
-val fdifference: a:bigint -> b:bigint{disjoint a b} -> STStack unit
+val fdifference: a:bigint -> b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> live h a /\ live h b
       (* (norm h a) /\ (norm h b) *)
     ))
@@ -274,7 +274,7 @@ let fscalar res b s =
   (* admitP(True /\ (valueOf h1 res = (v s +* valueOf h0 b))); *)
   pop_frame()
 
-val fmul: res:bigint -> a:bigint{disjoint res a} -> b:bigint{disjoint res b} -> STStack unit
+val fmul: res:bigint -> a:bigint{disjoint res a} -> b:bigint{disjoint res b} -> Stack unit
     (requires (fun h -> live h res /\ live h a /\ live h b
       (* live h res /\ norm h a /\ norm h b *)
     ))
@@ -302,7 +302,7 @@ let fmul res a b =
   (* fmul_lemma h0 h3 res a b; *)
   pop_frame()
 
-val fsquare: res:bigint -> a:bigint{disjoint res a} -> STStack unit
+val fsquare: res:bigint -> a:bigint{disjoint res a} -> Stack unit
     (requires (fun h -> live h res  /\ live h a))
       (* (live h res) /\ (norm h a))) *)
     (ensures (fun h0 _ h1 -> live h1 res /\ modifies_1 res h0 h1))

@@ -4,7 +4,7 @@ open Big_int
 open Stdint
 open Hacl_SBuffer
 open Hacl_EC_Curve25519_Bignum
-open Hacl_EC_Curve25519_Point
+open Hacl_EC_Curve25519_PPoint
 
 let scalar1 = "a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4"
 let scalar2 = "4b66e9d4d1b4673c5ad22691957d6af5c11b6421e0ea01d42ca4169e7918ba0d"

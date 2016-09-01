@@ -28,7 +28,7 @@ module H64  = Hacl.UInt64
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 val fsum_index: a:bigint -> a_idx:u32 -> b:bigint{disjoint a b} -> b_idx:u32 -> len:u32 ->
-  ctr:u32{U32.v ctr<=U32.v len} -> STStack unit
+  ctr:u32{U32.v ctr<=U32.v len} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ U32.v a_idx+U32.v len <= length a
       /\ U32.v b_idx+U32.v len <= length b
 	(* /\ willNotOverflow h (U32.v a_idx) (U32.v b_idx) (U32.v len) (U32.v ctr) a b)) *)
@@ -51,7 +51,7 @@ let rec fsum_index a a_idx b b_idx len ctr =
       ()
   end
 
-val fsum': a:bigint -> b:bigint{disjoint a b} -> STStack unit
+val fsum': a:bigint -> b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> live h a /\ live h b
       (* norm h a /\ norm h b *)
     ))
@@ -67,7 +67,7 @@ let fsum' a b =
 
 (* Scalar multiplication *)
 
-val scalar_multiplication_aux: res:bigint -> a:bigint{disjoint res a} -> s:s64 -> ctr:u32 -> STStack unit
+val scalar_multiplication_aux: res:bigint -> a:bigint{disjoint res a} -> s:s64 -> ctr:u32 -> Stack unit
   (requires (fun h -> live h res /\ live h a /\ U32.v ctr <= norm_length
     (* /\ (forall (i:nat). {:pattern (v (get h a i))} i < U32.v ctr ==> v (get h a i) * v s < poU32.v2 64)  *)
   ))
@@ -88,7 +88,7 @@ let rec scalar_multiplication_aux res a s ctr =
     ()
   end
 
-val scalar_multiplication: res:bigint -> a:bigint{disjoint res a} -> s:s64 -> STStack unit
+val scalar_multiplication: res:bigint -> a:bigint{disjoint res a} -> s:s64 -> Stack unit
   (requires (fun h -> live h res /\ live h a
     (* /\ (forall (i:nat). {:pattern (v (get h a i))} i < norm_length ==> v (get h a i) * v s < pow2 64)  *)
   ))
@@ -104,7 +104,7 @@ let scalar_multiplication res a s =
 
 (* Multiplication *)
 
-val multiplication_step_0: a:bigint -> b:bigint -> ctr:u32{U32.v ctr<norm_length} -> c:bigint{disjoint a c /\ disjoint b c} -> tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} ->  STStack unit
+val multiplication_step_0: a:bigint -> b:bigint -> ctr:u32{U32.v ctr<norm_length} -> c:bigint{disjoint a c /\ disjoint b c} -> tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} ->  Stack unit
      (requires (fun h -> live h a /\ live h b /\ live h c /\ live h tmp
        (* /\ bound27 h a /\ norm h b /\ live h c /\ live h tmp /\ length c >= 2*norm_length -1 *)
        (* /\ maxValue h c (length c) <= w ctr * pow2 53 *)
@@ -120,7 +120,7 @@ let multiplication_step_0 a b ctr c tmp =
 
 val multiplication_step_p1: a:bigint -> b:bigint -> ctr:u32{U32.v ctr<norm_length} ->
   c:bigint{disjoint a c /\ disjoint b c /\ length c >= 2*norm_length-1} ->
-  tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} ->  STStack unit
+  tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} ->  Stack unit
      (requires (fun h -> live h a /\ live h b /\ live h c /\ live h tmp
 	(* /\ bound27 h a /\ norm h b *)
         (* /\ (maxValue h c (length c) <= U32.v ctr * pow2 53) *)
@@ -140,7 +140,7 @@ let multiplication_step_p1 a b ctr c tmp =
 
 val multiplication_step: a:bigint -> b:bigint -> ctr:u32{U32.v ctr < norm_length} ->
   c:bigint{disjoint a c /\ disjoint b c /\ length c >= 2*norm_length-1} ->
-  tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> STStack unit
+  tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> Stack unit
      (requires (fun h ->  live h a  /\ live h b /\ live h c /\ live h tmp
         (* /\ bound27 h a /\ norm h b *)
 	(* /\ maxValue h c (length c) <= U32.v ctr * pow2 53 *)
@@ -159,7 +159,7 @@ let multiplication_step a b ctr c tmp =
 
 val multiplication_aux: a:bigint -> b:bigint -> ctr:u32{U32.v ctr<=norm_length} ->
   c:bigint{disjoint a c /\ disjoint b c /\ length c >= 2*norm_length-1} ->
-  tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> STStack unit
+  tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> Stack unit
      (requires (fun h -> live h a /\ live h b  /\ live h c /\ live h tmp
         (* /\ bound27 h a /\ norm h b *)
 	(* /\ maxValue h c (length c) <= (norm_length - U32.v ctr) * pow2 53 *)
@@ -183,7 +183,7 @@ let rec multiplication_aux a b ctr c tmp =
 
 (* Code : core multiplication function *)
 val multiplication: c:bigint{length c >= 2*norm_length-1} -> a:bigint{disjoint c a} ->
-  b:bigint{disjoint c b} -> STStack unit
+  b:bigint{disjoint c b} -> Stack unit
      (requires (fun h -> live h a /\ live h b /\ live h c
        (* bound27 h a /\ norm h b /\ live h c /\ null h c *)
      ))
@@ -220,7 +220,7 @@ let times_5 x =
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 val freduce_degree':
-  b:bigint -> ctr:u32{U32.v ctr < norm_length - 1} -> STStack unit
+  b:bigint -> ctr:u32{U32.v ctr < norm_length - 1} -> Stack unit
     (requires (fun h -> live h b /\ length b >= 2*norm_length - 1
       (* /\ reducible h b (U32.v ctr) *)
     ))
@@ -266,7 +266,7 @@ let rec freduce_degree' b ctr' =
     ()
   end
 
-val freduce_degree: b:bigint -> STStack unit
+val freduce_degree: b:bigint -> Stack unit
   (requires (fun h -> live h b /\ length b >= 2*norm_length - 1
     (* /\ satisfiesModuloConstraints h b *)
     ))
@@ -293,7 +293,7 @@ let mod2_26 a =
   (* SInt.ulogand_lemma_4 #64 a 26 mask; *)
   res
 
-val carry: b:bigint -> ctr:u32{U32.v ctr <= norm_length} -> STStack unit
+val carry: b:bigint -> ctr:u32{U32.v ctr <= norm_length} -> Stack unit
     (requires (fun h -> live h b /\ length b >= norm_length+1
       (* carriable h b (w ctr) /\ carried h b (w ctr) *)
     ))
@@ -326,7 +326,7 @@ let rec carry b i =
     carry b (U32 (i +^ 1ul))
   end
 
-val carry_top_to_0: b:bigint -> STStack unit
+val carry_top_to_0: b:bigint -> Stack unit
     (requires (fun h -> live h b /\ length b >= norm_length + 1
       (* /\ carried h b norm_length /\ length b >= 2*norm_length-1 *)
       (* /\ v (get h b 0) + 5 * v (get h b norm_length) < pow2 63 *)
@@ -350,7 +350,7 @@ let carry_top_to_0 b =
   (* let h1 = HST.get() in *)
   (* freduce_degree_lemma h0 h1 b 0 *)
 
-val carry2_aux: b:bigint -> ctr:u32{U32.v ctr > 0 /\ U32.v ctr <= norm_length} -> STStack unit
+val carry2_aux: b:bigint -> ctr:u32{U32.v ctr > 0 /\ U32.v ctr <= norm_length} -> Stack unit
   (requires (fun h -> live h b /\ length b >= norm_length + 1
     (* carriable2 h b (w ctr) *)
   ))
@@ -389,7 +389,7 @@ let rec carry2_aux b i =
     carry2_aux b (U32 (i +^ 1ul))
   end
 
-val carry2: b:bigint -> STStack unit
+val carry2: b:bigint -> Stack unit
   (requires (fun h -> live h b /\ length b >= norm_length + 1
     (* carried h b norm_length /\ length b >= 2*norm_length-1 *)
   ))
@@ -433,7 +433,7 @@ let rec carry2 b =
   (* cut(carriable2 h4 b 1); *)
   carry2_aux b 1ul
 
-val last_carry: b:bigint -> STStack unit
+val last_carry: b:bigint -> Stack unit
   (requires (fun h -> live h b /\ length b >= norm_length + 1
     (* carriable2 h b norm_length /\ length b >= 2*norm_length-1 *)
   ))
@@ -484,7 +484,7 @@ let last_carry b =
   (* cut (norm h4 b); *)
   ()
 
-val modulo: b:bigint -> STStack unit
+val modulo: b:bigint -> Stack unit
   (requires (fun h -> live h b /\ length b >= 2*norm_length-1
     (* /\ satisfiesModuloConstraints h b *)
   ))
@@ -506,7 +506,7 @@ let modulo b =
   (* let h4 = HST.get() in *)
   last_carry b
 
-val freduce_coefficients: b:bigint -> STStack unit
+val freduce_coefficients: b:bigint -> Stack unit
   (requires (fun h -> live h b
     (* /\ (forall (i:nat). {:pattern (v (get h b i))} i < norm_length ==> v (get h b i) < pow2 62) *)
   ))
@@ -539,7 +539,7 @@ let freduce_coefficients b =
 
 (*** Finalization ***)
 
-val finalize: b:bigint -> STStack unit
+val finalize: b:bigint -> Stack unit
   (requires (fun h -> live h b
     (* /\ norm h b *)
   ))

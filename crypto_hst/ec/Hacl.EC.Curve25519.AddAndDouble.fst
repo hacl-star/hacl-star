@@ -35,7 +35,7 @@ val double_and_add:
   two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} ->
   p:point{distinct two_p p /\ distinct two_p_plus_q p /\ same_frame_2 two_p_plus_q p} ->
   p_plus_q:point{distinct two_p p_plus_q /\ distinct two_p_plus_q p_plus_q /\ distinct p_plus_q p /\ same_frame_2 p p_plus_q} ->
-  q:point{same_frame q /\ frame_of q <> frame_of p} -> STStack unit
+  q:point{same_frame q /\ frame_of q <> frame_of p} -> Stack unit
     (requires (fun h -> live h two_p /\ live h two_p_plus_q /\ live h p /\ live h p_plus_q /\ live h q))
       (* /\ onCurve h p /\ onCurve h p_plus_q /\ (onCurve h q) )) *)
     (ensures (fun h0 _ h1 -> live h1 two_p /\ live h1 two_p_plus_q /\ live h1 p /\ live h1 p_plus_q

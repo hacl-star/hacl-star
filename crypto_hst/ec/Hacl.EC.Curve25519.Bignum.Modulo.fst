@@ -31,7 +31,7 @@ let times_19 x =
   let z = x <<^ 1ul in
   x +%^ y +%^ z
 
-val freduce_degree': b:bigint_wide -> ctr:u32{U32.v ctr < norm_length - 1} -> STStack unit
+val freduce_degree': b:bigint_wide -> ctr:u32{U32.v ctr < norm_length - 1} -> Stack unit
     (requires (fun h -> live h b /\ length b >= 2*norm_length-1
       (* /\ reducible' h b (w ctr) *)
     ))
@@ -76,7 +76,7 @@ let rec freduce_degree' b ctr' =
     (* cut (times19' h0 h2 b (w ctr))  *)
   end
 
-val freduce_degree: b:bigint_wide -> STStack unit
+val freduce_degree: b:bigint_wide -> Stack unit
   (requires (fun h -> live h b /\ length b >= 2*norm_length-1
     (* /\ satisfies_modulo_constraints h b *)
   ))
@@ -108,7 +108,7 @@ let mod2_51 a =
   res
 
 val carry:
-  b:bigint_wide -> ctr:u32{U32.v ctr <= norm_length} -> STStack unit
+  b:bigint_wide -> ctr:u32{U32.v ctr <= norm_length} -> Stack unit
     (requires (fun h -> live h b /\ length b >= norm_length+1
       (* carriable h b (w ctr) /\ carried h b (w ctr) *)
     ))
@@ -145,7 +145,7 @@ let rec carry b i =
     (* carry b (i+|1ul) *)
   end
 
-val carry_top_to_0: b:bigint_wide -> STStack unit
+val carry_top_to_0: b:bigint_wide -> Stack unit
     (requires (fun h -> live h b /\ length b >= norm_length+1
       (* carried h b norm_length /\  *)
       (* /\ v (get h b 0) + 19 * v (get h b norm_length) < pow2 (platform_wide-1) *)
@@ -169,7 +169,7 @@ let carry_top_to_0 b =
   (* freduce_degree_lemma h0 h1 b 0 *)
 
 val carry2:
-  b:bigint_wide -> ctr:u32{U32.v ctr <= norm_length} -> STStack unit
+  b:bigint_wide -> ctr:u32{U32.v ctr <= norm_length} -> Stack unit
   (requires (fun h -> live h b /\ length b >= norm_length+1
     (* carriable2 h b (w ctr) *)
   ))
@@ -213,7 +213,7 @@ let rec carry2 b i =
     carry2 b (U32 (i+^1ul))
   end
 
-val last_carry: b:bigint_wide -> STStack unit
+val last_carry: b:bigint_wide -> Stack unit
   (requires (fun h -> live h b /\ length b >= norm_length+1
     (* carriable2 h b norm_length *)
   ))
@@ -269,7 +269,7 @@ let last_carry b =
   (* cut (norm_wide h4 b) *)
 
 val freduce_coefficients:
-  b:bigint_wide -> STStack unit
+  b:bigint_wide -> Stack unit
   (requires (fun h -> live h b /\ length b >= norm_length+1
     (* /\ carriable h b 0 *)
   ))
@@ -308,7 +308,7 @@ let freduce_coefficients b =
   carry2 b 1ul;
   last_carry b
 
-val add_big_zero_core: b:bigint -> STStack unit
+val add_big_zero_core: b:bigint -> Stack unit
   (requires (fun h -> live h b
     (* /\norm h b *)
   ))
@@ -376,7 +376,7 @@ let add_big_zero_core b =
   (* cut (norm_length = 5 /\ True);  *)
   (* cut(filled h5 b) *)
 
-val add_big_zero: b:bigint -> STStack unit
+val add_big_zero: b:bigint -> Stack unit
   (requires (fun h -> live h b))
   (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1))
 let add_big_zero b =
@@ -387,7 +387,7 @@ let add_big_zero b =
 
 
 (* Not verified *)
-val normalize: b:bigint -> STStack unit
+val normalize: b:bigint -> Stack unit
   (requires (fun h -> live h b))
   (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1))
 let normalize b =

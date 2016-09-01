@@ -55,7 +55,7 @@ val small_step_exit:
   q:point{distinct q two_p /\ distinct q two_p_plus_q /\ distinct q p /\ distinct q p_plus_q} -> 
   n:erased nat -> byte:s8 ->
   scalar:erased nat(* {reveal n = reveal scalar * (pow2 8) + (S8.v byte / (pow2 (8-8)))} *) ->
-  STStack unit
+  Stack unit
      (requires (fun h -> live h two_p /\ live h two_p_plus_q /\ live h p /\ live h q /\ live h p_plus_q
        (* (live h two_p) /\ (live h two_p_plus_q) /\ (onCurve h p) /\ (onCurve h p_plus_q) /\ (onCurve h q) *)
        (* /\ (nTimesQ n (pointOf h q) h p p_plus_q)  *)
@@ -89,7 +89,7 @@ val small_step_core:
    p_plus_q:point{distinct p_plus_q two_p /\ distinct p_plus_q two_p_plus_q /\ distinct p_plus_q p} -> 
    q:point{distinct q two_p /\ distinct q two_p_plus_q /\ distinct q p /\ distinct q p_plus_q} -> 
    n:erased nat -> ctr:u32{U32.v ctr<8} -> byt:s8 -> scalar:erased nat(* {reveal n = reveal scalar * (pow2 (w ctr)) + (S8.v byt / (pow2 (8-w ctr)))} *) -> 
-   STStack unit
+   Stack unit
      (requires (fun h -> live h two_p /\ live h two_p_plus_q /\ live h p /\ live h q /\ live h p_plus_q))
      (ensures (fun h0 _ h1 -> live h1 two_p /\ live h1 two_p_plus_q /\ live h1 p /\ live h1 p_plus_q
        /\ HS.modifies_one (frame_of p) h0 h1
@@ -141,7 +141,7 @@ val small_step: two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q} -
    p_plus_q:point{distinct p_plus_q two_p /\ distinct p_plus_q two_p_plus_q /\ distinct p_plus_q p} ->
    q:point{distinct q two_p /\ distinct q two_p_plus_q /\ distinct q p /\ distinct q p_plus_q} ->
    n:erased nat -> ctr:u32{U32.v ctr<=8} -> b:s8 ->
-   scalar:erased nat(* {reveal n = reveal scalar * (pow2 (w ctr)) + (S8.v b / (pow2 (8-w ctr)))} *) -> STStack unit
+   scalar:erased nat(* {reveal n = reveal scalar * (pow2 (w ctr)) + (S8.v b / (pow2 (8-w ctr)))} *) -> Stack unit
      (requires (fun h -> live h two_p /\ live h two_p_plus_q /\ live h p /\ live h q /\ live h p_plus_q))
      (ensures (fun h0 _ h1 -> live h1 two_p /\ live h1 two_p_plus_q /\ live h1 p /\ live h1 p_plus_q
        /\ HS.modifies_one (frame_of p) h0 h1
@@ -221,7 +221,7 @@ let rec big_step n pp ppq p pq q ctr =
 
 val montgomery_ladder:
   res:point -> n:bytes{distinct2 n res} -> q:point{distinct2 n q /\ distinct res q} ->
-  STStack unit
+  Stack unit
     (requires (fun h -> live h res /\ live h q))
       (* live h res /\ onCurve h q )) *)
     (ensures (fun h0 _ h1 -> live h1 res

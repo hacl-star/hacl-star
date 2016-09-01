@@ -49,7 +49,7 @@ let lemma_uint32_of_bytes (a:t) (b:t) (c:t) (d:t) : Lemma
     lemma_euclidian_division (v a + pow2 8 * v b + pow2 16 * v c) (v d) (pow2 24)
 
 (** Reads an unsigned int32 out of 4 bytes *)
-val uint32_of_bytes: b:u8s{length b >= 4} -> STStack H32.t
+val uint32_of_bytes: b:u8s{length b >= 4} -> Stack H32.t
   (requires (fun h -> B.live h b))
   (ensures (fun h0 r h1 -> h0 == h1 /\ B.live h0 b
     /\ v r = H8 (v (get h0 b 0)
@@ -125,7 +125,7 @@ let rec bytes_of_uint32s output m l =
       end
     end
 
-val bytes_of_uint32: output:u8s{length output >= 4} -> m:s32 -> STStack unit
+val bytes_of_uint32: output:u8s{length output >= 4} -> m:s32 -> Stack unit
   (requires (fun h -> B.live h output))
   (ensures (fun h0 _ h1 -> B.live h1 output /\ modifies_1 output h0 h1 ))
 let rec bytes_of_uint32 output x =

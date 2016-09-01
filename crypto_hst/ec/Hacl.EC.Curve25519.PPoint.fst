@@ -106,7 +106,7 @@ let rec swap_conditional_aux' a b swap ctr =
 
 val swap_conditional_aux: a:bigint -> b:bigint{disjoint a b} ->
   is_swap:s64{v is_swap = pow2 platform_size -1 \/ v is_swap = 0} ->
-  STStack unit
+  Stack unit
     (requires (fun h -> B.live h a /\ B.live h b))
       (* norm h a /\ norm h b)) *)
     (ensures (fun h0 _ h1 -> B.live h1 a /\ B.live h1 b /\ modifies_2 a b h0 h1))
@@ -187,7 +187,7 @@ let helper_lemma_4 r h0 h1 h2 h3 a b : Lemma
 val swap_conditional:
   a:point{same_frame a} -> b:point{distinct a b /\ same_frame b} ->
   is_swap:s64{v is_swap = pow2 platform_size -1 \/ v is_swap = 0} ->
-  STStack unit
+  Stack unit
     (requires (fun h -> live h a /\ live h b /\ same_frame_2 a b))
       (* onCurve h a /\ onCurve h b)) *)
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 b
@@ -275,7 +275,7 @@ let helper_lemma_4' r h0 h1 h2 h3 a : Lemma
 
 val copy:
   a:point{same_frame a} -> b:point{distinct a b} ->
-  STStack unit
+  Stack unit
     (requires (fun h -> live h a /\ live h b))
       (* /\ onCurve h b)) *)
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 b
@@ -333,7 +333,7 @@ let copy a b =
 
 val swap:
   a:point -> b:point{distinct a b /\ same_frame b} ->
-  STStack unit
+  Stack unit
     (requires (fun h -> live h a /\ live h b))
       (* onCurve h a /\ live h b)) *)
     (ensures (fun h0 _ h1 -> live h1 b /\ live h1 a
@@ -363,7 +363,7 @@ let helper_lemma_5 h0 h1 a b =
 val swap_both:
   a:point -> b:point{distinct a b /\ same_frame_2 a b} ->
   c:point{distinct c a /\ distinct c b /\ same_frame_2 b c} ->
-  d:point{distinct d a /\ distinct d b /\ distinct d c /\ same_frame_2 c d} -> STStack unit
+  d:point{distinct d a /\ distinct d b /\ distinct d c /\ same_frame_2 c d} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h c /\ live h d))
       (* onCurve h a /\ onCurve h b /\ live h c /\ live h d)) *)
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 b /\ live h1 c /\ live h1 d
@@ -405,7 +405,7 @@ let swap_both a b c d =
 
 val copy2: p':point -> q':point{distinct p' q' /\ same_frame_2 p' q'} ->
   p:point{distinct p p' /\ distinct p q' /\ same_frame_2 p q'} ->
-  q:point{distinct q p' /\ distinct q q' /\ same_frame_2 p q} -> STStack unit
+  q:point{distinct q p' /\ distinct q q' /\ same_frame_2 p q} -> Stack unit
     (requires (fun h -> live h p' /\ live h q' /\ live h p /\ live h q))
       (* live h p' /\ live h q' /\ onCurve h p /\ onCurve h q )) *)
     (ensures (fun h0 _ h1 -> live h1 p' /\ live h1 q' /\ live h1 p /\ live h1 q

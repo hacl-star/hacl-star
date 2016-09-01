@@ -45,7 +45,7 @@ let mk_mask (nbits:U32.t{U32.v nbits < 64}) :
     H64 ((uint64_to_sint64 1uL <<^ nbits) -^ uint64_to_sint64 1uL)
 
 (* Formats a wordB into an elemB *)
-val toGroup: a:elemB -> b:wordB{length b = 16 /\ disjoint a b} -> STStack unit
+val toGroup: a:elemB -> b:wordB{length b = 16 /\ disjoint a b} -> Stack unit
   (requires (fun h -> live h a /\ B.live h b /\ disjoint a b))
   (ensures  (fun h0 _ h1 -> live h1 a /\ modifies_1 a h0 h1))
 let toGroup b s =
@@ -194,7 +194,7 @@ let zeroB a =
 val poly1305_init: acc:elemB -> // Accumulator
   r:elemB{disjoint acc r} -> // First half of the key, on which the polynome is evaluated
   key:bytes{length key >= 32 /\ disjoint acc key /\ disjoint r key} ->
-  STStack unit
+  Stack unit
   (requires (fun h -> live h acc /\ live h r /\ B.live h key))
   (ensures  (fun h0 log h1 -> live h1 acc /\ live h1 r /\ modifies_2 acc r h0 h1))
 let poly1305_init acc r key =
@@ -231,7 +231,7 @@ let poly1305_init acc r key =
 val poly1305_update:
   msg:wordB{length msg >= 16} ->
   acc:elemB{disjoint msg acc} ->
-  r:elemB{disjoint msg r /\ disjoint acc r} -> STStack unit
+  r:elemB{disjoint msg r /\ disjoint acc r} -> Stack unit
     (requires (fun h -> B.live h msg /\ live h acc /\ live h r))
     (ensures (fun h0 updated_log h1 -> live h1 acc /\ modifies_1 acc h0 h1))
 let poly1305_update msg acc r =
@@ -263,7 +263,7 @@ let rec poly1305_loop msg acc r ctr =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
-val poly1305_last_word: msg:wordB -> n:wordB{length n = 16 /\ disjoint msg n} -> len:u32{U32.v len <= length msg /\ U32.v len < 16} -> STStack unit
+val poly1305_last_word: msg:wordB -> n:wordB{length n = 16 /\ disjoint msg n} -> len:u32{U32.v len <= length msg /\ U32.v len < 16} -> Stack unit
   (requires (fun h -> B.live h msg /\ B.live h n))
   (ensures  (fun h0 _ h1 -> B.live h1 n /\ modifies_1 n h0 h1))
 let poly1305_last_word msg n len =
@@ -271,7 +271,7 @@ let poly1305_last_word msg n len =
   upd n len (uint8_to_sint8 1uy)
 
 val poly1305_last_block: n:wordB{length n = 16} -> acc:elemB{disjoint n acc} ->
-  r:elemB{disjoint n r /\ disjoint acc r} -> STStack unit
+  r:elemB{disjoint n r /\ disjoint acc r} -> Stack unit
   (requires (fun h -> B.live h n /\ live h acc /\ live h r))
   (ensures  (fun h0 _ h1 -> live h1 acc /\ modifies_1 acc h0 h1))
 let poly1305_last_block n acc r =
@@ -361,7 +361,7 @@ let poly1305_finish tag acc s =
    *)
 val poly1305_mac: tag:wordB{length tag >= 16} -> msg:bytes{disjoint tag msg} ->
   len:u32{U32.v len <= length msg} -> key:bytes{length key = 32 /\ disjoint msg key /\ disjoint tag key} ->
-  STStack unit
+  Stack unit
     (requires (fun h -> B.live h msg /\ B.live h key /\ B.live h tag))
     (ensures (fun h0 _ h1 -> B.live h1 tag /\ modifies_1 tag h0 h1))
 let poly1305_mac tag msg len key =

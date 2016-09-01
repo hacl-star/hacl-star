@@ -26,7 +26,7 @@ val fsum_index_aux:
   a:bigint ->
   b:bigint{disjoint a b} ->
   ctr:u32{U32.v ctr < norm_length} ->
-  STStack unit
+  Stack unit
     (requires (fun h -> live h a /\ live h b /\ norm_length <= length a /\ norm_length <= length b
       (* /\ willNotOverflow h a b (U32.v ctr) *)
     ))
@@ -58,7 +58,7 @@ val fsum_index:
   a:bigint ->
   b:bigint{disjoint a b} ->
   ctr:u32{U32.v ctr <= norm_length } ->
-  STStack unit
+  Stack unit
     (requires (fun h -> live h a /\ live h b
       (* /\ (forall (i:nat). (i >= U32.v ctr /\ i < norm_length) ==> *)
       (* 	  (v (get h a i) + v (get h b i) < pow2 platform_size)) *)
@@ -86,7 +86,7 @@ let rec fsum_index a b ctr =
 
 val fsum':
   a:bigint ->
-  b:bigint{disjoint a b} -> STStack unit
+  b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> live h a /\ live h b
       (* norm h a /\ norm h b *)
     ))

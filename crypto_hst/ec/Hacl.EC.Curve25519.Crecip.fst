@@ -27,7 +27,7 @@ module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
-val loop: tmp:bigint -> v:bigint{disjoint tmp v} -> ctr:U32.t -> STStack unit 
+val loop: tmp:bigint -> v:bigint{disjoint tmp v} -> ctr:U32.t -> Stack unit 
     (requires (fun h -> live h tmp /\ live h v)) 
     (ensures (fun h0 _ h1 -> live h1 tmp /\ live h1 v /\ modifies_2 tmp v h0 h1))
 let rec loop tmp v ctr =
@@ -43,7 +43,7 @@ let rec loop tmp v ctr =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
-val crecip_0: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> STStack unit
+val crecip_0: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z))
   (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
 let crecip_0 tmp z =
@@ -68,7 +68,7 @@ let crecip_0 tmp z =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
-val crecip_1: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> STStack unit
+val crecip_1: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z))
   (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
 let crecip_1 tmp z =
@@ -93,7 +93,7 @@ let crecip_1 tmp z =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
-val crecip_2: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> STStack unit
+val crecip_2: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z))
   (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
 let crecip_2 tmp z =
@@ -124,7 +124,7 @@ let crecip_2 tmp z =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
-val crecip_3: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> STStack unit
+val crecip_3: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z))
   (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
 let crecip_3 tmp z =
@@ -151,7 +151,7 @@ let crecip_3 tmp z =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
-val crecip_4: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> STStack unit
+val crecip_4: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z))
   (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
 let crecip_4 tmp z =
@@ -178,7 +178,7 @@ let crecip_4 tmp z =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
-val crecip': output:bigint -> z:bigint{disjoint output z} -> STStack unit 
+val crecip': output:bigint -> z:bigint{disjoint output z} -> Stack unit 
   (requires (fun h -> live h output /\ live h z)) 
   (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
 let crecip' output z = 
