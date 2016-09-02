@@ -146,13 +146,15 @@ val setall_aux: #t:Type -> b:buffer t -> z:t -> len:U32.t -> ctr:U32.t -> STL un
             (live h b)
             /\ (U32.v len = Seq.length (FB.as_seq h b))
             /\ (U32.v ctr <= U32.v len)
-            /\ (forall (i:nat). i < (U32.v ctr) ==> Seq.index (FB.as_seq h b) i == z)))
+            /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h b) i)}
+                        (i < (U32.v ctr) ==> Seq.index (FB.as_seq h b) i == z))))
   (ensures  (fun h0 _ h1 ->
             (live h0 b /\ live h1 b /\ modifies_1 b h0 h1)
             /\ (U32.v len = Seq.length (FB.as_seq h1 b))
             /\ (U32.v ctr <= U32.v len)
             /\ (Seq.length (FB.as_seq h0 b) = Seq.length (FB.as_seq h1 b))
-            /\ (forall (i:nat). i < (U32.v len) ==> Seq.index (FB.as_seq h1 b) i == z)))
+            /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 b) i)}
+                        (i < (U32.v len) ==> Seq.index (FB.as_seq h1 b) i == z))))
 
 let rec setall_aux #t b z len ctr =
   if (len -^ ctr) =^ 0ul then ()
@@ -168,7 +170,8 @@ val setall: #t:Type -> b:buffer t -> z:t -> len:U32.t -> STL unit
             (live h0 b /\ live h1 b /\ modifies_1 b h0 h1)
             /\ (U32.v len = Seq.length (FB.as_seq h1 b))
             /\ (Seq.length (FB.as_seq h0 b) = Seq.length (FB.as_seq h1 b))
-            /\ (forall (i:nat). i < (U32.v len) ==> Seq.index (FB.as_seq h1 b) i == z)))
+            /\ (forall (i:nat). {:pattern (Seq.index (FB.as_seq h1 b) i)}
+                        (i < (U32.v len) ==> Seq.index (FB.as_seq h1 b) i == z))))
 
 let setall #t b z len = setall_aux #t b z len 0ul
 
