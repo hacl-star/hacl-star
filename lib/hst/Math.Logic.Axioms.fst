@@ -144,6 +144,10 @@ assume val axiom_u8_lognot_1: a:u8
 assume val axiom_u8_lognot_2: unit
   -> Lemma (requires True) (ensures (U8.v (U8.lognot u8_zero) = U8.v u8_ones))
 
+(* Logical NOT operator: negation of ones *)
+assume val axiom_u8_lognot_3: unit
+  -> Lemma (requires True) (ensures (U8.v (U8.lognot u8_ones) = U8.v u8_zero))
+
 
 (*******************************************************************************)
 
@@ -202,6 +206,10 @@ assume val axiom_s8_lognot_1: a:s8
 (* Logical NOT operator: negation of zeros *)
 assume val axiom_s8_lognot_2: unit
   -> Lemma (requires True) (ensures (S8.v (S8.lognot s8_zero) = S8.v s8_ones))
+
+(* Logical NOT operator: negation of ones *)
+assume val axiom_s8_lognot_3: unit
+  -> Lemma (requires True) (ensures (S8.v (S8.lognot s8_ones) = S8.v s8_zero))
 
 
 (*******************************************************************************)
@@ -262,6 +270,10 @@ assume val axiom_u16_lognot_1: a:u16
 assume val axiom_u16_lognot_2: unit
   -> Lemma (requires True) (ensures (U16.v (U16.lognot u16_zero) = U16.v u16_ones))
 
+(* Logical NOT operator: negation of ones *)
+assume val axiom_u16_lognot_3: unit
+  -> Lemma (requires True) (ensures (U16.v (U16.lognot u16_ones) = U16.v u16_zero))
+
 
 (*******************************************************************************)
 
@@ -320,6 +332,10 @@ assume val axiom_s16_lognot_1: a:s16
 (* Logical NOT operator: negation of zeros *)
 assume val axiom_s16_lognot_2: unit
   -> Lemma (requires True) (ensures (S16.v (S16.lognot s16_zero) = S16.v s16_ones))
+
+(* Logical NOT operator: negation of ones *)
+assume val axiom_s16_lognot_3: unit
+  -> Lemma (requires True) (ensures (S16.v (S16.lognot s16_ones) = S16.v s16_zero))
 
 
 (*******************************************************************************)
@@ -380,6 +396,10 @@ assume val axiom_u32_lognot_1: a:u32
 assume val axiom_u32_lognot_2: unit
   -> Lemma (requires True) (ensures (U32.v (U32.lognot u32_zero) = U32.v u32_ones))
 
+(* Logical NOT operator: negation of ones *)
+assume val axiom_u32_lognot_3: unit
+  -> Lemma (requires True) (ensures (U32.v (U32.lognot u32_ones) = U32.v u32_zero))
+
 
 (*******************************************************************************)
 
@@ -438,6 +458,10 @@ assume val axiom_s32_lognot_1: a:s32
 (* Logical NOT operator: negation of zeros *)
 assume val axiom_s32_lognot_2: unit
   -> Lemma (requires True) (ensures (S32.v (S32.lognot s32_zero) = S32.v s32_ones))
+
+(* Logical NOT operator: negation of ones *)
+assume val axiom_s32_lognot_3: unit
+  -> Lemma (requires True) (ensures (S32.v (S32.lognot s32_ones) = S32.v s32_zero))
 
 
 (*******************************************************************************)
@@ -498,6 +522,10 @@ assume val axiom_u64_lognot_1: a:u64
 assume val axiom_u64_lognot_2: unit
   -> Lemma (requires True) (ensures (U64.v (U64.lognot u64_zero) = U64.v u64_ones))
 
+(* Logical NOT operator: negation of ones *)
+assume val axiom_u64_lognot_3: unit
+  -> Lemma (requires True) (ensures (U64.v (U64.lognot u64_ones) = U64.v u64_zero))
+
 
 (*******************************************************************************)
 
@@ -556,3 +584,8 @@ assume val axiom_s64_lognot_1: a:s64
 (* Logical NOT operator: negation of zeros *)
 assume val axiom_s64_lognot_2: unit
   -> Lemma (requires True) (ensures (S64.v (S64.lognot s64_zero) = S64.v s64_ones))
+
+(* Logical NOT operator: negation of ones *)
+assume val axiom_s64_lognot_3: unit
+  -> Lemma (requires True) (ensures (S64.v (S64.lognot s64_ones) = S64.v s64_zero))
+
