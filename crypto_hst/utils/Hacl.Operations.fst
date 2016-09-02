@@ -4,6 +4,7 @@ open FStar.HyperStack
 open FStar.HST
 open FStar.Buffer
 open FStar.Buffer.Quantifiers
+open Math.Logic.Axioms
 open FStar.UInt32
 open Hacl.Cast
 
@@ -15,6 +16,8 @@ module S32 = Hacl.UInt32
 module S8  = Hacl.UInt8
 module SB  = Hacl.SBuffer
 module FB  = FStar.Buffer
+module MLA = Math.Logic.Axioms
+
 
 (* Define base types *)
 let u8 = FStar.UInt8.t
@@ -135,6 +138,40 @@ let rec or_bytes output input len =
     let r = S8.logor (SB.index output i) (SB.index input i) in
     SB.upd output i r;
     or_bytes output input i end
+
+
+//
+// Branch_mask
+//
+
+val branch_s8_mask: v1:s8 -> v2:s8 -> mask:s8{S8.v mask = S8.v MLA.s8_zero \/ S8.v mask = S8.v MLA.s8_ones}
+  -> Tot (res:s8{((S8.v mask = S8.v MLA.s8_ones) ==> S8.v res = S8.v v1) /\ ((S8.v mask = S8.v MLA.s8_zero) ==> S8.v res = S8.v v2)})
+
+let branch_s8_mask v1 v2 mask =
+  let c1 = S8.logand v1 mask in
+  let c2 = S8.logand v2 (S8.lognot mask) in
+  let res = S8.logor (S8.logand v1 mask) (S8.logand v2 (S8.lognot mask)) in
+  (**) axiom_s8_logand_2 v1;
+  (**) axiom_s8_logand_3 v1;
+  (***) assert((S8.v mask = S8.v MLA.s8_ones) ==> S8.v c1 = S8.v v1);
+  (***) assert((S8.v mask = S8.v MLA.s8_zero) ==> S8.v c1 = 0);
+  (**) axiom_s8_logand_2 v2;
+  (**) axiom_s8_logand_3 v2;
+  (***) assert((S8.v (S8.lognot mask) = S8.v MLA.s8_ones) ==> S8.v c2 = S8.v v2);
+  (***) assert((S8.v (S8.lognot mask) = S8.v MLA.s8_zero) ==> S8.v c2 = 0);
+  (**) axiom_s8_lognot_2 ();
+  (**) axiom_s8_lognot_3 ();
+  (***) assert((S8.v mask = S8.v MLA.s8_ones) ==> S8.v c2 = 0);
+  (***) assert((S8.v mask = S8.v MLA.s8_zero) ==> S8.v c2 = S8.v v2);
+  (**) axiom_s8_logor_2 c1;
+  (**) axiom_s8_logor_3 c1;
+  (***) assert((S8.v mask = S8.v MLA.s8_ones) ==> S8.v res = S8.v v1);
+  (**) axiom_s8_logor_1 c1 c2;
+  (**) axiom_s8_logor_2 c2;
+  (**) axiom_s8_logor_3 c2;
+  (***) assert((S8.v (S8.lognot mask) = S8.v MLA.s8_ones) ==> S8.v res = S8.v v2);
+  (***) assert((S8.v mask = S8.v MLA.s8_zero) ==> S8.v res = S8.v v2);
+  res
 
 
 //
