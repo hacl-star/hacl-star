@@ -11,9 +11,14 @@ open Hacl.Cast
 
 
 (* Module aliases *)
+module U8  = FStar.UInt8
+module S8  = Hacl.UInt8
+module U16  = FStar.UInt16
+module S16  = Hacl.UInt16
 module U32 = FStar.UInt32
 module S32 = Hacl.UInt32
-module S8  = Hacl.UInt8
+module U64  = FStar.UInt64
+module S64  = Hacl.UInt64
 module SB  = Hacl.SBuffer
 module FB  = FStar.Buffer
 module MLA = Math.Logic.Axioms
@@ -22,8 +27,12 @@ module MLA = Math.Logic.Axioms
 (* Define base types *)
 let u8 = FStar.UInt8.t
 let s8 = Hacl.UInt8.t
+let u16 = FStar.UInt16.t
+let s16 = Hacl.UInt16.t
 let u32 = FStar.UInt32.t
 let s32 = Hacl.UInt32.t
+let u64 = FStar.UInt64.t
+let s64 = Hacl.UInt64.t
 let bytes = Hacl.SBuffer.u8s
 
 
@@ -144,34 +153,56 @@ let rec or_bytes output input len =
 // Branch_mask
 //
 
-val branch_s8_mask: v1:s8 -> v2:s8 -> mask:s8{S8.v mask = S8.v MLA.s8_zero \/ S8.v mask = S8.v MLA.s8_ones}
-  -> Tot (res:s8{((S8.v mask = S8.v MLA.s8_ones) ==> S8.v res = S8.v v1) /\ ((S8.v mask = S8.v MLA.s8_zero) ==> S8.v res = S8.v v2)})
+val branch_u8_mask: v1:u8 -> v2:u8 -> mask:u8{U8.v mask = U8.v MLA.u8_zero \/ U8.v mask = U8.v MLA.u8_ones}
+  -> Tot (res:u8{((U8.v mask = U8.v MLA.u8_ones) ==> U8.v res = U8.v v1)
+                /\ ((U8.v mask = U8.v MLA.u8_zero) ==> U8.v res = U8.v v2)})
 
-let branch_s8_mask v1 v2 mask =
-  let c1 = S8.logand v1 mask in
-  let c2 = S8.logand v2 (S8.lognot mask) in
-  let res = S8.logor (S8.logand v1 mask) (S8.logand v2 (S8.lognot mask)) in
-  (**) axiom_s8_logand_2 v1;
-  (**) axiom_s8_logand_3 v1;
-  (***) assert((S8.v mask = S8.v MLA.s8_ones) ==> S8.v c1 = S8.v v1);
-  (***) assert((S8.v mask = S8.v MLA.s8_zero) ==> S8.v c1 = 0);
-  (**) axiom_s8_logand_2 v2;
-  (**) axiom_s8_logand_3 v2;
-  (***) assert((S8.v (S8.lognot mask) = S8.v MLA.s8_ones) ==> S8.v c2 = S8.v v2);
-  (***) assert((S8.v (S8.lognot mask) = S8.v MLA.s8_zero) ==> S8.v c2 = 0);
-  (**) axiom_s8_lognot_2 ();
-  (**) axiom_s8_lognot_3 ();
-  (***) assert((S8.v mask = S8.v MLA.s8_ones) ==> S8.v c2 = 0);
-  (***) assert((S8.v mask = S8.v MLA.s8_zero) ==> S8.v c2 = S8.v v2);
-  (**) axiom_s8_logor_2 c1;
-  (**) axiom_s8_logor_3 c1;
-  (***) assert((S8.v mask = S8.v MLA.s8_ones) ==> S8.v res = S8.v v1);
-  (**) axiom_s8_logor_1 c1 c2;
-  (**) axiom_s8_logor_2 c2;
-  (**) axiom_s8_logor_3 c2;
-  (***) assert((S8.v (S8.lognot mask) = S8.v MLA.s8_ones) ==> S8.v res = S8.v v2);
-  (***) assert((S8.v mask = S8.v MLA.s8_zero) ==> S8.v res = S8.v v2);
-  res
+let branch_u8_mask v1 v2 mask = U8.logor (U8.logand v1 mask) (U8.logand v2 (U8.lognot mask))
+
+val branch_s8_mask: v1:s8 -> v2:s8 -> mask:s8{S8.v mask = S8.v MLA.s8_zero \/ S8.v mask = S8.v MLA.s8_ones}
+  -> Tot (res:s8{((S8.v mask = S8.v MLA.s8_ones) ==> S8.v res = S8.v v1)
+                /\ ((S8.v mask = S8.v MLA.s8_zero) ==> S8.v res = S8.v v2)})
+
+let branch_s8_mask v1 v2 mask = S8.logor (S8.logand v1 mask) (S8.logand v2 (S8.lognot mask))
+
+
+val branch_u16_mask: v1:u16 -> v2:u16 -> mask:u16{U16.v mask = U16.v MLA.u16_zero \/ U16.v mask = U16.v MLA.u16_ones}
+  -> Tot (res:u16{((U16.v mask = U16.v MLA.u16_ones) ==> U16.v res = U16.v v1)
+                /\ ((U16.v mask = U16.v MLA.u16_zero) ==> U16.v res = U16.v v2)})
+
+let branch_u16_mask v1 v2 mask = U16.logor (U16.logand v1 mask) (U16.logand v2 (U16.lognot mask))
+
+val branch_s16_mask: v1:s16 -> v2:s16 -> mask:s16{S16.v mask = S16.v MLA.s16_zero \/ S16.v mask = S16.v MLA.s16_ones}
+  -> Tot (res:s16{((S16.v mask = S16.v MLA.s16_ones) ==> S16.v res = S16.v v1)
+                /\ ((S16.v mask = S16.v MLA.s16_zero) ==> S16.v res = S16.v v2)})
+
+let branch_s16_mask v1 v2 mask = S16.logor (S16.logand v1 mask) (S16.logand v2 (S16.lognot mask))
+
+
+val branch_u32_mask: v1:u32 -> v2:u32 -> mask:u32{U32.v mask = U32.v MLA.u32_zero \/ U32.v mask = U32.v MLA.u32_ones}
+  -> Tot (res:u32{((U32.v mask = U32.v MLA.u32_ones) ==> U32.v res = U32.v v1)
+                /\ ((U32.v mask = U32.v MLA.u32_zero) ==> U32.v res = U32.v v2)})
+
+let branch_u32_mask v1 v2 mask = U32.logor (U32.logand v1 mask) (U32.logand v2 (U32.lognot mask))
+
+val branch_s32_mask: v1:s32 -> v2:s32 -> mask:s32{S32.v mask = S32.v MLA.s32_zero \/ S32.v mask = S32.v MLA.s32_ones}
+  -> Tot (res:s32{((S32.v mask = S32.v MLA.s32_ones) ==> S32.v res = S32.v v1)
+                /\ ((S32.v mask = S32.v MLA.s32_zero) ==> S32.v res = S32.v v2)})
+
+let branch_s32_mask v1 v2 mask = S32.logor (S32.logand v1 mask) (S32.logand v2 (S32.lognot mask))
+
+
+val branch_u64_mask: v1:u64 -> v2:u64 -> mask:u64{U64.v mask = U64.v MLA.u64_zero \/ U64.v mask = U64.v MLA.u64_ones}
+  -> Tot (res:u64{((U64.v mask = U64.v MLA.u64_ones) ==> U64.v res = U64.v v1)
+                /\ ((U64.v mask = U64.v MLA.u64_zero) ==> U64.v res = U64.v v2)})
+
+let branch_u64_mask v1 v2 mask = U64.logor (U64.logand v1 mask) (U64.logand v2 (U64.lognot mask))
+
+val branch_s64_mask: v1:s64 -> v2:s64 -> mask:s64{S64.v mask = S64.v MLA.s64_zero \/ S64.v mask = S64.v MLA.s64_ones}
+  -> Tot (res:s64{((S64.v mask = S64.v MLA.s64_ones) ==> S64.v res = S64.v v1)
+                /\ ((S64.v mask = S64.v MLA.s64_zero) ==> S64.v res = S64.v v2)})
+
+let branch_s64_mask v1 v2 mask = S64.logor (S64.logand v1 mask) (S64.logand v2 (S64.lognot mask))
 
 
 //
