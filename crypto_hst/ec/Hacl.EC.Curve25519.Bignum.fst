@@ -253,7 +253,7 @@ let fdifference a b =
   pop_frame()
 
 val fscalar:
-    res:bigint -> b:bigint{disjoint res b} -> s:s64{v s < templ 0} -> ST unit
+    res:bigint -> b:bigint{disjoint res b} -> s:s64(* {v s < templ 0} *) -> Stack unit
   (requires (fun h -> live h res /\ live h b))
   (* (live h res) /\ (norm h b))) *)
   (ensures (fun h0 _ h1 -> live h1 res /\ modifies_1 res h0 h1

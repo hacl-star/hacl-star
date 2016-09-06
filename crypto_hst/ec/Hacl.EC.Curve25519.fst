@@ -250,45 +250,59 @@ let contract output input =
   contract_4 output input
 
 
-(* TODO *)
-#reset-options "--lax"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 val exp: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
   pk:u8s{length pk >= 32 /\ disjoint pk output} -> STL unit
   (requires (fun h -> live h output /\ live h q_x /\ live h pk))
-  (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
+  (ensures  (fun h0 _ h1 -> modifies_2 output pk h0 h1 /\ live h1 output))
 let exp output q_x scalar =
+  let open FStar.UInt32 in
+
   push_frame();
+  let h0 = HST.get() in
 
   (* Allocate *)
   let zero = uint64_to_sint64 0uL in
   let one  = uint64_to_sint64 1uL in
-  
-  let qx = create zero nlength in
-  let qy = create zero nlength in
-  let qz = create zero nlength in
-  let resx = create zero nlength in
-  let resy = create zero nlength in
-  let resz = create zero nlength in
-  let zrecip = create zero nlength in
-    
-  (* Format scalar *)
-  format_scalar scalar;
+
+  let tmp    = create zero (7ul *^ nlength) in
+  let qx     = B.sub tmp 0ul nlength in
+  let qy     = B.sub tmp nlength nlength in
+  let qz     = B.sub tmp (2ul*^nlength) nlength in
+  let resx   = B.sub tmp (3ul*^nlength) nlength in
+  let resy   = B.sub tmp (4ul*^nlength) nlength in
+  let resz   = B.sub tmp (5ul*^nlength) nlength in
+  let zrecip = B.sub tmp (6ul*^nlength) nlength in
+  let basepoint = PPoint.make qx qy qz in
+  let res       = PPoint.make resx resy resz in
+  cut(PPoint.distinct res basepoint);
+  cut(distinct2 scalar basepoint);
+  cut(distinct2 scalar res);
 
   (* Create basepoint *)
   expand qx q_x;
   upd qz 0ul one;
-  let basepoint = Hacl.EC.Curve25519.PPoint.make qx qy qz in
+  let h1 = HST.get() in assert(modifies_0 h0 h1);
 
+  (* Format scalar *)
+  format_scalar scalar;
+  let h2 = HST.get() in assert(FStar.Buffer.modifies_2_1 scalar h0 h2);
   (* Point to store the result *)
-  let res = Hacl.EC.Curve25519.PPoint.make resx resy resz in
 
   (* Ladder *)
+  assume(PPoint.live h2 res); (* TODO *)
+  assume(PPoint.live h2 basepoint); (* TODO *)
   montgomery_ladder res scalar basepoint;
+  let h3 = HST.get() in assert(FStar.Buffer.modifies_3 (PPoint.get_x res) (PPoint.get_y res) (PPoint.get_z res) h2 h3);
 
   (* Get the affine coordinates back *)
+  assume (live h3 zrecip /\ live h3 (PPoint.get_z res)); (* TODO *)
   crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res);
   fmul resy resx zrecip;
+  let h4 = HST.get() in assert(FStar.Buffer.modifies_2 zrecip resy h3 h4);
+
+  assume (Buffer.modifies_2_1 scalar h0 h4 /\ live h4 output);
   contract output resy;
 
   pop_frame()

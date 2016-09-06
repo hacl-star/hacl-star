@@ -186,7 +186,7 @@ let helper_lemma_4 r h0 h1 h2 h3 a b : Lemma
 
 val swap_conditional:
   a:point{same_frame a} -> b:point{distinct a b /\ same_frame b} ->
-  is_swap:s64{v is_swap = pow2 platform_size -1 \/ v is_swap = 0} ->
+  is_swap:s64(* {v is_swap = pow2 platform_size -1 \/ v is_swap = 0} *) ->
   Stack unit
     (requires (fun h -> live h a /\ live h b /\ same_frame_2 a b))
       (* onCurve h a /\ onCurve h b)) *)

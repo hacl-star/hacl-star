@@ -45,13 +45,12 @@ let nth_bit byte idx =
 type distinct2 (n:bytes) (p:point) =
   disjoint n (get_x p) /\ disjoint n (get_y p) /\ disjoint n (get_z p)
 
-(* TODO *)
-#reset-options "--lax"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
 
 val small_step_exit: 
-  two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q} -> 
-  p:point{distinct p two_p /\ distinct p two_p_plus_q} -> 
-  p_plus_q:point{distinct p_plus_q two_p /\ distinct p_plus_q two_p_plus_q /\ distinct p_plus_q p} -> 
+  two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} -> 
+  p:point{distinct p two_p /\ distinct p two_p_plus_q /\ same_frame_2 two_p_plus_q p} -> 
+  p_plus_q:point{distinct p_plus_q two_p /\ distinct p_plus_q two_p_plus_q /\ distinct p_plus_q p /\ same_frame_2 p p_plus_q} -> 
   q:point{distinct q two_p /\ distinct q two_p_plus_q /\ distinct q p /\ distinct q p_plus_q} -> 
   n:erased nat -> byte:s8 ->
   scalar:erased nat(* {reveal n = reveal scalar * (pow2 8) + (S8.v byte / (pow2 (8-8)))} *) ->
@@ -62,7 +61,7 @@ val small_step_exit:
      ))
      (ensures (fun h0 _ h1 -> live h1 two_p /\ live h1 two_p_plus_q /\ live h1 p /\ live h1 p_plus_q
        /\ HS.modifies_one (frame_of p) h0 h1
-       /\ HS.modifies_ref (frame_of p) (refs two_p ++ refs two_p_plus_q ++ refs p ++ refs p_plus_q) h0 h1 ))
+       /\ HS.modifies_ref (frame_of p) (refs two_p ++ refs two_p_plus_q (* ++ refs p ++ refs p_plus_q *)) h0 h1 ))
        (* (onCurve h0 p) /\ (onCurve h0 p_plus_q) /\ (onCurve h0 q) *)
        (* /\ (onCurve h1 two_p) /\ (onCurve h1 two_p_plus_q) /\ (live h1 p) /\ (live h1 p_plus_q) /\ (onCurve h1 q)  *)
        (* /\ (modifies (refs two_p +++ refs two_p_plus_q +++ refs p +++ refs p_plus_q) h0 h1) *)
@@ -83,11 +82,19 @@ let small_step_exit pp ppq p pq q n byte scalar =
   ()
   (* helper_lemma_1 scalar byte *)
 
+let same_ref (p:point) = as_ref (get_x p) == as_ref (get_y p) /\ as_ref (get_y p) == as_ref (get_z p)
+let distinct_ref (p:point) (p':point) = same_ref p /\ same_ref p' /\ as_ref (get_x p) =!= as_ref (get_x p')
+
+
+(* TODO - WIP *)
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+
 val small_step_core: 
-   two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q} -> 
-   p:point{distinct p two_p /\ distinct p two_p_plus_q} -> 
-   p_plus_q:point{distinct p_plus_q two_p /\ distinct p_plus_q two_p_plus_q /\ distinct p_plus_q p} -> 
-   q:point{distinct q two_p /\ distinct q two_p_plus_q /\ distinct q p /\ distinct q p_plus_q} -> 
+   two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} -> 
+   p:point{distinct two_p p /\ distinct two_p_plus_q p /\ same_frame_2 two_p_plus_q p} ->
+   p_plus_q:point{distinct two_p p_plus_q /\ distinct two_p_plus_q p_plus_q /\ distinct p_plus_q p /\ same_frame_2 p p_plus_q} -> 
+   q:point{same_frame q /\ frame_of q <> frame_of p
+   (* distinct q two_p /\ distinct q two_p_plus_q /\ distinct q p /\ distinct q p_plus_q *)} -> 
    n:erased nat -> ctr:u32{U32.v ctr<8} -> byt:s8 -> scalar:erased nat(* {reveal n = reveal scalar * (pow2 (w ctr)) + (S8.v byt / (pow2 (8-w ctr)))} *) -> 
    Stack unit
      (requires (fun h -> live h two_p /\ live h two_p_plus_q /\ live h p /\ live h q /\ live h p_plus_q))
@@ -112,12 +119,18 @@ let small_step_core pp ppq p pq q n ctr b scalar =
   let bit = nth_bit b ctr in
   let mask = mk_mask bit in
   (* cut (v mask = pow2 platform_size - 1 \/ v mask = 0);  *)
+  let h0 = HST.get() in
   swap_conditional p pq mask; 
+  let h1 = HST.get() in assume (live h1 pp /\ live h1 ppq /\ live h1 q);
   (* let h = HST.get() in *)
   (* small_step_core_lemma_1 h0 h pp ppq p pq q; *)
   Hacl.EC.Curve25519.AddAndDouble.double_and_add pp ppq p pq q;
+  let h2 = HST.get() in
   (* let h2 = HST.get() in *)
   swap_conditional pp ppq mask; 
+  let h3 = HST.get() in assume (live h3 p /\ live h3 pq /\ live h3 q);
+  Hacl.EC.Curve25519.AddAndDouble.lemma_helper_2 (frame_of p) h0 h1 (refs p ++ refs pq) (refs pp ++ refs ppq ++ refs p ++ refs pq);
+  Hacl.EC.Curve25519.AddAndDouble.lemma_helper_2 (frame_of p) h2 h3 (refs pp ++ refs ppq) (refs pp ++ refs ppq ++ refs p ++ refs pq);
   (* lemma_5 scalar b ctr; *)
   (* let h1 = HST.get() in *)
   (* assert ((live h2 p) /\ (live h2 pq) /\ (onCurve h2 q));  *)
