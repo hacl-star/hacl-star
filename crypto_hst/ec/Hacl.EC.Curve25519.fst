@@ -252,57 +252,192 @@ let contract output input =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
-val exp: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
-  pk:u8s{length pk >= 32 /\ disjoint pk output} -> STL unit
-  (requires (fun h -> live h output /\ live h q_x /\ live h pk))
-  (ensures  (fun h0 _ h1 -> modifies_2 output pk h0 h1 /\ live h1 output))
-let exp output q_x scalar =
-  let open FStar.UInt32 in
+open Hacl.EC.Curve25519.PPoint
 
+private val mk_q:
+  output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
+  pk:u8s{length pk >= 32 /\ disjoint pk output} -> 
+  q:point{same_frame q /\ frame_of q <> frameOf q_x /\ frame_of q <> frameOf output /\ frame_of q <> frameOf pk} -> STL unit
+  (requires (fun h -> B.live h output /\ B.live h q_x /\ B.live h pk /\ live h q))
+  (ensures  (fun h0 _ h1 -> B.live h1 output /\ B.live h1 pk /\ live h1 q
+    /\ HS.modifies_one (frame_of q) h0 h1
+    /\ HS.modifies_ref (frame_of q) (refs q) h0 h1))
+let mk_q output q_x pk q =
+  let h0 = HST.get() in
+  let one  = uint64_to_sint64 1uL in
+  let qx     = get_x q in
+  let qy     = get_y q in
+  let qz     = get_z q in
+  expand qx q_x;
+  let h1 = HST.get() in
+  upd qz 0ul one;
+  let h2 = HST.get() in
+  assert(modifies_2 qx qz h0 h2);
+  FStar.Buffer.lemma_reveal_modifies_2 qx qz h0 h2;
+  assume (HS.modifies_ref (frame_of q) (refs q) h0 h2); (* TODO *)
+  ()
+
+private val exp_2:
+  output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
+  pk:u8s{length pk >= 32 /\ disjoint pk output} -> 
+  q:point{same_frame q /\ frame_of q <> frameOf q_x /\ frame_of q <> frameOf output /\ frame_of q <> frameOf pk} -> STL unit
+  (requires (fun h -> B.live h output /\ B.live h q_x /\ B.live h pk /\ live h q))
+  (ensures  (fun h0 _ h1 -> B.live h1 output /\ B.live h1 pk /\ live h1 q
+    /\ modifies_1 output h0 h1))
+let exp_2 output q_x scalar basepoint =
+  let hinit = HST.get() in
   push_frame();
   let h0 = HST.get() in
+  let zero = uint64_to_sint64 0uL in
+  let one  = uint64_to_sint64 1uL in
+  let tmp    = create zero (U32 (4ul *^ nlength)) in
+  let resx   = B.sub tmp 0ul            nlength in
+  let resy   = B.sub tmp nlength        nlength in
+  let resz   = B.sub tmp (U32 (2ul*^nlength)) nlength in
+  let zrecip = B.sub tmp (U32 (3ul*^nlength)) nlength in
+  let res    = PPoint.make resx resy resz in
+  (* (\* Ladder *\) *)
+  montgomery_ladder res scalar basepoint;
+  (* Get the affine coordinates back *)
+  let h1 = HST.get() in
+  cut( B.live h1 output);
+  crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res);
+  fmul resy resx zrecip;
+  let h2 = HST.get() in
+  assert(B.live h2 output);
+  cut (modifies_1 tmp h1 h2);
+  contract output resy;
+  pop_frame();
+  admit() (* TODO *)
 
+
+val exp_1: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
+  pk:u8s{length pk >= 32 /\ disjoint pk output} -> STL unit
+  (requires (fun h -> B.live h output /\ B.live h q_x /\ B.live h pk))
+  (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ B.live h1 output))
+let exp_1 output q_x scalar =
+  push_frame();
+  let open FStar.UInt32 in
+  let h0 = HST.get() in
   (* Allocate *)
   let zero = uint64_to_sint64 0uL in
   let one  = uint64_to_sint64 1uL in
-
-  let tmp    = create zero (7ul *^ nlength) in
+  let tmp    = create zero (3ul *^ nlength) in
   let qx     = B.sub tmp 0ul nlength in
   let qy     = B.sub tmp nlength nlength in
   let qz     = B.sub tmp (2ul*^nlength) nlength in
-  let resx   = B.sub tmp (3ul*^nlength) nlength in
-  let resy   = B.sub tmp (4ul*^nlength) nlength in
-  let resz   = B.sub tmp (5ul*^nlength) nlength in
-  let zrecip = B.sub tmp (6ul*^nlength) nlength in
-  let basepoint = PPoint.make qx qy qz in
-  let res       = PPoint.make resx resy resz in
-  cut(PPoint.distinct res basepoint);
-  cut(distinct2 scalar basepoint);
-  cut(distinct2 scalar res);
+  let q      = PPoint.make qx qy qz in
+  mk_q output q_x scalar q;
+  exp_2 output q_x scalar q;
+  pop_frame();
+  admit()
 
-  (* Create basepoint *)
-  expand qx q_x;
-  upd qz 0ul one;
-  let h1 = HST.get() in assert(modifies_0 h0 h1);
-
-  (* Format scalar *)
+val exp: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
+  pk:u8s{length pk >= 32 /\ disjoint pk output /\ disjoint pk q_x} -> STL unit
+  (requires (fun h -> B.live h output /\ B.live h q_x /\ B.live h pk))
+  (ensures  (fun h0 _ h1 -> modifies_2 output pk h0 h1 /\ B.live h1 output /\ B.live h1 pk))
+let exp output q_x scalar =
   format_scalar scalar;
-  let h2 = HST.get() in assert(FStar.Buffer.modifies_2_1 scalar h0 h2);
-  (* Point to store the result *)
+  exp_1 output q_x scalar
 
-  (* Ladder *)
-  assume(PPoint.live h2 res); (* TODO *)
-  assume(PPoint.live h2 basepoint); (* TODO *)
-  montgomery_ladder res scalar basepoint;
-  let h3 = HST.get() in assert(FStar.Buffer.modifies_3 (PPoint.get_x res) (PPoint.get_y res) (PPoint.get_z res) h2 h3);
+(*   push_frame(); *)
+(*   let open FStar.UInt32 in *)
+(*   let h0 = HST.get() in *)
+(*   (\* Allocate *\) *)
+(*   let zero = uint64_to_sint64 0uL in *)
+(*   let one  = uint64_to_sint64 1uL in *)
+(*   let tmp    = create zero (7ul *^ nlength) in *)
+(*   let qx     = B.sub tmp 0ul nlength in *)
+(*   let qy     = B.sub tmp nlength nlength in *)
+(*   let qz     = B.sub tmp (2ul*^nlength) nlength in *)
+(*   let resx   = B.sub tmp (3ul*^nlength) nlength in *)
+(*   let resy   = B.sub tmp (4ul*^nlength) nlength in *)
+(*   let resz   = B.sub tmp (5ul*^nlength) nlength in *)
+(*   let zrecip = B.sub tmp (6ul*^nlength) nlength in *)
+(*   let basepoint = PPoint.make qx qy qz in *)
+(*   let res       = PPoint.make resx resy resz in *)
+(*   cut(PPoint.distinct res basepoint); *)
+(*   cut(distinct2 scalar basepoint); *)
+(*   cut(distinct2 scalar res); *)
 
-  (* Get the affine coordinates back *)
-  assume (live h3 zrecip /\ live h3 (PPoint.get_z res)); (* TODO *)
-  crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res);
-  fmul resy resx zrecip;
-  let h4 = HST.get() in assert(FStar.Buffer.modifies_2 zrecip resy h3 h4);
+(*   (\* Create basepoint *\) *)
+(*   expand qx q_x; *)
+(*   upd qz 0ul one; *)
+(*   let h1 = HST.get() in assert(modifies_0 h0 h1); *)
 
-  assume (Buffer.modifies_2_1 scalar h0 h4 /\ live h4 output);
-  contract output resy;
+(*   (\* Ladder *\) *)
+(*   cut(PPoint.live h1 res); *)
+(*   cut(PPoint.live h1 basepoint); *)
+(*   montgomery_ladder res scalar basepoint; admit() *)
+(*   let h3 = HST.get() in assert(FStar.Buffer.modifies_3 (PPoint.get_x res) (PPoint.get_y res) (PPoint.get_z res) h2 h3); *)
 
-  pop_frame()
+(*   (\* Get the affine coordinates back *\) *)
+(*   assume (live h3 zrecip /\ live h3 (PPoint.get_z res)); (\* TODO *\) *)
+(*   crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res); *)
+(*   fmul resy resx zrecip; *)
+(*   let h4 = HST.get() in assert(FStar.Buffer.modifies_2 zrecip resy h3 h4); *)
+
+(*   assume (Buffer.modifies_2_1 scalar h0 h4 /\ live h4 output); *)
+(*   contract output resy; *)
+
+(*   pop_frame() *)
+
+(* val exp: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} -> *)
+(*   pk:u8s{length pk >= 32 /\ disjoint pk output} -> STL unit *)
+(*   (requires (fun h -> live h output /\ live h q_x /\ live h pk)) *)
+(*   (ensures  (fun h0 _ h1 -> modifies_2 output pk h0 h1 /\ live h1 output /\ live h1 pk)) *)
+(* let exp output q_x scalar = *)
+(*   (\* Point to store the result *\) *)
+(*   let open FStar.UInt32 in *)
+
+(*   push_frame(); *)
+
+(*   let h0 = HST.get() in *)
+(*   (\* Format scalar *\) *)
+(*   format_scalar scalar; *)
+(*   let h2 = HST.get() in assert(FStar.Buffer.modifies_2_1 scalar h0 h2); *)
+
+(*   (\* Allocate *\) *)
+(*   let zero = uint64_to_sint64 0uL in *)
+(*   let one  = uint64_to_sint64 1uL in *)
+
+(*   let tmp    = create zero (7ul *^ nlength) in *)
+(*   let qx     = B.sub tmp 0ul nlength in *)
+(*   let qy     = B.sub tmp nlength nlength in *)
+(*   let qz     = B.sub tmp (2ul*^nlength) nlength in *)
+(*   let resx   = B.sub tmp (3ul*^nlength) nlength in *)
+(*   let resy   = B.sub tmp (4ul*^nlength) nlength in *)
+(*   let resz   = B.sub tmp (5ul*^nlength) nlength in *)
+(*   let zrecip = B.sub tmp (6ul*^nlength) nlength in *)
+(*   let basepoint = PPoint.make qx qy qz in *)
+(*   let res       = PPoint.make resx resy resz in *)
+(*   cut(PPoint.distinct res basepoint); *)
+(*   cut(distinct2 scalar basepoint); *)
+(*   cut(distinct2 scalar res); *)
+
+(*   (\* Create basepoint *\) *)
+(*   expand qx q_x; *)
+(*   upd qz 0ul one; *)
+(*   let h1 = HST.get() in assert(modifies_0 h0 h1); *)
+
+(*   (\* Format scalar *\) *)
+(*   format_scalar scalar; *)
+(*   let h2 = HST.get() in assert(FStar.Buffer.modifies_2_1 scalar h0 h2); *)
+(*   (\* Point to store the result *\) *)
+
+(*   (\* Ladder *\) *)
+(*   assume(PPoint.live h2 res); (\* TODO *\) *)
+(*   assume(PPoint.live h2 basepoint); (\* TODO *\) *)
+(*   montgomery_ladder res scalar basepoint; *)
+(*   let h3 = HST.get() in assert(FStar.Buffer.modifies_3 (PPoint.get_x res) (PPoint.get_y res) (PPoint.get_z res) h2 h3); *)
+
+(*   (\* Get the affine coordinates back *\) *)
+(*   assume (live h3 zrecip /\ live h3 (PPoint.get_z res)); (\* TODO *\) *)
+(*   crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res); *)
+(*   fmul resy resx zrecip; *)
+(*   let h4 = HST.get() in assert(FStar.Buffer.modifies_2 zrecip resy h3 h4); *)
+
+(*   assume (Buffer.modifies_2_1 scalar h0 h4 /\ live h4 output); *)
+(*   contract output resy; *)
+
+(*   pop_frame() *)
