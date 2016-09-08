@@ -32,3 +32,4 @@ Currently verified primitives:
 + Chacha20 (memory safety)
 + Poly1305 (memory safety)
 + AEAD-AES256GCM (memory safety)
++ Curve25519 (memory safety)
