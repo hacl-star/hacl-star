@@ -440,60 +440,11 @@ let double_and_add two_p two_p_plus_q p p_plus_q q =
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) (nl +^ nl +^ nl2 +^ nl2 +^ nl2  +^ nl2  +^ nl2  +^ nl2  +^ nl2) in
   let h1 = HST.get() in
   lemma_reveal_modifies_0 h0 h1;
-  (* let origx      = B.sub tmp 0ul nl in *)
-  (* let origxprime = B.sub tmp nl  nl in *)
-  (* let zzz        = B.sub tmp (nl +^ nl) nl2 in *)
-  (* let xx         = B.sub tmp (nl +^ nl +^ nl2) nl2 in *)
-  (* let zz         = B.sub tmp (nl +^ nl +^ nl2 +^ nl2) nl2 in *)
-  (* let xxprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2) nl2 in *)
-  (* let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
-  (* let xxxprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
-  (* let zzzprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
 
   double_and_add_ two_p two_p_plus_q p p_plus_q q tmp;
   let h2 = HST.get() in
-  (* double_and_add_0 p p_plus_q tmp; *)
-  (* double_and_add_1 p p_plus_q tmp; *)
-  (* let h = HST.get() in assume (live h two_p /\ live h two_p_plus_q /\ live h p /\ live h p_plus_q /\ live h q /\ B.live h tmp); *)
-  (* double_and_add_2 two_p two_p_plus_q p p_plus_q q tmp; *)
-  (* double_and_add_3 two_p_plus_q tmp; *)
-  (* let h = HST.get() in assume (live h p /\ B.live h tmp); *)
-  (* double_and_add_4 p tmp; *)
-
-  (* let h = HST.get() in assume (live h two_p /\ B.live h tmp); *)
-  (* fmul x2 xx zz; *)
-  (* let h' = HST.get() in *)
-  (* lemma_reveal_modifies_1 x2 h h'; *)
-
-  (* double_and_add_5 tmp; *)
-
-  (* (\* fdifference zz xx; *\) *)
-  (* (\* Hacl.EC.Curve25519.Bignum.erase zzz nlength (U32 (nlength -^ 1ul)) 0ul; *\) *)
-  (* (\* fscalar zzz zz (Hacl.Cast.uint64_to_sint64 a24); *\) *)
-  (* (\* fsum zzz xx; *\) *)
-
-  (* let h = HST.get() in *)
-  (* fmul z2 zz zzz; *)
-  (* let h' = HST.get() in *)
-  (* lemma_reveal_modifies_1 z2 h h'; *)
 
   pop_frame();
   let hfin = HST.get() in
   lemma_helper_7 hinit h0 h1 h2 hfin (frame_of p);
   ()
-
-(* (\* Stateful double and add function on concrete points *\) *)
-(* val double_and_add: two_p:point -> two_p_plus_q:point -> p:point -> p_plus_q:point -> q:point -> STL unit *)
-(*     (requires (fun h -> live h two_p /\ live h two_p_plus_q  *)
-(*       /\ onCurve h p /\ onCurve h p_plus_q /\ onCurve h q )) *)
-(*     (ensures (fun h0 _ h1 -> live h0 two_p /\ live h0 two_p_plus_q *)
-(*       /\ onCurve h0 p /\ onCurve h0 p_plus_q /\ onCurve h0 q *)
-(*       /\ onCurve h1 two_p /\ onCurve h1 two_p_plus_q *)
-(*       /\ live h1 p /\ live h1 p_plus_q /\ onCurve h1 q *)
-(*        (\* /\ (modifies (refs two_p +++ refs two_p_plus_q +++ refs p +++ refs p_plus_q) h0 h1) *\) *)
-(*       /\ (pointOf h1 two_p == Math.Curve.add (pointOf h0 p) (pointOf h0 p)) *)
-(*       /\ (pointOf h1 two_p_plus_q == Math.Curve.add (pointOf h0 p) (pointOf h0 p_plus_q)) *)
-(*     )) *)
-(* let double_and_add two_p two_p_plus_q p p_plus_q q = *)
-(* //  admit(); *)
-(*   double_and_add' two_p two_p_plus_q p p_plus_q q *)
