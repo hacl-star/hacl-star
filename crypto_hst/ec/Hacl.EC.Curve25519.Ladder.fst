@@ -85,7 +85,47 @@ let lemma_helper_0 r s h0 h1 h2 h3 : Lemma
   (ensures  (HS.modifies_ref r s h0 h3))
   = ()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+
+let lemma_helper_00 a b c h0 h1 : Lemma
+  (requires (live h0 c /\ distinct c a /\ distinct c b /\ same_frame_2 a c /\ prop_1 h0 h1 a b))
+  (ensures  (live h1 c))
+  = ()
+
+
+let lemma_helper_01 a b c h0 h1 : Lemma
+  (requires (live h0 c /\ same_frame c /\ frame_of a <> frame_of c /\ HS.modifies_one (frame_of a) h0 h1
+    /\ equal_domains h0 h1))
+  (ensures  (live h1 c))
+  = ()
+
+let lemma_helper_02 r c h0 h1 : Lemma
+  (requires (live h0 c /\ same_frame c /\ r <> frame_of c /\ HS.modifies_one r h0 h1 /\ equal_domains h0 h1))
+  (ensures  (live h1 c))
+  = ()
+
+let lemma_distinct_symm a b : Lemma
+  (requires (distinct a b))
+  (ensures (distinct b a))
+  [SMTPat (distinct a b)]
+  = ()
+
+
+let lemma_helper_001 a b c d e h0 h1 : Lemma
+  (requires (live h0 c /\ live h0 d /\ live h0 e
+    /\ distinct a b /\ distinct a c /\ distinct a d
+    /\ distinct b c /\ distinct b d /\ distinct c d
+    /\ same_frame_2 a b /\ same_frame_2 b c /\ same_frame_2 c d /\ same_frame e /\ frame_of e <> frame_of a
+    /\ HS.modifies_one (frame_of a) h0 h1
+    /\ HS.modifies_ref (frame_of a) (refs a ++ refs b) h0 h1
+    /\ prop_1 h0 h1 a b /\ Map.contains h0.h (frame_of e) /\ Map.contains h0.h (frame_of a)
+    /\ equal_domains h0 h1))
+  (ensures  (live h1 c /\ live h1 d /\live h1 e))
+  = lemma_helper_00 a b c h0 h1;
+    lemma_helper_00 a b d h0 h1;
+    lemma_helper_01 a b e h0 h1
+
+#reset-options "--initial_fuel 0  --max_fuel 0 --z3timeout 20"
 
 val small_step_core:
    two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} ->
@@ -111,25 +151,28 @@ val small_step_core:
      (*   /\ (nTimesQ  (formula_2 (reveal n) (nth_bit byt ctr)) (pointOf h0 q) h1 two_p two_p_plus_q) *)
      (* )) *)
 let small_step_core pp ppq p pq q n ctr b scalar =
-  (* let h0 = HST.get() in *)
   (* distinct_commutative p pq; *)
   let bit = nth_bit b ctr in
   let mask = mk_mask bit in
   (* cut (v mask = pow2 platform_size - 1 \/ v mask = 0);  *)
   let h0 = HST.get() in
   swap_conditional p pq mask;
-  let h1 = HST.get() in assume (live h1 pp /\ live h1 ppq /\ live h1 q);
+  let h1 = HST.get() in
+  lemma_helper_001 p pq pp ppq q h0 h1;
   (* let h = HST.get() in *)
   (* small_step_core_lemma_1 h0 h pp ppq p pq q; *)
   Hacl.EC.Curve25519.AddAndDouble.double_and_add pp ppq p pq q;
   let h2 = HST.get() in
+  lemma_helper_02 (frame_of p) q h1 h2;
   (* let h2 = HST.get() in *)
   swap_conditional pp ppq mask;
-  let h3 = HST.get() in assume (live h3 p /\ live h3 pq /\ live h3 q);
+  let h3 = HST.get() in
+  lemma_helper_001 pp ppq p pq q h2 h3;
   Hacl.EC.Curve25519.AddAndDouble.lemma_helper_2 (frame_of p) h0 h1 (refs p ++ refs pq) (refs pp ++ refs ppq ++ refs p ++ refs pq);
   Hacl.EC.Curve25519.AddAndDouble.lemma_helper_2 (frame_of p) h2 h3 (refs pp ++ refs ppq) (refs pp ++ refs ppq ++ refs p ++ refs pq);
   lemma_helper_0 (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1 h2 h3;
   ()
+
   (* lemma_5 scalar b ctr; *)
   (* let h1 = HST.get() in *)
   (* assert ((live h2 p) /\ (live h2 pq) /\ (onCurve h2 q));  *)
@@ -224,9 +267,9 @@ val big_step:
     (*   /\ nTimesQ (hide (valueOfBytes h0 n)) (pointOf h0 q) h1 p pq  )) *)
 let rec big_step n pp ppq p pq q ctr =
   let h0 = HST.get() in
-  if U32 (blength =^ ctr) then () (* assume(reveal (formula_4 h0 n bytes_length) = valueOfBytes h0 n) *)
+  if U32 (blength =^ ctr) then () (* assum(reveal (formula_4 h0 n bytes_length) = valueOfBytes h0 n) *)
   else begin
-    (* assume(bytes_length-1-w ctr>=0 /\ bytes_length-w ctr-1>=0); *)
+    (* assum(bytes_length-1-w ctr>=0 /\ bytes_length-w ctr-1>=0); *)
     let byte = index n (U32 (blength-^1ul-^ctr)) in
     (* let m = formula_4 h0 n (w ctr) in *)
     // Replaces missing euclidian definitions in F*
