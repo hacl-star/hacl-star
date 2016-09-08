@@ -38,7 +38,7 @@ let lemma_helper_0 h0 h1 b : Lemma
     assert(TSet.mem (Buff b) (only b));
     TSet.lemma_equal_intro (arefs (only b)) !{as_ref b}
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
 
 private val double_and_add_0:
   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} ->
@@ -62,6 +62,8 @@ let double_and_add_0 pp ppq p p_plus_q q tmp =
   let h1 = HST.get() in
   lemma_helper_0 h0 h1 tmp;
   ()
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 let lemma_helper_2 r h0 h1 (sub:TSet.set Heap.aref) (s:TSet.set Heap.aref) : Lemma
   (requires (TSet.subset sub s /\ modifies_ref r sub h0 h1))
@@ -93,7 +95,7 @@ let lemma_helper_1 h0 h1 h2 h3 h4 p pq : Lemma
     lemma_helper_2 r h3 h4 (arefs (only (get_z pq))) s;
     lemma_helper_3 r s h0 h1 h2 h3 h4
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_1:
   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} ->
@@ -139,6 +141,89 @@ val lemma_helper_5: p:point -> b:bigint -> Lemma
   (ensures  (disjoint (get_x p) b /\ disjoint (get_y p) b /\ disjoint (get_z p) b ))
 let lemma_helper_5 p p' = ()
 
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+
+let lemma_helper_8 pp ppq p pq q tmp h0 h1 : Lemma
+  (requires (HS.modifies_one (frameOf tmp) h0 h1 /\ live h0 pp /\ live h0 ppq /\ live h0 p /\ live h0 pq /\ live h0 q
+    /\ same_frame_2 pp ppq /\ same_frame_2 ppq p /\ same_frame_2 p pq /\ same_frame q /\ frame_of q <> frameOf tmp /\ frame_of p <> frameOf tmp))
+  (ensures  (live h1 pp /\ live h1 ppq /\ live h1 p /\ live h1 pq /\ live h1 q))
+  = ()
+
+(* private val double_and_add_2_1: *)
+(*   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} -> *)
+(*   p:point{distinct pp p /\ distinct ppq p /\ same_frame_2 ppq p} -> *)
+(*   pq:point{distinct pp pq /\ distinct ppq pq /\ distinct pq p /\ same_frame_2 p pq} -> *)
+(*   q:point{same_frame q /\ frame_of q <> frame_of p} -> *)
+(*   tmp:bigint{length tmp = 73 /\ frameOf tmp <> frame_of q /\ frameOf tmp <> frame_of p} -> Stack unit *)
+(*     (requires (fun h -> live h pp /\ live h ppq /\ live h q /\ live h p /\ live h pq /\ B.live h tmp)) *)
+(*     (ensures (fun h0 _ h1 -> live h1 pp /\ live h1 ppq /\ live h1 p /\ live h1 pq /\ live h1 q *)
+(*       /\ B.live h1 tmp *)
+(*       /\ HS.modifies_one (frameOf tmp) h0 h1 *)
+(*       /\ HS.modifies_ref (frameOf tmp) (arefs (only tmp)) h0 h1 )) *)
+(* let double_and_add_2_1 pp ppq p pq q tmp = *)
+(*   let qmqp = get_x q in *)
+(*   let x = get_x p in *)
+(*   let z = get_z p in *)
+(*   let xprime = get_x pq in *)
+(*   let zprime = get_z pq in *)
+(*   (\* Big temporary buffer *\) *)
+(*   let open FStar.UInt32 in *)
+(*   let nl = nlength in *)
+(*   let nl2 = U32 (2ul *^ nlength -^ 1ul) in *)
+(*   let origxprime = B.sub tmp nl  nl in *)
+(*   let xxprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2) nl2 in *)
+(*   let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
+(*   let xxxprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
+(*   let zzzprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
+(*   let h0 = HST.get() in *)
+(*   fmul xxprime xprime z;                                       // xxprime = tmp *)
+(*   fmul zzprime x zprime;                                       // zzprime = tmp *)
+(*   let h1 = HST.get() in cut(modifies_1 tmp h0 h1); *)
+(*   blit xxprime 0ul origxprime 0ul nlength;                     // origxprime = tmp *)
+(*   fsum xxprime zzprime;                                        // xxprime = tmp *)
+(*   let h2 = HST.get() in cut(modifies_1 tmp h1 h2); *)
+(*   cut(modifies_1 tmp h0 h2); *)
+(*   lemma_helper_0 h0 h2 tmp; admit() *)
+(*   () *)
+
+
+(* private val double_and_add_2_2: *)
+(*   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} -> *)
+(*   p:point{distinct pp p /\ distinct ppq p /\ same_frame_2 ppq p} -> *)
+(*   pq:point{distinct pp pq /\ distinct ppq pq /\ distinct pq p /\ same_frame_2 p pq} -> *)
+(*   q:point{same_frame q /\ frame_of q <> frame_of p} -> *)
+(*   tmp:bigint{length tmp = 73 /\ frameOf tmp <> frame_of q /\ frameOf tmp <> frame_of p} -> Stack unit *)
+(*     (requires (fun h -> live h pp /\ live h ppq /\ live h q /\ live h p /\ live h pq /\ B.live h tmp)) *)
+(*     (ensures (fun h0 _ h1 -> live h1 pp /\ live h1 ppq /\ live h1 p /\ live h1 pq /\ live h1 q *)
+(*       /\ B.live h1 tmp *)
+(*       /\ HS.modifies_one (frameOf tmp) h0 h1 *)
+(*       /\ HS.modifies_ref (frameOf tmp) (arefs (only tmp)) h0 h1 )) *)
+(* let double_and_add_2_2 pp ppq p pq q tmp = *)
+(*   let qmqp = get_x q in *)
+(*   let x = get_x p in *)
+(*   let z = get_z p in *)
+(*   let xprime = get_x pq in *)
+(*   let zprime = get_z pq in *)
+(*   (\* Big temporary buffer *\) *)
+(*   let open FStar.UInt32 in *)
+(*   let nl = nlength in *)
+(*   let nl2 = U32 (2ul *^ nlength -^ 1ul) in *)
+(*   let origxprime = B.sub tmp nl  nl in *)
+(*   let xxprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2) nl2 in *)
+(*   let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
+(*   let xxxprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
+(*   let zzzprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
+(*   let h2 = HST.get() in *)
+(*   fdifference zzprime origxprime;                              // zzprime = tmp *)
+(*   fsquare xxxprime xxprime;                                    // xxxprime = tmp *)
+(*   let h3 = HST.get() in cut(modifies_1 tmp h2 h3); *)
+(*   fsquare zzzprime zzprime;                                    // zzzprime = tmp *)
+(*   fmul zzprime zzzprime qmqp;                                  // zzprime = tmp *)
+(*   let h4 = HST.get() in cut(modifies_1 tmp h3 h4); *)
+(*   cut(modifies_1 tmp h2 h4); *)
+(*   lemma_helper_0 h0 h4 tmp; *)
+(*   () *)
+
 #reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_2:
@@ -170,19 +255,19 @@ let double_and_add_2 pp ppq p pq q tmp =
   let h0 = HST.get() in
   fmul xxprime xprime z;                                       // xxprime = tmp
   fmul zzprime x zprime;                                       // zzprime = tmp
-  let h1 = HST.get() in assert(modifies_1 tmp h0 h1);
+  let h1 = HST.get() in cut(modifies_1 tmp h0 h1 /\ equal_domains h0 h1);
   blit xxprime 0ul origxprime 0ul nlength;                     // origxprime = tmp
   fsum xxprime zzprime;                                        // xxprime = tmp
-  let h2 = HST.get() in assert(modifies_1 tmp h1 h2);
+  let h2 = HST.get() in cut(modifies_1 tmp h1 h2 /\ equal_domains h1 h2);
   fdifference zzprime origxprime;                              // zzprime = tmp
   fsquare xxxprime xxprime;                                    // xxxprime = tmp
-  let h3 = HST.get() in assert(modifies_1 tmp h2 h3);
+  let h3 = HST.get() in cut(modifies_1 tmp h2 h3 /\ equal_domains h2 h3);
   fsquare zzzprime zzprime;                                    // zzzprime = tmp
   fmul zzprime zzzprime qmqp;                                  // zzprime = tmp
-  let h4 = HST.get() in assert(modifies_1 tmp h3 h4);
-  assert(modifies_1 tmp h0 h4);
+  let h4 = HST.get() in cut(modifies_1 tmp h3 h4 /\ equal_domains h3 h4);
+  cut(modifies_1 tmp h0 h4);
   lemma_helper_0 h0 h4 tmp;
-  ()
+  lemma_helper_8 pp ppq p pq q tmp h0 h4
 
 #reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
 
@@ -249,7 +334,7 @@ let double_and_add_4 pp ppq p pq q tmp =
   lemma_helper_0 h0 h1 tmp;
   ()
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_5:
   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} ->

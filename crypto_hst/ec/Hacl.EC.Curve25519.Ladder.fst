@@ -190,6 +190,8 @@ let small_step_core pp ppq p pq q n ctr b scalar =
   (* cut (nTimesQ n (pointOf h0 q) h0 p pq);  *)
   (* small_step_core_lemma_3 h0 h h2 h1 pp ppq p pq q n ctr b scalar *)
 
+#reset-options "--initial_fuel 0  --max_fuel 0 --z3timeout 100"
+
 val small_step: two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} ->
    p:point{distinct p two_p /\ distinct p two_p_plus_q /\ same_frame_2 two_p_plus_q p} ->
    p_plus_q:point{distinct p_plus_q two_p /\ distinct p_plus_q two_p_plus_q /\ distinct p_plus_q p /\ same_frame_2 p p_plus_q} ->

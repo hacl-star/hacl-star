@@ -158,6 +158,8 @@ let expand_4 output input =
   output.(4ul) <- o4;
   () // Without this unit the extraction to OCaml breaks
 
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
 val expand: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
@@ -167,6 +169,8 @@ let expand output input =
   expand_2 output input;
   expand_3 output input;
   expand_4 output input
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 val contract_0: output:u8s{length output >= 32} -> input:Hacl.EC.Curve25519.Bigint.bigint{disjoint output input}  -> STL unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))

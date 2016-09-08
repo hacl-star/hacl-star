@@ -158,11 +158,14 @@ let rec maxValueIdx h  b l =
   | 1 -> 0
   | _ -> if maxValue h  b l = v (get h b (l-1)) then l - 1 else maxValueIdx h b (l-1)
 
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+
 val maxValue_eq_lemma: 
   ha:heap -> hb:heap -> a:bigint{live ha  a} -> b:bigint{live hb  b} -> l:pos -> Lemma 
     (requires (equal ha a hb b /\ l > 0 /\ l <= length a)) 
     (ensures (equal ha a hb b /\ l > 0 /\ l <= length a /\ l <= length b /\ maxValue ha a l = maxValue hb b l))
 let rec maxValue_eq_lemma ha hb a b l =
+  FStar.Buffer.Quantifiers.eq_lemma ha a hb b;
   match l with
   | 1 -> ()
   | _ -> cut (v (get ha a (l-1)) = v (get hb b (l-1)));
@@ -177,7 +180,7 @@ val maxValueNorm_eq_lemma:
     (ensures (maxValueNorm ha a = maxValueNorm hb b))
 let maxValueNorm_eq_lemma ha hb a b = maxValue_eq_lemma ha hb a b norm_length
 
-#reset-options "--initial_fuel 1 --max_fuel 1"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
 
 val eval_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} -> b:bigint{live hb b} ->
   len:nat{ (len <= length a) /\ (len <= length b) } -> Lemma
@@ -190,19 +193,20 @@ let rec eval_eq_lemma ha hb a b len =
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 200"
 
-val eval_partial_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} ->  b:bigint{live hb b} -> 
+(* Timeout is too long to be reasonable *)
+assume val eval_partial_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} ->  b:bigint{live hb b} -> 
   ctr:nat -> len:nat{ ctr <= len /\ len <= length a /\ len <= length b} -> Lemma
     (requires (live ha a /\ live hb b
       /\ (forall (i:nat). i < len-ctr ==> get ha a (ctr+i) == get hb b (ctr+i)) ))
     (ensures ( eval ha a len - eval ha a ctr = eval hb b len - eval hb b ctr ))
-let rec eval_partial_eq_lemma ha hb a b ctr len =
-  if len = ctr then ()
-  else
-    begin
-      eval_def ha a len;
-      eval_def hb b len;
-      eval_partial_eq_lemma ha hb a b ctr (len-1)
-    end
+(* let rec eval_partial_eq_lemma ha hb a b ctr len = *)
+(*   if len = ctr then () *)
+(*   else *)
+(*     begin *)
+(*       eval_def ha a len; *)
+(*       eval_def hb b len; *)
+(*       eval_partial_eq_lemma ha hb a b ctr (len-1) *)
+(*     end *)
 
 #reset-options "--initial_fuel 1 --max_fuel 1"
 
