@@ -41,7 +41,7 @@ let op_At_Plus_Percent = U32.add_mod
 let op_At_Slash = U32.div
 
 (* Define parameters *)
-module HF = Hash.Sha256
+module HF = Hash.SHA2.L256
 let hash = HF.sha256
 
 (* Get parameters *)
@@ -118,16 +118,16 @@ let init' memb state key keylen =
   let state_hmac = sub state pos_state_hmac size_state_hmac in
   let state_hmac_flat = sub memb 0ul size_state_hmac_flat in
 
-  (** Conversion of the hmac state back to be flatten as bytes *)
+  (* Conversion of the hmac state back to be flatten as bytes *)
   (**) be_bytes_of_uint32s state_hmac_flat state_hmac size_state_hmac_flat;
   
   (* Set initial values for ipad *)
   let ipad = sub state_hmac_flat pos_ipad size_ipad in
-  setall ipad size_ipad (uint8_to_sint8 0x36uy);
+  setall ipad (uint8_to_sint8 0x36uy) size_ipad;
 
   (* Set initial values for ipad *)
   let opad = sub state_hmac_flat pos_opad size_opad in
-  setall opad size_opad (uint8_to_sint8 0x5cuy);
+  setall opad (uint8_to_sint8 0x5cuy) size_opad;
 
   (* Set initial values for  *)
   let okey = sub state_hmac_flat pos_key size_key in
@@ -143,7 +143,7 @@ let init' memb state key keylen =
   hash_update state_hash_1 ipad bl;
   hash_update state_hash_2 opad bl;
 
-  (** Conversion of the flat hmac state back in the global state *)
+  (* Conversion of the flat hmac state back in the global state *)
   (**) be_uint32s_of_bytes state_hmac state_hmac_flat size_state_hmac
 
 
@@ -156,7 +156,7 @@ val init : (state  :uint32s{length state = U32.v size_state}) ->
 
 let init state key keylen =
 
-  (** Push frame *)
+  (* Push frame *)
   (**) push_frame();
 
   let memblen = size_state_hmac_flat in
@@ -164,7 +164,7 @@ let init state key keylen =
 
   init' memb state key keylen;
 
-  (** Pop frame *)
+  (* Pop frame *)
   (**) pop_frame()
   
 
@@ -205,7 +205,7 @@ let finish' memb mac state =
   (* Select the part of the state used for the inner final hash *)
   let final_hash_1 = sub state_hmac_flat pos_final_hash_1 size_final_hash_1 in
 
-  (** Conversion of the hmac state back to be flatten as bytes *)
+  (* Conversion of the hmac state back to be flatten as bytes *)
   (**) be_bytes_of_uint32s state_hmac_flat state_hmac size_state_hmac_flat;
 
   (* Step 6: finalize inner hash *)
@@ -227,7 +227,7 @@ val finish: (mac   :bytes   { length mac = U32.v hashsize }) ->
 
 let finish mac state =
 
-  (** Push frame *)
+  (* Push frame *)
   (**) push_frame();
 
   let memblen = size_state_hmac_flat in
@@ -235,7 +235,7 @@ let finish mac state =
 
   finish' memb mac state;
 
-  (** Pop frame *)
+  (* Pop frame *)
   (**) pop_frame()
   
 
@@ -269,7 +269,7 @@ val hmac_core: (mac    :bytes {length mac >= U32.v hashsize }) ->
 
 let hmac_core mac key keylen data len =
 
-  (** Push frame *)
+  (* Push frame *)
   (**) push_frame();
 
   (* Allocate the memory block for the underlying function *)
@@ -279,7 +279,7 @@ let hmac_core mac key keylen data len =
   (* Call the hmac function *)
   hmac_core' memb mac key keylen data len ;
 
-  (** Pop frame *)
+  (* Pop frame *)
   (**) pop_frame()
 
 

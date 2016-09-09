@@ -25,8 +25,8 @@ let rotate_right (a:i32) (b:i32{v b <= 32}) : Tot i32 =
 
 
 (* Define helper xor function *)
-assume val xor_bytes: a:bytes -> b:bytes -> len:i32{I32.v len <= Seq.length a /\ I32.v len <= Seq.length b} 
-  -> Tot (output:bytes{Seq.length output = I32.v len})
+assume val xor_bytes: a:bytes -> b:bytes -> len:nat{len <= Seq.length a /\ len <= Seq.length b}
+  -> Tot (output:bytes{Seq.length output = len})
 
 
 assume val setall: (b:bytes) -> (l:nat{Seq.length b = l}) -> (x:i8) -> Tot (bf:bytes{Seq.length bf = l})

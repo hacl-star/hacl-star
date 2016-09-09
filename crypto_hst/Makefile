@@ -1,13 +1,13 @@
 all:
 	make -C symmetric
 	make -C ec
-#	make -C sha
-#	make -C hmac
+	make -C hash
+	make -C hmac
 #	make -C hkdf
 
 clean:
 	make clean -C symmetric
 	make clean -C ec
-	make clean -C sha
+	make clean -C hash
 	make clean -C hmac
 	make clean -C hkdf

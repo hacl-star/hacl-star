@@ -5,10 +5,12 @@ open FStar.Ghost
 open FStar.HyperStack
 open FStar.HST
 open FStar.Buffer
-open FStar.UInt32
-open Hacl.Cast
+
 open Hacl.UInt8
 open Hacl.UInt32
+open FStar.UInt32
+
+open Hacl.Cast
 open Hacl.SBuffer
 open Hacl.Operations
 open Hacl.Conversions
@@ -20,6 +22,9 @@ module S32 = Hacl.UInt32
 module U64 = FStar.UInt64
 module S64 = Hacl.UInt64
 module SB = Hacl.SBuffer
+module FB = FStar.Buffer
+
+module HM = Hash.SHA2.L256
 
 
 (* Define base types *)
@@ -33,13 +38,13 @@ let bytes = Hacl.SBuffer.u8s
 
 
 (* Define operators *)
-let op_At_Plus = U32.add_mod
+let op_Plus_At = U32.add_mod
 
 
 (* Define parameters *)
-let hash = Hash.Sha256.sha256
-let hashsize = Hash.Sha256.hashsize
-let blocksize = Hash.Sha256.blocksize
+let hash = HM.sha256
+let hashsize = HM.hashsize
+let blocksize = HM.blocksize
 let hl = hashsize
 let bl = blocksize
 
@@ -48,7 +53,7 @@ let bl = blocksize
 (* Define a function to wrap the key length after bl bits *)
 val wrap_key : (okey   :bytes{length okey = U32.v bl}) ->
                (key    :bytes{length key % (U32.v bl) = 0 /\ disjoint okey key}) ->
-               (keylen :u32  {U32.v keylen <= length key})
+               (keylen :u32  {U32.v keylen <= length key /\ U32.v keylen + 8 < pow2 32})
   -> STL unit
         (requires (fun h -> live h okey /\ live h key))
         (ensures  (fun h0 _ h1 -> live h1 okey /\ live h1 key /\ modifies_1 okey h0 h1))
@@ -65,15 +70,18 @@ let wrap_key okey key keylen =
 let size_ipad = bl
 let size_opad = bl
 let size_okey = bl
-let size_s3 = bl @+ bl
-let size_s6 = bl @+ bl
-let size_memb = size_ipad @+ size_opad @+ size_okey @+ size_s3 @+ size_s6
+let size_s3 = bl +@ bl
+let size_s6 = bl +@ bl
+let size_memb = size_ipad +@ size_opad +@ size_okey +@ size_s3 +@ size_s6
 
 let pos_ipad = 0ul
 let pos_opad = bl
-let pos_okey = bl @+ bl
-let pos_s3 = bl @+ bl @+ bl
-let pos_s6 = bl @+ bl @+ bl @+ bl @+ bl
+let pos_okey = bl +@ bl
+let pos_s3 = bl +@ bl +@ bl
+let pos_s6 = bl +@ bl +@ bl +@ bl +@ bl
+
+
+#reset-options "--z3timeout 20"
 
 
 (* Define the internal function *)
@@ -94,9 +102,9 @@ let hmac_core' memb mac key keylen data datalen =
 
   (* Set initial values for ipad and opad *)
   let ipad = sub memb pos_ipad size_ipad in
-  setall ipad size_ipad (uint8_to_sint8 0x36uy);
+  setall ipad (uint8_to_sint8 0x36uy) size_ipad;
   let opad = sub memb pos_opad size_opad in
-  setall opad size_opad (uint8_to_sint8 0x5cuy);
+  setall opad (uint8_to_sint8 0x5cuy) size_opad;
 
   (* Create the wrapped key location *)
   let okey = sub memb pos_okey size_okey in
@@ -118,7 +126,7 @@ let hmac_core' memb mac key keylen data datalen =
 
   (* Step 4: apply H to "result of step 3" *)
   let s4 = s2 in
-  hash s4 s3 (bl @+ datalen);
+  hash s4 s3 (bl +@ datalen);
 
   (* Step 5: xor "result of step 1" with opad *)
   xor_bytes okey opad bl;
@@ -132,7 +140,7 @@ let hmac_core' memb mac key keylen data datalen =
   (**) assert(modifies_1 memb h0 h1);
 
   (* Step 7: apply H to "result of step 6" *)
-  hash mac s6 (bl @+ hl);
+  hash mac s6 (bl +@ hl);
 
   (**) let h2 = HST.get() in
   (**) assert(modifies_2 memb mac h0 h2);
@@ -140,7 +148,6 @@ let hmac_core' memb mac key keylen data datalen =
   (**) assert(live h2 mac)
 
 
-#reset-options "--z3timeout 20"
 
 
 (* Define the main function *)
@@ -155,7 +162,7 @@ val hmac_core : (mac     :bytes {length mac = U32.v hl}) ->
 
 let hmac_core mac key keylen data datalen =
 
-  (** Push a new frame *)
+  (* Push a new frame *)
   (**) push_frame();
 
   let memblen = size_memb in
@@ -163,7 +170,7 @@ let hmac_core mac key keylen data datalen =
 
   hmac_core' memb mac key keylen data datalen;
 
-  (** Pop the current frame *)
+  (* Pop the current frame *)
   (**) pop_frame()
 
 
