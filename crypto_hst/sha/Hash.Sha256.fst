@@ -223,7 +223,7 @@ let pad' memb output data len encodedlen =
    * byte of the padding. BB.TODO: Maybe we can improve perfs. *)
   let pos1 = len in
   let pos2 = S32.add len (u32_to_s32 1ul) in
-  setmask3 output blocksize (u8_to_s8 0x00uy) (u8_to_s8 0x80uy) (u8_to_s8 0x00uy) pos1 pos2;
+  setbuf3 output blocksize (u8_to_s8 0x00uy) (u8_to_s8 0x80uy) (u8_to_s8 0x00uy) pos1 pos2;
 
   (* Masked copy of the partial block of data in the output *)
   (* Leakage resistance: the copy is done in constant time and
