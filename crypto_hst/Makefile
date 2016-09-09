@@ -2,7 +2,7 @@ all:
 	make -C symmetric
 	make -C ec
 	make -C hash
-#	make -C hmac
+	make -C hmac
 #	make -C hkdf
 
 clean:
