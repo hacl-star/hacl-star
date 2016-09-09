@@ -25,7 +25,7 @@ module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
 val copy_to_bigint': output:bigint -> input:bigint_wide{disjoint input output} -> idx:u32 -> len:u32 ->
-  ctr:u32{U32.v ctr <= U32.v len} -> STL unit
+  ctr:u32{U32.v ctr <= U32.v len} -> Stack unit
     (requires (fun h -> live h output /\ live h input /\ U32.v idx+U32.v len <= length output /\ U32.v idx+U32.v len<=length input))
       (* /\ (forall (i:nat). {:pattern (vv (get h input i))} (i >= w idx /\ i < w idx+w len) ==> vv (get h input i) < pow2 platform_size) *)
       (* /\ (forall (i:nat). i < w ctr ==> v (get h output (w idx+i)) = vv (get h input (w idx+i))) )) *)
@@ -253,7 +253,7 @@ let fdifference a b =
   pop_frame()
 
 val fscalar:
-    res:bigint -> b:bigint{disjoint res b} -> s:s64{v s < templ 0} -> ST unit
+    res:bigint -> b:bigint{disjoint res b} -> s:s64(* {v s < templ 0} *) -> Stack unit
   (requires (fun h -> live h res /\ live h b))
   (* (live h res) /\ (norm h b))) *)
   (ensures (fun h0 _ h1 -> live h1 res /\ modifies_1 res h0 h1

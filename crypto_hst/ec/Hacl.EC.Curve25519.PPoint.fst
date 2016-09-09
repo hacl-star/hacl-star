@@ -61,7 +61,7 @@ val make: bigint -> bigint -> bigint -> Tot point
 let make x y z = Point x y z
 
 val swap_conditional_aux': a:bigint -> b:bigint{disjoint a b} ->
-  is_swap:s64{v is_swap = pow2 platform_size -1 \/ v is_swap = 0} ->
+  is_swap:s64(* {v is_swap = pow2 platform_size -1 \/ v is_swap = 0} *) ->
   ctr:u32{U32.v ctr<=norm_length} -> STL unit
     (requires (fun h -> B.live h a /\ B.live h b))
       (* norm h a /\ norm h b)) *)
@@ -105,7 +105,7 @@ let rec swap_conditional_aux' a b swap ctr =
  end
 
 val swap_conditional_aux: a:bigint -> b:bigint{disjoint a b} ->
-  is_swap:s64{v is_swap = pow2 platform_size -1 \/ v is_swap = 0} ->
+  is_swap:s64(* {v is_swap = pow2 platform_size -1 \/ v is_swap = 0} *) ->
   Stack unit
     (requires (fun h -> B.live h a /\ B.live h b))
       (* norm h a /\ norm h b)) *)
@@ -184,9 +184,11 @@ let helper_lemma_4 r h0 h1 h2 h3 a b : Lemma
     assert(forall (#t:Type) (b':buffer t). disjoint_from_bufs b' s
 	     ==> (disjoint b' (get_z a) /\ disjoint b' (get_z b)))
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+
 val swap_conditional:
   a:point{same_frame a} -> b:point{distinct a b /\ same_frame b} ->
-  is_swap:s64{v is_swap = pow2 platform_size -1 \/ v is_swap = 0} ->
+  is_swap:s64(* {v is_swap = pow2 platform_size -1 \/ v is_swap = 0} *) ->
   Stack unit
     (requires (fun h -> live h a /\ live h b /\ same_frame_2 a b))
       (* onCurve h a /\ onCurve h b)) *)
@@ -235,6 +237,8 @@ let swap_conditional a b is_swap =
   helper_lemma_4 (frame_of a) h0 h1 h2 h3 a b;
   assert(HS.modifies_ref (frame_of a) (refs a ++ refs b) h0 h3);
   ()
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 val helper_lemma': #t:Type -> a:buffer t -> Lemma
   (requires (True))
@@ -329,7 +333,7 @@ let copy a b =
   assert(HS.modifies_ref (frame_of a) (refs a) h0 h3);
   ()
 
-#reset-options "--initial_fuel 0 --max_fuel 0"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 val swap:
   a:point -> b:point{distinct a b /\ same_frame b} ->
