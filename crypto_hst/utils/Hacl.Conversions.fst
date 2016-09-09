@@ -139,7 +139,11 @@ let be_sint32_of_bytes b =
 #set-options "--lax"
 
 
-val be_uint32s_of_bytes:uint32s -> b:bytes -> len:u32 -> St unit
+val be_uint32s_of_bytes: a:uint32s -> b:bytes{disjoint a b} -> len:u32
+  -> STL unit
+        (requires (fun h -> live h a /\ live h b))
+        (ensures  (fun h0 _ h1 -> live h1 a /\ live h1 b /\ modifies_1 a h0 h1))
+
 let rec be_uint32s_of_bytes u b len =
   if U32.eq len 0ul then ()
   else (
