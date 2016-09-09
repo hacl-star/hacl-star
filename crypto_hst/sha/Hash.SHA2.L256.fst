@@ -1,4 +1,4 @@
-module Hash.Sha256
+module Hash.SHA2.L256
 
 open FStar.Mul
 open FStar.Ghost
