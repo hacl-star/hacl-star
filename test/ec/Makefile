@@ -25,7 +25,7 @@ NO_CODEGEN=$(addprefix --no_extract , SInt $(REALIZED_MODULE))
 
 # OCaml HST variables
 REALIZED_MLI_HST=Hacl_UInt8 Hacl_UInt32 Hacl_UInt64 Hacl_UInt128
-REALIZED_HST=FStar_HyperStack FStar_HST Hacl_Cast Hacl_SBuffer 
+REALIZED_HST=Hacl_Cast Hacl_SBuffer 
 REALIZED_MODULE_HST=$(subst _,., $(REALIZED_HST))
 REALIZED_ML_HST=$(addsuffix .mli,$(REALIZED_MLI_HST)) $(addsuffix .ml,$(REALIZED_MLI_HST) $(REALIZED_HST))
 NO_CODEGEN_HST=$(addprefix --no_extract , $(REALIZED_MODULE_HST))
