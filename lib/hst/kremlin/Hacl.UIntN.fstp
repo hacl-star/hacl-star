@@ -3,8 +3,6 @@ open FStar.Mul
 (* NOTE: anything that you fix/update here should be reflected in [Hacl.IntN.fstp], which is mostly
  * a copy-paste of this module. *)
 
-let n = U.n
-
 type t = U.t
 
 let v (x:t) : GTot (FStar.UInt.uint_t n) = U.v x
@@ -14,11 +12,11 @@ val add: a:t -> b:t -> Pure t
   (ensures (fun c -> v a + v b = v c))
 let add a b = add a b
 
-val add_underspec: a:t -> b:t -> Pure t
-  (requires True)
-  (ensures (fun c ->
-    UInt.size (v a + v b) n ==> v a + v b = v c))
-let add_underspec a b = add_underspec a b
+(* val add_underspec: a:t -> b:t -> Pure t *)
+(*   (requires True) *)
+(*   (ensures (fun c -> *)
+(*     UInt.size (v a + v b) n ==> v a + v b = v c)) *)
+(* let add_underspec a b = add_underspec a b *)
 
 val add_mod: a:t -> b:t -> Pure t
   (requires True)
@@ -31,11 +29,11 @@ val sub: a:t -> b:t -> Pure t
   (ensures (fun c -> v a - v b = v c))
 let sub a b = sub a b
 
-val sub_underspec: a:t -> b:t -> Pure t
-  (requires True)
-  (ensures (fun c ->
-    UInt.size (v a - v b) n ==> v a - v b = v c))
-let sub_underspec a b = sub_underspec a b
+(* val sub_underspec: a:t -> b:t -> Pure t *)
+(*   (requires True) *)
+(*   (ensures (fun c -> *)
+(*     UInt.size (v a - v b) n ==> v a - v b = v c)) *)
+(* let sub_underspec a b = sub_underspec a b *)
 
 val sub_mod: a:t -> b:t -> Pure t
   (requires True)
@@ -48,11 +46,11 @@ val mul: a:t -> b:t -> Pure t
   (ensures (fun c -> v a * v b = v c))
 let mul a b = mul a b
 
-val mul_underspec: a:t -> b:t -> Pure t
-  (requires True)
-  (ensures (fun c ->
-    UInt.size (v a * v b) n ==> v a * v b = v c))
-let mul_underspec a b = mul_underspec a b
+(* val mul_underspec: a:t -> b:t -> Pure t *)
+(*   (requires True) *)
+(*   (ensures (fun c -> *)
+(*     UInt.size (v a * v b) n ==> v a * v b = v c)) *)
+(* let mul_underspec a b = mul_underspec a b *)
 
 val mul_mod: a:t -> b:t -> Pure t
   (requires True)
@@ -65,11 +63,11 @@ val div: a:t -> b:t{v b <> 0} -> Pure t
   (ensures (fun c -> v b <> 0 ==> v a / v b = v c))
 let div a b = div a b
 
-val div_underspec: a:t -> b:t{v b <> 0} -> Pure t
-  (requires True)
-  (ensures (fun c ->
-    (v b <> 0 /\ UInt.size (v a / v b) n) ==> v a / v b = v c))
-let div_underspec a b = div_underspec a b
+(* val div_underspec: a:t -> b:t{v b <> 0} -> Pure t *)
+(*   (requires True) *)
+(*   (ensures (fun c -> *)
+(*     (v b <> 0 /\ UInt.size (v a / v b) n) ==> v a / v b = v c)) *)
+(* let div_underspec a b = div_underspec a b *)
 
 (* Modulo primitives *)
 val rem: a:t -> b:t{v b <> 0} -> Pure t
@@ -88,10 +86,10 @@ let logor a b = logor a b
 val lognot: t -> Tot t
 let lognot a = lognot a
 
-val uint_to_t: x:(UInt.uint_t n) -> Pure t
-  (requires True)
-  (ensures (fun y -> v y = x))
-let uint_to_t x = uint_to_t x
+(* val uint_to_t: x:(UInt.uint_t n) -> Pure t *)
+(*   (requires True) *)
+(*   (ensures (fun y -> v y = x)) *)
+(* let uint_to_t x = uint_to_t x *)
 
 (* Shift operators *)
 val shift_right: a:t -> s:FStar.UInt32.t -> Pure t
@@ -104,21 +102,26 @@ val shift_left: a:t -> s:FStar.UInt32.t -> Pure t
   (ensures (fun c -> FStar.UInt32.v s < n ==> v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 n)))
 let shift_left a s = shift_left a s
 
-assume val eq_mask: a:t -> b:t -> Tot (c:t{(v a = v b ==> v c = pow2 n - 1) /\ (v a <> v b ==> v c = 0)})
-assume val gte_mask: a:t -> b:t -> Tot (c:t{(v a >= v b ==> v c = pow2 n - 1) /\ (v a < v b ==> v c = 0)})
-assume val gt_mask: a:t -> b:t -> Tot (c:t{(v a > v b ==> v c = pow2 n - 1) /\ (v a <= v b ==> v c = 0)})
-assume val lt_mask: a:t -> b:t -> Tot (c:t{(v a < v b ==> v c = pow2 n - 1) /\ (v a >= v b ==> v c = 0)})
-assume val lte_mask: a:t -> b:t -> Tot (c:t{(v a <= v b ==> v c = pow2 n - 1) /\ (v a > v b ==> v c = 0)})
+val eq_mask: a:t -> b:t -> Tot (c:t{(v a = v b ==> v c = pow2 n - 1) /\ (v a <> v b ==> v c = 0)})
+let eq_mask a b = eq_mask a b
+val gte_mask: a:t -> b:t -> Tot (c:t{(v a >= v b ==> v c = pow2 n - 1) /\ (v a < v b ==> v c = 0)})
+let gte_mask a b = gte_mask a b
+val gt_mask: a:t -> b:t -> Tot (c:t{(v a > v b ==> v c = pow2 n - 1) /\ (v a <= v b ==> v c = 0)})
+let gt_mask a b = lognot (gte_mask b a)
+val lt_mask: a:t -> b:t -> Tot (c:t{(v a < v b ==> v c = pow2 n - 1) /\ (v a >= v b ==> v c = 0)})
+let lt_mask a b = lognot (gte_mask a b)
+val lte_mask: a:t -> b:t -> Tot (c:t{(v a <= v b ==> v c = pow2 n - 1) /\ (v a > v b ==> v c = 0)})
+let lte_mask a b = lognot (gt_mask a b)
 
 (* Infix notations *)
 let op_Plus_Hat = add
-let op_Plus_Question_Hat = add_underspec
+(* let op_Plus_Question_Hat = add_underspec *)
 let op_Plus_Percent_Hat = add_mod
 let op_Subtraction_Hat = sub
-let op_Subtraction_Question_Hat = sub_underspec
+(* let op_Subtraction_Question_Hat = sub_underspec *)
 let op_Subtraction_Percent_Hat = sub_mod
 let op_Star_Hat = mul
-let op_Star_Question_Hat = mul_underspec
+(* let op_Star_Question_Hat = mul_underspec *)
 let op_Star_Percent_Hat = mul_mod
 let op_Slash_Hat = div
 let op_Percent_Hat = rem

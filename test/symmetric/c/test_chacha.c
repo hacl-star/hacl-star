@@ -3,7 +3,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "../Chacha20.c"
+#include "../Hacl_Symmetric_Chacha20.h"
 
 #define LEN 114
 static /* const */ uint8_t plaintext[LEN] = "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";
@@ -36,7 +36,7 @@ int main () {
   uint8_t nonce[12] = { 0, 0, 0, 0, 0, 0, 0, 0x4a, 0, 0, 0, 0 };
   uint8_t ciphertext[LEN] = { 0 };
 
-  Chacha20_chacha20_encrypt(ciphertext, key, counter, nonce, plaintext, LEN);
+  Hacl_Symmetric_Chacha20_chacha20_encrypt(ciphertext, key, counter, nonce, plaintext, LEN);
   if (memcmp(expected, ciphertext, LEN) != 0) {
     printf("[Chacha]: encryption FAILED\n");
     printf("\nPLAINTEXT:\n");

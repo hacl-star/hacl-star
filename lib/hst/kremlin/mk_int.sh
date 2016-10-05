@@ -10,6 +10,8 @@ module Hacl.UInt$i
 
 open FStar.UInt$i
 module U = FStar.UInt$i
+
+let n = $i
 EOF
   cat Hacl.UIntN.fstp >> $f
   if [ $i -eq 8 ]; then

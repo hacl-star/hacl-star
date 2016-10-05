@@ -8,7 +8,8 @@ open FStar.UInt32
 open Hacl.UInt8
 open Hacl.UInt32
 open Hacl.Cast
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 
 
 #reset-options "--max_fuel 0 --initial_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3timeout 50"
@@ -31,6 +32,9 @@ let u8  = U8.t
 (* Secret machine integer types *)
 let s32 = H32.t
 let s8  = H8.t
+
+let u8s = buffer H8.t
+let u32s = buffer H32.t
 let bytes = u8s
 
 (* 'Rotate' operators, to inline *)

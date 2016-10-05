@@ -7,7 +7,8 @@ open FStar.HST
 open FStar.Mul
 open FStar.Ghost
 open Hacl.UInt64
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 open Math.Axioms
 open Math.Lib
 open Hacl.Symmetric.Poly1305.Parameters
@@ -28,11 +29,18 @@ module H64  = Hacl.UInt64
 assume MaxUInt32: pow2 32 = 4294967296
 assume MaxUInt64: pow2 64 > pow2 32
 
+type u8s = buffer H8.t
+type u32s = buffer H32.t
+type u64s = buffer H64.t
 
 (* Type abbreviations *) 
 let u8 = FStar.UInt8.t
+let u32 = FStar.UInt32.t
 let u64  = FStar.UInt64.t
 let u128 = FStar.UInt128.t
+let s8 = H8.t
+let s32 = H32.t
+let s64  = H64.t
 let heap = HyperStack.mem
 
 

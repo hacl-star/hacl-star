@@ -10,10 +10,12 @@ open Math.Lib
 open Math.Lemmas
 open Hacl.UInt32
 open Hacl.Cast
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 
 (* Module abbreviations *)
-module B  = Hacl.SBuffer
+(* module B  = Hacl.SBuffer *)
+module B = FStar.Buffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
@@ -23,6 +25,15 @@ module U64  = FStar.UInt64
 module H8   = Hacl.UInt8
 module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
+
+let u8  = U8.t
+let u32 = U32.t
+let u64 = U64.t
+let s8  = H8.t
+let s32 = H32.t
+let s64 = H64.t
+
+let u8s = B.buffer H8.t
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
 

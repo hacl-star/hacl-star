@@ -11,7 +11,8 @@ open Math.Lib
 open Math.Lemmas
 open Hacl.UInt64
 open Hacl.Cast
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 open Hacl.Symmetric.Poly1305.Parameters
 open Hacl.Symmetric.Poly1305.Bigint
 open Hacl.Symmetric.Poly1305.Bignum.Lemmas
@@ -21,7 +22,8 @@ open Utils
 
 
 (* Module abbreviations *)
-module B  = Hacl.SBuffer
+(* module B  = Hacl.SBuffer *)
+module B = FStar.Buffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
