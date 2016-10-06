@@ -1,6 +1,7 @@
 open Hacl_Symmetric_Chacha20
 open Char
-open Hacl_SBuffer
+(* open Hacl_SBuffer *)
+open FStar_Buffer
 open Hacl_Cast
        
 let key = {content = Array.init 32 (fun x -> (Hacl_UInt8.of_string (string_of_int x))); idx = 0; length = 32 }

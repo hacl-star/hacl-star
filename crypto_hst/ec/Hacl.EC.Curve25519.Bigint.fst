@@ -6,13 +6,15 @@ open FStar.Ghost
 open Hacl.UInt8
 open Hacl.UInt128
 open Hacl.UInt64
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 open Math.Axioms
 open Math.Lib
 open Hacl.EC.Curve25519.Parameters
 
 (* Module abbreviations *)
-module B  = Hacl.SBuffer
+(* module B  = Hacl.SBuffer *)
+module B = FStar.Buffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
@@ -22,6 +24,19 @@ module U64  = FStar.UInt64
 module H8   = Hacl.UInt8
 module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
+module H128 = Hacl.UInt128
+
+let u8  = U8.t
+let u32 = U32.t
+let u64 = U64.t
+
+let s8   = H8.t
+let s64  = H64.t
+let s128 = H128.t
+
+let u8s   = buffer s8
+let u64s  = buffer s64
+let u128s = buffer s128
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
 

@@ -1,8 +1,9 @@
 open Hacl_Symmetric_Poly1305
 open Char
-open Hacl_SBuffer
-
-type sbytes = u8s
+(* open Hacl_SBuffer *)
+open FStar_Buffer
+       
+type sbytes = Hacl_UInt8.t buffer
        
 let from_string s : sbytes =
   let b = create (Hacl_UInt8.of_string "0") (String.length s) in

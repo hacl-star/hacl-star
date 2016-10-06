@@ -1,4 +1,5 @@
 all:
+	+make clean
 	$(MAKE) -C symmetric
 	$(MAKE) -C ec
 #	$(MAKE) -C hash

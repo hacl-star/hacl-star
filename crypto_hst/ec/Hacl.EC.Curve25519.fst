@@ -3,8 +3,10 @@ module Hacl.EC.Curve25519
 open FStar.HST
 open Hacl.UInt8
 open Hacl.Cast
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 open Hacl.EC.Curve25519.Parameters
+open Hacl.EC.Curve25519.Bigint
 open Hacl.EC.Curve25519.Bignum
 open Hacl.EC.Curve25519.Crecip
 open Hacl.EC.Curve25519.Ladder
@@ -13,7 +15,8 @@ open Hacl.EC.Curve25519.Ladder
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* Module abbreviations *)
-module B  = Hacl.SBuffer
+(* module B  = Hacl.SBuffer *)
+module B  = FStar.Buffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 

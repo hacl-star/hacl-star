@@ -2,7 +2,8 @@ open Hacl_EC_Curve25519_Parameters
 open Hacl_UInt64
 open Big_int
 open Stdint
-open Hacl_SBuffer
+(* open Hacl_SBuffer *)
+open FStar_Buffer
 open Hacl_EC_Curve25519_Bignum
 open Hacl_EC_Curve25519_PPoint
 

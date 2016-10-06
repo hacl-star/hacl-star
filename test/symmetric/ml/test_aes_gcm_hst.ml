@@ -1,5 +1,6 @@
 open Hacl_UInt8
-open Hacl_SBuffer
+(* open Hacl_SBuffer *)
+open FStar_Buffer
 open Hacl_AEAD_AES256GCM
 open Hacl_Symmetric_GCM
 

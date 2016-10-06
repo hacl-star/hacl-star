@@ -5,7 +5,8 @@ open FStar.HST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt128
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 open Math.Lib
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint

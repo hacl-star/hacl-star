@@ -7,7 +7,8 @@ open FStar.HST
 open FStar.Buffer
 open Hacl.UInt8
 open Hacl.Cast
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 open Hacl.Symmetric.AES
 open Hacl.Symmetric.GCM
 

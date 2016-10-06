@@ -6,7 +6,8 @@ open FStar.HyperStack
 open FStar.HST
 open Hacl.UInt8
 open Hacl.Cast
-open Hacl.SBuffer
+open FStar.Buffer
+(* open Hacl.SBuffer *)
 
 (* Module abbreviations *)
 module HH = FStar.HyperHeap
@@ -16,6 +17,13 @@ module U8  = FStar.UInt8
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
 module H32  = Hacl.UInt32
+
+let u8  = U8.t
+let u32 = U32.t
+let s8  = H8.t
+let s32 = H32.t
+
+let u8s = buffer s8
 
 (* This HAS to go in some more appropriate place *)
 assume MaxUInt8: pow2 8 = 256

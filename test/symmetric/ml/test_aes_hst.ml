@@ -1,5 +1,6 @@
 open Hacl_UInt8
-open Hacl_SBuffer
+(* open Hacl_SBuffer *)
+open FStar_Buffer
 open Hacl_Symmetric_AES
 
 let print (b:u8s) =

@@ -6,7 +6,8 @@ open FStar.HyperStack
 open FStar.Ghost
 open FStar.Buffer
 open Hacl.UInt64
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 open Math.Lib
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
@@ -17,7 +18,8 @@ open Hacl.EC.Curve25519.PPoint
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* Module abbreviations *)
-module B  = Hacl.SBuffer
+(* module B  = Hacl.SBuffer *)
+module B = FStar.Buffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
