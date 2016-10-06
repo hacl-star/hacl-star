@@ -47,11 +47,11 @@ val sub_mod: a:t -> b:t -> Pure t
   (ensures (fun c -> (v a - v b) % pow2 n = v c))
 let sub_mod a b = sub_mod a b
 
-(* Multiplication primitives *)
-val mul: a:t -> b:t -> Pure t
-  (requires (UInt.size (v a * v b) n))
-  (ensures (fun c -> v a * v b = v c))
-let mul a b = mul a b
+(* (\* Multiplication primitives *\) *)
+(* val mul: a:t -> b:t -> Pure t *)
+(*   (requires (UInt.size (v a * v b) n)) *)
+(*   (ensures (fun c -> v a * v b = v c)) *)
+(* let mul a b = mul a b *)
 
 (* val mul_underspec: a:t -> b:t -> Pure t *)
 (*   (requires True) *)
@@ -59,16 +59,16 @@ let mul a b = mul a b
 (*     UInt.size (v a * v b) n ==> v a * v b = v c)) *)
 (* let mul_underspec a b = mul_underspec a b *)
 
-val mul_mod: a:t -> b:t -> Pure t
-  (requires True)
-  (ensures (fun c -> (v a * v b) % pow2 n = v c)) 
-let mul_mod a b = mul_mod a b
+(* val mul_mod: a:t -> b:t -> Pure t *)
+(*   (requires True) *)
+(*   (ensures (fun c -> (v a * v b) % pow2 n = v c))  *)
+(* let mul_mod a b = mul_mod a b *)
 
-(* Division primitives *)
-val div: a:t -> b:t{v b <> 0} -> Pure t
-  (requires (UInt.size (v a / v b) n))
-  (ensures (fun c -> v b <> 0 ==> v a / v b = v c))
-let div a b = div a b
+(* (\* Division primitives *\) *)
+(* val div: a:t -> b:t{v b <> 0} -> Pure t *)
+(*   (requires (UInt.size (v a / v b) n)) *)
+(*   (ensures (fun c -> v b <> 0 ==> v a / v b = v c)) *)
+(* let div a b = div a b *)
 
 (* val div_underspec: a:t -> b:t{v b <> 0} -> Pure t *)
 (*   (requires True) *)
@@ -76,12 +76,12 @@ let div a b = div a b
 (*     (v b <> 0 /\ UInt.size (v a / v b) n) ==> v a / v b = v c)) *)
 (* let div_underspec a b = div_underspec a b *)
 
-(* Modulo primitives *)
-val rem: a:t -> b:t{v b <> 0} -> Pure t
-  (requires True)
-  (ensures (fun c ->
-    v a - ((v a / v b) * v b) = v c))
-let rem a b = rem a b
+(* (\* Modulo primitives *\) *)
+(* val rem: a:t -> b:t{v b <> 0} -> Pure t *)
+(*   (requires True) *)
+(*   (ensures (fun c -> *)
+(*     v a - ((v a / v b) * v b) = v c)) *)
+(* let rem a b = rem a b *)
 
 (* Bitwise operators *)
 val logand: t -> t -> Tot t
@@ -127,20 +127,21 @@ let op_Plus_Percent_Hat = add_mod
 let op_Subtraction_Hat = sub
 (* let op_Subtraction_Question_Hat = sub_underspec *)
 let op_Subtraction_Percent_Hat = sub_mod
-let op_Star_Hat = mul
+(* let op_Star_Hat = mul *)
 (* let op_Star_Question_Hat = mul_underspec *)
-let op_Star_Percent_Hat = mul_mod
-let op_Slash_Hat = div
-let op_Percent_Hat = rem
+(* let op_Star_Percent_Hat = mul_mod *)
+(* let op_Slash_Hat = div *)
+(* let op_Percent_Hat = rem *)
 let op_Hat_Hat = logxor
 let op_Amp_Hat = logand
 let op_Bar_Hat = logor
 let op_Less_Less_Hat = shift_left
 let op_Greater_Greater_Hat = shift_right
 
-(* To input / output constants *)
-assume val of_string: string -> Tot t
+(* (\* To input / output constants *\) *)
+(* assume val of_string: string -> Tot t *)
 
-assume val mul_wide: a:Hacl.UInt64.t -> b:Hacl.UInt64.t -> Pure t
+val mul_wide: a:Hacl.UInt64.t -> b:Hacl.UInt64.t -> Pure t
   (requires True)
   (ensures (fun c -> v c = Hacl.UInt64.v a * Hacl.UInt64.v b))
+let mul_wide a b = mul_wide a b
