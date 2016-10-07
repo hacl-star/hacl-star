@@ -193,28 +193,29 @@ val fsum: a:bigint -> b:bigint{disjoint a b} -> Stack unit
       (* /\ (modifies_1 a h0 h1) *)
     ))
 let fsum a b =
-  push_frame ();
-  (* let h0 = HST.get() in *)
-  (* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *)
-  let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) (UInt32.sub (UInt32.mul nlength 2ul) 1ul) in
+  (* push_frame (); *)
+  (* (\* let h0 = HST.get() in *\) *)
+  (* (\* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *\) *)
+  (* let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) (UInt32.sub (UInt32.mul nlength 2ul) 1ul) in *)
   Hacl.EC.Curve25519.Bignum.Fsum.fsum' a b;
-  (* let h1 = HST.get() in *)
-  copy_to_bigint_wide tmp a;
-  (* cut (forall (i:nat). {:pattern (v (get h1 a i))} i < norm_length ==> v (get h1 a i) = v (get h0 a i) + v (get h0 b i)); *)
-  (* let h2 = HST.get() in  *)
-  (* cut (forall (i:nat). {:pattern (vv (get h2 tmp i))} i < norm_length ==> vv (get h2 tmp (0+i)) =  *)
-  (* 	 v (get h1 a (0+i)));  *)
-  (* cut (forall (i:nat). {:pattern (vv (get h2 tmp i))} i < norm_length ==> vv (get h2 tmp i) =  *)
-  (*     v (get h0 a i) + v (get h0 b i));  *)
-  (* admitP (forall (i:nat). {:pattern (vv (get h2 tmp i))} (i >= norm_length /\ i < length tmp) ==> vv (get h2 tmp i) = 0); *)
-  (* Curve.Modulo.sum_satisfies_constraints h0 h2 tmp a b;  *)
-  modulo a tmp;
-  (* let h1 = HST.get() in *)
-  (* assert(valueOf h1 a = valueOf_wide h2 tmp);  *)
-  (* cut (True /\ eval h1 a norm_length % reveal prime = (eval h0 a norm_length + eval h0 b norm_length) % reveal prime);  *)
-  (* fsum_lemma h0 h1 a a b; *)
-  (* cut(modifies_1 a h0 h1); *)
-  pop_frame()
+  Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients a
+  (* (\* let h1 = HST.get() in *\) *)
+  (* copy_to_bigint_wide tmp a; *)
+  (* (\* cut (forall (i:nat). {:pattern (v (get h1 a i))} i < norm_length ==> v (get h1 a i) = v (get h0 a i) + v (get h0 b i)); *\) *)
+  (* (\* let h2 = HST.get() in  *\) *)
+  (* (\* cut (forall (i:nat). {:pattern (vv (get h2 tmp i))} i < norm_length ==> vv (get h2 tmp (0+i)) =  *\) *)
+  (* (\* 	 v (get h1 a (0+i)));  *\) *)
+  (* (\* cut (forall (i:nat). {:pattern (vv (get h2 tmp i))} i < norm_length ==> vv (get h2 tmp i) =  *\) *)
+  (* (\*     v (get h0 a i) + v (get h0 b i));  *\) *)
+  (* (\* admitP (forall (i:nat). {:pattern (vv (get h2 tmp i))} (i >= norm_length /\ i < length tmp) ==> vv (get h2 tmp i) = 0); *\) *)
+  (* (\* Curve.Modulo.sum_satisfies_constraints h0 h2 tmp a b;  *\) *)
+  (* modulo a tmp; *)
+  (* (\* let h1 = HST.get() in *\) *)
+  (* (\* assert(valueOf h1 a = valueOf_wide h2 tmp);  *\) *)
+  (* (\* cut (True /\ eval h1 a norm_length % reveal prime = (eval h0 a norm_length + eval h0 b norm_length) % reveal prime);  *\) *)
+  (* (\* fsum_lemma h0 h1 a a b; *\) *)
+  (* (\* cut(modifies_1 a h0 h1); *\) *)
+  (* pop_frame() *)
 
 val fdifference: a:bigint -> b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> live h a /\ live h b
@@ -240,6 +241,7 @@ let fdifference a b =
   (* no_upd_lemma h0 h2 a (only b');  *)
   (* cut (norm h2 a);  *)
   Hacl.EC.Curve25519.Bignum.Fdifference.fdifference' a b';
+//  Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients a;
   (* let h3 = HST.get() in *)
   (* let h4 = HST.get() in *)
   copy_to_bigint_wide tmp a;
@@ -270,7 +272,9 @@ let fscalar res b s =
   Hacl.EC.Curve25519.Bignum.Fscalar.scalar' tmp b s;
   (* let h = HST.get() in *)
   (* admitP(b2t(satisfies_modulo_constraints h tmp));   *)
-  modulo res tmp;
+  Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients_wide tmp;
+  copy_to_bigint res tmp;
+  (* modulo res tmp; *)
   (* let h1 = HST.get() in *)
   (* admitP(True /\ (valueOf h1 res = (v s +* valueOf h0 b))); *)
   pop_frame()
