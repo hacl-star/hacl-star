@@ -66,6 +66,7 @@ CURVE25519_FSTAR=$(CODE_DIR_HST)/Hacl.EC.Curve25519.fst
 CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml FStar_Math_Lib.ml \
 	Hacl_EC_Curve25519_Parameters.ml \
 	Hacl_EC_Curve25519_Bigint.ml \
+	Hacl_EC_Curve25519_Utils.ml \
 	Hacl_EC_Curve25519_Bignum_FsumWide.ml \
 	Hacl_EC_Curve25519_Bignum_Fsum.ml \
 	Hacl_EC_Curve25519_Bignum_Fscalar.ml \

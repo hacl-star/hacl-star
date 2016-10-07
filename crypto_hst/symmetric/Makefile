@@ -6,7 +6,7 @@ LIB_DIR=../../lib/hst
 
 OPTIONS_VER=--include $(LIB_DIR) --use_hints
 
-LIB_FILES=Hacl.Cast.fst Hacl.SBuffer.fst Hacl.UInt128.fst Hacl.UInt64.fst Hacl.UInt32.fst Hacl.UInt8.fst Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst
+LIB_FILES=Hacl.Cast.fst Hacl.SBuffer.fst Hacl.UInt128.fst Hacl.UInt64.fst Hacl.UInt32.fst Hacl.UInt8.fst
 
 all: chacha poly aead-aes256-gcm
 
