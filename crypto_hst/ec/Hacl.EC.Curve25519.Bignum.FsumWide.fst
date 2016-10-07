@@ -7,7 +7,7 @@ open FStar.Ghost
 open Hacl.UInt128
 (* open Hacl.SBuffer *)
 open FStar.Buffer
-open Math.Lib
+open FStar.Math.Lib
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 

@@ -6,9 +6,8 @@ open FStar.HyperStack
 open FStar.HST
 open FStar.Ghost
 open FStar.Buffer
-open Math.Axioms
-open Math.Lib
-open Math.Lemmas
+open FStar.Math.Lib
+open FStar.Math.Lemmas
 open Hacl.UInt64
 open Hacl.Cast
 (* open Hacl.SBuffer *)
@@ -43,7 +42,7 @@ type wordB = bytes
 (*** Poly1305 code ***)
 let mk_mask (nbits:U32.t{U32.v nbits < 64}) :
   Tot (z:H64.t{v z = pow2 (U32.v nbits) - 1})
-  = Math.Lib.pow2_increases_lemma 64 (U32.v nbits);
+  = Math.Lemmas.pow2_lt_compat 64 (U32.v nbits);
     H64 ((uint64_to_sint64 1uL <<^ nbits) -^ uint64_to_sint64 1uL)
 
 (* Formats a wordB into an elemB *)

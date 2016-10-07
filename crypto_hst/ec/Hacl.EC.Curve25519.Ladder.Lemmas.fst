@@ -7,7 +7,7 @@ open FStar.Ghost
 open Hacl.SBuffer
 open Hacl.UInt64
 open Hacl.Cast
-open Math.Lib
+open FStar.Math.Lib
 (* open Math.Field *)
 open Math.Curve
 open Curve.Parameters

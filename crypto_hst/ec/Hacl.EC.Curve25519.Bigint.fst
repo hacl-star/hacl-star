@@ -8,8 +8,7 @@ open Hacl.UInt128
 open Hacl.UInt64
 (* open Hacl.SBuffer *)
 open FStar.Buffer
-open Math.Axioms
-open Math.Lib
+open FStar.Math.Lib
 open Hacl.EC.Curve25519.Parameters
 
 (* Module abbreviations *)

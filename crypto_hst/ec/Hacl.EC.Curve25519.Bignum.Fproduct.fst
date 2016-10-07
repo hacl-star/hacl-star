@@ -7,7 +7,7 @@ open FStar.Ghost
 open Hacl.UInt64
 (* open Hacl.SBuffer *)
 open FStar.Buffer
-open Math.Lib
+open FStar.Math.Lib
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 
@@ -184,7 +184,7 @@ let multiplication c a b =
   push_frame();
   (* admit(); // OK *)
   (* let h0 = HST.get() in *)
-  let tmp = create (Hacl.UInt128.of_string "0") nlength in
+  let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) nlength in
   (* let h1 = HST.get() in *)
   (* assert(modifies Set.empty h0 h1);  *)
   (* multiplication_lemma_1 h0 h1 c a b; *)

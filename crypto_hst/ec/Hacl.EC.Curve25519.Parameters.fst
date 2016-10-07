@@ -1,6 +1,6 @@
 module Hacl.EC.Curve25519.Parameters
 
-open Math.Lib
+open FStar.Math.Lib
 open FStar.Mul
 open FStar.Ghost
 

@@ -5,9 +5,8 @@ open FStar.HyperStack
 open FStar.HST
 open FStar.Ghost
 open FStar.Buffer
-open Math.Axioms
-open Math.Lib
-open Math.Lemmas
+open FStar.Math.Lib
+open FStar.Math.Lemmas
 open Hacl.UInt64
 open Hacl.Cast
 open Hacl.SBuffer
@@ -242,7 +241,7 @@ val auxiliary_lemma_1: a:nat -> b:nat ->
     (ensures (pow2 (bitweight templ (a+b)) = pow2 (bitweight templ a) * pow2 (bitweight templ b)))
 let auxiliary_lemma_1 a b =
   bitweight_lemma_0 a b;
-  Math.Lib.pow2_exp_lemma (bitweight templ a) (bitweight templ b);
+  Math.Lemmas.pow2_plus (bitweight templ a) (bitweight templ b);
   ()
 
 let partialEquality (ha:heap) (a:bigint) (hb:heap) (b:bigint) (len:nat) : GTot Type0 =
@@ -404,14 +403,14 @@ let aux_lemma_4 () = ()
 val aux_lemma_41: b:s64{v b < pow2 26} -> Lemma (forall (a:s64). (v a < pow2 27 /\ v b < pow2 26) ==> (v a * v b < pow2 53))
 let aux_lemma_41 b =
   cut (forall (a:s64). v a < pow2 27 ==> v a * v b < pow2 27 * pow2 26);
-  Math.Lib.pow2_exp_lemma 27 26;
+  Math.Lemmas.pow2_plus 27 26;
   ()
 
 val aux_lemma_42: h:heap -> a:bigint{bound27 h a} -> z:s64{v z < pow2 26} -> Lemma (forall (i:nat). i < norm_length ==> v (get h a i) * v z < pow2 53)
 let aux_lemma_42 h a z =
   cut (forall (i:nat). {:pattern (get h a i)} i < norm_length ==> (v (get h a i) < pow2 27));
   aux_lemma_41 z;
-  Math.Lib.pow2_exp_lemma 27 26;
+  Math.Lemmas.pow2_plus 27 26;
   cut (forall (i:nat). i < norm_length ==> v (get h a i) * v z < pow2 53)
 
 val aux_lemma_43: h1:heap -> c:bigint{live h1 c /\ length c >= 2*norm_length-1} ->
@@ -448,7 +447,7 @@ let multiplication_step_lemma_001 h0 h1 a b ctr c tmp =
   cut (forall (i:nat). {:pattern (get h1 c)} i < norm_length ==> i+ctr < length c);
   cut (forall (i:nat). {:pattern (v (get h0 a i))} i < norm_length ==> (v (get h0 a i) < pow2 27));
   cut (forall (i:nat). {:pattern (v (get h1 tmp i))} i < norm_length ==> v (get h1 tmp i) = v (get h0 a i) * v (get h0 b ctr));
-  Math.Lib.pow2_exp_lemma 27 26;
+  Math.Lemmas.pow2_plus 27 26;
   aux_lemma_42 h0 a (get h0 b ctr);
   cut (forall (i:nat). {:pattern (v (get h1 tmp i))} i < norm_length ==> v (get h1 tmp i) < pow2 53);
   maxValue_lemma h1 c;
@@ -457,8 +456,8 @@ let multiplication_step_lemma_001 h0 h1 a b ctr c tmp =
   aux_lemma_43 h1 c tmp ctr;
   aux_lemma_4 ();
   lemma_helper_10 (ctr+1);
-  Math.Lib.pow2_exp_lemma 3 53;
-  Math.Lib.pow2_increases_lemma 64 56;
+  Math.Lemmas.pow2_plus 3 53;
+  Math.Lemmas.pow2_lt_compat 64 56;
   cut((ctr+1) * pow2 53 < pow2 platform_wide);
   cut (forall (i:nat). (i < norm_length /\ i >= 0) ==> v (get h1 c (i+ctr)) + v (get h1 tmp (i+0)) < pow2 64)
 
@@ -951,12 +950,12 @@ let rec pow2_bitweight_lemma_1 ctr =
     pow2_bitweight_lemma_1 (ctr-1);
     cut (pow2 (bitweight templ (ctr+norm_length-2)) = pow2 (bitweight templ (ctr-2)) * pow2 (bitweight templ norm_length));
     cut (bitweight templ (ctr+norm_length-1) = bitweight templ (ctr+norm_length-2) + 26);
-    Math.Lib.pow2_exp_lemma (bitweight templ (ctr+norm_length-2)) 26;
+    Math.Lemmas.pow2_plus (bitweight templ (ctr+norm_length-2)) 26;
     cut(pow2 (bitweight templ (ctr+norm_length-1)) = pow2 26 * pow2 (bitweight templ (ctr+norm_length-2)));
     cut(pow2 (bitweight templ (ctr+norm_length-1)) = pow2 26 * (pow2 (bitweight templ (ctr-2)) * pow2 (bitweight templ norm_length)));
     paren_mul_right (pow2 26) (pow2 (bitweight templ (ctr-2))) (pow2 (bitweight templ norm_length));
     cut (pow2 (bitweight templ (ctr+norm_length-1)) = pow2 26 * pow2 (bitweight templ (ctr-2)) * pow2 (bitweight templ norm_length));
-    Math.Lib.pow2_exp_lemma 26 (bitweight templ (ctr-2));
+    Math.Lemmas.pow2_plus 26 (bitweight templ (ctr-2));
     cut (pow2 (bitweight templ (ctr+norm_length-1)) = pow2 (26 + bitweight templ (ctr-2)) * pow2 (bitweight templ norm_length))
 
 //TMP#reset-options "--initial_fuel 6 --max_fuel 6"
@@ -1083,7 +1082,7 @@ val aux_lemma_4': h:heap -> b:bigint -> Lemma
   (ensures (reducible h b (norm_length-2)))
 let aux_lemma_4' h b =
   maxValue_lemma_aux h b (2*norm_length-1);
-  Math.Lib.pow2_increases_lemma 64 62;
+  Math.Lemmas.pow2_lt_compat 64 62;
   ()
   
 val aux_lemma_5': h0:heap -> h1:heap -> b:bigint -> Lemma
@@ -1112,7 +1111,7 @@ val pow2_bitweight_lemma: ctr:nat -> Lemma
     (requires (True)) 
     (ensures (pow2 (bitweight templ (ctr+1)) = pow2 (bitweight templ ctr) * pow2 (templ ctr)))
 let pow2_bitweight_lemma ctr =
-  Math.Lib.pow2_exp_lemma (bitweight templ ctr) (templ ctr);
+  Math.Lemmas.pow2_plus (bitweight templ ctr) (templ ctr);
   ()
 
 val helper_lemma_2: pb:nat -> pc:pos -> a0:nat -> b:nat ->
@@ -1158,7 +1157,7 @@ val helper_lemma_4: a:nat -> b:nat -> c:pos -> size:pos{size > c} ->
 	(ensures (a + b < pow2 size))
 let helper_lemma_4 a b c size = 
   if size-1 > size - c then begin
-    Math.Lib.pow2_increases_lemma (size-1) (size-c) ;
+    Math.Lemmas.pow2_lt_compat (size-1) (size-c) ;
     ()
     end
   else ()
@@ -1182,7 +1181,7 @@ val mod2_26: a:s64 -> Tot (b:s64{v b = v a % pow2 26})
 let mod2_26 a = 
   admit(); // TODO
   let mask = shift_left (uint64_to_sint64 1UL) 26ul in
-  Math.Lib.pow2_increases_lemma 64 26;
+  Math.Lemmas.pow2_lt_compat 64 26;
   let mask = mask -^ (uint64_to_sint64 1UL) in
   let res = a &^ mask in
   (* SInt.ulogand_lemma_4 #64 a 26 mask; *)
@@ -1254,7 +1253,7 @@ let untouched_2 (h0:heap) (h1:heap) (b:bigint) (ctr:nat) : GTot Type0 =
 (* 	  v (get h1 b i) = v (get h0 b i)) *)
 (*       /\ modifies_1 b h0 h1))       *)
 (* let carry_top_to_0 b = *)
-(*   Math.Lib.pow2_increases_lemma 64 63; *)
+(*   Math.Lemmas.pow2_lt_compat 64 63; *)
 (*   let h0 = HST.get() in *)
 (*   let b0 = index b 0ul in *)
 (*   let btop = index b nlength in  *)
@@ -1307,9 +1306,9 @@ assume val lemma_aux_2: a:s64 -> Lemma ((v a < pow2 26+pow2 15 /\ v a >= pow2 26
 (*     assume(v c < 2);  *)
 (*     let bip1 = index b (i+|1ul) in *)
 (*     auxiliary_lemma_2 bip1 c;  *)
-(*     Math.Lib.pow2_increases_lemma 64 27; *)
+(*     Math.Lemmas.pow2_lt_compat 64 27; *)
 (*     Math.Lemmas.pow2_double_sum 26; *)
-(*     Math.Lib.pow2_increases_lemma 26 15; *)
+(*     Math.Lemmas.pow2_lt_compat 26 15; *)
 (*     let z = bip1 +^ c in  *)
 (*     cut (v z = v bip1 + v c /\ v c < 2 /\ v bip1 < pow2 26);  *)
 (*     cut (v z >= pow2 26 ==> v c = 1);  *)
@@ -1339,11 +1338,11 @@ let pow2_3_lemma () =
 (* let rec carry2 b =  *)
 (*   let h0 = HST.get() in *)
 (*   pow2_3_lemma (); *)
-(*   Math.Lib.pow2_exp_lemma 3 37; *)
-(*   Math.Lib.pow2_increases_lemma 40 37; *)
-(*   Math.Lib.pow2_increases_lemma 40 26; *)
+(*   Math.Lemmas.pow2_plus 3 37; *)
+(*   Math.Lemmas.pow2_lt_compat 40 37; *)
+(*   Math.Lemmas.pow2_lt_compat 40 26; *)
 (*   Math.Lemmas.pow2_double_sum 40; *)
-(*   Math.Lib.pow2_increases_lemma 63 41; *)
+(*   Math.Lemmas.pow2_lt_compat 63 41; *)
 (*   carry_top_to_0 b; *)
 (*   let h1 = HST.get() in *)
 (*   upd b nlength (uint64_to_sint64 0UL); *)
@@ -1361,9 +1360,9 @@ let pow2_3_lemma () =
 (*   assume (v c < pow2 15);  *)
 (*   let bip1 = index b 1ul in  *)
 (*   auxiliary_lemma_2 bip1 c;  *)
-(*   Math.Lib.pow2_increases_lemma 64 27; *)
+(*   Math.Lemmas.pow2_lt_compat 64 27; *)
 (*   Math.Lemmas.pow2_double_sum 26; *)
-(*   Math.Lib.pow2_increases_lemma 26 15; *)
+(*   Math.Lemmas.pow2_lt_compat 26 15; *)
 (*   let z = bip1 +^ c in  *)
 (*   upd b 1ul z; *)
 (*   let h4 = HST.get() in  *)
@@ -1385,9 +1384,9 @@ let pow2_3_lemma () =
 (*   cut (v b0 < pow2 26 /\ v btop < 2);  *)
 (*   pow2_3_lemma (); *)
 (*   cut (5 * v btop < pow2 3 /\ True);  *)
-(*   Math.Lib.pow2_increases_lemma 26 3; *)
+(*   Math.Lemmas.pow2_lt_compat 26 3; *)
 (*   Math.Lemmas.pow2_double_sum 26; *)
-(*   Math.Lib.pow2_increases_lemma 64 27; *)
+(*   Math.Lemmas.pow2_lt_compat 64 27; *)
 (*   cut(v b0 + 5 * v btop < pow2 27 /\ True);  *)
 (*   let btop_5 = times_5 btop in   *)
 (*   upd b 0ul (b0 +^ btop_5);  *)
@@ -1409,9 +1408,9 @@ let pow2_3_lemma () =
 (*   assume (v bi >= pow2 26 ==> v c = 1); *)
 (*   let bip1 = index b 1ul in *)
 (*   auxiliary_lemma_2 bip1 c; *)
-(*   Math.Lib.pow2_increases_lemma 64 27; *)
+(*   Math.Lemmas.pow2_lt_compat 64 27; *)
 (*   Math.Lemmas.pow2_double_sum 26; *)
-(*   Math.Lib.pow2_increases_lemma 26 15; *)
+(*   Math.Lemmas.pow2_lt_compat 26 15; *)
 (*   let z = bip1 +^ c in *)
 (*   upd b 1ul z; *)
 (*   let h4 = HST.get() in *)

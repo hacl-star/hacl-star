@@ -5,9 +5,8 @@ open FStar.HyperStack
 open FStar.HST
 open FStar.Ghost
 open FStar.Buffer
-open Math.Axioms
-open Math.Lib
-open Math.Lemmas
+open FStar.Math.Lib
+open FStar.Math.Lemmas
 open Hacl.UInt64
 open Hacl.Cast
 (* open Hacl.SBuffer *)
@@ -214,7 +213,7 @@ let multiplication c a b =
 
 val times_5: x:s64{5 * v x < pow2 64} -> Tot (y:s64{v y = 5 * v x})
 let times_5 x =
-  Math.Lib.pow2_increases_lemma 64 2;
+  Math.Lemmas.pow2_lt_compat 64 2;
   let z = x <<^ 2ul in
   x +^ z
 
@@ -288,7 +287,7 @@ let freduce_degree b =
 val mod2_26: a:s64 -> Tot (b:s64(* {v b = v a % pow2 26} *))
 let mod2_26 a =
   let mask = shift_left (uint64_to_sint64 1UL) 26ul in
-  Math.Lib.pow2_increases_lemma 64 26;
+  Math.Lemmas.pow2_lt_compat 64 26;
   let mask = mask -^ (uint64_to_sint64 1UL) in
   let res = a &^ mask in
   (* SInt.ulogand_lemma_4 #64 a 26 mask; *)
@@ -341,7 +340,7 @@ val carry_top_to_0: b:bigint -> Stack unit
       (* /\ modifies_1 b h0 h1 *)
     ))
 let carry_top_to_0 b =
-  (* Math.Lib.pow2_increases_lemma 64 63; *)
+  (* Math.Lemmas.pow2_lt_compat 64 63; *)
   (* let h0 = HST.get() in *)
   let b0 = b.(0ul) in
   let btop = b.(nlength) in
@@ -375,9 +374,9 @@ let rec carry2_aux b i =
     (* assume(v c < 2);  *)
     let bip1 = b.(U32 (i +^ 1ul)) in
     (* auxiliary_lemma_2 bip1 c; *)
-    (* Math.Lib.pow2_increases_lemma 64 27; *)
+    (* Math.Lemmas.pow2_lt_compat 64 27; *)
     (* Math.Lemmas.pow2_double_sum 26; *)
-    (* Math.Lib.pow2_increases_lemma 26 15; *)
+    (* Math.Lemmas.pow2_lt_compat 26 15; *)
     let z = bip1 +%^ c in
     (* cut (v z = v bip1 + v c /\ v c < 2 /\ v bip1 < pow2 26); *)
     (* cut (v z >= pow2 26 ==> v c = 1);  *)
@@ -403,10 +402,10 @@ let rec carry2 b =
   (* let h0 = HST.get() in *)
   (* pow2_3_lemma (); *)
   (* Math.Lib.pow2_exp_lemma 3 37; *)
-  (* Math.Lib.pow2_increases_lemma 40 37; *)
-  (* Math.Lib.pow2_increases_lemma 40 26; *)
+  (* Math.Lemmas.pow2_lt_compat 40 37; *)
+  (* Math.Lemmas.pow2_lt_compat 40 26; *)
   (* Math.Lemmas.pow2_double_sum 40; *)
-  (* Math.Lib.pow2_increases_lemma 63 41; *)
+  (* Math.Lemmas.pow2_lt_compat 63 41; *)
   carry_top_to_0 b;
   (* let h1 = HST.get() in *)
   b.(nlength) <- (uint64_to_sint64 0UL);
@@ -424,9 +423,9 @@ let rec carry2 b =
   (* assume (v c < pow2 15);  *)
   let bip1 = b.(1ul) in
   (* auxiliary_lemma_2 bip1 c;  *)
-  (* Math.Lib.pow2_increases_lemma 64 27; *)
+  (* Math.Lemmas.pow2_lt_compat 64 27; *)
   (* Math.Lemmas.pow2_double_sum 26; *)
-  (* Math.Lib.pow2_increases_lemma 26 15; *)
+  (* Math.Lemmas.pow2_lt_compat 26 15; *)
   let z = bip1 +%^ c in
   b.(1ul) <- z;
   (* let h4 = HST.get() in *)
@@ -449,9 +448,9 @@ let last_carry b =
   (* cut (v b0 < pow2 26 /\ v btop < 2);  *)
   (* pow2_3_lemma (); *)
   (* cut (5 * v btop < pow2 3 /\ True);  *)
-  (* Math.Lib.pow2_increases_lemma 26 3; *)
+  (* Math.Lemmas.pow2_lt_compat 26 3; *)
   (* Math.Lemmas.pow2_double_sum 26; *)
-  (* Math.Lib.pow2_increases_lemma 64 27; *)
+  (* Math.Lemmas.pow2_lt_compat 64 27; *)
   (* cut(v b0 + 5 * v btop < pow2 27 /\ True);  *)
   let btop_5 = uint64_to_sint64 5uL *%^ btop in
   (* let btop_5 = times_5 btop in *)
@@ -474,9 +473,9 @@ let last_carry b =
   (* assume (v bi >= pow2 26 ==> v c = 1); *)
   let bip1 = b.(1ul) in
   (* auxiliary_lemma_2 bip1 c; *)
-  (* Math.Lib.pow2_increases_lemma 64 27; *)
+  (* Math.Lemmas.pow2_lt_compat 64 27; *)
   (* Math.Lemmas.pow2_double_sum 26; *)
-  (* Math.Lib.pow2_increases_lemma 26 15; *)
+  (* Math.Lemmas.pow2_lt_compat 26 15; *)
   let z = bip1 +%^ c in
   b.(1ul) <- z;
   (* let h4 = HST.get() in *)

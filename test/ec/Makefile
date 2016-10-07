@@ -7,10 +7,18 @@ LIB_DIR=../../lib/st
 LIB_FILES=$(addprefix $(LIB_DIR)/, axioms.fst intlib.fst IntLibLemmas.fst sint.fst sbuffer.fst SInt.UInt8.fst SInt.UInt32.fst SInt.UInt63.fst SInt.UInt64.fst SInt.Cast.fst SBytes.fst)
 
 LIB_DIR_HST=../../lib/hst
-LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst)
+LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst)
 
 CODE_DIR=../../crypto/ec
 CODE_DIR_HST=../../crypto_hst/ec
+
+
+KREMLIN_DIR?=../../../kremlin
+KREMLIN=$(KREMLIN_DIR)/Kremlin.native
+KREMLIN_LIB=$(KREMLIN_DIR)/kremlib
+KREMLIN_ARGS=-verbose
+C_COMP=gcc -I$(LIB_DIR_HST)/c/
+HACL_KREMLIN_LIB=$(addprefix $(LIB_DIR_HST)/kremlin/, Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst)
 
 OPTIONS_OCAML=--lax --codegen OCaml --no_location_info --use_native_int
 OPTIONS_OCAML_HST=--lax --codegen OCaml --no_location_info
@@ -40,7 +48,7 @@ CURVE_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/, Math.Definitions.fst Math.Field.fs
 CURVE_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Bignum_Parameters.ml Bignum_Bigint.ml Bignum_Fsum.ml Bignum_FsumWide.ml Bignum_Fdifference.ml Bignum_Fscalar.ml Bignum_Fproduct.ml Bignum_Modulo.ml Bignum_Core.ml Curve_Point.ml Curve_AddAndDouble.ml Curve_Ladder.ml
 
 # Extracted OCaml HST files
-CURVE_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Math_Axioms.ml Math_Lib.ml Math_Lemmas.ml Math_Definitions.ml Math_Field.ml Math_Curve.ml Curve_Parameters.ml Curve_Bigint.ml Curve_Fsum.ml Curve_FsumWide.ml Curve_Fdifference.ml Curve_Fscalar.ml Curve_Fproduct.ml Curve_Modulo.ml Curve_Bignum.ml Curve_Crecip.ml Curve_Point.ml Curve_AddAndDouble.ml Curve_Ladder.ml
+CURVE_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml FStar_Math_Lib.ml Math_Lemmas.ml Math_Definitions.ml Math_Field.ml Math_Curve.ml Curve_Parameters.ml Curve_Bigint.ml Curve_Fsum.ml Curve_FsumWide.ml Curve_Fdifference.ml Curve_Fscalar.ml Curve_Fproduct.ml Curve_Modulo.ml Curve_Bignum.ml Curve_Crecip.ml Curve_Point.ml Curve_AddAndDouble.ml Curve_Ladder.ml
 
 CURVE25519_FSTAR=$(CURVE_FSTAR_HST) $(CODE_DIR_HST)/Curve.Curve25519.fst
 P256_FSTAR=$(CURVE_FSTAR_HST) $(CODE_DIR_HST)/Curve.P256.fst
@@ -55,7 +63,7 @@ CURVE448_ODIR=curve448
 P256_ODIR=p256
 
 CURVE25519_FSTAR=$(CODE_DIR_HST)/Hacl.EC.Curve25519.fst
-CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Math_Axioms.ml Math_Lib.ml \
+CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml FStar_Math_Lib.ml \
 	Hacl_EC_Curve25519_Parameters.ml \
 	Hacl_EC_Curve25519_Bigint.ml \
 	Hacl_EC_Curve25519_Bignum_FsumWide.ml \
@@ -95,12 +103,16 @@ curve25519-compile: curve25519-extract
 curve25519-test: curve25519-compile
 	./test_curve25519.exe
 
+curve25519-kremlin:
+	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) -I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test/ $(CURVE25519_FSTAR) $(KREMLIN_DIR)/test/testlib.c c/test_poly.c
+	./a.out
+
 # Cleaning
 clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
 	$(MAKE) -C $(LIB_DIR) clean
 	$(MAKE) -C $(LIB_DIR_HST) clean
-	@rm -f $(addprefix ml/, *.cmx *.o *.cmi *~) *~ *.exe
+	@rm -f $(addprefix ml/, *.cmx *.o *.cmi *~) *~ *.exe *.o *.c *.h
 	@rm -rf $(CURVE25519_ODIR) $(CURVE448_ODIR) $(P256_ODIR)
 
 # Curve448 HST extraction to OCaml

@@ -5,9 +5,8 @@ open FStar.HyperStack
 open FStar.HST
 open FStar.Ghost
 open FStar.Buffer
-open Math.Axioms
-open Math.Lib
-open Math.Lemmas
+open FStar.Math.Lib
+open FStar.Math.Lemmas
 open Hacl.UInt32
 open Hacl.Cast
 (* open Hacl.SBuffer *)
@@ -52,11 +51,11 @@ let lemma_uint32_of_bytes (a:t) (b:t) (c:t) (d:t) : Lemma
   (ensures  (v a + pow2 8 * v b < pow2 16
     /\ v a + pow2 8 * v b + pow2 16 * v c < pow2 24
     /\ v a + pow2 8 * v b + pow2 16 * v c + pow2 24 * v d < pow2 32))
-  = Math.Lib.pow2_exp_lemma 8 8;
+  = Math.Lemmas.pow2_plus 8 8;
     lemma_euclidian_division (v a) (v b) (pow2 8);
-    Math.Lib.pow2_exp_lemma 8 16;
+    Math.Lemmas.pow2_plus 8 16;
     lemma_euclidian_division (v a + pow2 8 * v b) (v c) (pow2 16);
-    Math.Lib.pow2_exp_lemma 8 24;
+    Math.Lemmas.pow2_plus 8 24;
     lemma_euclidian_division (v a + pow2 8 * v b + pow2 16 * v c) (v d) (pow2 24)
 
 (** Reads an unsigned int32 out of 4 bytes *)
@@ -76,14 +75,14 @@ let uint32_of_bytes b =
   let b1' = sint8_to_sint32 b1 in
   let b2' = sint8_to_sint32 b2 in
   let b3' = sint8_to_sint32 b3 in
-  Math.Lib.pow2_increases_lemma 32 8;
+  Math.Lemmas.pow2_lt_compat 32 8;
   cut (v b0' = H8.v b0 /\ v b1' = H8.v b1 /\ v b2' = H8.v b2 /\ v b3' = H8.v b3);
-  Math.Lib.pow2_increases_lemma 16 8;
-  Math.Lib.pow2_increases_lemma 24 16;
-  Math.Lib.pow2_increases_lemma 32 24;
-  Math.Lib.pow2_exp_lemma 8 8;
-  Math.Lib.pow2_exp_lemma 8 16;
-  Math.Lib.pow2_exp_lemma 8 24;
+  Math.Lemmas.pow2_lt_compat 16 8;
+  Math.Lemmas.pow2_lt_compat 24 16;
+  Math.Lemmas.pow2_lt_compat 32 24;
+  Math.Lemmas.pow2_plus 8 8;
+  Math.Lemmas.pow2_plus 8 16;
+  Math.Lemmas.pow2_plus 8 24;
   let b1'' = b1' <<^ 8ul in
   let b2'' = b2' <<^ 16ul in
   let b3'' = b3' <<^ 24ul in

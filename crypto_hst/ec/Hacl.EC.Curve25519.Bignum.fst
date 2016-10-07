@@ -7,7 +7,7 @@ open FStar.Ghost
 open Hacl.UInt64
 (* open Hacl.SBuffer *)
 open FStar.Buffer
-open Math.Lib
+open FStar.Math.Lib
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 
@@ -159,7 +159,7 @@ let rec erase_wide b idx len ctr =
   (* let h0 = HST.get() in *)
   if U32 (len =^ ctr) then ()
   else begin
-    b.(U32 (idx +^ ctr)) <- (Hacl.UInt128.of_string "0");
+    b.(U32 (idx +^ ctr)) <- (Hacl.Cast.uint64_to_sint128 0uL);
     (* let h1 = HST.get() in *)
     (* upd_lemma h0 h1 b (idx+|ctr) (Hacl.UInt128.of_string "0"); *)
     erase_wide b idx len (U32 (ctr +^ 1ul))
@@ -196,7 +196,7 @@ let fsum a b =
   push_frame ();
   (* let h0 = HST.get() in *)
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *)
-  let tmp = create (Hacl.UInt128.of_string "0") (UInt32.sub (UInt32.mul nlength 2ul) 1ul) in
+  let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) (UInt32.sub (UInt32.mul nlength 2ul) 1ul) in
   Hacl.EC.Curve25519.Bignum.Fsum.fsum' a b;
   (* let h1 = HST.get() in *)
   copy_to_bigint_wide tmp a;
@@ -230,7 +230,7 @@ let fdifference a b =
   (* let h0 = HST.get() in *)
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b; *)
   let b' = create (Hacl.Cast.uint64_to_sint64 0uL) nlength in
-  let tmp = create (Hacl.UInt128.of_string "0") (U32 (2ul *^ nlength -^ 1ul)) in
+  let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) (U32 (2ul *^ nlength -^ 1ul)) in
   blit b 0ul b' 0ul nlength;
   (* let b' = Bigint.copy b in  *)
   (* let h1 = HST.get() in *)
@@ -266,7 +266,7 @@ let fscalar res b s =
   push_frame ();
   (* let h0 = HST.get() in *)
   (* standardized_eq_norm h0 b;  *)
-  let tmp = create (Hacl.UInt128.of_string "0") (U32 (2ul *^ nlength -^ 1ul)) in
+  let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) (U32 (2ul *^ nlength -^ 1ul)) in
   Hacl.EC.Curve25519.Bignum.Fscalar.scalar' tmp b s;
   (* let h = HST.get() in *)
   (* admitP(b2t(satisfies_modulo_constraints h tmp));   *)
@@ -288,7 +288,7 @@ let fmul res a b =
   push_frame ();
   (* let h0 = HST.get() in *)
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *)
-  let tmp = create (Hacl.UInt128.of_string "0") (U32 (2ul *^ nlength -^ 1ul)) in
+  let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) (U32 (2ul *^ nlength -^ 1ul)) in
   (* let h1 = HST.get() in *)
   (* no_upd_lemma h0 h1 a !{}; *)
   (* no_upd_lemma h0 h1 b !{}; *)

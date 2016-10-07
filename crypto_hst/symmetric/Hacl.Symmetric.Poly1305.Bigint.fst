@@ -9,8 +9,7 @@ open FStar.Ghost
 open Hacl.UInt64
 (* open Hacl.SBuffer *)
 open FStar.Buffer
-open Math.Axioms
-open Math.Lib
+open FStar.Math.Lib
 open Hacl.Symmetric.Poly1305.Parameters
 
 #reset-options "--initial_fuel 0 --max_fuel 0"

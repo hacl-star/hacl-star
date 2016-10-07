@@ -5,9 +5,8 @@ open FStar.HyperStack
 open FStar.HST
 open FStar.Ghost
 open FStar.Buffer
-open Math.Axioms
-open Math.Lib
-open Math.Lemmas
+open FStar.Math.Lib
+open FStar.Math.Lemmas
 open Hacl.UInt64
 open Hacl.Cast
 open Hacl.SBuffer

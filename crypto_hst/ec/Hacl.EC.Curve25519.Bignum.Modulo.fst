@@ -7,7 +7,7 @@ open FStar.Ghost
 open Hacl.UInt64
 (* open Hacl.SBuffer *)
 open FStar.Buffer
-open Math.Lib
+open FStar.Math.Lib
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 
@@ -99,11 +99,11 @@ let freduce_degree b =
 val mod2_51: a:s128 -> Tot (b:s128(* {v b = v a % pow2 51} *))
 let mod2_51 a =
   let open Hacl.UInt128 in
-  let mask = (of_string "1") <<^ 51ul in
+  let mask = (Hacl.Cast.uint64_to_sint128 1uL) <<^ 51ul in
   (* cut (v mask = pow2 51 % pow2 platform_wide /\ pow2 51 >= 1);  *)
   (* Math.Lemmas.pow2_increases_1 platform_wide 51;  *)
   (* mod_lemma_1 (pow2 51) (pow2 platform_wide); *)
-  let mask = mask -%^ (of_string "1") in
+  let mask = mask -%^ (Hacl.Cast.uint64_to_sint128 1uL) in
   let res = a &^ mask in
   (* log_and_wide_lemma_3 a mask 51; *)
   res
@@ -243,7 +243,7 @@ let last_carry b =
   b.(0ul) <- (b0 +%^ btop_19);
   (* let h1 = HST.get() in *)
   (* freduce_degree_lemma h0 h1 b 0;  *)
-  b.(nlength) <- (of_string "0");
+  b.(nlength) <- (Hacl.Cast.uint64_to_sint128 0uL);
   (* let h2 = HST.get() in *)
   (* eval_eq_lemma h1 h2 b b norm_length;  *)
   (* cut (eval_wide h2 b (norm_length+1) = eval_wide h1 b norm_length /\ True);  *)
@@ -281,7 +281,7 @@ val freduce_coefficients:
 let freduce_coefficients b =
   (* let h = HST.get() in *)
   let open Hacl.UInt128 in
-  b.(nlength) <- (of_string "0");
+  b.(nlength) <- (Hacl.Cast.uint64_to_sint128 0uL);
   (* let h' = HST.get() in *)
   (* eval_eq_lemma h h' b b norm_length; *)
   (* eval_wide_def h' b (norm_length+1); *)
@@ -291,7 +291,7 @@ let freduce_coefficients b =
   (* lemma_helper_40 h b; *)
   carry_top_to_0 b;
   (* let h1 = HST.get() in *)
-  b.(nlength) <- (of_string "0");
+  b.(nlength) <- (Hacl.Cast.uint64_to_sint128 0uL);
   let h2 = HST.get() in
   (* eval_eq_lemma h1 h2 b b norm_length; *)
   (* eval_wide_def h2 b (norm_length+1); *)

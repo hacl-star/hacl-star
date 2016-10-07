@@ -7,7 +7,7 @@ LIB_DIR=../../lib/st
 LIB_FILES=$(addprefix $(LIB_DIR)/, axioms.fst intlib.fst IntLibLemmas.fst sint.fst sbuffer.fst SInt.UInt8.fst SInt.UInt32.fst SInt.UInt63.fst SInt.UInt64.fst SInt.Cast.fst SBytes.fst)
 
 LIB_DIR_HST=../../lib/hst
-LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst)
+LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst)
 
 CODE_DIR=../../crypto/symmetric
 CODE_DIR_HST=../../crypto_hst/symmetric
@@ -22,7 +22,7 @@ C_COMP=gcc -I$(LIB_DIR_HST)/c/
 OPTIONS_OCAML=--lax --codegen OCaml --no_location_info --use_native_int
 OPTIONS_OCAML_HST=--lax --codegen OCaml --no_location_info
 OPTIONS_KREMLIN=--lax --codegen Kremlin
-HACL_KREMLIN_LIB=$(addprefix $(LIB_DIR_HST)/kremlin/, Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst) $(addprefix $(LIB_DIR_HST)/, Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst)
+HACL_KREMLIN_LIB=$(addprefix $(LIB_DIR_HST)/kremlin/, Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst)
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -20-26

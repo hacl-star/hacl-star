@@ -8,7 +8,7 @@ open FStar.Buffer
 open Hacl.UInt64
 (* open Hacl.SBuffer *)
 open FStar.Buffer
-open Math.Lib
+open FStar.Math.Lib
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 open Hacl.EC.Curve25519.Bignum
@@ -29,15 +29,31 @@ module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
-noeq type point = | Point: x:bigint -> y:bigint -> z:bigint -> point
+(* noeq type point = | Point: x:bigint -> y:bigint -> z:bigint -> point *)
+
+(* val get_x: point -> Tot bigint *)
+(* let get_x p = Point.x p *)
+(* val get_y: point -> Tot bigint *)
+(* let get_y p = Point.y p *)
+(* val get_z: point -> Tot bigint *)
+(* let get_z p = Point.z p *)
+
+(* val make: bigint -> bigint -> bigint -> Tot point *)
+(* let make x y z = Point x y z *)
+
+noeq type point = { x:bigint;
+                    y:bigint;
+                    z:bigint; }
 
 val get_x: point -> Tot bigint
-let get_x p = Point.x p
+let get_x p = p.x
 val get_y: point -> Tot bigint
-let get_y p = Point.y p
+let get_y p = p.y
 val get_z: point -> Tot bigint
-let get_z p = Point.z p
+let get_z p = p.z
 
+val make: bigint -> bigint -> bigint -> Tot point
+let make x y z = {x = x; y = y; z = z}
 
 // Separation between the references of all three coordinates
 type separateCoordinates (p:point) =
@@ -57,10 +73,6 @@ let op_Plus_Plus (#a:Type) (s:TSet.set a) (s':TSet.set a) : GTot (TSet.set a) = 
 
 val refs: p:point -> GTot (TSet.set Heap.aref)
 let refs p = arefs (only (get_x p) ++ only (get_y p) ++ (only (get_z p)))
-
-
-val make: bigint -> bigint -> bigint -> Tot point
-let make x y z = Point x y z
 
 val swap_conditional_aux': a:bigint -> b:bigint{disjoint a b} ->
   is_swap:s64(* {v is_swap = pow2 platform_size -1 \/ v is_swap = 0} *) ->

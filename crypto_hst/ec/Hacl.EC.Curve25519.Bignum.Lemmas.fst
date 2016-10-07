@@ -6,7 +6,7 @@ open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt64
 open Hacl.SBuffer
-open Math.Lib
+open FStar.Math.Lib
 open Hacl.EC.Curve25519.Bigint
 
 
