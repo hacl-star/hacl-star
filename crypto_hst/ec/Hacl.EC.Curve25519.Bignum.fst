@@ -178,7 +178,7 @@ let modulo output b =
   (* admit(); // OK *)
   (* let h0 = HST.get() in *)
   Hacl.EC.Curve25519.Bignum.Modulo.freduce_degree b;
-  Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients b;
+  Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients_wide b;
   (* let h = HST.get() in *)
   (* standardized_eq_norm h b; *)
   copy_to_bigint output b
@@ -234,7 +234,7 @@ let fdifference a b =
   blit b 0ul b' 0ul nlength;
   (* let b' = Bigint.copy b in  *)
   (* let h1 = HST.get() in *)
-  Hacl.EC.Curve25519.Bignum.Modulo.add_big_zero b';
+  Hacl.EC.Curve25519.Bignum.Fdifference.add_big_zero b';
   (* let h2 = HST.get() in *)
   (* cut (modifies_1 b' h0 h2);  *)
   (* no_upd_lemma h0 h2 a (only b');  *)
