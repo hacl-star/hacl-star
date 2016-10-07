@@ -105,15 +105,19 @@ curve25519-test: curve25519-compile
 	./test_curve25519.exe
 
 curve25519-kremlin:
-	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) -I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test/ $(CURVE25519_FSTAR) $(KREMLIN_DIR)/test/testlib.c c/test_poly.c
-	./a.out
+	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) -I $(CODE_DIR_HST) \
+		-I $(KREMLIN_DIR)/test/ $(CURVE25519_FSTAR) $(KREMLIN_DIR)/test/testlib.c \
+		c/test_curve25519.c \
+		-o test.exe
+	./test.exe
+
 
 # Cleaning
 clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
 	$(MAKE) -C $(LIB_DIR) clean
 	$(MAKE) -C $(LIB_DIR_HST) clean
-	@rm -f $(addprefix ml/, *.cmx *.o *.cmi *~) *~ *.exe *.o *.c *.h
+	@rm -f $(addprefix ml/, *.cmx *.o *.cmi *~) *~ *.exe *.o *.c *.h *.krml *.out
 	@rm -rf $(CURVE25519_ODIR) $(CURVE448_ODIR) $(P256_ODIR)
 
 # Curve448 HST extraction to OCaml

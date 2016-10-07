@@ -39,7 +39,7 @@ val expand_0: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input 
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_0 output input =
-  let mask = Hacl.UInt64.of_string "0x7ffffffffffff" in
+  let mask = Hacl.Cast.uint64_to_sint64 0x7ffffffffffffuL in
   let open Hacl.UInt64 in
   let i0 = input.(0ul) in
   let i1 = input.(1ul) in
@@ -63,7 +63,7 @@ val expand_1: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input 
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_1 output input =
-  let mask = Hacl.UInt64.of_string "0x7ffffffffffff" in
+  let mask = Hacl.Cast.uint64_to_sint64 0x7ffffffffffffuL in
   let open Hacl.UInt64 in
   let i6 = input.(6ul) in
   let i7 = input.(7ul) in
@@ -88,7 +88,7 @@ val expand_2: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input 
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_2 output input =
-  let mask = Hacl.UInt64.of_string "0x7ffffffffffff" in
+  let mask = Hacl.Cast.uint64_to_sint64 0x7ffffffffffffuL in
   let open Hacl.UInt64 in
   let i12 = input.(12ul) in
   let i13 = input.(13ul) in
@@ -115,7 +115,7 @@ val expand_3: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input 
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_3 output input =
-  let mask = Hacl.UInt64.of_string "0x7ffffffffffff" in
+  let mask = Hacl.Cast.uint64_to_sint64 0x7ffffffffffffuL in
   let open Hacl.UInt64 in
   let i19 = input.(19ul) in
   let i20 = input.(20ul) in
@@ -140,7 +140,7 @@ val expand_4: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input 
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
 let expand_4 output input =
-  let mask = Hacl.UInt64.of_string "0x7ffffffffffff" in
+  let mask = Hacl.Cast.uint64_to_sint64 0x7ffffffffffffuL in
   let open Hacl.UInt64 in
   let i25 = input.(25ul) in
   let i26 = input.(26ul) in
