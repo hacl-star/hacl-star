@@ -1,0 +1,63 @@
+module Hacl.SecretBox
+
+open FStar.Buffer
+open FStar.HST
+open Hacl.Constants
+
+
+(* Module abbreviations *)
+module HS  = FStar.HyperStack
+module B   = FStar.Buffer
+module U8  = FStar.UInt8
+module U32 = FStar.UInt32
+module U64 = FStar.UInt64
+
+(* TODO:
+   disjointness clauses
+*)
+
+(* 
+   From libsodium documentation: c & m may overlap which allows for inplace encrypto
+   -> adapt implementation 
+   *)
+val crypto_secretbox_easy:
+  c:uint8_p ->
+  m:uint8_p ->
+  mlen:u64{let len = U64.v mlen in len <= length m /\ len + crypto_secretbox_MACBYTES <= length c}  ->
+  n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
+  k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
+    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
+
+val crypto_secretbox_open_easy:
+  m:uint8_p ->
+  c:uint8_p ->
+  clen:u64{let len = U64.v clen in len = length m + crypto_secretbox_MACBYTES /\ len = length c}  ->
+  n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
+  k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
+    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
+
+val crypto_secretbox_detached:
+  c:uint8_p ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
+  m:uint8_p ->
+  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
+  k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h k))
+    (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
+
+val crypto_secretbox_open_detached:
+  m:uint8_p ->
+  c:uint8_p ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
+  clen:u64{let len = U64.v clen in len = length m /\ len = length c}  ->
+  n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
+  k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
+  Stack u32
+    (requires (fun h -> live h m /\ live h c /\ live h mac /\ live h n /\ live h k))
+    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
