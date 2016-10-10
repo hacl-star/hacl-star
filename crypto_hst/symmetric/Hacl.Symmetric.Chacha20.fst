@@ -229,9 +229,9 @@ let sum_matrixes m m0 =
   m.(4ul) <- (m.(4ul) +%^ m0.(4ul));
   m.(5ul) <- (m.(5ul) +%^ m0.(5ul));
   m.(6ul) <- (m.(6ul) +%^ m0.(6ul));
-  m.(7ul) <- (m.(7ul) +%^ m0.(7ul)); 
+  m.(7ul) <- (m.(7ul) +%^ m0.(7ul));
   m.(8ul) <- (m.(8ul) +%^ m0.(8ul));
-  m.(9ul) <- (m.(9ul) +%^ m0.(9ul)); 
+  m.(9ul) <- (m.(9ul) +%^ m0.(9ul));
   m.(10ul) <- (m.(10ul) +%^ m0.(10ul));
   m.(11ul) <- (m.(11ul) +%^ m0.(11ul));
   m.(12ul) <- (m.(12ul) +%^ m0.(12ul));
@@ -241,6 +241,93 @@ let sum_matrixes m m0 =
   let h1 = HST.get() in
   assert(modifies_1 m h0 h1);
   assert(live h1 m)
+
+val chacha20_init:
+  state:u32s{length state >= 16} ->
+  key:bytes{length key = 32 /\ disjoint state key} ->
+  counter:s32 ->
+  nonce:bytes{length nonce = 12 /\ disjoint state nonce} ->
+  Stack unit
+  (requires (fun h -> live h state /\ live h key /\ live h nonce))
+  (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+let chacha20_init state key counter nonce =
+  (* Key part *)
+  let k0 = sub key 0ul  4ul in
+  let k1 = sub key 4ul  4ul in
+  let k2 = sub key 8ul  4ul in
+  let k3 = sub key 12ul 4ul in
+  let k4 = sub key 16ul 4ul in
+  let k5 = sub key 20ul 4ul in
+  let k6 = sub key 24ul 4ul in
+  let k7 = sub key 28ul 4ul in
+  let k0 =  (s32_of_bytes k0) in
+  let k1 =  (s32_of_bytes k1) in
+  let k2 =  (s32_of_bytes k2) in
+  let k3 =  (s32_of_bytes k3) in
+  let k4 =  (s32_of_bytes k4) in
+  let k5 =  (s32_of_bytes k5) in
+  let k6 =  (s32_of_bytes k6) in
+  let k7 =  (s32_of_bytes k7) in
+  (* Nonce part *)
+  let n0 = sub nonce 0ul 4ul in
+  let n1 = sub nonce 4ul 4ul in
+  let n2 = sub nonce 8ul 4ul in
+  let n0 =  (s32_of_bytes n0) in
+  let n1 =  (s32_of_bytes n1) in
+  let n2 =  (s32_of_bytes n2) in
+  let h0 = HST.get() in
+  (* Constant part *)
+  state.(0ul) <- (uint32_to_sint32 0x61707865ul);
+  state.(1ul) <- (uint32_to_sint32 0x3320646eul);
+  state.(2ul) <- (uint32_to_sint32 0x79622d32ul);
+  state.(3ul) <- (uint32_to_sint32 0x6b206574ul);
+  (* Update with key *)
+  state.(4ul) <-  (k0);
+  state.(5ul) <-  (k1);
+  state.(6ul) <-  (k2);
+  state.(7ul) <-  (k3);
+  state.(8ul) <-  (k4);
+  state.(9ul) <-  (k5);
+  state.(10ul) <- (k6);
+  state.(11ul) <- (k7);
+  (* Block counter part *)
+  state.(12ul) <- counter;
+  (* Update with nonces *)
+  state.(13ul) <- (n0);
+  state.(14ul) <- (n1);
+  state.(15ul) <- (n2);
+  let h1 = HST.get() in
+  assert(modifies_1 state h0 h1);
+  assert(live h1 state)
+
+val chacha20_update:
+  output:bytes ->
+  state:u32s{length state = 32 /\ disjoint state output} ->
+  len:u32{U32.v len <= 64 /\ length output >= U32.v len} ->
+  Stack unit
+    (requires (fun h -> live h state /\ live h output))
+    (ensures (fun h0 _ h1 -> live h1 output /\ live h1 state /\ modifies_2 output state h0 h1 ))
+let chacha20_update output state len =
+  (* Initial state *)
+  let m  = sub state  0ul 16ul in
+  let m0 = sub state 16ul 16ul in // do we ever rely on m and m0 being contiguous?
+  blit m 0ul m0 0ul 16ul;
+  (* 20 rounds *)
+  column_round m; diagonal_round m;
+  column_round m; diagonal_round m;
+  column_round m; diagonal_round m;
+  column_round m; diagonal_round m;
+  column_round m; diagonal_round m;
+  column_round m; diagonal_round m;
+  column_round m; diagonal_round m;
+  column_round m; diagonal_round m;
+  column_round m; diagonal_round m;
+  column_round m; diagonal_round m;
+  (* Sum the matrixes *)
+  sum_matrixes m m0;
+  (* Serialize the state into byte stream *)
+  bytes_of_u32s output m len
+// avoid this copy when XORing? merge the sum_matrix and output loops? we don't use m0 afterward. 
 
 val chacha20_block: output:bytes -> 
   state:u32s{length state >= 32 /\ disjoint state output} ->

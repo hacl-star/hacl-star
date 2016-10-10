@@ -143,6 +143,12 @@ poly-kremlin:
 	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) -I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test/ $(POLY1305_FSTAR) $(KREMLIN_DIR)/test/testlib.c c/test_poly.c
 	./a.out
 
+aead-kremlin:
+	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) \
+		-I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test/ \
+		Hacl.AEAD.Chacha20Poly1305.fst $(KREMLIN_DIR)/test/testlib.c c/test_aead_chacha_poly.c
+	./a.out
+
 #########################################################################
 #                                 Old code                              #
 #########################################################################

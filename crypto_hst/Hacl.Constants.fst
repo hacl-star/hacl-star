@@ -5,7 +5,9 @@ type u8  = FStar.UInt8.t
 type u32 = FStar.UInt32.t
 type u64 = FStar.UInt64.t
 
-type uint8_p = FStar.Buffer.buffer u8
+type h8  = Hacl.UInt8.t
+
+type uint8_p = FStar.Buffer.buffer h8
 
 (* Size constants (for specifications) *)
 let crypto_box_NONCEBYTES     = 4
