@@ -51,15 +51,14 @@ let crypto_secretbox_open_detached m c mac clen n k =
   Hacl.Symmetric.Poly1305.poly1305_mac tmp_mac c clen k;
   assume (Hacl.Policies.declassifiable tmp_mac);
   let verify = cmp_bytes mac tmp_mac 16ul in
-  if U8 (verify =^ 0uy) then (
-    Hacl.Symmetric.Chacha20.chacha20_encrypt m k (Hacl.Cast.uint32_to_sint32 1ul) n c clen;
-    pop_frame();
-    0x0ul
-  )
-  else (
-    pop_frame();
-    0xfffffffful
-  )
+  let z = 
+    if U8 (verify =^ 0uy) then (
+      Hacl.Symmetric.Chacha20.chacha20_encrypt m k (Hacl.Cast.uint32_to_sint32 1ul) n c clen;
+      0x0ul
+    )
+    else 0xfffffffful in
+  pop_frame();
+  z
 
 
 val crypto_secretbox_easy:
