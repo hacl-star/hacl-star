@@ -11,3 +11,13 @@ clean:
 	make clean -C hash
 	make clean -C hmac
 	make clean -C hkdf
+
+LIB_DIR=../lib/hst
+SYMMETRIC_DIR=symmetric
+EC_DIR=ec
+
+top-level-lax:
+	fstar.exe --lax Hacl.Box.fst \
+		--include $(LIB_DIR) \
+		--include $(SYMMETRIC_DIR) \
+		--include $(EC_DIR)
