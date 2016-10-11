@@ -19,14 +19,14 @@ HACL_SYMMETRIC=$(HACL_API)/symmetric
 HACL_EC=$(HACL_API)/ec
 
 KREMLIN_HOME?=../../kremlin
-KREMLIN=$(KREMLIN_HOME)/Kremlin.native
+KREMLIN=$(KREMLIN_HOME)/krml
 KREMLIN_ARGS=-verbose
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 
 kremlin:
 	$(MAKE) -C symmetric chacha-kremlin poly-kremlin aead-kremlin
-	+make api-kremlin
+	$(MAKE) api-kremlin
 
 api-kremlin:
 	$(KREMLIN) $(KREMLIN_ARGS) \

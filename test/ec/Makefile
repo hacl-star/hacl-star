@@ -110,6 +110,13 @@ curve25519-kremlin:
 		-o test.exe
 	./test.exe
 
+curve25519-compcert:
+	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) -I $(CODE_DIR_HST) \
+		-I $(KREMLIN_DIR)/test/ $(CURVE25519_FSTAR) $(KREMLIN_DIR)/test/testlib.c \
+		c/test_curve25519.c \
+		-o test.exe -cc compcert
+	./test.exe
+
 
 # Cleaning
 clean:
