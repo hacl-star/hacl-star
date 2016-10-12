@@ -46,6 +46,7 @@ AES_FSTAR=$(addprefix $(CODE_DIR)/,Crypto.AES.fst)
 
 # FStar HST files
 CHACHA_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.Chacha20.fst)
+SALSA_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.Salsa20.fst)
 AES_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.AES.fst)
 AESGCM_FSTAR_HST=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.AES.fst Hacl.Symmetric.GCM.fst Hacl.AEAD.AES256GCM.fst)
 POLY1305_FSTAR=$(addprefix $(CODE_DIR_HST)/,Hacl.Symmetric.Poly1305.fst)
@@ -55,6 +56,7 @@ POLY_EXTRACTED=FStar_PredicateExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axio
 AES_EXTRACTED=Crypto_AES.ml
 
 CHACHA_EXTRACTED_HST=Hacl_Symmetric_Chacha20.ml
+SALSA_EXTRACTED_HST=Hacl_Symmetric_Salsa20.ml
 AES_EXTRACTED_HST=Hacl_Symmetric_AES.ml
 AESGCM_EXTRACTED_HST=Hacl_Symmetric_AES.ml Hacl_Symmetric_GCM.ml Hacl_AEAD_AES256GCM.ml
 POLY1305_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Utils.ml Hacl_Symmetric_Poly1305_Parameters.ml Hacl_Symmetric_Poly1305_Bigint.ml Hacl_Symmetric_Poly1305_Bignum.ml Hacl_Symmetric_Poly1305.ml
@@ -62,6 +64,8 @@ POLY1305_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq
 CHACHA_EXTRACTED_C=Hacl_Symmetric_Chacha20.c
 
 CHACHA_ODIR=chacha20
+SALSA_ODIR=salsa20
+XSALSA_ODIR=xsalsa20
 POLY_ODIR=poly1305
 AES_ODIR=aes
 AESGCM_ODIR=aesgcm
@@ -85,6 +89,18 @@ chacha-compile: chacha-extract
 
 chacha-test: chacha-compile
 	./test_chacha20.exe
+
+salsa-extract: ml-lib
+	mkdir -p $(SALSA_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(SALSA_FSTAR_HST) --odir $(SALSA_ODIR)
+
+salsa-compile: salsa-extract
+	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(SALSA_ODIR) \
+	  $(addprefix $(LIB_DIR_HST)/ml/,$(REALIZED_ML_HST)) \
+	  $(addprefix $(SALSA_ODIR)/,$(SALSA_EXTRACTED_HST)) ml/test_salsa_hst.ml -o test_salsa20.exe
+
+salsa-test: salsa-compile
+	./test_salsa20.exe
 
 # OCaml extracton of POLY1305
 poly-extract: ml-lib
@@ -129,15 +145,35 @@ aes-gcm-test: aes-gcm-compile
 # Cleaning
 clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
-	rm -rf *.c *.h *.out *.cmx *.o *.cmi *~ *.cmo *.exe *.krml $(CHACHA_ODIR) $(POLY_ODIR) $(AES_ODIR) $(AESGCM_ODIR) \
+	rm -rf *.c *.h *.out *.cmx *.o *.cmi *~ *.cmo *.exe *.krml $(CHACHA_ODIR) $(POLY_ODIR) $(AES_ODIR) $(AESGCM_ODIR) $(SALSA_ODIR) \
 		$(addprefix $(LIB_DIR)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
 		$(addprefix $(LIB_DIR_HST)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
 		$(addprefix ml/,*.cmx *.o *.cmi *~ *.cmo) $(CODE_DIR)/*~
 
 # C extraction of CHACHA20
-chacha-kremlin:
-	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) $(CHACHA_FSTAR_HST) c/test_chacha.c
-	./a.out
+chacha-kremlin: $(CODE_DIR_HST)/Hacl.Symmetric.Chacha20.fst
+	mkdir -p $(CHACHA_ODIR)
+	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) \
+		-I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test \
+		$(KREMLIN_DIR)/test/testlib.c c/test_chacha.c $^ \
+		-tmpdir $(CHACHA_ODIR) -o test_chacha.exe
+	./test_chacha.exe
+
+salsa20-kremlin: $(CODE_DIR_HST)/Hacl.Symmetric.Salsa20.fst
+	mkdir -p $(SALSA_ODIR)
+	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) \
+		-I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test/ \
+		$(KREMLIN_DIR)/test/testlib.c c/test_salsa20.c $^ \
+		-tmpdir $(SALSA_ODIR) -o test_salsa.exe
+	./test_salsa.exe
+
+salsa20-kremlin: $(CODE_DIR_HST)/Hacl.Symmetric.Salsa20.fst
+	mkdir -p $(SALSA_ODIR)
+	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) \
+		-I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test/ \
+		$(KREMLIN_DIR)/test/testlib.c c/test_salsa20.c $^ \
+		-tmpdir $(SALSA_ODIR) -o test_salsa.exe
+	./test_salsa.exe
 
 poly-kremlin:
 	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) -I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test/ $(POLY1305_FSTAR) $(KREMLIN_DIR)/test/testlib.c c/test_poly.c
