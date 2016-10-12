@@ -29,7 +29,7 @@ val crypto_secretbox_detached:
     (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
 let crypto_secretbox_detached c mac m mlen n k =
   let mlen = Int.Cast.uint64_to_uint32 mlen in
-  Hacl.Symmetric.Chacha20.chacha20_encrypt c k (Hacl.Cast.uint32_to_sint32 1ul) n m mlen;
+  Hacl.Symmetric.Chacha20.xsalsa20_encrypt c k n m mlen;
   Hacl.Symmetric.Poly1305.poly1305_mac mac c mlen k;
   0ul
 
@@ -53,7 +53,7 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let verify = cmp_bytes mac tmp_mac 16ul in
   let z = 
     if U8 (verify =^ 0uy) then (
-      Hacl.Symmetric.Chacha20.chacha20_encrypt m k (Hacl.Cast.uint32_to_sint32 1ul) n c clen;
+      Hacl.Symmetric.XSalsa20.xsalsa20_encrypt m k n c clen;
       0x0ul
     )
     else 0xfffffffful in

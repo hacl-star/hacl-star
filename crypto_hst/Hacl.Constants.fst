@@ -10,12 +10,12 @@ type h8  = Hacl.UInt8.t
 type uint8_p = FStar.Buffer.buffer h8
 
 (* Size constants (for specifications) *)
-let crypto_box_NONCEBYTES     = 4
+let crypto_box_NONCEBYTES     = 24
 let crypto_box_PUBLICKEYBYTES = 32
 let crypto_box_SECRETKEYBYTES = 32
 let crypto_box_MACBYTES       = 16
 
-let crypto_secretbox_NONCEBYTES = 4
+let crypto_secretbox_NONCEBYTES = 24
 let crypto_secretbox_KEYBYTES   = 32
 let crypto_secretbox_MACBYTES   = 16
 
