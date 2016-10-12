@@ -68,10 +68,14 @@ val crypto_box_detached:
     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
 let crypto_box_detached c mac m mlen n pk sk =
   push_frame();
-  let key = create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
+  let key = create (Hacl.Cast.uint8_to_sint8 0uy) 80ul in
+  let k = sub key 0ul 32ul in
+  let subkey = sub key 32ul 32ul in
+  let hsalsa_n = sub key 64ul 16ul in
   (* Compute shared key *)
-  Hacl.EC.Curve25519.exp key pk sk;
-  let z = crypto_secretbox_detached c mac m mlen n key in
+  Hacl.EC.Curve25519.exp k pk sk;
+  Hacl.Symmetric.XSalsa20.hsalsa_init subkey k hsalsa_n;
+  let z = crypto_secretbox_detached c mac m mlen n subkey in
   pop_frame();
   z
 
@@ -89,9 +93,13 @@ val crypto_box_open_detached:
     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
 let crypto_box_open_detached m c mac mlen n pk sk =
   push_frame();
-  let key = create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
+  let key = create (Hacl.Cast.uint8_to_sint8 0uy) 80ul in
+  let k = sub key 0ul 32ul in
+  let subkey = sub key 32ul 32ul in
+  let hsalsa_n = sub key 64ul 16ul in
   (* Compute shared key *)
-  Hacl.EC.Curve25519.exp key pk sk;
-  let z = crypto_secretbox_open_detached m c mac mlen n key in
+  Hacl.EC.Curve25519.exp k pk sk;
+  Hacl.Symmetric.XSalsa20.hsalsa_init subkey k hsalsa_n;
+  let z = crypto_secretbox_open_detached m c mac mlen n subkey in
   pop_frame();
   z
