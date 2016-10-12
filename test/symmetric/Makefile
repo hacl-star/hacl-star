@@ -145,7 +145,7 @@ aes-gcm-test: aes-gcm-compile
 # Cleaning
 clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
-	rm -rf *.c *.h *.out *.cmx *.o *.cmi *~ *.cmo *.exe *.krml $(CHACHA_ODIR) $(POLY_ODIR) $(AES_ODIR) $(AESGCM_ODIR) $(SALSA_ODIR) \
+	rm -rf *.c *.h *.out *.cmx *.o *.cmi *~ *.cmo *.exe *.krml $(CHACHA_ODIR) $(POLY_ODIR) $(AES_ODIR) $(AESGCM_ODIR) $(SALSA_ODIR) $(XSALSA_ODIR) \
 		$(addprefix $(LIB_DIR)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
 		$(addprefix $(LIB_DIR_HST)/ml/,*.cmx *.o *.cmi *~ *.cmo) \
 		$(addprefix ml/,*.cmx *.o *.cmi *~ *.cmo) $(CODE_DIR)/*~
@@ -167,13 +167,13 @@ salsa20-kremlin: $(CODE_DIR_HST)/Hacl.Symmetric.Salsa20.fst
 		-tmpdir $(SALSA_ODIR) -o test_salsa.exe
 	./test_salsa.exe
 
-salsa20-kremlin: $(CODE_DIR_HST)/Hacl.Symmetric.Salsa20.fst
-	mkdir -p $(SALSA_ODIR)
+xsalsa20-kremlin: $(CODE_DIR_HST)/Hacl.Symmetric.XSalsa20.fst
+	mkdir -p $(XSALSA_ODIR)
 	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) \
 		-I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test/ \
-		$(KREMLIN_DIR)/test/testlib.c c/test_salsa20.c $^ \
-		-tmpdir $(SALSA_ODIR) -o test_salsa.exe
-	./test_salsa.exe
+		$(KREMLIN_DIR)/test/testlib.c c/test_xsalsa20.c $^ \
+		-tmpdir $(XSALSA_ODIR) -o test_xsalsa.exe
+	./test_xsalsa.exe
 
 poly-kremlin:
 	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_LIB) -I $(CODE_DIR_HST) -I $(KREMLIN_DIR)/test/ $(POLY1305_FSTAR) $(KREMLIN_DIR)/test/testlib.c c/test_poly.c

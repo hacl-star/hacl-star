@@ -109,10 +109,14 @@ let h32_of_uint8_p (b:uint8_p{length b >= 4}) =
 	  +%^ sint8_to_sint32 b0 in
   r
 
-val uint8_p_of_uint32_p: output:uint8_p -> m:uint32_p{disjoint output m} -> len:u32{FStar.UInt32.v len <=length output /\ FStar.UInt32.v len<=op_Multiply 4 (length m)} -> STL unit
-  (requires (fun h -> live h output /\ live h m))
-  (ensures (fun h0 _ h1 -> live h0 output /\ live h0 m /\ live h1 output /\ live h1 m
-    /\ modifies_1 output h0 h1 ))
+val uint8_p_of_uint32_p:
+  output:uint8_p ->
+  m:uint32_p{disjoint output m} ->
+  len:u32{FStar.UInt32.v len <=length output /\ FStar.UInt32.v len<=op_Multiply 4 (length m)} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h m))
+    (ensures (fun h0 _ h1 -> live h0 output /\ live h0 m /\ live h1 output /\ live h1 m
+      /\ modifies_1 output h0 h1 ))
 let rec uint8_p_of_uint32_p output m l =
   if U32 (l >^ 0ul) then
     begin
