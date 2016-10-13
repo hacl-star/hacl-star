@@ -25,7 +25,7 @@ KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 
 kremlin:
-	$(MAKE) -C symmetric chacha-kremlin poly-kremlin aead-kremlin
+	$(MAKE) -C symmetric kremlin_chacha20.exe kremlin_salsa20.exe kremlin_xsalsa20.exe kremlin_poly1305.exe kremlin_chachapoly.exe
 	$(MAKE) api-kremlin
 
 lax:
