@@ -2,7 +2,7 @@
 #include "Hacl_Box.h"
 #include <sodium.h>
 
-#define MESSAGE_LEN 4
+#define MESSAGE_LEN 44
 #define secretbox_MACBYTES   16
 #define CIPHERTEXT_LEN (secretbox_MACBYTES + MESSAGE_LEN)
 #define secretbox_NONCEBYTES 24
@@ -12,7 +12,7 @@
 #define box_SECRETKEYBYTES   32
 #define box_NONCEBYTES       24
 
-uint8_t *msg = (uint8_t*) "test";
+uint8_t *msg = (uint8_t*) "testtesttesttesttesttesttesttesttesttesttest";
 
 uint8_t nonce[secretbox_NONCEBYTES] = {
   0x00, 0x01, 0x02, 0x03,
@@ -59,30 +59,20 @@ int main(){
   int i;
   /* Testing the secret box primitives */  
   Hacl_SecretBox_crypto_secretbox_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, key);
-  crypto_secretbox_detached(ciphertext2, mac2, msg, MESSAGE_LEN, nonce, key);
-
   res = crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key);
+
   printf("SecretBox decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
   compare_and_print("Secret box", msg, decrypted, MESSAGE_LEN);
 
   for(i = 0; i < MESSAGE_LEN; i++) decrypted[i] = 0;
   for(i = 0; i < CIPHERTEXT_LEN; i++) ciphertext[i] = 0;
   
-  /* Public key initialization */
-  Hacl_EC_Curve25519_exp(pk , basepoint, key);
-  Hacl_EC_Curve25519_exp(pk2, basepoint, sk);
-  Hacl_EC_Curve25519_exp(test, pk2, key);
-  Hacl_EC_Curve25519_exp(test2, pk, sk);
-  uint8_t empty[16] = {0};
-  Hacl_Symmetric_XSalsa20_hsalsa_init(test, test2, empty);
-  i = crypto_box_beforenm(test2, pk2, key);
-  compare_and_print("Beforenm", test2, test, 32);
-
   /* Testing the box primitives */
-  Hacl_Box_crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk, sk);  
-  res = crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key);
+  i = crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk, sk);  
+  res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key);
   printf("Box decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
   
   compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
+
   return EXIT_SUCCESS;
 }

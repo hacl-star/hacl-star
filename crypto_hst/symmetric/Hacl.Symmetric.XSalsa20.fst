@@ -8,10 +8,11 @@ open FStar.UInt32
 open Hacl.UInt8
 open Hacl.UInt32
 open Hacl.Cast
-(* open Hacl.SBuffer *)
 open FStar.Buffer
 
-#reset-options "--max_fuel 0 --initial_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3timeout 50"
+open Utils
+
+#reset-options "--max_fuel 0 --initial_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 (* Module abbreviations *)
 module HH = FStar.HyperHeap
@@ -42,23 +43,23 @@ let initialize_hsalsa_state state key nonce =
   let k5 = sub key 20ul 4ul in
   let k6 = sub key 24ul 4ul in
   let k7 = sub key 28ul 4ul in
-  let k0 =  (h32_of_uint8_p k0) in
-  let k1 =  (h32_of_uint8_p k1) in
-  let k2 =  (h32_of_uint8_p k2) in
-  let k3 =  (h32_of_uint8_p k3) in
-  let k4 =  (h32_of_uint8_p k4) in
-  let k5 =  (h32_of_uint8_p k5) in
-  let k6 =  (h32_of_uint8_p k6) in
-  let k7 =  (h32_of_uint8_p k7) in
+  let k0 =  (uint32_of_bytes k0) in
+  let k1 =  (uint32_of_bytes k1) in
+  let k2 =  (uint32_of_bytes k2) in
+  let k3 =  (uint32_of_bytes k3) in
+  let k4 =  (uint32_of_bytes k4) in
+  let k5 =  (uint32_of_bytes k5) in
+  let k6 =  (uint32_of_bytes k6) in
+  let k7 =  (uint32_of_bytes k7) in
   (* Nonce part *)
   let n0 = sub nonce 0ul  4ul in
   let n1 = sub nonce 4ul  4ul in
   let n2 = sub nonce 8ul  4ul in
   let n3 = sub nonce 12ul 4ul in
-  let n0 =  (h32_of_uint8_p n0) in
-  let n1 =  (h32_of_uint8_p n1) in
-  let n2 =  (h32_of_uint8_p n2) in
-  let n3 =  (h32_of_uint8_p n3) in
+  let n0 =  (uint32_of_bytes n0) in
+  let n1 =  (uint32_of_bytes n1) in
+  let n2 =  (uint32_of_bytes n2) in
+  let n3 =  (uint32_of_bytes n3) in
   let h0 = HST.get() in
   (* Constant part *)
   state.(0ul) <- (uint32_to_sint32 0x61707865ul);
@@ -78,10 +79,8 @@ let initialize_hsalsa_state state key nonce =
   state.(6ul) <- (n0);
   state.(7ul) <- (n1);
   state.(8ul) <- (n2);
-  state.(9ul) <- (n3);
-  let h1 = HST.get() in
-  assert(modifies_1 state h0 h1);
-  assert(live h1 state)
+  state.(9ul) <- (n3)
+
 
 val hsalsa_init:
   subkey:uint8_p{length subkey = 32} ->
@@ -96,12 +95,13 @@ let hsalsa_init subkey key nonce_16 =
   initialize_hsalsa_state m key nonce_16;
   rounds m;
   (* Subkey *)
-  uint8_p_of_uint32_p (offset subkey  0ul) (offset m  0ul)  4ul;
-  uint8_p_of_uint32_p (offset subkey  4ul) (offset m  5ul)  4ul;
-  uint8_p_of_uint32_p (offset subkey  8ul) (offset m 10ul)  4ul;
-  uint8_p_of_uint32_p (offset subkey 12ul) (offset m 15ul)  4ul;
-  uint8_p_of_uint32_p (offset subkey 16ul) (offset m  6ul) 16ul;
+  bytes_of_uint32s (offset subkey  0ul) (offset m  0ul)  4ul;
+  bytes_of_uint32s (offset subkey  4ul) (offset m  5ul)  4ul;
+  bytes_of_uint32s (offset subkey  8ul) (offset m 10ul)  4ul;
+  bytes_of_uint32s (offset subkey 12ul) (offset m 15ul)  4ul;
+  bytes_of_uint32s (offset subkey 16ul) (offset m  6ul) 16ul;
   pop_frame()
+
 
 val xsalsa20_encrypt:
   ciphertext:uint8_p ->
