@@ -66,7 +66,10 @@ int main(){
 
   for(i = 0; i < MESSAGE_LEN; i++) decrypted[i] = 0;
   for(i = 0; i < CIPHERTEXT_LEN; i++) ciphertext[i] = 0;
-  
+
+  // Creating public/private key couples
+  Hacl_EC_Curve25519_exp(pk , basepoint, key);
+  Hacl_EC_Curve25519_exp(pk2, basepoint, sk);
   /* Testing the box primitives */
   i = crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk, sk);  
   res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key);
