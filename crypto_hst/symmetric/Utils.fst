@@ -31,6 +31,9 @@ let u64 = U64.t
 let s8  = H8.t
 let s32 = H32.t
 let s64 = H64.t
+let h8  = H8.t
+let h32 = H32.t
+let h64 = H64.t
 
 let u8s = B.buffer H8.t
 
@@ -40,6 +43,14 @@ let u8s = B.buffer H8.t
 assume MaxUInt8 : pow2 8 = 256
 assume MaxUInt32: pow2 32 = 4294967296
 assume MaxUInt64: pow2 64 > pow2 32
+
+(* 'Rotate' operators, to inline *)
+let op_Greater_Greater_Greater (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
+  let (m:u32{FStar.UInt32.v m = 32}) = 32ul in
+  (a >>^ s) |^ (a <<^ (U32 (m -^ s)))
+let op_Less_Less_Less (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
+  let (m:u32{FStar.UInt32.v m = 32}) = 32ul in
+  (a <<^ s) |^ (a >>^ (U32 (m -^ s)))
 
 val lemma_euclidian_division: r:nat -> b:nat -> q:pos -> Lemma
   (requires (r < q))
@@ -149,3 +160,20 @@ let rec bytes_of_uint32 output x =
   upd output 1ul b1;
   upd output 2ul b2;
   upd output 3ul b3
+
+val xor_uint8_p_2: output:u8s -> in1:u8s{disjoint in1 output} ->
+  len:u32{FStar.UInt32.v len <= length output /\ FStar.UInt32.v len <= length in1} -> STL unit
+  (requires (fun h -> live h output /\ live h in1))
+  (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
+    /\ modifies_1 output h0 h1 ))
+let rec xor_uint8_p_2 output in1 len =
+  if U32 (len =^ 0ul) then ()
+  else
+    begin
+      let i    = U32 (len -^ 1ul) in
+      let in1i = in1.(i) in
+      let oi   = output.(i) in
+      let oi   = H8 (in1i ^^ oi) in
+      output.(i) <- oi;
+      xor_uint8_p_2 output in1 i
+    end
