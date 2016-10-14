@@ -1,42 +1,37 @@
-# FStar variables
-FSTAR_HOME?=../../../FStar
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_DEFAULT_ARGS) # from the included Makefile
+all:
+	@echo
+	@echo "############## LAX TYPECHEKING #############"
+	@echo
+	$(MAKE) lax
+	@echo
+	@echo "############## FULL TYPECHEKING #############"
+	@echo
+	$(MAKE) ver
 
-OPTIONS_VER=
+FSTAR_HOME?=../../FStar
+KREMLIN_HOME?=../../kremlin
+HACL_HOME?=../..
+include $(HACL_HOME)/lib/hyperstack/Makefile.include
 
-LIB_DIR=../../lib/st/
-TEST_DIR=../../test/ec
+INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_SYMMETRIC))
 
-LIB_FILES=$(addprefix $(LIB_DIR), axioms.fst intlib.fst IntLibLemmas.fst sint.fst sbuffer.fst SInt.UInt8.fst SInt.UInt32.fst SInt.UInt63.fst SInt.UInt64.fst SInt.Cast.fst SBytes.fst)
+# Sufficient modules to extract/lax-typecheck all others modules
+MAIN_MODULES=Hacl.Symmetric.XSalsa20 \
+	Hacl.AEAD.Chacha20Poly1305 \
+	Hacl.AEAD.AES256GCM \
 
-.PHONY: lib-ver chacha-ver chacha-ml poly-ver poly-ml
+# All the directory modules (for efficient verification)
+POLY1305_MODULES=$(addprefix Hacl.Symmetric.Poly1305., Parameters Bigint Bignum) \
+	Hacl.Symmetric.Poly1305
+COMMON_MODULES=Utils
+CHACHA20_MODULES=Hacl.Symmetric.Chacha20
+SALSA20_MODULES=Hacl.Symmetric.Salsa20
+XSALSA20_MODULES=Hacl.Symmetric.XSalsa20
+MODULES=$(COMMON_MODULES) $(CHACHA20_MODULES) $(SALSA20_MODULES) $(XSALSA20_MODULES) \
+	$(POLY1305_MODULES)
 
-all: lib-ver chacha-ver poly-ver
+lax: $(addsuffix .fst-lax, $(MAIN_MODULES))
+ver: $(addsuffix .fst-ver, $(MODULES))
 
-# Verification target for the low-level libraries of F* in universes
-lib-ver:
-	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES)
-
-# Verification target for CHACHA20
-chacha-ver: 
-	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES) chacha.fst
-
-# Verification target for POLY1305
-poly-ver:
-	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES) parameters.fst bigint.fst bignum.fst poly.fst
-
-# AES targets
-aes-ver:
-	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES) Crypto.AES.fst --lax
-
-# AEAD targets
-aead-ver:
-	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES) chacha.fst parameters.fst bigint.fst bignum.fst poly.fst --lax AEAD.ChaCha20_Poly1305.fst
-
-# Cleaning
 clean:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
-	@rm -f $(addprefix ml/, *.cmx *.o *.cmi *~)
-	@rm -rf $(CHACHA_ODIR) $(POLY_ODIR) $(CHACHA_ODIR)_ml $(POLY_ODIR)_ml \
-		$(BIGNUM_ODIR) $(CURVE_ODIR) $(AES_ODIR) *~ *.exe
+	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(HACL_FILES)

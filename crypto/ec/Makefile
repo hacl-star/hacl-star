@@ -1,27 +1,33 @@
-# FStar variables
-FSTAR_HOME?=../../../FStar
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_DEFAULT_ARGS) # from the included Makefile
+all:
+	@echo
+	@echo "############## LAX TYPECHEKING #############"
+	@echo
+	$(MAKE) lax
+	@echo
+	@echo "############## FULL TYPECHEKING #############"
+	@echo
+	$(MAKE) ver
 
-OPTIONS_VER=
+FSTAR_HOME?=../../FStar
+KREMLIN_HOME?=../../kremlin
+HACL_HOME?=../..
+include $(HACL_HOME)/lib/hyperstack/Makefile.include
 
-LIB_DIR=../../lib/st
-LIB_FILES=$(addprefix $(LIB_DIR)/, axioms.fst intlib.fst IntLibLemmas.fst sint.fst sbuffer.fst SInt.UInt8.fst SInt.UInt32.fst SInt.UInt63.fst SInt.UInt64.fst SInt.Cast.fst SBytes.fst)
+INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_SYMMETRIC))
 
-.PHONY: lib-ver
+# Sufficient modules to extract/lax-typecheck all others modules
+MAIN_MODULES=Hacl.EC.Curve25519
 
-all: lib-ver curve-lax
+# All the directory modules (for efficient verification)
+CURVE25519_MODULES=$(addprefix Hacl.EC.Curve25519., Parameters Bigint Bignum.Fsum Bignum.FsumWide \
+		Bignum.Fdifference Bignum.Fscalar Bignum.Fproduct Bignum.Modulo Bignum \
+		Crecip PPoint AddAndDouble Ladder) \
+	Hacl.EC.Curve25519
 
-# Verification target for the low-level libraries of F* in universes
-lib-ver:
-	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES)
+MODULES=$(CURVE25519_MODULES)
 
-# Curve25519 lax typechecking
-curve-lax:
-	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES) Curve.Ladder.fst --lax
+lax: $(addsuffix .fst-lax, $(MAIN_MODULES))
+ver: $(addsuffix .fst-ver, $(MODULES))
 
-# Cleaning
 clean:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
-	@rm -f *~
-
+	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(HACL_FILES)
