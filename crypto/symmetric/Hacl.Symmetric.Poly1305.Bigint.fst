@@ -3,7 +3,7 @@ module Hacl.Symmetric.Poly1305.Bigint
 open FStar.UInt8
 open FStar.UInt128
 open FStar.UInt64
-open FStar.HST
+open FStar.ST
 open FStar.Mul
 open FStar.Ghost
 open Hacl.UInt64

@@ -2,7 +2,7 @@ module Hacl.EC.Curve25519.AddAndDouble
 
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open FStar.Buffer
@@ -58,10 +58,10 @@ let double_and_add_0 pp ppq p p_plus_q q tmp =
   let xprime = get_x p_plus_q in
   let origx      = B.sub tmp 0ul 5ul in
   let origxprime = B.sub tmp 5ul  5ul in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   blit x 0ul origx 0ul nlength;                                // origix = tmp
   blit xprime 0ul origxprime 0ul nlength;                      // origxprime = tmp
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   lemma_helper_0 h0 h1 tmp;
   ()
 
@@ -117,18 +117,18 @@ let double_and_add_1 pp ppq p p_plus_q q tmp =
   let zprime = get_z p_plus_q in
   let origx      = B.sub tmp 0ul 5ul in
   let origxprime = B.sub tmp 5ul  5ul in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   fsum x z;                                                    // x
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   cut (live h1 p /\ live h1 p_plus_q);
   fdifference z origx;                                         // z
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   cut (live h2 p /\ live h2 p_plus_q);
   fsum xprime zprime;                                          // xprime
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   cut (live h3 p /\ live h3 p_plus_q);
   fdifference zprime origxprime;                               // zprime
-  let h4 = HST.get() in
+  let h4 = ST.get() in
   cut (live h4 p /\ live h4 p_plus_q);
   lemma_helper_1 h0 h1 h2 h3 h4 p p_plus_q;
   ()
@@ -177,13 +177,13 @@ let lemma_helper_8 pp ppq p pq q tmp h0 h1 : Lemma
 (*   let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
 (*   let xxxprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
 (*   let zzzprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
-(*   let h0 = HST.get() in *)
+(*   let h0 = ST.get() in *)
 (*   fmul xxprime xprime z;                                       // xxprime = tmp *)
 (*   fmul zzprime x zprime;                                       // zzprime = tmp *)
-(*   let h1 = HST.get() in cut(modifies_1 tmp h0 h1); *)
+(*   let h1 = ST.get() in cut(modifies_1 tmp h0 h1); *)
 (*   blit xxprime 0ul origxprime 0ul nlength;                     // origxprime = tmp *)
 (*   fsum xxprime zzprime;                                        // xxprime = tmp *)
-(*   let h2 = HST.get() in cut(modifies_1 tmp h1 h2); *)
+(*   let h2 = ST.get() in cut(modifies_1 tmp h1 h2); *)
 (*   cut(modifies_1 tmp h0 h2); *)
 (*   lemma_helper_0 h0 h2 tmp; admit() *)
 (*   () *)
@@ -215,13 +215,13 @@ let lemma_helper_8 pp ppq p pq q tmp h0 h1 : Lemma
 (*   let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
 (*   let xxxprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
 (*   let zzzprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in *)
-(*   let h2 = HST.get() in *)
+(*   let h2 = ST.get() in *)
 (*   fdifference zzprime origxprime;                              // zzprime = tmp *)
 (*   fsquare xxxprime xxprime;                                    // xxxprime = tmp *)
-(*   let h3 = HST.get() in cut(modifies_1 tmp h2 h3); *)
+(*   let h3 = ST.get() in cut(modifies_1 tmp h2 h3); *)
 (*   fsquare zzzprime zzprime;                                    // zzzprime = tmp *)
 (*   fmul zzprime zzzprime qmqp;                                  // zzprime = tmp *)
-(*   let h4 = HST.get() in cut(modifies_1 tmp h3 h4); *)
+(*   let h4 = ST.get() in cut(modifies_1 tmp h3 h4); *)
 (*   cut(modifies_1 tmp h2 h4); *)
 (*   lemma_helper_0 h0 h4 tmp; *)
 (*   () *)
@@ -254,19 +254,19 @@ let double_and_add_2 pp ppq p pq q tmp =
   let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in
   let xxxprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in
   let zzzprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   fmul xxprime xprime z;                                       // xxprime = tmp
   fmul zzprime x zprime;                                       // zzprime = tmp
-  let h1 = HST.get() in cut(modifies_1 tmp h0 h1 /\ equal_domains h0 h1);
+  let h1 = ST.get() in cut(modifies_1 tmp h0 h1 /\ equal_domains h0 h1);
   blit xxprime 0ul origxprime 0ul nlength;                     // origxprime = tmp
   fsum xxprime zzprime;                                        // xxprime = tmp
-  let h2 = HST.get() in cut(modifies_1 tmp h1 h2 /\ equal_domains h1 h2);
+  let h2 = ST.get() in cut(modifies_1 tmp h1 h2 /\ equal_domains h1 h2);
   fdifference zzprime origxprime;                              // zzprime = tmp
   fsquare xxxprime xxprime;                                    // xxxprime = tmp
-  let h3 = HST.get() in cut(modifies_1 tmp h2 h3 /\ equal_domains h2 h3);
+  let h3 = ST.get() in cut(modifies_1 tmp h2 h3 /\ equal_domains h2 h3);
   fsquare zzzprime zzprime;                                    // zzzprime = tmp
   fmul zzprime zzzprime qmqp;                                  // zzprime = tmp
-  let h4 = HST.get() in cut(modifies_1 tmp h3 h4 /\ equal_domains h3 h4);
+  let h4 = ST.get() in cut(modifies_1 tmp h3 h4 /\ equal_domains h3 h4);
   cut(modifies_1 tmp h0 h4);
   lemma_helper_0 h0 h4 tmp;
   lemma_helper_8 pp ppq p pq q tmp h0 h4
@@ -293,14 +293,14 @@ let double_and_add_3 pp two_p_plus_q p pq q tmp =
   let open FStar.UInt32 in
   let nl = nlength in
   let nl2 = U32 (2ul *^ nlength -^ 1ul) in
-  let h = HST.get() in
+  let h = ST.get() in
   let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in
   let xxxprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   blit xxxprime 0ul (get_x two_p_plus_q) 0ul nlength;          // ppq_x
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   blit zzprime 0ul (get_z two_p_plus_q) 0ul nlength;           // ppq_z
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   lemma_helper_0 h0 h1 (get_x two_p_plus_q);
   lemma_helper_0 h1 h2 (get_z two_p_plus_q);
   lemma_helper_2 (frame_of two_p_plus_q) h0 h1 (arefs (only (get_x two_p_plus_q))) (refs two_p_plus_q);
@@ -327,12 +327,12 @@ let double_and_add_4 pp ppq p pq q tmp =
   let nl2 = U32 (2ul *^ nlength -^ 1ul) in
   let x = get_x p in
   let z = get_z p in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let xx         = B.sub tmp (nl +^ nl +^ nl2) nl2 in
   let zz         = B.sub tmp (nl +^ nl +^ nl2 +^ nl2) nl2 in
   fsquare xx x;
   fsquare zz z;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   lemma_helper_0 h0 h1 tmp;
   ()
 
@@ -356,13 +356,13 @@ let double_and_add_5 pp ppq p pq q tmp =
   let zzz        = B.sub tmp (nl +^ nl) nl2 in
   let xx         = B.sub tmp (nl +^ nl +^ nl2) nl2 in
   let zz         = B.sub tmp (nl +^ nl +^ nl2 +^ nl2) nl2 in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   fdifference zz xx;
   Hacl.EC.Curve25519.Bignum.erase zzz nlength (U32 (nlength -^ 1ul)) 0ul;
-  let h1 = HST.get() in assert(modifies_1 tmp h0 h1);
+  let h1 = ST.get() in assert(modifies_1 tmp h0 h1);
   fscalar zzz zz (Hacl.Cast.uint64_to_sint64 a24);
   fsum zzz xx;
-  let h2 = HST.get() in assert(modifies_1 tmp h1 h2);
+  let h2 = ST.get() in assert(modifies_1 tmp h1 h2);
   cut(modifies_1 tmp h0 h2);
   lemma_helper_0 h0 h2 tmp;
   ()
@@ -434,32 +434,32 @@ let double_and_add_ pp ppq p pq q tmp =
   let zzz        = B.sub tmp (nl +^ nl) nl2 in
   let xx         = B.sub tmp (nl +^ nl +^ nl2) nl2 in
   let zz         = B.sub tmp (nl +^ nl +^ nl2 +^ nl2) nl2 in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   double_and_add_0 pp ppq p pq q tmp;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   lemma_helper_z (frameOf tmp) (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1;
   double_and_add_1 pp ppq p pq q tmp;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   lemma_helper_y (frame_of p) (refs p ++ refs pq) (refs pp ++ refs ppq ++ refs p ++ refs pq) h1 h2;
   double_and_add_2 pp ppq p pq q tmp;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   lemma_helper_z (frameOf tmp) (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h2 h3;
   double_and_add_3 pp ppq p pq q tmp;
-  let h4 = HST.get() in
+  let h4 = ST.get() in
   lemma_helper_y (frame_of ppq) (refs ppq) (refs pp ++ refs ppq ++ refs p ++ refs pq) h3 h4;
   double_and_add_4 pp ppq p pq q tmp;
-  let h5 = HST.get() in
+  let h5 = ST.get() in
   lemma_helper_z (frameOf tmp) (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h4 h5;
   fmul (get_x pp) xx zz;
-  let h6 = HST.get() in
+  let h6 = ST.get() in
   lemma_helper_0 h5 h6 (get_x pp);
   lemma_helper_w pp ppq p pq;
   lemma_helper_y (frame_of p) (arefs (only (get_x pp))) (refs pp ++ refs ppq ++ refs p ++ refs pq) h5 h6;
   double_and_add_5 pp ppq p pq q tmp;
-  let h7 = HST.get() in
+  let h7 = ST.get() in
   lemma_helper_z (frameOf tmp) (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h6 h7;
   fmul (get_z pp) zz zzz;
-  let h8 = HST.get() in
+  let h8 = ST.get() in
   lemma_helper_0 h7 h8 (get_z pp);
   lemma_helper_y (frame_of p) (arefs (only (get_z pp))) (refs pp ++ refs ppq ++ refs p ++ refs pq) h7 h8;
   lemma_helper_x (frame_of p) h0 h1 h2 h3 h4 h5 h6 h7 h8;
@@ -509,9 +509,9 @@ val double_and_add:
 (* //	       (x1 ^* (((x3 ^- z3) ^* (x2^+z2)) ^- ((x3 ^+ z3) ^* (x2 ^- z2))) ^^ 2) *)
 (* 	)) *)
 let double_and_add two_p two_p_plus_q p p_plus_q q =
-  let hinit = HST.get() in
+  let hinit = ST.get() in
   push_frame();
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   (* *)
   let qmqp = get_x q in
   let x = get_x p in
@@ -525,13 +525,13 @@ let double_and_add two_p two_p_plus_q p p_plus_q q =
   let nl = nlength in
   let nl2 = U32 (2ul *^ nlength -^ 1ul) in
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) (nl +^ nl +^ nl2 +^ nl2 +^ nl2  +^ nl2  +^ nl2  +^ nl2  +^ nl2) in
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   lemma_reveal_modifies_0 h0 h1;
 
   double_and_add_ two_p two_p_plus_q p p_plus_q q tmp;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
 
   pop_frame();
-  let hfin = HST.get() in
+  let hfin = ST.get() in
   lemma_helper_7 hinit h0 h1 h2 hfin (frame_of p);
   ()

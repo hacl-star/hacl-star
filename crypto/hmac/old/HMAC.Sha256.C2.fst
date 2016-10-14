@@ -3,7 +3,7 @@ module HMAC.Sha256
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Buffer
 open FStar.UInt32
 open Hacl.Cast
@@ -54,7 +54,7 @@ val xor_bytes: output:bytes -> in1:bytes -> in2:bytes{disjoint in1 in2 /\ disjoi
     (* /\ (forall (i:nat). i < v len ==> get h1 output i = (UInt8.logxor (get h0 in1 i) (get h0 in2 i))) *)
    ))
 let rec xor_bytes output in1 in2 len =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if len =^ 0ul then ()
   else
     begin
@@ -63,7 +63,7 @@ let rec xor_bytes output in1 in2 len =
       let in2i = index in2 i in
       let oi = Hacl.UInt8.logxor in1i in2i in
       upd output i oi;
-      let h1 = HST.get() in
+      let h1 = ST.get() in
       no_upd_lemma_1 h0 h1 output in1;
       no_upd_lemma_1 h0 h1 output in2;
       xor_bytes output in1 in2 i
@@ -108,11 +108,11 @@ val hmac_sha256 : (mac     :bytes { length mac = v hl }) ->
                         (ensures  (fun h0 r h1 -> live h1 mac /\ live h1 data /\ live h1 key /\ modifies_1 mac h0 h1))
 
 let hmac_sha256 mac key keylen data datalen =
-  let hinit = HST.get() in
+  let hinit = ST.get() in
   
   (* Push a new frame *)
   push_frame();
-    let h0 = HST.get() in
+    let h0 = ST.get() in
 
   (* Define ipad and opad *)
   let ipad = create (uint8_to_sint8 0x36uy) bl in
@@ -120,13 +120,13 @@ let hmac_sha256 mac key keylen data datalen =
 
   (* Create the wrapped key location *)
   let okey = create (uint8_to_sint8 0uy) bl in
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     assert(modifies_0 h0 h1);
     no_upd_lemma_0 h0 h1 key;
 
   (* Step 1: make sure the key has the proper length *)
   wrap_key okey key keylen;
-    let h2 = HST.get() in
+    let h2 = ST.get() in
     lemma_aux h0 h1 h2 okey;
     assert(modifies_0 h0 h2);
     no_upd_lemma_0 h0 h2 mac;
@@ -135,7 +135,7 @@ let hmac_sha256 mac key keylen data datalen =
 
   (* Step 2: xor "result of step 1" with ipad *)
   let s2 = create (uint8_to_sint8 0uy) bl in
-    let h3 = HST.get () in
+    let h3 = ST.get () in
     assert(modifies_0 h2 h3);
     assert(modifies_0 h0 h3);
     no_upd_lemma_0 h2 h3 okey;
@@ -145,7 +145,7 @@ let hmac_sha256 mac key keylen data datalen =
     no_upd_lemma_0 h2 h3 data;
 
   xor_bytes s2 okey ipad bl;
-    let h4 = HST.get () in
+    let h4 = ST.get () in
     lemma_aux h2 h3 h4 s2;
     no_upd_lemma_1 h3 h4 s2 okey;
     no_upd_lemma_1 h3 h4 s2 ipad;
@@ -156,7 +156,7 @@ let hmac_sha256 mac key keylen data datalen =
 
   (* Step 3: append data to "result of step 2" *)
   let s3 = create (uint8_to_sint8 0uy) (bl @+ datalen) in
-    let h5 = HST.get () in
+    let h5 = ST.get () in
     no_upd_lemma_0 h4 h5 s2;
     no_upd_lemma_0 h4 h5 mac;
     no_upd_lemma_0 h4 h5 data;
@@ -166,7 +166,7 @@ let hmac_sha256 mac key keylen data datalen =
     assert (length s3 >= (v bl) + (v datalen));
     
   blit s2 0ul s3 0ul bl;
-    let h6 = HST.get () in
+    let h6 = ST.get () in
     assert(modifies_1 s3 h5 h6);
     lemma_aux h0 h5 h6 s3;
     no_upd_lemma_1 h5 h6 s3 s2;
@@ -181,7 +181,7 @@ let hmac_sha256 mac key keylen data datalen =
     assert(length s3 >= (v bl) + (v datalen));
     
   blit data 0ul s3 bl datalen;
-    let h7 = HST.get () in
+    let h7 = ST.get () in
     assert(modifies_1 s3 h6 h7);
     lemma_aux h0 h6 h7 s3;
     assert(modifies_0 h0 h7);
@@ -191,7 +191,7 @@ let hmac_sha256 mac key keylen data datalen =
     
   (* Step 4: apply H to "result of step 3" *)
   let s4 = create (uint8_to_sint8 0uy) hl in
-    let h8 = HST.get () in
+    let h8 = ST.get () in
     assert(modifies_0 h7 h8);
     assert(modifies_0 h0 h8);
     no_upd_lemma_0 h0 h8 mac;
@@ -199,14 +199,14 @@ let hmac_sha256 mac key keylen data datalen =
     no_upd_lemma_0 h0 h8 key;
   
   hash s4 s3 (bl @+ datalen);
-    let h9 = HST.get () in
+    let h9 = ST.get () in
     assert(modifies_1 s4 h8 h9);
     lemma_aux h0 h8 h9 s4;
     assert(modifies_0 h0 h9);
     
   (* Step 5: xor "result of step 1" with opad *)
   let s5 = create (uint8_to_sint8 0uy) bl in
-    let h10 = HST.get () in
+    let h10 = ST.get () in
     assert(modifies_0 h9 h10);
     assert(modifies_0 h0 h10);
     no_upd_lemma_0 h0 h10 mac;
@@ -214,7 +214,7 @@ let hmac_sha256 mac key keylen data datalen =
     no_upd_lemma_0 h0 h10 key;
 
   xor_bytes s5 okey opad bl;
-    let h11 = HST.get() in
+    let h11 = ST.get() in
     lemma_aux h9 h10 h11 s5;
     no_upd_lemma_1 h10 h11 s5 okey;
     no_upd_lemma_1 h10 h11 s5 opad;
@@ -225,7 +225,7 @@ let hmac_sha256 mac key keylen data datalen =
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   let s6 = create (uint8_to_sint8 0uy) (hl @+ bl) in
-    let h12 = HST.get () in
+    let h12 = ST.get () in
     assert(modifies_0 h11 h12);
     assert(modifies_0 h0 h12);
     no_upd_lemma_0 h0 h12 mac;
@@ -233,7 +233,7 @@ let hmac_sha256 mac key keylen data datalen =
     no_upd_lemma_0 h0 h12 key;
 
   blit s5 0ul s6 0ul bl;
-    let h13 = HST.get () in
+    let h13 = ST.get () in
     assert(modifies_1 s6 h12 h13);
     lemma_aux h0 h12 h13 s6;
     assert(modifies_0 h0 h13);
@@ -242,7 +242,7 @@ let hmac_sha256 mac key keylen data datalen =
     no_upd_lemma_0 h0 h13 key;
 
   blit s4 0ul s6 bl hl;
-    let h14 = HST.get () in
+    let h14 = ST.get () in
     assert(modifies_1 s6 h13 h14);
     lemma_aux h0 h13 h14 s6;
     assert(modifies_0 h0 h14);
@@ -252,12 +252,12 @@ let hmac_sha256 mac key keylen data datalen =
 
   (* Step 7: apply H to "result of step 6" *)
   hash mac s6 (hl @+ bl);
-    let h15 = HST.get () in
+    let h15 = ST.get () in
     assert(modifies_1 mac h14 h15);
 
   (* Pop frame *)
   pop_frame();
-    let hfin = HST.get () in
+    let hfin = ST.get () in
     assert(modifies_1 mac hinit hfin);
     assume (equal_domains hinit hfin);
     assert(live hfin mac)

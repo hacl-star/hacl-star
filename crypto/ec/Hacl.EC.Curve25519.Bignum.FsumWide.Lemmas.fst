@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Bignum.FsumWide.Lemmas
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt128
@@ -113,7 +113,7 @@ val fsum_index: a:bigint_wide -> a_idx:u32 -> b:bigint_wide{disjoint a b} -> b_i
       /\ (forall (i:nat). ((i<U32.v ctr \/ i >= U32.v len) /\ i<length a-U32.v a_idx) ==>
 	  (get h1 a (i+U32.v a_idx) == get h0 a (i+U32.v a_idx)))  ))
 let rec fsum_index a a_idx b b_idx len ctr =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32.eq len ctr then ()
   else begin
     let i = ctr in
@@ -125,7 +125,7 @@ let rec fsum_index a a_idx b b_idx len ctr =
     cut(b2t(v (get h0 a (U32.v i+U32.v a_idx)) + v (get h0 b (U32.v i+U32.v b_idx)) < pow2 platform_wide));
     let z = ai +^ bi in
     upd a (a_idx+|i) z; 
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     (* upd_lemma h0 h1 a (i+|a_idx) z;  *)
     (* no_upd_lemma h0 h1 b (only a);  *)
     cut(True /\ live h1 a); 
@@ -135,7 +135,7 @@ let rec fsum_index a a_idx b b_idx len ctr =
     (*   (v (get h1 a (i+a_idx)) + v (get h1 b (i+b_idx)) < pow2 platform_wide)); *)
     (* FsumLemmas.auxiliary_lemma_0 len ctr; *)
     fsum_index a a_idx b b_idx len (ctr+|1ul); 
-    let h2 = HST.get() in
+    let h2 = ST.get() in
     (* no_upd_lemma h1 h2 b (only a);       *)
     (* cut (forall (i:nat). *)
     (*   (i<>ctr+a_idx /\ i < length a) ==> get h0 a (i) == get h1 a (i));  *)
@@ -284,10 +284,10 @@ val fsum':
 let fsum' a b =
   //@@
   admitP(True /\ pow2 platform_size < pow2 platform_wide);
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   auxiliary_lemma_0 h0 a h0 b;
   fsum_index a 0ul b 0ul nlength 0ul;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   (* no_upd_lemma h0 h1 b (only a); *)
   auxiliary_lemma_1 h0 h1 b;
   auxiliary_lemma_3 h0 h1 a b;

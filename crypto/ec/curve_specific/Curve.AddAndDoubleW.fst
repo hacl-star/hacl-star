@@ -1,7 +1,7 @@
 module Curve.AddAndDouble
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.SBuffer

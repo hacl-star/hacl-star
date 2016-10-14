@@ -1,7 +1,7 @@
 module Hacl.Box
 
 open FStar.Buffer
-open FStar.HST
+open FStar.ST
 
 open Hacl.Constants
 open Hacl.SecretBox

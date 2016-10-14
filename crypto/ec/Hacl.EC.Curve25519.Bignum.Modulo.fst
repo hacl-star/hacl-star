@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Bignum.Modulo
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt64
@@ -43,7 +43,7 @@ val freduce_degree': b:bigint_wide -> ctr:u32{U32.v ctr < norm_length - 1} -> St
     ))
 let rec freduce_degree' b ctr' =
   (* admit(); // OK *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let open Hacl.UInt128 in
   if U32 (ctr' =^ 0ul) then begin
     let b5ctr = index b (nlength) in
@@ -51,7 +51,7 @@ let rec freduce_degree' b ctr' =
     let b5ctr = times_19 b5ctr in
     let bctr = bctr +%^ b5ctr in
     b.(0ul) <- bctr(* ; *)
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     (* upd_lemma h0 h1 b 0ul bctr; *)
     (* freduce_degree_lemma h0 h1 b 0; *)
     (* cut (True /\ eval_wide h0 b (norm_length+1+0) % reveal prime = eval_wide h1 b (norm_length+0) % reveal prime); *)
@@ -64,13 +64,13 @@ let rec freduce_degree' b ctr' =
     let b5ctr = times_19 b5ctr in
     let bctr = bctr +%^ b5ctr in
     b.(ctr) <- bctr;
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     (* upd_lemma h0 h1 b ctr bctr; *)
     (* freduce_degree_lemma h0 h1 b (w ctr);  *)
     (* cut (True /\ eval_wide h0 b (norm_length+1+w ctr) % reveal prime = eval_wide h1 b (norm_length+w ctr) % reveal prime); *)
     (* cut(reducible' h1 b (w ctr-1));  *)
     freduce_degree' b (U32 (ctr -^ 1ul))(* ; *)
-    (* let h2 = HST.get() in  *)
+    (* let h2 = ST.get() in  *)
     (* cut (forall (i:nat). {:pattern (v (get h1 b i))} (i > w ctr /\ i < 2*norm_length-1) ==> *)
     (* 	   v (get h1 b i) = v (get h0 b i));  *)
     (* cut(untouched' h0 h2 b (w ctr)); *)
@@ -90,10 +90,10 @@ val freduce_degree: b:bigint_wide -> Stack unit
     (* /\ eval_wide h1 b norm_length % reveal prime = eval_wide h0 b (2*norm_length-1) % reveal prime *)
   ))
 let freduce_degree b =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   (* aux_lemma_4 h0 b;  *)
   freduce_degree' b (U32 (nlength -^2ul))
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* aux_lemma_5 h0 h1 b *)
 
 val mod2_51: a:s128 -> Tot (b:s128(* {v b = v a % pow2 51} *))
@@ -120,7 +120,7 @@ val carry:
     ))
 let rec carry b i =
   (* admit(); // OK *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let open Hacl.UInt128 in
   if U32 (i =^ nlength) then ()
   else begin
@@ -128,7 +128,7 @@ let rec carry b i =
     let ri = mod2_51 bi in
     (* assert(v ri < pow2 (templ (w i)));  *)
     b.(i) <- ri;
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     (* upd_lemma h0 h1 b i ri;  *)
     let c = bi >>^ 51ul in
     // In the spec of >>
@@ -139,7 +139,7 @@ let rec carry b i =
     (* auxiliary_lemma_1 bip1 c;  *)
     (* let z = bip1 + c in *)
     b.(U32 (i +^1ul)) <- (bip1 +%^ c)(* ; *)
-    (* let h2 = HST.get() in *)
+    (* let h2 = ST.get() in *)
     (* upd_lemma h1 h2 b (i+|1ul) z;  *)
     (* eval_carry_lemma h0 b h2 b (w i);  *)
     (* cut (forall (j:nat). (j > w i+1 /\ j <= norm_length) ==> v (get h2 b j) < pow2 (platform_wide - 1)); *)
@@ -160,13 +160,13 @@ val carry_top_to_0: b:bigint_wide -> Stack unit
     ))
 let carry_top_to_0 b =
   (* admit(); // OK *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let open Hacl.UInt128 in
   let b0 = b.(0ul) in
   let btop = b.(nlength) in
   let btop_19 = times_19 btop in
   b.(0ul) <- (b0 +%^ btop_19)(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* freduce_degree_lemma h0 h1 b 0 *)
 
 val carry2:
@@ -181,7 +181,7 @@ val carry2:
   ))
 let rec carry2 b i =
   (* admit(); // OK *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let open Hacl.UInt128 in
   if U32 (i =^ nlength) then ()
   else begin
@@ -189,7 +189,7 @@ let rec carry2 b i =
     let ri = mod2_51 bi in
     (* assert(v ri < pow2 (templ (w i))); *)
     b.(i) <- ri;
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     (* upd_lemma h0 h1 b i ri;  *)
     let bip1 = b.(U32 (i +^ 1ul)) in
     let c = bi >>^ 51ul in
@@ -207,7 +207,7 @@ let rec carry2 b i =
     (* cut (v c > 0 ==> v (get h0 b (w i)) / (pow2 51) > 0 ==> v (get h0 b (w i)) >= pow2 51);  *)
     (* cut (v z >= pow2 51 ==> v (get h1 b (w i)) < pow2 32);  *)
     b.(U32 (i +^ 1ul)) <- (bip1 +%^ c);
-    (* let h2 = HST.get() in *)
+    (* let h2 = ST.get() in *)
     (* (\* upd_lemma h1 h2 b (i+|1ul) z;  *\) *)
     (* cut (v z >= pow2 51 ==> v c = 1 /\ True);  *)
     (* eval_carry_lemma h0 b h2 b (w i); *)
@@ -225,7 +225,7 @@ val last_carry: b:bigint_wide -> Stack unit
   ))
 let last_carry b =
   (* admit(); // OK *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let open Hacl.UInt128 in
   let b0 = b.(0ul) in
   let btop = b.(nlength) in
@@ -241,16 +241,16 @@ let last_carry b =
   (* let bi = (b0 |+ btop_19) in *)
   (* upd_wide b 0 (b0 |+ btop_19);  *)
   b.(0ul) <- (b0 +%^ btop_19);
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* freduce_degree_lemma h0 h1 b 0;  *)
   b.(nlength) <- (Hacl.Cast.uint64_to_sint128 0uL);
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* eval_eq_lemma h1 h2 b b norm_length;  *)
   (* cut (eval_wide h2 b (norm_length+1) = eval_wide h1 b norm_length /\ True);  *)
   let bi = b.(0ul) in
   let ri = mod2_51 bi in
   b.(0ul) <- ri;
-  (* let h3 = HST.get() in *)
+  (* let h3 = ST.get() in *)
   let c = bi >>^ 51ul in
   (* Math.Lemmas.pow2_exp_1 32 5; *)
   (* cut (v bi < pow2 51 + 19 /\ True);  *)
@@ -264,7 +264,7 @@ let last_carry b =
   (* helper_lemma_33 bip1 c;  *)
   (* let z = bip1 |+ c in *)
   b.(1ul) <- (bip1 +%^ c)(* ; *)
-  (* let h4 = HST.get() in *)
+  (* let h4 = ST.get() in *)
   (* eval_carry_lemma h2 b h4 b 0;  *)
   (* cut (True /\ v (get h4 b 1) < pow2 51); *)
   (* cut (norm_wide h4 b) *)
@@ -279,20 +279,20 @@ val freduce_coefficients:
     (* /\ eval_wide h1 b norm_length % reveal prime = eval_wide h0 b norm_length % reveal prime *)
   ))
 let freduce_coefficients b =
-  (* let h = HST.get() in *)
+  (* let h = ST.get() in *)
   let open Hacl.UInt128 in
   b.(nlength) <- (Hacl.Cast.uint64_to_sint128 0uL);
-  (* let h' = HST.get() in *)
+  (* let h' = ST.get() in *)
   (* eval_eq_lemma h h' b b norm_length; *)
   (* eval_wide_def h' b (norm_length+1); *)
   (* cut (True /\ eval_wide h' b (norm_length+1) = eval_wide h b norm_length); *)
   carry b 0ul;
-  (* let h = HST.get() in *)
+  (* let h = ST.get() in *)
   (* lemma_helper_40 h b; *)
   carry_top_to_0 b;
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   b.(nlength) <- (Hacl.Cast.uint64_to_sint128 0uL);
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   (* eval_eq_lemma h1 h2 b b norm_length; *)
   (* eval_wide_def h2 b (norm_length+1); *)
   let b0 = b.(0ul) in
@@ -301,10 +301,10 @@ let freduce_coefficients b =
   let c0 = b0 >>^ 51ul in
   (* lemma_helper_41 b0;  *)
   (* lemma_helper_42 b1 c0; *)
-  (* let h = HST.get() in *)
+  (* let h = ST.get() in *)
   b.(0ul) <- r0;
   b.(1ul) <- b1 +%^ c0;
-  (* let h' = HST.get() in *)
+  (* let h' = ST.get() in *)
   (* eval_carry_lemma h b h' b 0;  *)
   carry2 b 1ul;
   last_carry b
@@ -324,7 +324,7 @@ val add_big_zero_core: b:bigint -> Stack unit
     (* 			 /\ modifies_1 b h0 h1 *)
     ))
 let add_big_zero_core b =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let two52m38 = (Hacl.Cast.uint64_to_sint64 0xfffffffffffdauL) in // pow2 52 - 38
   let two52m2 =  (Hacl.Cast.uint64_to_sint64 0xffffffffffffeuL) in // pow2 52 - 2
   (* admitP(vv two52m38 = pow2 52 - 38 /\ vv two52m2 = pow2 52 - 2);  *)
@@ -336,35 +336,35 @@ let add_big_zero_core b =
   (* addition_lemma b0 51 two52m38 52; *)
   (* Math.Lemmas.pow2_increases_1 platform_size 53;  *)
   b.(0ul) <- (b0 +%^ two52m38);
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* upd_lemma h0 h1 b 0ul (S64.add b0 two52m38);  *)
   let b1 = b.(1ul) in
   (* cut (vv b1 = vv (get h0 b 1) /\ vv b1 < pow2 51 /\ vv two52m2 < pow2 52);  *)
   (* addition_lemma b1 51 two52m2 52; *)
   (* Math.Lemmas.pow2_increases_1 platform_size 53;  *)
   b.(1ul) <-(b1 +%^ two52m2);
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* upd_lemma h1 h2 b 1ul (S64.add b1 two52m2);  *)
   let b2 = b.(2ul) in
   (* cut (vv b2 = vv (get h1 b 2) /\ vv (get h1 b 2) = vv (get h0 b 2) /\ vv b2 < pow2 51); *)
   (* addition_lemma b2 51 two52m2 52; *)
   (* Math.Lemmas.pow2_increases_1 platform_size 53;  *)
   b.(2ul) <- (b2 +%^ two52m2);
-  (* let h3 = HST.get() in *)
+  (* let h3 = ST.get() in *)
   (* upd_lemma h2 h3 b 2ul (S64.add b2 two52m2);  *)
   let b3 = index b 3ul in
   (* cut (vv b3 = vv (get h2 b 3) /\ vv (get h2 b 3) = vv (get h1 b 3) /\ vv (get h1 b 3) = vv (get h0 b 3) /\ vv b3 < pow2 51); *)
   (* addition_lemma b3 51 two52m2 52; *)
   (* Math.Lemmas.pow2_increases_1 platform_size 53;  *)
   b.(3ul) <- (b3 +%^ two52m2);
-  (* let h4 = HST.get() in *)
+  (* let h4 = ST.get() in *)
   (* upd_lemma h3 h4 b 3ul (S64.add b3 two52m2);  *)
   let b4 = b.(4ul) in
   (* cut (vv b4 = vv (get h3 b 4) /\ vv (get h3 b 4) = vv (get h2 b 4) /\ vv (get h2 b 4) = vv (get h1 b 4) /\ vv (get h1 b 4) = vv (get h0 b 4) /\ vv b4 < pow2 51); *)
   (* addition_lemma b4 51 two52m2 52; *)
   (* Math.Lemmas.pow2_increases_1 platform_size 53;  *)
   b.(4ul) <- (b4 +%^ two52m2)
-  (* let h5 = HST.get() in  *)
+  (* let h5 = ST.get() in  *)
   (* upd_lemma h4 h5 b 4ul (S64.add b4 two52m2); *)
   (* cut (vv (get h5 b 0) = vv (get h0 b 0) + (pow2 52 - 38) /\ True);  *)
   (* cut (vv (get h5 b 1) = vv (get h0 b 1) + (pow2 52 - 2) /\ True);  *)
@@ -381,9 +381,9 @@ val add_big_zero: b:bigint -> Stack unit
   (requires (fun h -> live h b))
   (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1))
 let add_big_zero b =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   add_big_zero_core b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* add_big_zero_lemma h0 h1 b *)
 
 

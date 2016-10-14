@@ -1,6 +1,6 @@
 module Hacl.Policies
 
-open FStar.HST
+open FStar.ST
 open FStar.Buffer
 
 open Hacl.Types

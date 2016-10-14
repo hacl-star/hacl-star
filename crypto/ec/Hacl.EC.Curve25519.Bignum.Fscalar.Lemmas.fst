@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Bignum.Fscalar.Lemmas
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt64
@@ -142,16 +142,16 @@ val scalar_multiplication_tr: res:bigint_wide -> a:bigint{disjoint res a} -> s:s
        /\ (Seq.equal (sel h0 (a)) (sel h1 (a)))  ))
 let rec scalar_multiplication_tr res a s ctr =
   //admit();
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32.eq ctr nlength then ()
   else begin
      let i = ctr in
      (* FscalarLemmas.lemma_4 norm_length ctr;  *)
      scalar_multiplication_tr_1 res a s ctr; 
-     let h1 = HST.get() in 
+     let h1 = ST.get() in 
      (* no_upd_lemma h0 h1 a (only res); *)
      scalar_multiplication_tr res a s (ctr+|1ul); 
-     let h2 = HST.get() in
+     let h2 = ST.get() in
      scalar_multiplication_tr_2 h0 h1 h2 res a s (w ctr)
   end
 
@@ -189,10 +189,10 @@ val scalar': res:bigint_wide -> a:bigint{disjoint res a} -> s:s64 -> STL unit
        /\ modifies_1 res h0 h1
        /\ eval_wide h1 res norm_length = eval h0 a norm_length * v s ))
 let scalar' res a s =
-  let h0 = HST.get() in  
+  let h0 = ST.get() in  
   auxiliary_lemma_0 h0 a s; 
   scalar_multiplication_tr res a s 0ul; 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   (* no_upd_lemma h0 h1 a (only res); *)
   auxiliary_lemma_1 h0 h1 a (res); 
   theorem_scalar_multiplication h0 h1 a s norm_length res; 

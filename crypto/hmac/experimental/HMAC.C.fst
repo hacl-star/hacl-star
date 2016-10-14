@@ -3,7 +3,7 @@ module HMAC.C
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Buffer
 open FStar.UInt32
 open Hacl.Cast
@@ -73,7 +73,7 @@ val hmac_core' :(memb    :bytes) ->
 let hmac_core' memb mac key keylen data datalen =
 
   (* Define ipad and opad *)
-  (**) let h0 = HST.get() in
+  (**) let h0 = ST.get() in
   let ipad = sub memb 0ul bl in
   let opad = sub memb bl bl in
 
@@ -107,13 +107,13 @@ let hmac_core' memb mac key keylen data datalen =
   blit s5 0ul s6 0ul bl;
   blit s4 0ul s6 bl hl;
 
-  (**) let h1 = HST.get() in
+  (**) let h1 = ST.get() in
   (**) assert(modifies_1 memb h0 h1);
 
   (* Step 7: apply H to "result of step 6" *)
   hash mac s6 (bl @+ hl);
 
-  (**) let h2 = HST.get() in
+  (**) let h2 = ST.get() in
   (**) assert(modifies_2 memb mac h0 h2);
   (**) assert(live h2 memb);
   (**) assert(live h2 mac)

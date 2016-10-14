@@ -1,7 +1,7 @@
 module Curve.Ladder
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.SBuffer
@@ -80,9 +80,9 @@ val small_step_exit:
      ))     
 let small_step_exit pp ppq p pq q n byte scalar =
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   Curve.Point.copy2 pp ppq p pq;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   distinct_lemma q p; distinct_lemma q pq; distinct_lemma q pp; distinct_lemma q ppq;
   (* let s = (erefs pp +*+ erefs ppq +*+ erefs p +*+ erefs pq) in *)
   (* cut(modifies (reveal s) h0 h1); *)
@@ -205,19 +205,19 @@ val small_step_core:
      ))
 let small_step_core pp ppq p pq q n ctr b scalar =
   admit(); // TODO
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   distinct_commutative p pq;
   let bit = nth_bit b ctr in
   let mask = mk_mask bit in
   cut (v mask = pow2 platform_size - 1 \/ v mask = 0); 
   swap_conditional p pq mask; 
-  let h = HST.get() in
+  let h = ST.get() in
   small_step_core_lemma_1 h0 h pp ppq p pq q;
   Curve.AddAndDouble.double_and_add pp ppq p pq q; 
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   swap_conditional pp ppq mask; 
   (* lemma_5 scalar b ctr; *)
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   assert ((live h2 p) /\ (live h2 pq) /\ (onCurve h2 q)); 
   assert (onCurve h1 pp /\ onCurve h1 ppq); 
   (* let set2 = (erefs pp +*+ erefs ppq +*+ erefs p +*+ erefs pq) in *)
@@ -296,10 +296,10 @@ let rec small_step pp ppq p pq q n ctr b scalar =
     ()
   end
   else begin
-    let h0 = HST.get() in
+    let h0 = ST.get() in
     (* lemma_0 ctr 8; *)
     small_step_core pp ppq p pq q n ctr b scalar;
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     let bit = nth_bit b ctr in
     cut (nTimesQ (formula_1 n bit) (pointOf h0 q) h1 pp ppq);
     (* lemma_10 scalar ctr b; *)
@@ -308,13 +308,13 @@ let rec small_step pp ppq p pq q n ctr b scalar =
     cut (w ctr+1 <= 8 /\ True);
     assert (onCurve h1 pp /\ onCurve h1 ppq /\ live h1 p /\ live h1 pq);
     swap_both pp ppq p pq;
-    let h2 = HST.get() in
+    let h2 = ST.get() in
     assert (Math.Curve.equal (pointOf h2 p) (pointOf h1 pp) /\ Math.Curve.equal (pointOf h2 pq) (pointOf h1 ppq));
     small_step_lemma_1 h0 h1 h2 pp ppq p pq q;
     (* formula_lemma n bit;  *)
     assert(nTimesQ (eformula_2 n bit) (pointOf h2 q) h2 p pq);
     small_step pp ppq p pq q (eformula_2 n bit) (ctr+|1ul) b scalar;
-    let h3 = HST.get() in
+    let h3 = ST.get() in
     small_step_lemma_2 h0 h1 h2 h3 pp ppq p pq q
   end
 
@@ -418,7 +418,7 @@ val big_step:
       /\ nTimesQ (hide (valueOfBytes h0 n)) (pointOf h0 q) h1 p pq  ))
 let rec big_step n pp ppq p pq q ctr =
   admit(); // OK modulo
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32.eq blength ctr then assume(reveal (formula_4 h0 n bytes_length) = valueOfBytes h0 n)
   else begin
     assume(bytes_length-1-w ctr>=0 /\ bytes_length-w ctr-1>=0);
@@ -427,10 +427,10 @@ let rec big_step n pp ppq p pq q ctr =
     // Replaces missing euclidian definitions in F*
     admitP(reveal m = reveal m * pow2 0 + (S8.v byte / pow2 (8-0)) /\ True);
     small_step pp ppq p pq q m 0ul byte m;
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     (* big_step_lemma_1 h0 h1 n pp ppq p pq q ctr byte; *)
     big_step n pp ppq p pq q (ctr+|1ul);
-    let h2 = HST.get() in
+    let h2 = ST.get() in
     big_step_lemma_2 h0 h1 h2 n pp ppq p pq q (w ctr) byte
   end
 

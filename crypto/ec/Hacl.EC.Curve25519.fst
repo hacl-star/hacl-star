@@ -1,6 +1,6 @@
 module Hacl.EC.Curve25519
 
-open FStar.HST
+open FStar.ST
 open Hacl.UInt8
 open Hacl.Cast
 (* open Hacl.SBuffer *)
@@ -280,15 +280,15 @@ private val mk_q:
     /\ HS.modifies_one (frame_of q) h0 h1
     /\ HS.modifies_ref (frame_of q) (refs q) h0 h1))
 let mk_q output q_x pk q =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let one  = uint64_to_sint64 1uL in
   let qx     = get_x q in
   let qy     = get_y q in
   let qz     = get_z q in
   expand qx q_x;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   upd qz 0ul one;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   assert(modifies_2 qx qz h0 h2);
   lemma_helper_0 (frame_of q) h0 h2 q;
   ()
@@ -324,9 +324,9 @@ private val exp_2:
   (ensures  (fun h0 _ h1 -> B.live h1 output /\ B.live h1 pk /\ live h1 q
     /\ modifies_1 output h0 h1))
 let exp_2 output q_x scalar basepoint =
-  let hinit = HST.get() in
+  let hinit = ST.get() in
   push_frame();
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let zero = uint64_to_sint64 0uL in
   let one  = uint64_to_sint64 1uL in
   let tmp    = create zero (U32 (4ul *^ nlength)) in
@@ -336,23 +336,23 @@ let exp_2 output q_x scalar basepoint =
   let zrecip = B.sub tmp (U32 (3ul*^nlength)) nlength in
   let res    = PPoint.make resx resy resz in
   (* Ladder *)
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   montgomery_ladder res scalar basepoint;
   (* Get the affine coordinates back *)
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   cut(HS (modifies_one h0.tip h1 h2));
   cut( B.live h2 output);
   crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res);
   fmul resy resx zrecip;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   assert(B.live h3 output);
   cut (modifies_1 tmp h2 h3);
   cut (HS (FStar.Buffer.frameOf tmp = h0.tip));
   Hacl.EC.Curve25519.AddAndDouble.lemma_helper_0 h2 h3 tmp;
   contract output resy;
-  let h4 = HST.get() in
+  let h4 = ST.get() in
   pop_frame();
-  let hfin = HST.get() in
+  let hfin = ST.get() in
   let open FStar.HyperStack in
   lemma_helper_1 hinit h0 h1 h2 h3 h4 hfin output;
   ()
@@ -383,10 +383,10 @@ val exp_1: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoi
   (requires (fun h -> B.live h output /\ B.live h q_x /\ B.live h pk))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ B.live h1 output))
 let exp_1 output q_x scalar =
-  let hinit = HST.get() in
+  let hinit = ST.get() in
   push_frame();
   let open FStar.UInt32 in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   (* Allocate *)
   let zero = uint64_to_sint64 0uL in
   let one  = uint64_to_sint64 1uL in
@@ -395,13 +395,13 @@ let exp_1 output q_x scalar =
   let qy     = B.sub tmp nlength nlength in
   let qz     = B.sub tmp (2ul*^nlength) nlength in
   let q      = PPoint.make qx qy qz in
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   mk_q output q_x scalar q;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   exp_2 output q_x scalar q;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   pop_frame();
-  let hfin = HST.get() in
+  let hfin = ST.get() in
   lemma_helper_2 hinit h0 h1 h2 h3 hfin output;
   ()
 

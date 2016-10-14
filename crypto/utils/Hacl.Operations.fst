@@ -1,7 +1,7 @@
 module Hacl.Operations
 
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Buffer
 open FStar.Buffer.Quantifiers
 open Math.Logic.Axioms

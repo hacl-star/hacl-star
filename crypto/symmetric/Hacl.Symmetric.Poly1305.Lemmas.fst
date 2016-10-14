@@ -2,7 +2,7 @@ module Hacl.Symmetric.Poly1305.Lemmas
 
 open FStar.Mul
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Ghost
 open FStar.Buffer
 open FStar.Math.Lib

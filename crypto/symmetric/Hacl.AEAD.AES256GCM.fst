@@ -3,7 +3,7 @@ module Hacl.AEAD.AES256GCM
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Buffer
 open Hacl.UInt8
 open Hacl.Cast
@@ -26,29 +26,29 @@ private val aes256: key:u8s{length key = 32} ->
       (requires (fun h -> live h key /\ live h input /\ live h out))
       (ensures  (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1))
 let aes256 key input out =
-  let hinit = HST.get() in
+  let hinit = ST.get() in
   push_frame();
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let tmp = create (uint8_to_sint8 0uy) 752ul in
   let w = sub tmp 0ul 240ul in
   let sbox = sub tmp 240ul 256ul in
   let inv_sbox = sub tmp 496ul 256ul in
   assert(~(contains h0 w) /\ ~(contains h0 inv_sbox) /\ ~(contains h0 sbox));
   lemma_aux_001 w;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   mk_sbox sbox;
   mk_inv_sbox inv_sbox;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   assert(modifies_0 h0 h2);
   keyExpansion key w sbox;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   assert(modifies_0 h0 h3);
   cipher out input w sbox;
-  let h4 = HST.get() in
+  let h4 = ST.get() in
   assert(modifies_2_1 out h0 h4);
   assert(poppable h4);
   pop_frame();
-  let hfin = HST.get() in
+  let hfin = ST.get() in
   assert(live hfin out);
   modifies_popped_1 out hinit h0 h4 hfin
 

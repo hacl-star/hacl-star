@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Crecip
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open FStar.Buffer
@@ -37,7 +37,7 @@ let rec loop tmp v ctr =
   else (
     fsquare tmp v;
     fsquare v tmp;
-    let h = HST.get() in
+    let h = ST.get() in
     assert(live h tmp /\ live h v);
     assert(U32.v ctr > 0);
     loop tmp v (U32 (ctr -^ 1ul))

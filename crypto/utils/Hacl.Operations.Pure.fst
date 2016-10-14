@@ -2,7 +2,7 @@ module Hacl.Operations.Pure
 
 open FStar.Seq
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Buffer
 open FStar.UInt32
 

@@ -3,7 +3,7 @@ module Hacl.Symmetric.Salsa20
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.UInt32
 open FStar.Buffer
 
@@ -106,7 +106,7 @@ val initialize_state:
 let initialize_state state key counter nonce =
   (* Key part *)
   let open FStar.Buffer in // Shadowing the 'sub' definition
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let k0 = sub key 0ul  4ul in
   let k1 = sub key 4ul  4ul in
   let k2 = sub key 8ul  4ul in
@@ -150,31 +150,6 @@ let initialize_state state key counter nonce =
   let c1 = sint64_to_sint32 (H64 (counter >>^ 32ul)) in
   state.(8ul) <- c0;
   state.(9ul) <- c1
-
-
-val sum_matrixes:
-  new_state:uint32_p{length new_state >= 16} ->
-  old_state:uint32_p{length old_state >= 16 /\ disjoint new_state old_state} ->
-  Stack unit
-    (requires (fun h -> live h new_state /\ live h old_state))
-    (ensures (fun h0 _ h1 -> live h1 new_state /\ modifies_1 new_state h0 h1))
-let sum_matrixes m m0 =
-  let m_0 = m.(0ul) in let m0_0 = m0.(0ul) in m.(0ul) <- (m_0 +%^ m0_0);
-  let m_1 = m.(1ul) in let m0_1 = m0.(1ul) in m.(1ul) <- (m_1 +%^ m0_1);
-  let m_2 = m.(2ul) in let m0_2 = m0.(2ul) in m.(2ul) <- (m_2 +%^ m0_2);
-  let m_3 = m.(3ul) in let m0_3 = m0.(3ul) in m.(3ul) <- (m_3 +%^ m0_3);
-  let m_4 = m.(4ul) in let m0_4 = m0.(4ul) in m.(4ul) <- (m_4 +%^ m0_4);
-  let m_5 = m.(5ul) in let m0_5 = m0.(5ul) in m.(5ul) <- (m_5 +%^ m0_5);
-  let m_6 = m.(6ul) in let m0_6 = m0.(6ul) in m.(6ul) <- (m_6 +%^ m0_6);
-  let m_7 = m.(7ul) in let m0_7 = m0.(7ul) in m.(7ul) <- (m_7 +%^ m0_7);
-  let m_8 = m.(8ul) in let m0_8 = m0.(8ul) in m.(8ul) <- (m_8 +%^ m0_8);
-  let m_9 = m.(9ul) in let m0_9 = m0.(9ul) in m.(9ul) <- (m_9 +%^ m0_9);
-  let m_10 = m.(10ul) in let m0_10 = m0.(10ul) in m.(10ul) <- (m_10 +%^ m0_10);
-  let m_11 = m.(11ul) in let m0_11 = m0.(11ul) in m.(11ul) <- (m_11 +%^ m0_11);
-  let m_12 = m.(12ul) in let m0_12 = m0.(12ul) in m.(12ul) <- (m_12 +%^ m0_12);
-  let m_13 = m.(13ul) in let m0_13 = m0.(13ul) in m.(13ul) <- (m_13 +%^ m0_13);
-  let m_14 = m.(14ul) in let m0_14 = m0.(14ul) in m.(14ul) <- (m_14 +%^ m0_14);
-  let m_15 = m.(15ul) in let m0_15 = m0.(15ul) in m.(15ul) <- (m_15 +%^ m0_15)
 
 
 val salsa20_core:
@@ -258,7 +233,7 @@ let salsa20_encrypt_body state ciphertext key counter nonce plaintext len =
       let open FStar.Buffer in
       let cipher_block = sub ciphertext (U32 (64ul *^ max)) rem in
       let plain_block = sub plaintext (U32 (64ul *^ max)) rem in
-      let h = HST.get() in
+      let h = ST.get() in
       salsa20_core cipher_block state key (H64 (counter +^ (uint32_to_sint64 max))) nonce rem;
       xor_uint8_p_2 cipher_block plain_block rem
     end

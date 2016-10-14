@@ -2,7 +2,7 @@ module Hacl.Symmetric.Poly1305.Bignum
 
 open FStar.Mul
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Ghost
 open FStar.Buffer
 open FStar.Math.Lib
@@ -193,17 +193,17 @@ val multiplication: c:bigint{length c >= 2*norm_length-1} -> a:bigint{disjoint c
        (* /\ maxValue h1 c (length c) <= norm_length * pow2 53 *)
      ))
 let multiplication c a b =
-  let h_init = HST.get() in
+  let h_init = ST.get() in
   push_frame ();
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let tmp = create (uint64_to_sint64 0UL) nlength in
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   multiplication_aux a b nlength c tmp;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   lemma_modifies_0_2' c tmp h0 h1 h2;
   assert(modifies_2_1 c h0 h2);
   pop_frame ();
-  let hfin = HST.get() in
+  let hfin = ST.get() in
   ()
 
 
@@ -230,7 +230,7 @@ val freduce_degree':
       (* /\ modifies_1 b h0 h1 *)
     ))
 let rec freduce_degree' b ctr' =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   if U32 (ctr' =^ 0ul) then begin
     let b5ctr = b.(nlength) in
     let bctr = b.(0ul) in
@@ -239,7 +239,7 @@ let rec freduce_degree' b ctr' =
     (* let b5ctr = times_5 b5ctr in *)
     (* let bctr = bctr +^ b5ctr in  *)
     b.(0ul) <- bctr(* ; *)
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     (* freduce_degree_lemma h0 h1 b 0; *)
     (* cut (eval h0 b (norm_length+1+0) % reveal prime = eval h1 b (norm_length+0) % reveal prime); *)
     (* cut (eval h0 b (norm_length+1) % reveal prime = eval h1 b (norm_length+0) % reveal prime) *)
@@ -253,12 +253,12 @@ let rec freduce_degree' b ctr' =
     (* let b5ctr = times_5 b5ctr in *)
     (* let bctr = bctr +^ b5ctr in  *)
     b.(ctr) <- bctr;
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     (* freduce_degree_lemma h0 h1 b (U32.v ctr);  *)
     (* cut (eval h0 b (norm_length+1+U32.v ctr) % reveal prime = eval h1 b (norm_length+U32.v ctr) % reveal prime); *)
     (* cut(reducible h1 b (U32.v ctr-1));  *)
     freduce_degree' b (U32 (ctr -^ 1ul));
-    (* let h2 = HST.get() in  *)
+    (* let h2 = ST.get() in  *)
     (* cut (forall (i:nat). {:pattern (v (get h1 b i))} (i > U32.v ctr /\ i < 2*norm_length-1) ==> *)
     (* 	   v (get h1 b i) = v (get h0 b i));  *)
     (* cut(untouched h0 h2 b (U32.v ctr)); *)
@@ -278,10 +278,10 @@ val freduce_degree: b:bigint -> Stack unit
     (* /\ eval h1 b norm_length % reveal prime = eval h0 b (2*norm_length-1) % reveal prime *)
   ))
 let freduce_degree b =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   (* aux_lemma_4' h0 b; *)
   freduce_degree' b (U32 (nlength -^ 2ul))
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* aux_lemma_5' h0 h1 b *)
 
 val mod2_26: a:s64 -> Tot (b:s64(* {v b = v a % pow2 26} *))
@@ -303,13 +303,13 @@ val carry: b:bigint -> ctr:u32{U32.v ctr <= norm_length} -> Stack unit
       (* /\ modifies_1 b h0 h1 *)
     ))
 let rec carry b i =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   if U32( i =^ nlength) then ()
   else begin
     let bi = b.(i) in
     let ri = mod2_26 bi in
     b.(i) <- ri;
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     let c = (bi >>^ 26ul) in
     (* cut (v c = (v bi) / (pow2 26)); *)
     (* Math.Lib.pow2_div_lemma 64 26; *)
@@ -321,7 +321,7 @@ let rec carry b i =
     (* auxiliary_lemma_1' bip1 c; *)
     let z = bip1 +%^ c in
     b.(U32 (i +^ 1ul)) <- z;
-    (* let h2 = HST.get() in *)
+    (* let h2 = ST.get() in *)
     (* eval_carry_lemma h0 b h2 b (w i); *)
     carry b (U32 (i +^ 1ul))
   end
@@ -341,13 +341,13 @@ val carry_top_to_0: b:bigint -> Stack unit
     ))
 let carry_top_to_0 b =
   (* Math.Lemmas.pow2_lt_compat 64 63; *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let b0 = b.(0ul) in
   let btop = b.(nlength) in
   let btop_5 = uint64_to_sint64 5uL *%^ btop in
   (* let btop_5 = times_5 btop in *)
   b.(0ul) <- (b0 +%^ btop_5)(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* freduce_degree_lemma h0 h1 b 0 *)
 
 val carry2_aux: b:bigint -> ctr:u32{U32.v ctr > 0 /\ U32.v ctr <= norm_length} -> Stack unit
@@ -360,7 +360,7 @@ val carry2_aux: b:bigint -> ctr:u32{U32.v ctr > 0 /\ U32.v ctr <= norm_length} -
     (* /\ modifies_1 b h0 h1 *)
   ))
 let rec carry2_aux b i =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   if U32 (i =^ nlength) then ()
   else begin
     let bi = b.(i) in
@@ -368,7 +368,7 @@ let rec carry2_aux b i =
     (* lemma_aux_2 bi; *)
     (* cut (v ri < pow2 (templ (w i)));  *)
     b.(i) <- ri;
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     let c = bi >>^ 26ul in
     // In the spec of >>, TODO
     (* assume(v c < 2);  *)
@@ -383,7 +383,7 @@ let rec carry2_aux b i =
     (* cut (v c > 0 ==> v (get h0 b (w i)) / (pow2 26) > 0 ==> v (get h0 b (w i)) >= pow2 26); *)
     (* cut (v z >= pow2 26 ==> v (get h1 b (w i)) < pow2 15);  *)
     upd b (U32 (i +^ 1ul)) z;
-    (* let h2 = HST.get() in *)
+    (* let h2 = ST.get() in *)
     (* cut (v z >= pow2 26 ==> v c = 1);  *)
     (* eval_carry_lemma h0 b h2 b (w i);  *)
     carry2_aux b (U32 (i +^ 1ul))
@@ -399,7 +399,7 @@ val carry2: b:bigint -> Stack unit
     (* /\ modifies_1 b h0 h1 *)
   ))
 let rec carry2 b =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   (* pow2_3_lemma (); *)
   (* Math.Lib.pow2_exp_lemma 3 37; *)
   (* Math.Lemmas.pow2_lt_compat 40 37; *)
@@ -407,16 +407,16 @@ let rec carry2 b =
   (* Math.Lemmas.pow2_double_sum 40; *)
   (* Math.Lemmas.pow2_lt_compat 63 41; *)
   carry_top_to_0 b;
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   b.(nlength) <- (uint64_to_sint64 0UL);
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* eval_eq_lemma h1 h2 b b norm_length; *)
   (* cut ( eval h2 b (norm_length+1) = eval h1 b (norm_length));  *)
   let bi = b.(0ul) in
   let ri = mod2_26 bi in
   (* cut (v ri < pow2 26); *)
   b.(0ul) <- ri;
-  (* let h3 = HST.get() in *)
+  (* let h3 = ST.get() in *)
   let c = bi >>^ 26ul in
   (* cut (v bi < pow2 41);  *)
   // In the spec of >>, TODO
@@ -428,7 +428,7 @@ let rec carry2 b =
   (* Math.Lemmas.pow2_lt_compat 26 15; *)
   let z = bip1 +%^ c in
   b.(1ul) <- z;
-  (* let h4 = HST.get() in *)
+  (* let h4 = ST.get() in *)
   (* eval_carry_lemma h2 b h4 b 0;  *)
   (* cut(carriable2 h4 b 1); *)
   carry2_aux b 1ul
@@ -442,7 +442,7 @@ val last_carry: b:bigint -> Stack unit
     (* /\ eval h1 b norm_length % reveal prime = eval h0 b (norm_length+1) % reveal prime *)
   ))
 let last_carry b =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let b0 = index b 0ul in
   let btop = b.(nlength) in
   (* cut (v b0 < pow2 26 /\ v btop < 2);  *)
@@ -455,17 +455,17 @@ let last_carry b =
   let btop_5 = uint64_to_sint64 5uL *%^ btop in
   (* let btop_5 = times_5 btop in *)
   b.(0ul) <- (b0 +%^ btop_5);
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* freduce_degree_lemma h0 h1 b 0; *)
   b.(nlength) <- (uint64_to_sint64 0UL);
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* eval_eq_lemma h1 h2 b b norm_length; *)
   (* cut (eval h2 b (norm_length+1) = eval h1 b norm_length); *)
   let bi = b.(0ul) in
   let ri = mod2_26 bi in
   (* assert(v ri < pow2 26); *)
   b.(0ul) <- ri;
-  (* let h3 = HST.get() in *)
+  (* let h3 = ST.get() in *)
   let c = bi >>^ 26ul in
   (* cut (v bi < pow2 26 + 5); *)
   (* cut (v bi >= pow2 26 ==> v (get h3 b 1) < pow2 15); *)
@@ -478,7 +478,7 @@ let last_carry b =
   (* Math.Lemmas.pow2_lt_compat 26 15; *)
   let z = bip1 +%^ c in
   b.(1ul) <- z;
-  (* let h4 = HST.get() in *)
+  (* let h4 = ST.get() in *)
   (* eval_carry_lemma h2 b h4 b 0; *)
   (* cut (v (get h4 b 1) < pow2 26); *)
   (* cut (norm h4 b); *)
@@ -493,17 +493,17 @@ val modulo: b:bigint -> Stack unit
     (* /\ eval h1 b norm_length % reveal prime = eval h0 b (2*norm_length-1) % reveal prime *)
   ))
 let modulo b =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   freduce_degree b;
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   b.(nlength) <- (uint64_to_sint64 0UL);
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* eval_eq_lemma h1 h2 b b norm_length; *)
   (* cut (eval h2 b (norm_length+1) = eval h1 b norm_length); *)
   carry b 0ul;
-  (* let h3 = HST.get() in *)
+  (* let h3 = ST.get() in *)
   carry2 b;
-  (* let h4 = HST.get() in *)
+  (* let h4 = ST.get() in *)
   last_carry b
 
 val freduce_coefficients: b:bigint -> Stack unit
@@ -517,21 +517,21 @@ val freduce_coefficients: b:bigint -> Stack unit
   ))
 let freduce_coefficients b =
   push_frame();
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let tmp = create (uint64_to_sint64 0UL) (U32 (2ul *^ nlength -^ 1ul)) in
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* eq_lemma_0 h0 h1 b; *)
   (* eval_eq_lemma h0 h1 b b norm_length; *)
   blit b 0ul tmp 0ul nlength;
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* eval_eq_lemma h1 h2 b tmp norm_length; *)
   (* cut (forall (i:nat). {:pattern (v (get h2 tmp i))} i < norm_length ==> v (get h2 tmp i) = v (get h0 b i));  *)
   carry tmp 0ul;
   carry2 tmp;
   last_carry tmp;
-  (* let h = HST.get() in *)
+  (* let h = ST.get() in *)
   blit tmp 0ul b 0ul nlength;
-  (* let h' = HST.get() in *)
+  (* let h' = ST.get() in *)
   (* eval_eq_lemma h h' tmp b norm_length; *)
   (* cut (forall (i:nat). {:pattern (v (get h tmp i))} i < norm_length ==> v (get h tmp i) < pow2 26);  *)
   (* cut (forall (i:nat). {:pattern (v (get h' b i))} i < norm_length ==> v (get h' b (0+i)) = v (get h tmp (0+i))) *)

@@ -1,7 +1,7 @@
 module Curve.AddAndDouble
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.SBuffer
@@ -67,7 +67,7 @@ val double_and_add': two_p:point -> two_p_plus_q:point -> p:point -> p_plus_q:po
       
 let double_and_add' two_p two_p_plus_q p p_plus_q q =
 //  admit();
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let qmqp = get_x q in
   let x = get_x p in let z = get_z p in 
   let xprime = get_x p_plus_q in let zprime = get_z p_plus_q in

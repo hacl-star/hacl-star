@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Bignum.Fsum
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt64
@@ -47,7 +47,7 @@ let fsum_index_aux a b ctr =
   (* assert(b2t(v (get h0 a (U32.v ctr)) + v (get h0 b (U32.v ctr)) < pow2 platform_size));  *)
   (* let z = ai +^ bi in *)
   a.(ctr) <- (ai +%^ bi);
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* (\* upd_lemma h0 h1 a ctr z;  *\) *)
   (* assert(v (get h1 a (U32.v ctr)) = v (get h0 a (U32.v ctr)) + v (get h0 b (U32.v ctr)));  *)
   (* assert(notModified h0 h1 a (U32.v ctr));  *)
@@ -73,15 +73,15 @@ val fsum_index:
     ))
 let rec fsum_index a b ctr =
   (* //@@ *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   if U32 (nlength =^ ctr) then ()
   else (
     fsum_index_aux a b ctr;
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     (* no_upd_lemma h0 h1 b (only a);  *)
     (* FsumLemmas.auxiliary_lemma_6 norm_length ctr;  *)
     fsum_index a b (U32 (ctr +^ 1ul))
-    (* let h2 = HST.get() in *)
+    (* let h2 = ST.get() in *)
     (* fsum_index_lemma h0 h1 h2 a b (U32.v ctr) *)
   )
 
@@ -98,10 +98,10 @@ val fsum':
       (* /\ isSum h0 h1 a b 0 *)
     ))
 let fsum' a b =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   (* auxiliary_lemma_0 h0 a h0 b; *)
   fsum_index a b 0ul
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* no_upd_lemma h0 h1 b (only a); *)
   (* auxiliary_lemma_1 h0 h1 b; *)
   (* auxiliary_lemma_3 h0 h1 a b; *)

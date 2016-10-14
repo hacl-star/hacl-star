@@ -3,7 +3,7 @@ module HKDF.Sha256
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Buffer
 open FStar.UInt32
 open Hacl.Cast
@@ -40,7 +40,7 @@ val xor_bytes: output:bytes -> in1:bytes -> in2:bytes{disjoint in1 in2 /\ disjoi
     (* /\ (forall (i:nat). i < v len ==> get h1 output i = (UInt8.logxor (get h0 in1 i) (get h0 in2 i))) *)
    ))
 let rec xor_bytes output in1 in2 len =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if len =^ 0ul then ()
   else
     begin
@@ -49,7 +49,7 @@ let rec xor_bytes output in1 in2 len =
       let in2i = index in2 i in
       let oi = Hacl.UInt8.logxor in1i in2i in
       upd output i oi; 
-      let h1 = HST.get() in
+      let h1 = ST.get() in
       no_upd_lemma_1 h0 h1 output in1;
       no_upd_lemma_1 h0 h1 output in2;
       xor_bytes output in1 in2 i
@@ -148,7 +148,7 @@ let hkdf_expand okm prk prklen info infolen l =
     let r = UInt32.rem l hl in
     (UInt32.div (l @- r) hl) @+ 1ul
   in
-  let i = HST.salloc 1ul in
+  let i = ST.salloc 1ul in
   let _Til = create (uint8_to_sint8 0uy) (hl @+ infolen @+ 1ul) in
   let _Ti = create (uint8_to_sint8 0uy) hl in
   let _T = create (uint8_to_sint8 0uy) (UInt32.mul_mod n hl) in

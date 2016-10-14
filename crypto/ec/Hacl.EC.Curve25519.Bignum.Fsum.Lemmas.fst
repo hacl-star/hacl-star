@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Bignum.Fsum
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt64
@@ -42,14 +42,14 @@ abstract type notModified (h0:heap) (h1:heap)
 (*       /\ v (get h1 a (ctr)) = v (get h0 a ctr) + v (get h0 b ctr))) *)
 (* let fsum_index_aux a b ctr = *)
 (*   //@@ *)
-(*   let h0 = HST.get() in *)
+(*   let h0 = ST.get() in *)
 (*   let ai = index a ctr in  *)
 (*   let bi = index b ctr in  *)
 (*   assert(U32.v ctr < norm_length);  *)
 (*   assert(b2t(v (get h0 a (U32.v ctr)) + v (get h0 b (U32.v ctr)) < pow2 platform_size));  *)
 (*   let z = add ai bi in  *)
 (*   upd a ctr z;  *)
-(*   let h1 = HST.get() in *)
+(*   let h1 = ST.get() in *)
 (*   (\* upd_lemma h0 h1 a ctr z;  *\) *)
 (*   assert(v (get h1 a (U32.v ctr)) = v (get h0 a (U32.v ctr)) + v (get h0 b (U32.v ctr)));  *)
 (*   assert(notModified h0 h1 a (U32.v ctr));  *)
@@ -109,15 +109,15 @@ let fsum_index_lemma h0 h1 h2 a b ctr =
 (*       /\ notModified2 h0 h1 a ctr )) *)
 (* let rec fsum_index a b ctr = *)
 (*   //@@ *)
-(*   let h0 = HST.get() in *)
+(*   let h0 = ST.get() in *)
 (*   if U32.eq nlength ctr then () *)
 (*   else ( *)
 (*     fsum_index_aux a b ctr;  *)
-(*     let h1 = HST.get() in *)
+(*     let h1 = ST.get() in *)
 (*     (\* no_upd_lemma h0 h1 b (only a);  *\) *)
 (*     (\* FsumLemmas.auxiliary_lemma_6 norm_length ctr;  *\) *)
 (*     fsum_index a b (U32.add ctr 1ul);  *)
-(*     let h2 = HST.get() in *)
+(*     let h2 = ST.get() in *)
 (*     fsum_index_lemma h0 h1 h2 a b (U32.v ctr) *)
 (*   ) *)
   
@@ -249,10 +249,10 @@ let auxiliary_lemma_3 h0 h1 a b =
 (*       /\ eval h1 a norm_length = eval h0 a norm_length + eval h0 b norm_length *)
 (*       /\ isSum h0 h1 a b 0 )) *)
 (* let fsum' a b = *)
-(*   let h0 = HST.get() in *)
+(*   let h0 = ST.get() in *)
 (*   auxiliary_lemma_0 h0 a h0 b; *)
 (*   fsum_index a b 0ul; *)
-(*   let h1 = HST.get() in *)
+(*   let h1 = ST.get() in *)
 (*   (\* no_upd_lemma h0 h1 b (only a); *\) *)
 (*   auxiliary_lemma_1 h0 h1 b; *)
 (*   auxiliary_lemma_3 h0 h1 a b; *)

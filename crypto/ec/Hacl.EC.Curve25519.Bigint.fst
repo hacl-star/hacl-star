@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Bigint
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.Ghost
 open Hacl.UInt8
 open Hacl.UInt128

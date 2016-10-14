@@ -3,7 +3,7 @@ module Hacl.Symmetric.Chacha20
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.UInt32
 open Hacl.UInt8
 open Hacl.UInt32
@@ -11,6 +11,7 @@ open Hacl.Cast
 (* open Hacl.SBuffer *)
 open FStar.Buffer
 
+open Utils
 
 #reset-options "--max_fuel 0 --initial_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3timeout 50"
 
@@ -56,22 +57,18 @@ val quarter_round:
     (requires (fun h -> live h m))
     (ensures (fun h0 _ h1 -> live h1 m /\ modifies_1 m h0 h1))
 let quarter_round m a b c d =
-  m.(a) <- (m.(a) +%^ m.(b));
-  m.(d) <- (m.(d) ^^ m.(a));
-  let tmp = m.(d) in
-  m.(d) <- (tmp <<< 16ul);
-  m.(c) <- (m.(c) +%^ m.(d));
-  m.(b) <- (m.(b) ^^ m.(c));
-  let tmp = m.(b) in
-  m.(b) <- (tmp <<< 12ul);
-  m.(a) <- (m.(a) +%^ m.(b));
-  m.(d) <- (m.(d) ^^ m.(a));
-  let tmp = m.(d) in
-  m.(d) <- (tmp <<< 8ul);
-  m.(c) <- (m.(c) +%^ m.(d));
-  m.(b) <- (m.(b) ^^ m.(c));
-  let tmp = m.(b) in
-  m.(b) <- (tmp <<< 7ul)
+  let ma = m.(a) in let mb = m.(b) in m.(a) <- (ma +%^ mb);
+  let md = m.(d) in let ma = m.(a) in m.(d) <- (md ^^ ma);
+  let md = m.(d) in                   m.(d) <- (md <<< 16ul);
+  let mc = m.(c) in let md = m.(d) in m.(c) <- (mc +%^ md);
+  let mb = m.(b) in let mc = m.(c) in m.(b) <- (mb ^^ mc);
+  let mb = m.(b) in                   m.(b) <- (mb <<< 12ul);
+  let ma = m.(a) in let mb = m.(b) in m.(a) <- (ma +%^ mb);
+  let md = m.(d) in let ma = m.(a) in m.(d) <- (md ^^ ma);
+  let md = m.(d) in                   m.(d) <- (md <<< 8ul);
+  let mc = m.(c) in let md = m.(d) in m.(c) <- (mc +%^ md);
+  let mb = m.(b) in let mc = m.(c) in m.(b) <- (mb ^^ mc);
+  let mb = m.(b) in                   m.(b) <- (mb <<< 7ul)
 
 (* Chacha20 block function *)
 val column_round: m:u32s{length m = 16} -> STL unit
@@ -92,81 +89,6 @@ let diagonal_round m =
   quarter_round m 2ul 7ul 8ul 13ul;
   quarter_round m 3ul 4ul 9ul 14ul
 
-val s32_of_bytes: b:bytes{length b >= 4} -> STL s32
-  (requires (fun h -> live h b))
-  (ensures (fun h0 r h1 -> h0 == h1 /\ live h0 b))
-let s32_of_bytes (b:bytes{length b >= 4}) =
-  let b0 = b.(0ul) in
-  let b1 = b.(1ul) in
-  let b2 = b.(2ul) in
-  let b3 = b.(3ul) in
-  let r = (sint8_to_sint32 b3 <<^ 24ul)
-	  +%^ (sint8_to_sint32 b2 <<^ 16ul)
-	  +%^ (sint8_to_sint32 b1 <<^ 8ul)
-	  +%^ sint8_to_sint32 b0 in
-  r
-
-val bytes_of_u32s: output:bytes -> m:u32s{disjoint output m} -> len:u32{FStar.UInt32.v len <=length output /\ FStar.UInt32.v len<=op_Multiply 4 (length m)} -> STL unit
-  (requires (fun h -> live h output /\ live h m))
-  (ensures (fun h0 _ h1 -> live h0 output /\ live h0 m /\ live h1 output /\ live h1 m
-    /\ modifies_1 output h0 h1 ))
-let rec bytes_of_u32s output m l =
-  if U32 (l >^ 0ul) then
-    begin
-    let rem = U32 (l %^ 4ul) in
-    if U32 (rem >^ 0ul) then
-      begin
-      let l = U32 (l -^ rem) in
-      let x = m.(U32 (l /^ 4ul)) in
-      let b0 = sint32_to_sint8 (x &^ (uint32_to_sint32 255ul)) in
-      output.(l) <- b0;
-      if U32 (rem >^ 1ul) then
-        begin
-        let b1 = sint32_to_sint8 ((x >>^ 8ul) &^ (uint32_to_sint32 255ul)) in
-        output.(U32 (l +^ 1ul)) <- b1;
-	if U32 (rem >^ 2ul) then
-	  begin
-	  let b2 = sint32_to_sint8 ((x >>^ 16ul) &^ (uint32_to_sint32 255ul)) in
-	  output.(U32 (l +^ 2ul)) <- b2
-          end
-	else ()
-	end
-      else ();
-      bytes_of_u32s output m l
-      end
-    else
-      begin
-      let l = U32 (l -^ 4ul) in
-      let x = m.(U32 (l /^ 4ul)) in
-      let b0 = sint32_to_sint8 (x &^ (uint32_to_sint32 255ul)) in
-      let b1 = sint32_to_sint8 ((x >>^ 8ul) &^ (uint32_to_sint32 255ul)) in
-      let b2 = sint32_to_sint8 ((x >>^ 16ul) &^ (uint32_to_sint32 255ul)) in
-      let b3 = sint32_to_sint8 ((x >>^ 24ul) &^ (uint32_to_sint32 255ul)) in
-      output.(l) <- b0;
-      output.(U32 (l +^ 1ul)) <- b1;
-      output.(U32 (l +^ 2ul)) <- b2;
-      output.(U32 (l +^ 3ul)) <- b3;
-      bytes_of_u32s output m l
-      end
-    end
-
-val xor_bytes_2: output:bytes -> in1:bytes{disjoint in1 output} ->
-  len:u32{FStar.UInt32.v len <= length output /\ FStar.UInt32.v len <= length in1} -> STL unit
-  (requires (fun h -> live h output /\ live h in1))
-  (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
-    /\ modifies_1 output h0 h1 ))
-let rec xor_bytes_2 output in1 len =
-  if len =^ 0ul then ()
-  else
-    begin
-      let i    = U32 (len -^ 1ul) in
-      let in1i = in1.(i) in
-      let oi   = output.(i) in
-      let oi   = H8 (in1i ^^ oi) in
-      output.(i) <- oi;
-      xor_bytes_2 output in1 i
-    end
-
 val initialize_state:
   state:u32s{length state >= 16} ->
   key:bytes{length key = 32 /\ disjoint state key} ->
@@ -185,22 +107,22 @@ let initialize_state state key counter nonce =
   let k5 = sub key 20ul 4ul in
   let k6 = sub key 24ul 4ul in
   let k7 = sub key 28ul 4ul in
-  let k0 =  (s32_of_bytes k0) in
-  let k1 =  (s32_of_bytes k1) in
-  let k2 =  (s32_of_bytes k2) in
-  let k3 =  (s32_of_bytes k3) in
-  let k4 =  (s32_of_bytes k4) in
-  let k5 =  (s32_of_bytes k5) in
-  let k6 =  (s32_of_bytes k6) in
-  let k7 =  (s32_of_bytes k7) in
+  let k0 =  (uint32_of_bytes k0) in
+  let k1 =  (uint32_of_bytes k1) in
+  let k2 =  (uint32_of_bytes k2) in
+  let k3 =  (uint32_of_bytes k3) in
+  let k4 =  (uint32_of_bytes k4) in
+  let k5 =  (uint32_of_bytes k5) in
+  let k6 =  (uint32_of_bytes k6) in
+  let k7 =  (uint32_of_bytes k7) in
   (* Nonce part *)
   let n0 = sub nonce 0ul 4ul in
   let n1 = sub nonce 4ul 4ul in
   let n2 = sub nonce 8ul 4ul in
-  let n0 =  (s32_of_bytes n0) in
-  let n1 =  (s32_of_bytes n1) in
-  let n2 =  (s32_of_bytes n2) in
-  let h0 = HST.get() in
+  let n0 =  (uint32_of_bytes n0) in
+  let n1 =  (uint32_of_bytes n1) in
+  let n2 =  (uint32_of_bytes n2) in
+  let h0 = ST.get() in
   (* Constant part *)
   state.(0ul) <- (uint32_to_sint32 0x61707865ul);
   state.(1ul) <- (uint32_to_sint32 0x3320646eul);
@@ -221,34 +143,9 @@ let initialize_state state key counter nonce =
   state.(13ul) <- (n0);
   state.(14ul) <- (n1);
   state.(15ul) <- (n2);
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   assert(modifies_1 state h0 h1);
   assert(live h1 state)
-
-val sum_matrixes: new_state:u32s{length new_state >= 16} -> old_state:u32s{length old_state >= 16 /\ disjoint new_state old_state} -> STL unit
-  (requires (fun h -> live h new_state /\ live h old_state))
-  (ensures (fun h0 _ h1 -> live h1 new_state /\ modifies_1 new_state h0 h1))
-let sum_matrixes m m0 =
-  let h0 = HST.get() in
-  m.(0ul) <- (m.(0ul) +%^ m0.(0ul));
-  m.(1ul) <- (m.(1ul) +%^ m0.(1ul));
-  m.(2ul) <- (m.(2ul) +%^ m0.(2ul));
-  m.(3ul) <- (m.(3ul) +%^ m0.(3ul));
-  m.(4ul) <- (m.(4ul) +%^ m0.(4ul));
-  m.(5ul) <- (m.(5ul) +%^ m0.(5ul));
-  m.(6ul) <- (m.(6ul) +%^ m0.(6ul));
-  m.(7ul) <- (m.(7ul) +%^ m0.(7ul));
-  m.(8ul) <- (m.(8ul) +%^ m0.(8ul));
-  m.(9ul) <- (m.(9ul) +%^ m0.(9ul));
-  m.(10ul) <- (m.(10ul) +%^ m0.(10ul));
-  m.(11ul) <- (m.(11ul) +%^ m0.(11ul));
-  m.(12ul) <- (m.(12ul) +%^ m0.(12ul));
-  m.(13ul) <- (m.(13ul) +%^ m0.(13ul));
-  m.(14ul) <- (m.(14ul) +%^ m0.(14ul));
-  m.(15ul) <- (m.(15ul) +%^ m0.(15ul));
-  let h1 = HST.get() in
-  assert(modifies_1 m h0 h1);
-  assert(live h1 m)
 
 val chacha20_init:
   state:u32s{length state >= 16} ->
@@ -260,53 +157,7 @@ val chacha20_init:
   (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let chacha20_init state key counter nonce =
   (* Key part *)
-  let k0 = sub key 0ul  4ul in
-  let k1 = sub key 4ul  4ul in
-  let k2 = sub key 8ul  4ul in
-  let k3 = sub key 12ul 4ul in
-  let k4 = sub key 16ul 4ul in
-  let k5 = sub key 20ul 4ul in
-  let k6 = sub key 24ul 4ul in
-  let k7 = sub key 28ul 4ul in
-  let k0 =  (s32_of_bytes k0) in
-  let k1 =  (s32_of_bytes k1) in
-  let k2 =  (s32_of_bytes k2) in
-  let k3 =  (s32_of_bytes k3) in
-  let k4 =  (s32_of_bytes k4) in
-  let k5 =  (s32_of_bytes k5) in
-  let k6 =  (s32_of_bytes k6) in
-  let k7 =  (s32_of_bytes k7) in
-  (* Nonce part *)
-  let n0 = sub nonce 0ul 4ul in
-  let n1 = sub nonce 4ul 4ul in
-  let n2 = sub nonce 8ul 4ul in
-  let n0 =  (s32_of_bytes n0) in
-  let n1 =  (s32_of_bytes n1) in
-  let n2 =  (s32_of_bytes n2) in
-  let h0 = HST.get() in
-  (* Constant part *)
-  state.(0ul) <- (uint32_to_sint32 0x61707865ul);
-  state.(1ul) <- (uint32_to_sint32 0x3320646eul);
-  state.(2ul) <- (uint32_to_sint32 0x79622d32ul);
-  state.(3ul) <- (uint32_to_sint32 0x6b206574ul);
-  (* Update with key *)
-  state.(4ul) <-  (k0);
-  state.(5ul) <-  (k1);
-  state.(6ul) <-  (k2);
-  state.(7ul) <-  (k3);
-  state.(8ul) <-  (k4);
-  state.(9ul) <-  (k5);
-  state.(10ul) <- (k6);
-  state.(11ul) <- (k7);
-  (* Block counter part *)
-  state.(12ul) <- counter;
-  (* Update with nonces *)
-  state.(13ul) <- (n0);
-  state.(14ul) <- (n1);
-  state.(15ul) <- (n2);
-  let h1 = HST.get() in
-  assert(modifies_1 state h0 h1);
-  assert(live h1 state)
+  initialize_state state key counter nonce
 
 val chacha20_update:
   output:bytes ->
@@ -334,7 +185,7 @@ let chacha20_update output state len =
   (* Sum the matrixes *)
   sum_matrixes m m0;
   (* Serialize the state into byte stream *)
-  bytes_of_u32s output m len
+  bytes_of_uint32s output m len
 // avoid this copy when XORing? merge the sum_matrix and output loops? we don't use m0 afterward. 
 
 val chacha20_block: output:bytes -> 
@@ -346,7 +197,7 @@ val chacha20_block: output:bytes ->
     (requires (fun h -> live h state /\ live h output /\ live h key /\ live h nonce))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h1 state /\ modifies_2 output state h0 h1 ))
 let chacha20_block output state key counter nonce len =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   (* Initialize internal state *)
   let m = sub state 0ul 16ul in
   let m0 = sub state 16ul 16ul in
@@ -367,10 +218,10 @@ let chacha20_block output state key counter nonce len =
   (* Sum the matrixes *)
   sum_matrixes m m0;
   (* Serialize the state into byte stream *)
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   assert(modifies_1 state h0 h1);
-  bytes_of_u32s output m len;
-  let h2 = HST.get() in
+  bytes_of_uint32s output m len;
+  let h2 = ST.get() in
   cut(live h2 output);
   cut(modifies_2 output state h0 h2);
   cut(live h2 state)
@@ -395,7 +246,7 @@ let rec chacha20_encrypt_loop state key counter nonce plaintext ciphertext j max
       let plaintext' = sub plaintext 64ul (U32 (64ul *^ (max -^ j -^ 1ul))) in
       chacha20_block cipher_block state key (counter +^ (uint32_to_sint32 j)) nonce 64ul;
       (* XOR the key stream with the plaintext *)
-      xor_bytes_2 cipher_block plain_block 64ul;
+      xor_uint8_p_2 cipher_block plain_block 64ul;
       (* Apply Chacha20 to the next blocks *)
       chacha20_encrypt_loop state key counter nonce plaintext' ciphertext' (U32 (j +^ 1ul)) max
     end
@@ -420,9 +271,9 @@ let chacha20_encrypt_body state ciphertext key counter nonce plaintext len =
     begin
       let cipher_block = sub ciphertext (U32 (64ul *^ max)) rem in
       let plain_block = sub plaintext (U32 (64ul *^ max)) rem in
-      let h = HST.get() in
+      let h = ST.get() in
       chacha20_block cipher_block state key (counter +^ (uint32_to_sint32 max)) nonce rem;
-      xor_bytes_2 cipher_block plain_block rem
+      xor_uint8_p_2 cipher_block plain_block rem
     end
 
 val chacha20_encrypt:

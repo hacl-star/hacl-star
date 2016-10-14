@@ -1,7 +1,7 @@
 module Curve.Modulo
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.Cast
@@ -212,7 +212,7 @@ let freduce_degree_1 b =
   let b5  = index b 5ul  in
   let b4  = index b 4ul  in
   let b3  = index b 3ul  in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   (* lemma_helper_0 b10 b14; *)
   (* lemma_helper_0 b6  b14; *)
   upd b 10ul (b10 |+ b14);
@@ -223,19 +223,19 @@ let freduce_degree_1 b =
   (* lemma_helper_0 b5  b13; *)
   upd b 9ul  (b9  |+ b13);
   upd b 5ul  (b5  |+ b13);
-  let h2 = HST.get() in 
+  let h2 = ST.get() in 
   (* freduce_degree_lemma_0 h1 h2 b 5;  *)
   (* lemma_helper_0 b8 b12; *)
   (* lemma_helper_0 b4 b12; *)
   upd b 8ul  (b8  |+ b12);
   upd b 4ul  (b4  |+ b12);
-  (* let h3 = HST.get() in  *)
+  (* let h3 = ST.get() in  *)
   (* freduce_degree_lemma_0 h2 h3 b 4;  *)
   (* lemma_helper_0 b7 b11; *)
   (* lemma_helper_0 b3 b11; *)
   upd b 7ul  (b7  |+ b11);
   upd b 3ul  (b3  |+ b11)
-  (* let h4 = HST.get() in *)
+  (* let h4 = ST.get() in *)
   (* freduce_degree_lemma_0 h3 h4 b 3 *)
 
 val lemma_helper_1: x:s128 -> y:s128 -> Lemma 
@@ -285,24 +285,24 @@ let freduce_degree_2 b =
   let b2  = index b 2ul  in
   let b1  = index b 1ul  in
   let b0  = index b 0ul  in
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   (* lemma_helper_1 b6 b10; *)
   (* lemma_helper_1 b2 b10; *)
   upd b 6ul (b6 |+ b10);
   upd b 2ul (b2 |+ b10);
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* freduce_degree_lemma_0 h0 h1 b 2;  *)
   (* lemma_helper_1 b5 b9; *)
   (* lemma_helper_1 b1 b9; *)
   upd b 5ul (b5 |+ b9);
   upd b 1ul (b1 |+ b9);
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* freduce_degree_lemma_0 h1 h2 b 1;  *)
   (* lemma_helper_1 b4 b8; *)
   (* lemma_helper_1 b0 b8; *)
   upd b 4ul  (b4  |+ b8);
   upd b 0ul  (b0  |+ b8)
-  (* let h3 = HST.get() in *)
+  (* let h3 = ST.get() in *)
   (* freduce_degree_lemma_0 h2 h3 b 0 *)
 
 #reset-options
@@ -421,14 +421,14 @@ val carry: b:bigint_wide -> ctr:u32(* {ctr <= norm_length} *) -> STL unit
     ))
 let rec carry b i =
   admit();
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if UInt32.eq nlength i then ()
   else begin 
     let bi = index b i in
     let ri = trim_2_56 bi in
     (* assert(v ri < pow2 (templ i));  *)
     upd b i ri; 
-    (* let h1 = HST.get() in *)
+    (* let h1 = ST.get() in *)
     let c = (bi |>> 56ul) in
     (* upd_lemma h0 h1 b i ri;  *)
     (* admitP (True /\ v c < pow2 (platform_wide - 56)); // From the spec of >> on wides, to add *)
@@ -436,7 +436,7 @@ let rec carry b i =
     (* lemma_helper_2 bip1 c; *)
     let z = bip1 |+ c in 
     upd b (i+|1ul) z;
-    (* let h2 = HST.get() in *)
+    (* let h2 = ST.get() in *)
     (* upd_lemma h1 h2 b (i+|1ul) z; *)
     (* eval_carry_lemma h0 b h2 b i; *)
     carry b (i+|1ul)
@@ -471,7 +471,7 @@ val carry_top_to_0:
       ))
 let carry_top_to_0 b =
   //@@
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let btop = index b 8ul in
   let b0 = index b 0ul in
   let b4 = index b 4ul in
@@ -479,7 +479,7 @@ let carry_top_to_0 b =
   (* lemma_helper_3 b4 btop; *)
   upd b 0ul (b0 |+ btop);
   upd b 4ul (b4 |+ btop)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* freduce_degree_lemma_0 h0 h1 b 0 *)
 
 #reset-options
@@ -527,33 +527,33 @@ val full_update: b:bigint_wide -> r0:s128 -> r1:s128 -> r2:s128 -> r3:s128 -> r4
     /\ v (get h1 b 3) = v r3 /\ v (get h1 b 4) = v r4 /\ v (get h1 b 5) = v r5
     /\ v (get h1 b 6) = v r6 /\ v (get h1 b 7) = v r7 /\ v (get h1 b 8) = v r8 ))
 let full_update b r0 r1 r2 r3 r4 r5 r6 r7 r8 =    
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   upd b 0ul r0;
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* upd_lemma h0 h1 b 0 r0; *)
   upd b 1ul r1;
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* upd_lemma h1 h2 b 1 r1; *)
   upd b 2ul r2; 
-  (* let h3 = HST.get() in *)
+  (* let h3 = ST.get() in *)
   (* upd_lemma h2 h3 b 2 r2; *)
   upd b 3ul r3; 
-  (* let h4 = HST.get() in *)
+  (* let h4 = ST.get() in *)
   (* upd_lemma h3 h4 b 3 r3; *)
   upd b 4ul r4;
-  (* let h5 = HST.get() in *)
+  (* let h5 = ST.get() in *)
   (* upd_lemma h4 h5 b 4 r4; *)
   upd b 5ul r5; 
-  (* let h6 = HST.get() in *)
+  (* let h6 = ST.get() in *)
   (* upd_lemma h5 h6 b 5 r5; *)
   upd b 6ul r6;
-  (* let h7 = HST.get() in *)
+  (* let h7 = ST.get() in *)
   (* upd_lemma h6 h7 b 6 r6; *)
   upd b 7ul r7; 
-  (* let h8 = HST.get() in *)
+  (* let h8 = ST.get() in *)
   (* upd_lemma h7 h8 b 7 r7; *)
   upd b 8ul r8;
-  (* let h9 = HST.get() in *)
+  (* let h9 = ST.get() in *)
   (* upd_lemma h8 h9 b 8 r8 *)
   ()
   
@@ -577,7 +577,7 @@ val carry2: b:bigint_wide -> STL unit
     ))
 let carry2 b = 
   (* admit(); // Timeout *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let b0 = index b 0ul in
   let b1 = index b 1ul in
   let b2 = index b 2ul in
@@ -672,7 +672,7 @@ val carry2_top_to_0: b:bigint_wide -> STL unit
       ))
 let carry2_top_to_0 b =
   //@@
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let btop = index b 8ul in
   let b0 = index b 0ul in
   let b4 = index b 4ul in
@@ -680,7 +680,7 @@ let carry2_top_to_0 b =
   (* lemma_helper_13 b4 btop; *)
   upd b 0ul (b0 |+ btop);
   upd b 4ul (b4 |+ btop)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* freduce_degree_lemma_0 h0 h1 b 0 *)
 
 (* val lemma_helper_14: x:wide -> y:wide -> Lemma *)
@@ -715,24 +715,24 @@ val full_update2: b:bigint_wide -> r0:s128{v r0 < pow2 56} -> r1:s128{v r1 < pow
     (* /\ norm h1 b)) *)
 let full_update2 b r0 r1 r2 r3 r4 r5 =    
   //@@
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   upd b 0ul r0;
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* upd_lemma h0 h1 b 0 r0; *)
   upd b 1ul r1;
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* upd_lemma h1 h2 b 1 r1; *)
   upd b 2ul r2; 
-  (* let h3 = HST.get() in *)
+  (* let h3 = ST.get() in *)
   (* upd_lemma h2 h3 b 2 r2; *)
   upd b 3ul r3; 
-  (* let h4 = HST.get() in *)
+  (* let h4 = ST.get() in *)
   (* upd_lemma h3 h4 b 3 r3; *)
   upd b 4ul r4;
-  (* let h5 = HST.get() in *)
+  (* let h5 = ST.get() in *)
   (* upd_lemma h4 h5 b 4 r4; *)
   upd b 5ul r5
-  (* let h6 = HST.get() in *)
+  (* let h6 = ST.get() in *)
   (* upd_lemma h5 h6 b 5 r5 *)
 
 val carry3: b:bigint_wide -> STL unit
@@ -743,7 +743,7 @@ val carry3: b:bigint_wide -> STL unit
     ))
 let carry3 b =
 //  admit(); Partial functional correctness
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let b0 = index b 0ul in
   let b1 = index b 1ul in
   let b2 = index b 2ul in
@@ -789,7 +789,7 @@ let carry3 b =
   (* lemma_helper_16 b5 c5;  *)
   let d5 = b5 |+ c5 in 
   full_update2 b r0 r1 r2 r3 r4 d5
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* P448 = 2^448 - 2^224 - 1, hence *)
   (*   a[0] + 2^56*a[1] + 2^112*a[2] + 2^168*a[3] + 2^224*a[4]  *)
   (*           + 2^280*a[5] + 2^336*a[6] + 2^392*a[7] + 2^448*a[8] *)
@@ -839,16 +839,16 @@ val freduce_degree: b:bigint_wide -> STL unit
     /\ carriable h1 b 0))
 let freduce_degree b =
   //@@
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   freduce_degree_1 b;
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_helper_5 h0 h1 b;  *)
   freduce_degree_2 b;
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   (* cut (reduced2 h1 h2 b); *)
   (* cut (True /\ eval h2 b norm_length % reveal prime = eval h0 b (2*norm_length-1) % reveal prime); *)
   upd b 8ul (Hacl.UInt128.of_string "0")
-  (* let h3 = HST.get() in  *)
+  (* let h3 = ST.get() in  *)
   (* upd_lemma_2 h2 h3 b norm_length zero_wide;  *)
   (* upd_lemma_3 h1 h2 h3 b norm_length zero_wide;  *)
   (* freduce_lemma_0 h0 h1 h3 b *)
@@ -863,17 +863,17 @@ val freduce_coefficients: b:bigint_wide -> STL unit
     ))
 let freduce_coefficients b =
   //@@
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let zero_wide = (Hacl.UInt128.of_string "0") in
   upd b nlength zero_wide; (* Unnecessary, to remove *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* eval_eq_lemma h0 h1 b b norm_length;  *)
   (* cut (True /\ eval h1 b (norm_length+1) = eval h1 b norm_length);  *)
   carry b 0ul; 
   carry_top_to_0 b; 
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   upd b nlength zero_wide; 
-  (* let h3 = HST.get() in *)
+  (* let h3 = ST.get() in *)
   (* eval_eq_lemma h2 h3 b b norm_length; *)
   carry2 b; 
   carry2_top_to_0 b;
@@ -964,7 +964,7 @@ let fits_2_57 h (b:bigint) : GTot Type0 =
 val add_big_zero: bigint -> Stl unit
 let add_big_zero b =
   (* admit(); // Must reduce timeout *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let two57m2 = Hacl.UInt64.of_string  "0x1fffffffffffffe" in // 2^57 - 2
   let two57m4 = Hacl.UInt64.of_string "0x1fffffffffffffc" in // 2^56 - 4
   (* admitP (v two57m2 = pow2 57 - 2 /\ v two57m4 = pow2 57 -4); *)
@@ -985,5 +985,5 @@ let add_big_zero b =
   upd b 5ul (Hacl.UInt64.add b5 two57m2);
   upd b 6ul (Hacl.UInt64.add b6 two57m2); 
   upd b 7ul (Hacl.UInt64.add b7 two57m2)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* admitP(True /\ eval h1 b norm_length % reveal prime = eval h0 b norm_length % reveal prime) *)

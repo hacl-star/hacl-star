@@ -1,6 +1,6 @@
 module Curve.Crecip
 
-open FStar.HST
+open FStar.ST
 open Hacl.SBuffer
 open Curve.Parameters
 open Curve.Bigint

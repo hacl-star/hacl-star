@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Ladder
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open FStar.Buffer
@@ -69,9 +69,9 @@ val small_step_exit:
        // Formula_0 replaces (scalar * pow2 8 + byte)
        (* /\ (nTimesQ  (formula_0 scalar byte) (pointOf h0 q) h1 two_p two_p_plus_q) *)
 let small_step_exit pp ppq p pq q n byte scalar =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   Hacl.EC.Curve25519.PPoint.copy2 pp ppq p pq;
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* distinct_lemma q p; distinct_lemma q pq; distinct_lemma q pp; distinct_lemma q ppq; *)
   (* let s = (erefs pp +*+ erefs ppq +*+ erefs p +*+ erefs pq) in *)
   (* cut(modifies (reveal s) h0 h1); *)
@@ -157,18 +157,18 @@ let small_step_core pp ppq p pq q n ctr b scalar =
   let bit = nth_bit b ctr in
   let mask = mk_mask bit in
   (* cut (v mask = pow2 platform_size - 1 \/ v mask = 0);  *)
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   swap_conditional p pq mask;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   lemma_helper_001 p pq pp ppq q h0 h1;
-  (* let h = HST.get() in *)
+  (* let h = ST.get() in *)
   (* small_step_core_lemma_1 h0 h pp ppq p pq q; *)
   Hacl.EC.Curve25519.AddAndDouble.double_and_add pp ppq p pq q;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   lemma_helper_02 (frame_of p) q h1 h2;
-  (* let h2 = HST.get() in *)
+  (* let h2 = ST.get() in *)
   swap_conditional pp ppq mask;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   lemma_helper_001 pp ppq p pq q h2 h3;
   Hacl.EC.Curve25519.AddAndDouble.lemma_helper_2 (frame_of p) h0 h1 (refs p ++ refs pq) (refs pp ++ refs ppq ++ refs p ++ refs pq);
   Hacl.EC.Curve25519.AddAndDouble.lemma_helper_2 (frame_of p) h2 h3 (refs pp ++ refs ppq) (refs pp ++ refs ppq ++ refs p ++ refs pq);
@@ -176,7 +176,7 @@ let small_step_core pp ppq p pq q n ctr b scalar =
   ()
 
   (* lemma_5 scalar b ctr; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* assert ((live h2 p) /\ (live h2 pq) /\ (onCurve h2 q));  *)
   (* assert (onCurve h1 pp /\ onCurve h1 ppq);  *)
   (* let set2 = (erefs pp +*+ erefs ppq +*+ erefs p +*+ erefs pq) in *)
@@ -219,10 +219,10 @@ let rec small_step pp ppq p pq q n ctr b scalar =
     ()
   end
   else begin
-    let h0 = HST.get() in
+    let h0 = ST.get() in
     (* lemma_0 ctr 8; *)
     small_step_core pp ppq p pq q n ctr b scalar;
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     let bit = nth_bit b ctr in
     (* cut (nTimesQ (formula_1 n bit) (pointOf h0 q) h1 pp ppq); *)
     (* lemma_10 scalar ctr b; *)
@@ -231,13 +231,13 @@ let rec small_step pp ppq p pq q n ctr b scalar =
     (* cut (w ctr+1 <= 8 /\ True); *)
     (* assert (onCurve h1 pp /\ onCurve h1 ppq /\ live h1 p /\ live h1 pq); *)
     swap_both pp ppq p pq;
-    let h2 = HST.get() in
+    let h2 = ST.get() in
     (* assert (Math.Curve.equal (pointOf h2 p) (pointOf h1 pp) /\ Math.Curve.equal (pointOf h2 pq) (pointOf h1 ppq)); *)
     (* small_step_lemma_1 h0 h1 h2 pp ppq p pq q; *)
     (* formula_lemma n bit;  *)
     (* assert(nTimesQ (eformula_2 n bit) (pointOf h2 q) h2 p pq); *)
     small_step pp ppq p pq q (hide 0(* eformula_2 n bit *)) (U32 (ctr+^1ul)) b scalar;
-    let h3 = HST.get() in
+    let h3 = ST.get() in
     (* small_step_lemma_2 h0 h1 h2 h3 pp ppq p pq q *)
     lemma_helper_0 (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1 h2 h3;
     ()
@@ -270,7 +270,7 @@ val big_step:
     (*   /\ nTimesQ (formula_4 h0 n (w ctr)) (pointOf h0 q) h0 p pq *)
     (*   /\ nTimesQ (hide (valueOfBytes h0 n)) (pointOf h0 q) h1 p pq  )) *)
 let rec big_step n pp ppq p pq q ctr =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32 (blength =^ ctr) then () (* assum(reveal (formula_4 h0 n bytes_length) = valueOfBytes h0 n) *)
   else begin
     (* assum(bytes_length-1-w ctr>=0 /\ bytes_length-w ctr-1>=0); *)
@@ -279,10 +279,10 @@ let rec big_step n pp ppq p pq q ctr =
     // Replaces missing euclidian definitions in F*
     (* admiP(reveal m = reveal m * pow2 0 + (S8.v byte / pow2 (8-0)) /\ True); *)
     small_step pp ppq p pq q (hide 0)(* m *) 0ul byte (hide 0)(* m *);
-    let h1 = HST.get() in assert(live h1 q);
+    let h1 = ST.get() in assert(live h1 q);
     (* big_step_lemma_1 h0 h1 n pp ppq p pq q ctr byte; *)
     big_step n pp ppq p pq q (U32 (ctr +^ 1ul));
-    let h2 = HST.get() in
+    let h2 = ST.get() in
     lemma_helper_1 (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1 h2;
     ()
     (* big_step_lemma_2 h0 h1 h2 n pp ppq p pq q (w ctr) byte *)
@@ -301,12 +301,12 @@ let init_points q tmp =
   let p_z = sub tmp 44ul 5ul in
 
   let inf_x = sub tmp 49ul 6ul in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   blit (get_x q) 0ul p_x 0ul nlength;
   blit (get_y q) 0ul p_y 0ul nlength;
   blit (get_z q) 0ul p_z 0ul nlength;
   upd inf_x 0ul (Hacl.Cast.uint64_to_sint64 1uL);
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   assert(modifies_1 tmp h0 h1);
   Hacl.EC.Curve25519.AddAndDouble.lemma_helper_0 h0 h1 tmp;
   ()
@@ -337,13 +337,13 @@ val montgomery_ladder:
     (*   (\* /\ (modifies (refs res) h0 h1)  *\) *)
     (*   /\ (pointOf h1 res = (valueOfBytes h0 n +* (pointOf h0 q)))  )) *)
 let montgomery_ladder res n q =
-  let hinit = HST.get() in
+  let hinit = ST.get() in
   push_frame();
 
   // Build 'storage' empty but 'live' points
   let nlp1 = U32 (nlength +^ 1ul) in
   let tot_len = 66ul in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) tot_len in
   let two_p_x = sub tmp 0ul 6ul  in
   let two_p_y = sub tmp 6ul 5ul in
@@ -365,22 +365,22 @@ let montgomery_ladder res n q =
   let two_p_plus_q = make two_p_plus_q_x two_p_plus_q_y two_p_plus_q_z in
   let p = make p_x p_y p_z in
   let inf = make inf_x inf_y inf_z in
-  let h = HST.get() in
+  let h = ST.get() in
 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   init_points q tmp;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   cut (HS.modifies_one (frameOf tmp) h1 h2);
   big_step n two_p two_p_plus_q inf p q 0ul;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   cut (HS.modifies_one (frameOf tmp) h2 h3);
   // Copy result to output
   copy res two_p;
-  let h4 = HST.get() in
+  let h4 = ST.get() in
   cut (HS.modifies_one (frame_of res) h3 h4);
 
   pop_frame();
-  let hfin = HST.get() in
+  let hfin = ST.get() in
   assert(equal_domains hinit hfin);
   lemma_reveal_modifies_0 h0 h1;
   lemma_helper_2 hinit h0 h3 h4 hfin (frame_of res);

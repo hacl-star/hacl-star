@@ -3,7 +3,7 @@ module Hacl.Symmetric.Poly1305
 
 open FStar.Mul
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Ghost
 open FStar.Buffer
 open FStar.Math.Lib
@@ -50,7 +50,7 @@ val toGroup: a:elemB -> b:wordB{length b = 16 /\ disjoint a b} -> Stack unit
   (requires (fun h -> live h a /\ B.live h b /\ disjoint a b))
   (ensures  (fun h0 _ h1 -> live h1 a /\ modifies_1 a h0 h1))
 let toGroup b s =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let mask_26 = mk_mask 26ul in
   let s0 = sub s 0ul  4ul in
   let s1 = sub s 4ul  4ul in
@@ -81,7 +81,7 @@ val toGroup_plus_2_128: a:elemB -> b:wordB{length b = 16 /\ disjoint a b} -> STL
   (ensures  (fun h0 _ h1 -> live h1 a /\ modifies_1 a h0 h1))
 let toGroup_plus_2_128 b s =
   toGroup b s;
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let b4 = b.(4ul) in
   let b4' = b4 +%^ (uint64_to_sint64 1uL <<^ 24ul) in
   b.(4ul) <- b4'
@@ -200,26 +200,26 @@ val poly1305_init: acc:elemB -> // Accumulator
   (ensures  (fun h0 log h1 -> live h1 acc /\ live h1 r /\ modifies_2 acc r h0 h1))
 let poly1305_init acc r key =
   push_frame();
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let r' = sub key 0ul 16ul in
   let r'' = create (uint8_to_sint8 0uy) 16ul in
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   (* Zero the accumulator *)
   zeroB acc;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   assert(modifies_2_1 acc h0 h2);
   (* Format the keys *)
   (* Make a copy of the first half of the key to clamp it *)
   blit r' 0ul r'' 0ul 16ul;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   assert(modifies_2_1 acc h0 h3);
   (* Clamp r *)
   clamp r'';
-  let h4 = HST.get() in
+  let h4 = ST.get() in
   assert(modifies_2_1 acc h0 h4);
   (* Format r to elemB *)
   toGroup r r'';
-  let h5 = HST.get() in
+  let h5 = ST.get() in
   assert(modifies_3_2 acc r h0 h5);
   pop_frame()
 

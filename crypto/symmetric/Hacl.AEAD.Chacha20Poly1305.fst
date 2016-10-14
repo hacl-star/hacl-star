@@ -1,6 +1,6 @@
 module Hacl.AEAD.Chacha20Poly1305
 
-open FStar.HST
+open FStar.ST
 open FStar.Buffer
 open FStar.UInt32
 open FStar.Ghost

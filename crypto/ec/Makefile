@@ -1,36 +1,33 @@
-FSTAR_HOME?=../../../FStar
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_DEFAULT_ARGS) # from the included Makefile
+all:
+	@echo
+	@echo "############## LAX TYPECHEKING #############"
+	@echo
+	$(MAKE) lax
+	@echo
+	@echo "############## FULL TYPECHEKING #############"
+	@echo
+	$(MAKE) ver
 
-LIB_DIR=../../lib/hst
+FSTAR_HOME?=../../FStar
+KREMLIN_HOME?=../../kremlin
+HACL_HOME?=../..
+include $(HACL_HOME)/lib/hyperstack/Makefile.include
 
-OPTIONS_VER=--include $(LIB_DIR) --use_hints
+INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_SYMMETRIC))
 
-LIB_FILES=Hacl.Cast.fst Hacl.SBuffer.fst Hacl.UInt128.fst Hacl.UInt64.fst Hacl.UInt32.fst Hacl.UInt8.fst Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst
+# Sufficient modules to extract/lax-typecheck all others modules
+MAIN_MODULES=Hacl.EC.Curve25519
 
-all: curve25519
+# All the directory modules (for efficient verification)
+CURVE25519_MODULES=$(addprefix Hacl.EC.Curve25519., Parameters Bigint Bignum.Fsum Bignum.FsumWide \
+		Bignum.Fdifference Bignum.Fscalar Bignum.Fproduct Bignum.Modulo Bignum \
+		Crecip PPoint AddAndDouble Ladder) \
+	Hacl.EC.Curve25519
 
-import-lib:
-	@cp $(addprefix ../../lib/hst/, $(LIB_FILES)) .
+MODULES=$(CURVE25519_MODULES)
 
-curve25519: $(addsuffix -ver, \
-			Hacl.EC.Curve25519.Bigint.fst \
-			Hacl.EC.Curve25519.Bignum.Fsum.fst \
-			Hacl.EC.Curve25519.Bignum.FsumWide.fst \
-			Hacl.EC.Curve25519.Bignum.Fdifference.fst \
-			Hacl.EC.Curve25519.Bignum.Fscalar.fst \
-			Hacl.EC.Curve25519.Bignum.Fproduct.fst \
-			Hacl.EC.Curve25519.Bignum.Modulo.fst \
-			Hacl.EC.Curve25519.Bignum.fst \
-			Hacl.EC.Curve25519.PPoint.fst \
-			Hacl.EC.Curve25519.AddAndDouble.fst \
-			Hacl.EC.Curve25519.Ladder.fst \
-			Hacl.EC.Curve25519.Crecip.fst \
-			Hacl.EC.Curve25519.Ladder.fst \
-			Hacl.EC.Curve25519.fst)
-
-%-ver: %
-	$(FSTAR) $(OPTIONS_VER) $^
+lax: $(addsuffix .fst-lax, $(MAIN_MODULES))
+ver: $(addsuffix .fst-ver, $(MODULES))
 
 clean:
-	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(LIB_FILES)
+	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(HACL_FILES)

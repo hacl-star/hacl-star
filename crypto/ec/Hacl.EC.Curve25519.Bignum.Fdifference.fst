@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Bignum.Fdifference
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt64
@@ -43,7 +43,7 @@ val fdifference_aux_1:
       (* /\ v (get h1 a (U32.v ctr)) = v (get h0 b (U32.v ctr)) - v (get h0 a (U32.v ctr)) *)
     ))
 let fdifference_aux_1 a b ctr =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   let i = ctr in
   (* FdifferenceLemmas.helper_lemma_3 i norm_length;  *)
   (* helper_lemma_1 (U32.v i) norm_length (length a); *)
@@ -54,7 +54,7 @@ let fdifference_aux_1 a b ctr =
   (* cut(b2t(v (get h0 b (U32.v i)) >= v (get h0 a (U32.v i))));  *)
   (* let z = bi -^ ai in  *)
   upd a i (bi -%^ ai)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* (\* upd_lemma h0 h1 a i z; *\) *)
   (* (\* no_upd_lemma h0 h1 b ((only a)) *\) *)
   (* () *)
@@ -76,14 +76,14 @@ val fdifference_aux:
     ))
 let rec fdifference_aux a b ctr =
   (* //@@ *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   if U32 (ctr =^ nlength) then ()
   else begin
       fdifference_aux_1 a b ctr;
-      (* let h1 = HST.get() in *)
+      (* let h1 = ST.get() in *)
       (* no_upd_lemma h0 h1 b ((only a)); *)
       fdifference_aux a b (U32 (ctr +^ 1ul))(* ;  *)
-      (* let h2 = HST.get() in *)
+      (* let h2 = ST.get() in *)
       (* fdifference_aux_2 h0 h1 h2 a b (U32.v ctr) *)
   end
 
@@ -99,9 +99,9 @@ val fdifference': a:bigint -> b:bigint{disjoint a b} -> Stack unit
     ))
 let fdifference' a b =
   (* //@@ *)
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   (* auxiliary_lemma_0 h0 a h0 b;  *)
   fdifference_aux a b 0ul(* ;  *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* (\* auxiliary_lemma_1 h0 h1 ((only a)) min max b ;  *\) *)
   (* subtraction_lemma h0 h1 a b norm_length *)

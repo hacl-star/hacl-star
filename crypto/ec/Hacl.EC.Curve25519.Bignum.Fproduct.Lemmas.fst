@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Bignum.Fproduct.Lemmas
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt64
@@ -308,7 +308,7 @@ val multiplication_step_0: a:bigint -> b:bigint -> ctr:u32{w ctr<norm_length/\w 
        /\ eval_wide h1 tmp norm_length = eval h0 a norm_length * vv (get h0 b (w ctr)) ))
 let multiplication_step_0 a b ctr c tmp = 
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let s = index b ctr in 
   assert(forall (n:nat). {:pattern (vv (get h0 b n))} n < norm_length ==> vv (get h0 b n) <= pow2 max_limb); 
   assert(forall (n:nat). n = w ctr ==> n < norm_length); 
@@ -318,7 +318,7 @@ let multiplication_step_0 a b ctr c tmp =
   assert(vv s < pow2 max_limb); 
   cut(forall (i:nat). (i < norm_length) ==> vv (get h0 a i) * vv s < pow2 platform_wide); 
   Curve.Fscalar.scalar_multiplication_tr tmp a s 0ul; 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   cut(True /\ vv s = vv (get h0 b (w ctr))); 
   assert(Fscalar.isScalarProduct h0 h1 0 norm_length a s tmp); 
   is_scalar_product_lemma h0 h1 a s tmp;
@@ -657,12 +657,12 @@ val multiplication_step_p1: a:bigint -> b:bigint -> ctr:u32{w ctr<norm_length} -
      ))
 let multiplication_step_p1 a b ctr c tmp =
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   multiplication_step_0 a b ctr c tmp; 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   multiplication_step_lemma_01 h0 h1 a b (w ctr) c tmp; 
   FsumWide.fsum_index c ctr tmp 0ul nlength 0ul; 
-  let h2 = HST.get() in 
+  let h2 = ST.get() in 
   multiplication_step_lemma_02 h0 h1 h2 a b ctr c tmp
 
 val helper_lemma_6: h0:heap -> h1:heap -> a:bigint -> b:bigint -> ctr:nat{ctr < norm_length} -> 
@@ -698,9 +698,9 @@ val multiplication_step: a:bigint -> b:bigint -> ctr:u32{w ctr < norm_length} ->
        /\ eval_wide h1 c (2*norm_length-1) = eval h0 a (norm_length) * vv (get h0 b (w ctr)) * pow2 (bitweight (templ) (w ctr)) + eval_wide h0 c (2*norm_length-1)
      ))
 let multiplication_step a b ctr c tmp =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   multiplication_step_p1 a b ctr c tmp;  
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   helper_lemma_6 h0 h1 a b (w ctr) c tmp
   
 (* Lemma : factorizes "eval" equation *)
@@ -810,15 +810,15 @@ val multiplication_aux: a:bigint -> b:bigint -> ctr:u32{w ctr <= norm_length} ->
        /\ (maxValue_wide h1 c (length c) <= norm_length * (maxValueNorm h0 a * maxValueNorm h0 b))
      ))
 let rec multiplication_aux a b ctr c tmp = 
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32.eq ctr 0ul then ()
   else begin
     (* FproductLemmas.helper_lemma_8 norm_length ctr; *)
     multiplication_step a b (nlength -| ctr) c tmp;
-    let h1 = HST.get() in    
+    let h1 = ST.get() in    
     multiplication_aux_lemma h0 h1 a b (w ctr) c tmp;
     multiplication_aux a b (ctr-|1ul) c tmp;
-    let h2 = HST.get() in
+    let h2 = ST.get() in
     multiplication_aux_lemma_2 h0 h1 h2 a b (w ctr) c tmp
   end
 
@@ -937,13 +937,13 @@ val multiplication: c:bigint_wide -> a:bigint{disjoint c a} -> b:bigint{disjoint
        /\ maxValue_wide h1 c (length c) <= norm_length * maxValueNorm h0 a * maxValueNorm h0 b ))
 let multiplication c a b =
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let tmp = create (Hacl.UInt128.of_string "0") nlength in
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   (* assert(modifies Set.empty h0 h1);  *)
   multiplication_lemma_1 h0 h1 c a b; 
   cut(True /\ length tmp >= norm_length);
   (* constant_template_lemma c a;  *)
   multiplication_aux a b nlength c tmp; 
-  let h2 = HST.get() in 
+  let h2 = ST.get() in 
   multiplication_lemma_2 h0 h1 h2 c a b tmp

@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Point.Lemmas
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt64
@@ -96,7 +96,7 @@ val swap_conditional_aux': a:bigint -> b:bigint{disjoint a b} ->
       /\ partialSwap h0 h1 is_swap (w ctr) a b))
 let rec swap_conditional_aux' a b swap ctr =
   admit(); // TODO
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32.eq nlength ctr then ()
   else begin
     admitP (True /\ w ctr < norm_length); 
@@ -110,15 +110,15 @@ let rec swap_conditional_aux' a b swap ctr =
     admitP (v swap = 0 ==> (v ai' = v ai /\ v bi' = v bi));
     admitP (v swap = pow2 platform_size - 1 ==> (v ai' = v bi /\ v bi' = v ai)); 
     upd a ctr ai'; 
-    let h2 = HST.get() in
+    let h2 = ST.get() in
     upd b ctr bi'; 
-    let h3 = HST.get() in 
+    let h3 = ST.get() in 
     (* upd_lemma h0 h2 a ctr ai';  *)
     (* no_upd_lemma h0 h2 b (only a);  *)
     (* upd_lemma h2 h3 b ctr bi';   *)
     (* no_upd_lemma h2 h3 a (only b);  *)
     swap_conditional_aux' a b swap (ctr+|1ul); 
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     admitP (forall (i:nat). (i >= w ctr + 1 /\ i < norm_length) ==> 
       ((v swap = 0 ==> (v (get h1 a i) = v (get h0 a i) 
 	         /\ v (get h1 b i) = v (get h0 b i)))
@@ -158,9 +158,9 @@ val swap_conditional_aux: a:bigint -> b:bigint{disjoint a b} ->
       /\ (v is_swap = pow2 platform_size - 1 ==> 
   	  ((valueOf h1 a = valueOf h0 b) /\ (valueOf h1 b = valueOf h0 a))) ))
 let rec swap_conditional_aux a b swap ctr =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   swap_conditional_aux' a b swap 0ul; 
-  let h1 = HST.get() in 
+  let h1 = ST.get() in 
   swap_conditional_aux_lemma h0 h1 a b swap  
 
 #reset-options
@@ -291,20 +291,20 @@ val swap_conditional:
   	  ((pointOf h1 a) == (pointOf h0 b) /\ (pointOf h1 b) == (pointOf h0 a))) ))
 let swap_conditional a b is_swap =
   admit(); // TODO
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   swap_conditional_aux (get_x a) (get_x b) is_swap 0;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   (* norm_lemma h0 h1 (get_y a) !{getRef (get_x a), getRef (get_x b)}; *)
   (* norm_lemma h0 h1 (get_y b) !{getRef (get_x a), getRef (get_x b)}; *)
   swap_conditional_aux (get_y a) (get_y b) is_swap 0;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   (* let mods = (hide !{getRef (get_x a), getRef (get_x b), getRef (get_y a), getRef (get_y b)}) in *)
   (* cut(modifies (reveal mods) h0 h2);  *)
   (* cut(not(FStar.Set.mem (Ref (getRef (get_z b))) (reveal mods)) /\ not(FStar.Set.mem (Ref (getRef (get_z a))) (reveal mods)));  *)
   (* enorm_lemma h0 h2 (get_z a) mods; *)
   (* enorm_lemma h0 h2 (get_z b) mods; *)
   swap_conditional_aux (get_z a) (get_z b) is_swap 0;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   swap_conditional_lemma h0 h1 h2 h3 a b is_swap
 
 #reset-options
@@ -335,16 +335,16 @@ val copy:
       ))
 let copy a b =
   admit(); // TODO
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   blit (get_x b) 0ul (get_x a) 0ul nlength; 
-  let h1 = HST.get() in 
+  let h1 = ST.get() in 
   (* norm_lemma h0 h1 (get_x b) (!{getRef (get_x a)});  *)
   (* norm_lemma h0 h1 (get_y b) (!{getRef (get_x a)});  *)
   (* norm_lemma h0 h1 (get_z b) (!{getRef (get_x a)});  *)
   (* bignum_live_lemma h0 h1 (get_y a) (!{getRef (get_x a)});  *)
   (* bignum_live_lemma h0 h1 (get_z a) (!{getRef (get_x a)});  *)
   blit (get_y b) 0ul (get_y a) 0ul nlength;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   (* norm_lemma h1 h2 (get_x b) (!{getRef (get_y a)});  *)
   (* norm_lemma h1 h2 (get_y b) (!{getRef (get_y a)}); *)
   (* norm_lemma h1 h2 (get_z b) (!{getRef (get_y a)});  *)
@@ -352,7 +352,7 @@ let copy a b =
   (* norm_lemma h1 h2 (get_x a) (!{getRef (get_y a)});  *)
   (* bignum_live_lemma h1 h2 (get_z a) (!{getRef (get_y a)}); *)
   blit (get_z b) 0ul (get_z a) 0ul nlength;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   (* norm_lemma h2 h3 (get_x b) (!{getRef (get_z a)}); *)
   (* norm_lemma h2 h3 (get_y b) (!{getRef (get_z a)}); *)
   (* norm_lemma h2 h3 (get_z b) (!{getRef (get_z a)}); *)
@@ -425,16 +425,16 @@ val swap_both:
     ))
 let swap_both a b c d =
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   copy c a; 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   let set01 = erefs c in 
   distinct_lemma c b; 
   distinct_lemma c d; 
   (* on_curve_lemma h0 h1 b set01;  *)
   (* live_lemma h0 h1 d set01;  *)
   copy d b;
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   distinct_lemma d c; 
   distinct_lemma d a;
   distinct_lemma d b;
@@ -453,16 +453,16 @@ val copy2: p':point -> q':point{distinct p' q'} -> p:point{distinct p p' /\ dist
       /\ (pointOf h1 q' == pointOf h0 q) ))
 let copy2 p' q' p q =
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   copy p' p; 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   let set01 = (erefs p') in 
   distinct_lemma p' q; 
   distinct_lemma p' q'; 
   (* on_curve_lemma h0 h1 q set01;  *)
   (* live_lemma h0 h1 q' set01;   *)
   copy q' q; 
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   distinct_lemma q' p'; 
   distinct_lemma q' p;
   distinct_lemma q' q; 

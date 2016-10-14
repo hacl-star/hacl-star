@@ -3,7 +3,7 @@ module HMAC.Sha256
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.Buffer
 open FStar.UInt32
 open Hacl.Cast
@@ -54,7 +54,7 @@ val xor_bytes: output:bytes -> in1:bytes -> in2:bytes{disjoint in1 in2 /\ disjoi
     (* /\ (forall (i:nat). i < v len ==> get h1 output i = (UInt8.logxor (get h0 in1 i) (get h0 in2 i))) *)
    ))
 let rec xor_bytes output in1 in2 len =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if len =^ 0ul then ()
   else
     begin
@@ -63,7 +63,7 @@ let rec xor_bytes output in1 in2 len =
       let in2i = index in2 i in
       let oi = Hacl.UInt8.logxor in1i in2i in
       upd output i oi;
-      let h1 = HST.get() in
+      let h1 = ST.get() in
       no_upd_lemma_1 h0 h1 output in1;
       no_upd_lemma_1 h0 h1 output in2;
       xor_bytes output in1 in2 i
@@ -126,9 +126,9 @@ val hmac_sha256 : (mac     :bytes { length mac = v hl }) ->
 let hmac_sha256 mac key keylen data datalen =
   
   (* Push a new frame *)
-  (**) let hinit = HST.get() in
+  (**) let hinit = ST.get() in
   (**) push_frame();
-  (**) let h0 = HST.get() in
+  (**) let h0 = ST.get() in
 
   (* Define ipad and opad *)
   let ipad = create (uint8_to_sint8 0x36uy) bl in
@@ -140,7 +140,7 @@ let hmac_sha256 mac key keylen data datalen =
   (* Create the working emplacements *)
   let s3 = create (uint8_to_sint8 0uy) (bl @+ datalen) in
   let s6 = create (uint8_to_sint8 0uy) (bl @+ hl) in
-  (**) let h1 = HST.get() in
+  (**) let h1 = ST.get() in
   (**) //assert(modifies_0 h0 h1);
   (**) no_upd_lemma_0 h0 h1 mac;
 
@@ -172,7 +172,7 @@ let hmac_sha256 mac key keylen data datalen =
 
   (* Pop frame *)
   (**) pop_frame();
-  (**) let hfin = HST.get () in
+  (**) let hfin = ST.get () in
   (**) assert(modifies_1 mac hinit hfin);
   (**) assume(equal_domains hinit hfin);
   (**) assert(live hfin mac)

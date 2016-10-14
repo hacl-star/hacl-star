@@ -3,7 +3,7 @@ module Hacl.Symmetric.XSalsa20
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.HST
+open FStar.ST
 open FStar.UInt32
 open Hacl.UInt8
 open Hacl.UInt32
@@ -60,7 +60,7 @@ let initialize_hsalsa_state state key nonce =
   let n1 =  (uint32_of_bytes n1) in
   let n2 =  (uint32_of_bytes n2) in
   let n3 =  (uint32_of_bytes n3) in
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   (* Constant part *)
   state.(0ul) <- (uint32_to_sint32 0x61707865ul);
   state.(5ul) <- (uint32_to_sint32 0x3320646eul);

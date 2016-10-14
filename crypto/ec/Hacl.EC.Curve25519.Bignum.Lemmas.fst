@@ -1,7 +1,7 @@
 module Hacl.EC.Curve25519.Bignum.Lemmas
 
 open FStar.Mul
-open FStar.HST
+open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
 open Hacl.UInt64
@@ -67,7 +67,7 @@ val copy_to_bigint': output:bigint -> input:bigint_wide{disjoint input output} -
       /\ modifies_1 output h0 h1 ))
 let rec copy_to_bigint' output b idx len ctr = 
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32.eq len ctr then ()
   else begin
     let bi = index b (idx+|ctr) in
@@ -75,7 +75,7 @@ let rec copy_to_bigint' output b idx len ctr =
     cast_lemma_1 bi;
     cut (v cast = vv bi /\ True); 
     upd output (idx+|ctr) cast; 
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     (* no_upd_lemma h0 h1 b (only output);  *)
     (* upd_lemma h0 h1 output (idx+|ctr) cast;  *)
     copy_to_bigint' output b idx len (ctr+|1ul)
@@ -103,10 +103,10 @@ val copy_to_bigint:
       /\ valueOf h1 output = valueOf_wide h0 input))
 let copy_to_bigint output b = 
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   norm_bigint_lemma_1 h0 b;
   copy_to_bigint' output b 0ul nlength 0ul; 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   cut (forall (i:nat). i < norm_length ==> v (get h1 output (0+i)) = vv (get h0 b (0+i))); 
   cut (forall (i:nat). i < norm_length ==> v (get h1 output i) = vv (get h0 b i));
   (* eval_eq_lemma h0 h1 b output norm_length; *)
@@ -124,14 +124,14 @@ val copy_to_bigint_wide': output:bigint_wide -> input:bigint{disjoint input outp
       /\ modifies_1 output h0 h1 ))
 let rec copy_to_bigint_wide' output b idx len ctr =
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32.eq len ctr then ()
   else begin
     let bi = index b (idx+|ctr) in
     let cast = Hacl.Cast.sint64_to_sint128 bi in
     cut (vv cast = v bi /\ True);
     upd output (idx+|ctr) cast;
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     (* no_upd_lemma h0 h1 b (only output); *)
     (* upd_lemma h0 h1 output (idx+|ctr) cast; *)
     copy_to_bigint_wide' output b idx len (ctr+|1ul)
@@ -146,9 +146,9 @@ val copy_to_bigint_wide: output:bigint_wide -> input:bigint{disjoint input outpu
       /\ (length output = length output) ))
 let copy_to_bigint_wide output b = 
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   copy_to_bigint_wide' output b 0ul nlength 0ul; 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   cut (forall (i:nat). i < norm_length ==> vv (get h1 output (0+i)) = v (get h0 b (0+i))); 
   cut (forall (i:nat). i < norm_length ==> vv (get h1 output i) = v (get h0 b i));
   (* eval_eq_lemma h0 h1 b output norm_length; *)
@@ -173,11 +173,11 @@ val erase: b:bigint -> idx:u32 -> len:u32 -> ctr:u32{w ctr <= w len} -> STL unit
       (* /\ (EqSub h1 b (idx+len) h0 b (idx+len) (length b-(idx+len))) *)
       /\ modifies_1 b h0 h1 ))
 let rec erase b idx len ctr = 
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32.eq len ctr then ()
   else begin
     upd b (idx+|ctr) (Hacl.Cast.uint64_to_sint64 0uL); 
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     (* upd_lemma h0 h1 b (idx+|ctr) 0uL; *)
     erase b idx len (ctr+|1ul)
   end
@@ -193,11 +193,11 @@ val erase_wide: b:bigint_wide -> idx:u32 -> len:u32 -> ctr:u32{w ctr <= w len} -
       /\ (modifies_1 b h0 h1) ))
 let rec erase_wide b idx len ctr = 
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   if U32.eq len ctr then ()
   else begin
     upd b (idx+|ctr) (Hacl.UInt128.of_string "0"); 
-    let h1 = HST.get() in
+    let h1 = ST.get() in
     (* upd_lemma h0 h1 b (idx+|ctr) (Hacl.UInt128.of_string "0"); *)
     erase_wide b idx len (ctr+|1ul)
   end
@@ -217,10 +217,10 @@ val modulo: output:bigint -> input:bigint_wide{disjoint input output} -> STL uni
       /\ modifies_2 output input h0 h1 ))
 let modulo output b = 
   admit(); // OK
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   Curve.Modulo.freduce_degree b; 
   Curve.Modulo.freduce_coefficients b; 
-  let h = HST.get() in
+  let h = ST.get() in
   (* standardized_eq_norm h b; *)
   copy_to_bigint output b
 
@@ -245,14 +245,14 @@ val fsum: a:bigint{templ = templ} -> b:bigint{disjoint a b} -> STL unit
 let fsum a b =
   push_frame ();
   admit(); // TODO
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *)
   Curve.Fsum.fsum' a b; 
   let tmp = create (S128.of_string "0") (UInt32.sub (UInt32.mul nlength 2ul) 1ul) in 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   copy_to_bigint_wide tmp a; 
   cut (forall (i:nat). {:pattern (v (get h1 a i))} i < norm_length ==> v (get h1 a i) = v (get h0 a i) + v (get h0 b i));
-  let h2 = HST.get() in 
+  let h2 = ST.get() in 
   cut (forall (i:nat). {:pattern (vv (get h2 tmp i))} i < norm_length ==> vv (get h2 tmp (0+i)) = 
 	 v (get h1 a (0+i))); 
   cut (forall (i:nat). {:pattern (vv (get h2 tmp i))} i < norm_length ==> vv (get h2 tmp i) = 
@@ -260,7 +260,7 @@ let fsum a b =
   admitP (forall (i:nat). {:pattern (vv (get h2 tmp i))} (i >= norm_length /\ i < length tmp) ==> vv (get h2 tmp i) = 0);
   Curve.Modulo.sum_satisfies_constraints h0 h2 tmp a b; 
   modulo a tmp; 
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   assert(valueOf h1 a = valueOf_wide h2 tmp); 
   cut (True /\ eval h1 a norm_length % reveal prime = (eval h0 a norm_length + eval h0 b norm_length) % reveal prime); // TODO
   fsum_lemma h0 h1 a a b;
@@ -288,27 +288,27 @@ val fdifference: a:bigint{templ = templ} -> b:bigint{disjoint a b} -> STL unit
 let fdifference a b = 
   push_frame ();
   admit(); // TODO
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b; *)
   let b' = create (Hacl.Cast.uint64_to_sint64 0uL) nlength in
   blit b 0ul b' 0ul nlength;
   (* let b' = Bigint.copy b in  *)
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   Curve.Modulo.add_big_zero b';
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   cut (modifies_1 b' h0 h2); 
   (* no_upd_lemma h0 h2 a (only b');  *)
   cut (norm h2 a); 
   Curve.Fdifference.fdifference' a b'; 
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   let tmp = create (S128.of_string "0") (U32.mul 2ul nlength-|1ul) in 
-  let h4 = HST.get() in
+  let h4 = ST.get() in
   copy_to_bigint_wide tmp a; 
-  let h5 = HST.get() in 
+  let h5 = ST.get() in 
   cut(live h5 a /\ (forall (i:nat). (i>=norm_length /\ i < length tmp) ==> vv (get h5 tmp i) = 0));
   Curve.Modulo.difference_satisfies_constraints h2 h5 tmp b' a; 
   modulo a tmp; 
-  let h6 = HST.get() in
+  let h6 = ST.get() in
   cut (True /\ eval h6 a norm_length % reveal prime = (eval h0 b norm_length - eval h0 a norm_length) % reveal prime);
   fdifference_lemma h0 h6 a b a;
   cut (modifies_1 a h0 h6);
@@ -326,14 +326,14 @@ val fscalar:
 let fscalar res b s =
   push_frame ();
   admit(); // TODO
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   (* standardized_eq_norm h0 b;  *)
   let tmp = create (S128.of_string "0") (U32.mul 2ul nlength-|1ul) in
   Curve.Fscalar.scalar' tmp b s; 
-  let h = HST.get() in
+  let h = ST.get() in
   (* admitP(b2t(satisfies_modulo_constraints h tmp));   *)
   modulo res tmp;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   admitP(True /\ (valueOf h1 res = (v s +* valueOf h0 b)));
   pop_frame()
 
@@ -360,19 +360,19 @@ val fmul: res:bigint -> a:bigint{disjoint res a} -> b:bigint{disjoint res b} -> 
 let fmul res a b = 
   push_frame ();
   admit(); // TODO
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   (* standardized_eq_norm h0 a; standardized_eq_norm h0 b;  *)
   let tmp = create (S128.of_string "0") (U32.mul 2ul nlength-|1ul) in
-  let h1 = HST.get() in  
+  let h1 = ST.get() in  
   (* no_upd_lemma h0 h1 a !{}; *)
   (* no_upd_lemma h0 h1 b !{}; *)
   norm_lemma_2 h1 a; norm_lemma_2 h1 b; 
   (* norm_lemma_3 h1 a; norm_lemma_3 h1 b; *)
   Curve.Fproduct.multiplication tmp a b; 
-  let h2 = HST.get() in
+  let h2 = ST.get() in
   Curve.Modulo.mul_satisfies_constraints h1 h2 tmp a b; 
   modulo res tmp;
-  let h3 = HST.get() in
+  let h3 = ST.get() in
   cut (True /\ eval h3 res norm_length % reveal prime = (eval h0 a norm_length * eval h0 b norm_length) % reveal prime);
   fmul_lemma h0 h3 res a b;
   pop_frame()
