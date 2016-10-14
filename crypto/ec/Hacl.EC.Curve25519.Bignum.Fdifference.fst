@@ -60,9 +60,9 @@ val add_big_zero:
     (ensures (fun h0 _ h1 -> fits51to53 h1 b /\ modifies_1 b h0 h1
       /\ eval h1 b norm_length % reveal prime = eval h0 b norm_length % reveal prime))
 let add_big_zero b =
-  (* let h0 = HST.get() in *)
+  (* let h0 = ST.get() in *)
   add_big_zero_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* add_big_zero_lemma h0 h1 b *)
 
 val fdifference_:

@@ -35,7 +35,7 @@ private val fsum_:
     (ensures (fun h0 u h1 -> norm h0 a /\ norm h0 b /\ live h1 a /\ modifies_1 a h0 h1
       /\ isSum h0 h1 a b))
 let fsum_ a b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let a0 = a.(0ul) in
   let a1 = a.(1ul) in
   let a2 = a.(2ul) in
@@ -69,7 +69,7 @@ val fsum':
       /\ eval h1 a norm_length = eval h0 a norm_length + eval h0 b norm_length
     ))
 let fsum' a b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   fsum_ a b;
-  let h1 = HST.get() in
+  let h1 = ST.get() in
   lemma_fsum h0 h1 a b

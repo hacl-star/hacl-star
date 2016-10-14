@@ -53,7 +53,7 @@ val freduce_degree_:
     (requires (fun h -> satisfiesModuloConstraints h b))
     (ensures (fun h0 _ h1 -> isDegreeReduced h0 h1 b /\ modifies_1 b h0 h1))
 let freduce_degree_ b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
   let b2 = b.(2ul) in
@@ -89,7 +89,7 @@ val freduce_degree:
 let freduce_degree b =
   let h0 = ST.get() in
   freduce_degree_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_freduce_degree h0 h1 b *)
 
 val mod_wide_2_51: a:s128 -> Tot (b:s128(* {v b = v a % pow2 51} *))
@@ -208,9 +208,9 @@ val carry_wide_1:
     (ensures (fun h0 _ h1 -> bound127 h0 b /\ norm_wide h1 b /\ modifies_1 b h0 h1
       /\ eval_wide h1 b (norm_length+1) = eval_wide h0 b norm_length /\ carried_wide_1 h1 b))
 let carry_wide_1 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   carry_wide_1_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_1 h0 h1 b *)
 
 
@@ -250,9 +250,9 @@ val carry_wide_2:
 	  /\ eval_wide h1 b (norm_length+1) = eval_wide h0 b norm_length
 	  /\ carried_wide_3 h1 b))
 let carry_wide_2 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   carry_wide_2_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_2 h0 h1 b *)
 
 
@@ -285,11 +285,11 @@ val carry_wide_top_1:
     (ensures  (fun h0 _ h1 -> carried_wide_1 h0 b /\ carried_wide_2 h1 b /\ modifies_1 b h0 h1
       /\ eval_wide h1 b norm_length % reveal prime = eval_wide h0 b (norm_length+1) % reveal prime))
 let carry_wide_top_1 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   pow2_double_sum 38; pow2_double_sum 39;  pow2_double_sum 40;
   pow2_lt_compat 63 26;  pow2_lt_compat 63 41;
   carry_wide_top_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_top_1 h0 h1 b *)
 
 
@@ -310,11 +310,11 @@ val carry_wide_top_2:
     (ensures  (fun h0 _ h1 -> carried_wide_3 h0 b /\ carried_wide_4 h1 b /\ modifies_1 b h0 h1
       /\ eval_wide h1 b norm_length % reveal prime = eval_wide h0 b (norm_length+1) % reveal prime))
 let carry_wide_top_2 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   pow2_double_sum 0; pow2_double_sum 1;  pow2_double_sum 2;
   pow2_lt_compat 63 26;  pow2_lt_compat 63 3;
   carry_wide_top_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_top_2 h0 h1 b *)
 
 
@@ -348,9 +348,9 @@ val carry_wide_0_to_1:
     (ensures  (fun h0 _ h1 -> carried_wide_4 h0 b /\ modifies_1 b h0 h1 /\ norm_wide h1 b
       /\ eval_wide h1 b norm_length = eval_wide h0 b norm_length))
 let carry_wide_0_to_1 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   carry_wide_0_to_1_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_0_to_1 h0 h1 b *)
 
 
@@ -492,9 +492,9 @@ val carry_1:
     (ensures (fun h0 _ h1 -> bound63 h0 b /\ norm h1 b /\ modifies_1 b h0 h1
       /\ eval h1 b (norm_length+1) = eval h0 b norm_length /\ carried_1 h1 b))
 let carry_1 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   carry_1_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_1 h0 h1 b *)
 
 
@@ -532,9 +532,9 @@ val carry_2:
 	  /\ eval h1 b (norm_length+1) = eval h0 b norm_length
 	  /\ carried_3 h1 b))
 let carry_2 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   carry_2_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_2 h0 h1 b *)
 
 
@@ -566,11 +566,11 @@ val carry_top_1:
     (ensures  (fun h0 _ h1 -> carried_1 h0 b /\ carried_2 h1 b /\ modifies_1 b h0 h1
       /\ eval h1 b norm_length % reveal prime = eval h0 b (norm_length+1) % reveal prime))
 let carry_top_1 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   pow2_double_sum 38; pow2_double_sum 39;  pow2_double_sum 40;
   pow2_lt_compat 63 26;  pow2_lt_compat 63 41;
   carry_top_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_top_1 h0 h1 b *)
 
 
@@ -590,11 +590,11 @@ val carry_top_2:
     (ensures  (fun h0 _ h1 -> carried_3 h0 b /\ carried_4 h1 b /\ modifies_1 b h0 h1
       /\ eval h1 b norm_length % reveal prime = eval h0 b (norm_length+1) % reveal prime))
 let carry_top_2 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   pow2_double_sum 0; pow2_double_sum 1;  pow2_double_sum 2;
   pow2_lt_compat 63 26;  pow2_lt_compat 63 3;
   carry_top_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_top_2 h0 h1 b *)
 
 
@@ -627,9 +627,9 @@ val carry_0_to_1:
     (ensures  (fun h0 _ h1 -> carried_4 h0 b /\ modifies_1 b h0 h1 /\ norm h1 b
       /\ eval h1 b norm_length = eval h0 b norm_length))
 let carry_0_to_1 b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   carry_0_to_1_ b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_carry_0_to_1 h0 h1 b *)
 
 

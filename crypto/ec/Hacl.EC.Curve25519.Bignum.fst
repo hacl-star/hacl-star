@@ -248,7 +248,7 @@ let fscalar res b s =
   Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients_wide tmp;
   copy_to_bigint res tmp;
   (* modulo res tmp; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* admitP(True /\ (valueOf h1 res = (v s +* valueOf h0 b))); *)
   pop_frame()
 

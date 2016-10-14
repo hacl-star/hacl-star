@@ -141,7 +141,7 @@ private val multiplication_:
        /\ isMultiplication h0 h1 a b c
      ))
 let multiplication_ c a b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   let a0 = a.(0ul) in let a1 = a.(1ul) in let a2 = a.(2ul) in let a3 = a.(3ul) in let a4 = a.(4ul) in
   let b0 = b.(0ul) in let b1 = b.(1ul) in let b2 = b.(2ul) in let b3 = b.(3ul) in let b4 = b.(4ul) in
   multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4
@@ -156,9 +156,9 @@ val multiplication:
        /\ eval_wide h1 c (2*norm_length-1) = eval h0 a (norm_length) * eval h0 b (norm_length)
        /\ maxValue_wide h1 c (2*norm_length-1) <= norm_length * pow2 53))
 let multiplication c a b =
-  let h0 = HST.get() in
+  let h0 = ST.get() in
   multiplication_ c a b(* ; *)
-  (* let h1 = HST.get() in *)
+  (* let h1 = ST.get() in *)
   (* lemma_multiplication h0 h1 c a b *)
 
 (*
