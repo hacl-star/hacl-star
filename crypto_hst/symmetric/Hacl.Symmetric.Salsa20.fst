@@ -52,10 +52,10 @@ val quarter_round:
     (requires (fun h -> live h m))
     (ensures (fun h0 _ h1 -> live h1 m /\ modifies_1 m h0 h1))
 let quarter_round m a b c d =
-  m.(a) <- m.(a) ^^ (( m.(d) +%^ m.(c) ) <<< 7ul);
-  m.(b) <- m.(b) ^^ (( m.(a) +%^ m.(d) ) <<< 9ul);
-  m.(c) <- m.(c) ^^ (( m.(b) +%^ m.(a) ) <<< 13ul);
-  m.(d) <- m.(d) ^^ (( m.(c) +%^ m.(b) ) <<< 18ul)
+  let md = m.(d) in let mc = m.(c) in m.(a) <- m.(a) ^^ ((md +%^ mc) <<< 7ul);
+  let ma = m.(a) in let md = m.(d) in m.(b) <- m.(b) ^^ ((ma +%^ md) <<< 9ul);
+  let mb = m.(b) in let ma = m.(a) in m.(c) <- m.(c) ^^ ((mb +%^ ma) <<< 13ul);
+  let mc = m.(c) in let mb = m.(b) in m.(d) <- m.(d) ^^ ((mc +%^ mb) <<< 18ul)
 
 
 (* Salsa20 block function *)
@@ -159,22 +159,22 @@ val sum_matrixes:
     (requires (fun h -> live h new_state /\ live h old_state))
     (ensures (fun h0 _ h1 -> live h1 new_state /\ modifies_1 new_state h0 h1))
 let sum_matrixes m m0 =
-  m.(0ul) <- (m.(0ul) +%^ m0.(0ul));
-  m.(1ul) <- (m.(1ul) +%^ m0.(1ul));
-  m.(2ul) <- (m.(2ul) +%^ m0.(2ul));
-  m.(3ul) <- (m.(3ul) +%^ m0.(3ul));
-  m.(4ul) <- (m.(4ul) +%^ m0.(4ul));
-  m.(5ul) <- (m.(5ul) +%^ m0.(5ul));
-  m.(6ul) <- (m.(6ul) +%^ m0.(6ul));
-  m.(7ul) <- (m.(7ul) +%^ m0.(7ul));
-  m.(8ul) <- (m.(8ul) +%^ m0.(8ul));
-  m.(9ul) <- (m.(9ul) +%^ m0.(9ul));
-  m.(10ul) <- (m.(10ul) +%^ m0.(10ul));
-  m.(11ul) <- (m.(11ul) +%^ m0.(11ul));
-  m.(12ul) <- (m.(12ul) +%^ m0.(12ul));
-  m.(13ul) <- (m.(13ul) +%^ m0.(13ul));
-  m.(14ul) <- (m.(14ul) +%^ m0.(14ul));
-  m.(15ul) <- (m.(15ul) +%^ m0.(15ul))
+  let m_0 = m.(0ul) in let m0_0 = m0.(0ul) in m.(0ul) <- (m_0 +%^ m0_0);
+  let m_1 = m.(1ul) in let m0_1 = m0.(1ul) in m.(1ul) <- (m_1 +%^ m0_1);
+  let m_2 = m.(2ul) in let m0_2 = m0.(2ul) in m.(2ul) <- (m_2 +%^ m0_2);
+  let m_3 = m.(3ul) in let m0_3 = m0.(3ul) in m.(3ul) <- (m_3 +%^ m0_3);
+  let m_4 = m.(4ul) in let m0_4 = m0.(4ul) in m.(4ul) <- (m_4 +%^ m0_4);
+  let m_5 = m.(5ul) in let m0_5 = m0.(5ul) in m.(5ul) <- (m_5 +%^ m0_5);
+  let m_6 = m.(6ul) in let m0_6 = m0.(6ul) in m.(6ul) <- (m_6 +%^ m0_6);
+  let m_7 = m.(7ul) in let m0_7 = m0.(7ul) in m.(7ul) <- (m_7 +%^ m0_7);
+  let m_8 = m.(8ul) in let m0_8 = m0.(8ul) in m.(8ul) <- (m_8 +%^ m0_8);
+  let m_9 = m.(9ul) in let m0_9 = m0.(9ul) in m.(9ul) <- (m_9 +%^ m0_9);
+  let m_10 = m.(10ul) in let m0_10 = m0.(10ul) in m.(10ul) <- (m_10 +%^ m0_10);
+  let m_11 = m.(11ul) in let m0_11 = m0.(11ul) in m.(11ul) <- (m_11 +%^ m0_11);
+  let m_12 = m.(12ul) in let m0_12 = m0.(12ul) in m.(12ul) <- (m_12 +%^ m0_12);
+  let m_13 = m.(13ul) in let m0_13 = m0.(13ul) in m.(13ul) <- (m_13 +%^ m0_13);
+  let m_14 = m.(14ul) in let m0_14 = m0.(14ul) in m.(14ul) <- (m_14 +%^ m0_14);
+  let m_15 = m.(15ul) in let m0_15 = m0.(15ul) in m.(15ul) <- (m_15 +%^ m0_15)
 
 
 val salsa20_core:

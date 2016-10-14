@@ -2,7 +2,7 @@
 
 # Taken from the FStar repository
 
-for i in 8 16 32 64 128; do
+for i in 8 16 32 64; do
   f=Hacl.UInt$i.fst
   cat > $f <<EOF
 module Hacl.UInt$i

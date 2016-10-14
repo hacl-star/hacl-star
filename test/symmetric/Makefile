@@ -1,7 +1,7 @@
 # FStar variables
 FSTAR_HOME?=../../../FStar
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_DEFAULT_ARGS) # from the included Makefile
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_DEFAULT_ARGS) --dump_module Hacl.Symmetric.Salsa20 # from the included Makefile
 
 LIB_DIR_HST=../../lib/hst
 LIB_FILES_HST=$(addprefix $(LIB_DIR_HST)/, Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.SBuffer.fst Hacl.Cast.fst)
@@ -39,8 +39,8 @@ CHACHA_EXTRACTED=Chacha.ml
 POLY_EXTRACTED=FStar_PredicateExtensionality.ml FStar_Seq.ml FStar_Ghost.ml Axioms.ml Parameters.ml Bigint.ml Bignum.ml Poly.ml
 AES_EXTRACTED=Crypto_AES.ml
 
-CHACHA_EXTRACTED_HST=Hacl_Symmetric_Chacha20.ml
-SALSA_EXTRACTED_HST=Hacl_Symmetric_Salsa20.ml
+CHACHA_EXTRACTED_HST=Utils.ml Hacl_Symmetric_Chacha20.ml
+SALSA_EXTRACTED_HST=Utils.ml Hacl_Symmetric_Salsa20.ml
 AES_EXTRACTED_HST=Hacl_Symmetric_AES.ml
 AESGCM_EXTRACTED_HST=Hacl_Symmetric_AES.ml Hacl_Symmetric_GCM.ml Hacl_AEAD_AES256GCM.ml
 POLY1305_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Utils.ml Hacl_Symmetric_Poly1305_Parameters.ml Hacl_Symmetric_Poly1305_Bigint.ml Hacl_Symmetric_Poly1305_Bignum.ml Hacl_Symmetric_Poly1305.ml
@@ -95,7 +95,7 @@ chacha-test: chacha-compile
 
 salsa-extract: ml-lib
 	mkdir -p $(SALSA_ODIR)
-	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(SALSA_FSTAR_HST) --odir $(SALSA_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OPTIONS_OCAML_HST) $(LIB_FILES_HST) $(HACL_KREMLIN_LIB) $(SALSA_FSTAR_HST) --odir $(SALSA_ODIR) --include $(CODE_DIR_HST)
 
 salsa-compile: salsa-extract
 	$(OCAMLOPT) -I $(LIB_DIR_HST)/ml -I $(SALSA_ODIR) \

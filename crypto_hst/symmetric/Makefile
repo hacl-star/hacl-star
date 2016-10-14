@@ -13,6 +13,9 @@ all: chacha poly aead-aes256-gcm
 import-lib:
 	@cp $(addprefix ../../lib/hst/, $(LIB_FILES)) .
 
+import-kremlin:
+	@cp $(addprefix ../../lib/hst/kremlin/, $(LIB_FILES)) .
+
 chacha: Hacl.Symmetric.Chacha20.fst-ver
 
 aes: Hacl.Symmetric.AES.fst-ver
