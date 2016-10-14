@@ -1,27 +1,36 @@
-# FStar variables
 FSTAR_HOME?=../../../FStar
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_DEFAULT_ARGS) # from the included Makefile
 
-OPTIONS_VER=
+LIB_DIR=../../lib/hst
 
-LIB_DIR=../../lib/st
-LIB_FILES=$(addprefix $(LIB_DIR)/, axioms.fst intlib.fst IntLibLemmas.fst sint.fst sbuffer.fst SInt.UInt8.fst SInt.UInt32.fst SInt.UInt63.fst SInt.UInt64.fst SInt.Cast.fst SBytes.fst)
+OPTIONS_VER=--include $(LIB_DIR) --use_hints
 
-.PHONY: lib-ver
+LIB_FILES=Hacl.Cast.fst Hacl.SBuffer.fst Hacl.UInt128.fst Hacl.UInt64.fst Hacl.UInt32.fst Hacl.UInt8.fst Math.Axioms.fst Math.Lib.fst Math.Lemmas.fst
 
-all: lib-ver curve-lax
+all: curve25519
 
-# Verification target for the low-level libraries of F* in universes
-lib-ver:
-	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES)
+import-lib:
+	@cp $(addprefix ../../lib/hst/, $(LIB_FILES)) .
 
-# Curve25519 lax typechecking
-curve-lax:
-	$(FSTAR) $(OPTIONS_VER) $(LIB_FILES) Curve.Ladder.fst --lax
+curve25519: $(addsuffix -ver, \
+			Hacl.EC.Curve25519.Bigint.fst \
+			Hacl.EC.Curve25519.Bignum.Fsum.fst \
+			Hacl.EC.Curve25519.Bignum.FsumWide.fst \
+			Hacl.EC.Curve25519.Bignum.Fdifference.fst \
+			Hacl.EC.Curve25519.Bignum.Fscalar.fst \
+			Hacl.EC.Curve25519.Bignum.Fproduct.fst \
+			Hacl.EC.Curve25519.Bignum.Modulo.fst \
+			Hacl.EC.Curve25519.Bignum.fst \
+			Hacl.EC.Curve25519.PPoint.fst \
+			Hacl.EC.Curve25519.AddAndDouble.fst \
+			Hacl.EC.Curve25519.Ladder.fst \
+			Hacl.EC.Curve25519.Crecip.fst \
+			Hacl.EC.Curve25519.Ladder.fst \
+			Hacl.EC.Curve25519.fst)
 
-# Cleaning
+%-ver: %
+	$(FSTAR) $(OPTIONS_VER) $^
+
 clean:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
-	@rm -f *~
-
+	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(LIB_FILES)
