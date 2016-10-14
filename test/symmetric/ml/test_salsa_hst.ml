@@ -46,21 +46,19 @@ let print_bytes b =
   print_string (print b); print_string "\n"
 
 let plaintext = create (Hacl_UInt8.of_string "0") 64
-                            
-let expected = "4DFA5E481DA23EA09A31022050859936\nDA52FCEE218005164F267CB65F5CFD7F\n2B4F97E0FF16924A52DF269515110A07\nF9E460BC65EF95DA58F740B7D1DBB0AA\n"
+let ok = "e3be8fdd8beca2e3ea8ef9475b29a6e7003951e1097a5c38d23b7a5fad9f6844b22c97559e2723c7cbbd3fe4fc8d9a0744652a83e72a9c461876af4d7ef1a117"
 
 let _ =
   let ciphertext = create (uint8_to_sint8 0) 64 in
-  salsa20_encrypt ciphertext key counter nonce plaintext 64;
+  salsa20_encrypt ciphertext key nonce plaintext 64;
   print_string "Test key:\n";
   print_bytes key;
   print_string "Test nonce:\n";
   print_bytes nonce;
   print_string "Expected ciphertext:\n";
-  print_string expected;
+  print_string ok;
   print_string "Got ciphertext:\n";
   print_bytes ciphertext;
-  let ok = "4dfa5e481da23ea09a31022050859936\nda52fcee218005164f267cb65f5cfd7f\n2b4f97e0ff16924a52df269515110a07\nf9e460bc65ef95da58f740b7d1dbb0aa" in
   for i = 0 to 63 do
     if not(Hacl_UInt8.to_string_hex (index ciphertext i) = String.sub ok (2*i) 2) then
       failwith (Printf.sprintf "Ciphertext differs at byte %d: %s %s\n" i (Hacl_UInt8.to_string_hex (index ciphertext i)) (String.sub ok (2*i) 2)) 
