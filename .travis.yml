@@ -1,0 +1,17 @@
+matrix:
+  include:
+  - env: Ubuntu=14.04
+    os: linux
+    dist: trusty
+    sudo: required
+before_install:
+- "./.ci/before_install.sh"
+install:
+- "./.ci/install.sh"
+script:
+- "./.ci/script.sh"
+git:
+  depth: 3
+notifications:
+  slack:
+    secure: nZdcLzqqgGYt3HR06Jtqr6LAHVMvo+lnxLEjZIWyHuhmLkxv1y0xqu72faswjKOMGr6HZV+WgjRk++Wes0OnRbS9cVUppPJNbim7D4bWHLk4wZ9XMtyJYye7nJPSrqm2OO66PThYIkuFbwKHhZNVBDveOGpJumBguTi9nQZV5a12irJuEp/dS6ypNQV4zrZht03hzH/KKesRwvG/t1Ejlr4ySnb4zuljpkfb6S2RBrLnSWkjPSuXjKlwPrjpxqgR6Rb4V8/LhxvV94y+p8uplGNl6LLKi/Py+BW5rrHwrB0TFUEBrC/i1Jq9GtTMFnqpfQovMhICJIhaxA3GIP4yHgyHI6cbjgaSShIU2emCVDOjuTXjNsDfY/w4XIk4tv4fU17Gsx8nLedCSjWoNZqB4J3UWUKgISUY0nI6tVaT8nyT4REBFk1kVrJSGX1qN4Qck5latT4ltnW/iENvkxb8Apvt6x9SeUYEvxdiOkGTXdoNkwymg8Hq3f1iT4D+LXyFE0Fovd/GmfgAQ/R2d/B82KY0gLQhQ1HtTuryhIHuhZX5QsoZMXV8Hmw+KsvEZWLuOFcwvI0fJ4uwKMPixQiBbHF/riqfnSyZVSl74wh7Gl7Qt67an0wAf0fK1R3OxQNZYWiEv7UjSWBEJHl/Du/kPiYy0ctlntc+m77TGZYMfU0=
