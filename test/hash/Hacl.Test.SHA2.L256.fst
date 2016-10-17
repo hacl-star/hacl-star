@@ -24,13 +24,13 @@ let main () =
     0x5duy; 0xaeuy; 0x22uy; 0x23uy; 0xb0uy; 0x03uy;
     0x61uy; 0xa3uy; 0x96uy; 0x17uy; 0x7auy; 0x9cuy;
     0xb4uy; 0x10uy; 0xffuy; 0x61uy; 0xf2uy; 0x00uy;
-    0x15ad ] in
+    0x15uy; 0xaduy ] in
 
   (* Call the function *)
-  Hacl.Hash.SHA2.L256.sha256 output plaintext size_input;
+  Hacl.Hash.SHA2.L256.sha256 output input size_input;
 
   (* Compare the expected result with output *)
-  C.compare_and_print2 expected output len;
+  C.compare_and_print2 expected output size_hash;
   pop_frame();
 
   (* Exit *)
