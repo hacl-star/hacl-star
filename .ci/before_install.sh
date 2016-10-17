@@ -7,6 +7,7 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
   sudo add-apt-repository --yes ppa:avsm/ppa;
   sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test;
   sudo add-apt-repository --yes ppa:0k53d-karl-f830m/openssl;
+  sudo add-apt-repository --yes ppa:chris-lea/libsodium
   sudo apt-get -qq update;
 fi
 
