@@ -15,8 +15,13 @@ HACL_SYMMETRIC=$(HACL_API)/symmetric
 HACL_HASH=$(HACL_API)/hash
 HACL_EC=$(HACL_API)/ec
 
+ifeq ($(CI),true)
+VERBOSE=
+else
+VERBOSE=-verbose
+endif
 KREMLIN=$(KREMLIN_HOME)/krml
-KREMLIN_ARGS=-verbose -ccopt -Wno-error=pointer-sign -no-prefix TestLib
+KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign -no-prefix TestLib
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 
