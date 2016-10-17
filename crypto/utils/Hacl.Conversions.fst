@@ -9,7 +9,8 @@ open FStar.UInt32
 open Hacl.Cast
 open Hacl.UInt8
 open Hacl.UInt32
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
+open FStar.Buffer
 open Hacl.Operations
 
 
@@ -19,7 +20,8 @@ module U32 = FStar.UInt32
 module S32 = Hacl.UInt32
 module U64 = FStar.UInt64
 module S64 = Hacl.UInt64
-module SB  = Hacl.SBuffer
+(* module SB  = Hacl.SBuffer *)
+module SB  = FStar.Buffer
 
 let u8 = FStar.UInt8.t
 let s8 = Hacl.UInt8.t
@@ -27,8 +29,9 @@ let u32 = FStar.UInt32.t
 let s32 = Hacl.UInt32.t
 let u64 = FStar.UInt64.t
 let s64 = Hacl.UInt64.t
-let uint32s = Hacl.SBuffer.u32s
-let bytes = Hacl.SBuffer.u8s
+
+let uint32s = SB.buffer s32 //Hacl.SBuffer.u32s
+let bytes = SB.buffer s8 //Hacl.SBuffer.u8s
 
 
 

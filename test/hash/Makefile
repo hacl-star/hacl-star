@@ -1,7 +1,7 @@
 all: test-kremlin test-ocaml
 
 FSTAR_HOME?=/opt/fstar
-KREMLIN_HOME?=/opt/kremlin
+KREMLIN_HOME?=../../../kremlin
 HACL_HOME?=../..
 include $(HACL_HOME)/lib/hyperstack/Makefile.include
 KREMLIN_INCLUDES=$(addprefix -I , $(HACL_KREMLIN) $(HACL_CRYPTO_UTILS) $(HACL_HASH) . $(KREMTEST)) \

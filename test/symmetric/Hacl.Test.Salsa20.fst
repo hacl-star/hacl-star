@@ -42,10 +42,11 @@ let main () =
   (* let chacha20 = createL [ *)
   (*   43y; 68y; 61y; 63y; 68y; 61y; 32y; 30y *)
   (* ] in *)
+  let salsa20 = createL [0y] in
   Hacl.Symmetric.Salsa20.salsa20_encrypt ciphertext key nonce plaintext len;
-  C.compare_and_print2 (* chacha20 *) expected1 (offset ciphertext 0ul) 64ul;
-  C.compare_and_print2 (* chacha20 *) expected2 (offset ciphertext 192ul) 64ul;
-  C.compare_and_print2 (* chacha20 *) expected3 (offset ciphertext 256ul) 64ul;
-  C.compare_and_print2 (* chacha20 *) expected4 (offset ciphertext 448ul) 64ul;
+  TestLib.compare_and_print salsa20 expected1 (offset ciphertext 0ul) 64ul;
+  TestLib.compare_and_print salsa20 expected2 (offset ciphertext 192ul) 64ul;
+  TestLib.compare_and_print salsa20 expected3 (offset ciphertext 256ul) 64ul;
+  TestLib.compare_and_print salsa20 expected4 (offset ciphertext 448ul) 64ul;
   pop_frame();
   C.exit_success

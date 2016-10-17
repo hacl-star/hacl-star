@@ -30,7 +30,8 @@ let main () =
   Hacl.Hash.SHA2.L256.sha256 output input size_input;
 
   (* Compare the expected result with output *)
-  C.compare_and_print2 expected output size_hash;
+  let sha256_string = FStar.Buffer.createL [0x73y; 0x68y; 0x61y; 0y] in
+  TestLib.compare_and_print sha256_string expected output size_hash;
   pop_frame();
 
   (* Exit *)

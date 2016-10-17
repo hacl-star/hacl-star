@@ -29,6 +29,7 @@ let main () =
     0x4auy; 0xbfuy; 0xf6uy; 0xafuy; 0x41uy; 0x49uy; 0xf5uy; 0x1buy
     ] in
   Hacl.Symmetric.Poly1305.poly1305_mac mac plaintext len key;
-  C.compare_and_print2 expected mac macsize;
+  let poly1305 = createL [0y] in
+  TestLib.compare_and_print poly1305 expected mac macsize;
   pop_frame();
   C.exit_success

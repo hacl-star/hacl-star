@@ -19,7 +19,8 @@ module U32 = FStar.UInt32
 module S32 = Hacl.UInt32
 module U64  = FStar.UInt64
 module S64  = Hacl.UInt64
-module SB  = Hacl.SBuffer
+module SB  = FStar.Buffer
+(* module SB  = Hacl.SBuffer *)
 module FB  = FStar.Buffer
 module MLA = Math.Logic.Axioms
 
@@ -33,7 +34,7 @@ let u32 = FStar.UInt32.t
 let s32 = Hacl.UInt32.t
 let u64 = FStar.UInt64.t
 let s64 = Hacl.UInt64.t
-let bytes = Hacl.SBuffer.u8s
+let bytes = FStar.Buffer.buffer s8 //Hacl.SBuffer.u8s
 
 
 #set-options "--z3timeout 10"

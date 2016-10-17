@@ -63,14 +63,14 @@ let modifies_2 (#a:Type) (#a':Type) (b:buffer a) (b':buffer a') h0 h1 = modifies
 
 let modifies_region rid bufs h0 h1 = modifies_region rid bufs h0 h1
 
-inline_for_extraction let create #t a len = create #t a len
-inline_for_extraction let index #t b i = index #t b i
-inline_for_extraction let upd #t b i v = upd #t b i v
-inline_for_extraction let sub #t b x y = sub #t b x y
-inline_for_extraction let offset #t b i = offset #t b i
+inline_for_extraction let create (* #t a len *) = create (* #t a len *)
+inline_for_extraction let index (* #t b i *) = index (* #t b i *)
+inline_for_extraction let upd (* #t b i v *) = upd
+inline_for_extraction let sub (* #t b x y *) = sub (* #t b x y *)
+inline_for_extraction let offset (* #t b i *) = offset (* #t b i *)
 
-inline_for_extraction let blit (#t:Type) (a:buffer t) aidx (b:buffer t) bidx len = blit a aidx b bidx len
-inline_for_extraction let fill #a = fill #a
+inline_for_extraction let blit = blit
+inline_for_extraction let fill = fill
 
-inline_for_extraction let op_Array_Assignment b n z = op_Array_Assignment b n z
-inline_for_extraction let op_Array_Access     b n   = op_Array_Access b n
+inline_for_extraction let op_Array_Assignment = op_Array_Assignment
+inline_for_extraction let op_Array_Access = op_Array_Access
