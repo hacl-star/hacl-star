@@ -99,7 +99,7 @@ void test_perf1() {
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
   printf("User time for Sodium: %f\n", t2);
 
-  printf("Slowdown: %f\n", t1/t2);
+  printf("Slowdown (AEAD): %f\n", t1/t2);
 }
 
 void test_perf2() {
@@ -120,7 +120,7 @@ void test_perf2() {
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
   printf("User time for Sodium: %f\n", t2);
 
-  printf("Slowdown: %f\n", t1/t2);
+  printf("Slowdown (Poly1305): %f\n", t1/t2);
 }
 
 int main(int argc, char *argv[]){
