@@ -12,14 +12,23 @@ allsubdirs: $(addsuffix .all , $(SUBDIRS))
 %.all:
 	$(MAKE) -C $(basename $@)
 
-api-kremlin:
+test_api.exe:
 	mkdir -p tmp
 	$(KREMLIN) $(KREMLIN_ARGS) \
 		$(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst $(KREMTEST)/testlib.c c/test_api.c \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
 		-I $(KREMLIB) -I $(KREMTEST) \
-		-tmpdir tmp -o test_api.exe -ldopt "-lsodium"
+		-tmpdir tmp -o test_api.exe -ldopt "-lsodium" # -ccopt "-m32"
 	./test_api.exe
+
+perf1: test_api.exe
+	./test_api.exe perf1
+
+perf2: test_api.exe
+	./test_api.exe perf2
+
+perf3: test_api.exe
+	./test_api.exe perf3
 
 clean:
 	rm -rf *~ *.exe *.out *.o *.c *.h *.cmi *.cmo *.cmx *.krml ./tmp

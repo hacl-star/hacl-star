@@ -123,11 +123,34 @@ void test_perf2() {
   printf("Slowdown (Poly1305): %f\n", t1/t2);
 }
 
+void test_perf3() {
+  void *plain = malloc(SIZE), *cipher = malloc(SIZE);
+  uint8_t mac[16];
+  clock_t c1, c2;
+  double t1, t2;
+
+  c1 = clock();
+  Hacl_Symmetric_HSalsa20_crypto_stream_xsalsa20_xor(cipher, plain, SIZE, nonce, key);
+  c2 = clock();
+  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for HACL: %f\n", t1);
+
+  c1 = clock();
+  crypto_stream_xsalsa20_xor(cipher, plain, SIZE, nonce, key);
+  c2 = clock();
+  t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for Sodium: %f\n", t2);
+
+  printf("Slowdown (XSalsa20): %f\n", t1/t2);
+}
+
 int main(int argc, char *argv[]){
   if (argc == 2 && strcmp(argv[1], "perf1") == 0) {
     test_perf1();
   } else if (argc == 2 && strcmp(argv[1], "perf2") == 0) {
     test_perf2();
+  } else if (argc == 2 && strcmp(argv[1], "perf3") == 0) {
+    test_perf3();
   } else {
     test_correctness();
   }
