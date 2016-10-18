@@ -1,6 +1,7 @@
 #include "testlib.h"
 #include "Hacl_Box.h"
 #include <sodium.h>
+#include <time.h>
 
 #define MESSAGE_LEN 44
 #define secretbox_MACBYTES   16
@@ -45,9 +46,9 @@ uint8_t sk[secretbox_KEYBYTES] = {
   0x41, 0x49, 0xf5, 0x1c
 };
 
-int main(){
+void test_correctness() {
   if (sodium_init() == -1) {
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
   uint8_t ciphertext[CIPHERTEXT_LEN], ciphertext2[CIPHERTEXT_LEN],
     mac[16],mac2[16],
@@ -76,6 +77,60 @@ int main(){
   printf("Box decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
   
   compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
+}
+
+#define SIZE (512*1024*1024)
+
+void test_perf1() {
+  void *plain = malloc(SIZE), *cipher = malloc(SIZE);
+  uint8_t mac[16];
+  clock_t c1, c2;
+  double t1, t2;
+
+  c1 = clock();
+  Hacl_SecretBox_crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
+  c2 = clock();
+  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for HACL: %f\n", t1);
+
+  c1 = clock();
+  crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
+  c2 = clock();
+  t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for Sodium: %f\n", t2);
+
+  printf("Slowdown: %f\n", t1/t2);
+}
+
+void test_perf2() {
+  void *plain = malloc(SIZE);
+  uint8_t mac[16];
+  clock_t c1, c2;
+  double t1, t2;
+
+  c1 = clock();
+  Hacl_Symmetric_Poly1305_poly1305_mac(mac, plain, SIZE, key);
+  c2 = clock();
+  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for HACL: %f\n", t1);
+
+  c1 = clock();
+  crypto_onetimeauth(mac, plain, SIZE, key);
+  c2 = clock();
+  t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for Sodium: %f\n", t2);
+
+  printf("Slowdown: %f\n", t1/t2);
+}
+
+int main(int argc, char *argv[]){
+  if (argc == 2 && strcmp(argv[1], "perf1") == 0) {
+    test_perf1();
+  } else if (argc == 2 && strcmp(argv[1], "perf2") == 0) {
+    test_perf2();
+  } else {
+    test_correctness();
+  }
 
   return EXIT_SUCCESS;
 }
