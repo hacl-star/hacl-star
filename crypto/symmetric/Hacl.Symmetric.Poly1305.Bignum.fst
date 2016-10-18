@@ -1,568 +1,470 @@
 module Hacl.Symmetric.Poly1305.Bignum
 
 open FStar.Mul
-open FStar.HyperStack
-open FStar.ST
 open FStar.Ghost
+(** Machine integers *)
+open Hacl.UInt64
+(** Effects and memory layout *)
+open FStar.HyperStack
+(** Buffers *)
 open FStar.Buffer
+(** Mathematical definitions *)
 open FStar.Math.Lib
 open FStar.Math.Lemmas
-open Hacl.UInt64
-open Hacl.Cast
-(* open Hacl.SBuffer *)
-open FStar.Buffer
+
 open Hacl.Symmetric.Poly1305.Parameters
 open Hacl.Symmetric.Poly1305.Bigint
-open Hacl.Symmetric.Poly1305.Bignum.Lemmas
 
-(* Module abbreviations *)
-module HH = FStar.HyperHeap
+module U32 = FStar.UInt32
+module U64 = FStar.UInt64
+module H32 = Hacl.UInt32
+module H64 = Hacl.UInt64
 module HS = FStar.HyperStack
 
-module U8   = FStar.UInt8
-module U32  = FStar.UInt32
-module H8   = Hacl.UInt8
-module H32  = Hacl.UInt32
-module H64  = Hacl.UInt64
+open FStar.Buffer.Quantifiers
+open Hacl.Symmetric.Poly1305.Bignum.Lemmas.Part1
+open Hacl.Symmetric.Poly1305.Bignum.Lemmas.Part2
+open Hacl.Symmetric.Poly1305.Bignum.Lemmas.Part3
+open Hacl.Symmetric.Poly1305.Bignum.Lemmas.Part4
+open Hacl.Symmetric.Poly1305.Bignum.Lemmas.Part5
 
-#reset-options "--initial_fuel 0 --max_fuel 0"
+let prime = prime
+let satisfiesModuloConstraints h b = satisfiesModuloConstraints h b
+let isSum h h1 a b = isSum h h1 a b
+let bound27 h b = bound27 h b
+let w : U32.t -> Tot int = U32.v
 
-val fsum_index: a:bigint -> a_idx:u32 -> b:bigint{disjoint a b} -> b_idx:u32 -> len:u32 ->
-  ctr:u32{U32.v ctr<=U32.v len} -> Stack unit
-    (requires (fun h -> live h a /\ live h b /\ U32.v a_idx+U32.v len <= length a
-      /\ U32.v b_idx+U32.v len <= length b
-	(* /\ willNotOverflow h (U32.v a_idx) (U32.v b_idx) (U32.v len) (U32.v ctr) a b)) *)
-	))
-    (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h1 a /\ live h1 b
-      /\ U32.v a_idx+U32.v len <= length a /\ U32.v b_idx+U32.v len <= length b /\ modifies_1 a h0 h1
-      (* TODO: restore the functional correctness bits *)
-      (* /\ isNotModified h0 h1 (w a_idx) (w len) (w ctr) a *)
-      (* /\ isSum h0 h1 (w a_idx) (w b_idx) (w len) (w ctr) a b *)
-    ))
-let rec fsum_index a a_idx b b_idx len ctr =
-  if U32 (len =^ ctr) then ()
-  else begin
-      let i = ctr in
-      let (ai:Hacl.UInt64.t) = U32 a.(i+^a_idx) in
-      let (bi:Hacl.UInt64.t) = U32 b.(i+^b_idx) in
-      let z = ai +%^ bi in
-      a.(U32 (a_idx +^ i)) <- z;
-      fsum_index a a_idx b b_idx len (U32 (ctr +^ 1ul));
-      ()
-  end
 
-val fsum': a:bigint -> b:bigint{disjoint a b} -> Stack unit
-    (requires (fun h -> live h a /\ live h b
-      (* norm h a /\ norm h b *)
-    ))
-    (ensures (fun h0 u h1 -> live h0 a /\ live h0 b /\ live h1 a /\ modifies_1 a h0 h1
-      (* /\ norm h0 a /\ norm h0 b /\  *)
-      (* /\ eval h1 a norm_length = eval h0 a norm_length + eval h0 b norm_length *)
-      (* /\ isNotModified h0 h1 0 norm_length 0 a *)
-      (* /\ isSum h0 h1 0 0 norm_length 0 a b *)
-    ))
-let fsum' a b =
-  fsum_index a 0ul b 0ul nlength 0ul;
-  ()
+(*** Addition ***)
 
-(* Scalar multiplication *)
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
 
-val scalar_multiplication_aux: res:bigint -> a:bigint{disjoint res a} -> s:s64 -> ctr:u32 -> Stack unit
-  (requires (fun h -> live h res /\ live h a /\ U32.v ctr <= norm_length
-    (* /\ (forall (i:nat). {:pattern (v (get h a i))} i < U32.v ctr ==> v (get h a i) * v s < poU32.v2 64)  *)
-  ))
-  (ensures (fun h0 _ h1 -> live h1 res /\ modifies_1 res h0 h1
-    (* /\ scalarProduct h0 h1 (U32.v ctr) a s res  *)
-    (* /\ equal h0 a h1 a  *)
-    (* /\ equalSub h0 res (U32.v ctr) h1 res (U32.v ctr) (length res - U32.v ctr)  *)
-  ))
-let rec scalar_multiplication_aux res a s ctr =
-  let open FStar.UInt32 in
-  if ctr =^ 0ul then ()
-  else begin
-    let i = ctr -^ 1ul in
-    let ai = a.(i) in
-    let resi = H64 (ai *%^ s) in
-    res.(i) <- resi;
-    scalar_multiplication_aux res a s i;
-    ()
-  end
-
-val scalar_multiplication: res:bigint -> a:bigint{disjoint res a} -> s:s64 -> Stack unit
-  (requires (fun h -> live h res /\ live h a
-    (* /\ (forall (i:nat). {:pattern (v (get h a i))} i < norm_length ==> v (get h a i) * v s < pow2 64)  *)
-  ))
-  (ensures (fun h0 _ h1 -> live h1 res /\ modifies_1 res h0 h1
-    (* /\ scalarProduct h0 h1 norm_length a s res  *)
-    (* /\ equal h0 a h1 a  *)
-    (* /\ equalSub h0 res norm_length h1 res norm_length (length res - norm_length) *)
-    (* /\ eval h1 res norm_length = eval h0 a norm_length * v s  *)
-  ))
-let scalar_multiplication res a s =
-  scalar_multiplication_aux res a s nlength;
-  ()
-
-(* Multiplication *)
-
-val multiplication_step_0: a:bigint -> b:bigint -> ctr:u32{U32.v ctr<norm_length} -> c:bigint{disjoint a c /\ disjoint b c} -> tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} ->  Stack unit
-     (requires (fun h -> live h a /\ live h b /\ live h c /\ live h tmp
-       (* /\ bound27 h a /\ norm h b /\ live h c /\ live h tmp /\ length c >= 2*norm_length -1 *)
-       (* /\ maxValue h c (length c) <= w ctr * pow2 53 *)
-     ))
-     (ensures (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1
-       (* /\ bound27 h0 a /\ norm h0 b /\ live h0 c /\ live h0 tmp /\ length c >= 2*norm_length-1 *)
-       (* /\ scalarProduct h0 h1 norm_length a (get h0 b (w ctr)) tmp *)
-       (* /\ eval h1 tmp norm_length = eval h0 a norm_length * v (get h0 b (w ctr)) *)
-     ))
-let multiplication_step_0 a b ctr c tmp =
-  let s = b.(ctr) in
-  scalar_multiplication tmp a s
-
-val multiplication_step_p1: a:bigint -> b:bigint -> ctr:u32{U32.v ctr<norm_length} ->
-  c:bigint{disjoint a c /\ disjoint b c /\ length c >= 2*norm_length-1} ->
-  tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} ->  Stack unit
-     (requires (fun h -> live h a /\ live h b /\ live h c /\ live h tmp
-	(* /\ bound27 h a /\ norm h b *)
-        (* /\ (maxValue h c (length c) <= U32.v ctr * pow2 53) *)
-	(* /\ (eval h c (2*norm_length-1) = eval h a (norm_length) * eval h b (U32.v ctr)) *)
-     ))
-     (ensures (fun h0 u h1 -> live h1 c /\ live h1 tmp /\ modifies_2 c tmp h0 h1
-       (* (bound27 h0 a) /\ (norm h0 b) /\ (live h0 c) /\ (live h0 tmp) *)
-       (* /\ (bound27 h1 a) /\ (norm h1 b) *)
-       (* /\ (maxValue h0 c (length c) <= U32.v ctr * pow2 53) *)
-       (* /\ (maxValue h1 c (length c) <= (U32.v ctr+1) * pow2 53) *)
-       (* /\ (eval h0 c (2*norm_length-1) = eval h0 a (norm_length) * eval h0 b (U32.v ctr)) *)
-       (* /\ (eval h1 c (2*norm_length-1) = eval h0 c (2*norm_length-1) + pow2 (bitweight templ (U32.v ctr)) * eval h0 a norm_length * v (get h0 b (U32.v ctr))) *)
-     ))
-let multiplication_step_p1 a b ctr c tmp =
-  multiplication_step_0 a b ctr c tmp;
-  fsum_index c ctr tmp 0ul nlength 0ul
-
-val multiplication_step: a:bigint -> b:bigint -> ctr:u32{U32.v ctr < norm_length} ->
-  c:bigint{disjoint a c /\ disjoint b c /\ length c >= 2*norm_length-1} ->
-  tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> Stack unit
-     (requires (fun h ->  live h a  /\ live h b /\ live h c /\ live h tmp
-        (* /\ bound27 h a /\ norm h b *)
-	(* /\ maxValue h c (length c) <= U32.v ctr * pow2 53 *)
-	(* /\ eval h c (2*norm_length-1) = eval h a (norm_length) * eval h b (U32.v ctr) *)
-     ))
-     (ensures (fun h0 u h1 -> live h1 c /\ live h1 tmp /\ modifies_2 c tmp h0 h1
-       (* /\ bound27 h0 a /\ bound27 h1 a /\ norm h0 b /\ norm h1 b *)
-       (* /\ live h0 c /\ live h1 c  /\ live h0 tmp *)
-       (* /\ maxValue h0 c (length c) <= U32.v ctr * pow2 53 *)
-       (* /\ maxValue h1 c (length c) <= (U32.v ctr+1) * pow2 53 *)
-       (* /\ eval h0 c (2*norm_length-1) = eval h0 a (norm_length) * eval h0 b (U32.v ctr) *)
-       (* /\ eval h1 c (2*norm_length-1) = eval h0 a (norm_length) * v (get h0 b (U32.v ctr)) * pow2 (bitweight templ (U32.v ctr)) + eval h0 c (2*norm_length-1) *)
-     ))
-let multiplication_step a b ctr c tmp =
-  multiplication_step_p1 a b ctr c tmp
-
-val multiplication_aux: a:bigint -> b:bigint -> ctr:u32{U32.v ctr<=norm_length} ->
-  c:bigint{disjoint a c /\ disjoint b c /\ length c >= 2*norm_length-1} ->
-  tmp:bigint{disjoint a tmp /\ disjoint b tmp /\ disjoint c tmp} -> Stack unit
-     (requires (fun h -> live h a /\ live h b  /\ live h c /\ live h tmp
-        (* /\ bound27 h a /\ norm h b *)
-	(* /\ maxValue h c (length c) <= (norm_length - U32.v ctr) * pow2 53 *)
-	(* /\ eval h c (2*norm_length-1) = eval h a (norm_length) * eval h b (norm_length - U32.v ctr) *)
-     ))
-     (ensures (fun h0 u h1 -> live h1 c /\ live h1 tmp /\ modifies_2 c tmp h0 h1
-       (* /\ bound27 h0 a /\ norm h0 b /\ live h0 c /\ live h0 tmp *)
-       (* /\ bound27 h1 a /\ norm h1 b *)
-       (* /\ eval h1 c (2*norm_length-1) = eval h0 a (norm_length) * eval h0 b (norm_length) *)
-       (* /\ maxValue h1 c (length c) <= norm_length * pow2 53 *)
-     ))
-let rec multiplication_aux a b ctr c tmp =
-  let open FStar.UInt32 in
-  if ctr =^ 0ul then ()
-  else begin
-    multiplication_step a b (nlength -^ ctr) c tmp;
-    multiplication_aux a b (ctr -^ 1ul) c tmp
-  end
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
-
-(* Code : core multiplication function *)
-val multiplication: c:bigint{length c >= 2*norm_length-1} -> a:bigint{disjoint c a} ->
-  b:bigint{disjoint c b} -> Stack unit
-     (requires (fun h -> live h a /\ live h b /\ live h c
-       (* bound27 h a /\ norm h b /\ live h c /\ null h c *)
-     ))
-     (ensures (fun h0 u h1 -> live h1 c /\ modifies_1 c h0 h1
-       (* /\ bound27 h0 a /\ norm h0 b /\ live h0 c /\ bound27 h1 a /\ norm h1 b *)
-       (* /\ eval h1 c (2*norm_length-1) = eval h0 a (norm_length) * eval h0 b (norm_length) *)
-       (* /\ maxValue h1 c (length c) <= norm_length * pow2 53 *)
-     ))
-let multiplication c a b =
-  let h_init = ST.get() in
-  push_frame ();
+private val fsum_: a:bigint -> b:bigint{disjoint a b} -> Stack unit
+  (requires (fun h -> norm h a /\ norm h b))
+  (ensures (fun h0 u h1 -> norm h0 a /\ norm h0 b /\ live h1 a /\ modifies_1 a h0 h1 /\ isSum h0 h1 a b))
+let fsum_ a b =
   let h0 = ST.get() in
-  let tmp = create (uint64_to_sint64 0UL) nlength in
-  let h1 = ST.get() in
-  multiplication_aux a b nlength c tmp;
-  let h2 = ST.get() in
-  lemma_modifies_0_2' c tmp h0 h1 h2;
-  assert(modifies_2_1 c h0 h2);
-  pop_frame ();
-  let hfin = ST.get() in
-  ()
-
-
-(*** Modulo ***)
-
-#reset-options "--initial_fuel 4 --max_fuel 4"
-
-val times_5: x:s64{5 * v x < pow2 64} -> Tot (y:s64{v y = 5 * v x})
-let times_5 x =
-  Math.Lemmas.pow2_lt_compat 64 2;
-  let z = x <<^ 2ul in
-  x +^ z
-
-#reset-options "--initial_fuel 0 --max_fuel 0"
-
-val freduce_degree':
-  b:bigint -> ctr:u32{U32.v ctr < norm_length - 1} -> Stack unit
-    (requires (fun h -> live h b /\ length b >= 2*norm_length - 1
-      (* /\ reducible h b (U32.v ctr) *)
-    ))
-    (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-      (* /\ untouched h0 h1 b (U32.v ctr) /\ times5 h0 h1 b (U32.v ctr) *)
-      (* /\ eval h1 b (norm_length) % reveal prime = eval h0 b (norm_length+1+U32.v ctr) % reveal prime *)
-      (* /\ modifies_1 b h0 h1 *)
-    ))
-let rec freduce_degree' b ctr' =
-  (* let h0 = ST.get() in *)
-  if U32 (ctr' =^ 0ul) then begin
-    let b5ctr = b.(nlength) in
-    let bctr = b.(0ul) in
-    let b5ctr = uint64_to_sint64 5uL *%^ b5ctr in
-    let bctr = bctr +%^ b5ctr in
-    (* let b5ctr = times_5 b5ctr in *)
-    (* let bctr = bctr +^ b5ctr in  *)
-    b.(0ul) <- bctr(* ; *)
-    (* let h1 = ST.get() in *)
-    (* freduce_degree_lemma h0 h1 b 0; *)
-    (* cut (eval h0 b (norm_length+1+0) % reveal prime = eval h1 b (norm_length+0) % reveal prime); *)
-    (* cut (eval h0 b (norm_length+1) % reveal prime = eval h1 b (norm_length+0) % reveal prime) *)
-    end
-  else begin
-    let ctr = ctr' in
-    let b5ctr = index b (U32 (ctr +^ nlength)) in
-    let bctr = b.(ctr) in
-    let b5ctr = uint64_to_sint64 5uL *%^ b5ctr in
-    let bctr = bctr +%^ b5ctr in
-    (* let b5ctr = times_5 b5ctr in *)
-    (* let bctr = bctr +^ b5ctr in  *)
-    b.(ctr) <- bctr;
-    (* let h1 = ST.get() in *)
-    (* freduce_degree_lemma h0 h1 b (U32.v ctr);  *)
-    (* cut (eval h0 b (norm_length+1+U32.v ctr) % reveal prime = eval h1 b (norm_length+U32.v ctr) % reveal prime); *)
-    (* cut(reducible h1 b (U32.v ctr-1));  *)
-    freduce_degree' b (U32 (ctr -^ 1ul));
-    (* let h2 = ST.get() in  *)
-    (* cut (forall (i:nat). {:pattern (v (get h1 b i))} (i > U32.v ctr /\ i < 2*norm_length-1) ==> *)
-    (* 	   v (get h1 b i) = v (get h0 b i));  *)
-    (* cut(untouched h0 h2 b (U32.v ctr)); *)
-    (* cut (times5 h0 h2 b (U32.v ctr)) ; *)
-    ()
-  end
-
-val freduce_degree: b:bigint -> Stack unit
-  (requires (fun h -> live h b /\ length b >= 2*norm_length - 1
-    (* /\ satisfiesModuloConstraints h b *)
-    ))
-  (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-    (* /\ live h0 b *)
-    (* /\ satisfiesModuloConstraints h0 b *)
-    (* /\ (forall (i:nat). {:pattern (v (get h1 b i))} i <= norm_length ==> *)
-    (* 	v (get h1 b i) < pow2 62) *)
-    (* /\ eval h1 b norm_length % reveal prime = eval h0 b (2*norm_length-1) % reveal prime *)
-  ))
-let freduce_degree b =
-  (* let h0 = ST.get() in *)
-  (* aux_lemma_4' h0 b; *)
-  freduce_degree' b (U32 (nlength -^ 2ul))
-  (* let h1 = ST.get() in *)
-  (* aux_lemma_5' h0 h1 b *)
-
-val mod2_26: a:s64 -> Tot (b:s64(* {v b = v a % pow2 26} *))
-let mod2_26 a =
-  let mask = shift_left (uint64_to_sint64 1UL) 26ul in
-  Math.Lemmas.pow2_lt_compat 64 26;
-  let mask = mask -^ (uint64_to_sint64 1UL) in
-  let res = a &^ mask in
-  (* SInt.ulogand_lemma_4 #64 a 26 mask; *)
-  res
-
-val carry: b:bigint -> ctr:u32{U32.v ctr <= norm_length} -> Stack unit
-    (requires (fun h -> live h b /\ length b >= norm_length+1
-      (* carriable h b (w ctr) /\ carried h b (w ctr) *)
-    ))
-    (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-      (* /\ carried h1 b norm_length /\ untouched_2 h0 h1 b (w ctr) *)
-      (* /\ eval h1 b (norm_length+1) = eval h0 b (norm_length+1) *)
-      (* /\ modifies_1 b h0 h1 *)
-    ))
-let rec carry b i =
-  (* let h0 = ST.get() in *)
-  if U32( i =^ nlength) then ()
-  else begin
-    let bi = b.(i) in
-    let ri = mod2_26 bi in
-    b.(i) <- ri;
-    (* let h1 = ST.get() in *)
-    let c = (bi >>^ 26ul) in
-    (* cut (v c = (v bi) / (pow2 26)); *)
-    (* Math.Lib.pow2_div_lemma 64 26; *)
-    (* (\* TODO *\) *)
-    (* assume (v c < pow2 (64 - 26)); *)
-    (* assert(live h1 b); *)
-    (* assert(w i + 1 < length b);  *)
-    let bip1 = b.(U32 (i +^ 1ul)) in
-    (* auxiliary_lemma_1' bip1 c; *)
-    let z = bip1 +%^ c in
-    b.(U32 (i +^ 1ul)) <- z;
-    (* let h2 = ST.get() in *)
-    (* eval_carry_lemma h0 b h2 b (w i); *)
-    carry b (U32 (i +^ 1ul))
-  end
-
-val carry_top_to_0: b:bigint -> Stack unit
-    (requires (fun h -> live h b /\ length b >= norm_length + 1
-      (* /\ carried h b norm_length /\ length b >= 2*norm_length-1 *)
-      (* /\ v (get h b 0) + 5 * v (get h b norm_length) < pow2 63 *)
-    ))
-    (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-      (* /\ carried h0 b norm_length /\ carried' h1 b 1 *)
-      (* /\ eval h1 b norm_length % (reveal prime) = eval h0 b (norm_length+1) % (reveal prime) *)
-      (* /\ v (get h1 b 0) = v (get h0 b 0) + 5 * v (get h0 b norm_length) *)
-      (* /\ (forall (i:nat). {:pattern (v (get h1 b i))} (i > 0 /\ i < length b) ==> *)
-      (* 	  v (get h1 b i) = v (get h0 b i)) *)
-      (* /\ modifies_1 b h0 h1 *)
-    ))
-let carry_top_to_0 b =
-  (* Math.Lemmas.pow2_lt_compat 64 63; *)
-  (* let h0 = ST.get() in *)
-  let b0 = b.(0ul) in
-  let btop = b.(nlength) in
-  let btop_5 = uint64_to_sint64 5uL *%^ btop in
-  (* let btop_5 = times_5 btop in *)
-  b.(0ul) <- (b0 +%^ btop_5)(* ; *)
-  (* let h1 = ST.get() in *)
-  (* freduce_degree_lemma h0 h1 b 0 *)
-
-val carry2_aux: b:bigint -> ctr:u32{U32.v ctr > 0 /\ U32.v ctr <= norm_length} -> Stack unit
-  (requires (fun h -> live h b /\ length b >= norm_length + 1
-    (* carriable2 h b (w ctr) *)
-  ))
-  (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-    (* carriable2 h0 b (w ctr) /\ carriable2 h1 b norm_length *)
-    (* /\ eval h1 b (norm_length+1) = eval h0 b (norm_length+1) *)
-    (* /\ modifies_1 b h0 h1 *)
-  ))
-let rec carry2_aux b i =
-  (* let h0 = ST.get() in *)
-  if U32 (i =^ nlength) then ()
-  else begin
-    let bi = b.(i) in
-    let ri = mod2_26 bi in
-    (* lemma_aux_2 bi; *)
-    (* cut (v ri < pow2 (templ (w i)));  *)
-    b.(i) <- ri;
-    (* let h1 = ST.get() in *)
-    let c = bi >>^ 26ul in
-    // In the spec of >>, TODO
-    (* assume(v c < 2);  *)
-    let bip1 = b.(U32 (i +^ 1ul)) in
-    (* auxiliary_lemma_2 bip1 c; *)
-    (* Math.Lemmas.pow2_lt_compat 64 27; *)
-    (* Math.Lemmas.pow2_double_sum 26; *)
-    (* Math.Lemmas.pow2_lt_compat 26 15; *)
-    let z = bip1 +%^ c in
-    (* cut (v z = v bip1 + v c /\ v c < 2 /\ v bip1 < pow2 26); *)
-    (* cut (v z >= pow2 26 ==> v c = 1);  *)
-    (* cut (v c > 0 ==> v (get h0 b (w i)) / (pow2 26) > 0 ==> v (get h0 b (w i)) >= pow2 26); *)
-    (* cut (v z >= pow2 26 ==> v (get h1 b (w i)) < pow2 15);  *)
-    upd b (U32 (i +^ 1ul)) z;
-    (* let h2 = ST.get() in *)
-    (* cut (v z >= pow2 26 ==> v c = 1);  *)
-    (* eval_carry_lemma h0 b h2 b (w i);  *)
-    carry2_aux b (U32 (i +^ 1ul))
-  end
-
-val carry2: b:bigint -> Stack unit
-  (requires (fun h -> live h b /\ length b >= norm_length + 1
-    (* carried h b norm_length /\ length b >= 2*norm_length-1 *)
-  ))
-  (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-    (* /\ carried h0 b norm_length /\ carriable2 h1 b norm_length *)
-    (* /\ eval h1 b (norm_length+1) % reveal prime = eval h0 b (norm_length+1) % reveal prime *)
-    (* /\ modifies_1 b h0 h1 *)
-  ))
-let rec carry2 b =
-  (* let h0 = ST.get() in *)
-  (* pow2_3_lemma (); *)
-  (* Math.Lib.pow2_exp_lemma 3 37; *)
-  (* Math.Lemmas.pow2_lt_compat 40 37; *)
-  (* Math.Lemmas.pow2_lt_compat 40 26; *)
-  (* Math.Lemmas.pow2_double_sum 40; *)
-  (* Math.Lemmas.pow2_lt_compat 63 41; *)
-  carry_top_to_0 b;
-  (* let h1 = ST.get() in *)
-  b.(nlength) <- (uint64_to_sint64 0UL);
-  (* let h2 = ST.get() in *)
-  (* eval_eq_lemma h1 h2 b b norm_length; *)
-  (* cut ( eval h2 b (norm_length+1) = eval h1 b (norm_length));  *)
-  let bi = b.(0ul) in
-  let ri = mod2_26 bi in
-  (* cut (v ri < pow2 26); *)
-  b.(0ul) <- ri;
-  (* let h3 = ST.get() in *)
-  let c = bi >>^ 26ul in
-  (* cut (v bi < pow2 41);  *)
-  // In the spec of >>, TODO
-  (* assume (v c < pow2 15);  *)
-  let bip1 = b.(1ul) in
-  (* auxiliary_lemma_2 bip1 c;  *)
-  (* Math.Lemmas.pow2_lt_compat 64 27; *)
-  (* Math.Lemmas.pow2_double_sum 26; *)
-  (* Math.Lemmas.pow2_lt_compat 26 15; *)
-  let z = bip1 +%^ c in
-  b.(1ul) <- z;
-  (* let h4 = ST.get() in *)
-  (* eval_carry_lemma h2 b h4 b 0;  *)
-  (* cut(carriable2 h4 b 1); *)
-  carry2_aux b 1ul
-
-val last_carry: b:bigint -> Stack unit
-  (requires (fun h -> live h b /\ length b >= norm_length + 1
-    (* carriable2 h b norm_length /\ length b >= 2*norm_length-1 *)
-  ))
-  (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-    (* /\ carriable2 h0 b norm_length /\ norm h1 b *)
-    (* /\ eval h1 b norm_length % reveal prime = eval h0 b (norm_length+1) % reveal prime *)
-  ))
-let last_carry b =
-  (* let h0 = ST.get() in *)
-  let b0 = index b 0ul in
-  let btop = b.(nlength) in
-  (* cut (v b0 < pow2 26 /\ v btop < 2);  *)
-  (* pow2_3_lemma (); *)
-  (* cut (5 * v btop < pow2 3 /\ True);  *)
-  (* Math.Lemmas.pow2_lt_compat 26 3; *)
-  (* Math.Lemmas.pow2_double_sum 26; *)
-  (* Math.Lemmas.pow2_lt_compat 64 27; *)
-  (* cut(v b0 + 5 * v btop < pow2 27 /\ True);  *)
-  let btop_5 = uint64_to_sint64 5uL *%^ btop in
-  (* let btop_5 = times_5 btop in *)
-  b.(0ul) <- (b0 +%^ btop_5);
-  (* let h1 = ST.get() in *)
-  (* freduce_degree_lemma h0 h1 b 0; *)
-  b.(nlength) <- (uint64_to_sint64 0UL);
-  (* let h2 = ST.get() in *)
-  (* eval_eq_lemma h1 h2 b b norm_length; *)
-  (* cut (eval h2 b (norm_length+1) = eval h1 b norm_length); *)
-  let bi = b.(0ul) in
-  let ri = mod2_26 bi in
-  (* assert(v ri < pow2 26); *)
-  b.(0ul) <- ri;
-  (* let h3 = ST.get() in *)
-  let c = bi >>^ 26ul in
-  (* cut (v bi < pow2 26 + 5); *)
-  (* cut (v bi >= pow2 26 ==> v (get h3 b 1) < pow2 15); *)
-  (* // In the spec of >>, TODO *)
-  (* assume (v bi >= pow2 26 ==> v c = 1); *)
-  let bip1 = b.(1ul) in
-  (* auxiliary_lemma_2 bip1 c; *)
-  (* Math.Lemmas.pow2_lt_compat 64 27; *)
-  (* Math.Lemmas.pow2_double_sum 26; *)
-  (* Math.Lemmas.pow2_lt_compat 26 15; *)
-  let z = bip1 +%^ c in
-  b.(1ul) <- z;
-  (* let h4 = ST.get() in *)
-  (* eval_carry_lemma h2 b h4 b 0; *)
-  (* cut (v (get h4 b 1) < pow2 26); *)
-  (* cut (norm h4 b); *)
-  ()
-
-val modulo: b:bigint -> Stack unit
-  (requires (fun h -> live h b /\ length b >= 2*norm_length-1
-    (* /\ satisfiesModuloConstraints h b *)
-  ))
-  (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-    (* /\ satisfiesModuloConstraints h0 b /\ norm h1 b *)
-    (* /\ eval h1 b norm_length % reveal prime = eval h0 b (2*norm_length-1) % reveal prime *)
-  ))
-let modulo b =
-  (* let h0 = ST.get() in *)
-  freduce_degree b;
-  (* let h1 = ST.get() in *)
-  b.(nlength) <- (uint64_to_sint64 0UL);
-  (* let h2 = ST.get() in *)
-  (* eval_eq_lemma h1 h2 b b norm_length; *)
-  (* cut (eval h2 b (norm_length+1) = eval h1 b norm_length); *)
-  carry b 0ul;
-  (* let h3 = ST.get() in *)
-  carry2 b;
-  (* let h4 = ST.get() in *)
-  last_carry b
-
-val freduce_coefficients: b:bigint -> Stack unit
-  (requires (fun h -> live h b
-    (* /\ (forall (i:nat). {:pattern (v (get h b i))} i < norm_length ==> v (get h b i) < pow2 62) *)
-  ))
-  (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-    (* /\ live h0 b /\ norm h1 b *)
-    (* /\ eval h1 b norm_length % reveal prime = eval h0 b norm_length % reveal prime *)
-    (* /\ modifies_1 b h0 h1 *)
-  ))
-let freduce_coefficients b =
-  push_frame();
-  (* let h0 = ST.get() in *)
-  let tmp = create (uint64_to_sint64 0UL) (U32 (2ul *^ nlength -^ 1ul)) in
-  (* let h1 = ST.get() in *)
-  (* eq_lemma_0 h0 h1 b; *)
-  (* eval_eq_lemma h0 h1 b b norm_length; *)
-  blit b 0ul tmp 0ul nlength;
-  (* let h2 = ST.get() in *)
-  (* eval_eq_lemma h1 h2 b tmp norm_length; *)
-  (* cut (forall (i:nat). {:pattern (v (get h2 tmp i))} i < norm_length ==> v (get h2 tmp i) = v (get h0 b i));  *)
-  carry tmp 0ul;
-  carry2 tmp;
-  last_carry tmp;
-  (* let h = ST.get() in *)
-  blit tmp 0ul b 0ul nlength;
-  (* let h' = ST.get() in *)
-  (* eval_eq_lemma h h' tmp b norm_length; *)
-  (* cut (forall (i:nat). {:pattern (v (get h tmp i))} i < norm_length ==> v (get h tmp i) < pow2 26);  *)
-  (* cut (forall (i:nat). {:pattern (v (get h' b i))} i < norm_length ==> v (get h' b (0+i)) = v (get h tmp (0+i))) *)
-  pop_frame()
-
-(*** Finalization ***)
-
-val finalize: b:bigint -> Stack unit
-  (requires (fun h -> live h b
-    (* /\ norm h b *)
-  ))
-  (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-    (* /\ norm h0 b /\ norm h1 b *)
-    (* /\ eval h1 b norm_length = eval h0 b norm_length % reveal prime *)
-  ))
-let finalize b =
-  let mask_26 = ((uint64_to_sint64 1UL) <<^ 26ul) -%^ (uint64_to_sint64 1UL) in
-  let mask2_26m5 = mask_26 -%^ (uint64_to_sint64 1UL <<^ 2ul) in
+  let a0 = a.(0ul) in
+  let a1 = a.(1ul) in
+  let a2 = a.(2ul) in
+  let a3 = a.(3ul) in
+  let a4 = a.(4ul) in
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
   let b2 = b.(2ul) in
   let b3 = b.(3ul) in
   let b4 = b.(4ul) in
-  let mask = Hacl.UInt64.eq_mask b4 mask_26 in
-  let mask = Hacl.UInt64.eq_mask b3 mask_26 &^ mask in
-  let mask = Hacl.UInt64.eq_mask b2 mask_26 &^ mask in
-  let mask = Hacl.UInt64.eq_mask b1 mask_26 &^ mask in
-  let mask = Hacl.UInt64.gte_mask b0 mask2_26m5 &^ mask in
-  b.(0ul) <- (b0 -%^ (mask &^ mask2_26m5));
-  b.(1ul) <- (b1 -%^ (b1 &^ mask));
-  b.(2ul) <- (b2 -%^ (b2 &^ mask));
-  b.(3ul) <- (b3 -%^ (b3 &^ mask));
-  b.(4ul) <- (b4 -%^ (b4 &^ mask));
-  ()
+  assert(v a0 = v (get h0 a 0)); assert(v a1 = v (get h0 a 1)); assert(v a2 = v (get h0 a 2));
+  assert(v a3 = v (get h0 a 3)); assert(v a4 = v (get h0 a 4)); assert(v b0 = v (get h0 b 0));
+  assert(v b1 = v (get h0 b 1)); assert(v b2 = v (get h0 b 2)); assert(v b3 = v (get h0 b 3));
+  assert(v b4 = v (get h0 b 4));
+  lemma_fsum_0 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4;
+  let ab0 = a0 +^ b0 in
+  let ab1 = a1 +^ b1 in
+  let ab2 = a2 +^ b2 in
+  let ab3 = a3 +^ b3 in
+  let ab4 = a4 +^ b4 in
+  a.(0ul) <- ab0;
+  a.(1ul) <- ab1;
+  a.(2ul) <- ab2;
+  a.(3ul) <- ab3;
+  a.(4ul) <- ab4
+
+val fsum': a:bigint -> b:bigint{disjoint a b} -> Stack unit
+    (requires (fun h -> norm h a /\ norm h b))
+    (ensures (fun h0 u h1 -> norm h0 a /\ norm h0 b /\ bound27 h1 a /\ modifies_1 a h0 h1
+      /\ isSum h0 h1 a b
+      /\ eval h1 a norm_length = eval h0 a norm_length + eval h0 b norm_length
+    ))
+let fsum' a b =
+  let h0 = ST.get() in
+  fsum_ a b;
+  let h1 = ST.get() in
+  lemma_fsum h0 h1 a b
+
+private val update_9: c:bigint{length c >= 2*norm_length-1} ->
+  c0:H64.t -> c1:H64.t -> c2:H64.t ->
+  c3:H64.t -> c4:H64.t -> c5:H64.t ->
+  c6:H64.t -> c7:H64.t -> c8:H64.t ->
+  Stack unit
+    (requires (fun h -> live h c))
+    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1
+      /\ get h1 c 0 == c0 /\ get h1 c 1 == c1 /\ get h1 c 2 == c2
+      /\ get h1 c 3 == c3 /\ get h1 c 4 == c4 /\ get h1 c 5 == c5
+      /\ get h1 c 6 == c6 /\ get h1 c 7 == c7 /\ get h1 c 8 == c8))
+let update_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8 =
+  c.(0ul) <- c0;
+  c.(1ul) <- c1;
+  c.(2ul) <- c2;
+  c.(3ul) <- c3;
+  c.(4ul) <- c4;
+  c.(5ul) <- c5;
+  c.(6ul) <- c6;
+  c.(7ul) <- c7;
+  c.(8ul) <- c8
+
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+
+private val multiplication_0:
+  c:bigint{length c >= 2*norm_length-1} ->
+  a0:u27 -> a1:u27 -> a2:u27 -> a3:u27 -> a4:u27 ->
+  b0:u26 -> b1:u26 -> b2:u26 -> b3:u26 -> b4:u26 ->
+  Stack unit
+    (requires (fun h -> live h c))
+    (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c
+      /\ isMultiplication_ h1 (v a0) (v a1) (v a2) (v a3) (v a4) (v b0) (v b1) (v b2) (v b3) (v b4) c))
+let multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
+  lemma_multiplication_0 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4;
+  let ab00 = a0 *^ b0 in
+  let ab01 = a0 *^ b1 in
+  let ab02 = a0 *^ b2 in
+  let ab03 = a0 *^ b3 in
+  let ab04 = a0 *^ b4 in
+  let ab10 = a1 *^ b0 in
+  let ab11 = a1 *^ b1 in
+  let ab12 = a1 *^ b2 in
+  let ab13 = a1 *^ b3 in
+  let ab14 = a1 *^ b4 in
+  let ab20 = a2 *^ b0 in
+  let ab21 = a2 *^ b1 in
+  let ab22 = a2 *^ b2 in
+  let ab23 = a2 *^ b3 in
+  let ab24 = a2 *^ b4 in
+  let ab30 = a3 *^ b0 in
+  let ab31 = a3 *^ b1 in
+  let ab32 = a3 *^ b2 in
+  let ab33 = a3 *^ b3 in
+  let ab34 = a3 *^ b4 in
+  let ab40 = a4 *^ b0 in
+  let ab41 = a4 *^ b1 in
+  let ab42 = a4 *^ b2 in
+  let ab43 = a4 *^ b3 in
+  let ab44 = a4 *^ b4 in
+  let c0 = ab00 in
+  cut (v c0 = v a0 * v b0);
+  let c1 = ab01 +^ ab10 in
+  cut (v c1 = v a0 * v b1 + v a1 * v b0);
+  let c2 = ab02 +^ ab11 +^ ab20 in
+  cut( v c2 = v a0 * v b2 + v a1 * v b1 + v a2 * v b0);
+  let c3 = ab03 +^ ab12 +^ ab21 +^ ab30 in
+  cut( v c3 = v a0 * v b3 + v a1 * v b2 + v a2 * v b1 + v a3 * v b0);
+  let c4 = ab04 +^ ab13 +^ ab22 +^ ab31 +^ ab40 in
+  cut( v c4 = v a0 * v b4 + v a1 * v b3 + v a2 * v b2 + v a3 * v b1 + v a4 * v b0);
+  let c5 = ab14 +^ ab23 +^ ab32 +^ ab41 in
+  cut( v c5 = v a1 * v b4 + v a2 * v b3 + v a3 * v b2 + v a4 * v b1);
+  let c6 = ab24 +^ ab33 +^ ab42 in
+  cut( v c6 = v a2 * v b4 + v a3 * v b3 + v a4 * v b2);
+  let c7 = ab34 +^ ab43 in
+  cut( v c7 = v a3 * v b4 + v a4 * v b3);
+  let c8 = ab44 in
+  cut( v c8 = v a4 * v b4 );
+  update_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8
+
+private val multiplication_:
+  c:bigint{length c >= 2 * norm_length - 1} ->
+  a:bigint{disjoint c a} ->
+  b:bigint{disjoint c b} ->
+  Stack unit
+     (requires (fun h -> bound27 h a /\ norm h b /\ live h c))
+     (ensures (fun h0 u h1 -> bound27 h0 a /\ norm h0 b /\ live h1 c /\ modifies_1 c h0 h1
+       /\ isMultiplication h0 h1 a b c
+     ))
+let multiplication_ c a b =
+  let h0 = ST.get() in
+  let a0 = a.(0ul) in let a1 = a.(1ul) in let a2 = a.(2ul) in let a3 = a.(3ul) in let a4 = a.(4ul) in
+  let b0 = b.(0ul) in let b1 = b.(1ul) in let b2 = b.(2ul) in let b3 = b.(3ul) in let b4 = b.(4ul) in
+  multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4
+
+val multiplication:
+  c:bigint{length c >= 2 * norm_length - 1} ->
+  a:bigint{disjoint c a} ->
+  b:bigint{disjoint c b} ->
+  Stack unit
+     (requires (fun h -> bound27 h a /\ norm h b /\ live h c))
+     (ensures (fun h0 u h1 -> bound27 h0 a /\ norm h0 b /\ live h1 c /\ modifies_1 c h0 h1
+       /\ eval h1 c (2*norm_length-1) = eval h0 a (norm_length) * eval h0 b (norm_length)
+       /\ maxValue h1 c (2*norm_length-1) <= norm_length * pow2 53
+     ))
+let multiplication c a b =
+  let h0 = ST.get() in
+  multiplication_ c a b;
+  let h1 = ST.get() in
+  lemma_multiplication h0 h1 c a b
+
+
+#reset-options "--z3timeout 5 --initial_fuel 3 --max_fuel 3"
+
+val times_5: b:H64.t{5 * v b < pow2 64} -> Tot (b':H64.t{v b' = 5 * v b})
+let times_5 b = assert_norm(pow2 2 = 4); (b <<^ 2ul) +^ b
+
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+
+val freduce_degree_: b:bigint -> Stack unit
+  (requires (fun h -> live h b /\ satisfiesModuloConstraints h b))
+  (ensures (fun h0 _ h1 -> live h0 b /\ live h1 b /\ modifies_1 b h0 h1
+    /\ isDegreeReduced h0 h1 b))
+let freduce_degree_ b =
+  let h0 = ST.get() in
+  let b0 = b.(0ul) in
+  let b1 = b.(1ul) in
+  let b2 = b.(2ul) in
+  let b3 = b.(3ul) in
+  let b5 = b.(5ul) in
+  let b6 = b.(6ul) in
+  let b7 = b.(7ul) in
+  let b8 = b.(8ul) in
+  lemma_freduce_degree_0 h0 b;
+  let b0' = b0 +^ times_5 b5 in
+  let b1' = b1 +^ times_5 b6 in
+  let b2' = b2 +^ times_5 b7 in
+  let b3' = b3 +^ times_5 b8 in
+  b.(0ul) <- b0';
+  b.(1ul) <- b1';
+  b.(2ul) <- b2';
+  b.(3ul) <- b3'
+
+
+val freduce_degree: b:bigint -> Stack unit
+  (requires (fun h -> satisfiesModuloConstraints h b))
+  (ensures (fun h0 _ h1 -> live h0 b /\ live h1 b /\ modifies_1 b h0 h1
+    /\ satisfiesModuloConstraints h0 b
+    /\ bound63 h1 b
+    /\ eval h1 b norm_length % reveal prime = eval h0 b (2*norm_length-1) % reveal prime
+  ))
+let freduce_degree b =
+  let h0 = ST.get() in
+  freduce_degree_ b;
+  let h1 = ST.get() in
+  lemma_freduce_degree h0 h1 b
+
+private val mod2_26: x:H64.t -> Tot (y:H64.t{v y = v x % pow2 26 /\ v y < pow2 26})
+let mod2_26 x =
+  let y = x &^ (Hacl.Cast.uint64_to_sint64 0x3ffffffuL) in
+  assume (v y = v x % pow2 26);
+  y
+
+private val div2_26: x:H64.t -> Tot (y:H64.t{v y = v x / pow2 26 /\ v y <= pow2 38})
+let div2_26 x = pow2_minus 64 26; x >>^ 26ul
+
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+
+private val update_5: c:bigint ->
+  c0:H64.t -> c1:H64.t -> c2:H64.t ->
+  c3:H64.t -> c4:H64.t ->
+  Stack unit
+    (requires (fun h -> live h c))
+    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1
+      /\ get h1 c 0 == c0 /\ get h1 c 1 == c1 /\ get h1 c 2 == c2
+      /\ get h1 c 3 == c3 /\ get h1 c 4 == c4))
+let update_5 c c0 c1 c2 c3 c4 =
+  c.(0ul) <- c0;
+  c.(1ul) <- c1;
+  c.(2ul) <- c2;
+  c.(3ul) <- c3;
+  c.(4ul) <- c4
+
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+
+private val update_6: c:bigint{length c >= norm_length+1} ->
+  c0:H64.t -> c1:H64.t -> c2:H64.t ->
+  c3:H64.t -> c4:H64.t -> c5:H64.t ->
+  Stack unit
+    (requires (fun h -> live h c))
+    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1
+      /\ get h1 c 0 == c0 /\ get h1 c 1 == c1 /\ get h1 c 2 == c2
+      /\ get h1 c 3 == c3 /\ get h1 c 4 == c4 /\ get h1 c 5 == c5))
+let update_6 c c0 c1 c2 c3 c4 c5  =
+  c.(0ul) <- c0;
+  c.(1ul) <- c1;
+  c.(2ul) <- c2;
+  c.(3ul) <- c3;
+  c.(4ul) <- c4;
+  c.(5ul) <- c5
+
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+
+
+private val carry_1_0:
+  b:bigint{length b >= norm_length+1} ->
+  b0:u633 -> b1:u633 -> b2:u633 -> b3:u633 -> b4:u633 ->
+  Stack unit
+    (requires (fun h -> bound63 h b))
+    (ensures (fun h0 _ h1 -> bound63 h0 b /\ norm h1 b /\ modifies_1 b h0 h1
+      /\ isCarried_ h1 b0 b1 b2 b3 b4 b ))
+let carry_1_0 b b0 b1 b2 b3 b4 =
+  pow2_lt_compat 39 38; pow2_lt_compat 63 39; pow2_double_sum 63;
+  assert(forall x y. {:pattern (v x + v y)}(v x < pow2 63 /\ v y <= pow2 38)
+    ==> v x + v y < pow2 64);
+  let b0' = mod2_26 b0 in
+  let r0  = div2_26 b0 in
+  let b1' = mod2_26 (b1 +^ r0) in
+  let r1  = div2_26 (b1 +^ r0) in
+  let b2' = mod2_26 (b2 +^ r1) in
+  let r2  = div2_26 (b2 +^ r1) in
+  let b3' = mod2_26 (b3 +^ r2) in
+  let r3  = div2_26 (b3 +^ r2) in
+  let b4' = mod2_26 (b4 +^ r3) in
+  let b5' = div2_26 (b4 +^ r3) in
+  update_6 b b0' b1' b2' b3' b4' b5'
+
+
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+
+private val carry_1_:
+  b:bigint{length b >= norm_length+1} ->
+  Stack unit
+    (requires (fun h -> bound63 h b))
+    (ensures (fun h0 _ h1 -> bound63 h0 b /\ norm h1 b /\ modifies_1 b h0 h1
+      /\ isCarried h0 h1 b
+    ))
+let carry_1_ b =
+  let b0 = b.(0ul) in
+  let b1 = b.(1ul) in
+  let b2 = b.(2ul) in
+  let b3 = b.(3ul) in
+  let b4 = b.(4ul) in
+  carry_1_0 b b0 b1 b2 b3 b4
+
+val carry_1:
+  b:bigint{length b >= norm_length+1} ->
+  Stack unit
+    (requires (fun h -> bound63 h b))
+    (ensures (fun h0 _ h1 -> bound63 h0 b /\ norm h1 b /\ modifies_1 b h0 h1
+      /\ eval h1 b (norm_length+1) = eval h0 b norm_length /\ carried_1 h1 b
+    ))
+let carry_1 b =
+  let h0 = ST.get() in
+  carry_1_ b;
+  let h1 = ST.get() in
+  lemma_carry_1 h0 h1 b
+
+val carry_2_: b:bigint -> Stack unit
+  (requires (fun h -> carried_2 h b))
+  (ensures (fun h0 _ h1 -> live h0 b /\ norm h1 b /\ modifies_1 b h0 h1
+    /\ isCarried h0 h1 b
+  ))
+let carry_2_ b =
+  pow2_lt_compat 63 42; pow2_lt_compat 63 26;
+  carry_1_ b
+
+val carry_2: b:bigint -> Stack unit
+  (requires (fun h -> carried_2 h b))
+  (ensures (fun h0 _ h1 -> carried_2 h0 b /\ norm h1 b /\ modifies_1 b h0 h1
+	  /\ eval h1 b (norm_length+1) = eval h0 b norm_length
+	  /\ carried_3 h1 b))
+let carry_2 b =
+  let h0 = ST.get() in
+  carry_2_ b;
+  let h1 = ST.get() in
+  lemma_carry_2 h0 h1 b
+
+
+val carry_top_: b:bigint -> Stack unit
+  (requires (fun h -> live h b /\ length b >= norm_length+1
+    /\ v (get h b 0) + 5 * v (get h b 5) < pow2 64 ))
+  (ensures  (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
+    /\ carriedTopBottom h0 h1 b))
+let carry_top_ b =
+  let b0 = b.(0ul) in
+  let b5 = b.(5ul) in
+  b.(0ul) <- b0 +^ times_5 b5
+
+
+val carry_top_1: b:bigint -> Stack unit
+  (requires (fun h -> carried_1 h b))
+  (ensures  (fun h0 _ h1 -> carried_1 h0 b /\ carried_2 h1 b /\ modifies_1 b h0 h1
+    /\ eval h1 b norm_length % reveal prime = eval h0 b (norm_length+1) % reveal prime))
+let carry_top_1 b =
+  let h0 = ST.get() in
+  pow2_double_sum 38; pow2_double_sum 39;  pow2_double_sum 40;
+  pow2_lt_compat 63 26;  pow2_lt_compat 63 41;
+  carry_top_ b;
+  let h1 = ST.get() in
+  lemma_carry_top_1 h0 h1 b
+
+
+val carry_top_2: b:bigint -> Stack unit
+  (requires (fun h -> carried_3 h b))
+  (ensures  (fun h0 _ h1 -> carried_3 h0 b /\ carried_4 h1 b /\ modifies_1 b h0 h1
+    /\ eval h1 b norm_length % reveal prime = eval h0 b (norm_length+1) % reveal prime))
+let carry_top_2 b =
+  let h0 = ST.get() in
+  pow2_double_sum 0; pow2_double_sum 1;  pow2_double_sum 2;
+  pow2_lt_compat 63 26;  pow2_lt_compat 63 3;
+  carry_top_ b;
+  let h1 = ST.get() in
+  lemma_carry_top_2 h0 h1 b
+
+
+private val carry_0_to_1_:
+  b:bigint ->
+  Stack unit
+    (requires (fun h -> carried_4 h b))
+    (ensures  (fun h0 _ h1 -> isCarried01 h0 h1 b /\ modifies_1 b h0 h1))
+let carry_0_to_1_ b =
+  pow2_lt_compat 63 38; pow2_lt_compat 63 26; pow2_double_sum 63;
+  let b0 = b.(0ul) in
+  let b1 = b.(1ul) in
+  let b0' = mod2_26 b0 in
+  let r0  = div2_26 b0 in
+  b.(0ul) <- b0';
+  b.(1ul) <- b1 +^ r0
+
+val carry_0_to_1: b:bigint -> Stack unit
+  (requires (fun h -> carried_4 h b))
+  (ensures  (fun h0 _ h1 -> carried_4 h0 b /\ modifies_1 b h0 h1 /\ norm h1 b
+    /\ eval h1 b norm_length = eval h0 b norm_length))
+let carry_0_to_1 b =
+  let h0 = ST.get() in
+  carry_0_to_1_ b;
+  let h1 = ST.get() in
+  lemma_carry_0_to_1 h0 h1 b
+
+
+val freduce_coefficients: b:bigint{length b >= norm_length + 1} -> Stack unit
+  (requires (fun h -> bound63 h b))
+  (ensures (fun h0 _ h1 -> bound63 h0 b /\ norm h1 b /\ modifies_1 b h0 h1
+    /\ eval h1 b norm_length % reveal prime = eval h0 b norm_length % reveal prime
+    ))
+let freduce_coefficients b =
+  carry_1 b;
+  carry_top_1 b;
+  carry_2 b;
+  carry_top_2 b;
+  carry_0_to_1 b
+
+
+val modulo: b:bigint -> Stack unit
+  (requires (fun h -> live h b /\ satisfiesModuloConstraints h b))
+  (ensures (fun h0 _ h1 -> live h0 b /\ satisfiesModuloConstraints h0 b /\ norm h1 b /\ modifies_1 b h0 h1
+    /\ eval h1 b norm_length % reveal prime = eval h0 b (2*norm_length-1) % reveal prime))
+let modulo b =
+  freduce_degree b;
+  freduce_coefficients b
+
+
+#set-options "--lax"
+
+val finalize: b:bigint -> Stack unit
+  (requires (fun h -> norm h b))
+  (ensures (fun h0 _ h1 -> norm h0 b /\ norm h1 b /\ modifies_1 b h0 h1
+    /\ eval h1 b norm_length = eval h0 b norm_length % reveal prime))
+let finalize b =
+  let one = Hacl.Cast.uint64_to_sint64 1uL in
+  let mask_26 = H64 ((one <<^ 26ul) -^ one) in
+  let mask2_26m5 = H64 (mask_26 -^ (one <<^ 2ul)) in
+  let b0 = b.(0ul) in
+  let b1 = b.(1ul) in
+  let b2 = b.(2ul) in
+  let b3 = b.(3ul) in
+  let b4 = b.(4ul) in
+  let mask = H64.eq_mask b4 mask_26 in
+  let mask = H64.eq_mask b3 mask_26 &^ mask in
+  let mask = H64.eq_mask b2 mask_26 &^ mask in
+  let mask = H64.eq_mask b1 mask_26 &^ mask in
+  let mask = H64.gte_mask b0 mask2_26m5 &^ mask in
+  b.(0ul) <- (b0 -^ (mask &^ mask2_26m5));
+  b.(1ul) <- (b1 -^ (b1 &^ mask));
+  b.(2ul) <- (b2 -^ (b2 &^ mask));
+  b.(3ul) <- (b3 -^ (b3 &^ mask));
+  b.(4ul) <- (b4 -^ (b4 &^ mask))
