@@ -127,7 +127,6 @@ let op_Plus_Percent_Hat = add_mod
 let op_Subtraction_Hat = sub
 (* let op_Subtraction_Question_Hat = sub_underspec *)
 let op_Subtraction_Percent_Hat = sub_mod
-(* let op_Star_Hat = mul *)
 (* let op_Star_Question_Hat = mul_underspec *)
 (* let op_Star_Percent_Hat = mul_mod *)
 (* let op_Slash_Hat = div *)
@@ -145,3 +144,5 @@ val mul_wide: a:Hacl.UInt64.t -> b:Hacl.UInt64.t -> Pure t
   (requires True)
   (ensures (fun c -> v c = Hacl.UInt64.v a * Hacl.UInt64.v b))
 let mul_wide a b = mul_wide a b
+
+let op_Star_Hat = mul_wide

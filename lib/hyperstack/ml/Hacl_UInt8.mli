@@ -1,4 +1,4 @@
-type uint8
+type uint8 = FStar_UInt8.t
 type t = uint8
 type byte = uint8
        

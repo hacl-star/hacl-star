@@ -31,7 +31,7 @@ OCAML_OPTIONS=--lax --codegen OCaml --no_location_info
 OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
 
 ml-lib:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml all
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml MEM=HST all
 
 import-lib:
 	@cp $(HACL_LIB_FILES) .

@@ -32,14 +32,14 @@ val sub_mod: a:t -> b:t -> Tot (c:t{(v a - v b) % pow2 n = v c})
 let sub_mod a b =
   Mk (sub_mod (a.v) (b.v))
 
-(* Multiplication primitives *)
-val mul: a:t -> b:t{UInt.size (v a * v b) n} -> Tot (c:t{v a * v b = v c})
-let mul a b =
-  Mk (mul (a.v) (b.v))
+(* (\* Multiplication primitives *\) *)
+(* val mul: a:t -> b:t{UInt.size (v a * v b) n} -> Tot (c:t{v a * v b = v c}) *)
+(* let mul a b = *)
+(*   Mk (mul (a.v) (b.v)) *)
 
-val mul_mod: a:t -> b:t -> Tot (c:t{(v a * v b) % pow2 n = v c})
-let mul_mod a b =
-  Mk (mul_mod (a.v) (b.v))
+(* val mul_mod: a:t -> b:t -> Tot (c:t{(v a * v b) % pow2 n = v c}) *)
+(* let mul_mod a b = *)
+(*   Mk (mul_mod (a.v) (b.v)) *)
 
 (* Bitwise operators *)
 val logand: t -> t -> Tot t
@@ -69,8 +69,8 @@ let op_Plus_Hat = add
 let op_Plus_Percent_Hat = add_mod
 let op_Subtraction_Hat = sub
 let op_Subtraction_Percent_Hat = sub_mod
-let op_Star_Hat = mul
-let op_Star_Percent_Hat = mul_mod
+(* let op_Star_Hat = mul *)
+(* let op_Star_Percent_Hat = mul_mod *)
 let op_Hat_Hat = logxor
 let op_Amp_Hat = logand
 let op_Bar_Hat = logor
@@ -83,3 +83,5 @@ let op_Greater_Greater_Hat = shift_right
 assume val mul_wide: a:Hacl.UInt64.t -> b:Hacl.UInt64.t -> Pure t
   (requires True)
   (ensures (fun c -> v c = Hacl.UInt64.v a * Hacl.UInt64.v b))
+
+let op_Star_Hat = mul_wide

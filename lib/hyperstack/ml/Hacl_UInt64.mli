@@ -1,4 +1,4 @@
-type uint64
+type uint64 = FStar_UInt64.t
 type t = uint64
 type uint128
 
