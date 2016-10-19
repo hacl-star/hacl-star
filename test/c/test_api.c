@@ -63,7 +63,7 @@ void test_correctness() {
   res = crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key);
 
   printf("SecretBox decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
-  compare_and_print("Secret box", msg, decrypted, MESSAGE_LEN);
+  TestLib_compare_and_print("Secret box", msg, decrypted, MESSAGE_LEN);
 
   for(i = 0; i < MESSAGE_LEN; i++) decrypted[i] = 0;
   for(i = 0; i < CIPHERTEXT_LEN; i++) ciphertext[i] = 0;
@@ -76,7 +76,7 @@ void test_correctness() {
   res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key);
   printf("Box decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
   
-  compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
+  TestLib_compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
 }
 
 #define SIZE (512*1024*1024)

@@ -227,7 +227,7 @@ let poly1305_finish mac m len key st =
 
       let h0 = (h0 +^ t0) &^ mask_2_44 in
       let h1 = (h1 +^ ((t0 >>^ 44ul) |^ (t1 <<^ 20ul))) &^ mask_2_44 in
-      let h2 = ((h2 +^ (t1 >>^ 24ul)) &^ mask_2_42) |^ (uint64_to_sint64 1uL <<^ 40ul) in
+      let h2 = (h2 +^ (t1 >>^ 24ul)) &^ mask_2_42  in
 
       let open Hacl.UInt128 in
 

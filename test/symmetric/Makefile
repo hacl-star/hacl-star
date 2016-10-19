@@ -135,7 +135,7 @@ poly64-extract: ml-lib
 	$(FSTAR) $(NO_CODEGEN) $(OCAML_OPTIONS) $(OCAML_INCLUDES) --odir $(POLY_ODIR) --include $(HACL_SYMMETRIC) Hacl.Test.Poly1305_64.fst --include $(KREMLIB) --include $(KREMTEST)
 	echo "let _ = main()" >> $(POLY_ODIR)/Hacl_Test_Poly1305_64.ml
 
-POLY1305_64_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Hacl_Symmetric_Poly1305_64_Parameters.ml Hacl_Symmetric_Poly1305_64_Bigint.ml Hacl_Symmetric_Poly1305_64.ml Hacl_Test_Poly1305_64.ml
+POLY1305_64_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml	Hacl_Symmetric_Poly1305_64_Parameters.ml Hacl_Symmetric_Poly1305_64_Bigint.ml Hacl_Symmetric_Poly1305_64.ml Hacl_Test_Poly1305_64.ml
 
 poly64-compile: #poly64-extract
 	$(OCAMLOPT) -I $(HACL_LIB)/ml -I $(POLY_ODIR) -I $(KREMTEST) -I $(KREMLIB) \

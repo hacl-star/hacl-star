@@ -21,17 +21,19 @@ else
 VERBOSE=-verbose
 endif
 KREMLIN=$(KREMLIN_HOME)/krml
-KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign -no-prefix TestLib
+KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 
 OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
-                   $(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ -w -20-26-3-8-58
+                $(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \
+		-I $(FSTAR_HOME)/ulib/ml/extracted \
+		-I $(FSTAR_HOME)/ulib/ml/hyperstack -w -20-26-3-8-58
 OCAML_OPTIONS=--lax --codegen OCaml --no_location_info
 OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
 
 ml-lib:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml MEM=HST all
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml MEM=HST
 
 import-lib:
 	@cp $(HACL_LIB_FILES) .
