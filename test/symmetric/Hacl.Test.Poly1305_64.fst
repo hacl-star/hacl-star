@@ -13,6 +13,8 @@ let main () =
   let keysize = 32ul in
   let macsize = 16ul in
   let mac = create (0uy) macsize in
+  let mac2 = create (0uy) macsize in
+  let mac3 = create (0uy) macsize in
   let plaintext = createL [
     0x43uy; 0x72uy; 0x79uy; 0x70uy; 0x74uy; 0x6fuy; 0x67uy; 0x72uy;
     0x61uy; 0x70uy; 0x68uy; 0x69uy; 0x63uy; 0x20uy; 0x46uy; 0x6fuy;
@@ -35,12 +37,18 @@ let main () =
   let poly1305 = createL [0y] in
   TestLib.compare_and_print poly1305 expected mac macsize;
 
-  (* Test encoding a 1 GB buffer. *)
-  (* let len = FStar.UInt32 (1024ul *%^ 1024ul *%^ 1024ul) in *)
-  (* let buf = TestLib.unsafe_malloc len in *)
-  (* let c1 = C.clock () in *)
-  (* Hacl.Symmetric.Poly1305.poly1305_mac mac buf len key; *)
-  (* let c2 = C.clock () in *)
-  (* TestLib.print_clock_diff c1 c2; *)
+  (* (\* Test encoding a 1 GB buffer. *\) *)
+  let len = FStar.UInt32 (1024ul *%^1024ul *%^ 1024ul) in
+  let len' = FStar.Int.Cast.uint32_to_uint64 len in
+  let buf = TestLib.unsafe_malloc len in
+  let c1 = C.clock () in
+  Hacl.Symmetric.Poly1305_64.crypto_onetimeauth mac buf len' key;
+  let c2 = C.clock () in
+  TestLib.print_clock_diff c1 c2;
+  let c1 = C.clock () in
+  Hacl.Symmetric.Poly1305.poly1305_mac mac buf len key;
+  let c2 = C.clock () in
+  TestLib.print_clock_diff c1 c2;
+
   pop_frame();
   C.exit_success

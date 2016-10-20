@@ -20,6 +20,9 @@ type poly1305_state = {
   h:buffer h64;
   }
 
+(* type poly1305_state = b:buffer h64{length b = 6} *)
+
+(* type triple = {t1:h64; t2:h64; t3:h64} *)
 
 val load64_le:
   b:uint8_p{length b >= 8} ->
@@ -87,6 +90,7 @@ let poly1305_init st key =
 
 
 val poly1305_blocks_loop:
+  st:poly1305_state ->
   m:uint8_p ->
   len:U64.t ->
   r0:h64 ->
@@ -97,11 +101,16 @@ val poly1305_blocks_loop:
   h0:h64 ->
   h1:h64 ->
   h2:h64 ->
-  Stack (h64 * h64 * h64)
+  Stack unit
     (requires (fun h -> True))
     (ensures  (fun _ _ _ -> True))
-let rec poly1305_blocks_loop m len r0 r1 r2 s1 s2 h0 h1 h2 =
-  if U64 (len <^ 16uL) then (h0, h1, h2)
+let rec poly1305_blocks_loop st m len r0 r1 r2 s1 s2 h0 h1 h2 =
+  (* if U64 (len <^ 16uL) then (h0, h1, h2) *)
+  if U64 (len <^ 16uL) then (
+    st.h.(0ul) <- h0;
+    st.h.(1ul) <- h1;
+    st.h.(2ul) <- h2
+  )
   else (
     let t0 = load64_le m in
     let t1 = load64_le (offset m 8ul) in
@@ -111,9 +120,9 @@ let rec poly1305_blocks_loop m len r0 r1 r2 s1 s2 h0 h1 h2 =
 
     let open Hacl.UInt64 in
 
-    let h0 = (h0 +^ t0) &^ mask_2_44 in
-    let h1 = (h1 +^ ((t0 >>^ 44ul) |^ (t1 <<^ 20ul))) &^ mask_2_44 in
-    let h2 = ((h2 +^ (t1 >>^ 24ul)) &^ mask_2_42) |^ (uint64_to_sint64 1uL <<^ 40ul) in
+    let h0 = h0 +^ (t0 &^ mask_2_44) in
+    let h1 = h1 +^ (((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ mask_2_44) in
+    let h2 = h2 +^ (((t1 >>^ 24ul) &^ mask_2_42) |^ (uint64_to_sint64 1uL <<^ 40ul)) in
 
     let open Hacl.UInt128 in
 
@@ -153,8 +162,8 @@ let rec poly1305_blocks_loop m len r0 r1 r2 s1 s2 h0 h1 h2 =
     let h1 = h1 +^ c in
 
     let len = U64 (len -^ 16uL) in
-    let m = offset m 16ul in
-    poly1305_blocks_loop m len r0 r1 r2 s1 s2 h0 h1 h2
+    let m   = offset m 16ul in
+    poly1305_blocks_loop st m len r0 r1 r2 s1 s2 h0 h1 h2
   )
 
 
@@ -177,11 +186,15 @@ let poly1305_blocks st m len =
   let s1 = H64 (r1 *^ (five <<^ 2ul)) in
   let s2 = H64 (r2 *^ (five <<^ 2ul)) in
 
-  let h0, h1, h2 = poly1305_blocks_loop m len r0 r1 r2 s1 s2 h0 h1 h2 in
+  (* let h0, h1, h2 = poly1305_blocks_loop m len r0 r1 r2 s1 s2 h0 h1 h2 in *)
+  poly1305_blocks_loop st m len r0 r1 r2 s1 s2 h0 h1 h2;
 
-  st.h.(0ul) <- h0;
-  st.h.(1ul) <- h1;
-  st.h.(2ul) <- h2;
+  (* st.h.(0ul) <- h0; *)
+  (* st.h.(1ul) <- h1; *)
+  (* st.h.(2ul) <- h2; *)
+  (* st.h.(0ul) <- t.t1; *)
+  (* st.h.(1ul) <- t.t2; *)
+  (* st.h.(2ul) <- t.t3; *)
   ()
 
 
@@ -212,22 +225,24 @@ let poly1305_finish mac m len key st =
   let s1 = H64 (r1 *^ (five <<^ 2ul)) in
   let s2 = H64 (r2 *^ (five <<^ 2ul)) in
 
-  let h0, h1, h2 =
-    if U64 (rem =^ 0uL) then h0, h1, h2
+  (* let h0, h1, h2 = *)
+  (* let t = *)
+    if U64 (rem =^ 0uL) then ()// {t1 = h0; t2 = h1; t3 = h2}
     else (
       let zero = uint8_to_sint8 0uy in
       let block = create zero 16ul in
       let i = FStar.Int.Cast.uint64_to_uint32 rem in
+      blit m (FStar.Int.Cast.uint64_to_uint32 (H64 (len -^ rem))) block 0ul i;
       block.(i) <- uint8_to_sint8 1uy;
 
-      let t0 = load64_le m in
-      let t1 = load64_le (offset m 8ul) in
+      let t0 = load64_le block in
+      let t1 = load64_le (offset block 8ul) in
 
       let open Hacl.UInt64 in
 
-      let h0 = (h0 +^ t0) &^ mask_2_44 in
-      let h1 = (h1 +^ ((t0 >>^ 44ul) |^ (t1 <<^ 20ul))) &^ mask_2_44 in
-      let h2 = (h2 +^ (t1 >>^ 24ul)) &^ mask_2_42  in
+      let h0 = h0 +^ (t0 &^ mask_2_44) in
+      let h1 = h1 +^ (((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ mask_2_44) in
+      let h2 = h2 +^ ((t1 >>^ 24ul) &^ mask_2_42) in
 
       let open Hacl.UInt128 in
 
@@ -265,8 +280,15 @@ let poly1305_finish mac m len key st =
       let c  = h0 >>^ 44ul in
       let h0 = h0 &^ mask_2_44 in
       let h1 = h1 +^ c in
-      h0, h1, h2
-    ) in
+      st.h.(0ul) <- h0;
+      st.h.(1ul) <- h1;
+      st.h.(2ul) <- h2
+      (* h0, h1, h2 *)
+    );
+
+  let h0 = st.h.(0ul) in
+  let h1 = st.h.(1ul) in
+  let h2 = st.h.(2ul) in
 
   let open Hacl.UInt64 in
 
@@ -312,8 +334,8 @@ let poly1305_finish mac m len key st =
   let h1 = (h1 >>^ 20ul) |^ (h2 <<^ 24ul) in
 
   store64_le mac h0;
-  store64_le (offset mac 8ul) h1
-
+  store64_le (offset mac 8ul) h1;
+  pop_frame()
 
 val crypto_onetimeauth:
   output:uint8_p ->

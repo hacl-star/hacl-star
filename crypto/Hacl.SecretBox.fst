@@ -172,3 +172,4 @@ let crypto_secretbox_open_easy m c clen n k =
   crypto_secretbox_open_detached m c' mac (U64 (clen -^ 16uL)) n k
 
 open Hacl.Symmetric.HSalsa20 // TODO: hack for dependency analysis
+open Hacl.Symmetric.Poly1305_64 // TODO: hack for dependency analysis

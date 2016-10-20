@@ -429,8 +429,8 @@ val freduce_coefficients: b:bigint{length b >= norm_length + 1} -> Stack unit
 let freduce_coefficients b =
   carry_1 b;
   carry_top_1 b;
-  carry_2 b;
-  carry_top_2 b;
+  (* carry_2 b; *)
+  (* carry_top_2 b; *)
   carry_0_to_1 b
 
 

@@ -104,23 +104,31 @@ void test_perf1() {
 
 void test_perf2() {
   void *plain = malloc(SIZE);
-  uint8_t mac[16];
+  uint8_t mac[16], mac2[16], mac3[16];
   clock_t c1, c2;
-  double t1, t2;
+  double t1, t2, t3;
 
   c1 = clock();
-  Hacl_Symmetric_Poly1305_poly1305_mac(mac, plain, SIZE, key);
+  Hacl_Symmetric_Poly1305_64_crypto_onetimeauth(mac, plain, SIZE, key);
   c2 = clock();
   t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
-  printf("User time for HACL: %f\n", t1);
+  printf("User time for HACL 64bit: %f\n", t1);
+  
+  c1 = clock();
+  Hacl_Symmetric_Poly1305_poly1305_mac(mac2, plain, SIZE, key);
+  c2 = clock();
+  t3 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for HACL 32bit: %f\n", t3);
 
   c1 = clock();
-  crypto_onetimeauth(mac, plain, SIZE, key);
+  crypto_onetimeauth(mac3, plain, SIZE, key);
   c2 = clock();
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
   printf("User time for Sodium: %f\n", t2);
 
-  printf("Slowdown (Poly1305): %f\n", t1/t2);
+  printf("Slowdown (Poly1305-32): %f\n", t3/t2);
+  printf("Slowdown (Poly1305-64): %f\n", t1/t2);
+  TestLib_compare_and_print("1Gb Poly1305", mac3, mac, 16);
 }
 
 void test_perf3() {
