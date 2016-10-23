@@ -115,7 +115,7 @@ let get_output output =
   let input51 = Bigint.getRef output in
   let input64 = Array.make 5 zero_limb in
   input64.(0) <- add_limb input51.(0) (shift_left_limb input51.(1) 51);
-  input64.(1) <- add_limb (shift_right_limb input51.(1) 13) (shift_left_limb input51.(2) 48);
+  input64.(1) <- add_limb (shift_right_limb input51.(1) 13) (shift_left_limb input51.(2) 38);
   input64.(2) <- add_limb (shift_right_limb input51.(2) 26) (shift_left_limb input51.(3) 25);
   input64.(3) <- add_limb (shift_right_limb input51.(3) 39) (shift_left_limb input51.(4) 12);
   let s = ref "" in
