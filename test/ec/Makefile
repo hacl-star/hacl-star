@@ -57,9 +57,6 @@ CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_
 	Hacl_EC_Curve25519_Crecip.ml \
 	Hacl_EC_Curve25519.ml
 
-ml-lib:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml all
-
 # Curve25519 extraction to OCaml
 curve25519-extract: ml-lib
 	@mkdir -p $(CURVE25519_ODIR)
