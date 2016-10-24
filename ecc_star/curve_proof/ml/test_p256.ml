@@ -79,6 +79,12 @@ let time f x s =
   let _ = f x in
   Printf.printf "Ellapsed time for %s : %fs\n" s (Sys.time() -. t)
 
+let compare s_ref s =
+  for i = 0 to (String.length s_ref/2) - 1  do
+    if String.sub s (2*i) 2 <> String.sub s_ref (2*i) 2 then
+      failwith (Printf.sprintf "Reference and result differ at byte %d: %s %s\n" i (String.sub s_ref (2*i) 2) (String.sub s (2*i) 2))
+  done
+
 (* Test vectors taken from http://point-at-infinity.org/ecc/nisttv *)
 let test () =
   (* Output data *)
@@ -114,7 +120,7 @@ let test () =
   let res = ConcretePoint.Point(resx, resy, resz) in
 
   (* Ladder *)
-  MontgomeryLadder.montgomery_ladder res scalar basepoint;
+  time (fun () -> MontgomeryLadder.montgomery_ladder res scalar basepoint) () "the P256 montgomery ladder";
 
   let z = ConcretePoint.get_z res in
   let zrecip = Bigint.create_limb norm_length  in
@@ -135,17 +141,22 @@ let test () =
   Bignum.fmul output_x resx zrecip2;
   Bignum.fmul output_y resy zrecip3;
 
-  let test = Bigint.create_limb norm_length in
-  Bignum.fmul test z2 zrecip2;
-  Bignum.fmul test z3 zrecip3;
+  Modulo.normalize output_x;
+  Modulo.normalize output_y;
+
   let output_x_string = get_output output_x in
   let output_y_string = get_output output_y in
-  print_string "Expected:\nx = 6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296\ny = B01CBD1C01E58065711814B583F061E9D431CCA994CEA1313449BF97C840AE0A\n";
+  print_string "Expected:\nx = 6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296\ny = b01cbd1c01e58065711814b583f061e9d431cca994cea1313449bf97c840ae0a\n";
   print_string "Got:\nx = ";
   print_string output_x_string;
   print_string "\ny = ";
   print_string output_y_string;
-  print_string "\n"
+  print_string "\n";
+  let ref1 = "6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296" in
+  let ref2 = "b01cbd1c01e58065711814b583f061e9d431cca994cea1313449bf97c840ae0a" in  
+  compare ref1 output_x_string;
+  compare ref2 output_y_string;
+  print_string "SUCCESS\n"
 
 let test5 () =
   (* Output data *)

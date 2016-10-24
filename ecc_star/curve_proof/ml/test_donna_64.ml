@@ -97,7 +97,13 @@ let time f x s =
   let t = Sys.time() in
   let _ = f x in
   Printf.printf "Ellapsed time for %s : %fs\n" s (Sys.time() -. t)
-      
+
+let compare s_ref s =
+  for i = 0 to (String.length s_ref/2) - 1  do
+    if String.sub s (2*i) 2 <> String.sub s_ref (2*i) 2 then
+      failwith (Printf.sprintf "Reference and result differ at byte %d: %s %s\n" i (String.sub s_ref (2*i) 2) (String.sub s (2*i) 2))
+  done
+
 let test4 () =
   (* Output data *)
   let output = Bigint.create_limb norm_length in
@@ -126,17 +132,19 @@ let test4 () =
   let res = ConcretePoint.Point(resx, resy, resz) in
   
   (* Ladder *)
-  time (fun () ->
-      for i = 0 to 9 do
-        MontgomeryLadder.montgomery_ladder res scalar basepoint;
-      done
-    ) () "10 times the montgomery ladder";
+  time (fun () -> MontgomeryLadder.montgomery_ladder res scalar basepoint) () "the curve25519 montgomery ladder";
+  (* time (fun () -> *)
+  (*     for i = 0 to 9 do *)
+  (*       MontgomeryLadder.montgomery_ladder res scalar basepoint; *)
+  (*     done *)
+  (*   ) () "10 times the montgomery ladder"; *)
 
   
   let zrecip = Bigint.create_limb norm_length in
   (* Get the affine coordinates back *)
   Crecip.crecip' zrecip (ConcretePoint.get_z res);
   Bignum.fmul output resx zrecip;
+  Modulo.normalize output;
 
   print_bigint_64 (ConcretePoint.get_x res);
   print_bigint_64 (ConcretePoint.get_z res);
@@ -145,7 +153,10 @@ let test4 () =
   print_string "\nExpected output u-coordinate:\nc3da55379de9c6908e94ea4df28d084f32eccf03491c71f754b4075577a28552\n";
   print_string "Got:\n";
   print_string output_string;
-  print_string "\n"
+  print_string "\n";
+  let s_ref = "c3da55379de9c6908e94ea4df28d084f32eccf03491c71f754b4075577a28552" in
+  compare s_ref output_string;
+  print_string "SUCCESS"
 	       
 		  
 let _ =
