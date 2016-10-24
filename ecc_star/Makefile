@@ -24,11 +24,11 @@ CURVE_FILES=$(addprefix $(CURVE_DIR)/, concrete_point.fst double_and_add.fst mon
 CURVE_FILES2=$(addprefix $(CURVE_DIR)/, concrete_point.fst double_and_add2.fst montgomery_ladder_lemmas.fst montgomery_ladder.fst)
 
 # Output directories
-C25519_64_ODIR=./ml/c25519_64
+C25519_64_ODIR=./c25519_64
 C25519_64_OPTIONS=--odir $(C25519_64_ODIR) 
-C448_64_ODIR=./ml/c448_64
+C448_64_ODIR=./c448_64
 C448_64_OPTIONS=--odir $(C448_64_ODIR)
-P256_ODIR=./ml/p256
+P256_ODIR=./p256
 P256_OPTIONS=--odir $(P256_ODIR)
 
 # OCaml files obtained after extraction (same module names for all curves)
