@@ -3,6 +3,12 @@ ECC* library
 *** RUNNING THE OCAML SNAPSHOT **
 
 An OCaml snapshot is included in the ./ml directory.
+
+To install and run OCaml we recommand to use the OPAM package manager available at
+https://opam.ocaml.org/doc/Install.html.
+Also note that the 'ocamlfind', 'batteries' and 'stdint' libraries are required to execute
+the extracted code: 'opam install ocamlfind batteries stdint'.
+
 To build the curves from the snapshot move to the directory and run 'make'.
 
 NB: The test drivers are located in curve_proof/ml.
@@ -81,7 +87,7 @@ A running OCaml installation is thus needed to execute the code.
 
 To install and run OCaml we recommand to use the OPAM package manager available at
 https://opam.ocaml.org/doc/Install.html.
-Also note that the 'ocamlfind', 'batteries' and 'stdlib' libraries are required to execute
+Also note that the 'ocamlfind', 'batteries' and 'stdint' libraries are required to execute
 the extracted code.
 
 A slight modification of F* library files is required: the file FStar_ST.ml located in
