@@ -1,5 +1,13 @@
 ECC* library
 
+*** RUNNING THE OCAML SNAPSHOT **
+
+An OCaml snapshot is included in the ./ml directory.
+To build the curves from the snapshot move to the directory and run 'make'.
+
+NB: The test drivers are located in curve_proof/ml.
+
+
 *** F* INSTALLATION INSTRUCTIONS ***
 
 F* sources can be found at https://github.com/FStarLang/FStar.
