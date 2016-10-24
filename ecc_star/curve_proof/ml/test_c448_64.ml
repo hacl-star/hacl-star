@@ -3,29 +3,11 @@ open UInt
 open Big_int
 open Stdint
 open Bignum
-       
-let template_donna_64 = fun x -> 51
-let template_donna = fun x -> 26 - (x mod 2)
+
 let template_448 = fun x -> 56
 
 let t = template_448
-			      
-let rec bitweight t i =
-  match i with
-  | 0 -> 0
-  | _ -> t i + bitweight t (i-1)
-			      
-let rnd_bigint_donna_64 () =
-  let a = Bigint.create_limb norm_length in
-  let b = ref zero_big_int in
-  for i = 0 to norm_length-1 do
-    let r = (Random.int64 (Int64.of_int 0x7ffffffffffff)) in
-    Bigint.upd_limb a i (of_int64 r);
-    b := add_big_int !b (mult_int_big_int (Int64.to_int r) (power_int_positive_int 2 (bitweight t i)));
-  done;
-  print_string "\n";
-  (a, !b)
-        
+
 let print_bigint_64 b =
   for i = 0 to norm_length-1 do
     print_string (to_string (Bigint.index_limb b i));
@@ -37,25 +19,7 @@ let print_bigint_64 b =
     print_string " ";
   done;
   print_string "\n"
-   
-let print_bigint_donna_128 b =
-  for i = 0 to 2*norm_length-2 do
-    print_string (wide_to_string (Bigint.index_wide b i));
-    print_string " ";
-  done;
-  print_string "\n"
 
-let print_big_int b =
-  for i = 0 to (norm_length-1) do
-    print_string (string_of_big_int (mod_big_int (div_big_int b (power_int_positive_int 2 (bitweight t i))) (power_int_positive_int 2 (t i))));
-    print_string " ";
-  done;
-  print_string "\n"
-	       
-let modulo b =
-  let prime = sub_big_int (sub_big_int (power_int_positive_int 2 448) (power_int_positive_int 2 224)) unit_big_int in
-  mod_big_int b prime
-		
 let format_secret s =
   Bigint.upd_byte s 0 (Uint8.logand (Bigint.index_byte s 0) (Uint8.of_int 252));
   Bigint.upd_byte s 55 (Uint8.logor (Bigint.index_byte s 55) (Uint8.of_int 128))
@@ -65,11 +29,11 @@ let scalar2 = "203d494428b8399352665ddca42f9de8fef600908e0d461cb021f8c538345dd77
 
 let input1 = "06fce640fa3487bfda5f6cf2d5263f8aad88334cbd07437f020f08f9814dc031ddbdc38c19c6da2583fa5429db94ada18aa7a7fb4ef8a086"
 let input2 = "0fbcc2f993cd56d3305b0b7d9e55d4c1a8fb5dbb52f8e9a1e9b6201b165d015894e56c4d3570bee52fe205e28a78b91cdfbde71ce8d157db"
-	       
+
 let get_input_scalar scalar_string =
   let bytes = Array.init 56 (fun i -> Stdint.Uint8.of_string ("0x" ^ (String.sub scalar_string (2*i) 2))) in
   Bigint.Bigint(bytes,fun x -> 8)
-	       
+
 let get_input input_string =
   let bytes = Array.init 56 (fun i -> Stdint.Uint8.of_string ("0x" ^ (String.sub input_string (2*i) 2))) in
   let input56 = Array.make 8 zero_limb in
@@ -85,7 +49,7 @@ let get_input input_string =
   fill input56 bytes 56;
   print_string (input1 ^ "\n");
   Bigint.Bigint(input56,Parameters.templ)
-  
+
 let get_output output =
   let input56 = Bigint.getRef output in
   let s = ref "" in
@@ -98,13 +62,13 @@ let get_output output =
     done;
   done;
   !s
-   
+
 let time f x s =
   let t = Sys.time() in
   let _ = f x in
   Printf.printf "Ellapsed time for %s : %fs\n" s (Sys.time() -. t)
-      	       
-let test3 () =
+
+let test () =
   (* Output data *)
   let output = Bigint.create_limb norm_length in
 
@@ -144,4 +108,4 @@ let test3 () =
 
 
 let _ =
-  test3 ()
+  test ()
