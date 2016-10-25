@@ -79,7 +79,7 @@ void test_correctness() {
   TestLib_compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
 }
 
-#define SIZE (512*1024*1024)
+#define SIZE (1024*1024*1024)
 
 void test_perf1() {
   void *plain = malloc(SIZE), *cipher = malloc(SIZE);

@@ -20,10 +20,6 @@ type poly1305_state = {
   h:buffer h64;
   }
 
-(* type poly1305_state = b:buffer h64{length b = 6} *)
-
-(* type triple = {t1:h64; t2:h64; t3:h64} *)
-
 val load64_le:
   b:uint8_p{length b >= 8} ->
   Stack h64
@@ -232,7 +228,7 @@ let poly1305_finish mac m len key st =
       let zero = uint8_to_sint8 0uy in
       let block = create zero 16ul in
       let i = FStar.Int.Cast.uint64_to_uint32 rem in
-      blit m (FStar.Int.Cast.uint64_to_uint32 (H64 (len -^ rem))) block 0ul i;
+      blit m (FStar.Int.Cast.uint64_to_uint32 (U64 (len -^ rem))) block 0ul i;
       block.(i) <- uint8_to_sint8 1uy;
 
       let t0 = load64_le block in
