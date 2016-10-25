@@ -2,9 +2,9 @@ all:
 	make clean
 	$(MAKE) allsubdirs test_api.exe
 
-FSTAR_HOME?=../../FStar
-KREMLIN_HOME?=../../kremlin
-HACL_HOME?=..
+FSTAR_HOME=/Users/bhargava/Desktop/repositories/FStar
+KREMLIN_HOME=/Users/bhargava/Desktop/repositories/kremlin
+HACL_HOME?=/Users/bhargava/Desktop/repositories/hacl-star
 include $(HACL_HOME)/lib/hyperstack/Makefile.include
 SUBDIRS=symmetric ec # hash hmac hkdf
 allsubdirs: $(addsuffix .all , $(SUBDIRS))
@@ -12,14 +12,22 @@ allsubdirs: $(addsuffix .all , $(SUBDIRS))
 %.all:
 	$(MAKE) -C $(basename $@)
 
-test_api.exe:
+test_api.exe: c/test_api.c
 	mkdir -p tmp 
 	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
-		$(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst $(KREMTEST)/testlib.c c/test_api.c \
+		$(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst $(KREMTEST)/testlib.c c/FStar_FileIO.c c/FStar_SocketIO.c c/test_api.c \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
 		-I $(KREMLIB) -I $(KREMTEST) \
 		-tmpdir tmp -o test_api.exe -ldopt "-lsodium" # -ccopt "-m32"
 	./test_api.exe
+
+tube.exe: c/tube.c
+	mkdir -p tmp 
+	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
+		$(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst $(KREMTEST)/testlib.c c/FStar_FileIO.c c/FStar_SocketIO.c c/tube.c \
+		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
+		-I $(KREMLIB) -I $(KREMTEST) \
+		-tmpdir tmp -o tube.exe -ldopt "-lsodium" # -ccopt "-m32"
 
 perf1: test_api.exe
 	./test_api.exe perf1
