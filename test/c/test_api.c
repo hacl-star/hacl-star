@@ -14,7 +14,6 @@
 #define box_NONCEBYTES       24
 
 
-
 #if defined(__i386__)
 
 static __inline__ unsigned long long rdtsc(void)
@@ -158,7 +157,7 @@ void test_perf1() {
   printf("User time for Sodium: %f\n", t2);
 
   printf("Slowdown (HACL/Sodium): %f\n", t1/t2);
-  printf("Cycle ratio (HACL/Sodium): %llu\n", d1/d2);
+  printf("Cycle ratio (HACL/Sodium): %lf\n", (double)d1/d2);
 }
 
 void test_perf2() {
