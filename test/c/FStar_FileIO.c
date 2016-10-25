@@ -1,10 +1,3 @@
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <sys/mman.h>
 #include "FStar_IO.h"
 
 result file_open_read_sequential(char* file,file_handle* fh){

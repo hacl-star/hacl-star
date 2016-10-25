@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/mman.h>
+#include <strings.h>
 
 typedef enum {OK, ERROR} result;
 

@@ -95,7 +95,7 @@ void test_correctness() {
   if (sodium_init() == -1) {
     exit(EXIT_FAILURE);
   }
-  uint8_t ciphertext[CIPHERTEXT_LEN], ciphertext2[CIPHERTEXT_LEN],
+  uint8_t ciphertext[CIPHERTEXT_LEN+16], ciphertext2[CIPHERTEXT_LEN+16],
     mac[16],mac2[16],
     decrypted[MESSAGE_LEN], decrypted2[MESSAGE_LEN],
     pk[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
@@ -104,8 +104,10 @@ void test_correctness() {
   uint32_t res;
   int i;
   /* Testing the secret box primitives */  
-  Hacl_SecretBox_crypto_secretbox_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, key);
-  res = crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key);
+  /* Hacl_SecretBox_crypto_secretbox_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, key); */
+  /* res = crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key); */
+  Hacl_SecretBox_crypto_secretbox_easy(ciphertext, msg, MESSAGE_LEN, nonce, key);
+  res = crypto_secretbox_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, key);
 
   printf("SecretBox decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("Secret box", msg, decrypted, MESSAGE_LEN);
@@ -116,9 +118,16 @@ void test_correctness() {
   // Creating public/private key couples
   Hacl_EC_Curve25519_exp(pk , basepoint, key);
   Hacl_EC_Curve25519_exp(pk2, basepoint, sk);
+
+  Hacl_Box_crypto_box_beforenm(test, pk, sk);
+  res = crypto_box_beforenm(test2, pk2, key);
+  TestLib_compare_and_print("BeforeNM", test2, test, 32);
+  
   /* Testing the box primitives */
-  i = crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk, sk);  
-  res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key);
+  /* i = crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk, sk); */
+  /* res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key); */
+  i = crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk, sk);
+  res = Hacl_Box_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, key);
   printf("Box decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
   
   TestLib_compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
