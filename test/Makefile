@@ -26,7 +26,7 @@ tube.exe: c/tube.c
 	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
 		$(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst $(KREMTEST)/testlib.c c/FStar_FileIO.c c/FStar_SocketIO.c c/tube.c \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
-		-I $(KREMLIB) -I $(KREMTEST) \
+		-I $(KREMLIB) -I $(KREMTEST) -I ./c \
 		-tmpdir tmp -o tube.exe -ldopt "-lsodium" # -ccopt "-m32"
 
 perf1: test_api.exe

@@ -1,3 +1,6 @@
+#define _POSIX_C_SOURCE 199309L
+#define _BSD_SOURCE
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -6,6 +9,8 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <strings.h>
+
+#define h_addr h_addr_list[0]
 
 typedef enum {OK, ERROR} result;
 

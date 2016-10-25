@@ -1,21 +1,17 @@
+#define _POSIX_C_SOURCE 199309L
+
 #include "testlib.h"
 #include "Hacl_Box.h"
 #include <sodium.h>
-#include <time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/mman.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 #include <errno.h>
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
 #include "FStar_IO.h"
+
 
 #define secretbox_MACBYTES   16
 #define secretbox_NONCEBYTES 24
@@ -29,6 +25,7 @@
 #define CIPHERLEN(x)         (x + secretbox_MACBYTES)
 #define CIPHERSIZE           CIPHERLEN(BLOCKSIZE)
 #define HEADERSIZE           1024
+
 
 unsigned char BOX_CHACHA_POLY = 0x00;
 unsigned char SECRETBOX_CHACHA_POLY = 0x01;
@@ -70,7 +67,7 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB) {
   }
 
   uint64_t file_size = fh.status.size;
-  printf("Sending file: %s, size:%lld\n",file,file_size);
+  printf("Sending file: %s, size:%lu\n",file,file_size);
   if (tcp_connect(host,port,&conn) == ERROR) {
     perror("connect");
     return;
@@ -180,7 +177,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
       printf("Received connection\n");
       clock_t c1, c2;
       double t1, t2;
-      c1 = clock(); 
+      c1 = clock();
       
       uint8_t ciphertext[CIPHERSIZE];
       int rb;
@@ -250,7 +247,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
       }
       char* file;
       file = (char*) (header+24);
-      printf("Receiving file: %s, size:%lld\n",file,file_size);
+      printf("Receiving file: %s, size:%lu\n",file,file_size);
 
       if (file_open_write_sequential(file,file_size,&fh) == ERROR) {
 	perror("fopen");
@@ -293,11 +290,11 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
       
       if (file_close (&fh) == ERROR) {
 	perror ("close fh");
-	return; 
+	return;
       }
       if (tcp_close (&conn) == ERROR) {
 	perror ("close sockfd");
-	return; 
+	return;
       }
       c2 = clock();
       t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
@@ -314,14 +311,15 @@ void print_usage() {
 
 void readHexLine(uint8_t* str, int len) {
   unsigned int x;
+  int res;
   for (int i = 0; i < len; i++) {
-    scanf("%02x",&x);
+    res = scanf("%02x",&x);
     str[i] = (uint8_t) x;
   }
 }
 
 void printHexLine(uint8_t* str, int len) {
-  for (int i = 0; i < len; i++) 
+  for (int i = 0; i < len; i++)
     printf("%02x",(unsigned int) str[i]);
   printf("\n");
 }
