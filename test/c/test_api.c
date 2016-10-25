@@ -158,6 +158,8 @@ void test_perf1() {
 
   printf("Slowdown (HACL/Sodium): %f\n", t1/t2);
   printf("Cycle ratio (HACL/Sodium): %lf\n", (double)d1/d2);
+  printf("Cycles/byte ratio HACL): %lf\n", (double)d1/SIZE);
+  printf("Cycles/byte ratio Sodium): %lf\n", (double)d2/SIZE);
 }
 
 void test_perf2() {
