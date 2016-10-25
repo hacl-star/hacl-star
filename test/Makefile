@@ -38,6 +38,10 @@ perf2: test_api.exe
 perf3: test_api.exe
 	./test_api.exe perf3
 
+tweetnacl: c/randombytes.c c/tweetnacl.c c/tweetnacl_test.c
+	gcc-5 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I $(KREMTEST) -I c $^ -o tweetnacl_test.exe
+	./tweetnacl_test.exe
+
 blah:
 	gcc-5 -m32 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I tmp -Wno-error=pointer-sign \
 		tmp/FStar_Mul.c \
