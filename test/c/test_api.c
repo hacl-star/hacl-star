@@ -2,6 +2,7 @@
 #include "Hacl_Box.h"
 #include <sodium.h>
 #include <time.h>
+#include "testutils.h"
 
 #define MESSAGE_LEN 44
 #define secretbox_MACBYTES   16
@@ -101,9 +102,9 @@ void test_perf1() {
   crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
 
   c1 = clock();
-  a = TestLib_rdtsc();
+  a = rdtsc();
   Hacl_SecretBox_crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
-  b = TestLib_rdtsc();
+  b = rdtsc();
   c2 = clock();
   d1 = b - a;
   printf("No of cycles for HACL: %llu\n", d1);
@@ -111,9 +112,9 @@ void test_perf1() {
   printf("User time for HACL: %f\n", t1);
 
   c1 = clock();
-  a = TestLib_rdtsc();
+  a = rdtsc();
   crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
-  b = TestLib_rdtsc();
+  b = rdtsc();
   c2 = clock();
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
   d2 = b - a;

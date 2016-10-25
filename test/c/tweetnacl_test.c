@@ -1,5 +1,6 @@
 #include "tweetnacl.h"
 #include "testlib.h"
+#include "testutils.h"
 
 #define SIZE (1024*1024*1024)
 #define MESSAGE_LEN 44
@@ -54,9 +55,9 @@ void test_perf1() {
   unsigned long long a,b,d1,d2;
 
   c1 = clock();
-  a = TestLib_rdtsc();
+  a = rdtsc();
   crypto_secretbox(cipher, plain, SIZE, nonce, key);
-  b = TestLib_rdtsc();
+  b = rdtsc();
   c2 = clock();
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
   d2 = b - a;
