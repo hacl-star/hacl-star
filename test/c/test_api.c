@@ -13,6 +13,52 @@
 #define box_SECRETKEYBYTES   32
 #define box_NONCEBYTES       24
 
+
+
+#if defined(__i386__)
+
+static __inline__ unsigned long long rdtsc(void)
+{
+  unsigned long long int x;
+  __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
+  return x;
+}
+#elif defined(__x86_64__)
+
+
+static __inline__ unsigned long long rdtsc(void)
+{
+  unsigned hi, lo;
+  __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+  return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
+}
+
+#elif defined(__powerpc__)
+
+
+static __inline__ unsigned long long rdtsc(void)
+{
+  unsigned long long int result=0;
+  unsigned long int upper, lower,tmp;
+  __asm__ volatile(
+                "0:                  \n"
+                "\tmftbu   %0           \n"
+                "\tmftb    %1           \n"
+                "\tmftbu   %2           \n"
+                "\tcmpw    %2,%0        \n"
+                "\tbne     0b         \n"
+                : "=r"(upper),"=r"(lower),"=r"(tmp)
+		   );
+  result = upper;
+  result = result<<32;
+  result = result|lower;
+
+  return(result);
+}
+
+#endif
+
+
 uint8_t *msg = (uint8_t*) "testtesttesttesttesttesttesttesttesttesttest";
 
 uint8_t nonce[secretbox_NONCEBYTES] = {
@@ -87,19 +133,32 @@ void test_perf1() {
   clock_t c1, c2;
   double t1, t2;
 
+  unsigned long long a,b,d1,d2;
+  // running it once each, just to remove cache effects.
+  crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
+
   c1 = clock();
+  a = rdtsc();
   Hacl_SecretBox_crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
+  b = rdtsc();
   c2 = clock();
+  d1 = b - a;
+  printf("No of cycles for HACL: %llu\n", d1);
   t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
   printf("User time for HACL: %f\n", t1);
 
   c1 = clock();
+  a = rdtsc();
   crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
+  b = rdtsc();
   c2 = clock();
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  d2 = b - a;
+  printf("No of cycles for Sodium: %llu\n", d2);
   printf("User time for Sodium: %f\n", t2);
 
-  printf("Slowdown (AEAD): %f\n", t1/t2);
+  printf("Slowdown (HACL/Sodium): %f\n", t1/t2);
+  printf("Cycle ratio (HACL/Sodium): %llu\n", d1/d2);
 }
 
 void test_perf2() {
