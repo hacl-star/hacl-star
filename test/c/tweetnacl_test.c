@@ -54,9 +54,9 @@ void test_perf1() {
   unsigned long long a,b,d1,d2;
 
   c1 = clock();
-  a = rdtsc();
+  a = TestLib_rdtsc();
   crypto_secretbox(cipher, plain, SIZE, nonce, key);
-  b = rdtsc();
+  b = TestLib_rdtsc();
   c2 = clock();
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
   d2 = b - a;

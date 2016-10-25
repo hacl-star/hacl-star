@@ -101,9 +101,9 @@ void test_perf1() {
   crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
 
   c1 = clock();
-  a = rdtsc();
+  a = TestLib_rdtsc();
   Hacl_SecretBox_crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
-  b = rdtsc();
+  b = TestLib_rdtsc();
   c2 = clock();
   d1 = b - a;
   printf("No of cycles for HACL: %llu\n", d1);
@@ -111,9 +111,9 @@ void test_perf1() {
   printf("User time for HACL: %f\n", t1);
 
   c1 = clock();
-  a = rdtsc();
+  a = TestLib_rdtsc();
   crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
-  b = rdtsc();
+  b = TestLib_rdtsc();
   c2 = clock();
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
   d2 = b - a;

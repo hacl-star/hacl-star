@@ -38,7 +38,7 @@ perf2: test_api.exe
 perf3: test_api.exe
 	./test_api.exe perf3
 
-tweetnacl: c/randombytes.c c/tweetnacl.c c/tweetnacl_test.c
+tweetnacl: $(KREMTEST)/testlib.c c/randombytes.c c/tweetnacl.c c/tweetnacl_test.c
 	gcc-5 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I $(KREMTEST) -I c $^ -o tweetnacl_test.exe
 	./tweetnacl_test.exe
 
