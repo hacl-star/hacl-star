@@ -21,6 +21,17 @@ test_api.exe: c/test_api.c
 		-tmpdir tmp -o test_api.exe -ldopt "-lsodium" # -ccopt "-m32"
 	./test_api.exe
 
+test_box.exe: Hacl.Test.Box.fst
+	mkdir -p box
+	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
+		$(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c $^ \
+		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
+		-I $(KREMLIB) -I $(KREMTEST) -I ./bindings \
+		-no-prefix Hacl.Test.Box \
+		-add-include '"testlib.h"' -add-include '<sodium.h>' -no-prefix Libsodium \
+		-tmpdir box -o test_box.exe -ldopt "-lsodium" # -ccopt "-m32"
+	./test_box.exe
+
 tube.exe: c/tube.c
 	mkdir -p tmp 
 	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
@@ -265,7 +276,7 @@ gprof:
 		-o test_api.exe -lsodium -pg
 
 clean:
-	rm -rf *~ *.exe *.out *.o *.c *.h *.cmi *.cmo *.cmx *.krml ./tmp
+	rm -rf *~ *.exe *.out *.o *.c *.h *.cmi *.cmo *.cmx *.krml ./tmp ./box
 	$(MAKE) -C symmetric clean
 	$(MAKE) -C ec clean
 # 	$(MAKE) -C hash clean
