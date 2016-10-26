@@ -7,26 +7,8 @@ open Bignum
 let to_limb = to_uint_limb       
 
 let template_donna_64 = fun x -> 51
-let template_donna = fun x -> 26 - (x mod 2)
-let template_448 = fun x -> 56
 
 let t = template_donna_64
-			      
-let rec bitweight t i =
-  match i with
-  | 0 -> 0
-  | _ -> t i + bitweight t (i-1)
-			      
-let rnd_bigint_donna_64 () =
-  let a = Bigint.create_limb 5 in
-  let b = ref zero_big_int in
-  for i = 0 to 4 do
-    let r = (Random.int64 (Int64.of_int 0x7ffffffffffff)) in
-    Bigint.upd_limb a i (of_int64 r);
-    b := add_big_int !b (mult_int_big_int (Int64.to_int r) (power_int_positive_int 2 (bitweight t i)));
-  done;
-  print_string "\n";
-  (a, !b)
         
 let print_bigint_64 b =
   let mask = of_string "0x3ffffff" in
@@ -35,25 +17,6 @@ let print_bigint_64 b =
     print_string " ";
   done;
   print_string "\n"
-	       
-   
-let print_bigint_donna_128 b =
-  for i = 0 to Array.length (Bigint.getRef b) - 1 do
-    print_string (wide_to_string (Bigint.index_wide b i));
-    print_string " ";
-  done;
-  print_string "\n"
-
-let print_big_int b =
-  for i = 0 to (norm_length-1) do
-    print_string (string_of_big_int (mod_big_int (div_big_int b (power_int_positive_int 2 (bitweight t i))) (power_int_positive_int 2 (t i))));
-    print_string " ";
-  done;
-  print_string "\n"
-	       
-let modulo b =
-  let prime = sub_big_int (power_int_positive_int 2 255) (big_int_of_int 19) in
-  mod_big_int b prime
 
 let format_secret s =
   Bigint.upd_byte s 0 (Uint8.logand (Bigint.index_byte s 0) (Uint8.of_int 248));
@@ -115,7 +78,7 @@ let get_output output =
   let input51 = Bigint.getRef output in
   let input64 = Array.make 5 zero_limb in
   input64.(0) <- add_limb input51.(0) (shift_left_limb input51.(1) 51);
-  input64.(1) <- add_limb (shift_right_limb input51.(1) 13) (shift_left_limb input51.(2) 48);
+  input64.(1) <- add_limb (shift_right_limb input51.(1) 13) (shift_left_limb input51.(2) 38);
   input64.(2) <- add_limb (shift_right_limb input51.(2) 26) (shift_left_limb input51.(3) 25);
   input64.(3) <- add_limb (shift_right_limb input51.(3) 39) (shift_left_limb input51.(4) 12);
   let s = ref "" in
@@ -134,7 +97,13 @@ let time f x s =
   let t = Sys.time() in
   let _ = f x in
   Printf.printf "Ellapsed time for %s : %fs\n" s (Sys.time() -. t)
-      
+
+let compare s_ref s =
+  for i = 0 to (String.length s_ref/2) - 1  do
+    if String.sub s (2*i) 2 <> String.sub s_ref (2*i) 2 then
+      failwith (Printf.sprintf "Reference and result differ at byte %d: %s %s\n" i (String.sub s_ref (2*i) 2) (String.sub s (2*i) 2))
+  done
+
 let test4 () =
   (* Output data *)
   let output = Bigint.create_limb norm_length in
@@ -163,17 +132,19 @@ let test4 () =
   let res = ConcretePoint.Point(resx, resy, resz) in
   
   (* Ladder *)
-  time (fun () ->
-      for i = 0 to 9 do
-        MontgomeryLadder.montgomery_ladder res scalar basepoint;
-      done
-    ) () "10 times the montgomery ladder";
+  time (fun () -> MontgomeryLadder.montgomery_ladder res scalar basepoint) () "the curve25519 montgomery ladder";
+  (* time (fun () -> *)
+  (*     for i = 0 to 9 do *)
+  (*       MontgomeryLadder.montgomery_ladder res scalar basepoint; *)
+  (*     done *)
+  (*   ) () "10 times the montgomery ladder"; *)
 
   
   let zrecip = Bigint.create_limb norm_length in
   (* Get the affine coordinates back *)
   Crecip.crecip' zrecip (ConcretePoint.get_z res);
   Bignum.fmul output resx zrecip;
+  Modulo.normalize output;
 
   print_bigint_64 (ConcretePoint.get_x res);
   print_bigint_64 (ConcretePoint.get_z res);
@@ -182,7 +153,10 @@ let test4 () =
   print_string "\nExpected output u-coordinate:\nc3da55379de9c6908e94ea4df28d084f32eccf03491c71f754b4075577a28552\n";
   print_string "Got:\n";
   print_string output_string;
-  print_string "\n"
+  print_string "\n";
+  let s_ref = "c3da55379de9c6908e94ea4df28d084f32eccf03491c71f754b4075577a28552" in
+  compare s_ref output_string;
+  print_string "SUCCESS"
 	       
 		  
 let _ =

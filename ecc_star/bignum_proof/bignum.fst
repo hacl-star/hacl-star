@@ -525,7 +525,7 @@ val fmul:
       /\ (modifies !{getRef res} h0 h1)
     ))
 let fmul res a b = 
-//  admit();//
+  //@@
   let h0 = ST.get() in
   standardized_eq_norm h0 a; standardized_eq_norm h0 b;
   let tmp = create_wide (2*norm_length-1) in

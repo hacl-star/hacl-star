@@ -3,62 +3,25 @@ open UInt
 open Big_int
 open Stdint
 open Bignum
-    
-let template_donna_64 = fun x -> 51
-let template_donna = fun x -> 26 - (x mod 2)
-let template_448 = fun x -> 56
+
 let template_256 = fun x -> 32
 
 let t = template_256
-			      
-let rec bitweight t i =
-  match i with
-  | 0 -> 0
-  | _ -> t i + bitweight t (i-1)
-			      
-let rnd_bigint_64 () =
-  let a = Bigint.create_limb norm_length in
-  let b = ref zero_big_int in
-  for i = 0 to norm_length-1 do
-    let r = (Random.int64 (Int64.of_int 0x7ffffffffffff)) in
-    Bigint.upd_limb a i (of_int64 r);
-    b := add_big_int !b (mult_int_big_int (Int64.to_int r) (power_int_positive_int 2 (bitweight t i)));
-  done;
-  print_string "\n";
-  (a, !b)
-        
+
 let print_bigint_64 b =
   for i = 0 to norm_length-1 do
     print_string (Uint64.to_string_hex (Uint64.of_int64 (to_int64 (Bigint.index_limb b i))));
     print_string " ";
   done;
   print_string "\n"
-           
+
 let print_bigint b =
   for i = 0 to norm_length-1 do
     print_string (Uint64.to_string_hex (Uint64.of_int64 (to_int64 (Bigint.index_limb b (7-i)))));
     print_string " ";
   done;
   print_string "\n"
-   
-let print_bigint_128 b =
-  for i = 0 to 2*norm_length-2 do
-    print_string (wide_to_string (Bigint.index_wide b i));
-    print_string " ";
-  done;
-  print_string "\n"
 
-let print_big_int b =
-  for i = 0 to (norm_length-1) do
-    print_string (string_of_big_int (mod_big_int (div_big_int b (power_int_positive_int 2 (bitweight t i))) (power_int_positive_int 2 (t i))));
-    print_string " ";
-  done;
-  print_string "\n"
-
-let modulo b =
-  let prime = sub_big_int (add_big_int (add_big_int (sub_big_int (power_int_positive_int 2 256) (power_int_positive_int 2 224)) (power_int_positive_int 2 192)) (power_int_positive_int 2 96)) unit_big_int in
-  mod_big_int b prime	       
-		
 let format_secret s =
   Bigint.upd_byte s 0 Uint8.zero
 
@@ -78,7 +41,7 @@ let yt = "5421c3209c2d6c704835d82ac4c3dd90f61a8a52598b9e7ab656e9d8c8b24316"
 let get_input_scalar scalar_string =
   let bytes = Array.init 32 (fun i -> Stdint.Uint8.of_string ("0x" ^ (String.sub scalar_string (62 - 2*i) 2))) in
   Bigint.Bigint(bytes,fun x -> 8)
-	       
+
 let get_input input_string =
   let bytes = Array.init 32 (fun i -> Stdint.Uint8.of_string ("0x" ^ (String.sub input_string (62 - 2*i) 2))) in
   let input32 = Array.make 8 zero_limb in
@@ -93,7 +56,7 @@ let get_input input_string =
        fill a b (ctr-1) in
   fill input32 bytes 32;
   Bigint.Bigint(input32,Parameters.templ)
-  
+
 let get_output output =
   let input32 = Bigint.getRef output in
   let s = ref "" in
@@ -115,16 +78,22 @@ let time f x s =
   let t = Sys.time() in
   let _ = f x in
   Printf.printf "Ellapsed time for %s : %fs\n" s (Sys.time() -. t)
-             
-(* Test vectors taken from http://point-at-infinity.org/ecc/nisttv *)	     
-let test3 () =
+
+let compare s_ref s =
+  for i = 0 to (String.length s_ref/2) - 1  do
+    if String.sub s (2*i) 2 <> String.sub s_ref (2*i) 2 then
+      failwith (Printf.sprintf "Reference and result differ at byte %d: %s %s\n" i (String.sub s_ref (2*i) 2) (String.sub s (2*i) 2))
+  done
+
+(* Test vectors taken from http://point-at-infinity.org/ecc/nisttv *)
+let test () =
   (* Output data *)
   let output_x = Bigint.create_limb norm_length  in
   let output_y = Bigint.create_limb norm_length  in
 
   let scalar = get_scalar_of_string "115792089210356248762697446949407573529996955224135760342422259061068512044368" in
   let scalar = Bigint.Bigint(scalar, fun x -> 8) in
-  
+
   print_string "Value of the scalar : lsb -> msb\n";
   Array.iter (fun x -> print_string ((Uint8.to_string x) ^ " ")) (Bigint.getRef scalar);
   print_string "\n";
@@ -151,7 +120,7 @@ let test3 () =
   let res = ConcretePoint.Point(resx, resy, resz) in
 
   (* Ladder *)
-  MontgomeryLadder.montgomery_ladder res scalar basepoint;
+  time (fun () -> MontgomeryLadder.montgomery_ladder res scalar basepoint) () "the P256 montgomery ladder";
 
   let z = ConcretePoint.get_z res in
   let zrecip = Bigint.create_limb norm_length  in
@@ -163,26 +132,31 @@ let test3 () =
   let z3 = Bigint.create_limb norm_length  in
 
   Bignum.fsquare z2 z;
-  Bignum.fmul z3 z2 z;  
-  
+  Bignum.fmul z3 z2 z;
+
   Bignum.fsquare zrecip2 zrecip;
 
   Bignum.fmul zrecip3 zrecip2 zrecip;
-  
+
   Bignum.fmul output_x resx zrecip2;
   Bignum.fmul output_y resy zrecip3;
 
-  let test = Bigint.create_limb norm_length in
-  Bignum.fmul test z2 zrecip2;
-  Bignum.fmul test z3 zrecip3;
+  Modulo.normalize output_x;
+  Modulo.normalize output_y;
+
   let output_x_string = get_output output_x in
   let output_y_string = get_output output_y in
-  print_string "Expected:\nx = 6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296\ny = B01CBD1C01E58065711814B583F061E9D431CCA994CEA1313449BF97C840AE0A\n";
+  print_string "Expected:\nx = 6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296\ny = b01cbd1c01e58065711814b583f061e9d431cca994cea1313449bf97c840ae0a\n";
   print_string "Got:\nx = ";
   print_string output_x_string;
   print_string "\ny = ";
   print_string output_y_string;
-  print_string "\n"
+  print_string "\n";
+  let ref1 = "6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296" in
+  let ref2 = "b01cbd1c01e58065711814b583f061e9d431cca994cea1313449bf97c840ae0a" in  
+  compare ref1 output_x_string;
+  compare ref2 output_y_string;
+  print_string "SUCCESS\n"
 
 let test5 () =
   (* Output data *)
@@ -196,7 +170,7 @@ let test5 () =
   let sy = get_input ys in
   let sz = Bigint.create_limb norm_length  in Bigint.upd_limb sz 0  one_limb;
   let s = ConcretePoint.Point(sx, sy, sz) in
-  
+
   (* Creating point "T" *)
   let tx = get_input xt in
   let ty = get_input yt in
@@ -222,32 +196,32 @@ let test5 () =
   let sty = Bigint.create_limb norm_length  in
   let stz = Bigint.create_limb norm_length  in
   let st = ConcretePoint.Point(stx, sty, stz) in
-						  
+
   (*  DoubleAndAdd.double_and_add ss st s t s; *)
   DoubleAndAdd.double ss s;
   DoubleAndAdd.add st t s;
-  
+
   let szrecip = Bigint.create_limb norm_length  in
   let tzrecip = Bigint.create_limb norm_length  in
-  
+
   Crecip.crecip szrecip ssz;
   Crecip.crecip tzrecip stz;
-  
+
   let szrecip2 = Bigint.create_limb norm_length  in
   let szrecip3 = Bigint.create_limb norm_length  in
   let tzrecip2 = Bigint.create_limb norm_length  in
   let tzrecip3 = Bigint.create_limb norm_length  in
-  
+
   Bignum.fsquare szrecip2 szrecip;
   Bignum.fmul szrecip3 szrecip2 szrecip;
   Bignum.fsquare tzrecip2 tzrecip;
   Bignum.fmul tzrecip3 tzrecip2 tzrecip;
-  
+
   Bignum.fmul ss_x ssx szrecip2;
   Bignum.fmul ss_y ssy szrecip3;
   Bignum.fmul st_x stx tzrecip2;
   Bignum.fmul st_y sty tzrecip3;
-  
+
   let ss_x_string = get_output ss_x in
   let ss_y_string = get_output ss_y in
   let st_x_string = get_output st_x in
@@ -263,6 +237,6 @@ let test5 () =
   print_string st_y_string;
   print_string "\n"
 
-		  
+
 let _ =
-  test3 ()
+  test ()

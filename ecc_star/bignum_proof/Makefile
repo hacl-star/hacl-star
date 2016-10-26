@@ -85,7 +85,7 @@ modulo_256: modulo_lemmas.fst modulo.fsti modulo_256_64.fst
 
 # 
 bignum: bignum.fst
-	$(FSTAR) --z3timeout 1000 $(VER_OPTIONS) --admit_fsi Modulo axiomatic.fst intlib.fst lemmas.fst parameters.fsti ../math_interfaces/definitions.fst ../math_interfaces/field.fst uint.fst bigint.fst eval.fst modulo.fsti fsum_lemmas.fst fsum.fst fsum_wide.fst fdifference_lemmas.fst fdifference.fst fscalar_lemmas.fst fscalar.fst fproduct_lemmas.fst fproduct.fst bignum_lemmas.fst $^ --verify_module Bignum
+	$(FSTAR) --z3timeout 4000 $(VER_OPTIONS) --admit_fsi Modulo axiomatic.fst intlib.fst lemmas.fst parameters.fsti ../math_interfaces/definitions.fst ../math_interfaces/field.fst uint.fst bigint.fst eval.fst modulo.fsti fsum_lemmas.fst fsum.fst fsum_wide.fst fdifference_lemmas.fst fdifference.fst fscalar_lemmas.fst fscalar.fst fproduct_lemmas.fst fproduct.fst bignum_lemmas.fst $^ --verify_module Bignum
 #
 # Extraction and compilation targets
 #
