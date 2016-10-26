@@ -187,3 +187,4 @@ int main(int argc, char *argv[]){
   } else {
     test_correctness();
   }
+}

@@ -1,6 +1,5 @@
 all:
-	make clean
-	$(MAKE) allsubdirs test_api.exe
+	$(MAKE) allsubdirs test_api.exe test_box.exe
 
 FSTAR_HOME?=/Users/bhargava/Desktop/repositories/FStar
 KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
