@@ -1,10 +1,3 @@
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <sys/mman.h>
 #include "FStar_IO.h"
 
 result file_open_read_sequential(char* file,file_handle* fh){
@@ -56,7 +49,7 @@ result file_open_write_sequential(char* file,uint64_t file_size,file_handle* fh)
   struct stat sb;
   off_t len;
   unsigned char *p;
-  int fd;
+  int fd,i;
   
   fd = open (file, O_RDWR | O_CREAT | O_TRUNC, (mode_t) 0600);
   if (fd == -1) {
@@ -73,7 +66,7 @@ result file_open_write_sequential(char* file,uint64_t file_size,file_handle* fh)
     fprintf (stderr, "%s is not a filen", file);
     return ERROR;
   }
-  ftruncate(fd,file_size);
+  i = ftruncate(fd,file_size);
   fsync(fd); 
   p = mmap (0, file_size, PROT_WRITE, MAP_SHARED, fd, 0);
   if (p == MAP_FAILED) {

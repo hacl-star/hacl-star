@@ -2,9 +2,9 @@ all:
 	make clean
 	$(MAKE) allsubdirs test_api.exe
 
-FSTAR_HOME=/Users/bhargava/Desktop/repositories/FStar
-KREMLIN_HOME=/Users/bhargava/Desktop/repositories/kremlin
-HACL_HOME?=/Users/bhargava/Desktop/repositories/hacl-star
+FSTAR_HOME?=/Users/bhargava/Desktop/repositories/FStar
+KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
+HACL_HOME?=..
 include $(HACL_HOME)/lib/hyperstack/Makefile.include
 SUBDIRS=symmetric ec # hash hmac hkdf
 allsubdirs: $(addsuffix .all , $(SUBDIRS))
@@ -26,7 +26,7 @@ tube.exe: c/tube.c
 	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
 		$(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst $(KREMTEST)/testlib.c c/FStar_FileIO.c c/FStar_SocketIO.c c/tube.c \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
-		-I $(KREMLIB) -I $(KREMTEST) \
+		-I $(KREMLIB) -I $(KREMTEST) -I ./c \
 		-tmpdir tmp -o tube.exe -ldopt "-lsodium" # -ccopt "-m32"
 
 perf1: test_api.exe
@@ -37,6 +37,10 @@ perf2: test_api.exe
 
 perf3: test_api.exe
 	./test_api.exe perf3
+
+tweetnacl: $(KREMTEST)/testlib.c c/randombytes.c c/tweetnacl.c c/tweetnacl_test.c
+	gcc-5 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I $(KREMTEST) -I c $^ -o tweetnacl_test.exe
+	./tweetnacl_test.exe
 
 blah:
 	gcc-5 -m32 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I tmp -Wno-error=pointer-sign \
