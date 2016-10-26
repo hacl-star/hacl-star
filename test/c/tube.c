@@ -72,7 +72,7 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB, uin
   }
 
   uint64_t file_size = fh.status.size;
-  printf("Sending file: %s, size:%lu\n",file,file_size);
+  printf("Sending file: %s, size:%llu\n",file,file_size);
   if (tcp_connect(host,port,&conn) == ERROR) {
     perror("connect");
     return;
@@ -295,7 +295,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
       }
       char* file;
       file = (char*) (header+24);
-      printf("Receiving file: %s, size:%lu\n",file,file_size);
+      printf("Receiving file: %s, size:%llu\n",file,file_size);
 
       if (file_open_write_sequential(file,file_size,&fh) == ERROR) {
 	perror("fopen");
