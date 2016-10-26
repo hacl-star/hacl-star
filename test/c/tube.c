@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <getopt.h>
 #include <errno.h>
 #include <arpa/inet.h> 
 #include "FStar_IO.h"
@@ -52,7 +53,10 @@ void makeNonce(uint8_t* nonce, uint64_t stream_id, uint64_t timestamp, uint64_t 
   memcpy(nonce+16,(uint8_t*) &seqno,8);
 }
 
-void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB) {
+void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB, uint64_t roundup) {
+
+  printf("Rounding up to %llu\n",roundup);
+
   file_handle fh;
   socket_handle conn;
   uint8_t pkA[box_PUBLICKEYBYTES];
@@ -77,9 +81,13 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB) {
   }
 
   uint8_t ciphertext[CIPHERSIZE];
-  int fragments = file_size / BLOCKSIZE;
-  int rem = file_size % BLOCKSIZE;
-
+  uint64_t fragments = file_size / BLOCKSIZE;
+  unsigned int rem = file_size % BLOCKSIZE;
+  uint64_t hrem = 0;
+  if (roundup > 0 && file_size%roundup != 0) {
+    hrem = (roundup - file_size%roundup);
+  }
+  uint64_t hsize = file_size + hrem;
 
   uint64_t mtime = fh.status.mtime;
   uint64_t nsize = strlen(file);
@@ -109,6 +117,9 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB) {
   if (tcp_write_all(&conn, (uint8_t*) &timestamp, 8) == ERROR) {
     return;
   }
+  if (tcp_write_all(&conn, (uint8_t*) &hsize, 8) == ERROR) {
+    return;
+  }
   if (tcp_write_all(&conn, pkA, box_PUBLICKEYBYTES) == ERROR) {
     return;
   }
@@ -130,7 +141,7 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB) {
     return;
   }
   
-  int i;
+  uint64_t i;
   uint8_t* next;
 
   for (i = 0; i < fragments; i++) { 
@@ -143,12 +154,43 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB) {
     }
   }
 
-  next = file_next_sequential(&fh,rem);
-  makeNonce(nonce,stream_id,timestamp,seqno);
-  seqno++;
-  crypto_box_easy_afternm(ciphertext, next, rem, nonce, key);   
-  if (tcp_write_all(&conn, ciphertext, CIPHERLEN(rem)) == ERROR) {
-    return;
+  uint8_t plaintext[BLOCKSIZE];
+  memset(plaintext,0,BLOCKSIZE);
+  if (rem + hrem > 0) {
+    next = file_next_sequential(&fh,rem);
+    memcpy(plaintext,next,rem);
+    makeNonce(nonce,stream_id,timestamp,seqno);
+    seqno++;
+    if (hrem + rem > BLOCKSIZE) {
+      rem = BLOCKSIZE;
+      hrem = hrem - (BLOCKSIZE - rem);
+    }
+    else {
+      rem = rem + hrem;
+      hrem = 0;
+    }
+    crypto_box_easy_afternm(ciphertext, plaintext, rem, nonce, key);   
+    if (tcp_write_all(&conn, ciphertext, CIPHERLEN(rem)) == ERROR) {
+      return;
+    }
+    if (hrem > 0) {
+      memset(plaintext,0,BLOCKSIZE);
+      fragments = hrem / BLOCKSIZE;
+      hrem = hrem % BLOCKSIZE;
+      for (i = 0; i < fragments; i++){
+	crypto_box_easy_afternm(ciphertext, plaintext, BLOCKSIZE, nonce, key);   
+	if (tcp_write_all(&conn, ciphertext, CIPHERLEN(BLOCKSIZE)) == ERROR) {
+	  return;
+	}
+      }
+      if (hrem > 0){
+	crypto_box_easy_afternm(ciphertext, plaintext, hrem, nonce, key);   
+	if (tcp_write_all(&conn, ciphertext, CIPHERLEN(hrem)) == ERROR) {
+	  return;
+	}
+	
+      }
+    }
   }
   tcp_close(&conn);
   c2 = clock(); 
@@ -187,6 +229,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
       uint8_t  pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES];
       uint64_t stream_id = 0;
       uint64_t timestamp;
+      uint64_t hsize;
 
       if (tcp_read_all(&conn, (uint8_t *) &stream_id, 8) == ERROR) {
 	perror("read did not read all connid");
@@ -198,6 +241,10 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
       }
       if (tcp_read_all(&conn, (uint8_t *) &timestamp, 8) == ERROR) {
 	perror("read did not read all timestamp");
+	return;
+      }
+      if (tcp_read_all(&conn, (uint8_t *) &hsize, 8) == ERROR) {
+	perror("read did not read ciphersize");
 	return;
       }
       if (tcp_read_all(&conn, pk1, box_PUBLICKEYBYTES) == ERROR) {
@@ -278,19 +325,20 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
 	}
       }
 
-      if (tcp_read_all(&conn, ciphertext, CIPHERLEN(rem)) == ERROR) {
-        printf("received %d fragments",i);
-	perror("read did not read all");
+      if (rem > 0) {
+	if (tcp_read_all(&conn, ciphertext, CIPHERLEN(rem)) == ERROR) {
+	  printf("received %d fragments",i);
+	  perror("read did not read all");
 	  return;
-      }
-      next = file_next_sequential(&fh,rem);
-      makeNonce(nonce,stream_id,timestamp,seqno);
-      seqno++;
-      if (crypto_box_open_easy_afternm(next,ciphertext,CIPHERLEN(rem), nonce, key) != 0) {
-	perror ("decrypt failed last!");
+	}
+	next = file_next_sequential(&fh,rem);
+	makeNonce(nonce,stream_id,timestamp,seqno);
+	seqno++;
+	if (crypto_box_open_easy_afternm(next,ciphertext,CIPHERLEN(rem), nonce, key) != 0) {
+	  perror ("decrypt failed last!");
 	  return;
+	}
       }
-      
       if (file_close (&fh) == ERROR) {
 	perror ("close fh");
 	return; 
@@ -309,7 +357,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
 
 
 void print_usage() {
-  printf("Usage: tube send file host port\n        tube receive port");
+  printf("Usage: tube send file host port\n       tube receive port\n       tube keygen\nOptions:\n-k --myprivatekey <64 hex characters>\n-p --peerpublickey <64 hex characters>\n-h --hidesize <number>K | <number>M | <number>G\n");
 }
 
 void readHexLine(uint8_t* str, int len) {
@@ -320,41 +368,102 @@ void readHexLine(uint8_t* str, int len) {
   }
 }
 
+void sreadHexLine(char* a, uint8_t* str, int len) {
+  unsigned int x;
+  for (int i = 0; i < len; i++) {
+    sscanf(a+(2*i),"%02x",&x);
+    str[i] = (uint8_t) x;
+  }
+}
+
 void printHexLine(uint8_t* str, int len) {
   for (int i = 0; i < len; i++) 
     printf("%02x",(unsigned int) str[i]);
   printf("\n");
 }
 
+static struct option long_options[] =
+  {
+    /* These options set a flag. */
+    {"myprivatekey", required_argument, 0, 'k'},
+    {"peerpublickey", required_argument, 0, 'p'},
+    {"hidesize",   required_argument, 0, 'h'},
+    {0, 0, 0, 0}
+  };
+
 int main(int argc, char *argv[]){
   uint8_t sk[secretbox_KEYBYTES];
   uint8_t pk[box_PUBLICKEYBYTES];
-
+  unsigned int port;
+  char host[512];
+  char file[512];
+  uint64_t roundup = 0;
+  bool got_sk = false, got_pk = false;
+  unsigned int n = 0;
+  unsigned char u = 0;
   
-
   if (argc == 2 && strcmp(argv[1], "keygen") == 0) {
     crypto_box_keypair(pk,sk);
-    printf("Your Curve25519 private key (64 hex characters): ");
+    printf("Your Curve25519 secret key (64 hex characters): ");
     printHexLine(sk,secretbox_KEYBYTES);
-    printf("Your Curve25519 public  key (64 hex characters): ");
+    printf("Your Curve25519 public key (64 hex characters): ");
     printHexLine(pk,box_PUBLICKEYBYTES);
-  } else if (argc == 5 && strcmp(argv[1], "send") == 0) {
-    unsigned int i;
-    sscanf(argv[4],"%u",&i);
-    printf("Your Curve25519 private key (64 hex characters): ");
+    return EXIT_SUCCESS;;
+  } 
+  
+  while (1)
+    {
+      int option_index = 0;
+      
+      char c = getopt_long (argc, argv, "k:p:h:",
+		       long_options, &option_index);
+      if (c == -1)
+	break;
+      switch (c)
+	{
+	case 'k':
+	  sreadHexLine(optarg,sk,secretbox_KEYBYTES);
+	  got_sk = true;
+	  break;
+	case 'p':
+	  sreadHexLine(optarg,pk,box_PUBLICKEYBYTES);
+	  got_pk = true;
+	  break;
+	case 'h':
+	  sscanf(optarg,"%u%c",&n,&u);
+	  switch (u) {
+	  case 'K': roundup = n * 1024; break;
+	  case 'M': roundup = n * 1024 * 1024; break;
+	  case 'G': roundup = n * 1024 * 1024 * 1024; break;
+	  default: printf("Hiding size up to %u%c",n,u); print_usage(); abort(); 
+	  } 
+	  break;
+	default:
+	  print_usage();
+	  fflush(stdout);
+	  abort();
+	}
+    }
+  if (!got_sk) {
+    printf("Your Curve25519 secret key (64 hex characters): ");
     readHexLine(sk,secretbox_KEYBYTES);
-    printf("Peer Curve25519 public  key (64 hex characters): ");
+  }
+  if (!got_pk) {
+    printf("Peer Curve25519 public key (64 hex characters): ");
     readHexLine(pk,box_PUBLICKEYBYTES);
-    file_send(argv[2],argv[3],(int)i,sk,pk);
-  } else if (argc == 3 && strcmp(argv[1], "receive") == 0) {
-    unsigned int i;
-    sscanf(argv[2],"%u",&i);
-    printf("Your Curve25519 private key (64 hex characters): ");
-    readHexLine(sk,secretbox_KEYBYTES);
-    printf("Peer Curve25519 public  key (64 hex characters): ");
-    readHexLine(pk,box_PUBLICKEYBYTES);
-    file_recv((int)i,pk,sk);
-  } else print_usage();
+  }
+  
+  if (argc - optind == 3 && strcmp(argv[optind], "send") == 0) {
+      strcpy(file, argv[optind+1]);
+      sscanf(argv[optind+2],"%512[^:]:%u",host,&port);
+      file_send(file,host,port,sk,pk,roundup);
+  } else if (argc - optind == 2 && strcmp(argv[optind], "receive") == 0) {
+      sscanf(argv[optind+1],"%u",&port);
+      file_recv(port,pk,sk);
+  } else {
+    print_usage();
+    abort();
+  }
 
   return EXIT_SUCCESS;
 }

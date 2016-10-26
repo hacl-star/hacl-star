@@ -21,6 +21,8 @@ typedef struct {
 
 typedef struct {
   int fd;
+  uint64_t sent_bytes;
+  uint64_t received_bytes;
 } socket_handle;
 
 result file_open_read_sequential(char* file, file_handle* fh);

@@ -46,6 +46,8 @@ result tcp_connect(char* host, int port, socket_handle* sh) {
       return ERROR;
     } 
   sh->fd = sockfd;
+  sh->sent_bytes = 0;
+  sh->received_bytes = 0;
   return OK;
 }
 
@@ -94,6 +96,7 @@ result tcp_write_all(socket_handle* conn, uint8_t* buf, uint64_t len) {
     perror("write did not write all");
     return ERROR;
   }
+  conn->sent_bytes += len;
   return OK;
 }    
 
@@ -112,10 +115,12 @@ result tcp_read_all(socket_handle* conn, uint8_t* buf, int len) {
     }
     got += n;
   }
+  conn->received_bytes += got;
   return OK;
 }
 
 result tcp_close(socket_handle* conn) {
   shutdown(conn->fd,2);
+  printf("Sent %llu bytes, Received %llu bytes\n",conn->sent_bytes,conn->received_bytes);
   return OK;
 }
