@@ -23,7 +23,7 @@
 #define box_SECRETKEYBYTES   32
 #define box_NONCEBYTES       24
 
-#define BLOCKSIZE            4096
+#define BLOCKSIZE            (256 * 1024)
 #define CIPHERLEN(x)         (x + secretbox_MACBYTES)
 #define CIPHERSIZE           CIPHERLEN(BLOCKSIZE)
 #define HEADERSIZE           1024

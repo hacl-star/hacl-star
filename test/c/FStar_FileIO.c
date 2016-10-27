@@ -24,7 +24,7 @@ result file_open_read_sequential(char* file,file_handle* fh){
 
   uint64_t file_size = sb.st_size;
 
-  p = mmap (0, file_size, PROT_READ, MAP_SHARED, fd, 0);
+  p = mmap (0, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
   if (p == MAP_FAILED) {
     perror ("mmap");
     return ERROR; 
@@ -68,7 +68,7 @@ result file_open_write_sequential(char* file,uint64_t file_size,file_handle* fh)
   }
   i = ftruncate(fd,file_size);
   fsync(fd); 
-  p = mmap (0, file_size, PROT_WRITE, MAP_SHARED, fd, 0);
+  p = mmap (0, file_size, PROT_WRITE, MAP_PRIVATE, fd, 0);
   if (p == MAP_FAILED) {
     perror ("mmap");
     return ERROR; 
