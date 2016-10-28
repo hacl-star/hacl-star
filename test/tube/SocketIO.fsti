@@ -15,18 +15,27 @@ type socket_state =
 val current_state: FStar.HyperStack.mem -> socket -> GTot socket_state
 
 type sresult = 
-     | SocketOk: socket -> sresult
+     | SocketOk: sresult
      | SocketError: sresult
 
-val tcp_connect: host: string -> port:u32 -> Stack sresult
+val tcp_connect: host: string -> port:u32 -> s:buffer socket -> Stack sresult
     (requires (fun _ -> True))
-    (ensures  (fun h0 s h1 -> match s with | SocketOk s -> current_state h1 s = Open))
-val tcp_listen: port:u32 -> Stack sresult
+    (ensures  (fun h0 r h1 -> match r with 
+    	      	              | SocketOk -> 
+			      	let sh = get h1 s 0 in
+				current_state h1 sh = Open))
+val tcp_listen: port:u32 -> s:buffer socket -> Stack sresult
     (requires (fun _ -> True))
-    (ensures  (fun h0 s h1 -> match s with | SocketOk s -> current_state h1 s = Open))
-val tcp_accept: l:socket -> Stack sresult
+    (ensures  (fun h0 r h1 -> match r with 
+    	      	              | SocketOk -> 
+			      	let sh = get h1 s 0 in
+				current_state h1 sh = Open))
+val tcp_accept: l:socket -> s:buffer socket -> Stack sresult
     (requires (fun h0 -> current_state h0 l = Open))
-    (ensures  (fun h0 s h1 -> match s with | SocketOk s -> current_state h1 s = Open))
+    (ensures  (fun h0 r h1 -> match r with 
+    	      	              | SocketOk -> 
+			      	let sh = get h1 s 0 in
+				current_state h1 sh = Open))
 
 val tcp_write_all: s:socket -> string -> len:u64 -> Stack bool
     (requires (fun h0 -> current_state h0 s = Open))

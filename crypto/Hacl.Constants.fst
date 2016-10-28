@@ -6,6 +6,8 @@ type u32 = FStar.UInt32.t
 type u64 = FStar.UInt64.t
 
 type h8  = Hacl.UInt8.t
+type h32  = Hacl.UInt32.t
+type h64  = Hacl.UInt64.t
 
 type uint8_p = FStar.Buffer.buffer h8
 
