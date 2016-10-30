@@ -75,4 +75,12 @@ SocketIO_sresult SocketIO_tcp_write_all(SocketIO_socket* conn, uint8_t* buf, uin
 SocketIO_sresult SocketIO_tcp_read_all(SocketIO_socket* conn, uint8_t* buf, int len);
 SocketIO_sresult SocketIO_tcp_close(SocketIO_socket* conn);
 
+typedef struct {
+  PaddedFileIO_fresult r;
+  uint8_t* streamID;
+  PaddedFileIO_file_stat fs;
+} Hacl_Tube_open_result;
+
+Hacl_Tube_open_result Hacl_Tube_file_send(uint8_t* file, uint64_t roundup, uint8_t* host, uint32_t port, uint8_t* skA, uint8_t* pkB);
+Hacl_Tube_open_result Hacl_Tube_file_recv(uint32_t port, uint8_t* pkA, uint8_t* skB);
 #endif

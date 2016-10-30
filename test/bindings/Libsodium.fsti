@@ -73,7 +73,17 @@ val crypto_box_easy_afternm:
   mlen:u64 ->
   n:uint8_p ->
   k:uint8_p ->
-  Stack unit
+  Stack u32
+    (requires (fun _ -> True))
+    (ensures  (fun _ _ _ -> True))
+
+val crypto_box_open_easy_afternm:
+  c:uint8_p ->
+  m:uint8_p ->
+  mlen:u64 ->
+  n:uint8_p ->
+  k:uint8_p ->
+  Stack u32
     (requires (fun _ -> True))
     (ensures  (fun _ _ _ -> True))
 

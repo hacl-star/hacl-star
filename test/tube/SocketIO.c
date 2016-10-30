@@ -1,5 +1,6 @@
 #include "IO.h"
 
+SocketIO_socket init_socket;
 
 SocketIO_sresult SocketIO_tcp_connect(char* host, int port, SocketIO_socket* sh) {
   int sockfd = 0, n = 0;

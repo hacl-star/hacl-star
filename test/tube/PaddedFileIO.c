@@ -1,5 +1,7 @@
 #include "IO.h"
 
+PaddedFileIO_file_handle PaddedFileIO_init_file_handle;
+
 PaddedFileIO_fresult PaddedFileIO_file_open_read_sequential(uint8_t* file,PaddedFileIO_file_handle* fh){
   struct stat sb;
   unsigned char *p;

@@ -33,6 +33,7 @@ type file_handle: Type0 =  {
      stat:   file_stat;
      fd:     file_descriptor
 }
+val init_file_handle: file_handle
 
 type fresult : Type0 = 
      | FileOk    : fresult
