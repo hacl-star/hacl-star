@@ -137,3 +137,31 @@ val crypto_box_open_easy:
     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
 let crypto_box_open_easy m c mlen n pk sk =
   crypto_box_open_detached m (offset c 16ul) c (U64 (mlen -^ 16uL)) n pk sk
+
+
+val crypto_box_open_detached_afternm:
+  c:uint8_p ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
+  m:uint8_p ->
+  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
+  k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h k))
+    (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
+let crypto_box_open_detached_afternm c mac m mlen n k =
+  crypto_secretbox_open_detached c mac m mlen n k
+
+
+val crypto_box_open_easy_afternm:
+  m:uint8_p ->
+  c:uint8_p ->
+  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
+  k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
+    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 c /\ live h1 k))
+let crypto_box_open_easy_afternm m c mlen n k =
+  crypto_box_open_detached_afternm m (offset c 16ul) c (U64 (mlen -^ 16uL)) n k
+

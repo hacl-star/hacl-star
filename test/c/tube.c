@@ -14,7 +14,6 @@
 #include <arpa/inet.h>
 #include "FStar_IO.h"
 
-
 #define secretbox_MACBYTES   16
 #define secretbox_NONCEBYTES 24
 #define secretbox_KEYBYTES   32
@@ -22,6 +21,7 @@
 #define box_PUBLICKEYBYTES   32
 #define box_SECRETKEYBYTES   32
 #define box_NONCEBYTES       24
+
 
 #define BLOCKSIZE            (256 * 1024)
 #define CIPHERLEN(x)         (x + secretbox_MACBYTES)
@@ -128,13 +128,13 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB, uin
   uint64_t seqno = 0;
   uint8_t nonce[24];
   uint8_t key[secretbox_KEYBYTES];
-  if (crypto_box_beforenm(key,pkB,skA) < 0) {
+  if (Hacl_Box_crypto_box_beforenm(key,pkB,skA) < 0) {
     perror("beforenm failed");
     return;
   }
   makeNonce(nonce,stream_id,timestamp,seqno);
   seqno++;
-  crypto_box_easy_afternm(ciphertext, header, HEADERSIZE, nonce, key);   
+  Hacl_Box_crypto_box_easy_afternm(ciphertext, header, HEADERSIZE, nonce, key);   
   if (tcp_write_all(&conn, ciphertext, CIPHERLEN(HEADERSIZE)) == ERROR) {
     return;
   }
@@ -146,7 +146,7 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB, uin
     next = file_next_sequential(&fh,BLOCKSIZE);
     makeNonce(nonce,stream_id,timestamp,seqno);
     seqno++;
-    crypto_box_easy_afternm(ciphertext, next, BLOCKSIZE, nonce, key);   
+    Hacl_Box_crypto_box_easy_afternm(ciphertext, next, BLOCKSIZE, nonce, key);   
     if (tcp_write_all(&conn, ciphertext, CIPHERSIZE) == ERROR) {
 	  return;
     }
@@ -167,7 +167,7 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB, uin
       rem = rem + hrem;
       hrem = 0;
     }
-    crypto_box_easy_afternm(ciphertext, plaintext, rem, nonce, key);   
+    Hacl_Box_crypto_box_easy_afternm(ciphertext, plaintext, rem, nonce, key);   
     if (tcp_write_all(&conn, ciphertext, CIPHERLEN(rem)) == ERROR) {
       return;
     }
@@ -176,13 +176,13 @@ void file_send(char* file, char* host, int port, uint8_t* skA, uint8_t* pkB, uin
       fragments = hrem / BLOCKSIZE;
       hrem = hrem % BLOCKSIZE;
       for (i = 0; i < fragments; i++){
-	crypto_box_easy_afternm(ciphertext, plaintext, BLOCKSIZE, nonce, key);   
+	Hacl_Box_crypto_box_easy_afternm(ciphertext, plaintext, BLOCKSIZE, nonce, key);   
 	if (tcp_write_all(&conn, ciphertext, CIPHERLEN(BLOCKSIZE)) == ERROR) {
 	  return;
 	}
       }
       if (hrem > 0){
-	crypto_box_easy_afternm(ciphertext, plaintext, hrem, nonce, key);   
+	Hacl_Box_crypto_box_easy_afternm(ciphertext, plaintext, hrem, nonce, key);   
 	if (tcp_write_all(&conn, ciphertext, CIPHERLEN(hrem)) == ERROR) {
 	  return;
 	}
@@ -262,7 +262,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
 	return;
       }
       uint8_t key[secretbox_KEYBYTES];
-      if (crypto_box_beforenm(key,pkA,skB) < 0) {
+      if (Hacl_Box_crypto_box_beforenm(key,pkA,skB) < 0) {
 	perror("beforenm failed");
 	return;
       }
@@ -278,7 +278,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
       }
       makeNonce(nonce,stream_id,timestamp,seqno);
       seqno++;
-      if (crypto_box_open_easy_afternm(header,ciphertext,CIPHERLEN(HEADERSIZE), nonce, key) != 0) {
+      if (Hacl_Box_crypto_box_open_easy_afternm(header,ciphertext,CIPHERLEN(HEADERSIZE), nonce, key) != 0) {
 	perror ("decrypt failed!");
 	return;
       }
@@ -317,7 +317,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
 
 	makeNonce(nonce,stream_id,timestamp,seqno);
 	seqno++;
-	if (crypto_box_open_easy_afternm(next,ciphertext,CIPHERSIZE, nonce, key) != 0) {
+	if (Hacl_Box_crypto_box_open_easy_afternm(next,ciphertext,CIPHERSIZE, nonce, key) != 0) {
 	  perror ("decrypt failed!");
 	  return;
 	}
@@ -332,7 +332,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
 	next = file_next_sequential(&fh,rem);
 	makeNonce(nonce,stream_id,timestamp,seqno);
 	seqno++;
-	if (crypto_box_open_easy_afternm(next,ciphertext,CIPHERLEN(rem), nonce, key) != 0) {
+	if (Hacl_Box_crypto_box_open_easy_afternm(next,ciphertext,CIPHERLEN(rem), nonce, key) != 0) {
 	  perror ("decrypt failed last!");
 	  return;
 	}
