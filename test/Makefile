@@ -54,11 +54,23 @@ tube-c.exe: c/tube.c
 tube-star.exe: tube/Box.Ideal.fst tube/Hacl.Tube.fst tube/tube.c
 	mkdir -p tmp 
 	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
-		$(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c ../crypto/Hacl.Constants.fst tube/Box.Ideal.fst tube/Hacl.Tube.fst tube/tube.c \
+		$(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c $^ \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
 		-I $(KREMLIB) -I $(KREMTEST) -I ./c -I ./bindings -I ./tube -no-prefix Libsodium \
 		-add-include '"IO.h"' -add-include '<sodium.h>' \
-		-tmpdir tmp -o tube-star.exe -ldopt "-lsodium"
+		-tmpdir tmp -o tube-star.exe -ldopt "-lsodium" -drop PaddedFileIO -drop SocketIO
+
+
+tube-toy.exe: tube/Hacl.Toy2.fst
+	mkdir -p tmp 
+	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
+		$(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c $^ \
+		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
+		-I $(KREMLIB) -I $(KREMTEST) -I ./c -I ./bindings -I ./tube -no-prefix Libsodium \
+		-add-include '"IO.h"' -add-include '<sodium.h>' \
+		-tmpdir tmp -o tube-star.exe -ldopt "-lsodium" -drop PaddedFileIO.Toy2 -skip-linking
+
+
 
 perf1: test_api.exe
 	./test_api.exe perf1
