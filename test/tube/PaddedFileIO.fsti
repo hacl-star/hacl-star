@@ -5,48 +5,30 @@ open FStar.Buffer
 open Hacl.Cast
 open Hacl.Constants
 open Hacl.UInt64
+open FileIO.Types
+
+module U64 = FStar.UInt64
+module H64 =  Hacl.UInt64
+module B   = FStar.Buffer
 
 (* Need to get rid of these  following ones *)
 type string = seq u8
 val zero: u64
-val sub: buffer u8 -> u64 -> u64 -> Tot (buffer u8)
-val v: u64 -> Tot nat
 (* The above need to come from some library module *)
 
 (* File System Buffer Size, currently 256KB *)
 val max_block_size: u64
 
-
-type file_stat: Type0 = {
-     name: uint8_p;
-     mtime: h64;
-     size: h64;	
-}
-
-val file_descriptor: Type0
-
-type fd_state = 
-     | FileOpen: fd_state
-     | FileClosed: fd_state
-
-type file_handle: Type0 =  {
-     stat:   file_stat;
-     fd:     file_descriptor
-}
 val init_file_handle: file_handle
-
-type fresult : Type0 = 
-     | FileOk    : fresult
-     | FileError : fresult
 
 
 val file_state: FStar.HyperStack.mem -> file_handle -> GTot fd_state
 val file_offset: FStar.HyperStack.mem -> file_handle -> GTot u64
-val file_buffer: FStar.HyperStack.mem -> file_stat -> GTot (buffer u8)
-val file_content: FStar.HyperStack.mem -> file_stat -> GTot (seq u8)
+val file_buffer: FStar.HyperStack.mem -> file_stat -> GTot (buffer h8)
+val file_content: FStar.HyperStack.mem -> file_stat -> GTot (seq h8)
 
 let file_sub (m:FStar.HyperStack.mem) (f:file_handle) (i:u64) (j:u64) =	
-    sub (file_buffer m f.stat) i j
+    B.sub (file_buffer m f.stat) (Int.Cast.uint64_to_uint32 i) (Int.Cast.uint64_to_uint32 j)
     
 
 (* TODO: check the live/modifies clauses below *)
@@ -75,35 +57,37 @@ val file_open_write_sequential: file_stat -> fb:buffer file_handle -> Stack fres
 			    | _ -> true))
 
 val file_next_read_buffer: fb:buffer file_handle -> len:u64 -> Stack uint8_p
-    (requires (fun h0 -> v len <= v max_block_size /\
+    (requires (fun h0 -> U64.v len <= U64.v max_block_size /\
     	      	         length fb = 1 /\ live h0 fb /\
     	      	         (let f = get h0 fb 0 in
 			  file_state h0 f = FileOpen)))
     (ensures  (fun h0 s h1 -> let f = get h1 fb 0 in
     	      	              let i = file_offset h0 f in
-    	      	      	      let j = file_offset h0 f +^ len in
+    	      	      	      let j = U64 (file_offset h0 f +^ len) in
 			      modifies_1 s h0 h1 /\
     	      	      	      file_state h1 f = FileOpen /\ 
     	      	      	      file_offset h1 f = j /\
 			      file_content h0 f.stat = file_content h1 f.stat /\
-			      ((v i <= v f.stat.size /\ v j <= v f.stat.size) ==> s = file_sub h1 f i len) /\
-			      ((v i <= v f.stat.size /\ v j > v f.stat.size) ==>  sub s zero (f.stat.size -^ i) = file_sub h1 f i (f.stat.size -^ i))))
+			      ((U64.v i <= H64.v f.stat.size /\ U64.v j <= H64.v f.stat.size) ==> s = file_sub h1 f i len)(*  /\ *)
+			      (* ((U64.v i <= v f.stat.size /\ U64.v j > v f.stat.size) ==>  B.sub s 0ul (Int.Cast.uint64_to_uint32 ((f.stat.size -^ i))) = file_sub h1 f i (f.stat.size -^ i)) *)
+                              ))
 			      
 
 val file_next_write_buffer: fb:buffer file_handle -> len:u64 -> Stack uint8_p
-    (requires (fun h0 -> v len <= v max_block_size /\
+    (requires (fun h0 -> U64.v len <= U64.v max_block_size /\
     	      	         length fb = 1 /\ live h0 fb /\
     	      	         (let f = get h0 fb 0 in
 			  file_state h0 f = FileOpen)))
     (ensures  (fun h0 s h1 -> let f = get h1 fb 0 in
     	      	              let i = file_offset h0 f in
-    	      	      	      let j = file_offset h0 f +^ len in
+    	      	      	      let j = U64 (file_offset h0 f +^ len) in
 			      modifies_1 s h0 h1 /\
     	      	      	      file_state h1 f = FileOpen /\ 
     	      	      	      file_offset h1 f = j /\
 			      file_content h0 f.stat = file_content h1 f.stat /\
-			      ((v i <= v f.stat.size /\ v j <= v f.stat.size) ==> s = file_sub h1 f i len) /\
-			      ((v i <= v f.stat.size /\ v j > v f.stat.size) ==>  sub s zero (f.stat.size -^ i) = file_sub h1 f i (f.stat.size -^ i))))
+			      ((U64.v i <= v f.stat.size /\ U64.v j <= v f.stat.size) ==> s = file_sub h1 f i len)(*  /\ *)
+			      (* ((U64.v i <= v f.stat.size /\ U64.v j > v f.stat.size) ==>  sub s zero (f.stat.size -^ i) = file_sub h1 f i (f.stat.size -^ i)) *)
+                              ))
 			      
 
 val file_close: fb:buffer file_handle -> Stack bool
@@ -114,4 +98,3 @@ val file_close: fb:buffer file_handle -> Stack bool
                          (let f = get h1 fb 0 in
        	      	      	  file_state h1 f = FileClosed /\
     			  file_content h0 f.stat = file_content h1 f.stat)))
-

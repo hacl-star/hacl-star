@@ -3,20 +3,9 @@ module SocketIO
 open FStar.Buffer
 open FStar.UInt8
 open Hacl.Constants
-
-type string = buffer u8
-val socket: Type0
-
-type socket_state = 
-     | Open: socket_state
-     | Closed: socket_state
-     | Error: socket_state
+open FileIO.Types
 
 val current_state: FStar.HyperStack.mem -> socket -> GTot socket_state
-
-type sresult = 
-     | SocketOk: sresult
-     | SocketError: sresult
 
 val init_socket: socket
 val tcp_connect: host: string -> port:u32 -> s:buffer socket -> Stack sresult
@@ -49,4 +38,3 @@ val tcp_read_all: s:socket -> buffer u8 -> len:u64 -> Stack sresult
 val tcp_close: s:socket -> Stack sresult
     (requires (fun h0 -> current_state h0 s = Open))
     (ensures  (fun _ r h1 -> r = SocketOk ==> current_state h1 s = Closed))
-

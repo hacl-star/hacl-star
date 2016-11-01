@@ -3,28 +3,33 @@ module Hacl.Tube
 
 open FStar.Seq
 open FStar.Buffer
+open FileIO.Types
 open PaddedFileIO
 open SocketIO
 open Hacl.Constants
 open Hacl.Cast
-open Box.Ideal 
-module U64=FStar.UInt64
-type clock = u64
-type str = buffer u8
+open Box.Ideal
 
-type boxtype = 
+module U64=FStar.UInt64
+
+#set-options "--lax"
+
+type clock = u64
+type str = uint8_p
+
+type boxtype =
   | BOX_CHACHA_POLY
   | SECRETBOX_CHACHA_POLY
 
-type streamID = b:buffer u8{length b = 16}
+type streamID = b:buffer h8{length b = 16}
 
 type open_result = {
-  r: PaddedFileIO.fresult;
+  r: FileIO.Types.fresult;
   sid: streamID;
-  fs: PaddedFileIO.file_stat
+  fs: FileIO.Types.file_stat
 }
 
-val opened: PaddedFileIO.fresult -> PaddedFileIO.file_stat -> streamID -> Tot open_result
+val opened: FileIO.Types.fresult -> FileIO.Types.file_stat -> streamID -> Tot open_result
 let opened r fs sid = {r = r; sid = sid; fs = fs}
 
 (* TODO: make streamID less opaque:
@@ -35,20 +40,20 @@ let opened r fs sid = {r = r; sid = sid; fs = fs}
 }
 *)
 
-assume val sent: FStar.HyperStack.mem -> pkA: seq u8 -> pkB: seq u8 -> sid:seq u8 -> file_stat -> (seq u8) -> GTot bool
+assume val sent: FStar.HyperStack.mem -> pkA: seq h8 -> pkB: seq h8 -> sid:seq h8 -> FileIO.Types.file_stat -> (seq h8) -> GTot bool
 
 val makeStreamID: unit -> StackInline streamID
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
-let makeStreamID () = 
-    let b = create 0uy 16ul in
+let makeStreamID () =
+    let b = create (Hacl.Cast.uint8_to_sint8 0uy) 16ul in
     randombytes_buf b (U64.uint_to_t 16);
     b
 
-val putU64: z:u64 -> b:buffer u8 -> StackInline unit
+val putU64: z:h64 -> b:uint8_p -> StackInline unit
   (requires (fun h -> live h b /\ length b = 8))
   (ensures  (fun h0 r h1 -> live h1 b))
-let putU64 z b = 
+let putU64 z b =
   let open Hacl.UInt64 in
   b.(0ul) <- sint64_to_sint8 z;
   b.(1ul) <- sint64_to_sint8 (z >>^ 8ul);
@@ -60,18 +65,18 @@ let putU64 z b =
   b.(7ul) <- sint64_to_sint8 (z >>^ 56ul)
 
 val file_send: file:str -> roundup:u64 ->
-       host:str -> port:u32 -> 
-       skA:buffer u8 -> pkB:buffer u8 ->
+       host:str -> port:u32 ->
+       skA:uint8_p -> pkB:uint8_p ->
            Stack open_result
 	   (requires (fun _ -> True))
-	   (ensures  (fun h0 s h1 -> match s.r with 
+	   (ensures  (fun h0 s h1 -> match s.r with
       	   	                   | FileOk ->
 				     let fs = s.fs in
 				     let sidb = s.sid in
 				     let pA = pubKey (as_seq h0 skA) in
 				     let pB = as_seq h0 pkB in
 				     let sid = as_seq h0 sidb in
-				     file_content h0 fs = file_content h1 fs /\	
+				     file_content h0 fs = file_content h1 fs /\
 				     sent h1 pA pB sid fs (file_content h0 fs)
 				   | _ -> true))
 let file_send f r h p skA pkB =
@@ -79,7 +84,7 @@ let file_send f r h p skA pkB =
   let fh = init_file_handle in
   let fb = Buffer.create fh 1ul in
   match (file_open_read_sequential f fb) with
-  | FileOk -> 
+  | FileOk ->
       let fh = fb.(0ul) in
       let s = init_socket in
       let sb = Buffer.create s 1ul in
@@ -91,12 +96,14 @@ let file_send f r h p skA pkB =
 	   | SocketError -> opened FileError fh.stat sid)
       | SocketError -> opened FileError fh.stat sid)
   | FileError -> opened FileError fh.stat sid
-  
 
 
-val file_recv: port:u32 -> pkA:buffer u8 -> skB:buffer u8 -> Stack open_result
+val get_fh_stat: file_handle -> Tot file_stat
+let get_fh_stat fh = fh.stat
+
+val file_recv: port:u32 -> pkA:uint8_p -> skB:uint8_p -> Stack open_result
        	   (requires (fun _ -> True))
-	   (ensures  (fun h0 s h1 -> match s.r with 
+	   (ensures  (fun h0 s h1 -> match s.r with
       	   	                   | FileOk ->
 				     let fs = s.fs in
 				     let sidb = s.sid in
@@ -108,6 +115,5 @@ val file_recv: port:u32 -> pkA:buffer u8 -> skB:buffer u8 -> Stack open_result
 let file_recv p pkA skB =
  let sid = makeStreamID() in
  let fh = init_file_handle in
- opened FileError fh.stat sid
-
-
+ let stat = get_fh_stat fh in
+ opened FileError stat sid

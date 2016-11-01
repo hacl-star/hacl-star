@@ -1,5 +1,6 @@
 type uint8 = FStar_UInt8.t
 type t = uint8
+type t' = t
 type byte = uint8
        
 val n:Prims.int

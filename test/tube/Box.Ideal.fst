@@ -16,13 +16,13 @@ private type symmetricKey  = l:uint8_p{length l = 32}
 val cipherlen: nat -> Tot nat
 let cipherlen m = m + 16
 
-assume val pubKey: sk:seq u8 -> GTot (pk:seq u8)
-assume val agreedKey: pkA: seq u8 -> pkB: seq u8 -> GTot (k: seq u8)
+assume val pubKey: sk:seq h8 -> GTot (pk:seq h8)
+assume val agreedKey: pkA: seq h8 -> pkB: seq h8 -> GTot (k: seq h8)
 assume val boxed: FStar.HyperStack.mem -> 
-       	   	  pkA:seq u8 ->
-		  pkB:seq u8 ->
-		  m:  seq u8 ->
-		  n:  seq u8 ->
+       	   	  pkA:seq h8 ->
+		  pkB:seq h8 ->
+		  m:  seq h8 ->
+		  n:  seq h8 ->
 		  GTot bool
 
 val randombytes_buf:
@@ -53,8 +53,8 @@ val getPublicKey:
     (ensures  (fun h0 _ h1 -> modifies_1 pk h0 h1 /\	
     	      	        as_seq h1 pk = pubKey (as_seq h0 sk)))
 let getPublicKey sk pk = 
-    let basepoint = create 0uy 32ul in
-    basepoint.(0ul) <- 9uy;
+    let basepoint = create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
+    basepoint.(0ul) <- (Hacl.Cast.uint8_to_sint8 9uy);
     Hacl.EC.Curve25519.exp pk basepoint sk
 
 val crypto_box_beforenm:
@@ -72,8 +72,8 @@ let crypto_box_beforenm k pk sk =
     Hacl.Box.crypto_box_beforenm k pk sk
 
 val crypto_box_easy_afternm:
-  #pkA:seq u8 ->
-  #pkB:seq u8 ->
+  #pkA:seq h8 ->
+  #pkB:seq h8 ->
   c:uint8_p ->
   m:uint8_p ->
   mlen:u64 -> 
@@ -92,8 +92,8 @@ let crypto_box_easy_afternm #pkA #pkB c m l n k =
     ()
 
 val crypto_box_open_easy_afternm:
-  #pkA:seq u8 ->
-  #pkB:seq u8 ->
+  #pkA:seq h8 ->
+  #pkB:seq h8 ->
   m:uint8_p ->
   c:uint8_p ->
   clen:u64 -> 

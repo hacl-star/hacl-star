@@ -1,9 +1,9 @@
 all:
 	$(MAKE) allsubdirs test_box.exe
 
-FSTAR_HOME=/Users/bhargava/Desktop/repositories/FStar
-KREMLIN_HOME=/Users/bhargava/Desktop/repositories/kremlin
-HACL_HOME?=..
+FSTAR_HOME?=/Users/bhargava/Desktop/repositories/FStar
+KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
+HACL_HOME=..
 include $(HACL_HOME)/lib/hyperstack/Makefile.include
 SUBDIRS=symmetric ec # hash hmac hkdf
 allsubdirs: $(addsuffix .all , $(SUBDIRS))

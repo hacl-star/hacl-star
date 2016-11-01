@@ -4,7 +4,6 @@ open FStar.Buffer
 open FStar.ST
 
 open Hacl.Constants
-(* open Hacl.SecretBox *)
 
 
 (* Module abbreviations *)

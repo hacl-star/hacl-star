@@ -4,6 +4,7 @@ let n = Prims.parse_int "8"
 
 type uint8 = int
 type t = uint8
+type t' = t
 type byte = uint8
            
 let (zero:uint8) = 0

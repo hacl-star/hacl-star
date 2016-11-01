@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include "FStar_IO.h"
+#include "Hacl_Tube.h"
 
 #define secretbox_MACBYTES   16
 #define secretbox_NONCEBYTES 24
