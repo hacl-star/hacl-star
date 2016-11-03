@@ -3,7 +3,9 @@ module Hacl.Symmetric.GCM.Lemmas
 open FStar.Mul
 open FStar.Seq
 open FStar.BitVector
+open FStar.Math.Lemmas
 
+(*
 module U8  = FStar.UInt8
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
@@ -11,44 +13,84 @@ module H8  = Hacl.UInt8
 let u8  = U8.t
 let u32 = U32.t
 let s8  = H8.t
+*)
 
 type bv128 = bv_t 128
 
-val seqbv_bv: #n:pos ->
+abstract val seqbv_bv: #n:pos ->
     a:seq (bv_t 8){length a = n} ->
     Tot (r:bv_t (n * 8){forall (i:nat{i < n * 8}). index r i = index (index a (i / 8)) (i % 8)})
 let rec seqbv_bv #n a =
   if n = 1 then index a 0 else
   append (index a 0) (seqbv_bv #(n - 1) (slice a 1 n))
 
-val bv_seqbv: #n:pos ->
-    a:bv_t (n * 8) ->
-    Tot (r:seq (bv_t 8){length r = n /\ (forall (i:nat{i < n * 8}). index a i = index (index r (i / 8)) (i % 8))})
-let rec bv_seqbv #n a =
-  if n = 1 then create #(bv_t 8) 1 (slice a 0 8) else begin
-  let r = append (create #(bv_t 8) 1 (slice a 0 8)) (bv_seqbv #(n - 1) (slice a 8 (n * 8))) in
-  admit();
-  r
-  end
-
-val gf128_add_pure_loop: a:seq (bv_t 8) ->
-    b:seq (bv_t 8) ->
-    dep:nat{dep <= 16} ->
-    Tot seq (bv_t 8)
-let gf128_add_pure_loop a b dep = admit()
+abstract val gf128_add_pure_loop: #n:pos ->
+    a:seq (bv_t 8){length a = n} ->
+    b:seq (bv_t 8){length b = n} ->
+    Tot (r:seq (bv_t 8){length r = n /\ (forall (i:nat{i < n}). equal (index r i) (logxor_vec (index a i) (index b i)))})
+let rec gf128_add_pure_loop #n a b =
+  if n = 1 then create 1 (logxor_vec (index a 0) (index b 0)) else
+  append (create 1 (logxor_vec (index a 0) (index b 0))) (gf128_add_pure_loop #(n - 1) (slice a 1 n) (slice b 1 n))
   
-
 val gf128_add: bv128 -> bv128 -> Tot bv128
-let gf128_add a b = logand_vec #128 a b
+let gf128_add a b = logxor_vec #128 a b
+
+val gf128_add_lemma: a:seq (bv_t 8){length a = 16} ->
+    b:seq (bv_t 8){length b = 16} ->
+    Lemma (equal (seqbv_bv #16 (gf128_add_pure_loop #16 a b)) (gf128_add (seqbv_bv #16 a) (seqbv_bv #16 b)))
+let gf128_add_lemma a b = ()
+
+abstract val gf128_shift_right_pure_loop: #n:pos ->
+    a:seq (bv_t 8){length a = n} ->
+    Tot (r:seq (bv_t 8){length r = n /\ equal (index r 0) (shift_right_vec (index a 0) 1) /\ (forall (i:pos{i < n}). index (index r i) 0 = index (index a (i - 1)) 7) /\ (forall (i:pos{i < n}). forall (j:pos{j < 8}). index (index r i) j = index (index a i) (j - 1))})
+let rec gf128_shift_right_pure_loop #n a =
+  if n = 1 then create 1 (shift_right_vec (index a 0) 1) else
+  append (gf128_shift_right_pure_loop #(n - 1) (slice a 0 (n - 1))) (create 1 (append (slice (index a (n - 2)) 7 8) (slice (index a (n - 1)) 0 7)))
 
 val gf128_shift_right: bv128 -> Tot bv128
 let gf128_shift_right a = shift_right_vec #128 a 1
 
-val apply_mask: bv128 -> bv128 -> Tot bv128
+val gf128_shift_right_lemma_aux_1: a:seq (bv_t 8){length a = 16} ->
+    Lemma (forall (i:pos{i < 128 /\ i % 8 = 0}). index (gf128_shift_right (seqbv_bv #16 a)) i = index (seqbv_bv #16 (gf128_shift_right_pure_loop #16 a)) i)
+let gf128_shift_right_lemma_aux_1 a =
+  assert(forall (i:pos). i % 8 = 0 ==> (i - 1) / 8 = i / 8 - 1 /\ (i - 1) % 8 = 7);
+  assert(forall (i:pos{i < 128 /\ i % 8 = 0}). index (gf128_shift_right (seqbv_bv #16 a)) i = index (index a (i / 8 - 1)) 7);
+  assert(forall (i:pos{i < 128 /\ i % 8 = 0}). index (seqbv_bv #16 (gf128_shift_right_pure_loop #16 a)) i = index (index a (i / 8 - 1)) 7)
+
+val gf128_shift_right_lemma_aux_2: a:seq (bv_t 8){length a = 16} ->
+    Lemma (forall (i:pos{i < 128 /\ i % 8 > 0}). index (gf128_shift_right (seqbv_bv #16 a)) i = index (seqbv_bv #16 (gf128_shift_right_pure_loop #16 a)) i)
+let gf128_shift_right_lemma_aux_2 a =
+  assert(forall (i:pos). i % 8 > 0 ==> (i - 1) / 8 = i / 8 /\ (i - 1) % 8 = i % 8 - 1);
+  assert(forall (i:pos{i < 128 /\ i % 8 > 0}). index (gf128_shift_right (seqbv_bv #16 a)) i = index (index a (i / 8)) (i % 8 - 1));
+  assert(forall (i:pos{i < 128 /\ i % 8 > 0}). index (seqbv_bv #16 (gf128_shift_right_pure_loop #16 a)) i = index (index a (i / 8)) (i % 8 - 1))
+
+val gf128_shift_right_lemma: a:seq (bv_t 8){length a = 16} ->
+    Lemma (equal (seqbv_bv #16 (gf128_shift_right_pure_loop #16 a)) (gf128_shift_right (seqbv_bv #16 a)))
+let gf128_shift_right_lemma a =
+  gf128_shift_right_lemma_aux_1 a; gf128_shift_right_lemma_aux_2 a
+(*
+val apply_mask: a:bv128 -> msk:bv128{equal msk (ones_vec #128) \/ equal msk (zero_vec #128)} -> Tot (r:bv128{(equal msk (ones_vec #128) ==> equal r a) /\ (equal msk (zero_vec #128) ==> equal r (zero_vec #128))})
 let apply_mask a msk = logand_vec a msk
+*)
+
+val gf128_shift_left: bv128 -> Tot bv128
+let gf128_shift_left a = shift_left_vec #128 a 1
+
+assume val r_mul: bv128
+
+val gf128_shift_right_mod: bv128 -> Tot bv128
+let gf128_shift_right_mod a =
+  if index a 127 then gf128_add r_mul (gf128_shift_right a)
+  else gf128_shift_right a
+
+val gf128_mul_pure_loop: a:bv128 -> b:bv128 -> r:bv128 -> dep:nat{dep <= 128} -> Tot bv128 (decreases (128 - dep))
+let rec gf128_mul_pure_loop a b r dep =
+  if dep = 128 then r
+  else if index b dep then gf128_mul_pure_loop (gf128_shift_right_mod a) b (gf128_add r a) (dep + 1)
+  else gf128_mul_pure_loop (gf128_shift_right_mod a) b r (dep + 1)
 
 val gf128_mul: bv128 -> bv128 -> Tot bv128
-let gf128_mul a b = admit()
+let gf128_mul a b = gf128_mul_pure_loop a b (zero_vec #128) 0
 
 assume val mk_len_info: len_1:nat -> len_2:nat -> Tot bv128
 
@@ -75,7 +117,7 @@ let rec ghash_loop otag auth_key #len str dep =
   end else begin
     let si = slice str dep (dep + 128) in
     let tag_1 = gf128_add otag si in
-    let tag_2 = gf128_mul tag_1 auth_key in
+    let tag_2 = gf128_mul auth_key tag_1 in
     let tag_3 = ghash_loop tag_2 auth_key #len str (dep + 128) in
     tag_3
   end
@@ -107,6 +149,6 @@ let ghash auth_key #adlen ad #len ciphertext =
   let tag_0 = zero_vec #128 in
   let tag_1 = ghash_loop tag_0 auth_key #adlen ad 0 in
   let tag_2 = ghash_loop tag_1 auth_key #len ciphertext 0 in
-  let tag_3 = gf128_add tag_2 len_info in
-  let tag_4 = gf128_mul tag_3 auth_key in
+  let tag_3 = gf128_add len_info tag_2 in
+  let tag_4 = gf128_mul auth_key tag_3 in
   tag_4
