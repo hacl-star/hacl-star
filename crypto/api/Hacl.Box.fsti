@@ -94,3 +94,13 @@ val crypto_box_open_easy:
   Stack u32
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
+
+val crypto_box_open_easy_afternm:
+  m:uint8_p ->
+  c:uint8_p ->
+  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
+  k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
+    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 c /\ live h1 k))

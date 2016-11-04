@@ -21,8 +21,8 @@ assume val tcp_listen: port:u32 -> s:buffer socket -> Stack sresult
     	      	              | SocketOk -> 
 			      	let sh = get h1 s 0 in
 				current_state h1 sh = Open))
-assume val tcp_accept: l:socket -> s:buffer socket -> Stack sresult
-    (requires (fun h0 -> current_state h0 l = Open))
+assume val tcp_accept: l:buffer socket -> s:buffer socket -> Stack sresult
+    (requires (fun h0 -> current_state h0 (get h0 l 0) = Open))
     (ensures  (fun h0 r h1 -> match r with 
     	      	              | SocketOk -> 
 			      	let sh = get h1 s 0 in
