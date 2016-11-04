@@ -23,57 +23,66 @@
 #include <arpa/inet.h> 
 #include "testlib.h"
 
-typedef enum {FileOk, FileError} PaddedFileIO_fresult;
-typedef enum {FileOpen, FileClosed} PaddedFileIO_fd_state;
+typedef enum {FileOk, FileError} fresult;
+typedef enum {FileOpen, FileClosed} fd_state;
 
-typedef struct {
+
+/* Same as the FileIO.Types type declarations */
+typedef struct PaddedFileIO_mmap {
   uint64_t current;
   uint8_t* buf;
 } PaddedFileIO_mmap;
 
-typedef struct {
+typedef struct file_descriptor {
   int fd;
   uint64_t current;
   uint8_t* mmap;
   uint8_t* last;
-} PaddedFileIO_file_descriptor;
+} file_descriptor;
 
-typedef struct {
+typedef struct file_stat {
   uint8_t* name;
   uint64_t mtime;
   uint64_t size;
-} PaddedFileIO_file_stat;
+} file_stat;
 
-typedef struct {
-  PaddedFileIO_file_stat stat;
-  PaddedFileIO_file_descriptor fd;
-} PaddedFileIO_file_handle;
+typedef struct file_handle {
+  file_stat stat;
+  file_descriptor fd;
+} file_handle;
 
 
 #define PaddedFileIO_max_block_size (256 * 1024)
 
-PaddedFileIO_fresult PaddedFileIO_file_open_read_sequential(uint8_t* file, PaddedFileIO_file_handle* fh);
-PaddedFileIO_fresult PaddedFileIO_file_open_write_sequential(PaddedFileIO_file_stat st, PaddedFileIO_file_handle* fh);
-uint8_t* PaddedFileIO_file_next_read_buffer(PaddedFileIO_file_handle* fh,uint64_t len);
-uint8_t* PaddedFileIO_file_next_write_buffer(PaddedFileIO_file_handle* fh,uint64_t len);
-PaddedFileIO_fresult PaddedFileIO_file_close(PaddedFileIO_file_handle* fh);
+
+fresult PaddedFileIO_file_open_read_sequential(uint8_t* file, file_handle* fh);
+fresult PaddedFileIO_file_open_write_sequential(file_stat st, file_handle* fh);
+uint8_t* PaddedFileIO_file_next_read_buffer(file_handle* fh,uint64_t len);
+uint8_t* PaddedFileIO_file_next_write_buffer(file_handle* fh,uint64_t len);
+fresult PaddedFileIO_file_close(file_handle* fh);
 
 
-typedef enum {SocketOk, SocketError} SocketIO_sresult;
+typedef enum {SocketOk, SocketError} sresult;
 
-typedef struct {
+typedef struct io_socket {
   int fd;
   uint64_t sent_bytes;
   uint64_t received_bytes;
-} SocketIO_socket;
+} io_socket;
 
 
-SocketIO_sresult SocketIO_tcp_connect(char* host, int port, SocketIO_socket* sh);
-SocketIO_sresult SocketIO_tcp_listen(int port, SocketIO_socket* sh);
-SocketIO_sresult SocketIO_tcp_accept(SocketIO_socket* lh, SocketIO_socket* conn);
-SocketIO_sresult SocketIO_tcp_write_all(SocketIO_socket* conn, uint8_t* buf, uint64_t len);
-SocketIO_sresult SocketIO_tcp_read_all(SocketIO_socket* conn, uint8_t* buf, int len);
-SocketIO_sresult SocketIO_tcp_close(SocketIO_socket* conn);
+sresult SocketIO_tcp_connect(char* host, int port, io_socket* sh);
+sresult SocketIO_tcp_listen(int port, io_socket* sh);
+sresult SocketIO_tcp_accept(io_socket* lh, io_socket* conn);
+sresult SocketIO_tcp_write_all(io_socket* conn, uint8_t* buf, uint64_t len);
+sresult SocketIO_tcp_read_all(io_socket* conn, uint8_t* buf, int len);
+sresult SocketIO_tcp_close(io_socket* conn);
+
+/* file_handle PaddedFileIO_init_file_handle(); */
+/* io_socket   SocketIO_init_socket(); */
+extern file_handle PaddedFileIO_init_file_handle;
+extern io_socket   SocketIO_init_socket;
+
 
 /* typedef struct { */
 /*   PaddedFileIO_fresult r; */

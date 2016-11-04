@@ -80,22 +80,27 @@ val file_send: file:str -> roundup:u64 ->
 				     sent h1 pA pB sid fs (file_content h0 fs)
 				   | _ -> true))
 let file_send f r h p skA pkB =
+  push_frame();
   let sid = makeStreamID() in
-  let fh = init_file_handle in
+  let dummy_ptr = FStar.Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) 1ul in
+  let fh = init_file_handle(dummy_ptr) in
   let fb = Buffer.create fh 1ul in
-  match (file_open_read_sequential f fb) with
-  | FileOk ->
-      let fh = fb.(0ul) in
-      let s = init_socket in
-      let sb = Buffer.create s 1ul in
-     (match tcp_connect h p sb with
-      | SocketOk ->
-	  let s = sb.(0ul) in
-	  (match tcp_write_all s sid 8uL with
-	   | SocketOk -> opened FileOk fh.stat sid
-	   | SocketError -> opened FileError fh.stat sid)
-      | SocketError -> opened FileError fh.stat sid)
-  | FileError -> opened FileError fh.stat sid
+  let res =
+    match (file_open_read_sequential f fb) with
+    | FileOk ->
+        let fh = fb.(0ul) in
+        let s = init_socket() in
+        let sb = Buffer.create s 1ul in
+        (match tcp_connect h p sb with
+        | SocketOk ->
+	    (* let s = sb.(0ul) in *)
+	    (match tcp_write_all sb sid 8uL with
+	    | SocketOk -> opened FileOk fh.stat sid
+	    | SocketError -> opened FileError fh.stat sid)
+        | SocketError -> opened FileError fh.stat sid)
+    | FileError -> opened FileError fh.stat sid in
+  pop_frame();
+  res
 
 
 val get_fh_stat: file_handle -> Tot file_stat
@@ -113,7 +118,11 @@ val file_recv: port:u32 -> pkA:uint8_p -> skB:uint8_p -> Stack open_result
 				     sent h0 pA pB sid fs (file_content h1 fs)
 				   | _ -> true))
 let file_recv p pkA skB =
- let sid = makeStreamID() in
- let fh = init_file_handle in
- let stat = get_fh_stat fh in
- opened FileError stat sid
+  push_frame();
+  let dummy_ptr = FStar.Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) 1ul in
+  let sid = makeStreamID() in
+  let fh = init_file_handle(dummy_ptr) in
+  let stat = get_fh_stat fh in
+  let res = opened FileError stat sid in
+  pop_frame();
+  res

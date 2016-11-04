@@ -22,7 +22,13 @@ type fd_state =
      | FileOpen: fd_state
      | FileClosed: fd_state
 
-type file_descriptor = FStar.Int32.t // Assuming that is the default C "int"
+
+type file_descriptor = {
+  fd_fd:FStar.Int32.t;
+  current:U64.t;
+  mmap:uint8_p;
+  last:uint8_p;
+}
 
 type file_handle =  {
      stat:   file_stat;
@@ -33,7 +39,11 @@ type fresult : Type0 =
      | FileOk    : fresult
      | FileError : fresult
 
-type socket = FStar.Int32.t
+type socket = {
+  socket_fd:FStar.Int32.t;
+  sent_bytes:U64.t;
+  received_bytes:U64.t;
+}
 
 type socket_state = 
      | Open: socket_state
@@ -43,3 +53,12 @@ type socket_state =
 type sresult = 
      | SocketOk: sresult
      | SocketError: sresult
+
+let init_file_handle (dummy_ptr:uint8_p) : Tot file_handle =
+  let zero = Hacl.Cast.uint64_to_sint64 0uL in
+  let fs = {name = dummy_ptr; mtime = zero; size = zero} in
+  let fd = {fd_fd = 0l; current = 0uL; mmap = dummy_ptr; last = dummy_ptr} in
+  {stat = fs; fd = fd}
+
+let init_socket () : Tot socket =
+  {socket_fd = 0l; sent_bytes = 0uL; received_bytes = 0uL}
