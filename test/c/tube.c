@@ -233,10 +233,10 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
 	perror("read did not read all connid");
 	return;
       }
-      if (checkStreamId(stream_id) == false) {
-	perror("unexpected stream_id");
-	return;
-      }
+      //      if (checkStreamId(stream_id) == false) {
+      //	perror("unexpected stream_id");
+      //	return;
+      //}
       if (tcp_read_all(&conn, (uint8_t *) &timestamp, 8) == ERROR) {
 	perror("read did not read all timestamp");
 	return;
