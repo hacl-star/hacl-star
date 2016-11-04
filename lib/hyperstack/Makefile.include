@@ -1,3 +1,5 @@
+UNAME := $(shell uname)
+
 # Caller needs to define FSTAR_HOME, HACL_HOME and KREMLIN_HOME
 HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe --include $(HYPERSTACK)
@@ -21,7 +23,14 @@ else
 VERBOSE=-verbose
 endif
 KREMLIN=$(KREMLIN_HOME)/krml
-KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign
+KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
+                        -ccopt -Wno-error=format=
+
+# Linux specific compilation instruction for PneuTube
+ifeq ($(UNAME), Linux)
+KREMLIN_ARGS+= -ccopt -D_GNU_SOURCE
+endif
+
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 

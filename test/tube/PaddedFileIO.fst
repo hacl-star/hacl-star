@@ -5,6 +5,7 @@ open FStar.Buffer
 open Hacl.Cast
 open Hacl.Constants
 open Hacl.UInt64
+
 open FileIO.Types
 
 module U64 = FStar.UInt64
@@ -13,14 +14,15 @@ module B   = FStar.Buffer
 
 (* Need to get rid of these  following ones *)
 type string = seq u8
-assume val zero: u64
+
+inline_for_extraction val zero: u64
+inline_for_extraction let zero = 0uL
 (* The above need to come from some library module *)
 
+
 (* File System Buffer Size, currently 256KB *)
-assume val max_block_size: u64
-
-assume val init_file_handle: file_handle
-
+inline_for_extraction val max_block_size: u64
+inline_for_extraction let max_block_size = 262144uL
 
 assume val file_state: FStar.HyperStack.mem -> file_handle -> GTot fd_state
 assume val file_offset: FStar.HyperStack.mem -> file_handle -> GTot u64
