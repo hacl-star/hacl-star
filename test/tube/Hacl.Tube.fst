@@ -259,17 +259,22 @@ let file_send f r h p skA pkB =
             let ciphertext = Buffer.create zero ciphersize_32 in
             let file_size = fh.stat.size in
             (* JK: I assume that blocksize is a power of 2 *)
-            let fragments = H64 (file_size >>^ blocksize_bits) in
-            let rem = H64 (file_size &^ (blocksize-^one_64)) in
+            (* let fragments = H64 (file_size >>^ blocksize_bits) in *)
+            (* let rem = H64 (file_size &^ (blocksize-^one_64)) in *)
+            let fragments = U64 (file_size /^ blocksize) in
+            let rem = U64 (file_size %^ blocksize) in
             let roundup = Hacl.Cast.uint64_to_sint64 r in
             (* JK: I assume that roundup is a power of 2, otherwise that is wrong *)
-            let hsize_mod_roundup = H64 (file_size &^ (roundup-^one_64)) in
-            let mask = H64 (gte_mask roundup one_64 &^ (lognot (eq_mask hsize_mod_roundup zero_64))) in
-            let hrem = H64 (roundup -^ hsize_mod_roundup) in
-            let hsize = H64 (file_size -^ hrem) in
+            (* let hsize_mod_roundup = H64 (file_size &^ (roundup-^one_64)) in *)
+            (* let hsize_mod_roundup = U64 (file_size %^ roundup) in *)
+            (* let mask = H64 (gte_mask roundup one_64 &^ (lognot (eq_mask hsize_mod_roundup zero_64))) in *)
+            (* let hrem = H64 ((roundup -^ hsize_mod_roundup) &^ mask) in *)
+            let hrem  = U64 (if (roundup >^ zero_64) then
+              if not ((file_size %^ roundup) =^ 0uL)  then 
+                (roundup -^ (file_size %^ roundup)) else 0uL else 0uL) in
+            let hsize = H64 (file_size +^ hrem) in
             let mtime = fh.stat.mtime in
             let nsize = strlen f in
-            let zero_8 = Hacl.Cast.uint8_to_sint8 0uy in
             let header = Buffer.create zero_8 headersize_32 in
             (* JK: Omitting memset to 0 for now *)
             store64_le (Buffer.sub header  0ul 8ul) file_size;
@@ -289,10 +294,10 @@ let file_send f r h p skA pkB =
                     | SocketOk -> (
                         match tcp_write_all sb pkB 32uL with
                         | SocketOk -> (
-                            let seqno = Hacl.Cast.uint64_to_sint64 0uL in
+                            let seqno = zero_64 in
                             let nonce = Buffer.create zero 24ul in
                             let key   = Buffer.create zero 32ul in
-                            if Hacl.Box.crypto_box_beforenm key pkB pkA = 0ul then (
+                            if U32 (Hacl.Box.crypto_box_beforenm key pkB skA =^ 0ul) then (
                               (* Populating the nonce *)
                               blit sid 0ul nonce 0ul 16ul;
                               store64_le (sub nonce 16ul 8ul) seqno;
@@ -309,14 +314,14 @@ let file_send f r h p skA pkB =
                                       // JK: TODO:hrem and rem are secret, need declassification
                                       let rem_dec = rem in
                                       let hrem_dec = hrem in
-                                      if U64 (rem_dec +^ hrem_dec >^ zero_64) then (
+                                      if U64 ((rem_dec +^ hrem_dec) >^ zero_64) then (
                                         let next = file_next_read_buffer fb rem in
                                         blit next 0ul plaintext 0ul (Int.Cast.uint64_to_uint32 rem);
                                         // Here seqno is 1 (header) + fragments (loop) + 1 (here)
-                                        let seqno = (H64 (fragments +^ 2uL)) in
+                                        let seqno = (H64 (fragments +^ 1uL)) in
                                         store64_le (sub nonce 16ul 8ul) seqno;
                                         let seqno = H64 (seqno +^ one_64) in
-                                        let cond = U64 (rem_dec +^ hrem_dec >^ blocksize) in
+                                        let cond = U64 ((rem_dec +^ hrem_dec) >^ blocksize) in
                                         let rem = if cond then blocksize else H64 (rem +^ hrem) in
                                         let hrem = if cond then H64 (hrem -^ (blocksize -^ rem)) else zero_64 in
                                         let _ = Hacl.Box.crypto_box_easy_afternm ciphertext plaintext rem nonce key in
@@ -455,7 +460,7 @@ let rec file_recv_loop fb connb lhb sid pkA pkB skB =
                          if U8 (memcmp_ct pk2 pkB 32ul =^ 0xffuy) then (
                            let key = create zero_8 32ul in
                            (* JK: ignoring check on beforenm *)
-                           let _ = Hacl.Box.crypto_box_beforenm key pkA pkB in
+                           let _ = Hacl.Box.crypto_box_beforenm key pkA skB in
                            let seqno = 0uL in
                            let header = create zero_8 headersize_32 in
                            fill header zero_8 headersize_32;
@@ -482,39 +487,39 @@ let rec file_recv_loop fb connb lhb sid pkA pkB skB =
                                              match tcp_read_all connb ciphertext (cipherlen(rem)) with
                                              | SocketOk -> (
                                                  let next = file_next_write_buffer fb rem in
-                                                 let seqno = U64 (fragments +^ 2uL) in
+                                                 let seqno = U64 (fragments +^ 1uL) in
                                                  if U32 (Hacl.Box.crypto_box_easy_afternm next ciphertext (cipherlen(rem)) nonce key =^ 0ul) then SocketOk
-                                                 else SocketError )
-                                             | SocketError -> SocketError
+                                                 else (TestLib.perr(15ul); SocketError) )
+                                             | SocketError -> TestLib.perr(14ul); SocketError
                                            ) else SocketOk in
                                          match res with
                                          | SocketOk -> (
                                              match file_close fb with
-                                             | true -> (
+                                             | false -> (
                                                  match tcp_close connb with
                                                  | SocketOk -> SocketOk
-                                                 | SocketError -> SocketError )
-                                             | false -> SocketError )
-                                         | SocketError -> SocketError )
-                                     | SocketError -> SocketError ) )
-                                 | FileError -> SocketError )
+                                                 | SocketError -> TestLib.perr(13ul); SocketError )
+                                             | true -> TestLib.perr(12ul); SocketError )
+                                         | SocketError -> TestLib.perr(11ul); SocketError )
+                                     | SocketError -> TestLib.perr(10ul); SocketError ) )
+                                 | FileError -> TestLib.perr(9ul); SocketError )
                                ) else (
-                                 SocketError ) )
+                                 TestLib.perr(8ul); SocketError ) )
                            | SocketError -> SocketError )
                          ) else (
-                           SocketError
+                           TestLib.perr(7ul); SocketError
                          )
                        ) else (
-                         SocketError ) )
-                  | SocketError -> SocketError )
-              | SocketError -> SocketError )
-          | SocketError -> SocketError )
-      | SocketError -> SocketError ) )
-  | SocketError -> SocketError in
+                         TestLib.perr(6ul); SocketError ) )
+                  | SocketError -> TestLib.perr(5ul); SocketError )
+              | SocketError -> TestLib.perr(4ul); SocketError )
+          | SocketError -> TestLib.perr(3ul); SocketError )
+      | SocketError -> TestLib.perr(2ul); SocketError ) )
+  | SocketError -> TestLib.perr(1ul); SocketError in
   pop_frame();
   match res with
   | SocketOk -> file_recv_loop  fb connb lhb sid pkA pkB skB
-  | SocketError -> SocketError
+  | SocketError -> TestLib.perr(0ul); SocketError
 
 
 val file_recv: port:u32 -> pkA:uint8_p -> skB:uint8_p -> Stack open_result

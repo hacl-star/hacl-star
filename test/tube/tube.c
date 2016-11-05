@@ -112,6 +112,7 @@ int main(int argc, char *argv[]){
 	  abort();
 	}
     }
+  printf("Hiding size up to %u%c\n", n, u);
   if (!got_sk) {
     printf("Your Curve25519 secret key (64 hex characters): ");
     readHexLine(sk,secretbox_KEYBYTES);

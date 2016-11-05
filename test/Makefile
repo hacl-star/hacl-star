@@ -57,9 +57,9 @@ tube-star.exe: tube/Box.Ideal.fst tube/PaddedFileIO_impl.c tube/SocketIO_impl.c 
 		$(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c $^ \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
 		-I $(KREMLIB) -I $(KREMTEST) -I ./c -I ./bindings -I ./tube -no-prefix Libsodium \
-		-add-include '<sodium.h>' \
+		-add-include '<sodium.h>' -add-include '"testlib.h"' \
 		-tmpdir tmp -o tube-star.exe -ldopt "-lsodium"
-
+	cp text.txt tmp/bla.txt
 
 tube-toy.exe: $(HACL_API)/Hacl.Constants.fst tube/Hacl.Tube.fst
 	mkdir -p tmp 
@@ -68,7 +68,12 @@ tube-toy.exe: $(HACL_API)/Hacl.Constants.fst tube/Hacl.Tube.fst
 		-I $(KREMLIB) -I $(KREMTEST) -I ./c -I ./bindings -I ./tube \
 		-tmpdir tmp -skip-compilation
 
+receive	:
+	rm -f bla.txt
+	./tube-star.exe receive 5001 -k dfcf8b782a2a72f65ee24f85fa68ab1a10b3b555751283c5f0bcdb20e1a6e4a8 -p 4d187de7a95fe760ba7ffc9a1ba4229eea9cd1136fe609bdc58816e3cf4d3350
 
+send:
+	cd tmp && ../tube-star.exe send bla.txt localhost:5001 -k 4d922658eb6d4aef64a83644a18e60e61a57c245aa8e5e9a93926cb2b317ffd7 -p 223fc224f2c9906fd4bbb1313236ecc4f36ed2f7e95b5fb1deafc459b19ab069
 
 perf1: test_api.exe
 	./test_api.exe perf1

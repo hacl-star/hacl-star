@@ -259,6 +259,8 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
       }
       if (memcmp(pk2,pkB,box_PUBLICKEYBYTES) != 0) {
 	perror("unexpected receiver public key");
+        for (int i = 0; i < 32; i++) printf("%02x ", (unsigned char)pkB[i]);
+        printf("\n");
 	return;
       }
       uint8_t key[secretbox_KEYBYTES];
@@ -279,7 +281,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
       makeNonce(nonce,stream_id,timestamp,seqno);
       seqno++;
       if (Hacl_Box_crypto_box_open_easy_afternm(header,ciphertext,CIPHERLEN(HEADERSIZE), nonce, key) != 0) {
-	perror ("decrypt failed!");
+	perror ("Header decrypt failed!");
 	return;
       }
 
@@ -319,6 +321,7 @@ void file_recv(int port, uint8_t* pkA, uint8_t* skB) {
 	seqno++;
 	if (Hacl_Box_crypto_box_open_easy_afternm(next,ciphertext,CIPHERSIZE, nonce, key) != 0) {
 	  perror ("decrypt failed!");
+          printf("Failing fragment number: %ldth", fragments);
 	  return;
 	}
       }
