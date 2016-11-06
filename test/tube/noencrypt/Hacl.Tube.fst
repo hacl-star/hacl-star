@@ -183,7 +183,8 @@ let rec file_send_loop fh sb ciphertext nonce key seqno len =
     let next = file_next_read_buffer fh blocksize in
     store64_le (sub nonce 16ul 8ul) seqno;
     let seqno = H64 (seqno +^ Hacl.Cast.uint64_to_sint64 1uL) in
-    let _ = Hacl.Box.crypto_box_easy_afternm ciphertext next blocksize nonce key in
+    (* let _ = Hacl.Box.crypto_box_easy_afternm ciphertext next blocksize nonce key in *)
+    blit next 0ul ciphertext 0ul blocksize_32;
     match tcp_write_all sb ciphertext ciphersize with
     | SocketOk -> file_send_loop fh sb ciphertext nonce key seqno i
     | SocketError -> SocketError
@@ -203,7 +204,8 @@ let rec file_send_loop_2 fh sb ciphertext plaintext nonce key len =
   if U64 (len =^ 0uL) then SocketOk
   else (
     let i = U64 (len -^ 1uL) in
-    let _ = Hacl.Box.crypto_box_easy_afternm ciphertext plaintext blocksize nonce key in
+    (* let _ = Hacl.Box.crypto_box_easy_afternm ciphertext plaintext blocksize nonce key in *)
+    blit plaintext 0ul ciphertext 0ul blocksize_32;
     match tcp_write_all sb ciphertext ciphersize with
     | SocketOk -> file_send_loop_2 fh sb ciphertext plaintext nonce key i
     | SocketError -> SocketError
@@ -302,8 +304,9 @@ let file_send f r h p skA pkB =
                               blit sid 0ul nonce 0ul 16ul;
                               store64_le (sub nonce 16ul 8ul) seqno;
                               let seqno = H64 (seqno +^ one_64) in
-                              let _ = Hacl.Box.crypto_box_easy_afternm ciphertext header headersize
-                                                               nonce key in
+                              (* let _ = Hacl.Box.crypto_box_easy_afternm ciphertext header headersize *)
+                              (*                                  nonce key in *)
+                              blit header 0ul ciphertext 0ul headersize_32;
                               (match tcp_write_all sb ciphertext (cipherlen headersize) with
                               | SocketOk -> (
                                   (* JK: need to declassify fragmensts *)
@@ -324,7 +327,8 @@ let file_send f r h p skA pkB =
                                         let cond = U64 ((rem_dec +^ hrem_dec) >^ blocksize) in
                                         let rem = if cond then blocksize else H64 (rem +^ hrem) in
                                         let hrem = if cond then H64 (hrem -^ (blocksize -^ rem)) else zero_64 in
-                                        let _ = Hacl.Box.crypto_box_easy_afternm ciphertext plaintext rem nonce key in
+                                        (* let _ = Hacl.Box.crypto_box_easy_afternm ciphertext plaintext rem nonce key in *)
+                                        blit plaintext 0ul ciphertext 0ul (Int.Cast.uint64_to_uint32 rem);
                                         (match tcp_write_all sb ciphertext (cipherlen rem) with
                                         | SocketOk -> (
                                             if U64 (hrem >^ 0uL) then (
@@ -334,7 +338,8 @@ let file_send f r h p skA pkB =
                                               (match file_send_loop_2 fb sb ciphertext plaintext nonce key fragments with
                                               | SocketOk ->
                                                   if U64 (hrem >^ 0uL) then (
-                                                    let _ = Hacl.Box.crypto_box_easy_afternm ciphertext plaintext hrem nonce key in
+                                                    (* let _ = Hacl.Box.crypto_box_easy_afternm ciphertext plaintext hrem nonce key in *)
+                                                    blit plaintext 0ul ciphertext 0ul (Int.Cast.uint64_to_uint32 hrem);
                                                     match tcp_write_all sb ciphertext (cipherlen hrem) with
                                                     | SocketOk -> opened FileOk fh.stat sid
                                                     | SocketError -> opened FileError fh.stat sid
@@ -416,13 +421,13 @@ let rec file_recv_loop_2 fb connb ciphertext nonce key seqno len =
     match tcp_read_all connb ciphertext ciphersize with
     | SocketOk -> (
         let next = file_next_write_buffer fb blocksize in
-        store64_le (sub nonce 16ul 8ul) seqno;
+        store64_le nonce seqno;
         let seqno = H64 (seqno +^ one_64) in
-        if U32 (Hacl.Box.crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then
-          file_recv_loop_2 fb connb ciphertext nonce key seqno i
-        (* JK: not distinguishing between socket error and decryption failure *)
-        else (TestLib.perr(20ul); SocketError) )
-    | SocketError -> TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); SocketError
+        blit ciphertext 0ul next 0ul ciphersize_32;
+        (* if U32 (Hacl.Box.crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then *)
+        file_recv_loop_2 fb connb ciphertext nonce key seqno i
+      )
+    | SocketError -> SocketError
   )
 
 
@@ -468,7 +473,9 @@ let rec file_recv_loop fb connb lhb sid pkA pkB skB =
                            | SocketOk -> (
                                store64_le (sub nonce 16ul 8ul) seqno;
                                let seqno = H64 (seqno +^ 1uL) in
-                               if U32 (Hacl.Box.crypto_box_open_easy_afternm header ciphertext (cipherlen(headersize)) nonce key =^ 0ul) then (
+                               (* if U32 (Hacl.Box.crypto_box_open_easy_afternm header ciphertext (cipherlen(headersize)) nonce key =^ 0ul) then ( *)
+                               if true then (
+                                 blit ciphertext 0ul header 0ul headersize_32;
                                  let file_size = load64_le (sub header 0ul  8ul) in
                                  let nsize     = load64_le (sub header 8ul  8ul) in
                                  let mtime     = load64_le (sub header 16ul 8ul) in
@@ -488,8 +495,8 @@ let rec file_recv_loop fb connb lhb sid pkA pkB skB =
                                              | SocketOk -> (
                                                  let next = file_next_write_buffer fb rem in
                                                  let seqno = U64 (fragments +^ 1uL) in
-                                                 if U32 (Hacl.Box.crypto_box_easy_afternm next ciphertext (cipherlen(rem)) nonce key =^ 0ul) then SocketOk
-                                                 else (TestLib.perr(15ul); SocketError) )
+                                                 (* if U32 (Hacl.Box.crypto_box_easy_afternm next ciphertext (cipherlen(rem)) nonce key =^ 0ul) then SocketOk *)
+                                                 blit ciphertext 0ul next 0ul (Int.Cast.uint64_to_uint32 (cipherlen(rem))); SocketOk)
                                              | SocketError -> TestLib.perr(14ul); SocketError
                                            ) else SocketOk in
                                          match res with
