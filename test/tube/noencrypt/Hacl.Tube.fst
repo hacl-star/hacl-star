@@ -244,6 +244,7 @@ let file_send f r h p skA pkB =
   let dummy_ptr = FStar.Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) 1ul in
   let fb = Buffer.create (init_file_handle(dummy_ptr)) 1ul in
 
+  let c1 = C.clock() in
   (* Initialization of the sessionID *)
   let sid = makeStreamID() in
 
@@ -365,6 +366,8 @@ let file_send f r h p skA pkB =
             | SocketError -> opened FileError fh.stat sid ) )
     | FileError -> opened FileError (fb.(0ul)).stat sid in
   pop_frame();
+  let c2 = C.clock() in
+  TestLib.print_clock_diff c1 c2;
   res
 
 
@@ -421,7 +424,7 @@ let rec file_recv_loop_2 fb connb ciphertext nonce key seqno len =
     match tcp_read_all connb ciphertext ciphersize with
     | SocketOk -> (
         let next = file_next_write_buffer fb blocksize in
-        store64_le nonce seqno;
+        store64_le (sub nonce 16ul 8ul) seqno;
         let seqno = H64 (seqno +^ one_64) in
         blit ciphertext 0ul next 0ul ciphersize_32;
         (* if U32 (Hacl.Box.crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then *)
@@ -451,6 +454,7 @@ let rec file_recv_loop fb connb lhb sid pkA pkB skB =
       let pk1 = create zero_8 32ul in
       let pk2 = create zero_8 32ul in
       let nonce = create zero_8 24ul in
+      let c1 = C.clock() in
       (match tcp_read_all connb (sub nonce 0ul 16ul) 16uL with
       | SocketOk -> (
           (* JK: no check on the streamID formatting *)
@@ -504,7 +508,10 @@ let rec file_recv_loop fb connb lhb sid pkA pkB skB =
                                              match file_close fb with
                                              | false -> (
                                                  match tcp_close connb with
-                                                 | SocketOk -> SocketOk
+                                                 | SocketOk -> (
+                                                     let c2 = C.clock() in
+                                                     TestLib.print_clock_diff c1 c2;
+                                                     SocketOk )
                                                  | SocketError -> TestLib.perr(13ul); SocketError )
                                              | true -> TestLib.perr(12ul); SocketError )
                                          | SocketError -> TestLib.perr(11ul); SocketError )
