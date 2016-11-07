@@ -69,6 +69,15 @@ tube-noenc.exe: tube/Box.Ideal.fst tube/PaddedFileIO_impl.c tube/SocketIO_impl.c
 		-add-include '<sodium.h>' -add-include '"testlib.h"' \
 		-tmpdir tmpn -o tube-noenc.exe -ldopt "-lsodium"
 
+tube-noenc.exe: tube/Box.Ideal.fst tube/PaddedFileIO_impl.c tube/SocketIO_impl.c tube/noencrypt/Hacl.Tube.fst tube/tube.c
+	mkdir -p tmp 
+	$(KREMLIN) $(KREMLIN_ARGS) \
+		$(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c $^ \
+		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
+		-I $(KREMLIB) -I $(KREMTEST) -I ./c -I ./bindings -I ./tube -no-prefix Libsodium \
+		-add-include '<sodium.h>' -add-include '"testlib.h"' \
+		-tmpdir tmp -o tube-noenc.exe -ldopt "-lsodium"
+
 tube-toy.exe: $(HACL_API)/Hacl.Constants.fst tube/Hacl.Tube.fst
 	mkdir -p tmp
 	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c $^ \
