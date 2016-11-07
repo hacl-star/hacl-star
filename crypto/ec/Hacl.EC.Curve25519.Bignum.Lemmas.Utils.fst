@@ -106,3 +106,77 @@ let lemma_eval_bigint_9 h b =
   eval_def h b 7;
   eval_def h b 8;
   eval_def h b 9
+
+module H128 = Hacl.UInt128
+
+val lemma_eval_bigint_wide_5:
+  h:mem ->
+  b:bigint_wide ->
+  Lemma (requires (live h b))
+	(ensures  (live h b
+	  /\ eval_wide h b norm_length = H128 (v (get h b 0) + pow2 51  * v (get h b 1)
+						  + pow2 102 * v (get h b 2)
+						  + pow2 153 * v (get h b 3)
+						  + pow2 204 * v (get h b 4)) ))
+let lemma_eval_bigint_wide_5 h b =
+  lemma_bitweight_values ();
+  assert_norm (pow2 0 = 1);
+  eval_wide_def h b 0;
+  eval_wide_def h b 1;
+  eval_wide_def h b 2;
+  eval_wide_def h b 3;
+  eval_wide_def h b 4;
+  eval_wide_def h b 5
+
+
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+
+val lemma_eval_bigint_wide_6:
+  h:mem ->
+  b:bigint_wide ->
+  Lemma (requires (live h b /\ length b >= norm_length+1))
+	(ensures  (live h b /\ length b >= norm_length+1
+	  /\ eval_wide h b (norm_length+1) = H128 (v (get h b 0) + pow2 51  * v (get h b 1)
+						     + pow2 102  * v (get h b 2)
+						     + pow2 153  * v (get h b 3)
+						     + pow2 204 * v (get h b 4)
+						     + pow2 255 * v (get h b 5)) ))
+let lemma_eval_bigint_wide_6 h b =
+  lemma_bitweight_values ();
+  assert_norm (pow2 0 = 1);
+  eval_wide_def h b 0;
+  eval_wide_def h b 1;
+  eval_wide_def h b 2;
+  eval_wide_def h b 3;
+  eval_wide_def h b 4;
+  eval_wide_def h b 5;
+  eval_wide_def h b 6
+
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+
+val lemma_eval_bigint_wide_9:
+  h:mem ->
+  b:bigint_wide ->
+  Lemma (requires (live h b /\ length b >= 2*norm_length-1))
+	(ensures  (live h b /\ length b >= 2*norm_length-1
+	  /\ eval_wide h b (2*norm_length-1) = H128 (v (get h b 0) + pow2 51  * v (get h b 1)
+						       + pow2 102  * v (get h b 2)
+						       + pow2 153  * v (get h b 3)
+						       + pow2 204 * v (get h b 4)
+						       + pow2 255 * v (get h b 5)
+						       + pow2 306 * v (get h b 6)
+						       + pow2 357 * v (get h b 7)
+						       + pow2 408 * v (get h b 8)) ))
+let lemma_eval_bigint_wide_9 h b =
+  lemma_bitweight_values ();
+  assert_norm (pow2 0 = 1);
+  eval_wide_def h b 0;
+  eval_wide_def h b 1;
+  eval_wide_def h b 2;
+  eval_wide_def h b 3;
+  eval_wide_def h b 4;
+  eval_wide_def h b 5;
+  eval_wide_def h b 6;
+  eval_wide_def h b 7;
+  eval_wide_def h b 8;
+  eval_wide_def h b 9

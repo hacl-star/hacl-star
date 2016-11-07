@@ -194,6 +194,68 @@ val maxValueNorm_eq_lemma:
     (ensures (maxValueNorm ha a = maxValueNorm hb b))
 let maxValueNorm_eq_lemma ha hb a b = maxValue_eq_lemma ha hb a b norm_length
 
+
+#reset-options "--initial_fuel 1 --max_fuel 1"
+
+val maxValue_wide_lemma_aux: h:heap -> b:bigint_wide{live h b} -> l:pos{l<=length b} ->
+  Lemma (forall (i:nat). i < l ==> H128.v (get h b i) <= maxValue_wide h b l)
+let rec maxValue_wide_lemma_aux h b l = match l with | 1 -> () | _ -> maxValue_wide_lemma_aux h b (l-1)
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
+val maxValue_wide_lemma: h:heap -> b:bigint_wide{live h b /\ length b > 0} ->
+  Lemma (requires (True)) 
+	(ensures (forall (i:nat). {:pattern (H128.v (get h b i))} i < length b ==> H128.v (get h b i) <= maxValue_wide h b (length b)))
+let rec maxValue_wide_lemma h b = maxValue_wide_lemma_aux h b (length b)
+
+#reset-options "--initial_fuel 1 --max_fuel 1"
+
+val maxValue_wide_bound_lemma_aux: h:heap -> b:bigint_wide{live h b /\ length b > 0} -> l:pos{l<=length b} -> 
+  bound:nat ->  Lemma (requires (forall (i:nat). i < l ==> H128.v (get h b i) <= bound))
+	             (ensures (maxValue_wide h b l <= bound))
+let rec maxValue_wide_bound_lemma_aux h b l bound = match l with | 1 -> () | _ -> maxValue_wide_bound_lemma_aux h b (l-1) bound
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
+val maxValue_wide_bound_lemma: h:heap -> b:bigint_wide{live h b /\ length b > 0} -> bound:nat ->  
+  Lemma (requires (forall (i:nat). i < length b ==> H128.v (get h b i) <= bound))
+	(ensures (maxValue_wide h b (length b) <= bound))
+let maxValue_wide_bound_lemma h b bound = maxValue_wide_bound_lemma_aux h b (length b) bound
+
+val maxValueNorm_wide: h:heap -> b:bigint_wide{live h  b /\ length  b >= norm_length} -> GTot nat
+let maxValueNorm_wide h  b = maxValue_wide h b norm_length
+
+#reset-options "--initial_fuel 1 --max_fuel 1"
+
+val maxValueIdx_wide: h:heap ->b:bigint_wide{live h  b} -> l:pos{l<=length  b} -> GTot nat
+let rec maxValueIdx_wide h  b l = 
+  match l with 
+  | 1 -> 0
+  | _ -> if maxValue_wide h  b l = H128.v (get h b (l-1)) then l - 1 else maxValueIdx_wide h b (l-1)
+
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+
+val maxValue_wide_eq_lemma: 
+  ha:heap -> hb:heap -> a:bigint_wide{live ha  a} -> b:bigint_wide{live hb  b} -> l:pos -> Lemma 
+    (requires (equal ha a hb b /\ l > 0 /\ l <= length a)) 
+    (ensures (equal ha a hb b /\ l > 0 /\ l <= length a /\ l <= length b /\ maxValue_wide ha a l = maxValue_wide hb b l))
+let rec maxValue_wide_eq_lemma ha hb a b l =
+  FStar.Buffer.Quantifiers.eq_lemma ha a hb b;
+  match l with
+  | 1 -> ()
+  | _ -> cut (H128.v (get ha a (l-1)) = H128.v (get hb b (l-1)));
+         maxValue_wide_eq_lemma ha hb a b (l-1)
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
+val maxValueNorm_wide_eq_lemma: 
+  ha:heap -> hb:heap -> a:bigint_wide{ live ha a /\ length a >= norm_length }  -> b:bigint_wide{ live hb b /\ length b >= norm_length } -> 
+  Lemma 
+    (requires (equal ha a hb b)) 
+    (ensures (maxValueNorm_wide ha a = maxValueNorm_wide hb b))
+let maxValueNorm_wide_eq_lemma ha hb a b = maxValue_wide_eq_lemma ha hb a b norm_length
+
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
 
 val eval_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} -> b:bigint{live hb b} ->
