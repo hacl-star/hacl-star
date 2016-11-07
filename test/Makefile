@@ -12,7 +12,7 @@ allsubdirs: $(addsuffix .all , $(SUBDIRS))
 	$(MAKE) -C $(basename $@)
 
 test_api.exe: c/test_api.c
-	mkdir -p tmp 
+	mkdir -p tmp
 	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
 		$(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst $(KREMTEST)/testlib.c c/FStar_FileIO.c c/FStar_SocketIO.c c/test_api.c \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
@@ -43,34 +43,43 @@ test_tube.exe: tube/PaddedFileIO.c tube/SocketIO.c tube/Hacl.Tube.fst
 	./test_box.exe
 
 tube-c.exe: c/tube.c
-	mkdir -p tmp 
-	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
-		$(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst $(KREMTEST)/testlib.c c/FStar_FileIO.c c/FStar_SocketIO.c c/tube.c \
+	mkdir -p tmpc
+	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst \
+		$(KREMTEST)/testlib.c c/FStar_FileIO.c c/FStar_SocketIO.c c/tube.c \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
 		-I $(KREMLIB) -I $(KREMTEST) -I ./c \
-		-tmpdir tmp -o tube-c.exe -ldopt "-lsodium" # -ccopt "-m32"
+		-tmpdir tmpc -o tube-c.exe -ldopt "-lsodium"
 
 
 tube-star.exe: tube/Box.Ideal.fst tube/PaddedFileIO_impl.c tube/SocketIO_impl.c tube/Hacl.Tube.fst tube/tube.c
-	mkdir -p tmp 
-	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--no_extract FStar.Int.Cast" \
+	mkdir -p tmps
+	$(KREMLIN) $(KREMLIN_ARGS) \
 		$(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c $^ \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
 		-I $(KREMLIB) -I $(KREMTEST) -I ./c -I ./bindings -I ./tube -no-prefix Libsodium \
 		-add-include '<sodium.h>' -add-include '"testlib.h"' \
-		-tmpdir tmp -o tube-star.exe -ldopt "-lsodium"
-	cp text.txt tmp/bla.txt
+		-tmpdir tmps -o tube-star.exe -ldopt "-lsodium"
+
+tube-noenc.exe: tube/Box.Ideal.fst tube/PaddedFileIO_impl.c tube/SocketIO_impl.c tube/noencrypt/Hacl.Tube.fst tube/tube.c
+	mkdir -p tmpn
+	$(KREMLIN) $(KREMLIN_ARGS) \
+		$(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c $^ \
+		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
+		-I $(KREMLIB) -I $(KREMTEST) -I ./c -I ./bindings -I ./tube -no-prefix Libsodium \
+		-add-include '<sodium.h>' -add-include '"testlib.h"' \
+		-tmpdir tmpn -o tube-noenc.exe -ldopt "-lsodium"
 
 tube-toy.exe: $(HACL_API)/Hacl.Constants.fst tube/Hacl.Tube.fst
-	mkdir -p tmp 
+	mkdir -p tmp
 	$(KREMLIN) $(KREMLIN_ARGS) $(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c $^ \
 		-I $(HACL_LIB) -I $(HACL_API)/api -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
 		-I $(KREMLIB) -I $(KREMTEST) -I ./c -I ./bindings -I ./tube \
 		-tmpdir tmp -skip-compilation
 
 receive	:
-	rm -f bla.txt
-	./tube-star.exe receive 5001 -k dfcf8b782a2a72f65ee24f85fa68ab1a10b3b555751283c5f0bcdb20e1a6e4a8 -p 4d187de7a95fe760ba7ffc9a1ba4229eea9cd1136fe609bdc58816e3cf4d3350
+	../tube-star.exe receive 5001 -k dfcf8b782a2a72f65ee24f85fa68ab1a10b3b555751283c5f0bcdb20e1a6e4a8 -p 4d187de7a95fe760ba7ffc9a1ba4229eea9cd1136fe609bdc58816e3cf4d3350
+
+
 
 send:
 	cd tmp && ../tube-star.exe send bla.txt localhost:5001 -k 4d922658eb6d4aef64a83644a18e60e61a57c245aa8e5e9a93926cb2b317ffd7 -p 223fc224f2c9906fd4bbb1313236ecc4f36ed2f7e95b5fb1deafc459b19ab069
@@ -311,7 +320,7 @@ gprof:
 		-o test_api.exe -lsodium -pg
 
 clean:
-	rm -rf *~ *.exe *.out *.o *.c *.h *.cmi *.cmo *.cmx *.krml ./tmp ./box
+	rm -rf *~ *.exe *.out *.o *.c *.h *.cmi *.cmo *.cmx *.krml ./tmp ./box ./tmpn ./tmpc ./tmps
 	$(MAKE) -C symmetric clean
 	$(MAKE) -C ec clean
 # 	$(MAKE) -C hash clean
