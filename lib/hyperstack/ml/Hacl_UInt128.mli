@@ -1,4 +1,4 @@
-type uint128
+type uint128 = FStar_UInt128.t
 type t = uint128
 
 type u32 = FStar_UInt32.t
@@ -29,8 +29,8 @@ val op_Plus_Hat: uint128 -> uint128 -> uint128
 val op_Plus_Percent_Hat: uint128 -> uint128 -> uint128
 val op_Subtraction_Hat: uint128 -> uint128 -> uint128
 val op_Subtraction_Percent_Hat: uint128 -> uint128 -> uint128
-val op_Star_Hat: uint128 -> uint128 -> uint128
-val op_Star_Percent_Hat: uint128 -> uint128 -> uint128
+val op_Star_Hat: Hacl_UInt64.t -> Hacl_UInt64.t -> uint128
+(* val op_Star_Percent_Hat: uint128 -> uint128 -> uint128 *)
 val op_Less_Less_Hat:uint128 -> u32 -> uint128
 val op_Greater_Greater_Hat:uint128 -> u32 -> uint128
 val op_Amp_Hat:uint128 -> uint128 -> uint128

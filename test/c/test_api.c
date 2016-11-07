@@ -1,6 +1,8 @@
 #include "testlib.h"
 #include "Hacl_Box.h"
 #include <sodium.h>
+#include <time.h>
+#include "testutils.h"
 
 #define MESSAGE_LEN 44
 #define secretbox_MACBYTES   16
@@ -45,11 +47,11 @@ uint8_t sk[secretbox_KEYBYTES] = {
   0x41, 0x49, 0xf5, 0x1c
 };
 
-int main(){
+void test_correctness() {
   if (sodium_init() == -1) {
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
-  uint8_t ciphertext[CIPHERTEXT_LEN], ciphertext2[CIPHERTEXT_LEN],
+  uint8_t ciphertext[CIPHERTEXT_LEN+16], ciphertext2[CIPHERTEXT_LEN+16],
     mac[16],mac2[16],
     decrypted[MESSAGE_LEN], decrypted2[MESSAGE_LEN],
     pk[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
@@ -58,11 +60,13 @@ int main(){
   uint32_t res;
   int i;
   /* Testing the secret box primitives */  
-  Hacl_SecretBox_crypto_secretbox_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, key);
-  res = crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key);
+  /* Hacl_SecretBox_crypto_secretbox_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, key); */
+  /* res = crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key); */
+  Hacl_SecretBox_crypto_secretbox_easy(ciphertext, msg, MESSAGE_LEN, nonce, key);
+  res = crypto_secretbox_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, key);
 
   printf("SecretBox decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
-  compare_and_print("Secret box", msg, decrypted, MESSAGE_LEN);
+  TestLib_compare_and_print("Secret box", msg, decrypted, MESSAGE_LEN);
 
   for(i = 0; i < MESSAGE_LEN; i++) decrypted[i] = 0;
   for(i = 0; i < CIPHERTEXT_LEN; i++) ciphertext[i] = 0;
@@ -70,12 +74,117 @@ int main(){
   // Creating public/private key couples
   Hacl_EC_Curve25519_exp(pk , basepoint, key);
   Hacl_EC_Curve25519_exp(pk2, basepoint, sk);
+
+  Hacl_Box_crypto_box_beforenm(test, pk, sk);
+  res = crypto_box_beforenm(test2, pk2, key);
+  TestLib_compare_and_print("BeforeNM", test2, test, 32);
+  
   /* Testing the box primitives */
-  i = crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk, sk);  
-  res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key);
+  /* i = crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk, sk); */
+  /* res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key); */
+  i = crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk, sk);
+  res = Hacl_Box_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, key);
   printf("Box decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
   
-  compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
+  TestLib_compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
+}
 
-  return EXIT_SUCCESS;
+#define SIZE (1024*1024*1024)
+
+void test_perf1() {
+  void *plain = malloc(SIZE), *cipher = malloc(SIZE);
+  uint8_t mac[16];
+  clock_t c1, c2;
+  double t1, t2;
+
+  unsigned long long a,b,d1,d2;
+  // running it once each, just to remove cache effects.
+  crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
+
+  c1 = clock();
+  a = rdtsc();
+  Hacl_SecretBox_crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
+  b = rdtsc();
+  c2 = clock();
+  d1 = b - a;
+  printf("No of cycles for HACL: %llu\n", d1);
+  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for HACL: %f\n", t1);
+
+  c1 = clock();
+  a = rdtsc();
+  crypto_secretbox_detached(cipher, mac, plain, SIZE, nonce, key);
+  b = rdtsc();
+  c2 = clock();
+  t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  d2 = b - a;
+  printf("No of cycles for Sodium: %llu\n", d2);
+  printf("User time for Sodium: %f\n", t2);
+
+  printf("Slowdown (HACL/Sodium): %f\n", t1/t2);
+  printf("Cycle ratio (HACL/Sodium): %lf\n", (double)d1/d2);
+  printf("Cycles/byte ratio HACL): %lf\n", (double)d1/SIZE);
+  printf("Cycles/byte ratio Sodium): %lf\n", (double)d2/SIZE);
+}
+
+void test_perf2() {
+  void *plain = malloc(SIZE);
+  uint8_t mac[16], mac2[16], mac3[16];
+  clock_t c1, c2;
+  double t1, t2, t3;
+
+  c1 = clock();
+  Hacl_Symmetric_Poly1305_64_crypto_onetimeauth(mac, plain, SIZE, key);
+  c2 = clock();
+  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for HACL 64bit: %f\n", t1);
+  
+  c1 = clock();
+  Hacl_Symmetric_Poly1305_poly1305_mac(mac2, plain, SIZE, key);
+  c2 = clock();
+  t3 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for HACL 32bit: %f\n", t3);
+
+  c1 = clock();
+  crypto_onetimeauth(mac3, plain, SIZE, key);
+  c2 = clock();
+  t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for Sodium: %f\n", t2);
+
+  printf("Slowdown (Poly1305-32): %f\n", t3/t2);
+  printf("Slowdown (Poly1305-64): %f\n", t1/t2);
+  TestLib_compare_and_print("1Gb Poly1305", mac3, mac, 16);
+}
+
+void test_perf3() {
+  void *plain = malloc(SIZE), *cipher = malloc(SIZE);
+  uint8_t mac[16];
+  clock_t c1, c2;
+  double t1, t2;
+
+  c1 = clock();
+  Hacl_Symmetric_HSalsa20_crypto_stream_xsalsa20_xor(cipher, plain, SIZE, nonce, key);
+  c2 = clock();
+  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for HACL: %f\n", t1);
+
+  c1 = clock();
+  crypto_stream_xsalsa20_xor(cipher, plain, SIZE, nonce, key);
+  c2 = clock();
+  t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for Sodium: %f\n", t2);
+
+  printf("Slowdown (XSalsa20): %f\n", t1/t2);
+}
+
+int main(int argc, char *argv[]){
+  if (argc == 2 && strcmp(argv[1], "perf1") == 0) {
+    test_perf1();
+  } else if (argc == 2 && strcmp(argv[1], "perf2") == 0) {
+    test_perf2();
+  } else if (argc == 2 && strcmp(argv[1], "perf3") == 0) {
+    test_perf3();
+  } else {
+    test_correctness();
+  }
 }

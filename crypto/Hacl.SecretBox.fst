@@ -16,9 +16,6 @@ module H8  = Hacl.UInt8
 module H32 = Hacl.UInt32
 module H64 = Hacl.UInt64
 
-(* TODO:
-   disjointness clauses
-*)
 
 private val set_zero_bytes:
   b:uint8_p{length b >= 16} ->
@@ -36,6 +33,7 @@ let set_zero_bytes b =
   b.(24ul) <- zero; b.(25ul) <- zero; b.(26ul) <- zero; b.(27ul) <- zero;
   b.(28ul) <- zero; b.(29ul) <- zero; b.(30ul) <- zero; b.(31ul) <- zero
 
+
 val crypto_secretbox_detached:
   c:uint8_p ->
   mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
@@ -48,36 +46,31 @@ val crypto_secretbox_detached:
     (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
 let crypto_secretbox_detached c mac m mlen n k =
   push_frame();
-  let hsalsa_state = create (uint8_to_sint8 0uy) 160ul in
-  let salsa_state = create (uint32_to_sint32 0ul) 32ul in
-  let block0 = sub hsalsa_state 0ul 64ul in
-  let subkey = sub hsalsa_state 64ul 32ul in
-  let block1 = sub hsalsa_state 96ul 64ul in
-  set_zero_bytes block0;
-  let mlen = Int.Cast.uint64_to_uint32 mlen in
-  let zerobytes = 32ul in
-  let mlen0 =
-    if (U32 (mlen >^ (64ul -^ zerobytes))) then U32 (64ul -^ zerobytes) else mlen in
-  blit m 0ul block0 zerobytes mlen0;
-  Hacl.Symmetric.XSalsa20.hsalsa_init subkey k (sub n 0ul 16ul);
-  Hacl.Symmetric.Salsa20.salsa20_encrypt_body salsa_state
-                                              block1
-                                              subkey
-                                              (uint64_to_sint64 0uL)
-                                              (sub n 16ul 8ul)
-                                              block0
-                                              (U32 (mlen0 +^ zerobytes));
-  (* Hacl.Symmetric.Poly1305.poly1305_init acc r block1; *)
-  blit block1 zerobytes c 0ul mlen0;
+  let hsalsa_state = create (uint8_to_sint8 0uy) 96ul in
+  let subkey = sub hsalsa_state  0ul 32ul in
+  let block0 = sub hsalsa_state 32ul 64ul in
 
-  if (U32 (mlen >^ mlen0)) then Hacl.Symmetric.Salsa20.salsa20_encrypt_body salsa_state
-                                                                            (offset c mlen0)
-                                                                            subkey
-                                                                            (uint64_to_sint64 1uL)
-                                                                            (sub n 16ul 8ul)
-                                                                            (offset m mlen0)
-                                                                            (U32 (mlen -^ mlen0));
-  Hacl.Symmetric.Poly1305.poly1305_mac mac c mlen block1;
+  let zerobytes = 32ul in
+  let zerobytes_64 = Int.Cast.uint32_to_uint64 zerobytes in
+  let mlen0 =
+      if (U64 (mlen >^ (64uL -^ zerobytes_64))) then U64 (64uL -^ zerobytes_64) else mlen in
+  let mlen0_32 = Int.Cast.uint64_to_uint32 mlen0 in
+  blit m 0ul block0 zerobytes mlen0_32;
+  Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey (sub n 0ul 16ul) k;
+  Hacl.Symmetric.HSalsa20.crypto_stream_salsa20_xor block0
+                                                    block0
+                                                    (U64 (mlen0 +^ zerobytes_64))
+                                                    (sub n 16ul 8ul)
+                                                    subkey;
+  blit block0 zerobytes c 0ul mlen0_32;
+  if (U64 (mlen >^ mlen0)) then
+    Hacl.Symmetric.HSalsa20.crypto_stream_salsa20_xor_ic (offset c mlen0_32)
+                                                         (offset m mlen0_32)
+                                                         (U64 (mlen -^ mlen0))
+                                                         (sub n 16ul 8ul)
+                                                         1uL
+                                                         subkey;
+  Hacl.Symmetric.Poly1305_64.crypto_onetimeauth mac c mlen block0;
   pop_frame();
   0ul
 
@@ -94,45 +87,38 @@ val crypto_secretbox_open_detached:
     (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
 let crypto_secretbox_open_detached m c mac clen n k =
   push_frame();
-  let hsalsa_state = create (uint8_to_sint8 0uy) 160ul in
-  let salsa_state = create (uint32_to_sint32 0ul) 32ul in
-  let tmp_mac = create (uint8_to_sint8 0uy) 16ul in
-  let block0 = sub hsalsa_state 0ul 64ul in
-  let subkey = sub hsalsa_state 64ul 32ul in
-  let block1 = sub hsalsa_state 96ul 64ul in
-  let clen = Int.Cast.uint64_to_uint32 clen in
-  Hacl.Symmetric.XSalsa20.hsalsa_init subkey k (sub n 0ul 16ul);
-  Hacl.Symmetric.Salsa20.salsa20_core block0
-                                      salsa_state
-                                      subkey
-                                      (uint64_to_sint64 0uL)
-                                      (sub n 16ul 8ul)
-                                      64ul;
-  Hacl.Symmetric.Poly1305.poly1305_mac tmp_mac c clen block0;
+  let hsalsa_state = create (uint8_to_sint8 0uy) 112ul in
+  let subkey = sub hsalsa_state 0ul 32ul in
+  let block0 = sub hsalsa_state 32ul 64ul in
+  let tmp_mac = sub hsalsa_state 96ul 16ul in
+
+  Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey (sub n 0ul 16ul) k;
+  Hacl.Symmetric.HSalsa20.crypto_stream_salsa20 block0 32uL (sub n 16ul 8ul) subkey;
+
+  Hacl.Symmetric.Poly1305_64.crypto_onetimeauth tmp_mac c clen block0;
   assume (Hacl.Policies.declassifiable tmp_mac);
   let verify = cmp_bytes mac tmp_mac 16ul in
   let zerobytes = 32ul in
-  (* TODO: report kremlin bug *)
+  let zerobytes_64 = 32uL in
   let clen0 =
-    if (U32 (clen >^ (64ul -^ zerobytes))) then U32 (64ul -^ zerobytes) else clen in
+    if (U64 (clen >^ (64uL -^ zerobytes_64))) then U64 (64uL -^ zerobytes_64) else clen in
+  let clen0_32 = Int.Cast.uint64_to_uint32 clen0 in
   let z =
     if U8 (verify =^ 0uy) then (
-      blit c 0ul block0 zerobytes clen0;
-      Hacl.Symmetric.Salsa20.salsa20_encrypt_body salsa_state
-                                                  block1
-                                                  subkey
-                                                  (uint64_to_sint64 0uL)
-                                                  (sub n 16ul 8ul)
-                                                  block0
-                                                  (U32 (clen0 +^ zerobytes));
-      blit block1 zerobytes m 0ul clen0;
-      if (U32 (clen >^ clen0)) then Hacl.Symmetric.Salsa20.salsa20_encrypt_body salsa_state
-                                                                                (offset m clen0)
-                                                                                subkey
-                                                                                (uint64_to_sint64 1uL)
-                                                                                (sub n 16ul 8ul)
-                                                                                (offset c clen0)
-                                                                                (U32 (clen -^ clen0));
+      blit c 0ul block0 zerobytes clen0_32;
+      Hacl.Symmetric.HSalsa20.crypto_stream_salsa20_xor block0
+                                                        block0
+                                                        (U64 (zerobytes_64 +^ clen0))
+                                                        (sub n 16ul 8ul)
+                                                        subkey;
+      blit block0 zerobytes m 0ul clen0_32;
+      if (U64 (clen >^ clen0))
+        then Hacl.Symmetric.HSalsa20.crypto_stream_salsa20_xor_ic (offset m clen0_32)
+                                                                  (offset c clen0_32)
+                                                                  (U64 (clen -^ clen0))
+                                                                  (sub n 16ul 8ul)
+                                                                  1uL
+                                                                  subkey;
       0x0ul
     )
     else 0xfffffffful in
@@ -170,3 +156,5 @@ let crypto_secretbox_open_easy m c clen n k =
   let c'  = sub c 16ul clen_ in
   let mac = sub c 0ul 16ul in
   crypto_secretbox_open_detached m c' mac (U64 (clen -^ 16uL)) n k
+
+open Hacl.Symmetric.Poly1305 // Hacl to make load the module with autodep

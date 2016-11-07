@@ -53,10 +53,11 @@ let main () =
     0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0x4auy; 0uy; 0uy; 0uy; 0uy
     ] in
   let counter = 1ul in
+  (* let chacha = "chacha" in *)
   let chacha20 = FStar.Buffer.createL [
-    43y; 68y; 61y; 63y; 68y; 61y; 32y; 30y
+    0x43y; 0x68y; 0x61y; 0x63y; 0x68y; 0x61y; 0x32y; 0x30y; 0y
   ] in
   Hacl.Symmetric.Chacha20.chacha20_encrypt ciphertext key counter nonce plaintext len;
-  C.compare_and_print2 (* chacha20 *) expected ciphertext len;
+  TestLib.compare_and_print chacha20 expected ciphertext len;
   pop_frame();
   C.exit_success

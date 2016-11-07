@@ -203,3 +203,58 @@ let sum_matrixes m m0 =
   let m_13 = m.(13ul) in let m0_13 = m0.(13ul) in m.(13ul) <- (m_13 +%^ m0_13);
   let m_14 = m.(14ul) in let m0_14 = m0.(14ul) in m.(14ul) <- (m_14 +%^ m0_14);
   let m_15 = m.(15ul) in let m0_15 = m0.(15ul) in m.(15ul) <- (m_15 +%^ m0_15)
+
+
+(** Inplace xor operation on u8s *)
+(* TODO: add functional spec *)
+val xor_bytes_inplace: output:u8s -> in1:u8s{disjoint in1 output} ->
+  len:u32{U32.v len <= length output /\ U32.v len <= length in1} -> STL unit
+  (requires (fun h -> live h output /\ live h in1))
+  (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
+    /\ modifies_1 output h0 h1 ))
+let rec xor_bytes_inplace output in1 len =
+  if U32 (len =^ 0ul) then ()
+  else
+    begin
+      let i    = U32 (len -^ 1ul) in
+      let in1i = index in1 i in
+      let oi   = index output i in
+      let oi   = H8 (in1i ^^ oi) in
+      output.(i) <- oi;
+      xor_bytes_inplace output in1 i
+    end
+
+val lemma_euclidean_division: r:nat -> b:nat -> q:pos -> Lemma
+  (requires (r < q))
+  (ensures  (r + q * b < q * (b+1)))
+let lemma_euclidean_division r b q = ()
+ 
+(* A form of memset, could go into some "Utils" functions module *)
+
+(*
+// should follow from Seq
+assume private val lemma_create_cons:
+  #a:Type -> n:nat -> v:a -> Lemma
+  (Seq.equal (SeqProperties.cons v (Seq.create n v)) (Seq.create (n + 1) v))
+*)
+
+//16-10-03 added functional step; made pre-condition tighter (sufficient for use in AEAD)
+val memset: b:u8s -> z:h8 -> len:u32 -> STL unit
+  (requires (fun h -> live h b /\ U32.v len = length b))
+  (ensures  (fun h0 _ h1 -> 
+    live h1 b /\ modifies_1 b h0 h1 /\ 
+    Seq.equal (as_seq h1 b) (Seq.create (U32.v len) z)))
+let rec memset b z len =
+  if len = 0ul then assume false
+  else
+  begin
+    let h0 = ST.get() in
+    let i = U32 (len -^ 1ul) in
+    memset (offset b 1ul) z i; // we should swap these two lines for tail recursion
+    b.(0ul) <- z; 
+    let h1 = ST.get() in 
+    let s = as_seq h1 b in
+    assert(Seq.index s 0 = z); // ...but this fails in the absence of framing
+    assert(Seq.equal s (SeqProperties.cons z (Seq.slice s 1 (U32.v len))))
+  end
+

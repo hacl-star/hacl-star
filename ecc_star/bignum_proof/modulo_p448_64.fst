@@ -449,7 +449,7 @@ let lemma_helper_3 x y =
 val carry_top_to_0:
   b:bigint_wide -> ST unit 
     (requires (fun h -> Carried h b norm_length /\ getLength h b >= norm_length+1)) 
-    (ensures (fun h0 _ h1 -> Updated h0 h1 b (2*norm_length-1)
+    (ensures (fun h0 _ h1 -> Updated h0 h1 b (norm_length+1)
       /\ Carried h0 b norm_length /\ Carried2 h1 b
       /\ eval h1 b norm_length % reveal prime = eval h0 b (norm_length+1) % reveal prime
       /\ v (getValue h1 b 0) = v (getValue h0 b 0) + v (getValue h0 b 8)

@@ -1,6 +1,7 @@
 module Hacl.Test.Poly1305
 
 open FStar.Buffer
+open Hacl.Cast
 
 val main: unit -> ST FStar.Int32.t
   (requires (fun h -> True))
@@ -10,7 +11,7 @@ let main () =
   let len = 34ul in
   let keysize = 32ul in
   let macsize = 16ul in
-  let mac = create 0uy macsize in
+  let mac = create (0uy) macsize in
   let plaintext = createL [
     0x43uy; 0x72uy; 0x79uy; 0x70uy; 0x74uy; 0x6fuy; 0x67uy; 0x72uy;
     0x61uy; 0x70uy; 0x68uy; 0x69uy; 0x63uy; 0x20uy; 0x46uy; 0x6fuy;
@@ -29,6 +30,15 @@ let main () =
     0x4auy; 0xbfuy; 0xf6uy; 0xafuy; 0x41uy; 0x49uy; 0xf5uy; 0x1buy
     ] in
   Hacl.Symmetric.Poly1305.poly1305_mac mac plaintext len key;
-  C.compare_and_print2 expected mac macsize;
+  let poly1305 = createL [0y] in
+  TestLib.compare_and_print poly1305 expected mac macsize;
+
+  (* Test encoding a 10 MB buffer. *)
+  let len = FStar.UInt32 (1024ul *%^ 1024ul *%^ 1024ul) in
+  let buf = TestLib.unsafe_malloc len in
+  let c1 = C.clock () in
+  Hacl.Symmetric.Poly1305.poly1305_mac mac buf len key;
+  let c2 = C.clock () in
+  TestLib.print_clock_diff c1 c2;
   pop_frame();
   C.exit_success

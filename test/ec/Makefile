@@ -23,6 +23,7 @@ test-ocaml: curve25519-test
 	./$(subst .,_,$(basename $^)).exe
 
 clean:
+	make -C $(FSTAR_HOME)/ulib/ml clean
 	make -C $(HACL_LIB) clean
 	rm -rf *.c *.h *.out *.cmx *.o *.cmi *~ *.cmo *.exe *.krml \
 		$(subst .,_,$(TESTS))
@@ -57,9 +58,6 @@ CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_
 	Hacl_EC_Curve25519_Ladder.ml \
 	Hacl_EC_Curve25519_Crecip.ml \
 	Hacl_EC_Curve25519.ml
-
-ml-lib:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml all
 
 # Curve25519 extraction to OCaml
 curve25519-extract: ml-lib

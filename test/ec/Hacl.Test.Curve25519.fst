@@ -46,8 +46,9 @@ let main () =
     0xe6uy; 0xf8uy; 0xf7uy; 0x64uy; 0x7auy; 0xacuy; 0x79uy; 0x57uy
     ] in
   Hacl.EC.Curve25519.exp result input1 scalar1;
-  C.compare_and_print2 expected1 result keysize;
+  let curve25519 = createL [0y] in
+  TestLib.compare_and_print curve25519 expected1 result keysize;
   Hacl.EC.Curve25519.exp result input2 scalar2;
-  C.compare_and_print2 expected2 result keysize;
+  TestLib.compare_and_print curve25519 expected2 result keysize;
   pop_frame();
   C.exit_success

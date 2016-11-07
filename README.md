@@ -1,5 +1,6 @@
 hacl-star
 =========
+[![Build Status](https://travis-ci.org/mitls/hacl-star.svg?branch=master)](https://travis-ci.org/mitls/hacl-star)
 
 A formally verified cryptographic library in F*
 

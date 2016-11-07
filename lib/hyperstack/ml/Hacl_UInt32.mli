@@ -1,4 +1,4 @@
-type uint32
+type uint32 = FStar_UInt32.t
 type t = uint32
            
 val n:Prims.int

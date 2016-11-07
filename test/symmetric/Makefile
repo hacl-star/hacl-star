@@ -6,13 +6,13 @@ HACL_HOME?=../..
 include $(HACL_HOME)/lib/hyperstack/Makefile.include
 KREMLIN_INCLUDES=$(addprefix -I , $(HACL_KREMLIN) $(HACL_SYMMETRIC) . $(KREMTEST)) \
 	$(KREMTEST)/testlib.c -add-include \"testlib.h\"
-OCAML_INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_SYMMETRIC) $(OCAML_LIB))
+OCAML_INCLUDES=$(addprefix --include , $(HACL_KREMLIN) $(HACL_SYMMETRIC) $(OCAML_LIB))
 
 TEST_CHACHA20=Hacl.Test.Chacha20
 TEST_SALSA20=Hacl.Test.Salsa20
 TEST_XSALSA20=Hacl.Test.XSalsa20
 TEST_POLY1305=Hacl.Test.Poly1305
-TESTS=$(TEST_CHACHA20) $(TEST_SALSA20) $(TEST_XSALSA20) $(TEST_POLY1305)
+TESTS=$(TEST_CHACHA20) $(TEST_SALSA20) $(TEST_XSALSA20) $(TEST_POLY1305) Hacl.Test2.Salsa20 Hacl.Test2.Salsa20 
 
 .PHONY:test-kremlin
 
@@ -51,7 +51,7 @@ CHACHA_EXTRACTED_HST=Utils.ml Hacl_Symmetric_Chacha20.ml
 SALSA_EXTRACTED_HST=Utils.ml Hacl_Symmetric_Salsa20.ml
 AES_EXTRACTED_HST=Hacl_Symmetric_AES.ml
 AESGCM_EXTRACTED_HST=Hacl_Symmetric_AES.ml Hacl_Symmetric_GCM.ml Hacl_AEAD_AES256GCM.ml
-POLY1305_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Utils.ml Hacl_Symmetric_Poly1305_Parameters.ml Hacl_Symmetric_Poly1305_Bigint.ml Hacl_Symmetric_Poly1305_Bignum.ml Hacl_Symmetric_Poly1305.ml
+POLY1305_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Utils.ml Hacl_Symmetric_Poly1305_Parameters.ml Hacl_Symmetric_Poly1305_Bigint.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part1.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part2.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part3.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part4.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part5.ml Hacl_Symmetric_Poly1305_Bignum.ml Hacl_Symmetric_Poly1305_Spec.ml Hacl_Symmetric_Poly1305.ml
 
 CHACHA_ODIR=chacha20
 SALSA_ODIR=salsa20
@@ -128,3 +128,20 @@ aes-gcm-compile: aes-gcm-extract
 
 aes-gcm-test: aes-gcm-compile
 	./test_aes_gcm.exe
+
+#OCaml extraction of the 64-bit version of Poly1305
+poly64-extract: ml-lib
+	mkdir -p $(POLY_ODIR)
+	$(FSTAR) $(NO_CODEGEN) $(OCAML_OPTIONS) $(OCAML_INCLUDES) --odir $(POLY_ODIR) --include $(HACL_SYMMETRIC) Hacl.Test.Poly1305_64.fst --include $(KREMLIB) --include $(KREMTEST)
+	echo "let _ = main()" >> $(POLY_ODIR)/Hacl_Test_Poly1305_64.ml
+
+POLY1305_64_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml	Hacl_Symmetric_Poly1305_64_Parameters.ml Hacl_Symmetric_Poly1305_64_Bigint.ml Hacl_Symmetric_Poly1305_64.ml Hacl_Test_Poly1305_64.ml
+
+poly64-compile: #poly64-extract
+	$(OCAMLOPT) -I $(HACL_LIB)/ml -I $(POLY_ODIR) -I $(KREMTEST) -I $(KREMLIB) \
+		$(addprefix $(HACL_LIB)/ml/,$(REALIZED_ML_HST)) \
+		$(KREMTEST)/TestLib.ml $(KREMLIB)/C.ml \
+	  	$(addprefix $(POLY_ODIR)/,$(POLY1305_64_EXTRACTED))  -o test_poly.exe
+
+poly64-test: poly64-compile
+	./test_poly.exe

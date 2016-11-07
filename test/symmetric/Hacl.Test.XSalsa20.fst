@@ -64,7 +64,8 @@ let main () =
     0xcduy; 0x62uy; 0xbduy; 0xa8uy; 0x75uy; 0xfcuy; 0x73uy; 0xd6uy; 
     0x82uy; 0x19uy; 0xe0uy; 0x03uy; 0x6buy; 0x7auy; 0x0buy; 0x37uy
     ] in
+  let xsalsa20 = createL [0y] in
   Hacl.Symmetric.XSalsa20.xsalsa20_encrypt ciphertext key nonce plaintext len;
-  C.compare_and_print2 expected (offset ciphertext 32ul) (FStar.UInt32 (len -^ 32ul));
+  TestLib.compare_and_print xsalsa20 expected (offset ciphertext 32ul) (FStar.UInt32 (len -^ 32ul));
   pop_frame();
   C.exit_success
