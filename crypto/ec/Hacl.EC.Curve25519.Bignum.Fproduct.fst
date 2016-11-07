@@ -32,52 +32,6 @@ module H128  = Hacl.UInt128
 
 let u51 = x:H64.t{v x < pow2 51}
 
-(* let op_Star_Bar (x:H64.t) (y:H64.t) : H128.t = H128.mul_wide x y *)
-
-(* let isMultiplication (h0:mem) (h1:mem) (a:bigint) (b:bigint) (c:bigint_wide) : GTot Type0 = *)
-(*   live h0 a /\ live h0 b /\ live h1 c *)
-(*   /\ length a >= norm_length /\ length b >= norm_length /\ length c >= 2*norm_length-1 *)
-(*   /\ ( *)
-(*     let a0 = v (get h0 a 0) in let a1 = v (get h0 a 1) in let a2 = v (get h0 a 2) in *)
-(*     let a3 = v (get h0 a 3) in let a4 = v (get h0 a 4) in let b0 = v (get h0 b 0) in *)
-(*     let b1 = v (get h0 b 1) in let b2 = v (get h0 b 2) in let b3 = v (get h0 b 3) in *)
-(*     let b4 = v (get h0 b 4) in *)
-(*     let open Hacl.UInt128 in *)
-(*     let c0 = v (get h1 c 0) in let c1 = v (get h1 c 1) in *)
-(*     let c2 = v (get h1 c 2) in let c3 = v (get h1 c 3) in let c4 = v (get h1 c 4) in *)
-(*     let c5 = v (get h1 c 5) in let c6 = v (get h1 c 6) in let c7 = v (get h1 c 7) in *)
-(*     let c8 = v (get h1 c 8) in *)
-(*     ( c0 = a0 * b0 *)
-(*       /\ c1 = a0 * b1 + a1 * b0 *)
-(*       /\ c2 = a0 * b2 + a1 * b1 + a2 * b0 *)
-(*       /\ c3 = a0 * b3 + a1 * b2 + a2 * b1 + a3 * b0 *)
-(*       /\ c4 = a0 * b4 + a1 * b3 + a2 * b2 + a3 * b1 + a4 * b0 *)
-(*       /\ c5 = a1 * b4 + a2 * b3 + a3 * b2 + a4 * b1 *)
-(*       /\ c6 = a2 * b4 + a3 * b3 + a4 * b2 *)
-(*       /\ c7 = a3 * b4 + a4 * b3 *)
-(*       /\ c8 = a4 * b4 ) ) *)
-
-(* let isMultiplication_ *)
-(*   (h1:mem) *)
-(*   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int) *)
-(*   (b0:int) (b1:int) (b2:int) (b3:int) (b4:int) *)
-(*   (c:bigint_wide) : GTot Type0 = *)
-(*   live h1 c /\ length c >= 2*norm_length-1 *)
-(*   /\ (let open Hacl.UInt128 in *)
-(*       let c0 = v (get h1 c 0) in let c1 = v (get h1 c 1) in *)
-(*       let c2 = v (get h1 c 2) in let c3 = v (get h1 c 3) in let c4 = v (get h1 c 4) in *)
-(*       let c5 = v (get h1 c 5) in let c6 = v (get h1 c 6) in let c7 = v (get h1 c 7) in *)
-(*       let c8 = v (get h1 c 8) in *)
-(*       ( c0 = a0 * b0 *)
-(* 	/\ c1 = a0 * b1 + a1 * b0 *)
-(* 	/\ c2 = a0 * b2 + a1 * b1 + a2 * b0 *)
-(* 	/\ c3 = a0 * b3 + a1 * b2 + a2 * b1 + a3 * b0 *)
-(* 	/\ c4 = a0 * b4 + a1 * b3 + a2 * b2 + a3 * b1 + a4 * b0 *)
-(* 	/\ c5 = a1 * b4 + a2 * b3 + a3 * b2 + a4 * b1 *)
-(* 	/\ c6 = a2 * b4 + a3 * b3 + a4 * b2 *)
-(* 	/\ c7 = a3 * b4 + a4 * b3 *)
-(* 	/\ c8 = a4 * b4 ) ) *)
-
 private val multiplication_0:
   c:bigint_wide{length c >= 2*norm_length-1} ->
   a0:u51 -> a1:u51 -> a2:u51 -> a3:u51 -> a4:u51 ->

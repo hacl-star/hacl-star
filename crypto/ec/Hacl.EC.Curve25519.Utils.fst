@@ -35,7 +35,7 @@ let update_5 c c0 c1 c2 c3 c4 =
   c.(4ul) <- c4
 
 val update_6:
-  c:bigint{length c >= 2*norm_length-1} ->
+  c:bigint{length c >= norm_length+1} ->
   c0:H64.t -> c1:H64.t -> c2:H64.t ->
   c3:H64.t -> c4:H64.t -> c5:H64.t ->
   Stack unit
@@ -90,7 +90,7 @@ let update_wide_5 c c0 c1 c2 c3 c4 =
   c.(4ul) <- c4
 
 val update_wide_6:
-  c:bigint_wide{length c >= 2*norm_length-1} ->
+  c:bigint_wide{length c >= norm_length+1} ->
   c0:H128.t -> c1:H128.t -> c2:H128.t ->
   c3:H128.t -> c4:H128.t -> c5:H128.t ->
   Stack unit
