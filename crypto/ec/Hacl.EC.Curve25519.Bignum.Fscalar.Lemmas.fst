@@ -4,45 +4,47 @@ open FStar.Mul
 open FStar.ST
 open FStar.HyperStack
 open FStar.Ghost
-open Hacl.UInt64
-open Hacl.SBuffer
+open FStar.Buffer
 open FStar.Math.Lib
+open FStar.Math.Lemmas
+
+open Hacl.UInt64
+
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
-
-#set-options "--lax"
+open Hacl.EC.Curve25519.Bignum.Lemmas.Utils
 
 module U32 = FStar.UInt32
+module H64 = Hacl.UInt64
+module H128 = Hacl.UInt128
 
-let w: u32 -> Tot int = U32.v
-let vv: s128 -> GTot int = Hacl.UInt128.v
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
-let op_Plus_Bar = U32.add
-let op_Plus_Subtraction = U32.sub
+let willNotOverflow (h:heap) (a:bigint) (s:s64) : GTot Type0 =
+  live h a /\ v (get h a 0) * v s < pow2 128 /\ v (get h a 1) * v s < pow2 128
+  /\ v (get h a 2) * v s < pow2 128 /\ v (get h a 3) * v s < pow2 128 /\ v (get h a 4) * v s < pow2 128
 
-#reset-options
 
-abstract type willNotOverflow (h:heap) 
-		     (a:bigint{live h a /\ length a >= norm_length}) 
-		     (s:s64) (ctr:nat) =
-  (forall (i:nat). {:pattern (v (get h a i))}
-    (i >= ctr /\ i < norm_length) ==> v (get h a i) * v s < pow2 platform_wide)
+let isScalarMult h0 h1 (res:bigint_wide) (a:bigint) (s:s64) : GTot Type0 =
+  live h0 a /\ live h1 res
+  /\ H128.v (get h1 res 0) = v (get h0 a 0) * v s
+  /\ H128.v (get h1 res 1) = v (get h0 a 1) * v s
+  /\ H128.v (get h1 res 2) = v (get h0 a 2) * v s
+  /\ H128.v (get h1 res 3) = v (get h0 a 3) * v s
+  /\ H128.v (get h1 res 4) = v (get h0 a 4) * v s
 
-abstract type isScalarProduct (h0:heap) (h1:heap) (ctr:nat) (len:nat)
-		  (a:bigint{live h0 a /\ length a >= len}) 
-		  (s:s64)
-		  (res:bigint_wide{live h1 res /\ length res >= len}) =
-  (forall (i:nat). {:pattern (Hacl.UInt128.v (get h1 res i))}
-    (i>= ctr /\ i < len) ==> Hacl.UInt128.v (get h1 res i) = v (get h0 a i) * v s)
 
-abstract type isNotModified (h0:heap) (h1:heap) 
-		   (res:bigint_wide{live h0 res /\ live h1 res /\ length res >= norm_length
-		     /\ length res = length res})
-		   (ctr:nat) =
-  (forall (i:nat). {:pattern (get h1 res i)}
-    (i < length res /\ (i < ctr \/ i >= norm_length)) ==>
-      (get h1 res i == get h0 res i))
+let bound115 h (b:bigint_wide) : GTot Type0 =
+  let open Hacl.UInt128 in
+  live h b
+  /\ v (get h b 0) < pow2 115
+  /\ v (get h b 1) < pow2 115
+  /\ v (get h b 2) < pow2 115
+  /\ v (get h b 3) < pow2 115
+  /\ v (get h b 4) < pow2 115
 
+
+(*
 #reset-options
 
 (* Lemma *)

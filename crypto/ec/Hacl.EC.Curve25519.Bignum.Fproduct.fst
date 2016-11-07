@@ -131,6 +131,7 @@ let multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   cut(H128.v c8 = v a4 * v b4 );
   update_wide_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8
 
+
 private val multiplication_:
   c:bigint_wide{length c >= 2 * norm_length - 1} ->
   a:bigint{disjoint c a} ->
@@ -145,6 +146,7 @@ let multiplication_ c a b =
   let a0 = a.(0ul) in let a1 = a.(1ul) in let a2 = a.(2ul) in let a3 = a.(3ul) in let a4 = a.(4ul) in
   let b0 = b.(0ul) in let b1 = b.(1ul) in let b2 = b.(2ul) in let b3 = b.(3ul) in let b4 = b.(4ul) in
   multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4
+
 
 val multiplication:
   c:bigint_wide{length c >= 2 * norm_length - 1} ->

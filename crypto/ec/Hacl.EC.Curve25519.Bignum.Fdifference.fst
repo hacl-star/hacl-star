@@ -26,7 +26,7 @@ module H8  = Hacl.UInt8
 module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 
-#set-options "--lax"
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
 val add_big_zero_:
   b:bigint ->
@@ -57,13 +57,14 @@ val add_big_zero:
   b:bigint ->
   Stack unit
     (requires (fun h -> norm h b))
-    (ensures (fun h0 _ h1 -> fits51to53 h1 b /\ modifies_1 b h0 h1
+    (ensures (fun h0 _ h1 -> live h0 b /\ fits51to53 h1 b /\ modifies_1 b h0 h1
       /\ eval h1 b norm_length % reveal prime = eval h0 b norm_length % reveal prime))
 let add_big_zero b =
-  (* let h0 = ST.get() in *)
-  add_big_zero_ b(* ; *)
-  (* let h1 = ST.get() in *)
-  (* add_big_zero_lemma h0 h1 b *)
+  let h0 = ST.get() in
+  add_big_zero_ b;
+  let h1 = ST.get() in
+  lemma_add_zero_eval h0 h1 b
+
 
 val fdifference_:
   a:bigint ->
@@ -96,8 +97,11 @@ val fdifference':
   b:bigint{disjoint a b} ->
   Stack unit
     (requires (fun h -> norm h a /\ fits51to53 h b))
-    (ensures (fun h0 u h1 -> bound53 h1 a /\ modifies_1 a h0 h1
-      /\ eval h1 a norm_length % reveal prime
-        = (eval h0 b norm_length - eval h0 a norm_length) % reveal prime))
+    (ensures (fun h0 u h1 -> live h0 a /\ live h0 b /\ bound53 h1 a /\ modifies_1 a h0 h1
+      /\ eval h1 a norm_length
+        = eval h0 b norm_length - eval h0 a norm_length))
 let fdifference' a b =
-  fdifference_ a b
+  let h0 = ST.get() in
+  fdifference_ a b;
+  let h1 = ST.get() in
+  lemma_fdifference h0 h1 a b
