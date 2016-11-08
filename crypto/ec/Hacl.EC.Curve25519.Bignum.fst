@@ -202,7 +202,23 @@ let lemma_eq_norm h h' (b:bigint) (b':bigint) : Lemma
   = lemma_norm h b; lemma_eq h b h' b'
 
 
-#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+
+(* TODO *)
+assume val lemma_mod_sub_distr_r: a:nat -> b:nat -> p:pos ->
+  Lemma (requires (True))
+        (ensures  ((a - b) % p = ((a % p) - b) % p))
+
+val lemma_mod_fdifference: a:nat -> b:nat -> c:nat -> p:pos ->
+  Lemma (requires (a % p = c % p))
+        (ensures  ((a - b) % p = ((c - b) % p)))
+let lemma_mod_fdifference a b c p =
+  lemma_mod_sub_distr_r a b p;
+  lemma_mod_sub_distr_r c b p;
+  ()
+
+
+#reset-options "--z3timeout 200 --initial_fuel 0 --max_fuel 0"
 
 val fdifference: a:bigint{length a >= norm_length+1} -> b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> norm h a /\ norm h b))
@@ -215,6 +231,7 @@ let fdifference a b =
   let b' = create (Hacl.Cast.uint64_to_sint64 0uL) nlength in
   let h0' = ST.get() in
     lemma_eq_norm hinit h0' b b;
+    Hacl.EC.Curve25519.Bigint.eval_eq_lemma hinit h0' b b 5;    
     lemma_eq_norm hinit h0' a a;
     Buffer.no_upd_lemma_0 h0 h0' b;
   copy_bigint b' b;
@@ -227,6 +244,7 @@ let fdifference a b =
     cut(modifies_1 b' h0' h2);
     Buffer.no_upd_lemma_1 h0' h2 b' a;
     lemma_eq_norm hinit h2 a a;
+    Hacl.EC.Curve25519.Bigint.eval_eq_lemma hinit h2 a a 5;
     cut (eval h2 b' 5 % (reveal prime) = eval h1 b' 5 % (reveal prime));
   Hacl.EC.Curve25519.Bignum.Fdifference.fdifference' a b';
   let h3 = ST.get() in
@@ -234,30 +252,58 @@ let fdifference a b =
     cut (eval h3 a 5 = eval h2 b' 5 - eval h2 a 5);
     Math.Lemmas.pow2_lt_compat 63 53;
   Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients a;
-  admit();
   let h4 = ST.get() in
-    (* cut (eval h4 a 5 % reveal prime = ((eval hinit b 5 % reveal prime) - eval hinit a 5) % reveal prime); *)
-  pop_frame()
+    cut (eval h4 a 5 % reveal prime = eval h3 a 5 % reveal prime);
+    cut (eval h4 a 5 % reveal prime = (eval h2 b' 5 - eval h2 a 5) % reveal prime);
+    cut (eval h4 a 5 % reveal prime = (eval h2 b' 5 - eval hinit a 5) % reveal prime);
+    lemma_mod_fdifference (eval h2 b' 5) (eval hinit a 5) (eval hinit b 5) (reveal prime);
+    cut (eval h4 a 5 % reveal prime = (eval hinit b 5 - eval hinit a 5) % reveal prime);
+  pop_frame();
+  let hfin = ST.get() in
+    lemma_eq_norm h4 hfin a a;
+    Hacl.EC.Curve25519.Bigint.eval_eq_lemma h4 hfin a a 5;
+    ()
 
+
+#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
 
 val fscalar:
     res:bigint -> b:bigint{disjoint res b} -> s:s64 -> Stack unit
   (requires (fun h -> live h res /\ norm h b))
   (ensures (fun h0 _ h1 -> norm h0 b /\ norm h1 res /\ modifies_1 res h0 h1
-    /\ eval h1 b norm_length % reveal prime = (eval h0 b norm_length * v s) % reveal prime))
+    /\ (eval h1 res norm_length % reveal prime = ((eval h0 b norm_length * v s) % reveal prime))))
 let fscalar res b s =
-  admit();
   let hinit = ST.get() in
   push_frame ();
   let h0 = ST.get() in
   let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) (6ul) in
+  let h0' = ST.get() in
+  lemma_eq_norm hinit h0' b b;
+  Hacl.EC.Curve25519.Bigint.eval_eq_lemma hinit h0' b b 5;
   Hacl.EC.Curve25519.Bignum.Fscalar.scalar' tmp b s;
-  Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients_wide tmp;
-  copy_to_bigint res tmp;
   let h1 = ST.get() in
+  cut (eval_wide h1 tmp 5 = eval hinit b 5 * v s);
+  Math.Lemmas.pow2_lt_compat 127 115;
+  Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients_wide tmp;
+  let h2 = ST.get() in
+  cut (eval_wide h2 tmp 5 % reveal prime = eval_wide h1 tmp 5 % reveal prime);
+  Math.Lemmas.pow2_lt_compat 64 51;
+  copy_to_bigint res tmp;
+  let h3 = ST.get() in
+  cut (eval h3 res norm_length = eval_wide h2 tmp norm_length);
+  cut (eval h3 res norm_length % reveal prime = eval_wide h1 tmp norm_length % reveal prime);
+  cut (eval h3 res norm_length % reveal prime = (eval hinit b norm_length * v s) % reveal prime);
   pop_frame();
   let hfin = ST.get() in
-  ()
+  lemma_eq_norm h3 hfin res res;
+  lemma_eq_norm hinit hfin b b;
+  Hacl.EC.Curve25519.Bigint.eval_eq_lemma h3 hfin res res 5;
+  cut ((eval hfin res norm_length % reveal prime) = ((eval hinit b norm_length * v s) % reveal prime));
+  cut (modifies_1 res hinit hfin);
+  cut (norm hinit b);
+  cut (norm hfin res);
+  cut (HyperStack.equal_domains hinit hfin)
+
 
 val fmul: res:bigint -> a:bigint{disjoint res a} -> b:bigint{disjoint res b} -> Stack unit
     (requires (fun h -> live h res /\ norm h a /\ norm h b))
