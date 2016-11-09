@@ -66,7 +66,7 @@ curve25519-extract: ml-lib
 		$(OCAML_INCLUDES) --odir $(CURVE25519_ODIR)
 	@sed -i 's/(Obj.magic ((fun pp ppq p pq q n ctr b scalar/(((fun pp ppq p pq q n ctr b scalar/g' $(CURVE25519_ODIR)/Hacl_EC_Curve25519_Ladder.ml
 
-curve25519-compile: #curve25519-extract
+curve25519-compile: curve25519-extract
 	$(OCAMLOPT) -I $(HACL_LIB)/ml -I $(CURVE25519_ODIR) \
 		$(addprefix $(HACL_LIB)/ml/,$(REALIZED_ML_HST)) \
 	  	$(addprefix $(CURVE25519_ODIR)/,$(CURVE25519_EXTRACTED)) \
