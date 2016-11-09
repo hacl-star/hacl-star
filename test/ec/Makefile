@@ -46,11 +46,11 @@ CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_
 	Hacl_EC_Curve25519_Parameters.ml \
 	Hacl_EC_Curve25519_Bigint.ml \
 	Hacl_EC_Curve25519_Utils.ml \
-	Hacl_EC_Curve25519_Bignum_FsumWide.ml \
 	Hacl_EC_Curve25519_Bignum_Fsum.ml \
 	Hacl_EC_Curve25519_Bignum_Fscalar.ml \
 	Hacl_EC_Curve25519_Bignum_Fdifference.ml \
 	Hacl_EC_Curve25519_Bignum_Fproduct.ml \
+	Hacl_EC_Curve25519_Bignum_Modulo_Lemmas.ml \
 	Hacl_EC_Curve25519_Bignum_Modulo.ml \
 	Hacl_EC_Curve25519_Bignum.ml \
 	Hacl_EC_Curve25519_PPoint.ml \
@@ -66,7 +66,7 @@ curve25519-extract: ml-lib
 		$(OCAML_INCLUDES) --odir $(CURVE25519_ODIR)
 	@sed -i 's/(Obj.magic ((fun pp ppq p pq q n ctr b scalar/(((fun pp ppq p pq q n ctr b scalar/g' $(CURVE25519_ODIR)/Hacl_EC_Curve25519_Ladder.ml
 
-curve25519-compile: curve25519-extract
+curve25519-compile: #curve25519-extract
 	$(OCAMLOPT) -I $(HACL_LIB)/ml -I $(CURVE25519_ODIR) \
 		$(addprefix $(HACL_LIB)/ml/,$(REALIZED_ML_HST)) \
 	  	$(addprefix $(CURVE25519_ODIR)/,$(CURVE25519_EXTRACTED)) \

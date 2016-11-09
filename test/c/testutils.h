@@ -1,3 +1,5 @@
+#ifndef __TESTUTILS_
+#define __TESTUTILS_
 
 #if defined(__i386__)
 
@@ -39,5 +41,7 @@ static __inline__ unsigned long long rdtsc(void)
 
   return(result);
 }
+
+#endif
 
 #endif

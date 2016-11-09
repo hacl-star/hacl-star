@@ -132,24 +132,38 @@ void test_perf2() {
   uint8_t mac[16], mac2[16], mac3[16];
   clock_t c1, c2;
   double t1, t2, t3;
+  unsigned long long a,b,d1,d2,d3;
 
   c1 = clock();
+  a = rdtsc();
   Hacl_Symmetric_Poly1305_64_crypto_onetimeauth(mac, plain, SIZE, key);
+  b = rdtsc();
   c2 = clock();
   t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  d1 = b - a;
   printf("User time for HACL 64bit: %f\n", t1);
   
   c1 = clock();
+  a = rdtsc();
   Hacl_Symmetric_Poly1305_poly1305_mac(mac2, plain, SIZE, key);
+  b = rdtsc();
   c2 = clock();
   t3 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  d2 = b - a;
   printf("User time for HACL 32bit: %f\n", t3);
 
   c1 = clock();
+  a = rdtsc();
   crypto_onetimeauth(mac3, plain, SIZE, key);
+  b = rdtsc();  
   c2 = clock();
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  d3 = b - a;
   printf("User time for Sodium: %f\n", t2);
+
+  printf("Cycles/byte ratio HACL32: %lf\n", (double)d2/SIZE);
+  printf("Cycles/byte ratio HACL64: %lf\n", (double)d1/SIZE);
+  printf("Cycles/byte ratio Sodium: %lf\n", (double)d3/SIZE);
 
   printf("Slowdown (Poly1305-32): %f\n", t3/t2);
   printf("Slowdown (Poly1305-64): %f\n", t1/t2);

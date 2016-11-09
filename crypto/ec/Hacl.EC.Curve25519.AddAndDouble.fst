@@ -358,7 +358,11 @@ let double_and_add_5 pp ppq p pq q tmp =
   let zz         = B.sub tmp (nl +^ nl +^ nl2 +^ nl2) nl2 in
   let h0 = ST.get() in
   fdifference zz xx;
-  Hacl.EC.Curve25519.Bignum.erase zzz nlength (U32 (nlength -^ 1ul)) 0ul;
+  (* zzz.(nlength) <- 0uL; *)
+  (* zzz.(U32 (nlength +^ 1ul)) <- 0uL; *)
+  (* zzz.(U32 (nlength +^ 2ul)) <- 0uL; *)
+  (* zzz.(U32 (nlength +^ 3ul)) <- 0uL; *)
+  (* Hacl.EC.Curve25519.Bignum.erase zzz nlength (U32 (nlength -^ 1ul)) 0ul; *)
   let h1 = ST.get() in assert(modifies_1 tmp h0 h1);
   fscalar zzz zz (Hacl.Cast.uint64_to_sint64 a24);
   fsum zzz xx;
