@@ -1,10 +1,3 @@
-# Change to local F* root directory
-FSTAR_HOME=~/dev/old_fstar/FStar
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe
-OPTIONS=--lax --codegen OCaml --use_native_int
-OPTIONS_VER=
-
-BIGNUM_DIR=../bignum_proof
 CURVE_DIR=../curve_proof
 
 # Curve files (changes on adding and doubling: one contains projective equations, the other jacobians 
@@ -20,12 +13,12 @@ P256_ODIR=./p256
 P256_OPTIONS=--odir $(P256_ODIR)
 
 # OCaml files obtained after extraction (same module names for all curves)
-CURVE_OCAML=$(addprefix $(FSTAR_HOME)/lib/ml/, native_int/prims.ml FStar_Set.ml FStar_ST.ml FStar_All.ml) FStar_FunctionalExtensionality.ml FStar_Seq.ml Parameters.ml IntLib.ml UInt.mli UInt.ml Bigint.mli Bigint.ml Eval.ml Modulo.ml Fsum.ml FsumWide.ml Fdifference.ml Fscalar.ml Fproduct.ml Bignum.ml ConcretePoint.ml DoubleAndAdd.ml MontgomeryLadder.ml 
+CURVE_OCAML=$(addprefix ../old_fstar_lib/, prims.ml FStar_Set.ml FStar_ST.ml FStar_All.ml) FStar_FunctionalExtensionality.ml FStar_Seq.ml Parameters.ml IntLib.ml UInt.mli UInt.ml Bigint.mli Bigint.ml Eval.ml Modulo.ml Fsum.ml FsumWide.ml Fdifference.ml Fscalar.ml Fproduct.ml Bignum.ml ConcretePoint.ml DoubleAndAdd.ml MontgomeryLadder.ml 
 
 # OCaml build variables
 OCAML=ocamlfind ocamlopt -package batteries -package stdint -linkpkg -g -thread -O3 -w -20-26-11
 DEBUG=ocamlfind ocamlc -package batteries -package stdint -linkpkg -g -thread
-OCAML_INCLUDE_PATHS=$(addprefix -I , $(FSTAR_HOME)/lib/ml/native_int $(FSTAR_HOME)/lib/ml)
+OCAML_INCLUDE_PATHS=$(addprefix -I , ../old_fstar_lib)
 
 .PHONY:extract25519 extract448 extract_p256
 
@@ -40,7 +33,8 @@ p256: test_p256
 clean:
 	rm -rf $(addprefix $(C25519_64_ODIR)/, *.o *.cmi *.cmx *.out test.ml) \
 		$(addprefix $(C448_64_ODIR)/, *.o *.cmi *.cmx *.out test.ml) \
-		$(addprefix $(P256_ODIR)/, *.o *.cmi *.cmx *.out test.ml) 
+		$(addprefix $(P256_ODIR)/, *.o *.cmi *.cmx *.out test.ml) \
+		$(addprefix old_fstar_lib/, *.o *.cmi *.cmx) 
 
 # Test targets
 test25519:
