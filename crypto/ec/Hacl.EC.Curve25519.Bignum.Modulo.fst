@@ -316,6 +316,7 @@ let times_19 x =
   x +^ y +^ z
 
 
+
 val mod_2_51: a:s64 -> Tot (b:s64{H64.v b = H64.v a % pow2 51})
 let mod_2_51 a =
   let open Hacl.UInt64 in
@@ -327,7 +328,7 @@ let mod_2_51 a =
 
 
 private val div_2_51: x:s64 -> Tot (y:s64{H64.v y = H64.v x / pow2 51 /\ H64.v y <= pow2 13})
-let div_2_51 x = 
+let div_2_51 x =
   let open Hacl.UInt64 in
   pow2_minus 64 51; lemma_div_mod (H64.v x) (pow2 51);
   lemma_div_lt (v x) 64 51;
@@ -604,6 +605,55 @@ let freduce_coefficients b =
   carry_top_2' b;
   carry_0_to_1' b
 
+  (* let m51 = 0x7ffffffffffffuL in *)
+  (* let b0 = b.(0ul) in *)
+  (* let b1 = b.(1ul) in *)
+  (* let b2 = b.(2ul) in *)
+  (* let b3 = b.(3ul) in *)
+  (* let b4 = b.(4ul) in *)
+  (* let r0 = b0 >>^ 51ul in *)
+  (* let b0 = b0 &^ m51 in *)
+  (* let b1 = b1 +^ r0 in *)
+  (* let r1 = b1 >>^ 51ul in *)
+  (* let b1 = b1 &^ m51 in *)
+  (* let b2 = b2 +^ r1 in *)
+  (* let r2 = b2 >>^ 51ul in *)
+  (* let b2 = b2 &^ m51 in *)
+  (* let b3 = b3 +^ r2 in *)
+  (* let r3 = b3 >>^ 51ul in *)
+  (* let b3 = b3 &^ m51 in *)
+  (* let b4 = b4 +^ r3 in *)
+  (* let r4 = b4 >>^ 51ul in *)
+  (* let b4 = b4 &^ m51 in *)
+  (* let r4 = r4 *^ 19uL in *)
+
+  (* let b0 = b0 +^ r4 in *)
+  (* let r0 = b0 >>^ 51ul in *)
+  (* let b0 = b0 &^ m51 in *)
+  (* let b1 = b1 +^ r0 in *)
+  (* let r1 = b1 >>^ 51ul in *)
+  (* let b1 = b1 &^ m51 in *)
+  (* let b2 = b2 +^ r1 in *)
+  (* let r2 = b2 >>^ 51ul in *)
+  (* let b2 = b2 &^ m51 in *)
+  (* let b3 = b3 +^ r2 in *)
+  (* let r3 = b3 >>^ 51ul in *)
+  (* let b3 = b3 &^ m51 in *)
+  (* let b4 = b4 +^ r3 in *)
+  (* let r4 = b4 >>^ 51ul in *)
+  (* let b4 = b4 &^ m51 in *)
+  (* let r4 = r4 *^ 19uL in *)
+
+  (* let b0 = b0 +^ r4 in *)
+  (* let r0 = b0 >>^ 51ul in *)
+  (* let b0 = b0 &^ m51 in *)
+  (* let b1 = b1 +^ r0 in *)
+
+  (* b.(0ul) <- b0; *)
+  (* b.(1ul) <- b1; *)
+  (* b.(2ul) <- b2; *)
+  (* b.(3ul) <- b3; *)
+  (* b.(4ul) <- b4 *)
 
 #reset-options "--initial_fuel 0 --max_fuel 9 --z3timeout 20"
 

@@ -6,7 +6,7 @@ open FStar.HyperStack
 open FStar.Ghost
 open FStar.Buffer
 open Hacl.UInt64
-(* open Hacl.SBuffer *)
+
 open FStar.Buffer
 open FStar.Math.Lib
 open Hacl.EC.Curve25519.Parameters
@@ -17,7 +17,6 @@ open Hacl.EC.Curve25519.Bignum
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* Module abbreviations *)
-(* module B  = Hacl.SBuffer *)
 module B  = FStar.Buffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
@@ -29,31 +28,37 @@ module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
-(* noeq type point = | Point: x:bigint -> y:bigint -> z:bigint -> point *)
 
-(* val get_x: point -> Tot bigint *)
-(* let get_x p = Point.x p *)
-(* val get_y: point -> Tot bigint *)
-(* let get_y p = Point.y p *)
-(* val get_z: point -> Tot bigint *)
-(* let get_z p = Point.z p *)
+noeq type point =
+  | Point: x:bigint{length x = 6} ->
+           y:bigint ->
+           z:bigint{length z = 6} ->
+           point
 
-(* val make: bigint -> bigint -> bigint -> Tot point *)
-(* let make x y z = Point x y z *)
-
-noeq type point = { x:bigint;
-                    y:bigint;
-                    z:bigint; }
 
 val get_x: point -> Tot bigint
-let get_x p = p.x
+let get_x p = Point.x p
 val get_y: point -> Tot bigint
-let get_y p = p.y
+let get_y p = Point.y p
 val get_z: point -> Tot bigint
-let get_z p = p.z
+let get_z p = Point.z p
 
 val make: bigint -> bigint -> bigint -> Tot point
-let make x y z = {x = x; y = y; z = z}
+let make x y z = Point x y z
+
+(* noeq type point = { x:bigint; *)
+(*                     y:bigint; *)
+(*                     z:bigint; } *)
+
+(* val get_x: point -> Tot bigint *)
+(* let get_x p = p.x *)
+(* val get_y: point -> Tot bigint *)
+(* let get_y p = p.y *)
+(* val get_z: point -> Tot bigint *)
+(* let get_z p = p.z *)
+
+(* val make: bigint -> bigint -> bigint -> Tot point *)
+(* let make x y z = {x = x; y = y; z = z} *)
 
 // Separation between the references of all three coordinates
 type separateCoordinates (p:point) =

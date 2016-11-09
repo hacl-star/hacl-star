@@ -296,11 +296,11 @@ private val init_points: q:point{same_frame q} -> tmp:bigint{length tmp = 66 /\ 
     /\ HS.modifies_one (frameOf tmp) h0 h1
     /\ HS.modifies_ref (frameOf tmp) (arefs (only tmp)) h0 h1))
 let init_points q tmp =
-  let p_x = sub tmp 34ul 5ul in
-  let p_y = sub tmp 39ul 5ul in
-  let p_z = sub tmp 44ul 5ul in
+  let p_x = sub tmp 34ul 6ul in
+  let p_y = sub tmp 40ul 5ul in
+  let p_z = sub tmp 45ul 6ul in
 
-  let inf_x = sub tmp 49ul 6ul in
+  let inf_x = sub tmp 51ul 6ul in
   let h0 = ST.get() in
   blit (get_x q) 0ul p_x 0ul nlength;
   blit (get_y q) 0ul p_y 0ul nlength;
@@ -342,7 +342,7 @@ let montgomery_ladder res n q =
 
   // Build 'storage' empty but 'live' points
   let nlp1 = U32 (nlength +^ 1ul) in
-  let tot_len = 66ul in
+  let tot_len = 68ul in
   let h0 = ST.get() in
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) tot_len in
   let two_p_x = sub tmp 0ul 6ul  in
@@ -353,13 +353,13 @@ let montgomery_ladder res n q =
   let two_p_plus_q_y = sub tmp 23ul 5ul in
   let two_p_plus_q_z = sub tmp 28ul 6ul in
 
-  let p_x = sub tmp 34ul 5ul in
-  let p_y = sub tmp 39ul 5ul in
-  let p_z = sub tmp 44ul 5ul in
+  let p_x = sub tmp 34ul 6ul in
+  let p_y = sub tmp 40ul 5ul in
+  let p_z = sub tmp 45ul 6ul in
 
-  let inf_x = sub tmp 49ul 6ul in
-  let inf_y = sub tmp 55ul 5ul in
-  let inf_z = sub tmp 60ul 6ul in
+  let inf_x = sub tmp 51ul 6ul in
+  let inf_y = sub tmp 57ul 5ul in
+  let inf_z = sub tmp 62ul 6ul in
 
   let two_p =  make two_p_x two_p_y two_p_z in
   let two_p_plus_q = make two_p_plus_q_x two_p_plus_q_y two_p_plus_q_z in

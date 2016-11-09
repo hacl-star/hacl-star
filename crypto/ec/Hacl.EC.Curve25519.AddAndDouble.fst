@@ -56,8 +56,10 @@ private val double_and_add_0:
 let double_and_add_0 pp ppq p p_plus_q q tmp =
   let x = get_x p in
   let xprime = get_x p_plus_q in
-  let origx      = B.sub tmp 0ul 5ul in
-  let origxprime = B.sub tmp 5ul  5ul in
+  (* let origx      = B.sub tmp 0ul 5ul in *)
+  (* let origxprime = B.sub tmp 5ul 5ul in *)
+  let origx      = B.sub tmp 0ul 6ul in
+  let origxprime = B.sub tmp 6ul 6ul in
   let h0 = ST.get() in
   blit x 0ul origx 0ul nlength;                                // origix = tmp
   blit xprime 0ul origxprime 0ul nlength;                      // origxprime = tmp
@@ -115,8 +117,10 @@ let double_and_add_1 pp ppq p p_plus_q q tmp =
   let z = get_z p in
   let xprime = get_x p_plus_q in
   let zprime = get_z p_plus_q in
-  let origx      = B.sub tmp 0ul 5ul in
-  let origxprime = B.sub tmp 5ul  5ul in
+  (* let origx      = B.sub tmp 0ul 5ul in *)
+  (* let origxprime = B.sub tmp 5ul  5ul in *)
+  let origx      = B.sub tmp 0ul 6ul in
+  let origxprime = B.sub tmp 6ul 6ul in
   let h0 = ST.get() in
   fsum x z;                                                    // x
   let h1 = ST.get() in
@@ -247,7 +251,7 @@ let double_and_add_2 pp ppq p pq q tmp =
   let zprime = get_z pq in
   (* Big temporary buffer *)
   let open FStar.UInt32 in
-  let nl = nlength in
+  let nl = U32 (nlength +^ 1ul) in
   let nl2 = U32 (2ul *^ nlength -^ 1ul) in
   let origxprime = B.sub tmp nl  nl in
   let xxprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2) nl2 in
@@ -291,7 +295,7 @@ private val double_and_add_3:
       /\ HS.modifies_ref (frame_of ppq) (refs ppq) h0 h1))
 let double_and_add_3 pp two_p_plus_q p pq q tmp =
   let open FStar.UInt32 in
-  let nl = nlength in
+  let nl = U32 (nlength +^ 1ul) in
   let nl2 = U32 (2ul *^ nlength -^ 1ul) in
   let h = ST.get() in
   let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in
@@ -323,7 +327,7 @@ private val double_and_add_4:
       /\ HS.modifies_ref (frameOf tmp) (arefs (only tmp)) h0 h1))
 let double_and_add_4 pp ppq p pq q tmp =
   let open FStar.UInt32 in
-  let nl = nlength in
+  let nl = U32 (nlength +^ 1ul) in
   let nl2 = U32 (2ul *^ nlength -^ 1ul) in
   let x = get_x p in
   let z = get_z p in
@@ -351,7 +355,7 @@ private val double_and_add_5:
       /\ HS.modifies_ref (frameOf tmp) (arefs (only tmp)) h0 h1))
 let double_and_add_5 pp ppq p pq q tmp =
   let open FStar.UInt32 in
-  let nl = nlength in
+  let nl = U32 (nlength +^ 1ul) in
   let nl2 = U32 (2ul *^ nlength -^ 1ul) in
   let zzz        = B.sub tmp (nl +^ nl) nl2 in
   let xx         = B.sub tmp (nl +^ nl +^ nl2) nl2 in
@@ -433,7 +437,7 @@ private val double_and_add_:
       /\ HS.modifies_ref (frame_of p) (refs two_p ++ refs two_p_plus_q ++ refs p ++ refs p_plus_q) h0 h1 ))
 let double_and_add_ pp ppq p pq q tmp =
   let open FStar.UInt32 in
-  let nl = nlength in
+  let nl = U32 (nlength +^ 1ul) in
   let nl2 = U32 (2ul *^ nlength -^ 1ul) in
   let zzz        = B.sub tmp (nl +^ nl) nl2 in
   let xx         = B.sub tmp (nl +^ nl +^ nl2) nl2 in
@@ -526,7 +530,7 @@ let double_and_add two_p two_p_plus_q p p_plus_q q =
   let z2 = get_z two_p in
   (* Big temporary buffer *)
   let open FStar.UInt32 in
-  let nl = nlength in
+  let nl = U32 (nlength +^ 1ul) in
   let nl2 = U32 (2ul *^ nlength -^ 1ul) in
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) (nl +^ nl +^ nl2 +^ nl2 +^ nl2  +^ nl2  +^ nl2  +^ nl2  +^ nl2) in
   let h1 = ST.get() in
