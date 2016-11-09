@@ -271,6 +271,7 @@ let lemma_helper_0 r h0 h1 p : Lemma
     assert(TSet.mem (Buff (get_x p)) s);
     assert(TSet.mem (Buff (get_z p)) s)
 
+
 private val mk_q:
   output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
   pk:u8s{length pk >= 32 /\ disjoint pk output} ->
@@ -293,6 +294,7 @@ let mk_q output q_x pk q =
   lemma_helper_0 (frame_of q) h0 h2 q;
   ()
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 let lemma_helper_1 hinit h0 h1 h2 h3 h4 hfin output : Lemma
@@ -314,6 +316,7 @@ let lemma_helper_1 hinit h0 h1 h2 h3 h4 hfin output : Lemma
     lemma_reveal_modifies_1 output h3 h4;
     lemma_intro_modifies_1 output hinit hfin
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 private val exp_2:
@@ -329,11 +332,12 @@ let exp_2 output q_x scalar basepoint =
   let h0 = ST.get() in
   let zero = uint64_to_sint64 0uL in
   let one  = uint64_to_sint64 1uL in
-  let tmp    = create zero (U32 (4ul *^ nlength)) in
-  let resx   = B.sub tmp 0ul            nlength in
-  let resy   = B.sub tmp nlength        nlength in
-  let resz   = B.sub tmp (U32 (2ul*^nlength)) nlength in
-  let zrecip = B.sub tmp (U32 (3ul*^nlength)) nlength in
+  (* let tmp    = create zero (U32 (4ul *^ nlength)) in *)
+  let tmp    = create zero 22ul in
+  let resx   = B.sub tmp 0ul  6ul in
+  let resy   = B.sub tmp 6ul  5ul in
+  let resz   = B.sub tmp 11ul 6ul in
+  let zrecip = B.sub tmp 17ul 5ul in
   let res    = PPoint.make resx resy resz in
   (* Ladder *)
   let h1 = ST.get() in
@@ -343,6 +347,8 @@ let exp_2 output q_x scalar basepoint =
   cut(HS (modifies_one h0.tip h1 h2));
   cut( B.live h2 output);
   crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res);
+  let h2' = ST.get() in
+  assume (norm h2' resx /\ norm h2' zrecip);
   fmul resy resx zrecip;
   let h3 = ST.get() in
   assert(B.live h3 output);
@@ -357,8 +363,8 @@ let exp_2 output q_x scalar basepoint =
   lemma_helper_1 hinit h0 h1 h2 h3 h4 hfin output;
   ()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 let lemma_helper_2 hinit h0 h1 h2 h3 hfin output : Lemma
   (requires (
@@ -376,6 +382,7 @@ let lemma_helper_2 hinit h0 h1 h2 h3 hfin output : Lemma
     lemma_reveal_modifies_1 output h2 h3;
     lemma_intro_modifies_1 output hinit hfin
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 val exp_1: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
@@ -390,10 +397,10 @@ let exp_1 output q_x scalar =
   (* Allocate *)
   let zero = uint64_to_sint64 0uL in
   let one  = uint64_to_sint64 1uL in
-  let tmp    = create zero (3ul *^ nlength) in
-  let qx     = B.sub tmp 0ul nlength in
-  let qy     = B.sub tmp nlength nlength in
-  let qz     = B.sub tmp (2ul*^nlength) nlength in
+  let tmp    = create zero 17ul in
+  let qx     = B.sub tmp 0ul 6ul in
+  let qy     = B.sub tmp 6ul 5ul in
+  let qz     = B.sub tmp 11ul 6ul in
   let q      = PPoint.make qx qy qz in
   let h1 = ST.get() in
   mk_q output q_x scalar q;
@@ -404,6 +411,7 @@ let exp_1 output q_x scalar =
   let hfin = ST.get() in
   lemma_helper_2 hinit h0 h1 h2 h3 hfin output;
   ()
+
 
 val exp: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
   pk:u8s{length pk >= 32 /\ disjoint pk output /\ disjoint pk q_x} -> STL unit

@@ -31,6 +31,7 @@ module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
 
 let lemma_helper_0 h0 h1 b : Lemma
@@ -39,6 +40,7 @@ let lemma_helper_0 h0 h1 b : Lemma
   = lemma_reveal_modifies_1 b h0 h1;
     assert(TSet.mem (Buff b) (only b));
     TSet.lemma_equal_intro (arefs (only b)) !{as_ref b}
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
 
@@ -66,6 +68,7 @@ let double_and_add_0 pp ppq p p_plus_q q tmp =
   let h1 = ST.get() in
   lemma_helper_0 h0 h1 tmp;
   ()
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
@@ -98,6 +101,7 @@ let lemma_helper_1 h0 h1 h2 h3 h4 p pq : Lemma
     lemma_helper_2 r h2 h3 (arefs (only (get_x pq))) s;
     lemma_helper_2 r h3 h4 (arefs (only (get_z pq))) s;
     lemma_helper_3 r s h0 h1 h2 h3 h4
+
 
 #reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
 
@@ -136,6 +140,7 @@ let double_and_add_1 pp ppq p p_plus_q q tmp =
   cut (live h4 p /\ live h4 p_plus_q);
   lemma_helper_1 h0 h1 h2 h3 h4 p p_plus_q;
   ()
+
 
 val lemma_helper_4: p:point -> p':point -> Lemma
   (requires (same_frame p /\ same_frame p' /\ frame_of p <> frame_of p'))
@@ -230,6 +235,7 @@ let lemma_helper_8 pp ppq p pq q tmp h0 h1 : Lemma
 (*   lemma_helper_0 h0 h4 tmp; *)
 (*   () *)
 
+
 #reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_2:
@@ -275,6 +281,7 @@ let double_and_add_2 pp ppq p pq q tmp =
   lemma_helper_0 h0 h4 tmp;
   lemma_helper_8 pp ppq p pq q tmp h0 h4
 
+
 #reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
 
 let lemma_helper_6 r s h0 h1 h2 : Lemma
@@ -312,6 +319,7 @@ let double_and_add_3 pp two_p_plus_q p pq q tmp =
   lemma_helper_6 (frame_of two_p_plus_q) (refs two_p_plus_q) h0 h1 h2;
   ()
 
+
 #reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_4:
@@ -339,6 +347,7 @@ let double_and_add_4 pp ppq p pq q tmp =
   let h1 = ST.get() in
   lemma_helper_0 h0 h1 tmp;
   ()
+
 
 #reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
 
@@ -375,6 +384,7 @@ let double_and_add_5 pp ppq p pq q tmp =
   lemma_helper_0 h0 h2 tmp;
   ()
 
+
 #reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
 
 let lemma_helper_x (r:HH.rid) h0 h1 h2 h3 h4 h5 h6 h7 h8 : Lemma
@@ -389,6 +399,7 @@ let lemma_helper_x (r:HH.rid) h0 h1 h2 h3 h4 h5 h6 h7 h8 : Lemma
     /\ HS.modifies_one r h7 h8 /\ h7.tip = h8.tip))
   (ensures  (HH.modifies_just (Set.union (Set.singleton h0.tip) (Set.singleton r)) h0.h h8.h))
   = ()
+
 
 #reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
 
@@ -419,6 +430,7 @@ let lemma_helper_xx (r:HH.rid) s h0 h1 h2 h3 h4 h5 h6 h7 h8 : Lemma
     /\ HS.modifies_ref r s h7 h8))
   (ensures  (HS.modifies_ref r s h0 h8))
   = ()
+
 
 #reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
 
@@ -480,6 +492,7 @@ let lemma_helper_7 hinit h0 h1 h2 hfin r : Lemma
   (requires (fresh_frame hinit h0 /\ HS.modifies_one h0.tip h0 h1 /\ HH.modifies_just (Set.union (Set.singleton h0.tip) (Set.singleton r)) h1.h h2.h /\ popped h2 hfin /\ equal_domains hinit hfin /\ equal_domains h1 h2))
   (ensures  (HS.modifies_one r hinit hfin))
   = ()
+
 
 #reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
 

@@ -43,30 +43,20 @@ let get_y p = Point.y p
 val get_z: point -> Tot bigint
 let get_z p = Point.z p
 
-val make: bigint -> bigint -> bigint -> Tot point
+
+val make: x:bigint{length x = 6} -> bigint -> z:bigint{length z = 6} -> Tot point
 let make x y z = Point x y z
 
-(* noeq type point = { x:bigint; *)
-(*                     y:bigint; *)
-(*                     z:bigint; } *)
-
-(* val get_x: point -> Tot bigint *)
-(* let get_x p = p.x *)
-(* val get_y: point -> Tot bigint *)
-(* let get_y p = p.y *)
-(* val get_z: point -> Tot bigint *)
-(* let get_z p = p.z *)
-
-(* val make: bigint -> bigint -> bigint -> Tot point *)
-(* let make x y z = {x = x; y = y; z = z} *)
 
 // Separation between the references of all three coordinates
 type separateCoordinates (p:point) =
   disjoint (get_x p) (get_y p) /\ disjoint (get_x p) (get_z p) /\ disjoint (get_y p) (get_z p)
 
+
 // Point "live" in memory 'h'
 type live (h:heap) (p:point) =
   live h (get_x p) /\ live h (get_y p) /\ live h (get_z p) /\ separateCoordinates p
+
 
 // Two distincts points from a memory point of view
 type distinct (a:point) (b:point) =
@@ -74,10 +64,13 @@ type distinct (a:point) (b:point) =
   /\ disjoint (get_y a) (get_x b) /\ disjoint (get_y a) (get_y b) /\ disjoint (get_y a) (get_z b)
   /\ disjoint (get_z a) (get_x b) /\ disjoint (get_z a) (get_y b) /\ disjoint (get_z a) (get_z b)
 
+
 let op_Plus_Plus (#a:Type) (s:TSet.set a) (s':TSet.set a) : GTot (TSet.set a) = TSet.union s s'
+
 
 val refs: p:point -> GTot (TSet.set Heap.aref)
 let refs p = arefs (only (get_x p) ++ only (get_y p) ++ (only (get_z p)))
+
 
 val swap_conditional_aux': a:bigint -> b:bigint{disjoint a b} ->
   is_swap:s64(* {v is_swap = pow2 platform_size -1 \/ v is_swap = 0} *) ->
@@ -148,6 +141,7 @@ type same_frame (p:point) =
 type same_frame_2 (p:point) (p':point) =
   same_frame p /\ same_frame p' /\ frameOf (get_x p) = frameOf (get_x p')
 
+
 let frame_of (p:point{same_frame p}) : GTot HH.rid = frameOf (get_x p)
 
 val helper_lemma: #t:Type -> a:buffer t -> b:buffer t -> Lemma
@@ -160,10 +154,12 @@ let helper_lemma #t a b =
   assert(TSet.mem (Buff b) s);
   TSet.lemma_equal_intro (arefs s) s'
 
+
 let helper_lemma_2 r h0 h1 (sub:TSet.set Heap.aref) (s:TSet.set Heap.aref) : Lemma
   (requires (TSet.subset sub s /\ modifies_ref r sub h0 h1))
   (ensures  (modifies_ref r s h0 h1))
   = ()
+
 
 let helper_lemma_3 r h0 h1 h2 s : Lemma
   (requires (HS.modifies_ref r s h0 h1 /\ HS.modifies_ref r s h1 h2))
@@ -203,7 +199,8 @@ let helper_lemma_4 r h0 h1 h2 h3 a b : Lemma
     assert(forall (#t:Type) (b':buffer t). disjoint_from_bufs b' s
 	     ==> (disjoint b' (get_z a) /\ disjoint b' (get_z b)))
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
 
 val swap_conditional:
   a:point{same_frame a} -> b:point{distinct a b /\ same_frame b} ->
@@ -248,14 +245,15 @@ let swap_conditional a b is_swap =
   helper_lemma (get_x a) (get_x b);
   helper_lemma (get_y a) (get_y b);
   helper_lemma (get_z a) (get_z b);
-  helper_lemma_2 (frame_of a) h0 h1 (arefs (only (get_x a) ++ only (get_x b))) (refs a ++ refs b);
-  helper_lemma_2 (frame_of a) h1 h2 (arefs (only (get_y a) ++ only (get_y b))) (refs a ++ refs b);
-  helper_lemma_2 (frame_of a) h2 h3 (arefs (only (get_z a) ++ only (get_z b))) (refs a ++ refs b);
+  helper_lemma_2 (frame_of a) h0 h1 !{as_ref (get_x a), as_ref (get_x b)} (refs a ++ refs b);
+  helper_lemma_2 (frame_of a) h1 h2 !{as_ref (get_y a), as_ref (get_y b)} (refs a ++ refs b);
+  helper_lemma_2 (frame_of a) h2 h3 !{as_ref (get_z a), as_ref (get_z b)} (refs a ++ refs b);
   helper_lemma_3 (frame_of a) h0 h1 h2 (refs a ++ refs b);
   helper_lemma_3 (frame_of a) h0 h2 h3 (refs a ++ refs b);
   helper_lemma_4 (frame_of a) h0 h1 h2 h3 a b;
   assert(HS.modifies_ref (frame_of a) (refs a ++ refs b) h0 h3);
   ()
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
@@ -343,14 +341,18 @@ let copy a b =
   helper_lemma' (get_x a);
   helper_lemma' (get_y a);
   helper_lemma' (get_z a);
-  helper_lemma_2 (frame_of a) h0 h1 (arefs (only (get_x a))) (refs a);
-  helper_lemma_2 (frame_of a) h1 h2 (arefs (only (get_y a))) (refs a);
-  helper_lemma_2 (frame_of a) h2 h3 (arefs (only (get_z a))) (refs a);
+  (* helper_lemma_2 (frame_of a) h0 h1 (arefs (only (get_x a))) (refs a); *)
+  (* helper_lemma_2 (frame_of a) h1 h2 (arefs (only (get_y a))) (refs a); *)
+  (* helper_lemma_2 (frame_of a) h2 h3 (arefs (only (get_z a))) (refs a); *)
+  helper_lemma_2 (frame_of a) h0 h1 !{as_ref (get_x a)} (refs a);
+  helper_lemma_2 (frame_of a) h1 h2 !{as_ref (get_y a)} (refs a);
+  helper_lemma_2 (frame_of a) h2 h3 !{as_ref (get_z a)} (refs a);
   helper_lemma_3 (frame_of a) h0 h1 h2 (refs a);
   helper_lemma_3 (frame_of a) h0 h2 h3 (refs a);
   helper_lemma_4' (frame_of a) h0 h1 h2 h3 a;
   assert(HS.modifies_ref (frame_of a) (refs a) h0 h3);
   ()
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
@@ -380,6 +382,7 @@ let helper_lemma_5 h0 h1 a b =
   assert(disjoint_from_bufs x s);
   assert(disjoint_from_bufs y s);
   assert(disjoint_from_bufs z s)
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
 
@@ -424,6 +427,7 @@ let swap_both a b c d =
   helper_lemma_3 (frame_of a) h0 h1 h2 (refs a ++ refs b ++ refs c ++ refs d);
   ()
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
 
 val copy2: p':point -> q':point{distinct p' q' /\ same_frame_2 p' q'} ->
@@ -467,5 +471,3 @@ let copy2 p' q' p q =
   helper_lemma_2 (frame_of p) h1 h2 (refs q') (refs p' ++ refs q');
   helper_lemma_3 (frame_of p) h0 h1 h2 (refs p' ++ refs q');
   ()
-
-#reset-options "--initial_fuel 0 --max_fuel 0"

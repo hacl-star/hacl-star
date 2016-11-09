@@ -290,7 +290,7 @@ let rec big_step n pp ppq p pq q ctr =
 
 #reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
 
-private val init_points: q:point{same_frame q} -> tmp:bigint{length tmp = 66 /\ frameOf tmp <> frame_of q} -> Stack unit
+private val init_points: q:point{same_frame q} -> tmp:bigint{length tmp = 68 /\ frameOf tmp <> frame_of q} -> Stack unit
   (requires (fun h -> B.live h tmp /\ live h q))
   (ensures  (fun h0 _ h1 -> B.live h1 tmp
     /\ HS.modifies_one (frameOf tmp) h0 h1

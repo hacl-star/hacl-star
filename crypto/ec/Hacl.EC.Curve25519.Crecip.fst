@@ -6,7 +6,7 @@ open FStar.HyperStack
 open FStar.Ghost
 open FStar.Buffer
 open Hacl.UInt64
-(* open Hacl.SBuffer *)
+
 open FStar.Buffer
 open FStar.Math.Lib
 open Hacl.EC.Curve25519.Parameters
@@ -17,7 +17,6 @@ open Hacl.EC.Curve25519.Bignum
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* Module abbreviations *)
-(* module B  = Hacl.SBuffer *)
 module B = FStar.Buffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
@@ -29,13 +28,23 @@ module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
+
+private let lemma_propagate_norm h h' (b:bigint{norm h b /\ equal h b h' b}) : Lemma
+  (requires (True))
+  (ensures  (norm h' b))
+  [SMTPat (norm h b); SMTPat (equal h b h' b)]
+  = Hacl.EC.Curve25519.Bignum.lemma_eq_norm h h' b b
+
+
 val loop: tmp:bigint -> v:bigint{disjoint tmp v} -> ctr:U32.t -> Stack unit 
-    (requires (fun h -> live h tmp /\ live h v)) 
-    (ensures (fun h0 _ h1 -> live h1 tmp /\ live h1 v /\ modifies_2 tmp v h0 h1))
+    (requires (fun h -> live h tmp /\ norm h v)) 
+    (ensures (fun h0 _ h1 -> live h1 tmp /\ norm h1 v /\ modifies_2 tmp v h0 h1))
 let rec loop tmp v ctr =
+  let h0 = ST.get() in
   if U32 (ctr =^ 0ul) then ()
   else (
     fsquare tmp v;
+    let h1 = ST.get() in
     fsquare v tmp;
     let h = ST.get() in
     assert(live h tmp /\ live h v);
@@ -43,11 +52,17 @@ let rec loop tmp v ctr =
     loop tmp v (U32 (ctr -^ 1ul))
   )
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 val crecip_0: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
-  (requires (fun h -> live h tmp /\ live h z))
-  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
+  (requires (fun h -> live h tmp /\ norm h z))
+  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1 /\ (
+    let z2      = sub tmp 0ul nlength in
+    let z9      = sub tmp 5ul nlength in
+    let z11     = sub tmp 10ul nlength in
+    let z2_5_0   = sub tmp 15ul nlength in
+    norm h1 z2 /\ norm h1 z9 /\ norm h1 z11 /\ norm h1 z2_5_0)))
 let crecip_0 tmp z =
   let z2      = sub tmp 0ul nlength in
   let z9      = sub tmp 5ul nlength in
@@ -68,11 +83,16 @@ let crecip_0 tmp z =
   fmul z2_5_0 t0 z9;  (* 2^5 - 2^0 = 31 *)
   ()
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 val crecip_1: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
-  (requires (fun h -> live h tmp /\ live h z))
-  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
+  (requires (fun h -> live h tmp /\ norm h z 
+    /\ (let z2_5_0   = sub tmp 15ul nlength in
+       let z11     = sub tmp 10ul nlength in norm h z2_5_0 /\ norm h z11)))
+  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1
+    /\ (let z2_10_0  = sub tmp 20ul nlength in
+       let z11     = sub tmp 10ul nlength in norm h1 z2_10_0 /\ norm h1 z11)))
 let crecip_1 tmp z =
   (* let z2      = sub tmp 0ul nlength in *)
   (* let z9      = sub tmp 5ul nlength in *)
@@ -93,11 +113,15 @@ let crecip_1 tmp z =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
 
 val crecip_2: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
-  (requires (fun h -> live h tmp /\ live h z))
-  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
+  (requires (fun h -> live h tmp /\ norm h z 
+    /\ (let z2_10_0  = sub tmp 20ul nlength in
+       let z11     = sub tmp 10ul nlength in norm h z2_10_0 /\ norm h z11)))
+  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1
+    /\ (let z2_50_0  = sub tmp 30ul nlength in
+       let z11     = sub tmp 10ul nlength in norm h1 z2_50_0 /\ norm h1 z11)))
 let crecip_2 tmp z =
   (* let z2      = sub tmp 0ul nlength in *)
   (* let z9      = sub tmp 5ul nlength in *)
@@ -127,8 +151,13 @@ let crecip_2 tmp z =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 val crecip_3: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
-  (requires (fun h -> live h tmp /\ live h z))
-  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
+  (requires (fun h -> live h tmp /\ live h z 
+    /\ (let z2_50_0  = sub tmp 30ul nlength in
+       let z11     = sub tmp 10ul nlength in norm h z2_50_0 /\ norm h z11)))
+  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1
+    /\ (let z2_50_0  = sub tmp 30ul nlength in
+       let t1 = sub tmp 45ul nlength in
+       let z11     = sub tmp 10ul nlength in norm h1 t1 /\ norm h1 z11 /\ norm h1 z2_50_0)))
 let crecip_3 tmp z =
   (* let z2      = sub tmp 0ul nlength in *)
   (* let z9      = sub tmp 5ul nlength in *)
@@ -154,8 +183,13 @@ let crecip_3 tmp z =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 val crecip_4: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
-  (requires (fun h -> live h tmp /\ live h z))
-  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1))
+  (requires (fun h -> live h tmp /\ norm h z
+    /\ (let z2_50_0 = sub tmp 30ul nlength in
+       let z11     = sub tmp 10ul nlength in
+       let t1 = sub tmp 45ul nlength in norm h z2_50_0 /\ norm h t1 /\ norm h z11)))
+  (ensures  (fun h0 _ h1 -> live h1 tmp /\ modifies_1 tmp h0 h1
+    /\ (let t1 = sub tmp 45ul nlength in
+       let z11     = sub tmp 10ul nlength in norm h1 t1 /\ norm h1 z11)))
 let crecip_4 tmp z =
   (* let z2      = sub tmp 0ul nlength in *)
   (* let z9      = sub tmp 5ul nlength in *)
@@ -178,23 +212,24 @@ let crecip_4 tmp z =
   fsquare t1 t0;  (* 2^255 - 2^5 *) 
   ()
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 val crecip': output:bigint -> z:bigint{disjoint output z} -> Stack unit 
-  (requires (fun h -> live h output /\ live h z)) 
-  (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
+  (requires (fun h -> live h output /\ norm h z)) 
+  (ensures (fun h0 _ h1 -> norm h1 output /\ modifies_1 output h0 h1))
 let crecip' output z = 
   push_frame();
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) (U32 (10ul *^ nlength)) in
-  (* let z2      = sub tmp 0ul nlength in *)
-  (* let z9      = sub tmp 5ul nlength in *)
+  let z2      = sub tmp 0ul nlength in
+  let z9      = sub tmp 5ul nlength in
   let z11     = sub tmp 10ul nlength in
-  (* let z2_5_0   = sub tmp 15ul nlength in *)
-  (* let z2_10_0  = sub tmp 20ul nlength in *)
-  (* let z2_20_0  = sub tmp 25ul nlength in *)
-  (* let z2_50_0  = sub tmp 30ul nlength in *)
-  (* let z2_100_0 = sub tmp 35ul nlength in *)
-  (* let t0      = sub tmp 40ul nlength in *)
+  let z2_5_0   = sub tmp 15ul nlength in
+  let z2_10_0  = sub tmp 20ul nlength in
+  let z2_20_0  = sub tmp 25ul nlength in
+  let z2_50_0  = sub tmp 30ul nlength in
+  let z2_100_0 = sub tmp 35ul nlength in
+  let t0      = sub tmp 40ul nlength in
   let t1      = sub tmp 45ul nlength in
   crecip_0 tmp z;
   crecip_1 tmp z;
