@@ -41,19 +41,24 @@ val op_Plus_At: a:elemS -> b:elemS ->
 let op_Plus_At a b = add_loop a b len
 
 
-#set-options "--z3timeout 10 --max_fuel 1 --initial_fuel 1"
+#reset-options "--z3timeout 10 --max_fuel 1 --initial_fuel 1"
 
 val shift_right_loop: a:elemS -> dep:nat{dep < len} ->
-  Tot (r:elemS) (decreases dep)
-let rec shift_right_loop a dep =
+  Tot (r:elemS{equal (slice (lbytes_to_bv r) 0 (nb * (dep + 1))) (slice (shift_right_vec (lbytes_to_bv a) 1) 0 (nb * (dep + 1)))}) (decreases dep)
+let rec shift_right_loop a dep = admit();
   if dep = 0 then upd a 0 ((index a 0) >>^ 1ul) else begin
     let i = dep - 1 in
     let na = upd a dep (((index a i) <<^ 7ul) +%^ ((index a dep) >>^ 1ul)) in
     shift_right_loop na i
   end
 
-val shift_right_spec: a:elemS -> Tot (r:elemS)
-let shift_right_spec a = shift_right_loop a (len - 1)
+#reset-options "--z3timeout 10 --max_fuel 0 --initial_fuel 0"
+
+val shift_right_spec: a:elemS ->
+  Tot (r:elemS{equal (lbytes_to_bv r) (shift_right_vec (lbytes_to_bv a) 1)})
+let shift_right_spec a = 
+  assert(equal (slice (shift_right_vec (lbytes_to_bv a) 1) 0 (nb * len)) (shift_right_vec (lbytes_to_bv a) 1));
+  shift_right_loop a (len - 1)
 
 
 val ith_bit_mask: num:byte -> i:u32{FStar.UInt32.v i < nb} ->
@@ -63,42 +68,60 @@ let ith_bit_mask num i =
   let res = logand num proj in
   eq_mask res proj
 
-val apply_mask_loop: a:elemS -> msk:byte -> dep:nat{dep <= len} ->
-  Tot (m:elemS{(forall (i:nat{i < dep}). index m i = ((index a i) &^ msk)) /\ (forall (i:nat{i >= dep /\ i < len}). index m i = index a i)}) (decreases dep)
-let rec apply_mask_loop a msk dep =
-  if dep = 0 then a else 
+val apply_mask_loop: a:elemS -> m:elemS -> msk:byte -> dep:nat{dep <= len} ->
+  Tot (r:elemS{forall (i:nat{i < dep}). index r i = ((index a i) &^ msk)}) (decreases dep)
+let rec apply_mask_loop a m msk dep =
+  if dep = 0 then m else 
   begin
     let i = dep - 1 in
-    let m = apply_mask_loop a msk i in
-    upd m i ((index a i) &^ msk)
+    let r = apply_mask_loop a m msk i in
+    upd r i ((index a i) &^ msk)
   end
 
 val apply_mask: a:elemS -> msk:byte ->
-  Tot (m:elemS{forall (i:nat{i < len}). index m i = ((index a i) &^ msk)})
-let apply_mask a msk = apply_mask_loop a msk len
+  Tot (r:elemS{forall (i:nat{i < len}). index r i = ((index a i) &^ msk)})
+let apply_mask a msk = apply_mask_loop a a msk len
 
 let r_mul = 225uy
 
-val mul_loop: a:elemS -> b:elemS -> tmp:elemS -> dep:u32{FStar.UInt32.v dep <= 128} -> Tot elemS (decreases (128 - FStar.UInt32.v dep))
-let rec mul_loop a b tmp dep =
-  if FStar.UInt32.v dep = 128 then a else
+val mask_add_spec: a:elemS -> b:elemS -> r:elemS -> dep:u32{FStar.UInt32.v dep < 128} -> Tot elemS (decreases (128 - FStar.UInt32.v dep))
+let mask_add_spec a b r dep =
+  let num = index b (FStar.UInt32.v (FStar.UInt32.div dep 8ul)) in
+  let msk = ith_bit_mask num (FStar.UInt32.rem dep 8ul) in
+  let m = apply_mask a msk in
+  r +@ m
+
+val shift_right_modulo: a:elemS -> Tot elemS
+let shift_right_modulo a =
+  let num = index a 15 in
+  let msk = ith_bit_mask num 7ul in
+  let na = shift_right_spec a in
+  let num = index na 0 in
+  upd na 0 (num ^^ (logand msk r_mul))
+
+val mul_loop: a:elemS -> b:elemS -> r:elemS -> dep:u32{FStar.UInt32.v dep <= 128} -> Tot elemS
+  (decreases (128 - FStar.UInt32.v dep))
+let rec mul_loop a b r dep =
+  if FStar.UInt32.v dep = 128 then r else
   begin
-    let num = index b (FStar.UInt32.v (FStar.UInt32.div dep 8ul)) in
+    (*let num = index b (FStar.UInt32.v (FStar.UInt32.div dep 8ul)) in
     let msk = ith_bit_mask num (FStar.UInt32.rem dep 8ul) in
     let m = apply_mask a msk in
-    let r = tmp +@ m in
+    let r = tmp1 +@ m in *)
+    let nr = mask_add_spec a b r dep in 
+    let na = shift_right_modulo a in (*
     let num = index a 15 in
     let msk = ith_bit_mask num 7ul in
     let na = shift_right_spec a in
     let num = index a 0 in
-    let na = upd na 0 (num ^^ (logand msk r_mul)) in
-    mul_loop na b r (FStar.UInt32.add dep 1ul)
+    let na = upd na 0 (num ^^ (logand msk r_mul)) in *)
+    mul_loop na b nr (FStar.UInt32.add dep 1ul)
   end
 
 let zero = Seq.create 16 0uy 
 
 val op_Star_At: a:elemS -> b:elemS -> Tot (r:elemS)
-let op_Star_At a b = mul_loop a b zero 0
+let op_Star_At a b = mul_loop a b zero 0ul
 
 open FStar.Seq
 open FStar.SeqProperties 

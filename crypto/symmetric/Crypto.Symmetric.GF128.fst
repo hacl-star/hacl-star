@@ -69,7 +69,7 @@ let rec gf128_shift_right_loop a dep =
   end
 
 (* In place shift. Calculate "a >> 1" and store the result in a. *)
-private val gf128_shift_right: a:elemB -> Stack unit
+private abstract val gf128_shift_right: a:elemB -> Stack unit
   (requires (fun h -> live h a))
   (ensures (fun h0 _ h1 ->
     live h0 a /\ live h1 a /\ modifies_1 a h0 h1 /\
@@ -77,38 +77,45 @@ private val gf128_shift_right: a:elemB -> Stack unit
 let gf128_shift_right a = gf128_shift_right_loop a 15ul
 
 (* Generate mask. If the i-th bit of num is 1 then return 11111111, otherwise return 00000000. *)
-private val ith_bit_mask: num:byte -> i:u32{U32.v i < 8} ->
+private abstract val ith_bit_mask: num:byte -> i:u32{U32.v i < 8} ->
   Tot (m:byte{m = Spec.ith_bit_mask num i})
 let ith_bit_mask num i =
   let proj = shift_right 128uy i in
   let res = logand num proj in
   eq_mask res proj
 
-private val apply_mask_loop: a:elemB -> m:elemB {disjoint a m} -> msk:byte -> dep:u32{U32.v dep <= 16} -> Stack unit
+private abstract val apply_mask_loop: a:elemB -> m:elemB {disjoint a m} -> msk:byte -> dep:u32{U32.v dep <= 16} -> Stack unit
   (requires (fun h -> live h a /\ live h m))
   (ensures (fun h0 _ h1 ->
-    live h0 a /\ live h1 m /\ modifies_1 m h0 h1 /\
-    as_seq h1 m = Spec.apply_mask_loop (as_seq h0 a) msk (U32.v dep)))
-let rec apply_mask_loop a m msk dep = admit();
+    live h0 a /\ live h0 m /\ live h1 m /\ modifies_1 m h0 h1 /\
+    as_seq h1 m = Spec.apply_mask_loop (as_seq h0 a) (as_seq h0 m) msk (U32.v dep)))
+let rec apply_mask_loop a m msk dep =
   if dep <> 0ul then 
   begin
     let i = U32 (dep -^ 1ul) in
-    m.(i) <- a.(i) &^ msk;
-    apply_mask_loop a m msk i
+    apply_mask_loop a m msk i;
+    m.(i) <- a.(i) &^ msk
   end
 
 (* This will apply a mask to each byte of bytes. *)
 (* Mask a with msk, and store the result in m. *)
-private val apply_mask: a:elemB -> m:elemB {disjoint a m} -> msk:byte -> Stack unit
+private abstract val apply_mask: a:elemB -> m:elemB {disjoint a m} -> msk:byte -> Stack unit
   (requires (fun h -> live h a /\ live h m))
   (ensures (fun h0 _ h1 -> 
-    live h0 a /\ live h1 m /\ modifies_1 m h0 h1 /\
+    live h0 a /\ live h0 m /\ live h1 m /\ modifies_1 m h0 h1 /\
+    as_seq h1 a = as_seq h0 a /\
     as_seq h1 m = Spec.apply_mask (as_seq h0 a) msk))
-let apply_mask a m msk = apply_mask_loop a m msk len
+
+let apply_mask a m msk = 
+  let h0 = ST.get() in
+  apply_mask_loop a m msk len;
+  let h1 = ST.get() in
+  assert(Seq.equal (as_seq h1 m) (Spec.apply_mask (as_seq h0 a) msk))
 
 private let r_mul = 225uy
 
-#reset-options "--z3timeout 25 --max_fuel 1 --initial_fuel 1"
+
+#reset-options "--z3timeout 20 --max_fuel 1 --initial_fuel 1"
 
 private val gf128_mul_loop: 
   a:elemB -> b:elemB {disjoint a b} -> tmp:buffer {length tmp = 32 /\ disjoint a tmp /\ disjoint b tmp} ->
@@ -116,24 +123,34 @@ private val gf128_mul_loop:
   (requires (fun h -> live h a /\ live h b /\ live h tmp))
   (ensures (fun h0 _ h1 -> 
     live h0 a /\ live h0 b /\ live h0 tmp /\ 
-    live h1 a /\ live h1 tmp /\ modifies_2 a tmp h0 h1 /\
-    Seq.slice (as_seq h1 tmp) 0 16 = Spec.mul_loop (as_seq h0 a) (as_seq h0 b) (Seq.slice (as_seq h0 tmp) 0 16) (U32.v dep)))
-let rec gf128_mul_loop a b tmp dep = admit();
+    live h1 a /\ live h1 tmp /\ modifies_2 a tmp h0 h1 /\ 
+    Seq.equal (as_seq h1 (sub tmp 0ul len)) (Spec.mul_loop (as_seq h0 a) (as_seq h0 b) (as_seq h0 (sub tmp 0ul len)) dep)))
+  (decreases (128 - U32.v dep))
+let rec gf128_mul_loop a b tmp dep =
   if dep <> 128ul then 
   begin
+    let h0 = ST.get() in
     let r = sub tmp 0ul len in
     let m = sub tmp len len in
     let num = b.(U32 (dep /^ 8ul)) in
     let msk = ith_bit_mask num (U32.rem dep 8ul) in
     apply_mask a m msk;
     gf128_add r m;
+    let h' = ST.get() in
+    assert(Seq.equal (as_seq h' (sub tmp 0ul len)) (Spec.mask_add_spec (as_seq h0 a) (as_seq h0 b) (as_seq h0 (sub tmp 0ul len)) dep));
     let num = a.(15ul) in
     let msk = ith_bit_mask num 7ul in
     gf128_shift_right a;
     let num = a.(0ul) in
     a.(0ul) <- (num ^^ (logand msk r_mul));
-    gf128_mul_loop a b tmp (U32 (dep +^ 1ul))
+    let h'' = ST.get() in
+    assert(Seq.equal (as_seq h'' a) (Spec.shift_right_modulo (as_seq h' a)));
+    gf128_mul_loop a b tmp (U32 (dep +^ 1ul));
+    let h1 = ST.get() in
+    assert(Seq.equal (as_seq h1 (sub tmp 0ul len)) (Spec.mul_loop (as_seq h'' a) (as_seq h'' b) (as_seq h'' (sub tmp 0ul len)) (U32 (dep +^ 1ul))))
   end
+
+#reset-options "--z3timeout 10 --max_fuel 0 --initial_fuel 0"
 
 (* In place multiplication. Calculate "a * b" and store the result in a.    *)
 (* WARNING: may have issues with constant time. *)
@@ -147,19 +164,13 @@ let gf128_mul a b =
   push_frame();
   let tmp = create 0uy 32ul in
   let h0 = ST.get() in
-  assert(as_seq h a = as_seq h0 a);
-  assert(as_seq h b = as_seq h0 b);
-  assert(as_seq h0 tmp = Seq.create 32 0uy);
-  assert(Seq.equal (Seq.slice (as_seq h0 tmp) 0 16) (Seq.create 16 0uy));
   gf128_mul_loop a b tmp 0ul;
   let h1 = ST.get() in
   assert(Seq.equal (Seq.slice (as_seq h0 tmp) 0 16) Spec.zero);
-  assert(Seq.equal (Seq.slice (as_seq h1 tmp) 0 16) (Spec.mul_loop (as_seq h0 a) (as_seq h0 b) (Seq.slice (as_seq h0 tmp) 0 16) 0));
   blit tmp 0ul a 0ul 16ul;
   pop_frame();
   let he = ST.get() in
-  assume(Seq.equal (as_seq he a) (Seq.slice (as_seq h1 tmp) 0 16));
-  assert(Seq.equal (as_seq he a) (as_seq h a *@ as_seq h b))
+  assert(Seq.equal (as_seq he a) (Seq.slice (as_seq h1 tmp) 0 16))
 
 let add_and_multiply a e k = 
   gf128_add a e;
