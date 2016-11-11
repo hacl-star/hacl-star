@@ -11,6 +11,8 @@ open Crypto.Symmetric.Bytes
 open Crypto.Symmetric.GF128.Spec
 
 module U32 = FStar.UInt32
+module UInt = FStar.UInt
+module BV = FStar.BitVector
 module Spec = Crypto.Symmetric.GF128.Spec
 
 
@@ -29,7 +31,7 @@ type elemB = b:lbuffer 16
 
 (* Every function "func_name_loop" is a helper for function "func_name". *)
 
-#set-options "--z3timeout 5 --max_fuel 1 --initial_fuel 1"
+#set-options "--z3timeout 10 --max_fuel 1 --initial_fuel 1"
 
 private val gf128_add_loop: 
   a:elemB -> b:elemB {disjoint a b} ->
@@ -76,12 +78,21 @@ private abstract val gf128_shift_right: a:elemB -> Stack unit
     as_seq h1 a = Spec.shift_right_spec (as_seq h0 a)))
 let gf128_shift_right a = gf128_shift_right_loop a 15ul
 
+private val elem_vec_logand_lemma: a:BV.bv_t 8 -> i:nat{i < 8} ->
+  Lemma (Seq.equal (BV.logand_vec a (BV.elem_vec #8 i)) (if Seq.index a i then (BV.elem_vec #8 i) else (BV.zero_vec #8)))
+let elem_vec_logand_lemma a i = ()
+
 (* Generate mask. If the i-th bit of num is 1 then return 11111111, otherwise return 00000000. *)
 private abstract val ith_bit_mask: num:byte -> i:u32{U32.v i < 8} ->
-  Tot (m:byte{m = Spec.ith_bit_mask num i})
+  Tot (m:byte{m = Spec.ith_bit_mask num (U32.v i)})
 let ith_bit_mask num i =
   let proj = shift_right 128uy i in
+  assert(v proj = pow2 7 / pow2 (U32.v i));
+  FStar.Math.Lemmas.pow2_minus 7 (U32.v i);
+  assert(v proj = UInt.pow2_n #8 (7 - U32.v i));
+  assert(Seq.equal (UInt.to_vec #8 (v proj)) (BV.elem_vec #8 (FStar.UInt32.v i)));
   let res = logand num proj in
+  elem_vec_logand_lemma (UInt.to_vec #8 (v num)) (U32.v i);
   eq_mask res proj
 
 private abstract val apply_mask_loop: a:elemB -> m:elemB {disjoint a m} -> msk:byte -> dep:u32{U32.v dep <= 16} -> Stack unit
@@ -93,8 +104,8 @@ let rec apply_mask_loop a m msk dep =
   if dep <> 0ul then 
   begin
     let i = U32 (dep -^ 1ul) in
-    apply_mask_loop a m msk i;
-    m.(i) <- a.(i) &^ msk
+    m.(i) <- a.(i) &^ msk;
+    apply_mask_loop a m msk i
   end
 
 (* This will apply a mask to each byte of bytes. *)
@@ -103,19 +114,14 @@ private abstract val apply_mask: a:elemB -> m:elemB {disjoint a m} -> msk:byte -
   (requires (fun h -> live h a /\ live h m))
   (ensures (fun h0 _ h1 -> 
     live h0 a /\ live h0 m /\ live h1 m /\ modifies_1 m h0 h1 /\
-    as_seq h1 a = as_seq h0 a /\
-    as_seq h1 m = Spec.apply_mask (as_seq h0 a) msk))
-
-let apply_mask a m msk = 
-  let h0 = ST.get() in
-  apply_mask_loop a m msk len;
-  let h1 = ST.get() in
-  assert(Seq.equal (as_seq h1 m) (Spec.apply_mask (as_seq h0 a) msk))
+    Seq.equal (as_seq h1 a) (as_seq h0 a) /\
+    Seq.equal (as_seq h1 m) (Spec.apply_mask (as_seq h0 a) msk)))
+let apply_mask a m msk = apply_mask_loop a m msk len
 
 private let r_mul = 225uy
 
 
-#reset-options "--z3timeout 20 --max_fuel 1 --initial_fuel 1"
+#reset-options "--z3timeout 60 --max_fuel 1 --initial_fuel 1"
 
 private val gf128_mul_loop: 
   a:elemB -> b:elemB {disjoint a b} -> tmp:buffer {length tmp = 32 /\ disjoint a tmp /\ disjoint b tmp} ->
@@ -124,7 +130,7 @@ private val gf128_mul_loop:
   (ensures (fun h0 _ h1 -> 
     live h0 a /\ live h0 b /\ live h0 tmp /\ 
     live h1 a /\ live h1 tmp /\ modifies_2 a tmp h0 h1 /\ 
-    Seq.equal (as_seq h1 (sub tmp 0ul len)) (Spec.mul_loop (as_seq h0 a) (as_seq h0 b) (as_seq h0 (sub tmp 0ul len)) dep)))
+    Seq.equal (as_seq h1 (sub tmp 0ul len)) (Spec.mul_loop (as_seq h0 a) (as_seq h0 b) (as_seq h0 (sub tmp 0ul len)) (U32.v dep))))
   (decreases (128 - U32.v dep))
 let rec gf128_mul_loop a b tmp dep =
   if dep <> 128ul then 
@@ -137,7 +143,7 @@ let rec gf128_mul_loop a b tmp dep =
     apply_mask a m msk;
     gf128_add r m;
     let h' = ST.get() in
-    assert(Seq.equal (as_seq h' (sub tmp 0ul len)) (Spec.mask_add_spec (as_seq h0 a) (as_seq h0 b) (as_seq h0 (sub tmp 0ul len)) dep));
+    assert(Seq.equal (as_seq h' (sub tmp 0ul len)) (Spec.mask_add_spec (as_seq h0 a) (as_seq h0 b) (as_seq h0 (sub tmp 0ul len)) (U32.v dep)));
     let num = a.(15ul) in
     let msk = ith_bit_mask num 7ul in
     gf128_shift_right a;
@@ -147,8 +153,9 @@ let rec gf128_mul_loop a b tmp dep =
     assert(Seq.equal (as_seq h'' a) (Spec.shift_right_modulo (as_seq h' a)));
     gf128_mul_loop a b tmp (U32 (dep +^ 1ul));
     let h1 = ST.get() in
-    assert(Seq.equal (as_seq h1 (sub tmp 0ul len)) (Spec.mul_loop (as_seq h'' a) (as_seq h'' b) (as_seq h'' (sub tmp 0ul len)) (U32 (dep +^ 1ul))))
+    assert(Seq.equal (as_seq h1 (sub tmp 0ul len)) (Spec.mul_loop (as_seq h'' a) (as_seq h'' b) (as_seq h'' (sub tmp 0ul len)) (U32.v dep + 1)))
   end
+
 
 #reset-options "--z3timeout 10 --max_fuel 0 --initial_fuel 0"
 
@@ -160,17 +167,16 @@ val gf128_mul: a:elemB -> b:elemB {disjoint a b} -> Stack unit
     live h0 a /\ live h0 b /\ live h1 a /\ modifies_1 a h0 h1 /\ 
     as_seq h1 a = as_seq h0 a *@ as_seq h0 b ))
 let gf128_mul a b =
-  let h = ST.get() in
   push_frame();
   let tmp = create 0uy 32ul in
-  let h0 = ST.get() in
+  let h' = ST.get() in
+  assert(Seq.equal (Seq.slice (as_seq h' tmp) 0 16) Spec.zero);
   gf128_mul_loop a b tmp 0ul;
-  let h1 = ST.get() in
-  assert(Seq.equal (Seq.slice (as_seq h0 tmp) 0 16) Spec.zero);
+  let h'' = ST.get() in
   blit tmp 0ul a 0ul 16ul;
   pop_frame();
-  let he = ST.get() in
-  assert(Seq.equal (as_seq he a) (Seq.slice (as_seq h1 tmp) 0 16))
+  let h1 = ST.get() in
+  assert(Seq.equal (as_seq h1 a) (Seq.slice (as_seq h'' tmp) 0 16))
 
 let add_and_multiply a e k = 
   gf128_add a e;
@@ -188,8 +194,6 @@ let finish a s =
 
 //16-09-23 Instead of the code below, we should re-use existing AEAD encodings
 //16-09-23 and share their injectivity proofs and crypto model.
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 private val ghash_loop_: 
   tag:elemB ->
