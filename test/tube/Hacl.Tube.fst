@@ -19,8 +19,6 @@ module H32=Hacl.UInt32
 module H64=Hacl.UInt64
 
 
-#set-options "--lax"
-
 (* JK: Putting here some toplevel constant *)
 inline_for_extraction let blocksize_bits = 18ul
 inline_for_extraction let blocksize = U64 (256uL *^ 1024uL) //1uL <<^ blocksize_bits) // 256 * 1024
@@ -36,6 +34,8 @@ inline_for_extraction let one_64  = Hacl.Cast.uint64_to_sint64 1uL
 inline_for_extraction let zero_64 = Hacl.Cast.uint64_to_sint64 0uL
 inline_for_extraction let one_8  = Hacl.Cast.uint8_to_sint8 1uy
 inline_for_extraction let zero_8 = Hacl.Cast.uint8_to_sint8 0uy
+
+#set-options "--lax"
 
 
 (* type clock = u64 *)

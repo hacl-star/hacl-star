@@ -191,6 +191,40 @@ void test_perf3() {
   printf("Slowdown (XSalsa20): %f\n", t1/t2);
 }
 
+
+void test_perf4() {
+  void *plain = malloc(SIZE), *cipher = malloc(SIZE), *cipher2 = malloc(SIZE);
+  uint8_t mac[16];
+  clock_t c1, c2;
+  double t1, t2;
+  unsigned long long a, b, d1, d2;
+  unsigned int ctr = 0;
+  unsigned int ctx[32];
+  c1 = clock();
+  a = rdtsc ();
+  Hacl_Symmetric_Chacha20_Sodium_chacha_keysetup(ctx,key);
+  Hacl_Symmetric_Chacha20_Sodium_chacha_ietf_ivsetup(ctx, nonce, ctr);
+  Hacl_Symmetric_Chacha20_Sodium_chacha_encrypt_bytes(ctx, plain, cipher, SIZE);
+  b = rdtsc ();
+  c2 = clock();
+  d1 = b - a;
+  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for HACL: %f\n", t1);
+
+  c1 = clock();
+  a = rdtsc();
+  crypto_stream_chacha20_ietf_xor(cipher2, plain, SIZE, nonce, key);
+  b = rdtsc();
+  c2 = clock();
+  d2 = b - a;
+  t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  printf("User time for Sodium: %f\n", t2);
+  printf("Cycles/byte ratio HACL64: %lf\n", (double)d1/SIZE);
+  printf("Cycles/byte ratio Sodium: %lf\n", (double)d2/SIZE);
+  printf("Slowdown (Chacha20): %f\n", (float)d1/d2);
+  printf("%s\n", memcmp(cipher, cipher2, SIZE) == 0 ? "SUCCESS" : "FAILURE");
+}
+
 int main(int argc, char *argv[]){
   if (argc == 2 && strcmp(argv[1], "perf1") == 0) {
     test_perf1();
@@ -198,6 +232,8 @@ int main(int argc, char *argv[]){
     test_perf2();
   } else if (argc == 2 && strcmp(argv[1], "perf3") == 0) {
     test_perf3();
+  } else if (argc == 2 && strcmp(argv[1], "perf4") == 0) {
+    test_perf4();
   } else {
     test_correctness();
   }

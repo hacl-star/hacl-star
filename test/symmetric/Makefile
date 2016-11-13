@@ -70,7 +70,7 @@ chacha-extract: ml-lib
 	mkdir -p $(CHACHA_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OCAML_OPTIONS) $(OCAML_INCLUDES) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR)
 
-chacha-compile: chacha-extract
+chacha-compile: #chacha-extract
 	$(OCAMLOPT) -I $(HACL_LIB)/ml -I $(CHACHA_ODIR) \
 	  $(addprefix $(HACL_LIB)/ml/,$(REALIZED_ML_HST)) \
 	  $(addprefix $(CHACHA_ODIR)/,$(CHACHA_EXTRACTED_HST)) ml/test_chacha_hst.ml -o test_chacha20.exe
@@ -145,3 +145,18 @@ poly64-compile: #poly64-extract
 
 poly64-test: poly64-compile
 	./test_poly.exe
+
+chacha-sodium-extract: ml-lib
+	mkdir -p chachasodium
+	$(FSTAR) $(NO_CODEGEN) $(OCAML_OPTIONS) $(OCAML_INCLUDES) --odir chachasodium --include $(HACL_SYMMETRIC) Hacl.Test.Chacha20.Sodium.fst --include $(KREMLIB) --include $(KREMTEST)
+	echo "let _ = main()" >> chachasodium/Hacl_Test_Chacha20_Sodium.ml
+
+chacha-sodium-compile:
+	$(OCAMLOPT) -I $(HACL_LIB)/ml -I chachasodium -I $(KREMTEST) -I $(KREMLIB) \
+		$(addprefix $(HACL_LIB)/ml/,$(REALIZED_ML_HST)) \
+		$(KREMTEST)/TestLib.ml $(KREMLIB)/C.ml \
+	  	$(addprefix chachasodium/, Hacl_Symmetric_Chacha20_Sodium.ml Hacl_Test_Chacha20_Sodium.ml)  -o test_chachasodium.exe
+	./test_chachasodium.exe
+
+bla:
+	gcc-5 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I /home/jkz/dev/FStar/../kremlin/kremlib -I /home/jkz/dev/FStar/../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I Hacl_Test_Chacha20_Sodium -I ../c -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= -D_GNU_SOURCE Hacl_Test_Chacha20_Sodium/Prims.c Hacl_Test_Chacha20_Sodium/FStar_Mul.c Hacl_Test_Chacha20_Sodium/FStar_Squash.c Hacl_Test_Chacha20_Sodium/FStar_StrongExcludedMiddle.c Hacl_Test_Chacha20_Sodium/FStar_List_Tot.c Hacl_Test_Chacha20_Sodium/FStar_Classical.c Hacl_Test_Chacha20_Sodium/FStar_ListProperties.c Hacl_Test_Chacha20_Sodium/FStar_SeqProperties.c Hacl_Test_Chacha20_Sodium/FStar_Math_Lemmas.c Hacl_Test_Chacha20_Sodium/FStar_BitVector.c Hacl_Test_Chacha20_Sodium/FStar_UInt.c Hacl_Test_Chacha20_Sodium/FStar_Int.c Hacl_Test_Chacha20_Sodium/FStar_FunctionalExtensionality.c Hacl_Test_Chacha20_Sodium/FStar_PropositionalExtensionality.c Hacl_Test_Chacha20_Sodium/FStar_PredicateExtensionality.c Hacl_Test_Chacha20_Sodium/FStar_TSet.c Hacl_Test_Chacha20_Sodium/FStar_Set.c Hacl_Test_Chacha20_Sodium/FStar_Map.c Hacl_Test_Chacha20_Sodium/FStar_Ghost.c Hacl_Test_Chacha20_Sodium/FStar_All.c Hacl_Test_Chacha20_Sodium/Hacl_UInt64.c Hacl_Test_Chacha20_Sodium/Hacl_UInt128.c Hacl_Test_Chacha20_Sodium/Hacl_UInt32.c Hacl_Test_Chacha20_Sodium/Hacl_UInt8.c Hacl_Test_Chacha20_Sodium/Hacl_Cast.c Hacl_Test_Chacha20_Sodium/FStar_Buffer.c  Hacl_Test_Chacha20_Sodium/Hacl_Symmetric_Chacha20_Sodium.c  ../../kremlin/kremlib/kremlib.c ../../kremlin/test/testlib.c bla.c  -o blah.exe -lsodium -m32

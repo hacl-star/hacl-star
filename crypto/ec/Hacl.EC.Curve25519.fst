@@ -346,6 +346,7 @@ let exp_2 output q_x scalar basepoint =
   let h2 = ST.get() in
   cut(HS (modifies_one h0.tip h1 h2));
   cut( B.live h2 output);
+  assume (norm h2 (Hacl.EC.Curve25519.PPoint.get_z res));
   crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res);
   let h2' = ST.get() in
   assume (norm h2' resx /\ norm h2' zrecip);
@@ -416,8 +417,11 @@ let exp_1 output q_x scalar =
 val exp: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
   pk:u8s{length pk >= 32 /\ disjoint pk output /\ disjoint pk q_x} -> STL unit
   (requires (fun h -> B.live h output /\ B.live h q_x /\ B.live h pk))
-  (ensures  (fun h0 _ h1 -> modifies_2 output pk h0 h1 /\ B.live h1 output /\ B.live h1 pk))
+  (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ B.live h1 output))
 let exp output q_x scalar =
-  format_scalar scalar;
-  exp_1 output q_x scalar;
-  ()
+  push_frame();
+  let scalar_cpy = create (uint8_to_sint8 0uy) 32ul in
+  blit scalar 0ul scalar_cpy 0ul 32ul;
+  format_scalar scalar_cpy;
+  exp_1 output q_x scalar_cpy;
+  pop_frame()
