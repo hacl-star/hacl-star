@@ -13,11 +13,27 @@ module U8  = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
+module Hacl.Box
+
+open FStar.Buffer
+open FStar.ST
+
+open Hacl.Constants
+open Hacl.SecretBox
+
+
+(* Module abbreviations *)
+module HS  = FStar.HyperStack
+module B   = FStar.Buffer
+module U8  = FStar.UInt8
+module U32 = FStar.UInt32
+module U64 = FStar.UInt64
+
 
 val crypto_box_beforenm:
   k:uint8_p{length k = crypto_box_PUBLICKEYBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES /\ disjoint k pk} ->
-  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint k sk} ->
+  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint k sk /\ disjoint pk sk} ->
   Stack u32
     (requires (fun h -> live h k /\ live h pk /\ live h sk))
     (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1))
@@ -25,7 +41,7 @@ val crypto_box_beforenm:
 
 val crypto_box_detached_afternm:
   c:uint8_p ->
-  mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ disjoint c mac} ->
   m:uint8_p ->
   mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
@@ -35,30 +51,33 @@ val crypto_box_detached_afternm:
     (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
 
 
+
 val crypto_box_detached:
   c:uint8_p ->
-  mac:uint8_p{length mac = crypto_box_MACBYTES} ->
+  mac:uint8_p{length mac = crypto_box_MACBYTES /\ disjoint c mac} ->
   m:uint8_p ->
   mlen:u64{let len = U64.v mlen in length c = len /\ len = length m}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
-  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES} ->
+  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint pk sk} ->
   Stack u32
-    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
-    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
+    (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h pk /\ live h sk))
+    (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
 
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
 
 val crypto_box_open_detached:
   m:uint8_p ->
   c:uint8_p ->
-  mac:uint8_p{length mac = crypto_box_MACBYTES} ->
+  mac:uint8_p{length mac = crypto_box_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
   mlen:u64{let len = U64.v mlen in length m = len /\ len = length c}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
-  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES} ->
+  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint sk pk} ->
   Stack u32
-    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
-    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
+    (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h pk /\ live h sk))
+    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
 
 
 val crypto_box_easy_afternm:
@@ -78,7 +97,7 @@ val crypto_box_easy:
   mlen:u64{let len = U64.v mlen in length c = len + crypto_box_MACBYTES /\ len = length m}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
-  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES} ->
+  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint sk pk} ->
   Stack u32
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
@@ -90,15 +109,28 @@ val crypto_box_open_easy:
   mlen:u64{let len = U64.v mlen in length m = len - crypto_box_MACBYTES /\ len = length c}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
-  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES} ->
+  sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint sk pk} ->
   Stack u32
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
-    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
+    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
+
+
+val crypto_box_open_detached_afternm:
+  m:uint8_p ->
+  c:uint8_p ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
+  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
+  k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h k))
+    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
+
 
 val crypto_box_open_easy_afternm:
   m:uint8_p ->
   c:uint8_p ->
-  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  mlen:u64{let len = U64.v mlen in len = length m + 16 /\ len = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
