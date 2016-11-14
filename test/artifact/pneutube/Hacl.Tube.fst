@@ -10,6 +10,8 @@ open Hacl.Constants
 open Hacl.Cast
 open Box.Ideal
 
+#set-options "--lax"
+
 module  U8=FStar.UInt8
 module U32=FStar.UInt32
 module U64=FStar.UInt64
@@ -18,13 +20,25 @@ module  H8=Hacl.UInt8
 module H32=Hacl.UInt32
 module H64=Hacl.UInt64
 
+private val lemma_max_uint32: n:nat -> Lemma
+ (requires (n = 32))
+ (ensures  (pow2 n = 4294967296))
+ [SMTPat (pow2 n)]
+let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296)
+private val lemma_max_uint64: n:nat -> Lemma
+ (requires (n = 64))
+ (ensures  (pow2 n = 18446744073709551616))
+ [SMTPat (pow2 n)]
+let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
-(* JK: Putting here some toplevel constant *)
+(* Blocksize needs to be a power of 2 *)
 inline_for_extraction let blocksize_bits = 18ul
 inline_for_extraction let blocksize = U64 (256uL *^ 1024uL) //1uL <<^ blocksize_bits) // 256 * 1024
 inline_for_extraction let blocksize_32 = U32 (256ul *^ 1024ul)
-inline_for_extraction let cipherlen (x:U64.t)  = U64 (x +^ 16uL)
-inline_for_extraction let cipherlen_32 (x:U32.t) = U32 (x +^ 16ul)
+
+inline_for_extraction let cipherlen (x:U64.t{ U64.v x <= U64.v blocksize}) : U64.t = U64 (x +^ 16uL)
+
+inline_for_extraction let cipherlen_32 (x:U32.t{ U32.v x <= U32.v blocksize_32}) : Tot U32.t = U32 (x +^ 16ul)
 inline_for_extraction let ciphersize = cipherlen (blocksize)
 inline_for_extraction let ciphersize_32 = cipherlen_32 (blocksize_32)
 inline_for_extraction let headersize = 1024uL
@@ -34,8 +48,6 @@ inline_for_extraction let one_64  = Hacl.Cast.uint64_to_sint64 1uL
 inline_for_extraction let zero_64 = Hacl.Cast.uint64_to_sint64 0uL
 inline_for_extraction let one_8  = Hacl.Cast.uint8_to_sint8 1uy
 inline_for_extraction let zero_8 = Hacl.Cast.uint8_to_sint8 0uy
-
-#set-options "--lax"
 
 
 (* type clock = u64 *)
@@ -50,7 +62,7 @@ type boxtype =
 type streamID = b:buffer h8{length b = 16}
 
 
-type open_result = {
+noeq type open_result = {
   r: FileIO.Types.fresult;
   sid: streamID;
   fs: FileIO.Types.file_stat
@@ -94,21 +106,7 @@ let makeStreamID () =
 (*   b.(7ul) <- sint64_to_sint8 (z >>^ 56ul) *)
 
 
-(* JK: move to a standard library ? Or use the string library ? *)
-val strlen_: s:str -> len:U32.t ->
-  Stack U32.t
-    (requires (fun h -> live h s)) // Also assumes that the '0uy' will appears somewhere
-    (ensures (fun h0 r h1 -> h0==h1 /\ U32.v r <= length s))
-let rec strlen_ s len =
-  let si = s.(len) in
-  if U8 (si =^ 0uy) then len
-  else strlen_ s (U32 (len +^ 1ul))
-
-val strlen:
-  string:str -> Stack U32.t
-    (requires (fun h -> live h string)) // Also assumes that the '0uy' will appears somewhere
-    (ensures (fun h0 r h1 -> h0==h1 /\ U32.v r <= length string))
-let strlen s = strlen_ s 0ul
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
 
 type timespec = {
   tv_sec: U64.t;
@@ -211,11 +209,11 @@ let rec file_send_loop_2 fh sb ciphertext plaintext nonce key len =
 
 
 val file_send:
-  file:str -> roundup:u64 ->
+  fsize:u32 -> file:str -> roundup:u64 ->
   host:str -> port:u32 ->
   skA:uint8_p -> pkB:uint8_p ->
   Stack open_result
-    (requires (fun _ -> True))
+    (requires (fun _ -> U32.v fsize <= length file))
     (ensures  (fun h0 s h1 -> match s.r with
       	   	                   | FileOk ->
 				     let fs = s.fs in
@@ -226,7 +224,7 @@ val file_send:
 				     file_content h0 fs = file_content h1 fs /\
 				     sent h1 pA pB sid fs (file_content h0 fs)
 				   | _ -> true))
-let file_send f r h p skA pkB =
+let file_send fsize f r h p skA pkB =
   push_frame();
   (* Initializing all buffers on the stack *)
   let pkA = Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
@@ -260,30 +258,24 @@ let file_send f r h p skA pkB =
 	    let s = sb.(0ul) in
             let ciphertext = Buffer.create zero ciphersize_32 in
             let file_size = fh.stat.size in
-            (* JK: I assume that blocksize is a power of 2 *)
-            (* let fragments = H64 (file_size >>^ blocksize_bits) in *)
-            (* let rem = H64 (file_size &^ (blocksize-^one_64)) in *)
-            let fragments = U64 (file_size /^ blocksize) in
-            let rem = U64 (file_size %^ blocksize) in
+            (* We assume that blocksize is a power of 2 *)
+            let fragments = H64 (file_size >>^ blocksize_bits) in 
+	    let sblock = Hacl.Cast.uint64_to_sint64 blocksize in
+            let rem = H64 (file_size &^ (sblock-^one_64)) in 
             let roundup = Hacl.Cast.uint64_to_sint64 r in
-            (* JK: I assume that roundup is a power of 2, otherwise that is wrong *)
-            (* let hsize_mod_roundup = H64 (file_size &^ (roundup-^one_64)) in *)
-            (* let hsize_mod_roundup = U64 (file_size %^ roundup) in *)
-            (* let mask = H64 (gte_mask roundup one_64 &^ (lognot (eq_mask hsize_mod_roundup zero_64))) in *)
-            (* let hrem = H64 ((roundup -^ hsize_mod_roundup) &^ mask) in *)
-            let hrem  = U64 (if (roundup >^ zero_64) then
-              if not ((file_size %^ roundup) =^ 0uL)  then 
-                (roundup -^ (file_size %^ roundup)) else 0uL else 0uL) in
+            (* We assume that roundup is a power of 2 *)
+	    let hsize_mod_roundup = H64 (file_size &^ (roundup-^one_64)) in 
+            let mask = H64 (gte_mask roundup one_64 &^ (lognot (eq_mask hsize_mod_roundup zero_64))) in 
+            let hrem = H64 ((roundup -^ hsize_mod_roundup) &^ mask) in 
             let hsize = H64 (file_size +^ hrem) in
             let mtime = fh.stat.mtime in
-            let nsize = strlen f in
             let header = Buffer.create zero_8 headersize_32 in
             (* JK: Omitting memset to 0 for now *)
             store64_le (Buffer.sub header  0ul 8ul) file_size;
             store64_le (Buffer.sub header  8ul 8ul) mtime;
-            store64_le (Buffer.sub header 16ul 8ul) (Int.Cast.uint32_to_uint64 nsize);
+            store64_le (Buffer.sub header 16ul 8ul) (Int.Cast.uint32_to_uint64 fsize);
             (* JK: Ignoring the test on the file name length for convenience *)
-            Buffer.blit f 0ul header 24ul nsize;
+            Buffer.blit f 0ul header 24ul fsize;
             (* A buffer to store uint64 values before flushing them *)
             let buf = Buffer.create zero 8ul in
             (* Flush the streamID *)

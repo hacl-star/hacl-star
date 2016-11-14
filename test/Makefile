@@ -8,6 +8,8 @@ include $(HACL_HOME)/lib/hyperstack/Makefile.include
 SUBDIRS=symmetric ec # hash hmac hkdf
 allsubdirs: $(addsuffix .all , $(SUBDIRS))
 
+INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_SYMMETRIC) $(HACL_HOME)/crypto/api bindings $(HACL_EC))
+
 %.all:
 	$(MAKE) -C $(basename $@)
 
@@ -61,6 +63,8 @@ tube-c.exe: c/tube.c
 		-I $(KREMLIB) -I $(KREMTEST) -I ./c \
 		-tmpdir tmpc -o tube-c.exe -ldopt "-lsodium"
 
+
+tube-tc: tube/Box.Ideal.fst-ver tube/PaddedFileIO.fst-ver tube/SocketIO.fst-ver tube/Hacl.Tube.fst-ver 
 
 tube-star.exe: tube/Box.Ideal.fst tube/PaddedFileIO_impl.c tube/SocketIO_impl.c tube/Hacl.Tube.fst tube/tube.c
 	mkdir -p tmps
