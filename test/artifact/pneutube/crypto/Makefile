@@ -12,3 +12,14 @@ MODULES=Hacl.Symmetric.Poly1305_64.Parameters \
 INCLUDES=$(addprefix --include , $(HACL_LIB))
 
 ver: $(addsuffix .fst-ver, $(MODULES))
+
+test: Hacl.Test.fst
+	$(KREMLIN) $(KREMLIN_ARGS) $^ -no-prefix Hacl.Test -add-include '"testlib.h"' \
+		$(HACL_KREMLIN_FILES) $(KREMTEST)/testlib.c \
+		-I ../../lib -I $(KREMLIB) -I $(KREMTEST) \
+		-tmpdir tmp -o test_crypto.exe
+	./test_crypto.exe
+
+clean:
+	rm -rf tmp
+	rm -f *~ *.exe
