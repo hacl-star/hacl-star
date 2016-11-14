@@ -12,10 +12,10 @@ module B   = FStar.Buffer
 
 type string = uint8_p
 
-type file_stat: Type0 = {
+noeq type file_stat: Type0 = {
      name: uint8_p;
      mtime: h64;
-     size: h64;	
+     size: x:h64{H64.v x < pow2 32};	
 }
 
 type fd_state = 
@@ -23,14 +23,14 @@ type fd_state =
      | FileClosed: fd_state
 
 
-type file_descriptor = {
+noeq type file_descriptor = {
   fd_fd:FStar.Int32.t;
   current:U64.t;
   mmap:uint8_p;
   last:uint8_p;
 }
 
-type file_handle =  {
+noeq type file_handle =  {
      stat:   file_stat;
      fd:     file_descriptor
 }
@@ -39,7 +39,7 @@ type fresult : Type0 =
      | FileOk    : fresult
      | FileError : fresult
 
-type socket = {
+noeq type socket = {
   socket_fd:FStar.Int32.t;
   sent_bytes:U64.t;
   received_bytes:U64.t;
