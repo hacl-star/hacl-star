@@ -1,7 +1,7 @@
 FSTAR_HOME?=../../FStar
 KREMLIN_HOME?=$(FSTAR_HOME)../kremlin
-HACL_HOME?=../../..
-include $(HACL_HOME)/lib/hyperstack/Makefile.include
+ARTIFACT_HOME=..
+include $(ARTIFACT_HOME)/Makefile.include
 
 INCLUDES=$(addprefix --include , ../lib)
 
@@ -25,13 +25,34 @@ CURVE25519_MODULES= \
 	Hacl.EC.Curve25519.Bignum.Lemmas.Utils \
 	Hacl.EC.Curve25519.Bignum
 
+POLY1305_BIGNUM_MODULES= \
+	Crypto.Symmetric.Poly1305.Parameters \
+	Crypto.Symmetric.Poly1305.Bigint \
+	Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part1 \
+	Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part2 \
+	Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part3 \
+	Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part4 \
+	Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part5 \
+	Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part6 \
+	Crypto.Symmetric.Poly1305.Bignum
+
+POLY1305_MODULES= \
+	Crypto.Symmetric.Bytes \
+	Buffer.Utils \
+	Crypto.Symmetric.Poly1305
+
 MODULES=$(CURVE25519_MODULES)
 
-ver: $(addsuffix .fst-ver, $(MODULES))
-hints: $(addsuffix .fst-hints, $(MODULES))
+curve25519-ver: $(addsuffix .fst-ver-ct, $(CURVE25519_MODULES))
+poly1305-ver: poly1305-bignum-ver poly1305-i-ver
+
+poly1305-bignum-ver: $(addsuffix .fst-ver-ct, $(POLY1305_MODULES))
+poly1305-i-ver: $(addsuffix .fst-ver, $(POLY1305_MODULES))
+
+hints: $(addsuffix .fst-hints, $(POLY1305_BIGNUM_MODULES))
 
 %.fst-hints: %.fst
-	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --record_hints
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --record_hints --include $(LIB)
 
 clean:
 	rm -f *~

@@ -753,25 +753,17 @@ let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 :
     lemma_intro_modifies_2_1 c h0 h3
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 2000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
-val crypto_stream_salsa20_xor_ic_:
-  c:uint8_p ->
-  m:uint8_p ->
-  mlen:FStar.UInt64.t{U64.v mlen <= length c /\ U64.v mlen <= length m /\ U64.v mlen > 0} ->
+val crypto_stream_salsa20_xor_ic__:
   n:uint8_p{length n = 8} ->
   ic:FStar.UInt64.t ->
   k:uint8_p{length k = 32} ->
+  local_state:uint8_p{length local_state = 112} ->
   Stack unit
-    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
-let crypto_stream_salsa20_xor_ic_ c m mlen n ic k =
-  cut (U64.v mlen < pow2 32);
-  Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
-  push_frame();
-  let h0 = ST.get() in
-  let zero = uint8_to_sint8 0uy in
-  let local_state = create zero 112ul in
+    (requires (fun h -> live h n /\ live h k /\ live h local_state))
+    (ensures  (fun h0 _ h1 -> live h1 local_state /\ modifies_1 local_state h0 h1))
+let crypto_stream_salsa20_xor_ic__ n ic k local_state =
   let input = Buffer.sub local_state 0ul  16ul in
   let block = Buffer.sub local_state 16ul 64ul in
   let kcopy = Buffer.sub local_state 80ul 32ul in
@@ -812,7 +804,70 @@ let crypto_stream_salsa20_xor_ic_ c m mlen n ic k =
   input.(12ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 32ul));
   input.(13ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 40ul));
   input.(14ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 48ul));
-  input.(15ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 56ul));
+  input.(15ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 56ul))
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+
+val crypto_stream_salsa20_xor_ic_:
+  c:uint8_p ->
+  m:uint8_p ->
+  mlen:FStar.UInt64.t{U64.v mlen <= length c /\ U64.v mlen <= length m /\ U64.v mlen > 0} ->
+  n:uint8_p{length n = 8} ->
+  ic:FStar.UInt64.t ->
+  k:uint8_p{length k = 32} ->
+  Stack unit
+    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
+    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
+let crypto_stream_salsa20_xor_ic_ c m mlen n ic k =
+  cut (U64.v mlen < pow2 32);
+  Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
+  push_frame();
+  let h0 = ST.get() in
+  let zero = uint8_to_sint8 0uy in
+  let local_state = create zero 112ul in
+  let input = Buffer.sub local_state 0ul  16ul in
+  let block = Buffer.sub local_state 16ul 64ul in
+  let kcopy = Buffer.sub local_state 80ul 32ul in
+  (* let k0 = k.(0ul) in let k1 = k.(1ul) in let k2 = k.(2ul) in let k3 = k.(3ul) in *)
+  (* let k4 = k.(4ul) in let k5 = k.(5ul) in let k6 = k.(6ul) in let k7 = k.(7ul) in *)
+  (* let k8 = k.(8ul) in let k9 = k.(9ul) in let k10 = k.(10ul) in let k11 = k.(11ul) in *)
+  (* let k12 = k.(12ul) in let k13 = k.(13ul) in let k14 = k.(14ul) in let k15 = k.(15ul) in *)
+  (* let k16 = k.(16ul) in let k17 = k.(17ul) in let k18 = k.(18ul) in let k19 = k.(19ul) in *)
+  (* let k20 = k.(20ul) in let k21 = k.(21ul) in let k22 = k.(22ul) in let k23 = k.(23ul) in *)
+  (* let k24 = k.(24ul) in let k25 = k.(25ul) in let k26 = k.(26ul) in let k27 = k.(27ul) in *)
+  (* let k28 = k.(28ul) in let k29 = k.(29ul) in let k30 = k.(30ul) in let k31 = k.(31ul) in *)
+  (* let n0 = n.(0ul) in let n1 = n.(1ul) in let n2 = n.(2ul) in let n3 = n.(3ul) in *)
+  (* let n4 = n.(4ul) in let n5 = n.(5ul) in let n6 = n.(6ul) in let n7 = n.(7ul) in *)
+  (* kcopy.(0ul) <- k0;   kcopy.(1ul) <- k1; *)
+  (* kcopy.(2ul) <- k2;   kcopy.(3ul) <- k3; *)
+  (* kcopy.(4ul) <- k4;   kcopy.(5ul) <- k5; *)
+  (* kcopy.(6ul) <- k6;   kcopy.(7ul) <- k7; *)
+  (* kcopy.(8ul) <- k8;   kcopy.(9ul) <- k9; *)
+  (* kcopy.(10ul) <- k10; kcopy.(11ul) <- k11; *)
+  (* kcopy.(12ul) <- k12; kcopy.(13ul) <- k13; *)
+  (* kcopy.(14ul) <- k14; kcopy.(15ul) <- k15; *)
+  (* kcopy.(16ul) <- k16; kcopy.(17ul) <- k17; *)
+  (* kcopy.(18ul) <- k18; kcopy.(19ul) <- k19; *)
+  (* kcopy.(20ul) <- k20; kcopy.(21ul) <- k21; *)
+  (* kcopy.(22ul) <- k22; kcopy.(23ul) <- k23; *)
+  (* kcopy.(24ul) <- k24; kcopy.(25ul) <- k25; *)
+  (* kcopy.(26ul) <- k26; kcopy.(27ul) <- k27; *)
+  (* kcopy.(28ul) <- k28; kcopy.(29ul) <- k29; *)
+  (* kcopy.(30ul) <- k30; kcopy.(31ul) <- k31; *)
+  (* input.(0ul) <- n0;   input.(1ul) <- n1; *)
+  (* input.(2ul) <- n2;   input.(3ul) <- n3; *)
+  (* input.(4ul) <- n4;   input.(5ul) <- n5; *)
+  (* input.(6ul) <- n6;   input.(7ul) <- n7; *)
+  (* input.(8ul)  <- uint64_to_sint8 ic; *)
+  (* input.(9ul)  <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 8ul)); *)
+  (* input.(10ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 16ul)); *)
+  (* input.(11ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 24ul)); *)
+  (* input.(12ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 32ul)); *)
+  (* input.(13ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 40ul)); *)
+  (* input.(14ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 48ul)); *)
+  (* input.(15ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 56ul)); *)
+  crypto_stream_salsa20_xor_ic__ n ic k local_state;
   let h1 = ST.get() in
   cut (modifies_0 h0 h1);
   let _ = crypto_stream_salsa20_xor_ic_loop c m block input kcopy mlen in
@@ -911,7 +966,61 @@ let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : L
     lemma_intro_modifies_2_1 c h0 h3
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+
+val crypto_stream_salsa20_:
+  n:uint8_p{length n = 8} ->
+  k:uint8_p{length k = 32} ->
+  local_state:uint8_p{length local_state = 112} ->
+  Stack unit
+    (requires (fun h -> live h n /\ live h k /\ live h local_state))
+    (ensures  (fun h0 _ h1 -> live h1 local_state /\ modifies_1 local_state h0 h1))
+let crypto_stream_salsa20_ n k local_state =
+  let zero = Hacl.Cast.uint8_to_sint8 0uy in
+  let input = Buffer.sub local_state 0ul 16ul in
+  let block = Buffer.sub local_state 16ul 64ul in
+  let kcopy = Buffer.sub local_state 80ul 32ul in
+  let k0 = k.(0ul) in let k1 = k.(1ul) in let k2 = k.(2ul) in let k3 = k.(3ul) in
+  let k4 = k.(4ul) in let k5 = k.(5ul) in let k6 = k.(6ul) in let k7 = k.(7ul) in
+  let k8 = k.(8ul) in let k9 = k.(9ul) in let k10 = k.(10ul) in let k11 = k.(11ul) in
+  let k12 = k.(12ul) in let k13 = k.(13ul) in let k14 = k.(14ul) in let k15 = k.(15ul) in
+  let k16 = k.(16ul) in let k17 = k.(17ul) in let k18 = k.(18ul) in let k19 = k.(19ul) in
+  let k20 = k.(20ul) in let k21 = k.(21ul) in let k22 = k.(22ul) in let k23 = k.(23ul) in
+  let k24 = k.(24ul) in let k25 = k.(25ul) in let k26 = k.(26ul) in let k27 = k.(27ul) in
+  let k28 = k.(28ul) in let k29 = k.(29ul) in let k30 = k.(30ul) in let k31 = k.(31ul) in
+  let n0 = n.(0ul) in let n1 = n.(1ul) in let n2 = n.(2ul) in let n3 = n.(3ul) in
+  let n4 = n.(4ul) in let n5 = n.(5ul) in let n6 = n.(6ul) in let n7 = n.(7ul) in
+  kcopy.(0ul) <- k0;   kcopy.(1ul) <- k1;
+  kcopy.(2ul) <- k2;   kcopy.(3ul) <- k3;
+  kcopy.(4ul) <- k4;   kcopy.(5ul) <- k5;
+  kcopy.(6ul) <- k6;   kcopy.(7ul) <- k7;
+  kcopy.(8ul) <- k8;   kcopy.(9ul) <- k9;
+  kcopy.(10ul) <- k10; kcopy.(11ul) <- k11;
+  kcopy.(12ul) <- k12; kcopy.(13ul) <- k13;
+  kcopy.(14ul) <- k14; kcopy.(15ul) <- k15;
+  kcopy.(16ul) <- k16; kcopy.(17ul) <- k17;
+  kcopy.(18ul) <- k18; kcopy.(19ul) <- k19;
+  kcopy.(20ul) <- k20; kcopy.(21ul) <- k21;
+  kcopy.(22ul) <- k22; kcopy.(23ul) <- k23;
+  kcopy.(24ul) <- k24; kcopy.(25ul) <- k25;
+  kcopy.(26ul) <- k26; kcopy.(27ul) <- k27;
+  kcopy.(28ul) <- k28; kcopy.(29ul) <- k29;
+  kcopy.(30ul) <- k30; kcopy.(31ul) <- k31;
+  input.(0ul) <- n0;   input.(1ul) <- n1;
+  input.(2ul) <- n2;   input.(3ul) <- n3;
+  input.(4ul) <- n4;   input.(5ul) <- n5;
+  input.(6ul) <- n6;   input.(7ul) <- n7;
+  input.(8ul)  <- zero;
+  input.(9ul)  <- zero;
+  input.(10ul) <- zero;
+  input.(11ul) <- zero;
+  input.(12ul) <- zero;
+  input.(13ul) <- zero;
+  input.(14ul) <- zero;
+  input.(15ul) <- zero
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
 
 val crypto_stream_salsa20:
   c:uint8_p ->
@@ -935,44 +1044,45 @@ let crypto_stream_salsa20 c clen n k =
     let input = Buffer.sub local_state 0ul 16ul in
     let block = Buffer.sub local_state 16ul 64ul in
     let kcopy = Buffer.sub local_state 80ul 32ul in
-    let k0 = k.(0ul) in let k1 = k.(1ul) in let k2 = k.(2ul) in let k3 = k.(3ul) in
-    let k4 = k.(4ul) in let k5 = k.(5ul) in let k6 = k.(6ul) in let k7 = k.(7ul) in
-    let k8 = k.(8ul) in let k9 = k.(9ul) in let k10 = k.(10ul) in let k11 = k.(11ul) in
-    let k12 = k.(12ul) in let k13 = k.(13ul) in let k14 = k.(14ul) in let k15 = k.(15ul) in
-    let k16 = k.(16ul) in let k17 = k.(17ul) in let k18 = k.(18ul) in let k19 = k.(19ul) in
-    let k20 = k.(20ul) in let k21 = k.(21ul) in let k22 = k.(22ul) in let k23 = k.(23ul) in
-    let k24 = k.(24ul) in let k25 = k.(25ul) in let k26 = k.(26ul) in let k27 = k.(27ul) in
-    let k28 = k.(28ul) in let k29 = k.(29ul) in let k30 = k.(30ul) in let k31 = k.(31ul) in
-    let n0 = n.(0ul) in let n1 = n.(1ul) in let n2 = n.(2ul) in let n3 = n.(3ul) in
-    let n4 = n.(4ul) in let n5 = n.(5ul) in let n6 = n.(6ul) in let n7 = n.(7ul) in
-    kcopy.(0ul) <- k0;   kcopy.(1ul) <- k1;
-    kcopy.(2ul) <- k2;   kcopy.(3ul) <- k3;
-    kcopy.(4ul) <- k4;   kcopy.(5ul) <- k5;
-    kcopy.(6ul) <- k6;   kcopy.(7ul) <- k7;
-    kcopy.(8ul) <- k8;   kcopy.(9ul) <- k9;
-    kcopy.(10ul) <- k10; kcopy.(11ul) <- k11;
-    kcopy.(12ul) <- k12; kcopy.(13ul) <- k13;
-    kcopy.(14ul) <- k14; kcopy.(15ul) <- k15;
-    kcopy.(16ul) <- k16; kcopy.(17ul) <- k17;
-    kcopy.(18ul) <- k18; kcopy.(19ul) <- k19;
-    kcopy.(20ul) <- k20; kcopy.(21ul) <- k21;
-    kcopy.(22ul) <- k22; kcopy.(23ul) <- k23;
-    kcopy.(24ul) <- k24; kcopy.(25ul) <- k25;
-    kcopy.(26ul) <- k26; kcopy.(27ul) <- k27;
-    kcopy.(28ul) <- k28; kcopy.(29ul) <- k29;
-    kcopy.(30ul) <- k30; kcopy.(31ul) <- k31;
-    input.(0ul) <- n0;   input.(1ul) <- n1;
-    input.(2ul) <- n2;   input.(3ul) <- n3;
-    input.(4ul) <- n4;   input.(5ul) <- n5;
-    input.(6ul) <- n6;   input.(7ul) <- n7;
-    input.(8ul)  <- zero;
-    input.(9ul)  <- zero;
-    input.(10ul) <- zero;
-    input.(11ul) <- zero;
-    input.(12ul) <- zero;
-    input.(13ul) <- zero;
-    input.(14ul) <- zero;
-    input.(15ul) <- zero;
+    (* let k0 = k.(0ul) in let k1 = k.(1ul) in let k2 = k.(2ul) in let k3 = k.(3ul) in *)
+    (* let k4 = k.(4ul) in let k5 = k.(5ul) in let k6 = k.(6ul) in let k7 = k.(7ul) in *)
+    (* let k8 = k.(8ul) in let k9 = k.(9ul) in let k10 = k.(10ul) in let k11 = k.(11ul) in *)
+    (* let k12 = k.(12ul) in let k13 = k.(13ul) in let k14 = k.(14ul) in let k15 = k.(15ul) in *)
+    (* let k16 = k.(16ul) in let k17 = k.(17ul) in let k18 = k.(18ul) in let k19 = k.(19ul) in *)
+    (* let k20 = k.(20ul) in let k21 = k.(21ul) in let k22 = k.(22ul) in let k23 = k.(23ul) in *)
+    (* let k24 = k.(24ul) in let k25 = k.(25ul) in let k26 = k.(26ul) in let k27 = k.(27ul) in *)
+    (* let k28 = k.(28ul) in let k29 = k.(29ul) in let k30 = k.(30ul) in let k31 = k.(31ul) in *)
+    (* let n0 = n.(0ul) in let n1 = n.(1ul) in let n2 = n.(2ul) in let n3 = n.(3ul) in *)
+    (* let n4 = n.(4ul) in let n5 = n.(5ul) in let n6 = n.(6ul) in let n7 = n.(7ul) in *)
+    (* kcopy.(0ul) <- k0;   kcopy.(1ul) <- k1; *)
+    (* kcopy.(2ul) <- k2;   kcopy.(3ul) <- k3; *)
+    (* kcopy.(4ul) <- k4;   kcopy.(5ul) <- k5; *)
+    (* kcopy.(6ul) <- k6;   kcopy.(7ul) <- k7; *)
+    (* kcopy.(8ul) <- k8;   kcopy.(9ul) <- k9; *)
+    (* kcopy.(10ul) <- k10; kcopy.(11ul) <- k11; *)
+    (* kcopy.(12ul) <- k12; kcopy.(13ul) <- k13; *)
+    (* kcopy.(14ul) <- k14; kcopy.(15ul) <- k15; *)
+    (* kcopy.(16ul) <- k16; kcopy.(17ul) <- k17; *)
+    (* kcopy.(18ul) <- k18; kcopy.(19ul) <- k19; *)
+    (* kcopy.(20ul) <- k20; kcopy.(21ul) <- k21; *)
+    (* kcopy.(22ul) <- k22; kcopy.(23ul) <- k23; *)
+    (* kcopy.(24ul) <- k24; kcopy.(25ul) <- k25; *)
+    (* kcopy.(26ul) <- k26; kcopy.(27ul) <- k27; *)
+    (* kcopy.(28ul) <- k28; kcopy.(29ul) <- k29; *)
+    (* kcopy.(30ul) <- k30; kcopy.(31ul) <- k31; *)
+    (* input.(0ul) <- n0;   input.(1ul) <- n1; *)
+    (* input.(2ul) <- n2;   input.(3ul) <- n3; *)
+    (* input.(4ul) <- n4;   input.(5ul) <- n5; *)
+    (* input.(6ul) <- n6;   input.(7ul) <- n7; *)
+    (* input.(8ul)  <- zero; *)
+    (* input.(9ul)  <- zero; *)
+    (* input.(10ul) <- zero; *)
+    (* input.(11ul) <- zero; *)
+    (* input.(12ul) <- zero; *)
+    (* input.(13ul) <- zero; *)
+    (* input.(14ul) <- zero; *)
+    (* input.(15ul) <- zero; *)
+    crypto_stream_salsa20_ n k local_state;
     let h1 = ST.get() in
     cut (modifies_0 h0 h1);
     let _ = crypto_stream_salsa20_loop c clen n kcopy input in

@@ -51,7 +51,7 @@ let crypto_box_beforenm k pk sk =
   0ul
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
 
 val crypto_box_detached_afternm:
   c:uint8_p ->
@@ -112,7 +112,7 @@ let crypto_box_detached c mac m mlen n pk sk =
   z
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 val crypto_box_open_detached:
   m:uint8_p ->
@@ -139,7 +139,7 @@ let crypto_box_open_detached m c mac mlen n pk sk =
   z
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 40"
 
 val crypto_box_easy_afternm:
   c:uint8_p ->

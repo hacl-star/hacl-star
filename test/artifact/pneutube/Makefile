@@ -3,7 +3,7 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 ARTIFACT_HOME=..
 include ../Makefile.include
 
-tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_impl.c Hacl.Tube.fst tube.c
+tube-star.exe: crypto/Hacl.EC.Curve25519.fst Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_impl.c Hacl.Tube.fst tube.c
 	mkdir -p tube
 	$(KREMLIN) $(KREMLIN_ARGS) -I $(LIB_KRML) -I crypto $(KREMTEST)/testlib.c $^ \
 		-I $(KREMLIB) -I $(KREMTEST) -I ./c_bindings -I ./tube -no-prefix Libsodium \
@@ -11,11 +11,11 @@ tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_
 		-tmpdir tube -o tube-star.exe -ldopt "-lsodium"
 
 tube-lax: Hacl.Tube.fst
-	$(FSTAR) --include $(LIB_KRML) --include c_bindings \
+	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include crypto_api \
 		--include $(KREMLIB) --include $(KREMTEST) $^ --lax
 
 tube-ver: Hacl.Tube.fst
-	$(FSTAR) --include $(LIB) --include c_bindings \
+	$(FSTAR) --include $(LIB) --include c_bindings --include crypto_api \
 		--include $(KREMLIB) --include $(KREMTEST) $^
 
 clean:

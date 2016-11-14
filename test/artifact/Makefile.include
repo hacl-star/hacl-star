@@ -36,5 +36,8 @@ OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
 %.fst-lax: %.fst
 	$(FSTAR) --lax $(INCLUDES) $^
 
-%.fst-ver: %.fst
+%.fst-ver-ct: %.fst
 	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --include $(LIB)
+
+%.fst-ver: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --include $(LIB_KRML)
