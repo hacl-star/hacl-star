@@ -16,7 +16,7 @@ module U64 = FStar.UInt64
 module U128 = FStar.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 type poly1305_state = st:buffer h64{length st = 6}
 
@@ -249,7 +249,7 @@ let poly1305_finish_ m rem st =
   pop_frame()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 val poly1305_finish__:
   mac:uint8_p{length mac = 16} ->

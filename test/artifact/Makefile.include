@@ -1,0 +1,40 @@
+UNAME := $(shell uname)
+
+# Caller needs to define FSTAR_HOME, ARTIFACT_HOME and KREMLIN_HOME
+HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe --include $(HYPERSTACK)
+FSTAR_OPTIONS_VER=--use_hints
+FSTAR_OPTIONS_KREMLIN=
+
+ifeq ($(CI),true)
+VERBOSE=
+else
+VERBOSE=-verbose
+endif
+KREMLIN=$(KREMLIN_HOME)/krml
+KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
+                        -ccopt -Wno-error=format=
+
+LIB=$(ARTIFACT_HOME)/lib
+LIB_KRML=$(ARTIFACT_HOME)/lib/kremlin
+
+# Linux specific compilation instruction for PneuTube
+ifeq ($(UNAME), Linux)
+KREMLIN_ARGS+= -ccopt -D_GNU_SOURCE
+endif
+
+KREMLIB=$(KREMLIN_HOME)/kremlib
+KREMTEST=$(KREMLIN_HOME)/test
+
+OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
+                $(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \
+		-I $(FSTAR_HOME)/ulib/ml/extracted \
+		-I $(FSTAR_HOME)/ulib/ml/hyperstack -w -20-26-3-8-58
+OCAML_OPTIONS=--lax --codegen OCaml --no_location_info
+OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
+
+%.fst-lax: %.fst
+	$(FSTAR) --lax $(INCLUDES) $^
+
+%.fst-ver: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --include $(LIB)

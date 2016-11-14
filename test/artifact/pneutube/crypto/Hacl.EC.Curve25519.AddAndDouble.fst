@@ -406,7 +406,7 @@ let double_and_add_ pp ppq p pq q tmp =
   lemma_helper_xx (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1 h2 h3 h4 h5 h6 h7 h8;
   ()
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3timeout 40 --initial_fuel 0 --max_fuel 0"
 
 let lemma_helper_7 hinit h0 h1 h2 hfin r : Lemma
   (requires (fresh_frame hinit h0 /\ HS.modifies_one h0.tip h0 h1 /\ HH.modifies_just (Set.union (Set.singleton h0.tip) (Set.singleton r)) h1.h h2.h /\ popped h2 hfin /\ equal_domains hinit hfin /\ equal_domains h1 h2))
@@ -414,7 +414,7 @@ let lemma_helper_7 hinit h0 h1 h2 hfin r : Lemma
   = ()
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
 
 val double_and_add:
   two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} ->

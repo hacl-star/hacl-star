@@ -55,7 +55,7 @@ let store32_le (k:uint8_p) (x:h32) : Stack unit
     k.(3ul) <- sint32_to_sint8 (x >>^ 24ul)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
 
 val crypto_core_hsalsa20:
   output:uint8_p{length output = 32} ->
