@@ -10,6 +10,14 @@ tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_
 		-add-include '<sodium.h>' -add-include '"testlib.h"' \
 		-tmpdir tube -o tube-star.exe -ldopt "-lsodium"
 
+tube-lax: Hacl.Tube.fst
+	$(FSTAR) --include $(LIB_KRML) --include c_bindings \
+		--include $(KREMLIB) --include $(KREMTEST) $^ --lax
+
+tube-ver: Hacl.Tube.fst
+	$(FSTAR) --include $(LIB) --include c_bindings \
+		--include $(KREMLIB) --include $(KREMTEST) $^
+
 clean:
 	rm -rf tube
 	rm -f *~ *.exe
