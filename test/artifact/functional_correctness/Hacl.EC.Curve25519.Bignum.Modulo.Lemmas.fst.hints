@@ -1,0 +1,2835 @@
+[
+  ")Ï3]f‹¸é0+ÑÆ\u001eîŸ¦",
+  [
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_def",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_def",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_def",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "unit_typing"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_mod_a_b",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_mod_a_b",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_mod_a_b",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_mul",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_mul",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_mul",
+      3,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_add",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_add",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_add",
+      3,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_0",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_0",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_0",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Parameters.prime", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_1",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_1",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_1",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_1",
+      4,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Parameters.prime", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_2",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_2",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_2",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_2",
+      4,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Parameters.prime", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_3",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_3",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9_3",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Ghost.reveal",
+        "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Parameters.prime", "equation_Prims.nat",
+        "equation_Prims.pos", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Parameters.prime", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_9",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255m19_val",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255m19_val",
+      2,
+      0,
+      1,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255_modulo_prime",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255_modulo_prime",
+      2,
+      0,
+      1,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255_modulo_prime",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "int_typing",
+        "lemma_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255m19_val",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255_modulo_prime",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+      6,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_Hacl.UInt128.n",
+        "haseqTm_refine_e5e09b9db68eee1607b2e382893a4997",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.satisfiesModuloConstraints",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree_0",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.satisfiesModuloConstraints",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree_0",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Hacl.EC.Curve25519.Parameters.MaxUInt128",
+        "assumption_Hacl.EC.Curve25519.Parameters.MaxUInt64",
+        "equation_FStar.Mul.op_Star", "equation_FStar.UInt8.n",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.satisfiesModuloConstraints",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.v", "equation_Prims.nat",
+        "fuel_correspondence_Hacl.EC.Curve25519.Bigint.maxValue_wide.fuel_instrumented",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "function_token_typing_FStar.UInt8.n", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.bound127",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree1",
+      1,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "data_elim_FStar.UInt64.Mk",
+        "equation_FStar.Buffer.buffer", "equation_FStar.Buffer.contains",
+        "equation_FStar.Buffer.live",
+        "equation_FStar.HyperHeap.contains_ref",
+        "equation_FStar.HyperStack.contains", "equation_FStar.Mul.op_Star",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt128.n", "equation_FStar.UInt32.n",
+        "equation_FStar.UInt64.n", "equation_FStar.UInt64.t",
+        "equation_FStar.UInt64.uint_to_t", "equation_FStar.UInt8.n",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.bound127",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.satisfiesModuloConstraints",
+        "equation_Hacl.EC.Curve25519.Parameters.a24",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "equation_Hacl.UInt128.v", "equation_Prims.l_and",
+        "equation_Prims.nat",
+        "fuel_correspondence_Hacl.EC.Curve25519.Bigint.maxValue_wide.fuel_instrumented",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "function_token_typing_FStar.UInt8.n",
+        "function_token_typing_Hacl.EC.Curve25519.Parameters.a24",
+        "int_typing", "kinding_Hacl.UInt128.t_@tok", "l_and-interp",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_7e3beb6acccffb41919f80afab550fdd",
+        "refinement_interpretation_Tm_refine_b0cc669109f5223394a5a92793efa434",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "typing_FStar.Buffer.MkBuffer.idx", "typing_FStar.Buffer.get",
+        "typing_FStar.UInt32.v", "typing_Hacl.UInt128.v"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_00",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.List.Tot.test_sort",
+        "equation_Prims._assert", "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_FStar.List.Tot.test_sort", "int_inversion",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_00",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_modulo_00",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_mul_nat",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.List.Tot.test_sort",
+        "equation_FStar.Mul.op_Star", "equation_Prims._assert",
+        "equation_Prims.nat",
+        "function_token_typing_FStar.List.Tot.test_sort", "int_inversion",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_Hacl.EC.Curve25519.Parameters.prime", "equation_Prims.nat",
+        "equation_Prims.pos", "int_typing",
+        "lemma_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255m19_val",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      8,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      9,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime0",
+      10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_Hacl.EC.Curve25519.Parameters.prime", "equation_Prims.nat",
+        "equation_Prims.pos", "int_typing",
+        "lemma_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255m19_val",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      8,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      9,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      11,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      12,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_pow2_modulo_prime",
+      13,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_51_p",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_Hacl.EC.Curve25519.Parameters.prime", "equation_Prims.nat",
+        "equation_Prims.pos", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_51_p",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_51_p",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree2",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree2",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.prime",
+        "equation_Hacl.UInt128.t", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree2",
+      3,
+      0,
+      2,
+      [
+        "@query", "b2t_def", "equation_FStar.Ghost.hide",
+        "equation_FStar.Ghost.reveal", "equation_FStar.Mul.op_Star",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.prime",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "equation_Hacl.UInt128.v", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree2",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree",
+      1,
+      0,
+      0,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree",
+      2,
+      0,
+      0,
+      [
+        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_FStar.Mul.op_Star",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isDegreeReduced",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.prime",
+        "equation_Hacl.UInt128.t", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_freduce_degree",
+      3,
+      0,
+      0,
+      [ "@query" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+      1,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "equation_Prims.pos", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.u127",
+      1,
+      0,
+      1,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried_",
+      1,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried_",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried_",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried_",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried_",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried_",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried_",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_1",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_10_0",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.List.Tot.test_sort",
+        "equation_Prims._assert", "equation_Prims.pos",
+        "function_token_typing_FStar.List.Tot.test_sort", "int_inversion",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_10_1",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Minus", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_10_1",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_10_1",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_10_2",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Hacl.EC.Curve25519.Parameters.MaxUInt128",
+        "assumption_Hacl.EC.Curve25519.Parameters.MaxUInt64",
+        "equation_Prims.pos", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_10",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Hacl.EC.Curve25519.Parameters.MaxUInt128",
+        "assumption_Hacl.EC.Curve25519.Parameters.MaxUInt64", "b2t_def",
+        "equation_FStar.Buffer.live", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.bound127",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_1",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "equation_Hacl.UInt128.v", "equation_Prims.l_and",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.HyperStack.mem", "l_and-interp",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110_0",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_FStar.Mul.op_Star"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110_0",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110_0",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      8,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      9,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1101",
+      11,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      8,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      9,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1102",
+      10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      8,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      9,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1103",
+      10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      8,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      9,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1204",
+      10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      8,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      9,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      11,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      12,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_110",
+      13,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      2,
+      0,
+      1,
+      [
+        "@query",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      3,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.v",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      8,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      9,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_11",
+      10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1",
+      2,
+      0,
+      1,
+      [
+        "@query",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_1",
+      3,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_2",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_3",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Buffer.buffer",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.norm_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_3",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_lt",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "int_inversion",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2fd2ca5ba5888b39b1231badbe38fb2e",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_lt",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2fd2ca5ba5888b39b1231badbe38fb2e",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_lt",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_lt",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_rest",
+      1,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_rest",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_99d212c0335bce88ec32beb431e6360c",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_mod_0",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.List.Tot.test_sort",
+        "equation_Prims._assert", "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_FStar.List.Tot.test_sort", "int_inversion",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_20",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Hacl.EC.Curve25519.Parameters.MaxUInt32",
+        "b2t_def", "bool_inversion", "bool_typing",
+        "equation_FStar.List.Tot.test_sort", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.norm_wide",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_2",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_3",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.templ",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.v",
+        "equation_Prims._assert", "equation_Prims.l_and",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "function_token_typing_FStar.List.Tot.test_sort", "int_inversion",
+        "l_and-interp", "l_imp-interp", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "unit_inversion"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_20",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_20",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_20",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_20",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_20",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_20",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_20",
+      8,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_2",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_2",
+      2,
+      0,
+      1,
+      [
+        "@query",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_2",
+      3,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+      3,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_Hacl.UInt128.n",
+        "haseqTm_refine_e5e09b9db68eee1607b2e382893a4997",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+      4,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_Hacl.UInt128.n",
+        "haseqTm_refine_e5e09b9db68eee1607b2e382893a4997",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+      5,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_Hacl.UInt128.n",
+        "haseqTm_refine_e5e09b9db68eee1607b2e382893a4997",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+      6,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_Hacl.UInt128.n",
+        "haseqTm_refine_e5e09b9db68eee1607b2e382893a4997",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_10",
+      1,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "bool_inversion", "bool_typing",
+        "equation_FStar.Buffer.as_seq", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Buffer.contains", "equation_FStar.Buffer.get",
+        "equation_FStar.Buffer.live", "equation_FStar.Mul.op_Star",
+        "equation_FStar.UInt128.t", "equation_FStar.UInt128.v",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_1",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_2",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "equation_Hacl.UInt128.v",
+        "equation_Prims.l_and", "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "fuel_guarded_inversion_FStar.UInt128.t_",
+        "fuel_guarded_inversion_Hacl.UInt128.t_", "int_typing",
+        "kinding_Hacl.UInt128.t_@tok", "l_and-interp",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
+        "proj_equation_FStar.UInt128.Mk_v",
+        "proj_equation_Hacl.UInt128.Mk_v",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_46641acd90d2b6089d6e481fd82969c8",
+        "refinement_interpretation_Tm_refine_7e3beb6acccffb41919f80afab550fdd",
+        "refinement_interpretation_Tm_refine_b0cc669109f5223394a5a92793efa434",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_c90e16742d2e633e32c657b87c3493b3",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_FStar.Buffer.as_seq", "typing_FStar.Buffer.get",
+        "typing_FStar.Seq.index", "typing_Hacl.UInt128.Mk.v",
+        "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_10",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_mod_6_p",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_mod_6_p",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_mod_6_p",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing",
+        "lemma_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255m19_val",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_11",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_11",
+      2,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "equation_FStar.Buffer.live",
+        "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.prime",
+        "equation_Hacl.UInt128.t", "equation_Prims.l_and",
+        "equation_Prims.pos", "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "l_and-interp", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_11",
+      3,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "equation_FStar.Buffer.live",
+        "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.prime",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "equation_Hacl.UInt128.v", "equation_Prims.l_and",
+        "equation_Prims.pos", "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "l_and-interp", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_1",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_1",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Buffer.live", "equation_FStar.Ghost.hide",
+        "equation_FStar.Ghost.reveal",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_1",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_2",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.prime",
+        "equation_Hacl.UInt128.t", "equation_Prims.l_and",
+        "equation_Prims.pos", "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "l_and-interp", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_1",
+      3,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_4",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_20",
+      1,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "bool_inversion", "bool_typing",
+        "equation_FStar.Buffer.as_seq", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Buffer.get", "equation_FStar.Buffer.live",
+        "equation_FStar.Mul.op_Star", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.norm_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_3",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_4",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.templ",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "equation_Hacl.UInt128.v", "equation_Prims.l_and",
+        "equation_Prims.l_imp", "equation_Prims.nat",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "function_token_typing_Hacl.UInt128.v", "int_inversion",
+        "int_typing",
+        "interpretation_Tm_arrow_15569832cb7b48ce3fe999c98911dd3f",
+        "kinding_Hacl.UInt128.t_@tok", "l_and-interp", "l_imp-interp",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_46641acd90d2b6089d6e481fd82969c8",
+        "refinement_interpretation_Tm_refine_7e3beb6acccffb41919f80afab550fdd",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_c90e16742d2e633e32c657b87c3493b3",
+        "token_correspondence_Hacl.UInt128.v", "typing_FStar.Buffer.as_seq",
+        "typing_FStar.Seq.index", "unit_typing"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_2",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_2",
+      2,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "bool_inversion", "bool_typing",
+        "equation_FStar.Buffer.buffer", "equation_FStar.Buffer.live",
+        "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.norm_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carriedTopBottom",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_3",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.prime",
+        "equation_Hacl.UInt128.t", "equation_Prims.l_and",
+        "equation_Prims.pos", "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.HyperStack.mem", "l_and-interp",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_top_2",
+      3,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried01",
+      1,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried01",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried01",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried01",
+      4,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_Hacl.UInt128.n",
+        "haseqTm_refine_e5e09b9db68eee1607b2e382893a4997",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried01",
+      5,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_Hacl.UInt128.n",
+        "haseqTm_refine_e5e09b9db68eee1607b2e382893a4997",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried01",
+      6,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_Hacl.UInt128.n",
+        "haseqTm_refine_e5e09b9db68eee1607b2e382893a4997",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_lt2",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_lt2",
+      2,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_div_lt2",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_99d212c0335bce88ec32beb431e6360c",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "unit_typing"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_norm_5",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Buffer.buffer",
+        "equation_FStar.List.Tot.test_sort",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.norm_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.EC.Curve25519.Parameters.templ",
+        "equation_Hacl.UInt128.t", "equation_Prims._assert",
+        "equation_Prims.nat", "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "function_token_typing_FStar.List.Tot.test_sort", "int_inversion",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_10",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Hacl.EC.Curve25519.Parameters.MaxUInt32",
+        "b2t_def", "bool_inversion", "bool_typing",
+        "equation_FStar.Buffer.contains", "equation_FStar.Buffer.live",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_4",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried01",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "equation_Hacl.UInt128.v", "equation_Prims.l_and",
+        "equation_Prims.l_imp", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.HyperStack.mem", "l_and-interp",
+        "l_imp-interp", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_10",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_11",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_11",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Buffer.live",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_4",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried01",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "equation_Prims.l_and",
+        "equation_Prims.l_imp",
+        "fuel_guarded_inversion_FStar.HyperStack.mem", "l_and-interp",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_11",
+      3,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "equation_FStar.Buffer.live",
+        "equation_FStar.Mul.op_Star", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt128.n",
+        "equation_Hacl.EC.Curve25519.Bigint.bigint_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bigint.u128s",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_4",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.isCarried01",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.n", "equation_Hacl.UInt128.t",
+        "equation_Hacl.UInt128.v", "equation_Prims.l_and",
+        "equation_Prims.l_imp", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.HyperStack.mem", "int_inversion",
+        "l_and-interp", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_11",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_11",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_11",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_1",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_1",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Buffer.live",
+        "equation_Hacl.EC.Curve25519.Bigint.norm_wide",
+        "equation_Hacl.EC.Curve25519.Bigint.s128",
+        "equation_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.carried_4",
+        "equation_Hacl.EC.Curve25519.Parameters.norm_length",
+        "equation_Hacl.UInt128.t", "equation_Prims.l_and",
+        "equation_Prims.l_imp",
+        "fuel_guarded_inversion_FStar.HyperStack.mem", "l_and-interp",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_carry_0_to_1",
+      3,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ]
+  ]
+]
