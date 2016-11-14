@@ -1413,13 +1413,12 @@ let crypto_stream_salsa20 c clen n k =
     cut (modifies_2_1 c h0 h2);
     let clen' = mod_64 clen in
     let off = U32 (Int.Cast.uint64_to_uint32 clen -^ clen') in
-    admit()); admit()
     if U32 (clen' >=^ 0ul) then (
       crypto_core_salsa20 block input kcopy;
       blit block 0ul (offset c off) 0ul (clen')
     );
     let h3 = ST.get() in
-    cut (modifies_2 c block h2 h3); admit()); admit()
+    cut (modifies_2 c block h2 h3);
     cut (modifies_2_1 c h0 h3)
 //    cut (modifies_2_1 c h0 h2)
   );

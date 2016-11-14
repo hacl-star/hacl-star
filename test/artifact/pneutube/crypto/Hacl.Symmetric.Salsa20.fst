@@ -753,7 +753,7 @@ let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 :
     lemma_intro_modifies_2_1 c h0 h3
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 2000"
 
 val crypto_stream_salsa20_xor_ic_:
   c:uint8_p ->
