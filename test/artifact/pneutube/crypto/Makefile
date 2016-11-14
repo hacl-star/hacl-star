@@ -35,6 +35,13 @@ test: Hacl.Test.fst
 		-tmpdir tmp -o test_crypto.exe
 	./test_crypto.exe
 
+extract: Hacl.Test.fst
+	$(KREMLIN) $(KREMLIN_ARGS) $^ -no-prefix Hacl.Test -add-include '"testlib.h"' \
+		$(KREMTEST)/testlib.c -I $(LIB_KRML) -I $(KREMLIB) -I $(KREMTEST) \
+		-tmpdir extracted_code -skip-compilation
+	./test_crypto.exe
+
+
 clean:
 	rm -rf tmp
 	rm -f *~ *.exe

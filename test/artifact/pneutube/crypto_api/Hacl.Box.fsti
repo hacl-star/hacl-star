@@ -49,8 +49,6 @@ val crypto_box_detached:
     (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
-
 val crypto_box_open_detached:
   m:uint8_p ->
   c:uint8_p ->
