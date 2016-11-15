@@ -54,7 +54,9 @@ curve25519-ver: $(addsuffix .fst-ver-ct, $(CURVE25519_MODULES))
 
 poly1305-bignum-ver: $(addsuffix .fst-ver-ct, $(POLY1305_BIGNUM_MODULES))
 
-ver: curve25519-ver poly1305-bignum-ver
+poly1305-ver: poly1305-bignum-ver
+
+ver: curve25519-ver poly1305-ver
 
 hints: $(addsuffix .fst-hints, $(POLY1305_BIGNUM_MODULES))
 
