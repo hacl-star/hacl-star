@@ -303,7 +303,7 @@ val file_send:
 val file_send:
   fsize:u32 -> file:str -> roundup:u64 ->
   host:str -> port:u32 ->
-  skA:uint8_p -> pkB:uint8_p ->
+  skA:privateKey -> pkB:publicKey ->
   Stack open_result
     (requires (fun h -> live h file /\ live h host /\ live h skA /\ live h pkB /\
     	      	        U32.v fsize <= length file))
@@ -495,9 +495,9 @@ val file_recv_loop:
   connb:buffer socket ->
   lhb:buffer socket ->
   sid:uint8_p ->
-  pkA:uint8_p ->
-  pkB:uint8_p ->
-  skB:uint8_p ->
+  pkA:publicKey ->
+  pkB:publicKey ->
+  skB:privateKey ->
   Stack sresult
     (requires (fun h -> True))
     (ensures  (fun h0 _ h1 -> True))
@@ -576,7 +576,7 @@ let rec file_recv_loop fb connb lhb sid pkA pkB skB =
   | SocketError -> TestLib.perr(0ul); SocketError
 
 
-val file_recv: port:u32 -> pkA:uint8_p -> skB:uint8_p -> Stack open_result
+val file_recv: port:u32 -> pkA:publicKey -> skB:privateKey -> Stack open_result
        	   (requires (fun _ -> True))
 	   (ensures  (fun h0 s h1 -> match s.r with
       	   	                   | FileOk ->
@@ -601,14 +601,11 @@ let file_recv p pkA skB =
   let lhb = Buffer.create s 1ul in
   let res = (match tcp_listen p lhb with
   | SocketOk -> (
-      let pkB = create zero_8 32ul in
-      let zero = zero_8 in
-      let nine = Hacl.Cast.uint8_to_sint8 9uy in
-      let basepoint = Buffer.createL [
-        nine; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero;
-        zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero; zero
-      ] in
-      Hacl.EC.Curve25519.exp pkB basepoint skB;
+      let pkB = Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
+      let h0 = ST.get() in
+      getPublicKey skB pkB;
+      let h1 = ST.get() in
+      lemma_reveal_modifies_1 pkB h0 h1;
       match file_recv_loop fb connb lhb sid pkA pkB skB with
       | SocketOk -> opened FileOk fh.stat sid
       | SocketError -> opened FileError fh.stat sid )

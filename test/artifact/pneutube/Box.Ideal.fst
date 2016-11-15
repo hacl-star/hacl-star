@@ -33,8 +33,8 @@ let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 type publicKey     = l:uint8_p{length l = 32}
 type nonce	   = l:uint8_p{length l = 24}
 
-private type privateKey    = l:uint8_p{length l = 32}
-private type symmetricKey  = l:uint8_p{length l = 32}
+type privateKey    = l:uint8_p{length l = 32}
+type symmetricKey  = l:uint8_p{length l = 32}
 
 val cipherlen: nat -> Tot nat
 let cipherlen m = m + 16
