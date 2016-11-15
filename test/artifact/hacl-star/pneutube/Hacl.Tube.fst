@@ -93,13 +93,13 @@ let opened r fs sid = {r = r; sid = sid; fs = fs}
 assume val sent: FStar.HyperStack.mem -> pkA: seq h8 -> pkB: seq h8 -> sid:seq h8 -> FileIO.Types.file_stat -> (seq h8) -> GTot bool
 
 
-val makeStreamID: unit -> StackInline streamID
-  (requires (fun h -> True))
-  (ensures  (fun h0 sid h1 -> live h1 sid /\ ~(contains h0 sid) /\ length sid = 16))
-let makeStreamID () =
-    let b = create (Hacl.Cast.uint8_to_sint8 0uy) 16ul in
-    randombytes_buf b 16uL;
-    b
+val makeStreamID: s:streamID -> StackInline unit
+  (requires (fun h -> live h s))
+  (ensures  (fun h0 sid h1 -> live h1 s /\ modifies_1 s h0 h1))
+let makeStreamID b =
+    (* let b = create (Hacl.Cast.uint8_to_sint8 0uy) 16ul in *)
+    randombytes_buf b 16uL
+    (* b *)
 
 
 (* val putU64: z:h64 -> b:uint8_p -> StackInline unit *)
@@ -182,45 +182,53 @@ module HS = FStar.HyperStack
 
 noextract let triple (a:HH.rid) (b:HH.rid) (c:HH.rid) = Set.union (Set.singleton a) (Set.union (Set.singleton b) (Set.singleton c))
 
-type uint8_p = b:uint8_p{HS.is_stack_region (frameOf b)}
+type uint8_p = b:uint8_p{frameOf b <> file_rgn /\ frameOf b <> socket_rgn}
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
 
 val file_send_loop:
   fh:fh_ref ->
   sb:socket_ref ->
-  ciphertext:uint8_p{Buffer.length ciphertext = U64.v blocksize + 16} ->
-  nonce:uint8_p{Buffer.length nonce = 24 /\ frameOf nonce = frameOf ciphertext} ->
-  key:uint8_p{Buffer.length key = 32 /\ frameOf key = frameOf nonce} ->
+  immut_state:uint8_p{length immut_state = 1244} ->
+  mut_state:uint8_p{length mut_state = U64.v ciphersize + 24 /\ frameOf mut_state <> frameOf immut_state} ->  
   seqno:H64.t ->
   len:U64.t{U64.v len + H64.v seqno < pow2 32} ->
   Stack sresult
     (requires (fun h -> 
       live_file h fh
-      /\ (let fh = get h fh 0 in file_state h fh = FileOpen
-      /\ U64.v (file_offset h fh) + U64.v len * U64.v blocksize <= H64.v fh.stat.size)
-      /\ live h sb /\ live h ciphertext /\ live h nonce /\ live h key
+      /\ (let fh = get h fh 0 in file_state h fh = FileOpen)
+      (* /\ U64.v (file_offset h fh) + U64.v len * U64.v blocksize <= H64.v fh.stat.size + U64.v max_block_size) *)
+      /\ live h sb /\ live h immut_state /\ live h mut_state
       /\ current_state h (get h sb 0) = Open))
     (ensures  (fun h0 res h1 -> 
       (match res with
       | SocketOk -> (
-        live_file h0 fh /\ U64.v blocksize <= U64.v max_block_size
-        /\ (let fh = get h0 fh 0 in file_state h0 fh = FileOpen
-        /\ U64.v (file_offset h0 fh) + U64.v len * U64.v blocksize <= H64.v fh.stat.size)
-        /\ (U64.v len * U64.v blocksize) <= H64.v (get h0 fh 0).stat.size
+        live_file h0 fh
+        /\ (let fh = get h0 fh 0 in file_state h0 fh = FileOpen)
+        (* /\ U64.v (file_offset h0 fh) + U64.v len * U64.v blocksize <= H64.v fh.stat.size + U64.v max_block_size) *)
+        (* /\ (U64.v len * U64.v blocksize) <= H64.v (get h0 fh 0).stat.size *)
         /\ live_file h0 fh /\ live_file h1 fh /\ same_file h0 fh h1 fh
         /\ (let fh0 = get h0 fh 0 in let fh1 = get h1 fh 0 in
-          U64.v (file_offset h1 fh1) = U64.v (file_offset h0 fh0) + U64.v len * U64.v blocksize
-          /\ file_state h1 fh1 = FileOpen)    
-        /\ live h1 nonce /\ live_file h1 fh /\ live h1 ciphertext /\ live h1 sb
-        /\ HS.modifies (triple socket_rgn file_rgn (frameOf ciphertext)) h0 h1
-        /\ modifies_buf_2 (frameOf ciphertext) nonce ciphertext h0 h1
+          (* U64.v (file_offset h1 fh1) = U64.v (file_offset h0 fh0) + U64.v len * U64.v blocksize *)
+          file_state h1 fh1 = FileOpen)
+        /\ live_file h1 fh /\ live h1 mut_state /\ live h1 sb
+        /\ HS.modifies (triple socket_rgn file_rgn (frameOf mut_state)) h0 h1
+        /\ modifies_buf_1 (frameOf mut_state) mut_state h0 h1
         (* /\ modifies_3 nonce fh ciphertext h0 h1 *)
         /\ current_state h1 (get h1 sb 0) = Open
         /\ same_file h0 fh h1 fh)
       | _ -> true)))
-let rec file_send_loop fh sb ciphertext nonce key seqno len =
+let rec file_send_loop fh sb immut_state mut_state seqno len =
+  let pkA   = Buffer.sub immut_state 0ul 32ul in
+  let pkB   = Buffer.sub immut_state 32ul 32ul in
+  let key   = Buffer.sub immut_state 64ul 32ul in
+  let sid   = Buffer.sub immut_state 96ul 16ul in
+  let hsbuf   = Buffer.sub immut_state 112ul 8ul in
+  let fname   = Buffer.sub immut_state 120ul 100ul in
+  let header  = Buffer.sub immut_state 220ul 1024ul in
+  let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
+  let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
   if U64 (len =^ 0uL) then (
     SocketOk
   )
@@ -232,52 +240,17 @@ let rec file_send_loop fh sb ciphertext nonce key seqno len =
     let h1 = ST.get() in
     lemma_reveal_modifies_1 nonce h0 h1;
     let seqno = H64 (seqno +^ Hacl.Cast.uint64_to_sint64 1uL) in
-    let _ = crypto_box_easy_afternm ciphertext next blocksize nonce key in
+    assume (as_seq h1 key = agreedKey (as_seq h1 pkA) (as_seq h1 pkB));
+    let _ = crypto_box_easy_afternm #pkA #pkB ciphertext next blocksize nonce key in
     let h2 = ST.get() in
-    lemma_reveal_modifies_1 ciphertext h1 h2;
+    lemma_reveal_modifies_1 mut_state h1 h2;
     let sock_res = tcp_write_all sb ciphertext ciphersize in
     let h3 = ST.get() in
     match sock_res with
-    | SocketOk -> file_send_loop fh sb ciphertext nonce key seqno i
+    | SocketOk -> file_send_loop fh sb immut_state mut_state seqno i
     | SocketError -> SocketError
   )
 
-
-(*
-val file_send_loop_2:
-  fh:fh_ref ->
-  sb:socket_ref ->
-  ciphertext:uint8_p{Buffer.length ciphertext = U64.v blocksize + 16} ->
-  plaintext:uint8_p{Buffer.length plaintext = U64.v blocksize} ->
-  nonce:uint8_p{Buffer.length nonce = 24 /\ frameOf nonce = frameOf ciphertext} ->
-  key:uint8_p{Buffer.length key = 32 /\ frameOf key = frameOf ciphertext} ->
-  len:U64.t  ->
-  Stack sresult
-    (requires (fun h -> 
-      live h sb /\ live h ciphertext /\ live h nonce /\ live h key /\ live h plaintext
-      /\ current_state h (get h sb 0) = Open))
-    (ensures (fun h0 res h1 -> 
-      (match res with
-      | SocketOk -> (
-        live h1 ciphertext /\ live h1 sb
-        /\ HS.modifies (Set.union (Set.singleton socket_rgn) (Set.singleton (frameOf ciphertext))) h0 h1
-        /\ modifies_buf_1 (frameOf ciphertext) ciphertext h0 h1
-        /\ current_state h1 (get h1 sb 0) = Open)
-      | _ -> true)))
-
-let rec file_send_loop_2 fh sb ciphertext plaintext nonce key len =
-  if U64 (len =^ 0uL) then SocketOk
-  else (
-    let i = U64 (len -^ 1uL) in
-    let h0 = ST.get() in
-    let _ = crypto_box_easy_afternm ciphertext plaintext blocksize nonce key in
-    let h1 = ST.get() in
-    lemma_reveal_modifies_1 ciphertext h0 h1;
-    match tcp_write_all sb ciphertext ciphersize with
-    | SocketOk -> file_send_loop_2 fh sb ciphertext plaintext nonce key i
-    | SocketError -> SocketError
-  )
-*)
 
 
 (* security spec *)
@@ -301,32 +274,36 @@ val file_send:
 *)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
-
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
 
 val file_send_fragments:
   sb:socket_ref ->
   fb:fh_ref ->
-  pkA:uint8_p ->
-  pkB:uint8_p ->
-  sid:streamID ->
-  ciphertext:uint8_p{Buffer.length ciphertext = U64.v blocksize + 16} ->
-  nonce:uint8_p{Buffer.length nonce = 24 /\ frameOf nonce = frameOf ciphertext} ->
-  key:uint8_p{Buffer.length key = 32 /\ frameOf key = frameOf nonce} ->
+  immut_state:uint8_p{length immut_state = 1244} ->
+  mut_state:uint8_p{length mut_state = U64.v ciphersize + 24 /\ frameOf mut_state <> frameOf immut_state} ->
   seqno:H64.t ->
   len:U64.t{U64.v len + H64.v seqno < pow2 32} ->
   rem:U64.t{U64.v rem < U64.v blocksize} ->
   Stack open_result
     (requires (fun h ->
       live_file h fb
-      /\ (let fh = get h fb 0 in file_state h fh = FileOpen
-      /\ U64.v (file_offset h fh) + U64.v len * U64.v blocksize <= H64.v fh.stat.size)
-      /\ live h sb /\ live h ciphertext /\ live h nonce /\ live h key /\ live h pkA /\ live h pkB
+      /\ (let fh = get h fb 0 in file_state h fh = FileOpen)
+      (* /\ U64.v (file_offset h fh) + U64.v len * U64.v blocksize <= H64.v fh.stat.size) *)
+      /\ live h sb /\ live h immut_state /\ live h mut_state
       /\ current_state h (get h sb 0) = Open))
     (ensures (fun h0 r h1 -> True))
-let file_send_fragments sb fb pkA pkB sid ciphertext nonce key seqno fragments rem =
+let file_send_fragments sb fb immut_state mut_state seqno fragments rem =
   let fh  = Buffer.index fb 0ul in
-  match file_send_loop fb sb ciphertext nonce key seqno fragments with
+  let pkA   = Buffer.sub immut_state 0ul 32ul in
+  let pkB   = Buffer.sub immut_state 32ul 32ul in
+  let key   = Buffer.sub immut_state 64ul 32ul in
+  let sid   = Buffer.sub immut_state 96ul 16ul in
+  let hsbuf   = Buffer.sub immut_state 112ul 8ul in
+  let fname   = Buffer.sub immut_state 120ul 100ul in
+  let header  = Buffer.sub immut_state 220ul 1024ul in
+  let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
+  let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
+  match file_send_loop fb sb immut_state mut_state seqno fragments with
   | SocketOk -> (
       if U64 (rem  >^ 0uL) then (
         let next = file_next_read_buffer fb rem in
@@ -352,81 +329,96 @@ let file_send_fragments sb fb pkA pkB sid ciphertext nonce key seqno fragments r
       ) )
   | SocketError -> opened FileError fh.stat sid
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 400"
 
 val file_flush_all:
   sb:socket_ref ->
   fb:fh_ref ->
-  skA:uint8_p ->
-  pkA:uint8_p ->
-  pkB:uint8_p ->
-  sid:streamID ->
-  header:uint8_p ->
-  ciphertext:uint8_p{Buffer.length ciphertext = U64.v blocksize + 16} ->
-  len:U64.t{U64.v len < pow2 32} ->
-  hsize:U64.t ->
+  immut_state:uint8_p{length immut_state = 1244} ->
+  mut_state:uint8_p{length mut_state = U64.v ciphersize + 24 /\ frameOf immut_state <> frameOf mut_state} ->
+  ctr:U64.t{U64.v ctr < pow2 32 - 1} ->
   rem:U64.t{U64.v rem < U64.v blocksize} ->
-  buf:uint8_p ->
   Stack open_result
-    (requires (fun _ -> true))
-    (ensures (fun _ _ _ -> true))
-let file_flush_all sb fb skA pkA pkB sid header ciphertext fragments hsize rem buf =
+    (requires (fun h -> live h sb /\ current_state h (get h sb 0) = Open
+      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)
+      /\ live h immut_state /\ live h mut_state))
+    (ensures (fun h0 r h1 -> True))
+let file_flush_all sb fb immut_state mut_state ctr rem =
   let fh  = Buffer.index fb 0ul in
+  let pkA   = Buffer.sub immut_state 0ul 32ul in
+  let pkB   = Buffer.sub immut_state 32ul 32ul in
+  let key   = Buffer.sub immut_state 64ul 32ul in
+  let sid   = Buffer.sub immut_state 96ul 16ul in
+  let hsbuf   = Buffer.sub immut_state 112ul 8ul in
+  let fname   = Buffer.sub immut_state 120ul 100ul in
+  let header  = Buffer.sub immut_state 220ul 1024ul in
+  let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
+  let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
   (match tcp_write_all sb sid 16uL with
     | SocketOk -> (
-                store64_le buf hsize;
-                match tcp_write_all sb buf 8uL with
+                match tcp_write_all sb hsbuf 8uL with
                 | SocketOk -> (
                     match tcp_write_all sb pkA 32uL with
                     | SocketOk -> (
                         match tcp_write_all sb pkB 32uL with
                         | SocketOk -> (
                             let seqno = zero_64 in
-                            let nonce = Buffer.create zero_8 24ul in
-                            let key   = Buffer.create zero_8 32ul in
-                            if U32 (crypto_box_beforenm key pkB skA =^ 0ul) then (
-                              (* Populating the nonce *)
-                              blit sid 0ul nonce 0ul 16ul;
-                              store64_le (sub nonce 16ul 8ul) seqno;
-                              let seqno = H64 (seqno +%^ one_64) in
-                              let _ = crypto_box_easy_afternm #pkA #pkB ciphertext header headersize
-                                                               nonce key in
-                              (match tcp_write_all sb ciphertext (cipherlen headersize) with
-                              | SocketOk -> file_send_fragments sb fb pkA pkB sid ciphertext nonce key seqno fragments rem                              
-                                  (* match file_send_loop fb sb ciphertext nonce key seqno fragments with *)
-                                  (* | SocketOk -> ( *)
-                                  (*     if U64 (rem  >^ 0uL) then ( *)
-                                  (*       let next = file_next_read_buffer fb rem in *)
-                                  (*       let seqno = Hacl.Cast.uint64_to_sint64 (U64 (fragments +%^ 1uL)) in *)
-				  (*       let h0 = ST.get() in *)
-                                  (*       store64_le (sub nonce 16ul 8ul) seqno; *)
-				  (*       let h1 = ST.get() in *)
-				  (*       lemma_reveal_modifies_1 nonce h0 h1; *)
-				  (*       let _ = crypto_box_easy_afternm #pkA #pkB ciphertext next blocksize nonce key in *)
-				  (*       let h2 = ST.get() in *)
-				  (*       lemma_reveal_modifies_1 ciphertext h1 h2; *)
-				  (*       let sock_res = tcp_write_all sb ciphertext (cipherlen rem) in *)
-				  (*       let h3 = ST.get() in *)
-                                  (*       (match sock_res with *)
-                                  (*       | SocketOk -> opened FileOk fh.stat sid *)
-                                  (*       | SocketError -> opened FileError fh.stat sid) *)
-                                  (*     ) else ( *)
-                                  (*       opened FileOk fh.stat sid *)
-                                  (*     ) ) *)
-                                  (* | SocketError -> opened FileError fh.stat sid ) *)
-                              | SocketError -> opened FileError fh.stat sid )
-                            ) else (
-                              opened FileOk fh.stat sid
-                            ) )
+                            let h0 = ST.get() in
+                            (* Populating the nonce *)
+                            blit sid 0ul nonce 0ul 16ul;
+                            store64_le (sub nonce 16ul 8ul) seqno;
+                            let seqno = H64 (seqno +%^ one_64) in
+                            let h = ST.get() in
+                            assume (as_seq h key == agreedKey (as_seq h pkA) (as_seq h pkB));
+                            let ciphertext' = sub ciphertext 0ul (U32 (headersize_32 +^ 16ul)) in
+                            let _ = crypto_box_easy_afternm #pkA #pkB ciphertext' header headersize
+                                                             nonce key in
+                            let h1 = ST.get() in
+                            lemma_reveal_modifies_1 mut_state h0 h1;
+                            (match tcp_write_all sb ciphertext' (cipherlen headersize) with
+                            | SocketOk -> file_send_fragments sb fb immut_state mut_state seqno ctr rem
+                            | SocketError -> opened FileError fh.stat sid ) )
                         | SocketError -> opened FileError fh.stat sid )
                     | SocketError -> opened FileError fh.stat sid )
                 | SocketError -> opened FileError fh.stat sid )
             | SocketError -> opened FileError fh.stat sid )
 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
+
+
+assume val input_rgn: r:HH.rid{r <> file_rgn /\ r <> socket_rgn}
+assume val dummy_ptr: uint8_p
+
+
+val file_send_2:
+  sb:socket_ref ->
+  fb:fh_ref ->
+  immutable_state:uint8_p{length immutable_state = 1244} ->
+  num:U64.t ->
+  rem:U64.t{U64.v rem < U64.v blocksize} ->
+  Stack open_result
+    (requires (fun h -> live h immutable_state /\ live h sb /\ live_file h fb))
+    (ensures  (fun h0 s h1 -> true))
+
+let file_send_2 sb fb immut_state num rem =
+  push_frame();
+  let s = sb.(0ul) in
+  let fh = fb.(0ul) in
+  let mut_state = Buffer.create zero_8 (U32 (ciphersize_32 +^ 24ul)) in
+  let header = Buffer.create zero_8 headersize_32 in
+  let res = file_flush_all sb fb immut_state mut_state num rem in
+  pop_frame();
+  res
+  
+
 val file_send:
-  fsize:u32 -> file:str{length file = U32.v fsize /\ length file < 100} -> roundup:u64 ->
-  host:str -> port:u32 ->
-  skA:privateKey -> pkB:publicKey ->
+  fsize:u32 ->
+  file:str{length file = U32.v fsize /\ length file < 100 /\ frameOf file = input_rgn} ->
+  roundup:u64 ->
+  host:str{frameOf host = input_rgn} -> port:u32 ->
+  skA:privateKey{frameOf skA = input_rgn} ->
+  pkB:publicKey{frameOf pkB = input_rgn /\ disjoint skA pkB} ->
   ST open_result
     (requires (fun h -> live h file /\ live h host /\ live h skA /\ live h pkB /\
     	      	        U32.v fsize <= length file))
@@ -435,121 +427,63 @@ val file_send:
 				     (* HS.modifies Set.empty h0 h1 *)
 				   | _ -> true))
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
+
 let file_send fsize f r h p skA pkB =
   push_frame();
-  (* Initializing all buffers on the stack *)
-  let pkA = Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
   let h0 = ST.get() in
+  (* Initializing all buffers on the stack *)
+  let state = Buffer.create zero_8 1244ul  in
+  let pkA   = Buffer.sub state 0ul 32ul in
+  let pkB_cpy = Buffer.sub state 32ul 32ul in
+  let key   = Buffer.sub state 64ul 32ul in
+  let sid   = Buffer.sub state 96ul 16ul in
+  let hsbuf   = Buffer.sub state 112ul 8ul in
+  let fname   = Buffer.sub state 120ul 100ul in
+  let header  = Buffer.sub state 220ul 1024ul in
+  let h0' = ST.get() in
   getPublicKey skA pkA;
+  makeStreamID sid;
+  blit pkB 0ul pkB_cpy 0ul 32ul;
+  Buffer.blit f 0ul fname 0ul fsize;
+  let keygen_res = U32 (crypto_box_beforenm key pkB skA =^ 0ul) in
   let h1 = ST.get() in
-  lemma_reveal_modifies_1 pkA h0 h1;
-
-  let zero = Hacl.Cast.uint8_to_sint8 0uy in
-
+  assert(modifies_0 h0 h1);
   (* Initialization of the file_handle *)
-  let dummy_ptr = FStar.Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) 1ul in
   let fb = Buffer.rcreate file_rgn (init_file_handle(dummy_ptr)) 1ul in
-
-  (* let c1 = C.clock() in *)
-
-  (* Initialization of the sessionID *)
-  let sid = makeStreamID() in
-
+  (* Initialization of the socket *)
+  let s = init_socket() in
+  let sb = Buffer.rcreate socket_rgn s 1ul in
   let res =
     match (file_open_read_sequential f fb) with
     | FileOk ->
         (* Read file handle value *)
         let fh = fb.(0ul) in
-        (* Initialization of the socket *)
-        let s = init_socket() in
-        let sb = Buffer.rcreate socket_rgn s 1ul in
+        let file_size = fh.stat.size in
+        let sblock = Hacl.Cast.uint64_to_sint64 blocksize in
+        let roundup = Hacl.Cast.uint64_to_sint64 r in
+	let file_size_mod_roundup = H64 (file_size &^ (roundup-%^one_64)) in
+        let mask = H64 (gte_mask roundup one_64 &^ (lognot (eq_mask file_size_mod_roundup zero_64))) in
+        let frem = H64 ((roundup -%^ file_size_mod_roundup) &^ mask) in
+        let hsize = H64 (file_size +%^ frem) in
+        let hfragments = H64 (hsize >>^ blocksize_bits) in
+        let hrem = H64 (file_size &^ (sblock-^one_64)) in
+	let fragments = declassify hfragments in
+        assume (Hacl.Policies.declassifiable hrem);
+	let rem = Hacl.Policies.declassify_u64 hrem in
+        let file_size = fh.stat.size in
+        let mtime = fh.stat.mtime in
+        let f64: h64 = Hacl.Cast.uint32_to_sint64 fsize in
+        store64_le (Buffer.sub header  0ul 8ul) file_size;
+        store64_le (Buffer.sub header  8ul 8ul) mtime;
+        store64_le (Buffer.sub header 16ul 8ul) f64;
+        Buffer.blit f 0ul header 24ul fsize;
+        store64_le (hsbuf) hsize;
         (match tcp_connect h p sb with
-        | SocketOk ->
-	    let s = sb.(0ul) in
-            let ciphertext = Buffer.create zero ciphersize_32 in
-            let file_size = fh.stat.size in
-
-            (* We assume that blocksize and roundup are both powers of 2;	
-	       Otherwise we will need "modulo" which is not constant-time *)
-	    let sblock = Hacl.Cast.uint64_to_sint64 blocksize in
-            let roundup = Hacl.Cast.uint64_to_sint64 r in
-	    let file_size_mod_roundup = H64 (file_size &^ (roundup-%^one_64)) in 
-            let mask = H64 (gte_mask roundup one_64 &^ (lognot (eq_mask file_size_mod_roundup zero_64))) in 
-            let frem = H64 ((roundup -%^ file_size_mod_roundup) &^ mask) in 
-            let hsize = H64 (file_size +%^ frem) in
-            let hfragments = H64 (hsize >>^ blocksize_bits) in 
-            let hrem = H64 (file_size &^ (sblock-^one_64)) in 
-	    let fragments = declassify hfragments in
-            assume (Hacl.Policies.declassifiable hrem);
-	    let rem = Hacl.Policies.declassify_u64 hrem in
-            let mtime = fh.stat.mtime in
-            let header = Buffer.create zero_8 headersize_32 in
-	    let f64: h64 = Hacl.Cast.uint32_to_sint64 fsize in
-            (* JK: Omitting memset to 0 for now *)
-            store64_le (Buffer.sub header  0ul 8ul) file_size;
-            store64_le (Buffer.sub header  8ul 8ul) mtime;
-            store64_le (Buffer.sub header 16ul 8ul) f64;
-            (* JK: Ignoring the test on the file name length for convenience *)
-            Buffer.blit f 0ul header 24ul fsize;
-            (* A buffer to store uint64 values before flushing them *)
-            let buf = Buffer.create zero 8ul in
-            (* Flush the streamID *)
-            file_flush_all sb fb skA pkA pkB sid header ciphertext fragments hsize rem buf      
-	    (* (match tcp_write_all sb sid 16uL with *)
-	    (* | SocketOk -> ( *)
-            (*     store64_le buf hsize; *)
-            (*     match tcp_write_all sb buf 8uL with *)
-            (*     | SocketOk -> ( *)
-            (*         match tcp_write_all sb pkA 32uL with *)
-            (*         | SocketOk -> ( *)
-            (*             match tcp_write_all sb pkB 32uL with *)
-            (*             | SocketOk -> ( *)
-            (*                 let seqno = zero_64 in *)
-            (*                 let nonce = Buffer.create zero 24ul in *)
-            (*                 let key   = Buffer.create zero 32ul in *)
-            (*                 if U32 (crypto_box_beforenm key pkB skA =^ 0ul) then ( *)
-            (*                   (\* Populating the nonce *\) *)
-            (*                   blit sid 0ul nonce 0ul 16ul; *)
-            (*                   store64_le (sub nonce 16ul 8ul) seqno; *)
-            (*                   let seqno = H64 (seqno +%^ one_64) in *)
-            (*                   let _ = crypto_box_easy_afternm #pkA #pkB ciphertext header headersize *)
-            (*                                                    nonce key in *)
-            (*                   (match tcp_write_all sb ciphertext (cipherlen headersize) with *)
-            (*                   | SocketOk -> ( *)
-            (*                       match file_send_loop fb sb ciphertext nonce key seqno fragments with *)
-            (*                       | SocketOk -> ( *)
-            (*                           if U64 (rem  >^ 0uL) then ( *)
-            (*                             let next = file_next_read_buffer fb rem in *)
-            (*                             let seqno = Hacl.Cast.uint64_to_sint64 (U64 (fragments +%^ 1uL)) in *)
-	    (*     			let h0 = ST.get() in *)
-            (*                             store64_le (sub nonce 16ul 8ul) seqno; *)
-	    (*     			let h1 = ST.get() in *)
-	    (*     			lemma_reveal_modifies_1 nonce h0 h1; *)
-	    (*     			let _ = crypto_box_easy_afternm #pkA #pkB ciphertext next blocksize nonce key in *)
-	    (*     			let h2 = ST.get() in *)
-	    (*     			lemma_reveal_modifies_1 ciphertext h1 h2; *)
-	    (*     			let sock_res = tcp_write_all sb ciphertext (cipherlen rem) in *)
-	    (*     			let h3 = ST.get() in *)
-            (*                             (match sock_res with *)
-            (*                             | SocketOk -> opened FileOk fh.stat sid *)
-            (*                             | SocketError -> opened FileError fh.stat sid) *)
-            (*                           ) else ( *)
-            (*                             opened FileOk fh.stat sid *)
-            (*                           ) ) *)
-            (*                       | SocketError -> opened FileError fh.stat sid ) *)
-            (*                   | SocketError -> opened FileError fh.stat sid ) *)
-            (*                 ) else ( *)
-            (*                   opened FileOk fh.stat sid *)
-            (*                 ) ) *)
-            (*             | SocketError -> opened FileError fh.stat sid ) *)
-            (*         | SocketError -> opened FileError fh.stat sid ) *)
-            (*     | SocketError -> opened FileError fh.stat sid ) *)
-            (* | SocketError -> opened FileError fh.stat sid ) *)
+        | SocketOk -> file_send_2 sb fb state fragments rem
         | SocketError -> opened FileError fh.stat sid )
     | FileError -> opened FileError (fb.(0ul)).stat sid in
   pop_frame();
-  (* let c2 = C.clock() in *)
-  (* TestLib.print_clock_diff c1 c2; *)
   res
 
 #set-options "--lax"

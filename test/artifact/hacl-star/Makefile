@@ -11,8 +11,8 @@ tube-star.exe: crypto/Hacl.EC.Curve25519.fst pneutube/Box.Ideal.fst pneutube/c_b
 		-tmpdir tube -o tube-star.exe -ldopt "-lsodium"
 
 tube-lax: pneutube/Hacl.Tube.fst
-	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include crypto_api \
-		--include $(KREMLIB) --include $(KREMTEST) $^ --lax
+	$(FSTAR) --include $(LIB_KRML) --include pneutube/c_bindings --include crypto_api \
+		--include $(KREMLIB) --include $(KREMTEST) $^ --lax --include pneutube --include $(FSTAR_HOME)/ulib/hyperstack
 
 tube-ver: pneutube/Hacl.Tube.fst
 	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include crypto_api \
