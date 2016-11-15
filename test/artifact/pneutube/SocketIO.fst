@@ -1,5 +1,7 @@
 module SocketIO
 
+open FStar.HyperHeap
+open FStar.HyperStack
 open FStar.Buffer
 open FStar.UInt8
 open Hacl.Constants
@@ -9,49 +11,69 @@ open PaddedFileIO
 
 module U64 = FStar.UInt64
 module H64 = Hacl.UInt64
+module HS = FStar.HyperStack
+module HH = FStar.HyperHeap
 
-assume val current_state: FStar.HyperStack.mem -> socket -> GTot socket_state
 
-assume val tcp_connect: host: uint8_p ->
+(* The region in which sockets live *)
+assume val socket_rgn: r:rid{is_eternal_region r /\ file_rgn <> r}
+type socket_ref = sb:buffer socket{length sb = 1 /\ socket_rgn = (frameOf sb)}
+
+(* The socket state only depends on the socket region *)
+assume val current_state_: FStar.Heap.heap -> socket -> GTot socket_state
+val current_state: FStar.HyperStack.mem -> socket -> GTot socket_state
+let current_state h s = current_state_ (Map.sel h.h socket_rgn) s
+
+
+assume val tcp_connect:
+  host: uint8_p ->
   port:u32 ->
-  s:buffer socket{length s = 1 /\ disjoint host s} ->
+  s:socket_ref ->
   Stack sresult
     (requires (fun h -> live h host /\ live h s))
-    (ensures  (fun h0 r h1 -> modifies_1 s h0 h1 /\ live h1 s /\ live h0 host /\ (match r with
-    	      	              | SocketOk ->
-			      	let sh = get h1 s 0 in
-				current_state h1 sh = Open
-                               | _ -> True)))
+    (ensures  (fun h0 r h1 -> HS.modifies (Set.singleton socket_rgn) h0 h1
+      /\ live h1 s /\ live h1 host
+      /\ (match r with | SocketOk -> let sh = get h1 s 0 in current_state h1 sh = Open
+                      | _ -> True)))
 
-assume val tcp_listen: port:u32 -> s:buffer socket{length s = 1} -> Stack sresult
+assume val tcp_listen: port:u32 -> s:socket_ref -> Stack sresult
     (requires (fun h -> live h s))
-    (ensures  (fun h0 r h1 -> live h1 s /\ modifies_1 s h0 h1
+    (ensures  (fun h0 r h1 -> HS.modifies (Set.singleton socket_rgn) h0 h1
+      /\ live h1 s
       /\ (match r with | SocketOk -> let sh = get h1 s 0 in current_state h1 sh = Open
                       | _ -> True)))
 
-assume val tcp_accept: l:buffer socket{length l = 1} -> s:buffer socket{length s = 1} -> Stack sresult
+
+assume val tcp_accept: l:socket_ref -> s:socket_ref -> Stack sresult
     (requires (fun h -> live h s /\ live h l /\ current_state h (get h l 0) = Open))
-    (ensures  (fun h0 r h1 -> live h1 s /\ modifies_1 s h0 h1
+    (ensures  (fun h0 r h1 -> live h1 s /\ live h1 l /\ HS.modifies (Set.singleton socket_rgn) h0 h1
       /\ (match r with | SocketOk -> let sh = get h1 s 0 in current_state h1 sh = Open
                       | _ -> True)))
 
-assume val tcp_write_all: s:buffer socket{length s = 1} ->
+
+assume val tcp_write_all: s:socket_ref ->
   b:uint8_p ->
   len:u64{U64.v len <= length b} ->
   Stack sresult
     (requires (fun h0 -> live h0 s /\ live h0 b /\ current_state h0 (get h0 s 0) = Open))
-    (ensures  (fun h0 r h1 -> live h1 s /\ live h1 b /\ h0 == h1
+    (ensures  (fun h0 r h1 -> live h1 s /\ live h1 b
+      /\ h0 == h1
+      (* /\ HS.modifies (Set.singleton socket_rgn) h0 h1 *)
+      (* /\ HS.modifies_ref socket_rgn !{} h0 h1 *)
       /\ (r = SocketOk ==> current_state h1 (get h1 s 0) = Open)))
 
-assume val tcp_read_all: s:buffer socket{length s = 1} ->
-  b:buffer u8 ->
+
+assume val tcp_read_all:
+  s:socket_ref ->
+  b:buffer u8{frameOf b <> socket_rgn} ->
   len:u64{length b >= U64.v len} ->
   Stack sresult
     (requires (fun h0 -> live h0 s /\ live h0 b /\ current_state h0 (get h0 s 0) = Open))
     (ensures  (fun h0 r h1 -> live h1 s /\ live h1 b /\ modifies_1 b h0 h1
       /\ (r = SocketOk ==> current_state h1 (get h1 s 0) = Open)))
 
+
 assume val tcp_close: s:buffer socket{length s = 1} -> Stack sresult
     (requires (fun h0 -> live h0 s /\ current_state h0 (get h0 s 0) = Open))
-    (ensures  (fun h0 r h1 -> live h1 s /\ h0 == h1
+    (ensures  (fun h0 r h1 -> live h1 s /\ HS.modifies (Set.singleton socket_rgn) h0 h1
       /\ (r = SocketOk ==> current_state h1 (get h1 s 0) = Closed)))
