@@ -36,18 +36,11 @@ POLY1305_BIGNUM_MODULES= \
 	Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part6 \
 	Crypto.Symmetric.Poly1305.Bignum
 
-POLY1305_MODULES= \
-	Crypto.Symmetric.Bytes \
-	Buffer.Utils \
-	Crypto.Symmetric.Poly1305
-
 MODULES=$(CURVE25519_MODULES)
 
 curve25519-ver: $(addsuffix .fst-ver-ct, $(CURVE25519_MODULES))
-poly1305-ver: poly1305-bignum-ver poly1305-i-ver
-
+poly1305-ver: poly1305-bignum-ver
 poly1305-bignum-ver: $(addsuffix .fst-ver-ct, $(POLY1305_MODULES))
-poly1305-i-ver: $(addsuffix .fst-ver, $(POLY1305_MODULES))
 
 hints: $(addsuffix .fst-hints, $(POLY1305_BIGNUM_MODULES))
 
