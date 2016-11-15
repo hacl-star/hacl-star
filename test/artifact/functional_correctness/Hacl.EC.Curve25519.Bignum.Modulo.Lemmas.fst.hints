@@ -642,8 +642,7 @@
         "lemma_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255m19_val",
         "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0
     ],
@@ -725,14 +724,26 @@
       0,
       1,
       [
-        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "@query", "b2t_def", "data_elim_FStar.UInt64.Mk",
+        "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt64.n",
+        "equation_FStar.UInt64.t", "equation_FStar.UInt64.uint_to_t",
+        "equation_Hacl.EC.Curve25519.Parameters.a24",
         "equation_Hacl.EC.Curve25519.Parameters.prime", "equation_Prims.nat",
-        "equation_Prims.pos", "int_typing",
+        "equation_Prims.nonzero", "equation_Prims.pos",
+        "function_token_typing_Hacl.EC.Curve25519.Parameters.a24",
+        "int_typing",
         "lemma_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas.lemma_2_255m19_val",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
+        "refinement_interpretation_Tm_refine_7075614a0e8c0bdbec6de0d0ef7f1280",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "unit_inversion", "unit_typing"
       ],
       0
     ],

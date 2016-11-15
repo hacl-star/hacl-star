@@ -32,12 +32,3 @@ OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
 		-I $(FSTAR_HOME)/ulib/ml/hyperstack -w -20-26-3-8-58
 OCAML_OPTIONS=--lax --codegen OCaml --no_location_info
 OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
-
-%.fst-lax: %.fst
-	$(FSTAR) --lax $(INCLUDES) $^
-
-%.fst-ver-ct: %.fst
-	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --include $(LIB)
-
-%.fst-ver: %.fst
-	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --include $(LIB_KRML)

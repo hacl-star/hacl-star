@@ -3,9 +3,9 @@ KREMLIN_HOME?=$(FSTAR_HOME)../kremlin
 ARTIFACT_HOME=..
 include $(ARTIFACT_HOME)/Makefile.include
 
-INCLUDES=$(addprefix --include , ../lib)
+INCLUDES=$(addprefix --include , ../lib ../security)
 
-# All the directory modules (for efficient verification)
+# All the directory modules
 CURVE25519_MODULES= \
 	Hacl.EC.Curve25519.Parameters \
 	Hacl.EC.Curve25519.Bigint \
@@ -38,14 +38,27 @@ POLY1305_BIGNUM_MODULES= \
 
 MODULES=$(CURVE25519_MODULES)
 
-curve25519-ver: $(addsuffix .fst-ver-ct, $(CURVE25519_MODULES))
-poly1305-ver: poly1305-bignum-ver
-poly1305-bignum-ver: $(addsuffix .fst-ver-ct, $(POLY1305_MODULES))
+%.fst-lax: %.fst
+	$(FSTAR) --lax $(INCLUDES) $^
 
-hints: $(addsuffix .fst-hints, $(POLY1305_BIGNUM_MODULES))
+%.fst-ver-ct: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --include $(LIB)
+
+%.fst-ver: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --include $(LIB_KRML)
 
 %.fst-hints: %.fst
 	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --record_hints --include $(LIB)
+
+curve25519-ver: $(addsuffix .fst-ver-ct, $(CURVE25519_MODULES))
+
+poly1305-bignum-ver: $(addsuffix .fst-ver-ct, $(POLY1305_BIGNUM_MODULES))
+
+poly1305-ver: poly1305-bignum-ver
+
+ver: curve25519-ver poly1305-ver
+
+hints: $(addsuffix .fst-hints, $(POLY1305_BIGNUM_MODULES))
 
 clean:
 	rm -f *~
