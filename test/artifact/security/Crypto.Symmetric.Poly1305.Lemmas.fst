@@ -530,7 +530,7 @@ let lemma_little_endian_16 h a =
   assert_norm (pow2 0 = 1)
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 
 let lemma_mul_mod (a:nat) (b:pos) : Lemma ((b * a) % b = 0) = Math.Lemmas.lemma_mod_plus 0 a b
@@ -736,6 +736,8 @@ let lemma_trunc1305_4 a =
   cut (((v a % pow2 32) / pow2 8) % pow2 8 = (v a / pow2 8) % pow2 8)
 
 
+#set-options "--initial_fuel 0 --max_fuel 0 --z3timeout 40"
+
 val lemma_norm_5:
   h:HyperStack.mem ->
   b:Buffer.buffer U64.t{length b >= 5 /\ Crypto.Symmetric.Poly1305.Bigint.norm h b} ->
@@ -743,9 +745,6 @@ val lemma_norm_5:
         (ensures  (v (get h b 0) < pow2 26 /\ v (get h b 1) < pow2 26
           /\ v (get h b 2) < pow2 26 /\ v (get h b 3) < pow2 26 /\ v (get h b 4) < pow2 26))
 let lemma_norm_5 h b = ()
-
-
-#set-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 val lemma_mod_sum_mul: x:nat -> y:nat -> l:nat -> m:nat -> Lemma
   (requires (x % pow2 l = 0 /\ y < pow2 l /\ m >= l))
