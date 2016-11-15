@@ -111,14 +111,14 @@ FileIO_Types_fresult PaddedFileIO_file_open_write_sequential(FileIO_Types_file_s
 }
 
 uint8_t* PaddedFileIO_file_next_read_buffer(FileIO_Types_file_handle* fh,uint64_t len) {
-  int curr = fh->fd.current;
   if (len > PaddedFileIO_max_block_size) {
     perror("read_buf: len > max_block_size!\n");
     abort();
   }
+  int curr = fh->fd.current;
+  fh->fd.current += len;
   if (curr + len <= fh->stat.size) {
-    fh->fd.current += len;
-    return (fh->fd.mmap + curr);
+   return (fh->fd.mmap + curr);
   }
   else if (curr <= fh->stat.size && curr + len > fh->stat.size) {
     memset(fh->fd.last,0, PaddedFileIO_max_block_size);

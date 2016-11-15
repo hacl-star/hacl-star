@@ -35,7 +35,7 @@ FileIO_Types_sresult SocketIO_tcp_connect(char* host, int port, FileIO_Types_soc
     perror("SocketError, DNS lookup on host failed");
     return FileIO_Types_sresult_SocketError;
   }
-  memset(&serv_addr, '0', sizeof(serv_addr)); 
+  memset(&serv_addr, 0, sizeof(serv_addr)); 
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(port); 
   bcopy((char *)server->h_addr, 
@@ -67,7 +67,7 @@ FileIO_Types_sresult SocketIO_tcp_listen(int port, FileIO_Types_socket* sh) {
       perror("Error : Could not create socket");
       return FileIO_Types_sresult_SocketError;
     } 
-  memset(&serv_addr, '0', sizeof(serv_addr)); 
+  memset(&serv_addr, 0, sizeof(serv_addr)); 
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   serv_addr.sin_port = htons(port); 

@@ -11,6 +11,7 @@ module H64 = Hacl.UInt64
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+
 private val lemma_max_uint8: n:nat -> Lemma
  (requires (n = 8))
  (ensures  (pow2 n = 256))
@@ -38,11 +39,11 @@ private type symmetricKey  = l:uint8_p{length l = 32}
 val cipherlen: nat -> Tot nat
 let cipherlen m = m + 16
 
-assume val pubKey: sk:seq h8 -> GTot (pk:seq h8)
-assume val agreedKey: pkA: seq h8 -> pkB: seq h8 -> GTot (k: seq h8)
+assume val pubKey: sk:seq h8 -> GTot (pk:seq u8)
+assume val agreedKey: pkA: seq u8 -> pkB: seq u8 -> GTot (k: seq u8)
 assume val boxed: FStar.HyperStack.mem -> 
-       	   	  pkA:seq h8 ->
-		  pkB:seq h8 ->
+       	   	  pkA:seq u8 ->
+		  pkB:seq u8 ->
 		  m:  seq h8 ->
 		  n:  seq h8 ->
 		  GTot bool
@@ -105,46 +106,51 @@ let crypto_box_beforenm k pk sk =
 
 
 val crypto_box_easy_afternm:
-  #pkA:seq h8 ->
-  #pkB:seq h8 ->
+  #pkA:uint8_p ->
+  #pkB:uint8_p ->
   c:uint8_p ->
   m:uint8_p ->
   mlen:u64 ->
   n:nonce ->
   k:symmetricKey ->
-  Stack unit
+  Stack UInt32.t
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k /\
-    	      	        as_seq h k == agreedKey pkA pkB /\
     	                (let len = U64.v mlen in
+			 let spkA = as_seq h pkA in
+			 let spkB = as_seq h pkB in
+    	      	        as_seq h k == agreedKey spkA spkB /\
            		 len <= length m /\
 	   		 cipherlen len = length c)))
-    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c /\ live h0 n /\ live h0 m
-    	      	      	    /\ boxed h1 pkA pkB (as_seq h0 m) (as_seq h0 n)))
+    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c /\ live h0 n /\ live h0 m /\
+    	      	      	      boxed h1 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h0 m) (as_seq h0 n)))
 let crypto_box_easy_afternm #pkA #pkB c m l n k =
   let h0 = ST.get() in
-  let _ = Hacl.Box.crypto_box_easy_afternm c m l n k in
+  let x = Hacl.Box.crypto_box_easy_afternm c m l n k in
   let h1 = ST.get() in
-  assume (boxed h1 pkA pkB (as_seq h0 m) (as_seq h0 n))
-
+  assume (boxed h1 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h0 m) (as_seq h0 n));
+  x
 
 val crypto_box_open_easy_afternm:
-  #pkA:seq h8 ->
-  #pkB:seq h8 ->
+  #pkA:uint8_p ->
+  #pkB:uint8_p ->
   m:uint8_p ->
   c:uint8_p ->
   clen:u64 ->
   n:nonce ->
   k:symmetricKey ->
-  Stack unit
+  Stack UInt32.t
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k /\
-    	      	        as_seq h k == agreedKey pkA pkB /\
     	                (let len = U64.v clen in
+			 let spkA = as_seq h pkA in
+			 let spkB = as_seq h pkB in
+   			 as_seq h k == agreedKey spkA spkB /\
            		 len = length c /\ len = length m + 16)))
     (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m /\ live h0 n
     	      	      	    /\ U64.v clen = cipherlen (length m)
-			    /\ boxed h0 pkA pkB (as_seq h1 m) (as_seq h0 n)))
+			    /\ boxed h0 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h1 m) (as_seq h0 n)))
 let crypto_box_open_easy_afternm #pkA #pkB m c l n k =
   let h0 = ST.get() in
-  let _ = Libsodium.crypto_box_open_easy_afternm m c l n k in
+  let x = Libsodium.crypto_box_open_easy_afternm m c l n k in
   let h1 = ST.get() in
-  assume (boxed h0 pkA pkB (as_seq h1 m) (as_seq h0 n))
+  assume (boxed h0 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h1 m) (as_seq h0 n));
+  x

@@ -15,7 +15,7 @@ tube-lax: Hacl.Tube.fst
 		--include $(KREMLIB) --include $(KREMTEST) $^ --lax
 
 tube-ver: Hacl.Tube.fst
-	$(FSTAR) --include $(LIB) --include c_bindings --include crypto_api \
+	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include crypto_api \
 		--include $(KREMLIB) --include $(KREMTEST) $^
 
 clean:
