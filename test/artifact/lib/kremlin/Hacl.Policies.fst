@@ -20,14 +20,14 @@ module H128  = Hacl.UInt128
 assume new type declassifiable (#a:Type0) (b:a)
 
 
-val declassify_u8: x:H8.t{declassifiable x} -> Tot (y:U8.t{H8.v x = U8.v y})
-let declassify_u8 x = x
-val declassify_u32: x:H32.t{declassifiable x} -> Tot (y:U32.t{H32.v x = U32.v y})
-let declassify_u32 x = x
-val declassify_u64: x:H64.t{declassifiable x} -> Tot (y:U64.t{H64.v x = U64.v y})
-let declassify_u64 x = x
-val declassify_u128: x:H128.t{declassifiable x} -> Tot (y:U128.t{H128.v x = U128.v y})
-let declassify_u128 x = x
+inline_for_extraction val declassify_u8: x:H8.t{declassifiable x} -> Tot (y:U8.t{H8.v x = U8.v y})
+inline_for_extraction let declassify_u8 x = x
+inline_for_extraction val declassify_u32: x:H32.t{declassifiable x} -> Tot (y:U32.t{H32.v x = U32.v y})
+inline_for_extraction let declassify_u32 x = x
+inline_for_extraction val declassify_u64: x:H64.t{declassifiable x} -> Tot (y:U64.t{H64.v x = U64.v y})
+inline_for_extraction let declassify_u64 x = x
+inline_for_extraction val declassify_u128: x:H128.t{declassifiable x} -> Tot (y:U128.t{H128.v x = U128.v y})
+inline_for_extraction let declassify_u128 x = x
 
 val leak_byte:
   b:uint8_p ->
