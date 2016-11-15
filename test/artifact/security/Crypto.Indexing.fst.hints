@@ -1,0 +1,69 @@
+[
+  "é\u0010øòqU$HL·öèÕ\u0010v∑",
+  [
+    [
+      "Crypto.Indexing.id",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Crypto.Indexing.aeadAlg_haseq",
+        "assumption_FStar.UInt32.t__haseq", "equation_FStar.UInt32.t"
+      ],
+      0
+    ],
+    [
+      "Crypto.Indexing.macAlg_of_id",
+      1,
+      0,
+      1,
+      [
+        "@query", "disc_equation_Crypto.Indexing.AES_128_GCM",
+        "disc_equation_Crypto.Indexing.AES_256_GCM",
+        "disc_equation_Crypto.Indexing.CHACHA20_POLY1305",
+        "equality_tok_Crypto.Indexing.GHASH@tok",
+        "equality_tok_Crypto.Indexing.POLY1305@tok",
+        "fuel_guarded_inversion_Crypto.Indexing.aeadAlg"
+      ],
+      0
+    ],
+    [
+      "Crypto.Indexing.cipherAlg_of_id",
+      1,
+      0,
+      1,
+      [
+        "@query", "disc_equation_Crypto.Indexing.AES_128_GCM",
+        "disc_equation_Crypto.Indexing.AES_256_GCM",
+        "disc_equation_Crypto.Indexing.CHACHA20_POLY1305",
+        "equality_tok_Crypto.Indexing.AES128@tok",
+        "equality_tok_Crypto.Indexing.AES256@tok",
+        "equality_tok_Crypto.Indexing.CHACHA20@tok",
+        "fuel_guarded_inversion_Crypto.Indexing.aeadAlg"
+      ],
+      0
+    ],
+    [
+      "Crypto.Indexing.testId",
+      1,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "function_token_typing_FStar.UInt32.n", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Prims.pow2"
+      ],
+      0
+    ]
+  ]
+]
