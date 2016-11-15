@@ -1,4 +1,4 @@
-FSTAR_HOME?=../../FStar
+FSTAR_HOME?=../../../../FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 ARTIFACT_HOME=..
 include $(ARTIFACT_HOME)/Makefile.include
@@ -18,25 +18,32 @@ MODULES= \
   Crypto.Symmetric.AES \
   Crypto.Symmetric.AES128 \
   Crypto.Symmetric.Cipher \
-  Crypto.AEAD.AES256GCM \
   Crypto.Symmetric.PRF \
   Crypto.AEAD.Encoding \
   Crypto.AEAD.Invariant \
   Crypto.AEAD.Lemmas \
+  Crypto.AEAD.AES256GCM \
   Crypto.Plain \
   Crypto.AEAD
 
-OPTIONS=--fstar_home $(FSTAR_HOME) --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 1 --z3timeout 20
+OPTIONS=$(FSTAR_OPTIONS_VER)
 
-%.fst-verify:
+%.fst-ver:
 	$(FSTAR) $(OPTIONS) \
 	$(FSTAR_INCLUDE_PATHS) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
-	--verify_module $(basename $(notdir $@)) \
 	--include ../functional_correctness --include $(LIB_KRML) \
+	--verify_module $(basename $(notdir $@)) \
 	$(basename $@).fst
 
-ver: $(addsuffix .fst-verify, $(MODULES))
+%.fst-in: 
+	@echo $(OPTIONS) \
+	$(FSTAR_INCLUDE_PATHS) \
+	--__temp_no_proj Crypto.Symmetric.MAC \
+	--include ../functional_correctness --include $(LIB_KRML) \
+	--verify_module $(basename $(notdir $@))
+
+ver: $(addsuffix .fst-ver, $(MODULES))
 
 test: real/Flag.fst real/test_hacks.c Crypto.KrmlTest.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -I ../functional_correctness -no-prefix Crypto.KrmlTest \
