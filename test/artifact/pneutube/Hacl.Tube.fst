@@ -10,7 +10,8 @@ open Hacl.Constants
 open Hacl.Cast
 open Box.Ideal
 
-#set-options "--lax"
+#reset-options "--initial_fuel 0 --max_fuel 0"
+
 
 module  U8=FStar.UInt8
 module U32=FStar.UInt32
@@ -20,6 +21,12 @@ module  H8=Hacl.UInt8
 module H32=Hacl.UInt32
 module H64=Hacl.UInt64
 
+
+private val lemma_max_uint8: n:nat -> Lemma
+ (requires (n = 8))
+ (ensures  (pow2 n = 256))
+ [SMTPat (pow2 n)]
+let lemma_max_uint8 n = assert_norm(pow2 8 = 256)
 private val lemma_max_uint32: n:nat -> Lemma
  (requires (n = 32))
  (ensures  (pow2 n = 4294967296))
@@ -30,6 +37,9 @@ private val lemma_max_uint64: n:nat -> Lemma
  (ensures  (pow2 n = 18446744073709551616))
  [SMTPat (pow2 n)]
 let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
 
 (* Blocksize needs to be a power of 2 *)
 inline_for_extraction let blocksize_bits = 18ul
@@ -84,10 +94,10 @@ assume val sent: FStar.HyperStack.mem -> pkA: seq h8 -> pkB: seq h8 -> sid:seq h
 
 val makeStreamID: unit -> StackInline streamID
   (requires (fun h -> True))
-  (ensures  (fun h0 r h1 -> True))
+  (ensures  (fun h0 sid h1 -> live h1 sid /\ ~(contains h0 sid) /\ length sid = 16))
 let makeStreamID () =
     let b = create (Hacl.Cast.uint8_to_sint8 0uy) 16ul in
-    randombytes_buf b (U64.uint_to_t 16);
+    randombytes_buf b 16uL;
     b
 
 
@@ -108,13 +118,13 @@ let makeStreamID () =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
 
-type timespec = {
-  tv_sec: U64.t;
-  tv_nsec: U64.t;
-}
+(* type timespec = { *)
+(*   tv_sec: U64.t; *)
+(*   tv_nsec: U64.t; *)
+(* } *)
 
 
-assume val clock_gettime: unit -> St timespec
+(* assume val clock_gettime: unit -> St timespec *)
 
 
 val store64_le:
@@ -160,28 +170,56 @@ let load64_le b =
     |^ (sint8_to_sint64 b7 <<^ 56ul)
   )
 
+open FStar.Mul
 
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+
+private let lemma_modifies_none_to_modifies_3 #a #b #c (x:buffer a) (y:buffer b) (z:buffer c) h :
+  Lemma (modifies_3 x y z h h)
+  = lemma_intro_modifies_3 x y z h h
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
 
 val file_send_loop:
   fh:buffer file_handle{length fh = 1} ->
   sb:buffer socket{length sb = 1} ->
-  ciphertext:uint8_p{Buffer.length ciphertext = U64.v blocksize} ->
+  ciphertext:uint8_p{Buffer.length ciphertext = U64.v blocksize + 16} ->
   nonce:uint8_p{Buffer.length nonce = 24} ->
-  key:uint8_p{Buffer.length key = 24} ->
+  key:uint8_p{Buffer.length key = 32} ->
   seqno:H64.t ->
-  len:U64.t ->
+  len:U64.t{U64.v len + H64.v seqno < pow2 32} ->
   Stack sresult
-    (requires (fun h -> live h fh /\ live h sb /\ live h ciphertext /\ live h nonce
-      /\ live h key))
-    (ensures  (fun h0 _ h1 -> True))
+    (requires (fun h ->  file_next_read_buffer_pre h fh blocksize
+      /\ (U64.v len * U64.v blocksize) <= H64.v (get h fh 0).stat.size
+      /\ live_file h fh /\ live h sb /\ live h ciphertext /\ live h nonce /\ live h key))
+    (ensures  (fun h0 res h1 -> 
+      (match res with
+      | SocketOk -> (
+        file_next_read_buffer_pre h0 fh len
+        /\ (U64.v len * U64.v blocksize) <= H64.v (get h0 fh 0).stat.size
+        /\ live_file h0 fh /\ live_file h1 fh /\ same_file h0 fh h1 fh
+        /\ (let fh0 = get h0 fh 0 in let fh1 = get h1 fh 0 in
+          U64.v (file_offset h1 fh1) = U64.v (file_offset h0 fh0) + U64.v len * U64.v blocksize
+          /\ file_state h1 fh1 = FileOpen)    
+        /\ live h1 nonce /\ live_file h1 fh /\ live h1 ciphertext 
+        /\ modifies_3 nonce fh ciphertext h0 h1
+        /\ same_file h0 fh h1 fh)
+      | _ -> true)))
 let rec file_send_loop fh sb ciphertext nonce key seqno len =
-  if U64 (len =^ 0uL) then SocketOk
+  if U64 (len =^ 0uL) then (
+    let h = ST.get() in lemma_modifies_none_to_modifies_3 nonce fh ciphertext h;
+    SocketOk
+  )
   else (
     let i = U64 (len -^ 1uL) in
     let next = file_next_read_buffer fh blocksize in
     store64_le (sub nonce 16ul 8ul) seqno;
-    let seqno = H64 (seqno +^ Hacl.Cast.uint64_to_sint64 1uL) in
+    let seqno = H64 (seqno +%^ Hacl.Cast.uint64_to_sint64 1uL) in
     let _ = Hacl.Box.crypto_box_easy_afternm ciphertext next blocksize nonce key in
+    let h = ST.get() in
+    assume (current_state h (get h sb 0) = Open);
     match tcp_write_all sb ciphertext ciphersize with
     | SocketOk -> file_send_loop fh sb ciphertext nonce key seqno i
     | SocketError -> SocketError

@@ -36,15 +36,15 @@ assume val tcp_accept: l:buffer socket{length l = 1} -> s:buffer socket{length s
                       | _ -> True)))
 
 assume val tcp_write_all: s:buffer socket{length s = 1} ->
-  b:uint8_p{disjoint s b} ->
+  b:uint8_p ->
   len:u64{U64.v len <= length b} ->
   Stack sresult
     (requires (fun h0 -> live h0 s /\ live h0 b /\ current_state h0 (get h0 s 0) = Open))
-    (ensures  (fun h0 r h1 -> live h1 s /\ live h1 b /\ modifies_1 b h0 h1
+    (ensures  (fun h0 r h1 -> live h1 s /\ live h1 b /\ h0 == h1
       /\ (r = SocketOk ==> current_state h1 (get h1 s 0) = Open)))
 
 assume val tcp_read_all: s:buffer socket{length s = 1} ->
-  b:buffer u8{disjoint b s} ->
+  b:buffer u8 ->
   len:u64{length b >= U64.v len} ->
   Stack sresult
     (requires (fun h0 -> live h0 s /\ live h0 b /\ current_state h0 (get h0 s 0) = Open))

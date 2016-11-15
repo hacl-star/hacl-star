@@ -141,7 +141,7 @@ let file_next_read_buffer_post h0 (s:uint8_p) h1 (fb:buffer file_handle{length f
       U64.v (file_offset h1 fh1) = U64.v (file_offset h0 fh0) + U64.v len
       /\ file_state h1 fh1 = FileOpen
       /\ s == Buffer.sub (file_buffer h0 fh0.stat) (Int.Cast.uint64_to_uint32 (file_offset h0 fh0)) (Int.Cast.uint64_to_uint32 len))
-  /\ modifies_0 h0 h1
+  /\ modifies_1 fb h0 h1
 
 
 assume val file_next_read_buffer:
@@ -165,7 +165,7 @@ let file_next_write_buffer_post h0 (s:uint8_p) h1 (fb:buffer file_handle{length 
       U64.v (file_offset h1 fh1) = U64.v (file_offset h0 fh0) + U64.v len
       /\ file_state h1 fh1 = FileOpen
       /\ s == Buffer.sub (file_buffer h0 fh0.stat) (Int.Cast.uint64_to_uint32 (file_offset h0 fh0)) (Int.Cast.uint64_to_uint32 len))
-  /\ modifies_0 h0 h1
+  /\ modifies_1 fb h0 h1
 
 assume val file_next_write_buffer: fb:buffer file_handle{length fb = 1} -> len:bufsize -> Stack uint8_p
     (requires (fun h0 -> file_next_write_buffer_pre h0 fb len))
