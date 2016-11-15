@@ -27,7 +27,11 @@ MODULES=Hacl.Symmetric.Poly1305_64.Parameters \
 
 INCLUDES=
 
-ver: $(addsuffix .fst-ver, $(MODULES))
+
+%.fst-ver-ct: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^ --include $(LIB)
+
+ver: $(addsuffix .fst-ver-ct, $(MODULES))
 
 test: Hacl.Test.fst
 	$(KREMLIN) $(KREMLIN_ARGS) $^ -no-prefix Hacl.Test -add-include '"testlib.h"' \
