@@ -485,8 +485,11 @@ val file_recv_loop_2:
   seqno:H64.t ->
   len:U64.t ->
   Stack sresult
-    (requires (fun h -> live h connb /\ current_state h (get h connb 0) = Open
-      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)
+    (requires (fun h -> 
+         live h connb 
+      /\ current_state h (get h connb 0) = Open
+      /\ live_file h fb 
+      /\ (let fh = get h fb 0 in file_state h fh = FileOpen)
       /\ live h state /\ live h mut_state))
     (ensures  (fun _ r h1 -> 
       match r with 

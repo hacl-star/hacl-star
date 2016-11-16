@@ -162,7 +162,7 @@ let file_next_write_buffer_pre h (fb:fh_ref) (len:U64.t) : GTot Type0 =
 
 let file_next_write_buffer_post h0 (s:uint8_p) h1 (fb:fh_ref)
                                (len:bufsize) : GTot Type0 =
-  file_next_read_buffer_pre h0 fb len
+  file_next_write_buffer_pre h0 fb len
   /\ live_file h0 fb /\ live_file h1 fb /\ same_file h0 fb h1 fb
   /\ (let fh0 = get h0 fb 0 in let fh1 = get h1 fb 0 in
       let nlen = (file_offset h0 fh0) +^ len in
