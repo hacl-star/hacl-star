@@ -1,7 +1,7 @@
 all:
 	$(MAKE) allsubdirs test_box.exe
 
-FSTAR_HOME?=/Users/bhargava/Desktop/repositories/FStar
+FSTAR_HOME?=../../fstar
 KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
 HACL_HOME=..
 include $(HACL_HOME)/lib/hyperstack/Makefile.include
@@ -122,7 +122,7 @@ tweetnacl: $(KREMTEST)/testlib.c c/randombytes.c c/tweetnacl.c c/tweetnacl_test.
 	./tweetnacl_test.exe
 
 blah:
-	gcc-6 -O3 -march=native -Wall -Werror -Wno-parentheses -Wno-unused-variable -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I /Users/bhargava/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign \
+	gcc-6 -O3 -march=native -Wall -Werror -Wno-parentheses -Wno-unused-variable -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I $(KREMLIN_HOME)/kremlib -I tmp -Wno-error=pointer-sign \
 		tmp/FStar_Mul.c \
 		tmp/FStar_List_Tot.c \
 		tmp/FStar_ListProperties.c \
@@ -189,14 +189,14 @@ blah:
 		tmp/Hacl_EC_Curve25519_Crecip.c \
 		tmp/Hacl_EC_Curve25519.c \
 		tmp/Hacl_Box.c \
-		/Users/bhargava/Desktop/repositories/kremlin/kremlib/kremlib.c \
+		$(KREMLIN_HOME)/kremlib/kremlib.c \
 		c/test_api.c \
 		../../kremlin/test/testlib.c \
 		-o test_api.exe -lsodium
 
 
 test32bits:
-	gcc-6 -m32 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I /Users/bhargava/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign \
+	gcc-6 -m32 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I $(KREMLIN_HOME)/kremlib -I tmp -Wno-error=pointer-sign \
 		tmp/FStar_Mul.c \
 		tmp/FStar_List_Tot.c \
 		tmp/FStar_ListProperties.c \
@@ -263,14 +263,14 @@ test32bits:
 		tmp/Hacl_EC_Curve25519_Crecip.c \
 		tmp/Hacl_EC_Curve25519.c \
 		tmp/Hacl_Box.c \
-		/Users/bhargava/Desktop/repositories/kremlin/kremlib/kremlib.c \
+		$(KREMLIN_HOME)/kremlib/kremlib.c \
 		../../kremlin/test/testlib.c \
 		-c
 
 
 
 gprof:
-	gcc-6 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I /Users/bhargava/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign \
+	gcc-6 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I $(KREMLIN_HOME)/kremlib -I tmp -Wno-error=pointer-sign \
 		tmp/FStar_Mul.c \
 		tmp/FStar_List_Tot.c \
 		tmp/FStar_ListProperties.c \
@@ -338,7 +338,7 @@ gprof:
 		tmp/Hacl_EC_Curve25519_Crecip.c \
 		tmp/Hacl_EC_Curve25519.c \
 		tmp/Hacl_Box.c \
-		/Users/bhargava/Desktop/repositories/kremlin/kremlib/kremlib.c \
+		$(KREMLIN_HOME)/kremlib/kremlib.c \
 		c/test_api.c \
 		../../kremlin/test/testlib.c \
 		-o test_api.exe -lsodium -pg
