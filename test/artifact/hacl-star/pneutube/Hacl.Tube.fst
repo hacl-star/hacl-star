@@ -510,17 +510,19 @@ val get_fh_stat: file_handle -> Tot file_stat
 let get_fh_stat fh = fh.stat
 
 val file_recv_loop_2:
-  fb:buffer file_handle ->
-  connb:buffer socket ->
-  ciphertext:buffer u8 ->
-  nonce:uint8_p ->
-  key:uint8_p ->
+  fb:fh_ref ->
+  connb:socket_ref ->
+  state: uint8_p{length state = 1244} ->
+  mut_state:uint8_p{length mut_state = U64.v ciphersize + 24 /\ frameOf mut_state <> frameOf state} ->  
   seqno:H64.t ->
   len:U64.t ->
   Stack sresult
     (requires (fun _ -> True))
     (ensures  (fun _ _ _ -> True))
-let rec file_recv_loop_2 fb connb ciphertext nonce key seqno len =
+let rec file_recv_loop_2 fb connb state mut_state seqno len =
+  let key   = Buffer.sub state 64ul 32ul in
+  let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
+  let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
   if U64 (len =^ 0uL) then SocketOk
   else 
   if U64 (len <^ blocksize) then (
@@ -541,88 +543,99 @@ let rec file_recv_loop_2 fb connb ciphertext nonce key seqno len =
         store64_le (sub nonce 16ul 8ul) seqno;
         let seqno = H64 (seqno +^ one_64) in
         if U32 (crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then
-          file_recv_loop_2 fb connb ciphertext nonce key seqno rem
+          file_recv_loop_2 fb connb state mut_state seqno rem
         (* JK: not distinguishing between socket error and decryption failure *)
         else (TestLib.perr(20ul); SocketError) )
     | SocketError -> TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); SocketError
   )
 
 
-val file_recv_loop:
-  fb:buffer file_handle ->
-  connb:buffer socket ->
-  lhb:buffer socket ->
-  sid:uint8_p ->
-  pkA:publicKey ->
-  pkB:publicKey ->
-  skB:privateKey ->
+val file_recv_enc:
+  fb:fh_ref ->
+  connb:socket_ref ->
+  state: uint8_p{length state = 1244} ->
+  hsize: U64.t ->
   Stack sresult
     (requires (fun h -> True))
     (ensures  (fun h0 _ h1 -> True))
-let rec file_recv_loop fb connb lhb sid pkA pkB skB =
+
+let file_recv_enc fb connb state size = 
+      let header  = Buffer.sub state 220ul 1024ul in
+      let seqno = 0uL in
+      let mut_state = Buffer.create zero_8 (U32 (ciphersize_32 +^ 24ul)) in
+      let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
+      let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
+      let key   = Buffer.sub state 64ul 32ul in
+      let pkA   = Buffer.sub state 0ul 32ul in
+      let pkB   = Buffer.sub state 32ul 32ul in
+
+      (match tcp_read_all connb ciphertext (cipherlen(headersize)) with
+      | SocketOk -> (
+          store64_le (sub nonce 16ul 8ul) seqno;
+          let seqno = H64 (seqno +^ 1uL) in
+	  let h = ST.get() in
+          if U32 (crypto_box_open_easy_afternm #pkA #pkB header ciphertext (cipherlen(headersize)) nonce key =^ 0ul) then (
+             let file_size = load64_le (sub header 0ul  8ul) in
+             let nsize     = load64_le (sub header 8ul  8ul) in
+             let mtime     = load64_le (sub header 16ul 8ul) in
+             let file = sub header 24ul (Int.Cast.uint64_to_uint32 nsize) in
+             let fstat = {name = file; mtime = mtime; size = file_size} in
+             (match file_open_write_sequential fstat fb with
+              | FileOk -> 
+                  (match file_recv_loop_2 fb connb state mut_state seqno size with
+                   | SocketOk -> (
+     		         match file_close fb with
+                       | false -> (
+                             match tcp_close connb with
+                            | SocketOk -> (
+                                  SocketOk )
+                            | SocketError -> TestLib.perr(13ul); SocketError )
+                       | true -> TestLib.perr(12ul); SocketError )
+                  | SocketError -> TestLib.perr(10ul); SocketError )
+              | FileError -> TestLib.perr(9ul); SocketError )
+          ) else (
+             TestLib.perr(8ul); SocketError ) )
+      | SocketError -> SocketError )
+
+                 
+val file_recv_loop:
+  fb:fh_ref ->
+  lb:socket_ref ->
+  connb:socket_ref ->
+  state: uint8_p{length state = 1244} ->
+  Stack sresult
+    (requires (fun h -> True))
+    (ensures  (fun h0 _ h1 -> True))
+let rec file_recv_loop fb lhb connb state =
   push_frame();
+  let sid   = Buffer.sub state 96ul 16ul in
+  let hsbuf   = Buffer.sub state 112ul 8ul in
+  let fname   = Buffer.sub state 120ul 100ul in
+  let header  = Buffer.sub state 220ul 1024ul in
+  let pkA   = Buffer.sub state 0ul 32ul in
+  let pkB   = Buffer.sub state 32ul 32ul in
+  let pk1 = Buffer.create zero_8 32ul in
+  let pk2 = Buffer.create zero_8 32ul in
   let res =
   match tcp_accept lhb connb with
   | SocketOk -> (
-      let ciphertext = create zero_8 ciphersize_32 in
-      let pk1 = create zero_8 32ul in
-      let pk2 = create zero_8 32ul in
-      let nonce = create zero_8 24ul in
-      let hsizeb = create zero_8 8ul in
       let c1 = C.clock() in
-      (match tcp_read_all connb (sub nonce 0ul 16ul) 16uL with
+      (match tcp_read_all connb sid 16uL with
       | SocketOk -> (
           (* JK: no check on the streamID formatting *)
-          match tcp_read_all connb hsizeb 8uL with
+          match tcp_read_all connb hsbuf 8uL with
           | SocketOk -> (
-	      let hsize = load64_le hsizeb in
+	      let hsize = load64_le hsbuf in
               match tcp_read_all connb pk1 32uL with
               | SocketOk -> (
                   match tcp_read_all connb pk2 32uL with
                   | SocketOk -> (
                       if U8 (memcmp pk1 pkA 32ul =^ 0xffuy) then (
                          if U8 (memcmp pk2 pkB 32ul =^ 0xffuy) then (
-                           let key = create zero_8 32ul in
-                           (* JK: ignoring check on beforenm *)
-                           let _ = crypto_box_beforenm key pkA skB in
-                           let seqno = 0uL in
-                           let header = create zero_8 headersize_32 in
-                           fill header zero_8 headersize_32;
-                           (match tcp_read_all connb ciphertext (cipherlen(headersize)) with
-                           | SocketOk -> (
-                               store64_le (sub nonce 16ul 8ul) seqno;
-                               let seqno = H64 (seqno +^ 1uL) in
-                               if U32 (crypto_box_open_easy_afternm header ciphertext (cipherlen(headersize)) nonce key =^ 0ul) then (
-                                 let file_size = load64_le (sub header 0ul  8ul) in
-                                 let nsize     = load64_le (sub header 8ul  8ul) in
-                                 let mtime     = load64_le (sub header 16ul 8ul) in
-                                 (* JK: no checking the size of the filename *)
-                                 (* JK: need declassification on nsize value *)
-                                 let file = sub header 24ul (Int.Cast.uint64_to_uint32 nsize) in
-                                 let fstat = {name = file; mtime = mtime; size = nsize} in
-                                 (match file_open_write_sequential fstat fb with
-                                 | FileOk -> 
-                                     (match file_recv_loop_2 fb connb ciphertext nonce key seqno hsize with
-                                     | SocketOk -> (
-				           match file_close fb with
-                                             | false -> (
-                                                 match tcp_close connb with
-                                                 | SocketOk -> (
-                                                     let c2 = C.clock() in
-                                                     TestLib.print_clock_diff c1 c2;
-                                                     SocketOk )
-                                                 | SocketError -> TestLib.perr(13ul); SocketError )
-                                             | true -> TestLib.perr(12ul); SocketError )
-                                      | SocketError -> TestLib.perr(10ul); SocketError )
-                                 | FileError -> TestLib.perr(9ul); SocketError )
-                               ) else (
-                                 TestLib.perr(8ul); SocketError ) )
-                           | SocketError -> SocketError )
-                         ) else (
-                           TestLib.perr(7ul); SocketError
-                         )
-                       ) else (
-                         TestLib.perr(6ul); SocketError ))
+			   let _ = file_recv_enc fb connb state hsize 
+			   in SocketOk)
+			 else TestLib.perr(7ul); SocketError )
+                      else TestLib.perr(6ul); SocketError )
                   | SocketError -> TestLib.perr(5ul); SocketError )
               | SocketError -> TestLib.perr(4ul); SocketError )
           | SocketError -> TestLib.perr(3ul); SocketError )
@@ -630,41 +643,51 @@ let rec file_recv_loop fb connb lhb sid pkA pkB skB =
   | SocketError -> TestLib.perr(1ul); SocketError in
   pop_frame();
   match res with
-  | SocketOk -> file_recv_loop  fb connb lhb sid pkA pkB skB
+  | SocketOk -> file_recv_loop  fb lhb connb state
   | SocketError -> TestLib.perr(0ul); SocketError
 
 
-val file_recv: port:u32 -> pkA:publicKey -> skB:privateKey -> Stack open_result
-       	   (requires (fun _ -> True))
-	   (ensures  (fun h0 s h1 -> match s.r with
-      	   	                   | FileOk ->
-				     let fs = s.fs in
+(* post-condition should be:
+			             let fs = s.fs in
 				     let sidb = s.sid in
 				     let pA = as_seq h0 pkA in
 				     let pB = pubKey (as_seq h0 skB) in
 				     let sid = as_seq h0 sidb in
 				     sent h0 pA pB sid fs (file_content h1 fs)
+*)
+
+val file_recv: port:u32 -> 
+    	   pkA:publicKey{frameOf pkA = input_rgn} -> 
+	   skB:privateKey {frameOf skB = input_rgn /\ disjoint pkA skB} -> 
+	   Stack open_result
+       	   (requires (fun h -> live h pkA /\ live h skB))
+	   (ensures  (fun h0 s h1 -> match s.r with
+      	   	                   | FileOk -> true				     
 				   | _ -> true))
 let file_recv p pkA skB =
   push_frame();
   (* Initialization of the file_handle *)
-  let dummy_ptr = FStar.Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) 1ul in
-  let fh = init_file_handle(dummy_ptr) in
-  let fb = create fh 1ul in
-  let sid = makeStreamID() in
-  let stat = get_fh_stat fh in
+  let fb = Buffer.rcreate file_rgn (init_file_handle(dummy_ptr)) 1ul in
+  let fh = fb.(0ul) in
+  let state = Buffer.create zero_8 1244ul  in
+  let pkA_cpy  = Buffer.sub state 0ul 32ul in
+  let pkB   = Buffer.sub state 32ul 32ul in
+  let key   = Buffer.sub state 64ul 32ul in
+  let sid   = Buffer.sub state 96ul 16ul in
+  let hsbuf   = Buffer.sub state 112ul 8ul in
+  let fname   = Buffer.sub state 120ul 100ul in
+  let header  = Buffer.sub state 220ul 1024ul in
+  blit pkA 0ul pkA_cpy 0ul 32ul;
+  getPublicKey skB pkB;
+  let keygen_res = U32 (crypto_box_beforenm key pkA skB =^ 0ul) in
+
   (* Initialization of the two sockets *)
   let s = init_socket() in
-  let connb = Buffer.create s 1ul in
-  let lhb = Buffer.create s 1ul in
-  let res = (match tcp_listen p lhb with
+  let lb = Buffer.rcreate socket_rgn s 1ul in
+  let sb = Buffer.rcreate socket_rgn s 1ul in
+  let res = (match tcp_listen p lb sb with
   | SocketOk -> (
-      let pkB = Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
-      let h0 = ST.get() in
-      getPublicKey skB pkB;
-      let h1 = ST.get() in
-      lemma_reveal_modifies_1 pkB h0 h1;
-      match file_recv_loop fb connb lhb sid pkA pkB skB with
+      match file_recv_loop fb sb state with
       | SocketOk -> opened FileOk fh.stat sid
       | SocketError -> opened FileError fh.stat sid )
   | SocketError -> opened FileError fh.stat sid ) in
