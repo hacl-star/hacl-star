@@ -11,10 +11,6 @@ module Crypto.Symmetric.PRF
    to generate the one-time MAC key, to generate a one-time-pad for
    encryption, and to generate a one-time-pad for decryption. *)
 
-// 16-10-15 currently specialized to CHACHA20 and POLY1305 
-// TODO improve agility (more i:id) and also support AES256 and AES128
-// TODO add a shared MAC key (here or in AEAD)
-
 open FStar.Ghost
 open FStar.UInt8
 open FStar.UInt32
@@ -127,7 +123,6 @@ let find_blk #rgn (#i:id) s (x:domain_blk i) =
 
 // The table exists only for idealization
 // What's in the table stays there. And the table does not have two entries with the same x.
-// TODO consider using a monotonic map to enforce those
 let table_t rgn mac_rgn (i:id) = 
   if prf i then r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r = rgn}
   else unit
@@ -267,16 +262,14 @@ let prf_mac i t k_0 x =
     let contents = !r in
     match find_mac contents x with
     | Some mac -> 
-      assume (CMA (MAC.norm h0 mac.r)); //TODO: replace this using monotonicity
-      assume (HS (Buffer (CMA (not ((Buffer.content mac.s).mm))))); //TODO: mark this as not manually managed
+      assume (CMA (MAC.norm h0 mac.r)); 
+      assume (HS (Buffer (CMA (not ((Buffer.content mac.s).mm)))));
       Buffer.recall (CMA mac.s);
       mac
     | None ->
       let mac = CMA.gen t.mac_rgn macId k_0 in
       r := SeqProperties.snoc contents (Entry x mac);
       assume false; 
-      //16-10-16 framing after change to genPost0?
-      //let h = ST.get() in assume(MAC(norm h mac.r));
       mac
     end
   else
@@ -329,9 +322,9 @@ let prf_sk0 #i t =
           r := SeqProperties.snoc contents (Entry x sk0);
           sk0 in
       assume (HS.is_eternal_region t.mac_rgn);
-      assume (HS (Buffer (CMA (not ((Buffer.content sk0).mm))))); //TODO: mark this as not manually managed
+      assume (HS (Buffer (CMA (not ((Buffer.content sk0).mm)))));
       Buffer.recall sk0;
-      assume false; //NS: disovered while triaging this file ... unable to prove that (find_sk0 (HS.sel h1 r) x = Some _)
+      assume false; 
       sk0
     end
   else
@@ -360,7 +353,6 @@ let modifies_x_buffer_1 #i (t:state i) x b h0 h1 =
   (if prf i then 
     let r = itable i t in 
     let rb = Buffer.frameOf b in
-    // can't use !{ t.rgn, rb}, why?
     let rgns = Set.union (Set.singleton #HH.rid t.rgn) (Set.singleton #HH.rid rb) in
     HS.modifies rgns h0 h1 /\
     HS.modifies_ref t.rgn !{HS.as_ref r} h0 h1 /\
@@ -491,7 +483,7 @@ let prf_dexor i t x l cipher plain =
 private let lemma_snoc_found (#rgn:region) (#i:id) (s:Seq.seq (entry rgn i)) (x:domain i) (v:range rgn i x) : Lemma
   (requires (find s x == None))
   (ensures (find (SeqProperties.snoc s (Entry x v)) x == Some v))
-  = admit() //TODO, move this ... find_append_r
+  = admit()
 
 #reset-options "--z3timeout 100"
 

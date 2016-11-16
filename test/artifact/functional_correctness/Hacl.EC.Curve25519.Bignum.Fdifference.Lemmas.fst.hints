@@ -1,5 +1,5 @@
 [
-  "z¨/ú´Æ\f‘¤\u001cÛƒ)9Ù\u0010",
+  "XQåW\u000fä»SV\u0000ú\u0014\f\fõ_",
   [
     [
       "Hacl.EC.Curve25519.Bignum.Fdifference.Lemmas.addedZero",
@@ -346,6 +346,14 @@
       2,
       0,
       1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Fdifference.Lemmas.lemma_add_zero_eval",
+      3,
+      0,
+      1,
       [
         "@query", "equation_FStar.Buffer.buffer",
         "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
@@ -367,7 +375,7 @@
     ],
     [
       "Hacl.EC.Curve25519.Bignum.Fdifference.Lemmas.lemma_add_zero_eval",
-      3,
+      4,
       0,
       1,
       [
@@ -388,19 +396,11 @@
         "fuel_correspondence_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_FStar.HyperStack.mem", "int_inversion",
         "int_typing", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
         "refinement_interpretation_Tm_refine_df62cd1a471cd66fcf0352dbae2270b3"
       ],
-      0
-    ],
-    [
-      "Hacl.EC.Curve25519.Bignum.Fdifference.Lemmas.lemma_add_zero_eval",
-      4,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
     [
@@ -436,6 +436,14 @@
       0
     ],
     [
+      "Hacl.EC.Curve25519.Bignum.Fdifference.Lemmas.lemma_add_zero_eval",
+      9,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
       "Hacl.EC.Curve25519.Bignum.Fdifference.Lemmas.factorization_lemma",
       1,
       0,
@@ -450,9 +458,8 @@
       1,
       [
         "@query", "equation_FStar.Mul.op_Star", "int_inversion",
-        "int_typing", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "unit_typing"
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0", "unit_typing"
       ],
       0
     ],

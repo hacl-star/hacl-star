@@ -1,5 +1,5 @@
 [
-  "\u0016zqÚï∑≥ëi1⁄T:]/È",
+  "êeº-A*jÕ\u0016ÔV\u0005â\u000f…&",
   [
     [
       "Hacl.EC.Curve25519.Bignum.bound64",
@@ -871,11 +871,11 @@
         "@query", "data_elim_FStar.Buffer.MkBuffer",
         "equation_FStar.Buffer.as_seq", "equation_FStar.Buffer.buffer",
         "equation_FStar.Buffer.get", "equation_FStar.Buffer.idx",
-        "equation_FStar.Buffer.length", "equation_FStar.Buffer.live",
-        "equation_FStar.Buffer.sel", "equation_FStar.List.Tot.test_sort",
-        "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.n",
-        "equation_FStar.UInt32.t", "equation_FStar.UInt32.v",
-        "equation_FStar.UInt64.t", "equation_FStar.UInt64.v",
+        "equation_FStar.Buffer.length", "equation_FStar.Buffer.sel",
+        "equation_FStar.List.Tot.test_sort", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.n", "equation_FStar.UInt32.t",
+        "equation_FStar.UInt32.v", "equation_FStar.UInt64.t",
+        "equation_FStar.UInt64.v",
         "equation_Hacl.EC.Curve25519.Bigint.bigint",
         "equation_Hacl.EC.Curve25519.Bigint.heap",
         "equation_Hacl.EC.Curve25519.Bigint.norm",
@@ -913,14 +913,12 @@
         "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
         "refinement_interpretation_Tm_refine_c80f93641670351ef037bee53d1c4edc",
         "refinement_interpretation_Tm_refine_c90e16742d2e633e32c657b87c3493b3",
-        "refinement_interpretation_Tm_refine_e0347f438a5eb94484943d30b66e67fe",
         "refinement_kinding_Tm_refine_c80f93641670351ef037bee53d1c4edc",
         "typing_FStar.Buffer.MkBuffer.content",
         "typing_FStar.Buffer.MkBuffer.idx", "typing_FStar.Buffer.as_seq",
         "typing_FStar.Buffer.get", "typing_FStar.Buffer.idx",
-        "typing_FStar.Buffer.sel", "typing_FStar.HyperStack.sel",
-        "typing_FStar.Seq.index", "typing_FStar.UInt32.v",
-        "typing_Hacl.UInt64.Mk.v"
+        "typing_FStar.HyperStack.sel", "typing_FStar.Seq.index",
+        "typing_FStar.UInt32.v", "typing_Hacl.UInt64.Mk.v"
       ],
       0
     ],
@@ -1072,64 +1070,10 @@
         "equation_Hacl.UInt64.t", "equation_Prims.nat",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem", "int_inversion",
-        "projection_inverse_BoxInt_proj_0",
+        "int_typing", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251"
       ],
-      0
-    ],
-    [
-      "Hacl.EC.Curve25519.Bignum.lemma_mod_sub_distr_r",
-      1,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.EC.Curve25519.Bignum.lemma_mod_sub_distr_r",
-      2,
-      0,
-      1,
-      [
-        "@query", "equation_Prims.pos",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
-      ],
-      0
-    ],
-    [
-      "Hacl.EC.Curve25519.Bignum.lemma_mod_fdifference",
-      1,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.EC.Curve25519.Bignum.lemma_mod_fdifference",
-      2,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.EC.Curve25519.Bignum.lemma_mod_fdifference",
-      3,
-      0,
-      1,
-      [
-        "@query", "equation_Prims.pos",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
-      ],
-      0
-    ],
-    [
-      "Hacl.EC.Curve25519.Bignum.lemma_mod_fdifference",
-      4,
-      0,
-      1,
-      [ "@query", "unit_typing" ],
       0
     ],
     [
@@ -1174,7 +1118,7 @@
         "equation_FStar.HyperStack.fresh_frame",
         "equation_FStar.HyperStack.is_tip",
         "equation_FStar.HyperStack.live_region",
-        "equation_FStar.HyperStack.poppable",
+        "equation_FStar.HyperStack.poppable", "equation_FStar.Mul.op_Star",
         "equation_FStar.ST.inline_stack_inv", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
@@ -1197,7 +1141,9 @@
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "function_token_typing_Hacl.EC.Curve25519.Parameters.a24",
         "function_token_typing_Hacl.EC.Curve25519.Parameters.nlength",
-        "int_typing", "kinding_Hacl.UInt64.t_@tok",
+        "function_token_typing_Hacl.EC.Curve25519.Parameters.prime",
+        "function_token_typing_Prims.pos", "int_inversion", "int_typing",
+        "kinding_Hacl.UInt64.t_@tok",
         "lemma_FStar.Buffer.lemma_disjoint_symm",
         "lemma_FStar.Buffer.lemma_equal_domains_2",
         "lemma_FStar.Buffer.lemma_fresh_poppable",
@@ -1217,7 +1163,8 @@
         "lemma_FStar.Buffer.no_upd_popped",
         "lemma_FStar.HyperStack.lemma_equal_domains_trans",
         "lemma_Hacl.EC.Curve25519.Bignum.Modulo.Lemmas3.lemma_2_255m19_val",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "primitive_Prims.op_disEquality",
         "proj_equation_FStar.HyperStack.HS_h",
         "proj_equation_FStar.HyperStack.HS_tip",
@@ -1230,8 +1177,9 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
         "refinement_interpretation_Tm_refine_d023b9461e4d4c2c1260f907a1d7e4a1",
-        "typing_FStar.Buffer.idx", "typing_FStar.HyperStack.poppable",
-        "unit_typing"
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_FStar.Buffer.idx", "typing_FStar.Ghost.reveal",
+        "typing_FStar.HyperStack.poppable", "unit_typing"
       ],
       0
     ],
@@ -1289,6 +1237,14 @@
     [
       "Hacl.EC.Curve25519.Bignum.fdifference",
       10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.fdifference",
+      11,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -1532,7 +1488,6 @@
         "lemma_FStar.Buffer.modifies_popped_1",
         "lemma_FStar.Buffer.no_upd_fresh",
         "lemma_FStar.Buffer.no_upd_lemma_0",
-        "lemma_FStar.Buffer.no_upd_lemma_1",
         "lemma_FStar.Buffer.no_upd_popped",
         "lemma_FStar.HyperStack.lemma_equal_domains_trans",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",

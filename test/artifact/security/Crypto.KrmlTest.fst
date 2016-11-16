@@ -117,7 +117,6 @@ let test() =
   assert_norm (114 <= pow2 14);
   assert_norm (FStar.Mul(114 <= 1999 * 64));
   assert(AETypes.safelen i (v plainlen) 1ul);
-  //NS: These 3 separation properties are explicitly violated by allocating st in HH.root
   //    Assuming them for the moment
   assume (
     HH.disjoint (Buffer.frameOf (Plain.as_buffer plain)) (AETypes st.log_region) /\

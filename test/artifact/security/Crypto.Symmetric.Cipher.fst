@@ -41,8 +41,6 @@ type key a   = lbuffer (v (keylen a))
 type block a = lbuffer (v (blocklen a))
 type state a = lbuffer (v (statelen a))
 
-// 16-10-02 an integer value, instead of a lbuffer (v (ivlen)),
-// so that it can be used both in abstract indexes and in real code.
 type iv a    = n:UInt128.t { UInt128.v n < pow2 (v (8ul *^ ivlen a)) } 
 
 let init (#a:alg) (k:key a) (s:state a) =
@@ -94,7 +92,7 @@ val compute:
 #reset-options "--z3timeout 10000" 
 
 let compute a output st n counter len = 
-  assume False; //16-10-02 TODO not sure what's going on
+  assume False; 
   push_frame();
   begin match a with 
   | CHACHA20 -> // already specialized for counter mode
@@ -103,7 +101,6 @@ let compute a output st n counter len =
       store_uint128 (ivlen CHACHA20) nbuf n;
       chacha20 output st nbuf counter len
 
-  // ADL: TODO single parametric AES module
   | AES128 ->
       let open Crypto.Symmetric.AES128 in
       let sbox = Buffer.sub st 0ul 256ul in
@@ -113,7 +110,7 @@ let compute a output st n counter len =
       aes_store_counter ctr_block counter;
       let output_block = Buffer.create 0uy (blocklen AES128) in
       cipher output_block ctr_block w sbox;
-      blit output_block 0ul output 0ul len // too much copying!
+      blit output_block 0ul output 0ul len
 
   | AES256 -> 
       let open Crypto.Symmetric.AES in 
@@ -124,8 +121,6 @@ let compute a output st n counter len =
       aes_store_counter ctr_block counter; 
       let output_block = Buffer.create 0uy (blocklen AES256) in 
       cipher output_block ctr_block w sbox;
-      blit output_block 0ul output 0ul len // too much copying!
+      blit output_block 0ul output 0ul len
   end;
   pop_frame()
-
-//NB double-check this is indeed big-endian.

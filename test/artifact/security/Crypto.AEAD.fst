@@ -64,7 +64,6 @@ let ctr x = PRF(x.ctr)
 //
 // For convenience, 'refines' relies on both the log and the table being ordered chronologically.
 
-// TODO `Functional' correctness? (actually a witnessed, stable property)
 // c = encryptT h i st nonce ad (real_or_zero i p) 
 //
 // Ideally, this depends on the (increasing) states of 
@@ -846,7 +845,7 @@ let rec counterblocks_contains_all_blocks i rgn x len remaining_len plain cipher
   if remaining_len = 0ul then ()
   else let l = min remaining_len (PRF.blocklen i) in 
        counterblocks_contains_all_blocks i rgn (PRF.incr i x) len (remaining_len -^ l) plain cipher;
-       admit() //NS: significant --- but will change for Plan A
+       admit() 
 
 let from_x_blocks_included_in (#i:id) (#rgn:rid) (x:PRF.domain i) (blocks:prf_blocks rgn i) (blocks':prf_blocks rgn i) = 
   forall (y:PRF.domain i).{:pattern (find blocks y)}

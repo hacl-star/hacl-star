@@ -202,27 +202,12 @@ let lemma_eq_norm h h' (b:bigint) (b':bigint) : Lemma
   = lemma_norm h b; lemma_eq h b h' b'
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
-
-assume val lemma_mod_sub_distr_r: a:nat -> b:nat -> p:pos ->
-  Lemma (requires (True))
-        (ensures  ((a - b) % p = ((a % p) - b) % p))
-
-val lemma_mod_fdifference: a:nat -> b:nat -> c:nat -> p:pos ->
-  Lemma (requires (a % p = c % p))
-        (ensures  ((a - b) % p = ((c - b) % p)))
-let lemma_mod_fdifference a b c p =
-  lemma_mod_sub_distr_r a b p;
-  lemma_mod_sub_distr_r c b p;
-  ()
-
-
 #reset-options "--z3timeout 200 --initial_fuel 0 --max_fuel 0"
 
 val fdifference: a:bigint{length a >= norm_length+1} -> b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> norm h a /\ norm h b))
     (ensures (fun h0 _ h1 -> norm h0 b /\ norm h0 a /\ norm h1 a /\ modifies_1 a h0 h1
-      /\ eval h1 a norm_length % reveal prime = (eval h0 b norm_length - eval h0 a norm_length) % reveal prime))
+      /\ eval h1 a norm_length % reveal prime = (2 * reveal prime + eval h0 b norm_length - eval h0 a norm_length) % reveal prime))
 let fdifference a b =
   let hinit = ST.get() in
   push_frame ();
@@ -245,6 +230,7 @@ let fdifference a b =
     lemma_eq_norm hinit h2 a a;
     Hacl.EC.Curve25519.Bigint.eval_eq_lemma hinit h2 a a 5;
     cut (eval h2 b' 5 % (reveal prime) = eval h1 b' 5 % (reveal prime));
+    cut (eval h2 b' 5 = 2 * reveal prime +  eval h1 b' 5);
   Hacl.EC.Curve25519.Bignum.Fdifference.fdifference' a b';
   let h3 = ST.get() in
     Hacl.EC.Curve25519.Bigint.eval_eq_lemma h2 h3 b' b' 5;
@@ -255,8 +241,7 @@ let fdifference a b =
     cut (eval h4 a 5 % reveal prime = eval h3 a 5 % reveal prime);
     cut (eval h4 a 5 % reveal prime = (eval h2 b' 5 - eval h2 a 5) % reveal prime);
     cut (eval h4 a 5 % reveal prime = (eval h2 b' 5 - eval hinit a 5) % reveal prime);
-    lemma_mod_fdifference (eval h2 b' 5) (eval hinit a 5) (eval hinit b 5) (reveal prime);
-    cut (eval h4 a 5 % reveal prime = (eval hinit b 5 - eval hinit a 5) % reveal prime);
+    cut (eval h4 a 5 % reveal prime = (2 * reveal prime + eval hinit b 5 - eval hinit a 5) % reveal prime);
   pop_frame();
   let hfin = ST.get() in
     lemma_eq_norm h4 hfin a a;

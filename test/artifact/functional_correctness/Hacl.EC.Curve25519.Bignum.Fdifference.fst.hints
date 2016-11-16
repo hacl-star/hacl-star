@@ -1,5 +1,5 @@
 [
-  "J^^ø‰¨\u0012;¶°ÇI\u0012ˇ¸Û",
+  "\u0003ßÂè°®Jç\u0001kï6ñOÚÒ",
   [
     [
       "Hacl.EC.Curve25519.Bignum.Fdifference.add_big_zero_",
@@ -80,8 +80,17 @@
       2,
       0,
       1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.EC.Curve25519.Bignum.Fdifference.add_big_zero",
+      3,
+      0,
+      1,
       [
-        "@query", "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
+        "@query", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Ghost.hide", "equation_FStar.Ghost.reveal",
         "equation_Hacl.EC.Curve25519.Bigint.bigint",
         "equation_Hacl.EC.Curve25519.Bigint.s64",
         "equation_Hacl.EC.Curve25519.Bigint.u64s",
@@ -90,6 +99,7 @@
         "equation_Hacl.EC.Curve25519.Parameters.norm_length",
         "equation_Hacl.EC.Curve25519.Parameters.prime",
         "equation_Hacl.UInt64.t", "equation_Prims.pos",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
@@ -99,7 +109,7 @@
     ],
     [
       "Hacl.EC.Curve25519.Bignum.Fdifference.add_big_zero",
-      3,
+      4,
       0,
       1,
       [
@@ -145,6 +155,7 @@
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "fuel_guarded_inversion_FStar.UInt64.t_",
         "fuel_guarded_inversion_Hacl.UInt64.t_",
+        "function_token_typing_FStar.UInt64.n",
         "function_token_typing_Hacl.EC.Curve25519.Parameters.a24",
         "int_typing", "kinding_Hacl.UInt64.t_@tok",
         "lemma_FStar.Buffer.Quantifiers.lemma_index_quantifiers",
@@ -159,8 +170,8 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_c54dcb782be971742f65876a3620f44b",
         "refinement_interpretation_Tm_refine_c7617a73c2f16910fb295e97ddc92251",
-        "typing_FStar.UInt64.sub", "typing_Hacl.UInt64.Mk.v",
-        "typing_Hacl.UInt64.v"
+        "typing_FStar.UInt.fits", "typing_FStar.UInt64.sub",
+        "typing_Hacl.UInt64.Mk.v", "typing_Hacl.UInt64.v"
       ],
       0
     ],

@@ -353,32 +353,7 @@ let isCarried_'
       /\ v (get h1 b 4) = (v b4 + r3)  % pow2 51
     )
 
-(* let isCarried (h0:mem) (h1:mem) (b:bigint) : GTot Type0 = *)
-(*   live h0 b /\ live h1 b /\ length b >= norm_length+1 *)
-(*   /\ ( *)
-(*       let b0 = v (get h0 b 0) in *)
-(*       let b1 = v (get h0 b 1) in *)
-(*       let b2 = v (get h0 b 2) in *)
-(*       let b3 = v (get h0 b 3) in *)
-(*       let b4 = v (get h0 b 4) in *)
-(*       let r0  = b0 / pow2 51 in *)
-(*       let r1  = (b1 + r0) / pow2 51 in *)
-(*       let r2  = (b2 + r1) / pow2 51 in *)
-(*       let r3  = (b3 + r2) / pow2 51 in *)
-(*       v (get h1 b 5) = (b4 + r3) / pow2 51 *)
-(*       /\ v (get h1 b 0) = b0 % pow2 51 *)
-(*       /\ v (get h1 b 1) = (b1 + r0)  % pow2 51 *)
-(*       /\ v (get h1 b 2) = (b2 + r1)  % pow2 51 *)
-(*       /\ v (get h1 b 3) = (b3 + r2)  % pow2 51 *)
-(*       /\ v (get h1 b 4) = (b4 + r3)  % pow2 51 *)
-(*     ) *)
-
 let u633 = x:s64{H64.v x < pow2 63}
-
-(* let bound63 (h:heap) (b:bigint) : GTot Type0 = *)
-(*   live h b *)
-(*   /\ v (get h b 0) < pow2 63 /\ v (get h b 1) < pow2 63 /\ v (get h b 2) < pow2 63 *)
-(*   /\ v (get h b 3) < pow2 63 /\ v (get h b 4) < pow2 63 *)
 
 private val carry_1_0':
   b:bigint{length b >= norm_length+1} ->
@@ -424,16 +399,6 @@ let carry_1_' b =
   let b4 = b.(4ul) in
   carry_1_0' b b0 b1 b2 b3 b4
 
-
-(* let carried_1 (h:mem) (b:bigint) : GTot Type0 = *)
-(*   live h b /\ length b >= norm_length+1 *)
-(*   /\ v (get h b 0) < pow2 51 *)
-(*   /\ v (get h b 1) < pow2 51 *)
-(*   /\ v (get h b 2) < pow2 51 *)
-(*   /\ v (get h b 3) < pow2 51 *)
-(*   /\ v (get h b 4) < pow2 51 *)
-(*   /\ v (get h b 5) <= pow2 77 *)
-
 val carry_1':
   b:bigint{length b >= norm_length+1} ->
   Stack unit
@@ -446,15 +411,6 @@ let carry_1' b =
   let h1 = ST.get() in
   lemma_carry_1 h0 h1 b
 
-
-(* let carried_2 (h:mem) (b:bigint) : GTot Type0 = *)
-(*   live h b /\ length b >= norm_length+1 *)
-(*   /\ v (get h b 0) < pow2 84 *)
-(*   /\ v (get h b 1) < pow2 51 *)
-(*   /\ v (get h b 2) < pow2 51 *)
-(*   /\ v (get h b 3) < pow2 51 *)
-(*   /\ v (get h b 4) < pow2 51 *)
-
 val carry_2_':
   b:bigint ->
   Stack unit
@@ -464,14 +420,6 @@ val carry_2_':
 let carry_2_' b =
   pow2_lt_compat 63 52; pow2_lt_compat 63 51;
   carry_1_' b
-
-
-(* let carried_3 (h:mem) (b:bigint) : GTot Type0 = *)
-(*   norm h b /\ length b >= norm_length+1 *)
-(*   /\ v (get h b 5) <= 1 *)
-(*   /\ (v (get h b 5) = 1 *)
-(*       ==> (v (get h b 1) < pow2 16 /\ v (get h b 2) < pow2 16  /\ v (get h b 3) < pow2 16 *)
-(* 	  /\ v (get h b 4) < pow2 16)) *)
 
 val carry_2':
   b:bigint ->
@@ -485,15 +433,6 @@ let carry_2' b =
   carry_2_' b;
   let h1 = ST.get() in
   lemma_carry_2 h0 h1 b
-
-
-(* let carriedTopBottom (h0:mem) (h1:mem) (b:bigint) : GTot Type0 = *)
-(*   live h0 b /\ live h1 b /\ length b >= norm_length+1 *)
-(*   /\ v (get h1 b 0) = v (get h0 b 0) + 19 * v (get h0 b 5) *)
-(*   /\ v (get h1 b 1) = v (get h0 b 1) *)
-(*   /\ v (get h1 b 2) = v (get h0 b 2) *)
-(*   /\ v (get h1 b 3) = v (get h0 b 3) *)
-(*   /\ v (get h1 b 4) = v (get h0 b 4) *)
 
 val carry_top_':
   b:bigint ->
@@ -524,16 +463,6 @@ let carry_top_1' b =
   let h1 = ST.get() in
   lemma_carry_top_1 h0 h1 b
 
-
-(* let carried_4 (h:mem) (b:bigint) : GTot Type0 = *)
-(*   live h b *)
-(*   /\ v (get h b 0) < pow2 51 + 19 *)
-(*   /\ v (get h b 1) < pow2 51 *)
-(*   /\ (v (get h b 0) >= pow2 51 ==> v (get h b 1) < pow2 16 // TODO: fix constant) *)
-(*   /\ v (get h b 2) < pow2 51 *)
-(*   /\ v (get h b 3) < pow2 51 *)
-(*   /\ v (get h b 4) < pow2 51) *)
-
 val carry_top_2':
   b:bigint ->
   Stack unit
@@ -549,15 +478,6 @@ let carry_top_2' b =
   carry_top_' b;
   let h1 = ST.get() in
   lemma_carry_top_2 h0 h1 b
-
-
-(* let isCarried01 (h0:mem) (h1:mem) (b:bigint) = *)
-(*   live h0 b /\ live h1 b *)
-(*   /\ v (get h1 b 0) = v (get h0 b 0) % pow2 51 *)
-(*   /\ v (get h1 b 1) = v (get h0 b 1) + (v (get h0 b 0) / pow2 51) *)
-(*   /\ v (get h1 b 2) = v (get h0 b 2) *)
-(*   /\ v (get h1 b 3) = v (get h0 b 3) *)
-(*   /\ v (get h1 b 4) = v (get h0 b 4) *)
 
 
 #reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
@@ -604,56 +524,6 @@ let freduce_coefficients b =
   carry_2' b;
   carry_top_2' b;
   carry_0_to_1' b
-
-  (* let m51 = 0x7ffffffffffffuL in *)
-  (* let b0 = b.(0ul) in *)
-  (* let b1 = b.(1ul) in *)
-  (* let b2 = b.(2ul) in *)
-  (* let b3 = b.(3ul) in *)
-  (* let b4 = b.(4ul) in *)
-  (* let r0 = b0 >>^ 51ul in *)
-  (* let b0 = b0 &^ m51 in *)
-  (* let b1 = b1 +^ r0 in *)
-  (* let r1 = b1 >>^ 51ul in *)
-  (* let b1 = b1 &^ m51 in *)
-  (* let b2 = b2 +^ r1 in *)
-  (* let r2 = b2 >>^ 51ul in *)
-  (* let b2 = b2 &^ m51 in *)
-  (* let b3 = b3 +^ r2 in *)
-  (* let r3 = b3 >>^ 51ul in *)
-  (* let b3 = b3 &^ m51 in *)
-  (* let b4 = b4 +^ r3 in *)
-  (* let r4 = b4 >>^ 51ul in *)
-  (* let b4 = b4 &^ m51 in *)
-  (* let r4 = r4 *^ 19uL in *)
-
-  (* let b0 = b0 +^ r4 in *)
-  (* let r0 = b0 >>^ 51ul in *)
-  (* let b0 = b0 &^ m51 in *)
-  (* let b1 = b1 +^ r0 in *)
-  (* let r1 = b1 >>^ 51ul in *)
-  (* let b1 = b1 &^ m51 in *)
-  (* let b2 = b2 +^ r1 in *)
-  (* let r2 = b2 >>^ 51ul in *)
-  (* let b2 = b2 &^ m51 in *)
-  (* let b3 = b3 +^ r2 in *)
-  (* let r3 = b3 >>^ 51ul in *)
-  (* let b3 = b3 &^ m51 in *)
-  (* let b4 = b4 +^ r3 in *)
-  (* let r4 = b4 >>^ 51ul in *)
-  (* let b4 = b4 &^ m51 in *)
-  (* let r4 = r4 *^ 19uL in *)
-
-  (* let b0 = b0 +^ r4 in *)
-  (* let r0 = b0 >>^ 51ul in *)
-  (* let b0 = b0 &^ m51 in *)
-  (* let b1 = b1 +^ r0 in *)
-
-  (* b.(0ul) <- b0; *)
-  (* b.(1ul) <- b1; *)
-  (* b.(2ul) <- b2; *)
-  (* b.(3ul) <- b3; *)
-  (* b.(4ul) <- b4 *)
 
 #reset-options "--initial_fuel 0 --max_fuel 9 --z3timeout 20"
 

@@ -98,6 +98,7 @@ val lemma_add_zero_eval:
   b:bigint{addedZero h0 h1 b} ->
   Lemma (requires (True))
         (ensures  (eval h1 b 5 % reveal prime = eval h0 b 5 % reveal prime
+          /\ eval h1 b 5 = 2 * reveal prime + eval h0 b 5
           /\ fits51to53 h1 b))
 let lemma_add_zero_eval h0 h1 b =
   lemma_add_zero_eval_ h0 h1 b;

@@ -116,11 +116,8 @@ unfold let authId (i:id) =
   let i = fst i in
   safeHS i && mac1 i
 
-// we will need authId i ==> ideal?
-
 // the index is the base index (controlling agility and idealization)
 // plus the value of the unique IV for this MAC
-// TODO make it a dependent pair to support agile IV types
 
 // authenticated payload: a sequence of words
 type text = Seq.seq (lbytes 16)
@@ -185,7 +182,6 @@ val alloc: region:rid{is_eternal_region region} -> i:id
   -> ST (state i)
   (requires (fun m0 -> live m0 k /\ live_ak m0 ak))
   (ensures  (fun m0 st m1 -> genPost i region m0 st m1))
- //   (skeyed (fst i) ==> modifies_1 (get_skey #region #(fst i) st.r) m0 m1)
 
 #reset-options "--z3timeout 30 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
@@ -232,13 +228,6 @@ let gen region i ak =
   let h1 = ST.get () in
   lemma_reveal_modifies_1 k h0 h1;
   alloc region i ak k
-//
-//let gen rgn i st0 = 
-//  let r_buff = 
-//    if static_r i then st0 
-//    else encode_r (random 16ul) in
-//  let s = random 16ul in
-//  alloc rgn i r_buff s
 
 val coerce: 
   r:rid -> i:id{~(authId i)} -> 
@@ -266,14 +255,13 @@ let irtext = if mac_log then FStar.HyperStack.reference text else unit
 
 let mk_irtext (r:HS.reference text{mac_log}) : irtext = r
 
-// 16-10-15 still missing region, needed for modifies clauses below!
 noeq abstract type accBuffer (i:id) = 
   | Acc: a:MAC.elemB i -> l:irtext -> accBuffer i
 
 let alog (#i:id) (acc:accBuffer i {mac_log}): HS.reference text = acc.l
 
 let acc_inv (#i:id) (st:state i) (acc:accBuffer i) h =
-  MAC.live h st.r /\ MAC.live h acc.a /\ //not sure why I need those, implied by norm
+  MAC.live h st.r /\ MAC.live h acc.a /\
   MAC.norm h st.r /\ MAC.norm h acc.a /\ 
   disjoint (MAC.as_buffer st.r) (MAC.as_buffer acc.a) /\
   (mac_log ==> (
@@ -296,7 +284,6 @@ let start #i st =
   Acc a l
 
 
-// update [was add]; could add finalize (for POLY1305, last block < 16).
 val update:
   #i:id ->
   st: state i ->
@@ -304,8 +291,6 @@ val update:
   w: lbuffer 16 -> STL unit
   (requires (fun h -> acc_inv st a h /\ Buffer.live h w))
   (ensures (fun h0 l1 h1 ->
-    // TODO. modifying both a buffer and its ref seq bytes (if present)
-    // acc_modifies a h0 h1 /\  
     Buffer.live h1 w /\ 
     acc_inv st a h1 /\ 
     (mac_log ==> (
@@ -313,16 +298,11 @@ val update:
       HS.sel h1 (alog a) == SeqProperties.cons v (HS.sel h0 (alog a))))))
 
 let update #i st acc w =
-  //16-10-17 if mac_log then acc.l <- SeqProperties.cons w !aac.l;
-  assume false; //16-10-17 
+  assume false; 
   MAC.update st.r acc.a w
 
 
 #reset-options "--z3timeout 100 --lax"
-(*
-val mk_itext: s:Seq.seq (lbytes 16){Flag.mac_log} -> itext
-let mk_itext s = s
-*)
 
 val mac: 
   #i:id -> 

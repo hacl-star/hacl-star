@@ -60,7 +60,7 @@ private val auth_body: #k:pos -> alg:cipher_alg k ->
     (ensures (fun h0 _ h1 -> live h1 ciphertext /\ live h1 tag /\ live h1 key /\ live h1 nonce /\ live h1 ad /\ live h1 tmp
         /\ modifies_2 tag tmp h0 h1))
 #set-options "--z3timeout 20"	
-//NS: Hints are not replayable for this function, and for a few others below	
+
 let auth_body #k alg ciphertext tag key nonce cnt ad adlen len tmp =
   let h0 = ST.get() in
   fill tag 0uy 16ul;

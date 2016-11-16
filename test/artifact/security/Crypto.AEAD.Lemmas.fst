@@ -33,22 +33,22 @@ let find_snoc (#a:Type) (s:Seq.seq a) (x:a) (f:a -> Tot bool)
 	   match res with 
 	   | None -> SeqProperties.find_l f s == None /\ not (f x)
 	   | Some y -> res == SeqProperties.find_l f s \/ (f x /\ x==y))
-  = admit() //NS: boring
+  = admit()
 
 let find_is_some (#i:id) (#rgn:rid) (b:prf_blocks rgn i) (x:domain i)
   : Lemma (requires (is_Some (find b x)))
           (ensures (Seq.length b <> 0))
-  = admit() //NS: boring
+  = admit()
 
 let find_blocks_append_l (#i:id) (#rgn:rid) (b:prf_blocks rgn i) (b':prf_blocks rgn i) (x:domain i) 
   : Lemma (requires (is_Some (find b x)))
           (ensures (find (Seq.append b b') x == find b x))
-  = admit() //NS: boring
+  = admit()
 
 let find_append (#i:id) (#r:rid) (d:domain i) (s1:Seq.seq (PRF.entry r i)) (s2:Seq.seq (PRF.entry r i)) 
    : Lemma (requires (is_None (find s1 d)))
            (ensures (find (Seq.append s1 s2) d == find s2 d))
-   = admit() //NS: boring
+   = admit()
 
 #set-options "--initial_ifuel 0 --max_ifuel 0 --initial_fuel 2 --max_fuel 2"
 let find_singleton (#rgn:region) (#i:id) (e:PRF.entry rgn i) (x:PRF.domain i) 
@@ -57,7 +57,7 @@ let find_singleton (#rgn:region) (#i:id) (e:PRF.entry rgn i) (x:PRF.domain i)
     = ()	     
 
 #reset-options "--initial_ifuel 0 --max_ifuel 0 --initial_fuel 2 --max_fuel 2"
-assume //NS: boring, this should be in the buffer library
+assume 
 val to_seq_temp: #a:Type -> b:Buffer.buffer a -> l:UInt32.t{v l <= Buffer.length b} -> ST (Seq.seq a)
   (requires (fun h -> Buffer.live h b))
   (ensures  (fun h0 r h1 -> h0 == h1 /\ Buffer.live h1 b /\ r == Buffer.as_seq h1 b))

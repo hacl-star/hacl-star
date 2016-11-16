@@ -50,27 +50,9 @@ type txtlen_32 = l:UInt32.t {l <=^ txtmax}
 // a spec for encoding and padding, convenient for injectivity proof
 let pad_0 b l = Seq.append b (Seq.create l 0uy)
 
-(*
-val encode_pad: i:MAC.id -> prefix:Seq.seq (MAC.elem i) -> txt:Seq.seq UInt8.t -> GTot (Seq.seq (MAC.elem i)) 
-  (decreases (Seq.length txt))
-let rec encode_pad i prefix txt =
-  let l = Seq.length txt in
-  if l = 0 then prefix
-  else if l < 16 then
-    let w = txt in
-    SeqProperties.snoc prefix (MAC.encode i w)
-  else
-    begin
-    let w, txt = SeqProperties.split txt 16 in
-    let prefix = SeqProperties.snoc prefix (MAC.encode i w) in
-    encode_pad i prefix txt
-    end
-*)
 
-//16-09-18 where is it in the libraries??
 private let min (a:nat) (b:nat) : nat = if a <= b then a else b
 
-//16-10-15 simpler variant? rediscuss injectivity.
 val encode_bytes: txt:Seq.seq UInt8.t -> GTot MAC.text (decreases (Seq.length txt))
 let rec encode_bytes txt =
   let l = Seq.length txt in
@@ -92,7 +74,7 @@ let rec lemma_encode_length txt: Lemma
   else if l < 16 then assert(Seq.length(encode_bytes txt) = 1)
   else (
     let txt0, txt' = SeqProperties.split txt 16 in
-    lemma_encode_length txt'; //NS: this is provable, but it takes 4mins for Z3 to prove; disabling it until we can find a better, faster proof
+    lemma_encode_length txt'; 
     assume false;
     assert(Seq.length(encode_bytes txt) = 1 + Seq.length(encode_bytes txt')))
 
@@ -115,72 +97,12 @@ let lemma_pad_0_injective b0 b1 l =
   SeqProperties.lemma_append_inj b0 (Seq.create l 0uy) b1 (Seq.create l 0uy);
   Seq.lemma_eq_intro b0 b1
 
-(* use the one in Poly1305.Spec:
-
-val lemma_encode_injective: i:MAC.id -> w0:word -> w1:word -> Lemma
-  (requires (length w0 == length w1 /\ MAC.encode i w0 == MAC.encode i w1))
-  (ensures  (w0 == w1))
-let lemma_encode_injective w0 w1 =
-  let open FStar.Mul in 
-  let l = length w0 in
-  lemma_little_endian_is_bounded w0;
-  lemma_little_endian_is_bounded w1;
-  pow2_le_compat 128 (8 * l);
-  lemma_mod_plus_injective p_1305 (pow2 (8 * l))
-    (little_endian w0) (little_endian w1);
-  assert (little_endian w0 == little_endian w1);
-  Seq.lemma_eq_intro (Seq.slice w0 0 l) w0;
-  Seq.lemma_eq_intro (Seq.slice w1 0 l) w1;
-  lemma_little_endian_is_injective w0 w1 l
-*)
-
 #reset-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 
 assume val lemma_encode_bytes_injective: t0:Seq.seq UInt8.t -> t1:Seq.seq UInt8.t -> Lemma
   (requires length t0 == length t1 /\ encode_bytes t0 == encode_bytes t1)
   (ensures t0 == t1)
   (decreases (Seq.length t0))
-(*  
-let rec lemma_encode_bytes_injective t0 t1 =
-  let l = Seq.length t0 in
-  if l = 0 then Seq.lemma_eq_intro t0 t1
-  else if l < 16 then
-    begin
-    lemma_index_create 1 t0 0;
-    lemma_index_create 1 t1 0
-    //lemma_encode_injective t0 t1
-    end
-  else
-    begin
-    let w0, t0' = SeqProperties.split_eq t0 16 in
-    let w1, t1' = SeqProperties.split_eq t1 16 in
-    let p0' = Seq.create 1 w0 in
-    let p1' = Seq.create 1 w1 in
-    assert (encode_bytes t0' == encode_bytes t1');
-    lemma_encode_bytes_injective t0' t1';
-    lemma_index_create 1 w0 0;
-    lemma_index_create 1 w1 0
-    //lemma_encode_injective w0 w1
-    end
-*)
-
-(*
-val encode_pad_empty: prefix:Seq.seq elem -> txt:Seq.seq UInt8.t -> Lemma
-  (requires Seq.length txt == 0)
-  (ensures  encode_pad prefix txt == prefix)
-let encode_pad_empty prefix txt = ()
-
-val encode_pad_snoc: prefix:Seq.seq elem -> txt:Seq.seq UInt8.t -> w:lbytes 16 -> Lemma
-  (encode_pad (SeqProperties.snoc prefix (encode w)) txt ==
-   encode_pad prefix (append w txt))
-let encode_pad_snoc prefix txt w =
-  Seq.lemma_len_append w txt;
-  assert (16 <= Seq.length (append w txt));
-  let w', txt' = SeqProperties.split (append w txt) 16 in
-  let prefix' = SeqProperties.snoc prefix (encode w') in
-  Seq.lemma_eq_intro w w';
-  Seq.lemma_eq_intro txt txt'
-*)
 
 // If the length is not a multiple of 16, pad to 16
 // (we actually don't depend on the details of the padding)
@@ -215,7 +137,7 @@ private val add_bytes:
     ))))
 
 let rec add_bytes #i st a len txt =
-  assume false; //TODO after specifying CMA.update
+  assume false; 
   push_frame();
   let r = 
     if len <> 0ul 
@@ -237,7 +159,7 @@ let rec add_bytes #i st a len txt =
   pop_frame(); 
   r
 
-//16-10-16 TODO in SeqProperties
+
 assume val lemma_append_slices: #a:Type -> s1:Seq.seq a -> s2:Seq.seq a -> Lemma
   (ensures 
     ( s1 == Seq.slice (Seq.append s1 s2) 0 (Seq.length s1)
@@ -264,7 +186,7 @@ private let encode_lengths_poly1305 (aadlen:UInt32.t) (plainlen:UInt32.t) : b:lb
   lemma_append_slices b0 (bp @| b0);
   lemma_append_slices bp b0;
   b
-//16-11-01 unclear why verification is slow above, fast below
+
 #reset-options
 
 open FStar.Mul
@@ -292,21 +214,6 @@ let encode_both (i:id) (aadlen:aadlen_32) (aad:lbytes (v aadlen)) (txtlen:txtlen
     (Seq.append 
       (encode_bytes cipher) 
       (encode_bytes aad))
-
-(*
-let field i = match alg i with 
-  | CHACHA20 -> elem
-  | AES256   -> lbytes (v Crypto.Symmetric.GF128.len) // not there yet
-
-#set-options "--prn"
-let field_encode (i:id) (aad:adata) (#l2:UInt32.t) (cipher:lbytes (v l2)) : GTot (Seq.seq (field i)) =
-  match alg i with 
-  | CHACHA20 -> 
-    encode_both (FStar.UInt32.uint_to_t (Seq.length aad)) aad l2 cipher
-  | _ -> 
-   //TODO
-    Seq.createEmpty
-*)
 
 let lemma_encode_both_inj i (al0:aadlen_32) (pl0:txtlen_32) (al1:aadlen_32) (pl1:txtlen_32)
   (a0:lbytes(v al0)) (p0:lbytes(v pl0)) (a1:lbytes(v al1)) (p1:lbytes (v pl1)) : Lemma
@@ -362,39 +269,34 @@ let accumulate #i st aadlen aad txtlen cipher  =
   let h0 = ST.get() in
   Buffer.lemma_reveal_modifies_0 h h0;
 
-  assume false;//16-11-01
+  assume false;
 
-  //16-10-16 :(
+
   assert (Buffer.disjoint_2 (MAC.as_buffer (CMA acc.a)) aad cipher);
 
   add_bytes st acc aadlen aad;
   let h1 = ST.get() in 
   Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA acc.a)) h0 h1;
-  //NS: this one fails too (11/10)
   assert(mac_log ==> 
     FStar.HyperStack.sel h1 (CMA.alog acc) == encode_bytes (Buffer.as_seq h1 aad));
 
-  // if mac_log then lemma_append_nil elem l;
-  // assert(mac_log ==> l = encode_bytes (Buffer.as_seq h1 aad));
   add_bytes st acc txtlen cipher;
   let h2 = ST.get() in 
   assert(mac_log ==>  
     FStar.HyperStack.sel h2 (CMA.alog acc) ==
     Seq.append (encode_bytes (Buffer.as_seq h2 cipher)) (encode_bytes (Buffer.as_seq h2 aad)));
 
-  allow_inversion macAlg; //NS: added this to invert macAlg below without consuming fuel
+  allow_inversion macAlg;
   let final_word = Buffer.create 0uy 16ul in (
   let id, _ = i in
-  // JP: removed a call to Prims.fst
   match macAlg_of_id id with 
   | POLY1305 -> store_uint32 4ul (Buffer.sub final_word 0ul 4ul) aadlen;
                store_uint32 4ul (Buffer.sub final_word 8ul 4ul) txtlen
   | GHASH -> store_big32 4ul (Buffer.sub final_word 4ul 4ul) (aadlen *^ 8ul);
             store_big32 4ul (Buffer.sub final_word 12ul 4ul) (txtlen *^ 8ul));
-  //16-10-31 confirm and verify the length formatting for GHASH (inferred from test vectors)
   
   let h3 = ST.get() in 
-  assume(encode_lengths (fst i) aadlen txtlen = Buffer.as_seq h3 final_word); //NS: 11/10; the assertion below fails ...
+  assume(encode_lengths (fst i) aadlen txtlen = Buffer.as_seq h3 final_word);
   assert(encode_lengths (fst i) aadlen txtlen = Buffer.as_seq h3 final_word);
   CMA.update st acc final_word;
   acc
