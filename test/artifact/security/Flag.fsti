@@ -4,7 +4,6 @@ open Crypto.Indexing
 
 (* All the idealization flags that we use for the cryptographic argument *)
 
-// TODO check that the real implementation normalizes fully.
 
 
 (* CRYPTOGRAPHIC SECURITY ASSUMPTIONS.

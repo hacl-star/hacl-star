@@ -269,20 +269,19 @@ let rec eval_eq_lemma ha hb a b len =
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 200"
 
-(* Timeout is too long to be reasonable *)
-assume val eval_partial_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} ->  b:bigint{live hb b} -> 
+val eval_partial_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} ->  b:bigint{live hb b} -> 
   ctr:nat -> len:nat{ ctr <= len /\ len <= length a /\ len <= length b} -> Lemma
     (requires (live ha a /\ live hb b
       /\ (forall (i:nat). i < len-ctr ==> get ha a (ctr+i) == get hb b (ctr+i)) ))
     (ensures ( eval ha a len - eval ha a ctr = eval hb b len - eval hb b ctr ))
-(* let rec eval_partial_eq_lemma ha hb a b ctr len = *)
-(*   if len = ctr then () *)
-(*   else *)
-(*     begin *)
-(*       eval_def ha a len; *)
-(*       eval_def hb b len; *)
-(*       eval_partial_eq_lemma ha hb a b ctr (len-1) *)
-(*     end *)
+let rec eval_partial_eq_lemma ha hb a b ctr len =
+  if len = ctr then ()
+  else
+    begin
+      eval_def ha a len;
+      eval_def hb b len;
+      eval_partial_eq_lemma ha hb a b ctr (len-1)
+    end
 
 #reset-options "--initial_fuel 1 --max_fuel 1"
 

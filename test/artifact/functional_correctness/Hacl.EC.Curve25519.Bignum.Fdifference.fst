@@ -58,7 +58,8 @@ val add_big_zero:
   Stack unit
     (requires (fun h -> norm h b))
     (ensures (fun h0 _ h1 -> live h0 b /\ fits51to53 h1 b /\ modifies_1 b h0 h1
-      /\ eval h1 b norm_length % reveal prime = eval h0 b norm_length % reveal prime))
+      /\ eval h1 b norm_length % reveal prime = eval h0 b norm_length % reveal prime
+      /\ eval h1 b norm_length = 2 * reveal prime + eval h0 b norm_length))
 let add_big_zero b =
   let h0 = ST.get() in
   add_big_zero_ b;

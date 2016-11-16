@@ -26,8 +26,6 @@ type elemB = b:lbuffer 16
 (* * gf128_shift_right: shift right by 1 bit. Used in multiplication.            **)
 (* * gf128_mul: multiplication. Achieved by combining 128 additions.             **)
 
-//16-09-23 we still miss a math specification of GF128 and a correctness proof.
-
 (* Every function "func_name_loop" is a helper for function "func_name". *)
 
 private val gf128_add_loop: 
@@ -53,7 +51,6 @@ let gf128_add a b =
   gf128_add_loop a b len;
   let h1 = ST.get() in
   assume (as_seq h1 a == as_seq h0 a +@ as_seq h0 b)
-  //16-10-27 TODO: functional correctness.
 
   
 private val gf128_shift_right_loop: a:elemB -> dep:u32{U32(dep <^ len)} -> Stack unit
@@ -139,7 +136,6 @@ let gf128_mul a b =
   pop_frame();
   let h1 = ST.get() in
   assume(as_seq h1 a == as_seq h0 a *@ as_seq h0 b)
-  //16-10-27 todo: functional correctness.
 
 val add_and_multiply: acc:elemB -> block:elemB{disjoint acc block}
   -> k:elemB{disjoint acc k /\ disjoint block k} -> Stack unit
@@ -167,9 +163,6 @@ let finish a s =
   //let _ = IO.debug_print_string "finish a=" in 
   //let _ = Crypto.Symmetric.Bytes.print_buffer a 0ul 16ul in
 
-
-//16-09-23 Instead of the code below, we should re-use existing AEAD encodings
-//16-09-23 and share their injectivity proofs and crypto model.
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 

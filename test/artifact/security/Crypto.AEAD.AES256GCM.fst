@@ -62,4 +62,4 @@ val aead_encrypt: ciphertext:bytes ->
 let aead_encrypt ciphertext tag key iv plaintext len ad adlen =
     Crypto.Symmetric.GCM.encrypt #32 aes256 ciphertext tag key iv ad adlen plaintext len
 
-(* TODO: AEAD decrypt function *)
+

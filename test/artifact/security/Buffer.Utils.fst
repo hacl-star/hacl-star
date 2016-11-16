@@ -27,7 +27,6 @@ let op_Less_Less_Less (a:u32) (s:u32{v s <= 32}) =
   (op_Less_Less_Hat a s) |^ (op_Greater_Greater_Hat a (m -^ s))
 
 (** Inplace xor operation on bytes *)
-(* TODO: add functional spec *)
 val xor_bytes_inplace: output:bytes -> in1:bytes{disjoint in1 output} ->
   len:u32{v len <= length output /\ v len <= length in1} -> STL unit
   (requires (fun h -> live h output /\ live h in1))
@@ -99,7 +98,6 @@ let uint32_of_bytes (b:bytes{length b >= 4}) =
 #set-options "--z3timeout 20"
 
 (** Stores the content of a byte buffer into a unsigned int32 buffer *)
-(* TODO: add functional spec *)
 val bytes_of_uint32s: output:bytes -> m:uint32s{disjoint output m} -> len:u32{v len <=length output /\ v len<=op_Multiply 4 (length m)} -> STL unit
   (requires (fun h -> live h output /\ live h m))
   (ensures (fun h0 _ h1 -> live h0 output /\ live h0 m /\ live h1 output /\ live h1 m

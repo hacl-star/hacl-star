@@ -18,10 +18,6 @@ let u8  = UInt8.t
 let u32 = UInt32.t
 let u64 = UInt64.t
 
-// TODO: rename and move to FStar.Buffer
-// bytes  -> uint8_s; lbytes  -> uint8_sl
-// buffer -> uint8_p; lbuffer -> uint8_sl
-
 type bytes = Seq.seq UInt8.t // Currently, Buffer.Utils redefines this as buffer
 type buffer = Buffer.buffer UInt8.t
 
@@ -54,14 +50,11 @@ let rec print_buffer s i len =
     let _ = print_buffer s (i +^ 1ul) len in
     ()
 
-// TODO: Deprecate?
+
 val sel_bytes: h:mem -> l:UInt32.t -> buf:lbuffer (v l){Buffer.live h buf}
   -> GTot (lbytes (v l))
 let sel_bytes h l buf = Buffer.as_seq h buf
 
-// Should be polymorphic on the integer size
-// This will be leaky (using implicitly the heap)
-// TODO: We should isolate it in a different module, e.g. Buffer.Alloc
 val load_bytes: l:UInt32.t -> buf:lbuffer (v l) -> Stack (lbytes (v l))
   (requires (fun h0 -> Buffer.live h0 buf))
   (ensures  (fun h0 r h1 -> h0 == h1 /\ Buffer.live h0 buf /\
@@ -97,9 +90,6 @@ val store_bytes: l:UInt32.t -> buf:lbuffer (v l) -> b:lbytes (v l) -> ST unit
     Seq.equal b (sel_bytes h1 l buf)))
 let store_bytes l buf b = store_bytes_aux l buf 0ul b
 
-// TODO: Dummy.
-// Should be external and relocated in some library with a crypto-grade
-// implementation in both OCaml and KreMLin,
 val random: len:nat -> b:lbuffer len -> Stack unit
   (requires (fun h -> live h b))
   (ensures  (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1))
@@ -303,7 +293,7 @@ let rec load_big64 len buf =
     FStar.UInt64(uint8_to_uint64 b +^ 256UL *^ n)
 
 
-(* TODO: Add to FStar.Int.Cast and Kremlin and OCaml implementations *)
+
 val uint8_to_uint128: a:UInt8.t -> Tot (b:UInt128.t{UInt128.v b == UInt8.v a})
 let uint8_to_uint128 a = uint64_to_uint128 (uint8_to_uint64 a)
 

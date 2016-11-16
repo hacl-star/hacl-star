@@ -99,7 +99,6 @@ let sel_int h b = eval h b norm_length
 
 #set-options "--initial_fuel 1 --max_fuel 1"
 
-(* TODO: Move to Crypto.Symmetric.Poly1305.Bignum *)
 val lemma_bitweight_templ_values: n:nat -> Lemma (bitweight templ n == 26 * n)
 let rec lemma_bitweight_templ_values n =
   if n = 0 then ()
@@ -226,7 +225,7 @@ val add_and_multiply: acc:elemB -> block:elemB{disjoint acc block}
     /\ sel_elem h1 acc == (sel_elem h0 acc +@ sel_elem h0 block) *@ sel_elem h0 r))
 
 #set-options "--z3timeout 120"
-// hint fails to replay
+
 let add_and_multiply acc block r =
   let h0 = ST.get () in
   fsum' acc block; // acc1 = acc0 + block
@@ -572,7 +571,6 @@ let trunc1305 a b =
   let a2 = index a 2ul in
   let a3 = index a 3ul in
   let a4 = index a 4ul in
-  (* some bitvector theory would simplify a lot the rest of the proof *)
   let b0 = uint64_to_uint8 a0 in
   let b1 = uint64_to_uint8 (a0 >>^ 8ul) in
   let b2 = uint64_to_uint8 (a0 >>^ 16ul) in
@@ -663,7 +661,7 @@ val poly1305_start: acc:elemB -> Stack unit
 let poly1305_start a = zeroB a
 
 
-(* TODO: certainly a more efficient, better implementation of that *)
+
 private val add_word: a:wordB_16 -> b:wordB_16 -> Stack unit
   (requires (fun h -> live h a /\ live h b))
   (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h1 a /\ modifies_1 a h0 h1 /\
@@ -773,7 +771,7 @@ val poly1305_update:
 let poly1305_update log msgB acc r =
   let h0 = ST.get () in
   push_frame();
-  let block = create 0UL nlength in //TODO: pass buffer, don't create one
+  let block = create 0UL nlength in
   toField_plus_2_128 block msgB;
   let h1 = ST.get () in
   eval_eq_lemma h0 h1 acc acc Parameters.norm_length;

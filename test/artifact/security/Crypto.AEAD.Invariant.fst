@@ -119,14 +119,14 @@ let refines_one_entry (#rgn:region) (#i:id{safeId i}) (h:mem) (e:entry i) (block
    let cipher, tag = SeqProperties.split cipher_tagged l in
    PRF (x.iv = nonce /\ x.ctr = PRF.ctr_0 i) /\ 
    safelen i l (PRF.ctr_0 i +^ 1ul) /\
-   xors == counterblocks i rgn (PRF.incr i x) l 0 l plain cipher /\ // forced to use propositional equality here, since this compares sequences of abstract plain texts.
+   xors == counterblocks i rgn (PRF.incr i x) l 0 l plain cipher /\
    (let m = PRF.macRange rgn i x e in
     let mac_log = CMA.ilog (CMA.State.log m) in
     m_contains mac_log h /\ (
     match m_sel h (CMA.ilog (CMA.State.log m)) with
     | None           -> False
     | Some (msg,tag') -> msg = encode_both i (FStar.UInt32.uint_to_t (Seq.length ad)) ad (FStar.UInt32.uint_to_t l) cipher /\
-                        tag = tag'))) // adding this bit to relate the tag in the entries to the tag in that MAC log
+                        tag = tag')))
 
 // States consistency of the PRF table contents vs the AEAD entries
 // (not a projection from one another because of allocated MACs and aad)
@@ -138,7 +138,7 @@ val refines:
   (decreases (Seq.length entries))
 let rec refines h i rgn entries blocks = 
   if Seq.length entries = 0 then 
-    Seq.length blocks == 0 //using == to get it to match with the Type returned by the other branch
+    Seq.length blocks == 0
   else let e = SeqProperties.head entries in
        let b = num_blocks e in 
        b < Seq.length blocks /\

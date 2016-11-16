@@ -65,7 +65,7 @@ let limb_length = function
 inline_for_extraction unfold
 type buffer_of a = b:Buffer.buffer (limb a){Buffer.length b == limb_length a}
 
-// TODO: workaround for #759
+
 inline_for_extraction type _buffer_of a = buffer_of a
 
 // private?
@@ -162,7 +162,7 @@ let create i =
   | POLY1305 -> B_POLY1305 (FStar.Buffer.create 0uL 5ul)
   | GHASH    -> B_GHASH    (FStar.Buffer.create 0uy 16ul)
 
-// TODO: generalize length, add functional spec
+
 (** Encode raw bytes of static key as a field element *)
 val encode_r: #i:id -> b:elemB i -> raw:lbuffer 16{Buffer.disjoint (as_buffer b) raw} -> Stack unit
   (requires (fun h -> live h b /\ Buffer.live h raw))
@@ -178,7 +178,7 @@ let encode_r #i b raw =
     Buffer.blit raw 0ul b 0ul 16ul
     end
 
-// TODO: generalize to word
+
 (** Encode a word of a message as a field element *)
 val encode: i:id -> w:word_16 -> GTot (elem i)
 let encode i w =
@@ -251,7 +251,7 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
-// TODO: use encodeB?
+
 let update #i r a w =
   let h0 = ST.get () in
   match r, a with

@@ -86,7 +86,7 @@ let mac_wrapper (#i:CMA.id) (st:CMA.state i) (acc:CMA.accBuffer i) (tag:MAC.tagB
     let h1 = get () in 
     if mac_log then begin
       (* Need to update UF1CMA to prove this (problem with the mods clause not working fully) *)
-      assume (HS.modifies_ref st.region !{HS.as_ref (as_hsref (ilog st.log))} h0 h1) // this goes away when UF1CMA is done
+      assume (HS.modifies_ref st.region !{HS.as_ref (as_hsref (ilog st.log))} h0 h1)
     end
 ////////////////////////////////////////////////////////////////////////////////
 //end UF1CMA.mac wrapper
@@ -140,7 +140,7 @@ let accumulate_wrapper (#i: MAC.id) (st: CMA.state i) (aadlen:aadlen_32) (aad:lb
     let acc = accumulate #i st aadlen aad txtlen cipher in
     let h1 = get () in
     assert (Buffer.disjoint_2 (MAC.as_buffer (CMA acc.a)) (CMA st.s) cipher);
-    assume (mac_log ==> alog_fresh h0 h1 (CMA.alog acc)); // this goes away when Encoding.accumulate is restored
+    assume (mac_log ==> alog_fresh h0 h1 (CMA.alog acc));
     acc
 ////////////////////////////////////////////////////////////////////////////////
 //end AEAD.Encoding.accumulate wrapper
@@ -196,7 +196,7 @@ val prf_mac_wrapper:
   (requires (fun h0 -> True))
   (ensures (fun h0 mac h1 -> prf_mac_ensures i t k_0 x h0 mac h1))
 let prf_mac_wrapper i t k_0 x = 
-  assume false;  // this goes away once prf_mac is restored
+  assume false;
   PRF.prf_mac i t k_0 x
 ////////////////////////////////////////////////////////////////////////////////
 //end prf_mac

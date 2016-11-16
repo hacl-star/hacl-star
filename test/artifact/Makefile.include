@@ -18,7 +18,7 @@ KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompa
 LIB=$(ARTIFACT_HOME)/lib
 LIB_KRML=$(ARTIFACT_HOME)/lib/kremlin
 
-# Linux specific compilation instruction for PneuTube
+# Linux specific compilation instruction
 ifeq ($(UNAME), Linux)
 KREMLIN_ARGS+= -ccopt -D_GNU_SOURCE
 endif

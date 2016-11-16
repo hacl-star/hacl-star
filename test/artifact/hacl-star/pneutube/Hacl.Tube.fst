@@ -388,7 +388,7 @@ val file_send:
 
 let file_send fsize f r h p skA pkB =
   push_frame();
-  let c1 = C.clock() in
+  (* let c1 = C.clock() in *)
 
   let h0 = ST.get() in
   (* Initializing all buffers on the stack *)
@@ -447,8 +447,8 @@ let file_send fsize f r h p skA pkB =
         | SocketError -> opened FileError fh.stat sid )
     | FileError -> opened FileError (fb.(0ul)).stat sid in
   pop_frame();
-  let c2 = C.clock() in
-  TestLib.print_clock_diff c1 c2;
+  (* let c2 = C.clock() in *)
+  (* TestLib.print_clock_diff c1 c2; *)
   res
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
@@ -539,8 +539,7 @@ let rec file_recv_loop_2 fb connb state mut_state seqno len =
         if U32 (Hacl.Box.crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then (
           let h2 = ST.get() in
           lemma_reveal_modifies_1 next h h2;
-          assume (current_state h2 (get h2 connb 0) = Open);
-          assume (live h2 fb);
+          assume (live_file h2 fb /\ (let fh = get h2 fb 0 in file_state h2 fh = FileOpen));
           file_recv_loop_2 fb connb state mut_state seqno rem )
         else (TestLib.perr(20ul); SocketError) )
     | SocketError -> TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); SocketError
@@ -558,7 +557,10 @@ val file_recv_enc:
     (requires (fun h -> live h connb /\ current_state h (get h connb 0) = Open
       /\ live_file h fb (* /\ (let fh = get h fb 0 in file_state h fh = FileOpen) *)
       /\ live h state))
-    (ensures  (fun h0 _ h1 -> True))
+    (ensures  (fun h0 r h1 -> match r with
+      | SocketOk -> (live h1 fb /\ live h1 lb /\ current_state h1 (get h1 lb 0) = Open
+      /\ live h1 connb /\ live h1 state)
+      | _ -> true))
 
 let file_recv_enc fb connb state size = 
   push_frame();
@@ -645,7 +647,7 @@ let rec file_recv_loop fb lhb connb state =
   | SocketOk -> (
       let h2 = ST.get() in
       cut(live h2 fb);
-      let c1 = C.clock() in
+      (* let c1 = C.clock() in *)
       (match tcp_read_all connb sid 16uL with
       | SocketOk -> (
           match tcp_read_all connb hsbuf 8uL with
@@ -659,11 +661,11 @@ let rec file_recv_loop fb lhb connb state =
                          if U8 (memcmp pk2 pkB 32ul =^ 0xffuy) then (
                            let h3 = ST.get() in
                            lemma_reveal_modifies_2 state pks h2 h3;
-                           assume (live h3 fb);
+                           assume (live_file h3 fb);
                            cut (live h3 state);
 			   let _ = file_recv_enc fb connb state hsize in
-			   let c2 = C.clock() in
-			   TestLib.print_clock_diff c1 c2;
+			   (* let c2 = C.clock() in *)
+			   (* TestLib.print_clock_diff c1 c2; *)
 			   SocketOk)
 			 else (TestLib.perr(7ul); SocketError) )
                       else (TestLib.perr(6ul); SocketError) )
