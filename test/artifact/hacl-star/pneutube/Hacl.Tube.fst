@@ -383,7 +383,7 @@ val file_send:
       	   	                   | FileOk -> true
 				   | _ -> true))
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 400 --lax"
 
 let file_send fsize f r h p skA pkB =
   push_frame();
@@ -404,7 +404,7 @@ let file_send fsize f r h p skA pkB =
   Buffer.blit f 0ul fname 0ul fsize;
   let keygen_res = U32 (crypto_box_beforenm key pkB skA =^ 0ul) in
   let h1 = ST.get() in
-  assert(modifies_0 h0 h1);
+  lemma_reveal_modifies_0 h0 h1;
   (* Initialization of the file_handle *)
   let fb = Buffer.rcreate file_rgn (init_file_handle(dummy_ptr)) 1ul in
   (* Initialization of the socket *)
@@ -431,11 +431,14 @@ let file_send fsize f r h p skA pkB =
         let file_size = fh.stat.size in
         let mtime = fh.stat.mtime in
         let f64: h64 = Hacl.Cast.uint32_to_sint64 fsize in
+        let h2 = ST.get() in
         store64_le (Buffer.sub header  0ul 8ul) file_size;
         store64_le (Buffer.sub header  8ul 8ul) mtime;
         store64_le (Buffer.sub header 16ul 8ul) f64;
         Buffer.blit f 0ul header 24ul fsize;
         store64_le (hsbuf) hsize;
+        let h3 = ST.get() in
+        lemma_reveal_modifies_1 state h2 h3;
         (match tcp_connect h p sb with
         | SocketOk -> file_send_2 sb fb state fragments rem
         | SocketError -> opened FileError fh.stat sid )
@@ -443,16 +446,16 @@ let file_send fsize f r h p skA pkB =
   pop_frame();
   res
 
-#set-options "--lax"
+#reset-options "--initial_fuel 0 --max_fuel 0"
 
 (** Non-Constant time comparison function **)
 val memcmp:
   b:buffer u8 ->
   b':buffer u8 ->
-  len:U32.t ->
+  len:U32.t{U32.v len <= length b /\ U32.v len <= length b'} ->
   Stack U8.t
-    (requires (fun _ -> True))
-    (ensures  (fun _ _ _ -> True))
+    (requires (fun h -> live h b /\ live h b'))
+    (ensures  (fun h0 r h1 -> h0 == h1))
 let rec memcmp b b' len =
   if U32 (len =^ 0ul) then (
     0xffuy
@@ -466,6 +469,9 @@ let rec memcmp b b' len =
 val get_fh_stat: file_handle -> Tot file_stat
 let get_fh_stat fh = fh.stat
 
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+
 val file_recv_loop_2:
   fb:fh_ref ->
   connb:socket_ref ->
@@ -474,10 +480,11 @@ val file_recv_loop_2:
   seqno:H64.t ->
   len:U64.t ->
   Stack sresult
-    (requires (fun _ -> True))
+    (requires (fun h -> live h connb /\ current_state h (get h connb 0) = Open
+      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)))
     (ensures  (fun _ _ _ -> True))
 let rec file_recv_loop_2 fb connb state mut_state seqno len =
-  let key   = Buffer.sub state 64ul 32ul in
+  let key        = Buffer.sub state 64ul 32ul in
   let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
   let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
   if U64 (len =^ 0uL) then SocketOk
@@ -501,7 +508,6 @@ let rec file_recv_loop_2 fb connb state mut_state seqno len =
         let seqno = H64 (seqno +^ one_64) in
         if U32 (crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then
           file_recv_loop_2 fb connb state mut_state seqno rem
-        (* JK: not distinguishing between socket error and decryption failure *)
         else (TestLib.perr(20ul); SocketError) )
     | SocketError -> TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); SocketError
   )
@@ -591,8 +597,8 @@ let rec file_recv_loop fb lhb connb state =
                          if U8 (memcmp pk2 pkB 32ul =^ 0xffuy) then (
 			   let _ = file_recv_enc fb connb state hsize 
 			   in SocketOk)
-			 else TestLib.perr(7ul); SocketError )
-                      else TestLib.perr(6ul); SocketError )
+			 else (TestLib.perr(7ul); SocketError) )
+                      else (TestLib.perr(6ul); SocketError) )
                   | SocketError -> TestLib.perr(5ul); SocketError )
               | SocketError -> TestLib.perr(4ul); SocketError )
           | SocketError -> TestLib.perr(3ul); SocketError )
@@ -642,9 +648,9 @@ let file_recv p pkA skB =
   let s = init_socket() in
   let lb = Buffer.rcreate socket_rgn s 1ul in
   let sb = Buffer.rcreate socket_rgn s 1ul in
-  let res = (match tcp_listen p lb sb with
+  let res = (match tcp_listen p lb with
   | SocketOk -> (
-      match file_recv_loop fb sb state with
+      match file_recv_loop fb lb sb state with
       | SocketOk -> opened FileOk fh.stat sid
       | SocketError -> opened FileError fh.stat sid )
   | SocketError -> opened FileError fh.stat sid ) in
