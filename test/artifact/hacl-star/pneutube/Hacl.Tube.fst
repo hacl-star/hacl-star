@@ -667,7 +667,7 @@ let rec file_recv_loop fb lhb connb state =
 val file_recv: port:u32 -> 
     	   pkA:publicKey{frameOf pkA = input_rgn} -> 
 	   skB:privateKey {frameOf skB = input_rgn /\ disjoint pkA skB} -> 
-	   Stack open_result
+	   ST open_result
        	   (requires (fun h -> live h pkA /\ live h skB))
 	   (ensures  (fun h0 s h1 -> match s.r with
       	   	                   | FileOk -> true				     
