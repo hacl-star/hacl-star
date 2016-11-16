@@ -21,8 +21,6 @@ module  H8=Hacl.UInt8
 module H32=Hacl.UInt32
 module H64=Hacl.UInt64
 
-assume val declassify: h64 -> Tot u64
-
 private val lemma_max_uint8: n:nat -> Lemma
  (requires (n = 8))
  (ensures  (pow2 n = 256))
@@ -97,35 +95,10 @@ val makeStreamID: s:streamID -> StackInline unit
   (requires (fun h -> live h s))
   (ensures  (fun h0 sid h1 -> live h1 s /\ modifies_1 s h0 h1))
 let makeStreamID b =
-    (* let b = create (Hacl.Cast.uint8_to_sint8 0uy) 16ul in *)
     randombytes_buf b 16uL
-    (* b *)
-
-
-(* val putU64: z:h64 -> b:uint8_p -> StackInline unit *)
-(*   (requires (fun h -> live h b /\ length b = 8)) *)
-(*   (ensures  (fun h0 r h1 -> live h1 b)) *)
-(* let putU64 z b = *)
-(*   let open Hacl.UInt64 in *)
-(*   b.(0ul) <- sint64_to_sint8 z; *)
-(*   b.(1ul) <- sint64_to_sint8 (z >>^ 8ul); *)
-(*   b.(2ul) <- sint64_to_sint8 (z >>^ 16ul); *)
-(*   b.(3ul) <- sint64_to_sint8 (z >>^ 24ul); *)
-(*   b.(4ul) <- sint64_to_sint8 (z >>^ 32ul); *)
-(*   b.(5ul) <- sint64_to_sint8 (z >>^ 40ul); *)
-(*   b.(6ul) <- sint64_to_sint8 (z >>^ 48ul); *)
-(*   b.(7ul) <- sint64_to_sint8 (z >>^ 56ul) *)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
-
-(* type timespec = { *)
-(*   tv_sec: U64.t; *)
-(*   tv_nsec: U64.t; *)
-(* } *)
-
-
-(* assume val clock_gettime: unit -> St timespec *)
 
 
 val store64_le:
@@ -185,7 +158,7 @@ noextract let triple (a:HH.rid) (b:HH.rid) (c:HH.rid) = Set.union (Set.singleton
 type uint8_p = b:uint8_p{frameOf b <> file_rgn /\ frameOf b <> socket_rgn}
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
 
 val file_send_loop:
   fh:fh_ref ->
@@ -253,28 +226,7 @@ let rec file_send_loop fh sb immut_state mut_state seqno len =
 
 
 
-(* security spec *)
-(*
-val file_send:
-  fsize:u32 -> file:str -> roundup:u64 ->
-  host:str -> port:u32 ->
-  skA:uint8_p -> pkB:uint8_p ->
-  Stack open_result
-    (requires (fun _ -> U32.v fsize <= length file))
-    (ensures  (fun h0 s h1 -> match s.r with
-      	   	                   | FileOk ->
-				     let fs = s.fs in
-				     let sidb = s.sid in
-				     let pA = pubKey (as_seq h0 skA) in
-				     let pB = as_seq h0 pkB in
-				     let sid = as_seq h0 sidb in
-				     file_content h0 fs = file_content h1 fs /\
-				     sent h1 pA pB sid fs (file_content h0 fs)
-				   | _ -> true))
-*)
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
 
 val file_send_fragments:
   sb:socket_ref ->
@@ -329,7 +281,8 @@ let file_send_fragments sb fb immut_state mut_state seqno fragments rem =
       ) )
   | SocketError -> opened FileError fh.stat sid
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 400"
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 400 --lax"
 
 val file_flush_all:
   sb:socket_ref ->
@@ -395,18 +348,22 @@ val file_send_2:
   sb:socket_ref ->
   fb:fh_ref ->
   immutable_state:uint8_p{length immutable_state = 1244} ->
-  num:U64.t ->
+  num:U64.t{U64.v num < pow2 32 - 1} ->
   rem:U64.t{U64.v rem < U64.v blocksize} ->
   Stack open_result
-    (requires (fun h -> live h immutable_state /\ live h sb /\ live_file h fb))
+    (requires (fun h -> live h immutable_state
+      /\ live h sb /\ current_state h (get h sb 0) = Open
+      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)))
     (ensures  (fun h0 s h1 -> true))
 
 let file_send_2 sb fb immut_state num rem =
   push_frame();
   let s = sb.(0ul) in
   let fh = fb.(0ul) in
+  let h0 = ST.get() in
   let mut_state = Buffer.create zero_8 (U32 (ciphersize_32 +^ 24ul)) in
-  let header = Buffer.create zero_8 headersize_32 in
+  let h1 = ST.get() in
+  lemma_reveal_modifies_0 h0 h1;
   let res = file_flush_all sb fb immut_state mut_state num rem in
   pop_frame();
   res
@@ -424,10 +381,9 @@ val file_send:
     	      	        U32.v fsize <= length file))
     (ensures  (fun h0 s h1 -> match s.r with
       	   	                   | FileOk -> true
-				     (* HS.modifies Set.empty h0 h1 *)
 				   | _ -> true))
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
 
 let file_send fsize f r h p skA pkB =
   push_frame();
@@ -468,9 +424,10 @@ let file_send fsize f r h p skA pkB =
         let hsize = H64 (file_size +%^ frem) in
         let hfragments = H64 (hsize >>^ blocksize_bits) in
         let hrem = H64 (file_size &^ (sblock-^one_64)) in
-	let fragments = declassify hfragments in
-        assume (Hacl.Policies.declassifiable hrem);
+	let fragments = Hacl.Policies.declassify_u64 hfragments in
+        assume (U64.v fragments < pow2 32 - 1);
 	let rem = Hacl.Policies.declassify_u64 hrem in
+        assume (U64.v rem < U64.v blocksize);
         let file_size = fh.stat.size in
         let mtime = fh.stat.mtime in
         let f64: h64 = Hacl.Cast.uint32_to_sint64 fsize in
