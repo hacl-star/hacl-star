@@ -470,7 +470,7 @@ val get_fh_stat: file_handle -> Tot file_stat
 let get_fh_stat fh = fh.stat
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 500"
 
 val file_recv_loop_2:
   fb:fh_ref ->
@@ -481,8 +481,13 @@ val file_recv_loop_2:
   len:U64.t ->
   Stack sresult
     (requires (fun h -> live h connb /\ current_state h (get h connb 0) = Open
-      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)))
-    (ensures  (fun _ _ _ -> True))
+      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)
+      /\ live h state /\ live h mut_state))
+    (ensures  (fun _ r h1 -> 
+      match r with 
+      | SocketOk -> (live h1 connb /\ current_state h1 (get h1 connb 0) = Open
+      /\ live_file h1 fb /\ (let fh = get h1 fb 0 in file_state h1 fh = FileOpen))
+      | _ -> true ))
 let rec file_recv_loop_2 fb connb state mut_state seqno len =
   let key        = Buffer.sub state 64ul 32ul in
   let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
@@ -490,28 +495,51 @@ let rec file_recv_loop_2 fb connb state mut_state seqno len =
   if U64 (len =^ 0uL) then SocketOk
   else 
   if U64 (len <^ blocksize) then (
+    let h0 = ST.get() in
     match tcp_read_all connb ciphertext (cipherlen len) with
     | SocketOk -> (
+        let h1 = ST.get() in
+        lemma_reveal_modifies_1 mut_state h0 h1;
         let next = file_next_write_buffer fb blocksize in
+        let h2 = ST.get() in
         store64_le (sub nonce 16ul 8ul) seqno;
-        let seqno = H64 (seqno +^ one_64) in
-        if U32 (crypto_box_open_easy_afternm next ciphertext (cipherlen len) nonce key =^ 0ul) then
-	  SocketOk 
+        let h3 = ST.get() in
+        lemma_reveal_modifies_1 mut_state h2 h3;
+        let seqno = H64 (seqno +%^ one_64) in
+        Math.Lemmas.modulo_lemma (U64.v len) (pow2 32);
+        let ciphertext' = Buffer.sub ciphertext 0ul (cipherlen_32 (Int.Cast.uint64_to_uint32 len)) in
+        let next' = Buffer.sub next 0ul (Int.Cast.uint64_to_uint32 len) in
+        if U32 (Hacl.Box.crypto_box_open_easy_afternm next' ciphertext' (cipherlen len) nonce key =^ 0ul) then (
+          let h4 = ST.get() in
+          lemma_reveal_modifies_1 next h3 h4;
+	  SocketOk )
 	else  (TestLib.perr(20ul); SocketError))
     | SocketError -> TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); SocketError)
   else (
+    let h0 = ST.get() in
     match tcp_read_all connb ciphertext ciphersize with
     | SocketOk -> (
+        let h1 = ST.get() in
+        lemma_reveal_modifies_1 mut_state h0 h1;
         let rem = U64 (len -^ blocksize) in
         let next = file_next_write_buffer fb blocksize in
+        let h1 = ST.get() in
         store64_le (sub nonce 16ul 8ul) seqno;
-        let seqno = H64 (seqno +^ one_64) in
-        if U32 (crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then
-          file_recv_loop_2 fb connb state mut_state seqno rem
+        let seqno = H64 (seqno +%^ one_64) in
+        let h = ST.get() in
+        lemma_reveal_modifies_1 mut_state h1 h;
+        if U32 (Hacl.Box.crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then (
+          let h2 = ST.get() in
+          lemma_reveal_modifies_1 next h h2;
+          assume (current_state h2 (get h2 connb 0) = Open);
+          assume (live h2 fb);
+          file_recv_loop_2 fb connb state mut_state seqno rem )
         else (TestLib.perr(20ul); SocketError) )
     | SocketError -> TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); SocketError
   )
 
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
 
 val file_recv_enc:
   fb:fh_ref ->
@@ -519,28 +547,42 @@ val file_recv_enc:
   state: uint8_p{length state = 1244} ->
   hsize: U64.t ->
   Stack sresult
-    (requires (fun h -> True))
+    (requires (fun h -> live h connb /\ current_state h (get h connb 0) = Open
+      /\ live_file h fb (* /\ (let fh = get h fb 0 in file_state h fh = FileOpen) *)
+      /\ live h state))
     (ensures  (fun h0 _ h1 -> True))
 
 let file_recv_enc fb connb state size = 
-      let header  = Buffer.sub state 220ul 1024ul in
-      let seqno = 0uL in
-      let mut_state = Buffer.create zero_8 (U32 (ciphersize_32 +^ 24ul)) in
-      let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
-      let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
-      let key   = Buffer.sub state 64ul 32ul in
-      let pkA   = Buffer.sub state 0ul 32ul in
-      let pkB   = Buffer.sub state 32ul 32ul in
-
-      (match tcp_read_all connb ciphertext (cipherlen(headersize)) with
+  push_frame();
+  let header  = Buffer.sub state 220ul 1024ul in
+  let seqno = 0uL in
+  let h0 = ST.get() in
+  let mut_state = Buffer.create zero_8 (U32 (ciphersize_32 +^ 24ul)) in
+  let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
+  let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
+  let key   = Buffer.sub state 64ul 32ul in
+  let pkA   = Buffer.sub state 0ul 32ul in
+  let pkB   = Buffer.sub state 32ul 32ul in
+  let h1 = ST.get() in
+  lemma_reveal_modifies_0 h0 h1;
+  let res =
+    (match tcp_read_all connb ciphertext (cipherlen(headersize)) with
       | SocketOk -> (
+          let h0 = ST.get() in
           store64_le (sub nonce 16ul 8ul) seqno;
           let seqno = H64 (seqno +^ 1uL) in
-	  let h = ST.get() in
-          if U32 (crypto_box_open_easy_afternm #pkA #pkB header ciphertext (cipherlen(headersize)) nonce key =^ 0ul) then (
+          let h = ST.get() in
+          assume (as_seq h key == agreedKey (as_seq h pkA) (as_seq h pkB));
+          let ciphertext' = Buffer.sub ciphertext 0ul (U32 (headersize_32 +^ 16ul)) in
+          if U32 (crypto_box_open_easy_afternm #pkA #pkB header ciphertext' (cipherlen(headersize)) nonce key =^ 0ul) then (
+	     let h1 = ST.get() in
+             lemma_reveal_modifies_2 state mut_state h0 h1;
              let file_size = load64_le (sub header 0ul  8ul) in
              let nsize     = load64_le (sub header 8ul  8ul) in
              let mtime     = load64_le (sub header 16ul 8ul) in
+             assume(H64.v nsize < 100);
+             assume(H64.v file_size < pow2 32);
+             Math.Lemmas.modulo_lemma (U64.v nsize) (pow2 32);
              let file = sub header 24ul (Int.Cast.uint64_to_uint32 nsize) in
              let fstat = {name = file; mtime = mtime; size = file_size} in
              (match file_open_write_sequential fstat fb with
@@ -558,16 +600,21 @@ let file_recv_enc fb connb state size =
               | FileError -> TestLib.perr(9ul); SocketError )
           ) else (
              TestLib.perr(8ul); SocketError ) )
-      | SocketError -> SocketError )
+      | SocketError -> SocketError ) in
+  pop_frame();
+  res
 
                  
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 500"
+
 val file_recv_loop:
   fb:fh_ref ->
   lb:socket_ref ->
   connb:socket_ref ->
   state: uint8_p{length state = 1244} ->
   Stack sresult
-    (requires (fun h -> True))
+    (requires (fun h -> live h fb /\ live h lb /\ current_state h (get h lb 0) = Open
+      /\ live h connb /\ live h state))
     (ensures  (fun h0 _ h1 -> True))
 let rec file_recv_loop fb lhb connb state =
   push_frame();
@@ -577,15 +624,19 @@ let rec file_recv_loop fb lhb connb state =
   let header  = Buffer.sub state 220ul 1024ul in
   let pkA   = Buffer.sub state 0ul 32ul in
   let pkB   = Buffer.sub state 32ul 32ul in
-  let pk1 = Buffer.create zero_8 32ul in
-  let pk2 = Buffer.create zero_8 32ul in
+  let h0 = ST.get() in
+  let pks = Buffer.create zero_8 64ul in
+  let pk1 = Buffer.sub pks 0ul 32ul in
+  let pk2 = Buffer.sub pks 32ul 32ul in
+  let h1 = ST.get() in
+  lemma_reveal_modifies_0 h0 h1;
   let res =
   match tcp_accept lhb connb with
   | SocketOk -> (
-      let c1 = C.clock() in
+      let h2 = ST.get() in
+      cut(live h2 fb);
       (match tcp_read_all connb sid 16uL with
       | SocketOk -> (
-          (* JK: no check on the streamID formatting *)
           match tcp_read_all connb hsbuf 8uL with
           | SocketOk -> (
 	      let hsize = load64_le hsbuf in
@@ -595,6 +646,10 @@ let rec file_recv_loop fb lhb connb state =
                   | SocketOk -> (
                       if U8 (memcmp pk1 pkA 32ul =^ 0xffuy) then (
                          if U8 (memcmp pk2 pkB 32ul =^ 0xffuy) then (
+                           let h3 = ST.get() in
+                           lemma_reveal_modifies_2 state pks h2 h3;
+                           assume (live h3 fb);
+                           cut (live h3 state);
 			   let _ = file_recv_enc fb connb state hsize 
 			   in SocketOk)
 			 else (TestLib.perr(7ul); SocketError) )
@@ -608,16 +663,6 @@ let rec file_recv_loop fb lhb connb state =
   match res with
   | SocketOk -> file_recv_loop  fb lhb connb state
   | SocketError -> TestLib.perr(0ul); SocketError
-
-
-(* post-condition should be:
-			             let fs = s.fs in
-				     let sidb = s.sid in
-				     let pA = as_seq h0 pkA in
-				     let pB = pubKey (as_seq h0 skB) in
-				     let sid = as_seq h0 sidb in
-				     sent h0 pA pB sid fs (file_content h1 fs)
-*)
 
 val file_recv: port:u32 -> 
     	   pkA:publicKey{frameOf pkA = input_rgn} -> 
