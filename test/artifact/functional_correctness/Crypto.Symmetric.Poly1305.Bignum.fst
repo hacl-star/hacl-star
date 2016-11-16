@@ -159,7 +159,7 @@ let multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   let c8 = ab44 in
   cut( v c8 = v a4 * v b4 );
   update_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8;
-  admit() //NS: adding an admit to workaround Z3 flakiness; this verifies if the error instrumentation code is removed
+  admit() // Adding an admit to workaround Z3 flakiness; this verifies if the error instrumentation code is removed
 
 private val multiplication_:
   c:bigint{length c >= 2 * norm_length - 1} ->

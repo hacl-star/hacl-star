@@ -117,7 +117,7 @@ let test() =
   assert_norm (114 <= pow2 14);
   assert_norm (FStar.Mul(114 <= 1999 * 64));
   assert(AETypes.safelen i (v plainlen) 1ul);
-  //NS: These 3 separation properties are explicitly violated by allocating st in HH.root
+  // These 3 separation properties are explicitly violated by allocating st in HH.root
   //    Assuming them for the moment
   assume (
     HH.disjoint (Buffer.frameOf (Plain.as_buffer plain)) (AETypes st.log_region) /\
@@ -161,7 +161,7 @@ let test() =
   ok_1 && not (fail_0 || fail_1 || fail_2)
 
 
-// JP: unused parameter [tn] makes the function polymorphic... which I managed
+// unused parameter [tn] makes the function polymorphic... which I managed
 // to tell using the F* log
 let test_aes_gcm i (tn: UInt32.t) key ivBuffer aadlen aad plainlen plainrepr expected_cipher =
   push_frame();

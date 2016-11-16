@@ -846,7 +846,7 @@ let rec counterblocks_contains_all_blocks i rgn x len remaining_len plain cipher
   if remaining_len = 0ul then ()
   else let l = min remaining_len (PRF.blocklen i) in 
        counterblocks_contains_all_blocks i rgn (PRF.incr i x) len (remaining_len -^ l) plain cipher;
-       admit() //NS: significant --- but will change for Plan A
+       admit() // significant --- but will change for Plan A
 
 let from_x_blocks_included_in (#i:id) (#rgn:rid) (x:PRF.domain i) (blocks:prf_blocks rgn i) (blocks':prf_blocks rgn i) = 
   forall (y:PRF.domain i).{:pattern (find blocks y)}

@@ -226,7 +226,7 @@ val add_and_multiply: acc:elemB -> block:elemB{disjoint acc block}
     /\ sel_elem h1 acc == (sel_elem h0 acc +@ sel_elem h0 block) *@ sel_elem h0 r))
 
 #set-options "--z3timeout 120"
-//NS: hint fails to replay
+// hint fails to replay
 let add_and_multiply acc block r =
   let h0 = ST.get () in
   fsum' acc block; // acc1 = acc0 + block
@@ -572,7 +572,7 @@ let trunc1305 a b =
   let a2 = index a 2ul in
   let a3 = index a 3ul in
   let a4 = index a 4ul in
-  (* JK: some bitvector theory would simplify a lot the rest of the proof *)
+  (* some bitvector theory would simplify a lot the rest of the proof *)
   let b0 = uint64_to_uint8 a0 in
   let b1 = uint64_to_uint8 (a0 >>^ 8ul) in
   let b2 = uint64_to_uint8 (a0 >>^ 16ul) in

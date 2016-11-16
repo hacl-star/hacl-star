@@ -331,7 +331,7 @@ let prf_sk0 #i t =
       assume (HS.is_eternal_region t.mac_rgn);
       assume (HS (Buffer (CMA (not ((Buffer.content sk0).mm))))); //TODO: mark this as not manually managed
       Buffer.recall sk0;
-      assume false; //NS: disovered while triaging this file ... unable to prove that (find_sk0 (HS.sel h1 r) x = Some _)
+      assume false; // disovered while triaging this file ... unable to prove that (find_sk0 (HS.sel h1 r) x = Some _)
       sk0
     end
   else

@@ -21,7 +21,7 @@
 
 /* FileIO_Types_file_handle PaddedFileIO_init_file_handle ={ {NULL, 0, 0}, {0, 0, NULL, NULL} }; */
 
-// JK: should not be necessary thanks to inlining
+// should not be necessary thanks to inlining
 #define PaddedFileIO_max_block_size (256 * 1024)
 
 FileIO_Types_fresult PaddedFileIO_file_open_read_sequential(uint8_t* file,FileIO_Types_file_handle* fh){

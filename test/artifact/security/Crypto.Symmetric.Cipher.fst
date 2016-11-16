@@ -103,7 +103,7 @@ let compute a output st n counter len =
       store_uint128 (ivlen CHACHA20) nbuf n;
       chacha20 output st nbuf counter len
 
-  // ADL: TODO single parametric AES module
+  // TODO single parametric AES module
   | AES128 ->
       let open Crypto.Symmetric.AES128 in
       let sbox = Buffer.sub st 0ul 256ul in

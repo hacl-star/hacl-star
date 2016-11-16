@@ -92,7 +92,7 @@ let rec lemma_encode_length txt: Lemma
   else if l < 16 then assert(Seq.length(encode_bytes txt) = 1)
   else (
     let txt0, txt' = SeqProperties.split txt 16 in
-    lemma_encode_length txt'; //NS: this is provable, but it takes 4mins for Z3 to prove; disabling it until we can find a better, faster proof
+    lemma_encode_length txt'; //this is provable, but it takes 4mins for Z3 to prove; disabling it until we can find a better, faster proof
     assume false;
     assert(Seq.length(encode_bytes txt) = 1 + Seq.length(encode_bytes txt')))
 
@@ -370,7 +370,7 @@ let accumulate #i st aadlen aad txtlen cipher  =
   add_bytes st acc aadlen aad;
   let h1 = ST.get() in 
   Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA acc.a)) h0 h1;
-  //NS: this one fails too (11/10)
+  //this one fails too (11/10)
   assert(mac_log ==> 
     FStar.HyperStack.sel h1 (CMA.alog acc) == encode_bytes (Buffer.as_seq h1 aad));
 
@@ -382,11 +382,10 @@ let accumulate #i st aadlen aad txtlen cipher  =
     FStar.HyperStack.sel h2 (CMA.alog acc) ==
     Seq.append (encode_bytes (Buffer.as_seq h2 cipher)) (encode_bytes (Buffer.as_seq h2 aad)));
 
-  allow_inversion macAlg; //NS: added this to invert macAlg below without consuming fuel
+  allow_inversion macAlg; //added this to invert macAlg below without consuming fuel
   let final_word = Buffer.create 0uy 16ul in (
   let id, _ = i in
-  // JP: removed a call to Prims.fst
-  match macAlg_of_id id with 
+  match macAlg_of_id id with
   | POLY1305 -> store_uint32 4ul (Buffer.sub final_word 0ul 4ul) aadlen;
                store_uint32 4ul (Buffer.sub final_word 8ul 4ul) txtlen
   | GHASH -> store_big32 4ul (Buffer.sub final_word 4ul 4ul) (aadlen *^ 8ul);
@@ -394,7 +393,7 @@ let accumulate #i st aadlen aad txtlen cipher  =
   //16-10-31 confirm and verify the length formatting for GHASH (inferred from test vectors)
   
   let h3 = ST.get() in 
-  assume(encode_lengths (fst i) aadlen txtlen = Buffer.as_seq h3 final_word); //NS: 11/10; the assertion below fails ...
+  assume(encode_lengths (fst i) aadlen txtlen = Buffer.as_seq h3 final_word); // 11/10; the assertion below fails ...
   assert(encode_lengths (fst i) aadlen txtlen = Buffer.as_seq h3 final_word);
   CMA.update st acc final_word;
   acc
