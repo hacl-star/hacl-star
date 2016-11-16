@@ -94,6 +94,8 @@ FileIO_Types_sresult SocketIO_tcp_accept(FileIO_Types_socket* lh, FileIO_Types_s
       return FileIO_Types_sresult_SocketError;
     } 
   conn->socket_fd = sockfd;
+  conn->sent_bytes = 0;
+  conn->received_bytes = 0;
   return FileIO_Types_sresult_SocketOk;
 }
 

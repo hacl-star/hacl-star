@@ -365,6 +365,7 @@ let file_send_2 sb fb immut_state num rem =
   let h1 = ST.get() in
   lemma_reveal_modifies_0 h0 h1;
   let res = file_flush_all sb fb immut_state mut_state num rem in
+  let res' = tcp_close sb in
   pop_frame();
   res
   
@@ -387,6 +388,8 @@ val file_send:
 
 let file_send fsize f r h p skA pkB =
   push_frame();
+  let c1 = C.clock() in
+
   let h0 = ST.get() in
   (* Initializing all buffers on the stack *)
   let state = Buffer.create zero_8 1244ul  in
@@ -444,6 +447,8 @@ let file_send fsize f r h p skA pkB =
         | SocketError -> opened FileError fh.stat sid )
     | FileError -> opened FileError (fb.(0ul)).stat sid in
   pop_frame();
+  let c2 = C.clock() in
+  TestLib.print_clock_diff c1 c2;
   res
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
@@ -554,6 +559,7 @@ val file_recv_enc:
 
 let file_recv_enc fb connb state size = 
   push_frame();
+  let sid   = Buffer.sub state 96ul 16ul in
   let header  = Buffer.sub state 220ul 1024ul in
   let seqno = 0uL in
   let h0 = ST.get() in
@@ -569,6 +575,7 @@ let file_recv_enc fb connb state size =
     (match tcp_read_all connb ciphertext (cipherlen(headersize)) with
       | SocketOk -> (
           let h0 = ST.get() in
+          blit sid 0ul nonce 0ul 16ul;
           store64_le (sub nonce 16ul 8ul) seqno;
           let seqno = H64 (seqno +^ 1uL) in
           let h = ST.get() in
@@ -635,6 +642,7 @@ let rec file_recv_loop fb lhb connb state =
   | SocketOk -> (
       let h2 = ST.get() in
       cut(live h2 fb);
+      let c1 = C.clock() in
       (match tcp_read_all connb sid 16uL with
       | SocketOk -> (
           match tcp_read_all connb hsbuf 8uL with
@@ -650,8 +658,10 @@ let rec file_recv_loop fb lhb connb state =
                            lemma_reveal_modifies_2 state pks h2 h3;
                            assume (live h3 fb);
                            cut (live h3 state);
-			   let _ = file_recv_enc fb connb state hsize 
-			   in SocketOk)
+			   let _ = file_recv_enc fb connb state hsize in
+			   let c2 = C.clock() in
+			   TestLib.print_clock_diff c1 c2;
+			   SocketOk)
 			 else (TestLib.perr(7ul); SocketError) )
                       else (TestLib.perr(6ul); SocketError) )
                   | SocketError -> TestLib.perr(5ul); SocketError )
