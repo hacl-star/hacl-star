@@ -86,31 +86,28 @@ let file_content m fs = as_seq m (file_buffer fs)
 (* TODO: check the live/modifies clauses below *)
 assume val file_open_read_sequential: n:uint8_p ->
   fb:fh_ref ->
-  Stack fresult
+  ST fresult
     (requires (fun h -> live h fb /\ live h n))
-    (ensures  (fun h0 s h1 -> (match s with
-	      	       	    | FileOk ->
-			      (* modifies_1 fb h0 h1 /\ *)
-                              HS.modifies (Set.singleton file_rgn) h0 h1
-                              /\ live_file h1 fb /\
-			      (let fh = get h1 fb 0 in
-    	      	     	       file_state h1 fh = FileOpen /\
-			       file_offset h1 fh = zero)
-			    | _ -> true)))
+    (ensures  (fun h0 s h1 -> live h1 fb /\ live h1 n
+      /\ HS.modifies (Set.singleton file_rgn) h0 h1
+      /\ modifies_buf_1 file_rgn fb h0 h1
+      /\ (match s with
+        | FileOk -> (live_file h1 fb /\ (let fh = get h1 fb 0 in file_state h1 fh = FileOpen /\
+			                   file_offset h1 fh = zero))
+	| _ -> true) ))
 
 assume val file_open_write_sequential: fs:file_stat ->
   fb:fh_ref ->
-  Stack fresult
+  ST fresult
     (requires (fun h -> live h fb))
-    (ensures  (fun h0 s h1 -> match s with
-    	      	      	    | FileOk ->
-                              HS.modifies (Set.singleton file_rgn) h0 h1
-			      /\ live_file h1 fb /\
-			      (let fh = get h1 fb 0 in
-    	      	      	       file_state h1 fh = FileOpen /\
-			       file_offset h1 fh = zero
-                               /\ fh.stat == fs)
-			    | _ -> true))
+    (ensures  (fun h0 s h1 ->
+      live h1 fb
+      /\ HS.modifies (Set.singleton file_rgn) h0 h1
+      /\ modifies_buf_1 file_rgn fb h0 h1
+      /\ (match s with
+    	 | FileOk -> (live_file h1 fb /\ (let fh = get h1 fb 0 in file_state h1 fh = FileOpen /\
+			       file_offset h1 fh = zero /\ fh.stat == fs))
+	 | _ -> true) ))
 
 
 private let sint64_to_uint64 (x:H64.t) : GTot U64.t = U64.uint_to_t (H64.v x)
@@ -125,6 +122,8 @@ let file_next_read_buffer_post h0 (s:uint8_p) h1 (fb:fh_ref{length fb = 1})
                                (len:bufsize) : GTot Type0 =
   file_next_read_buffer_pre h0 fb len
   /\ live_file h0 fb /\ live_file h1 fb /\ same_file h0 fb h1 fb
+  /\ modifies_buf_0 file_rgn h0 h1
+  /\ HS.modifies (Set.singleton file_rgn) h0 h1
   /\ (let fh0 = get h0 fb 0 in let fh1 = get h1 fb 0 in
       let nlen = (file_offset h0 fh0) +^ len in
       (if (U64.v nlen >= U64.v fh0.stat.size) then U64.v (file_offset h1 fh1) = U64.v fh1.stat.size
@@ -132,19 +131,7 @@ let file_next_read_buffer_post h0 (s:uint8_p) h1 (fb:fh_ref{length fb = 1})
       /\ file_state h1 fh1 = FileOpen
       /\ s == Buffer.sub (file_buffer fh0.stat)
                         (Int.Cast.uint64_to_uint32 (file_offset h0 fh0))
-                        (Int.Cast.uint64_to_uint32 len)
-      (* /\ (U64.v nlen <= H64.v fh0.stat.size ==>  *)
-      (*          s  == Buffer.sub (file_buffer fh0.stat)  *)
-      (*                           (Int.Cast.uint64_to_uint32 (file_offset h0 fh0))  *)
-      (*                           (Int.Cast.uint64_to_uint32 len))  *)
-      (* /\ (U64.v nlen > H64.v fh0.stat.size ==>  *)
-      (*          s == Buffer.sub (file_buffer fh0.stat) *)
-      (* 	       (as_seq h1 s == *)
-      (*          as_seq h0 (Buffer.sub (file_buffer fh0.stat) *)
-      (*                                (Int.Cast.uint64_to_uint32 (file_offset h0 fh0)) *)
-      (*                                (Int.Cast.uint64_to_uint32 (len))))) *)
-      (*                                (\* (Int.Cast.uint64_to_uint32 (nlen -^ fh0.stat.size))))) *\) *)
-      /\ HS.modifies (Set.singleton file_rgn) h0 h1)
+                        (Int.Cast.uint64_to_uint32 len))
 
 
 assume val file_next_read_buffer:
@@ -157,13 +144,13 @@ assume val file_next_read_buffer:
 
 let file_next_write_buffer_pre h (fb:fh_ref) (len:U64.t) : GTot Type0 =
   live_file h fb /\ U64.v len <= U64.v max_block_size
-  /\ (let fh = get h fb 0 in file_state h fh = FileOpen
-  (* /\ U64.v (file_offset h fh) + U64.v len <= H64.v fh.stat.size *))
+  /\ (let fh = get h fb 0 in file_state h fh = FileOpen)
 
 let file_next_write_buffer_post h0 (s:uint8_p) h1 (fb:fh_ref)
                                (len:bufsize) : GTot Type0 =
   file_next_write_buffer_pre h0 fb len
   /\ live_file h0 fb /\ live_file h1 fb /\ same_file h0 fb h1 fb
+  /\ modifies_buf_0 file_rgn h0 h1
   /\ (let fh0 = get h0 fb 0 in let fh1 = get h1 fb 0 in
       let nlen = (file_offset h0 fh0) +^ len in
       (if (U64.v nlen >= U64.v fh0.stat.size) then U64.v (file_offset h1 fh1) = U64.v fh1.stat.size
@@ -172,38 +159,19 @@ let file_next_write_buffer_post h0 (s:uint8_p) h1 (fb:fh_ref)
       /\ s == Buffer.sub (file_buffer fh0.stat)
                         (Int.Cast.uint64_to_uint32 (file_offset h0 fh0))
                         (Int.Cast.uint64_to_uint32 len))
-      (* /\ (U64.v nlen <= H64.v fh0.stat.size ==> *)
-      (*          s  == Buffer.sub (file_buffer fh0.stat)  *)
-      (*                           (Int.Cast.uint64_to_uint32 (file_offset h0 fh0))  *)
-      (*                           (Int.Cast.uint64_to_uint32 len))) *)
   /\ HS.modifies (Set.singleton file_rgn) h0 h1
 
 assume val file_next_write_buffer: fb:fh_ref -> len:bufsize -> Stack uint8_p
     (requires (fun h0 -> file_next_write_buffer_pre h0 fb len))
     (ensures  (fun h0 s h1 -> file_next_read_buffer_post h0 s h1 fb len))
 
-(* assume val file_next_write_buffer: fb:buffer file_handle -> len:u64 -> Stack uint8_p *)
-(*     (requires (fun h0 -> U64.v len <= U64.v max_block_size /\ *)
-(*     	      	         length fb = 1 /\ live h0 fb /\ *)
-(*     	      	         (let f = get h0 fb 0 in *)
-(* 			  file_state h0 f = FileOpen))) *)
-(*     (ensures  (fun h0 s h1 -> let f = get h1 fb 0 in *)
-(*     	      	              let i = file_offset h0 f in *)
-(*     	      	      	      let j = U64 (file_offset h0 f +^ len) in *)
-(* 			      modifies_1 s h0 h1 /\ *)
-(*     	      	      	      file_state h1 f = FileOpen /\ *)
-(*     	      	      	      file_offset h1 f = j /\ *)
-(* 			      file_content h0 f.stat = file_content h1 f.stat /\ *)
-(* 			      ((U64.v i <= v f.stat.size /\ U64.v j <= v f.stat.size) ==> s = file_sub h1 f i len)(\*  /\ *\) *)
-(* 			      (\* ((U64.v i <= v f.stat.size /\ U64.v j > v f.stat.size) ==>  sub s zero (f.stat.size -^ i) = file_sub h1 f i (f.stat.size -^ i)) *\) *)
-(*                               )) *)
 
-
-assume val file_close: fb:fh_ref -> Stack bool
+assume val file_close: fb:fh_ref -> ST bool
     (requires (fun h0 -> length fb = 1 /\ live_file h0 fb /\
                          (let f = get h0 fb 0 in
 			  file_state h0 f = FileOpen)))
     (ensures  (fun h0 r h1 -> live_file h0 fb /\ live_file h1 fb /\ same_file h0 fb h1 fb
       /\ HS.modifies (Set.singleton file_rgn) h0 h1
+      /\ modifies_buf_1 file_rgn fb h0 h1
       /\ (r ==> (let f = get h1 fb 0 in file_state h1 f = FileClosed /\
     			              file_content h0 f.stat == file_content h1 f.stat))))

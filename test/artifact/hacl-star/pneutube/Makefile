@@ -18,6 +18,23 @@ tube-ver: Hacl.Tube.fst
 	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api \
 		--include $(KREMLIB) --include $(KREMTEST) --include $(FSTAR_HOME)/ulib/hyperstack $^
 
+send-ver: Hacl.Tube.Send.fst
+	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api \
+		--include $(KREMLIB) --include $(KREMTEST) --include $(FSTAR_HOME)/ulib/hyperstack $^
+
+send-lax: Hacl.Tube.Send.fst
+	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api --lax \
+		--include $(KREMLIB) --include $(KREMTEST) --include $(FSTAR_HOME)/ulib/hyperstack $^
+
+receive-ver: Hacl.Tube.Receive.fst
+	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api \
+		--include $(KREMLIB) --include $(KREMTEST) --include $(FSTAR_HOME)/ulib/hyperstack $^
+
+receive-lax: Hacl.Tube.Receive.fst
+	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api --lax \
+		--include $(KREMLIB) --include $(KREMTEST) --include $(FSTAR_HOME)/ulib/hyperstack $^ 
+
+
 clean:
 	rm -rf tube
 	rm -f *~ *.exe
