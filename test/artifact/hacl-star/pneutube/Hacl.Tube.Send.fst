@@ -344,7 +344,7 @@ private val file_send_2:
   immutable_state:uint8_p{length immutable_state = 1244} ->
   num:U64.t{U64.v num < pow2 32 - 1} ->
   rem:U64.t{U64.v rem < U64.v blocksize} ->
-  Stack sresult
+  ST sresult
     (requires (fun h -> live h immutable_state
       /\ live h sb /\ current_state h (get h sb 0) = Open
       /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)))
@@ -377,7 +377,7 @@ private val file_send_1:
   immutable_state:uint8_p{length immutable_state = 1244} ->
   num:U64.t{U64.v num < pow2 32 - 1} ->
   rem:U64.t{U64.v rem < U64.v blocksize} ->
-  Stack open_result
+  ST open_result
     (requires (fun h -> live h immutable_state
       /\ live h sb /\ current_state h (get h sb 0) = Open
       /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)))
@@ -389,6 +389,8 @@ private val file_send_1:
 
 private let file_send_1 sb fb immut_state num rem =
   let fh = fb.(0ul) in
+  let sid = TestLib.uint8_p_null in
+  assume (length sid = 16);
   let res = file_send_2 sb fb immut_state num rem in
   let res' = file_close fb in
   match res, res' with

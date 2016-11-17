@@ -63,33 +63,34 @@ val get_fh_stat: file_handle -> Tot file_stat
 let get_fh_stat fh = fh.stat
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 val file_recv_loop_2:
   fb:fh_ref ->
   connb:socket_ref ->
   state: uint8_p{length state = 1244} ->
-  mut_state:uint8_p{length mut_state = U64.v ciphersize + 24 /\ frameOf mut_state <> frameOf state} ->  
+  mut_state:uint8_p{length mut_state = U64.v ciphersize + 24 /\ frameOf mut_state <> frameOf state} ->
   seqno:H64.t ->
   len:U64.t ->
   Stack sresult
-    (requires (fun h -> 
-         live h connb 
+    (requires (fun h ->
+      live h connb
       /\ current_state h (get h connb 0) = Open
-      /\ live_file h fb 
+      /\ live_file h fb
       /\ (let fh = get h fb 0 in file_state h fh = FileOpen)
       /\ live h state /\ live h mut_state))
-    (ensures  (fun _ r h1 -> 
-      match r with 
-      | SocketOk -> (live h1 connb /\ current_state h1 (get h1 connb 0) = Open
-      /\ live_file h1 fb /\ (let fh = get h1 fb 0 in file_state h1 fh = FileOpen))
-      | _ -> true ))
+    (ensures  (fun h0 r h1 ->
+      live_file h1 fb /\ file_state h1 (get h1 fb 0) = FileOpen /\ live h1 connb
+      /\ same_file h0 fb h1 fb
+      /\ (match r with
+      | SocketOk -> (current_state h1 (get h1 connb 0) = Open)
+      | _ -> true) ))
 let rec file_recv_loop_2 fb connb state mut_state seqno len =
   let key        = Buffer.sub state 64ul 32ul in
   let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
   let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
   if U64 (len =^ 0uL) then SocketOk
-  else 
+  else
   if U64 (len <^ blocksize) then (
     let h0 = ST.get() in
     match tcp_read_all connb ciphertext (cipherlen len) with
@@ -150,7 +151,7 @@ val file_recv_enc:
       /\ live h1 connb /\ live h1 state)
       | _ -> true))
 
-let file_recv_enc fb connb state size = 
+let file_recv_enc fb connb state size =
   push_frame();
   let sid   = Buffer.sub state 96ul 16ul in
   let header  = Buffer.sub state 220ul 1024ul in
