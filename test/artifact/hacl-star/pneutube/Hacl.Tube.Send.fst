@@ -93,7 +93,7 @@ let makeStreamID b =
     randombytes_buf b 16uL
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
 
 val store64_le:
@@ -139,6 +139,7 @@ let load64_le b =
     |^ (sint8_to_sint64 b7 <<^ 56ul)
   )
 
+
 open FStar.Mul
 
 
@@ -153,7 +154,7 @@ noextract let triple (a:HH.rid) (b:HH.rid) (c:HH.rid) = Set.union (Set.singleton
 type uint8_p = b:uint8_p{frameOf b <> file_rgn /\ frameOf b <> socket_rgn}
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
 
 private val file_send_loop:
   fh:fh_ref ->
@@ -165,19 +166,19 @@ private val file_send_loop:
   Stack sresult
     (requires (fun h ->
       live_file h fh
-      /\ (let fh = get h fh 0 in file_state h fh = FileOpen)
+      /\ file_state h fh = FileOpen
       /\ live h sb /\ live h immut_state /\ live h mut_state
-      /\ current_state h (get h sb 0) = Open))
+      /\ current_state h sb = Open))
     (ensures  (fun h0 res h1 ->
-      live_file h0 fh /\ (let fh = get h0 fh 0 in file_state h0 fh = FileOpen)
-      /\ live_file h1 fh /\ (let fh = get h1 fh 0 in file_state h1 fh = FileOpen)
+      live_file h0 fh /\ (file_state h0 fh = FileOpen)
+      /\ live_file h1 fh /\ (file_state h1 fh = FileOpen)
       /\ same_file h0 fh h1 fh
       /\ (match res with
         | SocketOk -> (
           live h1 mut_state /\ live h1 sb
           /\ HS.modifies (triple socket_rgn file_rgn (frameOf mut_state)) h0 h1
           /\ modifies_buf_1 (frameOf mut_state) mut_state h0 h1
-          /\ current_state h1 (get h1 sb 0) = Open)
+          /\ current_state h1 sb = Open)
       | _ -> true)))
 private let rec file_send_loop fh sb immut_state mut_state seqno len =
   let pkA   = Buffer.sub immut_state 0ul 32ul in
@@ -213,7 +214,7 @@ private let rec file_send_loop fh sb immut_state mut_state seqno len =
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
 
 private val file_send_fragments:
   sb:socket_ref ->
@@ -226,16 +227,16 @@ private val file_send_fragments:
   Stack sresult
     (requires (fun h ->
       live_file h fb
-      /\ (let fh = get h fb 0 in file_state h fh = FileOpen)
+      /\ (file_state h fb = FileOpen)
       /\ live h sb /\ live h immut_state /\ live h mut_state
-      /\ current_state h (get h sb 0) = Open))
+      /\ current_state h sb = Open))
     (ensures (fun h0 r h1 ->
-      live_file h0 fb /\ (let fh = get h0 fb 0 in file_state h0 fh = FileOpen)
-      /\ live_file h1 fb /\ (let fh = get h1 fb 0 in file_state h1 fh = FileOpen)
+      live_file h0 fb /\ (file_state h0 fb = FileOpen)
+      /\ live_file h1 fb /\ (file_state h1 fb = FileOpen)
       /\ same_file h0 fb h1 fb
       /\ live h1 sb /\
       (match r with
-      | SocketOk -> (current_state h1 (get h1 sb 0) = Open)
+      | SocketOk -> (current_state h1 sb = Open)
       | _ -> true) ))
 private let file_send_fragments sb fb immut_state mut_state seqno fragments rem =
   let fh  = Buffer.index fb 0ul in
@@ -271,7 +272,7 @@ private let file_send_fragments sb fb immut_state mut_state seqno fragments rem 
   | SocketError -> SocketError
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 400"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
 
 private val file_flush_all:
   sb:socket_ref ->
@@ -281,16 +282,16 @@ private val file_flush_all:
   ctr:U64.t{U64.v ctr < pow2 32 - 1} ->
   rem:U64.t{U64.v rem < U64.v blocksize} ->
   Stack sresult
-    (requires (fun h -> live h sb /\ current_state h (get h sb 0) = Open
-      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)
+    (requires (fun h -> live h sb /\ current_state h sb = Open
+      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fb = FileOpen)
       /\ live h immut_state /\ live h mut_state))
     (ensures (fun h0 r h1 ->
-      live_file h0 fb /\ (let fh = get h0 fb 0 in file_state h0 fh = FileOpen)
-      /\ live_file h1 fb /\ (let fh = get h1 fb 0 in file_state h1 fh = FileOpen)
+      live_file h0 fb /\ (let fh = get h0 fb 0 in file_state h0 fb = FileOpen)
+      /\ live_file h1 fb /\ (let fh = get h1 fb 0 in file_state h1 fb = FileOpen)
       /\ same_file h0 fb h1 fb
       /\ live h1 sb
       /\ (match r with
-      | SocketOk -> (live h1 sb /\ current_state h1 (get h1 sb 0) = Open)
+      | SocketOk -> (live h1 sb /\ current_state h1 sb = Open)
       | _ -> true) ))
 private let file_flush_all sb fb immut_state mut_state ctr rem =
   let fh  = Buffer.index fb 0ul in
@@ -335,7 +336,7 @@ private let file_flush_all sb fb immut_state mut_state ctr rem =
             | SocketError -> SocketError )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
 
 
 private val file_send_2:
@@ -346,11 +347,11 @@ private val file_send_2:
   rem:U64.t{U64.v rem < U64.v blocksize} ->
   ST sresult
     (requires (fun h -> live h immutable_state
-      /\ live h sb /\ current_state h (get h sb 0) = Open
-      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)))
+      /\ live h sb /\ current_state h sb = Open
+      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fb = FileOpen)))
     (ensures  (fun h0 s h1 ->
-      live_file h0 fb /\ (let fh = get h0 fb 0 in file_state h0 fh = FileOpen)
-      /\ live_file h1 fb /\ (let fh = get h1 fb 0 in file_state h1 fh = FileOpen)
+      live_file h0 fb /\ (let fh = get h0 fb 0 in file_state h0 fb = FileOpen)
+      /\ live_file h1 fb /\ (let fh = get h1 fb 0 in file_state h1 fb = FileOpen)
       /\ same_file h0 fb h1 fb /\ live h1 fb
     ))
 
@@ -379,11 +380,11 @@ private val file_send_1:
   rem:U64.t{U64.v rem < U64.v blocksize} ->
   ST open_result
     (requires (fun h -> live h immutable_state
-      /\ live h sb /\ current_state h (get h sb 0) = Open
-      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fh = FileOpen)))
+      /\ live h sb /\ current_state h sb = Open
+      /\ live_file h fb /\ (let fh = get h fb 0 in file_state h fb = FileOpen)))
     (ensures  (fun h0 r h1 -> live h1 fb
       /\ (match r.r with
-        | FileOk -> (file_state h1 (get h1 fb 0) = FileClosed)
+        | FileOk -> (file_state h1 fb = FileClosed)
         | _ -> true)
     ))
 
@@ -412,7 +413,7 @@ val file_send:
     	      	        U32.v fsize <= length file))
     (ensures  (fun h0 s h1 -> true))
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 400"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
 
 let file_send fsize f r h p skA pkB =
   push_frame();
