@@ -33,5 +33,12 @@ MODULES=$(COMMON_MODULES) $(CHACHA20_MODULES) $(SALSA20_MODULES) $(XSALSA20_MODU
 lax: $(addsuffix .fst-lax, $(MAIN_MODULES))
 ver: $(addsuffix .fst-ver, $(MODULES))
 
+chacha: Hacl.Symmetric.Chacha20.fst
+	$(FSTAR) --lax --include $(HACL_KREMLIN) $^
+
+chacha-extract: Hacl.Symmetric.Chacha20.fst
+	mkdir -p chacha_js
+	$(FSTAR) --codegen JavaScript --include $(HACL_KREMLIN) $^ --odir chacha_js
+
 clean:
 	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(HACL_FILES)
