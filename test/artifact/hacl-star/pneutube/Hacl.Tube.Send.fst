@@ -73,11 +73,11 @@ type streamID = b:buffer h8{length b = 16}
 
 noeq type open_result = {
   r: FileIO.Types.fresult;
-  sid: streamID;
+  sid: uint8_p(* streamID *);
   fs: FileIO.Types.file_stat
 }
 
-val opened: FileIO.Types.fresult -> FileIO.Types.file_stat -> streamID -> Tot open_result
+val opened: FileIO.Types.fresult -> FileIO.Types.file_stat -> (* streamID *) uint8_p -> Tot open_result
 let opened r fs sid = {r = r; sid = sid; fs = fs}
 
 assume val sent:
@@ -201,9 +201,7 @@ private let rec file_send_loop fh sb immut_state mut_state seqno len =
     let h1 = ST.get() in
     lemma_reveal_modifies_1 nonce h0 h1;
     let seqno = H64 (seqno +^ Hacl.Cast.uint64_to_sint64 1uL) in
-    (* assume (as_seq h1 key = agreedKey (as_seq h1 pkA) (as_seq h1 pkB)); *)
     let _ = Hacl.Box.crypto_box_easy_afternm ciphertext next blocksize nonce key in
-    (* let _ = crypto_box_easy_afternm #pkA #pkB ciphertext next blocksize nonce key in *)
     let h2 = ST.get() in
     lemma_reveal_modifies_1 mut_state h1 h2;
     let sock_res = tcp_write_all sb ciphertext ciphersize in
@@ -258,11 +256,9 @@ private let file_send_fragments sb fb immut_state mut_state seqno fragments rem 
         store64_le (sub nonce 16ul 8ul) seqno;
 	let h1 = ST.get() in
 	lemma_reveal_modifies_1 nonce h0 h1;
+        Math.Lemmas.modulo_lemma (U64.v rem) (pow2 32);
         let clen = U32 (Int.Cast.uint64_to_uint32 rem +^ 16ul) in
-        assume (U32.v clen = U64.v rem + 16);
-        (* assume (as_seq h1 key == agreedKey (as_seq h1 pkA) (as_seq h1 pkB)); *)
         let _ = Hacl.Box.crypto_box_easy_afternm (sub ciphertext 0ul clen) next rem nonce key in
-	(* let _ = crypto_box_easy_afternm #pkA #pkB ciphertext next blocksize nonce key in *)
 	let h2 = ST.get() in
 	lemma_reveal_modifies_1 ciphertext h1 h2;
 	tcp_write_all sb ciphertext (cipherlen rem)
@@ -319,10 +315,7 @@ private let file_flush_all sb fb immut_state mut_state ctr rem =
                             store64_le (sub nonce 16ul 8ul) seqno;
                             let seqno = H64 (seqno +%^ one_64) in
                             let h = ST.get() in
-                            (* assume (as_seq h key == agreedKey (as_seq h pkA) (as_seq h pkB)); *)
                             let ciphertext' = sub ciphertext 0ul (U32 (headersize_32 +^ 16ul)) in
-                            (* let _ = crypto_box_easy_afternm #pkA #pkB ciphertext' header headersize *)
-                            (*                                  nonce key in *)
                             let _ = Hacl.Box.crypto_box_easy_afternm ciphertext' header headersize
                                                                      nonce key in
                             let h1 = ST.get() in
@@ -391,7 +384,6 @@ private val file_send_1:
 private let file_send_1 sb fb immut_state num rem =
   let fh = fb.(0ul) in
   let sid = TestLib.uint8_p_null in
-  assume (length sid = 16);
   let res = file_send_2 sb fb immut_state num rem in
   let res' = file_close fb in
   match res, res' with
@@ -457,23 +449,27 @@ let file_send fsize f r h p skA pkB =
         let hfragments = H64 (hsize >>^ blocksize_bits) in
         let hrem = H64 (file_size &^ (sblock-^one_64)) in
 	let fragments = Hacl.Policies.declassify_u64 hfragments in
-        assume (U64.v fragments < pow2 32 - 1);
 	let rem = Hacl.Policies.declassify_u64 hrem in
-        assume (U64.v rem < U64.v blocksize);
-        let file_size = fh.stat.size in
-        let mtime = fh.stat.mtime in
-        let f64: h64 = Hacl.Cast.uint32_to_sint64 fsize in
-        let h2 = ST.get() in
-        store64_le (Buffer.sub header  0ul 8ul) file_size;
-        store64_le (Buffer.sub header  8ul 8ul) mtime;
-        store64_le (Buffer.sub header 16ul 8ul) f64;
-        Buffer.blit f 0ul header 24ul fsize;
-        store64_le (hsbuf) hsize;
-        let h3 = ST.get() in
-        lemma_reveal_modifies_1 state h2 h3;
-        (match tcp_connect h p sb with
-        | SocketOk -> file_send_1 sb fb state fragments rem
-        | SocketError -> opened FileError fh.stat sid )
+        if (U64 ((fragments >=^ 4294967295uL) || (rem >=^ blocksize))) then (
+          (* TestLib.perr(Int.Cast.uint64_to_uint32 rem); *)
+          opened FileError fh.stat sid )
+        else (
+        (* assume (U64.v fragments < pow2 32 - 1); *)
+        (* assume (U64.v rem < U64.v blocksize); *)
+          let file_size = fh.stat.size in
+          let mtime = fh.stat.mtime in
+          let f64: h64 = Hacl.Cast.uint32_to_sint64 fsize in
+          let h2 = ST.get() in
+          store64_le (Buffer.sub header  0ul 8ul) file_size;
+          store64_le (Buffer.sub header  8ul 8ul) mtime;
+          store64_le (Buffer.sub header 16ul 8ul) f64;
+          Buffer.blit f 0ul header 24ul fsize;
+          store64_le (hsbuf) hsize;
+          let h3 = ST.get() in
+          lemma_reveal_modifies_1 state h2 h3;
+          (match tcp_connect h p sb with
+          | SocketOk -> file_send_1 sb fb state fragments rem
+          | SocketError -> opened FileError fh.stat sid ) )
     | FileError -> opened FileError (fb.(0ul)).stat sid in
   pop_frame();
   (* let c2 = C.clock() in *)

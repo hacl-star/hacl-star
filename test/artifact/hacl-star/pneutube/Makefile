@@ -3,7 +3,7 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 ARTIFACT_HOME=../..
 include ../../Makefile.include
 
-tube-star.exe: ../crypto/Hacl.EC.Curve25519.fst Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_impl.c Hacl.Tube.fst tube.c
+tube-star.exe: ../crypto/Hacl.EC.Curve25519.fst Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_impl.c Hacl.Tube.Send.fst Hacl.Tube.Receive.fst tube.c
 	mkdir -p tube
 	$(KREMLIN) $(KREMLIN_ARGS) -I $(LIB_KRML) -I ../crypto $(KREMTEST)/testlib.c $^ \
 		-I $(KREMLIB) -I $(KREMTEST) -I c_bindings \
