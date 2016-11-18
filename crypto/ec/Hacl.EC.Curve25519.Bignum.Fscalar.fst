@@ -13,7 +13,6 @@ open Hacl.UInt64
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 open Hacl.EC.Curve25519.Utils
-open Hacl.EC.Curve25519.Bignum.Fscalar.Lemmas
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
@@ -33,10 +32,9 @@ val fscalar_:
   a:bigint{disjoint res a} ->
   s:s64 ->
   Stack unit
-    (requires (fun h -> live h res /\ norm h a))
-    (ensures (fun h0 _ h1 -> live h1 res /\ modifies_1 res h0 h1 /\ isScalarMult h0 h1 res a s))
+    (requires (fun h -> live h res /\ live h a))
+    (ensures (fun h0 _ h1 -> live h1 res /\ modifies_1 res h0 h1))
 let fscalar_ res a s =
-  Math.Lemmas.pow2_lt_compat 64 51; Math.Lemmas.pow2_plus 51 64; Math.Lemmas.pow2_plus 64 64;
   let a0 = a.(0ul) in
   let a1 = a.(1ul) in
   let a2 = a.(2ul) in
@@ -52,14 +50,7 @@ let fscalar_ res a s =
 
 
 val scalar': res:bigint_wide -> a:bigint{disjoint res a} -> s:s64 -> STL unit
-     (requires (fun h -> norm h a /\ live h res))
-     (ensures (fun h0 u h1 ->
-       live h0 res /\ live h1 res /\ norm h0 a /\ norm h1 a
-       /\ modifies_1 res h0 h1
-       /\ bound115 h1 res
-       /\ eval_wide h1 res norm_length = eval h0 a norm_length * v s ))
+     (requires (fun h -> live h a /\ live h res))
+     (ensures (fun h0 u h1 -> live h1 res /\ modifies_1 res h0 h1))
 let scalar' res a s =
-  let h0 = ST.get() in
-  fscalar_ res a s;
-  let h1 = ST.get() in
-  lemma_fscalar h0 h1 res a s
+  fscalar_ res a s

@@ -1,10 +1,7 @@
 UNAME := $(shell uname)
 
-# Caller needs to define FSTAR_HOME, HACL_HOME and KREMLIN_HOME
+# Caller needs to define HACL_HOME and KREMLIN_HOME
 HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe --include $(HYPERSTACK)
-FSTAR_OPTIONS_VER=--use_hints
-FSTAR_OPTIONS_KREMLIN=
 
 HACL_LIB=$(HACL_HOME)/lib/hyperstack
 HACL_FILES=Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Policies.fst
@@ -34,6 +31,10 @@ endif
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 
+FSTAR_OPTIONS_VER=--use_hints
+FSTAR_OPTIONS_KREMLIN=
+FSTAR=$(KREMLIN) -verify -verbose
+
 OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
                 $(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \
 		-I $(FSTAR_HOME)/ulib/ml/extracted \
@@ -51,10 +52,10 @@ import-kremlin:
 	@cp $(HACL_KREMLIN_FILES)) .
 
 %.fst-lax: %.fst
-	$(FSTAR) --lax $(INCLUDES) $^
+	$(FSTAR) --lax $(FSTAR_INCLUDES) $^
 
 %.fst-ver: %.fst
-	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) --verify_module $(basename $(notdir $@)) $^
+	$(FSTAR) $(addprefix -fsopt , $(FSTAR_OPTIONS_VER)) $(FSTAR_INCLUDES) --verify_module $(basename $(notdir $@)) $^
 
 %.fst-krml: %.fst
-	$(KREMLIN) $(KREMLIN_INCLUDES) 
+	$(KREMLIN) $(KREMLIN_INCLUDES) $^

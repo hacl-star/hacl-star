@@ -73,64 +73,33 @@ let refs p = arefs (only (get_x p) ++ only (get_y p) ++ (only (get_z p)))
 
 
 val swap_conditional_aux': a:bigint -> b:bigint{disjoint a b} ->
-  is_swap:s64(* {v is_swap = pow2 platform_size -1 \/ v is_swap = 0} *) ->
+  is_swap:s64 ->
   ctr:u32{U32.v ctr<=norm_length} -> STL unit
     (requires (fun h -> B.live h a /\ B.live h b))
-      (* norm h a /\ norm h b)) *)
     (ensures (fun h0 _ h1 -> B.live h1 a /\ B.live h1 b /\ modifies_2 a b h0 h1))
-      (* /\ norm h0 a /\ norm h0 b /\ norm h1 a /\ norm h1 b *)
-      (* (\* /\ EqSub h0 a 0 h1 a 0 ctr /\ EqSub h0 b 0 h1 b 0 ctr *\) *)
-      (* /\ partialSwap h0 h1 is_swap (w ctr) a b)) *)
 let rec swap_conditional_aux' a b swap ctr =
-  (* let h0 = ST.get() in *)
   if U32 (nlength =^ ctr) then ()
   else begin
-    (* admitP (True /\ w ctr < norm_length);  *)
     let ai = a.(ctr) in
     let bi = b.(ctr) in
     let y = ai ^^ bi in
     let x = swap &^ y in
     let ai' =  x ^^ ai in
     let bi' = x ^^ bi in
-    // Definition of the bitwise operations
-    (* admitP (v swap = 0 ==> (v ai' = v ai /\ v bi' = v bi)); *)
-    (* admitP (v swap = pow2 platform_size - 1 ==> (v ai' = v bi /\ v bi' = v ai));  *)
     a.(ctr) <- ai';
-    (* let h2 = ST.get() in *)
     b.(ctr) <- bi';
-    (* let h3 = ST.get() in  *)
-    (* upd_lemma h0 h2 a ctr ai';  *)
-    (* no_upd_lemma h0 h2 b (only a);  *)
-    (* upd_lemma h2 h3 b ctr bi';   *)
-    (* no_upd_lemma h2 h3 a (only b);  *)
     swap_conditional_aux' a b swap (U32 (ctr +^ 1ul));
-    (* let h1 = ST.get() in *)
-    (* admitP (forall (i:nat). (i >= w ctr + 1 /\ i < norm_length) ==>  *)
-    (*   ((v swap = 0 ==> (v (get h1 a i) = v (get h0 a i)  *)
-    (* 	         /\ v (get h1 b i) = v (get h0 b i))) *)
-    (*    /\ (v swap = pow2 platform_size - 1 ==> (v (get h1 a i) = v (get h0 b i)  *)
-    (* 					       /\ v (get h1 b i) = v (get h0 a i))))); *)
-    (* admitP (forall (i:nat). {:pattern (get h1 a i) \/ (get h1 b i)} 0+i = i);  *)
-    (* cut (forall (i:nat). {:pattern (get h1 a i)} i < w ctr ==> v (get h1 a i) = v (get h3 a i));  *)
-    (* cut (forall (i:nat). {:pattern (get h1 b i)} i < w ctr ==> v (get h1 b i) = v (get h3 b i)); *)
     ()
  end
 
 val swap_conditional_aux: a:bigint -> b:bigint{disjoint a b} ->
-  is_swap:s64(* {v is_swap = pow2 platform_size -1 \/ v is_swap = 0} *) ->
+  is_swap:s64 ->
   Stack unit
     (requires (fun h -> B.live h a /\ B.live h b))
-      (* norm h a /\ norm h b)) *)
     (ensures (fun h0 _ h1 -> B.live h1 a /\ B.live h1 b /\ modifies_2 a b h0 h1))
-      (* /\ norm h0 a /\ norm h0 b /\ norm h1 a /\ norm h1 b *)
-      (* /\ (v is_swap = 0 ==> ((valueOf h1 a = valueOf h0 a) /\ (valueOf h1 b = valueOf h0 b))) *)
-      (* /\ (v is_swap = pow2 platform_size - 1 ==>  *)
-      (* 	  ((valueOf h1 a = valueOf h0 b) /\ (valueOf h1 b = valueOf h0 a))) )) *)
 let rec swap_conditional_aux a b swap =
-  (* let h0 = ST.get() in *)
-  swap_conditional_aux' a b swap 0ul(* ;  *)
-  (* let h1 = ST.get() in  *)
-  (* swap_conditional_aux_lemma h0 h1 a b swap   *)
+  swap_conditional_aux' a b swap 0ul
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
 
@@ -204,39 +173,23 @@ let helper_lemma_4 r h0 h1 h2 h3 a b : Lemma
 
 val swap_conditional:
   a:point{same_frame a} -> b:point{distinct a b /\ same_frame b} ->
-  is_swap:s64(* {v is_swap = pow2 platform_size -1 \/ v is_swap = 0} *) ->
+  is_swap:s64 ->
   Stack unit
     (requires (fun h -> live h a /\ live h b /\ same_frame_2 a b))
-      (* onCurve h a /\ onCurve h b)) *)
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 b
       /\ HS.modifies_one (frame_of a) h0 h1
       /\ HS.modifies_ref (frame_of a) (refs a ++ refs b) h0 h1
       /\ prop_1 h0 h1 a b))
-      (* (onCurve h0 a /\ onCurve h0 b) /\ (onCurve h1 a /\ onCurve h1 b) *)
-      (* (\* /\ modifies (refs a ++ refs b) h0 h1  *\) *)
-      (* /\ (v is_swap = 0 ==>  *)
-      (* 	  ((pointOf h1 a) == (pointOf h0 a) /\ (pointOf h1 b) == (pointOf h0 b))) *)
-      (* /\ (v is_swap = pow2 platform_size - 1 ==>  *)
-      (* 	  ((pointOf h1 a) == (pointOf h0 b) /\ (pointOf h1 b) == (pointOf h0 a))) )) *)
 let swap_conditional a b is_swap =
   let h0 = ST.get() in
   swap_conditional_aux (get_x a) (get_x b) is_swap;
   let h1 = ST.get() in
   lemma_reveal_modifies_2 (get_x a) (get_x b) h0 h1;
-  (* assert(disjoint (get_x a) (get_y a)); assert(disjoint (get_x b) (get_y a)); *)
-  (* no_upd_lemma_2 h0 h1 (get_x a) (get_x b) (get_y a); *)
   cut (live h1 a /\ live h1 b);
-  (* norm_lemma h0 h1 (get_y a) !{getRef (get_x a), getRef (get_x b)}; *)
-  (* norm_lemma h0 h1 (get_y b) !{getRef (get_x a), getRef (get_x b)}; *)
   swap_conditional_aux (get_y a) (get_y b) is_swap;
   let h2 = ST.get() in
   cut (live h2 a /\ live h2 b);
   lemma_reveal_modifies_2 (get_y a) (get_y b) h1 h2;
-  (* let mods = (hide !{getRef (get_x a), getRef (get_x b), getRef (get_y a), getRef (get_y b)}) in *)
-  (* cut(modifies (reveal mods) h0 h2);  *)
-  (* cut(not(FStar.Set.mem (Ref (getRef (get_z b))) (reveal mods)) /\ not(FStar.Set.mem (Ref (getRef (get_z a))) (reveal mods)));  *)
-  (* enorm_lemma h0 h2 (get_z a) mods; *)
-  (* enorm_lemma h0 h2 (get_z b) mods; *)
   swap_conditional_aux (get_z a) (get_z b) is_swap;
   let h3 = ST.get() in
   cut (live h3 a /\ live h3 b);
@@ -298,52 +251,27 @@ val copy:
   a:point{same_frame a} -> b:point{distinct a b} ->
   Stack unit
     (requires (fun h -> live h a /\ live h b))
-      (* /\ onCurve h b)) *)
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 b
       /\ HS.modifies_one (frame_of a) h0 h1
       /\ HS.modifies_ref (frame_of a) (refs a) h0 h1
       /\ prop_2 h0 h1 a))
-      (* (live h0 a) /\ (onCurve h1 a) /\ (onCurve h0 b) /\ (onCurve h1 b) *)
-      (* /\ (pointOf h1 a = pointOf h0 b) /\ (pointOf h1 b = pointOf h0 b) *)
-      (* /\ (modifies (refs a) h0 h1) *)
 let copy a b =
   let h0 = ST.get() in
   blit (get_x b) 0ul (get_x a) 0ul nlength;
   let h1 = ST.get() in
   cut (live h1 a /\ live h1 b);
   lemma_reveal_modifies_1 (get_x a) h0 h1;
-  (* norm_lemma h0 h1 (get_x b) (!{getRef (get_x a)});  *)
-  (* norm_lemma h0 h1 (get_y b) (!{getRef (get_x a)});  *)
-  (* norm_lemma h0 h1 (get_z b) (!{getRef (get_x a)});  *)
-  (* bignum_live_lemma h0 h1 (get_y a) (!{getRef (get_x a)});  *)
-  (* bignum_live_lemma h0 h1 (get_z a) (!{getRef (get_x a)});  *)
   blit (get_y b) 0ul (get_y a) 0ul nlength;
   let h2 = ST.get() in
   cut (live h2 a /\ live h2 b);
   lemma_reveal_modifies_1 (get_y a) h1 h2;
-  (* norm_lemma h1 h2 (get_x b) (!{getRef (get_y a)});  *)
-  (* norm_lemma h1 h2 (get_y b) (!{getRef (get_y a)}); *)
-  (* norm_lemma h1 h2 (get_z b) (!{getRef (get_y a)});  *)
-  (* norm_lemma_2 h0 h1 (get_x b) (get_x a);  *)
-  (* norm_lemma h1 h2 (get_x a) (!{getRef (get_y a)});  *)
-  (* bignum_live_lemma h1 h2 (get_z a) (!{getRef (get_y a)}); *)
   blit (get_z b) 0ul (get_z a) 0ul nlength;
   let h3 = ST.get() in
   cut (live h2 a /\ live h2 b);
   lemma_reveal_modifies_1 (get_z a) h2 h3;
-  (* norm_lemma h2 h3 (get_x b) (!{getRef (get_z a)}); *)
-  (* norm_lemma h2 h3 (get_y b) (!{getRef (get_z a)}); *)
-  (* norm_lemma h2 h3 (get_z b) (!{getRef (get_z a)}); *)
-  (* norm_lemma h2 h3 (get_x a) (!{getRef (get_z a)}); *)
-  (* norm_lemma_2 h1 h2 (get_y b) (get_y a);  *)
-  (* norm_lemma h2 h3 (get_y a) (!{getRef (get_z a)});  *)
-  (* norm_lemma_2 h2 h3 (get_z b) (get_z a) *)
   helper_lemma' (get_x a);
   helper_lemma' (get_y a);
   helper_lemma' (get_z a);
-  (* helper_lemma_2 (frame_of a) h0 h1 (arefs (only (get_x a))) (refs a); *)
-  (* helper_lemma_2 (frame_of a) h1 h2 (arefs (only (get_y a))) (refs a); *)
-  (* helper_lemma_2 (frame_of a) h2 h3 (arefs (only (get_z a))) (refs a); *)
   helper_lemma_2 (frame_of a) h0 h1 !{as_ref (get_x a)} (refs a);
   helper_lemma_2 (frame_of a) h1 h2 !{as_ref (get_y a)} (refs a);
   helper_lemma_2 (frame_of a) h2 h3 !{as_ref (get_z a)} (refs a);
@@ -360,14 +288,10 @@ val swap:
   a:point -> b:point{distinct a b /\ same_frame b} ->
   Stack unit
     (requires (fun h -> live h a /\ live h b))
-      (* onCurve h a /\ live h b)) *)
     (ensures (fun h0 _ h1 -> live h1 b /\ live h1 a
       /\ HS.modifies_one (frame_of b) h0 h1
       /\ HS.modifies_ref (frame_of b) (refs b) h0 h1
       /\ prop_2 h0 h1 b ))
-      (* onCurve h0 a /\ live h0 b /\ onCurve h1 b /\ live h1 a *)
-      (* /\ (pointOf h0 a) == (pointOf h1 b) *)
-      (* (\* /\ modifies (FStar.Set.union (refs a) (refs b)) h0 h1)) *\) *)
 let swap a b =
   copy b a
 
@@ -391,37 +315,21 @@ val swap_both:
   c:point{distinct c a /\ distinct c b /\ same_frame_2 b c} ->
   d:point{distinct d a /\ distinct d b /\ distinct d c /\ same_frame_2 c d} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h c /\ live h d))
-      (* onCurve h a /\ onCurve h b /\ live h c /\ live h d)) *)
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 b /\ live h1 c /\ live h1 d
       /\ HS.modifies_one (frame_of a) h0 h1
       /\ HS.modifies_ref (frame_of a) (refs a ++ refs b ++ refs c ++ refs d) h0 h1 ))
-      (* onCurve h0 a /\ onCurve h0 b /\ live h0 c /\ live h0 d *)
-      (* /\ onCurve h1 c /\ onCurve h1 d /\ live h1 a /\ live h1 b *)
-      (* /\ (pointOf h0 a) == (pointOf h1 c) /\ (pointOf h0 b) == (pointOf h1 d) *)
 let swap_both a b c d =
-  (* admit(); // OK *)
   let h0 = ST.get() in
   copy c a;
   let h1 = ST.get() in
   helper_lemma_5 h0 h1 c a;
   helper_lemma_5 h0 h1 c b;
   helper_lemma_5 h0 h1 c d;
-  (* let set01 = erefs c in  *)
-  (* distinct_lemma c b;  *)
-  (* distinct_lemma c d;  *)
-  (* on_curve_lemma h0 h1 b set01;  *)
-  (* live_lemma h0 h1 d set01;  *)
   copy d b;
   let h2 = ST.get() in
   helper_lemma_5 h1 h2 d a;
   helper_lemma_5 h1 h2 d b;
   helper_lemma_5 h1 h2 d c;
-  (* distinct_lemma d c;  *)
-  (* distinct_lemma d a; *)
-  (* distinct_lemma d b; *)
-  (* on_curve_lemma h1 h2 c (erefs d); *)
-  (* live_lemma h1 h2 a (erefs d); *)
-  (* live_lemma h1 h2 b (erefs d) *)
   helper_lemma_2 (frame_of a) h0 h1 (refs c) (refs a ++ refs b ++ refs c ++ refs d);
   helper_lemma_2 (frame_of a) h1 h2 (refs d) (refs a ++ refs b ++ refs c ++ refs d);
   helper_lemma_3 (frame_of a) h0 h1 h2 (refs a ++ refs b ++ refs c ++ refs d);
@@ -434,39 +342,21 @@ val copy2: p':point -> q':point{distinct p' q' /\ same_frame_2 p' q'} ->
   p:point{distinct p p' /\ distinct p q' /\ same_frame_2 p q'} ->
   q:point{distinct q p' /\ distinct q q' /\ same_frame_2 p q} -> Stack unit
     (requires (fun h -> live h p' /\ live h q' /\ live h p /\ live h q))
-      (* live h p' /\ live h q' /\ onCurve h p /\ onCurve h q )) *)
     (ensures (fun h0 _ h1 -> live h1 p' /\ live h1 q' /\ live h1 p /\ live h1 q
       /\ HS.modifies_one (frame_of p) h0 h1
       /\ HS.modifies_ref (frame_of p) (refs p' ++ refs q') h0 h1 ))
-      (* onCurve h1 p' /\ onCurve h1 q' /\ onCurve h1 p /\ onCurve h1 q  *)
-      (* /\ onCurve h0 p /\ onCurve h0 q *)
-      (* (\* /\ (modifies (FStar.Set.union (refs p') (refs q')) h0 h1) *\) *)
-      (* /\ (pointOf h1 p' == pointOf h0 p) *)
-      (* /\ (pointOf h1 q' == pointOf h0 q) )) *)
 let copy2 p' q' p q =
-  (* admit(); // OK *)
   let h0 = ST.get() in
   copy p' p;
   let h1 = ST.get() in
   helper_lemma_5 h0 h1 p' q';
   helper_lemma_5 h0 h1 p' p;
   helper_lemma_5 h0 h1 p' q;
-  (* let set01 = (erefs p') in  *)
-  (* distinct_lemma p' q;  *)
-  (* distinct_lemma p' q';  *)
-  (* on_curve_lemma h0 h1 q set01;  *)
-  (* live_lemma h0 h1 q' set01;   *)
   copy q' q;
   let h2 = ST.get() in
   helper_lemma_5 h1 h2 q' p';
   helper_lemma_5 h1 h2 q' p;
   helper_lemma_5 h1 h2 q' q;
-  (* distinct_lemma q' p';  *)
-  (* distinct_lemma q' p; *)
-  (* distinct_lemma q' q;  *)
-  (* on_curve_lemma h1 h2 p' (erefs q');  *)
-  (* on_curve_lemma h1 h2 p (erefs q');  *)
-  (* on_curve_lemma h1 h2 q (erefs q') *)
   helper_lemma_2 (frame_of p) h0 h1 (refs p') (refs p' ++ refs q');
   helper_lemma_2 (frame_of p) h1 h2 (refs q') (refs p' ++ refs q');
   helper_lemma_3 (frame_of p) h0 h1 h2 (refs p' ++ refs q');

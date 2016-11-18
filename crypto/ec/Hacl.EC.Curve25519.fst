@@ -3,7 +3,6 @@ module Hacl.EC.Curve25519
 open FStar.ST
 open Hacl.UInt8
 open Hacl.Cast
-(* open Hacl.SBuffer *)
 open FStar.Buffer
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
@@ -15,7 +14,6 @@ open Hacl.EC.Curve25519.Ladder
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* Module abbreviations *)
-(* module B  = Hacl.SBuffer *)
 module B  = FStar.Buffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
@@ -84,6 +82,7 @@ let expand_1 output input =
   output.(1ul) <- o1;
   () // Without this unit the extraction to OCaml breaks
 
+
 val expand_2: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
@@ -111,6 +110,7 @@ let expand_2 output input =
   output.(2ul) <- o2;
   () // Without this unit the extraction to OCaml breaks
 
+
 val expand_3: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
@@ -135,6 +135,7 @@ let expand_3 output input =
   	   +%^ (i23 <<^ 31ul) +%^ (i24 <<^ 39ul) +%^ ((i25 <<^ 47ul) &^ mask) in
   output.(3ul) <- o3;
   () // Without this unit the extraction to OCaml breaks
+
 
 val expand_4: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
@@ -161,6 +162,7 @@ let expand_4 output input =
   output.(4ul) <- o4;
   () // Without this unit the extraction to OCaml breaks
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 val expand: output:Hacl.EC.Curve25519.Bigint.bigint -> input:u8s{length input >= 32} -> Stack unit
@@ -172,6 +174,7 @@ let expand output input =
   expand_2 output input;
   expand_3 output input;
   expand_4 output input
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
 
@@ -190,6 +193,7 @@ let contract_0 output input =
   output.(5ul) <- (sint64_to_sint8 (i0 >>^ 40ul));
   output.(6ul) <- (sint64_to_sint8 ((i0 >>^ 48ul) +%^ (i1 <<^ 3ul)))
 
+
 val contract_1: output:u8s{length output >= 32} -> input:Hacl.EC.Curve25519.Bigint.bigint{disjoint output input}  -> STL unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
@@ -203,6 +207,7 @@ let contract_1 output input =
   output.(10ul) <- (sint64_to_sint8 (i1 >>^ 29ul));
   output.(11ul) <- (sint64_to_sint8 (i1 >>^ 37ul));
   output.(12ul) <- (sint64_to_sint8 ((i1 >>^ 45ul) +%^ (i2 <<^ 6ul)))
+
 
 val contract_2: output:u8s{length output >= 32} -> input:Hacl.EC.Curve25519.Bigint.bigint{disjoint output input}  -> STL unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
@@ -219,6 +224,7 @@ let contract_2 output input =
   output.(18ul) <- (sint64_to_sint8 (i2 >>^ 42ul));
   output.(19ul) <- (sint64_to_sint8 ((i2 >>^ 50ul) +%^ (i3 <<^ 1ul)))
 
+
 val contract_3: output:u8s{length output >= 32} -> input:Hacl.EC.Curve25519.Bigint.bigint{disjoint output input}  -> STL unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
@@ -233,6 +239,7 @@ let contract_3 output input =
   output.(24ul) <- (sint64_to_sint8 (i3 >>^ 39ul));
   output.(25ul) <- (sint64_to_sint8 ((i3 >>^ 47ul) +%^ (i4 <<^ 4ul)))
 
+
 val contract_4: output:u8s{length output >= 32} -> input:Hacl.EC.Curve25519.Bigint.bigint{disjoint output input}  -> STL unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
   (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
@@ -245,6 +252,7 @@ let contract_4 output input =
   output.(29ul) <- (sint64_to_sint8 (i4 >>^ 28ul));
   output.(30ul) <- (sint64_to_sint8 (i4 >>^ 36ul));
   output.(31ul) <- (sint64_to_sint8 (i4 >>^ 44ul))
+
 
 val contract: output:u8s{length output >= 32} -> input:Hacl.EC.Curve25519.Bigint.bigint{disjoint output input}  -> STL unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
@@ -308,9 +316,7 @@ let lemma_helper_1 hinit h0 h1 h2 h3 h4 hfin output : Lemma
     /\ popped h4 hfin
     /\ h0.tip = h1.tip /\ h1.tip = h2.tip /\ h2.tip = h3.tip /\ h3.tip = h4.tip
     /\ Map.contains hinit.h (frameOf output)))
-  (ensures  ((* HS.modifies_one (frameOf output) hinit hfin *)
-    (* /\ FStar.Buffer.modifies_buf_1 (frameOf output) output hinit hfin *)
-      modifies_1 output hinit hfin))
+  (ensures  (modifies_1 output hinit hfin))
   = let open FStar.Buffer in
     lemma_reveal_modifies_0 h0 h1;
     lemma_reveal_modifies_1 output h3 h4;
@@ -332,7 +338,6 @@ let exp_2 output q_x scalar basepoint =
   let h0 = ST.get() in
   let zero = uint64_to_sint64 0uL in
   let one  = uint64_to_sint64 1uL in
-  (* let tmp    = create zero (U32 (4ul *^ nlength)) in *)
   let tmp    = create zero 22ul in
   let resx   = B.sub tmp 0ul  6ul in
   let resy   = B.sub tmp 6ul  5ul in
@@ -346,10 +351,8 @@ let exp_2 output q_x scalar basepoint =
   let h2 = ST.get() in
   cut(HS (modifies_one h0.tip h1 h2));
   cut( B.live h2 output);
-  assume (norm h2 (Hacl.EC.Curve25519.PPoint.get_z res));
   crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res);
   let h2' = ST.get() in
-  assume (norm h2' resx /\ norm h2' zrecip);
   fmul resy resx zrecip;
   let h3 = ST.get() in
   assert(B.live h3 output);
@@ -375,9 +378,7 @@ let lemma_helper_2 hinit h0 h1 h2 h3 hfin output : Lemma
     /\ modifies_1 output h2 h3 /\ popped h3 hfin
     /\ h0.tip = h1.tip /\ h1.tip = h2.tip /\ h2.tip = h3.tip
     /\ Map.contains hinit.h (frameOf output)))
-  (ensures  ((* HS.modifies_one (frameOf output) hinit hfin *)
-    (* /\ FStar.Buffer.modifies_buf_1 (frameOf output) output hinit hfin *)
-      modifies_1 output hinit hfin))
+  (ensures  (modifies_1 output hinit hfin))
   = let open FStar.Buffer in
     lemma_reveal_modifies_0 h0 h1;
     lemma_reveal_modifies_1 output h2 h3;

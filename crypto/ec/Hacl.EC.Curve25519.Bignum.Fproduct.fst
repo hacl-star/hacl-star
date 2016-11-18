@@ -15,8 +15,6 @@ open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 open Hacl.EC.Curve25519.Utils
 
-open Hacl.EC.Curve25519.Bignum.Fproduct.Lemmas
-
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
 (* Module abbreviations *)
@@ -30,18 +28,14 @@ module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
-let u51 = x:H64.t{v x < pow2 51}
-
 private val multiplication_0:
   c:bigint_wide{length c >= 2*norm_length-1} ->
-  a0:u51 -> a1:u51 -> a2:u51 -> a3:u51 -> a4:u51 ->
-  b0:u51 -> b1:u51 -> b2:u51 -> b3:u51 -> b4:u51 ->
+  a0:H64.t -> a1:H64.t -> a2:H64.t -> a3:H64.t -> a4:H64.t ->
+  b0:H64.t -> b1:H64.t -> b2:H64.t -> b3:H64.t -> b4:H64.t ->
   Stack unit
     (requires (fun h -> live h c))
-    (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c
-      /\ isMultiplication_ h1 (v a0) (v a1) (v a2) (v a3) (v a4) (v b0) (v b1) (v b2) (v b3) (v b4) c))
+    (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
 let multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
-  lemma_multiplication_0 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4;
   let open Hacl.UInt128 in
   let ab00 = a0 *^ b0 in
   let ab01 = a0 *^ b1 in
@@ -70,23 +64,14 @@ let multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   let ab44 = a4 *^ b4 in
   let open Hacl.UInt64 in
   let c0 = ab00 in
-  cut (H128.v c0 = v a0 * v b0);
-  let c1 = H128 (ab01 +^ ab10) in
-  cut (H128.v c1 = v a0 * v b1 + v a1 * v b0);
-  let c2 = H128 (ab02 +^ ab11 +^ ab20) in
-  cut(H128.v c2 = v a0 * v b2 + v a1 * v b1 + v a2 * v b0);
-  let c3 = H128 (ab03 +^ ab12 +^ ab21 +^ ab30) in
-  cut(H128.v c3 = v a0 * v b3 + v a1 * v b2 + v a2 * v b1 + v a3 * v b0);
-  let c4 = H128 (ab04 +^ ab13 +^ ab22 +^ ab31 +^ ab40) in
-  cut(H128.v c4 = v a0 * v b4 + v a1 * v b3 + v a2 * v b2 + v a3 * v b1 + v a4 * v b0);
-  let c5 = H128 (ab14 +^ ab23 +^ ab32 +^ ab41) in
-  cut(H128.v c5 = v a1 * v b4 + v a2 * v b3 + v a3 * v b2 + v a4 * v b1);
-  let c6 = H128 (ab24 +^ ab33 +^ ab42) in
-  cut(H128.v c6 = v a2 * v b4 + v a3 * v b3 + v a4 * v b2);
-  let c7 = H128 (ab34 +^ ab43) in
-  cut(H128.v c7 = v a3 * v b4 + v a4 * v b3);
+  let c1 = H128 (ab01 +%^ ab10) in
+  let c2 = H128 (ab02 +%^ ab11 +%^ ab20) in
+  let c3 = H128 (ab03 +%^ ab12 +%^ ab21 +%^ ab30) in
+  let c4 = H128 (ab04 +%^ ab13 +%^ ab22 +%^ ab31 +%^ ab40) in
+  let c5 = H128 (ab14 +%^ ab23 +%^ ab32 +%^ ab41) in
+  let c6 = H128 (ab24 +%^ ab33 +%^ ab42) in
+  let c7 = H128 (ab34 +%^ ab43) in
   let c8 = ab44 in
-  cut(H128.v c8 = v a4 * v b4 );
   update_wide_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8
 
 
@@ -95,10 +80,8 @@ private val multiplication_:
   a:bigint{disjoint c a} ->
   b:bigint{disjoint c b} ->
   Stack unit
-     (requires (fun h -> norm h a /\ norm h b /\ live h c))
-     (ensures (fun h0 u h1 -> norm h0 a /\ norm h0 b /\ live h1 c /\ modifies_1 c h0 h1
-       /\ isMultiplication h0 h1 a b c
-     ))
+     (requires (fun h -> live h a /\ live h b /\ live h c))
+     (ensures (fun h0 u h1 -> live h1 c /\ modifies_1 c h0 h1))
 let multiplication_ c a b =
   let h0 = ST.get() in
   let a0 = a.(0ul) in let a1 = a.(1ul) in let a2 = a.(2ul) in let a3 = a.(3ul) in let a4 = a.(4ul) in
@@ -111,12 +94,7 @@ val multiplication:
   a:bigint{disjoint c a} ->
   b:bigint{disjoint c b} ->
   Stack unit
-     (requires (fun h -> norm h a /\ norm h b /\ live h c))
-     (ensures (fun h0 u h1 -> norm h0 a /\ norm h0 b /\ live h1 c /\ modifies_1 c h0 h1
-       /\ eval_wide h1 c (2*norm_length-1) = eval h0 a (norm_length) * eval h0 b (norm_length)
-       /\ maxValue_wide h1 c (2*norm_length-1) <= norm_length * pow2 102))
+     (requires (fun h -> live h a /\ live h b /\ live h c))
+     (ensures (fun h0 u h1 -> live h1 c /\ modifies_1 c h0 h1))
 let multiplication c a b =
-  let h0 = ST.get() in
-  multiplication_ c a b;
-  let h1 = ST.get() in
-  lemma_multiplication h0 h1 c a b
+  multiplication_ c a b

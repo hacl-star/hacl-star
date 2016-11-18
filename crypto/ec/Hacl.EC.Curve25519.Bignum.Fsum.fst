@@ -13,7 +13,6 @@ open Hacl.UInt64
 open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 open Hacl.EC.Curve25519.Utils
-open Hacl.EC.Curve25519.Bignum.Fsum.Lemmas
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
@@ -31,9 +30,8 @@ private val fsum_:
   a:bigint ->
   b:bigint{disjoint a b} ->
   Stack unit
-    (requires (fun h -> norm h a /\ norm h b))
-    (ensures (fun h0 u h1 -> norm h0 a /\ norm h0 b /\ live h1 a /\ modifies_1 a h0 h1
-      /\ isSum h0 h1 a b))
+    (requires (fun h -> live h a /\ live h b))
+    (ensures (fun h0 u h1 -> live h1 a /\ modifies_1 a h0 h1))
 let fsum_ a b =
   let h0 = ST.get() in
   let a0 = a.(0ul) in
@@ -50,12 +48,11 @@ let fsum_ a b =
   assert(v a3 = v (get h0 a 3)); assert(v a4 = v (get h0 a 4)); assert(v b0 = v (get h0 b 0));
   assert(v b1 = v (get h0 b 1)); assert(v b2 = v (get h0 b 2)); assert(v b3 = v (get h0 b 3));
   assert(v b4 = v (get h0 b 4));
-  lemma_fsum_0 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4;
-  let ab0 = a0 +^ b0 in
-  let ab1 = a1 +^ b1 in
-  let ab2 = a2 +^ b2 in
-  let ab3 = a3 +^ b3 in
-  let ab4 = a4 +^ b4 in
+  let ab0 = a0 +%^ b0 in
+  let ab1 = a1 +%^ b1 in
+  let ab2 = a2 +%^ b2 in
+  let ab3 = a3 +%^ b3 in
+  let ab4 = a4 +%^ b4 in
   update_5 a ab0 ab1 ab2 ab3 ab4
 
 
@@ -63,13 +60,7 @@ val fsum':
   a:bigint ->
   b:bigint{disjoint a b} ->
   Stack unit
-    (requires (fun h -> norm h a /\ norm h b))
-    (ensures (fun h0 u h1 -> norm h0 a /\ norm h0 b /\ bound52 h1 a /\ modifies_1 a h0 h1
-      /\ isSum h0 h1 a b
-      /\ eval h1 a norm_length = eval h0 a norm_length + eval h0 b norm_length
-    ))
+    (requires (fun h -> live h a /\ live h b))
+    (ensures (fun h0 u h1 -> live h1 a /\ modifies_1 a h0 h1))
 let fsum' a b =
-  let h0 = ST.get() in
-  fsum_ a b;
-  let h1 = ST.get() in
-  lemma_fsum h0 h1 a b
+  fsum_ a b

@@ -6,10 +6,18 @@ open FStar.Ghost
 
 
 (* This HAS to go in some more appropriate place *)
-assume MaxUInt8 : pow2 8 = 256
-assume MaxUInt32: pow2 32 = 4294967296
-assume MaxUInt64: pow2 64 > 0xfffffffffffffff
-assume MaxUInt128: pow2 128 > pow2 64
+let lemma_max_uint8 (n:nat) : Lemma 
+  (requires (n = 8)) (ensures (pow2 n = 256)) [SMTPat (pow2 n)]
+  = assert_norm(pow2 8 = 256)
+let lemma_max_uint32 (n:nat) : Lemma 
+  (requires (n = 32)) (ensures (pow2 n = 0x100000000)) [SMTPat (pow2 n)]
+  = assert_norm(pow2 32 = 0x100000000)
+let lemma_max_uint64 (n:nat) : Lemma 
+  (requires (n = 64)) (ensures (pow2 n = 0x10000000000000000)) [SMTPat (pow2 n)]
+  = assert_norm(pow2 64 = 0x10000000000000000)
+let lemma_max_uint128 (n:nat) : Lemma 
+  (requires (n = 128)) (ensures (pow2 n = 0x100000000000000000000000000000000)) [SMTPat (pow2 n)]
+  = assert_norm(pow2 128 = 0x100000000000000000000000000000000)
 
 val prime: erased pos
 let prime = hide (pow2 255 - 19)

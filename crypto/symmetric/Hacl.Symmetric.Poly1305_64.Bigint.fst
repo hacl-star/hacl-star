@@ -25,6 +25,8 @@ module H128 = Hacl.UInt128
 
 (* * Types ***) 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+
 (* Maps the index of the integer data to the theoretic bit size of the cell *)
 type template: Type0 = nat -> Tot pos
 
@@ -52,6 +54,9 @@ let filled (h:heap) (b:bigint) : GTot Type0 =
     i < norm_length ==> 
     (pow2 (templ i) <= v (get h b i) /\ 
      v (get h b i) < pow2 (templ i + 1)))
+
+
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 5"
 
 (* Defines the weight's exponent for cell 'n' of a bigint *)
 val bitweight : t:template -> n:nat -> GTot nat
@@ -168,6 +173,9 @@ val maxValueNorm_eq_lemma: ha:heap -> hb:heap ->
   (ensures  (maxValueNorm ha a == maxValueNorm hb b))
 let maxValueNorm_eq_lemma ha hb a b = maxValue_eq_lemma ha hb a b norm_length
 
+
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+
 (*  The mathematical value of two bigints with the same content is the same *)
 val eval_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} -> b:bigint{live hb b} ->
   len:nat{len <= length a /\ len <= length b} -> Lemma
@@ -184,7 +192,7 @@ val norm_eq_lemma: ha:heap -> hb:heap -> a:bigint -> b:bigint -> Lemma
 let norm_eq_lemma ha hb a b =
   eval_eq_lemma ha hb a b norm_length
 
-#reset-options "--z3timeout 60"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 100"
 
 val eval_partial_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} -> b:bigint{live hb b} -> ctr:nat -> len:nat{ ctr <= len /\ len <= length a /\ len <= length b} -> Lemma
   (requires (live ha a /\ live hb b
