@@ -10,16 +10,14 @@ tube-star.exe: ../crypto/Hacl.EC.Curve25519.fst Box.Ideal.fst c_bindings/PaddedF
 		-no-prefix Libsodium -add-include '<sodium.h>' -add-include '"testlib.h"' \
 		-tmpdir tube -o tube-star.exe -ldopt "-lsodium"
 
-tube-lax: Hacl.Tube.fst
+tube-lax: Hacl.Tube.Receive.fst
 	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api \
 		--include $(KREMLIB) --include $(KREMTEST) $^ --lax --include $(FSTAR_HOME)/ulib/hyperstack
 
-tube-ver: Hacl.Tube.fst
-	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api \
-		--include $(KREMLIB) --include $(KREMTEST) --include $(FSTAR_HOME)/ulib/hyperstack $^
+tube-ver: send-ver receive-ver
 
 send-ver: Hacl.Tube.Send.fst
-	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api \
+	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api --use_hints \
 		--include $(KREMLIB) --include $(KREMTEST) --include $(FSTAR_HOME)/ulib/hyperstack $^
 
 send-lax: Hacl.Tube.Send.fst
@@ -27,7 +25,7 @@ send-lax: Hacl.Tube.Send.fst
 		--include $(KREMLIB) --include $(KREMTEST) --include $(FSTAR_HOME)/ulib/hyperstack $^
 
 receive-ver: Hacl.Tube.Receive.fst
-	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api \
+	$(FSTAR) --include $(LIB_KRML) --include c_bindings --include ../crypto_api --use_hints  \
 		--include $(KREMLIB) --include $(KREMTEST) --include $(FSTAR_HOME)/ulib/hyperstack $^
 
 receive-lax: Hacl.Tube.Receive.fst
