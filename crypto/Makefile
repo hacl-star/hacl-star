@@ -1,25 +1,42 @@
+all: symmetric-ver ec-ver
+	@echo
+	@echo "############## LAX TYPECHEKING #############"
+	@echo
+	$(MAKE) lax
+	@echo
+	@echo "############## FULL TYPECHEKING #############"
+	@echo
+	$(MAKE) ver
+
 FSTAR_HOME?=../../FStar
-KREMLIN_HOME?=../../kremlin
-HACL_HOME?=..
-include $(HACL_HOME)/lib/hyperstack/Makefile.include
-SUBDIRS=symmetric ec # hash hmac hkdf
+KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
+HACL_HOME=..
+include ../lib/hyperstack/Makefile.include
+
+SUBDIRS=symmetric ec
 INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_SYMMETRIC) $(HACL_EC) .)
-# Sufficient modules to extract/lax-typecheck all others modules
-MAIN_MODULES=Hacl.Box 
-# All the directory modules (for efficient verification)
-BOX_MODULES=Hacl.Box
-SECRETBOX_MODULES=Hacl.SecretBox
-MODULES=$(BOX_MODULES) $(SECRETBOX_MODULES)
 
-lax: $(addsuffix .lax, $(SUBDIRS)) $(addsuffix .fst-lax, $(MAIN_MODULES))
-ver: $(addsuffix .ver, $(SUBDIRS)) $(addsuffix .fst-ver, $(MODULES))
+MODULES=Hacl.SecretBox \
+	Hacl.Box
 
-%.ver:
-	$(MAKE) -C $(basename $@) ver
-%.lax:
-	$(MAKE) -C $(basename $@) lax
+FSTAR_INCLUDES:=-I ../lib/hyperstack -I ec -I symmetric
+
+%.fst-ver-ct: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(FSTAR_INCLUDES) $^
+%.fst-lax-ct: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(FSTAR_INCLUDES) $^ -fsopt "--lax"
+
+ver: $(addsuffix .fst-ver-ct, $(MODULES))
+lax: $(addsuffix .fst-lax-ct, $(MODULES))
+
+symmetric-ver:
+	$(MAKE) -C symmetric ver
+
+ec-ver:
+	$(MAKE) -C ec ver
 
 clean:
+	rm -f *~
 	$(MAKE) clean -C symmetric
 	$(MAKE) clean -C ec
 	$(MAKE) clean -C hash

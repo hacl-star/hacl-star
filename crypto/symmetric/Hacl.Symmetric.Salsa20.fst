@@ -31,7 +31,7 @@ let rotate (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32 (32ul -^ s)))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
 
 let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k >= 4))
@@ -54,7 +54,7 @@ let store32_le (k:uint8_p) (x:h32) : Stack unit
     k.(2ul) <- sint32_to_sint8 (x >>^ 16ul);
     k.(3ul) <- sint32_to_sint8 (x >>^ 24ul)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 500"
 
 val crypto_core_salsa20:
   output:uint8_p{length output = 64} ->

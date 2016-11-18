@@ -8,37 +8,27 @@ all:
 	@echo
 	$(MAKE) ver
 
-FSTAR_HOME?=../../FStar
-KREMLIN_HOME?=../../kremlin
-HACL_HOME?=../..
-include $(HACL_HOME)/lib/hyperstack/Makefile.include
+FSTAR_HOME?=../../../FStar
+KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
+HACL_HOME=../..
+include ../../lib/hyperstack/Makefile.include
 
-INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_SYMMETRIC))
+MODULES=Hacl.Symmetric.Poly1305_64.Parameters \
+	Hacl.Symmetric.Poly1305_64.Bigint \
+	Hacl.Symmetric.Poly1305_64 \
+	Hacl.Symmetric.HSalsa20 \
+	Hacl.Symmetric.Salsa20 \
+	Hacl.Symmetric.XSalsa20
 
-# Sufficient modules to extract/lax-typecheck all others modules
-MAIN_MODULES=Hacl.Symmetric.XSalsa20 \
-	Hacl.AEAD.Chacha20Poly1305 \
-	Hacl.AEAD.AES256GCM \
+FSTAR_INCLUDES:=-I ../../lib/hyperstack
 
-# All the directory modules (for efficient verification)
-POLY1305_MODULES=$(addprefix Hacl.Symmetric.Poly1305., Parameters Bigint Bignum) \
-	Hacl.Symmetric.Poly1305
-COMMON_MODULES=Utils
-CHACHA20_MODULES=Hacl.Symmetric.Chacha20
-SALSA20_MODULES=Hacl.Symmetric.Salsa20
-XSALSA20_MODULES=Hacl.Symmetric.XSalsa20
-MODULES=$(COMMON_MODULES) $(CHACHA20_MODULES) $(SALSA20_MODULES) $(XSALSA20_MODULES) \
-	$(POLY1305_MODULES)
+%.fst-ver-ct: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(FSTAR_INCLUDES) $^
+%.fst-lax-ct: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(FSTAR_INCLUDES) $^ -fsopt "--lax"
 
-lax: $(addsuffix .fst-lax, $(MAIN_MODULES))
-ver: $(addsuffix .fst-ver, $(MODULES))
-
-chacha: Hacl.Symmetric.Chacha20.fst
-	$(FSTAR) --lax --include $(HACL_KREMLIN) $^
-
-chacha-extract: Hacl.Symmetric.Chacha20.fst
-	mkdir -p chacha_js
-	$(FSTAR) --codegen JavaScript --include $(HACL_KREMLIN) $^ --odir chacha_js
+ver: $(addsuffix .fst-ver-ct, $(MODULES))
+lax: $(addsuffix .fst-lax-ct, $(MODULES))
 
 clean:
-	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(HACL_FILES)
+	rm -f *~

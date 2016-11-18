@@ -8,26 +8,35 @@ all:
 	@echo
 	$(MAKE) ver
 
-FSTAR_HOME?=../../FStar
-KREMLIN_HOME?=../../kremlin
-HACL_HOME?=../..
-include $(HACL_HOME)/lib/hyperstack/Makefile.include
+FSTAR_HOME?=../../../FStar
+KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
+HACL_HOME=../..
+include ../../lib/hyperstack/Makefile.include
 
-INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_SYMMETRIC))
-
-# Sufficient modules to extract/lax-typecheck all others modules
-MAIN_MODULES=Hacl.EC.Curve25519
-
-# All the directory modules (for efficient verification)
-CURVE25519_MODULES=$(addprefix Hacl.EC.Curve25519., Parameters Bigint Bignum.Fsum Bignum.FsumWide \
-		Bignum.Fdifference Bignum.Fscalar Bignum.Fproduct Bignum.Modulo Bignum \
-		Crecip PPoint AddAndDouble Ladder) \
+MODULES=Hacl.EC.Curve25519.Parameters \
+	Hacl.EC.Curve25519.Bigint \
+	Hacl.EC.Curve25519.Utils \
+	Hacl.EC.Curve25519.Bignum.Fdifference \
+	Hacl.EC.Curve25519.Bignum.Fproduct \
+	Hacl.EC.Curve25519.Bignum.Fscalar \
+	Hacl.EC.Curve25519.Bignum.Fsum \
+	Hacl.EC.Curve25519.Bignum.Modulo \
+	Hacl.EC.Curve25519.Bignum \
+	Hacl.EC.Curve25519.Crecip \
+	Hacl.EC.Curve25519.PPoint \
+	Hacl.EC.Curve25519.AddAndDouble \
+	Hacl.EC.Curve25519.Ladder \
 	Hacl.EC.Curve25519
 
-MODULES=$(CURVE25519_MODULES)
+FSTAR_INCLUDES:=-I ../../lib/hyperstack
 
-lax: $(addsuffix .fst-lax, $(MAIN_MODULES))
-ver: $(addsuffix .fst-ver, $(MODULES))
+%.fst-ver-ct: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(FSTAR_INCLUDES) $^
+%.fst-lax-ct: %.fst
+	$(FSTAR) $(FSTAR_OPTIONS_VER) $(FSTAR_INCLUDES) $^ -fsopt "--lax"
+
+ver: $(addsuffix .fst-ver-ct, $(MODULES))
+lax: $(addsuffix .fst-lax-ct, $(MODULES))
 
 clean:
-	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx) $(HACL_FILES)
+	rm -f *~

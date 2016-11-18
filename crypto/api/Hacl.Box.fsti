@@ -13,22 +13,6 @@ module U8  = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
-module Hacl.Box
-
-open FStar.Buffer
-open FStar.ST
-
-open Hacl.Constants
-open Hacl.SecretBox
-
-
-(* Module abbreviations *)
-module HS  = FStar.HyperStack
-module B   = FStar.Buffer
-module U8  = FStar.UInt8
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
-
 
 val crypto_box_beforenm:
   k:uint8_p{length k = crypto_box_PUBLICKEYBYTES} ->
@@ -64,8 +48,6 @@ val crypto_box_detached:
     (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h pk /\ live h sk))
     (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
 
 val crypto_box_open_detached:
   m:uint8_p ->

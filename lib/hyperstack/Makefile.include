@@ -31,7 +31,7 @@ endif
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 
-FSTAR_OPTIONS_VER=--use_hints
+FSTAR_OPTIONS_VER=-fsopt "--use_hints" -skip-extraction
 FSTAR_OPTIONS_KREMLIN=
 FSTAR=$(KREMLIN) -verify -verbose
 
