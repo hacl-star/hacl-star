@@ -91,13 +91,13 @@ FileIO_Types_fresult PaddedFileIO_file_open_write_sequential(FileIO_Types_file_s
   }
   i = ftruncate(fd,st.size + PaddedFileIO_max_block_size);
   fsync(fd); 
-  p = mmap (0, st.size, PROT_WRITE, MAP_PRIVATE, fd, 0);
+  p = mmap (0, st.size + PaddedFileIO_max_block_size, PROT_WRITE, MAP_PRIVATE, fd, 0);
   if (p == MAP_FAILED) {
     perror ("mmap");
     return FileIO_Types_fresult_FileError; 
   }
 
-  int adv = madvise(p,st.size,MADV_SEQUENTIAL|MADV_WILLNEED);
+  int adv = madvise(p,st.size + PaddedFileIO_max_block_size,MADV_SEQUENTIAL|MADV_WILLNEED);
 
   fh->stat = st;
  
