@@ -1,5 +1,7 @@
 module Hacl.Test.Chacha20
 
+open FStar.Buffer
+
 let len = 114ul
 
 val main: unit -> ST FStar.Int32.t
@@ -57,7 +59,10 @@ let main () =
   let chacha20 = FStar.Buffer.createL [
     0x43y; 0x68y; 0x61y; 0x63y; 0x68y; 0x61y; 0x32y; 0x30y; 0y
   ] in
-  Hacl.Symmetric.Chacha20.chacha20_encrypt ciphertext key counter nonce plaintext len;
+  let ctx = create 0ul 32ul in
+  Hacl.Symmetric.Chacha20.chacha_keysetup ctx key;
+  Hacl.Symmetric.Chacha20.chacha_ietf_ivsetup ctx nonce counter;
+  Hacl.Symmetric.Chacha20.chacha_encrypt_bytes ctx plaintext ciphertext len;
   TestLib.compare_and_print chacha20 expected ciphertext len;
   pop_frame();
   C.exit_success

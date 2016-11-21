@@ -41,7 +41,7 @@ let main () =
   key.(0ul) <- 0x80uy;
   let nonce = create 0uy noncesize in
   let salsa20 = createL [115y; 97y; 108y; 115y; 97y; 50y; 48y; 0y] in
-  Hacl.Symmetric.HSalsa20.crypto_stream_salsa20_xor ciphertext plaintext len' nonce key;
+  Hacl.Symmetric.Salsa20.crypto_stream_salsa20_xor ciphertext plaintext len' nonce key;
   TestLib.compare_and_print salsa20 expected1 (offset ciphertext 0ul) 64ul;
   TestLib.compare_and_print salsa20 expected2 (offset ciphertext 192ul) 64ul;
   TestLib.compare_and_print salsa20 expected3 (offset ciphertext 256ul) 64ul;
