@@ -6,7 +6,7 @@ HACL_HOME?=../..
 include $(HACL_HOME)/lib/hyperstack/Makefile.include
 KREMLIN_INCLUDES=$(addprefix -I , $(HACL_KREMLIN) $(HACL_EC) . $(KREMTEST)) \
 	$(KREMTEST)/testlib.c -add-include \"testlib.h\"
-OCAML_INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_EC) $(OCAML_LIB))
+OCAML_INCLUDES=$(addprefix -I , $(HACL_LIB) $(HACL_EC) $(OCAML_LIB))
 
 TEST_CURVE25519=Hacl.Test.Curve25519
 TESTS=$(TEST_CURVE25519)
@@ -14,7 +14,7 @@ TESTS=$(TEST_CURVE25519)
 .PHONY:test-kremlin test-ocaml
 
 test-kremlin: $(addsuffix -krml, $(TESTS))
-test-ocaml: curve25519-test
+test-ocaml: #curve25519-test
 %-krml: %.fst
 	mkdir -p $(subst .,_,$(basename $^))
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_INCLUDES) -no-prefix $(basename $^) $^ \
@@ -63,7 +63,7 @@ CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_
 curve25519-extract: ml-lib
 	@mkdir -p $(CURVE25519_ODIR)
 	$(FSTAR) $(NO_CODEGEN) $(OCAML_OPTIONS) $(CURVE25519_FSTAR) \
-		$(OCAML_INCLUDES) --odir $(CURVE25519_ODIR)
+		$(OCAML_INCLUDES) -tmpdir $(CURVE25519_ODIR)
 	@sed -i 's/(Obj.magic ((fun pp ppq p pq q n ctr b scalar/(((fun pp ppq p pq q n ctr b scalar/g' $(CURVE25519_ODIR)/Hacl_EC_Curve25519_Ladder.ml
 
 curve25519-compile: curve25519-extract

@@ -5,7 +5,7 @@ FSTAR_HOME?=../../fstar
 KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
 HACL_HOME=..
 include $(HACL_HOME)/lib/hyperstack/Makefile.include
-SUBDIRS=symmetric ec # hash hmac hkdf
+SUBDIRS=symmetric ec
 allsubdirs: $(addsuffix .all , $(SUBDIRS))
 
 INCLUDES=$(addprefix --include , $(HACL_LIB) $(HACL_SYMMETRIC) $(HACL_HOME)/crypto/api bindings $(HACL_EC))
@@ -19,7 +19,7 @@ test_api.exe: c/test_api.c
 		$(HACL_KREMLIN_FILES) $(HACL_API)/Hacl.Box.fst $(HACL_API)/symmetric/Hacl.Symmetric.Chacha20.Sodium.fst $(KREMTEST)/testlib.c c/FStar_FileIO.c c/FStar_SocketIO.c c/test_api.c \
 		-I $(HACL_LIB) -I $(HACL_API) -I $(HACL_SYMMETRIC) -I $(HACL_EC) \
 		-I $(KREMLIB) -I $(KREMTEST) \
-		-tmpdir tmp -o test_api.exe -ldopt "-lsodium" # -ccopt "-m32"
+		-tmpdir tmp -o test_api.exe -ldopt "-lsodium"
 	./test_api.exe
 
 
@@ -41,7 +41,7 @@ test_box.exe: Hacl.Test.Box.fst
 		-I $(KREMLIB) -I $(KREMTEST) -I ./bindings \
 		-no-prefix Hacl.Test.Box \
 		-add-include '"testlib.h"' -add-include '<sodium.h>' -no-prefix Libsodium \
-		-tmpdir box -o test_box.exe -ldopt "-lsodium" # -ccopt "-m32"
+		-tmpdir box -o test_box.exe -ldopt "-lsodium"
 	./test_box.exe
 
 test_tube.exe: tube/PaddedFileIO.c tube/SocketIO.c tube/Hacl.Tube.fst

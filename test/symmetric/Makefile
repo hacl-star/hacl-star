@@ -16,8 +16,12 @@ TESTS=$(TEST_CHACHA20) $(TEST_SALSA20) $(TEST_XSALSA20) $(TEST_POLY1305) Hacl.Te
 
 .PHONY:test-kremlin
 
+###################
+# KREMLIN TARGETS #
+###################
+
 test-kremlin: $(addsuffix -krml, $(TESTS))
-test-ocaml: chacha-test salsa-test poly-test aes-test
+test-ocaml: #chacha-test salsa-test poly-test aes-test
 
 %-krml: %.fst
 	mkdir -p $(subst .,_,$(basename $^))

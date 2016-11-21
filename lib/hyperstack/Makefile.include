@@ -39,7 +39,7 @@ OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
                 $(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \
 		-I $(FSTAR_HOME)/ulib/ml/extracted \
 		-I $(FSTAR_HOME)/ulib/ml/hyperstack -w -20-26-3-8-58
-OCAML_OPTIONS=--lax --codegen OCaml --no_location_info
+OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
 OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
 
 ml-lib:
