@@ -4,6 +4,12 @@ hacl-star
 
 A formally verified cryptographic library in F*
 
+# Warning
+
+This library is highly experimental and a work-in-progress.
+Do not use without asking advice to JK or Benjamin !
+
+
 # Code test targets (WIP)
 
 Run `make -C test` to run the extraction tests currently available (to OCaml, C extraction to appear soon).
