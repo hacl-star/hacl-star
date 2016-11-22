@@ -21,7 +21,7 @@ type limb    = H64.t
 type felem   = b:buffer limb{length b = 5}
 
 inline_for_extraction let zero_8 = uint8_to_sint8 0uy
-inline_for_extraction let zero_64 = uint64_to_sint64 1uL
+inline_for_extraction let zero_64 = uint64_to_sint64 0uL
 inline_for_extraction let one_8 = uint8_to_sint8 1uy
 inline_for_extraction let one_64 = uint64_to_sint64 1uL
 
@@ -77,7 +77,7 @@ let fscalar_product output input scalar =
   let output2 = sint128_to_sint64 a &^ mask_51 in
   let a = H128 ((input3 *^ scalar) +^ (a >>^ 51ul)) in
   let output3 = sint128_to_sint64 a &^ mask_51 in
-  let a = H128 ((input2 *^ scalar) +^ (a >>^ 51ul)) in
+  let a = H128 ((input4 *^ scalar) +^ (a >>^ 51ul)) in
   let output4 = sint128_to_sint64 a &^ mask_51 in
   let output0 = output0 +^ sint128_to_sint64 (H128 (sint128_to_sint64 (a >>^ 51ul) *^ uint64_to_sint64 19uL)) in
   output.(0ul) <- output0;
@@ -161,16 +161,16 @@ let fmul output input2 input =
   output.(4ul) <- r4
 
 
-val fsquare: output:felem -> input:felem -> Stack unit
-  (requires (fun h -> live h output /\ live h input))
+val fsquare: output:felem -> Stack unit
+  (requires (fun h -> live h output))
   (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
-let fsquare output input =
+let fsquare output =
   let mask_51 = uint64_to_sint64 0x7ffffffffffffuL in
-  let r0 = input.(0ul) in
-  let r1 = input.(1ul) in
-  let r2 = input.(2ul) in
-  let r3 = input.(3ul) in
-  let r4 = input.(4ul) in
+  let r0 = output.(0ul) in
+  let r1 = output.(1ul) in
+  let r2 = output.(2ul) in
+  let r3 = output.(3ul) in
+  let r4 = output.(4ul) in
   let two = uint64_to_sint64 2uL in
   let nineteen = uint64_to_sint64 19uL in
   let d0 = r0 *%^ two in
@@ -221,16 +221,24 @@ let fsquare output input =
   output.(4ul) <- r4
 
 
+val fsquare_times_: output:felem -> count:U32.t -> Stack unit
+  (requires (fun h -> live h output))
+  (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
+let rec fsquare_times_ output count =
+  if U32 (count =^ 0ul) then ()
+  else (
+    fsquare output;
+    let count = U32 (count -^ 1ul) in
+    fsquare_times_ output count
+  )
+
+
 val fsquare_times: output:felem -> input:felem -> count:U32.t -> Stack unit
   (requires (fun h -> live h output /\ live h input))
   (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
-let rec fsquare_times output input count =
-  if U32 (count =^ 0ul) then ()
-  else (
-    fsquare output input;
-    let count = U32 (count -^ 1ul) in
-    fsquare_times output input count
-  )
+let fsquare_times output input count =
+  blit input 0ul output 0ul 5ul;
+  fsquare_times_ output count
 
 
 val load64_le:
@@ -289,7 +297,7 @@ let fexpand output input =
   let i4 = load64_le (Buffer.sub input 24ul 8ul) in
   let output0 = (i0         ) &^ mask_51 in
   let output1 = (i1 >>^ 3ul ) &^ mask_51 in
-  let output2 = (i1 >>^ 6ul ) &^ mask_51 in
+  let output2 = (i2 >>^ 6ul ) &^ mask_51 in
   let output3 = (i3 >>^ 1ul ) &^ mask_51 in
   let output4 = (i4 >>^ 12ul) &^ mask_51 in
   output.(0ul) <- output0;
@@ -503,9 +511,10 @@ val cmult_big_loop: n:uint8_p{length n = 32} ->
 let rec cmult_big_loop n nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q i =
   if (U32 (i =^ 0ul)) then ()
   else (
-    let byte = n.(U32 (31ul -^ i)) in
+    let i = U32 (i -^ 1ul) in
+    let byte = n.(i) in
     cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byte 8ul;
-    cmult_big_loop n nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q (U32 (i -^ 1ul))
+    cmult_big_loop n nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q i
   )
 
 
@@ -524,6 +533,11 @@ let cmult resultx resultz n q =
   let nqpqz2 = Buffer.sub buf 25ul 5ul in
   let nqx2   = Buffer.sub buf 30ul 5ul in
   let nqz2   = Buffer.sub buf 35ul 5ul in
+
+  nqpqz.(0ul) <- one_64;
+  nqx.(0ul) <- one_64;
+  nqpqz2.(0ul) <- one_64;
+  nqz2.(0ul) <- one_64;
 
   blit q 0ul nqpqx 0ul 5ul;
 
