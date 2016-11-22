@@ -373,246 +373,228 @@ let fcontract output input =
   store64_le (Buffer.sub output 16ul 8ul) o2;
   store64_le (Buffer.sub output 24ul 8ul) o3
 
-(*
 
-/* Take a fully reduced polynomial form number and contract it into a
- * little-endian, 32-byte array
- */
-static void
-fcontract(u8 *output, const felem input) {
-  uint128_t t[5];
+val fmonty: x2:felem -> z2:felem ->
+  x3:felem -> z3:felem ->
+  x:felem -> z:felem ->
+  xprime:felem -> zprime:felem ->
+  qmqp:felem ->
+  Stack unit
+    (requires (fun h -> live h x2 /\ live h z2 /\ live h x3 /\ live h z3
+      /\ live h x /\ live h z /\ live h xprime /\ live h zprime /\ live h qmqp))
+    (ensures (fun h0 _ h1 -> true))
+let fmonty x2 z2 x3 z3 x z xprime zprime qmqp =
+  push_frame();
+  let buf = create zero_64 40ul in
+  let origx      = Buffer.sub buf 0ul  5ul in
+  let origxprime = Buffer.sub buf 5ul  5ul in
+  let zzz        = Buffer.sub buf 10ul 5ul in
+  let xx         = Buffer.sub buf 15ul 5ul in
+  let zz         = Buffer.sub buf 20ul 5ul in
+  let xxprime    = Buffer.sub buf 25ul 5ul in
+  let zzprime    = Buffer.sub buf 30ul 5ul in
+  let zzzprime   = Buffer.sub buf 35ul 5ul in
+  blit x 0ul origx 0ul 5ul;
+  fsum x z;
+  fdifference z origx;
+  blit xprime 0ul origxprime 0ul 5ul;
+  fsum xprime zprime;
+  fdifference zprime origxprime;
+  fmul xxprime xprime z;
+  fmul zzprime x zprime;
+  blit xxprime 0ul origxprime 0ul 5ul;
+  fsum xxprime zzprime;
+  fdifference zzprime origxprime;
+  fsquare_times x3 xxprime 1ul;
+  fsquare_times zzzprime zzprime 1ul;
+  fmul z3 zzzprime qmqp;
 
-  t[0] = input[0];
-  t[1] = input[1];
-  t[2] = input[2];
-  t[3] = input[3];
-  t[4] = input[4];
-
-  t[1] += t[0] >> 51; t[0] &= 0x7ffffffffffff;
-  t[2] += t[1] >> 51; t[1] &= 0x7ffffffffffff;
-  t[3] += t[2] >> 51; t[2] &= 0x7ffffffffffff;
-  t[4] += t[3] >> 51; t[3] &= 0x7ffffffffffff;
-  t[0] += 19 * (t[4] >> 51); t[4] &= 0x7ffffffffffff;
-
-  t[1] += t[0] >> 51; t[0] &= 0x7ffffffffffff;
-  t[2] += t[1] >> 51; t[1] &= 0x7ffffffffffff;
-  t[3] += t[2] >> 51; t[2] &= 0x7ffffffffffff;
-  t[4] += t[3] >> 51; t[3] &= 0x7ffffffffffff;
-  t[0] += 19 * (t[4] >> 51); t[4] &= 0x7ffffffffffff;
-
-  /* now t is between 0 and 2^255-1, properly carried. */
-  /* case 1: between 0 and 2^255-20. case 2: between 2^255-19 and 2^255-1. */
-
-  t[0] += 19;
-
-  t[1] += t[0] >> 51; t[0] &= 0x7ffffffffffff;
-  t[2] += t[1] >> 51; t[1] &= 0x7ffffffffffff;
-  t[3] += t[2] >> 51; t[2] &= 0x7ffffffffffff;
-  t[4] += t[3] >> 51; t[3] &= 0x7ffffffffffff;
-  t[0] += 19 * (t[4] >> 51); t[4] &= 0x7ffffffffffff;
-
-  /* now between 19 and 2^255-1 in both cases, and offset by 19. */
-
-  t[0] += 0x8000000000000 - 19;
-  t[1] += 0x8000000000000 - 1;
-  t[2] += 0x8000000000000 - 1;
-  t[3] += 0x8000000000000 - 1;
-  t[4] += 0x8000000000000 - 1;
-
-  /* now between 2^255 and 2^256-20, and offset by 2^255. */
-
-  t[1] += t[0] >> 51; t[0] &= 0x7ffffffffffff;
-  t[2] += t[1] >> 51; t[1] &= 0x7ffffffffffff;
-  t[3] += t[2] >> 51; t[2] &= 0x7ffffffffffff;
-  t[4] += t[3] >> 51; t[3] &= 0x7ffffffffffff;
-  t[4] &= 0x7ffffffffffff;
-
-  store_limb(output, t[0] | (t[1] << 51));
-  store_limb(output + 8, (t[1] >> 13) | (t[2] << 38));
-  store_limb(output + 16, (t[2] >> 26) | (t[3] << 25));
-  store_limb(output + 24, (t[3] >> 39) | (t[4] << 12));
-}
-
-/* Input: Q, Q', Q-Q'
- * Output: 2Q, Q+Q'
- *
- *   x2 z2: long form
- *   x3 z3: long form
- *   x z: short form, destroyed
- *   xprime zprime: short form, destroyed
- *   qmqp: short form, preserved
- */
-static void
-fmonty(limb *x2, limb *z2, /* output 2Q */
-       limb *x3, limb *z3, /* output Q + Q' */
-       limb *x, limb *z,   /* input Q */
-       limb *xprime, limb *zprime, /* input Q' */
-       const limb *qmqp /* input Q - Q' */) {
-  limb origx[5], origxprime[5], zzz[5], xx[5], zz[5], xxprime[5],
-        zzprime[5], zzzprime[5];
-
-  memcpy(origx, x, 5 * sizeof(limb));
-  fsum(x, z);
-  fdifference_backwards(z, origx); /* does x - z */
-
-  memcpy(origxprime, xprime, sizeof(limb) * 5);
-  fsum(xprime, zprime);
-  fdifference_backwards(zprime, origxprime);
-  fmul(xxprime, xprime, z);
-  fmul(zzprime, x, zprime);
-  memcpy(origxprime, xxprime, sizeof(limb) * 5);
-  fsum(xxprime, zzprime);
-  fdifference_backwards(zzprime, origxprime);
-  fsquare_times(x3, xxprime, 1);
-  fsquare_times(zzzprime, zzprime, 1);
-  fmul(z3, zzzprime, qmqp);
-
-  fsquare_times(xx, x, 1);
-  fsquare_times(zz, z, 1);
-  fmul(x2, xx, zz);
-  fdifference_backwards(zz, xx); /* does zz = xx - zz */
-  fscalar_product(zzz, zz, 121665);
-  fsum(zzz, xx);
-  fmul(z2, zz, zzz);
-}
-
-/* -----------------------------------------------------------------------------
-   Maybe swap the contents of two limb arrays (@a and @b), each @len elements
-   long. Perform the swap iff @swap is non-zero.
-
-   This function performs the swap without leaking any side-channel
-   information.
-   ----------------------------------------------------------------------------- */
-static void
-swap_conditional(limb a[5], limb b[5], limb iswap) {
-  unsigned i;
-  const limb swap = -iswap;
-
-  for (i = 0; i < 5; ++i) {
-    const limb x = swap & (a[i] ^ b[i]);
-    a[i] ^= x;
-    b[i] ^= x;
-  }
-}
-
-/* Calculates nQ where Q is the x-coordinate of a point on the curve
- *
- *   resultx/resultz: the x coordinate of the resulting curve point (short form)
- *   n: a little endian, 32-byte number
- *   q: a point of the curve (short form)
- */
-static void
-cmult(limb *resultx, limb *resultz, const u8 *n, const limb *q) {
-  limb a[5] = {0}, b[5] = {1}, c[5] = {1}, d[5] = {0};
-  limb *nqpqx = a, *nqpqz = b, *nqx = c, *nqz = d, *t;
-  limb e[5] = {0}, f[5] = {1}, g[5] = {0}, h[5] = {1};
-  limb *nqpqx2 = e, *nqpqz2 = f, *nqx2 = g, *nqz2 = h;
-
-  unsigned i, j;
-
-  memcpy(nqpqx, q, sizeof(limb) * 5);
-
-  for (i = 0; i < 32; ++i) {
-    u8 byte = n[31 - i];
-    for (j = 0; j < 8; ++j) {
-      const limb bit = byte >> 7;
-
-      swap_conditional(nqx, nqpqx, bit);
-      swap_conditional(nqz, nqpqz, bit);
-      fmonty(nqx2, nqz2,
-             nqpqx2, nqpqz2,
-             nqx, nqz,
-             nqpqx, nqpqz,
-             q);
-      swap_conditional(nqx2, nqpqx2, bit);
-      swap_conditional(nqz2, nqpqz2, bit);
-
-      t = nqx;
-      nqx = nqx2;
-      nqx2 = t;
-      t = nqz;
-      nqz = nqz2;
-      nqz2 = t;
-      t = nqpqx;
-      nqpqx = nqpqx2;
-      nqpqx2 = t;
-      t = nqpqz;
-      nqpqz = nqpqz2;
-      nqpqz2 = t;
-
-      byte <<= 1;
-    }
-  }
-
-  memcpy(resultx, nqx, sizeof(limb) * 5);
-  memcpy(resultz, nqz, sizeof(limb) * 5);
-}
+  fsquare_times xx x 1ul;
+  fsquare_times zz z 1ul;
+  fmul x2 xx zz;
+  fdifference zz xx;
+  fscalar_product zzz zz (uint64_to_sint64 121665uL);
+  fsum zzz xx;
+  fmul z2 zz zzz;
+  pop_frame()
 
 
-/* -----------------------------------------------------------------------------
-   Shamelessly copied from djb's code, tightened a little
-   ----------------------------------------------------------------------------- */
-static void
-crecip(felem out, const felem z) {
-  felem a,t0,b,c;
+val swap_conditional: a:felem -> b:felem -> iswap:limb ->
+  Stack unit
+    (requires (fun h -> live h a /\ live h b))
+    (ensures (fun h0 _ h1 -> modifies_2 a b h0 h1 /\ live h1 a /\ live h1 b))
+let swap_conditional a b iswap =
+  let a0 = a.(0ul) in
+  let a1 = a.(1ul) in
+  let a2 = a.(2ul) in
+  let a3 = a.(3ul) in
+  let a4 = a.(4ul) in
+  let b0 = b.(0ul) in
+  let b1 = b.(1ul) in
+  let b2 = b.(2ul) in
+  let b3 = b.(3ul) in
+  let b4 = b.(4ul) in
+  let swap = zero_64 -^ iswap in
+  let x = swap &^ (a0 ^^ b0) in
+  let a0 = a0 ^^ x in
+  let b0 = b0 ^^ x in
+  let x = swap &^ (a1 ^^ b1) in
+  let a1 = a1 ^^ x in
+  let b1 = b1 ^^ x in
+  let x = swap &^ (a2 ^^ b2) in
+  let a2 = a2 ^^ x in
+  let b2 = b2 ^^ x in
+  let x = swap &^ (a3 ^^ b3) in
+  let a3 = a3 ^^ x in
+  let b3 = b3 ^^ x in
+  let x = swap &^ (a4 ^^ b4) in
+  let a4 = a4 ^^ x in
+  let b4 = b4 ^^ x in
+  a.(0ul) <- a0;
+  a.(1ul) <- a1;
+  a.(2ul) <- a2;
+  a.(3ul) <- a3;
+  a.(4ul) <- a4;
+  b.(0ul) <- b0;
+  b.(1ul) <- b1;
+  b.(2ul) <- b2;
+  b.(3ul) <- b3;
+  b.(4ul) <- b4
 
-  /* 2 */ fsquare_times(a, z, 1); /* a = 2 */
-  /* 8 */ fsquare_times(t0, a, 2);
-  /* 9 */ fmul(b, t0, z); /* b = 9 */
-  /* 11 */ fmul(a, b, a); /* a = 11 */
-  /* 22 */ fsquare_times(t0, a, 1);
-  /* 2^5 - 2^0 = 31 */ fmul(b, t0, b);
-  /* 2^10 - 2^5 */ fsquare_times(t0, b, 5);
-  /* 2^10 - 2^0 */ fmul(b, t0, b);
-  /* 2^20 - 2^10 */ fsquare_times(t0, b, 10);
-  /* 2^20 - 2^0 */ fmul(c, t0, b);
-  /* 2^40 - 2^20 */ fsquare_times(t0, c, 20);
-  /* 2^40 - 2^0 */ fmul(t0, t0, c);
-  /* 2^50 - 2^10 */ fsquare_times(t0, t0, 10);
-  /* 2^50 - 2^0 */ fmul(b, t0, b);
-  /* 2^100 - 2^50 */ fsquare_times(t0, b, 50);
-  /* 2^100 - 2^0 */ fmul(c, t0, b);
-  /* 2^200 - 2^100 */ fsquare_times(t0, c, 100);
-  /* 2^200 - 2^0 */ fmul(t0, t0, c);
-  /* 2^250 - 2^50 */ fsquare_times(t0, t0, 50);
-  /* 2^250 - 2^0 */ fmul(t0, t0, b);
-  /* 2^255 - 2^5 */ fsquare_times(t0, t0, 5);
-  /* 2^255 - 21 */ fmul(out, t0, a);
-}
 
-static const unsigned char basepoint[32] = {9};
+val cmult_small_loop: nqx:felem -> nqz:felem -> nqpqx:felem -> nqpqz:felem ->
+  nqx2:felem -> nqz2:felem -> nqpqx2:felem -> nqpqz2:felem -> q:felem -> byte:H8.t ->
+  i:U32.t ->
+  Stack unit
+    (requires (fun h -> true))
+    (ensures (fun h0 _ h1 -> true))
+let rec cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byte i =
+  if (U32 (i =^ 0ul)) then ()
+  else (
+    let bit = sint8_to_sint64 (H8 (byte >>^ 7ul)) in
+    swap_conditional nqx nqpqx bit;
+    swap_conditional nqz nqpqz bit;
+    fmonty nqx2 nqz2 nqpqx2 nqpqz2 nqx nqz nqpqx nqpqz q;
+    swap_conditional nqx2 nqpqx2 bit;
+    swap_conditional nqz2 nqpqz2 bit;
+    let t = nqx in
+    let nqx = nqx2 in
+    let nqx2 = t in
+    let t = nqz in
+    let nqz = nqz2 in
+    let nqz2 = t in
+    let t = nqpqx in
+    let nqpqx = nqpqx2 in
+    let nqpqx2 = t in
+    let t = nqpqz in
+    let nqpqz = nqpqz2 in
+    let nqpqz2 = t in
+    let byte = H8 (byte <<^ 1ul) in
+    cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byte (U32 (i -^ 1ul))
+  )
 
-static int
-crypto_scalarmult_curve25519_donna_c64(unsigned char *mypublic,
-                                       const unsigned char *secret,
-                                       const unsigned char *basepoint) {
-  limb bp[5], x[5], z[5], zmone[5];
-  uint8_t e[32];
-  int i;
 
-  for (i = 0;i < 32;++i) e[i] = secret[i];
-  e[0] &= 248;
-  e[31] &= 127;
-  e[31] |= 64;
+val cmult_big_loop: n:uint8_p{length n = 32} ->
+  nqx:felem -> nqz:felem -> nqpqx:felem -> nqpqz:felem ->
+  nqx2:felem -> nqz2:felem -> nqpqx2:felem -> nqpqz2:felem -> q:felem -> i:U32.t ->
+  Stack unit
+    (requires (fun h -> true))
+    (ensures (fun h0 _ h1 -> true))
+let rec cmult_big_loop n nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q i =
+  if (U32 (i =^ 0ul)) then ()
+  else (
+    let byte = n.(U32 (31ul -^ i)) in
+    cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byte 8ul;
+    cmult_big_loop n nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q (U32 (i -^ 1ul))
+  )
 
-  fexpand(bp, basepoint);
-  cmult(x, z, e, bp);
-  crecip(zmone, z);
-  fmul(z, x, zmone);
-  fcontract(mypublic, z);
-  return 0;
-}
 
-static int
-crypto_scalarmult_curve25519_donna_c64_base(unsigned char *q,
-                                            const unsigned char *n)
-{
-  return crypto_scalarmult_curve25519_donna_c64(q, n, basepoint);
-}
+val cmult: resultx:felem -> resultz:felem -> n:uint8_p{length n = 32} -> q:felem ->
+  Stack unit
+    (requires (fun h -> live h resultx /\ live h resultz /\ live h n /\ live h q))
+    (ensures (fun h0 _ h1 -> modifies_2 resultx resultz h0 h1 /\ live h1 resultx /\ live h1 resultz))
+let cmult resultx resultz n q =
+  push_frame();
+  let buf = create zero_64 40ul in
+  let nqpqx  = Buffer.sub buf 0ul  5ul in
+  let nqpqz  = Buffer.sub buf 5ul  5ul in
+  let nqx    = Buffer.sub buf 10ul 5ul in
+  let nqz    = Buffer.sub buf 15ul 5ul in
+  let nqpqx2 = Buffer.sub buf 20ul 5ul in
+  let nqpqz2 = Buffer.sub buf 25ul 5ul in
+  let nqx2   = Buffer.sub buf 30ul 5ul in
+  let nqz2   = Buffer.sub buf 35ul 5ul in
 
-struct crypto_scalarmult_curve25519_implementation
-crypto_scalarmult_curve25519_donna_c64_implementation = {
-    SODIUM_C99(.mult = ) crypto_scalarmult_curve25519_donna_c64,
-    SODIUM_C99(.mult_base = ) crypto_scalarmult_curve25519_donna_c64_base
-};
-*)
+  blit q 0ul nqpqx 0ul 5ul;
+
+  cmult_big_loop n nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q 32ul;
+  blit nqx 0ul resultx 0ul 5ul;
+  blit nqz 0ul resultz 0ul 5ul;
+  pop_frame()
+
+
+val crecip: out:felem -> z:felem -> Stack unit
+  (requires (fun h -> live h out /\ live h z))
+  (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1))
+let crecip out z =
+  push_frame();
+  let buf = create zero_64 20ul in
+  let a  = Buffer.sub buf 0ul  5ul in
+  let t0 = Buffer.sub buf 5ul  5ul in
+  let b  = Buffer.sub buf 10ul 5ul in
+  let c  = Buffer.sub buf 15ul 5ul in
+  fsquare_times a z 1ul;
+  fsquare_times t0 a 2ul;
+  fmul b t0 z;
+  fmul a b a;
+  fsquare_times t0 a 1ul;
+  fmul b t0 b;
+  fsquare_times t0 b 5ul;
+  fmul b t0 b;
+  fsquare_times t0 b 10ul;
+  fmul c t0 b;
+  fsquare_times t0 c 20ul;
+  fmul t0 t0 c;
+  fsquare_times t0 t0 10ul;
+  fmul b t0 b;
+  fsquare_times t0 b 50ul;
+  fmul c t0 b;
+  fsquare_times t0 c 100ul;
+  fmul t0 t0 c;
+  fsquare_times t0 t0 50ul;
+  fmul t0 t0 b;
+  fsquare_times t0 t0 5ul;
+  fmul out t0 a;
+  pop_frame()
+
+
+val crypto_scalarmult_curve25519_donna_c64:
+  mypublic:uint8_p{length mypublic = 32} ->
+  secret:uint8_p{length secret = 32} ->
+  basepoint:uint8_p{length basepoint = 32} ->
+  Stack unit
+    (requires (fun h -> live h mypublic /\ live h secret /\ live h basepoint))
+    (ensures (fun h0 _ h1 -> live h1 mypublic /\ modifies_1 mypublic h0 h1))
+let crypto_scalarmult_curve25519_donna_c64 mypublic secret basepoint =
+  push_frame();
+  let buf = create zero_64 20ul in
+  let e   = create zero_8 32ul in
+  let bp    = Buffer.sub buf 0ul  5ul in
+  let x     = Buffer.sub buf 5ul  5ul in
+  let z     = Buffer.sub buf 10ul 5ul in
+  let zmone = Buffer.sub buf 15ul 5ul in
+  blit secret 0ul e 0ul 32ul;
+  let e0  = e.(0ul) in
+  let e31 = e.(31ul) in
+  let open Hacl.UInt8 in
+  let e0  = e0 &^ (uint8_to_sint8 248uy) in
+  let e31 = e31 &^ (uint8_to_sint8 127uy) in
+  let e31 = e31 |^ (uint8_to_sint8 64uy) in
+  e.(0ul) <- e0;
+  e.(31ul) <- e31;
+  fexpand bp basepoint;
+  cmult x z e bp;
+  crecip zmone z;
+  fmul z x zmone;
+  fcontract mypublic z;
+  pop_frame()
