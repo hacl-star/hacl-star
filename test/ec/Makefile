@@ -148,6 +148,9 @@ FILES=Hacl_Test_Curve25519_donna_c64/Prims.c \
 	Hacl_Test_Curve25519_donna_c64/Hacl_UInt8.c \
 	Hacl_Test_Curve25519_donna_c64/Hacl_Cast.c \
 	Hacl_Test_Curve25519_donna_c64/FStar_Buffer.c \
+	Hacl_Test_Curve25519_donna_c64/Hacl_EC_Curve25519_donna_c64_Fsum.c \
+	Hacl_Test_Curve25519_donna_c64/Hacl_EC_Curve25519_donna_c64_Fscalar.c \
+	Hacl_Test_Curve25519_donna_c64/Hacl_EC_Curve25519_donna_c64_Fmul.c \
 	Hacl_Test_Curve25519_donna_c64/Hacl_EC_Curve25519_donna_c64.c \
 	Hacl_Test_Curve25519_donna_c64/Hacl_Test_Curve25519_donna_c64.c \
 	/home/jkz/dev/kremlin/kremlib/kremlib.c \
@@ -155,9 +158,9 @@ FILES=Hacl_Test_Curve25519_donna_c64/Prims.c \
 
 
 old_test:
-	$(CC) $(OLD_FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_old.exe
+	gcc -Ofast -m64 -march=native -funroll-loops -flto $(OLD_FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_old.exe
 	./test_old.exe
 
 donna_test:
-	$(CC) -O3 $(FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_donna.exe
+	gcc -Ofast -m64 -march=native -funroll-loops -flto $(FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_donna.exe
 	./test_donna.exe

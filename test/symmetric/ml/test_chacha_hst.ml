@@ -20,7 +20,7 @@ let from_string s =
   done;
   b
                 
-let print (b:bytes) =
+let print (b:int buffer) =
   let s = ref "" in
   for i = 0 to b.length - 1 do
     let s' = Printf.sprintf "%X" (int_of_string (Hacl_UInt8.to_string (index b i)))  in
@@ -47,18 +47,17 @@ let print_bytes b =
 
 let plaintext = from_string "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it."
                             
-let expected = "  000  6e 2e 35 9a 25 68 f9 80 41 ba 07 28 dd 0d 69 81  n.5.%h..A..(..i.
-  016  e9 7e 7a ec 1d 43 60 c2 0a 27 af cc fd 9f ae 0b  .~z..C`..'......
-  032  f9 1b 65 c5 52 47 33 ab 8f 59 3d ab cd 62 b3 57  ..e.RG3..Y=..b.W
-  048  16 39 d6 24 e6 51 52 ab 8f 53 0c 35 9f 08 61 d8  .9.$.QR..S.5..a.
-  064  07 ca 0d bf 50 0d 6a 61 56 a3 8e 08 8a 22 b6 5e  ....P.jaV....\".^
-  080  52 bc 51 4d 16 cc f8 06 81 8c e9 1a b7 79 37 36  R.QM.........y76
-  096  5a f9 0b bf 74 a3 5b e6 b4 0b 8e ed f2 78 5e 42  Z...t.[......x^B
-  112  87 4d\n"
+let expected = "6E2E359A2568F98041BA0728DD0D6981E97E7AEC1D4360C20A27AFCCFD9FAE0BF91B65C5524733AB8F593DABCD62B3571639D624E65152AB8F530C359F0861D807CA0DBF500D6A6156A38E088A22B65E52BC514D16CCF806818CE91AB77937365AF90BBF74A35BE6B40B8EEDF2785E42874D\n"
 
 let _ =
+  let len = 114 in
   let ciphertext = create (uint8_to_sint8 0) 114 in
-  chacha20_encrypt ciphertext key counter nonce plaintext 114;
+  let ctx = create 0 32 in
+  (* chacha20_encrypt ciphertext key counter nonce plaintext 114; *)
+  chacha_keysetup ctx key;
+  chacha_ietf_ivsetup ctx nonce counter;
+  chacha_encrypt_bytes ctx plaintext ciphertext len;
+
   print_string "Test key:\n";
   print_bytes key;
   print_string "Test nonce:\n";
@@ -71,4 +70,25 @@ let _ =
   for i = 0 to 113 do
     if not(Hacl_UInt8.to_string_hex (index ciphertext i) = String.sub ok (2*i) 2) then
       failwith (Printf.sprintf "Ciphertext differs at byte %d: %s %s\n" i (Hacl_UInt8.to_string_hex (index ciphertext i)) (String.sub ok (2*i) 2)) 
-  done
+  done;
+  Printf.printf "TESTS ARE PASSING\n";
+  Random.self_init();
+  let max_len = 600 * 1024 in
+  let rounds = 1 in
+  let plain = create 0 (max_len) in
+  let cipher = create 0 (max_len) in
+  for i = 0 to max_len - 1 do upd plain i (Random.int(256)) done;
+  let t1 = Sys.time() in
+  for i = 1 to rounds do
+    let ctx = create 0 32 in
+    chacha_keysetup ctx key;
+    chacha_ietf_ivsetup ctx nonce counter;
+    chacha_encrypt_bytes ctx plain cipher max_len
+  done;
+  let t2 = Sys.time() in
+  Printf.printf "Ellapsed time for %s with %d rounds and %d bytes of random data : %fs\n"
+                "Chacha20"
+                rounds
+                max_len
+                (t2 -. t1)
+

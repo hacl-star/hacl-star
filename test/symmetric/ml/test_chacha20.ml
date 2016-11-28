@@ -1,28 +1,27 @@
 open Chacha
 open Char
-open SBuffer
-open SBytes
+open FStar_Buffer
        
-let key = {content = Array.init 32 (fun x -> (SInt_UInt8.of_int x)); idx = 0; length = 32 }
+let key = {content = Array.init 32 (fun x -> x); idx = 0; length = 32 }
 
 let nonce =
   let n = create SInt_UInt8.zero 12 in
-  upd n 7 (SInt_UInt8.of_int 0x4a);
+  upd n 7 (0x4a);
   n
 
-let counter = SInt_UInt32.one
+let counter = 1
 
 let from_string s =
-  let b = create SInt_UInt8.zero (String.length s) in
+  let b = create 0 (String.length s) in
   for i = 0 to (String.length s - 1) do
-    upd b i (SInt_UInt8.of_int (code (String.get s i)))
+    upd b i ( (code (String.get s i)))
   done;
   b
                 
-let print (b:sbytes) =
+let print (b:int buffer) =
   let s = ref "" in
   for i = 0 to b.length - 1 do
-    let s' = Printf.sprintf "%X" (SInt_UInt8.to_int (index b i))  in
+    let s' = Printf.sprintf "%X" ( (index b i))  in
     let s' = if String.length s' = 1 then "0" ^ s' else s' in 
     s := !s ^ s';
   done;
@@ -31,10 +30,10 @@ let print (b:sbytes) =
 let max x y =
   if x > y then x else y
    
-let print_array (a:int SBuffer.buffer) =
+let print_array (a:int FStar_Buffer.buffer) =
   let s = ref "" in
   for i = 0 to a.length - 1 do
-    let s' = Printf.sprintf "%X" (SBuffer.index 0 a i)  in
+    let s' = Printf.sprintf "%X" (FStar_Buffer.index 0 a i)  in
     let s' = String.init (max (8 - String.length s') 0) (fun x -> '0')  ^ s' in
     let s' = if i mod 4 = 3 then s' ^ "\n" else s' ^ " " in
     s := !s ^ s';
@@ -57,8 +56,12 @@ let expected = "  000  6e 2e 35 9a 25 68 f9 80 41 ba 07 28 dd 0d 69 81  n.5.%h..
 
 let _ =
   let ciphertext = create SInt_UInt8.zero 114 in
-  (*  let state = SBuffer.create 0 0 16 in *)
-  chacha20_encrypt ciphertext key counter nonce plaintext 114;
+  let len = 114 in
+  (*  let state = FStar_Buffer.create 0 0 16 in *)
+  (* Hacl.Symmetric.Chacha20. *)chacha_keysetup ctx key;
+  (* Hacl.Symmetric.Chacha20. *)chacha_ietf_ivsetup ctx nonce counter;
+  (* Hacl.Symmetric.Chacha20. *)chacha_encrypt_bytes ctx plaintext ciphertext len;
+  (* chacha20_encrypt ciphertext key counter nonce plaintext 114; *)
   print_string "Test key:\n";
   print_bytes key;
   print_string "Test nonce:\n";
@@ -70,8 +73,8 @@ let _ =
   let ok = "6e2e359a2568f98041ba0728dd0d6981e97e7aec1d4360c20a27afccfd9fae0bf91b65c5524733ab8f593dabcd62b3571639d624e65152ab8f530c359f0861d807ca0dbf500d6a6156a38e088a22b65e52bc514d16ccf806818ce91ab77937365af90bbf74a35be6b40b8eedf2785e42874d" in
   let to_string_hex x = Printf.sprintf "%02x" (SInt_UInt8.to_int x) in
   for i = 0 to 113 do
-    if not(to_string_hex (SBuffer.index 0 ciphertext i) = String.sub ok (2*i) 2) then
-      failwith (Printf.sprintf "Ciphertext differs at byte %d: %s %s\n" i (to_string_hex (SBuffer.index 0 ciphertext i)) (String.sub ok (2*i) 2)) 
+    if not(to_string_hex (FStar_Buffer.index 0 ciphertext i) = String.sub ok (2*i) 2) then
+      failwith (Printf.sprintf "Ciphertext differs at byte %d: %s %s\n" i (to_string_hex (FStar_Buffer.index 0 ciphertext i)) (String.sub ok (2*i) 2)) 
   done
 
               (*  print_array state *)

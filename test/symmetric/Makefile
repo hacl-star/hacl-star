@@ -51,8 +51,8 @@ AES_FSTAR_HST=$(addprefix $(HACL_SYMMETRIC)/,Hacl.Symmetric.AES.fst)
 AESGCM_FSTAR_HST=$(addprefix $(HACL_SYMMETRIC)/,Hacl.Symmetric.AES.fst Hacl.Symmetric.GCM.fst Hacl.AEAD.AES256GCM.fst)
 POLY1305_FSTAR=$(addprefix $(HACL_SYMMETRIC)/,Hacl.Symmetric.Poly1305.fst)
 
-CHACHA_EXTRACTED_HST=Utils.ml Hacl_Symmetric_Chacha20.ml
-SALSA_EXTRACTED_HST=Utils.ml Hacl_Symmetric_Salsa20.ml
+CHACHA_EXTRACTED_HST=Hacl_Symmetric_Chacha20.ml
+SALSA_EXTRACTED_HST=Hacl_Symmetric_Salsa20.ml
 AES_EXTRACTED_HST=Hacl_Symmetric_AES.ml
 AESGCM_EXTRACTED_HST=Hacl_Symmetric_AES.ml Hacl_Symmetric_GCM.ml Hacl_AEAD_AES256GCM.ml
 POLY1305_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_List_Tot.ml FStar_Seq.ml FStar_Ghost.ml Utils.ml Hacl_Symmetric_Poly1305_Parameters.ml Hacl_Symmetric_Poly1305_Bigint.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part1.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part2.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part3.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part4.ml Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part5.ml Hacl_Symmetric_Poly1305_Bignum.ml Hacl_Symmetric_Poly1305_Spec.ml Hacl_Symmetric_Poly1305.ml
@@ -69,10 +69,12 @@ AESGCM_ODIR=aesgcm
 # OCAML TARGETS #
 #################
 
+FSTAR_OCAML=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --lax --codegen OCaml --no_location_info
+
 # OCaml extracton of CHACHA20
-chacha-extract: ml-lib
+chacha-extract: #ml-lib
 	mkdir -p $(CHACHA_ODIR)
-	$(FSTAR) $(NO_CODEGEN) $(OCAML_OPTIONS) $(OCAML_INCLUDES) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR)
+	$(FSTAR_OCAML) $(OCAML_INCLUDES) $(CHACHA_FSTAR_HST) --odir $(CHACHA_ODIR)
 
 chacha-compile: #chacha-extract
 	$(OCAMLOPT) -I $(HACL_LIB)/ml -I $(CHACHA_ODIR) \

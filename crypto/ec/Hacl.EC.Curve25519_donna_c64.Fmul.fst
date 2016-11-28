@@ -54,7 +54,15 @@ let fmul output input2 input =
   let t2 =  ( r0) *^ s2 +%^ (r2) *^ s0 +%^ (r1) *^ s1 in
   let t3 =  ( r0) *^ s3 +%^ (r3) *^ s0 +%^ (r1) *^ s2 +%^ (r2) *^ s1 in
   let t4 =  ( r0) *^ s4 +%^ (r4) *^ s0 +%^ (r3) *^ s1 +%^ (r1) *^ s3 +%^ (r2) *^ s2 in
+  (* let t8 =  ( r0) *^ s0 in *)
+  (* let t7 =  ( r0) *^ s1 +%^ (r1) *^ s0 in *)
+  (* let t6 =  ( r0) *^ s2 +%^ (r2) *^ s0 +%^ (r1) *^ s1 in *)
+  (* let t5 =  ( r0) *^ s3 +%^ (r3) *^ s0 +%^ (r1) *^ s2 +%^ (r2) *^ s1 in *)
 
+  (* t.(0ul) <- t.(5ul) + 19 * t(5ul); *)
+  (* t.(1ul) <- t.(6ul) + 19 * t(5ul); *)
+  (* t.(2ul) <- t.(7ul) + 19 * t(5ul); *)
+  (* t.(3ul) <- t.(8ul) + 19 * t(5ul); *)
   let open Hacl.UInt64 in
   let nineteen = uint64_to_sint64 19uL in
   let r4 = r4 *%^ nineteen in
