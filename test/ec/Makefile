@@ -158,9 +158,58 @@ FILES=Hacl_Test_Curve25519_donna_c64/Prims.c \
 
 
 old_test:
-	gcc -Ofast -m64 -march=native -funroll-loops -flto $(OLD_FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_old.exe
+	gcc -Ofast -m64 -march=native -funroll-loops  $(OLD_FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_old.exe
 	./test_old.exe
 
+old_test2:
+	gcc -O3 $(OLD_FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_old2.exe
+	./test_old2.exe
+
 donna_test:
-	gcc -Ofast -m64 -march=native -funroll-loops -flto $(FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_donna.exe
+	gcc -O3 $(FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_donna.exe
 	./test_donna.exe
+
+
+donna_test2:
+	gcc -Ofast -m64 -march=native -funroll-loops -flto $(FILES) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_donna2.exe
+	./test_donna2.exe
+
+
+RECURSIVE=Hacl_Test_Curve25519_recursive/Prims.c \
+	Hacl_Test_Curve25519_recursive/FStar_Mul.c \
+	Hacl_Test_Curve25519_recursive/FStar_Squash.c \
+	Hacl_Test_Curve25519_recursive/FStar_StrongExcludedMiddle.c \
+	Hacl_Test_Curve25519_recursive/FStar_List_Tot.c \
+	Hacl_Test_Curve25519_recursive/FStar_Classical.c \
+	Hacl_Test_Curve25519_recursive/FStar_ListProperties.c \
+	Hacl_Test_Curve25519_recursive/FStar_SeqProperties.c \
+	Hacl_Test_Curve25519_recursive/FStar_Math_Lemmas.c \
+	Hacl_Test_Curve25519_recursive/FStar_BitVector.c \
+	Hacl_Test_Curve25519_recursive/FStar_UInt.c \
+	Hacl_Test_Curve25519_recursive/FStar_Int.c \
+	Hacl_Test_Curve25519_recursive/FStar_FunctionalExtensionality.c \
+	Hacl_Test_Curve25519_recursive/FStar_PropositionalExtensionality.c \
+	Hacl_Test_Curve25519_recursive/FStar_PredicateExtensionality.c \
+	Hacl_Test_Curve25519_recursive/FStar_TSet.c \
+	Hacl_Test_Curve25519_recursive/FStar_Set.c \
+	Hacl_Test_Curve25519_recursive/FStar_Map.c \
+	Hacl_Test_Curve25519_recursive/FStar_Ghost.c \
+	Hacl_Test_Curve25519_recursive/FStar_All.c \
+	Hacl_Test_Curve25519_recursive/Hacl_UInt64.c \
+	Hacl_Test_Curve25519_recursive/Hacl_UInt128.c \
+	Hacl_Test_Curve25519_recursive/Hacl_UInt32.c \
+	Hacl_Test_Curve25519_recursive/Hacl_UInt8.c \
+	Hacl_Test_Curve25519_recursive/Hacl_Cast.c \
+	Hacl_Test_Curve25519_recursive/FStar_Buffer.c \
+	Hacl_Test_Curve25519_recursive/Hacl_EC_Curve25519_recursive.c \
+	Hacl_Test_Curve25519_recursive/Hacl_Test_Curve25519_recursive.c \
+	/home/jkz/dev/kremlin/kremlib/kremlib.c \
+	../../../kremlin/test/testlib.c
+
+
+recursive:
+	$(MAKE) Hacl.Test.Curve25519_recursive-krml
+
+test_recursive:
+	gcc -Ofast -m64 -march=native -funroll-loops -flto $(RECURSIVE) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_recursive.exe
+	./test_recursive.exe
