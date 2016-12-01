@@ -14,6 +14,23 @@ module U32 = FStar.UInt32
 #set-options "--lax"
 
 
+val copy_from_wide_:
+  output:felem ->
+  input:felem_wide ->
+  ctr:U32.t ->
+  Stack unit
+    (requires (fun _ -> true))
+    (ensures (fun _ _ _ -> true))
+let rec copy_from_wide_ output input ctr =
+  if U32 (ctr =^ 0ul) then ()
+  else (
+    let i = U32 (ctr -^ 1ul) in
+    let inputi = input.(i) in
+    output.(i) <- Wide.wide_to_limb inputi;
+    copy_from_wide_ output input i
+  )
+
+
 val shift_:
   output:felem ->
   tmp:limb ->
@@ -78,13 +95,72 @@ val carry_wide_:
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
 let rec carry_wide_ t ctr =
-  if U32 (ctr =^ len -^ 1ul) then ()
+  if U32 (ctr =^ clen -^ 1ul) then ()
   else (
     let tctr = t.(ctr) in
     let tctrp1 = t.(U32 (ctr+^1ul)) in
-    let r0 = sint128_to_sint64 (tctr) &^ mask_51 in
-    let c  = sint128_to_sint64 (H128 (tctr >>^ limb_size)) in
-    t.(ctr) <- sint64_to_sint128 r0;
-    t.(U32 (ctr +^ 1ul)) <- H128 (tctrp1 +^ sint64_to_sint128 c);
+    let r0 = Hacl.Bignum.Wide.wide_to_limb (tctr) &^ ((one <<^ ctemplate ctr) -^ 1ul) in
+    let open Hacl.Bignum.Wide in
+    let c  = Hacl.Bignum.Wide.wide_to_limb (tctr >>^ ctemplate ctr) in
+    t.(ctr) <- Hacl.Bignum.Wide.limb_to_wide r0;
+    t.(U32 (ctr +^ 1ul)) <- tctrp1 +^ Hacl.Bignum.Wide.limb_to_wide c;
     carry_wide_ t (U32 (ctr +^ 1ul))
   )
+
+  
+val fmul:
+  output:felem ->
+  input:felem ->
+  input2:felem ->
+  Stack unit
+    (requires (fun _ -> true))
+    (ensures (fun _ _ _ -> true))
+let fmul output input input2 =
+  push_frame();
+  let tmp = create Wide.zero clen in
+  let t   = create Wide.zero clen in
+  blit input 0ul tmp 0ul clen;
+  mul_shift_reduce_ t tmp input2 clen;
+  carry_wide_ t 0ul;
+  reduce_wide t;
+  (* let tnm1 = t.(U32 (len -^ 1ul)) in *)
+  (* let t0   = t.(0ul) in   *)
+  (* let c = Wide.wide_to_limb (Wide (tnm1 >>^ (ctemplate (U32 (clen -^ 1ul)))) in *)
+  (* t.(U32 (clen -^ 1ul)) <- Wide (tnm1 &^ Wide.limb_to_wide ((one <<^ ctemplate (U32 (clen -^ 1ul))) &^ 1ul)); *)
+  (* t.(0ul) <- Wide (t0 +^ (c *^ nineteen)); *)
+  copy_from_wide_ output t clen;
+  let output0 = output.(0ul) in
+  let output1 = output.(1ul) in
+  let c = output0 >>^ (ctemplate 0ul) in
+  output.(0ul) <- output0 &^ (one <<^ ctemplate (U32 (clen -^ 1ul)) -^ 1uL);
+  output.(1ul) <- output1 +^ c;
+  pop_frame()
+
+val fsquare_times_:
+  input:felem ->
+  count:U32.t ->
+  Stack unit
+    (requires (fun _ -> true))
+    (ensures (fun _ _ _ -> true))
+let rec fsquare_times_ tmp count =
+  if U32 (count =^ 0ul) then ()
+  else (
+    fmul tmp tmp tmp;
+    fsquare_times_ tmp (U32 (count -^ 1ul))
+  )
+
+
+val fsquare_times:
+  output:felem ->
+  input:felem ->
+  count:U32.t ->
+  Stack unit
+    (requires (fun _ -> true))
+    (ensures (fun _ _ _ -> true))
+let fsquare_times output input count =
+  push_frame();
+  let tmp = create zero clen in
+  blit input 0ul tmp 0ul clen;
+  fsquare_times_ tmp count;
+  blit tmp 0ul output 0ul clen;
+  pop_frame()

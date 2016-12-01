@@ -35,3 +35,15 @@ val carry_top:
   Stack unit
   (requires (fun _ -> true))
   (ensures (fun _ _ _ -> true))
+
+val reduce:
+  b:felem ->
+  Stack unit
+  (requires (fun h -> true))
+  (ensures (fun _ _ _ -> true))
+
+val reduce_wide:
+  b:felem_wide ->
+  Stack unit
+    (requires (fun h -> true))
+    (ensures (fun _ _ _ -> true))

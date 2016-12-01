@@ -5,7 +5,7 @@ open Hacl.Bignum.Parameters
 
 inline_for_extraction let n = word_size
 
-type t = limb
+inline_for_extraction let t = limb
 
 val v: t -> GTot nat
 
@@ -51,3 +51,6 @@ inline_for_extraction let op_Amp_Hat = logand
 inline_for_extraction let op_Bar_Hat = logor
 inline_for_extraction let op_Less_Less_Hat = shift_left
 inline_for_extraction let op_Greater_Greater_Hat = shift_right
+
+inline_for_extraction val limb_to_byte: x:t -> Tot (y:Hacl.UInt8.t{Hacl.UInt8.v y = v x % 256})
+inline_for_extraction val byte_to_limb: x:Hacl.UInt8.t -> Tot (y:t{Hacl.UInt8.v x = v y})
