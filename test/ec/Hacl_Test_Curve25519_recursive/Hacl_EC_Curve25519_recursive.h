@@ -32,6 +32,7 @@
 #include "kremlib.h"
 #include "testlib.h"
 
+/*
 extern uint8_t Hacl_EC_Curve25519_recursive_zero_8;
 
 extern uint64_t Hacl_EC_Curve25519_recursive_zero_64;
@@ -180,6 +181,7 @@ Hacl_EC_Curve25519_recursive_cmult(
 );
 
 void Hacl_EC_Curve25519_recursive_crecip(uint64_t *out, uint64_t *z);
+*/
 
 void
 Hacl_EC_Curve25519_recursive_crypto_scalarmult_curve25519_donna_c64(

@@ -118,7 +118,7 @@ OLD_FILES=Hacl_Test_Curve25519/Prims.c \
 	Hacl_Test_Curve25519/Hacl_EC_Curve25519_Crecip.c \
 	Hacl_Test_Curve25519/Hacl_EC_Curve25519.c \
 	Hacl_Test_Curve25519/Hacl_Test_Curve25519.c \
-	/home/jkz/dev/kremlin/kremlib/kremlib.c \
+	../../../kremlin/kremlib/kremlib.c \
 	../../../kremlin/test/testlib.c
 
 
@@ -153,7 +153,7 @@ FILES=Hacl_Test_Curve25519_donna_c64/Prims.c \
 	Hacl_Test_Curve25519_donna_c64/Hacl_EC_Curve25519_donna_c64_Fmul.c \
 	Hacl_Test_Curve25519_donna_c64/Hacl_EC_Curve25519_donna_c64.c \
 	Hacl_Test_Curve25519_donna_c64/Hacl_Test_Curve25519_donna_c64.c \
-	/home/jkz/dev/kremlin/kremlib/kremlib.c \
+	../../../kremlin/kremlib/kremlib.c \
 	../../../kremlin/test/testlib.c
 
 
@@ -203,13 +203,18 @@ RECURSIVE=Hacl_Test_Curve25519_recursive/Prims.c \
 	Hacl_Test_Curve25519_recursive/FStar_Buffer.c \
 	Hacl_Test_Curve25519_recursive/Hacl_EC_Curve25519_recursive.c \
 	Hacl_Test_Curve25519_recursive/Hacl_Test_Curve25519_recursive.c \
-	/home/jkz/dev/kremlin/kremlib/kremlib.c \
+	../../../kremlin/kremlib/kremlib.c \
 	../../../kremlin/test/testlib.c
 
+STANDALONE=Hacl_Test_Curve25519_recursive/Hacl_EC_Curve25519_recursive_standalone.c
 
 recursive:
 	$(MAKE) Hacl.Test.Curve25519_recursive-krml
 
 test_recursive:
-	gcc -Ofast -m64 -march=native -funroll-loops -flto $(RECURSIVE) -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test -o test_recursive.exe
+	gcc-6 -Ofast -m64 -march=native -mtune=native -funroll-loops -flto $(RECURSIVE) -I ../../../kremlin/kremlib -I $(KREMTEST) -o test_recursive.exe
 	./test_recursive.exe
+
+test_standalone:
+	gcc-6 -Ofast -m64 -march=native -mtune=native -funroll-loops -flto $(STANDALONE) -o test_standalone.exe
+	./test_standalone.exe
