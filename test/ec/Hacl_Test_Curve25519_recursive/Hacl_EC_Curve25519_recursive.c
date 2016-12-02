@@ -1,29 +1,29 @@
 #include "Hacl_EC_Curve25519_recursive.h"
 
-uint8_t Hacl_EC_Curve25519_recursive_zero_8 = (uint8_t )0;
+static const uint8_t Hacl_EC_Curve25519_recursive_zero_8 = (uint8_t )0;
 
-uint64_t Hacl_EC_Curve25519_recursive_zero_64 = (uint64_t )0;
+static const uint64_t Hacl_EC_Curve25519_recursive_zero_64 = (uint64_t )0;
 
-FStar_UInt128_t
+static const FStar_UInt128_t
 Hacl_EC_Curve25519_recursive_zero_128 = FStar_Int_Cast_uint64_to_uint128((uint64_t )0);
 
-uint8_t Hacl_EC_Curve25519_recursive_one_8 = (uint8_t )1;
+static const uint8_t Hacl_EC_Curve25519_recursive_one_8 = (uint8_t )1;
 
-uint64_t Hacl_EC_Curve25519_recursive_one_64 = (uint64_t )1;
+static const uint64_t Hacl_EC_Curve25519_recursive_one_64 = (uint64_t )1;
 
-uint32_t Hacl_EC_Curve25519_recursive_len = (uint32_t )5;
+static const uint32_t Hacl_EC_Curve25519_recursive_len = (uint32_t )5;
 
-uint32_t Hacl_EC_Curve25519_recursive_limb_size = (uint32_t )51;
+static const uint32_t Hacl_EC_Curve25519_recursive_limb_size = (uint32_t )51;
 
-uint64_t Hacl_EC_Curve25519_recursive_two54m152 = (uint64_t )0x3fffffffffff68;
+static const uint64_t Hacl_EC_Curve25519_recursive_two54m152 = (uint64_t )0x3fffffffffff68;
 
-uint64_t Hacl_EC_Curve25519_recursive_two54m8 = (uint64_t )0x3ffffffffffff8;
+static const uint64_t Hacl_EC_Curve25519_recursive_two54m8 = (uint64_t )0x3ffffffffffff8;
 
-uint64_t Hacl_EC_Curve25519_recursive_nineteen = (uint64_t )19;
+static const uint64_t Hacl_EC_Curve25519_recursive_nineteen = (uint64_t )19;
 
-uint64_t Hacl_EC_Curve25519_recursive_mask_51 = (uint64_t )0x7ffffffffffff;
+static const uint64_t Hacl_EC_Curve25519_recursive_mask_51 = (uint64_t )0x7ffffffffffff;
 
-void Hacl_EC_Curve25519_recursive_fsum(uint64_t *a, uint64_t *b)
+static inline void Hacl_EC_Curve25519_recursive_fsum(uint64_t *a, uint64_t *b)
 {
   uint64_t a0 = a[(uint32_t )0];
   uint64_t b0 = b[(uint32_t )0];
@@ -42,7 +42,7 @@ void Hacl_EC_Curve25519_recursive_fsum(uint64_t *a, uint64_t *b)
   a[(uint32_t )4] = a4 + b4;
 }
 
-void Hacl_EC_Curve25519_recursive_fdifference(uint64_t *a, uint64_t *b)
+static inline void Hacl_EC_Curve25519_recursive_fdifference(uint64_t *a, uint64_t *b)
 {
   uint64_t a0 = a[(uint32_t )0];
   uint64_t b0 = b[(uint32_t )0];
@@ -61,7 +61,7 @@ void Hacl_EC_Curve25519_recursive_fdifference(uint64_t *a, uint64_t *b)
   a[(uint32_t )4] = b4 + (uint64_t )0x3ffffffffffff8 - a4;
 }
 
-void
+static inline void
 Hacl_EC_Curve25519_recursive_fscalar_(
   FStar_UInt128_t *output,
   uint64_t *a,
@@ -81,7 +81,7 @@ Hacl_EC_Curve25519_recursive_fscalar_(
   }
 }
 
-void Hacl_EC_Curve25519_recursive_carry_wide_(FStar_UInt128_t *t, uint32_t ctr)
+static inline void Hacl_EC_Curve25519_recursive_carry_wide_(FStar_UInt128_t *t, uint32_t ctr)
 {
   if (ctr == (uint32_t )4)
     return;
@@ -98,7 +98,7 @@ void Hacl_EC_Curve25519_recursive_carry_wide_(FStar_UInt128_t *t, uint32_t ctr)
   }
 }
 
-void
+static inline void
 Hacl_EC_Curve25519_recursive_copy_from_wide_(
   uint64_t *output,
   FStar_UInt128_t *input,
@@ -117,11 +117,9 @@ Hacl_EC_Curve25519_recursive_copy_from_wide_(
   }
 }
 
-void Hacl_EC_Curve25519_recursive_fscalar_product(uint64_t *output, uint64_t *a, uint64_t s)
+static inline void Hacl_EC_Curve25519_recursive_fscalar_product(uint64_t *output, uint64_t *a, uint64_t s)
 {
-  FStar_UInt128_t t[5];
-  for (uintmax_t i = 0; i < (uint32_t )5; ++i)
-    t[i] = FStar_Int_Cast_uint64_to_uint128((uint64_t )0);
+  FStar_UInt128_t t[5] = {Hacl_EC_Curve25519_recursive_zero_128};
   Hacl_EC_Curve25519_recursive_fscalar_(t, a, s, (uint32_t )5);
   Hacl_EC_Curve25519_recursive_carry_wide_(t, (uint32_t )0);
   FStar_UInt128_t tnm1 = t[(uint32_t )4];
@@ -134,7 +132,7 @@ void Hacl_EC_Curve25519_recursive_fscalar_product(uint64_t *output, uint64_t *a,
   Hacl_EC_Curve25519_recursive_copy_from_wide_(output, t, (uint32_t )5);
 }
 
-void Hacl_EC_Curve25519_recursive_shift_(uint64_t *output, uint64_t tmp, uint32_t ctr)
+static inline void Hacl_EC_Curve25519_recursive_shift_(uint64_t *output, uint64_t tmp, uint32_t ctr)
 {
   uint64_t tmp0;
   if (ctr == (uint32_t )5)
@@ -152,14 +150,14 @@ void Hacl_EC_Curve25519_recursive_shift_(uint64_t *output, uint64_t tmp, uint32_
   }
 }
 
-void Hacl_EC_Curve25519_recursive_shift_reduce(uint64_t *output)
+static inline void Hacl_EC_Curve25519_recursive_shift_reduce(uint64_t *output)
 {
   Hacl_EC_Curve25519_recursive_shift_(output, (uint64_t )0, (uint32_t )5);
   uint64_t o0 = output[(uint32_t )0];
   output[(uint32_t )0] = o0 * (uint64_t )19;
 }
 
-void
+static inline void
 Hacl_EC_Curve25519_recursive_sum_scalar_multiplication_(
   FStar_UInt128_t *output,
   uint64_t *input,
@@ -180,7 +178,7 @@ Hacl_EC_Curve25519_recursive_sum_scalar_multiplication_(
   }
 }
 
-void
+static inline void
 Hacl_EC_Curve25519_recursive_mul_shift_reduce_(
   FStar_UInt128_t *output,
   uint64_t *input,
@@ -202,12 +200,10 @@ Hacl_EC_Curve25519_recursive_mul_shift_reduce_(
   }
 }
 
-void Hacl_EC_Curve25519_recursive_fmul(uint64_t *output, uint64_t *input, uint64_t *input2)
+static inline void Hacl_EC_Curve25519_recursive_fmul(uint64_t *output, uint64_t *input, uint64_t *input2)
 {
   uint64_t tmp[5] = { 0 };
-  FStar_UInt128_t t[5];
-  for (uintmax_t i = 0; i < (uint32_t )5; ++i)
-    t[i] = FStar_Int_Cast_uint64_to_uint128((uint64_t )0);
+  FStar_UInt128_t t[5] = {Hacl_EC_Curve25519_recursive_zero_128};
   memcpy(tmp, input, (uint32_t )5 * sizeof input[0]);
   Hacl_EC_Curve25519_recursive_mul_shift_reduce_(t, tmp, input2, (uint32_t )5);
   Hacl_EC_Curve25519_recursive_carry_wide_(t, (uint32_t )0);
@@ -226,7 +222,7 @@ void Hacl_EC_Curve25519_recursive_fmul(uint64_t *output, uint64_t *input, uint64
   output[(uint32_t )1] = output1 + c;
 }
 
-void Hacl_EC_Curve25519_recursive_fsquare_(uint64_t *output, FStar_UInt128_t *t)
+static inline void Hacl_EC_Curve25519_recursive_fsquare_(uint64_t *output, FStar_UInt128_t *t)
 {
   uint64_t r0 = output[(uint32_t )0];
   uint64_t r1 = output[(uint32_t )1];
@@ -274,7 +270,7 @@ void Hacl_EC_Curve25519_recursive_fsquare_(uint64_t *output, FStar_UInt128_t *t)
   output[(uint32_t )1] = output1 + c;
 }
 
-void
+static inline void
 Hacl_EC_Curve25519_recursive_fsquare_times_(
   uint64_t *output,
   FStar_UInt128_t *tmp,
@@ -291,13 +287,11 @@ Hacl_EC_Curve25519_recursive_fsquare_times_(
   }
 }
 
-void
+static inline void
 Hacl_EC_Curve25519_recursive_fsquare_times(uint64_t *output, uint64_t *input, uint32_t count)
 {
   uint64_t tmp[5] = { 0 };
-  FStar_UInt128_t t[5];
-  for (uintmax_t i = 0; i < (uint32_t )5; ++i)
-    t[i] = FStar_Int_Cast_uint64_to_uint128((uint64_t )0);
+  FStar_UInt128_t t[5] = {Hacl_EC_Curve25519_recursive_zero_128};
   memcpy(tmp, input, (uint32_t )5 * sizeof input[0]);
   Hacl_EC_Curve25519_recursive_fsquare_times_(tmp, t, count);
   memcpy(output, tmp, (uint32_t )5 * sizeof tmp[0]);

@@ -32,6 +32,7 @@
 #include "kremlib.h"
 #include "testlib.h"
 
+/*
 extern uint8_t Hacl_EC_Curve25519_recursive_zero_8;
 
 extern uint64_t Hacl_EC_Curve25519_recursive_zero_64;
@@ -120,6 +121,7 @@ Hacl_EC_Curve25519_recursive_fsquare_times_(
 
 void
 Hacl_EC_Curve25519_recursive_fsquare_times(uint64_t *output, uint64_t *input, uint32_t count);
+*/
 
 uint64_t Hacl_EC_Curve25519_recursive_load64_le(uint8_t *b);
 
