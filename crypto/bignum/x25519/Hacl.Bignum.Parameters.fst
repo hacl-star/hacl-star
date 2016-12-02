@@ -9,6 +9,9 @@ let prime =
 
 let word_size = 64
 
+inline_for_extraction let limb = Hacl.UInt64.t
+inline_for_extraction let wide = Hacl.UInt128.t
+
 let v x = Hacl.UInt64.v x
 let w x = Hacl.UInt128.v x
 

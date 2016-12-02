@@ -10,8 +10,10 @@ val prime: pos
 val word_size: ws:pos{ws = 32 \/ ws = 64}
 
 (** Concrete platform word with side-channel protection **)
-inline_for_extraction let limb = if word_size = 32 then Hacl.UInt32.t else Hacl.UInt64.t
-inline_for_extraction let wide = if word_size = 32 then Hacl.UInt64.t else Hacl.UInt128.t
+(* inline_for_extraction let limb = if word_size = 32 then Hacl.UInt32.t else Hacl.UInt64.t *)
+(* inline_for_extraction let wide = if word_size = 32 then Hacl.UInt64.t else Hacl.UInt128.t *)
+inline_for_extraction val limb: Type0
+inline_for_extraction val wide: Type0
 inline_for_extraction let ctr  = FStar.UInt32.t
 
 

@@ -7,7 +7,7 @@ inline_for_extraction let n = word_size
 
 inline_for_extraction let t = limb
 
-val v: t -> GTot nat
+val v: limb -> GTot nat
 
 inline_for_extraction val zero: x:t{v x = 0}
 inline_for_extraction val one: x:t{v x = 1}

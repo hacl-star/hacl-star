@@ -5,7 +5,7 @@ open Hacl.Bignum.Parameters
 open Hacl.UInt64
 open Hacl.Cast
 
-let v x = v x
+let v x = Hacl.Bignum.Parameters.v x
 
 inline_for_extraction let zero = uint64_to_sint64 0uL
 inline_for_extraction let one  = uint64_to_sint64 1uL
@@ -37,5 +37,5 @@ inline_for_extraction let gt_mask a b  = gt_mask a b
 inline_for_extraction let lt_mask a b  = lt_mask a b
 inline_for_extraction let lte_mask a b = lte_mask a b
 
-inline_for_extraction let limb_to_byte x = sint64_to_sint8 x
+inline_for_extraction let limb_to_byte x = assert_norm(pow2 8 = 256); sint64_to_sint8 x
 inline_for_extraction let byte_to_limb x = sint8_to_sint64 x
