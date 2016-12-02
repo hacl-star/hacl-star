@@ -36,65 +36,102 @@ inline_for_extraction let two54m8   = uint64_to_sint64 0x3ffffffffffff8uL
 inline_for_extraction let nineteen  = uint64_to_sint64 19uL
 inline_for_extraction let mask_51    = uint64_to_sint64 0x7ffffffffffffuL
 
-val fsum_:
-  a:felem ->
-  b:felem ->
-  ctr:U32.t ->
-  Stack unit
-    (requires (fun _ -> true))
-    (ensures (fun _ _ _ -> true))
-let rec fsum_ a b ctr =
-  if U32 (ctr =^ 0ul) then ()
-  else (
-    let i = U32 (ctr -^ 1ul) in
-    let ai = a.(i) in let bi = b.(i) in
-    a.(i) <- ai +^ bi;
-    fsum_ a b i
-  )
+(* val fsum_: *)
+(*   a:felem -> *)
+(*   b:felem -> *)
+(*   ctr:U32.t -> *)
+(*   Stack unit *)
+(*     (requires (fun _ -> true)) *)
+(*     (ensures (fun _ _ _ -> true)) *)
+(* let rec fsum_ a b ctr = *)
+(*   if U32 (ctr =^ 0ul) then () *)
+(*   else ( *)
+(*     let i = U32 (ctr -^ 1ul) in *)
+(*     let ai = a.(i) in let bi = b.(i) in *)
+(*     a.(i) <- ai +^ bi; *)
+(*     fsum_ a b i *)
+(*   ) *)
 
 
-val fsum:
-  a:felem ->
-  b:felem ->
-  Stack unit
-    (requires (fun _ -> true))
-    (ensures (fun _ _ _ -> true))
-let fsum a b = fsum_ a b len
+(* val fsum: *)
+(*   a:felem -> *)
+(*   b:felem -> *)
+(*   Stack unit *)
+(*     (requires (fun _ -> true)) *)
+(*     (ensures (fun _ _ _ -> true)) *)
+(* let fsum a b = fsum_ a b len *)
 
-
-val fdifference_:
-  a:felem ->
-  b:felem ->
-  ctr:U32.t ->
-  Stack unit
-    (requires (fun _ -> true))
-    (ensures (fun _ _ _ -> true))
-let rec fdifference_ a b ctr =
-  if U32 (ctr =^ 0ul) then ()
-  else (
-    let i = U32 (ctr -^ 1ul) in
-    let ai = a.(i) in let bi = b.(i) in
-    a.(i) <- bi -^ ai;
-    fdifference_ a b i
-  )
-
-
-val fdifference:
+private val fsum:
   a:felem ->
   b:felem ->
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let fdifference a b =
-  push_frame();
-  let zero_prime = createL [two54m152; two54m8; two54m8; two54m8; two54m8] in
-  fsum  b zero_prime;
-  fdifference_ a b len;
-  pop_frame()
+private let fsum a b =
+  let a0 = a.(0ul) in let b0 = b.(0ul) in
+  let a1 = a.(1ul) in let b1 = b.(1ul) in
+  let a2 = a.(2ul) in let b2 = b.(2ul) in
+  let a3 = a.(3ul) in let b3 = b.(3ul) in
+  let a4 = a.(4ul) in let b4 = b.(4ul) in
+  a.(0ul) <- a0 +^ b0;
+  a.(1ul) <- a1 +^ b1;
+  a.(2ul) <- a2 +^ b2;
+  a.(3ul) <- a3 +^ b3;
+  a.(4ul) <- a4 +^ b4
+
+
+(* val fdifference_: *)
+(*   a:felem -> *)
+(*   b:felem -> *)
+(*   ctr:U32.t -> *)
+(*   Stack unit *)
+(*     (requires (fun _ -> true)) *)
+(*     (ensures (fun _ _ _ -> true)) *)
+(* let rec fdifference_ a b ctr = *)
+(*   if U32 (ctr =^ 0ul) then () *)
+(*   else ( *)
+(*     let i = U32 (ctr -^ 1ul) in *)
+(*     let ai = a.(i) in let bi = b.(i) in *)
+(*     a.(i) <- bi -^ ai; *)
+(*     fdifference_ a b i *)
+(*   ) *)
+
+
+(* val fdifference: *)
+(*   a:felem -> *)
+(*   b:felem -> *)
+(*   Stack unit *)
+(*     (requires (fun _ -> true)) *)
+(*     (ensures (fun _ _ _ -> true)) *)
+(* let fdifference a b = *)
+(*   push_frame(); *)
+(*   let zero_prime = createL [two54m152; two54m8; two54m8; two54m8; two54m8] in *)
+(*   fsum  b zero_prime; *)
+(*   fdifference_ a b len; *)
+(*   pop_frame() *)
+
+
+private val fdifference:
+  a:felem ->
+  b:felem ->
+  Stack unit
+    (requires (fun _ -> true))
+    (ensures (fun _ _ _ -> true))
+private let fdifference a b =
+  let a0 = a.(0ul) in let b0 = b.(0ul) in
+  let a1 = a.(1ul) in let b1 = b.(1ul) in
+  let a2 = a.(2ul) in let b2 = b.(2ul) in
+  let a3 = a.(3ul) in let b3 = b.(3ul) in
+  let a4 = a.(4ul) in let b4 = b.(4ul) in
+  a.(0ul) <- b0 +^ two54m152 -^ a0;
+  a.(1ul) <- b1 +^ two54m8   -^ a1;
+  a.(2ul) <- b2 +^ two54m8   -^ a2;
+  a.(3ul) <- b3 +^ two54m8   -^ a3;
+  a.(4ul) <- b4 +^ two54m8   -^ a4
 
 
 
-val fscalar_:
+private val fscalar_:
   output:felem_wide ->
   a:felem ->
   s:limb ->
@@ -102,7 +139,7 @@ val fscalar_:
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let rec fscalar_ output a s ctr =
+private let rec fscalar_ output a s ctr =
   if U32 (ctr =^ 0ul) then ()
   else (
     let i = U32 (ctr -^ 1ul) in
@@ -112,13 +149,13 @@ let rec fscalar_ output a s ctr =
   )
 
 
-val carry_wide_:
+private val carry_wide_:
   t:felem_wide ->
   ctr:U32.t ->
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let rec carry_wide_ t ctr =
+private let rec carry_wide_ t ctr =
   if U32 (ctr =^ len -^ 1ul) then ()
   else (
     let tctr = t.(ctr) in
@@ -131,7 +168,7 @@ let rec carry_wide_ t ctr =
   )
 
 
-val copy_from_wide_:
+private val copy_from_wide_:
   output:felem ->
   input:felem_wide ->
   ctr:U32.t ->
@@ -148,14 +185,14 @@ let rec copy_from_wide_ output input ctr =
   )
 
 
-val fscalar_product:
+private val fscalar_product:
   output:felem ->
   a:felem ->
   s:limb ->
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let fscalar_product output a s =
+private let fscalar_product output a s =
   push_frame();
   let t = create zero_128 len in
   fscalar_ t a s len;
@@ -169,14 +206,14 @@ let fscalar_product output a s =
   pop_frame()
 
 
-val shift_:
+private val shift_:
   output:felem ->
   tmp:limb ->
   ctr:U32.t ->
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let rec shift_ output tmp ctr =
+private let rec shift_ output tmp ctr =
   let open FStar.UInt32 in
   let tmp = if (ctr =^ len) then output.(0ul) else tmp in
   if (ctr =^ 1ul) then output.(1ul) <- tmp
@@ -187,18 +224,18 @@ let rec shift_ output tmp ctr =
   )
 
 
-val shift_reduce:
+private val shift_reduce:
   output:felem ->
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let shift_reduce output =
+private let shift_reduce output =
   shift_ output zero_64 len;
   let o0 = output.(0ul) in
   output.(0ul) <- o0 *^ nineteen
 
 
-val sum_scalar_multiplication_:
+private val sum_scalar_multiplication_:
   output:felem_wide ->
   input:felem ->
   s:limb ->
@@ -206,7 +243,7 @@ val sum_scalar_multiplication_:
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let rec sum_scalar_multiplication_ output input s ctr =
+private let rec sum_scalar_multiplication_ output input s ctr =
   if U32 (ctr =^ 0ul) then ()
   else (
     let i = U32 (ctr -^ 1ul) in
@@ -216,7 +253,7 @@ let rec sum_scalar_multiplication_ output input s ctr =
   )
 
 
-val mul_shift_reduce_:
+private val mul_shift_reduce_:
   output:felem_wide ->
   input:felem ->
   input2:felem ->
@@ -224,7 +261,7 @@ val mul_shift_reduce_:
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let rec mul_shift_reduce_ output input input2 ctr =
+private let rec mul_shift_reduce_ output input input2 ctr =
   let open FStar.UInt32 in
   if (ctr =^ 0ul) then ()
   else (
@@ -237,14 +274,14 @@ let rec mul_shift_reduce_ output input input2 ctr =
 
 
 
-val fmul:
+private val fmul:
   output:felem ->
   input:felem ->
   input2:felem ->
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let fmul output input input2 =
+private let fmul output input input2 =
   push_frame();
   let tmp = create zero_64 len in
   let t   = create zero_128 len in
@@ -265,45 +302,97 @@ let fmul output input input2 =
   pop_frame()
 
 
+private val fsquare_:
+  output:felem ->
+  tmp:felem_wide ->
+  Stack unit
+    (requires (fun _ -> true))
+    (ensures (fun _ _ _ -> true))
+private let fsquare_ output t =
+  let r0 = output.(0ul) in
+  let r1 = output.(1ul) in
+  let r2 = output.(2ul) in
+  let r3 = output.(3ul) in
+  let r4 = output.(4ul) in
+  let d0 = r0 *^ (uint64_to_sint64 2uL) in
+  let d1 = r1 *^ (uint64_to_sint64 2uL) in
+  let d2 = r2 *^ (uint64_to_sint64 2uL) *^ (uint64_to_sint64 19uL) in
+  let d419 = r4 *^ (uint64_to_sint64 19uL) in
+  let d4 = d419 *^ (uint64_to_sint64 2uL) in
+  let open Hacl.UInt128 in
+  t.(0ul) <- ( r0) *^ r0 +^ ( d4) *^ r1 +^ (( d2) *^ (r3     ));
+  t.(1ul) <- ( d0) *^ r1 +^ ( d4) *^ r2 +^ (( r3) *^ (H64 (r3 *^ (uint64_to_sint64 19uL))));
+  t.(2ul) <- ( d0) *^ r2 +^ ( r1) *^ r1 +^ (( d4) *^ (r3     ));
+  t.(3ul) <- ( d0) *^ r3 +^ ( d1) *^ r2 +^ (( r4) *^ (d419   ));
+  t.(4ul) <- ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     ));
+  carry_wide_ t 0ul;
+  let tnm1 = t.(U32 (len -^ 1ul)) in
+  let t0   = t.(0ul) in
+  let c = sint128_to_sint64 (H128 (tnm1 >>^ limb_size)) in
+  t.(U32 (len -^ 1ul)) <- H128 (tnm1 &^ sint64_to_sint128 mask_51);
+  t.(0ul) <- H128 (t0 +^ (c *^ nineteen));
+  copy_from_wide_ output t len;
+  let output0 = output.(0ul) in
+  let output1 = output.(1ul) in
+  let open Hacl.UInt64 in
+  let c = output0 >>^ limb_size in
+  output.(0ul) <- output0 &^ mask_51;
+  output.(1ul) <- output1 +^ c
 
-val fsquare_times_:
+
+(* val fsquare_times_: *)
+(*   input:felem -> *)
+(*   count:U32.t -> *)
+(*   Stack unit *)
+(*     (requires (fun _ -> true)) *)
+(*     (ensures (fun _ _ _ -> true)) *)
+(* let rec fsquare_times_ tmp count = *)
+(*   if U32 (count =^ 0ul) then () *)
+(*   else ( *)
+(*     fmul tmp tmp tmp; *)
+(*     fsquare_times_ tmp (U32 (count -^ 1ul)) *)
+(*   ) *)
+
+private val fsquare_times_:
   input:felem ->
+  tmp:felem_wide ->
   count:U32.t ->
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let rec fsquare_times_ tmp count =
+private let rec fsquare_times_ output tmp count =
   if U32 (count =^ 0ul) then ()
   else (
-    fmul tmp tmp tmp;
-    fsquare_times_ tmp (U32 (count -^ 1ul))
+    fsquare_ output tmp;
+    fsquare_times_ output tmp (U32 (count -^ 1ul))
   )
 
 
-val fsquare_times:
+private val fsquare_times:
   output:felem ->
   input:felem ->
   count:U32.t ->
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
-let fsquare_times output input count =
+private let fsquare_times output input count =
   push_frame();
   let tmp = create zero_64 len in
+  let t   = create zero_128 len in
   blit input 0ul tmp 0ul len;
-  fsquare_times_ tmp count;
+  fsquare_times_ tmp t count;
   blit tmp 0ul output 0ul len;
   pop_frame()
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
-val load64_le:
+private val load64_le:
   b:uint8_p{length b >= 8} ->
   Stack H64.t
     (requires (fun h -> live h b))
     (ensures  (fun h0 _ h1 -> h0 == h1))
-let load64_le b =
+private let load64_le b =
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
   let b2 = b.(2ul) in
@@ -324,13 +413,13 @@ let load64_le b =
   )
 
 
-val store64_le:
+private val store64_le:
   b:uint8_p{length b >= 8} ->
   z:H64.t ->
   Stack unit
     (requires (fun h -> live h b))
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b))
-let store64_le b z =
+private let store64_le b z =
   let open Hacl.UInt64 in
   b.(0ul) <- sint64_to_sint8 z;
   b.(1ul) <- sint64_to_sint8 (z >>^ 8ul);
@@ -342,10 +431,10 @@ let store64_le b z =
   b.(7ul) <- sint64_to_sint8 (z >>^ 56ul)
 
 
-val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack unit
+private val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack unit
   (requires (fun h -> live h output /\ live h input))
   (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
-let fexpand output input =
+private let fexpand output input =
   let mask_51 = uint64_to_sint64 0x7ffffffffffffuL in
   let i0 = load64_le (Buffer.sub input 0ul 8ul) in
   let i1 = load64_le (Buffer.sub input 6ul 8ul) in
@@ -364,10 +453,10 @@ let fexpand output input =
   output.(4ul) <- output4
 
 
-val fcontract: output:uint8_p{length output = 32} -> input:felem -> Stack unit
+private val fcontract: output:uint8_p{length output = 32} -> input:felem -> Stack unit
   (requires (fun h -> live h output /\ live h input))
   (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
-let fcontract output input =
+private let fcontract output input =
   let mask_51 = uint64_to_sint64 0x7ffffffffffffuL in
   let nineteen = uint64_to_sint64 19uL in
   let t0 = input.(0ul) in
@@ -439,7 +528,7 @@ let fcontract output input =
   store64_le (Buffer.sub output 24ul 8ul) o3
 
 
-val fmonty: x2:felem -> z2:felem ->
+private val fmonty: x2:felem -> z2:felem ->
   x3:felem -> z3:felem ->
   x:felem -> z:felem ->
   xprime:felem -> zprime:felem ->
@@ -448,7 +537,7 @@ val fmonty: x2:felem -> z2:felem ->
     (requires (fun h -> live h x2 /\ live h z2 /\ live h x3 /\ live h z3
       /\ live h x /\ live h z /\ live h xprime /\ live h zprime /\ live h qmqp))
     (ensures (fun h0 _ h1 -> true))
-let fmonty x2 z2 x3 z3 x z xprime zprime qmqp =
+private let fmonty x2 z2 x3 z3 x z xprime zprime qmqp =
   push_frame();
   let buf = create zero_64 40ul in
   let origx      = Buffer.sub buf 0ul  5ul in
@@ -484,47 +573,73 @@ let fmonty x2 z2 x3 z3 x z xprime zprime qmqp =
   pop_frame()
 
 
-val swap_conditional: a:felem -> b:felem -> iswap:limb ->
+(* private val swap_conditional: a:felem -> b:felem -> iswap:limb -> *)
+(*   Stack unit *)
+(*     (requires (fun h -> live h a /\ live h b)) *)
+(*     (ensures (fun h0 _ h1 -> modifies_2 a b h0 h1 /\ live h1 a /\ live h1 b)) *)
+(* private let swap_conditional a b iswap = *)
+(*   let a0 = a.(0ul) in *)
+(*   let a1 = a.(1ul) in *)
+(*   let a2 = a.(2ul) in *)
+(*   let a3 = a.(3ul) in *)
+(*   let a4 = a.(4ul) in *)
+(*   let b0 = b.(0ul) in *)
+(*   let b1 = b.(1ul) in *)
+(*   let b2 = b.(2ul) in *)
+(*   let b3 = b.(3ul) in *)
+(*   let b4 = b.(4ul) in *)
+(*   let swap = zero_64 -^ iswap in *)
+(*   let x = swap &^ (a0 ^^ b0) in *)
+(*   let a0 = a0 ^^ x in *)
+(*   let b0 = b0 ^^ x in *)
+(*   let x = swap &^ (a1 ^^ b1) in *)
+(*   let a1 = a1 ^^ x in *)
+(*   let b1 = b1 ^^ x in *)
+(*   let x = swap &^ (a2 ^^ b2) in *)
+(*   let a2 = a2 ^^ x in *)
+(*   let b2 = b2 ^^ x in *)
+(*   let x = swap &^ (a3 ^^ b3) in *)
+(*   let a3 = a3 ^^ x in *)
+(*   let b3 = b3 ^^ x in *)
+(*   let x = swap &^ (a4 ^^ b4) in *)
+(*   let a4 = a4 ^^ x in *)
+(*   let b4 = b4 ^^ x in *)
+(*   a.(0ul) <- a0; *)
+(*   a.(1ul) <- a1; *)
+(*   a.(2ul) <- a2; *)
+(*   a.(3ul) <- a3; *)
+(*   a.(4ul) <- a4; *)
+(*   b.(0ul) <- b0; *)
+(*   b.(1ul) <- b1; *)
+(*   b.(2ul) <- b2; *)
+(*   b.(3ul) <- b3; *)
+(*   b.(4ul) <- b4 *)
+
+private val swap_conditional_: a:felem -> b:felem -> swap:limb -> ctr:U32.t ->
   Stack unit
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> modifies_2 a b h0 h1 /\ live h1 a /\ live h1 b))
-let swap_conditional a b iswap =
-  let a0 = a.(0ul) in
-  let a1 = a.(1ul) in
-  let a2 = a.(2ul) in
-  let a3 = a.(3ul) in
-  let a4 = a.(4ul) in
-  let b0 = b.(0ul) in
-  let b1 = b.(1ul) in
-  let b2 = b.(2ul) in
-  let b3 = b.(3ul) in
-  let b4 = b.(4ul) in
+private let rec swap_conditional_ a b swap ctr =
+  if U32 (ctr =^ 0ul) then ()
+  else (
+    let i = U32 (ctr -^ 1ul) in
+    let ai = a.(i) in
+    let bi = b.(i) in
+    let x = swap &^ (ai ^^ bi) in
+    let ai = ai ^^ x in
+    let bi = bi ^^ x in
+    a.(i) <- ai;
+    b.(i) <- bi;
+    swap_conditional_ a b swap i
+  )
+
+private val swap_conditional: a:felem -> b:felem -> iswap:limb ->
+  Stack unit
+    (requires (fun h -> live h a /\ live h b))
+    (ensures (fun h0 _ h1 -> modifies_2 a b h0 h1 /\ live h1 a /\ live h1 b))
+private let rec swap_conditional a b iswap =
   let swap = zero_64 -^ iswap in
-  let x = swap &^ (a0 ^^ b0) in
-  let a0 = a0 ^^ x in
-  let b0 = b0 ^^ x in
-  let x = swap &^ (a1 ^^ b1) in
-  let a1 = a1 ^^ x in
-  let b1 = b1 ^^ x in
-  let x = swap &^ (a2 ^^ b2) in
-  let a2 = a2 ^^ x in
-  let b2 = b2 ^^ x in
-  let x = swap &^ (a3 ^^ b3) in
-  let a3 = a3 ^^ x in
-  let b3 = b3 ^^ x in
-  let x = swap &^ (a4 ^^ b4) in
-  let a4 = a4 ^^ x in
-  let b4 = b4 ^^ x in
-  a.(0ul) <- a0;
-  a.(1ul) <- a1;
-  a.(2ul) <- a2;
-  a.(3ul) <- a3;
-  a.(4ul) <- a4;
-  b.(0ul) <- b0;
-  b.(1ul) <- b1;
-  b.(2ul) <- b2;
-  b.(3ul) <- b3;
-  b.(4ul) <- b4
+  swap_conditional_ a b swap len
 
 
 val cmult_small_loop: nqx:felem -> nqz:felem -> nqpqx:felem -> nqpqz:felem ->

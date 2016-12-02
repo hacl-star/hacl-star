@@ -32,7 +32,6 @@
 #include "kremlib.h"
 #include "testlib.h"
 
-/*
 extern uint8_t Hacl_EC_Curve25519_recursive_zero_8;
 
 extern uint64_t Hacl_EC_Curve25519_recursive_zero_64;
@@ -65,11 +64,7 @@ extern uint64_t Hacl_EC_Curve25519_recursive_nineteen;
 
 extern uint64_t Hacl_EC_Curve25519_recursive_mask_51;
 
-void Hacl_EC_Curve25519_recursive_fsum_(uint64_t *a, uint64_t *b, uint32_t ctr);
-
 void Hacl_EC_Curve25519_recursive_fsum(uint64_t *a, uint64_t *b);
-
-void Hacl_EC_Curve25519_recursive_fdifference_(uint64_t *a, uint64_t *b, uint32_t ctr);
 
 void Hacl_EC_Curve25519_recursive_fdifference(uint64_t *a, uint64_t *b);
 
@@ -114,7 +109,14 @@ Hacl_EC_Curve25519_recursive_mul_shift_reduce_(
 
 void Hacl_EC_Curve25519_recursive_fmul(uint64_t *output, uint64_t *input, uint64_t *input2);
 
-void Hacl_EC_Curve25519_recursive_fsquare_times_(uint64_t *tmp, uint32_t count);
+void Hacl_EC_Curve25519_recursive_fsquare_(uint64_t *output, FStar_UInt128_t *t);
+
+void
+Hacl_EC_Curve25519_recursive_fsquare_times_(
+  uint64_t *output,
+  FStar_UInt128_t *tmp,
+  uint32_t count
+);
 
 void
 Hacl_EC_Curve25519_recursive_fsquare_times(uint64_t *output, uint64_t *input, uint32_t count);
@@ -138,6 +140,14 @@ Hacl_EC_Curve25519_recursive_fmonty(
   uint64_t *xprime,
   uint64_t *zprime,
   uint64_t *qmqp
+);
+
+void
+Hacl_EC_Curve25519_recursive_swap_conditional_(
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t swap,
+  uint32_t ctr
 );
 
 void Hacl_EC_Curve25519_recursive_swap_conditional(uint64_t *a, uint64_t *b, uint64_t iswap);
@@ -181,7 +191,6 @@ Hacl_EC_Curve25519_recursive_cmult(
 );
 
 void Hacl_EC_Curve25519_recursive_crecip(uint64_t *out, uint64_t *z);
-*/
 
 void
 Hacl_EC_Curve25519_recursive_crypto_scalarmult_curve25519_donna_c64(
