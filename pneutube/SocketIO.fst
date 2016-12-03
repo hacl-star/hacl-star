@@ -19,6 +19,10 @@ module HH = FStar.HyperHeap
 assume val socket_rgn: r:rid{is_eternal_region r /\ file_rgn <> r}
 type socket_ref = sb:buffer socket{length sb = 1 /\ socket_rgn = (frameOf sb)}
 
+(* The region in which socket addresses live *)
+assume val socket_addr_rgn: r:rid{is_eternal_region r /\ file_rgn <> r /\ socket_rgn <> r}
+type socket_addr_ref = sb:buffer socket_addr{length sb = 1 /\ socket_addr_rgn = (frameOf sb)}
+
 (* The socket state only depends on the socket region *)
 (* assume val current_state_: FStar.Heap.heap -> socket -> GTot socket_state *)
 (* val current_state: FStar.HyperStack.mem -> socket -> GTot socket_state *)
@@ -91,3 +95,29 @@ assume val tcp_close: s:socket_ref -> ST sresult
       /\ HS.modifies (Set.singleton socket_rgn) h0 h1
       /\ modifies_buf_1 socket_rgn s h0 h1
       /\ (r = SocketOk ==> current_state h1 s = Closed)))
+
+
+assume val udp_connect:
+  host: uint8_p ->
+  port:u32 ->
+  s:socket_ref ->
+  a:socket_addr_ref ->
+  ST sresult
+    (requires (fun h -> live h host /\ live h s /\ live h a))
+    (ensures  (fun h0 r h1 ->
+      HS.modifies (Set.singleton socket_rgn) h0 h1
+      /\ modifies_buf_2 socket_rgn s a h0 h1 (* When connecting the socket reference was modified *)
+      /\ live h1 s /\ live h1 a /\ live h1 host
+      /\ (match r with | SocketOk -> current_state h1 s = Open
+                      | _ -> True)))
+
+assume val udp_write_all: s:socket_ref ->
+  a:socket_addr_ref ->
+  b:uint8_p ->
+  len:u64{U64.v len <= length b} ->
+  Stack sresult
+    (requires (fun h0 -> live h0 s /\ live h0 a /\ live h0 b /\ current_state h0 s = Open))
+    (ensures  (fun h0 r h1 -> live h1 s /\ live h1 a /\ live h1 b
+      /\ HS.modifies (Set.singleton socket_rgn) h0 h1
+      /\ modifies_buf_2 socket_rgn s a h0 h1
+      /\ (r = SocketOk ==> current_state h1 s = Open)))
