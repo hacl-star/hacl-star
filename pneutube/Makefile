@@ -35,4 +35,4 @@ receive-lax: Hacl.Tube.Receive.fst
 
 clean:
 	rm -rf tube
-	rm -f *~ *.exe
+	rm -rf *~ *.exe *.dSYM
