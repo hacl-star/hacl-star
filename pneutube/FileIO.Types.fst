@@ -48,10 +48,21 @@ noeq type socket = {
   received_bytes:U64.t;
 }
 
-type socket_state = 
-     | Open: socket_state
-     | Closed: socket_state
-     | Error: socket_state
+noeq type sin_addr = {
+  s_addr:U32.t;
+}
+
+noeq type socket_addr = {
+  sin_family:FStar.Int32.t;
+  sin_port:U16.t;
+  sin_addr:sin_addr;
+  sin_zero:array FStar.Int8.t;
+}
+
+type socket_state =
+  | Open: socket_state
+  | Closed: socket_state
+  | Error: socket_state
 
 type sresult =
   | SocketOk: sresult
