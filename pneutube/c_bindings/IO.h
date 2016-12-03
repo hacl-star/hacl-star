@@ -78,6 +78,10 @@ sresult SocketIO_tcp_write_all(io_socket* conn, uint8_t* buf, uint64_t len);
 sresult SocketIO_tcp_read_all(io_socket* conn, uint8_t* buf, int len);
 sresult SocketIO_tcp_close(io_socket* conn);
 
+sresult SocketIO_udp_connect(char* host, int port, io_socket* sh, struct sockaddr_in* si);
+sresult SocketIO_udp_write_all(io_socket* sh, struct sockaddr_in* si, uint8_t* buf, uint64_t len);
+
+
 /* file_handle PaddedFileIO_init_file_handle(); */
 /* io_socket   SocketIO_init_socket(); */
 extern file_handle PaddedFileIO_init_file_handle;
