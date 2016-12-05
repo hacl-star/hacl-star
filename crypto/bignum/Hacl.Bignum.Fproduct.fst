@@ -11,13 +11,33 @@ open Hacl.Bignum.Modulo
 
 module U32 = FStar.UInt32
 
-#set-options "--lax"
+
+type seqelem = s:Seq.seq limb{Seq.length s = len}
+type seqelem_wide = s:Seq.seq wide{Seq.length s = len}
+
+
+let copy_from_wide_pre (s:seqelem_wide) : GTot Type0 =
+  (forall (i:nat). {:pattern w (Seq.index s i)} i < len ==> w (Seq.index s i) < pow2 n)
+
+
+val copy_from_wide_spec: s:seqelem_wide{copy_from_wide_pre s} -> i:nat{i <= len} ->
+  tmp:seqelem{(forall (j:nat). (j >= i /\ j < len) ==> v (Seq.index tmp j) = w (Seq.index s j))} -> Tot seqelem
+let rec copy_from_wide_spec s i tmp =
+  if i = 0 then tmp
+  else (
+    let i = i - 1 in
+    let si = Seq.index s i in
+    let tmpi = wide_to_limb si in
+    Math.Lemmas.modulo_lemma (w si) (pow2 n);
+    let tmp' = Seq.upd tmp i tmpi in
+    copy_from_wide_spec s i tmp'
+  )
 
 
 val copy_from_wide_:
   output:felem ->
   input:felem_wide ->
-  ctr:U32.t ->
+  ctr:U32.t{U32.v ctr <= len} ->
   Stack unit
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))

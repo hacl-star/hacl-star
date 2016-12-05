@@ -40,18 +40,36 @@ FSTAR_LIB_FILES= \
 HACL_LIB_FILES= Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst 
 
 
-x25519-parameters:
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include x25519 \
-		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
-		 Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
-		--verify_module Hacl.Bignum.Parameters
+# x25519-parameters:
+# 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+# 		--include x25519 \
+# 		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+# 		 Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
+# 		--verify_module Hacl.Bignum.Parameters
 
+# x25519-limb:
+# 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+# 		--include x25519 --detail_errors --print_before_norm \
+# 		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+# 		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
+# 		Hacl.Bignum.Limb.fst \
+# 		--verify_module Hacl.Bignum.Limb
 
-x25519-limb:
+# x25519-wide:
+# 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+# 		--include x25519 --detail_errors --print_before_norm \
+# 		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+# 		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
+# 		Hacl.Bignum.Wide.fst \
+# 		--verify_module Hacl.Bignum.Wide
+
+x25519-bigint:
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include x25519 --detail_errors --print_before_norm \
+		--include x25519  \
 		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
 		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
-		Hacl.Bignum.Limb.fsti Hacl.Bignum.Limb.fst \
-		--verify_module Hacl.Bignum.Limb
+		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst Hacl.Bignum.Bigint.fst \
+		$(addprefix --verify_module , 	Hacl.Bignum.Parameters \
+						Hacl.Bignum.Limb \
+						Hacl.Bignum.Wide \
+						Hacl.Bignum.Bigint)

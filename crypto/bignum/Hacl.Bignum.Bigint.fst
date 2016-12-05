@@ -8,7 +8,6 @@ open FStar.Buffer
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Limb
 open Hacl.Bignum.Wide
-(* open Hacl.Bignum.Lemmas *)
 
 module U32 = FStar.UInt32
 
