@@ -3,26 +3,26 @@ module Hacl.Bignum.Lemmas
 
 (* Bound lemmas associated to SMT patterns *)
 
-let lemma_max_uint8 (n:nat) : Lemma
-  (requires (n = 8))
-  (ensures (pow2 n = 256))
-  [SMTPat (pow2 n)]
-  = assert_norm(pow2 8 = 256)
-let lemma_max_uint32 (n:nat) : Lemma
-  (requires (n = 32))
-  (ensures (pow2 n = 4294967296))
-  [SMTPat (pow2 n)]
-  = assert_norm(pow2 32 = 4294967296)
-let lemma_max_uint64 (n:nat) : Lemma
-  (requires (n = 64))
-  (ensures (pow2 n = 18446744073709551616))
-  [SMTPat (pow2 n)]
-  = assert_norm(pow2 64 = 18446744073709551616)
-let lemma_max_uint128 (n:nat) : Lemma
-  (requires (n = 128))
-  (ensures (pow2 n = 340282366920938463463374607431768211456))
-  [SMTPat (pow2 n)]
-  = assert_norm(pow2 128 = 340282366920938463463374607431768211456)
+(* let lemma_max_uint8 (n:nat) : Lemma *)
+(*   (requires (n = 8)) *)
+(*   (ensures (pow2 n = 256)) *)
+(*   [SMTPat (pow2 n)] *)
+(*   = assert_norm(pow2 8 = 256) *)
+(* let lemma_max_uint32 (n:nat) : Lemma *)
+(*   (requires (n = 32)) *)
+(*   (ensures (pow2 n = 4294967296)) *)
+(*   [SMTPat (pow2 n)] *)
+(*   = assert_norm(pow2 32 = 4294967296) *)
+(* let lemma_max_uint64 (n:nat) : Lemma *)
+(*   (requires (n = 64)) *)
+(*   (ensures (pow2 n = 18446744073709551616)) *)
+(*   [SMTPat (pow2 n)] *)
+(*   = assert_norm(pow2 64 = 18446744073709551616) *)
+(* let lemma_max_uint128 (n:nat) : Lemma *)
+(*   (requires (n = 128)) *)
+(*   (ensures (pow2 n = 340282366920938463463374607431768211456)) *)
+(*   [SMTPat (pow2 n)] *)
+(*   = assert_norm(pow2 128 = 340282366920938463463374607431768211456) *)
 (* let lemma_2_51 (n:nat) : Lemma *)
 (*   (requires (n = 51)) *)
 (*   (ensures (pow2 n = 2251799813685248)) *)
