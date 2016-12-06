@@ -53,7 +53,6 @@ inline_for_extraction let lte_mask a b = wide_lte_mask a b
 
 
 (* Infix notations *)
-
 inline_for_extraction let op_Plus_Hat a b = add a b
 inline_for_extraction let op_Plus_Percent_Hat a b = add_mod a b
 inline_for_extraction let op_Subtraction_Hat a b = sub a b
@@ -63,4 +62,6 @@ inline_for_extraction let op_Hat_Hat a b = logxor a b
 inline_for_extraction let op_Bar_Hat a b = logor a b
 inline_for_extraction let op_Greater_Greater_Hat a s = shift_right a s
 inline_for_extraction let op_Less_Less_Hat a s = shift_left a s
+
 inline_for_extraction let mul_wide a b = mul_wide a b
+inline_for_extraction let op_Star_Hat a b = mul_wide a b

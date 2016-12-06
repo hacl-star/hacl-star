@@ -35,7 +35,7 @@ val fdifference:
     (ensures (fun _ _ _ -> true))
 let fdifference a b =
   add_zero b;
-  fdifference a b
+  fdifference_ a b clen
 
 
 val fscalar:
@@ -47,7 +47,7 @@ val fscalar:
     (ensures (fun _ _ _ -> true))
 let fscalar output b s =
   push_frame();
-  let tmp = create Hacl.Bignum.Wide.zero clen in
+  let tmp = create wide_zero clen in
   fscalar tmp b s;
   carry_wide_ tmp 0ul;
   reduce_wide tmp;

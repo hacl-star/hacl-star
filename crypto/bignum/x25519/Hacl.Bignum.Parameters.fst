@@ -25,6 +25,8 @@ open Hacl.UInt64
 
 inline_for_extraction let v x = v x
 
+let lemma_limb_injectivity a b = ()
+
 inline_for_extraction let limb_zero = uint64_to_sint64 0uL
 inline_for_extraction let limb_one  = uint64_to_sint64 1uL
 
@@ -60,6 +62,8 @@ inline_for_extraction let byte_to_limb x = sint8_to_sint64 x
 open Hacl.UInt128
 
 inline_for_extraction let w x = Hacl.UInt128.v x
+
+let lemma_wide_injectivity a b = ()
 
 inline_for_extraction let wide_zero = sint64_to_sint128 (uint64_to_sint64 0uL)
 inline_for_extraction let wide_one  = sint64_to_sint128 (uint64_to_sint64 1uL)

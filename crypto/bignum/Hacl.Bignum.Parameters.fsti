@@ -25,7 +25,7 @@ type felem_wide = b:buffer wide{length b = len}
 
 
 (** Associates a weight in bits to each limb of the bigint *)
-val limb_size: pos
+val limb_size: s:pos{s < word_size}
 inline_for_extraction val climb_size: l:FStar.UInt32.t{limb_size = FStar.UInt32.v l}
 
 val lemma_prime_limb_size: unit -> Lemma (pow2 (len * limb_size) > prime)
@@ -33,6 +33,11 @@ val lemma_prime_limb_size: unit -> Lemma (pow2 (len * limb_size) > prime)
 (* Limb operators *)
 inline_for_extraction let limb_n = word_size
 inline_for_extraction val v: limb -> GTot (FStar.UInt.uint_t limb_n)
+
+val lemma_limb_injectivity: a:limb -> b:limb -> Lemma
+  (requires (True))
+  (ensures (v a = v b ==> a == b))
+  [SMTPat (v a); SMTPat (v b)]
 
 inline_for_extraction val limb_zero: x:limb{v x = 0}
 inline_for_extraction val limb_one: x:limb{v x = 1}
@@ -72,6 +77,11 @@ inline_for_extraction let wide_n = 2 * word_size
 
 inline_for_extraction val w: wide -> GTot (FStar.UInt.uint_t wide_n)
 
+val lemma_wide_injectivity: a:wide -> b:wide -> Lemma
+  (requires (True))
+  (ensures (w a = w b ==> a == b))
+  [SMTPat (w a); SMTPat (w b)]
+
 inline_for_extraction val wide_zero: x:wide{w x = 0}
 inline_for_extraction val wide_one: x:wide{w x = 1}
 
@@ -98,8 +108,6 @@ inline_for_extraction val wide_lt_mask: a:wide -> b:wide -> Tot (c:wide{(w a < w
 inline_for_extraction val wide_lte_mask: a:wide -> b:wide -> Tot (c:wide{(w a <= w b ==> w c = pow2 wide_n - 1) /\ (w a > w b ==> w c = 0)})
 
 inline_for_extraction val mul_wide: a:limb -> b:limb -> Tot (c:wide{w c = v a * v b})
-
-inline_for_extraction let op_Star_Hat = mul_wide
 
 inline_for_extraction val limb_to_wide: x:limb -> Tot (y:wide{w y = v x})
 inline_for_extraction val wide_to_limb: x:wide -> Tot (y:limb{v y = w x % pow2 limb_n})
