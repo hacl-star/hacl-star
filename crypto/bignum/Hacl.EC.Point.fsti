@@ -24,10 +24,10 @@ val getz: point -> Tot felem
 
 
 (** Liveness of the point, depends on the Jacobian/Projective setup **)
-val live_coords: mem -> felem -> felem -> felem -> GTot bool
-val live: mem -> point -> GTot bool
+val live_coords: mem -> felem -> felem -> felem -> GTot Type0
+val live: mem -> point -> GTot Type0
 
-val make: felem -> felem -> felem -> Tot point
+val make: x:felem -> y:felem -> z:felem -> Tot (p:point)
 
 
 (** Workable state of a point **)

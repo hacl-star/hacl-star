@@ -63,13 +63,65 @@ HACL_LIB_FILES= Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst 
 # 		Hacl.Bignum.Wide.fst \
 # 		--verify_module Hacl.Bignum.Wide
 
-x25519-bigint:
+bignum:
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include x25519  \
 		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
-		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
-		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst Hacl.Bignum.Bigint.fst \
+		generic/Hacl.Bignum.Constants.fsti \
+		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
+		Hacl.Bignum.Bigint.fst \
+		Hacl.Bignum.Modulo.fsti \
+		Hacl.Bignum.Predicates.fsti \
+		Hacl.Bignum.Fsum.Spec.fst Hacl.Bignum.Fdifference.Spec.fst  \
+		Hacl.Bignum.Fscalar.Spec.fst Hacl.Bignum.Fproduct.Spec.fst \
+		Hacl.Bignum.Fsum.fst Hacl.Bignum.Fdifference.fst  \
+		Hacl.Bignum.Fscalar.fst Hacl.Bignum.Fproduct.fst \
+		Hacl.Bignum.Crecip.fsti Hacl.Bignum.fst \
 		$(addprefix --verify_module , 	Hacl.Bignum.Parameters \
 						Hacl.Bignum.Limb \
 						Hacl.Bignum.Wide \
-						Hacl.Bignum.Bigint)
+						Hacl.Bignum.Bigint \
+						Hacl.Bignum.Modulo \
+						Hacl.Bignum.Fsum.Spec \
+						Hacl.Bignum.Fdifference.Spec \
+						Hacl.Bignum.Fscalar.Spec \
+						Hacl.Bignum.Fproduct.Spec \
+						Hacl.Bignum.Fsum \
+						Hacl.Bignum.Fdifference \
+						Hacl.Bignum.Fscalar \
+						Hacl.Bignum.Fproduct \
+						Hacl.Bignum.Crecip \
+						Hacl.Bignum.Predicates \
+						Hacl.Bignum \
+		)
+
+x25519-bignum:
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --lax \
+		--include x25519  \
+		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+		Hacl.Bignum.Constants.fst \
+		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
+		Hacl.Bignum.Bigint.fst \
+		Hacl.Bignum.Modulo.fsti Hacl.Bignum.Modulo.fst \
+		Hacl.Bignum.Predicates.fsti Hacl.Bignum.Predicates.fst \
+		Hacl.Bignum.Fsum.Spec.fst Hacl.Bignum.Fdifference.Spec.fst  \
+		Hacl.Bignum.Fscalar.Spec.fst Hacl.Bignum.Fproduct.Spec.fst \
+		Hacl.Bignum.Fsum.fst Hacl.Bignum.Fdifference.fst  \
+		Hacl.Bignum.Fscalar.fst Hacl.Bignum.Fproduct.fst \
+		Hacl.Bignum.Crecip.fsti Hacl.Bignum.Crecip.fst Hacl.Bignum.fst \
+		$(addprefix --verify_module , 	Hacl.Bignum.Parameters \
+						Hacl.Bignum.Limb \
+						Hacl.Bignum.Wide \
+						Hacl.Bignum.Bigint \
+						Hacl.Bignum.Modulo \
+						Hacl.Bignum.Fsum.Spec \
+						Hacl.Bignum.Fdifference.Spec \
+						Hacl.Bignum.Fscalar.Spec \
+						Hacl.Bignum.Fproduct.Spec \
+						Hacl.Bignum.Fsum \
+						Hacl.Bignum.Fdifference \
+						Hacl.Bignum.Fscalar \
+						Hacl.Bignum.Fproduct \
+						Hacl.Bignum.Crecip \
+						Hacl.Bignum.Predicates \
+						Hacl.Bignum \
+		)

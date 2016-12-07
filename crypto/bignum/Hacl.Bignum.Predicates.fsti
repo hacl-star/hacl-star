@@ -8,9 +8,7 @@ open FStar.Buffer
 open Hacl.Bignum.Parameters
 
 
-type sfelem      = Seq.seq limb
-type sfelem_wide = Seq.seq wide
-
+#set-options "--lax"
 
 let is_sum h1 (a:felem) h0 (b:felem) : GTot Type0 =
   live h1 a /\ live h0 a /\ live h0 b

@@ -12,10 +12,6 @@ open Hacl.Bignum.Limb
 
 module U32 = FStar.UInt32
 
-
-type seqelem = s:Seq.seq limb{Seq.length s = len}
-type seqelem_wide = s:Seq.seq wide{Seq.length s = len}
-
 val add_zero_pre: seqelem -> GTot Type0
 
 val add_zero_spec: s:seqelem{add_zero_pre s} -> Tot seqelem
@@ -27,20 +23,6 @@ val add_zero:
     (ensures (fun h0 _ h1 -> live h0 b /\ add_zero_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == add_zero_spec (as_seq h0 b)
       /\ eval h1 b % prime = eval h0 b % prime))
-
-(* val shift_reduce_pre: seqelem -> GTot Type0 *)
-
-
-(* val shift_reduce_spec: s:seqelem{shift_reduce_pre s} -> Tot seqelem *)
-
-
-(* val shift_reduce: *)
-(*   b:felem -> *)
-(*   Stack unit *)
-(*     (requires (fun h -> live h b /\ shift_reduce_pre (as_seq h b))) *)
-(*     (ensures (fun h0 _ h1 -> live h0 b /\ shift_reduce_pre (as_seq h0 b) /\ modifies_1 b h0 h1 /\ live h1 b *)
-(*       /\ as_seq h1 b == shift_reduce_spec (as_seq h0 b))) *)
-
 
 val carry_top_pre: seqelem -> GTot Type0
 
