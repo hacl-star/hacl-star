@@ -27,7 +27,6 @@ type seqelem = s:Seq.seq limb{Seq.length s = len}
 type seqelem_wide = s:Seq.seq wide{Seq.length s = len}
 
 (** Associates a weight in bits to each limb of the bigint *)
-val limb_size: s:pos{s < word_size}
 inline_for_extraction val climb_size: l:FStar.UInt32.t{limb_size = FStar.UInt32.v l}
 
 val lemma_prime_limb_size: unit -> Lemma (pow2 (len * limb_size) > prime)

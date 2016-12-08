@@ -5,6 +5,7 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
 
+open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Limb
 open Hacl.Bignum.Wide

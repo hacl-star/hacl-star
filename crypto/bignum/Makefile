@@ -99,7 +99,8 @@ x25519-bignum:
 		--include x25519  \
 		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
 		Hacl.Bignum.Constants.fst \
-		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
+		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
+		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
 		Hacl.Bignum.Bigint.fst \
 		Hacl.Bignum.Modulo.fsti Hacl.Bignum.Modulo.fst \
 		Hacl.Bignum.Predicates.fsti Hacl.Bignum.Predicates.fst \

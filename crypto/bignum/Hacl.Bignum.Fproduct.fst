@@ -4,6 +4,7 @@ module Hacl.Bignum.Fproduct
 open FStar.HyperStack
 open FStar.Buffer
 
+open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb

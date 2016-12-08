@@ -1,5 +1,6 @@
 module Hacl.Bignum.Fproduct.Spec
 
+open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb

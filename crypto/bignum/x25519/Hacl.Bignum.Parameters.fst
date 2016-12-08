@@ -3,20 +3,13 @@ module Hacl.Bignum.Parameters
 open FStar.HyperStack
 open FStar.Buffer
 open Hacl.Cast
-
-let prime =
-  assert_norm (pow2 255 > 19);
-  pow2 255 - 19
-
-let word_size = 64
+open Hacl.Bignum.Constants
 
 inline_for_extraction let limb = Hacl.UInt64.t
 inline_for_extraction let wide = Hacl.UInt128.t
 
-let len = 5
 inline_for_extraction let clen = 5ul
 
-let limb_size = 51
 inline_for_extraction let climb_size = 51ul
 
 let lemma_prime_limb_size () = assert_norm (pow2 (5 * 51) > pow2 255 - 19)
@@ -99,26 +92,4 @@ inline_for_extraction let mul_wide x y = mul_wide x y
 inline_for_extraction let limb_to_wide x = sint64_to_sint128 x
 inline_for_extraction let wide_to_limb x = sint128_to_sint64 x
 
-(* let reduced_after_mul h b = *)
-(*   let _ = 0 in *)
-(*   live h b /\ v (get h b 0) < pow2 52 /\ v (get h b 1) < pow2 52 /\ v (get h b 2) < pow2 52 *)
-(*   /\ v (get h b 3) < pow2 52 /\ v (get h b 4) < pow2 52 *)
-
-(* let reduced_before_mul_l h b = *)
-(*   let _ = 0 in *)
-(*   live h b /\ v (get h b 0) < pow2 53 /\ v (get h b 1) < pow2 53 /\ v (get h b 2) < pow2 53 *)
-(*   /\ v (get h b 3) < pow2 53 /\ v (get h b 4) < pow2 53 *)
-
-(* let reduced_before_mul_r h b = *)
-(*   let _ = 0 in *)
-(*   live h b /\ v (get h b 0) < pow2 54 /\ v (get h b 1) < pow2 54 /\ v (get h b 2) < pow2 54 *)
-(*   /\ v (get h b 3) < pow2 54 /\ v (get h b 4) < pow2 54 *)
-
-(* let reduced_wide h b = *)
-(*   let _ = 0 in *)
-(*   live h b /\ w (get h b 0) < pow2 52 /\ w (get h b 1) < pow2 52 /\ w (get h b 2) < pow2 52 *)
-(*   /\ w (get h b 3) < pow2 52 /\ w (get h b 4) < pow2 52 *)
-
-(* let reducible h b = *)
-(*   (\* TODO *\) *)
-(*   admit() *)
+inline_for_extraction let uint64_to_limb x = Hacl.Cast.uint64_to_sint64 x
