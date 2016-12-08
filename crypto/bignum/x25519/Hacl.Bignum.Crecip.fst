@@ -8,11 +8,9 @@ open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
 open Hacl.Bignum.Fproduct
 
-module U32 = FStar.UInt32
-
 let crecip out z =
   push_frame();
-  let buf = create zero_64 20ul in
+  let buf = create limb_zero 20ul in
   let a  = Buffer.sub buf 0ul  5ul in
   let t0 = Buffer.sub buf 5ul  5ul in
   let b  = Buffer.sub buf 10ul 5ul in

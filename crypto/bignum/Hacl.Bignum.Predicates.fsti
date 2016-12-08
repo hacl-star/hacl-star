@@ -26,7 +26,7 @@ let is_sum_scalar_multiplication h1 (a:felem_wide) h0 (b:felem) s : GTot Type0 =
   /\ (forall (i:nat). {:pattern (w (get h1 a i))} i < len ==> w (get h1 a i) = v (get h0 b i) * s)
  
 
-val is_shift_reduced: mem -> felem -> mem -> felem -> GTot Type0
+(* val is_shift_reduced: mem -> felem -> mem -> felem -> GTot Type0 *)
 
 
 
