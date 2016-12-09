@@ -32,7 +32,7 @@ private val lemma_max_uint64: n:nat -> Lemma
 let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val crypto_stream_xsalsa20:
   c:uint8_p ->

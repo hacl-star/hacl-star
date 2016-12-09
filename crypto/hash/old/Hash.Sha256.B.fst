@@ -129,7 +129,7 @@ let rec be_bytes_of_uint32s output m len =
     end
 
 
-#reset-options "--z3timeout 50"
+#reset-options "--z3rlimit 50"
 
 //
 // SHA-256

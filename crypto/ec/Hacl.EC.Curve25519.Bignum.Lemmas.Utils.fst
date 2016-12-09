@@ -13,7 +13,7 @@ open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_bitweight_values: unit ->
   Lemma (bitweight templ 0 = 0 /\ bitweight templ 1 = 51
@@ -34,7 +34,7 @@ let lemma_bitweight_values () =
   bitweight_def templ 9
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_5:
   h:mem ->
@@ -55,7 +55,7 @@ let lemma_eval_bigint_5 h b =
   eval_def h b 4;
   eval_def h b 5
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_6:
   h:mem ->
@@ -78,7 +78,7 @@ let lemma_eval_bigint_6 h b =
   eval_def h b 5;
   eval_def h b 6
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_9:
   h:mem ->
@@ -129,7 +129,7 @@ let lemma_eval_bigint_wide_5 h b =
   eval_wide_def h b 5
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_wide_6:
   h:mem ->
@@ -152,7 +152,7 @@ let lemma_eval_bigint_wide_6 h b =
   eval_wide_def h b 5;
   eval_wide_def h b 6
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_wide_9:
   h:mem ->

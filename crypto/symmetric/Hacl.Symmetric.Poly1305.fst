@@ -55,7 +55,7 @@ let esel_word h b = hide (sel_word h b)
 val esel_word_16:h:mem -> b:wordB_16{live h b} -> Tot (erased word_16)
 let esel_word_16 h b = hide (sel_word h b)
 
-#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3timeout 20"
+#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 20"
 
 // when ideal, we use the actual contents
 private val read_word_: b:wordB_16 -> s:seq byte -> i:U32.t{U32.v i = Seq.length s /\ U32.v i <= 16} -> ST word_16
@@ -231,7 +231,7 @@ val add_and_multiply: acc:elemB -> block:elemB{disjoint acc block} -> r:elemB{di
     /\ modifies_1 acc h0 h1 // It was the only thing modified
     /\ sel_elem h1 acc = (sel_elem h0 acc +@ sel_elem h0 block) *@ sel_elem h0 r))
 
-#set-options "--z3timeout 30"
+#set-options "--z3rlimit 30"
 //NS: hint fails to replay
 let add_and_multiply acc block r =
   let h0 = ST.get () in
@@ -471,7 +471,7 @@ val toField_plus: a:elemB{length a = norm_length} -> b:wordB{disjoint a b} ->
     pow2 (8 * w len) + little_endian (Seq.slice (sel_word h0 b) 0 (w len)) ))
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3timeout 60 --detail_errors"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 60 --detail_errors"
 
 let toField_plus a b len =
   let h0 = ST.get() in
@@ -678,7 +678,7 @@ val poly1305_update:
       (*    ilog updated_log == SeqProperties.snoc (ilog current_log) (encode (sel_word h1 msg)) *)
       (*    /\ sel_elem h1 acc == poly (ilog updated_log) (sel_elem h0 r)) )) *)
 
-#set-options "--z3timeout 60 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 60 --initial_fuel 1 --max_fuel 1"
 
 let poly1305_update (* log *) msgB acc r =
   let h0 = ST.get () in
@@ -712,7 +712,7 @@ let poly1305_update (* log *) msgB acc r =
   (* updated_log *)
 
 
-#set-options "--z3timeout 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 val append_as_seq_sub: h:mem -> n:UInt32.t -> m:UInt32.t -> msg:bytes{live h msg /\ w m <= w n /\ w n <= length msg} -> Lemma
   (append (as_seq h (Buffer.sub msg 0ul m))
@@ -740,7 +740,7 @@ val poly1305_loop: (* current_log:log_t ->  *)
       (*   encode_pad (ilog current_log) (as_seq h0 (Buffer.sub msg 0ul (UInt32.mul 16ul ctr))) /\ *)
       (*   sel_elem h1 acc == poly (ilog updated_log) (sel_elem h0 r))) )) *)
     (decreases (w ctr))
-#set-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let rec poly1305_loop (* log *) msg acc r ctr =
   let h0 = ST.get () in
   if U32.lte ctr 0ul then
@@ -783,7 +783,7 @@ let rec poly1305_loop (* log *) msg acc r ctr =
     end
 
 
-#set-options "--z3timeout 30 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 30 --initial_fuel 0 --max_fuel 0"
 
 (**
    Performs the last step if there is an incomplete block

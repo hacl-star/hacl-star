@@ -13,7 +13,7 @@ open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_bitweight_values: unit ->
   Lemma (bitweight templ 0 = 0 /\ bitweight templ 1 = 51
@@ -34,7 +34,7 @@ let lemma_bitweight_values () =
   bitweight_def templ 9
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_5:
   h:mem ->
@@ -55,7 +55,7 @@ let lemma_eval_bigint_5 h b =
   eval_def h b 4;
   eval_def h b 5
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_6:
   h:mem ->
@@ -78,7 +78,7 @@ let lemma_eval_bigint_6 h b =
   eval_def h b 5;
   eval_def h b 6
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_9:
   h:mem ->
@@ -114,7 +114,7 @@ val lemma_eval_bigint_wide_5:
   b:bigint_wide ->
   Lemma (requires (live h b))
 	(ensures  (live h b
-	  /\ eval_wide h b norm_length = H128 (v (get h b 0) + pow2 51  * v (get h b 1)
+	  /\ eval_wide h b norm_length = H128.(v (get h b 0) + pow2 51  * v (get h b 1)
 						  + pow2 102 * v (get h b 2)
 						  + pow2 153 * v (get h b 3)
 						  + pow2 204 * v (get h b 4)) ))
@@ -129,14 +129,14 @@ let lemma_eval_bigint_wide_5 h b =
   eval_wide_def h b 5
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_wide_6:
   h:mem ->
   b:bigint_wide ->
   Lemma (requires (live h b /\ length b >= norm_length+1))
 	(ensures  (live h b /\ length b >= norm_length+1
-	  /\ eval_wide h b (norm_length+1) = H128 (v (get h b 0) + pow2 51  * v (get h b 1)
+	  /\ eval_wide h b (norm_length+1) = H128.(v (get h b 0) + pow2 51  * v (get h b 1)
 						     + pow2 102  * v (get h b 2)
 						     + pow2 153  * v (get h b 3)
 						     + pow2 204 * v (get h b 4)
@@ -152,14 +152,14 @@ let lemma_eval_bigint_wide_6 h b =
   eval_wide_def h b 5;
   eval_wide_def h b 6
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_wide_9:
   h:mem ->
   b:bigint_wide ->
   Lemma (requires (live h b /\ length b >= 2*norm_length-1))
 	(ensures  (live h b /\ length b >= 2*norm_length-1
-	  /\ eval_wide h b (2*norm_length-1) = H128 (v (get h b 0) + pow2 51  * v (get h b 1)
+	  /\ eval_wide h b (2*norm_length-1) = H128.(v (get h b 0) + pow2 51  * v (get h b 1)
 						       + pow2 102  * v (get h b 2)
 						       + pow2 153  * v (get h b 3)
 						       + pow2 204 * v (get h b 4)

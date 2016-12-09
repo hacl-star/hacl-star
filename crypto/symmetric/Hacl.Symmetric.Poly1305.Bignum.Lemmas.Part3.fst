@@ -24,7 +24,7 @@ module H64 = Hacl.UInt64
 module HS = FStar.HyperStack
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_div_def: a:nat -> b:pos -> Lemma (a = b * (a / b) + a % b)
 let lemma_div_def a b = ()
@@ -40,7 +40,7 @@ let lemma_modulo_add a b p =
   lemma_mod_plus_distr_l a b p
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_modulo_9_0: f:nat -> g:nat -> h:nat -> i:nat -> Lemma
   (let p = reveal prime in 
@@ -63,7 +63,7 @@ let lemma_modulo_9_1 f g h i =
   lemma_modulo_add (pow2 208 * i)  ((pow2 182 * h)%p) p
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_modulo_9_2: f:nat -> g:nat -> h:nat -> i:nat -> Lemma
   (let p = reveal prime in 
@@ -82,7 +82,7 @@ let lemma_modulo_9_2 f g h i =
   lemma_modulo_add ((pow2 208%p) * i)  (((pow2 182%p) * h)%p) p
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_modulo_9_3: f:nat -> g:nat -> h:nat -> i:nat -> Lemma
   (let p = reveal prime in 
@@ -96,7 +96,7 @@ let lemma_modulo_9_3 f g h i =
   lemma_modulo_add ((pow2 182 % p) * h + (pow2 208 % p) * i)  (((pow2 130 % p) * f + (pow2 156%p) * g) % p) p
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_modulo_9: a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat -> g:nat -> h:nat -> i:nat ->
   Lemma (requires (True))
@@ -129,7 +129,7 @@ let lemma_modulo_9 a b c d e f g h i =
   cut (m0 % p = ((pow2 130 % p) * f + (pow2 156 % p) * g + (pow2 182 % p) * h + (pow2 208 % p) * i) % p);
   lemma_modulo_add m2 m1 p
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val lemma_2_130_modulo_prime: unit -> Lemma (pow2 130 % (pow2 130 - 5) = 5)
 let lemma_2_130_modulo_prime () =
@@ -140,7 +140,7 @@ let lemma_2_130_modulo_prime () =
   lemma_mod_a_b (pow2 130 - 5) 5
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 let isDegreeReduced (h0:mem) (h1:mem) (b:bigint) =
   live h0 b /\ live h1 b /\ length b >= 2*norm_length-1
@@ -174,7 +174,7 @@ let bound63 (h:heap) (b:bigint) : GTot Type0 =
   /\ v (get h b 3) < pow2 63 /\ v (get h b 4) < pow2 63
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_freduce_degree1:
   h0:mem -> h1:mem ->
@@ -231,7 +231,7 @@ let lemma_2_26_p (a:nat) : Lemma (requires (a < pow2 26)) (ensures  (a < reveal 
     lemma_modulo_00 a (reveal prime)
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 val lemma_freduce_degree2:
   h0:mem -> h1:mem ->

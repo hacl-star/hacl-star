@@ -38,7 +38,7 @@ private val lemma_max_uint64: n:nat -> Lemma
 let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 (* Blocksize needs to be a power of 2 *)
 inline_for_extraction let blocksize_bits = 18ul
@@ -93,7 +93,7 @@ let makeStreamID b =
     randombytes_buf b 16uL
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 
 val store64_le:
@@ -143,7 +143,7 @@ let load64_le b =
 open FStar.Mul
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
@@ -154,7 +154,7 @@ noextract let triple (a:HH.rid) (b:HH.rid) (c:HH.rid) = Set.union (Set.singleton
 type uint8_p = b:uint8_p{frameOf b <> file_rgn /\ frameOf b <> socket_rgn}
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 private val file_send_loop:
   fh:fh_ref ->
@@ -212,7 +212,7 @@ private let rec file_send_loop fh sb immut_state mut_state seqno len =
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 private val file_send_fragments:
   sb:socket_ref ->
@@ -268,7 +268,7 @@ private let file_send_fragments sb fb immut_state mut_state seqno fragments rem 
   | SocketError -> SocketError
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 private val file_flush_all:
   sb:socket_ref ->
@@ -329,7 +329,7 @@ private let file_flush_all sb fb immut_state mut_state ctr rem =
             | SocketError -> SocketError )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 
 private val file_send_2:
@@ -405,7 +405,7 @@ val file_send:
     	      	        U32.v fsize <= length file))
     (ensures  (fun h0 s h1 -> true))
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 let file_send fsize f r h p skA pkB =
   push_frame();

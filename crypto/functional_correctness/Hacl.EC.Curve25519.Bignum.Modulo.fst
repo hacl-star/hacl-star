@@ -30,7 +30,7 @@ module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 val times_wide_19: x:s128{19 * H128.v x < pow2 platform_wide} -> Tot (y:s128{H128.v y = 19 * H128.v x})
 let times_wide_19 x =
@@ -45,7 +45,7 @@ let times_wide_19 x =
   x +^ y +^ z
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val freduce_degree_:
   b:bigint_wide ->
@@ -126,7 +126,7 @@ let isCarriedWide_
     )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private val carry_wide_1_0:
   b:bigint_wide{length b >= norm_length+1} ->
@@ -155,7 +155,7 @@ let carry_wide_1_0 b b0 b1 b2 b3 b4 =
   update_wide_6 b b0' b1' b2' b3' b4' b5'
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val carry_wide_1_:
   b:bigint_wide{length b >= norm_length+1} ->
@@ -220,7 +220,7 @@ val carry_wide_top_:
 let carry_wide_top_ b =
   let b0 = b.(0ul) in
   let b5 = b.(5ul) in
-  b.(0ul) <- H128 (b0 +^ times_wide_19 b5)
+  b.(0ul) <- H128.(b0 +^ times_wide_19 b5)
 
 
 val carry_wide_top_1:
@@ -270,7 +270,7 @@ let carry_wide_0_to_1_ b =
   let b0' = mod_wide_2_51 b0 in
   let r0  = div_wide_2_51 b0 in
   b.(0ul) <- b0';
-  b.(1ul) <- H128 (b1 +^ r0)
+  b.(1ul) <- H128.(b1 +^ r0)
 
 
 val carry_wide_0_to_1:
@@ -383,7 +383,7 @@ let carry_1_0' b b0 b1 b2 b3 b4 =
   update_6 b b0' b1' b2' b3' b4' b5'
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val carry_1_':
   b:bigint{length b >= norm_length+1} ->
@@ -480,7 +480,7 @@ let carry_top_2' b =
   lemma_carry_top_2 h0 h1 b
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val carry_0_to_1_':
   b:bigint ->
@@ -525,7 +525,7 @@ let freduce_coefficients b =
   carry_top_2' b;
   carry_0_to_1' b
 
-#reset-options "--initial_fuel 0 --max_fuel 9 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 9 --z3rlimit 20"
 
 open Hacl.EC.Curve25519.Bignum.Modulo.Lemmas3
 
@@ -536,7 +536,7 @@ private val lemma_2_255m19_val: n:nat ->
         [SMTPat (pow2 n - 19)]
 let lemma_2_255m19_val n = assert_norm (pow2 255 - 19 = 57896044618658097711785492504343953926634992332820282019728792003956564819949)
 
-#reset-options "--initial_fuel 0 --max_fuel 9 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 9 --z3rlimit 100"
 
 val normalize:
   b:bigint ->

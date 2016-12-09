@@ -53,7 +53,7 @@ let w : U32.t -> Tot int = U32.v
 
 (*** Addition ***)
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsum_0:
   a0:H64.t -> a1:H64.t -> a2:H64.t -> a3:H64.t -> a4:H64.t ->
@@ -68,7 +68,7 @@ let lemma_fsum_0 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   pow2_double_sum 26;
   pow2_lt_compat 64 27
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_bitweight_values: unit ->
   Lemma (bitweight templ 0 = 0 /\ bitweight templ 1 = 26
@@ -88,7 +88,7 @@ let lemma_bitweight_values () =
   bitweight_def templ 8;
   bitweight_def templ 9
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_5:
   h:mem ->
@@ -108,7 +108,7 @@ let lemma_eval_bigint_5 h b =
   eval_def h b 4;
   eval_def h b 5
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_6:
   h:mem ->
@@ -130,7 +130,7 @@ let lemma_eval_bigint_6 h b =
   eval_def h b 5;
   eval_def h b 6
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_eval_bigint_9:
   h:mem ->
@@ -158,14 +158,14 @@ let lemma_eval_bigint_9 h b =
   eval_def h b 8;
   eval_def h b 9
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val factorization_lemma: unit ->
   Lemma (requires (True))
 	(ensures  (forall a b c. {:pattern (a * (b+c))} a * (b + c) = a * b + a * c))
 let factorization_lemma () = ()
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsum: h0:mem -> h1:mem -> a:bigint -> b:bigint -> Lemma
   (requires (norm h0 a /\ norm h0 b /\ isSum h0 h1 a b))
@@ -178,7 +178,7 @@ let lemma_fsum h0 h1 a b =
   factorization_lemma ();
   lemma_eval_bigint_5 h1 a
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 let isMultiplication (h0:mem) (h1:mem) (a:bigint) (b:bigint) (c:bigint) : GTot Type0 =
   live h0 a /\ live h0 b /\ live h1 c
@@ -222,7 +222,7 @@ let isMultiplication_
 	/\ c7 = a3 * b4 + a4 * b3
 	/\ c8 = a4 * b4 ) )
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_multiplication_0:
   a0:H64.t -> a1:H64.t -> a2:H64.t -> a3:H64.t -> a4:H64.t ->
@@ -268,7 +268,7 @@ let lemma_multiplication_0 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   pow2_double_sum 55;
   pow2_lt_compat 64 56
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 let u27 = x:Hacl.UInt64.t{v x < pow2 27}
 let u26 = x:Hacl.UInt64.t{v x < pow2 26}
@@ -303,7 +303,7 @@ private let lemma_multiplication04 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 :
     lemma_multiplication03 a3 b0 b1 b2 b3 b4;
     lemma_multiplication03 a4 b0 b1 b2 b3 b4
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 let lemma_multiplication05
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)

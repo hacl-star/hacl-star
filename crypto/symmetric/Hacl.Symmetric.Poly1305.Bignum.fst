@@ -37,7 +37,7 @@ let w : U32.t -> Tot int = U32.v
 
 (*** Addition ***)
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val fsum_: a:bigint -> b:bigint{disjoint a b} -> Stack unit
   (requires (fun h -> norm h a /\ norm h b))
@@ -103,7 +103,7 @@ let update_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8 =
   c.(7ul) <- c7;
   c.(8ul) <- c8
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val multiplication_0:
   c:bigint{length c >= 2*norm_length-1} ->
@@ -192,12 +192,12 @@ let multiplication c a b =
   lemma_multiplication h0 h1 c a b
 
 
-#reset-options "--z3timeout 5 --initial_fuel 3 --max_fuel 3"
+#reset-options "--z3rlimit 5 --initial_fuel 3 --max_fuel 3"
 
 val times_5: b:H64.t{5 * v b < pow2 64} -> Tot (b':H64.t{v b' = 5 * v b})
 let times_5 b = assert_norm(pow2 2 = 4); (b <<^ 2ul) +^ b
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val freduce_degree_: b:bigint -> Stack unit
   (requires (fun h -> live h b /\ satisfiesModuloConstraints h b))
@@ -246,7 +246,7 @@ let mod2_26 x =
 private val div2_26: x:H64.t -> Tot (y:H64.t{v y = v x / pow2 26 /\ v y <= pow2 38})
 let div2_26 x = pow2_minus 64 26; x >>^ 26ul
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val update_5: c:bigint ->
   c0:H64.t -> c1:H64.t -> c2:H64.t ->
@@ -263,7 +263,7 @@ let update_5 c c0 c1 c2 c3 c4 =
   c.(3ul) <- c3;
   c.(4ul) <- c4
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val update_6: c:bigint{length c >= norm_length+1} ->
   c0:H64.t -> c1:H64.t -> c2:H64.t ->
@@ -281,7 +281,7 @@ let update_6 c c0 c1 c2 c3 c4 c5  =
   c.(4ul) <- c4;
   c.(5ul) <- c5
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 
 private val carry_1_0:
@@ -308,7 +308,7 @@ let carry_1_0 b b0 b1 b2 b3 b4 =
   update_6 b b0' b1' b2' b3' b4' b5'
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val carry_1_:
   b:bigint{length b >= norm_length+1} ->

@@ -37,7 +37,7 @@ let w : U32.t -> Tot int = U32.v
 
 (*** Addition ***)
 
-#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
 private val fsum_: a:bigint -> b:bigint{disjoint a b} -> Stack unit
   (requires (fun h -> norm h a /\ norm h b))
@@ -103,7 +103,7 @@ let update_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8 =
   c.(7ul) <- c7;
   c.(8ul) <- c8
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
+#reset-options "--z3rlimit 5000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
 
 private val multiplication_0:
   c:bigint{length c >= 2*norm_length-1} ->
@@ -158,8 +158,8 @@ let multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   cut( v c7 = v a3 * v b4 + v a4 * v b3);
   let c8 = ab44 in
   cut( v c8 = v a4 * v b4 );
-  update_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8;
-  admit() //adding an admit to workaround Z3 flakiness; this verifies if the error instrumentation code is removed
+  update_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8
+
 
 private val multiplication_:
   c:bigint{length c >= 2 * norm_length - 1} ->
@@ -192,7 +192,7 @@ let multiplication c a b =
   let h1 = ST.get() in
   lemma_multiplication h0 h1 c a b
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val times_5: b:H64.t{5 * v b < pow2 64} -> Tot (b':H64.t{v b' = 5 * v b})
 let times_5 b = assert_norm(pow2 2 = 4); (b <<^ 2ul) +^ b
@@ -237,15 +237,17 @@ let freduce_degree b =
 
 private val mod2_26: x:H64.t -> Tot (y:H64.t{v y = v x % pow2 26 /\ v y < pow2 26})
 let mod2_26 x =
+  assert_norm(pow2 64 > 0x3ffffff);
   let y = x &^ (Hacl.Cast.uint64_to_sint64 0x3ffffffuL) in
   assert_norm(U64.v 0x3ffffffuL = pow2 26 - 1);
   UInt.logand_mask (v x) 26;
   y
 
 private val div2_26: x:H64.t -> Tot (y:H64.t{v y = v x / pow2 26 /\ v y <= pow2 38})
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 let div2_26 x =
     pow2_minus 64 26;
+    assert_norm(pow2 32 > 26);
     let y = x >>^ 26ul in
     assert (v y = v x / pow2 26);
     assert (v x <= pow2 64);
@@ -268,7 +270,7 @@ let update_5 c c0 c1 c2 c3 c4 =
   c.(3ul) <- c3;
   c.(4ul) <- c4
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val update_6: c:bigint{length c >= norm_length+1} ->
   c0:H64.t -> c1:H64.t -> c2:H64.t ->
@@ -286,7 +288,7 @@ let update_6 c c0 c1 c2 c3 c4 c5  =
   c.(4ul) <- c4;
   c.(5ul) <- c5
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 
 private val carry_1_0:
@@ -313,7 +315,7 @@ let carry_1_0 b b0 b1 b2 b3 b4 =
   update_6 b b0' b1' b2' b3' b4' b5'
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val carry_1_:
   b:bigint{length b >= norm_length+1} ->
@@ -374,6 +376,7 @@ let carry_top_ b =
   let b5 = b.(5ul) in
   b.(0ul) <- b0 +^ times_5 b5
 
+#reset-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1"
 
 val carry_top_1: b:bigint -> Stack unit
   (requires (fun h -> carried_1 h b))
@@ -448,7 +451,7 @@ let modulo b =
   freduce_coefficients b
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val finalize: b:bigint -> Stack unit
   (requires (fun h -> norm h b))
@@ -456,6 +459,7 @@ val finalize: b:bigint -> Stack unit
     /\ eval h1 b norm_length = eval h0 b norm_length % reveal prime))
 let finalize b =
   let h0 = ST.get() in
+  assert_norm (pow2 64 = 0x10000000000000000);
   let mask_26 = Hacl.Cast.uint64_to_sint64 67108863uL in
   let mask2_26m5 = Hacl.Cast.uint64_to_sint64 67108859uL in
   assert_norm (v mask_26 = pow2 26 - 1); assert_norm(v mask2_26m5 = pow2 26 - 5);

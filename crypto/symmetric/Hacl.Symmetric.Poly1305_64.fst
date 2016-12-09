@@ -16,7 +16,7 @@ module U64 = FStar.UInt64
 module U128 = FStar.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 type poly1305_state = st:buffer h64{length st = 6}
 
@@ -34,7 +34,7 @@ let load64_le b =
   let b5 = b.(5ul) in
   let b6 = b.(6ul) in
   let b7 = b.(7ul) in
-  H64 (
+  H64.(
     sint8_to_sint64 b0
     |^ (sint8_to_sint64 b1 <<^ 8ul)
     |^ (sint8_to_sint64 b2 <<^ 16ul)
@@ -85,7 +85,7 @@ let poly1305_init st key =
   h.(2ul) <- zero
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val poly1305_blocks_loop:
   st:poly1305_state ->
@@ -104,7 +104,7 @@ val poly1305_blocks_loop:
     (ensures  (fun h0 _ h1 -> live h1 st /\ modifies_1 (sub st 3ul 3ul) h0 h1))
 let rec poly1305_blocks_loop st m len r0 r1 r2 s1 s2 h0 h1 h2 =
   let h = sub st 3ul 3ul in
-  if U64 (len <^ 16uL) then (
+  if U64.(len <^ 16uL) then (
     h.(0ul) <- h0;
     h.(1ul) <- h1;
     h.(2ul) <- h2
@@ -135,19 +135,19 @@ let rec poly1305_blocks_loop st m len r0 r1 r2 s1 s2 h0 h1 h2 =
     let d  = h2 *^ r0 in
     let d2 = d2 +%^ d in
     let c  = sint128_to_sint64 (d0 >>^ 44ul) in
-    let h0 = H64 (sint128_to_sint64 d0 &^ mask_2_44) in
+    let h0 = H64.(sint128_to_sint64 d0 &^ mask_2_44) in
     let d1 = d1 +%^ sint64_to_sint128 c in
     let c  = sint128_to_sint64 (d1 >>^ 44ul) in
-    let h1 = H64 (sint128_to_sint64 d1 &^ mask_2_44) in
+    let h1 = H64.(sint128_to_sint64 d1 &^ mask_2_44) in
     let d2 = d2 +%^ sint64_to_sint128 c in
     let c  = sint128_to_sint64 (d2 >>^ 42ul) in
-    let h2 = H64 (sint128_to_sint64 d2 &^ mask_2_42) in
+    let h2 = H64.(sint128_to_sint64 d2 &^ mask_2_42) in
     let open Hacl.UInt64 in
     let h0 = h0 +%^ (c *%^ uint64_to_sint64 5uL) in
     let c  = h0 >>^ 44ul in
     let h0 = h0 &^ mask_2_44 in
     let h1 = h1 +%^ c in
-    let len = U64 (len -^ 16uL) in
+    let len = U64.(len -^ 16uL) in
     let m   = offset m 16ul in
     poly1305_blocks_loop st m len r0 r1 r2 s1 s2 h0 h1 h2
   )
@@ -170,13 +170,13 @@ let poly1305_blocks st m len =
   let h1 = h.(1ul) in
   let h2 = h.(2ul) in
   let five = uint64_to_sint64 5uL in
-  let s1 = H64 (r1 *%^ (five <<^ 2ul)) in
-  let s2 = H64 (r2 *%^ (five <<^ 2ul)) in
+  let s1 = H64.(r1 *%^ (five <<^ 2ul)) in
+  let s2 = H64.(r2 *%^ (five <<^ 2ul)) in
   poly1305_blocks_loop st m len r0 r1 r2 s1 s2 h0 h1 h2;
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 
 val poly1305_finish_:
@@ -199,8 +199,8 @@ let poly1305_finish_ m rem st =
   let mask_2_44 = uint64_to_sint64 0xfffffffffffuL in
   let mask_2_42 = uint64_to_sint64 0x3ffffffffffuL in
   let five = uint64_to_sint64 5uL in
-  let s1 = H64 (r1 *%^ (five <<^ 2ul)) in
-  let s2 = H64 (r2 *%^ (five <<^ 2ul)) in
+  let s1 = H64.(r1 *%^ (five <<^ 2ul)) in
+  let s2 = H64.(r2 *%^ (five <<^ 2ul)) in
   let zero = Hacl.Cast.uint8_to_sint8 0uy in
   let block = create zero 16ul in
   let i = FStar.Int.Cast.uint64_to_uint32 rem in
@@ -231,13 +231,13 @@ let poly1305_finish_ m rem st =
   let d  = h2 *^ r0 in
   let d2 = d2 +%^ d  in
   let c  = sint128_to_sint64 (d0 >>^ 44ul) in
-  let h0 = H64 (sint128_to_sint64 d0 &^ mask_2_44) in
+  let h0 = H64.(sint128_to_sint64 d0 &^ mask_2_44) in
   let d1 = d1 +%^ sint64_to_sint128 c in
   let c  = sint128_to_sint64 (d1 >>^ 44ul) in
-  let h1 = H64 (sint128_to_sint64 d1 &^ mask_2_44) in
+  let h1 = H64.(sint128_to_sint64 d1 &^ mask_2_44) in
   let d2 = d2 +%^ sint64_to_sint128 c in
   let c  = sint128_to_sint64 (d2 >>^ 42ul) in
-  let h2 = H64 (sint128_to_sint64 d2 &^ mask_2_42) in
+  let h2 = H64.(sint128_to_sint64 d2 &^ mask_2_42) in
   let open Hacl.UInt64 in
   let h0 = h0 +%^ (c *%^ uint64_to_sint64 5uL) in
   let c  = h0 >>^ 44ul in
@@ -249,7 +249,7 @@ let poly1305_finish_ m rem st =
   pop_frame()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val poly1305_finish__:
   mac:uint8_p{length mac = 16} ->
@@ -320,10 +320,10 @@ let poly1305_finish mac m len key st =
   let m0 = ST.get() in
   let mask_2_44 = uint64_to_sint64 0xfffffffffffuL in
   let mask_2_42 = uint64_to_sint64 0x3ffffffffffuL in
-  let rem = U64 (len &^ 0xfuL) in
+  let remainder = U64.(len &^ 0xfuL) in
   let r = sub st 0ul 3ul in
   let h = sub st 3ul 3ul in
-  if U64 (rem =^ 0uL) then (
+  if U64.(remainder =^ 0uL) then (
     let m' = ST.get() in
     lemma_intro_modifies_1 h m0 m')
   else (
@@ -331,9 +331,9 @@ let poly1305_finish mac m len key st =
     assert_norm(pow2 4 = 16);
     Math.Lemmas.euclidean_division_definition (U64.v len) 16;
     assert_norm (pow2 32 = 4294967296);
-    Math.Lemmas.modulo_lemma (U64.v len - U64.v rem) (pow2 32);
-    let m = offset m (Int.Cast.uint64_to_uint32 (U64 (len -^ rem))) in
-    poly1305_finish_ m rem st
+    Math.Lemmas.modulo_lemma (U64.v len - U64.v remainder) (pow2 32);
+    let m = offset m (Int.Cast.uint64_to_uint32 (U64.(len -^ remainder))) in
+    poly1305_finish_ m remainder st
     );
   poly1305_finish__ mac key st
 

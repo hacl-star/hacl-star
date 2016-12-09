@@ -38,7 +38,7 @@ private val lemma_max_uint64: n:nat -> Lemma
 let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 (* Blocksize needs to be a power of 2 *)
 inline_for_extraction let blocksize_bits = 18ul
@@ -98,7 +98,7 @@ let makeStreamID b =
     randombytes_buf b 16uL
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 
 val store64_le:
@@ -147,7 +147,7 @@ let load64_le b =
 open FStar.Mul
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
@@ -158,7 +158,7 @@ noextract let triple (a:HH.rid) (b:HH.rid) (c:HH.rid) = Set.union (Set.singleton
 type uint8_p = b:uint8_p{frameOf b <> file_rgn /\ frameOf b <> socket_rgn}
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200 --lax"
 
 val file_send_loop:
   fh:fh_ref ->
@@ -226,7 +226,7 @@ let rec file_send_loop fh sb immut_state mut_state seqno len =
 
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200 --lax"
 
 val file_send_fragments:
   sb:socket_ref ->
@@ -282,7 +282,7 @@ let file_send_fragments sb fb immut_state mut_state seqno fragments rem =
   | SocketError -> opened FileError fh.stat sid
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 400 --lax"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400 --lax"
 
 val file_flush_all:
   sb:socket_ref ->
@@ -337,7 +337,7 @@ let file_flush_all sb fb immut_state mut_state ctr rem =
             | SocketError -> opened FileError fh.stat sid )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200 --lax"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200 --lax"
 
 
 assume val input_rgn: r:HH.rid{r <> file_rgn /\ r <> socket_rgn}
@@ -384,7 +384,7 @@ val file_send:
       	   	                   | FileOk -> true
 				   | _ -> true))
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 400 --lax"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400 --lax"
 
 let file_send fsize f r h p skA pkB =
   push_frame();
@@ -475,7 +475,7 @@ val get_fh_stat: file_handle -> Tot file_stat
 let get_fh_stat fh = fh.stat
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
 val file_recv_loop_2:
   fb:fh_ref ->
@@ -546,7 +546,7 @@ let rec file_recv_loop_2 fb connb state mut_state seqno len =
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 val file_recv_enc:
   fb:fh_ref ->
@@ -617,7 +617,7 @@ let file_recv_enc fb connb state size =
   res
 
                  
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
 val file_recv_loop:
   fb:fh_ref ->

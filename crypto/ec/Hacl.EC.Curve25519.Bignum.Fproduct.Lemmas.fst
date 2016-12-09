@@ -21,7 +21,7 @@ module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 let isMultiplication (h0:mem) (h1:mem) (a:bigint) (b:bigint) (c:bigint_wide) : GTot Type0 =
   live h0 a /\ live h0 b /\ live h1 c
@@ -68,7 +68,7 @@ let isMultiplication_
 	/\ c8 = a4 * b4 ) )
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_multiplication_0:
   a0:H64.t -> a1:H64.t -> a2:H64.t -> a3:H64.t -> a4:H64.t ->
@@ -115,7 +115,7 @@ let lemma_multiplication_0 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   pow2_lt_compat 128 105
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 let u51 = x:Hacl.UInt64.t{v x < pow2 51}
 
@@ -149,7 +149,7 @@ private let lemma_multiplication04 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 :
     lemma_multiplication03 a3 b0 b1 b2 b3 b4;
     lemma_multiplication03 a4 b0 b1 b2 b3 b4
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 let lemma_multiplication05
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)
@@ -165,7 +165,7 @@ let lemma_multiplication05
 			   (b0) (pow2 51 * b1) (pow2 102 * b2) (pow2 153 * b3) (pow2 204 * b4)
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private let lemma_multiplication060
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)
@@ -175,7 +175,7 @@ private let lemma_multiplication060
     = a0 * b0 + pow2 51  * (a0 * b1) + pow2 102  * (a0 * b2) + pow2 153  * (a0 * b3) + pow2 204 * (a0 * b4) )
   = ()
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 let lemma_swap p1 a p2 b : Lemma ((p1 * a) * (p2 * b) = p1 * p2 * (a * b)) = ()
 
@@ -196,7 +196,7 @@ private let lemma_multiplication061
     lemma_swap (pow2 51) a1 (pow2 204) b4
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private let lemma_multiplication062
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)
@@ -213,7 +213,7 @@ private let lemma_multiplication062
     lemma_swap (pow2 102) a2 (pow2 153) b3;
     lemma_swap (pow2 102) a2 (pow2 204) b4
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private let lemma_multiplication063
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)
@@ -230,7 +230,7 @@ private let lemma_multiplication063
     lemma_swap (pow2 153) a3 (pow2 153) b3;
     lemma_swap (pow2 153) a3 (pow2 204) b4
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private let lemma_multiplication064
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)
@@ -247,7 +247,7 @@ private let lemma_multiplication064
     lemma_swap (pow2 204) a4 (pow2 153) b3;
     lemma_swap (pow2 204) a4 (pow2 204) b4
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private let lemma_multiplication06
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)
@@ -269,7 +269,7 @@ private let lemma_multiplication06
     lemma_multiplication063 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4;
     lemma_multiplication064 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private let lemma_multiplication07
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)
@@ -284,7 +284,7 @@ private let lemma_multiplication07
   = lemma_multiplication05 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4;
     lemma_multiplication06 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private let lemma_multiplication08
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)
@@ -312,7 +312,7 @@ private let lemma_multiplication08
     lemma_multiplication00 (pow2 357) (a4 * b3) (a3 * b4)
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private let lemma_multiplication0
   (a0:int) (a1:int) (a2:int) (a3:int) (a4:int)
@@ -332,7 +332,7 @@ private let lemma_multiplication0
     lemma_multiplication08 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_multiplication1:
   h0:mem -> h1:mem ->
@@ -358,7 +358,7 @@ let lemma_multiplication1 h0 h1 c a b =
   lemma_multiplication0 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4
 
 
-#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 let lemma_mul_ineq (a:nat) (b:nat) c d : Lemma (requires (a < c /\ b < d))
 					    (ensures  (a * b < c * d))
@@ -421,7 +421,7 @@ let lemma_multiplication2 h0 h1 c a b =
   maxValue_wide_bound_lemma_aux h1 c (2*norm_length-1) (5*pow2 102)
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_multiplication:
   h0:mem ->

@@ -1,5 +1,6 @@
 module Crypto.Symmetric.Poly1305.Parameters
 
+inline_for_extraction let prime : pos = assert_norm(pow2 130 > 5); pow2 130 - 5
 (* Standard platform integer size *)
 inline_for_extraction let platform_size : pos = 64
 (* Integer size after multiplication *)

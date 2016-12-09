@@ -28,7 +28,7 @@ let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32 (32ul -^ s)))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k >= 4))
@@ -87,7 +87,7 @@ let chacha_ietf_ivsetup ctx iv counter =
     ctx.(15ul) <- load32_le(offset iv 8ul)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val chacha_encrypt_bytes_core:
   ctx:chacha_ctx ->

@@ -252,7 +252,7 @@ let shiftRows state =
   state.(i+^4ul)  <- tmp;
   ()
 
-#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
 val mixColumns_: state:u8s{length state >= 4 * UInt32.v nb} -> c:UInt32.t{UInt32.v c < 4} -> STL unit
   (requires (fun h -> live h state))
@@ -279,7 +279,7 @@ let mixColumns state =
   mixColumns_ state 2ul;
   mixColumns_ state 3ul
 
-#reset-options "--z3timeout 10 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
 
 val addRoundKey_: state:u8s{length state >= 4 * UInt32.v nb} -> w:u8s{length w >= 16 * (UInt32.v nr+1) /\ disjoint state w} -> round:UInt32.t{UInt32.v round <= UInt32.v nr}  -> c:UInt32.t{UInt32.v c < 4} -> STL unit
     (requires (fun h -> live h state /\ live h w))
@@ -322,7 +322,7 @@ let rec cipher_loop state w sbox round =
     cipher_loop state w sbox (round+^1ul)
   end
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val cipher_body: state:u8s{length state >= 4 * UInt32.v nb} -> out:u8s{length out >= 4 * UInt32.v nb} -> input:u8s{length input >= 4*UInt32.v nb} -> w:u8s{length w >= 16 * (UInt32.v nr+1)} -> sbox:u8s{length sbox = 256} -> STL unit
   (requires (fun h -> live h state /\ live h out /\ live h input /\ live h w /\ live h sbox
@@ -386,13 +386,13 @@ let rec rcon i tmp =
     rcon (i-^1ul) tmp
   end
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 let lemma_aux_000 (i:UInt32.t{UInt32.v i < 240 /\ UInt32.v i >= 4 * UInt32.v nk}) : Lemma
   (let open FStar.UInt32 in
     (4 * v nk <= pow2 32 - 1 /\ v (i+^0ul) >= v (4ul *^ nk) /\ v (i+^1ul) >= v (4ul *^ nk) /\ v (i+^2ul) >= v (4ul *^ nk) /\ v (i+^3ul) >= v (4ul *^ nk) /\ v ((i/^4ul)/^nk) >= 1)) = ()
 
-#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 val keyExpansion_aux_0:w:u8s{length w >= 16 * (UInt32.v nr+1)} -> temp:u8s{length temp >= 4} -> sbox:u8s{length sbox = 256} -> i:UInt32.t{UInt32.v i < 60 /\ UInt32.v i >= UInt32.v nk} -> STL unit
   (requires (fun h -> live h w /\ live h temp /\ live h sbox
@@ -418,7 +418,7 @@ let keyExpansion_aux_0 w temp sbox j =
   assert(live h1 temp);
   assert(modifies_1 temp h0 h1)
 
-#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
 val keyExpansion_aux_1: w:u8s{length w >= 16 * (UInt32.v nr+1)} -> temp:u8s{length temp >= 4} -> sbox:u8s{length sbox = 256} -> i:UInt32.t{UInt32.v i < 60 /\ UInt32.v i >= UInt32.v nk} -> STL unit
   (requires (fun h -> live h w /\ live h temp /\ live h sbox
@@ -516,7 +516,7 @@ val invSubBytes_sbox: state:u8s{length state >= 4 * UInt32.v nb} -> sbox:u8s{len
 let invSubBytes_sbox state sbox =
   invSubBytes_aux_sbox state sbox 0ul
 
-#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 val invMixColumns_: state:u8s{length state >= 4 * UInt32.v nb} -> c:UInt32.t{UInt32.v c < 4} -> STL unit
   (requires (fun h -> live h state))
@@ -567,7 +567,7 @@ let rec inv_cipher_loop state w sbox round =
 
 let lemma_002 (w:u8s) : Lemma (requires (length w >= 4 * UInt32.v nb * (UInt32.v nr + 1))) (ensures (length w >= 16 * (UInt32.v nr + 1))) = ()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val inv_cipher: out:u8s{length out = 4 * UInt32.v nb} -> input:u8s{length input = 4* UInt32.v nb} -> w:u8s{length w >= 4 * UInt32.v nb * (UInt32.v nr+1)} -> sbox:u8s{length sbox = 256} -> STL unit
   (requires (fun h -> live h out /\ live h input /\ live h w /\ live h sbox

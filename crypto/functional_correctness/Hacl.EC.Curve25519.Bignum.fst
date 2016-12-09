@@ -12,7 +12,7 @@ open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 open Hacl.EC.Curve25519.Utils
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 
 (* Module abbreviations *)
@@ -202,7 +202,7 @@ let lemma_eq_norm h h' (b:bigint) (b':bigint) : Lemma
   = lemma_norm h b; lemma_eq h b h' b'
 
 
-#reset-options "--z3timeout 200 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0"
 
 val fdifference: a:bigint{length a >= norm_length+1} -> b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> norm h a /\ norm h b))
@@ -249,7 +249,7 @@ let fdifference a b =
     ()
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val fscalar:
     res:bigint -> b:bigint{disjoint res b} -> s:s64 -> Stack unit

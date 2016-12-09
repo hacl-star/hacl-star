@@ -17,7 +17,7 @@ let len = 16   // Length of GF128 in bytes.
 type text = Seq.seq (lbytes len)
 type elemS = lbytes len
 
-#set-options "--z3timeout 15 --max_fuel 1 --initial_fuel 1"
+#set-options "--z3rlimit 15 --max_fuel 1 --initial_fuel 1"
 
 abstract val lbytes_to_bv: #n:pos -> a:lbytes n ->
   Tot (r:bv_t (n * nb){forall (i:nat{i < n * nb}). index r i = index (to_vec (v (index a (i / nb)))) (i % nb)})
@@ -35,14 +35,14 @@ let rec add_loop a b dep =
     upd na i ((index na i) ^^ (index b i))
   end
 
-#reset-options "--z3timeout 5 --max_fuel 0 --initial_fuel 0"
+#reset-options "--z3rlimit 5 --max_fuel 0 --initial_fuel 0"
 
 val op_Plus_At: a:elemS -> b:elemS ->
   Tot (r:elemS{equal (lbytes_to_bv r) (Algebra.add (lbytes_to_bv a) (lbytes_to_bv b))})
 let op_Plus_At a b = add_loop a b len
 
 
-#reset-options "--z3timeout 15 --max_fuel 1 --initial_fuel 1"
+#reset-options "--z3rlimit 15 --max_fuel 1 --initial_fuel 1"
 
 val shift_right_loop: a:elemS -> dep:nat{dep < len} ->
   Tot (r:elemS{(index r 0 = ((index a 0) >>^ 1ul)) /\
@@ -65,14 +65,14 @@ let shift_right_loop_lemma a dep i =
     assert(v (((index a (i - 1)) <<^ 7ul) +%^ ((index a i) >>^ 1ul)) = v ((index a (i - 1)) <<^ 7ul) + v ((index a i) >>^ 1ul));
     logor_disjoint (v ((index a (i - 1)) <<^ 7ul)) (v ((index a i) >>^ 1ul)) 7
     
-#reset-options "--z3timeout 10 --max_fuel 1 --initial_fuel 1"
+#reset-options "--z3rlimit 10 --max_fuel 1 --initial_fuel 1"
 
 val shift_right_spec: a:elemS ->
   Tot (r:elemS{(index r 0 = ((index a 0) >>^ 1ul)) /\
     (forall (i:pos{i < len}). index r i = logor ((index a (i - 1)) <<^ 7ul) ((index a i) >>^ 1ul))})
 let shift_right_spec a = shift_right_loop a (len - 1)
 
-#reset-options "--z3timeout 30 --max_fuel 0 --initial_fuel 0"
+#reset-options "--z3rlimit 30 --max_fuel 0 --initial_fuel 0"
 
 val shift_right_spec_lemma_aux_1: a:elemS -> 
   Lemma (forall (i:pos{i < 128 /\ i % 8 = 0}). index (lbytes_to_bv (shift_right_spec a)) i = index (shift_right_vec (lbytes_to_bv a) 1) i)

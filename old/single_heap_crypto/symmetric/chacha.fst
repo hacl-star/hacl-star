@@ -72,7 +72,7 @@ let diagonal_round m =
   quarter_round m 3 4 9 14;
   ()
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 val initialize_state: state:uint32s{length state = 16} -> key:sbytes{length key = 32 /\ disjoint state key} -> counter:uint32 -> nonce:sbytes{length nonce = 12 /\ disjoint key nonce /\ disjoint state nonce} -> ST unit
   (requires (fun h -> live h state /\ live h key /\ live h nonce))
@@ -113,7 +113,7 @@ let initialize_state state key counter nonce =
   upd state 15 (uint32_of_sbytes n2);
   ()
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 val sum_matrixes: new_state:uint32s{length new_state = 16} -> old_state:uint32s{length old_state = 16 /\ disjoint new_state old_state} -> ST unit
   (requires (fun h -> live h new_state /\ live h old_state))
@@ -139,7 +139,7 @@ let sum_matrixes m m0 =
 
 #reset-options
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 val chacha20_block: output:sbytes{length output = 64} -> state:uint32s{length state = 16 /\ disjoint state output} -> key:sbytes{length key = 32 /\ disjoint state key /\ disjoint output key} -> counter:uint32 -> nonce:sbytes{length nonce = 12 /\ disjoint key nonce /\ disjoint state nonce /\ disjoint nonce output} -> ST unit
     (requires (fun h -> live h state /\ live h output /\ live h key /\ live h nonce))

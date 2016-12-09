@@ -106,7 +106,7 @@ let test_xsalsa20 () =
     0x58y; 0x53y; 0x61y; 0x6cy; 0x73y; 0x61y; 0x32y; 0x30y; 0y
   ] (* Buffer literal for 'XSalsa20' *) in
   Hacl.Symmetric.XSalsa20.crypto_stream_xsalsa20_xor ciphertext plaintext len' nonce key;
-  TestLib.compare_and_print xsalsa20 expected (offset ciphertext 32ul) (FStar.UInt32 (len -^ 32ul));
+  TestLib.compare_and_print xsalsa20 expected (offset ciphertext 32ul) (FStar.UInt32.(len -^ 32ul));
   pop_frame()
 
 val test_curve25519: unit -> ST unit
@@ -178,7 +178,7 @@ let test_box () =
   let pk2 = create 0uy keysize in
   let nm1 = create 0uy keysize in
   let nm2 = create 0uy keysize in
-  let ciphertext = create 0uy (FStar.UInt32 (len +^ 16ul)) in
+  let ciphertext = create 0uy (FStar.UInt32.(len +^ 16ul)) in
   let mac = create 0uy macsize in
   let plaintext = create 0uy len in
   let result    = create 0uy len in
@@ -215,7 +215,7 @@ let test_box () =
   Hacl.EC.Curve25519.exp pk1 basepoint sk1;
   Hacl.EC.Curve25519.exp pk2 basepoint sk2;
   let _ = Hacl.Box.crypto_box_easy ciphertext plaintext len_64 nonce pk1 sk2 in
-  let _ = Hacl.Box.crypto_box_open_easy result ciphertext (FStar.UInt64 (len_64 +^ 16uL)) nonce pk2 sk1 in
+  let _ = Hacl.Box.crypto_box_open_easy result ciphertext (FStar.UInt64.(len_64 +^ 16uL)) nonce pk2 sk1 in
   let str_encr2 = createL [
     0x53y; 0x6fy; 0x64y; 0x69y; 0x75y; 0x6dy; 0x27y; 0x73y;
     0x20y; 0x42y; 0x6fy; 0x78y; 0x2fy; 0x55y; 0x6ey; 0x62y;

@@ -259,7 +259,7 @@ let multiplication_step_lemma_2 h0 h1 a b c idx len =
         pow2 (bitweight templ idx) * pow2 (bitweight templ (len-1)) * v (get h0 b (len-1))); 
   cut ( eval h1 c (len+idx) = eval h0 a (len+idx) + pow2 (bitweight templ idx) * eval h0 b len) 
 
-#reset-options "--z3timeout 100"
+#reset-options "--z3rlimit 100"
 
 val multiplication_step_lemma:
   h0:heap -> h1:heap -> a:bigint{live h0 a} -> b:bigint{live h0 b} -> c:bigint{live h1 c} -> idx:nat ->
@@ -333,7 +333,7 @@ let bound27_lemma h0 h1 a tmp = eq_lemma h0 h1 a (only tmp)
 val aux_lemma_4: unit -> Lemma (pow2 3 = 8)
 let aux_lemma_4 () = ()
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 val aux_lemma_41: b:uint63{v b < pow2 26} -> Lemma (forall (a:uint63). (v a < pow2 27 /\ v b < pow2 26) ==> (v a * v b < pow2 53))
 let aux_lemma_41 b = 
@@ -357,7 +357,7 @@ val aux_lemma_43: h1:heap -> c:bigint{live h1 c /\ length c >= 2*norm_length-1} 
 let aux_lemma_43 h1 c tmp ctr = 
   ()
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 val multiplication_step_lemma_001: h0:heap -> h1:heap -> a:bigint -> b:bigint -> 
   ctr:nat{ctr<norm_length} -> c:bigint{disjoint a c /\ disjoint b c} -> 
@@ -431,7 +431,7 @@ let max_value_lemma_1 h0 h1 h2 a b ctr c tmp =
   cut (forall (i:nat). i < length c ==> v (get h2 c i) <= (ctr+1) * pow2 53); 
   maxValue_bound_lemma h2 c ((ctr+1) * pow2 53)
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 val max_value_lemma: h0:heap -> h1:heap -> h2:heap -> a:bigint -> b:bigint -> 
   ctr:nat{ctr < norm_length} -> c:bigint{disjoint a c /\ disjoint b c} -> 
@@ -484,7 +484,7 @@ let standardized_lemma2 h0 h1 h2 a c tmp =
   eq_lemma h1 h2 tmp (only c);
   eq_lemma h0 h2 a (only c ++ tmp)
 
-#reset-options "--z3timeout 50"
+#reset-options "--z3rlimit 50"
 
 val multiplication_step_lemma_02: h0:heap -> h1:heap -> h2:heap -> a:bigint -> b:bigint -> 
   ctr:nat{ctr<norm_length} -> c:bigint{disjoint a c /\ disjoint b c} -> 
@@ -780,7 +780,7 @@ let untouched (h0:heap) (h1:heap) (b:bigint) (ctr:nat) : GTot Type0 =
   /\ (forall (i:nat). {:pattern (get h1 b i)} (i > ctr /\ i < 2*norm_length-1) ==> 
       v (get h0 b i) = v (get h1 b i))
 
-#reset-options "--z3timeout 50"
+#reset-options "--z3rlimit 50"
 
 val pow2_bitweight_lemma_1: ctr:pos -> Lemma (requires (True))
     (ensures (pow2 (bitweight templ (ctr+norm_length-1)) = pow2 (bitweight templ (ctr-1)) * pow2 (bitweight templ norm_length)))
@@ -816,7 +816,7 @@ assume val helper_lemma_5: a:nat -> b:nat -> c:nat -> p:pos -> Lemma (ensures ( 
 val lemma_aux_0: a:int -> b:int -> c:int -> d:int -> Lemma (a * b + c - (a * (b + 5 * d) + c) = - 5 * a * d)
 let lemma_aux_0 a b c d = ()
 
-#reset-options "--z3timeout 30"
+#reset-options "--z3rlimit 30"
 
 val freduce_degree_lemma_2: h0:heap -> h1:heap -> b:bigint{live h1 b /\ live h0 b /\ length b >= 2 * norm_length - 1} -> ctr:pos{ctr < norm_length-1} -> Lemma
     (requires ((forall (i:nat). {:pattern (v (get h1 b i))}
@@ -946,7 +946,7 @@ val helper_lemma_2: pb:nat -> pc:pos -> a0:nat -> b:nat ->
   Lemma  (ensures ((pb*pc) * a0/pc + (pb * (a0 % pc) + b) = pb * a0 + b))
 let helper_lemma_2 pb pc a0 b = ()
 
-#reset-options "--z3timeout 10"
+#reset-options "--z3rlimit 10"
 
 val eval_carry_lemma: ha:heap -> a:bigint{live ha a /\ length a >= norm_length+1} -> 
   hb:heap -> b:bigint{live hb b /\ length b >= norm_length+1} -> ctr:nat{ctr < norm_length} -> Lemma

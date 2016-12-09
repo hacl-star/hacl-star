@@ -31,7 +31,7 @@ module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 let lemma_helper_0 h0 h1 b : Lemma
   (requires (B.live h0 b /\ modifies_1 b h0 h1))
@@ -41,7 +41,7 @@ let lemma_helper_0 h0 h1 b : Lemma
     TSet.lemma_equal_intro (arefs (only b)) !{as_ref b}
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 private val double_and_add_0:
   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} ->
@@ -67,7 +67,7 @@ let double_and_add_0 pp ppq p p_plus_q q tmp =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 let lemma_helper_2 r h0 h1 (sub:TSet.set Heap.aref) (s:TSet.set Heap.aref) : Lemma
   (requires (TSet.subset sub s /\ modifies_ref r sub h0 h1))
@@ -100,7 +100,7 @@ let lemma_helper_1 h0 h1 h2 h3 h4 p pq : Lemma
     lemma_helper_3 r s h0 h1 h2 h3 h4
 
 
-#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_1:
   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} ->
@@ -147,7 +147,7 @@ val lemma_helper_5: p:point -> b:bigint -> Lemma
   (ensures  (disjoint (get_x p) b /\ disjoint (get_y p) b /\ disjoint (get_z p) b ))
 let lemma_helper_5 p p' = ()
 
-#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
 let lemma_helper_8 pp ppq p pq q tmp h0 h1 : Lemma
   (requires (HS.modifies_one (frameOf tmp) h0 h1 /\ live h0 pp /\ live h0 ppq /\ live h0 p /\ live h0 pq /\ live h0 q
@@ -156,7 +156,7 @@ let lemma_helper_8 pp ppq p pq q tmp h0 h1 : Lemma
   = ()
 
 
-#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_2:
   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} ->
@@ -177,8 +177,8 @@ let double_and_add_2 pp ppq p pq q tmp =
   let zprime = get_z pq in
   (* Big temporary buffer *)
   let open FStar.UInt32 in
-  let nl = U32 (nlength +^ 1ul) in
-  let nl2 = U32 (2ul *^ nlength -^ 1ul) in
+  let nl = U32.(nlength +^ 1ul) in
+  let nl2 = U32.(2ul *^ nlength -^ 1ul) in
   let origxprime = B.sub tmp nl  nl in
   let xxprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2) nl2 in
   let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in
@@ -202,7 +202,7 @@ let double_and_add_2 pp ppq p pq q tmp =
   lemma_helper_8 pp ppq p pq q tmp h0 h4
 
 
-#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
 let lemma_helper_6 r s h0 h1 h2 : Lemma
   (requires (HS.modifies_ref r s h0 h1 /\ HS.modifies_ref r s h1 h2))
@@ -222,8 +222,8 @@ private val double_and_add_3:
       /\ HS.modifies_ref (frame_of ppq) (refs ppq) h0 h1))
 let double_and_add_3 pp two_p_plus_q p pq q tmp =
   let open FStar.UInt32 in
-  let nl = U32 (nlength +^ 1ul) in
-  let nl2 = U32 (2ul *^ nlength -^ 1ul) in
+  let nl = U32.(nlength +^ 1ul) in
+  let nl2 = U32.(2ul *^ nlength -^ 1ul) in
   let h = ST.get() in
   let zzprime    = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in
   let xxxprime   = B.sub tmp (nl +^ nl +^ nl2 +^ nl2 +^ nl2 +^ nl2 +^ nl2) nl2 in
@@ -240,7 +240,7 @@ let double_and_add_3 pp two_p_plus_q p pq q tmp =
   ()
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_4:
   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} ->
@@ -255,8 +255,8 @@ private val double_and_add_4:
       /\ HS.modifies_ref (frameOf tmp) (arefs (only tmp)) h0 h1))
 let double_and_add_4 pp ppq p pq q tmp =
   let open FStar.UInt32 in
-  let nl = U32 (nlength +^ 1ul) in
-  let nl2 = U32 (2ul *^ nlength -^ 1ul) in
+  let nl = U32.(nlength +^ 1ul) in
+  let nl2 = U32.(2ul *^ nlength -^ 1ul) in
   let x = get_x p in
   let z = get_z p in
   let h0 = ST.get() in
@@ -269,7 +269,7 @@ let double_and_add_4 pp ppq p pq q tmp =
   ()
 
 
-#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_5:
   pp:point -> ppq:point{distinct pp ppq /\ same_frame_2 pp ppq} ->
@@ -284,8 +284,8 @@ private val double_and_add_5:
       /\ HS.modifies_ref (frameOf tmp) (arefs (only tmp)) h0 h1))
 let double_and_add_5 pp ppq p pq q tmp =
   let open FStar.UInt32 in
-  let nl = U32 (nlength +^ 1ul) in
-  let nl2 = U32 (2ul *^ nlength -^ 1ul) in
+  let nl = U32.(nlength +^ 1ul) in
+  let nl2 = U32.(2ul *^ nlength -^ 1ul) in
   let zzz        = B.sub tmp (nl +^ nl) nl2 in
   let xx         = B.sub tmp (nl +^ nl +^ nl2) nl2 in
   let zz         = B.sub tmp (nl +^ nl +^ nl2 +^ nl2) nl2 in
@@ -305,7 +305,7 @@ let double_and_add_5 pp ppq p pq q tmp =
   ()
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 let lemma_helper_x (r:HH.rid) h0 h1 h2 h3 h4 h5 h6 h7 h8 : Lemma
   (requires (h0.tip <> r
@@ -321,7 +321,7 @@ let lemma_helper_x (r:HH.rid) h0 h1 h2 h3 h4 h5 h6 h7 h8 : Lemma
   = ()
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 let lemma_helper_y r sub s h0 h1 : Lemma
   (requires (HS.modifies_ref r sub h0 h1 /\ TSet.subset sub s))
@@ -352,7 +352,7 @@ let lemma_helper_xx (r:HH.rid) s h0 h1 h2 h3 h4 h5 h6 h7 h8 : Lemma
   = ()
 
 
-#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 private val double_and_add_:
   two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} ->
@@ -369,8 +369,8 @@ private val double_and_add_:
       /\ HS.modifies_ref (frame_of p) (refs two_p ++ refs two_p_plus_q ++ refs p ++ refs p_plus_q) h0 h1 ))
 let double_and_add_ pp ppq p pq q tmp =
   let open FStar.UInt32 in
-  let nl = U32 (nlength +^ 1ul) in
-  let nl2 = U32 (2ul *^ nlength -^ 1ul) in
+  let nl = U32.(nlength +^ 1ul) in
+  let nl2 = U32.(2ul *^ nlength -^ 1ul) in
   let zzz        = B.sub tmp (nl +^ nl) nl2 in
   let xx         = B.sub tmp (nl +^ nl +^ nl2) nl2 in
   let zz         = B.sub tmp (nl +^ nl +^ nl2 +^ nl2) nl2 in
@@ -406,7 +406,7 @@ let double_and_add_ pp ppq p pq q tmp =
   lemma_helper_xx (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1 h2 h3 h4 h5 h6 h7 h8;
   ()
 
-#reset-options "--z3timeout 40 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0"
 
 let lemma_helper_7 hinit h0 h1 h2 hfin r : Lemma
   (requires (fresh_frame hinit h0 /\ HS.modifies_one h0.tip h0 h1 /\ HH.modifies_just (Set.union (Set.singleton h0.tip) (Set.singleton r)) h1.h h2.h /\ popped h2 hfin /\ equal_domains hinit hfin /\ equal_domains h1 h2))
@@ -414,7 +414,7 @@ let lemma_helper_7 hinit h0 h1 h2 hfin r : Lemma
   = ()
 
 
-#reset-options "--z3timeout 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
 val double_and_add:
   two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} ->
@@ -439,8 +439,8 @@ let double_and_add two_p two_p_plus_q p p_plus_q q =
   let z2 = get_z two_p in
   (* Big temporary buffer *)
   let open FStar.UInt32 in
-  let nl = U32 (nlength +^ 1ul) in
-  let nl2 = U32 (2ul *^ nlength -^ 1ul) in
+  let nl = U32.(nlength +^ 1ul) in
+  let nl2 = U32.(2ul *^ nlength -^ 1ul) in
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) (nl +^ nl +^ nl2 +^ nl2 +^ nl2  +^ nl2  +^ nl2  +^ nl2  +^ nl2) in
   let h1 = ST.get() in
   lemma_reveal_modifies_0 h0 h1;

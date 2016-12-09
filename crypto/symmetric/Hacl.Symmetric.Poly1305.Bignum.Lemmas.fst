@@ -86,7 +86,7 @@ let eq_lemma_2 h0 h1 (a:bigint) (a':bigint) (b:bigint) : Lemma
   (ensures  (live h0 b /\ live h1 b /\ (forall (i:nat). i < length b ==> get h1 b i == get h0 b i)))
   = ()
 
-//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 (* val fsum_index: a:bigint -> a_idx:u32 -> b:bigint{disjoint a b} -> b_idx:u32 -> len:u32 ->  *)
 (*   ctr:u32{U32.v ctr<=U32.v len} -> STL unit *)
@@ -111,7 +111,7 @@ let eq_lemma_2 h0 h1 (a:bigint) (a':bigint) (b:bigint) : Lemma
 (*       () *)
 (*   end *)
 
-//TMP#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+//TMP#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 val addition_lemma: h0:heap -> h1:heap -> a:bigint{live h0 a /\ live h1 a} -> b:bigint{live h0 b} ->
   len:nat{len <= length a /\ len <= length b /\ 
@@ -318,7 +318,7 @@ let multiplication_step_lemma_2 h0 h1 a b c idx len =
         pow2 (bitweight templ idx) * pow2 (bitweight templ (len-1)) * v (get h0 b (len-1)));
   cut ( eval h1 c (len+idx) = eval h0 a (len+idx) + pow2 (bitweight templ idx) * eval h0 b len)
 
-//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val multiplication_step_lemma:
   h0:heap -> h1:heap -> a:bigint{live h0 a} -> b:bigint{live h0 b} -> c:bigint{live h1 c} -> idx:nat ->
@@ -427,7 +427,7 @@ let lemma_helper_10 (x:nat) : Lemma (requires (x <= norm_length))
 				 (ensures  (x * pow2 53 <= pow2 3 * pow2 53))
   = ()
 
-//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val multiplication_step_lemma_001: h0:heap -> h1:heap -> a:bigint -> b:bigint ->
   ctr:nat{ctr<norm_length} -> c:bigint{disjoint a c /\ disjoint b c} ->
@@ -472,7 +472,7 @@ let aux_lemma_51 ctr = ()
 let lemma_helper_20 () : Lemma  (forall (a:nat) (b':nat) (c:nat) (d:nat). (a < c /\ b' < d) ==> a * b' < c * d)
   = ()
 
-//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val max_value_lemma_1: h0:heap -> h1:heap -> h2:heap -> a:bigint -> b:bigint ->
   ctr:nat{ctr < norm_length} -> c:bigint{disjoint a c /\ disjoint b c} ->
@@ -684,7 +684,7 @@ let helper_lemma_6 h0 h1 a b ctr c tmp =
 (* let multiplication_step a b ctr c tmp = *)
 (*   multiplication_step_p1 a b ctr c tmp *)
 
-//TMP#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+//TMP#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 val multiplication_step_lemma_03: h0:heap -> h1:heap -> a:bigint{norm h0 a} ->
   b:bigint{norm h0 b} -> ctr:pos{ctr<=norm_length} ->
@@ -870,7 +870,7 @@ let eq_lemma_fresh h0 h1 a : Lemma
 			    ==> get h1 a i == get h0 a i)))
   = ()
 
-//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+//TMP#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 (* (\* Code : core multiplication function *\) *)
 (* val multiplication: c:bigint{length c >= 2*norm_length-1} -> a:bigint{disjoint c a} -> *)
@@ -978,7 +978,7 @@ assume val helper_lemma_5: a:nat -> b:nat -> c:nat -> p:pos -> Lemma (ensures ( 
 val lemma_aux_0: a:int -> b:int -> c:int -> d:int -> Lemma (a * b + c - (a * (b + 5 * d) + c) = - 5 * a * d)
 let lemma_aux_0 a b c d = ()
 
-//TMP#reset-options "--z3timeout 100"
+//TMP#reset-options "--z3rlimit 100"
 #set-options "--lax" // TODO
 
 val freduce_degree_lemma_2: h0:heap -> h1:heap -> b:bigint{live h1 b /\ live h0 b /\ length b >= 2 * norm_length - 1} -> ctr:pos{ctr < norm_length-1} -> Lemma
@@ -1011,7 +1011,7 @@ let freduce_degree_lemma_2 h0 h1 b ctr =
   cut ( eval h0 b (norm_length+1+ctr) % prime = (5 * pow2 (bitweight templ ctr) * v (get h0 b (norm_length+ctr)) + eval h1 b (norm_length+ctr) - 5 * pow2 (bitweight templ ctr) * v (get h0 b (norm_length+ctr))) % prime /\ True); 
   cut ( eval h0 b (norm_length+1+ctr) % prime = (eval h1 b (norm_length+ctr) ) % prime /\ True)
 
-//TMP#reset-options "--z3timeout 50"
+//TMP#reset-options "--z3rlimit 50"
 #set-options "--lax" // OK
 
 val freduce_degree_lemma:
@@ -1033,7 +1033,7 @@ let freduce_degree_lemma h0 h1 b ctr =
     freduce_degree_lemma_2 h0 h1 b ctr
   )
 
-//TMP#reset-options "--z3timeout 100"
+//TMP#reset-options "--z3rlimit 100"
 #set-options "--lax" // TODO
 
 (* val freduce_degree':  *)
@@ -1118,7 +1118,7 @@ val helper_lemma_2: pb:nat -> pc:pos -> a0:nat -> b:nat ->
   Lemma  (ensures ((pb*pc) * a0/pc + (pb * (a0 % pc) + b) = pb * a0 + b))
 let helper_lemma_2 pb pc a0 b = ()
 
-//TMP#reset-options "--z3timeout 100"
+//TMP#reset-options "--z3rlimit 100"
 #set-options "--lax" // TODO
 
 val eval_carry_lemma: ha:heap -> a:bigint{live ha a /\ length a >= norm_length+1} -> 
@@ -1208,7 +1208,7 @@ let untouched_2 (h0:heap) (h1:heap) (b:bigint) (ctr:nat) : GTot Type0 =
   /\ (forall (i:nat). {:pattern (get h1 b i)}
       ((i < ctr \/ i >= norm_length+1) /\ i < length b) ==> v (get h0 b i) = v (get h1 b i))
 
-//TMP#reset-options "--z3timeout 100"
+//TMP#reset-options "--z3rlimit 100"
 #set-options "--lax" // TODO
 
 (* val carry: b:bigint -> ctr:u32{U32.v ctr <= norm_length} -> ST unit *)
@@ -1240,7 +1240,7 @@ let untouched_2 (h0:heap) (h1:heap) (b:bigint) (ctr:nat) : GTot Type0 =
 (*     carry b (i+|1ul) *)
 (*   end  *)
 
-//TMP#reset-options "--z3timeout 20"
+//TMP#reset-options "--z3rlimit 20"
 #set-options "--lax" // OK
 
 (* val carry_top_to_0: b:bigint -> STL unit *)
@@ -1283,7 +1283,7 @@ let lemma_aux a b =
 (* TODO: express in terms of % properties *)
 assume val lemma_aux_2: a:s64 -> Lemma ((v a < pow2 26+pow2 15 /\ v a >= pow2 26) ==> v a % pow2 26 < pow2 15)
 
-//TMP#reset-options "--z3timeout 100"
+//TMP#reset-options "--z3rlimit 100"
 #set-options "--lax" // OK
 
 (* val carry2_aux: b:bigint -> ctr:u32{w ctr > 0 /\ w ctr <= norm_length} -> STL unit *)
@@ -1327,7 +1327,7 @@ val pow2_3_lemma: unit -> Lemma (pow2 3 = 8)
 let pow2_3_lemma () = 
   ()
 
-//TMP#reset-options "--z3timeout 100"
+//TMP#reset-options "--z3rlimit 100"
 #set-options "--lax" // TODO
 
 (* val carry2: b:bigint -> STL unit *)
@@ -1370,7 +1370,7 @@ let pow2_3_lemma () =
 (*   cut(carriable2 h4 b 1); *)
 (*   carry2_aux b 1ul *)
 
-//TMP#reset-options "--z3timeout 100"
+//TMP#reset-options "--z3rlimit 100"
 
 (* val last_carry: b:bigint -> STL unit *)
 (*   (requires (fun h -> carriable2 h b norm_length /\ length b >= 2*norm_length-1)) *)

@@ -37,7 +37,7 @@ let s64 = Hacl.UInt64.t
 let bytes = FStar.Buffer.buffer s8 //Hacl.SBuffer.u8s
 
 
-#set-options "--z3timeout 10"
+#set-options "--z3rlimit 10"
 
 //
 // Word rotations

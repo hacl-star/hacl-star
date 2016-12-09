@@ -28,7 +28,7 @@ module H64  = Hacl.UInt64
 module H128  = Hacl.UInt128
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 inline_for_extraction val times_wide_19: s128 -> Tot (s128)
 inline_for_extraction let times_wide_19 x =
@@ -38,7 +38,7 @@ inline_for_extraction let times_wide_19 x =
   x +%^ y +%^ z
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val freduce_degree_:
   b:bigint_wide{length b >= 2*norm_length-1} ->
@@ -77,7 +77,7 @@ let freduce_degree b =
 inline_for_extraction val mod_wide_2_51: a:s128 -> Tot s128
 inline_for_extraction let mod_wide_2_51 a =
   let mask = (Hacl.Cast.uint64_to_sint128 0x7ffffffffffffuL) in
-  H128 (a &^ mask)
+  H128.(a &^ mask)
 
 
 inline_for_extraction private val div_wide_2_51: x:s128 -> Tot (s128)
@@ -86,7 +86,7 @@ inline_for_extraction private let div_wide_2_51 x =
   (x >>^ 51ul)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private val carry_wide_1_0:
   b:bigint_wide{length b >= norm_length+1} ->
@@ -109,7 +109,7 @@ let carry_wide_1_0 b b0 b1 b2 b3 b4 =
   update_wide_6 b b0' b1' b2' b3' b4' b5'
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val carry_wide_1_:
   b:bigint_wide{length b >= norm_length+1} ->
@@ -159,7 +159,7 @@ val carry_wide_top_:
 let carry_wide_top_ b =
   let b0 = b.(0ul) in
   let b5 = b.(5ul) in
-  b.(0ul) <- H128 (b0 +%^ times_wide_19 b5)
+  b.(0ul) <- H128.(b0 +%^ times_wide_19 b5)
 
 
 val carry_wide_top_1:
@@ -191,7 +191,7 @@ let carry_wide_0_to_1_ b =
   let b0' = mod_wide_2_51 b0 in
   let r0  = div_wide_2_51 b0 in
   b.(0ul) <- b0';
-  b.(1ul) <- H128 (b1 +%^ r0)
+  b.(1ul) <- H128.(b1 +%^ r0)
 
 
 val carry_wide_0_to_1:
@@ -258,7 +258,7 @@ let carry_1_0' b b0 b1 b2 b3 b4 =
   update_6 b b0' b1' b2' b3' b4' b5'
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val carry_1_':
   b:bigint{length b >= norm_length+1} ->
@@ -331,7 +331,7 @@ let carry_top_2' b =
 
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val carry_0_to_1_':
   b:bigint{length b >= norm_length + 1} ->
@@ -369,7 +369,7 @@ let freduce_coefficients b =
   carry_0_to_1' b
 
 
-#reset-options "--initial_fuel 0 --max_fuel 9 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 9 --z3rlimit 100"
 
 val normalize:
   b:bigint ->

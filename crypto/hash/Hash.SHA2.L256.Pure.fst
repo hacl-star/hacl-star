@@ -188,7 +188,7 @@ let rec ws (block:seq32{Seq.length block = 16}) (t:nat{t < Seq.length block}) : 
                  (I32.add_mod _t7
                              (I32.add_mod s0 _t16)))
 
-#reset-options "--z3timeout 10"
+#reset-options "--z3rlimit 10"
 
 
 (* Section 6.2.2 - Step 3: Perform logical operations on the working variables *)

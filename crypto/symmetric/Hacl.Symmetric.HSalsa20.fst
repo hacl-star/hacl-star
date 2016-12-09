@@ -28,10 +28,10 @@ let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
 
 let rotate (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
-  (a <<^ s) |^ (a >>^ (FStar.UInt32 (32ul -^ s)))
+  (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k >= 4))
@@ -55,7 +55,7 @@ let store32_le (k:uint8_p) (x:h32) : Stack unit
     k.(3ul) <- sint32_to_sint8 (x >>^ 24ul)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 val crypto_core_hsalsa20:
   output:uint8_p{length output = 32} ->

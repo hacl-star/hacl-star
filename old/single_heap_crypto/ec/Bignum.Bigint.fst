@@ -109,7 +109,7 @@ let rec eval_eq_lemma ha hb #size_a a #size_b b len =
   | 0 -> ()
   | _ -> eval_eq_lemma ha hb a b (len-1)
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 val eval_partial_eq_lemma: ha:heap -> hb:heap -> #size:pos -> a:buffer size{live ha a} -> b:buffer size{live hb b} -> 
   ctr:nat -> len:nat{ ctr <= len /\ len <= length a /\ len <= length b} -> Lemma
