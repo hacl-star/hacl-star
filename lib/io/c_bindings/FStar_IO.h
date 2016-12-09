@@ -44,3 +44,6 @@ result tcp_accept(socket_handle* lh, socket_handle* conn);
 result tcp_write_all(socket_handle* conn, uint8_t* buf, uint64_t len);
 result tcp_read_all(socket_handle* conn, uint8_t* buf, int len);
 result tcp_close(socket_handle* conn);
+
+result udp_connect(char* host, int port, socket_handle* sh, struct sockaddr_in* si);
+result udp_write_all(socket_handle* sh, struct sockaddr_in* si, uint8_t* buf, uint64_t len);

@@ -11,7 +11,8 @@ allsubdirs: $(addsuffix .all , $(SUBDIRS))
 INCLUDES=$(addprefix -I , $(HACL_KREMLIN) \
 				$(HACL_SYMMETRIC) \
 				$(HACL_HOME)/crypto \
-				../pneutube ../pneutube/c_bindings \
+				$(HACL_HOME)/lib/io/c_bindings \
+				../pneutube \
 				$(HACL_EC))
 
 test.exe: Hacl.Test.fst
