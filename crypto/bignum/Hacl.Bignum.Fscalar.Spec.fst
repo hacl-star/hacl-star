@@ -6,7 +6,7 @@ open Hacl.Bignum.Limb
 
 module U32 = FStar.UInt32
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 val fscalar_spec: output:seqelem_wide -> input:seqelem -> s:limb -> ctr:nat{ctr <= len} -> Tot seqelem_wide (decreases ctr)
 let rec fscalar_spec output input s ctr =

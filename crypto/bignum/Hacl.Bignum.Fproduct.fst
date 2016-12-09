@@ -13,7 +13,7 @@ open Hacl.Bignum.Fproduct.Spec
 
 module U32 = FStar.UInt32
 
-#set-options "--z3timeout 50 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1"
 
 val copy_from_wide_:
   output:felem ->
@@ -26,13 +26,13 @@ val copy_from_wide_:
       /\ modifies_1 output h0 h1
       /\ as_seq h1 output == copy_from_wide_spec (as_seq h0 input) ))
 let rec copy_from_wide_ output input ctr =
-  if U32 (ctr =^ 0ul) then (
+  if U32.(ctr =^ 0ul) then (
     let h = ST.get() in
     assert(forall (i:nat). i < len ==> v (Seq.index (as_seq h output) i) = w (Seq.index (as_seq h input) i));
     Seq.lemma_eq_intro (as_seq h output) (copy_from_wide_spec (as_seq h input))
   )
   else (
-    let i = U32 (ctr -^ 1ul) in
+    let i = U32.(ctr -^ 1ul) in
     let inputi = input.(i) in
     Math.Lemmas.modulo_lemma (w inputi) (pow2 n);
     output.(i) <- wide_to_limb inputi;
@@ -40,7 +40,7 @@ let rec copy_from_wide_ output input ctr =
   )
 
 
-#set-options "--z3timeout 50"
+#set-options "--z3rlimit 50"
 
 val shift_:
   output:felem ->
@@ -59,7 +59,7 @@ let rec shift_ output ctr =
     shift_ output (ctr -^ 1ul)
   )
 
-#set-options "--z3timeout 50"
+#set-options "--z3rlimit 50"
 
 
 val shift:
@@ -77,10 +77,10 @@ let rec shift output =
   let h = ST.get() in
   Seq.lemma_eq_intro (as_seq h output) (shift_spec (as_seq h0 output))
 
-#set-options "--z3timeout 20"
+#set-options "--z3rlimit 20"
 
 
-#set-options "--z3timeout 20 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
 
 val sum_scalar_multiplication_:
   output:felem_wide ->
@@ -93,9 +93,9 @@ val sum_scalar_multiplication_:
       /\ sum_scalar_multiplication_pre_ (as_seq h0 output) (as_seq h0 input) s (U32.v ctr)
       /\ (as_seq h1 output) == sum_scalar_multiplication_spec (as_seq h0 output) (as_seq h0 input) s (U32.v ctr)))
 let rec sum_scalar_multiplication_ output input s ctr =
-  if U32 (ctr =^ 0ul) then ()
+  if U32.(ctr =^ 0ul) then ()
   else (
-    let i = U32 (ctr -^ 1ul) in
+    let i = U32.(ctr -^ 1ul) in
     let oi = output.(i) in let ii = input.(i) in
     let open Hacl.Bignum.Wide in
     output.(i) <- (oi +^ (ii *^ s));
@@ -113,7 +113,7 @@ let shift_reduce output =
   shift output;
   reduce output
 
-#set-options "--z3timeout 50 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1"
 
 val mul_shift_reduce_:
   output:felem_wide ->
@@ -150,11 +150,11 @@ val carry_wide_:
     (ensures (fun h0 _ h1 -> live h0 t /\ live h1 t /\ modifies_1 t h0 h1
       /\ carry_wide_pre (as_seq h0 t) (U32.v ctr)
       /\ as_seq h1 t == carry_wide_spec (as_seq h0 t) (U32.v ctr)))
-let rec carry_wide_ t ctr =
-  if U32 (ctr =^ clen -^ 1ul) then ()
+let rec carry_wide_ tmp ctr =
+  if U32.(ctr =^ clen -^ 1ul) then ()
   else (
-    let tctr = t.(ctr) in
-    let tctrp1 = t.(U32 (ctr+^1ul)) in
+    let tctr = tmp.(ctr) in
+    let tctrp1 = tmp.(U32.(ctr+^1ul)) in
     assert_norm(pow2 0 = 1);
     Math.Lemmas.pow2_lt_compat limb_size 0;
     Math.Lemmas.pow2_lt_compat limb_n limb_size;
@@ -171,15 +171,15 @@ let rec carry_wide_ t ctr =
     Math.Lemmas.pow2_double_sum (wide_n - 1);
     Math.Lemmas.lemma_div_lt (w tctr) (wide_n) (limb_size);
     Math.Lemmas.pow2_le_compat (wide_n - 1) (wide_n - limb_size);
-    t.(ctr) <- limb_to_wide r0;
-    t.(U32 (ctr +^ 1ul)) <- tctrp1 +^ c;
-    carry_wide_ t (U32 (ctr +^ 1ul))
+    tmp.(ctr) <- limb_to_wide r0;
+    tmp.(U32.(ctr +^ 1ul)) <- tctrp1 +^ c;
+    carry_wide_ tmp (U32.(ctr +^ 1ul))
   )
 
 
-#set-options "--z3timeout 5"
+#set-options "--z3rlimit 5"
 
-#set-options "--z3timeout 20"
+#set-options "--z3rlimit 20"
 
 val carry_0_to_1:
   output:felem ->
@@ -209,7 +209,7 @@ let carry_0_to_1 output =
   output.(0ul) <- i0';
   output.(1ul) <- i1'
 
-#set-options "--z3timeout 40"
+#set-options "--z3rlimit 40"
 
 
 val fmul_:
@@ -277,10 +277,10 @@ val fsquare_times_:
     (requires (fun _ -> true))
     (ensures (fun _ _ _ -> true))
 let rec fsquare_times_ tmp count =
-  if U32 (count =^ 0ul) then ()
+  if U32.(count =^ 0ul) then ()
   else (
     fmul tmp tmp tmp;
-    fsquare_times_ tmp (U32 (count -^ 1ul))
+    fsquare_times_ tmp (U32.(count -^ 1ul))
   )
 
 

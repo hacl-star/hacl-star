@@ -40,12 +40,13 @@ FSTAR_LIB_FILES= \
 HACL_LIB_FILES= Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst 
 
 
-# x25519-parameters:
-# 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-# 		--include x25519 \
-# 		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
-# 		 Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
-# 		--verify_module Hacl.Bignum.Parameters
+x25519-parameters:
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include x25519 \
+		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+		Hacl.Bignum.Constants.fst \
+		 Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
+		--verify_module Hacl.Bignum.Parameters
 
 # x25519-limb:
 # 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \

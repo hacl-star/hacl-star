@@ -10,7 +10,7 @@ open Hacl.Bignum.Fscalar.Spec
 
 module U32 = FStar.UInt32
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 val fscalar_:
   output:felem_wide ->
@@ -22,9 +22,9 @@ val fscalar_:
     (ensures (fun h0 _ h1 -> live h0 input /\ live h0 output /\ live h1 output /\ modifies_1 output h0 h1
       /\ as_seq h1 output == fscalar_spec (as_seq h0 output) (as_seq h0 input) s (U32.v i)))
 let rec fscalar_ output b s i =
-  if U32 (i =^ 0ul) then ()
+  if U32.(i =^ 0ul) then ()
   else (
-    let i = U32 (i -^ 1ul) in
+    let i = U32.(i -^ 1ul) in
     let bi = b.(i) in
     let open Hacl.Bignum.Wide in
     output.(i) <- (bi *^ s);

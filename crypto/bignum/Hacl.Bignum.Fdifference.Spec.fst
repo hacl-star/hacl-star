@@ -6,7 +6,7 @@ open Hacl.Bignum.Limb
 
 module U32 = FStar.UInt32
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 let gte_limbs (a:seqelem) (b:seqelem) (l:nat{l <= len}) : GTot Type0 =
   (forall (i:nat). {:pattern (Seq.index a i) \/ (Seq.index b i)} i < l ==> v (Seq.index b i) >= v (Seq.index a i))

@@ -25,7 +25,7 @@ inline_for_extraction let one_8 = uint8_to_sint8 1uy
 inline_for_extraction let one_64 = uint64_to_sint64 1uL
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 
 (* Ouput: x_i < 2^52 *)

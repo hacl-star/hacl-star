@@ -25,7 +25,7 @@ inline_for_extraction let one_8 = uint8_to_sint8 1uy
 inline_for_extraction let one_64 = uint64_to_sint64 1uL
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 private inline_for_extraction let trim_128_to_51 (a:H128.t) : Tot (b:H64.t{v b = H128.v a % pow2 51})
   = let mask_51 = uint64_to_sint64 0x7ffffffffffffuL in
@@ -45,7 +45,7 @@ let lemma_div_pow2_lt x n m =
   Math.Lemmas.pow2_plus (m) (n-m)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private inline_for_extraction val mul_and_add_carry:
   a:H128.t -> input:H64.t{v input < pow2 52} -> scalar:H64.t{v scalar < pow2 44} ->
@@ -64,7 +64,7 @@ private inline_for_extraction let mul_and_add_carry a input scalar =
   H128 ((input *^ scalar) +^ (a >>^ 51ul))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 
 private let geval_5 (o0:nat) (o1:nat) (o2:nat) (o3:nat) (o4:nat) =
@@ -79,7 +79,7 @@ private let fscalar_product_lemma_11 (a:nat) (b:nat) (n:nat) (m:nat) : Lemma
     Math.Lemmas.distributivity_add_right (pow2 n) (pow2 m * (a / pow2 m)) (a % pow2 m)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 private val fscalar_product_lemma_1:
   i0:nat -> i1:nat -> i2:nat -> i3:nat -> i4:nat ->
@@ -106,7 +106,7 @@ let fscalar_product_lemma_1 i0 i1 i2 i3 i4 o0 o1 o2 o3 o4 s =
   fscalar_product_lemma_11 v0 (i1 * s) 0 51
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 
 private val fscalar_product_lemma_2:
@@ -127,7 +127,7 @@ let fscalar_product_lemma_2 o0 o1 o2 o3 o4 o0' o4' =
   Math.Lemmas.modulo_lemma (19 * (o4 / pow2 51)) (pow2 255 - 19)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 
 val fscalar_product:

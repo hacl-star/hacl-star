@@ -11,7 +11,7 @@ open Hacl.Bignum.Fsum.Spec
 
 module U32 = FStar.UInt32
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 let red_c h (f:felem) ctr = live h f /\ red (as_seq h f) ctr
 
@@ -24,9 +24,9 @@ val fsum_:
     (ensures (fun h0 _ h1 -> red_c h0 a (U32.v i) /\ red_c h0 b (U32.v i) /\ live h1 a
       /\ as_seq h1 a == fsum_spec (as_seq h0 a) (as_seq h0 b) (U32.v i)))
 let rec fsum_ a b i =
-  if U32 (i =^ 0ul) then ()
+  if U32.(i =^ 0ul) then ()
   else (
-    let i = U32 (i -^ 1ul) in
+    let i = U32.(i -^ 1ul) in
     let ai = a.(i) in let bi = b.(i) in
     Math.Lemmas.pow2_double_sum n;
     a.(i) <- ai +^ bi;

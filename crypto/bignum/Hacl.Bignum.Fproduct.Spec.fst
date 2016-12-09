@@ -14,7 +14,7 @@ let copy_from_wide_pre (s:seqelem_wide) : GTot Type0 =
   (forall (i:nat). {:pattern w (Seq.index s i)} i < len ==> w (Seq.index s i) < pow2 n)
 
 
-#set-options "--z3timeout 20"
+#set-options "--z3rlimit 20"
 
 val copy_from_wide_spec_: s:seqelem_wide{copy_from_wide_pre s} ->
   i:nat{i <= len} ->
@@ -32,7 +32,7 @@ let rec copy_from_wide_spec_ s i tmp =
   )
 
 
-#set-options "--z3timeout 5"
+#set-options "--z3rlimit 5"
 
 val copy_from_wide_spec: s:seqelem_wide{copy_from_wide_pre s} ->
   Tot (s':seqelem{(forall (j:nat). j < len ==> v (Seq.index s' j) = w (Seq.index s j))})
@@ -41,7 +41,7 @@ let rec copy_from_wide_spec s =
   copy_from_wide_spec_ s len tmp
 
 
-#set-options "--z3timeout 5"
+#set-options "--z3rlimit 5"
 
 val shift_spec: seqelem -> Tot seqelem
 let shift_spec s =
@@ -49,7 +49,7 @@ let shift_spec s =
   let slast = Seq.slice s (len-1) len in
   Seq.append slast sfirst
 
-#set-options "--z3timeout 20 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
 
 open FStar.Mul
 
@@ -112,14 +112,14 @@ let rec mul_shift_reduce_spec output input input2 ctr =
   )
 
 
-#set-options "--z3timeout 10"
+#set-options "--z3rlimit 10"
 
 let carry_wide_pre (s:seqelem_wide) (i:nat{i < len}) : GTot Type0 =
   (forall (j:nat). {:pattern (w (Seq.index s j))} (j > i /\ j < len) ==> w (Seq.index s j) < pow2 (wide_n - 1))
   /\ (forall (j:nat). {:pattern (w (Seq.index s j))} (j < i) ==> w (Seq.index s j) < pow2 limb_size)
 
 
-#set-options "--z3timeout 100 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
 val carry_wide_spec: s:seqelem_wide -> i:nat{i < len /\ carry_wide_pre s i} -> Tot (s':seqelem_wide)
   (decreases (len - 1 - i))
@@ -157,7 +157,7 @@ let rec carry_wide_spec s i =
   )
 
 
-#set-options "--z3timeout 5"
+#set-options "--z3rlimit 5"
 
 
 let carry_0_to_1_pre (input:seqelem) : GTot Type0 =
@@ -186,7 +186,7 @@ let carry_0_to_1_spec input =
   let output = Seq.upd input 0 i0' in
   Seq.upd output 1 i1'
 
-#set-options "--z3timeout 5"
+#set-options "--z3rlimit 5"
 
 let fmul_pre (input:seqelem) (input2:seqelem) : GTot Type0 =
   mul_shift_reduce_pre (Seq.create len wide_zero) input input2 len
@@ -210,7 +210,7 @@ let fmul_spec input input2 =
   let output4 = copy_from_wide_spec output3 in
   carry_0_to_1_spec output4
 
-#set-options "--z3timeout 40"
+#set-options "--z3rlimit 40"
 
 
 val lemma_whole_slice: #a:Type -> s:Seq.seq a -> Lemma
