@@ -1,5 +1,5 @@
 (*--build-config
-  options:--verify_module Lemmas --z3timeout 10;
+  options:--verify_module Lemmas --z3rlimit 10;
   other-files:axiomatic.fst intlib.fst
   --*)
 

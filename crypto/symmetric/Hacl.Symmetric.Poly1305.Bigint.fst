@@ -182,7 +182,7 @@ val norm_eq_lemma: ha:heap -> hb:heap -> a:bigint -> b:bigint -> Lemma
 let norm_eq_lemma ha hb a b =
   eval_eq_lemma ha hb a b norm_length
 
-#reset-options "--z3timeout 60"
+#reset-options "--z3rlimit 60"
 
 val eval_partial_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} -> b:bigint{live hb b} -> ctr:nat -> len:nat{ ctr <= len /\ len <= length a /\ len <= length b} -> Lemma
   (requires (live ha a /\ live hb b

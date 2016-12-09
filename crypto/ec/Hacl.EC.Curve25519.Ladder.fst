@@ -34,19 +34,19 @@ module H128  = Hacl.UInt128
 inline_for_extraction val mk_mask: x:s8 -> Tot (y:s64)
 inline_for_extraction let mk_mask x =
   let y = Hacl.Cast.sint8_to_sint64 x in
-  H64 (Hacl.Cast.uint64_to_sint64 0uL -%^ y)
+  H64.(Hacl.Cast.uint64_to_sint64 0uL -%^ y)
 
 inline_for_extraction val nth_bit: byt:s8 -> idx:u32{U32.v idx < 8} -> Tot (b:s8)
-inline_for_extraction let nth_bit byte idx =
+inline_for_extraction let nth_bit byt idx =
   let open Hacl.UInt8 in
-  let bit = (byte >>^ (U32 (7ul -^ idx))) &^ (Hacl.Cast.uint8_to_sint8 1uy) in
+  let bit = (byt >>^ (U32.(7ul -^ idx))) &^ (Hacl.Cast.uint8_to_sint8 1uy) in
   bit
 
 
 type distinct2 (n:bytes) (p:point) =
   disjoint n (get_x p) /\ disjoint n (get_y p) /\ disjoint n (get_z p)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 val small_step_exit:
   two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} ->
@@ -69,7 +69,7 @@ let lemma_helper_0 r s h0 h1 h2 h3 : Lemma
   (ensures  (HS.modifies_ref r s h0 h3))
   = ()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 let lemma_helper_00 a b c h0 h1 : Lemma
   (requires (live h0 c /\ distinct c a /\ distinct c b /\ same_frame_2 a c /\ prop_1 h0 h1 a b))
@@ -109,7 +109,7 @@ let lemma_helper_001 a b c d e h0 h1 : Lemma
     lemma_helper_00 a b d h0 h1;
     lemma_helper_01 a b e h0 h1
 
-#reset-options "--initial_fuel 0  --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0  --max_fuel 0 --z3rlimit 20"
 
 val small_step_core:
    two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} ->
@@ -141,7 +141,7 @@ let small_step_core pp ppq p pq q n ctr b scalar =
   ()
 
 
-#reset-options "--initial_fuel 0  --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0  --max_fuel 0 --z3rlimit 100"
 
 val small_step: two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\ same_frame_2 two_p two_p_plus_q} ->
    p:point{distinct p two_p /\ distinct p two_p_plus_q /\ same_frame_2 two_p_plus_q p} ->
@@ -154,7 +154,7 @@ val small_step: two_p:point -> two_p_plus_q:point{distinct two_p two_p_plus_q /\
        /\ HS.modifies_one (frame_of p) h0 h1
        /\ HS.modifies_ref (frame_of p) (refs two_p ++ refs two_p_plus_q ++ refs p ++ refs p_plus_q) h0 h1 ))
 let rec small_step pp ppq p pq q n ctr b scalar =
-  if U32 (8ul =^ ctr) then begin
+  if U32.(8ul =^ ctr) then begin
     ()
   end
   else begin
@@ -164,13 +164,13 @@ let rec small_step pp ppq p pq q n ctr b scalar =
     let bit = nth_bit b ctr in
     swap_both pp ppq p pq;
     let h2 = ST.get() in
-    small_step pp ppq p pq q (hide 0) (U32 (ctr+^1ul)) b scalar;
+    small_step pp ppq p pq q (hide 0) (U32.(ctr+^1ul)) b scalar;
     let h3 = ST.get() in
     lemma_helper_0 (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1 h2 h3;
     ()
   end
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 
 let lemma_helper_1 r s h0 h1 h2 : Lemma
@@ -191,18 +191,18 @@ val big_step:
        /\ HS.modifies_ref (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1 ))
 let rec big_step n pp ppq p pq q ctr =
   let h0 = ST.get() in
-  if U32 (blength =^ ctr) then ()
+  if U32.(blength =^ ctr) then ()
   else begin
-    let byte = index n (U32 (blength-^1ul-^ctr)) in
+    let byte = index n (U32.(blength-^1ul-^ctr)) in
     small_step pp ppq p pq q (hide 0)(* m *) 0ul byte (hide 0)(* m *);
     let h1 = ST.get() in assert(live h1 q);
-    big_step n pp ppq p pq q (U32 (ctr +^ 1ul));
+    big_step n pp ppq p pq q (U32.(ctr +^ 1ul));
     let h2 = ST.get() in
     lemma_helper_1 (frame_of p) (refs pp ++ refs ppq ++ refs p ++ refs pq) h0 h1 h2;
     ()
   end
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val init_points: q:point{same_frame q} -> tmp:bigint{length tmp = 68 /\ frameOf tmp <> frame_of q} -> Stack unit
   (requires (fun h -> B.live h tmp /\ live h q))
@@ -225,7 +225,7 @@ let init_points q tmp =
   Hacl.EC.Curve25519.AddAndDouble.lemma_helper_0 h0 h1 tmp;
   ()
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 let lemma_helper_2 hinit h0 h1 h2 hfin r : Lemma
   (requires (fresh_frame hinit h0 /\ HS.modifies_one h0.tip h0 h1 /\ HS.modifies_one r h1 h2
@@ -235,7 +235,7 @@ let lemma_helper_2 hinit h0 h1 h2 hfin r : Lemma
   = assert(Set.subset (Map.domain hinit.h) (Map.domain hfin.h))
 
 
-#reset-options "--z3timeout 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 val montgomery_ladder:
   res:point{same_frame res} -> n:bytes{distinct2 n res /\ frame_of res <> frameOf n /\ length n >= 32} ->
@@ -250,7 +250,7 @@ let montgomery_ladder res n q =
   push_frame();
 
   // Build 'storage' empty but 'live' points
-  let nlp1 = U32 (nlength +^ 1ul) in
+  let nlp1 = U32.(nlength +^ 1ul) in
   let tot_len = 68ul in
   let h0 = ST.get() in
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) tot_len in

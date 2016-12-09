@@ -1,5 +1,5 @@
 (*--build-config
-  options:--admit_fsi FStar.Set --admit_fsi Parameters --admit_fsi Fsum --admit_fsi FsumWide --admit_fsi Fscalar --verify_module Fproduct --z3timeout 50;
+  options:--admit_fsi FStar.Set --admit_fsi Parameters --admit_fsi Fsum --admit_fsi FsumWide --admit_fsi Fscalar --verify_module Fproduct --z3rlimit 50;
   other-files:FStar.Classical.fst FStar.FunctionalExtensionality.fst FStar.Set.fsi seq.fsi FStar.Seq.fst FStar.SeqProperties.fst FStar.Heap.fst FStar.ST.fst FStar.All.fst FStar.Array.fst FStar.Ghost.fst axiomatic.fst intlib.fst lemmas.fst parameters.fsti uint.fst bigint.fst eval.fst fsum.fsti fsum_wide.fsti fscalar.fsti fproduct_lemmas.fst;
   --*)
 

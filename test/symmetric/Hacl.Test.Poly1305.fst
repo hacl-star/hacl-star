@@ -34,7 +34,7 @@ let main () =
   TestLib.compare_and_print poly1305 expected mac macsize;
 
   (* Test encoding a 10 MB buffer. *)
-  let len = FStar.UInt32 (1024ul *%^ 1024ul *%^ 1024ul) in
+  let len = FStar.UInt32.(1024ul *%^ 1024ul *%^ 1024ul) in
   let buf = TestLib.unsafe_malloc len in
   let c1 = C.clock () in
   Hacl.Symmetric.Poly1305.poly1305_mac mac buf len key;

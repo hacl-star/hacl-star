@@ -37,11 +37,11 @@ noeq type point =
 
 
 val get_x: point -> Tot bigint
-let get_x p = Point.x p
+let get_x p = Point?.x p
 val get_y: point -> Tot bigint
-let get_y p = Point.y p
+let get_y p = Point?.y p
 val get_z: point -> Tot bigint
-let get_z p = Point.z p
+let get_z p = Point?.z p
 
 
 val make: x:bigint{length x = 6} -> bigint -> z:bigint{length z = 6} -> Tot point
@@ -78,7 +78,7 @@ val swap_conditional_aux': a:bigint -> b:bigint{disjoint a b} ->
     (requires (fun h -> B.live h a /\ B.live h b))
     (ensures (fun h0 _ h1 -> B.live h1 a /\ B.live h1 b /\ modifies_2 a b h0 h1))
 let rec swap_conditional_aux' a b swap ctr =
-  if U32 (nlength =^ ctr) then ()
+  if U32.(nlength =^ ctr) then ()
   else begin
     let ai = a.(ctr) in
     let bi = b.(ctr) in
@@ -88,7 +88,7 @@ let rec swap_conditional_aux' a b swap ctr =
     let bi' = x ^^ bi in
     a.(ctr) <- ai';
     b.(ctr) <- bi';
-    swap_conditional_aux' a b swap (U32 (ctr +^ 1ul));
+    swap_conditional_aux' a b swap (U32.(ctr +^ 1ul));
     ()
  end
 
@@ -101,7 +101,7 @@ let rec swap_conditional_aux a b swap =
   swap_conditional_aux' a b swap 0ul
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 (* For simplicity, assuming that the point coordinates have been allocated on the same frame.
    Ideally in the same buffer *)
@@ -142,7 +142,7 @@ let prop_1 h0 h1 (a:point) (b:point) : GTot Type0 =
 				    ++ only (get_x b) ++ only (get_y b) ++ only (get_z b) ))
 				    ==> equal h0 b' h1 b')
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 let helper_lemma_4 r h0 h1 h2 h3 a b : Lemma
   (requires ( (forall (#t:Type) (b':buffer t). (frameOf b' = frame_of a /\ B.live h0 b'
@@ -169,7 +169,7 @@ let helper_lemma_4 r h0 h1 h2 h3 a b : Lemma
 	     ==> (disjoint b' (get_z a) /\ disjoint b' (get_z b)))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val swap_conditional:
   a:point{same_frame a} -> b:point{distinct a b /\ same_frame b} ->
@@ -208,7 +208,7 @@ let swap_conditional a b is_swap =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val helper_lemma': #t:Type -> a:buffer t -> Lemma
   (requires (True))
@@ -245,7 +245,7 @@ let helper_lemma_4' r h0 h1 h2 h3 a : Lemma
     assert(forall (#t:Type) (b':buffer t). disjoint_from_bufs b' s
 	     ==> (disjoint b' (get_z a)))
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val copy:
   a:point{same_frame a} -> b:point{distinct a b} ->
@@ -282,7 +282,7 @@ let copy a b =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val swap:
   a:point -> b:point{distinct a b /\ same_frame b} ->
@@ -308,7 +308,7 @@ let helper_lemma_5 h0 h1 a b =
   assert(disjoint_from_bufs z s)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val swap_both:
   a:point -> b:point{distinct a b /\ same_frame_2 a b} ->
@@ -336,7 +336,7 @@ let swap_both a b c d =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val copy2: p':point -> q':point{distinct p' q' /\ same_frame_2 p' q'} ->
   p:point{distinct p p' /\ distinct p q' /\ same_frame_2 p q'} ->

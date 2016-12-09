@@ -22,7 +22,7 @@ open Hacl.Symmetric.Poly1305.Bignum.Lemmas.Part4
 module U64 = FStar.UInt64
 module H64 = Hacl.UInt64
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 
 let carriedTopBottom (h0:mem) (h1:mem) (b:bigint) : GTot Type0 =
@@ -102,7 +102,7 @@ let carried_4 (h:mem) (b:bigint) : GTot Type0 =
   /\ v (get h b 4) < pow2 26
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_carry_top_20:
   h0:mem -> h1:mem ->
@@ -112,7 +112,7 @@ val lemma_carry_top_20:
 let lemma_carry_top_20 h0 h1 b = ()
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_carry_top_2:
   h0:mem -> h1:mem ->
@@ -126,7 +126,7 @@ let lemma_carry_top_2 h0 h1 b =
   lemma_carry_top_11 h0 h1 b
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 let isCarried01 (h0:mem) (h1:mem) (b:bigint) =
   live h0 b /\ live h1 b
@@ -147,7 +147,7 @@ let lemma_norm_5 h (b:bigint) :
     = ()
 
 
-#reset-options "--z3timeout 10 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
 
 val lemma_carry_0_to_10:
   h0:mem -> h1:mem ->

@@ -46,10 +46,10 @@ INCLUDES=$(addprefix -I , $(HACL_LIB))
 	$(FSTAR) $(FSTAR_OPTIONS_VER) $(INCLUDES) $^
 
 curve25519-ver: $(addsuffix .fst-ver-ct, $(CURVE25519_MODULES))
-curve25519-lax: $(addsuffix .fst-lax-ct, $(CURVE25519_MODULES))
+curve25519-lax: Hacl.EC.Curve25519.Bignum.fst-lax-ct #$(addsuffix .fst-lax-ct, $(CURVE25519_MODULES))
 
 poly1305-ver: $(addsuffix .fst-ver-ct, $(POLY1305_BIGNUM_MODULES))
-poly1305-lax: $(addsuffix .fst-lax-ct, $(POLY1305_BIGNUM_MODULES))
+poly1305-lax: Crypto.Symmetric.Poly1305.Bignum.fst-lax-ct  #$(addsuffix .fst-lax-ct, $(POLY1305_BIGNUM_MODULES))
 
 ver: curve25519-ver poly1305-ver
 lax: curve25519-lax poly1305-lax

@@ -81,7 +81,7 @@ let pos_s3 = bl +@ bl +@ bl
 let pos_s6 = bl +@ bl +@ bl +@ bl +@ bl
 
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 
 (* Define the internal function *)

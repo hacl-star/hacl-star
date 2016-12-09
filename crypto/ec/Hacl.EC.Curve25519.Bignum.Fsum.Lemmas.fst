@@ -47,7 +47,7 @@ let bound52 (h:heap) (b:bigint) : GTot Type0 =
 
 let w : U32.t -> Tot int = U32.v
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsum_0:
   a0:H64.t -> a1:H64.t -> a2:H64.t -> a3:H64.t -> a4:H64.t ->
@@ -62,14 +62,14 @@ let lemma_fsum_0 a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   pow2_double_sum 51;
   pow2_lt_compat 64 52
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val factorization_lemma: unit ->
   Lemma (requires (True))
 	(ensures  (forall a b c. {:pattern (a * (b+c))} a * (b + c) = a * b + a * c))
 let factorization_lemma () = ()
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsum: h0:mem -> h1:mem -> a:bigint -> b:bigint -> Lemma
   (requires (norm h0 a /\ norm h0 b /\ isSum h0 h1 a b))

@@ -12,7 +12,7 @@ open Hacl.EC.Curve25519.Parameters
 open Hacl.EC.Curve25519.Bigint
 open Hacl.EC.Curve25519.Utils
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 
 (* Module abbreviations *)
@@ -110,7 +110,7 @@ let fsum a b =
   Hacl.EC.Curve25519.Bignum.Modulo.freduce_coefficients a
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val fdifference: a:bigint{length a >= norm_length+1} -> b:bigint{disjoint a b} -> Stack unit
     (requires (fun h -> live h a /\ live h b))
@@ -125,7 +125,7 @@ let fdifference a b =
   pop_frame()
 
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val fscalar:
     res:bigint -> b:bigint{disjoint res b} -> s:s64 -> Stack unit

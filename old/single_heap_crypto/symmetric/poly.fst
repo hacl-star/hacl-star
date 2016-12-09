@@ -199,7 +199,7 @@ let clamp r =
   upd r 12 (SInt.UInt8.op_Hat_Amp (index r 12) mask_252);
   ()
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 val poly1305_step: msg:sbytes -> acc:bigint{disjoint msg acc} -> 
   bigint_r:bigint{disjoint msg bigint_r /\ disjoint acc bigint_r} -> ctr:nat{length msg >= 16 * ctr} ->
@@ -240,7 +240,7 @@ let rec poly1305_step msg acc r ctr =
     poly1305_step msg acc r (ctr-1);
     ()
 
-#reset-options "--z3timeout 100"
+#reset-options "--z3rlimit 100"
 
 val poly1305_last: msg:sbytes -> acc:bigint{disjoint msg acc} -> 
   bigint_r:bigint{disjoint msg bigint_r /\ disjoint acc bigint_r} -> len:nat{len <= length msg} ->

@@ -1,5 +1,5 @@
 (*--build-config
-    options:--admit_fsi FStar.Set --verify_module Modulo --z3timeout 20;
+    options:--admit_fsi FStar.Set --verify_module Modulo --z3rlimit 20;
     variables:MATH=../math_interfaces BIGNUM=../bignum_proof;
     other-files:FStar.Classical.fst FStar.FunctionalExtensionality.fst FStar.Set.fsi FStar.Heap.fst FStar.ST.fst FStar.All.fst seq.fsi FStar.Seq.fst FStar.SeqProperties.fst FStar.Array.fst FStar.Ghost.fst $BIGNUM/axiomatic.fst $BIGNUM/intlib.fst $BIGNUM/lemmas.fst $BIGNUM/parameters_256_64.fst $BIGNUM/uint.fst $BIGNUM/bigint.fst $BIGNUM/eval.fst modulo.fsti;
   --*)

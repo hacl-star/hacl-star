@@ -28,10 +28,10 @@ let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
 
 let rotate (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
-  (a <<^ s) |^ (a >>^ (FStar.UInt32 (32ul -^ s)))
+  (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k >= 4))
@@ -54,7 +54,7 @@ let store32_le (k:uint8_p) (x:h32) : Stack unit
     k.(2ul) <- sint32_to_sint8 (x >>^ 16ul);
     k.(3ul) <- sint32_to_sint8 (x >>^ 24ul)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
 val crypto_core_salsa20:
   output:uint8_p{length output = 64} ->
@@ -462,7 +462,7 @@ let crypto_core_salsa20 output input key =
   store32_le (offset output 60ul) x15
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 module U64 = FStar.UInt64
 module U32 = FStar.UInt32
@@ -607,7 +607,7 @@ let xor_ c m block =
   c.(63ul) <- m63 ^^ block63
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
   (requires (live h0 c /\ live h0 input /\ live h0 block
@@ -620,7 +620,7 @@ let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemm
     lemma_intro_modifies_3 c input block h0 h2
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
   (requires (live h0 c /\ live h0 input /\ live h0 block
@@ -634,7 +634,7 @@ let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lem
     lemma_intro_modifies_3 c input block h0 h2
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val crypto_stream_salsa20_xor_ic_loop:
   c:uint8_p ->
@@ -647,7 +647,7 @@ val crypto_stream_salsa20_xor_ic_loop:
     (requires (fun h -> live h c /\ live h m /\ live h block /\ live h input /\ live h kcopy))
     (ensures  (fun h0 _ h1 -> live h1 c /\ live h1 input /\ live h1 block /\ modifies_3 c input block h0 h1))
 let rec crypto_stream_salsa20_xor_ic_loop c m block input kcopy mlen =
-  if (FStar.UInt64 (mlen <^ 64uL)) then (
+  if (FStar.UInt64.(mlen <^ 64uL)) then (
     let h = ST.get() in
     lemma_intro_modifies_3 c input block h h;
     mlen )
@@ -668,7 +668,7 @@ let rec crypto_stream_salsa20_xor_ic_loop c m block input kcopy mlen =
     let i14 = input.(14ul) in
     let i15 = input.(15ul) in
     (* *)
-    let u = Hacl.UInt64(
+    let u = Hacl.UInt64.(
       sint8_to_sint64 i8
       +%^ (sint8_to_sint64 i9 <<^ 8ul)
       +%^ (sint8_to_sint64 i10 <<^ 16ul)
@@ -682,17 +682,17 @@ let rec crypto_stream_salsa20_xor_ic_loop c m block input kcopy mlen =
     (* *)
     cut (modifies_2 c block h0 h2);
     input.(8ul)  <- sint64_to_sint8 u;
-    input.(9ul)  <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 8ul));
-    input.(10ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 16ul));
-    input.(11ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 24ul));
-    input.(12ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 32ul));
-    input.(13ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 40ul));
-    input.(14ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 48ul));
-    input.(15ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 56ul));
+    input.(9ul)  <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 8ul));
+    input.(10ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 16ul));
+    input.(11ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 24ul));
+    input.(12ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 32ul));
+    input.(13ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 40ul));
+    input.(14ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 48ul));
+    input.(15ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 56ul));
     (* *)
     let h3 = ST.get() in
     lemma_modifies_3 c input block h0 h2 h3;
-    let mlen = FStar.UInt64 (mlen -^ 64uL) in
+    let mlen = FStar.UInt64.(mlen -^ 64uL) in
     let c' = offset c 64ul in
     let m = offset m 64ul in
     (* *)
@@ -703,7 +703,7 @@ let rec crypto_stream_salsa20_xor_ic_loop c m block input kcopy mlen =
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 val xor_bytes:
   x:uint8_p ->
@@ -714,31 +714,31 @@ val xor_bytes:
     (requires (fun h -> live h x /\ live h y /\ live h z))
     (ensures  (fun h0 _ h1 -> live h1 x /\ modifies_1 x h0 h1))
 let rec xor_bytes x y z len =
-  if FStar.UInt32 (len =^ 0ul) then ()
+  if FStar.UInt32.(len =^ 0ul) then ()
   else (
-    let i = FStar.UInt32 (len -^ 1ul) in
+    let i = FStar.UInt32.(len -^ 1ul) in
     let yi = y.(i) in let zi = z.(i) in
-    x.(i) <- Hacl.UInt8 (yi ^^ zi);
+    x.(i) <- Hacl.UInt8.(yi ^^ zi);
     xor_bytes x y z i
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 
 inline_for_extraction let mod_64 (mlen:U64.t) : Tot (z:U32.t{U32.v z = U64.v mlen % 64 /\ U32.v z <= U64.v mlen}) =
-  let mlen' = U64 (mlen &^ 63uL) in
+  let mlen' = U64.(mlen &^ 63uL) in
   UInt.logand_mask (U64.v mlen) 6;
   assert_norm (pow2 6 = 64);
   Math.Lemmas.euclidean_division_definition (U64.v mlen) 64;
   Math.Lemmas.nat_over_pos_is_nat (U64.v mlen) 64;
   Math.Lemmas.nat_times_nat_is_nat (U64.v mlen / 64) 64;
-  cut (U64 (v mlen >= v mlen'));
+  cut (U64.(v mlen >= v mlen'));
   Math.Lemmas.modulo_lemma (U64.v mlen') (pow2 32);
   Int.Cast.uint64_to_uint32 mlen'
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
   (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block)
@@ -753,7 +753,7 @@ let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 :
     lemma_intro_modifies_2_1 c h0 h3
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val crypto_stream_salsa20_xor_ic__:
   n:uint8_p{length n = 8} ->
@@ -798,16 +798,16 @@ let crypto_stream_salsa20_xor_ic__ n ic k local_state =
   input.(4ul) <- n4;   input.(5ul) <- n5;
   input.(6ul) <- n6;   input.(7ul) <- n7;
   input.(8ul)  <- uint64_to_sint8 ic;
-  input.(9ul)  <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 8ul));
-  input.(10ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 16ul));
-  input.(11ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 24ul));
-  input.(12ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 32ul));
-  input.(13ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 40ul));
-  input.(14ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 48ul));
-  input.(15ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 56ul))
+  input.(9ul)  <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 8ul));
+  input.(10ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 16ul));
+  input.(11ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 24ul));
+  input.(12ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 32ul));
+  input.(13ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 40ul));
+  input.(14ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 48ul));
+  input.(15ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 56ul))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val crypto_stream_salsa20_xor_ic_:
   c:uint8_p ->
@@ -860,23 +860,23 @@ let crypto_stream_salsa20_xor_ic_ c m mlen n ic k =
   (* input.(4ul) <- n4;   input.(5ul) <- n5; *)
   (* input.(6ul) <- n6;   input.(7ul) <- n7; *)
   (* input.(8ul)  <- uint64_to_sint8 ic; *)
-  (* input.(9ul)  <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 8ul)); *)
-  (* input.(10ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 16ul)); *)
-  (* input.(11ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 24ul)); *)
-  (* input.(12ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 32ul)); *)
-  (* input.(13ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 40ul)); *)
-  (* input.(14ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 48ul)); *)
-  (* input.(15ul) <- uint64_to_sint8 (FStar.UInt64 (ic >>^ 56ul)); *)
+  (* input.(9ul)  <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 8ul)); *)
+  (* input.(10ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 16ul)); *)
+  (* input.(11ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 24ul)); *)
+  (* input.(12ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 32ul)); *)
+  (* input.(13ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 40ul)); *)
+  (* input.(14ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 48ul)); *)
+  (* input.(15ul) <- uint64_to_sint8 (FStar.UInt64.(ic >>^ 56ul)); *)
   crypto_stream_salsa20_xor_ic__ n ic k local_state;
   let h1 = ST.get() in
   cut (modifies_0 h0 h1);
   let _ = crypto_stream_salsa20_xor_ic_loop c m block input kcopy mlen in
   let mlen' = mod_64 mlen in
-  let off = U32 (Int.Cast.uint64_to_uint32 mlen -^ mlen') in
+  let off = U32.(Int.Cast.uint64_to_uint32 mlen -^ mlen') in
   let h2 = ST.get() in
   cut (modifies_3 c input block h1 h2);
   cut (live h2 block /\ live h2 c /\ disjoint block c);
-  if U32 (mlen' >=^ 0ul) then (
+  if U32.(mlen' >=^ 0ul) then (
     crypto_core_salsa20 block input kcopy;
     xor_bytes (offset c off) (offset m off) block (mlen')
   );
@@ -886,7 +886,7 @@ let crypto_stream_salsa20_xor_ic_ c m mlen n ic k =
   pop_frame()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 val crypto_stream_salsa20_xor_ic:
   c:uint8_p ->
@@ -899,11 +899,11 @@ val crypto_stream_salsa20_xor_ic:
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
 let crypto_stream_salsa20_xor_ic c m mlen n ic k =
-  if FStar.UInt64 (mlen =^ 0uL) then ()
+  if FStar.UInt64.(mlen =^ 0uL) then ()
   else crypto_stream_salsa20_xor_ic_ c m mlen n ic k
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 val crypto_stream_salsa20_loop:
   c:uint8_p ->
@@ -915,7 +915,7 @@ val crypto_stream_salsa20_loop:
     (requires (fun h -> live h c /\ live h n /\ live h k /\ live h input))
     (ensures  (fun h0 _ h1 -> live h1 c /\ live h1 input /\ modifies_2 c input h0 h1))
 let rec crypto_stream_salsa20_loop c clen n k input =
-  if FStar.UInt64 (clen <^ 64uL) then clen
+  if FStar.UInt64.(clen <^ 64uL) then clen
   else (
     crypto_core_salsa20 (Buffer.sub c 0ul 64ul) input k;
     let i8 = input.(8ul) in
@@ -926,7 +926,7 @@ let rec crypto_stream_salsa20_loop c clen n k input =
     let i13 = input.(13ul) in
     let i14 = input.(14ul) in
     let i15 = input.(15ul) in
-    let u = Hacl.UInt64(
+    let u = Hacl.UInt64.(
       sint8_to_sint64 i8
       +%^ (sint8_to_sint64 i9 <<^ 8ul)
       +%^ (sint8_to_sint64 i10 <<^ 16ul)
@@ -938,20 +938,20 @@ let rec crypto_stream_salsa20_loop c clen n k input =
       +%^ (uint64_to_sint64 1uL)
     ) in
     input.(8ul)  <- sint64_to_sint8 u;
-    input.(9ul)  <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 8ul));
-    input.(10ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 16ul));
-    input.(11ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 24ul));
-    input.(12ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 32ul));
-    input.(13ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 40ul));
-    input.(14ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 48ul));
-    input.(15ul) <- sint64_to_sint8 (Hacl.UInt64 (u >>^ 56ul));
-    let clen = FStar.UInt64 (clen -^ 64uL) in
+    input.(9ul)  <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 8ul));
+    input.(10ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 16ul));
+    input.(11ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 24ul));
+    input.(12ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 32ul));
+    input.(13ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 40ul));
+    input.(14ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 48ul));
+    input.(15ul) <- sint64_to_sint8 (Hacl.UInt64.(u >>^ 56ul));
+    let clen = FStar.UInt64.(clen -^ 64uL) in
     let c = offset c 64ul in
     crypto_stream_salsa20_loop c clen n k input
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 
 let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
@@ -966,7 +966,7 @@ let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : L
     lemma_intro_modifies_2_1 c h0 h3
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val crypto_stream_salsa20_:
   n:uint8_p{length n = 8} ->
@@ -1020,7 +1020,7 @@ let crypto_stream_salsa20_ n k local_state =
   input.(15ul) <- zero
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 val crypto_stream_salsa20:
   c:uint8_p ->
@@ -1033,11 +1033,11 @@ val crypto_stream_salsa20:
 let crypto_stream_salsa20 c clen n k =
   push_frame();
   let hh = ST.get() in
-  if (FStar.UInt64 (clen =^ 0uL)) then (let h = ST.get() in lemma_intro_modifies_2_1 c h h)
+  if (FStar.UInt64.(clen =^ 0uL)) then (let h = ST.get() in lemma_intro_modifies_2_1 c h h)
   else (
     let clen' = mod_64 clen in
     Math.Lemmas.modulo_lemma (U64.v clen) (pow2 32);
-    let off = U32 (Int.Cast.uint64_to_uint32 clen -^ clen') in
+    let off = U32.(Int.Cast.uint64_to_uint32 clen -^ clen') in
     let h0 = ST.get() in
     let zero = uint8_to_sint8 0uy in
     let local_state = create zero 112ul in
@@ -1088,7 +1088,7 @@ let crypto_stream_salsa20 c clen n k =
     let _ = crypto_stream_salsa20_loop c clen n kcopy input in
     let h2 = ST.get() in
     cut (modifies_2 c input h1 h2);
-    if U32 (clen' >=^ 0ul) then (
+    if U32.(clen' >=^ 0ul) then (
       crypto_core_salsa20 block input kcopy;
       blit block 0ul (offset c off) 0ul (clen');
       let h3 = ST.get() in

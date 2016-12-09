@@ -64,13 +64,13 @@ let multiplication_0 c a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   let ab44 = a4 *^ b4 in
   let open Hacl.UInt64 in
   let c0 = ab00 in
-  let c1 = H128 (ab01 +%^ ab10) in
-  let c2 = H128 (ab02 +%^ ab11 +%^ ab20) in
-  let c3 = H128 (ab03 +%^ ab12 +%^ ab21 +%^ ab30) in
-  let c4 = H128 (ab04 +%^ ab13 +%^ ab22 +%^ ab31 +%^ ab40) in
-  let c5 = H128 (ab14 +%^ ab23 +%^ ab32 +%^ ab41) in
-  let c6 = H128 (ab24 +%^ ab33 +%^ ab42) in
-  let c7 = H128 (ab34 +%^ ab43) in
+  let c1 = H128.(ab01 +%^ ab10) in
+  let c2 = H128.(ab02 +%^ ab11 +%^ ab20) in
+  let c3 = H128.(ab03 +%^ ab12 +%^ ab21 +%^ ab30) in
+  let c4 = H128.(ab04 +%^ ab13 +%^ ab22 +%^ ab31 +%^ ab40) in
+  let c5 = H128.(ab14 +%^ ab23 +%^ ab32 +%^ ab41) in
+  let c6 = H128.(ab24 +%^ ab33 +%^ ab42) in
+  let c7 = H128.(ab34 +%^ ab43) in
   let c8 = ab44 in
   update_wide_9 c c0 c1 c2 c3 c4 c5 c6 c7 c8
 

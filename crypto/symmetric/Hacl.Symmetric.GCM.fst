@@ -26,7 +26,7 @@ assume MaxUInt32: pow2 32 = 4294967296
 assume MaxUInt64: pow2 64 > 0xfffffffffffffff
 assume MaxUInt128: pow2 128 > pow2 64
 
-#set-options "--z3timeout 10 --max_fuel 0 --initial_fuel 0"
+#set-options "--z3rlimit 10 --max_fuel 0 --initial_fuel 0"
 
 (* Define a type for all 16-byte block cipher algorithm *)
 type cipher_alg (k: pos) = key:u8s{length key = k} ->
@@ -196,7 +196,7 @@ let mk_len_info len_info len_1 len_2 =
   let len_2 = len_2 >>^ 8ul in
   upd len_info 11ul (uint32_to_sint8 len_2)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private val ghash_loop_: tag:u8s{length tag = 16} ->
     auth_key:u8s{length auth_key = 16 /\ disjoint tag auth_key} ->
@@ -233,7 +233,7 @@ let rec ghash_loop tag auth_key str len dep =
     ghash_loop tag auth_key str len next
   end
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 (* A hash function used in authentication. It will authenticate additional data first, *)
 (* then ciphertext and at last length information. The result is stored in tag.        *)
@@ -329,7 +329,7 @@ let authenticate #k alg ciphertext tag key nonce cnt ad adlen len =
   auth_body #k alg ciphertext tag key nonce cnt ad adlen len tmp;
   pop_frame()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 private val encrypt_loop: #k:pos -> alg:cipher_alg k ->
     ciphertext:u8s ->
@@ -370,7 +370,7 @@ let rec encrypt_loop #k alg ciphertext key cnt plaintext len tmp dep =
     assert(live h1 ciphertext /\ live h1 key /\ live h1 plaintext /\ live h1 tmp /\ modifies_2 ciphertext tmp h0 h1)
   end
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private val encrypt_body: #k:pos -> alg:cipher_alg k ->
     ciphertext:u8s ->

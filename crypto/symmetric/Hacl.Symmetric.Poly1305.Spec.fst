@@ -91,7 +91,7 @@ let little_endian_singleton n =
     H8.v (Seq.index (Seq.create 1 n) 0) + pow2 8 *
     little_endian (Seq.slice (Seq.create 1 n) 1 1))
 
-#set-options "--z3timeout 20"
+#set-options "--z3rlimit 20"
 
 val little_endian_append: w1:word -> w2:word{length w1 + length w2 <= 16} -> Lemma
   (requires True)
@@ -346,7 +346,7 @@ let rec poly vs r =
   else (poly (seq_head vs) r +@ Seq.index vs (length vs - 1)) *@ r
 
 private let fix (r:word_16) (i:nat {i < 16}) m : Tot word_16 =
-  Seq.upd r i (H8 (Seq.index r i &^ m))
+  Seq.upd r i (H8.(Seq.index r i &^ m))
 
 // an abstract spec of clamping for our state invariant
 // for our polynomial-sampling assumption,

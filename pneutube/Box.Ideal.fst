@@ -10,7 +10,7 @@ module U64 = FStar.UInt64
 module H64 = Hacl.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 private val lemma_max_uint8: n:nat -> Lemma
  (requires (n = 8))
@@ -27,7 +27,7 @@ private val lemma_max_uint64: n:nat -> Lemma
  (ensures  (pow2 n = 18446744073709551616))
  [SMTPat (pow2 n)]
 let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 
 type publicKey     = l:uint8_p{length l = 32}

@@ -15,7 +15,7 @@ module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 private val lemma_max_uint32: n:nat -> Lemma
   (requires (n = 32))
@@ -29,7 +29,7 @@ private val lemma_max_uint64: n:nat -> Lemma
 let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val crypto_box_beforenm:
   k:uint8_p{length k = crypto_box_PUBLICKEYBYTES} ->
@@ -51,7 +51,7 @@ let crypto_box_beforenm k pk sk =
   0ul
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 val crypto_box_detached_afternm:
   c:uint8_p ->
@@ -67,7 +67,7 @@ let crypto_box_detached_afternm c mac m mlen n k =
   crypto_secretbox_detached c mac m mlen n k
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 let lemma_modifies_3_2 (c:uint8_p) (mac:uint8_p) h0 h1 h2 : Lemma
   (requires (live h0 c /\ live h0 mac /\ live h1 mac /\ live h1 c /\ live h2 c /\ live h2 mac
@@ -76,7 +76,7 @@ let lemma_modifies_3_2 (c:uint8_p) (mac:uint8_p) h0 h1 h2 : Lemma
   = lemma_reveal_modifies_0 h0 h1; lemma_reveal_modifies_2 c mac h1 h2; lemma_intro_modifies_3_2 c mac h0 h2
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val crypto_box_detached:
   c:uint8_p ->
@@ -112,7 +112,7 @@ let crypto_box_detached c mac m mlen n pk sk =
   z
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val crypto_box_open_detached:
   m:uint8_p ->
@@ -139,7 +139,7 @@ let crypto_box_open_detached m c mac mlen n pk sk =
   z
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 40"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 40"
 
 val crypto_box_easy_afternm:
   c:uint8_p ->
@@ -187,7 +187,7 @@ let crypto_box_open_easy m c mlen n pk sk =
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   let mac = sub c 0ul 16ul in
   assume (Hacl.Policies.declassifiable mac);
-  crypto_box_open_detached m (sub c 16ul (U32 (mlen' -^ 16ul))) mac (U64 (mlen -^ 16uL)) n pk sk
+  crypto_box_open_detached m (sub c 16ul (U32.(mlen' -^ 16ul))) mac (U64.(mlen -^ 16uL)) n pk sk
 
 
 val crypto_box_open_detached_afternm:
@@ -218,5 +218,5 @@ let crypto_box_open_easy_afternm m c mlen n k =
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   let mac = sub c 0ul 16ul in
   assume (Hacl.Policies.declassifiable mac);
-  let c = sub c 16ul (U32 (mlen' -^ 16ul)) in
-  crypto_box_open_detached_afternm m c mac (U64 (mlen -^ 16uL)) n k
+  let c = sub c 16ul (U32.(mlen' -^ 16ul)) in
+  crypto_box_open_detached_afternm m c mac (U64.(mlen -^ 16uL)) n k

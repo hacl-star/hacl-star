@@ -31,7 +31,7 @@ type elemB = b:lbuffer 16
 
 (* Every function "func_name_loop" is a helper for function "func_name". *)
 
-#set-options "--z3timeout 10 --max_fuel 1 --initial_fuel 1"
+#set-options "--z3rlimit 10 --max_fuel 1 --initial_fuel 1"
 
 private val gf128_add_loop: 
   a:elemB -> b:elemB {disjoint a b} ->
@@ -121,7 +121,7 @@ let apply_mask a m msk = apply_mask_loop a m msk len
 private let r_mul = 225uy
 
 
-#reset-options "--z3timeout 60 --max_fuel 1 --initial_fuel 1"
+#reset-options "--z3rlimit 60 --max_fuel 1 --initial_fuel 1"
 
 private val gf128_mul_loop: 
   a:elemB -> b:elemB {disjoint a b} -> tmp:buffer {length tmp = 32 /\ disjoint a tmp /\ disjoint b tmp} ->
@@ -157,7 +157,7 @@ let rec gf128_mul_loop a b tmp dep =
   end
 
 
-#reset-options "--z3timeout 10 --max_fuel 0 --initial_fuel 0"
+#reset-options "--z3rlimit 10 --max_fuel 0 --initial_fuel 0"
 
 (* In place multiplication. Calculate "a * b" and store the result in a.    *)
 (* WARNING: may have issues with constant time. *)
@@ -264,7 +264,7 @@ let mk_len_info len_info len_1 len_2 =
   upd len_info 11ul (uint32_to_uint8 len_2)
 // relying on outer initialization?
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 (* A hash function used in authentication. It will authenticate additional data first, *)
 (* then ciphertext and at last length information. The result is stored in tag.        *)

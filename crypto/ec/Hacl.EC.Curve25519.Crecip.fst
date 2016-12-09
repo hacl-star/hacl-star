@@ -35,7 +35,7 @@ val loop: tmp:bigint -> v:bigint{disjoint tmp v} -> ctr:U32.t -> Stack unit
     (ensures (fun h0 _ h1 -> live h1 tmp /\ live h1 v /\ modifies_2 tmp v h0 h1))
 let rec loop tmp v ctr =
   let h0 = ST.get() in
-  if U32 (ctr =^ 0ul) then ()
+  if U32.(ctr =^ 0ul) then ()
   else (
     fsquare tmp v;
     let h1 = ST.get() in
@@ -43,11 +43,11 @@ let rec loop tmp v ctr =
     let h = ST.get() in
     assert(live h tmp /\ live h v);
     assert(U32.v ctr > 0);
-    loop tmp v (U32 (ctr -^ 1ul))
+    loop tmp v (U32.(ctr -^ 1ul))
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val crecip_0: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z))
@@ -69,7 +69,7 @@ let crecip_0 tmp z =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val crecip_1: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z ))
@@ -88,7 +88,7 @@ let crecip_1 tmp z =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 val crecip_2: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z))
@@ -114,7 +114,7 @@ let crecip_2 tmp z =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val crecip_3: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z))
@@ -135,7 +135,7 @@ let crecip_3 tmp z =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val crecip_4: tmp:bigint{length tmp = 50} -> z:bigint{disjoint tmp z} -> Stack unit
   (requires (fun h -> live h tmp /\ live h z))
@@ -156,14 +156,14 @@ let crecip_4 tmp z =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val crecip': output:bigint -> z:bigint{disjoint output z} -> Stack unit 
   (requires (fun h -> live h output /\ live h z)) 
   (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
 let crecip' output z = 
   push_frame();
-  let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) (U32 (10ul *^ nlength)) in
+  let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) (U32.(10ul *^ nlength)) in
   let z2      = sub tmp 0ul nlength in
   let z9      = sub tmp 5ul nlength in
   let z11     = sub tmp 10ul nlength in

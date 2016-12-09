@@ -3,7 +3,7 @@
 set -e
 
 eval $(opam config env)
-export Z3=z3-4.4.1-x64-ubuntu-14.04;
+export Z3=z3-4.5.0-x64-ubuntu-14.04;
 export PATH=/home/travis/build/mitls/hacl-star/$Z3/bin:$PATH;
 export PATH=/home/travis/build/mitls/hacl-star:$PATH;
 export PATH=/home/travis/build/mitls/hacl-star/FStar/bin:$PATH;

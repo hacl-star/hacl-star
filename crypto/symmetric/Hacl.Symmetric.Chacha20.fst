@@ -25,10 +25,10 @@ val lemma_max_uint32: n:nat ->
 let lemma_max_uint32 n = assert_norm (pow2 32 = 4294967296)
 
 let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
-  (a <<^ s) |^ (a >>^ (FStar.UInt32 (32ul -^ s)))
+  (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k >= 4))
@@ -87,7 +87,7 @@ let chacha_ietf_ivsetup ctx iv counter =
     ctx.(15ul) <- load32_le(offset iv 8ul)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val chacha_encrypt_bytes_core:
   ctx:chacha_ctx ->
@@ -1175,13 +1175,13 @@ val chacha_encrypt_bytes_loop:
     (requires (fun h -> live h c /\ live h m /\ live h ctx))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_2 ctx c h0 h1))
 let rec chacha_encrypt_bytes_loop ctx m c len =
-  if FStar.UInt32 (len <^ 64ul) then ()
+  if FStar.UInt32.(len <^ 64ul) then ()
   else (
     chacha_encrypt_bytes_core ctx m c;
     let ctr = ctx.(12ul) in
     let one = uint32_to_sint32 1ul in
-    ctx.(12ul) <- H32 (ctr +%^ one);
-    chacha_encrypt_bytes_loop ctx (offset m 64ul) (offset c 64ul) (FStar.UInt32 (len -^ 64ul))
+    ctx.(12ul) <- H32.(ctr +%^ one);
+    chacha_encrypt_bytes_loop ctx (offset m 64ul) (offset c 64ul) (FStar.UInt32.(len -^ 64ul))
   )
 
 
@@ -1225,9 +1225,9 @@ let rec chacha_encrypt_bytes ctx m c len =
   UInt.logand_mask (U32.v len) 6;
   assert_norm(pow2 6 = 64);
   Math.Lemmas.euclidean_division_definition (U32.v len) 64;
-  let rem = U32 (len &^ 63ul) in // % 64
-  let q   = U32 (len >>^ 6ul) in // / 64
-  if FStar.UInt32 (rem >=^ 0ul) then (
-    let m = offset m (U32 (len -^ rem)) in
-    let c = offset c (U32 (len -^ rem)) in
-    chacha_encrypt_bytes_finish ctx m c rem)
+  let rema = U32.(len &^ 63ul) in // % 64
+  let q   = U32.(len >>^ 6ul) in // / 64
+  if FStar.UInt32.(rema >=^ 0ul) then (
+    let m = offset m (U32.(len -^ rema)) in
+    let c = offset c (U32.(len -^ rema)) in
+    chacha_encrypt_bytes_finish ctx m c rema)

@@ -94,7 +94,7 @@ let wrap_key okey key keylen =
     blit key 0ul okey 0ul keylen
 
 
-#reset-options "--z3timeout 3600"
+#reset-options "--z3rlimit 3600"
 
 
 (* Define the main function *)

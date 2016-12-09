@@ -172,7 +172,7 @@ let rec maxValueIdx h  b l =
   | 1 -> 0
   | _ -> if maxValue h  b l = v (get h b (l-1)) then l - 1 else maxValueIdx h b (l-1)
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 val maxValue_eq_lemma: 
   ha:heap -> hb:heap -> a:bigint{live ha  a} -> b:bigint{live hb  b} -> l:pos -> Lemma 
@@ -233,7 +233,7 @@ let rec maxValueIdx_wide h  b l =
   | 1 -> 0
   | _ -> if maxValue_wide h  b l = H128.v (get h b (l-1)) then l - 1 else maxValueIdx_wide h b (l-1)
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 val maxValue_wide_eq_lemma: 
   ha:heap -> hb:heap -> a:bigint_wide{live ha  a} -> b:bigint_wide{live hb  b} -> l:pos -> Lemma 
@@ -256,7 +256,7 @@ val maxValueNorm_wide_eq_lemma:
     (ensures (maxValueNorm_wide ha a = maxValueNorm_wide hb b))
 let maxValueNorm_wide_eq_lemma ha hb a b = maxValue_wide_eq_lemma ha hb a b norm_length
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 20"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 val eval_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} -> b:bigint{live hb b} ->
   len:nat{ (len <= length a) /\ (len <= length b) } -> Lemma
@@ -267,7 +267,7 @@ let rec eval_eq_lemma ha hb a b len =
   | 0 -> ()
   | _ -> eval_eq_lemma ha hb a b (len-1)
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3timeout 200"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 200"
 
 (* Timeout is too long to be reasonable *)
 val eval_partial_eq_lemma: ha:heap -> hb:heap -> a:bigint{live ha a} ->  b:bigint{live hb b} -> 

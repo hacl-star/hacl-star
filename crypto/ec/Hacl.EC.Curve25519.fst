@@ -176,7 +176,7 @@ let expand output input =
   expand_4 output input
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val contract_0: output:u8s{length output >= 32} -> input:Hacl.EC.Curve25519.Bigint.bigint{disjoint output input}  -> STL unit
   (requires (fun h -> disjoint input output /\ live h input /\ live h output))
@@ -265,7 +265,7 @@ let contract output input =
   contract_4 output input
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 open Hacl.EC.Curve25519.PPoint
 
@@ -303,7 +303,7 @@ let mk_q output q_x pk q =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 let lemma_helper_1 hinit h0 h1 h2 h3 h4 hfin output : Lemma
   (requires (
@@ -323,7 +323,7 @@ let lemma_helper_1 hinit h0 h1 h2 h3 h4 hfin output : Lemma
     lemma_intro_modifies_1 output hinit hfin
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 private val exp_2:
   output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
@@ -343,13 +343,13 @@ let exp_2 output q_x scalar basepoint =
   let resy   = B.sub tmp 6ul  5ul in
   let resz   = B.sub tmp 11ul 6ul in
   let zrecip = B.sub tmp 17ul 5ul in
-  let res    = PPoint.make resx resy resz in
+  let res    = Hacl.EC.Curve25519.PPoint.make resx resy resz in
   (* Ladder *)
   let h1 = ST.get() in
   montgomery_ladder res scalar basepoint;
   (* Get the affine coordinates back *)
   let h2 = ST.get() in
-  cut(HS (modifies_one h0.tip h1 h2));
+  cut(HS.(modifies_one h0.tip h1 h2));
   cut( B.live h2 output);
   crecip' zrecip (Hacl.EC.Curve25519.PPoint.get_z res);
   let h2' = ST.get() in
@@ -357,7 +357,7 @@ let exp_2 output q_x scalar basepoint =
   let h3 = ST.get() in
   assert(B.live h3 output);
   cut (modifies_1 tmp h2 h3);
-  cut (HS (FStar.Buffer.frameOf tmp = h0.tip));
+  cut (HS.(FStar.Buffer.frameOf tmp = h0.tip));
   Hacl.EC.Curve25519.AddAndDouble.lemma_helper_0 h2 h3 tmp;
   contract output resy;
   let h4 = ST.get() in
@@ -368,7 +368,7 @@ let exp_2 output q_x scalar basepoint =
   ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 let lemma_helper_2 hinit h0 h1 h2 h3 hfin output : Lemma
   (requires (
@@ -385,7 +385,7 @@ let lemma_helper_2 hinit h0 h1 h2 h3 hfin output : Lemma
     lemma_intro_modifies_1 output hinit hfin
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val exp_1: output:u8s{length output >= 32} -> q_x:u8s{length q_x >= 32 /\ disjoint q_x output} ->
   pk:u8s{length pk >= 32 /\ disjoint pk output} -> STL unit
@@ -403,7 +403,7 @@ let exp_1 output q_x scalar =
   let qx     = B.sub tmp 0ul 6ul in
   let qy     = B.sub tmp 6ul 5ul in
   let qz     = B.sub tmp 11ul 6ul in
-  let q      = PPoint.make qx qy qz in
+  let q      = Hacl.EC.Curve25519.PPoint.make qx qy qz in
   let h1 = ST.get() in
   mk_q output q_x scalar q;
   let h2 = ST.get() in

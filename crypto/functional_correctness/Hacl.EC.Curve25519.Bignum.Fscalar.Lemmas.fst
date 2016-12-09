@@ -44,7 +44,7 @@ let bound115 h (b:bigint_wide) : GTot Type0 =
   /\ v (get h b 4) < pow2 115
 
 
-#reset-options "--z3timeout 5 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fscalar:
   h0:mem -> h1:mem ->

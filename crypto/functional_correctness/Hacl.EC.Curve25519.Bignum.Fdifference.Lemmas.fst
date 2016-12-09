@@ -80,7 +80,7 @@ let isDifference h0 h1 a b =
   /\ v (get h1 a 3) = v (get h0 b 3) - v (get h0 a 3)
   /\ v (get h1 a 4) = v (get h0 b 4) - v (get h0 a 4)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 val lemma_add_zero_eval_:
   h0:mem -> h1:mem ->
@@ -127,7 +127,7 @@ val factorization_lemma: unit ->
 	(ensures  (forall a b c. {:pattern (a * (b-c))} a * (b - c) = a * b - a * c))
 let factorization_lemma () = ()
 
-#reset-options "--z3timeout 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fdifference: h0:mem -> h1:mem -> a:bigint -> b:bigint -> Lemma
   (requires (norm h0 a /\ fits51to53 h0 b /\ isDifference h0 h1 a b))

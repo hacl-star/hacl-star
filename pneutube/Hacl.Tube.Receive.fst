@@ -39,7 +39,7 @@ private val lemma_max_uint64: n:nat -> Lemma
 let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 (** Non-Constant time comparison function **)
 val memcmp:
@@ -66,7 +66,7 @@ let get_fh_stat fh = fh.stat
 module HS = FStar.HyperStack
 module HH = FStar.HyperHeap
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
 val file_recv_loop_2_lt_blocksize:
   fb:fh_ref ->
@@ -119,7 +119,7 @@ let file_recv_loop_2_lt_blocksize fb connb state mut_state seqno len =
     | SocketError -> (* TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); *)SocketError)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 val file_recv_loop_2:
   fb:fh_ref ->
@@ -194,7 +194,7 @@ let rec file_recv_loop_2 fb connb state mut_state seqno len =
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
 val file_recv_enc:
   fb:fh_ref ->
@@ -271,7 +271,7 @@ let file_recv_enc fb connb state size =
   res
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 val file_recv_loop:
   fb:fh_ref ->
@@ -332,7 +332,7 @@ let rec file_recv_loop fb lhb connb state =
   | SocketError -> (* TestLib.perr(0ul); *)SocketError
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 val file_recv:
   port:u32 ->

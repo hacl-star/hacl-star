@@ -16,7 +16,7 @@ open Hacl.EC.Curve25519.Bigint
 module H64 = Hacl.UInt64
 module H128 = Hacl.UInt128
 
-#reset-options "--z3timeout 20 --max_fuel 0 --initial_fuel 0 --max_ifuel 0 --initial_ifuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0 --initial_fuel 0 --max_ifuel 0 --initial_ifuel 0"
 
 val update_5: 
   c:bigint ->

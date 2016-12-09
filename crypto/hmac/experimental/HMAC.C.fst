@@ -119,7 +119,7 @@ let hmac_core' memb mac key keylen data datalen =
   (**) assert(live h2 mac)
 
 
-#reset-options "--z3timeout 20"
+#reset-options "--z3rlimit 20"
 
 
 (* Define the main function *)

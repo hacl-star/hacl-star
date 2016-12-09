@@ -26,7 +26,7 @@ module H8  = Hacl.UInt8
 module H32  = Hacl.UInt32
 module H64  = Hacl.UInt64
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3timeout 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val add_big_zero_:
   b:bigint ->

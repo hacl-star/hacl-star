@@ -1,5 +1,5 @@
 (*--build-config
-    options:--admit_fsi FStar.Set --verify_module Modulo --z3timeout 100;
+    options:--admit_fsi FStar.Set --verify_module Modulo --z3rlimit 100;
     other-files:FStar.Classical.fst FStar.FunctionalExtensionality.fst FStar.Set.fsi FStar.Heap.fst FStar.ST.fst FStar.All.fst seq.fsi FStar.Seq.fst FStar.SeqProperties.fst FStar.Array.fst FStar.Ghost.fst axiomatic.fst intlib.fst lemmas.fst parameters_25519_64.fst uint.fst bigint.fst eval.fst modulo_lemmas.fst modulo.fsti
   --*)
 
