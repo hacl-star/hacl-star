@@ -15,7 +15,7 @@ HACL_HASH=$(HACL_API)/hash
 HACL_EC=$(HACL_API)/ec
 
 ifeq ($(CI),true)
-VERBOSE=-verbose
+VERBOSE=
 else
 VERBOSE=-verbose
 endif
