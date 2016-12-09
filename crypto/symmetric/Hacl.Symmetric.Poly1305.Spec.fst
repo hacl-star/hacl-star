@@ -346,7 +346,7 @@ let rec poly vs r =
   else (poly (seq_head vs) r +@ Seq.index vs (length vs - 1)) *@ r
 
 private let fix (r:word_16) (i:nat {i < 16}) m : Tot word_16 =
-  Seq.upd r i (H8 (Seq.index r i &^ m))
+  Seq.upd r i (H8.(Seq.index r i &^ m))
 
 // an abstract spec of clamping for our state invariant
 // for our polynomial-sampling assumption,

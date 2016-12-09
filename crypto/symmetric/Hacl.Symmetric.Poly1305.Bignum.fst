@@ -451,8 +451,8 @@ val finalize: b:bigint -> Stack unit
     /\ eval h1 b norm_length = eval h0 b norm_length % reveal prime))
 let finalize b =
   let one = Hacl.Cast.uint64_to_sint64 1uL in
-  let mask_26 = H64 ((one <<^ 26ul) -^ one) in
-  let mask2_26m5 = H64 (mask_26 -^ (one <<^ 2ul)) in
+  let mask_26 = H64.((one <<^ 26ul) -^ one) in
+  let mask2_26m5 = H64.(mask_26 -^ (one <<^ 2ul)) in
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
   let b2 = b.(2ul) in

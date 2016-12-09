@@ -48,10 +48,10 @@ assume MaxUInt64: pow2 64 > pow2 32
 (* 'Rotate' operators, to inline *)
 let op_Greater_Greater_Greater (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
   let (m:u32{FStar.UInt32.v m = 32}) = 32ul in
-  (a >>^ s) |^ (a <<^ (U32 (m -^ s)))
+  (a >>^ s) |^ (a <<^ (U32.(m -^ s)))
 let op_Less_Less_Less (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
   let (m:u32{FStar.UInt32.v m = 32}) = 32ul in
-  (a <<^ s) |^ (a >>^ (U32 (m -^ s)))
+  (a <<^ s) |^ (a >>^ (U32.(m -^ s)))
 
 val lemma_euclidian_division: r:nat -> b:nat -> q:pos -> Lemma
   (requires (r < q))
@@ -74,7 +74,7 @@ let lemma_uint32_of_bytes (a:t) (b:t) (c:t) (d:t) : Lemma
 val uint32_of_bytes: b:u8s{length b >= 4} -> Stack H32.t
   (requires (fun h -> B.live h b))
   (ensures (fun h0 r h1 -> h0 == h1 /\ B.live h0 b
-    /\ v r = H8 (v (get h0 b 0)
+    /\ v r = H8.(v (get h0 b 0)
 		 + pow2 8 * v (get h0 b 1)
 		 + pow2 16 * v (get h0 b 2)
 		 + pow2 24 * v (get h0 b 3)) ))
@@ -108,23 +108,23 @@ val bytes_of_uint32s: output:u8s -> m:B.buffer H32.t{disjoint output m} -> len:u
   (requires (fun h -> B.live h output /\ B.live h m))
   (ensures (fun h0 _ h1 -> B.live h1 output /\ B.live h1 m /\ modifies_1 output h0 h1 ))
 let rec bytes_of_uint32s output m l =
-  if U32 (l >^ 0ul) then
+  if U32.(l >^ 0ul) then
     begin
-    let rem = U32 (l %^ 4ul) in
-    if U32 (rem >^ 0ul) then
+    let rem' = U32.(l %^ 4ul) in
+    if U32.(rem' >^ 0ul) then
       begin
-      let l = U32 (l -^ rem) in
-      let x = index m (U32 (l /^ 4ul)) in
+      let l = U32.(l -^ rem') in
+      let x = index m (U32.(l /^ 4ul)) in
       let b0 = sint32_to_sint8 (x &^ uint32_to_sint32 255ul) in
       upd output l b0;
-      if UInt32.gt rem 1ul then
+      if UInt32.gt rem' 1ul then
         begin
         let b1 = sint32_to_sint8 ((x >>^ 8ul) &^ uint32_to_sint32 255ul) in
-        upd output (U32 (l +^ 1ul)) b1;
-	if UInt32.gt rem 2ul then
+        upd output (U32.(l +^ 1ul)) b1;
+	if UInt32.gt rem' 2ul then
 	  begin
 	  let b2 = sint32_to_sint8 ((x >>^ 16ul) &^ uint32_to_sint32 255ul) in
-	  upd output (U32 (l +^ 2ul)) b2
+	  upd output (U32.(l +^ 2ul)) b2
           end
 	else ()
 	end
@@ -133,16 +133,16 @@ let rec bytes_of_uint32s output m l =
       end
     else
       begin
-      let l = U32 (l -^ 4ul) in
-      let x = index m (U32 (l /^ 4ul)) in
+      let l = U32.(l -^ 4ul) in
+      let x = index m (U32.(l /^ 4ul)) in
       let b0 = sint32_to_sint8 (x &^ uint32_to_sint32 255ul) in
       let b1 = sint32_to_sint8 ((x >>^ 8ul) &^ uint32_to_sint32 255ul) in
       let b2 = sint32_to_sint8 ((x >>^ 16ul) &^ uint32_to_sint32 255ul) in
       let b3 = sint32_to_sint8 ((x >>^ 24ul) &^ uint32_to_sint32 255ul) in
       upd output l b0;
-      upd output (U32 (l +^ 1ul)) b1;
-      upd output (U32 (l +^ 2ul)) b2;
-      upd output (U32 (l +^ 3ul)) b3;
+      upd output (U32.(l +^ 1ul)) b1;
+      upd output (U32.(l +^ 2ul)) b2;
+      upd output (U32.(l +^ 3ul)) b3;
       bytes_of_uint32s output m l
       end
     end
@@ -168,13 +168,13 @@ val xor_uint8_p_2: output:u8s -> in1:u8s{disjoint in1 output} ->
   (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
     /\ modifies_1 output h0 h1 ))
 let rec xor_uint8_p_2 output in1 len =
-  if U32 (len =^ 0ul) then ()
+  if U32.(len =^ 0ul) then ()
   else
     begin
-      let i    = U32 (len -^ 1ul) in
+      let i    = U32.(len -^ 1ul) in
       let in1i = in1.(i) in
       let oi   = output.(i) in
-      let oi   = H8 (in1i ^^ oi) in
+      let oi   = H8.(in1i ^^ oi) in
       output.(i) <- oi;
       xor_uint8_p_2 output in1 i
     end
@@ -213,13 +213,13 @@ val xor_bytes_inplace: output:u8s -> in1:u8s{disjoint in1 output} ->
   (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
     /\ modifies_1 output h0 h1 ))
 let rec xor_bytes_inplace output in1 len =
-  if U32 (len =^ 0ul) then ()
+  if U32.(len =^ 0ul) then ()
   else
     begin
-      let i    = U32 (len -^ 1ul) in
+      let i    = U32.(len -^ 1ul) in
       let in1i = index in1 i in
       let oi   = index output i in
-      let oi   = H8 (in1i ^^ oi) in
+      let oi   = H8.(in1i ^^ oi) in
       output.(i) <- oi;
       xor_bytes_inplace output in1 i
     end
@@ -249,7 +249,7 @@ let rec memset b z len =
   else
   begin
     let h0 = ST.get() in
-    let i = U32 (len -^ 1ul) in
+    let i = U32.(len -^ 1ul) in
     memset (offset b 1ul) z i; // we should swap these two lines for tail recursion
     b.(0ul) <- z; 
     let h1 = ST.get() in 
