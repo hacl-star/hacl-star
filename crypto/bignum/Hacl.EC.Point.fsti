@@ -12,10 +12,13 @@ open Hacl.Bignum
 
 module U32 = FStar.UInt32
 
-val plen: pos
-val cplen: x:U32.t{plen = U32.v x}
+(* val plen: pos *)
+(* val cplen: x:U32.t{plen = U32.v x} *)
 
-let point : Type0 = b:buffer limb{length b = plen}
+(* let point : Type0 = b:buffer limb{length b = plen} *)
+
+val point : Type0
+
 
 (** Coordinate getters *)
 val getx: point -> Tot felem
@@ -27,7 +30,9 @@ val getz: point -> Tot felem
 val live_coords: mem -> felem -> felem -> felem -> GTot Type0
 val live: mem -> point -> GTot Type0
 
-val make: x:felem -> y:felem -> z:felem -> Tot (p:point)
+val make_pre: x:felem -> y:felem -> z:felem -> GTot Type0
+
+val make: x:felem -> y:felem -> z:felem{make_pre x y z} -> Tot (p:point)
 
 
 (** Workable state of a point **)

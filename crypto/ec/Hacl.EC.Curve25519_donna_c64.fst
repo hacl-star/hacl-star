@@ -36,7 +36,7 @@ let load64_le b =
   let b5 = b.(5ul) in
   let b6 = b.(6ul) in
   let b7 = b.(7ul) in
-  H64 (
+  H64.(
     sint8_to_sint64 b0
     |^ (sint8_to_sint64 b1 <<^ 8ul)
     |^ (sint8_to_sint64 b2 <<^ 16ul)
@@ -257,10 +257,10 @@ val cmult_small_loop: nqx:felem -> nqz:felem -> nqpqx:felem -> nqpqz:felem ->
   Stack unit
     (requires (fun h -> true))
     (ensures (fun h0 _ h1 -> true))
-let rec cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byte i =
-  if (U32 (i =^ 0ul)) then ()
+let rec cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byt i =
+  if (U32.(i =^ 0ul)) then ()
   else (
-    let bit = sint8_to_sint64 (H8 (byte >>^ 7ul)) in
+    let bit = sint8_to_sint64 (H8.(byt >>^ 7ul)) in
     swap_conditional nqx nqpqx bit;
     swap_conditional nqz nqpqz bit;
     fmonty nqx2 nqz2 nqpqx2 nqpqz2 nqx nqz nqpqx nqpqz q;
@@ -278,8 +278,8 @@ let rec cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byte i =
     let t = nqpqz in
     let nqpqz = nqpqz2 in
     let nqpqz2 = t in
-    let byte = H8 (byte <<^ 1ul) in
-    cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byte (U32 (i -^ 1ul))
+    let byt = H8.(byt <<^ 1ul) in
+    cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byt (U32.(i -^ 1ul))
   )
 
 
@@ -290,9 +290,9 @@ val cmult_big_loop: n:uint8_p{length n = 32} ->
     (requires (fun h -> true))
     (ensures (fun h0 _ h1 -> true))
 let rec cmult_big_loop n nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q i =
-  if (U32 (i =^ 0ul)) then ()
+  if (U32.(i =^ 0ul)) then ()
   else (
-    let i = U32 (i -^ 1ul) in
+    let i = U32.(i -^ 1ul) in
     let byte = n.(i) in
     cmult_small_loop nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q byte 8ul;
     cmult_big_loop n nqx nqz nqpqx nqpqz nqx2 nqz2 nqpqx2 nqpqz2 q i

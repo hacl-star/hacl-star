@@ -61,7 +61,7 @@ private inline_for_extraction let mul_and_add_carry a input scalar =
   cut (v (input *^ scalar) < pow2 96);
   cut (v (a >>^ 51ul) < pow2 77);
   cut (v (a >>^ 51ul) < pow2 96);
-  H128 ((input *^ scalar) +^ (a >>^ 51ul))
+  H128.((input *^ scalar) +^ (a >>^ 51ul))
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
@@ -143,25 +143,25 @@ let fscalar_product output input scalar =
   let input4 = input.(4ul) in let output0 = output.(0ul) in
   let output1 = output.(1ul) in let output2 = output.(2ul) in
   let output3 = output.(3ul) in let output4 = output.(4ul) in
-  let a = H128 (input0 *^ scalar) in
+  let a = H128.(input0 *^ scalar) in
   (* let output0 = sint128_to_sint64 a &^ mask_51 in *)
   let output0 = trim_128_to_51 a in
   cut (v output0 = (v input0 * v scalar) % pow2 51);
-  (* let a = H128 ((input1 *^ scalar) +^ (a >>^ 51ul)) in *)
+  (* let a = H128.((input1 *^ scalar) +^ (a >>^ 51ul)) in *)
   let a1 = mul_and_add_carry a input1 scalar in
   cut (H128.v a1 = v input1 * v scalar + H128.v a / pow2 51);
   (* let output1 = sint128_to_sint64 a &^ mask_51 in *)
   let output1 = trim_128_to_51 a1 in
-  (* let a = H128 ((input2 *^ scalar) +^ (a >>^ 51ul)) in *)
+  (* let a = H128.((input2 *^ scalar) +^ (a >>^ 51ul)) in *)
   let a2 = mul_and_add_carry a1 input2 scalar in
   cut (H128.v a1 = v input1 * v scalar + H128.v a / pow2 51);
   (* let output2 = sint128_to_sint64 a &^ mask_51 in *)
   let output2 = trim_128_to_51 a2 in
-  (* let a = H128 ((input3 *^ scalar) +^ (a >>^ 51ul)) in *)
+  (* let a = H128.((input3 *^ scalar) +^ (a >>^ 51ul)) in *)
   let a3 = mul_and_add_carry a2 input3 scalar in
   (* let output3 = sint128_to_sint64 a &^ mask_51 in *)
   let output3 = trim_128_to_51 a3 in
-  (* let a = H128 ((input4 *^ scalar) +^ (a >>^ 51ul)) in *)
+  (* let a = H128.((input4 *^ scalar) +^ (a >>^ 51ul)) in *)
   let a4 = mul_and_add_carry a3 input4 scalar in
   (* let output4 = sint128_to_sint64 a &^ mask_51 in *)
   let output4 = trim_128_to_51 a4 in
@@ -169,10 +169,10 @@ let fscalar_product output input scalar =
                          (v output0) (v output1) (v output2) (v output3) (H128.v a4) (v scalar);
   lemma_div_pow2_lt (H128.v a4) 97 51; Math.Lemmas.pow2_lt_compat 64 46;
   assert_norm (pow2 5 = 32); Math.Lemmas.pow2_plus 46 5;
-  cut (v (sint128_to_sint64 (H128 (sint128_to_sint64 (a4 >>^ 51ul) *^ uint64_to_sint64 19uL))) < pow2 51);
+  cut (v (sint128_to_sint64 (H128.(sint128_to_sint64 (a4 >>^ 51ul) *^ uint64_to_sint64 19uL))) < pow2 51);
   Math.Lemmas.pow2_double_sum 51;
   Math.Lemmas.modulo_lemma (H128.v a4) (pow2 64);
-  let output0 = output0 +^ sint128_to_sint64 (H128 (sint128_to_sint64 (a4 >>^ 51ul) *^ uint64_to_sint64 19uL)) in
+  let output0 = output0 +^ sint128_to_sint64 (H128.(sint128_to_sint64 (a4 >>^ 51ul) *^ uint64_to_sint64 19uL)) in
   fscalar_product_lemma_2 (v output0) (v output1) (v output2) (v output3) (H128.v a4) (v output0) (v output4);
   output.(0ul) <- output0;
   output.(1ul) <- output1;

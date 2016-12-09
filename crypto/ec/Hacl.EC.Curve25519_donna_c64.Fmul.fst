@@ -78,23 +78,23 @@ let fmul output input2 input =
 
   let open Hacl.UInt64 in
   let r0 = sint128_to_sint64 t0 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t0 >>^ 51ul)) in
-  let t1 = H128 (t1 +%^ (sint64_to_sint128 c)) in
+  let c = sint128_to_sint64 (H128.(t0 >>^ 51ul)) in
+  let t1 = H128.(t1 +%^ (sint64_to_sint128 c)) in
 
   let r1 = sint128_to_sint64 t1 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t1 >>^ 51ul)) in
-  let t2 = H128 (t2 +%^ (sint64_to_sint128 c)) in
+  let c = sint128_to_sint64 (H128.(t1 >>^ 51ul)) in
+  let t2 = H128.(t2 +%^ (sint64_to_sint128 c)) in
 
   let r2 = sint128_to_sint64 t2 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t2 >>^ 51ul)) in
-  let t3 = H128 (t3 +%^ (sint64_to_sint128 c)) in
+  let c = sint128_to_sint64 (H128.(t2 >>^ 51ul)) in
+  let t3 = H128.(t3 +%^ (sint64_to_sint128 c)) in
 
   let r3 = sint128_to_sint64 t3 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t3 >>^ 51ul)) in
-  let t4 = H128 (t4 +%^ (sint64_to_sint128 c)) in
+  let c = sint128_to_sint64 (H128.(t3 >>^ 51ul)) in
+  let t4 = H128.(t4 +%^ (sint64_to_sint128 c)) in
 
   let r4 = sint128_to_sint64 t4 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t4 >>^ 51ul)) in
+  let c = sint128_to_sint64 (H128.(t4 >>^ 51ul)) in
 
   let r0 = r0 +%^ (c *%^ nineteen) in
   let c = r0 >>^ 51ul in
@@ -131,30 +131,30 @@ let fsquare output =
 
   let open Hacl.UInt128 in
   let t0 = (r0) *^ r0 +%^ (d4) *^ r1 +%^ ((d2) *^ (r3     )) in
-  let t1 = (d0) *^ r1 +%^ (d4) *^ r2 +%^ ((r3) *^ (H64 (r3 *%^ nineteen))) in
+  let t1 = (d0) *^ r1 +%^ (d4) *^ r2 +%^ ((r3) *^ (H64.(r3 *%^ nineteen))) in
   let t2 = (d0) *^ r2 +%^ (r1) *^ r1 +%^ ((d4) *^ (r3     )) in
   let t3 = (d0) *^ r3 +%^ (d1) *^ r2 +%^ ((r4) *^ (d419   )) in
   let t4 = (d0) *^ r4 +%^ (d1) *^ r3 +%^ ((r2) *^ (r2     )) in
 
   let open Hacl.UInt64 in
   let r0 = sint128_to_sint64 t0 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t0 >>^ 51ul)) in
-  let t1 = H128 (t1 +^ sint64_to_sint128 c) in
+  let c = sint128_to_sint64 (H128.(t0 >>^ 51ul)) in
+  let t1 = H128.(t1 +^ sint64_to_sint128 c) in
 
   let r1 = sint128_to_sint64 t1 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t1 >>^ 51ul)) in
-  let t2 = H128 (t2 +^ sint64_to_sint128 c) in
+  let c = sint128_to_sint64 (H128.(t1 >>^ 51ul)) in
+  let t2 = H128.(t2 +^ sint64_to_sint128 c) in
 
   let r2 = sint128_to_sint64 t2 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t2 >>^ 51ul)) in
-  let t3 = H128 (t3 +^ sint64_to_sint128 c) in
+  let c = sint128_to_sint64 (H128.(t2 >>^ 51ul)) in
+  let t3 = H128.(t3 +^ sint64_to_sint128 c) in
 
   let r3 = sint128_to_sint64 t3 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t3 >>^ 51ul)) in
-  let t4 = H128 (t4 +^ sint64_to_sint128 c) in
+  let c = sint128_to_sint64 (H128.(t3 >>^ 51ul)) in
+  let t4 = H128.(t4 +^ sint64_to_sint128 c) in
 
   let r4 = sint128_to_sint64 t4 &^ mask_51 in
-  let c = sint128_to_sint64 (H128 (t4 >>^ 51ul)) in
+  let c = sint128_to_sint64 (H128.(t4 >>^ 51ul)) in
 
   let r0 = r0 +%^ (c *%^ nineteen) in
   let c = r0 >>^ 51ul in
@@ -175,10 +175,10 @@ val fsquare_times_: output:felem -> count:U32.t -> Stack unit
   (requires (fun h -> live h output))
   (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
 let rec fsquare_times_ output count =
-  if U32 (count =^ 0ul) then ()
+  if U32.(count =^ 0ul) then ()
   else (
     fsquare output;
-    let count = U32 (count -^ 1ul) in
+    let count = U32.(count -^ 1ul) in
     fsquare_times_ output count
   )
 

@@ -8,6 +8,8 @@ open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
 open Hacl.Bignum.Fproduct
 
+#set-options "--lax"
+
 let crecip out z =
   push_frame();
   let buf = create limb_zero 20ul in

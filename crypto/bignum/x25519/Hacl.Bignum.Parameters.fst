@@ -5,9 +5,6 @@ open FStar.Buffer
 open Hacl.Cast
 open Hacl.Bignum.Constants
 
-inline_for_extraction let limb = Hacl.UInt64.t
-inline_for_extraction let wide = Hacl.UInt128.t
-
 inline_for_extraction let clen = 5ul
 
 inline_for_extraction let climb_size = 51ul

@@ -637,7 +637,7 @@ private val swap_conditional: a:felem -> b:felem -> iswap:limb ->
   Stack unit
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> modifies_2 a b h0 h1 /\ live h1 a /\ live h1 b))
-private let rec swap_conditional a b iswap =
+private rec swap_conditional a b iswap =
   let swap = zero_64 -^ iswap in
   swap_conditional_ a b swap len
 

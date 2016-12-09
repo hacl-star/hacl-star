@@ -65,7 +65,7 @@ let rec eval_eq_lemma ha hb a b = ()
 
 
 let eval_5 (x0:H64.t) (x1:H64.t) (x2:H64.t) (x3:H64.t) (x4:H64.t) =
-  H64 (v x0 + pow2 51 * v x1 + pow2 102 * v x2 + pow2 153 * v x3 + pow2 204 * v x4)
+  H64.(v x0 + pow2 51 * v x1 + pow2 102 * v x2 + pow2 153 * v x3 + pow2 204 * v x4)
 
 
 

@@ -21,7 +21,7 @@ val fsum_:
   i:ctr{U32.v i <= len} ->
   Stack unit
     (requires (fun h -> red_c h a (U32.v i) /\ red_c h b (U32.v i)))
-    (ensures (fun h0 _ h1 -> red_c h0 a (U32.v i) /\ red_c h0 b (U32.v i) /\ live h1 a
+    (ensures (fun h0 _ h1 -> red_c h0 a (U32.v i) /\ red_c h0 b (U32.v i) /\ live h1 a /\ modifies_1 a h0 h1
       /\ as_seq h1 a == fsum_spec (as_seq h0 a) (as_seq h0 b) (U32.v i)))
 let rec fsum_ a b i =
   if U32.(i =^ 0ul) then ()
