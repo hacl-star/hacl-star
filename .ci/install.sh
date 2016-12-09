@@ -16,8 +16,8 @@ opam install batteries sqlite3 fileutils stdint zarith yojson pprint \
   ppx_deriving_yojson menhir ulex process fix wasm
 
 if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-  export Z3=z3-4.4.1-x64-ubuntu-14.04;
-  wget https://github.com/Z3Prover/z3/releases/download/z3-4.4.1/$Z3.zip;
+  export Z3=z3-4.5.0-x64-ubuntu-14.04;
+  wget https://github.com/Z3Prover/z3/releases/download/z3-4.5.0/$Z3.zip;
   unzip $Z3.zip;
   export PATH=/home/travis/build/FStarLang/FStar/$Z3/bin:/home/travis/build/FStarLang/FStar/bin:$PATH;
 fi
