@@ -86,20 +86,31 @@ let reduce b =
   b.(0ul) <- nineteen *^ b0
 
 
-let reduce_wide_pre s =
+(* TODO: change the name *)
+let carry_top_wide_pre s =
   let _ = () in
   w (Seq.index s 0) * 19 < pow2 128
 
 
-let reduce_wide_spec s =
+(* TODO: change the spec *)
+let carry_top_wide_spec s =
   let open Hacl.Bignum.Wide in
   let s0 = Seq.index s 0 in
   let s0_19 = (s0 <<^ 4ul) +^ (s0 <<^ 1ul) +^ s0 in
   Seq.upd s 0 (s0_19)
 
 
-let reduce_wide b =
-  let s0 = b.(0ul) in
+let carry_top_wide b =
+  let b4 = b.(4ul) in
+  let b0 = b.(0ul) in
+  let nineteen = (limb_one <<^ 4ul) +^ (limb_one <<^ 1ul) +^ limb_one in
   let open Hacl.Bignum.Wide in
-  let s0_19 = (s0 <<^ 4ul) +^ (s0 <<^ 1ul) +^ s0 in
-  b.(0ul) <- s0_19
+  let mask = (wide_one <<^ climb_size) -^ wide_one in
+  let b4' = b4 &^ mask in
+  let b0' = b0 +^ (nineteen *^ (wide_to_limb (b4 >>^ climb_size))) in
+  b.(4ul) <- b4';
+  b.(0ul) <- b0'
+  (* let s0 = b.(0ul) in *)
+  (* let open Hacl.Bignum.Wide in *)
+  (* let s0_19 = (s0 <<^ 4ul) +^ (s0 <<^ 1ul) +^ s0 in *)
+  (* b.(0ul) <- s0_19 *)

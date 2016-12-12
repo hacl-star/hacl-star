@@ -233,7 +233,7 @@ let fmul_ output input input2 =
   let h2 = ST.get() in
   mul_shift_reduce_ t input input2 clen;
   carry_wide_ t 0ul;
-  reduce_wide t;
+  carry_top_wide t;
   copy_from_wide_ output t clen;
   carry_0_to_1 output;
   let h3 = ST.get() in

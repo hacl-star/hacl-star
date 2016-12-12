@@ -59,7 +59,7 @@ private let rec swap_conditional_ a b swap ctr =
   )
 
 let swap_conditional a b iswap =
-  let swap = limb_zero -^ iswap in
+  let swap = limb_zero -%^ iswap in
   swap_conditional_ (getx a) (getx b) swap clen;
   swap_conditional_ (getz a) (getz b) swap clen
 

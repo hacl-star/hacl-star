@@ -195,4 +195,6 @@ let format_secret secret =
   let e0  = e0 &^ (uint8_to_sint8 248uy) in
   let e31 = e31 &^ (uint8_to_sint8 127uy) in
   let e31 = e31 |^ (uint8_to_sint8 64uy) in
+  e.(0ul) <- e0;
+  e.(31ul) <- e31;
   e

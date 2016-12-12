@@ -70,8 +70,8 @@ val fscalar:
   Stack unit
     (requires (fun h -> live h b /\ live h a
       /\ carry_wide_pre (fscalar_spec (Seq.create len wide_zero) (as_seq h b) s len) 0
-      /\ reduce_wide_pre (carry_wide_spec (fscalar_spec (Seq.create len wide_zero) (as_seq h b) s len) 0)
-      /\ copy_from_wide_pre (reduce_wide_spec (carry_wide_spec (fscalar_spec (Seq.create len wide_zero) (as_seq h b) s len) 0)) ))
+      /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec (Seq.create len wide_zero) (as_seq h b) s len) 0)
+      /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec (Seq.create len wide_zero) (as_seq h b) s len) 0)) ))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ modifies_1 a h0 h1 /\ live h1 a
       /\ eval h1 a = eval h0 b * v s))
 let fscalar output b s =
@@ -81,7 +81,7 @@ let fscalar output b s =
   let tmp = create wide_zero clen in
   fscalar tmp b s;
   carry_wide_ tmp 0ul;
-  reduce_wide tmp;
+  carry_top_wide tmp;
   copy_from_wide_ output tmp clen;
   let h1 = ST.get() in
   pop_frame();

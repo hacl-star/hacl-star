@@ -49,13 +49,13 @@ val reduce:
   (ensures (fun h0 _ h1 -> live h0 b /\ reduce_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == reduce_spec (as_seq h0 b)))
 
-val reduce_wide_pre: seqelem_wide -> GTot Type0
+val carry_top_wide_pre: seqelem_wide -> GTot Type0
 
-val reduce_wide_spec: s:seqelem_wide{reduce_wide_pre s} -> Tot seqelem_wide
+val carry_top_wide_spec: s:seqelem_wide{carry_top_wide_pre s} -> Tot seqelem_wide
 
-val reduce_wide:
+val carry_top_wide:
   b:felem_wide ->
   Stack unit
-    (requires (fun h -> live h b /\ reduce_wide_pre (as_seq h b)))
-    (ensures (fun h0 _ h1 -> live h0 b /\ reduce_wide_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
-      /\ as_seq h1 b == reduce_wide_spec (as_seq h0 b)))
+    (requires (fun h -> live h b /\ carry_top_wide_pre (as_seq h b)))
+    (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_wide_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
+      /\ as_seq h1 b == carry_top_wide_spec (as_seq h0 b)))

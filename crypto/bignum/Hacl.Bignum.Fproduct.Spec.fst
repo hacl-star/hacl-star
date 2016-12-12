@@ -195,9 +195,9 @@ assume val lemma_mul_to_red: input:seqelem -> input2:seqelem -> Lemma
   (requires (fmul_pre input input2))
   (ensures  (fmul_pre input input2
     /\ carry_wide_pre (mul_shift_reduce_spec (Seq.create len wide_zero) input input2 len) 0
-    /\ reduce_wide_pre (carry_wide_spec (mul_shift_reduce_spec (Seq.create len wide_zero) input input2 len) 0)
-    /\ copy_from_wide_pre (reduce_wide_spec (carry_wide_spec (mul_shift_reduce_spec (Seq.create len wide_zero) input input2 len) 0))
-    /\ carry_0_to_1_pre (copy_from_wide_spec (reduce_wide_spec (carry_wide_spec (mul_shift_reduce_spec (Seq.create len wide_zero) input input2 len) 0)))))
+    /\ carry_top_wide_pre (carry_wide_spec (mul_shift_reduce_spec (Seq.create len wide_zero) input input2 len) 0)
+    /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (mul_shift_reduce_spec (Seq.create len wide_zero) input input2 len) 0))
+    /\ carry_0_to_1_pre (copy_from_wide_spec (carry_top_wide_spec (carry_wide_spec (mul_shift_reduce_spec (Seq.create len wide_zero) input input2 len) 0)))))
 
 
 val fmul_spec: input:seqelem -> input2:seqelem{fmul_pre input input2} -> Tot (output:seqelem)
@@ -206,7 +206,7 @@ let fmul_spec input input2 =
   let tmp = Seq.create len wide_zero in
   let output1 = mul_shift_reduce_spec tmp input input2 len in
   let output2 = carry_wide_spec output1 0 in
-  let output3 = reduce_wide_spec output2 in
+  let output3 = carry_top_wide_spec output2 in
   let output4 = copy_from_wide_spec output3 in
   carry_0_to_1_spec output4
 
