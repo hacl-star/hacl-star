@@ -157,6 +157,49 @@ let rec carry_wide_spec s i =
   )
 
 
+let carry_limb_pre (s:seqelem) (i:nat{i < len}) : GTot Type0 =
+  (forall (j:nat). {:pattern (v (Seq.index s j))} (j > i /\ j < len) ==> v (Seq.index s j) < pow2 (limb_n - 1))
+  /\ (forall (j:nat). {:pattern (v (Seq.index s j))} (j < i) ==> v (Seq.index s j) < pow2 limb_size)
+
+
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+
+val carry_limb_spec: s:seqelem -> i:nat{i < len /\ carry_limb_pre s i} -> Tot (s':seqelem)
+  (decreases (len - 1 - i))
+let rec carry_limb_spec s i =
+  if i = len - 1 then s
+  else (
+    let si = Seq.index s i in
+    let sip1 = Seq.index s (i+1) in
+    cut (v sip1 < pow2 (limb_n - 1));
+    assert_norm(pow2 0 = 1);
+    Math.Lemmas.pow2_lt_compat limb_size 0;
+    Math.Lemmas.pow2_lt_compat limb_n limb_size;
+    Math.Lemmas.modulo_lemma (pow2 limb_size) (pow2 limb_n);
+    let mask = (limb_one <<^ climb_size) -^ limb_one in
+    UInt.logand_mask #limb_n (v ( si)) limb_size;
+    let r0 =  si &^ mask in
+    Math.Lemmas.pow2_plus (limb_n - limb_size) (limb_size);
+    Math.Lemmas.modulo_modulo_lemma (v si) (pow2 limb_size) (pow2 (limb_n - limb_size));
+    assert(v r0 = v si % pow2 limb_size);
+    assert(v r0 < pow2 limb_size);
+    let open Hacl.Bignum.Limb in
+    let c = si >>^ climb_size in
+    Math.Lemmas.pow2_lt_compat (limb_n - 1) (limb_n);
+    Math.Lemmas.pow2_double_sum (limb_n - 1);
+    Math.Lemmas.lemma_div_lt (v si) (limb_n) (limb_size);
+    Math.Lemmas.pow2_le_compat (limb_n - 1) (limb_n - limb_size);
+    cut (v c < pow2 (limb_n - 1));
+    let s' = Seq.upd s i ( r0) in
+    assert(forall (j:nat). {:pattern (Seq.index s' j)} j < i + 1 ==> v (Seq.index s' j) < pow2 limb_size);
+    assert(forall (j:nat). {:pattern (Seq.index s' j)} (j > i /\ j < len) ==> v (Seq.index s' j) < pow2 (limb_n - 1));
+    let s'' = Seq.upd s' (i+1) (sip1 +^ c) in
+    assert(forall (j:nat). {:pattern (Seq.index s'' j)} j < i + 1 ==> v (Seq.index s'' j) < pow2 limb_size);
+    assert(forall (j:nat). {:pattern (Seq.index s'' j)} (j > i + 1 /\ j < len) ==> v (Seq.index s'' j) < pow2 (limb_n - 1));
+    carry_limb_spec s'' (i+1)
+  )
+
+
 #set-options "--z3rlimit 5"
 
 

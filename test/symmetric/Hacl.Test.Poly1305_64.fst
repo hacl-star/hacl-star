@@ -38,7 +38,7 @@ let main () =
   TestLib.compare_and_print poly1305 expected mac macsize;
 
   (* (\* Test encoding a 1 GB buffer. *\) *)
-  let len = FStar.UInt32 (1024ul *%^1024ul *%^ 1024ul) in
+  let len = FStar.UInt32.(1024ul *%^1024ul *%^ 1024ul) in
   let len' = FStar.Int.Cast.uint32_to_uint64 len in
   let buf = TestLib.unsafe_malloc len in
   let c1 = C.clock () in

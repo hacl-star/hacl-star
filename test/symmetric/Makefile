@@ -166,3 +166,54 @@ chacha-sodium-compile:
 
 bla:
 	gcc-5 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I /home/jkz/dev/FStar/../kremlin/kremlib -I /home/jkz/dev/FStar/../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I Hacl_Test_Chacha20_Sodium -I ../c -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= -D_GNU_SOURCE Hacl_Test_Chacha20_Sodium/Prims.c Hacl_Test_Chacha20_Sodium/FStar_Mul.c Hacl_Test_Chacha20_Sodium/FStar_Squash.c Hacl_Test_Chacha20_Sodium/FStar_StrongExcludedMiddle.c Hacl_Test_Chacha20_Sodium/FStar_List_Tot.c Hacl_Test_Chacha20_Sodium/FStar_Classical.c Hacl_Test_Chacha20_Sodium/FStar_ListProperties.c Hacl_Test_Chacha20_Sodium/FStar_SeqProperties.c Hacl_Test_Chacha20_Sodium/FStar_Math_Lemmas.c Hacl_Test_Chacha20_Sodium/FStar_BitVector.c Hacl_Test_Chacha20_Sodium/FStar_UInt.c Hacl_Test_Chacha20_Sodium/FStar_Int.c Hacl_Test_Chacha20_Sodium/FStar_FunctionalExtensionality.c Hacl_Test_Chacha20_Sodium/FStar_PropositionalExtensionality.c Hacl_Test_Chacha20_Sodium/FStar_PredicateExtensionality.c Hacl_Test_Chacha20_Sodium/FStar_TSet.c Hacl_Test_Chacha20_Sodium/FStar_Set.c Hacl_Test_Chacha20_Sodium/FStar_Map.c Hacl_Test_Chacha20_Sodium/FStar_Ghost.c Hacl_Test_Chacha20_Sodium/FStar_All.c Hacl_Test_Chacha20_Sodium/Hacl_UInt64.c Hacl_Test_Chacha20_Sodium/Hacl_UInt128.c Hacl_Test_Chacha20_Sodium/Hacl_UInt32.c Hacl_Test_Chacha20_Sodium/Hacl_UInt8.c Hacl_Test_Chacha20_Sodium/Hacl_Cast.c Hacl_Test_Chacha20_Sodium/FStar_Buffer.c  Hacl_Test_Chacha20_Sodium/Hacl_Symmetric_Chacha20_Sodium.c  ../../kremlin/kremlib/kremlib.c ../../kremlin/test/testlib.c bla.c  -o blah.exe -lsodium -m32
+
+poly:
+	gcc-6 -flto -Ofast -march=native \
+		-I FSTAR_HOME/ulib/hyperstack -I Hacl_Test_Poly1305_64 \
+		-I ../../lib/hyperstack/kremlin -I /home/jkz/dev/FStar/../kremlin/kremlib \
+		-I /home/jkz/dev/FStar/../kremlin/test -I /home/jkz/dev/kremlin/kremlib \
+		Hacl_Test_Poly1305_64/Prims.c \
+		Hacl_Test_Poly1305_64/FStar_Mul.c \
+		Hacl_Test_Poly1305_64/FStar_Squash.c \
+		Hacl_Test_Poly1305_64/FStar_StrongExcludedMiddle.c \
+		Hacl_Test_Poly1305_64/FStar_List_Tot.c \
+		Hacl_Test_Poly1305_64/FStar_Classical.c \
+		Hacl_Test_Poly1305_64/FStar_ListProperties.c \
+		Hacl_Test_Poly1305_64/FStar_SeqProperties.c \
+		Hacl_Test_Poly1305_64/FStar_Math_Lemmas.c \
+		Hacl_Test_Poly1305_64/FStar_BitVector.c \
+		Hacl_Test_Poly1305_64/FStar_UInt.c \
+		Hacl_Test_Poly1305_64/FStar_Int.c \
+		Hacl_Test_Poly1305_64/FStar_FunctionalExtensionality.c \
+		Hacl_Test_Poly1305_64/FStar_PropositionalExtensionality.c \
+		Hacl_Test_Poly1305_64/FStar_PredicateExtensionality.c \
+		Hacl_Test_Poly1305_64/FStar_TSet.c \
+		Hacl_Test_Poly1305_64/FStar_Set.c \
+		Hacl_Test_Poly1305_64/FStar_Map.c \
+		Hacl_Test_Poly1305_64/FStar_Ghost.c \
+		Hacl_Test_Poly1305_64/FStar_All.c \
+		Hacl_Test_Poly1305_64/Hacl_UInt64.c \
+		Hacl_Test_Poly1305_64/Hacl_UInt8.c \
+		Hacl_Test_Poly1305_64/Hacl_UInt128.c \
+		Hacl_Test_Poly1305_64/Hacl_UInt32.c \
+		Hacl_Test_Poly1305_64/Hacl_Cast.c \
+		Hacl_Test_Poly1305_64/FStar_Buffer.c \
+		Hacl_Test_Poly1305_64/Utils.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_64_Parameters.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_64_Bigint.c \
+		Hacl_Test_Poly1305_64/FStar_Buffer_Quantifiers.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_Parameters.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_Spec.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_Bigint.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part1.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part2.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part3.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part4.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_Bignum_Lemmas_Part5.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_Bignum.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305.c \
+		Hacl_Test_Poly1305_64/Hacl_Symmetric_Poly1305_64.c \
+		Hacl_Test_Poly1305_64/Hacl_Test_Poly1305_64.c \
+		/home/jkz/dev/kremlin/kremlib/kremlib.c \
+		../../../kremlin/test/testlib.c 
+

@@ -89,7 +89,7 @@ let reduce b =
 (* TODO: change the name *)
 let carry_top_wide_pre s =
   let _ = () in
-  w (Seq.index s 0) * 19 < pow2 128
+  w (Seq.index s 4) * 19 + w (Seq.index s 0) < pow2 128
 
 
 (* TODO: change the spec *)

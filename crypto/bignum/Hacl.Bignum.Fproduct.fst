@@ -177,7 +177,40 @@ let rec carry_wide_ tmp ctr =
   )
 
 
-#set-options "--z3rlimit 5"
+val carry_limb_:
+  t:felem ->
+  ctr:U32.t{U32.v ctr < len} ->
+  Stack unit
+    (requires (fun h -> live h t /\ carry_limb_pre (as_seq h t) (U32.v ctr)))
+    (ensures (fun h0 _ h1 -> live h0 t /\ live h1 t /\ modifies_1 t h0 h1
+      /\ carry_limb_pre (as_seq h0 t) (U32.v ctr)
+      /\ as_seq h1 t == carry_limb_spec (as_seq h0 t) (U32.v ctr)))
+let rec carry_limb_ tmp ctr =
+  if U32.(ctr =^ clen -^ 1ul) then ()
+  else (
+    let tctr = tmp.(ctr) in
+    let tctrp1 = tmp.(U32.(ctr+^1ul)) in
+    assert_norm(pow2 0 = 1);
+    Math.Lemmas.pow2_lt_compat limb_size 0;
+    Math.Lemmas.pow2_lt_compat limb_n limb_size;
+    Math.Lemmas.modulo_lemma (pow2 limb_size) (pow2 limb_n);
+    let r0 = (tctr) &^ ((limb_one <<^ climb_size) -^ limb_one) in
+    UInt.logand_mask #limb_n (v ( tctr)) limb_size;
+    Math.Lemmas.pow2_plus (limb_n - limb_size) (limb_size);
+    Math.Lemmas.modulo_modulo_lemma (v tctr) (pow2 limb_size) (pow2 (limb_n - limb_size));
+    assert(v r0 = v tctr % pow2 limb_size);
+    assert(v r0 < pow2 limb_size);
+    let open Hacl.Bignum.Limb in
+    let c  = tctr >>^ climb_size in
+    Math.Lemmas.pow2_lt_compat (limb_n - 1) (limb_n);
+    Math.Lemmas.pow2_double_sum (limb_n - 1);
+    Math.Lemmas.lemma_div_lt (v tctr) (limb_n) (limb_size);
+    Math.Lemmas.pow2_le_compat (limb_n - 1) (limb_n - limb_size);
+    tmp.(ctr) <-  r0;
+    tmp.(U32.(ctr +^ 1ul)) <- tctrp1 +^ c;
+    carry_limb_ tmp (U32.(ctr +^ 1ul))
+  )
+
 
 #set-options "--z3rlimit 20"
 
