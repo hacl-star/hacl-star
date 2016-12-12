@@ -250,3 +250,58 @@ compile:
 		tmp/Hacl_Test_X25519.c \
 		/home/jkz/dev/kremlin/kremlib/kremlib.c \
 		/home/jkz/dev/FStar/../kremlin/test/testlib.c
+
+
+run:
+	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -Wno-parentheses -Wno-unused-variable -g -fwrapv -I FSTAR_HOME/ulib/hyperstack -I /home/jkz/dev/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I /home/jkz/dev/FStar/../kremlin/kremlib -I /home/jkz/dev/FStar/../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
+		extracted25519/Prims.c \
+		extracted25519/FStar_Mul.c \
+		extracted25519/FStar_Squash.c \
+		extracted25519/FStar_StrongExcludedMiddle.c \
+		extracted25519/FStar_List_Tot.c \
+		extracted25519/FStar_Classical.c \
+		extracted25519/FStar_ListProperties.c \
+		extracted25519/FStar_SeqProperties.c \
+		extracted25519/FStar_Math_Lemmas.c \
+		extracted25519/FStar_BitVector.c \
+		extracted25519/FStar_UInt.c \
+		extracted25519/FStar_Int.c \
+		extracted25519/FStar_FunctionalExtensionality.c \
+		extracted25519/FStar_PropositionalExtensionality.c \
+		extracted25519/FStar_PredicateExtensionality.c \
+		extracted25519/FStar_TSet.c \
+		extracted25519/FStar_Set.c \
+		extracted25519/FStar_Map.c \
+		extracted25519/FStar_Ghost.c \
+		extracted25519/FStar_All.c \
+		extracted25519/Hacl_UInt64.c \
+		extracted25519/Hacl_UInt128.c \
+		extracted25519/Hacl_UInt32.c \
+		extracted25519/Hacl_UInt8.c \
+		extracted25519/Hacl_Cast.c \
+		extracted25519/Hacl_Bignum_Constants.c \
+		extracted25519/FStar_Buffer.c \
+		extracted25519/Hacl_Bignum_Parameters.c \
+		extracted25519/Hacl_Bignum_Predicates.c \
+		extracted25519/Hacl_Bignum_Limb.c \
+		extracted25519/Hacl_Bignum_Wide.c \
+		extracted25519/Hacl_Bignum_Bigint.c \
+		extracted25519/Hacl_Bignum_Fsum_Spec.c \
+		extracted25519/Hacl_Bignum_Fsum.c \
+		extracted25519/Hacl_Bignum_Fscalar_Spec.c \
+		extracted25519/Hacl_Bignum_Modulo.c \
+		extracted25519/Hacl_Bignum_Fproduct_Spec.c \
+		extracted25519/Hacl_Bignum_Fdifference_Spec.c \
+		extracted25519/Hacl_Bignum_Fproduct.c \
+		extracted25519/Hacl_Bignum_Crecip.c \
+		extracted25519/Hacl_Bignum_Fdifference.c \
+		extracted25519/Hacl_Bignum_Fscalar.c \
+		extracted25519/Hacl_Bignum.c \
+		extracted25519/Hacl_EC_Point.c \
+		extracted25519/Hacl_EC_Format.c \
+		extracted25519/Hacl_EC_AddAndDouble.c \
+		extracted25519/Hacl_EC_Ladder.c \
+		extracted25519/Hacl_EC.c \
+		extracted25519/Hacl_Test_X25519.c \
+		extracted25519/kremlib.c \
+		extracted25519/testlib.c
