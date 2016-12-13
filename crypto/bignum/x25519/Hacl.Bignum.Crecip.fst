@@ -6,7 +6,7 @@ open FStar.Buffer
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
-open Hacl.Bignum.Fproduct
+open Hacl.Bignum.Fmul
 
 #set-options "--lax"
 

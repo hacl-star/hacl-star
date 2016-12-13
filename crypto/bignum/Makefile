@@ -217,12 +217,14 @@ kremlin-x25519:
 		Hacl.Bignum.Parameters.fst \
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
 		Hacl.Bignum.Bigint.fst \
-		Hacl.Bignum.Modulo.fst \
+		Hacl.Bignum.Modulo.Spec.fst \
 		Hacl.Bignum.Predicates.fst \
 		Hacl.Bignum.Fsum.Spec.fst Hacl.Bignum.Fdifference.Spec.fst  \
 		Hacl.Bignum.Fscalar.Spec.fst Hacl.Bignum.Fproduct.Spec.fst \
+		Hacl.Bignum.Fmul.Lemmas.fst Hacl.Bignum.Fmul.Spec.fst \
+		Hacl.Bignum.Modulo.fst \
 		Hacl.Bignum.Fsum.fst Hacl.Bignum.Fdifference.fst  \
-		Hacl.Bignum.Fscalar.fst Hacl.Bignum.Fproduct.fst \
+		Hacl.Bignum.Fscalar.fst Hacl.Bignum.Fproduct.fst Hacl.Bignum.Fmul.fst \
 		Hacl.Bignum.Crecip.fst Hacl.Bignum.fst \
 		Hacl.EC.Point.fst \
 		Hacl.EC.AddAndDouble.fst \
