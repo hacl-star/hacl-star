@@ -246,7 +246,7 @@ val add_and_multiply:
     (ensures  (fun _ _ _ -> True))
 let add_and_multiply acc block r =
   Hacl.Bignum.Fsum.fsum_ acc block clen;
-  Hacl.Bignum.Fproduct.fmul acc acc r
+  Hacl.Bignum.Fmul.fmul acc acc r
 
 
 val poly1305_finish:

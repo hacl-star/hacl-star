@@ -247,11 +247,13 @@ kremlin-poly1305:
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
 		Hacl.Bignum.Bigint.fst \
 		Hacl.Bignum.Modulo.fst \
-		Hacl.Bignum.Predicates.fst \
 		Hacl.Bignum.Fsum.Spec.fst  \
 		Hacl.Bignum.Fproduct.Spec.fst \
+		Hacl.Bignum.Fmul.Lemmas.fst \
+		Hacl.Bignum.Fmul.Spec.fst \
 		Hacl.Bignum.Fsum.fst \
 		Hacl.Bignum.Fproduct.fst \
+		Hacl.Bignum.Fmul.fst \
 		Hacl.MAC.Poly1305_64.fst \
 		Hacl.Test.Poly1305_64.fst \
 		-I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
@@ -316,48 +318,16 @@ compile:
 
 banana:
 	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -I FSTAR_HOME/ulib/hyperstack -I /home/jkz/dev/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I /home/jkz/dev/FStar/../kremlin/kremlib -I /home/jkz/dev/FStar/../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
-		tmppoly/Prims.c \
-		tmppoly/FStar_Mul.c \
-		tmppoly/FStar_Squash.c \
-		tmppoly/FStar_StrongExcludedMiddle.c \
-		tmppoly/FStar_List_Tot.c \
-		tmppoly/FStar_Classical.c \
-		tmppoly/FStar_ListProperties.c \
-		tmppoly/FStar_SeqProperties.c \
-		tmppoly/FStar_Math_Lemmas.c \
-		tmppoly/FStar_BitVector.c \
-		tmppoly/FStar_UInt.c \
-		tmppoly/FStar_Int.c \
-		tmppoly/FStar_FunctionalExtensionality.c \
-		tmppoly/FStar_PropositionalExtensionality.c \
-		tmppoly/FStar_PredicateExtensionality.c \
-		tmppoly/FStar_TSet.c \
-		tmppoly/FStar_Set.c \
-		tmppoly/FStar_Map.c \
-		tmppoly/FStar_Ghost.c \
-		tmppoly/FStar_All.c \
-		tmppoly/Hacl_UInt64.c \
-		tmppoly/Hacl_UInt128.c \
-		tmppoly/Hacl_UInt32.c \
-		tmppoly/Hacl_UInt8.c \
-		tmppoly/Hacl_Cast.c \
-		tmppoly/Hacl_Bignum_Constants.c \
-		tmppoly/FStar_Buffer.c \
-		tmppoly/Hacl_Bignum_Parameters.c \
-		tmppoly/Hacl_Bignum_Predicates.c \
-		tmppoly/Hacl_Bignum_Limb.c \
-		tmppoly/Hacl_Bignum_Wide.c \
-		tmppoly/Hacl_Bignum_Bigint.c \
-		tmppoly/Hacl_Bignum_Fsum_Spec.c \
-		tmppoly/Hacl_Bignum_Fsum.c \
-		tmppoly/Hacl_Bignum_Modulo.c \
-		tmppoly/Hacl_Bignum_Fproduct_Spec.c \
-		tmppoly/Hacl_Bignum_Fproduct.c \
-		tmppoly/Hacl_MAC_Poly1305_64.c \
-		tmppoly/Hacl_Test_Poly1305_64.c \
-		/home/jkz/dev/kremlin/kremlib/kremlib.c \
-		/home/jkz/dev/FStar/../kremlin/test/testlib.c 
-
+	-o banana.exe \
+		extracted1305/Hacl_Bignum_Fsum.c \
+		extracted1305/Hacl_Bignum_Modulo.c \
+		extracted1305/Hacl_Bignum_Fproduct.c \
+		extracted1305/Hacl_Bignum_Fmul.c \
+		extracted1305/Hacl_MAC_Poly1305_64.c \
+		extracted1305/Hacl_Test_Poly1305_64.c \
+		extracted1305/kremlib.c \
+		extracted1305/testlib.c 
+	./banana.exe
 
 run:
 	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -Wno-parentheses -Wno-unused-variable -g -fwrapv -I FSTAR_HOME/ulib/hyperstack -I /home/jkz/dev/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I /home/jkz/dev/FStar/../kremlin/kremlib -I /home/jkz/dev/FStar/../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
