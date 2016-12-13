@@ -14,6 +14,8 @@ open Hacl.Bignum.Fsum
 open Hacl.Bignum.Fdifference
 open Hacl.Bignum.Fproduct.Spec
 open Hacl.Bignum.Fproduct
+open Hacl.Bignum.Fmul.Spec
+open Hacl.Bignum.Fmul.Spec2
 open Hacl.Bignum.Fmul
 open Hacl.Bignum.Crecip
 
@@ -53,8 +55,8 @@ let fdifference a b =
   let tmp = create limb_zero clen in
   blit b 0ul tmp 0ul clen;
   let h = ST.get() in
-  Hacl.Bignum.Fmul.Spec.lemma_whole_slice (as_seq h b);
-  Hacl.Bignum.Fmul.Spec.lemma_whole_slice (as_seq h tmp);
+  Hacl.Bignum.Fmul.Spec2.lemma_whole_slice (as_seq h b);
+  Hacl.Bignum.Fmul.Spec2.lemma_whole_slice (as_seq h tmp);
   FStar.Seq.lemma_eq_intro (as_seq h b) (as_seq h tmp);
   add_zero tmp;
   fdifference_ a tmp clen;

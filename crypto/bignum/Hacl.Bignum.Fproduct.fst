@@ -104,44 +104,6 @@ let rec sum_scalar_multiplication_ output input s ctr =
   )
 
 
-val shift_reduce: output:felem -> Stack unit
-  (requires (fun h -> live h output /\ shift_reduce_pre (as_seq h output)))
-  (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
-    /\ shift_reduce_pre (as_seq h0 output)
-    /\ as_seq h1 output == shift_reduce_spec (as_seq h0 output)))
-let shift_reduce output =
-  shift output;
-  reduce output
-
-#set-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1"
-
-val mul_shift_reduce_:
-  output:felem_wide ->
-  input:felem{disjoint output input} ->
-  input2:felem{disjoint output input2 /\ disjoint input input2}  ->
-  ctr:U32.t{U32.v ctr <= len} ->
-  Stack unit
-    (requires (fun h -> live h output /\ live h input /\ live h input2
-      /\ mul_shift_reduce_pre (as_seq h output) (as_seq h input) (as_seq h input2) (U32.v ctr)))
-    (ensures (fun h0 _ h1 -> live h0 output /\ live h0 input /\ live h0 input2 /\ modifies_2 output input h0 h1
-      /\ live h1 output /\ live h1 input
-      /\ mul_shift_reduce_pre (as_seq h0 output) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)
-      /\ as_seq h1 output == mul_shift_reduce_spec (as_seq h0 output) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)))
-let rec mul_shift_reduce_ output input input2 ctr =
-  let open FStar.UInt32 in
-  if (ctr =^ 0ul) then ()
-  else (
-    let h0 = ST.get() in
-    let i = ctr -^ 1ul in
-    let j = clen -^ 1ul -^ i in
-    let input2i = input2.(j) in
-    sum_scalar_multiplication_ output input input2i clen;
-    if (ctr >^ 1ul) then shift_reduce input;
-    mul_shift_reduce_ output input input2 i
-  )
-
-
-
 val carry_wide_:
   t:felem_wide ->
   ctr:U32.t{U32.v ctr < len} ->

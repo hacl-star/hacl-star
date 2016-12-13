@@ -6,6 +6,7 @@ open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
 open Hacl.Bignum.Modulo.Spec
 open Hacl.Bignum.Fproduct.Spec
+open Hacl.Bignum.Fmul.Spec
 
 module U32 = FStar.UInt32
 
