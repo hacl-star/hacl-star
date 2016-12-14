@@ -264,7 +264,7 @@ kremlin-poly1305:
                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native
 
 compile:
-	gcc -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I /home/jkz/dev/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I /home/jkz/dev/FStar/../kremlin/kremlib -I /home/jkz/dev/FStar/../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
+	gcc -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
 		tmp/Prims.c \
 		tmp/FStar_Mul.c \
 		tmp/FStar_Squash.c \
@@ -314,12 +314,16 @@ compile:
 		tmp/Hacl_EC_Ladder.c \
 		tmp/Hacl_EC.c \
 		tmp/Hacl_Test_X25519.c \
-		/home/jkz/dev/kremlin/kremlib/kremlib.c \
-		/home/jkz/dev/FStar/../kremlin/test/testlib.c
+		~/Desktop/repositories/kremlin/kremlib/kremlib.c \
+		~/Desktop/repositories/FStar/../kremlin/test/testlib.c
+
+
+run-poly1305:
+	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -I ~/Desktop/repositories/kremlin/kremlib extracted1305/Hacl_Poly1305.c extracted1305/Hacl_Test_Poly1305_64.c extracted25519/kremlib.c extracted25519/testlib.c
 
 
 banana:
-	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -I FSTAR_HOME/ulib/hyperstack -I /home/jkz/dev/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I /home/jkz/dev/FStar/../kremlin/kremlib -I /home/jkz/dev/FStar/../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
+	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
 	-o banana.exe \
 		extracted1305/Hacl_Bignum_Fsum.c \
 		extracted1305/Hacl_Bignum_Modulo.c \
@@ -331,8 +335,11 @@ banana:
 		extracted1305/testlib.c 
 	./banana.exe
 
+run-x25519:
+	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -fomit-frame-pointer -I ~/Desktop/repositories/kremlin/kremlib extracted25519/Hacl_X25519.c extracted25519/Hacl_Test_X25519.c extracted25519/kremlib.c extracted25519/testlib.c
+
 run:
-	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -Wno-parentheses -Wno-unused-variable -g -fwrapv -I FSTAR_HOME/ulib/hyperstack -I /home/jkz/dev/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I /home/jkz/dev/FStar/../kremlin/kremlib -I /home/jkz/dev/FStar/../kremlin/test -I /home/jkz/dev/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
+	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -Wno-parentheses -Wno-unused-variable -g -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
 		extracted25519/Prims.c \
 		extracted25519/FStar_Mul.c \
 		extracted25519/FStar_Squash.c \
