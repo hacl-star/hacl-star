@@ -6,6 +6,7 @@ open FStar.HyperStack
 open FStar.Buffer
 
 open Hacl.Bignum.Constants
+open Hacl.Bignum.Field
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Limb
 open Hacl.Bignum.Wide
@@ -28,6 +29,7 @@ let rec eval_ h b i =
 val eval: h:mem -> b:felem{live h b} -> GTot nat
 let eval h b = eval_ h b len
 
+let get_elem h b = eval h b % prime
 
 val eval_wide_: h:mem -> b:felem_wide{live h b} -> i:nat{i <= len} -> GTot nat
 let rec eval_wide_ h b i =

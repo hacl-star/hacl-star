@@ -4,6 +4,7 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
 
+open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
@@ -20,7 +21,9 @@ open Hacl.Bignum.Fmul
 open Hacl.Bignum.Crecip
 
 module U32 = FStar.UInt32
+module F   = Hacl.Bignum.Field
 
+#set-options "--initial_fuel 0 --max_fuel 0"
 
 val fsum:
   a:felem ->
@@ -31,13 +34,13 @@ val fsum:
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ red_c h0 a len /\ red_c h0 b len
       /\ live h1 a /\ modifies_1 a h0 h1
       /\ eval h1 a = eval h0 a + eval h0 b))
+      (* /\ F.(get_elem h1 a = get_elem h0 a @+ get_elem h0 b))) *)
 let fsum a b =
   let h0 = ST.get() in
   fsum_ a b clen;
   let h1 = ST.get() in
-  assume (eval h1 a = eval h0 a + eval h0 b)
+  Hacl.Bignum.Fsum.Spec.lemma_fsum_eval (as_seq h0 a) (as_seq h0 b)
 
-#set-options "--initial_fuel 0 --max_fuel 0"
 
 val fdifference:
   a:felem ->
@@ -59,8 +62,12 @@ let fdifference a b =
   Hacl.Bignum.Fmul.Spec2.lemma_whole_slice (as_seq h tmp);
   FStar.Seq.lemma_eq_intro (as_seq h b) (as_seq h tmp);
   add_zero tmp;
+  let h' = ST.get() in
+  cut (eval h' tmp % prime = eval hinit b % prime); admit()
   fdifference_ a tmp clen;
   let h1 = ST.get() in
+  Hacl.Bignum.Fdifference.Spec.lemma_fdifference_eval (as_seq hinit a) (as_seq h' tmp);
+  cut (eval h1 a = eval h' tmp - eval hinit a); admit()
   pop_frame();
   let hfin = ST.get() in
   assume (eval hfin a % prime = (eval hinit b - eval hinit a) % prime)

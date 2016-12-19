@@ -43,5 +43,5 @@ let rec lemma_fsum_eval_ s s' ctr =
   else lemma_fsum_eval_ s s' (ctr-1)
 
 val lemma_fsum_eval: s:seqelem -> s':seqelem{red s len /\ red s' len} ->
-  Lemma (seval_ (fsum_spec s s' len) len = seval_ s len + seval_ s' len)
+  Lemma (seval (fsum_spec s s' len) = seval s + seval s')
 let lemma_fsum_eval s s' = lemma_fsum_eval_ s s' len
