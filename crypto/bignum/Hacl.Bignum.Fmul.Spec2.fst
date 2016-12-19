@@ -1,5 +1,7 @@
 module Hacl.Bignum.Fmul.Spec2
 
+open FStar.Mul
+
 open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint
@@ -16,11 +18,17 @@ val fmul_spec: input:seqelem -> input2:seqelem{fmul_pre input input2} -> Tot (ou
 let fmul_spec input input2 =
   lemma_mul_to_red input input2;
   let tmp = Seq.create len wide_zero in
-  let output1 = mul_shift_reduce_spec tmp input input2 len in
+  let output1 = mul_shift_reduce_spec input input2 in
   let output2 = carry_wide_spec output1 0 in
   let output3 = carry_top_wide_spec output2 in
   let output4 = copy_from_wide_spec output3 in
   carry_0_to_1_spec output4
+
+
+val lemma_fmul_spec: input:seqelem -> input2:seqelem{fmul_pre input input2} -> Lemma
+  (seval (fmul_spec input input2) % prime = (seval input * seval input2) % prime)
+let lemma_fmul_spec input input2 =
+  admit() (* TOOD *)
 
 #set-options "--z3rlimit 40"
 

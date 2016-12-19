@@ -34,6 +34,7 @@ let add_zero_spec s =
   let s = Seq.upd s 3 (Seq.index s 3 +^ two54m8) in
   Seq.upd s 4 (Seq.index s 4 +^ two54m8)
 
+let lemma_add_zero_spec s = admit()
 
 let carry_top_pre s =
   let _ = () in
@@ -50,6 +51,7 @@ let carry_top_spec s =
   let s = Seq.upd s 4 s4' in
   Seq.upd s 0 s0'
 
+let lemma_carry_top_spec s = admit()
 
 let reduce_pre s =
   let _ = () in
@@ -61,12 +63,12 @@ let reduce_spec s =
   let s0 = Seq.index s 0 in
   Seq.upd s 0 (s0 *^ nineteen)
 
+let lemma_reduce_spec s = admit()
 
 let carry_top_wide_pre s =
   let _ = () in
   w (Seq.index s 4) / pow2 51 < pow2 64
   /\ w (Seq.index s 4) * 19 + w (Seq.index s 0) < pow2 128
-
 
 let carry_top_wide_spec s =
   let b4 = Seq.index s 4 in
@@ -78,3 +80,6 @@ let carry_top_wide_spec s =
   let b0' = b0 +^ (nineteen *^ (wide_to_limb (b4 >>^ climb_size))) in
   let s' = Seq.upd s 4 b4' in
   Seq.upd s' 0 b0'
+
+
+let lemma_carry_top_wide_spec s = admit()

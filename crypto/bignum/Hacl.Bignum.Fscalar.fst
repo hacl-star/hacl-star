@@ -20,7 +20,7 @@ val fscalar_:
   Stack unit
     (requires (fun h -> live h output /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 input /\ live h0 output /\ live h1 output /\ modifies_1 output h0 h1
-      /\ as_seq h1 output == fscalar_spec (as_seq h0 output) (as_seq h0 input) s (U32.v i)))
+      /\ as_seq h1 output == fscalar_spec_ (as_seq h0 output) (as_seq h0 input) s (U32.v i)))
 let rec fscalar_ output b s i =
   if U32.(i =^ 0ul) then ()
   else (
@@ -39,6 +39,8 @@ val fscalar:
   Stack unit
     (requires (fun h -> live h output /\ live h input))
     (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 input /\ live h1 output /\ modifies_1 output h0 h1
-      /\ as_seq h1 output == fscalar_spec (as_seq h0 output) (as_seq h0 input) s len))
+      /\ as_seq h1 output == fscalar_spec (as_seq h0 input) s))
 let fscalar output b s =
+  let h = ST.get() in
+  lemma_fscalar_eval_0 (as_seq h output) (as_seq h b) s;
   fscalar_ output b s clen

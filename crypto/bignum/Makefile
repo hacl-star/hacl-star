@@ -214,6 +214,7 @@ kremlin-x25519:
 		-I x25519 \
 		-I ../../lib/hyperstack/kremlin \
 		Hacl.Bignum.Constants.fst \
+		Hacl.Bignum.Field.fst \
 		Hacl.Bignum.Parameters.fst \
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
 		Hacl.Bignum.Bigint.fst \

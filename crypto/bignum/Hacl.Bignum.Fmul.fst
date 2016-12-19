@@ -41,7 +41,7 @@ val mul_shift_reduce_:
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 input /\ live h0 input2 /\ modifies_2 output input h0 h1
       /\ live h1 output /\ live h1 input
       /\ mul_shift_reduce_pre (as_seq h0 output) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)
-      /\ as_seq h1 output == mul_shift_reduce_spec (as_seq h0 output) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)))
+      /\ as_seq h1 output == mul_shift_reduce_spec_ (as_seq h0 output) (Seq.create len limb_zero) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)))
 let rec mul_shift_reduce_ output input input2 ctr =
   let open FStar.UInt32 in
   if (ctr =^ 0ul) then ()
