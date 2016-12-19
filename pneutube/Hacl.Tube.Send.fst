@@ -42,12 +42,12 @@ let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
 (* Blocksize needs to be a power of 2 *)
 inline_for_extraction let blocksize_bits = 18ul
-inline_for_extraction let blocksize = U64 (256uL *^ 1024uL) //1uL <<^ blocksize_bits) // 256 * 1024
-inline_for_extraction let blocksize_32 = U32 (256ul *^ 1024ul)
+inline_for_extraction let blocksize = U64.(256uL *^ 1024uL) //1uL <<^ blocksize_bits) // 256 * 1024
+inline_for_extraction let blocksize_32 = U32.(256ul *^ 1024ul)
 
-inline_for_extraction let cipherlen (x:U64.t{ U64.v x <= U64.v blocksize}) : U64.t = U64 (x +^ 16uL)
+inline_for_extraction let cipherlen (x:U64.t{ U64.v x <= U64.v blocksize}) : U64.t = U64.(x +^ 16uL)
 
-inline_for_extraction let cipherlen_32 (x:U32.t{ U32.v x <= U32.v blocksize_32}) : Tot U32.t = U32 (x +^ 16ul)
+inline_for_extraction let cipherlen_32 (x:U32.t{ U32.v x <= U32.v blocksize_32}) : Tot U32.t = U32.(x +^ 16ul)
 inline_for_extraction let ciphersize = cipherlen (blocksize)
 inline_for_extraction let ciphersize_32 = cipherlen_32 (blocksize_32)
 inline_for_extraction let headersize = 1024uL
@@ -128,7 +128,7 @@ let load64_le b =
   let b5 = b.(5ul) in
   let b6 = b.(6ul) in
   let b7 = b.(7ul) in
-  H64 (
+  H64.(
     sint8_to_sint64 b0
     |^ (sint8_to_sint64 b1 <<^ 8ul)
     |^ (sint8_to_sint64 b2 <<^ 16ul)
@@ -190,17 +190,17 @@ private let rec file_send_loop fh sb immut_state mut_state seqno len =
   let header  = Buffer.sub immut_state 220ul 1024ul in
   let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
   let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
-  if U64 (len =^ 0uL) then (
+  if U64.(len =^ 0uL) then (
     SocketOk
   )
   else (
-    let i = U64 (len -^ 1uL) in
+    let i = U64.(len -^ 1uL) in
     let next = file_next_read_buffer fh blocksize in
     let h0 = ST.get() in
     store64_le (sub nonce 16ul 8ul) seqno;
     let h1 = ST.get() in
     lemma_reveal_modifies_1 nonce h0 h1;
-    let seqno = H64 (seqno +^ Hacl.Cast.uint64_to_sint64 1uL) in
+    let seqno = H64.(seqno +^ Hacl.Cast.uint64_to_sint64 1uL) in
     let _ = Hacl.Box.crypto_box_easy_afternm ciphertext next blocksize nonce key in
     let h2 = ST.get() in
     lemma_reveal_modifies_1 mut_state h1 h2;
@@ -236,7 +236,7 @@ private val file_send_fragments:
       (match r with
       | SocketOk -> (current_state h1 sb = Open)
       | _ -> true) ))
-private let file_send_fragments sb fb immut_state mut_state seqno fragments rem =
+private let file_send_fragments sb fb immut_state mut_state seqno fragments rem' =
   let fh  = Buffer.index fb 0ul in
   let pkA   = Buffer.sub immut_state 0ul 32ul in
   let pkB   = Buffer.sub immut_state 32ul 32ul in
@@ -249,19 +249,19 @@ private let file_send_fragments sb fb immut_state mut_state seqno fragments rem 
   let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
   match file_send_loop fb sb immut_state mut_state seqno fragments with
   | SocketOk -> (
-      if U64 (rem  >^ 0uL) then (
-        let next = file_next_read_buffer fb rem in
-        let seqno = Hacl.Cast.uint64_to_sint64 (U64 (fragments +%^ 1uL)) in
+      if U64.(rem'  >^ 0uL) then (
+        let next = file_next_read_buffer fb rem' in
+        let seqno = Hacl.Cast.uint64_to_sint64 (U64.(fragments +%^ 1uL)) in
 	let h0 = ST.get() in
         store64_le (sub nonce 16ul 8ul) seqno;
 	let h1 = ST.get() in
 	lemma_reveal_modifies_1 nonce h0 h1;
-        Math.Lemmas.modulo_lemma (U64.v rem) (pow2 32);
-        let clen = U32 (Int.Cast.uint64_to_uint32 rem +^ 16ul) in
-        let _ = Hacl.Box.crypto_box_easy_afternm (sub ciphertext 0ul clen) next rem nonce key in
+        Math.Lemmas.modulo_lemma (U64.v rem') (pow2 32);
+        let clen = U32.(Int.Cast.uint64_to_uint32 rem' +^ 16ul) in
+        let _ = Hacl.Box.crypto_box_easy_afternm (sub ciphertext 0ul clen) next rem' nonce key in
 	let h2 = ST.get() in
 	lemma_reveal_modifies_1 ciphertext h1 h2;
-	tcp_write_all sb ciphertext (cipherlen rem)
+	tcp_write_all sb ciphertext (cipherlen rem')
       ) else (
         SocketOk
       ) )
@@ -289,7 +289,7 @@ private val file_flush_all:
       /\ (match r with
       | SocketOk -> (live h1 sb /\ current_state h1 sb = Open)
       | _ -> true) ))
-private let file_flush_all sb fb immut_state mut_state ctr rem =
+private let file_flush_all sb fb immut_state mut_state ctr rem' =
   let fh  = Buffer.index fb 0ul in
   let pkA   = Buffer.sub immut_state 0ul 32ul in
   let pkB   = Buffer.sub immut_state 32ul 32ul in
@@ -313,15 +313,15 @@ private let file_flush_all sb fb immut_state mut_state ctr rem =
                             (* Populating the nonce *)
                             blit sid 0ul nonce 0ul 16ul;
                             store64_le (sub nonce 16ul 8ul) seqno;
-                            let seqno = H64 (seqno +%^ one_64) in
+                            let seqno = H64.(seqno +%^ one_64) in
                             let h = ST.get() in
-                            let ciphertext' = sub ciphertext 0ul (U32 (headersize_32 +^ 16ul)) in
+                            let ciphertext' = sub ciphertext 0ul (U32.(headersize_32 +^ 16ul)) in
                             let _ = Hacl.Box.crypto_box_easy_afternm ciphertext' header headersize
                                                                      nonce key in
                             let h1 = ST.get() in
                             lemma_reveal_modifies_1 mut_state h0 h1;
                             (match tcp_write_all sb ciphertext' (cipherlen headersize) with
-                            | SocketOk -> file_send_fragments sb fb immut_state mut_state seqno ctr rem
+                            | SocketOk -> file_send_fragments sb fb immut_state mut_state seqno ctr rem'
                             | SocketError -> SocketError ) )
                         | SocketError -> SocketError )
                     | SocketError -> SocketError )
@@ -353,7 +353,7 @@ private let file_send_2 sb fb immut_state num rem =
   let s = sb.(0ul) in
   let fh = fb.(0ul) in
   let h0 = ST.get() in
-  let mut_state = Buffer.create zero_8 (U32 (ciphersize_32 +^ 24ul)) in
+  let mut_state = Buffer.create zero_8 (U32.(ciphersize_32 +^ 24ul)) in
   let h1 = ST.get() in
   lemma_reveal_modifies_0 h0 h1;
   let res = file_flush_all sb fb immut_state mut_state num rem in
@@ -426,7 +426,7 @@ let file_send fsize f r h p skA pkB =
   makeStreamID sid;
   blit pkB 0ul pkB_cpy 0ul 32ul;
   Buffer.blit f 0ul fname 0ul fsize;
-  let keygen_res = U32 (crypto_box_beforenm key pkB skA =^ 0ul) in
+  let keygen_res = U32.(crypto_box_beforenm key pkB skA =^ 0ul) in
   let h1 = ST.get() in
   lemma_reveal_modifies_0 h0 h1;
   (* Initialization of the file_handle *)
@@ -442,15 +442,15 @@ let file_send fsize f r h p skA pkB =
         let file_size = fh.stat.size in
         let sblock = Hacl.Cast.uint64_to_sint64 blocksize in
         let roundup = Hacl.Cast.uint64_to_sint64 r in
-	let file_size_mod_roundup = H64 (file_size &^ (roundup-%^one_64)) in
-        let mask = H64 (gte_mask roundup one_64 &^ (lognot (eq_mask file_size_mod_roundup zero_64))) in
-        let frem = H64 ((roundup -%^ file_size_mod_roundup) &^ mask) in
-        let hsize = H64 (file_size +%^ frem) in
-        let hfragments = H64 (hsize >>^ blocksize_bits) in
-        let hrem = H64 (file_size &^ (sblock-^one_64)) in
+	let file_size_mod_roundup = H64.(file_size &^ (roundup-%^one_64)) in
+        let mask = H64.(gte_mask roundup one_64 &^ (lognot (eq_mask file_size_mod_roundup zero_64))) in
+        let frem = H64.((roundup -%^ file_size_mod_roundup) &^ mask) in
+        let hsize = H64.(file_size +%^ frem) in
+        let hfragments = H64.(hsize >>^ blocksize_bits) in
+        let hrem = H64.(file_size &^ (sblock-^one_64)) in
 	let fragments = Hacl.Policies.declassify_u64 hfragments in
-	let rem = Hacl.Policies.declassify_u64 hrem in
-        if (U64 ((fragments >=^ 4294967295uL) || (rem >=^ blocksize))) then (
+	let rem' = Hacl.Policies.declassify_u64 hrem in
+        if (U64.((fragments >=^ 4294967295uL) || (rem' >=^ blocksize))) then (
           (* TestLib.perr(Int.Cast.uint64_to_uint32 rem); *)
           opened FileError fh.stat sid )
         else (
@@ -468,7 +468,7 @@ let file_send fsize f r h p skA pkB =
           let h3 = ST.get() in
           lemma_reveal_modifies_1 state h2 h3;
           (match tcp_connect h p sb with
-          | SocketOk -> file_send_1 sb fb state fragments rem
+          | SocketOk -> file_send_1 sb fb state fragments rem'
           | SocketError -> opened FileError fh.stat sid ) )
     | FileError -> opened FileError (fb.(0ul)).stat sid in
   pop_frame();

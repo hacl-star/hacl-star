@@ -1,5 +1,5 @@
 all:
-	$(MAKE) allsubdirs test.exe
+	$(MAKE) allsubdirs test.exe pneutube
 
 FSTAR_HOME?=../../fstar
 KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
@@ -24,6 +24,9 @@ test.exe: Hacl.Test.fst
 
 %.all:
 	$(MAKE) -C $(basename $@)
+
+pneutube:
+	$(MAKE) -C ../pneutube tube-test
 
 test_api.exe: c/test_api.c
 	mkdir -p tmp
