@@ -2,7 +2,11 @@
 
 void Hacl_Bignum_fsum(uint64_t *a, uint64_t *b)
 {
-  Hacl_Bignum_Fsum_fsum_(a, b, (uint32_t )5);
+  a[0] += b[0];
+  a[1] += b[1];
+  a[2] += b[2];
+  a[3] += b[3];
+  a[4] += b[4];
   return;
 }
 

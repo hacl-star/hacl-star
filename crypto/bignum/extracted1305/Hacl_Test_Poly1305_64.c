@@ -1,4 +1,35 @@
-#include "Hacl_Test_Poly1305_64.h"
+#include <string.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <inttypes.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <time.h>
+#include "Hacl_EC.h"
+#include "kremlib.h"
+#include "testlib.h"
+#include "Prims.h"
+#include "Hacl_Poly1305.h"
+
+#define ROUNDS (1024)
+#define MACSIZE 32
+
+static __inline__ unsigned long long rdtsc(void)
+{
+  unsigned hi, lo;
+  __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+  return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
+}
 
 int32_t main()
 {
@@ -103,6 +134,31 @@ int32_t main()
   Hacl_MAC_Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
   int8_t poly1305[1] = { (int8_t )0 };
   TestLib_compare_and_print(poly1305, expected, mac, macsize);
+
+  uint8_t* macs = malloc(ROUNDS * MACSIZE * sizeof(char));
+  int fd = open("1GB.bin", O_RDONLY);
+  uint64_t res;
+  len_ = 1024 * 1024 * sizeof(char);
+  uint8_t* plain = malloc(len_);
+  res = read(fd, plain, len_);
+  if (res != len_) {
+    printf("Error on reading, got read = %lu\n", res);
+    return 1;
+  }
+
+  unsigned long long a, b;
+  a = rdtsc();
+  for (int i = 0; i < ROUNDS; i++){
+    Hacl_MAC_Poly1305_64_crypto_onetimeauth(macs + MACSIZE * i, plain, len_, key);
+  }
+  b = rdtsc();
+  printf("Cycles/byte for the polymac: %f\n", (float)(b - a) / (ROUNDS * len_));
+
+  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
+                                 + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
+
+  printf("%llx\n", res);
+
   return exit_success;
 }
 

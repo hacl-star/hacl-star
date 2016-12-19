@@ -1,4 +1,3 @@
-#include "Hacl_Test_X25519.h"
 #include <string.h>
 #include <stdint.h>
 #include <string.h>
@@ -16,6 +15,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
+#include "Hacl_EC.h"
+#include "kremlib.h"
+#include "testlib.h"
 
 #define KEYSIZE 32 
 #define ROUNDS (64 * 1024)
