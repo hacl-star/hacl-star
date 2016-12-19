@@ -26,7 +26,7 @@ test.exe: Hacl.Test.fst
 	$(MAKE) -C $(basename $@)
 
 pneutube:
-	$(MAKE) -C ../pneutube tube-star.exe
+	$(MAKE) -C ../pneutube tube-test
 
 test_api.exe: c/test_api.c
 	mkdir -p tmp
