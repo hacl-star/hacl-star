@@ -237,7 +237,8 @@ kremlin-x25519:
 		-I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
 		$(FSTAR_HOME)/../kremlin/test/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                -ccopt -Wno-error=format= -no-prefix Hacl.Test.X25519
+                -ccopt -Wno-error=format= -no-prefix Hacl.Test.X25519 -o x25519.exe
+	./x25519.exe
 
 
 kremlin-poly1305:
@@ -263,6 +264,7 @@ kremlin-poly1305:
 		$(FSTAR_HOME)/../kremlin/test/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native
+
 
 compile:
 	gcc -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \

@@ -80,6 +80,7 @@ let fdifference a b =
 open Hacl.Bignum.Fscalar.Spec
 open Hacl.Bignum.Fproduct.Spec
 
+
 val fscalar:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -119,11 +120,7 @@ val fmul:
       /\ modifies_1 output h0 h1 /\ live h1 output
       /\ eval h1 output % prime = (eval h0 a * eval h0 b) % prime
       ))
-let fmul output a b =
-  let h0 = ST.get() in
-  fmul output a b;
-  let h1 = ST.get() in
-  assume (eval h1 output % prime = (eval h0 a * eval h0 b) % prime)
+let fmul output a b = fmul output a b
 
 
 #set-options "--lax"

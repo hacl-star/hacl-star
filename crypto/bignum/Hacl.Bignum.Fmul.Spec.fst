@@ -38,14 +38,16 @@ let lemma_shift_reduce_spec s =
 
 #set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 50"
 
-let rec mul_shift_reduce_pre (output:seqelem_wide) (input:seqelem) (input2:seqelem) (ctr:nat{ctr <= len}) : GTot Type0 (decreases ctr) =
-  if ctr > 0 then (
+let rec mul_shift_reduce_pre (output:seqelem_wide) (input_init:seqelem) (input:seqelem) (input2:seqelem) (ctr:nat{ctr <= len}) : GTot Type0 (decreases ctr) =
+  seval_wide output % prime = (seval input * seval_ input2 (len - ctr)) % prime
+  /\ (ctr > 0 ==> seval input % prime = (pow2 ((len - ctr) * limb_size) * seval input_init) % prime)
+  /\ (if ctr > 0 then (
     sum_scalar_multiplication_pre_ output input (Seq.index input2 (len-ctr)) len
     /\ (let output' = sum_scalar_multiplication_spec output input (Seq.index input2 (len-ctr)) len in
        (ctr > 1 ==> shift_reduce_pre input) /\
          (let input'  = if ctr > 1 then shift_reduce_spec input else input in
-          mul_shift_reduce_pre output' input' input2 (ctr-1))))
-          else true
+          mul_shift_reduce_pre output' input_init input' input2 (ctr-1))))
+          else true)
 
 
 #set-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1"
@@ -110,10 +112,7 @@ val mul_shift_reduce_spec_:
   input_init:seqelem ->
   input:seqelem ->
   input2:seqelem ->
-  ctr:nat{ctr <= len /\ mul_shift_reduce_pre output input input2 ctr
-    /\ seval_wide output % prime = (seval input * seval_ input2 (len - ctr)) % prime
-    /\ (ctr > 0 ==> seval input % prime = (pow2 ((len - ctr) * limb_size) * seval input_init) % prime)
-    } ->
+  ctr:nat{ctr <= len /\ mul_shift_reduce_pre output input_init input input2 ctr} ->
   Tot (s:seqelem_wide{seval_wide s % prime = (seval input * seval input2) % prime})
   (decreases ctr)
 
@@ -147,7 +146,7 @@ let rec lemma_seval_wide_null a ctr =
 
 
 val mul_shift_reduce_spec:
-  input:seqelem -> input2:seqelem{mul_shift_reduce_pre (Seq.create len wide_zero) input input2 len} ->
+  input:seqelem -> input2:seqelem{mul_shift_reduce_pre (Seq.create len wide_zero) input input input2 len} ->
   Tot (s:seqelem_wide{seval_wide s % prime = (seval input * seval input2) % prime})
 let rec mul_shift_reduce_spec input input2 =
   lemma_seval_wide_null (Seq.create len wide_zero) len;
@@ -183,4 +182,4 @@ let rec mul_shift_reduce_spec input input2 =
 
 
 let fmul_pre (input:seqelem) (input2:seqelem) : GTot Type0 =
-  mul_shift_reduce_pre (Seq.create len wide_zero) input input2 len
+  mul_shift_reduce_pre (Seq.create len wide_zero) input input input2 len
