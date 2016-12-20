@@ -8,20 +8,20 @@ open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
-open Hacl.Bignum.Modulo.Spec
+open Hacl.Spec.Bignum.Modulo
 open Hacl.Bignum.Modulo
 open Hacl.Bignum.Fscalar
 open Hacl.Bignum.Fsum
 open Hacl.Bignum.Fdifference
-open Hacl.Bignum.Fproduct.Spec
+open Hacl.Spec.Bignum.Fproduct
 open Hacl.Bignum.Fproduct
-open Hacl.Bignum.Fmul.Spec
-open Hacl.Bignum.Fmul.Spec2
+open Hacl.Spec.Bignum.Fmul
+open Hacl.Spec.Bignum.Fmul2
 open Hacl.Bignum.Fmul
 open Hacl.Bignum.Crecip
 
 module U32 = FStar.UInt32
-module F   = Hacl.Bignum.Field
+module F   = Hacl.Spec.Bignum.Field
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
@@ -39,7 +39,7 @@ let fsum a b =
   let h0 = ST.get() in
   fsum_ a b clen;
   let h1 = ST.get() in
-  Hacl.Bignum.Fsum.Spec.lemma_fsum_eval (as_seq h0 a) (as_seq h0 b)
+  Hacl.Spec.Bignum.Fsum.lemma_fsum_eval (as_seq h0 a) (as_seq h0 b)
 
 
 assume val lemma_diff: a:int -> b:int -> p:pos ->
@@ -53,7 +53,7 @@ val fdifference:
   b:felem{disjoint a b} ->
   Stack unit
     (requires (fun h -> live h a /\ live h b /\ add_zero_pre (as_seq h b)
-      /\ Hacl.Bignum.Fdifference.Spec.gte_limbs (as_seq h a) (add_zero_spec (as_seq h b)) len))
+      /\ Hacl.Spec.Bignum.Fdifference.gte_limbs (as_seq h a) (add_zero_spec (as_seq h b)) len))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b
       /\ live h1 a /\ modifies_1 a h0 h1
       /\ eval h1 a % prime = (eval h0 b - eval h0 a) % prime ))
@@ -63,22 +63,22 @@ let fdifference a b =
   let tmp = create limb_zero clen in
   blit b 0ul tmp 0ul clen;
   let h = ST.get() in
-  Hacl.Bignum.Fmul.Spec2.lemma_whole_slice (as_seq h b);
-  Hacl.Bignum.Fmul.Spec2.lemma_whole_slice (as_seq h tmp);
+  Hacl.Spec.Bignum.Fmul2.lemma_whole_slice (as_seq h b);
+  Hacl.Spec.Bignum.Fmul2.lemma_whole_slice (as_seq h tmp);
   FStar.Seq.lemma_eq_intro (as_seq h b) (as_seq h tmp);
   add_zero tmp;
   let h' = ST.get() in
   cut (eval h' tmp % prime = eval hinit b % prime);
   fdifference_ a tmp clen;
   let h1 = ST.get() in
-  Hacl.Bignum.Fdifference.Spec.lemma_fdifference_eval (as_seq hinit a) (as_seq h' tmp);
+  Hacl.Spec.Bignum.Fdifference.lemma_fdifference_eval (as_seq hinit a) (as_seq h' tmp);
   lemma_diff (eval h' tmp) (eval hinit a) prime;
   lemma_diff (eval hinit b) (eval hinit a) prime;
   pop_frame()
 
 
-open Hacl.Bignum.Fscalar.Spec
-open Hacl.Bignum.Fproduct.Spec
+open Hacl.Spec.Bignum.Fscalar
+open Hacl.Spec.Bignum.Fproduct
 
 
 val fscalar:

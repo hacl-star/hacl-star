@@ -1,10 +1,11 @@
-module Hacl.Bignum.Fproduct.Spec
+module Hacl.Spec.Bignum.Fproduct
 
 open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
-open Hacl.Bignum.Modulo.Spec
+
+open Hacl.Spec.Bignum.Modulo
 
 module U32 = FStar.UInt32
 

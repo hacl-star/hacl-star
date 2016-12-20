@@ -1,4 +1,4 @@
-module Hacl.Bignum.Modulo.Spec
+module Hacl.Spec.Bignum.Modulo
 
 open FStar.Mul
 open FStar.HyperStack

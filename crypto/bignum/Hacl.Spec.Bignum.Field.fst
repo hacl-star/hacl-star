@@ -1,4 +1,4 @@
-module Hacl.Bignum.Field
+module Hacl.Spec.Bignum.Field
 
 open FStar.Mul
 open Hacl.Bignum.Constants

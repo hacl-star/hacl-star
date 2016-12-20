@@ -7,7 +7,7 @@ open FStar.Buffer
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
-open Hacl.Bignum.Modulo.Spec
+open Hacl.Spec.Bignum.Modulo
 
 inline_for_extraction let two54m152 =
   assert_norm (pow2 64 > 0x3fffffffffff68); uint64_to_limb 0x3fffffffffff68uL

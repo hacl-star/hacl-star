@@ -1,4 +1,4 @@
-module Hacl.Bignum.Fscalar.Spec
+module Hacl.Spec.Bignum.Fscalar
 
 open FStar.Mul
 

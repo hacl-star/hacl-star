@@ -1,4 +1,4 @@
-module Hacl.Bignum.Fdifference.Spec
+module Hacl.Spec.Bignum.Fdifference
 
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint

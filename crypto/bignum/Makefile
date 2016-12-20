@@ -214,20 +214,16 @@ kremlin-x25519:
 		-I x25519 \
 		-I ../../lib/hyperstack/kremlin \
 		Hacl.Bignum.Constants.fst \
-		Hacl.Bignum.Field.fst \
-		Hacl.Bignum.Parameters.fst \
-		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
+		Hacl.Spec.Bignum.Field.fst \
+		Hacl.Bignum.Parameters.fst Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
 		Hacl.Bignum.Bigint.fst \
-		Hacl.Bignum.Modulo.Spec.fst \
-		Hacl.Bignum.Predicates.fst \
-		Hacl.Bignum.Fsum.Spec.fst Hacl.Bignum.Fdifference.Spec.fst  \
-		Hacl.Bignum.Fscalar.Spec.fst Hacl.Bignum.Fproduct.Spec.fst \
-		Hacl.Bignum.Fmul.Spec.fst \
-		Hacl.Bignum.Fmul.Lemmas.fst Hacl.Bignum.Fmul.Spec2.fst \
-		Hacl.Bignum.Modulo.fst \
-		Hacl.Bignum.Fsum.fst Hacl.Bignum.Fdifference.fst  \
+		Hacl.Spec.Bignum.Modulo.fst      Hacl.Spec.Bignum.Fsum.fst \
+		Hacl.Spec.Bignum.Fdifference.fst Hacl.Spec.Bignum.Fscalar.fst   \
+		Hacl.Spec.Bignum.Fproduct.fst    Hacl.Spec.Bignum.Fmul.fst      \
+		Hacl.Spec.Bignum.Fmul.Lemmas.fst Hacl.Spec.Bignum.Fmul2.fst     \
+		Hacl.Bignum.Modulo.fst  Hacl.Bignum.Fsum.fst     Hacl.Bignum.Fdifference.fst \
 		Hacl.Bignum.Fscalar.fst Hacl.Bignum.Fproduct.fst Hacl.Bignum.Fmul.fst \
-		Hacl.Bignum.Crecip.fst Hacl.Bignum.fst \
+		Hacl.Bignum.Crecip.fst  Hacl.Bignum.fst \
 		Hacl.EC.Point.fst \
 		Hacl.EC.AddAndDouble.fst \
 		Hacl.EC.Format.fst \
@@ -245,16 +241,16 @@ kremlin-poly1305:
 	mkdir -p tmppoly
 	krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir tmppoly -verbose \
 		-I poly1305 -I ../../lib/hyperstack/kremlin \
-		Hacl.Bignum.Constants.fst \
-		Hacl.Bignum.Parameters.fst \
+		Hacl.Bignum.Constants.fst Hacl.Bignum.Parameters.fst \
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
 		Hacl.Bignum.Bigint.fst \
+		Hacl.Spec.Bignum.Modulo.fst \
+		Hacl.Spec.Bignum.Fsum.fst  \
+		Hacl.Spec.Bignum.Fproduct.fst \
+		Hacl.Spec.Bignum.Fmul.fst \
+		Hacl.Spec.Bignum.Fmul.Lemmas.fst \
+		Hacl.Spec.Bignum.Fmul2.fst \
 		Hacl.Bignum.Modulo.fst \
-		Hacl.Bignum.Fsum.Spec.fst  \
-		Hacl.Bignum.Fproduct.Spec.fst \
-		Hacl.Bignum.Fmul.Spec.fst \
-		Hacl.Bignum.Fmul.Lemmas.fst \
-		Hacl.Bignum.Fmul.Spec2.fst \
 		Hacl.Bignum.Fsum.fst \
 		Hacl.Bignum.Fproduct.fst \
 		Hacl.Bignum.Fmul.fst \
@@ -263,7 +259,8 @@ kremlin-poly1305:
 		-I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
 		$(FSTAR_HOME)/../kremlin/test/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native
+                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native -o poly1305.exe
+	./poly1305.exe
 
 
 compile:
@@ -394,3 +391,6 @@ run:
 		extracted25519/Hacl_Test_X25519.c \
 		extracted25519/kremlib.c \
 		extracted25519/testlib.c
+
+clean:
+	rm -rf *.exe *.out *~ x25519/*~ poly1305/*~ tmp tmppoly

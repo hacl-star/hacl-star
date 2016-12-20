@@ -10,9 +10,9 @@ open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
 open Hacl.Bignum.Modulo
 open Hacl.Bignum.Fproduct
-open Hacl.Bignum.Fmul.Lemmas
-open Hacl.Bignum.Fmul.Spec
-open Hacl.Bignum.Fmul.Spec2
+open Hacl.Spec.Bignum.Fmul.Lemmas
+open Hacl.Spec.Bignum.Fmul
+open Hacl.Spec.Bignum.Fmul2
 
 module U32 = FStar.UInt32
 

@@ -6,8 +6,7 @@ open FStar.Buffer
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Bigint
 open Hacl.Bignum.Limb
-open Hacl.Bignum.Predicates
-open Hacl.Bignum.Fsum.Spec
+open Hacl.Spec.Bignum.Fsum
 
 module U32 = FStar.UInt32
 
