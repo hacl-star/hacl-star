@@ -214,9 +214,9 @@ kremlin-x25519:
 		-I x25519 \
 		-I ../../lib/hyperstack/kremlin \
 		Hacl.Bignum.Constants.fst \
-		Hacl.Spec.Bignum.Field.fst \
 		Hacl.Bignum.Parameters.fst Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
-		Hacl.Bignum.Bigint.fst \
+		Hacl.Spec.Bignum.Field.fst \
+		Hacl.Spec.Bignum.Bigint.fst \
 		Hacl.Spec.Bignum.Modulo.fst      Hacl.Spec.Bignum.Fsum.fst \
 		Hacl.Spec.Bignum.Fdifference.fst Hacl.Spec.Bignum.Fscalar.fst   \
 		Hacl.Spec.Bignum.Fproduct.fst    Hacl.Spec.Bignum.Fmul.fst      \
@@ -243,7 +243,7 @@ kremlin-poly1305:
 		-I poly1305 -I ../../lib/hyperstack/kremlin \
 		Hacl.Bignum.Constants.fst Hacl.Bignum.Parameters.fst \
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
-		Hacl.Bignum.Bigint.fst \
+		Hacl.Spec.Bignum.Bigint.fst \
 		Hacl.Spec.Bignum.Modulo.fst \
 		Hacl.Spec.Bignum.Fsum.fst  \
 		Hacl.Spec.Bignum.Fproduct.fst \
@@ -393,4 +393,4 @@ run:
 		extracted25519/testlib.c
 
 clean:
-	rm -rf *.exe *.out *~ x25519/*~ poly1305/*~ tmp tmppoly
+	rm -rf *.exe *.out *~ x25519/*~ poly1305/*~ interfaces/*~ tmp tmppoly

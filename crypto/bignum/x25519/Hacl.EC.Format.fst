@@ -12,8 +12,13 @@ open Hacl.Bignum.Parameters
 open Hacl.Bignum.Limb
 open Hacl.EC.Point
 
+type uint8_p = buffer Hacl.UInt8.t
+
 private inline_for_extraction let zero_8 = uint8_to_sint8 0uy
 
+val point_inf: unit -> StackInline point
+  (requires (fun h -> true))
+  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p))
 let point_inf () =
   let buf = create limb_zero 10ul in
   let x = Buffer.sub buf 0ul 5ul in
@@ -24,6 +29,9 @@ let point_inf () =
   p
 
 
+val alloc_point: unit -> StackInline point
+  (requires (fun h -> true))
+  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p))
 let alloc_point () =
   let buf = create limb_zero 10ul in
   let x = Buffer.sub buf 0ul 5ul in
@@ -165,6 +173,9 @@ private let fcontract output input =
   store64_le (Buffer.sub output 24ul 8ul) o3
 
 
+val point_of_scalar: scalar:buffer Hacl.UInt8.t{length scalar = keylen} -> StackInline point
+  (requires (fun h -> Buffer.live h scalar))
+  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p))
 let point_of_scalar scalar =
   let buf = create limb_zero 10ul in
   let x = Buffer.sub buf 0ul 5ul in
@@ -175,6 +186,9 @@ let point_of_scalar scalar =
   z.(0ul) <- limb_one;
   p
 
+val scalar_of_point: scalar:uint8_p{length scalar = keylen} -> p:point -> Stack unit
+  (requires (fun h -> Buffer.live h scalar /\ live h p))
+  (ensures (fun h0 _ h1 -> modifies_1 scalar h0 h1 /\ Buffer.live h1 scalar))
 let scalar_of_point scalar point =
   push_frame();
   let x = Hacl.EC.Point.getx point in
@@ -186,6 +200,9 @@ let scalar_of_point scalar point =
   pop_frame()
 
 
+val format_secret: secret:uint8_p{length secret = keylen} -> StackInline (s:uint8_p{length s = keylen})
+  (requires (fun h -> Buffer.live h secret))
+  (ensures (fun h0 s h1 -> Buffer.live h1 secret /\ modifies_0 h0 h1 /\ Buffer.live h1 s))
 let format_secret secret =
   let e   = create zero_8 32ul in
   blit secret 0ul e 0ul 32ul;

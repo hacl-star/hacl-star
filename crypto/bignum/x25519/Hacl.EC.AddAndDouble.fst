@@ -8,6 +8,15 @@ open Hacl.Bignum.Parameters
 open Hacl.Bignum
 open Hacl.EC.Point
 
+val fmonty:
+  pp:point ->
+  ppq:point ->
+  p:point ->
+  pq:point ->
+  q:point ->
+  Stack unit
+    (requires (fun _ -> true))
+    (ensures (fun _ _ _ -> true))
 let fmonty pp ppq p pq qmqp =
   let qx = getx qmqp in
   let x2 = getx pp in

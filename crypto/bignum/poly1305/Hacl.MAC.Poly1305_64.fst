@@ -9,7 +9,7 @@ open FStar.HyperStack
 
 open Hacl.Cast
 open Hacl.Bignum.Parameters
-open Hacl.Bignum.Bigint
+open Hacl.Spec.Bignum.Bigint
 
 module H8   = Hacl.UInt8
 module Limb = Hacl.Bignum.Limb

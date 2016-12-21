@@ -4,7 +4,7 @@ open FStar.Mul
 
 open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
-open Hacl.Bignum.Bigint
+open Hacl.Spec.Bignum.Bigint
 open Hacl.Bignum.Limb
 
 module U32 = FStar.UInt32
