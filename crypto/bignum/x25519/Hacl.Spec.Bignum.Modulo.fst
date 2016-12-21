@@ -44,13 +44,6 @@ let add_zero_spec s =
   Seq.upd s 4 (Seq.index s 4 +^ two54m8)
 
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
-
-val lemma_seval_def: s:seqelem -> i:nat{i <= len} -> Lemma
-  ((i > 0 ==> seval_ s i = pow2 (limb_size * (i-1)) * v (Seq.index s (i-1)) + seval_ s (i-1))
-    /\ (i = 0 ==> seval_ s i = 0))
-let lemma_seval_def s i = ()
-
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 val lemma_seval_5: s:seqelem -> Lemma
@@ -263,13 +256,6 @@ private let lemma_carry_top_wide_spec_ s =
   assert_norm(pow2 64 < pow2 128);
   Math.Lemmas.modulo_lemma (w (Seq.index s 4) / pow2 limb_size) (pow2 64)
 
-
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
-
-val lemma_seval_wide_def: s:seqelem_wide -> i:nat{i <= len} -> Lemma
-  ((i > 0 ==> seval_wide_ s i = pow2 (limb_size * (i-1)) * w (Seq.index s (i-1)) + seval_wide_ s (i-1))
-    /\ (i = 0 ==> seval_wide_ s i = 0))
-let lemma_seval_wide_def s i = ()
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 

@@ -16,12 +16,13 @@ open Hacl.Bignum.Fdifference
 open Hacl.Spec.Bignum.Fproduct
 open Hacl.Bignum.Fproduct
 open Hacl.Spec.Bignum.Fmul
-open Hacl.Spec.Bignum.Fmul2
+(* open Hacl.Spec.Bignum.Fmul2 *)
 open Hacl.Bignum.Fmul
 open Hacl.Bignum.Crecip
 
 module U32 = FStar.UInt32
 module F   = Hacl.Spec.Bignum.Field
+
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 

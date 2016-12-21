@@ -46,14 +46,14 @@ private inline_for_extraction let add_zero_ b =
   b.(4ul) <- b4 +^ two54m8
 
 
-private inline_for_extraction val add_zero:
+inline_for_extraction val add_zero:
   b:felem ->
   Stack unit
     (requires (fun h -> live h b /\ add_zero_pre (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 b /\ add_zero_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == add_zero_spec (as_seq h0 b)
       /\ eval h1 b % prime = eval h0 b % prime))
-private inline_for_extraction let add_zero b =
+inline_for_extraction let add_zero b =
   let h0 = ST.get() in
   add_zero_ b;
   lemma_add_zero_spec (as_seq h0 b)

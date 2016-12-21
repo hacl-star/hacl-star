@@ -220,7 +220,6 @@ kremlin-x25519:
 		Hacl.Spec.Bignum.Modulo.fst      Hacl.Spec.Bignum.Fsum.fst \
 		Hacl.Spec.Bignum.Fdifference.fst Hacl.Spec.Bignum.Fscalar.fst   \
 		Hacl.Spec.Bignum.Fproduct.fst    Hacl.Spec.Bignum.Fmul.fst      \
-		Hacl.Spec.Bignum.Fmul.Lemmas.fst Hacl.Spec.Bignum.Fmul2.fst     \
 		Hacl.Bignum.Modulo.fst  Hacl.Bignum.Fsum.fst     Hacl.Bignum.Fdifference.fst \
 		Hacl.Bignum.Fscalar.fst Hacl.Bignum.Fproduct.fst Hacl.Bignum.Fmul.fst \
 		Hacl.Bignum.Crecip.fst  Hacl.Bignum.fst \
@@ -248,8 +247,6 @@ kremlin-poly1305:
 		Hacl.Spec.Bignum.Fsum.fst  \
 		Hacl.Spec.Bignum.Fproduct.fst \
 		Hacl.Spec.Bignum.Fmul.fst \
-		Hacl.Spec.Bignum.Fmul.Lemmas.fst \
-		Hacl.Spec.Bignum.Fmul2.fst \
 		Hacl.Bignum.Modulo.fst \
 		Hacl.Bignum.Fsum.fst \
 		Hacl.Bignum.Fproduct.fst \

@@ -10,9 +10,9 @@ open Hacl.Spec.Bignum.Bigint
 open Hacl.Bignum.Limb
 open Hacl.Bignum.Modulo
 open Hacl.Bignum.Fproduct
-open Hacl.Spec.Bignum.Fmul.Lemmas
+(* open Hacl.Spec.Bignum.Fmul.Lemmas *)
 open Hacl.Spec.Bignum.Fmul
-open Hacl.Spec.Bignum.Fmul2
+(* open Hacl.Spec.Bignum.Fmul2 *)
 
 module U32 = FStar.UInt32
 
@@ -29,7 +29,7 @@ let shift_reduce output =
   reduce output
 
 
-#set-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 250 --initial_fuel 1 --max_fuel 1"
 
 val mul_shift_reduce_:
   output:felem_wide ->
@@ -53,8 +53,25 @@ let rec mul_shift_reduce_ output init_input input input2 ctr =
     let i = ctr -^ 1ul in
     let j = clen -^ 1ul -^ i in
     let input2i = input2.(j) in
+    Hacl.Spec.Bignum.Fproduct.lemma_sum_scalar_multiplication_ (as_seq h0 output) (as_seq h0 input)
+                                                               (input2i) len;
     sum_scalar_multiplication_ output input input2i clen;
     if (ctr >^ 1ul) then shift_reduce input;
+    let h' = ST.get() in
+    if (ctr >^ 1ul) then (
+      let open Hacl.Bignum.Limb in
+      lemma_shift_reduce_spec (as_seq h0 input);
+      lemma_mul_shift_reduce_spec_1 (as_seq h' output) (as_seq h0 output) (Ghost.reveal init_input)
+                                   (as_seq h0 input) (as_seq h' input) (as_seq h0 input2)
+                                   (v input2i) (FStar.UInt32.v ctr);
+      ()
+    ) else (
+      let open Hacl.Bignum.Limb in
+      lemma_mul_shift_reduce_spec_2 (as_seq h' output) (as_seq h0 output) (Ghost.reveal init_input)
+                                   (as_seq h0 input) (as_seq h' input) (as_seq h0 input2)
+                                   (v input2i);
+      ()
+    );
     mul_shift_reduce_ output init_input input input2 i
   )
 
@@ -73,7 +90,6 @@ val fmul_:
       ))
 let fmul_ output input input2 =
   let h0 = ST.get() in
-  lemma_mul_to_red (as_seq h0 input) (as_seq h0 input2);
   push_frame();
   let h1 = ST.get() in
   let t   = create wide_zero clen in
@@ -84,11 +100,15 @@ let fmul_ output input input2 =
                                   (as_seq) (Ghost.hide h2) (Ghost.hide input) in
   mul_shift_reduce_ t input_init input input2 clen;
   carry_wide_ t 0ul;
+  let h3 = ST.get() in
+  Hacl.Spec.Bignum.Modulo.lemma_carry_top_wide_spec (as_seq h3 t);
   carry_top_wide t;
+  let h4 = ST.get() in
+  Hacl.Spec.Bignum.Fproduct.lemma_copy_from_wide (as_seq h4 t);
   copy_from_wide_ output t clen;
   carry_0_to_1 output;
   let h3 = ST.get() in
-  assume (modifies_2 output input h1 h3);
+  (* assume (modifies_2 output input h1 h3); *)
   pop_frame()
 
 
@@ -106,7 +126,6 @@ val fmul:
       ))
 let fmul output input input2 =
   let h0 = ST.get() in
-  lemma_mul_to_red (as_seq h0 input) (as_seq h0 input2);
   push_frame();
   let h1 = ST.get() in
   let tmp = create limb_zero clen in

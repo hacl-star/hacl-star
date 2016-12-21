@@ -82,3 +82,18 @@ val lemma_eval_wide: h:mem -> b:felem_wide{live h b} -> Lemma
   (ensures (seval_wide (as_seq h b) = eval_wide h b))
   [SMTPat (eval_wide h b)]
 let lemma_eval_wide h b = lemma_eval_wide_ h b len
+
+
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
+
+val lemma_seval_def: s:seqelem -> i:nat{i <= len} -> Lemma
+  ((i > 0 ==> seval_ s i = pow2 (limb_size * (i-1)) * Hacl.Bignum.Limb.v (Seq.index s (i-1)) + seval_ s (i-1))
+    /\ (i = 0 ==> seval_ s i = 0))
+let lemma_seval_def s i = ()
+
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
+
+val lemma_seval_wide_def: s:seqelem_wide -> i:nat{i <= len} -> Lemma
+  ((i > 0 ==> seval_wide_ s i = pow2 (limb_size * (i-1)) * w (Seq.index s (i-1)) + seval_wide_ s (i-1))
+    /\ (i = 0 ==> seval_wide_ s i = 0))
+let lemma_seval_wide_def s i = ()
