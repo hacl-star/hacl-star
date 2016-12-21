@@ -4,28 +4,36 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
 
+open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint
 open Hacl.Bignum.Limb
 open Hacl.Spec.Bignum.Modulo
 
-inline_for_extraction let two54m152 =
+#set-options "--initial_fuel 0 --max_fuel 0"
+
+inline_for_extraction let two54m152 : x:limb{v x = 0x3fffffffffff68} =
   assert_norm (pow2 64 > 0x3fffffffffff68); uint64_to_limb 0x3fffffffffff68uL
-inline_for_extraction let two54m8   =
+inline_for_extraction let two54m8 : x:limb{v x = 0x3ffffffffffff8} =
   assert_norm (pow2 64 > 0x3ffffffffffff8); uint64_to_limb 0x3ffffffffffff8uL
-inline_for_extraction let nineteen  = assert_norm(19 < pow2 64); uint64_to_limb 19uL
-inline_for_extraction let mask_51    =
-  assert_norm (0x7ffffffffffff < pow2 64);uint64_to_limb 0x7ffffffffffffuL
+inline_for_extraction let nineteen : x:limb{v x = 19} = assert_norm(19 < pow2 64); uint64_to_limb 19uL
+inline_for_extraction let mask_51 : x:limb{v x = pow2 51 - 1} =
+  assert_norm (0x7ffffffffffff < pow2 64);
+  assert_norm (0x7ffffffffffff = pow2 51 - 1);
+  uint64_to_limb 0x7ffffffffffffuL
 
+#set-options "--z3rlimit 20"
 
-val add_zero:
+private inline_for_extraction val add_zero_:
   b:felem ->
   Stack unit
     (requires (fun h -> live h b /\ add_zero_pre (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 b /\ add_zero_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
-      /\ as_seq h1 b == add_zero_spec (as_seq h0 b)
-      /\ eval h1 b % prime = eval h0 b % prime))
-let add_zero b =
+      /\ as_seq h1 b == add_zero_spec (as_seq h0 b)))
+private inline_for_extraction let add_zero_ b =
+  assert_norm (pow2 63 > 0x3fffffffffff68);
+  assert_norm (pow2 63 > 0x3ffffffffffff8);
+  Math.Lemmas.pow2_double_sum 63;
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
   let b2 = b.(2ul) in
@@ -38,6 +46,19 @@ let add_zero b =
   b.(4ul) <- b4 +^ two54m8
 
 
+private inline_for_extraction val add_zero:
+  b:felem ->
+  Stack unit
+    (requires (fun h -> live h b /\ add_zero_pre (as_seq h b)))
+    (ensures (fun h0 _ h1 -> live h0 b /\ add_zero_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
+      /\ as_seq h1 b == add_zero_spec (as_seq h0 b)
+      /\ eval h1 b % prime = eval h0 b % prime))
+private inline_for_extraction let add_zero b =
+  let h0 = ST.get() in
+  add_zero_ b;
+  lemma_add_zero_spec (as_seq h0 b)
+
+
 val carry_top:
   b:felem ->
   Stack unit
@@ -47,8 +68,9 @@ val carry_top:
 let carry_top b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in
+  assert_norm((1 * pow2 limb_size) % pow2 word_size = pow2 limb_size);
+  assert_norm(pow2 limb_size > 1);
   let mask = (limb_one <<^ climb_size) -^ limb_one in
-  let nineteen = (limb_one <<^ 4ul) +^ (limb_one <<^ 1ul) +^ limb_one in
   let b4' = b4 &^ mask in
   let b0' = b0 +^ (nineteen *^ (b4 >>^ climb_size)) in
   b.(4ul) <- b4';
@@ -62,7 +84,6 @@ val reduce:
   (ensures (fun h0 _ h1 -> live h0 b /\ reduce_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == reduce_spec (as_seq h0 b)))
 let reduce b =
-  let nineteen = (limb_one <<^ 4ul) +^ (limb_one <<^ 1ul) +^ limb_one in
   let b0 = b.(0ul) in
   b.(0ul) <- nineteen *^ b0
 
@@ -76,10 +97,12 @@ val carry_top_wide:
 let carry_top_wide b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in
-  let nineteen = (limb_one <<^ 4ul) +^ (limb_one <<^ 1ul) +^ limb_one in
   let open Hacl.Bignum.Wide in
+  assert_norm((1 * pow2 limb_size) % pow2 (2 * word_size) = pow2 (limb_size));
+  assert_norm(pow2 limb_size > 1);
   let mask = (wide_one <<^ climb_size) -^ wide_one in
   let b4' = b4 &^ mask in
+  Math.Lemmas.modulo_lemma (w b4 / pow2 limb_size) (pow2 word_size);
   let b0' = b0 +^ (nineteen *^ (wide_to_limb (b4 >>^ climb_size))) in
   b.(4ul) <- b4';
   b.(0ul) <- b0'

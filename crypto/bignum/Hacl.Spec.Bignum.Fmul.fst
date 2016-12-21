@@ -62,12 +62,58 @@ val lemma_mod_mul_comm: a:nat -> b:nat -> p:pos -> Lemma ((a*b)%p = ((a%p)*b)%p)
 let lemma_mod_mul_comm a b p = Math.Lemmas.lemma_mod_mul_distr_l a b p
 
 
-#set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0"
+
+val lemma_mul_shift_reduce_spec_1_1:
+  o':seqelem_wide -> o:seqelem_wide ->
+  i0:seqelem -> i:seqelem ->i2:seqelem -> ij:nat ->
+  ctr:pos{ctr <= len /\ ij = v (Seq.index i2 (len-ctr))} -> Lemma
+  (requires (
+    seval_wide o' = seval_wide o + (seval i * ij)
+    /\ seval i % prime = (pow2 ((len-ctr)*limb_size) * seval i0) % prime
+    /\ seval_wide o % prime = (seval i0 * seval_ i2 (len-ctr)) % prime))
+  (ensures (seval_wide o' % prime = (seval i0 * seval_ i2 (len-ctr+1)) % prime))
+let lemma_mul_shift_reduce_spec_1_1 o' o i0 i i2 ij ctr =
+  let so' = seval_wide o' % prime in
+  Math.Lemmas.lemma_mod_plus_distr_l (seval_wide o) (seval i * ij) prime;
+  cut (so' = (((seval i0 * seval_ i2 (len-ctr)) % prime) + (seval i * ij)) % prime);
+  Math.Lemmas.lemma_mod_plus_distr_l ((seval i0 * seval_ i2 (len-ctr))) (seval i * ij) prime;
+  cut (so' = ((seval i0 * seval_ i2 (len-ctr)) + seval i * ij) % prime);
+  Math.Lemmas.lemma_mod_plus_distr_l (seval i * ij) ((seval i0 * seval_ i2 (len-ctr))) prime;
+  cut (so' = (((seval i * ij) % prime) + (seval i0 * seval_ i2 (len-ctr))) % prime);
+  Math.Lemmas.lemma_mod_mul_distr_l (seval i) ij prime;
+  cut (so' = ((((seval i % prime) * ij) % prime) + (seval i0 * seval_ i2 (len-ctr))) % prime);
+  Math.Lemmas.lemma_mod_mul_distr_l (pow2 ((len-ctr)*limb_size) * seval i0) ij prime;
+  cut (so' = ((((pow2 ((len-ctr)*limb_size) * seval i0) * ij) % prime) + (seval i0 * seval_ i2 (len-ctr))) % prime);
+  Math.Lemmas.lemma_mod_plus_distr_l ((pow2 ((len-ctr)*limb_size) * seval i0) * ij) 
+                                     (seval i0 * seval_ i2 (len-ctr)) prime;
+  cut (so' = (seval i0 * pow2 ((len-ctr)*limb_size) * ij + seval i0 * seval_ i2 (len-ctr)) % prime);
+  Math.Lemmas.distributivity_add_right (seval i0) (pow2 ((len-ctr)*limb_size) * ij) (seval_ i2 (len-ctr));
+  cut (so' = (seval i0 * (pow2 ((len-ctr)*limb_size) * ij + seval_ i2 (len-ctr))) % prime);
+  lemma_seval_def i2 (len-ctr+1)
+
+
+val lemma_mul_shift_reduce_spec_1_2:
+  o':seqelem_wide -> o:seqelem_wide ->
+  i0:seqelem -> i:seqelem -> i':seqelem -> i2:seqelem -> ij:nat ->
+  ctr:pos{ctr <= len /\ ij = v (Seq.index i2 (len-ctr))} -> Lemma
+  (requires (
+    seval_wide o' = seval_wide o + (seval i * ij)
+    /\ seval i % prime = (pow2 ((len-ctr)*limb_size) * seval i0) % prime
+    /\ seval i' % prime = (pow2 limb_size * seval i) % prime
+    /\ seval_wide o % prime = (seval i0 * seval_ i2 (len-ctr)) % prime))
+  (ensures (seval i' % prime = (pow2 ((len-ctr+1) * limb_size) * seval i0) % prime))
+let lemma_mul_shift_reduce_spec_1_2 o' o i0 i i' i2 ij ctr =
+  let si' = seval i' % prime in
+  Math.Lemmas.lemma_mod_mul_distr_l (seval i) (pow2 limb_size) prime;
+  Math.Lemmas.lemma_mod_mul_distr_l (pow2 ((len-ctr)*limb_size) * seval i0) (pow2 limb_size) prime;
+  Math.Lemmas.pow2_plus ((len-ctr) * limb_size) limb_size
 
 
 val lemma_mul_shift_reduce_spec_1:
   o':seqelem_wide -> o:seqelem_wide ->
-  i0:seqelem -> i:seqelem -> i':seqelem -> i2:seqelem -> ij:nat -> ctr:pos{ctr <= len} -> Lemma
+  i0:seqelem -> i:seqelem -> i':seqelem -> i2:seqelem -> ij:nat ->
+  ctr:pos{ctr <= len /\ ij = v (Seq.index i2 (len-ctr))} -> Lemma
   (requires (
     seval_wide o' = seval_wide o + (seval i * ij)
     /\ seval i % prime = (pow2 ((len-ctr)*limb_size) * seval i0) % prime
@@ -75,18 +121,22 @@ val lemma_mul_shift_reduce_spec_1:
     /\ seval_wide o % prime = (seval i0 * seval_ i2 (len-ctr)) % prime))
   (ensures (seval_wide o' % prime = (seval i0 * seval_ i2 (len-ctr+1)) % prime
     /\ seval i' % prime = (pow2 ((len-ctr+1) * limb_size) * seval i0) % prime))
-let lemma_mul_shift_reduce_spec_1 o' o i0 i i' i2 ij ctr = admit()
+let lemma_mul_shift_reduce_spec_1 o' o i0 i i' i2 ij ctr =
+  lemma_mul_shift_reduce_spec_1_1 o' o i0 i i2 ij ctr;
+  lemma_mul_shift_reduce_spec_1_2 o' o i0 i i' i2 ij ctr
 
 
 val lemma_mul_shift_reduce_spec_2:
   o':seqelem_wide -> o:seqelem_wide ->
-  i0:seqelem -> i:seqelem -> i':seqelem -> i2:seqelem -> ij:nat -> Lemma
+  i0:seqelem -> i:seqelem -> i':seqelem -> i2:seqelem -> ij:nat{ij = v (Seq.index i2 (len-1))} -> Lemma
   (requires (
     seval_wide o' = seval_wide o + (seval i * ij)
     /\ seval i % prime = (pow2 ((len-1)*limb_size) * seval i0) % prime
     /\ seval_wide o % prime = (seval i0 * seval_ i2 (len-1)) % prime))
   (ensures (seval_wide o' % prime = (seval i0 * seval i2) % prime))
-let lemma_mul_shift_reduce_spec_2 o' o i0 i i' i2 ij = admit()
+let lemma_mul_shift_reduce_spec_2 o' o i0 i i' i2 ij =
+  let ctr = 1 in
+  lemma_mul_shift_reduce_spec_1_1 o' o i0 i i2 ij ctr
 
 
 val mul_shift_reduce_spec_:
