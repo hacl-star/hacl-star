@@ -145,6 +145,8 @@ private let lemma_carry_top_spec_1 (a:nat) (b:nat) : Lemma
     ()
 
 
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
 val lemma_carry_top_spec: s:seqelem{carry_top_pre s} -> Lemma
   (seval (carry_top_spec s) % prime = seval s % prime)
 let lemma_carry_top_spec s =
@@ -155,6 +157,7 @@ let lemma_carry_top_spec s =
   lemma_seval_5 s';
   lemma_carry_top_spec_1 (v (Seq.index s 4)) (v (Seq.index s 0) + pow2 51 * v (Seq.index s 1) + pow2 102 * v (Seq.index s 2) + pow2 153 * v (Seq.index s 3))
 
+#set-options "--z3rlimit 10"
 
 val reduce_pre: seqelem -> GTot Type0
 let reduce_pre s =
@@ -218,7 +221,7 @@ val carry_top_wide_pre: seqelem_wide -> GTot Type0
 let carry_top_wide_pre s =
   let _ = () in
   w (Seq.index s 4) / pow2 51 < pow2 64
-  /\ w (Seq.index s 4) * 19 + w (Seq.index s 0) < pow2 128
+  /\ 19 * (w (Seq.index s 4) / pow2 limb_size) + w (Seq.index s 0) < pow2 128
 
 
 val carry_top_wide_spec: s:seqelem_wide{carry_top_wide_pre s} -> Tot seqelem_wide
@@ -240,14 +243,14 @@ let carry_top_wide_spec s =
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-private val lemma_carry_top_wide_spec_: s:seqelem_wide{carry_top_wide_pre s} -> Lemma
+val lemma_carry_top_wide_spec_: s:seqelem_wide{carry_top_wide_pre s} -> Lemma
   (let s' = carry_top_wide_spec s in
     w (Seq.index s' 4) = w (Seq.index s 4) % pow2 limb_size
     /\ w (Seq.index s' 0) = 19 * (w (Seq.index s 4) / pow2 limb_size) + w (Seq.index s 0)
     /\w (Seq.index s' 1) = w (Seq.index s 1)
     /\ w (Seq.index s' 2) = w (Seq.index s 2)
     /\ w (Seq.index s' 3) = w (Seq.index s 3))
-private let lemma_carry_top_wide_spec_ s =
+let lemma_carry_top_wide_spec_ s =
   let s' = carry_top_wide_spec s in
   assert_norm((1 * pow2 limb_size) % pow2 (2*word_size) = pow2 limb_size);
   assert_norm(pow2 limb_size > 1);
@@ -282,4 +285,7 @@ let lemma_carry_top_wide_spec s =
   assert_norm(pow2 255 % (pow2 255 - 19) = 19);
   lemma_seval_wide_5 s;
   lemma_seval_wide_5 s';
+  Math.Lemmas.nat_times_nat_is_nat (pow2 51) (w (Seq.index s 1));
+  Math.Lemmas.nat_times_nat_is_nat (pow2 102) (w (Seq.index s 2));
+  Math.Lemmas.nat_times_nat_is_nat (pow2 153) (w (Seq.index s 3));
   lemma_carry_top_spec_1 (w (Seq.index s 4)) (w (Seq.index s 0) + pow2 51 * w (Seq.index s 1) + pow2 102 * w (Seq.index s 2) + pow2 153 * w (Seq.index s 3))

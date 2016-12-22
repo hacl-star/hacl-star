@@ -144,12 +144,15 @@ let carry_wide_pre (s:seqelem_wide) (i:nat{i < len}) : GTot Type0 =
 #set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
 
-val carry_wide_step: s:seqelem_wide -> i:nat{i < len-1 /\ carry_wide_pre s i} ->
+val carry_wide_step: s:seqelem_wide ->
+    i:nat{i < len-1 /\ carry_wide_pre s i
+      (* /\ (forall (j:nat). {:pattern (w (Seq.index s j))} j < i ==> w (Seq.index s j) < pow2 limb_size) *)} ->
   Tot (s':seqelem_wide{
     (forall (j:nat). {:pattern (Seq.index s' j)} (j < i \/ (j > i+1 /\ j < len))
                ==> Seq.index s' j == Seq.index s j)
     /\ w (Seq.index s' i) = w (Seq.index s i) % pow2 limb_size
-    /\ w (Seq.index s' (i+1)) = w (Seq.index s (i+1)) + (w (Seq.index s i) / pow2 limb_size)})
+    /\ w (Seq.index s' (i+1)) = w (Seq.index s (i+1)) + (w (Seq.index s i) / pow2 limb_size)
+    (* /\ (forall (j:nat). {:pattern (w (Seq.index s' j))} j < (i+1) ==> w (Seq.index s' j) < pow2 limb_size) *)})
 let carry_wide_step s i =
     let si = Seq.index s i in
     let sip1 = Seq.index s (i+1) in
@@ -181,13 +184,15 @@ let carry_wide_step s i =
     s''
 
 
+#set-options "--z3rlimit 10 --initial_fuel 2 --max_fuel 2"
+
 val lemma_carry_wide_step_1: s:seqelem_wide -> i:nat{i < len - 1 /\ carry_wide_pre s i} -> j:nat{j <= i} ->
   Lemma (requires (true))
         (ensures (seval_wide_ (carry_wide_step s i) j = seval_wide_ s j))
 let rec lemma_carry_wide_step_1 s i j =
   if j = 0 then () else lemma_carry_wide_step_1 s i (j-1)
 
-#set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 val lemma_carry_wide_step_2_1: s1':nat -> s0':nat -> s1:nat -> s0:nat -> i:nat -> Lemma
   (requires (s0' = s0 % pow2 limb_size /\ s1' = s1 + s0 / pow2 limb_size))
@@ -203,13 +208,19 @@ let lemma_carry_wide_step_2_1 s1' s0' s1 s0 i =
   Math.Lemmas.paren_mul_right (pow2 (limb_size * i)) (pow2 limb_size) s1;
   Math.Lemmas.distributivity_add_right (pow2 (limb_size * i)) (pow2 limb_size * s1') s0'
 
-#set-options "--z3rlimit 10 --initial_fuel 2 --max_fuel 2"
 
-val lemma_carry_wide_step_2: s:seqelem_wide -> i:nat{i < len - 1 /\ carry_wide_pre s i} ->
+#set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0"
+
+val lemma_carry_wide_step_2: s:seqelem_wide -> i:nat{i < len - 1 /\ carry_wide_pre s i
+  /\ (forall (j:nat). {:pattern (w (Seq.index s j))} j < i ==> w (Seq.index s j) < pow2 limb_size)} ->
   Lemma (requires (true))
         (ensures (seval_wide_ (carry_wide_step s i) (i+2) = seval_wide_ s (i+2)))
 let rec lemma_carry_wide_step_2 s i =
   let s' = carry_wide_step s i in
+  lemma_seval_wide_def s' (i+2);
+  lemma_seval_wide_def s' (i+1);
+  lemma_seval_wide_def s (i+2);
+  lemma_seval_wide_def s (i+1);
   cut (seval_wide_ s' (i+2) = pow2 (limb_size * (i+1)) * w (Seq.index s' (i+1))
                               + pow2 (limb_size * (i)) * w (Seq.index s' (i))
                               + seval_wide_ s' i);
@@ -219,6 +230,8 @@ let rec lemma_carry_wide_step_2 s i =
   let s0 = w (Seq.index s (i)) in
   lemma_carry_wide_step_2_1 s1' s0' s1 s0 i;
   lemma_carry_wide_step_1 s i i
+
+#set-options "--initial_fuel 1 --max_fuel 1"
 
 val lemma_carry_wide_step_3: s:seqelem_wide -> i:nat{i < len - 1 /\ carry_wide_pre s i} -> j:nat{j > i + 1 /\ j <= len} ->
   Lemma (requires (true))
@@ -237,15 +250,19 @@ let lemma_carry_wide_step s i = lemma_carry_wide_step_3 s i len
 #set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
 val carry_wide_spec: s:seqelem_wide -> i:nat{i < len /\ carry_wide_pre s i} ->
-  Tot (s':seqelem_wide{seval_wide s' = seval_wide s})
+  Tot (s':seqelem_wide{seval_wide s' = seval_wide s
+    /\ (forall (j:nat). {:pattern (w (Seq.index s' j))} (j < len - 1) ==> w (Seq.index s' j) < pow2 limb_size)
+    (* /\ (i < len-1 ==> w (Seq.index s' (len-1)) < w (Seq.index s (len-1)) + pow2 (2*word_size - limb_size)) *)})
   (decreases (len - 1 - i))
 let rec carry_wide_spec s i =
   if i = len - 1 then s
   else (
     let s'' = carry_wide_step s i in
     lemma_carry_wide_step s i;
+    Math.Lemmas.lemma_div_lt (w (Seq.index s i)) (2*word_size) limb_size;
     carry_wide_spec s'' (i+1)
   )
+
 
 
 let carry_limb_pre (s:seqelem) (i:nat{i < len}) : GTot Type0 =

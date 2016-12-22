@@ -333,10 +333,10 @@ banana:
 	./banana.exe
 
 run-x25519:
-	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -fomit-frame-pointer -I ~/Desktop/repositories/kremlin/kremlib extracted25519/Hacl_X25519.c extracted25519/Hacl_Test_X25519.c extracted25519/kremlib.c extracted25519/testlib.c
+	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -fomit-frame-pointer -I ~/Desktop/repositories/kremlin/kremlib extracted25519/Hacl_X25519.c extracted25519/Hacl_Test_X25519.c extracted25519/kremlib.c extracted25519/testlib.c #	-flto=8 -fuse-linker-plugin
 
 run:
-	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -Wno-parentheses -Wno-unused-variable -g -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
+	gcc -march=native -m64 -funroll-loops -mtune=native -Ofast -flto=8 -Wno-parentheses -Wno-unused-variable -g -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= -fuse-linker-plugin \
 		extracted25519/Prims.c \
 		extracted25519/FStar_Mul.c \
 		extracted25519/FStar_Squash.c \
