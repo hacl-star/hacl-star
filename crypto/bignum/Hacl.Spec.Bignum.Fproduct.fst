@@ -76,8 +76,9 @@ let lemma_shift_spec_quantifiers s = ()
 open FStar.Mul
 
 let sum_scalar_multiplication_pre_ (sw:seqelem_wide) (s:seqelem) (scalar:limb) (i:nat{i <= len}) : GTot Type0 =
-  (forall (j:nat). j < i ==> w (Seq.index sw j) + (v (Seq.index s j) * v scalar) < pow2 wide_n)
+  (forall (j:nat). {:pattern (w (Seq.index sw j)) \/ (v (Seq.index s j))}j < i ==> w (Seq.index sw j) + (v (Seq.index s j) * v scalar) < pow2 wide_n)
 
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
 val sum_scalar_multiplication_spec:
   sw:seqelem_wide ->
