@@ -34,6 +34,97 @@ let red_55 s = smax s 55
 
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
 
+let mul_shift_reduce_pre' (input:seqelem) (input2:seqelem) : GTot Type0 =
+  sum_scalar_multiplication_pre_ (Seq.create len wide_zero) input (Seq.index input2 0) len
+  /\ shift_reduce_pre input
+  /\ (let output1 = sum_scalar_multiplication_spec (Seq.create len wide_zero) input (Seq.index input2 0) len in
+     let input1 = shift_reduce_spec input in
+     sum_scalar_multiplication_pre_ output1 input1 (Seq.index input2 1) len
+     /\ shift_reduce_pre input1
+     /\ (let output2 = sum_scalar_multiplication_spec output1 input1 (Seq.index input2 1) len in
+        let input2' = shift_reduce_spec input1 in
+        sum_scalar_multiplication_pre_ output2 input2' (Seq.index input2 2) len
+        /\ shift_reduce_pre input2'
+        /\ (let output3 = sum_scalar_multiplication_spec output2 input2' (Seq.index input2 2) len in
+           let input3 = shift_reduce_spec input2' in
+           sum_scalar_multiplication_pre_ output3 input3 (Seq.index input2 3) len
+           /\ shift_reduce_pre input3
+           /\ (let output4 = sum_scalar_multiplication_spec output3 input3 (Seq.index input2 3) len in
+              let input4 = shift_reduce_spec input3 in
+              sum_scalar_multiplication_pre_ output4 input4 (Seq.index input2 4) len
+              /\ shift_reduce_pre input4))))
+
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+
+private let lemma_mul_shift_reduce_pre_00 (output:seqelem_wide) (input:seqelem) (input2:seqelem) : Lemma
+  (mul_shift_reduce_pre_ output input input2 0 <==> true) = ()
+
+#set-options "--z3rlimit 100 --initial_fuel 2 --max_fuel 2"
+
+private let lemma_mul_shift_reduce_pre_0 (output:seqelem_wide) (input:seqelem) (input2:seqelem) : Lemma
+  (mul_shift_reduce_pre_ output input input2 1 <==> sum_scalar_multiplication_pre_ output input (Seq.index input2 (len-1)) len) = ()
+
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+
+private let lemma_mul_shift_reduce_pre_1 (output:seqelem_wide) (input:seqelem) (input2:seqelem) : Lemma
+  (mul_shift_reduce_pre_ output input input2 2 <==> (sum_scalar_multiplication_pre_ output input (Seq.index input2 3) len /\ shift_reduce_pre input /\ mul_shift_reduce_pre_ (sum_scalar_multiplication_spec output input (Seq.index input2 3) len) (shift_reduce_spec input) input2 1)) = ()
+
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+
+private let lemma_mul_shift_reduce_pre_2 (output:seqelem_wide) (input:seqelem) (input2:seqelem) : Lemma
+  (mul_shift_reduce_pre_ output input input2 3 <==> (sum_scalar_multiplication_pre_ output input (Seq.index input2 2) len /\ shift_reduce_pre input /\ mul_shift_reduce_pre_ (sum_scalar_multiplication_spec output input (Seq.index input2 2) len) (shift_reduce_spec input) input2 2)) = ()
+
+
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+
+private let lemma_mul_shift_reduce_pre_3 (output:seqelem_wide) (input:seqelem) (input2:seqelem) : Lemma
+  (mul_shift_reduce_pre_ output input input2 4 <==> (sum_scalar_multiplication_pre_ output input (Seq.index input2 1) len /\ shift_reduce_pre input /\ mul_shift_reduce_pre_ (sum_scalar_multiplication_spec output input (Seq.index input2 1) len) (shift_reduce_spec input) input2 3)) = ()
+
+
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+
+private let lemma_mul_shift_reduce_pre_4 (output:seqelem_wide) (input:seqelem) (input2:seqelem) : Lemma
+  (mul_shift_reduce_pre_ output input input2 len <==> (sum_scalar_multiplication_pre_ output input (Seq.index input2 0) len /\ shift_reduce_pre input /\ mul_shift_reduce_pre_ (sum_scalar_multiplication_spec output input (Seq.index input2 0) len) (shift_reduce_spec input) input2 4)) = ()
+
+#set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+
+let lemma_mul_shift_reduce_pre (input:seqelem) (input2:seqelem) : Lemma
+  (requires (mul_shift_reduce_pre' input input2))
+  (ensures (mul_shift_reduce_pre_ (Seq.create len wide_zero) input input2 len))
+  = lemma_mul_shift_reduce_pre_4 (Seq.create len wide_zero) input input2;
+    let output1 = sum_scalar_multiplication_spec (Seq.create len wide_zero) input (Seq.index input2 0) len in
+    let input1 = shift_reduce_spec input in
+    lemma_mul_shift_reduce_pre_3 output1 input1 input2;
+    let output2 = sum_scalar_multiplication_spec output1 input1 (Seq.index input2 1) len in
+    let input2' = shift_reduce_spec input1 in
+    lemma_mul_shift_reduce_pre_2 output2 input2' input2;
+    let output3 = sum_scalar_multiplication_spec output2 input2' (Seq.index input2 2) len in
+    let input3 = shift_reduce_spec input2' in
+    lemma_mul_shift_reduce_pre_1 output3 input3 input2;
+    let output4 = sum_scalar_multiplication_spec output3 input3 (Seq.index input2 3) len in
+    let input4 = shift_reduce_spec input3 in
+    lemma_mul_shift_reduce_pre_0 output4 input4 input2;
+    let output5 = sum_scalar_multiplication_spec output4 input4 (Seq.index input2 4) len in
+    ()
+
+#set-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1"
+
+let lemma_zero_mod (a:int{a = 0}) (b:pos) : Lemma (a % b = 0) = ()
+let lemma_zero_mul (a:int{a = 0}) (b:int) : Lemma (a * b = 0 /\ b * a = 0) = ()
+
+let lemma_mul_shift_reduce_pre2 (input:seqelem) (input2:seqelem) : Lemma
+  (requires (mul_shift_reduce_pre' input input2))
+  (ensures (mul_shift_reduce_pre (Seq.create len wide_zero) input input input2 len))
+  = lemma_mul_shift_reduce_pre input input2;
+    assert_norm(pow2 0 = 1);
+    lemma_seval_wide_null (Seq.create len wide_zero) len;
+    lemma_zero_mod (Hacl.Spec.Bignum.Bigint.seval_wide (Seq.create len wide_zero)) prime;
+    lemma_zero_mul (Hacl.Spec.Bignum.Bigint.seval_ input2 0) (Hacl.Spec.Bignum.Bigint.seval input);
+    lemma_zero_mod (Hacl.Spec.Bignum.Bigint.seval input * Hacl.Spec.Bignum.Bigint.seval_ input2 0) prime;
+    cut (Hacl.Spec.Bignum.Bigint.seval_wide (Seq.create len wide_zero) % prime = (Hacl.Spec.Bignum.Bigint.seval input * Hacl.Spec.Bignum.Bigint.seval_ input2 0) % prime);
+    lemma_zero_mul (len-len) limb_size
+
+
 private val mul_shift_reduce_unrolled__:
   input:seqelem{shift_reduce_pre input} -> input2:seqelem{
     sum_scalar_multiplication_pre_ (Seq.create len wide_zero) input (Seq.index input2 0) len
@@ -66,6 +157,7 @@ private let mul_shift_reduce_unrolled__ input input2 =
   let output4   = sum_scalar_multiplication_spec output3 input3 (Seq.index input2 3) len in
   let input4    = shift_reduce_spec input3 in
   sum_scalar_multiplication_spec output4 input4 (Seq.index input2 4) len
+
 
 inline_for_extraction let p53 : pos = pow2 53
 inline_for_extraction let p55 : pos = pow2 55
@@ -266,6 +358,7 @@ let lemma_shift_reduce_then_carry_wide_4 o s1 s2 =
   let s1' = shift_reduce_spec s1 in
   Math.Lemmas.pow2_plus 53 55
   
+#set-options "--z3rlimit 10 --initial_fuel 2 --max_fuel 2"
 
 private val mul_shift_reduce_unrolled_0:
   output:seqelem_wide ->
@@ -353,6 +446,40 @@ private val shift_reduce_unrolled:
 private let shift_reduce_unrolled input input2 =
   mul_shift_reduce_unrolled_ (Seq.create len wide_zero) input input input2
 
+#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+
+val lemma_mul_shift_reduce_unrolled: input:seqelem -> input2:seqelem -> Lemma
+  (requires (mul_shift_reduce_pre' input input2))
+  (ensures (mul_shift_reduce_pre (Seq.create len wide_zero) input input input2 len
+  /\ mul_shift_reduce_pre' input input2
+  /\ mul_shift_reduce_unrolled__ input input2 == mul_shift_reduce_spec input input2))
+let lemma_mul_shift_reduce_unrolled input input2 =
+  lemma_mul_shift_reduce_pre2 input input2;
+  let s = shift_reduce_unrolled input input2 in
+  cut (s == mul_shift_reduce_unrolled__ input input2)
+
+val lemma_shift_reduce_then_carry_wide:
+  s1:seqelem{red_53 s1} -> s2:seqelem{red_55 s2} ->
+  Lemma (mul_shift_reduce_pre' s1 s2 /\
+    bounds' (mul_shift_reduce_unrolled__ s1 s2) (77*p108) (59*p108) (41*p108) (23*p108) (5*p108))
+let lemma_shift_reduce_then_carry_wide s1 s2 =
+  lemma_shift_reduce_then_carry_wide_0 s1 s2;
+  let o1 = sum_scalar_multiplication_spec (Seq.create len wide_zero) s1 (Seq.index s2 0) len in
+  let s11 = shift_reduce_spec s1 in
+  lemma_shift_reduce_then_carry_wide_1 o1 s11 s2;
+
+  let o2 = sum_scalar_multiplication_spec o1 s11 (Seq.index s2 1) len in
+  let s12 = shift_reduce_spec s11 in
+  lemma_shift_reduce_then_carry_wide_2 o2 s12 s2;
+
+  let o3 = sum_scalar_multiplication_spec o2 s12 (Seq.index s2 2) len in
+  let s13 = shift_reduce_spec s12 in
+  lemma_shift_reduce_then_carry_wide_3 o3 s13 s2;
+
+  let o4 = sum_scalar_multiplication_spec o3 s13 (Seq.index s2 3) len in
+  let s14 = shift_reduce_spec s13 in
+  lemma_shift_reduce_then_carry_wide_4 o4 s14 s2; ()
+
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
@@ -378,6 +505,25 @@ private let carry_wide_spec_unrolled s =
 private val lemma_carry_wide_spec_unrolled:
   s:seqelem_wide{carry_wide_pre s 0} -> Lemma (carry_wide_spec_unrolled s == carry_wide_spec s 0)
 let lemma_carry_wide_spec_unrolled s = ()
+
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+
+inline_for_extraction let p51 : p:pos{p = 0x8000000000000} = assert_norm (pow2 51 = 0x8000000000000); pow2 51
+inline_for_extraction let p77 : p:pos{p = 0x20000000000000000000} = assert_norm (pow2 77 = 0x20000000000000000000); pow2 77
+
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+
+private val lemma_53_55_is_fine_to_carry:
+  s:seqelem_wide{bounds' s (77*p108) (59*p108) (41*p108) (23*p108) (5*p108)} ->
+  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s 0) p51 p51 p51 p51 (5*p108+p77))
+private let lemma_53_55_is_fine_to_carry s =
+  assert_norm (pow2 53 = 0x20000000000000);
+  assert_norm (pow2 55 = 0x80000000000000);
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
+  assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
+  assert_norm(p108 = 0x20000000000000 * 0x80000000000000);
+  lemma_carry_wide_spec_unrolled s
 
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
@@ -423,6 +569,45 @@ let lemma_carry_wide_then_carry_top s =
   )
   else ()
 
+
+
+private val lemma_53_55_is_fine_to_carry_top:
+  s:seqelem_wide{bounds' s p51 p51 p51 p51 (5*p108+p77)} ->
+  Lemma (carry_top_wide_pre s /\ bounds' (carry_top_wide_spec s) (p51+19*((5*p108+p77)/p51)) p51 p51 p51 p51)
+private let lemma_53_55_is_fine_to_carry_top s =
+  assert_norm (pow2 53 = 0x20000000000000);
+  assert_norm (pow2 55 = 0x80000000000000);
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
+  assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
+  assert_norm(p108 = 0x20000000000000 * 0x80000000000000);
+  lemma_carry_wide_then_carry_top s;
+  lemma_carry_top_wide_spec_ s
+
+
+private val lemma_53_55_is_fine_to_copy:
+  s:seqelem_wide{bounds' (s) (p51+19*((5*p108+p77)/p51)) p51 p51 p51 p51} ->
+  Lemma (copy_from_wide_pre s /\ bounds (copy_from_wide_spec s) (p51+19*((5*p108+p77)/p51)) p51 p51 p51 p51)
+let lemma_53_55_is_fine_to_copy s =
+  assert_norm (pow2 53 = 0x20000000000000);
+  assert_norm (pow2 55 = 0x80000000000000);
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
+  assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
+  assert_norm(p108 = 0x20000000000000 * 0x80000000000000)
+
+inline_for_extraction let p13 : p:pos{p = 0x2000} = assert_norm(pow2 13 = 0x2000); pow2 13
+
+private val lemma_53_55_is_fine_to_carry_last:
+  s:seqelem{bounds (s) (p51+19*((5*p108+p77)/p51)) p51 p51 p51 p51} ->
+  Lemma (carry_0_to_1_pre s /\ bounds (carry_0_to_1_spec s) (p51) (p51+p13) p51 p51 p51)
+private let lemma_53_55_is_fine_to_carry_last s =
+  assert_norm (pow2 53 = 0x20000000000000);
+  assert_norm (pow2 55 = 0x80000000000000);
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
+  assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
+  assert_norm(p108 = 0x20000000000000 * 0x80000000000000)
 
 (* val lemma_shift_reduce_then_carry_wide_0: *)
 (*   max1:nat -> s1:seqelem{smax s1 max1} -> *)

@@ -385,8 +385,12 @@ let rec carry_limb_spec s i =
 let carry_0_to_1_pre (input:seqelem) : GTot Type0 =
   (forall (i:nat). (i > 0 /\ i < len) ==> v (Seq.index input i) < pow2 limb_size)
 
+#set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
-val carry_0_to_1_spec: input:seqelem{carry_0_to_1_pre input} -> Tot (output:seqelem{seval output = seval input})
+
+val carry_0_to_1_spec: input:seqelem{carry_0_to_1_pre input} -> Tot (output:seqelem{seval output = seval input
+  /\ v (Seq.index output 0) = v (Seq.index input 0) % pow2 limb_size
+  /\ v (Seq.index output 1) = v (Seq.index input 1) + v (Seq.index input 0) / pow2 limb_size})
 let carry_0_to_1_spec input =
   let i0 = Seq.index input 0 in
   let i1 = Seq.index input 1 in
