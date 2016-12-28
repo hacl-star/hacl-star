@@ -204,7 +204,6 @@ val fmul_spec:
   input:seqelem -> input2:seqelem{fmul_pre input input2} ->
   Tot (output:seqelem{seval output % prime = (seval input * seval input2) % prime})
 let fmul_spec input input2 =
-  let tmp = Seq.create len wide_zero in
   let output1 = mul_shift_reduce_spec input input2 in
   let output2 = carry_wide_spec output1 0 in
   lemma_carry_top_wide_spec output2;

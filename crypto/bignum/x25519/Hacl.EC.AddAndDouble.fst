@@ -7,6 +7,35 @@ open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Bignum
 open Hacl.EC.Point
+open Hacl.Spec.EC.AddAndDouble2
+
+
+let all_disjoint ppx ppz ppqx ppqz px pz pqx pqz qx qz =
+  disjoint ppx ppz /\ disjoint ppx ppqx /\ disjoint ppx ppqz /\ disjoint ppx px /\ disjoint ppx pz
+  /\ disjoint ppx pqx /\ disjoint ppx pqz /\ disjoint ppx qx /\ disjoint ppx qz
+  /\ disjoint ppz ppqx /\ disjoint ppz ppqz /\ disjoint ppz px /\ disjoint ppz pz
+  /\ disjoint ppz pqx /\ disjoint ppz pqz /\ disjoint ppz qx /\ disjoint ppz qz
+  /\ disjoint ppqx ppqz /\ disjoint ppqx px /\ disjoint ppqx pz
+  /\ disjoint ppqx pqx /\ disjoint ppqx pqz /\ disjoint ppqx qx /\ disjoint ppqx qz
+  /\ disjoint ppqz px /\ disjoint ppqz pz
+  /\ disjoint ppqz pqx /\ disjoint ppqz pqz /\ disjoint ppqz qx /\ disjoint ppqz qz
+  /\ disjoint px pz /\ disjoint px pqx /\ disjoint px pqz /\ disjoint px qx /\ disjoint px qz
+  /\ disjoint pz pqx /\ disjoint pz pqz /\ disjoint pz qx /\ disjoint pz qz
+  /\ disjoint pqx pqz /\ disjoint pqx qx /\ disjoint pqx qz
+  /\ disjoint pqz qx /\ disjoint pqz qz
+  /\ disjoint qx qz
+
+
+val fmonty:
+  ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
+  px:felem -> pz:felem -> pqx:felem -> pqz:felem ->
+  qx:felem -> qz:felem -> Stack unit
+    (requires (fun h -> live h ppx /\ live h ppz /\ live h ppqx /\ live h ppqz
+      /\ live h px /\ live h pz /\ live h pqx /\ live h pqz
+      /\ all_disjoint ppx ppz ppqx ppqz px pz pqx pqz qx qz))
+    (ensures (fun h -> live h ppx /\ live h ppz /\ live h ppqx /\ live h ppqz
+      /\ live h px /\ live h pz /\ live h pqx /\ live h pqz
+      /\ as_seq
 
 val fmonty:
   pp:point ->

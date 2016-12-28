@@ -60,14 +60,14 @@ let lemma_seval_5 s =
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-private val lemma_add_zero_spec_: s:seqelem{add_zero_pre s} -> Lemma
+val lemma_add_zero_spec_: s:seqelem{add_zero_pre s} -> Lemma
   (let s' = add_zero_spec s in
     v (Seq.index s' 0) = v (Seq.index s 0) + 0x3fffffffffff68
     /\ v (Seq.index s' 1) = v (Seq.index s 1) + 0x3ffffffffffff8
     /\ v (Seq.index s' 2) = v (Seq.index s 2) + 0x3ffffffffffff8
     /\ v (Seq.index s' 3) = v (Seq.index s 3) + 0x3ffffffffffff8
     /\ v (Seq.index s' 4) = v (Seq.index s 4) + 0x3ffffffffffff8)
-private let lemma_add_zero_spec_ s =
+let lemma_add_zero_spec_ s =
   assert_norm(pow2 63 > 0x3fffffffffff68);
   assert_norm(pow2 63 > 0x3ffffffffffff8);
   Math.Lemmas.pow2_double_sum 63

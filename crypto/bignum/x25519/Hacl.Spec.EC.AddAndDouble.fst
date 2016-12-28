@@ -1,4 +1,4 @@
-module Hacl.EC.AddAndDouble
+module Hacl.Spec.EC.AddAndDouble
 
 open FStar.Mul
 open FStar.HyperStack
@@ -11,7 +11,7 @@ open Hacl.Spec.Bignum.Fdifference
 open Hacl.Spec.Bignum.Fproduct
 open Hacl.Spec.Bignum.Modulo
 open Hacl.Spec.Bignum.Fmul
-open Hacl.EC.Point
+open Hacl.Spec.Bignum
 
 
 val bound_by: seqelem -> nat -> Type0
@@ -27,9 +27,123 @@ let smax s x =
   /\ v (Seq.index s 3) < x /\ v (Seq.index s 4) < x
 
 
-let red_52 s = smax s 52
-let red_53 s = smax s 53
-let red_55 s = smax s 55
+inline_for_extraction let p52 : p:pos{p = 0x10000000000000} =
+  assert_norm(pow2 52 = 0x10000000000000); pow2 52
+inline_for_extraction let p53 : p:pos{p = 0x20000000000000} =
+  assert_norm(pow2 53 = 0x20000000000000); pow2 53
+inline_for_extraction let p55 : p:pos{p = 0x80000000000000} =
+  assert_norm(pow2 55 = 0x80000000000000); pow2 55
+
+let red_52 s = smax s p52
+let red_53 s = smax s p53
+let red_55 s = smax s p55
+
+
+#set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+
+val fsum_unrolled: s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} -> Tot (s:seqelem{
+  v (Seq.index s 0) = v (Seq.index s1 0) + v (Seq.index s2 0)
+  /\ v (Seq.index s 1) = v (Seq.index s1 1) + v (Seq.index s2 1)
+  /\ v (Seq.index s 2) = v (Seq.index s1 2) + v (Seq.index s2 2)
+  /\ v (Seq.index s 3) = v (Seq.index s1 3) + v (Seq.index s2 3)
+  /\ v (Seq.index s 4) = v (Seq.index s1 4) + v (Seq.index s2 4)})
+let fsum_unrolled a b =
+    Math.Lemmas.pow2_double_sum (limb_n-1);
+    let open Hacl.Bignum.Limb in
+    let c = Seq.upd a 4 ((Seq.index a 4) +^ (Seq.index b 4)) in
+    let c = Seq.upd c 3 ((Seq.index a 3) +^ (Seq.index b 3)) in
+    let c = Seq.upd c 2 ((Seq.index a 2) +^ (Seq.index b 2)) in
+    let c = Seq.upd c 1 ((Seq.index a 1) +^ (Seq.index b 1)) in
+    let c = Seq.upd c 0 ((Seq.index a 0) +^ (Seq.index b 0)) in
+    c
+
+
+#set-options "--z3rlimit 10 --initial_fuel 6 --max_fuel 6"
+
+val lemma_fsum_unrolled: s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} -> Lemma
+  (fsum_unrolled s1 s2 == fsum_spec s1 s2 len)
+let lemma_fsum_unrolled s1 s2 = ()
+
+
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+
+val lemma_fsum_def:
+  s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} ->
+  Lemma (let s = fsum_spec s1 s2 len in
+    v (Seq.index s 0) = v (Seq.index s1 0) + v (Seq.index s2 0)
+    /\ v (Seq.index s 1) = v (Seq.index s1 1) + v (Seq.index s2 1)
+    /\ v (Seq.index s 2) = v (Seq.index s1 2) + v (Seq.index s2 2)
+    /\ v (Seq.index s 3) = v (Seq.index s1 3) + v (Seq.index s2 3)
+    /\ v (Seq.index s 4) = v (Seq.index s1 4) + v (Seq.index s2 4))
+let lemma_fsum_def s1 s2 =
+  lemma_fsum_unrolled s1 s2
+
+
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+
+val fdifference_unrolled: s1:seqelem -> s2:seqelem{gte_limbs s1 s2 len} -> Tot (s:seqelem{
+  v (Seq.index s 0) = v (Seq.index s2 0) - v (Seq.index s1 0)
+  /\ v (Seq.index s 1) = v (Seq.index s2 1) - v (Seq.index s1 1)
+  /\ v (Seq.index s 2) = v (Seq.index s2 2) - v (Seq.index s1 2)
+  /\ v (Seq.index s 3) = v (Seq.index s2 3) - v (Seq.index s1 3)
+  /\ v (Seq.index s 4) = v (Seq.index s2 4) - v (Seq.index s1 4)})
+let fdifference_unrolled a b =
+    let open Hacl.Bignum.Limb in
+    let c = Seq.upd a 4 ((Seq.index b 4) -^ (Seq.index a 4)) in
+    let c = Seq.upd c 3 ((Seq.index b 3) -^ (Seq.index a 3)) in
+    let c = Seq.upd c 2 ((Seq.index b 2) -^ (Seq.index a 2)) in
+    let c = Seq.upd c 1 ((Seq.index b 1) -^ (Seq.index a 1)) in
+    let c = Seq.upd c 0 ((Seq.index b 0) -^ (Seq.index a 0)) in
+    c
+
+
+#set-options "--z3rlimit 10 --initial_fuel 6 --max_fuel 6"
+
+val lemma_fdifference_unrolled: s1:seqelem -> s2:seqelem{gte_limbs s1 s2 len} -> Lemma
+  (fdifference_unrolled s1 s2 == fdifference_spec s1 s2 len)
+let lemma_fdifference_unrolled s1 s2 = ()
+
+
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+
+val lemma_fdifference_def:
+  s1:seqelem -> s2:seqelem{gte_limbs s1 s2 len} ->
+  Lemma (let s = fdifference_spec s1 s2 len in
+    v (Seq.index s 0) = v (Seq.index s2 0) - v (Seq.index s1 0)
+    /\ v (Seq.index s 1) = v (Seq.index s2 1) - v (Seq.index s1 1)
+    /\ v (Seq.index s 2) = v (Seq.index s2 2) - v (Seq.index s1 2)
+    /\ v (Seq.index s 3) = v (Seq.index s2 3) - v (Seq.index s1 3)
+    /\ v (Seq.index s 4) = v (Seq.index s2 4) - v (Seq.index s1 4))
+let lemma_fdifference_def s1 s2 =
+  lemma_fdifference_unrolled s1 s2
+
+
+val fdifference_unrolled': s1:seqelem{red_52 s1}-> s2:seqelem{red_52 s2} -> Tot (s:seqelem{
+  red_55 s
+  /\ v (Seq.index s 0) = 0x3fffffffffff68 + v (Seq.index s2 0) - v (Seq.index s1 0)
+  /\ v (Seq.index s 1) = 0x3ffffffffffff8 + v (Seq.index s2 1) - v (Seq.index s1 1)
+  /\ v (Seq.index s 2) = 0x3ffffffffffff8 + v (Seq.index s2 2) - v (Seq.index s1 2)
+  /\ v (Seq.index s 3) = 0x3ffffffffffff8 + v (Seq.index s2 3) - v (Seq.index s1 3)
+  /\ v (Seq.index s 4) = 0x3ffffffffffff8 + v (Seq.index s2 4) - v (Seq.index s1 4)})
+let fdifference_unrolled' a b =
+  assert_norm(pow2 52 = 0x10000000000000);
+  assert_norm(pow2 63 = 0x8000000000000000);
+  let b' = add_zero_spec b in
+  lemma_add_zero_spec_ b;
+  let b'' = fdifference_unrolled a b' in
+  b''
+
+
+#set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+
+val lemma_fdifference_unrolled': s1:seqelem{red_52 s1} -> s2:seqelem{red_52 s2} -> Lemma
+  (add_zero_pre s2 /\ gte_limbs s1 (add_zero_spec s2) len
+    /\ fdifference_unrolled' s1 s2 == fdifference_tot s1 s2)
+let lemma_fdifference_unrolled' s1 s2 =
+  assert_norm(pow2 63 = 0x8000000000000000);
+  lemma_add_zero_spec_ s2;
+  let s' = add_zero_spec s2 in
+  lemma_fdifference_unrolled s1 s'
 
 
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
@@ -158,10 +272,9 @@ private let mul_shift_reduce_unrolled__ input input2 =
   let input4    = shift_reduce_spec input3 in
   sum_scalar_multiplication_spec output4 input4 (Seq.index input2 4) len
 
+inline_for_extraction let p108 : p:pos{p = 0x1000000000000000000000000000} =
+  assert_norm(pow2 108 = 0x1000000000000000000000000000); pow2 108
 
-inline_for_extraction let p53 : pos = pow2 53
-inline_for_extraction let p55 : pos = pow2 55
-inline_for_extraction let p108 : pos = pow2 108
 
 let bounds (s:seqelem) (s0:nat) (s1:nat) (s2:nat) (s3:nat) (s4:nat) : GTot Type0 =
   v (Seq.index s 0) < s0 /\ v (Seq.index s 1) < s1 /\ v (Seq.index s 2) < s2
@@ -230,6 +343,7 @@ val lemma_shift_reduce_then_carry_wide_0:
 let lemma_shift_reduce_then_carry_wide_0 s1 s2 =
   assert_norm (pow2 53 = 0x20000000000000);
   assert_norm (pow2 55 = 0x80000000000000);
+  assert_norm (pow2 64 = 0x10000000000000000);
   assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
   let bla = Seq.create len wide_zero in
   cut (w (Seq.index bla 0) = 0); cut (w (Seq.index bla 1) = 0); cut (w (Seq.index bla 2) = 0);
@@ -357,7 +471,8 @@ let lemma_shift_reduce_then_carry_wide_4 o s1 s2 =
   lemma_shift_reduce_spec_ s1;
   let s1' = shift_reduce_spec s1 in
   Math.Lemmas.pow2_plus 53 55
-  
+
+
 #set-options "--z3rlimit 10 --initial_fuel 2 --max_fuel 2"
 
 private val mul_shift_reduce_unrolled_0:
@@ -513,10 +628,10 @@ inline_for_extraction let p77 : p:pos{p = 0x20000000000000000000} = assert_norm 
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
-private val lemma_53_55_is_fine_to_carry:
+val lemma_53_55_is_fine_to_carry:
   s:seqelem_wide{bounds' s (77*p108) (59*p108) (41*p108) (23*p108) (5*p108)} ->
   Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s 0) p51 p51 p51 p51 (5*p108+p77))
-private let lemma_53_55_is_fine_to_carry s =
+let lemma_53_55_is_fine_to_carry s =
   assert_norm (pow2 53 = 0x20000000000000);
   assert_norm (pow2 55 = 0x80000000000000);
   assert_norm (pow2 64 = 0x10000000000000000);
@@ -571,10 +686,10 @@ let lemma_carry_wide_then_carry_top s =
 
 
 
-private val lemma_53_55_is_fine_to_carry_top:
+val lemma_53_55_is_fine_to_carry_top:
   s:seqelem_wide{bounds' s p51 p51 p51 p51 (5*p108+p77)} ->
   Lemma (carry_top_wide_pre s /\ bounds' (carry_top_wide_spec s) (p51+19*((5*p108+p77)/p51)) p51 p51 p51 p51)
-private let lemma_53_55_is_fine_to_carry_top s =
+let lemma_53_55_is_fine_to_carry_top s =
   assert_norm (pow2 53 = 0x20000000000000);
   assert_norm (pow2 55 = 0x80000000000000);
   assert_norm (pow2 64 = 0x10000000000000000);
@@ -585,7 +700,7 @@ private let lemma_53_55_is_fine_to_carry_top s =
   lemma_carry_top_wide_spec_ s
 
 
-private val lemma_53_55_is_fine_to_copy:
+val lemma_53_55_is_fine_to_copy:
   s:seqelem_wide{bounds' (s) (p51+19*((5*p108+p77)/p51)) p51 p51 p51 p51} ->
   Lemma (copy_from_wide_pre s /\ bounds (copy_from_wide_spec s) (p51+19*((5*p108+p77)/p51)) p51 p51 p51 p51)
 let lemma_53_55_is_fine_to_copy s =
@@ -598,10 +713,10 @@ let lemma_53_55_is_fine_to_copy s =
 
 inline_for_extraction let p13 : p:pos{p = 0x2000} = assert_norm(pow2 13 = 0x2000); pow2 13
 
-private val lemma_53_55_is_fine_to_carry_last:
+val lemma_53_55_is_fine_to_carry_last:
   s:seqelem{bounds (s) (p51+19*((5*p108+p77)/p51)) p51 p51 p51 p51} ->
   Lemma (carry_0_to_1_pre s /\ bounds (carry_0_to_1_spec s) (p51) (p51+p13) p51 p51 p51)
-private let lemma_53_55_is_fine_to_carry_last s =
+let lemma_53_55_is_fine_to_carry_last s =
   assert_norm (pow2 53 = 0x20000000000000);
   assert_norm (pow2 55 = 0x80000000000000);
   assert_norm (pow2 64 = 0x10000000000000000);
@@ -609,8 +724,40 @@ private let lemma_53_55_is_fine_to_carry_last s =
   assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
   assert_norm(p108 = 0x20000000000000 * 0x80000000000000)
 
-(* val lemma_shift_reduce_then_carry_wide_0: *)
-(*   max1:nat -> s1:seqelem{smax s1 max1} -> *)
-(*   max2:nat -> s2:seqelem{smax s2 max2} -> *)
-(*   output:seqelem_wide -> *)
-(*   Lemma (( *)
+
+#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+
+val fmul_53_55_is_fine:
+  s1:seqelem{red_53 s1} -> s2:seqelem{red_55 s2} ->
+  Lemma (fmul_pre s1 s2 /\ red_52 (fmul_spec s1 s2))
+let fmul_53_55_is_fine s1 s2 =
+  lemma_shift_reduce_then_carry_wide s1 s2;
+  lemma_mul_shift_reduce_unrolled s1 s2;
+  let o = mul_shift_reduce_spec s1 s2 in
+  lemma_53_55_is_fine_to_carry o;
+  let o' = carry_wide_spec o 0 in
+  lemma_53_55_is_fine_to_carry_top o';
+  let o'' = carry_top_wide_spec o' in
+  lemma_53_55_is_fine_to_copy o'';
+  let o''' = copy_from_wide_spec o'' in
+  lemma_53_55_is_fine_to_carry_last o''';
+  let o'''' = carry_0_to_1_spec o''' in
+  assert_norm(pow2 52 = 0x10000000000000);
+  cut (bounds o'''' (p51) (p51+p13) p51 p51 p51);
+  cut (o'''' == fmul_spec s1 s2);
+  assert_norm(p51 < pow2 52);
+  assert_norm(p51+p13 < pow2 52)
+
+#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+
+
+val fsum_52_is_53:
+  s1:seqelem{red_52 s1} -> s2:seqelem{red_52 s2} ->
+  Lemma (red s1 len /\ red s2 len /\ red_53 (fsum_spec s1 s2 len))
+let fsum_52_is_53 s1 s2 =
+  assert_norm (pow2 53 = 0x20000000000000);
+  assert_norm (pow2 52 = 0x10000000000000);
+  assert_norm (pow2 63 = 0x8000000000000000);
+  assert_norm (pow2 64 = 0x10000000000000000);
+  let s' = fsum_spec s1 s2 len in
+  lemma_fsum_def s1 s2

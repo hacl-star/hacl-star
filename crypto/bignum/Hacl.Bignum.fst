@@ -6,17 +6,17 @@ open FStar.Buffer
 
 open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
-open Hacl.Spec.Bignum.Bigint
 open Hacl.Bignum.Limb
+open Hacl.Spec.Bignum.Bigint
 open Hacl.Spec.Bignum.Modulo
+open Hacl.Spec.Bignum.Fproduct
+open Hacl.Spec.Bignum.Fmul
+open Hacl.Spec.Bignum
 open Hacl.Bignum.Modulo
 open Hacl.Bignum.Fscalar
 open Hacl.Bignum.Fsum
 open Hacl.Bignum.Fdifference
-open Hacl.Spec.Bignum.Fproduct
 open Hacl.Bignum.Fproduct
-open Hacl.Spec.Bignum.Fmul
-(* open Hacl.Spec.Bignum.Fmul2 *)
 open Hacl.Bignum.Fmul
 open Hacl.Bignum.Crecip
 
@@ -34,7 +34,8 @@ val fsum:
       /\ red_c h a len /\ red_c h b len))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ red_c h0 a len /\ red_c h0 b len
       /\ live h1 a /\ modifies_1 a h0 h1
-      /\ eval h1 a = eval h0 a + eval h0 b))
+      /\ eval h1 a = eval h0 a + eval h0 b
+      /\ as_seq h1 a == fsum_tot (as_seq h0 a) (as_seq h0 b)))
       (* /\ F.(get_elem h1 a = get_elem h0 a @+ get_elem h0 b))) *)
 let fsum a b =
   let h0 = ST.get() in
@@ -57,7 +58,11 @@ val fdifference:
       /\ Hacl.Spec.Bignum.Fdifference.gte_limbs (as_seq h a) (add_zero_spec (as_seq h b)) len))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b
       /\ live h1 a /\ modifies_1 a h0 h1
-      /\ eval h1 a % prime = (eval h0 b - eval h0 a) % prime ))
+      /\ add_zero_pre (as_seq h0 b)
+      /\ Hacl.Spec.Bignum.Fdifference.gte_limbs (as_seq h0 a) (add_zero_spec (as_seq h0 b)) len
+      /\ eval h1 a % prime = (eval h0 b - eval h0 a) % prime
+      /\ as_seq h1 a == fdifference_tot (as_seq h0 a) (as_seq h0 b)
+      ))
 let fdifference a b =
   let hinit = ST.get() in
   push_frame();
@@ -92,7 +97,12 @@ val fscalar:
       /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec (as_seq h b) s) 0)
       /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec (as_seq h b) s) 0)) ))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ modifies_1 a h0 h1 /\ live h1 a
-      /\ eval h1 a % prime = (eval h0 b * v s) % prime))
+      /\ eval h1 a % prime = (eval h0 b * v s) % prime
+      /\ carry_wide_pre (fscalar_spec (as_seq h0 b) s) 0
+      /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec (as_seq h0 b) s) 0)
+      /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec (as_seq h0 b) s) 0))
+      /\ as_seq h1 a == fscalar_tot (as_seq h0 b) s
+    ))
 let fscalar output b s =
   let hinit = ST.get() in
   push_frame();
@@ -119,7 +129,9 @@ val fmul:
       /\ fmul_pre (as_seq h a) (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 output /\ live h0 a /\ live h0 b
       /\ modifies_1 output h0 h1 /\ live h1 output
+      /\ fmul_pre (as_seq h0 a) (as_seq h0 b)
       /\ eval h1 output % prime = (eval h0 a * eval h0 b) % prime
+      /\ as_seq h1 output == fmul_tot (as_seq h0 a) (as_seq h0 b)
       ))
 let fmul output a b = fmul output a b
 
