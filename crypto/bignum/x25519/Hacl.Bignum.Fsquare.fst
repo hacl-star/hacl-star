@@ -1,0 +1,113 @@
+module Hacl.Bignum.Fsquare
+
+
+open FStar.HyperStack
+open FStar.Buffer
+
+open Hacl.Bignum.Constants
+open Hacl.Bignum.Parameters
+open Hacl.Bignum.Limb
+open Hacl.Spec.Bignum.Bigint
+open Hacl.Bignum.Modulo
+open Hacl.Bignum.Fproduct
+open Hacl.Spec.Bignum.Fsquare
+
+
+#set-options "--z3rlimit 500 --initial_fuel 0 --max_fuel 0"
+
+private val fsquare__:
+  tmp:felem_wide ->
+  output:felem{disjoint tmp output} ->
+  Stack unit
+    (requires (fun h -> live h tmp /\ live h output /\ fsquare_pre_ (as_seq h output)))
+    (ensures (fun h0 _ h1 -> live h0 tmp /\ live h0 output /\ live h1 tmp /\ modifies_1 tmp h0 h1
+      /\ fsquare_pre (as_seq h0 output)
+      /\ as_seq h1 tmp == fsquare_spec_ (as_seq h0 output)))
+private let fsquare__ tmp output =
+  let r0 = output.(0ul) in
+  let r1 = output.(1ul) in
+  let r2 = output.(2ul) in
+  let r3 = output.(3ul) in
+  let r4 = output.(4ul) in
+  let d0 = r0 *^ (uint64_to_limb 2uL) in
+  let d1 = r1 *^ (uint64_to_limb 2uL) in
+  let d2 = r2 *^ (uint64_to_limb 2uL) *^ (uint64_to_limb 19uL) in
+  let d419 = r4 *^ (uint64_to_limb 19uL) in
+  let d4 = d419 *^ (uint64_to_limb 2uL) in
+  let open Hacl.UInt128 in
+  tmp.(0ul) <- ( r0) *^ r0 +^ ( d4) *^ r1 +^ (( d2) *^ (r3     ));
+  tmp.(1ul) <- ( d0) *^ r1 +^ ( d4) *^ r2 +^ (( r3) *^ (Hacl.Bignum.Limb.(r3 *^ (uint64_to_limb 19uL))));
+  tmp.(2ul) <- ( d0) *^ r2 +^ ( r1) *^ r1 +^ (( d4) *^ (r3     ));
+  tmp.(3ul) <- ( d0) *^ r3 +^ ( d1) *^ r2 +^ (( r4) *^ (d419   ));
+  tmp.(4ul) <- ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     )); admit()
+
+
+#set-options "--z3rlimit 5"
+
+private val fsquare_:
+  tmp:felem_wide ->
+  output:felem{disjoint tmp output} ->
+  Stack unit
+    (requires (fun h -> live h tmp /\ live h output /\ fsquare_pre (as_seq h output)))
+    (ensures (fun h0 _ h1 -> live h0 tmp /\ live h0 output /\ live h1 tmp /\ modifies_2 output tmp h0 h1
+      /\ live h1 output
+      /\ fsquare_pre (as_seq h0 output)
+      /\ as_seq h1 output == fsquare_spec (as_seq h0 output)))
+private let fsquare_ tmp output =
+  let h0 = ST.get() in
+  fsquare__ tmp output;
+  let h3  = ST.get() in
+  Hacl.Bignum.Fproduct.carry_wide_ tmp 0ul;
+  carry_top_wide tmp;
+  copy_from_wide_ output tmp clen;
+  carry_0_to_1 output
+
+
+#set-options "--z3rlimit 5 --initial_fuel 1 --max_fuel 1"
+
+private val fsquare_times_:
+  input:felem ->
+  tmp:felem_wide{disjoint input tmp} ->
+  count:FStar.UInt32.t ->
+  Stack unit
+    (requires (fun h -> live h input /\ live h tmp /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h input)))
+    (ensures (fun h0 _ h1 -> live h0 input /\ live h1 input /\ live h1 tmp /\ modifies_2 input tmp h0 h1
+      /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h0 input)
+      /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h1 input)
+      /\ as_seq h1 input == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
+private let rec fsquare_times_ output tmp count =
+  if FStar.UInt32.(count =^ 0ul) then ()
+  else (
+    let i = FStar.UInt32.(count -^ 1ul) in
+    let h0 = ST.get() in
+    fsquare_52_is_fine (as_seq h0 output);
+    fsquare_  tmp output;
+    let h1 = ST.get() in
+    cut (Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h1 output));
+    cut (modifies_2 tmp output h0 h1);
+    fsquare_times_ output tmp (FStar.UInt32.(count -^ 1ul))
+  )
+
+
+#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+
+private val fsquare_times:
+  output:felem ->
+  input:felem{disjoint output input} ->
+  count:FStar.UInt32.t ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h input /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h input)))
+    (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ live h0 input /\ modifies_1 output h0 h1
+      /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h0 input)
+      /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h1 output)
+      /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
+private let fsquare_times output input count =
+  push_frame();
+  let t   = create wide_zero clen in
+  let h0 = ST.get() in
+  blit input 0ul output 0ul clen;
+  let h1 = ST.get() in
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h0 input);
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h1 output);
+  fsquare_times_ output t count;
+  pop_frame()

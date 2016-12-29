@@ -10,6 +10,11 @@ open Hacl.Bignum.Fmul
 
 #set-options "--lax"
 
+val crecip:
+  out:felem ->
+  z:felem -> Stack unit
+  (requires (fun h -> live h out /\ live h z))
+  (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1))
 let crecip out z =
   push_frame();
   let buf = create limb_zero 20ul in
