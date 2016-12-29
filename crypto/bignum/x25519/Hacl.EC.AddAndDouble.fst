@@ -178,7 +178,7 @@ val fmonty_:
           fmonty_tot (as_seq h0 px) (as_seq h0 pz) (as_seq h0 pqx) (as_seq h0 pqz) (as_seq h0 qx)
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-let fmonty_ x2 z2 x3 z3 x z xprime zprime qx qmqpz =
+let fmonty_ x2 z2 x3 z3 x z xprime zprime qx =
   push_frame();
   let buf = create limb_zero 40ul in
   let origx      = Buffer.sub buf 0ul  5ul in
@@ -225,7 +225,6 @@ let fmonty_ x2 z2 x3 z3 x z xprime zprime qx qmqpz =
   let h10 = ST.get() in
   Hacl.Spec.EC.AddAndDouble.lemma_fdifference_unrolled' (as_seq h10 zzprime) (as_seq h10 origxprime);
   fdifference zzprime origxprime; // zzprime <- sub
-  admit()
   let h11 = ST.get() in
   fsquare_times x3 xxprime 1ul; // sum sum
   let h12 = ST.get() in
@@ -248,6 +247,7 @@ let fmonty_ x2 z2 x3 z3 x z xprime zprime qx qmqpz =
   fmul z2 zz zzz;
   pop_frame()
 
+open Hacl.EC.Point
 
 val fmonty:
   pp:point ->

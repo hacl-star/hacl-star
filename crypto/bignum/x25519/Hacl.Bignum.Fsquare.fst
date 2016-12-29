@@ -80,7 +80,7 @@ private let rec fsquare_times_ output tmp count =
   else (
     let i = FStar.UInt32.(count -^ 1ul) in
     let h0 = ST.get() in
-    fsquare_52_is_fine (as_seq h0 output);
+    fsquare_53_is_fine (as_seq h0 output);
     fsquare_  tmp output;
     let h1 = ST.get() in
     cut (Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h1 output));
