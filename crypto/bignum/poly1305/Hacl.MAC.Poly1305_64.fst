@@ -10,6 +10,8 @@ open FStar.HyperStack
 open Hacl.Cast
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint
+open Hacl.Spec.Bignum.AddAndMultiply
+open Hacl.Bignum.AddAndMultiply
 
 module H8   = Hacl.UInt8
 module Limb = Hacl.Bignum.Limb
@@ -31,8 +33,6 @@ let wordB_16 = b:uint8_p{length b = 16}
 noeq type poly1305_state = | MkState: r:bigint -> h:bigint -> poly1305_state
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
-
-(* JK: living those functions here because packing them in one file gives better performance *)
 
 val load64_le:
   b:uint8_p{length b = 8} ->
@@ -138,9 +138,9 @@ let live_st m (st:poly1305_state) : Type0 =
 (*   live_st h st /\ sel_elem h st.h == poly' (Ghost.reveal log) (sel_elem h st.r) *)
 
 
-let limb_44 = x:limb{Limb.v x < pow2 44}
-let limb_45 = x:limb{Limb.v x < pow2 45}
-let limb_44_20 = x:limb{Limb.v x < 20 * pow2 44}
+(* let limb_44 = x:limb{Limb.v x < pow2 44} *)
+(* let limb_45 = x:limb{Limb.v x < pow2 45} *)
+(* let limb_44_20 = x:limb{Limb.v x < 20 * pow2 44} *)
 
 
 #reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
@@ -158,27 +158,60 @@ let mk_mask nbits =
 (* ############################################################################# *)
 
 
+#reset-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
+
+private val to_vec_lt_pow2: #n:nat -> a:UInt.uint_t n -> m:nat -> i:nat{i < n - m} ->
+  Lemma (requires (a < pow2 m))
+        (ensures  (Seq.index (UInt.to_vec a) i == false))
+        [SMTPat (Seq.index (UInt.to_vec #n a) i); SMTPatT (a < pow2 m)]
+let rec to_vec_lt_pow2 #n a m i =
+  if n = 0 then ()
+  else
+    if m = 0 then
+      assert (a == UInt.zero n)
+    else
+      begin
+      Seq.lemma_index_app1 (UInt.to_vec #(n - 1) (a / 2)) (Seq.create 1 (a % 2 = 1)) i;
+      assert (Seq.index (UInt.to_vec a) i == Seq.index (UInt.to_vec #(n - 1) (a / 2)) i);
+      to_vec_lt_pow2 #(n - 1) (a / 2) (m - 1) i
+      end
+
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+
+assume val lemma_logand_lt: #n:pos -> a:UInt.uint_t n -> m:pos{m < n} -> b:UInt.uint_t n{b < pow2 m} ->
+  Lemma (pow2 m < pow2 n /\ UInt.logand #n a b < pow2 m)
+
 val poly1305_encode_r:
   r:bigint ->
   key:uint8_p{length key = 16} ->
   Stack unit
     (requires (fun h -> live h r /\ live h key /\ disjoint key r))
     (ensures  (fun h0 _ h1 -> modifies_1 r h0 h1 /\ live h1 r /\ live h0 key
+      /\ red_44 (as_seq h1 r)
       (* /\ sel_elem h1 r = Hacl.Symmetric.Poly1305_64.FC.Spec.clamp (sel_word h0 (sub key 0ul 16ul)) *)
     ))
 let poly1305_encode_r r key =
   let t0 = load64_le(sub key 0ul 8ul) in
   let t1 = load64_le(sub key 8ul 8ul) in
-  let open Hacl.UInt64 in
-  let r0 = ( t0                           ) &^ uint64_to_sint64 0xffc0fffffffuL in
-  let r1 = ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ uint64_to_sint64 0xfffffc0ffffuL in
-  let r2 = ((t1 >>^ 24ul)                 ) &^ uint64_to_sint64 0x00ffffffc0fuL in
+  let open Hacl.Bignum.Limb in
+  assert_norm(pow2 64 = 0x10000000000000000);
+  assert_norm(pow2 44 = 0x100000000000);
+  assert_norm(pow2 42 = 0x40000000000);
+  let r0 = ( t0                           ) &^ uint64_to_limb 0xffc0fffffffuL in
+  let r1 = ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ uint64_to_limb 0xfffffc0ffffuL in
+  let r2 = ((t1 >>^ 24ul)                 ) &^ uint64_to_limb 0x00ffffffc0fuL in
   r.(0ul) <- r0;
   r.(1ul) <- r1;
   r.(2ul) <- r2;
-  let h1 = ST.get() in
-  cut (get h1 r 0 == r0 /\ get h1 r 1 == r1 /\ get h1 r 2 == r2);
-  admit() // WIP
+  lemma_logand_lt #64 (v t0) 44 0xffc0fffffff;
+  lemma_logand_lt #64 (v ((t0 >>^ 44ul) |^ (t1 <<^ 20ul))) 44 0xfffffc0ffff;
+  lemma_logand_lt #64 (v (t1 >>^ 24ul)) 42 0x00ffffffc0f
+
+
+inline_for_extraction let mask_42 : p:Hacl.Bignum.Limb.t{v p = pow2 42 - 1} = assert_norm(pow2 42 - 1 = 0x3ffffffffff); assert_norm(pow2 64 = 0x10000000000000000); uint64_to_limb 0x3ffffffffffuL
+  
+inline_for_extraction let mask_44 : p:Hacl.Bignum.Limb.t{v p = pow2 44 - 1} = assert_norm(pow2 44 - 1 = 0xfffffffffff);
+  assert_norm (pow2 64 = 0x10000000000000000); uint64_to_limb 0xfffffffffffuL
 
 
 val toField:
@@ -186,18 +219,21 @@ val toField:
   m:wordB_16 ->
   Stack unit
     (requires (fun h -> live h b /\ live h m /\ disjoint b m))
-    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b))
+    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b
+      /\ red_44 (as_seq h1 b)
+      /\ v (Seq.index (as_seq h1 b) 2) < pow2 40))
 let toField b m =
   (* Load block values *)
-  let t0 = load64_le m in
-  let t1 = load64_le (offset m 8ul) in
-  (* Useful masks *)
-  let mask_2_44 = mk_mask 44ul in
-  let mask_2_42 = mk_mask 42ul in
-  let open Hacl.UInt64 in
-  let t_0 = t0 &^ mask_2_44 in
-  let t_1 = ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ mask_2_44 in
-  let t_2 = ((t1 >>^ 24ul) &^ mask_2_42) in
+  let t0 = load64_le (Buffer.sub m 0ul 8ul) in
+  let t1 = load64_le (Buffer.sub m 8ul 8ul) in
+  let open Hacl.UInt64 in  
+  UInt.logand_mask (v t0) 44;
+  UInt.logand_mask (v ((t0 >>^ 44ul) |^ (t1 <<^ 20ul))) 44;
+  Math.Lemmas.lemma_div_lt (v t1) 64 24;
+  Math.Lemmas.pow2_lt_compat 44 40;
+  let t_0 = t0 &^ mask_44 in
+  let t_1 = ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ mask_44 in
+  let t_2 = (t1 >>^ 24ul) in
   b.(0ul) <- t_0;
   b.(1ul) <- t_1;
   b.(2ul) <- t_2
@@ -208,19 +244,23 @@ val toField_plus_2_128:
   m:wordB_16 ->
   Stack unit
     (requires (fun h -> live h b /\ live h m /\ disjoint b m))
-    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b))
+    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b
+      /\ red_44 (as_seq h1 b)))
 let toField_plus_2_128 b m =
   toField b m;
   let b2 = b.(2ul) in
   let open Hacl.Bignum.Limb in
-  let b2 = b2 |^ (limb_one <<^ 40ul) in
-  b.(2ul) <- b2
+  assert_norm (pow2 40 = 0x10000000000);
+  UInt.logor_disjoint (0x10000000000) (v b2) 40;
+  assert_norm (pow2 40 + pow2 40 < pow2 44);
+  let b2' = uint64_to_limb 0x10000000000uL |^ b2 in
+  b.(2ul) <- b2'
 
 
 val toField_plus:
-  len:U32.t ->
+  len:U32.t{U32.v len < 16} ->
   b:bigint ->
-  m:wordB ->
+  m:wordB{length m = U32.v len} ->
   Stack unit
     (requires (fun h -> live h b /\ live h m /\ disjoint b m))
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b))
@@ -237,32 +277,29 @@ let toField_plus len b m' =
   pop_frame()
 
 
-val add_and_multiply:
-  acc:bigint ->
-  block:bigint ->
-  r:bigint ->
-  Stack unit
-    (requires (fun _ -> True))
-    (ensures  (fun _ _ _ -> True))
-let add_and_multiply acc block r =
-  Hacl.Bignum.Fsum.fsum_ acc block clen;
-  Hacl.Bignum.Fmul.fmul acc acc r
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 
 val poly1305_finish:
   mac:uint8_p ->
-  acc:bigint ->
+  acc:felem ->
   key_s:uint8_p{length key_s = 16} ->
   Stack unit
-    (requires (fun _ -> True))
-    (ensures  (fun _ _ _ -> True))
+    (requires (fun h -> live h mac /\ live h acc /\ live h key_s /\ red_45 (as_seq h acc)))
+    (ensures  (fun h0 _ h1 -> live h1 mac /\ live h1 acc
+      /\ modifies_2 mac acc h0 h1))
 let poly1305_finish mac acc key_s =
   push_frame();
   let tmp = create limb_zero clen in
-  let mask_2_44 = uint64_to_sint64 0xfffffffffffuL in
-  let mask_2_42 = uint64_to_sint64 0x3ffffffffffuL in
   (* Full carry pass *)
+  Math.Lemmas.pow2_lt_compat 63 44;
   Hacl.Bignum.Fproduct.carry_limb_ acc 0ul;
+  let h1 = ST.get() in
+  assume (v (Seq.index (as_seq h1 acc) 2) < pow2 45 + pow2 20);
+  assert_norm(pow2 45 + pow2 20 = 0x200000000000 + 0x100000);
+  assert_norm(pow2 42 = 0x40000000000);
+  assert_norm(pow2 44 = 0x100000000000);
+  assert_norm(pow2 64 = 0x10000000000000000);
   Hacl.Bignum.Modulo.carry_top acc;
   Hacl.Bignum.Fproduct.carry_0_to_1 acc;
   (* Adding 2nd part of the key (one time pad) *)
@@ -275,40 +312,56 @@ let poly1305_finish mac acc key_s =
   let h2 = acc.(2ul) in
   let open Hacl.Bignum.Limb in
   let h0 = h0 |^ (h1 <<^ 44ul) in
-  let h1 = (h1 >>^ 20ul) |^ ((h2 &^ mask_2_42) <<^ 24ul) in
+  let h1 = (h1 >>^ 20ul) |^ ((h2 &^ mask_42) <<^ 24ul) in
   store64_le mac h0;
   store64_le (offset mac 8ul) h1;
   pop_frame()
 
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val poly1305_start:
   a:elemB ->
   Stack unit
     (requires (fun h -> live h a))
     (ensures  (fun h0 _ h1 -> live h1 a /\ modifies_1 a h0 h1
-      (* /\ sel_elem h1 a = 0 *)
+      /\ red_45 (as_seq h1 a)
+      /\ sel_int h1 a = 0
       ))
 let poly1305_start a =
   (* Zeroing the accumulator *)
   a.(0ul) <- limb_zero;
   a.(1ul) <- limb_zero;
-  a.(2ul) <- limb_zero
+  a.(2ul) <- limb_zero;
+  let h = ST.get() in
+  lemma_seval_def (as_seq h a) 3;
+  lemma_seval_def (as_seq h a) 2;
+  lemma_seval_def (as_seq h a) 1;
+  lemma_seval_def (as_seq h a) 0
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val poly1305_init:
   r:elemB ->
-  s:wordB_16 ->
-  key:uint8_p{length key = 32} ->
+  s:wordB_16{disjoint r s} ->
+  key:uint8_p{length key = 32 /\ disjoint s key /\ disjoint key r} ->
   Stack unit
     (requires (fun h -> live h r /\ live h s /\ live h key))
-    (ensures  (fun h0 _ h1 -> modifies_2 r s h0 h1 /\ live h1 r /\ live h1 s))
+    (ensures  (fun h0 _ h1 -> modifies_2 r s h0 h1 /\ live h1 r /\ live h1 s
+      /\ red_44 (as_seq h1 r)))
 let poly1305_init r s key =
-  let t0 = load64_le(key) in
-  let t1 = load64_le(offset key 8ul) in
+  let t0 = load64_le(sub key 0ul 8ul) in
+  let t1 = load64_le(sub key 8ul 8ul) in
   let open Hacl.UInt64 in
+  assert_norm(pow2 64 = 0x10000000000000000);
+  assert_norm(pow2 44 = 0x100000000000);
+  assert_norm(pow2 42 = 0x40000000000);
   r.(0ul) <- ( t0                           ) &^ uint64_to_sint64 0xffc0fffffffuL;
   r.(1ul) <- ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ uint64_to_sint64 0xfffffc0ffffuL;
   r.(2ul) <- ((t1 >>^ 24ul)                 ) &^ uint64_to_sint64 0x00ffffffc0fuL;
+  lemma_logand_lt #64 (v t0) 44 0xffc0fffffff;
+  lemma_logand_lt #64 (v ((t0 >>^ 44ul) |^ (t1 <<^ 20ul))) 44 0xfffffc0ffff;
+  lemma_logand_lt #64 (v (t1 >>^ 24ul)) 42 0x00ffffffc0f;
   blit key 16ul s 0ul 16ul
 
 
@@ -321,23 +374,15 @@ val poly1305_init_:
   st:poly1305_state ->
   key:uint8_p{length key = 32} ->
   Stack log_t
-    (requires (fun h -> live_st h st /\ live h key))
+    (requires (fun h -> live_st h st /\ live h key /\ red_45 (as_seq h st.h) /\ disjoint st.r key
+      /\ disjoint st.h key))
     (ensures  (fun h0 log h1 -> modifies_2 st.r st.h h0 h1
+      /\ live h1 st.r /\ live h1 st.h /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
       (* /\ acc_inv h1 log st *)
       ))
 let poly1305_init_ st key =
-  let t0 = load64_le(key) in
-  let t1 = load64_le(offset key 8ul) in
-
-  let open Hacl.UInt64 in
-  st.r.(0ul) <- ( t0                           ) &^ uint64_to_sint64 0xffc0fffffffuL;
-  st.r.(1ul) <- ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ uint64_to_sint64 0xfffffc0ffffuL;
-  st.r.(2ul) <- ((t1 >>^ 24ul)                 ) &^ uint64_to_sint64 0x00ffffffc0fuL;
-
-  st.h.(0ul) <- limb_zero;
-  st.h.(1ul) <- limb_zero;
-  st.h.(2ul) <- limb_zero(* ; *)
-  (* Ghost.hide (Seq.createEmpty #elem) *)
+  poly1305_encode_r st.r (sub key 0ul 16ul);
+  poly1305_start st.h
 
 
 val poly1305_update:
@@ -345,10 +390,13 @@ val poly1305_update:
   st:poly1305_state ->
   m:uint8_p{length m >= 16} ->
   Stack log_t
-    (requires (fun h -> live_st h st /\ live h m
+    (requires (fun h -> live_st h st /\ live h m /\ disjoint m st.h /\ disjoint m st.r
+      /\ red_45 (as_seq h st.h)
+      /\ red_44 (as_seq h st.r)
       (* /\ acc_inv h current_log st *)
       ))
     (ensures  (fun h0 updated_log h1 -> modifies_1 st.h h0 h1 /\ live_st h1 st
+      /\ red_45 (as_seq h1 st.h)
       (* /\ acc_inv h1 updated_log st *)
       (* /\ (reveal updated_log) == *)
       (*     SeqProperties.snoc (reveal current_log) (encode (sel_word h1 (Buffer.sub m 0ul 16ul))) *)
@@ -359,7 +407,7 @@ let poly1305_update log st m =
   let tmp = create limb_zero clen in
   let acc = st.h in
   let r   = st.r in
-  toField_plus_2_128 tmp m;
+  toField_plus_2_128 tmp (sub m 0ul 16ul);
   add_and_multiply acc tmp r;
   let new_log = (* elift1 (fun l -> SeqProperties.snoc l (eval_3_limbs h0 h1 h2)) log in *) () in
   pop_frame();
@@ -372,10 +420,13 @@ val poly1305_blocks:
   m:uint8_p ->
   len:U64.t{U64.v len <= length m} ->
   Stack log_t
-    (requires (fun h -> live_st h st /\ live h m
+    (requires (fun h -> live_st h st /\ live h m /\ disjoint st.r m /\ disjoint st.h m
+      /\ red_45 (as_seq h st.h)
+      /\ red_44 (as_seq h st.r)
       (* /\ acc_inv h current_log st *)
       ))
     (ensures  (fun h0 updated_log h1 -> modifies_1 st.h h0 h1 /\ live_st h1 st
+      /\ red_45 (as_seq h1 st.h)
       (* /\ acc_inv h1 updated_log st *)
       (* /\ (reveal updated_log) == *)
       (*     encode_pad (reveal current_log) (as_seq h0 (Buffer.sub m 0ul (Int.Cast.uint64_to_uint32 len))) *)
@@ -400,30 +451,35 @@ val poly1305_finish_:
   st:poly1305_state ->
   mac:uint8_p ->
   m:uint8_p ->
-  len:U64.t ->
+  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= length m} ->
   key_s:uint8_p{length key_s = 16} ->
   Stack log_t
-    (requires (fun h -> (* acc_inv h log st *)true))
+    (requires (fun h -> (* acc_inv h log st *)live_st h st /\ live h mac /\ live h m /\ live h key_s
+      /\ disjoint st.h mac
+      /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)))
     (ensures  (fun h0 updated_log h1 -> modifies_2 st.h mac h0 h1
+      /\ live h1 st.h /\ live h1 mac
       (* /\ acc_inv h1 updated_log st *)
       ))
 let poly1305_finish_ log st mac m len key_s =
   push_frame();
-  let mask_2_44 = uint64_to_sint64 0xfffffffffffuL in
-  let mask_2_42 = uint64_to_sint64 0x3ffffffffffuL in
   let tmp   = create limb_zero clen in
   let rem' = U64.(len &^ 0xfuL) in
+  assert_norm(pow2 4 - 1 = 0xf);
+  UInt.logand_mask (U64.v len) 4;
   if U64.(rem' =^ 0uL) then ()
   else (
     let zero = uint8_to_sint8 0uy in
     let block = create zero 16ul in
     let i = FStar.Int.Cast.uint64_to_uint32 rem' in
+    Math.Lemmas.modulo_lemma (U64.v len - U64.v rem') (pow2 32);
     blit m (FStar.Int.Cast.uint64_to_uint32 (U64.(len -^ rem'))) block 0ul i;
     block.(i) <- uint8_to_sint8 1uy;
     toField tmp block;
     add_and_multiply st.h tmp st.r
     );
   Hacl.Bignum.Fproduct.carry_limb_ st.h 0ul;
+  Hacl.Bignum.Modulo.carry_top st.h;
   Hacl.Bignum.Fproduct.carry_0_to_1 st.h;
   toField tmp key_s;
   Hacl.Bignum.Fsum.fsum_ st.h tmp clen;
@@ -433,7 +489,7 @@ let poly1305_finish_ log st mac m len key_s =
   let h2 = st.h.(2ul) in
   let open Hacl.Bignum.Limb in
   let h0 = h0 |^ (h1 <<^ 44ul) in
-  let h1 = (h1 >>^ 20ul) |^ ((h2 &^ mask_2_42) <<^ 24ul) in
+  let h1 = (h1 >>^ 20ul) |^ ((h2 &^ mask_42) <<^ 24ul) in
   store64_le mac h0;
   store64_le (offset mac 8ul) h1;
   pop_frame();

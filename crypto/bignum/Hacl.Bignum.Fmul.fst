@@ -114,7 +114,7 @@ let fmul_ output input input2 =
 
 val fmul:
   output:felem ->
-  input:felem{disjoint output input} ->
+  input:felem ->
   input2:felem{disjoint output input2} ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h input2
