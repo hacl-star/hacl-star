@@ -11,7 +11,6 @@ open Hacl.Cast
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint
 open Hacl.Spec.Bignum.AddAndMultiply
-open Hacl.Bignum.AddAndMultiply
 
 module H8   = Hacl.UInt8
 module Limb = Hacl.Bignum.Limb
@@ -22,45 +21,25 @@ module U64  = FStar.UInt64
 
 inline_for_extraction let log_t = unit
 
-inline_for_extraction let bigint = felem
-inline_for_extraction let uint8_p = buffer Hacl.UInt8.t
+let elem : Type0 = b:int{ b >= 0 /\ b < prime }
 
-let elemB : Type0 = b:felem
+let word = b:Seq.seq H8.t{Seq.length b <= 16}
+let word_16 = b:Seq.seq H8.t{Seq.length b = 16}
 
-let wordB = b:uint8_p{length b <= 16}
-let wordB_16 = b:uint8_p{length b = 16}
-
-noeq type poly1305_state = | MkState: r:bigint -> h:bigint -> poly1305_state
+(* noeq type poly1305_state_ = | MkState: r:seqelem -> h:seqelem -> poly1305_state_ *)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
-val load64_le:
-  b:uint8_p{length b = 8} ->
-  Stack limb
-    (requires (fun h -> live h b))
-    (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 b
-      (* /\ Limb.v r = little_endian (as_seq h0 b) *)
-      ))
-let load64_le b =
-  let h = ST.get() in
-  let b0 = b.(0ul) in
-  let b1 = b.(1ul) in
-  let b2 = b.(2ul) in
-  let b3 = b.(3ul) in
-  let b4 = b.(4ul) in
-  let b5 = b.(5ul) in
-  let b6 = b.(6ul) in
-  let b7 = b.(7ul) in
-  cut (b0 == get h b 0);
-  cut (b1 == get h b 1);
-  cut (b2 == get h b 2);
-  cut (b3 == get h b 3);
-  cut (b4 == get h b 4);
-  cut (b5 == get h b 5);
-  cut (b6 == get h b 6);
-  cut (b7 == get h b 7);
-  (* lemma_little_endian_8 h b; *)
-  (* lemma_load64_le b0 b1 b2 b3 b4 b5 b6 b7; *)
+val load64_le_spec: b:Seq.seq H8.t{Seq.length b = 8} -> Tot limb
+let load64_le_spec b =
+  let b0 = Seq.index b 0 in
+  let b1 = Seq.index b 1 in
+  let b2 = Seq.index b 2 in
+  let b3 = Seq.index b 3 in
+  let b4 = Seq.index b 4 in
+  let b5 = Seq.index b 5 in
+  let b6 = Seq.index b 6 in
+  let b7 = Seq.index b 7 in
   Limb.(
     sint8_to_sint64 b0
     |^ (sint8_to_sint64 b1 <<^ 8ul)
@@ -73,15 +52,8 @@ let load64_le b =
   )
 
 
-val store64_le:
-  b:uint8_p{length b = 8} ->
-  z:Limb.t ->
-  Stack unit
-    (requires (fun h -> live h b))
-    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b
-      (* /\ Limb.v z = little_endian (as_seq h1 b) *)
-      ))
-let store64_le b z =
+val store64_le_spec: z:Limb.t -> Tot (b:Seq.seq H8.t{Seq.length b = 8})
+let store64_le_spec z =
   let open Hacl.UInt64 in
   let b0 = sint64_to_sint8 z in
   let b1 = sint64_to_sint8 (z >>^ 8ul) in
@@ -91,79 +63,39 @@ let store64_le b z =
   let b5 = sint64_to_sint8 (z >>^ 40ul) in
   let b6 = sint64_to_sint8 (z >>^ 48ul) in
   let b7 = sint64_to_sint8 (z >>^ 56ul) in
-  b.(0ul) <- b0;
-  b.(1ul) <- b1;
-  b.(2ul) <- b2;
-  b.(3ul) <- b3;
-  b.(4ul) <- b4;
-  b.(5ul) <- b5;
-  b.(6ul) <- b6;
-  b.(7ul) <- b7;
-  let h1 = ST.get() in
-  cut (b0 == get h1 b 0);
-  cut (b1 == get h1 b 1);
-  cut (b2 == get h1 b 2);
-  cut (b3 == get h1 b 3);
-  cut (b4 == get h1 b 4);
-  cut (b5 == get h1 b 5);
-  cut (b6 == get h1 b 6);
-  cut (b7 == get h1 b 7);
-  (* lemma_little_endian_8 h1 b; *)
-  (* lemma_store64_le_ z; *)
-  ()
+  let s = Seq.create 8 (uint8_to_sint8 0uy) in
+  let s = Seq.upd s 0 b0 in
+  let s = Seq.upd s 1 b1 in
+  let s = Seq.upd s 2 b2 in
+  let s = Seq.upd s 3 b3 in
+  let s = Seq.upd s 4 b4 in
+  let s = Seq.upd s 5 b5 in
+  let s = Seq.upd s 6 b6 in
+  let s = Seq.upd s 7 b7 in
+  s
 
 
-val sel_word:
-  h:mem ->
-  b:wordB{live h b} ->
-  GTot (s:Seq.seq H8.t{Seq.length s = length b
-    /\ (forall (i:nat). {:pattern (Seq.index s i)}
-      i < Seq.length s ==> H8.v (Seq.index s i) == H8.v (get h b i))})
-let sel_word h b = as_seq h b
-
-(** From the current memory state, returns the integer corresponding to a elemB, (before
-   computing the modulo) *)
-val sel_int: h:mem -> b:elemB{live h b} -> GTot nat
-let sel_int h b = eval h b
-
-
-let live_st m (st:poly1305_state) : Type0 =
-  live m st.h /\ live m st.r /\ disjoint st.h st.r
+(** From the current memory state, returns the field element corresponding to a elemB *)
+val selem: seqelem -> GTot elem
+let selem s = seval s % prime
 
 
 #reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
-
-val mk_mask: nbits:U32.t{U32.v nbits < 64} -> Tot (z:limb{Limb.v z = pow2 (U32.v nbits) - 1})
-let mk_mask nbits =
-  Math.Lemmas.pow2_lt_compat 64 (U32.v nbits);
-  cut( (1*pow2 (U32.v nbits)) % pow2 64 = pow2 (U32.v nbits));
-  let one = uint64_to_sint64 1uL in
-  Limb.((one <<^ nbits) -^ one)
 
 
 (* ############################################################################# *)
 (*                              API FOR THE RECORD LAYER                         *)
 (* ############################################################################# *)
 
-
-#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
-
 assume val lemma_logand_lt: #n:pos -> a:UInt.uint_t n -> m:pos{m < n} -> b:UInt.uint_t n{b < pow2 m} ->
   Lemma (pow2 m < pow2 n /\ UInt.logand #n a b < pow2 m)
 
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
-val poly1305_encode_r:
-  r:bigint ->
-  key:uint8_p{length key = 16} ->
-  Stack unit
-    (requires (fun h -> live h r /\ live h key /\ disjoint key r))
-    (ensures  (fun h0 _ h1 -> modifies_1 r h0 h1 /\ live h1 r /\ live h0 key
-      /\ red_44 (as_seq h1 r)
-      (* /\ sel_elem h1 r = Hacl.Symmetric.Poly1305_64.FC.Spec.clamp (sel_word h0 (sub key 0ul 16ul)) *)
-    ))
-let poly1305_encode_r r key =
-  let t0 = load64_le(sub key 0ul 8ul) in
-  let t1 = load64_le(sub key 8ul 8ul) in
+val poly1305_encode_r_spec: key:Seq.seq H8.t{Seq.length key = 16} -> Tot (s':seqelem{red_44 s'})
+let poly1305_encode_r_spec key =
+  let t0 = load64_le_spec (Seq.slice key 0 8) in
+  let t1 = load64_le_spec (Seq.slice key 8 16) in
   let open Hacl.Bignum.Limb in
   assert_norm(pow2 64 = 0x10000000000000000);
   assert_norm(pow2 44 = 0x100000000000);
@@ -171,32 +103,27 @@ let poly1305_encode_r r key =
   let r0 = ( t0                           ) &^ uint64_to_limb 0xffc0fffffffuL in
   let r1 = ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ uint64_to_limb 0xfffffc0ffffuL in
   let r2 = ((t1 >>^ 24ul)                 ) &^ uint64_to_limb 0x00ffffffc0fuL in
-  r.(0ul) <- r0;
-  r.(1ul) <- r1;
-  r.(2ul) <- r2;
+  let s = Seq.create len limb_zero in
+  let s = Seq.upd s 0 r0 in
+  let s = Seq.upd s 1 r1 in
+  let s = Seq.upd s 2 r2 in
   lemma_logand_lt #64 (v t0) 44 0xffc0fffffff;
   lemma_logand_lt #64 (v ((t0 >>^ 44ul) |^ (t1 <<^ 20ul))) 44 0xfffffc0ffff;
-  lemma_logand_lt #64 (v (t1 >>^ 24ul)) 42 0x00ffffffc0f
+  lemma_logand_lt #64 (v (t1 >>^ 24ul)) 42 0x00ffffffc0f;
+  s
 
 
 inline_for_extraction let mask_42 : p:Hacl.Bignum.Limb.t{v p = pow2 42 - 1} = assert_norm(pow2 42 - 1 = 0x3ffffffffff); assert_norm(pow2 64 = 0x10000000000000000); uint64_to_limb 0x3ffffffffffuL
-  
+
 inline_for_extraction let mask_44 : p:Hacl.Bignum.Limb.t{v p = pow2 44 - 1} = assert_norm(pow2 44 - 1 = 0xfffffffffff);
   assert_norm (pow2 64 = 0x10000000000000000); uint64_to_limb 0xfffffffffffuL
 
 
-val toField:
-  b:bigint ->
-  m:wordB_16 ->
-  Stack unit
-    (requires (fun h -> live h b /\ live h m /\ disjoint b m))
-    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b
-      /\ red_44 (as_seq h1 b)
-      /\ v (Seq.index (as_seq h1 b) 2) < pow2 40))
-let toField b m =
+val toField_spec: m:word_16 -> Tot (s:seqelem{red_44 s /\ v (Seq.index s 2) < pow2 40})
+let toField_spec m =
   (* Load block values *)
-  let t0 = load64_le (Buffer.sub m 0ul 8ul) in
-  let t1 = load64_le (Buffer.sub m 8ul 8ul) in
+  let t0 = load64_le_spec (Seq.slice m 0 8) in
+  let t1 = load64_le_spec (Seq.slice m 8 16) in
   let open Hacl.UInt64 in  
   UInt.logand_mask (v t0) 44;
   UInt.logand_mask (v ((t0 >>^ 44ul) |^ (t1 <<^ 20ul))) 44;
@@ -205,57 +132,99 @@ let toField b m =
   let t_0 = t0 &^ mask_44 in
   let t_1 = ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ mask_44 in
   let t_2 = (t1 >>^ 24ul) in
-  b.(0ul) <- t_0;
-  b.(1ul) <- t_1;
-  b.(2ul) <- t_2
+  let b = Seq.create len limb_zero in
+  let b = Seq.upd b 0 t_0 in
+  let b = Seq.upd b 1 t_1 in
+  let b = Seq.upd b 2 t_2 in
+  b
 
 
-val toField_plus_2_128:
-  b:bigint ->
-  m:wordB_16 ->
-  Stack unit
-    (requires (fun h -> live h b /\ live h m /\ disjoint b m))
-    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b
-      /\ red_44 (as_seq h1 b)))
-let toField_plus_2_128 b m =
-  toField b m;
-  let b2 = b.(2ul) in
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
+
+val toField_plus_2_128_spec: m:word_16 -> Tot (s:seqelem{red_44 s})
+let toField_plus_2_128_spec m =
+  let b = toField_spec m in
+  let b2 = Seq.index b 2 in
+  cut (v b2 < pow2 40);
   let open Hacl.Bignum.Limb in
+  assert_norm (0 = 0x10000000000 % pow2 40);
   assert_norm (pow2 40 = 0x10000000000);
   UInt.logor_disjoint (0x10000000000) (v b2) 40;
   assert_norm (pow2 40 + pow2 40 < pow2 44);
   let b2' = uint64_to_limb 0x10000000000uL |^ b2 in
-  b.(2ul) <- b2'
+  Seq.upd b 2 b2'
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
-val poly1305_start:
-  a:elemB ->
-  Stack unit
-    (requires (fun h -> live h a))
-    (ensures  (fun h0 _ h1 -> live h1 a /\ modifies_1 a h0 h1
-      /\ red_45 (as_seq h1 a)
-      /\ sel_int h1 a = 0
-      ))
-let poly1305_start a =
-  (* Zeroing the accumulator *)
-  a.(0ul) <- limb_zero;
-  a.(1ul) <- limb_zero;
-  a.(2ul) <- limb_zero;
-  let h = ST.get() in
-  lemma_seval_def (as_seq h a) 3;
-  lemma_seval_def (as_seq h a) 2;
-  lemma_seval_def (as_seq h a) 1;
-  lemma_seval_def (as_seq h a) 0
+assume val lemma_logor_max: #n:pos -> a:UInt.uint_t n -> b:UInt.uint_t n -> m:nat{m <= n} -> Lemma
+  (requires (a < pow2 m /\ b < pow2 m))
+  (ensures (UInt.logor a b < pow2 m))
+
+val toField_plus_spec: len:U32.t{U32.v len < 16} -> m:word{Seq.length m = U32.v len} ->
+  Tot (s:seqelem{red_44 s})
+let toField_plus_spec len m' =
+  cut (pow2 (24 + U32.v len) % pow2 (24 + U32.v len) = 0);
+  let m = Seq.append m' (Seq.create (16 - U32.v len) (uint8_to_sint8 0uy)) in
+  let b = toField_spec m in
+  let b2 = Seq.index b 2 in
+  let open Hacl.Bignum.Limb in
+  let b2' = uint64_to_sint64 1uL <<^ (U32.(24ul +^ len)) |^ b2 in
+  Math.Lemmas.pow2_lt_compat 64 (24 + U32.v len);
+  Math.Lemmas.modulo_lemma (pow2 (24 + U32.v len)) (pow2 64);
+  Math.Lemmas.pow2_lt_compat 44 (24 + U32.v len);
+  lemma_logor_max #64 (pow2 (24 + U32.v len)) (v b2) 44;
+  Seq.upd b 2 b2'
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
+val poly1305_finish_spec: acc:seqelem{red_45 acc} -> key_s:Seq.seq H8.t{Seq.length key_s = 16} ->
+  Tot (mac:Seq.seq H8.t{Seq.length mac = 16})
+let poly1305_finish_spec acc key_s =
+  Math.Lemmas.pow2_lt_compat 63 44;
+  let acc1 = Hacl.Spec.Bignum.Fproduct.carry_limb_spec acc 0 in
+  (* assume (v (Seq.index (as_seq h1 acc) 2) < pow2 45 + pow2 20); *)
+  assert_norm(pow2 45 + pow2 20 = 0x200000000000 + 0x100000);
+  assert_norm(pow2 42 = 0x40000000000);
+  assert_norm(pow2 44 = 0x100000000000);
+  assert_norm(pow2 64 = 0x10000000000000000);
+  let acc2 = Hacl.Spec.Bignum.Modulo.carry_top_spec acc1 in
+  let acc3 = Hacl.Spec.Bignum.Fproduct.carry_0_to_1_spec acc in
+  (* Adding 2nd part of the key (one time pad) *)
+  let key = toField_spec key_s in
+  let acc4 = Hacl.Spec.Bignum.Fsum.fsum_spec acc key len in
+  (* Last carry and truncation *)
+  let acc5 = Hacl.Spec.Bignum.Fproduct.carry_limb_spec acc 0 in
+  let h0 = Seq.index acc5 0 in
+  let h1 = Seq.index acc5 1 in
+  let h2 = Seq.index acc5 2 in
+  let open Hacl.Bignum.Limb in
+  let h0 = h0 |^ (h1 <<^ 44ul) in
+  let h1 = (h1 >>^ 20ul) |^ (h2 <<^ 24ul) in
+  let mac0 = store64_le_spec h0 in
+  let mac1 = store64_le_spec h1 in
+  Seq.append mac0 mac1
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
+val poly1305_start_spec: unit -> Tot (s:seqelem{Seq.index s 0 == limb_zero /\ Seq.index s 1 == limb_zero /\ Seq.index s 2 == limb_zero /\ selem s = 0})
+let poly1305_start_spec () =
+  let s = Seq.create len limb_zero in
+  lemma_seval_def (s) 3;
+  lemma_seval_def (s) 2;
+  lemma_seval_def (s) 1;
+  lemma_seval_def (s) 0;
+  s
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 
 (* ******************* *)
 (* Fast implementation *)
 (* ******************* *)
 
-
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val poly1305_init_:
   st:poly1305_state ->
@@ -265,7 +234,6 @@ val poly1305_init_:
       /\ disjoint st.h key))
     (ensures  (fun h0 log h1 -> modifies_2 st.r st.h h0 h1
       /\ live h1 st.r /\ live h1 st.h /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
-      (* /\ acc_inv h1 log st *)
       ))
 let poly1305_init_ st key =
   poly1305_encode_r st.r (sub key 0ul 16ul);
@@ -333,8 +301,6 @@ let rec poly1305_blocks log st m len =
   )
 
 
-#set-options "--lax"
-
 val poly1305_finish_:
   log:log_t ->
   st:poly1305_state ->
@@ -385,26 +351,24 @@ let poly1305_finish_ log st mac m len key_s =
   log // TODO
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
-
 val crypto_onetimeauth:
-  output:uint8_p{length output = 16} ->
-  input:uint8_p{disjoint input output} ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= length input} ->
-  k:uint8_p{disjoint output k /\ length k = 32} ->
+  output:uint8_p ->
+  input:uint8_p ->
+  len:U64.t ->
+  k:uint8_p ->
   Stack unit
-    (requires (fun h -> live h output /\ live h input /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
+    (requires (fun _ -> True))
+    (ensures  (fun _ _ _ -> True))
 let crypto_onetimeauth output input len k =
   push_frame();
   let zero = uint64_to_sint64 0uL in
-  let buf = create zero U32.(clen +^ clen) in
-  let r = sub buf 0ul clen in
-  let h = sub buf clen clen in
+  let r = create zero clen in
+  let h = create zero clen in
   let st = MkState r h in
+  (* let st = {r = r; h = h} in *)
   let key_r = Buffer.sub k 0ul 16ul in
   let key_s = Buffer.sub k 16ul 16ul in
-  let init_log = poly1305_init_ st k in
+  let init_log = poly1305_init_ st key_r in
   let partial_log = poly1305_blocks init_log st input len in
   let final_log = poly1305_finish_ partial_log st output input len key_s in
   pop_frame()

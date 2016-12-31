@@ -35,9 +35,21 @@ let fsquare_pre_ s =
 
 #set-options "--z3rlimit 100"
 
-val seq_upd_5: #a:Type -> s:Seq.seq a{Seq.length s >= 5} -> s0:a -> s1:a -> s2:a -> s3:a -> s4:a ->
-  Tot (s':Seq.seq a{Seq.length s' = Seq.length s /\ Seq.index s' 0 == s0 /\ Seq.index s' 1 == s1 /\ Seq.index s' 2 == s2 /\ Seq.index s' 3 == s3 /\ Seq.index s' 4 == s4 /\ Seq.slice s 5 (Seq.length s) == Seq.slice s' 5 (Seq.length s)})
-let seq_upd_5 #a s s0 s1 s2 s3 s4 =
+(* val seq_upd_5: #a:Type -> s:Seq.seq a{Seq.length s >= 5} -> s0:a -> s1:a -> s2:a -> s3:a -> s4:a -> *)
+(*   Tot (s':Seq.seq a{Seq.length s' = Seq.length s /\ Seq.index s' 0 == s0 /\ Seq.index s' 1 == s1 /\ Seq.index s' 2 == s2 /\ Seq.index s' 3 == s3 /\ Seq.index s' 4 == s4 /\ Seq.slice s 5 (Seq.length s) == Seq.slice s' 5 (Seq.length s)}) *)
+(* let seq_upd_5 #a s s0 s1 s2 s3 s4 = *)
+(*   let s' = Seq.upd s 0 s0 in *)
+(*   let s' = Seq.upd s' 1 s1 in *)
+(*   let s' = Seq.upd s' 2 s2 in *)
+(*   let s' = Seq.upd s' 3 s3 in *)
+(*   let s' = Seq.upd s' 4 s4 in *)
+(*   s' *)
+
+
+val seq_upd_5: s0:wide -> s1:wide -> s2:wide -> s3:wide -> s4:wide ->
+  Tot (s':Seq.seq wide{Seq.length s' = len /\ Seq.index s' 0 == s0 /\ Seq.index s' 1 == s1 /\ Seq.index s' 2 == s2 /\ Seq.index s' 3 == s3 /\ Seq.index s' 4 == s4})
+let seq_upd_5 s0 s1 s2 s3 s4 =
+  let s  = Seq.create len wide_zero in
   let s' = Seq.upd s 0 s0 in
   let s' = Seq.upd s' 1 s1 in
   let s' = Seq.upd s' 2 s2 in
@@ -46,7 +58,55 @@ let seq_upd_5 #a s s0 s1 s2 s3 s4 =
   s'
 
 
-#set-options "--z3rlimit 1000"
+#set-options "--z3rlimit 10"
+
+inline_for_extraction val computation_1:
+  r0:limb -> r1:limb -> r2:limb -> r3:limb -> r4:limb -> d4:limb{v d4 = 2 * 19 * v r4} -> d2:limb{v d2 = 2 * 19 * v r2 /\ v d2 < p64 /\ v d4 < p64
+  /\ v r0 * v r0 + v d4 * v r1 + v d2 * v r3 < p128}
+  -> Tot (res:wide{w res = v r0 * v r0      + 2 * 19 * v r4 * v r1  + 2 * 19 * v r2 * v r3})
+inline_for_extraction let computation_1 r0 r1 r2 r3 r4 d4 d2 =
+  let open Hacl.Bignum.Wide in
+  (( r0) *^ r0 +^ ( d4) *^ r1 +^ (( d2) *^ (r3     )))  
+
+#set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+
+inline_for_extraction val computation_2:
+  r0:limb -> r1:limb -> r2:limb -> r3:limb -> r4:limb -> d4:limb{v d4 = 2 * 19 * v r4} -> d0:limb{v d0 = 2 * v r0 /\ v d0 < p64 /\ v d4 < p64 /\ 19 * v r3 < p64
+  /\ v d0 * v r1 + v d4 * v r2 + 19 * v r3 * v r3 < p128}
+  -> Tot (res:wide{w res = 2 * v r0 * v r1  + 2 * 19 * v r4 * v r2  + 19 * v r3 * v r3})
+inline_for_extraction let computation_2 r0 r1 r2 r3 r4 d4 d0 =
+  let open Hacl.Bignum.Wide in
+  (( d0) *^ r1 +^ ( d4) *^ r2 +^ (Hacl.Bignum.Limb.(r3 *^ (uint64_to_limb 19uL)) *^ r3))
+
+#set-options "--z3rlimit 10"
+
+inline_for_extraction val computation_3:
+  r0:limb -> r1:limb -> r2:limb -> r3:limb -> r4:limb -> d4:limb{v d4 = 2 * 19 * v r4} -> d0:limb{v d0 = 2 * v r0 /\ v d0 < p64 /\ v d4 < p64
+  /\ v d0 * v r2 + v r1 * v r1 + v d4 * v r3 < p128}
+  -> Tot (res:wide{w res = 2 * v r0 * v r2  + v r1 * v r1           + 2 * 19 * v r4 * v r3})
+inline_for_extraction let computation_3 r0 r1 r2 r3 r4 d4 d0 =
+  let open Hacl.Bignum.Wide in
+  ( d0) *^ r2 +^ ( r1) *^ r1 +^ (( d4) *^ (r3     ))
+
+#set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+
+inline_for_extraction val computation_4:
+  r0:limb -> r1:limb -> r2:limb -> r3:limb -> r4:limb -> d419:limb{v d419 = 19 * v r4} -> d0:limb{v d0 = 2 * v r0} -> d1:limb{v d1 = 2 * v r1 /\ v d0 < p64 /\ v d419 < p64 /\ v d1 < p64 /\ 19 * v r3 < p64
+  /\ v d0 * v r3 + v d1 * v r2 + v r4 * v d419 < p128}
+  -> Tot (res:wide{w res = 2 * v r0 * v r3  + 2 * v r1 * v r2       + 19 * v r4 * v r4})
+inline_for_extraction let computation_4 r0 r1 r2 r3 r4 d419 d0 d1 =
+  let open Hacl.Bignum.Wide in
+  ( d0) *^ r3 +^ ( d1) *^ r2 +^ (( r4) *^ (d419   ))
+
+
+inline_for_extraction val computation_5:
+  r0:limb -> r1:limb -> r2:limb -> r3:limb -> r4:limb -> d0:limb{v d0 = 2 * v r0} -> d1:limb{v d1 = 2 * v r1 /\ v d0 < p64 /\ v d1 < p64 /\ 19 * v r3 < p64
+  /\ v d0 * v r4 + v d1 * v r3 + v r2 * v r2 < p128}
+  -> Tot (res:wide{w res = 2 * v r0 * v r4  + 2 * v r1 * v r3       + v r2 * v r2})
+inline_for_extraction let computation_5 r0 r1 r2 r3 r4 d0 d1 =
+  let open Hacl.Bignum.Wide in
+  ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     ))
+
 
 val fsquare_spec_: s:seqelem{fsquare_pre_ s} -> Tot (s':seqelem_wide{
   let r0 = v (Seq.index s 0) in
@@ -72,19 +132,23 @@ let fsquare_spec_ s =
   let d419 = r4 *^ (uint64_to_limb 19uL) in
   let d4 = d419 *^ (uint64_to_limb 2uL) in
   let open Hacl.UInt128 in
-  let s0 = (( r0) *^ r0 +^ ( d4) *^ r1 +^ (( d2) *^ (r3     ))) in
-  let s1 = (( d0) *^ r1 +^ ( d4) *^ r2 +^ (( r3) *^ (Hacl.Bignum.Limb.(r3 *^ (uint64_to_limb 19uL))))) in
-  let s2 = ( d0) *^ r2 +^ ( r1) *^ r1 +^ (( d4) *^ (r3     )) in
-  let s3 = ( d0) *^ r3 +^ ( d1) *^ r2 +^ (( r4) *^ (d419   )) in
-  let s4 = ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     )) in
+  (* let s0 = (( r0) *^ r0 +^ ( d4) *^ r1 +^ (( d2) *^ (r3     ))) in *)
+  (* let s1 = (( d0) *^ r1 +^ ( d4) *^ r2 +^ (( r3) *^ (Hacl.Bignum.Limb.(r3 *^ (uint64_to_limb 19uL))))) in *)
+  (* let s2 = ( d0) *^ r2 +^ ( r1) *^ r1 +^ (( d4) *^ (r3     )) in *)
+  (* let s3 = ( d0) *^ r3 +^ ( d1) *^ r2 +^ (( r4) *^ (d419   )) in *)
+  (* let s4 = ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     )) in *)
+  let s0 = computation_1 r0 r1 r2 r3 r4 d4 d2 in
+  let s1 =  computation_2 r0 r1 r2 r3 r4 d4 d0 in
+  let s2 =  computation_3 r0 r1 r2 r3 r4 d4 d0 in
+  let s3 = computation_4 r0 r1 r2 r3 r4 d419 d0 d1 in
+  let s4 = computation_5 r0 r1 r2 r3 r4 d0 d1 in
   let open Hacl.UInt64 in
   cut (w s0 = v r0 * v r0      + 2 * 19 * v r4 * v r1  + 2 * 19 * v r2 * v r3);
   cut (w s1 = 2 * v r0 * v r1  + 2 * 19 * v r4 * v r2  + 19 * v r3 * v r3);
   cut (w s2 = 2 * v r0 * v r2  + v r1 * v r1           + 2 * 19 * v r4 * v r3);
   cut (w s3 = 2 * v r0 * v r3  + 2 * v r1 * v r2       + 19 * v r4 * v r4);
   cut (w s4 = 2 * v r0 * v r4  + 2 * v r1 * v r3       + v r2 * v r2);
-  let sz = Seq.create len wide_zero in
-  seq_upd_5 sz s0 s1 s2 s3 s4
+  seq_upd_5 s0 s1 s2 s3 s4
 
 
 private let lemma_mul_5 a b c d e : Lemma ( (a+b+c+d+e)*(a+b+c+d+e) =

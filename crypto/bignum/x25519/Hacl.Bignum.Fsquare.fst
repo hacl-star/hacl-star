@@ -21,7 +21,7 @@ private val fsquare__:
   Stack unit
     (requires (fun h -> live h tmp /\ live h output /\ fsquare_pre_ (as_seq h output)))
     (ensures (fun h0 _ h1 -> live h0 tmp /\ live h0 output /\ live h1 tmp /\ modifies_1 tmp h0 h1
-      /\ fsquare_pre (as_seq h0 output)
+      /\ fsquare_pre_ (as_seq h0 output)
       /\ as_seq h1 tmp == fsquare_spec_ (as_seq h0 output)))
 private let fsquare__ tmp output =
   let r0 = output.(0ul) in
@@ -35,11 +35,21 @@ private let fsquare__ tmp output =
   let d419 = r4 *^ (uint64_to_limb 19uL) in
   let d4 = d419 *^ (uint64_to_limb 2uL) in
   let open Hacl.UInt128 in
-  tmp.(0ul) <- ( r0) *^ r0 +^ ( d4) *^ r1 +^ (( d2) *^ (r3     ));
-  tmp.(1ul) <- ( d0) *^ r1 +^ ( d4) *^ r2 +^ (( r3) *^ (Hacl.Bignum.Limb.(r3 *^ (uint64_to_limb 19uL))));
-  tmp.(2ul) <- ( d0) *^ r2 +^ ( r1) *^ r1 +^ (( d4) *^ (r3     ));
-  tmp.(3ul) <- ( d0) *^ r3 +^ ( d1) *^ r2 +^ (( r4) *^ (d419   ));
-  tmp.(4ul) <- ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     )); admit()
+  let s0 = computation_1 r0 r1 r2 r3 r4 d4 d2 in
+  let s1 =  computation_2 r0 r1 r2 r3 r4 d4 d0 in
+  let s2 =  computation_3 r0 r1 r2 r3 r4 d4 d0 in
+  let s3 = computation_4 r0 r1 r2 r3 r4 d419 d0 d1 in
+  let s4 = computation_5 r0 r1 r2 r3 r4 d0 d1 in
+  tmp.(0ul) <- s0;
+  tmp.(1ul) <- s1;
+  tmp.(2ul) <- s2;
+  tmp.(3ul) <- s3;
+  tmp.(4ul) <- s4
+  (* tmp.(0ul) <- ( r0) *^ r0 +^ ( d4) *^ r1 +^ (( d2) *^ (r3     )); *)
+  (* tmp.(1ul) <- ( d0) *^ r1 +^ ( d4) *^ r2 +^ (( r3) *^ (Hacl.Bignum.Limb.(r3 *^ (uint64_to_limb 19uL)))); *)
+  (* tmp.(2ul) <- ( d0) *^ r2 +^ ( r1) *^ r1 +^ (( d4) *^ (r3     )); *)
+  (* tmp.(3ul) <- ( d0) *^ r3 +^ ( d1) *^ r2 +^ (( r4) *^ (d419   )); *)
+  (* tmp.(4ul) <- ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     )) *)
 
 
 #set-options "--z3rlimit 5"
@@ -72,8 +82,8 @@ private val fsquare_times_:
   Stack unit
     (requires (fun h -> live h input /\ live h tmp /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h input)))
     (ensures (fun h0 _ h1 -> live h0 input /\ live h1 input /\ live h1 tmp /\ modifies_2 input tmp h0 h1
-      /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h0 input)
-      /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h1 input)
+      /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h0 input)
+      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 input)
       /\ as_seq h1 input == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
 private let rec fsquare_times_ output tmp count =
   if FStar.UInt32.(count =^ 0ul) then ()

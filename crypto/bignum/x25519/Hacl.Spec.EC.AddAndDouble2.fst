@@ -63,8 +63,7 @@ let fmonty_tot px pz pqx pqz qx =
   let scalar = (uint64_to_limb Hacl.Bignum.Constants.a24) in
   fscalar_is_fine zz scalar;
   let zzz = fscalar_tot zz (uint64_to_limb Hacl.Bignum.Constants.a24) in
-  lemma_513_is_52 xx;
-  fsum_52_is_53 zzz xx;
+  fsum_513_is_53 zzz xx;
   let zzz' = fsum_tot zzz xx in
   fmul_53_55_is_fine zzz' zz';
   let z2 = fmul_tot zzz' zz' in

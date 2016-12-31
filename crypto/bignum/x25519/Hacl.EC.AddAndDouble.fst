@@ -28,7 +28,7 @@ let all_disjoint (ppx:felem) (ppz:felem) (ppqx:felem) (ppqz:felem)
   /\ disjoint pqz qx
 
 
-inline_for_extraction let red_52 s = Hacl.Spec.EC.AddAndDouble.red_52 s
+inline_for_extraction let red_513 s = Hacl.Spec.EC.AddAndDouble.red_513 s
 
 
 (* val fmonty_1: *)
@@ -154,6 +154,7 @@ inline_for_extraction let red_52 s = Hacl.Spec.EC.AddAndDouble.red_52 s
 (* ********************************************************************************* *)
 (* ********************************************************************************* *)
 
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val fmonty_:
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
@@ -163,21 +164,23 @@ val fmonty_:
       live h ppx /\ live h ppz /\ live h ppqx /\ live h ppqz
       /\ live h px /\ live h pz /\ live h pqx /\ live h pqz
       /\ live h qx
-      /\ red_52 (as_seq h px) /\ red_52 (as_seq h pz) /\ red_52 (as_seq h pqx) /\ red_52 (as_seq h pqz)
-      /\ red_52 (as_seq h qx)
+      /\ red_513 (as_seq h px) /\ red_513 (as_seq h pz) /\ red_513 (as_seq h pqx) /\ red_513 (as_seq h pqz)
+      /\ red_513 (as_seq h qx)
       /\ all_disjoint ppx ppz ppqx ppqz px pz pqx pqz qx))
     (ensures (fun h0 _ h1 ->
       live h0 ppx /\ live h0 ppz /\ live h0 ppqx /\ live h0 ppqz
       /\ live h0 px /\ live h0 pz /\ live h0 pqx /\ live h0 pqz
       /\ live h0 qx
       /\ live h1 ppx /\ live h1 ppz /\ live h1 ppqx /\ live h1 ppqz
-      /\ red_52 (as_seq h0 px) /\ red_52 (as_seq h0 pz) /\ red_52 (as_seq h0 pqx) /\ red_52 (as_seq h0 pqz)
-      /\ red_52 (as_seq h0 qx)
+      /\ red_513 (as_seq h0 px) /\ red_513 (as_seq h0 pz) /\ red_513 (as_seq h0 pqx) /\ red_513 (as_seq h0 pqz)
+      /\ red_513 (as_seq h0 qx)
       /\ all_disjoint ppx ppz ppqx ppqz px pz pqx pqz qx
+      /\ red_513 (as_seq h1 ppx) /\ red_513 (as_seq h1 ppz)
+      /\ red_513 (as_seq h1 ppqx) /\ red_513 (as_seq h1 ppqz)
       /\ (as_seq h1 ppx, as_seq h1 ppz, as_seq h1 ppqx, as_seq h1 ppqz) ==
           fmonty_tot (as_seq h0 px) (as_seq h0 pz) (as_seq h0 pqx) (as_seq h0 pqz) (as_seq h0 qx)
     ))
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 let fmonty_ x2 z2 x3 z3 x z xprime zprime qx =
   push_frame();
   let buf = create limb_zero 40ul in
@@ -194,20 +197,21 @@ let fmonty_ x2 z2 x3 z3 x z xprime zprime qx =
   let h1 = ST.get() in
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h0 x);
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h1 origx);
-  Hacl.Spec.EC.AddAndDouble.fsum_52_is_53 (as_seq h1 x) (as_seq h1 z);
+  Hacl.Spec.EC.AddAndDouble.fsum_513_is_53 (as_seq h1 x) (as_seq h1 z);
   fsum x z; // x < x + z
   let h2 = ST.get() in
-  Hacl.Spec.EC.AddAndDouble.lemma_fdifference_unrolled' (as_seq h2 z) (as_seq h2 origx);
+  Hacl.Spec.EC.AddAndDouble.lemma_fdifference_unrolled'' (as_seq h2 z) (as_seq h2 origx);
+  Hacl.Spec.EC.AddAndDouble.lemma_fdifference_unrolled''' (as_seq h2 z) (as_seq h2 origx);
   fdifference z origx; // z <- 8p + x - z
   let h3 = ST.get() in
   blit xprime 0ul origxprime 0ul 5ul;
   let h4 = ST.get() in
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h3 xprime);
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h4 origxprime);
-  Hacl.Spec.EC.AddAndDouble.fsum_52_is_53 (as_seq h4 xprime) (as_seq h4 zprime);
+  Hacl.Spec.EC.AddAndDouble.fsum_513_is_53 (as_seq h4 xprime) (as_seq h4 zprime);
   fsum xprime zprime; // xprime <- xprime + zprime
   let h5 = ST.get() in
-  Hacl.Spec.EC.AddAndDouble.lemma_fdifference_unrolled' (as_seq h5 zprime) (as_seq h5 origxprime);
+  Hacl.Spec.EC.AddAndDouble.lemma_fdifference_unrolled'' (as_seq h5 zprime) (as_seq h5 origxprime);
   fdifference zprime origxprime; // zprime <- 8p + xprime - zprime
   let h6 = ST.get() in
   Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine (as_seq h6 xprime) (as_seq h6 z);
@@ -220,32 +224,50 @@ let fmonty_ x2 z2 x3 z3 x z xprime zprime qx =
   let h9 = ST.get() in
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h8 xxprime);
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h9 origxprime);
-  Hacl.Spec.EC.AddAndDouble.fsum_52_is_53 (as_seq h9 xxprime) (as_seq h9 zzprime);
+  Hacl.Spec.EC.AddAndDouble.fsum_513_is_53 (as_seq h9 xxprime) (as_seq h9 zzprime);
   fsum xxprime zzprime; // xxprime <- sum
   let h10 = ST.get() in
-  Hacl.Spec.EC.AddAndDouble.lemma_fdifference_unrolled' (as_seq h10 zzprime) (as_seq h10 origxprime);
+  Hacl.Spec.EC.AddAndDouble.lemma_fdifference_unrolled''' (as_seq h10 zzprime) (as_seq h10 origxprime);
   fdifference zzprime origxprime; // zzprime <- sub
   let h11 = ST.get() in
+  lemma_53_is_5413 (as_seq h11 xxprime);
+  Hacl.Spec.Bignum.Fsquare.fsquare_5413_is_fine (as_seq h11 xxprime);
   fsquare_times x3 xxprime 1ul; // sum sum
   let h12 = ST.get() in
+  lemma_53_is_5413 (as_seq h12 zzprime);
+  Hacl.Spec.Bignum.Fsquare.fsquare_5413_is_fine (as_seq h12 zzprime);  
   fsquare_times zzzprime zzprime 1ul; // sub sub
   let h13 = ST.get() in
+  lemma_513_is_53 (as_seq h13 zzzprime); lemma_513_is_55 (as_seq h13 qx);
   fmul z3 zzzprime qx;
   let h14 = ST.get() in
+  lemma_53_is_5413 (as_seq h14 x);
+  Hacl.Spec.Bignum.Fsquare.fsquare_5413_is_fine (as_seq h14 x);
   fsquare_times xx x 1ul; // sum red
   let h15 = ST.get() in
+  Hacl.Spec.Bignum.Fsquare.fsquare_5413_is_fine (as_seq h15 z);
   fsquare_times zz z 1ul; // red sub
   let h16 = ST.get() in
+  lemma_513_is_53 (as_seq h16 xx);
+  lemma_513_is_55 (as_seq h16 zz);
+  Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine (as_seq h16 xx)  (as_seq h16 zz);
   fmul x2 xx zz; // red red
   let h17 = ST.get() in
+  Hacl.Spec.EC.AddAndDouble.lemma_fdifference_unrolled'' (as_seq h17 zz) (as_seq h17 xx);  
   fdifference zz xx; // red red
   let h18 = ST.get() in
-  fscalar zzz zz (uint64_to_limb Hacl.Bignum.Constants.a24);
+  let scalar = (uint64_to_limb Hacl.Bignum.Constants.a24) in
+  Hacl.Spec.EC.AddAndDouble.fscalar_is_fine (as_seq h18 zz) scalar;
+  fscalar zzz zz scalar;
   let h19 = ST.get() in
+  Hacl.Spec.EC.AddAndDouble.fsum_513_is_53 (as_seq h19 zzz) (as_seq h19 xx);
   fsum zzz xx; // red red
   let h20 = ST.get() in
-  fmul z2 zz zzz;
-  pop_frame()
+  Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine (as_seq h20 zzz) (as_seq h20 zz);
+  fmul z2 zzz zz;
+  pop_frame();
+  admit()
+
 
 open Hacl.EC.Point
 
