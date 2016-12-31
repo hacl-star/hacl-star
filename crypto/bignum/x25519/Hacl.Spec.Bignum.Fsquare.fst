@@ -18,7 +18,6 @@ open Hacl.Spec.EC.AddAndDouble
 inline_for_extraction let p64 : p:pos{p = 0x10000000000000000} = assert_norm(pow2 64 = 0x10000000000000000); pow2 64
 inline_for_extraction let p128 : p:pos{p = 0x100000000000000000000000000000000} = assert_norm(pow2 128 = 0x100000000000000000000000000000000); pow2 128
 
-
 val fsquare_pre_: s:seqelem -> GTot Type0
 let fsquare_pre_ s =
   let _ = () in
@@ -636,7 +635,7 @@ let lemma_106_smaller_than_108 s = ()
 
 val fsquare_53_is_fine:
   s1:seqelem{red_53 s1} ->
-  Lemma (fsquare_pre s1 /\ red_52 (fsquare_spec s1))
+  Lemma (fsquare_pre s1 /\ red_513 (fsquare_spec s1))
 let fsquare_53_is_fine s1 =
   lemma_53_to_fsquare_is_fine s1;
   let o = fsquare_spec_ s1 in
@@ -651,9 +650,7 @@ let fsquare_53_is_fine s1 =
   let o'''' = carry_0_to_1_spec o''' in
   assert_norm(pow2 52 = 0x10000000000000);
   cut (bounds o'''' (p51) (p51+p13) p51 p51 p51);
-  cut (o'''' == fsquare_spec s1);
-  assert_norm(p51 < pow2 52);
-  assert_norm(p51+p13 < pow2 52)
+  cut (o'''' == fsquare_spec s1)
 
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 10"
@@ -662,18 +659,111 @@ let fsquare_53_is_fine s1 =
 let lemma_52_fits_53 (s:seqelem{red_52 s}) : Lemma (red_53 s) = ()
 
 
+inline_for_extraction let pmax : p:pos{p = 410718794474278367478258677579776} =
+  assert_norm(p5413 * p5413 = 410718794474278367478258677579776); p5413 * p5413
+
+#set-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0"
+
+val lemma_5413_to_fsquare_is_fine: s:seqelem{red_5413 s} ->
+ Lemma (fsquare_pre_ s /\ bounds' (fsquare_spec_ s) (77 * pmax) (59 * pmax) (41 * pmax) (23 * pmax) (5 * pmax))
+let lemma_5413_to_fsquare_is_fine s =
+  let r0 = v (Seq.index s 0) in let r1 = v (Seq.index s 1) in let r2 = v (Seq.index s 2) in
+  let r3 = v (Seq.index s 3) in let r4 = v (Seq.index s 4) in
+  let d0 = r0 * 2 in let d1 = r1 * 2 in let d2 = r2 * 2 * 19 in let d3 = r3 * 19 in
+  let d419 = r4 * 19 in let d4 = d419 * 2 in
+  Math.Lemmas.nat_times_nat_is_nat r0 r0;
+  Math.Lemmas.nat_times_nat_is_nat d4 r1;
+  Math.Lemmas.nat_times_nat_is_nat r2 r3;
+  lemma_mul_ineq r0 r0 p5413 p5413;
+  lemma_mul_ineq d4 r1 (2 * 19 * p5413) p5413;
+  lemma_mul_ineq d2 r3 (2 * 19 * p5413) (p5413);
+  lemma_mul_ineq d0 r1 (2 * p5413) p5413;
+  lemma_mul_ineq d0 r2 (2 * p5413) p5413;
+  lemma_mul_ineq d0 r3 (2 * p5413) p5413;
+  lemma_mul_ineq d0 r4 (2 * p5413) p5413;
+  lemma_mul_ineq d4 r2 (2 * 19 * p5413) p5413;
+  lemma_mul_ineq r3 d3 (p5413) (19 * p5413);
+  lemma_mul_ineq r1 r1 (p5413) (p5413);
+  lemma_mul_ineq d4 r3 (2 * 19 * p5413) (p5413);
+  lemma_mul_ineq d1 r2 (2*p5413) (p5413);
+  lemma_mul_ineq r4 d419 (p5413) (19*p5413);
+  lemma_mul_ineq d1 r3 (2*p5413) (p5413);
+  lemma_mul_ineq r2 r2 (p5413) (p5413);
+  ()
+
+
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+
+val lemma_5413_is_fine_to_carry:
+  s:seqelem_wide{bounds' (s) (77 * pmax) (59 * pmax) (41 * pmax) (23 * pmax) (5 * pmax)} ->
+  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s 0) p51 p51 p51 p51 (5*pmax+p77))
+let lemma_5413_is_fine_to_carry s =
+  assert_norm (pow2 53 = 0x20000000000000);
+  assert_norm (pow2 55 = 0x80000000000000);
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
+  assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
+  lemma_carry_wide_spec_unrolled s
+
+
+val lemma_5413_is_fine_to_carry_top:
+  s:seqelem_wide{bounds' s p51 p51 p51 p51 (5*pmax+p77)} ->
+  Lemma (carry_top_wide_pre s /\ bounds' (carry_top_wide_spec s) (p51+19*((5*pmax+p77)/p51)) p51 p51 p51 p51)
+let lemma_5413_is_fine_to_carry_top s =
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
+  assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
+  lemma_carry_wide_then_carry_top s;
+  lemma_carry_top_wide_spec_ s
+
+
+val lemma_5413_is_fine_to_copy:
+  s:seqelem_wide{bounds' (s) (p51+19*((5*pmax+p77)/p51)) p51 p51 p51 p51} ->
+  Lemma (copy_from_wide_pre s /\ bounds (copy_from_wide_spec s) (p51+19*((5*pmax+p77)/p51)) p51 p51 p51 p51)
+let lemma_5413_is_fine_to_copy s =
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
+  assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000)
+
+
+val lemma_5413_is_fine_to_carry_last:
+  s:seqelem{bounds (s) (p51+19*((5*pmax+p77)/p51)) p51 p51 p51 p51} ->
+  Lemma (carry_0_to_1_pre s /\ bounds (carry_0_to_1_spec s) (p51) (p51+p13) p51 p51 p51)
+let lemma_5413_is_fine_to_carry_last s =
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
+  assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000)
+
+
+val fsquare_5413_is_fine:
+  s1:seqelem{red_5413 s1} ->
+  Lemma (fsquare_pre s1 /\ red_513 (fsquare_spec s1))
+let fsquare_5413_is_fine s1 =
+  lemma_5413_to_fsquare_is_fine s1;
+  let o = fsquare_spec_ s1 in
+  lemma_5413_is_fine_to_carry o;
+  let o' = carry_wide_spec o 0 in
+  lemma_5413_is_fine_to_carry_top o';
+  let o'' = carry_top_wide_spec o' in
+  lemma_5413_is_fine_to_copy o'';
+  let o''' = copy_from_wide_spec o'' in
+  lemma_5413_is_fine_to_carry_last o''';
+  let o'''' = carry_0_to_1_spec o''' in
+  cut (bounds o'''' (p51) (p51+p13) p51 p51 p51);
+  cut (o'''' == fsquare_spec s1)
+
+
 val exp: x:nat -> n:nat -> Tot nat
 let rec exp x n = if n = 0 then 1 else x * exp x (n-1)
 
 
-val fsquare_times_tot: s:seqelem{red_53 s} -> n:pos ->
-  Tot (s':seqelem{red_52 s'})
+val fsquare_times_tot: s:seqelem{red_5413 s} -> n:pos ->
+  Tot (s':seqelem{red_513 s'})
   (decreases n)
 let rec fsquare_times_tot s n =
-  if n = 1 then (fsquare_53_is_fine s; fsquare_spec s)
+  if n = 1 then (fsquare_5413_is_fine s; fsquare_spec s)
   else (cut (n > 1);
-    fsquare_53_is_fine s;
+    fsquare_5413_is_fine s;
     let s' = fsquare_spec s in
     cut (red_52 s');
-    lemma_52_fits_53 s';
     let s'' = fsquare_times_tot s' (n-1) in s'')
