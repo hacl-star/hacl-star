@@ -857,23 +857,23 @@ private let lemma_mul_le (a:nat) (b:nat) (c:nat) (d:nat) :
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
-inline_for_extraction let p70 : p:pos{p = 0x400000000000000000} = assert_norm(pow2 70 = 0x400000000000000000); pow2 70
+inline_for_extraction let p74 : p:pos{p = 0x4000000000000000000} = assert_norm(pow2 74 = 0x4000000000000000000); pow2 74
 
 
-val lemma_70_is_fine_to_carry:
-  s:seqelem_wide{bounds' s p70 p70 p70 p70 p70} ->
-  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s 0) p51 p51 p51 p51 (p70+p77))
-let lemma_70_is_fine_to_carry s =
+val lemma_74_is_fine_to_carry:
+  s:seqelem_wide{bounds' s p74 p74 p74 p74 p74} ->
+  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s 0) p51 p51 p51 p51 (p74+p77))
+let lemma_74_is_fine_to_carry s =
   assert_norm (pow2 64 = 0x10000000000000000);
   assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
   assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
   lemma_carry_wide_spec_unrolled s
 
 
-val lemma_70_is_fine_to_carry_top:
-  s:seqelem_wide{bounds' s p51 p51 p51 p51 (p70+p77)} ->
-  Lemma (carry_top_wide_pre s /\ bounds' (carry_top_wide_spec s) (p51+19*((p70+p77)/p51)) p51 p51 p51 p51)
-let lemma_70_is_fine_to_carry_top s =
+val lemma_74_is_fine_to_carry_top:
+  s:seqelem_wide{bounds' s p51 p51 p51 p51 (p74+p77)} ->
+  Lemma (carry_top_wide_pre s /\ bounds' (carry_top_wide_spec s) (p51+19*((p74+p77)/p51)) p51 p51 p51 p51)
+let lemma_74_is_fine_to_carry_top s =
   assert_norm (pow2 64 = 0x10000000000000000);
   assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
   assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
@@ -881,16 +881,16 @@ let lemma_70_is_fine_to_carry_top s =
   lemma_carry_top_wide_spec_ s
 
 
-val lemma_70_is_fine_to_copy:
-  s:seqelem_wide{bounds' (s) (p51+19*((p70+p77)/p51)) p51 p51 p51 p51} ->
-  Lemma (copy_from_wide_pre s /\ bounds (copy_from_wide_spec s) (p51+19*((p70+p77)/p51)) p51 p51 p51 p51)
-let lemma_70_is_fine_to_copy s =
+val lemma_74_is_fine_to_copy:
+  s:seqelem_wide{bounds' (s) (p51+19*((p74+p77)/p51)) p51 p51 p51 p51} ->
+  Lemma (copy_from_wide_pre s /\ bounds (copy_from_wide_spec s) (p51+19*((p74+p77)/p51)) p51 p51 p51 p51)
+let lemma_74_is_fine_to_copy s =
   assert_norm (pow2 64 = 0x10000000000000000);
   assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
   assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000)
 
 
-val fscalar_is_fine: a:seqelem{red_513 a} -> s:limb{v s  = 121665} ->
+val fscalar_is_fine: a:seqelem{red_5413 a} -> s:limb{v s  = 121665} ->
   Lemma (carry_wide_pre (Hacl.Spec.Bignum.Fscalar.fscalar_spec a s) 0
     /\ carry_top_wide_pre (carry_wide_spec (Hacl.Spec.Bignum.Fscalar.fscalar_spec a s) 0)
     /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (Hacl.Spec.Bignum.Fscalar.fscalar_spec a s) 0))
@@ -899,14 +899,14 @@ let fscalar_is_fine a sc =
   let o = fscalar_unrolled a sc in
   lemma_fscalar_unrolled a sc;
   assert_norm(pow2 64 = 0x10000000000000000);
-  cut (bounds' o p70 p70 p70 p70 p70);
-  lemma_70_is_fine_to_carry o;
+  cut (bounds' o p74 p74 p74 p74 p74);
+  lemma_74_is_fine_to_carry o;
   let o' = carry_wide_spec o 0 in
-  lemma_70_is_fine_to_carry_top o';
+  lemma_74_is_fine_to_carry_top o';
   let o'' = carry_top_wide_spec o' in
-  lemma_70_is_fine_to_copy o'';
+  lemma_74_is_fine_to_copy o'';
   let o''' = copy_from_wide_spec o'' in
   assert(o''' == fscalar_tot a sc);
-  assert_norm(p51+19*((p70+p77)/p51) < p52);
+  assert_norm(p51+19*((p74+p77)/p51) < p52);
   assert_norm(p51 < p52);
   ()
