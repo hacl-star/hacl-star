@@ -18,7 +18,9 @@ open Hacl.Bignum.Fsum
 open Hacl.Bignum.Fdifference
 open Hacl.Bignum.Fproduct
 open Hacl.Bignum.Fmul
+open Hacl.Bignum.Fsquare
 open Hacl.Bignum.Crecip
+
 
 module U32 = FStar.UInt32
 module F   = Hacl.Spec.Bignum.Field

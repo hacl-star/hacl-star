@@ -138,33 +138,33 @@ let fmul output input input2 =
   pop_frame()
 
 
-#set-options "--lax"
+(* #set-options "--lax" *)
 
-val fsquare_times_:
-  input:felem ->
-  count:U32.t ->
-  Stack unit
-    (requires (fun _ -> true))
-    (ensures (fun _ _ _ -> true))
-let rec fsquare_times_ tmp count =
-  if U32.(count =^ 0ul) then ()
-  else (
-    fmul tmp tmp tmp;
-    fsquare_times_ tmp (U32.(count -^ 1ul))
-  )
+(* val fsquare_times_: *)
+(*   input:felem -> *)
+(*   count:U32.t -> *)
+(*   Stack unit *)
+(*     (requires (fun _ -> true)) *)
+(*     (ensures (fun _ _ _ -> true)) *)
+(* let rec fsquare_times_ tmp count = *)
+(*   if U32.(count =^ 0ul) then () *)
+(*   else ( *)
+(*     fmul tmp tmp tmp; *)
+(*     fsquare_times_ tmp (U32.(count -^ 1ul)) *)
+(*   ) *)
 
 
-val fsquare_times:
-  output:felem ->
-  input:felem ->
-  count:U32.t ->
-  Stack unit
-    (requires (fun _ -> true))
-    (ensures (fun _ _ _ -> true))
-let fsquare_times output input count =
-  push_frame();
-  let tmp = create limb_zero clen in
-  blit input 0ul tmp 0ul clen;
-  fsquare_times_ tmp count;
-  blit tmp 0ul output 0ul clen;
-  pop_frame()
+(* val fsquare_times: *)
+(*   output:felem -> *)
+(*   input:felem -> *)
+(*   count:U32.t -> *)
+(*   Stack unit *)
+(*     (requires (fun _ -> true)) *)
+(*     (ensures (fun _ _ _ -> true)) *)
+(* let fsquare_times output input count = *)
+(*   push_frame(); *)
+(*   let tmp = create limb_zero clen in *)
+(*   blit input 0ul tmp 0ul clen; *)
+(*   fsquare_times_ tmp count; *)
+(*   blit tmp 0ul output 0ul clen; *)
+(*   pop_frame() *)

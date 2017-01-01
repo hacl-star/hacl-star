@@ -333,12 +333,51 @@ let rec poly1305_blocks log st m len =
   )
 
 
+val poly1305_process_last_block:
+  st:poly1305_state ->
+  m:uint8_p ->
+  len:U64.t{U64.v len < 16 /\ U64.v len = length m} ->
+  Stack unit
+    (requires (fun h -> live_st h st /\ live h m /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)))
+    (ensures (fun h0 _ h1 -> live_st h0 st /\ live h0 m /\ red_44 (as_seq h0 st.r) /\ red_45 (as_seq h0 st.h)
+      /\ live_st h1 st /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
+      /\ modifies_1 st.h h0 h1))
+let poly1305_process_last_block st m rem' =
+  push_frame();
+  let tmp = create limb_zero clen in
+  push_frame();
+  let zero = uint8_to_sint8 0uy in
+  let block = create zero 16ul in
+  let i = FStar.Int.Cast.uint64_to_uint32 rem' in
+  (* Math.Lemmas.modulo_lemma (U64.v len - U64.v rem') (pow2 32); *)
+  (* blit m (FStar.Int.Cast.uint64_to_uint32 (U64.(len -^ rem'))) block 0ul i; *)
+  blit m 0ul block 0ul i;
+  block.(i) <- uint8_to_sint8 1uy;
+  toField tmp block;
+  add_and_multiply st.h tmp st.r;
+  pop_frame();
+  pop_frame()
+
+
 #set-options "--lax"
+
+val poly1305_last_pass: acc:felem ->
+  Stack unit
+    (requires (fun h -> live h acc /\ red_45 (as_seq h acc)))
+    (ensures (fun h0 _ h1 -> live h0 acc /\ live h1 acc /\ red_45 (as_seq h0 acc)
+      /\ modifies_1 acc h0 h1))
+let poly1305_last_pass acc =
+  Hacl.Bignum.Fproduct.carry_limb_ acc 0ul;
+  Hacl.Bignum.Modulo.carry_top acc;
+  Hacl.Bignum.Fproduct.carry_0_to_1 acc
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val poly1305_finish_:
   log:log_t ->
   st:poly1305_state ->
-  mac:uint8_p ->
+  mac:uint8_p{length mac = 16} ->
   m:uint8_p ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len <= length m} ->
   key_s:uint8_p{length key_s = 16} ->
@@ -351,38 +390,43 @@ val poly1305_finish_:
       (* /\ acc_inv h1 updated_log st *)
       ))
 let poly1305_finish_ log st mac m len key_s =
-  push_frame();
-  let tmp   = create limb_zero clen in
   let rem' = U64.(len &^ 0xfuL) in
   assert_norm(pow2 4 - 1 = 0xf);
   UInt.logand_mask (U64.v len) 4;
+  let h0 = ST.get() in
   if U64.(rem' =^ 0uL) then ()
   else (
-    let zero = uint8_to_sint8 0uy in
-    let block = create zero 16ul in
-    let i = FStar.Int.Cast.uint64_to_uint32 rem' in
+    Math.Lemmas.lemma_div_mod (U64.v len) (16);
+    Math.Lemmas.pow2_lt_compat 64 32;
     Math.Lemmas.modulo_lemma (U64.v len - U64.v rem') (pow2 32);
-    blit m (FStar.Int.Cast.uint64_to_uint32 (U64.(len -^ rem'))) block 0ul i;
-    block.(i) <- uint8_to_sint8 1uy;
-    toField tmp block;
-    add_and_multiply st.h tmp st.r
+    Math.Lemmas.modulo_lemma (U64.v rem') (pow2 32);
+    let start = Int.Cast.uint64_to_uint32 U64.(len -^ rem') in
+    let l = Int.Cast.uint64_to_uint32 rem' in
+    poly1305_process_last_block st (sub m start l) rem'
     );
-  Hacl.Bignum.Fproduct.carry_limb_ st.h 0ul;
-  Hacl.Bignum.Modulo.carry_top st.h;
-  Hacl.Bignum.Fproduct.carry_0_to_1 st.h;
-  toField tmp key_s;
-  Hacl.Bignum.Fsum.fsum_ st.h tmp clen;
-  Hacl.Bignum.Fproduct.carry_limb_ st.h 0ul;
+  let h1 = ST.get() in
+  cut (modifies_1 st.h h0 h1);
+  poly1305_last_pass st.h;
+  let h2 = ST.get() in
+  cut (modifies_1 st.h h0 h2);
+  cut (disjoint st.h mac);
+  (* Hacl.Bignum.Fproduct.carry_limb_ st.h 0ul; *)
+  (* Hacl.Bignum.Modulo.carry_top st.h; *)
+  (* Hacl.Bignum.Fproduct.carry_0_to_1 st.h; *)
+  let kl = load64_le (sub key_s 0ul 8ul) in
+  let kh = load64_le (sub key_s 8ul 8ul) in
   let h0 = st.h.(0ul) in
   let h1 = st.h.(1ul) in
   let h2 = st.h.(2ul) in
   let open Hacl.Bignum.Limb in
-  let h0 = h0 |^ (h1 <<^ 44ul) in
-  let h1 = (h1 >>^ 20ul) |^ ((h2 &^ mask_42) <<^ 24ul) in
-  store64_le mac h0;
-  store64_le (offset mac 8ul) h1;
-  pop_frame();
-  log // TODO
+  let accl = h0 |^ (h1 <<^ 44ul) in
+  let acch = (h1 >>^ 20ul) |^ (h2 <<^ 24ul) in
+  let open Hacl.Bignum.Wide in
+  let acc' = limb_to_wide accl |^ (limb_to_wide acch <<^ 64ul) in
+  let k'   = limb_to_wide kl   |^ (limb_to_wide kh   <<^ 64ul) in
+  let mac' = acc' +%^ k' in  
+  store64_le (Buffer.sub mac 0ul 8ul) (wide_to_limb mac');
+  store64_le (Buffer.sub mac 8ul 8ul) (wide_to_limb (mac' >>^ 64ul))
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"

@@ -101,7 +101,7 @@ private let rec fsquare_times_ output tmp count =
 
 #set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
-private val fsquare_times:
+val fsquare_times:
   output:felem ->
   input:felem{disjoint output input} ->
   count:FStar.UInt32.t ->
@@ -111,7 +111,7 @@ private val fsquare_times:
       /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h0 input)
       /\ Hacl.Spec.EC.AddAndDouble.red_52 (as_seq h1 output)
       /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
-private let fsquare_times output input count =
+let fsquare_times output input count =
   push_frame();
   let t   = create wide_zero clen in
   let h0 = ST.get() in
