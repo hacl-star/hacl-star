@@ -1,4 +1,4 @@
-module Hacl.MAC.Poly1305_64
+module Hacl.Spec.MAC.Poly1305_64
 
 open FStar.Mul
 open FStar.ST
@@ -28,10 +28,11 @@ let word_16 = b:Seq.seq H8.t{Seq.length b = 16}
 
 noeq type poly1305_state_ = | MkState: r:seqelem -> h:seqelem -> log:log_t -> poly1305_state_
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val load64_le_spec: b:Seq.seq H8.t{Seq.length b = 8} -> Tot limb
 let load64_le_spec b =
+  assert_norm (pow2 32 = 0x100000000);
   let b0 = Seq.index b 0 in
   let b1 = Seq.index b 1 in
   let b2 = Seq.index b 2 in
@@ -54,6 +55,7 @@ let load64_le_spec b =
 
 val store64_le_spec: z:Limb.t -> Tot (b:Seq.seq H8.t{Seq.length b = 8})
 let store64_le_spec z =
+  assert_norm (pow2 32 = 0x100000000);
   let open Hacl.UInt64 in
   let b0 = sint64_to_sint8 z in
   let b1 = sint64_to_sint8 (z >>^ 8ul) in
@@ -90,7 +92,18 @@ let selem s = seval s % prime
 assume val lemma_logand_lt: #n:pos -> a:UInt.uint_t n -> m:pos{m < n} -> b:UInt.uint_t n{b < pow2 m} ->
   Lemma (pow2 m < pow2 n /\ UInt.logand #n a b < pow2 m)
 
+
 #reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+
+inline_for_extraction val create_3: s0:limb -> s1:limb -> s2:limb -> Tot (s:seqelem{
+  Seq.index s 0 == s0 /\ Seq.index s 1 == s1 /\ Seq.index s 2 == s2})
+inline_for_extraction let create_3 s0 s1 s2 =
+  let s = Seq.create len limb_zero in
+  let s = Seq.upd s 0 s0 in
+  let s = Seq.upd s 1 s1 in
+  let s = Seq.upd s 2 s2 in
+  s
+  
 
 val poly1305_encode_r_spec: key:Seq.seq H8.t{Seq.length key = 16} -> Tot (s':seqelem{red_44 s'})
 let poly1305_encode_r_spec key =
@@ -103,14 +116,10 @@ let poly1305_encode_r_spec key =
   let r0 = ( t0                           ) &^ uint64_to_limb 0xffc0fffffffuL in
   let r1 = ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ uint64_to_limb 0xfffffc0ffffuL in
   let r2 = ((t1 >>^ 24ul)                 ) &^ uint64_to_limb 0x00ffffffc0fuL in
-  let s = Seq.create len limb_zero in
-  let s = Seq.upd s 0 r0 in
-  let s = Seq.upd s 1 r1 in
-  let s = Seq.upd s 2 r2 in
   lemma_logand_lt #64 (v t0) 44 0xffc0fffffff;
   lemma_logand_lt #64 (v ((t0 >>^ 44ul) |^ (t1 <<^ 20ul))) 44 0xfffffc0ffff;
   lemma_logand_lt #64 (v (t1 >>^ 24ul)) 42 0x00ffffffc0f;
-  s
+  create_3 r0 r1 r2
 
 
 inline_for_extraction let mask_42 : p:Hacl.Bignum.Limb.t{v p = pow2 42 - 1} = assert_norm(pow2 42 - 1 = 0x3ffffffffff); assert_norm(pow2 64 = 0x10000000000000000); uint64_to_limb 0x3ffffffffffuL
@@ -132,11 +141,7 @@ let toField_spec m =
   let t_0 = t0 &^ mask_44 in
   let t_1 = ((t0 >>^ 44ul) |^ (t1 <<^ 20ul)) &^ mask_44 in
   let t_2 = (t1 >>^ 24ul) in
-  let b = Seq.create len limb_zero in
-  let b = Seq.upd b 0 t_0 in
-  let b = Seq.upd b 1 t_1 in
-  let b = Seq.upd b 2 t_2 in
-  b
+  create_3 t_0 t_1 t_2
 
 
 #reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
@@ -153,58 +158,6 @@ let toField_plus_2_128_spec m =
   assert_norm (pow2 40 + pow2 40 < pow2 44);
   let b2' = uint64_to_limb 0x10000000000uL |^ b2 in
   Seq.upd b 2 b2'
-
-
-(* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20" *)
-
-(* assume val lemma_logor_max: #n:pos -> a:UInt.uint_t n -> b:UInt.uint_t n -> m:nat{m <= n} -> Lemma *)
-(*   (requires (a < pow2 m /\ b < pow2 m)) *)
-(*   (ensures (UInt.logor a b < pow2 m)) *)
-
-(* val toField_plus_spec: len:U32.t{U32.v len < 16} -> m:word{Seq.length m = U32.v len} -> *)
-(*   Tot (s:seqelem{red_44 s}) *)
-(* let toField_plus_spec len m' = *)
-(*   cut (pow2 (24 + U32.v len) % pow2 (24 + U32.v len) = 0); *)
-(*   let m = Seq.append m' (Seq.create (16 - U32.v len) (uint8_to_sint8 0uy)) in *)
-(*   let b = toField_spec m in *)
-(*   let b2 = Seq.index b 2 in *)
-(*   let open Hacl.Bignum.Limb in *)
-(*   let b2' = uint64_to_sint64 1uL <<^ (U32.(24ul +^ len)) |^ b2 in *)
-(*   Math.Lemmas.pow2_lt_compat 64 (24 + U32.v len); *)
-(*   Math.Lemmas.modulo_lemma (pow2 (24 + U32.v len)) (pow2 64); *)
-(*   Math.Lemmas.pow2_lt_compat 44 (24 + U32.v len); *)
-(*   lemma_logor_max #64 (pow2 (24 + U32.v len)) (v b2) 44; *)
-(*   Seq.upd b 2 b2' *)
-
-
-(* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20" *)
-
-(* val poly1305_finish_spec: acc:seqelem{red_45 acc} -> key_s:Seq.seq H8.t{Seq.length key_s = 16} -> *)
-(*   Tot (mac:Seq.seq H8.t{Seq.length mac = 16}) *)
-(* let poly1305_finish_spec acc key_s = *)
-(*   Math.Lemmas.pow2_lt_compat 63 44; *)
-(*   let acc1 = Hacl.Spec.Bignum.Fproduct.carry_limb_spec acc 0 in *)
-(*   (\* assume (v (Seq.index (as_seq h1 acc) 2) < pow2 45 + pow2 20); *\) *)
-(*   assert_norm(pow2 45 + pow2 20 = 0x200000000000 + 0x100000); *)
-(*   assert_norm(pow2 42 = 0x40000000000); *)
-(*   assert_norm(pow2 44 = 0x100000000000); *)
-(*   assert_norm(pow2 64 = 0x10000000000000000); *)
-(*   let acc2 = Hacl.Spec.Bignum.Modulo.carry_top_spec acc1 in *)
-(*   let acc3 = Hacl.Spec.Bignum.Fproduct.carry_0_to_1_spec acc in *)
-(*   (\* Adding 2nd part of the key (one time pad) *\) *)
-(*   let key = toField_spec key_s in *)
-(*   let acc4 = Hacl.Spec.Bignum.Fsum.fsum_spec acc key len in *)
-(*   (\* Last carry and truncation *\) *)
-(*   let acc5 = Hacl.Spec.Bignum.Fproduct.carry_limb_spec acc 0 in *)
-(*   let h0 = Seq.index acc5 0 in *)
-(*   let h1 = Seq.index acc5 1 in *)
-(*   let h2 = Seq.index acc5 2 in *)
-(*   let open Hacl.Bignum.Limb in *)
-(*   let h0 = h0 |^ (h1 <<^ 44ul) in *)
-(*   let h1 = (h1 >>^ 20ul) |^ (h2 <<^ 24ul) in *)
-(*   let mac0 = store64_le_spec h0 in *)
-(*   let mac1 = store64_le_spec h1 in *)
-(*   Seq.append mac0 mac1 *)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
@@ -263,6 +216,7 @@ val poly1305_process_last_block_spec:
   rem':U64.t{U64.v rem' = Seq.length m /\ U64.v rem' < 16} ->
   Tot (st':poly1305_state_{red_44 (MkState?.r st') /\ red_45 (MkState?.h st')})
 let poly1305_process_last_block_spec st m rem' =
+  assert_norm (pow2 8 = 256);
   let m' = Seq.append m (Seq.create (16 - U64.v rem') (uint8_to_sint8 0uy)) in
   let m'' = Seq.upd m' (U64.v rem') (uint8_to_sint8 1uy) in
   let block = toField_spec m'' in
@@ -273,16 +227,17 @@ let poly1305_process_last_block_spec st m rem' =
   MkState r acc' log
 
 
-#set-options "--lax"
+#set-options "--initial_fuel 0 --max_fuel 0"
 
 val poly1305_last_pass_spec: acc:seqelem{red_45 acc} -> Tot (acc':seqelem)
 let poly1305_last_pass_spec acc =
+  last_pass_is_fine acc;
   let acc1 = Hacl.Spec.Bignum.Fproduct.carry_limb_spec acc 0 in
   let acc2 = Hacl.Spec.Bignum.Modulo.carry_top_spec acc1 in
   Hacl.Spec.Bignum.Fproduct.carry_0_to_1_spec acc2
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val poly1305_finish_spec: st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
   m:Seq.seq H8.t ->
@@ -290,6 +245,8 @@ val poly1305_finish_spec: st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (M
   key_s:Seq.seq H8.t{Seq.length key_s = 16} ->
   Tot (m:Seq.seq H8.t{Seq.length m = 16})
 let poly1305_finish_spec st m len key_s =
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 32 = 0x100000000);
   let rem' = U64.(len &^ 0xfuL) in
   assert_norm(pow2 4 - 1 = 0xf);
   UInt.logand_mask (U64.v len) 4;
@@ -315,7 +272,7 @@ let poly1305_finish_spec st m len key_s =
 
 val crypto_onetimeauth_spec:
   input:Seq.seq H8.t ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len < Seq.length input} ->
+  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Seq.length input} ->
   k:Seq.seq H8.t{Seq.length k = 32} ->
   Tot (mac:Seq.seq H8.t{Seq.length mac = 16})
 let crypto_onetimeauth_spec input len k =

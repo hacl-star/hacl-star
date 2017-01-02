@@ -516,13 +516,109 @@ let fmul_46_44_is_fine s1 s2 =
   assert_norm(p44 < p45);
   assert_norm(p42 < p45)
 
+open Hacl.Spec.Bignum.Bigint
 
 val add_and_multiply_tot:
   acc:seqelem{red_45 acc} -> block:seqelem{red_44 block} -> r:seqelem{red_44 r} ->
-  Tot (acc':seqelem{red_45 acc'})
+  Tot (acc':seqelem{red_45 acc'
+    /\ seval acc' % prime = ((seval acc + seval block) * seval r) % prime})
 let add_and_multiply_tot acc block r =
   assert_norm(pow2 63 = 0x8000000000000000);
   let acc_p_block = fsum_spec acc block len in
   lemma_fsum_def acc block;
+  lemma_fsum_eval acc block;
   fmul_46_44_is_fine acc_p_block r;
   fmul_spec acc_p_block r
+
+
+#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+
+private val carry_spec_unrolled:
+  s:seqelem{carry_limb_pre s 0} ->
+  Tot (s':seqelem{v (Seq.index s' 2) < v (Seq.index s 2) + pow2 (word_size-limb_size)})
+private let carry_spec_unrolled s =
+  let s1 = carry_limb_step s 0 in
+  lemma_carry_limb_step s 0;
+  let s2 = carry_limb_step s1 1 in
+  lemma_carry_limb_step s1 1;
+  Math.Lemmas.lemma_div_lt (v (Seq.index s1 1)) (word_size) limb_size;
+  cut (v (Seq.index s2 2) < v (Seq.index s 2) + pow2 (word_size - limb_size));
+  s2
+
+
+#set-options "--z3rlimit 5 --initial_fuel 5 --max_fuel 5"
+
+private val lemma_carry_spec_unrolled:
+  s:seqelem{carry_limb_pre s 0} -> Lemma (carry_spec_unrolled s == carry_limb_spec s 0)
+let lemma_carry_spec_unrolled s = ()
+
+
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+
+val lemma_carried_is_fine_to_carry:
+  s:seqelem{bounds s p45 p45 p45} ->
+  Lemma (carry_limb_pre s 0 /\ bounds (carry_limb_spec s 0) p44 p44 (p45+p20))
+let lemma_carried_is_fine_to_carry s =
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 (limb_n-1) = 0x8000000000000000);
+  lemma_carry_spec_unrolled s
+
+
+#set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
+
+val lemma_carry_then_carry_top: s:seqelem{carry_limb_pre s 0} -> Lemma
+  (((v (Seq.index s 2) + pow2 (word_size - limb_size))/ pow2 42 < pow2 word_size
+    /\ 5 * (v (Seq.index s 2) + pow2 (word_size - limb_size) / pow2 42) + pow2 limb_size < pow2 word_size)
+    ==> carry_top_pre (carry_limb_spec s 0) )
+let lemma_carry_then_carry_top s =
+  let s' = carry_spec_unrolled s in
+  lemma_carry_spec_unrolled s;
+  cut (v (Seq.index s' 2) < v (Seq.index s 2) + pow2 (word_size-limb_size));
+  Math.Lemmas.nat_times_nat_is_nat 5 (v (Seq.index s 2) + pow2 (word_size-limb_size));
+  if ((v (Seq.index s 2) + pow2 (word_size - limb_size))/ pow2 42 < pow2 word_size
+    && 5 * (v (Seq.index s 2) + pow2 (word_size - limb_size) / pow2 42) + pow2 limb_size < pow2 word_size) then (
+    Math.Lemmas.lemma_div_le (v (Seq.index s' 2)) (v (Seq.index s 2) + pow2 (word_size-limb_size)) (pow2 42);
+    cut (v (Seq.index s' 2) / pow2 42 <= (v (Seq.index s 2) + pow2 (word_size-limb_size)) / pow2 42);
+    Math.Lemmas.nat_over_pos_is_nat (v (Seq.index s' 2)) (pow2 42);
+    Math.Lemmas.nat_over_pos_is_nat (((v (Seq.index s 2)+(pow2 (word_size-limb_size)))/pow2 42)) (pow2 42);
+    Math.Lemmas.multiplication_order_lemma (v (Seq.index s' 2) / pow2 42)
+                                           ((v (Seq.index s 2)+(pow2 (word_size-limb_size)))/pow2 42) 5;
+    cut (5 * (v (Seq.index s' 2) / pow2 42) <= 5 * ((v (Seq.index s 2) + pow2 (word_size-limb_size)) / pow2 42));
+    cut (v (Seq.index s' 0) < pow2 limb_size);
+    cut (5 * (v (Seq.index s' 2) / pow2 42) + v (Seq.index s' 0) < pow2 word_size)
+  )
+  else ()
+
+
+
+val lemma_carried_is_fine_to_carry_top:
+  s:seqelem{bounds s p44 p44 (p45 + p20)} ->
+  Lemma (carry_top_pre s /\ bounds (carry_top_spec s) (p44+5*((p45+p20)/p42)) p44 p42)
+let lemma_carried_is_fine_to_carry_top s =
+  assert_norm (pow2 64 = 0x10000000000000000);
+  assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
+  assert_norm (pow2 (63) = 0x8000000000000000);
+  lemma_carry_then_carry_top s;
+  lemma_carry_top_spec_ s
+
+
+val lemma_carried_is_fine_to_carry_last:
+  s:seqelem{bounds (s) (p44+5*((p45+p20)/p42)) p44 p42} ->
+  Lemma (carry_0_to_1_pre s /\ bounds (carry_0_to_1_spec s) p44 (p44+p20) p42)
+let lemma_carried_is_fine_to_carry_last s =
+  assert_norm (pow2 64 = 0x10000000000000000)
+
+
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+
+val last_pass_is_fine:
+  s:seqelem{red_45 s} ->
+  Lemma (carry_limb_pre s 0
+    /\ carry_top_pre (carry_limb_spec s 0)
+    /\ carry_0_to_1_pre (carry_top_spec (carry_limb_spec s 0)))
+let last_pass_is_fine s =
+  lemma_carried_is_fine_to_carry s;
+  let o' = carry_limb_spec s 0 in
+  lemma_carried_is_fine_to_carry_top o';
+  let o'' = carry_top_spec o' in
+  lemma_carried_is_fine_to_carry_last o''
