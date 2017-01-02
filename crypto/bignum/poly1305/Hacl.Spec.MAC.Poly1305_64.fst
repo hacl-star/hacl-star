@@ -251,7 +251,7 @@ let poly1305_finish_spec st m len key_s =
   assert_norm(pow2 4 - 1 = 0xf);
   UInt.logand_mask (U64.v len) 4;
   let st' = if U64.(rem' =^ 0uL) then st
-           else poly1305_process_last_block_spec st (Seq.slice m 0 (U64.v rem')) rem' in
+           else poly1305_process_last_block_spec st (Seq.slice m (U64.v len - U64.v rem') (U64.v len)) rem' in
   let acc = poly1305_last_pass_spec (MkState?.h st') in
   let kl = load64_le_spec (Seq.slice key_s 0 8) in
   let kh = load64_le_spec (Seq.slice key_s 8 16) in
