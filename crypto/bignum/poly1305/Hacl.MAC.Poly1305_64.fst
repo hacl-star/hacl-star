@@ -523,7 +523,7 @@ val poly1305_finish_:
   key_s:uint8_p{length key_s = 16} ->
   Stack log_t
     (requires (fun h -> live_st h st /\ live h mac /\ live h m /\ live h key_s
-      /\ disjoint st.h mac
+      /\ disjoint st.h mac /\ disjoint st.h key_s /\ disjoint st.h m
       /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)))
     (ensures  (fun h0 updated_log h1 -> modifies_2 st.h mac h0 h1 /\ live_st h0 st /\ live h0 m
       /\ live h1 st.h /\ live h1 mac /\ live h0 key_s
@@ -531,33 +531,14 @@ val poly1305_finish_:
       /\ as_seq h1 mac == poly1305_finish_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) ())
                                               (as_seq h0 m) len (as_seq h0 key_s)
       ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 let poly1305_finish_ log st mac m len key_s =
+  let h0 = ST.get() in
   poly1305_finish__ log st mac m len key_s;  
-  (* assert_norm (pow2 64 = 0x10000000000000000); *)
-  (* assert_norm (pow2 32 = 0x100000000); *)
-  (* let rem' = U64.(len &^ 0xfuL) in *)
-  (* assert_norm(pow2 4 - 1 = 0xf); *)
-  (* UInt.logand_mask (U64.v len) 4; *)
-  (* let h0 = ST.get() in *)
-  (* if U64.(rem' =^ 0uL) then () *)
-  (* else ( *)
-  (*   Math.Lemmas.lemma_div_mod (U64.v len) (16); *)
-  (*   Math.Lemmas.pow2_lt_compat 64 32; *)
-  (*   Math.Lemmas.modulo_lemma (U64.v len - U64.v rem') (pow2 32); *)
-  (*   Math.Lemmas.modulo_lemma (U64.v rem') (pow2 32); *)
-  (*   let start = Int.Cast.uint64_to_uint32 U64.(len -^ rem') in *)
-  (*   let l = Int.Cast.uint64_to_uint32 rem' in *)
-  (*   let last_block = sub m start l in *)
-  (*   cut (as_seq h0 last_block == (Seq.slice (as_seq h0 m) (U64.v len - U64.v rem') (U64.v len))); *)
-  (*   poly1305_process_last_block st (sub m start l) rem' *)
-  (*   ); *)
-  (* let h1 = ST.get() in *)
-  (* cut (modifies_1 st.h h0 h1); *)
   poly1305_last_pass st.h;
-  let h2 = ST.get() in
-  (* cut (modifies_1 st.h h0 h2); *)
   cut (disjoint st.h mac);
+  let h1 = ST.get() in
+  no_upd_lemma_1 h0 h1 st.h key_s;
   let kl = load64_le (sub key_s 0ul 8ul) in
   let kh = load64_le (sub key_s 8ul 8ul) in
   let h0 = st.h.(0ul) in
