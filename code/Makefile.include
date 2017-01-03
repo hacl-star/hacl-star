@@ -2,12 +2,12 @@ UNAME := $(shell uname)
 
 FSTAR_HOME?=../../FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME=..
+HACL_HOME?=..
 
 HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
 
 HACL_LIB=$(HACL_HOME)/code/lib
-HACL_FILES=Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Policies.fst
+HACL_FILES=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Types.fst Hacl.Policies.fst
 HACL_LIB_FILES=$(addprefix $(HACL_LIB)/, $(HACL_FILES))
 HACL_KREMLIN=$(HACL_LIB)/kremlin
 HACL_KREMLIN_FILES=$(addprefix $(HACL_KREMLIN)/, $(HACL_FILES))

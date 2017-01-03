@@ -2,34 +2,40 @@
 
 ## Description
 
-This directory contains code for several cryptographic primitives.
-It uses a custom statful effect from the FStar.HyperStack and FStar.HST modules to ensures memory safety and emulate a C* stack with stack-allocation only.
-It emulates some pointer arithmetic features via `FStar.Buffer.fst` provided in `lib/hst`.
+This directory contains F* code for several cryptographic primitives.
+
 
 ## Structure
 
-+ ec
++ salsa-family
 
-   Code for Elliptic curve cryptography, for now:
-   + Curve25519
+   Code for Salsa20, HSalsa20, XSalsa20, and ChaCha20
 
-+ symetric
++ bignum
 
-   Code for symetric cryptography, for now:
-   + Chacha20
-   + Poly1305
-   + AES,GCM, AEAD-AES256GCM verify
+   Code for generic prime-field arithmetic 
 
-+ hash
++ poly1305
 
-   Code for hash functions
+   Code for Poly1305 MAC (relies on bignum)
+
++ curve25519
+
+   Code for Curve25519 (relies on bignum)
 
 ## Verification
 
-Run `make` to run start the library verification.
+Run `make verify` to run start the library verification.
 
 Currently verified primitives:
-+ Chacha20 (memory safety)
-+ Poly1305 (memory safety)
-+ AEAD-AES256GCM (memory safety)
-+ Curve25519 (memory safety)
++ Salsa20, HSalsa20, XSalsa20, Chacha20 (memory safety, side channel resistance)
++ Poly1305 (memory safety, overflow safety, functional correctness, side channel resistance)
++ Curve25519 (memory safety, overflow safety, functional correctness, side channel resistance)
+
+## Extraction to C and execution
+
+Run `make extract` to extract C code for all primitives.
+Run `make test` to run some benchmarks
+Run `make speed` to run speed tests
+
+

@@ -1,8 +1,7 @@
-
 FSTAR_HOME?=../../../FStar
-KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
-HACL_HOME=../..
-include ../../lib/hyperstack/Makefile.include
+KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
+HACL_HOME?=../..
+include ../Makefile.include
 
 
 FSTAR_LIB_FILES= \
@@ -46,12 +45,10 @@ FSTAR_LIB_FILES= \
 	FStar.ST.fst \
 	FStar.Buffer.fst
 
-HACL_LIB_FILES= Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst 
-
 bignum:
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
-		generic/Hacl.Bignum.Constants.fsti \
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
+		--include ../lib --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+		Hacl.Bignum.Constants.fsti \
 		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
 		Hacl.Bignum.Bigint.fst \
 		Hacl.Bignum.Modulo.fsti \
@@ -82,7 +79,7 @@ bignum:
 x25519-bignum:
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include x25519  \
-		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+		--include ../lib --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
 		Hacl.Bignum.Constants.fst \
 		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
@@ -117,7 +114,7 @@ x25519-bignum:
 x25519:
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --lax \
 		--include x25519  \
-		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+		--include ../lib --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
 		Hacl.Bignum.Constants.fst \
 		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
@@ -161,7 +158,7 @@ x25519:
 poly1305:
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --lax \
 		--include poly1305  \
-		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+		--include ../lib --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
 		Hacl.Bignum.Constants.fst \
 		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
@@ -189,7 +186,7 @@ test:
 	mkdir -p tmp
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --lax --odir tmp \
 		--include x25519 --codegen Kremlin \
-		--include ../../lib/hyperstack --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
+		--include ../lib --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
 		Hacl.Bignum.Constants.fst \
 		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Parameters.fst \
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
@@ -212,7 +209,7 @@ kremlin-x25519:
 	mkdir -p tmp
 	krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir tmp -verbose \
 		-I x25519 \
-		-I ../../lib/hyperstack/kremlin \
+		-I ../lib/kremlin \
 		Hacl.Bignum.Constants.fst \
 		Hacl.Bignum.Parameters.fst Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
 		Hacl.Spec.Bignum.Field.fst \
@@ -243,7 +240,7 @@ kremlin-x25519:
 kremlin-poly1305:
 	mkdir -p tmppoly
 	krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir tmppoly -verbose \
-		-I poly1305 -I ../../lib/hyperstack/kremlin \
+		-I poly1305 -I ../lib/kremlin \
 		Hacl.Bignum.Constants.fst Hacl.Bignum.Parameters.fst \
 		Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
 		Hacl.Spec.Bignum.Bigint.fst \
@@ -265,7 +262,7 @@ kremlin-poly1305:
 
 
 compile:
-	gcc -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
+	gcc -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../lib/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
 		tmp/Prims.c \
 		tmp/FStar_Mul.c \
 		tmp/FStar_Squash.c \
@@ -324,7 +321,7 @@ run-poly1305:
 
 
 banana:
-	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
+	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -flto -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../lib/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= \
 	-o banana.exe \
 		extracted1305/Hacl_Bignum_Fsum.c \
 		extracted1305/Hacl_Bignum_Modulo.c \
@@ -340,7 +337,7 @@ run-x25519:
 	gcc-6 -march=native -m64 -funroll-loops -mtune=native -Ofast -fomit-frame-pointer -I ~/Desktop/repositories/kremlin/kremlib extracted25519/Hacl_X25519.c extracted25519/Hacl_Test_X25519.c extracted25519/kremlib.c extracted25519/testlib.c #	-flto=8 -fuse-linker-plugin
 
 run:
-	gcc -march=native -m64 -funroll-loops -mtune=native -Ofast -flto=8 -Wno-parentheses -Wno-unused-variable -g -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../../lib/hyperstack/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= -fuse-linker-plugin \
+	gcc -march=native -m64 -funroll-loops -mtune=native -Ofast -flto=8 -Wno-parentheses -Wno-unused-variable -g -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ~/Desktop/repositories/FStar/ulib/hyperstack -I x25519 -I ../lib/kremlin -I ~/Desktop/repositories/FStar/../kremlin/kremlib -I ~/Desktop/repositories/FStar/../kremlin/test -I ~/Desktop/repositories/kremlin/kremlib -I tmp -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= -fuse-linker-plugin \
 		extracted25519/Prims.c \
 		extracted25519/FStar_Mul.c \
 		extracted25519/FStar_Squash.c \

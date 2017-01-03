@@ -43,12 +43,12 @@ val cmp_bytes_:
     (requires (fun h -> live h b /\ live h b'))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ (U8.v z = 0 ==> as_seq h0 b == as_seq h0 b')))
 let rec cmp_bytes_ b b' len tmp =
-  if U32(len =^ 0ul) then U8.lognot tmp
+  if U32.(len =^ 0ul) then U8.lognot tmp
   else (
-    let i = U32 (len -^ 1ul) in
+    let i = U32.(len -^ 1ul) in
     let bi = leak_byte b i in
     let bi' = leak_byte b' i in
-    let tmp = U8 (eq_mask bi bi' &^ tmp) in
+    let tmp = U8.(eq_mask bi bi' &^ tmp) in
     cmp_bytes_ b b' i tmp
   )
 
