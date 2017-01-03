@@ -1,0 +1,61 @@
+UNAME := $(shell uname)
+
+FSTAR_HOME?=../../FStar
+KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
+HACL_HOME=..
+
+HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
+
+HACL_LIB=$(HACL_HOME)/code/lib
+HACL_FILES=Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Policies.fst
+HACL_LIB_FILES=$(addprefix $(HACL_LIB)/, $(HACL_FILES))
+HACL_KREMLIN=$(HACL_LIB)/kremlin
+HACL_KREMLIN_FILES=$(addprefix $(HACL_KREMLIN)/, $(HACL_FILES))
+HACL_API=$(HACL_HOME)/code/api
+HACL_CRYPTO_UTILS=$(HACL_HOME)/code/lib
+
+ifeq ($(CI),true)
+VERBOSE=
+else
+VERBOSE=-verbose
+endif
+KREMLIN=$(KREMLIN_HOME)/krml
+KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
+                        -ccopt -Wno-error=format=
+
+# Linux specific compilation instruction for PneuTube
+ifeq ($(UNAME), Linux)
+KREMLIN_ARGS+= -ccopt -D_GNU_SOURCE
+endif
+
+KREMLIB=$(KREMLIN_HOME)/kremlib
+KREMTEST=$(KREMLIN_HOME)/test
+
+FSTAR_OPTIONS_VER=-fsopt "--use_hints" -skip-extraction
+FSTAR_OPTIONS_KREMLIN=
+FSTAR=$(KREMLIN) -verify -verbose -skip-compilation
+
+OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
+                $(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \
+		-I $(FSTAR_HOME)/ulib/ml/extracted \
+		-I $(FSTAR_HOME)/ulib/ml/hyperstack -w -20-26-3-8-58
+OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
+OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
+
+ml-lib:
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml MEM=HST
+
+import-lib:
+	@cp $(HACL_LIB_FILES) .
+
+import-kremlin:
+	@cp $(HACL_KREMLIN_FILES)) .
+
+%.fst-lax: %.fst
+	$(FSTAR) --lax $(FSTAR_INCLUDES) $^
+
+%.fst-ver: %.fst
+	$(FSTAR) $(addprefix -fsopt , $(FSTAR_OPTIONS_VER)) $(FSTAR_INCLUDES) --verify_module $(basename $(notdir $@)) $^
+
+%.fst-krml: %.fst
+	$(KREMLIN) $(KREMLIN_INCLUDES) $^
