@@ -45,36 +45,33 @@ FSTAR_LIB_FILES= \
 	FStar.ST.fst \
 	FStar.Buffer.fst
 
-bignum:
+BIGNUM_FILES= \
+	Hacl.Bignum.Constants.fsti \
+	Hacl.Bignum.Parameters.fsti \
+	Hacl.Bignum.Limb.fst \
+	Hacl.Bignum.Wide.fst \
+	Hacl.Spec.Bignum.Field.fst \
+	Hacl.Spec.Bignum.Bigint.fst \
+	Hacl.Bignum.Modulo.fsti \
+	Hacl.Bignum.Predicates.fsti \
+	Hacl.Spec.Bignum.Fsum.fst \
+	Hacl.Spec.Bignum.Fdifference.fst  \
+	Hacl.Spec.Bignum.Fscalar.fst \
+	Hacl.Spec.Bignum.Fproduct.fst \
+	Hacl.Bignum.Fsum.fst \
+	Hacl.Bignum.Fdifference.fst  \
+	Hacl.Bignum.Fscalar.fst \
+	Hacl.Bignum.Fproduct.fst \
+	Hacl.Bignum.Crecip.fsti \
+	Hacl.Bignum.Predicates.fst \
+	Hacl.Bignum.fst 
+
+BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
+
+verify: 
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
-		Hacl.Bignum.Constants.fsti \
-		Hacl.Bignum.Parameters.fsti Hacl.Bignum.Limb.fst Hacl.Bignum.Wide.fst \
-		Hacl.Bignum.Bigint.fst \
-		Hacl.Bignum.Modulo.fsti \
-		Hacl.Bignum.Predicates.fsti \
-		Hacl.Bignum.Fsum.Spec.fst Hacl.Bignum.Fdifference.Spec.fst  \
-		Hacl.Bignum.Fscalar.Spec.fst Hacl.Bignum.Fproduct.Spec.fst \
-		Hacl.Bignum.Fsum.fst Hacl.Bignum.Fdifference.fst  \
-		Hacl.Bignum.Fscalar.fst Hacl.Bignum.Fproduct.fst \
-		Hacl.Bignum.Crecip.fsti Hacl.Bignum.fst \
-		$(addprefix --verify_module , 	Hacl.Bignum.Parameters \
-						Hacl.Bignum.Limb \
-						Hacl.Bignum.Wide \
-						Hacl.Bignum.Bigint \
-						Hacl.Bignum.Modulo \
-						Hacl.Bignum.Fsum.Spec \
-						Hacl.Bignum.Fdifference.Spec \
-						Hacl.Bignum.Fscalar.Spec \
-						Hacl.Bignum.Fproduct.Spec \
-						Hacl.Bignum.Fsum \
-						Hacl.Bignum.Fdifference \
-						Hacl.Bignum.Fscalar \
-						Hacl.Bignum.Fproduct \
-						Hacl.Bignum.Crecip \
-						Hacl.Bignum.Predicates \
-						Hacl.Bignum \
-		)
+		--include ../lib --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) $(BIGNUM_FILES) \
+		$(addprefix --verify_module , 	$(BIGNUM_MODULES))
 
 x25519-bignum:
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
