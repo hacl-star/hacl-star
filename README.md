@@ -6,16 +6,13 @@ A formally verified cryptographic library in F*
 
 # Warning
 
-This library is highly experimental and a work-in-progress.
-Do not use without asking advice to JK or Benjamin !
+This library is highly experimental and a work-in-progress. Do not use it in production systems without consulting the authors.
 
 
-# Code test targets (WIP)
+# Code test targets 
 
-Run `make -C test` to run the extraction tests currently available (to OCaml, C extraction to appear soon).
+Run `make -C test` to run the extraction tests currently available
 
 
-# Code verification targets (WIP)
+# Code verification targets 
 
-Run `make -C crypto_hst` to run the verification.
-NB: this code relies on the F* low-level memory model (see [the fstar library](https://github.com/FStarLang/FStar/tree/master/ulib) for more details, in particular `FStar.HyperStack`, `FStar.HST` and `FStar.Buffer`).
