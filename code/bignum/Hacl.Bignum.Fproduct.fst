@@ -77,8 +77,6 @@ let rec shift output =
   let h = ST.get() in
   Seq.lemma_eq_intro (as_seq h output) (shift_spec (as_seq h0 output))
 
-#set-options "--z3rlimit 20"
-
 
 #set-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
 
@@ -139,6 +137,8 @@ let rec carry_wide_ tmp ctr =
   )
 
 
+#reset-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1"
+
 val carry_limb_:
   t:felem ->
   ctr:U32.t{U32.v ctr < len} ->
@@ -164,7 +164,6 @@ let rec carry_limb_ tmp ctr =
     assert(v r0 < pow2 limb_size);
     let open Hacl.Bignum.Limb in
     let c  = tctr >>^ climb_size in
-    Math.Lemmas.pow2_lt_compat (limb_n - 1) (limb_n);
     Math.Lemmas.pow2_double_sum (limb_n - 1);
     Math.Lemmas.lemma_div_lt (v tctr) (limb_n) (limb_size);
     Math.Lemmas.pow2_le_compat (limb_n - 1) (limb_n - limb_size);

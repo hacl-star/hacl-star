@@ -46,14 +46,10 @@ FSTAR_LIB_FILES= \
 	FStar.Buffer.fst
 
 BIGNUM_FILES= \
-	Hacl.Bignum.Constants.fsti \
-	Hacl.Bignum.Parameters.fsti \
 	Hacl.Bignum.Limb.fst \
 	Hacl.Bignum.Wide.fst \
 	Hacl.Spec.Bignum.Field.fst \
 	Hacl.Spec.Bignum.Bigint.fst \
-	Hacl.Bignum.Modulo.fsti \
-	Hacl.Bignum.Predicates.fsti \
 	Hacl.Spec.Bignum.Fsum.fst \
 	Hacl.Spec.Bignum.Fdifference.fst  \
 	Hacl.Spec.Bignum.Fscalar.fst \
@@ -62,16 +58,29 @@ BIGNUM_FILES= \
 	Hacl.Bignum.Fdifference.fst  \
 	Hacl.Bignum.Fscalar.fst \
 	Hacl.Bignum.Fproduct.fst \
-	Hacl.Bignum.Crecip.fsti \
-	Hacl.Bignum.Predicates.fst \
 	Hacl.Bignum.fst 
+#	Hacl.Bignum.Constants.fsti \
+	Hacl.Bignum.Parameters.fsti \
+	Hacl.Bignum.Modulo.fsti \
+	Hacl.Bignum.Crecip.fsti \
 
 BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
 
-verify: 
+%.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib --explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) $(BIGNUM_FILES) \
-		$(addprefix --verify_module , 	$(BIGNUM_MODULES))
+		--include ../lib $^ --use_hints
+
+verify:
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
+		--include ../lib $(BIGNUM_FILES) --use_hints
+
+%-hints: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
+		--include ../lib $^ --record_hints
+
+ALL_HINTS=$(addsuffix -hints, $(BIGNUM_MODULES))
+
+hints: $(ALL_HINTS)
 
 x25519-bignum:
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \

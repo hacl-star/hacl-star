@@ -10,7 +10,9 @@ open Hacl.Bignum.Limb
 open Hacl.Spec.Bignum.Bigint
 open Hacl.Spec.Bignum.Modulo
 open Hacl.Spec.Bignum.Fproduct
+open Hacl.Spec.Bignum.Fsquare
 open Hacl.Spec.Bignum.Fmul
+open Hacl.Spec.Bignum.Crecip
 open Hacl.Spec.Bignum
 open Hacl.Bignum.Modulo
 open Hacl.Bignum.Fscalar
@@ -138,24 +140,26 @@ val fmul:
 let fmul output a b = fmul output a b
 
 
-#set-options "--lax"
-
 val fsquare_times:
   output:felem ->
-  input:felem ->
-  count:ctr ->
+  input:felem{disjoint output input} ->
+  count:FStar.UInt32.t{FStar.UInt32.v count > 0} ->
   Stack unit
-    (requires (fun _ -> True))
-    (ensures (fun _ _ _ -> true))
+    (requires (fun h -> live h output /\ live h input /\ fsquare_pre (as_seq h input)))
+    (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ live h0 input /\ modifies_1 output h0 h1
+      /\ fsquare_pre (as_seq h0 input)
+      /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
 let fsquare_times output input count =
   fsquare_times output input count
 
 
 val crecip:
-  output:felem ->
-  input:felem ->
-  Stack unit
-    (requires (fun _ -> True))
-    (ensures (fun _ _ _ -> true))
+  out:felem ->
+  z:felem -> Stack unit
+  (requires (fun h -> live h out /\ live h z /\ crecip_pre (as_seq h z)))
+  (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1 /\ live h0 z
+    /\ crecip_pre (as_seq h0 z)
+    /\ as_seq h1 out == crecip_tot (as_seq h0 z)
+  ))
 let crecip output input =
   crecip output input

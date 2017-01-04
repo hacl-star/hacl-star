@@ -14,8 +14,6 @@ inline_for_extraction let word_size = word_size
 (** Concrete platform word with side-channel protection **)
 inline_for_extraction let limb : Type0 = limb
 inline_for_extraction let wide : Type0 = wide
-(* inline_for_extraction val limb: Type0 *)
-(* inline_for_extraction val wide: Type0 *)
 inline_for_extraction let ctr  = FStar.UInt32.t
 
 (** Number of limbs of a bigint **)

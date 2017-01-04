@@ -8,6 +8,7 @@ open Hacl.Spec.Bignum.Bigint
 open Hacl.Bignum.Limb
 open Hacl.Bignum.Fsquare
 open Hacl.Bignum.Fmul
+open Hacl.Spec.Bignum.Crecip
 
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -17,9 +18,10 @@ val crecip:
   out:felem ->
   z:felem{disjoint out z} ->
   Stack unit
-  (requires (fun h -> live h out /\ live h z /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h z)))
-  (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1
-    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 out)))
+  (requires (fun h -> live h out /\ live h z /\ crecip_pre (as_seq h z)))
+  (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1 /\ live h0 z
+    /\ as_seq h1 out == crecip_tot (as_seq h0 z)
+    /\ crecip_pre (as_seq h1 out)))
 let crecip out z =
   push_frame();
   let buf = create limb_zero 20ul in

@@ -11,9 +11,11 @@ open Hacl.Spec.EC.AddAndDouble
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 #set-options "--lax"
 
-val crecip:
+let crecip_pre (z:seqelem) : GTot Type0 = red_513 z
+
+val crecip_tot:
   z:seqelem{red_513 z} -> Tot (s':seqelem{red_513 s'})
-let crecip z =
+let crecip_tot z =
   let a = fsquare_times_tot z 1 in
   let t0 = fsquare_times_tot a 2 in
   let b = fmul_tot t0 z in
