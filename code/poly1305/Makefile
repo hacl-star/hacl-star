@@ -62,6 +62,16 @@ POLY1305_FILES= \
 	Hacl.Spec.MAC.Poly1305_64.fst \
 	Hacl.MAC.Poly1305_64.fst
 
+POLY1305_SPECIFIC= \
+	Hacl.Bignum.Constants.fst \
+	Hacl.Bignum.Parameters.fst \
+	Hacl.Spec.Bignum.Modulo.fst \
+	Hacl.Bignum.Modulo.fst \
+	Hacl.Spec.Bignum.AddAndMultiply.fst \
+	Hacl.Bignum.AddAndMultiply.fst \
+	Hacl.Spec.MAC.Poly1305_64.fst \
+	Hacl.MAC.Poly1305_64.fst
+
 POLY1305_MODULES= \
 	Hacl.Bignum.Parameters \
 	Hacl.Bignum.Limb \
@@ -78,12 +88,17 @@ POLY1305_MODULES= \
 	Hacl.MAC.Poly1305
 
 
-verify: 
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib --include ../bignum --include ../bignum/interfaces \
-		--explicit_deps $(FSTAR_LIB_FILES) $(HACL_LIB_FILES) \
-		$(POLY1305_FILES) \
-		$(addprefix --verify_module , 	$(POLY1305_MODULES))
+%.fst-verify: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum $^ --use_hints
+
+verify: $(addsuffix -verify, $(POLY1305_FILES))
+
+%.fst-hints: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum $^ --record_hints
+
+hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
 
 extract-c:
