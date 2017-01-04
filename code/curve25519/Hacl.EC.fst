@@ -15,6 +15,8 @@ open Hacl.EC.Ladder
 module U32 = FStar.UInt32
 module H8 = Hacl.UInt8
 
+#set-options "--lax"
+
 
 val crypto_scalarmult:
   mypublic:uint8_p{length mypublic = 32} ->

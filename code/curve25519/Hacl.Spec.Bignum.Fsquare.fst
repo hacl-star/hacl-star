@@ -150,6 +150,7 @@ let fsquare_spec_ s =
   cut (w s4 = 2 * v r0 * v r4  + 2 * v r1 * v r3       + v r2 * v r2);
   seq_upd_5 s0 s1 s2 s3 s4
 
+#set-options "--z3rlimit 50"
 
 private let lemma_mul_5 a b c d e : Lemma ( (a+b+c+d+e)*(a+b+c+d+e) =
   a * a + a * b + a * c + a * d + a * e
@@ -188,7 +189,7 @@ private let lemma_aux_2 a b c d : Lemma ( (b * d) * a * c = (b * a) * (d * c) ) 
 private let lemma_aux_3 a b c : Lemma ( a * b * c = (a * b) * c ) = ()
 
 
-#set-options "--z3rlimit 10"
+#set-options "--z3rlimit 50"
 
 val lemma_fsquare_spec_2_2_0: r0:nat -> r1:nat -> r2:nat -> r3:nat -> r4:nat -> Lemma
   ( r0 * r0 + r0 * (pow2 51 * r1) + r0 * (pow2 102 * r2) + r0 * (pow2 153 * r3) + r0 * (pow2 204 * r4)
@@ -622,7 +623,7 @@ let lemma_mul_ineq (a:nat) (b:nat) (c:nat{a < c}) (d:nat{b < d}) : Lemma (a * b 
 let lemma_mul_ineq1 (a:pos) (c:nat) (d:nat{c < d}) : Lemma (a * c < a * d) = ()
 
 
-#set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 
 val lemma_52_to_fsquare_is_fine: s:seqelem{red_52 s} ->
  Lemma (fsquare_pre_ s /\ bounds' (fsquare_spec_ s) (77 * p104) (59 * p104) (41 * p104) (23 * p104) (5 * p104))
@@ -658,7 +659,7 @@ val lemma_104_smaller_than_108: s:seqelem_wide{bounds' s (77 * p104) (59 * p104)
 let lemma_104_smaller_than_108 s = ()
 
 
-#set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 
 inline_for_extraction let p106 : p:pos{p = 0x400000000000000000000000000} =
   assert_norm(pow2 106 = 0x400000000000000000000000000); pow2 106
@@ -691,7 +692,7 @@ let lemma_53_to_fsquare_is_fine s =
   ()
 
 
-#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_106_smaller_than_108: s:seqelem_wide{bounds' s (77 * p106) (59 * p106) (41 * p106) (23 * p106) (5 * p106)} -> Lemma (bounds' s (77 * p108) (59 * p108) (41 * p108) (23 * p108) (5 * p108))
 let lemma_106_smaller_than_108 s = ()
@@ -726,7 +727,7 @@ let lemma_52_fits_53 (s:seqelem{red_52 s}) : Lemma (red_53 s) = ()
 inline_for_extraction let pmax : p:pos{p = 410718794474278367478258677579776} =
   assert_norm(p5413 * p5413 = 410718794474278367478258677579776); p5413 * p5413
 
-#set-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 
 val lemma_5413_to_fsquare_is_fine: s:seqelem{red_5413 s} ->
  Lemma (fsquare_pre_ s /\ bounds' (fsquare_spec_ s) (77 * pmax) (59 * pmax) (41 * pmax) (23 * pmax) (5 * pmax))

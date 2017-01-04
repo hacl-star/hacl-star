@@ -12,6 +12,8 @@ open Hacl.Bignum.Parameters
 open Hacl.Bignum.Limb
 open Hacl.EC.Point
 
+#set-options "--lax"
+
 type uint8_p = buffer Hacl.UInt8.t
 
 private inline_for_extraction let zero_8 = uint8_to_sint8 0uy

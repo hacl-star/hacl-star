@@ -773,7 +773,7 @@ let lemma_53_55_is_fine_to_carry_last s =
   assert_norm(p108 = 0x20000000000000 * 0x80000000000000)
 
 
-#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val fmul_53_55_is_fine:
   s1:seqelem{red_53 s1} -> s2:seqelem{red_55 s2} ->
@@ -795,8 +795,6 @@ let fmul_53_55_is_fine s1 s2 =
   cut (o'''' == fmul_spec s1 s2);
   assert_norm(p51 < pow2 52);
   assert_norm(p51+p13 < pow2 52)
-
-#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 
 val fsum_52_is_53:

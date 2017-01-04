@@ -185,6 +185,8 @@ private val lemma_reduce_spec_: s:seqelem{reduce_pre s} -> Lemma
 private let lemma_reduce_spec_ s = ()
 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
 private let lemma_reduce_spec_1_1 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemma
   ((pow2 limb_size * (a + pow2 51 * b + pow2 102 * c + pow2 153 * d + pow2 204 * e))
     = (pow2 51 * a + pow2 102 * b + pow2 153 * c + pow2 204 * d + pow2 255 * e))

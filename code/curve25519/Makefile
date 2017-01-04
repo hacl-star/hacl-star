@@ -77,6 +77,25 @@ X25519_FILES= \
 	Hacl.EC.Ladder.fst \
 	Hacl.EC.fst
 
+X25519_SPECIFIC= \
+	Hacl.Spec.Bignum.Modulo.fst \
+	Hacl.Bignum.Modulo.fst \
+	Hacl.Spec.Bignum.Fsquare.fst \
+	Hacl.Spec.Bignum.Fsquare.fst \
+	Hacl.Spec.EC.AddAndDouble.fst \
+	Hacl.Spec.Bignum.Fsquare.fst \
+	Hacl.EC.Point.fst \
+	Hacl.EC.AddAndDouble.fst \
+	Hacl.EC.Format.fst \
+	Hacl.EC.Ladder.fst \
+	Hacl.EC.fst
+#	Hacl.Bignum.Constants.fst \
+	Hacl.Bignum.Parameters.fst \
+	Hacl.Spec.Bignum.Crecip.fst \
+	Hacl.Bignum.Crecip.fst \
+	Hacl.Spec.EC.AddAndDouble2.fst \
+	Hacl.Bignum.Fsquare.fst \
+
 
 POLY1305_MODULES= \
 	Hacl.Bignum.Parameters \
@@ -109,10 +128,15 @@ POLY1305_MODULES= \
 
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $^ --lax
-
+		--include ../lib --include ../bignum $^ --use_hints
 
 verify: $(addsuffix -verify, $(X25519_FILES))
+
+%.fst-hints: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum $^ --record_hints
+
+hints: $(addsuffix -hints, $(X25519_SPECIFIC))
 
 
 extract-c:
@@ -127,7 +151,6 @@ extract-c:
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.X25519 -ccopt -flto -ccopt -march=native -o x25519.exe
 	./x25519.exe
-
 
 
 clean:

@@ -12,8 +12,7 @@ open Hacl.Bignum
 
 module U32 = FStar.UInt32
 
-(* let plen = 10 *)
-(* let cplen = 10ul *)
+#set-options "--lax"
 
 val point : Type0
 let point =
