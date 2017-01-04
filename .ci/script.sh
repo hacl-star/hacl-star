@@ -21,4 +21,5 @@ ocamlfind ocamlopt -config
 gcc --version
 fstar.exe --version
 
-make -C test
+make -C code/poly1305 extract-c
+make -C code/curvez25519 extract-c
