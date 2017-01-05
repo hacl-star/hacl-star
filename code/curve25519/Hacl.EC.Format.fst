@@ -12,15 +12,23 @@ open Hacl.Bignum.Parameters
 open Hacl.Bignum.Limb
 open Hacl.EC.Point
 
-#set-options "--lax"
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 type uint8_p = buffer Hacl.UInt8.t
 
 private inline_for_extraction let zero_8 = uint8_to_sint8 0uy
 
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
 val point_inf: unit -> StackInline point
   (requires (fun h -> true))
-  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p))
+  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p /\ disjoint (getx p) (getz p)
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getx p))
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getz p))
+    /\ frameOf (getx p) = frameOf (getz p)
+    ))
 let point_inf () =
   let buf = create limb_zero 10ul in
   let x = Buffer.sub buf 0ul 5ul in
@@ -28,6 +36,17 @@ let point_inf () =
   let z = Buffer.sub buf 5ul 5ul in
   x.(0ul) <- limb_one;
   let p = make x y z in
+  let h = ST.get() in
+  cut (v (get h (getx p) 0) = 1);
+  cut (v (get h (getx p) 1) = 0);
+  cut (v (get h (getx p) 2) = 0);
+  cut (v (get h (getx p) 3) = 0);
+  cut (v (get h (getx p) 4) = 0);
+  cut (v (get h (getz p) 0) = 0);
+  cut (v (get h (getz p) 1) = 0);
+  cut (v (get h (getz p) 2) = 0);
+  cut (v (get h (getz p) 3) = 0);
+  cut (v (get h (getz p) 4) = 0);
   p
 
 

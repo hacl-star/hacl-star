@@ -35,17 +35,6 @@ let fsquare_pre_ s =
 
 #set-options "--z3rlimit 100"
 
-(* val seq_upd_5: #a:Type -> s:Seq.seq a{Seq.length s >= 5} -> s0:a -> s1:a -> s2:a -> s3:a -> s4:a -> *)
-(*   Tot (s':Seq.seq a{Seq.length s' = Seq.length s /\ Seq.index s' 0 == s0 /\ Seq.index s' 1 == s1 /\ Seq.index s' 2 == s2 /\ Seq.index s' 3 == s3 /\ Seq.index s' 4 == s4 /\ Seq.slice s 5 (Seq.length s) == Seq.slice s' 5 (Seq.length s)}) *)
-(* let seq_upd_5 #a s s0 s1 s2 s3 s4 = *)
-(*   let s' = Seq.upd s 0 s0 in *)
-(*   let s' = Seq.upd s' 1 s1 in *)
-(*   let s' = Seq.upd s' 2 s2 in *)
-(*   let s' = Seq.upd s' 3 s3 in *)
-(*   let s' = Seq.upd s' 4 s4 in *)
-(*   s' *)
-
-
 val seq_upd_5: s0:wide -> s1:wide -> s2:wide -> s3:wide -> s4:wide ->
   Tot (s':Seq.seq wide{Seq.length s' = len /\ Seq.index s' 0 == s0 /\ Seq.index s' 1 == s1 /\ Seq.index s' 2 == s2 /\ Seq.index s' 3 == s3 /\ Seq.index s' 4 == s4})
 let seq_upd_5 s0 s1 s2 s3 s4 =
@@ -132,11 +121,6 @@ let fsquare_spec_ s =
   let d419 = r4 *^ (uint64_to_limb 19uL) in
   let d4 = d419 *^ (uint64_to_limb 2uL) in
   let open Hacl.UInt128 in
-  (* let s0 = (( r0) *^ r0 +^ ( d4) *^ r1 +^ (( d2) *^ (r3     ))) in *)
-  (* let s1 = (( d0) *^ r1 +^ ( d4) *^ r2 +^ (( r3) *^ (Hacl.Bignum.Limb.(r3 *^ (uint64_to_limb 19uL))))) in *)
-  (* let s2 = ( d0) *^ r2 +^ ( r1) *^ r1 +^ (( d4) *^ (r3     )) in *)
-  (* let s3 = ( d0) *^ r3 +^ ( d1) *^ r2 +^ (( r4) *^ (d419   )) in *)
-  (* let s4 = ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     )) in *)
   let s0 = computation_1 r0 r1 r2 r3 r4 d4 d2 in
   let s1 =  computation_2 r0 r1 r2 r3 r4 d4 d0 in
   let s2 =  computation_3 r0 r1 r2 r3 r4 d4 d0 in
@@ -150,14 +134,38 @@ let fsquare_spec_ s =
   cut (w s4 = 2 * v r0 * v r4  + 2 * v r1 * v r3       + v r2 * v r2);
   seq_upd_5 s0 s1 s2 s3 s4
 
-#set-options "--z3rlimit 50"
+#reset-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
 
 private let lemma_mul_5 a b c d e : Lemma ( (a+b+c+d+e)*(a+b+c+d+e) =
   a * a + a * b + a * c + a * d + a * e
   + b * a + b * b + b * c + b * d + b * e
   + c * a + c * b + c * c + c * d + c * e
   + d * a + d * b + d * c + d * d + d * e
-  + e * a + e * b + e * c + e * d + e * e) = ()
+  + e * a + e * b + e * c + e * d + e * e) =
+    Math.Lemmas.distributivity_add_right (a+b+c+d+e) a (b+c+d+e);
+    Math.Lemmas.distributivity_add_right (a+b+c+d+e) b (c+d+e);
+    Math.Lemmas.distributivity_add_right (a+b+c+d+e) c (d+e);
+    Math.Lemmas.distributivity_add_right (a+b+c+d+e) d (e);
+    Math.Lemmas.distributivity_add_left (a) (b+c+d+e) (a);
+    Math.Lemmas.distributivity_add_left (b) (c+d+e) (a);
+    Math.Lemmas.distributivity_add_left (c) (d+e) (a);
+    Math.Lemmas.distributivity_add_left (d) (e) (a);
+    Math.Lemmas.distributivity_add_left (a) (b+c+d+e) (b);
+    Math.Lemmas.distributivity_add_left (b) (c+d+e) (b);
+    Math.Lemmas.distributivity_add_left (c) (d+e) (b);
+    Math.Lemmas.distributivity_add_left (d) (e) (b);
+    Math.Lemmas.distributivity_add_left (a) (b+c+d+e) (c);
+    Math.Lemmas.distributivity_add_left (b) (c+d+e) (c);
+    Math.Lemmas.distributivity_add_left (c) (d+e) (c);
+    Math.Lemmas.distributivity_add_left (d) (e) (c);
+    Math.Lemmas.distributivity_add_left (a) (b+c+d+e) (d);
+    Math.Lemmas.distributivity_add_left (b) (c+d+e) (d);
+    Math.Lemmas.distributivity_add_left (c) (d+e) (d);
+    Math.Lemmas.distributivity_add_left (d) (e) (d);
+    Math.Lemmas.distributivity_add_left (a) (b+c+d+e) (e);
+    Math.Lemmas.distributivity_add_left (b) (c+d+e) (e);
+    Math.Lemmas.distributivity_add_left (c) (d+e) (e);
+    Math.Lemmas.distributivity_add_left (d) (e) (e)
 
 
 #set-options "--z3rlimit 10"
@@ -415,7 +423,7 @@ let lemma_sum_mod_0 a b c =
   Math.Lemmas.lemma_mod_plus_distr_l ((b % prime) * c) a prime
 
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_sum_mod: a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> Lemma
   ((a + pow2 255 * b + pow2 306 * c + pow2 357 * d + pow2 408 * e) % prime
@@ -439,7 +447,7 @@ let lemma_sum_mod a b c d e =
   lemma_sum_mod_0 (a + (19 * pow2 51) * c + (19 * pow2 102) * d + (19 * pow2 153) * e) (pow2 255) b
 
 
-#reset-options "--z3rlimit 10"
+#reset-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsquare_spec_5_1: r0:nat -> r1:nat -> r2:nat -> r3:nat -> r4:nat -> Lemma
   ((r0 * r0
@@ -659,7 +667,7 @@ val lemma_104_smaller_than_108: s:seqelem_wide{bounds' s (77 * p104) (59 * p104)
 let lemma_104_smaller_than_108 s = ()
 
 
-#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 1000 --initial_fuel 0 --max_fuel 0"
 
 inline_for_extraction let p106 : p:pos{p = 0x400000000000000000000000000} =
   assert_norm(pow2 106 = 0x400000000000000000000000000); pow2 106
@@ -727,7 +735,7 @@ let lemma_52_fits_53 (s:seqelem{red_52 s}) : Lemma (red_53 s) = ()
 inline_for_extraction let pmax : p:pos{p = 410718794474278367478258677579776} =
   assert_norm(p5413 * p5413 = 410718794474278367478258677579776); p5413 * p5413
 
-#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 1000 --initial_fuel 0 --max_fuel 0"
 
 val lemma_5413_to_fsquare_is_fine: s:seqelem{red_5413 s} ->
  Lemma (fsquare_pre_ s /\ bounds' (fsquare_spec_ s) (77 * pmax) (59 * pmax) (41 * pmax) (23 * pmax) (5 * pmax))

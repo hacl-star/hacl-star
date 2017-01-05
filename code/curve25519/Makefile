@@ -78,23 +78,21 @@ X25519_FILES= \
 	Hacl.EC.fst
 
 X25519_SPECIFIC= \
-	Hacl.Spec.Bignum.Modulo.fst \
-	Hacl.Bignum.Modulo.fst \
 	Hacl.Spec.Bignum.Fsquare.fst \
-	Hacl.Spec.Bignum.Fsquare.fst \
-	Hacl.Spec.EC.AddAndDouble.fst \
-	Hacl.Spec.Bignum.Fsquare.fst \
-	Hacl.EC.Point.fst \
 	Hacl.EC.AddAndDouble.fst \
-	Hacl.EC.Format.fst \
-	Hacl.EC.Ladder.fst \
-	Hacl.EC.fst
 #	Hacl.Bignum.Constants.fst \
 	Hacl.Bignum.Parameters.fst \
 	Hacl.Spec.Bignum.Crecip.fst \
 	Hacl.Bignum.Crecip.fst \
 	Hacl.Spec.EC.AddAndDouble2.fst \
 	Hacl.Bignum.Fsquare.fst \
+	Hacl.Spec.Bignum.Modulo.fst \
+	Hacl.Bignum.Modulo.fst \
+	Hacl.Spec.EC.AddAndDouble.fst \
+	Hacl.EC.Point.fst \
+	Hacl.EC.Format.fst \
+	Hacl.EC.Ladder.fst \
+	Hacl.EC.fst
 
 
 POLY1305_MODULES= \
