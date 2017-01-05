@@ -112,9 +112,28 @@ private let store64_le b z =
   b.(7ul) <- sint64_to_sint8 (z >>^ 56ul)
   
 
+private inline_for_extraction val upd_5: output:felem ->
+  o0:limb{v o0 < pow2 51} ->
+  o1:limb{v o1 < pow2 51} ->
+  o2:limb{v o2 < pow2 51} ->
+  o3:limb{v o3 < pow2 51} ->
+  o4:limb{v o4 < pow2 51} ->
+  Stack unit
+  (requires (fun h -> Buffer.live h output))
+  (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)))
+private inline_for_extraction let upd_5 output output0 output1 output2 output3 output4 =
+  output.(0ul) <- output0;
+  output.(1ul) <- output1;
+  output.(2ul) <- output2;
+  output.(3ul) <- output3;
+  output.(4ul) <- output4
+  
+
 private val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack unit
   (requires (fun h -> Buffer.live h output /\ Buffer.live h input))
-  (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1))
+  (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)))
 private let fexpand output input =
   let mask_51 = uint64_to_limb 0x7ffffffffffffuL in
   let i0 = load64_le (Buffer.sub input 0ul 8ul) in
@@ -127,11 +146,12 @@ private let fexpand output input =
   let output2 = (i2 >>^ 6ul ) &^ mask_51 in
   let output3 = (i3 >>^ 1ul ) &^ mask_51 in
   let output4 = (i4 >>^ 12ul) &^ mask_51 in
-  output.(0ul) <- output0;
-  output.(1ul) <- output1;
-  output.(2ul) <- output2;
-  output.(3ul) <- output3;
-  output.(4ul) <- output4
+  UInt.logand_mask (v i0) (51);
+  UInt.logand_mask (v (i1 >>^ 3ul)) (51);
+  UInt.logand_mask (v (i2 >>^ 6ul )) (51);
+  UInt.logand_mask (v (i3 >>^ 1ul )) (51);
+  UInt.logand_mask (v (i4 >>^ 12ul)) (51);
+  upd_5 output output0 output1 output2 output3 output4
 
 
 private val fcontract: output:uint8_p{length output = 32} -> input:felem -> Stack unit
@@ -153,7 +173,7 @@ private let fcontract output input =
   let t2 = t2 &^ mask_51 in
   let t4 = t4 +%^ (t3 >>^ 51ul) in
   let t3 = t3 &^ mask_51 in
-  let t0 = t0 +^ (nineteen *%^ (t4 >>^ 51ul)) in
+  let t0 = t0 +%^ (nineteen *%^ (t4 >>^ 51ul)) in
   let t4 = t4 &^ mask_51 in
   let t1 = t1 +%^ (t0 >>^ 51ul) in
   let t0 = t0 &^ mask_51 in
@@ -163,7 +183,7 @@ private let fcontract output input =
   let t2 = t2 &^ mask_51 in
   let t4 = t4 +%^ (t3 >>^ 51ul) in
   let t3 = t3 &^ mask_51 in
-  let t0 = t0 +^ (nineteen *%^ (t4 >>^ 51ul)) in
+  let t0 = t0 +%^ (nineteen *%^ (t4 >>^ 51ul)) in
   let t4 = t4 &^ mask_51 in
   let t0 = t0 +%^ nineteen in
   let t1 = t1 +%^ (t0 >>^ 51ul) in
@@ -174,7 +194,7 @@ private let fcontract output input =
   let t2 = t2 &^ mask_51 in
   let t4 = t4 +%^ (t3 >>^ 51ul) in
   let t3 = t3 &^ mask_51 in
-  let t0 = t0 +^ (nineteen *%^ (t4 >>^ 51ul)) in
+  let t0 = t0 +%^ (nineteen *%^ (t4 >>^ 51ul)) in
   let t4 = t4 &^ mask_51 in
   let two52 = uint64_to_sint64 0x8000000000000uL in
   let t0 = t0 +%^ two52 -%^ nineteen in
@@ -203,35 +223,68 @@ private let fcontract output input =
 
 val point_of_scalar: scalar:buffer Hacl.UInt8.t{length scalar = keylen} -> StackInline point
   (requires (fun h -> Buffer.live h scalar))
-  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p))
+  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getx p))
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getz p))
+  ))
 let point_of_scalar scalar =
-  let buf = create limb_zero 10ul in
+  let buf = create limb_zero 10ul in  
   let x = Buffer.sub buf 0ul 5ul in
-  let y = Buffer.sub buf 0ul 5ul in
   let z = Buffer.sub buf 5ul 5ul in
-  let p = make x y z in
+  let h = ST.get() in
+  cut (get h z 0 == limb_zero);
+  cut (get h z 1 == limb_zero);
+  cut (get h z 2 == limb_zero);
+  cut (get h z 3 == limb_zero);
+  cut (get h z 4 == limb_zero);
   fexpand x scalar;
+  let h' = ST.get() in
+  no_upd_lemma_1 h h' x z;
+  cut (get h z 0 == limb_zero);
+  cut (get h z 1 == limb_zero);
+  cut (get h z 2 == limb_zero);
+  cut (get h z 3 == limb_zero);
+  cut (get h z 4 == limb_zero);
   z.(0ul) <- limb_one;
-  p
+  let h = ST.get() in
+  cut (get h z 0 == limb_one);
+  cut (get h z 1 == limb_zero);
+  cut (get h z 2 == limb_zero);
+  cut (get h z 3 == limb_zero);
+  cut (get h z 4 == limb_zero);
+  buf
+
 
 val scalar_of_point: scalar:uint8_p{length scalar = keylen} -> p:point -> Stack unit
-  (requires (fun h -> Buffer.live h scalar /\ live h p))
+  (requires (fun h -> Buffer.live h scalar /\ live h p
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getx p))
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getz p))
+  ))
   (ensures (fun h0 _ h1 -> modifies_1 scalar h0 h1 /\ Buffer.live h1 scalar))
 let scalar_of_point scalar point =
   push_frame();
   let x = Hacl.EC.Point.getx point in
   let z = Hacl.EC.Point.getz point in
-  let zmone = Buffer.create limb_zero clen in
+  let buf   = Buffer.create limb_zero 10ul in
+  let zmone = Buffer.sub buf 0ul 5ul in
+  let sc    = Buffer.sub buf 5ul 5ul in
   Hacl.Bignum.crecip zmone z;
-  Hacl.Bignum.fmul z x zmone;
-  fcontract scalar z;
+  let h = ST.get() in
+  Hacl.Spec.EC.AddAndDouble2.lemma_513_is_53 (as_seq h x);
+  Hacl.Spec.EC.AddAndDouble2.lemma_513_is_55 (as_seq h zmone);
+  Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine (as_seq h x) (as_seq h zmone);
+  Hacl.Bignum.fmul sc x zmone;
+  fcontract scalar sc;
   pop_frame()
 
 
-val format_secret: secret:uint8_p{length secret = keylen} -> StackInline (s:uint8_p{length s = keylen})
-  (requires (fun h -> Buffer.live h secret))
-  (ensures (fun h0 s h1 -> Buffer.live h1 secret /\ modifies_0 h0 h1 /\ Buffer.live h1 s))
+val format_secret:
+  secret:uint8_p{length secret = keylen} ->
+  StackInline (s:uint8_p{length s = keylen})
+    (requires (fun h -> Buffer.live h secret))
+    (ensures (fun h0 s h1 -> Buffer.live h1 secret /\ modifies_0 h0 h1 /\ Buffer.live h1 s))
 let format_secret secret =
+  assert_norm(pow2 8 = 256);
   let e   = create zero_8 32ul in
   blit secret 0ul e 0ul 32ul;
   let e0  = e.(0ul) in
