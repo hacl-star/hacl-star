@@ -106,7 +106,7 @@ private let rec swap_conditional_ a b swap ctr =
     swap_conditional_ a b swap i
   )
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val swap_conditional:
   a:point ->
@@ -121,7 +121,7 @@ val swap_conditional:
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getz a))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getz b))
     ))
-    (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b
+    (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ modifies_2 a b h0 h1
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getx a))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getx b))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getz a))
@@ -153,6 +153,7 @@ val copy:
     ))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 input
       /\ live h1 output /\ live h1 input
+      /\ modifies_1 output h0 h1
       /\ disjoint (getx output) (getx input) /\ disjoint (getx output) (getz input)
       /\ disjoint (getz output) (getx input) /\ disjoint (getz output) (getz input)
       /\ as_seq h1 (getx output) == as_seq h0 (getx input)

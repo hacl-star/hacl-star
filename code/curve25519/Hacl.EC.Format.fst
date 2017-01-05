@@ -20,7 +20,7 @@ type uint8_p = buffer Hacl.UInt8.t
 private inline_for_extraction let zero_8 = uint8_to_sint8 0uy
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val point_inf: unit -> StackInline point
   (requires (fun h -> true))
@@ -32,21 +32,26 @@ val point_inf: unit -> StackInline point
 let point_inf () =
   let buf = create limb_zero 10ul in
   let x = Buffer.sub buf 0ul 5ul in
-  let y = Buffer.sub buf 0ul 5ul in
+  let y = x in
   let z = Buffer.sub buf 5ul 5ul in
+  let h' = ST.get() in
+  cut (v (get h' z 0) = 0);
+  cut (v (get h' z 1) = 0);
+  cut (v (get h' z 2) = 0);
+  cut (v (get h' z 3) = 0);
+  cut (v (get h' z 4) = 0);
+  Seq.lemma_eq_intro (as_seq h' z) (Seq.create len limb_zero);
+  cut (Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h' z));
+  cut (disjoint x z);
   x.(0ul) <- limb_one;
-  let p = make x y z in
   let h = ST.get() in
-  cut (v (get h (getx p) 0) = 1);
-  cut (v (get h (getx p) 1) = 0);
-  cut (v (get h (getx p) 2) = 0);
-  cut (v (get h (getx p) 3) = 0);
-  cut (v (get h (getx p) 4) = 0);
-  cut (v (get h (getz p) 0) = 0);
-  cut (v (get h (getz p) 1) = 0);
-  cut (v (get h (getz p) 2) = 0);
-  cut (v (get h (getz p) 3) = 0);
-  cut (v (get h (getz p) 4) = 0);
+  no_upd_lemma_1 h' h x z;
+  cut (v (get h x 0) = 1);
+  cut (v (get h x 1) = 0);
+  cut (v (get h x 2) = 0);
+  cut (v (get h x 3) = 0);
+  cut (v (get h x 4) = 0);
+  let p = make x y z in
   p
 
 
@@ -67,6 +72,7 @@ private val load64_le:
     (requires (fun h -> Buffer.live h b))
     (ensures  (fun h0 _ h1 -> h0 == h1))
 private let load64_le b =
+  assert_norm(pow2 32 = 0x100000000);
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
   let b2 = b.(2ul) in
@@ -94,6 +100,7 @@ private val store64_le:
     (requires (fun h -> Buffer.live h b))
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ Buffer.live h1 b))
 private let store64_le b z =
+  assert_norm(pow2 32 = 0x100000000);
   let open Hacl.Bignum.Limb in
   b.(0ul) <- sint64_to_sint8 z;
   b.(1ul) <- sint64_to_sint8 (z >>^ 8ul);
