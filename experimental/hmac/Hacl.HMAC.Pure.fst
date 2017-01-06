@@ -1,4 +1,4 @@
-module HMAC.Pure
+module Hacl.HMAC.Pure
 
 module I8 = FStar.UInt8
 module I32 = FStar.UInt32

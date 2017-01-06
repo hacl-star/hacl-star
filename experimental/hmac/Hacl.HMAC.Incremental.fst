@@ -1,4 +1,4 @@
-module HMAC.Incremental
+module Hacl.HMAC.Incremental
   
 open FStar.Mul
 open FStar.Ghost
