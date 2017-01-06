@@ -48,17 +48,17 @@ FSTAR_LIB_FILES= \
 POLY1305_FILES= \
 	Hacl.Bignum.Constants.fst \
 	Hacl.Bignum.Parameters.fst \
-	Hacl.Bignum.Limb.fst \
-	Hacl.Bignum.Wide.fst \
-	Hacl.Spec.Bignum.Field.fst \
-	Hacl.Spec.Bignum.Bigint.fst \
+	../bignum/Hacl.Bignum.Limb.fst \
+	../bignum/Hacl.Bignum.Wide.fst \
+	../bignum/Hacl.Spec.Bignum.Bigint.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
+	../bignum/Hacl.Spec.Bignum.Fsum.fst \
+	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
 	Hacl.Bignum.Modulo.fst \
-	Hacl.Spec.Bignum.Fsum.fst \
-	Hacl.Spec.Bignum.Fproduct.fst \
-	Hacl.Bignum.Fsum.fst \
-	Hacl.Bignum.Fproduct.fst \
+	../bignum/Hacl.Bignum.Fsum.fst \
+	../bignum/Hacl.Bignum.Fproduct.fst \
 	Hacl.Spec.Bignum.AddAndMultiply.fst \
+	Hacl.Bignum.AddAndMultiply.fst \
 	Hacl.Spec.MAC.Poly1305_64.fst \
 	Hacl.MAC.Poly1305_64.fst
 
@@ -132,4 +132,4 @@ compile-ml:
 	$(OCAMLOPT) -I poly-ml -I ../lib/ml -I $(FSTAR_HOME)/ulib/ml/hyperstack -I $(FSTAR_HOME)/ulib/ml $(addprefix poly-ml/,$(POLY_EXTRACTED)) 
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ poly1305-c
+	rm -rf *.exe *.exe.* *.out *~ poly-c
