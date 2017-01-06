@@ -1,19 +1,22 @@
 module Hacl.Bignum.Fsum
 
-open FStar.HyperStack
-open FStar.Buffer
 
-open Hacl.Bignum.Parameters
-open Hacl.Spec.Bignum.Bigint
-open Hacl.Bignum.Limb
+open FStar.UInt64     // F* 64-bit unsigned machine integers
+open FStar.HyperStack // F* memory model
+open FStar.Buffer     // F* pointer arithmetic model
 
-module U32 = FStar.UInt32
+module U32 = FStar.UInt32 // Module alias
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
+#set-options "--initial_fuel 1 --max_fuel 1" // Tuning verification parameters
+
+type u32 = FStar.UInt32.t                // Type alias for uint32
+type u64 = FStar.UInt64.t                // Type alias for uint64
+type felem = b:buffer u64{length b = 5}  // X25519-donna bignum array
+
 
 val fsum:
   a:felem -> b:felem ->
-  i:ctr{U32.v i <= len} ->
+  i:u32{U32.v i <= 5} ->
   Stack unit
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> true))
