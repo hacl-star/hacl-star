@@ -1,4 +1,4 @@
-module PBKDF2.Sha256
+module Hacl.PBKDF2
 
 open FStar.Mul
 open FStar.Ghost
