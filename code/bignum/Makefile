@@ -70,9 +70,7 @@ BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
 		--include ../lib $^ --use_hints
 
-verify:
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib $(BIGNUM_FILES) --use_hints
+verify: $(addsuffix -verify, $(BIGNUM_FILES))
 
 %-hints: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \

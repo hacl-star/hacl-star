@@ -48,27 +48,14 @@ FSTAR_LIB_FILES= \
 X25519_FILES= \
 	Hacl.Bignum.Constants.fst \
 	Hacl.Bignum.Parameters.fst \
-	../bignum/Hacl.Bignum.Limb.fst \
-	../bignum/Hacl.Bignum.Wide.fst \
-	../bignum/Hacl.Spec.Bignum.Field.fst \
-	../bignum/Hacl.Spec.Bignum.Bigint.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.Bignum.Modulo.fst \
-	../bignum/Hacl.Spec.Bignum.Fsum.fst \
-	../bignum/Hacl.Spec.Bignum.Fdifference.fst \
-	../bignum/Hacl.Spec.Bignum.Fscalar.fst \
-	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
 	Hacl.Spec.Bignum.Fsquare.fst \
-	../bignum/Hacl.Bignum.Fsum.fst \
-	../bignum/Hacl.Bignum.Fdifference.fst \
-	../bignum/Hacl.Bignum.Fscalar.fst \
-	../bignum/Hacl.Bignum.Fproduct.fst \
 	Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.Spec.EC.AddAndDouble.fst \
 	Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.Spec.EC.AddAndDouble2.fst \
 	Hacl.Bignum.Fsquare.fst \
-	../bignum/Hacl.Bignum.fst \
 	Hacl.Spec.EC.Point.fst \
 	Hacl.EC.Point.fst \
 	Hacl.EC.AddAndDouble.fst \
@@ -101,36 +88,6 @@ X25519_SPECIFIC= \
 	Hacl.EC.Ladder.fst \
 	Hacl.Spec.EC.fst \
 	Hacl.EC.fst
-
-
-POLY1305_MODULES= \
-	Hacl.Bignum.Parameters \
-	Hacl.Bignum.Limb \
-	Hacl.Bignum.Wide \
-	Hacl.Spec.Bignum.Field \
-	Hacl.Spec.Bignum.Bigint \
-	Hacl.Spec.Bignum.Modulo \
-	Hacl.Spec.Bignum.Fsum \
-	Hacl.Spec.Bignum.Fdifference \
-	Hacl.Spec.Bignum.Fscalar \
-	Hacl.Spec.Bignum.Fproduct \
-	Hacl.Spec.Bignum.Fsquare \
-	Hacl.Spec.Bignum.Crecip \
-	Hacl.Bignum.Modulo \
-	Hacl.Bignum.Fsum \
-	Hacl.Bignum.Fdifference \
-	Hacl.Bignum.Fscalar \
-	Hacl.Bignum.Fproduct \
-	Hacl.Bignum.Fsquare \
-	Hacl.Bignum.Crecip \
-	Hacl.Spec.EC.AddAndMultiply \
-	Hacl.Spec.MAC.Poly1305_64 \
-	Hacl.EC.Point \
-	Hacl.EC.AddAndMultiply \
-	Hacl.EC.Format \
-	Hacl.EC.Ladder \
-	Hacl.EC
-
 
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
