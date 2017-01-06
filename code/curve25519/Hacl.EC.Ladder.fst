@@ -56,6 +56,10 @@ assume private val lemma_seq': h:mem -> b:buffer limb{Buffer.live h b /\ length 
 (*   Seq.lemma_eq_intro (as_seq h (getz nq)) (Seq.create 5 limb_zero); admit() *)
 
 
+assume private val lemma_seq'': h:mem -> b:felem{Buffer.live h b /\ red_513 (as_seq h b)} -> Lemma
+  (red_513 (Seq.upd (as_seq h b) 0 limb_one))
+
+
 private inline_for_extraction val cmult_: result:point ->
   buf:buffer limb{length buf = 40} ->
   scalar:uint8_p{length scalar = keylen} ->
@@ -73,7 +77,7 @@ private inline_for_extraction val cmult_: result:point ->
     /\ red_513 (as_seq h1 (getx result))
     /\ red_513 (as_seq h1 (getz result))
   ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 2000"
 private inline_for_extraction let cmult_ result point_buf n q =
   assert_norm(pow2 32 = 0x100000000);
   let nq    = Buffer.sub point_buf 0ul 10ul in
@@ -85,8 +89,12 @@ private inline_for_extraction let cmult_ result point_buf n q =
   Hacl.EC.Point.copy nqpq q;
   let hh = ST.get() in
   no_upd_lemma_1 h0 hh nqpq nq;
+  lemma_seq'' hh (getx nq);
   (getx nq).(0ul) <- limb_one;
   let h = ST.get() in
+  no_upd_lemma_1 hh h (getx nq) (getx nqpq);
+  no_upd_lemma_1 hh h (getx nq) (getz nqpq);
+  no_upd_lemma_1 hh h (getx nq) (getz nq);
   cmult_big_loop n nq nqpq nq2 nqpq2 q 32ul;
   let h' = ST.get() in
   copy result nq;
@@ -101,7 +109,7 @@ val cmult: result:point ->
   q:point ->
   Stack unit
   (requires (fun h -> Buffer.live h scalar /\ live h q /\ live h result
-    /\ red_513 (as_seq h (getx q))))
+    /\ red_513 (as_seq h (getx q)) /\ red_513 (as_seq h (getz q))))
   (ensures (fun h0 _ h1 -> Buffer.live h0 scalar /\ live h0 q /\ live h0 result
     /\ live h1 result
     /\ modifies_1 result h0 h1
@@ -111,21 +119,11 @@ val cmult: result:point ->
 let cmult result n q =
   let h0 = ST.get() in
   push_frame();
-  (* let nq    = result in *)
   let h1 = ST.get() in
   let point_buf = create limb_zero 40ul in
-  (* (\* cmult_ result point_buf n q; *\) *)
-  (* let nq = Buffer.sub point_buf 0ul 10ul in *)
-  (* nq.(0ul) <- limb_one; *)
-  (* let nqpq = Buffer.sub point_buf 10ul 10ul in *)
-  (* let nq2 = Buffer.sub point_buf 20ul 10ul in *)
-  (* let nqpq2 = Buffer.sub point_buf 30ul 10ul in *)
-  (* lemma_seq 0; lemma_seq 10; lemma_seq 20; lemma_seq 30; *)
-  (* Hacl.EC.Point.copy nqpq q; *)
-  (* let h = ST.get() in *)
-  (* cut (red_513 (as_seq h (getx nq))); *)
-  (* cut (red_513 (as_seq h (getz nq))); *)
-  (* cmult_big_loop n nq nqpq nq2 nqpq2 q 32ul; *)
-  (* copy result nq; *)
+  let h2 = ST.get() in
+  lemma_reveal_modifies_0 h1 h2;
   cmult_ result point_buf n q;
-  pop_frame()
+  pop_frame();
+  let h4 = ST.get() in
+  lemma_intro_modifies_1 result h0 h4
