@@ -101,6 +101,7 @@ let rec sum_scalar_multiplication_ output input s ctr =
     sum_scalar_multiplication_ output input s i
   )
 
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
 val carry_wide_:
   t:felem_wide ->
