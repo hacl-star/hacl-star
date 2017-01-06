@@ -1,4 +1,4 @@
-module HKDF.Sha256
+module Hacl.HKDF.HMAC.SHA2.L256
 
 open FStar.Mul
 open FStar.Ghost
@@ -11,8 +11,8 @@ open Hacl.UInt8
 open Hacl.UInt32
 open Hacl.SBuffer
 
-open Hash.Sha256
-open HMAC.SHA2
+open Hacl.Hash.SHA2.L256
+open Hacl.HMAC.SHA2.L256
 
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
@@ -73,6 +73,7 @@ let be_bytes_of_uint32 output x =
 let op_At_Plus (a:u32) (b:u32) : Tot u32 = UInt32.add_mod a b
 let op_At_Minus (a:u32) (b:u32) : Tot u32 = UInt32.sub_mod a b
 
+
 (* Define the hash length used *)
 let hl = 32ul
 let hmac = hmac_sha256
@@ -91,7 +92,6 @@ val hkdf_extract : (prk     :bytes { length prk = v hl }) ->
 let hkdf_extract prk salt saltlen ikm ikmlen = hmac prk salt saltlen ikm ikmlen
 
 
-// BB.TODO: memory safety clause is missing for now
 // We could simplify the memory safety clause by reducing to modifies_1 _T h0 h1
 val hkdf_expand_inner : (t       :bytes) ->
                         (prk     :bytes { length prk >= v hl /\ disjoint t prk }) ->
