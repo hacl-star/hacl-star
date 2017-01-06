@@ -1,4 +1,4 @@
-module Hash.SHA2.L256.Pure
+module Hacl.Hash.SHA2.L256.Pure
 
 open FStar.UInt32
 
