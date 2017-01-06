@@ -1,4 +1,4 @@
-module Hash.SHA2.L256.Masked
+module Hacl.Hash.SHA2.L256.Masked.WIP
 
 open FStar.Mul
 open FStar.Ghost
