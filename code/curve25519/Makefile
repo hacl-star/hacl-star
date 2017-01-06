@@ -63,30 +63,26 @@ X25519_FILES= \
 	../bignum/Hacl.Bignum.Fdifference.fst \
 	../bignum/Hacl.Bignum.Fscalar.fst \
 	../bignum/Hacl.Bignum.Fproduct.fst \
-	Hacl.Spec.Bignum.Crecip.fst \
-	Hacl.Bignum.Crecip.fst \
 	Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.Spec.EC.AddAndDouble.fst \
 	Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.Spec.EC.AddAndDouble2.fst \
 	Hacl.Bignum.Fsquare.fst \
 	../bignum/Hacl.Bignum.fst \
-	Hacl.EC.Point.fst \
-	Hacl.EC.AddAndDouble.fst \
-	Hacl.EC.Format.fst \
-	Hacl.EC.Ladder.fst \
-	Hacl.EC.fst
-
-X25519_SPECIFIC= \
 	Hacl.Spec.EC.Point.fst \
 	Hacl.EC.Point.fst \
+	Hacl.EC.AddAndDouble.fst \
 	Hacl.Spec.EC.Format.fst \
 	Hacl.EC.Format.fst \
-	Hacl.Spec.EC.Ladder.fst \
+	Hacl.EC.Ladder.SmallLoop.fst \
+	Hacl.EC.Ladder.BigLoop.fst \
 	Hacl.EC.Ladder.fst \
-	Hacl.Spec.EC.fst \
 	Hacl.EC.fst
-#	Hacl.Spec.Bignum.Fsquare.fst \
+#	Hacl.Spec.Bignum.Crecip.fst \
+	Hacl.Bignum.Crecip.fst \
+
+X25519_SPECIFIC= \
+	Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.Bignum.Constants.fst \
 	Hacl.Bignum.Parameters.fst \
 	Hacl.Spec.Bignum.Crecip.fst \
@@ -97,6 +93,14 @@ X25519_SPECIFIC= \
 	Hacl.Bignum.Modulo.fst \
 	Hacl.Spec.EC.AddAndDouble.fst \
 	Hacl.EC.AddAndDouble.fst \
+	Hacl.Spec.EC.Point.fst \
+	Hacl.EC.Point.fst \
+	Hacl.Spec.EC.Format.fst \
+	Hacl.EC.Format.fst \
+	Hacl.Spec.EC.Ladder.fst \
+	Hacl.EC.Ladder.fst \
+	Hacl.Spec.EC.fst \
+	Hacl.EC.fst
 
 
 POLY1305_MODULES= \
