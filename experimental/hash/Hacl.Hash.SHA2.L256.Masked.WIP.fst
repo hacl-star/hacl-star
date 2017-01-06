@@ -1,4 +1,4 @@
-module Hacl.Hash.SHA2.L256
+module Hacl.Hash.SHA2.L256.Masked.WIP
 
 open FStar.Mul
 open FStar.Ghost
@@ -9,7 +9,7 @@ open FStar.Buffer
 open Hacl.Cast
 open Hacl.UInt8
 open Hacl.UInt32
-(* open Hacl.SBuffer *)
+open Hacl.SBuffer
 open Hacl.Conversions
 open Hacl.Operations
 open FStar.UInt32
@@ -20,35 +20,33 @@ module U32 = FStar.UInt32
 module S32 = Hacl.UInt32
 module U64 = FStar.UInt64
 module S64 = Hacl.UInt64
+module HC = Hacl.Cast
+module SB = Hacl.SBuffer
 module FB = FStar.Buffer
-module SB = FStar.Buffer
-(* module SB = Hacl.SBuffer *)
-
-
-
-#set-options "--lax"
 
 
 (* Define base types *)
-let u8 = FStar.UInt8.t
 let s8 = Hacl.UInt8.t
 let u32 = FStar.UInt32.t
 let s32 = Hacl.UInt32.t
 let u64 = FStar.UInt64.t
 let s64 = Hacl.UInt64.t
-(* let uint32s = Hacl.SBuffer.u32s *)
-(* let bytes = Hacl.SBuffer.u8s *)
+let uint32s = Hacl.SBuffer.u32s
+let bytes = Hacl.SBuffer.u8s
 
-let uint32s = SB.buffer s32 //Hacl.SBuffer.u32s
-let bytes = SB.buffer s8 //Hacl.SBuffer.u8s
+(* Operators *)
+let (-@) = U32.sub
+let (+@) = U32.add
 
-let u8_to_s8 = Hacl.Cast.uint8_to_sint8
-let u32_to_s32 = Hacl.Cast.uint32_to_sint32
-let u32_to_s64 = Hacl.Cast.uint32_to_sint64
-let s32_to_s64 = Hacl.Cast.sint32_to_sint64
-let u64_to_s64 = Hacl.Cast.uint64_to_sint64
+(* Function aliases *)
+let u8_to_s8 = HC.uint8_to_sint8
+let u32_to_s32 = HC.uint32_to_sint32
+let u32_to_s64 = HC.uint32_to_sint64
+let s32_to_s64 = HC.sint32_to_sint64
+let u64_to_s64 = HC.uint64_to_sint64
 
 
+#set-options "--lax"
 
 
 //
@@ -56,26 +54,28 @@ let u64_to_s64 = Hacl.Cast.uint64_to_sint64
 //
 
 (* Define algorithm parameters *)
-inline_for_extraction let hashsize    = 32ul  // 256 bits = 32 bytes (Final hash output size)
-inline_for_extraction let blocksize   = 64ul  // 512 bits = 64 bytes (Working data block size)
-inline_for_extraction let size_md_len = 8ul   // 64 bits = 8 bytes (MD pad length encoding)
+let hashsize    = 32ul  // 256 bits = 32 bytes (Final hash output size)
+let blocksize   = 64ul  // 512 bits = 64 bytes (Working data block size)
+let size_md_len = 8ul   // 64 bits = 8 bytes (MD pad length encoding)
 
 (* Sizes of objects in the state *)
-inline_for_extraction let size_k      = 64ul  // 2048 bits = 64 words of 32 bits (blocksize)
-inline_for_extraction let size_ws     = 64ul  // 2048 bits = 64 words of 32 bits (blocksize)
-inline_for_extraction let size_whash  = 8ul   // 256 bits = 8 words of 32 bits (hashsize/4)
-inline_for_extraction let size_wblock = 16ul  // 512 bits = 64 words of 32 bits (blocksize/4)
-inline_for_extraction let size_wblocklen = 1ul // 32 bits (UInt32)
-inline_for_extraction let size_count  = 1ul   // 32 bits (UInt32)
-inline_for_extraction let size_state  = size_k +^ size_ws +^ size_whash +^ size_wblock +^ size_wblocklen +^ size_count
+let size_k      = 64ul  // 2048 bits = 64 words of 32 bits (blocksize)
+let size_ws     = 64ul  // 2048 bits = 64 words of 32 bits (blocksize)
+let size_whash  = 8ul   // 256 bits = 8 words of 32 bits (hashsize/4)
+let size_wblock = 16ul  // 512 bits = 64 words of 32 bits (blocksize/4)
+let size_pblocklen = 1ul // 32 bits (UInt32)
+let size_count  = 1ul   // 32 bits (UInt32)
+let size_lblock = size_wblock
+let size_state  = size_k +^ size_ws +^ size_whash +^ size_wblock +^ size_pblocklen +^ size_count
 
 (* Positions of objects in the state *)
-inline_for_extraction let pos_k         = 0ul
-inline_for_extraction let pos_ws        = size_k
-inline_for_extraction let pos_whash     = size_k +^ size_ws
-inline_for_extraction let pos_wblock    = size_k +^ size_ws +^ size_whash
-inline_for_extraction let pos_wblocklen = size_k +^ size_ws +^ size_whash +^ size_wblock
-inline_for_extraction let pos_count     = size_k +^ size_ws +^ size_whash +^ size_wblock  +^ 1ul
+let pos_k         = 0ul
+let pos_ws        = pos_k +^ size_k
+let pos_whash     = pos_ws +^ size_ws
+let pos_wblock    = pos_whash +^ size_whash
+let pos_lblock    = pos_wblock +^ size_wblock
+let pos_pblocklen = pos_lblock +^ size_lblock
+let pos_count     = pos_pblocklen +^ 1ul
 
 
 
@@ -197,28 +197,32 @@ let set_whash state =
  * We have le number of blocks for the data and we add
  * potentially one block for the partial block and another
  * for the padding. *)
-val nblocks: x:u32{v x + 8 < pow2 32} -> Tot (n:u32{v n >= 1})
-let nblocks x = (div ((x +^ 8ul) -^ (rem (x +^ 8ul) 64ul)) 64ul) +^ 1ul
+val nblocks: x:s32{S32.v x + 8 < pow2 32} -> Tot (n:s32{S32.v n >= 1})
+let nblocks x = 
+  S32.add (S32.div (S32.sub (S32.add x (u32_to_s32 8ul))
+                            (S32.rem (S32.add x (u32_to_s32 8ul)) (u32_to_s32 64ul)))
+                   (u32_to_s32 64ul)) 
+          (u32_to_s32 1ul)
 
 
 (* Compute the pad length *)
 (* Leakage resistance: the length of the partial block/padding is secret *)
-(* val pad_length: rlen:s32{S32.v rlen - 64 < pow2 32} -> Tot (n:s32{S32.v n <= 64 /\ S32.v n >= 1}) *)
-(* let pad_length rlen = *)
-(*   let sec64 = u32_to_s32 64ul in *)
-(*   let sec56 = u32_to_s32 56ul in *)
-(*   admit(); // BB.TODO: More SMT automation needed. *)
-(*   S32.logor (S32.logand (S32.lt_mask (S32.rem rlen sec64) sec56) *)
-(*                         (S32.sub sec56 (S32.rem rlen sec64))) *)
-(*             (S32.logand (S32.lognot (S32.lt_mask (S32.rem rlen sec64) sec56)) *)
-(*                         (S32.sub (S32.add sec64 sec56) (S32.rem rlen sec64))) *)
+val pad_length: rlen:s32{S32.v rlen - 64 < pow2 32} -> Tot (n:s32{S32.v n <= 64 /\ S32.v n >= 1})
+let pad_length rlen =
+  let sec64 = u32_to_s32 64ul in
+  let sec56 = u32_to_s32 56ul in
+  admit(); // BB.TODO: More SMT automation needed.
+  S32.logor (S32.logand (S32.lt_mask (S32.rem rlen sec64) sec56)
+                        (S32.sub sec56 (S32.rem rlen sec64)))
+            (S32.logand (S32.lognot (S32.lt_mask (S32.rem rlen sec64) sec56))
+                        (S32.sub (S32.add sec64 sec56) (S32.rem rlen sec64)))
 
 
 (* Pad *)
 val pad': (memb   :bytes{length memb >= 8}) ->
-          (output :bytes{length output = v blocksize /\ disjoint output memb}) ->
-          (data   :bytes{length data = v blocksize /\ disjoint data memb /\ disjoint data output}) ->
-          (len    :s32  {S32.v len + 1 <= length data}) ->
+          (output :bytes{length output = U32.v blocksize /\ disjoint output memb}) ->
+          (data :bytes{length data = U32.v blocksize /\ disjoint data memb /\ disjoint data output}) ->
+          (len  :s32  {S32.v len + 1 <= length data}) ->
           (encodedlen :s64{S64.v encodedlen + S32.v len < pow2 64})
           -> STL unit
                 (requires (fun h -> live h memb /\ live h output /\ live h data))
@@ -232,25 +236,25 @@ let pad' memb output data len encodedlen =
   (* Set the output to be all zeros except for the first
    * byte of the padding. BB.TODO: Maybe we can improve perfs. *)
   let pos1 = len in
-  let pos2 = S32.add len (u32_to_s32 1ul) in
-  setbuf3 output blocksize (u8_to_s8 0x00uy) (u8_to_s8 0x80uy) (u8_to_s8 0x00uy) pos1 pos2;
+  let pos2 = S32.add len (uint32_to_sint32 1ul) in
+  setbuf3 output blocksize (uint8_to_sint8 0x00uy) (uint8_to_sint8 0x80uy) (uint8_to_sint8 0x00uy) pos1 pos2;
 
   (* Masked copy of the partial block of data in the output *)
   (* Leakage resistance: the copy is done in constant time and
   does not leak the length of the partial block but only the
   the size of the block *)
-  copymask data (u32_to_s32 0ul) len output blocksize;
+  copymask data (uint32_to_sint32 0ul) len output blocksize;
 
   (* Encode the length into big-endian bytes *)
   (* Leakage resistance: position and length of the MD encoded
   length are public, note that the input has size 2^64 maximum *)
   be_bytes_of_sint64 len_64 encodedlen;
-  SB.blit len_64 0ul output (blocksize -^ 8ul) 8ul
+  SB.blit len_64 0ul output (blocksize -@ 8ul) 8ul
 
 
-val pad: (output :bytes{length output = v blocksize}) ->
-         (data   :bytes{length data = v blocksize /\ disjoint data output}) ->
-         (len    :s32  {S32.v len + 1 <= length data /\ S32.v len + 8 <= length output}) ->
+val pad: (output :bytes{length output = U32.v blocksize}) ->
+         (data   :bytes{length data = U32.v blocksize /\ disjoint data output}) ->
+         (len    :s32  {S32.v len + 1 <= length data /\ S32.v len + S32.v (pad_length len) + 8 <= length output}) ->
          (encodedlen :s64{S64.v encodedlen + S32.v len < pow2 64})
          -> STL unit
               (requires (fun h -> live h output /\ live h data))
@@ -264,7 +268,7 @@ let pad output data len encodedlen =
    * representation we currently need 8 bytes more for casts here
    * This whole wrapping function should disappear after fix *)
   let memblen = 8ul in
-  let memb = create (u8_to_s8 0uy) memblen in
+  let memb = create (uint8_to_sint8 0uy) memblen in
 
   (* Call the padding function *)
   pad' memb output data len encodedlen;
@@ -276,7 +280,7 @@ let pad output data len encodedlen =
 
 (* [FIPS 180-4] section 6.2.2 *)
 (* Step 1 : Scheduling function for sixty-four 32bit words *)
-val ws_upd: (state  :uint32s {length state = v size_state}) ->
+val ws_upd: (state  :uint32s {length state = U32.v size_state}) ->
             (t      :u32)
                    -> STL unit
                         (requires (fun h -> live h state))
@@ -288,14 +292,14 @@ let rec ws_upd state t =
   let wblock = SB.sub state pos_wblock size_wblock in
 
   (* Perform computations *)
-  if t <^ 16ul then begin
-    ws.(t) <- wblock.(t);
-    ws_upd state (t +^ 1ul) end
-  else if t <^ 64ul then begin
-    let _t16 = ws.(t -^ 16ul) in
-    let _t15 = ws.(t -^ 15ul) in
-    let _t7  = ws.(t -^ 7ul) in
-    let _t2  = ws.(t -^ 2ul) in
+  if lt t 16ul then begin
+    upd ws t (index wblock t);
+    ws_upd state (t +@ 1ul) end
+  else if lt t 64ul then begin
+    let _t16 = index ws (t -@ 16ul) in
+    let _t15 = index ws (t -@ 15ul) in
+    let _t7  = index ws (t -@ 7ul) in
+    let _t2  = index ws (t -@ 2ul) in
 
     let v0 = _sigma1 _t2 in
     let v1 = _sigma0 _t15 in
@@ -303,14 +307,14 @@ let rec ws_upd state t =
     let v = (S32.add_mod v0
                      (S32.add_mod _t7
                               (S32.add_mod v1 _t16)))
-    in ws.(t) <- v;
-    ws_upd state (t +^ 1ul) end
+    in upd ws t v;
+    ws_upd state (t +@ 1ul) end
   else ()
 
 
 (* [FIPS 180-4] section 5.3.3 *)
 (* Define the initial hash value *)
-val init : state:uint32s{length state = v size_state}
+val init : state:uint32s{length state = U32.v size_state}
   -> STL unit
         (requires (fun h -> live h state))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
@@ -320,14 +324,16 @@ let init state =
   set_k state;
   (* The schedule state is left to zeros *)
   (* Initialize working hash *)
-  set_whash state
+  set_whash state;
   (* The data block is left to zeros *)
-  (* The length of the (partial) block is left to 0ul *)
+  (* The last block is left to zeros *)
+  (* The length of the (partial) block *)
+  upd state pos_pblocklen (u32_to_s32 blocksize)
   (* The total number of blocks is left to 0ul *)
 
 
 (* Step 3 : Perform logical operations on the working variables *)
-val update_inner : (state :uint32s{length state = v size_state}) ->
+val update_inner : (state :uint32s{length state = U32.v size_state}) ->
                    (t     :u32) ->
                    (t1    :s32) ->
                    (t2    :s32)
@@ -336,7 +342,7 @@ val update_inner : (state :uint32s{length state = v size_state}) ->
                          (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let rec update_inner state t t1 t2 =
-  if t <^ 64ul then begin
+  if lt t 64ul then begin
   
     (* Get necessary information from the state *)
     let whash = SB.sub state pos_whash size_whash in
@@ -344,36 +350,37 @@ let rec update_inner state t t1 t2 =
     let ws = SB.sub state pos_ws size_ws in
 
     (* Perform computations *)
-    let _h  = whash.(7ul) in
-    let _kt = k.(t) in
-    let _wt = ws.(t) in
-    let v0 = _Sigma1 whash.(4ul) in
-    let v1 = _Ch whash.(4ul) whash.(5ul) whash.(6ul) in
+    let _h = index whash 7ul in
+    let _kt = index k t in
+    let _wt = index ws t in
+    let v0 = _Sigma1 (index whash 4ul) in
+    let v1 = _Ch (index whash 4ul) (index whash 5ul) (index whash 6ul) in
     let t1 = S32.add_mod _h (S32.add_mod v0 (S32.add_mod v1 (S32.add_mod _kt _wt))) in
-    let z0 = _Sigma0 whash.(0ul) in
-    let z1 = _Maj whash.(0ul) whash.(1ul) whash.(2ul) in
+    let z0 = _Sigma0 (index whash 0ul) in
+    let z1 = _Maj (index whash 0ul) (index whash 1ul) (index whash 2ul) in
     let t2 = S32.add_mod z0 z1 in
-    let _d = whash.(3ul) in
+    let _d = index whash 3ul in
 
     (* Store the new working hash in the state *)
-    whash.(7ul) <- whash.(6ul);
-    whash.(6ul) <- whash.(5ul);
-    whash.(5ul) <- whash.(4ul);
-    whash.(4ul) <- (S32.add_mod _d t1);
-    whash.(3ul) <- whash.(2ul);
-    whash.(2ul) <- whash.(1ul);
-    whash.(1ul) <- whash.(0ul);
-    whash.(0ul) <- (S32.add_mod t1 t2);
-    update_inner state (t +^ 1ul) t1 t2 end
+    upd whash 7ul (index whash 6ul);
+    upd whash 6ul (index whash 5ul);
+    upd whash 5ul (index whash 4ul);
+    upd whash 4ul (S32.add_mod _d t1);
+    upd whash 3ul (index whash 2ul);
+    upd whash 2ul (index whash 1ul);
+    upd whash 1ul (index whash 0ul);
+    upd whash 0ul (S32.add_mod t1 t2);
+    update_inner state (t +@ 1ul) t1 t2 end
   else ()
 
 
-val update_step : (state :uint32s{length state = v size_state})
+val update_step : (state :uint32s{length state = U32.v size_state}) ->
+                  (mflag :s32)
                   -> STL unit
                         (requires (fun h -> live h state))
                         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-let update_step state =
+let update_step state maskflag =
   admit(); // This is just for verification timeout
   
   (* Get necessary information from the state *)
@@ -393,121 +400,145 @@ let update_step state =
   let input_state7 = index whash 7ul in
 
   (* Step 3 : Perform logical operations on the working variables *)
-  update_inner state 0ul (u32_to_s32 0ul) (u32_to_s32 0ul);
-
-  let current_state0 = whash.(0ul) in
-  let current_state1 = whash.(1ul) in
-  let current_state2 = whash.(2ul) in
-  let current_state3 = whash.(3ul) in
-  let current_state4 = whash.(4ul) in
-  let current_state5 = whash.(5ul) in
-  let current_state6 = whash.(6ul) in
-  let current_state7 = whash.(7ul) in
+  update_inner state 0ul (uint32_to_sint32 0ul) (uint32_to_sint32 0ul);
 
   (* Step 4 : Compute the ith intermediate hash value *)
-  let output_state0 = S32.add_mod current_state0 input_state0 in
-  let output_state1 = S32.add_mod current_state1 input_state1 in
-  let output_state2 = S32.add_mod current_state2 input_state2 in
-  let output_state3 = S32.add_mod current_state3 input_state3 in
-  let output_state4 = S32.add_mod current_state4 input_state4 in
-  let output_state5 = S32.add_mod current_state5 input_state5 in
-  let output_state6 = S32.add_mod current_state6 input_state6 in
-  let output_state7 = S32.add_mod current_state7 input_state7 in  
-  whash.(0ul) <- output_state0;
-  whash.(1ul) <- output_state1;
-  whash.(2ul) <- output_state2;
-  whash.(3ul) <- output_state3;
-  whash.(4ul) <- output_state4;
-  whash.(5ul) <- output_state5;
-  whash.(6ul) <- output_state6;
-  whash.(7ul) <- output_state7;  
+  (* Masking: once we no longer have real data to update the working hash,
+   * we continue performing permutations but without updating it. *)
+  (* Leakage resistance: we set the ouput value either to the new value or
+   * to the value of the existing one *)
+  (* BB:TODO: Discuss the fact that a clever compiler could optimize that *)
+  let output_state0 = S32.logor (S32.logand maskflag (S32.add_mod (index whash 0ul) input_state0)) 
+                                (S32.logand (S32.lognot maskflag) input_state0) in
+  let output_state1 = S32.logor (S32.logand maskflag (S32.add_mod (index whash 1ul) input_state1)) 
+                                (S32.logand (S32.lognot maskflag) input_state1) in
+  let output_state2 = S32.logor (S32.logand maskflag (S32.add_mod (index whash 2ul) input_state2)) 
+                                (S32.logand (S32.lognot maskflag) input_state2) in
+  let output_state3 = S32.logor (S32.logand maskflag (S32.add_mod (index whash 3ul) input_state3)) 
+                                (S32.logand (S32.lognot maskflag) input_state3) in
+  let output_state4 = S32.logor (S32.logand maskflag (S32.add_mod (index whash 4ul) input_state4)) 
+                                (S32.logand (S32.lognot maskflag) input_state4) in
+  let output_state5 = S32.logor (S32.logand maskflag (S32.add_mod (index whash 5ul) input_state5)) 
+                                (S32.logand (S32.lognot maskflag) input_state5) in
+  let output_state6 = S32.logor (S32.logand maskflag (S32.add_mod (index whash 6ul) input_state6)) 
+                                (S32.logand (S32.lognot maskflag) input_state6) in
+  let output_state7 = S32.logor (S32.logand maskflag (S32.add_mod (index whash 7ul) input_state7)) 
+                                (S32.logand (S32.lognot maskflag) input_state7) in
+  
+  (* Store the new working hash value in the state *)
+  upd whash 0ul output_state0;
+  upd whash 1ul output_state1;
+  upd whash 2ul output_state2;
+  upd whash 3ul output_state3;
+  upd whash 4ul output_state4;
+  upd whash 5ul output_state5;
+  upd whash 6ul output_state6;
+  upd whash 7ul output_state7;
 
   (* Increment the total number of blocks processed *)
-  let pc = state.(pos_count) in
-  let npc = S32.add pc (u32_to_s32 1ul) in
-  state.(pos_count) <- npc
+  upd state pos_count (S32.add (index state pos_count) (uint32_to_sint32 1ul))
 
 
-val update' : (memb  :bytes{length memb >= v blocksize}) ->
-              (state :uint32s{length state = v size_state /\ disjoint state memb}) ->
-              (data  :bytes{length data >= v blocksize /\ (length data) % (v blocksize) = 0
+val update' : (memb  :bytes{length memb = 2 * U32.v blocksize}) ->
+              (state :uint32s{length state = U32.v size_state /\ disjoint state memb}) ->
+              (data  :bytes{length data >= U32.v blocksize /\ (length data) % (U32.v blocksize) = 0
                            /\ disjoint state memb /\ disjoint state data }) ->
-              (len   :s32{S32.v len <= length data}) ->
-              (rounds:u32{v rounds * v blocksize < pow2 32}) ->
-              (i     :u32{v i >= 0})
+              (len   :s32) ->
+              (rounds_data:s32{S32.v rounds_data * U32.v blocksize < pow2 32}) ->
+              (rounds_mask:u32{U32.v rounds_mask * U32.v blocksize = length data}) ->
+              (i     :u32{U32.v i >= 0})
               -> STL unit
                     (requires (fun h -> live h memb /\ live h state /\ live h data))
                     (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 state /\ modifies_2 memb state h0 h1))
 
-let rec update' memb state data len rounds i =
+let rec update' memb state data len rounds_data rounds_mask i =
 
   (* Get necessary information from the state *)
   let wblock = SB.sub state pos_wblock size_wblock in
+  let lblock = SB.sub state pos_lblock size_wblock in
 
-  (* Flatten the working block *)
-  (* BB.FUTURE: Inherent conversion copies from wblock
-   * to block due to the representation of the buffers. *)
+  (* Flatten the working block and the last block *)
+  (* BB.FUTURE: Remove inherent conversion copies
+   * due to the representation of the buffers. *)
   let cblock = SB.sub memb 0ul blocksize in
   be_bytes_of_uint32s cblock wblock size_wblock;
+  let clblock = SB.sub memb blocksize blocksize in
+  be_bytes_of_uint32s clblock lblock size_lblock;
 
   (* Get the data required to fill the partial block *)
-  let cpos = i *^ blocksize in
+  let cpos = U32.mul i blocksize in
   let cdata = SB.sub data cpos blocksize in
   
-  (* Complete the partial block with data *)
+  (* Complete the partial block with data and store it in the state *)
   (* Leakage resistance: filling the partial block must not leak
    * it's current length, so the data block must have the length
    * blocksize to make sure the copy is done in constant time *)
-  copymask cdata (u32_to_s32 0ul) (u32_to_s32 blocksize) cblock blocksize;
-
-  (* Store the new working (potentially partial) block in the state *)
+  copymask cdata (uint32_to_sint32 0ul) (uint32_to_sint32 blocksize) cblock blocksize;
   be_uint32s_of_bytes wblock cblock blocksize;
 
-  if i <^ rounds then begin
+  (* Store the last block in the state or update with itself *)
+  let mask_last = S32.eq_mask (uint32_to_sint32 i) rounds_data in
+  let size_last = S32.logor (S32.logand mask_last (uint32_to_sint32 blocksize))
+                            (S32.logand (S32.lognot mask_last) (uint32_to_sint32 0ul)) in
+  copymask cdata (uint32_to_sint32 0ul) size_last clblock blocksize;
+  be_uint32s_of_bytes lblock clblock blocksize;
 
-    (* Update the current length of the partial block after processing *)
-    state.(pos_wblocklen) <- u32_to_s32 blocksize;
-    
-    (* Process the block *)
-    update_step state;
-    update' memb state data len rounds (i +^ 1ul) end
+  (* Compute the new partial block length when in the last block 
+   * In the other cases overwrite with the current value 
+   * The length of the last data block is initialized to blocksize *)
+  (* Timing leakage: this will not leak which block is the last 
+   * containing the real data *)
+  let cblocklen = index state pos_pblocklen in
+  let pblen = S32.sub len (uint32_to_sint32 cpos) in
+  let lblocklen = S32.logor (S32.logand mask_last pblen)
+                    (S32.logand (S32.lognot mask_last) cblocklen) in    
 
-  else
-  
   (* Update the current length of the partial block after processing *)
-  state.(pos_wblocklen) <- S32.sub len (u32_to_s32 cpos)
-  
+  upd state pos_pblocklen lblocklen;
+
+  if U32.lt i rounds_mask then begin
+
+    (* Signal update_step to update the working hash or not *)
+    let maskflag = S32.lt_mask (uint32_to_sint32 i) rounds_data in
+
+    (* Process the block *)
+    update_step state maskflag;
+    update' memb state data len rounds_data rounds_mask (U32.add i 1ul) end
+  else ()
+
 
 (* [FIPS 180-4] section 6.2.2 *)
 (* Update running hash function *)
-val update : (state :uint32s{length state = v size_state}) ->
-             (data  :bytes {length data >= v blocksize /\ (length data) % (v blocksize) = 0 /\ disjoint state data}) ->
-             (len   :u32{v len + 8 < pow2 32 /\ v len <= length data})
+val update : (state :uint32s{length state = U32.v size_state}) ->
+             (data  :bytes {length data >= U32.v blocksize /\ (length data) % (U32.v blocksize) = 0 /\ disjoint state data}) ->
+             (len   :s32{S32.v len + 8 < pow2 32 /\ S32.v len <= length data}) ->
+             (rounds_mask:u32{U32.v rounds_mask * U32.v blocksize = length data})
               -> STL unit
                     (requires (fun h -> live h state /\ live h data))
                     (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-let update state data len =
+let update state data len rounds_mask =
 
   (* Push frame *)
   (**) push_frame();
 
-  let memblen = blocksize in
-  let memb = create (u8_to_s8 0uy) memblen in
+  let memblen = U32.mul 2ul blocksize in
+  let memb = create (uint8_to_sint8 0uy) memblen in
   
   (* Compute the number of rounds to process the data *)
-  let rounds = nblocks len -^ 1ul in
-  
+  let rounds_data = S32.sub (nblocks len) (u32_to_s32 1ul) in
+  let rounds_mask = rounds_mask -@ 1ul in
+
   (* Perform updates for all blocks except the last *)
-  update' memb state data (u32_to_s32 len) rounds 0ul;
+  update' memb state data len rounds_data rounds_mask 0ul;
 
   (* Pop frame *)
   (**) pop_frame()
   
 
 (* Compute the final value of the hash from the last hash value *)
-val finish_1': (memb  :bytes{length memb >= 2 * v blocksize}) ->
-               (state :uint32s{length state = v size_state /\ disjoint memb state})
+val finish_1': (memb  :bytes{length memb >= 2 * U32.v blocksize}) ->
+               (state :uint32s{length state = U32.v size_state /\ disjoint memb state})
              -> STL unit
                    (requires (fun h -> live h memb /\ live h state))
                    (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 state /\ modifies_2 memb state h0 h1))
@@ -518,33 +549,34 @@ let finish_1' memb state =
   let fblock = SB.sub memb 0ul blocksize in
   let cblock = SB.sub memb blocksize blocksize in
 
-  (* Retreive the partial block from the state *)
-  let wblock = SB.sub state pos_wblock size_wblock in
-  be_bytes_of_uint32s cblock wblock blocksize;
+  (* Retreive the partial block requiring padding from the state *)
+  let lblock = SB.sub state pos_lblock size_lblock in
+  be_bytes_of_uint32s cblock lblock blocksize;
 
   (* Retrive the number of blocks and the partial block length *)
-  let count = state.(pos_count) in
-  let partiallen = state.(pos_wblocklen) in
+  let count = index state pos_count in
+  let partiallen = index state pos_pblocklen in
 
   (* Compute the final length to be encoded in the padding in bits
    * represented as UInt64 to make sure that the multiplication
    * will not overflow inside a UInt32. 
    * The cast to UInt64 is specific to the SHA2-224 and SHA2-256 *)   
-  let currentlen = S64.mul (s32_to_s64 count) (u32_to_s64 blocksize) in
-  let totlenbytes = S64.add currentlen (s32_to_s64 partiallen) in
-  let totlen = S64.mul totlenbytes (u64_to_s64 8uL) in
+  let count = index state pos_count in
+  let currentlen = S64.mul (sint32_to_sint64 count) (uint32_to_sint64 blocksize) in
+  let totlenbytes = S64.add currentlen (sint32_to_sint64 partiallen) in
+  let totlen = S64.mul totlenbytes (uint64_to_sint64 8uL) in
 
   (* Pad the data in constant time *)
   pad fblock cblock partiallen totlen;
 
   (* Store the new working block in the state *)
-  be_uint32s_of_bytes wblock fblock blocksize;
+  be_uint32s_of_bytes lblock fblock blocksize;
 
   (* Feed the last block to the update function for one round *)
-  update_step state
+  update_step state (uint32_to_sint32 0ul)
 
 
-val finish_1: (state :uint32s{length state = v size_state})
+val finish_1: (state :uint32s{length state = U32.v size_state})
              -> STL unit
                    (requires (fun h -> live h state))
                    (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
@@ -554,9 +586,9 @@ let finish_1 state =
   (* Push frame *)
   (**) push_frame();
 
-  (* Allocate the memory required to flatten wblock *)
-  let memblen = 2ul *^ blocksize in
-  let memb = create (u8_to_s8 0uy) memblen in
+  (* Allocate the memory required to flatten lblock *)
+  let memblen = U32.mul 2ul blocksize in
+  let memb = create (uint8_to_sint8 0uy) memblen in
 
   finish_1' memb state;
 
@@ -565,8 +597,8 @@ let finish_1 state =
   (**) pop_frame()
 
 
-val finish_2: (hash  :bytes{length hash >= v hashsize}) ->
-             (state :uint32s{length state = v size_state /\ disjoint state hash })
+val finish_2: (hash  :bytes{length hash >= U32.v hashsize}) ->
+             (state :uint32s{length state = U32.v size_state /\ disjoint state hash })
              -> STL unit
                    (requires (fun h -> live h hash /\ live h state))
                    (ensures  (fun h0 r h1 -> live h1 hash /\ modifies_1 hash h0 h1))
@@ -578,8 +610,8 @@ let finish_2 hash state =
 
 
 (* Compute the final value of the hash from the last hash value *)
-val finish: (hash  :bytes{length hash >= v hashsize}) ->
-            (state :uint32s{length state = v size_state /\ disjoint state hash})
+val finish: (hash  :bytes{length hash >= U32.v hashsize}) ->
+            (state :uint32s{length state = U32.v size_state /\ disjoint state hash})
             -> STL unit
                  (requires (fun h -> live h hash /\ live h state))
                  (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 state /\ modifies_2 hash state h0 h1))
@@ -592,41 +624,43 @@ let finish hash state =
 
 
 (* Compute the sha256 hash of the data *)
-val sha256': (memb :uint32s{ length memb >= v size_state}) ->
-             (hash :bytes{ length hash >= v hashsize /\ disjoint hash memb}) ->
-             (data :bytes{ length data >= v blocksize /\ (length data) % (v blocksize) = 0
+val sha256': (memb :uint32s{ length memb >= U32.v size_state}) ->
+             (hash :bytes{ length hash >= U32.v hashsize /\ disjoint hash memb}) ->
+             (data :bytes{ length data >= U32.v blocksize /\ (length data) % (U32.v blocksize) = 0
                          /\ disjoint data memb /\ disjoint data hash}) ->
-             (len  :u32{v len + 8 < pow2 32 /\ v len <= length data})
+             (len  :s32{S32.v len + 8 < pow2 32 /\ S32.v len <= length data}) ->
+             (rounds_mask:u32{U32.v rounds_mask * U32.v blocksize = length data})
              -> STL unit
                    (requires (fun h -> live h memb /\ live h hash /\ live h data))
                    (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 hash /\ modifies_2 memb hash h0 h1))
 
-let sha256' memb hash data len =
+let sha256' memb hash data len rounds_mask =
   let state = SB.sub memb 0ul size_state in
   init state;
-  update state data len;
+  update state data len rounds_mask;
   finish hash state
 
 
 (* Compute the sha256 hash of some bytes *)
-val sha256: (hash :bytes{ length hash >= v hashsize}) ->
-            (data :bytes{ length data >= v blocksize /\ (length data) % (v blocksize) = 0 /\ disjoint data hash}) ->
-            (len  :u32{v len + 8 < pow2 32 /\ v len <= length data})
+val sha256: (hash :bytes{length hash >= U32.v hashsize}) ->
+            (data :bytes{length data >= U32.v blocksize /\ (length data) % (U32.v blocksize) = 0 /\ disjoint data hash}) ->
+            (len  :s32{S32.v len + 8 < pow2 32 /\ S32.v len <= length data}) ->
+            (rounds_mask:u32{U32.v rounds_mask * U32.v blocksize = length data})
             -> STL unit
                  (requires (fun h -> live h hash /\ live h data))
                  (ensures  (fun h0 r h1 -> live h1 hash /\ modifies_1 hash h0 h1))
 
-let sha256 hash data len =
+let sha256 hash data len rounds_mask =
 
   (* Push frame *)
   (**) push_frame();
 
   (* Allocate the memory block for the underlying function *)
   let memblen = size_state in
-  let memb = create (u32_to_s32 0ul) memblen in
+  let memb = create (uint32_to_sint32 0ul) memblen in
 
   (* Call the sha256 function *)
-  sha256' memb hash data len ;
+  sha256' memb hash data len rounds_mask;
 
   (* Pop frame *)
   (**) admit(); // BB.TODO: Improve perf. (trivial)

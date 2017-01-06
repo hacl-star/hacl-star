@@ -1,4 +1,4 @@
-module Hash.SHA2.L256.Pure
+module Hacl.Hash.SHA2.L256.Pure
 
 open FStar.UInt32
 
@@ -17,7 +17,7 @@ let op_Star = Prims.op_Multiply
 (* Needed Insanity *)
 assume MaxI8 : pow2 8 = 256
 assume MaxI32: pow2 32 = 4294967296
-assume MaxI64: pow2 64 = 9999999999999999999999999999
+assume MaxI64: pow2 64 = 18446744073709551616
 
 
 (* Define base types *)

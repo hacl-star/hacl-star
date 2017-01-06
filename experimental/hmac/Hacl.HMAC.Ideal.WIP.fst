@@ -1,4 +1,4 @@
-module HMAC.Ideal
+module Hacl.HMAC.Ideal
 
 open FStar.Heap
 //open FStar.HyperHeap

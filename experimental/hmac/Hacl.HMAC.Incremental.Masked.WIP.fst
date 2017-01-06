@@ -1,4 +1,4 @@
-module HMAC.Masked
+module Hacl.HMAC.Incremental.Masked.WIP
   
 open FStar.Mul
 open FStar.Ghost

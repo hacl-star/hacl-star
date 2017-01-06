@@ -1,4 +1,4 @@
-module Hash.SHA2.L256
+module Hacl.Hash.SHA2.L256.WIP
 
 open FStar.Mul
 open FStar.Ghost
@@ -9,7 +9,7 @@ open FStar.Buffer
 open Hacl.Cast
 open Hacl.UInt8
 open Hacl.UInt32
-open Hacl.SBuffer
+(* open Hacl.SBuffer *)
 open Hacl.Conversions
 open Hacl.Operations
 open FStar.UInt32
@@ -20,17 +20,27 @@ module U32 = FStar.UInt32
 module S32 = Hacl.UInt32
 module U64 = FStar.UInt64
 module S64 = Hacl.UInt64
-module SB = Hacl.SBuffer
+module FB = FStar.Buffer
+module SB = FStar.Buffer
+(* module SB = Hacl.SBuffer *)
+
+
+
+#set-options "--lax"
 
 
 (* Define base types *)
+let u8 = FStar.UInt8.t
 let s8 = Hacl.UInt8.t
 let u32 = FStar.UInt32.t
 let s32 = Hacl.UInt32.t
 let u64 = FStar.UInt64.t
 let s64 = Hacl.UInt64.t
-let uint32s = Hacl.SBuffer.u32s
-let bytes = Hacl.SBuffer.u8s
+(* let uint32s = Hacl.SBuffer.u32s *)
+(* let bytes = Hacl.SBuffer.u8s *)
+
+let uint32s = SB.buffer s32 //Hacl.SBuffer.u32s
+let bytes = SB.buffer s8 //Hacl.SBuffer.u8s
 
 let u8_to_s8 = Hacl.Cast.uint8_to_sint8
 let u32_to_s32 = Hacl.Cast.uint32_to_sint32
@@ -39,33 +49,33 @@ let s32_to_s64 = Hacl.Cast.sint32_to_sint64
 let u64_to_s64 = Hacl.Cast.uint64_to_sint64
 
 
-#set-options "--lax"
+
 
 //
 // SHA-256
 //
 
 (* Define algorithm parameters *)
-let hashsize    = 32ul  // 256 bits = 32 bytes (Final hash output size)
-let blocksize   = 64ul  // 512 bits = 64 bytes (Working data block size)
-let size_md_len = 8ul   // 64 bits = 8 bytes (MD pad length encoding)
+inline_for_extraction let hashsize    = 32ul  // 256 bits = 32 bytes (Final hash output size)
+inline_for_extraction let blocksize   = 64ul  // 512 bits = 64 bytes (Working data block size)
+inline_for_extraction let size_md_len = 8ul   // 64 bits = 8 bytes (MD pad length encoding)
 
 (* Sizes of objects in the state *)
-let size_k      = 64ul  // 2048 bits = 64 words of 32 bits (blocksize)
-let size_ws     = 64ul  // 2048 bits = 64 words of 32 bits (blocksize)
-let size_whash  = 8ul   // 256 bits = 8 words of 32 bits (hashsize/4)
-let size_wblock = 16ul  // 512 bits = 64 words of 32 bits (blocksize/4)
-let size_wblocklen = 1ul // 32 bits (UInt32)
-let size_count  = 1ul   // 32 bits (UInt32)
-let size_state  = size_k +^ size_ws +^ size_whash +^ size_wblock +^ size_wblocklen +^ size_count
+inline_for_extraction let size_k      = 64ul  // 2048 bits = 64 words of 32 bits (blocksize)
+inline_for_extraction let size_ws     = 64ul  // 2048 bits = 64 words of 32 bits (blocksize)
+inline_for_extraction let size_whash  = 8ul   // 256 bits = 8 words of 32 bits (hashsize/4)
+inline_for_extraction let size_wblock = 16ul  // 512 bits = 64 words of 32 bits (blocksize/4)
+inline_for_extraction let size_wblocklen = 1ul // 32 bits (UInt32)
+inline_for_extraction let size_count  = 1ul   // 32 bits (UInt32)
+inline_for_extraction let size_state  = size_k +^ size_ws +^ size_whash +^ size_wblock +^ size_wblocklen +^ size_count
 
 (* Positions of objects in the state *)
-let pos_k         = 0ul
-let pos_ws        = size_k
-let pos_whash     = size_k +^ size_ws
-let pos_wblock    = size_k +^ size_ws +^ size_whash
-let pos_wblocklen = size_k +^ size_ws +^ size_whash +^ size_wblock
-let pos_count     = size_k +^ size_ws +^ size_whash +^ size_wblock  +^ 1ul
+inline_for_extraction let pos_k         = 0ul
+inline_for_extraction let pos_ws        = size_k
+inline_for_extraction let pos_whash     = size_k +^ size_ws
+inline_for_extraction let pos_wblock    = size_k +^ size_ws +^ size_whash
+inline_for_extraction let pos_wblocklen = size_k +^ size_ws +^ size_whash +^ size_wblock
+inline_for_extraction let pos_count     = size_k +^ size_ws +^ size_whash +^ size_wblock  +^ 1ul
 
 
 
@@ -385,18 +395,37 @@ let update_step state =
   (* Step 3 : Perform logical operations on the working variables *)
   update_inner state 0ul (u32_to_s32 0ul) (u32_to_s32 0ul);
 
+  let current_state0 = whash.(0ul) in
+  let current_state1 = whash.(1ul) in
+  let current_state2 = whash.(2ul) in
+  let current_state3 = whash.(3ul) in
+  let current_state4 = whash.(4ul) in
+  let current_state5 = whash.(5ul) in
+  let current_state6 = whash.(6ul) in
+  let current_state7 = whash.(7ul) in
+
   (* Step 4 : Compute the ith intermediate hash value *)
-  whash.(0ul) <- (S32.add_mod whash.(0ul) input_state0);
-  whash.(1ul) <- (S32.add_mod whash.(1ul) input_state1);
-  whash.(2ul) <- (S32.add_mod whash.(2ul) input_state2);
-  whash.(3ul) <- (S32.add_mod whash.(3ul) input_state3);
-  whash.(4ul) <- (S32.add_mod whash.(4ul) input_state4);
-  whash.(5ul) <- (S32.add_mod whash.(5ul) input_state5);
-  whash.(6ul) <- (S32.add_mod whash.(6ul) input_state6);
-  whash.(7ul) <- (S32.add_mod whash.(7ul) input_state7);
+  let output_state0 = S32.add_mod current_state0 input_state0 in
+  let output_state1 = S32.add_mod current_state1 input_state1 in
+  let output_state2 = S32.add_mod current_state2 input_state2 in
+  let output_state3 = S32.add_mod current_state3 input_state3 in
+  let output_state4 = S32.add_mod current_state4 input_state4 in
+  let output_state5 = S32.add_mod current_state5 input_state5 in
+  let output_state6 = S32.add_mod current_state6 input_state6 in
+  let output_state7 = S32.add_mod current_state7 input_state7 in  
+  whash.(0ul) <- output_state0;
+  whash.(1ul) <- output_state1;
+  whash.(2ul) <- output_state2;
+  whash.(3ul) <- output_state3;
+  whash.(4ul) <- output_state4;
+  whash.(5ul) <- output_state5;
+  whash.(6ul) <- output_state6;
+  whash.(7ul) <- output_state7;  
 
   (* Increment the total number of blocks processed *)
-  state.(pos_count) <- S32.add state.(pos_count) (u32_to_s32 1ul)
+  let pc = state.(pos_count) in
+  let npc = S32.add pc (u32_to_s32 1ul) in
+  state.(pos_count) <- npc
 
 
 val update' : (memb  :bytes{length memb >= v blocksize}) ->
