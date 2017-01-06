@@ -1,4 +1,4 @@
-module Hacl.HKDF.HMAC.SHA2.L256
+module Hacl.HKDF.fst
 
 open FStar.Mul
 open FStar.Ghost
