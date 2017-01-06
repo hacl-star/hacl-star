@@ -1,4 +1,4 @@
-module HMAC.B
+module HMAC
 
 open FStar.Mul
 open FStar.Ghost
