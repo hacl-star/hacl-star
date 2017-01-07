@@ -1,21 +1,81 @@
 hacl-star
 =========
 
-A formally verified cryptographic library in F*. 
+HACL* is a formally verified cryptographic library in F\*, developed
+as part of Project [Everest].  HACL
+stands for High-Assurance Cryptographic Library and its design is
+inspired by discussions at the HACS series of workshops.  The goal of
+this library is to develop *reference* implementations for popular
+cryptographic primitives and to verify them for memory safety,
+side-channel resistance, and (where applicable) functional
+correctness. All code is written and verified in F\* and
+then compiled to C or OCaml for execution. 
+The primitives and constructions supported currently are:
+
+* Stream ciphers: Chacha20, Salsa20, XSalsa20
+* MACs: Poly1305
+* Elliptic Curves: Curve25519
+* NaCl API: secret_box, box
+
+HACL* can be used in two ways. The verified primitives can be directly
+used in larger verification projects.  For example, HACL* code is used
+as the basis for cryptograrphic proofs of the TLS record layer in
+[miTLS].  Alternatively, developers can use HACL* through the [NaCl]
+API. In particular, we implement the same API as [libsodium] for the
+Box and SecretBox primitives, so any application that runs on
+libsodium can be immediately ported to use the verified code in HACL*
+instead. 
+
+HACL* primitives, when compiled to C, are as fast as state-of-the-art
+C implementations, but still much slower than assembly implementations.
+Linking HACL* to verified assembly language components is a long-term goal.
+
+[miTLS]: https://github.com/mitls/mitls-star
+[NaCl]: https://nacl.cr.yp.to/
+[libsodium]: https://github.com/jedisct1/libsodium
+[Everest]: https://github.com/project-everest
 
 # Warning
 
-This library is highly experimental and a work-in-progress. Do not use it in production systems without consulting the authors.
+This library is highly experimental and a work-in-progress. Do not use
+it in production systems without consulting the authors.
 
+# Installation
 
-# Code test targets 
+See [INSTALL.md].
 
-Run `make test` to run the extraction tests currently available
+To verify the F\* code, you need to install the [F\*] typechecker.
+To extract F\* code to C, you need to install [KreMLin].
 
+For convenience, we have already extracted C code for our verified primitives
+and made them available in [extracted].
+To run that code, you need a modern C compiler (preferably GCC-6).
+To compare its performance with the C reference code in libsodium, download and install
+[libsodium] with the --disable-asm flag.
 
-# Code verification targets 
+[INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
+[F\*]: https://github.com/FStarLang/FStar/
+[KreMLin]: https://github.com/FStarLang/kremlin
+[extracted]: https://github.com/mitls/hacl-star/extracted/c
+[libsodium]: https://github.com/jedisct1/libsodium
 
-Run `make verify` to run the extraction tests currently available
+# Browsing and testing the code
+
+The F\* code for our primitives is in the [code directory]: https://github.com/mitls/hacl-star/code
+Note that Poly1305 and Curve25519 share a good chunk of Bignum field arithmetic code, and this shared
+code is in code/bignum.  There are Makefile targets in each directory for verification.
+You can run `make test` in `extracted/c` to run tests on already extracted code.
+
+# Experimental features
+
+The `experimental/` directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
+* Elliptic Curves: NIST P-256, Curve448
+* Encryption: AES-128, AES-256
+* Hash functions: SHA-256
+* MACs: HMAC, GCM
+* Key Derivation: HKDF
+
+We are also working on a JavaScript backend to F* that would enable us to extract HACL* as a JavaScript library.
 
 # Maintainers
 
