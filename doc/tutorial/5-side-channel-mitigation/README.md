@@ -1,17 +1,17 @@
-## Example 4 - side channel mitigation
+## 5. Side channel mitigation
 
-In Hacl we use a wrapper mechanism around *secret* integers to prevent branching or array accesses based on their values, as well as the use of some of the arithmetic operators.
+Hacl uses a wrapper mechanism around *secret* integers to prevent branching or array accesses based on their values, as well as the use of some of the arithmetic operators such as division or remainder.
 
-This wrapper mechanism (see [Hacl.UInt32.fst](https://github.com/mitls/hacl-star/blob/master/code/lib/Hacl.UInt32.fst) for instance) leaves all the implementation details visible to the SMT solver. *Hacl* integers and F* integers share the same logic for the operators they have in common.
+This wrapper mechanism (see [Hacl.UInt32.fst](https://github.com/mitls/hacl-star/blob/master/code/lib/Hacl.UInt32.fst) for instance) leaves all the implementation details visible to the SMT solver. *Hacl* integers and F* integers share the same logic for the operators they have in common, they are however implemented as different types.
 
-They are, however, implemented as different types, since *Hacl* integers are implemented are wrapping F* machine integers in a Data Constructor. This means that, as oppposed to what would be the case if *Hacl* integers had been a simple refinement on F* integers, one cannot be use where the other was expected.
-Also, in the *Hacl* integers implementation appears the `noeq` keyword in the type declaration. This means that we implement no concrete homogeneous equality (`=`) for these types. This being the only *equaity* concrete function usable in F* (the `==` equality is heterogeneous and reserve to specifications), this prevents the programmer from writing equality tests that may leak some information on sensitive data.
+*Hacl* integers are defined on top of F* machine integers but inside Data Constructors. This means that one cannot be use where the other was expected, as oppposed to what would be the case if *Hacl* integers had been a simple refinement on F* integers.
+Also, in the *Hacl* integers implementation appears the `noeq` keyword in the type declaration. This means that we implement no concrete homogeneous equality (`=`) for these types. This being the only concrete *equality* function usable in F* (the `==` equality is heterogeneous and reserve to specifications), it prevents the programmer from writing equality tests that may leak some information on sensitive data.
 
-Similarly compared to the native F* machine integers, the *Hacl* integers have:
+Similarly, when compared to the native F* machine integers, the *Hacl* integers have:
 - No division or remainder operators defined, as those are often not constant-time.
 - No comparison operators (such as greater than or equal)
-- More gnerally, no concrete functions returning a native F* type. This means that when computing on a *Hacl* integer, the only type one can return is a *Hacl* integer (except in ghost code).
-- Coerciions from F* to Hacl integers, but not the other way,
+- More generally, no concrete functions returning a native F* type. This means that when computing on a *Hacl* integer, the only type one can return is an *Hacl* integer (except in ghost code).
+- Coercions from F* to Hacl integers (not the other way).
 - Masking operators to replace the comparison operators :
 ```F#
 val eq_mask: a:t -> b:t -> Tot (c:t{(v a = v b ==> v c = pow2 n - 1) /\ (v a <> v b ==> v c = 0)})
