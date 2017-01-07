@@ -46,3 +46,14 @@ This is worse than sounds: although the `Stack` effect enforces a constraint on 
 This is why we need to provide a `modifies` clause. Such clauses indicate exactly which references have been touched.
 
 Here the buffer `b` has a refinement: `disjoint a b`. This indicates that the two buffers are not overlapping. In combination with the fact that only `a` has been modified (`modifies_1 a h0 h1`), the solver can deduce that the sequence of values `b` points to (`as_seq h b`) is left unchanged by the function.
+
+### Memory safety
+
+This `live` conditions are precondition to all the buffer's read/write functions. Hence to typecheck the code those have to be enforced everywhere.
+This has two implications:
+- it is impossible to dereference any reference that is not live. If a frame is popped for instance, anything that was previously allocated on it is no longer live, and thus dangling pointers cannot be dereferenced,
+- one can never access an array out of bounds because of the static check that enforces that the size of the array must be larger than the index.
+
+This prevents all buffer overruns, and potential attacks such as HeartBleed.
+Hacl* and [mitls](www.mitls.org) are statically verified in that setting.
+Because all that verification is static, there is no need for dynamic checks to ensure memory safety, and thus no performance hit.
