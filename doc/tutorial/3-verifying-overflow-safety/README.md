@@ -1,4 +1,4 @@
-### Example 2 - Overflow prevention
+## 3. Overflow prevention
 
 ### Wrapping vs non-overflowing semantics
 
