@@ -4,47 +4,6 @@ HACL_HOME?=../..
 include ../Makefile.include
 
 
-FSTAR_LIB_FILES= \
-	FStar.Mul.fst \
-	FStar.Squash.fsti \
-	FStar.Squash.fst \
-	FStar.Classical.fst \
-	FStar.StrongExcludedMiddle.fst \
-	FStar.PropositionalExtensionality.fst \
-	FStar.FunctionalExtensionality.fst \
-	FStar.PredicateExtensionality.fst \
-	FStar.List.Tot.fst \
-	FStar.ListProperties.fst \
-	FStar.Seq.fst \
-	FStar.SeqProperties.fst \
-	FStar.Math.Lib.fst \
-	FStar.Math.Lemmas.fst \
-	FStar.BitVector.fst \
-	FStar.Int.fst \
-	FStar.UInt.fst \
-	FStar.UInt32.fst \
-	FStar.Int32.fst \
-	FStar.Int8.fst \
-	FStar.Int16.fst \
-	FStar.Int63.fst \
-	FStar.Int64.fst \
-	FStar.Int128.fst \
-	FStar.UInt8.fst \
-	FStar.UInt16.fst \
-	FStar.UInt63.fst \
-	FStar.UInt64.fst \
-	FStar.UInt128.fst \
-	FStar.Int.Cast.fst \
-	FStar.TSet.fst \
-	FStar.Set.fst \
-	FStar.Map.fst \
-	FStar.Heap.fst \
-	FStar.Ghost.fst \
-	FStar.HyperHeap.fst \
-	FStar.HyperStack.fst \
-	FStar.ST.fst \
-	FStar.Buffer.fst
-
 POLY1305_FILES= \
 	Hacl.Bignum.Constants.fst \
 	Hacl.Bignum.Parameters.fst \
@@ -107,8 +66,7 @@ extract-c:
 		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
 		$(POLY1305_FILES) Hacl.Test.Poly1305_64.fst \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
-		-drop Hacl.UInt128  -drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-bundle Hacl.Spec -bundle Hacl.Bignum -bundle Hacl.MAC \
+		-drop Hacl.UInt128  -drop Hacl.Bignum -bundle Hacl.Spec -bundle Hacl.Bignum -bundle Hacl.MAC -bundle Hacl.Symmetric -drop Hacl.Symmetric\
 		$(FSTAR_HOME)/../kremlin/test/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native -o poly1305.exe

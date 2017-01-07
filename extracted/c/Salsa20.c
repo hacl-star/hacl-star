@@ -1,32 +1,21 @@
-#include "Hacl_Symmetric_Salsa20.h"
+#include "Salsa20.h"
 
-uint32_t Hacl_Symmetric_Salsa20_rotate(uint32_t a, uint32_t s)
+static inline uint32_t Hacl_Symmetric_Salsa20_rotate(uint32_t a, uint32_t s)
 {
   return a << s | a >> (uint32_t )32 - s;
 }
 
-uint32_t Hacl_Symmetric_Salsa20_load32_le(uint8_t *k)
+static inline uint32_t Hacl_Symmetric_Salsa20_load32_le(uint8_t *k)
 {
-  uint8_t k0 = k[(uint32_t )0];
-  uint8_t k1 = k[(uint32_t )1];
-  uint8_t k2 = k[(uint32_t )2];
-  uint8_t k3 = k[(uint32_t )3];
-  return
-    (uint32_t )k0
-    | (uint32_t )k1 << (uint32_t )8
-    | (uint32_t )k2 << (uint32_t )16
-    | (uint32_t )k3 << (uint32_t )24;
+  return le32toh(load32(k));
 }
 
-void Hacl_Symmetric_Salsa20_store32_le(uint8_t *k, uint32_t x)
+static inline void Hacl_Symmetric_Salsa20_store32_le(uint8_t *k, uint32_t x)
 {
-  k[(uint32_t )0] = (uint8_t )x;
-  k[(uint32_t )1] = (uint8_t )(x >> (uint32_t )8);
-  k[(uint32_t )2] = (uint8_t )(x >> (uint32_t )16);
-  k[(uint32_t )3] = (uint8_t )(x >> (uint32_t )24);
+  store32(k,htole32(x));
 }
 
-void Hacl_Symmetric_Salsa20_crypto_core_salsa20(uint8_t *output, uint8_t *input, uint8_t *key)
+static inline void Hacl_Symmetric_Salsa20_crypto_core_salsa20(uint8_t *output, uint8_t *input, uint8_t *key)
 {
   uint32_t x00 = (uint32_t )0x61707865;
   uint32_t x50 = (uint32_t )0x3320646e;
@@ -415,7 +404,7 @@ void Hacl_Symmetric_Salsa20_crypto_core_salsa20(uint8_t *output, uint8_t *input,
   return;
 }
 
-void Hacl_Symmetric_Salsa20_xor_(uint8_t *c, uint8_t *m, uint8_t *block)
+static inline void Hacl_Symmetric_Salsa20_xor_(uint8_t *c, uint8_t *m, uint8_t *block)
 {
   uint8_t m0 = m[(uint32_t )0];
   uint8_t block0 = block[(uint32_t )0];
@@ -611,33 +600,7 @@ void Hacl_Symmetric_Salsa20_xor_(uint8_t *c, uint8_t *m, uint8_t *block)
   c[(uint32_t )63] = m63 ^ block63;
 }
 
-void
-Hacl_Symmetric_Salsa20_lemma_modifies_3(
-  uint8_t *c,
-  uint8_t *input,
-  uint8_t *block,
-  FStar_HyperStack_mem h0,
-  FStar_HyperStack_mem h1,
-  FStar_HyperStack_mem h2
-)
-{
-  return;
-}
-
-void
-Hacl_Symmetric_Salsa20_lemma_modifies_3_(
-  uint8_t *c,
-  uint8_t *input,
-  uint8_t *block,
-  FStar_HyperStack_mem h0,
-  FStar_HyperStack_mem h1,
-  FStar_HyperStack_mem h2
-)
-{
-  return;
-}
-
-uint64_t
+static inline uint64_t
 Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_loop(
   uint8_t *c,
   uint8_t *m,
@@ -695,7 +658,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_loop(
   }
 }
 
-void Hacl_Symmetric_Salsa20_xor_bytes(uint8_t *x, uint8_t *y, uint8_t *z, uint32_t len)
+static inline void Hacl_Symmetric_Salsa20_xor_bytes(uint8_t *x, uint8_t *y, uint8_t *z, uint32_t len)
 {
   if (len == (uint32_t )0)
     return;
@@ -710,26 +673,12 @@ void Hacl_Symmetric_Salsa20_xor_bytes(uint8_t *x, uint8_t *y, uint8_t *z, uint32
   }
 }
 
-uint32_t Hacl_Symmetric_Salsa20_mod_64(uint64_t mlen)
+static inline uint32_t Hacl_Symmetric_Salsa20_mod_64(uint64_t mlen)
 {
   return (uint32_t )(mlen & (uint64_t )63);
 }
 
-void
-Hacl_Symmetric_Salsa20_lemma_modifies_3_1(
-  uint8_t *c,
-  uint8_t *input,
-  uint8_t *block,
-  FStar_HyperStack_mem h0,
-  FStar_HyperStack_mem h1,
-  FStar_HyperStack_mem h2,
-  FStar_HyperStack_mem h3
-)
-{
-  return;
-}
-
-void
+static inline void
 Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic__(
   uint8_t *n,
   uint64_t ic,
@@ -830,7 +779,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic__(
   input[(uint32_t )15] = (uint8_t )(ic >> (uint32_t )56);
 }
 
-void
+static inline void
 Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_(
   uint8_t *c,
   uint8_t *m,
@@ -865,7 +814,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_(
   }
 }
 
-void
+static inline void
 Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic(
   uint8_t *c,
   uint8_t *m,
@@ -884,7 +833,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic(
   }
 }
 
-uint64_t
+static inline uint64_t
 Hacl_Symmetric_Salsa20_crypto_stream_salsa20_loop(
   uint8_t *c,
   uint64_t clen,
@@ -931,21 +880,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_loop(
   }
 }
 
-void
-Hacl_Symmetric_Salsa20_lemma_modifies_4(
-  uint8_t *c,
-  uint8_t *input,
-  uint8_t *block,
-  FStar_HyperStack_mem h0,
-  FStar_HyperStack_mem h1,
-  FStar_HyperStack_mem h2,
-  FStar_HyperStack_mem h3
-)
-{
-  return;
-}
-
-void
+static inline void
 Hacl_Symmetric_Salsa20_crypto_stream_salsa20_(uint8_t *n, uint8_t *k, uint8_t *local_state)
 {
   uint8_t zero = (uint8_t )0;
