@@ -4,16 +4,23 @@ Hacl* relies on [F*](https://github.com/FStarLang/FStar) and [KreMLin](https://g
 
 Both repositories are included as submodules which you can initialize running `git submodule update --init`.
 
-### Installing F*
+### Environement
 
-Installation instructions for F* can be found [here](https://github.com/FStarLang/FStar/blob/master/INSTALL.md#prerequisite-for-steps-2-and-3-working-ocaml-setup). F* is quickly evolving and it is unlikely that the binary packages will be up-to-date, so we recommand building the tool from the OCaml snapshot.
+Please FSTAR_HOME in your environnement variables:
+`export FSTAR_HOME= <path-to hacl-star/dependencies/FStar>`
 
-Wherever you install F*, you should export the `FSTAR_HOME` variable to its root directory.
+Please KREMLIN_HOME in your environnement variables:
+`export KREMLIN_HOME= <path-to hacl-star/dependencies/kremlin>`
 
-### Installing KreMLin
+### Installing FStar and KreMLin
 
-KreMLin relies on F* so please make sure that you have a running F* binary.
-Then KreMLin specific instructions are to be found [there](https://github.com/FStarLang/kremlin/blob/master/README.md).
+The only prerequisite to install F* and KreMLin is OCaml.
+Please install the OCaml compiler and the OPAM package manager.
+
+Then, from the Hacl* root repository:
+`make setup`
+
+This will install required OPAM packages and build F* and Kremlin.
 
 ### Verifying / extracting the code
 
