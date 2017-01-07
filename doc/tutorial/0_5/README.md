@@ -1,4 +1,4 @@
-## Example 0.5
+## Example 0.5 - Tail recursive functions as while loops
 
 This example presents a function which input/output behavior is identical to that of [example 0](https://github.com/mitls/hacl-star/tree/master/doc/tutorial/0) : it computes a limb to limb addition of the contents of `a` and `b` and stores the result inplace in `a`.
 
