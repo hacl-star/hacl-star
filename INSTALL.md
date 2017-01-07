@@ -6,10 +6,10 @@ Both repositories are included as submodules which you can initialize running `g
 
 ### Environement
 
-Please FSTAR_HOME in your environnement variables:
+Please set FSTAR_HOME in your environnement variables:
 `export FSTAR_HOME= <path-to hacl-star/dependencies/FStar>`
 
-Please KREMLIN_HOME in your environnement variables:
+Please set KREMLIN_HOME in your environnement variables:
 `export KREMLIN_HOME= <path-to hacl-star/dependencies/kremlin>`
 
 ### Installing FStar and KreMLin
@@ -22,6 +22,7 @@ Then, from the Hacl* root repository:
 `make setup`
 
 This will install required OPAM packages and build F* and Kremlin.
+You are good to go ! ;)
 
 ### Verifying / extracting the code
 
