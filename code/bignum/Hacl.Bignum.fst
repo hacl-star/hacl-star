@@ -140,22 +140,22 @@ val fmul:
 let fmul output a b = fmul output a b
 
 
-val fsquare_times:
-  output:felem ->
-  input:felem{disjoint output input} ->
-  count:FStar.UInt32.t{FStar.UInt32.v count > 0} ->
-  Stack unit
-    (requires (fun h -> live h output /\ live h input /\ fsquare_pre (as_seq h input)))
-    (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ live h0 input /\ modifies_1 output h0 h1
-      /\ fsquare_pre (as_seq h0 input)
-      /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
-let fsquare_times output input count =
-  fsquare_times output input count
+(* val fsquare_times: *)
+(*   output:felem -> *)
+(*   input:felem{disjoint output input} -> *)
+(*   count:FStar.UInt32.t{FStar.UInt32.v count > 0} -> *)
+(*   Stack unit *)
+(*     (requires (fun h -> live h output /\ live h input /\ fsquare_pre (as_seq h input))) *)
+(*     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ live h0 input /\ modifies_1 output h0 h1 *)
+(*       /\ fsquare_pre (as_seq h0 input) *)
+(*       /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count))) *)
+(* let fsquare_times output input count = *)
+(*   fsquare_times output input count *)
 
 
 val crecip:
   out:felem ->
-  z:felem -> Stack unit
+  z:felem{disjoint out z} -> Stack unit
   (requires (fun h -> live h out /\ live h z /\ crecip_pre (as_seq h z)))
   (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1 /\ live h0 z
     /\ crecip_pre (as_seq h0 z)

@@ -8,7 +8,7 @@ open Hacl.Spec.Bignum
 open Hacl.Spec.EC.AddAndDouble
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#set-options "--lax --initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 private let lemma_53_is_5413 (s:seqelem{red_53 s}) : Lemma (red_5413 s) = ()
 private let lemma_513_is_53 (s:seqelem{red_513 s}) : Lemma (red_53 s) = ()
@@ -21,7 +21,6 @@ let crecip_pre (z:seqelem) : GTot Type0 = red_513 z
 
 val crecip_tot:
   z:seqelem{red_513 z} -> Tot (s':seqelem{red_513 s'})
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let crecip_tot z =
   let a = fsquare_times_tot z 1 in
   let t0 = fsquare_times_tot a 2 in

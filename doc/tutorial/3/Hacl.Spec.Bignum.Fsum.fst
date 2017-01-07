@@ -1,17 +1,31 @@
 module Hacl.Spec.Bignum.Fsum
 
-open Hacl.Bignum.Parameters
-open Hacl.Spec.Bignum.Bigint
-open Hacl.Bignum.Limb
+open FStar.Mul
+open FStar.UInt64
 
+(* Parameter definitions *)
+let limb_size = 51
+let len = 5
+let prime : pos = assert_norm(pow2 255 > 19); pow2 255 - 19
 
-module U32 = FStar.UInt32
-
-
-(* Field definition *)
+(* Field definitions *)
 type elem = e:int{e >= 0 /\ e < prime}
 let fadd (e1:elem) (e2:elem) : Tot (elem) = (e1 + e2) % prime
-let op_At_Plus (e1:elem) (e2:elem) : Tot (elem) = fadd e1 e2
+let op_At_Plus (e1:elem) (e2:elem) : Tot (elem) = fadd e1 e2 // Infix operator
+
+
+(* Type abbreviations *)
+type u64 = FStar.UInt64.t
+type seqelem = s:Seq.seq u64{Seq.length s = 5}
+type felem   = b:Buffer.buffer u64{Buffer.length b = 5}
+
+
+(* Mapping sequences of uint64 to field elements *)
+val seval_: b:seqelem -> i:nat{i <= Seq.length b} -> GTot nat
+let rec seval_ b i =
+  if i = 0 then 0 else pow2 (limb_size * (i-1)) * v (Seq.index b (i-1)) + seval_ b (i-1)
+val seval: b:seqelem -> GTot nat
+let seval b = seval_ b len
 let to_field (s:seqelem) : GTot elem = seval s % prime
 
 
@@ -20,7 +34,6 @@ let to_field (s:seqelem) : GTot elem = seval s % prime
 let fsum_spec_pre (s:seqelem) (s':seqelem) (l:nat{l <= len}) =
   (forall (i:nat). {:pattern (v (Seq.index s i)) \/ (v (Seq.index s' i))} (i < l)
              ==> v (Seq.index s i) + v (Seq.index s' i) < pow2 n)
-
 
 val fsum_spec:
   s:seqelem -> s':seqelem -> ctr:nat{ctr <= len /\ fsum_spec_pre s s' ctr} ->
@@ -42,7 +55,6 @@ let rec fsum_spec a b ctr =
 
 
 #set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
-
 
 val lemma_fsum_eval_: s:seqelem -> s':seqelem -> ctr:nat{ctr <= len /\ fsum_spec_pre s s' len} ->
   Lemma (seval_ (fsum_spec s s' len) ctr = seval_ s ctr + seval_ s' ctr)
