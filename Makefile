@@ -2,20 +2,34 @@
 # Main HACL* Makefile
 #
 
-.PHONY: setup
+.PHONY: setup library
 
-all:
+all: library
 
 setup:
-	@echo "\n# Installing OCaml packages repositories"
+	@echo $(CYAN)"\n# Installing OCaml packages repositories"$(NORMAL)
 	opam repository add wasm git+https://github.com/msprotz/opam-repository
-	@echo "\n# Installing OCaml packages required by F*"
+	@echo $(CYAN)"\n# Installing OCaml packages required by F*"$(NORMAL)
 	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
-	@echo "\n# Installing OCaml packages required by KreMLin"
+	@echo $(CYAN)"\n# Installing OCaml packages required by KreMLin"$(NORMAL)
 	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
-	@echo "\n# Compiling F*"
+	@echo $(CYAN)"\n# Compiling F*"$(NORMAL)
 	make -C dependencies/FStar/src/ocaml-output
-	@echo "\n# Compiling KreMLin"
+	@echo $(CYAN)"\n# Compiling KreMLin"$(NORMAL)
 	make -C dependencies/kremlin
-	@echo "\nAll done ! Enjoy ;) "
+	@echo $(CYAN)"\nAll done ! Enjoy ;) "$(NORMAL)
 
+library:
+	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
+	mkdir -p build && cd build; \
+	cmake ../extracted/c && make
+	@echo $(CYAN)"\nAll done ! Enjoy ;) "$(NORMAL)
+
+clean:
+	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
+	rm -rf *~
+	rm -rf build
+
+
+NORMAL="\\033[0;39m"
+CYAN="\\033[1;36m"
