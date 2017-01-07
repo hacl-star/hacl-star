@@ -1,0 +1,26 @@
+#include "Hacl_Policies.h"
+
+uint8_t Hacl_Policies_leak_byte(uint8_t *b, uint32_t n)
+{
+  return b[n];
+}
+
+uint8_t Hacl_Policies_cmp_bytes_(uint8_t *b, uint8_t *b_, uint32_t len, uint8_t tmp)
+{
+  if (len == (uint32_t )0)
+    return ~tmp;
+  else
+  {
+    uint32_t i = len - (uint32_t )1;
+    uint8_t bi = Hacl_Policies_leak_byte(b, i);
+    uint8_t bi_ = Hacl_Policies_leak_byte(b_, i);
+    uint8_t tmp0 = FStar_UInt8_eq_mask(bi, bi_) & tmp;
+    return Hacl_Policies_cmp_bytes_(b, b_, i, tmp0);
+  }
+}
+
+uint8_t Hacl_Policies_cmp_bytes(uint8_t *b, uint8_t *b_, uint32_t len)
+{
+  return Hacl_Policies_cmp_bytes_(b, b_, len, (uint8_t )255);
+}
+
