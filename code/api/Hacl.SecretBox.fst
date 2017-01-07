@@ -93,7 +93,7 @@ let crypto_secretbox_detached c mac m mlen n k =
                                                          subkey;
   let h2 = ST.get() in
   cut (modifies_2_1 c h0 h2);
-  Hacl.Symmetric.Poly1305_64.crypto_onetimeauth mac c mlen (sub block0 0ul 32ul);
+  Hacl.MAC.Poly1305_64.crypto_onetimeauth mac c mlen (sub block0 0ul 32ul);
   let h3 = ST.get() in
   cut (modifies_3_2 c mac h0 h3);
   pop_frame();
@@ -126,7 +126,7 @@ let crypto_secretbox_open_detached m c mac clen n k =
   Hacl.Symmetric.Salsa20.crypto_stream_salsa20 block0 32uL (sub n 16ul 8ul) subkey;
   let h1 = ST.get() in
   cut(modifies_0 h0 h1);
-  Hacl.Symmetric.Poly1305_64.crypto_onetimeauth tmp_mac c clen (sub block0 0ul 32ul);
+  Hacl.MAC.Poly1305_64.crypto_onetimeauth tmp_mac c clen (sub block0 0ul 32ul);
   let h2 = ST.get() in
   cut(modifies_0 h0 h2);
   (* Declassication assumption *)
