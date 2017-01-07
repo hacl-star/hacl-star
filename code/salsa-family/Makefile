@@ -17,7 +17,6 @@ SALSA_FAMILY_FILES= \
 	Hacl.Symmetric.Salsa20.fst \
 	Hacl.Symmetric.HSalsa20.fst \
 	Hacl.Symmetric.XSalsa20.fst \
-	Hacl.Symmetric.Chacha20.fst \
 
 
 SALSA_MODULES= $(basename $(SALSA_FILES))
