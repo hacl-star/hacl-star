@@ -4,6 +4,8 @@
 
 .PHONY: setup
 
+all:
+
 setup:
 	@echo "\n# Installing OCaml packages required by F*"
 	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
