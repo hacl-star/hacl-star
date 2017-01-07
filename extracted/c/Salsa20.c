@@ -814,7 +814,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_(
   }
 }
 
-static inline void
+void
 Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic(
   uint8_t *c,
   uint8_t *m,
