@@ -1,4 +1,4 @@
-## A Simple Example in F\*
+## 0. A Simple Example in F\*
 
 The purpose of this example is to show F* code for a simple bignum operation.
 Here we assume that we are computing on arrays of size 5 (useful for instance for curve25519_donna_c64).
@@ -36,7 +36,7 @@ and they releate state of the heap (program memory) before and after the functio
 [FSum]: https://github.com/mitls/hacl-star/blob/master/doc/tutorial/0-coding-field-arithmetic-in-fstar/Hacl.Bignum.Fsum.fst
 
 The code of this example can be typechecked using `make verify` in this directory.
-The code can be extracted using `make extract` in this directory.
+The code can be extracted using `make extract-c` in this directory.
 
 The result C code is split into a header file:
 ```c
