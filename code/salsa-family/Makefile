@@ -13,14 +13,21 @@ SALSA_FILES= \
 	Hacl.Test.XSalsa20.fst \
 	Hacl.Test.Chacha20.fst 
 
+SALSA_FAMILY_FILES= \
+	Hacl.Symmetric.Salsa20.fst \
+	Hacl.Symmetric.HSalsa20.fst \
+	Hacl.Symmetric.XSalsa20.fst \
+	Hacl.Symmetric.Chacha20.fst \
+
+
 SALSA_MODULES= $(basename $(SALSA_FILES))
 
 
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib $^ 
+		--include ../lib $^ --use_hints
 
-verify: $(addsuffix -verify, $(SALSA_FILES))
+verify: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 
 
 extract-c:
