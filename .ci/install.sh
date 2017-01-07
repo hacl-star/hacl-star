@@ -22,5 +22,5 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
   export PATH=/home/travis/build/FStarLang/FStar/$Z3/bin:/home/travis/build/FStarLang/FStar/bin:$PATH;
 fi
 
-make -C FStar/src/ocaml-output
-make -C kremlin
+make -C dependencies/FStar/src/ocaml-output
+make -C dependencies/kremlin
