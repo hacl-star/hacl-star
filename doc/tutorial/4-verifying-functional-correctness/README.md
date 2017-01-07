@@ -1,4 +1,4 @@
-### Example 3 - functional correctness
+## 4. Functional correctness
 
 In F* buffers are encoded as a reference to a sequence of data, coupled with a *start index* that allows us to emulated some pointer arithmetic.
 
