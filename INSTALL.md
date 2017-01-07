@@ -16,6 +16,7 @@ Please KREMLIN_HOME in your environnement variables:
 
 The only prerequisite to install F* and KreMLin is OCaml.
 Please install the OCaml compiler and the OPAM package manager.
+If you want to run certain C targets, gcc-6 must be installed.
 
 Then, from the Hacl* root repository:
 `make setup`
