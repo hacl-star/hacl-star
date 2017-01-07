@@ -32,10 +32,12 @@ Currently verified primitives:
 + Poly1305 (memory safety, overflow safety, functional correctness, side channel resistance)
 + Curve25519 (memory safety, overflow safety, functional correctness, side channel resistance)
 
+Currently unverified and partially-verified primitives are kept in the `experimental` directory.
+They will be moved out of this directory to `code` once their verification is complete.
+
 ## Extraction to C and execution
 
-Run `make extract` to extract C code for all primitives.
-Run `make test` to run some benchmarks
-Run `make speed` to run speed tests
-
+Run `make extract-c` in each directory to extract C code for the primitive and run it on a single test vector.
+If you do not have F* or KreMLin installed, you can see the extracted code checked into the `extracted/c`
+directory. 
 

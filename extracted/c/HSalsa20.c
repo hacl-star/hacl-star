@@ -1,29 +1,18 @@
-#include "Hacl_Symmetric_HSalsa20.h"
+#include "HSalsa20.h"
 
-uint32_t Hacl_Symmetric_HSalsa20_rotate(uint32_t a, uint32_t s)
+static inline uint32_t Hacl_Symmetric_HSalsa20_rotate(uint32_t a, uint32_t s)
 {
   return a << s | a >> (uint32_t )32 - s;
 }
 
-uint32_t Hacl_Symmetric_HSalsa20_load32_le(uint8_t *k)
+static inline uint32_t Hacl_Symmetric_HSalsa20_load32_le(uint8_t *k)
 {
-  uint8_t k0 = k[(uint32_t )0];
-  uint8_t k1 = k[(uint32_t )1];
-  uint8_t k2 = k[(uint32_t )2];
-  uint8_t k3 = k[(uint32_t )3];
-  return
-    (uint32_t )k0
-    | (uint32_t )k1 << (uint32_t )8
-    | (uint32_t )k2 << (uint32_t )16
-    | (uint32_t )k3 << (uint32_t )24;
+  return le32toh(load32(k));
 }
 
-void Hacl_Symmetric_HSalsa20_store32_le(uint8_t *k, uint32_t x)
+static inline void Hacl_Symmetric_HSalsa20_store32_le(uint8_t *k, uint32_t x)
 {
-  k[(uint32_t )0] = (uint8_t )x;
-  k[(uint32_t )1] = (uint8_t )(x >> (uint32_t )8);
-  k[(uint32_t )2] = (uint8_t )(x >> (uint32_t )16);
-  k[(uint32_t )3] = (uint8_t )(x >> (uint32_t )24);
+  store32(k,htole32(x));
 }
 
 void
