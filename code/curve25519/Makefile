@@ -4,47 +4,6 @@ HACL_HOME?=../..
 include ../Makefile.include
 
 
-FSTAR_LIB_FILES= \
-	FStar.Mul.fst \
-	FStar.Squash.fsti \
-	FStar.Squash.fst \
-	FStar.Classical.fst \
-	FStar.StrongExcludedMiddle.fst \
-	FStar.PropositionalExtensionality.fst \
-	FStar.FunctionalExtensionality.fst \
-	FStar.PredicateExtensionality.fst \
-	FStar.List.Tot.fst \
-	FStar.ListProperties.fst \
-	FStar.Seq.fst \
-	FStar.SeqProperties.fst \
-	FStar.Math.Lib.fst \
-	FStar.Math.Lemmas.fst \
-	FStar.BitVector.fst \
-	FStar.Int.fst \
-	FStar.UInt.fst \
-	FStar.UInt32.fst \
-	FStar.Int32.fst \
-	FStar.Int8.fst \
-	FStar.Int16.fst \
-	FStar.Int63.fst \
-	FStar.Int64.fst \
-	FStar.Int128.fst \
-	FStar.UInt8.fst \
-	FStar.UInt16.fst \
-	FStar.UInt63.fst \
-	FStar.UInt64.fst \
-	FStar.UInt128.fst \
-	FStar.Int.Cast.fst \
-	FStar.TSet.fst \
-	FStar.Set.fst \
-	FStar.Map.fst \
-	FStar.Heap.fst \
-	FStar.Ghost.fst \
-	FStar.HyperHeap.fst \
-	FStar.HyperStack.fst \
-	FStar.ST.fst \
-	FStar.Buffer.fst
-
 X25519_FILES= \
 	Hacl.Bignum.Constants.fst \
 	Hacl.Bignum.Parameters.fst \

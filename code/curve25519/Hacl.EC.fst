@@ -1,6 +1,6 @@
 module Hacl.EC
 
-open FStar.Mul
+open FStar.Mu
 open FStar.HyperStack
 open FStar.Ghost
 open FStar.Buffer
