@@ -5,14 +5,25 @@ include ../Makefile.include
 
 
 X25519_FILES= \
+	../bignum/Hacl.Bignum.Limb.fst \
+	../bignum/Hacl.Bignum.Wide.fst \
+	../bignum/Hacl.Spec.Bignum.Field.fst \
+	../bignum/Hacl.Spec.Bignum.Bigint.fst \
+	../bignum/Hacl.Spec.Bignum.Fsum.fst \
+	../bignum/Hacl.Spec.Bignum.Fdifference.fst  \
+	../bignum/Hacl.Spec.Bignum.Fscalar.fst \
+	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
+	../bignum/Hacl.Bignum.Fsum.fst \
+	../bignum/Hacl.Bignum.Fdifference.fst  \
+	../bignum/Hacl.Bignum.Fscalar.fst \
+	../bignum/Hacl.Bignum.Fproduct.fst \
+	../bignum/Hacl.Bignum.fst \
 	Hacl.Bignum.Constants.fst \
 	Hacl.Bignum.Parameters.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.Bignum.Modulo.fst \
 	Hacl.Spec.Bignum.Fsquare.fst \
-	Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.Spec.EC.AddAndDouble.fst \
-	Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.Spec.EC.AddAndDouble2.fst \
 	Hacl.Bignum.Fsquare.fst \
 	Hacl.Spec.EC.Point.fst \

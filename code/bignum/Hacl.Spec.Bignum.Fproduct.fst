@@ -334,7 +334,7 @@ let lemma_carry_limb_step_2_1 s1' s0' s1 s0 i =
   Math.Lemmas.paren_mul_right (pow2 (limb_size * i)) (pow2 limb_size) s1;
   Math.Lemmas.distributivity_add_right (pow2 (limb_size * i)) (pow2 limb_size * s1') s0'
 
-#set-options "--z3rlimit 20 --initial_fuel 2 --max_fuel 2"
+#set-options "--z3rlimit 200 --initial_fuel 2 --max_fuel 2"
 
 val lemma_carry_limb_step_2: s:seqelem -> i:nat{i < len - 1 /\ carry_limb_pre s i} ->
   Lemma (requires (true))
