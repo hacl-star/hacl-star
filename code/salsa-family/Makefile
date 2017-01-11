@@ -52,4 +52,4 @@ extract-c: $(addsuffix -c, $(SALSA_FILES))
 
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ poly1305-c
+	rm -rf *.exe *.exe.* *.out *~ salsa-c
