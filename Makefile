@@ -7,8 +7,6 @@
 all: library
 
 setup:
-	@echo $(CYAN)"\n# Installing OCaml packages repositories"$(NORMAL)
-	opam repository add wasm git+https://github.com/msprotz/opam-repository
 	@echo $(CYAN)"\n# Installing OCaml packages required by F*"$(NORMAL)
 	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
 	@echo $(CYAN)"\n# Installing OCaml packages required by KreMLin"$(NORMAL)
