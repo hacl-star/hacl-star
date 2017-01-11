@@ -24,12 +24,12 @@ let point =
 
 
 (** Coordinate getters *)
-val getx: point -> Tot felem
-val gety: point -> Tot felem
-val getz: point -> Tot felem
-let getx p = Buffer.sub p 0ul 5ul
-let gety p = Buffer.sub p 0ul 5ul
-let getz p = Buffer.sub p 5ul 5ul
+inline_for_extraction val getx: point -> Tot felem
+inline_for_extraction val gety: point -> Tot felem
+inline_for_extraction val getz: point -> Tot felem
+inline_for_extraction let getx p = Buffer.sub p 0ul 5ul
+inline_for_extraction let gety p = Buffer.sub p 0ul 5ul
+inline_for_extraction let getz p = Buffer.sub p 5ul 5ul
 
 val live_coords: mem -> felem -> felem -> felem -> GTot Type0
 let live_coords h x y z =
@@ -46,8 +46,8 @@ let make_pre x y z =
   let _ = () in
   max_length x == max_length z /\ content x == content z /\ idx z = idx x + length x
 
-val make: x:felem -> y:felem -> z:felem{make_pre x y z} -> Tot (p:point)
-let make x y z = join x z
+inline_for_extraction val make: x:felem -> y:felem -> z:felem{make_pre x y z} -> Tot (p:point)
+inline_for_extraction let make x y z = join x z
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
@@ -142,7 +142,7 @@ let swap_conditional a b iswap =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30"
 
-val copy:
+inline_for_extraction val copy:
   output:point ->
   input:point ->
   Stack unit
@@ -159,7 +159,7 @@ val copy:
       /\ as_seq h1 (getx output) == as_seq h0 (getx input)
       /\ as_seq h1 (getz output) == as_seq h0 (getz input)
     ))
-let copy output input =
+inline_for_extraction let copy output input =
   let h = ST.get() in
   blit (getx input) 0ul (getx output) 0ul clen;
   blit (getz input) 0ul (getz output) 0ul clen;

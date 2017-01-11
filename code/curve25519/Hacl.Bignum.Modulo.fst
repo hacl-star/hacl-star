@@ -59,13 +59,13 @@ inline_for_extraction let add_zero b =
   lemma_add_zero_spec (as_seq h0 b)
 
 
-val carry_top:
+inline_for_extraction val carry_top:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ carry_top_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == carry_top_spec (as_seq h0 b)))
-let carry_top b =
+inline_for_extraction let carry_top b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in
   assert_norm((1 * pow2 limb_size) % pow2 word_size = pow2 limb_size);
@@ -77,24 +77,24 @@ let carry_top b =
   b.(0ul) <- b0'
 
 
-val reduce:
+inline_for_extraction val reduce:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ reduce_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ reduce_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == reduce_spec (as_seq h0 b)))
-let reduce b =
+inline_for_extraction let reduce b =
   let b0 = b.(0ul) in
   b.(0ul) <- nineteen *^ b0
 
 
-val carry_top_wide:
+inline_for_extraction val carry_top_wide:
   b:felem_wide ->
   Stack unit
     (requires (fun h -> live h b /\ carry_top_wide_pre (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_wide_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == carry_top_wide_spec (as_seq h0 b)))
-let carry_top_wide b =
+inline_for_extraction let carry_top_wide b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in
   let open Hacl.Bignum.Wide in

@@ -81,6 +81,36 @@ inline_for_extraction private let fsquare_times_inplace output count =
   fsquare_times_inplace output count
 
 
+private val lemma_crecip_1_modifies': h0:mem -> h1:mem -> b:buffer limb -> Lemma (requires (equal_domains h0 h1 /\ live h0 b /\ modifies_1 b h0 h1))
+  (ensures (live h1 b))
+private let lemma_crecip_1_modifies' h0 h1 b = ()
+ 
+
+private val lemma_crecip_1_modifies'': h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> h5:mem -> h6:mem -> h7:mem -> buf:buffer limb{length buf = 20} ->
+  Lemma (requires (
+    let a  = Buffer.sub buf 0ul  5ul in
+    let t0 = Buffer.sub buf 5ul  5ul in
+    let b  = Buffer.sub buf 10ul 5ul in
+    let c  = Buffer.sub buf 15ul 5ul in
+    live h0 buf /\ modifies_1 a h0 h1 /\ modifies_1 t0 h1 h2 /\ modifies_1 b h2 h3 /\ modifies_1 a h3 h4
+    /\ modifies_1 t0 h4 h5 /\ modifies_1 b h5 h6 /\ modifies_1 t0 h6 h7 /\ equal_domains h0 h7))
+        (ensures (modifies_1 buf h0 h7))
+private let lemma_crecip_1_modifies'' h0 h1 h2 h3 h4 h5 h6 h7 buf = ()
+
+private val lemma_crecip_1_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> h5:mem -> h6:mem -> h7:mem -> buf:buffer limb{length buf = 20} ->
+  Lemma (requires (
+    let a  = Buffer.sub buf 0ul  5ul in
+    let t0 = Buffer.sub buf 5ul  5ul in
+    let b  = Buffer.sub buf 10ul 5ul in
+    let c  = Buffer.sub buf 15ul 5ul in
+    live h0 buf /\ modifies_1 a h0 h1 /\ modifies_1 t0 h1 h2 /\ modifies_1 b h2 h3 /\ modifies_1 a h3 h4
+    /\ modifies_1 t0 h4 h5 /\ modifies_1 b h5 h6 /\ modifies_1 t0 h6 h7 /\ equal_domains h0 h7))
+        (ensures (modifies_1 buf h0 h7 /\ live h7 buf))
+private let lemma_crecip_1_modifies h0 h1 h2 h3 h4 h5 h6 h7 buf =
+  lemma_crecip_1_modifies'' h0 h1 h2 h3 h4 h5 h6 h7 buf;
+  lemma_crecip_1_modifies' h0 h7 buf
+
+
 private inline_for_extraction val crecip_1:
   buf:buffer limb{length buf = 20} ->
   z:felem{disjoint buf z} ->
@@ -103,13 +133,46 @@ private inline_for_extraction let crecip_1 buf z =
   let t0 = Buffer.sub buf 5ul  5ul in
   let b  = Buffer.sub buf 10ul 5ul in
   let c  = Buffer.sub buf 15ul 5ul in
+  let h0 = ST.get() in
   fsquare_times a z 1ul;
+  let h1 = ST.get() in
+  no_upd_lemma_1 h0 h1 a z;
   fsquare_times t0 a 2ul;
+  let h2 = ST.get() in
+  no_upd_lemma_1 h1 h2 t0 z;
+  no_upd_lemma_1 h1 h2 t0 a;
   fmul b t0 z;
+  let h3 = ST.get() in
+  no_upd_lemma_1 h2 h3 b a;
   fmul a b a;
+  let h4 = ST.get() in
   fsquare_times t0 a 1ul;
+  let h5 = ST.get() in
+  no_upd_lemma_1 h3 h4 a b;
+  no_upd_lemma_1 h4 h5 t0 b;
   fmul b t0 b;
-  fsquare_times t0 b 5ul
+  let h6 = ST.get() in
+  fsquare_times t0 b 5ul;
+  let h7 = ST.get() in
+  no_upd_lemma_1 h6 h7 t0 b;
+  no_upd_lemma_1 h4 h5 t0 a;
+  no_upd_lemma_1 h5 h6 b  a;
+  no_upd_lemma_1 h6 h7 t0 a;
+  lemma_crecip_1_modifies h0 h1 h2 h3 h4 h5 h6 h7 buf
+
+
+private val lemma_crecip_2_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> h5:mem -> h6:mem -> h7:mem -> h8:mem -> buf:buffer limb{length buf = 20} ->
+  Lemma (requires (
+    let a  = Buffer.sub buf 0ul  5ul in
+    let t0 = Buffer.sub buf 5ul  5ul in
+    let b  = Buffer.sub buf 10ul 5ul in
+    let c  = Buffer.sub buf 15ul 5ul in
+    live h0 buf /\ modifies_1 b h0 h1 /\ modifies_1 t0 h1 h2 /\ modifies_1 c h2 h3 /\ modifies_1 t0 h3 h4
+    /\ modifies_1 t0 h4 h5 /\ modifies_1 t0 h5 h6 /\ modifies_1 b h6 h7 /\ modifies_1 t0 h7 h8 /\ equal_domains h0 h8))
+        (ensures (modifies_1 buf h0 h8 /\ live h8 buf))
+private let lemma_crecip_2_modifies h0 h1 h2 h3 h4 h5 h6 h7 h8 buf =
+  cut (modifies_1 buf h0 h8);
+  lemma_crecip_1_modifies' h0 h8 buf
 
 
 private inline_for_extraction val crecip_2:
@@ -134,7 +197,7 @@ private inline_for_extraction val crecip_2:
        /\ crecip_pre (as_seq h1 a))
     (* /\ ( (as_seq h1 t0, as_seq h1 b, as_seq h1 a)  == crecip_tot_1 (as_seq h0 z))) *)
   ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 private inline_for_extraction let crecip_2 buf =
   assert_norm(pow2 32 = 0x100000000);
   let a  = Buffer.sub buf 0ul  5ul in
@@ -177,16 +240,26 @@ private inline_for_extraction let crecip_2 buf =
   no_upd_lemma_1 h7 h8 t0 b;
   cut (red_513 (as_seq h8 b));
   cut (red_513 (as_seq h8 a));
-  cut (red_513 (as_seq h8 t0)); admit()
-  (* no_upd_lemma_1 h3 h8 t0 b; *)
-  (* no_upd_lemma_1 h3 h8 t0 a; *)
-  (* no_upd_lemma_1 h3 h8 t0 c; admit() *)
+  cut (red_513 (as_seq h8 t0));
+  lemma_crecip_2_modifies h0 h1 h2 h3 h4 h5 h6 h7 h8 buf
 
+
+private val lemma_crecip_3_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> h5:mem -> h6:mem -> h7:mem -> buf:buffer limb{length buf = 20} -> out:felem{disjoint buf out} ->
+  Lemma (requires (
+    let a  = Buffer.sub buf 0ul  5ul in
+    let t0 = Buffer.sub buf 5ul  5ul in
+    let b  = Buffer.sub buf 10ul 5ul in
+    let c  = Buffer.sub buf 15ul 5ul in
+    live h0 buf /\ live h0 out
+    /\ modifies_1 c h0 h1 /\ modifies_1 t0 h1 h2 /\ modifies_1 t0 h2 h3 /\ modifies_1 t0 h3 h4
+    /\ modifies_1 t0 h4 h5 /\ modifies_1 t0 h5 h6 /\ modifies_1 out h6 h7 /\ equal_domains h0 h7))
+        (ensures (modifies_2 out buf h0 h7 /\ live h7 out))
+private let lemma_crecip_3_modifies h0 h1 h2 h3 h4 h5 h6 h7 buf out = ()
 
 
 private inline_for_extraction val crecip_3:
   out:felem ->
-  buf:buffer limb{length buf = 20} ->
+  buf:buffer limb{length buf = 20 /\ disjoint out buf} ->
   Stack unit
   (requires (fun h -> live h buf /\ live h out
     /\ (let a  = Buffer.sub buf 0ul  5ul in
@@ -197,23 +270,45 @@ private inline_for_extraction val crecip_3:
        /\ red_513 (as_seq h b)
        /\ red_513 (as_seq h a))
       ))
-  (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1 /\ live h0 buf
+  (ensures (fun h0 _ h1 -> live h1 out /\ modifies_2 out buf h0 h1 /\ live h0 buf
      /\ crecip_pre (as_seq h1 out)
     (* /\ ( (as_seq h1 t0, as_seq h1 b, as_seq h1 a)  == crecip_tot_1 (as_seq h0 z))) *)
   ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 private inline_for_extraction let crecip_3 out buf =
+  assert_norm(pow2 32 = 0x100000000);
   let a  = Buffer.sub buf 0ul  5ul in
   let t0 = Buffer.sub buf 5ul  5ul in
   let b  = Buffer.sub buf 10ul 5ul in
   let c  = Buffer.sub buf 15ul 5ul in
+  let h0 = ST.get() in
   fmul c t0 b;
+  let h1 = ST.get() in
+  no_upd_lemma_1 h0 h1 c b;
+  no_upd_lemma_1 h0 h1 c t0;
+  no_upd_lemma_1 h0 h1 c a;
   fsquare_times t0 c 100ul;
+  let h2 = ST.get() in
+  no_upd_lemma_1 h1 h2 t0 b;
+  no_upd_lemma_1 h1 h2 t0 a;
   fmul t0 t0 c;
+  let h3 = ST.get() in
+  no_upd_lemma_1 h2 h3 t0 b;
+  no_upd_lemma_1 h2 h3 t0 a;
   fsquare_times_inplace t0 50ul;
+  let h4 = ST.get() in
+  no_upd_lemma_1 h3 h4 t0 b;
+  no_upd_lemma_1 h3 h4 t0 a;
   fmul t0 t0 b;
+  let h5 = ST.get() in
+  no_upd_lemma_1 h4 h5 t0 a;
   fsquare_times_inplace t0 5ul;
-  fmul out t0 a
- 
+  let h6 = ST.get() in
+  no_upd_lemma_1 h5 h6 t0 a;
+  fmul out t0 a;
+  let h7 = ST.get() in
+  lemma_crecip_3_modifies h0 h1 h2 h3 h4 h5 h6 h7 buf out
+
 
 val crecip:
   out:felem ->

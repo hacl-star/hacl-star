@@ -50,7 +50,7 @@ private val lemma_set_union: s:Set.set HyperHeap.rid -> r:HyperHeap.rid{Set.mem 
   (Set.union s (Set.singleton r) == s)
 private let lemma_set_union s r = Set.lemma_equal_intro s (Set.union s (Set.singleton r))
 
-val lemma_fmonty__1_modifies:
+private val lemma_fmonty__1_modifies:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
   px:felem -> pz:felem -> pqx:felem -> pqz:felem ->
@@ -79,7 +79,7 @@ val lemma_fmonty__1_modifies:
       ))
     (ensures (modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h8))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
-let lemma_fmonty__1_modifies tmp ppx ppz ppqx ppqz px pz pqx pqz qx h0 h1 h2 h3 h4 h5 h6 h7 h8 =
+private let lemma_fmonty__1_modifies tmp ppx ppz ppqx ppqz px pz pqx pqz qx h0 h1 h2 h3 h4 h5 h6 h7 h8 =
   let origx    = Buffer.sub tmp 0ul  5ul in
   let origxprime = Buffer.sub tmp 5ul  5ul in
   let xxprime  = Buffer.sub tmp 25ul 5ul in
@@ -104,7 +104,7 @@ let lemma_fmonty__1_modifies tmp ppx ppz ppqx ppqz px pz pqx pqz qx h0 h1 h2 h3 
   lemma_modifies_composition s (frameOf tmp) h0 h7 h8
 
 
-val lemma_fmonty__2_modifies:
+private val lemma_fmonty__2_modifies:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
   px:felem -> pz:felem -> pqx:felem -> pqz:felem ->
@@ -135,7 +135,7 @@ val lemma_fmonty__2_modifies:
       ))
     (ensures (modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h8 h16))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
-let lemma_fmonty__2_modifies tmp ppx ppz x3 z3 px pz pqx pqz qx h8 h9 h10 h11 h12 h13 h14 h15 h16 =
+private let lemma_fmonty__2_modifies tmp ppx ppz x3 z3 px pz pqx pqz qx h8 h9 h10 h11 h12 h13 h14 h15 h16 =
   let origxprime = Buffer.sub tmp 5ul  5ul in
   let xx         = Buffer.sub tmp 15ul 5ul in
   let zz         = Buffer.sub tmp 20ul 5ul in
@@ -163,7 +163,7 @@ let lemma_fmonty__2_modifies tmp ppx ppz x3 z3 px pz pqx pqz qx h8 h9 h10 h11 h1
   lemma_modifies_composition s (frameOf tmp) h8 h15 h16
 
 
-val lemma_fmonty__3_modifies:
+private val lemma_fmonty__3_modifies:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
   px:felem -> pz:felem -> pqx:felem -> pqz:felem ->
@@ -187,7 +187,7 @@ val lemma_fmonty__3_modifies:
       ))
     (ensures (modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h16 h21))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
-let lemma_fmonty__3_modifies tmp x2 z2 x3 z3 px pz pqx pqz qx h16 h17 h18 h19 h20 h21 =
+private let lemma_fmonty__3_modifies tmp x2 z2 x3 z3 px pz pqx pqz qx h16 h17 h18 h19 h20 h21 =
   let ppx = x2 in
   let zz         = Buffer.sub tmp 20ul 5ul in
   let zzz        = Buffer.sub tmp 10ul 5ul in
@@ -210,7 +210,7 @@ let lemma_fmonty__3_modifies tmp x2 z2 x3 z3 px pz pqx pqz qx h16 h17 h18 h19 h2
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
-val fmonty__1:
+inline_for_extraction private val fmonty__1:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
   px:felem -> pz:felem -> pqx:felem -> pqz:felem ->
@@ -242,7 +242,7 @@ val fmonty__1:
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
-let fmonty__1 buf x2 z2 x3 z3 x z xprime zprime qx =
+inline_for_extraction private let fmonty__1 buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
   let origxprime = Buffer.sub buf 5ul  5ul in
   let zzz        = Buffer.sub buf 10ul 5ul in
@@ -283,7 +283,7 @@ let fmonty__1 buf x2 z2 x3 z3 x z xprime zprime qx =
   ()
 
 
-val fmonty__2:
+inline_for_extraction private val fmonty__2:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
   px:felem -> pz:felem -> pqx:felem -> pqz:felem ->
@@ -324,7 +324,7 @@ val fmonty__2:
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1500"
-let fmonty__2 buf x2 z2 x3 z3 x z xprime zprime qx =
+inline_for_extraction private let fmonty__2 buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
   let origxprime = Buffer.sub buf 5ul  5ul in
   let zzz        = Buffer.sub buf 10ul 5ul in
@@ -334,8 +334,6 @@ let fmonty__2 buf x2 z2 x3 z3 x z xprime zprime qx =
   let zzprime    = Buffer.sub buf 30ul 5ul in
   let zzzprime   = Buffer.sub buf 35ul 5ul in
   let h8 = ST.get() in
-  (* cut (red_513 (as_seq h8 xxprime)); *)
-  (* cut (red_513 (as_seq h8 zzprime)); *)
   blit xxprime 0ul origxprime 0ul 5ul;
   let h9 = ST.get() in
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h8 xxprime);
@@ -356,7 +354,6 @@ let fmonty__2 buf x2 z2 x3 z3 x z xprime zprime qx =
   fsquare_times x3 xxprime 1ul; // sum sum x3 = xxprime' * xxprime'
   let h12 = ST.get() in
   no_upd_lemma_1 h11 h12 x3 zzprime;
-  (* lemma_53_is_5413 (as_seq h12 zzprime); *)
   Hacl.Spec.Bignum.Fsquare.fsquare_5413_is_fine (as_seq h12 zzprime);
   fsquare_times zzzprime zzprime 1ul; // sub sub zzzprime = zzprime' * zzprime'
   let h13 = ST.get() in
@@ -396,7 +393,7 @@ let fmonty__2 buf x2 z2 x3 z3 x z xprime zprime qx =
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
-val fmonty__3:
+inline_for_extraction private val fmonty__3:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
   px:felem -> pz:felem -> pqx:felem -> pqz:felem ->
@@ -434,10 +431,10 @@ val fmonty__3:
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
     ))
 
-let lemma_5413_is_55 (s:seqelem{red_5413 s}) : Lemma (Hacl.Spec.EC.AddAndDouble.red_55 s) = ()
+private let lemma_5413_is_55 (s:seqelem{red_5413 s}) : Lemma (Hacl.Spec.EC.AddAndDouble.red_55 s) = ()
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1500"
-let fmonty__3 buf x2 z2 x3 z3 x z xprime zprime qx =
+inline_for_extraction private let fmonty__3 buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
   let origxprime = Buffer.sub buf 5ul  5ul in
   let zzz        = Buffer.sub buf 10ul 5ul in
@@ -478,7 +475,7 @@ let fmonty__3 buf x2 z2 x3 z3 x z xprime zprime qx =
 
 
 
-val fmonty__:
+inline_for_extraction private val fmonty__:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
   px:felem -> pz:felem -> pqx:felem -> pqz:felem ->
@@ -510,7 +507,7 @@ val fmonty__:
       /\ as_seq h1 qx == as_seq h0 qx
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-let fmonty__ buf x2 z2 x3 z3 x z xprime zprime qx =
+inline_for_extraction private let fmonty__ buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
   let origxprime = Buffer.sub buf 5ul  5ul in
   let zzz        = Buffer.sub buf 10ul 5ul in
@@ -552,14 +549,14 @@ let fmonty_pre h (pp:point) (ppq:point) (p:point) (pq:point) (q:point) : GTot Ty
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
-val lemma_fmonty_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> r:HyperHeap.rid -> Lemma
+private val lemma_fmonty_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> r:HyperHeap.rid -> Lemma
     (requires (
       fresh_frame h0 h1
       /\ modifies_0 h1 h2
       /\ modifies (Set.union (Set.singleton h1.tip) (Set.singleton r)) h2 h3
       /\ popped h3 h4))
     (ensures (modifies (Set.singleton r) h0 h4))
-let lemma_fmonty_modifies h0 h1 h2 h3 h4 r1 =
+private let lemma_fmonty_modifies h0 h1 h2 h3 h4 r1 =
   lemma_reveal_modifies_0 h1 h2
 
 
