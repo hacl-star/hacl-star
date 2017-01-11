@@ -2,11 +2,11 @@
 # Main HACL* Makefile
 #
 
-.PHONY: setup library
+.PHONY: prepare library
 
 all: library
 
-setup:
+prepare:
 	@echo $(CYAN)"\n# Installing OCaml packages required by F*"$(NORMAL)
 	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
 	@echo $(CYAN)"\n# Installing OCaml packages required by KreMLin"$(NORMAL)
