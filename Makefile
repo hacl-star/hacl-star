@@ -21,7 +21,7 @@ library:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
 	mkdir -p build && cd build; \
 	cmake -DCMAKE_C_COMPILER=gcc-6 ../extracted/c && make
-	@echo $(CYAN)"\nAll done ! Enjoy ;) "$(NORMAL)
+	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
 
 clean:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
