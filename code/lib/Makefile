@@ -1,4 +1,4 @@
-FSTAR_HOME?=../../../FStar
+FSTAR_HOME?=../../../dependencies/FStar
 HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe --include $(HYPERSTACK)
 
