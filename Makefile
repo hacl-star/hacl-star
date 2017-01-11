@@ -22,7 +22,7 @@ setup:
 library:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
 	mkdir -p build && cd build; \
-	cmake -DCMAKE_C_COMPILER=/usr/local/bin/gcc-6 -DCMAKE_CXX_COMPILER=/usr/local/bin/g++-6 ../extracted/c && make
+	cmake -DCMAKE_C_COMPILER=gcc-6 ../extracted/c && make
 	@echo $(CYAN)"\nAll done ! Enjoy ;) "$(NORMAL)
 
 clean:
