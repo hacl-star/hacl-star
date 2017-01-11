@@ -18,7 +18,7 @@ prepare:
 	make -C dependencies/FStar/src/ocaml-output
 	@echo $(CYAN)"\n# Compiling KreMLin"$(NORMAL)
 	make -C dependencies/kremlin
-	@echo $(CYAN)"\nAll done ! Enjoy ;) "$(NORMAL)
+	@echo $(CYAN)"\nDone ! Run 'make' to compile the library."$(NORMAL)
 
 library:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
