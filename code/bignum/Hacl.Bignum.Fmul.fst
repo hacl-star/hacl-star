@@ -16,8 +16,8 @@ open Hacl.Spec.Bignum.Fmul
 
 module U32 = FStar.UInt32
 
-#set-options "--z3rlimit 40"
 
+#set-options "--z3rlimit 40"
 
 val shift_reduce: output:felem -> Stack unit
   (requires (fun h -> live h output /\ shift_reduce_pre (as_seq h output)))
@@ -75,11 +75,23 @@ let rec mul_shift_reduce_ output init_input input input2 ctr =
     mul_shift_reduce_ output init_input input input2 i
   )
 
+#reset-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+
+
+let as_seq' (h:mem) (b:felem{live h b}) : GTot seqelem = as_seq h b
+
+private inline_for_extraction val get_seq: b:felem -> Stack (Ghost.erased (seqelem))
+  (requires (fun h -> live h b))
+  (ensures (fun h0 s h1 -> live h0 b /\ h1 == h0 /\ (Ghost.reveal s == as_seq h0 b)))
+private inline_for_extraction let get_seq b =
+  let h2 = ST.get() in
+  Ghost.elift1 #(b:felem{live h2 b}) (as_seq' h2) (Ghost.hide b)
+  
 
 val fmul_:
   output:felem ->
   input:felem{disjoint output input} ->
-  input2:felem{disjoint output input2 /\ disjoint input input2} ->
+  input2:felem{(* disjoint output input2 /\  *)disjoint input input2} ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h input2
       /\ fmul_pre (as_seq h input) (as_seq h input2)))
@@ -88,16 +100,14 @@ val fmul_:
       /\ fmul_pre (as_seq h0 input) (as_seq h0 input2)
       /\ as_seq h1 output == fmul_spec (as_seq h0 input) (as_seq h0 input2)
       ))
+#reset-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1"
 let fmul_ output input input2 =
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in
   let t   = create wide_zero clen in
   let h2 = ST.get() in
-  (* TODO: something more developer friendly ? *)
-  let input_init = Ghost.elift2_p #HyperStack.mem #felem
-                                  #(fun h x -> live h x) #seqelem 
-                                  (as_seq) (Ghost.hide h2) (Ghost.hide input) in
+  let input_init = get_seq input in
   mul_shift_reduce_ t input_init input input2 clen;
   carry_wide_ t 0ul;
   let h3 = ST.get() in
@@ -112,10 +122,12 @@ let fmul_ output input input2 =
   pop_frame()
 
 
+#reset-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+
 val fmul:
   output:felem ->
   input:felem ->
-  input2:felem{disjoint output input2} ->
+  input2:felem ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h input2
       /\ fmul_pre (as_seq h input) (as_seq h input2)))
@@ -136,35 +148,3 @@ let fmul output input input2 =
   fmul_ output tmp input2;
   let h3 = ST.get() in
   pop_frame()
-
-
-(* #set-options "--lax" *)
-
-(* val fsquare_times_: *)
-(*   input:felem -> *)
-(*   count:U32.t -> *)
-(*   Stack unit *)
-(*     (requires (fun _ -> true)) *)
-(*     (ensures (fun _ _ _ -> true)) *)
-(* let rec fsquare_times_ tmp count = *)
-(*   if U32.(count =^ 0ul) then () *)
-(*   else ( *)
-(*     fmul tmp tmp tmp; *)
-(*     fsquare_times_ tmp (U32.(count -^ 1ul)) *)
-(*   ) *)
-
-
-(* val fsquare_times: *)
-(*   output:felem -> *)
-(*   input:felem -> *)
-(*   count:U32.t -> *)
-(*   Stack unit *)
-(*     (requires (fun _ -> true)) *)
-(*     (ensures (fun _ _ _ -> true)) *)
-(* let fsquare_times output input count = *)
-(*   push_frame(); *)
-(*   let tmp = create limb_zero clen in *)
-(*   blit input 0ul tmp 0ul clen; *)
-(*   fsquare_times_ tmp count; *)
-(*   blit tmp 0ul output 0ul clen; *)
-(*   pop_frame() *)
