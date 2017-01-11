@@ -1,8 +1,7 @@
 # INSTALLATION
 
 Hacl* relies on [F*](https://github.com/FStarLang/FStar) and [KreMLin](https://github.com/FStarLang/kremlin) for verification.
-
-Both repositories are included as submodules which you can initialize running `git submodule update --init`.
+The submodules are automatically installed when running the makefile targets.
 
 ### Environement
 
@@ -16,13 +15,14 @@ Please set KREMLIN_HOME in your environnement variables:
 
 The only prerequisite to install F* and KreMLin is OCaml.
 Please install the OCaml compiler and the OPAM package manager.
-If you want to run certain C targets, gcc-6 must be installed.
 
 Then, from the Hacl* root repository:
-`make setup`
+`make prepare`
 
 This will install required OPAM packages and build F* and Kremlin.
-You are good to go ! ;)
+
+To generate the library, run:
+`make`
 
 ### Verifying / extracting the code
 
