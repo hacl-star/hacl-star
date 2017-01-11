@@ -11,6 +11,9 @@ prepare:
 	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
 	@echo $(CYAN)"\n# Installing OCaml packages required by KreMLin"$(NORMAL)
 	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
+	@echo $(CYAN)"\n# Installing submodules for F* and KreMLin"$(NORMAL)
+	git submodule init
+	git submodule update
 	@echo $(CYAN)"\n# Compiling F*"$(NORMAL)
 	make -C dependencies/FStar/src/ocaml-output
 	@echo $(CYAN)"\n# Compiling KreMLin"$(NORMAL)
