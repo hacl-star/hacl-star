@@ -6,7 +6,7 @@ open FStar.ST
 open FStar.Buffer
 open Hacl.Cast
 open Hacl.UInt32
-
+open Hacl.Spec.Symmetric.Chacha20
 
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
@@ -31,8 +31,9 @@ inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 let load32_le (k:uint8_p) : Stack h32
-  (requires (fun h -> live h k /\ length k >= 4))
-  (ensures  (fun h0 _ h1 -> h0 == h1))
+  (requires (fun h -> live h k /\ length k = 4))
+  (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 k /\ length k = 4
+    /\ r == load32_le_spec (as_seq h0 k)))
   = let k0 = k.(0ul) in
     let k1 = k.(1ul) in
     let k2 = k.(2ul) in
@@ -43,57 +44,64 @@ let load32_le (k:uint8_p) : Stack h32
             |^ (sint8_to_sint32 k3 <<^ 24ul) in
     z
 
+
 let store32_le (k:uint8_p) (x:h32) : Stack unit
-  (requires (fun h -> live h k /\ length k >= 4))
-  (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k))
+  (requires (fun h -> live h k /\ length k = 4))
+  (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k /\ length k = 4 /\ live h0 k
+    /\ as_seq h1 k == store32_le_spec (as_seq h0 k) x))
   = k.(0ul) <- sint32_to_sint8 x;
     k.(1ul) <- sint32_to_sint8 (x >>^ 8ul);
     k.(2ul) <- sint32_to_sint8 (x >>^ 16ul);
     k.(3ul) <- sint32_to_sint8 (x >>^ 24ul)
 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
 val chacha_keysetup:
   ctx:chacha_ctx ->
   k:uint8_p{length k = 32 /\ disjoint ctx k} ->
   Stack unit
     (requires (fun h -> live h ctx /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h1 ctx /\ modifies_1 ctx h0 h1))
+    (ensures  (fun h0 _ h1 -> live h0 ctx /\ live h0 k /\ live h1 ctx /\ modifies_1 ctx h0 h1
+      /\ as_seq h1 ctx == chacha_keysetup_spec (as_seq h0 ctx) (as_seq h0 k)))
 let chacha_keysetup ctx k =
     ctx.(0ul)  <- (uint32_to_sint32 0x61707865ul);
     ctx.(1ul)  <- (uint32_to_sint32 0x3320646eul);
     ctx.(2ul)  <- (uint32_to_sint32 0x79622d32ul);
     ctx.(3ul)  <- (uint32_to_sint32 0x6b206574ul);
-    ctx.(4ul)  <- load32_le(offset k  0ul);
-    ctx.(5ul)  <- load32_le(offset k  4ul);
-    ctx.(6ul)  <- load32_le(offset k  8ul);
-    ctx.(7ul)  <- load32_le(offset k 12ul);
-    ctx.(8ul)  <- load32_le(offset k 16ul);
-    ctx.(9ul)  <- load32_le(offset k 20ul);
-    ctx.(10ul) <- load32_le(offset k 24ul);
-    ctx.(11ul) <- load32_le(offset k 28ul)
+    ctx.(4ul)  <- load32_le(Buffer.sub k  0ul 4ul);
+    ctx.(5ul)  <- load32_le(Buffer.sub k  4ul 4ul);
+    ctx.(6ul)  <- load32_le(Buffer.sub k  8ul 4ul);
+    ctx.(7ul)  <- load32_le(Buffer.sub k 12ul 4ul);
+    ctx.(8ul)  <- load32_le(Buffer.sub k 16ul 4ul);
+    ctx.(9ul)  <- load32_le(Buffer.sub k 20ul 4ul);
+    ctx.(10ul) <- load32_le(Buffer.sub k 24ul 4ul);
+    ctx.(11ul) <- load32_le(Buffer.sub k 28ul 4ul)
 
 
 val chacha_ietf_ivsetup:
   ctx:chacha_ctx ->
-  k:uint8_p{length k = 32 /\ disjoint ctx k} ->
+  k:uint8_p{length k = 12 /\ disjoint ctx k} ->
   counter:u32 ->
   Stack unit
     (requires (fun h -> live h ctx /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h1 ctx /\ modifies_1 ctx h0 h1))
+    (ensures  (fun h0 _ h1 -> live h1 ctx /\ modifies_1 ctx h0 h1 /\ live h0 ctx /\ live h0 k
+      /\ as_seq h1 ctx == chacha_ietf_ivsetup_spec (as_seq h0 ctx) (as_seq h0 k) counter))
 let chacha_ietf_ivsetup ctx iv counter =
     ctx.(12ul) <- uint32_to_sint32 counter;
-    ctx.(13ul) <- load32_le(iv);
-    ctx.(14ul) <- load32_le(offset iv 4ul);
-    ctx.(15ul) <- load32_le(offset iv 8ul)
+    ctx.(13ul) <- load32_le(Buffer.sub iv 0ul 4ul);
+    ctx.(14ul) <- load32_le(Buffer.sub iv 4ul 4ul);
+    ctx.(15ul) <- load32_le(Buffer.sub iv 8ul 4ul)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val chacha_encrypt_bytes_round:
   ctx:chacha_ctx ->
   Stack unit
     (requires (fun h -> live h ctx))
-    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx))
+    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx 
+      /\ as_seq h1 ctx == chacha_encrypt_bytes_round_spec (as_seq h0 ctx)))
 let chacha_encrypt_bytes_round ctx =
   let x0 = ctx.(0ul) in
   let x1 = ctx.(1ul) in
@@ -229,7 +237,8 @@ val chacha_encrypt_bytes_rounds:
   ctx:chacha_ctx ->
   Stack unit
     (requires (fun h -> live h ctx))
-    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx))
+    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx
+      /\ as_seq h1 ctx == chacha_encrypt_bytes_rounds_spec (as_seq h0 ctx)))
 let chacha_encrypt_bytes_rounds ctx =
   chacha_encrypt_bytes_round ctx;
   chacha_encrypt_bytes_round ctx;
@@ -244,12 +253,14 @@ let chacha_encrypt_bytes_rounds ctx =
 
 
 val chacha_encrypt_bytes_store:
-  c:uint8_p{length c >= 64} ->
+  c:uint8_p{length c = 64} ->
   x0:h32 -> x1:h32 -> x2:h32 -> x3:h32 -> x4:h32 -> x5:h32 -> x6:h32 -> x7:h32 -> 
   x8:h32 -> x9:h32 -> x10:h32 -> x11:h32 -> x12:h32 -> x13:h32 -> x14:h32 -> x15:h32 ->
   Stack unit
     (requires (fun h -> live h c))
-    (ensures (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
+    (ensures (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1 /\ live h0 c
+      (* /\ as_seq h1 c == chacha_encrypt_bytes_store_spec (as_seq h0 c) x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 *)
+    ))
 let chacha_encrypt_bytes_store c x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 =
   let open FStar.Buffer in
   store32_le (sub c 0ul 4ul) x0;
