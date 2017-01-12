@@ -5,15 +5,16 @@ include ../Makefile.include
 
 
 SALSA_FILES= \
-	Hacl.Symmetric.Salsa20.fst \
+	Hacl.Test.Chacha20.fst \
+	Hacl.Test.Salsa20.fst \
+	Hacl.Test.XSalsa20.fst
+#	Hacl.Symmetric.Salsa20.fst \
 	Hacl.Symmetric.HSalsa20.fst \
 	Hacl.Symmetric.XSalsa20.fst \
 	Hacl.Symmetric.Chacha20.fst \
-	Hacl.Test.Salsa20.fst \
-	Hacl.Test.XSalsa20.fst \
-	Hacl.Test.Chacha20.fst 
 
 SALSA_FAMILY_FILES= \
+	Hacl.Symmetric.Chacha20.fst \
 	Hacl.Symmetric.Salsa20.fst \
 	Hacl.Symmetric.HSalsa20.fst \
 	Hacl.Symmetric.XSalsa20.fst \
@@ -29,17 +30,26 @@ SALSA_MODULES= $(basename $(SALSA_FILES))
 verify: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 
 
-extract-c:
+%.fst-hints: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib $^ --record_hints
+
+hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
+
+%.fst-c: %.fst
 	mkdir -p salsa-c
 	$(KREMLIN_HOME)/krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir salsa-c -verbose \
 		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
-		$(SALSA_FILES) \
+		$^ -o $(basename $^).exe \
 		-drop FStar -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
 		-drop Hacl.UInt128 -bundle Hacl.Spec \
 		$(FSTAR_HOME)/../kremlin/test/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native -ccopt -c
+                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native -no-prefix $(basename $^)
+	./$(basename $^).exe
+
+extract-c: $(addsuffix -c, $(SALSA_FILES))
 
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ poly1305-c
+	rm -rf *.exe *.exe.* *.out *~ salsa-c

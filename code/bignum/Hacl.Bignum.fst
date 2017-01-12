@@ -126,12 +126,12 @@ let fscalar output b s =
 
 val fmul:
   output:felem ->
-  a:felem{disjoint output a} ->
-  b:felem{disjoint output b} ->
+  a:felem ->
+  b:felem ->
   Stack unit
     (requires (fun h -> live h output /\ live h a /\ live h b
       /\ fmul_pre (as_seq h a) (as_seq h b)))
-    (ensures (fun h0 _ h1 -> live h0 output /\ live h0 output /\ live h0 a /\ live h0 b
+    (ensures (fun h0 _ h1 -> live h0 output /\ live h0 a /\ live h0 b
       /\ modifies_1 output h0 h1 /\ live h1 output
       /\ fmul_pre (as_seq h0 a) (as_seq h0 b)
       /\ eval h1 output % prime = (eval h0 a * eval h0 b) % prime
