@@ -24,19 +24,19 @@ let point =
 
 
 (** Coordinate getters *)
-inline_for_extraction val getx: point -> Tot felem
-inline_for_extraction val gety: point -> Tot felem
-inline_for_extraction val getz: point -> Tot felem
-inline_for_extraction let getx p = Buffer.sub p 0ul 5ul
-inline_for_extraction let gety p = Buffer.sub p 0ul 5ul
-inline_for_extraction let getz p = Buffer.sub p 5ul 5ul
+unfold inline_for_extraction val getx: point -> Tot felem
+unfold inline_for_extraction val gety: point -> Tot felem
+unfold inline_for_extraction val getz: point -> Tot felem
+unfold inline_for_extraction let getx p = Buffer.sub p 0ul 5ul
+unfold inline_for_extraction let gety p = Buffer.sub p 0ul 5ul
+unfold inline_for_extraction let getz p = Buffer.sub p 5ul 5ul
 
-val live_coords: mem -> felem -> felem -> felem -> GTot Type0
+unfold val live_coords: mem -> felem -> felem -> felem -> GTot Type0
 let live_coords h x y z =
   let _ = () in
   live h x /\ live h z
 
-val live: mem -> point -> GTot Type0
+unfold val live: mem -> point -> GTot Type0
 let live h p =
   let _ = () in
   live_coords h (getx p) (gety p) (getz p)
@@ -46,10 +46,10 @@ let make_pre x y z =
   let _ = () in
   max_length x == max_length z /\ content x == content z /\ idx z = idx x + length x
 
-inline_for_extraction val make: x:felem -> y:felem -> z:felem{make_pre x y z} -> Tot (p:point)
-inline_for_extraction let make x y z = join x z
+unfold inline_for_extraction val make: x:felem -> y:felem -> z:felem{make_pre x y z} -> Tot (p:point)
+unfold inline_for_extraction let make x y z = join x z
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 private inline_for_extraction val swap_conditional_step: a:felem -> b:felem -> swap:limb{v swap = pow2 64 - 1 \/ v swap = 0} -> ctr:U32.t{U32.v ctr <= len /\ U32.v ctr > 0} ->
   Stack unit
@@ -94,7 +94,7 @@ private val swap_conditional_: a:felem -> b:felem -> swap:limb{v swap = pow2 64 
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 b)
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 a)
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 b)
-      (* /\ (as_seq h1 a, as_seq h1 b) == swap_conditional_spec_ (as_seq h1 a) (as_seq h1 b) swap ctr *)
+     /\ (as_seq h1 a, as_seq h1 b) == swap_conditional_spec_ (as_seq h0 a) (as_seq h0 b) swap ctr
     ))
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 50"
 private let rec swap_conditional_ a b swap ctr =
@@ -131,6 +131,10 @@ val swap_conditional:
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getx b))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getz a))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getz b))
+      /\ (let spointa1 : spoint_513 = (as_seq h1 (getx a), (as_seq h1 (getz a))) in
+         let spointb1 : spoint_513 = (as_seq h1 (getx b), (as_seq h1 (getz b))) in
+         (spointa1, spointb1) == 
+          swap_conditional_spec (as_seq h0 (getx a), as_seq h0 (getz a)) (as_seq h0 (getx b), as_seq h0 (getz b)) i)
       ))
 let swap_conditional a b iswap =
   let swap = limb_zero -%^ iswap in
