@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?><Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<ItemGroup Label="ProjectConfigurations">
+<ProjectConfiguration Include="Debug|Win32"><Configuration>Debug</Configuration><Platform>Win32</Platform></ProjectConfiguration>
+<ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+<ProjectConfiguration Include="Release|Win32"><Configuration>Release</Configuration><Platform>Win32</Platform></ProjectConfiguration>
+<ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+</ItemGroup>
+<PropertyGroup Label="Globals"><ProjectGuid>{3E957544-442B-1A70-1849-F92968BC99EB}</ProjectGuid><Keyword>Win32Proj</Keyword><RootNamespace>chacha</RootNamespace><PlatformToolset>v120</PlatformToolset></PropertyGroup>
+<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration"><ConfigurationType>StaticLibrary</ConfigurationType><CharacterSet>MultiByte</CharacterSet><UseDebugLibraries>true</UseDebugLibraries></PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration"><ConfigurationType>StaticLibrary</ConfigurationType><CharacterSet>MultiByte</CharacterSet><UseDebugLibraries>true</UseDebugLibraries></PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration"><ConfigurationType>StaticLibrary</ConfigurationType><CharacterSet>MultiByte</CharacterSet><UseDebugLibraries>false</UseDebugLibraries></PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration"><ConfigurationType>StaticLibrary</ConfigurationType><CharacterSet>MultiByte</CharacterSet><UseDebugLibraries>false</UseDebugLibraries></PropertyGroup>
+<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+<ImportGroup Label="PropertySheets"><Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" /></ImportGroup>
+<PropertyGroup Label="UserMacros" />
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"><OutDir>$(SolutionDir)..\bin\Debug\x86-32bit\</OutDir><IntDir>$(SolutionDir)..\build\lib\Debug\x86-32bit\</IntDir><TargetName>chacha</TargetName><TargetExt>.lib</TargetExt></PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"><OutDir>$(SolutionDir)..\bin\Debug\amd64\</OutDir><IntDir>$(SolutionDir)..\build\lib\Debug\amd64\</IntDir><TargetName>chacha</TargetName><TargetExt>.lib</TargetExt></PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"><OutDir>$(SolutionDir)..\bin\Release\x86-32bit\</OutDir><IntDir>$(SolutionDir)..\build\lib\Release\x86-32bit\</IntDir><TargetName>chacha</TargetName><TargetExt>.lib</TargetExt></PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><OutDir>$(SolutionDir)..\bin\Release\amd64\</OutDir><IntDir>$(SolutionDir)..\build\lib\Release\amd64\</IntDir><TargetName>chacha</TargetName><TargetExt>.lib</TargetExt></PropertyGroup>
+<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+<ClCompile><PrecompiledHeader /><WarningLevel>Level4</WarningLevel><WholeProgramOptimization>false</WholeProgramOptimization><AdditionalIncludeDirectories>.\;..\app\include;..\app\extensions;..\framework\include;..\framework\driver;..\framework\driver\x86;</AdditionalIncludeDirectories><ObjectFileName>$(IntDir)dummy\%(RelativeDir)/</ObjectFileName><BufferSecurityCheck>true</BufferSecurityCheck><Optimization>Disabled</Optimization><IntrinsicFunctions>false</IntrinsicFunctions><InlineFunctionExpansion>Disabled</InlineFunctionExpansion><FavorSizeOrSpeed>Neither</FavorSizeOrSpeed><BufferSecurityCheck>true</BufferSecurityCheck><PreprocessorDefinitions>;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>
+<Lib><LinkTimeCodeGeneration>false</LinkTimeCodeGeneration></Lib>
+</ItemDefinitionGroup>
+<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+<ClCompile><PrecompiledHeader /><WarningLevel>Level4</WarningLevel><WholeProgramOptimization>false</WholeProgramOptimization><AdditionalIncludeDirectories>.\;..\app\include;..\app\extensions;..\framework\include;..\framework\driver;..\framework\driver\x86;</AdditionalIncludeDirectories><ObjectFileName>$(IntDir)dummy\%(RelativeDir)/</ObjectFileName><BufferSecurityCheck>true</BufferSecurityCheck><Optimization>Disabled</Optimization><IntrinsicFunctions>false</IntrinsicFunctions><InlineFunctionExpansion>Disabled</InlineFunctionExpansion><FavorSizeOrSpeed>Neither</FavorSizeOrSpeed><BufferSecurityCheck>true</BufferSecurityCheck><PreprocessorDefinitions>;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>
+<Lib><LinkTimeCodeGeneration>false</LinkTimeCodeGeneration></Lib>
+</ItemDefinitionGroup>
+<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+<ClCompile><PrecompiledHeader /><WarningLevel>Level4</WarningLevel><WholeProgramOptimization>false</WholeProgramOptimization><AdditionalIncludeDirectories>.\;..\app\include;..\app\extensions;..\framework\include;..\framework\driver;..\framework\driver\x86;</AdditionalIncludeDirectories><ObjectFileName>$(IntDir)dummy\%(RelativeDir)/</ObjectFileName><BufferSecurityCheck>false</BufferSecurityCheck><Optimization>MaxSpeed</Optimization><IntrinsicFunctions>true</IntrinsicFunctions><InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion><FavorSizeOrSpeed>Speed</FavorSizeOrSpeed><BufferSecurityCheck>false</BufferSecurityCheck><PreprocessorDefinitions>;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>
+<Lib><LinkTimeCodeGeneration>false</LinkTimeCodeGeneration></Lib>
+</ItemDefinitionGroup>
+<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+<ClCompile><PrecompiledHeader /><WarningLevel>Level4</WarningLevel><WholeProgramOptimization>false</WholeProgramOptimization><AdditionalIncludeDirectories>.\;..\app\include;..\app\extensions;..\framework\include;..\framework\driver;..\framework\driver\x86;</AdditionalIncludeDirectories><ObjectFileName>$(IntDir)dummy\%(RelativeDir)/</ObjectFileName><BufferSecurityCheck>false</BufferSecurityCheck><Optimization>MaxSpeed</Optimization><IntrinsicFunctions>true</IntrinsicFunctions><InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion><FavorSizeOrSpeed>Speed</FavorSizeOrSpeed><BufferSecurityCheck>false</BufferSecurityCheck><PreprocessorDefinitions>;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>
+<Lib><LinkTimeCodeGeneration>false</LinkTimeCodeGeneration></Lib>
+</ItemDefinitionGroup>
+<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+<ItemGroup>
+<ClHeader Include="..\framework\driver\gcc_driver.inc"></ClHeader>
+<ClHeader Include="..\framework\driver\yasm_driver.inc"></ClHeader>
+<ClCompile Include="..\framework\driver\cpuid.c"></ClCompile>
+<ClCompile Include="..\framework\driver\cpucycles.c"></ClCompile>
+<ClHeader Include="..\framework\driver\x86\gcc.inc"></ClHeader>
+<ClHeader Include="..\framework\driver\x86\cpucycles_impl.inc"></ClHeader>
+<ClHeader Include="..\framework\driver\x86\yasm.inc"></ClHeader>
+<CustomBuild Include="..\framework\driver\x86\driver.S"><Message>yasm [framework\driver\x86\driver.S]</Message><Command Condition="'$(Platform)'=='Win32'">yasm -r nasm -p gas -I./ -I../app/include -I../app/extensions -I../framework/include -I../framework/driver -I../framework/driver/x86  -o $(IntDir)\framework\driver\x86\driver.obj -f win32 ..\framework\driver\x86\driver.S</Command><Command Condition="'$(Platform)'=='x64'">yasm -r nasm -p gas -I./ -I../app/include -I../app/extensions -I../framework/include -I../framework/driver -I../framework/driver/x86  -o $(IntDir)\framework\driver\x86\driver.obj -f win64 ..\framework\driver\x86\driver.S</Command><Outputs>$(IntDir)\framework\driver\x86\driver.obj</Outputs></CustomBuild>
+<ClHeader Include="..\framework\driver\x86\cpuid_impl.inc"></ClHeader>
+<ClHeader Include="..\framework\driver\x86\cpuid_flags.inc"></ClHeader>
+</ItemGroup>
+<ItemGroup>
+<ClHeader Include="..\app\extensions\chacha\chacha_constants_x86.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_x86-32.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_avx-64.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_sse2-64.inc"></ClHeader>
+<CustomBuild Include="..\app\extensions\chacha\chacha.S"><Message>yasm [app\extensions\chacha\chacha.S]</Message><Command Condition="'$(Platform)'=='Win32'">yasm -r nasm -p gas -I./ -I../app/include -I../app/extensions -I../framework/include -I../framework/driver -I../framework/driver/x86  -o $(IntDir)\app\extensions\chacha\chacha.obj -f win32 ..\app\extensions\chacha\chacha.S</Command><Command Condition="'$(Platform)'=='x64'">yasm -r nasm -p gas -I./ -I../app/include -I../app/extensions -I../framework/include -I../framework/driver -I../framework/driver/x86  -o $(IntDir)\app\extensions\chacha\chacha.obj -f win64 ..\app\extensions\chacha\chacha.S</Command><Outputs>$(IntDir)\app\extensions\chacha\chacha.obj</Outputs></CustomBuild>
+<ClHeader Include="..\app\extensions\chacha\chacha_x86-64.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_avx2-32.inc"></ClHeader>
+<ClCompile Include="..\app\extensions\chacha\impl.c"></ClCompile>
+<ClHeader Include="..\app\extensions\chacha\chacha_ref.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_ssse3-32.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_avx2-64.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_xop-32.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_sse2-32.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_ssse3-64.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_xop-64.inc"></ClHeader>
+<ClHeader Include="..\app\extensions\chacha\chacha_avx-32.inc"></ClHeader>
+</ItemGroup>
+<ItemGroup>
+<ClHeader Include="..\app\include\chacha.h"></ClHeader>
+<ClHeader Include="..\framework\include\cpucycles.h"></ClHeader>
+<ClHeader Include="..\framework\include\bench.h"></ClHeader>
+<ClHeader Include="..\framework\include\fuzz.h"></ClHeader>
+<ClHeader Include="..\framework\include\cpuid.h"></ClHeader>
+</ItemGroup>
+</Project>

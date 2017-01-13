@@ -1,0 +1,712 @@
+#!/bin/sh
+
+if test x"$1" = x"-h" -o x"$1" = x"--help" ; then
+cat << EOF
+Usage: ./configure [options]
+
+Help:
+  -h, --help                          print this message
+
+Installation options:
+  --prefix=PREFIX                     install architecture-independent files in PREFIX
+                                      [/usr/local]
+  --exec-prefix=EPREFIX               install architecture-dependent files in EPREFIX
+                                      [PREFIX]
+  --bindir=DIR                        install binaries in DIR [EPREFIX/bin]
+  --libdir=DIR                        install libs in DIR [EPREFIX/lib]
+  --includedir=DIR                    install includes in DIR [PREFIX/include]
+
+Configuration options:
+  --appdir=DIR                        read per-project files (extensions/, project.def/ver) from DIR [app]
+  --debug                             builds with no optimization and debugging symbols enbaled
+  --disable-as                        do not use external assembly
+  --example                           equivalent to --appdir=app-
+  --force-32bits                      (try to) build for 32bits regardless of underlying system
+  --force-64bits                      (try to) build for 64bits regardless of underlying system
+  --generic                           alias for --disable-as, forces a generic build
+  --pic                               pass -fPIC to the compiler, required to build shared library
+  --strict                            use strict compiler flags for C
+  --yasm                              use yasm to compile external asm
+
+EOF
+exit 1
+fi
+
+
+cleanup() {
+    rm -f test.o
+    rm -f test
+    rm -f test.log
+}
+
+fatal_error() {
+    cleanup
+    echo "ERROR: $@"
+    exit 1
+}
+
+try_asm() {
+    printf "%s\n%s\n" "$asmheader" "$1" | $AS $ASFLAGSTEST -o test.o - >test.log 2>&1
+    res=$?
+    cat test.log >> $outputlog
+    return $res
+}
+
+test_for_asm_instruction_set() {
+    echo "checking for $2.." >>$outputlog
+    if try_asm "$1"; then
+        echo "#define $2" >> $outputheader
+    fi
+}
+
+test_for_asm_macro_parameter_convention() {
+    echo "checking for $4.." >>$outputlog
+    prog=$(printf "%s\n%s\n%s\n%s\n" ".macro TEST1 op" "$1 $3, $3" ".endm" "TEST1 $2")
+    if try_asm "$prog"; then
+        echo "#define $4" >> $outputheader
+    fi
+}
+
+test_for_asm_function_annotation() {
+    echo "checking for $1.." >>$outputlog
+    prog=$(printf ".globl %s\n%s %s\n%s\n" "myfn" "$1" "myfn" "myfn:")
+    try_asm "$prog"
+    res=$?
+    return $res
+}
+
+try_c() {
+    printf "%s\n" "$1" | $CC $CFLAGSTEST -o test.o - >test.log 2>&1
+    res=$?
+    cat test.log >> $outputlog
+    return $res
+}
+
+try_c_visibility() {
+    echo "checking for $1.." >> $outputlog
+    OLDFLAGS="$CFLAGSTEST"
+    CFLAGSTEST="$CFLAGSTEST -fvisibility=hidden -Werror"
+    prog=$(printf "%s int vis() { return 53; }" "$1")
+    try_c "$prog"
+    res=$?
+    return $res
+}
+
+try_c_stdint() {
+    echo "checking for $1.." >> $outputlog
+    prog=$(printf "#include <stdint.h>\nint main() { %s x = 53; return (int)x; }" "$1")
+    try_c "$prog"
+    res=$?
+    return $res
+}
+
+try_c_runnable() {
+    rm -f test
+    printf "%s\n" "$1" | $CC $CFLAGSTEST -o test.o - >test.log 2>&1
+    res=$?
+    cat test.log >> $outputlog
+    if [ "$res" != "0" ]; then
+       return $res
+    fi
+    $CC -o test test.o >test.log 2>&1
+    res=$?
+    cat test.log >> $outputlog
+    return $res
+}
+
+try_c_type() {
+    echo "checking for $1.." >> $outputlog
+    prog=$(printf "int main() {\n%s t = 0; return (int) t;\n}" "$1")
+    try_c "$prog"
+    res=$?
+    return $res
+}
+
+try_c_type_unsigned() {
+    echo "checking for $2 with $1 bits.." >> $outputlog
+    prog=$(printf "typedef %s mytype; int main(int argc,char *argv[]) {mytype x; int i; x = (mytype) atoi(argv[1]); for(i=0;i<%s;i++){if(x==0) return 100; x+=x+(mytype)atoi(argv[2]);} if(x!=0) return 100; x-=1; if(x<0) return 100; return 0;}" "$2" "$1")
+    try_c_runnable "$prog" || return $?
+    ./test 1 0
+    res=$?
+    return $res
+}
+
+define_c_type() {
+    echo "#define HAVE_$1" >> $outputheader
+    echo "#define DEFINE_$1 typedef $2; typedef $3;" >> $outputheader
+}
+
+define_c_type_undefined() {
+    echo "#define DEFINE_$1" >> $outputheader
+}
+
+does_c_define_exist() {
+    echo "checking for $1.." >> $outputlog
+    prog=$(printf "int main() {\n#if defined(%s)\nreturn 0;\n#else\n#error error\n#endif\n}" "$1")
+    try_c "$prog"
+    res=$?
+    return $res
+}
+
+test_for_gnu_make() {
+    if [ "$GNUMAKE" = "" ]; then
+        echo "checking for gnu make as '$1'" >> $outputlog
+        res=`$1 -v 2>$outputlog | grep GNU`
+        if [ "$res" != "" ]; then
+            GNUMAKE="$1"
+        fi
+    fi
+}
+
+# options
+outputheader="framework/include/asmopt.h"
+outputheaderstub="framework/include/asmopt_internal.h"
+outpututilimpls="framework/include/util_implementations.h"
+outputmake="asmopt.mak"
+outputlog="config.log"
+inputprojectname="project.def"
+inputprojectver="project.ver"
+asmheader=".text"
+debug="no"
+bits32="no"
+bits64="no"
+strict="no"
+yasm="no"
+pic="no"
+
+appdir="app"
+prefix="/usr/local"
+exec_prefix=""
+bindir=""
+libdir=""
+includedir=""
+
+# handle input paramters
+while [ "$1" != "" ]; do
+    arg="${1#*=}"
+    case $1 in
+        --appdir=* ) appdir="$arg"
+                     ;;
+
+        --example ) appdir="app-example"
+                    ;;
+
+        --prefix=* ) prefix="$arg"
+                     ;;
+
+        --exec-prefix=* ) exec_prefix="$arg"
+                          ;;
+
+        --bindir=* ) bindir="$arg"
+                     ;;
+
+        --libdir=* ) libdir="$arg"
+                     ;;
+
+        --includedir=* ) includedir="$arg"
+                         ;;
+
+        --debug ) debug="yes"
+                  ;;
+
+        --disable-as ) HAVEAS="no"
+                       ;;
+
+        --generic ) HAVEAS="no"
+                       ;;
+
+        --force-32bits ) bits32="yes"
+                         ;;
+
+        --force-64bits ) bits64="yes"
+                         ;;
+
+        --pic ) pic="yes"
+                ;;
+
+        --strict ) strict="yes"
+                   ;;
+
+        --yasm ) yasm="yes"
+                 ;;
+
+        * ) echo "Unknown paramaters $1, skipping.."
+            ;;
+    esac
+    shift
+done
+
+exec_prefix="${exec_prefix:-$prefix}"
+bindir="${bindir:-${exec_prefix}/bin}"
+libdir="${libdir:-${exec_prefix}/lib}"
+includedir="${includedir:-${prefix}/include}"
+
+GNUMAKE=""
+test_for_gnu_make "make"
+test_for_gnu_make "gmake"
+if [ "$GNUMAKE" = "" ]; then
+    fatal_error "Unable to find gnu make! (tried make, gmake)"
+fi
+
+# make variables
+CC="${CC:-gcc}"
+AR="${AR:-ar}"
+LD="${CC} -o "
+RANLIB="${RANLIB:-ranlib}"
+STRIP="${STRIP:-strip}"
+INSTALL="${INSTALL:-install}"
+CFLAGS="${CFLAGS:-}"
+CFLAGSTEST="-x c -c"
+SOFLAGS="${SOFLAGS:-}"
+SONAME=""
+SOSUFFIX=""
+SOIMPORT=""
+LDFLAGS="${LDFLAGS:-}"
+AS="$CC"
+ASFLAGS=""
+ASFLAGSTEST="-x assembler -c"
+HAVEAS="${HAVEAS:-yes}"
+HAVESHARED="no"
+DEPMM="-MMD"
+DEPMF="-MF"
+ARCH="generic"
+OFORMAT="generic"
+EXE=""
+STATICLIB=".lib"
+
+[ -e $appdir/$inputprojectname ] || fatal_error "Unable to find $appdir/$inputprojectname!"
+[ -e $appdir/$inputprojectver ] || fatal_error "Unable to find $appdir/$inputprojectver!"
+
+PROJECTNAME=`tr -d '[:cntrl:]' <$appdir/$inputprojectname 2>$outputlog | tr '[:upper:]' '[:lower:]'`
+PROJECTNAMEUPPER=`tr -d '[:cntrl:]' <$appdir/$inputprojectname 2>$outputlog | tr '[:lower:]' '[:upper:]'`
+PROJECTVERMAJOR=`cut -d . -f 1 $appdir/$inputprojectver` 2>$outputlog
+
+if [ x"$PROJECTNAME" = "x" ]; then
+    fatal_error "Unable to determine project name! Edit $appdir/$inputprojectname to set it"
+fi
+
+if [ x"$PROJECTVERMAJOR" = "x" ]; then
+    fatal_error "Unable to determine project name! Edit $appdir/$inputprojectver to set it"
+fi
+
+if [ "$yasm" = "yes" ]; then
+    AS="yasm"
+    ASFLAGSTEST="-r nasm -p gas -f elf32"
+fi
+
+# set things up
+mkdir -p build
+rm -f $outputmake
+> $outputlog
+
+cat > $outputheaderstub << EOF
+#ifndef ASMOPT_INTERNAL_H
+#define ASMOPT_INTERNAL_H
+
+EOF
+
+cat > $outputheader << EOF
+#ifndef ASMOPT_${PROJECTNAMEUPPER}_H
+#define ASMOPT_${PROJECTNAMEUPPER}_H
+
+EOF
+
+# output format
+if does_c_define_exist "__MACH__"; then
+    OFORMAT="macho"
+elif does_c_define_exist "__ELF__"; then
+    OFORMAT="elf"
+elif does_c_define_exist "_WIN32" || does_c_define_exist "_WIN64" || does_c_define_exist "__CYGWIN__"; then
+    OFORMAT="win"
+    EXE=".exe"
+else
+    OFORMAT="generic"
+fi
+
+# assembler detection
+foundas="no"
+if [ "$HAVEAS" = "yes" ] && try_asm "xorb %al, %al"; then
+    ASFLAGSTEST="$ASFLAGSTEST -m32"
+    echo "#define ARCH_X86" >> $outputheader
+    ARCH="x86"
+
+    # make sure the C compiler is actually speaking x86
+    if does_c_define_exist "__i386__"; then
+       OBITS="32"
+    elif does_c_define_exist "__x86_64__"; then
+       OBITS="64"
+    else
+       fatal_error "[x86] Unable to determine output bits!"
+    fi
+
+    # figure out which instruction sets the assembler supports
+    test_for_asm_instruction_set "vpaddq %zmm0, %zmm0, %zmm0" HAVE_AVX512
+    test_for_asm_instruction_set "vpaddq %ymm0, %ymm0, %ymm0" HAVE_AVX2
+    test_for_asm_instruction_set "vpaddq %xmm0, %xmm0, %xmm0" HAVE_AVX
+    test_for_asm_instruction_set "vprotd \$15, %xmm0, %xmm0" HAVE_XOP
+    test_for_asm_instruction_set "crc32b %cl, %ebx" HAVE_SSE4_2
+    test_for_asm_instruction_set "pblendw \$0, %xmm0, %xmm0" HAVE_SSE4_1
+    test_for_asm_instruction_set "pshufb %xmm0, %xmm0" HAVE_SSSE3
+    test_for_asm_instruction_set "lddqu 0(%esi), %xmm0" HAVE_SSE3
+    test_for_asm_instruction_set "pmuludq %xmm0, %xmm0" HAVE_SSE2
+    test_for_asm_instruction_set "movaps 0(%esi), %xmm0" HAVE_SSE
+    test_for_asm_instruction_set "punpckhdq %mm0, %mm0" HAVE_MMX
+
+    # OSX as uses a different macro paramter convention
+    if [ "$AS" != "yasm" ]; then
+        test_for_asm_macro_parameter_convention "\op" "xorl" "%eax" HAVE_SLASHMACRO
+        test_for_asm_macro_parameter_convention "\$0" "xorl" "%eax" HAVE_DOLLARMACRO
+    fi
+
+    # outbit bits
+    if [ "$bits32" = "yes" ]; then
+      OBITS="32"
+    elif [ "$bits64" = "yes" ]; then
+      OBITS="64"
+    fi
+
+    CFLAGS="$CFLAGS -m$OBITS"
+    LDFLAGS="$LDFLAGS -m$OBITS"
+    if [ "$AS" = "yasm" ]; then
+        case "$OFORMAT" in
+            "elf" | "win" | "macho" ) ASFLAGS="-r nasm -p gas -f $OFORMAT$OBITS"
+                                    ;;
+             * ) fatal_error "[x86/yasm] Unable to determine object format!"
+                 ;;
+        esac
+    else
+       ASFLAGS="$ASFLAGS -m$OBITS -c"
+    fi
+
+    if test_for_asm_function_annotation ".hidden"; then
+        echo "#define HAVE_AS_HIDDEN" >> $outputheader
+    elif test_for_asm_function_annotation ".private_extern"; then
+        echo "#define HAVE_AS_PRIVATE_EXTERN" >> $outputheader
+    fi
+
+    printf "#define CPU_%sBITS\n" "$OBITS" >> $outputheader
+    foundas="yes"
+elif [ "$HAVEAS" = "yes" ] && try_asm "and r0, r0, r0"; then
+    echo "#define ARCH_ARM" >> $outputheader
+    ARCH="arm"
+    foundas="yes"
+
+    if does_c_define_exist "__arm__"; then
+       OBITS="32"
+    elif does_c_define_exist "__aarch64__"; then
+       OBITS="64"
+    else
+       fatal_error "[ARM] Unable to determine output bits!"
+    fi
+
+    test_for_asm_macro_parameter_convention "\op" "tst" "r0" HAVE_SLASHMACRO
+    test_for_asm_macro_parameter_convention "\$0" "tst" "r0" HAVE_DOLLARMACRO
+
+    if [ "$OBITS" = "32" ]; then
+        asmheader=$(printf ".arch armv6\n.text")
+        test_for_asm_instruction_set "uqadd8 r3,r3,r3" HAVE_ARMv6
+        asmheader=$(printf ".arch armv7-a\n.text")
+        test_for_asm_instruction_set "pli [r0]" HAVE_ARMv7
+
+        asmheader=$(printf ".arch armv7-a\n.fpu neon\n.text")
+        test_for_asm_instruction_set "veor d0,d0,d0" HAVE_NEON
+        asmheader=$(printf ".arch armv7-a\n.fpu vfpv3\n.text")
+        test_for_asm_instruction_set "fcpyd d3,d22" HAVE_VFP3
+        asmheader=$(printf ".arch armv7-a\n.fpu vfpv3-d16\n.text")
+        test_for_asm_instruction_set "fcpyd d3,d4" HAVE_VFP3D16
+        asmheader=$(printf ".arch armv7-a\n.fpu neon-vfpv4\n.text")
+        test_for_asm_instruction_set "vfma.f32 q1, q2, q3" HAVE_VFP4
+
+        asmheader=$(printf ".arch armv7-a\n.arch_extension iwmmxt\n.text")
+        test_for_asm_instruction_set "wzeroge wr7" HAVE_IWMMXT
+        asmheader=$(printf ".arch armv7-a\n.arch_extension idiv\n.text")
+        test_for_asm_instruction_set "udiv r0, r1, r2" HAVE_IDIVA
+        asmheader=$(printf ".arch armv7-a\n.arch_extension idiv\n.text\n.thumb\n.thumb_func")
+        test_for_asm_instruction_set "udiv r0, r1, r2" HAVE_IDIVT
+    elif [ "$OBITS" = "64" ]; then
+        asmheader=$(printf ".arch armv8-a\n.text")
+        test_for_asm_instruction_set "hlt" HAVE_ARMv8
+
+        asmheader=$(printf ".arch armv8-a\n.fpu neon-fp-armv8\n.text")
+        test_for_asm_instruction_set "vvselge.f32 s4, s1, s23" HAVE_VFP4
+        asmheader=$(printf ".arch armv8-a\n.fpu neon-fp-armv8\n.text")
+        test_for_asm_instruction_set "vcvta.u32.f32 s2, s3" HAVE_ASIMD
+
+        asmheader=$(printf ".arch armv8-a\n.arch_extension crypto\n.text")
+        test_for_asm_instruction_set "aese.8 q0, q0" HAVE_AES
+
+        asmheader=$(printf ".arch armv8-a\n.arch_extension crypto\n.text")
+        test_for_asm_instruction_set "sha1p.32 q0,q0,q0" HAVE_SHA1
+        asmheader=$(printf ".arch armv8-a\n.arch_extension crypto\n.text")
+        test_for_asm_instruction_set "sha256h.32 q0, q0, q0" HAVE_SHA256
+        asmheader=$(printf ".arch armv8-a\n.arch_extension crypto\n.text")
+        test_for_asm_instruction_set "vmull.p64	q0, d0, d0" HAVE_PMULL
+        asmheader=$(printf ".arch armv8-a\n.arch_extension crc\n.text")
+        test_for_asm_instruction_set "crc32b r0, r1, r2" HAVE_CRC32
+    fi
+
+    printf "#define CPU_%sBITS\n" "$OBITS" >> $outputheader
+fi
+
+if [ "$HAVEAS" = "yes" ]; then
+    if [ "$foundas" = "no" ]; then
+        echo "Unable to find a working assembler/assembler dialect, you're flying solo!"
+        HAVEAS="no"
+    fi
+fi
+
+
+# stdint
+have_stdint="no"
+have_uint128="no"
+if try_c_stdint "uint8_t"; then
+    if [ "$OBITS" = "64" ]; then
+        if try_c_stdint "uint128_t"; then
+            echo "#define HAVE_INT128" >> $outputheader
+            have_uint128="yes"
+        fi
+    fi
+    if try_c_stdint "int64_t"; then
+        echo "#define HAVE_INT64" >> $outputheader
+    fi
+    echo "#define HAVE_INT32" >> $outputheader
+    echo "#define HAVE_INT16" >> $outputheader
+    echo "#define HAVE_INT8" >> $outputheader
+    echo "#define HAVE_STDINT" >> $outputheader
+    have_stdint="yes"
+fi
+
+# external uint128_t detection if stdint didn't have it
+ctype="INT128"
+if [ "$OBITS" = "64" ]; then
+    if [ "$have_uint128" = "no" ]; then
+        if try_c_type "__int128"; then
+            define_c_type "$ctype" "signed __int128 int128_t" "unsigned __int128 uint128_t"
+        elif try_c_type "__uint128_t"; then
+            define_c_type "$ctype" "__int128_t int128_t" "__uint128_t uint128_t"
+        elif try_c_type "unsigned int __attribute__ ((__mode__ (TI)))"; then
+            define_c_type "$ctype" "signed int int128_t __attribute__ ((__mode__ (TI)))" "unsigned int uint128_t __attribute__ ((__mode__ (TI)))"
+        else
+            define_c_type_undefined "$ctype"
+        fi
+    fi
+else
+    define_c_type_undefined "$ctype"
+fi
+
+if [ "$have_stdint" = "no" ]; then
+    # 64 bit int
+    ctype="INT64"
+    if try_c_type_unsigned "64" "unsigned long long"; then
+        define_c_type "$ctype" "signed long long int64_t" "unsigned long long uint64_t"
+    elif try_c_type_unsigned "64" "unsigned long"; then
+        define_c_type "$ctype" "signed long int64_t" "unsigned long uint64_t"
+    elif try_c_type_unsigned "64" "int __attribute__ ((__mode__ (DI)))"; then
+        define_c_type "$ctype" "signed int int64_t __attribute__ ((__mode__ (DI)))" "unsigned int uint64_t __attribute__ ((__mode__ (DI)))"
+    else
+        define_c_type_undefined "$ctype"
+    fi
+
+    # 32 bit int
+    ctype="INT32"
+    if try_c_type_unsigned "32" "unsigned long"; then
+        define_c_type "$ctype" "signed long int32_t" "unsigned long uint32_t"
+    elif try_c_type_unsigned "32" "unsigned int"; then
+        define_c_type "$ctype" "signed int uint32_t" "unsigned int uint32_t"
+    else
+        define_c_type_undefined "$ctype"
+    fi
+
+    # 16 bit int
+    ctype="INT16"
+    if try_c_type_unsigned "16" "unsigned int"; then
+        define_c_type "$ctype" "signed int int16_t" "unsigned int uint16_t"
+    elif try_c_type_unsigned "16" "unsigned short"; then
+        define_c_type "$ctype" "signed short int16_t" "unsigned short uint16_t"
+    else
+        define_c_type_undefined "$ctype"
+    fi
+
+    # 8bits
+    ctype="INT8"
+    if try_c_type_unsigned "8" "unsigned char"; then
+        define_c_type "$ctype" "signed char int8_t" "unsigned char uint8_t"
+    else
+        define_c_type_undefined "$ctype"
+    fi
+fi
+
+# gettimeofday
+if try_c "#include <sys/time.h> int main(void) { struct timeval t; gettimeofday(&t, NULL); return 0; }"; then
+    echo "#define HAVE_GETTIMEOFDAY" >> $outputheader
+fi
+
+# visibility
+if try_c_visibility '__attribute__ ((dllexport))'; then
+    LIB_EXPORT="__attribute__ ((dllexport))"
+    LIB_IMPORT="__attribute__ ((dllimport))"
+    CFLAGS="$CFLAGS -fvisibility=hidden -DLIB_PUBLIC=\"__attribute__ ((dllexport))\""
+elif try_c_visibility '__attribute__ ((visibility ("default")))'; then
+    CFLAGS="$CFLAGS -fvisibility=hidden -DLIB_PUBLIC=\"__attribute__ ((visibility (\\\"default\\\")))\""
+else
+    LIB_EXPORT=''
+    LIB_IMPORT=''
+    CFLAGS="$CFLAGS -DLIB_PUBLIC=\"\" "
+fi
+
+if [ "$pic" = "yes" ]; then
+    CFLAGS="$CFLAGS -fPIC"
+    HAVESHARED="yes"
+elif [ "$OFORMAT" = "win" ]; then
+    HAVESHARED="yes"
+fi
+
+
+if [ "$debug" = "yes" ]; then
+    CFLAGS="$CFLAGS -g"
+else
+    CFLAGS="$CFLAGS -O2"
+fi
+
+if [ "$strict" = "yes" ]; then
+    CFLAGS="$CFLAGS -Wall -fno-strict-aliasing -W -Wextra -Werror -Wmissing-prototypes"
+fi
+
+# only GCC style for now
+AR="$AR rc "
+
+# shared library
+if [ "$OFORMAT" = "win" ]; then
+    SONAME="lib${PROJECTNAME}.dll"
+    SOIMPORT="${SONAME}.a"
+    SOSUFFIX="dll"
+    SOFLAGS="-shared -Wl,--out-implib,\$(BINDIR)/\$(SOIMPORT) -Wl,--enable-auto-image-base $SOFLAGS"
+elif [ "$OFORMAT" = "macho" ]; then
+    SONAME="lib${PROJECTNAME}.${PROJECTVERMAJOR}.dylib"
+    SOIMPORT=""
+    SOSUFFIX="dylib"
+    SOFLAGS="-dynamiclib -install_name \$(libdir)/\$(SONAME) $SOFLAGS"
+elif [ `uname` = "SunOS" -a "`ld  --version  2>&1  | grep GNU`" = "" ]; then
+    SONAME="lib${PROJECTNAME}.so.${PROJECTVERMAJOR}"
+    SOIMPORT=""
+    SOSUFFIX="so"
+    SOFLAGS="-shared -Wl,-h,\$(SONAME) $SOFLAGS"
+else
+    SONAME="lib${PROJECTNAME}.so.${PROJECTVERMAJOR}"
+    SOIMPORT=""
+    SOSUFFIX="so"
+    SOFLAGS="-shared -Wl,-soname,\$(SONAME) $SOFLAGS"
+fi
+
+if [ `uname` = "SunOS" ]; then
+    if test -x /usr/ucb/install; then
+        INSTALL=/usr/ucb/install
+    elif test -x /usr/bin/ginstall; then
+        INSTALL=/usr/bin/ginstall
+    elif test -x /usr/gnu/bin/install ; then
+        INSTALL=/usr/gnu/bin/install
+    fi
+fi
+
+CFLAGS="$CFLAGS -DBUILDING_ASMOPT_${PROJECTNAMEUPPER}"
+
+cat > $outputmake << EOF
+PROJECTNAME=$PROJECTNAME
+CC=$CC
+CFLAGS=$CFLAGS
+AR=$AR
+LD=$LD
+RANLIB=$RANLIB
+STRIP=$STRIP
+INSTALL=$INSTALL
+HAVEAS=$HAVEAS
+HAVESHARED=$HAVESHARED
+AS=$AS
+ASFLAGS=$ASFLAGS
+ARCH=$ARCH
+EXE=$EXE
+STATICLIB=$STATICLIB
+DEPMM=$DEPMM
+DEPMF=$DEPMF
+SONAME=$SONAME
+SOIMPORT=$SOIMPORT
+SOSUFFIX=$SOSUFFIX
+SOFLAGS=$SOFLAGS
+LDFLAGS=$LDFLAGS
+exec_prefix=$exec_prefix
+bindir=$bindir
+libdir=$libdir
+includedir=$includedir
+appdir=$appdir
+EOF
+
+cat >> $outputheader << EOF
+
+#if !defined(BUILDING_ASM)
+
+#include <stddef.h>
+
+/* use HAVE_INTxxx to determine if an integer with [8,16,32,64,128] bits is available */
+
+#if defined(HAVE_STDINT)
+	#include <stdint.h>
+#else
+	DEFINE_INT64
+	DEFINE_INT32
+	DEFINE_INT16
+	DEFINE_INT8
+#endif
+
+/* stdint doesn't currently detect this, but may in the future */
+DEFINE_INT128
+
+#endif /* !defined(BUILDING_ASM) */
+
+#endif /* ASMOPT_${PROJECTNAMEUPPER}_H */
+
+EOF
+
+
+cat >> $outputheaderstub << EOF
+#include "asmopt.h"
+
+#define LOCAL_PREFIX3(a,b) a##_##b
+#define LOCAL_PREFIX2(a,b) LOCAL_PREFIX3(a,b)
+#define LOCAL_PREFIX(n) LOCAL_PREFIX2(PROJECT_NAME,n)
+#define PROJECT_NAME ${PROJECTNAME}
+
+/* yasm */
+#if (0)
+%define PROJECT_NAME ${PROJECTNAME}
+#endif
+
+#endif /* ASMOPT_INTERNAL_H */
+
+EOF
+
+# build util_implementations.h
+
+util_includes=`ls $appdir/include/*.h | sed "s/$appdir\/include\/\(.*\)\.h/#include \"\1.h\"/"`
+util_impls=`ls $appdir/include/*.h | sed "s/$appdir\/include\/\(.*\)\.h/make_impl(\1),/"`
+
+cat > $outpututilimpls << EOF
+$util_includes
+
+static const implementation_t implementations[] = {
+$util_impls
+};
+
+EOF
+
+
+cleanup
+
+$GNUMAKE clean
+
+makeshared=""
+if [ "$HAVESHARED" = "yes" ]; then
+    makeshared=",shared"
+fi
+
+echo "$outputheader generated for $PROJECTNAME, run '$GNUMAKE' or '$GNUMAKE [util,exe${makeshared}]' now"
+

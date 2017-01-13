@@ -4,14 +4,14 @@ all:
 FSTAR_HOME?=../../fstar
 KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
 HACL_HOME=..
-include $(HACL_HOME)/lib/hyperstack/Makefile.include
+include $(HACL_HOME)/code/lib/Makefile.include
 SUBDIRS=symmetric ec
 allsubdirs: $(addsuffix .all , $(SUBDIRS))
 
 INCLUDES=$(addprefix -I , $(HACL_KREMLIN) \
 				$(HACL_SYMMETRIC) \
-				$(HACL_HOME)/crypto \
-				$(HACL_HOME)/lib/io/c_bindings \
+				$(HACL_HOME)/code \
+				$(HACL_HOME)/apps/lib/io/c_bindings \
 				../pneutube \
 				$(HACL_EC))
 
@@ -58,7 +58,7 @@ tweetnacl: $(KREMTEST)/testlib.c c/randombytes.c c/tweetnacl.c c/tweetnacl_test.
 	./tweetnacl_test.exe
 
 blah:
-	gcc-6 -O3 -march=native -Wall -Werror -Wno-parentheses -Wno-unused-variable -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I $(KREMLIN_HOME)/kremlib -I tmp -Wno-error=pointer-sign \
+	gcc-6 -O3 -march=native -Wall -Werror -Wno-parentheses -Wno-unused-variable -fwrapv -I $(FSTAR_HOME)/ulib/hyperstack -I ../code/lib -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I $(KREMLIN_HOME)/kremlib -I tmp -Wno-error=pointer-sign \
 		tmp/FStar_Mul.c \
 		tmp/FStar_List_Tot.c \
 		tmp/FStar_ListProperties.c \
