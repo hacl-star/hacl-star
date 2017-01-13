@@ -73,8 +73,8 @@ let fdifference a b =
   let tmp = create limb_zero clen in
   blit b 0ul tmp 0ul clen;
   let h = ST.get() in
-  Hacl.Spec.Bignum.Fmul2.lemma_whole_slice (as_seq h b);
-  Hacl.Spec.Bignum.Fmul2.lemma_whole_slice (as_seq h tmp);
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h b);
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h tmp);
   FStar.Seq.lemma_eq_intro (as_seq h b) (as_seq h tmp);
   add_zero tmp;
   let h' = ST.get() in
