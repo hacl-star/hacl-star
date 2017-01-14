@@ -2,9 +2,9 @@
 # Main HACL* Makefile
 #
 
-.PHONY: prepare library
+.PHONY: prepare build
 
-all: library
+all: build
 
 prepare:
 	@echo $(CYAN)"\n# Installing OCaml packages required by F*"$(NORMAL)
@@ -19,7 +19,7 @@ prepare:
 	make -C dependencies/kremlin
 	@echo $(CYAN)"\nDone ! Run 'make' to compile the library."$(NORMAL)
 
-library:
+build:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
 	mkdir -p build && cd build; \
 	cmake $(CMAKE_COMPILER_OPTION) ../extracted/c && make
