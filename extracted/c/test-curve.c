@@ -244,7 +244,7 @@ int32_t test_curve()
   TestLib_compare_and_print("Sodium Curve25519", expected1, result, keysize);
   res = crypto_scalarmult_curve25519(result, scalar2, input2);
   TestLib_compare_and_print("Sodium Curve25519", expected2, result, keysize);
-
+  
   return exit_success;
 }
 
@@ -291,7 +291,7 @@ int32_t perf_curve() {
   }
   b = TestLib_cpucycles();
   t2 = clock();
-  print_results("HACL Curve25519 speed", (double)t2-t1,
+  print_results("Sodium Curve25519 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
