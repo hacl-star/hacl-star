@@ -34,7 +34,7 @@ let crecip_tot_1 z =
   let t0 = fsquare_times_tot a 2 in
   let b = fmul_tot t0 z in
   let a' = fmul_tot b a in
-  let t0' = fsquare_times_tot a 1 in
+  let t0' = fsquare_times_tot a' 1 in
   let b' = fmul_tot t0' b in
   let t0'' = fsquare_times_tot b' 5 in
   t0'', b', a'

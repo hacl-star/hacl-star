@@ -113,36 +113,49 @@ let chacha_inner_block_spec ctx =
   let ctx = chacha_quarter_round_spec ctx 3 4 9  14 in
   ctx
 
+#reset-options
+
+let chacha_state_setup_constants : c:seq h32{length c = 4} =
+  let l = [(uint32_to_sint32 0x61707865ul); (uint32_to_sint32 0x3320646eul);
+           (uint32_to_sint32 0x79622d32ul); (uint32_to_sint32 0x6b206574ul)] in
+  assert_norm(List.Tot.length l = 4);
+  SeqProperties.seq_of_list l
+
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+
+let chacha_state_setup_key (k:key) : Tot (k':seq h32{length k' = 8}) =
+  let k' = Seq.create 8 (uint32_to_sint32 0ul) in
+  let k' = Seq.upd k' 0 (bytes_to_h32 (slice k 0 4)) in
+  let k' = Seq.upd k' 1 (bytes_to_h32 (slice k 4 8)) in
+  let k' = Seq.upd k' 2 (bytes_to_h32 (slice k 8 12)) in
+  let k' = Seq.upd k' 3 (bytes_to_h32 (slice k 12 16)) in
+  let k' = Seq.upd k' 4 (bytes_to_h32 (slice k 16 20)) in
+  let k' = Seq.upd k' 5 (bytes_to_h32 (slice k 20 24)) in
+  let k' = Seq.upd k' 6 (bytes_to_h32 (slice k 24 28)) in
+  let k' = Seq.upd k' 7 (bytes_to_h32 (slice k 28 32)) in
+  k'
+
+
+let chacha_state_setup_nonce (n:nonce) : Tot (n':seq h32{length n' = 3}) =
+  let n' = Seq.create 3 (uint32_to_sint32 0ul) in
+  let n' = Seq.upd n' 0 (bytes_to_h32 (slice n 0 4)) in
+  let n' = Seq.upd n' 1 (bytes_to_h32 (slice n 4 8)) in
+  let n' = Seq.upd n' 2 (bytes_to_h32 (slice n 8 12)) in
+  n'
+
 
 val chacha_state_setup_spec: k:key -> counter:ctr -> n:nonce -> Tot chacha_sctx
 let chacha_state_setup_spec k counter n =
-  let ctx = Seq.create 16 (uint32_to_sint32 0ul) in
-  let ctx = Seq.upd ctx 0 (uint32_to_sint32 0x61707865ul) in
-  let ctx = Seq.upd ctx 1 (uint32_to_sint32 0x3320646eul) in
-  let ctx = Seq.upd ctx 2 (uint32_to_sint32 0x79622d32ul) in
-  let ctx = Seq.upd ctx 3 (uint32_to_sint32 0x6b206574ul) in
-  let ctx = Seq.upd ctx 4 (bytes_to_h32 (slice k 0 4)) in
-  let ctx = Seq.upd ctx 5 (bytes_to_h32 (slice k 4 8)) in
-  let ctx = Seq.upd ctx 6 (bytes_to_h32 (slice k 8 12)) in
-  let ctx = Seq.upd ctx 7 (bytes_to_h32 (slice k 12 16)) in
-  let ctx = Seq.upd ctx 8 (bytes_to_h32 (slice k 16 20)) in
-  let ctx = Seq.upd ctx 9 (bytes_to_h32 (slice k 20 24)) in
-  let ctx = Seq.upd ctx 10 (bytes_to_h32 (slice k 24 28)) in
-  let ctx = Seq.upd ctx 11 (bytes_to_h32 (slice k 28 32)) in
-  let ctx = Seq.upd ctx 12 (uint32_to_sint32 counter) in
-  let ctx = Seq.upd ctx 13 (bytes_to_h32 (slice n 0 4)) in
-  let ctx = Seq.upd ctx 14 (bytes_to_h32 (slice n 4 8)) in
-  let ctx = Seq.upd ctx 15 (bytes_to_h32 (slice n 8 12)) in
-  ctx
+  chacha_state_setup_constants
+  @| (chacha_state_setup_key k)
+  @| (create 1 (uint32_to_sint32 counter))
+  @| (chacha_state_setup_nonce n)
 
 
 val chacha_state_sum: s:chacha_sctx -> s':chacha_sctx -> Tot chacha_sctx
 let chacha_state_sum s s' =
-  let l = SeqProperties.seq_to_list s in
-  let l' = SeqProperties.seq_to_list s' in
-  let l'' = map2 (H32.add_mod) l l' in
-  SeqProperties.seq_of_list l''
-
+  SeqProperties.seq_of_list (map2 (H32.add_mod) (SeqProperties.seq_to_list s) 
+                                                (SeqProperties.seq_to_list s'))
 
 val chacha_state_serialize: s:chacha_sctx -> Tot block
 let chacha_state_serialize s =

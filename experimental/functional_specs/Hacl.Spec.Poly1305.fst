@@ -63,8 +63,8 @@ let rec poly vs r =
 private val fix: word_16 -> i:nat{i < 16} -> m:byte -> Tot word_16
 let fix r i m = Seq.upd r i (FStar.UInt8.(Seq.index r i &^ m))
 
-val clamp: word_16 -> Tot elem
-let clamp r =
+val encode_r: word_16 -> Tot elem
+let encode_r r =
   assert_norm(pow2 8 = 256);
   assert_norm(pow2 128 < pow2 130 - 5);
   let r = fix r  3  15uy in // 0000****
@@ -107,3 +107,16 @@ let finish a s =
   (* REMARK: this is equivalent to n = (a + little_endian s) % pow2 128 *)
   let n = (trunc_1305 a + little_endian s) % pow2 128 in
   little_bytes 16ul n
+
+val mac_1305: vs:text -> r:elem -> s:tag -> Tot tag
+let mac_1305 vs r s = finish (poly vs r) s
+
+val poly1305: msg:bytes -> k:bytes{length k = 32} -> Tot tag
+let poly1305 msg k =
+  let rec msg_to_text (msg:bytes) : Tot text (decreases (length msg)) =
+    if length msg <= 16 then create 1 msg
+    else SeqProperties.cons (slice msg 0 16) (msg_to_text (slice msg 16 (length msg))) in
+  let text = msg_to_text msg in
+  let r = encode_r (slice k 0 16) in
+  let s = slice k 16 32 in
+  mac_1305 text r s

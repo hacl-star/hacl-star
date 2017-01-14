@@ -124,8 +124,8 @@ private inline_for_extraction val crecip_1:
        let c  = Buffer.sub buf 15ul 5ul in
        crecip_pre (as_seq h1 t0)
        /\ crecip_pre (as_seq h1 b)
-       /\ crecip_pre (as_seq h1 a))
-    (* /\ ( (as_seq h1 t0, as_seq h1 b, as_seq h1 a)  == crecip_tot_1 (as_seq h0 z))) *)
+       /\ crecip_pre (as_seq h1 a)
+       /\ ( (as_seq h1 t0, as_seq h1 b, as_seq h1 a)  == crecip_tot_1 (as_seq h0 z)))
   ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 private inline_for_extraction let crecip_1 buf z =
@@ -192,12 +192,15 @@ private inline_for_extraction val crecip_2:
        let t0 = Buffer.sub buf 5ul  5ul in
        let b  = Buffer.sub buf 10ul 5ul in
        let c  = Buffer.sub buf 15ul 5ul in
-       crecip_pre (as_seq h1 t0)
+       red_513 (as_seq h0 t0)
+       /\ red_513 (as_seq h0 b)
+       /\ red_513 (as_seq h0 a)
+       /\ crecip_pre (as_seq h1 t0)
        /\ crecip_pre (as_seq h1 b)
-       /\ crecip_pre (as_seq h1 a))
-    (* /\ ( (as_seq h1 t0, as_seq h1 b, as_seq h1 a)  == crecip_tot_1 (as_seq h0 z))) *)
+       /\ crecip_pre (as_seq h1 a)
+       /\ ( (as_seq h1 t0, as_seq h1 b, as_seq h1 a)  == crecip_tot_2 (as_seq h0 t0) (as_seq h0 b) (as_seq h0 a)))
   ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 private inline_for_extraction let crecip_2 buf =
   assert_norm(pow2 32 = 0x100000000);
   let a  = Buffer.sub buf 0ul  5ul in
@@ -272,9 +275,16 @@ private inline_for_extraction val crecip_3:
       ))
   (ensures (fun h0 _ h1 -> live h1 out /\ modifies_2 out buf h0 h1 /\ live h0 buf
      /\ crecip_pre (as_seq h1 out)
-    (* /\ ( (as_seq h1 t0, as_seq h1 b, as_seq h1 a)  == crecip_tot_1 (as_seq h0 z))) *)
+     /\ (let a  = Buffer.sub buf 0ul  5ul in
+       let t0 = Buffer.sub buf 5ul  5ul in
+       let b  = Buffer.sub buf 10ul 5ul in
+       let c  = Buffer.sub buf 15ul 5ul in 
+       red_513 (as_seq h0 t0)
+       /\ red_513 (as_seq h0 b)
+       /\ red_513 (as_seq h0 a)
+       /\ as_seq h1 out  == crecip_tot_3 (as_seq h0 t0) (as_seq h0 b) (as_seq h0 a))
   ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 private inline_for_extraction let crecip_3 out buf =
   assert_norm(pow2 32 = 0x100000000);
   let a  = Buffer.sub buf 0ul  5ul in
@@ -316,7 +326,8 @@ val crecip:
   Stack unit
   (requires (fun h -> live h out /\ live h z /\ crecip_pre (as_seq h z)))
   (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1 /\ live h0 z
-    (* /\ as_seq h1 out == crecip_tot (as_seq h0 z) *)
+    /\ crecip_pre (as_seq h0 z)
+    /\ as_seq h1 out == crecip_tot (as_seq h0 z)
     /\ crecip_pre (as_seq h1 out)))
 let crecip out z =
   push_frame();
@@ -325,43 +336,3 @@ let crecip out z =
   crecip_2 buf;
   crecip_3 out buf;
   pop_frame()
-
-
-(* val crecip: *)
-(*   out:felem -> *)
-(*   z:felem{disjoint out z} -> *)
-(*   Stack unit *)
-(*   (requires (fun h -> live h out /\ live h z /\ crecip_pre (as_seq h z))) *)
-(*   (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1 /\ live h0 z *)
-(*     /\ as_seq h1 out == crecip_tot (as_seq h0 z) *)
-(*     /\ crecip_pre (as_seq h1 out))) *)
-(* let crecip out z = *)
-(*   push_frame(); *)
-(*   let buf = create limb_zero 20ul in *)
-(*   let a  = Buffer.sub buf 0ul  5ul in *)
-(*   let t0 = Buffer.sub buf 5ul  5ul in *)
-(*   let b  = Buffer.sub buf 10ul 5ul in *)
-(*   let c  = Buffer.sub buf 15ul 5ul in *)
-(*   fsquare_times a z 1ul; *)
-(*   fsquare_times t0 a 2ul; *)
-(*   fmul b t0 z; *)
-(*   fmul a b a; *)
-(*   fsquare_times t0 a 1ul; *)
-(*   fmul b t0 b; *)
-(*   fsquare_times t0 b 5ul; *)
-(*   fmul b t0 b; *)
-(*   fsquare_times t0 b 10ul; *)
-(*   fmul c t0 b; *)
-(*   fsquare_times t0 c 20ul; *)
-(*   fmul t0 t0 c; *)
-(*   fsquare_times t0 t0 10ul; *)
-(*   fmul b t0 b; *)
-(*   fsquare_times t0 b 50ul; *)
-(*   fmul c t0 b; *)
-(*   fsquare_times t0 c 100ul; *)
-(*   fmul t0 t0 c; *)
-(*   fsquare_times t0 t0 50ul; *)
-(*   fmul t0 t0 b; *)
-(*   fsquare_times t0 t0 5ul; *)
-(*   fmul out t0 a; *)
-(*   pop_frame() *)
