@@ -4,15 +4,29 @@ open Hacl.Hardware.Intel.CPUID
 
 
 
-let check_for_intel_drng () : St unit =
-  if (_is_intel_cpu() = 1ul) then
-    C.print_string (C.string_of_literal "Intel DRNG is supported on this hardware !\n")
-  else begin
-    C.print_string (C.string_of_literal "Intel DRNG is not available on this hardware !\n")
-  end; ()
+(* (\* Default value of a cpuid_t structure *\) *)
+(* let id:cpuid_t = { *)
+(*   eax = 0ul; *)
+(*   ebx = 0ul; *)
+(*   ecx = 0ul; *)
+(*   edx = 0ul; *)
+(* } *)
 
 
-(* int intel_check_drng(){ *)
+(* Detect if the processor is an Intel CPU *)
+val detect_intel_cpu: unit -> St bool
+let detect_intel_cpu () = if (_is_intel_cpu() = 1ul) then true else false
+
+
+(* Detect if the processor has support for the DRNG features *)
+val detect_intel_feature_rdrand: unit -> St bool
+let detect_intel_feature_rdrand () =
+  match detect_intel_cpu () with
+  | false -> false
+  | true -> true
+
+
+(* Int intel_check_drng(){ *)
 
 (*   // Check if the processor is an Intel CPU *)
 (*   if ( _is_intel_cpu()) { *)
@@ -29,28 +43,19 @@ let check_for_intel_drng () : St unit =
 (*   return 1; *)
 (* } *)
 
-(* int main () { *)
-
-(*   if (intel_check_drng() == 0) { *)
-(*     printf("Intel CPU with RDRAND feature Enabled !\n"); *)
-(*   } else { *)
-(*     perror("This hardware does not support DRNG !\n"); *)
-(*   } *)
-(*   return 0; *)
-(* } *)
-
-
-
-(* val check_hardware: unit  *)
-(*   -> Stack uint8_t (requires (fun h -> True)) *)
-(*                   (ensures  (fun _ _ _ -> True)) *)
-
-(* let check_hardware () = *)
-(*   if (_is_intel_cpu()) then *)
-
 
 let main () =
   push_frame();
-  check_for_intel_drng ();
+
+  (* Detect if the machine is an Intel CPU *)
+  (match detect_intel_cpu () with
+  | true  -> C.print_string (C.string_of_literal " * CPU Information: Intel processor detected on your machine.\n")
+  | false -> C.print_string (C.string_of_literal " * CPU Information: No Intel CPU has been detected on your machine !\n"));
+
+  (* Detect if the machine supports the RDRAND feature *)
+  (match detect_intel_feature_rdrand () with
+  | true -> C.print_string (C.string_of_literal " *         Feature: Digital Random Number Generator (RDRAND)\n")
+  | false -> ());
+
   pop_frame();
   C.exit_success
