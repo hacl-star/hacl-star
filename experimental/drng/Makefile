@@ -31,14 +31,14 @@ extract-c:
 
 
 build:
-	@echo $(CYAN)"\n# Compiling the DRNG component."$(NORMAL)
+	@echo $(CYAN)"\n# Compiling the CPUID component."$(NORMAL)
 	cp $(EXTERNAL_CODE)/* $(BUILD_DIR)
 	cd $(BUILD_DIR) && \
 	$(COMPILER) $(KREMLIN_HOME)/kremlib/kremlib.c $(EXTRACTED_FILES) -I$(INCLUDES) -o test_drng
 
 test:
-	@echo $(CYAN)"\n# Run the DRNG test."$(NORMAL)
-	$(BUILD_DIR)/test_drng
+	@echo $(CYAN)"\n# Run the CPUID test."$(NORMAL)
+	@$(BUILD_DIR)/test_drng
 
 clean:
 	@echo $(CYAN)"\n# Clean temporary files."$(NORMAL)
