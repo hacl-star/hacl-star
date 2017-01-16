@@ -34,11 +34,11 @@ build:
 	@echo $(CYAN)"\n# Compiling the CPUID component."$(NORMAL)
 	cp $(EXTERNAL_CODE)/* $(BUILD_DIR)
 	cd $(BUILD_DIR) && \
-	$(COMPILER) $(KREMLIN_HOME)/kremlib/kremlib.c $(EXTRACTED_FILES) -I$(INCLUDES) -o test_drng
+	$(COMPILER) $(KREMLIN_HOME)/kremlib/kremlib.c $(EXTRACTED_FILES) -I$(INCLUDES) -o test
 
 test:
 	@echo $(CYAN)"\n# Run the CPUID test."$(NORMAL)
-	@$(BUILD_DIR)/test_drng
+	@$(BUILD_DIR)/test
 
 clean:
 	@echo $(CYAN)"\n# Clean temporary files."$(NORMAL)
