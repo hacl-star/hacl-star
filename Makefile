@@ -22,7 +22,7 @@ prepare:
 build:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
 	mkdir -p build && cd build; \
-	cmake $(CMAKE_COMPILER_OPTION) ../extracted/c && make
+	cmake $(CMAKE_COMPILER_OPTION) ../snapshots/hacl-c && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
 
 clean:
