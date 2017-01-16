@@ -2,12 +2,15 @@ module Hacl.Hardware.Intel.CPUID
 
 open FStar.ST
 open FStar.Buffer
+open FStar.HyperStack
 
 (* Aliases for modules *)
 module U8  = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module FB  = FStar.Buffer
+module HS  = FStar.HyperStack
+
 
 (* Aliases for types *)
 let u8  = FStar.UInt8.t 
@@ -26,18 +29,18 @@ type cpuid_t = {
 
 
 (* Definition of the cpuid function *)
-assume val cpuid : info:cpuid_t -> leaf:u32 -> subleaf:u32
-  -> Stack unit (requires (fun _ -> True))
-               (ensures  (fun _ _ _ -> True))
+assume val cpuid : info:(buffer cpuid_t) -> leaf:u32 -> subleaf:u32
+  -> Stack unit (requires (fun h -> live h info))
+               (ensures  (fun h0 _ h1 -> live h1 info /\ modifies_1 info h0 h1))
 
 
 (* Definition of the _has_cpuid function *)
 assume val _has_cpuid : unit
   -> Stack u32  (requires (fun _ -> True))
-               (ensures  (fun _ _ _ -> True))
+               (ensures  (fun h0 _ h1 -> h0 == h1))
 
 
 (* Definition of the _is_intel_cpu function *)
 assume val _is_intel_cpu : unit
   -> Stack u32  (requires (fun _ -> True))
-               (ensures  (fun _ _ _ -> True))
+               (ensures  (fun h0 _ h1 -> h0 == h1))
