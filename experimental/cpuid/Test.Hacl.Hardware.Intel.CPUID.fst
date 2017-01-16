@@ -5,7 +5,7 @@ open FStar.HyperStack
 open FStar.Buffer
 open FStar.UInt32
 
-open Hacl.Hardware.Intel.CPUID
+open Hacl.Hardware.Intel.CPUID.Assumed
 
 
 

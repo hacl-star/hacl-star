@@ -13,7 +13,7 @@ endif
 EXTERNAL_CODE   = c
 BUILD_DIR		 = build
 
-MODULES_ASSUMED = Hacl.Hardware.Intel.CPUID
+MODULES_ASSUMED = Hacl.Hardware.Intel.CPUID.Assumed
 MAIN            = Test.Hacl.Hardware.Intel.CPUID
 
 INCLUDES        = $(KREMLIN_HOME)/kremlib

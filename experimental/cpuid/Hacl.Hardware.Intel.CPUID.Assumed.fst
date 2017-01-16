@@ -1,4 +1,4 @@
-module Hacl.Hardware.Intel.CPUID
+module Hacl.Hardware.Intel.CPUID.Assumed
 
 open FStar.ST
 open FStar.Buffer
