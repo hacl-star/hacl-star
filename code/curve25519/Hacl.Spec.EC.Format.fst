@@ -208,5 +208,5 @@ let format_secret secret =
   let e31 = e31 &^ (uint8_to_sint8 127uy) in
   let e31 = e31 |^ (uint8_to_sint8 64uy) in
   let e = Seq.upd secret 0 e0 in
-  let e = Seq.upd secret 31 e31 in
+  let e = Seq.upd e 31 e31 in
   e

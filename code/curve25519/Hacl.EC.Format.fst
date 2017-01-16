@@ -28,6 +28,8 @@ val point_inf: unit -> StackInline point
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getx p))
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getz p))
     /\ frameOf (getx p) = frameOf (getz p)
+    /\ (let px = as_seq h1 (getx p) in let pz = as_seq h1 (getz p) in
+       (px, pz) == Hacl.Spec.EC.Format.point_inf ())
     ))
 let point_inf () =
   let buf = create limb_zero 10ul in
@@ -55,22 +57,24 @@ let point_inf () =
   p
 
 
-val alloc_point: unit -> StackInline point
-  (requires (fun h -> true))
-  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p))
-let alloc_point () =
-  let buf = create limb_zero 10ul in
-  let x = Buffer.sub buf 0ul 5ul in
-  let y = Buffer.sub buf 0ul 5ul in
-  let z = Buffer.sub buf 5ul 5ul in
-  make x y z
+(* val alloc_point: unit -> StackInline point *)
+(*   (requires (fun h -> true)) *)
+(*   (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p)) *)
+(* let alloc_point () = *)
+(*   let buf = create limb_zero 10ul in *)
+(*   let x = Buffer.sub buf 0ul 5ul in *)
+(*   let y = Buffer.sub buf 0ul 5ul in *)
+(*   let z = Buffer.sub buf 5ul 5ul in *)
+(*   make x y z *)
 
 
 private val load64_le:
-  b:uint8_p{length b >= 8} ->
+  b:uint8_p{length b = 8} ->
   Stack limb
     (requires (fun h -> Buffer.live h b))
-    (ensures  (fun h0 _ h1 -> h0 == h1))
+    (ensures  (fun h0 r h1 -> h0 == h1 /\ Buffer.live h0 b
+      /\ Hacl.Spec.EC.Format.load64_le_spec (as_seq h1 b) == r
+    ))
 private let load64_le b =
   assert_norm(pow2 32 = 0x100000000);
   let b0 = b.(0ul) in
@@ -94,11 +98,14 @@ private let load64_le b =
 
 
 private val store64_le:
-  b:uint8_p{length b >= 8} ->
+  b:uint8_p{length b = 8} ->
   z:limb ->
   Stack unit
     (requires (fun h -> Buffer.live h b))
-    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ Buffer.live h1 b))
+    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ Buffer.live h1 b
+      /\ as_seq h1 b == Hacl.Spec.EC.Format.store64_le_spec z
+    ))
+#set-options "--lax"
 private let store64_le b z =
   assert_norm(pow2 32 = 0x100000000);
   let open Hacl.Bignum.Limb in
@@ -110,7 +117,9 @@ private let store64_le b z =
   b.(5ul) <- sint64_to_sint8 (z >>^ 40ul);
   b.(6ul) <- sint64_to_sint8 (z >>^ 48ul);
   b.(7ul) <- sint64_to_sint8 (z >>^ 56ul)
-  
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 private inline_for_extraction val upd_5: output:felem ->
   o0:limb{v o0 < pow2 51} ->
@@ -119,21 +128,38 @@ private inline_for_extraction val upd_5: output:felem ->
   o3:limb{v o3 < pow2 51} ->
   o4:limb{v o4 < pow2 51} ->
   Stack unit
-  (requires (fun h -> Buffer.live h output))
-  (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
-    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)))
+    (requires (fun h -> Buffer.live h output))
+    (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
+      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
+      /\ as_seq h1 output == Hacl.Spec.EC.Format.seq_upd_5 o0 o1 o2 o3 o4
+      (* /\ get h1 output 0 == o0 *)
+      (* /\ get h1 output 1 == o1 *)
+      (* /\ get h1 output 2 == o2 *)
+      (* /\ get h1 output 3 == o3 *)
+      (* /\ get h1 output 4 == o4 *)
+    ))
 private inline_for_extraction let upd_5 output output0 output1 output2 output3 output4 =
   output.(0ul) <- output0;
   output.(1ul) <- output1;
   output.(2ul) <- output2;
   output.(3ul) <- output3;
-  output.(4ul) <- output4
+  output.(4ul) <- output4;
+  let h1 = ST.get() in
+  cut (get h1 output 0 == output0
+      /\ get h1 output 1 == output1
+      /\ get h1 output 2 == output2
+      /\ get h1 output 3 == output3
+      /\ get h1 output 4 == output4 );
+  Seq.lemma_eq_intro (as_seq h1 output) (Hacl.Spec.EC.Format.seq_upd_5 output0 output1 output2 output3 output4)
   
+
 
 private val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack unit
   (requires (fun h -> Buffer.live h output /\ Buffer.live h input))
-  (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
-    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)))
+  (ensures (fun h0 _ h1 -> Buffer.live h0 output /\ Buffer.live h0 input
+    /\ Buffer.live h1 output /\ modifies_1 output h0 h1
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
+    /\ as_seq h1 output == Hacl.Spec.EC.Format.fexpand_spec (as_seq h0 input)))
 private let fexpand output input =
   let mask_51 = uint64_to_limb 0x7ffffffffffffuL in
   let i0 = load64_le (Buffer.sub input 0ul 8ul) in
@@ -156,7 +182,11 @@ private let fexpand output input =
 
 private val fcontract: output:uint8_p{length output = 32} -> input:felem -> Stack unit
   (requires (fun h -> Buffer.live h output /\ Buffer.live h input))
-  (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1))
+  (ensures (fun h0 _ h1 -> Buffer.live h0 output /\ Buffer.live h0 input
+    /\ Buffer.live h1 output /\ modifies_1 output h0 h1
+    /\ as_seq h1 output == Hacl.Spec.EC.Format.fcontract_spec (as_seq h0 input)
+  ))
+#set-options "--lax"
 private let fcontract output input =
   let mask_51 = uint64_to_limb 0x7ffffffffffffuL in
   let nineteen = uint64_to_limb 19uL in
@@ -221,12 +251,19 @@ private let fcontract output input =
   store64_le (Buffer.sub output 24ul 8ul) o3
 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
 val point_of_scalar: scalar:buffer Hacl.UInt8.t{length scalar = keylen} -> StackInline point
   (requires (fun h -> Buffer.live h scalar))
-  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p
+  (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p /\ Buffer.live h0 scalar
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getx p))
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 (getz p))
+    /\ (let px = as_seq h1 (getx p) in
+       let pz = as_seq h1 (getz p) in
+       let scalar = as_seq h0 scalar in
+       (px, pz) == Hacl.Spec.EC.Format.point_of_scalar scalar)
   ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 let point_of_scalar scalar =
   let buf = create limb_zero 10ul in  
   let x = Buffer.sub buf 0ul 5ul in
@@ -260,7 +297,14 @@ val scalar_of_point: scalar:uint8_p{length scalar = keylen} -> p:point -> Stack 
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getx p))
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getz p))
   ))
-  (ensures (fun h0 _ h1 -> modifies_1 scalar h0 h1 /\ Buffer.live h1 scalar))
+  (ensures (fun h0 _ h1 -> Buffer.live h0 scalar /\ live h0 p
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getx p))
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getz p))
+    /\ modifies_1 scalar h0 h1 /\ Buffer.live h1 scalar
+    /\ (let px = as_seq h0 (getx p) in
+       let pz = as_seq h0 (getz p) in
+       as_seq h1 scalar == Hacl.Spec.EC.Format.scalar_of_point (px,pz))
+  ))
 let scalar_of_point scalar point =
   push_frame();
   let x = Hacl.EC.Point.getx point in
@@ -282,13 +326,26 @@ val format_secret:
   secret:uint8_p{length secret = keylen} ->
   StackInline (s:uint8_p{length s = keylen})
     (requires (fun h -> Buffer.live h secret))
-    (ensures (fun h0 s h1 -> Buffer.live h1 secret /\ modifies_0 h0 h1 /\ Buffer.live h1 s))
+    (ensures (fun h0 s h1 -> Buffer.live h0 secret
+      /\ Buffer.live h1 secret /\ modifies_0 h0 h1 /\ Buffer.live h1 s
+      /\ as_seq h1 s == Hacl.Spec.EC.Format.format_secret (as_seq h0 secret)
+      ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let format_secret secret =
+  let hinit = ST.get() in
   assert_norm(pow2 8 = 256);
   let e   = create zero_8 32ul in
+  let h = ST.get() in
+  no_upd_lemma_0 hinit h secret;
   blit secret 0ul e 0ul 32ul;
+  let h' = ST.get() in
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h secret);
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' e);
+  cut (as_seq h' e == as_seq hinit secret);
   let e0  = e.(0ul) in
   let e31 = e.(31ul) in
+  cut (e0 == Seq.index (as_seq hinit secret) 0);
+  cut (e31 == Seq.index (as_seq hinit secret) 31);
   let open Hacl.UInt8 in
   let e0  = e0 &^ (uint8_to_sint8 248uy) in
   let e31 = e31 &^ (uint8_to_sint8 127uy) in

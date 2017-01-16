@@ -111,6 +111,6 @@ let rec cmult_big_loop_spec n nq nqpq q i =
 
 val cmult_spec: scalar:uint8_s{Seq.length scalar = keylen} -> q:spoint_513 -> Tot (result:spoint_513)
 let cmult_spec n q =
-  let nq = alloc_point () in
+  let nq = point_inf () in
   let nq2, nqpq2 = cmult_big_loop_spec n nq q q 32ul in
   nq2
