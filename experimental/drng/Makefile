@@ -17,7 +17,7 @@ MODULES_ASSUMED = Hacl.Hardware.Intel.CPUID
 MAIN            = Test.Hacl.Hardware.Intel.CPUID
 
 INCLUDES        = $(KREMLIN_HOME)/kremlib
-EXTRACTED_FILES =  Prims.c FStar.c Hacl_Hardware_Intel_CPUID.c Test_Hacl_Hardware_Intel_CPUID.c
+EXTRACTED_FILES =  Prims.c FStar.c cpuid.c Test_Hacl_Hardware_Intel_CPUID.c
 
 
 # Targets
@@ -27,7 +27,7 @@ all: extract-c build
 
 extract-c:
 	@echo $(CYAN)"\n# Generating C code from KreMLin."$(NORMAL)
-	krml $(MAIN).fst -drop $(MODULES_ASSUMED) -tmpdir $(BUILD_DIR) -no-prefix $(MAIN) -skip-compilation
+	krml $(MAIN).fst -drop $(MODULES_ASSUMED) -tmpdir $(BUILD_DIR) -no-prefix $(MODULES_ASSUMED) -no-prefix $(MAIN) -add-include '"cpuid.h"' -skip-compilation
 
 
 build:
