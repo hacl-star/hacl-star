@@ -32,19 +32,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Hacl_Hardware_Intel_CPUID.h"
+#include "cpuid.h"
 #include <string.h>
 #include <stdint.h>
 
-int Hacl_Hardware_Intel_CPUID__is_intel_cpu ()
+int _is_intel_cpu ()
 {
 	static int intel_cpu= -1;
-	Hacl_Hardware_Intel_CPUID_cpuid_t info;
+	cpuid_t info;
 
 	/* So we don't call cpuid multiple times for the same information */
 
 	if ( intel_cpu == -1 ) {
-		Hacl_Hardware_Intel_CPUID_cpuid(&info, 0, 0);
+		cpuid(&info, 0, 0);
 
 		if (
 			memcmp((char *) &info.ebx, "Genu", 4) ||
@@ -61,7 +61,7 @@ int Hacl_Hardware_Intel_CPUID__is_intel_cpu ()
 }
 
 #ifdef __i386__
-int Hacl_Hardware_Intel_CPUID__have_cpuid ()
+int _have_cpuid ()
 {
 	/*
 	 * cpuid availability is determined by setting and clearing the 
@@ -89,7 +89,7 @@ int Hacl_Hardware_Intel_CPUID__have_cpuid ()
 }
 #endif
 
-void Hacl_Hardware_Intel_CPUID_cpuid (Hacl_Hardware_Intel_CPUID_cpuid_t *info, unsigned int leaf, unsigned int subleaf)
+void cpuid (cpuid_t *info, unsigned int leaf, unsigned int subleaf)
 {
 #ifdef __i386__
 	/* Can't use %ebx when compiling with -fPIC (or -fPIE) */

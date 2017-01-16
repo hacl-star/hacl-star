@@ -40,14 +40,14 @@ typedef struct cpuid_struct {
 	unsigned int ebx;
 	unsigned int ecx;
 	unsigned int edx;
-} Hacl_Hardware_Intel_CPUID_cpuid_t;
+} cpuid_t;
 
-void Hacl_Hardware_Intel_CPUID_cpuid (Hacl_Hardware_Intel_CPUID_cpuid_t *info, unsigned int leaf, unsigned int subleaf);
+void cpuid (cpuid_t *info, unsigned int leaf, unsigned int subleaf);
 
 #ifdef __i386__
-int Hacl_Hardware_Intel_CPUID__has_cpuid ();
+int _has_cpuid ();
 #endif
-int Hacl_Hardware_Intel_CPUID__is_intel_cpu ();
+int _is_intel_cpu ();
 
 #endif
 
