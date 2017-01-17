@@ -44,16 +44,11 @@ let random_uint64 () =
   r
 
 
-#set-options "--lax"
-
 (* Get a N random bytes from the CPU *)
 val random_bytes: rand:bytes -> n:u32
-  -> Stack unit (requires (fun h -> True))
+  -> Stack unit (requires (fun h -> live h rand))
                (ensures  (fun h0 _ h1 -> live h1 rand /\ modifies_1 rand h0 h1))
 let random_bytes rand n = AM.rdrand_get_bytes n rand
-
-
-#reset-options
 
 
 (* Get a uint64_t seed from the CPU *)
