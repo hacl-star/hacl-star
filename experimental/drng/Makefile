@@ -9,6 +9,11 @@ else
 endif
 
 
+
+# Dependencies
+CPUID_DIR         = ../cpuid
+CPUID_ASSUMED_DIR = ../cpuid/c
+
 # Project
 EXTERNAL_CODE   = c
 BUILD_DIR		 = build
@@ -18,7 +23,7 @@ MODULE          = Hacl.Hardware.Intel.DRNG
 MAIN            = Test.Hacl.Hardware.Intel.DRNG
 
 INCLUDES        = $(KREMLIN_HOME)/kremlib
-EXTRACTED_FILES =  Prims.c FStar.c drng.c Hacl_Hardware_Intel_DRNG.c Test_Hacl_Hardware_Intel_DRNG.c
+EXTRACTED_FILES =  Prims.c FStar.c cpuid.c drng.c Hacl_Hardware_Intel_DRNG.c Test_Hacl_Hardware_Intel_DRNG.c
 
 
 # Targets
@@ -28,12 +33,13 @@ all: extract-c build
 
 extract-c:
 	@echo $(CYAN)"\n# Generating C code from KreMLin."$(NORMAL)
-	krml $(MAIN).fst -drop $(MODULES_ASSUMED) -tmpdir $(BUILD_DIR) -no-prefix $(MODULES_ASSUMED) -no-prefix $(MODULE) -no-prefix $(MAIN) -add-include '"config.h"' -add-include '"drng.h"' -skip-compilation
+	krml $(MAIN).fst -drop Hacl.Hardware.Intel.CPUID.Assumed -drop Hacl.Hardware.Intel.CPUID -drop $(MODULES_ASSUMED) -tmpdir $(BUILD_DIR) -no-prefix $(MODULES_ASSUMED) -no-prefix $(MODULE) -no-prefix $(MAIN) -add-include '"config.h"' -add-include '"drng.h"' -add-include '"../../cpuid/c/cpuid.h"' -skip-compilation
 
 
 build:
 	@echo $(CYAN)"\n# Compiling the DRNG component."$(NORMAL)
 	cp $(EXTERNAL_CODE)/* $(BUILD_DIR)
+	cp $(CPUID_ASSUMED_DIR)/cpuid.{c,h} $(BUILD_DIR)
 	cd $(BUILD_DIR) && \
 	$(COMPILER) $(KREMLIN_HOME)/kremlib/kremlib.c $(EXTRACTED_FILES) -I$(INCLUDES) -o test
 

@@ -47,10 +47,10 @@ let random_uint64 () =
 #set-options "--lax"
 
 (* Get a N random bytes from the CPU *)
-val random_bytes: n:u32 -> rand:bytes
+val random_bytes: rand:bytes -> n:u32
   -> Stack unit (requires (fun h -> True))
                (ensures  (fun h0 _ h1 -> live h1 rand /\ modifies_1 rand h0 h1))
-let random_bytes n rand = AM.rdrand_get_bytes n rand
+let random_bytes rand n = AM.rdrand_get_bytes n rand
 
 
 #reset-options
