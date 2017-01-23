@@ -383,48 +383,325 @@ let poly1305_process_last_block_spec st m rem' =
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
-val poly1305_last_pass_spec: acc:seqelem{red_45 acc} -> Tot (acc':seqelem{
-    seval acc' % prime = seval acc % prime})
-let poly1305_last_pass_spec acc =
-  last_pass_is_fine acc;
-  let acc1 = Hacl.Spec.Bignum.Fproduct.carry_limb_spec acc 0 in
-  let acc2 = Hacl.Spec.Bignum.Modulo.carry_top_spec acc1 in
-  Hacl.Spec.Bignum.Modulo.lemma_carry_top_spec acc1;
-  Hacl.Spec.Bignum.Fproduct.carry_0_to_1_spec acc2
+inline_for_extraction let p44m5 : p:limb{v p = pow2 44 - 5} =
+  assert_norm(pow2 44 - 5 = 0xffffffffffb); uint64_to_sint64 0xffffffffffbuL
+
+inline_for_extraction let p44m1 : p:limb{v p = pow2 44 - 1} =
+  assert_norm(pow2 44 - 1 = 0xfffffffffff); uint64_to_sint64 0xfffffffffffuL
+
+inline_for_extraction let p42m1 : p:limb{v p = pow2 42 - 1} =
+  assert_norm(pow2 42 - 1 = 0x3ffffffffff); uint64_to_sint64 0x3ffffffffffuL
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
+val seq_upd_3: a0:limb -> a1:limb -> a2:limb -> Tot (s:seqelem{Seq.index s 0 == a0
+  /\ Seq.index s 1 == a1 /\ Seq.index s 2 == a2})
+let seq_upd_3 a0 a1 a2 =
+  let s = Seq.create 3 limb_zero in
+  let s = Seq.upd s 0 a0 in
+  let s = Seq.upd s 1 a1 in
+  let s = Seq.upd s 2 a2 in
+  s
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
+val lemma_poly_last_pass: s:seqelem{bounds s p44 p44 p42} -> Lemma
+  (requires (bounds s p44 p44 p42 /\
+    (let a0' = Seq.index s 0 in let a1' = Seq.index s 1 in let a2' = Seq.index s 2 in
+     (v a0' <= 4 /\ v a1' = 0 /\ v a2' = 0) \/ (v a0' < pow2 44 - 5 \/ v a1' <> pow2 44 - 1 \/ v a2' <> pow2 42 - 1) )))
+  (ensures (seval s = seval s % prime))
+let lemma_poly_last_pass s =
+  Hacl.Spec.Bignum.Modulo.lemma_seval_3 s;
+  assert_norm(pow2 44 = 0x100000000000); assert_norm(pow2 88 = 0x10000000000000000000000);
+  assert_norm(pow2 44 - 5 + pow2 44 * (pow2 44 - 1) + pow2 88 * (pow2 42 - 1) = pow2 130 - 5)
+
+val lemma_poly_last_pass': a0:limb -> a1:limb -> a2:limb -> Lemma
+  (requires (let open Hacl.Bignum.Limb in
+    v a0 >= pow2 44 - 5 /\ v a1 = pow2 44 - 1 /\ v a2 = pow2 42 - 1))
+  (ensures (let open Hacl.Bignum.Limb in
+    (v a0 - (pow2 44 - 5) + pow2 44 * (v a1 - (pow2 44 - 1)) + pow2 88 * (v a2 - (pow2 42 - 1))) % prime
+    = (v a0 + pow2 44 * (v a1) + pow2 88 * (v a2)) % prime))
+let lemma_poly_last_pass' a0 a1 a2 =
+  assert_norm(pow2 130 - 5 = 0x3fffffffffffffffffffffffffffffffb);
+  assert_norm(pow2 44 = 0x100000000000); assert_norm(pow2 88 = 0x10000000000000000000000);
+  Math.Lemmas.distributivity_add_right (pow2 44) (v a1) (pow2 44 - 1);
+  Math.Lemmas.distributivity_add_right (pow2 88) (v a2) (pow2 42 - 1);
+  assert_norm(pow2 44 - 5 + pow2 44 * (pow2 44 - 1) + pow2 88 * (pow2 42 - 1) = pow2 130 - 5);
+  Math.Lemmas.lemma_mod_plus (v a0 + pow2 44 * (v a1) + pow2 88 * (v a2)) 1 prime
+
+val lemma_poly_last_pass'': a0:limb -> a1:limb -> a2:limb -> Lemma
+  (requires (true))
+  (ensures (let open Hacl.Bignum.Limb in
+    (v a0 >= pow2 44 - 5 /\ v a1 = pow2 44 - 1 /\ v a2 = pow2 42 - 1) ==>
+    ((v a0 - (pow2 44 - 5) + pow2 44 * (v a1 - (pow2 44 - 1)) + pow2 88 * (v a2 - (pow2 42 - 1))) % prime
+    = (v a0 + pow2 44 * (v a1) + pow2 88 * (v a2)) % prime)))
+let lemma_poly_last_pass'' a0 a1 a2 =
+  if (v a0 >= pow2 44 - 5 && v a1 = pow2 44 - 1 && v a2 = pow2 42 - 1)
+  then lemma_poly_last_pass' a0 a1 a2
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-val poly1305_finish_spec: st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
-  m:Seq.seq H8.t ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Seq.length m} ->
-  key_s:Seq.seq H8.t{Seq.length key_s = 16} ->
-  Tot (m:Seq.seq H8.t{Seq.length m = 16})
-let poly1305_finish_spec st m len key_s =
-  assert_norm (pow2 64 = 0x10000000000000000);
-  assert_norm (pow2 32 = 0x100000000);
-  let rem' = U64.(len &^ 0xfuL) in
-  assert_norm(pow2 4 - 1 = 0xf);
-  UInt.logand_mask (U64.v len) 4;
-  let st' = if U64.(rem' =^ 0uL) then st
-           else poly1305_process_last_block_spec st (Seq.slice m (U64.v len - U64.v rem') (U64.v len)) rem' in
-  let acc = poly1305_last_pass_spec (MkState?.h st') in
-  let k' = load128_le_spec key_s in
-  (* let kl = load64_le_spec (Seq.slice key_s 0 8) in *)
-  (* let kh = load64_le_spec (Seq.slice key_s 8 16) in *)
-  let h0 = Seq.index acc 0 in
-  let h1 = Seq.index acc 1 in
-  let h2 = Seq.index acc 2 in
+val poly1305_last_pass_spec_: acc:seqelem{bounds acc p44 p44 p42} -> Tot (acc':seqelem{
+  bounds acc' p44 p44 p42 /\  seval acc' = seval acc % prime})
+let poly1305_last_pass_spec_ acc =
+  let a0 = Seq.index acc 0 in
+  let a1 = Seq.index acc 1 in
+  let a2 = Seq.index acc 2 in
   let open Hacl.Bignum.Limb in
-  let accl = h0 |^ (h1 <<^ 44ul) in
-  let acch = (h1 >>^ 20ul) |^ (h2 <<^ 24ul) in
+  let mask0 = gte_mask a0 p44m5 in
+  let mask1 = eq_mask a1 p44m1 in
+  let mask2 = eq_mask a2 p42m1 in
+  let mask  = mask0 &^ mask1 &^ mask2 in
+  UInt.logand_lemma_1 (v mask0); UInt.logand_lemma_1 (v mask1); UInt.logand_lemma_1 (v mask2);
+  UInt.logand_lemma_2 (v mask0); UInt.logand_lemma_2 (v mask1); UInt.logand_lemma_2 (v mask2);
+  UInt.logand_associative (v mask0) (v mask1) (v mask2);
+  cut (v mask = UInt.ones 64 ==> (v a0 >= pow2 44 - 5 /\ v a1 = pow2 44 - 1 /\ v a2 = pow2 42 - 1));
+  UInt.logand_lemma_1 (v p44m5); UInt.logand_lemma_1 (v p44m1); UInt.logand_lemma_1 (v p42m1);
+  UInt.logand_lemma_2 (v p44m5); UInt.logand_lemma_2 (v p44m1); UInt.logand_lemma_2 (v p42m1);
+  let a0' = a0 -^ (p44m5 &^ mask) in
+  let a1' = a1 -^ (p44m1 &^ mask) in
+  let a2' = a2 -^ (p42m1 &^ mask) in
+  cut ( (v a0 >= pow2 44 - 5 /\ v a1 = pow2 44 - 1 /\ v a2 = pow2 42 - 1) ==> (v a0' <= 4 /\ v a1' = 0 /\ v a2' = 0) );
+  cut ( (v a0 < pow2 44 - 5 \/ v a1 <> pow2 44 - 1 \/ v a2 <> pow2 42 - 1) ==> (v a0' = v a0 /\ v a1' = v a1 /\ v a2' = v a2) );
+  let acc' = seq_upd_3 a0' a1' a2' in
+  Hacl.Spec.Bignum.Modulo.lemma_seval_3 acc';
+  Hacl.Spec.Bignum.Modulo.lemma_seval_3 acc;
+  lemma_poly_last_pass acc';
+  lemma_poly_last_pass'' a0 a1 a2;
+  cut (bounds acc' p44 p44 p42);
+  Math.Lemmas.modulo_lemma (seval acc') prime;
+  acc'
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+val lemma_carry_limb_unrolled: a0:limb -> a1:limb -> a2:limb ->
+  Lemma (v a0 % p44 + p44 * ((v a1 + v a0 / p44) % p44) + pow2 88 * (v a2 + ((v a1 + v a0 / p44) / p44))
+    = v a0 + p44 * v a1 + pow2 88 * v a2)
+let lemma_carry_limb_unrolled a0 a1 a2 =
+  let z = v a0 % p44 + p44 * ((v a1 + v a0 / p44) % p44) + pow2 88 * (v a2 + ((v a1 + v a0 / p44) / p44)) in
+  let p88 = pow2 88 in
+  let open FStar.Math.Lemmas in
+  distributivity_add_right (pow2 88) (v a2) ((v a1 + v a0 / p44) / p44);
+  cut (z = v a0 % p44 + p44 * ((v a1 + v a0 / p44) % p44) + p88 * v a2 + p88 * ((v a1 + v a0 / p44) / p44));
+  pow2_plus 44 44; lemma_div_mod (v a1 + v a0 / p44) p44;
+  lemma_div_mod (v a1 + v a0 / p44) p44;
+  distributivity_add_right (p44) ((v a1 + v a0 / p44)%p44) (p44 * ((v a1 + v a0 / p44) / p44));
+  cut (p44 * ((v a1 + v a0 / p44) % p44) + p88 * ((v a1 + v a0 / p44) / p44) =
+    p44 * (v a1 + v a0 / p44) );
+  distributivity_add_right (p44) (v a1) (v a0 / p44);
+  lemma_div_mod (v a0) p44
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+val carry_limb_unrolled: acc:seqelem{bounds (acc) (p44+5*((p45+p20)/p42)) p44 p42} ->
+  Tot (s:seqelem{bounds s p44 p44 (p42+1)
+    /\ seval s = seval acc
+    /\ Limb.(v (Seq.index s 2) >= p42 ==> v (Seq.index s 1) = 0)})
+let carry_limb_unrolled acc =
+  let a0 = Seq.index acc 0 in
+  let a1 = Seq.index acc 1 in
+  let a2 = Seq.index acc 2 in
+  let open Hacl.Bignum.Limb in
+  let a0' = a0 &^ mask_44 in
+  UInt.logand_mask (v a0) 44;
+  cut (v a0 < p45);
+  let r0  = a0 >>^ 44ul in
+  Math.Lemmas.lemma_div_lt (v a0) 45 44;
+  assert_norm(pow2 1 = 2); assert_norm(pow2 0 = 1);
+  cut (v r0 <= 1);
+  let a1' = (a1 +^ r0) &^ mask_44 in
+  UInt.logand_mask #64 (v a1 + v r0) 44;
+  Math.Lemmas.lemma_div_lt (v a1 + v r0) 45 44;
+  let r1  = (a1 +^ r0) >>^ 44ul in
+  let a2' = a2 +^ r1 in
+  let s = seq_upd_3 a0' a1' a2' in
+  Hacl.Spec.Bignum.Modulo.lemma_seval_3 s;
+  Hacl.Spec.Bignum.Modulo.lemma_seval_3 acc;
+  (* cut (seval s = v a0' + p44 * v a1' + pow2 88 * v a2'); *)
+  (* cut (seval s = v a0 % p44 + p44 * (v a1 + v a0 / p44) + pow2 88 * (v a2 + ((v a1 + v a0 / p44) / p44))); *)
+  lemma_carry_limb_unrolled a0 a1 a2;
+  s
+
+
+val carry_last_unrolled: s:seqelem{bounds s p44 p44 (p42+1) /\ (v (Seq.index s 2) = p42 ==> v (Seq.index s 1) = 0)} -> Tot (s':seqelem{bounds s' p44 p44 p42
+  /\ seval s' % prime = seval s % prime})
+#set-options "--lax"
+let carry_last_unrolled s =
+  lemma_carried_is_fine_to_carry_top s;
+  Hacl.Spec.Bignum.Modulo.lemma_carry_top_spec s;
+  let s' = Hacl.Spec.Bignum.Modulo.carry_top_spec s in  
+  let s'' = Hacl.Spec.Bignum.Fproduct.carry_0_to_1_spec s' in
+  s''
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
+val poly1305_last_pass_spec: acc:seqelem{red_45 acc} -> Tot (acc':seqelem{
+    seval acc' = seval acc % prime
+    /\ bounds acc' p44 p44 p42})
+let poly1305_last_pass_spec acc =
+  last_pass_is_fine acc;
+  lemma_carried_is_fine_to_carry acc;
+  let acc1 = Hacl.Spec.Bignum.Fproduct.carry_limb_spec acc 0 in
+  cut (bounds acc1 p44 p44 (p45 + p20));
+  lemma_carried_is_fine_to_carry_top acc1;
+  let acc2 = Hacl.Spec.Bignum.Modulo.carry_top_spec acc1 in
+  Hacl.Spec.Bignum.Modulo.lemma_carry_top_spec acc1;
+  cut (bounds (acc2) (p44+5*((p45+p20)/p42)) p44 p42);
+  let acc3 = carry_limb_unrolled acc2 in
+  let acc4 = carry_last_unrolled acc3 in
+  let acc5 = poly1305_last_pass_spec_ acc4 in
+  acc5
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+
+
+val lemma_bignum_to_128_:
+  h0:limb{v h0 < pow2 44} -> h1:limb{v h1 < pow2 44} -> h2:limb{v h2 < pow2 42} ->
+  Lemma (((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 + ((v h1 * pow2 44) % pow2 64) + v h0
+    = (v h0 + pow2 44 * v h1 + pow2 88 * (v h2 % pow2 40)))
+let lemma_bignum_to_128_ h0 h1 h2 =
+  let v1 = ((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 in
+  Math.Lemmas.distributivity_add_left ((v h2 * pow2 24) % pow2 64) (v h1 / pow2 20) (pow2 64);
+  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 64 24;
+  Math.Lemmas.pow2_plus 64 24;
+  Math.Lemmas.pow2_multiplication_division_lemma_2 (v h1) 64 44;
+  cut (v1 = pow2 88 * (v h2 % pow2 40) + pow2 64 * ((v h1 * pow2 44)/ pow2 64));
+  Math.Lemmas.lemma_div_mod (v h1 * pow2 44) (pow2 64)
+
+private val lemma_aux: a:nat -> b:nat -> c:nat -> Lemma
+  (requires (a < pow2 44 /\ b < pow2 44 /\ c < pow2 40))
+  (ensures (a + pow2 44 * b + pow2 88 * c < pow2 128))
+let lemma_aux a b c =
+  assert_norm((pow2 44 - 1) + pow2 44 * (pow2 44 - 1) + (pow2 40 - 1) * pow2 88 < pow2 128)
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+
+val lemma_bignum_to_128:
+  h0:limb{v h0 < pow2 44} -> h1:limb{v h1 < pow2 44} -> h2:limb{v h2 < pow2 42} ->
+  Lemma (((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 + ((v h1 * pow2 44) % pow2 64) + v h0
+    = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128)
+let lemma_bignum_to_128 h0 h1 h2 =
+  lemma_bignum_to_128_ h0 h1 h2;
+  let z = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128 in
+  Math.Lemmas.lemma_mod_plus_distr_l (pow2 88 * v h2) (v h0 + pow2 44 * v h1) (pow2 128);
+  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 128 88;
+  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 128 88;
+  cut (z = (v h0 + pow2 44 * v h1 + (v h2 % pow2 40) * pow2 88) % pow2 128);
+  assert_norm((pow2 44 - 1) + pow2 44 * (pow2 44 - 1) + (pow2 40 - 1) * pow2 88 < pow2 128);
+  lemma_aux (v h0) (v h1) (v h2 % pow2 40);
+  Math.Lemmas.modulo_lemma (v h0 + pow2 44 * v h1 + pow2 88 * (v h2 % pow2 40)) (pow2 128)
+
+
+val bignum_to_128: s:seqelem{bounds s p44 p44 p42} -> Tot (acc:wide{Wide.v acc = seval s % pow2 128})
+let bignum_to_128 s =
+  let h0 = Seq.index s 0 in
+  let h1 = Seq.index s 1 in
+  let h2 = Seq.index s 2 in
+  let open Hacl.Bignum.Limb in
+  let accl = (h1 <<^ 44ul) |^ h0 in
+  UInt.logor_disjoint (v (h1 <<^ 44ul)) (v h0) 44;
+  cut (v accl = ((v h1 * pow2 44) % pow2 64) + v h0);
+  let acch = (h2 <<^ 24ul) |^ (h1 >>^ 20ul)in
+  Math.Lemmas.lemma_div_lt (v h1) 44 20;
+  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 64 24;
+  Math.Lemmas.lemma_mod_plus 0 (v h2 % pow2 40) (pow2 24);
+  UInt.logor_disjoint (v (h2 <<^ 24ul)) (v (h1 >>^ 20ul)) 24;
+  cut (v acch = (v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20);
   let open Hacl.Bignum.Wide in
-  let acc' = limb_to_wide accl |^ (limb_to_wide acch <<^ 64ul) in
-  (* let k'   = limb_to_wide kl   |^ (limb_to_wide kh   <<^ 64ul) in *)
+  let acc' = (limb_to_wide acch <<^ 64ul) |^ limb_to_wide accl in
+  UInt.logor_disjoint #128 (v (limb_to_wide acch <<^ 64ul)) (v (limb_to_wide accl)) 64;
+  lemma_bignum_to_128 h0 h1 h2;
+  Hacl.Spec.Bignum.Modulo.lemma_seval_3 s;
+  acc'
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
+
+val poly1305_finish_spec:
+  st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
+  m:word ->
+  rem':limb{v rem' = length m /\ length m < 16} ->
+  key_s:Seq.seq H8.t{Seq.length key_s = 16} ->
+  Tot (mac:word_16{
+      (let mac = little_endian mac in
+       let m'  = little_endian m + pow2 (8 * length m) in
+       let k   = little_endian key_s in
+       let r   = seval (MkState?.r st) % prime in
+       let acc = seval (MkState?.h st) % prime in
+       if length m > 0
+       then mac = ( (((acc + m') * r) % prime) + k ) % pow2 128
+       else mac = ((acc % prime) + k) % pow2 128 )})
+let poly1305_finish_spec st m rem' key_s =
+  let st' = if U64.(rem' =^ 0uL) then st
+           else poly1305_process_last_block_spec st m rem' in
+  let acc = poly1305_last_pass_spec (MkState?.h st') in
+  cut (if length m >= 1
+       then (seval acc = ((seval (MkState?.h st) + (little_endian m + pow2 (8 * length m))) * seval (MkState?.r st)) % prime)
+       else seval acc = seval (MkState?.h st) % prime);
+  let k' = load128_le_spec key_s in
+  let open Hacl.Bignum.Wide in
+  let acc' = bignum_to_128 acc in
   let mac = acc' +%^ k' in
-  let macl = wide_to_limb mac in
-  let mach = wide_to_limb (mac >>^ 64ul) in
-  Seq.append (store64_le_spec macl) (store64_le_spec mach)
+  cut (let acc = seval (MkState?.h st) in
+       let r   = seval (MkState?.r st) in
+       let k   = little_endian key_s   in
+       let m'   = little_endian m + pow2 (8*length m) in
+       let mac = v mac in
+       if Seq.length m >= 1
+       then mac = (((((acc + m') * r) % prime) % pow2 128) + k) % pow2 128
+       else mac = ((((acc % prime) % pow2 128) + k) % pow2 128));
+  Math.Lemmas.lemma_mod_plus_distr_l (((seval (MkState?.h st) + (little_endian m + pow2 (8*length m))) * seval (MkState?.r st)) % prime) (little_endian key_s) (pow2 128);
+  Math.Lemmas.lemma_mod_plus_distr_l (seval (MkState?.h st) % prime) (little_endian key_s) (pow2 128);
+  store128_le_spec mac
+
+
+  (* let macl = wide_to_limb mac in *)
+  (* let mach = wide_to_limb (mac >>^ 64ul) in *)
+  (* Seq.append (store64_le_spec macl) (store64_le_spec mach) *)
+
+(* val poly1305_finish_spec: *)
+(*   st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} -> *)
+(*   m:Seq.seq H8.t -> *)
+(*   len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Seq.length m} -> *)
+(*   key_s:Seq.seq H8.t{Seq.length key_s = 16} -> *)
+(*   Tot (mac:Seq.seq H8.t{Seq.length m = 16 *)
+(*     /\ (let mac = little_endian mac in *)
+(*        let m   = if length m >= 1 then little_endian m + pow2 (8 * length m) else 0 in *)
+(*        let k   = little_endian key_s in *)
+(*        let r   = seval (MkState?.r st) % prime in *)
+(*        let acc = seval (MkState?.h st) % prime in *)
+(*        mac = ( (((acc + m) * r) % prime) + k ) % pow2 128) }) *)
+(* let poly1305_finish_spec st m len key_s = *)
+(*   let rem' = U64.(len &^ 0xfuL) in *)
+(*   assert_norm(pow2 4 - 1 = 0xf); *)
+(*   UInt.logand_mask (U64.v len) 4; *)
+(*   let st' = if U64.(rem' =^ 0uL) then st *)
+(*            else poly1305_process_last_block_spec st (Seq.slice m (U64.v len - U64.v rem') (U64.v len)) rem' in *)
+(*   let acc = poly1305_last_pass_spec (MkState?.h st') in *)
+(*   cut (if length m >= 1  *)
+(*        then (seval acc = ((seval (MkState?.h st) + (little_endian m + pow2 (8 * length m))) * seval (MkState?.r st)) % prime) *)
+(*        else seval acc = seval (MkState?.h st) % prime); admit() *)
+(*   let k' = load128_le_spec key_s in *)
+(*   let h0 = Seq.index acc 0 in *)
+(*   let h1 = Seq.index acc 1 in *)
+(*   let h2 = Seq.index acc 2 in *)
+(*   let open Hacl.Bignum.Limb in *)
+(*   let accl = h0 |^ (h1 <<^ 44ul) in *)
+(*   let acch = (h1 >>^ 20ul) |^ (h2 <<^ 24ul) in *)
+(*   let open Hacl.Bignum.Wide in *)
+(*   let acc' = limb_to_wide accl |^ (limb_to_wide acch <<^ 64ul) in *)
+(*   let mac = acc' +%^ k' in *)
+(*   let macl = wide_to_limb mac in *)
+(*   let mach = wide_to_limb (mac >>^ 64ul) in *)
+(*   Seq.append (store64_le_spec macl) (store64_le_spec mach) *)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
