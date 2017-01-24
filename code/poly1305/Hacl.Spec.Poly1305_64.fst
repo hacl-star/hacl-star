@@ -42,73 +42,6 @@ assume val store64_le_spec: r:limb -> Tot (b:Seq.seq H8.t{Seq.length b = 8 /\ v 
 assume val load128_le_spec : b:word_16 -> Tot (r:wide{Wide.v r == little_endian b})
 assume val store128_le_spec: r:wide -> Tot (b:word_16{Wide.v r == little_endian b})
 
-(* let lemma_cast_shift (a:H8.t) (off:U32.t{U32.v off <= 56}) : Lemma *)
-(*   (let a' = Limb.(sint8_to_sint64 a <<^ off) in *)
-(*    Limb.v a' = pow2 (U32.v off) * H8.v a *)
-(*    /\ Limb.v a' < pow2 (8 + U32.v off) *)
-(*    /\ Limb.v a' % pow2 (U32.v off) = 0 *)
-(*    ) *)
-(*   = assert_norm(pow2 8 = 256); *)
-(*     assert_norm(pow2 64 = 0x10000000000000000); *)
-(*     let a' = sint8_to_sint64 a in *)
-(*     let a'' = Limb.(a' <<^ off) in *)
-(*     Math.Lemmas.pow2_plus 8 (U32.v off); *)
-(*     Math.Lemmas.pow2_le_compat (64) (8 + U32.v off); *)
-(*     Math.Lemmas.modulo_lemma (H8.v a * pow2 (U32.v off)) (pow2 64); *)
-(*     Math.Lemmas.lemma_mod_plus 0 (H8.v a) (pow2 (U32.v off)); *)
-(*     cut (Limb.v a'' = 0 + H8.v a * pow2 (U32.v off)); *)
-(*     Math.Lemmas.modulo_lemma 0 (pow2 (U32.v off)) *)
-
-(* (\* let lemma_load64_le_spec (b0:H8.t) (b1:H8.t) (b2:H8.t) (b3:H8.t) (b4:H8.t) (b5:H8.t) (b6:H8.t) (b7:H8.t) : Lemma (H8.(v b0 + pow2 8 * v b1 + pow2 8 * v b1 + pow2 8 * v b1 + pow2 8 * v b1 + pow2 8 * v b1 + pow2 8 * v b + pow2 56 * v b7) *\) *)
-
-(* val load64_le_spec: b:Seq.seq H8.t{Seq.length b = 8} -> Tot (r:limb{v r = little_endian b}) *)
-(* let load64_le_spec b = *)
-(*   admit(); *)
-(*   assert_norm (pow2 32 = 0x100000000); *)
-(*   let b0 = Seq.index b 0 in *)
-(*   let b1 = Seq.index b 1 in *)
-(*   let b2 = Seq.index b 2 in *)
-(*   let b3 = Seq.index b 3 in *)
-(*   let b4 = Seq.index b 4 in *)
-(*   let b5 = Seq.index b 5 in *)
-(*   let b6 = Seq.index b 6 in *)
-(*   let b7 = Seq.index b 7 in *)
-(*   Limb.( *)
-(*     sint8_to_sint64 b0 *)
-(*     |^ (sint8_to_sint64 b1 <<^ 8ul) *)
-(*     |^ (sint8_to_sint64 b2 <<^ 16ul) *)
-(*     |^ (sint8_to_sint64 b3 <<^ 24ul) *)
-(*     |^ (sint8_to_sint64 b4 <<^ 32ul) *)
-(*     |^ (sint8_to_sint64 b5 <<^ 40ul) *)
-(*     |^ (sint8_to_sint64 b6 <<^ 48ul) *)
-(*     |^ (sint8_to_sint64 b7 <<^ 56ul) *)
-(*   ) *)
-
-(* #set-options "--lax" *)
-(* val store64_le_spec: z:Limb.t -> Tot (b:Seq.seq H8.t{Seq.length b = 8}) *)
-(* let store64_le_spec z = *)
-(*   assert_norm (pow2 32 = 0x100000000); *)
-(*   let open Hacl.UInt64 in *)
-(*   let b0 = sint64_to_sint8 z in *)
-(*   let b1 = sint64_to_sint8 (z >>^ 8ul) in *)
-(*   let b2 = sint64_to_sint8 (z >>^ 16ul) in *)
-(*   let b3 = sint64_to_sint8 (z >>^ 24ul) in *)
-(*   let b4 = sint64_to_sint8 (z >>^ 32ul) in *)
-(*   let b5 = sint64_to_sint8 (z >>^ 40ul) in *)
-(*   let b6 = sint64_to_sint8 (z >>^ 48ul) in *)
-(*   let b7 = sint64_to_sint8 (z >>^ 56ul) in *)
-(*   let s = Seq.create 8 (uint8_to_sint8 0uy) in *)
-(*   let s = Seq.upd s 0 b0 in *)
-(*   let s = Seq.upd s 1 b1 in *)
-(*   let s = Seq.upd s 2 b2 in *)
-(*   let s = Seq.upd s 3 b3 in *)
-(*   let s = Seq.upd s 4 b4 in *)
-(*   let s = Seq.upd s 5 b5 in *)
-(*   let s = Seq.upd s 6 b6 in *)
-(*   let s = Seq.upd s 7 b7 in *)
-(*   s *)
-
-
 #reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 (** From the current memory state, returns the field element corresponding to a elemB *)
@@ -192,7 +125,7 @@ let lemma_encode_r2 (k:wide) : Lemma (let r2 = Limb.(sint128_to_sint64 Wide.(k >
 
 #reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
-private
+(* private *)
 let lemma_encode_r (k:wide) : Lemma (let r0 = Limb.(sint128_to_sint64 k &^ mask_44) in
   let r1 = Limb.(sint128_to_sint64 Wide.(k >>^ 44ul) &^ mask_44) in
   let r2 = Limb.(sint128_to_sint64 Wide.(k >>^ 88ul)) in
@@ -522,19 +455,26 @@ let carry_limb_unrolled acc =
   let s = seq_upd_3 a0' a1' a2' in
   Hacl.Spec.Bignum.Modulo.lemma_seval_3 s;
   Hacl.Spec.Bignum.Modulo.lemma_seval_3 acc;
-  (* cut (seval s = v a0' + p44 * v a1' + pow2 88 * v a2'); *)
-  (* cut (seval s = v a0 % p44 + p44 * (v a1 + v a0 / p44) + pow2 88 * (v a2 + ((v a1 + v a0 / p44) / p44))); *)
   lemma_carry_limb_unrolled a0 a1 a2;
   s
 
 
+private val lemma_div: a:nat -> b:pos -> Lemma
+  ((a = b ==> a / b = 1) /\ (a < b ==> a / b = 0))
+private let lemma_div a b =
+  if a < b then Math.Lemmas.small_division_lemma_1 a b
+  else Math.Lemmas.lemma_div_mod a b
+
+
 val carry_last_unrolled: s:seqelem{bounds s p44 p44 (p42+1) /\ (v (Seq.index s 2) = p42 ==> v (Seq.index s 1) = 0)} -> Tot (s':seqelem{bounds s' p44 p44 p42
   /\ seval s' % prime = seval s % prime})
-#set-options "--lax"
 let carry_last_unrolled s =
   lemma_carried_is_fine_to_carry_top s;
   Hacl.Spec.Bignum.Modulo.lemma_carry_top_spec s;
-  let s' = Hacl.Spec.Bignum.Modulo.carry_top_spec s in  
+  Hacl.Spec.Bignum.Modulo.lemma_carry_top_spec_ s;
+  lemma_div (v (Seq.index s 2)) (pow2 42);
+  let s' = Hacl.Spec.Bignum.Modulo.carry_top_spec s in
+  cut (v (Seq.index s' 0) >= pow2 44 ==> v (Seq.index s' 1) = 0);
   let s'' = Hacl.Spec.Bignum.Fproduct.carry_0_to_1_spec s' in
   s''
 
@@ -623,7 +563,7 @@ let bignum_to_128 s =
   acc'
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val poly1305_finish_spec:
   st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
@@ -631,15 +571,15 @@ val poly1305_finish_spec:
   rem':limb{v rem' = length m /\ length m < 16} ->
   key_s:Seq.seq H8.t{Seq.length key_s = 16} ->
   Tot (mac:word_16{
-      (let mac = little_endian mac in
-       let m'  = little_endian m + pow2 (8 * length m) in
-       let k   = little_endian key_s in
-       let r   = seval (MkState?.r st) % prime in
-       let acc = seval (MkState?.h st) % prime in
-       if length m > 0
-       then mac = ( (((acc + m') * r) % prime) + k ) % pow2 128
-       else mac = ((acc % prime) + k) % pow2 128 )})
-let poly1305_finish_spec st m rem' key_s =
+      (let acc = seval (MkState?.h st) in
+       let r   = seval (MkState?.r st) in
+       let k   = little_endian key_s   in
+       let m'   = little_endian m + pow2 (8*length m) in
+       let mac = little_endian mac in
+       if Seq.length m >= 1
+       then mac = (((((acc + m') * r) % prime) (* % pow2 128 *)) + k) % pow2 128
+       else mac = ((((acc % prime) (* % pow2 128 *)) + k) % pow2 128)) })
+ let poly1305_finish_spec st m rem' key_s =
   let st' = if U64.(rem' =^ 0uL) then st
            else poly1305_process_last_block_spec st m rem' in
   let acc = poly1305_last_pass_spec (MkState?.h st') in
@@ -660,74 +600,101 @@ let poly1305_finish_spec st m rem' key_s =
        else mac = ((((acc % prime) % pow2 128) + k) % pow2 128));
   Math.Lemmas.lemma_mod_plus_distr_l (((seval (MkState?.h st) + (little_endian m + pow2 (8*length m))) * seval (MkState?.r st)) % prime) (little_endian key_s) (pow2 128);
   Math.Lemmas.lemma_mod_plus_distr_l (seval (MkState?.h st) % prime) (little_endian key_s) (pow2 128);
-  store128_le_spec mac
+  let mac = store128_le_spec mac in
+  cut (let acc = seval (MkState?.h st) in
+       let r   = seval (MkState?.r st) in
+       let k   = little_endian key_s   in
+       let m'   = little_endian m + pow2 (8*length m) in
+       let mac = little_endian mac in
+       if Seq.length m >= 1
+       then mac = (((((acc + m') * r) % prime) % pow2 128) + k) % pow2 128
+       else mac = ((((acc % prime) % pow2 128) + k) % pow2 128));
+  mac
 
 
-  (* let macl = wide_to_limb mac in *)
-  (* let mach = wide_to_limb (mac >>^ 64ul) in *)
-  (* Seq.append (store64_le_spec macl) (store64_le_spec mach) *)
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
-(* val poly1305_finish_spec: *)
-(*   st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} -> *)
+(* *************************** *)
+(* Standalone poly1305 version *)
+(* *************************** *)
+
+let zero : elem = 0
+let one  : elem = 1
+
+val fadd: elem -> elem -> Tot elem
+let fadd e1 e2 = (e1 + e2) % prime
+let op_Plus_At e1 e2 = fadd e1 e2
+
+val fmul: elem -> elem -> Tot elem
+let fmul e1 e2 = (e1 * e2) % prime
+let op_Star_At e1 e2 = fmul e1 e2
+
+
+let encode (w:word) : Tot elem =
+  let l = length w in
+  Math.Lemmas.pow2_le_compat 128 (8 * l);
+  assert_norm(pow2 128 < pow2 130 - 5);
+  lemma_little_endian_is_bounded w;
+  pow2 (8 * l) +@ little_endian w
+
+
+val poly: vs:text -> r:elem -> Tot (a:elem) (decreases (Seq.length vs))
+let rec poly vs r =
+  if Seq.length vs = 0 then 0
+  else
+    let v = SeqProperties.head vs in
+    (encode v +@ poly (SeqProperties.tail vs) r) *@ r
+
+
+let invariant (st:poly1305_state_) : GTot Type0 =
+  let acc = (MkState?.r st) in let r = (MkState?.h st) in let log = MkState?.log st in
+  seval r < pow2 130 - 5 /\  red_44 r /\ red_45 acc /\ seval acc % prime = poly log (seval r)
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+
+(* Variant from low-leval crypto *)
+val encode_bytes: txt:Seq.seq UInt8.t -> GTot (text) (decreases (Seq.length txt))
+let rec encode_bytes txt =
+  let l = Seq.length txt in
+  if l = 0 then
+    Seq.createEmpty
+  else
+    let l0 = FStar.Math.Lib.min l 16 in
+    let w, txt = SeqProperties.split txt l0 in
+    SeqProperties.snoc (encode_bytes txt) w
+
+(*  WIP *)
+(* TODO *)
+
+
+(* #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 10" *)
+
+(* val poly1305_blocks_spec: st:poly1305_state_{invariant st} -> *)
 (*   m:Seq.seq H8.t -> *)
-(*   len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Seq.length m} -> *)
-(*   key_s:Seq.seq H8.t{Seq.length key_s = 16} -> *)
-(*   Tot (mac:Seq.seq H8.t{Seq.length m = 16 *)
-(*     /\ (let mac = little_endian mac in *)
-(*        let m   = if length m >= 1 then little_endian m + pow2 (8 * length m) else 0 in *)
-(*        let k   = little_endian key_s in *)
-(*        let r   = seval (MkState?.r st) % prime in *)
-(*        let acc = seval (MkState?.h st) % prime in *)
-(*        mac = ( (((acc + m) * r) % prime) + k ) % pow2 128) }) *)
-(* let poly1305_finish_spec st m len key_s = *)
-(*   let rem' = U64.(len &^ 0xfuL) in *)
-(*   assert_norm(pow2 4 - 1 = 0xf); *)
-(*   UInt.logand_mask (U64.v len) 4; *)
-(*   let st' = if U64.(rem' =^ 0uL) then st *)
-(*            else poly1305_process_last_block_spec st (Seq.slice m (U64.v len - U64.v rem') (U64.v len)) rem' in *)
-(*   let acc = poly1305_last_pass_spec (MkState?.h st') in *)
-(*   cut (if length m >= 1  *)
-(*        then (seval acc = ((seval (MkState?.h st) + (little_endian m + pow2 (8 * length m))) * seval (MkState?.r st)) % prime) *)
-(*        else seval acc = seval (MkState?.h st) % prime); admit() *)
-(*   let k' = load128_le_spec key_s in *)
-(*   let h0 = Seq.index acc 0 in *)
-(*   let h1 = Seq.index acc 1 in *)
-(*   let h2 = Seq.index acc 2 in *)
-(*   let open Hacl.Bignum.Limb in *)
-(*   let accl = h0 |^ (h1 <<^ 44ul) in *)
-(*   let acch = (h1 >>^ 20ul) |^ (h2 <<^ 24ul) in *)
-(*   let open Hacl.Bignum.Wide in *)
-(*   let acc' = limb_to_wide accl |^ (limb_to_wide acch <<^ 64ul) in *)
-(*   let mac = acc' +%^ k' in *)
-(*   let macl = wide_to_limb mac in *)
-(*   let mach = wide_to_limb (mac >>^ 64ul) in *)
-(*   Seq.append (store64_le_spec macl) (store64_le_spec mach) *)
+(*   len:U64.t{U64.v len = Seq.length m} -> *)
+(*   Tot (st':poly1305_state_{ *)
+(*     let log' = MkState?.log st' in *)
+(*     let log = MkState?.log st in *)
+(*     log' = log @| encode_bytes m}) *)
+(*     (decreases (U64.v len)) *)
+(* let rec poly1305_blocks_spec st m len = *)
+(*   if U64.(len <^ 16uL) then poly *)
+(*   else ( *)
+(*     let mblock = Seq.slice m 0 16 in *)
+(*     let mblock, m'  = Seq.split m 16 (Seq.length m) in *)
+(*     let st' = poly1305_update_spec st mblock in *)
+(*     let len = U64.(len -^ 16uL) in *)
+(*     poly1305_blocks_spec st' m' len *)
+(*   ) *)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
-val poly1305_blocks_spec: st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
-  m:Seq.seq H8.t ->
-  len:U64.t{U64.v len <= Seq.length m} ->
-  Tot (st':poly1305_state_{red_44 (MkState?.r st') /\ red_45 (MkState?.h st')})
-      (decreases (U64.v len))
-let rec poly1305_blocks_spec st m len =
-  if U64.(len <^ 16uL) then st
-  else (
-    let mblock = Seq.slice m 0 16 in
-    let m'     = Seq.slice m 16 (Seq.length m) in
-    let st' = poly1305_update_spec st mblock in
-    let len = U64.(len -^ 16uL) in
-    poly1305_blocks_spec st' m' len
-  )
-
-
-val crypto_onetimeauth_spec:
-  input:Seq.seq H8.t ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Seq.length input} ->
-  k:Seq.seq H8.t{Seq.length k = 32} ->
-  Tot (mac:Seq.seq H8.t{Seq.length mac = 16})
-let crypto_onetimeauth_spec input len k =
-  let init_st = poly1305_init_spec k in  
-  let partial_st = poly1305_blocks_spec init_st input len in
-  poly1305_finish_spec partial_st input len (Seq.slice k 16 32)
+(* val crypto_onetimeauth_spec: *)
+(*   input:Seq.seq H8.t -> *)
+(*   len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Seq.length input} -> *)
+(*   k:Seq.seq H8.t{Seq.length k = 32} -> *)
+(*   Tot (mac:Seq.seq H8.t{Seq.length mac = 16}) *)
+(* let crypto_onetimeauth_spec input len k = *)
+(*   let init_st = poly1305_init_spec k in *)
+(*   let partial_st = poly1305_blocks_spec init_st input len in *)
+(*   poly1305_finish_spec partial_st input len (Seq.slice k 16 32) *)
