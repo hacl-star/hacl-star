@@ -42,7 +42,7 @@ let chacha20_init ctx k counter n =
   chacha_ietf_ivsetup ctx n counter;
   log
 
-open FStar.SeqProperties
+open FStar.Seq
 
 let xor_blocks (b:block) (b':block) : Tot block = seq_of_list (map2 FStar.UInt8.logxor
                                                                     (seq_to_list b)

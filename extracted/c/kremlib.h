@@ -88,7 +88,7 @@ void FStar_Buffer_recall(void *x);
 // Some types that KreMLin has no special knowledge of; many of them appear in
 // signatures of ghost functions, meaning that it suffices to give them (any)
 // definition.
-typedef void *Prims_pos, *Prims_nat, *Prims_nonzero, *FStar_Seq_seq, *Prims_int,
+typedef void *Prims_pos, *Prims_nat, *Prims_nonzero, *FStar_Seq_Base_seq, *Prims_int,
   *Prims_prop, *FStar_HyperStack_mem, *FStar_Set_set, *Prims_st_pre_h, *FStar_Heap_heap,
         *Prims_all_pre_h, *FStar_TSet_set, *Prims_string, *Prims_list,
         *FStar_Map_t,
@@ -148,15 +148,15 @@ bool FStar_HyperStack_is_eternal_color(Prims_int x0);
 Prims_int FStar_UInt32_v(uint32_t x);
 #define Prims_fst(x) (x).fst
 #define Prims_snd(x) (x).snd
-#define FStar_Seq_createEmpty(x) 0
-#define FStar_Seq_create(len, init) 0
-#define FStar_Seq_upd(s, i, e) 0
-#define FStar_Seq_eq(l1, l2) 0
-FStar_Seq_seq FStar_Seq_append(FStar_Seq_seq x, FStar_Seq_seq y);
-FStar_Seq_seq FStar_Seq_slice(FStar_Seq_seq x, FStar_Seq_seq y, Prims_nat z);
-#define FStar_SeqProperties_snoc(x, y) 0
-#define FStar_SeqProperties_cons(x, y) 0
-#define FStar_Seq_index(x, y) 0
+#define FStar_Seq_Base_createEmpty(x) 0
+#define FStar_Seq_Base_create(len, init) 0
+#define FStar_Seq_Base_upd(s, i, e) 0
+#define FStar_Seq_Base_eq(l1, l2) 0
+FStar_Seq_Base_seq FStar_Seq_Base_append(FStar_Seq_Base_seq x, FStar_Seq_Base_seq y);
+FStar_Seq_Base_seq FStar_Seq_Base_slice(FStar_Seq_Base_seq x, FStar_Seq_Base_seq y, Prims_nat z);
+#define FStar_Seq_Properties_snoc(x, y) 0
+#define FStar_Seq_Properties_cons(x, y) 0
+#define FStar_Seq_Base_index(x, y) 0
 FStar_UInt32_t FStar_UInt32_uint_to_t(Prims_nat x);
 
 

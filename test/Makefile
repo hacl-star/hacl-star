@@ -62,7 +62,7 @@ blah:
 		tmp/FStar_Mul.c \
 		tmp/FStar_List_Tot.c \
 		tmp/FStar_ListProperties.c \
-		tmp/FStar_Seq.c \
+		tmp/FStar_Seq_Base.c \
 		tmp/FStar_Math_Lib.c \
 		tmp/FStar_Math_Lemmas.c \
 		tmp/FStar_BitVector.c \
@@ -86,7 +86,7 @@ blah:
 		tmp/Hacl_Cast.c \
 		tmp/FStar_Squash.c \
 		tmp/FStar_Classical.c \
-		tmp/FStar_SeqProperties.c \
+		tmp/FStar_Seq_Properties.c \
 		tmp/FStar_Buffer.c \
 		tmp/FStar_Buffer_Quantifiers.c \
 		tmp/Hacl_EC_Curve25519_Parameters.c \
@@ -136,7 +136,7 @@ test32bits:
 		tmp/FStar_Mul.c \
 		tmp/FStar_List_Tot.c \
 		tmp/FStar_ListProperties.c \
-		tmp/FStar_Seq.c \
+		tmp/FStar_Seq_Base.c \
 		tmp/FStar_Math_Lib.c \
 		tmp/FStar_Math_Lemmas.c \
 		tmp/FStar_BitVector.c \
@@ -160,7 +160,7 @@ test32bits:
 		tmp/Hacl_Cast.c \
 		tmp/FStar_Squash.c \
 		tmp/FStar_Classical.c \
-		tmp/FStar_SeqProperties.c \
+		tmp/FStar_Seq_Properties.c \
 		tmp/FStar_Buffer.c \
 		tmp/FStar_Buffer_Quantifiers.c \
 		tmp/Hacl_EC_Curve25519_Parameters.c \
@@ -210,7 +210,7 @@ gprof:
 		tmp/FStar_Mul.c \
 		tmp/FStar_List_Tot.c \
 		tmp/FStar_ListProperties.c \
-		tmp/FStar_Seq.c \
+		tmp/FStar_Seq_Base.c \
 		tmp/FStar_Math_Lib.c \
 		tmp/FStar_Math_Lemmas.c \
 		tmp/FStar_BitVector.c \
@@ -235,7 +235,7 @@ gprof:
 		tmp/Hacl_Cast.c \
 		tmp/FStar_Squash.c \
 		tmp/FStar_Classical.c \
-		tmp/FStar_SeqProperties.c \
+		tmp/FStar_Seq_Properties.c \
 		tmp/FStar_Buffer.c \
 		tmp/FStar_Buffer_Quantifiers.c \
 		tmp/Hacl_EC_Curve25519_Parameters.c \

@@ -182,11 +182,11 @@ let rec encode_pad prefix txt =
   if l = 0 then prefix
   else if l < 16 then
     let w = txt in
-    SeqProperties.snoc prefix (encode w)
+    Seq.snoc prefix (encode w)
   else
     begin
-    let w, txt = SeqProperties.split txt 16 in
-    let prefix = SeqProperties.snoc prefix (encode w) in
+    let w, txt = Seq.split txt 16 in
+    let prefix = Seq.snoc prefix (encode w) in
     encode_pad prefix txt
     end
 
@@ -266,7 +266,7 @@ val lemma_pad_0_injective: b0:Seq.seq UInt8.t -> b1:Seq.seq UInt8.t -> l:nat -> 
   (requires (pad_0 b0 l == pad_0 b1 l))
   (ensures  (b0 == b1))
 let lemma_pad_0_injective b0 b1 l =
-  SeqProperties.lemma_append_inj b0 (Seq.create l 0uy) b1 (Seq.create l 0uy);
+  Seq.lemma_append_inj b0 (Seq.create l 0uy) b1 (Seq.create l 0uy);
   Seq.lemma_eq_intro b0 b1
 
 val lemma_encode_injective: w0:word -> w1:word -> Lemma
@@ -295,7 +295,7 @@ let rec lemma_encode_pad_injective p0 t0 p1 t1 =
   if l = 0 then Seq.lemma_eq_intro t0 t1
   else if l < 16 then
     begin
-    SeqProperties.lemma_append_inj
+    Seq.lemma_append_inj
       p0 (Seq.create 1 (encode t0))
       p1 (Seq.create 1 (encode t1));
     lemma_index_create 1 (encode t0) 0;
@@ -304,13 +304,13 @@ let rec lemma_encode_pad_injective p0 t0 p1 t1 =
     end
   else
     begin
-    let w0, t0' = SeqProperties.split_eq t0 16 in
-    let w1, t1' = SeqProperties.split_eq t1 16 in
-    let p0' = SeqProperties.snoc p0 (encode w0) in
-    let p1' = SeqProperties.snoc p1 (encode w1) in
+    let w0, t0' = Seq.split_eq t0 16 in
+    let w1, t1' = Seq.split_eq t1 16 in
+    let p0' = Seq.snoc p0 (encode w0) in
+    let p1' = Seq.snoc p1 (encode w1) in
     assert (encode_pad p0' t0' == encode_pad p1' t1');
     lemma_encode_pad_injective p0' t0' p1' t1';
-    SeqProperties.lemma_append_inj
+    Seq.lemma_append_inj
       p0 (Seq.create 1 (encode w0))
       p1 (Seq.create 1 (encode w1));
     lemma_index_create 1 (encode w0) 0;
@@ -324,13 +324,13 @@ val encode_pad_empty: prefix:Seq.seq elem -> txt:Seq.seq H8.t -> Lemma
 let encode_pad_empty prefix txt = ()
 
 val encode_pad_snoc: prefix:Seq.seq elem -> txt:Seq.seq H8.t -> w:word_16 -> Lemma
-  (encode_pad (SeqProperties.snoc prefix (encode w)) txt ==
+  (encode_pad (Seq.snoc prefix (encode w)) txt ==
    encode_pad prefix (append w txt))
 let encode_pad_snoc prefix txt w =
   Seq.lemma_len_append w txt;
   assert (16 <= Seq.length (append w txt));
-  let w', txt' = SeqProperties.split (append w txt) 16 in
-  let prefix' = SeqProperties.snoc prefix (encode w') in
+  let w', txt' = Seq.split (append w txt) 16 in
+  let prefix' = Seq.snoc prefix (encode w') in
   Seq.lemma_eq_intro w w';
   Seq.lemma_eq_intro txt txt'
 

@@ -5,7 +5,7 @@ OPTIONS=--lax --codegen OCaml --use_native_int
 OPTIONS_VER=
 
 # F* standard library files
-FSTAR_LIB=FStar.Classical.fst FStar.FunctionalExtensionality.fst FStar.Set.fsi FStar.Set.fst seq.fsi FStar.Seq.fst FStar.SeqProperties.fst FStar.Heap.fst FStar.ST.fst FStar.All.fst FStar.Array.fst FStar.Ghost.fst
+FSTAR_LIB=FStar.Classical.fst FStar.FunctionalExtensionality.fst FStar.Set.fsi FStar.Set.fst seq.fsi FStar.Seq.Base.fst FStar.Seq.Properties.fst FStar.Seq.fst FStar.Heap.fst FStar.ST.fst FStar.All.fst FStar.Array.fst FStar.Ghost.fst
 
 MATH_DIR=./math_interfaces
 BIGNUM_DIR=./bignum_proof

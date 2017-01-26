@@ -488,8 +488,8 @@ let toField_plus a b len =
   admit();
   eval_eq_lemma h3 h4 a a norm_length;
   assert (sel_int h4 a == little_endian (sel_word h2 n));
-  let n1, n2 = SeqProperties.split_eq (sel_word h2 n) (w len) in
-  let n3, n4 = SeqProperties.split_eq n2 1 in
+  let n1, n2 = Seq.split_eq (sel_word h2 n) (w len) in
+  let n3, n4 = Seq.split_eq n2 1 in
   little_endian_append n1 n2;
   little_endian_append n3 n4;
   cut (little_endian (sel_word h2 n) ==
@@ -498,8 +498,8 @@ let toField_plus a b len =
   Seq.lemma_eq_intro n3 (Seq.create 1 (uint8_to_sint8 1uy));
   little_endian_singleton (uint8_to_sint8 1uy);
   assert (little_endian n3 == 1);
-  let _, n2' = SeqProperties.split_eq (sel_word h1 n) (w len) in
-  let _, n4' = SeqProperties.split_eq n2' 1 in
+  let _, n2' = Seq.split_eq (sel_word h1 n) (w len) in
+  let _, n4' = Seq.split_eq n2' 1 in
   assert (forall (i:nat). i < Seq.length n4' ==> Seq.index n4' i == Seq.index n4 i);
   Seq.lemma_eq_intro n4 (Seq.create (Seq.length n4) (uint8_to_sint8 0uy));
   little_endian_null (Seq.length n4);
@@ -651,11 +651,11 @@ let poly1305_start a = zeroB a
 //CF we'll need a simpler, field-only update---not the one below.
 
 val seq_head_snoc: #a:Type -> xs:Seq.seq a -> x:a ->
-  Lemma (Seq.length (SeqProperties.snoc xs x) > 0 /\
-         seq_head (SeqProperties.snoc xs x) == xs)
+  Lemma (Seq.length (Seq.snoc xs x) > 0 /\
+         seq_head (Seq.snoc xs x) == xs)
 let seq_head_snoc #a xs x =
   Seq.lemma_len_append xs (Seq.create 1 x);
-  Seq.lemma_eq_intro (seq_head (SeqProperties.snoc xs x)) xs
+  Seq.lemma_eq_intro (seq_head (Seq.snoc xs x)) xs
 
 #reset-options
 
@@ -675,7 +675,7 @@ val poly1305_update:
       /\ norm h0 r
       /\ modifies_1 acc h0 h1))
       (* /\ (mac_log ==> *)
-      (*    ilog updated_log == SeqProperties.snoc (ilog current_log) (encode (sel_word h1 msg)) *)
+      (*    ilog updated_log == Seq.snoc (ilog current_log) (encode (sel_word h1 msg)) *)
       (*    /\ sel_elem h1 acc == poly (ilog updated_log) (sel_elem h0 r)) )) *)
 
 #set-options "--z3rlimit 60 --initial_fuel 1 --max_fuel 1"
@@ -700,8 +700,8 @@ let poly1305_update (* log *) msgB acc r =
   (*     let msg = read_word msgB in *)
   (*     assert (encode msg == sel_elem h1 block); *)
   (*     seq_head_snoc (ilog log) (encode msg); *)
-  (*     Seq.lemma_index_app2 (ilog log) (Seq.create 1 (encode msg)) (Seq.length (SeqProperties.snoc (ilog log) (encode msg)) - 1); *)
-  (*     SeqProperties.snoc (ilog log) (encode msg) *)
+  (*     Seq.lemma_index_app2 (ilog log) (Seq.create 1 (encode msg)) (Seq.length (Seq.snoc (ilog log) (encode msg)) - 1); *)
+  (*     Seq.snoc (ilog log) (encode msg) *)
   (*     end *)
   (*   else () in *)
   pop_frame();
@@ -759,7 +759,7 @@ let rec poly1305_loop (* log *) msg acc r ctr =
       assert (live h1 msg1 /\ norm h1 acc /\ norm h1 r);
       (* assert (mac_log ==> sel_elem h1 acc == poly (ilog log1) (sel_elem h0 r)); *)
       (* assert (mac_log ==> *)
-      (*   ilog log1 == SeqProperties.snoc (ilog log) (encode (sel_word h1 msg0))); *)
+      (*   ilog log1 == Seq.snoc (ilog log) (encode (sel_word h1 msg0))); *)
       let log2 = poly1305_loop (* log1 *) msg1 acc r (U32.(ctr -^ 1ul)) in
       let h2 = ST.get () in
       assert (norm h2 acc /\ modifies_1 acc h0 h2);
@@ -771,7 +771,7 @@ let rec poly1305_loop (* log *) msg acc r ctr =
       (*     //    (as_seq h0 (Buffer.sub msg1 0ul (UInt32.mul 16ul (ctr -| 1ul)))) ); *)
       (*     //assert (encode_pad (ilog log1) *)
       (*     //  (as_seq h0 (Buffer.sub msg1 0ul (UInt32.mul 16ul (ctr -| 1ul)))) == *)
-      (*     //encode_pad (SeqProperties.snoc (ilog log) (encode (sel_word h1 msg0))) *)
+      (*     //encode_pad (Seq.snoc (ilog log) (encode (sel_word h1 msg0))) *)
       (*     //  (as_seq h0 (Buffer.sub (Buffer.offset msg 16ul) 0ul (UInt32.mul 16ul ctr -| 16ul)))); *)
       (*     encode_pad_snoc (ilog log) (as_seq h0 (Buffer.sub (Buffer.offset msg 16ul) 0ul (U32.(16ul *^ ctr -^ 16ul)))) (sel_word h1 msg0); *)
       (*     append_as_seq_sub h0 (UInt32.mul 16ul ctr) 16ul msg *)
@@ -829,8 +829,8 @@ let poly1305_last (* log *) msg acc r len =
     (*     let msg = read_word msg in *)
     (*     assert (encode msg == sel_elem h1 block); *)
     (*     seq_head_snoc (ilog log) (sel_elem h1 block); *)
-    (*     Seq.lemma_index_app2 (ilog log) (Seq.create 1 (encode msg)) (Seq.length (SeqProperties.snoc (ilog log) (encode msg)) - 1); *)
-    (*     SeqProperties.snoc (ilog log) (encode msg) *)
+    (*     Seq.lemma_index_app2 (ilog log) (Seq.create 1 (encode msg)) (Seq.length (Seq.snoc (ilog log) (encode msg)) - 1); *)
+    (*     Seq.snoc (ilog log) (encode msg) *)
     (*     end *)
     (*   else () in *)
     pop_frame ();
@@ -862,9 +862,9 @@ poly (ilog updated_log) (sel_elem h0 r)
 
 ilog updated_log
 ==
-SeqProperties.snoc (ilog current_log) (sel_elem h0 block)
+Seq.snoc (ilog current_log) (sel_elem h0 block)
 ==
-SeqProperties.snoc (ilog current_log) (encode (pad_0 txt (16 - l)))
+Seq.snoc (ilog current_log) (encode (pad_0 txt (16 - l)))
 ==
 encode_pad (ilog current_log) txt
 

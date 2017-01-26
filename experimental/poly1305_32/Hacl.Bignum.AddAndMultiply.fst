@@ -5,7 +5,7 @@ open FStar.Mul
 open FStar.ST
 open FStar.Buffer
 open FStar.Ghost
-open FStar.SeqProperties
+open FStar.Seq
 open FStar.HyperStack
 
 open Hacl.Cast

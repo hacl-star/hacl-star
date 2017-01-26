@@ -1,4 +1,4 @@
-#include "FStar_SeqProperties.h"
+#include "FStar_Seq_Properties.h"
 
 
 

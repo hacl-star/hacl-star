@@ -1,6 +1,6 @@
 (*--build-config
   options:--admit_fsi FStar.Set --verify_module Parameters;
-  other-files:FStar.Classical.fst seq.fsi FStar.Seq.fst FStar.SeqProperties.fst FStar.Set.fsi FStar.Heap.fst FStar.ST.fst FStar.All.fst FStar.Ghost.fst axiomatic.fst intlib.fst;
+  other-files:FStar.Classical.fst seq.fsi FStar.Seq.Base.fst FStar.Seq.Properties.fst FStar.Seq.fst FStar.Set.fsi FStar.Heap.fst FStar.ST.fst FStar.All.fst FStar.Ghost.fst axiomatic.fst intlib.fst;
   --*)
 
 module Parameters
