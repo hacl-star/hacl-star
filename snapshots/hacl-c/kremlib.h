@@ -251,6 +251,9 @@ FStar_UInt32_t FStar_UInt32_uint_to_t(Prims_nat x);
 #define load32(b) (*((uint32_t*) b))
 #define store32(b,i) (*((uint32_t*)b)=i)
 
+#define load128_le(b) (*((FStar_UInt128_t *)b))
+#define store128_le(b, i) (*((FStar_UInt128_t *)b) = i)
+
 #define FStar_Buffer_to_seq_full(x) 0
 
 #undef force_inline
