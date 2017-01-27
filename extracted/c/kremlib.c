@@ -93,6 +93,6 @@ void *Prims____Cons___tl(void *_) { KRML_EXIT; }
 bool FStar_HyperStack_is_eternal_color(Prims_int x0) { KRML_EXIT; }
 
 Prims_int FStar_UInt32_v(uint32_t x) { return (void*)0; }
-FStar_Seq_seq FStar_Seq_append(FStar_Seq_seq x, FStar_Seq_seq y) { KRML_EXIT; }
-FStar_Seq_seq FStar_Seq_slice(FStar_Seq_seq x, FStar_Seq_seq y, Prims_nat z) { KRML_EXIT; }
+FStar_Seq_Base_seq FStar_Seq_Base_append(FStar_Seq_Base_seq x, FStar_Seq_Base_seq y) { KRML_EXIT; }
+FStar_Seq_Base_seq FStar_Seq_Base_slice(FStar_Seq_Base_seq x, FStar_Seq_Base_seq y, Prims_nat z) { KRML_EXIT; }
 FStar_UInt32_t FStar_UInt32_uint_to_t(Prims_nat x) { KRML_EXIT; }
