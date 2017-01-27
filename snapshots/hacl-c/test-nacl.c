@@ -90,8 +90,24 @@ int32_t test_api()
   for(i = 0; i < MESSAGE_LEN; i++) decrypted[i] = 0;
   for(i = 0; i < CIPHERTEXT_LEN; i++) ciphertext[i] = 0;
   // Creating public/private key couples
-  Hacl_EC_crypto_scalarmult(pk1, basepoint, sk1);
-  Hacl_EC_crypto_scalarmult(pk2, basepoint, sk2);
+  Hacl_EC_crypto_scalarmult(pk1, sk1, basepoint);
+  Hacl_EC_crypto_scalarmult(pk2, sk2, basepoint);
+
+  /* uint8_t tmp[48] = { 0 }; */
+  /* uint8_t *hsalsa_k = tmp + (uint32_t )0; */
+  /* uint8_t *hsalsa_n = tmp + (uint32_t )32; */
+  /* uint8_t tmp2[48] = { 0 }; */
+  /* uint8_t *hsalsa_k2 = tmp2 + (uint32_t )0; */
+  /* uint8_t *hsalsa_n2 = tmp2 + (uint32_t )32; */
+  /* /\* Hacl_EC_crypto_scalarmult(hsalsa_k, pk2, sk1); *\/ */
+  /* /\* Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(test1, hsalsa_n, hsalsa_k); *\/ */
+  
+  /* crypto_scalarmult(hsalsa_k2, sk2, pk1); */
+  /* Hacl_EC_crypto_scalarmult(hsalsa_k, sk1, pk2); */
+  /* /\* crypto_core_hsalsa20(test2, hsalsa_n2, hsalsa_k2, NULL); *\/ */
+
+  /* TestLib_compare_and_print("scalarmult", hsalsa_k, hsalsa_k2, 32); */
+  /* /\* TestLib_compare_and_print("hsalsa20", test1, test2, 32); *\/ */
 
   Hacl_Box_crypto_box_beforenm(test1, pk1, sk2);
   res = crypto_box_beforenm(test2, pk2, sk1);
@@ -105,9 +121,46 @@ int32_t test_api()
   printf("Box decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
   
   TestLib_compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
+  return exit_success;
 }
 
 int32_t perf_api() {
+  uint8_t ciphertext[CIPHERTEXT_LEN+16], ciphertext2[CIPHERTEXT_LEN+16],
+    mac[16],mac2[16],
+    decrypted[MESSAGE_LEN], decrypted2[MESSAGE_LEN],
+    pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
+    test1[box_PUBLICKEYBYTES], test2[box_PUBLICKEYBYTES],
+    basepoint[box_PUBLICKEYBYTES] = {9};
+  uint32_t res;
+  int i;
+
+  cycles a,b;
+  clock_t t1,t2;
+  t1 = clock();
+  a = TestLib_cpucycles();
+  for (int i = 0; i < ROUNDS; i++){
+    crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk1, sk2);
+  }
+  b = TestLib_cpucycles();
+  t2 = clock();
+  print_results("Sodium Box speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1);
+  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
+
+  t1 = clock();
+  a = TestLib_cpucycles();
+  for (int i = 0; i < ROUNDS; i++){
+    Hacl_Box_crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk1, sk2);
+  }
+  b = TestLib_cpucycles();
+  t2 = clock();
+  print_results("Hacl Box speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1);
+  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
   return exit_success;
 }
 
