@@ -2,6 +2,15 @@
 #include "testlib.h"
 #include "Poly1305_64.h"
 #include "sodium.h"
+#include "crypto/include/internal/poly1305.h"
+#include "crypto/poly1305/poly1305_local.h"
+
+void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
+  POLY1305 state;
+  Poly1305_Init(&state,key);
+  Poly1305_Update(&state,plain,len);
+  Poly1305_Final(&state,mac);
+}
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
@@ -155,6 +164,20 @@ int32_t perf_poly() {
   b = TestLib_cpucycles();
   t2 = clock();
   print_results("Sodium Poly1305 speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
+				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
+  printf("Composite result (ignore): %llx\n", res);
+
+
+  t1 = clock();
+  a = TestLib_cpucycles();
+  for (int i = 0; i < ROUNDS; i++){
+    ossl_poly1305(macs + MACSIZE * i, plain, len, key);
+  }
+  b = TestLib_cpucycles();
+  t2 = clock();
+  print_results("OpenSSL Poly1305 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);

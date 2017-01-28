@@ -2,6 +2,50 @@
 #include "testlib.h"
 #include "Curve25519.h"
 #include "sodium.h"
+#include "include/openssl/obj_mac.h"
+#include "include/openssl/ec.h"
+
+void ossl_curve25519(uint8_t* result, uint8_t* scalar, uint8_t* input){
+
+  BN_CTX *ctx = BN_CTX_new();
+  EC_KEY* key = EC_KEY_new_by_curve_name(NID_X25519);
+  if (key == NULL) {printf("null x25519 key\n\n\n");fflush(stdout); return;}
+  unsigned char* be_scalar = malloc(32);
+  for (int i = 0; i < 32; i++)
+    be_scalar[i] = scalar[32-1];
+  BIGNUM* priv = BN_bin2bn(be_scalar, 32, NULL);
+  EC_KEY_set_private_key(key, priv);
+  EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_X25519);
+  EC_POINT *pub = EC_POINT_new(group);
+
+  EC_POINT_mul(group, pub, priv, NULL, NULL, ctx);
+  EC_KEY_set_public_key(key, pub);
+
+
+  EC_POINT* peer = EC_POINT_new(group);
+  EC_POINT_oct2point(group, peer, input, 32, ctx);
+
+  ECDH_compute_key(result, 32, peer,key, NULL);
+}
+
+
+
+unsigned long long median(unsigned long long* a, int rounds) {
+  int i, j, temp;
+  for (i = 0; i < rounds - 1; ++i)
+    {
+      for (j = 0; j < rounds - 1 - i; ++j )
+	{
+	  if (a[j] > a[j+1])
+	    {
+	      temp = a[j+1];
+	      a[j+1] = a[j];
+	      a[j] = temp;
+	    }
+	}
+    }
+  return a[rounds/4];
+}
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
@@ -269,30 +313,44 @@ int32_t perf_curve() {
     return 1;
   }
 
+  unsigned long long d[ROUNDS];
   cycles a,b;
   clock_t t1,t2;
   t1 = clock();
-  a = TestLib_cpucycles();
   for (int i = 0; i < ROUNDS; i++){
+    a = TestLib_cpucycles();
     Hacl_EC_crypto_scalarmult(mul + KEYSIZE * i, sk + KEYSIZE * i, pk + KEYSIZE * i);
+    b = TestLib_cpucycles();
+    d[i] = b - a;
   }
-  b = TestLib_cpucycles();
   t2 = clock();
-  print_results("HACL Curve25519 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1);
+  print_results("HACL Curve25519 speed", (double)t2-t1, (double) median(d,ROUNDS), ROUNDS, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
 
   t1 = clock();
-  a = TestLib_cpucycles();
   for (int i = 0; i < ROUNDS; i++){
+    a = TestLib_cpucycles();
     res = crypto_scalarmult_curve25519(mul + KEYSIZE * i, sk + KEYSIZE * i, pk + KEYSIZE * i);
+    b = TestLib_cpucycles();
+    d[i] = b - a;
   }
-  b = TestLib_cpucycles();
   t2 = clock();
-  print_results("Sodium Curve25519 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1);
+  print_results("Sodium Curve25519 speed", (double)t2-t1, (double) median(d,ROUNDS), ROUNDS, 1);
+  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
+                                 + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
+  printf("Composite result (ignore): %llx\n", res);
+
+  t1 = clock();
+  for (int i = 0; i < ROUNDS; i++){
+    a = TestLib_cpucycles();
+    ossl_curve25519(mul + KEYSIZE * i, sk + KEYSIZE * i, pk + KEYSIZE * i);
+    b = TestLib_cpucycles();
+    d[i] = b - a;
+  }
+  t2 = clock();
+  print_results("HACL Curve25519 speed", (double)t2-t1, (double) median(d,ROUNDS), ROUNDS, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
