@@ -4,7 +4,7 @@ test: test-poly	test-chacha test-salsa test-curve
 
 test-poly:
 	gcc-6 -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	kremlib.c testlib.c Poly1305_64.c test-poly.c -l sodium -o test-poly.exe
+	openssl/libcrypto.a kremlib.c testlib.c Poly1305_64.c test-poly.c -l sodium -I openssl  -o test-poly.exe 
 	./test-poly.exe
 
 poly.asm:
@@ -23,8 +23,13 @@ salsa.asm:
 
 test-chacha:
 	gcc-6 -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	kremlib.c testlib.c Chacha20.c test-chacha.c -l sodium -o test-chacha.exe
+	openssl/libcrypto.a kremlib.c testlib.c Chacha20.c test-chacha.c -l sodium -o test-chacha.exe -I openssl
 	./test-chacha.exe
+
+test-chacha-avx:
+	gcc-6 -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
+	stream.c test-goll.c -o test-chacha-avx.exe
+	./test-chacha-avx.exe
 
 chacha.asm:
 	gcc-6 -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
@@ -32,15 +37,14 @@ chacha.asm:
 
 
 test-curve:
-	gcc-6 -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -mavx -mavx2 \
-	kremlib.c testlib.c Curve25519.c test-curve.c -l sodium -o test-curve.exe
+	gcc-6 -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
+	openssl/libcrypto.a openssl/libssl.a kremlib.c testlib.c Curve25519.c test-curve.c -l sodium -o test-curve.exe -I openssl/include -I openssl/crypto/ec -I openssl
 	./test-curve.exe
 
 test-nacl:
 	gcc-6 -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
 	kremlib.c testlib.c Hacl_Policies.c HSalsa20.c Salsa20.c Poly1305_64.c Curve25519.c NaCl.c test-nacl.c -l sodium -o test-nacl.exe
 	./test-nacl.exe
-
 
 clean:
 	rm -rf *~ *.exe *.out 
