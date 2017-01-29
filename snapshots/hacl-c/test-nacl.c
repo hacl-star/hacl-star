@@ -125,13 +125,17 @@ int32_t test_api()
 }
 
 int32_t perf_api() {
-  uint8_t ciphertext[CIPHERTEXT_LEN+16], ciphertext2[CIPHERTEXT_LEN+16],
-    mac[16],mac2[16],
-    decrypted[MESSAGE_LEN], decrypted2[MESSAGE_LEN],
-    pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
-    test1[box_PUBLICKEYBYTES], test2[box_PUBLICKEYBYTES],
-    basepoint[box_PUBLICKEYBYTES] = {9};
-  uint32_t res;
+  uint32_t len = 1024*1024 * sizeof(char);
+  uint8_t* plaintext = malloc(len);
+  uint8_t* ciphertext = malloc(len+16*sizeof(char));
+  int fd = open("/dev/urandom", O_RDONLY);
+  uint64_t res = read(fd, plaintext, len);
+  if (res != len) {
+    printf("Error on reading, got %llu bytes\n", res);
+    return 1;
+  }
+
+  uint8_t mac[16],mac2[16], pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES];
   int i;
 
   cycles a,b;
@@ -139,25 +143,25 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles();
   for (int i = 0; i < ROUNDS; i++){
-    crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk1, sk2);
+    crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
   }
   b = TestLib_cpucycles();
   t2 = clock();
   print_results("Sodium Box speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1);
-  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
+		(double) b - a, ROUNDS, 1024 * 1024);
+  for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);
 
   t1 = clock();
   a = TestLib_cpucycles();
   for (int i = 0; i < ROUNDS; i++){
-    Hacl_Box_crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk1, sk2);
+    Hacl_Box_crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
   }
   b = TestLib_cpucycles();
   t2 = clock();
   print_results("Hacl Box speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1);
+		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < CIPHERTEXT_LEN; i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);
