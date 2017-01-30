@@ -1,4 +1,5 @@
-FSTAR_HOME=../../FStar
+FSTAR_HOME?=../../FStar
+KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
 
 FSTAR?=$(FSTAR_HOME)/bin/fstar.exe
 
@@ -116,5 +117,35 @@ aead-wc:
 all-assumes: $(addsuffix .fst, $(VERIFY) $(LAX))
 	grep "\(assume\)\|\(admit\)\|\(lax\)" $^
 
+KRML_INCLUDES=$(addprefix -I , test/spartan_aes aead prf primitives uf1cma utils $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_ARGS=-verbose -ccopt -maes $(KOPTS)
+KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
+
+OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
+
+test/spartan_aes/aes.o:
+	make -C test/spartan_aes
+
+krml-test.exe: test/spartan_aes/aes.o aead/*.fst prf/*.fst primitives/*.fst uf1cma/*.fst utils/*.fst
+	$(KRML) test/spartan_aes/Crypto.Config.fst test/Flag.fst \
+		test/spartan_aes/aes.o test/spartan_stub.c \
+	       	test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
+	       	$(KREMLIN_HOME)/test/../kremlib/testlib.c \
+		-tmpdir tmp -add-include '"testlib.h"' -o $@
+	./krml-test.exe
+
+test-perf.exe: test/test_perf.c krml-test.exe
+	$(KRML) tmp/out.krml -drop Crypto.KrmlTest \
+		-tmpdir tmp-test-perf -add-include '"testlib.h"' -o $@ \
+	       	$(KREMLIN_HOME)/kremlib/testlib.c \
+	        test/test_perf.c test/spartan_aes/aes.o test/spartan_stub.c \
+		-ldopt -flto \
+		-ccopts -Ofast,-m64,-march=native,-mtune=native,-funroll-loops,-fomit-frame-pointer,-Wno-int-conversion \
+		-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test \
+		-I $(OPENSSL_HOME)/include -ldopts -L,$(OPENSSL_HOME)/lib,-L,$(OPENSSL_HOME),-lcrypto $(CFLAGS)
+	PATH=$(OPENSSL_HOME):"$(PATH)" \
+	  LD_LIBRARY_PATH=$(OPENSSL_HOME):"$(LD_LIBRARY_PATH)" \
+	  DYLD_LIBRARY_PATH=$(OPENSSL_HOME):"$(DYLD_LIBRARY_PATH)" ./test-perf.exe
+
 clean:
-	rm -rf *~ aead/*~ prf/*~ primitives/*~ uf1cma/*~ utils/*~
+	rm -rf *~ aead/*~ prf/*~ primitives/*~ uf1cma/*~ utils/*~ test/*~ tmp tmp-test-perf *.exe

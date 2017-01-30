@@ -262,19 +262,19 @@ val start: #i:id -> StackInline (elemB i)
 
 let start #i = create i
 
-val field_add: #i:id -> elem i -> elem i -> Tot (elem i)
+noextract val field_add: #i:id -> elem i -> elem i -> Tot (elem i)
 let field_add #i a b =
   match alg i with
   | POLY1305 -> PS.field_add a b
   | GHASH    -> GS.op_Plus_At a b
 
-val field_mul: #i:id -> elem i -> elem i -> Tot (elem i)
+noextract val field_mul: #i:id -> elem i -> elem i -> Tot (elem i)
 let field_mul #i a b =
   match alg i with
   | POLY1305 -> PS.field_mul a b
   | GHASH    -> GS.op_Star_At a b
 
-let op_Plus_At #i e1 e2 = field_add #i e1 e2
+noextract let op_Plus_At #i e1 e2 = field_add #i e1 e2
 let op_Star_At #i e1 e2 = field_mul #i e1 e2
 
 val poly_empty: #i:id -> t:text{Seq.length t == 0} -> r:elem i ->

@@ -40,7 +40,7 @@ let rec poly vs r =
     let v = SeqProperties.head vs in 
     (encode v +@ poly (SeqProperties.tail vs) r ) *@ r
 
-let finish a s = a +@ s 
+noextract let finish a s = a +@ s 
 
 let mac vs r s = finish (poly vs r) s
 
