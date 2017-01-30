@@ -9,39 +9,36 @@ open FStar.Buffer
 open Hacl.Cast
 open Hacl.UInt8
 open Hacl.UInt32
-(* open Hacl.SBuffer *)
 open Hacl.Conversions
 open Hacl.Operations
 open FStar.UInt32
 
+
+(* Definition of aliases for modules *)
 module U8 = FStar.UInt8
-module S8 = Hacl.UInt8
 module U32 = FStar.UInt32
-module S32 = Hacl.UInt32
 module U64 = FStar.UInt64
+
+module S8 = Hacl.UInt8
+module S32 = Hacl.UInt32
 module S64 = Hacl.UInt64
-module FB = FStar.Buffer
 module SB = FStar.Buffer
-(* module SB = Hacl.SBuffer *)
 
 
+(* Definition of base types *)
+let uint8_t   = FStar.UInt8.t
+let uint32_t  = FStar.UInt32.t
+let uint64_t  = FStar.UInt64.t
 
-#set-options "--lax"
+let uint8_st  = Hacl.UInt8.t
+let uint32_st = Hacl.UInt32.t
+let uint64_st = Hacl.UInt64.t
+
+let uint32_sp = SB.buffer s32
+let uint8_sp  = SB.buffer s8
 
 
-(* Define base types *)
-let u8 = FStar.UInt8.t
-let s8 = Hacl.UInt8.t
-let u32 = FStar.UInt32.t
-let s32 = Hacl.UInt32.t
-let u64 = FStar.UInt64.t
-let s64 = Hacl.UInt64.t
-(* let uint32s = Hacl.SBuffer.u32s *)
-(* let bytes = Hacl.SBuffer.u8s *)
-
-let uint32s = SB.buffer s32 //Hacl.SBuffer.u32s
-let bytes = SB.buffer s8 //Hacl.SBuffer.u8s
-
+(* Definitions of aliases for functions *)
 let u8_to_s8 = Hacl.Cast.uint8_to_sint8
 let u32_to_s32 = Hacl.Cast.uint32_to_sint32
 let u32_to_s64 = Hacl.Cast.uint32_to_sint64
@@ -49,6 +46,42 @@ let s32_to_s64 = Hacl.Cast.sint32_to_sint64
 let u64_to_s64 = Hacl.Cast.uint64_to_sint64
 
 
+val pow2_values: x:nat -> Lemma
+  (requires True)
+  (ensures (let p = pow2 x in
+   match x with
+   | 0  -> p=1
+   | 1  -> p=2
+   | 8  -> p=256
+   | 16 -> p=65536
+   | 31 -> p=2147483648
+   | 32 -> p=4294967296
+   | 63 -> p=9223372036854775808
+   | 64 -> p=18446744073709551616
+   | _  -> True))
+  [SMTPat (pow2 x)]
+let pow2_values x =
+   match x with
+   | 0  -> assert_norm (pow2 0 == 1)
+   | 1  -> assert_norm (pow2 1 == 2)
+   | 8  -> assert_norm (pow2 8 == 256)
+   | 16 -> assert_norm (pow2 16 == 65536)
+   | 31 -> assert_norm (pow2 31 == 2147483648)
+   | 32 -> assert_norm (pow2 32 == 4294967296)
+   | 63 -> assert_norm (pow2 63 == 9223372036854775808)
+   | 64 -> assert_norm (pow2 64 == 18446744073709551616)
+   | _  -> ()
+
+
+val set4: buf:uint32_sp{length buf <= pow2 32} -> idx:uint32_t{U32.v idx + 3 < length buf /\ U32.v idx + 3 <= pow2 32} -> a:uint32_t -> b:uint32_t -> c:uint32_t -> d:uint32_t
+  -> Stack unit (requires (fun h -> live h buf))
+               (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1))
+
+let set4 buf idx a b c d =
+  buf.(idx +^ 0ul) <- u32_to_s32 a;
+  buf.(idx +^ 1ul) <- u32_to_s32 b;
+  buf.(idx +^ 2ul) <- u32_to_s32 c;
+  buf.(idx +^ 3ul) <- u32_to_s32 d
 
 
 //
@@ -99,96 +132,39 @@ val _sigma1: x:s32 -> Tot s32
 let _sigma1 x = S32.logxor (rotate_right x 17ul) (S32.logxor (rotate_right x 19ul) (S32.shift_right x 10ul))
 
 
-
 (* [FIPS 180-4] section 4.2.2 *)
 val set_k: state:uint32s{length state = U32.v size_state}
-  -> STL unit (requires (fun h -> live h state))
+  -> Stack unit (requires (fun h -> live h state))
              (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let set_k state =
-  admit(); // This is just for verification timeout
   let k = SB.sub state pos_k size_k in
-  k.(0ul)  <- (u32_to_s32 0x428a2f98ul);
-  k.(1ul)  <- (u32_to_s32 0x71374491ul);
-  k.(2ul)  <- (u32_to_s32 0xb5c0fbcful);
-  k.(3ul)  <- (u32_to_s32 0xe9b5dba5ul);
-  k.(4ul)  <- (u32_to_s32 0x3956c25bul);
-  k.(5ul)  <- (u32_to_s32 0x59f111f1ul);
-  k.(6ul)  <- (u32_to_s32 0x923f82a4ul);
-  k.(7ul)  <- (u32_to_s32 0xab1c5ed5ul);
-  k.(8ul)  <- (u32_to_s32 0xd807aa98ul);
-  k.(9ul)  <- (u32_to_s32 0x12835b01ul);
-  k.(10ul) <- (u32_to_s32 0x243185beul);
-  k.(11ul) <- (u32_to_s32 0x550c7dc3ul);
-  k.(12ul) <- (u32_to_s32 0x72be5d74ul);
-  k.(13ul) <- (u32_to_s32 0x80deb1feul);
-  k.(14ul) <- (u32_to_s32 0x9bdc06a7ul);
-  k.(15ul) <- (u32_to_s32 0xc19bf174ul);
-  k.(16ul) <- (u32_to_s32 0xe49b69c1ul);
-  k.(17ul) <- (u32_to_s32 0xefbe4786ul);
-  k.(18ul) <- (u32_to_s32 0x0fc19dc6ul);
-  k.(19ul) <- (u32_to_s32 0x240ca1ccul);
-  k.(20ul) <- (u32_to_s32 0x2de92c6ful);
-  k.(21ul) <- (u32_to_s32 0x4a7484aaul);
-  k.(22ul) <- (u32_to_s32 0x5cb0a9dcul);
-  k.(23ul) <- (u32_to_s32 0x76f988daul);
-  k.(24ul) <- (u32_to_s32 0x983e5152ul);
-  k.(25ul) <- (u32_to_s32 0xa831c66dul);
-  k.(26ul) <- (u32_to_s32 0xb00327c8ul);
-  k.(27ul) <- (u32_to_s32 0xbf597fc7ul);
-  k.(28ul) <- (u32_to_s32 0xc6e00bf3ul);
-  k.(29ul) <- (u32_to_s32 0xd5a79147ul);
-  k.(30ul) <- (u32_to_s32 0x06ca6351ul);
-  k.(31ul) <- (u32_to_s32 0x14292967ul);
-  k.(32ul) <- (u32_to_s32 0x27b70a85ul);
-  k.(33ul) <- (u32_to_s32 0x2e1b2138ul);
-  k.(34ul) <- (u32_to_s32 0x4d2c6dfcul);
-  k.(35ul) <- (u32_to_s32 0x53380d13ul);
-  k.(36ul) <- (u32_to_s32 0x650a7354ul);
-  k.(37ul) <- (u32_to_s32 0x766a0abbul);
-  k.(38ul) <- (u32_to_s32 0x81c2c92eul);
-  k.(39ul) <- (u32_to_s32 0x92722c85ul);
-  k.(40ul) <- (u32_to_s32 0xa2bfe8a1ul);
-  k.(41ul) <- (u32_to_s32 0xa81a664bul);
-  k.(42ul) <- (u32_to_s32 0xc24b8b70ul);
-  k.(43ul) <- (u32_to_s32 0xc76c51a3ul);
-  k.(44ul) <- (u32_to_s32 0xd192e819ul);
-  k.(45ul) <- (u32_to_s32 0xd6990624ul);
-  k.(46ul) <- (u32_to_s32 0xf40e3585ul);
-  k.(47ul) <- (u32_to_s32 0x106aa070ul);
-  k.(48ul) <- (u32_to_s32 0x19a4c116ul);
-  k.(49ul) <- (u32_to_s32 0x1e376c08ul);
-  k.(50ul) <- (u32_to_s32 0x2748774cul);
-  k.(51ul) <- (u32_to_s32 0x34b0bcb5ul);
-  k.(52ul) <- (u32_to_s32 0x391c0cb3ul);
-  k.(53ul) <- (u32_to_s32 0x4ed8aa4aul);
-  k.(54ul) <- (u32_to_s32 0x5b9cca4ful);
-  k.(55ul) <- (u32_to_s32 0x682e6ff3ul);
-  k.(56ul) <- (u32_to_s32 0x748f82eeul);
-  k.(57ul) <- (u32_to_s32 0x78a5636ful);
-  k.(58ul) <- (u32_to_s32 0x84c87814ul);
-  k.(59ul) <- (u32_to_s32 0x8cc70208ul);
-  k.(60ul) <- (u32_to_s32 0x90befffaul);
-  k.(61ul) <- (u32_to_s32 0xa4506cebul);
-  k.(62ul) <- (u32_to_s32 0xbef9a3f7ul);
-  k.(63ul) <- (u32_to_s32 0xc67178f2ul)
+  set4 k 0ul  0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul;
+  set4 k 4ul  0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul;
+  set4 k 8ul  0xd807aa98ul 0x12835b01ul 0x243185beul 0x550c7dc3ul;
+  set4 k 12ul 0x72be5d74ul 0x80deb1feul 0x9bdc06a7ul 0xc19bf174ul;
+  set4 k 16ul 0xe49b69c1ul 0xefbe4786ul 0x0fc19dc6ul 0x240ca1ccul;
+  set4 k 20ul 0x2de92c6ful 0x4a7484aaul 0x5cb0a9dcul 0x76f988daul;
+  set4 k 24ul 0x983e5152ul 0xa831c66dul 0xb00327c8ul 0xbf597fc7ul;
+  set4 k 28ul 0xc6e00bf3ul 0xd5a79147ul 0x06ca6351ul 0x14292967ul;
+  set4 k 32ul 0x27b70a85ul 0x2e1b2138ul 0x4d2c6dfcul 0x53380d13ul;
+  set4 k 36ul 0x650a7354ul 0x766a0abbul 0x81c2c92eul 0x92722c85ul;
+  set4 k 40ul 0xa2bfe8a1ul 0xa81a664bul 0xc24b8b70ul 0xc76c51a3ul;
+  set4 k 44ul 0xd192e819ul 0xd6990624ul 0xf40e3585ul 0x106aa070ul;
+  set4 k 48ul 0x19a4c116ul 0x1e376c08ul 0x2748774cul 0x34b0bcb5ul;
+  set4 k 52ul 0x391c0cb3ul 0x4ed8aa4aul 0x5b9cca4ful 0x682e6ff3ul;
+  set4 k 56ul 0x748f82eeul 0x78a5636ful 0x84c87814ul 0x8cc70208ul;
+  set4 k 60ul 0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
 
 
 val set_whash: state:uint32s{length state = U32.v size_state}
-  -> STL unit (requires (fun h -> live h state))
-             (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+  -> Stack unit (requires (fun h -> live h state))
+               (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let set_whash state =
-  admit(); // This is just for verification timeout
   let whash = SB.sub state pos_whash size_whash in
-  whash.(0ul) <- (u32_to_s32 0x6a09e667ul);
-  whash.(1ul) <- (u32_to_s32 0xbb67ae85ul);
-  whash.(2ul) <- (u32_to_s32 0x3c6ef372ul);
-  whash.(3ul) <- (u32_to_s32 0xa54ff53aul);
-  whash.(4ul) <- (u32_to_s32 0x510e527ful);
-  whash.(5ul) <- (u32_to_s32 0x9b05688cul);
-  whash.(6ul) <- (u32_to_s32 0x1f83d9abul);
-  whash.(7ul) <- (u32_to_s32 0x5be0cd19ul)
+  set4 whash 0ul 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul;
+  set4 whash 4ul 0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
 
 
 (* [FIPS 180-4] section 5.1.1 *)
@@ -220,15 +196,15 @@ val pad': (memb   :bytes{length memb >= 8}) ->
           (data   :bytes{length data = v blocksize /\ disjoint data memb /\ disjoint data output}) ->
           (len    :s32  {S32.v len + 1 <= length data}) ->
           (encodedlen :s64{S64.v encodedlen + S32.v len < pow2 64})
-          -> STL unit
-                (requires (fun h -> live h memb /\ live h output /\ live h data))
-                (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 output /\ modifies_2 memb output h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h memb /\ live h output /\ live h data))
+          (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 output /\ modifies_2 memb output h0 h1))
 
 let pad' memb output data len encodedlen =
 
   (* Retrieve memory *)
   let len_64 = memb in
-  
+
   (* Set the output to be all zeros except for the first
    * byte of the padding. BB.TODO: Maybe we can improve perfs. *)
   let pos1 = len in
@@ -252,9 +228,9 @@ val pad: (output :bytes{length output = v blocksize}) ->
          (data   :bytes{length data = v blocksize /\ disjoint data output}) ->
          (len    :s32  {S32.v len + 1 <= length data /\ S32.v len + 8 <= length output}) ->
          (encodedlen :s64{S64.v encodedlen + S32.v len < pow2 64})
-         -> STL unit
-              (requires (fun h -> live h output /\ live h data))
-              (ensures  (fun h0 r h1 -> live h1 output /\ modifies_1 output h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h output /\ live h data))
+          (ensures  (fun h0 r h1 -> live h1 output /\ modifies_1 output h0 h1))
 
 let pad output data len encodedlen =
   (* Push frame *)
@@ -270,7 +246,6 @@ let pad output data len encodedlen =
   pad' memb output data len encodedlen;
 
   (* Pop frame *)
-  (**) admit(); // BB.TODO: Improve perf. (trivial)
   (**) pop_frame()
 
 
@@ -278,9 +253,9 @@ let pad output data len encodedlen =
 (* Step 1 : Scheduling function for sixty-four 32bit words *)
 val ws_upd: (state  :uint32s {length state = v size_state}) ->
             (t      :u32)
-                   -> STL unit
-                        (requires (fun h -> live h state))
-                        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h state))
+          (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let rec ws_upd state t =
   (* Get necessary information from the state *)
@@ -311,9 +286,9 @@ let rec ws_upd state t =
 (* [FIPS 180-4] section 5.3.3 *)
 (* Define the initial hash value *)
 val init : state:uint32s{length state = v size_state}
-  -> STL unit
-        (requires (fun h -> live h state))
-        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h state))
+          (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let init state =
   (* Initialize constant k *)
@@ -331,13 +306,13 @@ val update_inner : (state :uint32s{length state = v size_state}) ->
                    (t     :u32) ->
                    (t1    :s32) ->
                    (t2    :s32)
-                   -> STL unit
-                         (requires (fun h -> live h state ))
-                         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h state ))
+          (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let rec update_inner state t t1 t2 =
   if t <^ 64ul then begin
-  
+
     (* Get necessary information from the state *)
     let whash = SB.sub state pos_whash size_whash in
     let k = SB.sub state pos_k size_k in
@@ -369,16 +344,15 @@ let rec update_inner state t t1 t2 =
 
 
 val update_step : (state :uint32s{length state = v size_state})
-                  -> STL unit
-                        (requires (fun h -> live h state))
-                        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h state))
+          (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let update_step state =
-  admit(); // This is just for verification timeout
-  
+
   (* Get necessary information from the state *)
   let whash = SB.sub state pos_whash size_whash in
-  
+
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
   ws_upd state 0ul;
 
@@ -412,7 +386,7 @@ let update_step state =
   let output_state4 = S32.add_mod current_state4 input_state4 in
   let output_state5 = S32.add_mod current_state5 input_state5 in
   let output_state6 = S32.add_mod current_state6 input_state6 in
-  let output_state7 = S32.add_mod current_state7 input_state7 in  
+  let output_state7 = S32.add_mod current_state7 input_state7 in
   whash.(0ul) <- output_state0;
   whash.(1ul) <- output_state1;
   whash.(2ul) <- output_state2;
@@ -420,7 +394,7 @@ let update_step state =
   whash.(4ul) <- output_state4;
   whash.(5ul) <- output_state5;
   whash.(6ul) <- output_state6;
-  whash.(7ul) <- output_state7;  
+  whash.(7ul) <- output_state7;
 
   (* Increment the total number of blocks processed *)
   let pc = state.(pos_count) in
@@ -435,9 +409,9 @@ val update' : (memb  :bytes{length memb >= v blocksize}) ->
               (len   :s32{S32.v len <= length data}) ->
               (rounds:u32{v rounds * v blocksize < pow2 32}) ->
               (i     :u32{v i >= 0})
-              -> STL unit
-                    (requires (fun h -> live h memb /\ live h state /\ live h data))
-                    (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 state /\ modifies_2 memb state h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h memb /\ live h state /\ live h data))
+          (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 state /\ modifies_2 memb state h0 h1))
 
 let rec update' memb state data len rounds i =
 
@@ -453,7 +427,7 @@ let rec update' memb state data len rounds i =
   (* Get the data required to fill the partial block *)
   let cpos = i *^ blocksize in
   let cdata = SB.sub data cpos blocksize in
-  
+
   (* Complete the partial block with data *)
   (* Leakage resistance: filling the partial block must not leak
    * it's current length, so the data block must have the length
@@ -467,25 +441,25 @@ let rec update' memb state data len rounds i =
 
     (* Update the current length of the partial block after processing *)
     state.(pos_wblocklen) <- u32_to_s32 blocksize;
-    
+
     (* Process the block *)
     update_step state;
     update' memb state data len rounds (i +^ 1ul) end
 
   else
-  
+
   (* Update the current length of the partial block after processing *)
   state.(pos_wblocklen) <- S32.sub len (u32_to_s32 cpos)
-  
+
 
 (* [FIPS 180-4] section 6.2.2 *)
 (* Update running hash function *)
 val update : (state :uint32s{length state = v size_state}) ->
              (data  :bytes {length data >= v blocksize /\ (length data) % (v blocksize) = 0 /\ disjoint state data}) ->
              (len   :u32{v len + 8 < pow2 32 /\ v len <= length data})
-              -> STL unit
-                    (requires (fun h -> live h state /\ live h data))
-                    (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h state /\ live h data))
+          (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let update state data len =
 
@@ -494,23 +468,23 @@ let update state data len =
 
   let memblen = blocksize in
   let memb = create (u8_to_s8 0uy) memblen in
-  
+
   (* Compute the number of rounds to process the data *)
   let rounds = nblocks len -^ 1ul in
-  
+
   (* Perform updates for all blocks except the last *)
   update' memb state data (u32_to_s32 len) rounds 0ul;
 
   (* Pop frame *)
   (**) pop_frame()
-  
+
 
 (* Compute the final value of the hash from the last hash value *)
 val finish_1': (memb  :bytes{length memb >= 2 * v blocksize}) ->
                (state :uint32s{length state = v size_state /\ disjoint memb state})
-             -> STL unit
-                   (requires (fun h -> live h memb /\ live h state))
-                   (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 state /\ modifies_2 memb state h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h memb /\ live h state))
+          (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 state /\ modifies_2 memb state h0 h1))
 
 let finish_1' memb state =
 
@@ -528,8 +502,8 @@ let finish_1' memb state =
 
   (* Compute the final length to be encoded in the padding in bits
    * represented as UInt64 to make sure that the multiplication
-   * will not overflow inside a UInt32. 
-   * The cast to UInt64 is specific to the SHA2-224 and SHA2-256 *)   
+   * will not overflow inside a UInt32.
+   * The cast to UInt64 is specific to the SHA2-224 and SHA2-256 *)
   let currentlen = S64.mul (s32_to_s64 count) (u32_to_s64 blocksize) in
   let totlenbytes = S64.add currentlen (s32_to_s64 partiallen) in
   let totlen = S64.mul totlenbytes (u64_to_s64 8uL) in
@@ -545,9 +519,9 @@ let finish_1' memb state =
 
 
 val finish_1: (state :uint32s{length state = v size_state})
-             -> STL unit
-                   (requires (fun h -> live h state))
-                   (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h state))
+          (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let finish_1 state =
 
@@ -561,15 +535,14 @@ let finish_1 state =
   finish_1' memb state;
 
   (* Pop frame *)
-  (**) admit(); // BB.TODO: Improve perf. (trivial)
   (**) pop_frame()
 
 
 val finish_2: (hash  :bytes{length hash >= v hashsize}) ->
              (state :uint32s{length state = v size_state /\ disjoint state hash })
-             -> STL unit
-                   (requires (fun h -> live h hash /\ live h state))
-                   (ensures  (fun h0 r h1 -> live h1 hash /\ modifies_1 hash h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h hash /\ live h state))
+          (ensures  (fun h0 r h1 -> live h1 hash /\ modifies_1 hash h0 h1))
 
 let finish_2 hash state =
   (* Store the final hash to the output location *)
@@ -580,9 +553,9 @@ let finish_2 hash state =
 (* Compute the final value of the hash from the last hash value *)
 val finish: (hash  :bytes{length hash >= v hashsize}) ->
             (state :uint32s{length state = v size_state /\ disjoint state hash})
-            -> STL unit
-                 (requires (fun h -> live h hash /\ live h state))
-                 (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 state /\ modifies_2 hash state h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h hash /\ live h state))
+          (ensures  (fun h0 r h1 -> live h1 hash /\ live h1 state /\ modifies_2 hash state h0 h1))
 
 let finish hash state =
   (* Compute the final state *)
@@ -597,9 +570,9 @@ val sha256': (memb :uint32s{ length memb >= v size_state}) ->
              (data :bytes{ length data >= v blocksize /\ (length data) % (v blocksize) = 0
                          /\ disjoint data memb /\ disjoint data hash}) ->
              (len  :u32{v len + 8 < pow2 32 /\ v len <= length data})
-             -> STL unit
-                   (requires (fun h -> live h memb /\ live h hash /\ live h data))
-                   (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 hash /\ modifies_2 memb hash h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h memb /\ live h hash /\ live h data))
+          (ensures  (fun h0 r h1 -> live h1 memb /\ live h1 hash /\ modifies_2 memb hash h0 h1))
 
 let sha256' memb hash data len =
   let state = SB.sub memb 0ul size_state in
@@ -612,9 +585,9 @@ let sha256' memb hash data len =
 val sha256: (hash :bytes{ length hash >= v hashsize}) ->
             (data :bytes{ length data >= v blocksize /\ (length data) % (v blocksize) = 0 /\ disjoint data hash}) ->
             (len  :u32{v len + 8 < pow2 32 /\ v len <= length data})
-            -> STL unit
-                 (requires (fun h -> live h hash /\ live h data))
-                 (ensures  (fun h0 r h1 -> live h1 hash /\ modifies_1 hash h0 h1))
+  -> Stack unit
+          (requires (fun h -> live h hash /\ live h data))
+          (ensures  (fun h0 r h1 -> live h1 hash /\ modifies_1 hash h0 h1))
 
 let sha256 hash data len =
 
@@ -629,5 +602,4 @@ let sha256 hash data len =
   sha256' memb hash data len ;
 
   (* Pop frame *)
-  (**) admit(); // BB.TODO: Improve perf. (trivial)
   (**) pop_frame()
