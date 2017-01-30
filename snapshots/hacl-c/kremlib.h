@@ -132,8 +132,8 @@ typedef struct {
   uint64_t low;
 } FStar_UInt128_t, FStar_UInt128_t_;
 #define CONSTANT_TIME_CARRY(a, b) \
-  (a < b)
-  //  ((a ^ ((a ^ b) | ((a - b) ^ b))) >> (sizeof(a) * 8 - 1))
+  ((a ^ ((a ^ b) | ((a - b) ^ b))) >> (sizeof(a) * 8 - 1))
+// or just (a < b)? much better performance if we can use inline asm with adcq 
 
 static inline force_inline   FStar_UInt128_t FStar_UInt128_add(FStar_UInt128_t x, FStar_UInt128_t y) {
   FStar_UInt128_t r;
