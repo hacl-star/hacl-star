@@ -159,12 +159,12 @@ let finish a s =
 val mac_1305: vs:text -> r:elem -> s:tag -> Tot tag
 let mac_1305 vs r s = finish (poly vs r) s
 
+let rec msg_to_text (msg:bytes{length msg > 0}) : Tot text (decreases (length msg)) =
+  if length msg <= 16 then create 1 msg
+  else SeqProperties.snoc (msg_to_text (slice msg 16 (length msg))) (slice msg 0 16)
 
-val poly1305: msg:bytes -> k:bytes{length k = 32} -> Tot tag
+val poly1305: msg:bytes{length msg > 0} -> k:bytes{length k = 32} -> Tot tag
 let poly1305 msg k =
-  let rec msg_to_text (msg:bytes) : Tot text (decreases (length msg)) =
-    if length msg <= 16 then create 1 msg
-    else SeqProperties.cons (slice msg 0 16) (msg_to_text (slice msg 16 (length msg))) in
   let text = msg_to_text msg in
   let r = encode_r (slice k 0 16) in
   let s = slice k 16 32 in

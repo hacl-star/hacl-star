@@ -9,6 +9,8 @@ open FStar.HyperStack
 open FStar.Endianness
 open FStar.Buffer
 
+open C
+
 open Hacl.Cast
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint
@@ -36,20 +38,6 @@ let wordB_16 : Type0 = b:uint8_p{length b = 16}
 
 
 noeq type poly1305_state = | MkState: r:bigint -> h:bigint -> poly1305_state
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
-
-assume val load128_le: b:uint8_p{length b = 16} -> Stack wide
-    (requires (fun h -> live h b))
-    (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 b
-      /\ r == load128_le_spec (as_seq h0 b)))
-
-assume val store128_le: b:uint8_p{length b = 16} -> z:wide ->
-  Stack unit
-    (requires (fun h -> live h b))
-    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b
-      /\ as_seq h1 b == store128_le_spec z))
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
@@ -167,7 +155,6 @@ val poly1305_start:
     (requires (fun h -> live h a))
     (ensures  (fun h0 _ h1 -> live h1 a /\ modifies_1 a h0 h1
       /\ red_45 (as_seq h1 a)
-      (* /\ sel_int h1 a = 0 *)
       /\ as_seq h1 a == poly1305_start_spec ()
       ))
 let poly1305_start a =
@@ -574,16 +561,16 @@ val poly1305_blocks:
       /\ red_45 (as_seq h0 st.h)
       /\ red_44 (as_seq h0 st.r)
       /\ red_45 (as_seq h1 st.h)
-      /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) () == poly1305_blocks_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) ()) (as_seq h0 m) len
+      /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == poly1305_blocks_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) len
       ))
 let rec poly1305_blocks log st m len =
   let m0 = ST.get() in
-  if U64.(len <^ 16uL) then (
-    ()
+  if U64.(len =^ 0uL) then (
+    log
   )
   else (
     let new_log = poly1305_update log st m in
-    let len = U64.(len -^ 16uL) in
+    let len = U64.(len -^ 1uL) in
     let m   = offset m 16ul in
     poly1305_blocks new_log st m len
   )
@@ -594,7 +581,7 @@ let rec poly1305_blocks log st m len =
 val crypto_onetimeauth:
   output:uint8_p{length output = 16} ->
   input:uint8_p{disjoint input output} ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= length input} ->
+  len:U64.t{U64.v len < pow2 32 /\ U64.v len = length input} ->
   k:uint8_p{disjoint output k /\ length k = 32} ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h k))
@@ -602,15 +589,17 @@ val crypto_onetimeauth:
       /\ as_seq h1 output == crypto_onetimeauth_spec (as_seq h0 input) len (as_seq h0 k)))
 let crypto_onetimeauth output input len k =
   push_frame();
-  let zero = uint64_to_sint64 0uL in
-  let buf = create zero U32.(clen +^ clen) in
+  let len16 = U64.(len >>^ 4ul) in
+  let rem16 = U64.(len &^ 0xfuL) in
+  let partial_input = Buffer.sub input 0ul U32.(16ul *^ Int.Cast.uint64_to_uint32 len16) in
+  let last_block    = Buffer.sub input U32.(16ul *^ Int.Cast.uint64_to_uint32 len16) (Int.Cast.uint64_to_uint32 len) in
+  let buf = create limb_zero U32.(clen +^ clen) in
   let r = sub buf 0ul clen in
   let h = sub buf clen clen in
   let st = MkState r h in
   let key_r = Buffer.sub k 0ul 16ul in
   let key_s = Buffer.sub k 16ul 16ul in
-  let init_log = poly1305_init_ st k in
-  let partial_log = poly1305_blocks init_log st input len in
-  let final_log = poly1305_finish_ partial_log st output input len key_s in
+  let init_log = poly1305_init_ st key_r in
+  let partial_log = poly1305_blocks init_log st partial_input len16 in
+  let final_log = poly1305_finish_ partial_log st output last_block rem16 key_s in
   pop_frame()
-
