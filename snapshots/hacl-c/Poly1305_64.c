@@ -15,11 +15,6 @@ static inline void Hacl_Bignum_Fsum_fsum_(uint64_t *a, uint64_t *b, uint32_t i)
   }
 }
 
-static const FStar_UInt128_t
-Hacl_Bignum_Modulo_mask_2_42 = FStar_Int_Cast_uint64_to_uint128((uint64_t )0x3ffffffffff);
-
-static const uint64_t Hacl_Bignum_Modulo_mask_2_42_ = (uint64_t )0x3ffffffffff;
-
 static inline void Hacl_Bignum_Modulo_reduce(uint64_t *b)
 {
   uint64_t b0 = b[(uint32_t )0];

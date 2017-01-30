@@ -11,6 +11,9 @@
 #include <stdbool.h>
 #include <time.h>
 
+#undef force_inline
+#define force_inline __attribute__((always_inline))
+
 
 // For types and values from C.fsti that do not exactly have the same name as
 // their C counterparts
@@ -25,6 +28,69 @@ typedef uint16_t FStar_UInt16_t, FStar_UInt16_t_;
 typedef int16_t FStar_Int16_t, FStar_Int16_t_;
 typedef uint8_t FStar_UInt8_t, FStar_UInt8_t_;
 typedef int8_t FStar_Int8_t, FStar_Int8_t_;
+
+// Constant time comparisons
+static inline force_inline  uint8_t FStar_UInt8_eq_mask(uint8_t x, uint8_t y) {
+  x = ~(x ^ y);
+  x &= x << 4;
+  x &= x << 2;
+  x &= x << 1;
+  return (int8_t)x >> 7;
+}
+
+static inline force_inline  uint8_t FStar_UInt8_gte_mask(uint8_t x, uint8_t y) {
+  return ~(uint8_t)(((int32_t)x - y) >> 31);
+}
+
+static inline force_inline  uint16_t FStar_UInt16_eq_mask(uint16_t x, uint16_t y) {
+  x = ~(x ^ y);
+  x &= x << 8;
+  x &= x << 4;
+  x &= x << 2;
+  x &= x << 1;
+  return (int16_t)x >> 15;
+}
+
+static inline force_inline  uint16_t FStar_UInt16_gte_mask(uint16_t x, uint16_t y) {
+  return ~(uint16_t)(((int32_t)x - y) >> 31);
+}
+
+static inline force_inline  uint32_t FStar_UInt32_eq_mask(uint32_t x, uint32_t y) {
+  x = ~(x ^ y);
+  x &= x << 16;
+  x &= x << 8;
+  x &= x << 4;
+  x &= x << 2;
+  x &= x << 1;
+  return ((int32_t)x) >> 31;
+}
+
+static inline force_inline  uint32_t FStar_UInt32_gte_mask(uint32_t x, uint32_t y) {
+  return ~((uint32_t)(((int64_t)x - y) >> 63));
+}
+
+static inline force_inline  uint64_t FStar_UInt64_eq_mask(uint64_t x, uint64_t y) {
+  x = ~(x ^ y);
+  x &= x << 32;
+  x &= x << 16;
+  x &= x << 8;
+  x &= x << 4;
+  x &= x << 2;
+  x &= x << 1;
+  return ((int64_t)x) >> 63;
+}
+
+static inline force_inline  uint64_t FStar_UInt64_gte_mask(uint64_t x, uint64_t y) {
+  uint64_t low63 =
+      ~((uint64_t)((int64_t)((int64_t)(x & UINT64_C(0x7fffffffffffffff)) -
+                             (int64_t)(y & UINT64_C(0x7fffffffffffffff))) >>
+                   63));
+  uint64_t high_bit =
+      ~((uint64_t)((int64_t)((int64_t)(x & UINT64_C(0x8000000000000000)) -
+                             (int64_t)(y & UINT64_C(0x8000000000000000))) >>
+                   63));
+  return low63 & high_bit;
+}
 
 #if defined(__GNUC__) && defined(__SIZEOF_INT128__)
 typedef unsigned __int128 FStar_UInt128_t, FStar_UInt128_t_;
@@ -45,40 +111,146 @@ typedef unsigned __int128 FStar_UInt128_t, FStar_UInt128_t_;
 
 #define FStar_UInt128_op_Hat_Hat(x,y) ((x) ^ (y))
 
+static inline force_inline  FStar_UInt128_t FStar_UInt128_eq_mask(FStar_UInt128_t x, FStar_UInt128_t y) {
+  uint64_t mask =
+      FStar_UInt64_eq_mask((uint64_t)(x >> 64), (uint64_t)(y >> 64)) &
+      FStar_UInt64_eq_mask(x, y);
+  return ((FStar_UInt128_t)mask) << 64 | mask;
+}
+
+static inline force_inline  FStar_UInt128_t FStar_UInt128_gte_mask(FStar_UInt128_t x, FStar_UInt128_t y) {
+  uint64_t mask =
+      (FStar_UInt64_gte_mask(x >> 64, y >> 64) &
+       ~(FStar_UInt64_eq_mask(x >> 64, y >> 64))) |
+      (FStar_UInt64_eq_mask(x >> 64, y >> 64) & FStar_UInt64_gte_mask(x, y));
+  return ((FStar_UInt128_t)mask) << 64 | mask;
+}
+
 #else
 typedef struct {
   uint64_t high;
   uint64_t low;
 } FStar_UInt128_t, FStar_UInt128_t_;
-FStar_UInt128_t FStar_UInt128_add(FStar_UInt128_t x, FStar_UInt128_t y);
-FStar_UInt128_t FStar_UInt128_add_mod(FStar_UInt128_t x, FStar_UInt128_t y);
-FStar_UInt128_t FStar_UInt128_sub(FStar_UInt128_t x, FStar_UInt128_t y);
-FStar_UInt128_t FStar_UInt128_sub_mod(FStar_UInt128_t x, FStar_UInt128_t y);
-FStar_UInt128_t FStar_UInt128_mul(FStar_UInt128_t x, FStar_UInt128_t y);
-FStar_UInt128_t FStar_UInt128_logand(FStar_UInt128_t x, FStar_UInt128_t y);
-FStar_UInt128_t FStar_UInt128_logor(FStar_UInt128_t x, FStar_UInt128_t y);
-FStar_UInt128_t FStar_UInt128_logxor(FStar_UInt128_t x, FStar_UInt128_t y);
-FStar_UInt128_t FStar_UInt128_lognot(FStar_UInt128_t x);
-FStar_UInt128_t FStar_UInt128_shift_left(FStar_UInt128_t x, FStar_UInt32_t y);
-FStar_UInt128_t FStar_UInt128_shift_right(FStar_UInt128_t x, FStar_UInt32_t y);
-FStar_UInt128_t FStar_Int_Cast_uint64_to_uint128(uint64_t x);
-uint64_t FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_t x);
-FStar_UInt128_t FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
+#define CONSTANT_TIME_CARRY(a, b) \
+  (a < b)
+  //  ((a ^ ((a ^ b) | ((a - b) ^ b))) >> (sizeof(a) * 8 - 1))
+
+static inline force_inline   FStar_UInt128_t FStar_UInt128_add(FStar_UInt128_t x, FStar_UInt128_t y) {
+  FStar_UInt128_t r;
+  r.low = x.low + y.low;
+  r.high = x.high + y.high + CONSTANT_TIME_CARRY(r.low, y.low);
+  return r;
+}
+
+static inline force_inline   FStar_UInt128_t FStar_UInt128_add_mod(FStar_UInt128_t x, FStar_UInt128_t y) {
+  return FStar_UInt128_add(x, y);
+}
+
+static inline force_inline   FStar_UInt128_t FStar_UInt128_sub(FStar_UInt128_t x, FStar_UInt128_t y) {
+  FStar_UInt128_t r;
+  r.low = x.low - y.low;
+  r.high = x.high - y.high - CONSTANT_TIME_CARRY(x.low, r.low);
+  return r;
+}
+
+static inline force_inline   FStar_UInt128_t FStar_UInt128_sub_mod(FStar_UInt128_t x, FStar_UInt128_t y) {
+  return FStar_UInt128_sub(x, y);
+}
+
+static inline force_inline   FStar_UInt128_t FStar_UInt128_logand(FStar_UInt128_t x, FStar_UInt128_t y) {
+  FStar_UInt128_t r;
+  r.high = x.high & y.high;
+  r.low = x.low & y.low;
+  return r;
+}
+
+static inline force_inline   FStar_UInt128_t FStar_UInt128_logor(FStar_UInt128_t x, FStar_UInt128_t y) {
+  FStar_UInt128_t r;
+  r.high = x.high | y.high;
+  r.low = x.low | y.low;
+  return r;
+}
+
+static inline force_inline   FStar_UInt128_t FStar_UInt128_logxor(FStar_UInt128_t x, FStar_UInt128_t y) {
+  FStar_UInt128_t r;
+  r.high = x.high ^ y.high;
+  r.low = x.low ^ y.low;
+  return r;
+}
+
+static inline force_inline   FStar_UInt128_t FStar_UInt128_lognot(FStar_UInt128_t x) {
+  FStar_UInt128_t r;
+  r.high = ~x.high;
+  r.low = ~x.low;
+  return r;
+}
+
+/* y >= 128 should never happen */
+static inline force_inline  FStar_UInt128_t FStar_UInt128_shift_left(FStar_UInt128_t x, FStar_UInt32_t y) {
+  FStar_UInt128_t r;
+  uint64_t mask_64_m = (((int64_t)y - 64) >> 63);
+  uint64_t mask_64_p = ((64 - (int64_t)y) >> 63);
+  uint64_t mask_64 = ~(mask_64_m | mask_64_p);
+  uint64_t mask_0 = ((int64_t)y - 1) >> 63;
+  r.low = mask_64_m & (x.low << y);
+  r.high = (mask_64_m & ((x.high << y) | ((~mask_0) & (x.low >> (64 - y))))) |
+           ((mask_64_p) & (x.low << (y - 64))) | (mask_64 & x.low);
+  return r;
+}
+
+static inline force_inline  FStar_UInt128_t FStar_UInt128_shift_right(FStar_UInt128_t x, FStar_UInt32_t y) {
+  FStar_UInt128_t r;
+  uint64_t mask_64_m = (((int64_t)y - 64) >> 63);
+  uint64_t mask_64_p = ((64 - (int64_t)y) >> 63);
+  uint64_t mask_64 = ~(mask_64_m | mask_64_p);
+  uint64_t mask_0 = ((int64_t)y - 1) >> 63;
+  r.high = mask_64_m & (x.high >> y);
+  r.low = (mask_64_m & ((x.low >> y) | ((~mask_0) & (x.high << (64 - y))))) |
+          ((mask_64_p) & (x.high >> (y - 64))) | (mask_64 & x.high);
+  return r;
+}
+
+/* Conversions */
+static inline force_inline  FStar_UInt128_t FStar_Int_Cast_uint64_to_uint128(uint64_t x) {
+  return (FStar_UInt128_t){.high = UINT64_C(0), .low = x};
+}
+
+static inline force_inline  uint64_t FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_t x) { return x.low; }
+
+static inline force_inline  FStar_UInt128_t FStar_UInt128_eq_mask(FStar_UInt128_t x, FStar_UInt128_t y) {
+  return (FStar_UInt128_t){.low = FStar_UInt64_eq_mask(x.low, y.low),
+                           .high = FStar_UInt64_eq_mask(x.high, y.high)};
+}
+
+static inline force_inline  FStar_UInt128_t FStar_UInt128_gte_mask(FStar_UInt128_t x, FStar_UInt128_t y) {
+  uint64_t mask = (FStar_UInt64_gte_mask(x.high, y.high) &
+                   ~(FStar_UInt64_eq_mask(x.high, y.high))) |
+                  (FStar_UInt64_eq_mask(x.high, y.high) &
+                   FStar_UInt64_gte_mask(x.low, y.low));
+  return (FStar_UInt128_t){.high = mask, .low = mask};
+}
+
+static inline force_inline  FStar_UInt128_t FStar_UInt128_mul_wide(uint64_t x, uint64_t y) {
+  uint64_t u1, v1, t, w3, k, w1;
+  u1 = (x & 0xffffffff);
+  v1 = (y & 0xffffffff);
+  t = (u1 * v1);
+  w3 = (t & 0xffffffff);
+  k = (t >> 32);
+  x >>= 32;
+  t = (x * v1) + k;
+  k = (t & 0xffffffff);
+  w1 = (t >> 32);
+  y >>= 32;
+  t = (u1 * y) + k;
+  k = (t >> 32);
+  return (FStar_UInt128_t){.high = (x * y) + w1 + k, .low = (t << 32) + w3};
+}
 #endif
 
-// Constant-time comparisons
-uint64_t FStar_UInt64_eq_mask(uint64_t x, uint64_t y);
-uint64_t FStar_UInt64_gte_mask(uint64_t x, uint64_t y);
-uint32_t FStar_UInt32_eq_mask(uint32_t x, uint32_t y);
-uint32_t FStar_UInt32_gte_mask(uint32_t x, uint32_t y);
-uint16_t FStar_UInt16_eq_mask(uint16_t x, uint16_t y);
-uint16_t FStar_UInt16_gte_mask(uint16_t x, uint16_t y);
-uint8_t FStar_UInt8_eq_mask(uint8_t x, uint8_t y);
-uint8_t FStar_UInt8_gte_mask(uint8_t x, uint8_t y);
-
 // 128-bit arithmetic
-FStar_UInt128_t FStar_UInt128_eq_mask(FStar_UInt128_t x, FStar_UInt128_t y);
-FStar_UInt128_t FStar_UInt128_gte_mask(FStar_UInt128_t x, FStar_UInt128_t y);
+//FStar_UInt128_t FStar_UInt128_eq_mask(FStar_UInt128_t x, FStar_UInt128_t y);
+//FStar_UInt128_t FStar_UInt128_gte_mask(FStar_UInt128_t x, FStar_UInt128_t y);
 
 // Buffers (FIXME remove eqb!)
 #define FStar_Buffer_eqb(b1, b2, n) \
@@ -256,7 +428,5 @@ FStar_UInt32_t FStar_UInt32_uint_to_t(Prims_nat x);
 
 #define FStar_Buffer_to_seq_full(x) 0
 
-#undef force_inline
-#define force_inline __attribute__((always_inline))
-#endif
 
+#endif
