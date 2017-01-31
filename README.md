@@ -45,14 +45,14 @@ To verify the F\* code, you need to install the [F\*] typechecker.
 To extract F\* code to C, you need to install [KreMLin].
 
 For convenience, we have already extracted C code for our verified
-primitives and made them available in [extracted].  To run that code,
+primitives and made them available in [snapshots].  To run that code,
 you need a modern C compiler (preferably GCC-6).  To compare its
 performance with the C reference code in libsodium, download and
 compile [libsodium] with the `--disable-asm` flag.
 
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
 [KreMLin]: https://github.com/FStarLang/kremlin
-[extracted]: https://github.com/mitls/hacl-star/extracted/c
+[snapshots]: https://github.com/mitls/hacl-star/snapshots/hacl-c
 [libsodium]: https://github.com/jedisct1/libsodium
 
 # Browsing and testing the code
@@ -62,7 +62,7 @@ https://github.com/mitls/hacl-star/code Note that Poly1305 and
 Curve25519 share a good chunk of Bignum field arithmetic code, and
 this shared code is in code/bignum.  There are Makefile targets in
 each directory for verification and extraction.  
-You can run `make test` in `extracted/c` to run tests on already
+You can run `make test` in `snapshots/hacl-c` to run tests on already
 extracted code.
 
 # Performance
@@ -78,7 +78,7 @@ is a long-term goal.
 
 # Experimental features
 
-The `experimental/` directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
+The `code/experimental/` directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
 * Elliptic Curves: NIST P-256, Curve448
 * Encryption: AES-128, AES-256
 * Hash functions: SHA-256

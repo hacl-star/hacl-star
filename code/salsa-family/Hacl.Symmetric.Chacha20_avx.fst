@@ -1,11 +1,12 @@
-module Hacl.Symmetric.Chacha20
+module Hacl.Symmetric.Chacha20_avx
 
+type vec n l
 
 open FStar.HyperStack
 open FStar.ST
 open FStar.Buffer
 open Hacl.Cast
-open Hacl.UInt32
+open Hacl.UInt128
 open Hacl.Spec.Symmetric.Chacha20
 
 module U32 = FStar.UInt32
@@ -15,8 +16,6 @@ module H32 = Hacl.UInt32
 let u32 = U32.t
 let h32 = H32.t
 let uint8_p = buffer H8.t
-
-type chacha_ctx = b:Buffer.buffer h32{length b = 16}
 
 val lemma_max_uint32: n:nat -> 
   Lemma (requires (n = 32))
@@ -34,28 +33,24 @@ let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k = 4))
   (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 k /\ length k = 4
     /\ r == load32_le_spec (as_seq h0 k)))
-  = let k0 = k.(0ul) in
-    let k1 = k.(1ul) in
-    let k2 = k.(2ul) in
-    let k3 = k.(3ul) in
-    let z = sint8_to_sint32 k0
-            |^ (sint8_to_sint32 k1 <<^ 8ul)
-            |^ (sint8_to_sint32 k2 <<^ 16ul)
-            |^ (sint8_to_sint32 k3 <<^ 24ul) in
-    z
-
+  = C.le32toh(C.load32 k)
 
 let store32_le (k:uint8_p) (x:h32) : Stack unit
   (requires (fun h -> live h k /\ length k = 4))
   (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k /\ length k = 4 /\ live h0 k
     /\ as_seq h1 k == store32_le_spec (as_seq h0 k) x))
-  = k.(0ul) <- sint32_to_sint8 x;
-    k.(1ul) <- sint32_to_sint8 (x >>^ 8ul);
-    k.(2ul) <- sint32_to_sint8 (x >>^ 16ul);
-    k.(3ul) <- sint32_to_sint8 (x >>^ 24ul)
-
+  = C.store32 k (C.htole32 x)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+type chacha_ctx = b:Buffer.buffer Hacl.UInt128.t{length b = 4}
+
+let avx_vec4 (x1:h32) (x2:h32) (x3:h32) (x4:h32) : Hacl.UInt128.t =
+    (sint32_to_sint128 x1) <<^ 96 |
+    (sint32_to_sint128 x2) <<^ 64 |
+    (sint32_to_sint128 x3) <<^ 32 |
+    (sint32_to_sint128 x4) 
+    
 
 val chacha_keysetup:
   ctx:chacha_ctx ->
@@ -65,18 +60,12 @@ val chacha_keysetup:
     (ensures  (fun h0 _ h1 -> live h0 ctx /\ live h0 k /\ live h1 ctx /\ modifies_1 ctx h0 h1
       /\ as_seq h1 ctx == chacha_keysetup_spec (as_seq h0 ctx) (as_seq h0 k)))
 let chacha_keysetup ctx k =
-    ctx.(0ul)  <- (uint32_to_sint32 0x61707865ul);
-    ctx.(1ul)  <- (uint32_to_sint32 0x3320646eul);
-    ctx.(2ul)  <- (uint32_to_sint32 0x79622d32ul);
-    ctx.(3ul)  <- (uint32_to_sint32 0x6b206574ul);
-    ctx.(4ul)  <- load32_le(Buffer.sub k  0ul 4ul);
-    ctx.(5ul)  <- load32_le(Buffer.sub k  4ul 4ul);
-    ctx.(6ul)  <- load32_le(Buffer.sub k  8ul 4ul);
-    ctx.(7ul)  <- load32_le(Buffer.sub k 12ul 4ul);
-    ctx.(8ul)  <- load32_le(Buffer.sub k 16ul 4ul);
-    ctx.(9ul)  <- load32_le(Buffer.sub k 20ul 4ul);
-    ctx.(10ul) <- load32_le(Buffer.sub k 24ul 4ul);
-    ctx.(11ul) <- load32_le(Buffer.sub k 28ul 4ul)
+    ctx.(0ul)  <- avx_vec4 (uint32_to_sint32 0x61707865ul) (uint32_to_sint32 0x3320646eul)
+    		  	   (uint32_to_sint32 0x79622d32ul) (uint32_to_sint32 0x6b206574ul);
+    ctx.(1ul)  <- avx_vec4 (load32_le(Buffer.sub k  0ul 4ul)) (load32_le(Buffer.sub k  4ul 4ul))
+    	       	  	   (load32_le(Buffer.sub k  8ul 4ul)) (load32_le(Buffer.sub k 12ul 4ul));
+    ctx.(2ul)  <- avx_vec4 (load32_le(Buffer.sub k  16ul 4ul)) (load32_le(Buffer.sub k 20ul 4ul))
+    	       	  	   (load32_le(Buffer.sub k  24ul 4ul)) (load32_le(Buffer.sub k 28ul 4ul));
 
 
 val chacha_ietf_ivsetup:
@@ -88,149 +77,20 @@ val chacha_ietf_ivsetup:
     (ensures  (fun h0 _ h1 -> live h1 ctx /\ modifies_1 ctx h0 h1 /\ live h0 ctx /\ live h0 k
       /\ as_seq h1 ctx == chacha_ietf_ivsetup_spec (as_seq h0 ctx) (as_seq h0 k) counter))
 let chacha_ietf_ivsetup ctx iv counter =
-    ctx.(12ul) <- uint32_to_sint32 counter;
-    ctx.(13ul) <- load32_le(Buffer.sub iv 0ul 4ul);
-    ctx.(14ul) <- load32_le(Buffer.sub iv 4ul 4ul);
-    ctx.(15ul) <- load32_le(Buffer.sub iv 8ul 4ul)
+    ctx.(3ul) <- avx_vec4 (uint32_to_sint32 counter) (load32_le(Buffer.sub iv 0ul 4ul))
+    	      	 	  (load32_le(Buffer.sub iv 4ul 4ul)) (load32_le(Buffer.sub iv 8ul 4ul))
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-val chacha_encrypt_bytes_round:
+
+
+assume val chacha_doublequarterround:
   ctx:chacha_ctx ->
   Stack unit
     (requires (fun h -> live h ctx))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx 
       /\ as_seq h1 ctx == chacha_encrypt_bytes_round_spec (as_seq h0 ctx)))
-let chacha_encrypt_bytes_round ctx =
-  let x0 = ctx.(0ul) in
-  let x1 = ctx.(1ul) in
-  let x2 = ctx.(2ul) in
-  let x3 = ctx.(3ul) in
-  let x4 = ctx.(4ul) in
-  let x5 = ctx.(5ul) in
-  let x6 = ctx.(6ul) in
-  let x7 = ctx.(7ul) in
-  let x8 = ctx.(8ul) in
-  let x9 = ctx.(9ul) in
-  let x10 = ctx.(10ul) in
-  let x11 = ctx.(11ul) in
-  let x12 = ctx.(12ul) in
-  let x13 = ctx.(13ul) in
-  let x14 = ctx.(14ul) in
-  let x15 = ctx.(15ul) in
-  let x0 = x0 +%^ x4 in
-  let x12 = x12 ^^ x0 in
-  let x12 = x12 <<< 16ul in
-  let x8 = x8 +%^ x12 in
-  let x4 = x4 ^^ x8 in
-  let x4 = x4 <<< 12ul in
-  let x0 = x0 +%^ x4 in
-  let x12 = x12 ^^ x0 in
-  let x12 = x12 <<< 8ul in
-  let x8 = x8 +%^ x12 in
-  let x4 = x4 ^^ x8 in
-  let x4 = x4 <<< 7ul in
-  let x1 = x1 +%^ x5 in
-  let x13 = x13 ^^ x1 in
-  let x13 = x13 <<< 16ul in
-  let x9 = x9 +%^ x13 in
-  let x5 = x5 ^^ x9 in
-  let x5 = x5 <<< 12ul in
-  let x1 = x1 +%^ x5 in
-  let x13 = x13 ^^ x1 in
-  let x13 = x13 <<< 8ul in
-  let x9 = x9 +%^ x13 in
-  let x5 = x5 ^^ x9 in
-  let x5 = x5 <<< 7ul in
-  let x2 = x2 +%^ x6 in
-  let x14 = x14 ^^ x2 in
-  let x14 = x14 <<< 16ul in
-  let x10 = x10 +%^ x14 in
-  let x6 = x6 ^^ x10 in
-  let x6 = x6 <<< 12ul in
-  let x2 = x2 +%^ x6 in
-  let x14 = x14 ^^ x2 in
-  let x14 = x14 <<< 8ul in
-  let x10 = x10 +%^ x14 in
-  let x6 = x6 ^^ x10 in
-  let x6 = x6 <<< 7ul in
-  let x3 = x3 +%^ x7 in
-  let x15 = x15 ^^ x3 in
-  let x15 = x15 <<< 16ul in
-  let x11 = x11 +%^ x15 in
-  let x7 = x7 ^^ x11 in
-  let x7 = x7 <<< 12ul in
-  let x3 = x3 +%^ x7 in
-  let x15 = x15 ^^ x3 in
-  let x15 = x15 <<< 8ul in
-  let x11 = x11 +%^ x15 in
-  let x7 = x7 ^^ x11 in
-  let x7 = x7 <<< 7ul in
-  let x0 = x0 +%^ x5 in
-  let x15 = x15 ^^ x0 in
-  let x15 = x15 <<< 16ul in
-  let x10 = x10 +%^ x15 in
-  let x5 = x5 ^^ x10 in
-  let x5 = x5 <<< 12ul in
-  let x0 = x0 +%^ x5 in
-  let x15 = x15 ^^ x0 in
-  let x15 = x15 <<< 8ul in
-  let x10 = x10 +%^ x15 in
-  let x5 = x5 ^^ x10 in
-  let x5 = x5 <<< 7ul in
-  let x1 = x1 +%^ x6 in
-  let x12 = x12 ^^ x1 in
-  let x12 = x12 <<< 16ul in
-  let x11 = x11 +%^ x12 in
-  let x6 = x6 ^^ x11 in
-  let x6 = x6 <<< 12ul in
-  let x1 = x1 +%^ x6 in
-  let x12 = x12 ^^ x1 in
-  let x12 = x12 <<< 8ul in
-  let x11 = x11 +%^ x12 in
-  let x6 = x6 ^^ x11 in
-  let x6 = x6 <<< 7ul in
-  let x2 = x2 +%^ x7 in
-  let x13 = x13 ^^ x2 in
-  let x13 = x13 <<< 16ul in
-  let x8 = x8 +%^ x13 in
-  let x7 = x7 ^^ x8 in
-  let x7 = x7 <<< 12ul in
-  let x2 = x2 +%^ x7 in
-  let x13 = x13 ^^ x2 in
-  let x13 = x13 <<< 8ul in
-  let x8 = x8 +%^ x13 in
-  let x7 = x7 ^^ x8 in
-  let x7 = x7 <<< 7ul in
-  let x3 = x3 +%^ x4 in
-  let x14 = x14 ^^ x3 in
-  let x14 = x14 <<< 16ul in
-  let x9 = x9 +%^ x14 in
-  let x4 = x4 ^^ x9 in
-  let x4 = x4 <<< 12ul in
-  let x3 = x3 +%^ x4 in
-  let x14 = x14 ^^ x3 in
-  let x14 = x14 <<< 8ul in
-  let x9 = x9 +%^ x14 in
-  let x4 = x4 ^^ x9 in
-  let x4 = x4 <<< 7ul in
-  ctx.(0ul)  <- x0;
-  ctx.(1ul)  <- x1;
-  ctx.(2ul)  <- x2;
-  ctx.(3ul)  <- x3;
-  ctx.(4ul)  <- x4;
-  ctx.(5ul)  <- x5;
-  ctx.(6ul)  <- x6;
-  ctx.(7ul)  <- x7;
-  ctx.(8ul)  <- x8;
-  ctx.(9ul)  <- x9;
-  ctx.(10ul) <- x10;
-  ctx.(11ul) <- x11;
-  ctx.(12ul) <- x12;
-  ctx.(13ul) <- x13;
-  ctx.(14ul) <- x14;
-  ctx.(15ul) <- x15
 
 
 val chacha_encrypt_bytes_rounds:
