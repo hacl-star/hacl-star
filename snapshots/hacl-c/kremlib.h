@@ -133,12 +133,16 @@ typedef struct {
 } FStar_UInt128_t, FStar_UInt128_t_;
 #define CONSTANT_TIME_CARRY(a, b) \
   ((a ^ ((a ^ b) | ((a - b) ^ b))) >> (sizeof(a) * 8 - 1))
-// or just (a < b)? much better performance if we can use inline asm with adcq 
+// (a < b) give better perf, so does adcq with inline asm, but still not as good as native 32-bit code.
 
 static inline force_inline   FStar_UInt128_t FStar_UInt128_add(FStar_UInt128_t x, FStar_UInt128_t y) {
   FStar_UInt128_t r;
   r.low = x.low + y.low;
   r.high = x.high + y.high + CONSTANT_TIME_CARRY(r.low, y.low);
+  //__asm__("addq %2, %0; adcq %3, %1" :
+  //	  "=r"(r.low), "=r"(r.high) : 
+  //	  "emr" (y.low), "emr"(y.high), 
+  //	  "0" (x.low), "1" (x.high));
   return r;
 }
 
@@ -150,6 +154,10 @@ static inline force_inline   FStar_UInt128_t FStar_UInt128_sub(FStar_UInt128_t x
   FStar_UInt128_t r;
   r.low = x.low - y.low;
   r.high = x.high - y.high - CONSTANT_TIME_CARRY(x.low, r.low);
+  //  __asm__("subq %2, %0; sbbq %3, %1" :
+  //	  "=r"(r.low), "=r"(r.high) : 
+  //	  "emr" (y.low), "emr"(y.high), 
+  //	  "0" (x.low), "1" (x.high));
   return r;
 }
 

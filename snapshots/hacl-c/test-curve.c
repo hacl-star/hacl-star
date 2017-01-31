@@ -25,7 +25,7 @@ unsigned long long median(unsigned long long* a, int rounds) {
 	    }
 	}
     }
-  return a[rounds/4];
+  return a[rounds/8];
 }
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
