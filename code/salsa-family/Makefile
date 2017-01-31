@@ -6,8 +6,9 @@ include ../Makefile.include
 
 SALSA_FILES= \
 	Hacl.Test.Chacha20.fst \
+	Hacl.Test.Chacha20_avx.fst \
 	Hacl.Test.Salsa20.fst \
-	Hacl.Test.XSalsa20.fst
+	Hacl.Test.XSalsa20.fst 
 #	Hacl.Symmetric.Salsa20.fst \
 	Hacl.Symmetric.HSalsa20.fst \
 	Hacl.Symmetric.XSalsa20.fst \

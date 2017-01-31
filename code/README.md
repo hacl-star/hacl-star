@@ -33,7 +33,7 @@ Currently verified primitives:
 + Curve25519 (memory safety, overflow safety, functional correctness, side channel resistance)
 
 Currently unverified and partially-verified primitives are kept in the `experimental` directory.
-They will be moved out of this directory to `code` once their verification is complete.
+They will be moved out of this directory to a subdirectory of `code` once their verification is complete.
 
 ## Extraction to C and execution
 
