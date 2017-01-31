@@ -282,7 +282,7 @@ int32_t perf_curve() {
   sk = malloc(KEYSIZE * ROUNDS * sizeof(char));
   mul = malloc(KEYSIZE * ROUNDS * sizeof(char));
 
-  int fd = open("/dev/random", O_RDONLY);
+  int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, sk, len);
   if (res != len) {
     printf("Error on reading, got %llu bytes\n", res);

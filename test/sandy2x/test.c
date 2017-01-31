@@ -262,7 +262,7 @@ int32_t main()
   // TestLib_compare_and_print(curve25519, expected2, result, keysize);
   int i;
   unsigned char *pk, *sk, *mypk, *in;
-  int fd = open("/dev/random", O_RDONLY);
+  int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res;
   in = malloc(2 * KEYSIZE * ROUNDS * sizeof(char));
   res = read(fd, in, 2 * KEYSIZE * ROUNDS * sizeof(char));

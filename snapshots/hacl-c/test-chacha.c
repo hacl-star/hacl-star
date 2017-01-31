@@ -337,7 +337,7 @@ int32_t perf_chacha() {
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
   uint8_t* cipher = malloc(len);
-  int fd = open("/dev/random", O_RDONLY);
+  int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plain, len);
   if (res != len) {
     printf("Error on reading, got %llu bytes\n", res);

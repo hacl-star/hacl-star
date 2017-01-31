@@ -3,7 +3,7 @@
 #include "testutils.h"
 
 #define SIZE (1024*1024)
-#define ROUNDS (1000)
+#define ROUNDS (10)
 #define MESSAGE_LEN 44
 #define secretbox_MACBYTES   16
 #define CIPHERTEXT_LEN (secretbox_MACBYTES + MESSAGE_LEN + 32)
@@ -96,9 +96,9 @@ void test_xsalsa20(unsigned char* plain, unsigned char* cipher) {
   c2 = clock();
   t2 = ((double)c2 - c1)/CLOCKS_PER_SEC;
   d2 = b - a;
-  printf("[XSalsa20] No of cycles for TweetNacl: %llu\n", d2);
-  printf("[XSalsa20] User time for TweetNacl: %f\n", t2);
-  printf("[XSalsa20] Cycles/byte ratio TweetNacl): %lf\n", (double)d2/SIZE/ROUNDS);
+  printf("[Salsa20] No of cycles for TweetNacl: %llu\n", d2);
+  printf("[Salsa20] User time for TweetNacl: %f\n", t2);
+  printf("[Salsa20] Cycles/byte ratio TweetNacl): %lf\n", (double)d2/SIZE/ROUNDS);
 }
 
 void test_curve25519(unsigned char* plain, unsigned char* cipher) {

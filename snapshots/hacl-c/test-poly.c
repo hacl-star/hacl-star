@@ -2,8 +2,8 @@
 #include "testlib.h"
 #include "Poly1305_64.h"
 #include "sodium.h"
-#include "crypto/include/internal/poly1305.h"
-#include "crypto/poly1305/poly1305_local.h"
+#include "openssl/crypto/include/internal/poly1305.h"
+#include "openssl/crypto/poly1305/poly1305_local.h"
 
 void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
   POLY1305 state;
@@ -134,7 +134,7 @@ int32_t test_poly()
 int32_t perf_poly() {
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
-  int fd = open("/dev/random", O_RDONLY);
+  int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plain, len);
   uint8_t* macs = malloc(ROUNDS * MACSIZE * sizeof(char));
   if (res != len) {

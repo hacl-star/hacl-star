@@ -328,7 +328,7 @@ int32_t perf_salsa() {
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
   uint8_t* cipher = malloc(len);
-  int fd = open("/dev/random", O_RDONLY);
+  int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plain, len);
   if (res != len) {
     printf("Error on reading, got %llu bytes\n", res);
@@ -346,6 +346,7 @@ int32_t perf_salsa() {
   cycles a,b;
   clock_t t1,t2;
   t1 = clock();
+
   a = TestLib_cpucycles();
   for (int i = 0; i < ROUNDS; i++){
     Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(cipher, plain, len, nonce, key);
@@ -357,6 +358,7 @@ int32_t perf_salsa() {
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %llx\n", res);
+
   t1 = clock();
   a = TestLib_cpucycles();
   for (int i = 0; i < ROUNDS; i++){
@@ -369,6 +371,7 @@ int32_t perf_salsa() {
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %llx\n", res);
+  
   return exit_success;
 }
 
