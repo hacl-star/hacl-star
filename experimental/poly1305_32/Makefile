@@ -13,8 +13,9 @@ FSTAR_LIB_FILES= \
 	FStar.PropositionalExtensionality.fst \
 	FStar.FunctionalExtensionality.fst \
 	FStar.PredicateExtensionality.fst \
+	FStar.List.Tot.Base.fst \
+	FStar.List.Tot.Properties.fst \
 	FStar.List.Tot.fst \
-	FStar.ListProperties.fst \
 	FStar.Seq.Base.fst \
 	FStar.Seq.Properties.fst \
 	FStar.Seq.fst \

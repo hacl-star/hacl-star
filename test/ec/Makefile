@@ -39,10 +39,10 @@ NO_CODEGEN_HST=$(addprefix --no_extract , $(REALIZED_MODULE_HST))
 
 CURVE25519_ODIR=curve25519
 # Extracted OCaml HST files
-CURVE_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq_Base.ml FStar_Ghost.ml FStar_Math_Lib.ml Math_Lemmas.ml Math_Definitions.ml Math_Field.ml Math_Curve.ml Curve_Parameters.ml Curve_Bigint.ml Curve_Fsum.ml Curve_FsumWide.ml Curve_Fdifference.ml Curve_Fscalar.ml Curve_Fproduct.ml Curve_Modulo.ml Curve_Bignum.ml Curve_Crecip.ml Curve_Point.ml Curve_AddAndDouble.ml Curve_Ladder.ml
+CURVE_EXTRACTED_HST=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot_Base.ml FStar_Seq_Base.ml FStar_Ghost.ml FStar_Math_Lib.ml Math_Lemmas.ml Math_Definitions.ml Math_Field.ml Math_Curve.ml Curve_Parameters.ml Curve_Bigint.ml Curve_Fsum.ml Curve_FsumWide.ml Curve_Fdifference.ml Curve_Fscalar.ml Curve_Fproduct.ml Curve_Modulo.ml Curve_Bignum.ml Curve_Crecip.ml Curve_Point.ml Curve_AddAndDouble.ml Curve_Ladder.ml
 
 CURVE25519_FSTAR=Hacl.EC.Curve25519.fst
-CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot.ml FStar_Seq_Base.ml FStar_Ghost.ml FStar_Math_Lib.ml \
+CURVE25519_EXTRACTED=FStar_FunctionalExtensionality.ml FStar_TSet.ml FStar_List_Tot_Base.ml FStar_Seq_Base.ml FStar_Ghost.ml FStar_Math_Lib.ml \
 	Hacl_EC_Curve25519_Parameters.ml \
 	Hacl_EC_Curve25519_Bigint.ml \
 	Hacl_EC_Curve25519_Utils.ml \
@@ -80,9 +80,10 @@ OLD_FILES=Hacl_Test_Curve25519/Prims.c \
 	Hacl_Test_Curve25519/FStar_Mul.c \
 	Hacl_Test_Curve25519/FStar_Squash.c \
 	Hacl_Test_Curve25519/FStar_StrongExcludedMiddle.c \
-	Hacl_Test_Curve25519/FStar_List_Tot.c \
+	Hacl_Test_Curve25519/FStar_List_Tot_Base.c \
 	Hacl_Test_Curve25519/FStar_Classical.c \
-	Hacl_Test_Curve25519/FStar_ListProperties.c \
+	Hacl_Test_Curve25519/FStar_List_Tot_Properties.c \
+	Hacl_Test_Curve25519/FStar_List_Tot.c \
 	Hacl_Test_Curve25519/FStar_Seq_Properties.c \
 	Hacl_Test_Curve25519/FStar_Math_Lemmas.c \
 	Hacl_Test_Curve25519/FStar_BitVector.c \
@@ -126,9 +127,10 @@ FILES=Hacl_Test_Curve25519_donna_c64/Prims.c \
 	Hacl_Test_Curve25519_donna_c64/FStar_Mul.c \
 	Hacl_Test_Curve25519_donna_c64/FStar_Squash.c \
 	Hacl_Test_Curve25519_donna_c64/FStar_StrongExcludedMiddle.c \
-	Hacl_Test_Curve25519_donna_c64/FStar_List_Tot.c \
+	Hacl_Test_Curve25519_donna_c64/FStar_List_Tot_Base.c \
 	Hacl_Test_Curve25519_donna_c64/FStar_Classical.c \
-	Hacl_Test_Curve25519_donna_c64/FStar_ListProperties.c \
+	Hacl_Test_Curve25519_donna_c64/FStar_List_Tot_Properties.c \
+	Hacl_Test_Curve25519_donna_c64/FStar_List_Tot.c \
 	Hacl_Test_Curve25519_donna_c64/FStar_Seq_Properties.c \
 	Hacl_Test_Curve25519_donna_c64/FStar_Math_Lemmas.c \
 	Hacl_Test_Curve25519_donna_c64/FStar_BitVector.c \
@@ -179,9 +181,10 @@ RECURSIVE=Hacl_Test_Curve25519_recursive/Prims.c \
 	Hacl_Test_Curve25519_recursive/FStar_Mul.c \
 	Hacl_Test_Curve25519_recursive/FStar_Squash.c \
 	Hacl_Test_Curve25519_recursive/FStar_StrongExcludedMiddle.c \
-	Hacl_Test_Curve25519_recursive/FStar_List_Tot.c \
+	Hacl_Test_Curve25519_recursive/FStar_List_Tot_Base.c \
 	Hacl_Test_Curve25519_recursive/FStar_Classical.c \
-	Hacl_Test_Curve25519_recursive/FStar_ListProperties.c \
+	Hacl_Test_Curve25519_recursive/FStar_List_Tot_Properties.c \
+	Hacl_Test_Curve25519_recursive/FStar_List_Tot.c \
 	Hacl_Test_Curve25519_recursive/FStar_Seq_Properties.c \
 	Hacl_Test_Curve25519_recursive/FStar_Math_Lemmas.c \
 	Hacl_Test_Curve25519_recursive/FStar_BitVector.c \

@@ -60,8 +60,9 @@ tweetnacl: $(KREMTEST)/testlib.c c/randombytes.c c/tweetnacl.c c/tweetnacl_test.
 blah:
 	gcc-6 -O3 -march=native -Wall -Werror -Wno-parentheses -Wno-unused-variable -fwrapv -I $(FSTAR_HOME)/ulib/hyperstack -I ../code/lib -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I $(KREMLIN_HOME)/kremlib -I tmp -Wno-error=pointer-sign \
 		tmp/FStar_Mul.c \
+		tmp/FStar_List_Tot_Base.c \
+		tmp/FStar_List_Tot_Properties.c \
 		tmp/FStar_List_Tot.c \
-		tmp/FStar_ListProperties.c \
 		tmp/FStar_Seq_Base.c \
 		tmp/FStar_Math_Lib.c \
 		tmp/FStar_Math_Lemmas.c \
@@ -134,8 +135,9 @@ blah:
 test32bits:
 	gcc-6 -m32 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I $(KREMLIN_HOME)/kremlib -I tmp -Wno-error=pointer-sign \
 		tmp/FStar_Mul.c \
+		tmp/FStar_List_Tot_Base.c \
+		tmp/FStar_List_Tot_Properties.c \
 		tmp/FStar_List_Tot.c \
-		tmp/FStar_ListProperties.c \
 		tmp/FStar_Seq_Base.c \
 		tmp/FStar_Math_Lib.c \
 		tmp/FStar_Math_Lemmas.c \
@@ -208,8 +210,9 @@ test32bits:
 gprof:
 	gcc-6 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I ../lib/hyperstack -I ../crypto -I ../crypto/symmetric -I ../crypto/ec -I ../../kremlin/kremlib -I ../../kremlin/test -I $(KREMLIN_HOME)/kremlib -I tmp -Wno-error=pointer-sign \
 		tmp/FStar_Mul.c \
+		tmp/FStar_List_Tot_Base.c \
+		tmp/FStar_List_Tot_Properties.c \
 		tmp/FStar_List_Tot.c \
-		tmp/FStar_ListProperties.c \
 		tmp/FStar_Seq_Base.c \
 		tmp/FStar_Math_Lib.c \
 		tmp/FStar_Math_Lemmas.c \
