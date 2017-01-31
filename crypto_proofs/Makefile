@@ -192,7 +192,7 @@ bignum-ver:
 	$(FSTAR) --use_hints crypto/Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part6.fst --include crypto
 	$(FSTAR) --use_hints --include crypto crypto/Crypto.Symmetric.Poly1305.Bignum.fst
 
-KRML_INCLUDES=$(addprefix -I ,test/spartan_aes aead uf1cma primitives prf utils $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,test/spartan_aes aead uf1cma primitives prf utils ../code/bignum ../code/poly1305 ../code/lib/kremlin $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=-verbose -ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS)
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES) 
 
@@ -207,7 +207,8 @@ krml-test.exe: test/spartan_aes/aes.o
 		test/spartan_dummy.c  \
 	       	test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
 	       	$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
-		-tmpdir tmp -add-include '"testlib.h"' -o krml-test.exe
+		-tmpdir tmp -add-include '"testlib.h"' -o krml-test.exe \
+		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* -drop Hacl.Spec -bundle Hacl.Poly1305=Hacl.Bignum.*,Hacl.Impl.*
 	./krml-test.exe
 
 run-krml-test.exe: 
@@ -324,3 +325,122 @@ clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
 	@rm -f $(addprefix crypto/ml/, *.cmx *.o *.cmi *~)
 	@rm -rf tmp kremlin *~ *.exe
+
+KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
+
+FSTAR?=$(FSTAR_HOME)/bin/fstar.exe
+
+HINTS_ENABLED?=--use_hints
+
+OPTIONS=--fstar_home $(FSTAR_HOME) --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20  $(HINTS_ENABLED) $(OTHERFLAGS)
+
+FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include utils --include primitives --include prf --include uf1cma --include aead --include ../code/bignum --include ../code/poly1305 --include ../code/lib/kremlin --include $(KREMLIN_HOME)/kremlib/
+
+VERIFY= \
+  uf1cma/Crypto.Symmetric.MAC
+
+# Files that should fully typecheck
+# Files commented out are broken, uncomment once fixed
+VERIFY2= \
+  utils/Buffer.Utils \
+  utils/Crypto.Symmetric.Bytes \
+  primitives/Crypto.Symmetric.Poly1305.Bigint \
+  primitives/Crypto.Symmetric.Poly1305.Parameters \
+  primitives/Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part1 \
+  primitives/Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part2 \
+  primitives/Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part3 \
+  primitives/Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part4 \
+  primitives/Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part5 \
+  primitives/Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part6 \
+  primitives/Crypto.Symmetric.Poly1305.Bignum \
+  primitives/Crypto.Symmetric.Poly1305.Spec \
+  primitives/Crypto.Symmetric.GF128 \
+  uf1cma/Crypto.Symmetric.MAC \
+  uf1cma/Crypto.Symmetric.UF1CMA \
+  primitives/Crypto.Symmetric.AES \
+  primitives/Crypto.Symmetric.AES128 \
+  primitives/Crypto.Symmetric.Chacha20 \
+  prf/Crypto.Symmetric.Cipher \
+  prf/Crypto.Symmetric.PRF \
+  aead/Crypto.AEAD.Encoding \
+  aead/Crypto.AEAD.Invariant \
+  aead/Crypto.AEAD.BufferUtils \
+  aead/Crypto.AEAD.Encrypt.Invariant \
+  aead/Crypto.AEAD.Enxor.Invariant \
+  aead/Crypto.AEAD.EnxorDexor \
+  aead/Crypto.AEAD.Wrappers.PRF \
+  aead/Crypto.AEAD.Wrappers.CMA \
+  aead/Crypto.AEAD.Wrappers.Encoding \
+  aead/Crypto.AEAD.Decrypt \
+  aead/Crypto.AEAD.MAC_Wrapper.Invariant \
+  aead/Crypto.AEAD.Encrypt.Ideal.Invariant \
+  aead/Crypto.AEAD.Encrypt \
+  aead/Crypto.AEAD \
+  aead/Crypto.Plain
+
+
+EXTRA= \
+  Crypto.Symmetric.Poly1305 \
+  Crypto.Test
+
+#  Crypto.Symmetric.Poly1305.Lemmas  # verification target is not passing reliably so commenting out
+
+#16-10-30 removed files specific to Poly1305:
+#  Crypto.Symmetric.Poly1305.MAC 
+#  Crypto.AEAD.Chacha20Poly1305
+
+
+# Files that should fully typecheck, but not part of regression
+# because verification is too slow
+SLOW= \
+
+# Files not yet fully typechecking -- possibly due to timeouts.
+# Please move files that you know fully typecheck to VERIFY
+# Files commented out are broken, uncomment once fixed
+LAX=
+
+# \
+#   Crypto.Symmetric.Poly1305 \
+#   Crypto.AEAD #NS: both of these verify, but each takes 20+ mins to verify
+
+
+#16-10-09  Not sure how to verify Flag.fsti and Flag.fst
+
+all: all-ver $(addsuffix .fst-lax, $(LAX))
+
+extra: all-ver $(addsuffix .fst-ver, $(EXTRA))
+
+all-ver: $(addsuffix .fst-ver, $(VERIFY))
+
+all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
+
+# Parameter for interactive mode
+%.fst-in: 
+	@echo $(OPTIONS) \
+	$(FSTAR_INCLUDE_PATHS) \
+	--__temp_no_proj Crypto.Symmetric.MAC \
+	--verify_module $(basename $(notdir $@))
+
+# Verifying one file at a time
+%.fst-ver:
+	$(FSTAR) $(OPTIONS) \
+	$(FSTAR_INCLUDE_PATHS) \
+	--__temp_no_proj Crypto.Symmetric.MAC \
+	--verify_module $(basename $(notdir $@)) \
+	$(basename $@).fst
+
+# Lax verifying one file at a time
+%.fst-lax:
+	$(FSTAR) $(OPTIONS) \
+	$(FSTAR_INCLUDE_PATHS) --lax \
+	--verify_module $(basename $(notdir $@)) \
+	$(basename $@).fst
+
+AEAD_FILES=$(addsuffix .fst, $(VERIFY))
+aead-ver: $(addsuffix -ver, $(AEAD_FILES))
+
+aead-wc:
+	wc -l $(AEAD_FILES)
+
+all-assumes: $(addsuffix .fst, $(VERIFY) $(LAX))
+	grep "\(assume\)\|\(admit\)\|\(lax\)" $^

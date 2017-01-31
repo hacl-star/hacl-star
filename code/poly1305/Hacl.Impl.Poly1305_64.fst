@@ -561,7 +561,7 @@ val poly1305_blocks:
       /\ red_45 (as_seq h0 st.h)
       /\ red_44 (as_seq h0 st.r)
       /\ red_45 (as_seq h1 st.h)
-      /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == poly1305_blocks_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) len
+      /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == Hacl.Spe.Poly1305_64.poly1305_blocks_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) len
       ))
 let rec poly1305_blocks log st m len =
   let m0 = ST.get() in
@@ -586,7 +586,7 @@ val crypto_onetimeauth:
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h k))
     (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 /\ live h0 input /\ live h0 k
-      /\ as_seq h1 output == crypto_onetimeauth_spec (as_seq h0 input) len (as_seq h0 k)))
+      /\ as_seq h1 output == Hacl.Spe.Poly1305_64.crypto_onetimeauth_spec (as_seq h0 input) len (as_seq h0 k)))
 let crypto_onetimeauth output input len k =
   push_frame();
   let len16 = U64.(len >>^ 4ul) in
