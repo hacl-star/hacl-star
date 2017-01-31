@@ -337,6 +337,30 @@ let rec load_uint128 len buf =
     FStar.UInt128.(uint8_to_uint128 b +^ (n' <<^ 8ul))
 
 
+val load_big128: len:UInt32.t { v len <= 16 } -> buf:lbuffer (v len) -> ST UInt128.t
+  (requires (fun h0 -> live h0 buf))
+  (ensures (fun h0 n h1 ->
+    h0 == h1 /\ live h0 buf /\
+    UInt128.v n == big_endian (sel_bytes h1 len buf)))
+let rec load_big128 len buf =
+  if len = 0ul then uint64_to_uint128 0UL
+  else
+    let n = load_big128 (len -^ 1ul) (sub buf 0ul (len -^ 1ul)) in
+    let b = buf.(len -^ 1ul) in 
+    let h = ST.get () in
+    lemma_big_endian_is_bounded 
+      (sel_bytes h (len -^ 1ul) (sub buf 0ul (len -^ 1ul)));
+    assert (UInt128.v n <= pow2 (8 * v len - 8) - 1);
+    assert (256 * UInt128.v n <= 256 * pow2 (8 * v len - 8) - 256);
+    assert_norm (256 * pow2 (8 * 16 - 8) - 256 <= pow2 128 - 256);
+    Math.Lemmas.pow2_le_compat (8 * 16 - 8) (8 * v len - 8);
+    assert (256 * pow2 (8 * v len - 8) - 256 <= pow2 128 - 256);
+    Math.Lemmas.modulo_lemma (256 * UInt128.v n) (pow2 128);
+    assert_norm (pow2 (UInt32.v 8ul) == 256);
+    let n' = n in (* n shadowed by FStar.UInt128.n *)
+    assert (256 * UInt128.v n' == FStar.UInt128.(v (n' <<^ 8ul)));
+    FStar.UInt128.(uint8_to_uint128 b +^ (n' <<^ 8ul))
+
 (* stores a machine integer into a buffer of len bytes *)
 // 16-10-02 subsumes Buffer.Utils.bytes_of_uint32 ?
 // check efficient compilation for all back-ends
@@ -440,6 +464,25 @@ let rec little_bytes len n =
     assert(Seq.equal b' (tail b));
     b
 
+// turns an integer into a bytestream, big-endian
+val big_bytes: 
+  len:UInt32.t -> n:nat{n < pow2 (8 * v len)} ->
+  Tot (b:lbytes (v len) {n == big_endian b}) (decreases (v len))
+let rec big_bytes len n = 
+  if len = 0ul then 
+    Seq.createEmpty 
+  else
+    let len = len -^ 1ul in 
+    let byte = UInt8.uint_to_t (n % 256) in
+    let n' = n / 256 in 
+    Math.Lemmas.pow2_plus 8 (8 * v len);
+    assert(n' < pow2 (8 * v len ));
+    let b' = big_bytes len n' in
+    let b'' = Seq.create 1 byte in
+    let b = Seq.append b' b'' in
+    assert(Seq.equal b' (Seq.slice b 0 (v len)));
+    b
+
 // check efficient compilation for all back-ends
 val store_uint128: 
   len:UInt32.t {v len <= 16} -> buf:lbuffer (v len) -> 
@@ -460,6 +503,26 @@ let rec store_uint128 len buf n =
     assert_norm (pow2 8 == 256);
     store_uint128 len buf' n';
     buf.(0ul) <- b // updating after the recursive call helps verification
+
+val store_big128: 
+  len:UInt32.t {v len <= 16} -> buf:lbuffer (v len) -> 
+  n:UInt128.t {UInt128.v n < pow2 (8 * v len)} -> Stack unit
+  (requires (fun h0 -> Buffer.live h0 buf))
+  (ensures (fun h0 r h1 -> 
+    Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
+    UInt128.v n == big_endian (sel_bytes h1 len buf)))
+let rec store_big128 len buf n = 
+  if len <> 0ul then
+    let len = len -^ 1ul in 
+    let b = uint128_to_uint8 n in
+    let n1 = n in (* n defined in FStar.UInt128, so was shadowed, so renamed into n1 *)
+    let n' = FStar.UInt128.(n1 >>^ 8ul) in 
+    assert(UInt128.v n = UInt8.v b + 256 * UInt128.v n');
+    let buf' = Buffer.sub buf 0ul len in
+    Math.Lemmas.pow2_plus 8 (8 * v len);
+    assert_norm (pow2 8 == 256);
+    store_big128 len buf' n';
+    buf.(len) <- b // updating after the recursive call helps verification
 
 (* from Spec; used e.g. in AEAD.Encoding *)
 
