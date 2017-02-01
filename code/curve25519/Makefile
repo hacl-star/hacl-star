@@ -82,7 +82,7 @@ extract-c:
 		-bundle Hacl.Spec=Hacl.Spec.* -bundle Hacl.Bignum=Hacl.Bignum.* -bundle Hacl.EC=Hacl.EC.* \
 		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                -ccopt -Wno-error=format= -no-prefix Hacl.Test.X25519 -ccopt -flto -ccopt -march=native -o x25519.exe
+                -ccopt -Wno-error=format= -no-prefix Hacl.Test.X25519 -ldopt -flto -ccopt -march=native -o x25519.exe
 	./x25519.exe
 
 

@@ -72,7 +72,7 @@ extract-c:
 		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* -bundle Poly1305=Hacl.Bignum.*,Hacl.Impl.* \
 		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native -o poly1305.exe
+                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
 	./poly1305.exe
 #-bundle Hacl.Poly1305=Hacl.Bignum.*,Hacl.Impl.Poly1305_64
 
