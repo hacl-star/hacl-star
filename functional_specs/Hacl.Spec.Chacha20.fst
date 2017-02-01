@@ -119,7 +119,7 @@ let chacha_state_setup_constants : c:seq h32{length c = 4} =
   let l = [(uint32_to_sint32 0x61707865ul); (uint32_to_sint32 0x3320646eul);
            (uint32_to_sint32 0x79622d32ul); (uint32_to_sint32 0x6b206574ul)] in
   assert_norm(List.Tot.length l = 4);
-  SeqProperties.seq_of_list l
+  Seq.seq_of_list l
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
@@ -154,15 +154,15 @@ let chacha_state_setup_spec k counter n =
 
 val chacha_state_sum: s:chacha_sctx -> s':chacha_sctx -> Tot chacha_sctx
 let chacha_state_sum s s' =
-  SeqProperties.seq_of_list (map2 (H32.add_mod) (SeqProperties.seq_to_list s) 
-                                                (SeqProperties.seq_to_list s'))
+  Seq.seq_of_list (map2 (H32.add_mod) (Seq.seq_to_list s) 
+                                                (Seq.seq_to_list s'))
 
 val chacha_state_serialize: s:chacha_sctx -> Tot block
 let chacha_state_serialize s =
-  let l = SeqProperties.seq_to_list s in
-  let l' = List.Tot.flatten (List.Tot.map (fun x -> SeqProperties.seq_to_list (h32_to_bytes x)) l) in
+  let l = Seq.seq_to_list s in
+  let l' = List.Tot.flatten (List.Tot.map (fun x -> Seq.seq_to_list (h32_to_bytes x)) l) in
   assume (List.Tot.length l' = 64); // TODO
-  SeqProperties.seq_of_list l'
+  Seq.seq_of_list l'
 
 
 val chacha_block: k:key -> counter:ctr -> n:nonce -> Tot block
@@ -183,16 +183,16 @@ let chacha20_encrypt k counter n plaintext =
     else let keystream = chacha_block k counter n in
          let block = slice plaintext (j*64) (j*64+64) in
          let encrypted_message = encrypted_message @|
-                                (SeqProperties.seq_of_list (map2 (H8.logxor)
-                                                           (SeqProperties.seq_to_list keystream)
-                                                           (SeqProperties.seq_to_list block))) in
+                                (Seq.seq_of_list (map2 (H8.logxor)
+                                                           (Seq.seq_to_list keystream)
+                                                           (Seq.seq_to_list block))) in
          loop (j+1) encrypted_message in
   let encrypted_message = loop 0 (createEmpty) in
   if rem = 0 then encrypted_message
   else let keystream = chacha_block k (UInt32.uint_to_t max) n in
        let block = slice plaintext max (length plaintext) in
        let encrypted_mesage = encrypted_message @|
-                              SeqProperties.seq_of_list (map2 (H8.logxor)
-                                                        (SeqProperties.seq_to_list keystream)
-                                                        (SeqProperties.seq_to_list (slice block 0 rem))) in
+                              Seq.seq_of_list (map2 (H8.logxor)
+                                                        (Seq.seq_to_list keystream)
+                                                        (Seq.seq_to_list (slice block 0 rem))) in
        encrypted_message

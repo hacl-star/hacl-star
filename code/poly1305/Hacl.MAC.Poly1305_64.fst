@@ -4,7 +4,7 @@ open FStar.Mul
 open FStar.ST
 open FStar.Buffer
 open FStar.Ghost
-open FStar.SeqProperties
+open FStar.Seq
 open FStar.HyperStack
 
 open Hacl.Cast
@@ -300,7 +300,7 @@ val poly1305_update:
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) () == poly1305_update_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) ()) (as_seq h0 m)
       (* /\ acc_inv h1 updated_log st *)
       (* /\ (reveal updated_log) == *)
-      (*     SeqProperties.snoc (reveal current_log) (encode (sel_word h1 (Buffer.sub m 0ul 16ul))) *)
+      (*     Seq.snoc (reveal current_log) (encode (sel_word h1 (Buffer.sub m 0ul 16ul))) *)
       (* /\ sel_elem h1 st.h == poly (reveal updated_log) (sel_elem h0 st.r) *)
       ))
 let poly1305_update log st m =

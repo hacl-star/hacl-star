@@ -69,7 +69,7 @@ extract-c:
 		$(POLY1305_FILES) Hacl.Test.Poly1305_64.fst \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
 		-drop Hacl.UInt128 -drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-bundle Hacl.Spec=Hacl.Spec.* -bundle Poly1305=Hacl.Bignum.*,Hacl.Impl.* \
+		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* -bundle Poly1305=Hacl.Bignum.*,Hacl.Impl.* \
 		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native -o poly1305.exe

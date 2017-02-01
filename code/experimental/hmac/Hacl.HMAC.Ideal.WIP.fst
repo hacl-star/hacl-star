@@ -3,7 +3,7 @@ module Hacl.HMAC.Ideal
 open FStar.Heap
 //open FStar.HyperHeap
 open FStar.Seq
-open FStar.SeqProperties
+open FStar.Seq
 open FStar.BaseTypes
 open FStar.List.Tot
 

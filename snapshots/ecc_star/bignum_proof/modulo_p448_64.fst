@@ -1,7 +1,7 @@
 (*--build-config
     options:--admit_fsi FStar.Set --admit_fsi Parameters --z3rlimit 15 --verify_module Modulo;
     variables:MATH=../math_interfaces BIGNUM=../bignum_proof;
-    other-files:FStar.Classical.fst FStar.FunctionalExtensionality.fst FStar.Set.fsi FStar.Heap.fst FStar.ST.fst FStar.All.fst seq.fsi FStar.Seq.fst FStar.SeqProperties.fst FStar.Array.fst FStar.Ghost.fst $BIGNUM/axiomatic.fst $BIGNUM/intlib.fst $BIGNUM/lemmas.fst $BIGNUM/parameters_448_64.fst $BIGNUM/uint.fst $BIGNUM/bigint.fst $BIGNUM/eval.fst modulo_lemmas.fst modulo.fsti;
+    other-files:FStar.Classical.fst FStar.FunctionalExtensionality.fst FStar.Set.fsi FStar.Heap.fst FStar.ST.fst FStar.All.fst seq.fsi FStar.Seq.Base.fst FStar.Seq.Properties.fst FStar.Seq.fst FStar.Array.fst FStar.Ghost.fst $BIGNUM/axiomatic.fst $BIGNUM/intlib.fst $BIGNUM/lemmas.fst $BIGNUM/parameters_448_64.fst $BIGNUM/uint.fst $BIGNUM/bigint.fst $BIGNUM/eval.fst modulo_lemmas.fst modulo.fsti;
   --*)
 
 module Modulo

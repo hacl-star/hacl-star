@@ -48,8 +48,8 @@ val poly: vs:text -> r:elem -> Tot (a:elem) (decreases (Seq.length vs))
 let rec poly vs r =
   if Seq.length vs = 0 then 0
   else
-    let v = SeqProperties.head vs in
-    (encode v +@ poly (SeqProperties.tail vs) r) *@ r
+    let v = Seq.head vs in
+    (encode v +@ poly (Seq.tail vs) r) *@ r
 
 
 private val fix: word_16 -> i:nat{i < 16} -> m:byte -> Tot word_16
@@ -57,7 +57,7 @@ let fix r i m = Seq.upd r i (FStar.UInt8.(Seq.index r i &^ m))
 
 
 module L = FStar.List.Tot
-open FStar.SeqProperties
+open FStar.Seq
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
@@ -86,7 +86,7 @@ let test = assert_norm(little_endian_l [ 255uy; 255uy; 255uy; 15uy;
                                                         252uy; 255uy; 255uy; 15uy;
                                                         252uy; 255uy; 255uy; 15uy ] = mask)
 
-open FStar.SeqProperties
+open FStar.Seq
 
 unfold let little_endian_post (b:bytes_list) (n:nat) : GTot Type0 =
   (* normalize  *)(little_endian_l (b) = n)
@@ -161,7 +161,7 @@ let mac_1305 vs r s = finish (poly vs r) s
 
 let rec msg_to_text (msg:bytes{length msg > 0}) : Tot text (decreases (length msg)) =
   if length msg <= 16 then create 1 msg
-  else SeqProperties.snoc (msg_to_text (slice msg 16 (length msg))) (slice msg 0 16)
+  else Seq.snoc (msg_to_text (slice msg 16 (length msg))) (slice msg 0 16)
 
 val poly1305: msg:bytes{length msg > 0} -> k:bytes{length k = 32} -> Tot tag
 let poly1305 msg k =

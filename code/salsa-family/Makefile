@@ -6,10 +6,10 @@ include ../Makefile.include
 
 SALSA_FILES= \
 	Hacl.Test.Chacha20.fst \
-	Hacl.Test.Chacha20_avx.fst \
 	Hacl.Test.Salsa20.fst \
 	Hacl.Test.XSalsa20.fst 
 #	Hacl.Symmetric.Salsa20.fst \
+	Hacl.Test.Chacha20_avx.fst \
 	Hacl.Symmetric.HSalsa20.fst \
 	Hacl.Symmetric.XSalsa20.fst \
 	Hacl.Symmetric.Chacha20.fst \
@@ -43,8 +43,8 @@ hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
 		$^ -o $(basename $^).exe \
 		-drop FStar -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
-		-drop Hacl.UInt128 -bundle Hacl.Spec \
-		$(FSTAR_HOME)/../kremlin/test/testlib.c -add-include '"testlib.h"' \
+		-drop Hacl.UInt128 -bundle Hacl.Spec=Hacl.Spec.* \
+		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native -no-prefix $(basename $^)
 	./$(basename $^).exe

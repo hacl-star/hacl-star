@@ -30,7 +30,7 @@ type plainLen = nat // we'll need a tigher bound
 abstract type plain (i:id) (l:plainLen) = lbytes l
 
 // ghost
-val as_bytes: #i:id -> #l:plainLen -> p:plain i l -> GTot (lbytes l)
+noextract val as_bytes: #i:id -> #l:plainLen -> p:plain i l -> GTot (lbytes l)
 let as_bytes #i #l p = p
 
 // restricted
@@ -52,7 +52,7 @@ val repr_injective : i:id -> l:plainLen -> p:plain i l -> Lemma
 let repr_injective i l p = ()
 *)
 
-val slice: #i:id -> #l:plainLen -> p:plain i l -> s:nat -> j:nat{s <= j && j <= l} -> 
+noextract val slice: #i:id -> #l:plainLen -> p:plain i l -> s:nat -> j:nat{s <= j && j <= l} -> 
   Tot (q:plain i (j - s) {as_bytes q = Seq.slice (as_bytes p) s j})
   
 let slice #i #l p s j = Seq.slice p s j
@@ -85,7 +85,7 @@ let live #i #l h (p:plainBuffer i l) = Buffer.live h (as_buffer p)
 private let live' = live (* live may be shadowed by Buffer.live in case of local open *)
 
 // unconditional access in specs; rename to as_plain? 
-val sel_plain: h:mem -> #i:id -> l:UInt32.t -> buf:plainBuffer i (v l){live h buf} -> GTot (plain i (v l))
+noextract val sel_plain: h:mem -> #i:id -> l:UInt32.t -> buf:plainBuffer i (v l){live h buf} -> GTot (plain i (v l))
 let sel_plain h #i l buf = sel_bytes h l buf
 
 // restricted 

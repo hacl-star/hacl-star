@@ -74,9 +74,9 @@ let rec load_bytes l buf =
   else
     let b = Buffer.index buf 0ul in
     let t = load_bytes (l -^ 1ul) (Buffer.sub buf 1ul (l -^ 1ul)) in
-    SeqProperties.cons b t
+    Seq.cons b t
 
-private val store_bytes_aux: len:UInt32.t -> buf:lbuffer (v len)
+noextract private val store_bytes_aux: len:UInt32.t -> buf:lbuffer (v len)
   -> i:UInt32.t{i <=^ len} -> b:lbytes (v len) -> ST unit
   (requires (fun h0 -> Buffer.live h0 buf /\
     Seq.equal (Seq.slice b 0 (v i)) (sel_bytes h0 i (Buffer.sub buf 0ul i))))
@@ -89,11 +89,11 @@ let rec store_bytes_aux len buf i b =
     let h = ST.get () in
     assert (Seq.equal
       (sel_bytes h (i +^ 1ul) (Buffer.sub buf 0ul (i +^ 1ul)))
-      (SeqProperties.snoc (sel_bytes h i (Buffer.sub buf 0ul i)) (Seq.index b (v i))));
+      (Seq.snoc (sel_bytes h i (Buffer.sub buf 0ul i)) (Seq.index b (v i))));
     store_bytes_aux len buf (i +^ 1ul) b
     end
 
-val store_bytes: l:UInt32.t -> buf:lbuffer (v l) -> b:lbytes (v l) -> ST unit
+noextract val store_bytes: l:UInt32.t -> buf:lbuffer (v l) -> b:lbytes (v l) -> ST unit
   (requires (fun h0 -> Buffer.live h0 buf))
   (ensures  (fun h0 r h1 -> Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
     Seq.equal b (sel_bytes h1 l buf)))
@@ -124,7 +124,7 @@ let random_bytes len =
   b
 
 
-open FStar.SeqProperties
+open FStar.Seq
 
 (* Little endian integer value of a sequence of bytes *)
 let rec little_endian (b:bytes) : Tot (n:nat) (decreases (Seq.length b)) =
@@ -233,10 +233,10 @@ let rec lemma_big_endian_is_bounded b =
     let s = Seq.slice b 0 (Seq.length b - 1) in
     assert(Seq.length s = Seq.length b - 1);
     lemma_big_endian_is_bounded s;
-    assert(UInt8.v (SeqProperties.last b) < pow2 8);
+    assert(UInt8.v (Seq.last b) < pow2 8);
     assert(big_endian s < pow2 (8 * Seq.length s));
     assert(big_endian b < pow2 8 + pow2 8 * pow2 (8 * (Seq.length b - 1)));
-    lemma_euclidean_division (UInt8.v (SeqProperties.last b)) (big_endian s) (pow2 8);
+    lemma_euclidean_division (UInt8.v (Seq.last b)) (big_endian s) (pow2 8);
     assert(big_endian b <= pow2 8 * (big_endian s + 1));
     assert(big_endian b <= pow2 8 * pow2 (8 * (Seq.length b - 1)));
     Math.Lemmas.pow2_plus 8 (8 * (Seq.length b - 1));
@@ -404,7 +404,7 @@ let rec store_big32 len buf n =
     store_big32 len buf' n';
     buf.(len) <- b // updating after the recursive call helps verification
 
-val uint32_bytes: 
+noextract val uint32_bytes: 
   len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> 
   Tot (b:lbytes (v len) { UInt32.v n == little_endian b}) (decreases (v len))
 let rec uint32_bytes len n = 
@@ -423,9 +423,9 @@ let rec uint32_bytes len n =
     assert(v n' < pow2 (8 * v len ));
     let b' = uint32_bytes len n'
     in 
-    SeqProperties.cons byte b'
+    Seq.cons byte b'
 
-val uint32_be: 
+noextract val uint32_be: 
   len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> 
   Tot (b:lbytes (v len) { UInt32.v n == big_endian b}) (decreases (v len))
 let rec uint32_be len n = 
@@ -444,7 +444,7 @@ let rec uint32_be len n =
     assert(v n' < pow2 (8 * v len ));
     let b' = uint32_be len n'
     in 
-    SeqProperties.snoc b' byte 
+    Seq.snoc b' byte 
 
 // turns an integer into a bytestream, little-endian
 val little_bytes: 
@@ -535,7 +535,7 @@ type word = b:Seq.seq UInt8.t {Seq.length b <= 16}
 open FStar.Math.Lib
 open FStar.Math.Lemmas
 open FStar.Seq
-open FStar.SeqProperties 
+open FStar.Seq 
 
 private let endian_is_injective q r q' r' : Lemma
   (requires UInt8.v r + pow2 8 * q = UInt8.v r' + pow2 8 * q')

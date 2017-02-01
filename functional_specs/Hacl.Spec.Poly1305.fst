@@ -36,7 +36,7 @@ type text = seq word
 let rec little_endian (b:bytes) : Tot (n:nat) (decreases (Seq.length b)) =
   if Seq.length b = 0 then 0
   else
-    UInt8.v (SeqProperties.head b) + pow2 8 * little_endian (SeqProperties.tail b)
+    UInt8.v (Seq.head b) + pow2 8 * little_endian (Seq.tail b)
 
 assume val lemma_little_endian_is_bounded: b:bytes -> Lemma
   (requires True)
@@ -56,8 +56,8 @@ val poly: vs:text -> r:elem -> Tot (a:elem) (decreases (Seq.length vs))
 let rec poly vs r =
   if Seq.length vs = 0 then 0
   else 
-    let v = SeqProperties.head vs in
-    (encode v +@ poly (SeqProperties.tail vs) r) *@ r
+    let v = Seq.head vs in
+    (encode v +@ poly (Seq.tail vs) r) *@ r
 
 
 private val fix: word_16 -> i:nat{i < 16} -> m:byte -> Tot word_16
@@ -97,8 +97,8 @@ assume val little_bytes:
 (*     Math.Lemmas.pow2_plus 8 (8 * v len); *)
 (*     assert(n' < pow2 (8 * v len )); *)
 (*     let b' = little_bytes len n' in *)
-(*     let b = SeqProperties.cons byte b' in *)
-(*     assert(Seq.equal b' (SeqProperties.tail b)); *)
+(*     let b = Seq.cons byte b' in *)
+(*     assert(Seq.equal b' (Seq.tail b)); *)
 (*     b *)
 
 (** Finish: truncate and pad (or pad and truncate) *)
@@ -115,7 +115,7 @@ val poly1305: msg:bytes -> k:bytes{length k = 32} -> Tot tag
 let poly1305 msg k =
   let rec msg_to_text (msg:bytes) : Tot text (decreases (length msg)) =
     if length msg <= 16 then create 1 msg
-    else SeqProperties.cons (slice msg 0 16) (msg_to_text (slice msg 16 (length msg))) in
+    else Seq.cons (slice msg 0 16) (msg_to_text (slice msg 16 (length msg))) in
   let text = msg_to_text msg in
   let r = encode_r (slice k 0 16) in
   let s = slice k 16 32 in

@@ -11,8 +11,13 @@ open FStar.Ghost
 open FStar.UInt64
 open FStar.Buffer
 
-open Crypto.Symmetric.Poly1305.Spec
-open Crypto.Symmetric.Poly1305 // avoid?
+(* open Crypto.Symmetric.Poly1305.Spec *)
+(* open Crypto.Symmetric.Poly1305 // avoid? *)
+(* module PS_ = Hacl.Spec.Poly1305_64 *)
+module PS_ = Hacl.Spe.Poly1305_64
+module PS = Hacl.Spec.Poly1305
+module PL = Hacl.Impl.Poly1305_64
+
 open Crypto.Symmetric.Bytes
 open Crypto.Indexing
 open Flag
@@ -126,7 +131,7 @@ unfold let authId (i:id) = // inline_for_extraction?
 type text = Seq.seq (lbytes 16)
 
 (** One-time MAC log, None or Some (m, MAC(m)), stores nonce for framing purposes *)
-type log (i:id) = n:UInt128.t{n == snd i} * option (text * tag)
+type log (i:id) = n:UInt128.t{n == snd i} * option (text * (lbytes 16))
 
 let log_cmp (#i:id) (a:log i) (b:log i) =
   match snd a, snd b with
@@ -148,7 +153,7 @@ noeq type state (i:id) =
     #region: erid ->
     r: MAC.elemB i{
       let b = MAC.as_buffer r in Buffer.frameOf b == region /\ ~HS.((Buffer.content b).mm)} ->
-    s: wordB_16{frameOf s == region /\ disjoint (MAC.as_buffer r) s /\ ~ HS.((Buffer.content s).mm)} ->
+    s: PL.wordB_16{frameOf s == region /\ disjoint (MAC.as_buffer r) s /\ ~ HS.((Buffer.content s).mm)} ->
     log: log_ref i region ->
     state i
 
@@ -339,6 +344,45 @@ let modifies_buf_and_ref (#a:Type) (#b:Type) (buf:Buffer.buffer a) (ref:referenc
       (frameOf b == rid /\ live h b /\ disjoint b buf
       /\ disjoint_ref_1 b (HS.as_aref ref)) ==> equal h b h' b))
 
+
+(* TODO: begin here *)
+
+(** From the current memory state, returns the word corresponding to a wordB *)
+noextract val sel_word: h:mem -> b:PL.wordB{live h b} -> GTot word
+let sel_word h b = as_seq h b
+
+(** Only used when mac_log is true *)
+private noextract val _read_word: len:u32 -> b:PL.wordB{length b == UInt32.v len} 
+  -> s:Seq.seq UInt8.t -> i:u32{UInt32.v i <= UInt32.v len} -> ST word
+  (requires (fun h -> live h b /\ Seq.slice (sel_word h b) 0 (UInt32.v i) == s))
+  (ensures  (fun h0 s h1 -> h0 == h1 /\ live h1 b /\ s == sel_word h1 b))
+let rec _read_word len b s i =
+  let h = ST.get () in
+  if UInt32.v i = UInt32.v len then
+    begin
+    Seq.lemma_eq_intro s (sel_word h b);
+    s
+    end
+  else
+    begin
+    let x = b.(i) in
+    let s' = FStar.Seq.(s @| Seq.create 1 x) in
+    Seq.lemma_eq_intro s' (Seq.slice (sel_word h b) 0 (UInt32.v i + 1));
+    _read_word len b s' (FStar.UInt32.(i +^ 1ul))
+    end
+
+noextract val read_word: len:u32 -> b:PL.wordB{length b == UInt32.v len} -> ST word
+  (requires (fun h0 -> live h0 b))
+  (ensures (fun h0 r h1 -> h0 == h1 /\ live h1 b /\ r == (sel_word h1 b)))
+let read_word len b =
+  let h = ST.get() in
+  let s0 = Seq.createEmpty #UInt8.t in
+  Seq.lemma_eq_intro s0 (Seq.slice (sel_word h b) 0 0);
+  _read_word len b s0 0ul
+
+(* TODO: end here *)
+
+
 // update [was add]; could add finalize (for POLY1305 when last block < 16).
 val update: #i:id -> st:state i -> acc:accBuffer i -> w:lbuffer 16 ->
   Stack unit
@@ -353,7 +397,7 @@ val update: #i:id -> st:state i -> acc:accBuffer i -> w:lbuffer 16 ->
      Buffer.live h0 w /\
      (if mac_log then
        HS.sel h1 (alog acc) ==
-       SeqProperties.cons (Buffer.as_seq h0 w) (HS.sel h0 (alog acc)) /\
+       Seq.cons (Buffer.as_seq h0 w) (HS.sel h0 (alog acc)) /\
        (let buf = MAC.as_buffer acc.a in
         let rid = frameOf buf in
         //Alternative 1:
@@ -374,7 +418,7 @@ let update #i st acc w =
     begin
     let v = read_word 16ul w in
     let vs = !(alog acc) in
-    acc.l := SeqProperties.cons v vs;
+    acc.l := Seq.cons v vs;
     let h1 = ST.get () in
     MAC.frame_sel_elem h0 h1 st.r;
     MAC.frame_sel_elem h0 h1 acc.a;

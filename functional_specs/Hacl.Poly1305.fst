@@ -4,7 +4,7 @@ open FStar.Mul
 open FStar.ST
 open FStar.Buffer
 open FStar.Ghost
-open FStar.SeqProperties
+open FStar.Seq
 open FStar.HyperStack
 
 open Hacl.Cast
@@ -70,11 +70,11 @@ val poly1305_update:
          let acc  = seval (as_seq h0 st.h) % prime in
          let acc' = seval (as_seq h1 st.h) % prime in
          let block = Seq.slice (as_seq h0 m) 0 16 in
-         log' = SeqProperties.snoc log block
+         log' = Seq.snoc log block
          /\ acc' == poly log' r)))
 let poly1305_update log st m =
   let h = ST.get() in
-  let log' = elift1 (fun x -> SeqProperties.snoc x (Seq.slice (as_seq h m) 0 16)) log in
+  let log' = elift1 (fun x -> Seq.snoc x (Seq.slice (as_seq h m) 0 16)) log in
   poly1305_update () st m;
   log'
 
@@ -100,7 +100,7 @@ val poly1305_finish:
          let r    = seval (as_seq h0 st.r) % prime in
          let s    = as_seq h0 key_s in
          let block = Seq.slice (as_seq h0 m) 0 (U64.v len) in
-         let final_log = poly (SeqProperties.snoc log block) r in
+         let final_log = poly (Seq.snoc log block) r in
          let tag  = as_seq h1 mac in
          tag = finish final_log s)
       ))

@@ -32,7 +32,7 @@ let uint128_to_uint8 (a:UInt128.t) : Tot (b:UInt8.t{UInt8.v b == UInt128.v a % p
 #reset-options "--z3rlimit 20"
 
 
-open FStar.SeqProperties
+open FStar.Seq
 
 (* Little endian integer value of a sequence of bytes *)
 let rec little_endian (b:bytes) : Tot (n:nat) (decreases (Seq.length b)) =
@@ -152,10 +152,10 @@ let rec lemma_big_endian_is_bounded b =
     let s = Seq.slice b 0 (Seq.length b - 1) in
     assert(Seq.length s = Seq.length b - 1);
     lemma_big_endian_is_bounded s;
-    assert(UInt8.v (SeqProperties.last b) < pow2 8);
+    assert(UInt8.v (Seq.last b) < pow2 8);
     assert(big_endian s < pow2 (8 * Seq.length s));
     assert(big_endian b < pow2 8 + pow2 8 * pow2 (8 * (Seq.length b - 1)));
-    lemma_euclidean_division (UInt8.v (SeqProperties.last b)) (big_endian s) (pow2 8);
+    lemma_euclidean_division (UInt8.v (Seq.last b)) (big_endian s) (pow2 8);
     assert(big_endian b <= pow2 8 * (big_endian s + 1));
     assert(big_endian b <= pow2 8 * pow2 (8 * (Seq.length b - 1)));
     Math.Lemmas.pow2_plus 8 (8 * (Seq.length b - 1));
@@ -208,7 +208,7 @@ type word = b:Seq.seq UInt8.t {Seq.length b <= 16}
 open FStar.Math.Lib
 open FStar.Math.Lemmas
 open FStar.Seq
-open FStar.SeqProperties 
+open FStar.Seq 
 
 private let endian_is_injective q r q' r' : Lemma
   (requires UInt8.v r + pow2 8 * q = UInt8.v r' + pow2 8 * q')

@@ -175,7 +175,7 @@ let op_Star_At a b = mul_loop a b zero 0
 
 
 open FStar.Seq
-open FStar.SeqProperties 
+open FStar.Seq 
 
 let seq_head (vs:seq 'a {Seq.length vs > 0}) = Seq.slice vs 0 (Seq.length vs - 1)
 
@@ -185,8 +185,8 @@ val poly: vs:text -> r:elemS -> Tot (a:elemS) (decreases (Seq.length vs))
 let rec poly vs r =
   if Seq.length vs = 0 then zero
   else
-    let v = SeqProperties.head vs in 
-    (encode v +@ poly (SeqProperties.tail vs) r ) *@ r
+    let v = Seq.head vs in 
+    (encode v +@ poly (Seq.tail vs) r ) *@ r
 
 let finish a s = a +@ s 
 let mac vs r s = finish (poly vs r) s
