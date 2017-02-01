@@ -131,7 +131,7 @@ unfold let authId (i:id) = // inline_for_extraction?
 type text = Seq.seq (lbytes 16)
 
 (** One-time MAC log, None or Some (m, MAC(m)), stores nonce for framing purposes *)
-type log (i:id) = n:UInt128.t{n == snd i} * option (text * PS.tag)
+type log (i:id) = n:UInt128.t{n == snd i} * option (text * (lbytes 16))
 
 let log_cmp (#i:id) (a:log i) (b:log i) =
   match snd a, snd b with
@@ -397,7 +397,7 @@ val update: #i:id -> st:state i -> acc:accBuffer i -> w:lbuffer 16 ->
      Buffer.live h0 w /\
      (if mac_log then
        HS.sel h1 (alog acc) ==
-       SeqProperties.cons (Buffer.as_seq h0 w) (HS.sel h0 (alog acc)) /\
+       Seq.cons (Buffer.as_seq h0 w) (HS.sel h0 (alog acc)) /\
        (let buf = MAC.as_buffer acc.a in
         let rid = frameOf buf in
         //Alternative 1:
@@ -418,7 +418,7 @@ let update #i st acc w =
     begin
     let v = read_word 16ul w in
     let vs = !(alog acc) in
-    acc.l := SeqProperties.cons v vs;
+    acc.l := Seq.cons v vs;
     let h1 = ST.get () in
     MAC.frame_sel_elem h0 h1 st.r;
     MAC.frame_sel_elem h0 h1 acc.a;
