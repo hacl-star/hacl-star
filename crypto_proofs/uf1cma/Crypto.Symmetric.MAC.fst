@@ -68,7 +68,7 @@ let limb = function
 
 unfold inline_for_extraction
 let limb_length = function
-  | POLY1305 ->  5
+  | POLY1305 ->  3
   | GHASH    -> 1
 
 inline_for_extraction unfold
@@ -101,11 +101,18 @@ val live: mem -> #i:id -> elemB i -> Type0
 let live h #i b = Buffer.live h (as_buffer b)
 
 val norm: mem -> #i:id -> b:elemB i -> Type0
-let norm h #i b = 
+let norm h #i b =
   match reveal_elemB b with
-  | B_POLY1305 b -> True (* TODO *)//Crypto.Symmetric.Poly1305.Bigint.norm h b // implies live
+  | B_POLY1305 b -> Buffer.live h b /\ Hacl.Spec.Bignum.AddAndMultiply.red_45 (as_seq h b)
+    //Crypto.Symmetric.Poly1305.Bigint.norm h b // implies live
   | B_GHASH    b -> Buffer.live h b
 
+val norm_r: mem -> #i:id -> b:elemB i -> Type0
+let norm_r h #i b =
+  match reveal_elemB b with
+  | B_POLY1305 b -> Buffer.live h b /\ Hacl.Spec.Bignum.AddAndMultiply.red_44 (as_seq h b)
+    //Crypto.Symmetric.Poly1305.Bigint.norm h b // implies live
+  | B_GHASH    b -> Buffer.live h b
 
 (** message words (not necessarily a full word. *)
 let wlen = 16ul
@@ -125,8 +132,10 @@ let sel_word h b = Buffer.as_seq h b
 noextract val sel_elem: h:mem -> #i:id -> b:elemB i{live h b} -> GTot (elem i)
 let sel_elem h #i b = 
   match reveal_elemB b with
-  | B_POLY1305 b -> PL.sel_int h b % (normalize_term (pow2 130 - 5))
+  | B_POLY1305 b -> PS_.selem (as_seq h b)
   | B_GHASH    b -> GF.sel_elem h b
+
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val frame_norm: h0:mem -> h1:mem -> #i:id -> b:elemB i{live h1 b} -> Lemma
   (requires (norm h0 b /\
@@ -134,7 +143,7 @@ val frame_norm: h0:mem -> h1:mem -> #i:id -> b:elemB i{live h1 b} -> Lemma
   (ensures  (norm h1 b))
 let frame_norm h0 h1 #i b =
   match alg i with
-  | POLY1305 -> () (* TODO *)
+  | POLY1305 -> ()
     (* Crypto.Symmetric.Poly1305.Bigint.norm_eq_lemma h0 h1 (as_buffer b) (as_buffer b) *)
   | _ -> ()
 
@@ -143,7 +152,7 @@ val eq_sel_elem: h:mem -> #i:id -> b1:elemB i{live h b1} -> b2:elemB i{live h b2
  (ensures  (sel_elem h b1 == sel_elem h b2))
 let eq_sel_elem h #i b1 b2 =
   match alg i with
-  | POLY1305 -> () (* TODO *)
+  | POLY1305 -> ()
     (* Crypto.Symmetric.Poly1305.Bigint.eval_eq_lemma h h *)
     (*   (as_buffer b1) (as_buffer b2) (limb_length POLY1305) *)
   | _ -> ()
@@ -153,7 +162,7 @@ val frame_sel_elem: h1:mem -> h2:mem -> #i:id -> b:elemB i{live h1 b /\ live h2 
  (ensures  (sel_elem h1 b == sel_elem h2 b))
 let frame_sel_elem h1 h2 #i b =
   match alg i with
-  | POLY1305 -> () (* TODO *) 
+  | POLY1305 -> ()
     (* Crypto.Symmetric.Poly1305.Bigint.eval_eq_lemma h1 h2 *)
     (*   (as_buffer b) (as_buffer b) (limb_length POLY1305) *)
   | _ -> ()
@@ -292,17 +301,29 @@ val poly_empty: #i:id -> t:text{Seq.length t == 0} -> r:elem i ->
   Lemma (poly #i t r == zero i)
 let poly_empty #i t r =
   match alg i with
-  | POLY1305 -> (* PL.poly_empty (text_to_PS_text t) r *) admit() // TODO
+  | POLY1305 -> ()
+    (* PL.poly_empty (text_to_PS_text t) r *) 
   | GHASH    -> GS.poly_empty t r
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
+val poly_cons_: x:word -> xs:PS_.text -> r:PS_.elem ->
+  Lemma PS.(poly (Seq.cons x xs) r == (encode x +@ PS.poly xs r) *@ r)
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+let poly_cons_ x xs r =
+  let xxs = Seq.cons x xs in
+  Seq.lemma_len_append (Seq.create 1 x) xs;
+  Seq.lemma_eq_intro (Seq.tail xxs) xs;
+  PS.poly_def_1 xxs r
 
 val poly_cons: #i:id -> x:word_16 -> xs:text -> r:elem i ->
   Lemma (poly #i (Seq.cons x xs) r == (poly #i xs r +@ encode i x) *@ r)
 let poly_cons #i x xs r =
   match alg i with
-  | POLY1305 -> admit() // TODO
-    (* assert (Seq.equal (text_to_PS_text (Seq.cons x xs)) *)
-    (*                   (Seq.cons x (text_to_PS_text xs))); *)
-    (* PL.poly_cons x (text_to_PS_text xs) r *)
+  | POLY1305 -> 
+    assert (Seq.equal (text_to_PS_text (Seq.cons x xs))
+                      (Seq.cons x (text_to_PS_text xs)));
+    poly_cons_ x (text_to_PS_text xs) r
   | GHASH    ->  GS.poly_cons x xs r; GS.add_comm (poly #i xs r) (encode i x)
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
@@ -310,16 +331,17 @@ let poly_cons #i x xs r =
 (** Process one message block and update the accumulator *)
 val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
   (requires (fun h -> live h r /\ live h a /\ Buffer.live h w
-    /\ norm h r /\ norm h a
+    /\ norm_r h r /\ norm h a
     /\ Buffer.disjoint_2 (as_buffer r) (as_buffer a) w 
     /\ Buffer.disjoint (as_buffer a) w))
   (ensures  (fun h0 _ h1 ->
     live h0 a /\ live h0 r /\ Buffer.live h0 w /\ live h1 a ///\ live h1 r
     /\ norm h1 a
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
-    /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
+    /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r
+    ))
 
-#set-options "--z3rlimit 40"
+#set-options "--z3rlimit 100"
 
 // TODO: use encodeB?
 let update #i r a w =
@@ -379,12 +401,24 @@ val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
     let sv = Buffer.as_seq h0 s in
     let av = sel_elem h0 a in
     match alg i with
-    | POLY1305 -> (* Seq.equal tv (PS.finish av sv) *) True
+    | POLY1305 -> Seq.equal tv (Hacl.Spec.Poly1305.finish av sv)
     | GHASH    -> Seq.equal tv (GS.finish av sv) )))
 
 let finish #i s a t =
+  let h0 = ST.get() in
   match a with
-  | B_POLY1305 a -> PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.MkState a a) t t 0uL s
+  | B_POLY1305 a -> (
+    push_frame();
+    let h = ST.get() in
+    Math.Lemmas.lemma_mod_plus_distr_l (PS_.selem (as_seq h a)) (little_endian (as_seq h t)) (pow2 128);
+    let dummy_r = Buffer.create 0uL 3ul in
+    let dummy_m = Buffer.create 42uy 0ul in
+    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.MkState dummy_r a) t dummy_m 0uL s;
+    pop_frame();
+    let h1 = ST.get() in
+    FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t)
+                                             (Hacl.Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
+    )
   | B_GHASH    a ->
     begin
     GF.finish a s;

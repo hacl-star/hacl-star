@@ -15,7 +15,7 @@ open Hacl.Cast
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint
 open Hacl.Spec.Bignum.AddAndMultiply
-open Hacl.Spec.Poly1305_64
+open Hacl.Spe.Poly1305_64
 open Hacl.Bignum.AddAndMultiply
 
 module H8   = Hacl.UInt8
@@ -26,7 +26,7 @@ module U32  = FStar.UInt32
 module U64  = FStar.UInt64
 
 
-inline_for_extraction let log_t = erased (text)
+inline_for_extraction let log_t = erased (Hacl.Spec.Poly1305_64.text)
 
 inline_for_extraction let bigint = felem
 inline_for_extraction let uint8_p = buffer Hacl.UInt8.t
@@ -63,7 +63,7 @@ inline_for_extraction val upd_3: b:felem -> b0:limb -> b1:limb -> b2:limb ->
   Stack unit
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
-      /\ as_seq h1 b == create_3 b0 b1 b2))
+      /\ as_seq h1 b == Hacl.Spec.Poly1305_64.create_3 b0 b1 b2))
 inline_for_extraction let upd_3 b b0 b1 b2 =
   b.(0ul) <- b0;
   b.(1ul) <- b1;
@@ -72,12 +72,12 @@ inline_for_extraction let upd_3 b b0 b1 b2 =
   cut (get h b 0 == b0);
   cut (get h b 1 == b1);
   cut (get h b 2 == b2);
-  Seq.lemma_eq_intro (as_seq h b) (create_3 b0 b1 b2)
+  Seq.lemma_eq_intro (as_seq h b) (Hacl.Spec.Poly1305_64.create_3 b0 b1 b2)
 
 
 inline_for_extraction private
 let clamp_mask : cm:wide{Wide.v cm = 0x0ffffffc0ffffffc0ffffffc0fffffff} =
-  load128 (0x0ffffffc0ffffffcuL) (0x0ffffffc0fffffffuL)
+  Hacl.Spec.Poly1305_64.load128 (0x0ffffffc0ffffffcuL) (0x0ffffffc0fffffffuL)
 
 
 val poly1305_encode_r:
@@ -87,16 +87,16 @@ val poly1305_encode_r:
     (requires (fun h -> live h r /\ live h key /\ disjoint key r))
     (ensures  (fun h0 _ h1 -> modifies_1 r h0 h1 /\ live h1 r /\ live h0 key
       /\ red_44 (as_seq h1 r)
-      /\ as_seq h1 r == poly1305_encode_r_spec (as_seq h0 key)
+      /\ as_seq h1 r == Hacl.Spec.Poly1305_64.poly1305_encode_r_spec (as_seq h0 key)
     ))
 let poly1305_encode_r r key =
   let h0 = ST.get() in
   let k = load128_le key in
   let k_clamped = Wide.(k &^ clamp_mask) in
-  let r0 = Limb.(sint128_to_sint64 k_clamped &^ mask_44) in
-  let r1 = Limb.(sint128_to_sint64 (Wide.(k_clamped >>^ 44ul)) &^ mask_44) in
+  let r0 = Limb.(sint128_to_sint64 k_clamped &^ Hacl.Spec.Poly1305_64.mask_44) in
+  let r1 = Limb.(sint128_to_sint64 (Wide.(k_clamped >>^ 44ul)) &^ Hacl.Spec.Poly1305_64.mask_44) in
   let r2 = Limb.(sint128_to_sint64 (Wide.(k_clamped >>^ 88ul))) in
-  lemma_encode_r k_clamped;
+  Hacl.Spec.Poly1305_64.lemma_encode_r k_clamped;
   assert_norm(pow2 44 = 0x100000000000);
   assert_norm(pow2 40 = 0x10000000000);
   upd_3 r r0 r1 r2
@@ -112,17 +112,17 @@ val toField:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ live h0 m
       /\ red_44 (as_seq h1 b)
       /\ v (Seq.index (as_seq h1 b) 2) < pow2 40
-      /\ as_seq h1 b == toField_spec (as_seq h0 m)
+      /\ as_seq h1 b == Hacl.Spec.Poly1305_64.toField_spec (as_seq h0 m)
     ))
 let toField b block =
   let h0 = ST.get() in
   let m  = load128_le block in
-  let r0 = Limb.(sint128_to_sint64 m &^ mask_44) in
-  let r1 = Limb.(sint128_to_sint64 (Wide.(m >>^ 44ul)) &^ mask_44) in
+  let r0 = Limb.(sint128_to_sint64 m &^ Hacl.Spec.Poly1305_64.mask_44) in
+  let r1 = Limb.(sint128_to_sint64 (Wide.(m >>^ 44ul)) &^ Hacl.Spec.Poly1305_64.mask_44) in
   let r2 = Limb.(sint128_to_sint64 (Wide.(m >>^ 88ul))) in
   upd_3 b r0 r1 r2;
   let h1 = ST.get() in
-  cut (as_seq h1 b == toField_spec (as_seq h0 block));
+  cut (as_seq h1 b == Hacl.Spec.Poly1305_64.toField_spec (as_seq h0 block));
   ()
 
 
@@ -133,7 +133,7 @@ val toField_plus_2_128:
     (requires (fun h -> live h b /\ live h m /\ disjoint b m))
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ live h0 m
       /\ red_44 (as_seq h1 b)
-      /\ as_seq h1 b == toField_plus_2_128_spec (as_seq h0 m)
+      /\ as_seq h1 b == Hacl.Spec.Poly1305_64.toField_plus_2_128_spec (as_seq h0 m)
     ))
 let toField_plus_2_128 b m =
   let h0 = ST.get() in
@@ -155,13 +155,13 @@ val poly1305_start:
     (requires (fun h -> live h a))
     (ensures  (fun h0 _ h1 -> live h1 a /\ modifies_1 a h0 h1
       /\ red_45 (as_seq h1 a)
-      /\ as_seq h1 a == poly1305_start_spec ()
+      /\ as_seq h1 a == Hacl.Spec.Poly1305_64.poly1305_start_spec ()
       ))
 let poly1305_start a =
   (* Zeroing the accumulator *)
   upd_3 a limb_zero limb_zero limb_zero;
   let h = ST.get() in
-  Seq.lemma_eq_intro (as_seq h a) (poly1305_start_spec ())
+  Seq.lemma_eq_intro (as_seq h a) (Hacl.Spec.Poly1305_64.poly1305_start_spec ())
 
 
 
@@ -275,7 +275,7 @@ val poly1305_process_last_block_:
       /\ live_st h1 st /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
       /\ live h0 block
       /\ modifies_1 st.h h0 h1
-      /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == poly1305_process_last_block_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) (len)
+      /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == Hacl.Spec.Poly1305_64.poly1305_process_last_block_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) (len)
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let poly1305_process_last_block_ log block st m rem' =
@@ -309,7 +309,7 @@ val poly1305_process_last_block:
       /\ red_44 (as_seq h0 st.r) /\ red_45 (as_seq h0 st.h)
       /\ live_st h1 st /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
       /\ modifies_1 st.h h0 h1
-      /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == poly1305_process_last_block_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) (len)
+      /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == Hacl.Spec.Poly1305_64.poly1305_process_last_block_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) (len)
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let poly1305_process_last_block log st m rem' =
@@ -332,25 +332,25 @@ val poly1305_last_pass_:
     (ensures (fun h0 _ h1 -> live h0 acc /\ bounds (as_seq h0 acc) p44 p44 p42
       /\ live h1 acc /\ bounds (as_seq h1 acc) p44 p44 p42
       /\ modifies_1 acc h0 h1
-      /\ as_seq h1 acc == poly1305_last_pass_spec_ (as_seq h0 acc)))
+      /\ as_seq h1 acc == Hacl.Spec.Poly1305_64.poly1305_last_pass_spec_ (as_seq h0 acc)))
 let poly1305_last_pass_ acc =
   let a0 = acc.(0ul) in
   let a1 = acc.(1ul) in
   let a2 = acc.(2ul) in
   let open Hacl.Bignum.Limb in
-  let mask0 = gte_mask a0 p44m5 in
-  let mask1 = eq_mask a1 p44m1 in
-  let mask2 = eq_mask a2 p42m1 in
+  let mask0 = gte_mask a0 Hacl.Spec.Poly1305_64.p44m5 in
+  let mask1 = eq_mask a1 Hacl.Spec.Poly1305_64.p44m1 in
+  let mask2 = eq_mask a2 Hacl.Spec.Poly1305_64.p42m1 in
   let mask  = mask0 &^ mask1 &^ mask2 in
   UInt.logand_lemma_1 (v mask0); UInt.logand_lemma_1 (v mask1); UInt.logand_lemma_1 (v mask2);
   UInt.logand_lemma_2 (v mask0); UInt.logand_lemma_2 (v mask1); UInt.logand_lemma_2 (v mask2);
   UInt.logand_associative (v mask0) (v mask1) (v mask2);
   cut (v mask = UInt.ones 64 ==> (v a0 >= pow2 44 - 5 /\ v a1 = pow2 44 - 1 /\ v a2 = pow2 42 - 1));
-  UInt.logand_lemma_1 (v p44m5); UInt.logand_lemma_1 (v p44m1); UInt.logand_lemma_1 (v p42m1);
-  UInt.logand_lemma_2 (v p44m5); UInt.logand_lemma_2 (v p44m1); UInt.logand_lemma_2 (v p42m1);
-  let a0' = a0 -^ (p44m5 &^ mask) in
-  let a1' = a1 -^ (p44m1 &^ mask) in
-  let a2' = a2 -^ (p42m1 &^ mask) in
+  UInt.logand_lemma_1 (v Hacl.Spec.Poly1305_64.p44m5); UInt.logand_lemma_1 (v Hacl.Spec.Poly1305_64.p44m1); UInt.logand_lemma_1 (v Hacl.Spec.Poly1305_64.p42m1);
+  UInt.logand_lemma_2 (v Hacl.Spec.Poly1305_64.p44m5); UInt.logand_lemma_2 (v Hacl.Spec.Poly1305_64.p44m1); UInt.logand_lemma_2 (v Hacl.Spec.Poly1305_64.p42m1);
+  let a0' = a0 -^ (Hacl.Spec.Poly1305_64.p44m5 &^ mask) in
+  let a1' = a1 -^ (Hacl.Spec.Poly1305_64.p44m1 &^ mask) in
+  let a2' = a2 -^ (Hacl.Spec.Poly1305_64.p42m1 &^ mask) in
   upd_3 acc a0' a1' a2'
 
 
@@ -362,20 +362,20 @@ val carry_limb_unrolled:
     (requires (fun h -> live h acc /\ bounds (as_seq h acc) (p44+5*((p45+p20)/p42)) p44 p42))
     (ensures (fun h0 _ h1 -> live h0 acc /\ bounds (as_seq h0 acc) (p44+5*((p45+p20)/p42)) p44 p42
       /\ live h1 acc /\ modifies_1 acc h0 h1
-      /\ as_seq h1 acc == carry_limb_unrolled (as_seq h0 acc)))
+      /\ as_seq h1 acc == Hacl.Spec.Poly1305_64.carry_limb_unrolled (as_seq h0 acc)))
 let carry_limb_unrolled acc =
   let a0 = acc.(0ul) in
   let a1 = acc.(1ul) in
   let a2 = acc.(2ul) in
   let open Hacl.Bignum.Limb in
-  let a0' = a0 &^ mask_44 in
+  let a0' = a0 &^ Hacl.Spec.Poly1305_64.mask_44 in
   UInt.logand_mask (v a0) 44;
   cut (v a0 < p45);
   let r0  = a0 >>^ 44ul in
   Math.Lemmas.lemma_div_lt (v a0) 45 44;
   assert_norm(pow2 1 = 2); assert_norm(pow2 0 = 1);
   cut (v r0 <= 1);
-  let a1' = (a1 +^ r0) &^ mask_44 in
+  let a1' = (a1 +^ r0) &^ Hacl.Spec.Poly1305_64.mask_44 in
   UInt.logand_mask #64 (v a1 + v r0) 44;
   Math.Lemmas.lemma_div_lt (v a1 + v r0) 45 44;
   let r1  = (a1 +^ r0) >>^ 44ul in
@@ -394,7 +394,7 @@ val carry_last_unrolled:
       /\ (v (Seq.index (as_seq h0 acc) 2) = p42 ==> v (Seq.index (as_seq h0 acc) 1) = 0)
       /\ live h1 acc /\ bounds (as_seq h1 acc) p44 p44 p42
       /\ modifies_1 acc h0 h1
-      /\ as_seq h1 acc == carry_last_unrolled (as_seq h0 acc)))
+      /\ as_seq h1 acc == Hacl.Spec.Poly1305_64.carry_last_unrolled (as_seq h0 acc)))
 let carry_last_unrolled acc =
   let h = ST.get() in
   lemma_carried_is_fine_to_carry_top (as_seq h acc);
@@ -410,7 +410,7 @@ val poly1305_last_pass:
     (requires (fun h -> live h acc /\ red_45 (as_seq h acc)))
     (ensures (fun h0 _ h1 -> live h0 acc /\ live h1 acc /\ red_45 (as_seq h0 acc)
       /\ modifies_1 acc h0 h1
-      /\ as_seq h1 acc == poly1305_last_pass_spec (as_seq h0 acc)))
+      /\ as_seq h1 acc == Hacl.Spec.Poly1305_64.poly1305_last_pass_spec (as_seq h0 acc)))
 let poly1305_last_pass acc =
   let h = ST.get() in
   last_pass_is_fine (as_seq h acc);
@@ -432,7 +432,7 @@ val bignum_to_128:
   Stack wide
     (requires (fun h -> live h a /\ bounds (as_seq h a) p44 p44 p42))
     (ensures (fun h0 z h1 -> live h0 a /\ bounds (as_seq h0 a) p44 p44 p42
-      /\ h0 == h1 /\ z == bignum_to_128 (as_seq h0 a)))
+      /\ h0 == h1 /\ z == Hacl.Spec.Poly1305_64.bignum_to_128 (as_seq h0 a)))
 let bignum_to_128 acc =
   let h0 = acc.(0ul) in
   let h1 = acc.(1ul) in
@@ -469,7 +469,7 @@ inline_for_extraction val poly1305_finish__:
          let m    = as_seq h0 m in
          Spec.MkState r1 acc1 log' == (
            if U64.(len =^ 0uL) then Spec.MkState r0 acc0 log
-           else poly1305_process_last_block_spec (Spec.MkState r0 acc0 log) m len))
+           else Hacl.Spec.Poly1305_64.poly1305_process_last_block_spec (Spec.MkState r0 acc0 log) m len))
       ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 inline_for_extraction let poly1305_finish__ log st mac m len key_s =
@@ -533,7 +533,7 @@ let poly1305_finish_ log st mac m len key_s =
   let h2 = ST.get() in
   no_upd_lemma_1 h0 h2 acc key_s;
   let k'  = load128_le key_s in
-  cut (k' = load128_le_spec (as_seq h0 key_s));
+  cut (k' = Hacl.Spec.Poly1305_64.load128_le_spec (as_seq h0 key_s));
   let open Hacl.Bignum.Wide in
   let acc' = bignum_to_128 acc in
   let mac' = acc' +%^ k' in
