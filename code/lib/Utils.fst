@@ -235,7 +235,7 @@ let lemma_euclidean_division r b q = ()
 // should follow from Seq
 assume private val lemma_create_cons:
   #a:Type -> n:nat -> v:a -> Lemma
-  (Seq.equal (SeqProperties.cons v (Seq.create n v)) (Seq.create (n + 1) v))
+  (Seq.equal (Seq.cons v (Seq.create n v)) (Seq.create (n + 1) v))
 *)
 
 //16-10-03 added functional step; made pre-condition tighter (sufficient for use in AEAD)
@@ -255,6 +255,6 @@ let rec memset b z len =
     let h1 = ST.get() in 
     let s = as_seq h1 b in
     assert(Seq.index s 0 = z); // ...but this fails in the absence of framing
-    assert(Seq.equal s (SeqProperties.cons z (Seq.slice s 1 (U32.v len))))
+    assert(Seq.equal s (Seq.cons z (Seq.slice s 1 (U32.v len))))
   end
 
