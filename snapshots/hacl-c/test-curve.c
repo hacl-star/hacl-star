@@ -260,9 +260,9 @@ int32_t test_curve()
   uint8_t result[keysize];
   memset(result, 0, keysize * sizeof result[0]);
 
-  Hacl_EC_crypto_scalarmult(result, scalar1, input1);
+  Curve25519_crypto_scalarmult(result, scalar1, input1);
   TestLib_compare_and_print("HACL Curve25519", expected1, result, keysize);
-  Hacl_EC_crypto_scalarmult(result, scalar2, input2);
+  Curve25519_crypto_scalarmult(result, scalar2, input2);
   TestLib_compare_and_print("HACL Curve25519", expected2, result, keysize);
 
   int res = crypto_scalarmult_curve25519(result, scalar1, input1);
@@ -300,7 +300,7 @@ int32_t perf_curve() {
   t1 = clock();
   for (int i = 0; i < ROUNDS; i++){
     a = TestLib_cpucycles();
-    Hacl_EC_crypto_scalarmult(mul + KEYSIZE * i, sk + KEYSIZE * i, pk + KEYSIZE * i);
+    Curve25519_crypto_scalarmult(mul + KEYSIZE * i, sk + KEYSIZE * i, pk + KEYSIZE * i);
     b = TestLib_cpucycles();
     d[i] = b - a;
   }
