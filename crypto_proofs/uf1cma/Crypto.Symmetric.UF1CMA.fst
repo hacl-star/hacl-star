@@ -11,8 +11,13 @@ open FStar.Ghost
 open FStar.UInt64
 open FStar.Buffer
 
-open Crypto.Symmetric.Poly1305.Spec
-open Crypto.Symmetric.Poly1305 // avoid?
+(* open Crypto.Symmetric.Poly1305.Spec *)
+(* open Crypto.Symmetric.Poly1305 // avoid? *)
+(* module PS_ = Hacl.Spec.Poly1305_64 *)
+module PS_ = Hacl.Spe.Poly1305_64
+module PS = Hacl.Spec.Poly1305
+module PL = Hacl.Impl.Poly1305_64
+
 open Crypto.Symmetric.Bytes
 open Crypto.Indexing
 open Flag
@@ -126,7 +131,7 @@ unfold let authId (i:id) = // inline_for_extraction?
 type text = Seq.seq (lbytes 16)
 
 (** One-time MAC log, None or Some (m, MAC(m)), stores nonce for framing purposes *)
-type log (i:id) = n:UInt128.t{n == snd i} * option (text * tag)
+type log (i:id) = n:UInt128.t{n == snd i} * option (text * PS.tag)
 
 let log_cmp (#i:id) (a:log i) (b:log i) =
   match snd a, snd b with
@@ -148,7 +153,7 @@ noeq type state (i:id) =
     #region: erid ->
     r: MAC.elemB i{
       let b = MAC.as_buffer r in Buffer.frameOf b == region /\ ~HS.((Buffer.content b).mm)} ->
-    s: wordB_16{frameOf s == region /\ disjoint (MAC.as_buffer r) s /\ ~ HS.((Buffer.content s).mm)} ->
+    s: PL.wordB_16{frameOf s == region /\ disjoint (MAC.as_buffer r) s /\ ~ HS.((Buffer.content s).mm)} ->
     log: log_ref i region ->
     state i
 
