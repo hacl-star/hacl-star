@@ -119,10 +119,10 @@ type wordB = b:Buffer.buffer u8{Buffer.length b <= UInt32.v wlen}
 
 type wordB_16 = lbuffer (UInt32.v wlen)
 
-val sel_word: h:mem -> b:wordB{Buffer.live h b} -> GTot word
+noextract val sel_word: h:mem -> b:wordB{Buffer.live h b} -> GTot word
 let sel_word h b = Buffer.as_seq h b
 
-val sel_elem: h:mem -> #i:id -> b:elemB i{live h b} -> GTot (elem i)
+noextract val sel_elem: h:mem -> #i:id -> b:elemB i{live h b} -> GTot (elem i)
 let sel_elem h #i b = 
   match reveal_elemB b with
   | B_POLY1305 b -> PL.sel_int h b % (normalize_term (pow2 130 - 5))
@@ -356,7 +356,7 @@ type tag = lbytes (UInt32.v taglen)
 type tagB = lbuffer (UInt32.v taglen)
 
 (** Complete MAC-computation specifications *)
-val mac: #i:id -> cs:text -> r:elem i -> s:tag -> GTot tag
+noextract val mac: #i:id -> cs:text -> r:elem i -> s:tag -> GTot tag
 let mac #i cs r s =
   match alg i with
   | POLY1305 -> Hacl.Spec.Poly1305.mac_1305 (text_to_PS_text cs) r s

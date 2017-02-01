@@ -53,7 +53,7 @@ let ideal_ensures
     let log = st_ilog st in 				      
     HS.sel h1 log == SeqProperties.snoc (HS.sel h0 log) entry)
 
-val do_ideal:
+noextract val do_ideal:
 	 #i: id -> 
  	 st: aead_state i Writer ->
           n: Cipher.iv (alg i) ->

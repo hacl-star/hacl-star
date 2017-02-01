@@ -53,10 +53,10 @@ let lemma_append_nil #a s = assert (Seq.equal s (Seq.append s Seq.createEmpty))
 (* *            Encoding                         *)
 (* * *********************************************)
 
-let pad_0 b l = Seq.append b (Seq.create l 0uy)
+noextract let pad_0 b l = Seq.append b (Seq.create l 0uy)
  
 // spec for encoding bytestrings into sequences of words. // Note the refined refinement interferes with type instantiation
-val encode_bytes: txt:Seq.seq UInt8.t -> 
+noextract val encode_bytes: txt:Seq.seq UInt8.t -> 
   GTot (r:MAC.text{Seq.length r = (Seq.length txt + 15)/16}) 
   (decreases (Seq.length txt))
 
@@ -354,7 +354,7 @@ private let encode_lengths (i:id) (aadlen:aadlen_32) (txtlen:txtlen_32) : lbytes
   | POLY1305 -> encode_lengths_poly1305 aadlen txtlen 
   | GHASH -> encode_lengths_ghash aadlen txtlen
 
-let encode_both (i:id) (aadlen:aadlen_32) (aad:lbytes (v aadlen)) (txtlen:txtlen_32) (cipher:lbytes (v txtlen)) :
+noextract let encode_both (i:id) (aadlen:aadlen_32) (aad:lbytes (v aadlen)) (txtlen:txtlen_32) (cipher:lbytes (v txtlen)) :
   GTot (e:MAC.text {Seq.length e > 0 /\ SeqProperties.head e = encode_lengths i aadlen txtlen}) = 
   SeqProperties.cons (encode_lengths i aadlen txtlen)
     (Seq.append 

@@ -47,7 +47,7 @@ let safeMac (i:id) = safeHS i && mac1 i
       So, in the ideal case, after mac verification, we already know
       what plain text to expect and the caller passes it in **)
 let maybe_plain (i:id) (l:nat) = if safeId i then Plain.plain i l else unit
-let as_plain (#i:id) (#l:nat) (m:maybe_plain i l{safeId i}) : plain i l = m
+noextract let as_plain (#i:id) (#l:nat) (m:maybe_plain i l{safeId i}) : plain i l = m
 
 (*** COUNTERS AND LENGTHS ***)
 let u (n:FStar.UInt.uint_t 32) = uint_to_t n
@@ -163,7 +163,7 @@ let num_blocks_for_entry (#i:id) (e:aead_entry i) : Tot nat =
   let AEADEntry nonce ad l plain cipher_tagged = e in
   num_blocks_for_len i l
 
-let encode_ad_cipher (i:id) (ad:adata) (l:ok_len i) (cipher:lbytes l) =
+noextract let encode_ad_cipher (i:id) (ad:adata) (l:ok_len i) (cipher:lbytes l) =
   encode_both i (FStar.UInt32.uint_to_t (Seq.length ad)) ad (FStar.UInt32.uint_to_t l) cipher
 
 (*+ counterblocks:

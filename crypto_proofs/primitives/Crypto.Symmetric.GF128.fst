@@ -24,7 +24,7 @@ private inline_for_extraction let len = 16ul // length of GF128 in bytes
 type elem = Spec.elem
 type elemB = b:buffer U128.t{length b = 1}
 
-let sel_elem h (b:elemB{live h b}): GTot elem = Seq.index (as_seq h b) 0
+noextract let sel_elem h (b:elemB{live h b}): GTot elem = Seq.index (as_seq h b) 0
 
 #set-options "--z3rlimit 20 --max_fuel 0 --initial_fuel 0"
 
