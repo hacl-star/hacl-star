@@ -3,7 +3,7 @@ module Hacl.Spec.Poly1305_64
 open FStar.Mul
 open FStar.Ghost
 open FStar.Seq
-open FStar.SeqProperties
+open FStar.Seq
 open FStar.Endianness
 open FStar.Int.Cast
 

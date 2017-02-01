@@ -3,7 +3,7 @@ module Hacl.Spe.Poly1305_64
 open FStar.Mul
 open FStar.Ghost
 open FStar.Seq
-open FStar.SeqProperties
+open FStar.Seq
 open FStar.Endianness
 open FStar.Int.Cast
 
@@ -130,8 +130,8 @@ val poly: vs:text -> r:elem -> Tot (a:elem) (decreases (Seq.length vs))
 let rec poly vs r =
   if Seq.length vs = 0 then 0
   else
-    let v = SeqProperties.head vs in
-    (encode v +@ poly (SeqProperties.tail vs) r) *@ r
+    let v = Seq.head vs in
+    (encode v +@ poly (Seq.tail vs) r) *@ r
 
 
 let invariant (st:poly1305_state_) : GTot Type0 =
@@ -148,8 +148,8 @@ let rec encode_bytes txt =
     Seq.createEmpty
   else
     let l0 = FStar.Math.Lib.min l 16 in
-    let w, txt = SeqProperties.split txt l0 in
-    SeqProperties.snoc (encode_bytes txt) w
+    let w, txt = Seq.split txt l0 in
+    Seq.snoc (encode_bytes txt) w
 
 (** Auxiliary lemmas *)
 
@@ -161,15 +161,15 @@ let append_empty #a s1 s2 =
   Seq.lemma_eq_intro (Seq.append s1 s2) s2
 
 val append_cons_snoc: #a:Type -> s1:Seq.seq a -> hd:a -> tl:Seq.seq a -> Lemma
-  (Seq.append s1 (SeqProperties.cons hd tl) ==
-   Seq.append (SeqProperties.snoc s1 hd) tl)
+  (Seq.append s1 (Seq.cons hd tl) ==
+   Seq.append (Seq.snoc s1 hd) tl)
 let append_cons_snoc #a s1 hd tl =
   Seq.lemma_eq_intro
-    (Seq.append s1 (SeqProperties.cons hd tl))
-    (Seq.append (SeqProperties.snoc s1 hd) tl)
+    (Seq.append s1 (Seq.cons hd tl))
+    (Seq.append (Seq.snoc s1 hd) tl)
 
 val snoc_cons: #a:Type -> s:Seq.seq a -> x:a -> y:a -> Lemma
-  (FStar.SeqProperties.(Seq.equal (snoc (cons x s) y) (cons x (snoc s y))))
+  (FStar.Seq.(Seq.equal (snoc (cons x s) y) (cons x (snoc s y))))
 let snoc_cons #a s x y = ()
 
 val append_assoc: #a:Type -> s1:Seq.seq a -> s2:Seq.seq a -> s3:Seq.seq a -> Lemma
@@ -205,9 +205,9 @@ let encode_bytes_empty txt = ()
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 val snoc_encode_bytes: s:Seq.seq UInt8.t -> w:word_16 -> Lemma
-  (Seq.equal (SeqProperties.snoc (encode_bytes s) w) (encode_bytes (Seq.append w s)))
+  (Seq.equal (Seq.snoc (encode_bytes s) w) (encode_bytes (Seq.append w s)))
 let snoc_encode_bytes s w =
-  let txt0, txt1 = SeqProperties.split (Seq.append w s) 16 in
+  let txt0, txt1 = Seq.split (Seq.append w s) 16 in
   assert (Seq.equal w txt0 /\ Seq.equal s txt1)
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
@@ -215,11 +215,11 @@ let snoc_encode_bytes s w =
 val encode_bytes_append: len:U32.t -> s:Seq.seq UInt8.t -> w:word -> Lemma
   (requires (0 < Seq.length w /\ Seq.length s == U32.v len /\ U32.rem len 16ul == 0ul))
   (ensures  (Seq.equal (encode_bytes (Seq.append s w))
-                      (SeqProperties.cons w (encode_bytes s))))
+                      (Seq.cons w (encode_bytes s))))
   (decreases (Seq.length s))
 let rec encode_bytes_append len s w =
   let open FStar.Seq in
-  let open FStar.SeqProperties in
+  let open FStar.Seq in
   let txt = Seq.append s w in
   lemma_len_append s w;
   let l0 = Math.Lib.min (length txt) 16 in
@@ -286,7 +286,7 @@ let lemma_append_empty #a s = Seq.lemma_eq_intro s (s @| createEmpty #a)
 
 private let lemma_tl (log:log_t) (m:word_16) (log':log_t) : Lemma
   (requires (log' == create 1 m @| log))
-  (ensures (length log' > 0 /\ (SeqProperties.tail log' == log) /\ (SeqProperties.head log' == m)))
+  (ensures (length log' > 0 /\ (Seq.tail log' == log) /\ (Seq.head log' == m)))
   = Seq.lemma_eq_intro (tail log') log;
     cut (Seq.index log' 0 == m)
 
@@ -298,8 +298,8 @@ private let poly_def_0 (log:log_t{length log = 0}) (r:elem) : Lemma
    = ()
 
 private let poly_def_1 (log:log_t{length log > 0}) (r:elem) : Lemma
-  (let hd = SeqProperties.head log in
-   let tl = SeqProperties.tail log in
+  (let hd = Seq.head log in
+   let tl = Seq.tail log in
    poly log r = (poly tl r +@ encode hd) *@ r)
    = ()
 
@@ -343,7 +343,7 @@ let lemma_poly1305_blocks_spec_2 m len log log' log'' acc acc' acc'' r =
   snoc_encode_bytes m' block;
   lemma_eq_intro (append block m') m;
   lemma_eq_intro (encode_bytes m' @| create 1 block) (encode_bytes m);
-  cut (encode_bytes m == SeqProperties.snoc (encode_bytes m') block);
+  cut (encode_bytes m == Seq.snoc (encode_bytes m') block);
   append_cons_snoc (encode_bytes m') block log
   
 
@@ -379,7 +379,7 @@ let rec poly1305_blocks_spec st m len =
     let st'    = poly1305_update_spec st block in
     let len'   = U64.(len -^ 1uL) in
     let log'   = MkState?.log st' in
-    cut (log' == SeqProperties.cons block log);
+    cut (log' == Seq.cons block log);
     let acc'   = MkState?.h st' in
     Math.Lemmas.modulo_lemma (seval r) (prime);
     lemma_poly1305_blocks_spec_1 block log log' (selem acc) (seval r) (selem acc');

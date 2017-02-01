@@ -4,7 +4,7 @@ module Hacl.Impl.Poly1305_64
 open FStar.Mul
 open FStar.ST
 open FStar.Ghost
-open FStar.SeqProperties
+open FStar.Seq
 open FStar.HyperStack
 open FStar.Endianness
 open FStar.Buffer
