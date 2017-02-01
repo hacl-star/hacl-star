@@ -73,7 +73,7 @@ val poly1305_update_spec: st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (M
        let r1 = seval (MkState?.r st') % prime in
        let log0:seq word = (MkState?.log st) in
        let log1 = (MkState?.log st') in
-       let block  = (little_endian m + pow2 128) % prime in
+       let block  = (little_endian m + pow2 128) in
        r0 = r1 /\ acc1  = ((acc0 +@ block) *@ r0)
        /\ (log1 == (Seq.create 1 m) @| log0))})
 let poly1305_update_spec st m =
@@ -297,7 +297,7 @@ private let poly_def_0 (log:log_t{length log = 0}) (r:elem) : Lemma
   (poly log r = zero)
    = ()
 
-private let poly_def_1 (log:log_t{length log > 0}) (r:elem) : Lemma
+let poly_def_1 (log:log_t{length log > 0}) (r:elem) : Lemma
   (let hd = Seq.head log in
    let tl = Seq.tail log in
    poly log r = (poly tl r +@ encode hd) *@ r)
