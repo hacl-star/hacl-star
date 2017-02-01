@@ -5,5 +5,5 @@
 #include "kremlib.h"
 #include "testlib.h"
 
-void Hacl_EC_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint);
+void Curve25519_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint);
 #endif
