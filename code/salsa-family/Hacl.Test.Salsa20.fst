@@ -39,15 +39,11 @@ let main () =
   let key = create 0uy keysize in
   key.(0ul) <- 0x80uy;
   let nonce = create 0uy noncesize in
-  (* let chacha20 = createL [ *)
-  (*   43y; 68y; 61y; 63y; 68y; 61y; 32y; 30y *)
-  (* ] in *)
-  let salsa20 = createL [0y] in
   (* Hacl.Symmetric.Salsa20.salsa20_encrypt ciphertext key nonce plaintext len; *)
   Hacl.Symmetric.Salsa20.crypto_stream_salsa20_xor ciphertext plaintext 512uL nonce key;
-  TestLib.compare_and_print salsa20 expected1 (offset ciphertext 0ul) 64ul;
-  TestLib.compare_and_print salsa20 expected2 (offset ciphertext 192ul) 64ul;
-  TestLib.compare_and_print salsa20 expected3 (offset ciphertext 256ul) 64ul;
-  TestLib.compare_and_print salsa20 expected4 (offset ciphertext 448ul) 64ul;
+  TestLib.compare_and_print (C.string_of_literal "salsa20") expected1 (offset ciphertext 0ul) 64ul;
+  TestLib.compare_and_print (C.string_of_literal "salsa20") expected2 (offset ciphertext 192ul) 64ul;
+  TestLib.compare_and_print (C.string_of_literal "salsa20") expected3 (offset ciphertext 256ul) 64ul;
+  TestLib.compare_and_print (C.string_of_literal "salsa20") expected4 (offset ciphertext 448ul) 64ul;
   pop_frame();
   C.exit_success
