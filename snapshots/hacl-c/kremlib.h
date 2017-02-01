@@ -12,7 +12,7 @@
 #include <time.h>
 
 #undef force_inline
-#define force_inline __attribute__((always_inline))
+#define force_inline inline __attribute__((always_inline))
 
 
 // For types and values from C.fsti that do not exactly have the same name as
@@ -92,8 +92,7 @@ static inline force_inline  uint64_t FStar_UInt64_gte_mask(uint64_t x, uint64_t 
   return low63 & high_bit;
 }
 
-#if 0
-//defined(__GNUC__) && defined(__SIZEOF_INT128__)
+#if defined(__GNUC__) && defined(__SIZEOF_INT128__)
 typedef unsigned __int128 FStar_UInt128_t, FStar_UInt128_t_;
 #define FStar_UInt128_add(x,y) ((x) + (y))
 #define FStar_UInt128_mul(x,y) ((x) * (y))
@@ -255,29 +254,20 @@ static inline force_inline  FStar_UInt128_t FStar_UInt128_gte_mask(FStar_UInt128
 }
 
 static inline force_inline  FStar_UInt128_t FStar_UInt128_mul_wide(uint64_t x, uint64_t y) {
-  FStar_UInt128_t r;
-   __asm__("mulq %3\n\t"
-    : "=d" (r.high),
-  "=a" (r.low)
-    : "%a" (x),
-  "rm" (y)
-    : "cc" );
-   return r;
-   /* a[0] += hi; */
-   /* a[1] += lo;  /\* uint64_t u1, v1, t, w3, k, w1; *\/ */
-  /* u1 = (x & 0xffffffff); */
-  /* v1 = (y & 0xffffffff); */
-  /* t = (u1 * v1); */
-  /* w3 = (t & 0xffffffff); */
-  /* k = (t >> 32); */
-  /* x >>= 32; */
-  /* t = (x * v1) + k; */
-  /* k = (t & 0xffffffff); */
-  /* w1 = (t >> 32); */
-  /* y >>= 32; */
-  /* t = (u1 * y) + k; */
-  /* k = (t >> 32); */
-  /* return (FStar_UInt128_t){.high = (x * y) + w1 + k, .low = (t << 32) + w3}; */
+  uint64_t u1, v1, t, w3, k, w1; 
+  u1 = (x & 0xffffffff);
+  v1 = (y & 0xffffffff);
+  t = (u1 * v1);
+  w3 = (t & 0xffffffff);
+  k = (t >> 32);
+  x >>= 32;
+  t = (x * v1) + k;
+  k = (t & 0xffffffff);
+  w1 = (t >> 32);
+  y >>= 32;
+  t = (u1 * y) + k;
+  k = (t >> 32);
+  return (FStar_UInt128_t){.high = (x * y) + w1 + k, .low = (t << 32) + w3};
 }
 
 /* static inline force_inline  FStar_UInt128_t FStar_UInt128_mul_wide(uint64_t x, uint64_t y) { */

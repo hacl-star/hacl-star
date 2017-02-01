@@ -6,7 +6,6 @@ CC=gcc-6 -flto
 test: test-poly	test-chacha test-salsa test-curve
 
 #CC=/usr/local/opt/llvm/bin/clang
-CC=gcc-6
 
 test-poly:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
