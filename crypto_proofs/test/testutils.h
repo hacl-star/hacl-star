@@ -1,8 +1,6 @@
 #ifndef __TESTUTILS_
 #define __TESTUTILS_
 
-#if defined(__i386__)
-
 static __inline__ unsigned long long rdtsc(void)
 {
   unsigned long long int x;
@@ -42,6 +40,18 @@ static __inline__ unsigned long long rdtsc(void)
   return(result);
 }
 
-#endif
+static __inline__ uint64_t cpucycles_begin(void)
+{
+  uint32_t hi, lo;
+  __asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
+  return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
+}
+
+static __inline__ uint64_t cpucycles_end(void)
+{
+  uint32_t hi, lo;
+  __asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
+  return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
+}
 
 #endif

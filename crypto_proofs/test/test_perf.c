@@ -62,8 +62,8 @@ uint8_t ivBuffer[IVLEN] = {
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d 2^14 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
-  printf("User time for %d 2^14 bytes: %f (%fns/byte)\n", rounds, t1, t1*1000000/plainlen/rounds);
+  printf("Cycles for %d times 2^20 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
+  printf("User time for %d times 2^20 bytes: %2f (%2fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
 int openssl_aead_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *aad,
@@ -91,7 +91,7 @@ int openssl_aead_encrypt(unsigned char *plaintext, int plaintext_len, unsigned c
   double t1, t2;
   unsigned long long a,b,d1,d2;
   c1 = clock();
-  a = rdtsc();
+  a = TestLib_cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++){
     /* Set IV length if default 12 bytes (96 bits) is not appropriate */
     if(1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, 16, NULL))
@@ -118,10 +118,10 @@ int openssl_aead_encrypt(unsigned char *plaintext, int plaintext_len, unsigned c
     if(1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag))
       return EXIT_FAILURE;
   }
-  b = rdtsc();
+  b = TestLib_cpucycles_end();
   c2 = clock();
-  d1 = b - a;
-  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  d1 = (double) b - a;
+  t1 = (double)c2 - c1;
   print_results(cipher == AES_128_GCM ? "openssl-aes-128-gcm" : (cipher == AES_256_GCM? "openssl-aes-256-gcm" : "openssl-chacha20-poly1305"), t1, d1, ROUNDS, PLAINLEN);
   EVP_CIPHER_CTX_free(ctx);
   return ciphertext_len;
@@ -165,13 +165,13 @@ void test_kremlin_aead(void *plain, void*cipher, int alg){
   st0 = { .x00 = FStar_HyperHeap_root, .x01 = log, .x02 = prf, .x03 = ak };
 
   c1 = clock();
-  a = rdtsc();
+  a = TestLib_cpucycles_begin();
   int rounds = alg == CHACHA_POLY? ROUNDS : AES_ROUNDS;
   for (int j = 0; j < rounds; j++) Crypto_AEAD_Encrypt_encrypt(i, st0, iv, AADLEN, aad, PLAINLEN, plain, cipher);
-  b = rdtsc();
+  b = TestLib_cpucycles_end();
   c2 = clock();
-  d1 = b - a;
-  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  d1 = (double)b - a;
+  t1 = (double)c2 - c1;
   print_results(alg == AES_256_GCM ? "Kremlin-C-aes256-gcm" : (alg == AES_128_GCM? "Kremlin-C-aes128-gcm" : "Kremlin-C-chacha20-poly1305"), t1, d1, rounds, PLAINLEN);
 }
 
@@ -213,7 +213,7 @@ void test_kremlin_prf(void *plain, void*cipher, int alg){
   FStar_HyperStack_mem h1 = (void *)(uint8_t )0;
   Crypto_Symmetric_PRF_domain____ x = { .iv = Crypto_Symmetric_PRF_iv_0, .ctr = (uint32_t )0 };
   c1 = clock();
-  a = rdtsc();
+  a = TestLib_cpucycles_begin();
   int rounds = alg == CHACHA_POLY ? ROUNDS : AES_ROUNDS;
   for (int j = 0; j < rounds; j++) Crypto_AEAD_EnxorDexor_counter_enxor(i,
                                                              Crypto_AEAD_Invariant___proj__AEADState__item__prf(i, Crypto_Indexing_rw_Writer, st0),
@@ -223,10 +223,10 @@ void test_kremlin_prf(void *plain, void*cipher, int alg){
                                                              plain,
                                                              cipher,
                                                              h1);
-  b = rdtsc();
+  b = TestLib_cpucycles_end();
   c2 = clock();
-  d1 = b - a;
-  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  d1 = (double) b - a;
+  t1 = (double) c2 - c1;
   print_results(alg == AES_256_GCM ? "Kremlin-C-aes256" : (alg == AES_128_GCM? "Kremlin-C-aes128" : "Kremlin-C-chacha20"), t1, d1, rounds, PLAINLEN);
 }
 
@@ -270,7 +270,7 @@ void test_kremlin_mac(void *plain, void*cipher, int alg){
   FStar_HyperStack_mem h1 = (void *)(uint8_t )0;
   Crypto_Symmetric_PRF_domain____ x = { .iv = Crypto_Symmetric_PRF_iv_0, .ctr = (uint32_t )0 };
   c1 = clock();
-  a = rdtsc();
+  a = TestLib_cpucycles_begin();
   int rounds = alg == CHACHA_POLY? ROUNDS: AES_ROUNDS;
 
   uint64_t buf0[5], buf00[5];
@@ -439,10 +439,10 @@ void test_kremlin_mac(void *plain, void*cipher, int alg){
                             tag);
   }
 
-  b = rdtsc();
+  b = TestLib_cpucycles_end();
   c2 = clock();
-  d1 = b - a;
-  t1 = ((double)c2 - c1)/CLOCKS_PER_SEC;
+  d1 = (double)b - a;
+  t1 = (double)c2 - c1;
   print_results(alg == AES_256_GCM ? "Kremlin-C-aes256" : (alg == AES_128_GCM? "Kremlin-C-aes128" : "Kremlin-C-poly1305"), t1, d1, rounds, PLAINLEN);
 }
 

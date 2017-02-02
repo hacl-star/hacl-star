@@ -43,12 +43,11 @@ noeq type poly1305_state = | MkState: r:bigint -> h:bigint -> poly1305_state
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 (** From the current memory state, returns the integer corresponding to a elemB, (before
-   computing the modulo) *)
-val sel_int: h:mem -> b:elemB{live h b} -> GTot nat
-let sel_int h b = eval h b
+   computing the modulo)  *)
+private val sel_int: h:mem -> b:elemB{live h b} -> GTot nat
+private let sel_int h b = eval h b
 
-
-let live_st m (st:poly1305_state) : Type0 =
+private let live_st m (st:poly1305_state) : Type0 =
   live m st.h /\ live m st.r /\ disjoint st.h st.r
 
 
@@ -59,11 +58,13 @@ let live_st m (st:poly1305_state) : Type0 =
 
 #set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
+[@"substitute"]
 inline_for_extraction val upd_3: b:felem -> b0:limb -> b1:limb -> b2:limb ->
   Stack unit
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == Hacl.Spec.Poly1305_64.create_3 b0 b1 b2))
+[@"substitute"]
 inline_for_extraction let upd_3 b b0 b1 b2 =
   b.(0ul) <- b0;
   b.(1ul) <- b1;
@@ -75,11 +76,13 @@ inline_for_extraction let upd_3 b b0 b1 b2 =
   Seq.lemma_eq_intro (as_seq h b) (Hacl.Spec.Poly1305_64.create_3 b0 b1 b2)
 
 
+[@"substitute"]
 inline_for_extraction private
 let clamp_mask : cm:wide{Wide.v cm = 0x0ffffffc0ffffffc0ffffffc0fffffff} =
   Hacl.Spec.Poly1305_64.load128 (0x0ffffffc0ffffffcuL) (0x0ffffffc0fffffffuL)
 
 
+[@"c_inline"]
 val poly1305_encode_r:
   r:bigint ->
   key:uint8_p{length key = 16} ->
@@ -89,6 +92,7 @@ val poly1305_encode_r:
       /\ red_44 (as_seq h1 r)
       /\ as_seq h1 r == Hacl.Spec.Poly1305_64.poly1305_encode_r_spec (as_seq h0 key)
     ))
+[@"c_inline"]
 let poly1305_encode_r r key =
   let h0 = ST.get() in
   let k = load128_le key in
@@ -104,6 +108,7 @@ let poly1305_encode_r r key =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
+[@"c_inline"]
 val toField:
   b:bigint ->
   m:wordB_16 ->
@@ -114,6 +119,7 @@ val toField:
       /\ v (Seq.index (as_seq h1 b) 2) < pow2 40
       /\ as_seq h1 b == Hacl.Spec.Poly1305_64.toField_spec (as_seq h0 m)
     ))
+[@"c_inline"]
 let toField b block =
   let h0 = ST.get() in
   let m  = load128_le block in
@@ -126,6 +132,7 @@ let toField b block =
   ()
 
 
+[@"c_inline"]
 val toField_plus_2_128:
   b:bigint ->
   m:wordB_16 ->
@@ -135,6 +142,7 @@ val toField_plus_2_128:
       /\ red_44 (as_seq h1 b)
       /\ as_seq h1 b == Hacl.Spec.Poly1305_64.toField_plus_2_128_spec (as_seq h0 m)
     ))
+[@"c_inline"]
 let toField_plus_2_128 b m =
   let h0 = ST.get() in
   toField b m;
@@ -170,6 +178,7 @@ module Spec = Hacl.Spec.Poly1305_64
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 
+[@"c_inline"]
 val poly1305_init_:
   st:poly1305_state ->
   key:uint8_p{length key = 16} ->
@@ -180,6 +189,7 @@ val poly1305_init_:
       /\ live h1 st.r /\ live h1 st.h /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal log) == poly1305_init_spec (as_seq h0 key)
       ))
+[@"c_inline"]
 let poly1305_init_ st key =
   poly1305_encode_r st.r (sub key 0ul 16ul);
   poly1305_start st.h;
@@ -232,6 +242,7 @@ let poly1305_update log st m =
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
+[@"substitute"]
 inline_for_extraction val poly1305_concat:
   b:uint8_p{length b = 16} ->
   m:uint8_p{disjoint b m} ->
@@ -242,6 +253,7 @@ inline_for_extraction val poly1305_concat:
     (ensures (fun h0 _ h1 -> live h0 m /\ live h0 b /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == Seq.append (as_seq h0 m) (Seq.create (16 - U64.v len) (uint8_to_sint8 0uy))
     ))
+[@"substitute"]
 inline_for_extraction let poly1305_concat b m len =
   assert_norm(pow2 32 = 0x100000000);
   let h0 = ST.get() in
@@ -260,6 +272,7 @@ inline_for_extraction let poly1305_concat b m len =
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
+[@"c_inline"]
 val poly1305_process_last_block_:
   current_log:log_t ->
   block:uint8_p{length block = 16} ->
@@ -278,6 +291,7 @@ val poly1305_process_last_block_:
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == Hacl.Spec.Poly1305_64.poly1305_process_last_block_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) (len)
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+[@"c_inline"]
 let poly1305_process_last_block_ log block st m rem' =
   let h0 = ST.get() in
   push_frame();
@@ -356,6 +370,7 @@ let poly1305_last_pass_ acc =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
+[@"c_inline"]
 val carry_limb_unrolled:
   acc:felem ->
   Stack unit
@@ -363,6 +378,7 @@ val carry_limb_unrolled:
     (ensures (fun h0 _ h1 -> live h0 acc /\ bounds (as_seq h0 acc) (p44+5*((p45+p20)/p42)) p44 p42
       /\ live h1 acc /\ modifies_1 acc h0 h1
       /\ as_seq h1 acc == Hacl.Spec.Poly1305_64.carry_limb_unrolled (as_seq h0 acc)))
+[@"c_inline"]
 let carry_limb_unrolled acc =
   let a0 = acc.(0ul) in
   let a1 = acc.(1ul) in

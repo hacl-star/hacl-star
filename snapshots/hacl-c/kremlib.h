@@ -480,9 +480,30 @@ FStar_UInt32_t FStar_UInt32_uint_to_t(Prims_nat x);
 #define store64(b,i) (*((uint64_t*)b)=i)
 #define load32(b) (*((uint32_t*) b))
 #define store32(b,i) (*((uint32_t*)b)=i)
+#define load128(b) (*((FStar_UInt128_t *)b))
+#define store128(b, i) (*((FStar_UInt128_t *)b) = i)
 
-#define load128_le(b) (*((FStar_UInt128_t *)b))
-#define store128_le(b, i) (*((FStar_UInt128_t *)b) = i)
+#define htole128(i) i
+//(((uint128_t)htole64((uint64_t) i)) << 64 | (uint128_t)htole64((uint64_t) (i >> 64)))
+#define le128toh(i) i
+//(((uint128_t)le64toh((uint64_t) i)) << 64 | (uint128_t)le64toh((uint64_t) (i >> 64)))
+#define htobe128(i) (((uint128_t)htobe64((uint64_t) i)) | ((uint128_t)htobe64((uint64_t)(i >> 64)) << 64))
+#define be128toh(i) (((uint128_t)be64toh((uint64_t) i)) | ((uint128_t)be64toh((uint64_t)(i >> 64)) << 64))
+
+#define load32_le(b) (le32toh(load32(b)))
+#define store32_le(b, i) (store32(htole32(i)))
+#define load32_be(b) (be32toh(load32(b)))
+#define store32_be(b, i) (store32(htobe32(i)))
+
+#define load64_le(b) (le64toh(load64(b)))
+#define store64_le(b, i) (store64(htole64(i)))
+#define load64_be(b) (be64toh(load64(b)))
+#define store64_be(b, i) (store64(htobe64(i)))
+
+#define load128_le(b) (le128toh(load128(b)))
+#define store128_le(b, i) (store128(b,htole128(i)))
+#define load128_be(b) (be128toh(load128(b)))
+#define store128_be(b, i) (store128(b,htobe128(i)))
 
 #define FStar_Buffer_to_seq_full(x) 0
 

@@ -21,14 +21,15 @@ inline_for_extraction let mask_2_42' : p:t{v p = pow2 42 - 1} =
   assert_norm (pow2 64 = 0x10000000000000000); assert_norm(pow2 42 - 1 = 0x3ffffffffff);
   uint64_to_limb 0x3ffffffffffuL
 
-
-val reduce:
+[@"c_inline"]
+inline_for_extraction val reduce:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ reduce_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ reduce_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == reduce_spec (as_seq h0 b)))
-let reduce b =
+[@"c_inline"]
+inline_for_extraction let reduce b =
   assert_norm(pow2 4 = 16);
   assert_norm(pow2 2 = 4);
   let b0 = b.(0ul) in
@@ -39,12 +40,14 @@ let reduce b =
 
 #set-options "--z3rlimit 20"
 
+[@"c_inline"]
 val carry_top:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ carry_top_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == carry_top_spec (as_seq h0 b)))
+[@"c_inline"]
 let carry_top b =
   let b2 = b.(2ul) in
   let b0 = b.(0ul) in
@@ -58,12 +61,14 @@ let carry_top b =
   b.(0ul) <- ((b2_42 <<^ 2ul) +^ b2_42) +^ b0
 
 
+[@"c_inline"]
 val carry_top_wide:
   b:felem_wide ->
   Stack unit
     (requires (fun h -> live h b /\ carry_top_wide_pre (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_wide_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == carry_top_wide_spec (as_seq h0 b)))
+[@"c_inline"]
 let carry_top_wide b =
   let b2 = b.(2ul) in
   let b0 = b.(0ul) in

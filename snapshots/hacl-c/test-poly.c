@@ -124,9 +124,9 @@ int32_t test_poly()
   uint32_t macsize = (uint32_t )16;
   uint8_t mac[macsize];
   memset(mac, 0, macsize * sizeof mac[0]);
-  Hacl_MAC_Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
+  Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
   TestLib_compare_and_print("HACL Poly1305", expected, mac, macsize);
-  Hacl_MAC_Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
+  Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
   TestLib_compare_and_print("Sodium Poly1305", expected, mac, macsize);
   return exit_success;
 }
@@ -147,7 +147,7 @@ int32_t perf_poly() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Hacl_MAC_Poly1305_64_crypto_onetimeauth(macs + MACSIZE * i, plain, len, key);
+    Poly1305_64_crypto_onetimeauth(macs + MACSIZE * i, plain, len, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

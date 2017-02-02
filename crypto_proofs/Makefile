@@ -208,8 +208,8 @@ krml-test.exe: test/spartan_aes/aes.o
 	       	test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
 	       	$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
 		-tmpdir tmp -add-include '"testlib.h"' -o krml-test.exe \
-		-bundle Hacl.Poly1305=Hacl.Bignum.*,Hacl.Impl.* \
-		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* -drop Hacl.Spec
+		-bundle "Spec=Hacl.Spec.*,Hacl.Spe.*" -drop "Spec" \
+		-bundle "Hacl_Poly1305=Hacl.Impl.*,Hacl.Bignum.*,Crypto.Symmetric.*" 
 	./krml-test.exe
 
 run-krml-test.exe: 
@@ -309,7 +309,7 @@ ocaml-test.exe: ocaml-test-extract
 	$(OCAMLOPT) -I tmp -I crypto/ml -I $(AEAD_ODIR) $(OCAML_FILES) -o ocaml-test.exe
 	./ocaml-test.exe
 
-OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
+OPENSSL_HOME=../other_providers/openssl
 #OPENSSL_HOME=/usr/local/Cellar/openssl\@1.1/1.1.0c
 CC=gcc-6 
 

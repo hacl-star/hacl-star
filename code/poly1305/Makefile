@@ -63,16 +63,24 @@ hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
 
 extract-c:
+	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p poly-c
-	$(KREMLIN_HOME)/krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir poly-c -verbose -cc gcc \
-		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib \
-		$(POLY1305_FILES) Hacl.Test.Poly1305_64.fst \
-		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
-		-drop Hacl.UInt128 -drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* -bundle Poly1305=Hacl.Bignum.*,Hacl.Impl.* \
-		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
-		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
+	$(KREMLIN_HOME)/krml -tmpdir poly-c -verbose \
+		-I ../bignum -I ../lib/kremlin \
+		Poly1305_64.fst Hacl.Test.Poly1305_64.fst \
+		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
+		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*' \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
+                -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
+# 	$(KREMLIN_HOME)/krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir poly-c -verbose -cc gcc \
+# 		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib \
+# 		$(POLY1305_FILES) Hacl.Test.Poly1305_64.fst \
+# 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
+# 		-drop Hacl.UInt128 -drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
+# 		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* -bundle Poly1305=Hacl.Bignum.*,Hacl.Impl.* \
+# 		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
+# 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
+#                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
 	./poly1305.exe
 #-bundle Hacl.Poly1305=Hacl.Bignum.*,Hacl.Impl.Poly1305_64
 
