@@ -6,7 +6,6 @@ open FStar.HyperStack
 open FStar.ST
 open Hacl.UInt8
 open Hacl.Cast
-(* open Hacl.SBuffer *)
 open FStar.Buffer
 
 module U8  = FStar.UInt8
@@ -52,8 +51,8 @@ private val gf128_add_loop: a:u8s{length a = 16} ->
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 b /\ modifies_1 a h0 h1))
 let rec gf128_add_loop a b dep =
-  if U32 (dep =^ 0ul) then () else begin
-    let i = U32 (dep -^ 1ul) in
+  if U32.(dep =^ 0ul) then () else begin
+    let i = U32.(dep -^ 1ul) in
     let ai = a.(i) in
     let bi = b.(i) in
     let x = ai ^^ bi in
@@ -80,7 +79,7 @@ let rec gf128_shift_right_loop a dep =
     let x = shift_right ai 1ul in
     a.(0ul) <- x
   end else begin
-    let i = U32 (dep -^ 1ul) in
+    let i = U32.(dep -^ 1ul) in
     let hd = a.(i) in
     let tl = a.(dep) in
     let x = (hd <<^ 7ul) +%^ (tl >>^ 1ul) in
@@ -107,9 +106,9 @@ private val apply_mask_loop: a:u8s{length a = 16} ->
     (requires (fun h -> live h a /\ live h m))
     (ensures (fun h0 _ h1 -> live h1 a /\ live h1 m /\ modifies_1 m h0 h1))
 let rec apply_mask_loop a m msk dep =
-  if U32 (dep =^ 0ul) then () 
+  if U32.(dep =^ 0ul) then () 
   else begin
-    let i = U32 (dep -^ 1ul) in
+    let i = U32.(dep -^ 1ul) in
     let ai = a.(i) in
     let x = ai &^ msk in
     m.(i) <- x;
@@ -140,7 +139,7 @@ let rec gf128_mul_loop a b tmp dep =
   if U32.eq dep 128ul then () else begin
     let r = sub tmp 0ul 16ul in
     let m = sub tmp 16ul 16ul in
-    let num = b.(U32 (dep /^ 8ul)) in
+    let num = b.(U32.(dep /^ 8ul)) in
     let msk = ith_bit_mask num (U32.rem dep 8ul) in
     apply_mask a m msk;
     gf128_add r m;
@@ -149,7 +148,7 @@ let rec gf128_mul_loop a b tmp dep =
     gf128_shift_right a;
     let num = a.(0ul) in
     a.(0ul) <- (num ^^ (logand msk r_mul));
-    gf128_mul_loop a b tmp (U32 (dep +^ 1ul))
+    gf128_mul_loop a b tmp (U32.(dep +^ 1ul))
   end
 
 (* In place multiplication. Calculate "a * b" and store the result in a.    *)
@@ -185,7 +184,7 @@ let mk_len_info len_info len_1 len_2 =
   upd len_info 4ul (uint32_to_sint8 len_1);
   let len_1 = len_1 >>^ 8ul in
   upd len_info 3ul (uint32_to_sint8 len_1);
-  let last = Hacl.UInt8 (uint32_to_sint8 len_2 <<^ 3ul) in
+  let last = H8.(uint32_to_sint8 len_2 <<^ 3ul) in
   upd len_info 15ul last;
   let len_2 = len_2 >>^ 5ul in
   upd len_info 14ul (uint32_to_sint8 len_2);
@@ -208,7 +207,7 @@ private val ghash_loop_: tag:u8s{length tag = 16} ->
 let ghash_loop_ tag auth_key str len dep =
   push_frame();
   let last = create (uint8_to_sint8 0uy) 16ul in
-  blit str dep last 0ul (U32 (len -^ dep));
+  blit str dep last 0ul (U32.(len -^ dep));
   gf128_add tag last;
   gf128_mul tag auth_key;
   pop_frame()
@@ -223,7 +222,7 @@ private val ghash_loop: tag:u8s{length tag = 16} ->
     (ensures (fun h0 _ h1 -> live h1 tag /\ live h1 auth_key /\ live h1 str /\ modifies_1 tag h0 h1))
 let rec ghash_loop tag auth_key str len dep =
   (* Appending zeros if the last block is not a complete one. *)
-  if U32 (16ul >=^ (len -^ dep)) then begin
+  if U32.(16ul >=^ (len -^ dep)) then begin
     ghash_loop_ tag auth_key str len dep
   end else begin
     let next = U32.add dep 16ul in
@@ -345,16 +344,16 @@ private val encrypt_loop: #k:pos -> alg:cipher_alg k ->
         /\ modifies_2 ciphertext tmp h0 h1))
 let rec encrypt_loop #k alg ciphertext key cnt plaintext len tmp dep =
   (* Appending zeros if the last block is not a complete one. *)
-  if U32 (16ul >=^ (len -^ dep)) then begin
+  if U32.(16ul >=^ (len -^ dep)) then begin
     let h0 = ST.get() in
     let counter = sub tmp 0ul 16ul in
     update_counter counter cnt;
     let last = sub tmp 16ul 16ul in
-    blit plaintext dep last 0ul (U32 (len -^ dep));
+    blit plaintext dep last 0ul (U32.(len -^ dep));
     let ci = sub tmp 32ul 16ul in
     alg key counter ci;
     gf128_add ci last;
-    blit ci 0ul ciphertext dep (U32 (len -^ dep));
+    blit ci 0ul ciphertext dep (U32.(len -^ dep));
     let h1 = ST.get() in
     assert(live h1 ciphertext /\ live h1 key /\ live h1 plaintext /\ live h1 tmp /\ modifies_2 ciphertext tmp h0 h1)
   end else begin
@@ -365,7 +364,7 @@ let rec encrypt_loop #k alg ciphertext key cnt plaintext len tmp dep =
     let ci = sub ciphertext dep 16ul in
     alg key counter ci;
     gf128_add ci pi;
-    encrypt_loop #k alg ciphertext key (U32 (cnt +%^ 1ul)) plaintext len tmp (U32 (dep +^ 16ul));
+    encrypt_loop #k alg ciphertext key (U32.(cnt +%^ 1ul)) plaintext len tmp (U32.(dep +^ 16ul));
     let h1 = ST.get() in
     assert(live h1 ciphertext /\ live h1 key /\ live h1 plaintext /\ live h1 tmp /\ modifies_2 ciphertext tmp h0 h1)
   end
@@ -390,7 +389,7 @@ let encrypt_body #k alg ciphertext tag key nonce cnt ad adlen plaintext len =
   push_frame();
   let tmp = create (uint8_to_sint8 0uy) 48ul in
   blit nonce 0ul tmp 0ul 12ul;
-  encrypt_loop #k alg ciphertext key (U32 (cnt +%^ 1ul)) plaintext len tmp 0ul;
+  encrypt_loop #k alg ciphertext key (U32.(cnt +%^ 1ul)) plaintext len tmp 0ul;
   authenticate #k alg ciphertext tag key nonce cnt ad adlen len;
   pop_frame()
 

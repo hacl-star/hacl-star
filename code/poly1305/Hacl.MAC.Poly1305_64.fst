@@ -28,15 +28,15 @@ inline_for_extraction let uint8_p = buffer Hacl.UInt8.t
 
 let elemB : Type0 = b:felem
 
-let wordB = b:uint8_p{length b <= 16}
-let wordB_16 = b:uint8_p{length b = 16}
+let wordB = b:uint8_p{Buffer.length b <= 16}
+let wordB_16 = b:uint8_p{Buffer.length b = 16}
 
 noeq type poly1305_state = | MkState: r:bigint -> h:bigint -> poly1305_state
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val load64_le:
-  b:uint8_p{length b = 8} ->
+  b:uint8_p{Buffer.length b = 8} ->
   Stack limb
     (requires (fun h -> live h b))
     (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 b
@@ -76,7 +76,7 @@ let load64_le b =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val store64_le:
-  b:uint8_p{length b = 8} ->
+  b:uint8_p{Buffer.length b = 8} ->
   z:Limb.t ->
   Stack unit
     (requires (fun h -> live h b))
@@ -151,7 +151,7 @@ inline_for_extraction let upd_3 b b0 b1 b2 =
 
 val poly1305_encode_r:
   r:bigint ->
-  key:uint8_p{length key = 16} ->
+  key:uint8_p{Buffer.length key = 16} ->
   Stack unit
     (requires (fun h -> live h r /\ live h key /\ disjoint key r))
     (ensures  (fun h0 _ h1 -> modifies_1 r h0 h1 /\ live h1 r /\ live h0 key
@@ -266,7 +266,7 @@ module Spec = Hacl.Spec.MAC.Poly1305_64
 
 val poly1305_init_:
   st:poly1305_state ->
-  key:uint8_p{length key = 32} ->
+  key:uint8_p{Buffer.length key = 32} ->
   Stack log_t
     (requires (fun h -> live_st h st /\ live h key /\ red_45 (as_seq h st.h) /\ disjoint st.r key
       /\ disjoint st.h key))
@@ -285,7 +285,7 @@ let poly1305_init_ st key =
 val poly1305_update:
   current_log:log_t ->
   st:poly1305_state ->
-  m:uint8_p{length m >= 16} ->
+  m:uint8_p{Buffer.length m >= 16} ->
   Stack log_t
     (requires (fun h -> live_st h st /\ live h m /\ disjoint m st.h /\ disjoint m st.r
       /\ red_45 (as_seq h st.h)
@@ -305,7 +305,7 @@ val poly1305_update:
       ))
 let poly1305_update log st m =
   push_frame();
-  let tmp = create limb_zero clen in
+  let tmp = Buffer.create limb_zero clen in
   let acc = st.h in
   let r   = st.r in
   toField_plus_2_128 tmp (sub m 0ul 16ul);
@@ -319,7 +319,7 @@ val poly1305_blocks:
   current_log:log_t ->
   st:poly1305_state ->
   m:uint8_p ->
-  len:U64.t{U64.v len <= length m} ->
+  len:U64.t{U64.v len <= Buffer.length m} ->
   Stack log_t
     (requires (fun h -> live_st h st /\ live h m /\ disjoint st.r m /\ disjoint st.h m
       /\ red_45 (as_seq h st.h)
@@ -349,9 +349,9 @@ let rec poly1305_blocks log st m len =
 
 
 inline_for_extraction val poly1305_concat:
-  b:uint8_p{length b = 16} ->
+  b:uint8_p{Buffer.length b = 16} ->
   m:uint8_p{disjoint b m} ->
-  len:U64.t{U64.v len < 16 /\ U64.v len = length m} ->
+  len:U64.t{U64.v len < 16 /\ U64.v len = Buffer.length m} ->
   Stack unit
     (requires (fun h -> live h m /\ live h b
       /\ as_seq h b == Seq.create 16 (uint8_to_sint8 0uy)))
@@ -377,10 +377,10 @@ inline_for_extraction let poly1305_concat b m len =
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val poly1305_process_last_block_:
-  block:uint8_p{length block = 16} ->
+  block:uint8_p{Buffer.length block = 16} ->
   st:poly1305_state ->
   m:uint8_p ->
-  len:U64.t{U64.v len < 16 /\ U64.v len = length m} ->
+  len:U64.t{U64.v len < 16 /\ U64.v len = Buffer.length m} ->
   Stack unit
     (requires (fun h -> live_st h st /\ live h m /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)
       /\ live h block /\ as_seq h block == Seq.upd (Seq.append (as_seq h m) (Seq.create (16 - U64.v len) (uint8_to_sint8 0uy))) (U64.v len) (uint8_to_sint8 1uy)
@@ -395,7 +395,7 @@ val poly1305_process_last_block_:
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let poly1305_process_last_block_ block st m rem' =
   push_frame();
-  let tmp = create limb_zero clen in
+  let tmp = Buffer.create limb_zero clen in
   assert_norm(pow2 32 = 0x100000000);
   Math.Lemmas.modulo_lemma (U64.v rem') (pow2 32);
   let i = FStar.Int.Cast.uint64_to_uint32 rem' in
@@ -410,7 +410,7 @@ let poly1305_process_last_block_ block st m rem' =
 val poly1305_process_last_block:
   st:poly1305_state ->
   m:uint8_p ->
-  len:U64.t{U64.v len < 16 /\ U64.v len = length m} ->
+  len:U64.t{U64.v len < 16 /\ U64.v len = Buffer.length m} ->
   Stack unit
     (requires (fun h -> live_st h st /\ live h m /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)))
     (ensures (fun h0 _ h1 -> live_st h0 st /\ live h0 m /\ red_44 (as_seq h0 st.r) /\ red_45 (as_seq h0 st.h)
@@ -422,7 +422,7 @@ let poly1305_process_last_block st m rem' =
   push_frame();
   let h0 = ST.get() in
   let zero = uint8_to_sint8 0uy in
-  let block = create zero 16ul in
+  let block = Buffer.create zero 16ul in
   let i = FStar.Int.Cast.uint64_to_uint32 rem' in
   poly1305_concat block m rem';
   block.(i) <- uint8_to_sint8 1uy;
@@ -447,7 +447,7 @@ let poly1305_last_pass acc =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 val store128_le:
-  mac:uint8_p{length mac = 16} ->
+  mac:uint8_p{Buffer.length mac = 16} ->
   mac':wide ->
   Stack unit
     (requires (fun h -> live h mac))
@@ -469,10 +469,10 @@ let store128_le mac mac' =
 inline_for_extraction val poly1305_finish__:
   log:log_t ->
   st:poly1305_state ->
-  mac:uint8_p{length mac = 16} ->
+  mac:uint8_p{Buffer.length mac = 16} ->
   m:uint8_p ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= length m} ->
-  key_s:uint8_p{length key_s = 16} ->
+  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Buffer.length m} ->
+  key_s:uint8_p{Buffer.length key_s = 16} ->
   Stack log_t
     (requires (fun h -> live_st h st /\ live h mac /\ live h m /\ live h key_s
       /\ disjoint st.h mac
@@ -517,10 +517,10 @@ inline_for_extraction let poly1305_finish__ log st mac m len key_s =
 val poly1305_finish_:
   log:log_t ->
   st:poly1305_state ->
-  mac:uint8_p{length mac = 16} ->
+  mac:uint8_p{Buffer.length mac = 16} ->
   m:uint8_p ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= length m} ->
-  key_s:uint8_p{length key_s = 16} ->
+  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Buffer.length m} ->
+  key_s:uint8_p{Buffer.length key_s = 16} ->
   Stack log_t
     (requires (fun h -> live_st h st /\ live h mac /\ live h m /\ live h key_s
       /\ disjoint st.h mac /\ disjoint st.h key_s /\ disjoint st.h m
@@ -557,10 +557,10 @@ let poly1305_finish_ log st mac m len key_s =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val crypto_onetimeauth:
-  output:uint8_p{length output = 16} ->
+  output:uint8_p{Buffer.length output = 16} ->
   input:uint8_p{disjoint input output} ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= length input} ->
-  k:uint8_p{disjoint output k /\ length k = 32} ->
+  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Buffer.length input} ->
+  k:uint8_p{disjoint output k /\ Buffer.length k = 32} ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h k))
     (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 /\ live h0 input /\ live h0 k
@@ -568,7 +568,7 @@ val crypto_onetimeauth:
 let crypto_onetimeauth output input len k =
   push_frame();
   let zero = uint64_to_sint64 0uL in
-  let buf = create zero U32.(clen +^ clen) in
+  let buf = Buffer.create zero U32.(clen +^ clen) in
   let r = sub buf 0ul clen in
   let h = sub buf clen clen in
   let st = MkState r h in
