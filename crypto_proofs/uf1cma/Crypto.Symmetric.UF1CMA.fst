@@ -203,9 +203,9 @@ let alloc region i ak k =
   assert(modifies_ref region TSet.empty h0 hz);
   MAC.encode_r r rb;
   let h2 = ST.get () in
-  if skeyed (fst i) 
-  then lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2
-  else  lemma_reveal_modifies_2 (MAC.as_buffer r) rb h1 h2;
+  (* if skeyed (fst i)  *)
+  (* then *) lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
+  (* else  lemma_reveal_modifies_2 (MAC.as_buffer r) rb h1 h2; *)
   lemma_intro_modifies_1 k h0 h2;
   Buffer.blit sb 0ul s 0ul 16ul;
   let h3 = ST.get () in
@@ -279,7 +279,7 @@ noextract val abuf: #i:id -> acc:accBuffer i -> GTot (MAC.elemB i)
 noextract let abuf #i acc = acc.a
 
 let acc_inv (#i:id) (st:state i) (acc:accBuffer i) h : Type0 =
-  MAC.norm h st.r /\ MAC.norm h acc.a /\
+  MAC.norm_r h st.r /\ MAC.norm h acc.a /\
   disjoint (MAC.as_buffer st.r) (MAC.as_buffer acc.a) /\
   (mac_log ==> (
     let log = HS.sel h (alog acc) in

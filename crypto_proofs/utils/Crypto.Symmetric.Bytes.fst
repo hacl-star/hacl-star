@@ -628,5 +628,3 @@ let lemma_little_endian_inj b b' =
   Seq.lemma_eq_intro b (Seq.slice b 0  len);
   Seq.lemma_eq_intro b' (Seq.slice b' 0  len);
   lemma_little_endian_is_injective b b' len
-
-
