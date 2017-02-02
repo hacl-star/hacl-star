@@ -26,7 +26,7 @@ module HS = FStar.HyperStack
 type id = id * UInt128.t //NS: why not this definition : i:id & iv (alg i)
 let alg (i:id) = macAlg_of_id (fst i) 
 
-#set-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
 type text = Seq.seq (lbytes 16) // Used to be seq elem, then seq (lbytes 16)
 
@@ -178,11 +178,11 @@ val rcreate: rgn:HH.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
     ~(live h0 r) /\live h1 r))
 let rcreate rgn i =
   match alg i with
-  | POLY1305 -> B_POLY1305 (FStar.Buffer.rcreate rgn 0UL 5ul)
+  | POLY1305 -> B_POLY1305 (FStar.Buffer.rcreate rgn 0UL 3ul)
   | GHASH    -> B_GHASH    (FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul)
 
 
-#reset-options "--z3rlimit 30 --initial_fuel 1 --max_fuel 1"
+#reset-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1"
 
 val create: i:id -> StackInline (elemB i)
   (requires (fun h0 -> True))
@@ -212,10 +212,10 @@ let create i =
 val encode_r: #i:id -> b:elemB i -> raw:lbuffer 16{Buffer.disjoint (as_buffer b) raw} -> Stack unit
   (requires (fun h -> live h b /\ Buffer.live h raw))
   (ensures  (fun h0 _ h1 -> 
-    norm h1 b /\ 
+    norm_r h1 b /\ 
     Buffer.live h1 raw /\ 
     (match alg i with 
-      | POLY1305 -> Buffer.modifies_2 (as_buffer b) raw h0 h1
+      | POLY1305 -> Buffer.modifies_1 (as_buffer b) h0 h1
       | GHASH -> Buffer.modifies_1 (as_buffer b) h0 h1)))
 let encode_r #i b raw =
   match b with 
@@ -236,29 +236,29 @@ let encode i w =
   | POLY1305 -> PS.encode w
   | GHASH    -> GS.encode w
 
-(** Encode a word of a message as a field element in a buffer *)
-private val encodeB: i:id -> w:wordB_16 -> StackInline (elemB i)
-  (requires (fun h -> Buffer.live h w))
-  (ensures  (fun h0 b h1 -> Buffer.live h1 w /\ live h1 b /\ norm h1 b
-    /\ Buffer.modifies_0 h0 h1
-    /\ ~(Buffer.contains h0 (as_buffer b))
-    /\ sel_elem h1 b == encode i (sel_word h1 w)))
-let encodeB i w =
-  match alg i with 
-  | POLY1305 ->
-      let b = Buffer.create 0UL 5ul in
-      PL.toField_plus_2_128 b w;
-      B_POLY1305 b
-  | GHASH ->
-      //let buf = Buffer.create 0uy 16ul in
-      //let h0 = ST.get () in
-      //Buffer.blit w 0ul buf 0ul 16ul;
-      //let h1 = ST.get () in
-      //Seq.lemma_eq_intro (sel_word h0 w) (Seq.slice (Buffer.as_seq h0 w) 0 16);
-      //Seq.lemma_eq_intro (Buffer.as_seq h1 b) (Seq.slice (Buffer.as_seq h1 b) 0 16);
-      let v = GF.load128_be w in
-      let b = Buffer.create v 1ul in
-      B_GHASH b
+(* (\** Encode a word of a message as a field element in a buffer *\) *)
+(* private val encodeB: i:id -> w:wordB_16 -> StackInline (elemB i) *)
+(*   (requires (fun h -> Buffer.live h w)) *)
+(*   (ensures  (fun h0 b h1 -> Buffer.live h1 w /\ live h1 b /\ norm h1 b *)
+(*     /\ Buffer.modifies_0 h0 h1 *)
+(*     /\ ~(Buffer.contains h0 (as_buffer b)) *)
+(*     /\ sel_elem h1 b == encode i (sel_word h1 w))) *)
+(* let encodeB i w = *)
+(*   match alg i with  *)
+(*   | POLY1305 -> *)
+(*       let b = Buffer.create 0UL 5ul in *)
+(*       PL.toField_plus_2_128 b w; *)
+(*       B_POLY1305 b *)
+(*   | GHASH -> *)
+(*       //let buf = Buffer.create 0uy 16ul in *)
+(*       //let h0 = ST.get () in *)
+(*       //Buffer.blit w 0ul buf 0ul 16ul; *)
+(*       //let h1 = ST.get () in *)
+(*       //Seq.lemma_eq_intro (sel_word h0 w) (Seq.slice (Buffer.as_seq h0 w) 0 16); *)
+(*       //Seq.lemma_eq_intro (Buffer.as_seq h1 b) (Seq.slice (Buffer.as_seq h1 b) 0 16); *)
+(*       let v = GF.load128_be w in *)
+(*       let b = Buffer.create v 1ul in *)
+(*       B_GHASH b *)
 
 (** Polynomial evaluation *)
 noextract val poly: #i:id -> cs:text -> r:elem i -> Tot (elem i)
@@ -341,7 +341,7 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r
     ))
 
-#set-options "--z3rlimit 100"
+#reset-options "--z3rlimit 200"
 
 // TODO: use encodeB?
 let update #i r a w =
@@ -384,6 +384,12 @@ let mac #i cs r s =
   | POLY1305 -> Hacl.Spec.Poly1305.mac_1305 (text_to_PS_text cs) r s
   | GHASH    -> GS.mac cs r s
 
+(* private val lemma_little_bytes_finish: h:mem -> t:tagB -> h':mem -> t':tagB -> n:nat -> Lemma *)
+(*   (requires (Buffer.live h t /\ Buffer.live h' t' *)
+(*     /\ little_endian (as_seq h t) == little_endian (as_seq h' t'))) *)
+(*   (ensures (Buffer.live h t /\ Buffer.live h' t' /\ (as_seq h t) == (as_seq h' t'))) *)
+(* let lemma_little_bytes_finish h t h' t' n = *)
+(*     lemma_little_endian_inj (Buffer.as_seq h t) (Buffer.as_seq h' t') *)
 
 val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
   (requires (fun h -> 
@@ -403,7 +409,7 @@ val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
     match alg i with
     | POLY1305 -> Seq.equal tv (Hacl.Spec.Poly1305.finish av sv)
     | GHASH    -> Seq.equal tv (GS.finish av sv) )))
-
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let finish #i s a t =
   let h0 = ST.get() in
   match a with
@@ -416,7 +422,7 @@ let finish #i s a t =
     PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.MkState dummy_r a) t dummy_m 0uL s;
     pop_frame();
     let h1 = ST.get() in
-    FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t)
+    lemma_little_endian_inj (Buffer.as_seq h1 t)
                                              (Hacl.Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
     )
   | B_GHASH    a ->
