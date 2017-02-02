@@ -11,8 +11,8 @@
 #include <stdbool.h>
 #include <time.h>
 
-#undef inline
-#define inline inline __attribute__((always_inline))
+//#undef inline
+//#define inline inline __attribute__((always_inline))
 
 
 // For types and values from C.fsti that do not exactly have the same name as
@@ -132,18 +132,20 @@ typedef struct {
   uint64_t low;
 } FStar_UInt128_t, FStar_UInt128_t_;
 #define CONSTANT_TIME_CARRY(a, b) \
-  (a < b)
-  /* ((a ^ ((a ^ b) | ((a - b) ^ b))) >> (sizeof(a) * 8 - 1)) */
+  ((a ^ ((a ^ b) | ((a - b) ^ b))) >> (sizeof(a) * 8 - 1))
+//  (a < b)
+
 // (a < b) give better perf, so does adcq with inline asm, but still not as good as native 32-bit code.
 
 static inline    FStar_UInt128_t FStar_UInt128_add(FStar_UInt128_t x, FStar_UInt128_t y) {
   FStar_UInt128_t r;
-  /* r.low = x.low + y.low; */
-  /* r.high = x.high + y.high + CONSTANT_TIME_CARRY(r.low, y.low); */
-  __asm__("addq %2, %0; adcq %3, %1" :
+  r.low = x.low + y.low; 
+  r.high = x.high + y.high + CONSTANT_TIME_CARRY(r.low, y.low); 
+  /*  __asm__("addq %2, %0; adcq %3, %1" :
   	  "=r"(r.low), "=r"(r.high) : 
   	  "emr" (y.low), "emr"(y.high), 
   	  "0" (x.low), "1" (x.high));
+  */
   return r;
 }
 
@@ -153,12 +155,14 @@ static inline    FStar_UInt128_t FStar_UInt128_add_mod(FStar_UInt128_t x, FStar_
 
 static inline    FStar_UInt128_t FStar_UInt128_sub(FStar_UInt128_t x, FStar_UInt128_t y) {
   FStar_UInt128_t r;
-  /* r.low = x.low - y.low; */
-  /* r.high = x.high - y.high - CONSTANT_TIME_CARRY(x.low, r.low); */
+  r.low = x.low - y.low; 
+  r.high = x.high - y.high - CONSTANT_TIME_CARRY(x.low, r.low); 
+  /*
    __asm__("subq %2, %0; sbbq %3, %1" :
   	  "=r"(r.low), "=r"(r.high) : 
   	  "emr" (y.low), "emr"(y.high), 
   	  "0" (x.low), "1" (x.high));
+  */
   return r;
 }
 

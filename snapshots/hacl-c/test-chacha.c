@@ -351,13 +351,13 @@ int32_t perf_chacha() {
   clock_t t1,t2;
 
   t1 = clock();
-  a = TestLib_cpucycles();
+  a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     Hacl_Symmetric_Chacha20_chacha_keysetup(ctx, key);
     Hacl_Symmetric_Chacha20_chacha_ietf_ivsetup(ctx, nonce, counter);
     Hacl_Symmetric_Chacha20_chacha_encrypt_bytes(ctx, plain, plain, len);
   }
-  b = TestLib_cpucycles();
+  b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("HACL ChaCha20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
@@ -365,11 +365,11 @@ int32_t perf_chacha() {
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %llx\n", res);
   t1 = clock();
-  a = TestLib_cpucycles();
+  a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     crypto_stream_chacha20_ietf_xor(cipher,plain, len, nonce, key);
   }
-  b = TestLib_cpucycles();
+  b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Sodium ChaCha20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
@@ -378,11 +378,11 @@ int32_t perf_chacha() {
   printf("Composite result (ignore): %llx\n", res);
 
   t1 = clock();
-  a = TestLib_cpucycles();
+  a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     ossl_chacha20(cipher,plain, len, nonce, key);
   }
-  b = TestLib_cpucycles();
+  b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("OpenSSL ChaCha20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);

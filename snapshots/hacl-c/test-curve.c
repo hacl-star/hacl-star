@@ -9,8 +9,6 @@ void ossl_curve25519(uint8_t* result, uint8_t* scalar, uint8_t* input){
   X25519(result, scalar, input);
 }
 
-
-
 unsigned long long median(unsigned long long* a, int rounds) {
   int i, j, temp;
   for (i = 0; i < rounds - 1; ++i)
@@ -25,7 +23,7 @@ unsigned long long median(unsigned long long* a, int rounds) {
 	    }
 	}
     }
-  return a[rounds/8];
+  return a[1];
 }
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
@@ -305,7 +303,7 @@ int32_t perf_curve() {
     d[i] = b - a;
   }
   t2 = clock();
-  print_results("HACL Curve25519 speed", (double)t2-t1, (double) median(d,ROUNDS), ROUNDS, 1);
+  print_results("HACL Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
@@ -318,7 +316,7 @@ int32_t perf_curve() {
     d[i] = b - a;
   }
   t2 = clock();
-  print_results("Sodium Curve25519 speed", (double)t2-t1, (double) median(d,ROUNDS), ROUNDS, 1);
+  print_results("Sodium Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
@@ -331,7 +329,7 @@ int32_t perf_curve() {
     d[i] = b - a;
   }
   t2 = clock();
-  print_results("OpenSSL Curve25519 speed", (double)t2-t1, (double) median(d,ROUNDS), ROUNDS, 1);
+  print_results("OpenSSL Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);

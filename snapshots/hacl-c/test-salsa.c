@@ -347,11 +347,11 @@ int32_t perf_salsa() {
   clock_t t1,t2;
   t1 = clock();
 
-  a = TestLib_cpucycles();
+  a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(cipher, plain, len, nonce, key);
   }
-  b = TestLib_cpucycles();
+  b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("HACL Salsa20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
@@ -360,11 +360,11 @@ int32_t perf_salsa() {
   printf("Composite result (ignore): %llx\n", res);
 
   t1 = clock();
-  a = TestLib_cpucycles();
+  a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     crypto_stream_salsa20_xor(cipher,plain, len, nonce, key);
   }
-  b = TestLib_cpucycles();
+  b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Sodium Salsa20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
