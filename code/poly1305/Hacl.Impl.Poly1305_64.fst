@@ -58,13 +58,13 @@ private let live_st m (st:poly1305_state) : Type0 =
 
 #set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
-[@"substitute"]
+[@"c_inline"]
 inline_for_extraction val upd_3: b:felem -> b0:limb -> b1:limb -> b2:limb ->
   Stack unit
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == Hacl.Spec.Poly1305_64.create_3 b0 b1 b2))
-[@"substitute"]
+[@"c_inline"]
 inline_for_extraction let upd_3 b b0 b1 b2 =
   b.(0ul) <- b0;
   b.(1ul) <- b1;
@@ -76,7 +76,6 @@ inline_for_extraction let upd_3 b b0 b1 b2 =
   Seq.lemma_eq_intro (as_seq h b) (Hacl.Spec.Poly1305_64.create_3 b0 b1 b2)
 
 
-[@"substitute"]
 inline_for_extraction private
 let clamp_mask : cm:wide{Wide.v cm = 0x0ffffffc0ffffffc0ffffffc0fffffff} =
   Hacl.Spec.Poly1305_64.load128 (0x0ffffffc0ffffffcuL) (0x0ffffffc0fffffffuL)
@@ -242,7 +241,7 @@ let poly1305_update log st m =
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-[@"substitute"]
+[@"c_inline"]
 inline_for_extraction val poly1305_concat:
   b:uint8_p{length b = 16} ->
   m:uint8_p{disjoint b m} ->
@@ -253,7 +252,7 @@ inline_for_extraction val poly1305_concat:
     (ensures (fun h0 _ h1 -> live h0 m /\ live h0 b /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == Seq.append (as_seq h0 m) (Seq.create (16 - U64.v len) (uint8_to_sint8 0uy))
     ))
-[@"substitute"]
+[@"c_inline"]
 inline_for_extraction let poly1305_concat b m len =
   assert_norm(pow2 32 = 0x100000000);
   let h0 = ST.get() in

@@ -39,14 +39,13 @@ hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 
 %.fst-c: %.fst
 	mkdir -p salsa-c
-	$(KREMLIN_HOME)/krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir salsa-c -verbose \
-		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
-		$^ -o $(basename $^).exe \
-		-drop FStar -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
-		-drop Hacl.UInt128 -bundle Hacl.Spec=Hacl.Spec.* \
-		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
-		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -no-prefix $(basename $^)
+	$(KREMLIN_HOME)/krml -tmpdir salsa-c -verbose \
+		-I ../bignum -I ../lib/kremlin \
+		$^ -o $(basename $^).exe -no-prefix $(basename $^) \
+		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
+		-drop Prims -drop FStar \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
+                -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
 	./$(basename $^).exe
 
 extract-c: $(addsuffix -c, $(SALSA_FILES))
