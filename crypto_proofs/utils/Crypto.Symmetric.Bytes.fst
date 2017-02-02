@@ -127,75 +127,79 @@ let random_bytes len =
 open FStar.Seq
 
 (* Little endian integer value of a sequence of bytes *)
-let rec little_endian (b:bytes) : Tot (n:nat) (decreases (Seq.length b)) =
-  if Seq.length b = 0 then 0
-  else
-    UInt8.v (head b) + pow2 8 * little_endian (tail b)
+inline_for_extraction let little_endian (b:bytes) = FStar.Endianness.little_endian b
+(* let rec little_endian (b:bytes) : Tot (n:nat) (decreases (Seq.length b)) = *)
+(*   if Seq.length b = 0 then 0 *)
+(*   else *)
+(*     UInt8.v (head b) + pow2 8 * little_endian (tail b) *)
 
 (* Big endian integer value of a sequence of bytes *)
-let rec big_endian (b:bytes) : Tot (n:nat) (decreases (Seq.length b)) = 
-  if Seq.length b = 0 then 0 
-  else
-    UInt8.v (last b) + pow2 8 * big_endian (Seq.slice b 0 (Seq.length b - 1))
+inline_for_extraction let big_endian (b:bytes) = FStar.Endianness.big_endian b
+(* let rec big_endian (b:bytes) : Tot (n:nat) (decreases (Seq.length b)) =  *)
+(*   if Seq.length b = 0 then 0  *)
+(*   else *)
+(*     UInt8.v (last b) + pow2 8 * big_endian (Seq.slice b 0 (Seq.length b - 1)) *)
 
 #reset-options "--initial_fuel 1 --max_fuel 1"
 
 val little_endian_null: len:nat{len < 16} -> Lemma
   (little_endian (Seq.create len 0uy) == 0)
-let rec little_endian_null len =
-  if len = 0 then ()
-  else
-    begin
-    Seq.lemma_eq_intro (Seq.slice (Seq.create len 0uy) 1 len)
-		       (Seq.create (len - 1) 0uy);
-    assert (little_endian (Seq.create len 0uy) ==
-      0 + pow2 8 * little_endian (Seq.slice (Seq.create len 0uy) 1 len));
-    little_endian_null (len - 1)
-    end
+let little_endian_null len = FStar.Endianness.little_endian_null len
+(* let rec little_endian_null len = *)
+(*   if len = 0 then () *)
+(*   else *)
+(*     begin *)
+(*     Seq.lemma_eq_intro (Seq.slice (Seq.create len 0uy) 1 len) *)
+(* 		       (Seq.create (len - 1) 0uy); *)
+(*     assert (little_endian (Seq.create len 0uy) == *)
+(*       0 + pow2 8 * little_endian (Seq.slice (Seq.create len 0uy) 1 len)); *)
+(*     little_endian_null (len - 1) *)
+(*     end *)
 
 val little_endian_singleton: n:UInt8.t -> Lemma
   (little_endian (Seq.create 1 n) == UInt8.v n)
-let little_endian_singleton n =
-  assert (little_endian (Seq.create 1 n) ==
-    UInt8.v (Seq.index (Seq.create 1 n) 0) + pow2 8 *
-    little_endian (Seq.slice (Seq.create 1 n) 1 1))
+let little_endian_singleton n = FStar.Endianness.little_endian_singleton n
+  (* assert (little_endian (Seq.create 1 n) == *)
+  (*   UInt8.v (Seq.index (Seq.create 1 n) 0) + pow2 8 * *)
+  (*   little_endian (Seq.slice (Seq.create 1 n) 1 1)) *)
 
 val little_endian_append: w1:bytes -> w2:bytes -> Lemma
   (requires True)
   (ensures
     little_endian (Seq.append w1 w2) ==
     little_endian w1 + pow2 (8 * Seq.length w1) * little_endian w2)
-  (decreases (Seq.length w1))
-let rec little_endian_append w1 w2 =
-  let open FStar.Seq in
-  if length w1 = 0 then
-    begin
-    assert_norm (pow2 (8 * 0) == 1);
-    Seq.lemma_eq_intro (append w1 w2) w2
-    end
-  else
-    begin
-    let w1' = slice w1 1 (length w1) in
-    assert (length w1' == length w1 - 1);
-    little_endian_append w1' w2;
-    assert (index (append w1 w2) 0 == index w1 0);
-    Seq.lemma_eq_intro
-      (append w1' w2)
-      (Seq.slice (append w1 w2) 1 (length (append w1 w2)));
-    assert (little_endian (append w1 w2) ==
-      UInt8.v (index w1 0) + pow2 8 * little_endian (append w1' w2));
-    assert (little_endian (append w1' w2) ==
-      little_endian w1' + pow2 (8 * length w1') * little_endian w2);
-    assert (UInt8.v (index w1 0) + pow2 8 * little_endian (append w1' w2) ==
-      UInt8.v (index w1 0) +
-      pow2 8 * (little_endian w1' + pow2 (8 * length w1') * little_endian w2));
-    Math.Lemmas.pow2_plus 8 (8 * (length w1 - 1));
-    assert (pow2 8 * pow2 (8 * length w1') == pow2 (8 * length w1));
-    assert (UInt8.v (index w1 0) + pow2 8 * little_endian (append w1' w2) ==
-      UInt8.v (index w1 0) +
-      pow2 8 * little_endian w1' + pow2 (8 * length w1) * little_endian w2);
-    assert (UInt8.v (index w1 0) + pow2 8 * little_endian w1' == little_endian w1)
-    end
+let little_endian_append w1 w2 = FStar.Endianness.little_endian_append w1 w2
+  (* (decreases (Seq.length w1)) *)
+(* let rec little_endian_append w1 w2 = *)
+(*   let open FStar.Seq in *)
+(*   if length w1 = 0 then *)
+(*     begin *)
+(*     assert_norm (pow2 (8 * 0) == 1); *)
+(*     Seq.lemma_eq_intro (append w1 w2) w2 *)
+(*     end *)
+(*   else *)
+(*     begin *)
+(*     let w1' = slice w1 1 (length w1) in *)
+(*     assert (length w1' == length w1 - 1); *)
+(*     little_endian_append w1' w2; *)
+(*     assert (index (append w1 w2) 0 == index w1 0); *)
+(*     Seq.lemma_eq_intro *)
+(*       (append w1' w2) *)
+(*       (Seq.slice (append w1 w2) 1 (length (append w1 w2))); *)
+(*     assert (little_endian (append w1 w2) == *)
+(*       UInt8.v (index w1 0) + pow2 8 * little_endian (append w1' w2)); *)
+(*     assert (little_endian (append w1' w2) == *)
+(*       little_endian w1' + pow2 (8 * length w1') * little_endian w2); *)
+(*     assert (UInt8.v (index w1 0) + pow2 8 * little_endian (append w1' w2) == *)
+(*       UInt8.v (index w1 0) + *)
+(*       pow2 8 * (little_endian w1' + pow2 (8 * length w1') * little_endian w2)); *)
+(*     Math.Lemmas.pow2_plus 8 (8 * (length w1 - 1)); *)
+(*     assert (pow2 8 * pow2 (8 * length w1') == pow2 (8 * length w1)); *)
+(*     assert (UInt8.v (index w1 0) + pow2 8 * little_endian (append w1' w2) == *)
+(*       UInt8.v (index w1 0) + *)
+(*       pow2 8 * little_endian w1' + pow2 (8 * length w1) * little_endian w2); *)
+(*     assert (UInt8.v (index w1 0) + pow2 8 * little_endian w1' == little_endian w1) *)
+(*     end *)
 
 private val lemma_factorise: a:nat -> b:nat -> Lemma (a + a * b == a * (b + 1))
 let lemma_factorise a b = ()
@@ -203,45 +207,47 @@ let lemma_factorise a b = ()
 val lemma_little_endian_is_bounded: b:bytes -> Lemma
   (requires True)
   (ensures  (little_endian b < pow2 (8 * Seq.length b)))
-  (decreases (Seq.length b))
-let rec lemma_little_endian_is_bounded b =
-  if Seq.length b = 0 then ()
-  else
-    begin
-    let s = Seq.slice b 1 (Seq.length b) in
-    assert(Seq.length s = Seq.length b - 1);
-    lemma_little_endian_is_bounded s;
-    assert(UInt8.v (Seq.index b 0) < pow2 8);
-    assert(little_endian s < pow2 (8 * Seq.length s));
-    assert(little_endian b < pow2 8 + pow2 8 * pow2 (8 * (Seq.length b - 1)));
-    lemma_euclidean_division (UInt8.v (Seq.index b 0)) (little_endian s) (pow2 8);
-    assert(little_endian b <= pow2 8 * (little_endian s + 1));
-    assert(little_endian b <= pow2 8 * pow2 (8 * (Seq.length b - 1)));
-    Math.Lemmas.pow2_plus 8 (8 * (Seq.length b - 1));
-    lemma_factorise 8 (Seq.length b - 1)
-    end
+let lemma_little_endian_is_bounded b = FStar.Endianness.lemma_little_endian_is_bounded b
+(*   (decreases (Seq.length b)) *)
+(* let rec lemma_little_endian_is_bounded b = *)
+(*   if Seq.length b = 0 then () *)
+(*   else *)
+(*     begin *)
+(*     let s = Seq.slice b 1 (Seq.length b) in *)
+(*     assert(Seq.length s = Seq.length b - 1); *)
+(*     lemma_little_endian_is_bounded s; *)
+(*     assert(UInt8.v (Seq.index b 0) < pow2 8); *)
+(*     assert(little_endian s < pow2 (8 * Seq.length s)); *)
+(*     assert(little_endian b < pow2 8 + pow2 8 * pow2 (8 * (Seq.length b - 1))); *)
+(*     lemma_euclidean_division (UInt8.v (Seq.index b 0)) (little_endian s) (pow2 8); *)
+(*     assert(little_endian b <= pow2 8 * (little_endian s + 1)); *)
+(*     assert(little_endian b <= pow2 8 * pow2 (8 * (Seq.length b - 1))); *)
+(*     Math.Lemmas.pow2_plus 8 (8 * (Seq.length b - 1)); *)
+(*     lemma_factorise 8 (Seq.length b - 1) *)
+(*     end *)
 
 val lemma_big_endian_is_bounded: b:bytes -> Lemma
   (requires True)
   (ensures  (big_endian b < pow2 (8 * Seq.length b)))
   (decreases (Seq.length b))
-  [SMTPat (big_endian b)]
-let rec lemma_big_endian_is_bounded b =
-  if Seq.length b = 0 then ()
-  else
-    begin
-    let s = Seq.slice b 0 (Seq.length b - 1) in
-    assert(Seq.length s = Seq.length b - 1);
-    lemma_big_endian_is_bounded s;
-    assert(UInt8.v (Seq.last b) < pow2 8);
-    assert(big_endian s < pow2 (8 * Seq.length s));
-    assert(big_endian b < pow2 8 + pow2 8 * pow2 (8 * (Seq.length b - 1)));
-    lemma_euclidean_division (UInt8.v (Seq.last b)) (big_endian s) (pow2 8);
-    assert(big_endian b <= pow2 8 * (big_endian s + 1));
-    assert(big_endian b <= pow2 8 * pow2 (8 * (Seq.length b - 1)));
-    Math.Lemmas.pow2_plus 8 (8 * (Seq.length b - 1));
-    lemma_factorise 8 (Seq.length b - 1)
-    end
+let lemma_big_endian_is_bounded b = FStar.Endianness.lemma_big_endian_is_bounded b
+(*   [SMTPat (big_endian b)] *)
+(* let rec lemma_big_endian_is_bounded b = *)
+(*   if Seq.length b = 0 then () *)
+(*   else *)
+(*     begin *)
+(*     let s = Seq.slice b 0 (Seq.length b - 1) in *)
+(*     assert(Seq.length s = Seq.length b - 1); *)
+(*     lemma_big_endian_is_bounded s; *)
+(*     assert(UInt8.v (Seq.last b) < pow2 8); *)
+(*     assert(big_endian s < pow2 (8 * Seq.length s)); *)
+(*     assert(big_endian b < pow2 8 + pow2 8 * pow2 (8 * (Seq.length b - 1))); *)
+(*     lemma_euclidean_division (UInt8.v (Seq.last b)) (big_endian s) (pow2 8); *)
+(*     assert(big_endian b <= pow2 8 * (big_endian s + 1)); *)
+(*     assert(big_endian b <= pow2 8 * pow2 (8 * (Seq.length b - 1))); *)
+(*     Math.Lemmas.pow2_plus 8 (8 * (Seq.length b - 1)); *)
+(*     lemma_factorise 8 (Seq.length b - 1) *)
+(*     end *)
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
@@ -249,10 +255,10 @@ val lemma_little_endian_lt_2_128: b:bytes {Seq.length b <= 16} -> Lemma
   (requires True)
   (ensures  (little_endian b < pow2 128))
   [SMTPat (little_endian b)]
-let lemma_little_endian_lt_2_128 b =
-  lemma_little_endian_is_bounded b;
-  if Seq.length b = 16 then ()
-  else Math.Lemmas.pow2_lt_compat 128 (8 * Seq.length b)
+let lemma_little_endian_lt_2_128 b = FStar.Endianness.lemma_little_endian_lt_2_128 b
+  (* lemma_little_endian_is_bounded b; *)
+  (* if Seq.length b = 16 then () *)
+  (* else Math.Lemmas.pow2_lt_compat 128 (8 * Seq.length b) *)
 
 
 #reset-options "--z3rlimit 100 --max_fuel 1 --initial_fuel 1"
@@ -447,22 +453,23 @@ let rec uint32_be len n =
     Seq.snoc b' byte 
 
 // turns an integer into a bytestream, little-endian
-val little_bytes: 
+inline_for_extraction val little_bytes: 
   len:UInt32.t -> n:nat{n < pow2 (8 * v len)} ->
-  Tot (b:lbytes (v len) {n == little_endian b}) (decreases (v len))
-let rec little_bytes len n = 
-  if len = 0ul then 
-    Seq.createEmpty 
-  else
-    let len = len -^ 1ul in 
-    let byte = UInt8.uint_to_t (n % 256) in
-    let n' = n / 256 in 
-    Math.Lemmas.pow2_plus 8 (8 * v len);
-    assert(n' < pow2 (8 * v len ));
-    let b' = little_bytes len n' in
-    let b = cons byte b' in
-    assert(Seq.equal b' (tail b));
-    b
+  Tot (b:lbytes (v len) {n == little_endian b})(*  (decreases (v len)) *)
+inline_for_extraction let little_bytes len n = FStar.Endianness.little_bytes len n
+(* let rec little_bytes len n =  *)
+(*   if len = 0ul then  *)
+(*     Seq.createEmpty  *)
+(*   else *)
+(*     let len = len -^ 1ul in  *)
+(*     let byte = UInt8.uint_to_t (n % 256) in *)
+(*     let n' = n / 256 in  *)
+(*     Math.Lemmas.pow2_plus 8 (8 * v len); *)
+(*     assert(n' < pow2 (8 * v len )); *)
+(*     let b' = little_bytes len n' in *)
+(*     let b = cons byte b' in *)
+(*     assert(Seq.equal b' (tail b)); *)
+(*     b *)
 
 // turns an integer into a bytestream, big-endian
 val big_bytes: 

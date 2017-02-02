@@ -182,7 +182,7 @@ let rcreate rgn i =
   | GHASH    -> B_GHASH    (FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul)
 
 
-#reset-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --max_ifuel 0 --initial_ifuel 0"
 
 val create: i:id -> StackInline (elemB i)
   (requires (fun h0 -> True))
@@ -196,8 +196,10 @@ val create: i:id -> StackInline (elemB i)
      
 let create i =
   match alg i with
-  | POLY1305 -> let b = FStar.Buffer.create 0uL 3ul in
-                B_POLY1305 b
+  | POLY1305 ->
+      let b = FStar.Buffer.create 0uL 3ul in
+      PL.poly1305_start b;
+      B_POLY1305 b
       (* // hide in Poly1305.fst? *)
       (* let b = FStar.Buffer.create 0uL 5ul in *)
       (* let h1 = ST.get() in  *)
@@ -297,6 +299,8 @@ let field_mul #i a b =
 noextract let op_Plus_At #i e1 e2 = field_add #i e1 e2
 noextract let op_Star_At #i e1 e2 = field_mul #i e1 e2
 
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
+
 val poly_empty: #i:id -> t:text{Seq.length t == 0} -> r:elem i ->
   Lemma (poly #i t r == zero i)
 let poly_empty #i t r =
@@ -384,13 +388,6 @@ let mac #i cs r s =
   | POLY1305 -> Hacl.Spec.Poly1305.mac_1305 (text_to_PS_text cs) r s
   | GHASH    -> GS.mac cs r s
 
-(* private val lemma_little_bytes_finish: h:mem -> t:tagB -> h':mem -> t':tagB -> n:nat -> Lemma *)
-(*   (requires (Buffer.live h t /\ Buffer.live h' t' *)
-(*     /\ little_endian (as_seq h t) == little_endian (as_seq h' t'))) *)
-(*   (ensures (Buffer.live h t /\ Buffer.live h' t' /\ (as_seq h t) == (as_seq h' t'))) *)
-(* let lemma_little_bytes_finish h t h' t' n = *)
-(*     lemma_little_endian_inj (Buffer.as_seq h t) (Buffer.as_seq h' t') *)
-
 val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
   (requires (fun h -> 
     Buffer.live h s /\ 
@@ -410,6 +407,16 @@ val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
     | POLY1305 -> Seq.equal tv (Hacl.Spec.Poly1305.finish av sv)
     | GHASH    -> Seq.equal tv (GS.finish av sv) )))
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+
+private val lemma_modifies_3_2_finish: #a:Type -> #a':Type -> h:mem -> h':mem -> h'':mem -> b:buffer a -> b':buffer a' -> Lemma
+  (requires (Buffer.live h b /\ Buffer.live h b' /\ Buffer.modifies_0 h h' /\ Buffer.modifies_2 b b' h' h''))
+  (ensures (Buffer.modifies_3_2 b b' h h''))
+let lemma_modifies_3_2_finish #a #a' h h' h'' b b' =
+  lemma_reveal_modifies_0 h h';
+  lemma_reveal_modifies_2 b b' h' h'';
+  lemma_intro_modifies_3_2 b b' h h''
+
+
 let finish #i s a t =
   let h0 = ST.get() in
   match a with
@@ -419,11 +426,17 @@ let finish #i s a t =
     Math.Lemmas.lemma_mod_plus_distr_l (PS_.selem (as_seq h a)) (little_endian (as_seq h t)) (pow2 128);
     let dummy_r = Buffer.create 0uL 3ul in
     let dummy_m = Buffer.create 42uy 0ul in
+    let h' = ST.get() in
     PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.MkState dummy_r a) t dummy_m 0uL s;
+    let h'' = ST.get() in
+    lemma_modifies_3_2_finish h h' h'' a t;
     pop_frame();
     let h1 = ST.get() in
-    lemma_little_endian_inj (Buffer.as_seq h1 t)
-                                             (Hacl.Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
+    Buffer.modifies_popped_3_2 a t h0 h h'' h1;
+    cut (FStar.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Endianness.little_endian (as_seq h0 s)) % pow2 128);
+    cut (FStar.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Endianness.little_endian (as_seq h0 s)) % pow2 128);
+    
+    FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t) (Hacl.Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
     )
   | B_GHASH    a ->
     begin
