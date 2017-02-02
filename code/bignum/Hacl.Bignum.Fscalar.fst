@@ -12,6 +12,7 @@ module U32 = FStar.UInt32
 
 #set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
+[@"c_inline"]
 val fscalar_:
   output:felem_wide ->
   input:felem{disjoint input output} ->
@@ -21,6 +22,7 @@ val fscalar_:
     (requires (fun h -> live h output /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 input /\ live h0 output /\ live h1 output /\ modifies_1 output h0 h1
       /\ as_seq h1 output == fscalar_spec_ (as_seq h0 output) (as_seq h0 input) s (U32.v i)))
+[@"c_inline"]
 let rec fscalar_ output b s i =
   if U32.(i =^ 0ul) then ()
   else (
@@ -32,6 +34,7 @@ let rec fscalar_ output b s i =
   )
 
 
+[@"c_inline"]
 val fscalar:
   output:felem_wide ->
   input:felem{disjoint output input} ->
@@ -40,6 +43,7 @@ val fscalar:
     (requires (fun h -> live h output /\ live h input))
     (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 input /\ live h1 output /\ modifies_1 output h0 h1
       /\ as_seq h1 output == fscalar_spec (as_seq h0 input) s))
+[@"c_inline"]
 let fscalar output b s =
   let h = ST.get() in
   lemma_fscalar_eval_0 (as_seq h output) (as_seq h b) s;

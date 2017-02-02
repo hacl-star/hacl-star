@@ -24,12 +24,14 @@ inline_for_extraction let mask_51 : x:limb{v x = pow2 51 - 1} =
 
 #set-options "--z3rlimit 20"
 
+[@"substitute"]
 private inline_for_extraction val add_zero_:
   b:felem ->
   Stack unit
     (requires (fun h -> live h b /\ add_zero_pre (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 b /\ add_zero_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == add_zero_spec (as_seq h0 b)))
+[@"substitute"]
 private inline_for_extraction let add_zero_ b =
   assert_norm (pow2 63 > 0x3fffffffffff68);
   assert_norm (pow2 63 > 0x3ffffffffffff8);
@@ -46,6 +48,7 @@ private inline_for_extraction let add_zero_ b =
   b.(4ul) <- b4 +^ two54m8
 
 
+[@"substitute"]
 inline_for_extraction val add_zero:
   b:felem ->
   Stack unit
@@ -53,6 +56,7 @@ inline_for_extraction val add_zero:
     (ensures (fun h0 _ h1 -> live h0 b /\ add_zero_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == add_zero_spec (as_seq h0 b)
       /\ eval h1 b % prime = eval h0 b % prime))
+[@"substitute"]
 inline_for_extraction let add_zero b =
   let h0 = ST.get() in
   add_zero_ b;
@@ -77,23 +81,27 @@ inline_for_extraction let carry_top b =
   b.(0ul) <- b0'
 
 
+[@"c_inline"]
 inline_for_extraction val reduce:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ reduce_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ reduce_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == reduce_spec (as_seq h0 b)))
+[@"c_inline"]
 inline_for_extraction let reduce b =
   let b0 = b.(0ul) in
   b.(0ul) <- nineteen *^ b0
 
 
+[@"c_inline"]
 inline_for_extraction val carry_top_wide:
   b:felem_wide ->
   Stack unit
     (requires (fun h -> live h b /\ carry_top_wide_pre (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_wide_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == carry_top_wide_spec (as_seq h0 b)))
+[@"c_inline"]
 inline_for_extraction let carry_top_wide b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in

@@ -14,22 +14,30 @@ module U32 = FStar.UInt32
 
 let red_c h (f:felem) ctr = live h f /\ red (as_seq h f) ctr
 
-[@"c_inline"]
-val fsum_:
+[@"substitute"]
+inline_for_extraction val fsum_:
   a:felem ->
   b:felem{disjoint a b} ->
   i:ctr{U32.v i <= len} ->
   Stack unit
-    (requires (fun h -> red_c h a (U32.v i) /\ red_c h b (U32.v i)))
+    (requires (fun h -> red_c h a (U32.v i) /\ red_c h b (U32.v i) /\ len = 5))
     (ensures (fun h0 _ h1 -> red_c h0 a (U32.v i) /\ red_c h0 b (U32.v i) /\ live h1 a /\ modifies_1 a h0 h1
       /\ as_seq h1 a == fsum_spec (as_seq h0 a) (as_seq h0 b) (U32.v i)))
-[@"c_inline"]
-let rec fsum_ a b i =
-  if U32.(i =^ 0ul) then ()
-  else (
-    let i = U32.(i -^ 1ul) in
-    let ai = a.(i) in let bi = b.(i) in
-    Math.Lemmas.pow2_double_sum n;
-    a.(i) <- ai +^ bi;
-    fsum_ a b i
-  )
+[@"substitute"]
+inline_for_extraction let rec fsum_ a b i =
+    let a0 = a.(0ul) in 
+    let b0 = b.(0ul) in
+    let a1 = a.(1ul) in 
+    let b1 = b.(1ul) in
+    let a2 = a.(2ul) in 
+    let b2 = b.(2ul) in
+    let a3 = a.(3ul) in 
+    let b3 = b.(3ul) in
+    let a4 = a.(4ul) in 
+    let b4 = b.(4ul) in
+
+    a.(0ul) <- a0 +^ b0;
+    a.(1ul) <- a1 +^ b1;
+    a.(2ul) <- a2 +^ b2;
+    a.(3ul) <- a3 +^ b3;
+    a.(4ul) <- a4 +^ b4

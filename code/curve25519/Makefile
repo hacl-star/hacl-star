@@ -13,8 +13,8 @@ X25519_FILES= \
 	../bignum/Hacl.Spec.Bignum.Fdifference.fst  \
 	../bignum/Hacl.Spec.Bignum.Fscalar.fst \
 	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
-	../bignum/Hacl.Bignum.Fsum.fst \
-	../bignum/Hacl.Bignum.Fdifference.fst  \
+	Hacl.Bignum.Fsum.fst \
+	Hacl.Bignum.Fdifference.fst  \
 	../bignum/Hacl.Bignum.Fscalar.fst \
 	../bignum/Hacl.Bignum.Fproduct.fst \
 	../bignum/Hacl.Bignum.fst \

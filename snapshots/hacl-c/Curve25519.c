@@ -1,56 +1,12 @@
 #include "Curve25519.h"
 
-static void Hacl_Bignum_Fsum_fsum_rec(uint64_t *a, uint64_t *b, uint32_t i)
-{
-  if (i == (uint32_t )0)
-    return;
-  else
-  {
-    uint32_t i0 = i - (uint32_t )1;
-    uint64_t ai = a[i0];
-    uint64_t bi = b[i0];
-    a[i0] = ai + bi;
-    Hacl_Bignum_Fsum_fsum_rec(a, b, i0);
-    return;
-  }
-}
-
-static inline  void Hacl_Bignum_Fsum_fsum_(uint64_t *a, uint64_t *b, uint32_t i)
-{
-  a[0] = a[0] + b[0];
-  a[1] = a[1] + b[1];
-  a[2] = a[2] + b[2];
-  a[3] = a[3] + b[3];
-  a[4] = a[4] + b[4];
-  return;
-}
-static inline  void Hacl_Bignum_Modulo_add_zero_(uint64_t *b)
-{
-  uint64_t b0 = b[0];
-  uint64_t b1 = b[1];
-  uint64_t b2 = b[2];
-  uint64_t b3 = b[3];
-  uint64_t b4 = b[4];
-  b[0] = b0 + (uint64_t )0x3fffffffffff68;
-  b[1] = b1 + (uint64_t )0x3ffffffffffff8;
-  b[2] = b2 + (uint64_t )0x3ffffffffffff8;
-  b[3] = b3 + (uint64_t )0x3ffffffffffff8;
-  b[4] = b4 + (uint64_t )0x3ffffffffffff8;
-}
-
-static inline  void Hacl_Bignum_Modulo_add_zero(uint64_t *b)
-{
-  Hacl_Bignum_Modulo_add_zero_(b);
-  return;
-}
-
-static inline  void Hacl_Bignum_Modulo_reduce(uint64_t *b)
+inline static void Hacl_Bignum_Modulo_reduce(uint64_t *b)
 {
   uint64_t b0 = b[0];
   b[0] = (uint64_t )19 * b0;
 }
 
-static inline  void Hacl_Bignum_Modulo_carry_top_wide(FStar_UInt128_t *b)
+inline static void Hacl_Bignum_Modulo_carry_top_wide(FStar_UInt128_t *b)
 {
   FStar_UInt128_t b4 = b[4];
   FStar_UInt128_t b0 = b[0];
@@ -69,7 +25,7 @@ static inline  void Hacl_Bignum_Modulo_carry_top_wide(FStar_UInt128_t *b)
   b[0] = b0_;
 }
 
-static inline   void
+inline static void
 Hacl_Bignum_Fproduct_copy_from_wide_(uint64_t *output, FStar_UInt128_t *input, uint32_t ctr)
 {
   if (ctr == (uint32_t )0)
@@ -84,7 +40,7 @@ Hacl_Bignum_Fproduct_copy_from_wide_(uint64_t *output, FStar_UInt128_t *input, u
   }
 }
 
-static inline  void Hacl_Bignum_Fproduct_shift_(uint64_t *output, uint32_t ctr)
+inline static void Hacl_Bignum_Fproduct_shift_(uint64_t *output, uint32_t ctr)
 {
   if (ctr == (uint32_t )0)
     return;
@@ -97,14 +53,14 @@ static inline  void Hacl_Bignum_Fproduct_shift_(uint64_t *output, uint32_t ctr)
   }
 }
 
-static inline  void Hacl_Bignum_Fproduct_shift(uint64_t *output)
+inline static void Hacl_Bignum_Fproduct_shift(uint64_t *output)
 {
   uint64_t tmp = output[4];
   Hacl_Bignum_Fproduct_shift_(output, (uint32_t )4);
   output[0] = tmp;
 }
 
-static inline  void
+inline static void
 Hacl_Bignum_Fproduct_sum_scalar_multiplication_(
   FStar_UInt128_t *output,
   uint64_t *input,
@@ -125,7 +81,7 @@ Hacl_Bignum_Fproduct_sum_scalar_multiplication_(
   }
 }
 
-static inline  void Hacl_Bignum_Fproduct_carry_wide_(FStar_UInt128_t *tmp, uint32_t ctr)
+inline static void Hacl_Bignum_Fproduct_carry_wide_(FStar_UInt128_t *tmp, uint32_t ctr)
 {
   if (ctr == (uint32_t )4)
     return;
@@ -143,7 +99,7 @@ static inline  void Hacl_Bignum_Fproduct_carry_wide_(FStar_UInt128_t *tmp, uint3
   }
 }
 
-static inline  void Hacl_Bignum_Fproduct_carry_0_to_1(uint64_t *output)
+inline static void Hacl_Bignum_Fproduct_carry_0_to_1(uint64_t *output)
 {
   uint64_t i0 = output[0];
   uint64_t i1 = output[1];
@@ -153,14 +109,14 @@ static inline  void Hacl_Bignum_Fproduct_carry_0_to_1(uint64_t *output)
   output[1] = i1_;
 }
 
-static inline  void Hacl_Bignum_Fmul_shift_reduce(uint64_t *output)
+inline static void Hacl_Bignum_Fmul_shift_reduce(uint64_t *output)
 {
   Hacl_Bignum_Fproduct_shift(output);
   Hacl_Bignum_Modulo_reduce(output);
   return;
 }
 
-static inline  void
+inline static void
 Hacl_Bignum_Fmul_mul_shift_reduce_(
   FStar_UInt128_t *output,
   void *init_input,
@@ -184,17 +140,16 @@ Hacl_Bignum_Fmul_mul_shift_reduce_(
   }
 }
 
-static inline  void *Hacl_Bignum_Fmul_get_seq(uint64_t *b)
-{
-  return (void *)(uint8_t )0;
-}
-
-static inline  void Hacl_Bignum_Fmul_fmul_(uint64_t *output, uint64_t *input, uint64_t *input2)
+inline static void Hacl_Bignum_Fmul_fmul_(uint64_t *output, uint64_t *input, uint64_t *input2)
 {
   FStar_UInt128_t t[5];
   for (uintmax_t i = 0; i < (uint32_t )5; ++i)
     t[i] = FStar_Int_Cast_uint64_to_uint128((uint64_t )0);
-  void *input_init = (void *)Hacl_Bignum_Fmul_get_seq(input);
+  void
+  *input_init =
+    (void *)/* start inlining Hacl.Bignum.Fmul.get_seq */
+      (void *)(uint8_t )0
+    /* end inlining Hacl.Bignum.Fmul.get_seq */;
   Hacl_Bignum_Fmul_mul_shift_reduce_(t, (void *)(uint8_t )0, input, input2, (uint32_t )5);
   Hacl_Bignum_Fproduct_carry_wide_(t, (uint32_t )0);
   Hacl_Bignum_Modulo_carry_top_wide(t);
@@ -202,14 +157,14 @@ static inline  void Hacl_Bignum_Fmul_fmul_(uint64_t *output, uint64_t *input, ui
   Hacl_Bignum_Fproduct_carry_0_to_1(output);
 }
 
-static inline  void Hacl_Bignum_Fmul_fmul(uint64_t *output, uint64_t *input, uint64_t *input2)
+inline static void Hacl_Bignum_Fmul_fmul(uint64_t *output, uint64_t *input, uint64_t *input2)
 {
   uint64_t tmp[5] = { 0 };
   memcpy(tmp, input, (uint32_t )5 * sizeof input[0]);
   Hacl_Bignum_Fmul_fmul_(output, tmp, input2);
 }
 
-static inline  void
+inline static void
 Hacl_Bignum_Fsquare_upd_5(
   FStar_UInt128_t *tmp,
   FStar_UInt128_t s0,
@@ -226,7 +181,7 @@ Hacl_Bignum_Fsquare_upd_5(
   tmp[4] = s4;
 }
 
-static inline  void Hacl_Bignum_Fsquare_fsquare__(FStar_UInt128_t *tmp, uint64_t *output)
+inline static void Hacl_Bignum_Fsquare_fsquare__(FStar_UInt128_t *tmp, uint64_t *output)
 {
   uint64_t r0 = output[0];
   uint64_t r1 = output[1];
@@ -267,7 +222,7 @@ static inline  void Hacl_Bignum_Fsquare_fsquare__(FStar_UInt128_t *tmp, uint64_t
   return;
 }
 
-static inline  void Hacl_Bignum_Fsquare_fsquare_(FStar_UInt128_t *tmp, uint64_t *output)
+inline static void Hacl_Bignum_Fsquare_fsquare_(FStar_UInt128_t *tmp, uint64_t *output)
 {
   Hacl_Bignum_Fsquare_fsquare__(tmp, output);
   Hacl_Bignum_Fproduct_carry_wide_(tmp, (uint32_t )0);
@@ -277,7 +232,7 @@ static inline  void Hacl_Bignum_Fsquare_fsquare_(FStar_UInt128_t *tmp, uint64_t 
   return;
 }
 
-static inline  void
+inline static void
 Hacl_Bignum_Fsquare_fsquare_times_(uint64_t *output, FStar_UInt128_t *tmp, uint32_t count)
 {
   if (count == (uint32_t )1)
@@ -294,7 +249,7 @@ Hacl_Bignum_Fsquare_fsquare_times_(uint64_t *output, FStar_UInt128_t *tmp, uint3
   }
 }
 
-static inline  void
+inline static void
 Hacl_Bignum_Fsquare_fsquare_times(uint64_t *output, uint64_t *input, uint32_t count)
 {
   FStar_UInt128_t t[5];
@@ -304,7 +259,7 @@ Hacl_Bignum_Fsquare_fsquare_times(uint64_t *output, uint64_t *input, uint32_t co
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count);
 }
 
-static inline   void Hacl_Bignum_Fsquare_fsquare_times_inplace(uint64_t *output, uint32_t count)
+inline static void Hacl_Bignum_Fsquare_fsquare_times_inplace(uint64_t *output, uint32_t count)
 {
   FStar_UInt128_t t[5];
   for (uintmax_t i = 0; i < (uint32_t )5; ++i)
@@ -312,106 +267,96 @@ static inline   void Hacl_Bignum_Fsquare_fsquare_times_inplace(uint64_t *output,
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count);
 }
 
-static inline  void Hacl_Bignum_Crecip_fmul(uint64_t *output, uint64_t *a, uint64_t *b)
-{
-  Hacl_Bignum_Fmul_fmul(output, a, b);
-  return;
-}
-
-static inline  void Hacl_Bignum_Crecip_fsquare_times(uint64_t *output, uint64_t *input, uint32_t count)
-{
-  Hacl_Bignum_Fsquare_fsquare_times(output, input, count);
-  return;
-}
-
-static inline  void Hacl_Bignum_Crecip_fsquare_times_inplace(uint64_t *output, uint32_t count)
-{
-  Hacl_Bignum_Fsquare_fsquare_times_inplace(output, count);
-  return;
-}
-
-static inline  void Hacl_Bignum_Crecip_crecip_1(uint64_t *buf, uint64_t *z)
-{
-  uint64_t *a = buf;
-  uint64_t *t0 = buf + (uint32_t )5;
-  uint64_t *b = buf + (uint32_t )10;
-  uint64_t *c = buf + (uint32_t )15;
-  Hacl_Bignum_Crecip_fsquare_times(a, z, (uint32_t )1);
-  Hacl_Bignum_Crecip_fsquare_times(t0, a, (uint32_t )2);
-  Hacl_Bignum_Crecip_fmul(b, t0, z);
-  Hacl_Bignum_Crecip_fmul(a, b, a);
-  Hacl_Bignum_Crecip_fsquare_times(t0, a, (uint32_t )1);
-  Hacl_Bignum_Crecip_fmul(b, t0, b);
-  Hacl_Bignum_Crecip_fsquare_times(t0, b, (uint32_t )5);
-  return;
-}
-
-static inline   void Hacl_Bignum_Crecip_crecip_2(uint64_t *buf)
-{
-  uint64_t *a = buf;
-  uint64_t *t0 = buf + (uint32_t )5;
-  uint64_t *b = buf + (uint32_t )10;
-  uint64_t *c = buf + (uint32_t )15;
-  Hacl_Bignum_Crecip_fmul(b, t0, b);
-  Hacl_Bignum_Crecip_fsquare_times(t0, b, (uint32_t )10);
-  Hacl_Bignum_Crecip_fmul(c, t0, b);
-  Hacl_Bignum_Crecip_fsquare_times(t0, c, (uint32_t )20);
-  Hacl_Bignum_Crecip_fmul(t0, t0, c);
-  Hacl_Bignum_Crecip_fsquare_times_inplace(t0, (uint32_t )10);
-  Hacl_Bignum_Crecip_fmul(b, t0, b);
-  Hacl_Bignum_Crecip_fsquare_times(t0, b, (uint32_t )50);
-  return;
-}
-
-static inline  void Hacl_Bignum_Crecip_crecip_3(uint64_t *out, uint64_t *buf)
-{
-  uint64_t *a = buf;
-  uint64_t *t0 = buf + (uint32_t )5;
-  uint64_t *b = buf + (uint32_t )10;
-  uint64_t *c = buf + (uint32_t )15;
-  Hacl_Bignum_Crecip_fmul(c, t0, b);
-  Hacl_Bignum_Crecip_fsquare_times(t0, c, (uint32_t )100);
-  Hacl_Bignum_Crecip_fmul(t0, t0, c);
-  Hacl_Bignum_Crecip_fsquare_times_inplace(t0, (uint32_t )50);
-  Hacl_Bignum_Crecip_fmul(t0, t0, b);
-  Hacl_Bignum_Crecip_fsquare_times_inplace(t0, (uint32_t )5);
-  Hacl_Bignum_Crecip_fmul(out, t0, a);
-  return;
-}
-
-static inline  void Hacl_Bignum_Crecip_crecip(uint64_t *out, uint64_t *z)
+inline static void Hacl_Bignum_Crecip_crecip(uint64_t *out, uint64_t *z)
 {
   uint64_t buf[20] = { 0 };
-  Hacl_Bignum_Crecip_crecip_1(buf, z);
-  Hacl_Bignum_Crecip_crecip_2(buf);
-  Hacl_Bignum_Crecip_crecip_3(out, buf);
+  uint64_t *a = buf;
+  uint64_t *t00 = buf + (uint32_t )5;
+  uint64_t *b0 = buf + (uint32_t )10;
+  uint64_t *c0 = buf + (uint32_t )15;
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times */
+  Hacl_Bignum_Fsquare_fsquare_times(a, z, (uint32_t )1);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times */
+  Hacl_Bignum_Fsquare_fsquare_times(t00, a, (uint32_t )2);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times */
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(b0, t00, z);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(a, b0, a);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times */
+  Hacl_Bignum_Fsquare_fsquare_times(t00, a, (uint32_t )1);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times */
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(b0, t00, b0);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.crecip_1 */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times */
+  Hacl_Bignum_Fsquare_fsquare_times(t00, b0, (uint32_t )5);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times */
+  /* end inlining Hacl.Bignum.Crecip.crecip_1 */
+  uint64_t *a0 = buf;
+  uint64_t *t01 = buf + (uint32_t )5;
+  uint64_t *b1 = buf + (uint32_t )10;
+  uint64_t *c1 = buf + (uint32_t )15;
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(b1, t01, b1);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times */
+  Hacl_Bignum_Fsquare_fsquare_times(t01, b1, (uint32_t )10);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times */
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(c1, t01, b1);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times */
+  Hacl_Bignum_Fsquare_fsquare_times(t01, c1, (uint32_t )20);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times */
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(t01, t01, c1);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times_inplace */
+  Hacl_Bignum_Fsquare_fsquare_times_inplace(t01, (uint32_t )10);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times_inplace */
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(b1, t01, b1);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.crecip_2 */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times */
+  Hacl_Bignum_Fsquare_fsquare_times(t01, b1, (uint32_t )50);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times */
+  /* end inlining Hacl.Bignum.Crecip.crecip_2 */
+  uint64_t *a1 = buf;
+  uint64_t *t0 = buf + (uint32_t )5;
+  uint64_t *b = buf + (uint32_t )10;
+  uint64_t *c = buf + (uint32_t )15;
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(c, t0, b);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times */
+  Hacl_Bignum_Fsquare_fsquare_times(t0, c, (uint32_t )100);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times */
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(t0, t0, c);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times_inplace */
+  Hacl_Bignum_Fsquare_fsquare_times_inplace(t0, (uint32_t )50);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times_inplace */
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(t0, t0, b);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* start inlining Hacl.Bignum.Crecip.fsquare_times_inplace */
+  Hacl_Bignum_Fsquare_fsquare_times_inplace(t0, (uint32_t )5);
+  /* end inlining Hacl.Bignum.Crecip.fsquare_times_inplace */
+  /* start inlining Hacl.Bignum.Crecip.crecip_3 */
+  /* start inlining Hacl.Bignum.Crecip.fmul */
+  Hacl_Bignum_Fmul_fmul(out, t0, a1);
+  /* end inlining Hacl.Bignum.Crecip.fmul */
+  /* end inlining Hacl.Bignum.Crecip.crecip_3 */
 }
 
-static void Hacl_Bignum_Fdifference_fdifference_rec(uint64_t *a, uint64_t *b, uint32_t i)
-{
-  if (i == (uint32_t )0)
-    return;
-  else
-  {
-    uint32_t i0 = i - (uint32_t )1;
-    uint64_t ai = a[i0];
-    uint64_t bi = b[i0];
-    a[i0] = bi - ai;
-    Hacl_Bignum_Fdifference_fdifference_rec(a, b, i0);
-    return;
-  }
-}
-
-static inline void Hacl_Bignum_Fdifference_fdifference_(uint64_t *a, uint64_t *b, uint32_t i)
-{
-  a[0] = b[0] - a[0];
-  a[1] = b[1] - a[1];
-  a[2] = b[2] - a[2];
-  a[3] = b[3] - a[3];
-  a[4] = b[4] - a[4];
-}
-
-static void inline  
+inline static void
 Hacl_Bignum_Fscalar_fscalar_(FStar_UInt128_t *output, uint64_t *b, uint64_t s, uint32_t i)
 {
   if (i == (uint32_t )0)
@@ -426,27 +371,51 @@ Hacl_Bignum_Fscalar_fscalar_(FStar_UInt128_t *output, uint64_t *b, uint64_t s, u
   }
 }
 
-static inline  void Hacl_Bignum_Fscalar_fscalar(FStar_UInt128_t *output, uint64_t *b, uint64_t s)
+inline static void
+Hacl_Bignum_Fscalar_fscalar(FStar_UInt128_t *output, uint64_t *b, uint64_t s)
 {
   Hacl_Bignum_Fscalar_fscalar_(output, b, s, (uint32_t )5);
   return;
 }
 
-static inline  void Hacl_Bignum_fsum(uint64_t *a, uint64_t *b)
-{
-  Hacl_Bignum_Fsum_fsum_(a, b, (uint32_t )5);
-  return;
-}
-
-static inline  void Hacl_Bignum_fdifference(uint64_t *a, uint64_t *b)
+inline static void Hacl_Bignum_fdifference(uint64_t *a, uint64_t *b)
 {
   uint64_t tmp[5] = { 0 };
   memcpy(tmp, b, (uint32_t )5 * sizeof b[0]);
-  Hacl_Bignum_Modulo_add_zero(tmp);
-  Hacl_Bignum_Fdifference_fdifference_(a, tmp, (uint32_t )5);
+  uint64_t b00 = tmp[0];
+  uint64_t b10 = tmp[1];
+  uint64_t b20 = tmp[2];
+  uint64_t b30 = tmp[3];
+  uint64_t b40 = tmp[4];
+  tmp[0] = b00 + (uint64_t )0x3fffffffffff68;
+  tmp[1] = b10 + (uint64_t )0x3ffffffffffff8;
+  tmp[2] = b20 + (uint64_t )0x3ffffffffffff8;
+  tmp[3] = b30 + (uint64_t )0x3ffffffffffff8;
+  tmp[4] = b40 + (uint64_t )0x3ffffffffffff8;
+  /* start inlining Hacl.Bignum.Modulo.add_zero */
+  /* start inlining Hacl.Bignum.Modulo.add_zero_ */
+  /* end inlining Hacl.Bignum.Modulo.add_zero_ */
+  /* end inlining Hacl.Bignum.Modulo.add_zero */
+  uint64_t a0 = a[0];
+  uint64_t b0 = tmp[0];
+  uint64_t a1 = a[1];
+  uint64_t b1 = tmp[1];
+  uint64_t a2 = a[2];
+  uint64_t b2 = tmp[2];
+  uint64_t a3 = a[3];
+  uint64_t b3 = tmp[3];
+  uint64_t a4 = a[4];
+  uint64_t b4 = tmp[4];
+  a[0] = b0 - a0;
+  a[1] = b1 - a1;
+  a[2] = b2 - a2;
+  a[3] = b3 - a3;
+  a[4] = b4 - a4;
+  /* start inlining Hacl.Bignum.Fdifference.fdifference_ */
+  /* end inlining Hacl.Bignum.Fdifference.fdifference_ */
 }
 
-static inline  void Hacl_Bignum_fscalar(uint64_t *output, uint64_t *b, uint64_t s)
+inline static void Hacl_Bignum_fscalar(uint64_t *output, uint64_t *b, uint64_t s)
 {
   FStar_UInt128_t tmp[5];
   for (uintmax_t i = 0; i < (uint32_t )5; ++i)
@@ -457,13 +426,13 @@ static inline  void Hacl_Bignum_fscalar(uint64_t *output, uint64_t *b, uint64_t 
   Hacl_Bignum_Fproduct_copy_from_wide_(output, tmp, (uint32_t )5);
 }
 
-static inline  void Hacl_Bignum_fmul(uint64_t *output, uint64_t *a, uint64_t *b)
+inline static void Hacl_Bignum_fmul(uint64_t *output, uint64_t *a, uint64_t *b)
 {
   Hacl_Bignum_Fmul_fmul(output, a, b);
   return;
 }
 
-static inline  void Hacl_Bignum_crecip(uint64_t *output, uint64_t *input)
+inline static void Hacl_Bignum_crecip(uint64_t *output, uint64_t *input)
 {
   Hacl_Bignum_Crecip_crecip(output, input);
   return;
@@ -512,7 +481,7 @@ static void Hacl_EC_Point_copy(uint64_t *output, uint64_t *input)
     (uint32_t )5 * sizeof (input + (uint32_t )5)[0]);
 }
 
-static uint64_t Hacl_EC_Format_load64_le_full(uint8_t *b)
+static uint64_t Hacl_EC_Format_load64_le(uint8_t *b)
 {
   uint8_t b0 = b[0];
   uint8_t b1 = b[1];
@@ -533,12 +502,7 @@ static uint64_t Hacl_EC_Format_load64_le_full(uint8_t *b)
     | (uint64_t )b7 << (uint32_t )56;
 }
 
-static inline  uint64_t Hacl_EC_Format_load64_le(uint8_t *b)
-{
-  return le64toh(load64(b));
-}
-
-static void Hacl_EC_Format_store64_le_full(uint8_t *b, uint64_t z)
+static void Hacl_EC_Format_store64_le(uint8_t *b, uint64_t z)
 {
   b[0] = (uint8_t )z;
   b[1] = (uint8_t )(z >> (uint32_t )8);
@@ -550,12 +514,7 @@ static void Hacl_EC_Format_store64_le_full(uint8_t *b, uint64_t z)
   b[7] = (uint8_t )(z >> (uint32_t )56);
 }
 
-static inline  void Hacl_EC_Format_store64_le(uint8_t *b, uint64_t z)
-{
-  store64(b,htole64(z));
-}
-
-static inline  void
+static void
 Hacl_EC_Format_upd_5(
   uint64_t *output,
   uint64_t output0,
@@ -629,12 +588,12 @@ static void Hacl_EC_Format_fcontract(uint8_t *output, uint64_t *input)
   uint64_t t36 = t35 & mask_51;
   uint64_t t07 = t06 + nineteen * (t45 >> (uint32_t )51);
   uint64_t t46 = t45 & mask_51;
-  uint64_t two52 = (uint64_t )0x8000000000000;
-  uint64_t t08 = t07 + two52 - nineteen;
-  uint64_t t17 = t16 + two52 - (uint64_t )1;
-  uint64_t t27 = t26 + two52 - (uint64_t )1;
-  uint64_t t37 = t36 + two52 - (uint64_t )1;
-  uint64_t t47 = t46 + two52 - (uint64_t )1;
+  uint64_t two51 = (uint64_t )0x8000000000000;
+  uint64_t t08 = t07 + two51 - nineteen;
+  uint64_t t17 = t16 + two51 - (uint64_t )1;
+  uint64_t t27 = t26 + two51 - (uint64_t )1;
+  uint64_t t37 = t36 + two51 - (uint64_t )1;
+  uint64_t t47 = t46 + two51 - (uint64_t )1;
   uint64_t t18 = t17 + (t08 >> (uint32_t )51);
   uint64_t t0 = t08 & mask_51;
   uint64_t t28 = t27 + (t18 >> (uint32_t )51);
@@ -703,10 +662,46 @@ Hacl_EC_AddAndDouble_fmonty(
   uint64_t *zzprime1 = buf + (uint32_t )30;
   uint64_t *zzzprime1 = buf + (uint32_t )35;
   memcpy(origx0, x, (uint32_t )5 * sizeof x[0]);
-  Hacl_Bignum_fsum(x, z);
+  uint64_t a00 = x[0];
+  uint64_t b00 = z[0];
+  uint64_t a10 = x[1];
+  uint64_t b10 = z[1];
+  uint64_t a20 = x[2];
+  uint64_t b20 = z[2];
+  uint64_t a30 = x[3];
+  uint64_t b30 = z[3];
+  uint64_t a40 = x[4];
+  uint64_t b40 = z[4];
+  x[0] = a00 + b00;
+  x[1] = a10 + b10;
+  x[2] = a20 + b20;
+  x[3] = a30 + b30;
+  x[4] = a40 + b40;
+  /* start inlining Hacl.Bignum.fsum */
+  /* start inlining Hacl.Bignum.Fsum.fsum_ */
+  /* end inlining Hacl.Bignum.Fsum.fsum_ */
+  /* end inlining Hacl.Bignum.fsum */
   Hacl_Bignum_fdifference(z, origx0);
   memcpy(origxprime, xprime, (uint32_t )5 * sizeof xprime[0]);
-  Hacl_Bignum_fsum(xprime, zprime);
+  uint64_t a01 = xprime[0];
+  uint64_t b01 = zprime[0];
+  uint64_t a11 = xprime[1];
+  uint64_t b11 = zprime[1];
+  uint64_t a21 = xprime[2];
+  uint64_t b21 = zprime[2];
+  uint64_t a31 = xprime[3];
+  uint64_t b31 = zprime[3];
+  uint64_t a41 = xprime[4];
+  uint64_t b41 = zprime[4];
+  xprime[0] = a01 + b01;
+  xprime[1] = a11 + b11;
+  xprime[2] = a21 + b21;
+  xprime[3] = a31 + b31;
+  xprime[4] = a41 + b41;
+  /* start inlining Hacl.Bignum.fsum */
+  /* start inlining Hacl.Bignum.Fsum.fsum_ */
+  /* end inlining Hacl.Bignum.Fsum.fsum_ */
+  /* end inlining Hacl.Bignum.fsum */
   Hacl_Bignum_fdifference(zprime, origxprime);
   Hacl_Bignum_fmul(xxprime1, xprime, z);
   /* start inlining Hacl.EC.AddAndDouble.fmonty__1 */
@@ -721,7 +716,25 @@ Hacl_EC_AddAndDouble_fmonty(
   uint64_t *zzprime = buf + (uint32_t )30;
   uint64_t *zzzprime = buf + (uint32_t )35;
   memcpy(origxprime1, xxprime2, (uint32_t )5 * sizeof xxprime2[0]);
-  Hacl_Bignum_fsum(xxprime2, zzprime);
+  uint64_t a0 = xxprime2[0];
+  uint64_t b02 = zzprime[0];
+  uint64_t a12 = xxprime2[1];
+  uint64_t b12 = zzprime[1];
+  uint64_t a22 = xxprime2[2];
+  uint64_t b22 = zzprime[2];
+  uint64_t a32 = xxprime2[3];
+  uint64_t b32 = zzprime[3];
+  uint64_t a42 = xxprime2[4];
+  uint64_t b42 = zzprime[4];
+  xxprime2[0] = a0 + b02;
+  xxprime2[1] = a12 + b12;
+  xxprime2[2] = a22 + b22;
+  xxprime2[3] = a32 + b32;
+  xxprime2[4] = a42 + b42;
+  /* start inlining Hacl.Bignum.fsum */
+  /* start inlining Hacl.Bignum.Fsum.fsum_ */
+  /* end inlining Hacl.Bignum.Fsum.fsum_ */
+  /* end inlining Hacl.Bignum.fsum */
   Hacl_Bignum_fdifference(zzprime, origxprime1);
   Hacl_Bignum_Fsquare_fsquare_times(x3, xxprime2, (uint32_t )1);
   Hacl_Bignum_Fsquare_fsquare_times(zzzprime, zzprime, (uint32_t )1);
@@ -742,7 +755,25 @@ Hacl_EC_AddAndDouble_fmonty(
   Hacl_Bignum_fdifference(zz, xx);
   uint64_t scalar = (uint64_t )121665;
   Hacl_Bignum_fscalar(zzz2, zz, scalar);
-  Hacl_Bignum_fsum(zzz2, xx);
+  uint64_t a02 = zzz2[0];
+  uint64_t b0 = xx[0];
+  uint64_t a1 = zzz2[1];
+  uint64_t b1 = xx[1];
+  uint64_t a2 = zzz2[2];
+  uint64_t b2 = xx[2];
+  uint64_t a3 = zzz2[3];
+  uint64_t b3 = xx[3];
+  uint64_t a4 = zzz2[4];
+  uint64_t b4 = xx[4];
+  zzz2[0] = a02 + b0;
+  zzz2[1] = a1 + b1;
+  zzz2[2] = a2 + b2;
+  zzz2[3] = a3 + b3;
+  zzz2[4] = a4 + b4;
+  /* start inlining Hacl.Bignum.fsum */
+  /* start inlining Hacl.Bignum.Fsum.fsum_ */
+  /* end inlining Hacl.Bignum.Fsum.fsum_ */
+  /* end inlining Hacl.Bignum.fsum */
   /* start inlining Hacl.EC.AddAndDouble.fmonty__ */
   /* start inlining Hacl.EC.AddAndDouble.fmonty__3 */
   Hacl_Bignum_fmul(z2, zzz2, zz);
@@ -887,18 +918,27 @@ static void Hacl_EC_Ladder_cmult(uint64_t *result, uint8_t *n, uint64_t *q)
   Hacl_EC_Ladder_cmult_(result, point_buf, n, q);
 }
 
-static void Hacl_EC_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint)
+static void
+Hacl_EC_crypto_scalarmult__(
+  uint8_t *mypublic,
+  uint8_t *scalar,
+  uint8_t *basepoint,
+  uint64_t *q
+)
 {
-  uint64_t buf0[10] = { 0 };
-  uint64_t *x0 = buf0;
-  uint64_t *z0 = buf0 + (uint32_t )5;
-  Hacl_EC_Format_fexpand(x0, basepoint);
-  z0[0] = (uint64_t )1;
-  uint64_t
-  *q =
-    /* start inlining Hacl.EC.Format.point_of_scalar */
-      buf0
-    /* end inlining Hacl.EC.Format.point_of_scalar */;
+  uint64_t buf[15] = { 0 };
+  uint64_t *nq = buf;
+  uint64_t *x = nq;
+  uint64_t *z = nq + (uint32_t )5;
+  uint64_t *zmone = buf + (uint32_t )5;
+  x[0] = (uint64_t )1;
+  Hacl_EC_Ladder_cmult(nq, scalar, q);
+  Hacl_EC_Format_scalar_of_point(mypublic, nq);
+}
+
+static void
+Hacl_EC_crypto_scalarmult_(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint, uint64_t *q)
+{
   uint8_t e[32] = { 0 };
   memcpy(e, secret, (uint32_t )32 * sizeof secret[0]);
   uint8_t e00 = e[0];
@@ -913,18 +953,22 @@ static void Hacl_EC_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_
     /* start inlining Hacl.EC.Format.format_secret */
       e
     /* end inlining Hacl.EC.Format.format_secret */;
-  uint64_t buf[15] = { 0 };
-  uint64_t *nq = buf;
-  uint64_t *x = nq;
-  uint64_t *z = nq + (uint32_t )5;
-  uint64_t *zmone = buf + (uint32_t )5;
-  x[0] = (uint64_t )1;
-  Hacl_EC_Ladder_cmult(nq, scalar, q);
-  Hacl_EC_Format_scalar_of_point(mypublic, nq);
-  /* start inlining Hacl.EC.crypto_scalarmult__ */
-  /* end inlining Hacl.EC.crypto_scalarmult__ */
-  /* start inlining Hacl.EC.crypto_scalarmult_ */
-  /* end inlining Hacl.EC.crypto_scalarmult_ */
+  Hacl_EC_crypto_scalarmult__(mypublic, scalar, basepoint, q);
+}
+
+void Hacl_EC_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint)
+{
+  uint64_t buf[10] = { 0 };
+  uint64_t *x = buf;
+  uint64_t *z = buf + (uint32_t )5;
+  Hacl_EC_Format_fexpand(x, basepoint);
+  z[0] = (uint64_t )1;
+  uint64_t
+  *q =
+    /* start inlining Hacl.EC.Format.point_of_scalar */
+      buf
+    /* end inlining Hacl.EC.Format.point_of_scalar */;
+  Hacl_EC_crypto_scalarmult_(mypublic, secret, basepoint, q);
 }
 
 void Curve25519_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint)

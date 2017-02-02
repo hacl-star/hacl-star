@@ -15,12 +15,14 @@ open Hacl.Spec.Bignum.Fsquare
 
 #set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
+[@"c_inline"]
 private inline_for_extraction val upd_5:
   tmp:felem_wide -> s0:wide -> s1:wide -> s2:wide -> s3:wide -> s4:wide ->
   Stack unit
     (requires (fun h -> live h tmp))
     (ensures (fun h0 _ h1 -> live h1 tmp /\ as_seq h1 tmp == seq_upd_5 s0 s1 s2 s3 s4
       /\ modifies_1 tmp h0 h1))
+[@"c_inline"]
 private inline_for_extraction let upd_5 tmp s0 s1 s2 s3 s4 =
   tmp.(0ul) <- s0;
   tmp.(1ul) <- s1;
@@ -33,6 +35,7 @@ private inline_for_extraction let upd_5 tmp s0 s1 s2 s3 s4 =
 
 #set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
+[@"c_inline"]
 private inline_for_extraction val fsquare__:
   tmp:felem_wide ->
   output:felem{disjoint tmp output} ->
@@ -41,6 +44,7 @@ private inline_for_extraction val fsquare__:
     (ensures (fun h0 _ h1 -> live h0 tmp /\ live h0 output /\ live h1 tmp /\ modifies_1 tmp h0 h1
       /\ fsquare_pre_ (as_seq h0 output)
       /\ as_seq h1 tmp == fsquare_spec_ (as_seq h0 output)))
+[@"c_inline"]
 private inline_for_extraction let fsquare__ tmp output =
   let h0 = ST.get() in
   let r0 = output.(0ul) in
@@ -66,6 +70,7 @@ private inline_for_extraction let fsquare__ tmp output =
 
 #set-options "--z3rlimit 5"
 
+[@"c_inline"]
 private inline_for_extraction val fsquare_:
   tmp:felem_wide ->
   output:felem{disjoint tmp output} ->
@@ -75,6 +80,7 @@ private inline_for_extraction val fsquare_:
       /\ live h1 output
       /\ fsquare_pre (as_seq h0 output)
       /\ as_seq h1 output == fsquare_spec (as_seq h0 output)))
+[@"c_inline"]
 private inline_for_extraction let fsquare_ tmp output =
   let h0 = ST.get() in
   fsquare__ tmp output;
@@ -87,6 +93,7 @@ private inline_for_extraction let fsquare_ tmp output =
 
 #set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
+[@"c_inline"]
 private val fsquare_times_:
   input:felem ->
   tmp:felem_wide{disjoint input tmp} ->
@@ -97,6 +104,7 @@ private val fsquare_times_:
       /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h0 input)
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 input)
       /\ as_seq h1 input == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
+[@"c_inline"]
 private let rec fsquare_times_ output tmp count =
   if FStar.UInt32.(count =^ 1ul) then (
     let h0 = ST.get() in
@@ -118,6 +126,7 @@ private let rec fsquare_times_ output tmp count =
 
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
 
+[@"c_inline"]
 inline_for_extraction val fsquare_times:
   output:felem ->
   input:felem{disjoint output input} ->
@@ -128,6 +137,7 @@ inline_for_extraction val fsquare_times:
       /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h0 input)
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
       /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
+[@"c_inline"]
 inline_for_extraction let fsquare_times output input count =
   push_frame();
   let t   = create wide_zero clen in
@@ -140,6 +150,7 @@ inline_for_extraction let fsquare_times output input count =
   pop_frame()
 
 
+[@"c_inline"]
 inline_for_extraction val fsquare_times_inplace:
   output:felem ->
   count:FStar.UInt32.t{FStar.UInt32.v count > 0} ->
@@ -149,6 +160,7 @@ inline_for_extraction val fsquare_times_inplace:
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
       /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h0 output)
       /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 output) (FStar.UInt32.v count)))
+[@"c_inline"]
 inline_for_extraction let fsquare_times_inplace output count =
   push_frame();
   let t   = create wide_zero clen in

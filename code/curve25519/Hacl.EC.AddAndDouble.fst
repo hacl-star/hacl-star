@@ -34,8 +34,11 @@ let same_frame (ppx:felem) (ppz:felem) (ppqx:felem) (ppqz:felem)
   /\ frameOf pqx = frameOf pqz
 
 
+[@"substitute"]
 inline_for_extraction let red_513 s = Hacl.Spec.EC.AddAndDouble.red_513 s
+[@"substitute"]
 inline_for_extraction let red_53 s = Hacl.Spec.EC.AddAndDouble.red_53 s
+[@"substitute"]
 inline_for_extraction let red_5413 s = Hacl.Spec.EC.AddAndDouble.red_5413 s
 
 
@@ -210,6 +213,7 @@ private let lemma_fmonty__3_modifies tmp x2 z2 x3 z3 px pz pqx pqz qx h16 h17 h1
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
+[@"substitute"]
 inline_for_extraction private val fmonty__1:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
@@ -242,6 +246,7 @@ inline_for_extraction private val fmonty__1:
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
+[@"substitute"]
 inline_for_extraction private let fmonty__1 buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
   let origxprime = Buffer.sub buf 5ul  5ul in
@@ -283,6 +288,7 @@ inline_for_extraction private let fmonty__1 buf x2 z2 x3 z3 x z xprime zprime qx
   ()
 
 
+[@"substitute"]
 inline_for_extraction private val fmonty__2:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
@@ -324,6 +330,7 @@ inline_for_extraction private val fmonty__2:
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1500"
+[@"substitute"]
 inline_for_extraction private let fmonty__2 buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
   let origxprime = Buffer.sub buf 5ul  5ul in
@@ -393,6 +400,7 @@ inline_for_extraction private let fmonty__2 buf x2 z2 x3 z3 x z xprime zprime qx
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
+[@"substitute"]
 inline_for_extraction private val fmonty__3:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
@@ -434,6 +442,7 @@ inline_for_extraction private val fmonty__3:
 private let lemma_5413_is_55 (s:seqelem{red_5413 s}) : Lemma (Hacl.Spec.EC.AddAndDouble.red_55 s) = ()
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1500"
+[@"substitute"]
 inline_for_extraction private let fmonty__3 buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
   let origxprime = Buffer.sub buf 5ul  5ul in
@@ -475,6 +484,7 @@ inline_for_extraction private let fmonty__3 buf x2 z2 x3 z3 x z xprime zprime qx
 
 
 
+[@"substitute"]
 inline_for_extraction private val fmonty__:
   tmp:buffer limb{length tmp = 40} ->
   ppx:felem -> ppz:felem -> ppqx:felem -> ppqz:felem ->
@@ -507,6 +517,7 @@ inline_for_extraction private val fmonty__:
       /\ as_seq h1 qx == as_seq h0 qx
     ))
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+[@"substitute"]
 inline_for_extraction private let fmonty__ buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
   let origxprime = Buffer.sub buf 5ul  5ul in
