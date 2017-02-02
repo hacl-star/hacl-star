@@ -8,27 +8,20 @@ all:
 	@echo
 	$(MAKE) ver
 
-FSTAR_HOME?=../../../FStar
-KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
-HACL_HOME=../..
-include ../../lib/hyperstack/Makefile.include
+FSTAR_HOME ?= ../../../FStar
+FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe 
+KREMLIN_HOME = $(FSTAR_HOME)/../kremlin
+HACL_HOME ?= ../..
 
-MODULES=Hacl.Symmetric.Poly1305_64.Parameters \
-	Hacl.Symmetric.Poly1305_64.Bigint \
-	Hacl.Symmetric.Poly1305_64 \
-	Hacl.Symmetric.HSalsa20 \
-	Hacl.Symmetric.Salsa20 \
-	Hacl.Symmetric.XSalsa20
+MODULES= Hacl.Symmetric.GCM.fst Hacl.Symmetric.AES.fst Hacl.AEAD.AES256GCM.fst
 
-FSTAR_INCLUDES:=-I ../../lib/hyperstack
+FSTAR_INCLUDES:=--include $(FSTAR_HOME)/ulib/hyperstack --include $(HACL_HOME)/code/lib
 
-%.fst-ver-ct: %.fst
-	$(FSTAR) $(FSTAR_OPTIONS_VER) $(FSTAR_INCLUDES) $^
-%.fst-lax-ct: %.fst
-	$(FSTAR) $(FSTAR_OPTIONS_VER) $(FSTAR_INCLUDES) $^ -fsopt "--lax"
+lax:
+	$(FSTAR) $(FSTAR_INCLUDES) --lax $(MODULES)
 
-ver: $(addsuffix .fst-ver-ct, $(MODULES))
-lax: $(addsuffix .fst-lax-ct, $(MODULES))
+ver:
+	$(FSTAR) $(FSTAR_INCLUDES) $(MODULES)
 
 clean:
 	rm -f *~

@@ -7,9 +7,7 @@ open FStar.ST
 open Hacl.UInt8
 open Hacl.Cast
 open FStar.Buffer
-(* open Hacl.SBuffer *)
 
-(* Module abbreviations *)
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
@@ -195,10 +193,10 @@ let rec access_aux: sb:u8s{length sb = 256} -> byte -> ctr:UInt32.t{UInt32.v ctr
   (requires (fun h -> live h sb))
   (ensures  (fun h0 _ h1 -> h1 == h0))
   = fun sbox i ctr tmp ->
-  if U32 (ctr =^ 256ul) then tmp
+  if U32.(ctr =^ 256ul) then tmp
   else let mask = eq_mask i (uint32_to_sint8 ctr) in
        let tmp = tmp |^ (mask &^ sbox.(ctr)) in
-       access_aux sbox i (U32 (ctr +^ 1ul)) tmp
+       access_aux sbox i (U32.(ctr +^ 1ul)) tmp
 
 val access: sbox:u8s{length sbox = 256} -> idx:byte -> STL byte
   (requires (fun h -> live h sbox))
@@ -211,13 +209,13 @@ val subBytes_aux_sbox: state:u8s{length state >= 4 * UInt32.v nb} -> sbox:u8s{le
   (requires (fun h -> live h state /\ live h sbox))
   (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 let rec subBytes_aux_sbox state sbox ctr =
-  if U32 (ctr =^ 16ul) then ()
+  if U32.(ctr =^ 16ul) then ()
   else
   begin
     let si = state.(ctr) in
     let si' = access sbox si in
     state.(ctr) <- si';
-    subBytes_aux_sbox state sbox (U32 (ctr +^ 1ul))
+    subBytes_aux_sbox state sbox (U32.(ctr +^ 1ul))
   end
 
 val subBytes_sbox: state:u8s{length state >= 4 * UInt32.v nb} -> sbox:u8s{length sbox = 256 /\ disjoint state sbox} -> STL unit
@@ -263,10 +261,10 @@ let mixColumns_ state c =
   let s1 = state.(1ul+^(4ul*^c)) in
   let s2 = state.(2ul+^(4ul*^c)) in
   let s3 = state.(3ul+^(4ul*^c)) in
-  state.((4ul*^c)+^0ul) <- H8 (multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
-  state.((4ul*^c)+^1ul) <- H8 (multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
-  state.((4ul*^c)+^2ul) <- H8 (multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
-  state.((4ul*^c)+^3ul) <- H8 (multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2)
+  state.((4ul*^c)+^0ul) <- H8.(multiply (uint8_to_sint8 0x2uy) s0 ^^ multiply (uint8_to_sint8 0x3uy) s1 ^^ s2 ^^ s3);
+  state.((4ul*^c)+^1ul) <- H8.(multiply (uint8_to_sint8 0x2uy) s1 ^^ multiply (uint8_to_sint8 0x3uy) s2 ^^ s3 ^^ s0);
+  state.((4ul*^c)+^2ul) <- H8.(multiply (uint8_to_sint8 0x2uy) s2 ^^ multiply (uint8_to_sint8 0x3uy) s3 ^^ s0 ^^ s1);
+  state.((4ul*^c)+^3ul) <- H8.(multiply (uint8_to_sint8 0x2uy) s3 ^^ multiply (uint8_to_sint8 0x3uy) s0 ^^ s1 ^^ s2)
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
@@ -294,10 +292,10 @@ let addRoundKey_ state w round c =
   let w1 = w.(((4ul*^round)*^nb)+^(4ul*^c)+^1ul) in
   let w2 = w.(((4ul*^round)*^nb)+^(4ul*^c)+^2ul) in
   let w3 = w.(((4ul*^round)*^nb)+^(4ul*^c)+^3ul) in
-  state.((4ul*^c)+^0ul) <- H8 (s0 ^^ w0);
-  state.((4ul*^c)+^1ul) <- H8 (s1 ^^ w1);
-  state.((4ul*^c)+^2ul) <- H8 (s2 ^^ w2);
-  state.((4ul*^c)+^3ul) <- H8 (s3 ^^ w3)
+  state.((4ul*^c)+^0ul) <- H8.(s0 ^^ w0);
+  state.((4ul*^c)+^1ul) <- H8.(s1 ^^ w1);
+  state.((4ul*^c)+^2ul) <- H8.(s2 ^^ w2);
+  state.((4ul*^c)+^3ul) <- H8.(s3 ^^ w3)
 
 val addRoundKey: state:u8s{length state >= 4 * UInt32.v nb} -> w:u8s{length w >= 16 * (UInt32.v nr+1) /\ disjoint state w} -> round:UInt32.t{UInt32.v round <= UInt32.v nr}  -> STL unit
     (requires (fun h -> live h state /\ live h w))
@@ -345,7 +343,7 @@ val cipher: out:u8s{length out >= 4 * UInt32.v nb} -> input:u8s{length input >= 
   (ensures  (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1))
 let cipher out input w sbox =
   push_frame();
-  let state = create (uint8_to_sint8 0uy) (U32 (4ul*^nb)) in
+  let state = create (uint8_to_sint8 0uy) (U32.(4ul*^nb)) in
   cipher_body state out input w sbox;
   pop_frame()
 
@@ -409,7 +407,7 @@ let keyExpansion_aux_0 w temp sbox j =
     subWord temp sbox;
     let t0 = temp.(0ul) in
     let rc = rcon ((i/^4ul)/^nk) (uint8_to_sint8 1uy) in
-    let z = H8 (t0 ^^ rc) in
+    let z = H8.(t0 ^^ rc) in
     temp.(0ul) <- z
   ) else if (((i/^4ul) %^ nk) =^ 4ul) then (
     subWord temp sbox
@@ -435,10 +433,10 @@ let keyExpansion_aux_1 w temp sbox j =
   let t1 = temp.(1ul) in
   let t2 = temp.(2ul) in
   let t3 = temp.(3ul) in
-  w.(i+^0ul) <- H8 (t0 ^^ w0);
-  w.(i+^1ul) <- H8 (t1 ^^ w1);
-  w.(i+^2ul) <- H8 (t2 ^^ w2);
-  w.(i+^3ul) <- H8 (t3 ^^ w3)
+  w.(i+^0ul) <- H8.(t0 ^^ w0);
+  w.(i+^1ul) <- H8.(t1 ^^ w1);
+  w.(i+^2ul) <- H8.(t2 ^^ w2);
+  w.(i+^3ul) <- H8.(t3 ^^ w3)
 
 val keyExpansion_aux: w:u8s{length w >= 16 * (UInt32.v nr+1)} -> temp:u8s{length temp >= 4} -> sbox:u8s{length sbox = 256} -> i:UInt32.t{UInt32.v i <= 60 /\ UInt32.v i >= UInt32.v nk} -> STL unit
   (requires (fun h -> live h w /\ live h temp /\ live h sbox
@@ -507,7 +505,7 @@ let rec invSubBytes_aux_sbox state sbox ctr =
     let si = state.(ctr) in
     let si' = access sbox si in
     state.(ctr) <- si';
-    invSubBytes_aux_sbox state sbox (U32 (ctr+^1ul))
+    invSubBytes_aux_sbox state sbox (U32.(ctr+^1ul))
   end
 
 val invSubBytes_sbox: state:u8s{length state >= 4 * UInt32.v nb} -> sbox:u8s{length sbox = 256} -> STL unit
@@ -527,13 +525,13 @@ let invMixColumns_ state c =
   let s1 = state.(1ul+^(4ul*^c)) in
   let s2 = state.(2ul+^(4ul*^c)) in
   let s3 = state.(3ul+^(4ul*^c)) in
-  state.((4ul*^c)+^0ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s0 ^^ multiply (uint8_to_sint8 0xbuy) s1
+  state.((4ul*^c)+^0ul) <- (H8.(multiply (uint8_to_sint8 0xeuy) s0 ^^ multiply (uint8_to_sint8 0xbuy) s1
 	       ^^ multiply (uint8_to_sint8 0xduy) s2 ^^ multiply (uint8_to_sint8 0x9uy) s3));
-  state.((4ul*^c)+^1ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s1 ^^ multiply (uint8_to_sint8 0xbuy) s2
+  state.((4ul*^c)+^1ul) <- (H8.(multiply (uint8_to_sint8 0xeuy) s1 ^^ multiply (uint8_to_sint8 0xbuy) s2
 	       ^^ multiply (uint8_to_sint8 0xduy) s3 ^^ multiply (uint8_to_sint8 0x9uy) s0));
-  state.((4ul*^c)+^2ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s2 ^^ multiply (uint8_to_sint8 0xbuy) s3
+  state.((4ul*^c)+^2ul) <- (H8.(multiply (uint8_to_sint8 0xeuy) s2 ^^ multiply (uint8_to_sint8 0xbuy) s3
 	       ^^ multiply (uint8_to_sint8 0xduy) s0 ^^ multiply (uint8_to_sint8 0x9uy) s1));
-  state.((4ul*^c)+^3ul) <- (H8 (multiply (uint8_to_sint8 0xeuy) s3 ^^ multiply (uint8_to_sint8 0xbuy) s0
+  state.((4ul*^c)+^3ul) <- (H8.(multiply (uint8_to_sint8 0xeuy) s3 ^^ multiply (uint8_to_sint8 0xbuy) s0
 	       ^^ multiply (uint8_to_sint8 0xduy) s1 ^^ multiply (uint8_to_sint8 0x9uy) s2))
 
 #reset-options "--initial_fuel 0 --max_fuel 0"
