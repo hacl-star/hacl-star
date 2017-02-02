@@ -167,7 +167,7 @@ let mac_is_fresh (i:id) (region:erid) m0 (st:state i) m1 =
 
 let mac_is_unset (i:id) (region:erid) (st:state i) m =
    st.region == region /\
-   MAC.norm m st.r /\
+   MAC.norm_r m st.r /\
    Buffer.live m st.s /\
    (mac_log ==>
       RR.m_contains (ilog st.log) m /\
@@ -177,7 +177,7 @@ let genPost (i:id) (region:erid) m0 (st:state i) m1 =
   mac_is_fresh i region m0 st m1 /\
   mac_is_unset i region st m1
 
-#set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 val alloc: region:erid -> i:id
   -> ak:akey region (fst i)
@@ -220,9 +220,11 @@ let alloc region i ak k =
     State #i #region r s log
     end
   else
+    begin
     let h4 = ST.get() in 
     lemma_intro_modifies_1 k h0 h4;
     State #i #region r s ()
+    end
 
 
 val gen: region:erid -> i:id -> ak:akey region (fst i) -> ST (state i)
@@ -309,7 +311,7 @@ let frame_acc_inv #i st acc h0 h1 =
 
 // not framed, as we allocate private state on the caller stack
 val start: #i:id -> st:state i -> StackInline (accBuffer i)
-  (requires (fun h -> MAC.norm h st.r))
+  (requires (fun h -> MAC.norm_r h st.r))
   (ensures  (fun h0 a h1 ->
     Buffer.frameOf (MAC.as_buffer a.a) == h1.tip /\
     ~(h0 `Buffer.contains` (MAC.as_buffer (abuf a))) /\
@@ -578,7 +580,7 @@ val verify:
     verify_liveness st tag h0 /\
     Buffer.disjoint_2 (MAC.as_buffer (abuf acc)) st.s tag))
   (ensures (fun h0 b h1 -> verify_ensures st acc tag h0 b h1))
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let verify #i st acc tag =
   if authId i then RR.m_recall #st.region #(log i) #(log_cmp #i) (ilog st.log);
   let h0 = ST.get () in

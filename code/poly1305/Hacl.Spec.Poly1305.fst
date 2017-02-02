@@ -143,16 +143,17 @@ let encode_r rb =
   UInt.logand #128 (little_endian rb) (little_endian r_mask)
 
 
-(** Final truncation to 128 bits to compute the tag *)
-val trunc_1305: elem -> Tot elem
-let trunc_1305 e = e % normalize_term (pow2 128)
+(* (\** Final truncation to 128 bits to compute the tag *\) *)
+(* val trunc_1305: elem -> Tot elem *)
+(* let trunc_1305 e = e % normalize_term (pow2 128) *)
 
 
 (** Finish: truncate and pad (or pad and truncate) *)
 val finish: a:elem -> s:tag -> Tot tag
 let finish a s =
   (* REMARK: this is equivalent to n = (a + little_endian s) % pow2 128 *)
-  let n = (trunc_1305 a + little_endian s) % pow2 128 in
+  (* let n = (trunc_1305 a + little_endian s) % pow2 128 in *)
+  let n = ((* trunc_1305  *)a + little_endian s) % pow2 128 in
   little_bytes 16ul n
 
 
