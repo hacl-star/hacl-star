@@ -71,20 +71,17 @@ verify: $(addsuffix -verify, $(X25519_FILES))
 
 hints: $(addsuffix -hints, $(X25519_SPECIFIC))
 
-
 extract-c:
+	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p x25519-c
-	$(KREMLIN_HOME)/krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir x25519-c -verbose \
-		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
-		$(X25519_FILES) Hacl.Test.X25519.fst \
-		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
-		-drop Hacl.UInt128  -drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-bundle Hacl.Spec=Hacl.Spec.* -bundle Hacl.Bignum=Hacl.Bignum.* -bundle Hacl.EC=Hacl.EC.* \
-		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
-		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                -ccopt -Wno-error=format= -no-prefix Hacl.Test.X25519 -ccopt -flto -ccopt -march=native -o x25519.exe
+	$(KREMLIN_HOME)/krml -tmpdir x25519-c -verbose \
+		-I ../bignum -I ../lib/kremlin \
+		Curve25519.fst Hacl.Test.X25519.fst \
+		-drop 'Hacl.Spec.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
+		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum.*,Hacl.EC.*' \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
+                -no-prefix Hacl.Test.X25519 -ldopt -flto -ccopt -march=native -o x25519.exe
 	./x25519.exe
-
 
 clean:
 	rm -rf *.exe *.exe.* *.out *~ x25519-c 

@@ -1,15 +1,17 @@
 .PHONY: test clean
 
-# CC=clang -flto
+OPENSSL_HOME=../../other_providers/openssl
+LIBSODIUM_HOME=../../other_providers/libsodium/src/libsodium
 CC=gcc-6 -flto
 
-test: test-poly	test-chacha test-salsa test-curve
+test: test-poly	test-chacha test-salsa test-curve test-nacl
 
-#CC=/usr/local/opt/llvm/bin/clang
 
 test-poly:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	kremlib.c testlib.c Poly1305_64.c test-poly.c -l sodium -I openssl  -o test-poly.exe openssl/libcrypto.a 
+	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 $(OPENSSL_HOME)/libcrypto.a \
+	-l sodium \
+	kremlib.c testlib.c Poly1305_64.c test-poly.c -o test-poly.exe 
 	./test-poly.exe
 
 poly.asm:
@@ -28,7 +30,9 @@ salsa.asm:
 
 test-chacha:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	kremlib.c testlib.c Chacha20.c test-chacha.c -l sodium -o test-chacha.exe -I openssl -lcrypto
+	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 $(OPENSSL_HOME)/libcrypto.a \
+	-l sodium \
+	kremlib.c testlib.c Chacha20.c test-chacha.c -o test-chacha.exe
 	./test-chacha.exe
 
 test-chacha-avx:
@@ -43,7 +47,9 @@ chacha.asm:
 
 test-curve:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	kremlib.c testlib.c Curve25519.c test-curve.c -l sodium -o test-curve.exe -I openssl/include -I openssl/crypto/ec -I openssl openssl/libcrypto.a openssl/libssl.a
+	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a \
+	-l sodium \
+	kremlib.c testlib.c Curve25519.c test-curve.c -o test-curve.exe 
 	./test-curve.exe
 
 test-nacl:

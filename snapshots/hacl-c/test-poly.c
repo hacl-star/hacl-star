@@ -2,8 +2,8 @@
 #include "testlib.h"
 #include "Poly1305_64.h"
 #include "sodium.h"
-#include "openssl/crypto/include/internal/poly1305.h"
-#include "openssl/crypto/poly1305/poly1305_local.h"
+#include "internal/poly1305.h"
+#include "poly1305_local.h"
 
 void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
   POLY1305 state;
@@ -145,11 +145,11 @@ int32_t perf_poly() {
   cycles a,b;
   clock_t t1,t2;
   t1 = clock();
-  a = TestLib_cpucycles();
+  a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     Hacl_MAC_Poly1305_64_crypto_onetimeauth(macs + MACSIZE * i, plain, len, key);
   }
-  b = TestLib_cpucycles();
+  b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("HACL Poly1305 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
@@ -157,11 +157,11 @@ int32_t perf_poly() {
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
   t1 = clock();
-  a = TestLib_cpucycles();
+  a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     crypto_onetimeauth(macs + MACSIZE * i, plain, len, key);
   }
-  b = TestLib_cpucycles();
+  b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Sodium Poly1305 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
@@ -171,11 +171,11 @@ int32_t perf_poly() {
 
 
   t1 = clock();
-  a = TestLib_cpucycles();
+  a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     ossl_poly1305(macs + MACSIZE * i, plain, len, key);
   }
-  b = TestLib_cpucycles();
+  b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("OpenSSL Poly1305 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);

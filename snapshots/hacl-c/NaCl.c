@@ -126,7 +126,7 @@ uint32_t Hacl_Box_crypto_box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
   uint8_t tmp[48] = { 0 };
   uint8_t *hsalsa_k = tmp + (uint32_t )0;
   uint8_t *hsalsa_n = tmp + (uint32_t )32;
-  Hacl_EC_crypto_scalarmult(hsalsa_k, sk, pk);
+  Curve25519_crypto_scalarmult(hsalsa_k, sk, pk);
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(k, hsalsa_n, hsalsa_k);
   return (uint32_t )0;
 }
@@ -159,7 +159,7 @@ Hacl_Box_crypto_box_detached(
   uint8_t *k = key + (uint32_t )0;
   uint8_t *subkey = key + (uint32_t )32;
   uint8_t *hsalsa_n = key + (uint32_t )64;
-  Hacl_EC_crypto_scalarmult(k, sk, pk);
+  Curve25519_crypto_scalarmult(k, sk, pk);
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, hsalsa_n, k);
   uint32_t z = Hacl_SecretBox_crypto_secretbox_detached(c, mac, m, mlen, n, subkey);
   return z;
@@ -180,7 +180,7 @@ Hacl_Box_crypto_box_open_detached(
   uint8_t *k = key + (uint32_t )0;
   uint8_t *subkey = key + (uint32_t )32;
   uint8_t *hsalsa_n = key + (uint32_t )64;
-  Hacl_EC_crypto_scalarmult(k, sk, pk);
+  Curve25519_crypto_scalarmult(k, sk, pk);
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, hsalsa_n, k);
   uint32_t z = Hacl_SecretBox_crypto_secretbox_open_detached(m, c, mac, mlen, n, subkey);
   return z;

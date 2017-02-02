@@ -46,7 +46,7 @@ hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 		-drop Hacl.UInt128 -bundle Hacl.Spec=Hacl.Spec.* \
 		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ccopt -flto -ccopt -march=native -no-prefix $(basename $^)
+                -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -no-prefix $(basename $^)
 	./$(basename $^).exe
 
 extract-c: $(addsuffix -c, $(SALSA_FILES))
