@@ -14,8 +14,14 @@ open Crypto.Symmetric.Bytes
 open Crypto.Indexing
 open Crypto.Config
 
+#reset-options "--initial_fuel 0 --initial_ifuel 0 --max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
+module CHACHA = Hacl.Symmetric.Chacha20
+
 type alg = cipherAlg
 let algi = cipherAlg_of_id
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 inline_for_extraction let keylen = function
   | AES128   -> 16ul
@@ -39,22 +45,39 @@ inline_for_extraction let statelen = function
   | AES128   -> 432ul // 256 + 176
   | AES256   -> 496ul // 256 + 240
   | CHACHA20 -> 32ul
+  (* | CHACHA20 -> 16ul *)
+
+inline_for_extraction let stlen = function
+  | AES128   -> 432ul // 256 + 176
+  | AES256   -> 496ul // 256 + 240
+  | CHACHA20 -> 16ul
 
 type ctr = UInt32.t
 
 type key a   = lbuffer (v (keylen a))
 type block a = lbuffer (v (blocklen a))
-type state a = lbuffer (v (statelen a))
+
+unfold inline_for_extraction
+let state_limb = function
+  | AES128 -> FStar.UInt8.t
+  | AES256 -> FStar.UInt8.t
+  | CHACHA20 -> FStar.UInt32.t
+
+unfold inline_for_extraction
+type state a = b:Buffer.buffer (state_limb a){Buffer.length b = UInt32.v (stlen a)}
+(* type state a = lbuffer (v (statelen a)) *)
 
 // 16-10-02 an integer value, instead of a lbuffer (v (ivlen)),
 // so that it can be used both in abstract indexes and in real code.
 type iv a    = n:UInt128.t { UInt128.v n < pow2 (v (8ul *^ ivlen a)) } 
 
+
 let init (#i:id) (k:key (algi i)) (s:state (algi i)) =
   let a = algi i in
   match a with
   | CHACHA20 ->
-    Buffer.blit k 0ul s 0ul (keylen a)
+    CHACHA.chacha_keysetup s k
+    (* Buffer.blit k 0ul s 0ul (keylen a) *)
 
   | AES128 ->
     let open Crypto.Symmetric.AES128 in
@@ -100,10 +123,13 @@ val compute:
   counter: ctr ->
   len:UInt32.t { len <=^  blocklen (algi i) /\ v len <= length output} -> Stack unit
     (requires (fun h -> live h st /\ live h output))
-    (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1
+    (ensures (fun h0 _ h1 -> live h1 output /\ (
+      match cipherAlg_of_id i with
+      | CHACHA20 -> modifies_2 output st h0 h1
+      | _ -> modifies_1 output h0 h1)
       ))
 
-#reset-options "--z3rlimit 50" 
+#set-options "--z3rlimit 50"
 
 let compute i output st n counter len = 
   let h0 = ST.get() in 
@@ -111,15 +137,25 @@ let compute i output st n counter len =
   let a = algi i in
   begin match a with 
   | CHACHA20 -> // already specialized for counter mode
-      let open Crypto.Symmetric.Chacha20 in // shadows ivlen
+      (* let open Crypto.Symmetric.Chacha20 in // shadows ivlen *)
+      (* chacha20 output st nbuf counter len; *)
+      (* let h2 = ST.get() in *)
+      (* Buffer.lemma_reveal_modifies_2 output nbuf h1 h2; *)
+      (* () *)
+      begin
       let nbuf = Buffer.create 0uy (ivlen' CHACHA20) in
-      let h1 = ST.get() in 
       store_uint128 (ivlen' CHACHA20) nbuf n;
-      chacha20 output st nbuf counter len;
-      let h2 = ST.get() in
-      Buffer.lemma_reveal_modifies_2 output nbuf h1 h2;
+      if len = 64ul then (
+        CHACHA.chacha_ietf_ivsetup st nbuf counter;
+        CHACHA.chacha_encrypt_bytes_stream st output)
+      else (
+        CHACHA.chacha_ietf_ivsetup st nbuf counter;
+        CHACHA.chacha_encrypt_bytes_finish_stream st output len
+      );        
+      (* let nbuf = Buffer.create 0uy (ivlen CHACHA20) in *)
+      (* store_uint128 (ivlen CHACHA20) nbuf n; *)
       ()
-
+      end
   // ADL: TODO single parametric AES module
   | AES128 -> (
       let open Crypto.Symmetric.AES128 in // shadows blocklen
@@ -133,7 +169,6 @@ let compute i output st n counter len =
           | HaclAES -> cipher output_block ctr_block w sbox
           | SpartanAES -> Spartan.cipher output_block ctr_block w sbox );
       blit output_block 0ul output 0ul len ) // too much copying!
-
   | AES256 -> 
       let open Crypto.Symmetric.AES in  // shadows blocklen
       let sbox = Buffer.sub st 0ul 256ul in
