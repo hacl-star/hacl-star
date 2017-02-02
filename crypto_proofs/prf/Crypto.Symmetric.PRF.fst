@@ -239,7 +239,7 @@ val prf_mac:
        | Some mc' -> 
            h0 == h1 /\ // when decrypting
            mc == mc' /\ 
-           CMA.(MAC.norm h1 mc.r) /\ 
+           CMA.(MAC.norm_r h1 mc.r) /\ 
            CMA.(Buffer.live h1 mc.s) /\ 
            CMA.(mac_log ==> m_contains (ilog mc.log) h1) 
        | None ->  // when encrypting, we get the stateful post of MAC.create             
@@ -274,7 +274,7 @@ let prf_mac i t k_0 x =
     match find_mac contents x with
     | Some mc ->  (* beware: mac shadowed by CMA.mac *)
         let h0 = ST.get() in
-        assume (CMA.(MAC.norm h0 mc.r)); //16-12-20 TODO: replace this using monotonicity; NS: known limitation
+        assume (CMA.(MAC.norm_r h0 mc.r)); //16-12-20 TODO: replace this using monotonicity; NS: known limitation
         Buffer.recall (CMA.(mc.s));
         if mac_log then FStar.Monotonic.RRef.m_recall (CMA.(ilog mc.log));
         mc
