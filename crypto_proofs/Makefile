@@ -15,7 +15,7 @@ OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real
 
 KRML_INCLUDES=$(addprefix -I ,test/spartan_aes aead uf1cma primitives prf utils ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
-KRML_ARGS=-verbose -ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS)
+KRML_ARGS=-verbose -ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS) -ccopt -std=gnu99
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES) 
 
 test/spartan_aes/aes.o:
@@ -41,7 +41,7 @@ CC=gcc-6
 test-perf.exe: krml-test.exe test/test_perf.c
 	$(CC) -Ofast -m64 -flto -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
 	 -o test-perf.exe tmp/FStar.c tmp/Crypto_AEAD*.c tmp/Crypto_Indexing*.c tmp/Crypto_Symmetric*.c tmp/Hacl_Poly1305*.c tmp/Hacl_Symmetric_Chacha20.c tmp/Buffer_Utils*.c tmp/Crypto_Plain*.c $(KREMLIN_HOME)/kremlib/kremlib.c \
-		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_perf.c test/spartan_dummy.c test/test_hacks.c  -I tmp -I ../snapshots/hacl-c \
+		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_perf.c test/spartan_dummy.c test/test_hacks.c  -I tmp  \
 		-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test \
 		-I $(OPENSSL_HOME)/include -L $(OPENSSL_HOME) -lcrypto $(CFLAGS)
 	PATH=$(OPENSSL_HOME):$(PATH) LD_LIBRARY_PATH=$(OPENSSL_HOME):$(LD_LIBRARY_PATH) DYLD_LIBRARY_PATH=$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH) ./test-perf.exe
