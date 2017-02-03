@@ -502,11 +502,6 @@ let mac #i st acc tag =
     begin
     let t = read_word 16ul tag in // load_bytes 16ul tag in
     let vs = !(alog acc) in
-    (* Seq.lemma_eq_intro vs (MAC.text_to_PS_text vs); admit() end *)
-    (* lemma_mac_1 vs (MAC.sel_elem h0 st.r); *)
-    (* Seq.lemma_eq_intro t (MAC.mac vs (MAC.sel_elem h0 st.r) (Buffer.as_seq h0 st.s)); admit() end *)
-    assume (as_seq h1 tag == MAC.mac vs (MAC.sel_elem h0 st.r) (Buffer.as_seq h0 st.s));
-        (* cut (t == MAC.mac vs (MAC.sel_elem h0 st.r) (Buffer.as_seq h0 st.s)); admit() end *)
     assert (log_cmp #i (snd i, None) (snd i, Some (vs, t)));
     lemma_reveal_modifies_2 (MAC.as_buffer acc.a) tag h0 h1;
     RR.m_recall #st.region #(log i) #log_cmp (ilog st.log);
@@ -520,8 +515,7 @@ let mac #i st acc tag =
     let r = MAC.sel_elem h2 st.r in
     let s = Buffer.as_seq h2 st.s in
     let t = MAC.mac vs r s in
-    (* FStar.Endianness.lemma_little_endian_inj t (Buffer.as_seq h2 tag); *)
-    assume (Seq.equal (Buffer.as_seq h2 tag) t); // JK: TODO
+    MAC.lemma_poly_finish_to_mac i h2 tag (MAC.sel_elem h0 acc.a) h0 st.s vs r;
     if authId i then
       modifies_mac_aux (MAC.as_buffer acc.a) tag (RR.as_hsref (ilog st.log))
         (snd i, Some (vs,t)) h0 h1 h2
@@ -610,7 +604,7 @@ let verify #i st acc tag =
         h0 h1 h2 h3;
       let t = read_word 16ul computed in
       let vs = !(alog acc) in
-      assume (as_seq h3 computed == MAC.mac vs (MAC.sel_elem h0 st.r) (Buffer.as_seq h0 st.s)); // JK:TODO
+      MAC.lemma_poly_finish_to_mac i h3 computed (MAC.sel_elem h0 acc.a) h0 st.s vs (MAC.sel_elem h0 st.r);
       if authId i then
         begin
         let log = RR.m_read (ilog st.log) in // Don't inline it below; doesn't work
