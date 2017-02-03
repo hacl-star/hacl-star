@@ -39,7 +39,7 @@ let prf_mac_existed (i:id) (t:PRF.state i) (k_0: CMA.akey t.mac_rgn i) (x:PRF.do
 		    (h1:mem) (existing_mac:CMA.state (i, x.iv))
   = h0 == h1 /\                                               //we didn't change the state
     returned_mac == existing_mac        /\                    //we returned the mac we found
-    CMA.(MAC.norm h1 returned_mac.r)    /\                    //it's repr is in canonical form
+    CMA.(MAC.norm_r h1 returned_mac.r)    /\                    //it's repr is in canonical form
     CMA.(Buffer.live h1 returned_mac.s) /\                    //it's live
     CMA.(mac_log ==> m_contains (ilog returned_mac.log) h1)  //and its underlying log is live too
 
@@ -306,6 +306,8 @@ let prf_mac_find_unchanged #i #rw aead_st k_0 x h0 h1 e =
     FStar.Seq.find_snoc t0 e (is_entry_domain y) 
   in
   FStar.Classical.forall_intro aux
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 (*+ prf_mac_0: 
       Strengthening the spec of PRF.prf_mac to show that 

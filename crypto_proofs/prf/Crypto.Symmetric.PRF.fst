@@ -38,6 +38,7 @@ let blocklen i = Block.blocklen (cipherAlg_of_id i)
 type block i = b:lbytes (v (blocklen i))
 let keylen i = Block.keylen (cipherAlg_of_id i)
 let statelen i = Block.statelen (cipherAlg_of_id i)
+let stlen i = Block.stlen (cipherAlg_of_id i)
 
 (*
 private let lemma_lengths (i:id) : Lemma(keylen i <^ blocklen i) = 
@@ -172,31 +173,64 @@ val gen: rgn:region -> i:id -> ST (state i)
         ~ (h0 `HS.contains` (itable i s))
 	  /\ HS.sel h1 (itable i s) == Seq.createEmpty #(entry s.mac_rgn i))))
 let gen rgn i =
-  push_frame();
-  let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
-  let keystate = Buffer.rcreate rgn 0uy (statelen i) in
-  let key = Buffer.create 0uy (keylen i) in
-  let alg = cipherAlg_of_id i in
-  Bytes.random (v (keylen i)) key;
-  Block.init #i key keystate;
-  let table: table_t rgn mac_rgn i =
-    if prf i then 
-      mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i)))
-    else ()
-  in
-  pop_frame();
-  State #i #rgn #mac_rgn keystate table
-// no need to demand prf i so far.
+  (* match cipherAlg_of_id i with *)
+  (* | CHACHA20 -> *)
+  (*   begin *)
+  (*   let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in *)
+  (*   let keystate = Buffer.rcreate rgn 0ul (stlen i) in *)
+  (*   let key = Buffer.create 0uy (keylen i) in *)
+  (*   let alg = cipherAlg_of_id i in *)
+  (*   Bytes.random (v (keylen i)) key; *)
+  (*   Block.init #i key keystate; *)
+  (*   let table: table_t rgn mac_rgn i = *)
+  (*     if prf i then  *)
+  (*       mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i))) *)
+  (*     else () *)
+  (*     in *)
+  (*   pop_frame(); *)
+  (*   State #i #rgn #mac_rgn keystate table *)
+  (*   // no need to demand prf i so far. *)
+  (*   end *)
+  (* | _ ->  *)
+    (* begin *)
+    push_frame();
+    let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
+    let keystate = Buffer.rcreate rgn 0uy (statelen i) in
+    let key = Buffer.create 0uy (keylen i) in
+    let alg = cipherAlg_of_id i in
+    Bytes.random (v (keylen i)) key;
+    Block.init #i key keystate;
+    let table: table_t rgn mac_rgn i =
+      if prf i then 
+        mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i)))
+      else ()
+      in
+    pop_frame();
+    State #i #rgn #mac_rgn keystate table
+    // no need to demand prf i so far.
+    (* end *)
 
 val coerce: rgn:region -> i:id{~(prf i)} -> key:lbuffer (v (keylen i)) -> ST (state i)
   (requires (fun h -> Buffer.live h key))
   (ensures  (fun h0 s h1 -> s.rgn == rgn))
 let coerce rgn i key =
-  let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
-  let keystate = Buffer.rcreate rgn 0uy (statelen i) in
-  let alg = cipherAlg_of_id i in
-  Cipher.init #i key keystate;
-  State #i #rgn #mac_rgn keystate (no_table i rgn mac_rgn)
+  (* match cipherAlg_of_id i with *)
+  (* | CHACHA20 -> *)
+  (*   begin *)
+  (*   let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in *)
+  (*   let keystate = Buffer.rcreate rgn 0uy (stlen i) in *)
+  (*   let alg = cipherAlg_of_id i in *)
+  (*   Cipher.init #i key keystate; *)
+  (*   State #i #rgn #mac_rgn keystate (no_table i rgn mac_rgn) *)
+  (*   end *)
+  (* | _ -> *)
+    (* begin *)
+    let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
+    let keystate = Buffer.rcreate rgn 0uy (statelen i) in
+    let alg = cipherAlg_of_id i in
+    Cipher.init #i key keystate;
+    State #i #rgn #mac_rgn keystate (no_table i rgn mac_rgn)
+    (* end *)
 
 val leak: #i:id{~(prf i)} -> st:state i -> ST (key:lbuffer (v (statelen i)))
   (requires (fun h -> True))
@@ -239,7 +273,7 @@ val prf_mac:
        | Some mc' -> 
            h0 == h1 /\ // when decrypting
            mc == mc' /\ 
-           CMA.(MAC.norm h1 mc.r) /\ 
+           CMA.(MAC.norm_r h1 mc.r) /\ 
            CMA.(Buffer.live h1 mc.s) /\ 
            CMA.(mac_log ==> m_contains (ilog mc.log) h1) 
        | None ->  // when encrypting, we get the stateful post of MAC.create             
@@ -274,7 +308,7 @@ let prf_mac i t k_0 x =
     match find_mac contents x with
     | Some mc ->  (* beware: mac shadowed by CMA.mac *)
         let h0 = ST.get() in
-        assume (CMA.(MAC.norm h0 mc.r)); //16-12-20 TODO: replace this using monotonicity; NS: known limitation
+        assume (CMA.(MAC.norm_r h0 mc.r)); //16-12-20 TODO: replace this using monotonicity; NS: known limitation
         Buffer.recall (CMA.(mc.s));
         if mac_log then FStar.Monotonic.RRef.m_recall (CMA.(ilog mc.log));
         mc

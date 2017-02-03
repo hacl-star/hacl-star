@@ -32,7 +32,7 @@ open Crypto.AEAD.Invariant
 let accumulate_liveness (#i: MAC.id) (st: CMA.state i) 
 			(#aadlen:aadlen_32) (aad:lbuffer (v aadlen))
 			(#txtlen:txtlen_32) (cipher:lbuffer (v txtlen)) (h:mem) = 
-  MAC.norm h CMA.(st.r) /\
+  MAC.norm_r h CMA.(st.r) /\
   Buffer.live h aad /\ 
   Buffer.live h cipher
 

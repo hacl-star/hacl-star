@@ -389,7 +389,7 @@ let ak_live (#i:CMA.id) (r:rid) (ak:CMA.state i) (h:mem) =
     let open CMA in 
     ak.region = r /\
     Buffer.live h ak.s /\
-    MAC.norm h ak.r
+    MAC.norm_r h ak.r
 
 let enc_dec_liveness_and_separation (#i:id) (#rw:rw) (aead_st:aead_state i rw)
                                     (#aadlen:nat) (aad:lbuffer aadlen)
@@ -480,7 +480,7 @@ let init_remaining_len_ok (#i:id) (x:PRF.domain i{PRF.ctr_0 i +^ 1ul = x.ctr}) (
     = ()
 
 (*+ Framing lemmas for clauses of the main invariant **)
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let frame_refines_one_entry (#i:id) (#mac_rgn:region) 
 			    (h:mem) (h':mem) 
 			    (blocks:prf_table mac_rgn i)

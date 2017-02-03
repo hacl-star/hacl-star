@@ -365,7 +365,7 @@ let accumulate_encoded (#i:CMA.id)
 
 let acc_inv_weak (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) h : Type0 =
   let open CMA in
-  MAC.norm h ak.r /\ 
+  MAC.norm_r h ak.r /\ 
   (* MAC.norm h (abuf acc) /\ *)
   Buffer.disjoint (MAC.as_buffer ak.r) (MAC.as_buffer (abuf acc)) /\
   (mac_log ==> (

@@ -491,8 +491,9 @@ val mac:
                  Buffer.disjoint_ref_1 tag (HS.as_aref (alog acc))) /\
     (authId i ==> RR.m_sel h0 (ilog st.log) == (snd i, None)) ))
   (ensures (fun h0 _ h1 -> mac_ensures i st acc tag h0 h1))
+    
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 let mac #i st acc tag =
   let h0 = ST.get () in
   MAC.finish st.s acc.a tag;
@@ -514,7 +515,7 @@ let mac #i st acc tag =
     let r = MAC.sel_elem h2 st.r in
     let s = Buffer.as_seq h2 st.s in
     let t = MAC.mac vs r s in
-    assert (Seq.equal (Buffer.as_seq h2 tag) t);
+    MAC.lemma_poly_finish_to_mac i h2 tag (MAC.sel_elem h0 acc.a) h0 st.s vs r;
     if authId i then
       modifies_mac_aux (MAC.as_buffer acc.a) tag (RR.as_hsref (ilog st.log))
         (snd i, Some (vs,t)) h0 h1 h2
@@ -580,7 +581,7 @@ val verify:
     verify_liveness st tag h0 /\
     Buffer.disjoint_2 (MAC.as_buffer (abuf acc)) st.s tag))
   (ensures (fun h0 b h1 -> verify_ensures st acc tag h0 b h1))
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400"
 let verify #i st acc tag =
   if authId i then RR.m_recall #st.region #(log i) #(log_cmp #i) (ilog st.log);
   let h0 = ST.get () in
@@ -603,6 +604,7 @@ let verify #i st acc tag =
         h0 h1 h2 h3;
       let t = read_word 16ul computed in
       let vs = !(alog acc) in
+      MAC.lemma_poly_finish_to_mac i h3 computed (MAC.sel_elem h0 acc.a) h0 st.s vs (MAC.sel_elem h0 st.r);
       if authId i then
         begin
         let log = RR.m_read (ilog st.log) in // Don't inline it below; doesn't work

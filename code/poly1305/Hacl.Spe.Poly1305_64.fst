@@ -118,20 +118,21 @@ let poly1305_finish_spec st m rem' key_s =
 (* Standalone poly1305 version *)
 (* *************************** *)
 
-let encode (w:word) : Tot elem =
-  let l = length w in
-  Math.Lemmas.pow2_le_compat 128 (8 * l);
-  assert_norm(pow2 128 < pow2 130 - 5);
-  lemma_little_endian_is_bounded w;
-  pow2 (8 * l) +@ little_endian w
+inline_for_extraction let encode (w:word) : Tot elem = encode w
+  (* let l = length w in *)
+  (* Math.Lemmas.pow2_le_compat 128 (8 * l); *)
+  (* assert_norm(pow2 128 < pow2 130 - 5); *)
+  (* lemma_little_endian_is_bounded w; *)
+  (* pow2 (8 * l) +@ little_endian w *)
 
 
-val poly: vs:text -> r:elem -> Tot (a:elem) (decreases (Seq.length vs))
-let rec poly vs r =
-  if Seq.length vs = 0 then 0
-  else
-    let v = Seq.head vs in
-    (encode v +@ poly (Seq.tail vs) r) *@ r
+val poly: vs:text -> r:elem -> Tot (a:elem)
+let poly vs r = poly vs r
+(* let rec poly vs r = poly vs r *)
+  (* if Seq.length vs = 0 then 0 *)
+  (* else *)
+  (*   let v = Seq.head vs in *)
+  (*   (encode v +@ poly (Seq.tail vs) r) *@ r *)
 
 
 let invariant (st:poly1305_state_) : GTot Type0 =

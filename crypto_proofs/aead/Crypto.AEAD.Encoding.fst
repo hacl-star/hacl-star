@@ -120,6 +120,8 @@ let lemma_encode_injective w0 w1 =
   lemma_little_endian_is_injective w0 w1 l
 *)
 
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
+
 val lemma_encode_bytes_injective: t0:Seq.seq UInt8.t -> t1:Seq.seq UInt8.t -> Lemma
   (requires length t0 == length t1 /\ encode_bytes t0 == encode_bytes t1)
   (ensures t0 == t1)
@@ -139,7 +141,9 @@ let rec lemma_encode_bytes_injective t0 t1 =
     Seq.lemma_snoc_inj (encode_bytes t0') (encode_bytes t1') w0 w1 ;
     lemma_encode_bytes_injective t0' t1';
     Seq.lemma_eq_elim t0' t1'
- 
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
 // If the length is not a multiple of 16, pad to 16
 // (we actually don't depend on the details of the padding)
 val pad_16: b:lbuffer 16 -> len:UInt32.t { 0 < v len /\ v len <= 16 } -> STL unit
@@ -150,7 +154,10 @@ val pad_16: b:lbuffer 16 -> len:UInt32.t { 0 < v len /\ v len <= 16 } -> STL uni
     Buffer.modifies_1 b h0 h1 /\ 
     Seq.equal (Buffer.as_seq h1 b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))))
 let pad_16 b len =
-  memset (Buffer.offset b len) 0uy (16ul -^ len)
+  let h0 = ST.get() in
+  memset (Buffer.sub b len (16ul -^ len)) 0uy (16ul -^ len);
+  let h = ST.get() in
+  Seq.lemma_eq_intro (Buffer.as_seq h b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))
 
 open FStar.HyperStack
 
@@ -280,7 +287,7 @@ let rec add_bytes #i st acc len txt =
   if not mac_log then
     Buffer.lemma_intro_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h6
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 private let encode_lengths_poly1305 (aadlen:UInt32.t) (plainlen:UInt32.t) : b:lbytes 16
   { v aadlen = little_endian (Seq.slice b 0 4) /\
     v plainlen = little_endian (Seq.slice b 8 12) } = 
@@ -294,7 +301,7 @@ private let encode_lengths_poly1305 (aadlen:UInt32.t) (plainlen:UInt32.t) : b:lb
   Seq.append_slices bp b0;
   b
 //16-11-01 unclear why verification is slow above, fast below
-#reset-options
+(* #reset-options *)
 
 private val store_lengths_poly1305: aadlen:UInt32.t ->  plainlen:UInt32.t -> w:lbuffer 16 ->
   StackInline unit 
@@ -307,9 +314,17 @@ let store_lengths_poly1305 aadlen plainlen w =
   let w1 = Buffer.sub w 4ul 4ul in
   let w2 = Buffer.sub w 8ul 4ul in
   let w3 = Buffer.sub w 12ul 4ul in
+  let h0 = ST.get() in
+  Seq.lemma_eq_intro (Buffer.as_seq h0 w1) (Seq.create 4 0uy);
+  Seq.lemma_eq_intro (Buffer.as_seq h0 w3) (Seq.create 4 0uy);
   store_uint32 4ul w0 aadlen;
+  let h = ST.get() in
   store_uint32 4ul w2 plainlen;
   let h1 = ST.get() in 
+  Buffer.no_upd_lemma_1 h0 h w0 w1;
+  Buffer.no_upd_lemma_1 h h1 w2 w1;
+  Buffer.no_upd_lemma_1 h0 h w0 w3;
+  Buffer.no_upd_lemma_1 h h1 w2 w3;
   lemma_little_endian_inj (uint32_bytes 4ul aadlen) (Buffer.as_seq h1 w0);
   assert(Seq.equal (Buffer.as_seq h1 w1) (Seq.create 4 0uy));
   lemma_little_endian_inj (uint32_bytes 4ul plainlen) (Buffer.as_seq h1 w2);
@@ -341,9 +356,18 @@ let store_lengths_ghash aadlen txtlen w =
   let w1 = Buffer.sub w 4ul 4ul in
   let w2 = Buffer.sub w 8ul 4ul in
   let w3 = Buffer.sub w 12ul 4ul in
+  let h0 = ST.get() in
+  Seq.lemma_eq_intro (Buffer.as_seq h0 w0) (Seq.create 4 0uy);
+  Seq.lemma_eq_intro (Buffer.as_seq h0 w2) (Seq.create 4 0uy);
+  assert(Buffer.disjoint w0 w1 /\ Buffer.disjoint w0 w3 /\ Buffer.disjoint w2 w1 /\ Buffer.disjoint w2 w3);
   store_big32 4ul w1 (8ul *^ aadlen);
+  let h = ST.get() in
   store_big32 4ul w3 (8ul  *^ txtlen);
-  let h1 = ST.get() in 
+  let h1 = ST.get() in
+  Buffer.no_upd_lemma_1 h0 h w1 w0;
+  Buffer.no_upd_lemma_1 h h1 w3 w0;
+  Buffer.no_upd_lemma_1 h0 h w1 w2;
+  Buffer.no_upd_lemma_1 h h1 w3 w2;
   assert(Seq.equal (Buffer.as_seq h1 w0) (Seq.create 4 0uy));
   lemma_big_endian_inj (uint32_be 4ul (8ul *^ aadlen)) (Buffer.as_seq h1 w1);
   assert(Seq.equal (Buffer.as_seq h1 w2) (Seq.create 4 0uy));
@@ -393,7 +417,7 @@ val accumulate:
   txtlen:txtlen_32 -> cipher:lbuffer (v txtlen) -> 
   StackInline (CMA.accBuffer i)   // StackInline required for stack-allocated accumulator
   (requires (fun h0 -> 
-    CMA.(MAC.norm h0 st.r) /\
+    CMA.(MAC.norm_r h0 st.r) /\
     Buffer.live h0 aad /\ 
     Buffer.live h0 cipher /\ 
     Buffer.disjoint_2 CMA.(MAC.as_buffer st.r) aad cipher))
