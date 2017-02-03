@@ -18,41 +18,31 @@ let uint8_p = buffer H8.t
 
 type chacha_ctx = b:Buffer.buffer h32{length b = 16}
 
-val lemma_max_uint32: n:nat -> 
+private val lemma_max_uint32: n:nat -> 
   Lemma (requires (n = 32))
         (ensures (pow2 n = 4294967296))
         [SMTPat (pow2 n)]
 let lemma_max_uint32 n = assert_norm (pow2 32 = 4294967296)
 
-inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
+private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-let load32_le (k:uint8_p) : Stack h32
+[@"substitute"]
+private inline_for_extraction let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k = 4))
   (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 k /\ length k = 4
     /\ r == load32_le_spec (as_seq h0 k)))
-  = let k0 = k.(0ul) in
-    let k1 = k.(1ul) in
-    let k2 = k.(2ul) in
-    let k3 = k.(3ul) in
-    let z = sint8_to_sint32 k0
-            |^ (sint8_to_sint32 k1 <<^ 8ul)
-            |^ (sint8_to_sint32 k2 <<^ 16ul)
-            |^ (sint8_to_sint32 k3 <<^ 24ul) in
-    z
+  = C.load32_le k
 
-
-let store32_le (k:uint8_p) (x:h32) : Stack unit
+[@"substitute"]
+private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit
   (requires (fun h -> live h k /\ length k = 4))
   (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k /\ length k = 4 /\ live h0 k
     /\ as_seq h1 k == store32_le_spec (as_seq h0 k) x))
-  = k.(0ul) <- sint32_to_sint8 x;
-    k.(1ul) <- sint32_to_sint8 (x >>^ 8ul);
-    k.(2ul) <- sint32_to_sint8 (x >>^ 16ul);
-    k.(3ul) <- sint32_to_sint8 (x >>^ 24ul)
+  = C.store32_le k x
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
