@@ -1,8 +1,24 @@
 module Hacl.Test.Chacha20
 
+open Hacl.Symmetric.Chacha20
 open FStar.Buffer
 
 let len = 114ul
+
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
+private let rec loop
+  (st:chacha_ctx)
+  (c:buffer UInt8.t{disjoint st c})
+  (m:buffer UInt8.t)
+  (len:UInt32.t{length c >= UInt32.v len /\ length m >= UInt32.v len})
+  : Stack unit (requires (fun h -> live h st /\ live h c /\ live h m))
+               (ensures (fun h0 _ h1 -> live h1 st /\ live h1 c /\ live h1 m /\ modifies_2 st c h0 h1))
+  = if FStar.UInt32.(len <^ 64ul) then ()
+    else (
+      chacha20_update st (sub m 0ul 64ul) (sub c 0ul 64ul);
+      loop st (offset c 64ul) (offset m 64ul) FStar.UInt32.(len -^ 64ul)
+    )
 
 val main: unit -> ST FStar.Int32.t
   (requires (fun h -> True))
@@ -59,6 +75,13 @@ let main () =
   Hacl.Symmetric.Chacha20.chacha_keysetup ctx key;
   Hacl.Symmetric.Chacha20.chacha_ietf_ivsetup ctx nonce counter;
   Hacl.Symmetric.Chacha20.chacha_encrypt_bytes ctx plaintext ciphertext len;
+  TestLib.compare_and_print (C.string_of_literal "chacha20") expected ciphertext len;
+  let ctx = chacha20_init key nonce counter in
+  loop ctx ciphertext plaintext len;
+  let r = FStar.UInt32.(len &^ 0x3ful) in
+  let q = FStar.UInt32.(len >>^ 6ul) in
+  chacha20_finish ctx (Buffer.offset plaintext FStar.UInt32.(q *^ 64ul))
+                      (Buffer.offset ciphertext FStar.UInt32.(q *^ 64ul)) r;
   TestLib.compare_and_print (C.string_of_literal "chacha20") expected ciphertext len;
   pop_frame();
   C.exit_success
