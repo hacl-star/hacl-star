@@ -14,14 +14,14 @@ open Crypto.Symmetric.Bytes
 open Crypto.Indexing
 open Crypto.Config
 
-#reset-options "--initial_fuel 0 --initial_ifuel 0 --max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --initial_ifuel 0 --z3rlimit 20"
 
 module CHACHA = Hacl.Symmetric.Chacha20
 
 type alg = cipherAlg
 let algi = cipherAlg_of_id
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20 --initial_ifuel 1"
 
 inline_for_extraction let keylen = function
   | AES128   -> 16ul
@@ -32,6 +32,7 @@ inline_for_extraction let blocklen = function
   | AES128   -> 16ul
   | AES256   -> 16ul
   | CHACHA20 -> 64ul
+
 inline_for_extraction
 private let blocklen' = blocklen (* blocklen may be shadowed by Crypto.Symmetric.AES *)
 
@@ -171,7 +172,7 @@ let compute i output st n counter len =
           | HaclAES -> cipher output_block ctr_block w sbox
           | SpartanAES -> Spartan.cipher output_block ctr_block w sbox );
       blit output_block 0ul output 0ul len ) // too much copying!
-  | AES256 -> 
+  | AES256 -> (
       let open Crypto.Symmetric.AES in  // shadows blocklen
       let sbox = Buffer.sub st 0ul 256ul in
       let w = Buffer.sub st 256ul 240ul in
@@ -181,6 +182,7 @@ let compute i output st n counter len =
       let output_block = Buffer.create 0uy (blocklen' AES256) in 
       cipher output_block ctr_block w sbox;
       blit output_block 0ul output 0ul len // too much copying!
+  )
   end;
   pop_frame()
 

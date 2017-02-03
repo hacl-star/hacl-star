@@ -216,7 +216,7 @@ val lemma_encode_final: b:Seq.seq UInt8.t{0 <> Seq.length b /\ Seq.length b < 16
 let lemma_encode_final b = ()
 
 
-#reset-options "--z3rlimit 140 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 
 let rec add_bytes #i st acc len txt =
   let h0 = ST.get() in 

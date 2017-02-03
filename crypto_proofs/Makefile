@@ -63,6 +63,13 @@ OPTIONS=--fstar_home $(FSTAR_HOME) --max_fuel 4 --initial_fuel 0 --max_ifuel 2 -
 FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include utils --include primitives --include prf --include uf1cma --include aead --include ../code/bignum --include ../code/poly1305 --include ../code/salsa-family --include ../code/lib/kremlin --include $(KREMLIN_HOME)/kremlib/
 
 VERIFY= \
+  utils/Buffer.Utils \
+  utils/Crypto.Symmetric.Bytes \
+  primitives/Crypto.Symmetric.GF128 \
+  primitives/Crypto.Symmetric.AES \
+  primitives/Crypto.Symmetric.AES128 \
+  prf/Crypto.Symmetric.Cipher \
+  prf/Crypto.Symmetric.PRF \
   uf1cma/Crypto.Symmetric.MAC \
   uf1cma/Crypto.Symmetric.UF1CMA \
   aead/Crypto.AEAD.Encrypt.Invariant \
@@ -84,14 +91,6 @@ VERIFY= \
 # Files that should fully typecheck
 # Files commented out are broken, uncomment once fixed
 VERIFY2= \
-  utils/Buffer.Utils \
-  utils/Crypto.Symmetric.Bytes \
-  primitives/Crypto.Symmetric.GF128 \
-  primitives/Crypto.Symmetric.AES \
-  primitives/Crypto.Symmetric.AES128 \
-  prf/Crypto.Symmetric.Cipher \
-  prf/Crypto.Symmetric.PRF \
-  # primitives/Crypto.Symmetric.Chacha20 \
 
 
 EXTRA= \
