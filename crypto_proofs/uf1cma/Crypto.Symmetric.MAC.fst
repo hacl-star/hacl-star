@@ -443,3 +443,17 @@ let finish #i s a t =
     GF.finish a s;
     GF.store128_be t a.(0ul)
     end
+  
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0"
+
+val lemma_poly_finish_to_mac:
+  i:id -> ht:mem -> t:tagB -> a:elem i -> hs:mem -> s:tagB -> log:text -> r:elem i ->
+  Lemma (requires (Buffer.live ht t /\ Buffer.live hs s
+    /\ a == MAC.poly log r
+    /\ (match alg i with
+    | POLY1305 -> Seq.equal (Buffer.as_seq ht t) (Hacl.Spec.Poly1305.finish a (Buffer.as_seq hs s))
+    | GHASH    -> Seq.equal (Buffer.as_seq ht t) (GS.finish a (Buffer.as_seq hs s) ))
+    ))
+       (ensures (Buffer.live ht t /\ Buffer.live hs s
+         /\ Buffer.as_seq ht t == MAC.mac log r (Buffer.as_seq hs s)))
+let lemma_poly_finish_to_mac i ht t a hs s log r = ()

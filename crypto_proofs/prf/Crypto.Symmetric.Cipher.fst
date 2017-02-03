@@ -64,8 +64,8 @@ let state_limb = function
   | CHACHA20 -> FStar.UInt32.t
 
 unfold inline_for_extraction
-type state a = b:Buffer.buffer (state_limb a){Buffer.length b = UInt32.v (stlen a)}
-(* type state a = lbuffer (v (statelen a)) *)
+(* type state a = b:Buffer.buffer (state_limb a){Buffer.length b = UInt32.v (stlen a)} *)
+type state a = lbuffer (v (statelen a))
 
 // 16-10-02 an integer value, instead of a lbuffer (v (ivlen)),
 // so that it can be used both in abstract indexes and in real code.
@@ -76,8 +76,8 @@ let init (#i:id) (k:key (algi i)) (s:state (algi i)) =
   let a = algi i in
   match a with
   | CHACHA20 ->
-    CHACHA.chacha_keysetup s k
-    (* Buffer.blit k 0ul s 0ul (keylen a) *)
+    (* CHACHA.chacha_keysetup s k *)
+    Buffer.blit k 0ul s 0ul (keylen a)
 
   | AES128 ->
     let open Crypto.Symmetric.AES128 in
@@ -124,9 +124,9 @@ val compute:
   len:UInt32.t { len <=^  blocklen (algi i) /\ v len <= length output} -> Stack unit
     (requires (fun h -> live h st /\ live h output))
     (ensures (fun h0 _ h1 -> live h1 output /\ (
-      match cipherAlg_of_id i with
-      | CHACHA20 -> modifies_2 output st h0 h1
-      | _ -> modifies_1 output h0 h1)
+      (* match cipherAlg_of_id i with *)
+      (* | CHACHA20 -> modifies_2 output st h0 h1 *)
+      (* | _ ->  *)modifies_1 output h0 h1)
       ))
 
 #set-options "--z3rlimit 50"
@@ -145,16 +145,18 @@ let compute i output st n counter len =
       begin
       let nbuf = Buffer.create 0uy (ivlen' CHACHA20) in
       store_uint128 (ivlen' CHACHA20) nbuf n;
+      push_frame();
+      let chacha_state = Buffer.create 0ul 16ul in
       if len = 64ul then (
-        CHACHA.chacha_ietf_ivsetup st nbuf counter;
-        CHACHA.chacha_encrypt_bytes_stream st output)
+        CHACHA.chacha_keysetup chacha_state st;
+        CHACHA.chacha_ietf_ivsetup chacha_state nbuf counter;
+        CHACHA.chacha_encrypt_bytes_stream chacha_state output)
       else (
-        CHACHA.chacha_ietf_ivsetup st nbuf counter;
-        CHACHA.chacha_encrypt_bytes_finish_stream st output len
+        CHACHA.chacha_keysetup chacha_state st;
+        CHACHA.chacha_ietf_ivsetup chacha_state nbuf counter;
+        CHACHA.chacha_encrypt_bytes_finish_stream chacha_state output len
       );        
-      (* let nbuf = Buffer.create 0uy (ivlen CHACHA20) in *)
-      (* store_uint128 (ivlen CHACHA20) nbuf n; *)
-      ()
+      pop_frame()
       end
   // ADL: TODO single parametric AES module
   | AES128 -> (
@@ -183,4 +185,3 @@ let compute i output st n counter len =
   pop_frame()
 
 //NB double-check this is indeed big-endian.
-

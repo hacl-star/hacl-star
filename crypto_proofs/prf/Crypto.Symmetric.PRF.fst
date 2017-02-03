@@ -173,26 +173,26 @@ val gen: rgn:region -> i:id -> ST (state i)
         ~ (h0 `HS.contains` (itable i s))
 	  /\ HS.sel h1 (itable i s) == Seq.createEmpty #(entry s.mac_rgn i))))
 let gen rgn i =
-  match cipherAlg_of_id i with
-  | CHACHA20 ->
-    begin
-    let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
-    let keystate = Buffer.rcreate rgn 0ul (stlen i) in
-    let key = Buffer.create 0uy (keylen i) in
-    let alg = cipherAlg_of_id i in
-    Bytes.random (v (keylen i)) key;
-    Block.init #i key keystate;
-    let table: table_t rgn mac_rgn i =
-      if prf i then 
-        mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i)))
-      else ()
-      in
-    pop_frame();
-    State #i #rgn #mac_rgn keystate table
-    // no need to demand prf i so far.
-    end
-  | _ -> 
-    begin
+  (* match cipherAlg_of_id i with *)
+  (* | CHACHA20 -> *)
+  (*   begin *)
+  (*   let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in *)
+  (*   let keystate = Buffer.rcreate rgn 0ul (stlen i) in *)
+  (*   let key = Buffer.create 0uy (keylen i) in *)
+  (*   let alg = cipherAlg_of_id i in *)
+  (*   Bytes.random (v (keylen i)) key; *)
+  (*   Block.init #i key keystate; *)
+  (*   let table: table_t rgn mac_rgn i = *)
+  (*     if prf i then  *)
+  (*       mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i))) *)
+  (*     else () *)
+  (*     in *)
+  (*   pop_frame(); *)
+  (*   State #i #rgn #mac_rgn keystate table *)
+  (*   // no need to demand prf i so far. *)
+  (*   end *)
+  (* | _ ->  *)
+    (* begin *)
     push_frame();
     let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
     let keystate = Buffer.rcreate rgn 0uy (statelen i) in
@@ -208,29 +208,29 @@ let gen rgn i =
     pop_frame();
     State #i #rgn #mac_rgn keystate table
     // no need to demand prf i so far.
-    end
+    (* end *)
 
 val coerce: rgn:region -> i:id{~(prf i)} -> key:lbuffer (v (keylen i)) -> ST (state i)
   (requires (fun h -> Buffer.live h key))
   (ensures  (fun h0 s h1 -> s.rgn == rgn))
 let coerce rgn i key =
-  match cipherAlg_of_id i with
-  | CHACHA20 ->
-    begin
-    let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
-    let keystate = Buffer.rcreate rgn 0uy (stlen i) in
-    let alg = cipherAlg_of_id i in
-    Cipher.init #i key keystate;
-    State #i #rgn #mac_rgn keystate (no_table i rgn mac_rgn)
-    end
-  | _ ->
-    begin
+  (* match cipherAlg_of_id i with *)
+  (* | CHACHA20 -> *)
+  (*   begin *)
+  (*   let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in *)
+  (*   let keystate = Buffer.rcreate rgn 0uy (stlen i) in *)
+  (*   let alg = cipherAlg_of_id i in *)
+  (*   Cipher.init #i key keystate; *)
+  (*   State #i #rgn #mac_rgn keystate (no_table i rgn mac_rgn) *)
+  (*   end *)
+  (* | _ -> *)
+    (* begin *)
     let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
     let keystate = Buffer.rcreate rgn 0uy (statelen i) in
     let alg = cipherAlg_of_id i in
     Cipher.init #i key keystate;
     State #i #rgn #mac_rgn keystate (no_table i rgn mac_rgn)
-    end
+    (* end *)
 
 val leak: #i:id{~(prf i)} -> st:state i -> ST (key:lbuffer (v (statelen i)))
   (requires (fun h -> True))
