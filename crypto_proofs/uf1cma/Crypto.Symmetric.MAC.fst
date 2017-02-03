@@ -41,7 +41,7 @@ let rec text_to_PS_text t =
     Seq.cons (Seq.head t)
                        (text_to_PS_text (Seq.tail t))
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 (** Field element *)
 let elem i = (* dependent; used only ideally *)
@@ -72,6 +72,8 @@ unfold inline_for_extraction
 let limb_length = function
   | POLY1305 ->  3
   | GHASH    -> 1
+
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 inline_for_extraction unfold
 type buffer_of a = b:Buffer.buffer (limb a){Buffer.length b == limb_length a}
