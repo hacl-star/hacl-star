@@ -18,7 +18,7 @@ let uint8_p = buffer H8.t
 
 type chacha_ctx = b:Buffer.buffer h32{length b = 16}
 
-inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
+private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
@@ -41,6 +41,7 @@ private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
+[@"c_inline"]
 val chacha_keysetup:
   ctx:chacha_ctx ->
   k:uint8_p{length k = 32 /\ disjoint ctx k} ->
@@ -49,6 +50,7 @@ val chacha_keysetup:
     (ensures  (fun h0 _ h1 -> live h0 ctx /\ live h0 k /\ live h1 ctx /\ modifies_1 ctx h0 h1
       (* /\ as_seq h1 ctx == chacha_keysetup_spec (as_seq h0 ctx) (as_seq h0 k) *)
     ))
+[@"c_inline"]
 let chacha_keysetup ctx k =
     ctx.(0ul)  <- (uint32_to_sint32 0x61707865ul);
     ctx.(1ul)  <- (uint32_to_sint32 0x3320646eul);
@@ -64,6 +66,7 @@ let chacha_keysetup ctx k =
     ctx.(11ul) <- load32_le(Buffer.sub k 28ul 4ul)
 
 
+[@"c_inline"]
 val chacha_ietf_ivsetup:
   ctx:chacha_ctx ->
   k:uint8_p{length k = 12 /\ disjoint ctx k} ->
@@ -73,6 +76,7 @@ val chacha_ietf_ivsetup:
     (ensures  (fun h0 _ h1 -> live h1 ctx /\ modifies_1 ctx h0 h1 /\ live h0 ctx /\ live h0 k
       (* /\ as_seq h1 ctx == chacha_ietf_ivsetup_spec (as_seq h0 ctx) (as_seq h0 k) counter *)
     ))
+[@"c_inline"]
 let chacha_ietf_ivsetup ctx iv counter =
     ctx.(12ul) <- uint32_to_sint32 counter;
     ctx.(13ul) <- load32_le(Buffer.sub iv 0ul 4ul);
@@ -80,152 +84,68 @@ let chacha_ietf_ivsetup ctx iv counter =
     ctx.(15ul) <- load32_le(Buffer.sub iv 8ul 4ul)
 
 
-val chacha_encrypt_bytes_round:
+
+[@"c_inline"]
+private inline_for_extraction val chacha_encrypt_bytes_quarter_round:
+  ctx:chacha_ctx ->
+  a:u32 -> b:u32 -> c:u32 -> d:u32 ->
+  Stack unit
+    (requires (fun h -> live h ctx))
+    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx 
+      ))
+[@"c_inline"]
+private inline_for_extraction let chacha_encrypt_bytes_quarter_round ctx a b c d =
+  let xa = ctx.(a) in
+  let xb = ctx.(b) in
+  let xc = ctx.(c) in
+  let xd = ctx.(d) in
+  let xa = xa +%^ xb in
+  let xd = xd ^^ xa in
+  let xd = xd <<< 16ul in
+  let xc = xc +%^ xd in
+  let xb = xb ^^ xc in
+  let xb = xb <<< 12ul in
+  let xa = xa +%^ xb in
+  let xd = xd ^^ xa in
+  let xd = xd <<< 8ul in
+  let xc = xc +%^ xd in
+  let xb = xb ^^ xc in
+  let xb = xb <<< 7ul in
+  ctx.(a) <- xa;
+  ctx.(b) <- xb;
+  ctx.(c) <- xc;
+  ctx.(d) <- xd
+
+
+[@"c_inline"]
+private val chacha_encrypt_bytes_round:
   ctx:chacha_ctx ->
   Stack unit
     (requires (fun h -> live h ctx))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx 
       (* /\ as_seq h1 ctx == chacha_encrypt_bytes_round_spec (as_seq h0 ctx) *)
       ))
-let chacha_encrypt_bytes_round ctx =
-  let x0 = ctx.(0ul) in
-  let x1 = ctx.(1ul) in
-  let x2 = ctx.(2ul) in
-  let x3 = ctx.(3ul) in
-  let x4 = ctx.(4ul) in
-  let x5 = ctx.(5ul) in
-  let x6 = ctx.(6ul) in
-  let x7 = ctx.(7ul) in
-  let x8 = ctx.(8ul) in
-  let x9 = ctx.(9ul) in
-  let x10 = ctx.(10ul) in
-  let x11 = ctx.(11ul) in
-  let x12 = ctx.(12ul) in
-  let x13 = ctx.(13ul) in
-  let x14 = ctx.(14ul) in
-  let x15 = ctx.(15ul) in
-  let x0 = x0 +%^ x4 in
-  let x12 = x12 ^^ x0 in
-  let x12 = x12 <<< 16ul in
-  let x8 = x8 +%^ x12 in
-  let x4 = x4 ^^ x8 in
-  let x4 = x4 <<< 12ul in
-  let x0 = x0 +%^ x4 in
-  let x12 = x12 ^^ x0 in
-  let x12 = x12 <<< 8ul in
-  let x8 = x8 +%^ x12 in
-  let x4 = x4 ^^ x8 in
-  let x4 = x4 <<< 7ul in
-  let x1 = x1 +%^ x5 in
-  let x13 = x13 ^^ x1 in
-  let x13 = x13 <<< 16ul in
-  let x9 = x9 +%^ x13 in
-  let x5 = x5 ^^ x9 in
-  let x5 = x5 <<< 12ul in
-  let x1 = x1 +%^ x5 in
-  let x13 = x13 ^^ x1 in
-  let x13 = x13 <<< 8ul in
-  let x9 = x9 +%^ x13 in
-  let x5 = x5 ^^ x9 in
-  let x5 = x5 <<< 7ul in
-  let x2 = x2 +%^ x6 in
-  let x14 = x14 ^^ x2 in
-  let x14 = x14 <<< 16ul in
-  let x10 = x10 +%^ x14 in
-  let x6 = x6 ^^ x10 in
-  let x6 = x6 <<< 12ul in
-  let x2 = x2 +%^ x6 in
-  let x14 = x14 ^^ x2 in
-  let x14 = x14 <<< 8ul in
-  let x10 = x10 +%^ x14 in
-  let x6 = x6 ^^ x10 in
-  let x6 = x6 <<< 7ul in
-  let x3 = x3 +%^ x7 in
-  let x15 = x15 ^^ x3 in
-  let x15 = x15 <<< 16ul in
-  let x11 = x11 +%^ x15 in
-  let x7 = x7 ^^ x11 in
-  let x7 = x7 <<< 12ul in
-  let x3 = x3 +%^ x7 in
-  let x15 = x15 ^^ x3 in
-  let x15 = x15 <<< 8ul in
-  let x11 = x11 +%^ x15 in
-  let x7 = x7 ^^ x11 in
-  let x7 = x7 <<< 7ul in
-  let x0 = x0 +%^ x5 in
-  let x15 = x15 ^^ x0 in
-  let x15 = x15 <<< 16ul in
-  let x10 = x10 +%^ x15 in
-  let x5 = x5 ^^ x10 in
-  let x5 = x5 <<< 12ul in
-  let x0 = x0 +%^ x5 in
-  let x15 = x15 ^^ x0 in
-  let x15 = x15 <<< 8ul in
-  let x10 = x10 +%^ x15 in
-  let x5 = x5 ^^ x10 in
-  let x5 = x5 <<< 7ul in
-  let x1 = x1 +%^ x6 in
-  let x12 = x12 ^^ x1 in
-  let x12 = x12 <<< 16ul in
-  let x11 = x11 +%^ x12 in
-  let x6 = x6 ^^ x11 in
-  let x6 = x6 <<< 12ul in
-  let x1 = x1 +%^ x6 in
-  let x12 = x12 ^^ x1 in
-  let x12 = x12 <<< 8ul in
-  let x11 = x11 +%^ x12 in
-  let x6 = x6 ^^ x11 in
-  let x6 = x6 <<< 7ul in
-  let x2 = x2 +%^ x7 in
-  let x13 = x13 ^^ x2 in
-  let x13 = x13 <<< 16ul in
-  let x8 = x8 +%^ x13 in
-  let x7 = x7 ^^ x8 in
-  let x7 = x7 <<< 12ul in
-  let x2 = x2 +%^ x7 in
-  let x13 = x13 ^^ x2 in
-  let x13 = x13 <<< 8ul in
-  let x8 = x8 +%^ x13 in
-  let x7 = x7 ^^ x8 in
-  let x7 = x7 <<< 7ul in
-  let x3 = x3 +%^ x4 in
-  let x14 = x14 ^^ x3 in
-  let x14 = x14 <<< 16ul in
-  let x9 = x9 +%^ x14 in
-  let x4 = x4 ^^ x9 in
-  let x4 = x4 <<< 12ul in
-  let x3 = x3 +%^ x4 in
-  let x14 = x14 ^^ x3 in
-  let x14 = x14 <<< 8ul in
-  let x9 = x9 +%^ x14 in
-  let x4 = x4 ^^ x9 in
-  let x4 = x4 <<< 7ul in
-  ctx.(0ul)  <- x0;
-  ctx.(1ul)  <- x1;
-  ctx.(2ul)  <- x2;
-  ctx.(3ul)  <- x3;
-  ctx.(4ul)  <- x4;
-  ctx.(5ul)  <- x5;
-  ctx.(6ul)  <- x6;
-  ctx.(7ul)  <- x7;
-  ctx.(8ul)  <- x8;
-  ctx.(9ul)  <- x9;
-  ctx.(10ul) <- x10;
-  ctx.(11ul) <- x11;
-  ctx.(12ul) <- x12;
-  ctx.(13ul) <- x13;
-  ctx.(14ul) <- x14;
-  ctx.(15ul) <- x15
+[@"c_inline"]
+private let chacha_encrypt_bytes_round ctx =
+  chacha_encrypt_bytes_quarter_round ctx 0ul 4ul 8ul 12ul;
+  chacha_encrypt_bytes_quarter_round ctx 1ul 5ul 9ul 13ul;
+  chacha_encrypt_bytes_quarter_round ctx 2ul 6ul 10ul 14ul;
+  chacha_encrypt_bytes_quarter_round ctx 3ul 7ul 11ul 15ul;
+  chacha_encrypt_bytes_quarter_round ctx 0ul 5ul 10ul 15ul;
+  chacha_encrypt_bytes_quarter_round ctx 1ul 6ul 11ul 12ul;
+  chacha_encrypt_bytes_quarter_round ctx 2ul 7ul 8ul 13ul;
+  chacha_encrypt_bytes_quarter_round ctx 3ul 4ul 9ul 14ul
 
-
-val chacha_encrypt_bytes_rounds:
+[@"c_inline"]
+private val chacha_encrypt_bytes_rounds:
   ctx:chacha_ctx ->
   Stack unit
     (requires (fun h -> live h ctx))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx
       (* /\ as_seq h1 ctx == chacha_encrypt_bytes_rounds_spec (as_seq h0 ctx) *)
     ))
-let chacha_encrypt_bytes_rounds ctx =
+[@"c_inline"]
+private let chacha_encrypt_bytes_rounds ctx =
   chacha_encrypt_bytes_round ctx;
   chacha_encrypt_bytes_round ctx;
   chacha_encrypt_bytes_round ctx;
@@ -238,7 +158,8 @@ let chacha_encrypt_bytes_rounds ctx =
   chacha_encrypt_bytes_round ctx
 
 
-val chacha_encrypt_bytes_store:
+[@"substitute"]
+private val chacha_encrypt_bytes_store:
   c:uint8_p{length c = 64} ->
   x0:h32 -> x1:h32 -> x2:h32 -> x3:h32 -> x4:h32 -> x5:h32 -> x6:h32 -> x7:h32 -> 
   x8:h32 -> x9:h32 -> x10:h32 -> x11:h32 -> x12:h32 -> x13:h32 -> x14:h32 -> x15:h32 ->
@@ -247,7 +168,8 @@ val chacha_encrypt_bytes_store:
     (ensures (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1 /\ live h0 c
       (* /\ as_seq h1 c == chacha_encrypt_bytes_store_spec (as_seq h0 c) x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 *)
     ))
-let chacha_encrypt_bytes_store c x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 =
+[@"substitute"]
+private let chacha_encrypt_bytes_store c x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 =
   let open FStar.Buffer in
   store32_le (sub c 0ul 4ul) x0;
   store32_le (sub c 4ul 4ul) x1;
@@ -267,13 +189,15 @@ let chacha_encrypt_bytes_store c x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x
   store32_le (sub c 60ul 4ul) x15  
 
 
-val chacha_encrypt_bytes_stream:
+[@"c_inline"]
+private val chacha_encrypt_bytes_stream:
   ctx:chacha_ctx ->
   c:uint8_p{length c >= 64 /\ disjoint ctx c} ->
   Stack unit
     (requires (fun h -> live h ctx /\ live h c))
     (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
-let chacha_encrypt_bytes_stream ctx c =
+[@"c_inline"]
+private let chacha_encrypt_bytes_stream ctx c =
   push_frame();
   let tmp = create (uint32_to_sint32 0ul) 16ul in
   blit ctx 0ul tmp 0ul 16ul;
@@ -330,14 +254,16 @@ let chacha_encrypt_bytes_stream ctx c =
   pop_frame()
 
 
-val chacha_encrypt_bytes_core:
+[@"c_inline"]
+private val chacha_encrypt_bytes_core:
   ctx:chacha_ctx ->
   m:uint8_p{length m >= 64} ->
   c:uint8_p{length c >= 64 /\ disjoint ctx c} ->
   Stack unit
     (requires (fun h -> live h ctx /\ live h c /\ live h m))
     (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
-let chacha_encrypt_bytes_core ctx m c =
+[@"c_inline"]
+private let chacha_encrypt_bytes_core ctx m c =
   push_frame();
   let tmp = create (uint32_to_sint32 0ul) 16ul in
   blit ctx 0ul tmp 0ul 16ul;
@@ -427,7 +353,8 @@ let chacha_encrypt_bytes_core ctx m c =
   pop_frame()
 
 
-val chacha_encrypt_bytes_loop:
+[@"c_inline"]
+private val chacha_encrypt_bytes_loop:
   ctx:chacha_ctx ->
   m:uint8_p ->
   c:uint8_p{disjoint ctx c} ->
@@ -435,7 +362,8 @@ val chacha_encrypt_bytes_loop:
   Stack unit
     (requires (fun h -> live h c /\ live h m /\ live h ctx))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_2 ctx c h0 h1))
-let rec chacha_encrypt_bytes_loop ctx m c len =
+[@"c_inline"]
+private let rec chacha_encrypt_bytes_loop ctx m c len =
   if FStar.UInt32.(len <^ 64ul) then ()
   else (
     chacha_encrypt_bytes_core ctx m c;
@@ -446,7 +374,8 @@ let rec chacha_encrypt_bytes_loop ctx m c len =
   )
 
 
-val chacha_encrypt_bytes_finish:
+[@"c_inline"]
+private val chacha_encrypt_bytes_finish:
   ctx:chacha_ctx ->
   m:uint8_p ->
   c:uint8_p{disjoint ctx c} ->
@@ -454,7 +383,8 @@ val chacha_encrypt_bytes_finish:
   Stack unit
     (requires (fun h -> live h c /\ live h m /\ live h ctx))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_2 ctx c h0 h1))
-let chacha_encrypt_bytes_finish ctx m c len =
+[@"c_inline"]
+private let chacha_encrypt_bytes_finish ctx m c len =
   let hinit = ST.get() in
   push_frame();
   let h0 = ST.get() in
@@ -473,14 +403,15 @@ let chacha_encrypt_bytes_finish ctx m c len =
   ()
 
 
-val chacha_encrypt_bytes_finish_stream:
+[@"c_inline"]
+private val chacha_encrypt_bytes_finish_stream:
   ctx:chacha_ctx ->
   c:uint8_p{disjoint ctx c} ->
   len:UInt32.t{U32.v len <= length c /\ U32.v len < 64} ->
   Stack unit
     (requires (fun h -> live h c /\ live h ctx))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
-let chacha_encrypt_bytes_finish_stream ctx c len =
+private let chacha_encrypt_bytes_finish_stream ctx c len =
   let hinit = ST.get() in
   push_frame();
   let zero = uint8_to_sint8 0uy in
