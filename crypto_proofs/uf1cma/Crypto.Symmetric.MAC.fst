@@ -41,6 +41,8 @@ let rec text_to_PS_text t =
     Seq.cons (Seq.head t)
                        (text_to_PS_text (Seq.tail t))
 
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
+
 (** Field element *)
 let elem i = (* dependent; used only ideally *)
   match alg i with 

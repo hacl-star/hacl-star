@@ -293,7 +293,7 @@ val prf_mac:
       HS.modifies_ref t.mac_rgn TSet.empty h0 h1 )))
 
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 400"
 
 let prf_mac i t k_0 x =
   Buffer.recall t.key;
