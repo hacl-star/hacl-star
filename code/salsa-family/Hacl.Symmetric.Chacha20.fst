@@ -190,14 +190,14 @@ private let chacha_encrypt_bytes_store c x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x
 
 
 [@"c_inline"]
-private val chacha_encrypt_bytes_stream:
+val chacha_encrypt_bytes_stream:
   ctx:chacha_ctx ->
   c:uint8_p{length c >= 64 /\ disjoint ctx c} ->
   Stack unit
     (requires (fun h -> live h ctx /\ live h c))
     (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
 [@"c_inline"]
-private let chacha_encrypt_bytes_stream ctx c =
+let chacha_encrypt_bytes_stream ctx c =
   push_frame();
   let tmp = create (uint32_to_sint32 0ul) 16ul in
   blit ctx 0ul tmp 0ul 16ul;
@@ -404,14 +404,14 @@ private let chacha_encrypt_bytes_finish ctx m c len =
 
 
 [@"c_inline"]
-private val chacha_encrypt_bytes_finish_stream:
+val chacha_encrypt_bytes_finish_stream:
   ctx:chacha_ctx ->
   c:uint8_p{disjoint ctx c} ->
   len:UInt32.t{U32.v len <= length c /\ U32.v len < 64} ->
   Stack unit
     (requires (fun h -> live h c /\ live h ctx))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
-private let chacha_encrypt_bytes_finish_stream ctx c len =
+let chacha_encrypt_bytes_finish_stream ctx c len =
   let hinit = ST.get() in
   push_frame();
   let zero = uint8_to_sint8 0uy in
@@ -421,7 +421,7 @@ private let chacha_encrypt_bytes_finish_stream ctx c len =
   pop_frame();
   ()
 
-
+(** API a la LibSodium **)
 val chacha_encrypt_bytes:
   ctx:chacha_ctx ->
   m:uint8_p ->
@@ -441,3 +441,65 @@ let rec chacha_encrypt_bytes ctx m c len =
     let m = offset m (U32.(len -^ rema)) in
     let c = offset c (U32.(len -^ rema)) in
     chacha_encrypt_bytes_finish ctx m c rema)
+
+
+(* ************************************* *)
+(*              CHACHA20 API             *)
+(* ************************************* *)
+val chacha20_init:
+  key:uint8_p{length key = 32} ->
+  nonce:uint8_p{length nonce = 12} ->
+  ctr:UInt32.t ->
+  StackInline chacha_ctx
+    (requires (fun h -> live h key /\ live h nonce))
+    (ensures  (fun h0 st h1 -> live h0 key /\ live h0 nonce /\ live h1 st /\ modifies_0 h0 h1
+    ))
+let chacha20_init k n ctr =
+  let ctx = Buffer.create (Hacl.Cast.uint32_to_sint32 0ul) 16ul in
+  chacha_keysetup ctx k;
+  chacha_ietf_ivsetup ctx n ctr;
+  ctx
+
+[@"c_inline"]
+val chacha20_update:
+  ctx:chacha_ctx ->
+  m:uint8_p{length m = 64} ->
+  c:uint8_p{disjoint ctx c /\ length c = 64} ->
+  Stack unit
+    (requires (fun h -> live h c /\ live h m /\ live h ctx))
+    (ensures  (fun h0 _ h1 -> live h1 c /\ live h1 ctx /\ modifies_2 ctx c h0 h1))
+[@"c_inline"]
+let chacha20_update ctx m c =
+  chacha_encrypt_bytes_core ctx m c;
+  let ctr = ctx.(12ul) in
+  let one = uint32_to_sint32 1ul in
+  ctx.(12ul) <- H32.(ctr +%^ one)
+
+
+[@"c_inline"]
+val chacha20_finish:
+  ctx:chacha_ctx ->
+  m:uint8_p ->
+  c:uint8_p{disjoint ctx c} ->
+  len:UInt32.t{U32.v len = length m /\ U32.v len = length c /\ U32.v len < 64} ->
+  Stack unit
+    (requires (fun h -> live h c /\ live h m /\ live h ctx))
+    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_2 ctx c h0 h1))
+[@"c_inline"]
+let chacha20_finish ctx m c len =
+  let hinit = ST.get() in
+  push_frame();
+  let h0 = ST.get() in
+  let zero = uint8_to_sint8 0uy in
+  let tmp = create zero 64ul in
+  let h0' = ST.get() in
+  blit m 0ul tmp 0ul len;
+  let h1 = ST.get() in
+  chacha_encrypt_bytes_core ctx tmp tmp;
+  let h2 = ST.get() in
+  blit tmp 0ul c 0ul len;
+  let h3 = ST.get() in
+  lemma_modifies_2_1'' ctx c h0 h2 h3;
+  pop_frame();
+  let hfin = ST.get() in
+  ()
