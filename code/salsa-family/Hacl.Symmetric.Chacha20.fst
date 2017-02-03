@@ -190,14 +190,14 @@ private let chacha_encrypt_bytes_store c x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x
 
 
 [@"c_inline"]
-private val chacha_encrypt_bytes_stream:
+val chacha_encrypt_bytes_stream:
   ctx:chacha_ctx ->
   c:uint8_p{length c >= 64 /\ disjoint ctx c} ->
   Stack unit
     (requires (fun h -> live h ctx /\ live h c))
     (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
 [@"c_inline"]
-private let chacha_encrypt_bytes_stream ctx c =
+let chacha_encrypt_bytes_stream ctx c =
   push_frame();
   let tmp = create (uint32_to_sint32 0ul) 16ul in
   blit ctx 0ul tmp 0ul 16ul;
@@ -404,14 +404,14 @@ private let chacha_encrypt_bytes_finish ctx m c len =
 
 
 [@"c_inline"]
-private val chacha_encrypt_bytes_finish_stream:
+val chacha_encrypt_bytes_finish_stream:
   ctx:chacha_ctx ->
   c:uint8_p{disjoint ctx c} ->
   len:UInt32.t{U32.v len <= length c /\ U32.v len < 64} ->
   Stack unit
     (requires (fun h -> live h c /\ live h ctx))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
-private let chacha_encrypt_bytes_finish_stream ctx c len =
+let chacha_encrypt_bytes_finish_stream ctx c len =
   let hinit = ST.get() in
   push_frame();
   let zero = uint8_to_sint8 0uy in
