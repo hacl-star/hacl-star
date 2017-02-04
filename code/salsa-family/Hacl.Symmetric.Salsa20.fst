@@ -47,15 +47,15 @@ private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
-[@"substitute"]
-private val crypto_core_salsa20_quarter_round:
+[@"c_inline"]
+private inline_for_extraction val crypto_core_salsa20_quarter_round:
   ctx:buffer u32{length ctx = 16} ->
   a:u32 -> b:u32 -> c:u32 -> d:u32 ->
   Stack unit
     (requires (fun h -> live h ctx))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
-[@"substitute"]
-private let crypto_core_salsa20_quarter_round ctx a b c d =
+[@"c_inline"]
+private inline_for_extraction let crypto_core_salsa20_quarter_round ctx a b c d =
   let y0 = ctx.(a) in
   let y1 = ctx.(b) in
   let y2 = ctx.(c) in
@@ -69,40 +69,38 @@ private let crypto_core_salsa20_quarter_round ctx a b c d =
   ctx.(c) <- y2;
   ctx.(d) <- y3
 
-[@"substitute"]
-private val crypto_core_salsa20_row_round:
+[@"c_inline"]
+private inline_for_extraction val crypto_core_salsa20_row_round:
   ctx:buffer u32{length ctx = 16} ->
   Stack unit
     (requires (fun h -> live h ctx))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
-[@"substitute"]
-private let crypto_core_salsa20_row_round ctx =
+[@"c_inline"]
+private inline_for_extraction let crypto_core_salsa20_row_round ctx =
   crypto_core_salsa20_quarter_round ctx 0ul 1ul 2ul 3ul;
   crypto_core_salsa20_quarter_round ctx 5ul 6ul 7ul 4ul;
   crypto_core_salsa20_quarter_round ctx 10ul 11ul 8ul 9ul;
   crypto_core_salsa20_quarter_round ctx 15ul 12ul 13ul 14ul
 
 
-[@"substitute"]
-private val crypto_core_salsa20_column_round:
+[@"c_inline"]
+private inline_for_extraction val crypto_core_salsa20_column_round:
   ctx:buffer u32{length ctx = 16} ->
   Stack unit
     (requires (fun h -> live h ctx))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
-[@"substitute"]
-private let crypto_core_salsa20_column_round ctx =
+[@"c_inline"]
+private inline_for_extraction let crypto_core_salsa20_column_round ctx =
   crypto_core_salsa20_quarter_round ctx 0ul 4ul 8ul 12ul;
   crypto_core_salsa20_quarter_round ctx 5ul 9ul 13ul 1ul;
   crypto_core_salsa20_quarter_round ctx 10ul 14ul 2ul 6ul;
   crypto_core_salsa20_quarter_round ctx 15ul 3ul 7ul 11ul
 
-[@"c_inline"]
 private val crypto_core_salsa20_double_round_10:
   ctx:buffer u32{length ctx = 16} ->
   Stack unit
     (requires (fun h -> live h ctx))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
-[@"c_inline"]
 private let crypto_core_salsa20_double_round_10 ctx =
   crypto_core_salsa20_column_round ctx;
   crypto_core_salsa20_row_round ctx;
@@ -126,7 +124,6 @@ private let crypto_core_salsa20_double_round_10 ctx =
   crypto_core_salsa20_row_round ctx
 
 
-[@"c_inline"]
 private val crypto_core_salsa20:
   output:uint8_p{length output = 64} ->
   input :uint8_p{length input = 16} ->
@@ -134,7 +131,6 @@ private val crypto_core_salsa20:
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h key))
     (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
-[@"c_inline"]
 private let crypto_core_salsa20 output input key =
   push_frame();
   let ctx = create 0ul 16ul in 
