@@ -471,6 +471,8 @@ inline_for_extraction let little_bytes len n = FStar.Endianness.little_bytes len
 (*     assert(Seq.equal b' (tail b)); *)
 (*     b *)
 
+#reset-options "--z3rlimit 400"
+
 // turns an integer into a bytestream, big-endian
 val big_bytes: 
   len:UInt32.t -> n:nat{n < pow2 (8 * v len)} ->

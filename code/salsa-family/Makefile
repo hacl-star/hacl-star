@@ -43,7 +43,7 @@ test-chacha.exe: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst
 		-I ../bignum -I ../lib/kremlin \
 		Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe -no-prefix Hacl.Test.Chacha20 \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
-		-drop Prims -drop FStar -bundle Chacha20=Hacl.Symmetric.Chacha20 \
+		-drop Prims -drop FStar -bundle Chacha20=Hacl.Symmetric.Chacha20 Chacha20.fst \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -march=native 
 	./chacha20.exe
 
@@ -53,7 +53,7 @@ Chacha20.c: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 		-I ../bignum -I ../lib/kremlin \
 		Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe -no-prefix Hacl.Test.Chacha20 \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
-		-drop Prims -drop FStar -bundle Chacha20=Hacl.Symmetric.Chacha20 \
+		-drop Prims -drop FStar -bundle Chacha20=Hacl.Symmetric.Chacha20 Chacha20.fst \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -march=native 
 	./chacha20.exe
 
