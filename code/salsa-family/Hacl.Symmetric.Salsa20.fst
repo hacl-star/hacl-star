@@ -19,414 +19,176 @@ private val lemma_max_uint32: n:nat -> Lemma
   (requires (n = 32))
   (ensures  (pow2 n = 4294967296))
   [SMTPat (pow2 n)]
-let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296)
+private let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296)
 private val lemma_max_uint64: n:nat -> Lemma
   (requires (n = 64))
   (ensures  (pow2 n = 18446744073709551616))
   [SMTPat (pow2 n)]
-let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
+private let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
 
-
-let rotate (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
+[@"c_inline"]
+private let rol32 (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-let load32_le (k:uint8_p) : Stack h32
+[@"c_inline"]
+private inline_for_extraction let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k >= 4))
   (ensures  (fun h0 _ h1 -> h0 == h1))
-  = let k0 = k.(0ul) in
-    let k1 = k.(1ul) in
-    let k2 = k.(2ul) in
-    let k3 = k.(3ul) in
-    let z = sint8_to_sint32 k0
-            |^ (sint8_to_sint32 k1 <<^ 8ul)
-            |^ (sint8_to_sint32 k2 <<^ 16ul)
-            |^ (sint8_to_sint32 k3 <<^ 24ul) in
-    z
+  = C.load32_le k 
 
-let store32_le (k:uint8_p) (x:h32) : Stack unit
+[@"c_inline"]
+private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit
   (requires (fun h -> live h k /\ length k >= 4))
   (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k))
-  = k.(0ul) <- sint32_to_sint8 x;
-    k.(1ul) <- sint32_to_sint8 (x >>^ 8ul);
-    k.(2ul) <- sint32_to_sint8 (x >>^ 16ul);
-    k.(3ul) <- sint32_to_sint8 (x >>^ 24ul)
+  = C.store32_le k x
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
-val crypto_core_salsa20:
+[@"substitute"]
+private val crypto_core_salsa20_quarter_round:
+  ctx:buffer u32{length ctx = 16} ->
+  a:u32 -> b:u32 -> c:u32 -> d:u32 ->
+  Stack unit
+    (requires (fun h -> live h ctx))
+    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
+[@"substitute"]
+private let crypto_core_salsa20_quarter_round ctx a b c d =
+  let y0 = ctx.(a) in
+  let y1 = ctx.(b) in
+  let y2 = ctx.(c) in
+  let y3 = ctx.(d) in
+  let y1 = y1 ^^ (rol32 (y0+%^y3)  7ul) in
+  let y2 = y2 ^^ (rol32 (y1+%^y0)  9ul) in
+  let y3 = y3 ^^ (rol32 (y2+%^y1)  13ul) in
+  let y0 = y0 ^^ (rol32 (y3+%^y2)  18ul) in
+  ctx.(a) <- y0;
+  ctx.(b) <- y1;
+  ctx.(c) <- y2;
+  ctx.(d) <- y3
+
+[@"substitute"]
+private val crypto_core_salsa20_row_round:
+  ctx:buffer u32{length ctx = 16} ->
+  Stack unit
+    (requires (fun h -> live h ctx))
+    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
+[@"substitute"]
+private let crypto_core_salsa20_row_round ctx =
+  crypto_core_salsa20_quarter_round ctx 0ul 1ul 2ul 3ul;
+  crypto_core_salsa20_quarter_round ctx 5ul 6ul 7ul 4ul;
+  crypto_core_salsa20_quarter_round ctx 10ul 11ul 8ul 9ul;
+  crypto_core_salsa20_quarter_round ctx 15ul 12ul 13ul 14ul
+
+
+[@"substitute"]
+private val crypto_core_salsa20_column_round:
+  ctx:buffer u32{length ctx = 16} ->
+  Stack unit
+    (requires (fun h -> live h ctx))
+    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
+[@"substitute"]
+private let crypto_core_salsa20_column_round ctx =
+  crypto_core_salsa20_quarter_round ctx 0ul 4ul 8ul 12ul;
+  crypto_core_salsa20_quarter_round ctx 5ul 9ul 13ul 1ul;
+  crypto_core_salsa20_quarter_round ctx 10ul 14ul 2ul 6ul;
+  crypto_core_salsa20_quarter_round ctx 15ul 3ul 7ul 11ul
+
+[@"c_inline"]
+private val crypto_core_salsa20_double_round_10:
+  ctx:buffer u32{length ctx = 16} ->
+  Stack unit
+    (requires (fun h -> live h ctx))
+    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
+[@"c_inline"]
+private let crypto_core_salsa20_double_round_10 ctx =
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx;
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx;
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx;
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx;
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx;
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx;
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx;
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx;
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx;
+  crypto_core_salsa20_column_round ctx;
+  crypto_core_salsa20_row_round ctx
+
+
+[@"c_inline"]
+private val crypto_core_salsa20:
   output:uint8_p{length output = 64} ->
   input :uint8_p{length input = 16} ->
   key   :uint8_p{length key = 32} ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h key))
     (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1 /\ live h1 output))
-let crypto_core_salsa20 output input key =
-  let x0 = uint32_to_sint32 0x61707865ul in
-  let x5 = uint32_to_sint32 0x3320646eul in
-  let x10 = uint32_to_sint32 0x79622d32ul in
-  let x15 = uint32_to_sint32 0x6b206574ul in
-  let x1 = load32_le(offset key 0ul) in
-  let x2 = load32_le(offset key 4ul) in
-  let x3 = load32_le(offset key 8ul) in
-  let x4 = load32_le(offset key 12ul) in
-  let x11 = load32_le(offset key 16ul) in
-  let x12 = load32_le(offset key 20ul) in
-  let x13 = load32_le(offset key 24ul) in
-  let x14 = load32_le(offset key 28ul) in
-  let x6 = load32_le(offset input 0ul) in
-  let x7 = load32_le(offset input 4ul) in
-  let x8 = load32_le(offset input 8ul) in
-  let x9 = load32_le(offset input 12ul) in
-  let j0 = x0 in
-  let j1 = x1 in
-  let j2 = x2 in
-  let j3 = x3 in
-  let j4 = x4 in
-  let j5 = x5 in
-  let j6 = x6 in
-  let j7 = x7 in
-  let j8 = x8 in
-  let j9 = x9 in
-  let j10 = x10 in
-  let j11 = x11 in
-  let j12 = x12 in
-  let j13 = x13 in
-  let j14 = x14 in
-  let j15 = x15 in
+[@"c_inline"]
+private let crypto_core_salsa20 output input key =
+  push_frame();
+  let ctx = create 0ul 16ul in 
+  ctx.(0ul)  <- uint32_to_sint32 0x61707865ul;
+  ctx.(5ul)  <- uint32_to_sint32 0x3320646eul;
+  ctx.(10ul) <- uint32_to_sint32 0x79622d32ul;
+  ctx.(15ul) <- uint32_to_sint32 0x6b206574ul;
+  ctx.(1ul)  <- load32_le(offset key 0ul);
+  ctx.(2ul)  <- load32_le(offset key 4ul);
+  ctx.(3ul)  <- load32_le(offset key 8ul);
+  ctx.(4ul)  <- load32_le(offset key 12ul);
+  ctx.(11ul) <- load32_le(offset key 16ul);
+  ctx.(12ul) <- load32_le(offset key 20ul);
+  ctx.(13ul) <- load32_le(offset key 24ul);
+  ctx.(14ul) <- load32_le(offset key 28ul);
+  ctx.(6ul)  <- load32_le(offset input 0ul);
+  ctx.(7ul)  <- load32_le(offset input 4ul);
+  ctx.(8ul)  <- load32_le(offset input 8ul);
+  ctx.(9ul)  <- load32_le(offset input 12ul);
+  let j0 = ctx.(0ul) in
+  let j1 = ctx.(1ul) in
+  let j2 = ctx.(2ul) in
+  let j3 = ctx.(3ul) in
+  let j4 = ctx.(4ul) in
+  let j5 = ctx.(5ul) in
+  let j6 = ctx.(6ul) in
+  let j7 = ctx.(7ul) in
+  let j8 = ctx.(8ul) in
+  let j9 = ctx.(9ul) in
+  let j10 = ctx.(10ul) in
+  let j11 = ctx.(11ul) in
+  let j12 = ctx.(12ul) in
+  let j13 = ctx.(13ul) in
+  let j14 = ctx.(14ul) in
+  let j15 = ctx.(15ul) in
   (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
+  crypto_core_salsa20_double_round_10 ctx;
   (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
-  (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
-  (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
-  (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
-  (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
-  (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
-  (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
-  (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
-  (* *)
-  let x4 = x4 ^^ rotate( x0+%^x12)  7ul in
-  let x8 = x8 ^^ rotate( x4+%^ x0)  9ul in
-  let x12 = x12 ^^ rotate( x8+%^ x4) 13ul in
-  let x0 = x0 ^^ rotate(x12+%^ x8) 18ul in
-  let x9 = x9 ^^ rotate( x5+%^ x1)  7ul in
-  let x13 = x13 ^^ rotate( x9+%^ x5)  9ul in
-  let x1 = x1 ^^ rotate(x13+%^ x9) 13ul in
-  let x5 = x5 ^^ rotate( x1+%^x13) 18ul in
-  let x14 = x14 ^^ rotate(x10+%^ x6)  7ul in
-  let x2 = x2 ^^ rotate(x14+%^x10)  9ul in
-  let x6 = x6 ^^ rotate( x2+%^x14) 13ul in
-  let x10 = x10 ^^ rotate( x6+%^ x2) 18ul in
-  let x3 = x3 ^^ rotate(x15+%^x11)  7ul in
-  let x7 = x7 ^^ rotate( x3+%^x15)  9ul in
-  let x11 = x11 ^^ rotate( x7+%^ x3) 13ul in
-  let x15 = x15 ^^ rotate(x11+%^ x7) 18ul in
-  let x1 = x1 ^^ rotate( x0+%^ x3)  7ul in
-  let x2 = x2 ^^ rotate( x1+%^ x0)  9ul in
-  let x3 = x3 ^^ rotate( x2+%^ x1) 13ul in
-  let x0 = x0 ^^ rotate( x3+%^ x2) 18ul in
-  let x6 = x6 ^^ rotate( x5+%^ x4)  7ul in
-  let x7 = x7 ^^ rotate( x6+%^ x5)  9ul in
-  let x4 = x4 ^^ rotate( x7+%^ x6) 13ul in
-  let x5 = x5 ^^ rotate( x4+%^ x7) 18ul in
-  let x11 = x11 ^^ rotate(x10+%^ x9)  7ul in
-  let x8 = x8 ^^ rotate(x11+%^x10)  9ul in
-  let x9 = x9 ^^ rotate( x8+%^x11) 13ul in
-  let x10 = x10 ^^ rotate( x9+%^ x8) 18ul in
-  let x12 = x12 ^^ rotate(x15+%^x14)  7ul in
-  let x13 = x13 ^^ rotate(x12+%^x15)  9ul in
-  let x14 = x14 ^^ rotate(x13+%^x12) 13ul in
-  let x15 = x15 ^^ rotate(x14+%^x13) 18ul in
-  (* *)
+  let x0 = ctx.(0ul) in
+  let x1 = ctx.(1ul) in
+  let x2 = ctx.(2ul) in
+  let x3 = ctx.(3ul) in
+  let x4 = ctx.(4ul) in
+  let x5 = ctx.(5ul) in
+  let x6 = ctx.(6ul) in
+  let x7 = ctx.(7ul) in
+  let x8 = ctx.(8ul) in
+  let x9 = ctx.(9ul) in
+  let x10 = ctx.(10ul) in
+  let x11 = ctx.(11ul) in
+  let x12 = ctx.(12ul) in
+  let x13 = ctx.(13ul) in
+  let x14 = ctx.(14ul) in
+  let x15 = ctx.(15ul) in
   let x0 = x0 +%^ j0 in
   let x1 = x1 +%^ j1 in
   let x2 = x2 +%^ j2 in
@@ -443,7 +205,6 @@ let crypto_core_salsa20 output input key =
   let x13 = x13 +%^ j13 in
   let x14 = x14 +%^ j14 in
   let x15 = x15 +%^ j15 in
-  (* *)
   store32_le (offset output 0ul) x0;
   store32_le (offset output 4ul) x1;
   store32_le (offset output 8ul) x2;
@@ -459,8 +220,8 @@ let crypto_core_salsa20 output input key =
   store32_le (offset output 48ul) x12;
   store32_le (offset output 52ul) x13;
   store32_le (offset output 56ul) x14;
-  store32_le (offset output 60ul) x15
-
+  store32_le (offset output 60ul) x15;
+  pop_frame()
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
@@ -468,14 +229,35 @@ module U64 = FStar.UInt64
 module U32 = FStar.UInt32
 
 
-val xor_:
+[@"c_inline"]
+private val xor_:
   c:uint8_p{length c >= 64} ->
   m:uint8_p{length m >= 64} ->
   block:uint8_p{length block = 64} ->
   Stack unit
     (requires (fun h -> live h c /\ live h m /\ live h block))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
-let xor_ c m block =
+[@"c_inline"]
+private let xor_ c m block =
+  let open Hacl.UInt128 in
+  let m0 = C.load128(offset m 0ul) in
+  let m1 = C.load128(offset m 16ul) in
+  let m2 = C.load128(offset m 32ul) in
+  let m3 = C.load128(offset m 48ul) in
+  let b0 = C.load128(offset block 0ul) in
+  let b1 = C.load128(offset block 16ul) in
+  let b2 = C.load128(offset block 32ul) in
+  let b3 = C.load128(offset block 48ul) in
+  let c0 = FStar.UInt128.(m0 ^^ b0) in
+  let c1 = FStar.UInt128.(m1 ^^ b1) in
+  let c2 = FStar.UInt128.(m2 ^^ b2) in
+  let c3 = FStar.UInt128.(m3 ^^ b3) in
+  C.store128 (offset c 0ul ) c0; 
+  C.store128 (offset c 16ul) c1; 
+  C.store128 (offset c 32ul) c2;
+  C.store128 (offset c 48ul) c3
+
+(*
   let open Hacl.UInt8 in
   let m0 = m.(0ul) in let block0 = block.(0ul) in
   let m1 = m.(1ul) in let block1 = block.(1ul) in
@@ -605,11 +387,11 @@ let xor_ c m block =
   c.(61ul) <- m61 ^^ block61;
   c.(62ul) <- m62 ^^ block62;
   c.(63ul) <- m63 ^^ block63
-
+*)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
+private let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
   (requires (live h0 c /\ live h0 input /\ live h0 block
     /\ live h1 c /\ live h1 input /\ live h1 block
     /\ live h2 c /\ live h2 input /\ live h2 block
@@ -622,7 +404,7 @@ let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemm
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
+private let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
   (requires (live h0 c /\ live h0 input /\ live h0 block
     /\ live h1 c /\ live h1 input /\ live h1 block
     /\ live h2 c /\ live h2 input /\ live h2 block
@@ -636,7 +418,8 @@ let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lem
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-val crypto_stream_salsa20_xor_ic_loop:
+[@"c_inline"]
+private val crypto_stream_salsa20_xor_ic_loop:
   c:uint8_p ->
   m:uint8_p ->
   block:uint8_p{length block = 64 /\ disjoint block c} ->
@@ -646,7 +429,8 @@ val crypto_stream_salsa20_xor_ic_loop:
   Stack (z:FStar.UInt64.t{FStar.UInt64.v z < 64})
     (requires (fun h -> live h c /\ live h m /\ live h block /\ live h input /\ live h kcopy))
     (ensures  (fun h0 _ h1 -> live h1 c /\ live h1 input /\ live h1 block /\ modifies_3 c input block h0 h1))
-let rec crypto_stream_salsa20_xor_ic_loop c m block input kcopy mlen =
+[@"c_inline"]
+private let rec crypto_stream_salsa20_xor_ic_loop c m block input kcopy mlen =
   if (FStar.UInt64.(mlen <^ 64uL)) then (
     let h = ST.get() in
     lemma_intro_modifies_3 c input block h h;
@@ -705,7 +489,8 @@ let rec crypto_stream_salsa20_xor_ic_loop c m block input kcopy mlen =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
-val xor_bytes:
+[@"c_inline"]
+private val xor_bytes:
   x:uint8_p ->
   y:uint8_p ->
   z:uint8_p ->
@@ -713,7 +498,8 @@ val xor_bytes:
   Stack unit
     (requires (fun h -> live h x /\ live h y /\ live h z))
     (ensures  (fun h0 _ h1 -> live h1 x /\ modifies_1 x h0 h1))
-let rec xor_bytes x y z len =
+[@"c_inline"]
+private let rec xor_bytes x y z len =
   if FStar.UInt32.(len =^ 0ul) then ()
   else (
     let i = FStar.UInt32.(len -^ 1ul) in
@@ -725,8 +511,7 @@ let rec xor_bytes x y z len =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
-
-inline_for_extraction let mod_64 (mlen:U64.t) : Tot (z:U32.t{U32.v z = U64.v mlen % 64 /\ U32.v z <= U64.v mlen}) =
+private inline_for_extraction let mod_64 (mlen:U64.t) : Tot (z:U32.t{U32.v z = U64.v mlen % 64 /\ U32.v z <= U64.v mlen}) =
   let mlen' = U64.(mlen &^ 63uL) in
   UInt.logand_mask (U64.v mlen) 6;
   assert_norm (pow2 6 = 64);
@@ -740,7 +525,7 @@ inline_for_extraction let mod_64 (mlen:U64.t) : Tot (z:U32.t{U32.v z = U64.v mle
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
-let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
+private let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
   (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block)
     /\ live h1 c /\ live h1 input /\ live h1 block
     /\ live h2 c /\ live h2 input /\ live h2 block
@@ -755,7 +540,8 @@ let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 :
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-val crypto_stream_salsa20_xor_ic__:
+[@"c_inline"]
+private inline_for_extraction val crypto_stream_salsa20_xor_ic__:
   n:uint8_p{length n = 8} ->
   ic:FStar.UInt64.t ->
   k:uint8_p{length k = 32} ->
@@ -763,7 +549,8 @@ val crypto_stream_salsa20_xor_ic__:
   Stack unit
     (requires (fun h -> live h n /\ live h k /\ live h local_state))
     (ensures  (fun h0 _ h1 -> live h1 local_state /\ modifies_1 local_state h0 h1))
-let crypto_stream_salsa20_xor_ic__ n ic k local_state =
+[@"c_inline"]
+private inline_for_extraction let crypto_stream_salsa20_xor_ic__ n ic k local_state =
   let input = Buffer.sub local_state 0ul  16ul in
   let block = Buffer.sub local_state 16ul 64ul in
   let kcopy = Buffer.sub local_state 80ul 32ul in
@@ -809,7 +596,8 @@ let crypto_stream_salsa20_xor_ic__ n ic k local_state =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-val crypto_stream_salsa20_xor_ic_:
+[@"c_inline"]
+private inline_for_extraction val crypto_stream_salsa20_xor_ic_:
   c:uint8_p ->
   m:uint8_p ->
   mlen:FStar.UInt64.t{U64.v mlen <= length c /\ U64.v mlen <= length m /\ U64.v mlen > 0} ->
@@ -819,7 +607,8 @@ val crypto_stream_salsa20_xor_ic_:
   Stack unit
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
-let crypto_stream_salsa20_xor_ic_ c m mlen n ic k =
+[@"c_inline"]
+private inline_for_extraction let crypto_stream_salsa20_xor_ic_ c m mlen n ic k =
   cut (U64.v mlen < pow2 32);
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   push_frame();
@@ -888,6 +677,7 @@ let crypto_stream_salsa20_xor_ic_ c m mlen n ic k =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
+[@"c_inline"]
 val crypto_stream_salsa20_xor_ic:
   c:uint8_p ->
   m:uint8_p ->
@@ -898,6 +688,7 @@ val crypto_stream_salsa20_xor_ic:
   Stack unit
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
+[@"c_inline"]
 let crypto_stream_salsa20_xor_ic c m mlen n ic k =
   if FStar.UInt64.(mlen =^ 0uL) then ()
   else crypto_stream_salsa20_xor_ic_ c m mlen n ic k
@@ -905,7 +696,8 @@ let crypto_stream_salsa20_xor_ic c m mlen n ic k =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
-val crypto_stream_salsa20_loop:
+[@"c_inline"]
+private val crypto_stream_salsa20_loop:
   c:uint8_p ->
   clen:FStar.UInt64.t{U64.v clen <= length c} ->
   n:uint8_p{length n = 8} ->
@@ -914,7 +706,8 @@ val crypto_stream_salsa20_loop:
   Stack FStar.UInt64.t
     (requires (fun h -> live h c /\ live h n /\ live h k /\ live h input))
     (ensures  (fun h0 _ h1 -> live h1 c /\ live h1 input /\ modifies_2 c input h0 h1))
-let rec crypto_stream_salsa20_loop c clen n k input =
+[@"c_inline"]
+private let rec crypto_stream_salsa20_loop c clen n k input =
   if FStar.UInt64.(clen <^ 64uL) then clen
   else (
     crypto_core_salsa20 (Buffer.sub c 0ul 64ul) input k;
@@ -954,7 +747,7 @@ let rec crypto_stream_salsa20_loop c clen n k input =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 
-let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
+private let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
   (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block)
     /\ live h1 c /\ live h1 input /\ live h1 block
     /\ live h2 c /\ live h2 input /\ live h2 block
@@ -967,15 +760,16 @@ let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : L
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
-val crypto_stream_salsa20_:
+[@"c_inline"]
+private val crypto_stream_salsa20_:
   n:uint8_p{length n = 8} ->
   k:uint8_p{length k = 32} ->
   local_state:uint8_p{length local_state = 112} ->
   Stack unit
     (requires (fun h -> live h n /\ live h k /\ live h local_state))
     (ensures  (fun h0 _ h1 -> live h1 local_state /\ modifies_1 local_state h0 h1))
-let crypto_stream_salsa20_ n k local_state =
+[@"c_inline"]
+private let crypto_stream_salsa20_ n k local_state =
   let zero = Hacl.Cast.uint8_to_sint8 0uy in
   let input = Buffer.sub local_state 0ul 16ul in
   let block = Buffer.sub local_state 16ul 64ul in
@@ -1022,6 +816,7 @@ let crypto_stream_salsa20_ n k local_state =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
+[@"c_inline"]
 val crypto_stream_salsa20:
   c:uint8_p ->
   clen:FStar.UInt64.t{U64.v clen <= length c} ->
@@ -1030,6 +825,7 @@ val crypto_stream_salsa20:
   Stack unit
     (requires (fun h -> live h c /\ live h n /\ live h k))
     (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
+[@"c_inline"]
 let crypto_stream_salsa20 c clen n k =
   push_frame();
   let hh = ST.get() in

@@ -93,7 +93,7 @@ static inline   uint64_t FStar_UInt64_gte_mask(uint64_t x, uint64_t y) {
 }
 
 #if defined(__GNUC__) && defined(__SIZEOF_INT128__)
-typedef unsigned __int128 FStar_UInt128_t, FStar_UInt128_t_;
+typedef unsigned __int128 FStar_UInt128_t, FStar_UInt128_t_,uint128_t;
 #define FStar_UInt128_add(x,y) ((x) + (y))
 #define FStar_UInt128_mul(x,y) ((x) * (y))
 #define FStar_UInt128_add_mod(x,y) ((x) + (y))
@@ -476,12 +476,12 @@ FStar_UInt32_t FStar_UInt32_uint_to_t(Prims_nat x);
 
 #endif
 
-#define load32(b) (*((uint32_t*) b))
-#define store32(b,i) (*((uint32_t*)b)=i)
-#define load64(b) (*((uint64_t*) b))
-#define store64(b,i) (*((uint64_t*)b)=i)
-#define load128(b) (*((FStar_UInt128_t *)b))
-#define store128(b, i) (*((FStar_UInt128_t *)b) = i)
+#define load32(b) (*((uint32_t*)(b)))
+#define store32(b,i) (*((uint32_t*)(b))=i)
+#define load64(b) (*((uint64_t*)(b)))
+#define store64(b,i) (*((uint64_t*)(b))=i)
+#define load128(b) (*((FStar_UInt128_t *)(b)))
+#define store128(b, i) (*((FStar_UInt128_t *)(b)) = i)
 
 #define htole128(i) i
 //(((uint128_t)htole64((uint64_t) i)) << 64 | (uint128_t)htole64((uint64_t) (i >> 64)))
@@ -506,6 +506,16 @@ FStar_UInt32_t FStar_UInt32_uint_to_t(Prims_nat x);
 #define store128_be(b, i) (store128(b,htobe128(i)))
 
 #define FStar_Buffer_to_seq_full(x) 0
-
-
+/*
+uint32_t rotate32_left (uint32_t x, uint32_t n)
+{
+  //  assert (n<32);
+  return (x<<n) | (x>>(-n&31));
+}
+uint32_t rotate32_right (uint32_t x, uint32_t n)
+{
+  //  assert (n<32);
+  return (x>>n) | (x<<(-n&31));
+}
+*/
 #endif

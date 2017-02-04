@@ -167,6 +167,32 @@ int32_t perf_api() {
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);
 
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    Hacl_Box_crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("Hacl Box speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1024 * 1024);
+  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    int res = crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("Sodium Box speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1024 * 1024);
+  for (int i = 0; i < len + 16 * sizeof(char); i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
+
   return exit_success;
 }
 

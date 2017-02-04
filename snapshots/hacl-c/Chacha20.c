@@ -1,49 +1,52 @@
 #include "Chacha20.h"
 
-static inline uint32_t Hacl_Symmetric_Chacha20_load32_le(uint8_t *k)
+inline static uint32_t Hacl_Symmetric_Chacha20_load32_le(uint8_t *k)
 {
-  return le32toh(load32(k));
+  return load32_le(k);
 }
 
-static inline void Hacl_Symmetric_Chacha20_store32_le(uint8_t *k, uint32_t x)
+inline static void Hacl_Symmetric_Chacha20_store32_le(uint8_t *k, uint32_t x)
 {
-  store32(k,htole32(x));
+  store32_le(k, x);
+  return;
 }
 
-void Hacl_Symmetric_Chacha20_chacha_keysetup(uint32_t *ctx, uint8_t *k)
+inline void Hacl_Symmetric_Chacha20_chacha_keysetup(uint32_t *ctx, uint8_t *k)
 {
-  ctx[(uint32_t )0] = (uint32_t )0x61707865;
-  ctx[(uint32_t )1] = (uint32_t )0x3320646e;
-  ctx[(uint32_t )2] = (uint32_t )0x79622d32;
-  ctx[(uint32_t )3] = (uint32_t )0x6b206574;
-  uint32_t _0_24 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )0);
-  ctx[(uint32_t )4] = _0_24;
-  uint32_t _0_25 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )4);
-  ctx[(uint32_t )5] = _0_25;
-  uint32_t _0_26 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )8);
-  ctx[(uint32_t )6] = _0_26;
-  uint32_t _0_27 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )12);
-  ctx[(uint32_t )7] = _0_27;
-  uint32_t _0_28 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )16);
-  ctx[(uint32_t )8] = _0_28;
-  uint32_t _0_29 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )20);
-  ctx[(uint32_t )9] = _0_29;
-  uint32_t _0_30 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )24);
-  ctx[(uint32_t )10] = _0_30;
-  uint32_t _0_31 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )28);
-  ctx[(uint32_t )11] = _0_31;
+  ctx[0] = (uint32_t )0x61707865;
+  ctx[1] = (uint32_t )0x3320646e;
+  ctx[2] = (uint32_t )0x79622d32;
+  ctx[3] = (uint32_t )0x6b206574;
+  uint32_t _0_33 = Hacl_Symmetric_Chacha20_load32_le(k);
+  ctx[4] = _0_33;
+  uint32_t _0_34 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )4);
+  ctx[5] = _0_34;
+  uint32_t _0_35 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )8);
+  ctx[6] = _0_35;
+  uint32_t _0_36 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )12);
+  ctx[7] = _0_36;
+  uint32_t _0_37 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )16);
+  ctx[8] = _0_37;
+  uint32_t _0_38 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )20);
+  ctx[9] = _0_38;
+  uint32_t _0_39 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )24);
+  ctx[10] = _0_39;
+  uint32_t _0_40 = Hacl_Symmetric_Chacha20_load32_le(k + (uint32_t )28);
+  ctx[11] = _0_40;
 }
 
-void Hacl_Symmetric_Chacha20_chacha_ietf_ivsetup(uint32_t *ctx, uint8_t *iv, uint32_t counter)
+inline void
+Hacl_Symmetric_Chacha20_chacha_ietf_ivsetup(uint32_t *ctx, uint8_t *iv, uint32_t counter)
 {
-  ctx[(uint32_t )12] = counter;
-  uint32_t _0_32 = Hacl_Symmetric_Chacha20_load32_le(iv);
-  ctx[(uint32_t )13] = _0_32;
-  uint32_t _0_33 = Hacl_Symmetric_Chacha20_load32_le(iv + (uint32_t )4);
-  ctx[(uint32_t )14] = _0_33;
-  uint32_t _0_34 = Hacl_Symmetric_Chacha20_load32_le(iv + (uint32_t )8);
-  ctx[(uint32_t )15] = _0_34;
+  ctx[12] = counter;
+  uint32_t _0_41 = Hacl_Symmetric_Chacha20_load32_le(iv);
+  ctx[13] = _0_41;
+  uint32_t _0_42 = Hacl_Symmetric_Chacha20_load32_le(iv + (uint32_t )4);
+  ctx[14] = _0_42;
+  uint32_t _0_43 = Hacl_Symmetric_Chacha20_load32_le(iv + (uint32_t )8);
+  ctx[15] = _0_43;
 }
+
 inline static void
 Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_quarter_round(
   uint32_t *ctx,
@@ -189,103 +192,23 @@ Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_core(uint32_t *ctx, uint8_t *m, uin
   uint32_t x131 = x130 + j13;
   uint32_t x141 = x140 + j14;
   uint32_t x151 = x150 + j15;
-  uint8_t *x02 = m;
-  uint32_t
-  m0 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x02)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x03 = m + (uint32_t )4;
-  uint32_t
-  m1 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x03)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x04 = m + (uint32_t )8;
-  uint32_t
-  m2 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x04)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x05 = m + (uint32_t )12;
-  uint32_t
-  m3 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x05)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x06 = m + (uint32_t )16;
-  uint32_t
-  m4 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x06)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x07 = m + (uint32_t )20;
-  uint32_t
-  m5 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x07)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x08 = m + (uint32_t )24;
-  uint32_t
-  m6 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x08)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x09 = m + (uint32_t )28;
-  uint32_t
-  m7 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x09)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x010 = m + (uint32_t )32;
-  uint32_t
-  m8 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x010)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x011 = m + (uint32_t )36;
-  uint32_t
-  m9 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x011)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x012 = m + (uint32_t )40;
-  uint32_t
-  m10 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x012)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x013 = m + (uint32_t )44;
-  uint32_t
-  m11 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x013)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x014 = m + (uint32_t )48;
-  uint32_t
-  m12 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x014)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x015 = m + (uint32_t )52;
-  uint32_t
-  m13 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x015)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x016 = m + (uint32_t )56;
-  uint32_t
-  m14 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x016)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint8_t *x017 = m + (uint32_t )60;
-  uint32_t
-  m15 =
-    /* start inlining Hacl.Symmetric.Chacha20.load32_le */
-      load32_le(x017)
-    /* end inlining Hacl.Symmetric.Chacha20.load32_le */;
-  uint32_t x018 = x01 ^ m0;
+  uint32_t m0 = Hacl_Symmetric_Chacha20_load32_le(m);
+  uint32_t m1 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )4);
+  uint32_t m2 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )8);
+  uint32_t m3 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )12);
+  uint32_t m4 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )16);
+  uint32_t m5 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )20);
+  uint32_t m6 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )24);
+  uint32_t m7 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )28);
+  uint32_t m8 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )32);
+  uint32_t m9 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )36);
+  uint32_t m10 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )40);
+  uint32_t m11 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )44);
+  uint32_t m12 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )48);
+  uint32_t m13 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )52);
+  uint32_t m14 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )56);
+  uint32_t m15 = Hacl_Symmetric_Chacha20_load32_le(m + (uint32_t )60);
+  uint32_t x02 = x01 ^ m0;
   uint32_t x1 = x17 ^ m1;
   uint32_t x2 = x21 ^ m2;
   uint32_t x3 = x31 ^ m3;
@@ -301,72 +224,24 @@ Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_core(uint32_t *ctx, uint8_t *m, uin
   uint32_t x13 = x131 ^ m13;
   uint32_t x14 = x141 ^ m14;
   uint32_t x15 = x151 ^ m15;
-  uint8_t *x019 = c;
-  uint8_t *x0 = x019;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x0, x018);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x020 = x019 + (uint32_t )4;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x020, x1);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x021 = x019 + (uint32_t )8;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x021, x2);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x022 = x019 + (uint32_t )12;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x022, x3);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x023 = x019 + (uint32_t )16;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x023, x4);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x024 = x019 + (uint32_t )20;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x024, x5);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x025 = x019 + (uint32_t )24;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x025, x6);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x026 = x019 + (uint32_t )28;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x026, x7);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x027 = x019 + (uint32_t )32;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x027, x8);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x028 = x019 + (uint32_t )36;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x028, x9);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x029 = x019 + (uint32_t )40;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x029, x10);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x030 = x019 + (uint32_t )44;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x030, x11);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x031 = x019 + (uint32_t )48;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x031, x12);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x032 = x019 + (uint32_t )52;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x032, x13);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x033 = x019 + (uint32_t )56;
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x033, x14);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
-  uint8_t *x034 = x019 + (uint32_t )60;
+  uint8_t *x0 = c;
+  Hacl_Symmetric_Chacha20_store32_le(x0, x02);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )4, x1);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )8, x2);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )12, x3);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )16, x4);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )20, x5);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )24, x6);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )28, x7);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )32, x8);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )36, x9);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )40, x10);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )44, x11);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )48, x12);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )52, x13);
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )56, x14);
   /* start inlining Hacl.Symmetric.Chacha20.chacha_encrypt_bytes_store */
-  /* start inlining Hacl.Symmetric.Chacha20.store32_le */
-  store32_le(x034, x15);
-  /* end inlining Hacl.Symmetric.Chacha20.store32_le */
+  Hacl_Symmetric_Chacha20_store32_le(x0 + (uint32_t )60, x15);
   /* end inlining Hacl.Symmetric.Chacha20.chacha_encrypt_bytes_store */
 }
 

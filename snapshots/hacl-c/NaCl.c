@@ -23,14 +23,14 @@ Hacl_SecretBox_crypto_secretbox_detached(
   uint32_t mlen0_32 = (uint32_t )mlen0;
   memcpy(block0 + zerobytes, m, mlen0_32 * sizeof m[0]);
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, n + (uint32_t )0, k);
-  Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(block0,
+  Salsa20_crypto_stream_salsa20_xor(block0,
     block0,
     mlen0 + zerobytes_64,
     n + (uint32_t )16,
     subkey);
   memcpy(c, block0 + zerobytes, mlen0_32 * sizeof block0[0]);
   if (mlen > mlen0)
-    Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic(c + mlen0_32,
+    Salsa20_crypto_stream_salsa20_xor_ic(c + mlen0_32,
       m + mlen0_32,
       mlen - mlen0,
       n + (uint32_t )16,
@@ -55,7 +55,7 @@ Hacl_SecretBox_crypto_secretbox_open_detached(
   uint8_t *block0 = hsalsa_state + (uint32_t )32;
   uint8_t *tmp_mac = hsalsa_state + (uint32_t )96;
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, n + (uint32_t )0, k);
-  Hacl_Symmetric_Salsa20_crypto_stream_salsa20(block0, (uint64_t )32, n + (uint32_t )16, subkey);
+  Salsa20_crypto_stream_salsa20(block0, (uint64_t )32, n + (uint32_t )16, subkey);
   Poly1305_64_crypto_onetimeauth(tmp_mac, c, clen, block0 + (uint32_t )0);
   uint8_t verify = Hacl_Policies_cmp_bytes(mac, tmp_mac, (uint32_t )16);
   uint32_t zerobytes = (uint32_t )32;
@@ -70,14 +70,14 @@ Hacl_SecretBox_crypto_secretbox_open_detached(
   if (verify == (uint8_t )0)
   {
     memcpy(block0 + zerobytes, c, clen0_32 * sizeof c[0]);
-    Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(block0,
+    Salsa20_crypto_stream_salsa20_xor(block0,
       block0,
       zerobytes_64 + clen0,
       n + (uint32_t )16,
       subkey);
     memcpy(m, block0 + zerobytes, clen0_32 * sizeof block0[0]);
     if (clen > clen0)
-      Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic(m + clen0_32,
+      Salsa20_crypto_stream_salsa20_xor_ic(m + clen0_32,
         c + clen0_32,
         clen - clen0,
         n + (uint32_t )16,

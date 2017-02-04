@@ -24,14 +24,14 @@ private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32
 
 #reset-options "--initial_ifuel 0 --max_ifuel 0 --initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-[@"substitute"]
+[@"c_inline"]
 private inline_for_extraction let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k = 4))
   (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 k /\ length k = 4
     /\ r == load32_le_spec (as_seq h0 k)))
   = C.load32_le k
 
-[@"substitute"]
+[@"c_inline"]
 private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit
   (requires (fun h -> live h k /\ length k = 4))
   (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k /\ length k = 4 /\ live h0 k
