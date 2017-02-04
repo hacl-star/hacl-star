@@ -139,7 +139,7 @@ inline static void Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_rounds(uint32_t 
 }
 
 inline static void
-Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_core(uint32_t *ctx, uint8_t *m, uint8_t *c)
+Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_core(uint32_t* tmp1, uint32_t *ctx, uint8_t *m, uint8_t *c)
 {
   uint32_t tmp[16] = { 0 };
   memcpy(tmp, ctx, (uint32_t )16 * sizeof ctx[0]);
@@ -247,6 +247,7 @@ Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_core(uint32_t *ctx, uint8_t *m, uin
 
 inline static void
 Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_loop(
+  uint32_t *block,
   uint32_t *ctx,
   uint8_t *m,
   uint8_t *c,
@@ -257,11 +258,11 @@ Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_loop(
     return;
   else
   {
-    Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_core(ctx, m, c);
+    Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_core(block,ctx, m, c);
     uint32_t ctr = ctx[12];
     uint32_t one = (uint32_t )1;
     ctx[12] = ctr + one;
-    Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_loop(ctx,
+    Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_loop(block,ctx,
       m + (uint32_t )64,
       c + (uint32_t )64,
       len - (uint32_t )64);
@@ -271,6 +272,7 @@ Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_loop(
 
 inline static void
 Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_finish(
+  uint32_t *block,
   uint32_t *ctx,
   uint8_t *m,
   uint8_t *c,
@@ -282,7 +284,7 @@ Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_finish(
   for (uintmax_t i = 0; i < (uint32_t )64; ++i)
     tmp[i] = zero;
   memcpy(tmp, m, len * sizeof m[0]);
-  Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_core(ctx, tmp, tmp);
+  Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_core(block,ctx, tmp, tmp);
   memcpy(c, tmp, len * sizeof tmp[0]);
 }
 
@@ -294,14 +296,15 @@ Hacl_Symmetric_Chacha20_chacha_encrypt_bytes(
   uint32_t len
 )
 {
-  Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_loop(ctx, m, c, len);
+  uint32_t block[16] = { 0 };
+  Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_loop(block,ctx, m, c, len);
   uint32_t rema = len & (uint32_t )63;
   uint32_t q = len >> (uint32_t )6;
   if (rema >= (uint32_t )0)
   {
     uint8_t *m0 = m + len - rema;
     uint8_t *c0 = c + len - rema;
-    Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_finish(ctx, m0, c0, rema);
+    Hacl_Symmetric_Chacha20_chacha_encrypt_bytes_finish(block,ctx, m0, c0, rema);
     return;
   }
   else

@@ -506,16 +506,16 @@ FStar_UInt32_t FStar_UInt32_uint_to_t(Prims_nat x);
 #define store128_be(b, i) (store128(b,htobe128(i)))
 
 #define FStar_Buffer_to_seq_full(x) 0
-/*
-uint32_t rotate32_left (uint32_t x, uint32_t n)
+
+static inline uint32_t rotate32_left (uint32_t x, uint32_t n)
 {
   //  assert (n<32);
   return (x<<n) | (x>>(-n&31));
 }
-uint32_t rotate32_right (uint32_t x, uint32_t n)
+static inline uint32_t rotate32_right (uint32_t x, uint32_t n)
 {
   //  assert (n<32);
   return (x>>n) | (x<<(-n&31));
 }
-*/
+
 #endif
