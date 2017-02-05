@@ -306,6 +306,16 @@ inline static void Hacl_Symmetric_Salsa20_salsa20_xor(uint8_t *c, uint8_t *m, ui
   Hacl_Symmetric_Salsa20_xor_(c, m, block);
 }
 
+inline static uint64_t Hacl_Symmetric_Salsa20_incr_counter(uint32_t *ctx, uint64_t ctr)
+{
+  uint64_t ctr1 = ctr + (uint64_t )1;
+  uint64_t sctr1 = ctr1;
+  ctx[8] = (uint32_t )sctr1;
+  //KB NOTE: Commenting the following line drops Salsa20 to 1.89 cycles/byte
+  ctx[9] = (uint32_t )(sctr1 >> (uint32_t )32);
+  return ctr1;
+}
+
 inline static uint64_t
 Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_loop(
   uint8_t *c,
@@ -320,10 +330,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_loop(
   else
   {
     Hacl_Symmetric_Salsa20_salsa20_xor(c, m, ctx);
-    uint64_t ctr1 = ctr + (uint64_t )1;
-    uint64_t sctr1 = ctr1;
-    ctx[8] = (uint32_t )sctr1;
-    ctx[9] = (uint32_t )(sctr1 >> (uint32_t )32);
+    uint64_t ctr1 = Hacl_Symmetric_Salsa20_incr_counter(ctx, ctr);
     uint64_t mlen0 = mlen - (uint64_t )64;
     uint8_t *c_ = c + (uint32_t )64;
     uint8_t *m_ = m + (uint32_t )64;
@@ -350,11 +357,10 @@ Hacl_Symmetric_Salsa20_xor_bytes(uint8_t *x, uint8_t *y, uint32_t *b, uint32_t i
     uint32_t bi = b[i];
     uint8_t y0 = y[curr];
     uint8_t y1 = y[curr + (uint32_t )1];
-    uint32_t bi0 = b[i];
-    uint8_t b0 = (uint8_t )bi0;
-    uint8_t b1 = (uint8_t )(bi0 >> (uint32_t )8);
+    uint8_t b0 = (uint8_t )bi;
+    uint8_t b1 = (uint8_t )(bi >> (uint32_t )8);
     x[curr] = y0 ^ b0;
-    x[curr + (uint32_t )1] = y0 ^ b1;
+    x[curr + (uint32_t )1] = y1 ^ b1;
   }
   else if (r == (uint32_t )3)
   {
@@ -369,7 +375,7 @@ Hacl_Symmetric_Salsa20_xor_bytes(uint8_t *x, uint8_t *y, uint32_t *b, uint32_t i
     x[curr + (uint32_t )1] = y1 ^ b1;
     x[curr + (uint32_t )2] = y2 ^ b2;
   }
-  else if (r == (uint32_t )3)
+  else
   {
     uint32_t bi = b[i];
     uint8_t y0 = y[curr];
@@ -387,8 +393,6 @@ Hacl_Symmetric_Salsa20_xor_bytes(uint8_t *x, uint8_t *y, uint32_t *b, uint32_t i
     Hacl_Symmetric_Salsa20_xor_bytes(x, y, b, i + (uint32_t )1, len);
     return;
   }
-  else
-    return;
 }
 
 inline static void
@@ -412,7 +416,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_(
   uint32_t ctx[16] = { 0 };
   Hacl_Symmetric_Salsa20_salsa20_init(ctx, k, n, ic);
   uint64_t
-  uu____4272 = Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_loop(c, m, ctx, ic, mlen);
+  uu____4317 = Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_loop(c, m, ctx, ic, mlen);
   uint32_t mlen_ = (uint32_t )(mlen & (uint64_t )63);
   uint32_t off = (uint32_t )mlen - mlen_;
   if (mlen_ >= (uint32_t )0)
@@ -477,21 +481,22 @@ inline static void Hacl_Symmetric_Salsa20_salsa20_store(uint8_t *c, uint32_t *ct
 }
 
 inline static uint64_t
-Hacl_Symmetric_Salsa20_crypto_stream_salsa20_loop(uint8_t *c, uint64_t clen, uint32_t *ctx)
+Hacl_Symmetric_Salsa20_crypto_stream_salsa20_loop(
+  uint8_t *c,
+  uint64_t clen,
+  uint32_t *ctx,
+  uint64_t ctr
+)
 {
   if (clen < (uint64_t )64)
     return clen;
   else
   {
     Hacl_Symmetric_Salsa20_salsa20_store(c, ctx);
-    uint32_t ctr0 = ctx[8];
-    uint32_t ctr1 = ctx[9];
-    uint64_t ctr = (uint64_t )ctr0 + ((uint64_t )ctr1 << (uint32_t )32) + (uint64_t )1;
-    ctx[8] = (uint32_t )ctr;
-    ctx[9] = (uint32_t )(ctr >> (uint32_t )32);
+    uint64_t ctr1 = Hacl_Symmetric_Salsa20_incr_counter(ctx, ctr);
     uint64_t clen0 = clen - (uint64_t )64;
     uint8_t *c0 = c + (uint32_t )64;
-    return Hacl_Symmetric_Salsa20_crypto_stream_salsa20_loop(c0, clen0, ctx);
+    return Hacl_Symmetric_Salsa20_crypto_stream_salsa20_loop(c0, clen0, ctx, ctr1);
   }
 }
 
@@ -526,7 +531,7 @@ Hacl_Symmetric_Salsa20_store_bytes(uint8_t *x, uint32_t *b, uint32_t i, uint32_t
     x[curr + (uint32_t )1] = b1;
     x[curr + (uint32_t )2] = b2;
   }
-  else if (r == (uint32_t )3)
+  else
   {
     uint32_t bi = b[i];
     uint8_t b0 = (uint8_t )bi;
@@ -540,8 +545,6 @@ Hacl_Symmetric_Salsa20_store_bytes(uint8_t *x, uint32_t *b, uint32_t i, uint32_t
     Hacl_Symmetric_Salsa20_store_bytes(x, b, i + (uint32_t )1, len);
     return;
   }
-  else
-    return;
 }
 
 inline static void
@@ -565,7 +568,8 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20(uint8_t *c, uint64_t clen, uint8_t 
     uint32_t off = (uint32_t )clen - clen_;
     uint32_t ctx[16] = { 0 };
     Hacl_Symmetric_Salsa20_salsa20_init(ctx, k, n, (uint64_t )0);
-    uint64_t uu____5060 = Hacl_Symmetric_Salsa20_crypto_stream_salsa20_loop(c, clen, ctx);
+    uint64_t
+    uu____5052 = Hacl_Symmetric_Salsa20_crypto_stream_salsa20_loop(c, clen, ctx, (uint64_t )0);
     if (clen_ >= (uint32_t )0)
       Hacl_Symmetric_Salsa20_salsa20_store_partial(c + off, ctx, clen_);
   }

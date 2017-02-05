@@ -375,6 +375,21 @@ private let salsa20_xor c m ctx =
   pop_frame()
 
 [@"c_inline"]
+private val incr_counter:
+  ctx: salsa_ctx ->
+  ctr: UInt64.t ->
+  Stack UInt64.t
+    (requires (fun h -> live h ctx))
+    (ensures  (fun h0 _ h1 -> live h1 ctx /\ modifies_1 ctx h0 h1))
+[@"c_inline"]
+private let incr_counter ctx ctr = 
+  let ctr1 = U64.(ctr +^ 1uL) in
+  let sctr1 = uint64_to_sint64 ctr1 in
+  ctx.(8ul)  <- sint64_to_sint32 sctr1;
+  ctx.(9ul)  <- sint64_to_sint32 Hacl.UInt64.(sctr1 >>^ 32ul);	
+  ctr1
+
+[@"c_inline"]
 private val crypto_stream_salsa20_xor_ic_loop:
   c:uint8_p ->
   m:uint8_p ->
@@ -394,10 +409,7 @@ private let rec crypto_stream_salsa20_xor_ic_loop c m ctx ctr mlen =
     salsa20_xor c m ctx;    
     let h2 = ST.get() in
     (* *)
-    let ctr1 = U64.(ctr +^ 1uL) in
-    let sctr1 = uint64_to_sint64 ctr1 in
-    ctx.(8ul)  <- sint64_to_sint32 sctr1;
-    ctx.(9ul)  <- sint64_to_sint32 Hacl.UInt64.(sctr1 >>^ 32ul);
+    let ctr1 = incr_counter ctx ctr in
     (* *)
     let h3 = ST.get() in
     let mlen = FStar.UInt64.(mlen -^ 64uL) in
@@ -442,11 +454,10 @@ private let rec xor_bytes x y b i len =
     let bi = b.(i) in
     let y0 = y.(curr) in 
     let y1 = y.(curr +^ 1ul) in 
-    let bi = b.(i) in
     let b0 = sint32_to_sint8 bi in
     let b1 = sint32_to_sint8 H32.(bi >>^ 8ul) in
     x.(curr) <- Hacl.UInt8.(y0 ^^ b0);
-    x.(curr +^ 1ul) <- Hacl.UInt8.(y0 ^^ b1)
+    x.(curr +^ 1ul) <- Hacl.UInt8.(y1 ^^ b1)
   )
   else (
   if U32.(r =^ 3ul) then (
@@ -462,7 +473,6 @@ private let rec xor_bytes x y b i len =
     x.(curr +^ 2ul) <- Hacl.UInt8.(y2 ^^ b2)
   )
   else (
-  if U32.(r =^ 3ul) then (
     let bi = b.(i) in
     let y0 = y.(curr) in 
     let y1 = y.(curr +^ 1ul) in 
@@ -477,7 +487,6 @@ private let rec xor_bytes x y b i len =
     x.(curr +^ 2ul) <- Hacl.UInt8.(y2 ^^ b2);
     x.(curr +^ 3ul) <- Hacl.UInt8.(y3 ^^ b3);
     xor_bytes x y b (i +^ 1ul) len   
-  )
   ))))
 
 [@"c_inline"]
@@ -627,11 +636,7 @@ private let rec crypto_stream_salsa20_loop c clen ctx ctr =
   if FStar.UInt64.(clen <^ 64uL) then clen
   else (
     salsa20_store c ctx;
-
-    let ctr1 = U64.(ctr +^ 1uL) in
-    let sctr1 = uint64_to_sint64 ctr1 in
-    ctx.(8ul)  <- sint64_to_sint32 sctr1;
-    ctx.(9ul)  <- sint64_to_sint32 Hacl.UInt64.(sctr1 >>^ 32ul);
+    let ctr1 = incr_counter ctx ctr in
     let clen = FStar.UInt64.(clen -^ 64uL) in
     let c = offset c 64ul in
     crypto_stream_salsa20_loop c clen ctx ctr1
@@ -697,7 +702,6 @@ private let rec store_bytes x b i len =
     x.(curr +^ 2ul) <- b2
   )
   else (
-  if U32.(r =^ 3ul) then (
     let bi = b.(i) in
     let b0 = sint32_to_sint8 bi in
     let b1 = sint32_to_sint8 H32.(bi >>^ 8ul) in
@@ -708,7 +712,6 @@ private let rec store_bytes x b i len =
     x.(curr +^ 2ul) <- b2;
     x.(curr +^ 3ul) <- b3;
     store_bytes x b (i +^ 1ul) len   
-  )
   ))))
 
 [@"c_inline"]
