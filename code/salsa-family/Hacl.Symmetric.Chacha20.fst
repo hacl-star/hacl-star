@@ -25,6 +25,7 @@ private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32
 #reset-options "--initial_ifuel 0 --max_ifuel 0 --initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 [@"c_inline"]
+#set-options "--lax"
 private inline_for_extraction let load32_le (k:uint8_p) : Stack h32
   (requires (fun h -> live h k /\ length k = 4))
   (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 k /\ length k = 4
@@ -90,9 +91,8 @@ private inline_for_extraction val chacha_encrypt_bytes_quarter_round:
   ctx:chacha_ctx ->
   a:u32 -> b:u32 -> c:u32 -> d:u32 ->
   Stack unit
-    (requires (fun h -> live h ctx))
-    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx 
-      ))
+    (requires (fun h -> U32.v a < 16 /\ U32.v b < 16 /\ U32.v c < 16 /\ U32.v d < 16 /\ live h ctx))
+    (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
 [@"c_inline"]
 private inline_for_extraction let chacha_encrypt_bytes_quarter_round ctx a b c d =
   let xa = ctx.(a) in
@@ -135,6 +135,7 @@ private let chacha_encrypt_bytes_round ctx =
   chacha_encrypt_bytes_quarter_round ctx 1ul 6ul 11ul 12ul;
   chacha_encrypt_bytes_quarter_round ctx 2ul 7ul 8ul 13ul;
   chacha_encrypt_bytes_quarter_round ctx 3ul 4ul 9ul 14ul
+
 
 [@"c_inline"]
 private val chacha_encrypt_bytes_rounds:
