@@ -126,7 +126,7 @@ int32_t test_api()
 
 int32_t perf_api() {
   uint32_t len = 1024*1024 * sizeof(char);
-  uint8_t* plaintext = malloc(len);
+  uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(len+16*sizeof(char));
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plaintext, len);
@@ -144,11 +144,14 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Hacl_Box_crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
+    Hacl_SecretBox_crypto_secretbox_easy(ciphertext, plaintext, len, nonce, key);
+    uint8_t* tmp = plaintext;
+    ciphertext = plaintext;
+    plaintext = tmp;
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
-  print_results("Hacl Box speed", (double)t2-t1,
+  print_results("Hacl SecretBox speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < CIPHERTEXT_LEN; i++) 
     res += (uint64_t) ciphertext[i];
@@ -157,11 +160,14 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    int res = crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
+    int res = crypto_secretbox_easy(ciphertext, plaintext, len, nonce, key);
+    uint8_t* tmp = plaintext;
+    ciphertext = plaintext;
+    plaintext = tmp;
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
-  print_results("Sodium Box speed", (double)t2-t1,
+  print_results("Sodium SecretBox speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
@@ -171,6 +177,9 @@ int32_t perf_api() {
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     Hacl_Box_crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
+    uint8_t* tmp = plaintext;
+    ciphertext = plaintext;
+    plaintext = tmp;
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
@@ -184,6 +193,9 @@ int32_t perf_api() {
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     int res = crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
+    uint8_t* tmp = plaintext;
+    ciphertext = plaintext;
+    plaintext = tmp;
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

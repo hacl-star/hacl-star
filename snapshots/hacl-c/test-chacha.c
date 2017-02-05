@@ -367,7 +367,7 @@ int32_t perf_chacha() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    crypto_stream_chacha20_ietf_xor(cipher,plain, len, nonce, key);
+    crypto_stream_chacha20_ietf_xor(plain,plain, len, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
@@ -380,7 +380,7 @@ int32_t perf_chacha() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    ossl_chacha20(cipher,plain, len, nonce, key);
+    ossl_chacha20(plain,plain, len, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

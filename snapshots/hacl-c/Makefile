@@ -24,9 +24,9 @@ test-salsa:
 	kremlib.c testlib.c Salsa20.c test-salsa.c -l sodium -o test-salsa.exe
 	./test-salsa.exe
 
-salsa.asm:
+salsa.asm: Salsa20.c
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	Salsa20.c -S -fverbose-asm -o salsa.asm
+	Salsa20.c -l sodium -S -fverbose-asm -o salsa.asm
 
 test-chacha:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \

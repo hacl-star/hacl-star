@@ -349,7 +349,7 @@ int32_t perf_salsa() {
 
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(cipher, plain, len, nonce, key);
+    Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(plain, plain, len, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
@@ -362,7 +362,7 @@ int32_t perf_salsa() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    crypto_stream_salsa20_xor(cipher,plain, len, nonce, key);
+    crypto_stream_salsa20_xor(plain,plain, len, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
