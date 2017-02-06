@@ -5,6 +5,7 @@ open FStar.HyperStack
 open FStar.ST
 open FStar.Buffer
 open Hacl.UInt32
+open Hacl.Endianness
 open Hacl.Cast
 
 module U32 = FStar.UInt32
@@ -22,20 +23,20 @@ private let rol32 (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+(* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50" *)
 
-[@"c_inline"]
-#set-options "--lax"
-private inline_for_extraction let load32_le (k:uint8_p) : Stack h32
-  (requires (fun h -> live h k /\ length k = 4))
-  (ensures  (fun h0 _ h1 -> h0 == h1))
-  = C.load32_le k
+(* [@"c_inline"] *)
+(* #set-options "--lax" *)
+(* private inline_for_extraction let load32_le (k:uint8_p) : Stack h32 *)
+(*   (requires (fun h -> live h k /\ length k = 4)) *)
+(*   (ensures  (fun h0 _ h1 -> h0 == h1)) *)
+(*   = C.load32_le k *)
 
-[@"c_inline"]
-private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit
-  (requires (fun h -> live h k /\ length k = 4))
-  (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k))
-  = C.store32_le k x
+(* [@"c_inline"] *)
+(* private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit *)
+(*   (requires (fun h -> live h k /\ length k = 4)) *)
+(*   (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k)) *)
+(*   = C.store32_le k x *)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
@@ -134,16 +135,16 @@ private inline_for_extraction let salsa20_init ctx key n ic =
   ctx.(5ul)  <- uint32_to_sint32 0x3320646eul;
   ctx.(10ul) <- uint32_to_sint32 0x79622d32ul;
   ctx.(15ul) <- uint32_to_sint32 0x6b206574ul;
-  ctx.(1ul)  <- load32_le(Buffer.sub key 0ul 4ul);
-  ctx.(2ul)  <- load32_le(Buffer.sub key 4ul 4ul);
-  ctx.(3ul)  <- load32_le(Buffer.sub key 8ul 4ul);
-  ctx.(4ul)  <- load32_le(Buffer.sub key 12ul 4ul);
-  ctx.(11ul) <- load32_le(Buffer.sub key 16ul 4ul);
-  ctx.(12ul) <- load32_le(Buffer.sub key 20ul 4ul);
-  ctx.(13ul) <- load32_le(Buffer.sub key 24ul 4ul);
-  ctx.(14ul) <- load32_le(Buffer.sub key 28ul 4ul);
-  ctx.(6ul)  <- load32_le(Buffer.sub n 0ul 4ul);
-  ctx.(7ul)  <- load32_le(Buffer.sub n 4ul 4ul);
+  ctx.(1ul)  <- hload32_le(Buffer.sub key 0ul 4ul);
+  ctx.(2ul)  <- hload32_le(Buffer.sub key 4ul 4ul);
+  ctx.(3ul)  <- hload32_le(Buffer.sub key 8ul 4ul);
+  ctx.(4ul)  <- hload32_le(Buffer.sub key 12ul 4ul);
+  ctx.(11ul) <- hload32_le(Buffer.sub key 16ul 4ul);
+  ctx.(12ul) <- hload32_le(Buffer.sub key 20ul 4ul);
+  ctx.(13ul) <- hload32_le(Buffer.sub key 24ul 4ul);
+  ctx.(14ul) <- hload32_le(Buffer.sub key 28ul 4ul);
+  ctx.(6ul)  <- hload32_le(Buffer.sub n 0ul 4ul);
+  ctx.(7ul)  <- hload32_le(Buffer.sub n 4ul 4ul);
   ctx.(8ul)  <- sint64_to_sint32 ic;
   ctx.(9ul)  <- sint64_to_sint32 Hacl.UInt64.(ic >>^ 32ul)
 
@@ -255,22 +256,22 @@ private val xor_:
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
 [@"c_inline"]
 private let xor_ c m b =
-  let m0 = load32_le (Buffer.sub m 0ul 4ul) in
-  let m1 = load32_le (Buffer.sub m 4ul 4ul) in
-  let m2 = load32_le (Buffer.sub m 8ul 4ul) in
-  let m3 = load32_le (Buffer.sub m 12ul 4ul) in
-  let m4 = load32_le (Buffer.sub m 16ul 4ul) in
-  let m5 = load32_le (Buffer.sub m 20ul 4ul) in
-  let m6 = load32_le (Buffer.sub m 24ul 4ul) in
-  let m7 = load32_le (Buffer.sub m 28ul 4ul) in
-  let m8 = load32_le (Buffer.sub m 32ul 4ul) in
-  let m9 = load32_le (Buffer.sub m 36ul 4ul) in
-  let m10 = load32_le (Buffer.sub m 40ul 4ul) in
-  let m11 = load32_le (Buffer.sub m 44ul 4ul) in
-  let m12 = load32_le (Buffer.sub m 48ul 4ul) in
-  let m13 = load32_le (Buffer.sub m 52ul 4ul) in
-  let m14 = load32_le (Buffer.sub m 56ul 4ul) in
-  let m15 = load32_le (Buffer.sub m 60ul 4ul) in
+  let m0 = hload32_le (Buffer.sub m 0ul 4ul) in
+  let m1 = hload32_le (Buffer.sub m 4ul 4ul) in
+  let m2 = hload32_le (Buffer.sub m 8ul 4ul) in
+  let m3 = hload32_le (Buffer.sub m 12ul 4ul) in
+  let m4 = hload32_le (Buffer.sub m 16ul 4ul) in
+  let m5 = hload32_le (Buffer.sub m 20ul 4ul) in
+  let m6 = hload32_le (Buffer.sub m 24ul 4ul) in
+  let m7 = hload32_le (Buffer.sub m 28ul 4ul) in
+  let m8 = hload32_le (Buffer.sub m 32ul 4ul) in
+  let m9 = hload32_le (Buffer.sub m 36ul 4ul) in
+  let m10 = hload32_le (Buffer.sub m 40ul 4ul) in
+  let m11 = hload32_le (Buffer.sub m 44ul 4ul) in
+  let m12 = hload32_le (Buffer.sub m 48ul 4ul) in
+  let m13 = hload32_le (Buffer.sub m 52ul 4ul) in
+  let m14 = hload32_le (Buffer.sub m 56ul 4ul) in
+  let m15 = hload32_le (Buffer.sub m 60ul 4ul) in
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
   let b2 = b.(2ul) in
@@ -303,22 +304,22 @@ private let xor_ c m b =
   let c13 = H32.(m13 ^^ b13) in
   let c14 = H32.(m14 ^^ b14) in
   let c15 = H32.(m15 ^^ b15) in
-  store32_le (Buffer.sub c 0ul  4ul) c0;
-  store32_le (Buffer.sub c 4ul 4ul) c1;
-  store32_le (Buffer.sub c 8ul 4ul) c2;
-  store32_le (Buffer.sub c 12ul 4ul) c3;
-  store32_le (Buffer.sub c 16ul  4ul) c4;
-  store32_le (Buffer.sub c 20ul 4ul) c5;
-  store32_le (Buffer.sub c 24ul 4ul) c6;
-  store32_le (Buffer.sub c 28ul 4ul) c7;
-  store32_le (Buffer.sub c 32ul  4ul) c8;
-  store32_le (Buffer.sub c 36ul 4ul) c9;
-  store32_le (Buffer.sub c 40ul 4ul) c10;
-  store32_le (Buffer.sub c 44ul 4ul) c11;
-  store32_le (Buffer.sub c 48ul  4ul) c12;
-  store32_le (Buffer.sub c 52ul 4ul) c13;
-  store32_le (Buffer.sub c 56ul 4ul) c14;
-  store32_le (Buffer.sub c 60ul 4ul) c15
+  hstore32_le (Buffer.sub c 0ul  4ul) c0;
+  hstore32_le (Buffer.sub c 4ul 4ul) c1;
+  hstore32_le (Buffer.sub c 8ul 4ul) c2;
+  hstore32_le (Buffer.sub c 12ul 4ul) c3;
+  hstore32_le (Buffer.sub c 16ul  4ul) c4;
+  hstore32_le (Buffer.sub c 20ul 4ul) c5;
+  hstore32_le (Buffer.sub c 24ul 4ul) c6;
+  hstore32_le (Buffer.sub c 28ul 4ul) c7;
+  hstore32_le (Buffer.sub c 32ul  4ul) c8;
+  hstore32_le (Buffer.sub c 36ul 4ul) c9;
+  hstore32_le (Buffer.sub c 40ul 4ul) c10;
+  hstore32_le (Buffer.sub c 44ul 4ul) c11;
+  hstore32_le (Buffer.sub c 48ul  4ul) c12;
+  hstore32_le (Buffer.sub c 52ul 4ul) c13;
+  hstore32_le (Buffer.sub c 56ul 4ul) c14;
+  hstore32_le (Buffer.sub c 60ul 4ul) c15
 
 
 private let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
@@ -588,22 +589,22 @@ private let salsa20_store c ctx =
   push_frame();
   let b = create 0ul 16ul in
   salsa20 b ctx;
-  store32_le (offset c 0ul) b.(0ul);
-  store32_le (offset c 4ul) b.(1ul);
-  store32_le (offset c 8ul) b.(2ul);
-  store32_le (offset c 12ul) b.(3ul);
-  store32_le (offset c 16ul) b.(4ul);
-  store32_le (offset c 20ul) b.(5ul);
-  store32_le (offset c 24ul) b.(6ul);
-  store32_le (offset c 28ul) b.(7ul);
-  store32_le (offset c 32ul) b.(8ul);
-  store32_le (offset c 36ul) b.(9ul);
-  store32_le (offset c 40ul) b.(10ul);
-  store32_le (offset c 44ul) b.(11ul);
-  store32_le (offset c 48ul) b.(12ul);
-  store32_le (offset c 52ul) b.(13ul);
-  store32_le (offset c 56ul) b.(14ul);
-  store32_le (offset c 60ul) b.(15ul);
+  hstore32_le (offset c 0ul) b.(0ul);
+  hstore32_le (offset c 4ul) b.(1ul);
+  hstore32_le (offset c 8ul) b.(2ul);
+  hstore32_le (offset c 12ul) b.(3ul);
+  hstore32_le (offset c 16ul) b.(4ul);
+  hstore32_le (offset c 20ul) b.(5ul);
+  hstore32_le (offset c 24ul) b.(6ul);
+  hstore32_le (offset c 28ul) b.(7ul);
+  hstore32_le (offset c 32ul) b.(8ul);
+  hstore32_le (offset c 36ul) b.(9ul);
+  hstore32_le (offset c 40ul) b.(10ul);
+  hstore32_le (offset c 44ul) b.(11ul);
+  hstore32_le (offset c 48ul) b.(12ul);
+  hstore32_le (offset c 52ul) b.(13ul);
+  hstore32_le (offset c 56ul) b.(14ul);
+  hstore32_le (offset c 60ul) b.(15ul);
   pop_frame()
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"

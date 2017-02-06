@@ -9,7 +9,8 @@ open FStar.HyperStack
 open FStar.Endianness
 open FStar.Buffer
 
-open C
+(* open C *)
+open Hacl.Endianness
 
 open Hacl.Cast
 open Hacl.Bignum.Parameters
@@ -78,7 +79,7 @@ inline_for_extraction let upd_3 b b0 b1 b2 =
 
 inline_for_extraction private
 let clamp_mask : cm:wide{Wide.v cm = 0x0ffffffc0ffffffc0ffffffc0fffffff} =
-  Hacl.Spec.Poly1305_64.load128 (0x0ffffffc0ffffffcuL) (0x0ffffffc0fffffffuL)
+  Hacl.Spec.Poly1305_64.hload128 (0x0ffffffc0ffffffcuL) (0x0ffffffc0fffffffuL)
 
 
 [@"c_inline"]
@@ -94,7 +95,7 @@ val poly1305_encode_r:
 [@"c_inline"]
 let poly1305_encode_r r key =
   let h0 = ST.get() in
-  let k = load128_le key in
+  let k = hload128_le key in
   let k_clamped = Wide.(k &^ clamp_mask) in
   let r0 = Limb.(sint128_to_sint64 k_clamped &^ Hacl.Spec.Poly1305_64.mask_44) in
   let r1 = Limb.(sint128_to_sint64 (Wide.(k_clamped >>^ 44ul)) &^ Hacl.Spec.Poly1305_64.mask_44) in
@@ -121,7 +122,7 @@ val toField:
 [@"c_inline"]
 let toField b block =
   let h0 = ST.get() in
-  let m  = load128_le block in
+  let m  = hload128_le block in
   let r0 = Limb.(sint128_to_sint64 m &^ Hacl.Spec.Poly1305_64.mask_44) in
   let r1 = Limb.(sint128_to_sint64 (Wide.(m >>^ 44ul)) &^ Hacl.Spec.Poly1305_64.mask_44) in
   let r2 = Limb.(sint128_to_sint64 (Wide.(m >>^ 88ul))) in
@@ -192,7 +193,7 @@ val poly1305_init_:
 let poly1305_init_ st key =
   poly1305_encode_r st.r (sub key 0ul 16ul);
   poly1305_start st.h;
-  let log = hide (Seq.createEmpty #word) in
+  let log = hide (Seq.createEmpty #Hacl.Spec.Poly1305_64.word) in
   log
 
 
@@ -547,12 +548,12 @@ let poly1305_finish_ log st mac m len key_s =
   cut (disjoint acc mac);
   let h2 = ST.get() in
   no_upd_lemma_1 h0 h2 acc key_s;
-  let k'  = load128_le key_s in
+  let k'  = hload128_le key_s in
   cut (k' = Hacl.Spec.Poly1305_64.load128_le_spec (as_seq h0 key_s));
   let open Hacl.Bignum.Wide in
   let acc' = bignum_to_128 acc in
   let mac' = acc' +%^ k' in
-  store128_le mac mac'
+  hstore128_le mac mac'
 
 
 (* ************************************************ *)

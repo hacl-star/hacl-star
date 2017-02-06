@@ -1,35 +1,37 @@
 module FStar.Endianness
 
-
-open FStar.HyperHeap
-open FStar.HyperStack
 open FStar.UInt32
 open FStar.Ghost
-open FStar.Buffer
 open FStar.Mul
 open FStar.Int.Cast
 
 module U8 = FStar.UInt8
-
-type mem = FStar.HyperStack.mem
+module H8 = Hacl.UInt8
 
 let u8  = UInt8.t
 let u32 = UInt32.t
 let u64 = UInt64.t
+let h8  = Hacl.UInt8.t
+let h32 = Hacl.UInt32.t
+let h64 = Hacl.UInt64.t
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
-type bytes = Seq.seq UInt8.t // Currently, Buffer.Utils redefines this as buffer
-type buffer = Buffer.buffer UInt8.t
+type bytes  = Seq.seq U8.t // Pure sequence of bytes
+type hbytes = Seq.seq H8.t
 
-type lbytes  (l:nat) = b:bytes  {Seq.length b == l}
-type lbuffer (l:nat) = b:buffer {Buffer.length b == l}
+type  lbytes  (l:nat) = b:bytes   {Seq.length b == l}
+type hlbytes  (l:nat) = b:hbytes  {Seq.length b == l}
 
-let uint128_to_uint8 (a:UInt128.t) : Tot (b:UInt8.t{UInt8.v b == UInt128.v a % pow2 8})
+(* type lbuffer (l:nat) = b:buffer {Buffer.length b == l} *)
+
+#reset-options
+
+let uint128_to_uint8 (a:UInt128.t) : Tot (b:UInt8.t{UInt8.v b = UInt128.v a % pow2 8})
   = Math.Lemmas.pow2_modulo_modulo_lemma_2 (UInt128.v a) 64 8;
     uint64_to_uint8 (uint128_to_uint64 a)
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 
 open FStar.Seq
@@ -207,8 +209,6 @@ let rec little_bytes len n =
 type word = b:Seq.seq UInt8.t {Seq.length b <= 16}
 open FStar.Math.Lib
 open FStar.Math.Lemmas
-open FStar.Seq
-open FStar.Seq 
 
 private let endian_is_injective q r q' r' : Lemma
   (requires UInt8.v r + pow2 8 * q = UInt8.v r' + pow2 8 * q')
@@ -219,7 +219,7 @@ private let big_endian_step (b:word{length b > 0}) :
   Lemma (big_endian b = U8.v (last b) + pow2 8 * big_endian (slice b 0 (length b - 1))) =
   ()
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 100"
 val lemma_big_endian_inj: b:word -> b':word {length b = length b'} -> Lemma
   (requires big_endian b = big_endian b')
   (ensures b == b')
@@ -301,6 +301,3 @@ let lemma_little_endian_inj b b' =
   Seq.lemma_eq_intro b (Seq.slice b 0  len);
   Seq.lemma_eq_intro b' (Seq.slice b' 0  len);
   lemma_little_endian_is_injective b b' len
-
-
-

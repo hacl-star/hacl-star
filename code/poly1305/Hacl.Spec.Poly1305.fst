@@ -123,9 +123,9 @@ unfold let r_mask : w:word_16{little_endian w = 0x0ffffffc0ffffffc0ffffffc0fffff
 
 let rec lemma_little_endian_eq (b:bytes) : Lemma
   (requires (True))
-  (ensures (little_endian b = Endianness.little_endian b))
+  (ensures (little_endian b = FStar.Endianness.little_endian b))
   (decreases (length b))
-  [SMTPat (Endianness.little_endian b)]
+  [SMTPat (FStar.Endianness.little_endian b)]
   = if length b = 0 then ()
     else lemma_little_endian_eq (slice b 1 (length b))
 

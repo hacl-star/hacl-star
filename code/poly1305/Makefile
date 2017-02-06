@@ -7,21 +7,24 @@ include ../Makefile.include
 POLY1305_FILES= \
 	Hacl.Bignum.Constants.fst \
 	Hacl.Bignum.Parameters.fst \
+	../bignum/Hacl.Spec.Bignum.Field.fst \
 	../bignum/Hacl.Bignum.Limb.fst \
 	../bignum/Hacl.Bignum.Wide.fst \
 	../bignum/Hacl.Spec.Bignum.Bigint.fst \
-	Hacl.Spec.Bignum.Modulo.fst \
 	../bignum/Hacl.Spec.Bignum.Fsum.fst \
+	Hacl.Spec.Bignum.Modulo.fst \
 	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
-	Hacl.Bignum.Modulo.fst \
-	../bignum/Hacl.Bignum.Fsum.fst \
-	../bignum/Hacl.Bignum.Fproduct.fst \
+	../bignum/Hacl.Spec.Bignum.Fmul.fst \
 	Hacl.Spec.Bignum.AddAndMultiply.fst \
+	Hacl.Spec.Poly1305.fst \
+	Hacl.Spec.Poly1305_64.fst \
+	Hacl.Spe.Poly1305_64.fst \
+	../bignum/Hacl.Bignum.Fsum.fst \
+	Hacl.Bignum.Modulo.fst \
+	../bignum/Hacl.Bignum.Fproduct.fst \
+	../bignum/Hacl.Bignum.Fmul.fst \
 	Hacl.Bignum.AddAndMultiply.fst \
 	Hacl.Impl.Poly1305_64.fst
-# \
-	Hacl.Spec.MAC.Poly1305_64.fst \
-	Hacl.MAC.Poly1305_64.fst
 
 POLY1305_SPECIFIC= \
 	Hacl.Bignum.Constants.fst \
@@ -49,6 +52,12 @@ POLY1305_MODULES= \
 	Hacl.MAC.Poly1305
 
 
+%.fst-lax: %.fst
+	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum --lax $^
+
+lax: $(addsuffix -lax, $(POLY1305_FILES))
+
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib --include ../bignum $^ --use_hints
@@ -65,7 +74,7 @@ hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p poly-c
-	$(KREMLIN_HOME)/krml -tmpdir poly-c -verbose \
+	$(KREMLIN_HOME)/krml -tmpdir poly-c -verbose -ccopt -std=gnu99 \
 		-I ../bignum -I ../lib/kremlin \
 		Poly1305_64.fst Hacl.Test.Poly1305_64.fst \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
