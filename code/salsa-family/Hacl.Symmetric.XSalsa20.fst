@@ -18,19 +18,6 @@ let uint8_p = buffer Hacl.UInt8.t
 module U64 = FStar.UInt64
 module U32 = FStar.UInt32
 
-#reset-options "--initial_fuel 0 --max_fuel 0"
-
-private val lemma_max_uint32: n:nat -> Lemma
-  (requires (n = 32))
-  (ensures  (pow2 n = 4294967296))
-  [SMTPat (pow2 n)]
-let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296)
-private val lemma_max_uint64: n:nat -> Lemma
-  (requires (n = 64))
-  (ensures  (pow2 n = 18446744073709551616))
-  [SMTPat (pow2 n)]
-let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
-
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 

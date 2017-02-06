@@ -77,6 +77,7 @@ extract-c:
 	$(KREMLIN_HOME)/krml -tmpdir poly-c -verbose -ccopt -std=gnu99 \
 		-I ../bignum -I ../lib/kremlin \
 		Poly1305_64.fst Hacl.Test.Poly1305_64.fst \
+		-drop 'Hacl.Endianness' \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
 		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*' \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \

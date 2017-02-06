@@ -16,29 +16,13 @@ let u32 = FStar.UInt32.t
 let uint8_p = buffer Hacl.UInt8.t
 
 type salsa_ctx = b:Buffer.buffer h32{length b = 16}
-#reset-options "--initial_fuel 0 --max_fuel 0"
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
 [@"c_inline"]
 private let rol32 (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
-
-(* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50" *)
-
-(* [@"c_inline"] *)
-(* #set-options "--lax" *)
-(* private inline_for_extraction let load32_le (k:uint8_p) : Stack h32 *)
-(*   (requires (fun h -> live h k /\ length k = 4)) *)
-(*   (ensures  (fun h0 _ h1 -> h0 == h1)) *)
-(*   = C.load32_le k *)
-
-(* [@"c_inline"] *)
-(* private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit *)
-(*   (requires (fun h -> live h k /\ length k = 4)) *)
-(*   (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k)) *)
-(*   = C.store32_le k x *)
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 [@"c_inline"]
 private inline_for_extraction val salsa20_quarter_round:
@@ -61,6 +45,7 @@ private inline_for_extraction let salsa20_quarter_round ctx a b c d =
   ctx.(b) <- y1;
   ctx.(c) <- y2;
   ctx.(d) <- y3
+
 
 [@"c_inline"]
 private inline_for_extraction val salsa20_row_round:
@@ -88,6 +73,7 @@ private inline_for_extraction let salsa20_column_round ctx =
   salsa20_quarter_round ctx 5ul 9ul 13ul 1ul;
   salsa20_quarter_round ctx 10ul 14ul 2ul 6ul;
   salsa20_quarter_round ctx 15ul 3ul 7ul 11ul
+
 
 [@"c_inline"]
 private val salsa20_double_round_10:
@@ -118,7 +104,6 @@ private let salsa20_double_round_10 ctx =
   salsa20_column_round ctx;
   salsa20_row_round ctx
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 50"
 
 [@"c_inline"]
 private inline_for_extraction val salsa20_init:
@@ -145,7 +130,8 @@ private inline_for_extraction let salsa20_init ctx key n ic =
   ctx.(14ul) <- hload32_le(Buffer.sub key 28ul 4ul);
   ctx.(6ul)  <- hload32_le(Buffer.sub n 0ul 4ul);
   ctx.(7ul)  <- hload32_le(Buffer.sub n 4ul 4ul);
-  ctx.(8ul)  <- sint64_to_sint32 ic;
+  let ic     = uint64_to_sint64 ic in
+  ctx.(8ul)  <- sint64_to_sint32 (ic);
   ctx.(9ul)  <- sint64_to_sint32 Hacl.UInt64.(ic >>^ 32ul)
 
 
@@ -246,6 +232,7 @@ private let salsa20 output ctx =
 module U64 = FStar.UInt64
 module H32 = Hacl.UInt32
 
+
 [@"c_inline"]
 private val xor_:
   c:uint8_p{length c >= 64} ->
@@ -305,18 +292,18 @@ private let xor_ c m b =
   let c14 = H32.(m14 ^^ b14) in
   let c15 = H32.(m15 ^^ b15) in
   hstore32_le (Buffer.sub c 0ul  4ul) c0;
-  hstore32_le (Buffer.sub c 4ul 4ul) c1;
-  hstore32_le (Buffer.sub c 8ul 4ul) c2;
+  hstore32_le (Buffer.sub c 4ul  4ul) c1;
+  hstore32_le (Buffer.sub c 8ul  4ul) c2;
   hstore32_le (Buffer.sub c 12ul 4ul) c3;
-  hstore32_le (Buffer.sub c 16ul  4ul) c4;
+  hstore32_le (Buffer.sub c 16ul 4ul) c4;
   hstore32_le (Buffer.sub c 20ul 4ul) c5;
   hstore32_le (Buffer.sub c 24ul 4ul) c6;
   hstore32_le (Buffer.sub c 28ul 4ul) c7;
-  hstore32_le (Buffer.sub c 32ul  4ul) c8;
+  hstore32_le (Buffer.sub c 32ul 4ul) c8;
   hstore32_le (Buffer.sub c 36ul 4ul) c9;
   hstore32_le (Buffer.sub c 40ul 4ul) c10;
   hstore32_le (Buffer.sub c 44ul 4ul) c11;
-  hstore32_le (Buffer.sub c 48ul  4ul) c12;
+  hstore32_le (Buffer.sub c 48ul 4ul) c12;
   hstore32_le (Buffer.sub c 52ul 4ul) c13;
   hstore32_le (Buffer.sub c 56ul 4ul) c14;
   hstore32_le (Buffer.sub c 60ul 4ul) c15
@@ -332,6 +319,7 @@ private let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h
     lemma_reveal_modifies_1 input h1 h2;
     lemma_intro_modifies_3 c input block h0 h2
 
+
 private let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
   (requires (live h0 c /\ live h0 input /\ live h0 block
     /\ live h1 c /\ live h1 input /\ live h1 block
@@ -342,6 +330,7 @@ private let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 
   = lemma_reveal_modifies_3 c input block h0 h1;
     lemma_reveal_modifies_3 (offset c 64ul) input block h1 h2;
     lemma_intro_modifies_3 c input block h0 h2
+
 
 [@"c_inline"]
 private val salsa20_xor:
@@ -354,7 +343,7 @@ private val salsa20_xor:
 [@"c_inline"]
 private let salsa20_xor c m ctx =
   push_frame();
-  let block = create 0ul 16ul in
+  let block = create (uint32_to_sint32 0ul) 16ul in
   salsa20 block ctx;
   xor_ c m block;
   pop_frame()
@@ -407,73 +396,75 @@ private let rec crypto_stream_salsa20_xor_ic_loop c m ctx ctr mlen =
   )
 
 
+open FStar.Mul
+
+
 [@"c_inline"]
 private val xor_bytes:
   x:uint8_p ->
   y:uint8_p ->
   b:salsa_ctx ->
   i:FStar.UInt32.t ->
-  len:FStar.UInt32.t ->
+  len:FStar.UInt32.t{4 * U32.v i <= U32.v len /\ U32.v len <= 64} ->
   Stack unit
-    (requires (fun h -> live h x /\ live h y /\ live h b /\ 
-      FStar.Mul.(4 * v i < pow2 32) /\
-    	      	        (let iv = U32.v (i *^ 4ul) in 
-  	             	let l = U32.v len in 
-		     	iv <= 16 /\ iv <= l /\ 0 <= iv /\
-		     	length x >= l /\ 
-		     	length y >= l)))
+    (requires (fun h -> (
+      let iv = U32.v i * 4 in
+      let l = U32.v len in 
+      live h x /\ live h y /\ live h b /\ 
+      (* iv <= 16 /\ iv <= l /\ 0 <= iv /\ *)
+      length x >= l /\ 
+      length y >= l)))
     (ensures  (fun h0 _ h1 -> live h1 x /\ modifies_1 x h0 h1))
 [@"c_inline"]
 private let rec xor_bytes x y b i len =
   let curr:U32.t = U32.(i *^ 4ul) in
   let r :U32.t = U32.(len -^ curr) in
   if U32.(r =^ 0ul) then ()
-  else (
-  if U32.(r =^ 1ul) then (
+  else if U32.(r =^ 1ul) then (
     let bi = b.(i) in
     let y0 = y.(curr) in 
     let b0 = sint32_to_sint8 bi in
     x.(curr) <- Hacl.UInt8.(y0 ^^ b0)
-  )
-  else (
-  if U32.(r =^ 2ul) then (
+  ) else if U32.(r =^ 2ul) then (
     let bi = b.(i) in
     let y0 = y.(curr) in 
-    let y1 = y.(curr +^ 1ul) in 
+    let y1 = y.(U32.(curr +^ 1ul)) in 
     let b0 = sint32_to_sint8 bi in
     let b1 = sint32_to_sint8 H32.(bi >>^ 8ul) in
     x.(curr) <- Hacl.UInt8.(y0 ^^ b0);
-    x.(curr +^ 1ul) <- Hacl.UInt8.(y1 ^^ b1)
-  )
-  else (
-  if U32.(r =^ 3ul) then (
+    x.(U32.(curr +^ 1ul)) <- Hacl.UInt8.(y1 ^^ b1)
+  ) else if U32.(r =^ 3ul) then (
     let bi = b.(i) in
     let y0 = y.(curr) in 
-    let y1 = y.(curr +^ 1ul) in 
-    let y2 = y.(curr +^ 2ul) in 
+    let y1 = y.(U32.(curr +^ 1ul)) in 
+    let y2 = y.(U32.(curr +^ 2ul)) in 
     let b0 = sint32_to_sint8 bi in
     let b1 = sint32_to_sint8 H32.(bi >>^ 8ul) in
     let b2 = sint32_to_sint8 H32.(bi >>^ 16ul) in
     x.(curr) <- Hacl.UInt8.(y0 ^^ b0);
-    x.(curr +^ 1ul) <- Hacl.UInt8.(y1 ^^ b1);
-    x.(curr +^ 2ul) <- Hacl.UInt8.(y2 ^^ b2)
-  )
-  else (
+    x.(U32.(curr +^ 1ul)) <- Hacl.UInt8.(y1 ^^ b1);
+    x.(U32.(curr +^ 2ul)) <- Hacl.UInt8.(y2 ^^ b2)
+  ) else (
+    cut (U32.v r >= 4);
+    cut (U32.v len - 4 * U32.v i >= 4);
+    cut (U32.v len >= 4 * (U32.v i + 1));
+    let ip1 = U32.(i +^ 1ul) in
+    cut (U32.v len >= 4 * (U32.v ip1));
     let bi = b.(i) in
     let y0 = y.(curr) in 
-    let y1 = y.(curr +^ 1ul) in 
-    let y2 = y.(curr +^ 2ul) in 
-    let y3 = y.(curr +^ 3ul) in 
+    let y1 = y.(U32.(curr +^ 1ul)) in 
+    let y2 = y.(U32.(curr +^ 2ul)) in 
+    let y3 = y.(U32.(curr +^ 3ul)) in 
     let b0 = sint32_to_sint8 bi in
     let b1 = sint32_to_sint8 H32.(bi >>^ 8ul) in
     let b2 = sint32_to_sint8 H32.(bi >>^ 16ul) in
     let b3 = sint32_to_sint8 H32.(bi >>^ 24ul) in
     x.(curr) <- Hacl.UInt8.(y0 ^^ b0);
-    x.(curr +^ 1ul) <- Hacl.UInt8.(y1 ^^ b1);
-    x.(curr +^ 2ul) <- Hacl.UInt8.(y2 ^^ b2);
-    x.(curr +^ 3ul) <- Hacl.UInt8.(y3 ^^ b3);
-    xor_bytes x y b (i +^ 1ul) len   
-  ))))
+    x.(U32.(curr +^ 1ul)) <- Hacl.UInt8.(y1 ^^ b1);
+    x.(U32.(curr +^ 2ul)) <- Hacl.UInt8.(y2 ^^ b2);
+    x.(U32.(curr +^ 3ul)) <- Hacl.UInt8.(y3 ^^ b3);
+    xor_bytes x y b ip1 len   
+  )
 
 
 [@"c_inline"]
@@ -481,22 +472,18 @@ private val salsa20_xor_partial:
   c:uint8_p ->
   m:uint8_p ->
   ctx: salsa_ctx ->
-  len:u32 ->
+  len:u32{U32.v len <= length c /\ U32.v len <= length m /\ U32.v len <= 64} ->
   Stack unit
     (requires (fun h -> live h c /\ live h m /\ live h ctx))
     (ensures  (fun h0 _ h1 -> live h1 c /\ live h1 ctx /\ modifies_1 c h0 h1))
 [@"c_inline"]
 private let salsa20_xor_partial c m ctx len =
   push_frame();
-  let block = create 0ul 16ul in
+  let block = create (uint32_to_sint32 0ul) 16ul in
   salsa20 block ctx;
   xor_bytes c m block 0ul len;
   pop_frame()
 
-
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private inline_for_extraction let mod_64 (mlen:U64.t) : Tot (z:U32.t{U32.v z = U64.v mlen % 64 /\ U32.v z <= U64.v mlen}) =
   let mlen' = U64.(mlen &^ 63uL) in
@@ -510,8 +497,6 @@ private inline_for_extraction let mod_64 (mlen:U64.t) : Tot (z:U32.t{U32.v z = U
   Int.Cast.uint64_to_uint32 mlen'
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
-
 private let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
   (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block)
     /\ live h1 c /\ live h1 input /\ live h1 block
@@ -524,8 +509,6 @@ private let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1
     lemma_reveal_modifies_2 c block h2 h3;
     lemma_intro_modifies_2_1 c h0 h3
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 [@"c_inline"]
 private inline_for_extraction val crypto_stream_salsa20_xor_ic_:
@@ -544,7 +527,7 @@ private inline_for_extraction let crypto_stream_salsa20_xor_ic_ c m mlen n ic k 
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   push_frame();
   let h0 = ST.get() in
-  let ctx = create 0ul 16ul in
+  let ctx = create (uint32_to_sint32 0ul) 16ul in
   salsa20_init ctx k n ic;
   let h1 = ST.get() in
   let _ = crypto_stream_salsa20_xor_ic_loop c m ctx ic mlen in
@@ -557,8 +540,6 @@ private inline_for_extraction let crypto_stream_salsa20_xor_ic_ c m mlen n ic k 
   let h3 = ST.get() in
   pop_frame()
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 [@"c_inline"]
 val crypto_stream_salsa20_xor_ic:
@@ -579,35 +560,43 @@ let crypto_stream_salsa20_xor_ic c m mlen n ic k =
 
 [@"c_inline"]
 private val salsa20_store:
-  c:uint8_p ->
+  c:uint8_p{length c >= 64} ->
   ctx: salsa_ctx ->
   Stack unit
     (requires (fun h -> live h c /\ live h ctx))
     (ensures  (fun h0 _ h1 -> live h1 c /\ live h1 ctx /\ modifies_1 c h0 h1))
 [@"c_inline"]
 private let salsa20_store c ctx =
+  let h0 = ST.get() in
   push_frame();
-  let b = create 0ul 16ul in
+  let h = ST.get() in
+  let b = create (uint32_to_sint32 0ul) 16ul in
   salsa20 b ctx;
-  hstore32_le (offset c 0ul) b.(0ul);
-  hstore32_le (offset c 4ul) b.(1ul);
-  hstore32_le (offset c 8ul) b.(2ul);
-  hstore32_le (offset c 12ul) b.(3ul);
-  hstore32_le (offset c 16ul) b.(4ul);
-  hstore32_le (offset c 20ul) b.(5ul);
-  hstore32_le (offset c 24ul) b.(6ul);
-  hstore32_le (offset c 28ul) b.(7ul);
-  hstore32_le (offset c 32ul) b.(8ul);
-  hstore32_le (offset c 36ul) b.(9ul);
-  hstore32_le (offset c 40ul) b.(10ul);
-  hstore32_le (offset c 44ul) b.(11ul);
-  hstore32_le (offset c 48ul) b.(12ul);
-  hstore32_le (offset c 52ul) b.(13ul);
-  hstore32_le (offset c 56ul) b.(14ul);
-  hstore32_le (offset c 60ul) b.(15ul);
-  pop_frame()
+  let h' = ST.get() in
+  cut (modifies_0 h h');
+  hstore32_le (Buffer.sub c 0ul  4ul) b.(0ul);
+  hstore32_le (Buffer.sub c 4ul  4ul) b.(1ul);
+  hstore32_le (Buffer.sub c 8ul  4ul) b.(2ul);
+  hstore32_le (Buffer.sub c 12ul 4ul) b.(3ul);
+  hstore32_le (Buffer.sub c 16ul 4ul) b.(4ul);
+  hstore32_le (Buffer.sub c 20ul 4ul) b.(5ul);
+  hstore32_le (Buffer.sub c 24ul 4ul) b.(6ul);
+  hstore32_le (Buffer.sub c 28ul 4ul) b.(7ul);
+  hstore32_le (Buffer.sub c 32ul 4ul) b.(8ul);
+  hstore32_le (Buffer.sub c 36ul 4ul) b.(9ul);
+  hstore32_le (Buffer.sub c 40ul 4ul) b.(10ul);
+  hstore32_le (Buffer.sub c 44ul 4ul) b.(11ul);
+  hstore32_le (Buffer.sub c 48ul 4ul) b.(12ul);
+  hstore32_le (Buffer.sub c 52ul 4ul) b.(13ul);
+  hstore32_le (Buffer.sub c 56ul 4ul) b.(14ul);
+  hstore32_le (Buffer.sub c 60ul 4ul) b.(15ul);
+  let h'' = ST.get() in
+  cut (modifies_1 c h' h'');
+  lemma_modifies_0_1 c h h' h'';
+  pop_frame();
+  let h1 = ST.get() in
+  modifies_popped_1 c h0 h h'' h1
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 [@"c_inline"]
 private val crypto_stream_salsa20_loop:
@@ -630,9 +619,6 @@ private let rec crypto_stream_salsa20_loop c clen ctx ctr =
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
-
-
 private let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
   (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block)
     /\ live h1 c /\ live h1 input /\ live h1 block
@@ -645,18 +631,17 @@ private let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h
     lemma_intro_modifies_2_1 c h0 h3
 
 
-
 [@"c_inline"]
 private val store_bytes:
   x:uint8_p ->
   b:salsa_ctx ->
   i:FStar.UInt32.t ->
-  len:FStar.UInt32.t ->
+  len:FStar.UInt32.t{U32.v i * 4 <= U32.v len /\ U32.v len <= 64} ->
   Stack unit
     (requires (fun h -> live h x /\ live h b /\ 
-    	      	        (let iv = U32.v (i *^ 4ul) in 
+    	      	        (let iv = U32.v i * 4 in 
   	             	let l = U32.v len in 
-		     	iv <= 16 /\ iv <= l /\ 0 <= iv /\
+		     	(* iv <= 16 /\ iv <= l /\ 0 <= iv /\ *)
 		     	length x >= l)))
     (ensures  (fun h0 _ h1 -> live h1 x /\ modifies_1 x h0 h1))
 [@"c_inline"]
@@ -676,7 +661,7 @@ private let rec store_bytes x b i len =
     let b0 = sint32_to_sint8 bi in
     let b1 = sint32_to_sint8 H32.(bi >>^ 8ul) in
     x.(curr) <- b0;
-    x.(curr +^ 1ul) <- b1
+    x.(U32.(curr +^ 1ul)) <- b1
   )
   else (
   if U32.(r =^ 3ul) then (
@@ -685,8 +670,8 @@ private let rec store_bytes x b i len =
     let b1 = sint32_to_sint8 H32.(bi >>^ 8ul) in
     let b2 = sint32_to_sint8 H32.(bi >>^ 16ul) in
     x.(curr) <- b0;
-    x.(curr +^ 1ul) <- b1;
-    x.(curr +^ 2ul) <- b2
+    x.(U32.(curr +^ 1ul)) <- b1;
+    x.(U32.(curr +^ 2ul)) <- b2
   )
   else (
     let bi = b.(i) in
@@ -695,29 +680,29 @@ private let rec store_bytes x b i len =
     let b2 = sint32_to_sint8 H32.(bi >>^ 16ul) in
     let b3 = sint32_to_sint8 H32.(bi >>^ 24ul) in
     x.(curr) <- b0;
-    x.(curr +^ 1ul) <- b1;
-    x.(curr +^ 2ul) <- b2;
-    x.(curr +^ 3ul) <- b3;
-    store_bytes x b (i +^ 1ul) len   
+    x.(U32.(curr +^ 1ul)) <- b1;
+    x.(U32.(curr +^ 2ul)) <- b2;
+    x.(U32.(curr +^ 3ul)) <- b3;
+    store_bytes x b (U32.(i +^ 1ul)) len   
   ))))
+
 
 [@"c_inline"]
 private val salsa20_store_partial:
   c:uint8_p ->
   ctx: salsa_ctx ->
-  len: UInt32.t ->
+  len: UInt32.t{U32.v len <= 64 /\ U32.v len <= length c} ->
   Stack unit
     (requires (fun h -> live h c /\ live h ctx))
     (ensures  (fun h0 _ h1 -> live h1 c /\ live h1 ctx /\ modifies_1 c h0 h1))
 [@"c_inline"]
 private let salsa20_store_partial c ctx len =
   push_frame();
-  let b = create 0ul 16ul in
+  let b = create (uint32_to_sint32 0ul) 16ul in
   salsa20 b ctx;
   store_bytes c b 0ul len;
   pop_frame()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 [@"c_inline"]
 val crypto_stream_salsa20:
@@ -738,7 +723,7 @@ let crypto_stream_salsa20 c clen n k =
     Math.Lemmas.modulo_lemma (U64.v clen) (pow2 32);
     let off = U32.(Int.Cast.uint64_to_uint32 clen -^ clen') in
     let h0 = ST.get() in
-    let ctx = create 0ul 16ul in
+    let ctx = create (uint32_to_sint32 0ul) 16ul in
     salsa20_init ctx k n 0uL;
     let h1 = ST.get() in
     let _ = crypto_stream_salsa20_loop c clen ctx 0uL in

@@ -25,19 +25,6 @@ module U64  = FStar.UInt64
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
-
-(* let zero : elem = 0 *)
-(* let one  : elem = 1 *)
-
-(* val fadd: elem -> elem -> Tot elem *)
-(* let fadd e1 e2 = (e1 + e2) % prime *)
-(* let op_Plus_At e1 e2 = fadd e1 e2 *)
-
-(* val fmul: elem -> elem -> Tot elem *)
-(* let fmul e1 e2 = (e1 * e2) % prime *)
-(* let op_Star_At e1 e2 = fmul e1 e2 *)
-
-
 val poly1305_init_spec: key:Seq.seq H8.t{Seq.length key = 16} ->
   Tot (st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)
     /\ seval (MkState?.r st) = UInt.logand #128 (hlittle_endian key) 0x0ffffffc0ffffffc0ffffffc0fffffff
@@ -54,6 +41,7 @@ private let lemma_mod_distr acc block r0 =
   lemma_mod_mul_distr_l r0 ((acc + block) % prime) prime;
   lemma_mod_plus_distr_l acc block prime;
   lemma_mod_plus_distr_l block (acc % prime) prime
+
 
 private val lemma_mod_distr_seq: acc:seqelem -> block:word_16 -> r:seqelem -> Lemma
   (let acc0 = seval acc in let r0 = seval r in
