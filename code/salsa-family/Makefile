@@ -24,17 +24,21 @@ SALSA_FAMILY_FILES= \
 SALSA_MODULES= $(basename $(SALSA_FILES))
 
 
+FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
+
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib
+
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --lax $^
+	$(FSTAR_CT) --lax $^
 
 all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints
+	-$(FSTARB) $^ --use_hints
 
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 
@@ -43,15 +47,13 @@ all-ci: all-ver
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --lax $^
+	$(FSTARB) --lax $^
 
 all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints --record_hints
+	-$(FSTARB) $^ --use_hints --record_hints
 
 all-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 
