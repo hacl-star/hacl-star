@@ -59,7 +59,7 @@ TODO=Hacl.Bignum.Fsum.fst \
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 
 
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
@@ -73,19 +73,19 @@ all-ct: $(addsuffix -ct, $(X25519_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTAR) $^ --use_hints
+	$(FSTARB) $^ --use_hints
 
 all-ver: $(addsuffix -verify, $(X25519_FILES))
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
-	$(FSTAR) --lax $^
+	$(FSTARB) --lax $^
 
 all-lax: $(addsuffix -lax, $(X25519_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTAR) $^ --use_hints --record_hints
+	-$(FSTARB) $^ --use_hints --record_hints
 
 all-hints: $(addsuffix -hints, $(X25519_SPECIFIC))
 
