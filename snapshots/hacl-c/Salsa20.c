@@ -16,7 +16,7 @@ inline static void Hacl_Symmetric_Salsa20_store32_le(uint8_t *k, uint32_t x)
   return;
 }
 
-inline static void
+force_inline inline static void
 Hacl_Symmetric_Salsa20_salsa20_quarter_round(
   uint32_t *ctx,
   uint32_t a,
@@ -301,7 +301,7 @@ inline static void Hacl_Symmetric_Salsa20_xor_(uint8_t *c, uint8_t *m, uint32_t 
 
 inline static void Hacl_Symmetric_Salsa20_salsa20_xor(uint8_t *c, uint8_t *m, uint32_t *ctx)
 {
-  uint32_t block[16] = { 0 };
+  __attribute__ ((aligned (16))) uint32_t block[16] = { 0 };
   Hacl_Symmetric_Salsa20_salsa20(block, ctx);
   Hacl_Symmetric_Salsa20_xor_(c, m, block);
 }
@@ -309,10 +309,9 @@ inline static void Hacl_Symmetric_Salsa20_salsa20_xor(uint8_t *c, uint8_t *m, ui
 inline static uint64_t Hacl_Symmetric_Salsa20_incr_counter(uint32_t *ctx, uint64_t ctr)
 {
   uint64_t ctr1 = ctr + (uint64_t )1;
-  uint64_t sctr1 = ctr1;
-  ctx[8] = (uint32_t )sctr1;
+  ctx[8] = (uint32_t) ctr1;
   //KB NOTE: Commenting the following line drops Salsa20 to 1.89 cycles/byte
-  ctx[9] = (uint32_t )(sctr1 >> (uint32_t )32);
+  ctx[9] = (uint32_t )(ctr1 >> (uint32_t )32);
   return ctr1;
 }
 
@@ -398,7 +397,7 @@ Hacl_Symmetric_Salsa20_xor_bytes(uint8_t *x, uint8_t *y, uint32_t *b, uint32_t i
 inline static void
 Hacl_Symmetric_Salsa20_salsa20_xor_partial(uint8_t *c, uint8_t *m, uint32_t *ctx, uint32_t len)
 {
-  uint32_t block[16] = { 0 };
+  __attribute__ ((aligned (16)))uint32_t block[16] = { 0 };
   Hacl_Symmetric_Salsa20_salsa20(block, ctx);
   Hacl_Symmetric_Salsa20_xor_bytes(c, m, block, (uint32_t )0, len);
 }
@@ -413,7 +412,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_(
   uint8_t *k
 )
 {
-  uint32_t ctx[16] = { 0 };
+  __attribute__ ((aligned (16)))uint32_t ctx[16] = { 0 };
   Hacl_Symmetric_Salsa20_salsa20_init(ctx, k, n, ic);
   uint64_t
   uu____4317 = Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic_loop(c, m, ctx, ic, mlen);
@@ -444,7 +443,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor_ic(
 
 inline static void Hacl_Symmetric_Salsa20_salsa20_store(uint8_t *c, uint32_t *ctx)
 {
-  uint32_t b[16] = { 0 };
+  __attribute__ ((aligned (16)))uint32_t b[16] = { 0 };
   Hacl_Symmetric_Salsa20_salsa20(b, ctx);
   uint32_t _0_43 = b[0];
   Hacl_Symmetric_Salsa20_store32_le(c, _0_43);
@@ -550,7 +549,7 @@ Hacl_Symmetric_Salsa20_store_bytes(uint8_t *x, uint32_t *b, uint32_t i, uint32_t
 inline static void
 Hacl_Symmetric_Salsa20_salsa20_store_partial(uint8_t *c, uint32_t *ctx, uint32_t len)
 {
-  uint32_t b[16] = { 0 };
+  __attribute__ ((aligned (16)))uint32_t b[16] = { 0 };
   Hacl_Symmetric_Salsa20_salsa20(b, ctx);
   Hacl_Symmetric_Salsa20_store_bytes(c, b, (uint32_t )0, len);
 }
@@ -566,7 +565,7 @@ Hacl_Symmetric_Salsa20_crypto_stream_salsa20(uint8_t *c, uint64_t clen, uint8_t 
   {
     uint32_t clen_ = (uint32_t )(clen & (uint64_t )63);
     uint32_t off = (uint32_t )clen - clen_;
-    uint32_t ctx[16] = { 0 };
+    __attribute__ ((aligned (16)))uint32_t ctx[16] = { 0 };
     Hacl_Symmetric_Salsa20_salsa20_init(ctx, k, n, (uint64_t )0);
     uint64_t
     uu____5052 = Hacl_Symmetric_Salsa20_crypto_stream_salsa20_loop(c, clen, ctx, (uint64_t )0);
