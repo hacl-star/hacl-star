@@ -7,6 +7,7 @@ open FStar.Buffer
 open Hacl.UInt32
 open Hacl.Cast
 
+module U32 = FStar.UInt32
 
 let h8 = Hacl.UInt8.t
 let h32 = Hacl.UInt32.t
@@ -16,17 +17,6 @@ let uint8_p = buffer Hacl.UInt8.t
 type salsa_ctx = b:Buffer.buffer h32{length b = 16}
 #reset-options "--initial_fuel 0 --max_fuel 0"
 
-private val lemma_max_uint32: n:nat -> Lemma
-  (requires (n = 32))
-  (ensures  (pow2 n = 4294967296))
-  [SMTPat (pow2 n)]
-private let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296)
-private val lemma_max_uint64: n:nat -> Lemma
-  (requires (n = 64))
-  (ensures  (pow2 n = 18446744073709551616))
-  [SMTPat (pow2 n)]
-private let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
-
 [@"c_inline"]
 private let rol32 (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
@@ -35,25 +25,26 @@ private let rol32 (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 [@"c_inline"]
+#set-options "--lax"
 private inline_for_extraction let load32_le (k:uint8_p) : Stack h32
-  (requires (fun h -> live h k /\ length k >= 4))
+  (requires (fun h -> live h k /\ length k = 4))
   (ensures  (fun h0 _ h1 -> h0 == h1))
   = C.load32_le k
 
 [@"c_inline"]
 private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit
-  (requires (fun h -> live h k /\ length k >= 4))
+  (requires (fun h -> live h k /\ length k = 4))
   (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k))
   = C.store32_le k x
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 [@"c_inline"]
 private inline_for_extraction val salsa20_quarter_round:
   ctx:salsa_ctx ->
   a:u32 -> b:u32 -> c:u32 -> d:u32 ->
   Stack unit
-    (requires (fun h -> live h ctx))
+    (requires (fun h -> U32.v a < 16 /\ U32.v b < 16 /\ U32.v c < 16 /\ U32.v d < 16 /\ live h ctx))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx /\ live h0 ctx))
 [@"c_inline"]
 private inline_for_extraction let salsa20_quarter_round ctx a b c d =
@@ -126,6 +117,8 @@ private let salsa20_double_round_10 ctx =
   salsa20_column_round ctx;
   salsa20_row_round ctx
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 50"
+
 [@"c_inline"]
 private inline_for_extraction val salsa20_init:
   ctx   :salsa_ctx ->
@@ -133,7 +126,7 @@ private inline_for_extraction val salsa20_init:
   n     :uint8_p{length n = 8} ->
   ic    :FStar.UInt64.t ->
   Stack unit
-    (requires (fun h -> live h ctx /\ live h key))
+    (requires (fun h -> live h ctx /\ live h key /\ live h n))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx))
 [@"c_inline"]
 private inline_for_extraction let salsa20_init ctx key n ic =
@@ -141,16 +134,16 @@ private inline_for_extraction let salsa20_init ctx key n ic =
   ctx.(5ul)  <- uint32_to_sint32 0x3320646eul;
   ctx.(10ul) <- uint32_to_sint32 0x79622d32ul;
   ctx.(15ul) <- uint32_to_sint32 0x6b206574ul;
-  ctx.(1ul)  <- load32_le(offset key 0ul);
-  ctx.(2ul)  <- load32_le(offset key 4ul);
-  ctx.(3ul)  <- load32_le(offset key 8ul);
-  ctx.(4ul)  <- load32_le(offset key 12ul);
-  ctx.(11ul) <- load32_le(offset key 16ul);
-  ctx.(12ul) <- load32_le(offset key 20ul);
-  ctx.(13ul) <- load32_le(offset key 24ul);
-  ctx.(14ul) <- load32_le(offset key 28ul);
-  ctx.(6ul)  <- load32_le(offset n 0ul);
-  ctx.(7ul)  <- load32_le(offset n 4ul);
+  ctx.(1ul)  <- load32_le(Buffer.sub key 0ul 4ul);
+  ctx.(2ul)  <- load32_le(Buffer.sub key 4ul 4ul);
+  ctx.(3ul)  <- load32_le(Buffer.sub key 8ul 4ul);
+  ctx.(4ul)  <- load32_le(Buffer.sub key 12ul 4ul);
+  ctx.(11ul) <- load32_le(Buffer.sub key 16ul 4ul);
+  ctx.(12ul) <- load32_le(Buffer.sub key 20ul 4ul);
+  ctx.(13ul) <- load32_le(Buffer.sub key 24ul 4ul);
+  ctx.(14ul) <- load32_le(Buffer.sub key 28ul 4ul);
+  ctx.(6ul)  <- load32_le(Buffer.sub n 0ul 4ul);
+  ctx.(7ul)  <- load32_le(Buffer.sub n 4ul 4ul);
   ctx.(8ul)  <- sint64_to_sint32 ic;
   ctx.(9ul)  <- sint64_to_sint32 Hacl.UInt64.(ic >>^ 32ul)
 
@@ -248,10 +241,8 @@ private let salsa20 output ctx =
   output.(14ul) <- x14;
   output.(15ul) <- x15
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 module U64 = FStar.UInt64
-module U32 = FStar.UInt32
 module H32 = Hacl.UInt32
 
 [@"c_inline"]
@@ -264,22 +255,22 @@ private val xor_:
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
 [@"c_inline"]
 private let xor_ c m b =
-  let m0 = load32_le (offset m 0ul) in
-  let m1 = load32_le (offset m 4ul) in
-  let m2 = load32_le (offset m 8ul) in
-  let m3 = load32_le (offset m 12ul) in
-  let m4 = load32_le (offset m 16ul) in
-  let m5 = load32_le (offset m 20ul) in
-  let m6 = load32_le (offset m 24ul) in
-  let m7 = load32_le (offset m 28ul) in
-  let m8 = load32_le (offset m 32ul) in
-  let m9 = load32_le (offset m 36ul) in
-  let m10 = load32_le (offset m 40ul) in
-  let m11 = load32_le (offset m 44ul) in
-  let m12 = load32_le (offset m 48ul) in
-  let m13 = load32_le (offset m 52ul) in
-  let m14 = load32_le (offset m 56ul) in
-  let m15 = load32_le (offset m 60ul) in
+  let m0 = load32_le (Buffer.sub m 0ul 4ul) in
+  let m1 = load32_le (Buffer.sub m 4ul 4ul) in
+  let m2 = load32_le (Buffer.sub m 8ul 4ul) in
+  let m3 = load32_le (Buffer.sub m 12ul 4ul) in
+  let m4 = load32_le (Buffer.sub m 16ul 4ul) in
+  let m5 = load32_le (Buffer.sub m 20ul 4ul) in
+  let m6 = load32_le (Buffer.sub m 24ul 4ul) in
+  let m7 = load32_le (Buffer.sub m 28ul 4ul) in
+  let m8 = load32_le (Buffer.sub m 32ul 4ul) in
+  let m9 = load32_le (Buffer.sub m 36ul 4ul) in
+  let m10 = load32_le (Buffer.sub m 40ul 4ul) in
+  let m11 = load32_le (Buffer.sub m 44ul 4ul) in
+  let m12 = load32_le (Buffer.sub m 48ul 4ul) in
+  let m13 = load32_le (Buffer.sub m 52ul 4ul) in
+  let m14 = load32_le (Buffer.sub m 56ul 4ul) in
+  let m15 = load32_le (Buffer.sub m 60ul 4ul) in
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
   let b2 = b.(2ul) in
@@ -312,24 +303,23 @@ private let xor_ c m b =
   let c13 = H32.(m13 ^^ b13) in
   let c14 = H32.(m14 ^^ b14) in
   let c15 = H32.(m15 ^^ b15) in
-  store32_le (offset c 0ul ) c0;
-  store32_le (offset c 4ul) c1;
-  store32_le (offset c 8ul) c2;
-  store32_le (offset c 12ul) c3;
-  store32_le (offset c 16ul ) c4;
-  store32_le (offset c 20ul) c5;
-  store32_le (offset c 24ul) c6;
-  store32_le (offset c 28ul) c7;
-  store32_le (offset c 32ul ) c8;
-  store32_le (offset c 36ul) c9;
-  store32_le (offset c 40ul) c10;
-  store32_le (offset c 44ul) c11;
-  store32_le (offset c 48ul ) c12;
-  store32_le (offset c 52ul) c13;
-  store32_le (offset c 56ul) c14;
-  store32_le (offset c 60ul) c15
+  store32_le (Buffer.sub c 0ul  4ul) c0;
+  store32_le (Buffer.sub c 4ul 4ul) c1;
+  store32_le (Buffer.sub c 8ul 4ul) c2;
+  store32_le (Buffer.sub c 12ul 4ul) c3;
+  store32_le (Buffer.sub c 16ul  4ul) c4;
+  store32_le (Buffer.sub c 20ul 4ul) c5;
+  store32_le (Buffer.sub c 24ul 4ul) c6;
+  store32_le (Buffer.sub c 28ul 4ul) c7;
+  store32_le (Buffer.sub c 32ul  4ul) c8;
+  store32_le (Buffer.sub c 36ul 4ul) c9;
+  store32_le (Buffer.sub c 40ul 4ul) c10;
+  store32_le (Buffer.sub c 44ul 4ul) c11;
+  store32_le (Buffer.sub c 48ul  4ul) c12;
+  store32_le (Buffer.sub c 52ul 4ul) c13;
+  store32_le (Buffer.sub c 56ul 4ul) c14;
+  store32_le (Buffer.sub c 60ul 4ul) c15
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 private let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
   (requires (live h0 c /\ live h0 input /\ live h0 block
@@ -340,9 +330,6 @@ private let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h
   = lemma_reveal_modifies_2 c block h0 h1;
     lemma_reveal_modifies_1 input h1 h2;
     lemma_intro_modifies_3 c input block h0 h2
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 private let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
   (requires (live h0 c /\ live h0 input /\ live h0 block
@@ -355,13 +342,10 @@ private let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 
     lemma_reveal_modifies_3 (offset c 64ul) input block h1 h2;
     lemma_intro_modifies_3 c input block h0 h2
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
 [@"c_inline"]
 private val salsa20_xor:
-  c:uint8_p ->
-  m:uint8_p ->
+  c:uint8_p{length c >= 64} ->
+  m:uint8_p{length m >= 64} ->
   ctx: salsa_ctx ->
   Stack unit
     (requires (fun h -> live h c /\ live h m /\ live h ctx))
@@ -374,6 +358,7 @@ private let salsa20_xor c m ctx =
   xor_ c m block;
   pop_frame()
 
+
 [@"c_inline"]
 private val incr_counter:
   ctx: salsa_ctx ->
@@ -383,11 +368,12 @@ private val incr_counter:
     (ensures  (fun h0 _ h1 -> live h1 ctx /\ modifies_1 ctx h0 h1))
 [@"c_inline"]
 private let incr_counter ctx ctr = 
-  let ctr1 = U64.(ctr +^ 1uL) in
+  let ctr1 = U64.(ctr +%^ 1uL) in
   let sctr1 = uint64_to_sint64 ctr1 in
   ctx.(8ul)  <- sint64_to_sint32 sctr1;
   ctx.(9ul)  <- sint64_to_sint32 Hacl.UInt64.(sctr1 >>^ 32ul);	
   ctr1
+
 
 [@"c_inline"]
 private val crypto_stream_salsa20_xor_ic_loop:
@@ -420,8 +406,6 @@ private let rec crypto_stream_salsa20_xor_ic_loop c m ctx ctr mlen =
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
-
 [@"c_inline"]
 private val xor_bytes:
   x:uint8_p ->
@@ -431,6 +415,7 @@ private val xor_bytes:
   len:FStar.UInt32.t ->
   Stack unit
     (requires (fun h -> live h x /\ live h y /\ live h b /\ 
+      FStar.Mul.(4 * v i < pow2 32) /\
     	      	        (let iv = U32.v (i *^ 4ul) in 
   	             	let l = U32.v len in 
 		     	iv <= 16 /\ iv <= l /\ 0 <= iv /\
@@ -488,6 +473,7 @@ private let rec xor_bytes x y b i len =
     x.(curr +^ 3ul) <- Hacl.UInt8.(y3 ^^ b3);
     xor_bytes x y b (i +^ 1ul) len   
   ))))
+
 
 [@"c_inline"]
 private val salsa20_xor_partial:

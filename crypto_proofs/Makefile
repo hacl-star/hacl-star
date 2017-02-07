@@ -22,12 +22,12 @@ test/spartan_aes/aes.o:
 	make -C test/spartan_aes
 
 krml-test.exe: test/spartan_aes/aes.o
-	$(KRML) utils/Crypto.Config.fst test/Flag.fst \
+	$(KRML) utils/Crypto.Config.fst test/Flag.fst utils/Hacl.Spec.fst \
 		test/spartan_dummy.c  \
 	       	test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
 	       	$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
 		-tmpdir tmp -add-include '"testlib.h"' -o krml-test.exe \
-		-bundle Hacl.Poly1305=Hacl.Bignum.*,Hacl.Impl.* \
+		-bundle Hacl.Bignum.* -bundle Hacl.Impl.* \
 		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* -drop Hacl.Spec
 	./krml-test.exe
 
@@ -40,7 +40,7 @@ CC=gcc-6
 
 test-perf.exe: krml-test.exe test/test_perf.c
 	$(CC) -Ofast -m64 -flto -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
-	 -o test-perf.exe tmp/FStar.c tmp/Crypto_AEAD*.c tmp/Crypto_Indexing*.c tmp/Crypto_Symmetric*.c tmp/Hacl_Poly1305*.c tmp/Hacl_Symmetric_Chacha20.c tmp/Buffer_Utils*.c tmp/Crypto_Plain*.c $(KREMLIN_HOME)/kremlib/kremlib.c \
+	 -o test-perf.exe tmp/FStar.c tmp/Crypto_AEAD*.c tmp/Crypto_Indexing*.c tmp/Crypto_Symmetric*.c tmp/Hacl_Impl*.c tmp/Hacl_Bignum*.c tmp/Hacl_Symmetric_Chacha20.c tmp/Buffer_Utils*.c tmp/Crypto_Plain*.c $(KREMLIN_HOME)/kremlib/kremlib.c \
 		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_perf.c test/spartan_dummy.c test/test_hacks.c  -I tmp  \
 		-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test \
 		-I $(OPENSSL_HOME)/include -L $(OPENSSL_HOME) -lcrypto $(CFLAGS)
@@ -88,15 +88,6 @@ VERIFY= \
   aead/Crypto.AEAD \
   aead/Crypto.Plain
 
-# Files that should fully typecheck
-# Files commented out are broken, uncomment once fixed
-VERIFY2= \
-
-
-EXTRA= \
-  Crypto.Symmetric.Poly1305 \
-  Crypto.Test
-
 #  Crypto.Symmetric.Poly1305.Lemmas  # verification target is not passing reliably so commenting out
 
 #16-10-30 removed files specific to Poly1305:
@@ -126,6 +117,8 @@ extra: all-ver $(addsuffix .fst-ver, $(EXTRA))
 
 all-ver: $(addsuffix .fst-ver, $(VERIFY))
 
+all-hints: $(addsuffix .fst-hints, $(VERIFY))
+
 all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
 # Parameter for interactive mode
@@ -138,6 +131,14 @@ all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 # Verifying one file at a time
 %.fst-ver:
 	$(FSTAR) $(OPTIONS) \
+	$(FSTAR_INCLUDE_PATHS) \
+	--__temp_no_proj Crypto.Symmetric.MAC \
+	--verify_module $(basename $(notdir $@)) \
+	$(basename $@).fst
+
+# (Re-)Generate hints
+%.fst-hints:
+	$(FSTAR) $(OPTIONS) --record_hints \
 	$(FSTAR_INCLUDE_PATHS) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	--verify_module $(basename $(notdir $@)) \
