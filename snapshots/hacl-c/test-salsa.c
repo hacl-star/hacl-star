@@ -377,8 +377,8 @@ int32_t perf_salsa() {
 
 int32_t main()
 {
-  //  int32_t res = test_salsa();
   int32_t res = exit_success;
+  //  res = test_salsa();
   if (res == exit_success) {
     res = perf_salsa();
   }

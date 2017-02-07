@@ -3,6 +3,7 @@
 OPENSSL_HOME=../../other_providers/openssl
 LIBSODIUM_HOME=../../other_providers/libsodium/src/libsodium
 CC=gcc-6 -flto
+#CC=/usr/local/opt/llvm/bin/clang -flto
 
 test: test-poly	test-chacha test-salsa test-curve test-nacl
 
@@ -20,8 +21,10 @@ poly.asm:
 
 
 test-salsa:
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Salsa20.c -c -o Salsa20.o
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	kremlib.c testlib.c Salsa20.c test-salsa.c -l sodium -o test-salsa.exe
+	kremlib.c testlib.c Salsa20.o test-salsa.c -l sodium -o test-salsa.exe
 	./test-salsa.exe
 
 test-salsa-avx:
@@ -66,7 +69,15 @@ test-curve:
 
 test-nacl:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
-	kremlib.c testlib.c Hacl_Policies.c HSalsa20.c Salsa20.c Poly1305_64.c Curve25519.c NaCl.c test-nacl.c -l sodium -o test-nacl.exe
+	HSalsa20.c -c -o HSalsa20.o
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Salsa20.c -c -o Salsa20.o
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Poly1305_64.c -c -o Poly1305_64.o
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Curve25519.c -c -o Curve25519.o
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	HSalsa20.o Salsa20.o Poly1305_64.o Curve25519.o kremlib.c testlib.c Hacl_Policies.c NaCl.c test-nacl.c -l sodium -o test-nacl.exe
 	./test-nacl.exe
 
 clean:
