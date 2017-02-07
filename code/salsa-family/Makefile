@@ -60,7 +60,7 @@ all-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 
 Chacha20.c: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
-	$(KREMLIN_HOME)/krml -tmpdir chacha-c -verbose \
+	$(KREMLIN_HOME)/krml -tmpdir chacha-c \
 		-I ../bignum -I ../lib/kremlin \
 		Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe -no-prefix Hacl.Test.Chacha20 \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
@@ -70,7 +70,7 @@ Chacha20.c: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 
 Chacha20.compcert: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-cc
-	$(KREMLIN_HOME)/krml -tmpdir chacha-cc -verbose \
+	$(KREMLIN_HOME)/krml -tmpdir chacha-cc \
 		-I ../bignum -I ../lib/kremlin \
 		Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20cc.exe -no-prefix Hacl.Test.Chacha20 \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
@@ -80,7 +80,7 @@ Chacha20.compcert: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.f
 
 Salsa20.c: Hacl.Symmetric.Salsa20.fst Hacl.Test.Salsa20.fst
 	mkdir -p salsa-c
-	$(KREMLIN_HOME)/krml -tmpdir salsa-c -verbose \
+	$(KREMLIN_HOME)/krml -tmpdir salsa-c \
 		-I ../bignum -I ../lib/kremlin \
 		Salsa20.fst Hacl.Test.Salsa20.fst -o salsa20.exe -no-prefix Hacl.Test.Salsa20 \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
@@ -90,7 +90,7 @@ Salsa20.c: Hacl.Symmetric.Salsa20.fst Hacl.Test.Salsa20.fst
 
 HSalsa20.c: Hacl.Symmetric.HSalsa20.fst 
 	mkdir -p hsalsa-c
-	$(KREMLIN_HOME)/krml -tmpdir hsalsa-c -verbose \
+	$(KREMLIN_HOME)/krml -tmpdir hsalsa-c \
 		-I ../bignum -I ../lib/kremlin \
 		Hacl.Symmetric.HSalsa20.fst \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
@@ -99,7 +99,7 @@ HSalsa20.c: Hacl.Symmetric.HSalsa20.fst
 
 XSalsa20.c: Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst
 	mkdir -p xsalsa-c
-	$(KREMLIN_HOME)/krml -tmpdir xsalsa-c -verbose \
+	$(KREMLIN_HOME)/krml -tmpdir xsalsa-c \
 		-I ../bignum -I ../lib/kremlin \
 		Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst -o xsalsa20.exe -no-prefix Hacl.Test.XSalsa20 \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \

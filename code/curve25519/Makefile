@@ -95,7 +95,7 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_FILES)))
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p x25519-c
-	$(KREMLIN_HOME)/krml -tmpdir x25519-c -verbose -ccopt -std=gnu99 \
+	$(KREMLIN_HOME)/krml -tmpdir x25519-c -ccopt -std=gnu99 \
 		-I ../bignum -I ../lib/kremlin \
 		Curve25519.fst Hacl.Test.X25519.fst \
 		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \

@@ -73,7 +73,7 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p poly-c
-	$(KREMLIN_HOME)/krml -tmpdir poly-c -verbose -ccopt -std=gnu99 \
+	$(KREMLIN_HOME)/krml -tmpdir poly-c -ccopt -std=gnu99 \
 		-I ../bignum -I ../lib/kremlin \
 		Poly1305_64.fst Hacl.Test.Poly1305_64.fst \
 		-drop 'Hacl.Endianness' \
