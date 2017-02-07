@@ -6,7 +6,7 @@ all:
 travis:
 	$(MAKE) extract-c
 	$(MAKE) ct
-	$(MAKE) -C ../code world
+	$(MAKE) -C .. world
 
 extract-c-code:
 	$(MAKE) -C ../code extract-c
