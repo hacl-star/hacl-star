@@ -129,7 +129,7 @@ let mac_ensures
   (safeMac i ==> mac_is_set_st iv st aad cipher_tagged h1)
        
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 400"
 val frame_mac_is_set
         (i:id) (iv:Cipher.iv (alg i))
 	(st:aead_state i Writer)

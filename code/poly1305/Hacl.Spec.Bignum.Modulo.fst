@@ -216,7 +216,7 @@ let carry_top_wide_spec s =
   Seq.upd s' 0 b0'
 
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 200"
 
 val lemma_carry_top_wide_spec_: s:seqelem_wide{carry_top_wide_pre s} -> Lemma
   (let s' = carry_top_wide_spec s in
@@ -240,7 +240,7 @@ let lemma_carry_top_wide_spec_ s =
   ()
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val lemma_seval_wide_3: s:seqelem_wide -> Lemma
   (seval_wide s = w (Seq.index s 0) + pow2 44 * w (Seq.index s 1) + pow2 88 * w (Seq.index s 2))
