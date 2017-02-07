@@ -105,6 +105,8 @@ private let salsa20_double_round_10 ctx =
   salsa20_row_round ctx
 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 200"
+
 [@"c_inline"]
 private inline_for_extraction val salsa20_init:
   ctx   :salsa_ctx ->
@@ -496,6 +498,7 @@ private inline_for_extraction let mod_64 (mlen:U64.t) : Tot (z:U32.t{U32.v z = U
   Math.Lemmas.modulo_lemma (U64.v mlen') (pow2 32);
   Int.Cast.uint64_to_uint32 mlen'
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 400"
 
 private let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
   (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block)
