@@ -97,7 +97,7 @@ We need to agree on naming conventions for many files. As a concrete example, fo
 - `AES.Hacl`, `AES.Hacl64`,`AES.Spartan`, `AES.OpenSSL` for the supported implementations, proved (or assumed) functionally correct wrt `AES.Spec`
 - `AES.Hacl.Lemmas` etc for auxiliary proof of functional correctness
 - `AES` for the main, abstract API, multiplexing between these implementations (and possibly between algorithms, e.g. for agile functionalities)
-- `AES.PRF`, `AES.SPRF` for its conditional idealizations, assuming AES is a PRF, or a super PRF
+- `AES.PRF`, `AES.SPRP` for its conditional idealizations, assuming AES is a PRF, or a super PRP
 - `AES.PRF.Lemmas` etc for auxiliary proofs of computational soundness.
 
 where `AES` may actually stand for `Crypto.Symmetric.AES` 
