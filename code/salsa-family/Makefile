@@ -105,11 +105,7 @@ XSalsa20.c: Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ldopt -flto -ccopt -march=native  -ccopt -std=gnu99 
 	./xsalsa20.exe
 
-extract-c:
-	$(MAKE) Chacha20.c
-	$(MAKE) Salsa20.c
-	$(MAKE) HSalsa20.c
-	$(MAKE) XSalsa20.c
+extract-c: Chacha20.c Salsa20.c HSalsa20.c XSalsa20.c
 
 
 clean:
