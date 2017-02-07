@@ -196,6 +196,3 @@ inline_for_extraction val hload128_le:
 inline_for_extraction let hload128_le b = load128_le b
 [@"substitute" ]
 inline_for_extraction let hload64_be b  = load64_be b
-
-let test bla =
-  hload128_le bla

@@ -32,7 +32,7 @@ let rec fsum_spec a b ctr =
   )
 
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 80"
 
 
 val lemma_fsum_eval_: s:seqelem -> s':seqelem -> ctr:nat{ctr <= len /\ red s len /\ red s' len} ->

@@ -13,6 +13,8 @@ open Hacl.Bignum.Wide
 
 module U32 = FStar.UInt32
 
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
 val bitweight: n:nat{n < len} -> Tot nat
 let rec bitweight n = if n = 0 then 0 else limb_size + bitweight (n- 1)
 
@@ -21,9 +23,6 @@ val eval_: h:mem -> b:felem{live h b} -> i:nat{i <= len} -> GTot nat
 let rec eval_ h b i =
   if i = 0 then 0
   else pow2 (limb_size * (i - 1)) * Hacl.Bignum.Limb.v (get h b (i - 1)) + eval_ h b (i-1)
-(* let rec eval_ h b i = *)
-(*   if i = 0 then 0 *)
-(*   else pow2 (bitweight (i - 1)) * Hacl.Bignum.Limb.v (get h b (i - 1)) + eval_ h b (i-1) *)
 
 
 val eval: h:mem -> b:felem{live h b} -> GTot nat

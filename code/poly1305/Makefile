@@ -32,32 +32,32 @@ POLY1305_SPECIFIC= \
 
 POLY1305_FILES= $(BIGNUM) $(POLY1305_SPECIFIC)
 
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+	--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+	--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --lax $^
+	$(FSTAR_CT) $^ --lax
 
 all-ct: $(addsuffix -ct, $(POLY1305_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints
+	-$(FSTAR) $^ --use_hints
 
 all-ver: $(addsuffix -verify, $(POLY1305_FILES))
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --lax $^
+	$(FSTAR) $^ --lax
 
 all-lax: $(addsuffix -lax, $(POLY1305_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints --record_hints
+	-$(FSTAR) $^ --use_hints --record_hints
 
 all-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
@@ -73,17 +73,6 @@ extract-c:
 		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*' \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
                 -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
-# 	$(KREMLIN_HOME)/krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir poly-c -verbose -cc gcc \
-# 		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib \
-# 		$(POLY1305_FILES) Hacl.Test.Poly1305_64.fst \
-# 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
-# 		-drop Hacl.UInt128 -drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-# 		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* -bundle Poly1305=Hacl.Bignum.*,Hacl.Impl.* \
-# 		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' \
-# 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-#                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
-	./poly1305.exe
-#-bundle Hacl.Poly1305=Hacl.Bignum.*,Hacl.Impl.Poly1305_64
 
 include $(FSTAR_HOME)/src/gmake/fstar.mk
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
