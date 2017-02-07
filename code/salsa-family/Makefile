@@ -57,8 +57,8 @@ all-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 
 
 Chacha20.c: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
-	mkdir -p salsa-c
-	$(KREMLIN_HOME)/krml -tmpdir salsa-c -verbose \
+	mkdir -p chacha-c
+	$(KREMLIN_HOME)/krml -tmpdir chacha-c -verbose \
 		-I ../bignum -I ../lib/kremlin \
 		Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe -no-prefix Hacl.Test.Chacha20 \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
@@ -67,8 +67,8 @@ Chacha20.c: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 	./chacha20.exe
 
 Chacha20.compcert: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
-	mkdir -p salsa-c
-	$(KREMLIN_HOME)/krml -tmpdir salsa-c -verbose \
+	mkdir -p chacha-cc
+	$(KREMLIN_HOME)/krml -tmpdir chacha-cc -verbose \
 		-I ../bignum -I ../lib/kremlin \
 		Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe -no-prefix Hacl.Test.Chacha20 \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
@@ -87,8 +87,8 @@ Salsa20.c: Hacl.Symmetric.Salsa20.fst Hacl.Test.Salsa20.fst
 	./salsa20.exe
 
 HSalsa20.c: Hacl.Symmetric.HSalsa20.fst 
-	mkdir -p salsa-c
-	$(KREMLIN_HOME)/krml -tmpdir salsa-c -verbose \
+	mkdir -p hsalsa-c
+	$(KREMLIN_HOME)/krml -tmpdir hsalsa-c -verbose \
 		-I ../bignum -I ../lib/kremlin \
 		Hacl.Symmetric.HSalsa20.fst \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
@@ -96,8 +96,8 @@ HSalsa20.c: Hacl.Symmetric.HSalsa20.fst
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -skip-compilation  -ccopt -std=gnu99
 
 XSalsa20.c: Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst
-	mkdir -p salsa-c
-	$(KREMLIN_HOME)/krml -tmpdir salsa-c -verbose \
+	mkdir -p xsalsa-c
+	$(KREMLIN_HOME)/krml -tmpdir xsalsa-c -verbose \
 		-I ../bignum -I ../lib/kremlin \
 		Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst -o xsalsa20.exe -no-prefix Hacl.Test.XSalsa20 \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
@@ -109,4 +109,4 @@ extract-c: Chacha20.c Salsa20.c HSalsa20.c XSalsa20.c
 
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ salsa-c
+	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c chacha-cc hsalsa-c xsalsa-c
