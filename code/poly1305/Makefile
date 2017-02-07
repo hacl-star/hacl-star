@@ -29,37 +29,45 @@ POLY1305_SPECIFIC= \
 	Hacl.Bignum.AddAndMultiply.fst \
 	Hacl.Impl.Poly1305_64.fst
 
+SLOW=
+
+TODO=Hacl.Impl.Poly1305_64.fst \
+	Hacl.Spe.Poly1305_64.fst 
 
 POLY1305_FILES= $(BIGNUM) $(POLY1305_SPECIFIC)
 
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
+
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --lax $^
+	$(FSTAR_CT) --lax $^
 
 all-ct: $(addsuffix -ct, $(POLY1305_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints
+	$(FSTAR) $^ --use_hints
 
 all-ver: $(addsuffix -verify, $(POLY1305_FILES))
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --lax $^
+	$(FSTAR) --lax $^
 
 all-lax: $(addsuffix -lax, $(POLY1305_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints --record_hints
+	-$(FSTAR) $^ --use_hints --record_hints
 
 all-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
+
+# For CI, all modules restricted from incomplete or slow ones
+all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
 
 
 extract-c:

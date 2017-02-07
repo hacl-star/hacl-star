@@ -38,6 +38,9 @@ all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
 
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 
+# For CI, all modules restricted from incomplete or slow ones
+all-ci: all-ver
+
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \

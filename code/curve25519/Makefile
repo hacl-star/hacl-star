@@ -45,37 +45,52 @@ X25519_SPECIFIC= \
 	Hacl.Spec.EC.fst \
 	Hacl.EC.fst
 
+# Files that are too slow and for which verification speed must improve
+SLOW=
+
+# Files that still have errors
+TODO=Hacl.Bignum.Fsum.fst \
+	Hacl.Bignum.Fdifference.fst \
+	Hacl.Spec.EC.AddAndDouble.fst \
+	Hacl.Spec.Bignum.Modulo.fst \
+	Hacl.EC.AddAndDouble.fst \
+	Hacl.EC.Format.fst
 
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 
 
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
+
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib
+
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --lax $^
+	$(FSTAR_CT) --lax $^
 
 all-ct: $(addsuffix -ct, $(X25519_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints
+	$(FSTAR) $^ --use_hints
 
 all-ver: $(addsuffix -verify, $(X25519_FILES))
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --lax $^
+	$(FSTAR) --lax $^
 
 all-lax: $(addsuffix -lax, $(X25519_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints --record_hints
+	-$(FSTAR) $^ --use_hints --record_hints
 
 all-hints: $(addsuffix -hints, $(X25519_SPECIFIC))
+
+# For CI, all modules restricted from incomplete or slow ones
+all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_FILES)))
 
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
