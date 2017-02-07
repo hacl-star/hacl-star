@@ -29,5 +29,5 @@ verify: verify-code verify-crypto
 
 
 clean:
-	$(MAKE) -C code clean
-	$(MAKE) -C crypto_proofs clean
+	$(MAKE) -C ../code clean
+	$(MAKE) -C ../crypto_proofs clean
