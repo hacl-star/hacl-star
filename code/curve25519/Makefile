@@ -4,81 +4,88 @@ HACL_HOME?=../..
 include ../Makefile.include
 
 
-X25519_FILES= \
+BIGNUM= \
 	../bignum/Hacl.Bignum.Limb.fst \
-	../bignum/Hacl.Bignum.Wide.fst \
 	../bignum/Hacl.Spec.Bignum.Field.fst \
+	../bignum/Hacl.Bignum.Wide.fst \
 	../bignum/Hacl.Spec.Bignum.Bigint.fst \
-	../bignum/Hacl.Spec.Bignum.Fsum.fst \
-	../bignum/Hacl.Spec.Bignum.Fdifference.fst  \
-	../bignum/Hacl.Spec.Bignum.Fscalar.fst \
 	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
-	Hacl.Bignum.Fsum.fst \
-	Hacl.Bignum.Fdifference.fst  \
+	../bignum/Hacl.Spec.Bignum.Fsum.fst \
+	../bignum/Hacl.Spec.Bignum.Fdifference.fst \
+	../bignum/Hacl.Spec.Bignum.Fmul.fst \
+	../bignum/Hacl.Spec.Bignum.Fscalar.fst \
+	../bignum/Hacl.Spec.Bignum.fst \
 	../bignum/Hacl.Bignum.Fscalar.fst \
 	../bignum/Hacl.Bignum.Fproduct.fst \
-	../bignum/Hacl.Bignum.fst \
-	Hacl.Bignum.Constants.fst \
-	Hacl.Bignum.Parameters.fst \
-	Hacl.Spec.Bignum.Modulo.fst \
-	Hacl.Bignum.Modulo.fst \
-	Hacl.Spec.Bignum.Fsquare.fst \
-	Hacl.Spec.EC.AddAndDouble.fst \
-	Hacl.Spec.EC.AddAndDouble2.fst \
-	Hacl.Bignum.Fsquare.fst \
-	Hacl.Spec.EC.Point.fst \
-	Hacl.EC.Point.fst \
-	Hacl.EC.AddAndDouble.fst \
-	Hacl.Spec.EC.Format.fst \
-	Hacl.EC.Format.fst \
-	Hacl.EC.Ladder.SmallLoop.fst \
-	Hacl.EC.Ladder.BigLoop.fst \
-	Hacl.EC.Ladder.fst \
-	Hacl.EC.fst
-#	Hacl.Spec.Bignum.Crecip.fst \
-	Hacl.Bignum.Crecip.fst \
+	../bignum/Hacl.Bignum.Fmul.fst \
+	../bignum/Hacl.Bignum.fst
+
 
 X25519_SPECIFIC= \
-	Hacl.Spec.Bignum.Fsquare.fst \
-	Hacl.Bignum.Constants.fst \
 	Hacl.Bignum.Parameters.fst \
-	Hacl.Spec.Bignum.Crecip.fst \
-	Hacl.Bignum.Crecip.fst \
-	Hacl.Spec.EC.AddAndDouble2.fst \
-	Hacl.Bignum.Fsquare.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
-	Hacl.Bignum.Modulo.fst \
 	Hacl.Spec.EC.AddAndDouble.fst \
-	Hacl.EC.AddAndDouble.fst \
+	Hacl.Spec.Bignum.Fsquare.fst \
+	Hacl.Spec.Bignum.Crecip.fst \
+	Hacl.Bignum.Modulo.fst \
+	Hacl.Bignum.Fsum.fst \
+	Hacl.Bignum.Fdifference.fst \
+	Hacl.Bignum.Fsquare.fst \
+	Hacl.Bignum.Crecip.fst \
 	Hacl.Spec.EC.Point.fst \
 	Hacl.EC.Point.fst \
+	Hacl.Spec.EC.AddAndDouble2.fst \
 	Hacl.Spec.EC.Format.fst \
 	Hacl.EC.Format.fst \
+	Hacl.EC.AddAndDouble.fst \
 	Hacl.Spec.EC.Ladder.fst \
+	Hacl.EC.Ladder.SmallLoop.fst \
+	Hacl.EC.Ladder.BigLoop.fst \
 	Hacl.EC.Ladder.fst \
 	Hacl.Spec.EC.fst \
 	Hacl.EC.fst
 
+
+X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
+
+
+# Lax typechecking against the restricted integer interface
+%.fst-ct: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum --lax $^
+
+all-ct: $(addsuffix -ct, $(X25519_FILES))
+
+# Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
+	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum $^ --use_hints
+
+all-ver: $(addsuffix -verify, $(X25519_FILES))
+
+# Minimal lax typechecking, pre-requisite to any extraction
+%.fst-lax: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $^ --use_hints
+		--include ../lib/kremlin --include ../bignum --lax $^
 
-verify: $(addsuffix -verify, $(X25519_FILES))
+all-lax: $(addsuffix -lax, $(X25519_FILES))
 
+# Hints regeneration
 %.fst-hints: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $^ --record_hints
+	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum $^ --use_hints --record_hints
 
-hints: $(addsuffix -hints, $(X25519_SPECIFIC))
+all-hints: $(addsuffix -hints, $(X25519_SPECIFIC))
 
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p x25519-c
-	$(KREMLIN_HOME)/krml -tmpdir x25519-c -verbose \
+	$(KREMLIN_HOME)/krml -tmpdir x25519-c -verbose -ccopt -std=gnu99 \
 		-I ../bignum -I ../lib/kremlin \
 		Curve25519.fst Hacl.Test.X25519.fst \
-		-drop 'Hacl.Spec.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
-		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum.*,Hacl.EC.*' \
+		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
+		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
+		-bundle 'Hacl.Spec.*' \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
                 -no-prefix Hacl.Test.X25519 -ldopt -flto -ccopt -march=native -o x25519.exe
 	./x25519.exe

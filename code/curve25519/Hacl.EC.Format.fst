@@ -68,56 +68,57 @@ let point_inf () =
 (*   make x y z *)
 
 
-private val load64_le:
-  b:uint8_p{length b = 8} ->
-  Stack limb
-    (requires (fun h -> Buffer.live h b))
-    (ensures  (fun h0 r h1 -> h0 == h1 /\ Buffer.live h0 b
-      /\ Hacl.Spec.EC.Format.load64_le_spec (as_seq h1 b) == r
-    ))
-private let load64_le b =
-  assert_norm(pow2 32 = 0x100000000);
-  let b0 = b.(0ul) in
-  let b1 = b.(1ul) in
-  let b2 = b.(2ul) in
-  let b3 = b.(3ul) in
-  let b4 = b.(4ul) in
-  let b5 = b.(5ul) in
-  let b6 = b.(6ul) in
-  let b7 = b.(7ul) in
-  Hacl.Bignum.Limb.(
-    sint8_to_sint64 b0
-    |^ (sint8_to_sint64 b1 <<^ 8ul)
-    |^ (sint8_to_sint64 b2 <<^ 16ul)
-    |^ (sint8_to_sint64 b3 <<^ 24ul)
-    |^ (sint8_to_sint64 b4 <<^ 32ul)
-    |^ (sint8_to_sint64 b5 <<^ 40ul)
-    |^ (sint8_to_sint64 b6 <<^ 48ul)
-    |^ (sint8_to_sint64 b7 <<^ 56ul)
-  )
+(* private val load64_le: *)
+(*   b:uint8_p{length b = 8} -> *)
+(*   Stack limb *)
+(*     (requires (fun h -> Buffer.live h b)) *)
+(*     (ensures  (fun h0 r h1 -> h0 == h1 /\ Buffer.live h0 b *)
+(*       /\ Hacl.Spec.EC.Format.load64_le_spec (as_seq h1 b) == r *)
+(*     )) *)
+(* private let load64_le b = *)
+(*   assert_norm(pow2 32 = 0x100000000); *)
+(*   let b0 = b.(0ul) in *)
+(*   let b1 = b.(1ul) in *)
+(*   let b2 = b.(2ul) in *)
+(*   let b3 = b.(3ul) in *)
+(*   let b4 = b.(4ul) in *)
+(*   let b5 = b.(5ul) in *)
+(*   let b6 = b.(6ul) in *)
+(*   let b7 = b.(7ul) in *)
+(*   Hacl.Bignum.Limb.( *)
+(*     sint8_to_sint64 b0 *)
+(*     |^ (sint8_to_sint64 b1 <<^ 8ul) *)
+(*     |^ (sint8_to_sint64 b2 <<^ 16ul) *)
+(*     |^ (sint8_to_sint64 b3 <<^ 24ul) *)
+(*     |^ (sint8_to_sint64 b4 <<^ 32ul) *)
+(*     |^ (sint8_to_sint64 b5 <<^ 40ul) *)
+(*     |^ (sint8_to_sint64 b6 <<^ 48ul) *)
+(*     |^ (sint8_to_sint64 b7 <<^ 56ul) *)
+(*   ) *)
 
 
-private val store64_le:
-  b:uint8_p{length b = 8} ->
-  z:limb ->
-  Stack unit
-    (requires (fun h -> Buffer.live h b))
-    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ Buffer.live h1 b
-      /\ as_seq h1 b == Hacl.Spec.EC.Format.store64_le_spec z
-    ))
-#set-options "--lax"
-private let store64_le b z =
-  assert_norm(pow2 32 = 0x100000000);
-  let open Hacl.Bignum.Limb in
-  b.(0ul) <- sint64_to_sint8 z;
-  b.(1ul) <- sint64_to_sint8 (z >>^ 8ul);
-  b.(2ul) <- sint64_to_sint8 (z >>^ 16ul);
-  b.(3ul) <- sint64_to_sint8 (z >>^ 24ul);
-  b.(4ul) <- sint64_to_sint8 (z >>^ 32ul);
-  b.(5ul) <- sint64_to_sint8 (z >>^ 40ul);
-  b.(6ul) <- sint64_to_sint8 (z >>^ 48ul);
-  b.(7ul) <- sint64_to_sint8 (z >>^ 56ul)
+(* private val store64_le: *)
+(*   b:uint8_p{length b = 8} -> *)
+(*   z:limb -> *)
+(*   Stack unit *)
+(*     (requires (fun h -> Buffer.live h b)) *)
+(*     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ Buffer.live h1 b *)
+(*       /\ as_seq h1 b == Hacl.Spec.EC.Format.store64_le_spec z *)
+(*     )) *)
+(* #set-options "--lax" *)
+(* private let store64_le b z = *)
+(*   assert_norm(pow2 32 = 0x100000000); *)
+(*   let open Hacl.Bignum.Limb in *)
+(*   b.(0ul) <- sint64_to_sint8 z; *)
+(*   b.(1ul) <- sint64_to_sint8 (z >>^ 8ul); *)
+(*   b.(2ul) <- sint64_to_sint8 (z >>^ 16ul); *)
+(*   b.(3ul) <- sint64_to_sint8 (z >>^ 24ul); *)
+(*   b.(4ul) <- sint64_to_sint8 (z >>^ 32ul); *)
+(*   b.(5ul) <- sint64_to_sint8 (z >>^ 40ul); *)
+(*   b.(6ul) <- sint64_to_sint8 (z >>^ 48ul); *)
+(*   b.(7ul) <- sint64_to_sint8 (z >>^ 56ul) *)
 
+open Hacl.Endianness
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
@@ -153,6 +154,7 @@ private inline_for_extraction let upd_5 output output0 output1 output2 output3 o
   Seq.lemma_eq_intro (as_seq h1 output) (Hacl.Spec.EC.Format.seq_upd_5 output0 output1 output2 output3 output4)
   
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 private val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack unit
   (requires (fun h -> Buffer.live h output /\ Buffer.live h input))
@@ -162,11 +164,11 @@ private val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack u
     /\ as_seq h1 output == Hacl.Spec.EC.Format.fexpand_spec (as_seq h0 input)))
 private let fexpand output input =
   let mask_51 = uint64_to_limb 0x7ffffffffffffuL in
-  let i0 = load64_le (Buffer.sub input 0ul 8ul) in
-  let i1 = load64_le (Buffer.sub input 6ul 8ul) in
-  let i2 = load64_le (Buffer.sub input 12ul 8ul) in
-  let i3 = load64_le (Buffer.sub input 19ul 8ul) in
-  let i4 = load64_le (Buffer.sub input 24ul 8ul) in
+  let i0 = hload64_le (Buffer.sub input 0ul 8ul) in
+  let i1 = hload64_le (Buffer.sub input 6ul 8ul) in
+  let i2 = hload64_le (Buffer.sub input 12ul 8ul) in
+  let i3 = hload64_le (Buffer.sub input 19ul 8ul) in
+  let i4 = hload64_le (Buffer.sub input 24ul 8ul) in
   let output0 = (i0         ) &^ mask_51 in
   let output1 = (i1 >>^ 3ul ) &^ mask_51 in
   let output2 = (i2 >>^ 6ul ) &^ mask_51 in
@@ -245,10 +247,10 @@ private let fcontract output input =
   let o1 = (t1 >>^ 13ul) |^ (t2 <<^ 38ul) in
   let o2 = (t2 >>^ 26ul) |^ (t3 <<^ 25ul) in
   let o3 = (t3 >>^ 39ul) |^ (t4 <<^ 12ul) in
-  store64_le (Buffer.sub output 0ul  8ul) o0;
-  store64_le (Buffer.sub output 8ul  8ul) o1;
-  store64_le (Buffer.sub output 16ul 8ul) o2;
-  store64_le (Buffer.sub output 24ul 8ul) o3
+  hstore64_le (Buffer.sub output 0ul  8ul) o0;
+  hstore64_le (Buffer.sub output 8ul  8ul) o1;
+  hstore64_le (Buffer.sub output 16ul 8ul) o2;
+  hstore64_le (Buffer.sub output 24ul 8ul) o3
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"

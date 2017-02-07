@@ -46,12 +46,12 @@ let rec text_to_PS_text t =
 (** Field element *)
 let elem i = (* dependent; used only ideally *)
   match alg i with 
-  | POLY1305 -> PS_.elem
+  | POLY1305 -> Hacl.Spec.Poly1305.elem
   | GHASH    -> GS.elem
 
 let zero i : elem i = 
   match alg i with 
-  | POLY1305 -> PS.zero
+  | POLY1305 -> Hacl.Spec.Poly1305.zero
   | GHASH    -> GS.zero
 
 (** Private representation of a field element as a buffer *)
@@ -270,7 +270,7 @@ let encode i w =
 noextract val poly: #i:id -> cs:text -> r:elem i -> Tot (elem i)
 let poly #i cs r =
   match alg i with 
-  | POLY1305 -> PS.poly (text_to_PS_text cs) r
+  | POLY1305 -> Hacl.Spec.Poly1305.poly (text_to_PS_text cs) r
   | GHASH    -> GS.poly cs r
 
 
@@ -291,13 +291,13 @@ let start #i = create i
 noextract val field_add: #i:id -> elem i -> elem i -> Tot (elem i)
 let field_add #i a b =
   match alg i with
-  | POLY1305 -> PS.fadd a b
+  | POLY1305 -> Hacl.Spec.Poly1305.fadd a b
   | GHASH    -> GS.op_Plus_At a b
 
 noextract val field_mul: #i:id -> elem i -> elem i -> Tot (elem i)
 let field_mul #i a b =
   match alg i with
-  | POLY1305 -> PS.fmul a b
+  | POLY1305 -> Hacl.Spec.Poly1305.fmul a b
   | GHASH    -> GS.op_Star_At a b
 
 noextract let op_Plus_At #i e1 e2 = field_add #i e1 e2
@@ -316,7 +316,7 @@ let poly_empty #i t r =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val poly_cons_: x:word -> xs:PS_.text -> r:PS_.elem ->
-  Lemma PS.(poly (Seq.cons x xs) r == (encode x +@ PS.poly xs r) *@ r)
+  Lemma Hacl.Spec.Poly1305.(poly (Seq.cons x xs) r == (encode x +@ poly xs r) *@ r)
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 let poly_cons_ x xs r =
   let xxs = Seq.cons x xs in

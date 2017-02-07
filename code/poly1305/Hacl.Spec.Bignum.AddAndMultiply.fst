@@ -531,7 +531,7 @@ let add_and_multiply_tot acc block r =
   fmul_spec acc_p_block r
 
 
-#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 private val carry_spec_unrolled:
   s:seqelem{carry_limb_pre s 0} ->
