@@ -6,7 +6,9 @@ open FStar.ST
 open FStar.Buffer
 open Hacl.Cast
 open Hacl.UInt32
+open Hacl.Endianness
 open Hacl.Spec.Symmetric.Chacha20
+
 
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
@@ -22,22 +24,20 @@ private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
-#reset-options "--initial_ifuel 0 --max_ifuel 0 --initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+(* [@"c_inline"] *)
+(* #set-options "--lax" *)
+(* private inline_for_extraction let load32_le (k:uint8_p) : Stack h32 *)
+(*   (requires (fun h -> live h k /\ length k = 4)) *)
+(*   (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 k /\ length k = 4 *)
+(*     /\ r == load32_le_spec (as_seq h0 k))) *)
+(*   = C.load32_le k *)
 
-[@"c_inline"]
-#set-options "--lax"
-private inline_for_extraction let load32_le (k:uint8_p) : Stack h32
-  (requires (fun h -> live h k /\ length k = 4))
-  (ensures  (fun h0 r h1 -> h0 == h1 /\ live h0 k /\ length k = 4
-    /\ r == load32_le_spec (as_seq h0 k)))
-  = C.load32_le k
-
-[@"c_inline"]
-private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit
-  (requires (fun h -> live h k /\ length k = 4))
-  (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k /\ length k = 4 /\ live h0 k
-    /\ as_seq h1 k == store32_le_spec (as_seq h0 k) x))
-  = C.store32_le k x
+(* [@"c_inline"] *)
+(* private inline_for_extraction let store32_le (k:uint8_p) (x:h32) : Stack unit *)
+(*   (requires (fun h -> live h k /\ length k = 4)) *)
+(*   (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k /\ length k = 4 /\ live h0 k *)
+(*     /\ as_seq h1 k == store32_le_spec (as_seq h0 k) x)) *)
+(*   = C.store32_le k x *)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
@@ -57,14 +57,14 @@ let chacha_keysetup ctx k =
     ctx.(1ul)  <- (uint32_to_sint32 0x3320646eul);
     ctx.(2ul)  <- (uint32_to_sint32 0x79622d32ul);
     ctx.(3ul)  <- (uint32_to_sint32 0x6b206574ul);
-    ctx.(4ul)  <- load32_le(Buffer.sub k  0ul 4ul);
-    ctx.(5ul)  <- load32_le(Buffer.sub k  4ul 4ul);
-    ctx.(6ul)  <- load32_le(Buffer.sub k  8ul 4ul);
-    ctx.(7ul)  <- load32_le(Buffer.sub k 12ul 4ul);
-    ctx.(8ul)  <- load32_le(Buffer.sub k 16ul 4ul);
-    ctx.(9ul)  <- load32_le(Buffer.sub k 20ul 4ul);
-    ctx.(10ul) <- load32_le(Buffer.sub k 24ul 4ul);
-    ctx.(11ul) <- load32_le(Buffer.sub k 28ul 4ul)
+    ctx.(4ul)  <- hload32_le(Buffer.sub k  0ul 4ul);
+    ctx.(5ul)  <- hload32_le(Buffer.sub k  4ul 4ul);
+    ctx.(6ul)  <- hload32_le(Buffer.sub k  8ul 4ul);
+    ctx.(7ul)  <- hload32_le(Buffer.sub k 12ul 4ul);
+    ctx.(8ul)  <- hload32_le(Buffer.sub k 16ul 4ul);
+    ctx.(9ul)  <- hload32_le(Buffer.sub k 20ul 4ul);
+    ctx.(10ul) <- hload32_le(Buffer.sub k 24ul 4ul);
+    ctx.(11ul) <- hload32_le(Buffer.sub k 28ul 4ul)
 
 
 [@"c_inline"]
@@ -80,10 +80,9 @@ val chacha_ietf_ivsetup:
 [@"c_inline"]
 let chacha_ietf_ivsetup ctx iv counter =
     ctx.(12ul) <- uint32_to_sint32 counter;
-    ctx.(13ul) <- load32_le(Buffer.sub iv 0ul 4ul);
-    ctx.(14ul) <- load32_le(Buffer.sub iv 4ul 4ul);
-    ctx.(15ul) <- load32_le(Buffer.sub iv 8ul 4ul)
-
+    ctx.(13ul) <- hload32_le(Buffer.sub iv 0ul 4ul);
+    ctx.(14ul) <- hload32_le(Buffer.sub iv 4ul 4ul);
+    ctx.(15ul) <- hload32_le(Buffer.sub iv 8ul 4ul)
 
 
 [@"c_inline"]
@@ -172,22 +171,22 @@ private val chacha_encrypt_bytes_store:
 [@"substitute"]
 private let chacha_encrypt_bytes_store c x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 =
   let open FStar.Buffer in
-  store32_le (sub c 0ul 4ul) x0;
-  store32_le (sub c 4ul 4ul) x1;
-  store32_le (sub c 8ul 4ul) x2;
-  store32_le (sub c 12ul 4ul) x3;
-  store32_le (sub c 16ul 4ul) x4;
-  store32_le (sub c 20ul 4ul) x5;
-  store32_le (sub c 24ul 4ul) x6;
-  store32_le (sub c 28ul 4ul) x7;
-  store32_le (sub c 32ul 4ul) x8;
-  store32_le (sub c 36ul 4ul) x9;
-  store32_le (sub c 40ul 4ul) x10;
-  store32_le (sub c 44ul 4ul) x11;
-  store32_le (sub c 48ul 4ul) x12;
-  store32_le (sub c 52ul 4ul) x13;
-  store32_le (sub c 56ul 4ul) x14;
-  store32_le (sub c 60ul 4ul) x15  
+  hstore32_le (sub c 0ul 4ul) x0;
+  hstore32_le (sub c 4ul 4ul) x1;
+  hstore32_le (sub c 8ul 4ul) x2;
+  hstore32_le (sub c 12ul 4ul) x3;
+  hstore32_le (sub c 16ul 4ul) x4;
+  hstore32_le (sub c 20ul 4ul) x5;
+  hstore32_le (sub c 24ul 4ul) x6;
+  hstore32_le (sub c 28ul 4ul) x7;
+  hstore32_le (sub c 32ul 4ul) x8;
+  hstore32_le (sub c 36ul 4ul) x9;
+  hstore32_le (sub c 40ul 4ul) x10;
+  hstore32_le (sub c 44ul 4ul) x11;
+  hstore32_le (sub c 48ul 4ul) x12;
+  hstore32_le (sub c 52ul 4ul) x13;
+  hstore32_le (sub c 56ul 4ul) x14;
+  hstore32_le (sub c 60ul 4ul) x15  
 
 
 [@"c_inline"]
@@ -318,22 +317,22 @@ private let chacha_encrypt_bytes_core ctx m c =
   let x14 = x14 +%^ j14 in
   let x15 = x15 +%^ j15 in
   let open FStar.Buffer in
-  let m0 = load32_le (sub m 0ul 4ul) in
-  let m1 = load32_le (sub m 4ul 4ul) in
-  let m2 = load32_le (sub m 8ul 4ul) in
-  let m3 = load32_le (sub m 12ul 4ul) in
-  let m4 = load32_le (sub m 16ul 4ul) in
-  let m5 = load32_le (sub m 20ul 4ul) in
-  let m6 = load32_le (sub m 24ul 4ul) in
-  let m7 = load32_le (sub m 28ul 4ul) in
-  let m8 = load32_le (sub m 32ul 4ul) in
-  let m9 = load32_le (sub m 36ul 4ul) in
-  let m10 = load32_le (sub m 40ul 4ul) in
-  let m11 = load32_le (sub m 44ul 4ul) in
-  let m12 = load32_le (sub m 48ul 4ul) in
-  let m13 = load32_le (sub m 52ul 4ul) in
-  let m14 = load32_le (sub m 56ul 4ul) in
-  let m15 = load32_le (sub m 60ul 4ul) in
+  let m0 = hload32_le (sub m 0ul 4ul) in
+  let m1 = hload32_le (sub m 4ul 4ul) in
+  let m2 = hload32_le (sub m 8ul 4ul) in
+  let m3 = hload32_le (sub m 12ul 4ul) in
+  let m4 = hload32_le (sub m 16ul 4ul) in
+  let m5 = hload32_le (sub m 20ul 4ul) in
+  let m6 = hload32_le (sub m 24ul 4ul) in
+  let m7 = hload32_le (sub m 28ul 4ul) in
+  let m8 = hload32_le (sub m 32ul 4ul) in
+  let m9 = hload32_le (sub m 36ul 4ul) in
+  let m10 = hload32_le (sub m 40ul 4ul) in
+  let m11 = hload32_le (sub m 44ul 4ul) in
+  let m12 = hload32_le (sub m 48ul 4ul) in
+  let m13 = hload32_le (sub m 52ul 4ul) in
+  let m14 = hload32_le (sub m 56ul 4ul) in
+  let m15 = hload32_le (sub m 60ul 4ul) in
   let x0 = x0 ^^ m0 in
   let x1 = x1 ^^ m1 in
   let x2 = x2 ^^ m2 in
@@ -421,6 +420,7 @@ let chacha_encrypt_bytes_finish_stream ctx c len =
   blit tmp 0ul c 0ul len;
   pop_frame();
   ()
+
 
 (** API a la LibSodium **)
 val chacha_encrypt_bytes:

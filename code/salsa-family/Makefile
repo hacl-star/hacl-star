@@ -24,18 +24,34 @@ SALSA_FAMILY_FILES= \
 SALSA_MODULES= $(basename $(SALSA_FILES))
 
 
+# Lax typechecking against the restricted integer interface
+%.fst-ct: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum --lax $^
+
+all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
+
+# Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
+	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum $^ --use_hints
+
+all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
+
+# Minimal lax typechecking, pre-requisite to any extraction
+%.fst-lax: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib $^ --use_hints
+		--include ../lib/kremlin --include ../bignum --lax $^
 
-verify: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
+all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
-
+# Hints regeneration
 %.fst-hints: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib $^ --record_hints
+	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum $^ --use_hints --record_hints
 
-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
+all-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
+
 
 Chacha20.c: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 	mkdir -p salsa-c
