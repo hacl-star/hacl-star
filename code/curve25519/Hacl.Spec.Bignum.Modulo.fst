@@ -111,7 +111,7 @@ let carry_top_spec s =
   Seq.upd s 0 s0'
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private val lemma_carry_top_spec_: s:seqelem{carry_top_pre s} -> Lemma
   (let s' = carry_top_spec s in
@@ -127,7 +127,7 @@ private let lemma_carry_top_spec_ s =
   UInt.logand_mask (v (Seq.index s 4)) limb_size;
   assert(v (Seq.index s' 4) = v (Seq.index s 4) % pow2 limb_size)
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 40"
 
 private let lemma_carry_top_spec_1 (a:nat) (b:nat) : Lemma
   ((pow2 204 * a + b) % prime = (19 * (a / pow2 limb_size) + pow2 204 * (a % pow2 limb_size) + b) % prime)
@@ -185,7 +185,7 @@ private val lemma_reduce_spec_: s:seqelem{reduce_pre s} -> Lemma
 private let lemma_reduce_spec_ s = ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 private let lemma_reduce_spec_1_1 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemma
   ((pow2 limb_size * (a + pow2 51 * b + pow2 102 * c + pow2 153 * d + pow2 204 * e))

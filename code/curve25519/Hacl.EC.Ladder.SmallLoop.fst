@@ -126,7 +126,7 @@ private inline_for_extraction val cmult_small_loop_double_step:
          let spointb0 : spoint_513 = (as_seq h0 (getx nqpq), (as_seq h0 (getz nqpq))) in
          (spointa1, spointb1) == cmult_small_loop_double_step_spec (spointa0) (spointb0) pointq byte i)
     ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 private inline_for_extraction let cmult_small_loop_double_step nq nqpq nq2 nqpq2 q byt i =
   cmult_small_loop_step nq nqpq nq2 nqpq2 q byt i;
   let byt = H8.(byt <<^ 1ul) in

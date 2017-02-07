@@ -154,6 +154,7 @@ private inline_for_extraction let upd_5 output output0 output1 output2 output3 o
   Seq.lemma_eq_intro (as_seq h1 output) (Hacl.Spec.EC.Format.seq_upd_5 output0 output1 output2 output3 output4)
   
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 private val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack unit
   (requires (fun h -> Buffer.live h output /\ Buffer.live h input))
