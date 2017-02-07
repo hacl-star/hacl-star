@@ -78,7 +78,7 @@ extract-c:
 		Poly1305_64.fst Hacl.Test.Poly1305_64.fst \
 		-drop 'Hacl.Endianness' \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
-		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*' \
+		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*' \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
                 -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
 # 	$(KREMLIN_HOME)/krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir poly-c -verbose -cc gcc \

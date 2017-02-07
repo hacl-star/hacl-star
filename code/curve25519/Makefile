@@ -99,8 +99,8 @@ extract-c:
 		-I ../bignum -I ../lib/kremlin \
 		Curve25519.fst Hacl.Test.X25519.fst \
 		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
-		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
-		-bundle 'Hacl.Spec.*' \
+		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*' \
+		-bundle 'Hacl.Spec.\*' \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
                 -no-prefix Hacl.Test.X25519 -ldopt -flto -ccopt -march=native -o x25519.exe
 	./x25519.exe
