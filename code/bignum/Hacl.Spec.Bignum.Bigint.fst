@@ -13,6 +13,8 @@ open Hacl.Bignum.Wide
 
 module U32 = FStar.UInt32
 
+#set-options "--initial_fuel 0 --max_fuel 1 --z3rlimit 50"
+
 val bitweight: n:nat{n < len} -> Tot nat
 let rec bitweight n = if n = 0 then 0 else limb_size + bitweight (n- 1)
 
@@ -84,14 +86,11 @@ val lemma_eval_wide: h:mem -> b:felem_wide{live h b} -> Lemma
 let lemma_eval_wide h b = lemma_eval_wide_ h b len
 
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
-
 val lemma_seval_def: s:seqelem -> i:nat{i <= len} -> Lemma
   ((i > 0 ==> seval_ s i = pow2 (limb_size * (i-1)) * Hacl.Bignum.Limb.v (Seq.index s (i-1)) + seval_ s (i-1))
     /\ (i = 0 ==> seval_ s i = 0))
 let lemma_seval_def s i = ()
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
 
 val lemma_seval_wide_def: s:seqelem_wide -> i:nat{i <= len} -> Lemma
   ((i > 0 ==> seval_wide_ s i = pow2 (limb_size * (i-1)) * w (Seq.index s (i-1)) + seval_wide_ s (i-1))

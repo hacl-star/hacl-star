@@ -40,8 +40,8 @@ verify: $(addsuffix -verify, $(BIGNUM_FILES))
 all-ci: verify
 
 %-hints: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib $^ --record_hints
+	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
+		--include ../lib $^ --record_hints --use_hints
 
 ALL_HINTS=$(addsuffix -hints, $(BIGNUM_MODULES))
 
