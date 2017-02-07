@@ -48,17 +48,34 @@ X25519_SPECIFIC= \
 
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 
+
+# Lax typechecking against the restricted integer interface
+%.fst-ct: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum --lax $^
+
+all-ct: $(addsuffix -ct, $(X25519_FILES))
+
+# Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
 	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $^ --use_hints
+		--include ../lib/kremlin --include ../bignum $^ --use_hints
 
-verify: $(addsuffix -verify, $(X25519_FILES))
+all-ver: $(addsuffix -verify, $(X25519_FILES))
 
+# Minimal lax typechecking, pre-requisite to any extraction
+%.fst-lax: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum --lax $^
+
+all-lax: $(addsuffix -lax, $(X25519_FILES))
+
+# Hints regeneration
 %.fst-hints: %.fst
 	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $^ --record_hints
+		--include ../lib/kremlin --include ../bignum $^ --use_hints --record_hints
 
-hints: $(addsuffix -hints, $(X25519_SPECIFIC))
+all-hints: $(addsuffix -hints, $(X25519_SPECIFIC))
 
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473

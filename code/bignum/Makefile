@@ -25,6 +25,12 @@ BIGNUM_FILES= \
 
 BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
 
+%.fst-ct: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
+		--include ../lib $^ --lax
+
+all-ct: $(addsuffix -ct, $(BIGNUM_FILES))
+
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
 		--include ../lib $^ --use_hints

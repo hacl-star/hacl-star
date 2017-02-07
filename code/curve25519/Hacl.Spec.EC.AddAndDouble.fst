@@ -663,7 +663,7 @@ private let carry_wide_spec_unrolled s =
   s4
 
 
-#set-options "--z3rlimit 20 --initial_fuel 5 --max_fuel 5"
+#set-options "--z3rlimit 100 --initial_fuel 5 --max_fuel 5"
 
 val lemma_carry_wide_spec_unrolled:
   s:seqelem_wide{carry_wide_pre s 0} -> Lemma (carry_wide_spec_unrolled s == carry_wide_spec s 0)

@@ -33,23 +33,33 @@ POLY1305_SPECIFIC= \
 POLY1305_FILES= $(BIGNUM) $(POLY1305_SPECIFIC)
 
 
-%.fst-lax: %.fst
+# Lax typechecking against the restricted integer interface
+%.fst-ct: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib --include ../bignum --lax $^
 
-lax: $(addsuffix -lax, $(POLY1305_FILES))
+all-ct: $(addsuffix -ct, $(POLY1305_FILES))
 
+# Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
 	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $^ --use_hints
+		--include ../lib/kremlin --include ../bignum $^ --use_hints
 
-verify: $(addsuffix -verify, $(POLY1305_FILES))
+all-ver: $(addsuffix -verify, $(POLY1305_FILES))
 
+# Minimal lax typechecking, pre-requisite to any extraction
+%.fst-lax: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum --lax $^
+
+all-lax: $(addsuffix -lax, $(POLY1305_FILES))
+
+# Hints regeneration
 %.fst-hints: %.fst
 	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $^ --use_hints --record_hints
+		--include ../lib/kremlin --include ../bignum $^ --use_hints --record_hints
 
-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
+all-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
 
 extract-c:
