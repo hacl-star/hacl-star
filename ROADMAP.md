@@ -35,7 +35,7 @@ and also to provide algorithms not yet supported by Hacl*.
 Both agility and multiplexing can be resolved at compile-time. 
 Thus, Hacl* can be configured to exclude weak algorithms such as SHA1 or unverified providers such as OpenSSL. 
 
-# Project Structure and Internal Dependencies
+## Project Structure
 
 (Anticipating some suggested renaming)
 
