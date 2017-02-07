@@ -20,7 +20,7 @@ ct:
 	$(MAKE) -C ../code ct
 
 verify-code:
-	$(MAKE) -C ../code verify
+	$(MAKE) -C ../code ci
 
 verify-crypto:
 	$(MAKE) -C ../crypto_proofs all-ver
