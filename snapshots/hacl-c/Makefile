@@ -44,7 +44,7 @@ salsa_avx.asm: Salsa20_avx.c
 
 test-chacha:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 $(OPENSSL_HOME)/libcrypto.a \
+	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 $(OPENSSL_HOME)/libcrypto.a \
 	-l sodium \
 	kremlib.c testlib.c Chacha20.c test-chacha.c -o test-chacha.exe
 	./test-chacha.exe
