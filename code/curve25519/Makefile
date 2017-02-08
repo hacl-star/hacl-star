@@ -51,7 +51,6 @@ SLOW=
 # Files that still have errors
 TODO=Hacl.Bignum.Fsum.fst \
 	Hacl.Bignum.Fdifference.fst \
-	Hacl.Spec.EC.AddAndDouble.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.EC.AddAndDouble.fst \
 	Hacl.EC.Format.fst

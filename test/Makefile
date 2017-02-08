@@ -25,6 +25,14 @@ verify-code:
 verify-crypto:
 	$(MAKE) -C ../crypto_proofs all-ver
 
+hints-code:
+	$(MAKE) -C ../code hints
+
+hints-crypto:
+	$(MAKE) -C ../crypto_proofs all-hints
+
+hints: hints-code hints-crypto
+
 verify: verify-code verify-crypto
 
 

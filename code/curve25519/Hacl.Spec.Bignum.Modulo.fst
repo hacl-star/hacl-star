@@ -12,7 +12,7 @@ open Hacl.Bignum.Limb
 
 module U32 = FStar.UInt32
 
-#set-options "--initial_fuel 0 --max_fuel 0"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 inline_for_extraction let two54m152 =
   assert_norm (pow2 64 > 0x3fffffffffff68); uint64_to_limb 0x3fffffffffff68uL
