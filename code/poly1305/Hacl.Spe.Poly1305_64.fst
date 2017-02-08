@@ -102,7 +102,7 @@ let poly1305_finish_spec st m rem' key_s =
 (* *************************** *)
 
 
-unfold inline_for_extraction let encode (w:word) : GTot elem = encode (seq_map h8_to_u8 w)
+unfold inline_for_extraction let encode (w:word) : GTot elem = encode (reveal_sbytes w)
 
 
 (* val poly: vs:text -> r:elem -> GTot (a:elem) *)

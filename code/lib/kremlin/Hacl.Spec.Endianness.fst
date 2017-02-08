@@ -35,7 +35,7 @@ private let rec seq_map_ #a #b f s j s' =
     seq_map_ f s (j+1) s'
   )
 
-val seq_map: #a:Type -> #b:Type -> f:(a -> GTot b) -> s:Seq.seq a ->
+abstract val seq_map: #a:Type -> #b:Type -> f:(a -> GTot b) -> s:Seq.seq a ->
   GTot (s':Seq.seq b{Seq.length s' = Seq.length s /\ (forall (i:nat). i < Seq.length s ==> Seq.index s' i == f (Seq.index s i))})
 let seq_map #a #b f s =
   if Seq.length s = 0 then Seq.createEmpty #b
@@ -45,8 +45,10 @@ let seq_map #a #b f s =
 unfold inline_for_extraction
 let reveal_sbytes (s:Seq.seq H8.t) : GTot (s:Seq.seq U8.t) = s
 
-inline_for_extraction let hlittle_endian (s:Seq.seq H8.t) : GTot nat =
+unfold inline_for_extraction
+let hlittle_endian (s:Seq.seq H8.t) : GTot nat =
   little_endian s
 
-inline_for_extraction let hbig_endian (s:Seq.seq H8.t) : GTot nat =
+unfold inline_for_extraction
+let hbig_endian (s:Seq.seq H8.t) : GTot nat =
   big_endian s
