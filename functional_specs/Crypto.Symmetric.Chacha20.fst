@@ -17,16 +17,9 @@ open Buffer.Utils
 
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
-
-//type u64 = FStar.UInt64.t
-
 module Spec = Hacl.Spec.Chacha20
 
 (*** Chacha 20 ***)
-
-//inline_for_extraction let keylen   = UInt32.uint_to_t keylen
-//inline_for_extraction let blocklen = UInt32.uint_to_t blocklen
-//inline_for_extraction let ivlen    = UInt32.uint_to_t ivlen
 
 type bytes = buffer UInt8.t
 
@@ -138,7 +131,7 @@ let rec fill m i len src =
     m.(i) <- uint32_of_bytes (sub src 0ul 4ul); 
     let len = len -^ 1ul in 
     fill m (i +^ 1ul) len (sub src 4ul (4ul *^ len));
-    assume false //17-02-08 inductive  functional corectness proof TBC
+    assume false //17-02-08 inductive functional corectness proof TBC
     )
 
 //review handling of endianness
