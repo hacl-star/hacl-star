@@ -90,8 +90,8 @@ uint32_t hacl_aead_chacha20_poly1305_encrypt(uint8_t *plaintext,  uint32_t plain
     i++;
   }
   uint64_t aad_last[16] = {0};
-  blit(aad + i * 16, aad_len, aad_last, 0);
-  Hacl_Impl_Poly1305_64_poly1305_update(NULL, ctx_poly, aad_last);
+  blit(aad + i * 16, aad_len, (uint8_t*)aad_last, 0);
+  Hacl_Impl_Poly1305_64_poly1305_update(NULL, ctx_poly, (uint8_t*)aad_last);
 
   // Process Ciphertext
   i = 0;
@@ -101,8 +101,8 @@ uint32_t hacl_aead_chacha20_poly1305_encrypt(uint8_t *plaintext,  uint32_t plain
     i++;
   }
   uint64_t ciphertext_last[16] = {0};
-  blit(ciphertext + i * 16, plaintext_len, ciphertext_last, 0);
-  Hacl_Impl_Poly1305_64_poly1305_update(NULL, ctx_poly, ciphertext_last);
+  blit(ciphertext + i * 16, plaintext_len, (uint8_t*)ciphertext_last, 0);
+  Hacl_Impl_Poly1305_64_poly1305_update(NULL, ctx_poly, (uint8_t*)ciphertext_last);
 
   // Process length
   uint8_t encodedlen[16];
