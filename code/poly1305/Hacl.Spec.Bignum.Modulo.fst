@@ -196,7 +196,7 @@ let carry_top_wide_pre s =
   5 * (w (Seq.index s 2) / pow2 42) < pow2 64
   /\ 5 * (w (Seq.index s 2) / pow2 42) + w (Seq.index s 0) < pow2 128
 
-#set-options "--z3rlimit 5"
+#set-options "--z3rlimit 20"
 
 val carry_top_wide_spec: s:seqelem_wide{carry_top_wide_pre s} -> Tot seqelem_wide
 let carry_top_wide_spec s =
