@@ -7,7 +7,7 @@ project (hacl)
 set(CMAKE_BUILD_TYPE Release)
 
 # Include directories
-include_directories(./snapshots/hacl-c ./code/experimental/snapshots/hacl-c)
+include_directories(./snapshots/hacl-c ./snapshots/hacl-c-experimental)
 
 # Verified Files
 set(SOURCE_FILES_VERIFIED
@@ -22,9 +22,9 @@ set(SOURCE_FILES_VERIFIED
 
 # Experimental Files
 set(SOURCE_FILES_EXPERIMENTAL
-   code/experimental/snapshots/hacl-c/cpuid.c
-   code/experimental/snapshots/hacl-c/drng.c
-   code/experimental/snapshots/hacl-c/Random.c)
+   snapshots/hacl-c-experimental/cpuid.c
+   snapshots/hacl-c-experimental/drng.c
+   snapshots/hacl-c-experimental/Random.c)
 
 # Define a user variable to determinate if experimental files are build
 option(Experimental "Include experimental code in HaCl build" OFF)
