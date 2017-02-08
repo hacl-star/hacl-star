@@ -11,8 +11,8 @@
 #include <stdbool.h>
 #include <time.h>
 
-//#undef inline
-//#define inline inline __attribute__((always_inline))
+#undef force_inline
+#define force_inline inline __attribute__((always_inline))
 
 
 // For types and values from C.fsti that do not exactly have the same name as

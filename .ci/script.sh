@@ -21,7 +21,4 @@ ocamlfind ocamlopt -config
 gcc --version
 fstar.exe --version
 
-make -C code ct
-make -C code extract-c
-make -C crypto_proofs krml-test.exe
-make world
+make -C test travis

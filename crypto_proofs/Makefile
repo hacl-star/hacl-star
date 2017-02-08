@@ -15,7 +15,7 @@ OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real
 
 KRML_INCLUDES=$(addprefix -I ,test/spartan_aes aead uf1cma primitives prf utils ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
-KRML_ARGS=-verbose -ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS) -ccopt -std=gnu99
+KRML_ARGS=-ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS) -ccopt -std=gnu99
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES) 
 
 test/spartan_aes/aes.o:
@@ -88,15 +88,6 @@ VERIFY= \
   aead/Crypto.AEAD \
   aead/Crypto.Plain
 
-# Files that should fully typecheck
-# Files commented out are broken, uncomment once fixed
-VERIFY2= \
-
-
-EXTRA= \
-  Crypto.Symmetric.Poly1305 \
-  Crypto.Test
-
 #  Crypto.Symmetric.Poly1305.Lemmas  # verification target is not passing reliably so commenting out
 
 #16-10-30 removed files specific to Poly1305:
@@ -126,6 +117,8 @@ extra: all-ver $(addsuffix .fst-ver, $(EXTRA))
 
 all-ver: $(addsuffix .fst-ver, $(VERIFY))
 
+all-hints: $(addsuffix .fst-hints, $(VERIFY))
+
 all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
 # Parameter for interactive mode
@@ -138,6 +131,14 @@ all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 # Verifying one file at a time
 %.fst-ver:
 	$(FSTAR) $(OPTIONS) \
+	$(FSTAR_INCLUDE_PATHS) \
+	--__temp_no_proj Crypto.Symmetric.MAC \
+	--verify_module $(basename $(notdir $@)) \
+	$(basename $@).fst
+
+# (Re-)Generate hints
+%.fst-hints:
+	$(FSTAR) $(OPTIONS) --record_hints \
 	$(FSTAR_INCLUDE_PATHS) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	--verify_module $(basename $(notdir $@)) \

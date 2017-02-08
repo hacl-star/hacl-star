@@ -317,7 +317,7 @@ let poly_empty #i t r =
 
 val poly_cons_: x:word -> xs:PS_.text -> r:PS_.elem ->
   Lemma Hacl.Spec.Poly1305.(poly (Seq.cons x xs) r == (encode x +@ poly xs r) *@ r)
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let poly_cons_ x xs r =
   let xxs = Seq.cons x xs in
   Seq.lemma_len_append (Seq.create 1 x) xs;
@@ -349,7 +349,7 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r
     ))
 
-#reset-options "--z3rlimit 200"
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 
 // TODO: use encodeB?
 let update #i r a w =

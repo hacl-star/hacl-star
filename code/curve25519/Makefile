@@ -45,47 +45,62 @@ X25519_SPECIFIC= \
 	Hacl.Spec.EC.fst \
 	Hacl.EC.fst
 
+# Files that are too slow and for which verification speed must improve
+SLOW=
+
+# Files that still have errors
+TODO=Hacl.Bignum.Fsum.fst \
+	Hacl.Bignum.Fdifference.fst \
+	Hacl.Spec.EC.AddAndDouble.fst \
+	Hacl.Spec.Bignum.Modulo.fst \
+	Hacl.EC.AddAndDouble.fst \
+	Hacl.EC.Format.fst
 
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 
 
+FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
+
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib
+
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --lax $^
+	$(FSTAR_CT) --lax $^
 
 all-ct: $(addsuffix -ct, $(X25519_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints
+	$(FSTARB) $^ --use_hints
 
 all-ver: $(addsuffix -verify, $(X25519_FILES))
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --lax $^
+	$(FSTARB) --lax $^
 
 all-lax: $(addsuffix -lax, $(X25519_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum $^ --use_hints --record_hints
+	-$(FSTARB) $^ --use_hints --record_hints
 
 all-hints: $(addsuffix -hints, $(X25519_SPECIFIC))
+
+# For CI, all modules restricted from incomplete or slow ones
+all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_FILES)))
 
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p x25519-c
-	$(KREMLIN_HOME)/krml -tmpdir x25519-c -verbose -ccopt -std=gnu99 \
+	$(KREMLIN_HOME)/krml -tmpdir x25519-c -ccopt -std=gnu99 \
 		-I ../bignum -I ../lib/kremlin \
 		Curve25519.fst Hacl.Test.X25519.fst \
 		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
-		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
-		-bundle 'Hacl.Spec.*' \
+		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*' \
+		-bundle 'Hacl.Spec.\*' \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
                 -no-prefix Hacl.Test.X25519 -ldopt -flto -ccopt -march=native -o x25519.exe
 	./x25519.exe

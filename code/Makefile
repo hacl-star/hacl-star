@@ -11,9 +11,19 @@ DIRECTORIES= salsa-family bignum poly1305 curve25519
 %-ct: %
 	$(MAKE) -C $< all-ct
 
+%-ci: %
+	$(MAKE) -C $< all-ci
+
 verify: $(addsuffix -ver, $(DIRECTORIES))
 ct: $(addsuffix -ct, $(DIRECTORIES))
 extract-c: $(addsuffix -c, $(filter-out bignum, $(DIRECTORIES)))
+# extract-c:
+# 	$(MAKE) -C salsa-family extract-c
+# 	$(MAKE) -C curve25519 extract-c
+# 	$(MAKE) -C poly1305 extract-c
+
+ci: $(addsuffix -ci, $(DIRECTORIES))
+
 
 clean:
 	rm -rf *~ *.exe *.out 
