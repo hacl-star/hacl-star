@@ -520,7 +520,7 @@ let poly1305_finish_ log st mac m len key_s =
   let mac' = acc' +%^ k' in
   hstore128_le mac mac';
   let h1 = ST.get() in
-  lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Poly1305_64.poly1305_finish_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal log)) (as_seq h0 m) len (as_seq h0 key_s))
+  lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (poly1305_finish_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal log)) (as_seq h0 m) len (as_seq h0 key_s)))
 
 
 
@@ -529,31 +529,47 @@ let poly1305_finish_ log st mac m len key_s =
 (* ************************************************ *)
 
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val poly1305_blocks:
   current_log:log_t ->
   st:poly1305_state ->
   m:uint8_p ->
-  len:U64.t{U64.v len <= length m} ->
+  len:U64.t{16 * U64.v len = length m} ->
   Stack log_t
     (requires (fun h -> live_st h st /\ live h m /\ disjoint st.r m /\ disjoint st.h m
       /\ red_45 (as_seq h st.h)
       /\ red_44 (as_seq h st.r)
+      /\ (let r = as_seq h st.r in
+         let acc = as_seq h st.h in
+         let log = reveal current_log in
+         invariant (Spec.MkState r acc log))
       ))
     (ensures  (fun h0 updated_log h1 -> modifies_1 st.h h0 h1 /\ live_st h1 st /\ live_st h0 st /\ live h0 m
       /\ red_45 (as_seq h0 st.h)
       /\ red_44 (as_seq h0 st.r)
+      /\ red_44 (as_seq h1 st.r)
       /\ red_45 (as_seq h1 st.h)
-      /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == Hacl.Spe.Poly1305_64.poly1305_blocks_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) len
+      /\ (let r = as_seq h0 st.r in
+         let acc = as_seq h0 st.h in
+         let log = reveal current_log in
+         let r' = as_seq h1 st.r in
+         let acc' = as_seq h1 st.h in
+         let log' = reveal updated_log in
+         let m = as_seq h0 m in
+         invariant (Spec.MkState r acc log)
+         /\ invariant (Spec.MkState r' acc' log')
+         /\ Spec.MkState r acc' log' == Hacl.Spe.Poly1305_64.poly1305_blocks_spec (Spec.MkState r acc log) m len)
       ))
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let rec poly1305_blocks log st m len =
   let m0 = ST.get() in
   if U64.(len =^ 0uL) then (
     log
   )
   else (
-    let new_log = poly1305_update log st m in
+    cut (U64.v len >= 1);
+    let new_log = poly1305_update log st (Buffer.sub m 0ul 16ul) in
     let len = U64.(len -^ 1uL) in
     let m   = offset m 16ul in
     poly1305_blocks new_log st m len

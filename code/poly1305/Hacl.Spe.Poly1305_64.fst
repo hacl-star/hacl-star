@@ -292,7 +292,8 @@ val poly1305_blocks_spec:
     let acc' = MkState?.h st' in
     let acc  = MkState?.h st in
     let r    = MkState?.r st in
-    log' == encode_bytes m @| log
+    invariant st'
+    /\ log' == encode_bytes m @| log
     /\ selem acc' = poly log' (seval r)
   })
   (decreases (U64.v len))
@@ -327,21 +328,10 @@ let rec poly1305_blocks_spec st m len =
     st'')
 
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 10"
-
-(* assume val lemma_msg_to_text_eq_encode_bytes: msg:Seq.seq H8.t{length msg > 0} -> Lemma (encode_bytes msg == seq_map (seq_map uint8_to_sint8) (msg_to_text (seq_map h8_to_u8 msg))) *)
-(* let rec lemma_msg_to_text_eq_encode_bytes msg = *)
-(*   if length msg <= 16 then ( *)
-(*     lemma_eq_intro msg (slice msg 0 (Math.Lib.min 16 (length msg))); *)
-(*     lemma_eq_intro (msg @| createEmpty) msg *)
-(*   ) *)
-(*   else admit() *)
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val crypto_onetimeauth_spec:
-  input:Seq.seq H8.t ->
+  input:Seq.seq H8.t{Seq.length input > 0} ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Seq.length input} ->
   k:Seq.seq H8.t{Seq.length k = 32} ->
   Tot (mac:Seq.seq H8.t{Seq.length mac = 16
@@ -352,11 +342,15 @@ let crypto_onetimeauth_spec input len k =
   let rem16 = U64.(len &^ 0xfuL) in
   assert_norm(pow2 4 = 16);
   UInt.logand_mask (U64.v len) 4;
+  assert_norm(pow2 4 = 16);
+  Math.Lemmas.lemma_div_mod (U64.v len) 16;
   let part_input, last_block = split input (16 * U64.v len16) in
+  (* cut (Seq.length last_block < 16); *)
   let init_st = poly1305_init_spec kr in
   assert_norm(pow2 128 < pow2 130 - 5);
   poly_def_0 (MkState?.log init_st) (seval (MkState?.r init_st));
   cut (invariant init_st);
   let partial_st = poly1305_blocks_spec init_st part_input len16 in
+  cut (invariant partial_st);
   admit(); // TODO: finish
   poly1305_finish_spec partial_st last_block rem16 ks
