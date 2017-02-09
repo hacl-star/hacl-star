@@ -93,12 +93,12 @@ int32_t test2_aead_chacha20_poly1305()
   uint8_t tag[16];
 
   printf("\nAEAD Encryption\n");
-  hacl_aead_chacha20_poly1305_encrypt(test2_plaintext, 114, test2_aad, 12, test2_key, test2_iv, ciphertext, tag);
+  hacl_aead_chacha20_poly1305_encrypt(ciphertext, tag, test2_plaintext, 114, test2_aad, 12, test2_key, test2_iv);
   TestLib_compare_and_print("HACL Chacha20 Ciphertext", test2_expected, ciphertext, 114);
   TestLib_compare_and_print("HACL Poly1305 Tag", &test2_expected[114], tag, 16);
 
   printf("\nAEAD Decryption\n");
-  hacl_aead_chacha20_poly1305_decrypt(ciphertext, 114, test2_aad, 12, tag, test2_key, test2_iv, decrypted);
+  hacl_aead_chacha20_poly1305_decrypt(decrypted, tag, ciphertext, 114, test2_aad, 12, test2_key, test2_iv);
   TestLib_compare_and_print("HACL Chacha20 Plaintext", test2_plaintext, decrypted, 114);
   TestLib_compare_and_print("HACL Poly1305 Tag", &test2_expected[114], tag, 16);
 
