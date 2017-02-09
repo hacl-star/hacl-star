@@ -31,4 +31,4 @@ Run `make verify` to run the verification targets, or `make extract-c` to compil
 
 ### C code
 
-Already extracted C code can be found in the [extracted/c](extracted/c) directory.
+Already extracted C code can be found in the [snapshots/hacl-c](snapshots/hacl-c) directory.

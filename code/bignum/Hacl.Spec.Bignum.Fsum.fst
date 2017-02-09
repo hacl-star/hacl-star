@@ -7,7 +7,7 @@ open Hacl.Bignum.Limb
 
 module U32 = FStar.UInt32
 
-#set-options "--max_fuel 1 --initial_fuel 1"
+#set-options "--max_fuel 1 --initial_fuel 0 --z3rlimit 50"
 
 let red (s:seqelem) (l:nat{l <= len}) = (forall (i:nat). {:pattern (v (Seq.index s i))} (i < l)
                                                  ==> v (Seq.index s i) < pow2 (n - 1))
@@ -30,9 +30,6 @@ let rec fsum_spec a b ctr =
     let s'' = fsum_spec a' b i in
     s''
   )
-
-
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 
 val lemma_fsum_eval_: s:seqelem -> s':seqelem -> ctr:nat{ctr <= len /\ red s len /\ red s' len} ->

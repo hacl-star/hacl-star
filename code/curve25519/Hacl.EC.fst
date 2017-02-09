@@ -12,7 +12,7 @@ open Hacl.Bignum.Limb
 open Hacl.EC.Point
 open Hacl.EC.Format
 open Hacl.EC.Ladder
-
+open Hacl.Spec.EC
 
 module U32 = FStar.UInt32
 module H8 = Hacl.UInt8
@@ -30,7 +30,14 @@ inline_for_extraction val crypto_scalarmult__:
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getx q))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getz q))
     ))
-    (ensures (fun h0 _ h1 -> Buffer.live h1 mypublic /\ modifies_1 mypublic h0 h1))
+    (ensures (fun h0 _ h1 -> live h0 q /\ Buffer.live h0 mypublic /\ Buffer.live h0 secret
+      /\ Buffer.live h0 basepoint
+      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getx q))
+      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getz q))
+      /\ Buffer.live h1 mypublic /\ modifies_1 mypublic h0 h1
+      (* /\ (as_seq h1 mypublic == crypto_scalarmult_spec (as_seq h0 secret) *)
+      ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 inline_for_extraction let crypto_scalarmult__ mypublic scalar basepoint q =
   let h0 = ST.get() in
   push_frame();

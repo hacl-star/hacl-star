@@ -2,9 +2,11 @@
 # Main HACL* Makefile
 #
 
-.PHONY: prepare build
+.PHONY: prepare build experimental clean
 
 all: build
+
+world: build experimental
 
 prepare:
 	@echo $(CYAN)"\n# Installing OCaml packages required by F*"$(NORMAL)
@@ -22,13 +24,26 @@ prepare:
 build:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
 	mkdir -p build && cd build; \
-	cmake $(CMAKE_COMPILER_OPTION) ../extracted/c && make
+	cmake $(CMAKE_COMPILER_OPTION) .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
+
+experimental:
+	@echo $(CYAN)"# Compiling the HaCl* library (with experimental features)"$(NORMAL)
+	mkdir -p build-experimental && cd build-experimental; \
+	cmake $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
+	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
+
+ci:
+	$(MAKE) -C test
+
+hints:
+	$(MAKE) -C test hints
 
 clean:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
 	rm -rf *~
 	rm -rf build
+	rm -rf build-experimental
 
 
 # Check if GCC-6 is installed, uses GCC otherwise

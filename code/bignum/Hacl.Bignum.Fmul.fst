@@ -19,11 +19,13 @@ module U32 = FStar.UInt32
 
 #set-options "--z3rlimit 40"
 
+[@"c_inline"]
 val shift_reduce: output:felem -> Stack unit
   (requires (fun h -> live h output /\ shift_reduce_pre (as_seq h output)))
   (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
     /\ shift_reduce_pre (as_seq h0 output)
     /\ as_seq h1 output == shift_reduce_spec (as_seq h0 output)))
+[@"c_inline"]
 let shift_reduce output =
   shift output;
   reduce output
@@ -31,6 +33,7 @@ let shift_reduce output =
 
 #set-options "--z3rlimit 250 --initial_fuel 1 --max_fuel 1"
 
+[@"c_inline"]
 val mul_shift_reduce_:
   output:felem_wide ->
   init_input:Ghost.erased seqelem ->
@@ -45,6 +48,7 @@ val mul_shift_reduce_:
       /\ mul_shift_reduce_pre (as_seq h0 output) (Ghost.reveal init_input) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)
       /\ as_seq h1 output == mul_shift_reduce_spec_ (as_seq h0 output) (Ghost.reveal init_input) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)
       ))
+[@"c_inline"]
 let rec mul_shift_reduce_ output init_input input input2 ctr =
   let open FStar.UInt32 in
   if (ctr =^ 0ul) then ()
@@ -80,15 +84,18 @@ let rec mul_shift_reduce_ output init_input input input2 ctr =
 
 let as_seq' (h:mem) (b:felem{live h b}) : GTot seqelem = as_seq h b
 
+[@"substitute"]
 private inline_for_extraction val get_seq: b:felem -> Stack (Ghost.erased (seqelem))
   (requires (fun h -> live h b))
   (ensures (fun h0 s h1 -> live h0 b /\ h1 == h0 /\ (Ghost.reveal s == as_seq h0 b)))
+[@"substitute"]
 private inline_for_extraction let get_seq b =
   let h2 = ST.get() in
   Ghost.elift1 #(b:felem{live h2 b}) (as_seq' h2) (Ghost.hide b)
   
 
-val fmul_:
+[@"c_inline"]
+private val fmul_:
   output:felem ->
   input:felem{disjoint output input} ->
   input2:felem{(* disjoint output input2 /\  *)disjoint input input2} ->
@@ -101,7 +108,8 @@ val fmul_:
       /\ as_seq h1 output == fmul_spec (as_seq h0 input) (as_seq h0 input2)
       ))
 #reset-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1"
-let fmul_ output input input2 =
+[@"c_inline"]
+private let fmul_ output input input2 =
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in
@@ -124,6 +132,7 @@ let fmul_ output input input2 =
 
 #reset-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
 
+[@"c_inline"]
 val fmul:
   output:felem ->
   input:felem ->
@@ -136,6 +145,7 @@ val fmul:
       /\ fmul_pre (as_seq h0 input) (as_seq h0 input2)
       /\ as_seq h1 output == fmul_spec (as_seq h0 input) (as_seq h0 input2)
       ))
+[@"c_inline"]
 let fmul output input input2 =
   let h0 = ST.get() in
   push_frame();

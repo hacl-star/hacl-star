@@ -46,8 +46,8 @@ let main () =
     0xe6uy; 0xf8uy; 0xf7uy; 0x64uy; 0x7auy; 0xacuy; 0x79uy; 0x57uy
     ] in
   Hacl.EC.crypto_scalarmult result scalar1 input1;
-  TestLib.compare_and_print (C.string_of_literal "curve25519") expected1 result keysize;
+  TestLib.compare_and_print (C.string_of_literal "Curve25519") expected1 result keysize;
   Hacl.EC.crypto_scalarmult result scalar2 input2;
-  TestLib.compare_and_print (C.string_of_literal "curve25519") expected2 result keysize;
+  TestLib.compare_and_print (C.string_of_literal "Curve25519") expected2 result keysize;
   pop_frame();
   C.exit_success

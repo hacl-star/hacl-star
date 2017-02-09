@@ -11,6 +11,10 @@ module U32 = FStar.UInt32
 module H8 = Hacl.UInt8
 
 
+(* val crypto_scalarmul_spec__: *)
+(*   secret:uint8_s{Seq.length secret = 32} -> *)
+
+
 val crypto_scalarmult_spec:
   secret:uint8_s{Seq.length secret = 32} ->
   basepoint:uint8_s{Seq.length basepoint = 32} ->

@@ -30,6 +30,7 @@ module F   = Hacl.Spec.Bignum.Field
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
+[@"c_inline"]
 val fsum:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -41,6 +42,7 @@ val fsum:
       /\ eval h1 a = eval h0 a + eval h0 b
       /\ as_seq h1 a == fsum_tot (as_seq h0 a) (as_seq h0 b)))
       (* /\ F.(get_elem h1 a = get_elem h0 a @+ get_elem h0 b))) *)
+[@"c_inline"]
 let fsum a b =
   let h0 = ST.get() in
   fsum_ a b clen;
@@ -54,6 +56,7 @@ assume val lemma_diff: a:int -> b:int -> p:pos ->
 
 #set-options "--z3rlimit 20"
 
+[@"c_inline"]
 val fdifference:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -67,6 +70,7 @@ val fdifference:
       /\ eval h1 a % prime = (eval h0 b - eval h0 a) % prime
       /\ as_seq h1 a == fdifference_tot (as_seq h0 a) (as_seq h0 b)
       ))
+[@"c_inline"]
 let fdifference a b =
   let hinit = ST.get() in
   push_frame();
@@ -91,6 +95,7 @@ open Hacl.Spec.Bignum.Fscalar
 open Hacl.Spec.Bignum.Fproduct
 
 
+[@"c_inline"]
 val fscalar:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -107,6 +112,7 @@ val fscalar:
       /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec (as_seq h0 b) s) 0))
       /\ as_seq h1 a == fscalar_tot (as_seq h0 b) s
     ))
+[@"c_inline"]
 let fscalar output b s =
   let hinit = ST.get() in
   push_frame();
@@ -124,6 +130,7 @@ let fscalar output b s =
   pop_frame()
 
 
+[@"c_inline"]
 val fmul:
   output:felem ->
   a:felem ->
@@ -137,6 +144,7 @@ val fmul:
       /\ eval h1 output % prime = (eval h0 a * eval h0 b) % prime
       /\ as_seq h1 output == fmul_tot (as_seq h0 a) (as_seq h0 b)
       ))
+[@"c_inline"]
 let fmul output a b = fmul output a b
 
 
@@ -153,6 +161,7 @@ let fmul output a b = fmul output a b
 (*   fsquare_times output input count *)
 
 
+[@"c_inline"]
 val crecip:
   out:felem ->
   z:felem{disjoint out z} -> Stack unit
@@ -161,5 +170,6 @@ val crecip:
     /\ crecip_pre (as_seq h0 z)
     /\ as_seq h1 out == crecip_tot (as_seq h0 z)
   ))
+[@"c_inline"]
 let crecip output input =
   crecip output input

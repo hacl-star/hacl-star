@@ -25,19 +25,27 @@ BIGNUM_FILES= \
 
 BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
 
+%.fst-ct: %.fst
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
+		--include ../lib $^ --lax
+
+all-ct: $(addsuffix -ct, $(BIGNUM_FILES))
+
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
 		--include ../lib $^ --use_hints
 
 verify: $(addsuffix -verify, $(BIGNUM_FILES))
 
+all-ci: verify
+
 %-hints: %.fst
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib $^ --record_hints
+	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
+		--include ../lib $^ --record_hints --use_hints
 
 ALL_HINTS=$(addsuffix -hints, $(BIGNUM_MODULES))
 
-hints: $(ALL_HINTS)
+all-hints: $(ALL_HINTS)
 
 clean:
 	rm -rf *.exe *.out *~ x25519/*~ poly1305/*~ interfaces/*~ tmp tmppoly

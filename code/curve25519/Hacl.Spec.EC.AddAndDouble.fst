@@ -77,7 +77,7 @@ let fsum_unrolled a b =
     c
 
 
-#set-options "--z3rlimit 10 --initial_fuel 6 --max_fuel 6"
+#set-options "--z3rlimit 40 --initial_fuel 6 --max_fuel 6"
 
 val lemma_fsum_unrolled: s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} -> Lemma
   (fsum_unrolled s1 s2 == fsum_spec s1 s2 len)
@@ -116,7 +116,7 @@ let fdifference_unrolled a b =
     c
 
 
-#set-options "--z3rlimit 10 --initial_fuel 6 --max_fuel 6"
+#set-options "--z3rlimit 40 --initial_fuel 6 --max_fuel 6"
 
 val lemma_fdifference_unrolled: s1:seqelem -> s2:seqelem{gte_limbs s1 s2 len} -> Lemma
   (fdifference_unrolled s1 s2 == fdifference_spec s1 s2 len)
@@ -609,7 +609,7 @@ private val shift_reduce_unrolled:
 private let shift_reduce_unrolled input input2 =
   mul_shift_reduce_unrolled_ (Seq.create len wide_zero) input input input2
 
-#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_mul_shift_reduce_unrolled: input:seqelem -> input2:seqelem -> Lemma
   (requires (mul_shift_reduce_pre' input input2))
@@ -663,7 +663,7 @@ private let carry_wide_spec_unrolled s =
   s4
 
 
-#set-options "--z3rlimit 20 --initial_fuel 5 --max_fuel 5"
+#set-options "--z3rlimit 100 --initial_fuel 5 --max_fuel 5"
 
 val lemma_carry_wide_spec_unrolled:
   s:seqelem_wide{carry_wide_pre s 0} -> Lemma (carry_wide_spec_unrolled s == carry_wide_spec s 0)
@@ -839,7 +839,7 @@ let fscalar_unrolled a sc =
     c
 
 
-#set-options "--z3rlimit 10 --initial_fuel 6 --max_fuel 6"
+#set-options "--z3rlimit 40 --initial_fuel 6 --max_fuel 6"
 
 val lemma_fscalar_unrolled: s1:seqelem -> sc:limb -> Lemma
   (fscalar_unrolled s1 sc == Hacl.Spec.Bignum.Fscalar.fscalar_spec s1 sc)

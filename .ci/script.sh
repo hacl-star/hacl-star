@@ -21,6 +21,4 @@ ocamlfind ocamlopt -config
 gcc --version
 fstar.exe --version
 
-make -C code/poly1305 extract-c
-make -C code/curve25519 extract-c
-make
+make -C test travis

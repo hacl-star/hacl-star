@@ -15,6 +15,7 @@ module U32 = FStar.UInt32
 
 #set-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1"
 
+[@"c_inline"]
 val copy_from_wide_:
   output:felem ->
   input:felem_wide{disjoint output input} ->
@@ -25,6 +26,7 @@ val copy_from_wide_:
     (ensures (fun h0 _ h1 -> live h0 input /\ copy_from_wide_pre (as_seq h0 input) /\ live h1 output
       /\ modifies_1 output h0 h1
       /\ as_seq h1 output == copy_from_wide_spec (as_seq h0 input) ))
+[@"c_inline"]
 let rec copy_from_wide_ output input ctr =
   if U32.(ctr =^ 0ul) then (
     let h = ST.get() in
@@ -42,6 +44,7 @@ let rec copy_from_wide_ output input ctr =
 
 #set-options "--z3rlimit 50"
 
+[@"c_inline"]
 val shift_:
   output:felem ->
   ctr:U32.t{U32.v ctr < len} ->
@@ -50,6 +53,7 @@ val shift_:
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
       /\ (forall (i:nat). (i < U32.v ctr) ==> v (get h1 output (i+1)) = v (get h0 output i))
       /\ (forall (i:nat). (i > U32.v ctr /\ i < len) ==> get h1 output i == get h0 output i)))
+[@"c_inline"]
 let rec shift_ output ctr =
   let open FStar.UInt32 in
   if (ctr =^ 0ul) then ()
@@ -62,12 +66,14 @@ let rec shift_ output ctr =
 #set-options "--z3rlimit 50"
 
 
+[@"c_inline"]
 val shift:
   output:felem ->
   Stack unit
     (requires (fun h -> live h output))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
       /\ as_seq h1 output == shift_spec (as_seq h0 output)))
+[@"c_inline"]
 let rec shift output =
   let h0 = ST.get() in
   let open FStar.UInt32 in
@@ -80,6 +86,7 @@ let rec shift output =
 
 #set-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
 
+[@"c_inline"]
 val sum_scalar_multiplication_:
   output:felem_wide ->
   input:felem{disjoint output input} ->
@@ -90,6 +97,7 @@ val sum_scalar_multiplication_:
     (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 /\ live h0 input /\ live h0 output
       /\ sum_scalar_multiplication_pre_ (as_seq h0 output) (as_seq h0 input) s (U32.v ctr)
       /\ (as_seq h1 output) == sum_scalar_multiplication_spec (as_seq h0 output) (as_seq h0 input) s (U32.v ctr)))
+[@"c_inline"]
 let rec sum_scalar_multiplication_ output input s ctr =
   if U32.(ctr =^ 0ul) then ()
   else (
@@ -103,6 +111,7 @@ let rec sum_scalar_multiplication_ output input s ctr =
 
 #set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
+[@"c_inline"]
 val carry_wide_:
   t:felem_wide ->
   ctr:U32.t{U32.v ctr < len} ->
@@ -111,6 +120,7 @@ val carry_wide_:
     (ensures (fun h0 _ h1 -> live h0 t /\ live h1 t /\ modifies_1 t h0 h1
       /\ carry_wide_pre (as_seq h0 t) (U32.v ctr)
       /\ as_seq h1 t == carry_wide_spec (as_seq h0 t) (U32.v ctr)))
+[@"c_inline"]
 let rec carry_wide_ tmp ctr =
   if U32.(ctr =^ clen -^ 1ul) then ()
   else (
@@ -140,6 +150,7 @@ let rec carry_wide_ tmp ctr =
 
 #reset-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1"
 
+[@"c_inline"]
 val carry_limb_:
   t:felem ->
   ctr:U32.t{U32.v ctr < len} ->
@@ -148,6 +159,7 @@ val carry_limb_:
     (ensures (fun h0 _ h1 -> live h0 t /\ live h1 t /\ modifies_1 t h0 h1
       /\ carry_limb_pre (as_seq h0 t) (U32.v ctr)
       /\ as_seq h1 t == carry_limb_spec (as_seq h0 t) (U32.v ctr)))
+[@"c_inline"]
 let rec carry_limb_ tmp ctr =
   if U32.(ctr =^ clen -^ 1ul) then ()
   else (
@@ -176,6 +188,7 @@ let rec carry_limb_ tmp ctr =
 
 #set-options "--z3rlimit 20"
 
+[@"c_inline"]
 val carry_0_to_1:
   output:felem ->
   Stack unit
@@ -183,6 +196,7 @@ val carry_0_to_1:
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
       /\ carry_0_to_1_pre (as_seq h0 output)
       /\ as_seq h1 output == carry_0_to_1_spec (as_seq h0 output)))
+[@"c_inline"]
 let carry_0_to_1 output =
   assume (length output > 1);
   let i0 = output.(0ul) in

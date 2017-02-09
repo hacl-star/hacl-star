@@ -16,6 +16,7 @@ let gte_limbs_c h (a:felem) h' (b:felem) (l:nat{l <= len}) : GTot Type0 =
   live h a /\ live h' b /\ gte_limbs (as_seq h a) (as_seq h' b) l
 
 
+[@"c_inline"]
 val fdifference_:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -24,6 +25,7 @@ val fdifference_:
     (requires (fun h -> gte_limbs_c h a h b (U32.v i)))
     (ensures (fun h0 _ h1 -> gte_limbs_c h0 a h0 b (U32.v i) /\ live h1 a /\ modifies_1 a h0 h1
       /\ as_seq h1 a == fdifference_spec (as_seq h0 a) (as_seq h0 b) (U32.v i)))
+[@"c_inline"]
 let rec fdifference_ a b i =
   if U32.(i =^ 0ul) then ()
   else (
