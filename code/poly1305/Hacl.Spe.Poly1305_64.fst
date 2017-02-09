@@ -82,13 +82,13 @@ val poly1305_finish_spec:
        let r   = seval (MkState?.r st) % prime in
        let k   = hlittle_endian key_s   in
        let m'   = (hlittle_endian m + pow2 (8*length m)) % prime in
-       let mac = hlittle_endian mac in
-       if Seq.length m >= 1
-       then mac = (((acc +@ m') *@ r) + k) % pow2 128
-       else mac = ((acc + k) % pow2 128)) })
+       (* let mac = hlittle_endian mac in *)
        (* if Seq.length m >= 1 *)
-       (* then mac == finish ((acc +@ m') *@ r) key_s *)
-       (* else mac == finish acc key_s) }) *)
+       (* then mac = (((acc +@ m') *@ r) + k) % pow2 128 *)
+       (* else mac = ((acc + k) % pow2 128)) }) *)
+       if Seq.length m >= 1
+       then reveal_sbytes mac == finish ((acc +@ m') *@ r) (reveal_sbytes key_s)
+       else reveal_sbytes mac == finish acc (reveal_sbytes key_s)) })
 let poly1305_finish_spec st m rem' key_s =
   if Seq.length m >= 1 then (
     lemma_mod_distr (seval (MkState?.h st)) (hlittle_endian m + pow2 (8*length m)) (seval (MkState?.r st))
@@ -332,7 +332,7 @@ let rec poly1305_blocks_spec st m len =
 
 val crypto_onetimeauth_spec:
   input:Seq.seq H8.t{Seq.length input > 0} ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Seq.length input} ->
+  len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   k:Seq.seq H8.t{Seq.length k = 32} ->
   Tot (mac:Seq.seq H8.t{Seq.length mac = 16
     /\ reveal_sbytes mac == poly1305 (reveal_sbytes input) (reveal_sbytes k)})
@@ -343,6 +343,7 @@ let crypto_onetimeauth_spec input len k =
   assert_norm(pow2 4 = 16);
   UInt.logand_mask (U64.v len) 4;
   assert_norm(pow2 4 = 16);
+  cut (U64.v len = 16 * U64.v len16 + U64.v rem16);
   Math.Lemmas.lemma_div_mod (U64.v len) 16;
   let part_input, last_block = split input (16 * U64.v len16) in
   (* cut (Seq.length last_block < 16); *)
@@ -352,5 +353,6 @@ let crypto_onetimeauth_spec input len k =
   cut (invariant init_st);
   let partial_st = poly1305_blocks_spec init_st part_input len16 in
   cut (invariant partial_st);
-  admit(); // TODO: finish
-  poly1305_finish_spec partial_st last_block rem16 ks
+  let mac = poly1305_finish_spec partial_st last_block rem16 ks in
+  FStar.Endianness.lemma_little_endian_inj (reveal_sbytes mac) (poly1305 (reveal_sbytes input) (reveal_sbytes k));
+  mac
