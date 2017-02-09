@@ -91,20 +91,34 @@ let diagonal_round m =
   quarter_round m 2ul 7ul  8ul 13ul;
   quarter_round m 3ul 4ul  9ul 14ul
 
+private val double_round: shuffle (Spec.double_round) 
+let double_round m = 
+  column_round m; 
+  diagonal_round m
+
+assume val iter: n:UInt32.t -> spec: Spec.shuffle -> body: shuffle spec -> shuffle (Spec.iter (v n) spec)
+(* 17-02-09 triggers an F* failure: Bound term variable not found (after unmangling): n#33581
+let rec iter n spec body m = 
+  if n <> 0ul then (
+    body m; 
+    iter (n -^ 1ul) spec body m)
+*)
+
 private val rounds: shuffle (Spec.rounds)
 let rounds m = (* 20 rounds *)
-  column_round m; diagonal_round m; 
-  column_round m; diagonal_round m;
-  column_round m; diagonal_round m;
-  column_round m; diagonal_round m;
-  column_round m; diagonal_round m;
-  column_round m; diagonal_round m;
-  column_round m; diagonal_round m;
-  column_round m; diagonal_round m;
-  column_round m; diagonal_round m;
-  column_round m; diagonal_round m;
-  assume  false
-//17-02-08  not sure how to control unfolding for functional correctness; probably needs a loop too.
+  iter 10ul Spec.double_round double_round m
+
+  (* column_round m; diagonal_round m; *)
+  (* column_round m; diagonal_round m; *)
+  (* column_round m; diagonal_round m; *)
+  (* column_round m; diagonal_round m *)
+  (* column_round m; diagonal_round m; *)
+  (* column_round m; diagonal_round m; *)
+  (* column_round m; diagonal_round m; *)
+  (* column_round m; diagonal_round m; *)
+  (* column_round m; diagonal_round m; *)
+  (* column_round m; diagonal_round m *)
+//17-02-08  was not sure how to control unfolding for functional correctness; probably needs a loop too.
 
 private val chacha20_init: 
   m:matrix -> k:key{disjoint m k} -> n:iv{disjoint m n} -> counter:UInt32.t -> 
@@ -136,8 +150,6 @@ let rec fill m i len src =
 
 //review handling of endianness
 
-#reset-options "--z3rlimit 100"
-
 // RFC 7539 2.3
 let chacha20_init m key iv counter =
   m.(0ul) <- Spec.constant_0;
@@ -156,7 +168,12 @@ private val add:
   i:u32 { i <^ 16ul } ->
   STL unit
   (requires (fun h -> live h m /\ live h m0))
-  (ensures (fun h0 _ h1 -> live h1 m /\ modifies_1 m h0 h1))
+  (ensures (fun h0 _ h1 -> 
+    live h0 m /\ live h0 m0 /\ live h1 m /\ modifies_1 m h0 h1 /\
+    as_seq h1 m == Seq.upd 
+      (as_seq h0 m) (v i) 
+      (Spec.add (as_seq h0 m) (as_seq h0 m0) (v i))
+  ))
 let add m m0 i = 
   m.(i) <- m.(i) +%^ m0.(i)
 
@@ -186,46 +203,73 @@ let sum_matrixes m m0 =
   add m m0 12ul;
   add m m0 13ul;
   add m m0 14ul;
-  add m m0 15ul;
+  add m m0 15ul; 
   assume false // this style won't do... and Seq.init seems underspecified.
 
+(* this split did not help much...
 private val chacha20_update: 
   output:bytes -> 
   state:uint32s{length state = 32 /\ disjoint state output} ->
-  len:u32{v len <= 64 /\ length output >= v len} -> STL unit
-    (requires (fun h -> live h state /\ live h output))
-    (ensures (fun h0 _ h1 -> live h1 output /\ live h1 state /\ modifies_2 output state h0 h1 ))
+  len:u32{v len <= 64 /\ length output = v len} -> STL unit
+    (requires (fun h -> live h state /\ live h output))  
+    (ensures (fun h0 _ h1 -> 
+      live h1 output /\ live h1 state /\ modifies_2 output state h0 h1 /\
+      as_seq h1 output = Seq.slice (Spec.chacha20 key iv c) 0 (v len) ))
 let chacha20_update output state len =
   (* Initial state *) 
+  let h0 = ST.get() in 
   let m  = sub state  0ul 16ul in
   let m0 = sub state 16ul 16ul in // do we ever rely on m and m0 being contiguous?
-  blit m 0ul m0 0ul 16ul;
+  blit m 0ul m0 0ul 16ul; (* save initial state *)
+  let h1 = ST.get() in 
+  assert(as_seq h1 m = Spec.init (as_seq h0 key) (as_seq h0 iv) c);
   rounds m;
-  (* Sum the matrixes *)
-  sum_matrixes m m0;
-  (* Serialize the state into byte stream *)
-  bytes_of_uint32s output m len
+  sum_matrixes m m0; (* add initial and final state *)
+  let h2 = ST.get() in 
+  assert(as_seq h2 m = Spec.chacha20 (as_seq h0 key) (as_seq h0 iv) c);
+  bytes_of_uint32s output m len   (* serialize result into byte stream *)
 // avoid this copy when XORing? merge the sum_matrix and output loops? we don't use m0 afterward. 
+*)
 
 // computes one pseudo-random 64-byte block 
 // (consider fixing len to 64ul)
 
+//17-02-09 TODO this function is not yet fully specified. 
 val chacha20: 
   output:bytes -> 
   k:key ->
   n:iv ->
   counter: u32 ->
-  len:u32{v len <= v blocklen /\ v len <= length output} -> STL unit
+  len:u32{v len <= Spec.blocklen /\ v len <= length output} -> STL unit
     (requires (fun h -> live h k /\ live h n /\ live h output))
     (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 ))
-let chacha20 output key n counter len = 
+let chacha20 output key iv c len = 
+  let h0 = ST.get() in 
+
   push_frame ();
-  let state = create 0ul 32ul in
-  let m = sub state 0ul 16ul in
-  chacha20_init m key n counter;
-  chacha20_update output state len;
+  let m = create 0ul 16ul in
+  let m0 = create 0ul 16ul in
+  chacha20_init m key iv c;
+  blit m 0ul m0 0ul 16ul; (* save initial state *)
+  let h1 = ST.get() in 
+  assert(as_seq h1 m = Spec.init (as_seq h0 key) (as_seq h0 iv) c);
+
+  // failing; the post of blit is probably too complicated
+  assert(Seq.slice (as_seq h1 m0) 0ul 16ul = Seq.slice (as_seq h1 m) 0ul 16ul);
+  assert(as_seq h1 m0 = Spec.init (as_seq h0 key) (as_seq h0 iv) c);
+
+  rounds m;
+  sum_matrixes m m0; (* add initial and final state *)
+  let h2 = ST.get() in 
+  assert(as_seq h2 m = Spec.compute (as_seq h0 key) (as_seq h0 iv) c);
+
+  bytes_of_uint32s output m len;   (* serialize result into byte stream *)
+  let h3= ST.get() in
+  assert(as_seq h3 output = Spec.chacha20 (v len) (as_seq h0 key) (as_seq h0 iv) c);
+  
   pop_frame ()
 
+  
 // Performance: it may be easier to precompute and re-use an expanded key (m0), 
 // to avoid passing around (key, counter, iv, constant), and only have m on the stack.
 // We may also merge the 3 final loops: sum_matrixes, bytes_of_uint32s, and outer XOR/ADD. 
@@ -239,11 +283,11 @@ let chacha20 output key n counter len =
 // It should appear after PRF idealization.
 
 private let prf = chacha20
-
+private let blocklen = UInt32.uint_to_t Spec.blocklen
 // XOR-based encryption and decryption (just swap ciphertext and plaintext)
 val counter_mode: 
   k:key -> n:iv -> counter:u32 -> 
-  len:u32{v counter + v len / v blocklen < pow2 32} ->
+  len:u32{v counter + v len / Spec.blocklen < pow2 32} ->
   plaintext:bytes {length plaintext = v len /\ disjoint k plaintext} -> 
   ciphertext:bytes {length ciphertext = v len /\ disjoint n ciphertext /\ disjoint k ciphertext /\ disjoint plaintext ciphertext} -> 
   STL unit
