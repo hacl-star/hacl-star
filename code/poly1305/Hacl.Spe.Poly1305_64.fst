@@ -372,7 +372,7 @@ assume val lemma_onetimeauth_finish_2:
 (* let lemma_onetimeauth_finish input len = () *)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 val crypto_onetimeauth_spec:
   input:Seq.seq H8.t{Seq.length input > 0} ->
@@ -400,5 +400,6 @@ let crypto_onetimeauth_spec input len k =
   let mac = poly1305_finish_spec partial_st last_block rem16 ks in
   lemma_onetimeauth_finish_1 input len;
   if U64.v rem16 > 0 then lemma_onetimeauth_finish_2 input len (selem (MkState?.r init_st));
+  assert(mac == finish (poly (encode_bytes input) (encode_r kr)) ks);
   FStar.Endianness.lemma_little_endian_inj (reveal_sbytes mac) (poly1305 (reveal_sbytes input) (reveal_sbytes k));
   mac
