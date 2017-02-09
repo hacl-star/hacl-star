@@ -138,7 +138,7 @@ all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
 # (Re-)Generate hints
 %.fst-hints:
-	$(FSTAR) $(OPTIONS) --record_hints \
+	-$(FSTAR) $(OPTIONS) --record_hints \
 	$(FSTAR_INCLUDE_PATHS) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	--verify_module $(basename $(notdir $@)) \

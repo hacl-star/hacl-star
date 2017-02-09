@@ -45,7 +45,7 @@ all-ci: verify
 
 ALL_HINTS=$(addsuffix -hints, $(BIGNUM_MODULES))
 
-hints: $(ALL_HINTS)
+all-hints: $(ALL_HINTS)
 
 clean:
 	rm -rf *.exe *.out *~ x25519/*~ poly1305/*~ interfaces/*~ tmp tmppoly

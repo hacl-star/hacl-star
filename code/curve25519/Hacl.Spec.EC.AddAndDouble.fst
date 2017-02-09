@@ -609,7 +609,7 @@ private val shift_reduce_unrolled:
 private let shift_reduce_unrolled input input2 =
   mul_shift_reduce_unrolled_ (Seq.create len wide_zero) input input input2
 
-#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_mul_shift_reduce_unrolled: input:seqelem -> input2:seqelem -> Lemma
   (requires (mul_shift_reduce_pre' input input2))

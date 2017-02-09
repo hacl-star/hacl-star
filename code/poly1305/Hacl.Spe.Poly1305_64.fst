@@ -23,7 +23,7 @@ module U32  = FStar.UInt32
 module U64  = FStar.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 20"
 
 val poly1305_init_spec: key:Seq.seq H8.t{Seq.length key = 16} ->
   Tot (st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)
@@ -52,6 +52,8 @@ private let lemma_mod_distr_seq acc block r =
   let block = hlittle_endian block + pow2 128 in
   lemma_mod_distr acc0 block r0
 
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
 val poly1305_update_spec: st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
   m:word_16 ->
@@ -87,50 +89,38 @@ val poly1305_finish_spec:
        (* if Seq.length m >= 1 *)
        (* then mac == finish ((acc +@ m') *@ r) key_s *)
        (* else mac == finish acc key_s) }) *)
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let poly1305_finish_spec st m rem' key_s =
   if Seq.length m >= 1 then (
-    lemma_mod_distr (seval (MkState?.h st)) (hlittle_endian m + pow2 (8*length m)) (seval (MkState?.r st))(* ; *)
-    (* Math.Lemmas.lemma_mod_plus_distr_l (((selem (MkState?.h st) +@ ((little_endian m + pow2 (8*length m)) % prime)) *@ (seval (MkState?.r st) % prime))) (little_endian key_s) (pow2 128) *)
-  )
-  (* else ( *)
-  (*   Math.Lemmas.lemma_mod_plus_distr_l (selem (MkState?.h st)) (little_endian key_s) (pow2 128) *)
-  (* ) *);
+    lemma_mod_distr (seval (MkState?.h st)) (hlittle_endian m + pow2 (8*length m)) (seval (MkState?.r st))
+  );
   let mac = poly1305_finish_spec st m rem' key_s in
-  (* lemma_little_endian_inj mac (if length m >= 1 then finish ((selem (MkState?.h st) +@ ((little_endian m + pow2 (8*length m)) % prime)) *@ (seval (MkState?.r st) % prime)) key_s else finish (selem (MkState?.h st)) key_s); *)
   mac
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 (* *************************** *)
 (* Standalone poly1305 version *)
 (* *************************** *)
 
-inline_for_extraction let encode (w:word) : GTot elem = encode (seq_map h8_to_u8 w)
-  (* let l = length w in *)
-  (* Math.Lemmas.pow2_le_compat 128 (8 * l); *)
-  (* assert_norm(pow2 128 < pow2 130 - 5); *)
-  (* lemma_little_endian_is_bounded w; *)
-  (* pow2 (8 * l) +@ little_endian w *)
+
+unfold inline_for_extraction let encode (w:word) : GTot elem = encode (reveal_sbytes w)
 
 
-val poly: vs:text -> r:elem -> GTot (a:elem)
-let poly vs r = poly (seq_map (seq_map h8_to_u8) vs) r
-(* let poly vs r = poly vs r *)
-(* let rec poly vs r = poly vs r *)
-  (* if Seq.length vs = 0 then 0 *)
-  (* else *)
-  (*   let v = Seq.head vs in *)
-  (*   (encode v +@ poly (Seq.tail vs) r) *@ r *)
+(* val poly: vs:text -> r:elem -> GTot (a:elem) *)
+(* let poly vs r = *)
+(* poly vs r *)
+
+val poly: vs:text -> r:elem -> GTot (a:elem) (decreases (Seq.length vs))
+let rec poly vs r =
+  if Seq.length vs = 0 then 0
+  else
+    let v = Seq.head vs in
+    (encode v +@ poly (Seq.tail vs) r) *@ r
 
 
 let invariant (st:poly1305_state_) : GTot Type0 =
   let acc = (MkState?.h st) in let r = (MkState?.r st) in let log = MkState?.log st in
   seval r < pow2 130 - 5 /\  red_44 r /\ red_45 acc /\ selem acc = poly log (seval r)
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 val encode_bytes: txt:Seq.seq H8.t -> GTot (text) (decreases (Seq.length txt))
 let rec encode_bytes txt =
@@ -141,7 +131,7 @@ let rec encode_bytes txt =
     let l0 = FStar.Math.Lib.min l 16 in
     let w, txt = Seq.split txt l0 in
     Seq.snoc (encode_bytes txt) w
-    (* Seq.snoc (encode_bytes txt) w *)
+
 
 (** Auxiliary lemmas *)
 
@@ -168,25 +158,8 @@ val append_assoc: #a:Type -> s1:Seq.seq a -> s2:Seq.seq a -> s3:Seq.seq a -> Lem
   (FStar.Seq.(equal (append s1 (append s2 s3)) (append (append s1 s2) s3)))
 let append_assoc #a s1 s2 s3 = ()
 
-(* val append_as_seq_sub: h:mem -> n:UInt32.t -> m:UInt32.t -> msg:Buffer.buffer H8.t{Buffer.live h msg /\ U32.v m <= U32.v n /\ U32.v n <= Buffer.length msg} -> Lemma *)
-(*   (append (Buffer.as_seq h (Buffer.sub msg 0ul m)) *)
-(*           (Buffer.as_seq h (Buffer.sub (Buffer.offset msg m) 0ul (U32.sub n m))) == *)
-(*    Buffer.as_seq h (Buffer.sub msg 0ul n)) *)
-(* let append_as_seq_sub h n m msg = *)
-(*   Seq.lemma_eq_intro *)
-(*     (append (Buffer.as_seq h (Buffer.sub msg 0ul m)) *)
-(*             (Buffer.as_seq h (Buffer.sub (Buffer.offset msg m) 0ul (U32.sub n m)))) *)
-(*      (Buffer.as_seq h (Buffer.sub msg 0ul n)) *)
 
-(* val append_as_seq: h:mem -> m:UInt32.t -> n:UInt32.t -> *)
-(*   msg:Buffer.buffer H8.t{Buffer.live h msg /\ U32.v m + U32.v n == Buffer.length msg} -> Lemma *)
-(*   (Seq.equal *)
-(*     (append (Buffer.as_seq h (Buffer.sub msg 0ul m)) (Buffer.as_seq h (Buffer.sub msg m n))) *)
-(*     (Buffer.as_seq h msg)) *)
-(* let append_as_seq h n m msg = () *)
-
-
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 val encode_bytes_empty: txt:Seq.seq H8.t -> Lemma
     (requires Seq.length txt == 0)
@@ -232,49 +205,14 @@ let rec encode_bytes_append len s w =
     end
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val lemma_append_empty: #a:Type -> s:seq a -> Lemma
   (s @| createEmpty #a == s)
 let lemma_append_empty #a s = Seq.lemma_eq_intro s (s @| createEmpty #a)
-
-
-
-
-(* val poly1305_blocks_spec_: *)
-(*   st:poly1305_state_{invariant st} -> *)
-(*   m:Seq.seq H8.t -> *)
-(*   len:U64.t{16 * U64.v len = Seq.length m /\ Seq.length m >= 16} -> *)
-(*   Tot (st':poly1305_state_{ *)
-(*     let log' = MkState?.log st' in *)
-(*     let log  = MkState?.log st in *)
-(*     let acc' = MkState?.h st' in *)
-(*     let acc  = MkState?.h st in *)
-(*     let r    = MkState?.r st in *)
-(*     log' == log @| encode_bytes m *)
-(*     /\ selem acc' = poly log' (seval r) *)
-(*   }) *)
-(* let poly1305_blocks_spec_ st m len = *)
-(*   cut (U64.v len >= 1); *)
-(*   let log = MkState?.log st in *)
-(*   let acc = MkState?.h st in *)
-(*   let r   = MkState?.r st in *)
-(*   let block  = slice m 0 16 in *)
-(*   let m'     = slice m 16 (length m) in *)
-(*   let st'    = poly1305_update_spec st block in *)
-(*   let len'   = U64.(len -^ 1uL) in *)
-(*   let log'   = MkState?.log st' in *)
-(*   let acc'   = MkState?.h st' in *)
-(*   cut (log' == log @| Seq.create 1 block); *)
-(*   Math.Lemmas.modulo_lemma (seval r) (prime); *)
-(*   cut (selem acc' = poly log' (seval r)); admit() *)
-(*   append_cons_snoc log block (encode_bytes m'); *)
-(*   (\* append_cons_snoc (encode_bytes m') m log; *\) *)
-(*   let st'' = poly1305_blocks_spec st' m' len in *)
-(*   st'') *)
      
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private let lemma_tl (log:log_t) (m:word_16) (log':log_t) : Lemma
   (requires (log' == create 1 m @| log))
@@ -283,11 +221,13 @@ private let lemma_tl (log:log_t) (m:word_16) (log':log_t) : Lemma
     cut (Seq.index log' 0 == m)
 
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 private let poly_def_0 (log:log_t{length log = 0}) (r:elem) : Lemma
   (poly log r = zero)
    = ()
+
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 let poly_def_1 (log:log_t{length log > 0}) (r:elem) : Lemma
   (let hd = Seq.head log in
@@ -295,7 +235,8 @@ let poly_def_1 (log:log_t{length log > 0}) (r:elem) : Lemma
    poly log r = (poly tl r +@ encode hd) *@ r)
    = ()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val lemma_poly1305_blocks_spec_1:
   m:word_16 ->
@@ -308,7 +249,7 @@ let lemma_poly1305_blocks_spec_1 m log log' acc r acc' =
   poly_def_1 log' r;
   cut (poly log' r = (poly log r +@ encode m) *@ r)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val lemma_poly1305_blocks_spec_2:
   m:Seq.seq H8.t ->
@@ -339,7 +280,7 @@ let lemma_poly1305_blocks_spec_2 m len log log' log'' acc acc' acc'' r =
   append_cons_snoc (encode_bytes m') block log
   
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 val poly1305_blocks_spec:
   st:poly1305_state_{invariant st} ->
@@ -351,7 +292,8 @@ val poly1305_blocks_spec:
     let acc' = MkState?.h st' in
     let acc  = MkState?.h st in
     let r    = MkState?.r st in
-    log' == encode_bytes m @| log
+    invariant st'
+    /\ log' == encode_bytes m @| log
     /\ selem acc' = poly log' (seval r)
   })
   (decreases (U64.v len))
@@ -360,8 +302,9 @@ let rec poly1305_blocks_spec st m len =
   let acc = MkState?.h st in
   let r   = MkState?.r st in
   if U64.(len =^ 0uL) then (
-    admit();
     encode_bytes_empty m; lemma_append_empty log;
+    Seq.lemma_eq_intro log (encode_bytes m @| log);
+    cut(log == encode_bytes m @| log);
     st
   )
   else (
@@ -385,36 +328,29 @@ let rec poly1305_blocks_spec st m len =
     st'')
 
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 10"
-
-assume val lemma_msg_to_text_eq_encode_bytes: msg:Seq.seq H8.t{length msg > 0} -> Lemma (encode_bytes msg == seq_map (seq_map uint8_to_sint8) (msg_to_text (seq_map h8_to_u8 msg)))
-(* let rec lemma_msg_to_text_eq_encode_bytes msg = *)
-(*   if length msg <= 16 then ( *)
-(*     lemma_eq_intro msg (slice msg 0 (Math.Lib.min 16 (length msg))); *)
-(*     lemma_eq_intro (msg @| createEmpty) msg *)
-(*   ) *)
-(*   else admit() *)
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val crypto_onetimeauth_spec:
-  input:Seq.seq H8.t ->
+  input:Seq.seq H8.t{Seq.length input > 0} ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len <= Seq.length input} ->
   k:Seq.seq H8.t{Seq.length k = 32} ->
   Tot (mac:Seq.seq H8.t{Seq.length mac = 16
-    /\ seq_map h8_to_u8 mac == poly1305 (seq_map h8_to_u8 input) (seq_map h8_to_u8 k)})
+    /\ reveal_sbytes mac == poly1305 (reveal_sbytes input) (reveal_sbytes k)})
 let crypto_onetimeauth_spec input len k =
   let kr, ks = split k 16 in
   let len16 = U64.(len >>^  4ul) in
   let rem16 = U64.(len &^ 0xfuL) in
   assert_norm(pow2 4 = 16);
   UInt.logand_mask (U64.v len) 4;
+  assert_norm(pow2 4 = 16);
+  Math.Lemmas.lemma_div_mod (U64.v len) 16;
   let part_input, last_block = split input (16 * U64.v len16) in
+  (* cut (Seq.length last_block < 16); *)
   let init_st = poly1305_init_spec kr in
   assert_norm(pow2 128 < pow2 130 - 5);
   poly_def_0 (MkState?.log init_st) (seval (MkState?.r init_st));
   cut (invariant init_st);
   let partial_st = poly1305_blocks_spec init_st part_input len16 in
+  cut (invariant partial_st);
   admit(); // TODO: finish
   poly1305_finish_spec partial_st last_block rem16 ks
