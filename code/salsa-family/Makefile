@@ -23,6 +23,8 @@ SALSA_FAMILY_FILES= \
 
 SALSA_MODULES= $(basename $(SALSA_FILES))
 
+SLOW=Hacl.Symmetric.Salsa20.fst \
+
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
@@ -43,7 +45,7 @@ all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 
 # For CI, all modules restricted from incomplete or slow ones
-all-ci: all-ver
+all-ci: $(addsuffix -verify, $(filter-out $(SLOW), $(SALSA_FAMILY_FILES)))
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
