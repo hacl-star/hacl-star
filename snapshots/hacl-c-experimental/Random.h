@@ -4,7 +4,6 @@
 
 
 #include "kremlib.h"
-#include "config.h"
 #include "drng.h"
 #include "cpuid.h"
 
