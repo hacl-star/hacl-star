@@ -44,6 +44,7 @@ clean:
 	rm -rf *~
 	rm -rf build
 	rm -rf build-experimental
+	$(MAKE) -C test clean
 
 
 # Check if GCC-6 is installed, uses GCC otherwise
