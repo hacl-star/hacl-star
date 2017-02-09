@@ -32,7 +32,6 @@ let rec fsum_spec a b ctr =
   )
 
 
-
 val lemma_fsum_eval_: s:seqelem -> s':seqelem -> ctr:nat{ctr <= len /\ red s len /\ red s' len} ->
   Lemma (seval_ (fsum_spec s s' len) ctr = seval_ s ctr + seval_ s' ctr)
 let rec lemma_fsum_eval_ s s' ctr =

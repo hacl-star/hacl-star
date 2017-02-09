@@ -23,9 +23,6 @@ val eval_: h:mem -> b:felem{live h b} -> i:nat{i <= len} -> GTot nat
 let rec eval_ h b i =
   if i = 0 then 0
   else pow2 (limb_size * (i - 1)) * Hacl.Bignum.Limb.v (get h b (i - 1)) + eval_ h b (i-1)
-(* let rec eval_ h b i = *)
-(*   if i = 0 then 0 *)
-(*   else pow2 (bitweight (i - 1)) * Hacl.Bignum.Limb.v (get h b (i - 1)) + eval_ h b (i-1) *)
 
 
 val eval: h:mem -> b:felem{live h b} -> GTot nat

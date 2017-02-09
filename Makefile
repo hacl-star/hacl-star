@@ -33,6 +33,12 @@ experimental:
 	cmake $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
 
+ci:
+	$(MAKE) -C test
+
+hints:
+	$(MAKE) -C test hints
+
 clean:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
 	rm -rf *~

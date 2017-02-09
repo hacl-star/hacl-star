@@ -8,7 +8,7 @@ open Hacl.Bignum.Limb
 open Hacl.Spec.EC.Point
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
 type uint8_s = Seq.seq Hacl.UInt8.t
 
@@ -30,8 +30,6 @@ let alloc_point () =
   let z = Seq.slice s 5 10 in
   x, z
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val load64_le_spec: b:uint8_s{Seq.length b = 8} -> Tot limb
 let load64_le_spec b =
@@ -186,7 +184,6 @@ let point_of_scalar scalar =
   x, z
 
 val scalar_of_point: p:spoint_513 -> Tot (scalar:uint8_s{Seq.length scalar = keylen})
-#set-options "--z3rlimit 10"
 let scalar_of_point point =
   let x = sgetx point in
   let z = sgetz point in
