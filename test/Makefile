@@ -12,7 +12,7 @@ extract-c-code:
 	$(MAKE) -C ../code extract-c
 
 extract-c-crypto:
-	$(MAKE) -C ../crypto_proofs krml-test.exe
+	$(MAKE) -C ../secure_api krml-test.exe
 
 extract-c: extract-c-code extract-c-crypto
 
@@ -23,13 +23,13 @@ verify-code:
 	$(MAKE) -C ../code ci
 
 verify-crypto:
-	$(MAKE) -C ../crypto_proofs all-ver
+	$(MAKE) -C ../secure_api all-ver
 
 hints-code:
 	$(MAKE) -C ../code hints
 
 hints-crypto:
-	$(MAKE) -C ../crypto_proofs all-hints
+	$(MAKE) -C ../secure_api all-hints
 
 hints: hints-code hints-crypto
 
@@ -38,4 +38,4 @@ verify: verify-code verify-crypto
 
 clean:
 	$(MAKE) -C ../code clean
-	$(MAKE) -C ../crypto_proofs clean
+	$(MAKE) -C ../secure_api clean
