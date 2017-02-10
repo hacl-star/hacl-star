@@ -12,7 +12,7 @@ open Hacl.Bignum.Parameters
 open Hacl.Spec.Endianness
 open Hacl.Spec.Bignum.Bigint
 open Hacl.Spec.Bignum.AddAndMultiply
-open Hacl.Spec.Poly1305
+open Spec.Poly1305
 open Hacl.Spec.Poly1305_64
 
 module H8   = Hacl.UInt8

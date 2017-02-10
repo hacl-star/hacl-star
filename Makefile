@@ -31,7 +31,7 @@ experimental:
 	@echo $(CYAN)"# Compiling the HaCl* library (with experimental features)"$(NORMAL)
 	mkdir -p build-experimental && cd build-experimental; \
 	cmake $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
-	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
+	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build-experimental'."$(NORMAL)
 
 ci:
 	$(MAKE) -C test
@@ -44,6 +44,7 @@ clean:
 	rm -rf *~
 	rm -rf build
 	rm -rf build-experimental
+	$(MAKE) -C test clean
 
 
 # Check if GCC-6 is installed, uses GCC otherwise
