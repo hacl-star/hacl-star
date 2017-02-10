@@ -15,7 +15,7 @@ open FStar.Buffer
 (* open Crypto.Symmetric.Poly1305 // avoid? *)
 (* module PS_ = Hacl.Spec.Poly1305_64 *)
 module PS_ = Hacl.Spe.Poly1305_64
-module PS = Hacl.Spec.Poly1305
+module PS = Spec.Poly1305
 module PL = Hacl.Impl.Poly1305_64
 
 open Crypto.Symmetric.Bytes
