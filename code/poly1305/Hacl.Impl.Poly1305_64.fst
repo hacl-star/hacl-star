@@ -184,7 +184,7 @@ val poly1305_init_:
 let poly1305_init_ st key =
   poly1305_encode_r st.r (sub key 0ul 16ul);
   poly1305_start st.h;
-  let log = hide (Seq.createEmpty #Hacl.Spec.Poly1305_64.word) in
+  let log = hide (Seq.createEmpty #Spec.Poly1305.word) in
   log
 
 
@@ -228,7 +228,7 @@ let poly1305_update log st m =
   let h5 = ST.get() in
   let m' = elift2_p #wordB_16 #HyperStack.mem #(fun m h -> live h m) #Spec.word
                     (fun m h -> as_seq h m) (hide m) (hide h0) in
-  elift2 (fun l m -> FStar.Seq.((Seq.create 1 m) @| l)) log m'
+  elift2 (fun l m -> FStar.Seq.((Seq.create 1 (Hacl.Spec.Endianness.reveal_sbytes m)) @| l)) log m'
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
@@ -295,7 +295,7 @@ let poly1305_process_last_block_ log block st m rem' =
   pop_frame();
   let m' = elift2_p #wordB #HyperStack.mem #(fun m h -> live h m) #Spec.word
                     (fun m h -> as_seq h m) (hide m) (hide h0) in
-  elift2 (fun l m -> FStar.Seq.((Seq.create 1 m) @| l)) log m'
+  elift2 (fun l m -> FStar.Seq.((Seq.create 1 (Hacl.Spec.Endianness.reveal_sbytes m)) @| l)) log m'
   
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 20"

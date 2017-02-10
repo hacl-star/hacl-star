@@ -46,7 +46,7 @@ let encode (w:word) : Tot elem =
 
 val poly: vs:text -> r:elem -> Tot (a:elem) (decreases (Seq.length vs))
 let rec poly vs r =
-  if Seq.length vs = 0 then 0
+  if Seq.length vs = 0 then zero
   else
     let v = Seq.head vs in
     (encode v +@ poly (Seq.tail vs) r) *@ r
@@ -153,20 +153,28 @@ val finish: a:elem -> s:tag -> Tot tag
 let finish a s =
   (* REMARK: this is equivalent to n = (a + little_endian s) % pow2 128 *)
   (* let n = (trunc_1305 a + little_endian s) % pow2 128 in *)
-  let n = ((* trunc_1305  *)a + little_endian s) % pow2 128 in
+  let n = (a + little_endian s) % pow2 128 in
   little_bytes 16ul n
 
 
 val mac_1305: vs:text -> r:elem -> s:tag -> Tot tag
 let mac_1305 vs r s = finish (poly vs r) s
 
-let rec msg_to_text (msg:bytes{length msg > 0}) : Tot text (decreases (length msg)) =
-  if length msg <= 16 then create 1 msg
-  else Seq.snoc (msg_to_text (slice msg 16 (length msg))) (slice msg 0 16)
+
+val encode_bytes: txt:bytes -> Tot (text) (decreases (Seq.length txt))
+let rec encode_bytes txt =
+  let l = Seq.length txt in
+  if l = 0 then
+    Seq.createEmpty
+  else
+    let l0 = FStar.Math.Lib.min l 16 in
+    let w, txt = Seq.split txt l0 in
+    Seq.snoc (encode_bytes txt) w
+
 
 val poly1305: msg:bytes{length msg > 0} -> k:bytes{length k = 32} -> Tot tag
 let poly1305 msg k =
-  let text = msg_to_text msg in
+  let text = encode_bytes msg in
   let r = encode_r (slice k 0 16) in
   let s = slice k 16 32 in
   mac_1305 text r s
