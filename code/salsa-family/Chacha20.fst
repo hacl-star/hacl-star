@@ -17,6 +17,7 @@ let h32 = H32.t
 let uint8_p = buffer H8.t
 type chacha_ctx = b:Buffer.buffer h32{length b = 16}
 
+(* sets the lower 12 words of the state (usable for multiple encryptions) *)
 val chacha_keysetup:
   ctx:chacha_ctx ->
   k:uint8_p{length k = 32 /\ disjoint ctx k} ->
@@ -26,16 +27,18 @@ val chacha_keysetup:
       /\ as_seq h1 ctx == chacha_keysetup_spec (as_seq h0 ctx) (as_seq h0 k)))
 let chacha_keysetup ctx k = Hacl.Symmetric.Chacha20.chacha_keysetup ctx k
 
+(* sets the upper 4 words of the state to a specific IV and counter *)
 val chacha_ietf_ivsetup:
   ctx:chacha_ctx ->
   k:uint8_p{length k = 12 /\ disjoint ctx k} ->
   counter:u32 ->
   Stack unit
     (requires (fun h -> live h ctx /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h1 ctx /\ modifies_1 ctx h0 h1 /\ live h0 ctx /\ live h0 k
+    (ensures  (fun h0 _ h1 -> live h1 ctx /\ live h0 ctx /\ live h0 k /\ modifies_1 ctx h0 h1 
       /\ as_seq h1 ctx == chacha_ietf_ivsetup_spec (as_seq h0 ctx) (as_seq h0 k) counter))
 let chacha_ietf_ivsetup ctx k ctr = Hacl.Symmetric.Chacha20.chacha_ietf_ivsetup ctx k ctr
 
+(* encrypts len bytes from m to c; [missing spec; destroys the state?] *)
 val chacha_encrypt_bytes:
   ctx:chacha_ctx ->
   m:uint8_p ->
