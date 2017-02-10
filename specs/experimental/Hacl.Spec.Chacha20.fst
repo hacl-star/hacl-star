@@ -146,10 +146,10 @@ let rec fill i len src =
     set i (uint32_of_bytes (slice src 0 4)) @  (* or bytes_to_h32 ? *)
     fill (i + 1) (len - 1) (slice src 4 (4*len)) 
 
-let constant_0 = 0x61707865ul
-let constant_1 = 0x3320646eul
-let constant_2 = 0x79622d32ul
-let constant_3 = 0x6b206574ul
+inline_for_extraction let constant_0 = 0x61707865ul
+inline_for_extraction let constant_1 = 0x3320646eul
+inline_for_extraction let constant_2 = 0x79622d32ul
+inline_for_extraction let constant_3 = 0x6b206574ul
 
 let init0 (k:key) (n:iv) (c:counter): shuffle =
   set 0 constant_0 @
@@ -179,14 +179,48 @@ let compute k n c =
   let m = init k n c in 
   add_state m (rounds m)
 
-val chacha20: len:nat {len < blocklen} -> key -> iv -> counter -> Tot (lbytes len)
+val chacha20: len:nat {len <= blocklen} -> key -> iv -> counter -> Tot (lbytes len)
 let chacha20 len k iv c =
   let b = uint32s_to_bytes (compute k iv c) in
   Seq.slice b 0 len
 
-(* omitting for now counter-mode encryption: a generic construction on top of cipher 
 
-val chacha20_encrypt: k:key -> counter:ctr -> n:iv -> plaintext:uint8_s -> Tot (c:uint8_s)
+(*** Counter-mode encryption ***)
+// a generic construction on top of cipher--- not Chacha20-specific
+// could move to its own spec; see also AEAD
+
+private let prf = chacha20
+
+val counter_mode: 
+  k:key -> n:iv -> counter:UInt32.t -> 
+  plain:seq UInt8.t {v counter + length plain / blocklen < pow2 32} ->
+  Tot (lbytes (length plain))
+  (decreases (length plain))
+
+// migrate to FStar.Seq
+val xor: #len:nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
+let rec xor #len x y = 
+  if len = 0 then createEmpty 
+  else cons (UInt8.logxor (head x) (head y)) (xor #(len -1) (tail x) (tail y))
+
+#reset-options "--z3rlimit 40 --max_fuel 2"
+let rec counter_mode key iv counter plain =
+  let len = length plain in 
+  if len = 0 then Seq.createEmpty else
+  if len < blocklen 
+  then (* encrypt final partial block *)
+      let mask = prf len key iv counter in 
+      xor plain mask
+  else (* encrypt full block *)
+      let (b, plain) = split plain blocklen in 
+      let mask = prf blocklen key iv counter in 
+      let cipher = counter_mode key iv (counter +^ 1ul) plain in
+      xor b mask @| cipher 
+
+
+(* older spec for counter-mode encryption: 
+
+val encrypt_bytes: k:key -> counter:ctr -> n:iv -> plaintext:bytes -> Tot (lbytes (lenght plaintext))
 let chacha20_encrypt k counter n plaintext =
   let max = length plaintext / 64 in
   let rem = length plaintext % 64 in

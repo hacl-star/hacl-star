@@ -17,6 +17,8 @@ let h32 = H32.t
 let uint8_p = buffer H8.t
 type chacha_ctx = b:Buffer.buffer h32{length b = 16}
 
+(* aligned to LibSodium API *) 
+
 (* sets the lower 12 words of the state (usable for multiple encryptions) *)
 val chacha_keysetup:
   ctx:chacha_ctx ->
@@ -38,7 +40,7 @@ val chacha_ietf_ivsetup:
       /\ as_seq h1 ctx == chacha_ietf_ivsetup_spec (as_seq h0 ctx) (as_seq h0 k) counter))
 let chacha_ietf_ivsetup ctx k ctr = Hacl.Symmetric.Chacha20.chacha_ietf_ivsetup ctx k ctr
 
-(* encrypts len bytes from m to c; [missing spec; destroys the state?] *)
+(* encrypts len bytes from m to c [still missing full spec; the state is destroyed] *)
 val chacha_encrypt_bytes:
   ctx:chacha_ctx ->
   m:uint8_p ->

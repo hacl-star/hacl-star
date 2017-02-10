@@ -298,8 +298,8 @@ val counter_mode:
 // a bit slow, e.g. on the len precondition
 
 let rec counter_mode key iv counter len plaintext ciphertext =
-  if len =^ 0ul then () 
-  else if len <^ blocklen 
+  if len <> 0ul then
+  if len <^ blocklen 
   then (* encrypt final partial block *)
     begin
       let cipher = sub ciphertext  0ul len in 
