@@ -113,8 +113,20 @@ let diagonal_round : shuffle =
   quarter_round 2 7 8 13 @
   quarter_round 3 4 9 14
 
-let rec rounds : shuffle = (* 20 rounds *)
-  iter 10 (column_round @ diagonal_round)
+let double_round: shuffle = column_round @ diagonal_round 
+
+let rec rounds : shuffle = iter 10 double_round (* 20 rounds *)
+
+  (* column_round @ diagonal_round @  *)
+  (* column_round @ diagonal_round @ *)
+  (* column_round @ diagonal_round @ *)
+  (* column_round @ diagonal_round @ *)
+  (* column_round @ diagonal_round @ *)
+  (* column_round @ diagonal_round @ *)
+  (* column_round @ diagonal_round @ *)
+  (* column_round @ diagonal_round @ *)
+  (* column_round @ diagonal_round @ *)
+  (* column_round @ diagonal_round *)
 
 (* state initialization *) 
 
@@ -151,15 +163,26 @@ let init0 (k:key) (n:iv) (c:counter): shuffle =
 let init (k:key) (n:iv) (c:counter): state = 
   init0 k n c (Seq.create (blocklen/4) 0ul)
 
-val add_state: state -> state -> Tot state
-let add_state m0 m1 = 
-  let content i = UInt32.add_mod (index m0 i) (index m1 i) in
-  Seq.init (blocklen/4) content
+(*
+val add: idx -> state -> state -> Tot state 
+let add i m m0 = 
+*)
 
-val chacha20: key -> iv -> counter -> Tot block
-let chacha20 k n c =
+val add_state: state -> state -> Tot state
+//17-02-09 strangely, I had to unfold idx
+//let add (m0:state) (m1:state) (i:idx) = index m0 i +%^ index m1 i 
+let add (m0:state) (m1:state) (i:nat {i < blocklen/4}) = index m0 i +%^ index m1 i 
+let add_state m0 m1 = Seq.init (blocklen/4) (add m0 m1)
+
+val compute: key -> iv -> counter -> Tot state
+let compute k n c =
   let m = init k n c in 
-  uint32s_to_bytes (add_state m (rounds m))
+  add_state m (rounds m)
+
+val chacha20: len:nat {len < blocklen} -> key -> iv -> counter -> Tot (lbytes len)
+let chacha20 len k iv c =
+  let b = uint32s_to_bytes (compute k iv c) in
+  Seq.slice b 0 len
 
 (* omitting for now counter-mode encryption: a generic construction on top of cipher 
 
