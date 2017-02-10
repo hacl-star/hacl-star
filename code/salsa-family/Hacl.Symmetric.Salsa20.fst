@@ -114,7 +114,7 @@ private inline_for_extraction val salsa20_init:
   n     :uint8_p{length n = 8} ->
   ic    :FStar.UInt64.t ->
   Stack unit
-    (requires (fun h -> live h ctx /\ live h key /\ live h n))
+    (requires (fun h -> live h ctx /\ live h key /\ live h n (* /\ disjoint ctx key /\ disjoint ctx n *)))
     (ensures  (fun h0 _ h1 -> modifies_1 ctx h0 h1 /\ live h1 ctx))
 [@"c_inline"]
 private inline_for_extraction let salsa20_init ctx key n ic =
@@ -311,27 +311,27 @@ private let xor_ c m b =
   hstore32_le (Buffer.sub c 60ul 4ul) c15
 
 
-private let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
-  (requires (live h0 c /\ live h0 input /\ live h0 block
-    /\ live h1 c /\ live h1 input /\ live h1 block
-    /\ live h2 c /\ live h2 input /\ live h2 block
-    /\ modifies_2 c block h0 h1 /\ modifies_1 input h1 h2))
-  (ensures (modifies_3 c input block h0 h2))
-  = lemma_reveal_modifies_2 c block h0 h1;
-    lemma_reveal_modifies_1 input h1 h2;
-    lemma_intro_modifies_3 c input block h0 h2
+(* private let lemma_modifies_3 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma *)
+(*   (requires (live h0 c /\ live h0 input /\ live h0 block *)
+(*     /\ live h1 c /\ live h1 input /\ live h1 block *)
+(*     /\ live h2 c /\ live h2 input /\ live h2 block *)
+(*     /\ modifies_2 c block h0 h1 /\ modifies_1 input h1 h2)) *)
+(*   (ensures (modifies_3 c input block h0 h2)) *)
+(*   = lemma_reveal_modifies_2 c block h0 h1; *)
+(*     lemma_reveal_modifies_1 input h1 h2; *)
+(*     lemma_intro_modifies_3 c input block h0 h2 *)
 
 
-private let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma
-  (requires (live h0 c /\ live h0 input /\ live h0 block
-    /\ live h1 c /\ live h1 input /\ live h1 block
-    /\ live h2 c /\ live h2 input /\ live h2 block
-    /\ length c >= 64 /\ modifies_3 c input block h0 h1
-    /\ modifies_3 (offset c 64ul) input block h1 h2))
-  (ensures (modifies_3 c input block h0 h2))
-  = lemma_reveal_modifies_3 c input block h0 h1;
-    lemma_reveal_modifies_3 (offset c 64ul) input block h1 h2;
-    lemma_intro_modifies_3 c input block h0 h2
+(* private let lemma_modifies_3' (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 : Lemma *)
+(*   (requires (live h0 c /\ live h0 input /\ live h0 block *)
+(*     /\ live h1 c /\ live h1 input /\ live h1 block *)
+(*     /\ live h2 c /\ live h2 input /\ live h2 block *)
+(*     /\ length c >= 64 /\ modifies_3 c input block h0 h1 *)
+(*     /\ modifies_3 (offset c 64ul) input block h1 h2)) *)
+(*   (ensures (modifies_3 c input block h0 h2)) *)
+(*   = lemma_reveal_modifies_3 c input block h0 h1; *)
+(*     lemma_reveal_modifies_3 (offset c 64ul) input block h1 h2; *)
+(*     lemma_intro_modifies_3 c input block h0 h2 *)
 
 
 [@"c_inline"]
@@ -500,17 +500,17 @@ private inline_for_extraction let mod_64 (mlen:U64.t) : Tot (z:U32.t{U32.v z = U
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 400"
 
-private let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
-  (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block)
-    /\ live h1 c /\ live h1 input /\ live h1 block
-    /\ live h2 c /\ live h2 input /\ live h2 block
-    /\ live h3 c /\ live h3 input /\ live h3 block
-    /\ modifies_0 h0 h1 /\ modifies_3 c input block h1 h2 /\ modifies_2 c block h2 h3))
-  (ensures (modifies_2_1 c h0 h3))
-  = lemma_reveal_modifies_0 h0 h1;
-    lemma_reveal_modifies_3 c input block h1 h2;
-    lemma_reveal_modifies_2 c block h2 h3;
-    lemma_intro_modifies_2_1 c h0 h3
+(* private let lemma_modifies_3_1 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma *)
+(*   (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block) *)
+(*     /\ live h1 c /\ live h1 input /\ live h1 block *)
+(*     /\ live h2 c /\ live h2 input /\ live h2 block *)
+(*     /\ live h3 c /\ live h3 input /\ live h3 block *)
+(*     /\ modifies_0 h0 h1 /\ modifies_3 c input block h1 h2 /\ modifies_2 c block h2 h3)) *)
+(*   (ensures (modifies_2_1 c h0 h3)) *)
+(*   = lemma_reveal_modifies_0 h0 h1; *)
+(*     lemma_reveal_modifies_3 c input block h1 h2; *)
+(*     lemma_reveal_modifies_2 c block h2 h3; *)
+(*     lemma_intro_modifies_2_1 c h0 h3 *)
 
 
 [@"c_inline"]
@@ -622,16 +622,16 @@ private let rec crypto_stream_salsa20_loop c clen ctx ctr =
   )
 
 
-private let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma
-  (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block)
-    /\ live h1 c /\ live h1 input /\ live h1 block
-    /\ live h2 c /\ live h2 input /\ live h2 block
-    /\ modifies_0 h0 h1 /\ modifies_2 c input h1 h2 /\ modifies_2 c block h2 h3))
-  (ensures (modifies_2_1 c h0 h3))
-  = lemma_reveal_modifies_0 h0 h1;
-    lemma_reveal_modifies_2 c input h1 h2;
-    lemma_reveal_modifies_2 c block h2 h3;
-    lemma_intro_modifies_2_1 c h0 h3
+(* private let lemma_modifies_4 (c:uint8_p) (input:uint8_p) (block:uint8_p) h0 h1 h2 h3 : Lemma *)
+(*   (requires (live h0 c /\ ~(contains h0 input) /\ ~(contains h0 block) *)
+(*     /\ live h1 c /\ live h1 input /\ live h1 block *)
+(*     /\ live h2 c /\ live h2 input /\ live h2 block *)
+(*     /\ modifies_0 h0 h1 /\ modifies_2 c input h1 h2 /\ modifies_2 c block h2 h3)) *)
+(*   (ensures (modifies_2_1 c h0 h3)) *)
+(*   = lemma_reveal_modifies_0 h0 h1; *)
+(*     lemma_reveal_modifies_2 c input h1 h2; *)
+(*     lemma_reveal_modifies_2 c block h2 h3; *)
+(*     lemma_intro_modifies_2_1 c h0 h3 *)
 
 
 [@"c_inline"]
