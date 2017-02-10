@@ -13,10 +13,13 @@ BIGNUM_FILES= \
 	Hacl.Spec.Bignum.Fdifference.fst  \
 	Hacl.Spec.Bignum.Fscalar.fst \
 	Hacl.Spec.Bignum.Fproduct.fst \
+	Hacl.Spec.Bignum.Fmul.fst \
+	Hacl.Spec.Bignum.fst \
 	Hacl.Bignum.Fsum.fst \
 	Hacl.Bignum.Fdifference.fst  \
 	Hacl.Bignum.Fscalar.fst \
 	Hacl.Bignum.Fproduct.fst \
+	Hacl.Bignum.Fmul.fst \
 	Hacl.Bignum.fst 
 #	Hacl.Bignum.Constants.fsti \
 	Hacl.Bignum.Parameters.fsti \

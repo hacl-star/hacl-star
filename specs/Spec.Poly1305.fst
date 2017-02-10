@@ -1,4 +1,4 @@
-module Hacl.Spec.Poly1305
+module Spec.Poly1305
 
 open FStar.Mul
 open FStar.Seq
