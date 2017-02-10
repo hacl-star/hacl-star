@@ -54,7 +54,7 @@ all-ct: $(addsuffix -ct, $(POLY1305_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints
+	$(FSTARB) $^ --use_hints --record_hints
 
 all-ver: $(addsuffix -verify, $(POLY1305_FILES))
 

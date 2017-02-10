@@ -74,7 +74,7 @@ all-ct: $(addsuffix -ct, $(X25519_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints
+	$(FSTARB) $^ --use_hints --record_hints
 
 all-ver: $(addsuffix -verify, $(X25519_FILES))
 
