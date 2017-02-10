@@ -130,7 +130,7 @@ private let fmul_ output input input2 =
   pop_frame()
 
 
-#reset-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 [@"c_inline"]
 val fmul:

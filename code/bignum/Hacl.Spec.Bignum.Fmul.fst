@@ -62,7 +62,7 @@ val lemma_mod_mul_comm: a:nat -> b:nat -> p:pos -> Lemma ((a*b)%p = ((a%p)*b)%p)
 let lemma_mod_mul_comm a b p = Math.Lemmas.lemma_mod_mul_distr_l a b p
 
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 
 val lemma_mul_shift_reduce_spec_1_1:
   o':seqelem_wide -> o:seqelem_wide ->
