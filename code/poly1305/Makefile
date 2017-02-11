@@ -3,6 +3,10 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../..
 include ../Makefile.include
 
+SPECS=../../specs
+
+INCLUDE_DIRS=../bignum ../lib/kremlin $(SPECS)
+
 
 BIGNUM= \
 	../bignum/Hacl.Spec.Bignum.Field.fst \
@@ -22,7 +26,7 @@ POLY1305_SPECIFIC= \
 	Hacl.Bignum.Parameters.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.Spec.Bignum.AddAndMultiply.fst \
-	Hacl.Spec.Poly1305.fst \
+	$(SPECS)/Spec.Poly1305.fst \
 	Hacl.Spec.Poly1305_64.fst \
 	Hacl.Spe.Poly1305_64.fst \
 	Hacl.Bignum.Modulo.fst \
@@ -37,10 +41,10 @@ TODO=Hacl.Impl.Poly1305_64.fst \
 POLY1305_FILES= $(BIGNUM) $(POLY1305_SPECIFIC)
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
+	$(addprefix --include , $(INCLUDE_DIRS)) --include $(KREMLIN_HOME)/kremlib
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib
+		--include ../lib --include ../bignum --include $(SPECS) --include $(KREMLIN_HOME)/kremlib
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -50,7 +54,7 @@ all-ct: $(addsuffix -ct, $(POLY1305_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints
+	$(FSTARB) $^ --use_hints --record_hints
 
 all-ver: $(addsuffix -verify, $(POLY1305_FILES))
 
@@ -74,7 +78,7 @@ extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p poly-c
 	$(KREMLIN_HOME)/krml -tmpdir poly-c -ccopt -std=gnu99 \
-		-I ../bignum -I ../lib/kremlin \
+		$(addprefix -I , $(INCLUDE_DIRS)) \
 		Poly1305_64.fst Hacl.Test.Poly1305_64.fst \
 		-drop 'Hacl.Endianness' \
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \

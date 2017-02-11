@@ -3,7 +3,7 @@
 Hacl* relies on [F*](https://github.com/FStarLang/FStar) and [KreMLin](https://github.com/FStarLang/kremlin) for verification.
 The submodules are automatically installed when running the makefile targets.
 
-### Environement
+### Environment
 
 Please set FSTAR_HOME in your environnement variables:
 `export FSTAR_HOME= <path-to hacl-star/dependencies/FStar>`
