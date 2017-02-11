@@ -18,7 +18,7 @@ let main () =
 
   let plaintext_len = 3ul in
   let plaintext = FStar.Buffer.createL [
-      0x4cuy; 0x61uy; 0x64uy;
+      0x61uy; 0x62uy; 0x63uy;
     ] in
 
   (* Allocate memory for state *)
