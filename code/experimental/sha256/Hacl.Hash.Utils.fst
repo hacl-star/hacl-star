@@ -47,11 +47,12 @@ let s32_to_s64 = Cast.sint32_to_sint64
 let u64_to_s64 = Cast.uint64_to_sint64
 
 
-
+[@"c_inline"]
 val upd4: buf:suint32_p{length buf <= pow2 32} -> idx:uint32_t{U32.v idx + 3 < length buf /\ U32.v idx + 3 <= pow2 32} -> a:uint32_t -> b:uint32_t -> c:uint32_t -> d:uint32_t
   -> Stack unit (requires (fun h -> live h buf))
                (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1))
 
+[@"c_inline"]
 let upd4 buf idx a b c d =
   buf.(idx +^ 0ul) <- u32_to_s32 a;
   buf.(idx +^ 1ul) <- u32_to_s32 b;
