@@ -1,4 +1,4 @@
-module Hacl.Hash.SHA2.L256.Ref
+module Hacl.Hash.SHA2.L256
 
 open FStar.Mul
 open FStar.Ghost
@@ -98,7 +98,7 @@ let _sigma1 x = S32.logxor (rotate_right x 17ul) (S32.logxor (rotate_right x 19u
 [@"c_inline"]
 val set_k:
   state:suint32_p{length state = U32.v size_state} ->
-  Stack unit 
+  Stack unit
         (requires (fun h -> live h state))
         (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
@@ -176,29 +176,17 @@ let rec ws_upd state wblock t =
 (* [FIPS 180-4] section 5.3.3 *)
 (* Define the initial hash value *)
 val init:
-  unit ->
-  StackInline (state:suint32_p{length state = v size_state})
-              (requires (fun h -> True))
-              (ensures  (fun h0 r h1 -> modifies_0 h0 h1))
-let init () =
-
-  (* Push a new memory frame *)
-  (**) push_frame();
-
-  (* Allocate the memory for the state *)
-  let state = create (uint32_to_sint32 0ul) size_state in
-
+  (state:suint32_p{length state = v size_state}) ->
+  Stack unit
+        (requires (fun h0 -> live h0 state))
+        (ensures  (fun h0 r h1 -> modifies_1 state h0 h1))
+let init state =
   (* Initialize constant k *)
   set_k state;
-  
   (* The schedule state is left to zeros *)
   (* Initialize working hash *)
-  set_whash state;
+  set_whash state
   (* The total number of blocks is left to 0ul *)
-
-  (* Pop the frame *)
-  (**) pop_frame();
-  state
 
 
 (* Step 3 : Perform logical operations on the working variables *)
@@ -335,7 +323,7 @@ let update_last state data len =
 
   (* Allocate memory for integer conversions *)
   let len_64 = Buffer.create (uint8_to_sint8 0uy) 8ul in
-  
+
   (* Alocate memory set to zeros for the last two blocks of data *)
   let blocks = Buffer.create (uint8_to_sint8 0uy) (U32.mul 2ul blocksize) in
 
@@ -394,4 +382,3 @@ let finish state hash =
   (* Store the final hash to the output location *)
   let whash = Buffer.sub state pos_whash size_whash in
   be_bytes_of_uint32s hash whash hashsize
-
