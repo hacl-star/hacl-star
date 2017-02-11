@@ -1,4 +1,6 @@
-all: dut_hacl_chacha20 dut_aes32 dut_aesbitsliced dut_cmpmemcmp dut_cmpct dut_donna dut_donnabad 
+all: dut_hacl_chacha20 dut_hacl_curve25519
+
+examples: dut_aes32 dut_aesbitsliced dut_cmpmemcmp dut_cmpct dut_donna dut_donnabad 
 
 OBJS = src/cpucycles.o src/fixture.o src/random.o \
 src/ttest.o src/percentile.o
@@ -23,12 +25,19 @@ LDFLAGS = $(OPTIMIZATION)
 
 INCS	= -Iinc/ 
 
+GOLL_CHACHA20_SRC = dut/hacl-c/Chacha20_goll.c
 CHACHA20_SRC = ../../snapshots/hacl-c/Chacha20.c
-CHACHA_INCS = $(INCS) -I ../../snapshots/hacl-c/
-CHACHA_LIBS = $(LIBS) -L ../../snapshots/hacl-c/
+CURVE25519_SRC = ../../snapshots/hacl-c/Curve25519.c
+HACL_INCS = $(INCS) -I ../../snapshots/hacl-c/
 
-dut_hacl_chacha20: $(OBJS) $(OBJS_CHACHA) dut/hacl-chacha20/dut_chacha20.c
-	$(CC) $(LDFLAGS) $(CHACHA_INCS) -o dudect_chacha20_$(OPTIMIZATION) $(CHACHA20_SRC) dut/hacl-chacha20/dut_chacha20.c $(OBJS) $(CHACHA_LIBS)
+dut_hacl_chacha20: $(OBJS) dut/hacl-c/dut_chacha20.c
+	$(CC) $(LDFLAGS) $(HACL_INCS) -o dudect_chacha20_$(OPTIMIZATION) $(CHACHA20_SRC) dut/hacl-c/dut_chacha20.c $(OBJS)
+
+dut_goll_chacha20: $(OBJS) dut/hacl-c/dut_goll_chacha20.c
+	$(CC) $(LDFLAGS) $(HACL_INCS) -o dudect_goll_chacha20_$(OPTIMIZATION) $(GOLL_CHACHA20_SRC) dut/hacl-c/dut_goll_chacha20.c $(OBJS)
+
+dut_hacl_curve25519: $(OBJS) dut/hacl-c/dut_curve25519.c
+	$(CC) $(LDFLAGS) $(HACL_INCS) -o dudect_curve25519_$(OPTIMIZATION) $(CURVE25519_SRC) dut/hacl-c/dut_curve25519.c $(OBJS)
 
 dut_aes32: $(OBJS) $(OBJS_AES32) dut/aes32/dut_aes32.c
 	$(CC) $(LDFLAGS) $(INCS) -o dudect_aes32_$(OPTIMIZATION) dut/aes32/$@.c $(OBJS) $(OBJS_AES32) $(LIBS)
