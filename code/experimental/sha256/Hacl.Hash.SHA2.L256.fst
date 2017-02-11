@@ -331,7 +331,7 @@ let update_last state data len =
   Buffer.blit data 0ul blocks 0ul len;
 
   (* Set the first byte of the padding *)
-  blocks.(len +^ 1ul) <- (u8_to_s8 0x80uy);
+  blocks.(len) <- (u8_to_s8 0x80uy);
 
   (* Compute the final length of the data *)
   let count = state.(pos_count) in
