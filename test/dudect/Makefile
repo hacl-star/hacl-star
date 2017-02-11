@@ -1,4 +1,4 @@
-all: dut_aes32 dut_aesbitsliced dut_cmpmemcmp dut_cmpct dut_donna dut_donnabad 
+all: dut_hacl_chacha20 dut_aes32 dut_aesbitsliced dut_cmpmemcmp dut_cmpct dut_donna dut_donnabad 
 
 OBJS = src/cpucycles.o src/fixture.o src/random.o \
 src/ttest.o src/percentile.o
@@ -13,7 +13,7 @@ dut/aesbitsliced/int128_aes128ctr.o \
 dut/aesbitsliced/stream_aes128ctr.o \
 dut/aesbitsliced/xor_afternm_aes128ctr.o
 CC=gcc-6
-OPTIMIZATION=-Ofast
+OPTIMIZATION=-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto
 #CFLAGS	= -Weverything -O0 -fsanitize=memory -fno-omit-frame-pointer -g 
 CFLAGS	= $(OPTIMIZATION)
 LIBS	= -lm
@@ -27,8 +27,8 @@ CHACHA20_SRC = ../../snapshots/hacl-c/Chacha20.c
 CHACHA_INCS = $(INCS) -I ../../snapshots/hacl-c/
 CHACHA_LIBS = $(LIBS) -L ../../snapshots/hacl-c/
 
-dut_chacha20: $(OBJS) $(OBJS_CHACHA) dut/hacl-chacha20/dut_chacha20.c
-	$(CC) $(LDFLAGS) $(CHACHA_INCS) -o dudect_chacha20_$(OPTIMIZATION) $(CHACHA20_SRC) dut/hacl-chacha20/$@.c $(OBJS) $(CHACHA_LIBS)
+dut_hacl_chacha20: $(OBJS) $(OBJS_CHACHA) dut/hacl-chacha20/dut_chacha20.c
+	$(CC) $(LDFLAGS) $(CHACHA_INCS) -o dudect_chacha20_$(OPTIMIZATION) $(CHACHA20_SRC) dut/hacl-chacha20/dut_chacha20.c $(OBJS) $(CHACHA_LIBS)
 
 dut_aes32: $(OBJS) $(OBJS_AES32) dut/aes32/dut_aes32.c
 	$(CC) $(LDFLAGS) $(INCS) -o dudect_aes32_$(OPTIMIZATION) dut/aes32/$@.c $(OBJS) $(OBJS_AES32) $(LIBS)
