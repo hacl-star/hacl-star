@@ -335,11 +335,10 @@ let update_last state data len =
 
   (* Compute the final length of the data *)
   let count = state.(pos_count) in
-  let c_0 = s32_to_s64 count in
-  let c_1 = u32_to_s64 blocksize in
-  let l_0 = S64.mul_mod c_0 c_1 in
+  let l_0 = S64.mul_mod (s32_to_s64 count) (u32_to_s64 blocksize) in
   let l_1 = u32_to_s64 len in
-  be_bytes_of_sint64 len_64 S64.(l_0 +^ l_1);
+  let t_0 = S64.mul_mod S64.(l_0 +^ l_1) (u32_to_s64 8ul) in
+  be_bytes_of_sint64 len_64 t_0;
 
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length are considered public here ! *)
