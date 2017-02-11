@@ -22,7 +22,7 @@ let main () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 128ul in
+  let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
   SHA2.init ctx;
@@ -30,7 +30,7 @@ let main () =
   SHA2.finish ctx output;
 
   (* Display the result *)
-  C.print_bytes output output_len;
+  C.print_bytes output 32ul;
 
   (* Pop the memory frame *)
   (**) pop_frame();
