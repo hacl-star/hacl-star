@@ -653,13 +653,13 @@ val poly1305_update_last_spec:
   rem':U64.t{U64.v rem' = length m /\ length m < 16} ->
   GTot (a:seqelem{
       (let acc = selem (MkState?.h st) in
-       let acc' = selem a in
+       let acc' = seval a in
        let r   = selem (MkState?.r st) in
        let m'   = (hlittle_endian m + pow2 (8*length m)) % prime in
        bounds a p44 p44 p42
        /\ (if Seq.length m >= 1
          then acc' = (((acc + m') % prime) * r) % prime
-         else acc' = (acc % prime))) })
+         else acc' = acc)) })
 let poly1305_update_last_spec st m rem' =
   if Seq.length m >= 1 then (
     lemma_mod_distr (seval (MkState?.h st)) (hlittle_endian m + pow2 (8*length m)) (seval (MkState?.r st))
@@ -674,7 +674,7 @@ let poly1305_update_last_spec st m rem' =
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
 val poly1305_finish_spec':
-  acc:seqelem{bounds acc 44 44 42} ->
+  acc:seqelem{bounds acc p44 p44 p42} ->
   key_s:word_16{Seq.length key_s = 16} ->
   GTot (mac:word_16{
     let acc = seval acc in
