@@ -308,12 +308,36 @@ let update state data_8 =
   (**) pop_frame()
 
 
+val update_multi:
+  state :suint32_p{length state = v size_state} ->
+  data  :suint8_p ->
+  n     :uint32_t ->
+  idx   :uint32_t ->
+  Stack unit
+        (requires (fun h0 -> live h0 state))
+        (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+
+let rec update_multi state data n idx =
+
+  if (idx =^ n) then ()
+  else
+
+    (* Get the current block for the data *)
+    let b = Buffer.sub data (mul_mod idx blocksize) blocksize in
+
+    (* Call the update function on the current block *)
+    update state b;
+
+    (* Recursive call *)
+    update_multi state data n (idx +^ 1ul)
+
+
 val update_last:
   state :suint32_p{length state = v size_state} ->
   data  :suint8_p {length data <= v blocksize} ->
   len   :uint32_t {U32.v len <= v blocksize} ->
   Stack unit
-        (requires (fun h -> live h state))
+        (requires (fun h0 -> live h0 state))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let update_last state data len =
@@ -381,3 +405,43 @@ let finish state hash =
   (* Store the final hash to the output location *)
   let whash = Buffer.sub state pos_whash size_whash in
   be_bytes_of_uint32s hash whash hashsize
+
+
+
+val sha256:
+  hash :suint8_p{length hash = v hashsize} ->
+  input:suint8_p ->
+  len  :uint32_t{v len = length input} ->
+  Stack unit
+        (requires (fun h0 -> live h0 hash /\ live h0 input))
+        (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1))
+
+let sha256 hash input len =
+
+  (* Push a new memory frame *)
+  (**) push_frame();
+
+  (* Allocate memory for the hash state *)
+  let ctx = Buffer.create (u32_to_s32 0ul) size_state in
+
+  (* Compute the number of blocks to process *)
+  let n = U32.div len blocksize in
+  let r = U32.rem len blocksize in
+
+  (* Initialize the hash function *)
+  init ctx;
+
+  (* Update the state with data blocks *)
+  update_multi ctx input n 0ul;
+
+  (* Get the last block *)
+  let input_last = Buffer.sub input (mul_mod n blocksize) r in
+
+  (* Process the last block of data *)
+  update_last ctx input_last r;
+
+  (* Finalize the hash output *)
+  finish ctx hash;
+
+  (* Pop the memory frame *)
+  (**) pop_frame()
