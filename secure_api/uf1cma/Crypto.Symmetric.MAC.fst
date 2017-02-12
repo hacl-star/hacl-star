@@ -12,10 +12,14 @@ module Crypto.Symmetric.MAC
 open Crypto.Symmetric.Bytes
 open Crypto.Indexing
 open Flag
-open FStar.Buffer
+open FStar.Buffer // no need? 
 
 module GS = Crypto.Symmetric.GF128.Spec
 module GF = Crypto.Symmetric.GF128
+
+//17-02-11 now switched from 32-bit to 64-bit; can we keep both?
+
+//17-02-11 Please at least document such notations! Besides Spec.Poly1305 is also used below.
 module PS_ = Hacl.Spec.Poly1305_64
 module PS = Hacl.Spe.Poly1305_64
 module PL = Hacl.Impl.Poly1305_64
@@ -103,6 +107,9 @@ let as_buffer #i = function
 
 val live: mem -> #i:id -> elemB i -> Type0
 let live h #i b = Buffer.live h (as_buffer b)
+
+//17-02-11 should red_45 and red_44 really be part of the poly1305 API??
+//17-02-11 what's the purpose of norm vs norm_r?
 
 val norm: mem -> #i:id -> b:elemB i -> Type0
 let norm h #i b =
@@ -315,7 +322,8 @@ let poly_empty #i t r =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
-val poly_cons_: x:word -> xs:PS_.text -> r:PS_.elem ->
+//17-02-11 rename? relocate?
+private val poly_cons_: x:word -> xs:PS_.text -> r:PS_.elem ->
   Lemma Spec.Poly1305.(poly (Seq.cons x xs) r == (encode x +@ poly xs r) *@ r)
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let poly_cons_ x xs r =
@@ -346,8 +354,7 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     live h0 a /\ live h0 r /\ Buffer.live h0 w /\ live h1 a ///\ live h1 r
     /\ norm h1 a
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
-    /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r
-    ))
+    /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
 #reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 
@@ -447,9 +454,9 @@ let finish #i s a t =
     GF.finish a s;
     GF.store128_be t a.(0ul)
     end
-  
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0"
 
+//17-02-11 new lemma
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0"
 val lemma_poly_finish_to_mac:
   i:id -> ht:mem -> t:tagB -> a:elem i -> hs:mem -> s:tagB -> log:text -> r:elem i ->
   Lemma (requires (Buffer.live ht t /\ Buffer.live hs s

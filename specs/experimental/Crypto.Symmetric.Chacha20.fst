@@ -1,3 +1,6 @@
+
+//17-02-11 Using a variant of this file to experiment with full correctness verification.
+//17-02-12 I'd like to keep as a simple reference implementation.
 module Crypto.Symmetric.Chacha20
 
 // Concrete implementation of CHACHA20 and countermode encryption
@@ -77,6 +80,18 @@ let quarter_round m a b c d =
   line m a b d  8ul; 
   line m c d b  7ul
 
+(*
+  let open FStar.Buffer in
+  m.(a) := m.(a) +%^ m.(b);
+  m.(d) := (m.(d) ^^  m.(a)) <<< 16ul;
+  m.(c) := m.(c) +%^ m.(d);
+  m.(b) := (m.(b) ^^  m.(c)) <<< 12ul;
+  m.(a) := m.(a) +%^ m.(b);
+  m.(d) := (m.(d) ^^  m.(a)) <<< 8ul;
+  m.(c) := m.(c) +%^ m.(d);
+  m.(b) := (m.(b) ^^  m.(c)) <<< 7ul
+*)
+
 private val column_round: shuffle (Spec.column_round)
 let column_round m =
   quarter_round m 0ul 4ul  8ul 12ul;
@@ -96,29 +111,24 @@ let double_round m =
   column_round m; 
   diagonal_round m
 
-assume val iter: n:UInt32.t -> spec: Spec.shuffle -> body: shuffle spec -> shuffle (Spec.iter (v n) spec)
-(* 17-02-09 triggers an F* failure: Bound term variable not found (after unmangling): n#33581
+val iter: n:UInt32.t -> spec: Spec.shuffle -> body: shuffle spec ->
+  m:matrix -> STL unit
+  (requires (fun h -> live h m))
+  (ensures (fun h0 _ h1 -> 
+    live h0 m /\ live h1 m /\ modifies_1 m h0 h1 /\ 
+    as_seq h1 m = Spec.iter (v n) spec (as_seq h0 m)))
 let rec iter n spec body m = 
   if n <> 0ul then (
     body m; 
     iter (n -^ 1ul) spec body m)
-*)
+//17-02-12 I had to inline the more compact "shuffle (Spec.iter (v n) spec)";
+//17-02-12 otherwise missing inferred decreases clause? this yields the same function:
+// val iter': n:UInt32.t -> spec: Spec.shuffle -> body: shuffle spec -> shuffle (Spec.iter (v n) spec)
+// let iter' = iter
 
 private val rounds: shuffle (Spec.rounds)
 let rounds m = (* 20 rounds *)
   iter 10ul Spec.double_round double_round m
-
-  (* column_round m; diagonal_round m; *)
-  (* column_round m; diagonal_round m; *)
-  (* column_round m; diagonal_round m; *)
-  (* column_round m; diagonal_round m *)
-  (* column_round m; diagonal_round m; *)
-  (* column_round m; diagonal_round m; *)
-  (* column_round m; diagonal_round m; *)
-  (* column_round m; diagonal_round m; *)
-  (* column_round m; diagonal_round m; *)
-  (* column_round m; diagonal_round m *)
-//17-02-08  was not sure how to control unfolding for functional correctness; probably needs a loop too.
 
 private val chacha20_init: 
   m:matrix -> k:key{disjoint m k} -> n:iv{disjoint m n} -> counter:UInt32.t -> 
@@ -161,8 +171,8 @@ let chacha20_init m key iv counter =
   fill m 13ul 3ul iv
 //17-02-08 verification gets slow... cutting code into smaller chunks helps. 
 
-
-(* lifted by hand for now: *)
+(*
+(* local functon, lifted by hand for now *)
 private val add: 
   m: matrix -> m0: matrix{disjoint m m0} -> 
   i:u32 { i <^ 16ul } ->
@@ -174,8 +184,40 @@ private val add:
       (as_seq h0 m) (v i) 
       (Spec.add (as_seq h0 m) (as_seq h0 m0) (v i))
   ))
-let add m m0 i = 
-  m.(i) <- m.(i) +%^ m0.(i)
+let add m m0 i = m.(i) <- m.(i) +%^ m0.(i)
+*)
+
+private val map2_inplace: 
+  #a:eqtype -> 
+  f:(a -> a -> Tot a) -> 
+  n: UInt32.t ->
+  b: buffer a {length b = v n} ->
+  b0: buffer a {length b0 = v n /\ disjoint b b0} ->
+  STL unit
+  (requires (fun h -> live h b /\ live h b0))
+  (ensures (fun h0 _ h1 ->
+    live h0 b /\ live h0 b0 /\live h1 b /\ modifies_1 b h0 h1 /\
+    Seq.equal (as_seq h1 b) (Spec.map2 f (as_seq h0 b) (as_seq h0 b0)))) 
+let rec map2_inplace #a f n b b0 = 
+  if n <> 0ul then (
+    b.(0ul) <- f b.(0ul) b0.(0ul);
+    let v1 = b.(0ul) in
+    map2_inplace f (n -^ 1ul) (offset b 1ul) (offset b0 1ul);
+    let v2 = b.(0ul) in
+    assume(v1 = v2) // which lemma to apply??
+  )
+    // let b' = sub b 1ul n in 
+    // let b0' = sub b0 1ul n in
+    // assert(disjoint (sub b 0ul 1ul) b');
+    // let h0 = ST.get() in 
+    // let h1 = ST.get() in 
+    // let h2 = ST.get() in
+    //let v'' = (sub b0 0ul 1ul).(0ul) in assert(v' = v'');
+    //lemma_sub_spec b 0ul 1ul h2;
+    //lemma_sub_spec b 0ul 1ul h1;
+    //
+    // assert(Seq.equal (as_seq h2 b') (Spec.map2 f (as_seq h1 b') (as_seq h1 b0')));
+    // assert(Seq.equal (as_seq h2 b) (Seq.cons v (as_seq h2 b')));
 
 private val sum_matrixes: 
   m: matrix -> m0:matrix{disjoint m m0} -> 
@@ -185,27 +227,8 @@ private val sum_matrixes:
     live h0 m /\ live h0 m0 /\ live h1 m /\ modifies_1 m h0 h1 /\ 
     as_seq h1 m = Spec.add_state (as_seq h0 m) (as_seq h0 m0) 
     ))
-let sum_matrixes m m0 =
-//let add i = upd m i (m.(i) +%^ m0.(i)) in // inlined? 
-// forUint32 0ul 15ul (fun i -> add m m0 i)
-  add m m0  0ul;
-  add m m0  1ul;
-  add m m0  2ul;
-  add m m0  3ul;
-  add m m0  4ul;
-  add m m0  5ul;
-  add m m0  6ul;
-  add m m0  7ul;
-  add m m0  8ul;
-  add m m0  9ul;
-  add m m0 10ul;
-  add m m0 11ul;
-  add m m0 12ul;
-  add m m0 13ul;
-  add m m0 14ul;
-  add m m0 15ul; 
-  assume false // this style won't do... and Seq.init seems underspecified.
-
+let sum_matrixes m m0 = map2_inplace (fun x y -> x +%^ y) 16ul m m0
+  
 (* this split did not help much...
 private val chacha20_update: 
   output:bytes -> 

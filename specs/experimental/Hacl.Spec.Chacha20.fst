@@ -59,10 +59,11 @@ let rec map2 f l1 l2 =
 val iter: n:nat -> (f: 'a -> Tot 'a) -> 'a -> 'a 
 let rec iter n f x = if n = 0 then x else iter (n-1) f (f x)
 
-
-//17-02-08 shall we use Uint8 instead?
 type lbytes l = b:seq UInt8.t {length b = l}
 
+// left rotation by s bits; could go elsewhere
+inline_for_extraction let rotate (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
+  (a <<^ s) |^ (a >>^ (32ul -^ s))
 
 (*** pure Chacha20 ***)
 // roughly aligned to Crypto.Symmetric.Chacha20
@@ -80,11 +81,6 @@ type counter = UInt32.t
 type state = m:seq UInt32.t {length m = blocklen / 4}
 type idx = n:nat{n < blocklen / 4}
 type shuffle = state -> Tot state 
-
-
-// left rotation by s bits 
-inline_for_extraction let rotate (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
-  (a <<^ s) |^ (a >>^ (32ul -^ s))
 
 val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> shuffle
 let line a b d s m = 
@@ -116,17 +112,6 @@ let diagonal_round : shuffle =
 let double_round: shuffle = column_round @ diagonal_round 
 
 let rec rounds : shuffle = iter 10 double_round (* 20 rounds *)
-
-  (* column_round @ diagonal_round @  *)
-  (* column_round @ diagonal_round @ *)
-  (* column_round @ diagonal_round @ *)
-  (* column_round @ diagonal_round @ *)
-  (* column_round @ diagonal_round @ *)
-  (* column_round @ diagonal_round @ *)
-  (* column_round @ diagonal_round @ *)
-  (* column_round @ diagonal_round @ *)
-  (* column_round @ diagonal_round @ *)
-  (* column_round @ diagonal_round *)
 
 (* state initialization *) 
 
@@ -163,27 +148,48 @@ let init0 (k:key) (n:iv) (c:counter): shuffle =
 let init (k:key) (n:iv) (c:counter): state = 
   init0 k n c (Seq.create (blocklen/4) 0ul)
 
+let lemma_incr (k:key) (n:iv) (c:counter {v c < pow2 32 - 1}) :
+  Lemma(
+  let s = init k n c in 
+  index s 12 == c /\
+  Seq.equal (init k n (c +^ 1ul)) (set 12 (index s 12 +^ 1ul) s))
+  = 
+  let s = init k n c in 
+  assert_norm(index s 12 == c);
+  assert_norm(Seq.equal (init k n (c +^ 1ul)) (set 12 (index s 12 +^ 1ul) s))
+
+
+val map2: 
+  #a:Type -> 
+  f:(a -> a -> Tot a) -> 
+  s0: seq a -> 
+  s1: seq a {length s0 = length s1} -> 
+  Tot (s: seq a {length s = length s0}) (decreases (length s0))
+let rec map2 #a f s0 s1 = 
+  if length s0 = 0 then createEmpty else
+  cons (f (head s0) (head s1)) (map2 f (tail s0) (tail s1))
+
 (*
 val add: idx -> state -> state -> Tot state 
 let add i m m0 = 
 *)
 
+//val add_state: state -> state -> Tot state
+////17-02-09 strangely, I had to unfold idx
+////let add (m0:state) (m1:state) (i:idx) = index m0 i +%^ index m1 i 
+//let add (m0:state) (m1:state) (i:nat {i < blocklen/4}) = index m0 i +%^ index m1 i 
 val add_state: state -> state -> Tot state
-//17-02-09 strangely, I had to unfold idx
-//let add (m0:state) (m1:state) (i:idx) = index m0 i +%^ index m1 i 
-let add (m0:state) (m1:state) (i:nat {i < blocklen/4}) = index m0 i +%^ index m1 i 
-let add_state m0 m1 = Seq.init (blocklen/4) (add m0 m1)
+let add_state m0 m1 = map2 (fun x y -> x +%^ y) m0 m1 
 
-val compute: key -> iv -> counter -> Tot state
+val compute: key -> iv -> counter -> Tot (lbytes blocklen)
 let compute k n c =
   let m = init k n c in 
-  add_state m (rounds m)
+  let m = add_state m (rounds m) in
+  uint32s_to_bytes m
 
 val chacha20: len:nat {len <= blocklen} -> key -> iv -> counter -> Tot (lbytes len)
-let chacha20 len k iv c =
-  let b = uint32s_to_bytes (compute k iv c) in
-  Seq.slice b 0 len
-
+let chacha20 len k iv c = slice (compute k iv c) 0 len
+// used in AEAD but not great; truncation should be handled in the mode.
 
 (*** Counter-mode encryption ***)
 // a generic construction on top of cipher--- not Chacha20-specific

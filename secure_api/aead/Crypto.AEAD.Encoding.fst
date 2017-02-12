@@ -158,6 +158,7 @@ let pad_16 b len =
   memset (Buffer.sub b len (16ul -^ len)) 0uy (16ul -^ len);
   let h = ST.get() in
   Seq.lemma_eq_intro (Buffer.as_seq h b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))
+//17-02-11  why a new proof? (same below)
 
 open FStar.HyperStack
 
@@ -391,7 +392,6 @@ let lemma_encode_both_inj i (al0:aadlen_32) (pl0:txtlen_32) (al1:aadlen_32) (pl1
   (ensures al0 = al1 /\ pl0 = pl1 /\ a0 = a1 /\ p0 = p1) = 
 
   let open FStar.Seq in 
-  let open FStar.Seq in
   let w0 = encode_lengths i al0 pl0 in 
   let w1 = encode_lengths i al1 pl1 in
   //assert(encode w0 = encode w1);
