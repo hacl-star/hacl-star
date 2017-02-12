@@ -25,4 +25,4 @@ extract-c:
 
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
-	rm -rf sha2-c
+	rm -rf hmac-c
