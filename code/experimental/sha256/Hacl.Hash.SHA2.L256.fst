@@ -11,7 +11,7 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
-open Hacl.Hash.Utils
+open Hacl.Utils.Experimental
 
 
 (* Definition of aliases for modules *)

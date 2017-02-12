@@ -1,4 +1,4 @@
-module Hacl.Hash.Utils
+module Hacl.Utils.Experimental
 
 open FStar.Mul
 open FStar.Ghost
@@ -21,7 +21,6 @@ module S8 = Hacl.UInt8
 module S32 = Hacl.UInt32
 module S64 = Hacl.UInt64
 
-module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
 
@@ -123,12 +122,33 @@ let be_bytes_of_sint64 output x =
  upd output 7ul b7
 
 
+val xor_bytes:
+  output :suint8_p ->
+  input  :suint8_p ->
+  len    :uint32_t{U32.v len <= length output /\ U32.v len <= length input} ->
+  Stack unit
+        (requires (fun h0 -> live h0 output /\ live h0 input))
+        (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
+        
+let rec xor_bytes output input len =
+  if U32.(len =^ 0ul) then ()
+  else
+    begin
+      let i    = U32.(len -^ 1ul) in
+      let in1i = Buffer.index input i in
+      let oi   = Buffer.index output i in
+      let oi   = S8.(in1i ^^ oi) in
+      output.(i) <- oi;
+      xor_bytes output input i
+    end
+    
+
 #set-options "--lax"
 
-val be_bytes_of_uint32s: 
-  output:suint8_p -> 
-  m:suint32_p -> 
-  len:uint32_t{U32.v len <= length output /\ U32.v len <= Prims.op_Multiply 4 (length m)} 
+val be_bytes_of_uint32s:
+  output:suint8_p ->
+  m:suint32_p ->
+  len:uint32_t{U32.v len <= length output /\ U32.v len <= Prims.op_Multiply 4 (length m)}
   -> Stack unit
           (requires (fun h -> live h output /\ live h m))
           (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 ))
@@ -166,3 +186,4 @@ let rec be_uint32s_of_bytes u b len =
     let l4 = U32.div len 4ul in
     upd u (U32.sub l4 1ul) (be_sint32_of_bytes (Buffer.sub b (U32.sub len 4ul) 4ul));
     be_uint32s_of_bytes u b (U32.sub len 4ul))
+

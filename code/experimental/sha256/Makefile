@@ -7,7 +7,7 @@ KREMLIN_HOME ?= /opt/kremlin
 extract:
 	mkdir -p sha2-c
 	$(KREMLIN_HOME)/krml -tmpdir sha2-c \
-		-I $(HACL_HOME)/code/lib/kremlin \
+		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils \
 		Hacl.Hash.SHA2.L256.fst Hacl.Test.Hash.SHA2.fst -o sha2.exe -no-prefix Hacl.Test.Hash.SHA2 \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 		-drop Prims -drop FStar Hacl.Test.Hash.SHA2.fst \
@@ -23,7 +23,7 @@ compile-test:
 	gcc-6 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_LIB/hyperstack -I /opt/hacl-star/code/lib/kremlin -I /opt/kremlin/kremlib -I sha2-c -march=native -std=gnu99 -c sha2-c/Hacl_Test_Hash_SHA2.c -o sha2-c/Hacl_Test_Hash_SHA2.o
 
 compile-exe:
-	gcc-6 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_LIB/hyperstack -I /opt/hacl-star/code/lib/kremlin -I /opt/kremlin/kremlib -I sha2-c -march=native -std=gnu99 sha2-c/Hacl_Hash_Utils.o sha2-c/Hacl_Hash_SHA2_L256.o sha2-c/Hacl_Test_Hash_SHA2.o sha2-c/kremlib.o sha2-c/testlib.o -o sha2.exe
+	gcc-6 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_LIB/hyperstack -I /opt/hacl-star/code/lib/kremlin -I /opt/kremlin/kremlib -I sha2-c -march=native -std=gnu99 sha2-c/Hacl_Utils_Experimental.o sha2-c/Hacl_Hash_SHA2_L256.o sha2-c/Hacl_Test_Hash_SHA2.o sha2-c/kremlib.o sha2-c/testlib.o -o sha2.exe
 
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
