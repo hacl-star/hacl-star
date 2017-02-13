@@ -114,8 +114,8 @@ val chacha20_xor_block:  (* was named core *)
         live h1 cipher /\ modifies_1 cipher h0 h1 /\ 
         (forall k iv c. 
           as_seq h0 b = Spec.init k iv c ==>
-          Seq.equal (as_seq h1 cipher) Spec.xor_block (as_seq h0 plain) (Spec.compute k iv c)
-        )))
+          Seq.equal (as_seq h1 cipher) (Spec.xor_block (as_seq h0 plain) (Spec.compute k iv c)
+        ))))
 
 // hopefully the rest can be built abstractly on top of these blocks. 
 
