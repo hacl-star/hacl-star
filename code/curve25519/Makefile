@@ -23,6 +23,8 @@ BIGNUM= \
 
 X25519_SPECIFIC= \
 	Hacl.Bignum.Parameters.fst \
+	Hacl.Bignum.Fsum.fst \
+	Hacl.Bignum.Fdifference.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.Spec.EC.AddAndDouble.fst \
 	Hacl.Spec.Bignum.Fsquare.fst \
@@ -52,9 +54,7 @@ SLOW= Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.EC.fst \
 
 # Files that still have errors
-TODO=Hacl.Bignum.Fsum.fst \
-	Hacl.Bignum.Fdifference.fst \
-	Hacl.Spec.Bignum.Modulo.fst \
+TODO=	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.EC.AddAndDouble.fst \
 	Hacl.EC.Format.fst
 
