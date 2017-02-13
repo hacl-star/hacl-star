@@ -195,7 +195,7 @@ val chacha_encrypt_bytes_stream:
   c:uint8_p{length c >= 64 /\ disjoint ctx c} ->
   Stack unit
     (requires (fun h -> live h ctx /\ live h c))
-    (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
+    (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c)) (* produces one block; no plaintext yet. *)
 [@"c_inline"]
 let chacha_encrypt_bytes_stream ctx c =
   push_frame();
@@ -258,10 +258,10 @@ let chacha_encrypt_bytes_stream ctx c =
 private val chacha_encrypt_bytes_core:
   ctx:chacha_ctx ->
   m:uint8_p{length m >= 64} ->
-  c:uint8_p{length c >= 64 /\ disjoint ctx c} ->
+  c:uint8_p{length c >= 64 /\ disjoint ctx c} -> (* m and c can overlap, since we read all of m before writing to c. *)
   Stack unit
     (requires (fun h -> live h ctx /\ live h c /\ live h m))
-    (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
+    (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c)) (* encrypts one block; does not modify ctx. *)
 [@"c_inline"]
 private let chacha_encrypt_bytes_core ctx m c =
   push_frame();
@@ -354,7 +354,7 @@ private let chacha_encrypt_bytes_core ctx m c =
 
 
 [@"c_inline"]
-private val chacha_encrypt_bytes_loop:
+private val chacha_encrypt_bytes_loop: (* counter-mode loop; could share increment code; stops before any partial iteration *)
   ctx:chacha_ctx ->
   m:uint8_p ->
   c:uint8_p{disjoint ctx c} ->
@@ -375,7 +375,7 @@ private let rec chacha_encrypt_bytes_loop ctx m c len =
 
 
 [@"c_inline"]
-private val chacha_encrypt_bytes_finish:
+private val chacha_encrypt_bytes_finish: (* final partial bloc; avoidable with block-aligned buffers for c, and maybe m? *)
   ctx:chacha_ctx ->
   m:uint8_p ->
   c:uint8_p{disjoint ctx c} ->

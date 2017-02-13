@@ -387,7 +387,6 @@ let prf_sk0 #i t =
 let extends (#rgn:region) (#i:id) (s0:Seq.seq (entry rgn i)) 
 	    (s1:Seq.seq (entry rgn i)) (x:domain i{ctr_0 i <^ x.ctr}) =
   let open FStar.Seq in 
-  let open FStar.Seq in 
   match find s0 x with 
   | Some _ -> s0 == s1
   | None   -> Seq.length s1 = Seq.length s0 + 1 /\ 

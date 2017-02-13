@@ -1,5 +1,6 @@
 FSTAR_HOME?=../../FStar
 
+#17-02-13 in low-level, we used to have two Makefiles, merged here.
 MEM=HST
 
 include $(FSTAR_HOME)/src/gmake/fstar.mk
@@ -62,6 +63,12 @@ OPTIONS=--fstar_home $(FSTAR_HOME) --max_fuel 4 --initial_fuel 0 --max_ifuel 2 -
 
 FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include utils --include spartan --include ../code/experimental/aesgcm --include prf --include uf1cma --include aead --include ../code/bignum --include ../code/poly1305 --include ../code/salsa-family --include ../code/lib/kremlin --include $(KREMLIN_HOME)/kremlib/ --include ../specs
 
+# TODO integrate GF128 with specs and code
+# TODO recheck why we dropped TestMonotonic and AES256GCM
+# TODO handle Poly1305 (by default keep in auxiliary directory)
+
+# Files that should fully typecheck
+# Files commented out are broken, uncomment once fixed
 VERIFY= \
   utils/Buffer.Utils \
   utils/Crypto.Symmetric.Bytes \
@@ -72,21 +79,25 @@ VERIFY= \
   prf/Crypto.Symmetric.PRF \
   uf1cma/Crypto.Symmetric.MAC \
   uf1cma/Crypto.Symmetric.UF1CMA \
-  aead/Crypto.AEAD.Encrypt.Invariant \
   aead/Crypto.AEAD.Encoding \
   aead/Crypto.AEAD.Invariant \
   aead/Crypto.AEAD.BufferUtils \
+  aead/Crypto.AEAD.Encrypt.Invariant \
   aead/Crypto.AEAD.Enxor.Invariant \
-  aead/Crypto.AEAD.Wrappers.CMA \
-  aead/Crypto.AEAD.Wrappers.Encoding \
   aead/Crypto.AEAD.EnxorDexor \
   aead/Crypto.AEAD.Wrappers.PRF \
+  aead/Crypto.AEAD.Wrappers.CMA \
+  aead/Crypto.AEAD.Wrappers.Encoding \
   aead/Crypto.AEAD.Decrypt \
   aead/Crypto.AEAD.MAC_Wrapper.Invariant \
   aead/Crypto.AEAD.Encrypt.Ideal.Invariant \
   aead/Crypto.AEAD.Encrypt \
   aead/Crypto.AEAD \
   aead/Crypto.Plain
+
+EXTRA= \
+  Crypto.Symmetric.Poly1305 \
+  Crypto.Test
 
 #  Crypto.Symmetric.Poly1305.Lemmas  # verification target is not passing reliably so commenting out
 
