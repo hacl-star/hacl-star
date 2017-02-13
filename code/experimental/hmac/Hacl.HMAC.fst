@@ -57,42 +57,189 @@ let u64_to_s64 = Cast.uint64_to_sint64
 // HMAC
 //
 
-
 (* Define parameters *)
-inline_for_extraction let hash = Hash.sha256
 inline_for_extraction let hashsize = Hash.hashsize
 inline_for_extraction let blocksize = Hash.blocksize
 
-
-(* Size and positions of objects in memb *)
+(* Size and positions of objects in the state *)
 inline_for_extraction let size_ipad = blocksize
 inline_for_extraction let size_opad = blocksize
-inline_for_extraction let size_okey = blocksize
-inline_for_extraction let size_s3   = blocksize +^ blocksize
-inline_for_extraction let size_s6   = blocksize +^ blocksize
-inline_for_extraction let size_memb = size_ipad +^ size_opad +^ size_okey +^ size_s3 +^ size_s6
+inline_for_extraction let size_okey_32 = blocksize /^ 4ul
+inline_for_extraction let size_state = size_okey_32 +^ Hash.size_state
 
-inline_for_extraction let pos_ipad  = 0ul
-inline_for_extraction let pos_opad  = pos_ipad +^ blocksize
-inline_for_extraction let pos_okey  = pos_opad +^ blocksize
-inline_for_extraction let pos_s3    = pos_okey +^ blocksize
-inline_for_extraction let pos_s6    = pos_s3 +^ blocksize
+inline_for_extraction let pos_okey = 0ul
+inline_for_extraction let pos_state_hash_0 = pos_okey +^ size_okey_32
 
 
-(* Define a function to wrap the key length after bl bits *)
+
+(* Define a function to wrap the key length after blocksize *)
+[@"c_inline"]
 private val hmac_wrap_key:
-  okey   :suint8_p{length okey = U32.v blocksize} ->
-  key    :suint8_p ->
-  keylen :uint32_t{U32.v keylen <= length key /\ U32.v keylen + 8 < pow2 32} ->
+  okey :suint8_p{length okey = U32.v blocksize} ->
+  key  :suint8_p ->
+  len  :uint32_t{U32.v len <= length key /\ U32.v len + 8 < pow2 32} ->
   Stack unit
         (requires (fun h0 -> live h0 okey /\ live h0 key))
         (ensures  (fun h0 _ h1 -> live h1 okey /\ live h1 key /\ modifies_1 okey h0 h1))
 
-let hmac_wrap_key okey key keylen =
-  if U32.(keylen >^ blocksize) then
-    hash okey key keylen
+[@"c_inline"]
+let hmac_wrap_key okey key len =
+  if U32.(len >^ blocksize) then
+    Hash.hash okey key len
   else
-    blit key 0ul okey 0ul keylen
+    Buffer.blit key 0ul okey 0ul len
+
+
+
+val init:
+  state :suint32_p{length state = U32.v size_state} ->
+  key   :suint8_p ->
+  len   :uint32_t {U32.v len = length key} ->
+  Stack unit
+        (requires (fun h0 -> live h0 state))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+
+let init state key len =
+
+  (* Push a new memory frame *)
+  (**) push_frame();
+
+  (* Allocate and set initial values for ipad *)
+  let ipad = Buffer.create (uint8_to_sint8 0x36uy) size_ipad in
+
+  (* Retrive and allocate memory for the wrapped key location *)
+  let okey_32 = Buffer.sub state pos_okey size_okey_32 in
+  let okey_8 = Buffer.create (uint8_to_sint8 0x00uy) blocksize in
+
+  (* Retreive memory for the inner hash state *)
+  let ctx_0 = Buffer.sub state pos_state_hash_0 Hash.size_state in
+
+  (* Initialize the hash states *)
+  Hash.init ctx_0;
+
+  (* Step 1: make sure the key has the proper length *)
+  hmac_wrap_key okey_8 key len;
+  (**) be_uint32s_of_bytes okey_32 okey_8 size_okey_32;
+
+  (* Step 2: xor "result of step 1" with ipad *)
+  Utils.xor_bytes ipad okey_8 blocksize;
+  let s2 = ipad in
+
+  (* Step 3a: feed s2 to the inner hash function *)
+  Hash.update ctx_0 s2;
+
+  (* Pop the memory frame *)
+  (**) pop_frame()
+
+
+
+val update :
+  state :suint32_p{length state = U32.v size_state} ->
+  data  :suint8_p {length data = U32.v blocksize} ->
+  Stack unit
+        (requires (fun h0 -> live h0 state /\ live h0 data))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+
+let update state data =
+
+  (* Select the part of the state used by the inner hash function *)
+  let ctx_hash_0 = Buffer.sub state pos_state_hash_0 Hash.size_state in
+
+  (* Process the rest of the data *)
+  Hash.update ctx_hash_0 data
+
+
+
+val update_multi:
+  state :suint32_p{length state = v size_state} ->
+  data  :suint8_p ->
+  n     :uint32_t ->
+  idx   :uint32_t ->
+  Stack unit
+        (requires (fun h0 -> live h0 state))
+        (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+
+let rec update_multi state data n idx =
+
+  if (idx =^ n) then ()
+  else
+
+    (* Get the current block for the data *)
+    let b = Buffer.sub data (mul_mod idx blocksize) blocksize in
+
+    (* Call the update function on the current block *)
+    update state b;
+
+    (* Recursive call *)
+    update_multi state data n (idx +^ 1ul)
+
+
+
+val update_last:
+  state :suint32_p{length state = U32.v size_state} ->
+  data  :suint8_p {length data = U32.v blocksize} ->
+  len   :uint32_t {U32.v len <= U32.v blocksize} ->
+  Stack unit
+        (requires (fun h0 -> live h0 state /\ live h0 data))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+
+let update_last state data len =
+
+  (* Select the part of the state used by the inner hash function *)
+  let ctx_hash_0 = Buffer.sub state pos_state_hash_0 Hash.size_state in
+
+  (* Process the rest of the data *)
+  Hash.update_last ctx_hash_0 data len
+
+
+
+val finish:
+  state :suint32_p{length state = U32.v size_state} ->
+  mac   :suint8_p {length mac = U32.v hashsize} ->
+  Stack unit
+        (requires (fun h0 -> live h0 state /\ live h0 mac))
+        (ensures  (fun h0 _ h1 -> live h1 state /\ live h1 mac /\ modifies_2 state mac h0 h1))
+
+let finish state mac =
+
+  (* Push a new memory frame *)
+  (**) push_frame();
+
+  (* Allocate and set initial values for ipad and opad *)
+  let opad = Buffer.create (uint8_to_sint8 0x5cuy) size_opad in
+
+  (* Allocate memory to store the output of the inner hash *)
+  let s4 = Buffer.create (uint8_to_sint8 0x00uy) hashsize in
+
+  (* Allocate memory for the outer hash state *)
+  let ctx_hash_1 = Buffer.create (uint32_to_sint32 0ul) Hash.size_state in
+
+  (* Retrieve the state of the inner hash *)
+  let ctx_hash_0 = Buffer.sub state pos_state_hash_0 Hash.size_state in
+
+  (* Retrive and allocate memory for the wrapped key location *)
+  let okey_32 = Buffer.sub state pos_okey size_okey_32 in
+  let okey_8 = Buffer.create (uint8_to_sint8 0x00uy) blocksize in
+  (**) be_bytes_of_uint32s okey_8 okey_32 blocksize;
+
+  (* Step 4: apply H to "result of step 3" *)
+  Hash.finish ctx_hash_0 s4;
+
+  (* Initialize outer hash state *)
+  Hash.init ctx_hash_1;
+
+  (* Step 5: xor "result of step 1" with opad *)
+  Utils.xor_bytes opad okey_8 blocksize;
+  let s5 = opad in
+
+  (* Step 6: append "result of step 4" to "result of step 5" *)
+  (* Step 7: apply H to "result of step 6" *)
+  Hash.update ctx_hash_1 s5;
+  Hash.update_last ctx_hash_1 s4 hashsize;
+  Hash.finish ctx_hash_1 mac;
+
+  (* Pop memory frame *)
+  (**) pop_frame()
 
 
 
@@ -111,45 +258,27 @@ let hmac mac key keylen data datalen =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  (* Allocate memory for the padding *)
-  let memb = Buffer.create (uint8_to_sint8 0uy) size_memb in
+  (* Allocate memory for the mac state *)
+  let ctx = Buffer.create (u32_to_s32 0ul) size_state in
 
-  (* Allocate and set initial values for ipad and opad *)
-  let ipad = Buffer.create (uint8_to_sint8 0x36uy) size_ipad in
-  let opad = Buffer.create (uint8_to_sint8 0x5cuy) size_opad in
+  (* Compute the number of blocks to process *)
+  let n = U32.div datalen blocksize in
+  let r = U32.rem datalen blocksize in
 
-  (* Allocate memory for the wrapped key location *)
-  let okey = Buffer.create (uint8_to_sint8 0uy) size_okey in
+  (* Initialize the mac state *)
+  init ctx key keylen;
 
-  (* Allocate memory for working emplacements *)
-  let s3 = Buffer.create (uint8_to_sint8 0uy) size_s3 in
-  let s6 = Buffer.create (uint8_to_sint8 0uy) size_s6 in
+  (* Update the state with data blocks *)
+  update_multi ctx data n 0ul;
 
-  (* Step 1: make sure the key has the proper length *)
-  hmac_wrap_key okey key keylen;
+  (* Get the last block *)
+  let input_last = Buffer.sub data (mul_mod n blocksize) r in
 
-  (* Step 2: xor "result of step 1" with ipad *)
-  Utils.xor_bytes ipad okey blocksize;
-  let s2 = ipad in
+  (* Process the last block of data *)
+  update_last ctx input_last r;
 
-  (* Step 3: append data to "result of step 2" *)
-  Buffer.blit s2 0ul s3 0ul blocksize;
-  Buffer.blit data 0ul s3 blocksize blocksize;
-
-  (* Step 4: apply H to "result of step 3" *)
-  let s4 = s2 in
-  hash s4 s3 (blocksize +^ datalen);
-
-  (* Step 5: xor "result of step 1" with opad *)
-  Utils.xor_bytes okey opad blocksize;
-  let s5 = okey in
-
-  (* Step 6: append "result of step 4" to "result of step 5" *)
-  Buffer.blit s5 0ul s6 0ul blocksize;
-  Buffer.blit s4 0ul s6 blocksize blocksize;
-
-  (* Step 7: apply H to "result of step 6" *)
-  hash mac s6 (blocksize +^ hashsize);
+  (* Finalize the mac output *)
+  finish ctx mac;
 
   (* Pop the memory frame *)
   (**) pop_frame()
