@@ -112,10 +112,10 @@ let init state key len =
   let okey_8 = Buffer.create (uint8_to_sint8 0x00uy) blocksize in
 
   (* Retreive memory for the inner hash state *)
-  let ctx_0 = Buffer.sub state pos_state_hash_0 Hash.size_state in
+  let ctx_hash_0 = Buffer.sub state pos_state_hash_0 Hash.size_state in
 
-  (* Initialize the hash states *)
-  Hash.init ctx_0;
+  (* Initialize the inner hash state *)
+  Hash.init ctx_hash_0;
 
   (* Step 1: make sure the key has the proper length *)
   hmac_wrap_key okey_8 key len;
@@ -126,7 +126,7 @@ let init state key len =
   let s2 = ipad in
 
   (* Step 3a: feed s2 to the inner hash function *)
-  Hash.update ctx_0 s2;
+  Hash.update ctx_hash_0 s2;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -153,15 +153,15 @@ let update state data =
 val update_multi:
   state :suint32_p{length state = v size_state} ->
   data  :suint8_p ->
-  n     :uint32_t ->
+  max   :uint32_t ->
   idx   :uint32_t ->
   Stack unit
         (requires (fun h0 -> live h0 state))
         (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-let rec update_multi state data n idx =
+let rec update_multi state data max idx =
 
-  if (idx =^ n) then ()
+  if (idx =^ max) then ()
   else
 
     (* Get the current block for the data *)
@@ -171,7 +171,7 @@ let rec update_multi state data n idx =
     update state b;
 
     (* Recursive call *)
-    update_multi state data n (idx +^ 1ul)
+    update_multi state data max (idx +^ 1ul)
 
 
 
@@ -225,12 +225,12 @@ let finish state mac =
   (* Step 4: apply H to "result of step 3" *)
   Hash.finish ctx_hash_0 s4;
 
-  (* Initialize outer hash state *)
-  Hash.init ctx_hash_1;
-
   (* Step 5: xor "result of step 1" with opad *)
   Utils.xor_bytes opad okey_8 blocksize;
   let s5 = opad in
+
+  (* Initialize outer hash state *)
+  Hash.init ctx_hash_1;
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   (* Step 7: apply H to "result of step 6" *)
