@@ -408,7 +408,7 @@ let finish state hash =
 
 
 
-val sha256:
+val hash:
   hash :suint8_p{length hash = v hashsize} ->
   input:suint8_p ->
   len  :uint32_t{v len = length input} ->
@@ -416,7 +416,7 @@ val sha256:
         (requires (fun h0 -> live h0 hash /\ live h0 input))
         (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1))
 
-let sha256 hash input len =
+let hash hash input len =
 
   (* Push a new memory frame *)
   (**) push_frame();

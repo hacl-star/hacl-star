@@ -2,7 +2,7 @@ module Hacl.Test.Hash.SHA2
 
 open FStar.Buffer
 
-module SHA2 = Hacl.Hash.SHA2.L256
+module SHA2_256 = Hacl.Hash.SHA2.L256
 
 
 
@@ -33,9 +33,9 @@ let test_1a () =
   let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
-  SHA2.init ctx;
-  SHA2.update_last ctx plaintext plaintext_len;
-  SHA2.finish ctx output;
+  SHA2_256.init ctx;
+  SHA2_256.update_last ctx plaintext plaintext_len;
+  SHA2_256.finish ctx output;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 1a") expected output 32ul;
@@ -71,7 +71,7 @@ let test_1b () =
   let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
-  SHA2.sha256 output plaintext plaintext_len;
+  SHA2_256.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 1b") expected output 32ul;
@@ -106,9 +106,9 @@ let test_2a () =
   let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
-  SHA2.init ctx;
-  SHA2.update_last ctx plaintext plaintext_len;
-  SHA2.finish ctx output;
+  SHA2_256.init ctx;
+  SHA2_256.update_last ctx plaintext plaintext_len;
+  SHA2_256.finish ctx output;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 2a") expected output 32ul;
@@ -142,7 +142,7 @@ let test_2b () =
   let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
-  SHA2.sha256 output plaintext plaintext_len;
+  SHA2_256.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 2b") expected output 32ul;
@@ -185,9 +185,9 @@ let test_3a () =
   let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
-  SHA2.init ctx;
-  SHA2.update_last ctx plaintext plaintext_len;
-  SHA2.finish ctx output;
+  SHA2_256.init ctx;
+  SHA2_256.update_last ctx plaintext plaintext_len;
+  SHA2_256.finish ctx output;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 3a") expected output 32ul;
@@ -229,7 +229,7 @@ let test_3b () =
   let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
-  SHA2.sha256 output plaintext plaintext_len;
+  SHA2_256.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 3b") expected output 32ul;
@@ -279,9 +279,9 @@ let test_4a () =
   let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
-  SHA2.init ctx;
-  SHA2.update_last ctx plaintext plaintext_len;
-  SHA2.finish ctx output;
+  SHA2_256.init ctx;
+  SHA2_256.update_last ctx plaintext plaintext_len;
+  SHA2_256.finish ctx output;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 4a") expected output 32ul;
@@ -330,7 +330,7 @@ let test_4b () =
   let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
-  SHA2.sha256 output plaintext plaintext_len;
+  SHA2_256.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 4b") expected output 32ul;
@@ -365,7 +365,7 @@ let test_5 () =
   let ctx = FStar.Buffer.create 0ul 137ul in
 
   (* Call the hash function *)
-  SHA2.sha256 output plaintext plaintext_len;
+  SHA2_256.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 5") expected output 32ul;
