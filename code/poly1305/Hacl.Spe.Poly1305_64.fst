@@ -226,7 +226,7 @@ private let lemma_tl (log:log_t) (m:word_16) (log':log_t) : Lemma
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
-private let poly_def_0 (log:Spec.text{length log = 0}) (r:elem) : Lemma
+let poly_def_0 (log:Spec.text{length log = 0}) (r:elem) : Lemma
   (poly log r = zero)
    = ()
 

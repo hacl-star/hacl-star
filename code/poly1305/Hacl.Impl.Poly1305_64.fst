@@ -47,7 +47,7 @@ noeq type poly1305_state = | MkState: r:bigint -> h:bigint -> poly1305_state
 private val sel_int: h:mem -> b:elemB{live h b} -> GTot nat
 private let sel_int h b = eval h b
 
-private let live_st m (st:poly1305_state) : Type0 =
+let live_st m (st:poly1305_state) : Type0 =
   live m st.h /\ live m st.r /\ disjoint st.h st.r
 
 
@@ -174,8 +174,8 @@ val poly1305_init_:
   st:poly1305_state ->
   key:uint8_p{length key = 16} ->
   Stack log_t
-    (requires (fun h -> live_st h st /\ live h key /\ red_45 (as_seq h st.h) /\ disjoint st.r key
-      /\ disjoint st.h key))
+    (requires (fun h -> live_st h st /\ live h key (* /\ red_45 (as_seq h st.h) *) (* /\ disjoint st.r key *)
+      (* /\ disjoint st.h key *)))
     (ensures  (fun h0 log h1 -> modifies_2 st.r st.h h0 h1 /\ live h0 key
       /\ live h1 st.r /\ live h1 st.h /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal log) == poly1305_init_spec (as_seq h0 key)
