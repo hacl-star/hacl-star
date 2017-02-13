@@ -337,7 +337,7 @@ let rec poly1305_blocks_spec st m len =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val lemma_onetimeauth_finish_1_1:
-  input:Seq.seq H8.t{Seq.length input > 0} ->
+  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   Lemma (
     let l = 16 * (U64.v len / 16) in
@@ -348,7 +348,7 @@ let lemma_onetimeauth_finish_1_1 input len =
 
 
 val lemma_onetimeauth_finish_1_2:
-  input:Seq.seq H8.t{Seq.length input > 0} ->
+  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   Lemma (
     let l = 16 * (U64.v len / 16) in
@@ -367,7 +367,7 @@ let lemma_onetimeauth_finish_1_2 input len =
 
 
 val lemma_onetimeauth_finish_1:
-  input:Seq.seq H8.t{Seq.length input > 0} ->
+  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   Lemma (
     let l = 16 * (U64.v len / 16) in
@@ -383,7 +383,7 @@ let lemma_onetimeauth_finish_1 input len =
 
 
 val lemma_onetimeauth_finish_2:
-  input:Seq.seq H8.t{Seq.length input > 0} ->  
+  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->  
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input /\ U64.v len % 16 > 0} ->
   r:elem ->
   Lemma (
@@ -394,11 +394,12 @@ val lemma_onetimeauth_finish_2:
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let lemma_onetimeauth_finish_2 input len r =
   lemma_onetimeauth_finish_1_2 input len;
+  let input = reveal_sbytes input in
   let l = 16 * (U64.v len / 16) in
   let a, b = split input l in
-  cut (encode_bytes input == Seq.cons b (encode_bytes a));
-  lemma_eq_intro (tail (encode_bytes input)) (encode_bytes a);
-  poly_def_1 (encode_bytes input) r
+  cut (encode_bytes (input) == Seq.cons b (encode_bytes (a)));
+  lemma_eq_intro (tail (encode_bytes (input))) (encode_bytes (a));
+  poly_def_1 (encode_bytes (input)) r
   
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -436,7 +437,7 @@ let poly1305_partial input len kr =
 
 
 val poly1305_complete:
-  input:Seq.seq H8.t{Seq.length input > 0} ->
+  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   k:Seq.seq H8.t{Seq.length k = 32} ->
   GTot (acc:seqelem{bounds acc p44 p44 p42
@@ -462,7 +463,7 @@ let poly1305_complete input len k =
 
 
 val crypto_onetimeauth_spec:
-  input:Seq.seq H8.t{Seq.length input > 0} ->
+  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   k:Seq.seq H8.t{Seq.length k = 32} ->
   GTot (mac:Seq.seq H8.t{Seq.length mac = 16

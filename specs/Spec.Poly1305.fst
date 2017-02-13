@@ -67,14 +67,12 @@ unfold let clamp_mask : word_16 = createL [ 255uy; 255uy; 255uy; 15uy;
                                                         252uy; 255uy; 255uy; 15uy;
                                                         252uy; 255uy; 255uy; 15uy ]
 
-type bytes_list = bl:list byte
-
 unfold let mask = 0x0ffffffc0ffffffc0ffffffc0fffffff
 
 #set-options "--initial_ifuel 1 --max_ifuel 1"
 
-val little_endian_l: bl:bytes_list -> Tot nat
-let rec little_endian_l bl =
+noextract val little_endian_l: bl:list byte -> GTot nat
+noextract let rec little_endian_l bl =
   match bl with
   | [] -> 0
   | hd::tl -> UInt8.v hd + pow2 8 * little_endian_l tl
@@ -88,7 +86,7 @@ let test = assert_norm(little_endian_l [ 255uy; 255uy; 255uy; 15uy;
 
 open FStar.Seq
 
-unfold let little_endian_post (b:bytes_list) (n:nat) : GTot Type0 =
+unfold let little_endian_post (b:list byte) (n:nat) : GTot Type0 =
   (* normalize  *)(little_endian_l (b) = n)
 
 #set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
@@ -103,11 +101,11 @@ let rec little_endian (b:bytes) :
 
 #set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
 
-unfold let createL_wrapper_post (l:bytes_list) (n:nat) : GTot Type0 =
+unfold let createL_wrapper_post (l:list byte) (n:nat) : GTot Type0 =
   normalize (n = little_endian_l l)
 
-val createL: b:bytes_list -> Tot (s:bytes{let n = little_endian s in createL_wrapper_post b n})
-let createL b = createL b
+noextract val createL: b:list byte -> Tot (s:bytes{let n = little_endian s in createL_wrapper_post b n})
+noextract let createL b = createL b
 
 unfold let mask_list = [ 255uy; 255uy; 255uy; 15uy; 252uy; 255uy; 255uy; 15uy;
                          252uy; 255uy; 255uy; 15uy; 252uy; 255uy; 255uy; 15uy ]
@@ -172,7 +170,7 @@ let rec encode_bytes txt =
     Seq.snoc (encode_bytes txt) w
 
 
-val poly1305: msg:bytes{length msg > 0} -> k:bytes{length k = 32} -> Tot tag
+val poly1305: msg:bytes -> k:bytes{length k = 32} -> Tot tag
 let poly1305 msg k =
   let text = encode_bytes msg in
   let r = encode_r (slice k 0 16) in

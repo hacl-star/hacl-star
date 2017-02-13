@@ -161,7 +161,7 @@ val poly1305_partial:
   Stack P.log_t
     (requires (fun h -> P.(live_st h st /\ live h m /\ disjoint st.r m /\ disjoint st.h m /\ live h kr)))
     (ensures  (fun h0 updated_log h1 -> P.(modifies_2 st.h st.r h0 h1 /\ live_st h1 st /\ live_st h0 st /\ live h0 m
-      /\ red_45 (as_seq h0 st.h) /\ red_44 (as_seq h0 st.r) /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
+      /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
       /\ live h0 kr /\ live h1 kr
       /\ (let r' = as_seq h1 st.r in
          let acc' = as_seq h1 st.h in
@@ -183,33 +183,83 @@ let poly1305_partial st input len kr =
   (* lemma_append_empty' (encode_bytes (reveal_sbytes input)) (MkState?.log init_st); *)
   partial_log
 
-
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+val poly1305_complete:
+  st:P.poly1305_state ->
+  m:P.uint8_p ->
+  len:U64.t{U64.v len = length m} ->
+  k:P.uint8_p{length k = 32} ->
+  Stack unit
+    (requires (fun h -> P.(live_st h st /\ live h m /\ disjoint st.r m /\ disjoint st.h m /\ live h k)))
+    (ensures  (fun h0 updated_log h1 -> P.(modifies_2 st.h st.r h0 h1 /\ live_st h1 st /\ live_st h0 st /\ live h0 m
+      /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
+      /\ live h0 k
+      /\ (let acc' = as_seq h1 st.h in
+         let m = as_seq h0 m in
+         let k = as_seq h0 k in
+         acc' == poly1305_complete m len k))
+         (* bounds acc' p44 p44 p42 *)
+         (* /\ acc == invariant (Spec.MkState r' acc' log') *)
+         (* /\ Spec.MkState r' acc' log' == Hacl.Spe.Poly1305_64.poly1305_partial m len k)) *)
+    ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+let poly1305_complete st m len k =
+  let kr = Buffer.sub k 0ul 16ul in
+  let len16 = U64.(len >>^  4ul) in
+  let rem16 = U64.(len &^ 0xfuL) in
+  assert_norm(pow2 4 = 16);
+  UInt.logand_mask (U64.v len) 4;
+  assert_norm(pow2 4 = 16);
+  cut (U64.v len = 16 * U64.v len16 + U64.v rem16);
+  Math.Lemmas.lemma_div_mod (U64.v len) 16;
+  Math.Lemmas.modulo_lemma (16 * U64.v len16) (pow2 32);
+  Math.Lemmas.modulo_lemma (U64.v len) (pow2 32);
+  let part_input = Buffer.sub m 0ul (Int.Cast.uint64_to_uint32 (U64.(16uL *^ len16))) in
+  let last_block = Buffer.sub m (Int.Cast.uint64_to_uint32 (U64.(16uL *^ len16))) (Int.Cast.uint64_to_uint32 rem16) in
+  let l = poly1305_partial st part_input len16 kr in
+  P.poly1305_update_last l st last_block rem16
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-val crypto_onetimeauth:
-  output:uint8_p{length output = 16} ->
-  input:uint8_p{disjoint input output} ->
+val crypto_onetimeauth_:
+  output:P.uint8_p{length output = 16} ->
+  input:P.uint8_p{disjoint input output} ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = length input} ->
-  k:uint8_p{disjoint output k /\ length k = 32} ->
+  k:P.uint8_p{length k = 32} ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h k))
     (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 /\ live h0 input /\ live h0 k
       /\ as_seq h1 output == Hacl.Spe.Poly1305_64.crypto_onetimeauth_spec (as_seq h0 input) len (as_seq h0 k)))
-let crypto_onetimeauth output input len k =
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+let crypto_onetimeauth_ output input len k =
   push_frame();
-  let len16 = U64.(len >>^ 4ul) in
-  let rem16 = U64.(len &^ 0xfuL) in
-  let partial_input = Buffer.sub input 0ul U32.(16ul *^ Int.Cast.uint64_to_uint32 len16) in
-  let last_block    = Buffer.sub input U32.(16ul *^ Int.Cast.uint64_to_uint32 len16) (Int.Cast.uint64_to_uint32 len) in
+  (* let len16 = U64.(len >>^ 4ul) in *)
+  (* let rem16 = U64.(len &^ 0xfuL) in *)
+  (* let partial_input = Buffer.sub input 0ul U32.(16ul *^ Int.Cast.uint64_to_uint32 len16) in *)
+  (* let last_block    = Buffer.sub input U32.(16ul *^ Int.Cast.uint64_to_uint32 len16) (Int.Cast.uint64_to_uint32 len) in *)
   let buf = create limb_zero U32.(clen +^ clen) in
   let r = sub buf 0ul clen in
   let h = sub buf clen clen in
-  let st = MkState r h in
+  let st = P.MkState r h in
   let key_r = Buffer.sub k 0ul 16ul in
   let key_s = Buffer.sub k 16ul 16ul in
-  let init_log = poly1305_init_ st key_r in
-  let partial_log = poly1305_blocks init_log st partial_input len16 in
-  let final_log = poly1305_finish_ partial_log st output last_block rem16 key_s in
+  (* let init_log = poly1305_init_ st key_r in *)
+  let partial_log = poly1305_complete st input len k in
+  let final_log = P.poly1305_finish st output key_s in
   pop_frame()
+
+open Hacl.Spec.Endianness
+
+val crypto_onetimeauth:
+  output:P.uint8_p{length output = 16} ->
+  input:P.uint8_p{disjoint input output} ->
+  len:U64.t{U64.v len = length input} ->
+  k:P.uint8_p{length k = 32} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h input /\ live h k))
+    (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 /\ live h0 input /\ live h0 k
+      /\ reveal_sbytes (as_seq h1 output) == Spec.Poly1305.poly1305 (reveal_sbytes (as_seq h0 input)) (reveal_sbytes (as_seq h0 k))))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+let crypto_onetimeauth output input len k =
+  crypto_onetimeauth_ output input len k

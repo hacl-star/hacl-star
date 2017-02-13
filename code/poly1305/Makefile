@@ -31,12 +31,12 @@ POLY1305_SPECIFIC= \
 	Hacl.Spe.Poly1305_64.fst \
 	Hacl.Bignum.Modulo.fst \
 	Hacl.Bignum.AddAndMultiply.fst \
-	Hacl.Impl.Poly1305_64.fst
+	Hacl.Impl.Poly1305_64.fst \
+	Hacl.Standalone.Poly1305_64.fst 
 
 SLOW=
 
-TODO=Hacl.Impl.Poly1305_64.fst \
-	Hacl.Spe.Poly1305_64.fst 
+TODO=
 
 POLY1305_FILES= $(BIGNUM) $(POLY1305_SPECIFIC)
 
