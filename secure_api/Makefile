@@ -65,7 +65,10 @@ FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include utils --in
 
 # TODO integrate GF128 with specs and code
 # TODO recheck why we dropped TestMonotonic and AES256GCM
-# TODO handle Poly1305 (by default keep in auxiliary directory)
+# TODO store our old 32-bit Poly1305 verified code (by default keep in auxiliary directory)
+
+# TODO document (or even call) auxiliary verification targets elsewhere!
+# for example it is unclear where and how to reverify the libraries and Poly1305.
 
 # Files that should fully typecheck
 # Files commented out are broken, uncomment once fixed
