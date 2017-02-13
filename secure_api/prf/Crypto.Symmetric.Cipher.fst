@@ -48,6 +48,7 @@ inline_for_extraction let statelen = function
   | CHACHA20 -> 32ul
   (* | CHACHA20 -> 16ul *)
 
+(*17-02-11  why? *)
 inline_for_extraction let stlen = function
   | AES128   -> 432ul // 256 + 176
   | AES256   -> 496ul // 256 + 240
@@ -66,6 +67,7 @@ let state_limb = function
 
 unfold inline_for_extraction
 (* type state a = b:Buffer.buffer (state_limb a){Buffer.length b = UInt32.v (stlen a)} *)
+// problematic with Kremlin? Use sum type for now?
 type state a = lbuffer (v (statelen a))
 
 // 16-10-02 an integer value, instead of a lbuffer (v (ivlen)),
