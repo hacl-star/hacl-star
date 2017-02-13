@@ -1,6 +1,7 @@
 module Hacl.Test.Hash.SHA2
 
 open FStar.Buffer
+open FStar.UInt32
 
 module SHA2_256 = Hacl.Hash.SHA2.L256
 
@@ -30,7 +31,7 @@ let test_1a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 137ul in
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
 
   (* Call the hash function *)
   SHA2_256.init ctx;
@@ -68,7 +69,7 @@ let test_1b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 137ul in
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
 
   (* Call the hash function *)
   SHA2_256.hash output plaintext plaintext_len;
@@ -103,7 +104,7 @@ let test_2a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 137ul in
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
 
   (* Call the hash function *)
   SHA2_256.init ctx;
@@ -139,7 +140,7 @@ let test_2b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 137ul in
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
 
   (* Call the hash function *)
   SHA2_256.hash output plaintext plaintext_len;
@@ -182,7 +183,7 @@ let test_3a () =
   ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 137ul in
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
 
   (* Call the hash function *)
   SHA2_256.init ctx;
@@ -226,7 +227,7 @@ let test_3b () =
   ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 137ul in
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
 
   (* Call the hash function *)
   SHA2_256.hash output plaintext plaintext_len;
@@ -276,7 +277,7 @@ let test_4a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 137ul in
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
 
   (* Call the hash function *)
   SHA2_256.init ctx;
@@ -327,7 +328,7 @@ let test_4b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 137ul in
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
 
   (* Call the hash function *)
   SHA2_256.hash output plaintext plaintext_len;
@@ -362,13 +363,77 @@ let test_5 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul 137ul in
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
 
   (* Call the hash function *)
   SHA2_256.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 5") expected output 32ul;
+
+  (* Pop the memory frame *)
+  (**) pop_frame()
+
+
+
+val test_6_loop:
+  plaintext:FStar.Buffer.buffer FStar.UInt8.t ->
+  ctx:FStar.Buffer.buffer FStar.UInt32.t ->
+  max:FStar.UInt32.t ->
+  idx:FStar.UInt32.t ->
+  ST unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 r h1 -> True))
+let rec test_6_loop plaintext ctx max idx =
+  if (idx =^ max) then ()
+  else (
+    SHA2_256.update ctx plaintext;
+    test_6_loop plaintext ctx max (idx +^ 1ul))
+
+
+val test_6: unit -> ST unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 r h1 -> True))
+let test_6 () =
+
+  (* Push a new memory frame *)
+  (**) push_frame();
+
+  let output_len = 32ul in
+  let output = FStar.Buffer.create 0uy output_len in
+
+  let plaintext_len = 64ul in
+  let plaintext = FStar.Buffer.createL [
+      0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
+      0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
+      0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy; 0x6auy;
+      0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy; 0x6auy; 0x6buy;
+      0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy; 0x6auy; 0x6buy; 0x6cuy;
+      0x66uy; 0x67uy; 0x68uy; 0x69uy; 0x6auy; 0x6buy; 0x6cuy; 0x6duy;
+      0x67uy; 0x68uy; 0x69uy; 0x6auy; 0x6buy; 0x6cuy; 0x6duy; 0x6euy;
+      0x68uy; 0x69uy; 0x6auy; 0x6buy; 0x6cuy; 0x6duy; 0x6euy; 0x6fuy
+  ] in
+
+  let expected = FStar.Buffer.createL [
+      0x50uy; 0xe7uy; 0x2auy; 0x0euy; 0x26uy; 0x44uy; 0x2fuy; 0xe2uy;
+      0x55uy; 0x2duy; 0xc3uy; 0x93uy; 0x8auy; 0xc5uy; 0x86uy; 0x58uy;
+      0x22uy; 0x8cuy; 0x0cuy; 0xbfuy; 0xb1uy; 0xd2uy; 0xcauy; 0x87uy;
+      0x2auy; 0xe4uy; 0x35uy; 0x26uy; 0x6fuy; 0xcduy; 0x05uy; 0x5euy
+    ] in
+
+  (* Allocate memory for state *)
+  let ctx = FStar.Buffer.create 0ul SHA2_256.size_state in
+
+  (* Initialize the hash state *)
+  SHA2_256.init ctx;
+
+  test_6_loop plaintext ctx 16777215ul 0ul;
+
+  SHA2_256.update_last ctx plaintext plaintext_len;
+  SHA2_256.finish ctx output;
+
+  (* Display the result *)
+  TestLib.compare_and_print (C.string_of_literal "Test 6") expected output 32ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -398,6 +463,9 @@ let main () =
 
   (* Run test vector 5 *)
   test_5 ();
+
+  (* Run test vector 6 *)
+  test_6();
 
   (* Exit the program *)
   C.exit_success
