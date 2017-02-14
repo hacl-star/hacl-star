@@ -2,8 +2,6 @@ module Crypto.AEAD.Invariant
 // We implement ideal AEAD on top of ideal Chacha20 and ideal Poly1305. 
 // We precisely relate AEAD's log to their underlying state.
 
-// This file intends to match the spec of AEAD0.fst in mitls-fstar. 
-
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
@@ -78,6 +76,7 @@ let safelen (i:id)
    (remaining_len + len_all_blocks_so_far <= maxplain i &&
     remaining_len <= max_len_for_remaining_blocks))
 
+//17-02-14  nz = non-zero; probably not needed in the proof after all
 type ok_len (i:id) = plainlen:nat{safelen i plainlen (otp_offset i)}
 type nz_ok_len (i:id) = plainlen:ok_len i{plainlen <> 0}
 type ok_len_32 (i:id) = plainlen:txtlen_32{safelen i (v plainlen) (otp_offset i)}
@@ -413,29 +412,19 @@ let inv (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) : Type0 =
 (*** SEPARATION AND LIVENESS
      REQUIREMENTS OF THE INTERFACE ***)
 
-module Plain = Crypto.Plain
-
 let recall_aead_liveness (#i:id) (#rw:rw) (st:aead_state i rw) 
   : ST unit (requires (fun h -> True))
 	    (ensures (fun h0 _ h1 -> 
 			h0 == h1 /\
 			aead_liveness st h1))
-  = recall_region PRF.(st.prf.mac_rgn);
-    if prf i
-    then recall (PRF.itable i st.prf);
-    if safeMac i
-    then recall (st_ilog st)
-
-
-module Plain = Crypto.Plain
+  = 
+  recall_region PRF.(st.prf.mac_rgn);
+  if prf i then recall (PRF.itable i st.prf);
+  if safeMac i then recall (st_ilog st)
 
 let ctagbuf (plainlen:txtlen_32) = lbuffer (v plainlen + v MAC.taglen)
-
-let cbuf (#plainlen:txtlen_32) (ct:ctagbuf plainlen) : lbuffer (v plainlen) = 
-  Buffer.sub ct 0ul plainlen
-
-let ctag (#plainlen:txtlen_32) (ct:ctagbuf plainlen) : MAC.tagB =
-  Buffer.sub ct plainlen MAC.taglen
+let cbuf (#plainlen:txtlen_32) (ct:ctagbuf plainlen) : lbuffer (v plainlen) = Buffer.sub ct 0ul plainlen
+let ctag (#plainlen:txtlen_32) (ct:ctagbuf plainlen) : MAC.tagB = Buffer.sub ct plainlen MAC.taglen
 
 (*+ found_matching_entry: 
       the entry in the aead table corresponding to nonce n
@@ -755,7 +744,7 @@ val counterblocks_snoc: #i:id{safeId i} -> (rgn:region) -> (x:domain i{ctr_0 i <
 							   (PRF.Entry ({x with ctr=UInt32.uint_to_t k}) 
 							              (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last)))))
 	   (decreases (completed_len - v x.ctr))
-#reset-options "--z3rlimit 400 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 2000 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 let rec counterblocks_snoc #i rgn x k len next completed_len plain cipher =
    let open FStar.Mul in
    let from_pos = (v x.ctr - (v (otp_offset i))) * v (PRF.blocklen i) in
@@ -773,11 +762,10 @@ let rec counterblocks_snoc #i rgn x k len next completed_len plain cipher =
 	  let recursive_call = counterblocks i rgn y len (from_pos + l0) to_pos plain cipher in
 	  let middle = counterblocks i rgn y len (from_pos + l0) completed_len plain cipher in
 	  let last_entry = PRF.Entry ({x with ctr=UInt32.uint_to_t k}) (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last) in
-	  assert (counterblocks i rgn x len from_pos to_pos plain cipher ==
-		  Seq.cons head recursive_call);
+	  assert (counterblocks i rgn x len from_pos to_pos plain cipher == Seq.cons head recursive_call);
 	  counterblocks_snoc rgn y k len next completed_len plain cipher;
 	  assert (recursive_call == Seq.snoc middle last_entry);
-          Seq.lemma_cons_snoc head middle last_entry //REVIEW: THIS PROOF TAKES A WHILE ...optimize
+          Seq.lemma_cons_snoc head middle last_entry //REVIEW: THIS PROOF TAKES A WHILE ...optimize //17-02-14 increased rlimit again.
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 (*+ counterblocks_slice: 

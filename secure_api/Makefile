@@ -1,4 +1,5 @@
 FSTAR_HOME?=../../FStar
+HACL_HOME?=$(FSTAR_HOME)/../hacl-star
 
 #17-02-13 in low-level, we used to have two Makefiles, merged here.
 MEM=HST
@@ -61,7 +62,21 @@ HINTS_ENABLED?=--use_hints
 
 OPTIONS=--fstar_home $(FSTAR_HOME) --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20  $(HINTS_ENABLED) $(OTHERFLAGS)
 
-FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include utils --include spartan --include ../code/experimental/aesgcm --include prf --include uf1cma --include aead --include ../code/bignum --include ../code/poly1305 --include ../code/salsa-family --include ../code/lib/kremlin --include $(KREMLIN_HOME)/kremlib/ --include ../specs
+# A bit much!!
+FSTAR_INCLUDE_PATHS= \
+--include $(FSTAR_HOME)/ulib/hyperstack \
+--include $(HACL_HOME)/code/bignum \
+--include $(HACL_HOME)/code/experimental/aesgcm \
+--include $(HACL_HOME)/code/lib/kremlin \
+--include $(HACL_HOME)/code/poly1305 \
+--include $(HACL_HOME)/code/salsa-family \
+--include $(HACL_HOME)/secure_api/aead \
+--include $(HACL_HOME)/secure_api/prf \
+--include $(HACL_HOME)/secure_api/spartan \
+--include $(HACL_HOME)/secure_api/uf1cma \
+--include $(HACL_HOME)/secure_api/utils \
+--include $(HACL_HOME)/specs \
+--include $(KREMLIN_HOME)/kremlib
 
 # TODO integrate GF128 with specs and code
 # TODO recheck why we dropped TestMonotonic and AES256GCM
@@ -101,6 +116,7 @@ VERIFY= \
 EXTRA= \
   Crypto.Symmetric.Poly1305 \
   Crypto.Test
+# TODO Crypto.Test has moved; probably call test/KrmlTest instead.
 
 #  Crypto.Symmetric.Poly1305.Lemmas  # verification target is not passing reliably so commenting out
 
@@ -138,13 +154,11 @@ all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 # Parameter for interactive mode
 %.fst-in: 
 	@echo $(OPTIONS) \
-	$(FSTAR_INCLUDE_PATHS) \
-	--__temp_no_proj Crypto.Symmetric.MAC \
-	--verify_module $(basename $(notdir $@))
+	$(FSTAR_INCLUDE_PATHS) 
 
 # Verifying one file at a time
 %.fst-ver:
-	$(FSTAR) $(OPTIONS) \
+	@$(FSTAR) $(OPTIONS) \
 	$(FSTAR_INCLUDE_PATHS) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	--verify_module $(basename $(notdir $@)) \

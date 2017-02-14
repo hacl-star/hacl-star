@@ -67,7 +67,7 @@ val chacha20_ivsetup:
     (ensures (fun h0 __ h1 -> 
         let b = as_buffer ctx in 
         live h0 b /\ live h0 nonce /\ live h1 b /\ modifies_1 b h0 h1 /\
-        ( forall k iv c.
+        ( forall k iv c.{:pattern Spec.init k iv c}
         as_seq h0 b = Spec.init k iv c ==>
         as_seq h1 b = Spec.init k (as_seq h0 nonce) counter)))
 
