@@ -5,7 +5,7 @@ CC=gcc-6 -flto
 
 .PHONY: test clean
 
-test: test-aead test-random
+test: test-aead test-random test-sha2
 
 test-aead:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
@@ -16,6 +16,11 @@ test-random:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
 	-I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c cpuid.c drng.c Random.c test-random.c -o test-random.exe
 	./test-random.exe
+
+test-sha2:
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
+	-I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c Hacl_Utils_Experimental.c SHA2_256.c test-sha2.c -o test-sha2.exe
+	./test-sha2.exe
 
 clean:
 	rm -rf *~ *.exe *.out 
