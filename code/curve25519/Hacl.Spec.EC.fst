@@ -18,7 +18,7 @@ module H8 = Hacl.UInt8
 val crypto_scalarmult_spec:
   secret:uint8_s{Seq.length secret = 32} ->
   basepoint:uint8_s{Seq.length basepoint = 32} ->
-  Tot (mypublic:uint8_s{Seq.length mypublic = 32})
+  GTot (mypublic:uint8_s{Seq.length mypublic = 32})
 let crypto_scalarmult_spec secret basepoint =
   let q = point_of_scalar basepoint in
   let scalar = format_secret secret in
