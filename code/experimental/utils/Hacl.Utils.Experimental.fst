@@ -143,47 +143,43 @@ let rec xor_bytes output input len =
     end
     
 
-#set-options "--lax"
 
-val be_bytes_of_uint32s:
-  output:suint8_p ->
-  m:suint32_p ->
-  len:uint32_t{U32.v len <= length output /\ U32.v len <= Prims.op_Multiply 4 (length m)}
-  -> Stack unit
-          (requires (fun h -> live h output /\ live h m))
-          (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 ))
+val load32s_be:
+  buf_32 :Buffer.buffer UInt32.t ->
+  len_32 :UInt32.t{UInt32.v len_32 <= length buf_32} ->
+  buf_8  :Buffer.buffer UInt8.t{ (UInt32.v len_32 * 4) <= length buf_8} ->
+  Stack unit
+        (requires (fun h0 -> live h0 buf_32 /\ live h0 buf_8))
+        (ensures  (fun h0 _ h1 -> live h1 buf_32 /\ modifies_1 buf_32 h0 h1))
 
-let rec be_bytes_of_uint32s output m len =
-  if len =^ 0ul then ()
+let rec load32s_be buf_32 len_32 buf_8 =
+  if FStar.UInt32.(len_32 =^ 0ul) then ()
   else
     begin
-      let l4 = U32.div len 4ul in
-      let l = U32.sub l4 1ul in
-      let x = Buffer.index m l in
-      let b0 = s32_to_s8 S32.((x >>^ 24ul) &^ u32_to_s32 255ul) in
-      let b1 = s32_to_s8 S32.((x >>^ 16ul) &^ u32_to_s32 255ul) in
-      let b2 = s32_to_s8 S32.((x >>^ 8ul)  &^ u32_to_s32 255ul) in
-      let b3 = s32_to_s8 S32.((x)          &^ u32_to_s32 255ul) in
-      let l4 = U32.sub len 4ul in
-      Buffer.upd output l4 b0;
-      Buffer.upd output (U32.add l4 1ul) b1;
-      Buffer.upd output (U32.add l4 2ul) b2;
-      Buffer.upd output (U32.add l4 3ul) b3;
-      be_bytes_of_uint32s output m l4
+      let x_8 = Buffer.sub buf_8 FStar.UInt32.((len_32 -^ 1ul) *^ 4ul) 4ul in
+      let x_32 = Hacl.Endianness.load32_be x_8 in
+      Buffer.upd buf_32 FStar.UInt32.(len_32 -^ 1ul) x_32;
+      load32s_be buf_32 FStar.UInt32.(len_32 -^ 1ul) buf_8
     end
 
 
-val be_uint32s_of_bytes:
-  a:suint32_p ->
-  b:suint8_p ->
-  len:uint32_t ->
+val store32s_be:
+  buf_8  :buffer UInt8.t ->
+  len_8 :UInt32.t{UInt32.v len_8 % 4 = 0 /\ UInt32.v len_8 <= length buf_8} ->
+  buf_32 :buffer UInt32.t{UInt32.v len_8 <= (4 * length buf_32)} ->
   Stack unit
-        (requires (fun h -> live h a /\ live h b))
-        (ensures  (fun h0 _ h1 -> live h1 a /\ live h1 b /\ modifies_1 a h0 h1))
-let rec be_uint32s_of_bytes u b len =
-  if U32.eq len 0ul then ()
-  else (
-    let l4 = U32.div len 4ul in
-    upd u (U32.sub l4 1ul) (be_sint32_of_bytes (Buffer.sub b (U32.sub len 4ul) 4ul));
-    be_uint32s_of_bytes u b (U32.sub len 4ul))
+        (requires (fun h0 -> live h0 buf_8 /\ live h0 buf_32))
+        (ensures  (fun h0 _ h1 -> live h1 buf_8 /\ modifies_1 buf_8 h0 h1))
 
+let rec store32s_be buf_8 len_8 buf_32 =
+  if FStar.UInt32.(len_8 =^ 0ul) then ()
+  else
+    begin
+      cut((UInt32.v len_8 - 4)% 4 = 0);
+      cut((UInt32.v len_8 - 4) <= length buf_8);
+      let i_32 = FStar.UInt32.(len_8 /^ 4ul) in
+      let x_32 = Buffer.index buf_32 FStar.UInt32.(i_32 -^ 1ul) in
+      let x_8 = Buffer.sub buf_8 FStar.UInt32.((i_32 -^ 1ul) *^ 4ul) 4ul in
+      Hacl.Endianness.store32_be x_8 x_32;
+      store32s_be buf_8 FStar.UInt32.(len_8 -^ 4ul) buf_32
+    end
