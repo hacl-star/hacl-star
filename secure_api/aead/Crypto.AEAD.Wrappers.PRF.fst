@@ -94,6 +94,7 @@ private val lemma_aead_entries_are_same_after_prf_mac
   (ensures  (let entries_0 = HS.sel #(aead_entries i) h0 aead_st.log in
              let entries_1 = HS.sel #(aead_entries i) h1 aead_st.log in
 	     entries_0 == entries_1))  //aead entries are same in h0 and h1
+#reset-options "--z3rlimit 100" 
 let lemma_aead_entries_are_same_after_prf_mac #i #rw aead_st k_0 x h0 h1 mac = ()
 
 (*

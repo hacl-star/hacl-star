@@ -336,6 +336,7 @@ let rec poly1305_blocks_spec st m len =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
+<<<<<<< HEAD
 val lemma_onetimeauth_finish_1_1:
   input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
@@ -400,6 +401,27 @@ let lemma_onetimeauth_finish_2 input len r =
   cut (encode_bytes (input) == Seq.cons b (encode_bytes (a)));
   lemma_eq_intro (tail (encode_bytes (input))) (encode_bytes (a));
   poly_def_1 (encode_bytes (input)) r
+=======
+(* assume val lemma_onetimeauth_finish_1: *)
+(*   input:Seq.seq H8.t{Seq.length input > 0} -> *)
+(*   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} -> *)
+(*   Lemma ( *)
+(*     let l = 16 * (U64.v len / 16) in *)
+(*     let i1, i2 = split input l in *)
+(*     msg_to_text (reveal_sbytes input) == encode_bytes (input) *)
+(*     /\ (if l = U64.v len then encode_bytes input == encode_bytes i1 *)
+(*        else encode_bytes input == Seq.create 1 i2 @| encode_bytes i1)) *)
+
+(* assume val lemma_onetimeauth_finish_2: *)
+(*   input:Seq.seq H8.t{Seq.length input > 0} ->   *)
+(*   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input /\ U64.v len % 16 > 0} -> *)
+(*   r:elem -> *)
+(*   Lemma ( *)
+(*     let l = 16 * (U64.v len / 16) in *)
+(*     let i1, i2 = split input l in *)
+(*     let block = (hlittle_endian i2 + pow2 (8*length i2)) % prime in *)
+(*     poly (encode_bytes input) r = (poly (encode_bytes i1) r +@ block) *@ r) *)
+>>>>>>> dev
   
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -453,6 +475,7 @@ let poly1305_complete input len k =
   cut (U64.v len = 16 * U64.v len16 + U64.v rem16);
   Math.Lemmas.lemma_div_mod (U64.v len) 16;
   assert_norm(pow2 128 < pow2 130 - 5);
+<<<<<<< HEAD
   Math.Lemmas.modulo_lemma (UInt.logand #128 (hlittle_endian (slice k 0 16)) 0x0ffffffc0ffffffc0ffffffc0fffffff) prime;
   let part_input, last_block = split input (16 * U64.v len16) in
   let partial_st = poly1305_partial part_input len16 kr in
@@ -471,5 +494,15 @@ val crypto_onetimeauth_spec:
 let crypto_onetimeauth_spec input len k =
   let acc = poly1305_complete input len k in
   let mac = poly1305_finish_spec' acc (slice k 16 32) in
+=======
+  poly_def_0 (MkState?.log init_st) (seval (MkState?.r init_st));
+  cut (invariant init_st);
+  let partial_st = poly1305_blocks_spec init_st part_input len16 in
+  cut (invariant partial_st);
+  let mac = poly1305_finish_spec partial_st last_block rem16 ks in
+  (* lemma_onetimeauth_finish_1 input len; *)
+  (* if U64.v rem16 > 0 then lemma_onetimeauth_finish_2 input len (selem (MkState?.r init_st)); *)
+  (* assert(mac == finish (poly (encode_bytes input) (encode_r kr)) ks); *)
+>>>>>>> dev
   FStar.Endianness.lemma_little_endian_inj (reveal_sbytes mac) (poly1305 (reveal_sbytes input) (reveal_sbytes k));
   mac

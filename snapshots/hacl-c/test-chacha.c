@@ -17,11 +17,12 @@ void ossl_chacha20(uint8_t* cipher, uint8_t* plain, int len, uint8_t* nonce, uin
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d times 2^20 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
-  printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
+  printf("Cycles for %d * %d bytes: %llu (%.2fcycles/byte)\n", rounds, plainlen, d1, (double)d1/plainlen/rounds);
+  double ts = t1/CLOCKS_PER_SEC;
+  printf("User time for %d times %d bytes: %fs (%fus/byte)\n", rounds, plainlen, ts, (double)(ts*1000000)/(plainlen*rounds));
 }
 
-#define PLAINLEN (1024*1024)
+#define PLAINLEN (512*1024)
 #define ROUNDS 1000
 #define MACSIZE 32
 

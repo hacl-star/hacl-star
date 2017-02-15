@@ -42,7 +42,8 @@ private val frame_aead_entries_enxor
   (requires (enxor_h0_h1 aead_st nonce aad plain ct h0 h1))
   (ensures  (HS.sel #(aead_entries i) h0 (st_ilog aead_st) ==              
              HS.sel #(aead_entries i) h1 (st_ilog aead_st)))
-#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+//17-02-14 brittle proof; doubled limit
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let frame_aead_entries_enxor #i #rw #aadlen #plainlan aead_st nonce aad plain ct h0 h1 = ()
 
 (*
