@@ -52,8 +52,7 @@ SLOW= Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.EC.fst \
 
 # Files that still have errors
-TODO=	Hacl.EC.AddAndDouble.fst \
-	Hacl.EC.Format.fst
+TODO=	Hacl.EC.Format.fst \
 
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 

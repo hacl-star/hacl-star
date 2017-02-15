@@ -10,6 +10,7 @@ open Hacl.Spec.EC.Point
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
+
 type uint8_s = Seq.seq Hacl.UInt8.t
 
 private inline_for_extraction let zero_8 = uint8_to_sint8 0uy
@@ -31,51 +32,22 @@ let alloc_point () =
   x, z
 
 
-val load64_le_spec: b:uint8_s{Seq.length b = 8} -> Tot limb
+open FStar.Endianness
+open Hacl.Spec.Endianness
+open Hacl.Endianness
+
+val load64_le_spec: b:uint8_s{Seq.length b = 8} -> GTot (z:limb{v z = hlittle_endian b})
 let load64_le_spec b =
-  assert_norm (pow2 32 = 0x100000000);
-  let b0 = Seq.index b 0 in
-  let b1 = Seq.index b 1 in
-  let b2 = Seq.index b 2 in
-  let b3 = Seq.index b 3 in
-  let b4 = Seq.index b 4 in
-  let b5 = Seq.index b 5 in
-  let b6 = Seq.index b 6 in
-  let b7 = Seq.index b 7 in
-  Hacl.Bignum.Limb.(
-    sint8_to_sint64 b0
-    |^ (sint8_to_sint64 b1 <<^ 8ul)
-    |^ (sint8_to_sint64 b2 <<^ 16ul)
-    |^ (sint8_to_sint64 b3 <<^ 24ul)
-    |^ (sint8_to_sint64 b4 <<^ 32ul)
-    |^ (sint8_to_sint64 b5 <<^ 40ul)
-    |^ (sint8_to_sint64 b6 <<^ 48ul)
-    |^ (sint8_to_sint64 b7 <<^ 56ul)
-  )
+  let z = hlittle_endian b in
+  lemma_little_endian_is_bounded (reveal_sbytes b);
+  Hacl.Cast.uint64_to_sint64 (FStar.UInt64.uint_to_t z)
 
 
-val store64_le_spec: z:Hacl.Bignum.Limb.t -> Tot (b:uint8_s{Seq.length b = 8})
+val store64_le_spec: z:Hacl.Bignum.Limb.t -> GTot (b:uint8_s{Seq.length b = 8 /\ hlittle_endian b = v z})
 let store64_le_spec z =
-  assert_norm (pow2 32 = 0x100000000);
-  let open Hacl.Bignum.Limb in
-  let b0 = sint64_to_sint8 z in
-  let b1 = sint64_to_sint8 (z >>^ 8ul) in
-  let b2 = sint64_to_sint8 (z >>^ 16ul) in
-  let b3 = sint64_to_sint8 (z >>^ 24ul) in
-  let b4 = sint64_to_sint8 (z >>^ 32ul) in
-  let b5 = sint64_to_sint8 (z >>^ 40ul) in
-  let b6 = sint64_to_sint8 (z >>^ 48ul) in
-  let b7 = sint64_to_sint8 (z >>^ 56ul) in
-  let s = Seq.create 8 (uint8_to_sint8 0uy) in
-  let s = Seq.upd s 0 b0 in
-  let s = Seq.upd s 1 b1 in
-  let s = Seq.upd s 2 b2 in
-  let s = Seq.upd s 3 b3 in
-  let s = Seq.upd s 4 b4 in
-  let s = Seq.upd s 5 b5 in
-  let s = Seq.upd s 6 b6 in
-  let s = Seq.upd s 7 b7 in
-  s
+  let b = little_bytes 8ul (v z) in
+  intro_sbytes b
+
 
 inline_for_extraction let mask_51 : p:t{v p = pow2 51 - 1} = assert_norm(pow2 51 - 1 = 0x7ffffffffffff);
   uint64_to_limb 0x7ffffffffffffuL
@@ -92,7 +64,7 @@ inline_for_extraction let seq_upd_5 s0 s1 s2 s3 s4 =
   s
 
 
-val fexpand_spec: input:uint8_s{Seq.length input = 32} -> Tot (s:seqelem{Hacl.Spec.EC.AddAndDouble.red_513 s})
+val fexpand_spec: input:uint8_s{Seq.length input = 32} -> GTot (s:seqelem{Hacl.Spec.EC.AddAndDouble.red_513 s})
 let fexpand_spec input =
   let i0 = load64_le_spec (Seq.slice input 0 8) in
   let i1 = load64_le_spec (Seq.slice input 6 14) in
@@ -114,7 +86,7 @@ let fexpand_spec input =
 
 inline_for_extraction let nineteen : p:t{v p = 19} = assert_norm(pow2 64 > 19); uint64_to_limb 19uL
 
-val fcontract_spec: input:seqelem -> Tot (s:uint8_s{Seq.length s = 32})
+val fcontract_spec: input:seqelem -> GTot (s:uint8_s{Seq.length s = 32})
 let fcontract_spec input =
   let t0 = Seq.index input 0 in
   let t1 = Seq.index input 1 in
@@ -174,7 +146,7 @@ let fcontract_spec input =
   FStar.Seq.(store64_le_spec o0 @| store64_le_spec o1 @| store64_le_spec o2 @| store64_le_spec o3)
 
 
-val point_of_scalar: scalar:uint8_s{Seq.length scalar = keylen} -> Tot spoint_513
+val point_of_scalar: scalar:uint8_s{Seq.length scalar = keylen} -> GTot spoint_513
 let point_of_scalar scalar =
   let s = Seq.create 10 limb_zero in
   let x = Seq.slice s 0 5 in
@@ -183,7 +155,7 @@ let point_of_scalar scalar =
   let z = Seq.upd z 0 limb_one in
   x, z
 
-val scalar_of_point: p:spoint_513 -> Tot (scalar:uint8_s{Seq.length scalar = keylen})
+val scalar_of_point: p:spoint_513 -> GTot (scalar:uint8_s{Seq.length scalar = keylen})
 let scalar_of_point point =
   let x = sgetx point in
   let z = sgetz point in

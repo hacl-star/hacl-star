@@ -23,16 +23,16 @@ test-salsa:
 
 test-chacha:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 $(OPENSSL_HOME)/libcrypto.a \
-	-l sodium \
-	kremlib.c testlib.c Chacha20.c test-chacha.c -o test-chacha.exe
+	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 \
+	kremlib.c testlib.c Chacha20.c test-chacha.c -o test-chacha.exe \
+	 $(OPENSSL_HOME)/libcrypto.a -l sodium -lpthread -ldl
 	./test-chacha.exe
 
 test-curve:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a \
-	-l sodium \
-	kremlib.c testlib.c Curve25519.c test-curve.c -o test-curve.exe 
+	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
+	kremlib.c testlib.c Curve25519.c test-curve.c -o test-curve.exe \
+	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -l sodium
 	./test-curve.exe
 
 test-nacl:

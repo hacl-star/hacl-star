@@ -35,13 +35,13 @@ module Spec2 = Hacl.Spe.Poly1305_64
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
-private let lemma_poly1305_blocks_spec_0 (st:Spec.poly1305_state_{invariant st}) (m:Seq.seq H8.t) (len:U64.t{16*U64.v len = Seq.length m /\ U64.v len = 0}) : Lemma
+private noextract let lemma_poly1305_blocks_spec_0 (st:Spec.poly1305_state_{invariant st}) (m:Seq.seq H8.t) (len:U64.t{16*U64.v len = Seq.length m /\ U64.v len = 0}) : Lemma
   (poly1305_blocks_spec st m len == st)
   = ()
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-private val lemma_poly1305_blocks_spec_1_
+private noextract val lemma_poly1305_blocks_spec_1_
   (st:Spec.poly1305_state_{invariant st})
   (m:Seq.seq H8.t)
   (len:U64.t{16*U64.v len = Seq.length m /\ U64.v len > 0}) : Lemma
@@ -50,7 +50,7 @@ private val lemma_poly1305_blocks_spec_1_
    let st'   = poly1305_update_spec st block in
    Seq.length m' = 16*(U64.v len - 1) /\ invariant st')
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-private let lemma_poly1305_blocks_spec_1_ st m len =
+private noextract let lemma_poly1305_blocks_spec_1_ st m len =
   let block = Seq.slice m 0 16 in
   let m'    = Seq.slice m 16 (Seq.length m) in
   let st'   = poly1305_update_spec st block in
@@ -64,7 +64,7 @@ private let lemma_poly1305_blocks_spec_1_ st m len =
   lemma_poly1305_blocks_spec_1 block log log' (Spec.selem acc) (seval r) (Spec.selem acc')
 
 
-private val lemma_poly1305_blocks_spec_1
+private noextract val lemma_poly1305_blocks_spec_1
   (st:Spec.poly1305_state_{invariant st})
   (m:Seq.seq H8.t)
   (len:U64.t{16*U64.v len = Seq.length m /\ U64.v len > 0}) : Lemma
@@ -75,7 +75,7 @@ private val lemma_poly1305_blocks_spec_1
    (let st'':Spec.poly1305_state_  = poly1305_blocks_spec st' m' U64.(len -^ 1uL) in
    poly1305_blocks_spec st m len == st''))
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 200"
-private let lemma_poly1305_blocks_spec_1 st m len =
+private noextract let lemma_poly1305_blocks_spec_1 st m len =
   lemma_poly1305_blocks_spec_1_ st m len
 
   (* assert(false) *)

@@ -52,72 +52,25 @@ let rec poly vs r =
     (encode v +@ poly (Seq.tail vs) r) *@ r
 
 
-private val fix: word_16 -> i:nat{i < 16} -> m:byte -> Tot word_16
-let fix r i m = Seq.upd r i (FStar.UInt8.(Seq.index r i &^ m))
-
-
 module L = FStar.List.Tot
 open FStar.Seq
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
-
-unfold let clamp_mask : word_16 = createL [ 255uy; 255uy; 255uy; 15uy;
-                                                        252uy; 255uy; 255uy; 15uy;
-                                                        252uy; 255uy; 255uy; 15uy;
-                                                        252uy; 255uy; 255uy; 15uy ]
-
 unfold let mask = 0x0ffffffc0ffffffc0ffffffc0fffffff
 
 #set-options "--initial_ifuel 1 --max_ifuel 1"
 
-noextract val little_endian_l: bl:list byte -> GTot nat
-noextract let rec little_endian_l bl =
-  match bl with
-  | [] -> 0
-  | hd::tl -> UInt8.v hd + pow2 8 * little_endian_l tl
-
-#set-options "--initial_ifuel 0 --max_ifuel 0"
-
-let test = assert_norm(little_endian_l [ 255uy; 255uy; 255uy; 15uy;
-                                                        252uy; 255uy; 255uy; 15uy;
-                                                        252uy; 255uy; 255uy; 15uy;
-                                                        252uy; 255uy; 255uy; 15uy ] = mask)
-
 open FStar.Seq
-
-unfold let little_endian_post (b:list byte) (n:nat) : GTot Type0 =
-  (* normalize  *)(little_endian_l (b) = n)
 
 #set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 (* Little endian integer value of a sequence of bytes *)
-let rec little_endian (b:bytes) :
-  Tot (n:nat{let l = seq_to_list b in little_endian_post l n})
-      (decreases (Seq.length b)) =
-  if Seq.length b = 0 then 0
-  else
-    UInt8.v (head b) + pow2 8 * little_endian (tail b)
+inline_for_extraction
+let little_endian (b:bytes) : Tot (n:nat) = little_endian b
 
 #set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 5"
 
-unfold let createL_wrapper_post (l:list byte) (n:nat) : GTot Type0 =
-  normalize (n = little_endian_l l)
-
-noextract val createL: b:list byte -> Tot (s:bytes{let n = little_endian s in createL_wrapper_post b n})
-noextract let createL b = createL b
-
-unfold let mask_list = [ 255uy; 255uy; 255uy; 15uy; 252uy; 255uy; 255uy; 15uy;
-                         252uy; 255uy; 255uy; 15uy; 252uy; 255uy; 255uy; 15uy ]
-
-
-let test' (u:unit) : Tot unit =
-  assert(little_endian (createL [ 255uy; 255uy; 255uy; 15uy; 252uy; 255uy; 255uy; 15uy;
-                                       252uy; 255uy; 255uy; 15uy; 252uy; 255uy; 255uy; 15uy ] )
-              = 0x0ffffffc0ffffffc0ffffffc0fffffff)
-
-unfold let r_mask : w:word_16{little_endian w = 0x0ffffffc0ffffffc0ffffffc0fffffff}
-  = createL [ 255uy; 255uy; 255uy; 15uy; 252uy; 255uy; 255uy; 15uy; 252uy; 255uy; 255uy; 15uy; 252uy; 255uy; 255uy; 15uy ]
 
 let rec lemma_little_endian_eq (b:bytes) : Lemma
   (requires (True))
@@ -128,29 +81,17 @@ let rec lemma_little_endian_eq (b:bytes) : Lemma
     else lemma_little_endian_eq (slice b 1 (length b))
 
 
-let encode_r_post (rb:word_16) (r:elem) : GTot Type0 =
-  lemma_little_endian_is_bounded rb;
-  assert_norm(pow2 128 = 0x100000000000000000000000000000000);
-  r = UInt.logand #128 (little_endian rb) 0x0ffffffc0ffffffc0ffffffc0fffffff
-
-
-val encode_r: rb:word_16 -> Tot (r:elem{encode_r_post rb r})
+val encode_r: rb:word_16 -> Tot (r:elem)
 let encode_r rb =
   lemma_little_endian_is_bounded rb;
   assert_norm(pow2 128 = 0x100000000000000000000000000000000);
-  UInt.logand #128 (little_endian rb) (little_endian r_mask)
-
-
-(* (\** Final truncation to 128 bits to compute the tag *\) *)
-(* val trunc_1305: elem -> Tot elem *)
-(* let trunc_1305 e = e % normalize_term (pow2 128) *)
+  UInt.logand #128 (little_endian rb) 0x0ffffffc0ffffffc0ffffffc0fffffff
 
 
 (** Finish: truncate and pad (or pad and truncate) *)
 val finish: a:elem -> s:tag -> Tot tag
 let finish a s =
-  (* REMARK: this is equivalent to n = (a + little_endian s) % pow2 128 *)
-  (* let n = (trunc_1305 a + little_endian s) % pow2 128 in *)
+  (* REMARK: this is equivalent to n = ((a % pow2 128) + little_endian s) % pow2 128 *)
   let n = (a + little_endian s) % pow2 128 in
   little_bytes 16ul n
 

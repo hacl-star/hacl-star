@@ -19,5 +19,8 @@ val crypto_onetimeauth:
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h k))
     (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 /\ live h0 input /\ live h0 k
-      /\ as_seq h1 output == Hacl.Spe.Poly1305_64.crypto_onetimeauth_spec (as_seq h0 input) len (as_seq h0 k)))
-let crypto_onetimeauth output input len k = Hacl.Impl.Poly1305_64.crypto_onetimeauth output input len k
+      /\ (let mac     = Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 output) in
+         let message = Hacl.Spec.Endianness.reveal_sbytes (as_seq h0 input) in
+         let key     = Hacl.Spec.Endianness.reveal_sbytes (as_seq h0 k) in
+         mac == Spec.Poly1305.poly1305 message key)))
+let crypto_onetimeauth output input len k = Hacl.Standalone.Poly1305_64.crypto_onetimeauth output input len k
