@@ -13,10 +13,10 @@ all: poly
 
 EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  FStar_Endianness.ml 
 
-poly:
+poly: Spec.Poly1305.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p poly-spec
-	$(FSTAR) --codegen OCaml Spec.Poly1305.fst --odir poly-spec --include ../code/lib/kremlin
+	$(FSTAR) --codegen OCaml $^ --odir poly-spec --include ../code/lib/kremlin
 	echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> poly-spec/Spec_Poly1305.ml
 	$(OCAMLOPT) -I poly-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix poly-spec/, $(EXTRACTED)) poly-spec/Spec_Poly1305.ml
 	./a.out
