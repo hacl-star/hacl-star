@@ -23,7 +23,7 @@ verify-code:
 	$(MAKE) -C ../code ci
 
 verify-crypto:
-	$(MAKE) -C ../secure_api all-ver
+	$(MAKE) -C ../secure_api all-hints
 
 hints-code:
 	$(MAKE) -C ../code hints

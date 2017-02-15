@@ -1,5 +1,7 @@
 FSTAR_HOME?=../../FStar
+HACL_HOME?=$(FSTAR_HOME)/../hacl-star
 
+#17-02-13 in low-level, we used to have two Makefiles, merged here.
 MEM=HST
 
 include $(FSTAR_HOME)/src/gmake/fstar.mk
@@ -12,9 +14,9 @@ KREMLIN_HOME?=~/dev/kremlin
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 
-FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real
+FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real --include ../specs
 
-KRML_INCLUDES=$(addprefix -I ,test/spartan_aes aead uf1cma spartan prf utils ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,test/spartan_aes aead uf1cma spartan prf utils ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=-ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS) -ccopt -std=gnu99
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES) 
 
@@ -60,8 +62,31 @@ HINTS_ENABLED?=--use_hints
 
 OPTIONS=--fstar_home $(FSTAR_HOME) --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20  $(HINTS_ENABLED) $(OTHERFLAGS)
 
-FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include utils --include spartan --include ../code/experimental/aesgcm --include prf --include uf1cma --include aead --include ../code/bignum --include ../code/poly1305 --include ../code/salsa-family --include ../code/lib/kremlin --include $(KREMLIN_HOME)/kremlib/
+# A bit much!!
+FSTAR_INCLUDE_PATHS= \
+--include $(FSTAR_HOME)/ulib/hyperstack \
+--include $(HACL_HOME)/code/bignum \
+--include $(HACL_HOME)/code/experimental/aesgcm \
+--include $(HACL_HOME)/code/lib/kremlin \
+--include $(HACL_HOME)/code/poly1305 \
+--include $(HACL_HOME)/code/salsa-family \
+--include $(HACL_HOME)/secure_api/aead \
+--include $(HACL_HOME)/secure_api/prf \
+--include $(HACL_HOME)/secure_api/spartan \
+--include $(HACL_HOME)/secure_api/uf1cma \
+--include $(HACL_HOME)/secure_api/utils \
+--include $(HACL_HOME)/specs \
+--include $(KREMLIN_HOME)/kremlib
 
+# TODO integrate GF128 with specs and code
+# TODO recheck why we dropped TestMonotonic and AES256GCM
+# TODO store our old 32-bit Poly1305 verified code (by default keep in auxiliary directory)
+
+# TODO document (or even call) auxiliary verification targets elsewhere!
+# for example it is unclear where and how to reverify the libraries and Poly1305.
+
+# Files that should fully typecheck
+# Files commented out are broken, uncomment once fixed
 VERIFY= \
   utils/Buffer.Utils \
   utils/Crypto.Symmetric.Bytes \
@@ -72,21 +97,26 @@ VERIFY= \
   prf/Crypto.Symmetric.PRF \
   uf1cma/Crypto.Symmetric.MAC \
   uf1cma/Crypto.Symmetric.UF1CMA \
-  aead/Crypto.AEAD.Encrypt.Invariant \
   aead/Crypto.AEAD.Encoding \
   aead/Crypto.AEAD.Invariant \
   aead/Crypto.AEAD.BufferUtils \
+  aead/Crypto.AEAD.Encrypt.Invariant \
   aead/Crypto.AEAD.Enxor.Invariant \
-  aead/Crypto.AEAD.Wrappers.CMA \
-  aead/Crypto.AEAD.Wrappers.Encoding \
   aead/Crypto.AEAD.EnxorDexor \
   aead/Crypto.AEAD.Wrappers.PRF \
+  aead/Crypto.AEAD.Wrappers.CMA \
+  aead/Crypto.AEAD.Wrappers.Encoding \
   aead/Crypto.AEAD.Decrypt \
   aead/Crypto.AEAD.MAC_Wrapper.Invariant \
   aead/Crypto.AEAD.Encrypt.Ideal.Invariant \
   aead/Crypto.AEAD.Encrypt \
   aead/Crypto.AEAD \
   aead/Crypto.Plain
+
+EXTRA= \
+  Crypto.Symmetric.Poly1305 \
+  Crypto.Test
+# TODO Crypto.Test has moved; probably call test/KrmlTest instead.
 
 #  Crypto.Symmetric.Poly1305.Lemmas  # verification target is not passing reliably so commenting out
 
@@ -124,13 +154,11 @@ all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 # Parameter for interactive mode
 %.fst-in: 
 	@echo $(OPTIONS) \
-	$(FSTAR_INCLUDE_PATHS) \
-	--__temp_no_proj Crypto.Symmetric.MAC \
-	--verify_module $(basename $(notdir $@))
+	$(FSTAR_INCLUDE_PATHS) 
 
 # Verifying one file at a time
 %.fst-ver:
-	$(FSTAR) $(OPTIONS) \
+	@$(FSTAR) $(OPTIONS) \
 	$(FSTAR_INCLUDE_PATHS) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	--verify_module $(basename $(notdir $@)) \

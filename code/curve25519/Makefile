@@ -48,6 +48,7 @@ X25519_SPECIFIC= \
 # Files that are too slow and for which verification speed must improve
 SLOW= Hacl.Spec.Bignum.Fsquare.fst \
 	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
+	../bignum/Hacl.Spec.Bignum.Fmul.fst \
 	Hacl.EC.fst \
 
 # Files that still have errors
@@ -74,7 +75,7 @@ all-ct: $(addsuffix -ct, $(X25519_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints
+	$(FSTARB) $^ --use_hints --record_hints
 
 all-ver: $(addsuffix -verify, $(X25519_FILES))
 

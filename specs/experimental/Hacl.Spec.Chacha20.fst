@@ -59,10 +59,11 @@ let rec map2 f l1 l2 =
 val iter: n:nat -> (f: 'a -> Tot 'a) -> 'a -> 'a 
 let rec iter n f x = if n = 0 then x else iter (n-1) f (f x)
 
-
-//17-02-08 shall we use Uint8 instead?
 type lbytes l = b:seq UInt8.t {length b = l}
 
+// left rotation by s bits; could go elsewhere
+inline_for_extraction let rotate (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
+  (a <<^ s) |^ (a >>^ (32ul -^ s))
 
 (*** pure Chacha20 ***)
 // roughly aligned to Crypto.Symmetric.Chacha20
@@ -80,11 +81,6 @@ type counter = UInt32.t
 type state = m:seq UInt32.t {length m = blocklen / 4}
 type idx = n:nat{n < blocklen / 4}
 type shuffle = state -> Tot state 
-
-
-// left rotation by s bits 
-inline_for_extraction let rotate (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
-  (a <<^ s) |^ (a >>^ (32ul -^ s))
 
 val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> shuffle
 let line a b d s m = 
@@ -113,8 +109,9 @@ let diagonal_round : shuffle =
   quarter_round 2 7 8 13 @
   quarter_round 3 4 9 14
 
-let rec rounds : shuffle = (* 20 rounds *)
-  iter 10 (column_round @ diagonal_round)
+let double_round: shuffle = column_round @ diagonal_round 
+
+let rec rounds : shuffle = iter 10 double_round (* 20 rounds *)
 
 (* state initialization *) 
 
@@ -134,10 +131,10 @@ let rec fill i len src =
     set i (uint32_of_bytes (slice src 0 4)) @  (* or bytes_to_h32 ? *)
     fill (i + 1) (len - 1) (slice src 4 (4*len)) 
 
-let constant_0 = 0x61707865ul
-let constant_1 = 0x3320646eul
-let constant_2 = 0x79622d32ul
-let constant_3 = 0x6b206574ul
+inline_for_extraction let constant_0 = 0x61707865ul
+inline_for_extraction let constant_1 = 0x3320646eul
+inline_for_extraction let constant_2 = 0x79622d32ul
+inline_for_extraction let constant_3 = 0x6b206574ul
 
 let init0 (k:key) (n:iv) (c:counter): shuffle =
   set 0 constant_0 @
@@ -151,19 +148,89 @@ let init0 (k:key) (n:iv) (c:counter): shuffle =
 let init (k:key) (n:iv) (c:counter): state = 
   init0 k n c (Seq.create (blocklen/4) 0ul)
 
+let lemma_incr (k:key) (n:iv) (c:counter {v c < pow2 32 - 1}) :
+  Lemma(
+  let s = init k n c in 
+  index s 12 == c /\
+  Seq.equal (init k n (c +^ 1ul)) (set 12 (index s 12 +^ 1ul) s))
+  = 
+  let s = init k n c in 
+  assert_norm(index s 12 == c);
+  assert_norm(Seq.equal (init k n (c +^ 1ul)) (set 12 (index s 12 +^ 1ul) s))
+
+
+val map2: 
+  #a:Type -> 
+  f:(a -> a -> Tot a) -> 
+  s0: seq a -> 
+  s1: seq a {length s0 = length s1} -> 
+  Tot (s: seq a {length s = length s0}) (decreases (length s0))
+let rec map2 #a f s0 s1 = 
+  if length s0 = 0 then createEmpty else
+  cons (f (head s0) (head s1)) (map2 f (tail s0) (tail s1))
+
+(*
+val add: idx -> state -> state -> Tot state 
+let add i m m0 = 
+*)
+
+//val add_state: state -> state -> Tot state
+////17-02-09 strangely, I had to unfold idx
+////let add (m0:state) (m1:state) (i:idx) = index m0 i +%^ index m1 i 
+//let add (m0:state) (m1:state) (i:nat {i < blocklen/4}) = index m0 i +%^ index m1 i 
 val add_state: state -> state -> Tot state
-let add_state m0 m1 = 
-  let content i = UInt32.add_mod (index m0 i) (index m1 i) in
-  Seq.init (blocklen/4) content
+let add_state m0 m1 = map2 (fun x y -> x +%^ y) m0 m1 
 
-val chacha20: key -> iv -> counter -> Tot block
-let chacha20 k n c =
+val compute: key -> iv -> counter -> Tot (lbytes blocklen)
+let compute k n c =
   let m = init k n c in 
-  uint32s_to_bytes (add_state m (rounds m))
+  let m = add_state m (rounds m) in
+  uint32s_to_bytes m
 
-(* omitting for now counter-mode encryption: a generic construction on top of cipher 
+// rename to block?
+val chacha20: len:nat {len <= blocklen} -> key -> iv -> counter -> Tot (lbytes len)
+let chacha20 len k iv c = slice (compute k iv c) 0 len
 
-val chacha20_encrypt: k:key -> counter:ctr -> n:iv -> plaintext:uint8_s -> Tot (c:uint8_s)
+let xor_block (m0 m1: block) = map2 (fun x y -> FStar.UInt8.(x ^^ y)) m0 m1
+
+// used in AEAD but not great; truncation should be handled in the mode.
+
+(*** Counter-mode encryption ***)
+// a generic construction on top of cipher--- not Chacha20-specific
+// could move to its own spec; see also AEAD
+
+private let prf = chacha20
+
+val counter_mode: 
+  k:key -> n:iv -> counter:UInt32.t -> 
+  plain:seq UInt8.t {v counter + length plain / blocklen < pow2 32} ->
+  Tot (lbytes (length plain))
+  (decreases (length plain))
+
+// migrate to FStar.Seq
+val xor: #len:nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
+let rec xor #len x y = 
+  if len = 0 then createEmpty 
+  else cons (UInt8.logxor (head x) (head y)) (xor #(len -1) (tail x) (tail y))
+
+#reset-options "--z3rlimit 40 --max_fuel 2"
+let rec counter_mode key iv counter plain =
+  let len = length plain in 
+  if len = 0 then Seq.createEmpty else
+  if len < blocklen 
+  then (* encrypt final partial block *)
+      let mask = prf len key iv counter in 
+      xor plain mask
+  else (* encrypt full block *)
+      let (b, plain) = split plain blocklen in 
+      let mask = prf blocklen key iv counter in 
+      let cipher = counter_mode key iv (counter +^ 1ul) plain in
+      xor b mask @| cipher 
+
+
+(* older spec for counter-mode encryption: 
+
+val encrypt_bytes: k:key -> counter:ctr -> n:iv -> plaintext:bytes -> Tot (lbytes (lenght plaintext))
 let chacha20_encrypt k counter n plaintext =
   let max = length plaintext / 64 in
   let rem = length plaintext % 64 in

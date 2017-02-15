@@ -9,7 +9,6 @@ SALSA_FILES= \
 	Hacl.Test.Salsa20.fst \
 	Hacl.Test.XSalsa20.fst 
 #	Hacl.Symmetric.Salsa20.fst \
-	Hacl.Test.Chacha20_avx.fst \
 	Hacl.Symmetric.HSalsa20.fst \
 	Hacl.Symmetric.XSalsa20.fst \
 	Hacl.Symmetric.Chacha20.fst \
@@ -40,7 +39,7 @@ all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTARB) $^ --use_hints
+	-$(FSTARB) $^ --use_hints --record_hints
 
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 

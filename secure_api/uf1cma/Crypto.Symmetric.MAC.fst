@@ -12,10 +12,14 @@ module Crypto.Symmetric.MAC
 open Crypto.Symmetric.Bytes
 open Crypto.Indexing
 open Flag
-open FStar.Buffer
+open FStar.Buffer // no need? 
 
 module GS = Crypto.Symmetric.GF128.Spec
 module GF = Crypto.Symmetric.GF128
+
+//17-02-11 now switched from 32-bit to 64-bit; can we keep both?
+
+//17-02-11 Please at least document such notations! Besides Spec.Poly1305 is also used below.
 module PS_ = Hacl.Spec.Poly1305_64
 module PS = Hacl.Spe.Poly1305_64
 module PL = Hacl.Impl.Poly1305_64
@@ -46,12 +50,12 @@ let rec text_to_PS_text t =
 (** Field element *)
 let elem i = (* dependent; used only ideally *)
   match alg i with 
-  | POLY1305 -> Hacl.Spec.Poly1305.elem
+  | POLY1305 -> Spec.Poly1305.elem
   | GHASH    -> GS.elem
 
 let zero i : elem i = 
   match alg i with 
-  | POLY1305 -> Hacl.Spec.Poly1305.zero
+  | POLY1305 -> Spec.Poly1305.zero
   | GHASH    -> GS.zero
 
 (** Private representation of a field element as a buffer *)
@@ -103,6 +107,9 @@ let as_buffer #i = function
 
 val live: mem -> #i:id -> elemB i -> Type0
 let live h #i b = Buffer.live h (as_buffer b)
+
+//17-02-11 should red_45 and red_44 really be part of the poly1305 API??
+//17-02-11 what's the purpose of norm vs norm_r?
 
 val norm: mem -> #i:id -> b:elemB i -> Type0
 let norm h #i b =
@@ -270,7 +277,7 @@ let encode i w =
 noextract val poly: #i:id -> cs:text -> r:elem i -> Tot (elem i)
 let poly #i cs r =
   match alg i with 
-  | POLY1305 -> Hacl.Spec.Poly1305.poly (text_to_PS_text cs) r
+  | POLY1305 -> Spec.Poly1305.poly (text_to_PS_text cs) r
   | GHASH    -> GS.poly cs r
 
 
@@ -291,13 +298,13 @@ let start #i = create i
 noextract val field_add: #i:id -> elem i -> elem i -> Tot (elem i)
 let field_add #i a b =
   match alg i with
-  | POLY1305 -> Hacl.Spec.Poly1305.fadd a b
+  | POLY1305 -> Spec.Poly1305.fadd a b
   | GHASH    -> GS.op_Plus_At a b
 
 noextract val field_mul: #i:id -> elem i -> elem i -> Tot (elem i)
 let field_mul #i a b =
   match alg i with
-  | POLY1305 -> Hacl.Spec.Poly1305.fmul a b
+  | POLY1305 -> Spec.Poly1305.fmul a b
   | GHASH    -> GS.op_Star_At a b
 
 noextract let op_Plus_At #i e1 e2 = field_add #i e1 e2
@@ -315,8 +322,9 @@ let poly_empty #i t r =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
-val poly_cons_: x:word -> xs:PS_.text -> r:PS_.elem ->
-  Lemma Hacl.Spec.Poly1305.(poly (Seq.cons x xs) r == (encode x +@ poly xs r) *@ r)
+//17-02-11 rename? relocate?
+private val poly_cons_: x:word -> xs:PS_.text -> r:PS_.elem ->
+  Lemma Spec.Poly1305.(poly (Seq.cons x xs) r == (encode x +@ poly xs r) *@ r)
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let poly_cons_ x xs r =
   let xxs = Seq.cons x xs in
@@ -346,8 +354,7 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     live h0 a /\ live h0 r /\ Buffer.live h0 w /\ live h1 a ///\ live h1 r
     /\ norm h1 a
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
-    /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r
-    ))
+    /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
 #reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 
@@ -389,7 +396,7 @@ type tagB = lbuffer (UInt32.v taglen)
 noextract val mac: #i:id -> cs:text -> r:elem i -> s:tag -> GTot tag
 let mac #i cs r s =
   match alg i with
-  | POLY1305 -> Hacl.Spec.Poly1305.mac_1305 (text_to_PS_text cs) r s
+  | POLY1305 -> Spec.Poly1305.mac_1305 (text_to_PS_text cs) r s
   | GHASH    -> GS.mac cs r s
 
 val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
@@ -408,7 +415,7 @@ val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
     let sv = Buffer.as_seq h0 s in
     let av = sel_elem h0 a in
     match alg i with
-    | POLY1305 -> Seq.equal tv (Hacl.Spec.Poly1305.finish av sv)
+    | POLY1305 -> Seq.equal tv (Spec.Poly1305.finish av sv)
     | GHASH    -> Seq.equal tv (GS.finish av sv) )))
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
@@ -440,22 +447,22 @@ let finish #i s a t =
     cut (FStar.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Endianness.little_endian (as_seq h0 s)) % pow2 128);
     cut (FStar.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Endianness.little_endian (as_seq h0 s)) % pow2 128);
     
-    FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t) (Hacl.Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
+    FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t) (Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
     )
   | B_GHASH    a ->
     begin
     GF.finish a s;
     GF.store128_be t a.(0ul)
     end
-  
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0"
 
+//17-02-11 new lemma
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0"
 val lemma_poly_finish_to_mac:
   i:id -> ht:mem -> t:tagB -> a:elem i -> hs:mem -> s:tagB -> log:text -> r:elem i ->
   Lemma (requires (Buffer.live ht t /\ Buffer.live hs s
     /\ a == MAC.poly log r
     /\ (match alg i with
-    | POLY1305 -> Seq.equal (Buffer.as_seq ht t) (Hacl.Spec.Poly1305.finish a (Buffer.as_seq hs s))
+    | POLY1305 -> Seq.equal (Buffer.as_seq ht t) (Spec.Poly1305.finish a (Buffer.as_seq hs s))
     | GHASH    -> Seq.equal (Buffer.as_seq ht t) (GS.finish a (Buffer.as_seq hs s) ))
     ))
        (ensures (Buffer.live ht t /\ Buffer.live hs s

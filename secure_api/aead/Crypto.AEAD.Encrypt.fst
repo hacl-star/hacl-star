@@ -82,8 +82,8 @@ let encrypt_ensures  (#i:id) (st:aead_state i Writer)
 		     (aad: lbuffer (v aadlen))
 		     (#plainlen: UInt32.t)
 		     (plain: plainBuffer i (v plainlen))
-		     (cipher_tagged:lbuffer (v plainlen + v MAC.taglen))
-		     (h0:mem) (h1:mem) = 
+		     (cipher_tagged: lbuffer (v plainlen + v MAC.taglen))
+		     (h0 h1: mem) = 
     enc_dec_liveness st aad plain cipher_tagged h1 /\
     (safeMac i ==>  (
        let aad = Buffer.as_seq h1 aad in

@@ -54,7 +54,7 @@ private val frame_aead_entries_are_refined_mac_wrapper
 	      entries_0 == entries_1 /\
 	      table_0 == table_1 /\
 	      aead_entries_are_refined table_0 entries_0 h1)))
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 100" //17-02-14 doubled
 let frame_aead_entries_are_refined_mac_wrapper #i #rw #aadlen #plainlen aead_st nonce aad plain cipher_tagged mac_st h0 h1 =
   let open FStar.Seq in
   let open FStar.Classical in
@@ -108,7 +108,7 @@ private val frame_unused_aead_id_for_prf_mac_wrapper
 	     nonce <> nonce'))
   (ensures  (let table_0 = HS.sel h0 (itable i aead_st.prf) in
              unused_aead_iv_for_prf table_0 nonce' h1))
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 120 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let frame_unused_aead_id_for_prf_mac_wrapper #i #rw #aadlen #plainlen aead_st nonce aad plain ct mac_st h0 h1 nonce' =
    let dom_0 = {iv=nonce'; ctr=PRF.ctr_0 i} in
    let prf_table = HS.sel h0 (itable i aead_st.prf) in
@@ -166,7 +166,8 @@ private val frame_entries_and_table_mac_wrapper
 let frame_entries_and_table_mac_wrapper #i #rw #aadlen #plainlen aead_st nonce aad plain cipher_tagged mac_st h0 h1 = 
   frame_aead_entries_are_refined_mac_wrapper aead_st nonce aad plain cipher_tagged mac_st h0 h1
 
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"      
+//17-02-14  brittle proof
+#reset-options "--z3rlimit 600 --initial_fuel 0 --max_fuel 2 --initial_ifuel 0 --max_ifuel 2"      
 (*
  * mac_wrapper does not modify the plain text buffer and the ciphertext part of the ciphertext buffer
  *)

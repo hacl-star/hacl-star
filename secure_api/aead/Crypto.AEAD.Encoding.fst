@@ -5,7 +5,6 @@ module Crypto.AEAD.Encoding
 
 open FStar.UInt32
 open FStar.Ghost
-open Buffer.Utils
 open FStar.Monotonic.RRef
 
 open FStar.Math.Lib
@@ -20,7 +19,6 @@ module HS = FStar.HyperStack
 
 module MAC = Crypto.Symmetric.MAC
 module CMA = Crypto.Symmetric.UF1CMA
-
 module Cipher = Crypto.Symmetric.Cipher
 module PRF = Crypto.Symmetric.PRF
 
@@ -30,12 +28,13 @@ let alg (i:id) = cipherAlg_of_id i
 
 type rgn = rgn:HH.rid {HS.is_eternal_region rgn}
 
-// concrete (somewhat arbitrary) bounds on inputs lengths
-let txtmax = 16485ul
-let aadmax = 2000ul
+// Concrete, somewhat arbitrary bounds on input lengths; 
+// these should go to some configuration flle 
+let txtmax = 16485ul // one TLS fragment
+let aadmax = 2000ul // more than enough for TLS
 
 // placeholder for additional data
-type adata = b:bytes { Seq.length b <= v aadmax} 
+type adata = b:bytes {Seq.length b <= v aadmax} 
 type cipher (i:id) (l:nat) = lbytes(l + v MAC.taglen)
 
 type aadlen_32 = l:UInt32.t {l <=^ aadmax}
@@ -45,8 +44,8 @@ type txtlen_32 = l:UInt32.t {l <=^ txtmax}
 //16-09-18 where is it in the libraries?
 private let min (a:nat) (b:nat) : nat = if a <= b then a else b
 
-val lemma_append_nil: #a:_ -> s:Seq.seq a -> Lemma (s == Seq.append s Seq.createEmpty)
-let lemma_append_nil #a s = assert (Seq.equal s (Seq.append s Seq.createEmpty))
+//val lemma_append_nil: #a:_ -> s:Seq.seq a -> Lemma (s == Seq.append s Seq.createEmpty)
+//let lemma_append_nil #a s = assert (Seq.equal s (Seq.append s Seq.createEmpty))
 
 
 (* * *********************************************)
@@ -88,8 +87,6 @@ let rec lemma_encode_length txt: Lemma
 (* *          Encoding-related lemmas            *)
 (* * *********************************************)
 
-open FStar.Seq
-
 val lemma_pad_0_injective: b0:Seq.seq UInt8.t -> b1:Seq.seq UInt8.t -> l:nat -> Lemma
   (requires (pad_0 b0 l == pad_0 b1 l))
   (ensures  (b0 == b1))
@@ -120,12 +117,11 @@ let lemma_encode_injective w0 w1 =
   lemma_little_endian_is_injective w0 w1 l
 *)
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
-
 val lemma_encode_bytes_injective: t0:Seq.seq UInt8.t -> t1:Seq.seq UInt8.t -> Lemma
-  (requires length t0 == length t1 /\ encode_bytes t0 == encode_bytes t1)
+  (requires Seq.length t0 == Seq.length t1 /\ encode_bytes t0 == encode_bytes t1)
   (ensures t0 == t1)
   (decreases (Seq.length t0))
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let rec lemma_encode_bytes_injective t0 t1 =
   let l = Seq.length t0 in
   if l = 0 then Seq.lemma_eq_intro t0 t1
@@ -141,34 +137,32 @@ let rec lemma_encode_bytes_injective t0 t1 =
     Seq.lemma_snoc_inj (encode_bytes t0') (encode_bytes t1') w0 w1 ;
     lemma_encode_bytes_injective t0' t1';
     Seq.lemma_eq_elim t0' t1'
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options 
 
 // If the length is not a multiple of 16, pad to 16
 // (we actually don't depend on the details of the padding)
-val pad_16: b:lbuffer 16 -> len:UInt32.t { 0 < v len /\ v len <= 16 } -> STL unit
+val pad_16: b:lbuffer 16 -> len:UInt32.t {0 < v len /\ v len <= 16} -> STL unit
   (requires (fun h -> Buffer.live h b))
   (ensures  (fun h0 _ h1 -> 
     Buffer.live h0 b /\
     Buffer.live h1 b /\ 
     Buffer.modifies_1 b h0 h1 /\ 
     Seq.equal (Buffer.as_seq h1 b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))))
+#reset-options "--max_ifuel 0 --z3rlimit 200"
 let pad_16 b len =
   let h0 = ST.get() in
-  memset (Buffer.sub b len (16ul -^ len)) 0uy (16ul -^ len);
-  let h = ST.get() in
-  Seq.lemma_eq_intro (Buffer.as_seq h b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))
+  Buffer.Utils.memset (Buffer.sub b len (16ul -^ len)) 0uy (16ul -^ len);
+  let h1 = ST.get() in
+  Seq.lemma_eq_intro (Buffer.as_seq h1 b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))
 
+//16-12-07 copied from UF1CMA for now; ad hoc
 open FStar.HyperStack
-
-//16-12-07  copied from UF1CMA for now
-let modifies_buf_and_ref (#a:Type) (#b:Type) (buf:Buffer.buffer a) (ref:reference b) (h:mem) (h':mem) : GTot Type0 =
+let modifies_buf_and_ref (#a:Type) (#b:Type) (buf:Buffer.buffer a) (ref:HS.reference b) (h:mem) (h':mem) : GTot Type0 =
   (forall rid. Set.mem rid (Map.domain h.h) ==>
     HH.modifies_rref rid !{Buffer.as_ref buf, HS.as_ref ref} h.h h'.h
     /\ (forall (#a:Type) (b:Buffer.buffer a). 
       (Buffer.frameOf b == rid /\ Buffer.live h b /\ Buffer.disjoint b buf
       /\ Buffer.disjoint_ref_1 b (HS.as_aref ref)) ==> Buffer.equal h b h' b))
-
 let modifies_nothing (h:mem) (h':mem) : GTot Type0 =
   (forall rid. Set.mem rid (Map.domain h.h) ==>
     HH.modifies_rref rid !{} h.h h'.h
@@ -192,32 +186,28 @@ private val add_bytes:
   (ensures (fun h0 () h1 -> 
     let b = CMA.(MAC.as_buffer (CMA.abuf acc)) in
     Buffer.live h1 txt /\ 
-    CMA.acc_inv st acc h1 /\ //(1)
-    (if mac_log then 
-      let log = CMA.alog acc in
-      let l0 = FStar.HyperStack.sel h0 log in
-      let l1 = FStar.HyperStack.sel h1 log in
-      Seq.equal l1 (Seq.append (encode_bytes (Buffer.as_seq h1 txt)) l0) /\ //(2) 
-      modifies_buf_and_ref b log h0 h1 //(3)
-    else 
-      Buffer.modifies_1 b h0 h1 //(4)
-      )))
+    CMA.acc_inv st acc h1 /\ 
+    ( if mac_log then 
+        let log = CMA.alog acc in
+        let l0 = FStar.HyperStack.sel h0 log in
+        let l1 = FStar.HyperStack.sel h1 log in
+        Seq.equal l1 (Seq.append (encode_bytes (Buffer.as_seq h1 txt)) l0) /\ 
+        modifies_buf_and_ref b log h0 h1 
+      else 
+        Buffer.modifies_1 b h0 h1 )))
 
-// not sure why I need these lemmas; maybe just Z3 complexity
-private let lemma_encode_loop (b:_ { Seq.length b >= 16 }) : Lemma
-  ( encode_bytes b ==
-    Seq.snoc 
-      (encode_bytes (Seq.slice b 16 (Seq.length b))) 
-      (Seq.slice b 0 16)) 
+#reset-options "--z3rlimit 20" 
+// not sure why I need lemmas unfolding encode_bytes; maybe just Z3 complexity
+private let lemma_encode_loop (b:_ {Seq.length b >= 16}) : Lemma ( 
+  Seq.equal (encode_bytes b) (Seq.snoc (encode_bytes (Seq.slice b 16 (Seq.length b))) (Seq.slice b 0 16)))
   =  ()
 
 val lemma_encode_final: b:Seq.seq UInt8.t{0 <> Seq.length b /\ Seq.length b < 16} ->
   Lemma (Seq.equal (encode_bytes b) (Seq.create 1 (pad_0 b (16 - Seq.length b))))
 let lemma_encode_final b = ()
 
-
+ 
 #reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
-
 let rec add_bytes #i st acc len txt =
   let h0 = ST.get() in 
   assert(mac_log ==> h0 `contains` (CMA.alog acc));
@@ -254,7 +244,7 @@ let rec add_bytes #i st acc len txt =
         else Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc))  h3 h4
       end
   else 
-      begin
+     begin
         let w = Buffer.sub txt 0ul 16ul in 
         let txt' = Buffer.offset txt 16ul in
         CMA.update st acc w;
@@ -391,7 +381,6 @@ let lemma_encode_both_inj i (al0:aadlen_32) (pl0:txtlen_32) (al1:aadlen_32) (pl1
   (ensures al0 = al1 /\ pl0 = pl1 /\ a0 = a1 /\ p0 = p1) = 
 
   let open FStar.Seq in 
-  let open FStar.Seq in
   let w0 = encode_lengths i al0 pl0 in 
   let w1 = encode_lengths i al1 pl1 in
   //assert(encode w0 = encode w1);
@@ -435,6 +424,8 @@ val accumulate:
       else
         Buffer.modifies_0 h0 h1)))
 
+val lemma_append_nil: #a:_ -> s:Seq.seq a -> Lemma (s == Seq.append s Seq.createEmpty)
+let lemma_append_nil #a s = assert (Seq.equal s (Seq.append s Seq.createEmpty))
  
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 200"
 let accumulate #i st aadlen aad txtlen cipher  = 
