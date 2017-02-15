@@ -469,7 +469,7 @@ let init_remaining_len_ok (#i:id) (x:PRF.domain i{PRF.ctr_0 i +^ 1ul = x.ctr}) (
     = ()
 
 (*+ Framing lemmas for clauses of the main invariant **)
-#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let frame_refines_one_entry (#i:id) (#mac_rgn:region) 
 			    (h:mem) (h':mem) 
 			    (blocks:prf_table mac_rgn i)
