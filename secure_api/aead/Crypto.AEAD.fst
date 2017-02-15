@@ -8,8 +8,6 @@ module Crypto.AEAD
 // precisely relates the contents of the AEAD log to the states of the
 // PRF and the MACs.
 
-// This file intends to match the spec of AEAD0.fst in mitls-fstar. 
-
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
@@ -36,7 +34,9 @@ module Enxor    = Crypto.AEAD.EnxorDexor
 module Dexor    = Crypto.AEAD.EnxorDexor
 module PRF_MAC  = Crypto.AEAD.Wrappers.PRF
 module Encoding = Crypto.AEAD.Encoding   
-	 
+
+(* Key management *)
+
 val gen: 
   i:id -> 
   rgn:eternal_region -> 
@@ -83,3 +83,8 @@ val leak: #i:id{~(prf i)} -> st:aead_state i Writer -> ST (lbuffer (v (PRF.state
   (requires (fun _ -> True))
   (ensures  (fun _ _ _ -> True))
 let leak #i st = PRF.leak st.prf
+
+include Crypto.AEAD.Encrypt
+include Crypto.AEAD.Decrypt
+//17-02-14 shall we provide a more abstract API, 
+//17-02-14 e.g. make inv opaque
