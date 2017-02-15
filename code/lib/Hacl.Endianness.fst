@@ -53,6 +53,21 @@ assume val load32_le:
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h1 b
       /\ little_endian (as_seq h0 b) = U32.v z))
 
+assume val store32_be:
+  b:buffer U8.t{length b = 4} ->
+  z:U32.t ->
+  Stack unit
+    (requires (fun h -> Buffer.live h b))
+    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ Buffer.live h1 b
+      /\ big_endian (as_seq h1 b) = U32.v z))
+
+assume val load32_be:
+  b:buffer U8.t{length b = 4} ->
+  Stack U32.t
+    (requires (fun h -> Buffer.live h b))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ live h1 b
+      /\ big_endian (as_seq h0 b) = U32.v z))
+
 assume val load64_le:
   b:buffer U8.t{length b = 8} ->
   Stack U64.t
