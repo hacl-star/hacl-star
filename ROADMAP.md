@@ -75,7 +75,7 @@ Calls between e.g. different parts of `code` should use `spec` interfaces when p
 
 Any idealization, agility, and multiplexing parameters come first, so that they can be resolved by partial application.
 
-Hopefully we can use the same tests for code in `spec`, `secureAPI`, `code`, and `external`.
+Hopefully we can use the same tests for code in `spec`, `secureAPI`, `code`, and `other_providers`.
 
 #### TODO 
 
@@ -84,7 +84,7 @@ it would be natural to also have `Poly1305.fst` in there. (Conversely, it seems 
 
 Within `secureAPI` (aka `crypto_proofs`) clarify where flags and agility configuration go; explain that it is more general than miTLS. Add pointer to IACR
 
-Eventually migrate `coreCrypto` to `external/OpenSSL` (currently providing OpenSSL in F\*) there
+Eventually migrate `coreCrypto` to `other_providers/OpenSSL` (currently providing OpenSSL in F\*) there
 
 
 #### Filename conventions (from slack discussion summary, adapted a bit)
