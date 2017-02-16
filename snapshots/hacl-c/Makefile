@@ -9,9 +9,9 @@ test: test-poly	test-chacha test-salsa test-curve test-nacl
 
 test-poly:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 $(OPENSSL_HOME)/libcrypto.a \
-	-l sodium \
-	kremlib.c testlib.c Poly1305_64.c test-poly.c -o test-poly.exe 
+	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
+	kremlib.c testlib.c Poly1305_64.c test-poly.c -o test-poly.exe \
+	-lsodium $(OPENSSL_HOME)/libcrypto.a
 	./test-poly.exe
 
 test-salsa:
