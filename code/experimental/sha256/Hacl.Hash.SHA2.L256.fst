@@ -78,29 +78,29 @@ inline_for_extraction let pos_count_32     = size_k_32 +^ size_ws_32 +^ size_wha
 
 
 (* [FIPS 180-4] section 4.1.2 *)
-val _Ch: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
+private val _Ch: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
 let _Ch x y z = S32.logxor (S32.logand x y) (S32.logand (S32.lognot x) z)
 
-val _Maj: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
+private val _Maj: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
 let _Maj x y z = S32.logxor (S32.logand x y) (S32.logxor (S32.logand x z) (S32.logand y z))
 
-val _Sigma0: x:suint32_t -> Tot suint32_t
+private val _Sigma0: x:suint32_t -> Tot suint32_t
 let _Sigma0 x = S32.logxor (rotate_right x 2ul) (S32.logxor (rotate_right x 13ul) (rotate_right x 22ul))
 
-val _Sigma1: x:suint32_t -> Tot suint32_t
+private val _Sigma1: x:suint32_t -> Tot suint32_t
 let _Sigma1 x = S32.logxor (rotate_right x 6ul) (S32.logxor (rotate_right x 11ul) (rotate_right x 25ul))
 
-val _sigma0: x:suint32_t -> Tot suint32_t
+private val _sigma0: x:suint32_t -> Tot suint32_t
 let _sigma0 x = S32.logxor (rotate_right x 7ul) (S32.logxor (rotate_right x 18ul) (S32.shift_right x 3ul))
 
-val _sigma1: x:suint32_t -> Tot suint32_t
+private val _sigma1: x:suint32_t -> Tot suint32_t
 let _sigma1 x = S32.logxor (rotate_right x 17ul) (S32.logxor (rotate_right x 19ul) (S32.shift_right x 10ul))
 
 
 
 (* [FIPS 180-4] section 4.2.2 *)
 [@"c_inline"]
-val set_k:
+private val set_k:
   state:suint32_p{length state = U32.v size_state} ->
   Stack unit
         (requires (fun h -> live h state))
@@ -129,7 +129,7 @@ let set_k state =
 
 
 [@"c_inline"]
-val set_whash:
+private val set_whash:
   state:suint32_p{length state = U32.v size_state} ->
   Stack unit (requires (fun h -> live h state))
                (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
@@ -145,7 +145,7 @@ let set_whash state =
 (* [FIPS 180-4] section 6.2.2 *)
 (* Step 1 : Scheduling function for sixty-four 32bit words *)
 [@"c_inline"]
-val ws_upd:
+private val ws_upd:
   state  :suint32_p {length state = v size_state} ->
   wblock :suint32_p {length wblock = v blocksize} ->
   t      :uint32_t  {v t + 64 < pow2 32} ->
@@ -196,9 +196,10 @@ let init state =
   (* The total number of blocks is left to 0ul *)
 
 
+
 (* Step 3 : Perform logical operations on the working variables *)
 [@"c_inline"]
-val update_inner:
+private val update_inner:
   state :suint32_p{length state = v size_state} ->
   t1    :suint32_t ->
   t2    :suint32_t ->
