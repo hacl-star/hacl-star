@@ -57,7 +57,7 @@ kinds of algorithms, such as `code/poly1305` and `code/salsa-family`.
 
 `code/experimental` includes any additional Hacl\* code that has not yet been verified. 
 
-`external` include third-party cryptographic providers and some
+`other_providers` include third-party cryptographic providers and some
 adapter F\* code. It implements some of the interfaces of `spec`, and is used by `secureAPI` and `test`.
 
 `secureAPI` includes F\* code supporting our cryptographic security model and proofs. 
