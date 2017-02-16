@@ -200,7 +200,7 @@ val poly1305_update:
   st:poly1305_state ->
   m:uint8_p{length m = 16} ->
   Stack log_t
-    (requires (fun h -> live_st h st /\ live h m /\ disjoint m st.h /\ disjoint m st.r
+    (requires (fun h -> live_st h st /\ live h m (* /\ disjoint m st.h /\ disjoint m st.r *)
       /\ red_45 (as_seq h st.h)
       /\ red_44 (as_seq h st.r)
       ))
@@ -278,7 +278,7 @@ val poly1305_process_last_block_:
   Stack log_t
     (requires (fun h -> live_st h st /\ live h m /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)
       /\ live h block /\ as_seq h block == Seq.upd (Seq.append (as_seq h m) (Seq.create (16 - U64.v len) (uint8_to_sint8 0uy))) (U64.v len) (uint8_to_sint8 1uy)
-      /\ disjoint block st.h /\ disjoint block st.r /\ disjoint block m
+      /\ disjoint block st.h /\ disjoint block st.r (* /\ disjoint block m *)
     ))
     (ensures (fun h0 updated_log h1 -> live_st h0 st /\ live h0 m /\ red_44 (as_seq h0 st.r) /\ red_45 (as_seq h0 st.h)
       /\ live_st h1 st /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
@@ -494,7 +494,7 @@ inline_for_extraction let poly1305_finish__ log st m len =
     )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 [@"substitute"]
 val poly1305_finish_:
@@ -545,7 +545,7 @@ val poly1305_update_last:
   m:uint8_p ->
   len:U64.t{U64.v len < 16 /\ U64.v len = length m} ->
   Stack unit
-    (requires (fun h -> live_st h st /\ live h m /\ disjoint st.h m
+    (requires (fun h -> live_st h st /\ live h m (* /\ disjoint st.h m *)
       /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)))
     (ensures  (fun h0 _ h1 -> modifies_1 st.h h0 h1 /\ live_st h0 st /\ live h0 m /\ live h1 st.h
       /\ red_44 (as_seq h0 st.r) /\ red_45 (as_seq h0 st.h)
@@ -588,3 +588,14 @@ let poly1305_finish st mac key_s =
   hstore128_le mac mac';
   let h1 = ST.get() in
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 acc) (as_seq h0 key_s)))
+
+
+val alloc:
+  unit -> StackInline poly1305_state
+    (requires (fun h -> True))
+    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st))
+let alloc () =
+  let buf = create limb_zero U32.(clen +^ clen) in
+  let r = sub buf 0ul clen in
+  let h = sub buf clen clen in
+  MkState r h
