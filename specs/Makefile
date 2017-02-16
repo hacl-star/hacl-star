@@ -9,17 +9,22 @@ FSTAR_ARGS=$(OTHERFLAGS)
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 
-all: poly
+all: poly1305.exe
 
 EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  FStar_Endianness.ml 
 
-poly: Spec.Poly1305.fst
+NOEXTRACT=$(addprefix --no_extract FStar., Classical Ghost Int16 Int32 Int64 Int63 Int16 Int8 Int.Cast Int List.Tot.Base List.Tot List.Tot.Properties Math.Lemmas Mul StrongExcludedMiddle UInt128 UInt16 UInt32 UInt63 UInt64 UInt8) $(addprefix --no_extract Hacl., UInt64 UInt32 UInt8)
+
+ARGS=--codegen OCaml --lax --odir poly-spec --include ../code/lib/kremlin $(NOEXTRACT)
+
+poly1305.exe: Spec.Poly1305.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p poly-spec
-	$(FSTAR) --codegen OCaml $^ --odir poly-spec --include ../code/lib/kremlin
-	echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> poly-spec/Spec_Poly1305.ml
-	$(OCAMLOPT) -I poly-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix poly-spec/, $(EXTRACTED)) poly-spec/Spec_Poly1305.ml
-	./a.out
+	$(FSTAR) $(ARGS) $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> poly-spec/Spec_Poly1305.ml
+	$(OCAMLOPT) -I poly-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix poly-spec/, $(EXTRACTED)) poly-spec/Spec_Poly1305.ml -o poly1305.exe
+	./poly1305.exe
 
 clean:
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out poly-spec
+	$(MAKE) -C ../code/lib/ml clean
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec

@@ -24,6 +24,8 @@ FSTAR_LIB=$(FSTAR_HOME)/ulib/ml
 
 
 all: hacllib.cmxa
+
+hacllib.cmxa:
 	$(MAKE) -C $(FSTAR_LIB) MEM=HST
 	ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g -w -58 -I $(FSTAR_LIB) -I $(FSTAR_LIB)/hyperstack -I $(FSTAR_LIB)/extracted $(FSTAR_LIB)/fstarlib.cmxa  -c -linkpkg $(FILES)
 	ocamlopt -a $(FSTAR_FILES) $(FILESX) -o hacllib.cmxa
