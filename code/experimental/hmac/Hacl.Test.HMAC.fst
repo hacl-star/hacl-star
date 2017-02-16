@@ -202,6 +202,46 @@ let test_5 () =
   (**) push_frame();
 
   let output_len = 32ul in
+  let output = FStar.Buffer.create 0x00uy output_len in
+
+  let key_len = 20ul in
+  let key = FStar.Buffer.create 0x0cuy key_len in
+
+  let data_len = 20ul in
+  let data = FStar.Buffer.createL [
+      0x54uy; 0x65uy; 0x73uy; 0x74uy; 0x20uy; 0x57uy; 0x69uy; 0x74uy;
+      0x68uy; 0x20uy; 0x54uy; 0x72uy; 0x75uy; 0x6euy; 0x63uy; 0x61uy;
+      0x74uy; 0x69uy; 0x6fuy; 0x6euy
+  ] in
+
+  let expected = FStar.Buffer.createL [
+      0xa3uy; 0xb6uy; 0x16uy; 0x74uy; 0x73uy; 0x10uy; 0x0euy; 0xe0uy;
+      0x6euy; 0x0cuy; 0x79uy; 0x6cuy; 0x29uy; 0x55uy; 0x55uy; 0x2buy
+    ] in
+
+  (* Allocate memory for state *)
+  let ctx = FStar.Buffer.create 0ul 137ul in
+
+  (* Call the hash function *)
+  HMAC.hmac output key key_len data data_len;
+
+  (* Display the result *)
+  TestLib.compare_and_print (C.string_of_literal "Test 5") expected output 16ul;
+
+  (* Pop the memory frame *)
+  (**) pop_frame()
+
+
+
+val test_6: unit -> ST unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 r h1 -> True))
+let test_6 () =
+
+  (* Push a new memory frame *)
+  (**) push_frame();
+
+  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
   let key_len = 131ul in
@@ -232,17 +272,17 @@ let test_5 () =
   HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 5") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 6") expected output 32ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
 
 
 
-val test_6: unit -> ST unit
+val test_7: unit -> ST unit
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
-let test_6 () =
+let test_7 () =
 
   (* Push a new memory frame *)
   (**) push_frame();
@@ -290,7 +330,7 @@ let test_6 () =
   HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 6") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 7") expected output 32ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -309,6 +349,7 @@ let main () =
   test_4 ();
   test_5 ();
   test_6 ();
+  test_7 ();
 
   (* Exit the program *)
   C.exit_success
