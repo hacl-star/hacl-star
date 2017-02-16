@@ -59,7 +59,10 @@ let u64_to_s64 = Cast.uint64_to_sint64
 
 (* Define parameters *)
 inline_for_extraction let hashsize = Hash.hashsize
+inline_for_extraction let hashsize_32 = Hash.hashsize_32
 inline_for_extraction let blocksize = Hash.blocksize
+inline_for_extraction let blocksize_32 = Hash.blocksize_32
+
 
 (* Size and positions of objects in the state *)
 inline_for_extraction let size_ipad = blocksize
@@ -119,7 +122,7 @@ let init state key len =
 
   (* Step 1: make sure the key has the proper length *)
   hmac_wrap_key okey_8 key len;
-  (**) be_uint32s_of_bytes okey_32 okey_8 size_okey_32;
+  Hacl.Utils.Experimental.load32s_be okey_32 okey_8 (size_okey_32 *^ 4ul);
 
   (* Step 2: xor "result of step 1" with ipad *)
   Utils.xor_bytes ipad okey_8 blocksize;
@@ -220,7 +223,7 @@ let finish state mac =
   (* Retrive and allocate memory for the wrapped key location *)
   let okey_32 = Buffer.sub state pos_okey size_okey_32 in
   let okey_8 = Buffer.create (uint8_to_sint8 0x00uy) blocksize in
-  (**) be_bytes_of_uint32s okey_8 okey_32 blocksize;
+  Hacl.Utils.Experimental.store32s_be okey_8 okey_32 blocksize;
 
   (* Step 4: apply H to "result of step 3" *)
   Hash.finish ctx_hash_0 s4;
