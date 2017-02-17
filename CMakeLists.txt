@@ -28,8 +28,7 @@ set(SOURCE_FILES_EXPERIMENTAL
    snapshots/hacl-c-experimental/cpuid.c
    snapshots/hacl-c-experimental/drng.c
    snapshots/hacl-c-experimental/Random.c
-   snapshots/hacl-c-experimental/Hacl_Utils_Experimental.c
-   snapshots/hacl-c-experimental/SHA2_256.c
+   snapshots/hacl-c-experimental/SHA2.c
    snapshots/hacl-c-experimental/Chacha20.c
    snapshots/hacl-c-experimental/Poly1305_64.c
    snapshots/hacl-c-experimental/aead_chacha20_poly1305.c)
