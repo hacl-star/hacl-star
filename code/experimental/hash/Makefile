@@ -6,7 +6,7 @@ FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
 
 verify:
-	$(FSTAR) --include /opt/fstar/ulib/hyperstack --include /opt/kremlin/kremlib --include /opt/hacl-star/code/lib --include /opt/hacl-star/code/experimental/utils Hacl.Hash.SHA2.L256.fst --use_hints
+	$(FSTAR) --include /opt/fstar/ulib/hyperstack --include /opt/kremlin/kremlib --include /opt/hacl-star/code/lib --include /opt/hacl-star/code/experimental/utils SHA2.fst --use_hints
 
 extract-c:
 	mkdir -p sha2-c
