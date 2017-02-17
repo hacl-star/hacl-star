@@ -1,4 +1,4 @@
-#include "Hacl_Test_Hash_SHA2.h"
+#include "SHA2.h"
 
 void test_1a()
 {
