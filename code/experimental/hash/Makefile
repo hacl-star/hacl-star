@@ -11,12 +11,14 @@ verify:
 extract-c:
 	mkdir -p sha2-c
 	$(KREMLIN_HOME)/krml -tmpdir sha2-c \
-		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils \
-		Hacl.Hash.SHA2.L256.fst Hacl.Test.Hash.SHA2.fst -o sha2.exe -no-prefix Hacl.Test.Hash.SHA2 \
+		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils \
+		Hacl.Test.Hash.SHA2.fst -o sha2.exe -no-prefix Hacl.Test.Hash.SHA2 \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop 'Hacl.Spec.Endianness' -drop Prims -drop FStar Hacl.Test.Hash.SHA2.fst \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99
+		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop Prims -drop FStar Hacl.Test.Hash.SHA2.fst \
+		-bundle "SHA2=Hacl.Utils.Experimental,Hacl.Hash.SHA2.L256,SHA2" \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99 -verbose
 	./sha2.exe
+
 
 recompile: compile-sha2 compile-test compile-exe
 
