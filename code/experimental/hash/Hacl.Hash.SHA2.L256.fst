@@ -147,7 +147,7 @@ let set_whash state =
 [@"c_inline"]
 private val ws_upd:
   state  :suint32_p {length state = v size_state} ->
-  wblock :suint32_p {length wblock = v blocksize} ->
+  wblock :suint32_p {length wblock = v blocksize_32} ->
   t      :uint32_t  {v t + 64 < pow2 32} ->
   Stack unit
         (requires (fun h -> live h state /\ live h wblock))
@@ -243,13 +243,15 @@ let rec update_inner state t1 t2 t =
 
 
 
+#set-options "--z3rlimit 50"
+
 (* [FIPS 180-4] section 6.2.2 *)
 (* Update running hash function *)
 val update:
   state:suint32_p{length state = v size_state} ->
-  data :suint8_p {length data = v blocksize} ->
+  data_8 :suint8_p {length data_8 = v blocksize} ->
   Stack unit
-        (requires (fun h0 -> live h0 state /\ live h0 data))
+        (requires (fun h0 -> live h0 state /\ live h0 data_8))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 let update state data_8 =
 
@@ -260,6 +262,9 @@ let update state data_8 =
   let data_32 = create (u32_to_s32 0ul) blocksize_32 in
 
   (* Cast the data bytes into a uint32_t buffer *)
+  (**) cut(v blocksize % 4 = 0);
+  (**) cut(v blocksize <= length data_8);
+  (**) cut(v blocksize <= 4 * length data_32);
   Hacl.Utils.Experimental.load32s_be data_32 data_8 blocksize;
 
   (* Get necessary information from the state *)
@@ -321,8 +326,8 @@ let update state data_8 =
 val update_multi:
   state :suint32_p{length state = v size_state} ->
   data  :suint8_p ->
-  n     :uint32_t ->
-  idx   :uint32_t ->
+  n     :uint32_t{v n * v blocksize <= length data} ->
+  idx   :uint32_t{v idx <= v n} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
@@ -333,7 +338,7 @@ let rec update_multi state data n idx =
   else
 
     (* Get the current block for the data *)
-    let b = Buffer.sub data (mul_mod idx blocksize) blocksize in
+    let b = Buffer.sub data (U32.mul_mod idx blocksize) blocksize in
 
     (* Call the update function on the current block *)
     update state b;
@@ -346,7 +351,7 @@ let rec update_multi state data n idx =
 val update_last:
   state :suint32_p{length state = v size_state} ->
   data  :suint8_p {length data <= v blocksize} ->
-  len   :uint32_t {U32.v len <= v blocksize} ->
+  len   :uint32_t {U32.v len = length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
@@ -410,7 +415,7 @@ val finish:
   hash  :suint8_p{length hash = v hashsize} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
-        (ensures  (fun h0 _ h1 -> live h1 state /\ live h1 hash /\ modifies_2 state hash h0 h1))
+        (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1))
 
 let finish state hash =
 

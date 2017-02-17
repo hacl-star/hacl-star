@@ -3,7 +3,7 @@ module Hacl.Test.HMAC
 open FStar.Buffer
 
 module HMAC = Hacl.HMAC
-module SHA2 = Hacl.Hash.SHA2.L256
+module Hash = Hacl.Hash.SHA2.L256
 
 
 
@@ -39,7 +39,7 @@ let test_1 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA2.size_state in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
   HMAC.hmac output key key_len data data_len;
@@ -89,7 +89,7 @@ let test_2 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA2.size_state in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
   HMAC.hmac output key key_len data data_len;
@@ -132,7 +132,7 @@ let test_3 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA2.size_state in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
   HMAC.hmac output key key_len data data_len;
@@ -180,7 +180,7 @@ let test_4 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA2.size_state in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
   HMAC.hmac output key key_len data data_len;
@@ -220,7 +220,7 @@ let test_5 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA2.size_state in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
   HMAC.hmac output key key_len data data_len;
@@ -266,7 +266,7 @@ let test_6 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA2.size_state in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
   HMAC.hmac output key key_len data data_len;
@@ -324,7 +324,7 @@ let test_7 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA2.size_state in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
   HMAC.hmac output key key_len data data_len;
