@@ -12,7 +12,7 @@ extract-c:
 	mkdir -p sha2-c
 	$(KREMLIN_HOME)/krml -tmpdir sha2-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils \
-		Hacl.Test.Hash.SHA2.fst -o sha2.exe -no-prefix Hacl.Test.Hash.SHA2 \
+		Hacl.Test.Hash.SHA2.fst -o sha2.exe -no-prefix Hacl.Test.Hash.SHA2 -no-prefix SHA2 \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop Prims -drop FStar Hacl.Test.Hash.SHA2.fst \
 		-bundle "SHA2=Hacl.Utils.Experimental,Hacl.Hash.SHA2.L256,SHA2" \
