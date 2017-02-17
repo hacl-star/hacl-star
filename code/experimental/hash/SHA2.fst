@@ -97,7 +97,7 @@ val sha2_finish_256:
   hash  :suint8_p{length hash = v hashsize_256} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
-        (ensures  (fun h0 _ h1 -> live h1 state /\ live h1 hash /\ modifies_2 state hash h0 h1))
+        (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1))
 
 let sha2_finish_256 state hash = Hacl.Hash.SHA2.L256.finish state hash
 
