@@ -5,10 +5,10 @@ open Spec.Lib
 
 type block_cipher_ctx = {
      keylen: nat ;
-     blocklen: nat;
+     blocklen: (x:nat{x>0});
      noncelen: nat;
-     counterbits: nat
-}
+     counterbits: nat}
+
 type key (c:block_cipher_ctx) = lbytes c.keylen
 type nonce (c:block_cipher_ctx) = lbytes c.noncelen
 type block (c:block_cipher_ctx) = lbytes c.blocklen
@@ -22,7 +22,7 @@ val counter_mode:
   ctx: block_cipher_ctx ->
   bc: block_cipher ctx ->
   k:key ctx -> n:nonce ctx -> c:counter ctx -> 
-  plain:seq UInt8.t{c + (length plain / ctx.blocklen) < pow2 32} ->
+  plain:seq UInt8.t{c + (length plain / ctx.blocklen) < pow2 ctx.counterbits} ->
   Tot (lbytes (length plain))
   (decreases (length plain))
 #reset-options "--z3rlimit 40 --max_fuel 2"
