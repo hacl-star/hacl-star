@@ -78,7 +78,7 @@ is a long-term goal.
 
 # Experimental features
 
-The `code/experimental/` directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
+The [code/experimental](code/experimental) directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
 * Elliptic Curves: NIST P-256, Curve448
 * Encryption: AES-128, AES-256
 * Hash functions: SHA-256
