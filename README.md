@@ -39,7 +39,7 @@ it in production systems without consulting the authors.
 
 # Installation
 
-See [INSTALL.md].
+See [INSTALL.md](INSTALL.md).
 
 To verify the F\* code, you need to install the [F\*] typechecker.
 To extract F\* code to C, you need to install [KreMLin].
@@ -58,7 +58,7 @@ compile [libsodium] with the `--disable-asm` flag.
 # Browsing and testing the code
 
 The F\* code for our primitives is in the [code directory]:
-https://github.com/mitls/hacl-star/code Note that Poly1305 and
+(code) Note that Poly1305 and
 Curve25519 share a good chunk of Bignum field arithmetic code, and
 this shared code is in code/bignum.  There are Makefile targets in
 each directory for verification and extraction.  
