@@ -25,6 +25,14 @@ poly1305.exe: Spec.Poly1305.fst
 	$(OCAMLOPT) -I poly-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix poly-spec/, $(EXTRACTED)) poly-spec/Spec_Poly1305.ml -o poly1305.exe
 	./poly1305.exe
 
+chacha20.exe: Spec.Chacha20.fst
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p chacha-spec
+	$(FSTAR) $(ARGS) $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> chacha-spec/Spec_Chacha20.ml
+	$(OCAMLOPT) -I chacha-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix chacha-spec/, $(EXTRACTED)) chacha-spec/Spec_Chacha20.ml -o chacha20.exe
+	./chacha20.exe
+
 clean:
 	$(MAKE) -C ../code/lib/ml clean
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec
