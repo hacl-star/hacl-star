@@ -13,8 +13,10 @@ type key (c:block_cipher_ctx) = lbytes c.keylen
 type nonce (c:block_cipher_ctx) = lbytes c.noncelen
 type block (c:block_cipher_ctx) = lbytes c.blocklen
 type counter (c:block_cipher_ctx) = UInt.uint_t c.counterbits
-
 type block_cipher (c:block_cipher_ctx) =  key c -> nonce c -> counter c -> block c
+
+val xor: #len:nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
+let rec xor #len x y = map2 (fun x y -> FStar.UInt8.(x ^^ y)) x y
 
 val counter_mode: 
   ctx: block_cipher_ctx ->

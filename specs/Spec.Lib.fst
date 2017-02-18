@@ -1,6 +1,13 @@
 module Spec.Lib
 
+open FStar.Mul
 open FStar.Seq
+open FStar.UInt32
+open FStar.Endianness
+
+// left rotation by s bits; could go elsewhere
+let op_Less_Less_Less (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
+  ((a <<^ s) |^ (a >>^ (32ul -^ s)))
 
 let lbytes (l:nat) = b:seq UInt8.t {length b = l}
 let op_At f g = fun x -> g (f x) 
@@ -19,8 +26,33 @@ let rec map2 f s1 s2 =
      let t2 = slice s2 1 len in
      let r = map2 f t1 t2 in
      cons (f h1 h2) r
-val xor: #len:nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
-let rec xor #len x y = map2 (fun x y -> FStar.UInt8.(x ^^ y)) x y
+
+
+let uint32_from_le (b:lbytes 4) : UInt32.t =
+    let n = little_endian b  in		
+    UInt32.uint_to_t (UInt.to_uint_t 32 n)
+
+let uint32_to_le (a:UInt32.t) : lbytes 4 =
+    little_bytes 4ul (v a) 
+    
+
+val uint32s_from_le: len:nat -> b:lbytes (4 * len) -> Tot (s:seq UInt32.t{length s = len}) (decreases len)
+let rec uint32s_from_le len src =
+  if len = 0 then Seq.createEmpty #UInt32.t
+  else 
+    let h = slice src 0 4 in
+    let t = slice src 4 (4*len) in
+    Seq.cons (uint32_from_le h)
+             (uint32s_from_le (len-1) t)
+
+val uint32s_to_le: len:nat -> s:seq UInt32.t{length s = len} -> Tot (lbytes (4 * len))  (decreases len)
+let rec uint32s_to_le len src =
+  if len = 0 then Seq.createEmpty #UInt8.t
+  else 
+    let h = index src 0 in
+    let t = slice src 1 len in
+    Seq.append (uint32_to_le h)
+               (uint32s_to_le (len-1) t)
 
 
 

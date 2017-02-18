@@ -33,6 +33,23 @@ chacha20.exe: Spec.Lib.fst Spec.CTR.fst Spec.Chacha20.fst
 	$(OCAMLOPT) -I chacha-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix chacha-spec/, $(EXTRACTED)) chacha-spec/Spec_Lib.ml chacha-spec/Spec_CTR.ml chacha-spec/Spec_Chacha20.ml -o chacha20.exe
 	./chacha20.exe
 
+salsa20.exe: Spec.Lib.fst Spec.CTR.fst Spec.Salsa20.fst
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p salsa-spec
+	$(FSTAR) $(ARGS) --odir salsa-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> salsa-spec/Spec_Salsa20.ml
+	$(OCAMLOPT) -I salsa-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix salsa-spec/, $(EXTRACTED)) salsa-spec/Spec_Lib.ml salsa-spec/Spec_CTR.ml salsa-spec/Spec_Salsa20.ml -o salsa20.exe
+	./salsa20.exe
+
+secretbox.exe: Spec.Lib.fst Spec.CTR.fst Spec.Salsa20.fst Spec.HSalsa20.fst Spec.Poly1305.fst Spec.SecretBox.fst
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p secretbox-spec
+	$(FSTAR) $(ARGS) --odir secretbox-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> secretbox-spec/Spec_SecretBox.ml
+	$(OCAMLOPT) -I secretbox-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix secretbox-spec/, $(EXTRACTED)) secretbox-spec/Spec_Lib.ml secretbox-spec/Spec_CTR.ml secretbox-spec/Spec_Salsa20.ml secretbox-spec/Spec_HSalsa20.ml secretbox-spec/Spec_Poly1305.ml secretbox-spec/Spec_SecretBox.ml -o secretbox.exe
+	./secretbox.exe
+
+
 clean:
 	$(MAKE) -C ../code/lib/ml clean
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec

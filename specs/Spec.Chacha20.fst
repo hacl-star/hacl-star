@@ -65,32 +65,6 @@ let chacha20_core (s:state) =
 
 (* state initialization *) 
 
-let uint32_from_le (b:lbytes 4) : UInt32.t =
-    let n = little_endian b  in		
-    UInt32.uint_to_t (UInt.to_uint_t 32 n)
-
-let uint32_to_le (a:UInt32.t) : lbytes 4 =
-    little_bytes 4ul (v a) 
-    
-
-val uint32s_from_le: len:nat -> b:lbytes (4 * len) -> Tot (s:seq UInt32.t{length s = len}) (decreases len)
-let rec uint32s_from_le len src =
-  if len = 0 then Seq.createEmpty #UInt32.t
-  else 
-    let h = slice src 0 4 in
-    let t = slice src 4 (4*len) in
-    Seq.cons (uint32_from_le h)
-             (uint32s_from_le (len-1) t)
-
-val uint32s_to_le: len:nat -> s:seq UInt32.t{length s = len} -> Tot (lbytes (4 * len))  (decreases len)
-let rec uint32s_to_le len src =
-  if len = 0 then Seq.createEmpty #UInt8.t
-  else 
-    let h = index src 0 in
-    let t = slice src 1 len in
-    Seq.append (uint32_to_le h)
-               (uint32s_to_le (len-1) t)
-
 let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
 
 let setup (k:key) (n:nonce) (c:counter): state =
