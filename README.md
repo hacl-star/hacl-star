@@ -57,8 +57,8 @@ compile [libsodium] with the `--disable-asm` flag.
 
 # Browsing and testing the code
 
-The F\* code for our primitives is in the [code directory]:
-(code) Note that Poly1305 and
+The F\* code for our primitives is in the [code](code) directory
+Note that Poly1305 and
 Curve25519 share a good chunk of Bignum field arithmetic code, and
 this shared code is in code/bignum.  There are Makefile targets in
 each directory for verification and extraction.  
