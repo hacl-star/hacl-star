@@ -9,7 +9,7 @@ FSTAR_ARGS=$(OTHERFLAGS)
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 
-all: poly1305.exe chacha20.exe salsa20.exe secretbox.exe
+all: poly1305.exe chacha20.exe salsa20.exe secretbox.exe chacha20poly1305.exe
 
 EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  FStar_Endianness.ml 
 
@@ -48,6 +48,14 @@ secretbox.exe: Spec.Lib.fst Spec.CTR.fst Spec.Salsa20.fst Spec.HSalsa20.fst Spec
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> secretbox-spec/Spec_SecretBox.ml
 	$(OCAMLOPT) -I secretbox-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix secretbox-spec/, $(EXTRACTED)) secretbox-spec/Spec_Lib.ml secretbox-spec/Spec_CTR.ml secretbox-spec/Spec_Salsa20.ml secretbox-spec/Spec_HSalsa20.ml secretbox-spec/Spec_Poly1305.ml secretbox-spec/Spec_SecretBox.ml -o secretbox.exe
 	./secretbox.exe
+
+chacha20poly1305.exe: Spec.Lib.fst Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p chacha-poly-spec
+	$(FSTAR) $(ARGS) --odir chacha-poly-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> chacha-poly-spec/Spec_Chacha20Poly1305.ml
+	$(OCAMLOPT) -I chacha-poly-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix chacha-poly-spec/, $(EXTRACTED)) chacha-poly-spec/Spec_Lib.ml chacha-poly-spec/Spec_CTR.ml chacha-poly-spec/Spec_Chacha20.ml chacha-poly-spec/Spec_Poly1305.ml chacha-poly-spec/Spec_Chacha20Poly1305.ml -o chacha20poly1305.exe
+	./chacha20poly1305.exe
 
 
 clean:
