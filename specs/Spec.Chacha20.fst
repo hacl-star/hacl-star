@@ -4,6 +4,7 @@ open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness
+open Spec.Lib
 
 (* This should go elsewhere! *)
 
@@ -13,7 +14,6 @@ open FStar.Endianness
 let op_Less_Less_Less (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
   (a <<^ s) |^ (a >>^ (32ul -^ s))
 
-let lbytes (l:nat) = b:seq UInt8.t {length b = l}
 let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
 let noncelen = 12 (* in bytes *)
@@ -21,26 +21,9 @@ let noncelen = 12 (* in bytes *)
 type key = lbytes keylen
 type block = lbytes blocklen
 type nonce = lbytes noncelen
-type counter = UInt32.t
+type counter = UInt.uint_t 32
 
 // using @ as a functional substitute for ;
-let op_At f g = fun x -> g (f x) 
-val iter: n:nat -> (f: 'a -> Tot 'a) -> 'a -> 'a 
-let rec iter n f x = if n = 0 then x else iter (n-1) f (f x)
-val map2: ('a -> 'b -> Tot 'c) -> 
-	  a:seq 'a -> b:seq 'b{length b = length a} ->	
-    	  Tot (c:seq 'c{length c = length a}) (decreases (length a))
-let rec map2 f s1 s2 =
-  let len = length s1 in
-  if len = 0 then Seq.createEmpty 
-  else 
-     let h1 = index s1 0 in
-     let h2 = index s2 0 in
-     let t1 = slice s1 1 len in
-     let t2 = slice s2 1 len in
-     let r = map2 f t1 t2 in
-     cons (f h1 h2) r
-
 // internally, blocks are represented as 16 x 4-byte integers
 type state = m:seq UInt32.t {length m = 16}
 type idx = n:nat{n < 16}
@@ -113,7 +96,7 @@ let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
 let setup (k:key) (n:nonce) (c:counter): state =
   createL constants @|
   uint32s_from_le 8 k @|
-  createL [c] @| 
+  createL [UInt32.uint_to_t c] @| 
   uint32s_from_le 3 n
 
 let chacha20_block (k:key) (n:nonce) (c:counter): block =
@@ -122,37 +105,19 @@ let chacha20_block (k:key) (n:nonce) (c:counter): block =
     uint32s_to_le 16 st'
 
 
-(* Generic Counter Mode: move to Spec.CTR.fst *)
+let chacha20_ctx: Spec.CTR.block_cipher_ctx = 
+    let open Spec.CTR in
+    {
+    keylen = keylen;
+    blocklen = blocklen;
+    noncelen = noncelen;
+    counterbits = 32
+    }
 
-val xor: #len:nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
-let rec xor #len x y = map2 (fun x y -> FStar.UInt8.(x ^^ y)) x y
-
-val counter_mode: 
-  block_enc: (key -> nonce -> counter -> block) ->
-  k:key -> n:nonce -> c:counter -> 
-  plain:seq UInt8.t {v c + (length plain / blocklen) < pow2 32} ->
-  Tot (lbytes (length plain))
-  (decreases (length plain))
-#reset-options "--z3rlimit 40 --max_fuel 2"
-let rec counter_mode block_enc key nonce counter plain =
-  let len = length plain in 
-  if len = 0 then Seq.createEmpty #UInt8.t else
-  if len <= blocklen 
-  then (* encrypt final partial block *)
-      let mask = block_enc key nonce counter in 
-      let mask = slice mask 0 len in 
-      xor plain mask
-  else (* encrypt full block *)
-      let (b, plain) = split plain blocklen in 
-      let mask = block_enc key nonce counter in 
-      let eb = xor b mask in
-      let cipher = counter_mode block_enc key nonce (counter +^ 1ul) plain in
-      eb @| cipher 
-
-(* End of generic code *)
+let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
 
 let chacha20_encrypt_bytes key nonce counter m = 
-    counter_mode chacha20_block key nonce counter m
+    Spec.CTR.counter_mode chacha20_ctx chacha20_cipher key nonce counter m
 
 
 unfold let test_plaintext : lbytes 114 = createL [
@@ -201,7 +166,7 @@ unfold let test_nonce:nonce = createL [
     0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0x4auy; 0uy; 0uy; 0uy; 0uy
     ] 
 
-unfold let test_counter = 1ul
+unfold let test_counter = 1
 
 let test() = 
     chacha20_encrypt_bytes test_key test_nonce test_counter test_plaintext 
