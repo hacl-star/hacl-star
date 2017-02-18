@@ -17,12 +17,16 @@ The only prerequisite to install F* and KreMLin is OCaml.
 Please install the OCaml compiler and the OPAM package manager.
 
 Then, from the Hacl* root repository:
-```make prepare```
+```
+make prepare
+```
 
 This will install required OPAM packages and build F* and Kremlin.
 
 To generate the library, run:
-```make```
+```
+make
+```
 
 ### Verifying / extracting the code
 
