@@ -20,31 +20,29 @@ let pad_16 (x:bytes) =
     if m = 0 then x 
     else x @| create (16-m) 0uy
 
+let poly1305_aad k n m aad =
+    let b0 = Spec.Chacha20.chacha20_block k n 0 in
+    let mackey = slice b0 0 32 in
+    let laad = little_bytes 8ul (length aad) in
+    let lm = little_bytes 8ul (length m) in
+    let to_mac = pad_16 aad @| pad_16 m @| laad @| lm in
+    let mac = Spec.Poly1305.poly1305 to_mac mackey in
+    mac
+
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30"
 val aead_chacha20_poly1305_encrypt: k:key -> n:nonce -> 
     m:bytes -> aad:bytes{(length m + length aad) / Spec.Chacha20.blocklen < pow2 32} ->
 Tot (lbytes (length m) * Spec.Poly1305.tag) 
 let aead_chacha20_poly1305_encrypt k n m aad = 
-    let b0 = Spec.Chacha20.chacha20_block k n 0 in
-    let mackey = slice b0 0 32 in
     let cipher = Spec.Chacha20.chacha20_encrypt_bytes k n 1 m in
-    let laad = little_bytes 8ul (length aad) in
-    let lcipher = little_bytes 8ul (length cipher) in
-    let to_mac = pad_16 aad @| pad_16 cipher @| laad @| lcipher in
-    let mac = Spec.Poly1305.poly1305 to_mac mackey in
+    let mac = poly1305_aad k n cipher aad in
     (cipher, mac)
             
-
 val aead_chacha20_poly1305_decrypt: k:key -> n:nonce -> 
     c:bytes -> tag:lbytes 16 ->  aad:bytes{(length c + length aad) / Spec.Chacha20.blocklen < pow2 32} ->
     Tot (option (lbytes (length c)))
 let aead_chacha20_poly1305_decrypt k n c mac aad = 
-    let b0 = Spec.Chacha20.chacha20_block k n 0 in
-    let mackey = slice b0 0 32 in
-    let laad = little_bytes 8ul (length aad) in
-    let lcipher = little_bytes 8ul (length c) in
-    let to_mac = pad_16 aad @| pad_16 c @| laad @| lcipher in
-    let xmac = Spec.Poly1305.poly1305 to_mac mackey in
+    let xmac = poly1305_aad k n c aad in
     if xmac = mac then
        let plain = Spec.Chacha20.chacha20_encrypt_bytes k n 1 c in
        Some plain
