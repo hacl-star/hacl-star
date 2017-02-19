@@ -21,24 +21,23 @@ type state = Spec.Salsa20.state
 let setup (k:key) (n:nonce): state =
   let ks = uint32s_from_le 8 k in
   let ns = uint32s_from_le 4 n in
-  let st = create 16 0ul in
-  let st = upd st 0  Spec.Salsa20.constant0 in
-  let st = upd st 5  Spec.Salsa20.constant1 in 
-  let st = upd st 10 Spec.Salsa20.constant2 in 
-  let st = upd st 15 Spec.Salsa20.constant3 in 
-  let st = upd st 1  (index ks 0) in
-  let st = upd st 2  (index ks 1) in 
-  let st = upd st 3  (index ks 2) in 
-  let st = upd st 4  (index ks 3) in 
-  let st = upd st 11  (index ks 4) in
-  let st = upd st 12  (index ks 5) in 
-  let st = upd st 13  (index ks 6) in 
-  let st = upd st 14  (index ks 7) in 
-  let st = upd st 6  (index ns 0) in 
-  let st = upd st 7  (index ns 1) in 
-  let st = upd st 8  (index ns 2) in 
-  let st = upd st 9  (index ns 3) in 
-  st
+  (set 0  Spec.Salsa20.constant0 @
+   set 5  Spec.Salsa20.constant1 @
+   set 10 Spec.Salsa20.constant2 @
+   set 15 Spec.Salsa20.constant3 @
+   set 1  (index ks 0) @
+   set 2  (index ks 1) @ 
+   set 3  (index ks 2) @ 
+   set 4  (index ks 3) @ 
+   set 11  (index ks 4) @
+   set 12  (index ks 5) @ 
+   set 13  (index ks 6) @ 
+   set 14  (index ks 7) @ 
+   set 6  (index ns 0) @ 
+   set 7  (index ns 1) @ 
+   set 8  (index ns 2) @ 
+   set 9  (index ns 3))
+  (create 16 0ul)
 
 let hsalsa20 (k:key) (n:nonce) : key = 
   let st = setup k n in

@@ -11,6 +11,8 @@ let op_Less_Less_Less (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
 
 let lbytes (l:nat) = b:seq UInt8.t {length b = l}
 let op_At f g = fun x -> g (f x) 
+let set i x s = upd s i x
+
 val iter: n:nat -> (f: 'a -> Tot 'a) -> 'a -> 'a 
 let rec iter n f x = if n = 0 then x else iter (n-1) f (f x)
 val map2: ('a -> 'b -> Tot 'c) -> 

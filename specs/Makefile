@@ -41,7 +41,7 @@ salsa20.exe: Spec.Salsa20.fst
 	$(OCAMLOPT) -I salsa-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix salsa-spec/, $(EXTRACTED)) salsa-spec/Spec_Lib.ml salsa-spec/Spec_CTR.ml salsa-spec/Spec_Salsa20.ml -o salsa20.exe
 	./salsa20.exe
 
-secretbox.exe: Spec.SecretBox.fst
+secretbox.exe: Spec.HSalsa20.fst Spec.SecretBox.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p secretbox-spec
 	$(FSTAR) $(ARGS) --odir secretbox-spec $^
