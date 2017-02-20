@@ -39,9 +39,9 @@ let setup (k:key) (n:nonce): state =
    set 9  (index ns 3))
   (create 16 0ul)
 
-let hsalsa20 (k:key) (n:nonce) : key = 
+let hsalsa20 (k:key) (n:nonce) : Tot key = 
   let st = setup k n in
   let st' = Spec.Salsa20.rounds st in
-  let hs = createL [index st' 0; index st' 5; index st' 10; index st' 15; 
-      	   	    index st' 6; index st' 7; index st' 8; index st' 9] in
+  let hs = seq_of_list [index st' 0; index st' 5; index st' 10; index st' 15; 
+      	   	        index st' 6; index st' 7; index st' 8; index st' 9] in
   uint32s_to_le 8 hs
