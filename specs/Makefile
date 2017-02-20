@@ -17,6 +17,14 @@ NOEXTRACT=$(addprefix --no_extract FStar., Classical Ghost Int16 Int32 Int64 Int
 
 ARGS=--codegen OCaml --lax --include generic --include ../code/lib/kremlin $(NOEXTRACT) 
 
+gf128.exe: Spec.GF128.fst
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p gf128-spec
+	$(FSTAR) $(ARGS) --odir gf128-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> gf128-spec/Spec_GF128.ml
+	$(OCAMLOPT) -I gf128-spec -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa $(addprefix gf128-spec/, $(EXTRACTED)) gf128-spec/Spec_GaloisField.ml gf128-spec/Spec_GF128.ml -o gf128.exe
+	./gf128.exe
+
 poly1305.exe: Spec.Poly1305.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p poly-spec
@@ -60,4 +68,4 @@ chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec

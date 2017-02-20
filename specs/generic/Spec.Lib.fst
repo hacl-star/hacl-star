@@ -9,6 +9,8 @@ open FStar.Endianness
 let op_Less_Less_Less (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
   ((a <<^ s) |^ (a >>^ (32ul -^ s)))
 
+let byte = UInt8.t
+let bytes = seq UInt8.t
 let lbytes (l:nat) = b:seq UInt8.t {length b = l}
 let op_At f g = fun x -> g (f x) 
 let set i x s = upd s i x
