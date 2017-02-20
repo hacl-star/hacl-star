@@ -92,48 +92,23 @@ int32_t test_api()
   uint32_t res;
   int i;
 
-  /* Testing the secret box primitives */  
-  /* Hacl_SecretBox_crypto_secretbox_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, key); */
-  /* res = crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key); */
-  Hacl_SecretBox_crypto_secretbox_easy(ciphertext, msg, MESSAGE_LEN, nonce, key);
-  res = crypto_secretbox_open_easy(decrypted, ciphertext+16, MESSAGE_LEN+16, nonce, key);
-
-  printf("SecretBox decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
-  TestLib_compare_and_print("HACL secretbox", msg+32, decrypted, MESSAGE_LEN-32);
-
-  for(i = 0; i < MESSAGE_LEN; i++) decrypted[i] = 0;
-  for(i = 0; i < CIPHERTEXT_LEN; i++) ciphertext[i] = 0;
   // Creating public/private key couples
   Curve25519_crypto_scalarmult(pk1, sk1, basepoint);
   Curve25519_crypto_scalarmult(pk2, sk2, basepoint);
-
-  /* uint8_t tmp[48] = { 0 }; */
-  /* uint8_t *hsalsa_k = tmp + (uint32_t )0; */
-  /* uint8_t *hsalsa_n = tmp + (uint32_t )32; */
-  /* uint8_t tmp2[48] = { 0 }; */
-  /* uint8_t *hsalsa_k2 = tmp2 + (uint32_t )0; */
-  /* uint8_t *hsalsa_n2 = tmp2 + (uint32_t )32; */
-  /* /\* Curve25519_crypto_scalarmult(hsalsa_k, pk2, sk1); *\/ */
-  /* /\* Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(test1, hsalsa_n, hsalsa_k); *\/ */
-  
-  /* crypto_scalarmult(hsalsa_k2, sk2, pk1); */
-  /* Curve25519_crypto_scalarmult(hsalsa_k, sk1, pk2); */
-  /* /\* crypto_core_hsalsa20(test2, hsalsa_n2, hsalsa_k2, NULL); *\/ */
-
-  /* TestLib_compare_and_print("scalarmult", hsalsa_k, hsalsa_k2, 32); */
-  /* /\* TestLib_compare_and_print("hsalsa20", test1, test2, 32); *\/ */
 
   Hacl_Box_crypto_box_beforenm(test1, pk1, sk2);
   res = crypto_box_beforenm(test2, pk2, sk1);
   TestLib_compare_and_print("HACL beforenm", test1, test2, 32);
   
   /* Testing the box primitives */
-  /* i = crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk, sk); */
-  /* res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key); */
+  i = Hacl_Box_crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk1, sk2); 
+  res = crypto_box_open_detached(decrypted, ciphertext+32, mac, MESSAGE_LEN, nonce, pk2, sk1); 
+  printf("Libsodium decryption of HACL box was a %s.\n", res == 0 ? "success" : "failure");
+  TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
+
   i = crypto_box_easy(ciphertext, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
   res = Hacl_Box_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, sk1);
-  printf("Box decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
-  
+  printf("Box decryption of libsodium box was a %s.\n", res == 0 ? "success" : "failure");  
   TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
   return exit_success;
 }
@@ -150,36 +125,9 @@ int32_t perf_api() {
   }
 
   uint8_t mac[16],mac2[16], pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES];
-  int i;
 
   cycles a,b;
   clock_t t1,t2;
-
-  t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    Hacl_SecretBox_crypto_secretbox_easy(ciphertext, plaintext, len, nonce, key);
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  print_results("Hacl SecretBox speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
-    res += (uint64_t) ciphertext[i];
-  printf("Composite result (ignore): %llx\n", res);
-
-  t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    int res = crypto_secretbox_easy(plaintext, plaintext, len, nonce, key);
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  print_results("Sodium SecretBox speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < len + 16 * sizeof(char); i++) 
-    res += (uint64_t) ciphertext[i];
-  printf("Composite result (ignore): %llx\n", res);
 
   t1 = clock();
   a = TestLib_cpucycles_begin();

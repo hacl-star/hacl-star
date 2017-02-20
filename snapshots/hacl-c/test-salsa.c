@@ -1,6 +1,9 @@
 #include "kremlib.h"
 #include "testlib.h"
 #include "Salsa20.h"
+#include "Salsa20Block.h"
+#include "Poly1305_64.h"
+#include "HSalsa20.h"
 #include "sodium.h"
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
@@ -339,9 +342,20 @@ int32_t perf_salsa() {
   uint32_t noncesize = (uint32_t )8;
   __attribute__ ((aligned (16)))uint8_t key[keysize];
   memset(key, 0, keysize * sizeof key[0]);
+  __attribute__ ((aligned (16)))uint8_t subkey[keysize];
+  memset(subkey, 0, keysize * sizeof subkey[0]);
   key[(uint32_t )0] = (uint8_t )0x80;
   __attribute__ ((aligned (16)))uint8_t nonce[noncesize];
   memset(nonce, 0, noncesize * sizeof nonce[0]);
+  __attribute__ ((aligned (16)))uint8_t block[64];
+  memset(block, 0, 64 * sizeof block[0]);
+  __attribute__ ((aligned (16)))uint8_t block_[64];
+  memset(block_, 0, 64 * sizeof block_[0]);
+
+  __attribute__ ((aligned (16)))uint8_t nonce_[noncesize];
+  memset(nonce_, 0, noncesize * sizeof nonce_[0]);
+  __attribute__ ((aligned (16)))uint8_t subkey_[keysize];
+  memset(subkey_, 0, keysize * sizeof subkey_[0]);
 
   cycles a,b;
   clock_t t1,t2;
@@ -349,7 +363,12 @@ int32_t perf_salsa() {
 
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(plain, plain, len, nonce, key);
+    //memcpy(block+32,plain,32);
+    //Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, nonce, key);
+    //    memcpy(cipher,block+32,32);
+    Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(cipher, plain, len, nonce, key);
+    //Poly1305_64_crypto_onetimeauth(subkey_, cipher, len, subkey);
+    //Salsa20_crypto_stream_salsa20_xor_block0(block_, block, 64, nonce_, subkey);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

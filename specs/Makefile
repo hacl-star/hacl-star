@@ -19,6 +19,9 @@ ARGS=--codegen OCaml --lax --include generic --include ../code/lib/kremlin $(NOE
 
 OCAML_INCLUDES=-I ../code/lib/ml -I $(FSTAR_HOME)/ulib/ml/hyperstack ../code/lib/ml/hacllib.cmxa 
 
+%.fst-ver: %.fst
+	$(FSTAR) --include generic --include ../code/lib/kremlin --include experimental --include $(FSTAR_HOME)/ulib/hyperstack $*.fst
+
 gf128.exe: Spec.GF128.fst
 	$(MAKE) -C ../code/lib/ml MEM=HST
 	mkdir -p gf128-spec
