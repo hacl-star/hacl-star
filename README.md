@@ -45,14 +45,13 @@ To verify the F\* code, you need to install the [F\*] typechecker.
 To extract F\* code to C, you need to install [KreMLin].
 
 For convenience, we have already extracted C code for our verified
-primitives and made them available in [snapshots].  To run that code,
-you need a modern C compiler (preferably GCC-6).  To compare its
-performance with the C reference code in libsodium, download and
-compile [libsodium] with the `--disable-asm` flag.
+primitives and made them available in [snapshots/hacl-c](snapshots/hacl-c).
+To run that code, you need a modern C compiler (preferably GCC-6).
+To compare its performance with the C reference code in libsodium,
+download and compile [libsodium] with the `--disable-asm` flag.
 
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
 [KreMLin]: https://github.com/FStarLang/kremlin
-[snapshots]: https://github.com/mitls/hacl-star/snapshots/hacl-c
 [libsodium]: https://github.com/jedisct1/libsodium
 
 # Browsing and testing the code
