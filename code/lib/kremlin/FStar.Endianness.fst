@@ -6,22 +6,16 @@ open FStar.Mul
 open FStar.Int.Cast
 
 module U8 = FStar.UInt8
-module H8 = Hacl.UInt8
 
 let u8  = UInt8.t
 let u32 = UInt32.t
 let u64 = UInt64.t
-let h8  = Hacl.UInt8.t
-let h32 = Hacl.UInt32.t
-let h64 = Hacl.UInt64.t
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
 type bytes  = Seq.seq U8.t // Pure sequence of bytes
-type hbytes = Seq.seq H8.t
 
 type  lbytes  (l:nat) = b:bytes   {Seq.length b == l}
-type hlbytes  (l:nat) = b:hbytes  {Seq.length b == l}
 
 (* type lbuffer (l:nat) = b:buffer {Buffer.length b == l} *)
 
@@ -301,3 +295,67 @@ let lemma_little_endian_inj b b' =
   Seq.lemma_eq_intro b (Seq.slice b 0  len);
   Seq.lemma_eq_intro b' (Seq.slice b' 0  len);
   lemma_little_endian_is_injective b b' len
+
+
+val uint32_bytes: 
+  len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> 
+  Tot (b:lbytes (v len) { UInt32.v n == little_endian b}) (decreases (v len))
+let rec uint32_bytes len n = 
+  if len = 0ul then 
+    let e = Seq.createEmpty #UInt8.t in
+    assert_norm(0 = little_endian e);
+    e
+  else
+    let len = len -^ 1ul in 
+    let byte = uint32_to_uint8 n in
+    let n1 = n in (* n defined in FStar.UInt32, so was shadowed, so renamed into n1 *)
+    let n' = FStar.UInt32.(n1 >>^ 8ul) in 
+    assert(v n = UInt8.v byte + 256 * v n');
+    Math.Lemmas.pow2_plus 8 (8 * v len);
+    assert_norm (pow2 8 == 256);
+    assert(v n' < pow2 (8 * v len ));
+    let b' = uint32_bytes len n'
+    in 
+    Seq.cons byte b'
+
+val uint32_be: 
+  len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> 
+  Tot (b:lbytes (v len) { UInt32.v n == big_endian b}) (decreases (v len))
+let rec uint32_be len n = 
+  if len = 0ul then 
+    let e = Seq.createEmpty #UInt8.t in
+    assert_norm(0 = big_endian e);
+    e
+  else
+    let len = len -^ 1ul in 
+    let byte = uint32_to_uint8 n in
+    let n1 = n in (* n shadowed by FStar.UInt32.n *)
+    let n' = FStar.UInt32.(n1 >>^ 8ul) in 
+    assert(v n = UInt8.v byte + 256 * v n');
+    Math.Lemmas.pow2_plus 8 (8 * v len);
+    assert_norm (pow2 8 == 256);
+    assert(v n' < pow2 (8 * v len ));
+    let b' = uint32_be len n'
+    in 
+    Seq.snoc b' byte 
+
+#reset-options "--z3rlimit 400"
+
+// turns an integer into a bytestream, big-endian
+val big_bytes: 
+  len:UInt32.t -> n:nat{n < pow2 (8 * v len)} ->
+  Tot (b:lbytes (v len) {n == big_endian b}) (decreases (v len))
+let rec big_bytes len n = 
+  if len = 0ul then 
+    Seq.createEmpty 
+  else
+    let len = len -^ 1ul in 
+    let byte = UInt8.uint_to_t (n % 256) in
+    let n' = n / 256 in 
+    Math.Lemmas.pow2_plus 8 (8 * v len);
+    assert(n' < pow2 (8 * v len ));
+    let b' = big_bytes len n' in
+    let b'' = Seq.create 1 byte in
+    let b = Seq.append b' b'' in
+    assert(Seq.equal b' (Seq.slice b 0 (v len)));
+    b
