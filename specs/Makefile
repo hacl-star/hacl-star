@@ -9,7 +9,7 @@ FSTAR_ARGS=$(OTHERFLAGS)
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 
-all: poly1305.exe chacha20.exe salsa20.exe secretbox.exe chacha20poly1305.exe
+all: poly1305.exe chacha20.exe salsa20.exe secretbox.exe chacha20poly1305.exe gf128.exe
 
 EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  FStar_Endianness.ml 
 
