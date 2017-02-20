@@ -318,7 +318,7 @@ val lemma_carry_limb_step_1: s:seqelem -> i:nat{i < len - 1 /\ carry_limb_pre s 
 let rec lemma_carry_limb_step_1 s i j =
   if j = 0 then () else lemma_carry_limb_step_1 s i (j-1)
 
-#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 val lemma_carry_limb_step_2_1: s1':nat -> s0':nat -> s1:nat -> s0:nat -> i:nat -> Lemma
   (requires (s0' = s0 % pow2 limb_size /\ s1' = s1 + s0 / pow2 limb_size))
@@ -334,7 +334,7 @@ let lemma_carry_limb_step_2_1 s1' s0' s1 s0 i =
   Math.Lemmas.paren_mul_right (pow2 (limb_size * i)) (pow2 limb_size) s1;
   Math.Lemmas.distributivity_add_right (pow2 (limb_size * i)) (pow2 limb_size * s1') s0'
 
-#set-options "--z3rlimit 200 --initial_fuel 2 --max_fuel 2"
+#reset-options "--z3rlimit 200 --initial_fuel 2 --max_fuel 2"
 
 val lemma_carry_limb_step_2: s:seqelem -> i:nat{i < len - 1 /\ carry_limb_pre s i} ->
   Lemma (requires (true))
