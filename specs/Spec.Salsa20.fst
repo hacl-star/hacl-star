@@ -50,7 +50,7 @@ let double_round: shuffle =
 let rec rounds : shuffle = 
     iter 10 double_round (* 20 rounds *)
 
-let salsa20_core (s:state) = 
+let salsa20_core (s:state) : Tot state = 
     let s' = rounds s in
     map2 (fun x y -> x +%^ y) s s'
 
