@@ -27,7 +27,7 @@ libsodium can be immediately ported to use the verified code in HACL*
 instead. 
 
 [F\*]: https://github.com/FStarLang/FStar/
-[miTLS]: https://github.com/mitls/mitls-star
+[miTLS]: https://github.com/mitls/mitls-fstar
 [NaCl API]: https://nacl.cr.yp.to/
 [libsodium]: https://github.com/jedisct1/libsodium
 [Project Everest]: https://github.com/project-everest
