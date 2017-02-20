@@ -52,11 +52,7 @@ SLOW= Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.EC.fst \
 
 # Files that still have errors
-TODO=Hacl.Bignum.Fsum.fst \
-	Hacl.Bignum.Fdifference.fst \
-	Hacl.Spec.Bignum.Modulo.fst \
-	Hacl.EC.AddAndDouble.fst \
-	Hacl.EC.Format.fst
+TODO=	Hacl.EC.Format.fst \
 
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 
@@ -100,7 +96,7 @@ extract-c:
 	$(KREMLIN_HOME)/krml -tmpdir x25519-c -ccopt -std=gnu99 \
 		-I ../bignum -I ../lib/kremlin \
 		Curve25519.fst Hacl.Test.X25519.fst \
-		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
+		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
 		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*' \
 		-bundle 'Hacl.Spec.\*' \

@@ -3,6 +3,8 @@ module Hacl.Test.Poly1305_64
 open FStar.Buffer
 open Hacl.Cast
 
+module Poly = Poly1305_64
+
 val main: unit -> ST FStar.Int32.t
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
@@ -31,7 +33,7 @@ let main () =
     0x4auy; 0xbfuy; 0xf6uy; 0xafuy; 0x41uy; 0x49uy; 0xf5uy; 0x1buy
     ] in
   (* Hacl.MAC.Poly1305_64.crypto_onetimeauth mac plaintext len' key; *)
-  Hacl.Impl.Poly1305_64.crypto_onetimeauth mac plaintext len' key;
+  Poly.crypto_onetimeauth mac plaintext len' key;
   TestLib.compare_and_print (C.string_of_literal "poly1305") expected mac macsize;
   pop_frame();
   C.exit_success

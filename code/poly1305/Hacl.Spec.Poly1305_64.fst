@@ -13,6 +13,8 @@ open Hacl.Spec.Endianness
 open Hacl.Spec.Bignum.Bigint
 open Hacl.Spec.Bignum.AddAndMultiply
 
+module Spec = Spec.Poly1305
+
 module H8   = Hacl.UInt8
 module Limb = Hacl.Bignum.Limb
 module Wide = Hacl.Bignum.Wide
@@ -27,18 +29,31 @@ type bytes = seq byte
 type word = w:bytes{length w <= 16}
 type word_16 = w:bytes{length w = 16}
 type tag = word_16
-type text = seq word
+
+
+type word' = Spec.word
+type text = Spec.text
 
 let log_t = text
 
 let elem : Type0 = b:int{ b >= 0 /\ b < prime }
 
+
+inline_for_extraction let red_44 s = Hacl.Spec.Bignum.AddAndMultiply.red_44 s
+inline_for_extraction let red_45 s = Hacl.Spec.Bignum.AddAndMultiply.red_45 s
+
+inline_for_extraction let p42  = Hacl.Spec.Bignum.AddAndMultiply.p42
+inline_for_extraction let p44  = Hacl.Spec.Bignum.AddAndMultiply.p44
+
 noeq type poly1305_state_ = | MkState: r:seqelem -> h:seqelem -> log:log_t -> poly1305_state_
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-assume val load64_le_spec : b:bytes{Seq.length b = 8} -> Tot (r:limb{v r == hlittle_endian b})
+assume val load64_le_spec : b:bytes{Seq.length b = 8} -> GTot (r:limb{v r == hlittle_endian b})
+(* let load64_le_spec b = lemma_little_endian_is_bounded (reveal_sbytes b); *)
+(*   UInt64.uint_to_t (little_endian b) *)
 assume val store64_le_spec: r:limb -> Tot (b:bytes{Seq.length b = 8 /\ v r == hlittle_endian b})
+(* let store64_le_spec r = little *)
 
 assume val load128_le_spec : b:word_16 -> Tot (r:wide{Wide.v r == hlittle_endian b})
 assume val store128_le_spec: r:wide -> Tot (b:word_16{Wide.v r == hlittle_endian b})
@@ -236,22 +251,22 @@ let poly1305_init_spec key =
 
 val poly1305_update_spec: st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
   m:word_16 ->
-  Tot (st':poly1305_state_{red_44 (MkState?.r st') /\ red_45 (MkState?.h st')
+  GTot (st':poly1305_state_{red_44 (MkState?.r st') /\ red_45 (MkState?.h st')
     /\ (let acc0 = seval (MkState?.h st) in
        let acc1 = seval (MkState?.h st') in
        let r0 = seval (MkState?.r st) in
        let r1 = seval (MkState?.r st') in
-       let log0:seq word = (MkState?.log st) in
+       let log0:seq word' = (MkState?.log st) in
        let log1 = (MkState?.log st') in
        let block  = hlittle_endian m + pow2 128 in
        r0 = r1 /\ acc1 % prime = ((acc0 + block) * r0) % prime
-       /\ (log1 == (Seq.create 1 m) @| log0))})
+       /\ (log1 == (Seq.create 1 (reveal_sbytes m)) @| log0))})
 let poly1305_update_spec st m =
   let block = toField_plus_2_128_spec m in
   cut (seval block = hlittle_endian m + pow2 128);
   let acc = MkState?.h st in
   let r = MkState?.r st in
-  let log = Seq.append (Seq.create 1 m) (MkState?.log st) in
+  let log = Seq.append (Seq.create 1 (reveal_sbytes m)) (MkState?.log st) in
   let acc' = add_and_multiply_tot acc block r in
   cut (seval acc' % prime = ((seval acc + seval block) * seval r) % prime);
   MkState r acc' log
@@ -262,24 +277,22 @@ let poly1305_update_spec st m =
 private val lemma_append_one_to_zeros_: unit -> Lemma
   (hlittle_endian (Seq.create 1 (uint8_to_sint8 1uy)) = 1)
 private let lemma_append_one_to_zeros_ () = 
-  admit() // JK: TODO
-  (* little_endian_singleton (uint8_to_sint8 1uy) *)
+  little_endian_singleton (1uy)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 private val lemma_append_one_to_zeros: (n:nat{n >= 1 /\ n <= 16}) -> Lemma
   (hlittle_endian (Seq.create 1 (uint8_to_sint8 1uy) @| Seq.create (n-1) (uint8_to_sint8 0uy)) = 1)
 private let lemma_append_one_to_zeros n =
-  admit() // JK: TODO
-  (* let nm1:nat = n - 1 in *)
-  (* let one = Seq.create 1 (uint8_to_sint8 1uy) in *)
-  (* let zeros = Seq.create (nm1) (uint8_to_sint8 0uy) in *)
-  (* let s = one @| zeros in *)
-  (* Seq.lemma_eq_intro (tail s) zeros; *)
-  (* little_endian_append one zeros; *)
-  (* lemma_append_one_to_zeros_ (); *)
-  (* little_endian_null (nm1) *)
+  let nm1:nat = n - 1 in
+  let one = Seq.create 1 (1uy) in
+  let zeros = Seq.create (nm1) (0uy) in
+  let s = one @| zeros in
+  Seq.lemma_eq_intro (tail s) zeros;
+  little_endian_append one zeros;
+  lemma_append_one_to_zeros_ ();
+  little_endian_null (nm1)
 
 
 private
@@ -287,18 +300,18 @@ val lemma_seq_append_little_endian: (m:word{Seq.length m < 16}) -> Lemma
   (let m' = Seq.upd (Seq.append m (Seq.create (16 - length m) (uint8_to_sint8 0uy))) (Seq.length m) (uint8_to_sint8 1uy) in
    hlittle_endian m' = hlittle_endian m + pow2 (8 * length m))
 private let lemma_seq_append_little_endian m =
-  admit() // JK: TODO
-  (* let m' = Seq.append m (Seq.create (16 - length m) (uint8_to_sint8 0uy)) in *)
-  (* let m'' = Seq.upd m' (length m) (uint8_to_sint8 1uy) in *)
-  (* let one = Seq.create 1 (uint8_to_sint8 1uy) in *)
-  (* let zeros = Seq.create (16 - length m - 1) (uint8_to_sint8 0uy) in *)
-  (* let z'' = m @| one @| zeros in *)
-  (* cut (m @| one @| zeros == m @| (one @| zeros)); *)
-  (* Seq.lemma_eq_intro m'' z''; *)
-  (* lemma_append_one_to_zeros (16 - length m); *)
-  (* little_endian_append one zeros; *)
-  (* assert_norm(pow2 0 = 1); *)
-  (* little_endian_append m (one @| zeros) *)
+  let m = reveal_sbytes m in
+  let m' = Seq.append m (Seq.create (16 - length m) (0uy)) in
+  let m'' = Seq.upd m' (length m) (1uy) in
+  let one = Seq.create 1 (1uy) in
+  let zeros = Seq.create (16 - length m - 1) (0uy) in
+  let z'' = m @| one @| zeros in
+  cut (m @| one @| zeros == m @| (one @| zeros));
+  Seq.lemma_eq_intro m'' z'';
+  lemma_append_one_to_zeros (16 - length m);
+  little_endian_append one zeros;
+  assert_norm(pow2 0 = 1);
+  little_endian_append m (one @| zeros)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -307,16 +320,16 @@ val poly1305_process_last_block_spec:
   st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
   m:Seq.seq H8.t ->
   rem':U64.t{U64.v rem' = Seq.length m /\ U64.v rem' < 16} ->
-  Tot (st':poly1305_state_{red_44 (MkState?.r st') /\ red_45 (MkState?.h st')
+  GTot (st':poly1305_state_{red_44 (MkState?.r st') /\ red_45 (MkState?.h st')
     /\ (let acc0 = seval (MkState?.h st) in
        let acc1 = seval (MkState?.h st') in
        let r0 = seval (MkState?.r st) in
        let r1 = seval (MkState?.r st') in
-       let log0:seq word = (MkState?.log st) in
+       let log0:seq word' = (MkState?.log st) in
        let log1 = (MkState?.log st') in
        let block  = hlittle_endian m + pow2 (8 * U64.v rem') in
        r0 = r1 /\ acc1 % prime = ((acc0 + block) * r0) % prime
-       /\ (log1 == (Seq.create 1 m) @| log0))})
+       /\ (log1 == (Seq.create 1 (reveal_sbytes m)) @| log0))})
 let poly1305_process_last_block_spec st m rem' =
   assert_norm (pow2 8 = 256);
   let m' = Seq.append m (Seq.create (16 - U64.v rem') (uint8_to_sint8 0uy)) in
@@ -325,7 +338,7 @@ let poly1305_process_last_block_spec st m rem' =
   let block = toField_spec m'' in
   let acc = MkState?.h st in
   let r = MkState?.r st in
-  let log = Seq.append (Seq.create 1 m) (MkState?.log st) in
+  let log = Seq.append (Seq.create 1 (reveal_sbytes m)) (MkState?.log st) in
   let acc' = add_and_multiply_tot acc block r in
   MkState r acc' log
 
@@ -586,7 +599,7 @@ val poly1305_finish_spec:
   m:word ->
   rem':U64.t{U64.v rem' = length m /\ length m < 16} ->
   key_s:Seq.seq H8.t{Seq.length key_s = 16} ->
-  Tot (mac:word_16{
+  GTot (mac:word_16{
       (let acc = seval (MkState?.h st) in
        let r   = seval (MkState?.r st) in
        let k   = hlittle_endian key_s   in
@@ -625,4 +638,59 @@ let poly1305_finish_spec st m rem' key_s =
        if Seq.length m >= 1
        then mac = (((((acc + m') * r) % prime) % pow2 128) + k) % pow2 128
        else mac = ((((acc % prime) % pow2 128) + k) % pow2 128));
+  mac
+
+
+
+private val lemma_mod_distr: acc0:nat -> block:nat -> r0:nat -> Lemma
+  (((acc0 + block) * r0) % prime = ((((acc0 % prime) + (block % prime)) % prime) * (r0 % prime)) % prime)
+private let lemma_mod_distr acc block r0 =
+  let open FStar.Math.Lemmas in
+  lemma_mod_mul_distr_l (acc + block) r0 prime;
+  lemma_mod_mul_distr_l r0 ((acc + block) % prime) prime;
+  lemma_mod_plus_distr_l acc block prime;
+  lemma_mod_plus_distr_l block (acc % prime) prime
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+
+val poly1305_update_last_spec:
+  st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
+  m:word ->
+  rem':U64.t{U64.v rem' = length m /\ length m < 16} ->
+  GTot (a:seqelem{
+      (let acc = selem (MkState?.h st) in
+       let acc' = seval a in
+       let r   = selem (MkState?.r st) in
+       let m'   = (hlittle_endian m + pow2 (8*length m)) % prime in
+       bounds a p44 p44 p42
+       /\ (if Seq.length m >= 1
+         then acc' = (((acc + m') % prime) * r) % prime
+         else acc' = acc)) })
+let poly1305_update_last_spec st m rem' =
+  if Seq.length m >= 1 then (
+    lemma_mod_distr (seval (MkState?.h st)) (hlittle_endian m + pow2 (8*length m)) (seval (MkState?.r st))
+  );
+  let st' = if U64.(rem' =^ 0uL) then st
+           else poly1305_process_last_block_spec st m rem' in
+  let acc = poly1305_last_pass_spec (MkState?.h st') in
+  Math.Lemmas.modulo_lemma (seval acc) prime;
+  acc
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+
+val poly1305_finish_spec':
+  acc:seqelem{bounds acc p44 p44 p42} ->
+  key_s:word_16{Seq.length key_s = 16} ->
+  GTot (mac:word_16{
+    let acc = seval acc in
+    let k   = hlittle_endian key_s in    
+    hlittle_endian mac == (acc + k) % pow2 128})
+let poly1305_finish_spec' acc key_s =
+  let k' = load128_le_spec key_s in
+  let open Hacl.Bignum.Wide in
+  let acc' = bignum_to_128 acc in
+  let mac = acc' +%^ k' in
+  let mac = store128_le_spec mac in
   mac

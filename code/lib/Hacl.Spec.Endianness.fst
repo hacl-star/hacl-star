@@ -45,6 +45,9 @@ let seq_map #a #b f s =
 unfold inline_for_extraction
 let reveal_sbytes (s:Seq.seq H8.t) : GTot (s:Seq.seq U8.t) = seq_map h8_to_u8 s
 
+unfold inline_for_extraction
+let intro_sbytes (s:Seq.seq U8.t) : GTot (s:Seq.seq H8.t) = seq_map Hacl.Cast.uint8_to_sint8 s
+
 
 unfold inline_for_extraction 
 let hlittle_endian (s:Seq.seq H8.t) : GTot nat =
