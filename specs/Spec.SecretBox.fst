@@ -8,43 +8,51 @@ open Spec.Lib
 
 let keylen =   32 (* in bytes *)
 let noncelen = 24 (* in bytes *)
-
 type key = lbytes keylen
 type nonce = lbytes noncelen
 type bytes = seq UInt8.t
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30"
+
+val secretbox_init: k:key -> n:nonce -> 
+    		    Tot (Spec.Poly1305.key * Spec.Salsa20.key * Spec.Salsa20.nonce)
+let secretbox_init  k n = 
+    let (n1,n2) = split n 16 in
+    let subkey = Spec.HSalsa20.hsalsa20 k n1 in
+    let keyblock = Spec.Salsa20.salsa20_block subkey n2 0 in
+    let mackey = slice keyblock 0 32 in
+    (mackey,subkey,n2)    
+
+val secretbox_process: input:bytes{length input / Spec.Salsa20.blocklen < pow2 32} ->
+    		       k:Spec.Salsa20.key -> n:Spec.Salsa20.nonce -> 
+    		       Tot (lbytes (length input))
+let secretbox_process input k n = 
+    let ilen = length input in
+    let ilen0 = if ilen < 32 then ilen else 32 in
+    let (i0,irest) = split input ilen0 in
+    let iblock0 = create 32 0uy @| i0 in
+    let oblock0 = Spec.Salsa20.salsa20_encrypt_bytes k n 0 iblock0 in
+    let o0 = slice oblock0 32 64 in
+    let orest = Spec.Salsa20.salsa20_encrypt_bytes k n 1 irest in
+    let output = o0 @| orest in
+    output
+            
 val secretbox_detached: m:bytes{length m / Spec.Salsa20.blocklen < pow2 32} ->
     k:key -> n:nonce -> Tot (lbytes (length m) * Spec.Poly1305.tag) 
 let secretbox_detached m k n = 
-    let (n1,n2) = split n 16 in
-    let subkey:Spec.Salsa20.key = Spec.HSalsa20.hsalsa20 k n1 in
-    let mlen = length m in
-    let mlen0 = if mlen < 32 then mlen else 32 in
-    let (m0,rest) = split m mlen0 in
-    let b0 = create 32 0uy @| m0 in
-    let c0 = Spec.Salsa20.salsa20_encrypt_bytes subkey n2 0 b0 in
-    let (mackey,c0) = split c0 32 in
-    let crest = Spec.Salsa20.salsa20_encrypt_bytes subkey n2 1 rest in
-    let cipher = c0 @| crest in
-    let mac = Spec.Poly1305.poly1305 cipher mackey in
-    (cipher, mac)
-            
+    let (mk,ek,n) = secretbox_init k n in
+    let cipher = secretbox_process m ek n in
+    let mac = Spec.Poly1305.poly1305 cipher mk in
+    (cipher,mac)
+          
 val secretbox_open_detached: c:bytes{length c / Spec.Salsa20.blocklen < pow2 32} ->
     mac:Spec.Poly1305.tag -> k:key -> n:nonce -> Tot (option (lbytes (length c)))
 let secretbox_open_detached cipher mac k n = 
-    let (n1,n2) = split n 16 in
-    let subkey = Spec.HSalsa20.hsalsa20 k n1 in
-    let clen = length cipher in
-    let clen0 = if clen < 32 then clen else 32 in
-    let c0,crest = split cipher clen0 in
-    let b0 = create 32 0uy @| c0 in
-    let m0 = Spec.Salsa20.salsa20_encrypt_bytes subkey n2 0 b0 in
-    let (mackey,m0) = split m0 32 in
-    let mrest = Spec.Salsa20.salsa20_encrypt_bytes subkey n2 1 crest in
-    let xmac = Spec.Poly1305.poly1305 cipher mackey in
+    let (mk,ek,n) = secretbox_init k n in
+    let xmac = Spec.Poly1305.poly1305 cipher mk in
     if xmac = mac then 
-      Some (m0 @| mrest)
+       let plain = secretbox_process cipher ek n in
+       Some plain
     else None
 
 let secretbox_easy m k n = 

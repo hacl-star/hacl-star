@@ -28,8 +28,6 @@ let op_Star_At e1 e2 = fmul e1 e2
 
 
 (* Types from Low-level crypto *)
-type byte = FStar.UInt8.t
-type bytes = seq byte
 type word = w:bytes{length w <= 16}
 type word_16 = w:bytes{length w = 16}
 type tag = word_16
@@ -100,7 +98,6 @@ let finish a s =
 val mac_1305: vs:text -> r:elem -> s:tag -> Tot tag
 let mac_1305 vs r s = finish (poly vs r) s
 
-
 val encode_bytes: txt:bytes -> Tot (text) (decreases (Seq.length txt))
 let rec encode_bytes txt =
   let l = Seq.length txt in
@@ -111,8 +108,8 @@ let rec encode_bytes txt =
     let w, txt = Seq.split txt l0 in
     Seq.snoc (encode_bytes txt) w
 
-
-val poly1305: msg:bytes -> k:bytes{length k = 32} -> Tot tag
+type key = lbytes 32
+val poly1305: msg:bytes -> k:key -> Tot tag
 let poly1305 msg k =
   let text = encode_bytes msg in
   let r = encode_r (slice k 0 16) in
@@ -133,7 +130,7 @@ unfold let msg = createL [
   0x61uy; 0x72uy; 0x63uy; 0x68uy; 0x20uy; 0x47uy; 0x72uy; 0x6fuy;
   0x75uy; 0x70uy ]
 
-unfold let key :b:bytes{length b = 32} = createL [
+unfold let k : key = createL [
   0x85uy; 0xd6uy; 0xbeuy; 0x78uy; 0x57uy; 0x55uy; 0x6duy; 0x33uy;
   0x7fuy; 0x44uy; 0x52uy; 0xfeuy; 0x42uy; 0xd5uy; 0x06uy; 0xa8uy;
   0x01uy; 0x03uy; 0x80uy; 0x8auy; 0xfbuy; 0x0duy; 0xb2uy; 0xfduy;
@@ -144,4 +141,4 @@ unfold let expected = createL [
   0xc2uy; 0x2buy; 0x8buy; 0xafuy; 0x0cuy; 0x01uy; 0x27uy; 0xa9uy ]
 
 let test () =
-  poly1305 msg key = expected
+  poly1305 msg k = expected
