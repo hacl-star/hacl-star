@@ -38,6 +38,13 @@ let log_t = text
 
 let elem : Type0 = b:int{ b >= 0 /\ b < prime }
 
+
+inline_for_extraction let red_44 s = Hacl.Spec.Bignum.AddAndMultiply.red_44 s
+inline_for_extraction let red_45 s = Hacl.Spec.Bignum.AddAndMultiply.red_45 s
+
+inline_for_extraction let p42  = Hacl.Spec.Bignum.AddAndMultiply.p42
+inline_for_extraction let p44  = Hacl.Spec.Bignum.AddAndMultiply.p44
+
 noeq type poly1305_state_ = | MkState: r:seqelem -> h:seqelem -> log:log_t -> poly1305_state_
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"

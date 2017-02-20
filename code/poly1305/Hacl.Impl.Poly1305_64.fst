@@ -59,13 +59,13 @@ let live_st m (st:poly1305_state) : Type0 =
 
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
-[@"c_inline"]
+[@"substitute"]
 inline_for_extraction val upd_3: b:felem -> b0:limb -> b1:limb -> b2:limb ->
   Stack unit
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == Hacl.Spec.Poly1305_64.create_3 b0 b1 b2))
-[@"c_inline"]
+[@"substitute"]
 inline_for_extraction let upd_3 b b0 b1 b2 =
   b.(0ul) <- b0;
   b.(1ul) <- b1;
@@ -82,7 +82,7 @@ let clamp_mask : cm:wide{Wide.v cm = 0x0ffffffc0ffffffc0ffffffc0fffffff} =
   Hacl.Spec.Poly1305_64.hload128 (0x0ffffffc0ffffffcuL) (0x0ffffffc0fffffffuL)
 
 
-[@"c_inline"]
+[@"substitute"]
 val poly1305_encode_r:
   r:bigint ->
   key:uint8_p{length key = 16} ->
@@ -92,7 +92,7 @@ val poly1305_encode_r:
       /\ red_44 (as_seq h1 r)
       /\ as_seq h1 r == Hacl.Spec.Poly1305_64.poly1305_encode_r_spec (as_seq h0 key)
     ))
-[@"c_inline"]
+[@"substitute"]
 let poly1305_encode_r r key =
   let h0 = ST.get() in
   let k = hload128_le key in
@@ -106,7 +106,7 @@ let poly1305_encode_r r key =
   upd_3 r r0 r1 r2
 
 
-[@"c_inline"]
+[@"substitute"]
 val toField:
   b:bigint ->
   m:wordB_16 ->
@@ -117,7 +117,7 @@ val toField:
       /\ v (Seq.index (as_seq h1 b) 2) < pow2 40
       /\ as_seq h1 b == Hacl.Spec.Poly1305_64.toField_spec (as_seq h0 m)
     ))
-[@"c_inline"]
+[@"substitute"]
 let toField b block =
   let h0 = ST.get() in
   let m  = hload128_le block in
@@ -130,7 +130,7 @@ let toField b block =
   ()
 
 
-[@"c_inline"]
+[@"substitute"]
 val toField_plus_2_128:
   b:bigint ->
   m:wordB_16 ->
@@ -140,7 +140,7 @@ val toField_plus_2_128:
       /\ red_44 (as_seq h1 b)
       /\ as_seq h1 b == Hacl.Spec.Poly1305_64.toField_plus_2_128_spec (as_seq h0 m)
     ))
-[@"c_inline"]
+[@"substitute"]
 let toField_plus_2_128 b m =
   let h0 = ST.get() in
   toField b m;
@@ -153,6 +153,7 @@ let toField_plus_2_128 b m =
   b.(2ul) <- b2'
 
 
+[@"substitute"]
 val poly1305_start:
   a:elemB ->
   Stack unit
@@ -161,6 +162,7 @@ val poly1305_start:
       /\ red_45 (as_seq h1 a)
       /\ as_seq h1 a == Hacl.Spec.Poly1305_64.poly1305_start_spec ()
       ))
+[@"substitute"]
 let poly1305_start a =
   (* Zeroing the accumulator *)
   upd_3 a limb_zero limb_zero limb_zero;
@@ -172,7 +174,7 @@ module Spec = Hacl.Spec.Poly1305_64
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-[@"c_inline"]
+[@"substitute"]
 val poly1305_init_:
   st:poly1305_state ->
   key:uint8_p{length key = 16} ->
@@ -182,7 +184,7 @@ val poly1305_init_:
       /\ live h1 st.r /\ live h1 st.h /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal log) == poly1305_init_spec (as_seq h0 key)
       ))
-[@"c_inline"]
+[@"substitute"]
 let poly1305_init_ st key =
   poly1305_encode_r st.r (sub key 0ul 16ul);
   poly1305_start st.h;
@@ -192,12 +194,13 @@ let poly1305_init_ st key =
 
 #set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
+[@"c_inline"]
 val poly1305_update:
   current_log:log_t ->
   st:poly1305_state ->
   m:uint8_p{length m = 16} ->
   Stack log_t
-    (requires (fun h -> live_st h st /\ live h m /\ disjoint m st.h /\ disjoint m st.r
+    (requires (fun h -> live_st h st /\ live h m (* /\ disjoint m st.h /\ disjoint m st.r *)
       /\ red_45 (as_seq h st.h)
       /\ red_44 (as_seq h st.r)
       ))
@@ -210,6 +213,7 @@ val poly1305_update:
         == poly1305_update_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m)
       ))
 #set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+[@"c_inline"]
 let poly1305_update log st m =
   let acc = st.h in
   let r   = st.r in
@@ -236,7 +240,7 @@ let poly1305_update log st m =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
-[@"c_inline"]
+[@"substitute"]
 inline_for_extraction val poly1305_concat:
   b:uint8_p{length b = 16} ->
   m:uint8_p{disjoint b m} ->
@@ -247,7 +251,7 @@ inline_for_extraction val poly1305_concat:
     (ensures (fun h0 _ h1 -> live h0 m /\ live h0 b /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == Seq.append (as_seq h0 m) (Seq.create (16 - U64.v len) (uint8_to_sint8 0uy))
     ))
-[@"c_inline"]
+[@"substitute"]
 inline_for_extraction let poly1305_concat b m len =
   assert_norm(pow2 32 = 0x100000000);
   let h0 = ST.get() in
@@ -274,7 +278,7 @@ val poly1305_process_last_block_:
   Stack log_t
     (requires (fun h -> live_st h st /\ live h m /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)
       /\ live h block /\ as_seq h block == Seq.upd (Seq.append (as_seq h m) (Seq.create (16 - U64.v len) (uint8_to_sint8 0uy))) (U64.v len) (uint8_to_sint8 1uy)
-      /\ disjoint block st.h /\ disjoint block st.r /\ disjoint block m
+      /\ disjoint block st.h /\ disjoint block st.r (* /\ disjoint block m *)
     ))
     (ensures (fun h0 updated_log h1 -> live_st h0 st /\ live h0 m /\ red_44 (as_seq h0 st.r) /\ red_45 (as_seq h0 st.h)
       /\ live_st h1 st /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
@@ -303,6 +307,7 @@ let poly1305_process_last_block_ log block st m rem' =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
+[@"c_inline"]
 val poly1305_process_last_block:
   current_log:log_t ->
   st:poly1305_state ->
@@ -316,6 +321,7 @@ val poly1305_process_last_block:
       /\ modifies_1 st.h h0 h1
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == Hacl.Spec.Poly1305_64.poly1305_process_last_block_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) (len)
     ))
+[@"c_inline"]
 let poly1305_process_last_block log st m rem' =
   push_frame();
   let h0 = ST.get() in
@@ -329,6 +335,7 @@ let poly1305_process_last_block log st m rem' =
   log'
 
 
+[@"substitute"]
 val poly1305_last_pass_:
   acc:felem ->
   Stack unit
@@ -337,6 +344,7 @@ val poly1305_last_pass_:
       /\ live h1 acc /\ bounds (as_seq h1 acc) p44 p44 p42
       /\ modifies_1 acc h0 h1
       /\ as_seq h1 acc == Hacl.Spec.Poly1305_64.poly1305_last_pass_spec_ (as_seq h0 acc)))
+[@"substitute"]
 let poly1305_last_pass_ acc =
   let a0 = acc.(0ul) in
   let a1 = acc.(1ul) in
@@ -358,7 +366,7 @@ let poly1305_last_pass_ acc =
   upd_3 acc a0' a1' a2'
 
 
-[@"c_inline"]
+[@"substitute"]
 val carry_limb_unrolled:
   acc:felem ->
   Stack unit
@@ -366,7 +374,7 @@ val carry_limb_unrolled:
     (ensures (fun h0 _ h1 -> live h0 acc /\ bounds (as_seq h0 acc) (p44+5*((p45+p20)/p42)) p44 p42
       /\ live h1 acc /\ modifies_1 acc h0 h1
       /\ as_seq h1 acc == Hacl.Spec.Poly1305_64.carry_limb_unrolled (as_seq h0 acc)))
-[@"c_inline"]
+[@"substitute"]
 let carry_limb_unrolled acc =
   let a0 = acc.(0ul) in
   let a1 = acc.(1ul) in
@@ -389,6 +397,7 @@ let carry_limb_unrolled acc =
 
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
+[@"substitute"]
 val carry_last_unrolled:
   acc:felem ->
   Stack unit
@@ -399,6 +408,7 @@ val carry_last_unrolled:
       /\ live h1 acc /\ bounds (as_seq h1 acc) p44 p44 p42
       /\ modifies_1 acc h0 h1
       /\ as_seq h1 acc == Hacl.Spec.Poly1305_64.carry_last_unrolled (as_seq h0 acc)))
+[@"substitute"]
 let carry_last_unrolled acc =
   let h = ST.get() in
   lemma_carried_is_fine_to_carry_top (as_seq h acc);
@@ -410,6 +420,7 @@ let carry_last_unrolled acc =
 
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
+[@"substitute"]
 val poly1305_last_pass:
   acc:felem ->
   Stack unit
@@ -431,12 +442,14 @@ let poly1305_last_pass acc =
   poly1305_last_pass_ acc
 
 
+[@"substitute"]
 val bignum_to_128:
   a:felem ->
   Stack wide
     (requires (fun h -> live h a /\ bounds (as_seq h a) p44 p44 p42))
     (ensures (fun h0 z h1 -> live h0 a /\ bounds (as_seq h0 a) p44 p44 p42
       /\ h0 == h1 /\ z == Hacl.Spec.Poly1305_64.bignum_to_128 (as_seq h0 a)))
+[@"substitute"]
 let bignum_to_128 acc =
   let h0 = acc.(0ul) in
   let h1 = acc.(1ul) in
@@ -449,7 +462,9 @@ let bignum_to_128 acc =
   acc'
 
 
-inline_for_extraction val poly1305_finish__:
+[@"substitute"]
+inline_for_extraction
+val poly1305_finish__:
   log:log_t ->
   st:poly1305_state ->
   m:uint8_p ->
@@ -469,6 +484,7 @@ inline_for_extraction val poly1305_finish__:
            if U64.(len =^ 0uL) then Spec.MkState r0 acc0 log
            else Hacl.Spec.Poly1305_64.poly1305_process_last_block_spec (Spec.MkState r0 acc0 log) m len))
       ))
+[@"substitute"]
 inline_for_extraction let poly1305_finish__ log st m len =
   let h0 = ST.get() in
   if U64.(len =^ 0uL) then (log)
@@ -478,8 +494,9 @@ inline_for_extraction let poly1305_finish__ log st m len =
     )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
+[@"substitute"]
 val poly1305_finish_:
   log:log_t ->
   st:poly1305_state ->
@@ -502,6 +519,7 @@ val poly1305_finish_:
          let k    = as_seq h0 key_s in
          mac == poly1305_finish_spec (Spec.MkState r0 acc0 log) m len k)
     ))
+[@"substitute"]
 let poly1305_finish_ log st mac m len key_s =
   let acc = st.h in
   let h0 = ST.get() in
@@ -520,13 +538,14 @@ let poly1305_finish_ log st mac m len key_s =
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (poly1305_finish_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal log)) (as_seq h0 m) len (as_seq h0 key_s)))
 
 
+[@"substitute"]
 val poly1305_update_last:
   log:log_t ->
   st:poly1305_state ->
   m:uint8_p ->
   len:U64.t{U64.v len < 16 /\ U64.v len = length m} ->
   Stack unit
-    (requires (fun h -> live_st h st /\ live h m /\ disjoint st.h m
+    (requires (fun h -> live_st h st /\ live h m (* /\ disjoint st.h m *)
       /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)))
     (ensures  (fun h0 _ h1 -> modifies_1 st.h h0 h1 /\ live_st h0 st /\ live h0 m /\ live h1 st.h
       /\ red_44 (as_seq h0 st.r) /\ red_45 (as_seq h0 st.h)
@@ -539,12 +558,14 @@ val poly1305_update_last:
          bounds acc1 p44 p44 p42 /\ 
          acc1 == Hacl.Spec.Poly1305_64.poly1305_update_last_spec (Spec.MkState r0 acc0 log) m len)
     ))
+[@"substitute"]
 let poly1305_update_last log st m len =
   let log' = poly1305_finish__ log st m len in
   let acc  = MkState?.h st in
   poly1305_last_pass acc
 
 
+[@"substitute"]
 val poly1305_finish:
   st:poly1305_state ->
   mac:uint8_p{length mac = 16} ->
@@ -556,6 +577,7 @@ val poly1305_finish:
       /\ bounds (as_seq h0 (MkState?.h st)) p44 p44 p42
       /\ as_seq h1 mac == Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 (MkState?.h st)) (as_seq h0 k)
     ))
+[@"substitute"]
 let poly1305_finish st mac key_s =
   let h0 = ST.get() in
   let acc = MkState?.h st in
@@ -566,3 +588,14 @@ let poly1305_finish st mac key_s =
   hstore128_le mac mac';
   let h1 = ST.get() in
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 acc) (as_seq h0 key_s)))
+
+
+val alloc:
+  unit -> StackInline poly1305_state
+    (requires (fun h -> True))
+    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st))
+let alloc () =
+  let buf = create limb_zero U32.(clen +^ clen) in
+  let r = sub buf 0ul clen in
+  let h = sub buf clen clen in
+  MkState r h

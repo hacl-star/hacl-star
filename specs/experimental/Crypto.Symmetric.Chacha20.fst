@@ -228,7 +228,7 @@ private val sum_matrixes:
     as_seq h1 m = Spec.add_state (as_seq h0 m) (as_seq h0 m0) 
     ))
 let sum_matrixes m m0 = map2_inplace (fun x y -> x +%^ y) 16ul m m0
-  
+
 (* this split did not help much...
 private val chacha20_update: 
   output:bytes -> 

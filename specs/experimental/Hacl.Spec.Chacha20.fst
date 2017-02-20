@@ -187,8 +187,12 @@ let compute k n c =
   let m = add_state m (rounds m) in
   uint32s_to_bytes m
 
+// rename to block?
 val chacha20: len:nat {len <= blocklen} -> key -> iv -> counter -> Tot (lbytes len)
 let chacha20 len k iv c = slice (compute k iv c) 0 len
+
+let xor_block (m0 m1: block) = map2 (fun x y -> FStar.UInt8.(x ^^ y)) m0 m1
+
 // used in AEAD but not great; truncation should be handled in the mode.
 
 (*** Counter-mode encryption ***)

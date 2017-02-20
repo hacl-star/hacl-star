@@ -10,7 +10,7 @@ open Hacl.Bignum.Fsquare
 open Hacl.Spec.EC.AddAndDouble2
 
 
-#set-options "--initial_fuel 0 --max_fuel 0"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 let all_disjoint (ppx:felem) (ppz:felem) (ppqx:felem) (ppqz:felem)
                  (px:felem) (pz:felem) (pqx:felem) (pqz:felem) (qx:felem) : GTot Type0 =
@@ -42,16 +42,16 @@ inline_for_extraction let red_53 s = Hacl.Spec.EC.AddAndDouble.red_53 s
 inline_for_extraction let red_5413 s = Hacl.Spec.EC.AddAndDouble.red_5413 s
 
 
-#set-options "--initial_fuel 0 --max_fuel 0"
-
 private val lemma_modifies_composition: s1:Set.set HyperHeap.rid -> r2:HyperHeap.rid -> h0:mem -> h1:mem -> h2:mem -> Lemma
   (requires (modifies s1 h0 h1 /\ modifies (Set.singleton r2) h1 h2))
   (ensures (modifies (Set.union s1 (Set.singleton r2)) h0 h2))
 private let lemma_modifies_composition s1 r2 h0 h1 h2 = ()
 
+
 private val lemma_set_union: s:Set.set HyperHeap.rid -> r:HyperHeap.rid{Set.mem r s} -> Lemma
   (Set.union s (Set.singleton r) == s)
 private let lemma_set_union s r = Set.lemma_equal_intro s (Set.union s (Set.singleton r))
+
 
 private val lemma_fmonty__1_modifies:
   tmp:buffer limb{length tmp = 40} ->
@@ -81,7 +81,7 @@ private val lemma_fmonty__1_modifies:
       /\ modifies_1 zzprime h7 h8
       ))
     (ensures (modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h8))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 private let lemma_fmonty__1_modifies tmp ppx ppz ppqx ppqz px pz pqx pqz qx h0 h1 h2 h3 h4 h5 h6 h7 h8 =
   let origx    = Buffer.sub tmp 0ul  5ul in
   let origxprime = Buffer.sub tmp 5ul  5ul in
@@ -189,7 +189,7 @@ private val lemma_fmonty__3_modifies:
       /\ modifies_1 ppz h20 h21
       ))
     (ensures (modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h16 h21))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 private let lemma_fmonty__3_modifies tmp x2 z2 x3 z3 px pz pqx pqz qx h16 h17 h18 h19 h20 h21 =
   let ppx = x2 in
   let zz         = Buffer.sub tmp 20ul 5ul in
@@ -210,8 +210,6 @@ private let lemma_fmonty__3_modifies tmp x2 z2 x3 z3 px pz pqx pqz qx h16 h17 h1
   cut (modifies (Set.union s' (Set.singleton (frameOf ppx))) h16 h21);
   Set.lemma_equal_intro s s'
 
-
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
 inline_for_extraction private val fmonty__1:
@@ -245,7 +243,7 @@ inline_for_extraction private val fmonty__1:
       /\ as_seq h1 qx == as_seq h0 qx
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
     ))
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 [@"substitute"]
 inline_for_extraction private let fmonty__1 buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
@@ -329,7 +327,7 @@ inline_for_extraction private val fmonty__2:
       /\ as_seq h1 qx == as_seq h0 qx
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
     ))
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1500"
 [@"substitute"]
 inline_for_extraction private let fmonty__2 buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
@@ -398,7 +396,7 @@ inline_for_extraction private let fmonty__2 buf x2 z2 x3 z3 x z xprime zprime qx
   ()
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 [@"substitute"]
 inline_for_extraction private val fmonty__3:
@@ -438,6 +436,7 @@ inline_for_extraction private val fmonty__3:
       /\ as_seq h1 qx == as_seq h0 qx
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
     ))
+
 
 private let lemma_5413_is_55 (s:seqelem{red_5413 s}) : Lemma (Hacl.Spec.EC.AddAndDouble.red_55 s) = ()
 
@@ -516,7 +515,7 @@ inline_for_extraction private val fmonty__:
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
       /\ as_seq h1 qx == as_seq h0 qx
     ))
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 [@"substitute"]
 inline_for_extraction private let fmonty__ buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in
@@ -558,7 +557,8 @@ let fmonty_pre h (pp:point) (ppq:point) (p:point) (pq:point) (q:point) : GTot Ty
   /\ red_513 (as_seq h (getx p)) /\ red_513 (as_seq h (getz p)) /\ red_513 (as_seq h (getx pq)) /\ red_513 (as_seq h (getz pq))
   /\ red_513 (as_seq h (getx q))
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 private val lemma_fmonty_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> r:HyperHeap.rid -> Lemma
     (requires (

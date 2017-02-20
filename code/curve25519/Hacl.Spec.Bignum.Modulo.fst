@@ -12,7 +12,7 @@ open Hacl.Bignum.Limb
 
 module U32 = FStar.UInt32
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 inline_for_extraction let two54m152 =
   assert_norm (pow2 64 > 0x3fffffffffff68); uint64_to_limb 0x3fffffffffff68uL
@@ -21,6 +21,7 @@ inline_for_extraction let two54m8   =
 inline_for_extraction let nineteen  = assert_norm(19 < pow2 64); uint64_to_limb 19uL
 inline_for_extraction let mask_51    =
   assert_norm (0x7ffffffffffff < pow2 64); uint64_to_limb 0x7ffffffffffffuL
+
 
 val add_zero_pre: seqelem -> GTot Type0
 let add_zero_pre s =
@@ -44,8 +45,6 @@ let add_zero_spec s =
   Seq.upd s 4 (Seq.index s 4 +^ two54m8)
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
-
 val lemma_seval_5: s:seqelem -> Lemma
   (seval s = v (Seq.index s 0) + pow2 51 * v (Seq.index s 1) 
   + pow2 102 * v (Seq.index s 2) + pow2 153 * v (Seq.index s 3) + pow2 204 * v (Seq.index s 4))
@@ -58,7 +57,8 @@ let lemma_seval_5 s =
   lemma_seval_def s 4;
   lemma_seval_def s 5
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+
+#set-options "--z3rlimit 50"
 
 val lemma_add_zero_spec_: s:seqelem{add_zero_pre s} -> Lemma
   (let s' = add_zero_spec s in
@@ -111,7 +111,7 @@ let carry_top_spec s =
   Seq.upd s 0 s0'
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 private val lemma_carry_top_spec_: s:seqelem{carry_top_pre s} -> Lemma
   (let s' = carry_top_spec s in
@@ -127,7 +127,6 @@ private let lemma_carry_top_spec_ s =
   UInt.logand_mask (v (Seq.index s 4)) limb_size;
   assert(v (Seq.index s' 4) = v (Seq.index s 4) % pow2 limb_size)
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 40"
 
 private let lemma_carry_top_spec_1 (a:nat) (b:nat) : Lemma
   ((pow2 204 * a + b) % prime = (19 * (a / pow2 limb_size) + pow2 204 * (a % pow2 limb_size) + b) % prime)
@@ -145,7 +144,7 @@ private let lemma_carry_top_spec_1 (a:nat) (b:nat) : Lemma
     ()
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val lemma_carry_top_spec: s:seqelem{carry_top_pre s} -> Lemma
   (seval (carry_top_spec s) % prime = seval s % prime)
@@ -157,7 +156,6 @@ let lemma_carry_top_spec s =
   lemma_seval_5 s';
   lemma_carry_top_spec_1 (v (Seq.index s 4)) (v (Seq.index s 0) + pow2 51 * v (Seq.index s 1) + pow2 102 * v (Seq.index s 2) + pow2 153 * v (Seq.index s 3))
 
-#set-options "--z3rlimit 10"
 
 val reduce_pre: seqelem -> GTot Type0
 let reduce_pre s =
@@ -171,8 +169,6 @@ let reduce_spec s =
   let s0 = Seq.index s 0 in
   Seq.upd s 0 (s0 *^ nineteen)
 
-
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private val lemma_reduce_spec_: s:seqelem{reduce_pre s} -> Lemma
   (let s' = reduce_spec s in
@@ -261,8 +257,6 @@ let lemma_carry_top_wide_spec_ s =
   assert_norm(pow2 64 < pow2 128);
   Math.Lemmas.modulo_lemma (w (Seq.index s 4) / pow2 limb_size) (pow2 64)
 
-
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 val lemma_seval_wide_5: s:seqelem_wide -> Lemma
   (seval_wide s = w (Seq.index s 0) + pow2 51 * w (Seq.index s 1)

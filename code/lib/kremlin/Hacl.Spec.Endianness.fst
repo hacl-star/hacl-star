@@ -46,6 +46,9 @@ unfold inline_for_extraction
 let reveal_sbytes (s:Seq.seq H8.t) : GTot (s:Seq.seq U8.t) = s
 
 unfold inline_for_extraction
+let intro_sbytes (s:Seq.seq U8.t) : GTot (s:Seq.seq H8.t) = s
+
+unfold inline_for_extraction
 let hlittle_endian (s:Seq.seq H8.t) : GTot nat =
   little_endian s
 
