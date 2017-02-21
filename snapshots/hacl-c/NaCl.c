@@ -10,33 +10,17 @@ Hacl_SecretBox_crypto_secretbox_detached(
   uint8_t *k
 )
 {
-  uint8_t hsalsa_state[96] = { 0 };
-  uint8_t *subkey = hsalsa_state + (uint32_t )0;
-  uint8_t *block0 = hsalsa_state + (uint32_t )32;
-  uint32_t zerobytes = (uint32_t )32;
-  uint64_t zerobytes_64 = (uint64_t )zerobytes;
-  uint64_t mlen0;
-  if (mlen > (uint64_t )64 - zerobytes_64)
-    mlen0 = (uint64_t )64 - zerobytes_64;
-  else
-    mlen0 = mlen;
-  uint32_t mlen0_32 = (uint32_t )mlen0;
-  memcpy(block0 + zerobytes, m, mlen0_32 * sizeof m[0]);
+  /* assume that plaintext starts at m+32 */
+  /* assume that ciphertext starts at c+32 */
+  uint8_t subkey[32];
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, n + (uint32_t )0, k);
-  Salsa20_crypto_stream_salsa20_xor(block0,
-    block0,
-    mlen0 + zerobytes_64,
-    n + (uint32_t )16,
-    subkey);
-  memcpy(c, block0 + zerobytes, mlen0_32 * sizeof block0[0]);
-  if (mlen > mlen0)
-    Salsa20_crypto_stream_salsa20_xor_ic(c + mlen0_32,
-      m + mlen0_32,
-      mlen - mlen0,
-      n + (uint32_t )16,
-      (uint64_t )1,
-      subkey);
-  Poly1305_64_crypto_onetimeauth(mac, c, mlen, block0 + (uint32_t )0);
+  Salsa20_crypto_stream_salsa20_xor(c,
+				    m,
+				    mlen,
+				    n+16,
+				    subkey);
+  Poly1305_64_crypto_onetimeauth(mac, c+32, mlen, c);
+  memset(c,0,32);
   return (uint32_t )0;
 }
 
@@ -54,40 +38,21 @@ Hacl_SecretBox_crypto_secretbox_open_detached(
   uint8_t *subkey = hsalsa_state + (uint32_t )0;
   uint8_t *block0 = hsalsa_state + (uint32_t )32;
   uint8_t *tmp_mac = hsalsa_state + (uint32_t )96;
-  Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, n + (uint32_t )0, k);
+  Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, n, k);
   Salsa20_crypto_stream_salsa20(block0, (uint64_t )32, n + (uint32_t )16, subkey);
-  Poly1305_64_crypto_onetimeauth(tmp_mac, c, clen, block0 + (uint32_t )0);
+  Poly1305_64_crypto_onetimeauth(tmp_mac, c+32, clen, block0 + (uint32_t )0);
   uint8_t verify = Hacl_Policies_cmp_bytes(mac, tmp_mac, (uint32_t )16);
-  uint32_t zerobytes = (uint32_t )32;
-  uint64_t zerobytes_64 = (uint64_t )32;
-  uint64_t clen0;
-  if (clen > (uint64_t )64 - zerobytes_64)
-    clen0 = (uint64_t )64 - zerobytes_64;
-  else
-    clen0 = clen;
-  uint32_t clen0_32 = (uint32_t )clen0;
-  uint32_t z;
   if (verify == (uint8_t )0)
   {
-    memcpy(block0 + zerobytes, c, clen0_32 * sizeof c[0]);
-    Salsa20_crypto_stream_salsa20_xor(block0,
-      block0,
-      zerobytes_64 + clen0,
-      n + (uint32_t )16,
-      subkey);
-    memcpy(m, block0 + zerobytes, clen0_32 * sizeof block0[0]);
-    if (clen > clen0)
-      Salsa20_crypto_stream_salsa20_xor_ic(m + clen0_32,
-        c + clen0_32,
-        clen - clen0,
+      memset(c,0,32);
+      Salsa20_crypto_stream_salsa20_xor(m,
+        c,
+	clen, 
         n + (uint32_t )16,
-        (uint64_t )1,
-        subkey);
-    z = (uint32_t )0x0;
+        subkey); 
+      memset(m,0,32);
   }
-  else
-    z = (uint32_t )0xffffffff;
-  return z;
+  return verify;
 }
 
 uint32_t
@@ -99,10 +64,9 @@ Hacl_SecretBox_crypto_secretbox_easy(
   uint8_t *k
 )
 {
-  uint8_t *c_ = c + (uint32_t )16;
-  uint8_t *m_ = m + (uint32_t )0;
-  uint8_t *mac = c + (uint32_t )0;
-  return Hacl_SecretBox_crypto_secretbox_detached(c_, mac, m_, mlen, n, k);
+  uint8_t mac[16];
+  int res = Hacl_SecretBox_crypto_secretbox_detached(c, mac, m, mlen, n, k);
+  memcpy(c+16,mac,16);
 }
 
 uint32_t
@@ -114,10 +78,7 @@ Hacl_SecretBox_crypto_secretbox_open_easy(
   uint8_t *k
 )
 {
-  uint32_t clen_ = (uint32_t )(clen - (uint64_t )16);
-  uint8_t *c_ = c + (uint32_t )16;
-  uint8_t *mac = c + (uint32_t )0;
-  return Hacl_SecretBox_crypto_secretbox_open_detached(m, c_, mac, clen - (uint64_t )16, n, k);
+  return Hacl_SecretBox_crypto_secretbox_open_detached(m, c, c+16, clen - (uint64_t )16, n, k);
 }
 
 
@@ -208,35 +169,45 @@ Hacl_Box_crypto_box_easy(
   uint8_t *sk
 )
 {
-  return
-    Hacl_Box_crypto_box_detached(c + (uint32_t )16,
-      c + (uint32_t )0,
-      m + (uint32_t )0,
-      mlen,
-      n,
-      pk,
-      sk);
+  uint8_t key[80] = { 0 };
+  uint8_t *k = key + (uint32_t )0;
+  uint8_t *subkey = key + (uint32_t )32;
+  uint8_t *hsalsa_n = key + (uint32_t )64;
+  Curve25519_crypto_scalarmult(k, sk, pk);
+  Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, hsalsa_n, k);
+
+
+  //  uint8_t mac[16];
+  // uint32_t z = Hacl_SecretBox_crypto_secretbox_detached(c, mac, m, mlen, n, subkey);
+  // memcpy(c+16,mac,16);
+
+  int res = 
+    Hacl_SecretBox_crypto_secretbox_easy(c,
+				   m ,
+				   mlen,
+				   n,
+				   subkey);
+  
 }
 
 uint32_t
 Hacl_Box_crypto_box_open_easy(
   uint8_t *m,
   uint8_t *c,
-  uint64_t mlen,
+  uint64_t clen,
   uint8_t *n,
   uint8_t *pk,
   uint8_t *sk
 )
 {
-  uint8_t *mac = c + (uint32_t )0;
-  return
-    Hacl_Box_crypto_box_open_detached(m,
-      c + (uint32_t )16,
-      mac,
-      mlen - (uint64_t )16,
-      n,
-      pk,
-      sk);
+  uint8_t key[80] = { 0 };
+  uint8_t *k = key + (uint32_t )0;
+  uint8_t *subkey = key + (uint32_t )32;
+  uint8_t *hsalsa_n = key + (uint32_t )64;
+  Curve25519_crypto_scalarmult(k, sk, pk);
+  Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, hsalsa_n, k);
+  uint32_t z = Hacl_SecretBox_crypto_secretbox_open_easy(m, c, clen, n, subkey);
+  return z;
 }
 
 uint32_t

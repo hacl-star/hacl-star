@@ -12,8 +12,11 @@
 #include <time.h>
 
 #undef force_inline
+#ifdef __clang__
+#define force_inline inline 
+#else
 #define force_inline inline __attribute__((always_inline))
-
+#endif
 
 // For types and values from C.fsti that do not exactly have the same name as
 // their C counterparts

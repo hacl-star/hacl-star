@@ -47,6 +47,6 @@ val poly_empty: t:text{Seq.length t == 0} -> r:elem ->
   Lemma (poly t r == zero #gf128)
 let poly_empty t r = ()
 
-(* Test *)
+(* Test: TODO, for now, we point to Spec.GaloisField *)
 
 let test() = Spec.GaloisField.test()

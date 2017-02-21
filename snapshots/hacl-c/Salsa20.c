@@ -16,7 +16,7 @@ inline static void Hacl_Symmetric_Salsa20_store32_le(uint8_t *k, uint32_t x)
   return;
 }
 
-force_inline inline static void
+force_inline static void
 Hacl_Symmetric_Salsa20_salsa20_quarter_round(
   uint32_t *ctx,
   uint32_t a,
