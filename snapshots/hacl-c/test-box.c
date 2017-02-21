@@ -4,7 +4,7 @@
 #include "sodium.h"
 
 
-#define MESSAGE_LEN 104
+#define MESSAGE_LEN 72
 #define secretbox_MACBYTES   16
 #define CIPHERTEXT_LEN (secretbox_MACBYTES + MESSAGE_LEN)
 #define secretbox_NONCEBYTES 24
@@ -106,8 +106,8 @@ int32_t test_api()
   printf("Libsodium decryption of HACL box was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
 
-  i = crypto_box_easy(ciphertext, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
-  res = Hacl_Box_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, sk1);
+  i = crypto_box_easy(ciphertext+16, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
+  res = Hacl_Box_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN, nonce, pk2, sk1);
   printf("Box decryption of libsodium box was a %s.\n", res == 0 ? "success" : "failure");  
   TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
   return exit_success;
