@@ -4,7 +4,7 @@
 #include "sodium.h"
 
 
-#define MESSAGE_LEN 104
+#define MESSAGE_LEN 72
 #define secretbox_MACBYTES   16
 #define CIPHERTEXT_LEN (secretbox_MACBYTES + MESSAGE_LEN)
 #define secretbox_NONCEBYTES 24
@@ -83,12 +83,8 @@ void print_results(char *txt, double t1, unsigned long long d1, int rounds, int 
 
 int32_t test_api()
 {
-  uint8_t ciphertext[CIPHERTEXT_LEN+16], ciphertext2[CIPHERTEXT_LEN+16],
-    mac[16],mac2[16],
-    decrypted[MESSAGE_LEN+32], decrypted2[MESSAGE_LEN],
-    pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
-    test1[box_PUBLICKEYBYTES], test2[box_PUBLICKEYBYTES],
-    basepoint[box_PUBLICKEYBYTES] = {9};
+  uint8_t ciphertext[CIPHERTEXT_LEN+16],
+    mac[16], decrypted[MESSAGE_LEN+32];
   uint32_t res;
   int i;
 
@@ -97,6 +93,8 @@ int32_t test_api()
   res = Hacl_SecretBox_crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key); 
   printf("HACL decryption of libsodium encryption was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("HACL secretbox", msg+32, decrypted+32, MESSAGE_LEN-32);
+  memset(decrypted,0,MESSAGE_LEN);
+
   Hacl_SecretBox_crypto_secretbox_easy(ciphertext, msg, MESSAGE_LEN, nonce, key);
   res = crypto_secretbox_open_easy(decrypted, ciphertext+16, MESSAGE_LEN+16, nonce, key);
   printf("Libsodium decryption of HACL encryption was a %s.\n", res == 0 ? "success" : "failure");

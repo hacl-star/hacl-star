@@ -83,11 +83,9 @@ void print_results(char *txt, double t1, unsigned long long d1, int rounds, int 
 
 int32_t test_api()
 {
-  uint8_t ciphertext[CIPHERTEXT_LEN+16], ciphertext2[CIPHERTEXT_LEN+16],
-    mac[16],mac2[16],
-    decrypted[MESSAGE_LEN], decrypted2[MESSAGE_LEN],
-    pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
+  uint8_t ciphertext[CIPHERTEXT_LEN+16], mac[16], decrypted[MESSAGE_LEN+32],
     test1[box_PUBLICKEYBYTES], test2[box_PUBLICKEYBYTES],
+    pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
     basepoint[box_PUBLICKEYBYTES] = {9};
   uint32_t res;
   int i;
@@ -105,11 +103,26 @@ int32_t test_api()
   res = crypto_box_open_detached(decrypted, ciphertext+32, mac, MESSAGE_LEN, nonce, pk2, sk1); 
   printf("Libsodium decryption of HACL box was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
+  memset(decrypted,0,MESSAGE_LEN);
+
+  i = crypto_box_detached(ciphertext+32, mac, msg+32, MESSAGE_LEN, nonce, pk1, sk2); 
+  res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, sk1); 
+  printf("HACL decryption of Libsodium box was a %s.\n", res == 0 ? "success" : "failure");
+  TestLib_compare_and_print("Box", msg+32, decrypted+32, MESSAGE_LEN-32);
+  memset(decrypted,0,MESSAGE_LEN);
+
+  i = Hacl_Box_crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk1, sk2); 
+  res = crypto_box_open_easy(decrypted, ciphertext+16, MESSAGE_LEN+16, nonce, pk2, sk1); 
+  printf("Libsodium decryption of HACL box_easy was a %s.\n", res == 0 ? "success" : "failure");
+  TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
+  memset(decrypted,0,MESSAGE_LEN);
 
   i = crypto_box_easy(ciphertext+16, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
-  res = Hacl_Box_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN, nonce, pk2, sk1);
-  printf("Box decryption of libsodium box was a %s.\n", res == 0 ? "success" : "failure");  
-  TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
+  res = Hacl_Box_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, sk1);
+  printf("Box decryption of libsodium box easy was a %s.\n", res == 0 ? "success" : "failure");  
+  TestLib_compare_and_print("Box", msg+32, decrypted+32, MESSAGE_LEN-32);
+  memset(decrypted,0,MESSAGE_LEN);
+
   return exit_success;
 }
 

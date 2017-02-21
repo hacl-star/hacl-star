@@ -51,10 +51,8 @@ Hacl_SecretBox_crypto_secretbox_open_detached(
         n + (uint32_t )16,
         subkey); 
       memset(m,0,32);
-      return 0x0;
   }
-  else
-    return 0xffffffff;
+  return verify;
 }
 
 uint32_t
@@ -80,10 +78,7 @@ Hacl_SecretBox_crypto_secretbox_open_easy(
   uint8_t *k
 )
 {
-  uint32_t clen_ = (uint32_t )(clen - (uint64_t )16);
-  uint8_t *c_ = c + (uint32_t )16;
-  uint8_t *mac = c + (uint32_t )0;
-  return Hacl_SecretBox_crypto_secretbox_open_detached(m, c_, mac, clen - (uint64_t )16, n, k);
+  return Hacl_SecretBox_crypto_secretbox_open_detached(m, c, c+16, clen - (uint64_t )16, n, k);
 }
 
 
@@ -180,19 +175,26 @@ Hacl_Box_crypto_box_easy(
   uint8_t *hsalsa_n = key + (uint32_t )64;
   Curve25519_crypto_scalarmult(k, sk, pk);
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, hsalsa_n, k);
+
+
+  //  uint8_t mac[16];
+  // uint32_t z = Hacl_SecretBox_crypto_secretbox_detached(c, mac, m, mlen, n, subkey);
+  // memcpy(c+16,mac,16);
+
   int res = 
     Hacl_SecretBox_crypto_secretbox_easy(c,
 				   m ,
 				   mlen,
 				   n,
 				   subkey);
+  
 }
 
 uint32_t
 Hacl_Box_crypto_box_open_easy(
   uint8_t *m,
   uint8_t *c,
-  uint64_t mlen,
+  uint64_t clen,
   uint8_t *n,
   uint8_t *pk,
   uint8_t *sk
@@ -204,7 +206,7 @@ Hacl_Box_crypto_box_open_easy(
   uint8_t *hsalsa_n = key + (uint32_t )64;
   Curve25519_crypto_scalarmult(k, sk, pk);
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, hsalsa_n, k);
-  uint32_t z = Hacl_SecretBox_crypto_secretbox_open_easy(m, c, mlen, n, subkey);
+  uint32_t z = Hacl_SecretBox_crypto_secretbox_open_easy(m, c, clen, n, subkey);
   return z;
 }
 
