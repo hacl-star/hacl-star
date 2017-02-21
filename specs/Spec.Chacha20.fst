@@ -52,12 +52,12 @@ let diagonal_round : shuffle =
 let double_round: shuffle = 
     column_round @ diagonal_round (* 2 rounds *)
 
-let rec rounds : shuffle = 
+let rounds : shuffle = 
     iter 10 double_round (* 20 rounds *)
 
 let chacha20_core (s:state) : Tot state = 
     let s' = rounds s in
-    map2 (fun x y -> x +%^ y) s s'
+    map2 (fun x y -> x +%^ y) s' s
 
 (* state initialization *) 
 
@@ -68,7 +68,8 @@ let setup (k:key) (n:nonce) (c:counter): Tot state =
   assert_norm(List.Tot.length constants = 4); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
   createL constants @|
   uint32s_from_le 8 k @|
-  createL [UInt32.uint_to_t c] @| 
+  singleton (UInt32.uint_to_t c) @|
+  (* create [UInt32.uint_to_t c] @|  *)
   uint32s_from_le 3 n
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
