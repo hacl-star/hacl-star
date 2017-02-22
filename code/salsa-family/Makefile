@@ -58,7 +58,7 @@ all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
 all-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 
-KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
+KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experimental -I ../../specs/generic -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -ccopt -march=native -ccopt -std=gnu99 -drop 'Hacl.UInt8' \
 	-drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 	-drop 'Hacl.Endianness' -drop 'Hacl.Cast'
@@ -82,6 +82,14 @@ Chacha20.compcert: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.f
 		-drop Prims -drop FStar \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -cc compcert
 	./chacha20cc.exe
+
+# Temporary target
+Chacha.c: Hacl.Impl.Chacha20.fst # Hacl.Test.Chacha20.fst Chacha20.fst
+	mkdir -p chacha-c
+	$(KRML) -tmpdir chacha2-c  -no-prefix Hacl.Test2.Chacha20 \
+		-bundle 'Chacha=Chacha,Hacl.Impl.Chacha20' -drop 'Hacl.Spec.*' \
+		Hacl.Test2.Chacha20.fst -o chacha.exe -verbose -ccopt='-Wno-error=pointer-to-int-cast'
+	./chacha.exe
 
 Salsa20.c: Hacl.Symmetric.Salsa20.fst Hacl.Test.Salsa20.fst
 	mkdir -p salsa-c
