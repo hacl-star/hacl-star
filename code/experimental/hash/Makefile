@@ -6,16 +6,16 @@ FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
 
 verify:
-	$(FSTAR) --include /opt/fstar/ulib/hyperstack --include /opt/kremlin/kremlib --include /opt/hacl-star/code/lib --include /opt/hacl-star/code/experimental/utils SHA2.fst --use_hints
+	$(FSTAR) --include /opt/fstar/ulib/hyperstack --include /opt/kremlin/kremlib --include /opt/hacl-star/code/lib --include /opt/hacl-star/code/experimental/utils SHA2_256.fst --use_hints
 
 extract-c:
 	mkdir -p sha2-c
 	$(KREMLIN_HOME)/krml -tmpdir sha2-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils \
-		Hacl.Test.Hash.SHA2.fst -o sha2.exe -no-prefix Hacl.Test.Hash.SHA2 -no-prefix SHA2 \
+		Hacl.Test.SHA2_256.fst -o sha2.exe -no-prefix Hacl.Test.SHA2_256 -no-prefix SHA2_256 \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop Prims -drop FStar Hacl.Test.Hash.SHA2.fst \
-		-bundle "SHA2=Hacl.Utils.Experimental,Hacl.Hash.SHA2.L256,SHA2" \
+		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop Prims -drop FStar Hacl.Test.SHA2_256.fst \
+		-bundle "SHA2_256=Hacl.Utils.Experimental,Hacl.Hash.SHA2.L256,SHA2_256" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99 -verbose
 	./sha2.exe
 

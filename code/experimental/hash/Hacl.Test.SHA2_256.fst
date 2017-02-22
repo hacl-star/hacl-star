@@ -1,9 +1,9 @@
-module Hacl.Test.Hash.SHA2
+module Hacl.Test.SHA2_256
 
 open FStar.Buffer
 open FStar.UInt32
 
-module SHA = SHA2
+module SHA = SHA2_256
 
 val test_1a: unit -> ST unit
   (requires (fun h -> True))
