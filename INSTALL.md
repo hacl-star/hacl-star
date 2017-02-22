@@ -5,11 +5,11 @@ The submodules are automatically installed when running the makefile targets.
 
 ### Environment
 
-Please set FSTAR_HOME in your environnement variables:
-`export FSTAR_HOME= <path-to hacl-star/dependencies/FStar>`
-
-Please set KREMLIN_HOME in your environnement variables:
-`export KREMLIN_HOME= <path-to hacl-star/dependencies/kremlin>`
+Please set FSTAR_HOME and KREMLIN_HOME in your environnement variables:
+```
+export FSTAR_HOME= <path-to hacl-star/dependencies/FStar>
+export KREMLIN_HOME= <path-to hacl-star/dependencies/kremlin>
+```
 
 ### Installing FStar and KreMLin
 
@@ -17,12 +17,16 @@ The only prerequisite to install F* and KreMLin is OCaml.
 Please install the OCaml compiler and the OPAM package manager.
 
 Then, from the Hacl* root repository:
-`make prepare`
+```
+make prepare
+```
 
 This will install required OPAM packages and build F* and Kremlin.
 
 To generate the library, run:
-`make`
+```
+make
+```
 
 ### Verifying / extracting the code
 
