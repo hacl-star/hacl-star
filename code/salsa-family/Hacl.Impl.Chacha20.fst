@@ -695,7 +695,7 @@ val chacha20_counter_mode:
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 let rec chacha20_counter_mode output plain len log st ctr =
   let h0 = ST.get() in
-  if U32.(len <=^ 64ul) then admit() // chacha20_counter_mode_ output plain len log st ctr
+  if U32.(len <=^ 64ul) then chacha20_counter_mode_ output plain len log st ctr
   else (
     let b  = Buffer.sub plain 0ul 64ul in
     let b' = Buffer.offset plain 64ul in
