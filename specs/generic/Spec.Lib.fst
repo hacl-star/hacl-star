@@ -30,6 +30,10 @@ let iter n f x = Combinators.iter_ n f x
 inline_for_extraction
 let map2 f s1 s2 = Combinators.seq_map2 f s1 s2
 
+let singleton x = Seq.create 1 x
+
+let tuple x y = Seq.upd (Seq.create 2 x) 1 y
+
 #set-options "--initial_fuel 0 --max_fuel 0"
 
 let uint32_from_le (b:lbytes 4) : UInt32.t =
@@ -74,19 +78,19 @@ let rec uint32s_to_le len src =
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
-private let lemma_uint32s_from_le_def_0 (len:nat{len = 0}) (b:lbytes (4*len)) : Lemma
+let lemma_uint32s_from_le_def_0 (len:nat{len = 0}) (b:lbytes (4*len)) : Lemma
   (uint32s_from_le len b == Seq.createEmpty)
   = ()
-private let lemma_uint32s_from_le_def_1 (len:nat{len > 0}) (b:lbytes (4*len)) : Lemma
+let lemma_uint32s_from_le_def_1 (len:nat{len > 0}) (b:lbytes (4*len)) : Lemma
   (uint32s_from_le len b == Seq.cons (uint32_from_le (slice b 0 4))
                                      (uint32s_from_le (len-1) (slice b 4 (4*len))))
   = ()
 
 
-private let lemma_uint32s_to_le_def_0 (len:nat{len = 0}) (s:seq UInt32.t{length s = len}) : Lemma
+let lemma_uint32s_to_le_def_0 (len:nat{len = 0}) (s:seq UInt32.t{length s = len}) : Lemma
   (uint32s_to_le len s == Seq.createEmpty)
   = ()
-private let lemma_uint32s_to_le_def_1 (len:nat{len > 0}) (s:seq UInt32.t{length s = len}) : Lemma
+let lemma_uint32s_to_le_def_1 (len:nat{len > 0}) (s:seq UInt32.t{length s = len}) : Lemma
   (uint32s_to_le len s == Seq.append (uint32_to_le (index s 0))
                                      (uint32s_to_le (len-1) (slice s 1 (len))))
   = ()
