@@ -3,16 +3,21 @@
 // This allows us to rely on OpenSSL's benchmarking infrastructure while
 // multiplexing between:
 // - the HACL* implementation
-// - the Windows implementation
 // - the OpenSSL implementation, which *we* call back into, so as to keep the
 //   overhead of the testing infrastructure and have a fair performance
 //   comparison (EVP_Digest allocates and frees on the heap on every inner loop
 //   in the "speed" test).
+// The Windows/BCrypt implementation now lies in a separate file since the
+// potential for sharing is actually minimal.
 #include <stdint.h>
 #include <stdio.h>
 #include <openssl/engine.h>
 #include <openssl/aes.h>
 #include <openssl/ec.h>
+
+#ifdef _WIN32
+#include "BCryptWrapper.h"
+#endif
 
 #include "Curve25519.h"
 
@@ -20,7 +25,7 @@
 // compiler to override the default HACL implementation.
 #define IMPL_HACL 0
 #define IMPL_OPENSSL 1
-#define IMPL_WINCRYPTO
+#define IMPL_BCRYPT 2
 #ifndef IMPL
 #define IMPL IMPL_HACL
 #endif
@@ -31,8 +36,8 @@ static const char *engine_Everest_id = "Everest";
 static const char *engine_Everest_name = "Everest engine (OpenSSL crypto)";
 #elif IMPL == IMPL_HACL
 static const char *engine_Everest_name = "Everest engine (HACL* crypto)";
-#elif IMPL == IMPL_WINCRYPTO
-static const char *engine_Everest_name = "Everest engine (Windows crypto)";
+#elif IMPL == IMPL_BCRYPT
+static const char *engine_Everest_name = "Everest engine (Windows crypto, BCrypt)";
 #else
 #error "Unknown implementation"
 #endif
@@ -69,6 +74,7 @@ typedef struct {
     unsigned char *privkey;
 } X25519_KEY;
 
+#if IMPL == IMPL_HACL
 static int X25519(uint8_t out_shared_key[32], uint8_t private_key[32],
   const uint8_t peer_public_value[32])
 {
@@ -79,6 +85,7 @@ static int X25519(uint8_t out_shared_key[32], uint8_t private_key[32],
   /* The all-zero output results when the input is a point of small order. */
   return CRYPTO_memcmp(kZeros, out_shared_key, 32) != 0;
 }
+#endif
 
 // This is a version of pkey_ecx_derive in ecx_meth.c that i) uses the public
 // API and ii) calls our own X25519 function
@@ -123,6 +130,9 @@ EVP_PKEY_METHOD *get_hacl_x25519_meth() {
   EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
 #elif IMPL == IMPL_OPENSSL
   ;
+#elif IMPL == IMPL_BCRYPT
+  initialize_bcrypt();
+  EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
 #else
 #error "Unsupported implementation"
 #endif
