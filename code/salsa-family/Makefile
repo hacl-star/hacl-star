@@ -26,10 +26,12 @@ SLOW=Hacl.Symmetric.Salsa20.fst \
 
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
+		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib
+		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -120,4 +122,4 @@ extract-c: Chacha20.c Salsa20.c HSalsa20.c XSalsa20.c
 
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c chacha-cc hsalsa-c xsalsa-c
+	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c chacha-cc hsalsa-c xsalsa-c chacha2-c *.graph
