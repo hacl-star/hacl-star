@@ -1,4 +1,4 @@
-module Hacl.HMAC
+module Hacl.HMAC.SHA2.L256
 
 open FStar.Mul
 open FStar.Ghost
@@ -67,7 +67,8 @@ inline_for_extraction let blocksize_32 = Hash.blocksize_32
 (* Size and positions of objects in the state *)
 inline_for_extraction let size_ipad = blocksize
 inline_for_extraction let size_opad = blocksize
-inline_for_extraction let size_okey_32 = blocksize /^ 4ul
+inline_for_extraction let size_okey_32 = blocksize_32
+inline_for_extraction let size_okey_8 = size_okey_32 *^ 4ul
 inline_for_extraction let size_state = size_okey_32 +^ Hash.size_state
 
 inline_for_extraction let pos_okey = 0ul
@@ -76,30 +77,33 @@ inline_for_extraction let pos_state_hash_0 = pos_okey +^ size_okey_32
 
 
 (* Define a function to wrap the key length after blocksize *)
+(* Threat model : the length of the key is considered public here *)
 [@"c_inline"]
 private val hmac_wrap_key:
-  okey :suint8_p{length okey = U32.v blocksize} ->
-  key  :suint8_p ->
-  len  :uint32_t{U32.v len <= length key /\ U32.v len + 8 < pow2 32} ->
+  okey :suint8_p{length okey = v size_okey_8} ->
+  key  :suint8_p{disjoint okey key} ->
+  len  :uint32_t{v len = length key} ->
   Stack unit
         (requires (fun h0 -> live h0 okey /\ live h0 key))
-        (ensures  (fun h0 _ h1 -> live h1 okey /\ live h1 key /\ modifies_1 okey h0 h1))
+        (ensures  (fun h0 _ h1 -> live h1 okey /\ modifies_1 okey h0 h1))
 
 [@"c_inline"]
 let hmac_wrap_key okey key len =
   if U32.(len >^ blocksize) then
+    let okey = Buffer.sub okey 0ul Hash.hashsize in
     Hash.hash okey key len
   else
+    let okey = Buffer.sub okey 0ul len in
     Buffer.blit key 0ul okey 0ul len
 
 
 
 val init:
-  state :suint32_p{length state = U32.v size_state} ->
+  state :suint32_p{length state = v size_state} ->
   key   :suint8_p ->
-  len   :uint32_t {U32.v len = length key} ->
+  len   :uint32_t {v len = length key} ->
   Stack unit
-        (requires (fun h0 -> live h0 state))
+        (requires (fun h0 -> live h0 state /\ live h0 key))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 let init state key len =
@@ -112,7 +116,7 @@ let init state key len =
 
   (* Retrive and allocate memory for the wrapped key location *)
   let okey_32 = Buffer.sub state pos_okey size_okey_32 in
-  let okey_8 = Buffer.create (uint8_to_sint8 0x00uy) blocksize in
+  let okey_8 = Buffer.create (uint8_to_sint8 0x00uy) size_okey_8 in
 
   (* Retreive memory for the inner hash state *)
   let ctx_hash_0 = Buffer.sub state pos_state_hash_0 Hash.size_state in
@@ -122,7 +126,10 @@ let init state key len =
 
   (* Step 1: make sure the key has the proper length *)
   hmac_wrap_key okey_8 key len;
-  Hacl.Utils.Experimental.load32s_be okey_32 okey_8 (size_okey_32 *^ 4ul);
+
+  (**) assert_norm(v size_okey_8 % 4 = 0);
+  (**) assert_norm(v size_okey_8 <= (4 * v size_okey_32));
+  Hacl.Utils.Experimental.load32s_be okey_32 okey_8 size_okey_8;
 
   (* Step 2: xor "result of step 1" with ipad *)
   Utils.xor_bytes ipad okey_8 blocksize;
@@ -132,7 +139,8 @@ let init state key len =
   Hash.update ctx_hash_0 s2;
 
   (* Pop the memory frame *)
-  (**) pop_frame()
+  (**) pop_frame();
+  admit()
 
 
 
@@ -156,15 +164,15 @@ let update state data =
 val update_multi:
   state :suint32_p{length state = v size_state} ->
   data  :suint8_p ->
-  max   :uint32_t ->
-  idx   :uint32_t ->
+  n     :uint32_t{v n * v blocksize <= length data} ->
+  idx   :uint32_t{v idx <= v n} ->
   Stack unit
-        (requires (fun h0 -> live h0 state))
+        (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-let rec update_multi state data max idx =
+let rec update_multi state data n idx =
 
-  if (idx =^ max) then ()
+  if (idx =^ n) then ()
   else
 
     (* Get the current block for the data *)
@@ -174,14 +182,14 @@ let rec update_multi state data max idx =
     update state b;
 
     (* Recursive call *)
-    update_multi state data max (idx +^ 1ul)
+    update_multi state data n (idx +^ 1ul)
 
 
 
 val update_last:
-  state :suint32_p{length state = U32.v size_state} ->
-  data  :suint8_p {length data = U32.v blocksize} ->
-  len   :uint32_t {U32.v len <= U32.v blocksize} ->
+  state :suint32_p{length state = v size_state} ->
+  data  :suint8_p {length data <= v blocksize} ->
+  len   :uint32_t {v len = length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
@@ -208,6 +216,9 @@ let finish state mac =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  (* Get the memory *)
+  let h0 = ST.get () in
+
   (* Allocate and set initial values for ipad and opad *)
   let opad = Buffer.create (uint8_to_sint8 0x5cuy) size_opad in
 
@@ -217,13 +228,20 @@ let finish state mac =
   (* Allocate memory for the outer hash state *)
   let ctx_hash_1 = Buffer.create (uint32_to_sint32 0ul) Hash.size_state in
 
+  let h1 = ST.get () in
+  assert(live h1 state /\ live h1 mac /\ modifies_1 state h0 h1);
+  admit();
+
   (* Retrieve the state of the inner hash *)
   let ctx_hash_0 = Buffer.sub state pos_state_hash_0 Hash.size_state in
 
   (* Retrive and allocate memory for the wrapped key location *)
   let okey_32 = Buffer.sub state pos_okey size_okey_32 in
-  let okey_8 = Buffer.create (uint8_to_sint8 0x00uy) blocksize in
-  Hacl.Utils.Experimental.store32s_be okey_8 okey_32 blocksize;
+  let okey_8 = Buffer.create (uint8_to_sint8 0x00uy) size_okey_8 in
+
+  (**) assert_norm(v size_okey_32 * 4 <= v size_okey_8);
+  (**) assert_norm(v size_okey_8 <= (4 * v size_okey_32));
+  Hacl.Utils.Experimental.store32s_be okey_8 okey_32 size_okey_32;
 
   (* Step 4: apply H to "result of step 3" *)
   Hash.finish ctx_hash_0 s4;
@@ -247,11 +265,11 @@ let finish state mac =
 
 
 val hmac:
-  mac     :suint8_p{length mac = U32.v hashsize} ->
+  mac     :suint8_p{length mac = v hashsize} ->
   key     :suint8_p ->
-  keylen  :uint32_t{U32.v keylen <= length key} ->
+  keylen  :uint32_t{v keylen = length key} ->
   data    :suint8_p ->
-  datalen :uint32_t{U32.v datalen <= length data /\ U32.v datalen + U32.v blocksize <= pow2 32} ->
+  datalen :uint32_t{v datalen = length data /\ v datalen + v blocksize <= pow2 32} ->
   Stack unit
         (requires (fun h -> live h mac /\ live h key /\ live h data ))
         (ensures  (fun h0 r h1 -> live h1 mac /\ modifies_1 mac h0 h1))
@@ -265,8 +283,10 @@ let hmac mac key keylen data datalen =
   let ctx = Buffer.create (u32_to_s32 0ul) size_state in
 
   (* Compute the number of blocks to process *)
-  let n = U32.div datalen blocksize in
-  let r = U32.rem datalen blocksize in
+  let n = datalen /^ blocksize in
+  let r = datalen %^ blocksize in
+  (**) cut(v datalen % v blocksize <= v blocksize);
+  (**) cut(v r <= v blocksize);
 
   (* Initialize the mac state *)
   init ctx key keylen;
@@ -275,7 +295,8 @@ let hmac mac key keylen data datalen =
   update_multi ctx data n 0ul;
 
   (* Get the last block *)
-  let input_last = Buffer.sub data (mul_mod n blocksize) r in
+  (**) assert_norm(v n * v blocksize <= v datalen);
+  let input_last = Buffer.sub data (n *^ blocksize) r in
 
   (* Process the last block of data *)
   update_last ctx input_last r;
