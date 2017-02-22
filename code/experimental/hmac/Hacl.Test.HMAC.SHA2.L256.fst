@@ -1,9 +1,8 @@
-module Hacl.Test.HMAC
+module Hacl.Test.HMAC.SHA2.L256
 
 open FStar.Buffer
 
-module HMAC = Hacl.HMAC
-module Hash = Hacl.Hash.SHA2.L256
+module MAC = HMAC_SHA2_256
 
 
 
@@ -39,10 +38,10 @@ let test_1 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
 
   (* Call the hash function *)
-  HMAC.hmac output key key_len data data_len;
+  MAC.hmac_sha2_256 output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 1") expected output 32ul;
@@ -89,10 +88,10 @@ let test_2 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
 
   (* Call the hash function *)
-  HMAC.hmac output key key_len data data_len;
+  MAC.hmac_sha2_256 output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 2") expected output 32ul;
@@ -132,10 +131,10 @@ let test_3 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
 
   (* Call the hash function *)
-  HMAC.hmac output key key_len data data_len;
+  MAC.hmac_sha2_256 output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 3") expected output 32ul;
@@ -180,10 +179,10 @@ let test_4 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
 
   (* Call the hash function *)
-  HMAC.hmac output key key_len data data_len;
+  MAC.hmac_sha2_256 output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 4") expected output 32ul;
@@ -220,10 +219,10 @@ let test_5 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
 
   (* Call the hash function *)
-  HMAC.hmac output key key_len data data_len;
+  MAC.hmac_sha2_256 output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 5") expected output 16ul;
@@ -266,10 +265,10 @@ let test_6 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
 
   (* Call the hash function *)
-  HMAC.hmac output key key_len data data_len;
+  MAC.hmac_sha2_256 output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 6") expected output 32ul;
@@ -324,10 +323,10 @@ let test_7 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
 
   (* Call the hash function *)
-  HMAC.hmac output key key_len data data_len;
+  MAC.hmac_sha2_256 output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 7") expected output 32ul;
