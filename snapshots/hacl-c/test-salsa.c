@@ -1,7 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
 #include "Salsa20.h"
-#include "Salsa20Block.h"
 #include "Poly1305_64.h"
 #include "HSalsa20.h"
 #include "sodium.h"
