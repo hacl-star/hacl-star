@@ -5,6 +5,15 @@ open Hacl.Impl.Chacha20
 
 module U32 = FStar.UInt32
 
+
+val double_round:
+  st:buffer Hacl.UInt32.t{length st = 16} ->
+  Stack unit
+    (requires (fun h -> live h st))
+    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
+let double_round st = double_round st
+
+
 val chacha20:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->

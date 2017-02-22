@@ -86,8 +86,8 @@ Chacha20.compcert: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.f
 # Temporary target
 Chacha.c: Hacl.Impl.Chacha20.fst # Hacl.Test.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
-	$(KRML) -tmpdir chacha2-c  -no-prefix Hacl.Test2.Chacha20 \
-		-bundle 'Chacha=Chacha,Hacl.Impl.Chacha20' -drop 'Hacl.Spec.*' \
+	$(KRML) -tmpdir chacha2-c  -no-prefix Hacl.Test2.Chacha20 -no-prefix Loops -I . -drop "Loops" \
+		-bundle 'Chacha=Chacha,Hacl.Impl.Chacha20' -drop 'Hacl.Spec.*' -add-include '"loops.h"' -drop 'Spec.*' \
 		Hacl.Test2.Chacha20.fst -o chacha.exe -verbose -ccopt='-Wno-error=pointer-to-int-cast'
 	./chacha.exe
 

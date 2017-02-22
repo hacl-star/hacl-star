@@ -353,8 +353,9 @@ val rounds:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = as_seq h0 st in let s' = as_seq h1 st in
          s' == rounds s)))
-let rounds st =
-  Combinators.iter #H32.t #16 #double_round' 10ul double_round st 16ul
+let rounds st = Loops.rounds st
+// Real implementation bellow
+(*   Combinators.iter #H32.t #16 #double_round' 10ul double_round st 16ul *)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -367,8 +368,8 @@ val sum_states:
     (ensures  (fun h0 _ h1 -> live h0 st /\ live h1 st /\ live h0 st' /\ modifies_1 st h0 h1
       /\ (let s1 = as_seq h1 st in let s = as_seq h0 st in let s' = as_seq h0 st' in
          s1 == Combinators.seq_map2 (fun x y -> H32.(x +%^ y)) s s')))
-let sum_states st st' =
-  Combinators.inplace_map2 (fun x y -> H32.(x +%^ y)) st st' 16ul
+let sum_states st st' = Loops.sum_states st st'
+  (* Combinators.inplace_map2 (fun x y -> H32.(x +%^ y)) st st' 16ul *)
 
 
 val copy_state:
@@ -576,7 +577,8 @@ let update_last output plain len log st ctr =
   let block = create (uint8_to_sint8 0uy) 64ul in
   let l = chacha20_block log block st ctr in
   let mask = Buffer.sub block 0ul len in
-  Combinators.map2 (fun x y -> H8.(x ^^ y)) output plain mask len;
+  Loops.xor_bytes output plain mask len;
+  (* Combinators.map2 (fun x y -> H8.(x ^^ y)) output plain mask len; *)
   let h1 = ST.get() in
   lemma_chacha20_counter_mode_1 h1 output h0 plain len h0 st
     (Ghost.reveal log).k (Ghost.reveal log).n ctr;
@@ -603,7 +605,8 @@ let update output plain log st ctr =
   push_frame();
   let block = create (uint8_to_sint8 0uy) 64ul in
   let l = chacha20_block log block st ctr in
-  Combinators.map2 (fun x y -> H8.(x ^^ y)) output plain block 64ul;
+  Loops.xor_bytes output plain block 64ul;
+  (* Combinators.map2 (fun x y -> H8.(x ^^ y)) output plain block 64ul; *)
   pop_frame();
   l
 
