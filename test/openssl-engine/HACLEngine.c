@@ -16,15 +16,19 @@
 
 #include "Curve25519.h"
 
+// The multiplexing is done at compile-time; pass -DIMPL=IMPL_OPENSSL to your
+// compiler to override the default HACL implementation.
 #define IMPL_HACL 0
 #define IMPL_OPENSSL 1
 #define IMPL_WINCRYPTO
+#ifndef IMPL
 #define IMPL IMPL_HACL
+#endif
 
 static const char *engine_Everest_id = "Everest";
 
 #if IMPL == IMPL_OPENSSL
-static const char *engine_Everest_name = "Everest engine (OPENSSL crypto)";
+static const char *engine_Everest_name = "Everest engine (OpenSSL crypto)";
 #elif IMPL == IMPL_HACL
 static const char *engine_Everest_name = "Everest engine (HACL* crypto)";
 #elif IMPL == IMPL_WINCRYPTO
@@ -56,11 +60,14 @@ int Everest_init(ENGINE *e) {
 //
 #define X25519_KEYLEN        32
 
+// This is the internal struct type that I ended up copy/pasting from the
+// original OpenSSL implementation. If they ever change their internal
+// representation, this code will segfault. Everything else uses their public
+// API.
 typedef struct {
     unsigned char pubkey[X25519_KEYLEN];
     unsigned char *privkey;
 } X25519_KEY;
-
 
 static int X25519(uint8_t out_shared_key[32], uint8_t private_key[32],
   const uint8_t peer_public_value[32])
@@ -73,6 +80,8 @@ static int X25519(uint8_t out_shared_key[32], uint8_t private_key[32],
   return CRYPTO_memcmp(kZeros, out_shared_key, 32) != 0;
 }
 
+// This is a version of pkey_ecx_derive in ecx_meth.c that i) uses the public
+// API and ii) calls our own X25519 function
 static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
 {
     const X25519_KEY *pkey, *peerkey;
@@ -96,6 +105,7 @@ static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
 
 static EVP_PKEY_METHOD *hacl_x25519_meth = NULL;
 
+// A lazy initializer
 EVP_PKEY_METHOD *get_hacl_x25519_meth() {
   if (hacl_x25519_meth)
     return hacl_x25519_meth;
@@ -107,13 +117,16 @@ EVP_PKEY_METHOD *get_hacl_x25519_meth() {
   }
 
   hacl_x25519_meth = EVP_PKEY_meth_new(NID_X25519, 0);
-#if IMPL == IMPL_HACL
   EVP_PKEY_meth_copy(hacl_x25519_meth, openssl_meth);
+
+#if IMPL == IMPL_HACL
+  EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
+#elif IMPL == IMPL_OPENSSL
+  ;
 #else
 #error "Unsupported implementation"
 #endif
 
-  EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
   return hacl_x25519_meth;
 }
 
@@ -186,7 +199,6 @@ int Everest_ciphers(ENGINE *e, const EVP_CIPHER **cipher, const int **nids, int 
 
 int Everest_pkey_meths(ENGINE *e, EVP_PKEY_METHOD **method, const int **nids, int nid)
 {
-  printf("Everest_pkey_meths\n");
   if (method == NULL) {
     return Everest_pkey_meths_nids(nids);
   } else if (nid == NID_X25519) {
