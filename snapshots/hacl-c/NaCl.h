@@ -5,7 +5,6 @@
 #include "Hacl_Policies.h"
 #include "HSalsa20.h"
 #include "Salsa20.h"
-#include "Salsa20Block.h"
 #include "Poly1305_64.h"
 #include "Curve25519.h"
 #include "kremlib.h"
