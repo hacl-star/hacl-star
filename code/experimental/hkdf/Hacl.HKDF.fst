@@ -1,4 +1,4 @@
-module Hacl.HKDF.fst
+module Hacl.HKDF
 
 open FStar.Mul
 open FStar.Ghost
@@ -6,151 +6,187 @@ open FStar.HyperStack
 open FStar.ST
 open FStar.Buffer
 open FStar.UInt32
-open Hacl.Cast
-open Hacl.UInt8
-open Hacl.UInt32
-open Hacl.SBuffer
-
-open Hacl.Hash.SHA2.L256
-open Hacl.HMAC.SHA2.L256
-
-module HH = FStar.HyperHeap
-module HS = FStar.HyperStack
-module U8 = Hacl.UInt8
-module U32 = Hacl.UInt32
-
-let u32 = FStar.UInt32.t
-let u64 = FStar.UInt64.t
-let s64 = Hacl.UInt64.t
-let s32 = Hacl.UInt32.t
-let s8 = Hacl.UInt8.t
-let uint32s = Hacl.SBuffer.u32s
-let bytes = Hacl.SBuffer.u8s
 
 
-#set-options "--lax"
+(* Definition of aliases for modules *)
+module U8 = FStar.UInt8
+module U32 = FStar.UInt32
+module U64 = FStar.UInt64
+
+module S8 = Hacl.UInt8
+module S32 = Hacl.UInt32
+module S64 = Hacl.UInt64
+
+module Buffer = FStar.Buffer
+module Cast = Hacl.Cast
+
+module Hash = Hacl.Hash.SHA2.L256
+module HMAC = Hacl.HMAC
+
+
+(* Definition of base types *)
+let uint8_t   = FStar.UInt8.t
+let uint32_t  = FStar.UInt32.t
+let uint64_t  = FStar.UInt64.t
+
+let suint8_t  = Hacl.UInt8.t
+let suint32_t = Hacl.UInt32.t
+let suint64_t = Hacl.UInt64.t
+
+let suint32_p = Buffer.buffer suint32_t
+let suint8_p  = Buffer.buffer suint8_t
+
+
+(* Definitions of aliases for functions *)
+let u8_to_s8 = Cast.uint8_to_sint8
+let u32_to_s8 = Cast.uint32_to_sint8
+let u32_to_s32 = Cast.uint32_to_sint32
+let u32_to_s64 = Cast.uint32_to_sint64
+let s32_to_s8  = Cast.sint32_to_sint8
+let s32_to_s64 = Cast.sint32_to_sint64
+let u64_to_s64 = Cast.uint64_to_sint64
 
 
 
-val xor_bytes: output:bytes -> in1:bytes -> in2:bytes{disjoint in1 in2 /\ disjoint in1 output /\ disjoint in2 output} -> len:u32{v len <= length output /\ v len <= length in1 /\ v len <= length in2} -> STL unit
-  (requires (fun h -> live h output /\ live h in1 /\ live h in2))
-  (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h0 in2 
-    /\ live h1 output /\ live h1 in1 /\ live h1 in2
-    /\ modifies_1 output h0 h1
-    (* /\ (forall (i:nat). i < v len ==> get h1 output i = (UInt8.logxor (get h0 in1 i) (get h0 in2 i))) *)
-   ))
-let rec xor_bytes output in1 in2 len =
-  let h0 = ST.get() in
-  if len =^ 0ul then ()
-  else
-    begin
-      let i = UInt32.sub len 1ul in 
-      let in1i = index in1 i in
-      let in2i = index in2 i in
-      let oi = Hacl.UInt8.logxor in1i in2i in
-      upd output i oi; 
-      let h1 = ST.get() in
-      no_upd_lemma_1 h0 h1 output in1;
-      no_upd_lemma_1 h0 h1 output in2;
-      xor_bytes output in1 in2 i
-    end
+//
+// HKDF
+//
 
-let op_At_At_Amp = UInt32.logand
+(* Define parameters *)
+inline_for_extraction let hashsize = HMAC.hashsize
+inline_for_extraction let hashsize_32 = HMAC.hashsize_32
+inline_for_extraction let blocksize = HMAC.blocksize
+inline_for_extraction let blocksize_32 = HMAC.blocksize_32
 
-val be_bytes_of_uint32: bytes -> u32 -> St unit
-let be_bytes_of_uint32 output x =
- let b3 = uint32_to_sint8 ((UInt32.shift_right x 24ul) @@& 255ul) in
- let b2 = uint32_to_sint8 ((UInt32.shift_right x 16ul) @@& 255ul) in
- let b1 = uint32_to_sint8 ((UInt32.shift_right x 8ul)  @@& 255ul) in
- let b0 = uint32_to_sint8 ((x)                         @@& 255ul) in
- upd output 0ul b0; 
- upd output (1ul) b1;
- upd output (2ul) b2;
- upd output (3ul) b3
-
-
-(* Operators *)
-let op_At_Plus (a:u32) (b:u32) : Tot u32 = UInt32.add_mod a b
-let op_At_Minus (a:u32) (b:u32) : Tot u32 = UInt32.sub_mod a b
-
-
-(* Define the hash length used *)
-let hl = 32ul
-let hmac = hmac_sha256
 
 
 (* Define HKDF Extraction function *)
-val hkdf_extract : (prk     :bytes { length prk = v hl }) ->
-                   (salt    :bytes { disjoint prk salt }) ->
-                   (saltlen :u32 { length salt = v saltlen } ) ->
-                   (ikm     :bytes { disjoint prk ikm /\ disjoint salt ikm }) ->
-                   (ikmlen  :u32 { length ikm = v ikmlen })
-                   -> STL unit
-                        (requires (fun h -> live h prk /\ live h salt /\ live h ikm))
-                        (ensures  (fun h0 r h1 -> live h1 prk /\ live h1 salt /\ live h1 ikm /\ modifies_1 prk h0 h1))
+val hkdf_extract :
+  prk     :suint8_p{length prk = v hashsize} ->
+  salt    :suint8_p ->
+  saltlen :uint32_t{v saltlen = length salt} ->
+  ikm     :suint8_p ->
+  ikmlen  :uint32_t{v ikmlen = length ikm} ->
+  Stack unit
+        (requires (fun h0 -> live h0 prk /\ live h0 salt /\ live h0 ikm))
+        (ensures  (fun h0 r h1 -> live h1 prk /\ modifies_1 prk h0 h1))
 
-let hkdf_extract prk salt saltlen ikm ikmlen = hmac prk salt saltlen ikm ikmlen
+let hkdf_extract prk salt saltlen ikm ikmlen = HMAC.hmac prk salt saltlen ikm ikmlen
 
 
-// We could simplify the memory safety clause by reducing to modifies_1 _T h0 h1
-val hkdf_expand_inner : (t       :bytes) ->
-                        (prk     :bytes { length prk >= v hl /\ disjoint t prk }) ->
-                        (prklen  :u32   { length prk = v prklen }) ->
-                        (info    :bytes { disjoint t info /\ disjoint prk info }) ->
-                        (infolen :u32   { length info = v infolen }) ->
-                        (n       :u32) ->
-                        (i       :stackref u32) ->
-                        (ti      :bytes { length ti = (v hl) + (v infolen) + 1
-                                           /\ disjoint ti t /\ disjoint ti prk /\ disjoint ti info }) ->
-                        (til     :bytes { length til = v hl
-                                           /\ disjoint til t /\ disjoint til prk
-                                           /\ disjoint til info /\ disjoint til ti})
-                        -> STL unit
-                             (requires (fun h -> live h t /\ live h prk /\ live h info /\ live h ti /\ live h til))
-                             (ensures  (fun h0 r h1 -> live h1 t /\ live h1 prk /\ live h1 info /\ live h1 ti /\ live h1 til))
 
-let rec hkdf_expand_inner t prk prklen info infolen n i ti til =
-  let _i = create (uint8_to_sint8 0uy) 4ul in
-  be_bytes_of_uint32 _i !i;
-  if !i = 1ul then begin
-    let _til = create (uint8_to_sint8 0uy) (infolen @+ 1ul) in
-    blit info 0ul _til 0ul infolen;
-    blit _i 0ul _til infolen 1ul;
-    hmac ti prk prklen _til (infolen @+ 1ul);
-    blit ti 0ul t 0ul hl;
-    i := !i @+ 1ul;
-    hkdf_expand_inner t prk prklen info infolen n i ti til end
-  else if lte !i n then begin
-    blit ti 0ul til 0ul hl;
-    blit info 0ul til hl infolen;
-    blit _i 0ul til (hl @+ infolen) 1ul;
-    hmac ti prk prklen til (hl @+ infolen @+ 1ul);
-    let pos = UInt32.mul_mod (!i @- 1ul) hl in
-    blit ti 0ul t pos hl;
-    i := !i @+ 1ul;
-    hkdf_expand_inner t prk prklen info infolen n i ti til end
-  else ()
+[@"c_inline"]
+private val hkdf_expand_inner:
+  state   :suint8_p ->
+  prk     :suint8_p {v hashsize <= length prk} ->
+  prklen  :uint32_t {v prklen = length prk} ->
+  info    :suint8_p ->
+  infolen :uint32_t {v infolen = length info} ->
+  n       :uint32_t {v n <= pow2 8}->
+  i       :uint32_t {v i <= v n} ->
+  Stack unit
+        (requires (fun h0 -> live h0 state /\ live h0 prk /\ live h0 info))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+
+[@"c_inline"]
+let rec hkdf_expand_inner state prk prklen info infolen n i =
+
+  (* Push a new memory frame *)
+  (**) push_frame();
+
+  (* Recompute the sizes and position of the intermediary objects *)
+  (* Note: here we favour readability over efficiency *)
+  let size_T = U32.mul_mod n hashsize in
+  let size_Ti  = hashsize in
+  let size_Til = hashsize +^ infolen +^ 1ul in
+  let pos_Ti = 0ul in
+  let pos_Til = size_Ti in
+  let pos_T = pos_Til +^ size_Til in
+
+  (* Retreive the memory for local computations. state =  Ti | Til | T *)
+  let ti = Buffer.sub state pos_Ti size_Ti in
+  let til = Buffer.sub state pos_Til size_Til in
+  let t = Buffer.sub state pos_T size_T in
+
+  if (i =^ 1ul) then begin
+
+    (* Concatenate T(i-1) | Info | i *)
+    Buffer.blit info 0ul til 0ul infolen;
+    Buffer.upd til (size_Til -^ 1ul) (u32_to_s8 i);
+
+    (* Compute the mac of to get block Ti *)
+    HMAC.hmac ti prk prklen til size_Til;
+
+    (* Store the resulting block in T *)
+    Buffer.blit ti 0ul t 0ul hashsize;
+
+    (* Recursive call *)
+    hkdf_expand_inner state prk prklen info infolen n (i +^ 1ul) end
+
+  else if (i <=^ n) then begin
+
+    (* Concatenate T(i-1) | Info | i *)
+    Buffer.blit ti 0ul til 0ul hashsize;
+    Buffer.blit info 0ul til hashsize infolen;
+    Buffer.upd til (size_Til -^ 1ul) (u32_to_s8 i);
+
+    (* Compute the mac of to get block Ti *)
+    HMAC.hmac ti prk prklen til size_Til;
+
+    (* Store the resulting block in T *)
+    let pos = U32.mul_mod (i -^ 1ul) hashsize in
+    Buffer.blit ti 0ul t pos hashsize;
+
+    (* Recursive call *)
+    hkdf_expand_inner state prk prklen info infolen n (i +^ 1ul) end
+  else ();
+
+  (* Pop the memory frame *)
+  (**) pop_frame()
+
 
 
 (* Define HKDF Expand function *)
-val hkdf_expand : (okm     :bytes) ->
-                  (prk     :bytes { length prk >= v hl /\ disjoint prk okm }) ->
-                  (prklen  :u32 { length prk = v prklen }) ->
-                  (info    :bytes { disjoint info okm /\ disjoint info prk}) ->
-                  (infolen :u32 { length info = v infolen }) ->
-                  (l       :u32 { length okm = v l })
-                  -> STL unit
-                       (requires (fun h -> live h okm /\ live h prk /\ live h info))
-                       (ensures  (fun h0 r h1 -> live h1 okm /\ live h1 prk /\ live h1 info /\ modifies_1 okm h0 h1))
+val hkdf_expand :
+  okm     :suint8_p ->
+  prk     :suint8_p {v hashsize <= length prk} ->
+  prklen  :uint32_t {v prklen <= length prk} ->
+  info    :suint8_p ->
+  infolen :uint32_t {v infolen <= length info} ->
+  len     :uint32_t {v len <= length okm
+                    /\ v len <= (255 * U32.v hashsize)
+                    /\ (U32.v len / U32.v hashsize + 1) <= length okm} ->
+  Stack unit
+        (requires (fun h0 -> live h0 okm /\ live h0 prk /\ live h0 info))
+        (ensures  (fun h0 r h1 -> live h1 okm /\ modifies_1 okm h0 h1))
 
-let hkdf_expand okm prk prklen info infolen l =
-  let n =
-    let r = UInt32.rem l hl in
-    (UInt32.div (l @- r) hl) @+ 1ul
-  in
-  let i = ST.salloc 1ul in
-  let _Til = create (uint8_to_sint8 0uy) (hl @+ infolen @+ 1ul) in
-  let _Ti = create (uint8_to_sint8 0uy) hl in
-  let _T = create (uint8_to_sint8 0uy) (UInt32.mul_mod n hl) in
-  hkdf_expand_inner _T prk prklen info infolen n i _Ti _Til;
-  blit _T 0ul okm 0ul l
+let hkdf_expand okm prk prklen info infolen len =
+
+  (* Push a new memory frame *)
+  (**) push_frame ();
+
+  (* Compute the number of blocks necessary to compute the output *)
+  let n = U32.(div len hashsize) +^ 1ul in
+
+  (* Describe the shape of memory used by the inner recursive function *)
+  let size_T = U32.mul_mod n hashsize in
+  let size_Ti  = hashsize in
+  let size_Til = hashsize +^ infolen +^ 1ul in
+  let pos_Ti = 0ul in
+  let pos_Til = size_Ti in
+  let pos_T = pos_Til +^ size_Til in
+
+  (* Allocate memory for inner expension: state =  Ti | Til | T *)
+  let state = Buffer.create (u8_to_s8 0uy) (size_Ti +^ size_Til +^ size_T) in
+
+  (* Call the inner expension function *)
+  hkdf_expand_inner state prk prklen info infolen n 0ul;
+
+  (* Extract T from the state *)
+  let _T = Buffer.sub state pos_T size_T in
+
+  (* Redundant copy the desired part of T *)
+  Buffer.blit _T 0ul okm 0ul len;
+
+  (* Pop the memory frame *)
+  (**) pop_frame()

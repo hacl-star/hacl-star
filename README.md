@@ -27,7 +27,7 @@ libsodium can be immediately ported to use the verified code in HACL*
 instead. 
 
 [F\*]: https://github.com/FStarLang/FStar/
-[miTLS]: https://github.com/mitls/mitls-star
+[miTLS]: https://github.com/mitls/mitls-fstar
 [NaCl API]: https://nacl.cr.yp.to/
 [libsodium]: https://github.com/jedisct1/libsodium
 [Project Everest]: https://github.com/project-everest
@@ -39,26 +39,25 @@ it in production systems without consulting the authors.
 
 # Installation
 
-See [INSTALL.md].
+See [INSTALL.md](INSTALL.md).
 
 To verify the F\* code, you need to install the [F\*] typechecker.
 To extract F\* code to C, you need to install [KreMLin].
 
 For convenience, we have already extracted C code for our verified
-primitives and made them available in [snapshots].  To run that code,
-you need a modern C compiler (preferably GCC-6).  To compare its
-performance with the C reference code in libsodium, download and
-compile [libsodium] with the `--disable-asm` flag.
+primitives and made them available in [snapshots/hacl-c](snapshots/hacl-c).
+To run that code, you need a modern C compiler (preferably GCC-6).
+To compare its performance with the C reference code in libsodium,
+download and compile [libsodium] with the `--disable-asm` flag.
 
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
 [KreMLin]: https://github.com/FStarLang/kremlin
-[snapshots]: https://github.com/mitls/hacl-star/snapshots/hacl-c
 [libsodium]: https://github.com/jedisct1/libsodium
 
 # Browsing and testing the code
 
-The F\* code for our primitives is in the [code directory]:
-https://github.com/mitls/hacl-star/code Note that Poly1305 and
+The F\* code for our primitives is in the [code](code) directory
+Note that Poly1305 and
 Curve25519 share a good chunk of Bignum field arithmetic code, and
 this shared code is in code/bignum.  There are Makefile targets in
 each directory for verification and extraction.  
@@ -78,7 +77,7 @@ is a long-term goal.
 
 # Experimental features
 
-The `code/experimental/` directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
+The [code/experimental](code/experimental) directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
 * Elliptic Curves: NIST P-256, Curve448
 * Encryption: AES-128, AES-256
 * Hash functions: SHA-256
