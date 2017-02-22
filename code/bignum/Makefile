@@ -36,7 +36,7 @@ all-ct: $(addsuffix -ct, $(BIGNUM_FILES))
 
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib $^ --use_hints
+		--include ../lib $^ --use_hints --record_hints
 
 verify: $(addsuffix -verify, $(BIGNUM_FILES))
 

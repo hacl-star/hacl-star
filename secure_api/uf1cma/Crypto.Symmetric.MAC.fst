@@ -246,7 +246,7 @@ let encode_r #i b raw =
 val encode: i:id -> w:word_16 -> GTot (elem i)
 let encode i w =
   match alg i with 
-  | POLY1305 -> PS.encode w
+  | POLY1305 -> Spec.Poly1305.encode w
   | GHASH    -> GS.encode w
 
 (* (\** Encode a word of a message as a field element in a buffer *\) *)

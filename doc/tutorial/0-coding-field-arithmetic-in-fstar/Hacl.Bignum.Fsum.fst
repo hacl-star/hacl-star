@@ -23,6 +23,7 @@ let fsum a b =
   let a2 = a.(2ul) in
   let a3 = a.(3ul) in
   let a4 = a.(4ul) in
+  let a4 = a.(5ul) in
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
   let b2 = b.(2ul) in

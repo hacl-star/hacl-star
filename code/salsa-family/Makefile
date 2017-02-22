@@ -58,16 +58,18 @@ all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
 all-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 
+KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experimental -I ../../specs/generic -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
+	-add-include '"testlib.h"' -ccopt -march=native -ccopt -std=gnu99 -drop 'Hacl.UInt8' \
+	-drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
+	-drop 'Hacl.Endianness' -drop 'Hacl.Cast'
+
 
 Chacha20.c: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
-	$(KREMLIN_HOME)/krml -tmpdir chacha-c \
-		-I ../bignum -I ../lib/kremlin \
+	$(KRML) -tmpdir chacha-c \
 		Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe -no-prefix Hacl.Test.Chacha20 \
-		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop Prims -drop FStar -bundle Chacha20=Hacl.Symmetric.Chacha20 Chacha20.fst \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -march=native -ccopt -std=gnu99 
+		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' \
+		-bundle Chacha20=Hacl.Symmetric.Chacha20 Chacha20.fst
 	./chacha20.exe
 
 Chacha20.compcert: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
@@ -81,15 +83,20 @@ Chacha20.compcert: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.f
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -cc compcert
 	./chacha20cc.exe
 
+# Temporary target
+Chacha.c: Hacl.Impl.Chacha20.fst # Hacl.Test.Chacha20.fst Chacha20.fst
+	mkdir -p chacha-c
+	$(KRML) -tmpdir chacha2-c  -no-prefix Hacl.Test2.Chacha20 -no-prefix Loops -I . -drop "Loops" \
+		-bundle 'Chacha=Chacha,Hacl.Impl.Chacha20' -drop 'Hacl.Spec.*' -add-include '"loops.h"' -drop 'Spec.*' \
+		Hacl.Test2.Chacha20.fst -o chacha.exe -verbose -ccopt='-Wno-error=pointer-to-int-cast'
+	./chacha.exe
+
 Salsa20.c: Hacl.Symmetric.Salsa20.fst Hacl.Test.Salsa20.fst
 	mkdir -p salsa-c
-	$(KREMLIN_HOME)/krml -tmpdir salsa-c -verbose \
-		-I ../bignum -I ../lib/kremlin \
+	$(KRML) -tmpdir salsa-c -verbose \
 		Salsa20.fst Hacl.Test.Salsa20.fst -o salsa20.exe -no-prefix Hacl.Test.Salsa20 \
-		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop Prims -drop FStar  -bundle Salsa20=Hacl.Symmetric.Salsa20 \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ldopt -flto -ccopt -march=native  -ccopt -std=gnu99
+		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.UInt.\*' \
+		-bundle Salsa20=Hacl.Symmetric.Salsa20
 	./salsa20.exe
 
 HSalsa20.c: Hacl.Symmetric.HSalsa20.fst 
@@ -104,13 +111,9 @@ HSalsa20.c: Hacl.Symmetric.HSalsa20.fst
 
 XSalsa20.c: Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst
 	mkdir -p xsalsa-c
-	$(KREMLIN_HOME)/krml -tmpdir xsalsa-c \
-		-I ../bignum -I ../lib/kremlin \
+	$(KRML) -tmpdir xsalsa-c \
 		Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst -o xsalsa20.exe -no-prefix Hacl.Test.XSalsa20 \
-		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
-		-drop Prims -drop FStar \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ldopt -flto -ccopt -march=native  -ccopt -std=gnu99 
+		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.UInt.\*'
 	./xsalsa20.exe
 
 extract-c: Chacha20.c Salsa20.c HSalsa20.c XSalsa20.c

@@ -4,7 +4,7 @@
 #include "sodium.h"
 
 
-#define MESSAGE_LEN 44
+#define MESSAGE_LEN 72
 #define secretbox_MACBYTES   16
 #define CIPHERTEXT_LEN (secretbox_MACBYTES + MESSAGE_LEN)
 #define secretbox_NONCEBYTES 24
@@ -14,7 +14,21 @@
 #define box_SECRETKEYBYTES   32
 #define box_NONCEBYTES       24
 
-uint8_t *msg = (uint8_t*) "testtesttesttesttesttesttesttesttesttesttest";
+uint8_t msg[104] = {
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00, 0x01, 0x02, 0x03,  0x04, 0x05, 0x06, 0x07,
+  0x08, 0x09, 0x10, 0x11,  0x12, 0x13, 0x14, 0x15,
+  0x16, 0x17, 0x18, 0x19,  0x20, 0x21, 0x22, 0x23,
+  0x00, 0x01, 0x02, 0x03,  0x04, 0x05, 0x06, 0x07,
+  0x08, 0x09, 0x10, 0x11,  0x12, 0x13, 0x14, 0x15,
+  0x16, 0x17, 0x18, 0x19,  0x20, 0x21, 0x22, 0x23,
+  0x00, 0x01, 0x02, 0x03,  0x04, 0x05, 0x06, 0x07,
+  0x08, 0x09, 0x10, 0x11,  0x12, 0x13, 0x14, 0x15,
+  0x16, 0x17, 0x18, 0x19,  0x20, 0x21, 0x22, 0x23,
+};
 
 uint8_t nonce[secretbox_NONCEBYTES] = {
   0x00, 0x01, 0x02, 0x03,
@@ -82,10 +96,10 @@ int32_t test_api()
   /* Hacl_SecretBox_crypto_secretbox_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, key); */
   /* res = crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key); */
   Hacl_SecretBox_crypto_secretbox_easy(ciphertext, msg, MESSAGE_LEN, nonce, key);
-  res = crypto_secretbox_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, key);
+  res = crypto_secretbox_open_easy(decrypted, ciphertext+16, MESSAGE_LEN+16, nonce, key);
 
   printf("SecretBox decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
-  TestLib_compare_and_print("HACL secretbox", msg, decrypted, MESSAGE_LEN);
+  TestLib_compare_and_print("HACL secretbox", msg+32, decrypted, MESSAGE_LEN-32);
 
   for(i = 0; i < MESSAGE_LEN; i++) decrypted[i] = 0;
   for(i = 0; i < CIPHERTEXT_LEN; i++) ciphertext[i] = 0;
@@ -116,11 +130,11 @@ int32_t test_api()
   /* Testing the box primitives */
   /* i = crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk, sk); */
   /* res = Hacl_Box_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, key); */
-  i = crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk1, sk2);
+  i = crypto_box_easy(ciphertext+16, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
   res = Hacl_Box_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, sk1);
   printf("Box decryption with libsodium was a %s.\n", res == 0 ? "success" : "failure");
-  
-  TestLib_compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
+ 
+  TestLib_compare_and_print("Box", msg+32, decrypted+32, MESSAGE_LEN-32);
   return exit_success;
 }
 
@@ -145,9 +159,6 @@ int32_t perf_api() {
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
     Hacl_SecretBox_crypto_secretbox_easy(ciphertext, plaintext, len, nonce, key);
-    uint8_t* tmp = plaintext;
-    ciphertext = plaintext;
-    plaintext = tmp;
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
@@ -160,10 +171,7 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    int res = crypto_secretbox_easy(ciphertext, plaintext, len, nonce, key);
-    uint8_t* tmp = plaintext;
-    ciphertext = plaintext;
-    plaintext = tmp;
+    int res = crypto_secretbox_easy(plaintext, plaintext, len, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
@@ -176,10 +184,7 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Hacl_Box_crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
-    uint8_t* tmp = plaintext;
-    ciphertext = plaintext;
-    plaintext = tmp;
+    Hacl_Box_crypto_box_easy(plaintext, plaintext, len, nonce, sk1, sk2);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
@@ -192,10 +197,7 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    int res = crypto_box_easy(ciphertext, plaintext, len, nonce, sk1, sk2);
-    uint8_t* tmp = plaintext;
-    ciphertext = plaintext;
-    plaintext = tmp;
+    int res = crypto_box_easy(plaintext, plaintext, len, nonce, sk1, sk2);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
