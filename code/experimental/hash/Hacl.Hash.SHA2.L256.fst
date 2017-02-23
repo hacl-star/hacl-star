@@ -70,10 +70,10 @@ inline_for_extraction let size_count_32  = 1ul   // 32 bits (UInt32)
 inline_for_extraction let size_state  = size_k_32 +^ size_ws_32 +^ size_whash_32 +^ size_count_32
 
 (* Positions of objects in the state *)
-inline_for_extraction let pos_k_32         = 0ul
-inline_for_extraction let pos_ws_32        = size_k_32
-inline_for_extraction let pos_whash_32     = size_k_32 +^ size_ws_32
-inline_for_extraction let pos_count_32     = size_k_32 +^ size_ws_32 +^ size_whash_32
+inline_for_extraction let pos_k_32       = 0ul
+inline_for_extraction let pos_ws_32      = size_k_32
+inline_for_extraction let pos_whash_32   = size_k_32 +^ size_ws_32
+inline_for_extraction let pos_count_32   = size_k_32 +^ size_ws_32 +^ size_whash_32
 
 
 
@@ -163,18 +163,11 @@ let rec ws_upd state wblock t =
     ws.(t) <- wblock.(t);
     ws_upd state wblock (t +^ 1ul) end
   else if t <^ 64ul then begin
-    let _t16 = ws.(t -^ 16ul) in
-    let _t15 = ws.(t -^ 15ul) in
-    let _t7  = ws.(t -^ 7ul) in
-    let _t2  = ws.(t -^ 2ul) in
-
-    let v0 = _sigma1 _t2 in
-    let v1 = _sigma0 _t15 in
-
-    let v = (S32.add_mod v0
-                     (S32.add_mod _t7
-                              (S32.add_mod v1 _t16)))
-    in ws.(t) <- v;
+    let t16 = ws.(t -^ 16ul) in
+    let t15 = ws.(t -^ 15ul) in
+    let t7  = ws.(t -^ 7ul) in
+    let t2  = ws.(t -^ 2ul) in
+    ws.(t) <- ((_sigma1 t2) +%^ (t7 +%^ ((_sigma0 t15) +%^ t16)));
     ws_upd state wblock (t +^ 1ul) end
   else ()
 
@@ -328,7 +321,7 @@ let rec update_multi state data n idx =
   else
 
     (* Get the current block for the data *)
-    let b = Buffer.sub data (U32.mul_mod idx blocksize) blocksize in
+    let b = Buffer.sub data (idx *%^ blocksize) blocksize in
 
     (* Call the update function on the current block *)
     update state b;
@@ -355,7 +348,7 @@ let update_last state data len =
   let len_64 = Buffer.create (uint8_to_sint8 0uy) 8ul in
 
   (* Alocate memory set to zeros for the last two blocks of data *)
-  let blocks = Buffer.create (uint8_to_sint8 0uy) (U32.mul 2ul blocksize) in
+  let blocks = Buffer.create (uint8_to_sint8 0uy) (2ul *^ blocksize) in
 
   (* Copy the data to the final construct *)
   Buffer.blit data 0ul blocks 0ul len;
@@ -365,9 +358,9 @@ let update_last state data len =
 
   (* Compute the final length of the data *)
   let count = state.(pos_count_32) in
-  let l_0 = S64.mul_mod (s32_to_s64 count) (u32_to_s64 blocksize) in
+  let l_0 = S64.((s32_to_s64 count) *%^ (u32_to_s64 blocksize)) in
   let l_1 = u32_to_s64 len in
-  let t_0 = S64.mul_mod S64.(l_0 +^ l_1) (u32_to_s64 8ul) in
+  let t_0 = S64.((l_0 +^ l_1) *%^ (u32_to_s64 8ul)) in
   Hacl.Endianness.hstore64_be len_64 t_0;
 
   (* Verification of how many blocks are necessary *)
@@ -442,7 +435,7 @@ let hash hash input len =
   update_multi ctx input n 0ul;
 
   (* Get the last block *)
-  let input_last = Buffer.sub input (mul_mod n blocksize) r in
+  let input_last = Buffer.sub input (n *%^ blocksize) r in
 
   (* Process the last block of data *)
   update_last ctx input_last r;
