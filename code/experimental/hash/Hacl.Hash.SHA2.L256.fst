@@ -199,7 +199,7 @@ let init state =
 
 (* Step 3 : Perform logical operations on the working variables *)
 [@"c_inline"]
-private val update_inner:
+private val shuffle:
   state :suint32_p{length state = v size_state} ->
   t1    :suint32_t ->
   t2    :suint32_t ->
@@ -209,7 +209,7 @@ private val update_inner:
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 [@"c_inline"]
-let rec update_inner state t1 t2 t =
+let rec shuffle state t1 t2 t =
   if t <^ 64ul then begin
 
     (* Get necessary information from the state *)
@@ -238,7 +238,7 @@ let rec update_inner state t1 t2 t =
     whash.(2ul) <- whash.(1ul);
     whash.(1ul) <- whash.(0ul);
     whash.(0ul) <- (S32.add_mod t1 t2);
-    update_inner state t1 t2 (t +^ 1ul) end
+    shuffle state t1 t2 (t +^ 1ul) end
   else ()
 
 
@@ -268,55 +268,45 @@ let update state data_8 =
   Hacl.Utils.Experimental.load32s_be data_32 data_8 blocksize;
 
   (* Get necessary information from the state *)
-  let whash = Buffer.sub state pos_whash_32 size_whash_32 in
+  let h = Buffer.sub state pos_whash_32 size_whash_32 in
 
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
   ws_upd state data_32 0ul;
 
   (* Step 2 : Initialize the eight working variables *)
-  let input_state0 = index whash 0ul in
-  let input_state1 = index whash 1ul in
-  let input_state2 = index whash 2ul in
-  let input_state3 = index whash 3ul in
-  let input_state4 = index whash 4ul in
-  let input_state5 = index whash 5ul in
-  let input_state6 = index whash 6ul in
-  let input_state7 = index whash 7ul in
+  let a_0 = h.(0ul) in
+  let b_0 = h.(1ul) in
+  let c_0 = h.(2ul) in
+  let d_0 = h.(3ul) in
+  let e_0 = h.(4ul) in
+  let f_0 = h.(5ul) in
+  let g_0 = h.(6ul) in
+  let h_0 = h.(7ul) in
 
   (* Step 3 : Perform logical operations on the working variables *)
-  update_inner state (u32_to_s32 0ul) (u32_to_s32 0ul) 0ul;
-
-  let current_state0 = whash.(0ul) in
-  let current_state1 = whash.(1ul) in
-  let current_state2 = whash.(2ul) in
-  let current_state3 = whash.(3ul) in
-  let current_state4 = whash.(4ul) in
-  let current_state5 = whash.(5ul) in
-  let current_state6 = whash.(6ul) in
-  let current_state7 = whash.(7ul) in
+  shuffle state (u32_to_s32 0ul) (u32_to_s32 0ul) 0ul;
 
   (* Step 4 : Compute the ith intermediate hash value *)
-  let output_state0 = S32.add_mod current_state0 input_state0 in
-  let output_state1 = S32.add_mod current_state1 input_state1 in
-  let output_state2 = S32.add_mod current_state2 input_state2 in
-  let output_state3 = S32.add_mod current_state3 input_state3 in
-  let output_state4 = S32.add_mod current_state4 input_state4 in
-  let output_state5 = S32.add_mod current_state5 input_state5 in
-  let output_state6 = S32.add_mod current_state6 input_state6 in
-  let output_state7 = S32.add_mod current_state7 input_state7 in
-  whash.(0ul) <- output_state0;
-  whash.(1ul) <- output_state1;
-  whash.(2ul) <- output_state2;
-  whash.(3ul) <- output_state3;
-  whash.(4ul) <- output_state4;
-  whash.(5ul) <- output_state5;
-  whash.(6ul) <- output_state6;
-  whash.(7ul) <- output_state7;
+  let a_1 = h.(0ul) in
+  let b_1 = h.(1ul) in
+  let c_1 = h.(2ul) in
+  let d_1 = h.(3ul) in
+  let e_1 = h.(4ul) in
+  let f_1 = h.(5ul) in
+  let g_1 = h.(6ul) in
+  let h_1 = h.(7ul) in
+
+  h.(0ul) <- (a_0 +%^ a_1);
+  h.(1ul) <- (b_0 +%^ b_1);
+  h.(2ul) <- (c_0 +%^ c_1);
+  h.(3ul) <- (d_0 +%^ d_1);
+  h.(4ul) <- (e_0 +%^ e_1);
+  h.(5ul) <- (f_0 +%^ f_1);
+  h.(6ul) <- (g_0 +%^ g_1);
+  h.(7ul) <- (h_0 +%^ h_1);
 
   (* Increment the total number of blocks processed *)
-  let pc = state.(pos_count_32) in
-  let npc = S32.add_mod pc (u32_to_s32 1ul) in
-  state.(pos_count_32) <- npc;
+  state.(pos_count_32) <- (state.(pos_count_32) +%^ (u32_to_s32 1ul));
 
   (* Pop the frame *)
   (**) pop_frame()

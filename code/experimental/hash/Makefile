@@ -7,7 +7,7 @@ FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
 
 verify: Hacl.Hash.SHA2.L256.fst SHA2_256.fst
-	$(FSTAR) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib --include $(HACL_HOME)/code/experimental/utils --use_hints $^
+	$(FSTAR) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/experimental/utils --use_hints $^
 
 
 build:

@@ -19,7 +19,8 @@
       2,
       1,
       [
-        "@query", "equation_Hacl.Hash.SHA2.L256.size_state",
+        "@query", "equation_FStar.UInt32.t",
+        "equation_Hacl.Hash.SHA2.L256.size_state",
         "equation_Hacl.Hash.SHA2.L256.suint32_t", "equation_Hacl.UInt32.t",
         "equation_Hacl.Utils.Experimental.suint32_t",
         "equation_SHA2_256.size_state_256", "equation_SHA2_256.suint32_p",
@@ -58,7 +59,8 @@
       2,
       1,
       [
-        "@query", "equation_Hacl.Hash.SHA2.L256.blocksize",
+        "@query", "equation_FStar.UInt32.t", "equation_FStar.UInt8.t",
+        "equation_Hacl.Hash.SHA2.L256.blocksize",
         "equation_Hacl.Hash.SHA2.L256.size_state",
         "equation_Hacl.Hash.SHA2.L256.suint32_t",
         "equation_Hacl.Hash.SHA2.L256.suint8_t", "equation_Hacl.UInt32.t",
@@ -91,7 +93,8 @@
       2,
       1,
       [
-        "@query", "equation_Hacl.Hash.SHA2.L256.size_state",
+        "@query", "equation_FStar.UInt32.t",
+        "equation_Hacl.Hash.SHA2.L256.size_state",
         "equation_Hacl.Hash.SHA2.L256.suint32_t",
         "equation_Hacl.Hash.SHA2.L256.suint8_t", "equation_Hacl.UInt32.t",
         "equation_Hacl.Utils.Experimental.suint32_t",
@@ -132,7 +135,7 @@
       2,
       1,
       [
-        "@query", "equation_FStar.UInt32.t",
+        "@query", "equation_FStar.UInt32.t", "equation_FStar.UInt8.t",
         "equation_Hacl.Hash.SHA2.L256.size_state",
         "equation_Hacl.Hash.SHA2.L256.suint32_t",
         "equation_Hacl.Hash.SHA2.L256.suint8_t", "equation_Hacl.UInt32.t",
@@ -177,7 +180,8 @@
       2,
       1,
       [
-        "@query", "equation_Hacl.Hash.SHA2.L256.hashsize",
+        "@query", "equation_FStar.UInt32.t", "equation_FStar.UInt8.t",
+        "equation_Hacl.Hash.SHA2.L256.hashsize",
         "equation_Hacl.Hash.SHA2.L256.size_state",
         "equation_Hacl.Hash.SHA2.L256.suint32_t",
         "equation_Hacl.Hash.SHA2.L256.suint8_t", "equation_Hacl.UInt32.t",
@@ -221,7 +225,7 @@
       2,
       1,
       [
-        "@query", "equation_FStar.UInt32.t",
+        "@query", "equation_FStar.UInt32.t", "equation_FStar.UInt8.t",
         "equation_Hacl.Hash.SHA2.L256.hashsize",
         "equation_Hacl.Hash.SHA2.L256.suint8_t", "equation_Hacl.UInt8.t",
         "equation_Hacl.Utils.Experimental.suint8_t",
