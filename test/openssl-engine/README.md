@@ -1,6 +1,10 @@
 Compiling just the OpenSSL/HACL* engines:
 
-x86_64-w64-mingw32-gcc -I../../../openssl/include -L../../../openssl   -I../../../kremlin/kremlib -shared -o haclengine.dll HACLEngine.c -I../../code/curve25519/x25519-c -Wall -lcrypto ../../code/curve25519/x25519-c/Curve25519.c -Wno-unused-variable -Wno-parentheses -DIMPL=IMPL_HACL -O3 -flto
+x86_64-w64-mingw32-gcc -I../../../openssl/include -L../../../openssl
+-I../../../kremlin/kremlib -shared -o haclengine.dll HACLEngine.c
+-I../../code/curve25519/x25519-c -Wall -lcrypto
+../../code/curve25519/x25519-c/Curve25519.c -Wno-unused-variable
+-Wno-parentheses -DIMPL=IMPL_HACL -O3 -flto
 
 For Windows...
 

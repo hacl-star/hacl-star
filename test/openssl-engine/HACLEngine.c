@@ -8,7 +8,9 @@
 //   comparison (EVP_Digest allocates and frees on the heap on every inner loop
 //   in the "speed" test).
 // The Windows/BCrypt implementation now lies in a separate file since the
-// potential for sharing is actually minimal.
+// potential for sharing is actually minimal. This file can potentially be
+// extended with any other algorithm that easily exposes the X25519
+// multiplication.
 #include <stdint.h>
 #include <stdio.h>
 #include <openssl/engine.h>
@@ -25,7 +27,6 @@
 // compiler to override the default HACL implementation.
 #define IMPL_HACL 0
 #define IMPL_OPENSSL 1
-#define IMPL_BCRYPT 2
 #ifndef IMPL
 #define IMPL IMPL_HACL
 #endif
@@ -36,8 +37,6 @@ static const char *engine_Everest_id = "Everest";
 static const char *engine_Everest_name = "Everest engine (OpenSSL crypto)";
 #elif IMPL == IMPL_HACL
 static const char *engine_Everest_name = "Everest engine (HACL* crypto)";
-#elif IMPL == IMPL_BCRYPT
-static const char *engine_Everest_name = "Everest engine (Windows crypto, BCrypt)";
 #else
 #error "Unknown implementation"
 #endif
@@ -110,10 +109,10 @@ static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
     return 1;
 }
 
-static EVP_PKEY_METHOD *hacl_x25519_meth = NULL;
-
 // A lazy initializer
 EVP_PKEY_METHOD *get_hacl_x25519_meth() {
+  static EVP_PKEY_METHOD *hacl_x25519_meth = NULL;
+
   if (hacl_x25519_meth)
     return hacl_x25519_meth;
 
@@ -130,9 +129,6 @@ EVP_PKEY_METHOD *get_hacl_x25519_meth() {
   EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
 #elif IMPL == IMPL_OPENSSL
   ;
-#elif IMPL == IMPL_BCRYPT
-  initialize_bcrypt();
-  EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
 #else
 #error "Unsupported implementation"
 #endif
