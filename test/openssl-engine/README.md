@@ -8,10 +8,11 @@ This directory contains several OpenSSL engines suitable for the `speed` command
   10 SDK's BCrypt/CNG functions.
 
 Use as follows:
-- checkout openssl and compile it;
+- checkout openssl and compile it (using `CC=x86_64-w64-mingw32-gcc ./Configure
+  mingw64` on Windows);
 - possibly overriding OPENSSL_HOME and KREMLIN_HOME, run `make` followed by one
-  of the three targets above
-- `$OPENSSL_HOME/apps/openssl`, possibly prefixed by
+  of the three targets above;
+- run `$OPENSSL_HOME/apps/openssl`, possibly prefixed by
   `DYLD_LIBRARY_PATH=$OPENSSL_HOME` on OSX, `PATH=...` on Windows and
   `LD_LIBRARY_PATH=...` on Linux.
 
