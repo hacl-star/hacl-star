@@ -427,7 +427,7 @@ val accumulate:
 val lemma_append_nil: #a:_ -> s:Seq.seq a -> Lemma (s == Seq.append s Seq.createEmpty)
 let lemma_append_nil #a s = assert (Seq.equal s (Seq.append s Seq.createEmpty))
  
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 200"
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 500"
 let accumulate #i st aadlen aad txtlen cipher  = 
   let h = ST.get() in 
   let acc = CMA.start st in
