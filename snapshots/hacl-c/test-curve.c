@@ -4,6 +4,10 @@
 #include "sodium.h"
 #include "ec_lcl.h"
 
+#ifdef _WIN32
+#include <WinCrypt.h>
+#endif
+
 
 void ossl_curve25519(uint8_t* result, uint8_t* scalar, uint8_t* input){
   X25519(result, scalar, input);
@@ -280,6 +284,24 @@ int32_t perf_curve() {
   sk = malloc(KEYSIZE * ROUNDS * sizeof(char));
   mul = malloc(KEYSIZE * ROUNDS * sizeof(char));
 
+#ifdef _WIN32
+  HCRYPTPROV hCryptProv;
+
+  if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
+    fprintf(stderr, "Error acquiring context\n");
+    exit(1);
+  }
+  if (!CryptGenRandom(hCryptProv, len, sk)) {
+    fprintf(stderr, "Error reading\n");
+    exit(1);
+  }
+  if (!CryptGenRandom(hCryptProv, len, pk)) {
+    fprintf(stderr, "Error reading\n");
+    exit(1);
+  }
+
+  uint64_t res = len;
+#else
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, sk, len);
   if (res != len) {
@@ -291,6 +313,7 @@ int32_t perf_curve() {
     printf("Error on reading, got %llu bytes\n", res);
     return 1;
   }
+#endif
 
   unsigned long long d[ROUNDS];
   cycles a,b;

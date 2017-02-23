@@ -28,6 +28,20 @@ The Makefile relies on GCC-6, because of its superior support for tail-recursive
 but any C compiler should work. The test code relies on libsodium. For like-for-like comparison, 
 compile libsodium with `--disable-asm` so that the tests only use the C code in libsodium.
 
+## Windows
 
+- Compile OpenSSL using the mingw64/64-bit compiler.
 
+  ```
+  CC=x86_64-w64-mingw32-gcc ./Configure mingw64 && make
+  ```
 
+- Download and unzip the mingw64 binary distribution of `libsodium`
+
+- Run the following invocation:
+
+  ```
+  CC="x86_64-w64-mingw32-gcc -Wl,-flto -I ../../../libsodium-win64/include -L../../../libsodium-win64/lib" OPENSSL_HOME=../../../openssl LIBSODIUM_HOME=../../../libsodium-win64/ make test-curve
+  ```
+
+Don't forget to put the directory containing `libsodium-18.dll` on your PATH.

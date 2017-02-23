@@ -169,7 +169,7 @@ val encode_bytes_empty: txt:Seq.seq H8.t -> Lemma
 let encode_bytes_empty txt = ()
 
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 
 val snoc_encode_bytes: s:Seq.seq H8.t -> w:word_16 -> Lemma
   (Seq.equal (Seq.snoc (encode_bytes (reveal_sbytes s)) (reveal_sbytes w)) (encode_bytes (reveal_sbytes (Seq.append w s))))
