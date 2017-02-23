@@ -1,16 +1,32 @@
-Compiling just the OpenSSL/HACL* engines:
+This directory contains several OpenSSL engines suitable for the `speed` command.
+- HaclEngine.dll (or .so): implements x25519 using the HACL* implementation.
+- OpenSSLEngine.dll (or .so): implements x25519 using the original OpenSSL
+  implementation; this is to make sure we're pitting HACL* against the OpenSSL
+  implementation including the same overhead of going through an external
+  engine.
+- BCryptEngine.dll (windows-only): runs the x25519 multiplication using Windows
+  10 SDK's BCrypt/CNG functions.
 
-x86_64-w64-mingw32-gcc -I../../../openssl/include -L../../../openssl
--I../../../kremlin/kremlib -shared -o haclengine.dll HACLEngine.c
--I../../code/curve25519/x25519-c -Wall -lcrypto
-../../code/curve25519/x25519-c/Curve25519.c -Wno-unused-variable
--Wno-parentheses -DIMPL=IMPL_HACL -O3 -flto
+Use as follows:
+- checkout openssl and compile it;
+- possibly overriding OPENSSL_HOME and KREMLIN_HOME, run `make` followed by one
+  of the three targets above
+- `$OPENSSL_HOME/apps/openssl`, possibly prefixed by
+  `DYLD_LIBRARY_PATH=$OPENSSL_HOME` on OSX, `PATH=...` on Windows and
+  `LD_LIBRARY_PATH=...` on Linux.
 
-For Windows...
+Sample session:
 
-cl /c /FoBCryptWrapper.o /I"c:/Program Files (x86)/Windows Kits/10/Include/10.0.14393.0/shared" BCryptWrapper.c
-x86_64-w64-mingw32-gcc -I../../../openssl/include -L../../../openssl   -I../../../kremlin/kremlib -I../../code/curve25519/x25519-c -Wall -lcrypto ../../code/curve25519/x25519-c/Curve25519.c -Wno-unused-variable -Wno-parentheses -DIMPL=IMPL_BCRYPT -O3 HACLEngine.c BCryptWrapper.o -lbcrypt -lcrypto -shared -o EverestBCrypt.dll
+```
+jonathan@chartreuse:~/Code/hacl-star/test/openssl-engine (protz_) $ DYLD_LIBRARY_PATH=../../../openssl/ rlwrap ../../../openssl/apps/openssl
+OpenSSL> engine /Users/jonathan/Code/hacl-star/test/openssl-engine/haclengine.so
+(/Users/jonathan/Code/hacl-star/test/openssl-engine/haclengine.so) Everest engine (HACL* crypto)
+Loaded: (Everest) Everest engine (HACL* crypto)
+OpenSSL> speed -engine Everest ecdhx25519
+engine "Everest" set.
+Doing 253 bit  ecdh's for 10s: 142752 253-bit ECDH ops in 9.97s
+...
+```
 
-Issues with the wrong version of msvcrt.
-
-x86_64-w64-mingw32-gcc -I../../../openssl/include -L../../../openssl   -I../../../kremlin/kremlib -I../../code/curve25519/x25519-c -Wall -lcrypto ../../code/curve25519/x25519-c/Curve25519.c -Wno-unused-variable -Wno-parentheses -DIMPL=IMPL_BCRYPT -O3 HACLEngine.c BCryptWrapper.c -lbcrypt -lcrypto -shared -o EverestBCrypt.dll
+Note the use of an absolute path to locate the `.so` and the `-engine Everest`
+flag for the `speed` command.
