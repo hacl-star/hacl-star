@@ -7,6 +7,7 @@
 #include <bcrypt.h>
 
 #define NT_SUCCESS(Status)          (((NTSTATUS)(Status)) >= 0)
+#define STATUS_UNSUCCESSFUL         ((NTSTATUS)0xC0000001L)
 
 // This file contains an OpenSSL engine that implements X25519 using the Windows
 // BCrypt APIs (i.e. the modern Windows Cryptographic APIs). Since Curve25519 is
@@ -38,35 +39,51 @@ typedef struct {
   BCRYPT_KEY_HANDLE pair;
 } bcrypt_x25519_key;
 
-#define X25519_KEYLEN        32
+// JP: tried out all the values between 252 and 256. 255 is the one that
+// works.
+#define X25519_BITS   255
+#define X25519_KEYLEN 32
 
 static int bcrypt_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
 {
+  NTSTATUS status = STATUS_UNSUCCESSFUL;
+
   // A quick reminder on the OpenSSL "public" API. Keys are defined as a union
   // field (we don't know that) that, for "exotic" key types (i.e. none of the
   // classic RSA, DSA, etc.), features a void* field. The void* field can then
   // point to a custom, heap-allocated data structure.
+  // TODO: no memory management at this stage
   bcrypt_x25519_key *key = malloc(sizeof(bcrypt_x25519_key));
 
   // TODO: no clue whether that generates a proper key pair or not. Are we
   // expected to fill it with random bytes?
-  if (!NT_SUCCESS(BCryptGenerateKeyPair(hAlg, &key->pair, X25519_KEYLEN*8, 0))) {
-    fprintf(stderr, "Cannot generate key pair\n");
+  if (!NT_SUCCESS(status = BCryptGenerateKeyPair(hAlg, &key->pair, X25519_BITS, 0))) {
+    fprintf(stderr, "Cannot generate key pair, status is 0x%lx\n", status);
     return 0;
   }
-  if (!NT_SUCCESS(BCryptFinalizeKeyPair(key->pair, 0))) {
-    fprintf(stderr, "Cannot finalize key pair\n");
+  if (!NT_SUCCESS(status = BCryptFinalizeKeyPair(key->pair, 0))) {
+    fprintf(stderr, "Cannot finalize key pair, status is 0x%lx\n", status);
     return 0;
   }
-  EVP_PKEY_assign(pkey, EVP_PKEY_NONE, key);
+  // Using the same type as the original OpenSSL code... so that the code treats
+  // the key type as an arbitrary void*.
+  // TODO: check why can't use EVP_PKEY_NONE
+  EVP_PKEY_assign(pkey, NID_X25519, key);
   return 1;
 }
 
+// Argh! This is one more of these OpenSSL-style schizophrenic APIs, where
+// depending on whether a parameter is NULL or not, different values are
+// expected...
 static int bcrypt_derive(EVP_PKEY_CTX *ctx, unsigned char *outKey, size_t *outKeyLen)
 {
   *outKeyLen = X25519_KEYLEN;
+
+  // First usage: a query for how many bytes the caller needs to allocate.
   if (outKey == NULL)
-    return 0;
+    return 1;
+
+  // Second usage: writing into outkey the derived secret.
 
   // Note: this does NOT give you the actual bytes for the SECRET_HANDLE. (See
   // http://stackoverflow.com/questions/87694/im-using-wincrypt-for-diffie-hellman-can-i-export-the-shared-secret-in-plain
@@ -81,7 +98,7 @@ static int bcrypt_derive(EVP_PKEY_CTX *ctx, unsigned char *outKey, size_t *outKe
     return 0;
   }
   // Writing out a dummy value in the meanwhile...
-  memset(outKey, 0, X25519_KEYLEN*8);
+  memset(outKey, 0, X25519_KEYLEN);
 
   return 1;
 }
