@@ -3,6 +3,10 @@
 #include <openssl/engine.h>
 #include <openssl/aes.h>
 #include <openssl/ec.h>
+#include <windows.h>
+#include <bcrypt.h>
+
+#define NT_SUCCESS(Status)          (((NTSTATUS)(Status)) >= 0)
 
 // This file contains an OpenSSL engine that implements X25519 using the Windows
 // BCrypt APIs (i.e. the modern Windows Cryptographic APIs). Since Curve25519 is
@@ -28,36 +32,10 @@
 //   a Win10 manifest record and ignorable.
 // > The error message text is completely misleading.
 
-static const char *engine_Everest_id = "Everest";
-static const char *engine_Everest_name = "Everest engine (Windows/CNG/BestCrypt)";
-
-int bind_helper(ENGINE * e, const char *id);
-
-IMPLEMENT_DYNAMIC_CHECK_FN();
-IMPLEMENT_DYNAMIC_BIND_FN(bind_helper);
-
 static BCRYPT_ALG_HANDLE hAlg = NULL;
 
-int Everest_init(ENGINE *e) {
-  if (!NT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_ECDH_ALGORITHM, NULL, 0))) {
-    fprintf(stderr, "Cannot open algorithm provider\n");
-    exit(1);
-  }
-  if (!NT_SUCCESS(BCryptSetProperty(hAlg,
-          BCRYPT_ECC_CURVE_NAME,
-          (PUCHAR) BCRYPT_ECC_CURVE_25519,
-          sizeof(BCRYPT_ECC_CURVE_25519),
-          0))) {
-    fprintf(stderr, "Cannot select the right curve\n");
-    exit(1);
-  }
-
-  return 1;
-}
-
 typedef struct {
-  BCRYPT_KEY_HANDLE priv;
-  BCRYPT_KEY_HANDLE pub;
+  BCRYPT_KEY_HANDLE pair;
 } bcrypt_x25519_key;
 
 #define X25519_KEYLEN        32
@@ -72,19 +50,15 @@ static int bcrypt_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
 
   // TODO: no clue whether that generates a proper key pair or not. Are we
   // expected to fill it with random bytes?
-  if (!NT_SUCCESS(BCryptGenerateKeyPair(hAlg, &key->priv, X25519_KEYLEN*8, 0)) ||
-      !NT_SUCCESS(BCryptFinalizeKeyPair(key->priv, 0)))
-  {
-    fprintf(stderr, "Cannot generate priv key pair\n");
+  if (!NT_SUCCESS(BCryptGenerateKeyPair(hAlg, &key->pair, X25519_KEYLEN*8, 0))) {
+    fprintf(stderr, "Cannot generate key pair\n");
     return 0;
   }
-  if (!NT_SUCCESS(BCryptGenerateKeyPair(hAlg, &key->pub, X25519_KEYLEN*8, 0)) ||
-      !NT_SUCCESS(BCryptFinalizeKeyPair(key->pub, 0)))
-  {
-    fprintf(stderr, "Cannot generate pub key pair\n");
+  if (!NT_SUCCESS(BCryptFinalizeKeyPair(key->pair, 0))) {
+    fprintf(stderr, "Cannot finalize key pair\n");
     return 0;
   }
-  EVP_PKEY_assign(pkey, key);
+  EVP_PKEY_assign(pkey, EVP_PKEY_NONE, key);
   return 1;
 }
 
@@ -99,9 +73,10 @@ static int bcrypt_derive(EVP_PKEY_CTX *ctx, unsigned char *outKey, size_t *outKe
   // for something vaguely related). BCryptExportKey works for a KEY_HANDLE, not
   // a SECRET_HANDLE... and the type is defined as void* in the public Windows
   // 10 headers.
-  bcrypt_x25519_key *key = EVP_PKEY_get0(ctx);
+  bcrypt_x25519_key *pkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_pkey(ctx));
+  bcrypt_x25519_key *peerkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_peerkey(ctx));
   BCRYPT_SECRET_HANDLE hSecret = NULL;
-  if (!NT_SUCCESS(BCryptSecretAgreement(key->priv, key->pub, &hSecret, 0))) {
+  if (!NT_SUCCESS(BCryptSecretAgreement(pkey->pair, peerkey->pair, &hSecret, 0))) {
     fprintf(stderr, "Cannot compute agreement\n");
     return 0;
   }
@@ -118,19 +93,7 @@ static int bcrypt_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
     return -2;
 }
 
-
-EVP_PKEY_METHOD *get_bcrypt_x25519_meth() {
-  static EVP_PKEY_METHOD *bcrypt_x25519_meth = NULL;
-
-  if (bcrypt_x25519_meth)
-    return bcrypt_x25519_meth;
-
-  bcrypt_x25519_meth = EVP_PKEY_meth_new(NID_X25519, 0);
-  EVP_PKEY_meth_set_derive(bcrypt_x25519_meth, NULL, bcrypt_derive);
-  EVP_PKEY_meth_set_ctrl(bcrypt_x25519_meth, NULL, bcrypt_ctrl);
-  EVP_PKEY_meth_set_keygen(bcrypt_x25519_meth, NULL, bcrypt_keygen);
-  return bcrypt_x25519_meth;
-}
+// OpenSSL engine-specific registration ---------------------------------------
 
 static int Everest_pkey_meths_nids(const int **nids)
 {
@@ -149,17 +112,46 @@ static int Everest_pkey_meths_nids(const int **nids)
   return count;
 }
 
+static EVP_PKEY_METHOD *bcrypt_x25519_meth = NULL;
+
 int Everest_pkey_meths(ENGINE *e, EVP_PKEY_METHOD **method, const int **nids, int nid)
 {
   if (method == NULL) {
     return Everest_pkey_meths_nids(nids);
   } else if (nid == NID_X25519) {
-    *method = get_hacl_x25519_meth();
+    *method = bcrypt_x25519_meth;
     return 1;
   } else {
     return 0;
   }
 }
+
+int Everest_init(ENGINE *e) {
+  // Initialize the global variables needed for BCrypt
+  if (!NT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_ECDH_ALGORITHM, NULL, 0))) {
+    fprintf(stderr, "Cannot open algorithm provider\n");
+    return 0;
+  }
+  if (!NT_SUCCESS(BCryptSetProperty(hAlg,
+          BCRYPT_ECC_CURVE_NAME,
+          (PUCHAR) BCRYPT_ECC_CURVE_25519,
+          sizeof(BCRYPT_ECC_CURVE_25519),
+          0))) {
+    fprintf(stderr, "Cannot select the right curve\n");
+    return 0;
+  }
+
+  // Initialize our new method
+  bcrypt_x25519_meth = EVP_PKEY_meth_new(NID_X25519, 0);
+  EVP_PKEY_meth_set_derive(bcrypt_x25519_meth, NULL, bcrypt_derive);
+  EVP_PKEY_meth_set_ctrl(bcrypt_x25519_meth, bcrypt_ctrl, NULL);
+  EVP_PKEY_meth_set_keygen(bcrypt_x25519_meth, NULL, bcrypt_keygen);
+
+  return 1;
+}
+
+static const char *engine_Everest_id = "Everest";
+static const char *engine_Everest_name = "Everest engine (Windows/CNG/BestCrypt)";
 
 int bind_helper(ENGINE * e, const char *id)
 {
@@ -172,3 +164,6 @@ int bind_helper(ENGINE * e, const char *id)
 
   return 1;
 }
+
+IMPLEMENT_DYNAMIC_CHECK_FN();
+IMPLEMENT_DYNAMIC_BIND_FN(bind_helper);
