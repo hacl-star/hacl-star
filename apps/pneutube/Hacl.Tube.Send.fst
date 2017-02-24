@@ -80,11 +80,6 @@ noeq type open_result = {
 val opened: FileIO.Types.fresult -> FileIO.Types.file_stat -> (* streamID *) uint8_p -> Tot open_result
 let opened r fs sid = {r = r; sid = sid; fs = fs}
 
-assume val sent:
-  FStar.HyperStack.mem ->
-  pkA: seq h8 -> pkB: seq h8 -> sid:seq h8 -> FileIO.Types.file_stat -> (seq h8) ->
-  GTot bool
-
 
 val makeStreamID: s:streamID -> StackInline unit
   (requires (fun h -> live h s))
