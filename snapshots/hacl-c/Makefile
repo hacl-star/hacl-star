@@ -60,5 +60,19 @@ test-box:
 	HSalsa20.o Salsa20.o Poly1305_64.o Curve25519.o kremlib.c testlib.c Hacl_Policies.c NaCl.c test-box.c -l sodium -o test-box.exe
 	./test-box.exe
 
+lib:
+	$(CC) -fpic -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Hacl_Symmetric_HSalsa20.c -c -o HSalsa20.o
+	$(CC) -fpic -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Salsa20.c -c -o Salsa20.o
+	$(CC) -fpic -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Poly1305_64.c -c -o Poly1305_64.o
+	$(CC) -fpic -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Curve25519.c -c -o Curve25519.o
+	$(CC) -shared -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	HSalsa20.o Salsa20.o Poly1305_64.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c \
+	-o libhacl.so
+
+
 clean:
 	rm -rf *~ *.exe *.out 

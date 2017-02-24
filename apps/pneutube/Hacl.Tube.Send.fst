@@ -201,7 +201,7 @@ private let rec file_send_loop fh sb immut_state mut_state seqno len =
     let h1 = ST.get() in
     lemma_reveal_modifies_1 nonce h0 h1;
     let seqno = H64.(seqno +^ Hacl.Cast.uint64_to_sint64 1uL) in
-    let _ = Hacl.Box.crypto_box_easy_afternm ciphertext next blocksize nonce key in
+    let _ = NaCl.crypto_box_easy_afternm ciphertext next blocksize nonce key in
     let h2 = ST.get() in
     lemma_reveal_modifies_1 mut_state h1 h2;
     let sock_res = tcp_write_all sb ciphertext ciphersize in
@@ -258,7 +258,7 @@ private let file_send_fragments sb fb immut_state mut_state seqno fragments rem'
 	lemma_reveal_modifies_1 nonce h0 h1;
         Math.Lemmas.modulo_lemma (U64.v rem') (pow2 32);
         let clen = U32.(Int.Cast.uint64_to_uint32 rem' +^ 16ul) in
-        let _ = Hacl.Box.crypto_box_easy_afternm (sub ciphertext 0ul clen) next rem' nonce key in
+        let _ = NaCl.crypto_box_easy_afternm (sub ciphertext 0ul clen) next rem' nonce key in
 	let h2 = ST.get() in
 	lemma_reveal_modifies_1 ciphertext h1 h2;
 	tcp_write_all sb ciphertext (cipherlen rem')
@@ -316,7 +316,7 @@ private let file_flush_all sb fb immut_state mut_state ctr rem' =
                             let seqno = H64.(seqno +%^ one_64) in
                             let h = ST.get() in
                             let ciphertext' = sub ciphertext 0ul (U32.(headersize_32 +^ 16ul)) in
-                            let _ = Hacl.Box.crypto_box_easy_afternm ciphertext' header headersize
+                            let _ = NaCl.crypto_box_easy_afternm ciphertext' header headersize
                                                                      nonce key in
                             let h1 = ST.get() in
                             lemma_reveal_modifies_1 mut_state h0 h1;
