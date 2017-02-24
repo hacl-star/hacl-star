@@ -128,6 +128,7 @@ private let fexpand output input =
 
 
 open Hacl.Spec.Endianness
+open FStar.Endianness
 
 private val store_4:
   output:uint8_p{length output = 32} ->
@@ -168,10 +169,10 @@ private let store_4 output v0 v1 v2 v3 =
   no_upd_lemma_1 h3 h4 b3 b0;
   no_upd_lemma_1 h3 h4 b3 b1;
   no_upd_lemma_1 h3 h4 b3 b2;
-  FStar.Endianness.lemma_little_endian_inj (as_seq h4 b0) (hlittle_bytes 8ul (v v0));
-  FStar.Endianness.lemma_little_endian_inj (as_seq h4 b1) (hlittle_bytes 8ul (v v1));
-  FStar.Endianness.lemma_little_endian_inj (as_seq h4 b2) (hlittle_bytes 8ul (v v2));
-  FStar.Endianness.lemma_little_endian_inj (as_seq h4 b3) (hlittle_bytes 8ul (v v3));
+  FStar.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 b0)) (little_bytes 8ul (v v0));
+  FStar.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 b1)) (little_bytes 8ul (v v1));
+  FStar.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 b2)) (little_bytes 8ul (v v2));
+  FStar.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 b3)) (little_bytes 8ul (v v3));
   Seq.lemma_eq_intro (as_seq h4 output) 
                      FStar.Seq.(hlittle_bytes 8ul (v v0) @| hlittle_bytes 8ul (v v1)
                          @| hlittle_bytes 8ul (v v2) @| hlittle_bytes 8ul (v v3))
