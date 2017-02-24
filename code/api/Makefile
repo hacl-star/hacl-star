@@ -12,16 +12,45 @@ FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../salsa-family/interfaces --incude ../curve25519/interfaces \
 		--include ../poly1305/interfaces
 
+
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+		--include ../lib/ --include ../salsa-family/interfaces --incude ../curve25519/interfaces \
+		--include ../poly1305/interfaces
+
+
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
 		-I ../poly1305/interfaces -I ../../specs \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
 
+# Lax typechecking against the restricted integer interface
+%.fst-ct: %.fst
+	$(FSTAR_CT) --lax $^
 
+all-ct: $(addsuffix -ct, $(API_FILES))
+
+# Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints
+	$(FSTARB) $^ --use_hints --record_hints
 
-verify: $(addsuffix -verify, $(API_FILES))
+all-ver: $(addsuffix -verify, $(API_FILES))
+
+# Minimal lax typechecking, pre-requisite to any extraction
+%.fst-lax: %.fst
+	$(FSTARB) --lax $^
+
+all-lax: $(addsuffix -lax, $(API_FILES))
+
+# Hints regeneration
+%.fst-hints: %.fst
+	-$(FSTARB) $^ --use_hints --record_hints
+
+all-hints: $(addsuffix -hints, $(API_FILES))
+
+# For CI, all modules restricted from incomplete or slow ones
+all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(API_FILES)))
+
+api: verify
 
 extract-c:
 	mkdir -p api-c
@@ -35,15 +64,3 @@ extract-c:
 
 clean:
 	rm -rf api-c *~ *.exe *.graph *.o *.out
-
-# extract-c:
-# 	mkdir -p api-c
-# 	$(KREMLIN_HOME)/krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir api-c -verbose \
-# 		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
-# 		-I ../salsa-family -I ../poly1305 -I ../curve25519 $(API_FILES) \
-# 		-I ../../specs \
-# 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
-# 		-drop Hacl.UInt128  -drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-# 		-bundle "Poly1305_64=Poly1305_64,Hacl.Bignum.\*,Hacl.Spec.\*" \
-# 		-bundle "Curve25510=Curve25519,Hacl.Bignum.\*,Hacl.Spec.\*" \
-# 		$(FSTAR_HOME)/../kremlin/kremlib/testlib.c -add-include '"testlib.h"' -skip-compilation
