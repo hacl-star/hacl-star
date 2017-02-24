@@ -75,4 +75,4 @@ lib:
 
 
 clean:
-	rm -rf *~ *.exe *.out 
+	rm -rf *~ *.exe *.out *.o
