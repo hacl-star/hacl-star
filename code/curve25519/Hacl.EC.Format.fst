@@ -57,67 +57,6 @@ let point_inf () =
   p
 
 
-(* val alloc_point: unit -> StackInline point *)
-(*   (requires (fun h -> true)) *)
-(*   (ensures (fun h0 p h1 -> modifies_0 h0 h1 /\ live h1 p)) *)
-(* let alloc_point () = *)
-(*   let buf = create limb_zero 10ul in *)
-(*   let x = Buffer.sub buf 0ul 5ul in *)
-(*   let y = Buffer.sub buf 0ul 5ul in *)
-(*   let z = Buffer.sub buf 5ul 5ul in *)
-(*   make x y z *)
-
-
-(* private val load64_le: *)
-(*   b:uint8_p{length b = 8} -> *)
-(*   Stack limb *)
-(*     (requires (fun h -> Buffer.live h b)) *)
-(*     (ensures  (fun h0 r h1 -> h0 == h1 /\ Buffer.live h0 b *)
-(*       /\ Hacl.Spec.EC.Format.load64_le_spec (as_seq h1 b) == r *)
-(*     )) *)
-(* private let load64_le b = *)
-(*   assert_norm(pow2 32 = 0x100000000); *)
-(*   let b0 = b.(0ul) in *)
-(*   let b1 = b.(1ul) in *)
-(*   let b2 = b.(2ul) in *)
-(*   let b3 = b.(3ul) in *)
-(*   let b4 = b.(4ul) in *)
-(*   let b5 = b.(5ul) in *)
-(*   let b6 = b.(6ul) in *)
-(*   let b7 = b.(7ul) in *)
-(*   Hacl.Bignum.Limb.( *)
-(*     sint8_to_sint64 b0 *)
-(*     |^ (sint8_to_sint64 b1 <<^ 8ul) *)
-(*     |^ (sint8_to_sint64 b2 <<^ 16ul) *)
-(*     |^ (sint8_to_sint64 b3 <<^ 24ul) *)
-(*     |^ (sint8_to_sint64 b4 <<^ 32ul) *)
-(*     |^ (sint8_to_sint64 b5 <<^ 40ul) *)
-(*     |^ (sint8_to_sint64 b6 <<^ 48ul) *)
-(*     |^ (sint8_to_sint64 b7 <<^ 56ul) *)
-(*   ) *)
-
-
-(* private val store64_le: *)
-(*   b:uint8_p{length b = 8} -> *)
-(*   z:limb -> *)
-(*   Stack unit *)
-(*     (requires (fun h -> Buffer.live h b)) *)
-(*     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ Buffer.live h1 b *)
-(*       /\ as_seq h1 b == Hacl.Spec.EC.Format.store64_le_spec z *)
-(*     )) *)
-(* #set-options "--lax" *)
-(* private let store64_le b z = *)
-(*   assert_norm(pow2 32 = 0x100000000); *)
-(*   let open Hacl.Bignum.Limb in *)
-(*   b.(0ul) <- sint64_to_sint8 z; *)
-(*   b.(1ul) <- sint64_to_sint8 (z >>^ 8ul); *)
-(*   b.(2ul) <- sint64_to_sint8 (z >>^ 16ul); *)
-(*   b.(3ul) <- sint64_to_sint8 (z >>^ 24ul); *)
-(*   b.(4ul) <- sint64_to_sint8 (z >>^ 32ul); *)
-(*   b.(5ul) <- sint64_to_sint8 (z >>^ 40ul); *)
-(*   b.(6ul) <- sint64_to_sint8 (z >>^ 48ul); *)
-(*   b.(7ul) <- sint64_to_sint8 (z >>^ 56ul) *)
-
 open Hacl.Endianness
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -187,6 +126,7 @@ private let fexpand output input =
   UInt.logand_mask (v (i4 >>^ 12ul)) (51);
   upd_5 output output0 output1 output2 output3 output4
 
+
 open Hacl.Spec.Endianness
 
 private val store_4:
@@ -204,15 +144,38 @@ private let store_4 output v0 v1 v2 v3 =
   let b2 = Buffer.sub output 16ul 8ul in
   let b3 = Buffer.sub output 24ul 8ul in
   let h0 = ST.get() in
+  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 8)   (as_seq h0 b0);
+  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 8 16)  (as_seq h0 b1);
+  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 16 24) (as_seq h0 b2);
+  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 24 32) (as_seq h0 b3);
   hstore64_le b0 v0;
   let h1 = ST.get() in
+  no_upd_lemma_1 h0 h1 b0 b1;
+  no_upd_lemma_1 h0 h1 b0 b2;
+  no_upd_lemma_1 h0 h1 b0 b3;
   hstore64_le b1 v1;
   let h2 = ST.get() in
+  no_upd_lemma_1 h1 h2 b1 b0;
+  no_upd_lemma_1 h1 h2 b1 b2;
+  no_upd_lemma_1 h1 h2 b1 b3;
   hstore64_le b2 v2;
   let h3 = ST.get() in
+  no_upd_lemma_1 h2 h3 b2 b0;
+  no_upd_lemma_1 h2 h3 b2 b1;
+  no_upd_lemma_1 h2 h3 b2 b3;
   hstore64_le b3 v3;
   let h4 = ST.get() in
-  ()
+  no_upd_lemma_1 h3 h4 b3 b0;
+  no_upd_lemma_1 h3 h4 b3 b1;
+  no_upd_lemma_1 h3 h4 b3 b2;
+  FStar.Endianness.lemma_little_endian_inj (as_seq h4 b0) (hlittle_bytes 8ul (v v0));
+  FStar.Endianness.lemma_little_endian_inj (as_seq h4 b1) (hlittle_bytes 8ul (v v1));
+  FStar.Endianness.lemma_little_endian_inj (as_seq h4 b2) (hlittle_bytes 8ul (v v2));
+  FStar.Endianness.lemma_little_endian_inj (as_seq h4 b3) (hlittle_bytes 8ul (v v3));
+  Seq.lemma_eq_intro (as_seq h4 output) 
+                     FStar.Seq.(hlittle_bytes 8ul (v v0) @| hlittle_bytes 8ul (v v1)
+                         @| hlittle_bytes 8ul (v v2) @| hlittle_bytes 8ul (v v3))
+
 
 private val fcontract: output:uint8_p{length output = 32} -> input:felem -> Stack unit
   (requires (fun h -> Buffer.live h output /\ Buffer.live h input))
@@ -279,10 +242,6 @@ private let fcontract output input =
   let o2 = (t2 >>^ 26ul) |^ (t3 <<^ 25ul) in
   let o3 = (t3 >>^ 39ul) |^ (t4 <<^ 12ul) in
   store_4 output o0 o1 o2 o3
-  (* hstore64_le (Buffer.sub output 0ul  8ul) o0; *)
-  (* hstore64_le (Buffer.sub output 8ul  8ul) o1; *)
-  (* hstore64_le (Buffer.sub output 16ul 8ul) o2; *)
-  (* hstore64_le (Buffer.sub output 24ul 8ul) o3 *)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
