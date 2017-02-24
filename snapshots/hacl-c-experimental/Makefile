@@ -19,7 +19,7 @@ test-random:
 
 test-sha2:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	-I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c SHA2.c test-sha2.c -o test-sha2.exe
+	-I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c SHA2_256.c test-sha2.c -o test-sha2.exe
 	./test-sha2.exe
 
 clean:

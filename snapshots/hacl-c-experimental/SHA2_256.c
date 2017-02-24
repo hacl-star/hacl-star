@@ -1,4 +1,4 @@
-#include "SHA2.h"
+#include "SHA2_256.h"
 
 static uint32_t Hacl_Utils_Experimental_u32_to_s32(uint32_t a)
 {
