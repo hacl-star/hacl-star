@@ -89,14 +89,14 @@ int32_t test_api()
   int i;
 
   /* Testing the secret box primitives */  
-  crypto_secretbox_detached(ciphertext+32, mac, msg+32, MESSAGE_LEN, nonce, key); 
-  res = Hacl_SecretBox_crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key); 
+  crypto_secretbox_detached(ciphertext, mac, msg+32, MESSAGE_LEN, nonce, key); 
+  res = NaCl_crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key); 
   printf("HACL decryption of libsodium encryption was a %s.\n", res == 0 ? "success" : "failure");
-  TestLib_compare_and_print("HACL secretbox", msg+32, decrypted+32, MESSAGE_LEN-32);
+  TestLib_compare_and_print("HACL secretbox", msg+32, decrypted, MESSAGE_LEN-32);
   memset(decrypted,0,MESSAGE_LEN);
 
-  Hacl_SecretBox_crypto_secretbox_easy(ciphertext, msg, MESSAGE_LEN, nonce, key);
-  res = crypto_secretbox_open_easy(decrypted, ciphertext+16, MESSAGE_LEN+16, nonce, key);
+  NaCl_crypto_secretbox_easy(ciphertext, msg+32, MESSAGE_LEN, nonce, key);
+  res = crypto_secretbox_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, key);
   printf("Libsodium decryption of HACL encryption was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("HACL secretbox", msg+32, decrypted, MESSAGE_LEN-32);
   return exit_success;
@@ -119,7 +119,7 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Hacl_SecretBox_crypto_secretbox_easy(ciphertext, plaintext, len, nonce, key);
+    NaCl_crypto_secretbox_easy(ciphertext, plaintext, len, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

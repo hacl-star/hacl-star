@@ -41,16 +41,23 @@ hints: hints-code hints-crypto
 
 verify: verify-code verify-crypto
 
-snapshot: extract-c-code
+build-snapshot:
 	mkdir -p snapshot
 	cp ../code/poly1305/poly-c/Poly1305_64.* ../code/curve25519/x25519-c/Curve25519.* \
 		../code/salsa-family/chacha-c/Chacha20.* ../code/salsa-family/salsa-c/Salsa20.* \
-		snapshot
-	cp $(addprefix ../snapshots/hacl-c/, test-chacha.c test-curve.c testlib.c testlib.h test-poly.c test-salsa.c Makefile) snapshot
+		../code/salsa-family/hsalsa-c/Hacl_Symmetric_HSalsa20.* snapshot
+	cp $(addprefix ../snapshots/hacl-c/, test-chacha.c test-curve.c testlib.c testlib.h test-poly.c test-salsa.c test-secretbox.c test-box.c Makefile) snapshot
 	cp $(addprefix $(KREMLIN_HOME)/kremlib/, native128.* kremlib.* gcc_compat.h) snapshot
+	cp $(addprefix ../code/api/api-c/, Hacl_Policies.* Hacl_SecretBox.* Hacl_Box.* NaCl.*) snapshot
 
-test-snapshot: snapshot
-	$(MAKE) -C snapshot test-chacha test-curve test-poly test-salsa
+test-snapshot:
+	$(MAKE) -C snapshot test-chacha test-curve test-poly test-salsa test-secretbox test-box
+
+snapshot:
+	$(MAKE) extract-c-code
+	$(MAKE) build-snapshot
+	$(MAKE) test-snapshot
+
 
 clean:
 	$(MAKE) -C ../code clean

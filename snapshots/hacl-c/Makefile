@@ -36,7 +36,7 @@ test-curve:
 
 test-secretbox:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
-	HSalsa20.c -c -o HSalsa20.o
+	Hacl_Symmetric_HSalsa20.c -c -o HSalsa20.o
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
 	Salsa20.c -c -o Salsa20.o
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
@@ -49,7 +49,7 @@ test-secretbox:
 
 test-box:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
-	HSalsa20.c -c -o HSalsa20.o
+	Hacl_Symmetric_HSalsa20.c -c -o HSalsa20.o
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
 	Salsa20.c -c -o Salsa20.o
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \

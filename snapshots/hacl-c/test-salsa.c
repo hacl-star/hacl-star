@@ -1,8 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
 #include "Salsa20.h"
-#include "Poly1305_64.h"
-#include "HSalsa20.h"
 #include "sodium.h"
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){

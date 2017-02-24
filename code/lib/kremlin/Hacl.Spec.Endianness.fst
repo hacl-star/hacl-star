@@ -55,3 +55,13 @@ let hlittle_endian (s:Seq.seq H8.t) : GTot nat =
 unfold inline_for_extraction
 let hbig_endian (s:Seq.seq H8.t) : GTot nat =
   big_endian s
+
+open FStar.Mul
+
+unfold inline_for_extraction
+let hlittle_bytes  (len:U32.t) (n:nat{n < pow2 (8 * U32.v len)}) : GTot (b:Seq.seq H8.t{Seq.length b = U32.v len}) =
+  little_bytes len n
+
+unfold inline_for_extraction
+let hbig_bytes (len:U32.t) (n:nat{n < pow2 (8 * U32.v len)}) : GTot (b:Seq.seq H8.t{Seq.length b = U32.v len}) =
+  big_bytes len n
