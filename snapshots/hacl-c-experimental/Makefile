@@ -22,5 +22,10 @@ test-sha2:
 	-I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c SHA2_256.c test-sha2.c -o test-sha2.exe
 	./test-sha2.exe
 
+test-hmac-sha2:
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
+	-I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c HMAC_SHA2_256.c test-hmac-sha2.c -o test-hmac-sha2.exe
+	./test-hmac-sha2.exe
+
 clean:
 	rm -rf *~ *.exe *.out 
