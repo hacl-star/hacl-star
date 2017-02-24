@@ -67,24 +67,11 @@ let setup (k:key) (n:nonce) (c:counter): state =
   let c64 = UInt64.uint_to_t c in
   let c0 = FStar.Int.Cast.uint64_to_uint32 c64 in
   let c1 = FStar.Int.Cast.uint64_to_uint32 FStar.UInt64.(c64 >>^ 32ul) in
-  (set 0  constant0 @
-   set 5  constant1 @
-   set 10 constant2 @
-   set 15 constant3 @
-   set 1  (index ks 0) @
-   set 2  (index ks 1) @ 
-   set 3  (index ks 2) @ 
-   set 4  (index ks 3) @ 
-   set 11  (index ks 4) @
-   set 12  (index ks 5) @ 
-   set 13  (index ks 6) @ 
-   set 14  (index ks 7) @ 
-   set 6  (index ns 0) @ 
-   set 7  (index ns 1) @ 
-   set 8  c0 @ 
-   set 9  c1) 
-  (create 16 0ul)
-
+  createL [constant0    ; (index ks 0) ; (index ks 1) ; (index ks 2) ;
+           (index ks 3) ; constant1    ; (index ns 0) ; (index ns 1) ;
+	   c0 	     	; c1	       ; constant2    ; (index ks 4) ; 
+	   (index ks 5) ; (index ks 6) ; (index ks 7) ; constant3    ]
+	   
 
 let salsa20_block (k:key) (n:nonce) (c:counter): block =
     let st = setup k n c in
