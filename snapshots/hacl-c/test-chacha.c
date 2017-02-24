@@ -323,9 +323,7 @@ int32_t test_chacha()
   memset(ciphertext, 0, len * sizeof ciphertext[0]); 
   uint32_t counter = (uint32_t )1;
   uint32_t ctx[32] = { 0 };
-  Hacl_Symmetric_Chacha20_chacha_keysetup(ctx, key);
-  Hacl_Symmetric_Chacha20_chacha_ietf_ivsetup(ctx, nonce, counter);
-  Hacl_Symmetric_Chacha20_chacha_encrypt_bytes(ctx, plaintext, ciphertext, len);
+  Chacha20_chacha20(ciphertext,plaintext,len, key, nonce, counter);
   TestLib_compare_and_print("HACL Chacha20", expected, ciphertext, len);
 
   crypto_stream_chacha20_ietf_xor_ic(ciphertext,plaintext, len, nonce, 1, key);
@@ -354,9 +352,7 @@ int32_t perf_chacha() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Hacl_Symmetric_Chacha20_chacha_keysetup(ctx, key);
-    Hacl_Symmetric_Chacha20_chacha_ietf_ivsetup(ctx, nonce, counter);
-    Hacl_Symmetric_Chacha20_chacha_encrypt_bytes(ctx, plain, plain, len);
+  Chacha20_chacha20(cipher,plain,len, key, nonce, counter);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

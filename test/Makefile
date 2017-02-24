@@ -44,7 +44,7 @@ verify: verify-code verify-crypto
 build-snapshot:
 	mkdir -p snapshot
 	cp ../code/poly1305/poly-c/Poly1305_64.* ../code/curve25519/x25519-c/Curve25519.* \
-		../code/salsa-family/chacha-c/Chacha20.* ../code/salsa-family/salsa-c/Salsa20.* \
+		../code/salsa-family/chacha-c/Chacha20.* ../code/salsa-family/loops.h ../code/salsa-family/salsa-c/Salsa20.* \
 		../code/salsa-family/hsalsa-c/Hacl_Symmetric_HSalsa20.* snapshot
 	cp $(addprefix ../snapshots/hacl-c/, test-chacha.c test-curve.c testlib.c testlib.h test-poly.c test-salsa.c test-secretbox.c test-box.c Makefile) snapshot
 	cp $(addprefix $(KREMLIN_HOME)/kremlib/, native128.* kremlib.* gcc_compat.h) snapshot

@@ -163,6 +163,12 @@ private val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack u
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
     /\ as_seq h1 output == Hacl.Spec.EC.Format.fexpand_spec (as_seq h0 input)))
 private let fexpand output input =
+  let h = ST.get() in
+  Seq.lemma_eq_intro (Seq.slice (as_seq h input) 0 8) (as_seq h (Buffer.sub input 0ul 8ul));
+  Seq.lemma_eq_intro (Seq.slice (as_seq h input) 6 14) (as_seq h (Buffer.sub input 6ul 8ul));
+  Seq.lemma_eq_intro (Seq.slice (as_seq h input) 12 20) (as_seq h (Buffer.sub input 12ul 8ul));
+  Seq.lemma_eq_intro (Seq.slice (as_seq h input) 19 27) (as_seq h (Buffer.sub input 19ul 8ul));
+  Seq.lemma_eq_intro (Seq.slice (as_seq h input) 24 32) (as_seq h (Buffer.sub input 24ul 8ul));
   let mask_51 = uint64_to_limb 0x7ffffffffffffuL in
   let i0 = hload64_le (Buffer.sub input 0ul 8ul) in
   let i1 = hload64_le (Buffer.sub input 6ul 8ul) in
@@ -181,6 +187,32 @@ private let fexpand output input =
   UInt.logand_mask (v (i4 >>^ 12ul)) (51);
   upd_5 output output0 output1 output2 output3 output4
 
+open Hacl.Spec.Endianness
+
+private val store_4:
+  output:uint8_p{length output = 32} ->
+  v1:limb -> v2:limb -> v3:limb -> v4:limb ->
+  Stack unit
+    (requires (fun h -> Buffer.live h output))
+    (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
+      /\ (let s = as_seq h1 output in
+         s == FStar.Seq.(hlittle_bytes 8ul (v v1) @| hlittle_bytes 8ul (v v2)
+                         @| hlittle_bytes 8ul (v v3) @| hlittle_bytes 8ul (v v4)))))
+private let store_4 output v0 v1 v2 v3 =
+  let b0 = Buffer.sub output 0ul  8ul in
+  let b1 = Buffer.sub output 8ul  8ul in
+  let b2 = Buffer.sub output 16ul 8ul in
+  let b3 = Buffer.sub output 24ul 8ul in
+  let h0 = ST.get() in
+  hstore64_le b0 v0;
+  let h1 = ST.get() in
+  hstore64_le b1 v1;
+  let h2 = ST.get() in
+  hstore64_le b2 v2;
+  let h3 = ST.get() in
+  hstore64_le b3 v3;
+  let h4 = ST.get() in
+  ()
 
 private val fcontract: output:uint8_p{length output = 32} -> input:felem -> Stack unit
   (requires (fun h -> Buffer.live h output /\ Buffer.live h input))
@@ -188,7 +220,6 @@ private val fcontract: output:uint8_p{length output = 32} -> input:felem -> Stac
     /\ Buffer.live h1 output /\ modifies_1 output h0 h1
     /\ as_seq h1 output == Hacl.Spec.EC.Format.fcontract_spec (as_seq h0 input)
   ))
-#set-options "--lax"
 private let fcontract output input =
   let mask_51 = uint64_to_limb 0x7ffffffffffffuL in
   let nineteen = uint64_to_limb 19uL in
@@ -247,10 +278,11 @@ private let fcontract output input =
   let o1 = (t1 >>^ 13ul) |^ (t2 <<^ 38ul) in
   let o2 = (t2 >>^ 26ul) |^ (t3 <<^ 25ul) in
   let o3 = (t3 >>^ 39ul) |^ (t4 <<^ 12ul) in
-  hstore64_le (Buffer.sub output 0ul  8ul) o0;
-  hstore64_le (Buffer.sub output 8ul  8ul) o1;
-  hstore64_le (Buffer.sub output 16ul 8ul) o2;
-  hstore64_le (Buffer.sub output 24ul 8ul) o3
+  store_4 output o0 o1 o2 o3
+  (* hstore64_le (Buffer.sub output 0ul  8ul) o0; *)
+  (* hstore64_le (Buffer.sub output 8ul  8ul) o1; *)
+  (* hstore64_le (Buffer.sub output 16ul 8ul) o2; *)
+  (* hstore64_le (Buffer.sub output 24ul 8ul) o3 *)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
