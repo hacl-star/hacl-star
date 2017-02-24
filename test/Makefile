@@ -60,6 +60,10 @@ snapshot:
 	$(MAKE) build-snapshot
 	$(MAKE) test-snapshot
 
+update-snapshot:
+	$(build-snapshot)
+	$(MAKE) -C snapshot clean
+	cp snapshot/*.c snapshot/*.h ../snapshots/hacl-c
 
 clean:
 	$(MAKE) -C ../code clean
