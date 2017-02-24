@@ -17,6 +17,9 @@ module H128 = Hacl.UInt128
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
 let h8_to_u8 (x:H8.t) : GTot (y:U8.t{U8.v y = H8.v x}) = U8.uint_to_t (H8.v x)
+let h32_to_u32   (x:H32.t) : GTot (y:U32.t{U32.v y = H32.v x}) = U32.uint_to_t (H32.v x)
+let h64_to_u64   (x:H64.t) : GTot (y:U64.t{U64.v y = H64.v x}) = U64.uint_to_t (H64.v x)
+let h128_to_u128 (x:H128.t) : GTot (y:U128.t{U128.v y = H128.v x}) = U128.uint_to_t (H128.v x)
 
 private val seq_map_:
   #a:Type -> #b:Type ->
@@ -40,13 +43,28 @@ abstract val seq_map: #a:Type -> #b:Type -> f:(a -> GTot b) -> s:Seq.seq a ->
 let seq_map #a #b f s =
   if Seq.length s = 0 then Seq.createEmpty #b
   else seq_map_ f s 0 (Seq.create (Seq.length s) (f (Seq.index s 0)))
-  
+
 
 unfold inline_for_extraction
 let reveal_sbytes (s:Seq.seq H8.t) : GTot (s:Seq.seq U8.t) = s
 
 unfold inline_for_extraction
+let reveal_h32s (s:Seq.seq H32.t) : GTot (s:Seq.seq U32.t) = s
+
+unfold inline_for_extraction
+let reveal_h64s (s:Seq.seq H64.t) : GTot (s:Seq.seq U64.t) = s
+
+unfold inline_for_extraction
+let reveal_h128s (s:Seq.seq H128.t) : GTot (s:Seq.seq U128.t) = s
+
+unfold inline_for_extraction
 let intro_sbytes (s:Seq.seq U8.t) : GTot (s:Seq.seq H8.t) = s
+
+unfold inline_for_extraction
+let intro_h32s (s:Seq.seq U32.t) : GTot (s:Seq.seq H32.t) = s
+
+unfold inline_for_extraction
+let intro_h64s (s:Seq.seq U64.t) : GTot (s:Seq.seq H64.t) = s
 
 unfold inline_for_extraction
 let hlittle_endian (s:Seq.seq H8.t) : GTot nat =

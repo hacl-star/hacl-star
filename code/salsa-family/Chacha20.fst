@@ -1,6 +1,7 @@
 module Chacha20
 
 open FStar.Buffer
+open Hacl.Spec.Endianness
 open Hacl.Impl.Chacha20
 
 module U32 = FStar.UInt32
@@ -26,10 +27,10 @@ val chacha20:
   Stack unit
     (requires (fun h -> live h output /\ live h plain))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_1 output h0 h1
-      /\ (let o = as_seq h1 output in
-         let plain = as_seq h0 plain in
-         let k = as_seq h0 key in
-         let n = as_seq h0 nonce in
+      /\ (let o = reveal_sbytes (as_seq h1 output) in
+         let plain = reveal_sbytes (as_seq h0 plain) in
+         let k = reveal_sbytes (as_seq h0 key) in
+         let n = reveal_sbytes (as_seq h0 nonce) in
          let ctr = U32.v ctr in
          o == Spec.CTR.counter_mode Spec.Chacha20.chacha20_ctx Spec.Chacha20.chacha20_cipher k n ctr plain)))
 let chacha20 output plain len k n ctr = chacha20 output plain len k n ctr
