@@ -59,6 +59,12 @@ let pad_16_bytes input len =
 module Poly = Hacl.Standalone.Poly1305_64
 module Impl = Hacl.Impl.Poly1305_64
 
+val poly1305_alloc:
+  unit -> StackInline poly1305_state
+    (requires (fun h -> True))
+    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st))
+let poly1305_alloc () = Impl.alloc ()
+
 
 val poly1305_blocks_init:
   st:poly1305_state ->

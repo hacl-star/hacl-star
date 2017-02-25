@@ -17,7 +17,7 @@ module H8  = Hacl.UInt8
 module H32 = Hacl.UInt32
 
 
-val chacha_key_block:
+val chacha20_key_block:
   block:uint8_p{length block = 64} ->
   k:uint8_p{length k = 32 /\ disjoint block k} ->
   n:uint8_p{length k = 12 /\ disjoint block n} ->
@@ -25,8 +25,26 @@ val chacha_key_block:
   Stack unit
     (requires (fun h -> live h block /\ live h k))
     (ensures (fun h0 _ h1 -> live h1 block /\ modifies_1 block h0 h1))
-let chacha_key_block block k n ctr =
+let chacha20_key_block block k n ctr =
   let st = alloc () in
   let _  = setup st k n ctr in
   let _  = chacha20_block (Ghost.hide (MkLog Seq.createEmpty Seq.createEmpty)) block st ctr in
   ()
+
+val chacha20:
+  output:uint8_p ->
+  plain:uint8_p{disjoint output plain} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain} ->
+  key:uint8_p{length key = 32} ->
+  nonce:uint8_p{length key = 12} ->
+  ctr:U32.t{U32.v ctr + (length plain / 64) < pow2 32} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h plain))
+    (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_1 output h0 h1
+      /\ (let o = reveal_sbytes (as_seq h1 output) in
+         let plain = reveal_sbytes (as_seq h0 plain) in
+         let k = reveal_sbytes (as_seq h0 key) in
+         let n = reveal_sbytes (as_seq h0 nonce) in
+         let ctr = U32.v ctr in
+         o == Spec.CTR.counter_mode Spec.Chacha20.chacha20_ctx Spec.Chacha20.chacha20_cipher k n ctr plain)))
+let chacha20 output plain len k n ctr = chacha20 output plain len k n ctr
