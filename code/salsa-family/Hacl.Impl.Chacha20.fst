@@ -374,8 +374,9 @@ let double_round st =
     column_round st;
     diagonal_round st
 
-
-unfold let double_round' (b:Seq.seq H32.t{Seq.length b = 16}) : GTot (b':Seq.seq H32.t{Seq.length b' = Seq.length b /\ reveal_h32s b' == Spec.Chacha20.double_round (reveal_h32s b)}) = intro_h32s (Spec.Chacha20.double_round (reveal_h32s b))
+unfold let double_round' (b:Seq.seq H32.t{Seq.length b = 16}) : Tot (b':Seq.seq H32.t{Seq.length b' = Seq.length b /\ reveal_h32s b' == Spec.Chacha20.double_round (reveal_h32s b)}) =
+  let f (s:Seq.seq U32.t{Seq.length s = 16}) : Tot (s':Seq.seq U32.t{Seq.length s' = 16}) = Spec.Chacha20.double_round s in
+  lift_32 #(fun s -> Seq.length s = 16) f b
 
 
 #reset-options "--initial_fuel 0 --max_fuel 1 --z3rlimit 100"
@@ -391,7 +392,7 @@ val rounds:
 [@ "c_inline"]
 let rounds st = Loops.rounds st
 // Real implementation bellow
-(*   Combinators.iter #H32.t #16 #double_round' 10ul double_round st 16ul *)
+  (* Combinators.iter #H32.t #16 #(double_round') 10ul double_round st 16ul *)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -408,6 +409,7 @@ val sum_states:
          s1 == Combinators.seq_map2 (fun x y -> H32.(x +%^ y)) s s')))
 [@ "c_inline"]
 let sum_states st st' = Loops.sum_states st st'
+  // Real implementation bellow
   (* Combinators.inplace_map2 (fun x y -> H32.(x +%^ y)) st st' 16ul *)
 
 

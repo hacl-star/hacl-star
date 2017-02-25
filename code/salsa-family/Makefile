@@ -93,6 +93,15 @@ Chacha20.c: Hacl.Impl.Chacha20.fst # Hacl.Test.Chacha20.fst Chacha20.fst
 		Hacl.Test.Chacha20.fst -o chacha20.exe -verbose
 	./chacha20.exe
 
+
+# Temporary target
+Salsa.c: Hacl.Impl.Chacha20.fst # Hacl.Test.Chacha20.fst Chacha20.fst
+	mkdir -p salsa2-c
+	$(KRML) -tmpdir salsa2-c  -no-prefix Hacl.Test2.Salsa20 -no-prefix Loops -I . -drop "Loops" \
+		-bundle 'Salsa=Salsa,Hacl.Impl.Salsa20' -drop 'Hacl.Spec.*' -add-include '"loops.h"' -drop 'Spec.*' -drop "Combinators" \
+		Hacl.Test2.Salsa20.fst -o salsa.exe -verbose
+	./salsa.exe
+
 Salsa20.c: Hacl.Symmetric.Salsa20.fst Hacl.Test.Salsa20.fst
 	mkdir -p salsa-c
 	$(KRML) -tmpdir salsa-c -verbose \
