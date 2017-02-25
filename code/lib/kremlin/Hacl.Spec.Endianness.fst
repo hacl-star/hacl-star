@@ -83,3 +83,15 @@ let hlittle_bytes  (len:U32.t) (n:nat{n < pow2 (8 * U32.v len)}) : GTot (b:Seq.s
 unfold inline_for_extraction
 let hbig_bytes (len:U32.t) (n:nat{n < pow2 (8 * U32.v len)}) : GTot (b:Seq.seq H8.t{Seq.length b = U32.v len}) =
   big_bytes len n
+
+(* unfold inline_for_extraction *)
+(* let lift_8 (#p:(Seq.seq U8.t -> Type0)) (f:(s':Seq.seq U8.t{p  -> Tot (Seq.seq U8.t))) (s:Seq.seq H8.t) : Tot (s':Seq.seq H8.t{ *)
+(*   reveal_sbytes s' == f (reveal_sbytes s)}) = f s *)
+
+unfold inline_for_extraction
+let lift_32 (#p:(Seq.seq U32.t -> Type0)) (f:(s:Seq.seq U32.t{p s} -> Tot (Seq.seq U32.t))) (s:Seq.seq H32.t{p s}) : Tot (s':Seq.seq H32.t{
+  reveal_h32s s' == f (reveal_h32s s)}) = f s
+
+unfold inline_for_extraction
+let lift_64 (f:(Seq.seq U64.t -> Tot (Seq.seq U64.t))) (s:Seq.seq H64.t) : Tot (s':Seq.seq H64.t{
+  reveal_h64s s' == f (reveal_h64s s)}) = f s
