@@ -3,6 +3,7 @@
 #include "stdlib.h"
 #include <fcntl.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #define FOR(i,n) for (i = 0;i < n;++i)
 #define sv static void
