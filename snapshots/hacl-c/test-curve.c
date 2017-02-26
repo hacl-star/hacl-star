@@ -2,6 +2,7 @@
 #include "testlib.h"
 #include "Curve25519.h"
 #include "sodium.h"
+#include "tweetnacl.h"
 #include "ec_lcl.h"
 
 #ifdef _WIN32
@@ -27,7 +28,7 @@ unsigned long long median(unsigned long long* a, int rounds) {
 	    }
 	}
     }
-  return a[1];
+  return a[rounds/4];
 }
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
@@ -340,6 +341,20 @@ int32_t perf_curve() {
   }
   t2 = clock();
   print_results("Sodium Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
+  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
+                                 + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
+  printf("Composite result (ignore): %llx\n", res);
+
+
+  t1 = clock();
+  for (int i = 0; i < ROUNDS; i++){
+    a = TestLib_cpucycles();
+    res = tweet_crypto_scalarmult(mul + KEYSIZE * i, sk + KEYSIZE * i, pk + KEYSIZE * i);
+    b = TestLib_cpucycles();
+    d[i] = b - a;
+  }
+  t2 = clock();
+  print_results("TweetNacl Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);

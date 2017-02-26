@@ -2,6 +2,7 @@
 #include "testlib.h"
 #include "NaCl.h"
 #include "sodium.h"
+#include "tweetnacl.h"
 
 
 #define MESSAGE_LEN 72
@@ -163,6 +164,19 @@ int32_t perf_api() {
   b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Sodium Box speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1024 * 1024);
+  for (int i = 0; i < len + 16 * sizeof(char); i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    int res = tweet_crypto_box(plaintext, plaintext, len, nonce, sk1, sk2);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("TweetNacl Box speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];

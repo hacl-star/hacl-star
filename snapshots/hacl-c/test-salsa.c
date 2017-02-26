@@ -2,6 +2,7 @@
 #include "testlib.h"
 #include "Salsa20.h"
 #include "sodium.h"
+#include "tweetnacl.h"
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
@@ -383,6 +384,19 @@ int32_t perf_salsa() {
   b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Sodium Salsa20 speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+  for (int i = 0; i < PLAINLEN; i++) 
+    res += (uint64_t) plain[i];
+  printf("Composite result (ignore): %llx\n", res);
+  
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    tweet_crypto_stream_salsa20_xor(plain,plain, len, nonce, key);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("TweetNacl Salsa20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];

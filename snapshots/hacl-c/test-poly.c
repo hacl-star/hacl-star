@@ -4,6 +4,7 @@
 #include "sodium.h"
 #include "internal/poly1305.h"
 #include "poly1305_local.h"
+#include "tweetnacl.h"
 
 void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
   POLY1305 state;
@@ -156,6 +157,7 @@ int32_t perf_poly() {
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
+
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
@@ -164,6 +166,20 @@ int32_t perf_poly() {
   b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Sodium Poly1305 speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
+				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
+  printf("Composite result (ignore): %llx\n", res);
+
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    tweet_crypto_onetimeauth(macs + MACSIZE * i, plain, len, key);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("TweetNacl Poly1305 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);

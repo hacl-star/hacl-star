@@ -352,7 +352,8 @@ int32_t perf_chacha() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Chacha20_chacha20(cipher,plain,len, key, nonce, counter);
+    Chacha20_chacha20(plain,plain,len, key, nonce, counter);
+    plain[0] = cipher[0];
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
@@ -361,10 +362,11 @@ int32_t perf_chacha() {
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %llx\n", res);
+
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    crypto_stream_chacha20_ietf_xor(cipher,plain, len, nonce, key);
+    crypto_stream_chacha20_ietf_xor(plain,plain, len, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

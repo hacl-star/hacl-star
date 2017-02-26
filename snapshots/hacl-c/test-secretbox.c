@@ -120,7 +120,7 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    NaCl_crypto_secretbox_easy(ciphertext, plaintext, len, nonce, key);
+    NaCl_crypto_secretbox_easy(plaintext, plaintext, len, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
@@ -138,6 +138,19 @@ int32_t perf_api() {
   b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Sodium SecretBox speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1024 * 1024);
+  for (int i = 0; i < len + 16 * sizeof(char); i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    int res = tweet_crypto_secretbox_easy(plaintext, plaintext, len, nonce, key);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("TweetNacl SecretBox speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
