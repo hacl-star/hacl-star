@@ -2,6 +2,7 @@
 #include "testlib.h"
 #include "NaCl.h"
 #include "sodium.h"
+#include "tweetnacl.h"
 
 
 #define MESSAGE_LEN 72
@@ -146,7 +147,7 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    int res = tweet_crypto_secretbox_easy(plaintext, plaintext, len, nonce, key);
+    int res = tweet_crypto_secretbox(plaintext, plaintext, len, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
