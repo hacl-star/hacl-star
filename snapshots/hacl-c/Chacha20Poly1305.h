@@ -5,7 +5,6 @@
 
 #include "Chacha20.h"
 #include "Poly1305_64.h"
-#include "AEAD_Poly1305_64.h"
 #include "Hacl_Policies.h"
 #include "kremlib.h"
 #include "testlib.h"

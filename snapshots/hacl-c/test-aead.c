@@ -88,7 +88,7 @@ int32_t test_api()
   TestLib_compare_and_print("HACL aead cipher", xciphertext, ciphertext, MESSAGE_LEN);
   TestLib_compare_and_print("HACL aead mac", xmac, mac, MACLEN);
 
-  uint64_t maclen;
+  long long unsigned int maclen;
   res = crypto_aead_chacha20poly1305_ietf_encrypt_detached(ciphertext, mac, &maclen, plaintext, MESSAGE_LEN, aad, 12, NULL, nonce, key); 
   TestLib_compare_and_print("Sodium aead cipher", xciphertext, ciphertext, MESSAGE_LEN);
   TestLib_compare_and_print("Sodium aead mac", xmac, mac, MACLEN);
@@ -116,7 +116,7 @@ int32_t perf_api() {
   cycles a,b;
   clock_t t1,t2;
   
-  uint64_t maclen;
+  long long unsigned int maclen;
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
