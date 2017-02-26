@@ -54,13 +54,13 @@ api: verify
 
 extract-c:
 	mkdir -p api-c
-	$(KRML) -tmpdir api-c ../salsa-family/Hacl.Symmetric.HSalsa20.fst NaCl.fst -verbose \
+	$(KRML) -tmpdir api-c NaCl.fst -verbose \
 		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
 		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' \
 		-drop Hacl.Constants -drop "Hacl.Endianness" \
 		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box" \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Salsa20.h"' \
-		-add-include '"Poly1305_64.h"' -add-include '"Curve25519.h"' 
+		-add-include '"Poly1305_64.h"' -add-include '"Curve25519.h"'  -add-include '"Hacl_Symmetric_HSalsa20.h"'
 extract-aead:
 	mkdir -p aead-c
 	$(KRML) -tmpdir aead-c Hacl.AEAD.Chacha20Poly1305.fst -verbose \

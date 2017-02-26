@@ -26,7 +26,7 @@ POLY1305_SPECIFIC= \
 	Hacl.Bignum.Parameters.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.Spec.Bignum.AddAndMultiply.fst \
-	$(SPECS)/Spec.Poly1305.fst \
+	../../specs/Spec.Poly1305.fst \
 	Hacl.Spec.Poly1305_64.fst \
 	Hacl.Spe.Poly1305_64.fst \
 	Hacl.Bignum.Modulo.fst \
@@ -44,7 +44,8 @@ FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 	$(addprefix --include , $(INCLUDE_DIRS)) --include $(KREMLIN_HOME)/kremlib
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --include $(SPECS) --include $(KREMLIN_HOME)/kremlib
+		--include ../lib --include ../bignum $(addprefix --include , $(SPECS)) \
+		--include $(KREMLIN_HOME)/kremlib
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
