@@ -26,7 +26,7 @@ POLY1305_SPECIFIC= \
 	Hacl.Bignum.Parameters.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.Spec.Bignum.AddAndMultiply.fst \
-	$(SPECS)/Spec.Poly1305.fst \
+	../../specs/Spec.Poly1305.fst \
 	Hacl.Spec.Poly1305_64.fst \
 	Hacl.Spe.Poly1305_64.fst \
 	Hacl.Bignum.Modulo.fst \
