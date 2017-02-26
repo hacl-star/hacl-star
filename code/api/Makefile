@@ -11,7 +11,7 @@ API_FILES= \
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
 		--include ../poly1305/interfaces --include ../../specs --include ../../specs/generic \
-		 --include ../../specs/experimental
+		--include ../../specs/experimental
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/ --include ../salsa-family/interfaces --include ../curve25519/interfaces \
@@ -61,6 +61,18 @@ extract-c:
 		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box" \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Salsa20.h"' \
 		-add-include '"Poly1305_64.h"' -add-include '"Curve25519.h"'  -add-include '"Hacl_Symmetric_HSalsa20.h"'
+
+extract-box:
+	mkdir -p box-c
+	$(KRML) -tmpdir box-c NaCl.fst -verbose \
+		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
+		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' \
+		-drop Hacl.Constants -drop "Hacl.Endianness" \
+		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad" \
+		-add-include '"testlib.h"' -skip-compilation -add-include '"Salsa20.h"' \
+		-add-include '"Poly1305_64.h"' -add-include '"Curve25519.h"' 
+
+
 extract-aead:
 	mkdir -p aead-c
 	$(KRML) -tmpdir aead-c Hacl.AEAD.Chacha20Poly1305.fst -verbose \

@@ -160,7 +160,7 @@ val poly1305_blocks_init:
 let poly1305_blocks_init st input len k =
   let l = I.poly1305_init_ st (Buffer.sub k 0ul 16ul) in
   let len_16 = U32.(len >>^ 4ul) in
-  let rem_16 = U32.(len &^ 4ul)  in
+  let rem_16 = U32.(len &^ 15ul)  in
   let l = Poly.poly1305_blocks l st (Buffer.sub input 0ul U32.(16ul *^ len_16)) (Int.Cast.uint32_to_uint64 len_16) in
   if U32.(rem_16 =^ 0ul) then ()
   else (
@@ -181,7 +181,7 @@ val poly1305_blocks_continue:
     (ensures (fun h0 _ h1 -> live_state h1 st /\ live h0 input /\ modifies_1 (get_accumulator st) h0 h1))
 let poly1305_blocks_continue st input len =
   let len_16 = U32.(len >>^ 4ul) in
-  let rem_16 = U32.(len &^ 4ul)  in
+  let rem_16 = U32.(len &^ 15ul)  in
   let l = Poly.poly1305_blocks empty_log st (Buffer.sub input 0ul U32.(16ul *^ len_16)) (Int.Cast.uint32_to_uint64 len_16) in
   if U32.(rem_16 =^ 0ul) then ()
   else (

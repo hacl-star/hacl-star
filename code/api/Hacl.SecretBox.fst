@@ -103,7 +103,6 @@ let crypto_secretbox_detached c mac m mlen n k =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
-
 val crypto_secretbox_open_detached:
   m:uint8_p ->
   c:uint8_p ->
