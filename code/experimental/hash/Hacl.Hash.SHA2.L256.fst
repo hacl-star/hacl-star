@@ -173,13 +173,23 @@ let rec ws_upd state wblock t =
 
 
 
+val alloc:
+  unit ->
+  StackInline (state:suint32_p{length state = v size_state})
+        (requires (fun h0 -> True))
+        (ensures  (fun h0 state h1 -> modifies_0 h0 h1 /\ live h1 state))
+
+let alloc () = Buffer.create (u32_to_s32 0ul) size_state
+
+
+
 (* [FIPS 180-4] section 5.3.3 *)
-(* Define the initial hash value *)
 val init:
-  (state:suint32_p{length state = v size_state}) ->
+  state:suint32_p{length state = v size_state} ->
   Stack unit
         (requires (fun h0 -> live h0 state))
         (ensures  (fun h0 r h1 -> modifies_1 state h0 h1))
+
 let init state =
   (* Initialize constant k *)
   set_k state;
@@ -419,7 +429,7 @@ val hash:
 let hash hash input len =
 
   (* Push a new memory frame *)
-  (**) push_frame();
+  (**) push_frame ();
 
   (* Allocate memory for the hash state *)
   let ctx = Buffer.create (u32_to_s32 0ul) size_state in
@@ -444,4 +454,4 @@ let hash hash input len =
   finish ctx hash;
 
   (* Pop the memory frame *)
-  (**) pop_frame()
+  (**) pop_frame ()
