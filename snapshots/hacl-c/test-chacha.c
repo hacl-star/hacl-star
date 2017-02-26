@@ -22,7 +22,7 @@ void print_results(char *txt, double t1, unsigned long long d1, int rounds, int 
   printf("User time for %d times %d bytes: %fs (%fus/byte)\n", rounds, plainlen, ts, (double)(ts*1000000)/(plainlen*rounds));
 }
 
-#define PLAINLEN (512*1024)
+#define PLAINLEN (1024*1024)
 #define ROUNDS 1000
 #define MACSIZE 32
 

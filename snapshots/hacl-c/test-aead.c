@@ -2,6 +2,21 @@
 #include "testlib.h"
 #include "Chacha20Poly1305.h"
 #include "sodium.h"
+#include "openssl/evp.h"
+
+void ossl_chacha20poly1305(uint8_t* cipher, uint8_t* mac, uint8_t* plain, int len, uint8_t* aad, int aad_len, uint8_t* nonce, uint8_t* key){
+  EVP_CIPHER_CTX *ctx;
+  int clen,alen;
+  ctx = EVP_CIPHER_CTX_new();
+  EVP_EncryptInit_ex(ctx, EVP_chacha20_poly1305(), NULL, NULL, NULL);
+  EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, 16, NULL);
+  EVP_EncryptInit_ex(ctx, EVP_chacha20_poly1305(), NULL, key, nonce);
+  EVP_EncryptUpdate(ctx, NULL, &alen, aad, aad_len);
+  EVP_EncryptUpdate(ctx, cipher, &clen, plain, len);
+  EVP_EncryptFinal_ex(ctx, cipher + clen, &clen);
+  EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, mac);
+  EVP_CIPHER_CTX_free(ctx);
+}
 
 
 #define MESSAGE_LEN 114
@@ -77,6 +92,11 @@ int32_t test_api()
   res = crypto_aead_chacha20poly1305_ietf_encrypt_detached(ciphertext, mac, &maclen, plaintext, MESSAGE_LEN, aad, 12, NULL, nonce, key); 
   TestLib_compare_and_print("Sodium aead cipher", xciphertext, ciphertext, MESSAGE_LEN);
   TestLib_compare_and_print("Sodium aead mac", xmac, mac, MACLEN);
+
+
+  ossl_chacha20poly1305(ciphertext, mac, plaintext, MESSAGE_LEN, aad, 12, nonce, key); 
+  TestLib_compare_and_print("OpenSSL aead cipher", xciphertext, ciphertext, MESSAGE_LEN);
+  TestLib_compare_and_print("OpenSSL aead mac", xmac, mac, MACLEN);
   return exit_success;
 }
 
@@ -96,20 +116,6 @@ int32_t perf_api() {
   cycles a,b;
   clock_t t1,t2;
   
-  t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    Chacha20Poly1305_aead_encrypt(ciphertext, mac, plaintext, len, aad, 12, key, nonce);
-    plaintext[0] = mac[0];
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  print_results("Hacl ChachaPoly speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
-    res += (uint64_t) ciphertext[i];
-  printf("Composite result (ignore): %llx\n", res);
-
   uint64_t maclen;
   t1 = clock();
   a = TestLib_cpucycles_begin();
@@ -124,6 +130,36 @@ int32_t perf_api() {
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);
+
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    ossl_chacha20poly1305(ciphertext, mac, plaintext, len, aad, 12, nonce, key); 
+    plaintext[0] = mac[0];
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("OpenSSL ChachaPoly speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1024 * 1024);
+  for (int i = 0; i < len + 16 * sizeof(char); i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    Chacha20Poly1305_aead_encrypt(ciphertext, mac, plaintext, len, aad, 12, key, nonce);
+    plaintext[0] = mac[0];
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("Hacl ChachaPoly speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1024 * 1024);
+  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
+
   
   return exit_success;
 }

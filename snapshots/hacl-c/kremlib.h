@@ -260,10 +260,10 @@ FStar_UInt32_t FStar_UInt32_uint_to_t(Prims_nat x);
 
 #define load64(b) (*((uint64_t*)(b)))
 #define store64(b,i) (*((uint64_t*)(b))=i)
-#define load32(b) (*((uint32_t*) b))
-#define store32(b,i) (*((uint32_t*)b)=i)
-#define load128(b) (*((FStar_UInt128_t *)b))
-#define store128(b, i) (*((FStar_UInt128_t *)b) = i)
+#define load32(b) (*((uint32_t*) (b)))
+#define store32(b,i) (*((uint32_t*)(b))=i)
+#define load128(b) (*((FStar_UInt128_t *)(b)))
+#define store128(b, i) (*((FStar_UInt128_t *)(b)) = i)
 
 #define htole128(i) i
 //TODO (((uint128_t)htole64((uint64_t) i)) << 64 | (uint128_t)htole64((uint64_t) (i >> 64)))

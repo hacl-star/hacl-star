@@ -1,6 +1,6 @@
 #include "Chacha20.h"
 
-static void
+inline static void
 Hacl_Impl_Chacha20_uint32s_from_le_bytes(uint32_t *output, uint8_t *input, uint32_t len)
 {
   if (len == (uint32_t )0)
@@ -23,7 +23,7 @@ Hacl_Impl_Chacha20_uint32s_from_le_bytes(uint32_t *output, uint8_t *input, uint3
   }
 }
 
-static void
+inline static void
 Hacl_Impl_Chacha20_uint32s_to_le_bytes(uint8_t *output, uint32_t *input, uint32_t len)
 {
   if (len == (uint32_t )0)
@@ -70,7 +70,7 @@ inline static void Hacl_Impl_Chacha20_setup(uint32_t *st, uint8_t *k, uint8_t *n
   /* end inlining Hacl.Impl.Chacha20.ivsetup */
 }
 
-inline static void
+force_inline static void
 Hacl_Impl_Chacha20_quarter_round(uint32_t *st, uint32_t a, uint32_t b, uint32_t c, uint32_t d)
 {
   uint32_t sa0 = st[a];
@@ -142,6 +142,28 @@ inline static void Hacl_Impl_Chacha20_copy_state(uint32_t *st, uint32_t *st_)
 }
 
 inline static void
+Hacl_Impl_Chacha20_chacha20_core(void *log, uint32_t *nst, uint32_t *st, uint32_t ctr)
+{
+  st[12] = ctr;
+  Hacl_Impl_Chacha20_copy_state(nst, st);
+  Hacl_Impl_Chacha20_rounds(nst);
+  Hacl_Impl_Chacha20_sum_states(nst, st);
+  return;
+}
+
+inline static void
+Hacl_Impl_Chacha20_chacha20_xor_block(void *log, uint8_t *out, uint32_t *st, uint8_t* in, uint32_t ctr)
+{
+  uint32_t st_[16] = { 0 };
+  Hacl_Impl_Chacha20_chacha20_core(log, st_,st, ctr);
+  for (int i = 0; i < 16; i++) {
+    store32_le(out+(4*i), st_[i] ^ load32_le(in+(4*i)));
+  }
+  return;
+}
+
+
+inline static void
 Hacl_Impl_Chacha20_chacha20_block(void *log, uint8_t *stream_block, uint32_t *st, uint32_t ctr)
 {
   uint32_t st_[16] = { 0 };
@@ -184,9 +206,7 @@ Hacl_Impl_Chacha20_update(
   uint32_t ctr
 )
 {
-  uint8_t block[64] = { 0 };
-  void *l = (Hacl_Impl_Chacha20_chacha20_block((void *)(uint8_t )0, block, st, ctr) , (void *)0);
-  xor_bytes(output, plain, block, (uint32_t )64);
+  Hacl_Impl_Chacha20_chacha20_xor_block((void *)(uint8_t )0, output, st, plain, ctr);
 }
 
 static void
