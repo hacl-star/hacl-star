@@ -70,9 +70,13 @@ int32_t test_api()
   uint32_t res;
   int i;
   Chacha20Poly1305_aead_encrypt(ciphertext, mac, plaintext, MESSAGE_LEN, aad, 12, key, nonce); 
-
   TestLib_compare_and_print("HACL aead cipher", xciphertext, ciphertext, MESSAGE_LEN);
   TestLib_compare_and_print("HACL aead mac", xmac, mac, MACLEN);
+
+  uint64_t maclen;
+  res = crypto_aead_chacha20poly1305_ietf_encrypt_detached(ciphertext, mac, &maclen, plaintext, MESSAGE_LEN, aad, 12, NULL, nonce, key); 
+  TestLib_compare_and_print("Sodium aead cipher", xciphertext, ciphertext, MESSAGE_LEN);
+  TestLib_compare_and_print("Sodium aead mac", xmac, mac, MACLEN);
   return exit_success;
 }
 
@@ -106,19 +110,21 @@ int32_t perf_api() {
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);
 
-  /*  t1 = clock();
+  uint64_t maclen;
+  t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    int res = crypto_secretbox_easy(plaintext, plaintext, len, nonce, key);
+    int res = crypto_aead_chacha20poly1305_ietf_encrypt_detached(ciphertext, mac, &maclen, plaintext, len, aad, 12, NULL, nonce, key); 
+    plaintext[0] = mac[0];
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
-  print_results("Sodium SecretBox speed", (double)t2-t1,
+  print_results("Sodium ChachaPoly speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);
-  */
+  
   return exit_success;
 }
 
@@ -129,10 +135,10 @@ int32_t main()
     exit(EXIT_FAILURE);
   }
   int32_t res;
-  //res = test_api();
-  //if (res == exit_success) {
+  res = test_api();
+  if (res == exit_success) {
     res = perf_api();
-  //}
+  }
   return res;
 }
   

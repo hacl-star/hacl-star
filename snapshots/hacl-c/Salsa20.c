@@ -5,7 +5,7 @@ inline static uint32_t Hacl_Symmetric_Salsa20_rol32(uint32_t a, uint32_t s)
   return a << s | a >> (uint32_t )32 - s;
 }
 
-inline static void
+force_inline static void
 Hacl_Symmetric_Salsa20_salsa20_quarter_round(
   uint32_t *ctx,
   uint32_t a,

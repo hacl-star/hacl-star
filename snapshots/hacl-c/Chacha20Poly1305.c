@@ -23,13 +23,13 @@ Chacha20Poly1305_aead_encrypt(
   Chacha20_chacha20_key_block(b, k, n, (uint32_t )0);
   uint8_t *mk = b;
   uint8_t *key_s = mk + (uint32_t )16;
-  uint64_t buf[2];
-  Poly1305_64_state st;
-  st.x00 = buf;
-  st.x01 = buf+1;
-  uint8_t lb[16] = { 0 };
+  uint64_t buf[6] = { 0 };
+  uint64_t *r = buf;
+  uint64_t *h = buf + (uint32_t )3;
+  Hacl_Impl_Poly1305_64_poly1305_state st = { .x00 = r, .x01 = h };
   Poly1305_64_poly1305_blocks_init(st, aad, aadlen, mk);
   Poly1305_64_poly1305_blocks_continue(st, c, mlen);
+  uint8_t lb[16] = { 0 };
   uint8_t *x0 = lb;
   /* start inlining Hacl.Endianness.hstore64_le */
   /* start inlining Hacl.Endianness.store64_le */
@@ -43,6 +43,22 @@ Chacha20Poly1305_aead_encrypt(
   /* end inlining Hacl.Endianness.store64_le */
   /* end inlining Hacl.Endianness.hstore64_le */
   Poly1305_64_poly1305_blocks_finish(st, lb, mac, key_s);
+
+/*   printf("[");for (int i = 0; i < 64; i++) printf("%d,",b[i]); printf("]\n"); */
+/*   uint32_t mlen_ = (mlen % 16 == 0? mlen : mlen + (16 - mlen %16)); */
+/*   uint32_t aadlen_ = (aadlen % 16 == 0? aadlen : aadlen + (16 - aadlen %16)); */
+/*   uint32_t to_mac_len = mlen_ + aadlen_ + 16; */
+/*   uint8_t* to_mac = malloc(to_mac_len); */
+/*   for (int i = 0; i < to_mac_len; i++) to_mac[i] = 0; */
+/*   memcpy(to_mac,aad,aadlen); */
+/*   memcpy(to_mac+aadlen_,c,mlen); */
+/*   printf("here: mlen %d, aadlen %d, mlen_ %d, aadlen_ %d \n",mlen,aadlen,mlen_,aadlen_);fflush(stdout); */
+/*   store64_le(to_mac+aadlen_+mlen_,(uint64_t)aadlen); */
+/*   store64_le(to_mac+aadlen_+mlen_+8,(uint64_t)mlen); */
+/*   printf("[");  for (int i = 0; i < to_mac_len; i++) printf("%d; ",to_mac[i]); printf("]\n"); */
+/*   Poly1305_64_crypto_onetimeauth(mac,to_mac,to_mac_len,b); */
+/*   free(to_mac); */
+
   return (uint32_t )0;
 }
 
@@ -63,10 +79,10 @@ Chacha20Poly1305_aead_decrypt(
   uint8_t *mk = b;
   uint8_t *key_s = mk + (uint32_t )16;
   uint8_t rmac[16] = { 0 };
-  uint64_t buf[2];
-  Poly1305_64_state st;
-  st.x00 = buf;
-  st.x01 = buf+1;
+  uint64_t buf[6] = { 0 };
+  uint64_t *r = buf;
+  uint64_t *h = buf + (uint32_t )3;
+  Hacl_Impl_Poly1305_64_poly1305_state st = { .x00 = r, .x01 = h };
   uint8_t lb[16] = { 0 };
   Poly1305_64_poly1305_blocks_init(st, aad, aadlen, mk);
   Poly1305_64_poly1305_blocks_continue(st, c, mlen);

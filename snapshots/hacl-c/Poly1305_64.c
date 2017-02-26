@@ -737,7 +737,7 @@ Poly1305_64_poly1305_blocks_init(
       (void *)(uint8_t )0
     /* end inlining Hacl.Impl.Poly1305_64.poly1305_init_ */;
   uint32_t len_16 = len >> (uint32_t )4;
-  uint32_t rem_16 = len & (uint32_t )4;
+  uint32_t rem_16 = len & (uint32_t )15;
   void
   *l =
     (Hacl_Standalone_Poly1305_64_poly1305_blocks((void *)(uint8_t )0,
@@ -767,7 +767,7 @@ Poly1305_64_poly1305_blocks_continue(
 )
 {
   uint32_t len_16 = len >> (uint32_t )4;
-  uint32_t rem_16 = len & (uint32_t )4;
+  uint32_t rem_16 = len & (uint32_t )15;
   void
   *l =
     (Hacl_Standalone_Poly1305_64_poly1305_blocks((void *)(uint8_t )0,

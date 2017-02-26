@@ -2,7 +2,7 @@
 
 OPENSSL_HOME   ?=../../other_providers/openssl
 LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
-CC=gcc-6 -flto
+CC=gcc-6 -fno-tree-vectorize
 
 test: test-poly	test-chacha test-salsa test-curve test-secretbox test-box test-aead
 
