@@ -98,6 +98,16 @@ let hmac_wrap_key okey key len =
 
 
 
+val alloc:
+  unit ->
+  StackInline (state:suint32_p{length state = v size_state})
+        (requires (fun h0 -> True))
+        (ensures  (fun h0 state h1 -> modifies_0 h0 h1 /\ live h1 state))
+
+let alloc () = Buffer.create (u32_to_s32 0ul) size_state
+
+
+
 val init:
   state :suint32_p{length state = v size_state} ->
   key   :suint8_p ->
