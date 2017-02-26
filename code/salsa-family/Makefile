@@ -86,11 +86,17 @@ Chacha20.compcert: Hacl.Symmetric.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.f
 	./chacha20cc.exe
 
 # Temporary target
-Chacha20.c: Hacl.Impl.Chacha20.fst # Hacl.Test.Chacha20.fst Chacha20.fst
+Chacha20.c: Hacl.Impl.Chacha20.fst Chacha20.fst
+	mkdir -p chacha-c
+	$(KRML) -tmpdir chacha-c -no-prefix Loops -I . -drop "Loops" \
+		-bundle 'Chacha20=Hacl.Impl.Chacha20,Chacha20' -drop 'Hacl.Spec.*' -add-include '"loops.h"' -drop 'Spec.*' -drop "Combinators" \
+		Chacha20.fst -verbose -skip-linking
+
+chacha20.exe: Hacl.Impl.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
 	$(KRML) -tmpdir chacha-c  -no-prefix Hacl.Test.Chacha20 -no-prefix Loops -I . -drop "Loops" \
 		-bundle 'Chacha20=Chacha20,Hacl.Impl.Chacha20' -drop 'Hacl.Spec.*' -add-include '"loops.h"' -drop 'Spec.*' -drop "Combinators" \
-		Hacl.Test.Chacha20.fst -o chacha20.exe -verbose
+		Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe -verbose
 	./chacha20.exe
 
 Salsa20.c: Hacl.Symmetric.Salsa20.fst Hacl.Test.Salsa20.fst

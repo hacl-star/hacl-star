@@ -3,7 +3,7 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../..
 include ../Makefile.include
 
-SPECS=../../specs
+SPECS=../../specs ../../specs/generic ../../specs/experimental
 
 INCLUDE_DIRS=../bignum ../lib/kremlin $(SPECS)
 
@@ -80,7 +80,7 @@ extract-c:
 	$(KREMLIN_HOME)/krml -tmpdir poly-c -ccopt -std=gnu99 \
 		$(addprefix -I , $(INCLUDE_DIRS)) \
 		Poly1305_64.fst Hacl.Test.Poly1305_64.fst \
-		-drop 'Hacl.Endianness' -drop 'Spec.\*' \
+		-drop 'Combinators' -drop 'Hacl.Endianness' -drop 'Spec.\*' \
 		-bundle 'Hacl.Spec.\*' -bundle 'Hacl.Spe.\*' \
 		-drop 'Hacl.Bignum.Parameters' -drop 'Hacl.Endianness' \
 		-drop 'Hacl.Spec' -drop 'Hacl.Spe' -drop 'Hacl.Cast' \

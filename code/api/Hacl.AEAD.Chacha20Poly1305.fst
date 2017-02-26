@@ -23,9 +23,6 @@ let noncelen = 12
 let keylen = 32
 let maclen = 16
 
-module Chacha20 = AEAD.Chacha20
-module Poly1305 = AEAD.Poly1305_64
-
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val aead_encrypt:
@@ -48,13 +45,13 @@ let aead_encrypt c mac m mlen aad aadlen k n =
   let mk = Buffer.sub b 0ul 32ul in
   let key_s = Buffer.sub mk 16ul 16ul in
 
-  let st = Poly1305.poly1305_alloc () in
+  let st = Poly1305_64.alloc () in
   let lb = create (uint8_to_sint8 0uy) 16ul in
-  Poly1305.poly1305_blocks_init st aad aadlen mk;
-  Poly1305.poly1305_blocks_continue st c mlen;
+  Poly1305_64.poly1305_blocks_init st aad aadlen mk;
+  Poly1305_64.poly1305_blocks_continue st c mlen;
   hstore64_le (Buffer.sub lb 0ul 8ul) (uint32_to_sint64 aadlen);
   hstore64_le (Buffer.sub lb 8ul 8ul) (uint32_to_sint64 mlen);
-  Poly1305.poly1305_blocks_finish st lb mac key_s;
+  Poly1305_64.poly1305_blocks_finish st lb mac key_s;
   pop_frame();
   0ul
 
@@ -81,13 +78,13 @@ let aead_decrypt m c mlen mac aad aadlen k n =
   let key_s = Buffer.sub mk 16ul 16ul in
 
   let rmac = create (uint8_to_sint8 0uy) 16ul in
-  let st = Poly1305.poly1305_alloc () in
+  let st = Poly1305_64.alloc () in
   let lb = create (uint8_to_sint8 0uy) 16ul in
-  Poly1305.poly1305_blocks_init st aad aadlen mk;
-  Poly1305.poly1305_blocks_continue st c mlen;
+  Poly1305_64.poly1305_blocks_init st aad aadlen mk;
+  Poly1305_64.poly1305_blocks_continue st c mlen;
   hstore64_le (Buffer.sub lb 0ul 8ul) (uint32_to_sint64 aadlen);
   hstore64_le (Buffer.sub lb 8ul 8ul) (uint32_to_sint64 mlen);
-  Poly1305.poly1305_blocks_finish st lb rmac key_s;
+  Poly1305_64.poly1305_blocks_finish st lb rmac key_s;
   let verify = cmp_bytes mac rmac 16ul in
   let res = 
     if U8.(verify =^ 0uy) then (

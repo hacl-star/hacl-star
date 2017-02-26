@@ -2,9 +2,9 @@
 
 OPENSSL_HOME   ?=../../other_providers/openssl
 LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
-CC?=gcc-6 -flto
+CC=gcc-6 -flto
 
-test: test-poly	test-chacha test-salsa test-curve test-secretbox test-box
+test: test-poly	test-chacha test-salsa test-curve test-secretbox test-box test-aead
 
 test-poly:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
@@ -36,7 +36,7 @@ test-curve:
 
 test-secretbox:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
-	Hacl_Symmetric_HSalsa20.c -c -o HSalsa20.o
+	HSalsa20.c -c -o HSalsa20.o
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
 	Salsa20.c -c -o Salsa20.o
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
@@ -47,9 +47,18 @@ test-secretbox:
 	HSalsa20.o Salsa20.o Poly1305_64.o Curve25519.o kremlib.c testlib.c Hacl_Policies.c NaCl.c test-secretbox.c -l sodium -o test-secretbox.exe
 	./test-secretbox.exe
 
+test-aead:
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Chacha20.c -c -o Chacha20.o
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Poly1305_64.c -c -o Poly1305_64.o
+	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
+	Chacha20.o Poly1305_64.o kremlib.c testlib.c Hacl_Policies.c Chacha20Poly1305.c test-aead.c -l sodium -o test-aead.exe
+	./test-aead.exe
+
 test-box:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
-	Hacl_Symmetric_HSalsa20.c -c -o HSalsa20.o
+	HSalsa20.c -c -o HSalsa20.o
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
 	Salsa20.c -c -o Salsa20.o
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
@@ -62,7 +71,7 @@ test-box:
 
 lib:
 	$(CC) -fpic -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
-	Hacl_Symmetric_HSalsa20.c -c -o HSalsa20.o
+	HSalsa20.c -c -o HSalsa20.o
 	$(CC) -fpic -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \
 	Salsa20.c -c -o Salsa20.o
 	$(CC) -fpic -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto \

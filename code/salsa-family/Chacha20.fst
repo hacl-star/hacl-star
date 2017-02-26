@@ -6,6 +6,20 @@ open Hacl.Impl.Chacha20
 
 module U32 = FStar.UInt32
 
+val chacha20_key_block:
+  block:uint8_p{length block = 64} ->
+  k:uint8_p{length k = 32 /\ disjoint block k} ->
+  n:uint8_p{length k = 12 /\ disjoint block n} ->
+  ctr:U32.t ->
+  Stack unit
+    (requires (fun h -> live h block /\ live h k))
+    (ensures (fun h0 _ h1 -> live h1 block /\ modifies_1 block h0 h1))
+let chacha20_key_block block k n ctr =
+  let st = alloc () in
+  let l  = init st k n in
+  let l  = chacha20_block l block st ctr in
+  ()
+
 
 // JK : this is only necessary as long as the 'loop.h' hack is alive (double_round is otherwise
 // killed by the bundling
@@ -16,22 +30,6 @@ val double_round:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
 let double_round st = double_round st
 
-[@ "c_inline"]
-val chacha20_init_block:
-  stream_block:uint8_p{length stream_block = 64} ->
-  k:uint8_p{length k = 32 /\ disjoint stream_block k} ->
-  n:uint8_p{length n = 12 /\ disjoint stream_block n /\ disjoint k n} ->
-  Stack unit
-    (requires (fun h -> live h k /\ live h n /\ live h stream_block))
-    (ensures  (fun h0 log h1 -> live h1 stream_block /\ live h0 k /\ live h0 n /\ modifies_1 stream_block h0 h1
-      /\ (let block = reveal_sbytes (as_seq h1 stream_block) in
-              block == Spec.Chacha20.chacha20_block (as_seq h1 k) (as_seq h1 n) (U32.v 0ul))))
-[@ "c_inline"]
-let chacha20_init_block str k n = 
-    let st = alloc () in
-    let l = init st k n in
-    let l = chacha20_block l str st 0ul in
-    ()
 
 val chacha20:
   output:uint8_p ->

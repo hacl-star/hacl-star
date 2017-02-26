@@ -61,6 +61,14 @@ extract-c:
 		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box" \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Salsa20.h"' \
 		-add-include '"Poly1305_64.h"' -add-include '"Curve25519.h"' 
+extract-aead:
+	mkdir -p aead-c
+	$(KRML) -tmpdir aead-c Hacl.AEAD.Chacha20Poly1305.fst -verbose \
+		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
+		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' \
+		-drop Hacl.Constants -drop "Hacl.Endianness" -drop 'Combinators' \
+		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
+		-add-include '"Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs -I ../../specs/generic -I ../../specs/experimental
 
 clean:
 	rm -rf api-c *~ *.exe *.graph *.o *.out

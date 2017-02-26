@@ -267,6 +267,21 @@ void Chacha20_double_round(uint32_t *st)
 }
 
 void
+Chacha20_chacha20_key_block(
+  uint8_t *block,
+  uint8_t *k,
+  uint8_t *n,
+  uint32_t ctr
+)
+{
+  uint32_t st[16] = { 0 };
+  void *l = (Hacl_Impl_Chacha20_init(st, k, n) , (void *)0);
+  l = (Hacl_Impl_Chacha20_chacha20_block((void *)(uint8_t )0, block, st, ctr) , (void *)0);
+  return;
+}
+
+
+void
 Chacha20_chacha20(
   uint8_t *output,
   uint8_t *plain,
