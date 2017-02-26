@@ -9,14 +9,14 @@ API_FILES= \
 	Hacl.Box.fst
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../salsa-family/interfaces --incude ../curve25519/interfaces \
-		--include ../poly1305/interfaces
-
+		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
+		--include ../poly1305/interfaces --include ../../specs --include ../../specs/generic \
+		 --include ../../specs/experimental
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/ --include ../salsa-family/interfaces --incude ../curve25519/interfaces \
-		--include ../poly1305/interfaces
-
+		--include ../lib/ --include ../salsa-family/interfaces --include ../curve25519/interfaces \
+		--include ../poly1305/interfaces --include ../../specs --include ../../specs/generic \
+		 --include ../../specs/experimental
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
 		-I ../poly1305/interfaces -I ../../specs \
