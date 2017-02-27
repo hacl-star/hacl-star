@@ -21,11 +21,12 @@ let crypto_secretbox_NONCEBYTES = 24
 let crypto_secretbox_KEYBYTES   = 32
 let crypto_secretbox_MACBYTES   = 16
 
+
 val crypto_secretbox_detached:
   c:uint8_p ->
   mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ disjoint mac c} ->
-  m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  m:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -35,9 +36,9 @@ let crypto_secretbox_detached c mac m mlen n k = Hacl.SecretBox.ZeroPad.crypto_s
 
 val crypto_secretbox_open_detached:
   m:uint8_p ->
-  c:uint8_p ->
+  c:uint8_p{disjoint c m} ->
   mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ declassifiable mac} ->
-  clen:u64{let len = U64.v clen in len = length m /\ len = length c}  ->
+  clen:u64{let len = U64.v clen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -47,8 +48,8 @@ let crypto_secretbox_open_detached m c mac clen n k = Hacl.SecretBox.ZeroPad.cry
 
 val crypto_secretbox_easy:
   c:uint8_p ->
-  m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in len <= length m /\ len + crypto_secretbox_MACBYTES <= length c}  ->
+  m:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -59,8 +60,8 @@ let crypto_secretbox_easy c m mlen n k =
 
 val crypto_secretbox_open_easy:
   m:uint8_p ->
-  c:uint8_p ->
-  clen:u64{let len = U64.v clen in len = length m + crypto_secretbox_MACBYTES /\ len = length c}  ->
+  c:uint8_p{disjoint m c} ->
+  clen:u64{let len = U64.v clen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -82,8 +83,8 @@ let crypto_box_beforenm k pk sk =
 val crypto_box_detached_afternm:
   c:uint8_p ->
   mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ disjoint c mac} ->
-  m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  m:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -95,8 +96,8 @@ let crypto_box_detached_afternm c mac m mlen n k =
 val crypto_box_detached:
   c:uint8_p ->
   mac:uint8_p{length mac = crypto_box_MACBYTES /\ disjoint c mac} ->
-  m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in length c = len /\ len = length m}  ->
+  m:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in length c = len + 32 /\ len + 32 = length m}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
   sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint pk sk} ->
@@ -108,9 +109,9 @@ let crypto_box_detached c mac m mlen n pk sk =
 
 val crypto_box_open_detached:
   m:uint8_p ->
-  c:uint8_p ->
+  c:uint8_p{disjoint c m} ->
   mac:uint8_p{length mac = crypto_box_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
-  mlen:u64{let len = U64.v mlen in length m = len /\ len = length c}  ->
+  mlen:u64{let len = U64.v mlen in length m = len + 32 /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
   sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint sk pk} ->
@@ -122,8 +123,8 @@ let crypto_box_open_detached m c mac mlen n pk sk =
 
 val crypto_box_easy_afternm:
   c:uint8_p ->
-  m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in len <= length m /\ len + crypto_secretbox_MACBYTES <= length c}  ->
+  m:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -134,8 +135,8 @@ let crypto_box_easy_afternm c m mlen n k =
 
 val crypto_box_easy:
   c:uint8_p ->
-  m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in length c = len + crypto_box_MACBYTES /\ len = length m}  ->
+  m:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in length c = len + 32 /\ len + 32 = length m}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
   sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint sk pk} ->
@@ -147,8 +148,8 @@ let crypto_box_easy c m mlen n pk sk =
 
 val crypto_box_open_easy:
   m:uint8_p ->
-  c:uint8_p ->
-  mlen:u64{let len = U64.v mlen in length m = len - crypto_box_MACBYTES /\ len = length c}  ->
+  c:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in length m = len + 32 /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
   sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint sk pk} ->
@@ -160,9 +161,9 @@ let crypto_box_open_easy m c mlen n pk sk =
 
 val crypto_box_open_detached_afternm:
   m:uint8_p ->
-  c:uint8_p ->
+  c:uint8_p{disjoint c m} ->
   mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
-  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -174,8 +175,8 @@ let crypto_box_open_detached_afternm m c mac mlen n k =
 
 val crypto_box_open_easy_afternm:
   m:uint8_p ->
-  c:uint8_p ->
-  mlen:u64{let len = U64.v mlen in len = length m + 16 /\ len = length c}  ->
+  c:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32

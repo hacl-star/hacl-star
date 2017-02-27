@@ -16,20 +16,6 @@ module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
-
-private val lemma_max_uint32: n:nat -> Lemma
-  (requires (n = 32))
-  (ensures  (pow2 n = 4294967296))
-  [SMTPat (pow2 n)]
-let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296)
-private val lemma_max_uint64: n:nat -> Lemma
-  (requires (n = 64))
-  (ensures  (pow2 n = 18446744073709551616))
-  [SMTPat (pow2 n)]
-let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
-
-
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val crypto_box_beforenm:
@@ -58,7 +44,7 @@ val crypto_box_detached_afternm:
   c:uint8_p ->
   mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ disjoint c mac} ->
   m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -68,7 +54,7 @@ let crypto_box_detached_afternm c mac m mlen n k =
   crypto_secretbox_detached c mac m mlen n k
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 let lemma_modifies_3_2 (c:uint8_p) (mac:uint8_p) h0 h1 h2 : Lemma
   (requires (live h0 c /\ live h0 mac /\ live h1 mac /\ live h1 c /\ live h2 c /\ live h2 mac
@@ -83,7 +69,7 @@ val crypto_box_detached:
   c:uint8_p ->
   mac:uint8_p{length mac = crypto_box_MACBYTES /\ disjoint c mac} ->
   m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in length c = len /\ len = length m}  ->
+  mlen:u64{let len = U64.v mlen in length c = len + 32 /\ len + 32 = length m}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
   sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint pk sk} ->
@@ -113,13 +99,13 @@ let crypto_box_detached c mac m mlen n pk sk =
   z
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val crypto_box_open_detached:
   m:uint8_p ->
-  c:uint8_p ->
+  c:uint8_p{disjoint m c} ->
   mac:uint8_p{length mac = crypto_box_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
-  mlen:u64{let len = U64.v mlen in length m = len /\ len = length c}  ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
   sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint sk pk} ->
@@ -145,7 +131,7 @@ let crypto_box_open_detached m c mac mlen n pk sk =
 val crypto_box_easy_afternm:
   c:uint8_p ->
   m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in len <= length m /\ len + crypto_secretbox_MACBYTES <= length c}  ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -153,14 +139,20 @@ val crypto_box_easy_afternm:
     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
 let crypto_box_easy_afternm c m mlen n k =
   let mlen' = Int.Cast.uint64_to_uint32 mlen in
+  push_frame();
+  let cmac = Buffer.create (uint8_to_sint8 0uy) 16ul in
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
-  crypto_box_detached_afternm (sub c 16ul mlen') (sub c 0ul 16ul) (sub m 0ul mlen') mlen n k
+  let z = crypto_box_detached_afternm c cmac m mlen n k in
+  blit cmac 0ul c 16ul 16ul;
+  pop_frame();
+  z
+  (* crypto_box_detached_afternm (sub c 16ul mlen') (sub c 0ul 16ul) (sub m 0ul mlen') mlen n k *)
 
 
 val crypto_box_easy:
   c:uint8_p ->
-  m:uint8_p ->
-  mlen:u64{let len = U64.v mlen in length c = len + crypto_box_MACBYTES /\ len = length m}  ->
+  m:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length c /\ len + 32 = length m}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
   sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint sk pk} ->
@@ -168,7 +160,7 @@ val crypto_box_easy:
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
 let crypto_box_easy c m mlen n pk sk =
-  push_frame ();  
+  push_frame ();
   let mlen' = Int.Cast.uint64_to_uint32 mlen in
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   let cmac   = create (uint8_to_sint8 0uy) 16ul in
@@ -181,8 +173,8 @@ let crypto_box_easy c m mlen n pk sk =
 
 val crypto_box_open_easy:
   m:uint8_p ->
-  c:uint8_p ->
-  mlen:u64{let len = U64.v mlen in length m = len - crypto_box_MACBYTES /\ len = length c}  ->
+  c:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in length m = len + 32 /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
   sk:uint8_p{length sk = crypto_box_SECRETKEYBYTES /\ disjoint sk pk} ->
@@ -194,14 +186,14 @@ let crypto_box_open_easy m c mlen n pk sk =
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   let mac = sub c 16ul 16ul in
   assume (Hacl.Policies.declassifiable mac);
-  crypto_box_open_detached m c mac (U64.(mlen -^ 16uL)) n pk sk
+  crypto_box_open_detached m c mac mlen n pk sk
 
 
 val crypto_box_open_detached_afternm:
   m:uint8_p ->
-  c:uint8_p ->
+  c:uint8_p{disjoint m c} ->
   mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
-  mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -213,8 +205,8 @@ let crypto_box_open_detached_afternm m c mac mlen n k =
 
 val crypto_box_open_easy_afternm:
   m:uint8_p ->
-  c:uint8_p ->
-  mlen:u64{let len = U64.v mlen in len = length m + 16 /\ len = length c}  ->
+  c:uint8_p{disjoint c m} ->
+  mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
@@ -225,5 +217,4 @@ let crypto_box_open_easy_afternm m c mlen n k =
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   let mac = sub c 0ul 16ul in
   assume (Hacl.Policies.declassifiable mac);
-  let c = sub c 16ul (U32.(mlen' -^ 16ul)) in
-  crypto_box_open_detached_afternm m c mac (U64.(mlen -^ 16uL)) n k
+  crypto_box_open_detached_afternm m c mac mlen n k
