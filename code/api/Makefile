@@ -26,6 +26,12 @@ KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
 
+
+KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
+		-I ../poly1305 -I ../../specs \
+		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
+		-drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
+
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
@@ -55,7 +61,9 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(API_FILES)))
 
 api: verify
 
-extract-c:
+extract-c: extract-api extract-box extract-aead
+
+extract-api:
 	mkdir -p api-c
 	$(KRML) -tmpdir api-c NaCl.fst -verbose \
 		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
@@ -78,12 +86,13 @@ extract-box:
 
 extract-aead:
 	mkdir -p aead-c
-	$(KRML) -tmpdir aead-c Hacl.AEAD.Chacha20Poly1305.fst -verbose \
+	$(KRML2) -tmpdir aead-c Hacl.AEAD.Chacha20Poly1305.fst -verbose \
 		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
 		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' \
 		-drop Hacl.Constants -drop "Hacl.Endianness" -drop 'Combinators' \
+		-drop "Hacl.Bignum.\*" -drop "Hacl.Spe.\*" -drop "Hacl.Impl.\*" -drop "Hacl.Standalone.\*" \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
-		-add-include '"Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs -I ../../specs/generic -I ../../specs/experimental
+		-add-include '"Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs -I ../../specs/generic -I ../../specs/experimental 
 
 clean:
 	rm -rf api-c *~ *.exe *.graph *.o *.out
