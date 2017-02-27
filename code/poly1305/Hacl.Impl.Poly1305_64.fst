@@ -593,7 +593,8 @@ let poly1305_finish st mac key_s =
 val alloc:
   unit -> StackInline poly1305_state
     (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st))
+    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st /\ frameOf st.h == h0.tip
+      /\ frameOf st.r = h0.tip /\ ~(contains h0 st.r) /\ ~(contains h0 st.h)))
 let alloc () =
   let buf = create limb_zero U32.(clen +^ clen) in
   let r = sub buf 0ul clen in
