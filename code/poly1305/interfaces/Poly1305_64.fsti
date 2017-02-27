@@ -38,6 +38,12 @@ val alloc:
     (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st /\ frameOf st.h == h0.tip
       /\ frameOf st.r = h0.tip /\ ~(contains h0 st.r) /\ ~(contains h0 st.h)))
 
+val mk_state:
+  r:buffer Hacl.UInt64.t{length r = 3} -> acc:buffer Hacl.UInt64.t{length acc = 3 /\ disjoint r acc} ->
+  Stack state
+    (requires (fun h -> live h r /\ live h acc))
+    (ensures (fun h0 st h1 -> h0 == h1 /\ MkState?.r st == r /\ MkState?.h st == acc /\ live_st h1 st))
+
 
 val init:
   st:state ->
