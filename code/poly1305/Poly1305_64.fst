@@ -25,9 +25,9 @@ module Poly = Hacl.Standalone.Poly1305_64
 type uint8_p = Buffer.buffer Hacl.UInt8.t
 type key = k:uint8_p{length k = 32}
 
-(* abstract  *)type state = I.poly1305_state
-(* abstract *) type live_state (h:mem) (st:state) = I.live_st h st
-(* abstract *) type stable (h:mem) (st:state) = live_state h st /\ S.red_45 (as_seq h I.(st.h)) /\ S.red_44 (as_seq h I.(st.r))
+type state = I.poly1305_state
+type live_state (h:mem) (st:state) = I.live_st h st
+type stable (h:mem) (st:state) = live_state h st /\ S.red_45 (as_seq h I.(st.h)) /\ S.red_44 (as_seq h I.(st.r))
 
 private let get_key (st:state) = I.MkState?.r st
 private let get_accumulator (st:state) = I.MkState?.h st
@@ -86,7 +86,7 @@ let rec update st m len =
 
 module A = Hacl.Spec.Bignum.AddAndMultiply
 
-(* abstract *) type before_finish h st = A.(live_state h st /\ bounds (as_seq h (get_accumulator st)) p44 p44 p42)
+type before_finish h st = A.(live_state h st /\ bounds (as_seq h (get_accumulator st)) p44 p44 p42)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -148,11 +148,6 @@ let pad_16_bytes input len =
   (* Seq.lemma_eq_intro (as_seq h b) (Spec.pad_16 (as_seq h0 input)); *)
   b
 
-(* open Hacl.Spec.Bignum.AddAndMultiply *)
-(* open Hacl.Spe.Poly1305_64 *)
-(* open Hacl.Bignum.AddAndMultiply *)
-(* open Hacl.Impl.Poly1305_64 *)
-
 
 val blocks:
   current_log:I.log_t ->
@@ -184,7 +179,6 @@ let rec blocks log st m len =
     let len = U64.(len -^ 1uL) in
     blocks new_log st tail len
   )
-
 
 
 val poly1305_alloc:
@@ -310,47 +304,3 @@ let poly1305_blocks_finish log st input mac key_s =
   let log = I.poly1305_update_last log st (Buffer.offset input 16ul) 0uL in
   let _ = I.poly1305_finish st mac key_s in
   ()
-
-
-(* The following values should point to Spec.Chacha20Poly1305 *)
-let noncelen = 12
-let keylen = 32
-let maclen = 16
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
-
-val aead_encrypt:
-  c:uint8_p ->
-  mac:uint8_p{length mac = maclen /\ disjoint mac c} ->
-  m:uint8_p{disjoint c m} ->
-  mlen:u32{let len = U32.v mlen in len = length m /\ len = length c}  ->
-  aad:uint8_p ->
-  aadlen:u32{let len = U32.v aadlen in len = length aad}  ->
-  k:uint8_p{length k = keylen} ->
-  n:uint8_p{length n = noncelen} ->
-  Stack u32
-    (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h k /\ live h aad))
-    (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-let aead_encrypt c mac m mlen aad aadlen k n =
-  push_frame();
-  let tmp = create (uint8_to_sint8 0uy) 80ul in
-  let b = Buffer.sub tmp 0ul 64ul in
-  let lb = Buffer.sub tmp 64ul 16ul in
-  (* let b = create (uint8_to_sint8 0uy) 64ul in *)
-  (* let lb = create (uint8_to_sint8 0uy) 16ul in *)
-  Chacha20.chacha20 c m mlen k n 1ul;
-  Chacha20.chacha20_key_block b k n 0ul;
-  let mk = Buffer.sub b 0ul 32ul in
-  let key_s = Buffer.sub mk 16ul 16ul in
-  push_frame();
-  let st = P.alloc () in
-  let log = P.poly1305_blocks_init st aad aadlen mk in
-  let log = P.poly1305_blocks_continue log st c mlen in
-  Hacl.Endianness.hstore64_le (Buffer.sub lb 0ul 8ul) (uint32_to_sint64 aadlen);
-  Hacl.Endianness.hstore64_le (Buffer.sub lb 8ul 8ul) (uint32_to_sint64 mlen);
-  let log = P.poly1305_blocks_finish log st lb mac key_s in
-  pop_frame();
-  pop_frame();
-  0ul
