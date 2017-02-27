@@ -95,4 +95,4 @@ extract-aead:
 		-add-include '"Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs -I ../../specs/generic -I ../../specs/experimental 
 
 clean:
-	rm -rf api-c *~ *.exe *.graph *.o *.out
+	rm -rf api-c *~ *.exe *.graph *.o *.out aead-c box-c
