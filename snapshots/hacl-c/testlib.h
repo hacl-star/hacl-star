@@ -32,11 +32,7 @@ void TestLib_perr(unsigned int err_code);
 
 typedef uint64_t cycles;
 
-#if NO_ASM
-static inline cycles TestLib_cpucycles(void){ return 0; }
-static inline cycles TestLib_cpucycles_begin(void){ return 0; }
-static inline cycles TestLib_cpucycles_end(void){ return 0; }
-#else
+#if defined(__GNUC__) || defined(__clang__)
 static inline cycles TestLib_cpucycles(void)
 {
   uint32_t hi, lo;
@@ -58,6 +54,11 @@ static inline cycles TestLib_cpucycles_end(void)
   return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 void TestLib_print_cycles_per_round(cycles c1, cycles c2, uint32_t rounds);
+#else
+//NO_ASM
+static inline cycles TestLib_cpucycles(void){ return 0; }
+static inline cycles TestLib_cpucycles_begin(void){ return 0; }
+static inline cycles TestLib_cpucycles_end(void){ return 0; }
 #endif
 
 #endif
