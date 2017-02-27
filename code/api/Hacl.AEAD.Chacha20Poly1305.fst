@@ -24,6 +24,8 @@ let noncelen = 12
 let keylen = 32
 let maclen = 16
 
+type state = Hacl.Impl.Poly1305_64.poly1305_state
+inline_for_extraction let log_t = Ghost.erased (Spec.Poly1305.text)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
@@ -67,13 +69,15 @@ private let aead_encrypt_poly  c mlen mac aad aadlen k n tmp =
   let key_s = Buffer.sub mk 16ul 16ul in
   push_frame();
   let h0 = ST.get() in
-  let st = Poly1305_64.alloc () in
+  let tmp = Buffer.create (uint64_to_sint64 0uL) 6ul in
+  let st = Poly1305_64.mk_state (Buffer.sub tmp 0ul 3ul) (Buffer.sub tmp 3ul 3ul) in
+  (* let st = Poly1305_64.alloc () in *)
   let h1 = ST.get() in
-  let log = Poly1305_64.poly1305_blocks_init st aad aadlen mk in
+  let log:log_t = Poly1305_64.poly1305_blocks_init st aad aadlen mk in
   let h2 = ST.get() in
-  let log = Poly1305_64.poly1305_blocks_continue log st c mlen in
+  let log:log_t = Poly1305_64.poly1305_blocks_continue log st c mlen in
   let h3 = ST.get() in
-  let log = Poly1305_64.poly1305_blocks_finish log st lb mac key_s in
+  Poly1305_64.poly1305_blocks_finish log st lb mac key_s;
   let h4 = ST.get() in
   lemma_aead_encrypt_poly h0 h1 h2 h3 h4 Hacl.Impl.Poly1305_64.(st.r) Hacl.Impl.Poly1305_64.(st.h) mac;
   pop_frame()
