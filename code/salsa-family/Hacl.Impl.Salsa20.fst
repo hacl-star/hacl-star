@@ -888,11 +888,11 @@ val salsa20:
   plain:uint8_p{disjoint output plain} ->
   len:U32.t{U32.v len = length output /\ U32.v len = length plain} ->
   key:uint8_p{length key = 32} ->
-  nonce:uint8_p{length key = 12} ->
+  nonce:uint8_p{length nonce = 8} ->
   ctr:UInt64.t{UInt64.v ctr + (length plain / 64) < pow2 64} ->
   Stack unit
-    (requires (fun h -> live h output /\ live h plain))
-    (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain
+    (requires (fun h -> live h output /\ live h plain /\ live h key /\ live h nonce))
+    (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ live h0 key /\ live h0 nonce
       /\ modifies_1 output h0 h1
       /\ (let o = reveal_sbytes (as_seq h1 output) in
          let plain = reveal_sbytes (as_seq h0 plain) in

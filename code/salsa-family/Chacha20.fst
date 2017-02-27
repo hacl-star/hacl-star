@@ -34,6 +34,9 @@ val double_round:
 let double_round st = double_round st
 
 
+let value_at m (h:HyperStack.mem{live h m}) = reveal_sbytes (as_seq h m)
+
+
 val chacha20:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
@@ -45,10 +48,10 @@ val chacha20:
     (requires (fun h -> live h output /\ live h plain /\ live h nonce /\ live h key))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_1 output h0 h1
       /\ live h0 nonce /\ live h0 key
-      /\ (let o = reveal_sbytes (as_seq h1 output) in
-         let plain = reveal_sbytes (as_seq h0 plain) in
-         let k = reveal_sbytes (as_seq h0 key) in
-         let n = reveal_sbytes (as_seq h0 nonce) in
+      /\ (let o = output `value_at` h1 in
+         let plain = plain `value_at` h0 in
+         let k = key `value_at` h0 in
+         let n = nonce `value_at` h0 in
          let ctr = U32.v ctr in
-         o == Spec.CTR.counter_mode Spec.Chacha20.chacha20_ctx Spec.Chacha20.chacha20_cipher k n ctr plain)))
+         o == Spec.Chacha20.chacha20_encrypt_bytes k n ctr plain)))
 let chacha20 output plain len k n ctr = chacha20 output plain len k n ctr

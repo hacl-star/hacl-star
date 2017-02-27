@@ -6,7 +6,6 @@ open FStar.Buffer
 open Hacl.Cast
 open Hacl.UInt32
 open FStar.Buffer
-open Hacl.Spec.Symmetric.Chacha20
 open Hacl.Spec.Endianness
 
 module U32 = FStar.UInt32
@@ -24,8 +23,9 @@ val chacha20_key_block:
   n:uint8_p{length n = 12 /\ disjoint block n} ->
   ctr:UInt32.t ->
   Stack unit
-    (requires (fun h -> live h block /\ live h k))
+    (requires (fun h -> live h block /\ live h k /\ live h n))
     (ensures (fun h0 _ h1 -> live h1 block /\ modifies_1 block h0 h1))
+
 
 val chacha20:
   output:uint8_p ->
@@ -35,9 +35,9 @@ val chacha20:
   nonce:uint8_p{length nonce = 12} ->
   ctr:U32.t{U32.v ctr + (length plain / 64) < pow2 32} ->
   Stack unit
-    (requires (fun h -> live h output /\ live h plain /\ live h key /\ live h nonce))
+    (requires (fun h -> live h output /\ live h plain /\ live h nonce /\ live h key))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_1 output h0 h1
-      /\ live h0 key /\ live h0 nonce
+      /\ live h0 nonce /\ live h0 key
       /\ (let o = reveal_sbytes (as_seq h1 output) in
          let plain = reveal_sbytes (as_seq h0 plain) in
          let k = reveal_sbytes (as_seq h0 key) in
