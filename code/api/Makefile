@@ -5,18 +5,21 @@ include ../Makefile.include
 
 API_FILES= \
 	Hacl.Constants.fst \
-	Hacl.SecretBox.fst \
+	Hacl.AEAD.Chacha20Poly1305.fst \
+	Hacl.SecretBox.ZeroPad.fst \
+	Hacl.Box.ZeroPad.fst
+#	Hacl.SecretBox.fst \
 	Hacl.Box.fst
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
 		--include ../poly1305/interfaces --include ../../specs --include ../../specs/generic \
-		--include ../../specs/experimental
+		--include ../../specs/experimental --include $(KREMLIN_HOME)/kremlib
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/ --include ../salsa-family/interfaces --include ../curve25519/interfaces \
 		--include ../poly1305/interfaces --include ../../specs --include ../../specs/generic \
-		 --include ../../specs/experimental
+		 --include ../../specs/experimental  --include $(KREMLIN_HOME)/kremlib
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
 		-I ../poly1305/interfaces -I ../../specs \
