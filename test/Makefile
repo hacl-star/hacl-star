@@ -46,9 +46,14 @@ build-snapshot:
 	cp ../code/poly1305/poly-c/Poly1305_64.* ../code/curve25519/x25519-c/Curve25519.* \
 		../code/salsa-family/chacha-c/Chacha20.* ../code/salsa-family/loops.h ../code/salsa-family/salsa-c/Salsa20.* \
 		../code/salsa-family/hsalsa-c/Hacl_Symmetric_HSalsa20.* snapshot
-	cp $(addprefix ../snapshots/hacl-c/, test-chacha.c test-curve.c testlib.c testlib.h test-poly.c test-salsa.c test-secretbox.c test-box.c Makefile) snapshot
+	# cp $(addprefix ../snapshots/hacl-c/, test-chacha.c test-curve.c testlib.c testlib.h test-poly.c test-salsa.c test-secretbox.c test-box.c Makefile) snapshot
 	cp $(addprefix $(KREMLIN_HOME)/kremlib/, native128.* kremlib.* gcc_compat.h) snapshot
-	cp $(addprefix ../code/api/api-c/, Hacl_Policies.* NaCl.*) snapshot
+	# cp $(addprefix ../code/api/api-c/, Hacl_Policies.* NaCl.*) snapshot
+	cp $(addprefix ../code/api/aead-c/, Hacl_AEAD_Chacha20Poly1305.*) snapshot
+	cp $(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) snapshot
+	mv snapshot/Hacl_Symmetric_HSalsa20.c snapshot/HSalsa20.c
+	mv snapshot/Hacl_AEAD_Chacha20Poly1305.c snapshot/Chacha20Poly1305.c
+	cp ./c/* snapshot/
 
 CCOMP=gcc-6 -flto -std=c11 -D_GNU_SOURCE
 
