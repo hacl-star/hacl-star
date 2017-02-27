@@ -77,7 +77,7 @@ all-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
 
 
-extract-c:
+test-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p poly-c
 	$(KREMLIN_HOME)/krml -tmpdir poly-c -ccopt -std=gnu99 \
@@ -92,6 +92,22 @@ extract-c:
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
                 -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
 	./poly1305.exe
+
+extract-c:
+	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
+	mkdir -p poly-c
+	$(KREMLIN_HOME)/krml -tmpdir poly-c -ccopt -std=gnu99 \
+		$(addprefix -I , $(INCLUDE_DIRS)) \
+		Poly1305_64.fst \
+		-drop 'Combinators' -drop 'Hacl.Endianness' -drop 'Spec.\*' \
+		-bundle 'Hacl.Spec.\*' -bundle 'Hacl.Spe.\*' \
+		-drop 'Hacl.Bignum.Parameters' -drop 'Hacl.Endianness' \
+		-drop 'Hacl.Spec' -drop 'Hacl.Spe' -drop 'Hacl.Cast' \
+		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
+		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64,Hacl.Spec.\*,Hacl.Spe.\*' \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
+                -ldopt -flto -ccopt -march=native -skip-linking
+
 
 include $(FSTAR_HOME)/src/gmake/fstar.mk
 include $(FSTAR_HOME)/ulib/ml/Makefile.include

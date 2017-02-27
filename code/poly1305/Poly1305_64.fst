@@ -41,6 +41,13 @@ val alloc:
 let alloc () =
   I.alloc()
 
+val mk_state:
+  r:buffer Hacl.UInt64.t{length r = 3} -> acc:buffer Hacl.UInt64.t{length acc = 3 /\ disjoint r acc} ->
+  Stack state
+    (requires (fun h -> live h r /\ live h acc))
+    (ensures (fun h0 st h1 -> h0 == h1 /\ I.MkState?.r st == r /\ I.MkState?.h st == acc /\ I.live_st h1 st))
+let mk_state r acc = I.MkState r acc
+
 
 val init:
   st:state ->
@@ -198,6 +205,10 @@ let mul_div_16 (len:U32.t) : Tot (len':U32.t{U32.v len' = 16 * (U32.v len / 16)}
 
 #reset-options "--initial_fuel 0 -max_fuel 0 --z3rlimit 100"
 
+private let lemma_pad_last_modifies (h:mem) (acc:buffer Hacl.UInt64.t) : Lemma
+  (modifies_1 acc h h) = lemma_intro_modifies_1 acc h h
+
+
 val pad_last:
   log:I.log_t ->
   st:I.poly1305_state ->
@@ -212,20 +223,26 @@ val pad_last:
       /\ A.red_44 (as_seq h1 I.(st.r))
     ))
 let pad_last log st input len =
+  push_frame();
   cut (U32.v len >= 0 /\ U32.v len < 16);
-  if U32.(len =^ 0ul) then log
-  else (
+  let l =
+  if U32.(len =^ 0ul) then (
+    let h0 = ST.get() in
+    lemma_pad_last_modifies h0 I.(st.h);
+    log
+  )else (
     cut (U32.v len <> 0);
     cut (U32.v len < 16);
     cut (U32.v len > 0 /\ U32.v len < 16);
-    push_frame();
     let h0 = ST.get() in
     let b = pad_16_bytes input len in
     let h = ST.get() in
     let l = I.poly1305_update log st b in
-    pop_frame();
+    let h1 = ST.get() in
     l
-  )
+  ) in
+  pop_frame();
+  l
 
 #reset-options "--initial_fuel 0 -max_fuel 0 --z3rlimit 100"
 
