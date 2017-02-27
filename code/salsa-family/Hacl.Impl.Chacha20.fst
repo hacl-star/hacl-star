@@ -533,7 +533,8 @@ val alloc:
   unit ->
   StackInline state
     (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> ~(live h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip))
+    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
+      /\ Map.domain h1.h == Map.domain h0.h))
 [@ "c_inline"]
 let alloc () =
   create (uint32_to_sint32 0ul) 16ul
@@ -547,7 +548,8 @@ val init:
   Stack log_t
     (requires (fun h -> live h k /\ live h n /\ live h st))
     (ensures  (fun h0 log h1 -> live h1 st /\ live h0 k /\ live h0 n /\ modifies_1 st h0 h1
-      /\ invariant log h1 st))
+      /\ invariant log h1 st
+      /\ (match Ghost.reveal log with MkLog k' n' -> k' == as_seq h0 k /\ n' == as_seq h0 n)))
 [@ "c_inline"]
 let init st k n =
   setup st k n 0ul;
@@ -776,11 +778,11 @@ val chacha20:
   plain:uint8_p{disjoint output plain} ->
   len:U32.t{U32.v len = length output /\ U32.v len = length plain} ->
   key:uint8_p{length key = 32} ->
-  nonce:uint8_p{length key = 12} ->
+  nonce:uint8_p{length nonce = 12} ->
   ctr:U32.t{U32.v ctr + (length plain / 64) < pow2 32} ->
   Stack unit
-    (requires (fun h -> live h output /\ live h plain))
-    (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain
+    (requires (fun h -> live h output /\ live h plain /\ live h key /\ live h nonce))
+    (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ live h0 key /\ live h0 nonce
       /\ modifies_1 output h0 h1
       /\ (let o = reveal_sbytes (as_seq h1 output) in
          let plain = reveal_sbytes (as_seq h0 plain) in
@@ -789,8 +791,23 @@ val chacha20:
          let ctr = U32.v ctr in
          o == Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n ctr plain)))
 let chacha20 output plain len k n ctr =
+  (* let h0 = ST.get() in *)
   push_frame();
+  (* let h = ST.get() in *)
   let st = alloc () in
   let l  = init st k n in
+  (* let h' = ST.get() in *)
+  (* cut (modifies_0 h h'); *)
   let l' = chacha20_counter_mode output plain len l st ctr in
-  pop_frame()
+  (* let h'' = ST.get() in *)
+  (* cut (let o = reveal_sbytes (as_seq h'' output) in *)
+  (*        let plain = reveal_sbytes (as_seq h' plain) in *)
+  (*        let k = reveal_sbytes (as_seq h' k) in *)
+  (*        let n = reveal_sbytes (as_seq h' n) in *)
+  (*        let ctr = U32.v ctr in *)
+  (*        o == Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n ctr plain); admit() *)
+  (* cut (modifies_2_1 output h h''); *)
+  pop_frame()(* ; *)
+  (* let h1 = ST.get() in *)
+  (* cut (modifies_1 output h0 h1); *)
+  (* cut (equal_domains h0 h1) *)
