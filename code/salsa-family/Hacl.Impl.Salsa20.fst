@@ -261,8 +261,8 @@ let setup st k n c =
   let n'  = Buffer.sub tmp 8ul 2ul in
   uint32s_from_le_bytes k' k 8ul;
   uint32s_from_le_bytes n' n 2ul;
-  let c0 = FStar.Int.Cast.uint64_to_uint32 c in
-  let c1 = FStar.Int.Cast.uint64_to_uint32 FStar.UInt64.(c >>^ 32ul) in
+  let c0 = uint32_to_sint32 (FStar.Int.Cast.uint64_to_uint32 c) in
+  let c1 = uint32_to_sint32 (FStar.Int.Cast.uint64_to_uint32 FStar.UInt64.(c >>^ 32ul)) in
   let k0 = k'.(0ul) in
   let k1 = k'.(1ul) in
   let k2 = k'.(2ul) in
@@ -474,7 +474,7 @@ let high32_of_u64 (x:UInt64.t) : Tot (y:UInt32.t{UInt32.v y = UInt64.v x / pow2 
 (* Invariant on the state recording which block was computed last *)
 let invariant (log:log_t) (h:mem) (st:state) : GTot Type0 =
   live h st /\ (let log = Ghost.reveal log in let s   = as_seq h st in
-    match log with | MkLog key nonce -> reveal_h32s s == Spec.setup key nonce (UInt64.v (u64_of_u32s (Seq.index s 8) (Seq.index s 9))))
+    match log with | MkLog key nonce -> reveal_h32s s == Spec.setup key nonce (UInt64.v (u64_of_u32s (h32_to_u32 (Seq.index s 8)) (h32_to_u32 (Seq.index s 9)))))
 
 
 module H64 = Hacl.UInt64
@@ -486,18 +486,25 @@ private val lemma_invariant:
   st:Spec.state ->
   k:Spec.key -> n:Spec.nonce -> c:H64.t -> c':H64.t -> Lemma
     (requires (st == Spec.setup k n (H64.v c)))
-    (ensures (let l = low32_of_u64 c' in let h = high32_of_u64 c' in
+    (ensures (let l = low32_of_u64 (h64_to_u64 c') in let h = high32_of_u64 (h64_to_u64 c') in
       Seq.upd (Seq.upd st 8 l) 9 h == Spec.setup k n (H64.v c')))
 let lemma_invariant s k n c c' =
   let kk = k in
   let nn = n in
+  let c = h64_to_u64 c in
+  let c' = h64_to_u64 c' in
   let c0 = low32_of_u64 c in
   let c1 = high32_of_u64 c in
   let c0' = low32_of_u64 c' in
   let c1' = high32_of_u64 c' in
-  let s' = Seq.upd (Seq.upd s 8 c0') 9 c1' in
-  let k = Spec.Lib.uint32s_from_le 8 k in
-  let n = Spec.Lib.uint32s_from_le 2 n in
+  let s' = intro_h32s (Seq.upd (Seq.upd s 8 c0') 9 c1') in
+  let c0 = uint32_to_sint32 c0 in
+  let c1 = uint32_to_sint32 c1 in
+  let c0' = uint32_to_sint32 c0' in
+  let c1' = uint32_to_sint32 c1' in
+  let k = intro_h32s (Spec.Lib.uint32s_from_le 8 k) in
+  let n = intro_h32s (Spec.Lib.uint32s_from_le 2 n) in
+  let s = intro_h32s (s) in
   let k0 = Seq.index k 0 in
   let k1 = Seq.index k 1 in
   let k2 = Seq.index k 2 in
@@ -543,9 +550,11 @@ let lemma_invariant s k n c c' =
   assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 14 = k7);
   assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 15 = (uint32_to_sint32 constant3));
   lemma_seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)];
-  cut (Spec.Salsa20.setup kk nn (UInt64.v c) == Seq.seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)]);
-  cut (Spec.Salsa20.setup kk nn (UInt64.v c') == Seq.seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)]);
+  cut (intro_h32s (Spec.Salsa20.setup kk nn (UInt64.v c)) == Seq.seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)]);
+  cut (intro_h32s (Spec.Salsa20.setup kk nn (UInt64.v c')) == Seq.seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)]);
   lemma_seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)];
+  (* lemma_create_16 s (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0 c1 *)
+  (*           (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3); *)
   lemma_create_16 s (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0 c1
             (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3);
   lemma_create_16 s' (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0' c1'
@@ -559,9 +568,13 @@ private val lemma_state_counter:
 let lemma_state_counter k n c =
   let c0 = low32_of_u64 (UInt64.uint_to_t c) in
   let c1 = high32_of_u64 (UInt64.uint_to_t c) in
+  let c0 = uint32_to_sint32 c0 in
+  let c1 = uint32_to_sint32 c1 in
   let s = Spec.setup k n c in
   let k = Spec.Lib.uint32s_from_le 8 k in
   let n = Spec.Lib.uint32s_from_le 2 n in
+  let k = intro_h32s k in
+  let n = intro_h32s n in
   let k0 = Seq.index k 0 in
   let k1 = Seq.index k 1 in
   let k2 = Seq.index k 2 in
@@ -606,8 +619,8 @@ val salsa20_block:
              block == salsa20_block k n (UInt64.v ctr) /\ k == k' /\ n == n')))
 [@ "c_inline"]
 let salsa20_block log stream_block st ctr =
-  let c0 = low32_of_u64 ctr in
-  let c1 = high32_of_u64 ctr in
+  let c0 = uint32_to_sint32 (low32_of_u64 ctr) in
+  let c1 = uint32_to_sint32 (high32_of_u64 ctr) in
   let h0 = ST.get() in
   push_frame();
   let h_0 = ST.get() in
@@ -615,16 +628,16 @@ let salsa20_block log stream_block st ctr =
   let h_1 = ST.get() in
   no_upd_lemma_0 h_0 h_1 st;
   cut (as_seq h0 st == as_seq h_1 st);
-  st.(8ul) <- uint32_to_sint32 c0;
+  st.(8ul) <- c0;
   let h_ = ST.get() in
-  cut (as_seq h_ st == Seq.upd (as_seq h_1 st) 8 c0);
-  st.(9ul) <- uint32_to_sint32 c1;
+  cut (as_seq h_ st == Seq.upd (as_seq h_1 st) 8 (c0));
+  st.(9ul) <- c1;
   let h_2 = ST.get() in
-  cut (as_seq h_2 st == Seq.upd (as_seq h_ st) 9 c1);
+  cut (as_seq h_2 st == Seq.upd (as_seq h_ st) 9 (c1));
   cut (get h_2 st 8 == c0 /\ get h_2 st 9 == c1);
   cut (let s = as_seq h0 st in let s' = as_seq h_2 st in s' == Seq.upd (Seq.upd s 8 c0) 9 c1);
-  lemma_invariant (reveal_h32s (as_seq h0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (u64_of_u32s (get h0 st 8) (get h0 st 9)) (uint64_to_sint64 ctr);
-  lemma_u64_of_u32s c0 c1;
+  lemma_invariant (reveal_h32s (as_seq h0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (uint64_to_sint64 (u64_of_u32s (h32_to_u32 (get h0 st 8)) (h32_to_u32 (get h0 st 9)))) (uint64_to_sint64 ctr);
+  lemma_u64_of_u32s (h32_to_u32 c0) (h32_to_u32 c1);
   cut (invariant log h_2 st);
   copy_state st' st;
   rounds st';
@@ -658,14 +671,16 @@ val init:
   Stack log_t
     (requires (fun h -> live h k /\ live h n /\ live h st))
     (ensures  (fun h0 log h1 -> live h1 st /\ live h0 k /\ live h0 n /\ modifies_1 st h0 h1
-      /\ invariant log h1 st))
+      /\ invariant log h1 st
+      /\ (match Ghost.reveal log with MkLog k' n' -> k' == reveal_sbytes (as_seq h0 k)
+          /\ n' == reveal_sbytes (as_seq h0 n))))
 [@ "c_inline"]
 let init st k n =
   let h0 = ST.get() in
   setup st k n 0uL;
   let h = ST.get() in
-  lemma_state_counter (as_seq h0 k) (as_seq h0 n) 0;
-  cut (as_seq h st == Spec.setup (as_seq h0 k) (as_seq h0 n) 0);
+  lemma_state_counter (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) 0;
+  cut (reveal_h32s (as_seq h st) == Spec.setup (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) 0);
   Ghost.elift2 (fun (k:uint8_p{length k = 32 /\ live h k}) (n:uint8_p{length n = 8 /\ live h n}) -> MkLog (reveal_sbytes (as_seq h k)) (reveal_sbytes (as_seq h n))) (Ghost.hide k) (Ghost.hide n)
 
 

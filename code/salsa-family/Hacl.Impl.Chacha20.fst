@@ -549,7 +549,8 @@ val init:
     (requires (fun h -> live h k /\ live h n /\ live h st))
     (ensures  (fun h0 log h1 -> live h1 st /\ live h0 k /\ live h0 n /\ modifies_1 st h0 h1
       /\ invariant log h1 st
-      /\ (match Ghost.reveal log with MkLog k' n' -> k' == as_seq h0 k /\ n' == as_seq h0 n)))
+      /\ (match Ghost.reveal log with MkLog k' n' -> k' == reveal_sbytes (as_seq h0 k)
+           /\ n' == reveal_sbytes (as_seq h0 n))))
 [@ "c_inline"]
 let init st k n =
   setup st k n 0ul;

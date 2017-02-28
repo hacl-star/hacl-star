@@ -32,7 +32,7 @@ type stable (h:mem) (st:state) = live_state h st /\ S.red_45 (as_seq h I.(st.h))
 private let get_key (st:state) = I.MkState?.r st
 private let get_accumulator (st:state) = I.MkState?.h st
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val alloc:
   unit -> StackInline state
@@ -106,7 +106,7 @@ val update_last:
     (requires (fun h -> stable h st /\ live h m))
     (ensures  (fun h0 _ h1 -> modifies_1 (get_accumulator st) h0 h1 /\ before_finish h1 st))
 let update_last st m len =
-  I.poly1305_update_last empty_log st (Buffer.sub m 0ul len) (Hacl.Cast.sint32_to_sint64 len)
+  I.poly1305_update_last empty_log st (Buffer.sub m 0ul len) (Int.Cast.uint32_to_uint64 len)
 
 
 val finish:
@@ -162,7 +162,7 @@ val blocks:
   m:I.uint8_p ->
   len:U64.t{16 * U64.v len = length m} ->
   Stack I.log_t
-    (requires (fun h -> I.(live_st h st /\ live h m /\ disjoint st.r m /\ disjoint st.h m
+    (requires (fun h -> I.(live_st h st /\ live h m /\ disjoint st.h m
       /\ A.red_45 (as_seq h st.h)
       /\ A.red_44 (as_seq h st.r)
     )))
@@ -212,7 +212,7 @@ private let lemma_pad_last_modifies (h:mem) (acc:buffer Hacl.UInt64.t) : Lemma
 val pad_last:
   log:I.log_t ->
   st:I.poly1305_state ->
-  input:uint8_p{disjoint I.(st.r) input /\ disjoint I.(st.h) input} ->
+  input:uint8_p{disjoint I.(st.h) input} ->
   len:U32.t{U32.v len = length input /\ U32.v len < 16} ->
   Stack I.log_t
     (requires (fun h -> I.live_st h st /\ live h input
@@ -273,6 +273,7 @@ let poly1305_blocks_init st input len k =
   let l = Poly.poly1305_partial st part_input (Int.Cast.uint32_to_uint64 len_16) kr in
   pad_last l st last_block rem_16
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
 val poly1305_blocks_continue:
   log:I.log_t ->
@@ -302,7 +303,7 @@ let poly1305_blocks_continue log st input len =
   pad_last l st last_block rem_16
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 val poly1305_blocks_finish:
   log:I.log_t ->

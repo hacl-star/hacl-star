@@ -49,14 +49,20 @@ noeq type poly1305_state_ = | MkState: r:seqelem -> h:seqelem -> log:log_t -> po
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-assume val load64_le_spec : b:bytes{Seq.length b = 8} -> GTot (r:limb{v r == hlittle_endian b})
-(* let load64_le_spec b = lemma_little_endian_is_bounded (reveal_sbytes b); *)
-(*   UInt64.uint_to_t (little_endian b) *)
-assume val store64_le_spec: r:limb -> Tot (b:bytes{Seq.length b = 8 /\ v r == hlittle_endian b})
-(* let store64_le_spec r = little *)
+val load64_le_spec : b:bytes{Seq.length b = 8} -> GTot (r:limb{v r == hlittle_endian b})
+let load64_le_spec b = lemma_little_endian_is_bounded (reveal_sbytes b);
+  Hacl.Cast.uint64_to_sint64 (UInt64.uint_to_t (hlittle_endian b))
 
-assume val load128_le_spec : b:word_16 -> Tot (r:wide{Wide.v r == hlittle_endian b})
-assume val store128_le_spec: r:wide -> Tot (b:word_16{Wide.v r == hlittle_endian b})
+val store64_le_spec: r:limb -> GTot (b:bytes{Seq.length b = 8 /\ v r == hlittle_endian b})
+let store64_le_spec r = hlittle_bytes 8ul (v r)
+
+val load128_le_spec : b:word_16 -> GTot (r:wide{Wide.v r == hlittle_endian b})
+let load128_le_spec b = lemma_little_endian_is_bounded (reveal_sbytes b);
+  Hacl.Cast.uint128_to_sint128 (UInt128.uint_to_t (hlittle_endian b))
+
+val store128_le_spec: r:wide -> GTot (b:word_16{Wide.v r == hlittle_endian b})
+let store128_le_spec r = hlittle_bytes 16ul (w r)
+
 
 #reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
@@ -169,7 +175,7 @@ let lemma_encode_r (k:wide) : Lemma (let r0 = Limb.(sint128_to_sint64 k &^ mask_
 
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
-val toField_spec: m:word_16 -> Tot (s':seqelem{red_44 s' /\ v (Seq.index s' 2) < pow2 40
+val toField_spec: m:word_16 -> GTot (s':seqelem{red_44 s' /\ v (Seq.index s' 2) < pow2 40
   /\ seval s' = hlittle_endian m})
 let toField_spec block =
   let m = load128_le_spec block in
@@ -184,7 +190,7 @@ let toField_spec block =
   s
 
 
-val poly1305_encode_r_spec: key:Seq.seq H8.t{Seq.length key = 16} -> Tot (s':seqelem{red_44 s'
+val poly1305_encode_r_spec: key:Seq.seq H8.t{Seq.length key = 16} -> GTot (s':seqelem{red_44 s'
   /\ seval s' = UInt.logand #128 (hlittle_endian key) 0x0ffffffc0ffffffc0ffffffc0fffffff})
 let poly1305_encode_r_spec key =
   let k = load128_le_spec key in
@@ -202,7 +208,7 @@ let poly1305_encode_r_spec key =
 
 #reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
-val toField_plus_2_128_spec: m:word_16 -> Tot (s:seqelem{red_44 s
+val toField_plus_2_128_spec: m:word_16 -> GTot (s:seqelem{red_44 s
   /\ seval s = hlittle_endian m + pow2 128})
 let toField_plus_2_128_spec m =
   let b = toField_spec m in
@@ -240,7 +246,7 @@ let poly1305_start_spec () =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val poly1305_init_spec: key:Seq.seq H8.t{Seq.length key = 16} ->
-  Tot (st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)
+  GTot (st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)
     /\ seval (MkState?.r st) = UInt.logand #128 (hlittle_endian key) 0x0ffffffc0ffffffc0ffffffc0fffffff
     /\ seval (MkState?.h st) = 0})
 let poly1305_init_spec key =
