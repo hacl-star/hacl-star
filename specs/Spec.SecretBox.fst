@@ -32,18 +32,18 @@ let secretbox_process input k n =
     let (i0,irest) = split input ilen0 in
     let iblock0 = create 32 0uy @| i0 in
     let oblock0 = Spec.Salsa20.salsa20_encrypt_bytes k n 0 iblock0 in
-    let o0 = slice oblock0 32 64 in
+    let (_,o0) = split oblock0 32 in
     let orest = Spec.Salsa20.salsa20_encrypt_bytes k n 1 irest in
     let output = o0 @| orest in
     output
             
 val secretbox_detached: m:bytes{length m / Spec.Salsa20.blocklen < pow2 32} ->
-    k:key -> n:nonce -> Tot (lbytes (length m) * Spec.Poly1305.tag) 
+    k:key -> n:nonce -> Tot (Spec.Poly1305.tag * lbytes (length m)) 
 let secretbox_detached m k n = 
     let (mk,ek,n) = secretbox_init k n in
     let cipher = secretbox_process m ek n in
     let mac = Spec.Poly1305.poly1305 cipher mk in
-    (cipher,mac)
+    (mac,cipher)
           
 val secretbox_open_detached: c:bytes{length c / Spec.Salsa20.blocklen < pow2 32} ->
     mac:Spec.Poly1305.tag -> k:key -> n:nonce -> Tot (option (lbytes (length c)))
@@ -55,17 +55,20 @@ let secretbox_open_detached cipher mac k n =
        Some plain
     else None
 
+val secretbox_easy: m:bytes{length m / Spec.Salsa20.blocklen < pow2 32} ->
+    k:key -> n:nonce -> Tot (lbytes (length m + 16)) 
 let secretbox_easy m k n = 
-    let (cipher,mac) = secretbox_detached m k n in 
+    let (mac,cipher) = secretbox_detached m k n in 
     mac @| cipher
 
-val secretbox_open_easy: c:bytes{(length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
+val secretbox_open_easy: c:bytes{length c >= 16 /\ (length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
     k:key -> n:nonce -> Tot (option (lbytes (length c - 16)))
 let secretbox_open_easy c k n = 
-    let (cipher,mac) = split c 16 in 
+    let (mac,cipher) = split c 16 in 
     secretbox_open_detached cipher mac k n 
 
-(* Tests: https://cr.yp.to/highspeed/naclcrypto-20090310.pdf *)
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30 --lax"
+//(* Tests: https://cr.yp.to/highspeed/naclcrypto-20090310.pdf *)
 
 let test() = 
     let k:key = createL [
@@ -95,9 +98,21 @@ let test() =
 	0xf0uy;0xa0uy;0x89uy;0xbcuy;0x76uy;0x89uy;0x70uy;0x40uy;
 	0xe0uy;0x82uy;0xf9uy;0x37uy;0x76uy;0x38uy;0x48uy;0x64uy;
 	0x5euy;0x07uy;0x05uy] in
-    let (cipher,mac) = secretbox_detached p k n in
+    let (mac,cipher) = secretbox_detached p k n in
+    let out_easy = secretbox_easy p k n in
+    let (mac_easy,cipher_easy) = split out_easy 16 in
+    let plain = secretbox_open_detached cipher mac k n in
+    let plain_easy = secretbox_open_easy (mac @| cipher) k n in
+    (match plain with
+    | Some plain' -> plain' = p
+    | None -> false) &&
+    (match plain_easy with
+    | Some plain_easy' -> plain_easy' = p
+    | None -> false) &&
+    mac_easy = mac &&
     mac = createL [0xf3uy;0xffuy;0xc7uy;0x70uy;0x3fuy;0x94uy;0x00uy;0xe5uy;
     	  	   0x2auy;0x7duy;0xfbuy;0x4buy;0x3duy;0x33uy;0x05uy;0xd9uy] &&
+    cipher = cipher_easy &&
     cipher = createL [
         0x8euy;0x99uy;0x3buy;0x9fuy;0x48uy;0x68uy;0x12uy;0x73uy;
 	0xc2uy;0x96uy;0x50uy;0xbauy;0x32uy;0xfcuy;0x76uy;0xceuy;
