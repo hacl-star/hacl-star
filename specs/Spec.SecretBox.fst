@@ -23,8 +23,6 @@ let secretbox_init  k n =
     let mackey = slice keyblock 0 32 in
     (mackey,subkey,n2)    
 
-
-
 val secretbox_process: input:bytes{length input / Spec.Salsa20.blocklen < pow2 32} ->
     		       k:Spec.Salsa20.key -> n:Spec.Salsa20.nonce -> 
     		       Tot (lbytes (length input))
@@ -56,7 +54,6 @@ let secretbox_open_detached cipher mac k n =
        let plain = secretbox_process cipher ek n in
        Some plain
     else None
-
 
 val secretbox_easy: m:bytes{length m / Spec.Salsa20.blocklen < pow2 32} ->
     k:key -> n:nonce -> Tot (lbytes (length m + 16)) 
