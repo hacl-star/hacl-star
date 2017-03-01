@@ -75,49 +75,28 @@ static inline void chacha20_core3(vec* v0, vec*v1, vec* v2, vec* s) {
 
 /* this ones costs 0.5 cycle/byte, try to optimize */
 /* This function and init are the only ones that depends on the vector size */
-static inline void write_xor(unsigned* in, unsigned* out, vec* v) {
+static inline void write_xor(const unsigned char* in, unsigned char* out, vec* v) {
 #if defined(VEC256)
-    vec v0 = (vec){in[0],in[1],in[2],in[3],in[16],in[17],in[18],in[19]};
-    vec v1 = (vec){in[4],in[5],in[6],in[7],in[20],in[21],in[22],in[23]};
-    vec v2 = (vec){in[8],in[9],in[10],in[11],in[24],in[25],in[26],in[27]};
-    vec v3 = (vec){in[12],in[13],in[14],in[15],in[28],in[29],in[30],in[31]};
-    v0 = v0 ^ v[0];
-    v1 = v1 ^ v[1];
-    v2 = v2 ^ v[2];
-    v3 = v3 ^ v[3];
-    out[0] = v0[0];
-    out[1] = v0[1];
-    out[2] = v0[2];
-    out[3] = v0[3];
-    out[4] = v1[0];
-    out[5] = v1[1];
-    out[6] = v1[2];
-    out[7] = v1[3];
-    out[8] = v2[0];
-    out[9] = v2[1];
-    out[10] = v2[2];
-    out[11] = v2[3];
-    out[12] = v3[0];
-    out[13] = v3[1];
-    out[14] = v3[2];
-    out[15] = v3[3];
-    out[16] = v0[4];
-    out[17] = v0[5];
-    out[18] = v0[6];
-    out[19] = v0[7];
-    out[20] = v1[4];
-    out[21] = v1[5];
-    out[22] = v1[6];
-    out[23] = v1[7];
-    out[24] = v2[4];
-    out[25] = v2[5];
-    out[26] = v2[6];
-    out[27] = v2[7];
-    out[28] = v3[4];
-    out[29] = v3[5];
-    out[30] = v3[6];
-    out[31] = v3[7];
+  vec v0 = vec256_set_128_low(v[0], v[1]);
+  vec v1 = vec256_set_128_low(v[2], v[3]);
+  vec v2 = vec256_set_128_high(v[0], v[1]);
+  vec v3 = vec256_set_128_high(v[2], v[3]);
+
+  vec i0 = vec_load(in);
+  vec i1 = vec_load(in+vec_size);
+  vec i2 = vec_load(in+(2*vec_size));
+  vec i3 = vec_load(in+(3*vec_size));
+    v0 = v0 ^ i0;
+    v1 = v1 ^ i1;
+    v2 = v2 ^ i2;
+    v3 = v3 ^ i3;
+    vec_store(out,v0);
+    vec_store(out+vec_size,v1);
+    vec_store(out+(2*vec_size),v2);
+    vec_store(out+(3*vec_size),v3);
 #elif defined(VEC128)
+    unsigned* in = in;
+    unsigned* out = out;
     vec v0 = (vec){in[0],in[1],in[2],in[3]};
     vec v1 = (vec){in[4],in[5],in[6],in[7]};
     vec v2 = (vec){in[8],in[9],in[10],in[11]};
@@ -160,31 +139,28 @@ static inline void chacha20_init(vec* st, const unsigned char* k, const unsigned
   st[0] = (vec) {0x61707865,0x3320646E,0x79622D32,0x6B206574};
   st[1] = (vec) {kp[0], kp[1], kp[2], kp[3]};
   st[2] = (vec) {kp[4], kp[5], kp[6], kp[7]};
-  st[3] = (vec) {1,     np[0], np[1], np[2]};
+  st[3] = (vec) {ctr,   np[0], np[1], np[2]};
 #else
-    printf("only vec_size 16/32 supported\n");
+    printf("only vec_size 128/256 supported\n");
     exit(1);
 #endif
 }
 
 static inline void chacha20_block(unsigned char* out, const unsigned char* in, vec* st) {
-  unsigned* op = (unsigned*) out;
-  unsigned* ip = (unsigned*) in;
   vec one = ONE;
   vec v[4];
   chacha20_core(v,st);
-  write_xor(ip, op, v);
+  write_xor(in, out, v);
   st[3] = st[3] + one;
 }
 
 static inline void chacha20_block3(unsigned char* out, const unsigned char* in, vec* st) {
-  unsigned* op = (unsigned*) out;
-  unsigned* ip = (unsigned*) in;
   vec v0[4],v1[4],v2[4];
+  int blocks = vec_size / 16;
   chacha20_core3(v0,v1,v2,st);
-  write_xor(ip, op, v0);
-  write_xor(ip+vec_size, op+vec_size, v1);
-  write_xor(ip+(2 * vec_size), op+(2* vec_size), v2);
+  write_xor(in, out, v0);
+  write_xor(in+(64 * blocks), out+(64 * blocks), v1);
+  write_xor(in+(128 * blocks), out+(128 * blocks), v2);
 }
 
 int crypto_stream_xor_ic(
