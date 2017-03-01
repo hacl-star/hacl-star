@@ -17,10 +17,6 @@
 #include <openssl/aes.h>
 #include <openssl/ec.h>
 
-#ifdef _WIN32
-#include "BCryptWrapper.h"
-#endif
-
 #include "Curve25519.h"
 
 // The multiplexing is done at compile-time; pass -DIMPL=IMPL_OPENSSL to your
@@ -84,7 +80,6 @@ static int X25519(uint8_t out_shared_key[32], uint8_t private_key[32],
   /* The all-zero output results when the input is a point of small order. */
   return CRYPTO_memcmp(kZeros, out_shared_key, 32) != 0;
 }
-#endif
 
 // This is a version of pkey_ecx_derive in ecx_meth.c that i) uses the public
 // API and ii) calls our own X25519 function
@@ -108,6 +103,7 @@ static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
         return 0;
     return 1;
 }
+#endif
 
 // A lazy initializer
 EVP_PKEY_METHOD *get_hacl_x25519_meth() {
