@@ -31,6 +31,13 @@ test-chacha:
 	 $(OPENSSL_HOME)/libcrypto.a -l sodium -lpthread -ldl
 	./test-chacha.exe
 
+test-chacha-vec:
+	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I ../../other_providers/tweetnacl \
+	../../other_providers/tweetnacl/tweetnacl.c kremlib.c testlib.c Chacha20_vec.c test-chacha20-vec.c -o test-chacha-vec.exe \
+	 $(OPENSSL_HOME)/libcrypto.a -l sodium -lpthread -ldl
+	./test-chacha-vec.exe
+
 test-curve:
 	$(CC) $(CCOPTS) \
 	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
