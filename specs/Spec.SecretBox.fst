@@ -59,7 +59,7 @@ let secretbox_easy m k n =
     let (cipher,mac) = secretbox_detached m k n in 
     mac @| cipher
 
-val secretbox_open_easy: c:bytes{(length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
+val secretbox_open_easy: c:bytes{(length c >= 16 /\ length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
     k:key -> n:nonce -> Tot (option (lbytes (length c - 16)))
 let secretbox_open_easy c k n = 
     let (cipher,mac) = split c 16 in 
