@@ -3,7 +3,7 @@
 TWEETNACL_HOME   ?=../../other_providers/tweetnacl
 OPENSSL_HOME   ?=../../other_providers/openssl
 LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
-CC=gcc-6 -fno-tree-vectorize -flto
+CC=gcc-6 -fno-tree-vectorize -flto 
 CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
 
 test: test-poly	test-chacha test-salsa test-curve test-secretbox test-box test-aead

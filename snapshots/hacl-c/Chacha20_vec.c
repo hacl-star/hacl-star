@@ -1,6 +1,6 @@
 /* Code shamelessly copied from Krovetz's implementation */
 #include "Chacha20_vec.h"
-#include "vec128.h"
+#include "vec256.h"
 
 static inline vec rotate_vec1 (vec v){ return RORV(v,1); }
 static inline vec rotate_vec2 (vec v){ return RORV(v,2); }
@@ -46,6 +46,7 @@ static inline void chacha20_core(vec* v, vec* s) {
 /* This following function works much better with the 3 dqrounds in a row.
    2x slower if I split them up */
 static inline void chacha20_core3(vec* v0, vec*v1, vec* v2, vec* s) {
+  vec one = ONE;
   v0[0] = v1[0] = v2[0] = s[0];
   v0[1] = v1[1] = v2[1] = s[1];
   v0[2] = v1[2] = v2[2] = s[2];
@@ -59,21 +60,21 @@ static inline void chacha20_core3(vec* v0, vec*v1, vec* v2, vec* s) {
   v0[1] = v0[1] + s[1];
   v0[2] = v0[2] + s[2];
   v0[3] = v0[3] + s[3];
-  s[3] = s[3] + ONE;
+  s[3] = s[3] + one;
   v1[0] = v1[0] + s[0];
   v1[1] = v1[1] + s[1];
   v1[2] = v1[2] + s[2];
   v1[3] = v1[3] + s[3];
-  s[3] = s[3] + ONE;
+  s[3] = s[3] + one;
   v2[0] = v2[0] + s[0];
   v2[1] = v2[1] + s[1];
   v2[2] = v2[2] + s[2];
   v2[3] = v2[3] + s[3];
-  s[3] = s[3] + ONE;
+  s[3] = s[3] + one;
 }
 
 /* this ones costs 0.5 cycle/byte, try to optimize */
-/* This function is the only one that depends on the vector size */
+/* This function and init are the only ones that depends on the vector size */
 static inline void write_xor(unsigned* in, unsigned* out, vec* v) {
 #if defined(VEC256)
     vec v0 = (vec){in[0],in[1],in[2],in[3],in[16],in[17],in[18],in[19]};
@@ -147,13 +148,33 @@ static inline void write_xor(unsigned* in, unsigned* out, vec* v) {
 #endif
 }
 
+static inline void chacha20_init(vec* st, const unsigned char* k, const unsigned char* n, unsigned int ctr) {
+  unsigned * kp = (unsigned *)k;
+  unsigned * np = (unsigned *)n;
+#if defined(VEC256)
+  st[0] = (vec) {0x61707865,0x3320646E,0x79622D32,0x6B206574,0x61707865,0x3320646E,0x79622D32,0x6B206574};
+  st[1] = (vec) {kp[0], kp[1], kp[2], kp[3],kp[0], kp[1], kp[2], kp[3]};
+  st[2] = (vec) {kp[4], kp[5], kp[6], kp[7],kp[4], kp[5], kp[6], kp[7]};
+  st[3] = (vec) {ctr,   np[0], np[1], np[2],ctr+1, np[0], np[1], np[2]};
+#elif defined(VEC128)
+  st[0] = (vec) {0x61707865,0x3320646E,0x79622D32,0x6B206574};
+  st[1] = (vec) {kp[0], kp[1], kp[2], kp[3]};
+  st[2] = (vec) {kp[4], kp[5], kp[6], kp[7]};
+  st[3] = (vec) {1,     np[0], np[1], np[2]};
+#else
+    printf("only vec_size 16/32 supported\n");
+    exit(1);
+#endif
+}
+
 static inline void chacha20_block(unsigned char* out, const unsigned char* in, vec* st) {
   unsigned* op = (unsigned*) out;
   unsigned* ip = (unsigned*) in;
+  vec one = ONE;
   vec v[4];
   chacha20_core(v,st);
   write_xor(ip, op, v);
-  st[3] += ONE;
+  st[3] = st[3] + one;
 }
 
 static inline void chacha20_block3(unsigned char* out, const unsigned char* in, vec* st) {
@@ -166,22 +187,18 @@ static inline void chacha20_block3(unsigned char* out, const unsigned char* in, 
   write_xor(ip+(2 * vec_size), op+(2* vec_size), v2);
 }
 
-int crypto_stream_xor(
+int crypto_stream_xor_ic(
         unsigned char *out,
         const unsigned char *in,
         unsigned long long inlen,
         const unsigned char *n,
-        const unsigned char *k
+        const unsigned char *k,
+	unsigned int ctr
 )
 {
   /* Assumes all pointers are aligned properly for vector reads */
-    unsigned * kp = (unsigned *)k;
-    unsigned * np = (unsigned *)n;
     vec st[4];
-    st[0] = (vec) {0x61707865,0x3320646E,0x79622D32,0x6B206574};
-    st[1] = (vec) {kp[0], kp[1], kp[2], kp[3]};
-    st[1] = (vec) {kp[4], kp[5], kp[6], kp[7]};
-    st[3] = (vec) {1,     np[0], np[1], np[2]};
+    chacha20_init(st,k,n,ctr);
     int blocks = vec_size / 16;
     int iters;
     for (iters = 0; iters < inlen/(3*blocks*64); iters++) {
@@ -203,6 +220,17 @@ int crypto_stream_xor(
 	memcpy(out,buf,inlen);
     }
     return 0;
+}
+
+int crypto_stream_xor(
+        unsigned char *out,
+        const unsigned char *in,
+        unsigned long long inlen,
+        const unsigned char *n,
+        const unsigned char *k
+)
+{
+  return crypto_stream_xor_ic(out,in,inlen,n,k,0);
 }
 
 int crypto_stream(
