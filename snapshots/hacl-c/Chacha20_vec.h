@@ -1,3 +1,6 @@
+#ifndef __Chacha20_H
+#define __Chacha20_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -26,3 +29,4 @@ int crypto_stream_xor_ic(
         const unsigned char *k,
 	unsigned int ctr
 		      );
+#endif

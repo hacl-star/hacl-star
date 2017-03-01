@@ -1,3 +1,5 @@
+#ifndef __Vec_H
+#define __Vec_H
 #include <immintrin.h>
 #include "kremlib.h"
 #define VEC256
@@ -24,3 +26,4 @@ static inline vec vec_load(const unsigned char* in) {
 static inline void vec_store(unsigned char* out, vec v) {
   _mm256_storeu_si256((__m256i*)(out), (__m256i) v);
 }
+#endif

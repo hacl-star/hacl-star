@@ -81,6 +81,15 @@ static inline void write_xor(const unsigned char* in, unsigned char* out, vec* v
   vec v1 = vec256_set_128_low(v[2], v[3]);
   vec v2 = vec256_set_128_high(v[0], v[1]);
   vec v3 = vec256_set_128_high(v[2], v[3]);
+#elif  defined(VEC128)
+  vec v0 = v[0];
+  vec v1 = v[1];
+  vec v2 = v[2];
+  vec v3 = v[3];
+#else
+    printf("only vec_size 16/32 supported\n");
+    exit(1);
+#endif
 
   vec i0 = vec_load(in);
   vec i1 = vec_load(in+vec_size);
@@ -94,37 +103,6 @@ static inline void write_xor(const unsigned char* in, unsigned char* out, vec* v
     vec_store(out+vec_size,v1);
     vec_store(out+(2*vec_size),v2);
     vec_store(out+(3*vec_size),v3);
-#elif defined(VEC128)
-    unsigned* in = in;
-    unsigned* out = out;
-    vec v0 = (vec){in[0],in[1],in[2],in[3]};
-    vec v1 = (vec){in[4],in[5],in[6],in[7]};
-    vec v2 = (vec){in[8],in[9],in[10],in[11]};
-    vec v3 = (vec){in[12],in[13],in[14],in[15]};
-    v0 = v0 ^ v[0];
-    v1 = v1 ^ v[1];
-    v2 = v2 ^ v[2];
-    v3 = v3 ^ v[3];
-    out[0] = v0[0];
-    out[1] = v0[1];
-    out[2] = v0[2];
-    out[3] = v0[3];
-    out[4] = v1[0];
-    out[5] = v1[1];
-    out[6] = v1[2];
-    out[7] = v1[3];
-    out[8] = v2[0];
-    out[9] = v2[1];
-    out[10] = v2[2];
-    out[11] = v2[3];
-    out[12] = v3[0];
-    out[13] = v3[1];
-    out[14] = v3[2];
-    out[15] = v3[3];
-#else
-    printf("only vec_size 16/32 supported\n");
-    exit(1);
-#endif
 }
 
 static inline void chacha20_init(vec* st, const unsigned char* k, const unsigned char* n, unsigned int ctr) {
