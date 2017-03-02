@@ -24,7 +24,7 @@ Currently, everything is still work in progress and freshly ported over from FSt
   +------------+--------------+       |          +---------------------------+                     |
                ^                      |                                                            |
                |                      |                                                            |
-               |                      |								   v
+               |                      |	                                                           v
   +------------+--------------+       |          +---------------------------+        +---------------------------+
   |                           |       |          |                           |        |                           |
   | Box.DH                    |       |          | Box.AE                    |        | Box.PlainAE               |
