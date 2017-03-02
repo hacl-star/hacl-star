@@ -46,6 +46,14 @@ chacha20.exe: Spec.Chacha20.fst
 	$(OCAMLOPT) -I chacha-spec $(OCAML_INCLUDES) $(addprefix chacha-spec/, $(EXTRACTED)) chacha-spec/Combinators.ml chacha-spec/Spec_Lib.ml chacha-spec/Spec_CTR.ml chacha-spec/Spec_Chacha20.ml -o chacha20.exe
 	./chacha20.exe
 
+chacha20-vec.exe: Spec.Chacha20_vec.fst
+	$(MAKE) -C ../code/lib/ml MEM=HST
+	mkdir -p chacha-spec-vec
+	$(FSTAR) $(ARGS) --odir chacha-spec-vec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> chacha-spec-vec/Spec_Chacha20_vec.ml
+	$(OCAMLOPT) -I chacha-spec-vec $(OCAML_INCLUDES) $(addprefix chacha-spec-vec/, $(EXTRACTED)) chacha-spec-vec/Combinators.ml chacha-spec-vec/Spec_Lib.ml chacha-spec-vec/Spec_CTR.ml chacha-spec-vec/Spec_Chacha20_vec.ml -o chacha20-vec.exe
+	./chacha20-vec.exe
+
 salsa20.exe: Spec.Salsa20.fst
 	$(MAKE) -C ../code/lib/ml MEM=HST
 	mkdir -p salsa-spec
