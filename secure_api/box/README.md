@@ -8,7 +8,7 @@ We attempt to provide a secure API as described in the partent directory.
 Currently, everything is still work in progress and freshly ported over from FStar/examples/crypto/cryptobox.
 
 ### Module architecture
-
+```
   +---------------------------+                  +---------------------------+
   |                           |                  |                           |
   | Box.PKAE                  |                  | Box.PlainPKAE             |
@@ -86,7 +86,7 @@ Currently, everything is still work in progress and freshly ported over from FSt
   |   controlled              |
   |                           |
   +---------------------------+
-
+```
 
 TODO:
 - use curve25519's scalar multiplication
