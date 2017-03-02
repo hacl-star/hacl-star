@@ -1,14 +1,8 @@
 /* Code shamelessly copied from Krovetz's implementation */
 #include "Chacha20_vec.h"
-#include "vec256.h"
+#include "Chacha20_state.h"
 
-#ifdef VEC256
-const vec ONE = {1,0,0,0,1,0,0,0};
-#else
-const vec ONE = {1,0,0,0};
-#endif 
-
-static inline void dqround_vectors(vec* v) {
+static inline void dqround_vectors(chacha20_state v) {
   vec a = v[0];
   vec b = v[1];
   vec c = v[2];
@@ -29,7 +23,7 @@ static inline void dqround_vectors(vec* v) {
   v[3] = d;
 }
 
-static inline void chacha20_core(vec* v, vec* s) {
+static inline void chacha20_core(chacha20_state v, chacha20_state s) {
   v[0] = s[0];
   v[1] = s[1];
   v[2] = s[2];
@@ -43,8 +37,8 @@ static inline void chacha20_core(vec* v, vec* s) {
 
 /* This following function works much better with the 3 dqrounds in a row.
    2x slower if I split them up */
-static inline void chacha20_core3(vec* v0, vec*v1, vec* v2, vec* s) {
-  vec one = ONE;
+static inline void chacha20_core3(chacha20_state v0, chacha20_state v1, chacha20_state v2, chacha20_state s) {
+  vec one = one_128_le();
   v0[0] = v1[0] = v2[0] = s[0];
   v0[1] = v1[1] = v2[1] = s[1];
   v0[2] = v1[2] = v2[2] = s[2];
@@ -64,72 +58,45 @@ static inline void chacha20_core3(vec* v0, vec*v1, vec* v2, vec* s) {
   v1[2] = vec_add(v1[2],s[2]);
   v1[3] = vec_add(v1[3],s[3]);
   s[3]  = vec_add(s[3],one);
-  v2[0] = v2[0] + s[0];
-  v2[1] = v2[1] + s[1];
-  v2[2] = v2[2] + s[2];
-  v2[3] = v2[3] + s[3];
+  v2[0] = vec_add(v2[0],s[0]);
+  v2[1] = vec_add(v2[1],s[1]);
+  v2[2] = vec_add(v2[2],s[2]);
+  v2[3] = vec_add(v2[3],s[3]);
   s[3]  = vec_add(s[3],one);
 }
 
 /* this ones costs 0.5 cycle/byte, try to optimize */
 /* This function and init are the only ones that depends on the vector size */
-static inline void write_xor(const unsigned char* in, unsigned char* out, vec* v) {
-#if defined(VEC256)
-  vec v0 = vec256_choose_128(v[0], v[1], 0, 2);
-  vec v1 = vec256_choose_128(v[2], v[3], 0, 2);
-  vec v2 = vec256_choose_128(v[0], v[1], 1, 3);
-  vec v3 = vec256_choose_128(v[2], v[3], 1, 3);
-#elif  defined(VEC128)
-  vec v0 = v[0];
-  vec v1 = v[1];
-  vec v2 = v[2];
-  vec v3 = v[3];
-#else
-    printf("only vec_size 16/32 supported\n");
-    exit(1);
-#endif
+static inline void write_xor(const unsigned char* in, unsigned char* out, chacha20_state v) {
+  vec k[4];
+  chacha20_state_to_key(k,v);
   vec i0 = vec_load(in);
   vec i1 = vec_load(in+vec_size);
   vec i2 = vec_load(in+(2*vec_size));
   vec i3 = vec_load(in+(3*vec_size));
-  v0 = vec_xor(v0,i0);
-  v1 = vec_xor(v1,i1);
-  v2 = vec_xor(v2,i2);
-  v3 = vec_xor(v3,i3);
-  vec_store(out,v0);
-  vec_store(out+vec_size,v1);
-  vec_store(out+(2*vec_size),v2);
-  vec_store(out+(3*vec_size),v3);
+  k[0] = vec_xor(k[0],i0);
+  k[1] = vec_xor(k[1],i1);
+  k[2] = vec_xor(k[2],i2);
+  k[3] = vec_xor(k[3],i3);
+  vec_store(out,k[0]);
+  vec_store(out+vec_size,k[1]);
+  vec_store(out+(2*vec_size),k[2]);
+  vec_store(out+(3*vec_size),k[3]);
 }
 
-static inline void chacha20_init(vec* st, const unsigned char* k, const unsigned char* n, unsigned int ctr) {
-  unsigned * kp = (unsigned *)k;
-  unsigned * np = (unsigned *)n;
-#if defined(VEC256)
-  st[0] = (vec) {0x61707865,0x3320646E,0x79622D32,0x6B206574,0x61707865,0x3320646E,0x79622D32,0x6B206574}; 
-  st[1] = (vec) {kp[0], kp[1], kp[2], kp[3],kp[0], kp[1], kp[2], kp[3]};
-  st[2] = (vec) {kp[4], kp[5], kp[6], kp[7],kp[4], kp[5], kp[6], kp[7]};
-  st[3] = (vec) {ctr,   np[0], np[1], np[2],ctr+1, np[0], np[1], np[2]};
-#elif defined(VEC128)
-  st[0] = (vec) {0x61707865,0x3320646E,0x79622D32,0x6B206574};
-  st[1] = (vec) {kp[0], kp[1], kp[2], kp[3]};
-  st[2] = (vec) {kp[4], kp[5], kp[6], kp[7]};
-  st[3] = (vec) {ctr,   np[0], np[1], np[2]};
-#else
-    printf("only vec_size 128/256 supported\n");
-    exit(1);
-#endif
+static inline void chacha20_init(chacha20_state st, const unsigned char* k, const unsigned char* n, unsigned int ctr) {
+  chacha20_state_init(st,k,n,ctr);
 }
 
-static inline void chacha20_block(unsigned char* out, const unsigned char* in, vec* st) {
-  vec one = ONE;
+static inline void chacha20_block(unsigned char* out, const unsigned char* in, chacha20_state st) {
+  vec one = one_128_le();
   vec v[4];
   chacha20_core(v,st);
   write_xor(in, out, v);
-  st[3] = st[3] + one;
+  st[3] = vec_add(st[3],one);
 }
 
-static inline void chacha20_block3(unsigned char* out, const unsigned char* in, vec* st) {
+static inline void chacha20_block3(unsigned char* out, const unsigned char* in, chacha20_state st) {
   vec v0[4],v1[4],v2[4];
   int blocks = vec_size / 16;
   chacha20_core3(v0,v1,v2,st);
