@@ -37,7 +37,8 @@ private let get_accumulator (st:state) = I.MkState?.h st
 val alloc:
   unit -> StackInline state
     (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_state h1 st))
+    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ I.live_st h1 st /\ frameOf I.(st.h) == h0.tip
+      /\ frameOf I.(st.r) = h0.tip /\ ~(contains h0 I.(st.r)) /\ ~(contains h0 I.(st.h))))
 let alloc () =
   I.alloc()
 
@@ -135,6 +136,11 @@ val crypto_onetimeauth:
 let crypto_onetimeauth output input len k = Hacl.Standalone.Poly1305_64.crypto_onetimeauth output input len k
 
 
+open Spec.Chacha20Poly1305
+open Hacl.Spec.Endianness
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
 val pad_16_bytes:
   input:uint8_p ->
   len:U32.t{length input = U32.v len /\ U32.v len < 16 /\ U32.v len > 0} ->
@@ -142,8 +148,8 @@ val pad_16_bytes:
     (requires (fun h -> live h input))
     (ensures (fun h0 output h1 -> live h0 input /\ live h1 output /\ frameOf output = h1.tip
       /\ modifies_0 h0 h1 /\ length output = 16
-      (* /\ (let o = as_seq h1 output in let i = as_seq h0 input in *)
-      (*    o == Spec.pad_16 i) *)))
+      /\ (let o = reveal_sbytes (as_seq h1 output) in let i = reveal_sbytes (as_seq h0 input) in
+         o == Spec.Chacha20Poly1305.pad_16 i)))
 let pad_16_bytes input len =
   let h0 = ST.get() in
   let b = Buffer.create (uint8_to_sint8 0uy) 16ul in
@@ -152,47 +158,9 @@ let pad_16_bytes input len =
   no_upd_lemma_0 h0 h input;
   Seq.lemma_eq_intro (as_seq h input) (Seq.slice (as_seq h input) 0 (U32.v len));
   Seq.lemma_eq_intro (Seq.slice (as_seq h b) (U32.v len) 16) (Seq.create (16 - U32.v len) (uint8_to_sint8 0uy));
-  (* Seq.lemma_eq_intro (as_seq h b) (Spec.pad_16 (as_seq h0 input)); *)
+  Seq.lemma_eq_intro (reveal_sbytes (as_seq h b)) (Spec.Chacha20Poly1305.pad_16 (reveal_sbytes (as_seq h0 input)));
   b
 
-
-val blocks:
-  current_log:I.log_t ->
-  st:I.poly1305_state ->
-  m:I.uint8_p ->
-  len:U64.t{16 * U64.v len = length m} ->
-  Stack I.log_t
-    (requires (fun h -> I.(live_st h st /\ live h m /\ disjoint st.h m
-      /\ A.red_45 (as_seq h st.h)
-      /\ A.red_44 (as_seq h st.r)
-    )))
-    (ensures  (fun h0 updated_log h1 -> I.(modifies_1 st.h h0 h1 /\ live_st h1 st /\ live_st h0 st /\ live h0 m
-      /\ A.red_45 (as_seq h0 st.h)
-      /\ A.red_44 (as_seq h0 st.r)
-      /\ A.red_44 (as_seq h1 st.r)
-      /\ A.red_45 (as_seq h1 st.h)
-      )))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-let rec blocks log st m len =
-  let h0 = ST.get() in
-  if U64.(len =^ 0uL) then (
-    log
-  )
-  else (
-    cut (U64.v len >= 1);
-    let block = Buffer.sub m 0ul 16ul in
-    let tail  = Buffer.offset m 16ul in
-    let new_log = I.poly1305_update log st block in
-    let len = U64.(len -^ 1uL) in
-    blocks new_log st tail len
-  )
-
-
-val poly1305_alloc:
-  unit -> StackInline I.poly1305_state
-    (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ I.live_st h1 st))
-let poly1305_alloc () = I.alloc ()
 
 private let lemma_div (x:nat) : Lemma (16 * (x / 16) <= x /\ 16 * (x / 16) >= 0) =
   Math.Lemmas.lemma_div_mod x 16
@@ -209,6 +177,41 @@ private let lemma_pad_last_modifies (h:mem) (acc:buffer Hacl.UInt64.t) : Lemma
   (modifies_1 acc h h) = lemma_intro_modifies_1 acc h h
 
 
+private val pad_16_block: x:word{Seq.length x < 16 /\ Seq.length x > 0} -> Tot (lbytes 16)
+let pad_16_block x = Spec.Chacha20Poly1305.pad_16 x
+
+
+private val pad_last_spec:
+  st:S.poly1305_state_{Hacl.Spe.Poly1305_64.invariant st} ->
+  m:word{Seq.length m < 16 /\ Seq.length m > 0} ->
+  GTot (st':S.poly1305_state_{Hacl.Spe.Poly1305_64.invariant st'
+    /\ (let log  = S.MkState?.log st  in
+       let log' = S.MkState?.log st'  in
+       let m    = pad_16_block m in log' == Seq.cons m log)})
+#reset-options "--initial_fuel 0 -max_fuel 0 --z3rlimit 5"
+let pad_last_spec st m =
+  let acc = S.MkState?.h st in
+  let r   = S.MkState?.r st in
+  let log = S.MkState?.log st in
+  let m_16 = pad_16_block m in
+  let st' = Hacl.Spe.Poly1305_64.poly1305_update_spec st (intro_sbytes (m_16)) in
+  let acc' = S.MkState?.h st' in
+  let r' = S.MkState?.r st' in
+  let log' = S.MkState?.log st' in
+  cut (log' == Seq.cons (m_16) log);
+  Math.Lemmas.modulo_lemma (Hacl.Spec.Bignum.Bigint.seval r) (pow2 130 - 5);
+  assert_norm (pow2 128 + pow2 128 < pow2 130 - 5); lemma_little_endian_is_bounded m_16;
+  let b : Spec.Poly1305.elem = little_endian m_16 + pow2 128 in
+  let b' = Spec.Poly1305.encode m_16 in
+  Math.Lemmas.modulo_lemma b (pow2 130 - 5);
+  cut (S.selem r = S.selem r');
+  cut (S.selem acc' = Spec.Poly1305.((S.selem acc +@ b) *@ S.selem r));
+  cut (S.selem acc' = Spec.Poly1305.((S.selem acc +@ encode m_16) *@ S.selem r));
+  Hacl.Spe.Poly1305_64.lemma_poly1305_blocks_spec_1 (intro_sbytes m_16) log log' (S.selem acc) (Hacl.Spec.Bignum.Bigint.seval r) (S.selem acc');
+  st'
+
+
+
 val pad_last:
   log:I.log_t ->
   st:I.poly1305_state ->
@@ -216,12 +219,25 @@ val pad_last:
   len:U32.t{U32.v len = length input /\ U32.v len < 16} ->
   Stack I.log_t
     (requires (fun h -> I.live_st h st /\ live h input
-      /\ A.red_45 (as_seq h I.(st.h))
-      /\ A.red_44 (as_seq h I.(st.r))))
-    (ensures (fun h0 log h1 -> I.live_st h1 st /\ live h0 input /\ modifies_1 I.(st.h) h0 h1
-      /\ A.red_45 (as_seq h1 I.(st.h))
-      /\ A.red_44 (as_seq h1 I.(st.r))
+      /\ (let r = as_seq h I.(st.r) in
+         let acc = as_seq h I.(st.h) in
+         let log = reveal log in
+         Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log))
     ))
+    (ensures (fun h0 updated_log h1 -> I.live_st h0 st /\ I.live_st h1 st /\ live h0 input
+      /\ modifies_1 I.(st.h) h0 h1
+      /\ (let r = as_seq h0 I.(st.r) in
+         let acc = as_seq h0 I.(st.h) in
+         let log = reveal log in
+         let acc' = as_seq h1 I.(st.h) in
+         let log' = reveal updated_log in
+         let m    = reveal_sbytes (as_seq h0 input) in
+         Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log)
+         /\ Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc' log')
+         /\ (if U32.v len = 0 then log' == log
+           else (let m = pad_16 m in Seq.length m = 16 /\ log' == Seq.cons m log)))
+    ))
+#reset-options "--initial_fuel 0 -max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 400"
 let pad_last log st input len =
   push_frame();
   cut (U32.v len >= 0 /\ U32.v len < 16);
@@ -230,13 +246,15 @@ let pad_last log st input len =
     let h0 = ST.get() in
     lemma_pad_last_modifies h0 I.(st.h);
     log
-  )else (
+  ) else (
     cut (U32.v len <> 0);
     cut (U32.v len < 16);
     cut (U32.v len > 0 /\ U32.v len < 16);
     let h0 = ST.get() in
     let b = pad_16_bytes input len in
     let h = ST.get() in
+    Seq.lemma_eq_intro (as_seq h b) (Seq.slice (as_seq h b) 0 16);
+    Hacl.Standalone.Poly1305_64.lemma_poly1305_blocks_spec_1 (S.MkState (as_seq h0 I.(st.r)) (as_seq h0 I.(st.h)) (reveal log)) (as_seq h b) 1uL;
     let l = I.poly1305_update log st b in
     let h1 = ST.get() in
     l
@@ -244,8 +262,38 @@ let pad_last log st input len =
   pop_frame();
   l
 
-#reset-options "--initial_fuel 0 -max_fuel 0 --z3rlimit 100"
 
+#reset-options "--initial_fuel 0 -max_fuel 0 --z3rlimit 5"
+
+
+private val lemma_pad_16_:
+  s:Seq.seq U8.t{Seq.length s % 16 = 0} ->
+  Lemma (Spec.Poly1305.encode_bytes (pad_16 s) == Spec.Poly1305.encode_bytes s)
+let lemma_pad_16_ s = ()
+
+
+private val lemma_pad_16:
+  h:mem ->
+  b:uint8_p{live h b} ->
+  len_16:U32.t{U32.v len_16 = 16 * (length b / 16)} ->
+  rem_16:U32.t{U32.v rem_16 = length b % 16} ->
+  Lemma (
+    U32.v len_16 <= length b /\ U32.v rem_16 + U32.v len_16 = length b /\
+    (let x = reveal_sbytes (as_seq h (Buffer.sub b 0ul len_16)) in
+     let y = reveal_sbytes (as_seq h (Buffer.sub b len_16 rem_16)) in
+     let b = reveal_sbytes (as_seq h b) in
+     if U32.v rem_16 = 0 then Spec.Poly1305.encode_bytes (pad_16 b) == Spec.Poly1305.encode_bytes x
+     else (Seq.length (pad_16 y) = 16
+           /\ Spec.Poly1305.encode_bytes (pad_16 b) == Seq.cons (pad_16 y) (Spec.Poly1305.encode_bytes x))))
+#reset-options "--initial_fuel 0 -max_fuel 0 --z3rlimit 100"
+let lemma_pad_16 h b len_16 rem_16 =
+  Math.Lemmas.lemma_div_mod (length b) 16;
+  Seq.lemma_eq_intro (Seq.slice (as_seq h b) 0 (U32.v len_16)) (as_seq h (Buffer.sub b 0ul len_16));
+  Seq.lemma_eq_intro (Seq.slice (as_seq h b) (U32.v len_16) (length b)) (as_seq h (Buffer.sub b len_16 rem_16));
+  Hacl.Spec.Poly1305_64.Lemmas1.lemma_pad_16 (reveal_sbytes (as_seq h b)) (U32.v len_16) (U32.v rem_16)
+
+
+#reset-options "--initial_fuel 0 -max_fuel 0 --z3rlimit 200"
 
 val poly1305_blocks_init:
   st:I.poly1305_state ->
@@ -254,9 +302,14 @@ val poly1305_blocks_init:
   k:uint8_p{length k = 32 /\ disjoint k I.(st.r) /\ disjoint k I.(st.h)} ->
   Stack I.log_t
     (requires (fun h -> I.live_st h st /\ live h input /\ live h k))
-    (ensures (fun h0 log h1 -> I.live_st h1 st /\ live h0 input /\ live h0 k /\ modifies_2 I.(st.r) I.(st.h) h0 h1
-      /\ A.red_45 (as_seq h1 I.(st.h))
-      /\ A.red_44 (as_seq h1 I.(st.r))
+    (ensures (fun h0 log h1 -> I.live_st h1 st /\ live h0 input /\ live h0 k
+      /\ modifies_2 I.(st.r) I.(st.h) h0 h1
+      /\ (let r   = as_seq h1 I.(st.r) in
+         let acc = as_seq h1 I.(st.h) in
+         let log = reveal log in
+         let m   = reveal_sbytes (as_seq h0 input) in
+         Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log)
+         /\ log == Spec.Poly1305.encode_bytes (pad_16 m))
     ))
 let poly1305_blocks_init st input len k =
   let len_16 = U32.(len >>^ 4ul) in
@@ -270,10 +323,16 @@ let poly1305_blocks_init st input len k =
   let part_input = Buffer.sub input 0ul len' in
   let last_block = Buffer.offset input len' in
   cut (length last_block = U32.v rem_16);
+  let h0 = ST.get() in
   let l = Poly.poly1305_partial st part_input (Int.Cast.uint32_to_uint64 len_16) kr in
-  pad_last l st last_block rem_16
+  let h1 = ST.get() in
+  let l' = pad_last l st last_block rem_16 in
+  let h2 = ST.get() in
+  lemma_pad_16 h0 input len' rem_16;
+  l'
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
+
+(* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500" *)
 
 val poly1305_blocks_continue:
   log:I.log_t ->
@@ -282,13 +341,24 @@ val poly1305_blocks_continue:
   len:U32.t{U32.v len = length input} ->
   Stack I.log_t
     (requires (fun h -> I.live_st h st /\ live h input
-        /\ A.red_45 (as_seq h I.(st.h))
-      /\ A.red_44 (as_seq h I.(st.r))
+      /\ (let r = as_seq h I.(st.r) in
+         let acc = as_seq h I.(st.h) in
+         let log = reveal log in
+         Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log))
     ))
-    (ensures (fun h0 log' h1 -> I.live_st h1 st /\ live h0 input /\ modifies_1 I.(st.h) h0 h1
-      /\ A.red_45 (as_seq h1 I.(st.h))
-      /\ A.red_44 (as_seq h1 I.(st.r))
+    (ensures (fun h0 log' h1 -> I.live_st h0 st /\ I.live_st h1 st /\ live h0 input
+      /\ modifies_1 I.(st.h) h0 h1
+      /\ (let r = as_seq h0 I.(st.r) in
+         let acc = as_seq h0 I.(st.h) in
+         let log = reveal log in
+         let acc' = as_seq h1 I.(st.h) in
+         let log' = reveal log' in
+         let m    = reveal_sbytes (as_seq h0 input) in
+         Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log)
+         /\ Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc' log')
+         /\ log' == Seq.append (Spec.Poly1305.encode_bytes (pad_16 m)) log)
     ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 let poly1305_blocks_continue log st input len =
   let len_16 = U32.(len >>^ 4ul) in
   let rem_16 = U32.(len &^ 15ul)  in
@@ -299,8 +369,58 @@ let poly1305_blocks_continue log st input len =
   let len' = mul_div_16 len in
   let part_input = Buffer.sub input 0ul len' in
   let last_block = Buffer.offset input len' in
-  let l = blocks log st part_input (Int.Cast.uint32_to_uint64 len_16) in
-  pad_last l st last_block rem_16
+  let h0 = ST.get() in
+  let l = Hacl.Standalone.Poly1305_64.poly1305_blocks log st part_input (Int.Cast.uint32_to_uint64 len_16) in
+  let h1 = ST.get() in
+  let l' = pad_last l st last_block rem_16 in
+  let h2 = ST.get() in
+  lemma_pad_16 h0 input len' rem_16;
+  Seq.lemma_eq_intro (Seq.append (Spec.Poly1305.encode_bytes (pad_16 (reveal_sbytes (as_seq h0 input))))
+                                 (reveal log))
+                     (reveal l');
+  l'
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+
+[@ "substitute"]
+val poly1305_blocks_finish_:
+  log:I.log_t ->
+  st:I.poly1305_state ->
+  input:uint8_p{disjoint I.(st.h) input /\ length input = 16} ->
+  Stack I.log_t
+    (requires (fun h -> I.live_st h st /\ live h input
+      /\ (let r = as_seq h I.(st.r) in
+         let acc = as_seq h I.(st.h) in
+         let log = reveal log in
+         Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log))
+    ))
+    (ensures (fun h0 log' h1 -> I.live_st h0 st /\ live h0 input /\ modifies_1 I.(st.h) h0 h1
+      /\ I.live_st h1 st
+      /\ (let r    = as_seq h0 I.(st.r) in
+         let acc  = as_seq h0 I.(st.h) in
+         let acc' = as_seq h1 I.(st.h) in
+         let log  = reveal log         in
+         let log' = reveal log'        in
+         let m    = reveal_sbytes (as_seq h0 input)    in
+         Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log)
+         /\ Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc' log')
+         /\ log' == Seq.cons m log
+         /\ Hacl.Spec.Bignum.Bigint.seval acc' < pow2 130 - 5
+         /\ Hacl.Spec.Bignum.AddAndMultiply.bounds acc' S.p44 S.p44 S.p42)
+    ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
+[@ "substitute"]
+let poly1305_blocks_finish_ log st input =
+  let h = ST.get() in
+  Seq.lemma_eq_intro (as_seq h input) (Seq.slice (as_seq h input) 0 16);
+  Math.Lemmas.modulo_lemma (Hacl.Spec.Bignum.Bigint.seval (as_seq h I.(st.r))) (pow2 130 - 5);
+  Hacl.Standalone.Poly1305_64.lemma_poly1305_blocks_spec_1 (S.MkState (as_seq h (I.MkState?.r st)) (as_seq h (I.MkState?.h st)) (reveal log)) (as_seq h input) 1uL;
+  let log' = I.poly1305_update log st input in
+  Hacl.Spe.Poly1305_64.poly_def_1 (reveal log') (Hacl.Spec.Bignum.Bigint.seval (as_seq h I.(st.r)));
+  cut (reveal log' == Seq.cons (reveal_sbytes (as_seq h input)) (reveal log));
+  I.poly1305_update_last log' st (Buffer.offset input 16ul) 0uL;
+  log'
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
@@ -313,12 +433,28 @@ val poly1305_blocks_finish:
   key_s:uint8_p{disjoint key_s I.(st.h) /\ disjoint key_s mac /\ length key_s = 16} ->
   Stack unit
     (requires (fun h -> I.live_st h st /\ live h input /\ live h mac /\ live h key_s
-      /\ A.red_45 (as_seq h I.(st.h))
-      /\ A.red_44 (as_seq h I.(st.r))
+      /\ (let r = as_seq h I.(st.r) in
+         let acc = as_seq h I.(st.h) in
+         let log = reveal log in
+         Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log))
     ))
-    (ensures (fun h0 _ h1 -> live h0 input /\ modifies_2 mac I.(st.h) h0 h1 /\ live h1 mac))
+    (ensures (fun h0 _ h1 -> I.live_st h0 st /\ live h0 key_s /\ live h0 input
+      /\ modifies_2 mac I.(st.h) h0 h1 /\ live h1 mac
+      /\ (let mac = as_seq h1 mac in
+         let r   = (as_seq h0 I.(st.r)) in
+         let acc = as_seq h0 I.(st.h) in
+         let log = reveal log in
+         let m   = reveal_sbytes (as_seq h0 input) in
+         let k   = Hacl.Spec.Endianness.hlittle_endian (as_seq h0 key_s) in
+         Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log)
+         /\ Hacl.Spec.Endianness.hlittle_endian mac
+           == (Spec.Poly1305.poly (Seq.cons m log) (Hacl.Spec.Bignum.Bigint.seval r) + k) % pow2 128)
+    ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let poly1305_blocks_finish log st input mac key_s =
-  let log = I.poly1305_update log st input in
-  let log = I.poly1305_update_last log st (Buffer.offset input 16ul) 0uL in
-  let _ = I.poly1305_finish st mac key_s in
-  ()
+  let h = ST.get() in
+  let _ = poly1305_blocks_finish_ log st input in
+  let h' = ST.get() in
+  Math.Lemmas.modulo_lemma (Hacl.Spec.Bignum.Bigint.seval (as_seq h' I.(st.h))) (pow2 130 - 5);
+  cut (Hacl.Spec.Bignum.Bigint.seval (as_seq h' I.(st.h)) = Spec.Poly1305.poly (Seq.cons (reveal_sbytes (as_seq h input)) (reveal log)) (Hacl.Spec.Bignum.Bigint.seval (as_seq h I.(st.r))));
+  I.poly1305_finish st mac key_s
