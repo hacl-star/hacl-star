@@ -3,7 +3,7 @@
 TWEETNACL_HOME   ?=../../other_providers/tweetnacl
 OPENSSL_HOME   ?=../../other_providers/openssl
 LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
-CC=gcc-6 -fno-tree-vectorize -flto 
+CC=gcc-6 -flto 
 CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
 
 test: test-poly	test-chacha test-salsa test-curve test-secretbox test-box test-aead
@@ -62,11 +62,11 @@ test-secretbox:
 
 test-aead:
 	$(CC) $(CCOPTS) \
-	Chacha20.c -c -o Chacha20.o
+	Chacha20_vec.c -c -o Chacha20_vec.o
 	$(CC) $(CCOPTS) \
 	Poly1305_64.c -c -o Poly1305_64.o
 	$(CC) $(CCOPTS) \
-	Chacha20.o Poly1305_64.o kremlib.c testlib.c Hacl_Policies.c Chacha20Poly1305.c test-aead.c -o test-aead.exe \
+	Chacha20_vec.o Poly1305_64.o kremlib.c testlib.c Hacl_Policies.c Chacha20Poly1305.c test-aead.c -o test-aead.exe \
 	-l sodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread -ldl
 	./test-aead.exe
 

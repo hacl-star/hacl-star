@@ -354,13 +354,8 @@ int32_t perf_chacha() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
-#if defined(VEC256)
-  print_results("HACL VEC256 ChaCha20 speed", (double)t2-t1,
+  print_results("HACL VEC ChaCha20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
-#else 
-  print_results("HACL VEC128 ChaCha20 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, PLAINLEN);
-#endif
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %llx\n", res);

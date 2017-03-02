@@ -1,6 +1,6 @@
 /* Code shamelessly copied from Krovetz's implementation */
 #include "Chacha20_vec.h"
-#include "vec128.h"
+#include "vec256.h"
 
 #ifdef VEC256
 const vec ONE = {1,0,0,0,1,0,0,0};
