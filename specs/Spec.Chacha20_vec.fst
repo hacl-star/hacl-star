@@ -9,7 +9,7 @@ open Spec.Lib
 module U32 = FStar.UInt32
 (* This should go elsewhere! *)
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
@@ -36,15 +36,19 @@ unfold let op_Hat_Hat (x:vec) (y:vec) : Tot vec =
 unfold let op_Less_Less_Less (x:vec) (n:UInt32.t{v n < 32}) : Tot vec = 
        Combinators.seq_map (fun x -> x <<< n) x 
 
-unfold let shuffle_right (x:vec) (n:idx) : Tot vec =
-        let z:nat = 4 - n in
-	let x = upd x 0 (index x ((z)%4)) in
-	let x = upd x 1 (index x ((z+1)%4)) in
-	let x = upd x 2 (index x ((z+2)%4)) in
-	let x = upd x 3 (index x ((z+3)%4)) in
+let shuffle_right (x:vec) (n:idx) : Tot vec =
+        let z:nat = n in
+        let x0 = index x ((0+z)%4) in
+        let x1 = index x ((1+z)%4) in
+        let x2 = index x ((2+z)%4) in
+        let x3 = index x ((3+z)%4) in
+	let x = upd x 0 x0 in
+	let x = upd x 1 x1 in
+	let x = upd x 2 x2 in
+	let x = upd x 3 x3 in
 	x
 
-unfold let shuffle_row (i:idx) (n:idx) (s:state) : Tot state = 
+let shuffle_row (i:idx) (n:idx) (s:state) : Tot state = 
        upd s i (shuffle_right (index s i) n)
 
 val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> shuffle
@@ -53,19 +57,23 @@ let line a b d s m =
   let m = upd m d ((index m d ^^  index m a) <<< s) in
   m
 
-let quarter_round_shift : shuffle = 
-  line 0 1 3 16ul @ 
+
+let double_round : shuffle =
+  line 0 1 3 16ul @
   line 2 3 1 12ul @
-  line 0 1 3 8ul @ 
-  line 2 3 1 7ul @
+  line 0 1 3 8ul  @
+  line 2 3 1 7ul  @
   shuffle_row 1 1 @
   shuffle_row 2 2 @
-  shuffle_row 3 1 
+  shuffle_row 3 3 @
+  line 0 1 3 16ul @
+  line 2 3 1 12ul @
+  line 0 1 3 8ul  @
+  line 2 3 1 7ul  @
+  shuffle_row 1 3 @
+  shuffle_row 2 2 @
+  shuffle_row 3 1
 
-
-let double_round : shuffle = 
-  quarter_round_shift @
-  quarter_round_shift 
 
 let rounds : shuffle = 
     iter 10 double_round (* 20 rounds *)
@@ -81,18 +89,21 @@ unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
 // JK: I have to add those assertions to typechecks, would be nice to get rid of it
 let setup (k:key) (n:nonce) (c:counter): Tot state =
   assert_norm(List.Tot.length constants = 4); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
-  Seq.of_list [createL constants; 
-  	       uint32s_from_le 4 (Seq.slice k 0 4);
-	       uint32s_from_le 4 (Seq.slice k 4 8);
-	       singleton (UInt32.uint_to_t c) @|  uint32s_from_le 3 n]
+  let constants:vec = createL constants in
+  let key_part_1:vec = uint32s_from_le 4 (Seq.slice k 0 16)  in
+  let key_part_2:vec = uint32s_from_le 4 (Seq.slice k 16 32) in
+  let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) in
+  assert_norm(List.Tot.length [constants; key_part_1; key_part_2; nonce] = 4);
+  Seq.seq_of_list [constants; key_part_1; key_part_2; nonce]
+
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     let st = setup k n c in
     let st' = chacha20_core st in
-    uint32s_to_le 16 (index st' 0) @|
-    uint32s_to_le 16 (index st' 1) @|
-    uint32s_to_le 16 (index st' 2) @|
-    uint32s_to_le 16 (index st' 3) 
+    uint32s_to_le 4 (index st' 0) @|
+    uint32s_to_le 4 (index st' 1) @|
+    uint32s_to_le 4 (index st' 2) @|
+    uint32s_to_le 4 (index st' 3) 
 
 
 
