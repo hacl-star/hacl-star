@@ -31,6 +31,9 @@ type word_16 = w:bytes{length w = 16}
 type tag = word_16
 
 
+(* Types from specs *)
+type seqelem = seqelem
+
 type word' = Spec.word
 type text = Spec.text
 
@@ -69,6 +72,11 @@ let store128_le_spec r = hlittle_bytes 16ul (w r)
 (** From the current memory state, returns the field element corresponding to a elemB *)
 val selem: seqelem -> GTot elem
 let selem s = seval s % prime
+
+inline_for_extraction
+val seval: seqelem -> GTot nat
+inline_for_extraction
+let seval s = seval s
 
 
 (* ############################################################################# *)
