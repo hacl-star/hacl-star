@@ -150,19 +150,19 @@ private let pad_length (len:nat) : Tot (n:nat{(len + n) % 64 = 0}) =
 
 
 (* Pad the data up to the block length and encode the total length *)
-let pad (input:bytes{Seq.length input < pow2 61}) : Tot (output:blocks_32) =
+let pad (prevlen:nat) (input:bytes{(Seq.length input) + prevlen < pow2 61})  : Tot (output:blocks_32) =
 
   (* Compute the padding length *)
   let padlen = pad_length (Seq.length input) - 8 in
 
   (* Generate the padding (without the last 8 bytes) *)
-  let padding = Seq.create padlen 0uy in
-
   (* Set the first bit of the padding to be a '1' *)
+  let padding = Seq.create padlen 0uy in
   let padding = Seq.upd padding 0 0x80uy in
 
   (* Encode the data length (in bits) as a 64bit big endian integer*)
-  let encodedlen = Endianness.big_bytes 8ul ((Seq.length input) * 8) in
+  let finallen = prevlen + Seq.length input in
+  let encodedlen = Endianness.big_bytes 8ul (finallen * 8) in
 
   (* Concatenate the data, padding and encoded length *)
   let output = Seq.append input padding in
@@ -184,12 +184,18 @@ let rec update_multi (n:nat) (hash:hash_32) (blocks:blocks_32{Seq.length blocks 
     update_multi (n - 1) (update_compress hash (Seq.index h 0)) t
 
 
+let update_last (hash:hash_32) (block:block_32) (prevlen:nat) (input:bytes{(Seq.length input) + prevlen < pow2 61}) : Tot hash_32 =
+  let blocks = pad prevlen input in
+  let n = Seq.length blocks in
+  update_multi n hash blocks
+
+
 let finish (hash:hash_32) : Tot bytes =
   Spec.Lib.uint32s_to_be 8 hash
 
 
 let hash (input:bytes{Seq.length input < pow2 61}) : Tot (hash:bytes) =
-  let blocks = pad input in
+  let blocks = pad 0 input in
   let n = Seq.length blocks in
   (**) assert_norm(List.Tot.length h_0 = 8);
   finish (update_multi n (Seq.seq_of_list h_0) blocks)
