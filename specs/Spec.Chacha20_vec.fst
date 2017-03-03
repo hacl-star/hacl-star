@@ -36,15 +36,19 @@ unfold let op_Hat_Hat (x:vec) (y:vec) : Tot vec =
 unfold let op_Less_Less_Less (x:vec) (n:UInt32.t{v n < 32}) : Tot vec = 
        Combinators.seq_map (fun x -> x <<< n) x 
 
-unfold let shuffle_right (x:vec) (n:idx) : Tot vec =
-        let z:nat = 4 - n in
-	let x = upd x 0 (index x ((z)%4)) in
-	let x = upd x 1 (index x ((z+1)%4)) in
-	let x = upd x 2 (index x ((z+2)%4)) in
-	let x = upd x 3 (index x ((z+3)%4)) in
+let shuffle_right (x:vec) (n:idx) : Tot vec =
+        let z:nat = n in
+        let x0 = index x ((0+z)%4) in
+        let x1 = index x ((1+z)%4) in
+        let x2 = index x ((2+z)%4) in
+        let x3 = index x ((3+z)%4) in
+	let x = upd x 0 x0 in
+	let x = upd x 1 x1 in
+	let x = upd x 2 x2 in
+	let x = upd x 3 x3 in
 	x
 
-unfold let shuffle_row (i:idx) (n:idx) (s:state) : Tot state = 
+let shuffle_row (i:idx) (n:idx) (s:state) : Tot state = 
        upd s i (shuffle_right (index s i) n)
 
 val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> shuffle
@@ -53,19 +57,23 @@ let line a b d s m =
   let m = upd m d ((index m d ^^  index m a) <<< s) in
   m
 
-let quarter_round_shift : shuffle = 
-  line 0 1 3 16ul @ 
+
+let double_round : shuffle =
+  line 0 1 3 16ul @
   line 2 3 1 12ul @
-  line 0 1 3 8ul @ 
-  line 2 3 1 7ul @
+  line 0 1 3 8ul  @
+  line 2 3 1 7ul  @
   shuffle_row 1 1 @
   shuffle_row 2 2 @
-  shuffle_row 3 1 
+  shuffle_row 3 3 @
+  line 0 1 3 16ul @
+  line 2 3 1 12ul @
+  line 0 1 3 8ul  @
+  line 2 3 1 7ul  @
+  shuffle_row 1 3 @
+  shuffle_row 2 2 @
+  shuffle_row 3 1
 
-
-let double_round : shuffle = 
-  quarter_round_shift @
-  quarter_round_shift 
 
 let rounds : shuffle = 
     iter 10 double_round (* 20 rounds *)
