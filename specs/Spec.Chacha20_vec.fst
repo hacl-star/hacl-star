@@ -9,7 +9,7 @@ open Spec.Lib
 module U32 = FStar.UInt32
 (* This should go elsewhere! *)
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
@@ -81,18 +81,21 @@ unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
 // JK: I have to add those assertions to typechecks, would be nice to get rid of it
 let setup (k:key) (n:nonce) (c:counter): Tot state =
   assert_norm(List.Tot.length constants = 4); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
-  Seq.of_list [createL constants; 
-  	       uint32s_from_le 4 (Seq.slice k 0 4);
-	       uint32s_from_le 4 (Seq.slice k 4 8);
-	       singleton (UInt32.uint_to_t c) @|  uint32s_from_le 3 n]
+  let constants:vec = createL constants in
+  let key_part_1:vec = uint32s_from_le 4 (Seq.slice k 0 16)  in
+  let key_part_2:vec = uint32s_from_le 4 (Seq.slice k 16 32) in
+  let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) in
+  assert_norm(List.Tot.length [constants; key_part_1; key_part_2; nonce] = 4);
+  Seq.seq_of_list [constants; key_part_1; key_part_2; nonce]
+
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     let st = setup k n c in
     let st' = chacha20_core st in
-    uint32s_to_le 16 (index st' 0) @|
-    uint32s_to_le 16 (index st' 1) @|
-    uint32s_to_le 16 (index st' 2) @|
-    uint32s_to_le 16 (index st' 3) 
+    uint32s_to_le 4 (index st' 0) @|
+    uint32s_to_le 4 (index st' 1) @|
+    uint32s_to_le 4 (index st' 2) @|
+    uint32s_to_le 4 (index st' 3) 
 
 
 
