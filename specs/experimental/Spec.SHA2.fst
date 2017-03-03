@@ -115,13 +115,6 @@ private let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
     (s1 +%^ (t7 +%^ (s0 +%^ t16)))
 
 
-(* private let shuffle_core_aux (a b c d e f g h:word) (block:block_w) (t:counter{t < size_k_w}) : Tot (Prims.tuple2 word word) = *)
-(*   (\**\) assert_norm(List.Tot.length k = size_k_w); *)
-(*   let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index k t) +%^ (ws block t) in *)
-(*   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in *)
-(*   t1, t2 *)
-
-
 private let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w}) : Tot hash_w =
   let a = index hash 0 in
   let b = index hash 1 in
