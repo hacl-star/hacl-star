@@ -1,3 +1,9 @@
+(**
+   Box.AE provides cryptographically verified authenticated encryption for use by Box.PKAE. Plaintext types and functions
+   to create new plaintext or break the plaintext down to bytes are provided in PlainAE. Some functions and variables are
+   only present for purposes of modelling the cryptographic AE game. Of interest for other modules that are not concerned
+   with cryptographic verification are coerce_key, encrypt and decrpyt.
+*)
 module Box.AE
 
 open FStar.Set
@@ -11,38 +17,58 @@ open Crypto.Symmetric.Bytes
 open Box.Flags
 open Box.Indexing
 
-module B = Platform.Bytes
 module MR = FStar.Monotonic.RRef
 module HH = FStar.HyperHeap
-module HS = FStar.HyperStack
 module MM = MonotoneMap
 module SPEC = Spec.SecretBox
 
 open Box.PlainAE
 
-// TODO: Import all the constants from specs. Also implement an init function for all the global state.
+// TODO: implement an init function for all the global state.
 type noncesize = SPEC.noncelen
 type keysize = SPEC.keylen
-type aes_key = SPEC.key (* = b:bytes{B.length b = keysize} *)
+type aes_key = SPEC.key 
 type bytes = SPEC.bytes
 type cipher = b:bytes
 type nonce = SPEC.nonce
+
+val create_zero_bytes: n:nat -> Tot (b:bytes{Seq.length b = n})
+let create_zero_bytes n =
+  Seq.create n (UInt8.uint_to_t 0)
+
 assume val ae_key_region: (r:MR.rid{ extends r root 
 				     /\ is_eternal_region r 
 				     /\ is_below r root
-				     /\ disjoint r id_freshness_table_region
-				     /\ disjoint r id_honesty_table_region
+				     /\ disjoint r id_log_region
+				     /\ disjoint r id_honesty_log_region
 				     })
 
 type log_key = nonce
 type log_value (i:id{AE_id? i}) = (cipher*protected_ae_plain i)
 type log_range = fun (i:id{AE_id? i}) -> (fun log_key -> (log_value i))
 type log_inv (i:id{AE_id? i}) (f:MM.map' log_key (log_range i)) = True
-type log_t (i:id{AE_id? i}) (r:rid)  = MM.t r log_key (log_range i) (log_inv i)
-
 
 (**
-   The key type is abstract and can only be accessed via the leak and coerce_key functions.
+   log_t is a monotone map that maps nonces to a tuple of ciphertext and plaintext. It is instantiated in the key type
+   to provide the following guarantees in case the key is honest and AE is idealized:
+   * Authentication: Upon encryption, the message is stored in the log, indexed by the nonce. Upon decryption, a lookup
+     is performed using the nonce received and if the ciphertext in the log matches the received ciphertext, the plaintext
+     is extracted from the log.
+   * Nonce uniqueness: Every log can only have one entry per index. Since the nonce is used as the index in the log, a nonce
+     can only be used once per key.
+   
+*)
+type log_t (i:id{AE_id? i}) (r:rid)  = MM.t r log_key (log_range i) (log_inv i)
+
+(**
+   empty_log returns an empty monotone map of type log_t. 
+*)
+val empty_log: i:id{AE_id? i} -> Tot (MM.map' log_key (log_range i))
+let empty_log i = MM.empty_map log_key (log_range i)
+
+(**
+   The key type is abstract and can only be accessed via the leak and coerce_key functions. This means that the adversary has no means
+   of accessing the raw representation of any honest AE key if AE is idealized.
 *)
 noeq abstract type key =
   | Key: #i:id{AE_id? i /\ unfresh i /\ registered i} -> #(region:rid{extends region ae_key_region /\ is_below region ae_key_region /\ is_eternal_region region}) -> raw:aes_key -> log:log_t i region -> key
@@ -52,8 +78,8 @@ let get_index k = k.i
 
 #set-options "--z3rlimit 25"
 (**
-   This function generates a key in a fresh region of memory below the parent region.
-   The postcondition ensures that the log is empty after creation.
+   This function generates a fresh random key. Honest, as well as dishonest ids can be created using keygen. However, note that the adversary can
+   only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
 *)
 val keygen: i:id{AE_id? i} -> ST (k:key{k.i=i})
   (requires (fun h -> 
@@ -61,7 +87,7 @@ val keygen: i:id{AE_id? i} -> ST (k:key{k.i=i})
     /\ registered i // We require this to enforce a static corruption model.
   ))
   (ensures  (fun h0 k h1 -> 
-    let (s:Set.set (HH.rid)) = Set.union (Set.singleton k.region) (Set.singleton id_freshness_table_region) in
+    let (s:Set.set (HH.rid)) = Set.union (Set.singleton k.region) (Set.singleton id_log_region) in
     HH.modifies_just s h0.h h1.h
     /\ extends k.region ae_key_region
     /\ fresh_region k.region h0.h h1.h
@@ -71,7 +97,7 @@ val keygen: i:id{AE_id? i} -> ST (k:key{k.i=i})
     /\ makes_unfresh_just i h0 h1
   ))
 let keygen i =
-  MR.m_recall id_freshness_table;
+  MR.m_recall id_log;
   make_unfresh i;
   let rnd_k = random_bytes (UInt32.uint_to_t keysize) in
   let region = new_region ae_key_region in
@@ -79,19 +105,17 @@ let keygen i =
   fresh_unfresh_contradiction i;
   Key #i #region rnd_k log
 
-
 #set-options "--z3rlimit 20"
 (**
-   The coerce function transforms a raw aes_key into an abstract key. The function is stateful,
-   as we need to allocate space in memory for the key. The refinement type on the key makes sure that
-   abstract keys created this way can not be honest.
+   The coerce function transforms a raw aes_key into an abstract key. Only dishonest ids can be used
+   with this function.
 *)
 val coerce_key: i:id{AE_id? i /\ (dishonest i)} -> raw_k:aes_key -> ST (k:key{k.i=i /\ k.raw = raw_k})
   (requires (fun h0 -> 
     registered i
   ))
   (ensures  (fun h0 k h1 ->
-    let (s:Set.set (HH.rid)) = Set.union (Set.singleton k.region) (Set.singleton id_freshness_table_region) in
+    let (s:Set.set (HH.rid)) = Set.union (Set.singleton k.region) (Set.singleton id_log_region) in
     HH.modifies_just s h0.h h1.h
     /\ extends k.region ae_key_region
     /\ fresh_region k.region h0.h h1.h
@@ -108,8 +132,12 @@ let coerce_key i raw =
   let log = MM.alloc #region #log_key #(log_range i) #(log_inv i) in
   fresh_unfresh_contradiction i;
   Key #i #region raw log
-#reset-options
 
+(**
+   The message wrap- and unwrap functions are provided here for use in the PKAE module.
+*)
+let message_wrap #i = PlainAE.ae_message_wrap #i
+let message_unwrap #i = PlainAE.ae_message_unwrap #i
 
 (**
    The leak_key function transforms an abstract key into a raw aes_key.
@@ -119,17 +147,24 @@ val leak_key: k:key{(dishonest k.i) \/ ~(b2t ae_ind_cca)} -> Tot (raw_k:aes_key{
 let leak_key k =
   k.raw
 
+(**
+   Similar to the leak_key function, get_keyGT provides access to the raw representation of an AE key.
+   However, note that the GTot effect only allows use in type refinements and is erased upon extraction.
+*)
 val get_keyGT: k:key -> GTot (raw_k:aes_key{raw_k=k.raw})
 let get_keyGT k =
   k.raw
-
+(**
+   The get_logGT function provides direct access to the log of a key. Note that its GTot effect allows
+   use on type-level only and means that the function will be erased upon extraction.
+*)
 val get_logGT: k:key -> GTot (log:log_t k.i k.region{log=k.log})
 let get_logGT k =
   k.log
 
-val empty_log: i:id{AE_id? i} -> Tot (MM.map' log_key (log_range i))
-let empty_log i = MM.empty_map log_key (log_range i)
-
+(**
+   recall_log allows proving liveness of the log of a key.
+*)
 val recall_log: k:key -> ST unit
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 ->
@@ -142,11 +177,6 @@ let recall_log k =
 val get_regionGT: k:key -> GTot (region:rid{region=k.region})
 let get_regionGT k =
   k.region
-
-val create_zero_bytes: n:nat -> b:bytes{Seq.length b = n}
-let create_zero_bytes n =
-  Seq.create n (UInt8.uint_to_t 0)
-  
 
 #set-options "--z3rlimit 15"
 (**
@@ -170,8 +200,6 @@ val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_pla
       ==> c = SPEC.secretbox_easy (repr m) k.raw n)
     /\ (dishonest i \/ honest i)
     ))
-
-
 let encrypt #i n k m =
   let honest_i = is_honest i in
   let p = 
@@ -188,7 +216,7 @@ let encrypt #i n k m =
     c
   )
 
-
+#set-options "--z3rlimit 15"
 (**
    Decrypt a ciphertext c using a key k. If the key is honest and ae_int_ctxt is idealized,
    try to obtain the ciphertext from the log. Else decrypt via concrete implementation.
@@ -224,4 +252,3 @@ let decrypt #i n k c =
     match p with
     | Some p' -> Some (PlainAE.coerce #i p')
     | None -> None
-#reset-options
