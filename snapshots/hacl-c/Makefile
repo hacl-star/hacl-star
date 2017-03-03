@@ -3,7 +3,7 @@
 TWEETNACL_HOME   ?=../../other_providers/tweetnacl
 OPENSSL_HOME   ?=../../other_providers/openssl
 LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
-CC=gcc-6 -flto 
+CC=gcc-6 -flto -fno-tree-vectorize
 CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
 
 test: test-poly	test-chacha test-salsa test-curve test-secretbox test-box test-aead
@@ -15,6 +15,14 @@ test-poly:
 	kremlib.c testlib.c Poly1305_64.c test-poly.c -o test-poly.exe \
 	-lsodium $(OPENSSL_HOME)/libcrypto.a
 	./test-poly.exe
+
+test-poly32:
+	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
+	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	kremlib.c testlib.c Poly1305_32.c test-poly32.c -o test-poly32.exe \
+	-lsodium $(OPENSSL_HOME)/libcrypto.a
+	./test-poly32.exe
 
 test-salsa:
 	$(CC) $(CCOPTS) \
