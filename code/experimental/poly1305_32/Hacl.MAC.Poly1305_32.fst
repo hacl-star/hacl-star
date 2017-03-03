@@ -2,9 +2,9 @@ module Hacl.MAC.Poly1305_32
 
 open FStar.Mul
 open FStar.ST
-open FStar.Buffer
 open FStar.Ghost
 open FStar.Seq
+open FStar.Buffer
 open FStar.HyperStack
 
 open Hacl.Cast
