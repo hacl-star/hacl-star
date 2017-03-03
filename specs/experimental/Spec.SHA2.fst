@@ -4,6 +4,7 @@ open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
 
+module Word = FStar.UInt32
 
 val pow2_values: x:nat -> Lemma
   (requires True)
@@ -26,38 +27,54 @@ let pow2_values x =
 //
 
 (* Define algorithm parameters *)
-let hashlen = 32
-let blocklen = 64
-let blocklen_32 = 16
+let size_hash_w = 8
+let size_block_w = 16
+let size_hash = 4 * size_hash_w
+let size_block = 4 * size_block_w
+let size_k_w = 64
+let size_len_8 = 8
+let size_len_ul_8 = 8ul
+let max_input_len_8 = pow2 61
 
 type bytes = m:seq UInt8.t
-type hash_32 = m:seq UInt32.t {length m = 8}
-type block_32 = m:seq UInt32.t {length m = 16}
-type blocks_32 = m:seq block_32
+type word = Word.t
+type hash_w = m:seq word {length m = size_hash_w}
+type block_w = m:seq word {length m = size_block_w}
+type blocks_w = m:seq block_w
 type counter = UInt.uint_t 32
 
+(* Define word based operators *)
+let words_to_be = Spec.Lib.uint32s_to_be
+let words_from_be = Spec.Lib.uint32s_from_be
+let word_logxor = Word.logxor
+let word_logand = Word.logand
+let word_logor = Word.logor
+let word_lognot = Word.lognot
+let word_shift_right = Word.shift_right
 
-private let rotate_right (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
+
+
+private let rotate_right (a:word) (s:word {v s<32}) : Tot word =
   ((a >>^ s) |^ (a <<^ (32ul -^ s)))
 
 (* [FIPS 180-4] section 4.1.2 *)
-private val _Ch: x:UInt32.t -> y:UInt32.t -> z:UInt32.t -> Tot UInt32.t
-let _Ch x y z = UInt32.logxor (UInt32.logand x y) (UInt32.logand (UInt32.lognot x) z)
+private val _Ch: x:word -> y:word -> z:word -> Tot word
+let _Ch x y z = word_logxor (word_logand x y) (word_logand (word_lognot x) z)
 
-private val _Maj: x:UInt32.t -> y:UInt32.t -> z:UInt32.t -> Tot UInt32.t
-let _Maj x y z = UInt32.logxor (UInt32.logand x y) (UInt32.logxor (UInt32.logand x z) (UInt32.logand y z))
+private val _Maj: x:word -> y:word -> z:word -> Tot word
+let _Maj x y z = word_logxor (word_logand x y) (word_logxor (word_logand x z) (word_logand y z))
 
-private val _Sigma0: x:UInt32.t -> Tot UInt32.t
-let _Sigma0 x = UInt32.logxor (rotate_right x 2ul) (UInt32.logxor (rotate_right x 13ul) (rotate_right x 22ul))
+private val _Sigma0: x:word -> Tot word
+let _Sigma0 x = word_logxor (rotate_right x 2ul) (word_logxor (rotate_right x 13ul) (rotate_right x 22ul))
 
-private val _Sigma1: x:UInt32.t -> Tot UInt32.t
-let _Sigma1 x = UInt32.logxor (rotate_right x 6ul) (UInt32.logxor (rotate_right x 11ul) (rotate_right x 25ul))
+private val _Sigma1: x:word -> Tot word
+let _Sigma1 x = word_logxor (rotate_right x 6ul) (word_logxor (rotate_right x 11ul) (rotate_right x 25ul))
 
-private val _sigma0: x:UInt32.t -> Tot UInt32.t
-let _sigma0 x = UInt32.logxor (rotate_right x 7ul) (UInt32.logxor (rotate_right x 18ul) (UInt32.shift_right x 3ul))
+private val _sigma0: x:word -> Tot word
+let _sigma0 x = word_logxor (rotate_right x 7ul) (word_logxor (rotate_right x 18ul) (word_shift_right x 3ul))
 
-private val _sigma1: x:UInt32.t -> Tot UInt32.t
-let _sigma1 x = UInt32.logxor (rotate_right x 17ul) (UInt32.logxor (rotate_right x 19ul) (UInt32.shift_right x 10ul))
+private val _sigma1: x:word -> Tot word
+let _sigma1 x = word_logxor (rotate_right x 17ul) (word_logxor (rotate_right x 19ul) (word_shift_right x 10ul))
 
 
 (* [FIPS 180-4] section 4.2.2 *)
@@ -80,13 +97,13 @@ private let k = [
   0x90befffaul; 0xa4506cebul; 0xbef9a3f7ul; 0xc67178f2ul]
 
 
-private unfold let h_0 = [
+private let h_0 = [
   0x6a09e667ul; 0xbb67ae85ul; 0x3c6ef372ul; 0xa54ff53aul;
   0x510e527ful; 0x9b05688cul; 0x1f83d9abul; 0x5be0cd19ul]
 
 
-private let rec ws (b:block_32) (t:counter{t < 64}) : Tot UInt32.t =
-  if t < 16 then index b t
+private let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
+  if t < size_block_w then index b t
   else
     let t16 = ws b (t - 16) in
     let t15 = ws b (t - 15) in
@@ -98,14 +115,14 @@ private let rec ws (b:block_32) (t:counter{t < 64}) : Tot UInt32.t =
     (s1 +%^ (t7 +%^ (s0 +%^ t16)))
 
 
-private let shuffle_core_aux (a b c d e f g h:UInt32.t) (block:block_32) (t:counter{t < 64}) : Tot (Prims.tuple2 UInt32.t UInt32.t) =
-  (**) assert_norm(List.Tot.length k = 64);
-  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index k t) +%^ (ws block t) in
-  let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
-  t1, t2
+(* private let shuffle_core_aux (a b c d e f g h:word) (block:block_w) (t:counter{t < size_k_w}) : Tot (Prims.tuple2 word word) = *)
+(*   (\**\) assert_norm(List.Tot.length k = size_k_w); *)
+(*   let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index k t) +%^ (ws block t) in *)
+(*   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in *)
+(*   t1, t2 *)
 
 
-private let shuffle_core (hash:hash_32) (block:block_32) (t:counter{t < 64}) : Tot hash_32 =
+private let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w}) : Tot hash_w =
   let a = index hash 0 in
   let b = index hash 1 in
   let c = index hash 2 in
@@ -115,7 +132,10 @@ private let shuffle_core (hash:hash_32) (block:block_32) (t:counter{t < 64}) : T
   let g = index hash 6 in
   let h = index hash 7 in
 
-  let t1, t2 = shuffle_core_aux a b c d e f g h block t in
+  (**) assert_norm(List.Tot.length k = size_k_w);
+  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index k t) +%^ (ws block t) in
+  let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
+  (* let t1, t2 = shuffle_core_aux a b c d e f g h block t in *)
 
   let hash = upd hash 7 g in
   let hash = upd hash 6 f in
@@ -128,55 +148,55 @@ private let shuffle_core (hash:hash_32) (block:block_32) (t:counter{t < 64}) : T
   hash
 
 
-private let rec shuffle (hash:hash_32) (block:block_32) (t:counter{t <= 64}) : Tot hash_32 (decreases (64 - t)) =
-  if t < 64 then
+private let rec shuffle (hash:hash_w) (block:block_w) (t:counter{t <= size_k_w}) : Tot hash_w (decreases (size_k_w - t)) =
+  if t < size_k_w then
     let hash = shuffle_core hash block t in
     shuffle hash block (t + 1)
   else hash
 
 
-private let rec store_blocks (n:nat) (input:bytes{Seq.length input = n * blocklen}) : Tot blocks_32 (decreases n) =
-  if n = 0 then Seq.createEmpty #block_32
+private let rec store_blocks (n:nat) (input:bytes{Seq.length input = n * size_block}) : Tot (b:blocks_w{Seq.length b = n}) (decreases n) =
+  if n = 0 then Seq.createEmpty #block_w
   else
-    let h = Seq.slice input 0 blocklen in
-    let t = Seq.slice input blocklen (n * blocklen) in
-    let b_32 = Spec.Lib.uint32s_from_be 16 h in
-    Seq.snoc (store_blocks (n - 1) t) b_32
+    let h = Seq.slice input 0 size_block in
+    let t = Seq.slice input size_block (n * size_block) in
+    let b_w = words_from_be size_block_w h in
+    Seq.snoc (store_blocks (n - 1) t) b_w
 
 
-private let pad_length (len:nat) : Tot (n:nat{(len + n) % 64 = 0}) =
-  if (len % 64) < 56 then 56 - (len % 64) + 8
-  else 64 + 56 - (len % 64) + 8
+private let pad_length (len:nat) : Tot (n:nat{(len + n) % size_block = 0}) =
+  if (len % size_block) < (size_block - size_len_8) then size_block - (len % size_block)
+  else (2 * size_block) - (len % size_block)
 
 
 (* Pad the data up to the block length and encode the total length *)
-let pad (prevlen:nat) (input:bytes{(Seq.length input) + prevlen < pow2 61})  : Tot (output:blocks_32) =
+let pad (prevlen:nat) (input:bytes{(Seq.length input) + prevlen < max_input_len_8})  : Tot (output:blocks_w) =
 
   (* Compute the padding length *)
-  let padlen = pad_length (Seq.length input) - 8 in
+  let padlen = pad_length (Seq.length input) - size_len_8 in
 
-  (* Generate the padding (without the last 8 bytes) *)
+  (* Generate the padding (without the last size_len_8 bytes) *)
   (* Set the first bit of the padding to be a '1' *)
   let padding = Seq.create padlen 0uy in
   let padding = Seq.upd padding 0 0x80uy in
 
-  (* Encode the data length (in bits) as a 64bit big endian integer*)
+  (* Encode the data length (in bits) as a 64bit big endian integer *)
   let finallen = prevlen + Seq.length input in
-  let encodedlen = Endianness.big_bytes 8ul (finallen * 8) in
+  let encodedlen = Endianness.big_bytes size_len_ul_8 (finallen * 8) in
 
   (* Concatenate the data, padding and encoded length *)
   let output = Seq.append input padding in
   let output = Seq.append output encodedlen in
-  let n = Seq.length output / blocklen in
+  let n = Seq.length output / size_block in
   store_blocks n output
 
 
-let update_compress (hash:hash_32) (block:block_32) : Tot hash_32 =
+let update_compress (hash:hash_w) (block:block_w) : Tot hash_w =
   let hash_1 = shuffle hash block 0 in
   Spec.Lib.map2 (fun x y -> x +%^ y) hash hash_1
 
 
-let rec update_multi (n:nat) (hash:hash_32) (blocks:blocks_32{Seq.length blocks = n}) : Tot hash_32 (decreases n) =
+let rec update_multi (n:nat) (hash:hash_w) (blocks:blocks_w{Seq.length blocks = n}) : Tot hash_w (decreases n) =
   if n = 0 then hash
   else
     let h = Seq.slice blocks 0 1 in
@@ -184,18 +204,28 @@ let rec update_multi (n:nat) (hash:hash_32) (blocks:blocks_32{Seq.length blocks 
     update_multi (n - 1) (update_compress hash (Seq.index h 0)) t
 
 
-let update_last (hash:hash_32) (block:block_32) (prevlen:nat) (input:bytes{(Seq.length input) + prevlen < pow2 61}) : Tot hash_32 =
+let update_last (hash:hash_w) (prevlen:nat) (input:bytes{(Seq.length input) + prevlen < max_input_len_8}) : Tot hash_w =
   let blocks = pad prevlen input in
   let n = Seq.length blocks in
   update_multi n hash blocks
 
 
-let finish (hash:hash_32) : Tot bytes =
-  Spec.Lib.uint32s_to_be 8 hash
+let finish (hash:hash_w) : Tot bytes = words_to_be size_hash_w hash
 
 
-let hash (input:bytes{Seq.length input < pow2 61}) : Tot (hash:bytes) =
+let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
+  let n = Seq.length input / size_block in
+  let input_blocks_8 = Seq.slice input 0 (n * size_block) in
+  let input_blocks_w = store_blocks n input_blocks_8 in
+  (**) assert_norm(List.Tot.length h_0 = size_hash_w);
+  let hash = update_multi n (Seq.seq_of_list h_0) input_blocks_w in
+  let input_last = Seq.slice input (n * size_block) (Seq.length input) in
+  let hash = update_last hash (n * size_block) input_last in
+  finish hash
+
+
+let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
   let blocks = pad 0 input in
   let n = Seq.length blocks in
-  (**) assert_norm(List.Tot.length h_0 = 8);
+  (**) assert_norm(List.Tot.length h_0 = size_hash_w);
   finish (update_multi n (Seq.seq_of_list h_0) blocks)
