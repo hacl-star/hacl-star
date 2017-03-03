@@ -128,7 +128,6 @@ private let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w})
   (**) assert_norm(List.Tot.length k = size_k_w);
   let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index k t) +%^ (ws block t) in
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
-  (* let t1, t2 = shuffle_core_aux a b c d e f g h block t in *)
 
   let hash = upd hash 7 g in
   let hash = upd hash 6 f in
