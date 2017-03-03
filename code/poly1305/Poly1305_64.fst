@@ -308,9 +308,12 @@ val poly1305_blocks_init:
          let acc = as_seq h1 I.(st.h) in
          let log = reveal log in
          let m   = reveal_sbytes (as_seq h0 input) in
+         let kr  = reveal_sbytes (as_seq h0 (Buffer.sub k 0ul 16ul)) in
          Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc log)
+         /\ S.seval r = Spec.Poly1305.encode_r kr
          /\ log == Spec.Poly1305.encode_bytes (pad_16 m))
     ))
+#reset-options "--initial_fuel 0 -max_fuel 0 --z3rlimit 200"
 let poly1305_blocks_init st input len k =
   let len_16 = U32.(len >>^ 4ul) in
   let rem_16 = U32.(len &^ 15ul)  in
@@ -332,7 +335,7 @@ let poly1305_blocks_init st input len k =
   l'
 
 
-(* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500" *)
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
 val poly1305_blocks_continue:
   log:I.log_t ->
