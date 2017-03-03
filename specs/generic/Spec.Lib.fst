@@ -44,6 +44,14 @@ let uint32_from_le (b:lbytes 4) : UInt32.t =
 let uint32_to_le (a:UInt32.t) : lbytes 4 =
     little_bytes 4ul (v a)
 
+let uint32_from_be (b:lbytes 4) : UInt32.t =
+    let n = big_endian b  in
+    lemma_big_endian_is_bounded b;
+    UInt32.uint_to_t n
+
+let uint32_to_be (a:UInt32.t) : lbytes 4 =
+    big_bytes 4ul (v a)
+
 
 let lemma_uint32_from_le_inj (b:lbytes 4) (b':lbytes 4) : Lemma
   (requires (uint32_from_le b = uint32_from_le b'))
@@ -74,6 +82,24 @@ let rec uint32s_to_le len src =
     let t = slice src 1 len in
     Seq.append (uint32_to_le h)
                (uint32s_to_le (len-1) t)
+
+val uint32s_from_be: len:nat -> b:lbytes (4 * len) -> Tot (s:seq UInt32.t{length s = len}) (decreases len)
+let rec uint32s_from_be len src =
+  if len = 0 then Seq.createEmpty #UInt32.t
+  else
+    let h = slice src 0 4 in
+    let t = slice src 4 (4*len) in
+    Seq.cons (uint32_from_be h)
+             (uint32s_from_be (len-1) t)
+
+val uint32s_to_be: len:nat -> s:seq UInt32.t{length s = len} -> Tot (lbytes (4 * len))  (decreases len)
+let rec uint32s_to_be len src =
+  if len = 0 then Seq.createEmpty #UInt8.t
+  else
+    let h = index src 0 in
+    let t = slice src 1 len in
+    Seq.append (uint32_to_be h)
+               (uint32s_to_be (len-1) t)
 
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
@@ -110,7 +136,7 @@ let rec lemma_uint32s_from_le_inj (len:nat) (b:lbytes (4 * len)) (b':lbytes (4 *
           lemma_uint32s_from_le_def_1 len b;
           lemma_uint32s_from_le_def_1 len b';
           Seq.lemma_eq_intro (uint32s_from_le len b) (uint32s_from_le len b');
-          cut (Seq.index (uint32s_from_le len b) 0 == Seq.index (uint32s_from_le len b') 0); 
+          cut (Seq.index (uint32s_from_le len b) 0 == Seq.index (uint32s_from_le len b') 0);
           cut (Seq.index (uint32s_from_le len b) 0 == uint32_from_le h);
           cut (Seq.index (uint32s_from_le len b') 0 == uint32_from_le h');
           lemma_uint32_from_le_inj h h';
