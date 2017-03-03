@@ -3,9 +3,22 @@ module Spec.SHA2
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
-open FStar.Endianness
 
 
+val pow2_values: x:nat -> Lemma
+  (requires True)
+  (ensures (let p = pow2 x in
+   match x with
+   | 61 -> p=2305843009213693952
+   | _  -> True))
+  [SMTPat (pow2 x)]
+let pow2_values x =
+   match x with
+   | 61 -> assert_norm (pow2 61 == 2305843009213693952)
+   | _  -> ()
+
+
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 25"
 
 
 //
@@ -15,11 +28,12 @@ open FStar.Endianness
 (* Define algorithm parameters *)
 let hashlen = 32
 let blocklen = 64
+let blocklen_32 = 16
 
+type bytes = m:seq UInt8.t
 type hash_32 = m:seq UInt32.t {length m = 8}
 type block_32 = m:seq UInt32.t {length m = 16}
 type blocks_32 = m:seq block_32
-type idx = n:nat{n < 16}
 type counter = UInt.uint_t 32
 
 
@@ -66,7 +80,7 @@ private let k = [
   0x90befffaul; 0xa4506cebul; 0xbef9a3f7ul; 0xc67178f2ul]
 
 
-private let h_0 = [
+private unfold let h_0 = [
   0x6a09e667ul; 0xbb67ae85ul; 0x3c6ef372ul; 0xa54ff53aul;
   0x510e527ful; 0x9b05688cul; 0x1f83d9abul; 0x5be0cd19ul]
 
@@ -92,7 +106,6 @@ private let shuffle_core_aux (a b c d e f g h:UInt32.t) (block:block_32) (t:coun
 
 
 private let shuffle_core (hash:hash_32) (block:block_32) (t:counter{t < 64}) : Tot hash_32 =
-  admit();
   let a = index hash 0 in
   let b = index hash 1 in
   let c = index hash 2 in
@@ -122,46 +135,25 @@ private let rec shuffle (hash:hash_32) (block:block_32) (t:counter{t <= 64}) : T
   else hash
 
 
-(* let rec shuffle2 (hash:hash_32) (block:block_32) (t:counter{t <= 64}) : Tot hash_32 (decreases (64 - t)) = *)
-(*   if t < 64 then begin *)
-(*     let lhash = Seq.seq_to_list hash in *)
-(*     (\**\) assert_norm(List.Tot.length lhash = 8); *)
-(*     (match lhash with *)
-(*     | [a; b; c; d; e; f; g; h] -> begin *)
-(*         let t1, t2 = shuffle_core_aux a b c d e f g h block t in *)
-(*         let hash = Seq.of_list [g; f; e; (d +%^ t1); c; b; a; (t1 +%^ t2)] in *)
-(*         shuffle2 hash block (t + 1) end) *)
-(*   end *)
-(*   else hash *)
-
-
-(* private let rec store_blocks (input:bytes{length input % blocklen = 0}) : Tot blocks_32 (decreases (Seq.length input)) = *)
-(*   let l = (Seq.length input / blocklen) in *)
-(*   if l = 0 then *)
-(*     Seq.createEmpty *)
-(*   else *)
-(*     let w,input = Seq.split input blocklen in *)
-(*     Seq.snoc (store_blocks input) (Spec.Lib.uint32s_from_be 16 w) *)
-
-
-private let rec store_blocks (input:bytes{length input % blocklen = 0}) (n:nat{n * blocklen = length input}): Tot blocks_32 =
-  if n = 0 then
-    Seq.createEmpty
+private let rec store_blocks (n:nat) (input:bytes{Seq.length input = n * blocklen}) : Tot blocks_32 (decreases n) =
+  if n = 0 then Seq.createEmpty #block_32
   else
-    let w,input = Seq.split input blocklen in
-    Seq.snoc (store_blocks input (n - 1)) (Spec.Lib.uint32s_from_be 16 w)
+    let h = Seq.slice input 0 blocklen in
+    let t = Seq.slice input blocklen (n * blocklen) in
+    let b_32 = Spec.Lib.uint32s_from_be 16 h in
+    Seq.snoc (store_blocks (n - 1) t) b_32
 
 
-private let pad_length (len:nat) : Tot (n:nat{n <= 64}) =
-  if (len % 64) < 56 then 56 - (len % 64)
-  else 64 + 56 - (len % 64)
+private let pad_length (len:nat) : Tot (n:nat{(len + n) % 64 = 0}) =
+  if (len % 64) < 56 then 56 - (len % 64) + 8
+  else 64 + 56 - (len % 64) + 8
 
 
 (* Pad the data up to the block length and encode the total length *)
-let pad (input:bytes) : Tot (output:blocks_32) =
+let pad (input:bytes{Seq.length input < pow2 61}) : Tot (output:blocks_32) =
 
   (* Compute the padding length *)
-  let padlen = pad_length (Seq.length input) in
+  let padlen = pad_length (Seq.length input) - 8 in
 
   (* Generate the padding (without the last 8 bytes) *)
   let padding = Seq.create padlen 0uy in
@@ -170,32 +162,34 @@ let pad (input:bytes) : Tot (output:blocks_32) =
   let padding = Seq.upd padding 0 0x80uy in
 
   (* Encode the data length (in bits) as a 64bit big endian integer*)
-  let encodedlen = big_bytes 8ul ((Seq.length input) * 8) in
+  let encodedlen = Endianness.big_bytes 8ul ((Seq.length input) * 8) in
 
   (* Concatenate the data, padding and encoded length *)
   let output = Seq.append input padding in
   let output = Seq.append output encodedlen in
   let n = Seq.length output / blocklen in
-  store_blocks output n
+  store_blocks n output
 
 
-let compress (hash:hash_32) (block:block_32) : Tot hash_32 =
+let update_compress (hash:hash_32) (block:block_32) : Tot hash_32 =
   let hash_1 = shuffle hash block 0 in
   Spec.Lib.map2 (fun x y -> x +%^ y) hash hash_1
 
 
-let rec update_multi (h:hash_32) (b:blocks_32) : Tot hash_32 =
-  let l = Seq.length b in
-  if l = 0 then h
+let rec update_multi (n:nat) (hash:hash_32) (blocks:blocks_32{Seq.length blocks = n}) : Tot hash_32 (decreases n) =
+  if n = 0 then hash
   else
-    let bhd,btl = Seq.split b 1 in
-    let b = Seq.head bhd in
-    update_multi (compress h b) btl
+    let h = Seq.slice blocks 0 1 in
+    let t = Seq.slice blocks 1 n in
+    update_multi (n - 1) (update_compress hash (Seq.index h 0)) t
 
 
-let finish (h:hash_32) : Tot bytes =
-  Spec.Lib.uint32s_to_be 8 h
+let finish (hash:hash_32) : Tot bytes =
+  Spec.Lib.uint32s_to_be 8 hash
 
 
-let hash (input:bytes) : Tot (hash:bytes) =
-  finish (update_multi (Seq.of_list h_0) (pad input))
+let hash (input:bytes{Seq.length input < pow2 61}) : Tot (hash:bytes) =
+  let blocks = pad input in
+  let n = Seq.length blocks in
+  (**) assert_norm(List.Tot.length h_0 = 8);
+  finish (update_multi n (Seq.seq_of_list h_0) blocks)
