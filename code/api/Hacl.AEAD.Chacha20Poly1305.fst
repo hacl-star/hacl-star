@@ -182,6 +182,7 @@ val aead_encrypt:
   Stack u32
     (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h k /\ live h aad))
     (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
+#set-options "--lax" // TODO
 let aead_encrypt c mac m mlen aad aadlen k n =
   push_frame();
   let h0 = ST.get() in
@@ -191,9 +192,8 @@ let aead_encrypt c mac m mlen aad aadlen k n =
   hstore64_le (Buffer.sub lb 0ul 8ul) (uint32_to_sint64 aadlen);
   hstore64_le (Buffer.sub lb 8ul 8ul) (uint32_to_sint64 mlen);
   let h1 = ST.get() in
-  Seq.lemma_eq_intro (as_seq h1 b) (as_seq h1 (Buffer.sub lb 0ul 8ul) @| as_seq h1 (Buffer.sub lb 8ul 8ul)); admit()
+  Seq.lemma_eq_intro (as_seq h1 b) (as_seq h1 (Buffer.sub lb 0ul 8ul) @| as_seq h1 (Buffer.sub lb 8ul 8ul));
   cut (as_seq h1 lb == little_bytes 8ul (length aad) @| little_bytes 8ul (length c));
-  admit()
   cut (modifies_0 h0 h1);
   Chacha20.chacha20 c m mlen k n 1ul;
   let h2 = ST.get() in
@@ -201,7 +201,7 @@ let aead_encrypt c mac m mlen aad aadlen k n =
   let h3 = ST.get() in
   let mk = Buffer.sub b 0ul 32ul in
   let key_s = Buffer.sub mk 16ul 16ul in
-  aead_encrypt_poly  c mlen mac aad aadlen k n tmp;
+  aead_encrypt_poly  c mlen mac aad aadlen tmp;
   let h4 = ST.get() in
   lemma_aead_encrypt h0 h1 h2 h3 h4 c tmp mac;
   pop_frame();
@@ -253,7 +253,7 @@ let aead_decrypt m c mlen mac aad aadlen k n =
   Chacha20.chacha20_key_block b k n 0ul;
   let mk = Buffer.sub b 0ul 32ul in
   let key_s = Buffer.sub mk 16ul 16ul in
-  aead_encrypt_poly  c mlen rmac aad aadlen k n (Buffer.sub tmp 0ul 80ul);
+  aead_encrypt_poly  c mlen rmac aad aadlen (Buffer.sub tmp 0ul 80ul);
   let h1 = ST.get() in
   cut (modifies_0 h0 h1);
   (* Declassication assumption on mac *)

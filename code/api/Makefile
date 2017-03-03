@@ -22,7 +22,7 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		 --include ../../specs/experimental  --include $(KREMLIN_HOME)/kremlib
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
-		-I ../poly1305/interfaces -I ../../specs \
+		-I ../poly1305/interfaces -I ../../specs -I ../../specs/experimental -I ../../specs/generic \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
 
