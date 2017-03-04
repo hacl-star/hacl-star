@@ -38,20 +38,19 @@ let suint8_p  = Buffer.buffer suint8_t
 
 
 (* Definitions of aliases for functions *)
-let u8_to_s8 = Cast.uint8_to_sint8
-let u32_to_s32 = Cast.uint32_to_sint32
-let u32_to_s64 = Cast.uint32_to_sint64
-let s32_to_s8  = Cast.sint32_to_sint8
-let s32_to_s64 = Cast.sint32_to_sint64
-let u64_to_s64 = Cast.uint64_to_sint64
+inline_for_extraction let u8_to_s8 = Cast.uint8_to_sint8
+inline_for_extraction let u32_to_s32 = Cast.uint32_to_sint32
+inline_for_extraction let u32_to_s64 = Cast.uint32_to_sint64
+inline_for_extraction let s32_to_s8  = Cast.sint32_to_sint8
+inline_for_extraction let s32_to_s64 = Cast.sint32_to_sint64
+inline_for_extraction let u64_to_s64 = Cast.uint64_to_sint64
 
 
-[@"c_inline"]
+[@"substitute"]
 val upd4: buf:suint32_p{length buf <= pow2 32} -> idx:uint32_t{U32.v idx + 3 < length buf /\ U32.v idx + 3 <= pow2 32} -> a:uint32_t -> b:uint32_t -> c:uint32_t -> d:uint32_t
   -> Stack unit (requires (fun h -> live h buf))
                (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1))
-
-[@"c_inline"]
+[@"substitute"]
 let upd4 buf idx a b c d =
   buf.(idx +^ 0ul) <- u32_to_s32 a;
   buf.(idx +^ 1ul) <- u32_to_s32 b;
@@ -61,15 +60,18 @@ let upd4 buf idx a b c d =
 
 
 (* Definition of the right rotation function for UInt32.t *)
+[@"substitute"]
 let rotate_right (a:suint32_t) (b:uint32_t{v b <= 32}) : Tot suint32_t =
   S32.logor (S32.shift_right a b) (S32.shift_left a (U32.sub 32ul b))
 
 
+[@"substitute"]
 val be_bytes_of_sint32: b:suint8_p{length b >= 4} -> x:suint32_t
   -> Stack unit
           (requires (fun h -> live h b))
           (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1))
 
+[@"substitute"]
 let be_bytes_of_sint32 output x =
  let b0 = sint32_to_sint8 (S32.logand (S32.shift_right x 24ul) (uint32_to_sint32 255ul)) in
  let b1 = sint32_to_sint8 (S32.logand (S32.shift_right x 16ul) (uint32_to_sint32 255ul)) in
@@ -81,11 +83,13 @@ let be_bytes_of_sint32 output x =
  upd output 3ul b3
 
 
+[@"substitute"]
 val be_sint32_of_bytes: b:suint8_p{length b >= 4}
   -> Stack suint32_t
         (requires (fun h -> live h b))
         (ensures (fun h0 r h1 -> live h1 b /\ modifies_1 b h0 h1))
 
+[@"substitute"]
 let be_sint32_of_bytes b =
   let b0 = index b 0ul in
   let b1 = index b 1ul in
@@ -98,11 +102,13 @@ let be_sint32_of_bytes b =
                 (S32.op_Less_Less_Hat (sint8_to_sint32 b0) 24ul) in
   r
 
+[@"substitute"]
 val be_bytes_of_sint64: b:suint8_p{length b >= 8} -> x:suint64_t
   -> Stack unit
         (requires (fun h -> live h b))
         (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1))
 
+[@"substitute"]
 let be_bytes_of_sint64 output x =
  let b0 = sint64_to_sint8 (S64.logand (S64.shift_right x 56ul) (uint32_to_sint64 255ul)) in
  let b1 = sint64_to_sint8 (S64.logand (S64.shift_right x 48ul) (uint32_to_sint64 255ul)) in
@@ -121,7 +127,7 @@ let be_bytes_of_sint64 output x =
  upd output 6ul b6;
  upd output 7ul b7
 
-
+[@"substitute"]
 val xor_bytes:
   output :suint8_p ->
   input  :suint8_p ->
@@ -130,6 +136,7 @@ val xor_bytes:
         (requires (fun h0 -> live h0 output /\ live h0 input))
         (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
 
+[@"substitute"]
 let rec xor_bytes output input len =
   if U32.(len =^ 0ul) then ()
   else
@@ -141,7 +148,6 @@ let rec xor_bytes output input len =
       output.(i) <- oi;
       xor_bytes output input i
     end
-
 
 
 val load32s_be:
