@@ -19,9 +19,34 @@ typedef uint8_t *Hacl_MAC_Poly1305_32_wordB;
 
 typedef uint8_t *Hacl_MAC_Poly1305_32_wordB_16;
 
+//typedef uint64_t vec;
+typedef unsigned long int vec __attribute__ ((vector_size (32)));
+typedef long int svec __attribute__ ((vector_size (32)));
+
+static inline vec vec_gte_mask(vec x, uint64_t y) {
+ vec low63 =
+   ~((vec)((svec)((svec)(x & 0x7fffffffffffffff) -
+		  (int64_t)(y & 0x7fffffffffffffff)) >>  63));
+ vec high_bit =
+   ~((vec)((svec)((svec)(x & 0x8000000000000000) -
+		  (int64_t)(y & 0x8000000000000000)) >>  63));
+ return low63 & high_bit;
+}
+
+static inline vec vec_eq_mask(vec x, uint64_t y) {
+  x = ~(x ^ y);
+  x &= x << 32;
+  x &= x << 16;
+  x &= x << 8;
+  x &= x << 4;
+  x &= x << 2;
+  x &= x << 1;
+  return ((vec)x) >> 63;
+}
+
 typedef struct {
-  uint64_t *x00;
-  uint64_t *x01;
+  vec *x00;
+  vec *x01;
 }
 Hacl_MAC_Poly1305_32_poly1305_state;
 

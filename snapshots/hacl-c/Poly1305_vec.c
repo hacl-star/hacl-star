@@ -1,86 +1,87 @@
 #include "Poly1305_vec.h"
 
-inline static void Hacl_Bignum_Fsum_fsum_(uint64_t *a, uint64_t *b, uint64_t i)
+
+inline static void Hacl_Bignum_Fsum_fsum_(vec *a, vec *b, uint32_t i)
 {
   if (i == (uint32_t )0)
     return;
   else
   {
     uint32_t i0 = i - (uint32_t )1;
-    uint64_t ai = a[i0];
-    uint64_t bi = b[i0];
+    vec ai = a[i0];
+    vec bi = b[i0];
     a[i0] = ai + bi;
     Hacl_Bignum_Fsum_fsum_(a, b, i0);
     return;
   }
 }
 
-static void Hacl_Bignum_Modulo_reduce(uint64_t *b)
+static void Hacl_Bignum_Modulo_reduce(vec *b)
 {
-  uint64_t b0 = b[0];
+  vec b0 = b[0];
   b[0] = (b0 << (uint32_t )2) + b0;
 }
 
-static void Hacl_Bignum_Modulo_carry_top(uint64_t *b)
+static void Hacl_Bignum_Modulo_carry_top(vec *b)
 {
-  uint64_t b4 = b[4];
-  uint64_t b0 = b[0];
-  uint64_t b4_26 = b4 >> (uint32_t )26;
+  vec b4 = b[4];
+  vec b0 = b[0];
+  vec b4_26 = b4 >> (uint32_t )26;
   b[4] = b4 & (uint64_t )0x3ffffff;
   b[0] = (b4_26 << (uint32_t )2) + b4_26 + b0;
 }
 
-static void Hacl_Bignum_Modulo_carry_top_wide(uint64_t *b)
+static void Hacl_Bignum_Modulo_carry_top_wide(vec *b)
 {
-  uint64_t b4 = b[4];
-  uint64_t b0 = b[0];
-  uint64_t b4_ = b4 & (uint64_t )(uint64_t )0x3ffffff;
-  uint64_t b4_26 = (uint64_t )(b4 >> (uint32_t )26);
-  uint64_t b0_ = b0 + (uint64_t )((b4_26 << (uint32_t )2) + b4_26);
+  vec b4 = b[4];
+  vec b0 = b[0];
+  vec b4_ = b4 & (uint64_t )(uint64_t )0x3ffffff;
+  vec b4_26 = (vec )(b4 >> (uint32_t )26);
+  vec b0_ = b0 + (vec )((b4_26 << (uint32_t )2) + b4_26);
   b[4] = b4_;
   b[0] = b0_;
 }
 
 inline static void
-Hacl_Bignum_Fproduct_copy_from_wide_(uint64_t *output, uint64_t *input, uint32_t ctr)
+Hacl_Bignum_Fproduct_copy_from_wide_(vec *output, vec *input, uint32_t ctr)
 {
   if (ctr == (uint32_t )0)
     return;
   else
   {
     uint32_t i = ctr - (uint32_t )1;
-    uint64_t inputi = input[i];
-    output[i] = (uint32_t )inputi;
+    vec inputi = input[i];
+    output[i] = inputi ;
     Hacl_Bignum_Fproduct_copy_from_wide_(output, input, i);
     return;
   }
 }
 
-inline static void Hacl_Bignum_Fproduct_shift_(uint64_t *output, uint32_t ctr)
+inline static void Hacl_Bignum_Fproduct_shift_(vec *output, uint32_t ctr)
 {
   if (ctr == (uint32_t )0)
     return;
   else
   {
-    uint64_t z = output[ctr - (uint32_t )1];
+    vec z = output[ctr - (uint32_t )1];
     output[ctr] = z;
     Hacl_Bignum_Fproduct_shift_(output, ctr - (uint32_t )1);
     return;
   }
 }
 
-inline static void Hacl_Bignum_Fproduct_shift(uint64_t *output)
+inline static void Hacl_Bignum_Fproduct_shift(vec *output)
 {
-  uint64_t tmp = output[4];
+  vec tmp = output[4];
   Hacl_Bignum_Fproduct_shift_(output, (uint32_t )4);
   output[0] = tmp;
 }
 
 inline static void
 Hacl_Bignum_Fproduct_sum_scalar_multiplication_(
-  uint64_t *output,
-  uint64_t *input,
-  uint64_t s,
+  vec *output,
+  vec *input,
+  vec s,
   uint32_t ctr
 )
 {
@@ -89,41 +90,41 @@ Hacl_Bignum_Fproduct_sum_scalar_multiplication_(
   else
   {
     uint32_t i = ctr - (uint32_t )1;
-    uint64_t oi = output[i];
-    uint64_t ii = input[i];
-    output[i] = oi + (uint64_t )ii * (uint64_t )s;
+    vec oi = output[i];
+    vec ii = input[i];
+    output[i] = oi + (vec )ii * (vec )s;
     Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, s, i);
     return;
   }
 }
 
-inline static void Hacl_Bignum_Fproduct_carry_wide_(uint64_t *tmp, uint32_t ctr)
+inline static void Hacl_Bignum_Fproduct_carry_wide_(vec *tmp, uint32_t ctr)
 {
   if (ctr == (uint32_t )4)
     return;
   else
   {
-    uint64_t tctr = tmp[ctr];
-    uint64_t tctrp1 = tmp[ctr + (uint32_t )1];
-    uint64_t r0 = (uint64_t )tctr & ((uint64_t )1 << (uint32_t )26) - (uint64_t )1;
-    uint64_t c = tctr >> (uint32_t )26;
-    tmp[ctr] = (uint64_t )r0;
+    vec tctr = tmp[ctr];
+    vec tctrp1 = tmp[ctr + (uint32_t )1];
+    vec r0 = (vec )tctr & ((uint64_t )1 << (uint32_t )26) - (uint64_t )1;
+    vec c = tctr >> (uint32_t )26;
+    tmp[ctr] = (vec )r0;
     tmp[ctr + (uint32_t )1] = tctrp1 + c;
     Hacl_Bignum_Fproduct_carry_wide_(tmp, ctr + (uint32_t )1);
     return;
   }
 }
 
-inline static void Hacl_Bignum_Fproduct_carry_limb_(uint64_t *tmp, uint32_t ctr)
+inline static void Hacl_Bignum_Fproduct_carry_limb_(vec *tmp, uint32_t ctr)
 {
   if (ctr == (uint32_t )4)
     return;
   else
   {
-    uint64_t tctr = tmp[ctr];
-    uint64_t tctrp1 = tmp[ctr + (uint32_t )1];
-    uint64_t r0 = tctr & ((uint64_t )1 << (uint32_t )26) - (uint64_t )1;
-    uint64_t c = tctr >> (uint32_t )26;
+    vec tctr = tmp[ctr];
+    vec tctrp1 = tmp[ctr + (uint32_t )1];
+    vec r0 = tctr & ((uint64_t )1 << (uint32_t )26) - (uint64_t )1;
+    vec c = tctr >> (uint32_t )26;
     tmp[ctr] = r0;
     tmp[ctr + (uint32_t )1] = tctrp1 + c;
     Hacl_Bignum_Fproduct_carry_limb_(tmp, ctr + (uint32_t )1);
@@ -131,17 +132,17 @@ inline static void Hacl_Bignum_Fproduct_carry_limb_(uint64_t *tmp, uint32_t ctr)
   }
 }
 
-inline static void Hacl_Bignum_Fproduct_carry_0_to_1(uint64_t *output)
+inline static void Hacl_Bignum_Fproduct_carry_0_to_1(vec *output)
 {
-  uint64_t i0 = output[0];
-  uint64_t i1 = output[1];
-  uint64_t i0_ = i0 & ((uint64_t )1 << (uint32_t )26) - (uint64_t )1;
-  uint64_t i1_ = i1 + (i0 >> (uint32_t )26);
+  vec i0 = output[0];
+  vec i1 = output[1];
+  vec i0_ = i0 & ((uint64_t )1 << (uint32_t )26) - (uint64_t )1;
+  vec i1_ = i1 + (i0 >> (uint32_t )26);
   output[0] = i0_;
   output[1] = i1_;
 }
 
-inline static void Hacl_Bignum_Fmul_shift_reduce(uint64_t *output)
+inline static void Hacl_Bignum_Fmul_shift_reduce(vec *output)
 {
   Hacl_Bignum_Fproduct_shift(output);
   Hacl_Bignum_Modulo_reduce(output);
@@ -150,10 +151,10 @@ inline static void Hacl_Bignum_Fmul_shift_reduce(uint64_t *output)
 
 inline static void
 Hacl_Bignum_Fmul_mul_shift_reduce_(
-  uint64_t *output,
+  vec *output,
   void *init_input,
-  uint64_t *input,
-  uint64_t *input2,
+  vec *input,
+  vec *input2,
   uint32_t ctr
 )
 {
@@ -163,7 +164,7 @@ Hacl_Bignum_Fmul_mul_shift_reduce_(
   {
     uint32_t i = ctr - (uint32_t )1;
     uint32_t j = (uint32_t )4 - i;
-    uint64_t input2i = input2[j];
+    vec input2i = input2[j];
     Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i, (uint64_t )5);
     if (ctr > (uint32_t )1)
       Hacl_Bignum_Fmul_shift_reduce(input);
@@ -172,9 +173,9 @@ Hacl_Bignum_Fmul_mul_shift_reduce_(
   }
 }
 
-inline static void Hacl_Bignum_Fmul_fmul_(uint64_t *output, uint64_t *input, uint64_t *input2)
+inline static void Hacl_Bignum_Fmul_fmul_(vec *output, vec *input, vec *input2)
 {
-  uint64_t t[5] = { 0 };
+  vec t[5] = { 0 };
   void
   *input_init =
     (void *)/* start inlining Hacl.Bignum.Fmul.get_seq */
@@ -187,47 +188,47 @@ inline static void Hacl_Bignum_Fmul_fmul_(uint64_t *output, uint64_t *input, uin
   Hacl_Bignum_Fproduct_carry_0_to_1(output);
 }
 
-inline static void Hacl_Bignum_Fmul_fmul(uint64_t *output, uint64_t *input, uint64_t *input2)
+inline static void Hacl_Bignum_Fmul_fmul(vec *output, vec *input, vec *input2)
 {
-  uint64_t tmp[5] = { 0 };
+  vec tmp[5] = { 0 };
   memcpy(tmp, input, (uint32_t )5 * sizeof input[0]);
   Hacl_Bignum_Fmul_fmul_(output, tmp, input2);
 }
 
 static void
-Hacl_Bignum_AddAndMultiply_add_and_multiply(uint64_t *acc, uint64_t *block, uint64_t *r)
+Hacl_Bignum_AddAndMultiply_add_and_multiply(vec *acc, vec *block, vec *r)
 {
   Hacl_Bignum_Fsum_fsum_(acc, block, (uint32_t )5);
   Hacl_Bignum_Fmul_fmul(acc, acc, r);
   return;
 }
 
-static uint64_t
+static vec
 *Hacl_MAC_Poly1305_32___proj__MkState__item__r(Hacl_MAC_Poly1305_32_poly1305_state projectee)
 {
   Hacl_MAC_Poly1305_32_poly1305_state scrut = projectee;
-  uint64_t *r = scrut.x00;
-  uint64_t *h = scrut.x01;
+  vec *r = scrut.x00;
+  vec *h = scrut.x01;
   return r;
 }
 
-static uint64_t
+static vec
 *Hacl_MAC_Poly1305_32___proj__MkState__item__h(Hacl_MAC_Poly1305_32_poly1305_state projectee)
 {
   Hacl_MAC_Poly1305_32_poly1305_state scrut = projectee;
-  uint64_t *r = scrut.x00;
-  uint64_t *h = scrut.x01;
+  vec *r = scrut.x00;
+  vec *h = scrut.x01;
   return h;
 }
 
 static void
 Hacl_MAC_Poly1305_32_upd_5(
-  uint64_t *b,
-  uint64_t b0,
-  uint64_t b1,
-  uint64_t b2,
-  uint64_t b3,
-  uint64_t b4
+  vec *b,
+  vec b0,
+  vec b1,
+  vec b2,
+  vec b3,
+  vec b4
 )
 {
   b[0] = b0;
@@ -237,56 +238,61 @@ Hacl_MAC_Poly1305_32_upd_5(
   b[4] = b4;
 }
 
-static void Hacl_MAC_Poly1305_32_poly1305_encode_r(uint64_t *r, uint8_t *key)
+static void Hacl_MAC_Poly1305_32_poly1305_encode_r(vec *r, uint8_t *key)
 {
   uint64_t t00 = load32_le(key);
   uint64_t t10 = load32_le(key + (uint32_t )4);
   uint64_t t20 = load32_le(key + (uint32_t )8);
   uint64_t t30 = load32_le(key + (uint32_t )12);
-  uint64_t t0 = t00 & (uint64_t )0x0fffffff;
-  uint64_t t1 = t10 & (uint64_t )0x0ffffffc;
-  uint64_t t2 = t20 & (uint64_t )0x0ffffffc;
-  uint64_t t3 = t30 & (uint64_t )0x0ffffffc;
-  uint64_t r0 = t0 & (uint64_t )0x3ffffff;
-  uint64_t r1 = (t0 >> (uint32_t )26 | t1 << (uint32_t )6) & (uint64_t )0x3ffffff;
-  uint64_t r2 = (t1 >> (uint32_t )20 | t2 << (uint32_t )12) & (uint64_t )0x3ffffff;
-  uint64_t r3 = (t2 >> (uint32_t )14 | t3 << (uint32_t )18) & (uint64_t )0x3ffffff;
-  uint64_t r4 = t3 >> (uint32_t )8 & (uint64_t )0x3ffffff;
+  vec v0 = (vec){t00,0,0,0};
+  vec v1 = (vec){t10,0,0,0};
+  vec v2 = (vec){t20,0,0,0};
+  vec v3 = (vec){t30,0,0,0};
+  vec t0 = v0 & (uint64_t )0x0fffffff;
+  vec t1 = v1 & (uint64_t )0x0ffffffc;
+  vec t2 = v2 & (uint64_t )0x0ffffffc;
+  vec t3 = v3 & (uint64_t )0x0ffffffc;
+  vec r0 = t0 & (uint64_t )0x3ffffff;
+  vec r1 = (t0 >> (uint32_t )26 | t1 << (uint32_t )6) & (uint64_t )0x3ffffff;
+  vec r2 = (t1 >> (uint32_t )20 | t2 << (uint32_t )12) & (uint64_t )0x3ffffff;
+  vec r3 = (t2 >> (uint32_t )14 | t3 << (uint32_t )18) & (uint64_t )0x3ffffff;
+  vec r4 = t3 >> (uint32_t )8 & (uint64_t )0x3ffffff;
   Hacl_MAC_Poly1305_32_upd_5(r, r0, r1, r2, r3, r4);
   return;
 }
 
-static void Hacl_MAC_Poly1305_32_toField(uint64_t *b, uint8_t *m)
+/* TODO FIX */
+static void Hacl_MAC_Poly1305_32_toField(vec *b, uint8_t *m)
 {
   uint64_t t0 = load32_le(m);
   uint64_t t1 = load32_le(m + (uint32_t )4);
   uint64_t t2 = load32_le(m + (uint32_t )8);
   uint64_t t3 = load32_le(m + (uint32_t )12);
-  uint64_t r0 = t0 & (uint64_t )0x3ffffff;
-  uint64_t r1 = (t0 >> (uint32_t )26 | t1 << (uint32_t )6) & (uint64_t )0x3ffffff;
-  uint64_t r2 = (t1 >> (uint32_t )20 | t2 << (uint32_t )12) & (uint64_t )0x3ffffff;
-  uint64_t r3 = (t2 >> (uint32_t )14 | t3 << (uint32_t )18) & (uint64_t )0x3ffffff;
-  uint64_t r4 = t3 >> (uint32_t )8 & (uint64_t )0x3ffffff;
+  vec v0 = (vec){t0,0,0,0};
+  vec v1 = (vec){t1,0,0,0};
+  vec v2 = (vec){t2,0,0,0};
+  vec v3 = (vec){t3,0,0,0};
+  vec r0 = v0 & (uint64_t )0x3ffffff;
+  vec r1 = (v0 >> (uint32_t )26 | v1 << (uint32_t )6) & (uint64_t )0x3ffffff;
+  vec r2 = (v1 >> (uint32_t )20 | v2 << (uint32_t )12) & (uint64_t )0x3ffffff;
+  vec r3 = (v2 >> (uint32_t )14 | v3 << (uint32_t )18) & (uint64_t )0x3ffffff;
+  vec r4 = v3 >> (uint32_t )8 & (uint64_t )0x3ffffff;
   Hacl_MAC_Poly1305_32_upd_5(b, r0, r1, r2, r3, r4);
   return;
 }
 
-static void Hacl_MAC_Poly1305_32_toField_plus_2_128(uint64_t *b, uint8_t *m)
+static void Hacl_MAC_Poly1305_32_toField_plus_2_128(vec *b, uint8_t *m)
 {
   Hacl_MAC_Poly1305_32_toField(b, m);
-  uint64_t b4 = b[4];
-  uint64_t b4_ = (uint64_t )0x1000000 | b4;
+  vec b4 = b[4];
+  vec b4_ = (uint64_t )0x1000000 | b4;
   b[4] = b4_;
 }
 
-static void Hacl_MAC_Poly1305_32_poly1305_start(uint64_t *a)
+static void Hacl_MAC_Poly1305_32_poly1305_start(vec *a)
 {
-  Hacl_MAC_Poly1305_32_upd_5(a,
-    (uint64_t )0,
-    (uint64_t )0,
-    (uint64_t )0,
-    (uint64_t )0,
-    (uint64_t )0);
+  vec zero = (vec){0,0,0,0};
+  Hacl_MAC_Poly1305_32_upd_5(a,zero,zero,zero,zero,zero);
   return;
 }
 
@@ -305,9 +311,9 @@ Hacl_MAC_Poly1305_32_poly1305_update(
   uint8_t *m
 )
 {
-  uint64_t tmp[5] = { 0 };
-  uint64_t *acc = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st);
-  uint64_t *r = Hacl_MAC_Poly1305_32___proj__MkState__item__r(st);
+  vec tmp[5] = { 0 };
+  vec *acc = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st);
+  vec *r = Hacl_MAC_Poly1305_32___proj__MkState__item__r(st);
   Hacl_MAC_Poly1305_32_toField_plus_2_128(tmp, m);
   Hacl_Bignum_AddAndMultiply_add_and_multiply(acc, tmp, r);
 }
@@ -346,7 +352,7 @@ Hacl_MAC_Poly1305_32_poly1305_process_last_block_(
   uint64_t rem_
 )
 {
-  uint64_t tmp[5] = { 0 };
+  vec tmp[5] = { 0 };
   Hacl_MAC_Poly1305_32_toField(tmp, block);
   Hacl_Bignum_AddAndMultiply_add_and_multiply(Hacl_MAC_Poly1305_32___proj__MkState__item__h(st),
     tmp,
@@ -370,7 +376,7 @@ Hacl_MAC_Poly1305_32_poly1305_process_last_block(
   Hacl_MAC_Poly1305_32_poly1305_process_last_block_(block, st, m, rem_);
 }
 
-static void Hacl_MAC_Poly1305_32_poly1305_last_pass(uint64_t *acc)
+static void Hacl_MAC_Poly1305_32_poly1305_last_pass(vec *acc)
 {
   Hacl_Bignum_Fproduct_carry_limb_(acc, (uint32_t )0);
   Hacl_Bignum_Modulo_carry_top(acc);
@@ -379,22 +385,22 @@ static void Hacl_MAC_Poly1305_32_poly1305_last_pass(uint64_t *acc)
   Hacl_Bignum_Fproduct_carry_0_to_1(acc);
   uint64_t p26m1 = (uint64_t )0x3ffffff;
   uint64_t p26m5 = (uint64_t )0x3fffffb;
-  uint64_t a0 = acc[0];
-  uint64_t a1 = acc[1];
-  uint64_t a2 = acc[2];
-  uint64_t a3 = acc[3];
-  uint64_t a4 = acc[4];
-  uint64_t mask0 = FStar_UInt32_gte_mask(a0, p26m5);
-  uint64_t mask1 = FStar_UInt32_eq_mask(a1, p26m1);
-  uint64_t mask2 = FStar_UInt32_eq_mask(a2, p26m1);
-  uint64_t mask3 = FStar_UInt32_eq_mask(a3, p26m1);
-  uint64_t mask4 = FStar_UInt32_eq_mask(a4, p26m1);
-  uint64_t mask = mask0 & mask1 & mask2 & mask3 & mask4;
-  uint64_t a0_ = a0 - (p26m5 & mask);
-  uint64_t a1_ = a1 - (p26m1 & mask);
-  uint64_t a2_ = a2 - (p26m1 & mask);
-  uint64_t a3_ = a3 - (p26m1 & mask);
-  uint64_t a4_ = a4 - (p26m1 & mask);
+  vec a0 = acc[0];
+  vec a1 = acc[1];
+  vec a2 = acc[2];
+  vec a3 = acc[3];
+  vec a4 = acc[4];
+  vec mask0 = vec_gte_mask(a0, p26m5);
+  vec mask1 = vec_eq_mask(a1, p26m1);
+  vec mask2 = vec_eq_mask(a2, p26m1);
+  vec mask3 = vec_eq_mask(a3, p26m1);
+  vec mask4 = vec_eq_mask(a4, p26m1);
+  vec mask = mask0 & mask1 & mask2 & mask3 & mask4;
+  vec a0_ = a0 - (p26m5 & mask);
+  vec a1_ = a1 - (p26m1 & mask);
+  vec a2_ = a2 - (p26m1 & mask);
+  vec a3_ = a3 - (p26m1 & mask);
+  vec a4_ = a4 - (p26m1 & mask);
   Hacl_MAC_Poly1305_32_upd_5(acc, a0_, a1_, a2_, a3_, a4_);
   return;
 }
@@ -431,7 +437,7 @@ Hacl_MAC_Poly1305_32_poly1305_finish_(
   uint8_t *key_s
 )
 {
-  uint64_t tmp[5] = { 0 };
+  vec tmp[5] = { 0 };
   Hacl_MAC_Poly1305_32_toField(tmp, key_s);
   Hacl_MAC_Poly1305_32_poly1305_finish__((void *)(uint8_t )0, st, mac, m, len, key_s);
   Hacl_MAC_Poly1305_32_poly1305_last_pass(Hacl_MAC_Poly1305_32___proj__MkState__item__h(st));
@@ -442,19 +448,23 @@ Hacl_MAC_Poly1305_32_poly1305_finish_(
   uint64_t k1 = load32_le(key_s + (uint32_t )4);
   uint64_t k2 = load32_le(key_s + (uint32_t )8);
   uint64_t k3 = load32_le(key_s + (uint32_t )12);
-  uint64_t h0 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[0];
-  uint64_t h1 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[1];
-  uint64_t h2 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[2];
-  uint64_t h3 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[3];
-  uint64_t h4 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[4];
-  uint64_t acc0 = h0 | h1 << (uint32_t )26;
-  uint64_t acc1 = h1 >> (uint32_t )6 | h2 << (uint32_t )20;
-  uint64_t acc2 = h2 >> (uint32_t )12 | h3 << (uint32_t )14;
-  uint64_t acc3 = h3 >> (uint32_t )18 | h4 << (uint32_t )8;
-  store32_le(mac, acc0);
-  store32_le(mac + (uint32_t )4, acc1);
-  store32_le(mac + (uint32_t )8, acc2);
-  store32_le(mac + (uint32_t )12, acc3);
+  vec v0 = (vec){k0,0,0,0};
+  vec v1 = (vec){k1,0,0,0};
+  vec v2 = (vec){k2,0,0,0};
+  vec v3 = (vec){k3,0,0,0};
+  vec h0 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[0];
+  vec h1 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[1];
+  vec h2 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[2];
+  vec h3 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[3];
+  vec h4 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[4];
+  vec acc0 = h0 | h1 << (uint32_t )26;
+  vec acc1 = h1 >> (uint32_t )6 | h2 << (uint32_t )20;
+  vec acc2 = h2 >> (uint32_t )12 | h3 << (uint32_t )14;
+  vec acc3 = h3 >> (uint32_t )18 | h4 << (uint32_t )8;
+  store32_le(mac, acc0[0]);
+  store32_le(mac + (uint32_t )4, acc1[0]);
+  store32_le(mac + (uint32_t )8, acc2[0]);
+  store32_le(mac + (uint32_t )12, acc3[0]);
 }
 
 static void
@@ -465,9 +475,9 @@ Hacl_MAC_Poly1305_32_crypto_onetimeauth(
   uint8_t *k
 )
 {
-  uint64_t buf[10] = { 0 };
-  uint64_t *r = buf;
-  uint64_t *h = buf + (uint32_t )5;
+  vec buf[10] = { 0 };
+  vec *r = buf;
+  vec *h = buf + (uint32_t )5;
   Hacl_MAC_Poly1305_32_poly1305_state st = { .x00 = r, .x01 = h };
   uint8_t *key_r = k;
   uint8_t *key_s = k + (uint32_t )16;
