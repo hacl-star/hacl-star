@@ -41,11 +41,17 @@ let suint8_p  = Buffer.buffer suint8_t
 
 
 (* Definitions of aliases for functions *)
+[@"substitute"]
 let u8_to_s8 = Cast.uint8_to_sint8
+[@"substitute"]
 let u32_to_s32 = Cast.uint32_to_sint32
+[@"substitute"]
 let u32_to_s64 = Cast.uint32_to_sint64
+[@"substitute"]
 let s32_to_s8  = Cast.sint32_to_sint8
+[@"substitute"]
 let s32_to_s64 = Cast.sint32_to_sint64
+[@"substitute"]
 let u64_to_s64 = Cast.uint64_to_sint64
 
 
@@ -78,35 +84,47 @@ inline_for_extraction let pos_count_32   = size_k_32 +^ size_ws_32 +^ size_whash
 
 
 (* [FIPS 180-4] section 4.1.2 *)
+[@"substitute"]
 private val _Ch: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _Ch x y z = S32.logxor (S32.logand x y) (S32.logand (S32.lognot x) z)
 
+[@"substitute"]
 private val _Maj: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _Maj x y z = S32.logxor (S32.logand x y) (S32.logxor (S32.logand x z) (S32.logand y z))
 
+[@"substitute"]
 private val _Sigma0: x:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _Sigma0 x = S32.logxor (rotate_right x 2ul) (S32.logxor (rotate_right x 13ul) (rotate_right x 22ul))
 
+[@"substitute"]
 private val _Sigma1: x:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _Sigma1 x = S32.logxor (rotate_right x 6ul) (S32.logxor (rotate_right x 11ul) (rotate_right x 25ul))
 
+[@"substitute"]
 private val _sigma0: x:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _sigma0 x = S32.logxor (rotate_right x 7ul) (S32.logxor (rotate_right x 18ul) (S32.shift_right x 3ul))
 
+[@"substitute"]
 private val _sigma1: x:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _sigma1 x = S32.logxor (rotate_right x 17ul) (S32.logxor (rotate_right x 19ul) (S32.shift_right x 10ul))
 
 
 
 (* [FIPS 180-4] section 4.2.2 *)
-[@"c_inline"]
+[@"substitute"]
 private val set_k:
   state:suint32_p{length state = U32.v size_state} ->
   Stack unit
         (requires (fun h -> live h state))
         (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-[@"c_inline"]
+[@"substitute"]
 let set_k state =
   let k = Buffer.sub state pos_k_32 size_k_32 in
   upd4 k 0ul  0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul;
@@ -127,15 +145,14 @@ let set_k state =
   upd4 k 60ul 0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
 
 
-
-[@"c_inline"]
+[@"substitute"]
 private val set_whash:
   state:suint32_p{length state = U32.v size_state} ->
   Stack unit (requires (fun h -> live h state))
                (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-[@"c_inline"]
-let set_whash state =
+[@"substitute"]
+private let set_whash state =
   let whash = Buffer.sub state pos_whash_32 size_whash_32 in
   upd4 whash 0ul 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul;
   upd4 whash 4ul 0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
@@ -144,8 +161,7 @@ let set_whash state =
 
 (* [FIPS 180-4] section 6.2.2 *)
 (* Step 1 : Scheduling function for sixty-four 32bit words *)
-[@"c_inline"]
-private val ws_upd:
+inline_for_extraction private val ws_upd:
   state  :suint32_p {length state = v size_state} ->
   wblock :suint32_p {length wblock = v blocksize_32} ->
   t      :uint32_t  {v t + 64 < pow2 32} ->
@@ -153,7 +169,6 @@ private val ws_upd:
         (requires (fun h -> live h state /\ live h wblock))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-[@"c_inline"]
 let rec ws_upd state wblock t =
   (* Get necessary information from the state *)
   let ws = Buffer.sub state pos_ws_32 size_ws_32 in
