@@ -26,16 +26,16 @@ module Cast = Hacl.Cast
 
 
 (* Definition of base types *)
-let uint8_t   = FStar.UInt8.t
-let uint32_t  = FStar.UInt32.t
-let uint64_t  = FStar.UInt64.t
+private let uint8_t   = FStar.UInt8.t
+private let uint32_t  = FStar.UInt32.t
+private let uint64_t  = FStar.UInt64.t
 
-let suint8_t  = Hacl.UInt8.t
-let suint32_t = Hacl.UInt32.t
-let suint64_t = Hacl.UInt64.t
+private let suint8_t  = Hacl.UInt8.t
+private let suint32_t = Hacl.UInt32.t
+private let suint64_t = Hacl.UInt64.t
 
-let suint32_p = Buffer.buffer suint32_t
-let suint8_p  = Buffer.buffer suint8_t
+private let suint32_p = Buffer.buffer suint32_t
+private let suint8_p  = Buffer.buffer suint8_t
 
 
 
@@ -47,6 +47,17 @@ let suint8_p  = Buffer.buffer suint8_t
 let hashsize_256 = Hacl.Hash.SHA2.L256.hashsize
 let blocksize_256 = Hacl.Hash.SHA2.L256.blocksize
 let size_state_256 = Hacl.Hash.SHA2.L256.size_state
+
+
+
+val sha2_alloc_256:
+  unit ->
+  StackInline (state:suint32_p{length state = v size_state_256})
+        (requires (fun h0 -> True))
+        (ensures  (fun h0 state h1 -> modifies_0 h0 h1 /\ live h1 state))
+
+let sha2_alloc_256 () = Hacl.Hash.SHA2.L256.alloc ()
+
 
 val sha2_init_256:
   (state:suint32_p{length state = v size_state_256}) ->
