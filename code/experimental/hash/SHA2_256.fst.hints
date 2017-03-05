@@ -1,6 +1,32 @@
 [
-  "g\u0018­ò&lÆ3[iiÀHýW\u0011",
+  "Ë{q)ÈI½Õ=q;ó\u0013˜”Ü",
   [
+    [
+      "SHA2_256.sha2_alloc_256",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "haseqTm_refine_e0b8a7ce8790eaaca2b2e4fb4d625bad",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "SHA2_256.sha2_alloc_256",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_Hacl.Hash.SHA2.L256.suint32_p",
+        "equation_Hacl.Hash.SHA2.L256.suint32_t",
+        "equation_Hacl.Utils.Experimental.suint32_t",
+        "equation_SHA2_256.size_state_256", "equation_SHA2_256.suint32_p",
+        "equation_SHA2_256.suint32_t"
+      ],
+      0
+    ],
     [
       "SHA2_256.sha2_init_256",
       1,
