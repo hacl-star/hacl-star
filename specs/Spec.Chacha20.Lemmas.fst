@@ -15,6 +15,7 @@ module V = Spec.Chacha20_vec
 let state = S.state
 let vec_state = V.state
 
+
 #set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
 abstract
@@ -64,6 +65,40 @@ let lemma_vec_state s =
   lemma_eq_intro (slice s' 8  12) s2;
   lemma_eq_intro (slice s' 12 16) s3;
   lemma_eq_intro (create_4 s0 s1 s2 s3) (s)
+
+
+let eq_states' (s:state) (s':vec_state) : GTot Type0 =
+   let s0' = index (index s' 0) 0 in   let s1' = index (index s' 0) 1 in
+   let s2' = index (index s' 0) 2 in   let s3' = index (index s' 0) 3 in
+   let s4' = index (index s' 1) 0 in   let s5' = index (index s' 1) 1 in
+   let s6' = index (index s' 1) 2 in   let s7' = index (index s' 1) 3 in
+   let s8' = index (index s' 2) 0 in   let s9' = index (index s' 2) 1 in
+   let s10' = index (index s' 2) 2 in  let s11' = index (index s' 2) 3 in
+   let s12' = index (index s' 3) 0 in  let s13' = index (index s' 3) 1 in
+   let s14' = index (index s' 3) 2 in  let s15' = index (index s' 3) 3 in
+   let s0 = index s 0 in   let s1 = index s 1 in
+   let s2 = index s 2 in   let s3 = index s 3 in
+   let s4 = index s 4 in   let s5 = index s 5 in
+   let s6 = index s 6 in   let s7 = index s 7 in
+   let s8 = index s 8 in   let s9 = index s 9 in
+   let s10 = index s 10 in  let s11 = index s 11 in
+   let s12 = index s 12 in  let s13 = index s 13 in
+   let s14 = index s 14 in  let s15 = index s 15 in
+   s0' == s0 /\ s1' == s1 /\ s2' == s2 /\ s3' == s3
+   /\ s4' == s4 /\ s5' == s5 /\ s6' == s6 /\ s7' == s7
+   /\ s8' == s8 /\ s9' == s9 /\ s10' == s10 /\ s11' == s11
+   /\ s12' == s12 /\ s13' == s13 /\ s14' == s14 /\ s15' == s15
+
+
+let eq_states (s:state) (s':vec_state) : GTot Type0 =
+  vec_state_to_state s' == s
+
+
+val lemma_eq_states_intro: s:state -> s':vec_state -> Lemma
+  (requires (eq_states' s s'))
+  (ensures (eq_states s s'))
+let lemma_eq_states_intro s s' =
+  lemma_eq_intro (vec_state_to_state s') s
 
 
 let quarter_round_vec (s:vec_state) : Tot vec_state =
@@ -232,7 +267,6 @@ val column_round_standard_1: s:state -> Tot (s':state{
    /\ s5 == s5' /\ s6 == s6' /\ s7 == s7'
    /\ s9 == s9' /\ s10 == s10' /\ s11 == s11'
    /\ s13 == s13' /\ s14 == s14' /\ s15 == s15')})
-(* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100" *)
 let column_round_standard_1 s =
   lemma_quarter_round_standard s 0 4 8 12;
   let s' = quarter_round_standard s 0 4 8 12 in
@@ -469,4 +503,486 @@ let column_round_standard s =
   lemma_column_round_standard_4 s''' s'''';
   lemma_column_round_def s;
   s''''
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+
+val shuffle_right: x:vec -> n:V.idx -> Tot (x':vec{
+  index x' 0 == index x (n % 4)
+  /\ index x' 1 == index x ((n+1) % 4)
+  /\ index x' 2 == index x ((n+2) % 4)
+  /\ index x' 3 == index x ((n+3) % 4)})
+let shuffle_right x n =
+  V.shuffle_right x n
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+
+val shuffle_rous_1: s:vec_state -> Tot (s':vec_state{
+   let s0' = index (index s' 0) 0 in   let s1' = index (index s' 0) 1 in
+   let s2' = index (index s' 0) 2 in   let s3' = index (index s' 0) 3 in
+   let s4' = index (index s' 1) 0 in   let s5' = index (index s' 1) 1 in
+   let s6' = index (index s' 1) 2 in   let s7' = index (index s' 1) 3 in
+   let s8' = index (index s' 2) 0 in   let s9' = index (index s' 2) 1 in
+   let s10' = index (index s' 2) 2 in  let s11' = index (index s' 2) 3 in
+   let s12' = index (index s' 3) 0 in  let s13' = index (index s' 3) 1 in
+   let s14' = index (index s' 3) 2 in  let s15' = index (index s' 3) 3 in
+   let s0 = index (index s 0) 0 in   let s1 = index (index s 0) 1 in
+   let s2 = index (index s 0) 2 in   let s3 = index (index s 0) 3 in
+   let s4 = index (index s 1) 0 in   let s5 = index (index s 1) 1 in
+   let s6 = index (index s 1) 2 in   let s7 = index (index s 1) 3 in
+   let s8 = index (index s 2) 0 in   let s9 = index (index s 2) 1 in
+   let s10 = index (index s 2) 2 in  let s11 = index (index s 2) 3 in
+   let s12 = index (index s 3) 0 in  let s13 = index (index s 3) 1 in
+   let s14 = index (index s 3) 2 in  let s15 = index (index s 3) 3 in
+   s0 == s0' /\ s1 == s1' /\ s2 == s2' /\ s3 == s3'
+   /\ s4' == s5 /\ s5' == s6 /\ s6' == s7 /\ s7' == s4
+   /\ s8' == s10 /\ s9' == s11 /\ s10' == s8 /\ s11' == s9
+   /\ s12' == s15 /\ s13' == s12 /\ s14' == s13 /\ s15' == s14
+   /\ (let s'' = V.shuffle_row 1 1 s in
+     let s'' = V.shuffle_row 2 2 s'' in
+     let s'' = V.shuffle_row 3 3 s'' in
+     s'' == s')
+   })
+let shuffle_rous_1 s =
+  let s' = shuffle_row 1 1 s in
+  lemma_eq_intro (shuffle_right (index s 1) 1) (index s' 1);
+  lemma_eq_intro (index s 0) (index s' 0);
+  lemma_eq_intro (index s 2) (index s' 2);
+  lemma_eq_intro (index s 3) (index s' 3);
+  let s'' = shuffle_row 2 2 s' in
+  lemma_eq_intro (shuffle_right (index s' 2) 2) (index s'' 2);
+  lemma_eq_intro (index s' 0) (index s'' 0);
+  lemma_eq_intro (index s' 1) (index s'' 1);
+  lemma_eq_intro (index s' 3) (index s'' 3);  
+  let s''' = shuffle_row 3 3 s'' in
+  lemma_eq_intro (shuffle_right (index s'' 3) 3) (index s''' 3);
+  lemma_eq_intro (index s'' 0) (index s''' 0);
+  lemma_eq_intro (index s'' 1) (index s''' 1);
+  lemma_eq_intro (index s'' 2) (index s''' 2);
+  s'''
+
+
+val shuffle_rous_2: s:vec_state -> Tot (s':vec_state{
+   let s0' = index (index s' 0) 0 in   let s1' = index (index s' 0) 1 in
+   let s2' = index (index s' 0) 2 in   let s3' = index (index s' 0) 3 in
+   let s4' = index (index s' 1) 0 in   let s5' = index (index s' 1) 1 in
+   let s6' = index (index s' 1) 2 in   let s7' = index (index s' 1) 3 in
+   let s8' = index (index s' 2) 0 in   let s9' = index (index s' 2) 1 in
+   let s10' = index (index s' 2) 2 in  let s11' = index (index s' 2) 3 in
+   let s12' = index (index s' 3) 0 in  let s13' = index (index s' 3) 1 in
+   let s14' = index (index s' 3) 2 in  let s15' = index (index s' 3) 3 in
+   let s0 = index (index s 0) 0 in   let s1 = index (index s 0) 1 in
+   let s2 = index (index s 0) 2 in   let s3 = index (index s 0) 3 in
+   let s4 = index (index s 1) 0 in   let s5 = index (index s 1) 1 in
+   let s6 = index (index s 1) 2 in   let s7 = index (index s 1) 3 in
+   let s8 = index (index s 2) 0 in   let s9 = index (index s 2) 1 in
+   let s10 = index (index s 2) 2 in  let s11 = index (index s 2) 3 in
+   let s12 = index (index s 3) 0 in  let s13 = index (index s 3) 1 in
+   let s14 = index (index s 3) 2 in  let s15 = index (index s 3) 3 in
+   s0 == s0' /\ s1 == s1' /\ s2 == s2' /\ s3 == s3'
+   /\ s4' == s7 /\ s5' == s4 /\ s6' == s5 /\ s7' == s6
+   /\ s8' == s10 /\ s9' == s11 /\ s10' == s8 /\ s11' == s9
+   /\ s12' == s13 /\ s13' == s14 /\ s14' == s15 /\ s15' == s12
+   /\ (let s'' = V.shuffle_row 1 3 s in
+     let s'' = V.shuffle_row 2 2 s'' in
+     let s'' = V.shuffle_row 3 1 s'' in
+     s'' == s')
+   })
+let shuffle_rous_2 s =
+  let s' = shuffle_row 1 3 s in
+  lemma_eq_intro (shuffle_right (index s 1) 3) (index s' 1);
+  lemma_eq_intro (index s 0) (index s' 0);
+  lemma_eq_intro (index s 2) (index s' 2);
+  lemma_eq_intro (index s 3) (index s' 3);
+  let s'' = shuffle_row 2 2 s' in
+  lemma_eq_intro (shuffle_right (index s' 2) 2) (index s'' 2);
+  lemma_eq_intro (index s' 0) (index s'' 0);
+  lemma_eq_intro (index s' 1) (index s'' 1);
+  lemma_eq_intro (index s' 3) (index s'' 3);  
+  let s''' = shuffle_row 3 1 s'' in
+  lemma_eq_intro (shuffle_right (index s'' 3) 1) (index s''' 3);
+  lemma_eq_intro (index s'' 0) (index s''' 0);
+  lemma_eq_intro (index s'' 1) (index s''' 1);
+  lemma_eq_intro (index s'' 2) (index s''' 2);
+  s'''
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+
+val lemma_diagonal_round_standard_1: s:state -> s':state -> Lemma
+  (requires ((forall (i:nat). {:pattern (index s' i)} (i < 16 /\ i <> 0 /\ i <> 5 /\ i <> 10 /\ i <> 15)  ==> index s' i == index s i)))
+  (ensures (
+   let s0 = index s 0 in   let s1 = index s 1 in
+   let s2 = index s 2 in   let s3 = index s 3 in
+   let s4 = index s 4 in   let s5 = index s 5 in
+   let s6 = index s 6 in   let s7 = index s 7 in
+   let s8 = index s 8 in   let s9 = index s 9 in
+   let s10 = index s 10 in  let s11 = index s 11 in
+   let s12 = index s 12 in  let s13 = index s 13 in
+   let s14 = index s 14 in  let s15 = index s 15 in
+   let s0' = index s' 0 in   let s1' = index s' 1 in
+   let s2' = index s' 2 in   let s3' = index s' 3 in
+   let s4' = index s' 4 in   let s5' = index s' 5 in
+   let s6' = index s' 6 in   let s7' = index s' 7 in
+   let s8' = index s' 8 in   let s9' = index s' 9 in
+   let s10' = index s' 10 in  let s11' = index s' 11 in
+   let s12' = index s' 12 in  let s13' = index s' 13 in
+   let s14' = index s' 14 in  let s15' = index s' 15 in
+   s1 == s1' /\ s2 == s2' /\ s3 == s3'
+   /\ s4 == s4' /\ s6 == s6' /\ s7 == s7'
+   /\ s9 == s9' /\ s8 == s8' /\ s11 == s11'
+   /\ s13 == s13' /\ s14 == s14' /\ s12 == s12'))
+let lemma_diagonal_round_standard_1 s s' =
+  let p = fun (i:nat) -> (i < 16 /\ i <> 0 /\ i <> 5 /\ i <> 10 /\ i <> 15) in
+  let q = fun (i:nat) -> (i < 16 /\ index s' i == index s i) in
+  lemma_forall_elim p q 1;
+  lemma_forall_elim p q 2;
+  lemma_forall_elim p q 3;
+  lemma_forall_elim p q 4;
+  lemma_forall_elim p q 6;
+  lemma_forall_elim p q 7;
+  lemma_forall_elim p q 9;
+  lemma_forall_elim p q 8;
+  lemma_forall_elim p q 11;
+  lemma_forall_elim p q 13;
+  lemma_forall_elim p q 14;
+  lemma_forall_elim p q 12
+
+
+val diagonal_round_standard_1: s:state -> Tot (s':state{
+  (let s'' = S.quarter_round 0 5 10 15 s in
+   let s0 = index s 0 in   let s1 = index s 1 in
+   let s2 = index s 2 in   let s3 = index s 3 in
+   let s4 = index s 4 in   let s5 = index s 5 in
+   let s6 = index s 6 in   let s7 = index s 7 in
+   let s8 = index s 8 in   let s9 = index s 9 in
+   let s10 = index s 10 in  let s11 = index s 11 in
+   let s12 = index s 12 in  let s13 = index s 13 in
+   let s14 = index s 14 in  let s15 = index s 15 in
+   let s0' = index s' 0 in   let s1' = index s' 1 in
+   let s2' = index s' 2 in   let s3' = index s' 3 in
+   let s4' = index s' 4 in   let s5' = index s' 5 in
+   let s6' = index s' 6 in   let s7' = index s' 7 in
+   let s8' = index s' 8 in   let s9' = index s' 9 in
+   let s10' = index s' 10 in  let s11' = index s' 11 in
+   let s12' = index s' 12 in  let s13' = index s' 13 in
+   let s14' = index s' 14 in  let s15' = index s' 15 in
+   lined s0 s5 s10 s15 s0' s5' s10' s15'
+   /\ s'' == s'
+   /\ s1 == s1' /\ s2 == s2' /\ s3 == s3'
+   /\ s4 == s4' /\ s6 == s6' /\ s7 == s7'
+   /\ s9 == s9' /\ s8 == s8' /\ s11 == s11'
+   /\ s13 == s13' /\ s14 == s14' /\ s12 == s12')})
+let diagonal_round_standard_1 s =
+  lemma_quarter_round_standard s 0 5 10 15;
+  let s' = quarter_round_standard s 0 5 10 15 in
+  cut (lined (index s 0) (index s 5) (index s 10) (index s 15) (index s' 0) (index s' 5) (index s' 10) (index s' 15));
+  lemma_diagonal_round_standard_1 s s';
+  s'
+
+
+val lemma_diagonal_round_standard_2: s:state -> s':state -> Lemma
+  (requires ((forall (i:nat). {:pattern (index s' i)} (i < 16 /\ i <> 1 /\ i <> 6 /\ i <> 11 /\ i <> 12)  ==> index s' i == index s i)))
+  (ensures (
+   let s0 = index s 0 in   let s1 = index s 1 in
+   let s2 = index s 2 in   let s3 = index s 3 in
+   let s4 = index s 4 in   let s5 = index s 5 in
+   let s6 = index s 6 in   let s7 = index s 7 in
+   let s8 = index s 8 in   let s9 = index s 9 in
+   let s10 = index s 10 in  let s11 = index s 11 in
+   let s12 = index s 12 in  let s13 = index s 13 in
+   let s14 = index s 14 in  let s15 = index s 15 in
+   let s0' = index s' 0 in   let s1' = index s' 1 in
+   let s2' = index s' 2 in   let s3' = index s' 3 in
+   let s4' = index s' 4 in   let s5' = index s' 5 in
+   let s6' = index s' 6 in   let s7' = index s' 7 in
+   let s8' = index s' 8 in   let s9' = index s' 9 in
+   let s10' = index s' 10 in  let s11' = index s' 11 in
+   let s12' = index s' 12 in  let s13' = index s' 13 in
+   let s14' = index s' 14 in  let s15' = index s' 15 in
+   s0 == s0' /\ s2 == s2' /\ s3 == s3'
+   /\ s4 == s4' /\ s5 == s5' /\ s7 == s7'
+   /\ s8 == s8' /\ s10 == s10' /\ s9 == s9'
+   /\ s13 == s13' /\ s14 == s14' /\ s15 == s15'))
+let lemma_diagonal_round_standard_2 s s' =
+  let p = fun (i:nat) -> (i < 16 /\ i <> 1 /\ i <> 6 /\ i <> 11 /\ i <> 12) in
+  let q = fun (i:nat) -> (i < 16 /\ index s' i == index s i) in
+  lemma_forall_elim p q 0;
+  lemma_forall_elim p q 2;
+  lemma_forall_elim p q 3;
+  lemma_forall_elim p q 4;
+  lemma_forall_elim p q 5;
+  lemma_forall_elim p q 7;
+  lemma_forall_elim p q 8;
+  lemma_forall_elim p q 10;
+  lemma_forall_elim p q 9;
+  lemma_forall_elim p q 13;
+  lemma_forall_elim p q 14;
+  lemma_forall_elim p q 15
+
+
+val diagonal_round_standard_2: s:state -> Tot (s':state{
+  (let s'' = S.quarter_round 0 5 10 15 s in
+   let s'' = S.quarter_round 1 6 11 12 s'' in
+   let s0 = index s 0 in   let s1 = index s 1 in
+   let s2 = index s 2 in   let s3 = index s 3 in
+   let s4 = index s 4 in   let s5 = index s 5 in
+   let s6 = index s 6 in   let s7 = index s 7 in
+   let s8 = index s 8 in   let s9 = index s 9 in
+   let s10 = index s 10 in  let s11 = index s 11 in
+   let s12 = index s 12 in  let s13 = index s 13 in
+   let s14 = index s 14 in  let s15 = index s 15 in
+   let s0' = index s' 0 in   let s1' = index s' 1 in
+   let s2' = index s' 2 in   let s3' = index s' 3 in
+   let s4' = index s' 4 in   let s5' = index s' 5 in
+   let s6' = index s' 6 in   let s7' = index s' 7 in
+   let s8' = index s' 8 in   let s9' = index s' 9 in
+   let s10' = index s' 10 in  let s11' = index s' 11 in
+   let s12' = index s' 12 in  let s13' = index s' 13 in
+   let s14' = index s' 14 in  let s15' = index s' 15 in
+   lined s0 s5 s10 s15 s0' s5' s10' s15'
+   /\ s'' == s'
+   /\ lined s1 s6 s11 s12 s1' s6' s11' s12'
+   /\ s2 == s2' /\ s3 == s3'
+   /\ s4 == s4' /\ s7 == s7'
+   /\ s8 == s8' /\ s9 == s9'
+   /\ s14 == s14' /\ s13 == s13')})
+let diagonal_round_standard_2 s =
+  let s' = diagonal_round_standard_1 s in
+  lemma_quarter_round_standard s' 1 6 11 12;
+  let s'' = quarter_round_standard s' 1 6 11 12 in
+  lemma_diagonal_round_standard_2 s' s'';
+  s''
+
+
+val lemma_diagonal_round_standard_3: s:state -> s':state -> Lemma
+  (requires ((forall (i:nat). {:pattern (index s' i)} (i < 16 /\ i <> 2 /\ i <> 7 /\ i <> 8 /\ i <> 13)  ==> index s' i == index s i)))
+  (ensures (
+   let s0 = index s 0 in   let s1 = index s 1 in
+   let s2 = index s 2 in   let s3 = index s 3 in
+   let s4 = index s 4 in   let s5 = index s 5 in
+   let s6 = index s 6 in   let s7 = index s 7 in
+   let s8 = index s 8 in   let s9 = index s 9 in
+   let s10 = index s 10 in  let s11 = index s 11 in
+   let s12 = index s 12 in  let s13 = index s 13 in
+   let s14 = index s 14 in  let s15 = index s 15 in
+   let s0' = index s' 0 in   let s1' = index s' 1 in
+   let s2' = index s' 2 in   let s3' = index s' 3 in
+   let s4' = index s' 4 in   let s5' = index s' 5 in
+   let s6' = index s' 6 in   let s7' = index s' 7 in
+   let s8' = index s' 8 in   let s9' = index s' 9 in
+   let s10' = index s' 10 in  let s11' = index s' 11 in
+   let s12' = index s' 12 in  let s13' = index s' 13 in
+   let s14' = index s' 14 in  let s15' = index s' 15 in
+   s0 == s0' /\ s1 == s1' /\ s3 == s3'
+   /\ s4 == s4' /\ s5 == s5' /\ s6 == s6'
+   /\ s10 == s10' /\ s9 == s9' /\ s11 == s11'
+   /\ s12 == s12' /\ s14 == s14' /\ s15 == s15'))
+let lemma_diagonal_round_standard_3 s s' =
+  let p = fun (i:nat) -> (i < 16 /\ i <> 2 /\ i <> 7 /\ i <> 8 /\ i <> 13) in
+  let q = fun (i:nat) -> (i < 16 /\ index s' i == index s i) in
+  lemma_forall_elim p q 0;
+  lemma_forall_elim p q 1;
+  lemma_forall_elim p q 3;
+  lemma_forall_elim p q 4;
+  lemma_forall_elim p q 5;
+  lemma_forall_elim p q 6;
+  lemma_forall_elim p q 10;
+  lemma_forall_elim p q 9;
+  lemma_forall_elim p q 11;
+  lemma_forall_elim p q 12;
+  lemma_forall_elim p q 14;
+  lemma_forall_elim p q 15
+
+
+val diagonal_round_standard_3: s:state -> Tot (s':state{
+  (let s'' = S.quarter_round 0 5 10 15 s in
+   let s'' = S.quarter_round 1 6 11 12 s'' in
+   let s'' = S.quarter_round 2 7  8 13 s'' in
+   let s0 = index s 0 in   let s1 = index s 1 in
+   let s2 = index s 2 in   let s3 = index s 3 in
+   let s4 = index s 4 in   let s5 = index s 5 in
+   let s6 = index s 6 in   let s7 = index s 7 in
+   let s8 = index s 8 in   let s9 = index s 9 in
+   let s10 = index s 10 in  let s11 = index s 11 in
+   let s12 = index s 12 in  let s13 = index s 13 in
+   let s14 = index s 14 in  let s15 = index s 15 in
+   let s0' = index s' 0 in   let s1' = index s' 1 in
+   let s2' = index s' 2 in   let s3' = index s' 3 in
+   let s4' = index s' 4 in   let s5' = index s' 5 in
+   let s6' = index s' 6 in   let s7' = index s' 7 in
+   let s8' = index s' 8 in   let s9' = index s' 9 in
+   let s10' = index s' 10 in  let s11' = index s' 11 in
+   let s12' = index s' 12 in  let s13' = index s' 13 in
+   let s14' = index s' 14 in  let s15' = index s' 15 in
+   lined s0 s5 s10 s15 s0' s5' s10' s15'
+   /\ lined s1 s6 s11 s12 s1' s6' s11' s12'
+   /\ lined s2 s7 s8 s13 s2' s7' s8' s13'
+   /\ s'' == s'
+   /\ s3 == s3'
+   /\ s4 == s4'
+   /\ s9 == s9'
+   /\ s14 == s14')})
+let diagonal_round_standard_3 s =
+  let s'' = diagonal_round_standard_2 s in
+  lemma_quarter_round_standard s'' 2 7 8 13;
+  let s''' = quarter_round_standard s'' 2 7 8 13 in
+  lemma_diagonal_round_standard_3 s'' s''';
+  s'''
+
+
+val lemma_diagonal_round_standard_4: s:state -> s':state -> Lemma
+  (requires ((forall (i:nat). {:pattern (index s' i)} (i < 16 /\ i <> 3 /\ i <> 4 /\ i <> 9 /\ i <> 14)  ==> index s' i == index s i)))
+  (ensures (
+   let s0 = index s 0 in   let s1 = index s 1 in
+   let s2 = index s 2 in   let s3 = index s 3 in
+   let s4 = index s 4 in   let s5 = index s 5 in
+   let s6 = index s 6 in   let s7 = index s 7 in
+   let s8 = index s 8 in   let s9 = index s 9 in
+   let s10 = index s 10 in  let s11 = index s 11 in
+   let s12 = index s 12 in  let s13 = index s 13 in
+   let s14 = index s 14 in  let s15 = index s 15 in
+   let s0' = index s' 0 in   let s1' = index s' 1 in
+   let s2' = index s' 2 in   let s3' = index s' 3 in
+   let s4' = index s' 4 in   let s5' = index s' 5 in
+   let s6' = index s' 6 in   let s7' = index s' 7 in
+   let s8' = index s' 8 in   let s9' = index s' 9 in
+   let s10' = index s' 10 in  let s11' = index s' 11 in
+   let s12' = index s' 12 in  let s13' = index s' 13 in
+   let s14' = index s' 14 in  let s15' = index s' 15 in
+   s0 == s0' /\ s1 == s1' /\ s2 == s2'
+   /\ s6 == s6' /\ s5 == s5' /\ s7 == s7'
+   /\ s8 == s8' /\ s11 == s11' /\ s10 == s10'
+   /\ s12 == s12' /\ s13 == s13' /\ s15 == s15'))
+let lemma_diagonal_round_standard_4 s s' =
+  let p = fun (i:nat) -> (i < 16 /\ i <> 3 /\ i <> 4 /\ i <> 9 /\ i <> 14) in
+  let q = fun (i:nat) -> (i < 16 /\ index s' i == index s i) in
+  lemma_forall_elim p q 0;
+  lemma_forall_elim p q 1;
+  lemma_forall_elim p q 2;
+  lemma_forall_elim p q 7;
+  lemma_forall_elim p q 5;
+  lemma_forall_elim p q 6;
+  lemma_forall_elim p q 8;
+  lemma_forall_elim p q 11;
+  lemma_forall_elim p q 10;
+  lemma_forall_elim p q 12;
+  lemma_forall_elim p q 13;
+  lemma_forall_elim p q 15
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 10"
+
+val lemma_diagonal_round_def: s:state -> Lemma
+  (let s' = S.quarter_round 0 5 10 15 s in
+   let s' = S.quarter_round 1 6 11 12 s' in
+   let s' = S.quarter_round 2 7 8  13 s' in
+   let s' = S.quarter_round 3 4 9  14 s' in
+   s' == S.diagonal_round s)
+let lemma_diagonal_round_def s = ()
+
+val diagonal_round_standard: s:state -> Tot (s':state{
+  (s' == S.diagonal_round s
+   /\ (let s0 = index s 0 in   let s1 = index s 1 in
+   let s2 = index s 2 in   let s3 = index s 3 in
+   let s4 = index s 4 in   let s5 = index s 5 in
+   let s6 = index s 6 in   let s7 = index s 7 in
+   let s8 = index s 8 in   let s9 = index s 9 in
+   let s10 = index s 10 in  let s11 = index s 11 in
+   let s12 = index s 12 in  let s13 = index s 13 in
+   let s14 = index s 14 in  let s15 = index s 15 in
+   let s0' = index s' 0 in   let s1' = index s' 1 in
+   let s2' = index s' 2 in   let s3' = index s' 3 in
+   let s4' = index s' 4 in   let s5' = index s' 5 in
+   let s6' = index s' 6 in   let s7' = index s' 7 in
+   let s8' = index s' 8 in   let s9' = index s' 9 in
+   let s10' = index s' 10 in  let s11' = index s' 11 in
+   let s12' = index s' 12 in  let s13' = index s' 13 in
+   let s14' = index s' 14 in  let s15' = index s' 15 in
+   lined s0 s5 s10 s15 s0' s5' s10' s15'
+   /\ lined s1 s6 s11 s12 s1' s6' s11' s12'
+   /\ lined s2 s7 s8 s13 s2' s7' s8' s13'
+   /\ lined s3 s4 s9 s14 s3' s4' s9' s14'))})
+let diagonal_round_standard s =
+  let s''' = diagonal_round_standard_3 s in
+  lemma_quarter_round_standard s''' 3 4 9 14;
+  let s'''' = quarter_round_standard s''' 3 4 9 14 in
+  lemma_diagonal_round_standard_4 s''' s'''';
+  lemma_diagonal_round_def s;
+  s''''
+
+
+val diagonal_round_vectorized: s:vec_state -> Tot (s':vec_state{
+  (let s0 = index (index s 0) 0 in   let s1 = index (index s 0) 1 in
+   let s2 = index (index s 0) 2 in   let s3 = index (index s 0) 3 in
+   let s4 = index (index s 1) 0 in   let s5 = index (index s 1) 1 in
+   let s6 = index (index s 1) 2 in   let s7 = index (index s 1) 3 in
+   let s8 = index (index s 2) 0 in   let s9 = index (index s 2) 1 in
+   let s10 = index (index s 2) 2 in  let s11 = index (index s 2) 3 in
+   let s12 = index (index s 3) 0 in  let s13 = index (index s 3) 1 in
+   let s14 = index (index s 3) 2 in  let s15 = index (index s 3) 3 in
+   let s0' = index (index s' 0) 0 in   let s1' = index (index s' 0) 1 in
+   let s2' = index (index s' 0) 2 in   let s3' = index (index s' 0) 3 in
+   let s4' = index (index s' 1) 0 in   let s5' = index (index s' 1) 1 in
+   let s6' = index (index s' 1) 2 in   let s7' = index (index s' 1) 3 in
+   let s8' = index (index s' 2) 0 in   let s9' = index (index s' 2) 1 in
+   let s10' = index (index s' 2) 2 in  let s11' = index (index s' 2) 3 in
+   let s12' = index (index s' 3) 0 in  let s13' = index (index s' 3) 1 in
+   let s14' = index (index s' 3) 2 in  let s15' = index (index s' 3) 3 in
+   lined s0 s5 s10 s15 s0' s5' s10' s15'
+   /\ lined s1 s6 s11 s12 s1' s6' s11' s12'
+   /\ lined s2 s7 s8 s13 s2' s7' s8' s13'
+   /\ lined s3 s4 s9 s14 s3' s4' s9' s14')})
+let diagonal_round_vectorized s =
+  let s' = shuffle_rous_1 s in
+  lemma_quarter_round_vectorized s';
+  let s'' = quarter_round_vec s' in
+  let s''' = shuffle_rous_2 s'' in
+  s'''
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+
+
+val lemma_quarter_round: s:vec_state -> Lemma
+  (quarter_round_vec s == V.round s)
+let lemma_quarter_round s = ()
+
+val lemma_column_round: s:vec_state -> Lemma
+  (quarter_round_vec s == V.column_round s)
+let lemma_column_round s = ()
+
+val lemma_shuffle_rows_1: s:vec_state -> Lemma
+  (shuffle_rous_1 s == V.shuffle_rows_0123 s)
+let lemma_shuffle_rows_1 s = ()
+
+val lemma_shuffle_rows_2: s:vec_state -> Lemma
+  (shuffle_rous_2 s == V.shuffle_rows_0321 s)
+let lemma_shuffle_rows_2 s = ()
+
+val lemma_diagonal_round_vec: s:vec_state -> Lemma
+  (diagonal_round_vectorized s == V.diagonal_round s)
+let lemma_diagonal_round_vec s =
+  lemma_shuffle_rows_1 s;
+  let s' = shuffle_rous_1 s in
+  lemma_quarter_round s';
+  let s'' = quarter_round_vec s' in
+  lemma_shuffle_rows_2 s''
+
+val double_round_vec: s:vec_state -> Tot vec_state
+let double_round_vec s =
+  let s' = quarter_round_vec s in
+  let s'' = diagonal_round_vectorized s' in
+  s''
+
+val lemma_double_round_def: s:vec_state -> Lemma
+  (double_round_vec s == V.double_round s)
+let lemma_double_round_def s =
+  lemma_column_round s;
+  let s = quarter_round_vec s in
+  lemma_diagonal_round_vec s
 

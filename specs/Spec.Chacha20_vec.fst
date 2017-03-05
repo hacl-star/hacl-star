@@ -58,21 +58,50 @@ let line a b d s m =
   m
 
 
-let double_round : shuffle =
+let round : shuffle =
   line 0 1 3 16ul @
   line 2 3 1 12ul @
   line 0 1 3 8ul  @
-  line 2 3 1 7ul  @
+  line 2 3 1 7ul
+
+
+let shuffle_rows_0123 : shuffle =
   shuffle_row 1 1 @
   shuffle_row 2 2 @
-  shuffle_row 3 3 @
-  line 0 1 3 16ul @
-  line 2 3 1 12ul @
-  line 0 1 3 8ul  @
-  line 2 3 1 7ul  @
+  shuffle_row 3 3
+
+
+let shuffle_rows_0321 : shuffle =
   shuffle_row 1 3 @
   shuffle_row 2 2 @
   shuffle_row 3 1
+
+
+let column_round : shuffle = round
+
+
+let diagonal_round : shuffle =
+  shuffle_rows_0123 @
+  round           @
+  shuffle_rows_0321
+
+
+let double_round : shuffle =
+  column_round @ diagonal_round
+  (* line 0 1 3 16ul @ *)
+  (* line 2 3 1 12ul @ *)
+  (* line 0 1 3 8ul  @ *)
+  (* line 2 3 1 7ul  @ *)
+  (* shuffle_row 1 1 @ *)
+  (* shuffle_row 2 2 @ *)
+  (* shuffle_row 3 3 @ *)
+  (* line 0 1 3 16ul @ *)
+  (* line 2 3 1 12ul @ *)
+  (* line 0 1 3 8ul  @ *)
+  (* line 2 3 1 7ul  @ *)
+  (* shuffle_row 1 3 @ *)
+  (* shuffle_row 2 2 @ *)
+  (* shuffle_row 3 1 *)
 
 
 let rounds : shuffle = 
