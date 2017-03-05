@@ -187,6 +187,65 @@ let rec ws_upd state wblock t =
   else ()
 
 
+[@"c_inline"]
+private val shuffle_core:
+  state :suint32_p{length state = v size_state} ->
+  t     :uint32_t {v t < v size_k_32} ->
+  Stack unit
+        (requires (fun h -> live h state ))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+
+[@"c_inline"]
+let shuffle_core state t =
+
+  (* Get necessary information from the state *)
+  let hash = Buffer.sub state pos_whash_32 size_whash_32 in
+  let k = Buffer.sub state pos_k_32 size_k_32 in
+  let ws = Buffer.sub state pos_ws_32 size_ws_32 in
+
+  let a = Buffer.index hash 0ul in
+  let b = Buffer.index hash 1ul in
+  let c = Buffer.index hash 2ul in
+  let d = Buffer.index hash 3ul in
+  let e = Buffer.index hash 4ul in
+  let f = Buffer.index hash 5ul in
+  let g = Buffer.index hash 6ul in
+  let h = Buffer.index hash 7ul in
+
+  (* Perform computations *)
+  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (Buffer.index k t) +%^ (Buffer.index ws t) in
+  let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
+
+  (* Store the new working hash in the state *)
+  Buffer.upd hash 7ul g;
+  Buffer.upd hash 6ul f;
+  Buffer.upd hash 5ul e;
+  Buffer.upd hash 4ul (d +%^ t1);
+  Buffer.upd hash 3ul c;
+  Buffer.upd hash 2ul b;
+  Buffer.upd hash 1ul a;
+  Buffer.upd hash 0ul (t1 +%^ t2)
+
+
+(* Step 3 : Perform logical operations on the working variables *)
+[@"c_inline"]
+private val shuffle:
+  state :suint32_p{length state = v size_state} ->
+  i     :uint32_t {v i + 64 < pow2 32} ->
+  Stack unit
+        (requires (fun h -> live h state ))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+
+[@"c_inline"]
+let rec shuffle state t =
+  if t <^ 64ul then begin
+    shuffle_core state t;
+    shuffle state (t +^ 1ul) end
+  else ()
+
+
+#set-options "--z3rlimit 50"
+
 
 val alloc:
   unit ->
@@ -195,7 +254,6 @@ val alloc:
         (ensures  (fun h0 state h1 -> modifies_0 h0 h1 /\ live h1 state))
 
 let alloc () = Buffer.create (u32_to_s32 0ul) size_state
-
 
 
 (* [FIPS 180-4] section 5.3.3 *)
@@ -213,55 +271,6 @@ let init state =
   set_whash state
   (* The total number of blocks is left to 0ul *)
 
-
-
-(* Step 3 : Perform logical operations on the working variables *)
-[@"c_inline"]
-private val shuffle:
-  state :suint32_p{length state = v size_state} ->
-  t1    :suint32_t ->
-  t2    :suint32_t ->
-  i     :uint32_t {v i + 64 < pow2 32} ->
-  Stack unit
-        (requires (fun h -> live h state ))
-        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
-
-[@"c_inline"]
-let rec shuffle state t1 t2 t =
-  if t <^ 64ul then begin
-
-    (* Get necessary information from the state *)
-    let whash = Buffer.sub state pos_whash_32 size_whash_32 in
-    let k = Buffer.sub state pos_k_32 size_k_32 in
-    let ws = Buffer.sub state pos_ws_32 size_ws_32 in
-
-    (* Perform computations *)
-    let _h  = whash.(7ul) in
-    let _kt = k.(t) in
-    let _wt = ws.(t) in
-    let v0 = _Sigma1 whash.(4ul) in
-    let v1 = _Ch whash.(4ul) whash.(5ul) whash.(6ul) in
-    let t1 = S32.add_mod _h (S32.add_mod v0 (S32.add_mod v1 (S32.add_mod _kt _wt))) in
-    let z0 = _Sigma0 whash.(0ul) in
-    let z1 = _Maj whash.(0ul) whash.(1ul) whash.(2ul) in
-    let t2 = S32.add_mod z0 z1 in
-    let _d = whash.(3ul) in
-
-    (* Store the new working hash in the state *)
-    whash.(7ul) <- whash.(6ul);
-    whash.(6ul) <- whash.(5ul);
-    whash.(5ul) <- whash.(4ul);
-    whash.(4ul) <- (S32.add_mod _d t1);
-    whash.(3ul) <- whash.(2ul);
-    whash.(2ul) <- whash.(1ul);
-    whash.(1ul) <- whash.(0ul);
-    whash.(0ul) <- (S32.add_mod t1 t2);
-    shuffle state t1 t2 (t +^ 1ul) end
-  else ()
-
-
-
-#set-options "--z3rlimit 50"
 
 (* [FIPS 180-4] section 6.2.2 *)
 (* Update running hash function *)
@@ -302,7 +311,7 @@ let update state data_8 =
   let h_0 = h.(7ul) in
 
   (* Step 3 : Perform logical operations on the working variables *)
-  shuffle state (u32_to_s32 0ul) (u32_to_s32 0ul) 0ul;
+  shuffle state 0ul;
 
   (* Step 4 : Compute the ith intermediate hash value *)
   let a_1 = h.(0ul) in
