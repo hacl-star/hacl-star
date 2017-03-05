@@ -118,14 +118,14 @@ let _sigma1 x = S32.logxor (rotate_right x 17ul) (S32.logxor (rotate_right x 19u
 
 (* [FIPS 180-4] section 4.2.2 *)
 [@"substitute"]
-private val set_k:
+private val constants_set_k:
   state:suint32_p{length state = U32.v size_state} ->
   Stack unit
         (requires (fun h -> live h state))
         (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 [@"substitute"]
-let set_k state =
+let constants_set_k state =
   let k = Buffer.sub state pos_k_32 size_k_32 in
   upd4 k 0ul  0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul;
   upd4 k 4ul  0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul;
@@ -146,13 +146,13 @@ let set_k state =
 
 
 [@"substitute"]
-private val set_whash:
+private val constants_set_h_0:
   state:suint32_p{length state = U32.v size_state} ->
   Stack unit (requires (fun h -> live h state))
                (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 [@"substitute"]
-private let set_whash state =
+private let constants_set_h_0 state =
   let whash = Buffer.sub state pos_whash_32 size_whash_32 in
   upd4 whash 0ul 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul;
   upd4 whash 4ul 0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
@@ -161,7 +161,7 @@ private let set_whash state =
 
 (* [FIPS 180-4] section 6.2.2 *)
 (* Step 1 : Scheduling function for sixty-four 32bit words *)
-inline_for_extraction private val ws_upd:
+inline_for_extraction private val ws_compute:
   state  :suint32_p {length state = v size_state} ->
   wblock :suint32_p {length wblock = v blocksize_32} ->
   t      :uint32_t  {v t + 64 < pow2 32} ->
@@ -169,21 +169,21 @@ inline_for_extraction private val ws_upd:
         (requires (fun h -> live h state /\ live h wblock))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-let rec ws_upd state wblock t =
+let rec ws_compute state wblock t =
   (* Get necessary information from the state *)
   let ws = Buffer.sub state pos_ws_32 size_ws_32 in
 
   (* Perform computations *)
   if t <^ 16ul then begin
     ws.(t) <- wblock.(t);
-    ws_upd state wblock (t +^ 1ul) end
+    ws_compute state wblock (t +^ 1ul) end
   else if t <^ 64ul then begin
     let t16 = ws.(t -^ 16ul) in
     let t15 = ws.(t -^ 15ul) in
     let t7  = ws.(t -^ 7ul) in
     let t2  = ws.(t -^ 2ul) in
     ws.(t) <- ((_sigma1 t2) +%^ (t7 +%^ ((_sigma0 t15) +%^ t16)));
-    ws_upd state wblock (t +^ 1ul) end
+    ws_compute state wblock (t +^ 1ul) end
   else ()
 
 
@@ -264,12 +264,8 @@ val init:
         (ensures  (fun h0 r h1 -> modifies_1 state h0 h1))
 
 let init state =
-  (* Initialize constant k *)
-  set_k state;
-  (* The schedule state is left to zeros *)
-  (* Initialize working hash *)
-  set_whash state
-  (* The total number of blocks is left to 0ul *)
+  constants_set_k state;
+  constants_set_h_0 state
 
 
 (* [FIPS 180-4] section 6.2.2 *)
@@ -298,7 +294,7 @@ let update state data_8 =
   let h = Buffer.sub state pos_whash_32 size_whash_32 in
 
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
-  ws_upd state data_32 0ul;
+  ws_compute state data_32 0ul;
 
   (* Step 2 : Initialize the eight working variables *)
   let a_0 = h.(0ul) in
