@@ -147,7 +147,7 @@ let montgomery_ladder k u =
       loop k x_1 x_2 z_2 x_3 z_3 swap ctr
   ) in
   let k    = little_endian k in // Scalar as natural number
-  let u    = little_endian u % prime in // Point as element of the prime field
+  let u    = little_endian u (* % prime *) in // Point as element of the prime field
   let x_1   = u in               // Basepoint 'x' coordinate
   let x_2   = one in             // First point 'P' of the ladder (point at infinity at first)
   let z_2   = 0 in
@@ -163,6 +163,7 @@ let montgomery_ladder k u =
 
 let scalarmult (k:scalar) (u:serialized_point) : Tot serialized_point =
   let k = decodeScalar25519 k in
+  let u = upd u 31 (index u 31 &^ 127uy) in
   let u = montgomery_ladder k u in
   assert_norm(pow2 256 >= pow2 255 - 19);
   little_bytes 32ul u
@@ -208,4 +209,4 @@ let test () =
     0xe6uy; 0xf8uy; 0xf7uy; 0x64uy; 0x7auy; 0xacuy; 0x79uy; 0x57uy
     ] in
   scalarmult scalar1 input1 = expected1
-  (* && scalarmult scalar2 input2 = expected2 *) // TODO: fails !!!
+  && scalarmult scalar2 input2 = expected2
