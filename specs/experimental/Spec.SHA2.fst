@@ -129,6 +129,7 @@ private let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w})
   let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index k t) +%^ (ws block t) in
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
 
+  (**) cut(7 < Seq.length hash);
   let hash = upd hash 7 g in
   let hash = upd hash 6 f in
   let hash = upd hash 5 e in
@@ -153,11 +154,11 @@ private let rec store_blocks (n:nat) (input:bytes{Seq.length input = n * size_bl
     let h = Seq.slice input 0 size_block in
     let t = Seq.slice input size_block (n * size_block) in
     let b_w = words_from_be size_block_w h in
-    Seq.snoc (store_blocks (n - 1) t) b_w
+    Seq.cons b_w  (store_blocks (n - 1) t)
 
 
 private let pad_length (len:nat) : Tot (n:nat{(len + n) % size_block = 0}) =
-  if (len % size_block) < (size_block - size_len_8) then size_block - (len % size_block)
+  if (len % size_block) < (size_block - size_len_8 - 1) then size_block - (len % size_block)
   else (2 * size_block) - (len % size_block)
 
 
@@ -165,7 +166,7 @@ private let pad_length (len:nat) : Tot (n:nat{(len + n) % size_block = 0}) =
 let pad (prevlen:nat) (input:bytes{(Seq.length input) + prevlen < max_input_len_8})  : Tot (output:blocks_w) =
 
   (* Compute the padding length *)
-  let padlen = pad_length (Seq.length input) - size_len_8 in
+  let padlen = (pad_length (Seq.length input)) - size_len_8 in
 
   (* Generate the padding (without the last size_len_8 bytes) *)
   (* Set the first bit of the padding to be a '1' *)
@@ -188,6 +189,38 @@ let update_compress (hash:hash_w) (block:block_w) : Tot hash_w =
   Spec.Lib.map2 (fun x y -> x +%^ y) hash hash_1
 
 
+(* let update_compress' (hash:hash_w) (block:block_w) : Tot hash_w = *)
+  (* let a_0 = Seq.index hash 0 in *)
+  (* let b_0 = Seq.index hash 1 in *)
+  (* let c_0 = Seq.index hash 2 in *)
+  (* let d_0 = Seq.index hash 3 in *)
+  (* let e_0 = Seq.index hash 4 in *)
+  (* let f_0 = Seq.index hash 5 in *)
+  (* let g_0 = Seq.index hash 6 in *)
+  (* let h_0 = Seq.index hash 7 in *)
+
+  (* let hash_1 = shuffle hash block 0 in *)
+
+  (* let a_1 = Seq.index hash_1 0 in *)
+  (* let b_1 = Seq.index hash_1 1 in *)
+  (* let c_1 = Seq.index hash_1 2 in *)
+  (* let d_1 = Seq.index hash_1 3 in *)
+  (* let e_1 = Seq.index hash_1 4 in *)
+  (* let f_1 = Seq.index hash_1 5 in *)
+  (* let g_1 = Seq.index hash_1 6 in *)
+  (* let h_1 = Seq.index hash_1 7 in *)
+
+  (* let hash = Seq.upd hash 0 (a_0 +%^ a_1) in *)
+  (* let hash = Seq.upd hash 1 (b_0 +%^ b_1) in *)
+  (* let hash = Seq.upd hash 2 (c_0 +%^ c_1) in *)
+  (* let hash = Seq.upd hash 3 (d_0 +%^ d_1) in *)
+  (* let hash = Seq.upd hash 4 (e_0 +%^ e_1) in *)
+  (* let hash = Seq.upd hash 5 (f_0 +%^ f_1) in *)
+  (* let hash = Seq.upd hash 6 (g_0 +%^ g_1) in *)
+  (* let hash = Seq.upd hash 7 (h_0 +%^ h_1) in *)
+  (* hash *)
+
+
 let rec update_multi (n:nat) (hash:hash_w) (blocks:blocks_w{Seq.length blocks = n}) : Tot hash_w (decreases n) =
   if n = 0 then hash
   else
@@ -200,6 +233,35 @@ let update_last (hash:hash_w) (prevlen:nat) (input:bytes{(Seq.length input) + pr
   let blocks = pad prevlen input in
   let n = Seq.length blocks in
   update_multi n hash blocks
+
+
+(* let update_last' (hash:hash_w) (prevlen:nat) (input:bytes{(Seq.length input <= size_block) /\ (Seq.length input) + prevlen < max_input_len_8}) : Tot hash_w = *)
+
+(*   (\* Compute the final length *\) *)
+(*   let finallen = prevlen + Seq.length input in *)
+
+(*   (\* Compute the padding length *\) *)
+(*   let padlen = pad_length (Seq.length input) - size_len_8 in *)
+
+(*   (\* Create the padding and set the first bit to 1 *\) *)
+(*   let padding = Seq.create padlen 0uy in *)
+(*   let padding = Seq.upd padding 0 0x80uy in *)
+
+(*   (\* Encode the data length (in bits) as a 64bit big endian integer *\) *)
+(*   let encodedlen = Endianness.big_bytes size_len_ul_8 (finallen * 8) in *)
+
+(*   (\* Concatenate ever*\) *)
+(*   let last = Seq.append input padding in *)
+(*   let last = Seq.append last encodedlen in *)
+
+(*   (\* Get the last block(s) *\) *)
+(*   let n = Seq.length last / size_block in *)
+(*   let blocks = store_blocks n last in *)
+
+(*   (\* Compress one or two blocks depending on the input length *\) *)
+(*   if Seq.length last <= 64 then *)
+(*     update_compress hash (Seq.index blocks 0) *)
+(*   else update_compress (update_compress hash (Seq.index blocks 0)) (Seq.index blocks 1) *)
 
 
 let finish (hash:hash_w) : Tot bytes = words_to_be size_hash_w hash
@@ -221,3 +283,95 @@ let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
   let n = Seq.length blocks in
   (**) assert_norm(List.Tot.length h_0 = size_hash_w);
   finish (update_multi n (Seq.seq_of_list h_0) blocks)
+
+
+
+//
+// Test 1
+//
+
+unfold let test_plaintext_1 = [
+      0x61uy; 0x62uy; 0x63uy;
+]
+
+unfold let test_expected_1 = [
+      0xbauy; 0x78uy; 0x16uy; 0xbfuy; 0x8fuy; 0x01uy; 0xcfuy; 0xeauy;
+      0x41uy; 0x41uy; 0x40uy; 0xdeuy; 0x5duy; 0xaeuy; 0x22uy; 0x23uy;
+      0xb0uy; 0x03uy; 0x61uy; 0xa3uy; 0x96uy; 0x17uy; 0x7auy; 0x9cuy;
+      0xb4uy; 0x10uy; 0xffuy; 0x61uy; 0xf2uy; 0x00uy; 0x15uy; 0xaduy
+]
+
+
+//
+// Test 2
+//
+
+unfold let test_plaintext_2 = [
+    0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy;
+    0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy;
+    0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
+    0x67uy; 0x68uy; 0x69uy; 0x6auy; 0x68uy; 0x69uy; 0x6auy; 0x6buy;
+    0x69uy; 0x6auy; 0x6buy; 0x6cuy; 0x6auy; 0x6buy; 0x6cuy; 0x6duy;
+    0x6buy; 0x6cuy; 0x6duy; 0x6euy; 0x6cuy; 0x6duy; 0x6euy; 0x6fuy;
+    0x6duy; 0x6euy; 0x6fuy; 0x70uy; 0x6euy; 0x6fuy; 0x70uy; 0x71uy
+    ]
+
+unfold let test_expected_2 = [
+      0x24uy; 0x8duy; 0x6auy; 0x61uy; 0xd2uy; 0x06uy; 0x38uy; 0xb8uy;
+      0xe5uy; 0xc0uy; 0x26uy; 0x93uy; 0x0cuy; 0x3euy; 0x60uy; 0x39uy;
+      0xa3uy; 0x3cuy; 0xe4uy; 0x59uy; 0x64uy; 0xffuy; 0x21uy; 0x67uy;
+      0xf6uy; 0xecuy; 0xeduy; 0xd4uy; 0x19uy; 0xdbuy; 0x06uy; 0xc1uy
+]
+
+
+//
+// Test 3
+//
+
+unfold let test_plaintext_3 = [
+      0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
+      0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
+      0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy; 0x6auy;
+      0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy; 0x6auy; 0x6buy;
+      0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy; 0x6auy; 0x6buy; 0x6cuy;
+      0x66uy; 0x67uy; 0x68uy; 0x69uy; 0x6auy; 0x6buy; 0x6cuy; 0x6duy;
+      0x67uy; 0x68uy; 0x69uy; 0x6auy; 0x6buy; 0x6cuy; 0x6duy; 0x6euy;
+      0x68uy; 0x69uy; 0x6auy; 0x6buy; 0x6cuy; 0x6duy; 0x6euy; 0x6fuy;
+      0x69uy; 0x6auy; 0x6buy; 0x6cuy; 0x6duy; 0x6euy; 0x6fuy; 0x70uy;
+      0x6auy; 0x6buy; 0x6cuy; 0x6duy; 0x6euy; 0x6fuy; 0x70uy; 0x71uy;
+      0x6buy; 0x6cuy; 0x6duy; 0x6euy; 0x6fuy; 0x70uy; 0x71uy; 0x72uy;
+      0x6cuy; 0x6duy; 0x6euy; 0x6fuy; 0x70uy; 0x71uy; 0x72uy; 0x73uy;
+      0x6duy; 0x6euy; 0x6fuy; 0x70uy; 0x71uy; 0x72uy; 0x73uy; 0x74uy;
+      0x6euy; 0x6fuy; 0x70uy; 0x71uy; 0x72uy; 0x73uy; 0x74uy; 0x75uy
+]
+
+unfold let test_expected_3 = [
+      0xcfuy; 0x5buy; 0x16uy; 0xa7uy; 0x78uy; 0xafuy; 0x83uy; 0x80uy;
+      0x03uy; 0x6cuy; 0xe5uy; 0x9euy; 0x7buy; 0x04uy; 0x92uy; 0x37uy;
+      0x0buy; 0x24uy; 0x9buy; 0x11uy; 0xe8uy; 0xf0uy; 0x7auy; 0x51uy;
+      0xafuy; 0xacuy; 0x45uy; 0x03uy; 0x7auy; 0xfeuy; 0xe9uy; 0xd1uy
+
+]
+
+
+//
+// Main
+//
+
+let test () =
+  assert_norm(List.Tot.length test_plaintext_1 = 3);
+  assert_norm(List.Tot.length test_expected_1 = 32);
+  assert_norm(List.Tot.length test_plaintext_2 = 56);
+  assert_norm(List.Tot.length test_expected_2 = 32);
+  assert_norm(List.Tot.length test_plaintext_3 = 112);
+  assert_norm(List.Tot.length test_expected_3 = 32);
+  let test_plaintext_1 = createL test_plaintext_1 in
+  let test_expected_1 = createL test_expected_1 in
+  let test_plaintext_2 = createL test_plaintext_2 in
+  let test_expected_2 = createL test_expected_2 in
+  let test_plaintext_3 = createL test_plaintext_3 in
+  let test_expected_3 = createL test_expected_3 in
+
+  (hash test_plaintext_1 = test_expected_1) && (hash' test_plaintext_1 = test_expected_1) &&
+  (hash test_plaintext_2 = test_expected_2) && (hash' test_plaintext_2 = test_expected_2) &&
+  (hash test_plaintext_3 = test_expected_3) && (hash' test_plaintext_3 = test_expected_3)
