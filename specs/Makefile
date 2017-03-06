@@ -38,6 +38,14 @@ poly1305.exe: Spec.Poly1305.fst
 	$(OCAMLOPT) -I poly-spec $(OCAML_INCLUDES) $(addprefix poly-spec/, $(EXTRACTED)) poly-spec/Spec_Poly1305.ml -o poly1305.exe
 	./poly1305.exe
 
+sha2.exe: experimental/Spec.SHA2.fst
+	$(MAKE) -C ../code/lib/ml MEM=HST
+	mkdir -p sha2-spec
+	$(FSTAR) $(ARGS) --odir sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_Sha2.ml
+	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Combinators.ml sha2-spec/Spec_Lib.ml sha2-spec/Spec_Sha2.ml -o sha2.exe
+	./sha2.exe
+
 chacha20.exe: Spec.Chacha20.fst
 	$(MAKE) -C ../code/lib/ml MEM=HST
 	mkdir -p chacha-spec

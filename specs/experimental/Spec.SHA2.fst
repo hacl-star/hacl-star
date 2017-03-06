@@ -97,10 +97,11 @@ private let k = [
   0x90befffaul; 0xa4506cebul; 0xbef9a3f7ul; 0xc67178f2ul]
 
 
-private let h_0 = [
+private let h_0 : hash_w = let l = [
   0x6a09e667ul; 0xbb67ae85ul; 0x3c6ef372ul; 0xa54ff53aul;
-  0x510e527ful; 0x9b05688cul; 0x1f83d9abul; 0x5be0cd19ul]
-
+  0x510e527ful; 0x9b05688cul; 0x1f83d9abul; 0x5be0cd19ul] in
+  assert_norm(List.Tot.length l = size_hash_w);
+  l
 
 private let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
   if t < size_block_w then index b t
@@ -148,141 +149,50 @@ private let rec shuffle (hash:hash_w) (block:block_w) (t:counter{t <= size_k_w})
   else hash
 
 
-private let rec store_blocks (n:nat) (input:bytes{Seq.length input = n * size_block}) : Tot (b:blocks_w{Seq.length b = n}) (decreases n) =
-  if n = 0 then Seq.createEmpty #block_w
-  else
-    let h = Seq.slice input 0 size_block in
-    let t = Seq.slice input size_block (n * size_block) in
-    let b_w = words_from_be size_block_w h in
-    Seq.cons b_w  (store_blocks (n - 1) t)
-
-
-private let pad_length (len:nat) : Tot (n:nat{(len + n) % size_block = 0}) =
-  if (len % size_block) < (size_block - size_len_8 - 1) then size_block - (len % size_block)
-  else (2 * size_block) - (len % size_block)
-
-
-(* Pad the data up to the block length and encode the total length *)
-let pad (prevlen:nat) (input:bytes{(Seq.length input) + prevlen < max_input_len_8})  : Tot (output:blocks_w) =
-
-  (* Compute the padding length *)
-  let padlen = (pad_length (Seq.length input)) - size_len_8 in
-
-  (* Generate the padding (without the last size_len_8 bytes) *)
-  (* Set the first bit of the padding to be a '1' *)
-  let padding = Seq.create padlen 0uy in
-  let padding = Seq.upd padding 0 0x80uy in
-
-  (* Encode the data length (in bits) as a 64bit big endian integer *)
-  let finallen = prevlen + Seq.length input in
-  let encodedlen = Endianness.big_bytes size_len_ul_8 (finallen * 8) in
-
-  (* Concatenate the data, padding and encoded length *)
-  let output = Seq.append input padding in
-  let output = Seq.append output encodedlen in
-  let n = Seq.length output / size_block in
-  store_blocks n output
-
-
-let update_compress (hash:hash_w) (block:block_w) : Tot hash_w =
-  let hash_1 = shuffle hash block 0 in
+let update_compress (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
+  let b = words_from_be size_block_w block in
+  let hash_1 = shuffle hash b 0 in
   Spec.Lib.map2 (fun x y -> x +%^ y) hash hash_1
 
-
-(* let update_compress' (hash:hash_w) (block:block_w) : Tot hash_w = *)
-  (* let a_0 = Seq.index hash 0 in *)
-  (* let b_0 = Seq.index hash 1 in *)
-  (* let c_0 = Seq.index hash 2 in *)
-  (* let d_0 = Seq.index hash 3 in *)
-  (* let e_0 = Seq.index hash 4 in *)
-  (* let f_0 = Seq.index hash 5 in *)
-  (* let g_0 = Seq.index hash 6 in *)
-  (* let h_0 = Seq.index hash 7 in *)
-
-  (* let hash_1 = shuffle hash block 0 in *)
-
-  (* let a_1 = Seq.index hash_1 0 in *)
-  (* let b_1 = Seq.index hash_1 1 in *)
-  (* let c_1 = Seq.index hash_1 2 in *)
-  (* let d_1 = Seq.index hash_1 3 in *)
-  (* let e_1 = Seq.index hash_1 4 in *)
-  (* let f_1 = Seq.index hash_1 5 in *)
-  (* let g_1 = Seq.index hash_1 6 in *)
-  (* let h_1 = Seq.index hash_1 7 in *)
-
-  (* let hash = Seq.upd hash 0 (a_0 +%^ a_1) in *)
-  (* let hash = Seq.upd hash 1 (b_0 +%^ b_1) in *)
-  (* let hash = Seq.upd hash 2 (c_0 +%^ c_1) in *)
-  (* let hash = Seq.upd hash 3 (d_0 +%^ d_1) in *)
-  (* let hash = Seq.upd hash 4 (e_0 +%^ e_1) in *)
-  (* let hash = Seq.upd hash 5 (f_0 +%^ f_1) in *)
-  (* let hash = Seq.upd hash 6 (g_0 +%^ g_1) in *)
-  (* let hash = Seq.upd hash 7 (h_0 +%^ h_1) in *)
-  (* hash *)
-
-
-let rec update_multi (n:nat) (hash:hash_w) (blocks:blocks_w{Seq.length blocks = n}) : Tot hash_w (decreases n) =
-  if n = 0 then hash
+let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}) : Tot hash_w (decreases (Seq.length blocks)) =
+  if Seq.length blocks = 0 then hash
   else
-    let h = Seq.slice blocks 0 1 in
-    let t = Seq.slice blocks 1 n in
-    update_multi (n - 1) (update_compress hash (Seq.index h 0)) t
+    let (h,t) = Seq.split blocks size_block in
+    update_multi (update_compress hash h) t
+
+private let pad0_length (len:nat) : Tot (n:nat{(len + n) % size_block = 0}) =
+  let m = (len + size_len_8 + 1 % size_block) in
+  if m = 0 then 0
+  else size_block - m
+  
+
+(* Pad the data up to the block length and encode the total length *)
+let pad (len:N) = 
+  let firstbyte = Seq.create 1 0x80 in
+  let zeroes = pad0_length len in
+  let padding = Seq.create zeroes 0uy in
+  let encodedlen = Endianness.big_bytes size_len_ul_8 (len * 8) in
+   firstbyte @| zeroes @| encodedlen
 
 
 let update_last (hash:hash_w) (prevlen:nat) (input:bytes{(Seq.length input) + prevlen < max_input_len_8}) : Tot hash_w =
-  let blocks = pad prevlen input in
-  let n = Seq.length blocks in
-  update_multi n hash blocks
-
-
-(* let update_last' (hash:hash_w) (prevlen:nat) (input:bytes{(Seq.length input <= size_block) /\ (Seq.length input) + prevlen < max_input_len_8}) : Tot hash_w = *)
-
-(*   (\* Compute the final length *\) *)
-(*   let finallen = prevlen + Seq.length input in *)
-
-(*   (\* Compute the padding length *\) *)
-(*   let padlen = pad_length (Seq.length input) - size_len_8 in *)
-
-(*   (\* Create the padding and set the first bit to 1 *\) *)
-(*   let padding = Seq.create padlen 0uy in *)
-(*   let padding = Seq.upd padding 0 0x80uy in *)
-
-(*   (\* Encode the data length (in bits) as a 64bit big endian integer *\) *)
-(*   let encodedlen = Endianness.big_bytes size_len_ul_8 (finallen * 8) in *)
-
-(*   (\* Concatenate ever*\) *)
-(*   let last = Seq.append input padding in *)
-(*   let last = Seq.append last encodedlen in *)
-
-(*   (\* Get the last block(s) *\) *)
-(*   let n = Seq.length last / size_block in *)
-(*   let blocks = store_blocks n last in *)
-
-(*   (\* Compress one or two blocks depending on the input length *\) *)
-(*   if Seq.length last <= 64 then *)
-(*     update_compress hash (Seq.index blocks 0) *)
-(*   else update_compress (update_compress hash (Seq.index blocks 0)) (Seq.index blocks 1) *)
-
+  let blocks = pad (prevlen + Seq.length input) in
+  update_multi hash (input @| blocks)
 
 let finish (hash:hash_w) : Tot bytes = words_to_be size_hash_w hash
 
 
 let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
   let n = Seq.length input / size_block in
-  let input_blocks_8 = Seq.slice input 0 (n * size_block) in
-  let input_blocks_w = store_blocks n input_blocks_8 in
-  (**) assert_norm(List.Tot.length h_0 = size_hash_w);
-  let hash = update_multi n (Seq.seq_of_list h_0) input_blocks_w in
-  let input_last = Seq.slice input (n * size_block) (Seq.length input) in
-  let hash = update_last hash (n * size_block) input_last in
+  let (bs,l) = Seq.split input (n * size_block) in
+  let hash = update_multi (Seq.seq_of_list h_0) bs in
+  let hash = update_last hash (n * size_block) l in
   finish hash
 
 
 let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
-  let blocks = pad 0 input in
-  let n = Seq.length blocks in
-  (**) assert_norm(List.Tot.length h_0 = size_hash_w);
-  finish (update_multi n (Seq.seq_of_list h_0) blocks)
+  let blocks = pad (Seq.length input) in
+  finish (update_multi (Seq.seq_of_list h_0) (input @| blocks))
 
 
 
