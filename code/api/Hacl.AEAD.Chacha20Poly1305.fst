@@ -175,44 +175,83 @@ private let lemma_aead_encrypt h0 h1 h2 h3 h4 c b mac =
   lemma_intro_modifies_3_2 c mac h0 h4
 
 
+val encode_length:
+  lb:uint8_p{length lb = 16} ->
+  aad_len:u32 -> mlen:u32 ->
+  Stack unit
+    (requires (fun h -> live h lb))
+    (ensures (fun h0 _ h1 -> live h1 lb /\ modifies_1 lb h0 h1
+      /\ as_seq h1 lb == little_bytes 8ul (U32.v aad_len) @| little_bytes 8ul (U32.v mlen)))
+let encode_length lb aad_len mlen =
+  let h0 = ST.get() in
+  hstore64_le (Buffer.sub lb 0ul 8ul) (uint32_to_sint64 aad_len);
+  let h1 = ST.get() in
+  lemma_little_endian_inj (little_bytes 8ul (U32.v aad_len)) (as_seq h1 (Buffer.sub lb 0ul 8ul));
+  hstore64_le (Buffer.sub lb 8ul 8ul) (uint32_to_sint64 mlen);
+  let h2 = ST.get() in
+  lemma_little_endian_inj (little_bytes 8ul (U32.v mlen)) (as_seq h2 (Buffer.sub lb 8ul 8ul));
+  Seq.lemma_eq_intro (slice (as_seq h2 lb) 0 8) (as_seq h2 (Buffer.sub lb 0ul 8ul));
+  Seq.lemma_eq_intro (slice (as_seq h2 lb) 8 16) (as_seq h2 (Buffer.sub lb 8ul 8ul));
+  no_upd_lemma_1 h1 h2 (Buffer.sub lb 8ul 8ul) (Buffer.sub lb 0ul 8ul);
+  lemma_eq_intro (as_seq h2 lb) (little_bytes 8ul (U32.v aad_len) @| little_bytes 8ul (U32.v mlen))
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 300"
+
 val aead_encrypt:
   c:uint8_p ->
   mac:uint8_p{length mac = maclen /\ disjoint mac c} ->
   m:uint8_p{disjoint c m} ->
   mlen:u32{let len = U32.v mlen in len = length m /\ len = length c}  ->
-  aad:uint8_p ->
+  aad:uint8_p{disjoint aad c} ->
   aadlen:u32{let len = U32.v aadlen in len = length aad}  ->
   k:uint8_p{length k = keylen /\ disjoint k mac /\ disjoint k c} ->
   n:uint8_p{length n = noncelen /\ disjoint n mac /\ disjoint n c} ->
   Stack u32
     (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h k /\ live h aad))
-    (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
-#set-options "--lax" // TODO
+    (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac
+      /\ live h0 c /\ live h0 mac /\ live h0 m /\ live h0 n /\ live h0 k /\ live h0 aad
+      /\ (let c   = as_seq h1 c in
+         let mac = as_seq h1 mac in
+         let k   = as_seq h0 k in
+         let n   = as_seq h0 n in
+         let aad' = as_seq h0 aad in
+         let m'   = as_seq h0 m in
+         let mackey = slice (Spec.Chacha20.chacha20_block k n 0) 0 32 in
+         c == Spec.Chacha20.chacha20_encrypt_bytes k n 1 m'
+         /\ mac == Spec.Poly1305.poly1305 (pad_16 aad' @| pad_16 c @| little_bytes 8ul (length aad) @| little_bytes 8ul (length m)) mackey)
+      ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 let aead_encrypt c mac m mlen aad aadlen k n =
   push_frame();
   let h0 = ST.get() in
   let tmp = create (uint8_to_sint8 0uy) 80ul in
   let b = Buffer.sub tmp 0ul 64ul in
   let lb = Buffer.sub tmp 64ul 16ul in
-  hstore64_le (Buffer.sub lb 0ul 8ul) (uint32_to_sint64 aadlen);
-  hstore64_le (Buffer.sub lb 8ul 8ul) (uint32_to_sint64 mlen);
+  encode_length lb aadlen mlen;
   let h1 = ST.get() in
-  Seq.lemma_eq_intro (as_seq h1 b) (as_seq h1 (Buffer.sub lb 0ul 8ul) @| as_seq h1 (Buffer.sub lb 8ul 8ul));
-  cut (reveal_sbytes (as_seq h1 lb) == little_bytes 8ul (length aad) @| little_bytes 8ul (length c));
   cut (modifies_0 h0 h1);
   Chacha20.chacha20 c m mlen k n 1ul;
   let h2 = ST.get() in
+  cut (let m = as_seq h0 m in let c = as_seq h2 c in let k = as_seq h0 k in let n = as_seq h0 n in
+    c == Spec.Chacha20.chacha20_encrypt_bytes k n 1 m);
   Chacha20.chacha20_key_block b k n 0ul;
   let h3 = ST.get() in
-  let mk = Buffer.sub b 0ul 32ul in
-  let key_s = Buffer.sub mk 16ul 16ul in
+  no_upd_lemma_1 h2 h3 b c;
+  cut (let b = as_seq h3 b in let k = as_seq h0 k in let n = as_seq h0 n in
+       b == Spec.Chacha20.chacha20_block k n 0);
+  Seq.lemma_eq_intro (slice (as_seq h3 b) 0 32) (as_seq h3 (Buffer.sub b 0ul 32ul));
+  Seq.lemma_eq_intro (slice (as_seq h3 b) 0 32) (slice (Spec.Chacha20.chacha20_block (as_seq h0 k) (as_seq h0 n) 0) 0 32);
   aead_encrypt_poly  c mlen mac aad aadlen tmp;
+  cut (let aad' = as_seq h0 aad in let c = as_seq h2 c in let lb = as_seq h3 lb in
+    pad_16 aad' @| pad_16 c @| little_bytes 8ul (length aad) @| little_bytes 8ul (length m)
+    == pad_16 aad' @| pad_16 c @| lb);
   let h4 = ST.get() in
   lemma_aead_encrypt h0 h1 h2 h3 h4 c tmp mac;
   pop_frame();
   0ul
 
-
+(* WIP *)
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 private let lemma_aead_decrypt_ (h:mem) (h':mem) (m:uint8_p) : Lemma 
