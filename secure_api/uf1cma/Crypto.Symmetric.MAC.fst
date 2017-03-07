@@ -396,7 +396,7 @@ type tagB = lbuffer (UInt32.v taglen)
 noextract val mac: #i:id -> cs:text -> r:elem i -> s:tag -> GTot tag
 let mac #i cs r s =
   match alg i with
-  | POLY1305 -> Spec.Poly1305.mac_1305 (text_to_PS_text cs) r s
+  | POLY1305 -> Spec.Poly1305.finish (Spec.Poly1305.poly (text_to_PS_text cs) r) s
   | GHASH    -> GS.mac cs r s
 
 val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
