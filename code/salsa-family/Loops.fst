@@ -14,6 +14,15 @@ assume val rounds:
          let s' = reveal_h32s (as_seq h1 st) in
          s' == rounds s)))
 
+assume val rounds':
+  st:buffer Hacl.UInt32.t{length st = 16} ->
+  Stack unit
+    (requires (fun h -> live h st))
+    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
+      /\ (let s = reveal_h32s (as_seq h0 st) in
+         let s' = reveal_h32s (as_seq h1 st) in
+         s' == Spec.Salsa20.rounds s)))
+
 assume val sum_states:
   st:buffer Hacl.UInt32.t{length st = 16} ->
   st':buffer Hacl.UInt32.t{length st' = 16 /\ disjoint st st'} ->

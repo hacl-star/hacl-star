@@ -90,6 +90,8 @@ typedef Hacl_Impl_Poly1305_64_poly1305_state Poly1305_64_state;
 
 void Poly1305_64_init(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *k);
 
+extern void *Poly1305_64_empty_log;
+
 void Poly1305_64_update_block(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *m);
 
 void Poly1305_64_update(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *m, uint32_t len);
@@ -100,4 +102,27 @@ Poly1305_64_update_last(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *m, uin
 void Poly1305_64_finish(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *mac, uint8_t *k);
 
 void Poly1305_64_crypto_onetimeauth(uint8_t *output, uint8_t *input, uint64_t len, uint8_t *k);
+
+void
+Poly1305_64_poly1305_blocks_init(
+  Hacl_Impl_Poly1305_64_poly1305_state st,
+  uint8_t *input,
+  uint32_t len,
+  uint8_t *k
+);
+
+void
+Poly1305_64_poly1305_blocks_continue(
+  Hacl_Impl_Poly1305_64_poly1305_state st,
+  uint8_t *input,
+  uint32_t len
+);
+
+void
+Poly1305_64_poly1305_blocks_finish(
+  Hacl_Impl_Poly1305_64_poly1305_state st,
+  uint8_t *input,
+  uint8_t *mac,
+  uint8_t *key_s
+);
 #endif

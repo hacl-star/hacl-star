@@ -2,9 +2,9 @@ module Hacl.MAC.Poly1305_32
 
 open FStar.Mul
 open FStar.ST
-open FStar.Buffer
 open FStar.Ghost
 open FStar.Seq
+open FStar.Buffer
 open FStar.HyperStack
 
 open Hacl.Cast
@@ -318,8 +318,28 @@ val poly1305_last_pass: acc:felem ->
 let poly1305_last_pass acc =
   Hacl.Bignum.Fproduct.carry_limb_ acc 0ul;
   Hacl.Bignum.Modulo.carry_top acc;
-  Hacl.Bignum.Fproduct.carry_0_to_1 acc
-
+  Hacl.Bignum.Fproduct.carry_limb_ acc 0ul;
+  Hacl.Bignum.Modulo.carry_top acc;
+  Hacl.Bignum.Fproduct.carry_0_to_1 acc;
+  let p26m1 = 0x3fffffful in
+  let p26m5 = 0x3fffffbul in
+  let a0 = acc.(0ul) in
+  let a1 = acc.(1ul) in
+  let a2 = acc.(2ul) in
+  let a3 = acc.(3ul) in
+  let a4 = acc.(4ul) in
+  let mask0 = Hacl.Bignum.Limb.gte_mask a0 p26m5 in
+  let mask1 = Hacl.Bignum.Limb.eq_mask  a1 p26m1 in
+  let mask2 = Hacl.Bignum.Limb.eq_mask  a2 p26m1 in
+  let mask3 = Hacl.Bignum.Limb.eq_mask  a3 p26m1 in
+  let mask4 = Hacl.Bignum.Limb.eq_mask  a4 p26m1 in
+  let mask  = Limb.(mask0 &^ mask1 &^ mask2 &^ mask3 &^ mask4) in
+  let a0'   = Limb.(a0 -^ (p26m5 &^ mask)) in
+  let a1'   = Limb.(a1 -^ (p26m1 &^ mask)) in
+  let a2'   = Limb.(a2 -^ (p26m1 &^ mask)) in
+  let a3'   = Limb.(a3 -^ (p26m1 &^ mask)) in
+  let a4'   = Limb.(a4 -^ (p26m1 &^ mask)) in
+  upd_5 acc a0' a1' a2' a3' a4'
 
 (* val store128_le: *)
 (*   mac:uint8_p{length mac = 16} -> *)

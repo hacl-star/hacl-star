@@ -2,11 +2,12 @@
 #include "testlib.h"
 #include "NaCl.h"
 #include "sodium.h"
+#include "tweetnacl.h"
 
 
 #define MESSAGE_LEN 72
 #define secretbox_MACBYTES   16
-#define CIPHERTEXT_LEN (secretbox_MACBYTES + MESSAGE_LEN)
+#define CIPHERTEXT_LEN       MESSAGE_LEN
 #define secretbox_NONCEBYTES 24
 #define secretbox_KEYBYTES   32
 #define box_MACBYTES         16
@@ -83,10 +84,10 @@ void print_results(char *txt, double t1, unsigned long long d1, int rounds, int 
 
 int32_t test_api()
 {
-  uint8_t ciphertext[CIPHERTEXT_LEN+16], mac[16], decrypted[MESSAGE_LEN+32],
-    test1[box_PUBLICKEYBYTES], test2[box_PUBLICKEYBYTES],
-    pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
-    basepoint[box_PUBLICKEYBYTES] = {9};
+  uint8_t ciphertext[CIPHERTEXT_LEN+32], mac[16], decrypted[MESSAGE_LEN+32],
+          test1[box_PUBLICKEYBYTES], test2[box_PUBLICKEYBYTES],
+          pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
+          basepoint[box_PUBLICKEYBYTES] = {9};
   uint32_t res;
   int i;
 
@@ -99,28 +100,28 @@ int32_t test_api()
   TestLib_compare_and_print("HACL beforenm", test1, test2, 32);
   
   /* Testing the box primitives */
-  i = NaCl_crypto_box_detached(ciphertext, mac, msg+32, MESSAGE_LEN, nonce, pk1, sk2); 
-  res = crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, sk1); 
+  i = NaCl_crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk1, sk2); 
+  res = crypto_box_open_detached(decrypted, ciphertext+32, mac, MESSAGE_LEN, nonce, pk2, sk1); 
   printf("Libsodium decryption of HACL box was a %s.\n", res == 0 ? "success" : "failure");
-  TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
+  TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
 
-  i = crypto_box_detached(ciphertext, mac, msg+32, MESSAGE_LEN, nonce, pk1, sk2); 
+  i = crypto_box_detached(ciphertext+32, mac, msg+32, MESSAGE_LEN, nonce, pk1, sk2); 
   res = NaCl_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, sk1); 
   printf("HACL decryption of Libsodium box was a %s.\n", res == 0 ? "success" : "failure");
-  TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
+  TestLib_compare_and_print("Box", msg+32, decrypted+32, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
 
-  i = NaCl_crypto_box_easy(ciphertext, msg+32, MESSAGE_LEN, nonce, pk1, sk2); 
-  res = crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, sk1); 
+  i = NaCl_crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk1, sk2); 
+  res = crypto_box_open_easy(decrypted, ciphertext+16, MESSAGE_LEN+16, nonce, pk2, sk1); 
   printf("Libsodium decryption of HACL box_easy was a %s.\n", res == 0 ? "success" : "failure");
-  TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
+  TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
 
-  i = crypto_box_easy(ciphertext, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
+  i = crypto_box_easy(ciphertext+16, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
   res = NaCl_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, sk1);
   printf("Box decryption of libsodium box easy was a %s.\n", res == 0 ? "success" : "failure");  
-  TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN-32);
+  TestLib_compare_and_print("Box", msg+32, decrypted+32, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
 
   return exit_success;
@@ -163,6 +164,19 @@ int32_t perf_api() {
   b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Sodium Box speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1024 * 1024);
+  for (int i = 0; i < len + 16 * sizeof(char); i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    int res = tweet_crypto_box(plaintext, plaintext, len, nonce, sk1, sk2);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("TweetNacl Box speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];

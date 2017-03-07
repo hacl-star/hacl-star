@@ -19,16 +19,16 @@ module H64 = Hacl.UInt64
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-private val lemma_max_uint32: n:nat -> Lemma
-  (requires (n = 32))
-  (ensures  (pow2 n = 4294967296))
-  [SMTPat (pow2 n)]
-let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296)
-private val lemma_max_uint64: n:nat -> Lemma
-  (requires (n = 64))
-  (ensures  (pow2 n = 18446744073709551616))
-  [SMTPat (pow2 n)]
-let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
+(* private val lemma_max_uint32: n:nat -> Lemma *)
+(*   (requires (n = 32)) *)
+(*   (ensures  (pow2 n = 4294967296)) *)
+(*   [SMTPat (pow2 n)] *)
+(* let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296) *)
+(* private val lemma_max_uint64: n:nat -> Lemma *)
+(*   (requires (n = 64)) *)
+(*   (ensures  (pow2 n = 18446744073709551616)) *)
+(*   [SMTPat (pow2 n)] *)
+(* let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616) *)
 
 private val set_zero_bytes:
   b:uint8_p{length b >= 32} ->
@@ -102,7 +102,6 @@ let crypto_secretbox_detached c mac m mlen n k =
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
-
 
 val crypto_secretbox_open_detached:
   m:uint8_p ->

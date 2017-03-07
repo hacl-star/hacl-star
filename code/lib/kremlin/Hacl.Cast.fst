@@ -8,6 +8,7 @@ module U32 = FStar.UInt32
 module S32 = Hacl.UInt32
 module U64 = FStar.UInt64
 module S64 = Hacl.UInt64
+module U128 = FStar.UInt128
 module S128 = Hacl.UInt128
 
 (** Uints to Sints **)
@@ -65,3 +66,6 @@ inline_for_extraction val uint8_to_sint32: a:U8.t -> Tot (b:S32.t{S32.v b = U8.v
 inline_for_extraction let uint8_to_sint32 a = uint8_to_uint32 a
 inline_for_extraction val uint8_to_sint8: a:U8.t -> Tot (b:S8.t{S8.v b = U8.v a})
 inline_for_extraction let  uint8_to_sint8 a = a
+
+inline_for_extraction val uint128_to_sint128: a:U128.t -> Tot (b:S128.t{S128.v b = U128.v a})
+inline_for_extraction let uint128_to_sint128 a = a

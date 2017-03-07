@@ -71,5 +71,5 @@ tube-test: tube-star.exe
 
 
 clean:
-	rm -rf tube
+	rm -rf tube send receive
 	rm -rf *~ *.exe *.dSYM

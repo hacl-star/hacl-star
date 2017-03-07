@@ -1,7 +1,7 @@
 FSTAR_HOME?=../../../FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../..
-include ../Makefile.include
+include ../../Makefile.include
 
 
 FSTAR_LIB_FILES= \
@@ -92,13 +92,13 @@ POLY1305_MODULES= \
 
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $^ --use_hints
+		--include ../lib --include ../../bignum $^ --use_hints
 
 verify: $(addsuffix -verify, $(POLY1305_FILES))
 
 %.fst-hints: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $^ --record_hints
+		--include ../lib --include ../../bignum $^ --record_hints
 
 hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
@@ -106,12 +106,13 @@ hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 extract-c:
 	mkdir -p poly-c
 	$(KREMLIN_HOME)/krml -I $(FSTAR_HOME)/ulib/hyperstack -tmpdir poly-c -verbose \
-		-I ../bignum -I ../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib -I $(FSTAR_HOME)/../kremlin/test \
+		-I ../../bignum -I ../../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib \
 		Hacl.Test.Poly1305_32.fst \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
 		-drop Hacl.UInt128  -drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-bundle Hacl.Spec -bundle Hacl.Bignum -bundle Hacl.MAC \
-		$(FSTAR_HOME)/../kremlin/test/testlib.c -add-include '"testlib.h"' \
+		-bundle "Hacl.Spec.\*" -bundle "Poly1305_32=Poly1305_32,Hacl.Bignum.\*,Hacl.MAC.\*" \
+		-add-include '"testlib.h"' $(KREMLIN_HOME)/kremlib/testlib.c \
+		-ccopt "-D_GNU_SOURCE" \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_32 -ccopt -flto -ccopt -march=native -o poly1305.exe
 	./poly1305.exe

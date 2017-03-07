@@ -26,7 +26,7 @@ module U64  = FStar.UInt64
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 20"
 
 val poly1305_init_spec: key:Seq.seq H8.t{Seq.length key = 16} ->
-  Tot (st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)
+  GTot (st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)
     /\ seval (MkState?.r st) = UInt.logand #128 (hlittle_endian key) 0x0ffffffc0ffffffc0ffffffc0fffffff
     /\ seval (MkState?.h st) = 0})
 let poly1305_init_spec key =
@@ -84,10 +84,6 @@ val poly1305_finish_spec:
        let r   = seval (MkState?.r st) % prime in
        let k   = hlittle_endian key_s   in
        let m'   = (hlittle_endian m + pow2 (8*length m)) % prime in
-       (* let mac = hlittle_endian mac in *)
-       (* if Seq.length m >= 1 *)
-       (* then mac = (((acc +@ m') *@ r) + k) % pow2 128 *)
-       (* else mac = ((acc + k) % pow2 128)) }) *)
        if Seq.length m >= 1
        then reveal_sbytes mac == finish ((acc +@ m') *@ r) (reveal_sbytes key_s)
        else reveal_sbytes mac == finish acc (reveal_sbytes key_s)) })
@@ -122,16 +118,10 @@ let poly1305_finish_spec st m rem' key_s =
 
 module Spec = Spec.Poly1305
 
-(* unfold inline_for_extraction let encode (w:word) : GTot Spec.elem = encode (reveal_sbytes w) *)
-
 
 let invariant (st:poly1305_state_) : GTot Type0 =
   let acc = (MkState?.h st) in let r = (MkState?.r st) in let log = MkState?.log st in
   seval r < pow2 130 - 5 /\  red_44 r /\ red_45 acc /\ selem acc = poly log (seval r)
-
-
-(* inline_for_extraction val encode_bytes: txt:Seq.seq H8.t -> GTot (text) (decreases (Seq.length txt)) *)
-(* inline_for_extraction let encode_bytes txt = encode_bytes (reveal_sbytes txt) *)
 
 
 (** Auxiliary lemmas *)
@@ -337,7 +327,7 @@ let rec poly1305_blocks_spec st m len =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val lemma_onetimeauth_finish_1_1:
-  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
+  input:Seq.seq H8.t ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   Lemma (
     let l = 16 * (U64.v len / 16) in
@@ -348,7 +338,7 @@ let lemma_onetimeauth_finish_1_1 input len =
 
 
 val lemma_onetimeauth_finish_1_2:
-  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
+  input:Seq.seq H8.t ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   Lemma (
     let l = 16 * (U64.v len / 16) in
@@ -367,7 +357,7 @@ let lemma_onetimeauth_finish_1_2 input len =
 
 
 val lemma_onetimeauth_finish_1:
-  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
+  input:Seq.seq H8.t ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   Lemma (
     let l = 16 * (U64.v len / 16) in
@@ -383,7 +373,7 @@ let lemma_onetimeauth_finish_1 input len =
 
 
 val lemma_onetimeauth_finish_2:
-  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->  
+  input:Seq.seq H8.t ->  
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input /\ U64.v len % 16 > 0} ->
   r:elem ->
   Lemma (
@@ -437,7 +427,7 @@ let poly1305_partial input len kr =
 
 
 val poly1305_complete:
-  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
+  input:Seq.seq H8.t ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   k:Seq.seq H8.t{Seq.length k = 32} ->
   GTot (acc:seqelem{bounds acc p44 p44 p42
@@ -463,7 +453,7 @@ let poly1305_complete input len k =
 
 
 val crypto_onetimeauth_spec:
-  input:Seq.seq H8.t(* {Seq.length input > 0} *) ->
+  input:Seq.seq H8.t ->
   len:U64.t{U64.v len < pow2 32 /\ U64.v len = Seq.length input} ->
   k:Seq.seq H8.t{Seq.length k = 32} ->
   GTot (mac:Seq.seq H8.t{Seq.length mac = 16

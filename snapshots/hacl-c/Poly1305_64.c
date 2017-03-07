@@ -597,10 +597,12 @@ void Poly1305_64_init(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *k)
   return;
 }
 
+void *Poly1305_64_empty_log = (void *)(uint8_t )0;
+
 void Poly1305_64_update_block(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *m)
 {
   void
-  *uu____107 = (Hacl_Impl_Poly1305_64_poly1305_update((void *)(uint8_t )0, st, m) , (void *)0);
+  *uu____108 = (Hacl_Impl_Poly1305_64_poly1305_update((void *)(uint8_t )0, st, m) , (void *)0);
   return;
 }
 
@@ -681,5 +683,172 @@ void Poly1305_64_crypto_onetimeauth(uint8_t *output, uint8_t *input, uint64_t le
 {
   Hacl_Standalone_Poly1305_64_crypto_onetimeauth(output, input, len, k);
   return;
+}
+
+void
+Poly1305_64_poly1305_blocks_init(
+  Hacl_Impl_Poly1305_64_poly1305_state st,
+  uint8_t *input,
+  uint32_t len,
+  uint8_t *k
+)
+{
+  uint8_t *x10 = k;
+  uint64_t *x0 = Hacl_Impl_Poly1305_64___proj__MkState__item__r(st);
+  uint8_t *x1 = x10;
+  FStar_UInt128_t
+  k0 =
+    /* start inlining Hacl.Endianness.hload128_le */
+      /* start inlining Hacl.Endianness.load128_le */
+        load128_le(x1)
+      /* end inlining Hacl.Endianness.load128_le */
+    /* end inlining Hacl.Endianness.hload128_le */;
+  FStar_UInt128_t
+  k_clamped =
+    FStar_UInt128_logand(k0,
+      FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_uint64_to_uint128((uint64_t )0x0ffffffc0ffffffc),
+          (uint32_t )64),
+        FStar_Int_Cast_uint64_to_uint128((uint64_t )0x0ffffffc0fffffff)));
+  uint64_t r0 = FStar_Int_Cast_uint128_to_uint64(k_clamped) & (uint64_t )0xfffffffffff;
+  uint64_t
+  r1 =
+    FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )44))
+    & (uint64_t )0xfffffffffff;
+  uint64_t
+  r2 = FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )88));
+  x0[0] = r0;
+  x0[1] = r1;
+  x0[2] = r2;
+  /* start inlining Hacl.Impl.Poly1305_64.poly1305_encode_r */
+  /* start inlining Hacl.Impl.Poly1305_64.upd_3 */
+  /* end inlining Hacl.Impl.Poly1305_64.upd_3 */
+  /* end inlining Hacl.Impl.Poly1305_64.poly1305_encode_r */
+  uint64_t *x00 = Hacl_Impl_Poly1305_64___proj__MkState__item__h(st);
+  x00[0] = (uint64_t )0;
+  x00[1] = (uint64_t )0;
+  x00[2] = (uint64_t )0;
+  /* start inlining Hacl.Impl.Poly1305_64.poly1305_start */
+  /* start inlining Hacl.Impl.Poly1305_64.upd_3 */
+  /* end inlining Hacl.Impl.Poly1305_64.upd_3 */
+  /* end inlining Hacl.Impl.Poly1305_64.poly1305_start */
+  void
+  *l0 =
+    /* start inlining Hacl.Impl.Poly1305_64.poly1305_init_ */
+      (void *)(uint8_t )0
+    /* end inlining Hacl.Impl.Poly1305_64.poly1305_init_ */;
+  uint32_t len_16 = len >> (uint32_t )4;
+  uint32_t rem_16 = len & (uint32_t )15;
+  void
+  *l =
+    (Hacl_Standalone_Poly1305_64_poly1305_blocks((void *)(uint8_t )0,
+      st,
+      input,
+      (uint64_t )len_16)
+    , (void *)0);
+  if (rem_16 == (uint32_t )0)
+    return;
+  else
+  {
+    uint8_t *x0 = input + len - rem_16;
+    uint8_t b[16] = { 0 };
+    memcpy(b, x0, rem_16 * sizeof x0[0]);
+    uint8_t
+    *b0 =
+      /* start inlining Poly1305_64.pad_16_bytes */ b /* end inlining Poly1305_64.pad_16_bytes */;
+    void *l = (Hacl_Impl_Poly1305_64_poly1305_update((void *)(uint8_t )0, st, b0) , (void *)0);
+  }
+}
+
+void
+Poly1305_64_poly1305_blocks_continue(
+  Hacl_Impl_Poly1305_64_poly1305_state st,
+  uint8_t *input,
+  uint32_t len
+)
+{
+  uint32_t len_16 = len >> (uint32_t )4;
+  uint32_t rem_16 = len & (uint32_t )15;
+  void
+  *l =
+    (Hacl_Standalone_Poly1305_64_poly1305_blocks((void *)(uint8_t )0,
+      st,
+      input,
+      (uint64_t )len_16)
+    , (void *)0);
+  if (rem_16 == (uint32_t )0)
+    return;
+  else
+  {
+    uint8_t *x0 = input + len - rem_16;
+    uint8_t b[16] = { 0 };
+    memcpy(b, x0, rem_16 * sizeof x0[0]);
+    uint8_t
+    *b0 =
+      /* start inlining Poly1305_64.pad_16_bytes */ b /* end inlining Poly1305_64.pad_16_bytes */;
+    void
+    *uu____401 = (Hacl_Impl_Poly1305_64_poly1305_update((void *)(uint8_t )0, st, b0) , (void *)0);
+  }
+}
+
+void
+Poly1305_64_poly1305_blocks_finish(
+  Hacl_Impl_Poly1305_64_poly1305_state st,
+  uint8_t *input,
+  uint8_t *mac,
+  uint8_t *key_s
+)
+{
+  void
+  *uu____441 =
+    (Hacl_Impl_Poly1305_64_poly1305_update((void *)(uint8_t )0, st, input) , (void *)0);
+  uint8_t *x2 = input + (uint32_t )16;
+  void *ite;
+  if ((uint64_t )0 == (uint64_t )0)
+    ite = (void *)(uint8_t )0;
+  else
+    ite =
+      (void *)(Hacl_Impl_Poly1305_64_poly1305_process_last_block((void *)(uint8_t )0,
+        st,
+        x2,
+        (uint64_t )0)
+      , (void *)0);
+  void
+  *log_ =
+    /* start inlining Hacl.Impl.Poly1305_64.poly1305_finish__ */
+      (void *)ite
+    /* end inlining Hacl.Impl.Poly1305_64.poly1305_finish__ */;
+  uint64_t *acc = Hacl_Impl_Poly1305_64___proj__MkState__item__h(st);
+  /* start inlining Hacl.Impl.Poly1305_64.poly1305_update_last */
+  Hacl_Impl_Poly1305_64_poly1305_last_pass(acc);
+  /* end inlining Hacl.Impl.Poly1305_64.poly1305_update_last */
+  /* start inlining Hacl.Impl.Poly1305_64.poly1305_finish */
+  uint64_t *acc0 = Hacl_Impl_Poly1305_64___proj__MkState__item__h(st);
+  FStar_UInt128_t
+  k_ =
+    /* start inlining Hacl.Endianness.hload128_le */
+      /* start inlining Hacl.Endianness.load128_le */
+        load128_le(key_s)
+      /* end inlining Hacl.Endianness.load128_le */
+    /* end inlining Hacl.Endianness.hload128_le */;
+  uint64_t h0 = acc0[0];
+  uint64_t h1 = acc0[1];
+  uint64_t h2 = acc0[2];
+  FStar_UInt128_t
+  acc_ =
+    /* start inlining Hacl.Impl.Poly1305_64.bignum_to_128 */
+      FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_uint64_to_uint128(h2
+            << (uint32_t )24
+            | h1 >> (uint32_t )20),
+          (uint32_t )64),
+        FStar_Int_Cast_uint64_to_uint128(h1 << (uint32_t )44 | h0))
+    /* end inlining Hacl.Impl.Poly1305_64.bignum_to_128 */;
+  FStar_UInt128_t mac_ = FStar_UInt128_add_mod(acc_, k_);
+  /* start inlining Hacl.Endianness.hstore128_le */
+  /* start inlining Hacl.Endianness.store128_le */
+  store128_le(mac, mac_);
+  return;
+  /* end inlining Hacl.Endianness.store128_le */
+  /* end inlining Hacl.Endianness.hstore128_le */
+  /* end inlining Hacl.Impl.Poly1305_64.poly1305_finish */
 }
 

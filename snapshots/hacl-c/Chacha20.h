@@ -37,4 +37,13 @@ Chacha20_chacha20(
   uint8_t *n,
   uint32_t ctr
 );
+
+void
+Chacha20_chacha20_key_block(
+  uint8_t *block,
+  uint8_t *k,
+  uint8_t *n,
+  uint32_t ctr
+			    );
+
 #endif
