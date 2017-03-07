@@ -273,49 +273,20 @@ val aead_encrypt:
     (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac
       /\ live h0 c /\ live h0 mac /\ live h0 m /\ live h0 n /\ live h0 k /\ live h0 aad
       /\ (length c + length aad) / 64 < pow2 32
-      /\ (let c:lbytes (length m) = reveal_sbytes (as_seq h1 c) in
-         let mac = reveal_sbytes (as_seq h1 mac) in
-         let k   = reveal_sbytes (as_seq h0 k) in
-         let n   = reveal_sbytes (as_seq h0 n) in
-         let aad' = reveal_sbytes (as_seq h0 aad) in
-         let m'   = reveal_sbytes (as_seq h0 m) in
-         let mackey = slice (Spec.Chacha20.chacha20_block k n 0) 0 32 in
-         (c, mac) == aead_chacha20_poly1305_encrypt k n m' aad')
+      /\ (let cipher = reveal_sbytes (as_seq h1 c) in
+       let mac    = reveal_sbytes (as_seq h1 mac) in
+       let k      = reveal_sbytes (as_seq h0 k) in
+       let n      = reveal_sbytes (as_seq h0 n) in
+       let m      = reveal_sbytes (as_seq h0 m) in
+       let aad    = reveal_sbytes (as_seq h0 aad) in
+       let cipher', mac' = aead_chacha20_poly1305_encrypt k n m aad in
+       cipher == cipher' /\ mac == mac')
       ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
-let aead_encrypt c mac m mlen aad aadlen k n = aead_encrypt_ c mac m mlen aad aadlen k n
-  (* push_frame(); *)
-  (* let h0 = ST.get() in *)
-  (* let tmp = create (uint8_to_sint8 0uy) 80ul in *)
-  (* let b = Buffer.sub tmp 0ul 64ul in *)
-  (* let lb = Buffer.sub tmp 64ul 16ul in *)
-  (* encode_length lb aadlen mlen; *)
-  (* let h1 = ST.get() in *)
-  (* cut (modifies_0 h0 h1); *)
-  (* Chacha20.chacha20 c m mlen k n 1ul; *)
-  (* let h2 = ST.get() in *)
-  (* cut (let m = reveal_sbytes (as_seq h0 m) in *)
-  (*      let c = reveal_sbytes (as_seq h2 c) in *)
-  (*      let k = reveal_sbytes (as_seq h0 k) in *)
-  (*      let n = reveal_sbytes (as_seq h0 n) in *)
-  (*   c == Spec.Chacha20.chacha20_encrypt_bytes k n 1 m); *)
-  (* Chacha20.chacha20_key_block b k n 0ul; *)
-  (* let h3 = ST.get() in *)
-  (* no_upd_lemma_1 h2 h3 b c; *)
-  (* cut (let b = reveal_sbytes (as_seq h3 b) in let k = reveal_sbytes (as_seq h0 k) in *)
-  (*      let n = reveal_sbytes (as_seq h0 n) in *)
-  (*      b == Spec.Chacha20.chacha20_block k n 0); *)
-  (* Seq.lemma_eq_intro (slice (as_seq h3 b) 0 32) (as_seq h3 (Buffer.sub b 0ul 32ul)); *)
-  (* Seq.lemma_eq_intro (reveal_sbytes (slice (as_seq h3 b) 0 32)) (slice (Spec.Chacha20.chacha20_block (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) 0) 0 32); *)
-  (* aead_encrypt_poly  c mlen mac aad aadlen tmp; *)
-  (* cut (let aad' = reveal_sbytes (as_seq h0 aad) in let c = reveal_sbytes (as_seq h2 c) in *)
-  (*      let lb = reveal_sbytes (as_seq h3 lb) in *)
-  (*   pad_16 aad' @| pad_16 c @| little_bytes 8ul (length aad) @| little_bytes 8ul (length m) *)
-  (*   == pad_16 aad' @| pad_16 c @| lb); *)
-  (* let h4 = ST.get() in *)
-  (* lemma_aead_encrypt h0 h1 h2 h3 h4 c tmp mac; *)
-  (* pop_frame(); *)
-  (* 0ul *)
+let aead_encrypt c mac m mlen aad aadlen k n =
+  let z = aead_encrypt_ c mac m mlen aad aadlen k n in
+  z
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
