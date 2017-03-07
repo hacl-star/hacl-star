@@ -199,12 +199,12 @@ let encode_length lb aad_len mlen =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 300"
 
-val aead_encrypt:
+val aead_encrypt_:
   c:uint8_p ->
   mac:uint8_p{length mac = maclen /\ disjoint mac c} ->
   m:uint8_p{disjoint c m} ->
   mlen:u32{let len = U32.v mlen in len = length m /\ len = length c}  ->
-  aad:uint8_p{disjoint aad c /\ ((length m + length aad) / 64) < pow2 32} ->
+  aad:uint8_p{disjoint aad c} ->
   aadlen:u32{let len = U32.v aadlen in len = length aad}  ->
   k:uint8_p{length k = keylen /\ disjoint k mac /\ disjoint k c} ->
   n:uint8_p{length n = noncelen /\ disjoint n mac /\ disjoint n c} ->
@@ -219,12 +219,12 @@ val aead_encrypt:
          let aad' = reveal_sbytes (as_seq h0 aad) in
          let m'   = reveal_sbytes (as_seq h0 m) in
          let mackey = slice (Spec.Chacha20.chacha20_block k n 0) 0 32 in
-         (c, mac) == aead_chacha20_poly1305_encrypt k n m' aad')
-         (* c == Spec.Chacha20.chacha20_encrypt_bytes k n 1 m' *)
-         (* /\ mac == Spec.Poly1305.poly1305 (pad_16 aad' @| pad_16 c @| little_bytes 8ul (length aad) @| little_bytes 8ul (length m)) mackey) *)
+         (* (c, mac) == aead_chacha20_poly1305_encrypt k n m' aad') *)
+         c == Spec.Chacha20.chacha20_encrypt_bytes k n 1 m'
+         /\ mac == Spec.Poly1305.poly1305 (pad_16 aad' @| pad_16 c @| little_bytes 8ul (length aad) @| little_bytes 8ul (length m)) mackey)
       ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
-let aead_encrypt c mac m mlen aad aadlen k n =
+let aead_encrypt_ c mac m mlen aad aadlen k n =
   push_frame();
   let h0 = ST.get() in
   let tmp = create (uint8_to_sint8 0uy) 80ul in
@@ -258,7 +258,36 @@ let aead_encrypt c mac m mlen aad aadlen k n =
   pop_frame();
   0ul
 
-(* WIP *)
+
+val aead_encrypt:
+  c:uint8_p ->
+  mac:uint8_p{length mac = maclen /\ disjoint mac c} ->
+  m:uint8_p{disjoint c m} ->
+  mlen:u32{let len = U32.v mlen in len = length m /\ len = length c}  ->
+  aad:uint8_p{disjoint aad c} ->
+  aadlen:u32{let len = U32.v aadlen in len = length aad}  ->
+  k:uint8_p{length k = keylen /\ disjoint k mac /\ disjoint k c} ->
+  n:uint8_p{length n = noncelen /\ disjoint n mac /\ disjoint n c} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h k /\ live h aad))
+    (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac
+      /\ live h0 c /\ live h0 mac /\ live h0 m /\ live h0 n /\ live h0 k /\ live h0 aad
+      /\ (length c + length aad) / 64 < pow2 32
+      /\ (let cipher = reveal_sbytes (as_seq h1 c) in
+       let mac    = reveal_sbytes (as_seq h1 mac) in
+       let k      = reveal_sbytes (as_seq h0 k) in
+       let n      = reveal_sbytes (as_seq h0 n) in
+       let m      = reveal_sbytes (as_seq h0 m) in
+       let aad    = reveal_sbytes (as_seq h0 aad) in
+       let cipher', mac' = aead_chacha20_poly1305_encrypt k n m aad in
+       cipher == cipher' /\ mac == mac')
+      ))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+let aead_encrypt c mac m mlen aad aadlen k n =
+  let z = aead_encrypt_ c mac m mlen aad aadlen k n in
+  z
+
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 private let lemma_aead_decrypt_ (h:mem) (h':mem) (m:uint8_p) : Lemma 
