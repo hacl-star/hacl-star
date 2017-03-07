@@ -4,6 +4,7 @@
 
 
 #include "Chacha20_vec.h"
+#include "Chacha20_state.h"
 #include "Poly1305_64.h"
 #include "Hacl_Policies.h"
 #include "kremlib.h"

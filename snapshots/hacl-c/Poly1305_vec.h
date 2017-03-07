@@ -47,6 +47,7 @@ static inline vec vec_eq_mask(vec x, uint64_t y) {
 typedef struct {
   vec *x00;
   vec *x01;
+  vec *x02;
 }
 Hacl_MAC_Poly1305_32_poly1305_state;
 

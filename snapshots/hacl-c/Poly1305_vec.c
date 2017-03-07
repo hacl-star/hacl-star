@@ -1,6 +1,8 @@
 #include "Poly1305_vec.h"
+#include "immintrin.h"
 
-
+#undef inline
+#define inline 
 inline static void Hacl_Bignum_Fsum_fsum_(vec *a, vec *b, uint32_t i)
 {
   if (i == (uint32_t )0)
@@ -238,16 +240,16 @@ Hacl_MAC_Poly1305_32_upd_5(
   b[4] = b4;
 }
 
-static void Hacl_MAC_Poly1305_32_poly1305_encode_r(vec *r, uint8_t *key)
+static void Hacl_MAC_Poly1305_32_poly1305_encode_r(vec *r, vec* rp4, uint8_t *key)
 {
   uint64_t t00 = load32_le(key);
   uint64_t t10 = load32_le(key + (uint32_t )4);
   uint64_t t20 = load32_le(key + (uint32_t )8);
   uint64_t t30 = load32_le(key + (uint32_t )12);
-  vec v0 = (vec){t00,0,0,0};
-  vec v1 = (vec){t10,0,0,0};
-  vec v2 = (vec){t20,0,0,0};
-  vec v3 = (vec){t30,0,0,0};
+  vec v0 = (vec){t00,t00,t00,t00};
+  vec v1 = (vec){t10,t10,t10,t10};
+  vec v2 = (vec){t20,t20,t20,t20};
+  vec v3 = (vec){t30,t30,t30,t30};
   vec t0 = v0 & (uint64_t )0x0fffffff;
   vec t1 = v1 & (uint64_t )0x0ffffffc;
   vec t2 = v2 & (uint64_t )0x0ffffffc;
@@ -258,20 +260,50 @@ static void Hacl_MAC_Poly1305_32_poly1305_encode_r(vec *r, uint8_t *key)
   vec r3 = (t2 >> (uint32_t )14 | t3 << (uint32_t )18) & (uint64_t )0x3ffffff;
   vec r4 = t3 >> (uint32_t )8 & (uint64_t )0x3ffffff;
   Hacl_MAC_Poly1305_32_upd_5(r, r0, r1, r2, r3, r4);
+  vec rp2[5];
+  Hacl_Bignum_Fmul_fmul(rp2, r, r);
+  Hacl_Bignum_Fmul_fmul(rp4, rp2, rp2);
   return;
 }
 
-/* TODO FIX */
-static void Hacl_MAC_Poly1305_32_toField(vec *b, uint8_t *m)
+inline static void Hacl_MAC_Poly1305_32_toField(vec *b, uint8_t *m, uint32_t k)
 {
-  uint64_t t0 = load32_le(m);
-  uint64_t t1 = load32_le(m + (uint32_t )4);
-  uint64_t t2 = load32_le(m + (uint32_t )8);
-  uint64_t t3 = load32_le(m + (uint32_t )12);
-  vec v0 = (vec){t0,0,0,0};
-  vec v1 = (vec){t1,0,0,0};
-  vec v2 = (vec){t2,0,0,0};
-  vec v3 = (vec){t3,0,0,0};
+  uint64_t t00, t01, t02, t03,
+    t10, t11, t12, t13,
+    t20, t21, t22, t23,
+    t30, t31, t32, t33;
+  t00 = load32_le(m);
+  t01 = load32_le(m + (uint32_t )4);
+  t02 = load32_le(m + (uint32_t )8);
+  t03 = load32_le(m + (uint32_t )12);
+  if (k > 1) {
+    t10 = load32_le(m+16);
+    t11 = load32_le(m + (uint32_t )20);
+    t12 = load32_le(m + (uint32_t )24);
+    t13 = load32_le(m + (uint32_t )28);
+  } else {
+    t10 = t11 = t12 = t13 = 0;
+  }
+  if (k > 2) {
+    t20 = load32_le(m+32);
+    t21 = load32_le(m + (uint32_t )36);
+    t22 = load32_le(m + (uint32_t )40);
+    t23 = load32_le(m + (uint32_t )44);
+  } else {
+    t20 = t21 = t22 = t23 = 0;
+  }
+  if (k > 3) {
+    t30 = load32_le(m+48);
+    t31 = load32_le(m + (uint32_t )52);
+    t32 = load32_le(m + (uint32_t )56);
+    t33 = load32_le(m + (uint32_t )60);
+  } else {
+    t30 = t31 = t32 = t33 = 0;
+  }
+  vec v0 = (vec){t00,t10,t20,t30};
+  vec v1 = (vec){t01,t11,t21,t31};
+  vec v2 = (vec){t02,t12,t22,t32};
+  vec v3 = (vec){t03,t13,t23,t33};
   vec r0 = v0 & (uint64_t )0x3ffffff;
   vec r1 = (v0 >> (uint32_t )26 | v1 << (uint32_t )6) & (uint64_t )0x3ffffff;
   vec r2 = (v1 >> (uint32_t )20 | v2 << (uint32_t )12) & (uint64_t )0x3ffffff;
@@ -281,9 +313,55 @@ static void Hacl_MAC_Poly1305_32_toField(vec *b, uint8_t *m)
   return;
 }
 
-static void Hacl_MAC_Poly1305_32_toField_plus_2_128(vec *b, uint8_t *m)
+inline static void Hacl_MAC_Poly1305_32_toField4(vec *b, uint8_t *m)
 {
-  Hacl_MAC_Poly1305_32_toField(b, m);
+  uint64_t t00, t01, t02, t03,
+    t10, t11, t12, t13,
+    t20, t21, t22, t23,
+    t30, t31, t32, t33;
+
+  t00 = load32_le(m);
+  t01 = load32_le(m + (uint32_t )4);
+  t02 = load32_le(m + (uint32_t )8);
+  t03 = load32_le(m + (uint32_t )12);
+  t10 = load32_le(m+16);
+  t11 = load32_le(m + (uint32_t )20);
+  t12 = load32_le(m + (uint32_t )24);
+  t13 = load32_le(m + (uint32_t )28);
+  t20 = load32_le(m+32);
+  t21 = load32_le(m + (uint32_t )36);
+  t22 = load32_le(m + (uint32_t )40);
+  t23 = load32_le(m + (uint32_t )44);
+  t30 = load32_le(m+48);
+  t31 = load32_le(m + (uint32_t )52);
+  t32 = load32_le(m + (uint32_t )56);
+  t33 = load32_le(m + (uint32_t )60);
+  vec v0 = (vec){t00,t10,t20,t30};
+  vec v1 = (vec){t01,t11,t21,t31};
+  vec v2 = (vec){t02,t12,t22,t32};
+  vec v3 = (vec){t03,t13,t23,t33};
+  vec r0 = v0 & (uint64_t )0x3ffffff;
+  vec r1 = (v0 >> (uint32_t )26 | v1 << (uint32_t )6) & (uint64_t )0x3ffffff;
+  vec r2 = (v1 >> (uint32_t )20 | v2 << (uint32_t )12) & (uint64_t )0x3ffffff;
+  vec r3 = (v2 >> (uint32_t )14 | v3 << (uint32_t )18) & (uint64_t )0x3ffffff;
+  vec r4 = v3 >> (uint32_t )8 & (uint64_t )0x3ffffff;
+  Hacl_MAC_Poly1305_32_upd_5(b, r0, r1, r2, r3, r4);
+  Hacl_MAC_Poly1305_32_upd_5(b, v0, v1, v2, v3, v0);
+  return;
+}
+
+
+inline static void Hacl_MAC_Poly1305_32_toField_plus_2_128(vec *b, uint8_t *m, uint32_t l)
+{
+  Hacl_MAC_Poly1305_32_toField(b, m, l);
+  vec b4 = b[4];
+  vec b4_ = (uint64_t )0x1000000 | b4;
+  b[4] = b4_;
+}
+
+inline static void Hacl_MAC_Poly1305_32_toField_plus_2_128_4(vec *b, uint8_t *m)
+{
+  Hacl_MAC_Poly1305_32_toField4(b, m);
   vec b4 = b[4];
   vec b4_ = (uint64_t )0x1000000 | b4;
   b[4] = b4_;
@@ -299,13 +377,31 @@ static void Hacl_MAC_Poly1305_32_poly1305_start(vec *a)
 static void
 Hacl_MAC_Poly1305_32_poly1305_init_(Hacl_MAC_Poly1305_32_poly1305_state st, uint8_t *key)
 {
-  Hacl_MAC_Poly1305_32_poly1305_encode_r(Hacl_MAC_Poly1305_32___proj__MkState__item__r(st), key);
+  Hacl_MAC_Poly1305_32_poly1305_encode_r(Hacl_MAC_Poly1305_32___proj__MkState__item__r(st), st.x02, key);
   Hacl_MAC_Poly1305_32_poly1305_start(Hacl_MAC_Poly1305_32___proj__MkState__item__h(st));
   return;
 }
 
-static void
+
+inline static void
 Hacl_MAC_Poly1305_32_poly1305_update(
+  void *log,
+  Hacl_MAC_Poly1305_32_poly1305_state st,
+  uint8_t *m,
+  uint32_t b
+)
+{
+  vec tmp[5] = { 0 };
+  vec *acc = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st);
+  vec *r = Hacl_MAC_Poly1305_32___proj__MkState__item__r(st);
+  vec *rp4 = st.x02;
+  Hacl_MAC_Poly1305_32_toField_plus_2_128(tmp, m, b);
+  Hacl_Bignum_AddAndMultiply_add_and_multiply(acc, tmp, rp4);
+}
+
+
+inline static void
+Hacl_MAC_Poly1305_32_poly1305_update4(
   void *log,
   Hacl_MAC_Poly1305_32_poly1305_state st,
   uint8_t *m
@@ -314,8 +410,9 @@ Hacl_MAC_Poly1305_32_poly1305_update(
   vec tmp[5] = { 0 };
   vec *acc = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st);
   vec *r = Hacl_MAC_Poly1305_32___proj__MkState__item__r(st);
-  Hacl_MAC_Poly1305_32_toField_plus_2_128(tmp, m);
-  Hacl_Bignum_AddAndMultiply_add_and_multiply(acc, tmp, r);
+  vec *rp4 = st.x02;
+  Hacl_MAC_Poly1305_32_toField_plus_2_128_4(tmp, m);
+  Hacl_Bignum_AddAndMultiply_add_and_multiply(acc, tmp, rp4);
 }
 
 static void
@@ -329,10 +426,15 @@ Hacl_MAC_Poly1305_32_poly1305_blocks(
   if (len < (uint64_t )16)
     return;
   else
+    if (len < (uint64_t )64) {
+      uint64_t l = len / 16 ;
+      void *new_log = (Hacl_MAC_Poly1305_32_poly1305_update((void *)(uint8_t )0, st, m, l) , (void *)0);
+      return;}
+  else
   {
-    void *new_log = (Hacl_MAC_Poly1305_32_poly1305_update((void *)(uint8_t )0, st, m) , (void *)0);
-    uint64_t len0 = len - (uint64_t )16;
-    uint8_t *m0 = m + (uint32_t )16;
+    void *new_log = (Hacl_MAC_Poly1305_32_poly1305_update4((void *)(uint8_t )0, st, m) , (void *)0);
+    uint64_t len0 = len - (uint64_t )64;
+    uint8_t *m0 = m + (uint32_t )64;
     Hacl_MAC_Poly1305_32_poly1305_blocks((void *)(uint8_t )0, st, m0, len0);
     return;
   }
@@ -352,11 +454,32 @@ Hacl_MAC_Poly1305_32_poly1305_process_last_block_(
   uint64_t rem_
 )
 {
+  vec* r = Hacl_MAC_Poly1305_32___proj__MkState__item__r(st);
+  vec* acc = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st);
+  vec rp2[5];
+  Hacl_Bignum_Fmul_fmul(rp2, r, r);
+  vec rp3[5];
+  Hacl_Bignum_Fmul_fmul(rp3, rp2, r);
+  vec* rp4 = st.x02;
+  vec accr4[5];
+  vec accr3[5];
+  vec accr2[5];
+  vec accr1[5];
+  Hacl_Bignum_Fmul_fmul(accr4, acc, rp4);
+  Hacl_Bignum_Fmul_fmul(accr2, acc, rp3);
+  Hacl_Bignum_Fmul_fmul(accr3, acc, rp2);
+  Hacl_Bignum_Fmul_fmul(accr1, acc, r);
+  acc[0][0] += acc[0][1] + acc[0][2] + acc[0][3];
+  acc[1][0] += acc[1][1] + acc[1][2] + acc[1][3];
+  acc[2][0] += acc[2][1] + acc[2][2] + acc[2][3];
+  acc[3][0] += acc[3][1] + acc[3][2] + acc[3][3];
+  acc[0] &= (vec){0xffffffffffffffff,0,0,0};
+  acc[1] &= (vec){0xffffffffffffffff,0,0,0};
+  acc[2] &= (vec){0xffffffffffffffff,0,0,0};
+  acc[3] &= (vec){0xffffffffffffffff,0,0,0};
   vec tmp[5] = { 0 };
-  Hacl_MAC_Poly1305_32_toField(tmp, block);
-  Hacl_Bignum_AddAndMultiply_add_and_multiply(Hacl_MAC_Poly1305_32___proj__MkState__item__h(st),
-    tmp,
-    Hacl_MAC_Poly1305_32___proj__MkState__item__r(st));
+  Hacl_MAC_Poly1305_32_toField(tmp, block,1);
+  Hacl_Bignum_AddAndMultiply_add_and_multiply(acc,tmp, r);
 }
 
 static void
@@ -438,20 +561,12 @@ Hacl_MAC_Poly1305_32_poly1305_finish_(
 )
 {
   vec tmp[5] = { 0 };
-  Hacl_MAC_Poly1305_32_toField(tmp, key_s);
+  Hacl_MAC_Poly1305_32_toField(tmp, key_s, 1);
   Hacl_MAC_Poly1305_32_poly1305_finish__((void *)(uint8_t )0, st, mac, m, len, key_s);
   Hacl_MAC_Poly1305_32_poly1305_last_pass(Hacl_MAC_Poly1305_32___proj__MkState__item__h(st));
   Hacl_Bignum_Fsum_fsum_(Hacl_MAC_Poly1305_32___proj__MkState__item__h(st), tmp, (uint32_t )5);
   Hacl_Bignum_Fproduct_carry_limb_(Hacl_MAC_Poly1305_32___proj__MkState__item__h(st),
     (uint32_t )0);
-  uint64_t k0 = load32_le(key_s);
-  uint64_t k1 = load32_le(key_s + (uint32_t )4);
-  uint64_t k2 = load32_le(key_s + (uint32_t )8);
-  uint64_t k3 = load32_le(key_s + (uint32_t )12);
-  vec v0 = (vec){k0,0,0,0};
-  vec v1 = (vec){k1,0,0,0};
-  vec v2 = (vec){k2,0,0,0};
-  vec v3 = (vec){k3,0,0,0};
   vec h0 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[0];
   vec h1 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[1];
   vec h2 = Hacl_MAC_Poly1305_32___proj__MkState__item__h(st)[2];
@@ -475,10 +590,11 @@ Hacl_MAC_Poly1305_32_crypto_onetimeauth(
   uint8_t *k
 )
 {
-  vec buf[10] = { 0 };
+  vec buf[15] = { 0 };
   vec *r = buf;
   vec *h = buf + (uint32_t )5;
-  Hacl_MAC_Poly1305_32_poly1305_state st = { .x00 = r, .x01 = h };
+  vec *rp4 = buf + (uint32_t )10;
+  Hacl_MAC_Poly1305_32_poly1305_state st = { .x00 = r, .x01 = h, .x02 = rp4 };
   uint8_t *key_r = k;
   uint8_t *key_s = k + (uint32_t )16;
   void *init_log = (Hacl_MAC_Poly1305_32_poly1305_init_(st, k) , (void *)0);

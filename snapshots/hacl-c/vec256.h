@@ -1,9 +1,10 @@
-#ifndef __Vec_H
-#define __Vec_H
+#ifndef __Vec256_H
+#define __Vec256_H
+
 #include <immintrin.h>
 #include "kremlib.h"
 #define VEC256
-const int vec_size = 32;
+static const int vec_size = 32;
 typedef unsigned int vec256 __attribute__ ((vector_size (32)));
 
 typedef struct {
@@ -75,7 +76,7 @@ static inline vec vec_xor(vec v1, vec v2) {
 }
 //#define vec_xor(v1,v2) (vec256)(v1).v ^ (v2).v
 
-const vec256 ONE = {1,0,0,0,1,0,0,0};
+static const vec256 ONE = {1,0,0,0,1,0,0,0};
 
 static inline vec one_128_le() {
   vec r;

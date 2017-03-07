@@ -4,6 +4,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "Chacha20_state.h"
+
+int chacha20_init_block(unsigned char* out, chacha20_state st, const unsigned char* k, const unsigned char* n, unsigned int ctr);
+
+int chacha20_continue(        
+	unsigned char *out,
+        const unsigned char *in,
+        unsigned long long inlen,
+        chacha20_state st);
 
 int crypto_stream(
                                   unsigned char *out,

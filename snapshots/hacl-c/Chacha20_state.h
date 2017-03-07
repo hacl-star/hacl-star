@@ -1,5 +1,8 @@
-#include "vec256.h"
-//#include "vec128.h"
+#ifndef __Chacha20_state_H
+#define __Chacha20_state_H
+
+//#include "vec256.h"
+#include "vec128.h"
 //#include "vec_buf.h"
 
 typedef vec chacha20_state[4];
@@ -44,3 +47,4 @@ static inline void chacha20_state_to_key(chacha20_state k, chacha20_state st) {
 }
 
 
+#endif

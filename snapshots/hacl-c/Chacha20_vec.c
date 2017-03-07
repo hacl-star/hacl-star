@@ -65,6 +65,28 @@ static inline void chacha20_core3(chacha20_state v0, chacha20_state v1, chacha20
   s[3]  = vec_add(s[3],one);
 }
 
+static inline void chacha20_core2(chacha20_state v0, chacha20_state v1, chacha20_state s) {
+  vec one = one_128_le();
+  v0[0] = v1[0] = s[0];
+  v0[1] = v1[1] = s[1];
+  v0[2] = v1[2] = s[2];
+  v0[3] = v1[3] = s[3];
+  for (int i = 0; i < 10; i++) {
+    dqround_vectors(v0);
+    dqround_vectors(v1);
+  }
+  v0[0] = vec_add(v0[0],s[0]);
+  v0[1] = vec_add(v0[1],s[1]);
+  v0[2] = vec_add(v0[2],s[2]);
+  v0[3] = vec_add(v0[3],s[3]);
+  s[3]  = vec_add(s[3],one);
+  v1[0] = vec_add(v1[0],s[0]);
+  v1[1] = vec_add(v1[1],s[1]);
+  v1[2] = vec_add(v1[2],s[2]);
+  v1[3] = vec_add(v1[3],s[3]);
+  s[3]  = vec_add(s[3],one);
+}
+
 /* this ones costs 0.5 cycle/byte, try to optimize */
 /* This function and init are the only ones that depends on the vector size */
 static inline void write_xor(const unsigned char* in, unsigned char* out, chacha20_state v) {
@@ -89,10 +111,10 @@ static inline void chacha20_init(chacha20_state st, const unsigned char* k, cons
 }
 
 static inline void chacha20_block(unsigned char* out, const unsigned char* in, chacha20_state st) {
-  vec one = one_128_le();
   vec v[4];
   chacha20_core(v,st);
   write_xor(in, out, v);
+  vec one = one_128_le();
   st[3] = vec_add(st[3],one);
 }
 
@@ -103,6 +125,62 @@ static inline void chacha20_block3(unsigned char* out, const unsigned char* in, 
   write_xor(in, out, v0);
   write_xor(in+(64 * blocks), out+(64 * blocks), v1);
   write_xor(in+(128 * blocks), out+(128 * blocks), v2);
+}
+
+static inline void chacha20_block2(unsigned char* out, const unsigned char* in, chacha20_state st) {
+  vec v0[4],v1[4];
+  int blocks = vec_size / 16;
+  chacha20_core2(v0,v1,st);
+  write_xor(in, out, v0);
+  write_xor(in+(64 * blocks), out+(64 * blocks), v1);
+}
+
+int chacha20_init_block(unsigned char* out, chacha20_state st, const unsigned char* k, const unsigned char* n, unsigned int ctr) {
+  chacha20_state_init(st,k,n,ctr);
+  vec v[4];
+  chacha20_core(v,st);
+  vec_store(out,v[0]);
+  vec_store(out+vec_size,v[1]);
+  vec_store(out+(2*vec_size),v[2]);
+  vec_store(out+(3*vec_size),v[3]);
+  vec one = one_128_le();
+  st[3] = vec_add(st[3],one);
+}
+
+int chacha20_continue(        
+	unsigned char *out,
+        const unsigned char *in,
+        unsigned long long inlen,
+        chacha20_state st) {
+    int blocks = vec_size / 16;
+    int iters;
+    /* 
+    for (iters = 0; iters < inlen/(3*blocks*64); iters++) {
+      chacha20_block3(out,in,st);
+      in += 3*blocks*64;
+      out += 3*blocks*64;
+    }
+    inlen = inlen % (3*blocks*64);
+    */
+    for (iters = 0; iters < inlen/(2*blocks*64); iters++) {
+      chacha20_block2(out,in,st);
+      in += 2*blocks*64;
+      out += 2*blocks*64;
+    }
+    inlen = inlen % (2*blocks*64);
+    for (iters = inlen/(blocks*64); iters != 0; iters--) {
+      chacha20_block(out,in,st);
+      in += blocks*64;
+      out+= blocks*64;
+    }
+    inlen = inlen % (blocks*64);
+    if (inlen) {
+        __attribute__ ((aligned (16))) char buf[blocks*64];
+        memcpy(buf,in,inlen);
+	chacha20_block(buf,buf,st);
+	memcpy(out,buf,inlen);
+    }
+    return 0;
 }
 
 int crypto_stream_xor_ic(
