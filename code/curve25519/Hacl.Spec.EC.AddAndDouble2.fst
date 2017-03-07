@@ -29,30 +29,55 @@ val fmonty_tot:
   px:s_513 -> pz:s_513 ->
   pqx:s_513 -> pqz:s_513 ->
   qx:s_513 ->
-  Tot (s_513 * s_513 * s_513 * s_513)
+  Tot (t:(s_513 * s_513 * s_513 * s_513){
+    let x2 = selem (Mktuple4?._1 t) in
+    let z2 = selem (Mktuple4?._2 t) in
+    let x3 = selem (Mktuple4?._3 t) in
+    let z3 = selem (Mktuple4?._4 t) in
+    let x_2 = selem px in let z_2 = selem pz in
+    let x_3 = selem pqx in let z_3 = selem pqz in let x_1 = selem qx in
+    let a  = x_2 +@ z_2 in
+    let aa = a *@ a in
+    let b  = x_2 -@ z_2 in
+    let bb = b *@ b in
+    let e = aa -@ bb in
+    let c = x_3 +@ z_3 in
+    let d = x_3 -@ z_3 in
+    let da = d *@ a in
+    let cb = c *@ b in
+    x3 = (da +@ cb) *@ (da +@ cb) /\ 
+    z3 = x_1 *@ ((da -@ cb) *@ (da -@ cb)) /\
+    x2 = aa *@ bb /\
+    z2 = e *@ (aa +@ ((121665 % prime) *@ e))
+    })
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let fmonty_tot px pz pqx pqz qx =
   fsum_513_is_53 px pz;
   let px' = fsum_tot px pz in
+  (* assert(selem px' = selem px +@ selem pz); *) // a = x_2 + z2
   lemma_fdifference_unrolled'' pz px;
   lemma_fdifference_unrolled''' pz px;
   let pz' = fdifference_tot pz px in
+  (* assert(selem pz' = selem px -@ selem pz); *) // b = x_2 - z2
   fsum_513_is_53 pqx pqz;
   let pqx' = fsum_tot pqx pqz in
+  (* assert(selem pqx' = selem pqx +@ selem pqz); *) // c = x_3 + z_3
   lemma_fdifference_unrolled'' pqz pqx;
   let pqz' = fdifference_tot pqz pqx in
+  (* assert(selem pqz' = selem pqx -@ selem pqz); *) // d = x_3 - z_3
   fmul_53_55_is_fine pqx' pz';
-  let xxprime = fmul_tot pqx' pz' in
+  let xxprime = fmul_tot pqx' pz' in // cb = c * b
   fmul_53_55_is_fine px' pqz';
-  let zzprime = fmul_tot px' pqz' in
+  let zzprime = fmul_tot px' pqz' in // da = a * d <<<<
   fsum_513_is_53 xxprime zzprime;
-  let xxprime' = fsum_tot xxprime zzprime in
+  let xxprime' = fsum_tot xxprime zzprime in // cbda = cb + da <<<<
   lemma_fdifference_unrolled''' zzprime xxprime;
-  let zzprime' = fdifference_tot zzprime xxprime in
+  let zzprime' = fdifference_tot zzprime xxprime in // da - cb
   lemma_53_is_5413 xxprime';
   fsquare_5413_is_fine xxprime';
-  let x3 = fsquare_times_tot xxprime' 1 in
+  let x3 = fsquare_times_tot xxprime' 1 in // x3 = cbda ^ 2
   fsquare_5413_is_fine zzprime';
-  let zzzprime = fsquare_times_tot zzprime' 1 in
+  let zzzprime = fsquare_times_tot zzprime' 1 in // zzzprime = (da - cb) ^ 2
   lemma_513_is_53 zzzprime; lemma_513_is_55 qx;
   fmul_53_55_is_fine zzzprime qx;
   let z3 = fmul_tot zzzprime qx in

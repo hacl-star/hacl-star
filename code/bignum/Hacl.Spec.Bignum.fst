@@ -40,6 +40,7 @@ let op_Star_At e1 e2 = fmul e1 e2
 val selem: seqelem -> GTot elem
 let selem s = seval s % prime
 
+(* TODO: move the the standard libraries *)
 assume val lemma_mod_sub_distr_l_l: a:nat -> b:nat -> p:pos -> Lemma ((a - b) % p = ((a % p) - b) % p)
 assume val lemma_mod_sub_distr_l_r: a:nat -> b:nat -> p:pos -> Lemma ((a - b) % p = (a - (b % p)) % p)
 
@@ -79,16 +80,26 @@ val fscalar_tot: a:seqelem -> s:limb{
   carry_wide_pre (fscalar_spec a s) 0
   /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec a s) 0)
   /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec a s) 0)) } ->
-  (* Tot (c:seqelem{selem c = (v s * selem a) % prime}) *)
-  Tot (c:seqelem)
+  Tot (c:seqelem{selem c = ((v s % prime) *@ selem a)})
 let fscalar_tot a s =
   let x = fscalar_spec a s in
   lemma_fscalar_eval a s;
+  cut (seval_wide x == v s * seval a);
   let y = carry_wide_spec x 0 in
+  cut (seval_wide y == v s * seval a);
   let z = carry_top_wide_spec y in
   lemma_carry_top_wide_spec y;
-  copy_from_wide_spec z
+  cut (seval_wide z % prime == (v s * seval a) % prime);
+  lemma_copy_from_wide z;
+  let z' = copy_from_wide_spec z in
+  Math.Lemmas.lemma_mod_mul_distr_l (v s) (seval a) prime;
+  Math.Lemmas.lemma_mod_mul_distr_l (seval a) (v s % prime) prime;
+  z'
 
 
-val fmul_tot: input:seqelem -> input2:seqelem{fmul_pre input input2} -> Tot seqelem
-let fmul_tot input input2 = fmul_spec input input2
+val fmul_tot: input:seqelem -> input2:seqelem{fmul_pre input input2} ->
+  Tot (out:seqelem{selem out = (selem input *@ selem input2)})
+let fmul_tot input input2 =
+  Math.Lemmas.lemma_mod_mul_distr_l (seval input) (seval input2) prime;
+  Math.Lemmas.lemma_mod_mul_distr_l (seval input2) (selem input) prime;  
+  fmul_spec input input2
