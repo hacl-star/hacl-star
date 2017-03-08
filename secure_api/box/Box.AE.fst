@@ -24,6 +24,7 @@ module SPEC = Spec.SecretBox
 
 open Box.PlainAE
 
+#set-options "--z3rlimit 100 --lax"
 // TODO: implement an init function for all the global state.
 type noncesize = SPEC.noncelen
 type keysize = SPEC.keylen
@@ -73,7 +74,7 @@ let empty_log i = MM.empty_map log_key (log_range i)
 noeq abstract type key =
   | Key: #i:id{AE_id? i /\ unfresh i /\ registered i} -> #(region:rid{extends region ae_key_region /\ is_below region ae_key_region /\ is_eternal_region region}) -> raw:aes_key -> log:log_t i region -> key
 
-val get_index: k:key -> Tot (i:id{i=k.i /\ unfresh i})
+val get_index: k:key -> Tot (i:id{i=k.i})
 let get_index k = k.i
 
 #set-options "--z3rlimit 25"
@@ -105,7 +106,6 @@ let keygen i =
   fresh_unfresh_contradiction i;
   Key #i #region rnd_k log
 
-#set-options "--z3rlimit 20"
 (**
    The coerce function transforms a raw aes_key into an abstract key. Only dishonest ids can be used
    with this function.
@@ -178,10 +178,10 @@ val get_regionGT: k:key -> GTot (region:rid{region=k.region})
 let get_regionGT k =
   k.region
 
-#set-options "--z3rlimit 15"
 (**
    Encrypt a a message under a key. Idealize if the key is honest and ae_ind_cca true.
 *)
+#set-options "--z3rlimit 100 --print_z3_statistics"
 val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i) -> ST cipher
   (requires (fun h0 -> 
     (honest i /\ (b2t ae_ind_cca) ==> MM.fresh k.log n h0)
@@ -216,7 +216,8 @@ let encrypt #i n k m =
     c
   )
 
-#set-options "--z3rlimit 15"
+#reset-options
+#set-options "--z3rlimit 100"
 (**
    Decrypt a ciphertext c using a key k. If the key is honest and ae_int_ctxt is idealized,
    try to obtain the ciphertext from the log. Else decrypt via concrete implementation.
@@ -252,3 +253,20 @@ let decrypt #i n k c =
     match p with
     | Some p' -> Some (PlainAE.coerce #i p')
     | None -> None
+
+
+//val functional_correctness_lemma: #i:id{AE_id? i} -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i ) -> ST bool
+//  (requires (fun h0 ->
+//    (honest i /\ (b2t ae_ind_cca) ==> MM.fresh k.log n h0)
+//    /\ MR.m_contains k.log h0
+//    /\ registered i
+//    /\ Map.contains h0.h k.region
+//    /\ MR.m_contains k.log h0
+//    /\ registered i
+//  ))
+//  (ensures (fun h0 b h1 -> b2t b))
+//let functional_correctness_lemma #i n k m =
+//  let c = encrypt n k m in
+//  match decrypt n k c with
+//  | Some m' -> m = m'
+//  | None -> false
