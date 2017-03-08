@@ -7,13 +7,13 @@ safety. The `fsum` function takes two limb arrays and adds them.  What
 if the input arrays were null-pointers, or more generally they do not
 point to valid arrays in the heap)?  What if the input arrays had size
 3? In these cases, the generated C code would have a serious bug:
-either a null-pointer exception or a buffer overrun. 
+either a null-pointer exception or a buffer overrun.
 
 F\* requires memory safety for all code, and consequently,
 we needed to add preconditions saying that the input buffers were `live`
-and that they were of type `felem` and hence had size 5. 
+and that they were of type `felem` and hence had size 5.
 
-The example in this directory is almost identical to [example 0] but its 
+The example in this directory is almost identical to [example 0] but its
 post-condition adds more information on what parts of the memory the function
 modified. As we shall see, this post-condition is essential if we want to
 be able to call fsum from another function.
@@ -21,7 +21,7 @@ be able to call fsum from another function.
 
 ### The F\* memory model
 
-F* has customizable effects. `Stack` is one of those. It means that the computation implicitely carries the program memory, on which some changes can be performed.
+F* has customizable effects. `Stack` is one of those. It means that the computation implicitly carries the program memory, on which some changes can be performed.
 
 The memory model lying under the `Stack` effect is called *HyperStack*. Without getting too deep into the details of the model, consider that *HyperStack* is a tree of *regions*.
 These *regions* are organized into 3 different disjoint categories:
@@ -34,7 +34,7 @@ In this setting the `Stack` effect is quite constrained. It carries an invariant
 - the set of references of each regions is identical before and after.
 
 Hence when in the `Stack` effect, nothing can be allocated on the heap, and thus the only way to allocate a fresh value is to first push a fresh frame on top of stack, allocate in it, and then free it.
-Note that in our setting integers are implicitely allocated, only buffers are explicitely go through concrete allocation.
+Note that in our setting integers are implicitly allocated, only buffers are explicitly go through concrete allocation.
 
 ### Memory safety conditions
 
@@ -54,7 +54,7 @@ If trying to access an element at an index greater than or equal to the length o
 
 ### All side-effects must be reflected in post-conditions
 
-In F* the `let` definition of the stateful computation is opaque: it is only visible to the SMT solver when it typechecks the function. When calling it it only knows about what its post-condition specifies.
+In F* the `let` definition of the stateful computation is opaque: it is only visible to the SMT solver when it typechecks the function. When calling it, it only knows about what its post-condition specifies.
 
 Hence, in *example 0* where the post-condition is `true`, the SMT solver knows nothing about what the function did.
 This is worse than sounds: although the `Stack` effect enforces a constraint on the memory layout, this is all the solver knows, which means that all the referenced values might have changed. For proofs, that is bad.
@@ -67,7 +67,7 @@ Here the buffer `b` has a refinement: `disjoint a b`. This indicates that the tw
 All F\* functions that use buffers must have `live` preconditions on
 all input buffers, and reading the buffer at an index has a
 precondition that the buffer's length must be larger than the
-index. This has two implications: 
+index. This has two implications:
 
 - it is impossible to dereference
 any reference that is not live. If a frame is popped for instance,
