@@ -20,11 +20,11 @@ First we define what are the element of the Z/pZ field (as mathematical integers
 
 Then we define `seqelem`, the type of the sequence of 5 uint64 corresponding to the value of the bignums in a certain heap.
 On this type, we define a mapping function, which associates a field element to a `seqelem`. Although the definition of the `seval_` function is recursive, for convenience for proofs, the unrolled value of
-`to_field s` is (s[0] + 2^51*s[1] + 2^(51*2)*s[2] + 2^(51*3)*s[3] + 2^(51*4)*s[4]) % (2^255-19), which is a natural mapping for the representation detailed in [example 2](https://github.com/mitls/hacl-star/tree/master/doc/tutorial/2).
+`to_field s` is `(s[0] + 2^51*s[1] + 2^(51*2)*s[2] + 2^(51*3)*s[3] + 2^(51*4)*s[4]) % (2^255-19)`, which is a natural mapping for the representation detailed in [example 2](https://github.com/mitls/hacl-star/tree/master/doc/tutorial/2).
 
 Then we implement the equivalent of the `fsum_` function on sequence: `fsum_spec` and we show that indeed, `fsum_spec` is the pure specification of the `fsum` stateful computation between the memory state `h0` and `h1`.
 
-Eventually we show that `fsum_spec` properly implements the field's addition via a extrinsic lemma:
+Eventually we show that `fsum_spec` properly implements the field's addition via an extrinsic lemma:
 ```F#
 val lemma_fsum_field: s:seqelem -> s':seqelem{fsum_spec_pre s s' len} ->
   Lemma (to_field (fsum_spec s s' len) = to_field s @+ to_field s')
