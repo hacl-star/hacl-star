@@ -613,15 +613,21 @@ let fsquare_pre s =
   /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s) 0))
   /\ carry_0_to_1_pre (copy_from_wide_spec (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s) 0)))
 
-val fsquare_spec: s:seqelem{fsquare_pre s} -> Tot (s':seqelem)
+val fsquare_spec: s:seqelem{fsquare_pre s} ->
+  Tot (s':seqelem{selem s' = selem s *@ selem s})
 let fsquare_spec s =
+  lemma_fsquare_spec_ s;
   let output1 = fsquare_spec_ s in
+  cut (seval_wide output1 % prime = (seval s * seval s) % prime);
   let output2 = carry_wide_spec output1 0 in
   lemma_carry_top_wide_spec output2;
   let output3 = carry_top_wide_spec output2 in
   lemma_copy_from_wide output3;
   let output4 = copy_from_wide_spec output3 in
-  carry_0_to_1_spec output4
+  let output5 = carry_0_to_1_spec output4 in
+  Math.Lemmas.lemma_mod_mul_distr_l (seval s) (seval s) prime;
+  Math.Lemmas.lemma_mod_mul_distr_l (seval s) (selem s) prime;
+  output5
 
 
 #set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"

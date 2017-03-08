@@ -29,10 +29,6 @@ val fmul: elem -> elem -> Tot elem
 let fmul e1 e2 = (e1 * e2) % prime
 let op_Star_At e1 e2 = fmul e1 e2
 
-val fdiv: elem -> d:elem{d <> zero} -> Tot elem
-let fdiv e1 e2 = (e1 / e2) % prime
-let op_Slash_At e1 e2 = fdiv e1 e2
-
 let rec op_Star_Star (e:elem) (n:pos) : Tot elem (decreases n) =
   if n = 1 then e
   else (
@@ -56,6 +52,22 @@ let xor a b = match a,b with | true, false | false, true -> true | _ -> false
 
 let cswap swap x y = if swap then y,x else x,y
 
+let add_and_double x_1 x_2 z_2 x_3 z_3 =
+  let a  = x_2 +@ z_2 in
+  let aa = a**2 in
+  let b  = x_2 -@ z_2 in
+  let bb = b**2 in
+  let e = aa -@ bb in
+  let c = x_3 +@ z_3 in
+  let d = x_3 -@ z_3 in
+  let da = d *@ a in
+  let cb = c *@ b in
+  let x_3 = (da +@ cb)**2 in
+  let z_3 = x_1 *@ ((da -@ cb)**2) in
+  let x_2 = aa *@ bb in
+  let z_2 = e *@ (aa +@ (121665 *@ e)) in
+  x_2, z_2, x_3, z_3
+
 val montgomery_ladder: k:scalar -> u:serialized_point -> Tot elem
 let montgomery_ladder k u =
   let rec loop k x_1 x_2 z_2 x_3 z_3 swap (ctr:nat) : Tot (tuple5 elem elem elem elem bool)
@@ -69,19 +81,7 @@ let montgomery_ladder k u =
       let x_2, x_3 = cswap swap x_2 x_3 in
       let z_2, z_3 = cswap swap z_2 z_3 in
       let swap = k_t in
-      let a  = x_2 +@ z_2 in
-      let aa = a**2 in
-      let b  = x_2 -@ z_2 in
-      let bb = b**2 in
-      let e = aa -@ bb in
-      let c = x_3 +@ z_3 in
-      let d = x_3 -@ z_3 in
-      let da = d *@ a in
-      let cb = c *@ b in
-      let x_3 = (da +@ cb)**2 in
-      let z_3 = x_1 *@ ((da -@ cb)**2) in
-      let x_2 = aa *@ bb in
-      let z_2 = e *@ (aa +@ (121665 *@ e)) in
+      let x_2, z_2 ,x_3, z_3 = add_and_double x_1 x_2 z_2 x_3 z_3 in
       loop k x_1 x_2 z_2 x_3 z_3 swap ctr
   ) in
   let k    = little_endian k in // Scalar as natural number
@@ -103,7 +103,6 @@ let scalarmult (k:scalar) (u:serialized_point) : Tot serialized_point =
   let k = decodeScalar25519 k in
   let u = upd u 31 (index u 31 &^ 127uy) in
   let u = montgomery_ladder k u in
-  (* assert_norm(pow2 256 >= pow2 255 - 19); *)
   little_bytes 32ul u
 
 
