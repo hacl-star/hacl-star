@@ -67,7 +67,7 @@ type box_key_log_inv (f:MM.map' box_key_log_key box_key_log_range) = True
 
 (**
    This monotone map maps an AE id to a key. It is used when box_beforenm generates a key using an honest DH-public key and an honest DH-private key.
-   If PKAE is idealized, we box_beforenm generates a random key instead of computing it from its DH components. We thus need this monotone log to guarantee that 
+   If PKAE is idealized, box_beforenm generates a random key instead of computing it from its DH components. We thus need this monotone log to guarantee that 
    for a given set of DH ids a single unique key is generated.
 *)
 assume val box_key_log:  MM.t box_key_log_region box_key_log_key box_key_log_range box_key_log_inv
@@ -124,8 +124,8 @@ let log_invariant_all_keys (h:mem) =
   (forall (i:id{AE_id? i /\ honest i}) (n:nonce) . (MM.defined box_key_log i h ==> (let k = MM.value box_key_log i h in // if it is in the box_key_log, then box_log and the local key_log
   									    let k_log = get_logGT k in          // should be in sync.
   									    (MM.defined box_log (n,i) h <==> MM.defined k_log n h))))
-  /\ (forall (i:id{AE_id? i /\ honest i}) . (MM.defined box_key_log i h ==> (let k = MM.value box_key_log i h in // if it is in the box_key_log, then box_log and the local key_log
-  									    let k_log = get_logGT k in          // should be in sync.
+  /\ (forall (i:id{AE_id? i /\ honest i}) . (MM.defined box_key_log i h ==> (let k = MM.value box_key_log i h in // if it is in the box_key_log, then the local key_log
+  									    let k_log = get_logGT k in          // should be contained in the heap.
 									    MR.m_contains k_log h)))
   // Removed this and made it a requirement only for the id that is currently handled.
   ///\ (forall (i:id{AE_id? i /\ honest i}) (n:nonce) . (MM.fresh box_key_log i h ==> MM.fresh box_log (n,i) h)) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
