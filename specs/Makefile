@@ -9,7 +9,7 @@ FSTAR_ARGS=$(OTHERFLAGS)
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 
-all: poly1305.exe chacha20.exe salsa20.exe secretbox.exe chacha20poly1305.exe gf128.exe
+all: poly1305.exe chacha20.exe salsa20.exe secretbox.exe chacha20poly1305.exe gf128.exe cryptobox.exe
 
 EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  FStar_Endianness.ml
 
@@ -79,6 +79,14 @@ chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 	./chacha20poly1305.exe
 
 
+cryptobox.exe: Spec.HSalsa20.fst Spec.SecretBox.fst Spec.Curve25519.fst Spec.CryptoBox.fst
+	$(MAKE) -C ../code/lib/ml MEM=HST
+	mkdir -p cryptobox-spec
+	$(FSTAR) $(ARGS) --odir cryptobox-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> cryptobox-spec/Spec_CryptoBox.ml
+	$(OCAMLOPT) -I cryptobox-spec $(OCAML_INCLUDES) $(addprefix cryptobox-spec/, $(EXTRACTED)) cryptobox-spec/Combinators.ml cryptobox-spec/Spec_Lib.ml cryptobox-spec/Spec_CTR.ml cryptobox-spec/Spec_Salsa20.ml cryptobox-spec/Spec_HSalsa20.ml cryptobox-spec/Spec_Poly1305.ml cryptobox-spec/Spec_SecretBox.ml cryptobox-spec/Spec_Curve25519.ml cryptobox-spec/Spec_CryptoBox.ml -o cryptobox.exe
+	./cryptobox.exe
+
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec cryptobox-spec

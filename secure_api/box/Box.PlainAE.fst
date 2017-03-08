@@ -12,7 +12,7 @@ abstract type protected_ae_plain (i:id{AE_id? i}) = p:protected_pkae_plain{get_i
 
 type ae_plain = b:bytes{Seq.length b / Spec.Salsa20.blocklen < pow2 32}
 
-val length: #i:id{AE_id? i} -> (protected_ae_plain i) -> Tot nat
+val length: #i:id{AE_id? i} -> (protected_ae_plain i) -> Tot (n:nat {n / Spec.Salsa20.blocklen < pow2 32})
 let length #i p = PlainPKAE.length p
 
 (**
@@ -34,17 +34,14 @@ let repr #i p =
 
 (**
    This is a helper function used by PKAE.encrypt to encapsulate the payload before
-   passing it on to AE.encrypt. If AE is idealized and the payload is honest, then we 
-   wrap the payload into our abstract type in good faith. If not, we coerce it.
+   passing it on to AE.encrypt.
 *)
 val ae_message_wrap: #i:id{AE_id? i} -> p:protected_pkae_plain{get_index p = i} -> Tot (protected_ae_plain i)
 let ae_message_wrap #i p = p
 
 (**
    This is the reverse function to ae_message_wrap. PKAE.decrypt uses it to extract a
-   protected ae payload. If it AE is idealized and the payload is honest, then
-   we strip it of its protection in good faith. Otherwise we break it down to its 
-   byte representation using repr.
+   protected ae payload.
 *)
 val ae_message_unwrap: #i:id{AE_id? i} -> p:protected_ae_plain i -> Tot (p:protected_pkae_plain{get_index p = i})
 let ae_message_unwrap #i p = p

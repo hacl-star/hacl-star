@@ -225,10 +225,10 @@ val honest_dishonest_lemma: dh_i:dh_id -> ST(unit)
   (requires (fun h -> registered (DH_id dh_i)))
   (ensures (fun h0 _ h1 ->
     let i = DH_id dh_i in
-    modifies_none h0 h1 /\
-    ( dishonest i \/ honest i ) /\
-    ( ~(honest i) ==> dishonest i ) /\
-    ( ~(dishonest i) ==> honest i ) /\
+    modifies_none h0 h1
+    /\ ( dishonest i \/ honest i )
+    /\ ( ~(honest i) ==> dishonest i )
+    /\ ( ~(dishonest i) ==> honest i )
   ))
 let honest_dishonest_lemma i = 
   let h = get() in

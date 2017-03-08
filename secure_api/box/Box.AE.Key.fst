@@ -1,13 +1,11 @@
 (**
-   TODO: Documentation.
+   This module exists to provide type information and functions needed by Box.DH. Box.AE is not imported directly by
+   Box.DH to preserve some notion of modularity. If Box.DH should be used with some other module, only Box.PlainDH
+   should have to be edited.
 *)
-module Box.PlainDH
+module Box.AE.Key
 
-open CoreCrypto
-open Platform.Bytes
-open Box.Flags
-open Box.Indexing
-open Box.AE
+module AE = Box.AE
 
 type key = AE.key
 
@@ -21,14 +19,10 @@ let leak_key = AE.leak_key
 
 let ae_key_region = AE.ae_key_region
 
-let get_regionGT = AE.get_regionGT
-
 let get_logGT = AE.get_logGT
 
 let recall_log = AE.recall_log
 
 let empty_log = AE.empty_log
-
-let nonce = AE.nonce
 
 let aes_key = AE.aes_key
