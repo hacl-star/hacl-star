@@ -21,6 +21,7 @@ let h32 = H32.t
 let uint8_p = buffer H8.t
 type state = b:Buffer.buffer uint32x8{length b = 4}
 unfold let blocks = U32.(vec_size /^ 4ul)
+unfold let vecsizebytes = U32.(vec_size *^ 4ul)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 

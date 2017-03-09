@@ -81,10 +81,10 @@ Chacha20.c: Hacl.Impl.Chacha20.fst Chacha20.fst
 		-bundle 'Chacha20=Hacl.Impl.Chacha20,Chacha20' -drop 'Hacl.Spec.\*' -add-include '"loops.h"' -drop 'Spec.\*' -drop "Combinators" \
 		Chacha20.fst $(VERBOSE) -skip-linking
 
-Chacha20_vec.c: Hacl.Uint32x4.fst Loops_vec.fst Hacl.Impl.Chacha20_vec.fst Chacha20_vec.fst
+Chacha20_vec.c: Hacl.UInt32x4.fst Hacl.UInt32x8.fst Loops_vec.fst Hacl.Impl.Chacha20_vec.fst Chacha20_vec.fst
 	mkdir -p chacha-c
-	$(KRML) -tmpdir chacha-vec-c -no-prefix Loops_vec -no-prefix Hacl.UInt32x4 -I . -drop "Loops_vec" -drop "Hacl.UInt32x4" \
-		-bundle 'Chacha20_vec=Loops_vec,Hacl.Impl.Chacha20_vec,Chacha20_vec' -drop 'Hacl.Spec.\*' -add-include '"loops_vec.h"' -drop 'Spec.\*' -drop "Combinators" -add-include '"vec128.h"' \
+	$(KRML) -tmpdir chacha-vec-c -no-prefix Loops_vec -no-prefix Hacl.UInt32x4 -no-prefix Hacl.UInt32x8 -I . -drop "Loops_vec" -drop "Hacl.UInt32x4" -drop "Hacl.UInt32x8" \
+		-bundle 'Chacha20_vec=Loops_vec,Hacl.Impl.Chacha20_state,Hacl.Impl.Chacha20_vec,Chacha20_vec' -drop 'Hacl.Spec.\*' -add-include '"loops_vec.h"' -drop 'Spec.\*' -drop "Combinators" -add-include '"vec256.h"' \
 		Chacha20_vec.fst $(VERBOSE) -skip-linking
 
 chacha20.exe: Hacl.Impl.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst

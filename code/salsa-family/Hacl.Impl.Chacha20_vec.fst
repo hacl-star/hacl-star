@@ -21,6 +21,9 @@ let u32 = U32.t
 let h32 = H32.t
 let uint8_p = buffer H8.t
 
+unfold let vecsizebytes2 = U32.(vecsizebytes *^ 2ul)
+unfold let vecsizebytes3 = U32.(vecsizebytes *^ 3ul)
+unfold let vecsizebytes4 = U32.(vecsizebytes *^ 4ul)
 
 let idx = a:U32.t{U32.v a < 4}
 
@@ -121,13 +124,13 @@ let double_round st =
 
 #reset-options "--initial_fuel 0 --max_fuel 1 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ "substitute"]
 val rounds:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
-[@ "c_inline"]
+[@ "substitute"]
 let rounds st = Loops_vec.rounds st
 // Real implementation bellow
   (* Combinators.iter #H32.t #16 #(double_round') 10ul double_round st 16ul *)
@@ -136,27 +139,27 @@ let rounds st = Loops_vec.rounds st
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 
-[@ "c_inline"]
+[@ "substitute"]
 val sum_states:
   st:state ->
   st':state{disjoint st st'} ->
   Stack unit
     (requires (fun h -> live h st /\ live h st'))
     (ensures  (fun h0 _ h1 -> live h0 st /\ live h1 st /\ live h0 st' /\ modifies_1 st h0 h1))
-[@ "c_inline"]
+[@ "substitute"]
 let sum_states st st' = Loops_vec.sum_states st st'
   // Real implementation bellow
   (* Combinators.inplace_map2 (fun x y -> Hacl.UInt32x4.(x +%^ y)) st st' 16ul *)
 
 
-[@ "c_inline"]
+[@ "substitute"]
 val copy_state:
   st':state ->
   st:state{disjoint st st'} ->
   Stack unit
     (requires (fun h -> live h st /\ live h st'))
     (ensures (fun h0 _ h1 -> live h1 st /\ live h0 st' /\ modifies_1 st' h0 h1))
-[@ "c_inline"]
+[@ "substitute"]
 let copy_state st' st =
   st'.(0ul) <- st.(0ul);
   st'.(1ul) <- st.(1ul);
@@ -187,7 +190,7 @@ let chacha20_core k st =
 
 [@ "c_inline"]
 val chacha20_block:
-  stream_block:uint8_p{length stream_block = 64 * U32.v blocks} ->
+  stream_block:uint8_p{length stream_block = U32.v vecsizebytes4} ->
   st:state{disjoint st stream_block} ->
   Stack unit
     (requires (fun h -> live h stream_block))
@@ -216,80 +219,34 @@ let init st k n =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-val lemma_chacha20_counter_mode_1:
-  ho:mem -> output:uint8_p{live ho output} ->
-  hi:mem -> input:uint8_p{live hi input} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len <= 64 /\ U32.v len > 0} ->
-  (* h:mem -> st:state{live h st} -> *)
-  k:Spec.key -> n:Spec.nonce -> ctr:U32.t{U32.v ctr + (length input / 64) < pow2 32} -> Lemma
-    (Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr) (reveal_sbytes (as_seq hi input))
-     == Combinators.seq_map2 (fun x y -> FStar.UInt8.(x ^^ y))
-                             (reveal_sbytes (as_seq hi input))
-                             (Seq.slice (Spec.chacha20_block k n (U32.v ctr)) 0 (U32.v len)))
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
-let lemma_chacha20_counter_mode_1 ho output hi input len k n ctr = ()
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
-val lemma_chacha20_counter_mode_2:
-  ho:mem -> output:uint8_p{live ho output} ->
-  hi:mem -> input:uint8_p{live hi input} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len > 64} ->
-  k:Spec.key -> n:Spec.nonce -> ctr:U32.t{U32.v ctr + (length input / 64) < pow2 32} -> Lemma
-    (Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr) (reveal_sbytes (as_seq hi input))
-     == (let b, plain = Seq.split (reveal_sbytes (as_seq hi input)) 64 in
-         let mask = Spec.chacha20_block k n (U32.v ctr) in
-         let eb = Combinators.seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) b mask in
-         let cipher = Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr + 1) plain in
-         Seq.append eb cipher))
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
-let lemma_chacha20_counter_mode_2 ho output hi input len k n ctr = ()
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
-val lemma_chacha20_counter_mode_0:
-  ho:mem -> output:uint8_p{live ho output} ->
-  hi:mem -> input:uint8_p{live hi input} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len = 0} ->
-  k:Spec.key -> n:Spec.nonce -> ctr:U32.t{U32.v ctr + (length input / 64) < pow2 32} -> Lemma
-    (Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr) (reveal_sbytes (as_seq hi input))
-     == reveal_sbytes (as_seq ho output))
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
-let lemma_chacha20_counter_mode_0 ho output hi input len k n ctr =
-  Seq.lemma_eq_intro (as_seq ho output) Seq.createEmpty
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
 val update_last:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= 64 * U32.v blocks /\ U32.v len > 0} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= U32.v vecsizebytes4 /\ U32.v len > 0} ->
   st:state{disjoint st output /\ disjoint st plain} ->
   Stack unit
     (requires (fun h -> live h output /\ live h plain))
     (ensures (fun h0 updated_log h1 -> live h1 output /\ live h0 plain /\ modifies_2 output st h0 h1))
 let update_last output plain len st =
   push_frame();
-  let block = create (uint8_to_sint8 0uy) U32.(blocks *^ 64ul) in
+  let block = create (uint8_to_sint8 0uy) vecsizebytes4 in
   chacha20_block block st;
   let mask = Buffer.sub block 0ul len in
   Loops_vec.xor_bytes output plain mask len;
   pop_frame()
 
 val xor_block:
-  output:uint8_p{length output = 64} ->
-  plain:uint8_p{disjoint output plain /\ length plain = 64} ->
+  output:uint8_p{length output = U32.v vecsizebytes4} ->
+  plain:uint8_p{disjoint output plain /\ length plain = U32.v vecsizebytes4} ->
   st:state{disjoint st output /\ disjoint st plain} ->
   Stack unit
     (requires (fun h -> live h output /\ live h plain))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_1 output h0 h1))
 let xor_block output plain st = 
-  let p0 = vec_load_le (Buffer.sub plain 0ul 16ul) in
-  let p1 = vec_load_le (Buffer.sub plain 16ul 16ul) in
-  let p2 = vec_load_le (Buffer.sub plain 32ul 16ul) in
-  let p3 = vec_load_le (Buffer.sub plain 48ul 16ul) in
+  let p0 = vec_load_le (Buffer.sub plain 0ul vecsizebytes) in
+  let p1 = vec_load_le (Buffer.sub plain vecsizebytes vecsizebytes) in
+  let p2 = vec_load_le (Buffer.sub plain vecsizebytes2 vecsizebytes) in
+  let p3 = vec_load_le (Buffer.sub plain vecsizebytes3 vecsizebytes) in
   let k0 = st.(0ul) in
   let k1 = st.(1ul) in
   let k2 = st.(2ul) in
@@ -298,14 +255,14 @@ let xor_block output plain st =
   let o1 = vec_xor p1 k1 in
   let o2 = vec_xor p2 k2 in
   let o3 = vec_xor p3 k3 in
-  vec_store_le (Buffer.sub output 0ul 16ul) o0;
-  vec_store_le (Buffer.sub output 16ul 16ul) o1;
-  vec_store_le (Buffer.sub output 32ul 16ul) o2;
-  vec_store_le (Buffer.sub output 48ul 16ul) o3
+  vec_store_le (Buffer.sub output 0ul  vecsizebytes) o0;
+  vec_store_le (Buffer.sub output vecsizebytes vecsizebytes) o1;
+  vec_store_le (Buffer.sub output vecsizebytes2 vecsizebytes) o2;
+  vec_store_le (Buffer.sub output vecsizebytes3 vecsizebytes) o3
 
 val update:
-  output:uint8_p{length output = 64} ->
-  plain:uint8_p{disjoint output plain /\ length plain = 64} ->
+  output:uint8_p{length output = U32.v vecsizebytes4} ->
+  plain:uint8_p{disjoint output plain /\ length plain = U32.v vecsizebytes4} ->
   st:state{disjoint st output /\ disjoint st plain} ->
   Stack unit
     (requires (fun h -> live h output /\ live h plain))
@@ -340,7 +297,7 @@ let update2 output plain st =
   state_to_key k;
   xor_block output plain k;
   state_to_key k;
-  xor_block (Buffer.offset output 64ul) (Buffer.offset plain 64ul) k';
+  xor_block (Buffer.offset output vecsizebytes4) (Buffer.offset plain vecsizebytes4) k';
   state_incr st;
   state_incr st;
   pop_frame()
@@ -350,7 +307,7 @@ let update2 output plain st =
 val chacha20_counter_mode_:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= 64} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= U32.v vecsizebytes4} ->
   st:state{disjoint st output /\ disjoint st plain} ->
   Stack unit
     (requires (fun h -> live h output /\ live h plain))
@@ -379,7 +336,7 @@ val chacha20_counter_mode:
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 let rec chacha20_counter_mode output plain len st ctr =
   let h0 = ST.get() in
-  let bs = U32.(blocks *^ 64ul) in 
+  let bs = vecsizebytes4 in
   if U32.(len <^ bs) then chacha20_counter_mode_ output plain len st
   else (
     let b  = Buffer.sub plain 0ul bs in
