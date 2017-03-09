@@ -9,7 +9,7 @@ open Hacl.UInt32
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Chacha20
-open Combinators
+open C.Loops
 
 module Spec = Spec.Chacha20
 
@@ -390,9 +390,9 @@ val rounds:
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == rounds s)))
 [@ "c_inline"]
-let rounds st = Loops.rounds st
+let rounds st =
 // Real implementation bellow
-  (* Combinators.iter #H32.t #16 #(double_round') 10ul double_round st 16ul *)
+  repeat #H32.t #16 #(double_round') st 16ul 10ul double_round
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -406,11 +406,11 @@ val sum_states:
     (requires (fun h -> live h st /\ live h st'))
     (ensures  (fun h0 _ h1 -> live h0 st /\ live h1 st /\ live h0 st' /\ modifies_1 st h0 h1
       /\ (let s1 = as_seq h1 st in let s = as_seq h0 st in let s' = as_seq h0 st' in
-         s1 == Combinators.seq_map2 (fun x y -> H32.(x +%^ y)) s s')))
+         s1 == seq_map2 (fun x y -> H32.(x +%^ y)) s s')))
 [@ "c_inline"]
-let sum_states st st' = Loops.sum_states st st'
+let sum_states st st' =
   // Real implementation bellow
-  (* Combinators.inplace_map2 (fun x y -> H32.(x +%^ y)) st st' 16ul *)
+  in_place_map2 st st' 16ul (fun x y -> H32.(x +%^ y))
 
 
 [@ "c_inline"]
@@ -567,7 +567,7 @@ val lemma_chacha20_counter_mode_1:
   (* h:mem -> st:state{live h st} -> *)
   k:Spec.key -> n:Spec.nonce -> ctr:U32.t{U32.v ctr + (length input / 64) < pow2 32} -> Lemma
     (Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr) (reveal_sbytes (as_seq hi input))
-     == Combinators.seq_map2 (fun x y -> FStar.UInt8.(x ^^ y))
+     == seq_map2 (fun x y -> FStar.UInt8.(x ^^ y))
                              (reveal_sbytes (as_seq hi input))
                              (Seq.slice (Spec.chacha20_block k n (U32.v ctr)) 0 (U32.v len)))
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
@@ -583,7 +583,7 @@ val lemma_chacha20_counter_mode_2:
     (Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr) (reveal_sbytes (as_seq hi input))
      == (let b, plain = Seq.split (reveal_sbytes (as_seq hi input)) 64 in
          let mask = Spec.chacha20_block k n (U32.v ctr) in
-         let eb = Combinators.seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) b mask in
+         let eb = seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) b mask in
          let cipher = Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr + 1) plain in
          Seq.append eb cipher))
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
@@ -627,8 +627,9 @@ let update_last output plain len log st ctr =
   let block = create (uint8_to_sint8 0uy) 64ul in
   let l = chacha20_block log block st ctr in
   let mask = Buffer.sub block 0ul len in
-  Loops.xor_bytes output plain mask len;
-  (* Combinators.map2 (fun x y -> H8.(x ^^ y)) output plain mask len; *)
+  let len' = len in
+  (* map2 output plain block len (fun x y -> H8.(x ^^ y)); *)
+  map2 output plain block len' (fun x y -> H8.(x ^^ y));
   let h1 = ST.get() in
   lemma_chacha20_counter_mode_1 h1 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr;
   pop_frame();
@@ -649,14 +650,13 @@ val update:
       /\ (let o = reveal_sbytes (as_seq h1 output) in
          let plain = reveal_sbytes (as_seq h0 plain) in
          match Ghost.reveal log with | MkLog k n ->
-         o == Combinators.seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) plain (chacha20_cipher k n (U32.v ctr)))))
+         o == seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) plain (chacha20_cipher k n (U32.v ctr)))))
 let update output plain log st ctr =
   let h0 = ST.get() in
   push_frame();
   let block = create (uint8_to_sint8 0uy) 64ul in
   let l = chacha20_block log block st ctr in
-  Loops.xor_bytes output plain block 64ul;
-  (* Combinators.map2 (fun x y -> H8.(x ^^ y)) output plain block 64ul; *)
+  map2 output plain block 64ul (fun x y -> H8.(x ^^ y));
   pop_frame();
   l
 
@@ -675,7 +675,7 @@ val lemma_chacha20_counter_mode:
      let p = reveal_sbytes (as_seq h0 (Buffer.sub plain 0ul 64ul)) in
      let o' = reveal_sbytes (as_seq h2 (Buffer.offset output 64ul)) in
      let p' = reveal_sbytes (as_seq h0 (Buffer.offset plain 64ul)) in
-     o == Combinators.seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p (chacha20_cipher k n (ctr))
+     o == seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p (chacha20_cipher k n (ctr))
      /\ o' == Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (ctr + 1) p')))
      (ensures (
        (let o = reveal_sbytes (as_seq h2 output) in
@@ -692,7 +692,7 @@ let lemma_chacha20_counter_mode h0 h1 h2 output plain len k n ctr =
   Seq.lemma_eq_intro b (reveal_sbytes (as_seq h0 (Buffer.sub plain 0ul 64ul)));
   Seq.lemma_eq_intro plainn (reveal_sbytes (as_seq h0 (Buffer.offset plain 64ul)));
   let mask = Spec.chacha20_block k n (ctr) in
-  let eb = Combinators.seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) b mask in
+  let eb = seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) b mask in
   Seq.lemma_eq_intro eb (reveal_sbytes (as_seq h2 (Buffer.sub output 0ul 64ul)));
   let cipher = Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (ctr + 1) plainn in
   Seq.lemma_eq_intro cipher (reveal_sbytes (as_seq h2 (Buffer.offset output 64ul)));
