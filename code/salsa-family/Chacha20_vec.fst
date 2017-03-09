@@ -2,6 +2,7 @@ module Chacha20_vec
 
 open FStar.Buffer
 open Hacl.Spec.Endianness
+open Hacl.Impl.Chacha20_state
 open Hacl.Impl.Chacha20_vec
 
 module U32 = FStar.UInt32
@@ -18,8 +19,8 @@ val chacha20_key_block:
     (ensures (fun h0 _ h1 -> live h1 block /\ modifies_1 block h0 h1))
 let chacha20_key_block block k n ctr =
   push_frame();
-  let st = alloc () in
-  setup st k n ctr;
+  let st = state_alloc () in
+  state_setup st k n ctr;
   chacha20_block block st;
   pop_frame()
 

@@ -4,7 +4,7 @@
 #include <emmintrin.h>
 
 #define VEC128
-static const int vec_size = 16;
+static const int vec_size = 4;
 
 typedef unsigned int vec128 __attribute__ ((vector_size (16)));
 
@@ -73,7 +73,12 @@ static inline vec vec_xor(vec v1, vec v2) {
   return r;
 }
 
+static const vec two_le = {.v = {2,0,0,0}};
 static const vec one_le = {.v = {1,0,0,0}};
 static const vec zero = {.v = {0,0,0,0}};
+
+static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned int second) {
+  return v1;
+}
 
 #endif

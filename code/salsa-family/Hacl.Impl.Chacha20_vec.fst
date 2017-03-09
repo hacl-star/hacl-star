@@ -14,84 +14,12 @@ module Spec = Spec.Chacha20
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
 module H32 = Hacl.UInt32
-open Hacl.UInt32x4
+open Hacl.UInt32x8
+open Hacl.Impl.Chacha20_state
 
 let u32 = U32.t
 let h32 = H32.t
 let uint8_p = buffer H8.t
-type state = b:Buffer.buffer uint32x4{length b = 4}
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
-
-[@ "substitute"]
-val constant_setup_:
-  c:state ->
-  Stack unit
-    (requires (fun h -> live h c))
-    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
-[@ "substitute"]
-let constant_setup_ st =
-  st.(0ul)  <- vec_load_32x4 (uint32_to_sint32 0x61707865ul) 
-  	       		     (uint32_to_sint32 0x3320646eul)
-			     (uint32_to_sint32 0x79622d32ul)
-			     (uint32_to_sint32 0x6b206574ul)
-
-
-[@ "substitute"]
-val constant_setup:
-  c:state ->
-  Stack unit
-    (requires (fun h -> live h c))
-    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
-[@ "substitute"]
-let constant_setup st =
-  constant_setup_ st
-
-[@ "substitute"]
-val keysetup:
-  st:state ->
-  k:uint8_p{length k = 32 /\ disjoint st k} ->
-  Stack unit
-    (requires (fun h -> live h st /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h0 st /\ live h0 k /\ live h1 st /\ modifies_1 st h0 h1))
-[@ "substitute"]
-let keysetup st k =
-  let k0 = vec_load_le (Buffer.sub k 0ul 16ul) in
-  let k1 = vec_load_le (Buffer.sub k 16ul 16ul) in
-  st.(1ul) <- k0;
-  st.(2ul) <- k1
-
-
-[@ "substitute"]
-val ctr_ivsetup:
-  st:state ->
-  ctr:U32.t ->
-  iv:uint8_p{length iv = 12 /\ disjoint st iv} ->
-  StackInline unit
-    (requires (fun h -> live h st /\ live h iv))
-    (ensures  (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 iv))
-[@ "substitute"]
-let ctr_ivsetup st ctr iv =
-  let n0 = load32_le (Buffer.sub iv 0ul 4ul) in
-  let n1 = load32_le (Buffer.sub iv 4ul 4ul) in
-  let n2 = load32_le (Buffer.sub iv 8ul 4ul) in
-  let v = vec_load_32x4 ctr n0 n1 n2 in
-  st.(3ul) <- v
-
-[@ "c_inline"]
-val setup:
-  st:state ->
-  k:uint8_p{length k = 32 /\ disjoint st k} ->
-  n:uint8_p{length n = 12 /\ disjoint st n} ->
-  c:U32.t ->
-  Stack unit
-    (requires (fun h -> live h st /\ live h k /\ live h n))
-    (ensures (fun h0 _ h1 -> live h0 k /\ live h0 n /\ live h1 st /\ modifies_1 st h0 h1))
-[@ "c_inline"]
-let setup st k n c =
-  constant_setup st;
-  keysetup st k;
-  ctr_ivsetup st c n
 
 
 let idx = a:U32.t{U32.v a < 4}
@@ -114,13 +42,13 @@ let line st a b d s =
   st.(d) <- sd
 
 
-[@ "c_inline"]
+[@ "substitute"]
 val round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
-[@ "c_inline"]
+[@ "substitute"]
 let round st =
   line st 0ul 1ul 3ul 16ul;
   line st 2ul 3ul 1ul 12ul;
@@ -137,11 +65,13 @@ val column_round:
 [@ "substitute"]
 let column_round st = round st
 
+[@ "substitute"]
 val shuffle_rows_0123:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
+[@ "substitute"]
 let shuffle_rows_0123 st = 
     let r1 = st.(1ul) in
     let r2 = st.(2ul) in
@@ -150,11 +80,13 @@ let shuffle_rows_0123 st =
     st.(2ul) <-  vec_shuffle_right r2 2ul;
     st.(3ul) <-  vec_shuffle_right r3 3ul
 
+[@ "substitute"]
 val shuffle_rows_0321:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
+[@ "substitute"]
 let shuffle_rows_0321 st = 
     let r1 = st.(1ul) in
     let r2 = st.(2ul) in
@@ -255,7 +187,7 @@ let chacha20_core k st =
 
 [@ "c_inline"]
 val chacha20_block:
-  stream_block:uint8_p{length stream_block = 64} ->
+  stream_block:uint8_p{length stream_block = 64 * U32.v blocks} ->
   st:state{disjoint st stream_block} ->
   Stack unit
     (requires (fun h -> live h stream_block))
@@ -265,22 +197,8 @@ let chacha20_block stream_block st =
   push_frame();
   let k = Buffer.create zero 4ul in
   chacha20_core k st;
-  vec_store_le (Buffer.sub stream_block 0ul 16ul) k.(0ul);
-  vec_store_le (Buffer.sub stream_block 16ul 16ul) k.(1ul);
-  vec_store_le (Buffer.sub stream_block 32ul 16ul) k.(2ul);
-  vec_store_le (Buffer.sub stream_block 48ul 16ul) k.(3ul);
+  state_to_key_block stream_block k;
   pop_frame()
-
-[@ "c_inline"]
-val alloc:
-  unit ->
-  StackInline state
-    (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
-      /\ Map.domain h1.h == Map.domain h0.h))
-[@ "c_inline"]
-let alloc () =
-  create zero 4ul
 
 
 [@ "c_inline"]
@@ -293,7 +211,7 @@ val init:
     (ensures  (fun h0 log h1 -> live h1 st /\ live h0 k /\ live h0 n /\ modifies_1 st h0 h1))
 [@ "c_inline"]
 let init st k n = 
-  setup st k n 0ul
+  state_setup st k n 0ul
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -347,14 +265,14 @@ let lemma_chacha20_counter_mode_0 ho output hi input len k n ctr =
 val update_last:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= 64 /\ U32.v len > 0} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= 64 * U32.v blocks /\ U32.v len > 0} ->
   st:state{disjoint st output /\ disjoint st plain} ->
   Stack unit
     (requires (fun h -> live h output /\ live h plain))
     (ensures (fun h0 updated_log h1 -> live h1 output /\ live h0 plain /\ modifies_2 output st h0 h1))
 let update_last output plain len st =
   push_frame();
-  let block = create (uint8_to_sint8 0uy) 64ul in
+  let block = create (uint8_to_sint8 0uy) U32.(blocks *^ 64ul) in
   chacha20_block block st;
   let mask = Buffer.sub block 0ul len in
   Loops_vec.xor_bytes output plain mask len;
@@ -397,10 +315,35 @@ let update output plain st =
   push_frame();
   let k = Buffer.create zero 4ul in
   chacha20_core k st;
+  state_to_key k;
   xor_block output plain k;
-  st.(3ul) <- vec_add st.(3ul) one_le;
+  state_incr st;
   pop_frame()
 
+val update2:
+  output:uint8_p{length output = 128} ->
+  plain:uint8_p{disjoint output plain /\ length plain = 128} ->
+  st:state{disjoint st output /\ disjoint st plain} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h plain))
+    (ensures (fun h0 updated_log h1 -> live h1 output /\ live h0 plain /\ modifies_2 output st h0 h1))
+let update2 output plain st =
+  let h0 = ST.get() in
+  push_frame();
+  let st' = Buffer.create zero 4ul in
+  copy_state st' st;
+  state_incr st';
+  let k = Buffer.create zero 4ul in
+  let k' = Buffer.create zero 4ul in
+  chacha20_core k st;
+  chacha20_core k' st';
+  state_to_key k;
+  xor_block output plain k;
+  state_to_key k;
+  xor_block (Buffer.offset output 64ul) (Buffer.offset plain 64ul) k';
+  state_incr st;
+  state_incr st;
+  pop_frame()
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 300"
 
@@ -436,18 +379,18 @@ val chacha20_counter_mode:
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 let rec chacha20_counter_mode output plain len st ctr =
   let h0 = ST.get() in
-  if U32.(len <=^ 64ul) then chacha20_counter_mode_ output plain len st
+  let bs = U32.(blocks *^ 64ul) in 
+  if U32.(len <^ bs) then chacha20_counter_mode_ output plain len st
   else (
-    let b  = Buffer.sub plain 0ul 64ul in
-    let b' = Buffer.offset plain 64ul in
-    let o  = Buffer.sub output 0ul 64ul in
-    let o' = Buffer.offset output 64ul in
+    let b  = Buffer.sub plain 0ul bs in
+    let b' = Buffer.offset plain bs in
+    let o  = Buffer.sub output 0ul bs in
+    let o' = Buffer.offset output bs in
     update o b st;
     let h = ST.get() in
-    let l = chacha20_counter_mode o' b' U32.(len -^ 64ul) st U32.(ctr +^ 1ul) in
+    let l = chacha20_counter_mode o' b' U32.(len -^ bs) st U32.(ctr +^ blocks) in
     let h' = ST.get() in
     ())
-
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
@@ -464,7 +407,7 @@ val chacha20:
       /\ modifies_1 output h0 h1))
 let chacha20 output plain len k n ctr =
   push_frame();
-  let st = alloc () in
-  setup st k n ctr;
+  let st = state_alloc () in
+  state_setup st k n ctr;
   chacha20_counter_mode output plain len st ctr;
   pop_frame()(* ; *)
