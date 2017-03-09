@@ -25,10 +25,10 @@ inline_for_extraction
 let set (i:nat) (x:'a) (s:seq 'a{length s > i}) : Tot (s':seq 'a{length s' = length s}) = upd s i x
 
 inline_for_extraction
-let iter n f x = Combinators.iter_ n f x
+let iter n f x = C.Loops.repeat_spec n f x
 
 inline_for_extraction
-let map2 f s1 s2 = Combinators.seq_map2 f s1 s2
+let map2 f s1 s2 = C.Loops.seq_map2 f s1 s2
 
 let singleton x = Seq.create 1 x
 
