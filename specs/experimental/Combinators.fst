@@ -3,6 +3,7 @@ module Combinators
 open FStar.Mul
 open FStar.ST
 open FStar.Buffer
+(* open C.Loops *)
 
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
@@ -75,34 +76,34 @@ let rec lemma_iter_0 #a n f x = ()
 // A higher-order combinator that KreMLin is aware of and will extract as a
 // proper for-loop
 (* Jonathan's original for-loop proposal *)
-val for: #(a: Type0) ->
-  b:buffer a ->
-  l:UInt32.t{ UInt32.( 0 <= v l /\ v l <= Buffer.length b) } ->
-  start:UInt32.t{ UInt32.( 0 <= v start /\ v start <= v l )} ->
-  inv:(HS.mem -> nat -> Type0) ->
-  f:(i:UInt32.t{ UInt32.( v start <= v i /\ v i < v l ) } ->
-    Stack unit
-      (requires (fun h -> inv h (UInt32.v i)))
-      (ensures (fun h_1 _ h_2 -> UInt32.(inv h_1 (v i) /\ inv h_2 (v i + 1))))) ->
-  Stack unit
-    (requires (fun h ->
-      (forall (h: HS.mem) (i: nat). inv h i ==> live h b) /\
-      inv h (UInt32.v start)))
-    (ensures (fun _ _ h_2 -> inv h_2 (UInt32.v l)))
-    (decreases (UInt32.(v l - v start)))
-let rec for #a b l start inv f =
-  let open FStar.Buffer in
-  if start = l then
-    ()
-  else begin
-    let x = b.(start) in
-    f start;
-    for b l (UInt32.(start +^ 1ul)) inv f
-  end
+(* val for: #(a: Type0) -> *)
+(*   b:buffer a -> *)
+(*   l:UInt32.t{ UInt32.( 0 <= v l /\ v l <= Buffer.length b) } -> *)
+(*   start:UInt32.t{ UInt32.( 0 <= v start /\ v start <= v l )} -> *)
+(*   inv:(HS.mem -> nat -> Type0) -> *)
+(*   f:(i:UInt32.t{ UInt32.( v start <= v i /\ v i < v l ) } -> *)
+(*     Stack unit *)
+(*       (requires (fun h -> inv h (UInt32.v i))) *)
+(*       (ensures (fun h_1 _ h_2 -> UInt32.(inv h_1 (v i) /\ inv h_2 (v i + 1))))) -> *)
+(*   Stack unit *)
+(*     (requires (fun h -> *)
+(*       (forall (h: HS.mem) (i: nat). inv h i ==> live h b) /\ *)
+(*       inv h (UInt32.v start))) *)
+(*     (ensures (fun _ _ h_2 -> inv h_2 (UInt32.v l))) *)
+(*     (decreases (UInt32.(v l - v start))) *)
+(* let rec for #a b l start inv f = *)
+(*   let open FStar.Buffer in *)
+(*   if start = l then *)
+(*     () *)
+(*   else begin *)
+(*     let x = b.(start) in *)
+(*     f start; *)
+(*     for b l (UInt32.(start +^ 1ul)) inv f *)
+(*   end *)
 
 
 (* Simplified version *)
-val for2:
+val for:
   start:UInt32.t ->
   finish:UInt32.t{UInt32.v finish >= UInt32.v start} ->
   inv:(HS.mem -> nat -> Type0) ->
@@ -112,13 +113,13 @@ val for2:
   Stack unit
     (requires (fun h -> inv h (UInt32.v start)))
     (ensures (fun _ _ h_2 -> inv h_2 (UInt32.v finish)))
-let rec for2 start finish inv f =
+let rec for start finish inv f =
   let open FStar.Buffer in
   if start = finish then
     ()
   else begin
     f start;
-    for2 (UInt32.(start +^ 1ul)) finish inv f
+    for (UInt32.(start +^ 1ul)) finish inv f
   end
 
 
@@ -155,7 +156,7 @@ let iter #a #len #f max fc b l =
     lemma_iter (UInt32.v i + 1) f (as_seq h0 b)
   in
   lemma_iter_0 0 f (as_seq h0 b);
-  for2 0ul max inv f'
+  for 0ul max inv f'
 
 
 val inplace_map:
@@ -182,7 +183,7 @@ let inplace_map #a f b l =
   =
     b.(i) <- f (b.(i))
   in
-  for2 0ul l inv f';
+  for 0ul l inv f';
   let h1 = ST.get() in
   Seq.lemma_eq_intro (as_seq h1 b) (seq_map f (as_seq h0 b))
 
@@ -215,7 +216,7 @@ let map #a #b f output input l =
   =
     output.(i) <- f (input.(i))
   in
-  for2 0ul l inv f';
+  for 0ul l inv f';
   let h1 = ST.get() in
   Seq.lemma_eq_intro (as_seq h1 output) (seq_map f (as_seq h0 input))
 
@@ -247,7 +248,7 @@ let inplace_map2 #a #b f in1 in2 l =
   =
     in1.(i) <- f (in1.(i)) (in2.(i))
   in
-  for2 0ul l inv f';
+  for 0ul l inv f';
   let h1 = ST.get() in
   Seq.lemma_eq_intro (as_seq h1 in1) (seq_map2 f (as_seq h0 in1) (as_seq h0 in2))
 
@@ -280,6 +281,6 @@ let map2 #a #b #c f output in1 in2 l =
   =
     output.(i) <- f (in1.(i)) (in2.(i))
   in
-  for2 0ul l inv f';
+  for 0ul l inv f';
   let h1 = ST.get() in
   Seq.lemma_eq_intro (as_seq h1 output) (seq_map2 f (as_seq h0 in1) (as_seq h0 in2))
