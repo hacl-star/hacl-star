@@ -391,8 +391,7 @@ val rounds:
          s' == rounds s)))
 [@ "c_inline"]
 let rounds st =
-// Real implementation bellow
-  repeat #H32.t (* #16 *) 16ul (double_round') st (* 16ul *) 10ul double_round
+  repeat #H32.t 16ul (double_round') st 10ul double_round
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -409,7 +408,6 @@ val sum_states:
          s1 == seq_map2 (fun x y -> H32.(x +%^ y)) s s')))
 [@ "c_inline"]
 let sum_states st st' =
-  // Real implementation bellow
   in_place_map2 st st' 16ul (fun x y -> H32.(x +%^ y))
 
 
@@ -433,7 +431,7 @@ let copy_state st st' =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 
-type log_t_ = | MkLog: k:Spec.key -> n:Spec.nonce -> (* c:Spec.counter -> *) log_t_
+type log_t_ = | MkLog: k:Spec.key -> n:Spec.nonce -> log_t_
 type log_t = Ghost.erased log_t_
 
 
@@ -564,7 +562,6 @@ val lemma_chacha20_counter_mode_1:
   ho:mem -> output:uint8_p{live ho output} ->
   hi:mem -> input:uint8_p{live hi input} ->
   len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len <= 64 /\ U32.v len > 0} ->
-  (* h:mem -> st:state{live h st} -> *)
   k:Spec.key -> n:Spec.nonce -> ctr:U32.t{U32.v ctr + (length input / 64) < pow2 32} -> Lemma
     (Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr) (reveal_sbytes (as_seq hi input))
      == seq_map2 (fun x y -> FStar.UInt8.(x ^^ y))
@@ -790,23 +787,8 @@ val chacha20:
          let ctr = U32.v ctr in
          o == Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n ctr plain)))
 let chacha20 output plain len k n ctr =
-  (* let h0 = ST.get() in *)
   push_frame();
-  (* let h = ST.get() in *)
   let st = alloc () in
   let l  = init st k n in
-  (* let h' = ST.get() in *)
-  (* cut (modifies_0 h h'); *)
   let l' = chacha20_counter_mode output plain len l st ctr in
-  (* let h'' = ST.get() in *)
-  (* cut (let o = reveal_sbytes (as_seq h'' output) in *)
-  (*        let plain = reveal_sbytes (as_seq h' plain) in *)
-  (*        let k = reveal_sbytes (as_seq h' k) in *)
-  (*        let n = reveal_sbytes (as_seq h' n) in *)
-  (*        let ctr = U32.v ctr in *)
-  (*        o == Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n ctr plain); admit() *)
-  (* cut (modifies_2_1 output h h''); *)
-  pop_frame()(* ; *)
-  (* let h1 = ST.get() in *)
-  (* cut (modifies_1 output h0 h1); *)
-  (* cut (equal_domains h0 h1) *)
+  pop_frame()
