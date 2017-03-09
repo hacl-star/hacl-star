@@ -12,6 +12,12 @@ CFLAGS=-I$(OPENSSL_HOME)/include -L$(OPENSSL_HOME) -I$(KREMLIN_HOME)/kremlib \
   -Wall
 LDFLAGS=-lcrypto
 
+ifeq ($(OS),Windows_NT)
+all: OpenSSLEngine.$(SO) HaclEngine.$(SO) BCryptEngine.$(SO)
+else
+all: OpenSSLEngine.$(SO) HaclEngine.$(SO)
+endif
+
 OpenSSLEngine.$(SO): HACLEngine.c
 	$(CC) $(CFLAGS) -DIMPL=IMPL_OPENSSL $< -o $@ -shared $(LDFLAGS)
 
