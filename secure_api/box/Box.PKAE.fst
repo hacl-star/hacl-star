@@ -22,6 +22,11 @@ module SPEC = Spec.SecretBox
 
 #set-options "--z3rlimit 100 --lax"
 
+(**
+   The type of the ciphertext that box and box_open use.
+*)
+type c = AE.cipher
+
 assume val box_log_region: (r:MR.rid{ extends r root 
 					 /\ is_eternal_region r 
 					 /\ is_below r root 
@@ -43,7 +48,7 @@ assume val box_key_log_region: (r:MR.rid{ extends r root
 					 
 
 type box_log_key = (nonce*(i:id{AE_id? i /\ honest i}))
-type box_log_value = (protected_pkae_plain)
+type box_log_value = (cipher*protected_pkae_plain)
 type box_log_range = fun box_log_key -> box_log_value
 type box_log_inv (f:MM.map' box_log_key box_log_range) = True
 
@@ -52,8 +57,8 @@ type box_log_inv (f:MM.map' box_log_key box_log_range) = True
    encrypted under an honest key while PKAE is idealized. During encryption, the plaintext will be stored in the log, indexed by the id and the nonce.
    Upon decryption with an honest key, a lookup is performed in the log using the received pair of nonce and ciphertext as index. The log and its monotonic nature
    guarantee the following properties, provided PKAE is idealized and the key is honest:
-   * Authenticity: Only the owner of the (honest) key can insert things into the log under a certain id. Anyone who decrypts a message with a key is thus
-     guaranteed that it was previously encrypted by another owner of that key.
+   * Authenticity: Only the actors in posession of the (honest) key can insert things into the log under a certain id. Anyone who decrypts a message with a key is thus
+     guaranteed that it was previously encrypted by an actor in the posession of that key.
    * Uniqueness of nonces: Only one entry can exist for any combination of nonce and key. This means that a nonce can not be used a second time with the
      same key.
 *)
@@ -102,11 +107,6 @@ let keygen #i =
   let (dh_pk, dh_sk) = DH.keygen #i in
   let pkae_pk = PKey #i dh_pk in
   pkae_pk, SKey #i dh_sk pkae_pk
-
-(**
-   The type of the ciphertext that box and box_open use.
-*)
-type c = AE.cipher
 
 (**
    Log invariant: WIP
@@ -263,7 +263,7 @@ let box_beforenm #pk_id #sk_id pk sk =
 //    /\ ((honest i /\ b2t ae_ind_cca)
 //      ==> (c == SPEC.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n
 //	/\ MR.witnessed (MM.contains k_log n (c,AE.message_wrap p))
-//	/\ MR.witnessed (MM.contains box_log (n,i) p)))
+//	/\ MR.witnessed (MM.contains box_log (n,i) (c,p))))
 //    /\ MR.m_contains id_log h1
 //    /\ MR.m_contains box_log h1
 //    /\ MR.m_contains box_key_log h1
@@ -279,8 +279,8 @@ let box_beforenm #pk_id #sk_id pk sk =
 //  let ae_m = AE.message_wrap #i p in
 //  let honest_i = is_honest i in
 //  if honest_i && pkae then (
-//    MM.extend box_log (n,i) p;
 //    let c = AE.encrypt #i n k ae_m in
+//    MM.extend box_log (n,i) (c,p);
 //    c
 //  ) else (
 //    let c = AE.encrypt #i n k ae_m in
@@ -318,7 +318,7 @@ let box_beforenm #pk_id #sk_id pk sk =
 //  let c = box_afternm k n p in
 //  c
 //
-//
+//// Review this function!
 //val box_open: #(sk_id:id{DH_id? sk_id}) -> 
 //	     #(pk_id:id{DH_id? pk_id}) -> 
 //	     n:nonce ->  
