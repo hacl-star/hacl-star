@@ -51,10 +51,11 @@ type log_inv (i:id{AE_id? i}) (f:MM.map' log_key (log_range i)) = True
 
 (**
    log_t is a monotone map that maps nonces to a tuple of ciphertext and plaintext. It is instantiated in the key type
-   to provide the following guarantees in case the key is honest and AE is idealized:
+   to provide the following guarantee in case the key is honest and AE is idealized:
    * Authentication: Upon encryption, the message is stored in the log, indexed by the nonce. Upon decryption, a lookup
      is performed using the nonce received and if the ciphertext in the log matches the received ciphertext, the plaintext
      is extracted from the log.
+   The log will give the following guarantee regardless of the honesty of the key or the idealization of AE:
    * Nonce uniqueness: Every log can only have one entry per index. Since the nonce is used as the index in the log, a nonce
      can only be used once per key.
    
@@ -178,13 +179,15 @@ val get_regionGT: k:key -> GTot (region:rid{region=k.region})
 let get_regionGT k =
   k.region
 
+
 (**
    Encrypt a a message under a key. Idealize if the key is honest and ae_ind_cca true.
 *)
-#set-options "--z3rlimit 100 --print_z3_statistics"
+#reset-options
+#set-options "--z3rlimit 100"
 val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i) -> ST cipher
   (requires (fun h0 -> 
-    (honest i /\ (b2t ae_ind_cca) ==> MM.fresh k.log n h0)
+    MM.fresh k.log n h0 // Nonce freshness
     /\ MR.m_contains k.log h0
     /\ registered i
   ))
@@ -192,29 +195,26 @@ val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_pla
     let current_log = MR.m_sel h0 k.log in
     modifies_one k.region h0.h h1.h
     /\ m_contains k.log h1
-    /\ ((honest i /\ b2t ae_ind_cca)
-      ==> (c = SPEC.secretbox_easy (create_zero_bytes (length m)) k.raw n
-    	 /\ MR.m_sel h1 k.log == MM.upd current_log n (c,m))
-    	 /\ MR.witnessed (MM.contains k.log n (c,m)))
-    /\ ((dishonest i \/ ~(b2t ae_ind_cca))
-      ==> c = SPEC.secretbox_easy (repr m) k.raw n)
+    /\ ((honest i /\ b2t ae_ind_cpa)
+      ==> (c = SPEC.secretbox_easy (create_zero_bytes (length m)) k.raw n))
+    /\ ((dishonest i \/ ~(b2t ae_ind_cpa))
+      ==> (c = SPEC.secretbox_easy (repr m) k.raw n))
     /\ (dishonest i \/ honest i)
+    /\ MR.m_sel h1 k.log == MM.upd current_log n (c,m)
+    /\ MR.witnessed (MM.contains k.log n (c,m))
     ))
 let encrypt #i n k m =
   let honest_i = is_honest i in
   let p = 
-    if (ae_ind_cca && honest_i) then (
+    if (ae_ind_cpa && honest_i) then (
       Seq.create (length m) (UInt8.uint_to_t 0)
     ) else (
       repr m )
   in
   let  c = SPEC.secretbox_easy p k.raw n in
-  if (ae_ind_cca && honest_i) then (
-    MM.extend k.log n (c,m);
-    c
-  ) else (
-    c
-  )
+  MM.extend k.log n (c,m);
+  c
+
 
 #reset-options
 #set-options "--z3rlimit 100"
@@ -231,16 +231,16 @@ val decrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> c:cipher{Seq.length
   (ensures  (fun h0 p h1 -> 
     modifies_none h0 h1
     /\ m_contains k.log h1
-    /\ ((~(b2t ae_ind_cca) \/ dishonest i)
+    /\ ((~(b2t ae_int_ctxt) \/ dishonest i)
       ==> (Some? (SPEC.secretbox_open_easy c k.raw n)
         ==> Some? p /\ Some?.v p == coerce (Some?.v (SPEC.secretbox_open_easy c k.raw n))))
-    /\ (( (b2t ae_ind_cca) /\ honest i /\ Some? p) 
+    /\ (( (b2t ae_int_ctxt) /\ honest i /\ Some? p) 
       ==> (MM.defined k.log n h0 /\ (fst (MM.value k.log n h0) == c ) 
          /\ Some?.v p == snd (MM.value k.log n h0)))
   ))
 let decrypt #i n k c =
   let honest_i = is_honest i in
-  if ae_ind_cca && honest_i then
+  if ae_int_ctxt && honest_i then
     match MM.lookup k.log n with
     | Some (c',m') -> 
       if c' = c then 
