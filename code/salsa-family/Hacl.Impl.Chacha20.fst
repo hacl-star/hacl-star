@@ -392,7 +392,7 @@ val rounds:
 [@ "c_inline"]
 let rounds st =
 // Real implementation bellow
-  repeat #H32.t #16 #(double_round') st 16ul 10ul double_round
+  repeat #H32.t (* #16 *) 16ul (double_round') st (* 16ul *) 10ul double_round
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -627,9 +627,7 @@ let update_last output plain len log st ctr =
   let block = create (uint8_to_sint8 0uy) 64ul in
   let l = chacha20_block log block st ctr in
   let mask = Buffer.sub block 0ul len in
-  let len' = len in
-  (* map2 output plain block len (fun x y -> H8.(x ^^ y)); *)
-  map2 output plain block len' (fun x y -> H8.(x ^^ y));
+  map2 output plain block len (fun x y -> H8.(x ^^ y));
   let h1 = ST.get() in
   lemma_chacha20_counter_mode_1 h1 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr;
   pop_frame();
