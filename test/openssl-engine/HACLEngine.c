@@ -37,15 +37,6 @@ static const char *engine_Everest_name = "Everest engine (HACL* crypto)";
 #error "Unknown implementation"
 #endif
 
-int bind_helper(ENGINE * e, const char *id);
-
-IMPLEMENT_DYNAMIC_CHECK_FN();
-IMPLEMENT_DYNAMIC_BIND_FN(bind_helper);
-
-int Everest_init(ENGINE *e) {
-  return 1;
-}
-
 // The simplest way to get *our* implementation of X25519 running is to clone
 // the original implementation, then override the pointer to the salient
 // function with our code.
@@ -105,32 +96,6 @@ static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
 }
 #endif
 
-// A lazy initializer
-EVP_PKEY_METHOD *get_hacl_x25519_meth() {
-  static EVP_PKEY_METHOD *hacl_x25519_meth = NULL;
-
-  if (hacl_x25519_meth)
-    return hacl_x25519_meth;
-
-  const EVP_PKEY_METHOD *openssl_meth = EVP_PKEY_meth_find(NID_X25519);
-  if (!openssl_meth) {
-    fprintf(stderr, "Couldn't find OpenSSL X25519\n");
-    exit(1);
-  }
-
-  hacl_x25519_meth = EVP_PKEY_meth_new(NID_X25519, 0);
-  EVP_PKEY_meth_copy(hacl_x25519_meth, openssl_meth);
-
-#if IMPL == IMPL_HACL
-  EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
-#elif IMPL == IMPL_OPENSSL
-  ;
-#else
-#error "Unsupported implementation"
-#endif
-
-  return hacl_x25519_meth;
-}
 
 static int Everest_digest_nids(const int **nids)
 {
@@ -154,6 +119,8 @@ static int Everest_ciphers_nids(const int **nids)
   int count = 0;
 
   if (!init) {
+    cipher_nids[count++] = NID_chacha20;
+
     // NULL-terminate the lst
     cipher_nids[count] = 0;
     init = 1;
@@ -179,36 +146,71 @@ static int Everest_pkey_meths_nids(const int **nids)
   return count;
 }
 
+static EVP_MD *hacl_poly1305_digest = NULL;
+
 // These three functions follow the protocol explained in
 // include/openssl/engine.h near line 280.
 int Everest_digest(ENGINE *e, const EVP_MD **digest, const int **nids, int nid)
 {
   if (digest == NULL) {
     return Everest_digest_nids(nids);
+  } else if (nid = NID_poly1305) {
+    *digest = hacl_poly1305_digest;
+    return 1;
   } else {
     return 0;
   }
 }
 
+static EVP_CIPHER *hacl_chacha20_cipher = NULL;
+
 int Everest_ciphers(ENGINE *e, const EVP_CIPHER **cipher, const int **nids, int nid)
 {
   if (cipher == NULL) {
     return Everest_ciphers_nids(nids);
+  } else if (nid == NID_chacha20) {
+    *cipher = hacl_chacha20_cipher;
+    return 1;
   } else {
     return 0;
   }
 }
+
+static EVP_PKEY_METHOD *hacl_x25519_meth = NULL;
 
 int Everest_pkey_meths(ENGINE *e, EVP_PKEY_METHOD **method, const int **nids, int nid)
 {
   if (method == NULL) {
     return Everest_pkey_meths_nids(nids);
   } else if (nid == NID_X25519) {
-    *method = get_hacl_x25519_meth();
+    *method = hacl_x25519_meth;
     return 1;
   } else {
     return 0;
   }
+}
+
+
+// Fill in the hacl_x25519_meth global.
+int Everest_init(ENGINE *e) {
+  const EVP_PKEY_METHOD *openssl_meth = EVP_PKEY_meth_find(NID_X25519);
+  if (!openssl_meth) {
+    fprintf(stderr, "Couldn't find OpenSSL X25519\n");
+    exit(1);
+  }
+
+  hacl_x25519_meth = EVP_PKEY_meth_new(NID_X25519, 0);
+  EVP_PKEY_meth_copy(hacl_x25519_meth, openssl_meth);
+
+#if IMPL == IMPL_HACL
+  EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
+#elif IMPL == IMPL_OPENSSL
+  ;
+#else
+#error "Unsupported implementation"
+#endif
+
+  return 1;
 }
 
 // See https://wiki.openssl.org/index.php/Creating_an_OpenSSL_Engine_to_use_indigenous_ECDH_ECDSA_and_HASH_Algorithms
@@ -226,3 +228,6 @@ int bind_helper(ENGINE * e, const char *id)
 
   return 1;
 }
+
+IMPLEMENT_DYNAMIC_CHECK_FN();
+IMPLEMENT_DYNAMIC_BIND_FN(bind_helper);
