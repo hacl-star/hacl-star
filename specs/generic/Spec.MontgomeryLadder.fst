@@ -1,39 +1,6 @@
 module Spec.MontgomeryLadder
 
-
-#set-options "--initial_fuel 0 --max_fuel 0"
-
-type additive_law (a:eqtype) (zero:a) = add:(x:a -> y:a -> Tot a)
-  {(forall x y. {:pattern (x `add` y)} x `add` y = y `add` x /\ x `add` zero = x)
-   /\ (forall x y z. {:pattern (x `add` (y `add` z))}  (x `add` y) `add` z = x `add` (y `add` z))}
-
-let rec exp #a #zero (add:additive_law a zero) x (k:nat) =
-  if k = 0 then zero
-  else x `add` (exp add x (k-1))
-
-#set-options "--initial_fuel 1 --max_fuel 1"
-
-let rec lemma_exp_add #a #zero (add:additive_law a zero) x (k:nat) (k':nat) z z' : Lemma
-  (requires (z = exp add x k /\ z' = exp add x k'))
-  (ensures (z `add` z' = exp add x (k+k')))
-  = if k = 0 then ()
-    else (
-      lemma_exp_add add x (k-1) k' (exp add x (k-1)) z';
-      cut (z = x `add` (exp add x (k-1)));
-      cut (z `add` z' = (x `add` (exp add x (k-1)) `add` z'));
-      cut (x `add` ((exp add x (k-1)) `add` z') = (x `add` (exp add x (k-1)) `add` z'))
-    )
-
-let rec lemma_exp_def_0 #a #zero (add:additive_law a zero) x (k:nat) (k':nat) z z' : Lemma
-  (requires (z = exp add x k /\ z' = exp add x k'))
-  (ensures (z `add` z' = exp add x (k+k')))
-  = if k = 0 then ()
-    else (
-      lemma_exp_add add x (k-1) k' (exp add x (k-1)) z';
-      cut (z = x `add` (exp add x (k-1)));
-      cut (z `add` z' = (x `add` (exp add x (k-1)) `add` z'));
-      cut (x `add` ((exp add x (k-1)) `add` z') = (x `add` (exp add x (k-1)) `add` z'))
-    )
+open Spec.AdditiveLaw
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
@@ -81,8 +48,6 @@ let rec montgomery_ladder_ #a #zero plus init x xp1 k ctr max =
     lemma_div_scalar k ctr;
     montgomery_ladder_ plus init x xp1 k ctr' max
   )
-        
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 
 val montgomery_ladder:
   #a:eqtype -> #zero:a ->
@@ -92,9 +57,6 @@ val montgomery_ladder:
   max:nat{k < pow2 max} ->
   Tot (y:a{y = exp f init k})
 let montgomery_ladder #a #zero plus init k max =
-  cut (k / pow2 max = 0);
-  cut (zero = exp plus init 0);
-  cut (init = exp plus init 1);
-  cut (zero = exp plus init (k / pow2 max));
-  cut (init = exp plus init (k / pow2 max + 1));
+  lemma_exp_def_1 plus init 1;
+  lemma_exp_def_0 plus init;
   montgomery_ladder_ #a #zero plus init zero init k max max

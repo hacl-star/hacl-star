@@ -6,6 +6,7 @@ open FStar.UInt8
 open FStar.Endianness
 open Spec.Lib
 open Spec.Curve25519.Lemmas
+open Spec.AdditiveLaw
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
@@ -39,20 +40,24 @@ let rec op_Star_Star (e:elem) (n:pos) : Tot elem (decreases n) =
 type scalar = lbytes 32
 type serialized_point = lbytes 32
 
-type proj_point = | Proj: x:elem -> y:elem -> z:elem -> proj_point
+type proj_point = | Proj: x:elem -> z:elem -> proj_point // y is ignored
 
-let decodeScalar25519 (k:scalar) : Tot scalar =
+let decodeScalar25519 (k:scalar) : Tot (n:nat{n < pow2 256}) =
   let k0  = index k 0  in
   let k31 = index k 31 in
   let k   = upd k 0 (k0 &^ 248uy)             in
   let k   = upd k 31 ((k31 &^ 127uy) |^ 64uy) in
-  k
+  lemma_little_endian_is_bounded k; little_endian k
 
-let xor a b = match a,b with | true, false | false, true -> true | _ -> false
+let decodePoint (u:serialized_point) : Tot elem =
+  little_endian (upd u 31 (index u 31 &^ 127uy)) % prime
 
-let cswap swap x y = if swap then y,x else x,y
-
-let add_and_double x_1 x_2 z_2 x_3 z_3 =
+let add_and_double qx nq nqp1 =
+  let x_1 = qx in
+  let x_2 = nq.x in 
+  let z_2 = nq.z in 
+  let x_3 = nqp1.x in 
+  let z_3 = nqp1.z in 
   let a  = x_2 +@ z_2 in
   let aa = a**2 in
   let b  = x_2 -@ z_2 in
@@ -66,44 +71,46 @@ let add_and_double x_1 x_2 z_2 x_3 z_3 =
   let z_3 = x_1 *@ ((da -@ cb)**2) in
   let x_2 = aa *@ bb in
   let z_2 = e *@ (aa +@ (121665 *@ e)) in
-  x_2, z_2, x_3, z_3
+  Proj x_2 z_2, Proj x_3 z_3
 
-val montgomery_ladder: k:scalar -> u:serialized_point -> Tot elem
-let montgomery_ladder k u =
-  let rec loop k x_1 x_2 z_2 x_3 z_3 swap (ctr:nat) : Tot (tuple5 elem elem elem elem bool)
-                                                   (decreases (ctr))
-  =
-    if ctr = 0 then (x_2, z_2, x_3, z_3, swap)
-    else (
-      let ctr = ctr - 1 in
-      let k_t = (k / pow2 ctr) % 2 = 1 in // ctr-th bit of the scalar
-      let swap = swap `xor` k_t in
-      let x_2, x_3 = cswap swap x_2 x_3 in
-      let z_2, z_3 = cswap swap z_2 z_3 in
-      let swap = k_t in
-      let x_2, z_2 ,x_3, z_3 = add_and_double x_1 x_2 z_2 x_3 z_3 in
-      loop k x_1 x_2 z_2 x_3 z_3 swap ctr
-  ) in
-  let k    = little_endian k in // Scalar as natural number
-  let u    = little_endian u % prime in // Point as element of the prime field
-  let x_1   = u in               // Basepoint 'x' coordinate
-  let x_2   = one in             // First point 'P' of the ladder (point at infinity at first)
-  let z_2   = 0 in
-  let x_3   = u in               // Second point 'Q' of the ladder (equal to 'u' at first)
-  let z_3   = one in
-  let swap = false in           // Swap variable
-  let x_2, z_2, x_3, z_3, swap = loop k x_1 x_2 z_2 x_3 z_3 swap 256 in
-  // Can be integrated to the recursive call
-  let x_2, x_3 = cswap swap x_2 x_3 in
-  let z_2, z_3 = cswap swap z_2 z_3 in
-  x_2 *@ (z_2 ** (prime - 2))
+val montgomery_ladder_:
+  init:elem ->
+  x:proj_point ->
+  xp1:proj_point ->
+  k:nat ->
+  ctr:nat ->
+  Tot proj_point
+    (decreases ctr)
+let rec montgomery_ladder_ init x xp1 k ctr =
+  if ctr = 0 then x
+  else (
+    let ctr' = ctr - 1 in
+    let (x', xp1') =
+      if k / pow2 ctr' % 2 = 1 then (
+        let nqp2, nqp1 = add_and_double init xp1 x in
+        nqp1, nqp2
+      ) else add_and_double init x xp1 in
+    montgomery_ladder_ init x' xp1' k ctr'
+  )
 
 
-let scalarmult (k:scalar) (u:serialized_point) : Tot serialized_point =
+val montgomery_ladder:
+  init:elem ->
+  k:nat{k < pow2 256} ->
+  Tot proj_point
+let montgomery_ladder init k =
+  montgomery_ladder_ init (Proj one zero) (Proj init one) k 256
+
+let encodePoint (p:proj_point) : Tot serialized_point =
+  let p = p.x *@ (p.z ** (prime - 2)) in
+  little_bytes 32ul p
+
+val scalarmult: k:scalar -> u:serialized_point -> Tot serialized_point
+let scalarmult k u =
   let k = decodeScalar25519 k in
-  let u = upd u 31 (index u 31 &^ 127uy) in
-  let u = montgomery_ladder k u in
-  little_bytes 32ul u
+  let u = decodePoint u in
+  let res = montgomery_ladder u k in
+  encodePoint res
 
 
 let scalar1 = [

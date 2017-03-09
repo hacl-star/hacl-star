@@ -43,7 +43,7 @@ curve25519.exe: Spec.Curve25519.fst
 	mkdir -p curve25519-spec
 	$(FSTAR) $(ARGS) --odir curve25519-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> curve25519-spec/Spec_Curve25519.ml
-	$(OCAMLOPT) -I curve25519-spec $(OCAML_INCLUDES) $(addprefix curve25519-spec/, $(EXTRACTED)) curve25519-spec/Combinators.ml curve25519-spec/Spec_Lib.ml curve25519-spec/Spec_Curve25519.ml -o curve25519.exe
+	$(OCAMLOPT) -I curve25519-spec $(OCAML_INCLUDES) $(addprefix curve25519-spec/, $(EXTRACTED)) curve25519-spec/Combinators.ml curve25519-spec/Spec_Lib.ml curve25519-spec/Spec_AdditiveLaw.ml curve25519-spec/Spec_Curve25519.ml -o curve25519.exe
 	./curve25519.exe
 
 chacha20.exe: Spec.Chacha20.fst
