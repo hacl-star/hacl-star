@@ -53,18 +53,21 @@ assume val dh_key_log_region: (r:HH.rid{ extends r root
 					 /\ disjoint r id_log_region
 					 /\ disjoint r id_honesty_log_region
 					 })
+type dh_key_log_key = i:id{AE_id? i /\ honest i}
+type dh_key_log_value = (AE.key)
+type dh_key_log_range = fun (i:dh_key_log_key) -> (k:dh_key_log_value{AE.get_index k = i})
+type dh_key_log_inv (f:MM.map' dh_key_log_key dh_key_log_range) = True
 
 //private type dh_key_log_key = k_id:id{AE_id? k_id}
 //private type dh_key_log_value = 
-private type dh_key_log_range = fun (k_id:id{AE_id? k_id}) -> (k:Key.key{Key.ae_key_get_index k = k_id})
-private let dh_key_log_inv (m:MM.map' (k_id:id{AE_id? k_id}) dh_key_log_range) = True
 
 (**
    The dh_key_log is a monotone map that maps ids to AE keys. Keys that are generated/computed by prf_odh are random if both DH keys
    that serve as its input are honest. Such honest keys are stored in the dh_key_log to ensure that only one AE key is generated for each
    pair of DH keys. This is ensured by the monotone nature of the log and the composition of AE ids through DH ids.
 *)
-assume val dh_key_log: MM.t dh_key_log_region (i:id{AE_id? i}) dh_key_log_range dh_key_log_inv
+assume val dh_key_log: MM.t dh_key_log_region dh_key_log_key dh_key_log_range dh_key_log_inv
+//assume val dh_key_log: MM.t dh_key_log_region (i:id{AE_id? i /\ honest i}) dh_key_log_range dh_key_log_inv
 
 (**
    A DH public key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
@@ -196,10 +199,11 @@ val handle_honest_i: i:id{AE_id? i /\ honest i} -> ST (k:Key.key)
     /\ MR.witnessed (MM.contains dh_key_log i k)
     /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
     			          /\ MR.m_sel h1 k_log == Key.empty_log i     // and the log of the key will be empty.
-    				  /\ makes_unfresh_just i h0 h1))
+    				  /\ makes_unfresh_just i h0 h1
+				  /\ HS.modifies regions_modified_honest h0 h1))
     /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
-    			            /\ MR.m_sel h0 k_log == MR.m_sel h1 k_log))       // and the log of the key will be the same as before.
-    /\ HS.modifies regions_modified_honest h0 h1
+    			            /\ MR.m_sel h0 k_log == MR.m_sel h1 k_log
+				    /\ h0 == h1))       // and the log of the key will be the same as before.
   ))
 let handle_honest_i i = 
   //lemma_honest_not_dishonest i;
@@ -250,7 +254,7 @@ let handle_dishonest_i dh_sk dh_pk i =
 val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
   ( requires (fun h0 -> 
     let i = generate_ae_id pk.pk_id sk.sk_id in
-    ((AE_id? i /\ honest i) ==> (MM.defined dh_key_log i h0 \/ fresh i h0))
+    ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==>  fresh i h0)
     /\ m_contains id_log h0
     /\ registered i
   ))
@@ -266,10 +270,12 @@ val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
     		   MR.witnessed (MM.contains dh_key_log i k)
     		   /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
     						  /\ MR.m_sel h1 k_log == Key.empty_log i // and the log of the key will be empty.
-						  /\ makes_unfresh_just i h0 h1))
+						  /\ makes_unfresh_just i h0 h1
+    						  /\ modifies regions_modified_honest h0 h1))
     		   /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
-    						    /\ MR.m_sel h0 k_log == MR.m_sel h1 k_log))       // and the log of the key will be the same as before.
-    		   /\ modifies regions_modified_honest h0 h1))
+    						    /\ MR.m_sel h0 k_log == MR.m_sel h1 k_log
+						    /\ h0==h1))       // and the log of the key will be the same as before.
+      ))
     /\ (dishonest i
     	==> (modifies regions_modified_dishonest h0 h1
     	   /\ Key.leak_key k = prf_odhGT sk pk

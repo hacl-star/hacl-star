@@ -65,11 +65,15 @@ type box_log_inv (f:MM.map' box_log_key box_log_range) = True
 assume val box_log: MM.t box_log_region box_log_key box_log_range box_log_inv
 //let box_log = MM.alloc #pkae_table_region #pkae_table_key #pkae_table_range #pkae_table_inv
 
-type box_key_log_key = i:id{AE_id? i /\ honest i}
-type box_key_log_value = (AE.key)
-type box_key_log_range = fun (i:box_key_log_key) -> (k:box_key_log_value{AE.get_index k = i})
-type box_key_log_inv (f:MM.map' box_key_log_key box_key_log_range) = True
+//type box_key_log_key = i:id{AE_id? i /\ honest i}
+//type box_key_log_value = (AE.key)
+//type box_key_log_range = fun (i:box_key_log_key) -> (k:box_key_log_value{AE.get_index k = i})
+//type box_key_log_inv (f:MM.map' box_key_log_key box_key_log_range) = True
 
+type box_key_log_key = DH.dh_key_log_key
+type box_key_log_value = DH.dh_key_log_value
+type box_key_log_range = DH.dh_key_log_range
+type box_key_log_inv (f:MM.map' box_key_log_key box_key_log_range) = True
 (**
    This monotone map maps an AE id to a key. It is used when box_beforenm generates a key using an honest DH-public key and an honest DH-private key.
    If PKAE is idealized, box_beforenm generates a random key instead of computing it from its DH components. We thus need this monotone log to guarantee that 
@@ -77,8 +81,7 @@ type box_key_log_inv (f:MM.map' box_key_log_key box_key_log_range) = True
 *)
 assume val box_key_log:  MM.t box_key_log_region box_key_log_key box_key_log_range box_key_log_inv
 //let box_key_log = MM.alloc #pkae_table_region #pkae_table_key #pkae_table_range #pkae_table_inv
-
-
+ 
 (**
    A PKAE public key, containing a DH public key.
 *)
@@ -112,8 +115,8 @@ let keygen #i =
    Log invariant: WIP
 *)
 
-//#reset-options
-//#set-options "--z3rlimit 100"
+#reset-options
+#set-options "--z3rlimit 100"
 // TODO: We should be able to replace "dishonest i"  with "~(honest i)" everywhere!
 // TODO: Add patterns to quantifiers.
 let log_invariant_all_keys (h:mem) = 
@@ -131,7 +134,8 @@ let log_invariant_all_keys (h:mem) =
   ///\ (forall (i:id{AE_id? i /\ honest i}) (n:nonce) . (MM.fresh box_key_log i h ==> MM.fresh box_log (n,i) h)) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
 
 let log_invariant_id (h:mem) (i:id) =
-  ((AE_id? i /\ honest i) ==> (MM.fresh box_key_log i h <==> MM.fresh dh_key_log i h <==> fresh i h)) // dh_key_log and box_key_log are in sync
+  MR.m_sel h box_key_log == MR.m_sel h dh_key_log
+  /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h <==> fresh i h)) // dh_key_log and box_key_log are in sync
   /\ (AE_id? i /\ honest i /\ MM.fresh box_key_log i h) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h)) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
 
 let log_invariant_single_key (h:mem) (i:id) (k:AE.key) =
@@ -180,6 +184,9 @@ val box_beforenm: #(pk_id:id{DH_id? pk_id /\ registered pk_id}) ->
     /\ MR.m_contains box_log h0
     /\ MR.m_contains box_key_log h0
     /\ MR.m_contains dh_key_log h0
+    /\ MR.m_sel h0 box_key_log == MR.m_sel h0 dh_key_log
+    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // dh_key_log and box_key_log are in sync
+    /\ ((AE_id? i /\ honest i /\ MM.fresh box_key_log i h0) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h0))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
   ))
   (ensures (fun h0 k h1 -> 
     let i = generate_ae_id pk_id sk_id in
@@ -191,65 +198,63 @@ val box_beforenm: #(pk_id:id{DH_id? pk_id /\ registered pk_id}) ->
     (AE.get_index k = generate_ae_id pk_id sk_id)
     // If honest, something is inserted into the log
     /\ (honest i
-      ==> (modifies regions_modified_honest_set h0 h1
+      ==> (let current_log = MR.m_sel h0 box_key_log in
+	 /\ (MM.fresh box_key_log i h0 ==> (MR.m_sel h1 box_key_log == MM.upd current_log i k
+					 /\ MR.m_sel h1 k_log == Key.empty_log i
+					 /\ makes_unfresh_just i h0 h1
+					 /\ modifies regions_modified_honest_set h0 h1))
+	 /\ (MM.defined box_key_log i h0 ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log
+					   /\ MR.m_sel h0 k_log == MR.m_sel h1 k_log
+					   /\ h0 == h1))
     	 /\ MR.witnessed (MM.contains box_key_log i k)
     	 /\ MM.contains box_key_log i k h1))
-    // If dishonest, the returned key is actually computed from both DH keys.
-    /\ (dishonest i
-      ==> (modifies regions_modified_dishonest_set h0 h1
-         /\ leak_key k = DH.prf_odhGT sk.dh_sk pk.dh_pk))
-    // Sync of box_log and the local log of the returned key
-    /\ log_invariant_single_key h1 i k
-    // id is fresh if it is in the box_key_log, 
-    // sync between box_key_log and dh_key_log and
-    // if id is fresh, then there are no entries for it in the box_log
-    // TODO: This makes only sense if we demand it for all ids. For performance reasons, 
-    // this is currently only for the id used in this function
-    /\ log_invariant_id h1 i
-    // Liveness of global logs and local key log of the returned key.
-    /\ MR.m_contains k_log h1
-    /\ MR.m_contains id_log h1
-    /\ MR.m_contains id_honesty_log h1
-    /\ MR.m_contains box_log h1
-    /\ MR.m_contains box_key_log h1
-    /\ MR.m_contains dh_key_log h1
+    //// If dishonest, the returned key is actually computed from both DH keys.
+    ///\ (dishonest i
+    //  ==> (modifies regions_modified_dishonest_set h0 h1
+    //     /\ leak_key k = DH.prf_odhGT sk.dh_sk pk.dh_pk))
+    //// Sync of box_log and the local log of the returned key
+    ///\ log_invariant_single_key h1 i k
+    //// id is fresh if it is in the box_key_log, 
+    //// sync between box_key_log and dh_key_log and
+    //// if id is fresh, then there are no entries for it in the box_log
+    //// TODO: This makes only sense if we demand it for all ids. For performance reasons, 
+    //// this is currently only for the id used in this function
+    ///\ log_invariant_id h1 i
+    //// Liveness of global logs and local key log of the returned key.
+    /\ MR.m_contains k_log h1 (*x*)
+    /\ MR.m_contains id_log h1 (*x*)
+    /\ MR.m_contains id_honesty_log h1 (*x*)
+    /\ MR.m_contains box_log h1 (*x*)
+    /\ MR.m_contains box_key_log h1 (*x*)
+    /\ MR.m_contains dh_key_log h1 (*x*)
     // Would like to ensure for all keys, but verification takes too much time. Need a smarter invariant (via patterns?).
     ///\ log_invariant_all_keys h1
   ))
 let box_beforenm #pk_id #sk_id pk sk =
+  MR.m_recall id_log;
+  MR.m_recall id_honesty_log;
+  MR.m_recall dh_key_log;
+  MR.m_recall box_log;
+  MR.m_recall box_key_log;
   let i = generate_ae_id pk_id sk_id in
-  if is_honest i then
+  let h = ST.get() in
+  assert(MR.m_sel h box_key_log == MR.m_sel h dh_key_log
+  /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h <==> fresh i h)));
+  assert ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h) ==>  fresh i h);
+  let k = prf_odh sk.dh_sk pk.dh_pk in
+  (if is_honest i then
     match MM.lookup box_key_log i with
-    | Some k -> 
-	//recall_global_logs();
-	MR.m_recall id_log;
-	MR.m_recall id_honesty_log;
-	MR.m_recall dh_key_log;
-	MR.m_recall box_log;
-	MR.m_recall box_key_log;
-	recall_log k;
-        k
-    | None ->
-        let k = prf_odh sk.dh_sk pk.dh_pk in
-        MM.extend box_key_log i k;
-	//recall_global_logs();
-	MR.m_recall id_log;
-	MR.m_recall id_honesty_log;
-	MR.m_recall dh_key_log;
-	MR.m_recall box_log;
-	MR.m_recall box_key_log;
-	recall_log k;
-        k
-  else (
-    let k = prf_odh sk.dh_sk pk.dh_pk in
-    //recall_global_logs();
-    MR.m_recall id_log;
-    MR.m_recall id_honesty_log;
-    MR.m_recall dh_key_log;
-    MR.m_recall box_log;
-    MR.m_recall box_key_log;
-    recall_log k;
-    k)
+    | Some _ -> ()
+    | None -> MM.extend box_key_log i k);
+  recall_log k;
+  MR.m_recall id_log;
+  MR.m_recall id_honesty_log;
+  MR.m_recall dh_key_log;
+  MR.m_recall box_log;
+  MR.m_recall box_key_log;
+  k
+                    ∧ modifies regions_modified_honest h0 h1))
+ 
 
 
 (**
@@ -313,6 +318,7 @@ let box_afternm k n p =
   MR.m_recall id_log;
   MR.m_recall dh_key_log;
   let i = AE.get_index k in
+  // TODO : perform lookup in box_log
   let ae_m = AE.message_wrap #i p in
   let honest_i = is_honest i in
   let c = AE.encrypt #i n k ae_m in
@@ -381,13 +387,12 @@ val box_open: #(sk_id:id{DH_id? sk_id}) ->
   ))
   (ensures (fun h0 p h1 -> 
     let i = generate_ae_id pk_id sk_id in
-    ∧ m_contains k.log h1
-    ∧ ((¬(b2t pkae) ∨ dishonest i)
-      ⟹ (Some? (SPEC.secretbox_open_easy c k.raw n)
-        ⟹ Some? p ∧ Some?.v p == coerce (Some?.v (SPEC.secretbox_open_easy c k.raw n))))
-    ∧ (( (b2t pkae) ∧ honest i ∧ Some? p)
-      ⟹ (MM.defined k.log n h0 ∧ (fst (MM.value k.log n h0) == c )
-         ∧ Some?.v p == snd (MM.value k.log n h0) (* Can we prove this? /\ MM.contains box_key_log i k h0*)))
+    ((~(b2t pkae) \/ dishonest i)
+      ==> (Some? (SPEC.secretbox_open_easy c k.raw n)
+        ==> Some? p /\ Some?.v p == coerce (Some?.v (SPEC.secretbox_open_easy c k.raw n))))
+    /\ (( (b2t pkae) /\ honest i /\ Some? p)
+      ==> (MM.defined k.log n h0 /\ (fst (MM.value k.log n h0) == c )
+         /\ Some?.v p == snd (MM.value k.log n h0) (* Can we prove this? /\ MM.contains box_key_log i k h0*)))
     // Make sure that log_invariants hold. Would like to ensure "all_keys" variant, but too expensive to verify currently.
     /\ log_invariant_id h1 i
     /\ log_invariant_single_key h1 i k
