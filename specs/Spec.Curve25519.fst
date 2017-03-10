@@ -42,12 +42,13 @@ type serialized_point = lbytes 32
 
 type proj_point = | Proj: x:elem -> z:elem -> proj_point // y is ignored
 
-let decodeScalar25519 (k:scalar) : Tot (n:nat{n < pow2 256}) =
+let decodeScalar25519 (k:scalar) : Tot (* (n:nat{n < pow2 256}) *)(k':scalar) =
   let k0  = index k 0  in
   let k31 = index k 31 in
   let k   = upd k 0 (k0 &^ 248uy)             in
   let k   = upd k 31 ((k31 &^ 127uy) |^ 64uy) in
-  lemma_little_endian_is_bounded k; little_endian k
+  k
+  (* lemma_little_endian_is_bounded k; little_endian k *)
 
 let decodePoint (u:serialized_point) : Tot elem =
   little_endian (upd u 31 (index u 31 &^ 127uy)) % prime
@@ -73,12 +74,16 @@ let add_and_double qx nq nqp1 =
   let z_2 = e *@ (aa +@ (121665 *@ e)) in
   Proj x_2 z_2, Proj x_3 z_3
 
+let ith_bit (k:scalar) (i:nat{i < 256}) =
+  let q = i / 8 in let r = i % 8 in
+  (v (index k q) / pow2 r) % 2
+
 val montgomery_ladder_:
   init:elem ->
   x:proj_point ->
   xp1:proj_point ->
-  k:nat ->
-  ctr:nat ->
+  k:scalar ->
+  ctr:nat{ctr <= 256} ->
   Tot proj_point
     (decreases ctr)
 let rec montgomery_ladder_ init x xp1 k ctr =
@@ -86,7 +91,7 @@ let rec montgomery_ladder_ init x xp1 k ctr =
   else (
     let ctr' = ctr - 1 in
     let (x', xp1') =
-      if k / pow2 ctr' % 2 = 1 then (
+      if ith_bit k ctr' = 1 then (
         let nqp2, nqp1 = add_and_double init xp1 x in
         nqp1, nqp2
       ) else add_and_double init x xp1 in
@@ -96,14 +101,16 @@ let rec montgomery_ladder_ init x xp1 k ctr =
 
 val montgomery_ladder:
   init:elem ->
-  k:nat{k < pow2 256} ->
+  k:scalar ->
   Tot proj_point
 let montgomery_ladder init k =
   montgomery_ladder_ init (Proj one zero) (Proj init one) k 256
 
+
 let encodePoint (p:proj_point) : Tot serialized_point =
   let p = p.x *@ (p.z ** (prime - 2)) in
   little_bytes 32ul p
+
 
 val scalarmult: k:scalar -> u:serialized_point -> Tot serialized_point
 let scalarmult k u =
