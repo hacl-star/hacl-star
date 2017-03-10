@@ -24,17 +24,19 @@ let uint8_p = buffer H8.t
 unfold let vecsizebytes2 = U32.(vecsizebytes *^ 2ul)
 unfold let vecsizebytes3 = U32.(vecsizebytes *^ 3ul)
 unfold let vecsizebytes4 = U32.(vecsizebytes *^ 4ul)
+unfold let vecsizebytes8 = U32.(vecsizebytes *^ 8ul)
+unfold let vecsizebytes12 = U32.(vecsizebytes *^ 12ul)
 
 let idx = a:U32.t{U32.v a < 4}
 
-[@ "substitute"]
+[@ "c_inline"]
 val line:
   st:state ->
   a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s < 32} ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st))
-[@ "substitute"]
+[@ "c_inline"]
 let line st a b d s =
   let sa = st.(a) in 
   let sb = st.(b) in
@@ -45,13 +47,13 @@ let line st a b d s =
   st.(d) <- sd
 
 
-[@ "substitute"]
+[@ "c_inline"]
 val round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
-[@ "substitute"]
+[@ "c_inline"]
 let round st =
   line st 0ul 1ul 3ul 16ul;
   line st 2ul 3ul 1ul 12ul;
@@ -139,27 +141,37 @@ let rounds st = Loops_vec.rounds st
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 
-[@ "substitute"]
+[@ "c_inline"]
 val sum_states:
-  st:state ->
-  st':state{disjoint st st'} ->
+  st':state ->
+  st:state{disjoint st st'} ->
   Stack unit
     (requires (fun h -> live h st /\ live h st'))
-    (ensures  (fun h0 _ h1 -> live h0 st /\ live h1 st /\ live h0 st' /\ modifies_1 st h0 h1))
-[@ "substitute"]
-let sum_states st st' = Loops_vec.sum_states st st'
-  // Real implementation bellow
-  (* Combinators.inplace_map2 (fun x y -> Hacl.UInt32x4.(x +%^ y)) st st' 16ul *)
+    (ensures  (fun h0 _ h1 -> live h1 st' /\ live h1 st /\ modifies_1 st' h0 h1))
+[@ "c_inline"]
+let sum_states st' st =
+  let s0 = st.(0ul) in
+  let s1 = st.(1ul) in
+  let s2 = st.(2ul) in
+  let s3 = st.(3ul) in
+  let s0' = st'.(0ul) in
+  let s1' = st'.(1ul) in
+  let s2' = st'.(2ul) in
+  let s3' = st'.(3ul) in
+  st'.(0ul) <- s0' +%^ s0;
+  st'.(1ul) <- s1' +%^ s1;
+  st'.(2ul) <- s2' +%^ s2;
+  st'.(3ul) <- s3' +%^ s3
 
 
-[@ "substitute"]
+[@ "c_inline"]
 val copy_state:
   st':state ->
   st:state{disjoint st st'} ->
   Stack unit
     (requires (fun h -> live h st /\ live h st'))
     (ensures (fun h0 _ h1 -> live h1 st /\ live h0 st' /\ modifies_1 st' h0 h1))
-[@ "substitute"]
+[@ "c_inline"]
 let copy_state st' st =
   st'.(0ul) <- st.(0ul);
   st'.(1ul) <- st.(1ul);
@@ -187,6 +199,47 @@ let chacha20_core k st =
   copy_state k st;
   rounds k;
   sum_states k st
+
+[@ "c_inline"]
+val chacha20_core2:
+  k0:state ->
+  k1:state ->
+  st:state ->
+  Stack unit
+    (requires (fun h -> live h k0 /\ live h k1 /\ live h st))
+    (ensures  (fun h0 updated_log h1 -> live h1 k0 /\ live h1 k1 /\ live h1 st /\ modifies_3 st k0 k1 h0 h1))
+[@ "c_inline"]
+let chacha20_core2 k0 k1 st =
+  copy_state k0 st;
+  copy_state k1 st;
+  state_incr k1;
+  Loops_vec.rounds2 k0 k1;
+  sum_states k0 st;
+  state_incr st;
+  sum_states k1 st
+
+[@ "c_inline"]
+val chacha20_core3:
+  k0:state ->
+  k1:state ->
+  k2:state ->
+  st:state ->
+  Stack unit
+    (requires (fun h -> live h k0 /\ live h k1 /\ live h k2 /\ live h st))
+    (ensures  (fun h0 updated_log h1 -> live h1 k0 /\ live h1 k1 /\ live h1 k2 /\ live h1 st /\ modifies_3 st k0 k1 h0 h1 ))
+[@ "c_inline"]
+let chacha20_core3 k0 k1 k2 st =
+  copy_state k0 st;
+  copy_state k1 st;
+  state_incr k1;
+  copy_state k2 k1;
+  state_incr k2;
+  Loops_vec.rounds3 k0 k1 k2;
+  sum_states k0 st;
+  state_incr st;
+  sum_states k1 st;
+  state_incr st;
+  sum_states k2 st
 
 [@ "c_inline"]
 val chacha20_block:
@@ -241,8 +294,9 @@ val xor_block:
   st:state{disjoint st output /\ disjoint st plain} ->
   Stack unit
     (requires (fun h -> live h output /\ live h plain))
-    (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_1 output h0 h1))
+    (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_2 st output h0 h1))
 let xor_block output plain st = 
+  state_to_key st;
   let p0 = vec_load_le (Buffer.sub plain 0ul vecsizebytes) in
   let p1 = vec_load_le (Buffer.sub plain vecsizebytes vecsizebytes) in
   let p2 = vec_load_le (Buffer.sub plain vecsizebytes2 vecsizebytes) in
@@ -272,14 +326,13 @@ let update output plain st =
   push_frame();
   let k = Buffer.create zero 4ul in
   chacha20_core k st;
-  state_to_key k;
   xor_block output plain k;
   state_incr st;
   pop_frame()
 
 val update2:
-  output:uint8_p{length output = 128} ->
-  plain:uint8_p{disjoint output plain /\ length plain = 128} ->
+  output:uint8_p{length output = U32.v vecsizebytes8} ->
+  plain:uint8_p{disjoint output plain /\ length plain = U32.v vecsizebytes8} ->
   st:state{disjoint st output /\ disjoint st plain} ->
   Stack unit
     (requires (fun h -> live h output /\ live h plain))
@@ -287,18 +340,31 @@ val update2:
 let update2 output plain st =
   let h0 = ST.get() in
   push_frame();
-  let st' = Buffer.create zero 4ul in
-  copy_state st' st;
-  state_incr st';
   let k = Buffer.create zero 4ul in
   let k' = Buffer.create zero 4ul in
-  chacha20_core k st;
-  chacha20_core k' st';
-  state_to_key k;
+  chacha20_core2 k k' st;
   xor_block output plain k;
-  state_to_key k;
   xor_block (Buffer.offset output vecsizebytes4) (Buffer.offset plain vecsizebytes4) k';
   state_incr st;
+  pop_frame()
+
+val update3:
+  output:uint8_p{length output = U32.v vecsizebytes12} ->
+  plain:uint8_p{disjoint output plain /\ length plain = U32.v vecsizebytes12} ->
+  st:state{disjoint st output /\ disjoint st plain} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h plain))
+    (ensures (fun h0 updated_log h1 -> live h1 output /\ live h0 plain /\ modifies_2 output st h0 h1))
+let update3 output plain st =
+  let h0 = ST.get() in
+  push_frame();
+  let k0 = Buffer.create zero 4ul in
+  let k1 = Buffer.create zero 4ul in
+  let k2 = Buffer.create zero 4ul in
+  chacha20_core3 k0 k1 k2 st;
+  xor_block output plain k0;
+  xor_block (Buffer.offset output vecsizebytes4) (Buffer.offset plain vecsizebytes4) k1;
+  xor_block (Buffer.offset output vecsizebytes8) (Buffer.offset plain vecsizebytes8) k2;
   state_incr st;
   pop_frame()
 
@@ -337,8 +403,11 @@ val chacha20_counter_mode:
 let rec chacha20_counter_mode output plain len st ctr =
   let h0 = ST.get() in
   let bs = vecsizebytes4 in
+  let bs2 = U32.(bs *^ 2ul) in
+  let bs3 = U32.(bs *^ 3ul) in
   if U32.(len <^ bs) then chacha20_counter_mode_ output plain len st
-  else (
+  else 
+  if U32.(len <^ bs2) then (
     let b  = Buffer.sub plain 0ul bs in
     let b' = Buffer.offset plain bs in
     let o  = Buffer.sub output 0ul bs in
@@ -346,6 +415,27 @@ let rec chacha20_counter_mode output plain len st ctr =
     update o b st;
     let h = ST.get() in
     let l = chacha20_counter_mode o' b' U32.(len -^ bs) st U32.(ctr +^ blocks) in
+    let h' = ST.get() in
+    ())
+  else 
+  if U32.(len <^ bs3) then (
+    let b  = Buffer.sub plain 0ul bs2 in
+    let b' = Buffer.offset plain bs2 in
+    let o  = Buffer.sub output 0ul bs2 in
+    let o' = Buffer.offset output bs2 in
+    update2 o b st;
+    let h = ST.get() in
+    let l = chacha20_counter_mode o' b' U32.(len -^ bs2) st U32.(ctr +^ (2ul *^ blocks)) in
+    let h' = ST.get() in
+    ())
+  else (
+    let b  = Buffer.sub plain 0ul bs3 in
+    let b' = Buffer.offset plain bs3 in
+    let o  = Buffer.sub output 0ul bs3 in
+    let o' = Buffer.offset output bs3 in
+    update3 o b st;
+    let h = ST.get() in
+    let l = chacha20_counter_mode o' b' U32.(len -^ bs3) st U32.(ctr +^ (3ul *^ blocks)) in
     let h' = ST.get() in
     ())
 

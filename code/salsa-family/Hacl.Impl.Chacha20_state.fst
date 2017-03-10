@@ -37,13 +37,13 @@ let state_alloc () =
   create zero 4ul
 
 
-[@ "substitute"]
+[@ "c_inline"]
 val state_incr:
     k:state ->
     Stack unit 
       (requires (fun h -> live h k))
       (ensures  (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1))
-[@ "substitute"]
+[@ "c_inline"]
 let state_incr k = 
     let k3 = k.(3ul) in
     if (blocks = 2ul) then (
@@ -53,13 +53,13 @@ let state_incr k =
     k.(3ul) <- vec_add k3 one_le
     )
     
-[@ "substitute"]
+[@ "c_inline"]
 val state_to_key:
     k:state ->
     Stack unit 
       (requires (fun h -> live h k))
       (ensures  (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1))
-[@ "substitute"]
+[@ "c_inline"]
 let state_to_key k = 
     if (blocks = 2ul) then (
     let k0 = k.(0ul) in
@@ -72,14 +72,14 @@ let state_to_key k =
     k.(3ul) <- vec_choose_128 k2 k3 1ul 3ul)
     else ()
 
-[@ "substitute"]
+[@ "c_inline"]
 val state_to_key_block:
     stream_block:uint8_p{length stream_block = 64 * U32.v blocks} ->
     k:state ->
     Stack unit 
       (requires (fun h -> live h k))
       (ensures  (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1))
-[@ "substitute"]
+[@ "c_inline"]
 let state_to_key_block stream_block k = 
     state_to_key k;
     let bb = U32.(blocks *^ 16ul) in
