@@ -28,7 +28,8 @@ module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 type id = id * UInt128.t //NS: why not this definition : i:id & iv (alg i)
-let alg (i:id) = macAlg_of_id (fst i) 
+inline_for_extraction let alg (i:id) =
+ let i, _ = i in macAlg_of_id i
 
 #set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 

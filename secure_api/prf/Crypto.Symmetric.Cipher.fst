@@ -12,7 +12,6 @@ module HS = FStar.HyperStack
 open FStar.UInt32
 open Crypto.Symmetric.Bytes
 open Crypto.Indexing
-open Crypto.Config
 
 #reset-options "--initial_fuel 0 --initial_ifuel 0 --z3rlimit 20"
 

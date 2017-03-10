@@ -1,5 +1,7 @@
 FSTAR_HOME?=../../FStar
-HACL_HOME?=$(FSTAR_HOME)/../hacl-star
+HACL_HOME?=..
+KREMLIN_HOME?=../../kremlin
+OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
 
 #17-02-13 in low-level, we used to have two Makefiles, merged here.
 MEM=HST
@@ -9,11 +11,8 @@ include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
 FSTAR_ARGS=$(OTHERFLAGS)
 
-KREMLIN_HOME?=~/dev/kremlin
-
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
-
 FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real --include ../specs
 
 KRML_INCLUDES=$(addprefix -I ,test/spartan_aes aead uf1cma spartan prf utils ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
@@ -23,22 +22,28 @@ KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 test/spartan_aes/aes.o:
 	make -C test/spartan_aes
 
-krml-test.exe: test/spartan_aes/aes.o
-	$(KRML) utils/Crypto.Config.fst test/Flag.fst utils/Hacl.Spec.fst \
-		test/spartan_dummy.c  \
+krml-test-vale.exe: test/spartan_aes/aes.o
+	$(KRML) test/test_vale/Crypto.Indexing.fst \
+	       	test/test_vale/spartan_impl.c test/spartan_aes/aes.o \
+		test/Flag.fst utils/Hacl.Spec.fst \
 	       	test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
 	       	$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
-		-tmpdir tmp -add-include '"testlib.h"' -o krml-test.exe \
+		-tmpdir tmp-vale -add-include '"testlib.h"' -o krml-test-vale.exe \
 		-bundle Hacl.Bignum.* -bundle Hacl.Impl.* \
-		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* -drop Hacl.Spec
-	./krml-test.exe
+		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* \
+	       	-drop Hacl.Spec -drop Spec.\*
+	./krml-test-vale.exe
 
-run-krml-test.exe: 
-	gcc-6 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_HOME/ulib/hyperstack -I spartan_aes -I crypto -I ../../../kremlin/kremlib -I ../../../kremlin/test -I /Users/bhargava/Desktop/repositories/kremlin/kremlib -I tmp -maes -Wno-error=pointer-sign tmp/Prims.c tmp/Buffer_Utils.c tmp/Crypto_Symmetric_Bytes.c tmp/Crypto_Symmetric_Poly1305_Spec.c tmp/Crypto_Symmetric_Poly1305_Parameters.c tmp/Crypto_Symmetric_Poly1305_Bigint.c tmp/Crypto_Symmetric_Poly1305_Bignum_Lemmas_Part1.c tmp/Crypto_Symmetric_Poly1305_Bignum_Lemmas_Part2.c tmp/Crypto_AEAD_BufferUtils.c tmp/Crypto_Symmetric_Poly1305_Bignum_Lemmas_Part3.c tmp/Crypto_Symmetric_Poly1305_Bignum_Lemmas_Part4.c tmp/Crypto_Symmetric_Poly1305_Bignum_Lemmas_Part5.c tmp/FStar.c tmp/Crypto_Symmetric_Chacha20.c tmp/Crypto_Config.c tmp/Crypto_Indexing.c tmp/Flag.c tmp/Crypto_Symmetric_AES.c tmp/Spartan.c tmp/Crypto_Symmetric_AES128.c tmp/Crypto_Symmetric_Cipher.c tmp/Crypto_Symmetric_Poly1305_Lemmas.c tmp/Crypto_Symmetric_Poly1305_Bignum_Lemmas_Part6.c tmp/Crypto_Symmetric_Poly1305_Bignum.c tmp/Crypto_Symmetric_Poly1305.c tmp/Crypto_Symmetric_GF128_Spec.c tmp/Crypto_Symmetric_GF128.c tmp/Crypto_Symmetric_MAC.c tmp/Crypto_Symmetric_UF1CMA.c tmp/Crypto_Plain.c tmp/Crypto_Symmetric_PRF.c tmp/Crypto_AEAD_Encoding.c tmp/Crypto_AEAD_Invariant.c tmp/Crypto_AEAD_Wrappers_Encoding.c tmp/Crypto_AEAD_Wrappers_CMA.c tmp/Crypto_AEAD_Encrypt_Invariant.c tmp/Crypto_AEAD_Wrappers_PRF.c tmp/Crypto_AEAD_EnxorDexor.c tmp/Crypto_AEAD_Encrypt_Ideal_Invariant.c tmp/Crypto_AEAD_MAC_Wrapper_Invariant.c tmp/Crypto_AEAD_Enxor_Invariant.c tmp/Crypto_AEAD_Encrypt.c tmp/Crypto_AEAD_Decrypt.c tmp/Crypto_AEAD.c tmp/Crypto_KrmlTest.c tmp/kremlib.o test/test_hacks.c tmp/testlib.o tmp/spartan_stub.o spartan_aes/aes.o -o krml-test.exe
-
-OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
-#OPENSSL_HOME=/usr/local/Cellar/openssl\@1.1/1.1.0c
-CC=gcc-6 
+krml-test-hacl.exe:
+	$(KRML) test/test_hacl/Crypto.Indexing.fst \
+		test/Flag.fst utils/Hacl.Spec.fst \
+		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
+		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
+		-tmpdir tmp-hacl -add-include '"testlib.h"' -o krml-test-hacl.exe \
+		-bundle Hacl.Bignum.* -bundle Hacl.Impl.* \
+		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* \
+		-drop Hacl.Spec -drop Spec.\*
+	./krml-test-hacl.exe
 
 test-perf.exe: krml-test.exe test/test_perf.c
 	$(CC) -Ofast -m64 -flto -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
@@ -52,9 +57,7 @@ test-perf.exe: krml-test.exe test/test_perf.c
 clean:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
 	@rm -f $(addprefix crypto/ml/, *.cmx *.o *.cmi *~)
-	@rm -rf tmp kremlin *~ *.exe
-
-KREMLIN_HOME=$(FSTAR_HOME)/../kremlin
+	@rm -rf tmp tmp-vale tmp-hacl kremlin *~ *.exe
 
 FSTAR?=$(FSTAR_HOME)/bin/fstar.exe
 

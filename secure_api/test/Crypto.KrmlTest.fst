@@ -20,7 +20,6 @@ open FStar.Buffer
 open Crypto.Indexing
 open Crypto.Symmetric.Bytes
 open Crypto.Plain
-open Crypto.Config
 open Crypto
 open Buffer
 open Flag
