@@ -37,7 +37,7 @@ val cmult_small_loop_step_spec:
     let nqpq'' = Spec.Curve25519.Proj (selem (fst (snd nq2))) (selem (snd (snd nq2))) in
     (nq', nqpq') == (nq'', nqpq'')
   })
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 let cmult_small_loop_step_spec nq nqpq q byt (* i *) =
   assert_norm((pow2 8 - 1) / pow2 7 < 2);
   (* cut (U32.v i - 1 >= 0); *)
@@ -78,6 +78,8 @@ let cmult_small_loop_double_step_spec nq nqpq q byt (* i  *)=
   cmult_small_loop_step_spec nq2' nqpq2' q byt
 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
+
 val cmult_small_loop_spec:
   nq:spoint_513 ->
   nqpq:spoint_513 ->
@@ -107,8 +109,7 @@ let rec cmult_small_loop_spec nq nqpq q byt i =
   )
 
 
-
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val cmult_big_loop_spec:
   n:uint8_s{Seq.length n = 32} ->
@@ -124,17 +125,31 @@ val cmult_big_loop_spec:
     nq' == nq''
   })
   (decreases (U32.v i))
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 let rec cmult_big_loop_spec n nq nqpq q i =
-  if (U32.(i =^ 0ul)) then nq
+  if (U32.(i =^ 0ul)) then (
+    Hacl.Spec.Curve25519.Lemmas.montgomery_ladder_big_def_0 (selem (fst q)) (Spec.Curve25519.Proj (selem (fst nq)) (selem (snd nq))) (Spec.Curve25519.Proj (selem (fst nqpq)) (selem (snd nqpq))) n;
+    nq
+  )
   else (
-    let i = U32.(i -^ 1ul) in
-    let byte = Seq.index n (U32.v i) in
+    cut (U32.v i > 0);
+    let i' = U32.(i -^ 1ul) in
+    let byte = Seq.index n (U32.v i') in
     let nq2, nqpq2 = cmult_small_loop_spec nq nqpq q byte 4ul in
-    cmult_big_loop_spec n nq2 nqpq2 q i
+    Hacl.Spec.EC.Ladder.Lemmas.lemma_small_loop_unrolled3 (selem (fst q)) (Spec.Curve25519.Proj (selem (fst nq)) (selem (snd nq))) (Spec.Curve25519.Proj (selem (fst nqpq)) (selem (snd nqpq))) byte;
+    Hacl.Spec.Curve25519.Lemmas.lemma_small_step_eq (selem (fst q)) (Spec.Curve25519.Proj (selem (fst nq)) (selem (snd nq))) (Spec.Curve25519.Proj (selem (fst nqpq)) (selem (snd nqpq))) n (U32.v i);
+    Hacl.Spec.Curve25519.Lemmas.montgomery_ladder_big_def_1 (selem (fst q)) (Spec.Curve25519.Proj (selem (fst nq)) (selem (snd nq))) (Spec.Curve25519.Proj (selem (fst nqpq)) (selem (snd nqpq))) n (U32.v i);
+    cmult_big_loop_spec n nq2 nqpq2 q i'
   )
 
 
-val cmult_spec: scalar:uint8_s{Seq.length scalar = keylen} -> q:spoint_513 -> GTot (result:spoint_513)
+val cmult_spec: scalar:uint8_s{Seq.length scalar = keylen} ->
+  q:spoint_513{selem (snd q) = one} ->
+  GTot (result:spoint_513{
+    let r = Spec.Curve25519.Proj (selem (fst result)) (selem (snd result)) in
+    r == Spec.Curve25519.montgomery_ladder (selem (fst q)) scalar
+  })
 let cmult_spec n q =
   let nq = point_inf () in
+  Hacl.Spec.Curve25519.Lemmas.lemma_montgomery_ladder_8 (selem (fst q)) (Spec.Curve25519.Proj one zero) (Spec.Curve25519.Proj (selem (fst q)) (selem (snd q))) n 32;
   cmult_big_loop_spec n nq q q 32ul

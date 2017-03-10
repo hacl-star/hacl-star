@@ -5,6 +5,7 @@ open Hacl.Cast
 open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Bignum.Limb
+open Hacl.Spec.Bignum
 open Hacl.Spec.EC.Point
 
 
@@ -15,12 +16,18 @@ type uint8_s = Seq.seq Hacl.UInt8.t
 
 private inline_for_extraction let zero_8 = uint8_to_sint8 0uy
 
-val point_inf: unit -> Tot spoint_513
+val point_inf: unit -> Tot (t:spoint_513{selem (fst t) = 1 /\ selem (snd t) = 0})
 let point_inf () =
   let s = Seq.create 10 limb_zero in
   let x = Seq.slice s 0 5 in
   let z = Seq.slice s 5 10 in
   let x = Seq.upd x 0 limb_one in
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 x;
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 z;
+  cut (Hacl.Spec.Bignum.Bigint.seval x = 1);
+  cut (Hacl.Spec.Bignum.Bigint.seval z = 0);
+  Math.Lemmas.modulo_lemma (Hacl.Spec.Bignum.Bigint.seval x) (pow2 255 - 19);
+  Math.Lemmas.modulo_lemma (Hacl.Spec.Bignum.Bigint.seval z) (pow2 255 - 19);
   x, z
 
 
