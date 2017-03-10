@@ -14,12 +14,12 @@ module Spec = Spec.Chacha20
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
 module H32 = Hacl.UInt32
-open Hacl.UInt32x8
+open Hacl.UInt32x4N
 
 let u32 = U32.t
 let h32 = H32.t
 let uint8_p = buffer H8.t
-type state = b:Buffer.buffer uint32x8{length b = 4}
+type state = b:Buffer.buffer vec{length b = 4}
 unfold let blocks = U32.(vec_size /^ 4ul)
 unfold let vecsizebytes = U32.(vec_size *^ 4ul)
 
@@ -147,7 +147,11 @@ let ctr_ivsetup st ctr iv =
   let n0 = load32_le (Buffer.sub iv 0ul 4ul) in
   let n1 = load32_le (Buffer.sub iv 4ul 4ul) in
   let n2 = load32_le (Buffer.sub iv 8ul 4ul) in
-  let v = vec_load_32x8 ctr n0 n1 n2 U32.(ctr +^ 1ul) n0 n1 n2 in
+  let v =  vec_load_32x8 ctr n0 n1 n2 U32.(ctr +^ 1ul) n0 n1 n2 in
+
+(*      if (vec_size = 8ul) then 
+        else vec_load_32x4 ctr n0 n1 n2  *)
+
   st.(3ul) <- v
 
 [@ "c_inline"]

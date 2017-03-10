@@ -14,7 +14,7 @@ module Spec = Spec.Chacha20
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
 module H32 = Hacl.UInt32
-open Hacl.UInt32x8
+open Hacl.UInt32x4N
 open Hacl.Impl.Chacha20_state
 
 let u32 = U32.t
