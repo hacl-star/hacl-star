@@ -204,6 +204,7 @@ val handle_honest_i: i:id{AE_id? i /\ honest i} -> ST (k:Key.key)
     /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
     			            /\ MR.m_sel h0 k_log == MR.m_sel h1 k_log
 				    /\ h0 == h1))       // and the log of the key will be the same as before.
+    /\ MM.contains dh_key_log i k h1
   ))
 let handle_honest_i i = 
   //lemma_honest_not_dishonest i;
@@ -268,6 +269,7 @@ val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
     /\ (fresh i h0 ==> (MR.m_sel h1 (Key.get_logGT k) == Key.empty_log i))
     /\ (honest i ==> (let current_log = MR.m_sel h0 dh_key_log in
     		   MR.witnessed (MM.contains dh_key_log i k)
+		   /\ MM.contains dh_key_log i k h1
     		   /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
     						  /\ MR.m_sel h1 k_log == Key.empty_log i // and the log of the key will be empty.
 						  /\ makes_unfresh_just i h0 h1
@@ -315,4 +317,3 @@ let prf_odh dh_sk dh_pk =
 //    fresh_unfresh_contradiction i;
 //    k
   )
-
