@@ -37,4 +37,6 @@ test-%:
 	@PATH=$(OPENSSL_HOME):"$(PATH)" \
 	LD_LIBRARY_PATH=$(OPENSSL_HOME):"$(LD_LIBRARY_PATH)" \
 	DYLD_LIBRARY_PATH=$(OPENSSL_HOME):"$(DYLD_LIBRARY_PATH)" \
+	echo -e "engine $(PWD)/$*\nspeed ecdhx25519" | $(OPENSSL_HOME)/apps/openssl.exe
+	echo -e "engine $(PWD)/$*\nspeed -evp chacha20" | $(OPENSSL_HOME)/apps/openssl.exe
 	echo -e "engine $(PWD)/$*\nspeed -evp chacha20-poly1305" | $(OPENSSL_HOME)/apps/openssl.exe
