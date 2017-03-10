@@ -87,7 +87,7 @@ val poly1305_encode_r:
   r:bigint ->
   key:uint8_p{length key = 16} ->
   Stack unit
-    (requires (fun h -> live h r /\ live h key (* /\ disjoint key r *)))
+    (requires (fun h -> live h r /\ live h key))
     (ensures  (fun h0 _ h1 -> modifies_1 r h0 h1 /\ live h1 r /\ live h0 key
       /\ red_44 (as_seq h1 r)
       /\ as_seq h1 r == Hacl.Spec.Poly1305_64.poly1305_encode_r_spec (as_seq h0 key)
@@ -200,7 +200,7 @@ val poly1305_update:
   st:poly1305_state ->
   m:uint8_p{length m = 16} ->
   Stack log_t
-    (requires (fun h -> live_st h st /\ live h m (* /\ disjoint m st.h /\ disjoint m st.r *)
+    (requires (fun h -> live_st h st /\ live h m
       /\ red_45 (as_seq h st.h)
       /\ red_44 (as_seq h st.r)
       ))
@@ -278,7 +278,7 @@ val poly1305_process_last_block_:
   Stack log_t
     (requires (fun h -> live_st h st /\ live h m /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)
       /\ live h block /\ as_seq h block == Seq.upd (Seq.append (as_seq h m) (Seq.create (16 - U64.v len) (uint8_to_sint8 0uy))) (U64.v len) (uint8_to_sint8 1uy)
-      /\ disjoint block st.h /\ disjoint block st.r (* /\ disjoint block m *)
+      /\ disjoint block st.h /\ disjoint block st.r
     ))
     (ensures (fun h0 updated_log h1 -> live_st h0 st /\ live h0 m /\ red_44 (as_seq h0 st.r) /\ red_45 (as_seq h0 st.h)
       /\ live_st h1 st /\ red_44 (as_seq h1 st.r) /\ red_45 (as_seq h1 st.h)
@@ -545,7 +545,7 @@ val poly1305_update_last:
   m:uint8_p ->
   len:U64.t{U64.v len < 16 /\ U64.v len = length m} ->
   Stack unit
-    (requires (fun h -> live_st h st /\ live h m (* /\ disjoint st.h m *)
+    (requires (fun h -> live_st h st /\ live h m
       /\ red_44 (as_seq h st.r) /\ red_45 (as_seq h st.h)))
     (ensures  (fun h0 _ h1 -> modifies_1 st.h h0 h1 /\ live_st h0 st /\ live h0 m /\ live h1 st.h
       /\ red_44 (as_seq h0 st.r) /\ red_45 (as_seq h0 st.h)
@@ -593,7 +593,8 @@ let poly1305_finish st mac key_s =
 val alloc:
   unit -> StackInline poly1305_state
     (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st))
+    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st /\ frameOf st.h == h0.tip
+      /\ frameOf st.r = h0.tip /\ ~(contains h0 st.r) /\ ~(contains h0 st.h)))
 let alloc () =
   let buf = create limb_zero U32.(clen +^ clen) in
   let r = sub buf 0ul clen in

@@ -79,7 +79,7 @@ let getPublicKey sk pk =
   push_frame();
   let basepoint = create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
   basepoint.(0ul) <- (Hacl.Cast.uint8_to_sint8 9uy);
-  Hacl.EC.Curve25519.exp pk basepoint sk;
+  Curve25519.crypto_scalarmult pk sk basepoint;
   pop_frame();
   let hfin = ST.get() in
   assume (as_seq hfin pk == pubKey (as_seq hinit sk))
@@ -97,7 +97,7 @@ val crypto_box_beforenm:
 			 as_seq h1 k == agreedKey pkA pkB)))
 let crypto_box_beforenm k pk sk =
   let h0 = ST.get() in
-  let r = Hacl.Box.crypto_box_beforenm k pk sk in
+  let r = NaCl.crypto_box_beforenm k pk sk in
   let h1 = ST.get() in
   assume (let pkA = pubKey (as_seq h0 sk) in
 			 let pkB = as_seq h0 pk in
@@ -125,7 +125,7 @@ val crypto_box_easy_afternm:
     	      	      	      boxed h1 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h0 m) (as_seq h0 n)))
 let crypto_box_easy_afternm #pkA #pkB c m l n k =
   let h0 = ST.get() in
-  let x = Hacl.Box.crypto_box_easy_afternm c m l n k in
+  let x = NaCl.crypto_box_easy_afternm c m l n k in
   let h1 = ST.get() in
   assume (boxed h1 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h0 m) (as_seq h0 n));
   x
@@ -150,7 +150,7 @@ val crypto_box_open_easy_afternm:
 			    /\ boxed h0 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h1 m) (as_seq h0 n)))
 let crypto_box_open_easy_afternm #pkA #pkB m c l n k =
   let h0 = ST.get() in
-  let x = Libsodium.crypto_box_open_easy_afternm m c l n k in
+  let x = NaCl.crypto_box_open_easy_afternm m c l n k in
   let h1 = ST.get() in
   assume (boxed h0 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h1 m) (as_seq h0 n));
   x

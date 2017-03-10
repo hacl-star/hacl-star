@@ -1,5 +1,5 @@
-FSTAR_HOME   ?= /opt/fstar
-KREMLIN_HOME ?= /opt/kremlin
+FSTAR_HOME   = ~/Desktop/repositories/FStar
+KREMLIN_HOME = ~/Desktop/repositories/kremlin
 
 CC=gcc-6 -flto
 

@@ -196,7 +196,7 @@ private val add_bytes:
       else 
         Buffer.modifies_1 b h0 h1 )))
 
-#reset-options "--z3rlimit 20" 
+#reset-options "--z3rlimit 200" 
 // not sure why I need lemmas unfolding encode_bytes; maybe just Z3 complexity
 private let lemma_encode_loop (b:_ {Seq.length b >= 16}) : Lemma ( 
   Seq.equal (encode_bytes b) (Seq.snoc (encode_bytes (Seq.slice b 16 (Seq.length b))) (Seq.slice b 0 16)))
@@ -427,7 +427,7 @@ val accumulate:
 val lemma_append_nil: #a:_ -> s:Seq.seq a -> Lemma (s == Seq.append s Seq.createEmpty)
 let lemma_append_nil #a s = assert (Seq.equal s (Seq.append s Seq.createEmpty))
  
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 5000"
 let accumulate #i st aadlen aad txtlen cipher  = 
   let h = ST.get() in 
   let acc = CMA.start st in

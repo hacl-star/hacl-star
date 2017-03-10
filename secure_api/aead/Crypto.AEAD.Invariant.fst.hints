@@ -646,12 +646,16 @@
       0,
       [
         "@query", "b2t_def", "bool_inversion", "bool_typing",
+        "constructor_distinct_BoxBool",
         "constructor_distinct_Crypto.Indexing.AES128",
+        "constructor_distinct_Crypto.Indexing.AES256",
         "constructor_distinct_Crypto.Indexing.AES_128_GCM",
+        "constructor_distinct_Crypto.Indexing.AES_256_GCM",
         "constructor_distinct_Crypto.Indexing.CHACHA20",
         "constructor_distinct_Crypto.Indexing.CHACHA20_POLY1305",
         "constructor_distinct_Tm_unit",
         "equality_tok_Crypto.Indexing.AES128@tok",
+        "equality_tok_Crypto.Indexing.AES256@tok",
         "equality_tok_Crypto.Indexing.CHACHA20@tok",
         "equation_Crypto.AEAD.Encoding.aadmax",
         "equation_Crypto.AEAD.Encoding.adata",
@@ -685,6 +689,7 @@
         "equation_FStar.UInt32.uint_to_t", "equation_FStar.UInt32.v",
         "equation_FStar.UInt8.t", "equation_Prims.nat",
         "fuel_guarded_inversion_FStar.UInt32.t_",
+        "function_token_typing_Crypto.AEAD.Encoding.txtmax",
         "function_token_typing_Crypto.Symmetric.AES.blocklen",
         "function_token_typing_Crypto.Symmetric.AES.keylen",
         "function_token_typing_Crypto.Symmetric.GF128.len", "int_inversion",
@@ -711,8 +716,8 @@
         "typing_Crypto.Symmetric.Cipher.blocklen",
         "typing_Crypto.Symmetric.PRF.ctr_0",
         "typing_Crypto.Symmetric.UF1CMA.skeyed",
-        "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.uint_to_t",
-        "typing_FStar.UInt32.v"
+        "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.lte",
+        "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v"
       ],
       0
     ],

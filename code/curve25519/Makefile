@@ -49,10 +49,11 @@ X25519_SPECIFIC= \
 SLOW= Hacl.Spec.Bignum.Fsquare.fst \
 	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
 	../bignum/Hacl.Spec.Bignum.Fmul.fst \
+	Hacl.EC.Format.fst \
 	Hacl.EC.fst \
 
 # Files that still have errors
-TODO=	Hacl.EC.Format.fst \
+TODO=
 
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 

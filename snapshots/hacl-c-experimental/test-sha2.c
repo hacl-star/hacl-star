@@ -1,4 +1,3 @@
-
 #include "SHA2_256.h"
 #include "kremlib.h"
 #include "testlib.h"
@@ -26,6 +25,35 @@ void test_6_loop(uint8_t *plaintext, uint32_t *ctx, uint32_t max, uint32_t idx);
 void test_6();
 
 int32_t main();
+
+
+void ossl_sha256(unsigned char* hash, const unsigned char *message, size_t message_len)
+{
+  EVP_MD_CTX *mdctx;
+
+  if((mdctx = EVP_MD_CTX_create()) == NULL)
+    {printf("ossl error\n"); exit(1);}
+
+  if(1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL))
+    {printf("ossl error\n"); exit(1);}
+
+
+  if(1 != EVP_DigestUpdate(mdctx, message, message_len))
+    {printf("ossl error\n"); exit(1);}
+
+  int len;
+  if(1 != EVP_DigestFinal_ex(mdctx, hash, &len))
+    {printf("ossl error\n"); exit(1);}
+
+  EVP_MD_CTX_destroy(mdctx);
+}
+
+void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
+  printf("Testing: %s\n", txt);
+  printf("Cycles for %d * %d bytes: %llu (%.2fcycles/byte)\n", rounds, plainlen, d1, (double)d1/plainlen/rounds);
+  double ts = t1/CLOCKS_PER_SEC;
+  printf("User time for %d times %d bytes: %fs (%fus/byte)\n", rounds, plainlen, ts, (double)(ts*1000000)/(plainlen*rounds));
+}
 
 
 void test_1a()
@@ -367,6 +395,67 @@ void test_6()
   TestLib_compare_and_print("Test 6", expected, output, (uint32_t )32);
 }
 
+#define PLAINLEN (1024*1024)
+#define ROUNDS 1000
+
+int32_t perf_sha() {
+  uint32_t len = PLAINLEN * sizeof(char);
+  uint8_t* plain = malloc(len);
+  uint8_t* cipher = malloc(len);
+  int fd = open("/dev/urandom", O_RDONLY);
+  uint64_t res = read(fd, plain, len);
+  if (res != len) {
+    printf("Error on reading, got %llu bytes\n", res);
+    return 1;
+  }
+
+  uint8_t hash[32];
+  cycles a,b;
+  clock_t t1,t2;
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    sha2_256(hash,plain,len);
+    plain[0] = hash[0];
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("HACL SHA256 speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+  for (int i = 0; i < PLAINLEN; i++) 
+    res += (uint64_t) plain[i];
+  printf("Composite result (ignore): %llx\n", res);
+
+  /*
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    crypto_stream_chacha20_ietf_xor(plain,plain, len, nonce, key);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("Sodium ChaCha20 speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+  for (int i = 0; i < PLAINLEN; i++) 
+    res += (uint64_t) plain[i];
+  printf("Composite result (ignore): %llx\n", res);
+  */
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    ossl_sha256(hash,plain, len);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("OpenSSL SHA256 speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+  for (int i = 0; i < PLAINLEN; i++) 
+    res += (uint64_t) plain[i];
+  printf("Composite result (ignore): %llx\n", res);
+  return exit_success;
+}
+
 int32_t main()
 {
   test_1a();
@@ -378,7 +467,8 @@ int32_t main()
   test_4a();
   test_4b();
   test_5();
-  test_6();
+  //  test_6();
+  perf_sha();
   return exit_success;
 }
 

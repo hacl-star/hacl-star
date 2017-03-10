@@ -5,11 +5,11 @@ open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness
 open Spec.Lib
-
-(* This should go elsewhere! *)
+open Spec.Chacha20.Lemmas
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
+(* Constants *)
 let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
 let noncelen = 12 (* in bytes *)
@@ -60,23 +60,17 @@ let chacha20_core (s:state) : Tot state =
     map2 (fun x y -> x +%^ y) s' s
 
 (* state initialization *) 
-
 unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
-
-// JK: I have to add those assertions to typechecks, would be nice to get rid of it
 let setup (k:key) (n:nonce) (c:counter): Tot state =
-  assert_norm(List.Tot.length constants = 4); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
   createL constants @|
   uint32s_from_le 8 k @|
   singleton (UInt32.uint_to_t c) @|
-  (* create [UInt32.uint_to_t c] @|  *)
   uint32s_from_le 3 n
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     let st = setup k n c in
     let st' = chacha20_core st in
     uint32s_to_le 16 st'
-
 
 let chacha20_ctx: Spec.CTR.block_cipher_ctx = 
     let open Spec.CTR in

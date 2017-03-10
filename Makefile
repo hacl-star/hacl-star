@@ -44,6 +44,9 @@ clean:
 	rm -rf *~
 	rm -rf build
 	rm -rf build-experimental
+	$(MAKE) -C specs clean
+	$(MAKE) -C code clean
+	$(MAKE) -C apps clean
 	$(MAKE) -C test clean
 
 

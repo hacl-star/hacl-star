@@ -35,7 +35,7 @@ poly1305.exe: Spec.Poly1305.fst
 	mkdir -p poly-spec
 	$(FSTAR) $(ARGS) --odir poly-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> poly-spec/Spec_Poly1305.ml
-	$(OCAMLOPT) -I poly-spec $(OCAML_INCLUDES) $(addprefix poly-spec/, $(EXTRACTED)) poly-spec/Spec_Poly1305.ml -o poly1305.exe
+	$(OCAMLOPT) -I poly-spec $(OCAML_INCLUDES) $(addprefix poly-spec/, $(EXTRACTED)) poly-spec/Spec_Poly1305_Lemmas.ml poly-spec/Spec_Poly1305.ml -o poly1305.exe
 	./poly1305.exe
 
 sha2.exe: experimental/Spec.SHA2.fst
@@ -45,6 +45,14 @@ sha2.exe: experimental/Spec.SHA2.fst
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_Sha2.ml
 	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Combinators.ml sha2-spec/Spec_Lib.ml sha2-spec/Spec_Sha2.ml -o sha2.exe
 	./sha2.exe
+
+curve25519.exe: Spec.Curve25519.fst
+	$(MAKE) -C ../code/lib/ml MEM=HST
+	mkdir -p curve25519-spec
+	$(FSTAR) $(ARGS) --odir curve25519-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> curve25519-spec/Spec_Curve25519.ml
+	$(OCAMLOPT) -I curve25519-spec $(OCAML_INCLUDES) $(addprefix curve25519-spec/, $(EXTRACTED)) curve25519-spec/Combinators.ml curve25519-spec/Spec_Lib.ml curve25519-spec/Spec_Curve25519.ml -o curve25519.exe
+	./curve25519.exe
 
 chacha20.exe: Spec.Chacha20.fst
 	$(MAKE) -C ../code/lib/ml MEM=HST
@@ -81,4 +89,4 @@ chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec
