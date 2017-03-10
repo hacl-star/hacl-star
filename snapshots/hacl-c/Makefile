@@ -3,8 +3,9 @@
 TWEETNACL_HOME   ?=../../other_providers/tweetnacl
 OPENSSL_HOME   ?=../../other_providers/openssl
 LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
-CC=gcc-6 -flto 
-CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -std=c11 -g
+CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
+CC=gcc-6 -flto
+#CC=/usr/local/opt/llvm/bin/clang -flto
 
 test: test-poly	test-chacha test-salsa test-curve test-secretbox test-box test-aead
 
@@ -17,23 +18,15 @@ test-poly:
 	./test-poly.exe
 
 test-poly32-custom:
-	$(CC) -Ofast -m32 -fwrapv -fomit-frame-pointer -funroll-loops -std=c11 -fmath-errno \
+	$(CC) -Ofast -m32 -mtune=generic -fwrapv -fomit-frame-pointer -funroll-loops -fmath-errno \
 	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
 	kremlib.c testlib.c Poly1305_32_custom.c test-poly32-custom.c -o test-poly32-custom.exe 
 	./test-poly32-custom.exe
 
-test-curve32-custom:
-	$(CC) -Ofast -m32 -mtune=generic -fwrapv -fomit-frame-pointer -funroll-loops -std=c11 -fmath-errno \
-	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
-	kremlib.c testlib.c Curve25519_32_custom.c test-curve32-custom.c -o test-curve32-custom.exe 
-	./test-curve32-custom.exe
-
 test-poly32:
-	$(CC) $(CCOPTS) \
-	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
+	$(CC) -Ofast -m32 -mtune=generic -fwrapv -fomit-frame-pointer -funroll-loops -fmath-errno \
 	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
-	kremlib.c testlib.c Poly1305_32.c test-poly32.c -o test-poly32.exe \
-	-lsodium $(OPENSSL_HOME)/libcrypto.a
+	kremlib.c testlib.c Poly1305_32.c test-poly32.c -o test-poly32.exe 
 	./test-poly32.exe
 
 test-poly-vec:
@@ -72,6 +65,12 @@ test-curve:
 	kremlib.c testlib.c Curve25519.c test-curve.c -o test-curve.exe \
 	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -l sodium -lpthread -ldl
 	./test-curve.exe
+
+test-curve32-custom:
+	$(CC) -Ofast -m32 -mtune=generic -fwrapv -fomit-frame-pointer -funroll-loops -std=c11 -fmath-errno \
+	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c curve25519-donna.c \
+	kremlib.c testlib.c Curve25519_32_custom.c test-curve32-custom.c -o test-curve32-custom.exe 
+	./test-curve32-custom.exe
 
 test-secretbox:
 	$(CC) $(CCOPTS) \
