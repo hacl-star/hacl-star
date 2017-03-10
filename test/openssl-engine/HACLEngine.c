@@ -18,6 +18,7 @@
 #include <openssl/ec.h>
 
 #include "Curve25519.h"
+#include "Chacha20.h"
 
 // The multiplexing is done at compile-time; pass -DIMPL=IMPL_OPENSSL to your
 // compiler to override the default HACL implementation.
@@ -96,6 +97,29 @@ static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
 }
 #endif
 
+
+static int Wrapper_Chacha20_Init(EVP_CIPHER_CTX *ctx, const unsigned char *key, const unsigned char *iv, int enc) {
+  uint32_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
+  Chacha20_chacha_keysetup(my_ctx, (uint8_t*) key);
+  Chacha20_chacha_ietf_ivsetup(my_ctx, (uint8_t*) iv, 1);
+
+  return 1;
+}
+
+static int Wrapper_Chacha20_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out, const unsigned char *in, size_t len) {
+  uint32_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
+
+  while (len > 64) {
+    Hacl_Symmetric_Chacha20_chacha20_update(my_ctx, (uint8_t*) in, (uint8_t*) out);
+    in += 64;
+    out += 64;
+    len -= 64;
+  }
+  int r = len & 0x3f;
+  Hacl_Symmetric_Chacha20_chacha20_finish(my_ctx, (uint8_t*) in, (uint8_t*) out, r);
+
+  return 1;
+}
 
 static int Everest_digest_nids(const int **nids)
 {
@@ -191,8 +215,10 @@ int Everest_pkey_meths(ENGINE *e, EVP_PKEY_METHOD **method, const int **nids, in
 }
 
 
-// Fill in the hacl_x25519_meth global.
 int Everest_init(ENGINE *e) {
+  // Fill in the hacl_x25519_meth global by copying the existence OpenSSL code
+  // and swapping in just our multiplication, so that we don't have to duplicate
+  // the rest of the logic.
   const EVP_PKEY_METHOD *openssl_meth = EVP_PKEY_meth_find(NID_X25519);
   if (!openssl_meth) {
     fprintf(stderr, "Couldn't find OpenSSL X25519\n");
@@ -206,6 +232,21 @@ int Everest_init(ENGINE *e) {
   EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
 #elif IMPL == IMPL_OPENSSL
   ;
+#else
+#error "Unsupported implementation"
+#endif
+
+  // Chacha20
+#if IMPL == IMPL_HACL
+  hacl_chacha20_cipher = EVP_CIPHER_meth_new(NID_chacha20, 1, 32);
+  EVP_CIPHER_meth_set_iv_length(hacl_chacha20_cipher, 16);
+  EVP_CIPHER_meth_set_flags(hacl_chacha20_cipher, EVP_CIPH_CUSTOM_IV | EVP_CIPH_ALWAYS_CALL_INIT);
+  EVP_CIPHER_meth_set_init(hacl_chacha20_cipher, Wrapper_Chacha20_Init);
+  EVP_CIPHER_meth_set_do_cipher(hacl_chacha20_cipher, Wrapper_Chacha20_Cipher);
+  // Context is 32 uint32_t's.
+  EVP_CIPHER_meth_set_impl_ctx_size(hacl_chacha20_cipher, 32 * 4);
+#elif IMPL == IMPL_OPENSSL
+  hacl_chacha20_cipher = EVP_chacha20();
 #else
 #error "Unsupported implementation"
 #endif
