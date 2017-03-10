@@ -197,10 +197,10 @@ val box_beforenm: #(pk_id:id{DH_id? pk_id /\ registered pk_id}) ->
     // Id sanity
     (AE.get_index k = generate_ae_id pk_id sk_id)
     // If honest, something is inserted into the log
-    /\ (honest i
+    /\ ((AE_id?i /\ honest i) (*x*)
       ==> (let current_log = MR.m_sel h0 box_key_log in
-	 /\ (MM.fresh box_key_log i h0 ==> (MR.m_sel h1 box_key_log == MM.upd current_log i k
-					 /\ MR.m_sel h1 k_log == Key.empty_log i
+         (MM.fresh box_key_log i h0 ==> (MR.m_sel h1 box_key_log == MM.upd current_log i k
+					 /\ MR.m_sel h1 k_log == AE.empty_log i
 					 /\ makes_unfresh_just i h0 h1
 					 /\ modifies regions_modified_honest_set h0 h1))
 	 /\ (MM.defined box_key_log i h0 ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log
@@ -208,10 +208,11 @@ val box_beforenm: #(pk_id:id{DH_id? pk_id /\ registered pk_id}) ->
 					   /\ h0 == h1))
     	 /\ MR.witnessed (MM.contains box_key_log i k)
     	 /\ MM.contains box_key_log i k h1))
-    //// If dishonest, the returned key is actually computed from both DH keys.
-    ///\ (dishonest i
-    //  ==> (modifies regions_modified_dishonest_set h0 h1
-    //     /\ leak_key k = DH.prf_odhGT sk.dh_sk pk.dh_pk))
+    // If dishonest, the returned key is actually computed from both DH keys.
+    // TODO: This does not work yet.
+    /\ (dishonest i
+      ==> (modifies regions_modified_dishonest_set h0 h1
+         /\ leak_key k = DH.prf_odhGT sk.dh_sk pk.dh_pk))
     //// Sync of box_log and the local log of the returned key
     ///\ log_invariant_single_key h1 i k
     //// id is fresh if it is in the box_key_log, 
@@ -237,15 +238,25 @@ let box_beforenm #pk_id #sk_id pk sk =
   MR.m_recall box_log;
   MR.m_recall box_key_log;
   let i = generate_ae_id pk_id sk_id in
-  let h = ST.get() in
-  assert(MR.m_sel h box_key_log == MR.m_sel h dh_key_log
-  /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h <==> fresh i h)));
-  assert ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h) ==>  fresh i h);
   let k = prf_odh sk.dh_sk pk.dh_pk in
+  MR.m_recall id_log;
+  MR.m_recall id_honesty_log;
+  MR.m_recall dh_key_log;
+  MR.m_recall box_log;
+  MR.m_recall box_key_log;
   (if is_honest i then
     match MM.lookup box_key_log i with
-    | Some _ -> ()
-    | None -> MM.extend box_key_log i k);
+    | Some _ ->
+      let h1 = ST.get() in
+      assert((AE_id? i /\ honest i) ==> MM.contains dh_key_log i k h1);
+      assert((AE_id? i /\ honest i) ==> MM.contains box_key_log i k h1);
+      ()
+    | None -> 
+      MM.extend box_key_log i k;
+      let h1 = ST.get() in
+      assert(honest i ==> MM.contains dh_key_log i k h1);
+      assert(honest i ==> MM.contains box_key_log i k h1);
+      ());
   recall_log k;
   MR.m_recall id_log;
   MR.m_recall id_honesty_log;
@@ -253,8 +264,6 @@ let box_beforenm #pk_id #sk_id pk sk =
   MR.m_recall box_log;
   MR.m_recall box_key_log;
   k
-                    ∧ modifies regions_modified_honest h0 h1))
- 
 
 
 (**
