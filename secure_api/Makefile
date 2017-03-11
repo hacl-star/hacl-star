@@ -15,16 +15,16 @@ FSTAR_ARGS=$(OTHERFLAGS)
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real --include ../specs
 
-KRML_INCLUDES=$(addprefix -I ,test/spartan_aes aead uf1cma spartan prf utils ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/aes prf utils ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=-ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS) -ccopt -std=gnu99
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES) 
 
-test/spartan_aes/aes.o:
-	make -C test/spartan_aes
+vale/aes/aes.o:
+	make -C vale/aes
 
-krml-test-vale.exe: test/spartan_aes/aes.o
+krml-test-vale.exe: vale/aes/aes.o
 	$(KRML) test/test_vale/Crypto.Indexing.fst \
-	       	test/test_vale/spartan_impl.c test/spartan_aes/aes.o \
+	       	test/test_vale/vale.c vale/aes/aes.o \
 		test/Flag.fst utils/Hacl.Spec.fst \
 	       	test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
 	       	$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
@@ -45,13 +45,13 @@ krml-test-hacl.exe:
 		-drop Hacl.Spec -drop Spec.\*
 	./krml-test-hacl.exe
 
-test-perf.exe: krml-test.exe test/test_perf.c
+test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 	$(CC) -Ofast -m64 -flto -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
-	 -o test-perf.exe tmp/FStar.c tmp/Crypto_AEAD*.c tmp/Crypto_Indexing*.c tmp/Crypto_Symmetric*.c tmp/Hacl_Impl*.c tmp/Hacl_Bignum*.c tmp/Hacl_Symmetric_Chacha20.c tmp/Buffer_Utils*.c tmp/Crypto_Plain*.c $(KREMLIN_HOME)/kremlib/kremlib.c \
-		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_perf.c test/spartan_dummy.c test/test_hacks.c  -I tmp  \
+	 -o test-perf-hacl.exe tmp-hacl/FStar.c tmp-hacl/Crypto_AEAD*.c tmp-hacl/Crypto_Indexing*.c tmp-hacl/Crypto_Symmetric*.c tmp-hacl/Hacl_Impl*.c tmp-hacl/Hacl_Bignum*.c tmp-hacl/Hacl_Symmetric_Chacha20.c tmp-hacl/Buffer_Utils*.c tmp-hacl/Crypto_Plain*.c $(KREMLIN_HOME)/kremlib/kremlib.c \
+		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_perf.c test/test_hacks.c -I tmp-hacl  \
 		-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test \
 		-I $(OPENSSL_HOME)/include -L $(OPENSSL_HOME) -lcrypto $(CFLAGS)
-	PATH=$(OPENSSL_HOME):$(PATH) LD_LIBRARY_PATH=$(OPENSSL_HOME):$(LD_LIBRARY_PATH) DYLD_LIBRARY_PATH=$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH) ./test-perf.exe
+	PATH=$(OPENSSL_HOME):$(PATH) LD_LIBRARY_PATH=$(OPENSSL_HOME):$(LD_LIBRARY_PATH) DYLD_LIBRARY_PATH=$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH) ./test-perf-hacl.exe
 
 # Cleaning
 clean:
@@ -75,7 +75,7 @@ FSTAR_INCLUDE_PATHS= \
 --include $(HACL_HOME)/code/salsa-family \
 --include $(HACL_HOME)/secure_api/aead \
 --include $(HACL_HOME)/secure_api/prf \
---include $(HACL_HOME)/secure_api/spartan \
+--include $(HACL_HOME)/secure_api/vale \
 --include $(HACL_HOME)/secure_api/uf1cma \
 --include $(HACL_HOME)/secure_api/utils \
 --include $(HACL_HOME)/specs \

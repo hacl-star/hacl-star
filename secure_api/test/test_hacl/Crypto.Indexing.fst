@@ -1,7 +1,6 @@
 module Crypto.Indexing
 
-abstract type id0 = aeadAlg
-let id : Type0 = id0
+let id : Type0 = aeadAlg
 
 inline_for_extraction let aeadAlg_of_id i = i
 

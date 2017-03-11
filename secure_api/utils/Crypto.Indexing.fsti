@@ -22,7 +22,7 @@ type aeadAlg =
   | CHACHA20_POLY1305
 
 type aesImpl =
-  | SpartanAES
+  | ValeAES
   | HaclAES
 
 val id:Type0

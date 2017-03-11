@@ -18,7 +18,7 @@ inline_for_extraction let cipherAlg_of_id i =
   | CHACHA20_POLY1305 -> CHACHA20
 
 inline_for_extraction let aesImpl_of_id (i:id) =
-  SpartanAES
+  ValeAES
 
 let testId (a:aeadAlg) = a
 

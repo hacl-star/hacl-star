@@ -89,8 +89,8 @@ let init (#i:id) (k:key (algi i)) (s:state (algi i)) =
     | HaclAES ->
       mk_sbox sbox;
       keyExpansion k w sbox
-    | SpartanAES ->
-      Spartan.keyExpansion k w sbox)
+    | ValeAES ->
+      Vale.AES.keyExpansion k w sbox)
 
   | AES256 ->
     let open Crypto.Symmetric.AES in
@@ -171,7 +171,7 @@ let compute i output st n counter len =
       let output_block = Buffer.create 0uy (blocklen' AES128) in
       ( match aesImpl_of_id i with
           | HaclAES -> cipher output_block ctr_block w sbox
-          | SpartanAES -> Spartan.cipher output_block ctr_block w sbox );
+          | ValeAES -> Vale.AES.cipher output_block ctr_block w sbox );
       blit output_block 0ul output 0ul len ) // too much copying!
   | AES256 -> (
       let open Crypto.Symmetric.AES in  // shadows blocklen

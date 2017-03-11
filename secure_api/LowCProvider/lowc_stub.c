@@ -87,7 +87,8 @@ CAMLprim value ocaml_AEAD_create(value alg, value key) {
                 default:
                         caml_failwith("LowCProvider: unsupported AEAD alg");
         }
-        Crypto_Indexing_id id = calg; // {.cipher = calg, .aes=Crypto_Config_aesImpl_SpartanAES, .uniq = 0};
+        Crypto_Indexing_id id = calg;
+       	// {.cipher = calg, .aes=Crypto_Config_aesImpl_ValeAES, .uniq = 0};
         uint8_t* ckey = (uint8_t*) String_val(key);
         uint32_t keylen = caml_string_length(key);
 

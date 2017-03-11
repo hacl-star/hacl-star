@@ -63,7 +63,7 @@ $(CORECRYPTO)/CoreCrypto.cmx: $(CORECRYPTO)/CoreCrypto.ml
 	$(MAKE) -C $(CORECRYPTO)
 
 libllcrypto.a: ../krml-test-vale.exe
-	$(AR) -cr libllcrypto.a ../test/spartan_aes/aes.o ../tmp-vale/*.o
+	$(AR) -cr libllcrypto.a ../vale/aes/aes.o ../tmp-vale/*.o
 	$(AR) -d libllcrypto.a Crypto_KrmlTest.o
 
 lowc_stub.o: libllcrypto.a
