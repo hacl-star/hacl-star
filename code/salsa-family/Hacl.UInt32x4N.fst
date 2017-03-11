@@ -39,6 +39,7 @@ assume val vec_load128_le: b:uint8_p -> ST vec
 			     forall i. (0 <= i /\ i < U32.v vec_size) ==>
 			     index rs i = index s (i % 4))))
 
+assume val vec_load_32: h32-> Tot vec
 assume val vec_load_32x4: h32 -> h32 -> h32 -> h32 -> Tot vec
 assume val vec_load_32x8: h32 -> h32 -> h32 -> h32 -> h32 -> h32 -> h32 -> h32 -> Tot vec
 assume val vec_shuffle_right: vec -> r:u32 -> Tot (vec)
@@ -47,6 +48,11 @@ assume val vec_rotate_left_8:  vec -> Tot (vec)
 assume val vec_rotate_left_16:  vec -> Tot (vec)
 assume val vec_add:  vec -> vec -> Tot (vec)
 assume val vec_xor:  vec -> vec -> Tot (vec)
+
+assume val vec_interleave32_low: vec -> vec -> Tot vec
+assume val vec_interleave32_high: vec -> vec -> Tot vec
+assume val vec_interleave64_low: vec -> vec -> Tot vec
+assume val vec_interleave64_high: vec -> vec -> Tot vec
 assume val vec_choose_128: vec -> vec -> u32 -> u32 -> Tot vec
 
 inline_for_extraction let op_Less_Less_Less (v:vec) (r:u32): Tot (vec) = vec_rotate_left v r

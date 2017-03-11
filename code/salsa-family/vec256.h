@@ -24,6 +24,12 @@ static inline vec vec_load_32x4(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t 
   return v;
 }
 
+static inline vec vec_load_32(uint32_t x){
+  vec v;
+  v.v = (vec256) _mm256_set1_epi32(x);
+  return v;
+}
+
 
 static inline vec vec_load_32x8(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4, uint32_t x5, uint32_t x6, uint32_t x7, uint32_t x8){
   vec v;
@@ -113,6 +119,8 @@ static inline vec vec_xor(vec v1, vec v2) {
 static const vec two_le = {.v = {2,0,0,0,2,0,0,0}};
 static const vec one_le = {.v = {1,0,0,0,1,0,0,0}};
 static const vec zero = {.v = {0,0,0,0,0,0,0}};
+static const vec ones = {.v = {1,1,1,1,1,1,1,1}};
+static const vec eights = {.v = {8,8,8,8,8,8,8,8}};
 
 #if __clang__
 #define vec_choose_128(v1,v2,first,second) \
@@ -122,6 +130,29 @@ static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned in
   vec r;
   unsigned char control = (second * 16) + first;
   r.v = (vec256)_mm256_permute2x128_si256((__m256i)v1.v, (__m256i)v2.v, control);
+  return r;
+}
+
+static inline vec vec_interleave32_high(vec v1, vec v2) {
+  vec r;
+  r.v = (vec256)_mm256_unpackhi_epi32((__m256i)v1.v,(__m256i)v2.v);
+  return r;
+}
+
+static inline vec vec_interleave32_low(vec v1, vec v2) {
+  vec r;
+  r.v = (vec256)_mm256_unpacklo_epi32((__m256i)v1.v,(__m256i)v2.v);
+  return r;
+}
+static inline vec vec_interleave64_high(vec v1, vec v2) {
+  vec r;
+  r.v = (vec256)_mm256_unpackhi_epi64((__m256i)v1.v,(__m256i)v2.v);
+  return r;
+}
+
+static inline vec vec_interleave64_low(vec v1, vec v2) {
+  vec r;
+  r.v = (vec256)_mm256_unpacklo_epi64((__m256i)v1.v,(__m256i)v2.v);
   return r;
 }
 #endif
