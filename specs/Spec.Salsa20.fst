@@ -94,7 +94,8 @@ let salsa20_ctx: Spec.CTR.block_cipher_ctx =
     keylen = keylen;
     blocklen = blocklen;
     noncelen = noncelen;
-    counterbits = 64
+    counterbits = 64;
+    incr = 1
     }
 
 let salsa20_cipher: Spec.CTR.block_cipher salsa20_ctx = salsa20_block

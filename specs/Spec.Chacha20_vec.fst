@@ -142,7 +142,8 @@ let chacha20_ctx: Spec.CTR.block_cipher_ctx =
     keylen = keylen;
     blocklen = blocklen;
     noncelen = noncelen;
-    counterbits = 32
+    counterbits = 32;
+    incr = 1
     }
 
 let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block

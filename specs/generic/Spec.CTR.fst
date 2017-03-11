@@ -7,7 +7,8 @@ type block_cipher_ctx = {
      keylen: nat ;
      blocklen: (x:nat{x>0});
      noncelen: nat;
-     counterbits: nat}
+     counterbits: nat;
+     incr: pos}
 
 type key (c:block_cipher_ctx) = lbytes c.keylen
 type nonce (c:block_cipher_ctx) = lbytes c.noncelen
@@ -38,6 +39,6 @@ let rec counter_mode ctx block_enc key nonce counter plain =
       let (b, plain) = split plain ctx.blocklen in 
       let mask = block_enc key nonce counter in 
       let eb = xor b mask in
-      let cipher = counter_mode ctx block_enc key nonce (counter + 1) plain in
+      let cipher = counter_mode ctx block_enc key nonce (counter + ctx.incr) plain in
       eb @| cipher 
 
