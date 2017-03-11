@@ -59,10 +59,12 @@ X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
+		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include ../../specs --include ../../specs/generic
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib
+		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include ../../specs --include ../../specs/generic
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst

@@ -11,7 +11,6 @@ open Hacl.Spec.EC.Point
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
-
 type uint8_s = Seq.seq Hacl.UInt8.t
 
 private inline_for_extraction let zero_8 = uint8_to_sint8 0uy
@@ -31,11 +30,15 @@ let point_inf () =
   x, z
 
 
-val alloc_point: unit -> Tot spoint_513
+val alloc_point: unit -> Tot (p:spoint_513{selem (fst p) = 0 /\ selem (snd p) = 0})
 let alloc_point () =
   let s = Seq.create 10 limb_zero in
   let x = Seq.slice s 0 5 in
   let z = Seq.slice s 5 10 in
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 x;
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 z;
+  Math.Lemmas.modulo_lemma (Hacl.Spec.Bignum.Bigint.seval x) (pow2 255 - 19);
+  Math.Lemmas.modulo_lemma (Hacl.Spec.Bignum.Bigint.seval z) (pow2 255 - 19);
   x, z
 
 
@@ -71,7 +74,7 @@ inline_for_extraction let seq_upd_5 s0 s1 s2 s3 s4 =
   s
 
 
-val fexpand_spec: input:uint8_s{Seq.length input = 32} -> GTot (s:seqelem{Hacl.Spec.EC.AddAndDouble.red_513 s})
+val fexpand_spec: input:uint8_s{Seq.length input = 32} -> GTot (s:seqelem{Hacl.Spec.EC.AddAndDouble.red_513 s /\ Hacl.Spec.Bignum.Bigint.seval s = little_endian input % pow2 255})
 let fexpand_spec input =
   let i0 = load64_le_spec (Seq.slice input 0 8) in
   let i1 = load64_le_spec (Seq.slice input 6 14) in
@@ -88,7 +91,10 @@ let fexpand_spec input =
   UInt.logand_mask (v (i2 >>^ 6ul)) 51;
   UInt.logand_mask (v (i3 >>^ 1ul)) 51;
   UInt.logand_mask (v (i4 >>^ 12ul)) 51;
-  seq_upd_5 output0 output1 output2 output3 output4
+  let s = seq_upd_5 output0 output1 output2 output3 output4 in
+  Hacl.Spec.EC.Format.Lemmas.lemma_fexpand input;
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 s;
+  s
 
 
 inline_for_extraction let nineteen : p:t{v p = 19} = assert_norm(pow2 64 > 19); uint64_to_limb 19uL
