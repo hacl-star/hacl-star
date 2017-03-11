@@ -12,7 +12,8 @@ extract-c-code:
 	$(MAKE) -C ../code extract-c
 
 extract-c-crypto:
-	$(MAKE) -C ../secure_api krml-test.exe
+	$(MAKE) -C ../secure_api krml-test-vale.exe
+	$(MAKE) -C ../secure_api krml-test-hacl.exe
 
 extract-c: extract-c-code extract-c-crypto
 
