@@ -833,8 +833,8 @@ let fsquare_5413_is_fine s1 =
   cut (o'''' == fsquare_spec s1)
 
 
-val exp: x:nat -> n:nat -> Tot nat
-let rec exp x n = if n = 0 then 1 else x * exp x (n-1)
+(* val exp: x:elem -> n:elem -> Tot elem *)
+(* let rec exp x n = if n = 0 then 1 else x * exp x (n-1) *)
 
 
 val fsquare_times_tot: s:seqelem{red_5413 s} -> n:pos ->

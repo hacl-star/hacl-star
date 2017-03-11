@@ -76,6 +76,21 @@ let rec lemma_exp_double x n =
     cut (exp x (n+n) = x *@ (x *@ exp x (n+n-2)));
     lemma_op_Star_At_assoc x x (exp x (n+n-2)))
 
+val lemma_exp_mul: x:elem -> n:nat -> m:nat -> Lemma
+  (requires (True))
+  (ensures (exp (exp x n) m = exp x (op_Multiply n m)))
+  (decreases m)
+let rec lemma_exp_mul x n m =
+  if m = 0 then (
+    lemma_exp_def_0 (exp x n);
+    lemma_exp_def_0 (x)
+  ) else (
+    cut (m > 0);
+    let open FStar.Mul in
+    lemma_exp_mul x n (m-1);
+    lemma_exp_def_1 (exp x n) m;
+    lemma_exp_add x n (n * (m-1)))
+
 
 val lemma_exp_eq: x:elem -> n:pos -> Lemma
   (requires (True))
