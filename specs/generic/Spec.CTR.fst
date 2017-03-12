@@ -30,7 +30,7 @@ val counter_mode:
 let rec counter_mode ctx block_enc key nonce counter plain =
   let len = length plain in 
   if len = 0 then Seq.createEmpty #UInt8.t else
-  if len <= ctx.blocklen 
+  if len < ctx.blocklen 
   then (* encrypt final partial block *)
       let mask = block_enc key nonce counter in 
       let mask = slice mask 0 len in 
