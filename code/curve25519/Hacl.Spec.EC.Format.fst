@@ -384,18 +384,26 @@ let point_of_scalar scalar =
 val scalar_of_point: p:spoint_513 -> GTot (scalar:uint8_s{Seq.length scalar = keylen
   /\ (let x = Hacl.Spec.Bignum.selem (fst p) in
      let z = Hacl.Spec.Bignum.selem (snd p) in
-     pow2 255 - 21 > 0 /\
-     little_endian scalar = Spec.Curve25519.(x *@ (z ** (pow2 255 - 21))))
+     (* pow2 255 - 21 > 0 /\ *)
+     scalar == Spec.Curve25519.(encodePoint (Proj x z)))
+     (* little_endian scalar = Spec.Curve25519.(x *@ (z ** (pow2 255 - 21)))) *)
   })
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 let scalar_of_point point =
+  assert_norm(pow2 255 > 21);
   let x = sgetx point in
   let z = sgetz point in
+  cut ((Spec.Curve25519.(encodePoint (Proj (Hacl.Spec.Bignum.selem x) (Hacl.Spec.Bignum.selem z)))) == little_bytes 32ul (Spec.Curve25519.(Hacl.Spec.Bignum.selem x *@ (Hacl.Spec.Bignum.selem z ** (pow2 255 - 21)))));
   let zmone = Hacl.Spec.Bignum.Crecip.crecip_tot z in
   Hacl.Spec.EC.AddAndDouble2.lemma_513_is_53 x;
   Hacl.Spec.EC.AddAndDouble2.lemma_513_is_55 zmone;
   Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine x zmone;
   let y = Hacl.Spec.Bignum.fmul_tot x zmone in
-  fcontract_spec y
+  let r = fcontract_spec y in
+  cut (little_endian r = Spec.Curve25519.(Hacl.Spec.Bignum.selem x *@ (Hacl.Spec.Bignum.selem z ** (pow2 255 - 21))));
+  lemma_little_endian_inj r (Spec.Curve25519.(encodePoint (Proj (Hacl.Spec.Bignum.selem x) (Hacl.Spec.Bignum.selem z))));
+  r
+
 
 
 val format_secret: secret:uint8_s{Seq.length secret = keylen} -> Tot (s:uint8_s{Seq.length s = keylen /\ s == Spec.Curve25519.decodeScalar25519 secret})

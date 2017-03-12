@@ -51,7 +51,7 @@ let decodeScalar25519 (k:scalar) : Tot (* (n:nat{n < pow2 256}) *)(k':scalar) =
   (* lemma_little_endian_is_bounded k; little_endian k *)
 
 let decodePoint (u:serialized_point) : Tot elem =
-  little_endian (upd u 31 (index u 31 &^ 127uy)) % prime
+  (little_endian u % pow2 255) % prime
 
 let add_and_double qx nq nqp1 =
   let x_1 = qx in
