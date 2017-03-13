@@ -71,7 +71,11 @@ all-lax: $(addsuffix -lax, $(POLY1305_FILES))
 %.fst-hints: %.fst
 	-$(FSTARB) $^ --use_hints --record_hints
 
-all-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
+all-hints2: $(addsuffix -hints, $(POLY1305_FILES))
+all-hints:
+	cp bignum_hints/* ../bignum
+	$(MAKE) all-hints2
+	mv ../bignum/*.hints ./bignum_hints
 
 # For CI, all modules restricted from incomplete or slow ones
 all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))

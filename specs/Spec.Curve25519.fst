@@ -40,17 +40,16 @@ let rec op_Star_Star (e:elem) (n:pos) : Tot elem (decreases n) =
 type scalar = lbytes 32
 type serialized_point = lbytes 32
 
-type proj_point = | Proj: x:elem -> z:elem -> proj_point // y is ignored
+type proj_point = | Proj: x:elem -> z:elem -> proj_point
 
-let decodeScalar25519 (k:scalar) : Tot (* (n:nat{n < pow2 256}) *)(k':scalar) =
+let decodeScalar25519 (k:scalar) =
   let k0  = index k 0  in
   let k31 = index k 31 in
   let k   = upd k 0 (k0 &^ 248uy)             in
   let k   = upd k 31 ((k31 &^ 127uy) |^ 64uy) in
   k
-  (* lemma_little_endian_is_bounded k; little_endian k *)
 
-let decodePoint (u:serialized_point) : Tot elem =
+let decodePoint (u:serialized_point) =
   (little_endian u % pow2 255) % prime
 
 let add_and_double qx nq nqp1 =
