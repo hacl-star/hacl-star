@@ -230,6 +230,7 @@ inline_for_extraction
 let p51m19 : p:limb{v p = pow2 51 - 19} =
   assert_norm(pow2 51 - 19 = 0x7ffffffffffed);
   0x7ffffffffffeduL
+inline_for_extraction
 let p51m1 : p:limb{v p = pow2 51 - 1} =
   assert_norm(pow2 51 - 1 = 0x7ffffffffffff);
   0x7ffffffffffffuL
