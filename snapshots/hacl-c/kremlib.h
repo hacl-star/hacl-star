@@ -401,7 +401,7 @@ static inline uint128_t FStar_UInt128_mul32(uint64_t x, uint32_t y) {
 
 #else 
 
-#if 1 //using 64-bits here
+#if 0 //using 64-bits here
 
 typedef struct {
   uint64_t n1;
