@@ -14,16 +14,15 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
-#include "tmp/Prims.h"
-#include "tmp/Crypto_Config.h"
-#include "tmp/Crypto_Indexing.h"
-#include "tmp/Crypto_Symmetric_Bytes.h"
-#include "tmp/Crypto_Symmetric_PRF.h"
-#include "tmp/Crypto_Symmetric_UF1CMA.h"
-#include "tmp/Crypto_AEAD_Invariant.h"
-#include "tmp/Crypto_AEAD_Encrypt.h"
-#include "tmp/Crypto_AEAD_Decrypt.h"
-#include "tmp/Crypto_AEAD.h"
+#include "tmp-vale/Prims.h"
+#include "tmp-vale/Crypto_Indexing.h"
+#include "tmp-vale/Crypto_Symmetric_Bytes.h"
+#include "tmp-vale/Crypto_Symmetric_PRF.h"
+#include "tmp-vale/Crypto_Symmetric_UF1CMA.h"
+#include "tmp-vale/Crypto_AEAD_Invariant.h"
+#include "tmp-vale/Crypto_AEAD_Encrypt.h"
+#include "tmp-vale/Crypto_AEAD_Decrypt.h"
+#include "tmp-vale/Crypto_AEAD.h"
 
 typedef Crypto_Symmetric_PRF_state____ PRF_ST;
 typedef Crypto_AEAD_Invariant_aead_state_______ AEAD_ST;
@@ -88,7 +87,8 @@ CAMLprim value ocaml_AEAD_create(value alg, value key) {
                 default:
                         caml_failwith("LowCProvider: unsupported AEAD alg");
         }
-        Crypto_Indexing_id id = {.cipher = calg, .aes=Crypto_Config_aesImpl_SpartanAES, .uniq = 0};
+        Crypto_Indexing_id id = calg;
+       	// {.cipher = calg, .aes=Crypto_Config_aesImpl_ValeAES, .uniq = 0};
         uint8_t* ckey = (uint8_t*) String_val(key);
         uint32_t keylen = caml_string_length(key);
 

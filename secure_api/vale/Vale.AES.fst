@@ -1,4 +1,4 @@
-module Spartan
+module Vale.AES
 
 open FStar.Buffer
 type u8=FStar.UInt8.t
