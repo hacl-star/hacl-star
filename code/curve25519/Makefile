@@ -22,6 +22,7 @@ BIGNUM= \
 
 
 X25519_SPECIFIC= \
+	Hacl.Spec.Curve25519.Lemmas.fst \
 	Hacl.Bignum.Parameters.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.Spec.EC.AddAndDouble.fst \
@@ -35,9 +36,11 @@ X25519_SPECIFIC= \
 	Hacl.Spec.EC.Point.fst \
 	Hacl.EC.Point.fst \
 	Hacl.Spec.EC.AddAndDouble2.fst \
+	Hacl.Spec.EC.Format.Lemmas.fst \
 	Hacl.Spec.EC.Format.fst \
 	Hacl.EC.Format.fst \
 	Hacl.EC.AddAndDouble.fst \
+	Hacl.Spec.EC.Ladder.Format.fst \
 	Hacl.Spec.EC.Ladder.fst \
 	Hacl.EC.Ladder.SmallLoop.fst \
 	Hacl.EC.Ladder.BigLoop.fst \

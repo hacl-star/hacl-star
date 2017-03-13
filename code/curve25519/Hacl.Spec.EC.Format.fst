@@ -74,7 +74,7 @@ inline_for_extraction let seq_upd_5 s0 s1 s2 s3 s4 =
   s
 
 
-val fexpand_spec: input:uint8_s{Seq.length input = 32} -> GTot (s:seqelem{Hacl.Spec.EC.AddAndDouble.red_513 s /\ Hacl.Spec.Bignum.Bigint.seval s = little_endian input % pow2 255})
+val fexpand_spec: input:uint8_s{Seq.length input = 32} -> GTot (s:seqelem{Hacl.Spec.EC.AddAndDouble.red_513 s /\ Hacl.Spec.Bignum.Bigint.seval s = hlittle_endian input % pow2 255})
 let fexpand_spec input =
   let i0 = load64_le_spec (Seq.slice input 0 8) in
   let i1 = load64_le_spec (Seq.slice input 6 14) in
@@ -92,7 +92,7 @@ let fexpand_spec input =
   UInt.logand_mask (v (i3 >>^ 1ul)) 51;
   UInt.logand_mask (v (i4 >>^ 12ul)) 51;
   let s = seq_upd_5 output0 output1 output2 output3 output4 in
-  Hacl.Spec.EC.Format.Lemmas.lemma_fexpand input;
+  Hacl.Spec.EC.Format.Lemmas.lemma_fexpand (reveal_sbytes input);
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 s;
   s
 
@@ -229,11 +229,11 @@ let fcontract_second_carry_full input =
 inline_for_extraction
 let p51m19 : p:limb{v p = pow2 51 - 19} =
   assert_norm(pow2 51 - 19 = 0x7ffffffffffed);
-  0x7ffffffffffeduL
+  uint64_to_sint64 0x7ffffffffffeduL
 inline_for_extraction
 let p51m1 : p:limb{v p = pow2 51 - 1} =
   assert_norm(pow2 51 - 1 = 0x7ffffffffffff);
-  0x7ffffffffffffuL
+  uint64_to_sint64 0x7ffffffffffffuL
 
 val lemma_fcontract_trim_1: s:seqelem -> Lemma
   (requires (Hacl.Spec.EC.AddAndDouble.bounds s p51 p51 p51 p51 p51 /\
@@ -333,7 +333,7 @@ let fcontract_store_lemma x a b =
   
 
 val fcontract_store: s:seqelem{Hacl.Spec.EC.AddAndDouble.bounds s p51 p51 p51 p51 p51} ->
-  GTot (s':uint8_s{Seq.length s' = 32 /\ little_endian s' = Hacl.Spec.Bignum.Bigint.seval s})
+  GTot (s':uint8_s{Seq.length s' = 32 /\ hlittle_endian s' = Hacl.Spec.Bignum.Bigint.seval s})
 let fcontract_store s =
   assert_norm(pow2 0 = 1);
   let t0 = Seq.index s 0 in
@@ -360,7 +360,7 @@ let fcontract_store s =
 
 
 val fcontract_spec: input:seqelem{Hacl.Spec.EC.AddAndDouble.red_513 input} ->
-  GTot (s:uint8_s{Seq.length s = 32 /\ little_endian s = Hacl.Spec.Bignum.selem input})
+  GTot (s:uint8_s{Seq.length s = 32 /\ hlittle_endian s = Hacl.Spec.Bignum.selem input})
 let fcontract_spec input =
   let s = fcontract_first_carry_full input in
   let s' = fcontract_second_carry_full s in
@@ -369,7 +369,7 @@ let fcontract_spec input =
 
 
 val point_of_scalar: scalar:uint8_s{Seq.length scalar = keylen} ->
-  GTot (p:spoint_513{Hacl.Spec.Bignum.Bigint.seval (fst p) = little_endian scalar % pow2 255
+  GTot (p:spoint_513{Hacl.Spec.Bignum.Bigint.seval (fst p) = hlittle_endian scalar % pow2 255
     /\ Hacl.Spec.Bignum.selem (snd p) = 1})
 let point_of_scalar scalar =
   let s = Seq.create 10 limb_zero in
@@ -386,7 +386,7 @@ val scalar_of_point: p:spoint_513 -> GTot (scalar:uint8_s{Seq.length scalar = ke
   /\ (let x = Hacl.Spec.Bignum.selem (fst p) in
      let z = Hacl.Spec.Bignum.selem (snd p) in
      (* pow2 255 - 21 > 0 /\ *)
-     scalar == Spec.Curve25519.(encodePoint (Proj x z)))
+     reveal_sbytes scalar == Spec.Curve25519.(encodePoint (Proj x z)))
      (* little_endian scalar = Spec.Curve25519.(x *@ (z ** (pow2 255 - 21)))) *)
   })
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
@@ -401,13 +401,13 @@ let scalar_of_point point =
   Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine x zmone;
   let y = Hacl.Spec.Bignum.fmul_tot x zmone in
   let r = fcontract_spec y in
-  cut (little_endian r = Spec.Curve25519.(Hacl.Spec.Bignum.selem x *@ (Hacl.Spec.Bignum.selem z ** (pow2 255 - 21))));
-  lemma_little_endian_inj r (Spec.Curve25519.(encodePoint (Proj (Hacl.Spec.Bignum.selem x) (Hacl.Spec.Bignum.selem z))));
+  cut (hlittle_endian r = Spec.Curve25519.(Hacl.Spec.Bignum.selem x *@ (Hacl.Spec.Bignum.selem z ** (pow2 255 - 21))));
+  lemma_little_endian_inj (reveal_sbytes r) (Spec.Curve25519.(encodePoint (Proj (Hacl.Spec.Bignum.selem x) (Hacl.Spec.Bignum.selem z))));
   r
 
 
 
-val format_secret: secret:uint8_s{Seq.length secret = keylen} -> Tot (s:uint8_s{Seq.length s = keylen /\ s == Spec.Curve25519.decodeScalar25519 secret})
+val format_secret: secret:uint8_s{Seq.length secret = keylen} -> Tot (s:uint8_s{Seq.length s = keylen /\ reveal_sbytes s == Spec.Curve25519.decodeScalar25519 (reveal_sbytes secret)})
 let format_secret secret =
   assert_norm(pow2 8 = 256);
   let e0  = Seq.index secret 0 in
