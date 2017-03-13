@@ -955,3 +955,9 @@ void Curve25519_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *b
   return;
 }
 
+void curve25519_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint)
+{
+  Hacl_EC_crypto_scalarmult(mypublic, secret, basepoint);
+  return;
+}
+
