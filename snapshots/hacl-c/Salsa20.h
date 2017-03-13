@@ -7,11 +7,15 @@
 #include "kremlib.h"
 #include "testlib.h"
 
+typedef uint8_t Hacl_Symmetric_Salsa20_h8;
+
 typedef uint32_t Hacl_Symmetric_Salsa20_h32;
 
 typedef uint32_t Hacl_Symmetric_Salsa20_u32;
 
 typedef uint8_t *Hacl_Symmetric_Salsa20_uint8_p;
+
+typedef uint32_t *Hacl_Symmetric_Salsa20_salsa_ctx;
 
 void
 Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(

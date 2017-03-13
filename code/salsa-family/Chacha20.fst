@@ -1,52 +1,62 @@
 module Chacha20
 
-open FStar.HyperStack
-open FStar.ST
 open FStar.Buffer
-open Hacl.Cast
-open Hacl.UInt32
-open FStar.Buffer
-open Hacl.Spec.Symmetric.Chacha20
+open Hacl.Spec.Endianness
+open Hacl.Impl.Chacha20
 
 module U32 = FStar.UInt32
-module H8  = Hacl.UInt8
-module H32 = Hacl.UInt32
 
-let u32 = U32.t
-let h32 = H32.t
-let uint8_p = buffer H8.t
-type chacha_ctx = b:Buffer.buffer h32{length b = 16}
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-(* aligned to LibSodium API *) 
-
-(* sets the lower 12 words of the state (usable for multiple encryptions) *)
-val chacha_keysetup:
-  ctx:chacha_ctx ->
-  k:uint8_p{length k = 32 /\ disjoint ctx k} ->
+val chacha20_key_block:
+  block:uint8_p{length block = 64} ->
+  k:uint8_p{length k = 32 /\ disjoint block k} ->
+  n:uint8_p{length n = 12 /\ disjoint block n} ->
+  ctr:UInt32.t ->
   Stack unit
-    (requires (fun h -> live h ctx /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h0 ctx /\ live h0 k /\ live h1 ctx /\ modifies_1 ctx h0 h1
-      /\ as_seq h1 ctx == chacha_keysetup_spec (as_seq h0 ctx) (as_seq h0 k)))
-let chacha_keysetup ctx k = Hacl.Symmetric.Chacha20.chacha_keysetup ctx k
+    (requires (fun h -> live h block /\ live h k /\ live h n))
+    (ensures (fun h0 _ h1 -> live h1 block /\ modifies_1 block h0 h1 /\ live h0 k /\ live h0 n
+      /\ (let block = reveal_sbytes (as_seq h1 block) in
+         let k     = reveal_sbytes (as_seq h0 k) in
+         let n     = reveal_sbytes (as_seq h0 n) in
+         block == Spec.Chacha20.chacha20_block k n (UInt32.v ctr))
+     ))
+let chacha20_key_block block k n ctr =
+  push_frame();
+  let st = alloc () in
+  let l  = init st k n in
+  let l  = chacha20_block l block st ctr in
+  pop_frame()
 
-(* sets the upper 4 words of the state to a specific IV and counter *)
-val chacha_ietf_ivsetup:
-  ctx:chacha_ctx ->
-  k:uint8_p{length k = 12 /\ disjoint ctx k} ->
-  counter:u32 ->
-  Stack unit
-    (requires (fun h -> live h ctx /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h1 ctx /\ live h0 ctx /\ live h0 k /\ modifies_1 ctx h0 h1 
-      /\ as_seq h1 ctx == chacha_ietf_ivsetup_spec (as_seq h0 ctx) (as_seq h0 k) counter))
-let chacha_ietf_ivsetup ctx k ctr = Hacl.Symmetric.Chacha20.chacha_ietf_ivsetup ctx k ctr
 
-(* encrypts len bytes from m to c [still missing full spec; the state is destroyed] *)
-val chacha_encrypt_bytes:
-  ctx:chacha_ctx ->
-  m:uint8_p ->
-  c:uint8_p{disjoint ctx c} ->
-  len:UInt32.t{U32.v len <= length m /\ U32.v len <= length c} ->
+// JK : this is only necessary as long as the 'loop.h' hack is alive (double_round is otherwise
+// killed by the bundling
+val double_round:
+  st:buffer Hacl.UInt32.t{length st = 16} ->
   Stack unit
-    (requires (fun h -> live h c /\ live h m /\ live h ctx))
-    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_2 ctx c h0 h1))
-let chacha_encrypt_bytes ctx m c l = Hacl.Symmetric.Chacha20.chacha_encrypt_bytes ctx m c l
+    (requires (fun h -> live h st))
+    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
+let double_round st = double_round st
+
+
+let value_at m (h:HyperStack.mem{live h m}) = reveal_sbytes (as_seq h m)
+
+
+val chacha20:
+  output:uint8_p ->
+  plain:uint8_p{disjoint output plain} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain} ->
+  key:uint8_p{length key = 32} ->
+  nonce:uint8_p{length nonce = 12} ->
+  ctr:U32.t{U32.v ctr + (length plain / 64) < pow2 32} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h plain /\ live h nonce /\ live h key))
+    (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_1 output h0 h1
+      /\ live h0 nonce /\ live h0 key
+      /\ (let o = output `value_at` h1 in
+         let plain = plain `value_at` h0 in
+         let k = key `value_at` h0 in
+         let n = nonce `value_at` h0 in
+         let ctr = U32.v ctr in
+         o == Spec.Chacha20.chacha20_encrypt_bytes k n ctr plain)))
+let chacha20 output plain len k n ctr = chacha20 output plain len k n ctr

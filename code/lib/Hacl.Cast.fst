@@ -7,6 +7,7 @@ module S32 = Hacl.UInt32
 module U64 = FStar.UInt64
 module S64 = Hacl.UInt64
 module S128 = Hacl.UInt128
+module U128 = FStar.UInt128
 
 (** Uints to Sints **)
 assume val sint8_to_sint128: a:S8.t -> Tot (b:S128.t{S128.v b = S8.v a})
@@ -39,3 +40,5 @@ assume val uint8_to_sint128: a:U8.t -> Tot (b:S128.t{S128.v b = U8.v a})
 assume val uint8_to_sint64: a:U8.t -> Tot (b:S64.t{S64.v b = U8.v a})
 assume val uint8_to_sint32: a:U8.t -> Tot (b:S32.t{S32.v b = U8.v a})
 assume val uint8_to_sint8: a:U8.t -> Tot (b:S8.t{S8.v b = U8.v a})
+
+assume val uint128_to_sint128: a:U128.t -> Tot (b:S128.t{S128.v b = U128.v a})

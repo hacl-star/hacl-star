@@ -1,5 +1,25 @@
 #include "Hacl_Policies.h"
 
+uint8_t Hacl_Policies_declassify_u8(uint8_t x)
+{
+  return x;
+}
+
+uint32_t Hacl_Policies_declassify_u32(uint32_t x)
+{
+  return x;
+}
+
+uint64_t Hacl_Policies_declassify_u64(uint64_t x)
+{
+  return x;
+}
+
+FStar_UInt128_t Hacl_Policies_declassify_u128(FStar_UInt128_t x)
+{
+  return x;
+}
+
 uint8_t Hacl_Policies_leak_byte(uint8_t *b, uint32_t n)
 {
   return b[n];
