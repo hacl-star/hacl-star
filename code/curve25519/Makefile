@@ -96,7 +96,7 @@ all-hints2: $(addsuffix -hints, $(X25519_FILES))
 all-hints:
 	cp ./bignum_hints/* ../bignum/
 	$(MAKE) all-hints2
-	cp ../bignum/*.hints ./bignum_hints
+	mv ../bignum/*.hints ./bignum_hints
 
 # For CI, all modules restricted from incomplete or slow ones
 all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_FILES)))
