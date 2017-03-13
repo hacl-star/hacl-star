@@ -157,7 +157,7 @@ val lemma_small_step_eq:
   x:proj_point -> xp1:proj_point -> k:scalar -> ctr:nat{ctr > 0 /\ ctr <= 32} ->
   Lemma (montgomery_ladder_small_step init x xp1 k FStar.Mul.(8 * ctr)
     == Hacl.Spec.EC.Ladder.Lemmas.small_loop_unrolled3 init x xp1 (Seq.index k (ctr-1)))
-#reset-options "--max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 let lemma_small_step_eq init x xp1 k ctr =
   lemma_div_8 ctr;
   let b = Seq.index k (ctr-1) in

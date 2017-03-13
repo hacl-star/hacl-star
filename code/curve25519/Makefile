@@ -91,7 +91,7 @@ all-lax: $(addsuffix -lax, $(X25519_FILES))
 %.fst-hints: %.fst
 	-$(FSTARB) $^ --use_hints --record_hints
 
-all-hints: $(addsuffix -hints, $(X25519_SPECIFIC))
+all-hints: $(addsuffix -hints, $(X25519_FILES))
 
 # For CI, all modules restricted from incomplete or slow ones
 all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_FILES)))

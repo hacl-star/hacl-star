@@ -49,6 +49,6 @@ let rec cmult_big_loop n nq nqpq nq2 nqpq2 q i =
     cut (U32.v i > 0);
     let i = U32.(i -^ 1ul) in
     let byte = n.(i) in
-    cmult_small_loop nq nqpq nq2 nqpq2 q byte 8ul;
+    cmult_small_loop nq nqpq nq2 nqpq2 q byte 4ul;
     cmult_big_loop n nq nqpq nq2 nqpq2 q i
   )

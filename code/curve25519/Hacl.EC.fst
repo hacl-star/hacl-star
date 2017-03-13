@@ -30,6 +30,7 @@ inline_for_extraction val crypto_scalarmult__:
       /\ Buffer.live h basepoint
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getx q))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getz q))
+      /\ Hacl.Spec.Bignum.selem (as_seq h (getz q)) = 1
     ))
     (ensures (fun h0 _ h1 -> live h0 q /\ Buffer.live h0 mypublic /\ Buffer.live h0 secret
       /\ Buffer.live h0 basepoint
@@ -42,7 +43,7 @@ inline_for_extraction val crypto_scalarmult__:
          let q        = Hacl.Spec.Bignum.selem (as_seq h0 (getx q)) in
          mypublic == Spec.Curve25519.(encodePoint (montgomery_ladder q secret)))
       ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 inline_for_extraction let crypto_scalarmult__ mypublic scalar basepoint q =
   let h0 = ST.get() in
   push_frame();
@@ -55,6 +56,7 @@ inline_for_extraction let crypto_scalarmult__ mypublic scalar basepoint q =
   let h2 = ST.get() in
   x.(0ul) <- limb_one;
   let h3 = ST.get() in
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h3 x);
   no_upd_lemma_1 h2 h3 x z;
   no_upd_lemma_1 h2 h3 x (getx q);
   no_upd_lemma_1 h2 h3 x (getz q);
@@ -84,6 +86,7 @@ inline_for_extraction val crypto_scalarmult_:
       /\ Buffer.live h basepoint
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getx q))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getz q))
+      /\ Hacl.Spec.Bignum.selem (as_seq h (getz q)) = 1
     ))
     (ensures (fun h0 _ h1 -> Buffer.live h1 mypublic /\ modifies_1 mypublic h0 h1
      /\ live h0 q /\ Buffer.live h0 mypublic /\ Buffer.live h0 secret
