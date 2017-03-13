@@ -97,7 +97,7 @@ private inline_for_extraction val cmult_small_loop_step:
          let pointq   : spoint_513' = (as_seq h0 (getx q), (as_seq h0 (getz q))) in
          let spointa0 : spoint_513 = (as_seq h0 (getx nq), (as_seq h0 (getz nq))) in
          let spointb0 : spoint_513 = (as_seq h0 (getx nqpq), (as_seq h0 (getz nqpq))) in
-         (spointa1, spointb1) == cmult_small_loop_step_spec (spointa0) (spointb0) pointq byte i)
+         (spointa1, spointb1) == cmult_small_loop_step_spec (spointa0) (spointb0) pointq byte)
     ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 private inline_for_extraction let cmult_small_loop_step nq nqpq nq2 nqpq2 q byt i =
@@ -124,7 +124,7 @@ private inline_for_extraction val cmult_small_loop_double_step:
          let pointq   : spoint_513' = (as_seq h0 (getx q), (as_seq h0 (getz q))) in
          let spointa0 : spoint_513 = (as_seq h0 (getx nq), (as_seq h0 (getz nq))) in
          let spointb0 : spoint_513 = (as_seq h0 (getx nqpq), (as_seq h0 (getz nqpq))) in
-         (spointa1, spointb1) == cmult_small_loop_double_step_spec (spointa0) (spointb0) pointq byte i)
+         (spointa1, spointb1) == cmult_small_loop_double_step_spec (spointa0) (spointb0) pointq byte)
     ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 private inline_for_extraction let cmult_small_loop_double_step nq nqpq nq2 nqpq2 q byt i =
@@ -163,14 +163,4 @@ let rec cmult_small_loop nq nqpq nq2 nqpq2 q byt i =
     cmult_small_loop_double_step nq nqpq nq2 nqpq2 q byt i;
     let byt' = H8.(byt <<^ 2ul) in
     cmult_small_loop nq nqpq nq2 nqpq2 q byt' i'
-    (* cut (U32.v i > 0); *)
-    (* cmult_small_loop_step nq nqpq nq2 nqpq2 q byt i; *)
-    (* let t = nq in *)
-    (* let nq = nq2 in *)
-    (* let nq2 = t in *)
-    (* let t = nqpq in *)
-    (* let nqpq = nqpq2 in *)
-    (* let nqpq2 = t in *)
-    (* let byt = H8.(byt <<^ 1ul) in *)
-    (* cmult_small_loop nq nqpq nq2 nqpq2 q byt (U32.(i -^ 1ul)) *)
   )

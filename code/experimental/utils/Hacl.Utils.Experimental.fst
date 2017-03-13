@@ -127,7 +127,7 @@ let be_bytes_of_sint64 output x =
  upd output 6ul b6;
  upd output 7ul b7
 
-[@"substitute"]
+
 val xor_bytes:
   output :suint8_p ->
   input  :suint8_p ->
@@ -136,7 +136,6 @@ val xor_bytes:
         (requires (fun h0 -> live h0 output /\ live h0 input))
         (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
 
-[@"substitute"]
 let rec xor_bytes output input len =
   if U32.(len =^ 0ul) then ()
   else

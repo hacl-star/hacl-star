@@ -40,7 +40,7 @@ val cmult_big_loop:
          let pointq   : spoint_513' = (as_seq h0 (getx q), (as_seq h0 (getz q))) in
          let spointa0 : spoint_513 = (as_seq h0 (getx nq), (as_seq h0 (getz nq))) in
          let spointb0 : spoint_513 = (as_seq h0 (getx nqpq), (as_seq h0 (getz nqpq))) in
-         (spointa1, spointb1) == cmult_big_loop_spec (as_seq h0 n) (spointa0) (spointb0) pointq i)
+         (spointa1) == cmult_big_loop_spec (as_seq h0 n) (spointa0) (spointb0) pointq i)
     ))
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 1000"
 let rec cmult_big_loop n nq nqpq nq2 nqpq2 q i =

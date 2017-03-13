@@ -7,21 +7,21 @@
 #include "kremlib.h"
 #include "testlib.h"
 
-typedef uint8_t Hacl_Utils_Experimental_uint8_t;
+typedef uint8_t uint8_t;
 
-typedef uint32_t Hacl_Utils_Experimental_uint32_t;
+typedef uint32_t uint32_t;
 
-typedef uint64_t Hacl_Utils_Experimental_uint64_t;
+typedef uint64_t uint64_t;
 
-typedef uint8_t Hacl_Utils_Experimental_suint8_t;
+typedef uint8_t suint8_t;
 
-typedef uint32_t Hacl_Utils_Experimental_suint32_t;
+typedef uint32_t suint32_t;
 
-typedef uint64_t Hacl_Utils_Experimental_suint64_t;
+typedef uint64_t suint64_t;
 
-typedef uint32_t *Hacl_Utils_Experimental_suint32_p;
+typedef uint32_t *suint32_p;
 
-typedef uint8_t *Hacl_Utils_Experimental_suint8_p;
+typedef uint8_t *suint8_p;
 
 typedef uint8_t Hacl_Hash_SHA2_L256_uint8_t;
 
@@ -39,27 +39,27 @@ typedef uint32_t *Hacl_Hash_SHA2_L256_suint32_p;
 
 typedef uint8_t *Hacl_Hash_SHA2_L256_suint8_p;
 
-typedef uint8_t uint8_t;
+typedef uint8_t uint8_t0;
 
-typedef uint32_t uint32_t;
+typedef uint32_t uint32_t0;
 
-typedef uint64_t uint64_t;
+typedef uint64_t uint64_t0;
 
-typedef uint8_t suint8_t;
+typedef uint8_t suint8_t0;
 
-typedef uint32_t suint32_t;
+typedef uint32_t suint32_t0;
 
-typedef uint64_t suint64_t;
+typedef uint64_t suint64_t0;
 
-typedef uint32_t *suint32_p;
+typedef uint32_t *suint32_p0;
 
-typedef uint8_t *suint8_p;
+typedef uint8_t *suint8_p0;
 
-extern uint32_t hashsize_256;
+extern uint32_t hash_hashsize_256;
 
-extern uint32_t blocksize_256;
+extern uint32_t hash_blocksize_256;
 
-extern uint32_t size_state_256;
+extern uint32_t hash_size_state_256;
 
 void sha2_init_256(uint32_t *state);
 

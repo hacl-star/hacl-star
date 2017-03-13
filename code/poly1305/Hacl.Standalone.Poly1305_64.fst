@@ -64,7 +64,7 @@ private noextract let lemma_poly1305_blocks_spec_1_ st m len =
   lemma_poly1305_blocks_spec_1 block log log' (Spec.selem acc) (seval r) (Spec.selem acc')
 
 
-private noextract val lemma_poly1305_blocks_spec_1
+noextract val lemma_poly1305_blocks_spec_1
   (st:Spec.poly1305_state_{invariant st})
   (m:Seq.seq H8.t)
   (len:U64.t{16*U64.v len = Seq.length m /\ U64.v len > 0}) : Lemma
@@ -75,7 +75,7 @@ private noextract val lemma_poly1305_blocks_spec_1
    (let st'':Spec.poly1305_state_  = poly1305_blocks_spec st' m' U64.(len -^ 1uL) in
    poly1305_blocks_spec st m len == st''))
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 200"
-private noextract let lemma_poly1305_blocks_spec_1 st m len =
+noextract let lemma_poly1305_blocks_spec_1 st m len =
   lemma_poly1305_blocks_spec_1_ st m len
 
   (* assert(false) *)

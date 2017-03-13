@@ -19,16 +19,16 @@ module H64 = Hacl.UInt64
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-private val lemma_max_uint32: n:nat -> Lemma
-  (requires (n = 32))
-  (ensures  (pow2 n = 4294967296))
-  [SMTPat (pow2 n)]
-let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296)
-private val lemma_max_uint64: n:nat -> Lemma
-  (requires (n = 64))
-  (ensures  (pow2 n = 18446744073709551616))
-  [SMTPat (pow2 n)]
-let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
+(* private val lemma_max_uint32: n:nat -> Lemma *)
+(*   (requires (n = 32)) *)
+(*   (ensures  (pow2 n = 4294967296)) *)
+(*   [SMTPat (pow2 n)] *)
+(* let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296) *)
+(* private val lemma_max_uint64: n:nat -> Lemma *)
+(*   (requires (n = 64)) *)
+(*   (ensures  (pow2 n = 18446744073709551616)) *)
+(*   [SMTPat (pow2 n)] *)
+(* let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616) *)
 
 private val set_zero_bytes:
   b:uint8_p{length b >= 32} ->
@@ -75,7 +75,7 @@ let crypto_secretbox_detached c mac m mlen n k =
   Math.Lemmas.modulo_lemma (U32.v mlen0_32) (pow2 32);
   blit m 0ul block0 zerobytes mlen0_32;
   Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey (sub n 0ul 16ul) k;
-  Hacl.Symmetric.Salsa20.crypto_stream_salsa20_xor block0
+  Salsa20.crypto_stream_salsa20_xor block0
                                                     block0
                                                     (U64.(mlen0 +^ zerobytes_64))
                                                     (sub n 16ul 8ul)
@@ -85,7 +85,7 @@ let crypto_secretbox_detached c mac m mlen n k =
   cut (modifies_0 h0 h1);
   blit block0 zerobytes c 0ul mlen0_32;
   if (U64.(mlen >^ mlen0)) then
-    Hacl.Symmetric.Salsa20.crypto_stream_salsa20_xor_ic (offset c mlen0_32)
+    Salsa20.crypto_stream_salsa20_xor_ic (offset c mlen0_32)
                                                          (offset m mlen0_32)
                                                          (U64.(mlen -^ mlen0))
                                                          (sub n 16ul 8ul)
@@ -102,7 +102,6 @@ let crypto_secretbox_detached c mac m mlen n k =
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
-
 
 val crypto_secretbox_open_detached:
   m:uint8_p ->
@@ -123,7 +122,7 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let tmp_mac = sub hsalsa_state 96ul 16ul in
   let h0' = ST.get() in
   Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey (sub n 0ul 16ul) k;
-  Hacl.Symmetric.Salsa20.crypto_stream_salsa20 block0 32uL (sub n 16ul 8ul) subkey;
+  Salsa20.crypto_stream_salsa20 block0 32uL (sub n 16ul 8ul) subkey;
   let h1 = ST.get() in
   cut(modifies_0 h0 h1);
   Poly1305_64.crypto_onetimeauth tmp_mac c clen (sub block0 0ul 32ul);
@@ -140,7 +139,7 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let z =
     if U8.(verify =^ 0uy) then (
       blit c 0ul block0 zerobytes clen0_32;
-      Hacl.Symmetric.Salsa20.crypto_stream_salsa20_xor block0
+      Salsa20.crypto_stream_salsa20_xor block0
                                                         block0
                                                         (U64.(zerobytes_64 +^ clen0))
                                                         (sub n 16ul 8ul)
@@ -149,7 +148,7 @@ let crypto_secretbox_open_detached m c mac clen n k =
       let h3 = ST.get() in
       cut(modifies_2_1 m h0 h3);
       if (U64.(clen >^ clen0))
-        then Hacl.Symmetric.Salsa20.crypto_stream_salsa20_xor_ic (offset m clen0_32)
+        then Salsa20.crypto_stream_salsa20_xor_ic (offset m clen0_32)
                                                                   (offset c clen0_32)
                                                                   (U64.(clen -^ clen0))
                                                                   (sub n 16ul 8ul)

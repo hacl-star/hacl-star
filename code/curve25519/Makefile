@@ -22,6 +22,7 @@ BIGNUM= \
 
 
 X25519_SPECIFIC= \
+	Hacl.Spec.Curve25519.Lemmas.fst \
 	Hacl.Bignum.Parameters.fst \
 	Hacl.Spec.Bignum.Modulo.fst \
 	Hacl.Spec.EC.AddAndDouble.fst \
@@ -35,9 +36,11 @@ X25519_SPECIFIC= \
 	Hacl.Spec.EC.Point.fst \
 	Hacl.EC.Point.fst \
 	Hacl.Spec.EC.AddAndDouble2.fst \
+	Hacl.Spec.EC.Format.Lemmas.fst \
 	Hacl.Spec.EC.Format.fst \
 	Hacl.EC.Format.fst \
 	Hacl.EC.AddAndDouble.fst \
+	Hacl.Spec.EC.Ladder.Lemmas.fst \
 	Hacl.Spec.EC.Ladder.fst \
 	Hacl.EC.Ladder.SmallLoop.fst \
 	Hacl.EC.Ladder.BigLoop.fst \
@@ -49,19 +52,22 @@ X25519_SPECIFIC= \
 SLOW= Hacl.Spec.Bignum.Fsquare.fst \
 	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
 	../bignum/Hacl.Spec.Bignum.Fmul.fst \
+	Hacl.EC.Format.fst \
 	Hacl.EC.fst \
 
 # Files that still have errors
-TODO=	Hacl.EC.Format.fst \
+TODO=
 
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib
+		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include ../../specs --include ../../specs/generic
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib
+		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include ../../specs --include ../../specs/generic
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -94,12 +100,12 @@ extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p x25519-c
 	$(KREMLIN_HOME)/krml -tmpdir x25519-c -ccopt -std=gnu99 \
-		-I ../bignum -I ../lib/kremlin \
+		-I ../bignum -I ../lib/kremlin -I ../../specs -I ../../specs/generic \
 		Curve25519.fst Hacl.Test.X25519.fst \
 		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
 		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*' \
-		-bundle 'Hacl.Spec.\*' \
+		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
                 -no-prefix Hacl.Test.X25519 -ldopt -flto -ccopt -march=native -o x25519.exe
 	./x25519.exe

@@ -22,13 +22,13 @@ let bytes = seq UInt8.t
 let lbytes (l:nat) = b:seq UInt8.t {length b = l}
 let op_At f g = fun x -> g (f x)
 inline_for_extraction
-let set (i:nat) (x:'a) (s:seq 'a{length s > i}) : Tot (seq 'a) = upd s i x
+let set (i:nat) (x:'a) (s:seq 'a{length s > i}) : Tot (s':seq 'a{length s' = length s}) = upd s i x
 
 inline_for_extraction
-let iter n f x = Combinators.iter_ n f x
+let iter n f x = C.Loops.repeat_spec n f x
 
 inline_for_extraction
-let map2 f s1 s2 = Combinators.seq_map2 f s1 s2
+let map2 f s1 s2 = C.Loops.seq_map2 f s1 s2
 
 let singleton x = Seq.create 1 x
 
@@ -53,6 +53,23 @@ let uint32_to_be (a:UInt32.t) : lbytes 4 =
     big_bytes 4ul (v a)
 
 
+let uint64_from_le (b:lbytes 8) : UInt64.t =
+    let n = little_endian b  in
+    lemma_little_endian_is_bounded b;
+    UInt64.uint_to_t n
+
+let uint64_to_le (a:UInt64.t) : lbytes 8 =
+    little_bytes 8ul (UInt64.v a)
+
+let uint64_from_be (b:lbytes 8) : UInt64.t =
+    let n = big_endian b  in
+    lemma_big_endian_is_bounded b;
+    UInt64.uint_to_t n
+
+let uint64_to_be (a:UInt64.t) : lbytes 8 =
+    big_bytes 8ul (UInt64.v a)
+
+
 let lemma_uint32_from_le_inj (b:lbytes 4) (b':lbytes 4) : Lemma
   (requires (uint32_from_le b = uint32_from_le b'))
   (ensures  (b == b'))
@@ -64,7 +81,7 @@ let lemma_uint32_to_le_inj (b:UInt32.t) (b':UInt32.t) : Lemma
   (ensures  (b = b'))
   = ()
 
-// JK: those two should go somewhere else
+
 val uint32s_from_le: len:nat -> b:lbytes (4 * len) -> Tot (s:seq UInt32.t{length s = len}) (decreases len)
 let rec uint32s_from_le len src =
   if len = 0 then Seq.createEmpty #UInt32.t
@@ -83,6 +100,26 @@ let rec uint32s_to_le len src =
     Seq.append (uint32_to_le h)
                (uint32s_to_le (len-1) t)
 
+
+val uint64s_from_le: len:nat -> b:lbytes (8 * len) -> Tot (s:seq UInt64.t{length s = len}) (decreases len)
+let rec uint64s_from_le len src =
+  if len = 0 then Seq.createEmpty #UInt64.t
+  else
+    let h = slice src 0 8 in
+    let t = slice src 8 (8*len) in
+    Seq.cons (uint64_from_le h)
+             (uint64s_from_le (len-1) t)
+
+val uint64s_to_le: len:nat -> s:seq UInt64.t{length s = len} -> Tot (lbytes (8 * len))  (decreases len)
+let rec uint64s_to_le len src =
+  if len = 0 then Seq.createEmpty #UInt8.t
+  else
+    let h = index src 0 in
+    let t = slice src 1 len in
+    Seq.append (uint64_to_le h)
+               (uint64s_to_le (len-1) t)
+
+
 val uint32s_from_be: len:nat -> b:lbytes (4 * len) -> Tot (s:seq UInt32.t{length s = len}) (decreases len)
 let rec uint32s_from_be len src =
   if len = 0 then Seq.createEmpty #UInt32.t
@@ -100,6 +137,25 @@ let rec uint32s_to_be len src =
     let t = slice src 1 len in
     Seq.append (uint32_to_be h)
                (uint32s_to_be (len-1) t)
+
+
+val uint64s_from_be: len:nat -> b:lbytes (8 * len) -> Tot (s:seq UInt64.t{length s = len}) (decreases len)
+let rec uint64s_from_be len src =
+  if len = 0 then Seq.createEmpty #UInt64.t
+  else
+    let h = slice src 0 8 in
+    let t = slice src 8 (8*len) in
+    Seq.cons (uint64_from_be h)
+             (uint64s_from_be (len-1) t)
+
+val uint64s_to_be: len:nat -> s:seq UInt64.t{length s = len} -> Tot (lbytes (8 * len))  (decreases len)
+let rec uint64s_to_be len src =
+  if len = 0 then Seq.createEmpty #UInt8.t
+  else
+    let h = index src 0 in
+    let t = slice src 1 len in
+    Seq.append (uint64_to_be h)
+               (uint64s_to_be (len-1) t)
 
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"

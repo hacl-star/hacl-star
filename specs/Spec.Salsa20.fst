@@ -9,6 +9,7 @@ open Spec.Lib
 (* This should go elsewhere! *)
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
 let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
 let noncelen = 8   (* in bytes *)
@@ -48,17 +49,21 @@ let double_round: shuffle =
   column_round @ row_round (* 2 rounds *)
 
 let rec rounds : shuffle = 
-    iter 10 double_round (* 20 rounds *)
+    C.Loops.repeat_spec 10 double_round (* 20 rounds *)
 
 let salsa20_core (s:state) : Tot state = 
     let s' = rounds s in
-    map2 (fun x y -> x +%^ y) s s'
+    C.Loops.seq_map2 (fun x y -> x +%^ y) s' s
 
 (* state initialization *) 
 
+unfold inline_for_extraction
 let constant0 = 0x61707865ul
+unfold inline_for_extraction
 let constant1 = 0x3320646eul
+unfold inline_for_extraction
 let constant2 = 0x79622d32ul
+unfold inline_for_extraction
 let constant3 = 0x6b206574ul
 
 let setup (k:key) (n:nonce) (c:counter): state =
@@ -67,24 +72,15 @@ let setup (k:key) (n:nonce) (c:counter): state =
   let c64 = UInt64.uint_to_t c in
   let c0 = FStar.Int.Cast.uint64_to_uint32 c64 in
   let c1 = FStar.Int.Cast.uint64_to_uint32 FStar.UInt64.(c64 >>^ 32ul) in
-  (set 0  constant0 @
-   set 5  constant1 @
-   set 10 constant2 @
-   set 15 constant3 @
-   set 1  (index ks 0) @
-   set 2  (index ks 1) @ 
-   set 3  (index ks 2) @ 
-   set 4  (index ks 3) @ 
-   set 11  (index ks 4) @
-   set 12  (index ks 5) @ 
-   set 13  (index ks 6) @ 
-   set 14  (index ks 7) @ 
-   set 6  (index ns 0) @ 
-   set 7  (index ns 1) @ 
-   set 8  c0 @ 
-   set 9  c1) 
-  (create 16 0ul)
-
+  assert_norm (List.Tot.length ([constant0    ; (index ks 0) ; (index ks 1) ; (index ks 2) ;
+              (index ks 3) ; constant1    ; (index ns 0) ; (index ns 1) ;
+	      c0 	     	; c1	       ; constant2    ; (index ks 4) ; 
+	      (index ks 5) ; (index ks 6) ; (index ks 7) ; constant3    ]) = 16);
+  seq_of_list ([constant0    ; (index ks 0) ; (index ks 1) ; (index ks 2) ;
+              (index ks 3) ; constant1    ; (index ns 0) ; (index ns 1) ;
+	      c0 	     	; c1	       ; constant2    ; (index ks 4) ; 
+	      (index ks 5) ; (index ks 6) ; (index ks 7) ; constant3    ])
+	   
 
 let salsa20_block (k:key) (n:nonce) (c:counter): block =
     let st = setup k n c in
@@ -109,6 +105,8 @@ let salsa20_encrypt_bytes key nonce counter m =
 
 
 (* TESTS: https://cr.yp.to/snuffle/spec.pdf *)
+
+#set-options "--lax"
 
 let test_quarter_round () = 
     let st = create 16 0ul in

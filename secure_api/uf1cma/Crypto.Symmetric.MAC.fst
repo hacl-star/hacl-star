@@ -28,7 +28,8 @@ module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 type id = id * UInt128.t //NS: why not this definition : i:id & iv (alg i)
-let alg (i:id) = macAlg_of_id (fst i) 
+inline_for_extraction let alg (i:id) =
+ let i, _ = i in macAlg_of_id i
 
 #set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
@@ -396,7 +397,7 @@ type tagB = lbuffer (UInt32.v taglen)
 noextract val mac: #i:id -> cs:text -> r:elem i -> s:tag -> GTot tag
 let mac #i cs r s =
   match alg i with
-  | POLY1305 -> Spec.Poly1305.mac_1305 (text_to_PS_text cs) r s
+  | POLY1305 -> Spec.Poly1305.finish (Spec.Poly1305.poly (text_to_PS_text cs) r) s
   | GHASH    -> GS.mac cs r s
 
 val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
