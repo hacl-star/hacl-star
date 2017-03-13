@@ -40,7 +40,7 @@ X25519_SPECIFIC= \
 	Hacl.Spec.EC.Format.fst \
 	Hacl.EC.Format.fst \
 	Hacl.EC.AddAndDouble.fst \
-	Hacl.Spec.EC.Ladder.Format.fst \
+	Hacl.Spec.EC.Ladder.Lemmas.fst \
 	Hacl.Spec.EC.Ladder.fst \
 	Hacl.EC.Ladder.SmallLoop.fst \
 	Hacl.EC.Ladder.BigLoop.fst \
