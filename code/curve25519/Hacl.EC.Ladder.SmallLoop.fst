@@ -153,7 +153,7 @@ val cmult_small_loop:
            let spointb0 : spoint_513 = (as_seq h0 (getx nqpq), (as_seq h0 (getz nqpq))) in
            (spointa1, spointb1) == cmult_small_loop_spec (spointa0) (spointb0) pointq byte i))
     ))
-#reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 200"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 1000"
 let rec cmult_small_loop nq nqpq nq2 nqpq2 q byt i =
   if (U32.(i =^ 0ul)) then ()
   else (
