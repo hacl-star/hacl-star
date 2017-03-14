@@ -38,7 +38,7 @@ let test_1 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul MAC.hmac_size_state_256 in
 
   (* Call the hash function *)
   MAC.hmac_sha2_256 output key key_len data data_len;
@@ -88,7 +88,7 @@ let test_2 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul MAC.hmac_size_state_256 in
 
   (* Call the hash function *)
   MAC.hmac_sha2_256 output key key_len data data_len;
@@ -131,7 +131,7 @@ let test_3 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul MAC.hmac_size_state_256 in
 
   (* Call the hash function *)
   MAC.hmac_sha2_256 output key key_len data data_len;
@@ -179,7 +179,7 @@ let test_4 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul MAC.hmac_size_state_256 in
 
   (* Call the hash function *)
   MAC.hmac_sha2_256 output key key_len data data_len;
@@ -219,7 +219,7 @@ let test_5 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul MAC.hmac_size_state_256 in
 
   (* Call the hash function *)
   MAC.hmac_sha2_256 output key key_len data data_len;
@@ -265,7 +265,7 @@ let test_6 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul MAC.hmac_size_state_256 in
 
   (* Call the hash function *)
   MAC.hmac_sha2_256 output key key_len data data_len;
@@ -323,7 +323,7 @@ let test_7 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul MAC.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul MAC.hmac_size_state_256 in
 
   (* Call the hash function *)
   MAC.hmac_sha2_256 output key key_len data data_len;
