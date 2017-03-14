@@ -133,6 +133,36 @@ private inline_for_extraction let cmult_small_loop_double_step nq nqpq nq2 nqpq2
   cmult_small_loop_step nq2 nqpq2 nq nqpq q byt (* U32.(i-^1ul) *)
 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+
+val cmult_small_loop_def_0:
+  nq:spoint_513 ->
+  nqpq:spoint_513 ->
+  q:spoint_513' ->
+  byte:H8.t ->
+  Lemma (cmult_small_loop_spec nq nqpq q byte 0ul == (nq, nqpq))
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
+let cmult_small_loop_def_0 nq nqpq q byte = ()
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+val cmult_small_loop_def_1:
+  nq:spoint_513 ->
+  nqpq:spoint_513 ->
+  q:spoint_513' ->
+  byt:H8.t ->
+  i:UInt32.t{UInt32.v i <= 4 /\ UInt32.v i > 0} ->
+  Lemma (cmult_small_loop_spec nq nqpq q byt i == (
+           let i' = U32.(i -^ 1ul) in
+           let nq', nqpq' = cmult_small_loop_double_step_spec nq nqpq q byt in
+           let byt' = H8.(byt <<^ 2ul) in
+           cmult_small_loop_spec nq' nqpq' q byt' i'))
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
+let cmult_small_loop_def_1 nq nqpq q byte i = ()
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
+
 val cmult_small_loop:
   nq:point ->
   nqpq:point ->
@@ -153,13 +183,18 @@ val cmult_small_loop:
            let spointb0 : spoint_513 = (as_seq h0 (getx nqpq), (as_seq h0 (getz nqpq))) in
            (spointa1, spointb1) == cmult_small_loop_spec (spointa0) (spointb0) pointq byte i))
     ))
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 1000"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10000"
 let rec cmult_small_loop nq nqpq nq2 nqpq2 q byt i =
-  if (U32.(i =^ 0ul)) then ()
+  if (U32.(i =^ 0ul)) then (
+    let h = ST.get() in
+    cmult_small_loop_def_0 (as_seq h (getx nq), (as_seq h (getz nq))) (as_seq h (getx nqpq), (as_seq h (getz nqpq))) (as_seq h (getx q), (as_seq h (getz q))) byt
+  )
   else (
     let i' = U32.(i -^ 1ul) in
     cut (U32.v i >= 1);
-    cmult_small_loop_double_step nq nqpq nq2 nqpq2 q byt (* i *);
+    let h = ST.get() in
+    cmult_small_loop_def_1 (as_seq h (getx nq), (as_seq h (getz nq))) (as_seq h (getx nqpq), (as_seq h (getz nqpq))) (as_seq h (getx q), (as_seq h (getz q))) byt i;
+    cmult_small_loop_double_step nq nqpq nq2 nqpq2 q byt;
     let byt' = H8.(byt <<^ 2ul) in
     cmult_small_loop nq nqpq nq2 nqpq2 q byt' i'
   )
