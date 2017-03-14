@@ -83,7 +83,8 @@ static inline cycles TestLib_cpucycles_end(void)
 {
   return (TestLib_cpucycles());
 }
-
+#endif
+#endif
 #else
 static inline cycles TestLib_cpucycles(void){ return 0; }
 static inline cycles TestLib_cpucycles_begin(void){ return 0; }
