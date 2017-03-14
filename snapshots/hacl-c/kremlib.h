@@ -685,10 +685,10 @@ static inline void store128_be(uint8_t *b, uint128_t n) {
 
 static inline uint128_t FStar_UInt128_add(uint128_t x, uint128_t y) {
   uint128_t r;
-  asm ("add %[r0], %[x0], %[y0]"
-       "adc %[r1], %[x1], %[y1]"
-       "adc %[r2], %[x2], %[y2]"
-       "adc %[r3], %[x3], %[y3]"
+  asm ("add %[r0], %[x0], %[y0]\n\t"
+       "adc %[r1], %[x1], %[y1]\n\t"
+       "adc %[r2], %[x2], %[y2]\n\t"
+       "adc %[r3], %[x3], %[y3]\n\t"
        : [r0] "=r" (r.n0), [r1] "=r" (r.n1), [r2] "=r" (r.n2), [r3] "=r" (r.n3) 
        : [x0] "r" (x.n0), [x1] "r" (x.n1), [x2] "r" (r.n2), [x3] "r" (x.n3), 
 	 [y0] "r" (y.n0), [y1] "r" (y.n1), [y2] "r" (r.n2), [y3] "r" (y.n3));
