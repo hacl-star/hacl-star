@@ -91,6 +91,14 @@ static inline vec vec_load_le(const unsigned char* in) {
   return r;
 }
 
+const static vec256 stride = {0, 8, 16, 24, 32, 40, 48, 56};
+
+static inline vec vec_gather(const unsigned char* in) {
+  vec r;
+  r.v = (vec256) _mm256_i32gather_epi32((uint32_t*)in,(__m256i)stride,4);
+  return r;
+}
+
 static inline void vec_store_le(unsigned char* out, vec v) {
   _mm256_storeu_si256((__m256i*)(out), (__m256i) v.v);
 }
