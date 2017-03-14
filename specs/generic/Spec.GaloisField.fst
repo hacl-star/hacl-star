@@ -16,42 +16,44 @@ type felem (f:field) = bv_t f.bits
 
 let to_felem #f (u:UInt.uint_t f.bits) = UInt.to_vec #f.bits u
 let from_felem #f (e:felem f) = UInt.from_vec #f.bits e
-let zero #f : felem f = to_felem #f 0
-let one #f : felem f = to_felem #f 1
+let zero #f : felem f = zero_vec #f.bits
+let one #f : felem f = elem_vec #f.bits 0
 
 let fadd (#f:field) (a:felem f) (b:felem f) : felem f = logxor_vec #f.bits a b
 let op_Plus_At e1 e2 = fadd e1 e2
 
 let shift_reduce (#f:field) (a:felem f) = 
-    if (index a 0 = true) then
-       fadd (shift_left_vec a 1) f.irred
-    else (shift_left_vec a 1)
+    if (index a (f.bits - 1) = true) then
+       fadd (shift_right_vec a 1) f.irred
+    else (shift_right_vec a 1)
 
 let rec fmul_loop (#f:field) (a:felem f) (b:felem f) (n:nat{n<=f.bits}) 
-    : Tot (felem f) (decreases n) = 
-    if n = 0 then zero #f
+    : Tot (felem f) (decreases (f.bits - n)) = 
+    if n = f.bits then zero #f
     else 
-       let n_1 : nat = n - 1 in
+       let n_1 : nat = n + 1 in
        let fmul_n_1 = fmul_loop (shift_reduce #f a) 
        	   	      		b n_1 in
-       if (index b n_1 = true) then 
+       if (index b n = true) then 
           fadd a fmul_n_1
        else fmul_n_1
       
-let fmul (#f:field) (a:felem f) (b:felem f) = fmul_loop a b f.bits
+let fmul (#f:field) (a:felem f) (b:felem f) = fmul_loop a b 0
 let op_Star_At e1 e2 = fmul e1 e2
 
 val add_comm: #f:field -> a:felem f -> b:felem f -> Lemma (a +@ b == b +@ a)
-let add_comm #f a b = UInt.logxor_commutative (from_felem a) (from_felem b)
+let add_comm #f a b = lemma_eq_intro (a +@ b) (b +@ a)
 
+val add_zero: #f:field -> a:felem f -> Lemma (a +@ zero #f == a)
+let add_zero #f a = lemma_eq_intro (a +@ zero #f) (a)
 
 (* Test GF8: Wikipedia *)
 
-let irr : polynomial 7 = UInt.to_vec #8 0x1b
+let irr : polynomial 7 = UInt.to_vec #8 0xd8
 let gf8 = mk_field 8 irr
 
 let a = to_felem #gf8 0x53
-let b = to_felem #gf8 0xCA
+let b = to_felem #gf8 0xca
 
 let a_plus_b = to_felem #gf8 0x99
 let a_times_b = one #gf8
