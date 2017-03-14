@@ -22,10 +22,31 @@ let one #f : felem f = elem_vec #f.bits 0
 let fadd (#f:field) (a:felem f) (b:felem f) : felem f = logxor_vec #f.bits a b
 let op_Plus_At e1 e2 = fadd e1 e2
 
+val add_comm: #f:field -> a:felem f -> b:felem f -> Lemma (a +@ b == b +@ a)
+let add_comm #f a b = lemma_eq_intro (a +@ b) (b +@ a)
+
+val add_asso: #f:field -> a:felem f -> b:felem f -> c:felem f -> Lemma (a +@ b +@ c == a +@ (b +@ c))
+let add_asso #f a b c = lemma_eq_intro (a +@ b +@ c) (a +@ (b +@ c))
+
+val add_zero: #f:field -> a:felem f -> b:felem f{b = zero #f} -> Lemma (a +@ b == a)
+let add_zero #f a b = lemma_eq_intro (a +@ b) a
+
 let shift_reduce (#f:field) (a:felem f) = 
     if (index a (f.bits - 1) = true) then
        fadd (shift_right_vec a 1) f.irred
     else (shift_right_vec a 1)
+
+let cond_fadd (#f:field) (a:felem f) (b:felem f) (c:felem f) (n:nat{n < f.bits}) = 
+    if (index b n = true) then fadd c a else c
+
+val cond_fadd_lemma: #f:field -> a:felem f -> b:felem f -> c:felem f -> d:felem f -> n:nat{n < f.bits} -> Lemma
+  (requires True)
+  (ensures cond_fadd a b c n +@ d = c +@ cond_fadd a b d n)
+let cond_fadd_lemma #f a b c d n =
+    if (index b n = true) then begin
+       add_comm d a;
+       add_asso c a d
+    end else ()
 
 let rec fmul_loop (#f:field) (a:felem f) (b:felem f) (n:nat{n<=f.bits}) 
     : Tot (felem f) (decreases (f.bits - n)) = 
@@ -34,18 +55,10 @@ let rec fmul_loop (#f:field) (a:felem f) (b:felem f) (n:nat{n<=f.bits})
        let n_1 : nat = n + 1 in
        let fmul_n_1 = fmul_loop (shift_reduce #f a) 
        	   	      		b n_1 in
-       if (index b n = true) then 
-          fadd a fmul_n_1
-       else fmul_n_1
+       cond_fadd a b fmul_n_1 n
       
 let fmul (#f:field) (a:felem f) (b:felem f) = fmul_loop a b 0
 let op_Star_At e1 e2 = fmul e1 e2
-
-val add_comm: #f:field -> a:felem f -> b:felem f -> Lemma (a +@ b == b +@ a)
-let add_comm #f a b = lemma_eq_intro (a +@ b) (b +@ a)
-
-val add_zero: #f:field -> a:felem f -> Lemma (a +@ zero #f == a)
-let add_zero #f a = lemma_eq_intro (a +@ zero #f) (a)
 
 (* Test GF8: Wikipedia *)
 

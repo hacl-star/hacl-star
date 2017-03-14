@@ -54,13 +54,17 @@ inline_for_extraction let ones_128 : H128.t =
   H128.(((uint64_to_sint128 0xffffffffffffffffuL) <<^ 64ul) +^ (uint64_to_sint128 0xffffffffffffffffuL))
 private let r_mul : H128.t = H128.(uint64_to_sint128(225uL) <<^ 120ul)
 
-private val value_lemma: v:H128.t -> Lemma
-  (requires True)
-  (ensures (v = zero_128 ==> H128.v v = 0) /\
-           (v = one_128  ==> H128.v v = 1) /\
-	   (v = ones_128 ==> H128.v v = pow2 128 - 1) /\
-	   (v = r_mul ==> H128.v v = 0xe1000000000000000000000000000000))
-let value_lemma v = if v = r_mul then assert_norm((225 * pow2 120) % pow2 128 = 0xe1000000000000000000000000000000)
+private val fzero_lemma: v:H128.t -> Lemma
+  (requires v = zero_128)
+  (ensures to_felem #gf128 (H128.v v) = Spec.GaloisField.zero #gf128)
+let fzero_lemma v =
+  assert(H128.v v = UInt.zero 128);
+  lemma_eq_intro (to_felem #gf128 (H128.v v)) (Spec.GaloisField.zero #gf128)
+
+private val r_mul_lemma: v:H128.t -> Lemma
+  (requires v = r_mul)
+  (ensures to_felem #gf128 (H128.v v) = Spec.irr)
+let r_mul_lemma v = assert_norm((225 * pow2 120) % pow2 128 = 0xe1000000000000000000000000000000)
 
 private val elem_vec_logand_lemma: a:BV.bv_t 128 -> i:nat{i < 128} ->
   Lemma (Seq.equal (BV.logand_vec a (BV.elem_vec #128 i))
@@ -84,7 +88,6 @@ let ith_bit_mask num i =
   assert(Seq.equal (FStar.UInt.to_vec #128 (H128.v proj)) (BV.elem_vec #128 (U32.v i)));
   let res = H128.(num &^ proj) in
   elem_vec_logand_lemma (FStar.UInt.to_vec #128 (H128.v num)) (U32.v i);
-  value_lemma ones_128;
   H128.eq_mask res proj
 
 private inline_for_extraction
@@ -100,11 +103,39 @@ let gf128_shift_reduce a =
   FStar.UInt.logand_lemma_1 (H128.v r_mul);
   FStar.UInt.logand_lemma_2 (H128.v r_mul);
   let av = H128.(av >>^ 1ul) in
-  value_lemma r_mul;
+  r_mul_lemma r_mul;
   FStar.UInt.logxor_lemma_1 (H128.v av);
   a.(0ul) <- H128.(av ^^ msk_r_mul)
 
-(*
+private inline_for_extraction
+val gf128_cond_fadd:
+  x:elemB ->
+  y:elemB {disjoint x y} ->
+  z:elemB {disjoint x z /\ disjoint y z} ->
+  i:U32.t {U32.v i < 128} ->
+  Stack unit
+  (requires (fun h -> live h x /\ live h y /\ live h z))
+  (ensures (fun h0 _ h1 -> live h0 x /\ live h0 y /\ live h0 z /\
+    live h1 x /\ live h1 y /\ live h1 z /\ modifies_1 z h0 h1 /\
+    sel_elem h1 z = cond_fadd (sel_elem h0 x) (sel_elem h0 y) (sel_elem h0 z) (U32.v i)))
+let gf128_cond_fadd x y z i =
+  let xv = x.(0ul) in
+  let yv = y.(0ul) in
+  let zv = z.(0ul) in
+  let mski = ith_bit_mask yv i in
+  let msk_x = H128.(xv &^ mski) in
+  FStar.UInt.logand_lemma_1 (H128.v xv);
+  FStar.UInt.logand_lemma_2 (H128.v xv);
+  FStar.UInt.logxor_lemma_1 (H128.v zv);
+  z.(0ul) <- H128.(zv ^^ msk_x)
+
+#reset-options "--z3rlimit 20 --max_fuel 1 --initial_fuel 1"
+
+private val fmul_loop_lemma: #f:field -> a:felem f -> b:felem f -> n:nat{n < f.bits} -> Lemma
+  (requires True)
+  (ensures fmul_loop a b n = cond_fadd a b (fmul_loop (shift_reduce #f a) b (n + 1)) n)
+let fmul_loop_lemma #f a b n = ()
+
 private val gf128_mul_loop: 
   x:elemB -> 
   y:elemB {disjoint x y} -> 
@@ -114,24 +145,23 @@ private val gf128_mul_loop:
   (requires (fun h -> live h x /\ live h y /\ live h z))
   (ensures (fun h0 _ h1 -> live h0 x /\ live h0 y /\ live h0 z /\
     live h1 x /\ live h1 y /\ live h1 z /\ modifies_2 x z h0 h1 /\
-    (sel_elem h1 z) = sel_elem h0 z +@ fmul_loop (sel_elem h0 x) (sel_elem h0 y) (U32.v ctr)))
-let rec gf128_mul_loop x y z ctr = admit();
-  if ctr <> 128ul then 
-  begin
-    let xv = x.(0ul) in
-    let yv = y.(0ul) in
-    let zv = z.(0ul) in
-
-    let mski = ith_bit_mask yv ctr in     
-    let msk_x = H128.(xv &^ mski) in
-    FStar.UInt.logand_lemma_1 (H128.v xv);
-    FStar.UInt.logand_lemma_2 (H128.v xv);
-    z.(0ul) <- H128.(zv ^^ msk_x);
-    
+    sel_elem h1 z = fmul_loop (sel_elem h0 x) (sel_elem h0 y) (U32.v ctr) +@ sel_elem h0 z))
+let rec gf128_mul_loop x y z ctr =
+  if ctr = 128ul then begin
+    let h0 = ST.get() in
+    add_comm (fmul_loop (sel_elem h0 x) (sel_elem h0 y) (U32.v ctr)) (sel_elem h0 z);
+    add_zero (sel_elem h0 z) (fmul_loop (sel_elem h0 x) (sel_elem h0 y) (U32.v ctr))
+  end else begin
+    let h0 = ST.get() in
+    gf128_cond_fadd x y z ctr;
     gf128_shift_reduce x;
+    gf128_mul_loop x y z (U32.(ctr +^ 1ul));
     
-    gf128_mul_loop x y z (U32.(ctr +^ 1ul))
+    fmul_loop_lemma (sel_elem h0 x) (sel_elem h0 y) (U32.v ctr);
+    cond_fadd_lemma (sel_elem h0 x) (sel_elem h0 y) (fmul_loop (shift_reduce (sel_elem h0 x)) (sel_elem h0 y) (U32.v ctr + 1)) (sel_elem h0 z) (U32.v ctr)
   end
+
+#reset-options "--z3rlimit 20 --max_fuel 0 --initial_fuel 0"
 
 (* In place multiplication. Calculate "a * b" and store the result in a.    *)
 (* WARNING: may have issues with constant time. *)
@@ -142,12 +172,14 @@ val gf128_mul: x:elemB -> y:elemB {disjoint x y} -> Stack unit
 let gf128_mul x y =
   push_frame();
   let z = create zero_128 1ul in
+  let h0 = ST.get() in
   gf128_mul_loop x y z 0ul;
   x.(0ul) <- z.(0ul);
+  fzero_lemma zero_128;
+  add_zero #gf128 (fmul_loop (sel_elem h0 x) (sel_elem h0 y) 0) (sel_elem h0 z);
   pop_frame()
-*)
 
-(*
+
 val add_and_multiply: acc:elemB -> block:elemB{disjoint acc block}
   -> k:elemB{disjoint acc k /\ disjoint block k} -> Stack unit
   (requires (fun h -> live h acc /\ live h block /\ live h k))
@@ -159,6 +191,7 @@ let add_and_multiply acc block k =
   gf128_add acc block;
   gf128_mul acc k
 
+(*
 val finish: acc:elemB -> s:buffer UInt8.t{length s = 16} -> Stack unit
   (requires (fun h -> live h acc /\ live h s /\ disjoint acc s))
   (ensures  (fun h0 _ h1 -> live h0 acc /\ live h0 s
