@@ -93,5 +93,36 @@ static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned in
   return v1; 
 }
 
+static inline vec vec_interleave32_high(vec v1, vec v2) {
+  vec r;
+  uint32x2_t h0 = vget_high_u32(v1);
+  uint32x3_t h1 = vget_high_u32(v2);
+  r.v = (vec128) vcombine_u32(h0,h1);
+  return r;
+}
+
+static inline vec vec_interleave32_low(vec v1, vec v2) {
+  vec r;
+  uint32x2_t h0 = vget_low_u32(v1);
+  uint32x2_t h1 = vget_low_u32(v2);
+  r.v = (vec128) vcombine_u32(h0,h1);
+  return r;
+}
+static inline vec vec_interleave64_high(vec v1, vec v2) {
+  vec r;
+  uint64x1_t h0 = vget_high_u64((uint64x2_t)v1);
+  uint64x1_t h1 = vget_high_u64((uint64x2_t)v2);
+  r.v = (vec128) vcombine_u64(h0,h1);
+  return r;
+}
+
+static inline vec vec_interleave64_low(vec v1, vec v2) {
+  vec r;
+  uint64x1_t h0 = vget_low_u64((uint64x2_t)v1);
+  uint64x1_t h1 = vget_low_u64((uint64x2_t)v2);
+  r.v = (vec128) vcombine_u64(h0,h1);
+  return r;
+}
+
 
 #endif
