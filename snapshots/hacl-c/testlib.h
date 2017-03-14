@@ -69,7 +69,7 @@ static inline cycles TestLib_cpucycles(void)
     if (pmcntenset & 0x80000000ul) {  // Is it counting?
       asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(pmccntr));
       // The counter is set up to count every 64th cycle
-      return static_cast<int64_t>(pmccntr) * 64;  // Should optimize to << 6
+      return (int64_t)(pmccntr) * 64;  // Should optimize to << 6
     }
   }
 }
