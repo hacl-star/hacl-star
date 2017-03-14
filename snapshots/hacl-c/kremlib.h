@@ -400,7 +400,7 @@ static inline uint128_t FStar_UInt128_mul32(uint64_t x, uint32_t y) {
 
 #else 
 
-#if 0 //using 64-bits here
+#if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)
 
 typedef struct {
   uint64_t n1;
@@ -638,8 +638,7 @@ static inline uint128_t FStar_UInt128_mul32(uint64_t x, uint32_t y) {
 }
 
 #else //using 32-bits here
-
-//#include "x86intrin.h"
+#if defined(__ARM_ARCH) 
 
 typedef struct {
   uint32_t n3;
@@ -686,10 +685,13 @@ static inline void store128_be(uint8_t *b, uint128_t n) {
 
 static inline uint128_t FStar_UInt128_add(uint128_t x, uint128_t y) {
   uint128_t r;
-  asm ("add %[o], %[i1], %[i2]": [o] "=r" (r.n0) : [i1] "r" (x.n0), [i2] "r" (y.n0));
-  asm ("adc %[o], %[i1], %[i2]": [o] "=r" (r.n1) : [i1] "r" (x.n1), [i2] "r" (y.n1));
-  asm ("adc %[o], %[i1], %[i2]": [o] "=r" (r.n2) : [i1] "r" (x.n2), [i2] "r" (y.n2));
-  asm ("adc %[o], %[i1], %[i2]": [o] "=r" (r.n3) : [i1] "r" (x.n3), [i2] "r" (y.n3));
+  asm ("add %[r0], %[x0], %[y0]"
+       "adc %[r1], %[x1], %[y1]"
+       "adc %[r2], %[x2], %[y2]"
+       "adc %[r3], %[x3], %[y3]"
+       : [r0] "=r" (r.n0), [r1] "=r" (r.n1), [r2] "=r" (r.n2), [r3] "=r" (r.n3) 
+       : [x0] "r" (x.n0), [x1] "r" (x.n1), [x2] "r" (r.n2), [x3] "=r" (x.n3), 
+       [y0] "r" (y.n0), [y1] "r" (y.n1), [y2] "r" (r.n2), [y3] "=r" (y.n3));
   return r;
 }
 
@@ -941,6 +943,7 @@ static inline uint128_t FStar_UInt128_mul32(uint64_t x, uint32_t y) {
   return (uint128_t){.n3 = 0, .n2 = r1, .n1 = (uint32_t)(r0 >> 32), .n0 = (uint32_t)r0};
 }
 
+#endif
 #endif
 #endif
 
