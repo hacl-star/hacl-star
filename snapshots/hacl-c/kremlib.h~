@@ -198,7 +198,8 @@ static inline   uint64_t FStar_UInt64_gte_mask(uint64_t x, uint64_t y) {
 static const uint64_t two51_1 = 2251799813685247;
 static const uint64_t two51_19 = 2251799813685229;
 
-#if defined(__GNUC__) && defined(__SIZEOF_INT128__)
+#if 0
+//defined(__GNUC__) && defined(__SIZEOF_INT128__)
 typedef unsigned __int128 FStar_UInt128_t, FStar_UInt128_t_,uint128_t;
 static inline void print128(unsigned char* where, uint128_t n) {
   printf("%s: [%llu,%llu]\n",where,(uint64_t)(n>>64),(uint64_t)n);
