@@ -7,7 +7,11 @@
 #ifdef __SSSE3__
 #include "vec128.h"
 #else
+#ifdef  __ARM_NEON__
+#include "vec-neon.h"
+#else
 #include "vec_buf.h"
+#endif
 #endif
 #endif
 #endif
