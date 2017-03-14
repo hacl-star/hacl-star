@@ -639,7 +639,7 @@ static inline uint128_t FStar_UInt128_mul32(uint64_t x, uint32_t y) {
 
 #else //using 32-bits here
 
-#include "x86intrin.h"
+//#include "x86intrin.h"
 
 typedef struct {
   uint32_t n3;
@@ -683,13 +683,13 @@ static inline void store128_be(uint8_t *b, uint128_t n) {
   store64_le(b + 8, n.n1);
   store64_le(b + 12, n.n0);
 }
+
 static inline uint128_t FStar_UInt128_add(uint128_t x, uint128_t y) {
   uint128_t r;
-  uint8_t c = 0;
-  c = _addcarry_u32(c,x.n0,y.n0,&r.n0);
-  c = _addcarry_u32(c,x.n1,y.n1,&r.n1);
-  c = _addcarry_u32(c,x.n2,y.n2,&r.n2);
-  c = _addcarry_u32(c,x.n3,y.n3,&r.n3);
+  asm ("add %[o], %[i1], %[i2]": [o] "=r" (r.n0) : [i1] "r" (x.n0), [i2] "r" (y.n0));
+  asm ("adc %[o], %[i1], %[i2]": [o] "=r" (r.n1) : [i1] "r" (x.n1), [i2] "r" (y.n1));
+  asm ("adc %[o], %[i1], %[i2]": [o] "=r" (r.n2) : [i1] "r" (x.n2), [i2] "r" (y.n2));
+  asm ("adc %[o], %[i1], %[i2]": [o] "=r" (r.n3) : [i1] "r" (x.n3), [i2] "r" (y.n3));
   return r;
 }
 
@@ -741,11 +741,10 @@ static inline uint128_t FStar_UInt128_split44(uint128_t *src) {
 
 static inline uint128_t FStar_UInt128_sub(uint128_t x, uint128_t y) {
   uint128_t r;
-  uint8_t c = 0;
-  c = _subborrow_u32(c,x.n0,y.n0,&r.n0);
-  c = _subborrow_u32(c,x.n1,y.n1,&r.n1);
-  c = _subborrow_u32(c,x.n2,y.n2,&r.n2);
-  c = _subborrow_u32(c,x.n3,y.n3,&r.n3);
+  asm ("sub %[o], %[i1], %[i2]": [o] "=r" (r.n0) : [i1] "r" (x.n0), [i2] "r" (y.n0));
+  asm ("sbb %[o], %[i1], %[i2]": [o] "=r" (r.n1) : [i1] "r" (x.n1), [i2] "r" (y.n1));
+  asm ("sbb %[o], %[i1], %[i2]": [o] "=r" (r.n2) : [i1] "r" (x.n2), [i2] "r" (y.n2));
+  asm ("sbb %[o], %[i1], %[i2]": [o] "=r" (r.n3) : [i1] "r" (x.n3), [i2] "r" (y.n3));
   return r;
 }
 
