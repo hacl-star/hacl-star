@@ -56,7 +56,7 @@ static inline cycles TestLib_cpucycles_end(void)
 }
 void TestLib_print_cycles_per_round(cycles c1, cycles c2, uint32_t rounds);
 #else 
-#if defined(__ARM_ARCH)) 
+#if defined(__ARM_ARCH) 
 static inline cycles TestLib_cpucycles(void)
 {
   uint32_t pmccntr;
