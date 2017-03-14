@@ -6,7 +6,7 @@
 #define VEC128
 static const int vec_size = 4;
 
-typedef uint32x4_t vec128
+typedef uint32x4_t vec128;
 
 typedef struct {
   vec128 v;
@@ -21,7 +21,7 @@ static inline vec mk_vec(vec128 v) {
 
 static inline vec vec_rotate_left(vec v, unsigned int n) {
   vec r;
-  r.v = (vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)x,n),(uint32x4_t)x,32-n);
+  r.v = (vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)v.v,n),(uint32x4_t)v.v,32-n);
   return r;
 }
 
@@ -31,7 +31,7 @@ static inline vec vec_rotate_right(vec v, unsigned int n) {
 
 static inline vec vec_shuffle_right(vec x, unsigned int n) {
   vec r;
-  r.v = (vec128)vextq_u32((uint32x4_t)x,(uint32x4_t)x,n);
+  r.v = (vec128)vextq_u32((uint32x4_t)x.v,(uint32x4_t)x.v,n);
   return r;
 }
 static inline vec vec_shuffle_left(vec x, unsigned int n) {
@@ -60,7 +60,7 @@ static inline vec vec_load_32x8(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t 
 
 static inline vec vec_load_le(const unsigned char* in) {
   vec r;
-  r.v = (vec128) vld1q_u32(in);
+  r.v = (vec128) vld1q_u32((uint32_t*) in);
   return r;
 }
 
@@ -69,7 +69,7 @@ static inline vec vec_load128_le(const unsigned char* in) {
 }
 
 static inline void vec_store_le(unsigned char* out, vec v) {
-  vst1q_u32(out,v.v);
+  vst1q_u32((uint32_t*)out,v.v);
 }
 
 
