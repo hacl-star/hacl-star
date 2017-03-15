@@ -24,7 +24,8 @@ verify-code:
 	$(MAKE) -C ../code ci
 
 verify-crypto:
-	$(MAKE) -C ../secure_api all-hints
+	# Note: the all-hints target fails silently.
+	$(MAKE) -C ../secure_api all-ver OTHERFLAGS=--record_hints
 
 hints-code:
 	$(MAKE) -C ../code hints
