@@ -323,6 +323,7 @@ let prf_mac i t k_0 x =
   else
     let keyBuffer = Buffer.rcreate t.mac_rgn 0uy (CMA.keylen i) in
     let h1 = ST.get() in
+    Crypto.Indexing.aeadAlg_cipherAlg i;
     getBlock t x (CMA.keylen i) keyBuffer;
     let mc = CMA.coerce t.mac_rgn macId k_0 keyBuffer in
     let h3 = ST.get() in 

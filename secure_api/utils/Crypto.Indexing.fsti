@@ -38,6 +38,5 @@ val aeadAlg_cipherAlg: i:id -> Lemma
     ((aeadAlg_of_id i == AES_128_GCM ==> cipherAlg_of_id i == AES128) /\
      (aeadAlg_of_id i == AES_256_GCM ==> cipherAlg_of_id i == AES256) /\
      (aeadAlg_of_id i == CHACHA20_POLY1305 ==> cipherAlg_of_id i == CHACHA20)))
-  [SMTPat (aeadAlg_of_id i); SMTPat (cipherAlg_of_id i)]
 
 val testId: a:aeadAlg -> Tot (i:id{aeadAlg_of_id i = a})
