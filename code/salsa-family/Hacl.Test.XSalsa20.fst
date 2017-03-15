@@ -10,7 +10,7 @@ let main () =
   let len = 163ul in
   let keysize = 32ul in
   let noncesize = 8ul in
-  let ciphertext = create 0uy len in
+  let ciphertext = create 0uy 163ul in
   let plaintext = createL [
     0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 
     0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 
