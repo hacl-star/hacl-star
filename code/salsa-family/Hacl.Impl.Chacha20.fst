@@ -309,7 +309,8 @@ let line st a b d s =
   let sa = st.(a) in let sb = st.(b) in
   st.(a) <- sa +%^ sb;
   let sd = st.(d) in let sa = st.(a) in
-  st.(d) <- (sd ^^ sa) <<< s
+  let sda = sd ^^ sa in
+  st.(d) <- sda <<< s
 
 
 [@ "c_inline"]
@@ -490,6 +491,35 @@ let lemma_state_counter k n c = ()
 
 
 [@ "c_inline"]
+val chacha20_core:
+  log:log_t ->
+  k:state ->
+  st:state{disjoint st k} ->
+  ctr:UInt32.t ->
+  Stack log_t
+    (requires (fun h -> live h k /\ live h st /\ invariant log h st))
+    (ensures  (fun h0 updated_log h1 -> live h0 st /\ live h0 k /\ invariant log h0 st
+      /\ live h1 k /\ invariant updated_log h1 st /\ modifies_2 k st h0 h1
+      /\ (let key = reveal_h32s (as_seq h1 k) in
+          let stv = reveal_h32s (as_seq h1 st) in
+          Seq.index stv 12 == uint32_to_sint32 ctr /\
+         (match Ghost.reveal log, Ghost.reveal updated_log with
+         | MkLog k n, MkLog k' n' ->
+             key == chacha20_core stv /\ k == k' /\ n == n'))))
+[@ "c_inline"]
+let chacha20_core log k st ctr =
+  let h_0 = ST.get() in
+  st.(12ul) <- uint32_to_sint32 ctr;
+  lemma_invariant (reveal_h32s (as_seq h_0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (get h_0 st 12) (uint32_to_sint32 ctr);
+  copy_state k st;
+  rounds k;
+  sum_states k st;
+  let h = ST.get() in
+  cut (reveal_h32s (as_seq h k) == chacha20_core (reveal_h32s (as_seq h st)));
+  Ghost.elift1 (fun l -> match l with | MkLog k n -> MkLog k n) log
+
+
+[@ "c_inline"]
 val chacha20_block:
   log:log_t ->
   stream_block:uint8_p{length stream_block = 64} ->
@@ -505,25 +535,16 @@ val chacha20_block:
              block == chacha20_block k n (U32.v ctr) /\ k == k' /\ n == n')))
 [@ "c_inline"]
 let chacha20_block log stream_block st ctr =
-  let h0 = ST.get() in
   push_frame();
   let h_0 = ST.get() in
   let st' = Buffer.create (uint32_to_sint32 0ul) 16ul in
-  let h_1 = ST.get() in
-  st.(12ul) <- uint32_to_sint32 ctr;
-  let h_2 = ST.get() in
-  lemma_invariant (reveal_h32s (as_seq h0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (get h0 st 12) (uint32_to_sint32 ctr);
-  copy_state st' st;
-  rounds st';
-  sum_states st' st;
-  let h_3 = ST.get() in
+  let log' = chacha20_core log st' st ctr in
   uint32s_to_le_bytes stream_block st' 16ul;
-  let h_4 = ST.get() in
   let h = ST.get() in
-  cut (reveal_sbytes (as_seq h stream_block) == chacha20_block (Ghost.reveal log).k (Ghost.reveal log).n (U32.v ctr));
+  cut (reveal_sbytes (as_seq h stream_block) == chacha20_block (Ghost.reveal log').k (Ghost.reveal log').n (U32.v ctr));
   cut (modifies_3_2 stream_block st h_0 h);
   pop_frame();
-  Ghost.elift1 (fun l -> match l with | MkLog k n -> MkLog k n) log
+  Ghost.elift1 (fun l -> match l with | MkLog k n -> MkLog k n) log'
 
 
 [@ "c_inline"]
