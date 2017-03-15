@@ -11,7 +11,7 @@ module U32 = FStar.UInt32
 #set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let keylen = 32 (* in bytes *)
-let blocklen = 128  (* in bytes *)
+let blocklen = 384  (* in bytes *)
 let noncelen = 12 (* in bytes *)
 
 type key = lbytes keylen
@@ -95,28 +95,21 @@ let diagonal_round : shuffle =
 
 let double_round : shuffle =
   column_round @ diagonal_round
-  (* line 0 1 3 16ul @ *)
-  (* line 2 3 1 12ul @ *)
-  (* line 0 1 3 8ul  @ *)
-  (* line 2 3 1 7ul  @ *)
-  (* shuffle_row 1 1 @ *)
-  (* shuffle_row 2 2 @ *)
-  (* shuffle_row 3 3 @ *)
-  (* line 0 1 3 16ul @ *)
-  (* line 2 3 1 12ul @ *)
-  (* line 0 1 3 8ul  @ *)
-  (* line 2 3 1 7ul  @ *)
-  (* shuffle_row 1 3 @ *)
-  (* shuffle_row 2 2 @ *)
-  (* shuffle_row 3 1 *)
+
+
+let vec_units_state = s:seq state{length s = 3}
 
 
 let rounds : shuffle = 
     iter 10 double_round (* 20 rounds *)
 
-let chacha20_core (s:state) : Tot state = 
-    let s' = rounds s in
-    Combinators.seq_map2 op_Plus_Percent_Hat s' s
+let sum_states (s:state) (s':state) : Tot state =
+  Combinators.seq_map2 op_Plus_Percent_Hat s' s
+
+let chacha20_core (s:vec_units_state) : Tot vec_units_state = 
+    let s' = Combinators.seq_map rounds s in
+    Combinators.seq_map2 sum_states s s'
+    (* Combinators.seq_map2 op_Plus_Percent_Hat s' s *)
 
 (* state initialization *) 
 
@@ -134,10 +127,7 @@ let setup (k:key) (n:nonce) (c:counter): Tot state =
   assert_norm(List.Tot.length [constants; key_part_1; key_part_2; nonce] = 4);
   Seq.seq_of_list [constants; key_part_1; key_part_2; nonce]
 
-
-let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
-    let st = setup k n c in
-    let st' = chacha20_core st in
+let flush (st':state) : Tot (lbytes 128) =
     uint32s_to_le 4 (slice (index st' 0) 0 4) @|
     uint32s_to_le 4 (slice (index st' 1) 0 4) @|
     uint32s_to_le 4 (slice (index st' 2) 0 4) @|
@@ -147,6 +137,17 @@ let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     uint32s_to_le 4 (slice (index st' 2) 4 8) @|
     uint32s_to_le 4 (slice (index st' 3) 4 8)
 
+let setup_units (k:key) (n:nonce) (c:counter) : Tot vec_units_state =
+    let st1 = setup k n c in
+    let st2 = setup k n ((c+2)%0x100000000) in
+    let st3 = setup k n ((c+4)%0x100000000) in
+    assert_norm(List.Tot.length [st1; st2; st3] = 3);
+    Seq.createL [st1; st2; st3]
+
+let chacha20_block (k:key) (n:nonce) (c:counter): Tot (lbytes 384) =
+    let st = setup_units k n c in
+    let st' = chacha20_core st in
+    flush (index st' 0) @| flush (index st' 1) @| flush (index st' 2)
 
 
 let chacha20_ctx: Spec.CTR.block_cipher_ctx = 
@@ -156,7 +157,7 @@ let chacha20_ctx: Spec.CTR.block_cipher_ctx =
     blocklen = blocklen;
     noncelen = noncelen;
     counterbits = 32;
-    incr = 2
+    incr = 6
     }
 
 let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
