@@ -33,7 +33,7 @@ KREMTEST=$(KREMLIN_HOME)/test
 
 FSTAR_OPTIONS_VER=-fsopt "--use_hints" -skip-extraction
 FSTAR_OPTIONS_KREMLIN=
-FSTAR=$(KREMLIN) -verify -verbose -skip-compilation
+FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
 
 OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
                 $(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \

@@ -29,7 +29,7 @@ let test_1a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Call the hash function *)
   SHA.sha2_init_256 ctx;
@@ -67,7 +67,7 @@ let test_1b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Call the hash function *)
   SHA.sha2_256 output plaintext plaintext_len;
@@ -102,7 +102,7 @@ let test_2a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Call the hash function *)
   SHA.sha2_init_256 ctx;
@@ -138,7 +138,7 @@ let test_2b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Call the hash function *)
   SHA.sha2_256 output plaintext plaintext_len;
@@ -181,7 +181,7 @@ let test_3a () =
   ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Call the hash function *)
   SHA.sha2_init_256 ctx;
@@ -225,7 +225,7 @@ let test_3b () =
   ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Call the hash function *)
   SHA.sha2_256 output plaintext plaintext_len;
@@ -275,7 +275,7 @@ let test_4a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Call the hash function *)
   SHA.sha2_init_256 ctx;
@@ -326,7 +326,7 @@ let test_4b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Call the hash function *)
   SHA.sha2_256 output plaintext plaintext_len;
@@ -361,7 +361,7 @@ let test_5 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Call the hash function *)
   SHA.sha2_256 output plaintext plaintext_len;
@@ -420,7 +420,7 @@ let test_6 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.size_state_256 in
+  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
 
   (* Sha2_Init_256ialize the hash state *)
   SHA.sha2_init_256 ctx;

@@ -14,7 +14,7 @@ let main () =
   let len' = 34uL in
   let keysize = 32ul in
   let macsize = 16ul in
-  let mac = create (0uy) macsize in
+  let mac = create (0uy) 16ul in
   let plaintext = createL [
     0x43uy; 0x72uy; 0x79uy; 0x70uy; 0x74uy; 0x6fuy; 0x67uy; 0x72uy;
     0x61uy; 0x70uy; 0x68uy; 0x69uy; 0x63uy; 0x20uy; 0x46uy; 0x6fuy;

@@ -67,7 +67,7 @@ extract-api:
 	mkdir -p api-c
 	$(KRML) -tmpdir api-c NaCl.fst -verbose \
 		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' \
+		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
 		-drop Hacl.Constants -drop "Hacl.Endianness" \
 		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box" \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Salsa20.h"' \
@@ -77,7 +77,7 @@ extract-box:
 	mkdir -p box-c
 	$(KRML) -tmpdir box-c NaCl.fst -verbose \
 		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' \
+		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
 		-drop Hacl.Constants -drop "Hacl.Endianness" \
 		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad" \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Salsa20.h"' \
@@ -88,7 +88,7 @@ extract-aead:
 	mkdir -p aead-c
 	$(KRML2) -tmpdir aead-c Hacl.AEAD.Chacha20Poly1305.fst -verbose \
 		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' \
+		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
 		-drop Hacl.Constants -drop "Hacl.Endianness" -drop 'Combinators' \
 		-drop "Hacl.Bignum.\*" -drop "Hacl.Spe.\*" -drop "Hacl.Impl.\*" -drop "Hacl.Standalone.\*" \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
