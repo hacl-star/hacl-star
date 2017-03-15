@@ -63,9 +63,13 @@ VERBOSE=
 else
 VERBOSE=-verbose
 endif
+
 KREMLIN=$(KREMLIN_HOME)/krml
-KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                        -ccopt -Wno-error=format=
+ifeq ($(CC),ccomp)
+  KREMLIN_ARGS=-cc compcert $(VERBOSE)
+else
+  KREMLIN_ARGS=-ccopt -march=native $(VERBOSE) -ldopt -flto
+endif
 
 # Linux specific compilation instruction for PneuTube
 ifeq ($(UNAME), Linux)

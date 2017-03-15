@@ -104,7 +104,7 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_FILES)))
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p x25519-c
-	$(KREMLIN_HOME)/krml -tmpdir x25519-c -ccopt -std=gnu99 \
+	$(KREMLIN_HOME)/krml -tmpdir x25519-c $(KREMLIN_ARGS) \
 		-I ../bignum -I ../lib/kremlin -I ../../specs -I ../../specs/generic \
 		Curve25519.fst Hacl.Test.X25519.fst \
 		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
@@ -112,7 +112,7 @@ extract-c:
 		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*' \
 		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-                -no-prefix Hacl.Test.X25519 -ldopt -flto -ccopt -march=native -o x25519.exe
+                -no-prefix Hacl.Test.X25519 -o x25519.exe
 	./x25519.exe
 
 clean:
