@@ -14,19 +14,19 @@ let prime = pow2 130 - 5
 
 type elem = e:int{e >= 0 /\ e < prime}
 
+let fadd (e1:elem) (e2:elem) = (e1 + e2) % prime
+let op_Plus_At e1 e2 = fadd e1 e2
+
+let fmul (e1:elem) (e2:elem) = (e1 * e2) % prime
+let op_Star_At e1 e2 = fmul e1 e2
+
 let zero : elem = 0
 let one  : elem = 1
 
-val fadd: elem -> elem -> Tot elem
-let fadd e1 e2 = (e1 + e2) % prime
-let op_Plus_At e1 e2 = fadd e1 e2
-
-val fmul: elem -> elem -> Tot elem
-let fmul e1 e2 = (e1 * e2) % prime
-let op_Star_At e1 e2 = fmul e1 e2
 
 
 (* Type aliases *)
+let op_Amp_Bar = UInt.logand #128
 type word = w:bytes{length w <= 16}
 type word_16 = w:bytes{length w = 16}
 type tag = word_16
@@ -34,19 +34,20 @@ type key = lbytes 32
 type text = seq word
 
 (* Specification code *)
-let encode (w:word) : Tot elem =
+let encode (w:word) =
   pow2 (8 * length w) +@ little_endian w
 
 val poly: vs:text -> r:elem -> Tot (a:elem) (decreases (Seq.length vs))
 let rec poly vs r =
   if length vs = 0 then zero
   else
-    let v = Seq.head vs in
-    (encode v +@ poly (Seq.tail vs) r) *@ r
+    let a = poly (Seq.tail vs) r in
+    let n = encode (Seq.head vs) in
+    (n +@ a) *@ r
 
-val encode_r: rb:word_16 -> Tot (r:elem)
-let encode_r rb =
-  UInt.logand #128 (little_endian rb) 0x0ffffffc0ffffffc0ffffffc0fffffff
+(* val encode_r: rb:word_16 -> Tot (r:elem) *)
+let encode_r (rb:word_16) =
+  (little_endian rb) &| 0x0ffffffc0ffffffc0ffffffc0fffffff
 
 (** Finish: truncate and pad (or pad and truncate) *)
 val finish: a:elem -> s:tag -> Tot tag
