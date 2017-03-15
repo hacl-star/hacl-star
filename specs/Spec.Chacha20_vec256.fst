@@ -124,18 +124,18 @@ unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul;
                         0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
 
 // JK: I have to add those assertions to typechecks, would be nice to get rid of it
-let setup (k:key) (n:nonce) (c:counter{c < pow2 32 - 1}): Tot state =
+let setup (k:key) (n:nonce) (c:counter): Tot state =
   assert_norm(List.Tot.length constants = 8); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
   let constants:vec = createL constants in
   let key_part_1:vec = uint32s_from_le 4 (Seq.slice k 0 16) @| uint32s_from_le 4 (Seq.slice k 0 16) in
   let key_part_2:vec = uint32s_from_le 4 (Seq.slice k 16 32) @| uint32s_from_le 4 (Seq.slice k 16 32) in
   let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) @|
-                      Seq.cons (UInt32.uint_to_t (c+1)) (uint32s_from_le 3 n) in
+                      Seq.cons (UInt32.uint_to_t ((c+1)%0x100000000)) (uint32s_from_le 3 n) in
   assert_norm(List.Tot.length [constants; key_part_1; key_part_2; nonce] = 4);
   Seq.seq_of_list [constants; key_part_1; key_part_2; nonce]
 
 
-let chacha20_block (k:key) (n:nonce) (c:counter{c < pow2 32 - 1}): Tot block =
+let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     let st = setup k n c in
     let st' = chacha20_core st in
     uint32s_to_le 4 (slice (index st' 0) 0 4) @|
@@ -164,6 +164,7 @@ let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
 let chacha20_encrypt_bytes key nonce counter m = 
     Spec.CTR.counter_mode chacha20_ctx chacha20_cipher key nonce counter m
 
+#set-options "--lax"
 
 unfold let test_plaintext = [
     0x4cuy; 0x61uy; 0x64uy; 0x69uy; 0x65uy; 0x73uy; 0x20uy; 0x61uy;
