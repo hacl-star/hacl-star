@@ -544,7 +544,7 @@ private inline_for_extraction let crypto_stream_salsa20_xor_ic_ c m mlen n ic k 
   pop_frame()
 
 
-// JP: removed c_inline, see below
+[@"c_inline"]
 val crypto_stream_salsa20_xor_ic:
   c:uint8_p ->
   m:uint8_p ->
@@ -555,6 +555,7 @@ val crypto_stream_salsa20_xor_ic:
   Stack unit
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1))
+[@"c_inline"]
 let crypto_stream_salsa20_xor_ic c m mlen n ic k =
   if FStar.UInt64.(mlen =^ 0uL) then ()
   else crypto_stream_salsa20_xor_ic_ c m mlen n ic k
@@ -706,8 +707,7 @@ private let salsa20_store_partial c ctx len =
   pop_frame()
 
 
-// JP: removed the c_inline qualifier because that allows the C compiler to
-// remove the function and not make it callable from another translation unit.
+[@ "c_inline" ]
 val crypto_stream_salsa20:
   c:uint8_p ->
   clen:FStar.UInt64.t{U64.v clen <= length c} ->
@@ -716,6 +716,7 @@ val crypto_stream_salsa20:
   Stack unit
     (requires (fun h -> live h c /\ live h n /\ live h k))
     (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
+[@ "c_inline" ]
 let crypto_stream_salsa20 c clen n k =
   push_frame();
   let hh = ST.get() in
