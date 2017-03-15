@@ -132,23 +132,6 @@ let crecip_tot_1 z =
   assert_norm(op_Multiply 31 (pow2 5) = pow2 10 - pow2 5);
   cut (selem t0'' = L.exp (selem z) (pow2 10 - pow2 5));
   t0'', b', a'
-
-
-(* val lemma_crecip_tot_1: z:s_513 -> Lemma *)
-(*   (let t0'', b', a' = crecip_tot_1 z in *)
-(*    selem t0'' = L.exp (selem z) (pow2 10 - pow2 5) /\ *)
-(*    selem b' = L.exp (selem z) (pow2 5 - pow2 0) /\ *)
-(*    selem a' = L.exp (selem z) (11)) *)
-(* let lemma_crecip_tot_1 z = *)
-(*   let a = fsquare_times_tot z 1 in  // z^2 *)
-(*   cut ( *)
-(*   let t0 = fsquare_times_tot a 2 in // z^8 *)
-(*   let b = fmul_tot t0 z in          // z^9 *)
-(*   let a' = fmul_tot b a in          // z^11 *)
-(*   let t0' = fsquare_times_tot a' 1 in // z^22 *)
-(*   let b' = fmul_tot t0' b in          // z^(2^5 - 2^0) *)
-(*   let t0'' = fsquare_times_tot b' 5 in // z^(2^10 - 2^5) *)
-(*   t0'', b', a' *)
   
 
 
@@ -232,11 +215,6 @@ let lemma_crecip_tot_0 z t0'' b' a' t0_7 b''' =
   cut (t0_7 = L.exp (L.exp (z) (pow2 10 - pow2 5) *@ L.exp (z) (pow2 5 - pow2 0)) (pow2 90 + pow2 80 + pow2 70 + pow2 60 + pow2 50));
   L.lemma_exp_add (z) (pow2 10 - pow2 5) (pow2 5 - pow2 0);
   cut (t0_7 = L.exp (L.exp (z) (pow2 10 - pow2 0)) (pow2 90 + pow2 80 + pow2 70 + pow2 60 + pow2 50));
-  (* let u = (pow2 10 - pow2 0) in *)
-  (* let v = (pow2 90 + pow2 80 + pow2 70 + pow2 60 + pow2 50) in *)
-  (* cut (t0_7 = L.exp (L.exp (z) (u)) (v)); *)
-  (* L.lemma_exp_mul (z) u v; *)
-  (* cut (L.exp (L.exp z u) v = L.exp z (op_Multiply u v)); admit() *)
   L.lemma_exp_mul (z) (pow2 10 - pow2 0) (pow2 90 + pow2 80 + pow2 70 + pow2 60 + pow2 50);
   cut (L.exp (L.exp z (pow2 10 - pow2 0)) (pow2 90 + pow2 80 + pow2 70 + pow2 60 + pow2 50) =
     L.exp z (op_Multiply (pow2 10 - pow2 0) (pow2 90 + pow2 80 + pow2 70 + pow2 60 + pow2 50)));
