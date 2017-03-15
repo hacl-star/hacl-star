@@ -70,6 +70,18 @@ chacha20-vec2-ml:
 	$(OCAMLOPT) -I chacha-spec-vec2 $(OCAML_INCLUDES) $(addprefix chacha-spec-vec2/, $(EXTRACTED)) chacha-spec-vec2/Combinators.ml chacha-spec-vec2/Spec_Lib.ml chacha-spec-vec2/Spec_CTR.ml chacha-spec-vec2/Spec_Chacha20_vec2.ml -o chacha20-vec2.exe
 	./chacha20-vec2.exe
 
+chacha20-vec3.exe: Spec.Chacha20_vec256.fst
+	$(MAKE) -C ../code/lib/ml MEM=HST
+	mkdir -p chacha-spec-vec3
+	$(FSTAR) $(ARGS) --odir chacha-spec-vec3 $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> chacha-spec-vec3/Spec_Chacha20_vec256.ml
+	$(OCAMLOPT) -I chacha-spec-vec3 $(OCAML_INCLUDES) $(addprefix chacha-spec-vec3/, $(EXTRACTED)) chacha-spec-vec3/Combinators.ml chacha-spec-vec3/Spec_Lib.ml chacha-spec-vec3/Spec_CTR.ml chacha-spec-vec3/Spec_Chacha20_vec256.ml -o chacha20-vec256.exe
+	./chacha20-vec256.exe
+
+chacha20-vec3-ml:
+	$(OCAMLOPT) -I chacha-spec-vec3 $(OCAML_INCLUDES) $(addprefix chacha-spec-vec3/, $(EXTRACTED)) chacha-spec-vec3/Combinators.ml chacha-spec-vec3/Spec_Lib.ml chacha-spec-vec3/Spec_CTR.ml chacha-spec-vec3/Spec_Chacha20_vec256.ml -o chacha20-vec256.exe
+	./chacha20-vec256.exe
+
 salsa20.exe: Spec.Salsa20.fst
 	$(MAKE) -C ../code/lib/ml MEM=HST
 	mkdir -p salsa-spec
