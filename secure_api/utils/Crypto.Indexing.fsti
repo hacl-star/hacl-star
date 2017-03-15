@@ -31,5 +31,13 @@ inline_for_extraction val aeadAlg_of_id: i:id -> Tot aeadAlg
 inline_for_extraction val macAlg_of_id: i:id -> Tot macAlg
 inline_for_extraction val cipherAlg_of_id: i:id -> Tot cipherAlg
 inline_for_extraction val aesImpl_of_id: i:id -> Tot aesImpl
-val testId: a:aeadAlg -> Tot (i:id{aeadAlg_of_id i = a})
 
+val aeadAlg_cipherAlg: i:id -> Lemma
+  (requires True)
+  (ensures
+    ((aeadAlg_of_id i == AES_128_GCM ==> cipherAlg_of_id i == AES128) /\
+     (aeadAlg_of_id i == AES_256_GCM ==> cipherAlg_of_id i == AES256) /\
+     (aeadAlg_of_id i == CHACHA20_POLY1305 ==> cipherAlg_of_id i == CHACHA20)))
+  [SMTPat (aeadAlg_of_id i); SMTPat (cipherAlg_of_id i)]
+
+val testId: a:aeadAlg -> Tot (i:id{aeadAlg_of_id i = a})
