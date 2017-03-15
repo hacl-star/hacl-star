@@ -1,3 +1,6 @@
+(*--build-config
+options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../vale --include ../uf1cma --include ../utils --include ../../specs --include ../../../kremlin/kremlib --include ../../../FStar/ulib/hyperstack
+--*)
 (**
   This module multiplexes between different real implementations of polynomial
   MACs. It is oblivious to the static vs one-time allocation of the r part of
@@ -82,29 +85,31 @@ let limb_length = function
 inline_for_extraction unfold
 type buffer_of a = b:Buffer.buffer (limb a){Buffer.length b == limb_length a}
 
-// TODO: workaround for #759
-inline_for_extraction type _buffer_of a = buffer_of a
-
-// private?
-noeq type _buffer =
-  | B_POLY1305 of _buffer_of POLY1305
-  | B_GHASH    of _buffer_of GHASH
-
 #reset-options "--z3rlimit 100 --initial_ifuel 1 --max_ifuel 1"
-type pub_elemB (i:id) = b:_buffer
-  { (match alg i with
-  | POLY1305 -> B_POLY1305? b
-  | GHASH    -> B_GHASH? b) }
+inline_for_extraction type pub_elemB (i:id) =
+  buffer_of (alg i)
+
+//  (match alg i with
+//  | POLY1305 -> buffer_of POLY1305
+//  | GHASH -> buffer_of GHASH)
+
+//b:_buffer{
+//    POLY1305? (alg i) <==> B_POLY1305? b /\
+//    GHASH? (alg i) <==> B_GHASH? b
+//  }
+//  { (match alg i with
+//  | POLY1305 -> B_POLY1305? b
+//  | GHASH    -> B_GHASH? b) }
 
 abstract type elemB (i:id) = pub_elemB i
 
 noextract val reveal_elemB : #i:id -> elemB i -> GTot (pub_elemB i)
 let reveal_elemB #i e = e
 
-val as_buffer: #i:id -> elemB i -> GTot (_buffer_of (alg i))
-let as_buffer #i = function
-  | B_POLY1305 b -> b
-  | B_GHASH    b -> b
+#reset-options "--z3rlimit 100 --initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
+val as_buffer: #i:id -> elemB i -> GTot (buffer_of (alg i))
+let as_buffer #i e =
+  reveal_elemB e
 
 val live: mem -> #i:id -> elemB i -> Type0
 let live h #i b = Buffer.live h (as_buffer b)
@@ -114,17 +119,18 @@ let live h #i b = Buffer.live h (as_buffer b)
 
 val norm: mem -> #i:id -> b:elemB i -> Type0
 let norm h #i b =
-  match reveal_elemB b with
-  | B_POLY1305 b -> Buffer.live h b /\ Hacl.Spec.Bignum.AddAndMultiply.red_45 (as_seq h b)
+  match alg i with
+  | POLY1305 -> Buffer.live h b /\ Hacl.Spec.Bignum.AddAndMultiply.red_45 (as_seq h b)
     //Crypto.Symmetric.Poly1305.Bigint.norm h b // implies live
-  | B_GHASH    b -> Buffer.live h b
+  | GHASH -> Buffer.live h b
 
 val norm_r: mem -> #i:id -> b:elemB i -> Type0
 let norm_r h #i b =
-  match reveal_elemB b with
-  | B_POLY1305 b -> Buffer.live h b /\ Hacl.Spec.Bignum.AddAndMultiply.red_44 (as_seq h b)
+  let b = reveal_elemB b in
+  match alg i with
+  | POLY1305 -> Buffer.live h b /\ Hacl.Spec.Bignum.AddAndMultiply.red_44 (as_seq h b)
     //Crypto.Symmetric.Poly1305.Bigint.norm h b // implies live
-  | B_GHASH    b -> Buffer.live h b
+  | GHASH -> Buffer.live h b
 
 (** message words (not necessarily a full word. *)
 let wlen = 16ul
@@ -143,9 +149,10 @@ let sel_word h b = Buffer.as_seq h b
 
 noextract val sel_elem: h:mem -> #i:id -> b:elemB i{live h b} -> GTot (elem i)
 let sel_elem h #i b =
-  match reveal_elemB b with
-  | B_POLY1305 b -> PS_.selem (as_seq h b)
-  | B_GHASH    b -> GF.sel_elem h b
+  let b = reveal_elemB b in
+  match alg i with
+  | POLY1305 -> PS_.selem (as_seq h b)
+  | GHASH -> GF.sel_elem h b
 
 #reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
@@ -191,8 +198,8 @@ val rcreate: rgn:HH.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
     ~(live h0 r) /\live h1 r))
 let rcreate rgn i =
   match alg i with
-  | POLY1305 -> B_POLY1305 (FStar.Buffer.rcreate rgn 0UL 3ul)
-  | GHASH    -> B_GHASH    (FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul)
+  | POLY1305 -> FStar.Buffer.rcreate rgn 0UL 3ul
+  | GHASH    -> FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul
 
 val create: i:id -> StackInline (elemB i)
   (requires (fun h0 -> True))
@@ -209,7 +216,7 @@ let create i =
   | POLY1305 ->
       let b = FStar.Buffer.create 0uL 3ul in
       PL.poly1305_start b;
-      B_POLY1305 b
+      b
       (* hide in Poly1305.fst? *)
       (* let b = FStar.Buffer.create 0uL 5ul in *)
       (* let h1 = ST.get() in  *)
@@ -217,7 +224,7 @@ let create i =
       (* assert(Crypto.Symmetric.Poly1305.Bigint.norm h1 b); *)
       (* B_POLY1305 b *)
   | GHASH ->
-      B_GHASH (FStar.Buffer.create (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul)
+      FStar.Buffer.create (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul
 
 // TODO: generalize length, add functional spec
 (** Encode raw bytes of static key as a field element *)
@@ -230,11 +237,11 @@ val encode_r: #i:id -> b:elemB i -> raw:lbuffer 16{Buffer.disjoint (as_buffer b)
       | POLY1305 -> Buffer.modifies_1 (as_buffer b) h0 h1
       | GHASH -> Buffer.modifies_1 (as_buffer b) h0 h1)))
 let encode_r #i b raw =
-  match b with
-  | B_POLY1305 b -> PL.poly1305_encode_r b raw
+  match alg i with
+  | POLY1305 -> PL.poly1305_encode_r b raw
       (* PL.clamp raw;  *)
       (* PL.toField b raw *)
-  | B_GHASH    b ->
+  | GHASH ->
       //let h0 = ST.get () in
       //assert (Buffer.modifies_1 raw h0 h0); // Necessary for triggering right lemmas
       let i = GF.load128_be raw in
@@ -356,12 +363,10 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
 #reset-options " --z3rlimit 300 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
-
-// TODO: use encodeB?
 let update #i r a w =
   let h0 = ST.get () in
-  match r, a with
-  | B_POLY1305 r, B_POLY1305 a -> let _ = PL.poly1305_update (Ghost.hide Seq.createEmpty) (PL.MkState r a) w in ()
+  match alg i with
+  | POLY1305 -> let _ = PL.poly1305_update (Ghost.hide Seq.createEmpty) (PL.MkState r a) w in ()
     (* begin *)
     (*   push_frame(); *)
     (*   let e = Buffer.create 0UL 5ul in *)
@@ -379,7 +384,7 @@ let update #i r a w =
     (*   let h3 = ST.get () in *)
     (*   Crypto.Symmetric.Poly1305.Bigint.eval_eq_lemma h2 h3 a a 5 *)
     (* end *)
-  | B_GHASH r, B_GHASH a ->
+  | GHASH ->
       push_frame();
       let e = Buffer.create GF.zero_128 1ul in
       e.(0ul) <- GF.load128_be w;
@@ -428,8 +433,8 @@ let lemma_modifies_3_2_finish #a #a' h h' h'' b b' =
 
 let finish #i s a t =
   let h0 = ST.get() in
-  match a with
-  | B_POLY1305 a -> (
+  match alg i with
+  | POLY1305 -> (
     push_frame();
     let h = ST.get() in
     Math.Lemmas.lemma_mod_plus_distr_l (PS_.selem (as_seq h a)) (little_endian (as_seq h t)) (pow2 128);
@@ -447,7 +452,7 @@ let finish #i s a t =
 
     FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t) (Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
     )
-  | B_GHASH    a ->
+  | GHASH ->
     begin
     GF.finish a s;
     GF.store128_be t a.(0ul)
