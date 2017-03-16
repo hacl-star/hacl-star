@@ -440,10 +440,10 @@ let lemma_modifies_3_2_finish #a #a' h h' h'' b b' =
   lemma_intro_modifies_3_2 b b' h h''
 
 let finish #i s a t =
-  push_frame();
   let h0 = ST.get() in
-  (match alg i with
+  match alg i with
   | POLY1305 ->
+    push_frame();
     let a' : Buffer.buffer UInt64.t = a in
     let h = ST.get() in
     Math.Lemmas.lemma_mod_plus_distr_l (PS_.selem (as_seq h a)) (little_endian (as_seq h t)) (pow2 128);
@@ -453,6 +453,7 @@ let finish #i s a t =
     PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.MkState dummy_r a') t dummy_m 0uL s;
     let h'' = ST.get() in
     lemma_modifies_3_2_finish h h' h'' a t;
+    pop_frame();
     let h1 = ST.get() in
     Buffer.modifies_popped_3_2 a t h0 h h'' h1;
     cut (FStar.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Endianness.little_endian (as_seq h0 s)) % pow2 128);
@@ -462,7 +463,6 @@ let finish #i s a t =
     let a' : Buffer.buffer UInt128.t = a in
     GF.finish a' s;
     GF.store128_be t a'.(0ul)
-  ); pop_frame()
 
 //17-02-11 new lemma
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
