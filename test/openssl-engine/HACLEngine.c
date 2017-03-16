@@ -269,6 +269,16 @@ int Everest_init(ENGINE *e) {
   return 1;
 }
 
+int Everest_destroy(ENGINE *e) {
+  // Because meth_copy frees the destination pointer? Need to look at the
+  // implementation...
+  // EVP_PKEY_meth_free(hacl_x25519_meth);
+  #if IMPL==IMPL_HACL
+  EVP_CIPHER_meth_free(hacl_chacha20_cipher);
+  #endif
+  EVP_MD_meth_free(hacl_poly1305_digest);
+}
+
 void Everest_create_all_the_things() {
   // X25519
   // ------
@@ -338,11 +348,11 @@ int bind_helper(ENGINE * e, const char *id)
   if (!ENGINE_set_id(e, engine_Everest_id) ||
     !ENGINE_set_name(e, engine_Everest_name) ||
     !ENGINE_set_init_function(e, Everest_init) ||
+    !ENGINE_set_destroy_function(e, Everest_destroy) ||
     !ENGINE_set_ciphers(e, Everest_ciphers) ||
     !ENGINE_set_digests(e, Everest_digest) ||
     !ENGINE_set_pkey_meths(e, Everest_pkey_meths) ||
-    !EVP_add_digest(hacl_poly1305_digest) ||
-    !EVP_add_digest_alias(EVP_MD_name(hacl_poly1305_digest), "poly1305")
+    !EVP_add_digest(hacl_poly1305_digest)
   ) {
     fprintf(stderr, "Error initializing the Everest engine!\n");
     return 0;

@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 if [[ $1 == "" || $2 == "" ]]; then
   echo Usage: $0 OPENSSL_HOME ENGINE
   exit 0
