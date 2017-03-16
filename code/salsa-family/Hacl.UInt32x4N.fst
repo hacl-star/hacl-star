@@ -7,7 +7,7 @@ open Hacl.Cast
 open Hacl.UInt32
 open Hacl.Spec.Endianness
 open Hacl.Endianness
-open Combinators
+open C.Loops
 open FStar.Seq
 
 module U32 = FStar.UInt32
@@ -17,7 +17,7 @@ module H32 = Hacl.UInt32
 let u32 = U32.t
 let h32 = H32.t
 let uint8_p = buffer H8.t
-type vec
+type vec = Spec.Chacha20_vec256.vec
 assume val vec_size: (x:u32{U32.v x % 4 = 0})
 assume val vec_as_seq: vec -> GTot (s:seq h32{length s == U32.v vec_size})
 assume val vec_load_le: b:uint8_p -> ST vec 

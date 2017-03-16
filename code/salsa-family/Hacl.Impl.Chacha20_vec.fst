@@ -8,7 +8,7 @@ open Hacl.Cast
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Chacha20
-open Combinators
+open C.Loops
 
 module Spec = Spec.Chacha20
 module U32 = FStar.UInt32
@@ -133,9 +133,55 @@ val rounds:
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
 [@ "substitute"]
-let rounds st = Loops_vec.rounds st
-// Real implementation bellow
-  (* Combinators.iter #H32.t #16 #(double_round') 10ul double_round st 16ul *)
+let rounds st =
+  repeat #vec 16ul (Spec.Chacha20_vec256.double_round) st 10ul double_round
+
+[@ "substitute"]
+val rounds2:
+  st:state ->
+  st':state{disjoint st st'} ->
+  Stack unit
+    (requires (fun h -> live h st /\ live h st'))
+    (ensures (fun h0 _ h1 -> live h0 st /\ live h0 st'
+      /\ live h1 st /\ live h1 st' /\ modifies_2 st st' h0 h1))
+[@ "substitute"]
+let rounds2 st st' =
+  let h0 = ST.get() in
+  let inv (h1:mem) (i:nat) : Type0 =
+    live h1 st /\ live h1 st' /\ i <= 10
+    /\ as_seq h1 st == repeat_spec i Spec.Chacha20_vec256.double_round (as_seq h0 st)
+    /\ as_seq h1 st' == repeat_spec i Spec.Chacha20_vec256.double_round (as_seq h0 st') in
+  let f (i:UInt32.t{FStar.UInt32.(0 <= v i /\ v i < 10)}) : Stack unit
+    (requires (fun h -> inv h (UInt32.v i)))
+    (ensures (fun h0 _ h1 -> FStar.UInt32.(inv h1 (v i + 1)))) =
+      double_round st;
+      double_round st' in
+  for 0ul 10ul inv f
+
+[@ "substitute"]
+val rounds3:
+  st:state ->
+  st':state{disjoint st st'} ->
+  st'':state{disjoint st st'' /\ disjoint st' st''} ->
+  Stack unit
+    (requires (fun h -> live h st /\ live h st' /\ live h st''))
+    (ensures (fun h0 _ h1 -> live h0 st /\ live h0 st' /\ live h0 st''
+      /\ live h1 st /\ live h1 st' /\ live h1 st'' /\ modifies_3 st st' st'' h0 h1))
+[@ "substitute"]
+let rounds3 st st' st'' =
+  let h0 = ST.get() in
+  let inv (h1:mem) (i:nat) : Type0 =
+    live h1 st /\ live h1 st' /\ live h1 st'' /\ i <= 10
+    /\ as_seq h1 st == repeat_spec i Spec.Chacha20_vec256.double_round (as_seq h0 st)
+    /\ as_seq h1 st' == repeat_spec i Spec.Chacha20_vec256.double_round (as_seq h0 st')
+    /\ as_seq h1 st'' == repeat_spec i Spec.Chacha20_vec256.double_round (as_seq h0 st'') in
+  let f (i:UInt32.t{FStar.UInt32.(0 <= v i /\ v i < 10)}) : Stack unit
+    (requires (fun h -> inv h (UInt32.v i)))
+    (ensures (fun h0 _ h1 -> FStar.UInt32.(inv h1 (v i + 1)))) =
+      double_round st;
+      double_round st';
+      double_round st'' in
+  for 0ul 10ul inv f
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
@@ -213,7 +259,7 @@ let chacha20_core2 k0 k1 st =
   copy_state k0 st;
   copy_state k1 st;
   state_incr k1;
-  Loops_vec.rounds2 k0 k1;
+  rounds2 k0 k1;
   sum_states k0 st;
   state_incr st;
   sum_states k1 st
@@ -234,7 +280,7 @@ let chacha20_core3 k0 k1 k2 st =
   state_incr k1;
   copy_state k2 k1;
   state_incr k2;
-  Loops_vec.rounds3 k0 k1 k2;
+  rounds3 k0 k1 k2;
   sum_states k0 st;
   state_incr st;
   sum_states k1 st;
@@ -285,7 +331,8 @@ let update_last output plain len st =
   let block = create (uint8_to_sint8 0uy) vecsizebytes4 in
   chacha20_block block st;
   let mask = Buffer.sub block 0ul len in
-  Loops_vec.xor_bytes output plain mask len;
+  map2 output plain mask len (Hacl.UInt8.logxor);
+  (* Loops_vec.xor_bytes output plain mask len; *)
   pop_frame()
 
 val xor_block:

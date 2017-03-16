@@ -2,7 +2,7 @@ module Loops_vec
 
 open FStar.Buffer
 open Spec.Chacha20
-open Combinators
+open C.Loops
 open Hacl.Spec.Endianness
 open Hacl.UInt32x4N
 
@@ -66,7 +66,7 @@ assume val vec_gather16:
   input:buffer Hacl.UInt8.t ->
   vs:Hacl.UInt32.t{U32.v vs = 4 * U32.v vec_size} ->
   Stack unit
-    (requires (fun h -> live h st /\ live h inpput))
+    (requires (fun h -> live h st /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ live h1 input /\ modifies_1 st h0 h1))
 
 assume val vec_xor16:

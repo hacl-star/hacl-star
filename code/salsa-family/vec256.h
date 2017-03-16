@@ -8,9 +8,12 @@ static const int vec_size = 8;
 
 typedef unsigned int vec256 __attribute__ ((vector_size (32)));
 
+
 typedef struct {
   vec256 v;
 } vec;
+
+typedef vec Spec_Chacha20_vec256_vec;
 
 static inline vec mk_vec(vec256 v) {
   vec r;

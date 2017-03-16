@@ -73,7 +73,7 @@ Chacha20_vec.c: Hacl.UInt32x4N.fst Loops_vec.fst Hacl.Impl.Chacha20_vec.fst Chac
 	mkdir -p chacha-c
 	$(KRML) -tmpdir chacha-vec-c -no-prefix Loops_vec -no-prefix Hacl.UInt32x4N -I . -drop "Loops_vec" -drop "Hacl.UInt32x4N" \
 		-bundle 'Chacha20_vec=Loops_vec,Hacl.Impl.Chacha20_state,Hacl.Impl.Chacha20_vec,Chacha20_vec' -drop 'Hacl.Spec.\*' -add-include '"loops_vec.h"' -drop 'Spec.\*' -drop "Combinators" -add-include '"vec32x4N.h"' \
-		Chacha20_vec.fst $(VERBOSE) -skip-linking
+		interfaces/Spec.Chacha20_vec256.fst Chacha20_vec.fst $(VERBOSE) -skip-linking
 
 Chacha20_vec2.c: Hacl.UInt32x4N.fst Loops_vec.fst Hacl.Impl.Chacha20_vec2.fst Chacha20_vec2.fst
 	mkdir -p chacha-c

@@ -8,7 +8,7 @@ open Hacl.Cast
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Chacha20
-open Combinators
+open C.Loops
 
 module Spec = Spec.Chacha20
 module U32 = FStar.UInt32
@@ -19,6 +19,7 @@ open Hacl.UInt32x4N
 let u32 = U32.t
 let h32 = H32.t
 let uint8_p = buffer H8.t
+
 type state = b:Buffer.buffer vec{length b = 4}
 unfold let blocks = U32.(vec_size /^ 4ul)
 unfold let vecsizebytes = U32.(vec_size *^ 4ul)
