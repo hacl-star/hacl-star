@@ -11,14 +11,11 @@ LDFLAGS=-lcrypto
 ifeq ($(OS),Windows_NT)
 CC?=x86_64-w64-mingw32-gcc
 SO=dll
-EXE=.exe
 PWD=$(shell cygpath -m $$(pwd))
 
 all: OpenSSLEngine.$(SO) HaclEngine.$(SO) BCryptEngine.$(SO)
 else
 SO=so
-EXE=
-CYGPATH=echo
 PWD=$(shell pwd)
 
 all: OpenSSLEngine.$(SO) HaclEngine.$(SO)
@@ -35,8 +32,6 @@ BCryptEngine.$(SO): BCryptEngine.c
 
 .PHONY: test
 test: test-OpenSSLEngine.$(SO) test-HaclEngine.$(SO)
-
-OPENSSL_EXE=$(OPENSSL_HOME)/apps/openssl$(EXE)
 
 test-%: all
 	./test.sh "$(OPENSSL_HOME)" "$(PWD)/$*"
