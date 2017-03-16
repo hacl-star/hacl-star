@@ -1,4 +1,4 @@
-// Everest OpenSSL crypto engine for Curve25519
+// Everest OpenSSL crypto engine for Chacah20, Curve25519, Poly1305
 //
 // This allows us to rely on OpenSSL's benchmarking infrastructure while
 // multiplexing between:
@@ -16,8 +16,10 @@
 #include <openssl/engine.h>
 #include <openssl/aes.h>
 #include <openssl/ec.h>
+#include <openssl/evp.h>
 
 #include "Curve25519.h"
+#include "Poly1305_64.h"
 #include "Chacha20.h"
 
 // The multiplexing is done at compile-time; pass -DIMPL=IMPL_OPENSSL to your
@@ -37,6 +39,8 @@ static const char *engine_Everest_name = "Everest engine (HACL* crypto)";
 #else
 #error "Unknown implementation"
 #endif
+
+// X25519 ----------------------------------------------------------------------
 
 // The simplest way to get *our* implementation of X25519 running is to clone
 // the original implementation, then override the pointer to the salient
@@ -95,9 +99,11 @@ static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
         return 0;
     return 1;
 }
-#endif
+#endif // IMPL_HACL
 
+// Chacha20 --------------------------------------------------------------------
 
+#if IMPL == IMPL_HACL
 static int Wrapper_Chacha20_Init(EVP_CIPHER_CTX *ctx, const unsigned char *key, const unsigned char *iv, int enc) {
   uint32_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
   Chacha20_chacha_keysetup(my_ctx, (uint8_t*) key);
@@ -120,6 +126,47 @@ static int Wrapper_Chacha20_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out, cons
 
   return 1;
 }
+#endif // IMPL_HACL
+
+// Poly1305 --------------------------------------------------------------------
+
+// Dummy key for benchmarking purposes.
+static /* const */ uint8_t poly1305_dummy_key[] =
+{
+  0x85, 0xd6, 0xbe, 0x78, 0x57, 0x55, 0x6d, 0x33, 0x7f, 0x44, 0x52, 0xfe, 0x42, 0xd5, 0x06, 0xa8,
+  0x01, 0x03, 0x80, 0x8a, 0xfb, 0x0d, 0xb2, 0xfd, 0x4a, 0xbf, 0xf6, 0xaf, 0x41, 0x49, 0xf5, 0x1b
+};
+
+static int hacl_poly1305_init(EVP_MD_CTX *ctx) {
+  #if IMPL==IMPL_HACL
+  Poly1305_64_state *state = EVP_MD_CTX_md_data(ctx);
+  uint64_t *buf = malloc(sizeof (uint64_t) * 6);
+  state->x00 = buf;
+  state->x01 = buf + 3;
+
+  Poly1305_64_init(*state, poly1305_dummy_key);
+  #endif
+  return 1;
+}
+
+static int hacl_poly1305_update(EVP_MD_CTX *ctx, const void *data, size_t count) {
+  #if IMPL==IMPL_HACL
+  Poly1305_64_state *state = EVP_MD_CTX_md_data(ctx);
+  Poly1305_64_update(*state, (uint8_t *) data, (uint32_t) count);
+  #endif
+  return 1;
+}
+
+static int hacl_poly1305_final(EVP_MD_CTX *ctx, unsigned char *md) {
+  #if IMPL==IMPL_HACL
+  Poly1305_64_state *state = EVP_MD_CTX_md_data(ctx);
+  Poly1305_64_update_last(*state, NULL, 0);
+  Poly1305_64_finish(*state, md, poly1305_dummy_key + 16);
+  #endif
+  return 1;
+}
+
+// Registering our algorithms within the engine infrastructure -----------------
 
 static int Everest_digest_nids(const int **nids)
 {
@@ -214,11 +261,13 @@ int Everest_pkey_meths(ENGINE *e, EVP_PKEY_METHOD **method, const int **nids, in
   }
 }
 
+// Allocate the EVP_* data structures for our algorithms -----------------------
 
 int Everest_init(ENGINE *e) {
-  // Fill in the hacl_x25519_meth global by copying the existence OpenSSL code
-  // and swapping in just our multiplication, so that we don't have to duplicate
-  // the rest of the logic.
+  // X25519
+  // ------
+  // We copy the existing OpenSSL code and just swap in our
+  // multiplication, so that we don't have to duplicate the rest of the logic.
   const EVP_PKEY_METHOD *openssl_meth = EVP_PKEY_meth_find(NID_X25519);
   if (!openssl_meth) {
     fprintf(stderr, "Couldn't find OpenSSL X25519\n");
@@ -227,17 +276,18 @@ int Everest_init(ENGINE *e) {
 
   hacl_x25519_meth = EVP_PKEY_meth_new(NID_X25519, 0);
   EVP_PKEY_meth_copy(hacl_x25519_meth, openssl_meth);
-
-#if IMPL == IMPL_HACL
+  #if IMPL == IMPL_HACL
   EVP_PKEY_meth_set_derive(hacl_x25519_meth, NULL, hacl_derive);
-#elif IMPL == IMPL_OPENSSL
-  ;
-#else
-#error "Unsupported implementation"
-#endif
+  #elif IMPL == IMPL_OPENSSL
+  // Let the benchmarking go through the Engine framework, but redirect back to
+  // OpenSSL.
+  #else
+  #error "Unsupported implementation"
+  #endif
 
   // Chacha20
-#if IMPL == IMPL_HACL
+  // --------
+  #if IMPL == IMPL_HACL
   hacl_chacha20_cipher = EVP_CIPHER_meth_new(NID_chacha20, 1, 32);
   EVP_CIPHER_meth_set_iv_length(hacl_chacha20_cipher, 16);
   EVP_CIPHER_meth_set_flags(hacl_chacha20_cipher, EVP_CIPH_CUSTOM_IV | EVP_CIPH_ALWAYS_CALL_INIT);
@@ -245,17 +295,36 @@ int Everest_init(ENGINE *e) {
   EVP_CIPHER_meth_set_do_cipher(hacl_chacha20_cipher, Wrapper_Chacha20_Cipher);
   // Context is 32 uint32_t's.
   EVP_CIPHER_meth_set_impl_ctx_size(hacl_chacha20_cipher, 32 * 4);
-#elif IMPL == IMPL_OPENSSL
+  #elif IMPL == IMPL_OPENSSL
+  // Let the benchmarking go through the Engine framework, but redirect back to
+  // OpenSSL.
   hacl_chacha20_cipher = EVP_chacha20();
-#else
-#error "Unsupported implementation"
-#endif
+  #else
+  #error "Unsupported implementation"
+  #endif
+
+  // Poly1305
+  // --------
+  hacl_poly1305_digest = EVP_MD_meth_new(NID_poly1305, NID_undef);
+  EVP_MD_meth_set_init(hacl_poly1305_digest, hacl_poly1305_init);
+  EVP_MD_meth_set_update(hacl_poly1305_digest, hacl_poly1305_update);
+  EVP_MD_meth_set_final(hacl_poly1305_digest, hacl_poly1305_final);
+  #if IMPL == IMPL_HACL
+  // There's ZERO documentation, but reading the implementation, it seems like
+  // this does what I want, i.e. OpenSSL allocates that many bytes when the MD
+  // is created, and then I can get it via md_data.
+  EVP_MD_meth_set_app_datasize(hacl_poly1305_digest, sizeof(Poly1305_64_state));
+  #else
+  #error "Unsupported implementation"
+  #endif
+  EVP_MD_meth_set_input_blocksize(hacl_poly1305_digest, 16);
 
   return 1;
 }
 
-// See https://wiki.openssl.org/index.php/Creating_an_OpenSSL_Engine_to_use_indigenous_ECDH_ECDSA_and_HASH_Algorithms
+// Registering everything as an engine -----------------------------------------
 
+// See https://wiki.openssl.org/index.php/Creating_an_OpenSSL_Engine_to_use_indigenous_ECDH_ECDSA_and_HASH_Algorithms
 int bind_helper(ENGINE * e, const char *id)
 {
   if (!ENGINE_set_id(e, engine_Everest_id) ||
