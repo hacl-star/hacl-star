@@ -4,8 +4,8 @@ CURVE_HOME=../../code/curve25519/x25519-c
 CHACHA_HOME=../../code/salsa-family/chacha-c
 POLY_HOME=../../code/poly1305/poly-c
 CFLAGS=-I$(OPENSSL_HOME)/include -L$(OPENSSL_HOME) -I$(KREMLIN_HOME)/kremlib \
-  -I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(POLY_HOME) -shared -Wno-unused-variable -Wno-parentheses -O3 -flto \
-  -Wall
+  -I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(POLY_HOME) -I$(OPENSSL_HOME) \
+  -shared -Wno-unused-variable -Wno-parentheses -O3 -flto -Wall
 LDFLAGS=-lcrypto
 
 ifeq ($(OS),Windows_NT)
@@ -38,6 +38,6 @@ test-%:
 	@PATH=$(OPENSSL_HOME):"$(PATH)" \
 	LD_LIBRARY_PATH=$(OPENSSL_HOME):"$(LD_LIBRARY_PATH)" \
 	DYLD_LIBRARY_PATH=$(OPENSSL_HOME):"$(DYLD_LIBRARY_PATH)" \
-	echo -e "engine $(PWD)/$*\nspeed ecdhx25519" | $(OPENSSL_HOME)/apps/openssl.exe
-	echo -e "engine $(PWD)/$*\nspeed -evp chacha20" | $(OPENSSL_HOME)/apps/openssl.exe
-	echo -e "engine $(PWD)/$*\nspeed -evp chacha20-poly1305" | $(OPENSSL_HOME)/apps/openssl.exe
+	echo -e "engine $(PWD)/$*\nspeed -engine Everest ecdhx25519" | $(OPENSSL_HOME)/apps/openssl.exe
+	echo -e "engine $(PWD)/$*\nspeed -engine Everest -evp chacha20" | $(OPENSSL_HOME)/apps/openssl.exe
+	echo -e "engine $(PWD)/$*\nspeed -engine Everest -evp poly1305" | $(OPENSSL_HOME)/apps/openssl.exe

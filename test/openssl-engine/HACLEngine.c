@@ -22,6 +22,9 @@
 #include "Poly1305_64.h"
 #include "Chacha20.h"
 
+// OpenSSL private header for benchmarking purposes
+#include "crypto/include/internal/poly1305.h"
+
 // The multiplexing is done at compile-time; pass -DIMPL=IMPL_OPENSSL to your
 // compiler to override the default HACL implementation.
 #define IMPL_HACL 0
@@ -145,6 +148,8 @@ static int hacl_poly1305_init(EVP_MD_CTX *ctx) {
   state->x01 = buf + 3;
 
   Poly1305_64_init(*state, poly1305_dummy_key);
+  #elif IMPL == IMPL_OPENSSL
+  Poly1305_Init(EVP_MD_CTX_md_data(ctx), poly1305_dummy_key);
   #endif
   return 1;
 }
@@ -153,6 +158,8 @@ static int hacl_poly1305_update(EVP_MD_CTX *ctx, const void *data, size_t count)
   #if IMPL==IMPL_HACL
   Poly1305_64_state *state = EVP_MD_CTX_md_data(ctx);
   Poly1305_64_update(*state, (uint8_t *) data, (uint32_t) count);
+  #elif IMPL == IMPL_OPENSSL
+  Poly1305_Update(EVP_MD_CTX_md_data(ctx), data, count);
   #endif
   return 1;
 }
@@ -162,6 +169,8 @@ static int hacl_poly1305_final(EVP_MD_CTX *ctx, unsigned char *md) {
   Poly1305_64_state *state = EVP_MD_CTX_md_data(ctx);
   Poly1305_64_update_last(*state, NULL, 0);
   Poly1305_64_finish(*state, md, poly1305_dummy_key + 16);
+  #elif IMPL == IMPL_OPENSSL
+  Poly1305_Final(EVP_MD_CTX_md_data(ctx), md);
   #endif
   return 1;
 }
@@ -264,6 +273,10 @@ int Everest_pkey_meths(ENGINE *e, EVP_PKEY_METHOD **method, const int **nids, in
 // Allocate the EVP_* data structures for our algorithms -----------------------
 
 int Everest_init(ENGINE *e) {
+  return 1;
+}
+
+void Everest_create_all_the_things() {
   // X25519
   // ------
   // We copy the existing OpenSSL code and just swap in our
@@ -314,12 +327,12 @@ int Everest_init(ENGINE *e) {
   // this does what I want, i.e. OpenSSL allocates that many bytes when the MD
   // is created, and then I can get it via md_data.
   EVP_MD_meth_set_app_datasize(hacl_poly1305_digest, sizeof(Poly1305_64_state));
+  #elif IMPL == IMPL_OPENSSL
+  EVP_MD_meth_set_app_datasize(hacl_poly1305_digest, Poly1305_ctx_size());
   #else
   #error "Unsupported implementation"
   #endif
   EVP_MD_meth_set_input_blocksize(hacl_poly1305_digest, 16);
-
-  return 1;
 }
 
 // Registering everything as an engine -----------------------------------------
@@ -327,14 +340,20 @@ int Everest_init(ENGINE *e) {
 // See https://wiki.openssl.org/index.php/Creating_an_OpenSSL_Engine_to_use_indigenous_ECDH_ECDSA_and_HASH_Algorithms
 int bind_helper(ENGINE * e, const char *id)
 {
+  Everest_create_all_the_things();
+
   if (!ENGINE_set_id(e, engine_Everest_id) ||
     !ENGINE_set_name(e, engine_Everest_name) ||
-    !ENGINE_set_init_function(e,Everest_init) ||
+    !ENGINE_set_init_function(e, Everest_init) ||
     !ENGINE_set_ciphers(e, Everest_ciphers) ||
     !ENGINE_set_digests(e, Everest_digest) ||
-    !ENGINE_set_pkey_meths(e, Everest_pkey_meths)
-  )
+    !ENGINE_set_pkey_meths(e, Everest_pkey_meths) ||
+    !EVP_add_digest(hacl_poly1305_digest) ||
+    !EVP_add_digest_alias(EVP_MD_name(hacl_poly1305_digest), "poly1305")
+  ) {
+    fprintf(stderr, "Error initializing the Everest engine!\n");
     return 0;
+  }
 
   return 1;
 }
