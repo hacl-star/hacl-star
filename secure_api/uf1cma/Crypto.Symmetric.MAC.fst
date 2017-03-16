@@ -31,8 +31,8 @@ module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 type id = id * UInt128.t //NS: why not this definition : i:id & iv (alg i)
-let alg (i:id) : macAlg =
- let i, _ = i in macAlg_of_id i
+inline_for_extraction let alg ((i,_):id) : macAlg =
+ macAlg_of_id i
 
 #set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
@@ -198,8 +198,10 @@ val rcreate: rgn:HH.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
     ~(live h0 r) /\ live h1 r))
 let rcreate rgn i =
   match alg i with
-  | POLY1305 -> FStar.Buffer.rcreate rgn 0UL 3ul
-  | GHASH    -> FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul
+  | POLY1305 ->
+    let b : Buffer.buffer UInt64.t = FStar.Buffer.rcreate rgn 0UL 3ul in b
+  | GHASH ->
+    let b : Buffer.buffer UInt128.t = FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in b
 
 val create: i:id -> StackInline (elemB i)
   (requires (fun h0 -> True))
@@ -214,7 +216,7 @@ val create: i:id -> StackInline (elemB i)
 let create i =
   match alg i with
   | POLY1305 ->
-      let b = FStar.Buffer.create 0uL 3ul in
+      let b : Buffer.buffer UInt64.t = FStar.Buffer.create 0uL 3ul in
       PL.poly1305_start b;
       b
       (* hide in Poly1305.fst? *)
@@ -224,7 +226,8 @@ let create i =
       (* assert(Crypto.Symmetric.Poly1305.Bigint.norm h1 b); *)
       (* B_POLY1305 b *)
   | GHASH ->
-      FStar.Buffer.create (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul
+    let b : Buffer.buffer UInt128.t =
+      FStar.Buffer.create (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in b
 
 // TODO: generalize length, add functional spec
 (** Encode raw bytes of static key as a field element *)
@@ -363,9 +366,14 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
 
 #reset-options " --z3rlimit 300 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let update #i r a w =
+  push_frame();
   let h0 = ST.get () in
-  match alg i with
-  | POLY1305 -> let _ = PL.poly1305_update (Ghost.hide Seq.createEmpty) (PL.MkState r a) w in ()
+  (match alg i with
+  | POLY1305 ->
+    let a' : Buffer.buffer UInt64.t = a in
+    let r' : Buffer.buffer UInt64.t = r in
+    let _ = PL.poly1305_update (Ghost.hide Seq.createEmpty) (PL.MkState r' a') w in
+    ()
     (* begin *)
     (*   push_frame(); *)
     (*   let e = Buffer.create 0UL 5ul in *)
@@ -384,11 +392,12 @@ let update #i r a w =
     (*   Crypto.Symmetric.Poly1305.Bigint.eval_eq_lemma h2 h3 a a 5 *)
     (* end *)
   | GHASH ->
-      push_frame();
-      let e = Buffer.create GF.zero_128 1ul in
-      e.(0ul) <- GF.load128_be w;
-      GF.add_and_multiply a e r;
-      pop_frame()
+    let a' : Buffer.buffer UInt128.t = a in
+    let r' : Buffer.buffer UInt128.t = r in
+    let e = Buffer.create GF.zero_128 1ul in
+    e.(0ul) <- GF.load128_be w;
+    GF.add_and_multiply a' e r'
+  ); pop_frame()
 
 let taglen = 16ul
 type tag = lbytes (UInt32.v taglen)
@@ -429,34 +438,30 @@ let lemma_modifies_3_2_finish #a #a' h h' h'' b b' =
   lemma_reveal_modifies_2 b b' h' h'';
   lemma_intro_modifies_3_2 b b' h h''
 
-
 let finish #i s a t =
+  push_frame();
   let h0 = ST.get() in
-  match alg i with
-  | POLY1305 -> (
-    push_frame();
+  (match alg i with
+  | POLY1305 ->
+    let a' : Buffer.buffer UInt64.t = a in
     let h = ST.get() in
     Math.Lemmas.lemma_mod_plus_distr_l (PS_.selem (as_seq h a)) (little_endian (as_seq h t)) (pow2 128);
     let dummy_r = Buffer.create 0uL 3ul in
     let dummy_m = Buffer.create 42uy 0ul in
     let h' = ST.get() in
-    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.MkState dummy_r a) t dummy_m 0uL s;
+    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.MkState dummy_r a') t dummy_m 0uL s;
     let h'' = ST.get() in
     lemma_modifies_3_2_finish h h' h'' a t;
-    pop_frame();
     let h1 = ST.get() in
     Buffer.modifies_popped_3_2 a t h0 h h'' h1;
     cut (FStar.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Endianness.little_endian (as_seq h0 s)) % pow2 128);
     cut (FStar.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Endianness.little_endian (as_seq h0 s)) % pow2 128);
-
     FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t) (Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
-    )
   | GHASH ->
-    begin
     let a' : Buffer.buffer UInt128.t = a in
     GF.finish a' s;
     GF.store128_be t a'.(0ul)
-    end
+  ); pop_frame()
 
 //17-02-11 new lemma
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
