@@ -177,7 +177,7 @@ let genPost (i:id) (region:erid) m0 (st:state i) m1 =
   mac_is_fresh i region m0 st m1 /\
   mac_is_unset i region st m1
 
-#reset-options "--z3rlimit 2000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 val alloc: region:erid -> i:id
   -> ak:akey region (fst i)
@@ -203,9 +203,7 @@ let alloc region i ak k =
   assert(modifies_ref region TSet.empty h0 hz);
   MAC.encode_r r rb;
   let h2 = ST.get () in
-  (* if skeyed (fst i)  *)
-  (* then *) lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
-  (* else  lemma_reveal_modifies_2 (MAC.as_buffer r) rb h1 h2; *)
+  lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
   lemma_intro_modifies_1 k h0 h2;
   Buffer.blit sb 0ul s 0ul 16ul;
   let h3 = ST.get () in
@@ -226,6 +224,8 @@ let alloc region i ak k =
     State #i #region r s ()
     end
 
+
+#set-options " --initial_ifuel 0 --max_ifuel 0"
 
 val gen: region:erid -> i:id -> ak:akey region (fst i) -> ST (state i)
   (requires (fun m0 -> live_ak m0 ak))
@@ -321,6 +321,8 @@ val start: #i:id -> st:state i -> StackInline (accBuffer i)
     acc_inv st a h1 /\
     modifies_0 h0 h1))
 
+#set-options " --initial_ifuel 1 --max_ifuel 1"
+
 let start #i st =
   let h0 = ST.get () in
   let a = MAC.start #i in
@@ -339,13 +341,16 @@ let start #i st =
     Acc #i a ()
 
 
-let modifies_buf_and_ref (#a:Type) (#b:Type) (buf:Buffer.buffer a) (ref:reference b) h h' : GTot Type0 =
-  (forall rid. Set.mem rid (Map.domain h.h) ==>
-    HH.modifies_rref rid !{Buffer.as_ref buf, HS.as_ref ref} h.h h'.h
-    /\ (forall (#a:Type) (b:Buffer.buffer a). 
-      (frameOf b == rid /\ live h b /\ disjoint b buf
-      /\ disjoint_ref_1 b (HS.as_aref ref)) ==> equal h b h' b))
 
+let modifies_buf_and_ref (#a:Type) (#b:Type)
+  (buf:Buffer.buffer a)
+  (ref:reference b{frameOf buf == ref.id}) h0 h1 : GTot Type0 =
+  HS.modifies_one ref.id h0 h1 /\
+  HS.modifies_ref ref.id !{HS.as_ref ref, Buffer.as_ref buf} h0 h1 /\
+  (forall (#t:Type) (buf':Buffer.buffer t).
+    (frameOf buf' == ref.id /\ Buffer.live h0 buf' /\
+    Buffer.disjoint buf buf' /\ Buffer.disjoint_ref_1 buf' (HS.as_aref ref)) ==>
+    equal h0 buf' h1 buf')
 
 (* TODO: begin here *)
 
@@ -402,18 +407,11 @@ val update: #i:id -> st:state i -> acc:accBuffer i -> w:lbuffer 16 ->
        Seq.cons (Buffer.as_seq h0 w) (HS.sel h0 (alog acc)) /\
        (let buf = MAC.as_buffer acc.a in
         let rid = frameOf buf in
-        //Alternative 1:
-        //HS.modifies (Set.singleton rid) h0 h1 /\
-        //HS.modifies_ref rid (TSet.singleton (FStar.Heap.Ref (HS.as_ref (alog acc)))) h0 h1 /\
-        //Buffer.modifies_buf_1 rid buf h0 h1)
-        // Alternative 2:
-        //modifies_bufs_and_refs 
-        //  (Buffer.only buf) (TSet.singleton (HS.as_aref (alog acc))) h0 h1)
-        // Alternative 3 (works):
-        modifies_buf_and_ref buf (alog acc) h0 h1) 
+        modifies_buf_and_ref buf (alog acc) h0 h1)
      else
        Buffer.modifies_1 (MAC.as_buffer acc.a) h0 h1) ))
 
+#reset-options "--z3rlimit 100"
 let update #i st acc w =
   let h0 = ST.get () in
   if mac_log then
@@ -431,28 +429,24 @@ let update #i st acc w =
   let h2 = ST.get () in
   lemma_reveal_modifies_1 (MAC.as_buffer acc.a) h1 h2;
   MAC.frame_sel_elem h1 h2 st.r
+#reset-options
 
 
-abstract let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type)
-  (buf1:Buffer.buffer a) (buf2:Buffer.buffer b) (ref:reference c) h h' : GTot Type0 =
-  (forall rid. Set.mem rid (Map.domain h.h) ==>
-    HH.modifies_rref rid !{Buffer.as_ref buf1, Buffer.as_ref buf2, HS.as_ref ref} h.h h'.h
-    /\ (forall (#a:Type) (b:Buffer.buffer a).
-      (frameOf b == rid /\ live h b /\ disjoint_2 b buf1 buf2
-      /\ disjoint_ref_1 b (HS.as_aref ref)) ==> equal h b h' b))
+let pairwise_distinct (r1:HH.rid) (r2:HH.rid) (r3:HH.rid) =
+  r1 <> r2 /\ r2 <> r3 /\ r3 <> r1
 
-(** Auxiliary lemma to prove modifies clause of `mac` *)
-private val modifies_mac_aux: #a:Type -> #b:Type -> #c:Type ->
-  buf1:Buffer.buffer a -> buf2:Buffer.buffer b -> ref:reference c -> v:c ->
-  h0:mem -> h1:mem -> h2:mem -> Lemma
-  (requires (modifies_2 buf1 buf2 h0 h1 /\
-             h1 `HS.contains` ref /\ h2 == HS.upd h1 ref v))
-  (ensures (modifies_bufs_and_ref buf1 buf2 ref h0 h2))
-let modifies_mac_aux #a #b #c buf1 buf2 ref v h0 h1 h2 =
-  lemma_reveal_modifies_2 buf1 buf2 h0 h1
+let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type)
+  (buf1:Buffer.buffer a) (buf2:Buffer.buffer b)
+  (ref:reference c{pairwise_distinct (frameOf buf1) (frameOf buf2) ref.id}) h0 h1 : GTot Type0 =
+  HS.modifies (Set.as_set [frameOf buf1; frameOf buf2; ref.id]) h0 h1 /\
+  HS.modifies_ref ref.id !{HS.as_ref ref} h0 h1 /\
+  Buffer.modifies_buf_1 (frameOf buf1) buf1 h0 h1 /\
+  Buffer.modifies_buf_1 (frameOf buf2) buf2 h0 h1
 
 let mac_ensures
-  (i:id) (st:state i) (acc:accBuffer i) (tag:MAC.tagB) (h0:mem) (h1:mem) =
+  (i:id) (st:state i) (acc:accBuffer i)
+  (tag:MAC.tagB{pairwise_distinct (frameOf (MAC.as_buffer (abuf acc))) (frameOf tag) st.region})
+  (h0:mem) (h1:mem) =
   Buffer.live h1 st.s /\
   MAC.live h1 st.r /\
   Buffer.live h1 tag /\
@@ -478,7 +472,7 @@ val mac:
   #i:id ->
   st:state i ->
   acc:accBuffer i ->
-  tag:lbuffer 16 ->
+  tag:lbuffer 16{pairwise_distinct (frameOf (MAC.as_buffer (abuf acc))) (frameOf tag) st.region} ->
   Stack unit
   (requires (fun h0 ->
     acc_inv st acc h0 /\
@@ -515,12 +509,10 @@ let mac #i st acc tag =
     let r = MAC.sel_elem h2 st.r in
     let s = Buffer.as_seq h2 st.s in
     let t = MAC.mac vs r s in
-    MAC.lemma_poly_finish_to_mac i h2 tag (MAC.sel_elem h0 acc.a) h0 st.s vs r;
-    if authId i then
-      modifies_mac_aux (MAC.as_buffer acc.a) tag (RR.as_hsref (ilog st.log))
-        (snd i, Some (vs,t)) h0 h1 h2
+    MAC.lemma_poly_finish_to_mac i h2 tag (MAC.sel_elem h0 acc.a) h0 st.s vs r
     end
 #reset-options
+
 
 let verify_liveness (#i:id) (st:state i) (tag:MAC.tagB) (h:mem) =
   Buffer.live h st.s /\

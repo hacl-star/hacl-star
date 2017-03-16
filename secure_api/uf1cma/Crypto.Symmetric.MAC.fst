@@ -195,7 +195,7 @@ val rcreate: rgn:HH.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
     HS.modifies_ref rgn TSet.empty h0 h1 /\
     ~(HS.((Buffer.content (as_buffer r)).mm)) /\
     Buffer.frameOf (as_buffer r) == rgn /\
-    ~(live h0 r) /\live h1 r))
+    ~(live h0 r) /\ live h1 r))
 let rcreate rgn i =
   match alg i with
   | POLY1305 -> FStar.Buffer.rcreate rgn 0UL 3ul
@@ -233,9 +233,7 @@ val encode_r: #i:id -> b:elemB i -> raw:lbuffer 16{Buffer.disjoint (as_buffer b)
   (ensures  (fun h0 _ h1 ->
     norm_r h1 b /\
     Buffer.live h1 raw /\
-    (match alg i with
-      | POLY1305 -> Buffer.modifies_1 (as_buffer b) h0 h1
-      | GHASH -> Buffer.modifies_1 (as_buffer b) h0 h1)))
+    Buffer.modifies_1 (as_buffer b) h0 h1))
 let encode_r #i b raw =
   match alg i with
   | POLY1305 -> PL.poly1305_encode_r b raw
