@@ -1,6 +1,5 @@
 module Spec.Chacha20_vec256
 
-open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness
@@ -101,20 +100,31 @@ let double_round (st:state) : Tot state =
   let st = diagonal_round st in
   st
 
+(* type state3 = m:seq vec      {length m = 12} *)
+type state3 = | VecUnits: v1:state -> v2:state -> v3:state -> state3
+(* let get_1 s = Mktuple3?._1 s *)
+(* let get_2 s = Mktuple3?._2 s *)
+(* let get_3 s = Mktuple3?._3 s *)
 
-let vec_units_state = s:seq state{length s = 3}
+let double_round' (st:state3) : Tot state3 =
+  VecUnits (double_round (st.v1)) (double_round (st.v2)) (double_round (st.v3))
 
+let rounds (st:state3) : Tot state3 = 
+    iter 10 double_round' st (* 20 rounds *)
 
-let rounds : shuffle = 
-    iter 10 double_round (* 20 rounds *)
+(* let rounds : shuffle =  *)
+(*     iter 10 double_round (\* 20 rounds *\) *)
 
 let sum_states (s:state) (s':state) : Tot state =
   Combinators.seq_map2 op_Plus_Percent_Hat s' s
 
-let chacha20_core (s:vec_units_state) : Tot vec_units_state = 
-    let s' = Combinators.seq_map rounds s in
-    Combinators.seq_map2 sum_states s s'
-    (* Combinators.seq_map2 op_Plus_Percent_Hat s' s *)
+let sum_states' (st:state3) (st':state3) : Tot state3 =
+  VecUnits (sum_states st.v1 st'.v1) (sum_states st.v2 st'.v2) (sum_states st.v3 st'.v3)
+  
+let chacha20_core (s:state3) : Tot state3 = 
+    let s' = rounds s in
+    let s'' = sum_states' s s' in
+    s''
 
 (* state initialization *) 
 
@@ -142,17 +152,16 @@ let flush (st':state) : Tot (lbytes 128) =
     uint32s_to_le 4 (slice (index st' 2) 4 8) @|
     uint32s_to_le 4 (slice (index st' 3) 4 8)
 
-let setup_units (k:key) (n:nonce) (c:counter) : Tot vec_units_state =
+let setup_units (k:key) (n:nonce) (c:counter) : Tot state3 =
     let st1 = setup k n c in
     let st2 = setup k n ((c+2)%0x100000000) in
     let st3 = setup k n ((c+4)%0x100000000) in
-    assert_norm(List.Tot.length [st1; st2; st3] = 3);
-    Seq.createL [st1; st2; st3]
+    VecUnits st1 st2 st3
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot (lbytes 384) =
     let st = setup_units k n c in
     let st' = chacha20_core st in
-    flush (index st' 0) @| flush (index st' 1) @| flush (index st' 2)
+    flush (st'.v1) @| flush (st'.v2) @| flush (st'.v3)
 
 
 let chacha20_ctx: Spec.CTR.block_cipher_ctx = 
