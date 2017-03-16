@@ -106,27 +106,20 @@ static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
 
 // Chacha20 --------------------------------------------------------------------
 
+#define CHACHA20_KEY_SIZE 32
+#define CHACHA20_IV_SIZE 12
+
 #if IMPL == IMPL_HACL
 static int Wrapper_Chacha20_Init(EVP_CIPHER_CTX *ctx, const unsigned char *key, const unsigned char *iv, int enc) {
-  uint32_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
-  Chacha20_chacha_keysetup(my_ctx, (uint8_t*) key);
-  Chacha20_chacha_ietf_ivsetup(my_ctx, (uint8_t*) iv, 1);
-
+  uint8_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
+  memcpy(my_ctx, key, CHACHA20_KEY_SIZE);
+  memcpy(my_ctx+CHACHA20_KEY_SIZE, iv, CHACHA20_IV_SIZE);
   return 1;
 }
 
 static int Wrapper_Chacha20_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out, const unsigned char *in, size_t len) {
-  uint32_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
-
-  while (len > 64) {
-    Hacl_Symmetric_Chacha20_chacha20_update(my_ctx, (uint8_t*) in, (uint8_t*) out);
-    in += 64;
-    out += 64;
-    len -= 64;
-  }
-  int r = len & 0x3f;
-  Hacl_Symmetric_Chacha20_chacha20_finish(my_ctx, (uint8_t*) in, (uint8_t*) out, r);
-
+  uint8_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
+  Chacha20_chacha20(out, in, len, my_ctx, my_ctx + CHACHA20_KEY_SIZE, 0);
   return 1;
 }
 #endif // IMPL_HACL
@@ -234,7 +227,7 @@ int Everest_digest(ENGINE *e, const EVP_MD **digest, const int **nids, int nid)
 {
   if (digest == NULL) {
     return Everest_digest_nids(nids);
-  } else if (nid = NID_poly1305) {
+  } else if (nid == NID_poly1305) {
     *digest = hacl_poly1305_digest;
     return 1;
   } else {
@@ -301,13 +294,13 @@ void Everest_create_all_the_things() {
   // Chacha20
   // --------
   #if IMPL == IMPL_HACL
-  hacl_chacha20_cipher = EVP_CIPHER_meth_new(NID_chacha20, 1, 32);
-  EVP_CIPHER_meth_set_iv_length(hacl_chacha20_cipher, 16);
+  hacl_chacha20_cipher = EVP_CIPHER_meth_new(NID_chacha20, 1, CHACHA20_KEY_SIZE);
+  EVP_CIPHER_meth_set_iv_length(hacl_chacha20_cipher, CHACHA20_IV_SIZE);
   EVP_CIPHER_meth_set_flags(hacl_chacha20_cipher, EVP_CIPH_CUSTOM_IV | EVP_CIPH_ALWAYS_CALL_INIT);
   EVP_CIPHER_meth_set_init(hacl_chacha20_cipher, Wrapper_Chacha20_Init);
   EVP_CIPHER_meth_set_do_cipher(hacl_chacha20_cipher, Wrapper_Chacha20_Cipher);
-  // Context is 32 uint32_t's.
-  EVP_CIPHER_meth_set_impl_ctx_size(hacl_chacha20_cipher, 32 * 4);
+  // We just store the key (32) and the iv (12)
+  EVP_CIPHER_meth_set_impl_ctx_size(hacl_chacha20_cipher, CHACHA20_KEY_SIZE + CHACHA20_IV_SIZE);
   #elif IMPL == IMPL_OPENSSL
   // Let the benchmarking go through the Engine framework, but redirect back to
   // OpenSSL.

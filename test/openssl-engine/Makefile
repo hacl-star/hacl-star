@@ -4,20 +4,22 @@ CURVE_HOME=../../code/curve25519/x25519-c
 CHACHA_HOME=../../code/salsa-family/chacha-c
 POLY_HOME=../../code/poly1305/poly-c
 CFLAGS=-I$(OPENSSL_HOME)/include -L$(OPENSSL_HOME) -I$(KREMLIN_HOME)/kremlib \
-  -I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(POLY_HOME) -I$(OPENSSL_HOME) \
-  -shared -Wno-unused-variable -Wno-parentheses -O3 -flto -Wall
+  -I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(CHACHA_HOME)/.. -I$(POLY_HOME) -I$(OPENSSL_HOME) \
+  -shared -Wall -Wno-unused-variable -Wno-parentheses -O3 -flto
 LDFLAGS=-lcrypto
 
 ifeq ($(OS),Windows_NT)
-  CC?=x86_64-w64-mingw32-gcc
-  SO=dll
-  PWD=$(shell cygpath -m $$(pwd))
+CC?=x86_64-w64-mingw32-gcc
+SO=dll
+EXE=.exe
+PWD=$(shell cygpath -m $$(pwd))
 
 all: OpenSSLEngine.$(SO) HaclEngine.$(SO) BCryptEngine.$(SO)
 else
-  SO=so
-  CYGPATH=echo
-  PWD=$(shell pwd)
+SO=so
+EXE=
+CYGPATH=echo
+PWD=$(shell pwd)
 
 all: OpenSSLEngine.$(SO) HaclEngine.$(SO)
 endif
@@ -34,10 +36,8 @@ BCryptEngine.$(SO): BCryptEngine.c
 .PHONY: test
 test: test-OpenSSLEngine.$(SO) test-HaclEngine.$(SO)
 
-test-%:
-	@PATH=$(OPENSSL_HOME):"$(PATH)" \
-	LD_LIBRARY_PATH=$(OPENSSL_HOME):"$(LD_LIBRARY_PATH)" \
-	DYLD_LIBRARY_PATH=$(OPENSSL_HOME):"$(DYLD_LIBRARY_PATH)" \
-	echo -e "engine $(PWD)/$*\nspeed -engine Everest ecdhx25519" | $(OPENSSL_HOME)/apps/openssl.exe
-	echo -e "engine $(PWD)/$*\nspeed -engine Everest -evp chacha20" | $(OPENSSL_HOME)/apps/openssl.exe
-	echo -e "engine $(PWD)/$*\nspeed -engine Everest -evp poly1305" | $(OPENSSL_HOME)/apps/openssl.exe
+OPENSSL_EXE=$(OPENSSL_HOME)/apps/openssl$(EXE)
+
+test-%: all
+	./test.sh "$(OPENSSL_HOME)" "$(PWD)/$*"
+
