@@ -283,8 +283,6 @@ private let encode_lengths_poly1305 (aadlen:UInt32.t) (plainlen:UInt32.t) : b:lb
   Seq.append_slices b0 (bp @| b0);
   Seq.append_slices bp b0;
   b
-//16-11-01 unclear why verification is slow above, fast below
-(* #reset-options *)
 
 private val store_lengths_poly1305: aadlen:UInt32.t ->  plainlen:UInt32.t -> w:lbuffer 16 ->
   StackInline unit 
@@ -356,10 +354,12 @@ let store_lengths_ghash aadlen txtlen w =
   assert(Seq.equal (Buffer.as_seq h1 w2) (Seq.create 4 0uy));
   lemma_big_endian_inj (uint32_be 4ul (8ul *^ txtlen)) (Buffer.as_seq h1 w3)
 
+#set-options "--initial_ifuel 1 --max_ifuel 1"
 private let encode_lengths (i:id) (aadlen:aadlen_32) (txtlen:txtlen_32) : lbytes 16 =
   match macAlg_of_id i with 
   | POLY1305 -> encode_lengths_poly1305 aadlen txtlen 
   | GHASH -> encode_lengths_ghash aadlen txtlen
+#reset-options
 
 noextract let encode_both (i:id) (aadlen:aadlen_32) (aad:lbytes (v aadlen)) (txtlen:txtlen_32) (cipher:lbytes (v txtlen)) :
   GTot (e:MAC.text {Seq.length e > 0 /\ Seq.head e = encode_lengths i aadlen txtlen}) = 
