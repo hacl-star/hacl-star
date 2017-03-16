@@ -380,7 +380,7 @@ unfold let double_round' (b:Seq.seq H32.t{Seq.length b = 16}) : Tot (b':Seq.seq 
   lift_32 #(fun s -> Seq.length s = 16) f b
 
 
-#reset-options "--initial_fuel 0 --max_fuel 1 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 [@ "c_inline"]
 val rounds:
@@ -622,7 +622,7 @@ let lemma_chacha20_counter_mode_0 ho output hi input len k n ctr =
   Seq.lemma_eq_intro (as_seq ho output) Seq.createEmpty
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 val update_last:
   output:uint8_p ->
