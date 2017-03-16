@@ -1,6 +1,8 @@
 module Crypto.Symmetric.GF128
 
+module U8   = FStar.UInt8
 module U32  = FStar.UInt32
+module H8   = Hacl.UInt8
 module H128 = Hacl.UInt128
 module Spec = Spec.GF128
 module BV   = FStar.BitVector
@@ -15,13 +17,7 @@ open FStar.Buffer
 open FStar.UInt
 open FStar.BitVector
 open Hacl.Cast
-(*
-open FStar.HyperStack
-open FStar.Int.Cast
-open FStar.Buffer
-*)
-
-private inline_for_extraction let len = 16ul // length of GF128 in bytes
+open Hacl.Endianness
 
 type elem = Spec.elem
 type elemB = b:buffer H128.t{length b = 1}
@@ -29,6 +25,16 @@ type elemB = b:buffer H128.t{length b = 1}
 noextract let sel_elem h (b:elemB{live h b}): GTot elem = to_felem #gf128 (H128.v (Seq.index (as_seq h b) 0))
 
 #set-options "--z3rlimit 20 --max_fuel 0 --initial_fuel 0"
+
+inline_for_extraction val load128_be: b:buffer U8.t{length b = 16} -> Stack H128.t
+  (requires (fun h -> live h b))
+  (ensures (fun h0 n h1 -> h0 == h1 /\ live h1 b /\ to_felem #gf128 (H128.v n) = encode (as_seq h1 b)))
+let load128_be b = let v = load128_be b in uint128_to_sint128 v
+
+inline_for_extraction val store128_be: b:buffer H8.t{length b = 16} -> n:H128.t -> Stack unit
+  (requires (fun h -> live h b))
+  (ensures (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ Hacl.Spec.Endianness.hbig_endian (as_seq h1 b) = H128.v n))
+let store128_be b n = hstore128_be b n
 
 (* * Every block of message is regarded as an element in Galois field GF(2^128), **)
 (* * The following several functions are basic operations in this field.         **)
@@ -55,14 +61,14 @@ inline_for_extraction let ones_128 : H128.t =
 private let r_mul : H128.t = H128.(uint64_to_sint128(225uL) <<^ 120ul)
 
 private val fzero_lemma: v:H128.t -> Lemma
-  (requires v = zero_128)
+  (requires v == zero_128)
   (ensures to_felem #gf128 (H128.v v) = Spec.GaloisField.zero #gf128)
 let fzero_lemma v =
   assert(H128.v v = UInt.zero 128);
   lemma_eq_intro (to_felem #gf128 (H128.v v)) (Spec.GaloisField.zero #gf128)
 
 private val r_mul_lemma: v:H128.t -> Lemma
-  (requires v = r_mul)
+  (requires v == r_mul)
   (ensures to_felem #gf128 (H128.v v) = Spec.irr)
 let r_mul_lemma v = assert_norm((225 * pow2 120) % pow2 128 = 0xe1000000000000000000000000000000)
 
@@ -77,8 +83,8 @@ let elem_vec_logand_lemma a i = ()
 
 private inline_for_extraction 
 val ith_bit_mask: num:H128.t -> i:U32.t{U32.v i < 128} ->
-  Tot (r:H128.t {(nth (H128.v num) (U32.v i) = true  ==> r = ones_128) /\
-                 (nth (H128.v num) (U32.v i) = false ==> r = zero_128)})
+  Tot (r:H128.t {(nth (H128.v num) (U32.v i) = true  ==> r == ones_128) /\
+                 (nth (H128.v num) (U32.v i) = false ==> r == zero_128)})
 let ith_bit_mask num i =
   let mi = U32.(127ul -^ i) in
   let proj = H128.(one_128 <<^ mi) in
@@ -191,16 +197,14 @@ let add_and_multiply acc block k =
   gf128_add acc block;
   gf128_mul acc k
 
-(*
-val finish: acc:elemB -> s:buffer UInt8.t{length s = 16} -> Stack unit
+val finish: acc:elemB -> s:buffer U8.t{length s = 16} -> Stack unit
   (requires (fun h -> live h acc /\ live h s /\ disjoint acc s))
   (ensures  (fun h0 _ h1 -> live h0 acc /\ live h0 s
     /\ modifies_1 acc h0 h1 /\ live h1 acc
     /\ decode (sel_elem h1 acc) = finish (sel_elem h0 acc) (as_seq h0 s)))
 let finish a s = 
   let sf = load128_be s in
-  a.(0ul) <- U128.(a.(0ul) ^^ sf)
-*)
+  a.(0ul) <- H128.(a.(0ul) ^^ sf)
 
 (*
 //16-09-23 Instead of the code below, we should re-use existing AEAD encodings
