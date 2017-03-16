@@ -47,26 +47,29 @@ inline_for_extraction let statelen = function
   | CHACHA20 -> 32ul
   (* | CHACHA20 -> 16ul *)
 
-(*17-02-11  why? *)
+(*17-02-11  why?
 inline_for_extraction let stlen = function
   | AES128   -> 432ul // 256 + 176
   | AES256   -> 496ul // 256 + 240
   | CHACHA20 -> 16ul
+*)
 
 type ctr = UInt32.t
 
 type key a   = lbuffer (v (keylen a))
 type block a = lbuffer (v (blocklen a))
 
-unfold inline_for_extraction
+(*
 let state_limb = function
   | AES128 -> FStar.UInt8.t
   | AES256 -> FStar.UInt8.t
   | CHACHA20 -> FStar.UInt32.t
 
 unfold inline_for_extraction
-(* type state a = b:Buffer.buffer (state_limb a){Buffer.length b = UInt32.v (stlen a)} *)
+type state a = b:Buffer.buffer (state_limb a){Buffer.length b = UInt32.v (stlen a)}
 // problematic with Kremlin? Use sum type for now?
+*)
+unfold inline_for_extraction
 type state a = lbuffer (v (statelen a))
 
 // 16-10-02 an integer value, instead of a lbuffer (v (ivlen)),
@@ -125,11 +128,7 @@ val compute:
   counter: ctr ->
   len:UInt32.t { len <=^  blocklen (algi i) /\ v len <= length output} -> Stack unit
     (requires (fun h -> live h st /\ live h output))
-    (ensures (fun h0 _ h1 -> live h1 output /\ (
-      (* match cipherAlg_of_id i with *)
-      (* | CHACHA20 -> modifies_2 output st h0 h1 *)
-      (* | _ ->  *)modifies_1 output h0 h1)
-      ))
+    (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
 
 #set-options "--z3rlimit 50"
 
@@ -182,8 +181,7 @@ let compute i output st n counter len =
       aes_store_counter ctr_block counter; 
       let output_block = Buffer.create 0uy (blocklen' AES256) in 
       cipher output_block ctr_block w sbox;
-      blit output_block 0ul output 0ul len // too much copying!
-  )
+      blit output_block 0ul output 0ul len ) // too much copying!
   end;
   pop_frame()
 

@@ -232,6 +232,8 @@ val reestablish_inv:
               then ideal_ensures st n aad plain cipher_tag h3 h4
               else h3 == h4)))
   (ensures    (inv st h4))
+
+#reset-options "--z3rlimit 2000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let reestablish_inv i st n #aadlen aad #plainlen plain cipher_tag ak acc h0 h1 h2 h3 h4 =
   let cipher : lbuffer (v plainlen) = Buffer.sub cipher_tag 0ul plainlen in
   lemma_propagate_inv_enxor st n aad plain cipher_tag h0 h1;
@@ -239,6 +241,7 @@ let reestablish_inv i st n #aadlen aad #plainlen plain cipher_tag ak acc h0 h1 h
   lemma_propagate_inv_accumulate false st n aad plain cipher_tag h1 h2;
   lemma_propagate_inv_mac_wrapper st n aad plain cipher_tag ak h2 h3;
   reestablish_inv st n aad plain cipher_tag h3 h4 //needs some optimization
+#reset-options
 
 ////////////////////////////////////////////////////////////////////////////////
        
