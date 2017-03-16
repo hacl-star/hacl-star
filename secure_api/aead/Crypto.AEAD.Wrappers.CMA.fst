@@ -55,6 +55,7 @@ let mac_modifies
        modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
        modifies_buf_1 (frameOf tbuf) tbuf h0 h1
 
+#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let weaken_mac_modifies         
         (i:id) (iv:Cipher.iv (Cipher.algi i))
 	(tbuf:lbuffer (v MAC.taglen))
@@ -65,9 +66,9 @@ let weaken_mac_modifies
 	    Buffer.frameOf abuf = HS.(h0.tip) /\
 	    mac_modifies i iv tbuf ak acc h0 h1 ==>
 	    BufferUtils.mac_modifies CMA.(ak.region) abuf tbuf h0 h1)
-   = ()	    
+   = ()
 
-#set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let mac_wrapper (#i:EncodingWrapper.mac_id) (ak:CMA.state i) (acc:CMA.accBuffer i) 
   (tag:MAC.tagB{CMA.pairwise_distinct (Buffer.frameOf (MAC.as_buffer (CMA.abuf acc))) (Buffer.frameOf tag) ak.CMA.region})
   : ST unit
@@ -361,6 +362,7 @@ let acc_inv_weak (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) h : Type0 =
     Buffer.disjoint_ref_1 (MAC.as_buffer (CMA.abuf acc)) (HS.as_aref (CMA.alog acc)) /\
     Buffer.disjoint_ref_1 (MAC.as_buffer ak.r)  (HS.as_aref (CMA.alog acc))))
 
+#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let acc_ensures_weak (#i: MAC.id) (ak: CMA.state i) 
 		     (#aadlen:aadlen_32) (aad:lbuffer (v aadlen))
 		     (#txtlen:txtlen_32) (cipher:lbuffer (v txtlen))
