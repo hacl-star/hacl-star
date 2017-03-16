@@ -245,7 +245,8 @@ let encode_r #i b raw =
       //let h0 = ST.get () in
       //assert (Buffer.modifies_1 raw h0 h0); // Necessary for triggering right lemmas
       let i = GF.load128_be raw in
-      b.(0ul) <- i
+      let b' : Buffer.buffer UInt128.t = b in
+      b'.(0ul) <- i
 
 // TODO: generalize to word
 (** Encode a word of a message as a field element *)
@@ -454,8 +455,9 @@ let finish #i s a t =
     )
   | GHASH ->
     begin
-    GF.finish a s;
-    GF.store128_be t a.(0ul)
+    let a' : Buffer.buffer UInt128.t = a in
+    GF.finish a' s;
+    GF.store128_be t a'.(0ul)
     end
 
 //17-02-11 new lemma
