@@ -56,6 +56,7 @@ let elem i = (* dependent; used only ideally *)
   | POLY1305 -> Spec.Poly1305.elem
   | GHASH    -> GS.elem
 
+private
 let zero i : elem i =
   match alg i with
   | POLY1305 -> Spec.Poly1305.zero
@@ -75,7 +76,7 @@ let limb = function
   | POLY1305 -> UInt64.t
   | GHASH    -> UInt128.t
 
-unfold inline_for_extraction
+private unfold inline_for_extraction
 let limb_length = function
   | POLY1305 ->  3
   | GHASH    -> 1

@@ -12,7 +12,7 @@ open FStar.UInt64
 open FStar.Buffer
 
 (* open Crypto.Symmetric.Poly1305.Spec *)
-(* open Crypto.Symmetric.Poly1305 // avoid? *)
+(* open Crypto.Symmetric.Poly1305 / avoid? *)
 (* module PS_ = Hacl.Spec.Poly1305_64 *)
 module PS_ = Hacl.Spe.Poly1305_64
 module PS = Spec.Poly1305
