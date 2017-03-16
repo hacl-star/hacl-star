@@ -1,15 +1,16 @@
-module Spec.Chacha20
+module Spec.Chacha20_vec
 
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness
 open Spec.Lib
-open Spec.Chacha20.Lemmas
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+module U32 = FStar.UInt32
+(* This should go elsewhere! *)
 
-(* Constants *)
+#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+
 let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
 let noncelen = 12 (* in bytes *)
@@ -21,56 +22,111 @@ type counter = UInt.uint_t 32
 
 // using @ as a functional substitute for ;
 // internally, blocks are represented as 16 x 4-byte integers
-type state = m:seq UInt32.t {length m = 16}
-type idx = n:nat{n < 16}
+type vec   = v:seq UInt32.t {length v = 4}
+type state = m:seq vec      {length m = 4}
+type idx = n:nat{n < 4}
 type shuffle = state -> Tot state 
 
-val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> shuffle
+(* unfold  *)let op_Plus_Percent_Hat (x:vec) (y:vec) : Tot vec = 
+       C.Loops.seq_map2 U32.op_Plus_Percent_Hat x y
+
+(* unfold *) let op_Hat_Hat (x:vec) (y:vec) : Tot vec = 
+       C.Loops.seq_map2 U32.op_Hat_Hat x y
+
+(* unfold *) let op_Less_Less_Less (x:vec) (n:UInt32.t{v n < 32}) : Tot vec = 
+       C.Loops.seq_map (fun x -> x <<< n) x 
+
+let shuffle_right (x:vec) (n:idx) : Tot vec =
+        let z:nat = n in
+        let x0 = index x ((0+z)%4) in
+        let x1 = index x ((1+z)%4) in
+        let x2 = index x ((2+z)%4) in
+        let x3 = index x ((3+z)%4) in
+	let x = upd x 0 x0 in
+	let x = upd x 1 x1 in
+	let x = upd x 2 x2 in
+	let x = upd x 3 x3 in
+	x
+
+let shuffle_row (i:idx) (n:idx) (s:state) : Tot state = 
+       upd s i (shuffle_right (index s i) n)
+
+val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> st:state -> Tot state
 let line a b d s m = 
   let m = upd m a (index m a +%^ index m b) in
   let m = upd m d ((index m d ^^  index m a) <<< s) in
   m
 
-let quarter_round a b c d : shuffle = 
-  line a b d 16ul @ 
-  line c d b 12ul @
-  line a b d 8ul @ 
-  line c d b 7ul 
 
-let column_round : shuffle = 
-  quarter_round 0 4 8 12 @
-  quarter_round 1 5 9 13 @
-  quarter_round 2 6 10 14 @
-  quarter_round 3 7 11 15
+let round (st:state) : Tot state =
+  let st = line 0 1 3 16ul st in
+  let st = line 2 3 1 12ul st in
+  let st = line 0 1 3 8ul  st in
+  let st = line 2 3 1 7ul  st in
+  st
 
-let diagonal_round : shuffle = 
-  quarter_round 0 5 10 15 @
-  quarter_round 1 6 11 12 @
-  quarter_round 2 7 8 13 @
-  quarter_round 3 4 9 14
 
-let double_round: shuffle = 
-    column_round @ diagonal_round (* 2 rounds *)
+let shuffle_rows_0123 (st:state) : Tot state =
+  let st = shuffle_row 1 1 st in
+  let st = shuffle_row 2 2 st in
+  let st = shuffle_row 3 3 st in
+  st
 
-let rounds : shuffle = 
-    iter 10 double_round (* 20 rounds *)
+
+let shuffle_rows_0321 (st:state) : Tot state =
+  let st = shuffle_row 1 3 st in
+  let st = shuffle_row 2 2 st in
+  let st = shuffle_row 3 1 st in
+  st
+
+
+let column_round (st:state) : Tot state = round st
+
+
+let diagonal_round (st:state) : Tot state =
+  let st = shuffle_rows_0123 st in
+  let st = round           st in
+  let st = shuffle_rows_0321 st in
+  st
+
+
+let double_round (st:state) : Tot state =
+  let st = column_round st in
+  let st = diagonal_round st in
+  st
+
+
+let rounds (st:state) : Tot state = 
+    iter 10 double_round st (* 20 rounds *)
 
 let chacha20_core (s:state) : Tot state = 
     let s' = rounds s in
-    map2 (fun x y -> x +%^ y) s' s
+    C.Loops.seq_map2 op_Plus_Percent_Hat s' s
 
 (* state initialization *) 
+
 unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
+
+// JK: I have to add those assertions to typechecks, would be nice to get rid of it
 let setup (k:key) (n:nonce) (c:counter): Tot state =
-  createL constants @|
-  uint32s_from_le 8 k @|
-  singleton (UInt32.uint_to_t c) @|
-  uint32s_from_le 3 n
+  assert_norm(List.Tot.length constants = 4); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
+  let constants:vec = createL constants in
+  let key_part_1:vec = uint32s_from_le 4 (Seq.slice k 0 16)  in
+  let key_part_2:vec = uint32s_from_le 4 (Seq.slice k 16 32) in
+  let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) in
+  assert_norm(List.Tot.length [constants; key_part_1; key_part_2; nonce] = 4);
+  Seq.seq_of_list [constants; key_part_1; key_part_2; nonce]
+
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     let st = setup k n c in
     let st' = chacha20_core st in
-    uint32s_to_le 16 st'
+    uint32s_to_le 4 (index st' 0) @|
+    uint32s_to_le 4 (index st' 1) @|
+    uint32s_to_le 4 (index st' 2) @|
+    uint32s_to_le 4 (index st' 3) 
+
+
 
 let chacha20_ctx: Spec.CTR.block_cipher_ctx = 
     let open Spec.CTR in

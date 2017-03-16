@@ -236,3 +236,60 @@ let rec lemma_uint32s_to_le_inj (len:nat) (b:seq UInt32.t{length b = len})
       Seq.lemma_eq_intro b (cons h t);
       Seq.lemma_eq_intro b' (cons h' t')
     )
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+
+
+let lemma_append_assoc (#a:Type) (x:seq a) (y:seq a) (z:seq a) : Lemma
+  (x @| (y @| z) == (x @| y) @| z) = lemma_eq_intro ((x @| y) @| z) (x @| (y @| z))
+
+
+val lemma_uint32s_from_le_slice: len:nat -> b:lbytes (4*len) -> n:nat{n <= len} -> Lemma
+  (requires (True))
+  (ensures (uint32s_from_le len b == uint32s_from_le n (slice b 0 (4 * n)) @| uint32s_from_le (len - n) (slice b (4 * n) (length b))))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+let rec lemma_uint32s_from_le_slice len b n =
+  if n = 0 then (
+    lemma_uint32s_from_le_def_0 0 (slice b 0 0);
+    lemma_eq_intro (slice b 0 (length b)) b;
+    lemma_eq_intro (uint32s_from_le 0 (slice b 0 0)) createEmpty;
+    lemma_eq_intro (createEmpty @| uint32s_from_le len b) (uint32s_from_le len b)
+  ) else (
+    lemma_uint32s_from_le_def_1 len b;
+    lemma_uint32s_from_le_def_1 n (slice b 0 (4*n));
+    let hd, tl = split b 4 in
+    lemma_uint32s_from_le_slice (len-1) tl (n-1);
+    cut (uint32s_from_le (len-1) tl == uint32s_from_le (n-1) (slice tl 0 (4 * (n-1))) @| uint32s_from_le (len - n) (slice tl (4 * (n-1)) (length tl)));
+    lemma_eq_intro (slice tl (4 * (n-1)) (length tl)) (slice b (4 * n) (length b));
+    lemma_eq_intro (slice tl 0 (4*(n-1))) (slice b 4 (4 * n));
+    lemma_append_assoc (create 1 (uint32_from_le hd)) (uint32s_from_le (n-1) (slice tl 0 (4 * (n-1))))
+                       (uint32s_from_le (len-n) (slice b (4 * n) (length b)));
+    lemma_eq_intro (slice b 0 4) (slice (slice b 0 (4*n)) 0 4);
+    lemma_eq_intro (slice b 4 (4*n)) (slice (slice b 0 (4*n)) 4 (4 *n));
+    lemma_eq_intro (uint32s_from_le n (slice b 0 (4 * n))) (cons (uint32_from_le hd) (uint32s_from_le (n-1) (slice b 4 (4*n)))))
+
+
+val lemma_uint32s_to_le_slice: len:nat -> b:Seq.seq UInt32.t{length b = len} -> n:nat{n <= len} -> Lemma
+  (uint32s_to_le len b = uint32s_to_le n (slice b 0 n) @| uint32s_to_le (len - n) (slice b n len))
+let rec lemma_uint32s_to_le_slice len b n =
+  if n = 0 then (
+    lemma_uint32s_to_le_def_0 0 (slice b 0 0);
+    lemma_eq_intro (slice b 0 (length b)) b;
+    lemma_eq_intro (uint32s_to_le 0 (slice b 0 0)) createEmpty;
+    lemma_eq_intro (createEmpty @| uint32s_to_le len b) (uint32s_to_le len b)
+  ) else (
+    lemma_uint32s_to_le_def_1 len b;
+    lemma_uint32s_to_le_def_1 n (slice b 0 (n));
+    let h  = index b 0 in
+    let tl = slice b 1 len in
+    lemma_uint32s_to_le_slice (len-1) tl (n-1);
+    cut (uint32s_to_le (len-1) tl == uint32s_to_le (n-1) (slice tl 0 (n-1))
+                                     @| uint32s_to_le (len-n) (slice tl (n-1) (len-1)));
+    lemma_eq_intro (slice tl (n-1) (len-1)) (slice b n len);
+    lemma_eq_intro (slice tl 0 (n-1)) (slice b 1 n);
+    lemma_append_assoc (uint32_to_le h) (uint32s_to_le (n-1) (slice b 1 n))
+                       (uint32s_to_le (len-n) (slice b n len));
+    cut (index (slice b 0 n) 0 = index b 0);
+    lemma_eq_intro (slice b 1 n) (slice (slice b 0 n) 1 n);
+    lemma_eq_intro (uint32s_to_le n (slice b 0 n)) (uint32_to_le h @| (uint32s_to_le (n-1) (slice b 1 n)))
+  )
