@@ -277,6 +277,7 @@ int Everest_destroy(ENGINE *e) {
   EVP_CIPHER_meth_free(hacl_chacha20_cipher);
   #endif
   EVP_MD_meth_free(hacl_poly1305_digest);
+  return 1;
 }
 
 void Everest_create_all_the_things() {

@@ -19,6 +19,9 @@ elif [[ $(uname) == "CYGWIN" ]]; then
   EXE=".exe"
 fi
 
+tput setaf 1
+echo Running with engine: $ENGINE
+tput sgr0
 $OPENSSL_HOME/apps/openssl$EXE <<EOF
   engine $ENGINE
   speed -engine Everest ecdhx25519
