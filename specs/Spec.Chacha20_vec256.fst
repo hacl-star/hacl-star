@@ -26,13 +26,13 @@ type state = m:seq vec      {length m = 4}
 type idx = n:nat{n < 4}
 type shuffle = state -> Tot state 
 
-unfold let op_Plus_Percent_Hat (x:vec) (y:vec) : Tot vec = 
+(* unfold *) let op_Plus_Percent_Hat (x:vec) (y:vec) : Tot vec = 
        Combinators.seq_map2 U32.op_Plus_Percent_Hat x y
 
-unfold let op_Hat_Hat (x:vec) (y:vec) : Tot vec = 
+(* unfold *) let op_Hat_Hat (x:vec) (y:vec) : Tot vec = 
        Combinators.seq_map2 U32.op_Hat_Hat x y
 
-unfold let op_Less_Less_Less (x:vec) (n:UInt32.t{v n < 32}) : Tot vec = 
+(* unfold *) let op_Less_Less_Less (x:vec) (n:UInt32.t{v n < 32}) : Tot vec = 
        Combinators.seq_map (fun x -> x <<< n) x
 
 let shuffle_right (x:vec) (n:idx) : Tot vec =
@@ -65,36 +65,41 @@ let line a b d s m =
   m
 
 
-let round : shuffle =
-  line 0 1 3 16ul @
-  line 2 3 1 12ul @
-  line 0 1 3 8ul  @
-  line 2 3 1 7ul
+let round (st:state) : Tot state =
+  let st = line 0 1 3 16ul st in
+  let st = line 2 3 1 12ul st in
+  let st = line 0 1 3 8ul  st in
+  let st = line 2 3 1 7ul  st in
+  st
 
 
-let shuffle_rows_0123 : shuffle =
-  shuffle_row 1 1 @
-  shuffle_row 2 2 @
-  shuffle_row 3 3
+let shuffle_rows_0123 (st:state) : Tot state =
+  let st = shuffle_row 1 1 st in
+  let st = shuffle_row 2 2 st in
+  let st = shuffle_row 3 3 st in
+  st
 
 
-let shuffle_rows_0321 : shuffle =
-  shuffle_row 1 3 @
-  shuffle_row 2 2 @
-  shuffle_row 3 1
-
+let shuffle_rows_0321 (st:state) : Tot state =
+  let st = shuffle_row 1 3 st in
+  let st = shuffle_row 2 2 st in
+  let st = shuffle_row 3 1 st in
+  st
 
 let column_round : shuffle = round
 
 
-let diagonal_round : shuffle =
-  shuffle_rows_0123 @
-  round           @
-  shuffle_rows_0321
+let diagonal_round (st:state) : Tot state =
+  let st = shuffle_rows_0123 st in
+  let st = round           st in
+  let st = shuffle_rows_0321 st in
+  st
+  
 
-
-let double_round : shuffle =
-  column_round @ diagonal_round
+let double_round (st:state) : Tot state =
+  let st = column_round st in
+  let st = diagonal_round st in
+  st
 
 
 let vec_units_state = s:seq state{length s = 3}
@@ -437,4 +442,3 @@ let test() =
   = test_ciphertext &&
   chacha20_encrypt_bytes test_key test_nonce test_counter test_plaintext2
   = test_ciphertext2
-
