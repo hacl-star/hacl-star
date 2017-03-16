@@ -102,6 +102,7 @@ private let lemma_point_inf s s' =
   cut (fst inf == Seq.upd (Seq.create 5 limb_zero) 0 limb_one);
   cut (snd inf == Seq.create 5 limb_zero)
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 private inline_for_extraction val cmult_: result:point ->
   buf:buffer limb{length buf = 40} ->
@@ -112,9 +113,11 @@ private inline_for_extraction val cmult_: result:point ->
     /\ Buffer.live h buf /\ frameOf buf <> frameOf q /\ frameOf buf <> frameOf scalar /\ frameOf buf <> frameOf result
     /\ as_seq h buf == Seq.create 40 limb_zero
     /\ red_513 (as_seq h (getx q)) /\ red_513 (as_seq h (getz q))
+    /\ Hacl.Spec.Bignum.selem (as_seq h (getz q)) = 1
   ))
   (ensures (fun h0 _ h1 -> Buffer.live h0 scalar /\ live h0 q /\ live h0 result /\ Buffer.live h0 buf
-    /\ red_513 (as_seq h0 (getx q)) /\ red_513 (as_seq h0 (getz q))  
+    /\ red_513 (as_seq h0 (getx q)) /\ red_513 (as_seq h0 (getz q))
+    /\ Hacl.Spec.Bignum.selem (as_seq h0 (getz q)) = 1
     /\ live h1 result /\ Buffer.live h1 buf
     /\ modifies (Set.union (Set.singleton (frameOf buf)) (Set.singleton (frameOf result))) h0 h1
     /\ modifies_buf_1 (frameOf result) result h0 h1
@@ -124,7 +127,6 @@ private inline_for_extraction val cmult_: result:point ->
        let n  = as_seq h0 scalar in
        let q  = (as_seq h0 (getx q), as_seq h0 (getz q)) in
        nq == Hacl.Spec.EC.Ladder.cmult_spec n q)
-    (* /\ ( *)
   ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 2000"
 private inline_for_extraction let cmult_ result point_buf n q =
@@ -156,16 +158,19 @@ private inline_for_extraction let cmult_ result point_buf n q =
   lemma_cmult__modifies point_buf result h0 h h' h''
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 val cmult: result:point ->
   scalar:uint8_p{length scalar = keylen} ->
   q:point ->
   Stack unit
   (requires (fun h -> Buffer.live h scalar /\ live h q /\ live h result
-    /\ red_513 (as_seq h (getx q)) /\ red_513 (as_seq h (getz q))))
+    /\ red_513 (as_seq h (getx q)) /\ red_513 (as_seq h (getz q))
+    /\ Hacl.Spec.Bignum.selem (as_seq h (getz q)) = 1    
+  ))
   (ensures (fun h0 _ h1 -> Buffer.live h0 scalar /\ live h0 q /\ live h0 result
     /\ red_513 (as_seq h0 (getx q)) /\ red_513 (as_seq h0 (getz q))
+    /\ Hacl.Spec.Bignum.selem (as_seq h0 (getz q)) = 1
     /\ live h1 result
     /\ modifies_1 result h0 h1
     /\ red_513 (as_seq h1 (getx result))

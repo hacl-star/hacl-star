@@ -1,31 +1,8 @@
-#include "SHA2_256.h"
 #include "kremlib.h"
 #include "testlib.h"
-
-void test_1a();
-
-void test_1b();
-
-void test_2a();
-
-void test_2b();
-
-void test_3a();
-
-void test_3b();
-
-void test_4a();
-
-void test_4b();
-
-void test_5();
-
-void test_6_loop(uint8_t *plaintext, uint32_t *ctx, uint32_t max, uint32_t idx);
-
-void test_6();
-
-int32_t main();
-
+#include "sodium.h"
+#include "openssl/evp.h"
+#include "SHA2.h"
 
 void ossl_sha256(unsigned char* hash, const unsigned char *message, size_t message_len)
 {

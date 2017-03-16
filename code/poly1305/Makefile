@@ -71,7 +71,11 @@ all-lax: $(addsuffix -lax, $(POLY1305_FILES))
 %.fst-hints: %.fst
 	-$(FSTARB) $^ --use_hints --record_hints
 
-all-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
+all-hints2: $(addsuffix -hints, $(POLY1305_FILES))
+all-hints:
+	cp bignum_hints/* ../bignum
+	$(MAKE) all-hints2
+	mv ../bignum/*.hints ./bignum_hints
 
 # For CI, all modules restricted from incomplete or slow ones
 all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
@@ -80,7 +84,7 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
 test-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p poly-c
-	$(KREMLIN_HOME)/krml -tmpdir poly-c -ccopt -std=gnu99 \
+	$(KREMLIN_HOME)/krml -tmpdir poly-c $(KREMLIN_ARGS) \
 		$(addprefix -I , $(INCLUDE_DIRS)) \
 		Poly1305_64.fst Hacl.Test.Poly1305_64.fst \
 		-drop 'Combinators' -drop 'Hacl.Endianness' -drop 'Spec.\*' \
@@ -90,13 +94,13 @@ test-c:
 		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64,Hacl.Spec.\*,Hacl.Spe.\*' \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-                -no-prefix Hacl.Test.Poly1305_64 -ldopt -flto -ccopt -march=native -o poly1305.exe
+                -no-prefix Hacl.Test.Poly1305_64 -o poly1305.exe
 	./poly1305.exe
 
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p poly-c
-	$(KREMLIN_HOME)/krml -tmpdir poly-c -ccopt -std=gnu99 \
+	$(KREMLIN_HOME)/krml -tmpdir poly-c $(KREMLIN_ARGS) \
 		$(addprefix -I , $(INCLUDE_DIRS)) \
 		Poly1305_64.fst \
 		-drop 'Combinators' -drop 'Hacl.Endianness' -drop 'Spec.\*' \
@@ -106,7 +110,7 @@ extract-c:
 		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64,Hacl.Spec.\*,Hacl.Spe.\*' \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-                -ldopt -flto -ccopt -march=native -skip-linking
+                -skip-linking
 
 
 include $(FSTAR_HOME)/src/gmake/fstar.mk

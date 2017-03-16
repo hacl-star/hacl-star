@@ -63,9 +63,13 @@ VERBOSE=
 else
 VERBOSE=-verbose
 endif
+
 KREMLIN=$(KREMLIN_HOME)/krml
-KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
-                        -ccopt -Wno-error=format=
+ifeq ($(CC),ccomp)
+  KREMLIN_ARGS=-cc compcert $(VERBOSE)
+else
+  KREMLIN_ARGS=-ccopt -march=native $(VERBOSE) -ldopt -flto
+endif
 
 # Linux specific compilation instruction for PneuTube
 ifeq ($(UNAME), Linux)
@@ -77,7 +81,7 @@ KREMTEST=$(KREMLIN_HOME)/test
 
 FSTAR_OPTIONS_VER=-fsopt "--use_hints" -skip-extraction
 FSTAR_OPTIONS_KREMLIN=
-FSTAR=$(KREMLIN) -verify -verbose -skip-compilation
+FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
 
 OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
                 $(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \

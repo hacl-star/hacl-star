@@ -9,7 +9,7 @@ open Hacl.UInt32
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Salsa20
-open Combinators
+open C.Loops
 
 open Hacl.Impl.Salsa20
 

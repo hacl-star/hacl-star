@@ -12,6 +12,7 @@ open Hacl.Bignum.Limb
 open Hacl.EC.Point
 open Hacl.EC.Format
 open Hacl.EC.Ladder
+open Hacl.Spec.Endianness
 open Hacl.Spec.EC
 
 module U32 = FStar.UInt32
@@ -29,15 +30,20 @@ inline_for_extraction val crypto_scalarmult__:
       /\ Buffer.live h basepoint
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getx q))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getz q))
+      /\ Hacl.Spec.Bignum.selem (as_seq h (getz q)) = 1
     ))
     (ensures (fun h0 _ h1 -> live h0 q /\ Buffer.live h0 mypublic /\ Buffer.live h0 secret
       /\ Buffer.live h0 basepoint
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getx q))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getz q))
       /\ Buffer.live h1 mypublic /\ modifies_1 mypublic h0 h1
-      (* /\ (as_seq h1 mypublic == crypto_scalarmult_spec (as_seq h0 secret) *)
+      /\ (let secret = reveal_sbytes (as_seq h0 secret) in
+         let basepoint = reveal_sbytes (as_seq h0 basepoint) in
+         let mypublic = reveal_sbytes (as_seq h1 mypublic) in
+         let q        = Hacl.Spec.Bignum.selem (as_seq h0 (getx q)) in
+         mypublic == Spec.Curve25519.(encodePoint (montgomery_ladder q secret)))
       ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 inline_for_extraction let crypto_scalarmult__ mypublic scalar basepoint q =
   let h0 = ST.get() in
   push_frame();
@@ -50,6 +56,7 @@ inline_for_extraction let crypto_scalarmult__ mypublic scalar basepoint q =
   let h2 = ST.get() in
   x.(0ul) <- limb_one;
   let h3 = ST.get() in
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h3 x);
   no_upd_lemma_1 h2 h3 x z;
   no_upd_lemma_1 h2 h3 x (getx q);
   no_upd_lemma_1 h2 h3 x (getz q);
@@ -79,8 +86,19 @@ inline_for_extraction val crypto_scalarmult_:
       /\ Buffer.live h basepoint
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getx q))
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h (getz q))
+      /\ Hacl.Spec.Bignum.selem (as_seq h (getz q)) = 1
     ))
-    (ensures (fun h0 _ h1 -> Buffer.live h1 mypublic /\ modifies_1 mypublic h0 h1))
+    (ensures (fun h0 _ h1 -> Buffer.live h1 mypublic /\ modifies_1 mypublic h0 h1
+     /\ live h0 q /\ Buffer.live h0 mypublic /\ Buffer.live h0 secret
+     /\ Buffer.live h0 basepoint
+     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getx q))
+     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 (getz q))
+     /\ (let secret = reveal_sbytes (as_seq h0 secret) in
+        let basepoint = reveal_sbytes (as_seq h0 basepoint) in
+        let mypublic = reveal_sbytes (as_seq h1 mypublic) in
+         let q        = Hacl.Spec.Bignum.selem (as_seq h0 (getx q)) in
+        mypublic == Spec.Curve25519.(encodePoint (montgomery_ladder q (decodeScalar25519 secret))))
+    ))
 inline_for_extraction let crypto_scalarmult_ mypublic secret basepoint q =
   let h0 = ST.get() in
   push_frame();
@@ -96,7 +114,13 @@ val crypto_scalarmult:
   basepoint:uint8_p{length basepoint = 32} ->
   Stack unit
     (requires (fun h -> Buffer.live h mypublic /\ Buffer.live h secret /\ Buffer.live h basepoint))
-    (ensures (fun h0 _ h1 -> Buffer.live h1 mypublic /\ modifies_1 mypublic h0 h1))
+    (ensures (fun h0 _ h1 -> Buffer.live h1 mypublic /\ modifies_1 mypublic h0 h1
+     /\ Buffer.live h0 mypublic /\ Buffer.live h0 secret /\ Buffer.live h0 basepoint
+     /\ (let secret = reveal_sbytes (as_seq h0 secret) in
+        let basepoint = reveal_sbytes (as_seq h0 basepoint) in
+        let mypublic = reveal_sbytes (as_seq h1 mypublic) in
+        mypublic == Spec.Curve25519.(scalarmult secret basepoint))
+    ))
 let crypto_scalarmult mypublic secret basepoint =
   push_frame();
   let q  = point_of_scalar basepoint in

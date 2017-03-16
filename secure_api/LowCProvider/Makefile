@@ -1,11 +1,11 @@
-FSTAR_HOME = ../../..
+FSTAR_HOME ?= ../../../FStar
 CONTRIB=ucontrib
 PLATFORM = $(FSTAR_HOME)/$(CONTRIB)/Platform/ml
 CORECRYPTO = $(FSTAR_HOME)/$(CONTRIB)/CoreCrypto/ml
 INCLUDE=-package batteries,zarith -I $(PLATFORM) -I $(CORECRYPTO)
 MARCH?=x86_64
 
-KREMLIN_HOME=../../../../kremlin
+KREMLIN_HOME ?= ../../../kremlin
 KRML_INCLUDES=$(addprefix -I ,.. $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=-verbose -ccopt -Wno-error=pointer-sign $(KOPTS)
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
@@ -45,13 +45,10 @@ endif
 
 .PHONY: test dep
 
-all: ../krml-test.exe ../spartan_aes/aes.o LowCProvider.cmxa
+all: ../krml-test-vale.exe LowCProvider.cmxa
 
-../spartan_aes/aes.o:
-	$(MAKE) -C ../spartan_aes
-
-../krml-test.exe: $(wildcard ../crypto/*.fst)
-	$(MAKE) -C .. krml-test.exe
+../krml-test-vale.exe:
+	$(MAKE) -C .. krml-test-vale.exe
 
 %.cmi: %.mli
 	$(OCAMLC) -c $<
@@ -65,10 +62,8 @@ all: ../krml-test.exe ../spartan_aes/aes.o LowCProvider.cmxa
 $(CORECRYPTO)/CoreCrypto.cmx: $(CORECRYPTO)/CoreCrypto.ml
 	$(MAKE) -C $(CORECRYPTO)
 
-
-
-libllcrypto.a: ../krml-test.exe
-	$(AR) -cr libllcrypto.a ../spartan_aes/aes.o ../tmp/*.o
+libllcrypto.a: ../krml-test-vale.exe
+	$(AR) -cr libllcrypto.a ../vale/aes/aes.o ../tmp-vale/*.o
 	$(AR) -d libllcrypto.a Crypto_KrmlTest.o
 
 lowc_stub.o: libllcrypto.a
@@ -92,3 +87,4 @@ depend:
 	$(OCAMLDEP) *.ml *.mli > .depend
 
 include .depend
+

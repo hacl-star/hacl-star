@@ -707,7 +707,7 @@ private let salsa20_store_partial c ctx len =
   pop_frame()
 
 
-[@"c_inline"]
+[@ "c_inline" ]
 val crypto_stream_salsa20:
   c:uint8_p ->
   clen:FStar.UInt64.t{U64.v clen <= length c} ->
@@ -716,7 +716,7 @@ val crypto_stream_salsa20:
   Stack unit
     (requires (fun h -> live h c /\ live h n /\ live h k))
     (ensures  (fun h0 _ h1 -> modifies_1 c h0 h1 /\ live h1 c))
-[@"c_inline"]
+[@ "c_inline" ]
 let crypto_stream_salsa20 c clen n k =
   push_frame();
   let hh = ST.get() in

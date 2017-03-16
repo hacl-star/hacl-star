@@ -54,7 +54,7 @@ assume val lemma_diff: a:int -> b:int -> p:pos ->
   Lemma ( (a - b) % p = ((a%p) - b) % p /\ (a - b) % p = (a - (b % p)) % p)
 
 
-#set-options "--z3rlimit 20"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 [@"c_inline"]
 val fdifference:

@@ -107,7 +107,7 @@ let carry_top_pre s =
   5 * (v (Seq.index s 2) / pow2 42) < pow2 64
   /\ 5 * (v (Seq.index s 2) / pow2 42) + v (Seq.index s 0) < pow2 64
 
-#set-options "--z3rlimit 5"
+#set-options "--z3rlimit 20"
 
 val carry_top_spec: s:seqelem{carry_top_pre s} -> Tot seqelem
 let carry_top_spec s =
@@ -126,7 +126,7 @@ let carry_top_spec s =
   Seq.upd s' 0 b0'
 
 
-#set-options "--z3rlimit 5"
+#set-options "--z3rlimit 20"
 
 val lemma_carry_top_spec_: s:seqelem{carry_top_pre s} -> Lemma
   (let s' = carry_top_spec s in
@@ -149,7 +149,7 @@ let lemma_carry_top_spec_ s =
   ()
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 private val lemma_mod_0: a:nat -> b:nat -> c:nat -> Lemma
   ( (a + b * c) % prime = (a + (b % prime) * c) % prime)
@@ -188,7 +188,7 @@ let lemma_carry_top_spec s =
   lemma_0 (v (Seq.index s 0) + pow2 44 * v (Seq.index s 1)) (v (Seq.index s 2))
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val carry_top_wide_pre: seqelem_wide -> GTot Type0
 let carry_top_wide_pre s =
