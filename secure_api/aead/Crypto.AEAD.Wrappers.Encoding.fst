@@ -93,7 +93,7 @@ let is_ak_for_iv (#i: mac_id) (#rw:rw) (aead_st:aead_state (fst i) rw) (ak:CMA.s
     let j = fst i in
     let n = snd i in
     safeId j ==> is_mac_for_iv #j #rw #n aead_st ak h
-    
+
 val accumulate_enc 
 	       (#i: mac_id) (#rw:rw) (aead_st:aead_state (fst i) rw)
 	       (ak: CMA.state i) (#aadlen:aadlen_32) (aad:lbuffer (v aadlen))
@@ -119,7 +119,7 @@ val accumulate_enc
 	      CMA.mac_is_unset i PRF.(aead_st.prf.mac_rgn) ak h1) /\
 	  accumulate_modifies_nothing h0 h1 /\
 	  accumulate_ensures ak aad cipher h0 acc h1))
-#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let accumulate_freshness (#i:mac_id) (acc:CMA.accBuffer i) (h0:mem) (h1:mem) = 
     (mac_log ==> fresh_sref h0 h1 (CMA.alog acc)) /\
     (fresh_sref h0 h1 (Buffer.content (MAC.as_buffer (CMA.abuf acc))))
@@ -133,6 +133,7 @@ let accumulate_enc #i #rw aead_st ak #aadlen aad #txtlen plain cipher_tagged =
     FStar.Buffer.lemma_reveal_modifies_0 h0 h1;
     acc
 
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 val accumulate (#i: mac_id) (#rw:rw) (aead_st:aead_state (fst i) rw)
 	       (ak: CMA.state i) (#aadlen:aadlen_32) (aad:lbuffer (v aadlen))
 	       (#txtlen:txtlen_32) (plain:plainBuffer (fst i) (v txtlen)) 
@@ -164,4 +165,3 @@ let accumulate #i #rw aead_st ak #aadlen aad #txtlen plain cipher_tagged =
     FStar.Buffer.lemma_reveal_modifies_0 h0 h1;
     frame_inv_modifies_tip aead_st h0 h1;
     acc
-
