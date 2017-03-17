@@ -31,10 +31,15 @@ inline_for_extraction val load128_be: b:buffer U8.t{length b = 16} -> Stack H128
   (ensures (fun h0 n h1 -> h0 == h1 /\ live h1 b /\ to_felem #gf128 (H128.v n) = encode (as_seq h1 b)))
 let load128_be b = let v = load128_be b in uint128_to_sint128 v
 
+#reset-options "--z3rlimit 20 --max_fuel 1 --initial_fuel 1"
+
 inline_for_extraction val store128_be: b:buffer H8.t{length b = 16} -> n:H128.t -> Stack unit
   (requires (fun h -> live h b))
-  (ensures (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ Hacl.Spec.Endianness.hbig_endian (as_seq h1 b) = H128.v n))
-let store128_be b n = hstore128_be b n
+  (ensures (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ Seq.equal (decode (to_felem #gf128 (H128.v n))) (as_seq h1 b)))
+let store128_be b n =
+  hstore128_be b n;
+  let h1 = ST.get() in
+  FStar.Endianness.lemma_big_endian_inj (decode (to_felem #gf128 (H128.v n))) (as_seq h1 b)
 
 (* * Every block of message is regarded as an element in Galois field GF(2^128), **)
 (* * The following several functions are basic operations in this field.         **)
@@ -60,14 +65,14 @@ inline_for_extraction let ones_128 : H128.t =
   H128.(((uint64_to_sint128 0xffffffffffffffffuL) <<^ 64ul) +^ (uint64_to_sint128 0xffffffffffffffffuL))
 private let r_mul : H128.t = H128.(uint64_to_sint128(225uL) <<^ 120ul)
 
-private val fzero_lemma: v:H128.t -> Lemma
+val fzero_lemma: v:H128.t -> Lemma
   (requires v == zero_128)
   (ensures to_felem #gf128 (H128.v v) = Spec.GaloisField.zero #gf128)
 let fzero_lemma v =
   assert(H128.v v = UInt.zero 128);
   lemma_eq_intro (to_felem #gf128 (H128.v v)) (Spec.GaloisField.zero #gf128)
 
-private val r_mul_lemma: v:H128.t -> Lemma
+val r_mul_lemma: v:H128.t -> Lemma
   (requires v == r_mul)
   (ensures to_felem #gf128 (H128.v v) = Spec.irr)
 let r_mul_lemma v = assert_norm((225 * pow2 120) % pow2 128 = 0xe1000000000000000000000000000000)

@@ -13,9 +13,9 @@ FSTAR_ARGS=$(OTHERFLAGS)
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
-FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real --include ../specs
+FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real --include ../specs --include ../specs/generic
 
-KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/aes prf utils ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/aes prf utils ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs ../specs/generic $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=-ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS) -ccopt -std=gnu99
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES) 
 
