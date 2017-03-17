@@ -50,7 +50,7 @@ all-ver: $(addsuffix -verify, $(SPEC_FILES))
 %.fst-hints: %.fst
 	-$(FSTAR) --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin $*.fst --record_hints
 
-all-ver: $(addsuffix -verify, $(SPEC_FILES))
+all-hints: $(addsuffix -hints, $(SPEC_FILES))
 
 gf128.exe: Spec.GF128.fst
 	$(MAKE) -C ../code/lib/ml MEM=HST

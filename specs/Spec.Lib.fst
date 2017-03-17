@@ -5,7 +5,6 @@ open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness
 
-
 #set-options "--initial_fuel 0 --initial_ifuel 0 --max_fuel 0 --max_ifuel 0"
 
 let rotate_left (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
@@ -25,9 +24,9 @@ let op_Bar_Greater f g = op_At f g
 inline_for_extraction
 let set (i:nat) (x:'a) (s:seq 'a{length s > i}) : Tot (s':seq 'a{length s' = length s}) = upd s i x
 inline_for_extraction
-let op_String_Access s i = Seq.index s i
+let op_String_Access = Seq.index
 inline_for_extraction
-let op_String_Assignment s i v = Seq.upd s i v
+let op_String_Assignment = Seq.upd
 
 inline_for_extraction
 let iter n f x = Spec.Loops.repeat_spec n f x
@@ -86,6 +85,60 @@ let lemma_uint32_to_le_inj (b:UInt32.t) (b':UInt32.t) : Lemma
   (ensures  (b = b'))
   = ()
 
+
+abstract val create_4: #a:Type -> s0:a -> s1:a -> s2:a -> s3:a ->
+  Tot (s:seq a{length s = 4 /\ index s 0 == s0 /\ index s 1 == s1 /\ index s 2 == s2 /\ index s 3 == s3})
+let create_4 #a s0 s1 s2 s3 =
+  let s = create 4 s0 in
+  let s = s.[1] <- s1 in
+  let s = s.[2] <- s2 in
+  let s = s.[3] <- s3 in s
+
+abstract val create_8: #a:Type -> s0:a -> s1:a -> s2:a -> s3:a -> s4:a -> s5:a -> s6:a -> s7:a ->
+  Tot (s:seq a{length s = 8 /\ index s 0 == s0 /\ index s 1 == s1 /\ index s 2 == s2 /\ index s 3 == s3  /\ index s 4 == s4 /\ index s 5 == s5 /\ index s 6 == s6 /\ index s 7 == s7})
+let create_8 #a s0 s1 s2 s3 s4 s5 s6 s7 =
+  let s = create 8 s0 in
+  let s = s.[1] <- s1 in
+  let s = s.[2] <- s2 in
+  let s = s.[3] <- s3 in
+  let s = s.[4] <- s4 in
+  let s = s.[5] <- s5 in
+  let s = s.[6] <- s6 in
+  let s = s.[7] <- s7 in s
+
+abstract val create_16: #a:Type ->
+  s0:a -> s1:a -> s2:a -> s3:a -> s4:a -> s5:a -> s6:a -> s7:a ->
+  s8:a -> s9:a -> s10:a -> s11:a -> s12:a -> s13:a -> s14:a -> s15:a ->
+  Tot (s:seq a{length s = 16
+    /\ index s 0 == s0 /\ index s 1 == s1 /\ index s 2 == s2 /\ index s 3 == s3
+    /\ index s 4 == s4 /\ index s 5 == s5 /\ index s 6 == s6 /\ index s 7 == s7
+    /\ index s 8 == s8 /\ index s 9 == s9 /\ index s 10 == s10 /\ index s 11 == s11
+    /\ index s 12 == s12 /\ index s 13 == s13 /\ index s 14 == s14 /\ index s 15 == s15})
+let create_16 #a s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15 =
+  let s = create 16 s0 in
+  let s = s.[1] <- s1 in
+  let s = s.[2] <- s2 in
+  let s = s.[3] <- s3 in
+  let s = s.[4] <- s4 in
+  let s = s.[5] <- s5 in
+  let s = s.[6] <- s6 in
+  let s = s.[7] <- s7 in
+  let s = s.[8] <- s8 in
+  let s = s.[9] <- s9 in
+  let s = s.[10] <- s10 in
+  let s = s.[11] <- s11 in
+  let s = s.[12] <- s12 in
+  let s = s.[13] <- s13 in
+  let s = s.[14] <- s14 in
+  let s = s.[15] <- s15 in s
+
+abstract val create_4: #a:Type -> s0:a -> s1:a -> s2:a -> s3:a ->
+  Tot (s:seq a{length s = 4 /\ index s 0 == s0 /\ index s 1 == s1 /\ index s 2 == s2 /\ index s 3 == s3})
+let create_4 #a s0 s1 s2 s3 =
+  let s = create 4 s0 in
+  let s = s.[1] <- s1 in
+  let s = s.[2] <- s2 in
+  let s = s.[3] <- s3 in s
 
 val uint32s_from_le: len:nat -> b:lbytes (4 * len) -> Tot (s:seq UInt32.t{length s = len}) (decreases len)
 let rec uint32s_from_le len src =
