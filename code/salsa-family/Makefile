@@ -25,11 +25,11 @@ SLOW=Hacl.Symmetric.Salsa20.fst \
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
+		 --include ../../specs
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
+		 --include ../../specs
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -58,20 +58,20 @@ all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
 all-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 
-KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experimental -I ../../specs/generic -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
+KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experimental -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -drop 'Hacl.UInt8' $(KREMLIN_ARGS) \
 	-drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 	-drop 'Hacl.Endianness' -drop 'Hacl.Cast'
 
 Chacha20.c: Hacl.Impl.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
-	$(KRML) -tmpdir chacha-c -no-prefix Loops -I . -drop "Loops" \
-		-bundle 'Chacha20=Hacl.Impl.Chacha20,Chacha20' -drop 'Hacl.Spec.\*' -add-include '"loops.h"' -drop 'Spec.\*' -drop "Combinators" \
+	$(KRML) -tmpdir chacha-c \
+		-bundle 'Chacha20=Hacl.Impl.Chacha20,Chacha20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*' -drop "C.Loops" \
 		Chacha20.fst $(VERBOSE) -skip-linking
 
 chacha20.exe: Hacl.Impl.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
-	$(KRML) $(KREMLIN_ARGS) -tmpdir chacha-c  -no-prefix Hacl.Test.Chacha20 -no-prefix Loops -I . -drop "C.Loops" \
+	$(KRML) $(KREMLIN_ARGS) -tmpdir chacha-c  -no-prefix Hacl.Test.Chacha20 -I . -drop "C.Loops" \
 		-bundle 'Chacha20=Chacha20,Hacl.Impl.Chacha20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*'  \
 		Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe
 	./chacha20.exe
@@ -107,8 +107,8 @@ XSalsa20.c: Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.UInt.\*'
 	./xsalsa20.exe
 
-extract-c: Chacha20.c Salsa20.c HSalsa20.c XSalsa20.c Salsa.c
+extract-c: Chacha20.c Salsa20.c HSalsa20.c XSalsa20.c
 
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ salsa-c salsa2-c chacha-c chacha-cc hsalsa-c xsalsa-c chacha2-c *.graph
+	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c hsalsa-c xsalsa-c *.graph

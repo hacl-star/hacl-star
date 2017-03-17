@@ -3,7 +3,7 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../..
 include ../Makefile.include
 
-SPECS=../../specs ../../specs/generic ../../specs/experimental
+SPECS=../../specs
 
 INCLUDE_DIRS=../bignum ../lib/kremlin $(SPECS)
 

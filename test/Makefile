@@ -46,7 +46,7 @@ verify: verify-code verify-crypto
 build-snapshot:
 	mkdir -p snapshot
 	cp ../code/poly1305/poly-c/Poly1305_64.* ../code/curve25519/x25519-c/Curve25519.* \
-		../code/salsa-family/chacha-c/Chacha20.* ../code/salsa-family/loops.h ../code/salsa-family/salsa-c/Salsa20.* \
+		../code/salsa-family/chacha-c/Chacha20.* ../code/salsa-family/salsa-c/Salsa20.* \
 		../code/salsa-family/hsalsa-c/Hacl_Symmetric_HSalsa20.* snapshot
 	cp $(addprefix ../code/api/aead-c/, Hacl_AEAD_Chacha20Poly1305.*) snapshot
 	cp $(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) snapshot
