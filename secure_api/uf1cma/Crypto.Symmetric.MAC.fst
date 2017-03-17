@@ -17,7 +17,7 @@ open Crypto.Indexing
 open Flag
 open FStar.Buffer // no need?
 
-module GS = Crypto.Symmetric.GF128.Spec
+module GS = Spec.GF128
 module GF = Crypto.Symmetric.GF128
 
 //17-02-11 now switched from 32-bit to 64-bit; can we keep both?
@@ -34,7 +34,7 @@ type id = id * UInt128.t //NS: why not this definition : i:id & iv (alg i)
 inline_for_extraction let alg ((i,_):id) : macAlg =
  macAlg_of_id i
 
-#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 
 type text = Seq.seq (lbytes 16) // Used to be seq elem, then seq (lbytes 16)
 
@@ -227,8 +227,11 @@ let create i =
       (* assert(Crypto.Symmetric.Poly1305.Bigint.norm h1 b); *)
       (* B_POLY1305 b *)
   | GHASH ->
-    let b : Buffer.buffer UInt128.t =
-      FStar.Buffer.create (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in b
+      let b : Buffer.buffer UInt128.t =
+        FStar.Buffer.create (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in
+      let h1 = ST.get() in
+      GF.fzero_lemma (Seq.index (as_seq h1 b) 0);
+      b
 
 // TODO: generalize length, add functional spec
 (** Encode raw bytes of static key as a field element *)
@@ -255,7 +258,7 @@ let encode_r #i b raw =
 val encode: i:id -> w:word_16 -> GTot (elem i)
 let encode i w =
   match alg i with
-  | POLY1305 -> PS.encode w
+  | POLY1305 -> Spec.Poly1305.encode w
   | GHASH    -> GS.encode w
 
 (* (\** Encode a word of a message as a field element in a buffer *\) *)
@@ -287,7 +290,7 @@ noextract val poly: #i:id -> cs:text -> r:elem i -> Tot (elem i)
 let poly #i cs r =
   match alg i with
   | POLY1305 -> Spec.Poly1305.poly (text_to_PS_text cs) r
-  | GHASH    -> GS.poly cs r
+  | GHASH    -> GS.poly (text_to_PS_text cs) r
 
 
 (** Create and initialize the accumulator *)
@@ -319,7 +322,7 @@ let field_mul #i a b =
 noextract let op_Plus_At #i e1 e2 = field_add #i e1 e2
 noextract let op_Star_At #i e1 e2 = field_mul #i e1 e2
 
-#reset-options " --z3rlimit 20 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 
 val poly_empty: #i:id -> t:text{Seq.length t == 0} -> r:elem i ->
   Lemma (poly #i t r == zero i)
@@ -327,9 +330,10 @@ let poly_empty #i t r =
   match alg i with
   | POLY1305 -> ()
     (* PL.poly_empty (text_to_PS_text t) r *)
-  | GHASH    -> GS.poly_empty t r
+  | GHASH    -> ()
+    (* GS.poly_empty t r *)
 
-#reset-options " --z3rlimit 30 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 //17-02-11 rename? relocate?
 private val poly_cons_: x:word -> xs:PS_.text -> r:PS_.elem ->
@@ -341,17 +345,21 @@ let poly_cons_ x xs r =
   Seq.lemma_eq_intro (Seq.tail xxs) xs;
   PS.poly_def_1 xxs r
 
+#reset-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
+
 val poly_cons: #i:id -> x:word_16 -> xs:text -> r:elem i ->
   Lemma (poly #i (Seq.cons x xs) r == (poly #i xs r +@ encode i x) *@ r)
 let poly_cons #i x xs r =
+        assert (Seq.equal (text_to_PS_text (Seq.cons x xs))
+                          (Seq.cons x (text_to_PS_text xs)));
   match alg i with
-  | POLY1305 ->
-    assert (Seq.equal (text_to_PS_text (Seq.cons x xs))
-                      (Seq.cons x (text_to_PS_text xs)));
-    poly_cons_ x (text_to_PS_text xs) r
-  | GHASH    ->  GS.poly_cons x xs r; GS.add_comm (poly #i xs r) (encode i x)
+  | POLY1305 -> 
+	poly_cons_ x (text_to_PS_text xs) r
+  | GHASH    -> 
+        GS.poly_cons x (text_to_PS_text xs) r;
+        GS.add_comm (GS.poly (text_to_PS_text xs) r) (GS.encode x)
 
-#reset-options " --z3rlimit 30 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 (** Process one message block and update the accumulator *)
 val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
@@ -365,7 +373,7 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
-#reset-options " --z3rlimit 300 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 300 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let update #i r a w =
   push_frame();
   let h0 = ST.get () in
@@ -408,8 +416,8 @@ type tagB = lbuffer (UInt32.v taglen)
 noextract val mac: #i:id -> cs:text -> r:elem i -> s:tag -> GTot tag
 let mac #i cs r s =
   match alg i with
-  | POLY1305 -> Spec.Poly1305.mac_1305 (text_to_PS_text cs) r s
-  | GHASH    -> GS.mac cs r s
+  | POLY1305 -> Spec.Poly1305.finish (Spec.Poly1305.poly (text_to_PS_text cs) r) s
+  | GHASH    -> GS.mac (text_to_PS_text cs) r s
 
 val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
   (requires (fun h ->
@@ -429,6 +437,8 @@ val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
     match alg i with
     | POLY1305 -> Seq.equal tv (Spec.Poly1305.finish av sv)
     | GHASH    -> Seq.equal tv (GS.finish av sv) )))
+
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 private val lemma_modifies_3_2_finish: #a:Type -> #a':Type -> h:mem -> h':mem -> h'':mem -> b:buffer a -> b':buffer a' -> Lemma
@@ -465,7 +475,6 @@ let finish #i s a t =
     GF.store128_be t a'.(0ul)
 
 //17-02-11 new lemma
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 val lemma_poly_finish_to_mac:
   i:id -> ht:mem -> t:tagB -> a:elem i -> hs:mem -> s:tagB -> log:text -> r:elem i ->
   Lemma (requires (Buffer.live ht t /\ Buffer.live hs s

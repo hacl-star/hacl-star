@@ -107,6 +107,19 @@ assume val store128_le:
     (requires (fun h -> live h b))
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ little_endian (as_seq h1 b) = U128.v z))
 
+assume val load128_be:
+  b:buffer U8.t{length b = 16} ->
+  Stack U128.t
+    (requires (fun h -> live h b))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ big_endian (as_seq h0 b) = U128.v z))
+
+assume val store128_be:
+  b:buffer U8.t{length b = 16} ->
+  z:U128.t ->
+  Stack unit
+    (requires (fun h -> live h b))
+    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ big_endian (as_seq h1 b) = U128.v z))
+
 assume val hstore32_le:
   b:buffer H8.t{length b = 4} ->
   z:H32.t ->
@@ -175,3 +188,16 @@ assume val hstore128_le:
   Stack unit
     (requires (fun h -> live h b))
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ hlittle_endian (as_seq h1 b) = H128.v z))
+
+assume val hload128_be:
+  b:buffer H8.t{length b = 16} ->
+  Stack H128.t
+    (requires (fun h -> live h b))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ hbig_endian (as_seq h0 b) = H128.v z))
+
+assume val hstore128_be:
+  b:buffer H8.t{length b = 16} ->
+  z:H128.t ->
+  Stack unit
+    (requires (fun h -> live h b))
+    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ hbig_endian (as_seq h1 b) = H128.v z))

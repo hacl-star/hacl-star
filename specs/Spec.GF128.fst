@@ -13,6 +13,9 @@ open Spec.GaloisField
 let irr : polynomial 127 = UInt.to_vec #128 0xe1000000000000000000000000000000
 let gf128 = mk_field 128 irr
 let elem = felem gf128
+let zero = zero #gf128
+let op_Plus_At e1 e2 = fadd #gf128 e1 e2
+let op_Star_At e1 e2 = fmul #gf128 e1 e2
 
 type word = w:bytes{length w <= 16}
 type word_16 = w:bytes{length w = 16}
@@ -45,6 +48,9 @@ let mac vs r s = finish (poly vs r) s
 
 #reset-options "--initial_fuel 0 --max_fuel 2 --initial_ifuel 0 --max_ifuel 2"
 
+val add_comm: a:elem -> b:elem -> Lemma (a +@ b == b +@ a)
+let add_comm e1 e2 = add_comm #gf128 e1 e2
+
 val poly_non_empty: vs:text{Seq.length vs > 0} -> r:elem ->
   Lemma (poly vs r == (encode (Seq.head vs) +@ poly (Seq.tail vs) r) *@ r)
 let poly_non_empty vs r = ()
@@ -56,7 +62,7 @@ let poly_cons x xs r =
   Seq.lemma_eq_intro (Seq.tail (Seq.cons x xs)) xs
 
 val poly_empty: t:text{Seq.length t == 0} -> r:elem ->
-  Lemma (poly t r == zero #gf128)
+  Lemma (poly t r == zero)
 let poly_empty t r = ()
 
 
