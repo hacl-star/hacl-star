@@ -16,7 +16,8 @@ let fadd (e1:elem) (e2:elem) = (e1 + e2) % prime
 let fmul (e1:elem) (e2:elem) = (e1 * e2) % prime
 let zero : elem = 0
 let one  : elem = 1
-
+let op_Plus_At = fadd
+let op_Star_At = fmul
 (* Type aliases *)
 let op_Amp_Bar = UInt.logand #128
 type word = w:bytes{length w <= 16}
