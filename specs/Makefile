@@ -23,9 +23,9 @@ EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib
 
 NOEXTRACT=$(addprefix --no_extract FStar., Classical Ghost Int16 Int32 Int64 Int63 Int16 Int8 Int.Cast Int List.Tot.Base List.Tot List.Tot.Properties Math.Lemmas Mul StrongExcludedMiddle UInt128 UInt16 UInt32 UInt63 UInt64 UInt8) $(addprefix --no_extract Hacl., UInt64 UInt32 UInt8)
 
-ARGS=--codegen OCaml --lax --include generic --include ../code/lib/kremlin $(NOEXTRACT) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib
+ARGS=--codegen OCaml --lax --include ../code/lib/kremlin $(NOEXTRACT) --include $(KREMLIN_HOME)/kremlib
 
-OCAML_INCLUDES=-I ../code/lib/ml -I $(FSTAR_HOME)/ulib/ml/hyperstack ../code/lib/ml/hacllib.cmxa 
+OCAML_INCLUDES=-I ../code/lib/ml ../code/lib/ml/hacllib.cmxa 
 
 SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Chacha20.fst \
@@ -43,8 +43,12 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.SecretBox.fst
 
 %.fst-verify: %.fst
-	$(FSTAR) --include generic --include ../code/lib/kremlin --include experimental --include $(FSTAR_HOME)/ulib/hyperstack $*.fst
+	$(FSTAR)  --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin $*.fst
 
+all-ver: $(addsuffix -verify, $(SPEC_FILES))
+
+%.fst-hints: %.fst
+	-$(FSTAR) --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin $*.fst --record_hints
 
 all-ver: $(addsuffix -verify, $(SPEC_FILES))
 

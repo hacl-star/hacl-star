@@ -24,6 +24,10 @@ let op_At f g = fun x -> g (f x)
 let op_Bar_Greater f g = op_At f g
 inline_for_extraction
 let set (i:nat) (x:'a) (s:seq 'a{length s > i}) : Tot (s':seq 'a{length s' = length s}) = upd s i x
+inline_for_extraction
+let op_String_Access s i = Seq.index s i
+inline_for_extraction
+let op_String_Assignment s i v = Seq.upd s i v
 
 inline_for_extraction
 let iter n f x = Spec.Loops.repeat_spec n f x

@@ -11,19 +11,11 @@ open Spec.Poly1305.Lemmas
 
 (* Field types and parameters *)
 let prime = pow2 130 - 5
-
 type elem = e:int{e >= 0 /\ e < prime}
-
 let fadd (e1:elem) (e2:elem) = (e1 + e2) % prime
-let op_Plus_At e1 e2 = fadd e1 e2
-
 let fmul (e1:elem) (e2:elem) = (e1 * e2) % prime
-let op_Star_At e1 e2 = fmul e1 e2
-
 let zero : elem = 0
 let one  : elem = 1
-
-
 
 (* Type aliases *)
 let op_Amp_Bar = UInt.logand #128
@@ -35,46 +27,40 @@ type text = seq word
 
 (* Specification code *)
 let encode (w:word) =
-  pow2 (8 * length w) +@ little_endian w
+  (pow2 (8 * length w)) `fadd` (little_endian w)
 
-val poly: vs:text -> r:elem -> Tot (a:elem) (decreases (Seq.length vs))
-let rec poly vs r =
-  if length vs = 0 then zero
+let rec poly (txt:text) (r:e:elem) : Tot elem (decreases (length txt)) =
+  if length txt = 0 then zero
   else
-    let a = poly (Seq.tail vs) r in
-    let n = encode (Seq.head vs) in
-    (n +@ a) *@ r
+    let a = poly (Seq.tail txt) r in
+    let n = encode (Seq.head txt) in
+    (n `fadd` a) `fmul` r
 
-(* val encode_r: rb:word_16 -> Tot (r:elem) *)
 let encode_r (rb:word_16) =
   (little_endian rb) &| 0x0ffffffc0ffffffc0ffffffc0fffffff
 
-(** Finish: truncate and pad (or pad and truncate) *)
-val finish: a:elem -> s:tag -> Tot tag
-let finish a s =
+let finish (a:elem) (s:word_16) : Tot tag =
   let n = (a + little_endian s) % pow2 128 in
   little_bytes 16ul n
 
-val encode_bytes: txt:bytes -> Tot (text) (decreases (Seq.length txt))
-let rec encode_bytes txt =
+let rec encode_bytes (txt:bytes) : Tot text (decreases (length txt)) =
   if length txt = 0 then createEmpty
   else
     let w, txt = split txt (min (length txt) 16) in
     append_last (encode_bytes txt) w
 
-val poly1305: msg:bytes -> k:key -> Tot tag
-let poly1305 msg k =
+let poly1305 (msg:bytes) (k:key) : Tot tag =
   let text = encode_bytes msg in
   let r = encode_r (slice k 0 16) in
   let s = slice k 16 32 in
   finish (poly text r) s
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
-
 (* ********************* *)
 (* RFC 7539 Test Vectors *)
 (* ********************* *)
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 unfold let msg = [
   0x43uy; 0x72uy; 0x79uy; 0x70uy; 0x74uy; 0x6fuy; 0x67uy; 0x72uy;
