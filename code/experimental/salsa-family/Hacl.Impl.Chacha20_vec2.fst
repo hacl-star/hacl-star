@@ -8,7 +8,7 @@ open Hacl.Cast
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Chacha20
-open Combinators
+open C.Loops
 
 module Spec = Spec.Chacha20
 module U32 = FStar.UInt32
