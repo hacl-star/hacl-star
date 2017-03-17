@@ -1,0 +1,2 @@
+#define crypto_stream_chacha20_e_sparc_KEYBYTES 32
+#define crypto_stream_chacha20_e_sparc_NONCEBYTES 8
