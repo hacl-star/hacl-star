@@ -7,10 +7,10 @@ open FStar.Buffer
 open Hacl.Cast
 open Hacl.Spec.Endianness
 open Hacl.Endianness
-open Spec.Chacha20
+(* open Spec.Chacha20 *)
 open C.Loops
 
-module Spec = Spec.Chacha20
+module Spec = Spec.Chacha20_vec256
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
 module H32 = Hacl.UInt32

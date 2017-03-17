@@ -21,6 +21,28 @@ type counter = UInt.uint_t 32
 // using @ as a functional substitute for ;
 // internally, blocks are represented as 16 x 4-byte integers
 type vec   = v:seq UInt32.t {length v = 8}
+
+abstract val zero: s:vec{index s 0 == 0ul /\ index s 1 == 0ul /\ index s 2 == 0ul /\ index s 3 == 0ul
+  /\ index s 4 == 0ul /\ index s 5 == 0ul /\ index s 6 == 0ul /\ index s 7 == 0ul}
+let zero = create 8 0ul
+
+abstract val one_le: s:vec{index s 0 == 1ul /\ index s 1 == 0ul /\ index s 2 == 0ul /\ index s 3 == 0ul
+  /\ index s 4 == 1ul /\ index s 5 == 0ul /\ index s 6 == 0ul /\ index s 7 == 0ul}
+let one_le =
+  let one = create 8 0ul in
+  let one = upd one 0 1ul in
+  let one = upd one 4 1ul in
+  one
+
+abstract val two_le: s:vec{index s 0 == 2ul /\ index s 1 == 0ul /\ index s 2 == 0ul /\ index s 3 == 0ul
+  /\ index s 4 == 2ul /\ index s 5 == 0ul /\ index s 6 == 0ul /\ index s 7 == 0ul}
+let two_le =
+  let two = create 8 0ul in
+  let two = upd two 0 2ul in
+  let two = upd two 4 2ul in
+  two
+
+
 type state = m:seq vec      {length m = 4}
 type idx = n:nat{n < 4}
 type shuffle = state -> Tot state 
