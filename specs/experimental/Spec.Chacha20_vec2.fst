@@ -43,13 +43,13 @@ type stateT = m:seq (r:seq U32.t{length r = 16}){length m = 8}
 //Chacha20 code begins
 
 (* unfold *) let op_Plus_Percent_Hat (x:vec) (y:vec) : Tot vec = 
-       C.Loops.seq_map2 U32.op_Plus_Percent_Hat x y
+       Spec.Loops.seq_map2 U32.op_Plus_Percent_Hat x y
 
 (* unfold  *)let op_Hat_Hat (x:vec) (y:vec) : Tot vec = 
-       C.Loops.seq_map2 U32.op_Hat_Hat x y
+       Spec.Loops.seq_map2 U32.op_Hat_Hat x y
 
 (* unfold *) let op_Less_Less_Less (x:vec) (n:UInt32.t{v n < 32}) : Tot vec = 
-       C.Loops.seq_map (fun x -> x <<< n) x 
+       Spec.Loops.seq_map (fun x -> x <<< n) x 
 
 val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> shuffle
 let line a b d s m = 
@@ -107,7 +107,7 @@ let rounds : shuffle =
 
 let chacha20_core (s:state) : Tot state = 
     let s' = rounds s in
-    C.Loops.seq_map2 op_Plus_Percent_Hat s' s
+    Spec.Loops.seq_map2 op_Plus_Percent_Hat s' s
 
 (* state initialization *) 
 
@@ -117,18 +117,18 @@ unfold let constants : (s:seq U32.t{length s = 4}) =
 	 createL l	 
 
 let setup (k:key) (n:nonce) (c:counter): Tot state =
-  let constants:seq vec = C.Loops.seq_map to_vec constants in
-  let key = C.Loops.seq_map to_vec (uint32s_from_le 8 k) in
-  let nonce = C.Loops.seq_map to_vec (uint32s_from_le 3 n) in
+  let constants:seq vec = Spec.Loops.seq_map to_vec constants in
+  let key = Spec.Loops.seq_map to_vec (uint32s_from_le 8 k) in
+  let nonce = Spec.Loops.seq_map to_vec (uint32s_from_le 3 n) in
   let ctr = create 1 (initial_counter c) in
   constants @| key @| ctr @| nonce
 
 let column (s:state) (c:nat): (m:seq U32.t{length m = 16}) = 
-  C.Loops.seq_map (fun r -> index r c) s
+  Spec.Loops.seq_map (fun r -> index r c) s
   
 let transpose (s:state): Tot stateT =
     let cols = createL [0;1;2;3;4;5;6;7] in
-    C.Loops.seq_map (column s) cols
+    Spec.Loops.seq_map (column s) cols
 
 let state_to_key (s:state): Tot vec_block =
     let k = transpose s in
