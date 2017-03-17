@@ -20,5 +20,7 @@ inline_for_extraction let cipherAlg_of_id i =
 inline_for_extraction let aesImpl_of_id (i:id) =
   ValeAES
 
+let aeadAlg_cipherAlg i = ()
+
 let testId (a:aeadAlg) = a
 

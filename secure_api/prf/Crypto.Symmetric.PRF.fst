@@ -32,13 +32,14 @@ module MAC   = Crypto.Symmetric.MAC
 module CMA   = Crypto.Symmetric.UF1CMA
 module Block = Crypto.Symmetric.Cipher
 
+
 // PRF TABLE
 
 let blocklen i = Block.blocklen (cipherAlg_of_id i)
 type block i = b:lbytes (v (blocklen i))
 let keylen i = Block.keylen (cipherAlg_of_id i)
 let statelen i = Block.statelen (cipherAlg_of_id i)
-let stlen i = Block.stlen (cipherAlg_of_id i)
+(* let stlen i = Block.stlen (cipherAlg_of_id i) *)
 
 (*
 private let lemma_lengths (i:id) : Lemma(keylen i <^ blocklen i) = 
@@ -293,7 +294,7 @@ val prf_mac:
       HS.modifies_ref t.mac_rgn TSet.empty h0 h1 )))
 
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 100"
 
 let prf_mac i t k_0 x =
   Buffer.recall t.key;
@@ -308,7 +309,8 @@ let prf_mac i t k_0 x =
     match find_mac contents x with
     | Some mc ->  (* beware: mac shadowed by CMA.mac *)
         let h0 = ST.get() in
-        assume (CMA.(MAC.norm_r h0 mc.r)); //16-12-20 TODO: replace this using monotonicity; NS: known limitation
+        //16-12-20 TODO: replace this using monotonicity; NS: known limitation
+        assume (CMA.(MAC.norm_r h0 mc.r));
         Buffer.recall (CMA.(mc.s));
         if mac_log then FStar.Monotonic.RRef.m_recall (CMA.(ilog mc.log));
         mc
@@ -321,6 +323,7 @@ let prf_mac i t k_0 x =
   else
     let keyBuffer = Buffer.rcreate t.mac_rgn 0uy (CMA.keylen i) in
     let h1 = ST.get() in
+    Crypto.Indexing.aeadAlg_cipherAlg i;
     getBlock t x (CMA.keylen i) keyBuffer;
     let mc = CMA.coerce t.mac_rgn macId k_0 keyBuffer in
     let h3 = ST.get() in 
