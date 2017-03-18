@@ -88,11 +88,11 @@ test-secretbox:
 
 test-aead:
 	$(CC) $(CCOPTS) \
-	Chacha20_vec.c -c -o Chacha20_vec.o
+	Chacha20.c -c -o Chacha20.o
 	$(CC) $(CCOPTS) \
 	Poly1305_64.c -c -o Poly1305_64.o
 	$(CC) $(CCOPTS) \
-	Chacha20_vec.o Poly1305_64.o kremlib.c testlib.c Hacl_Policies.c Chacha20Poly1305.c test-aead.c -o test-aead.exe \
+	Chacha20.o Poly1305_64.o kremlib.c testlib.c Hacl_Policies.c Chacha20Poly1305.c test-aead.c -o test-aead.exe \
 	-l sodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread -ldl
 	./test-aead.exe
 
