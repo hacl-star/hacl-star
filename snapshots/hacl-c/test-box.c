@@ -119,7 +119,7 @@ int32_t test_api()
   memset(decrypted,0,MESSAGE_LEN);
 
   i = crypto_box_easy(ciphertext+16, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
-  res = NaCl_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, sk1);
+  res = NaCl_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN, nonce, pk2, sk1);
   printf("Box decryption of libsodium box easy was a %s.\n", res == 0 ? "success" : "failure");  
   TestLib_compare_and_print("Box", msg+32, decrypted+32, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);

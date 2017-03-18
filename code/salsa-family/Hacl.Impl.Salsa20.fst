@@ -61,6 +61,7 @@ private let lemma_uint32s_from_le_bytes' h h' output =
   Seq.lemma_eq_intro (Seq.append (as_seq h' output') (as_seq h' output'')) (as_seq h' output)
 
 
+[@ "c_inline"]
 val uint32s_from_le_bytes:
   output:buffer H32.t ->
   input:uint8_p{disjoint output input} ->
@@ -71,6 +72,7 @@ val uint32s_from_le_bytes:
       (let o = reveal_h32s (as_seq h1 output) in
        let i = reveal_sbytes (as_seq h0 input) in
        o == Spec.Lib.uint32s_from_le (U32.v len) i)))
+[@ "c_inline"]
 let rec uint32s_from_le_bytes output input len =
   let h0 = ST.get() in
   if U32.(len =^ 0ul) then (
@@ -118,6 +120,7 @@ private let lemma_uint32s_to_le_bytes' h h' output =
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 4) (as_seq h output')
 
 
+[@ "c_inline"]
 val uint32s_to_le_bytes:
   output:uint8_p ->
   input:buffer H32.t{disjoint output input} ->
@@ -128,6 +131,7 @@ val uint32s_to_le_bytes:
       (let o = reveal_sbytes (as_seq h1 output) in
        let i = reveal_h32s (as_seq h0 input) in
        o == Spec.Lib.uint32s_to_le (U32.v len) i)))
+[@ "c_inline"]
 let rec uint32s_to_le_bytes output input len =
   let h0 = ST.get() in
   if U32.(len =^ 0ul) then (
@@ -153,6 +157,7 @@ let rec uint32s_to_le_bytes output input len =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
+[@ "substitute"]
 val upd_16:
   st:state ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
@@ -166,6 +171,7 @@ val upd_16:
          Seq.index s 8 == v8 /\ Seq.index s 9 == v9 /\ Seq.index s 10 == v10 /\ Seq.index s 11 == v11 /\
          Seq.index s 12 == v12 /\ Seq.index s 13 == v13 /\ Seq.index s 14 == v14 /\ Seq.index s 15 == v15)
      ))
+[@ "substitute"]
 let upd_16 st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
   st.(0ul) <- v0;
   st.(1ul) <- v1;
@@ -284,7 +290,7 @@ let setup st k n c =
 
 let idx = a:U32.t{U32.v a < 16}
 
-[@ "substitute"]
+[@ "c_inline"]
 val line:
   st:state ->
   a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s < 32} ->
@@ -294,10 +300,12 @@ val line:
       /\ (let st1 = reveal_h32s (as_seq h1 st) in
          let st0 = reveal_h32s (as_seq h0 st) in
          st1 == line (U32.v a) (U32.v b) (U32.v d) s st0)))
-[@ "substitute"]
+[@ "c_inline"]
 let line st a b d s =
   let sa = st.(a) in let sb = st.(b) in let sd = st.(d) in
-  st.(a) <- (sa ^^ ((sb +%^ sd) <<< s))
+  let sbd = sb +%^ sd in
+  let sbds = sbd <<< s in
+  st.(a) <- (sa ^^ sbds)
 
 
 [@ "c_inline"]
@@ -580,6 +588,49 @@ private let lemma_u64_of_u32s (low:U32.t) (high:U32.t) : Lemma (low32_of_u64 (u6
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 [@ "c_inline"]
+val salsa20_core:
+  log:log_t ->
+  k:state ->
+  st:state{disjoint st k} ->
+  ctr:UInt64.t ->
+  Stack log_t
+    (requires (fun h -> live h k /\ live h st /\ invariant log h st))
+    (ensures  (fun h0 updated_log h1 -> live h0 st /\ live h0 k /\ invariant log h0 st
+      /\ live h1 k /\ invariant updated_log h1 st /\ modifies_2 k st h0 h1
+      /\ (let key = reveal_h32s (as_seq h1 k) in
+          let stv = reveal_h32s (as_seq h1 st) in
+          Seq.index stv 12 == uint32_to_sint32 (low32_of_u64 ctr) /\
+          Seq.index stv 13 == uint32_to_sint32 (high32_of_u64 ctr) /\
+         (match Ghost.reveal log, Ghost.reveal updated_log with
+         | MkLog k n, MkLog k' n' ->
+             key == salsa20_core stv /\ k == k' /\ n == n'))))
+[@ "c_inline"]
+let salsa20_core log k st ctr =
+  let h0 = ST.get() in
+  let c0 = uint32_to_sint32 (low32_of_u64 ctr) in
+  let c1 = uint32_to_sint32 (high32_of_u64 ctr) in
+  let h_1 = ST.get() in
+  st.(8ul) <- c0;
+  let h_ = ST.get() in
+  cut (as_seq h_ st == Seq.upd (as_seq h_1 st) 8 (c0));
+  st.(9ul) <- c1;
+  let h_2 = ST.get() in
+  cut (as_seq h_2 st == Seq.upd (as_seq h_ st) 9 (c1));
+  cut (get h_2 st 8 == c0 /\ get h_2 st 9 == c1);
+  cut (let s = as_seq h0 st in let s' = as_seq h_2 st in s' == Seq.upd (Seq.upd s 8 c0) 9 c1);
+  lemma_invariant (reveal_h32s (as_seq h0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (uint64_to_sint64 (u64_of_u32s (h32_to_u32 (get h0 st 8)) (h32_to_u32 (get h0 st 9)))) (uint64_to_sint64 ctr);
+  lemma_u64_of_u32s (h32_to_u32 c0) (h32_to_u32 c1);
+  cut (invariant log h_2 st);
+  copy_state k st;
+  rounds k;
+  sum_states k st;
+  let h_3 = ST.get() in
+  let h = ST.get() in
+  cut (reveal_h32s (as_seq h k) == salsa20_core (reveal_h32s (as_seq h st)));
+  Ghost.elift1 (fun l -> match l with | MkLog k n -> MkLog k n) log
+
+
+[@ "c_inline"]
 val salsa20_block:
   log:log_t ->
   stream_block:uint8_p{length stream_block = 64} ->
@@ -595,8 +646,6 @@ val salsa20_block:
              block == salsa20_block k n (UInt64.v ctr) /\ k == k' /\ n == n')))
 [@ "c_inline"]
 let salsa20_block log stream_block st ctr =
-  let c0 = uint32_to_sint32 (low32_of_u64 ctr) in
-  let c1 = uint32_to_sint32 (high32_of_u64 ctr) in
   let h0 = ST.get() in
   push_frame();
   let h_0 = ST.get() in
@@ -604,20 +653,7 @@ let salsa20_block log stream_block st ctr =
   let h_1 = ST.get() in
   no_upd_lemma_0 h_0 h_1 st;
   cut (as_seq h0 st == as_seq h_1 st);
-  st.(8ul) <- c0;
-  let h_ = ST.get() in
-  cut (as_seq h_ st == Seq.upd (as_seq h_1 st) 8 (c0));
-  st.(9ul) <- c1;
-  let h_2 = ST.get() in
-  cut (as_seq h_2 st == Seq.upd (as_seq h_ st) 9 (c1));
-  cut (get h_2 st 8 == c0 /\ get h_2 st 9 == c1);
-  cut (let s = as_seq h0 st in let s' = as_seq h_2 st in s' == Seq.upd (Seq.upd s 8 c0) 9 c1);
-  lemma_invariant (reveal_h32s (as_seq h0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (uint64_to_sint64 (u64_of_u32s (h32_to_u32 (get h0 st 8)) (h32_to_u32 (get h0 st 9)))) (uint64_to_sint64 ctr);
-  lemma_u64_of_u32s (h32_to_u32 c0) (h32_to_u32 c1);
-  cut (invariant log h_2 st);
-  copy_state st' st;
-  rounds st';
-  sum_states st' st;
+  let log = salsa20_core log st' st ctr in
   let h_3 = ST.get() in
   uint32s_to_le_bytes stream_block st' 16ul;
   let h_4 = ST.get() in
@@ -753,9 +789,13 @@ val update:
 let update output plain log st ctr =
   let h0 = ST.get() in
   push_frame();
-  let block = create (uint8_to_sint8 0uy) 64ul in
-  let l = salsa20_block log block st ctr in
-  map2 output plain block 64ul (fun x y -> H8.(x ^^ y));
+  let k = create (uint32_to_sint32 0ul) 16ul in
+  let l = salsa20_core log k st ctr in
+  let ib = create (uint32_to_sint32 0ul) 16ul in
+  let ob = create (uint32_to_sint32 0ul) 16ul in
+  uint32s_from_le_bytes ib plain 16ul;
+  map2 ob ib k 16ul (fun x y -> H32.(x ^^ y));
+  uint32s_to_le_bytes output ob 16ul;
   pop_frame();
   l
 

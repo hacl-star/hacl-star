@@ -47,8 +47,8 @@ krml-test-hacl.exe:
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 	$(CC) -Ofast -m64 -flto -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
-	 -o test-perf-hacl.exe tmp-hacl/FStar.c tmp-hacl/Crypto_AEAD*.c tmp-hacl/Crypto_Indexing*.c tmp-hacl/Crypto_Symmetric*.c tmp-hacl/Hacl_Impl*.c tmp-hacl/Hacl_Bignum*.c tmp-hacl/Hacl_Symmetric_Chacha20.c tmp-hacl/Buffer_Utils*.c tmp-hacl/Crypto_Plain*.c $(KREMLIN_HOME)/kremlib/kremlib.c \
-		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_perf.c test/test_hacks.c -I tmp-hacl  \
+	 -o test-perf-hacl.exe tmp-hacl/Crypto_AEAD*.c tmp-hacl/Crypto_Indexing*.c tmp-hacl/Crypto_Symmetric*.c tmp-hacl/Hacl_Impl*.c tmp-hacl/Hacl_Bignum*.c tmp-hacl/Hacl_Symmetric_Chacha20.c tmp-hacl/Buffer_Utils*.c tmp-hacl/Crypto_Plain*.c $(KREMLIN_HOME)/kremlib/kremlib.c tmp-hacl/Hacl_UInt128*.c\
+		$(KREMLIN_HOME)/kremlib/testlib.c test/test_perf.c test/test_hacks.c -I tmp-hacl  \
 		-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test \
 		-I $(OPENSSL_HOME)/include -L $(OPENSSL_HOME) -lcrypto $(CFLAGS)
 	PATH=$(OPENSSL_HOME):$(PATH) LD_LIBRARY_PATH=$(OPENSSL_HOME):$(LD_LIBRARY_PATH) DYLD_LIBRARY_PATH=$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH) ./test-perf-hacl.exe

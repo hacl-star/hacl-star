@@ -670,9 +670,13 @@ val update:
 let update output plain log st ctr =
   let h0 = ST.get() in
   push_frame();
-  let block = create (uint8_to_sint8 0uy) 64ul in
-  let l = chacha20_block log block st ctr in
-  map2 output plain block 64ul (fun x y -> H8.(x ^^ y));
+  let k = create (uint32_to_sint32 0ul) 16ul in
+  let l = chacha20_core log k st ctr in
+  let ib = create (uint32_to_sint32 0ul) 16ul in
+  let ob = create (uint32_to_sint32 0ul) 16ul in
+  uint32s_from_le_bytes ib plain 16ul;
+  map2 ob ib k 16ul (fun x y -> H32.(x ^^ y));
+  uint32s_to_le_bytes output ob 16ul;
   pop_frame();
   l
 
