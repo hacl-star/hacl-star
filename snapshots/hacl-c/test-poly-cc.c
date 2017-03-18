@@ -1,17 +1,7 @@
 #include "kremlib.h"
 #include "testlib.h"
 #include "Poly1305_64.h"
-#include "sodium.h"
-#include "internal/poly1305.h"
-#include "poly1305_local.h"
-#include "tweetnacl.h"
 
-void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
-  POLY1305 state;
-  Poly1305_Init(&state,key);
-  Poly1305_Update(&state,plain,len);
-  Poly1305_Final(&state,mac);
-}
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
@@ -19,8 +9,8 @@ void print_results(char *txt, double t1, unsigned long long d1, int rounds, int 
   printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
-#define PLAINLEN (16*1024)
-#define ROUNDS 3000
+#define PLAINLEN (1024*1024)
+#define ROUNDS 1000
 #define MACSIZE 32
 
 uint8_t
@@ -127,8 +117,6 @@ int32_t test_poly()
   memset(mac, 0, macsize * sizeof mac[0]);
   Poly1305_64_crypto_onetimeauth(mac, plaintext, 34, key);
   TestLib_compare_and_print("HACL Poly1305", expected, mac, macsize);
-  Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
-  TestLib_compare_and_print("Sodium Poly1305", expected, mac, macsize);
   return exit_success;
 }
 
@@ -157,48 +145,6 @@ int32_t perf_poly() {
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
-
-  t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    crypto_onetimeauth(macs + MACSIZE * i, plain, len, key);
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  print_results("Sodium Poly1305 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
-				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
-
-
-  t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    tweet_crypto_onetimeauth(macs + MACSIZE * i, plain, len, key);
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  print_results("TweetNacl Poly1305 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
-				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
-
-
-  t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    ossl_poly1305(macs + MACSIZE * i, plain, len, key);
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  print_results("OpenSSL Poly1305 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
-				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
-
   return exit_success;
 }
 

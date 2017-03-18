@@ -10,8 +10,8 @@ void print_results(char *txt, double t1, unsigned long long d1, int rounds, int 
   printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
-#define PLAINLEN (1024*1024)
-#define ROUNDS 1000
+#define PLAINLEN (16*1024)
+#define ROUNDS 3000
 #define MACSIZE 32
 
 __attribute__ ((aligned (16)))  uint8_t
