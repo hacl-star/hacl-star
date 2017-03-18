@@ -381,7 +381,7 @@ let update #i r a w =
   | POLY1305 ->
     let a' : Buffer.buffer UInt64.t = a in
     let r' : Buffer.buffer UInt64.t = r in
-    let _ = PL.poly1305_update (Ghost.hide Seq.createEmpty) (PL.MkState r' a') w in
+    let _ = PL.poly1305_update (Ghost.hide Seq.createEmpty) (PL.mk_state r' a') w in
     ()
     (* begin *)
     (*   push_frame(); *)
@@ -460,7 +460,7 @@ let finish #i s a t =
     let dummy_r = Buffer.create 0uL 3ul in
     let dummy_m = Buffer.create 42uy 0ul in
     let h' = ST.get() in
-    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.MkState dummy_r a') t dummy_m 0uL s;
+    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.mk_state dummy_r a') t dummy_m 0uL s;
     let h'' = ST.get() in
     lemma_modifies_3_2_finish h h' h'' a t;
     pop_frame();
