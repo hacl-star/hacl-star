@@ -47,13 +47,37 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_detached(
   uint8_t *k
 )
 {
+  uint32_t mlen_ = (uint32_t )mlen;
+  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )32);
   uint8_t subkey[32] = { 0 };
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, n, k);
-  Salsa20_crypto_stream_salsa20_xor(c, m, mlen + (uint64_t )32, n + (uint32_t )16, subkey);
+  Salsa20_salsa20(c, m, mlen_ + (uint32_t )32, subkey, n + (uint32_t )16, (uint64_t )0);
   Poly1305_64_crypto_onetimeauth(mac, c + (uint32_t )32, mlen, c);
   Hacl_SecretBox_ZeroPad_set_zero_bytes(c);
   Hacl_SecretBox_ZeroPad_set_zero_bytes(subkey);
   return (uint32_t )0;
+}
+
+static uint32_t
+Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached_decrypt(
+  uint8_t *m,
+  uint8_t *c,
+  uint64_t clen,
+  uint8_t *n,
+  uint8_t *subkey,
+  uint8_t verify
+)
+{
+  uint32_t clen_ = (uint32_t )clen;
+  if (verify == (uint8_t )0)
+  {
+    Salsa20_salsa20(m, c, clen_ + (uint32_t )32, subkey, n + (uint32_t )16, (uint64_t )0);
+    Hacl_SecretBox_ZeroPad_set_zero_bytes(subkey);
+    Hacl_SecretBox_ZeroPad_set_zero_bytes(m);
+    return (uint32_t )0;
+  }
+  else
+    return (uint32_t )0xffffffff;
 }
 
 static uint32_t
@@ -66,23 +90,23 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached(
   uint8_t *k
 )
 {
-  uint8_t subkey[32] = { 0 };
-  uint8_t mackey[64] = { 0 };
-  uint8_t cmac[16] = { 0 };
+  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )112);
+  uint8_t tmp[112] = { 0 };
+  uint8_t *subkey = tmp;
+  uint8_t *mackey = tmp + (uint32_t )32;
+  uint8_t *cmac = tmp + (uint32_t )96;
   Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, n, k);
-  Salsa20_crypto_stream_salsa20(mackey, (uint64_t )32, n + (uint32_t )16, subkey);
+  Salsa20_salsa20(mackey, mackey, (uint32_t )32, subkey, n + (uint32_t )16, (uint64_t )0);
   Poly1305_64_crypto_onetimeauth(cmac, c + (uint32_t )32, clen, mackey);
   uint8_t verify = Hacl_Policies_cmp_bytes(mac, cmac, (uint32_t )16);
-  uint32_t z;
-  if (verify == (uint8_t )0)
-  {
-    Salsa20_crypto_stream_salsa20_xor(m, c, clen + (uint64_t )32, n + (uint32_t )16, subkey);
-    Hacl_SecretBox_ZeroPad_set_zero_bytes(subkey);
-    Hacl_SecretBox_ZeroPad_set_zero_bytes(m);
-    z = (uint32_t )0;
-  }
-  else
-    z = (uint32_t )0xffffffff;
+  uint32_t
+  z =
+    Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached_decrypt(m,
+      c,
+      clen,
+      n,
+      subkey,
+      verify);
   return z;
 }
 
@@ -95,6 +119,7 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_easy(
   uint8_t *k
 )
 {
+  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )16);
   uint8_t cmac[16] = { 0 };
   uint32_t res = Hacl_SecretBox_ZeroPad_crypto_secretbox_detached(c, cmac, m, mlen, n, k);
   memcpy(c + (uint32_t )16, cmac, (uint32_t )16 * sizeof cmac[0]);
@@ -110,18 +135,13 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_open_easy(
   uint8_t *k
 )
 {
-  uint8_t *mac = c + (uint32_t )16;
-  return
-    Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached(m,
-      c,
-      mac,
-      clen - (uint64_t )16,
-      n,
-      k);
+  uint8_t *mac = c;
+  return Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached(m, c, mac, clen, n, k);
 }
 
 static uint32_t Hacl_Box_ZeroPad_crypto_box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
 {
+  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )48);
   uint8_t tmp[48] = { 0 };
   uint8_t *hsalsa_k = tmp;
   uint8_t *hsalsa_n = tmp + (uint32_t )32;
@@ -154,6 +174,7 @@ Hacl_Box_ZeroPad_crypto_box_detached(
   uint8_t *sk
 )
 {
+  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )80);
   uint8_t key[80] = { 0 };
   uint8_t *k = key;
   uint8_t *subkey = key + (uint32_t )32;
@@ -175,6 +196,7 @@ Hacl_Box_ZeroPad_crypto_box_open_detached(
   uint8_t *sk
 )
 {
+  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )80);
   uint8_t key[80] = { 0 };
   uint8_t *k = key;
   uint8_t *subkey = key + (uint32_t )32;
@@ -194,7 +216,11 @@ Hacl_Box_ZeroPad_crypto_box_easy_afternm(
   uint8_t *k
 )
 {
-  return Hacl_Box_ZeroPad_crypto_box_detached_afternm(c + (uint32_t )16, c, m, mlen, n, k);
+  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )16);
+  uint8_t cmac[16] = { 0 };
+  uint32_t z = Hacl_Box_ZeroPad_crypto_box_detached_afternm(c, cmac, m, mlen, n, k);
+  memcpy(c + (uint32_t )16, cmac, (uint32_t )16 * sizeof cmac[0]);
+  return z;
 }
 
 static uint32_t
@@ -207,6 +233,7 @@ Hacl_Box_ZeroPad_crypto_box_easy(
   uint8_t *sk
 )
 {
+  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )16);
   uint8_t cmac[16] = { 0 };
   uint32_t res = Hacl_Box_ZeroPad_crypto_box_detached(c, cmac, m, mlen, n, pk, sk);
   memcpy(c + (uint32_t )16, cmac, (uint32_t )16 * sizeof cmac[0]);
@@ -224,7 +251,7 @@ Hacl_Box_ZeroPad_crypto_box_open_easy(
 )
 {
   uint8_t *mac = c + (uint32_t )16;
-  return Hacl_Box_ZeroPad_crypto_box_open_detached(m, c, mac, mlen - (uint64_t )16, n, pk, sk);
+  return Hacl_Box_ZeroPad_crypto_box_open_detached(m, c, mac, mlen, n, pk, sk);
 }
 
 static uint32_t
@@ -250,14 +277,7 @@ Hacl_Box_ZeroPad_crypto_box_open_easy_afternm(
 )
 {
   uint8_t *mac = c;
-  uint8_t *c0 = c + (uint32_t )16;
-  return
-    Hacl_Box_ZeroPad_crypto_box_open_detached_afternm(m,
-      c0,
-      mac,
-      mlen - (uint64_t )16,
-      n,
-      k);
+  return Hacl_Box_ZeroPad_crypto_box_open_detached_afternm(m, c, mac, mlen, n, k);
 }
 
 Prims_int NaCl_crypto_box_NONCEBYTES;

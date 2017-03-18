@@ -7,24 +7,23 @@
 #include "kremlib.h"
 #include "testlib.h"
 
-typedef uint8_t Hacl_Symmetric_Salsa20_h8;
+typedef uint32_t Hacl_Impl_Salsa20_u32;
 
-typedef uint32_t Hacl_Symmetric_Salsa20_h32;
+typedef uint32_t Hacl_Impl_Salsa20_h32;
 
-typedef uint32_t Hacl_Symmetric_Salsa20_u32;
+typedef uint8_t *Hacl_Impl_Salsa20_uint8_p;
 
-typedef uint8_t *Hacl_Symmetric_Salsa20_uint8_p;
+typedef uint32_t *Hacl_Impl_Salsa20_state;
 
-typedef uint32_t *Hacl_Symmetric_Salsa20_salsa_ctx;
+typedef uint32_t Hacl_Impl_Salsa20_idx;
 
-void
-Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(
-  uint8_t *c,
-  uint8_t *m,
-  uint64_t mlen,
-  uint8_t *n,
-  uint8_t *k
-);
+typedef struct {
+  void *x00;
+  void *x01;
+}
+Hacl_Impl_Salsa20_log_t_;
+
+typedef void *Hacl_Impl_Salsa20_log_t;
 
 typedef uint32_t Salsa20_u32;
 
@@ -32,24 +31,17 @@ typedef uint32_t Salsa20_h32;
 
 typedef uint8_t *Salsa20_uint8_p;
 
-void
-Salsa20_crypto_stream_salsa20_xor_ic(
-  uint8_t *c,
-  uint8_t *m,
-  uint64_t mlen,
-  uint8_t *n,
-  uint64_t ic,
-  uint8_t *k
-);
+typedef uint32_t *Salsa20_state;
 
-void Salsa20_crypto_stream_salsa20(uint8_t *c, uint64_t clen, uint8_t *n, uint8_t *k);
+void *Salsa20_value_at(uint8_t *m, FStar_HyperStack_mem h);
 
 void
-Salsa20_crypto_stream_salsa20_xor(
-  uint8_t *c,
-  uint8_t *m,
-  uint64_t mlen,
+Salsa20_salsa20(
+  uint8_t *output,
+  uint8_t *plain,
+  uint32_t len,
+  uint8_t *k,
   uint8_t *n,
-  uint8_t *k
+  uint64_t ctr
 );
 #endif

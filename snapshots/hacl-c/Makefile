@@ -3,8 +3,8 @@
 TWEETNACL_HOME   ?=../../other_providers/tweetnacl
 OPENSSL_HOME   ?=../../other_providers/openssl
 LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
-CCOPTS= -Ofast -march=native -mtune=native  -fwrapv -fomit-frame-pointer -funroll-loops -g
-CC=gcc-6 -flto -fmath-errno
+CCOPTS= -Ofast -march=native -mtune=native  -fwrapv -fomit-frame-pointer -funroll-all-loops -g
+CC=gcc-6 -flto --param max-unroll-times=20
 #CC=/usr/local/opt/llvm/bin/clang -flto
 
 test: test-poly	test-chacha test-salsa test-curve test-secretbox test-box test-aead

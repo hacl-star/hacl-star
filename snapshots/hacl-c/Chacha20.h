@@ -6,7 +6,6 @@
 
 #include "kremlib.h"
 #include "testlib.h"
-#include "loops.h"
 
 typedef uint32_t Hacl_Impl_Chacha20_u32;
 
@@ -26,7 +25,11 @@ Hacl_Impl_Chacha20_log_t_;
 
 typedef void *Hacl_Impl_Chacha20_log_t;
 
+void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n, uint32_t ctr);
+
 void Chacha20_double_round(uint32_t *st);
+
+void *Chacha20_value_at(uint8_t *m, FStar_HyperStack_mem h);
 
 void
 Chacha20_chacha20(
@@ -37,13 +40,4 @@ Chacha20_chacha20(
   uint8_t *n,
   uint32_t ctr
 );
-
-void
-Chacha20_chacha20_key_block(
-  uint8_t *block,
-  uint8_t *k,
-  uint8_t *n,
-  uint32_t ctr
-			    );
-
 #endif
