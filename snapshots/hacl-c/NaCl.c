@@ -1,6 +1,6 @@
 #include "NaCl.h"
 
-static void Hacl_SecretBox_ZeroPad_set_zero_bytes(uint8_t *b)
+inline static void Hacl_SecretBox_ZeroPad_set_zero_bytes(uint8_t *b)
 {
   uint8_t zero = (uint8_t )0;
   b[0] = zero;
@@ -37,7 +37,7 @@ static void Hacl_SecretBox_ZeroPad_set_zero_bytes(uint8_t *b)
   b[31] = zero;
 }
 
-static uint32_t
+inline static uint32_t
 Hacl_SecretBox_ZeroPad_crypto_secretbox_detached(
   uint8_t *c,
   uint8_t *mac,
@@ -54,11 +54,11 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_detached(
   Salsa20_salsa20(c, m, mlen_ + (uint32_t )32, subkey, n + (uint32_t )16, (uint64_t )0);
   Poly1305_64_crypto_onetimeauth(mac, c + (uint32_t )32, mlen, c);
   Hacl_SecretBox_ZeroPad_set_zero_bytes(c);
-  Hacl_SecretBox_ZeroPad_set_zero_bytes(subkey);
+  //  Hacl_SecretBox_ZeroPad_set_zero_bytes(subkey);
   return (uint32_t )0;
 }
 
-static uint32_t
+inline static uint32_t
 Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached_decrypt(
   uint8_t *m,
   uint8_t *c,
@@ -80,7 +80,7 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached_decrypt(
     return (uint32_t )0xffffffff;
 }
 
-static uint32_t
+inline static uint32_t
 Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached(
   uint8_t *m,
   uint8_t *c,
@@ -110,7 +110,7 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached(
   return z;
 }
 
-static uint32_t
+inline static uint32_t
 Hacl_SecretBox_ZeroPad_crypto_secretbox_easy(
   uint8_t *c,
   uint8_t *m,
@@ -126,7 +126,7 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_easy(
   return res;
 }
 
-static uint32_t
+inline static uint32_t
 Hacl_SecretBox_ZeroPad_crypto_secretbox_open_easy(
   uint8_t *m,
   uint8_t *c,
@@ -139,7 +139,7 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_open_easy(
   return Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached(m, c, mac, clen, n, k);
 }
 
-static uint32_t Hacl_Box_ZeroPad_crypto_box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
+inline static uint32_t Hacl_Box_ZeroPad_crypto_box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
 {
   KRML_CHECK_SIZE((uint8_t )0, (uint32_t )48);
   uint8_t tmp[48] = { 0 };

@@ -79,7 +79,7 @@ void print_results(char *txt, double t1, unsigned long long d1, int rounds, int 
   printf("User time for %d times %d bytes: %f (%fus/byte)\n", rounds, plainlen, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
-#define PLAINLEN (16*1024)
+#define PLAINLEN (1024*1024)
 #define ROUNDS 3000
 
 int32_t test_api()
