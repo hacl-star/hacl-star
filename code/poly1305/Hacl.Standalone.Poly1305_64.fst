@@ -125,11 +125,11 @@ val poly1305_blocks:
 let rec poly1305_blocks log st m len =
   let h0 = ST.get() in
   if U64.(len =^ 0uL) then (
-    lemma_poly1305_blocks_spec_0 (Spec.MkState (as_seq h0 (P.MkState?.r st)) (as_seq h0 (P.MkState?.h st)) (reveal log)) (as_seq h0 m) len;
+    lemma_poly1305_blocks_spec_0 (Spec.MkState (as_seq h0 P.(st.r)) (as_seq h0 P.(st.h)) (reveal log)) (as_seq h0 m) len;
     log
   )
   else (
-    lemma_poly1305_blocks_spec_1 (Spec.MkState (as_seq h0 (P.MkState?.r st)) (as_seq h0 (P.MkState?.h st)) (reveal log)) (as_seq h0 m) len;
+    lemma_poly1305_blocks_spec_1 (Spec.MkState (as_seq h0 P.(st.r)) (as_seq h0 P.(st.h)) (reveal log)) (as_seq h0 m) len;
     cut (U64.v len >= 1);
     let block = Buffer.sub m 0ul 16ul in
     let tail  = Buffer.offset m 16ul in
@@ -176,8 +176,8 @@ let poly1305_partial st input len kr =
   let init_log = P.poly1305_init_ st kr in
   let h0 = ST.get() in
   assert_norm(pow2 128 < pow2 130 - 5);
-  poly_def_0 (reveal init_log) (seval (as_seq h0 (P.MkState?.r st)));
-  (* cut (invariant (Spec.MkState (as_seq h0 (P.MkState?.r st)) (as_seq h0 (P.MkState?.h st)) (reveal log))); *)
+  poly_def_0 (reveal init_log) (seval (as_seq h0 P.(st.r)));
+  (* cut (invariant (Spec.MkState (as_seq h0 P.(st.r)) (as_seq h0 P.(st.h)) (reveal log))); *)
   let partial_log = poly1305_blocks init_log st input len in
   (* cut (invariant partial_st); *)
   (* lemma_append_empty' (encode_bytes (reveal_sbytes input)) (MkState?.log init_st); *)
@@ -241,7 +241,7 @@ let crypto_onetimeauth_ output input len k =
   let buf = create limb_zero U32.(clen +^ clen) in
   let r = sub buf 0ul clen in
   let h = sub buf clen clen in
-  let st = P.MkState r h in
+  let st = P.mk_state r h in
   let key_r = Buffer.sub k 0ul 16ul in
   let key_s = Buffer.sub k 16ul 16ul in
   (* let init_log = poly1305_init_ st key_r in *)

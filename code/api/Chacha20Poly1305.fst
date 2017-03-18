@@ -1,4 +1,4 @@
-module Hacl.AEAD.Chacha20Poly1305
+module Chacha20Poly1305
 
 open FStar.Seq
 open FStar.HyperStack

@@ -5,7 +5,7 @@ include ../Makefile.include
 
 API_FILES= \
 	Hacl.Constants.fst \
-	Hacl.AEAD.Chacha20Poly1305.fst \
+	Chacha20Poly1305.fst \
 	Hacl.SecretBox.ZeroPad.fst \
 	Hacl.Box.ZeroPad.fst
 #	Hacl.SecretBox.fst \
@@ -86,7 +86,7 @@ extract-box:
 
 extract-aead:
 	mkdir -p aead-c
-	$(KRML2) -tmpdir aead-c Hacl.AEAD.Chacha20Poly1305.fst -verbose \
+	$(KRML2) -tmpdir aead-c Chacha20Poly1305.fst -verbose \
 		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
 		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
 		-drop Hacl.Constants -drop "Hacl.Endianness" -drop 'Combinators' \

@@ -72,8 +72,8 @@ uint8_t xmac[16] = {
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d times 2^20 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
-  printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
+  printf("Cycles for %d times %d bytes: %llu (%.2fcycles/byte)\n", rounds, plainlen, d1, (double)d1/plainlen/rounds);
+  printf("User time for %d times %d bytes: %f (%fus/byte)\n", rounds, plainlen, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
 #define PLAINLEN (16*1024)
