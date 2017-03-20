@@ -24,6 +24,10 @@
 
 // OpenSSL private header for benchmarking purposes
 #include "crypto/include/internal/poly1305.h"
+#ifdef _WIN32
+void OPENSSL_cpuid_setup() {
+}
+#endif
 
 // The multiplexing is done at compile-time; pass -DIMPL=IMPL_OPENSSL to your
 // compiler to override the default HACL implementation.
