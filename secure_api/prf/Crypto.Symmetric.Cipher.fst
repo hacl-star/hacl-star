@@ -15,7 +15,8 @@ open Crypto.Indexing
 
 #reset-options "--initial_fuel 0 --initial_ifuel 0 --z3rlimit 20"
 
-module CHACHA = Hacl.Symmetric.Chacha20
+(* module CHACHA = Hacl.Symmetric.Chacha20 *)
+module CHACHA = Hacl.SecureAPI.Chacha20
 
 type alg = cipherAlg
 let algi = cipherAlg_of_id
@@ -149,13 +150,17 @@ let compute i output st n counter len =
       push_frame();
       let chacha_state = Buffer.create 0ul 16ul in
       if len = 64ul then (
-        CHACHA.chacha_keysetup chacha_state st;
-        CHACHA.chacha_ietf_ivsetup chacha_state nbuf counter;
-        CHACHA.chacha_encrypt_bytes_stream chacha_state output)
-      else (
-        CHACHA.chacha_keysetup chacha_state st;
-        CHACHA.chacha_ietf_ivsetup chacha_state nbuf counter;
-        CHACHA.chacha_encrypt_bytes_finish_stream chacha_state output len
+        CHACHA.setup chacha_state st nbuf counter;
+        CHACHA.chacha20_stream output chacha_state
+        (* CHACHA.chacha_keysetup chacha_state st; *)
+        (* CHACHA.chacha_ietf_ivsetup chacha_state nbuf counter; *)
+        (* CHACHA.chacha_encrypt_bytes_stream chacha_state output) *)
+      ) else (
+        CHACHA.setup chacha_state st nbuf counter;
+        CHACHA.chacha20_stream_finish output len chacha_state
+        (* CHACHA.chacha_keysetup chacha_state st; *)
+        (* CHACHA.chacha_ietf_ivsetup chacha_state nbuf counter; *)
+        (* CHACHA.chacha_encrypt_bytes_finish_stream chacha_state output len *)
       );        
       pop_frame()
       end
