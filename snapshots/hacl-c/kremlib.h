@@ -221,17 +221,10 @@ FStar_Seq_Base_seq FStar_Seq_Base_slice(FStar_Seq_Base_seq x,
 
 // Loads and stores
 
-#define load16(b) (*((uint16_t *)(b)))
-#define store16(b, i) (*((uint16_t *)(b)) = i)
 #define load32(b) (*((uint32_t *)(b)))
 #define store32(b, i) (*((uint32_t *)(b)) = i)
 #define load64(b) (*((uint64_t *)(b)))
 #define store64(b, i) (*((uint64_t *)(b)) = i)
-
-#define load16_le(b) (le16toh(load16(b)))
-#define store16_le(b, i) (store16(b, htole16(i)))
-#define load16_be(b) (be16toh(load16(b)))
-#define store16_be(b, i) (store16(b, htobe16(i)))
 
 #define load32_le(b) (le32toh(load32(b)))
 #define store32_le(b, i) (store32(b, htole32(i)))

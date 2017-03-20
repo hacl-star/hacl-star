@@ -33,18 +33,15 @@ extern void Hacl_Bignum_lemma_diff(Prims_int x0, Prims_int x1, Prims_pos x2);
 
 typedef uint64_t *Hacl_EC_Point_point;
 
-typedef uint8_t *Hacl_EC_Format_uint8_p;
-
 typedef uint8_t *Hacl_EC_Ladder_SmallLoop_uint8_p;
 
 typedef uint8_t *Hacl_EC_Ladder_uint8_p;
+
+typedef uint8_t *Hacl_EC_Format_uint8_p;
 
 void Hacl_EC_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint);
 
 typedef uint8_t *Curve25519_uint8_p;
 
 void Curve25519_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint);
-
-void curve25519_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint);
-
 #endif

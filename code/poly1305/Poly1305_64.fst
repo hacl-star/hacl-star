@@ -29,8 +29,8 @@ type state = I.poly1305_state
 type live_state (h:mem) (st:state) = I.live_st h st
 type stable (h:mem) (st:state) = live_state h st /\ S.red_45 (as_seq h I.(st.h)) /\ S.red_44 (as_seq h I.(st.r))
 
-private let get_key (st:state) = I.MkState?.r st
-private let get_accumulator (st:state) = I.MkState?.h st
+private let get_key (st:state) = I.(st.r)
+private let get_accumulator (st:state) = I.(st.h)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
@@ -46,8 +46,8 @@ val mk_state:
   r:buffer Hacl.UInt64.t{length r = 3} -> acc:buffer Hacl.UInt64.t{length acc = 3 /\ disjoint r acc} ->
   Stack state
     (requires (fun h -> live h r /\ live h acc))
-    (ensures (fun h0 st h1 -> h0 == h1 /\ I.MkState?.r st == r /\ I.MkState?.h st == acc /\ I.live_st h1 st))
-let mk_state r acc = I.MkState r acc
+    (ensures (fun h0 st h1 -> h0 == h1 /\ I.(st.r) == r /\ I.(st.h) == acc /\ I.live_st h1 st))
+let mk_state r acc = I.mk_state r acc
 
 
 val init:
@@ -418,7 +418,7 @@ let poly1305_blocks_finish_ log st input =
   let h = ST.get() in
   Seq.lemma_eq_intro (as_seq h input) (Seq.slice (as_seq h input) 0 16);
   Math.Lemmas.modulo_lemma (Hacl.Spec.Bignum.Bigint.seval (as_seq h I.(st.r))) (pow2 130 - 5);
-  Hacl.Standalone.Poly1305_64.lemma_poly1305_blocks_spec_1 (S.MkState (as_seq h (I.MkState?.r st)) (as_seq h (I.MkState?.h st)) (reveal log)) (as_seq h input) 1uL;
+  Hacl.Standalone.Poly1305_64.lemma_poly1305_blocks_spec_1 (S.MkState (as_seq h I.(st.r)) (as_seq h I.(st.h)) (reveal log)) (as_seq h input) 1uL;
   let log' = I.poly1305_update log st input in
   Hacl.Spe.Poly1305_64.poly_def_1 (reveal log') (Hacl.Spec.Bignum.Bigint.seval (as_seq h I.(st.r)));
   cut (reveal log' == Seq.cons (reveal_sbytes (as_seq h input)) (reveal log));

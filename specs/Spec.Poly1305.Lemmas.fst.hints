@@ -1,0 +1,123 @@
+[
+  "Y‹è0ÈY#πNËhöØÁn\u0005",
+  [
+    [
+      "Spec.Poly1305.Lemmas.lemma_prime_value",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_prime_value",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_prime_value",
+      3,
+      2,
+      1,
+      [
+        "@query", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_prime_value",
+      4,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_bound",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_FStar.UInt8.t",
+        "equation_Prims.nat", "kinding_FStar.UInt8.t_@tok",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2c4751014d16f1ec8b1f34b6cc3b2faa",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_FStar.Seq.Base.length"
+      ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_bound",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_FStar.UInt8.t",
+        "equation_Prims.nat", "kinding_FStar.UInt8.t_@tok",
+        "lemma_Spec.Poly1305.Lemmas.lemma_prime_value",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2c4751014d16f1ec8b1f34b6cc3b2faa",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_FStar.Seq.Base.length"
+      ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_r",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_r",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_r",
+      3,
+      2,
+      1,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_r",
+      4,
+      2,
+      1,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_r",
+      5,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_FStar.UInt8.t",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_aca10fb50cc7162d8b55c168416f714b"
+      ],
+      0
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_r",
+      6,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ]
+  ]
+]

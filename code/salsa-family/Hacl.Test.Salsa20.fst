@@ -1,7 +1,7 @@
 module Hacl.Test.Salsa20
 
 open FStar.Buffer
-module Salsa20=Hacl.Symmetric.Salsa20
+module Salsa20=Salsa20
 
 val main: unit -> ST FStar.Int32.t
   (requires (fun h -> True))
@@ -40,8 +40,7 @@ let main () =
   let key = create 0uy 32ul in
   key.(0ul) <- 0x80uy;
   let nonce = create 0uy 8ul in
-  (* Hacl.Symmetric.Salsa20.salsa20_encrypt ciphertext key nonce plaintext len; *)
-  Salsa20.crypto_stream_salsa20_xor ciphertext plaintext 512uL nonce key;
+  Salsa20.salsa20 ciphertext plaintext 512ul key nonce 0uL;
   TestLib.compare_and_print (C.string_of_literal "salsa20") expected1 (offset ciphertext 0ul) 64ul;
   TestLib.compare_and_print (C.string_of_literal "salsa20") expected2 (offset ciphertext 192ul) 64ul;
   TestLib.compare_and_print (C.string_of_literal "salsa20") expected3 (offset ciphertext 256ul) 64ul;

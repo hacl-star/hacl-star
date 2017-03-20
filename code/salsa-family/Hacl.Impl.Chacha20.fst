@@ -380,7 +380,7 @@ unfold let double_round' (b:Seq.seq H32.t{Seq.length b = 16}) : Tot (b':Seq.seq 
   lift_32 #(fun s -> Seq.length s = 16) f b
 
 
-#reset-options "--initial_fuel 0 --max_fuel 1 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 [@ "c_inline"]
 val rounds:
@@ -502,7 +502,7 @@ val chacha20_core:
       /\ live h1 k /\ invariant updated_log h1 st /\ modifies_2 k st h0 h1
       /\ (let key = reveal_h32s (as_seq h1 k) in
           let stv = reveal_h32s (as_seq h1 st) in
-          Seq.index stv 12 == uint32_to_sint32 ctr /\
+          Seq.index stv 12 == ctr /\
          (match Ghost.reveal log, Ghost.reveal updated_log with
          | MkLog k n, MkLog k' n' ->
              key == chacha20_core stv /\ k == k' /\ n == n'))))
@@ -622,7 +622,7 @@ let lemma_chacha20_counter_mode_0 ho output hi input len k n ctr =
   Seq.lemma_eq_intro (as_seq ho output) Seq.createEmpty
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 val update_last:
   output:uint8_p ->
@@ -670,9 +670,13 @@ val update:
 let update output plain log st ctr =
   let h0 = ST.get() in
   push_frame();
-  let block = create (uint8_to_sint8 0uy) 64ul in
-  let l = chacha20_block log block st ctr in
-  map2 output plain block 64ul (fun x y -> H8.(x ^^ y));
+  let k = create (uint32_to_sint32 0ul) 16ul in
+  let l = chacha20_core log k st ctr in
+  let ib = create (uint32_to_sint32 0ul) 16ul in
+  let ob = create (uint32_to_sint32 0ul) 16ul in
+  uint32s_from_le_bytes ib plain 16ul;
+  map2 ob ib k 16ul (fun x y -> H32.(x ^^ y));
+  uint32s_to_le_bytes output ob 16ul;
   pop_frame();
   l
 

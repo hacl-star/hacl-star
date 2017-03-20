@@ -5,7 +5,7 @@ include ../Makefile.include
 
 API_FILES= \
 	Hacl.Constants.fst \
-	Hacl.AEAD.Chacha20Poly1305.fst \
+	Chacha20Poly1305.fst \
 	Hacl.SecretBox.ZeroPad.fst \
 	Hacl.Box.ZeroPad.fst
 #	Hacl.SecretBox.fst \
@@ -13,16 +13,16 @@ API_FILES= \
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
-		--include ../poly1305/interfaces --include ../../specs --include ../../specs/generic \
-		--include ../../specs/experimental --include $(KREMLIN_HOME)/kremlib
+		--include ../poly1305/interfaces --include ../../specs \
+		--include $(KREMLIN_HOME)/kremlib
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/ --include ../salsa-family/interfaces --include ../curve25519/interfaces \
-		--include ../poly1305/interfaces --include ../../specs --include ../../specs/generic \
-		 --include ../../specs/experimental  --include $(KREMLIN_HOME)/kremlib
+		--include ../poly1305/interfaces --include ../../specs \
+		--include $(KREMLIN_HOME)/kremlib
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
-		-I ../poly1305/interfaces -I ../../specs -I ../../specs/experimental -I ../../specs/generic \
+		-I ../poly1305/interfaces -I ../../specs \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
 
@@ -86,13 +86,13 @@ extract-box:
 
 extract-aead:
 	mkdir -p aead-c
-	$(KRML2) -tmpdir aead-c Hacl.AEAD.Chacha20Poly1305.fst -verbose \
+	$(KRML2) -tmpdir aead-c Chacha20Poly1305.fst -verbose \
 		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
 		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
 		-drop Hacl.Constants -drop "Hacl.Endianness" -drop 'Combinators' \
 		-drop "Hacl.Bignum.\*" -drop "Hacl.Spe.\*" -drop "Hacl.Impl.\*" -drop "Hacl.Standalone.\*" \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
-		-add-include '"Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs -I ../../specs/generic -I ../../specs/experimental 
+		-add-include '"Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs
 
 clean:
 	rm -rf api-c *~ *.exe *.graph *.o *.out aead-c box-c

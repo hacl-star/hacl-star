@@ -155,14 +155,7 @@ let pad_16 b len =
   let h1 = ST.get() in
   Seq.lemma_eq_intro (Buffer.as_seq h1 b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))
 
-//16-12-07 copied from UF1CMA for now; ad hoc
 open FStar.HyperStack
-let modifies_buf_and_ref (#a:Type) (#b:Type) (buf:Buffer.buffer a) (ref:HS.reference b) (h:mem) (h':mem) : GTot Type0 =
-  (forall rid. Set.mem rid (Map.domain h.h) ==>
-    HH.modifies_rref rid !{Buffer.as_ref buf, HS.as_ref ref} h.h h'.h
-    /\ (forall (#a:Type) (b:Buffer.buffer a). 
-      (Buffer.frameOf b == rid /\ Buffer.live h b /\ Buffer.disjoint b buf
-      /\ Buffer.disjoint_ref_1 b (HS.as_aref ref)) ==> Buffer.equal h b h' b))
 let modifies_nothing (h:mem) (h':mem) : GTot Type0 =
   (forall rid. Set.mem rid (Map.domain h.h) ==>
     HH.modifies_rref rid !{} h.h h'.h
@@ -192,7 +185,7 @@ private val add_bytes:
         let l0 = FStar.HyperStack.sel h0 log in
         let l1 = FStar.HyperStack.sel h1 log in
         Seq.equal l1 (Seq.append (encode_bytes (Buffer.as_seq h1 txt)) l0) /\ 
-        modifies_buf_and_ref b log h0 h1 
+        CMA.modifies_buf_and_ref b log h0 h1
       else 
         Buffer.modifies_1 b h0 h1 )))
 
@@ -290,8 +283,6 @@ private let encode_lengths_poly1305 (aadlen:UInt32.t) (plainlen:UInt32.t) : b:lb
   Seq.append_slices b0 (bp @| b0);
   Seq.append_slices bp b0;
   b
-//16-11-01 unclear why verification is slow above, fast below
-(* #reset-options *)
 
 private val store_lengths_poly1305: aadlen:UInt32.t ->  plainlen:UInt32.t -> w:lbuffer 16 ->
   StackInline unit 
@@ -363,10 +354,12 @@ let store_lengths_ghash aadlen txtlen w =
   assert(Seq.equal (Buffer.as_seq h1 w2) (Seq.create 4 0uy));
   lemma_big_endian_inj (uint32_be 4ul (8ul *^ txtlen)) (Buffer.as_seq h1 w3)
 
+#set-options "--initial_ifuel 1 --max_ifuel 1"
 private let encode_lengths (i:id) (aadlen:aadlen_32) (txtlen:txtlen_32) : lbytes 16 =
   match macAlg_of_id i with 
   | POLY1305 -> encode_lengths_poly1305 aadlen txtlen 
   | GHASH -> encode_lengths_ghash aadlen txtlen
+#reset-options
 
 noextract let encode_both (i:id) (aadlen:aadlen_32) (aad:lbytes (v aadlen)) (txtlen:txtlen_32) (cipher:lbytes (v txtlen)) :
   GTot (e:MAC.text {Seq.length e > 0 /\ Seq.head e = encode_lengths i aadlen txtlen}) = 
@@ -468,12 +461,11 @@ let accumulate #i st aadlen aad txtlen cipher  =
       assert(equal (HS.sel h5 al) (Seq.cons lbytes (encode_bytes cbytes @| encode_bytes abytes)));
       assert(equal (HS.sel h5 al) (encode_both (fst i) aadlen abytes txtlen cbytes));
 
-      //16-12-15 can't prove Buffer.modifies_0 from current CMA posts?
       assert(HS.modifies_one h.tip h h0);
-      assume(HS.modifies_one h.tip h0 h2); //NS: cf. issue #788 (known limitation)
+      assert(HS.modifies_one h.tip h0 h2);
       assert(HS.modifies_one h.tip h2 h3);
       assert(HS.modifies_one h.tip h3 h4);
-      assume(HS.modifies_one h.tip h4 h5); //NS: cf. issue #788 (known limitation)
+      assert(HS.modifies_one h.tip h4 h5);
       assert(HS.modifies_one h.tip h h5);
       assert(Buffer.modifies_buf_0 h.tip h h5);
       Buffer.lemma_intro_modifies_0 h h5
@@ -481,8 +473,6 @@ let accumulate #i st aadlen aad txtlen cipher  =
   else 
     begin
       Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.(abuf acc))) h0 h2;
-      Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc))  h4 h5
+      Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h4 h5
     end;
   acc
-
- 

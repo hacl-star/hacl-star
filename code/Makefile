@@ -23,8 +23,19 @@ extract-c: $(addsuffix -c, $(filter-out bignum, $(DIRECTORIES)))
 
 ci: $(addsuffix -ci, $(DIRECTORIES))
 
-hints: $(addsuffix -hints, $(DIRECTORIES))
+# Gathering all bignum verification code in one target to allow parallelization of the others
+bignum-hints:
+	$(MAKE) -C bignum all-hints
+	$(MAKE) -C poly1305 bignum-hints
+	$(MAKE) -C curve25519 bignum-hints
 
+poly1305-specific-hints:
+	$(MAKE) -C poly1305 specific-hints
+
+x25519-specific-hints:
+	$(MAKE) -C curve25519 specific-hints
+
+hints: $(addsuffix -hints, salsa-family api) bignum-hints poly1305-specific-hints x25519-specific-hints
 
 clean:
 	rm -rf *~ *.exe *.out 

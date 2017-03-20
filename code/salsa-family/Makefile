@@ -16,6 +16,7 @@ SALSA_FAMILY_FILES= \
 	Hacl.Symmetric.HSalsa20.fst \
 	Hacl.Symmetric.XSalsa20.fst \
 	Chacha20.fst \
+	Hacl.SecureAPI.Chacha20.fst \
 	Salsa20.fst
 
 SALSA_MODULES= $(basename $(SALSA_FILES))
@@ -25,11 +26,11 @@ SLOW=Hacl.Symmetric.Salsa20.fst \
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
+		 --include ../../specs
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
+		 --include ../../specs
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -58,38 +59,36 @@ all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
 all-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
 
-KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experimental -I ../../specs/generic -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
+KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experimental -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -drop 'Hacl.UInt8' $(KREMLIN_ARGS) \
 	-drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 	-drop 'Hacl.Endianness' -drop 'Hacl.Cast'
 
 Chacha20.c: Hacl.Impl.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
-	$(KRML) -tmpdir chacha-c -no-prefix Loops -I . -drop "Loops" \
-		-bundle 'Chacha20=Hacl.Impl.Chacha20,Chacha20' -drop 'Hacl.Spec.\*' -add-include '"loops.h"' -drop 'Spec.\*' -drop "Combinators" \
+	$(KRML) -tmpdir chacha-c \
+		-bundle 'Chacha20=Hacl.Impl.Chacha20,Chacha20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*' -drop "C.Loops" \
 		Chacha20.fst $(VERBOSE) -skip-linking
 
 chacha20.exe: Hacl.Impl.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
-	$(KRML) $(KREMLIN_ARGS) -tmpdir chacha-c  -no-prefix Hacl.Test.Chacha20 -no-prefix Loops -I . -drop "Loops" \
-		-bundle 'Chacha20=Chacha20,Hacl.Impl.Chacha20' -drop 'Hacl.Spec.\*' -add-include '"loops.h"' -drop 'Spec.\*' -drop "Combinators" \
+	$(KRML) $(KREMLIN_ARGS) -tmpdir chacha-c  -no-prefix Hacl.Test.Chacha20 -I . -drop "C.Loops" \
+		-bundle 'Chacha20=Chacha20,Hacl.Impl.Chacha20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*'  \
 		Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe
 	./chacha20.exe
 
 
-Salsa.c: Hacl.Impl.Chacha20.fst
-	mkdir -p salsa2-c
-	$(KRML) $(KREMLIN_ARGS) -tmpdir salsa2-c  -no-prefix Hacl.Test2.Salsa20 -no-prefix Loops -I . -drop "Loops" \
-		-bundle 'Salsa=Salsa,Hacl.Impl.Salsa20' -drop 'Hacl.Spec.\*' -add-include '"loops.h"' -drop 'Spec.\*' -drop "Combinators" \
-		Hacl.Test2.Salsa20.fst -o salsa.exe
-	./salsa.exe
-
-Salsa20.c: Hacl.Symmetric.Salsa20.fst Hacl.Test.Salsa20.fst
+Salsa20.c: Hacl.Impl.Salsa20.fst Salsa20.fst
 	mkdir -p salsa-c
-	$(KRML) $(KREMLIN_ARGS) -tmpdir salsa-c \
-		Salsa20.fst Hacl.Test.Salsa20.fst -o salsa20.exe -no-prefix Hacl.Test.Salsa20 \
-		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.UInt.\*' \
-		-bundle Salsa20=Hacl.Symmetric.Salsa20
+	$(KRML) $(KREMLIN_ARGS) -tmpdir salsa-c -I . -skip-compilation \
+		-bundle 'Salsa20=Salsa20,Hacl.Impl.Salsa20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*' -drop "C.Loops" \
+		$^
+
+salsa20.exe: Hacl.Impl.Salsa20.fst Salsa20.fst Hacl.Test.Salsa20.fst
+	mkdir -p salsa-c
+	$(KRML) $(KREMLIN_ARGS) -tmpdir salsa-c  -no-prefix Hacl.Test.Salsa20 \
+		-bundle 'Salsa20=Salsa20,Hacl.Impl.Salsa20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*' -drop "C.Loops" \
+		$^ -o salsa20.exe
 	./salsa20.exe
 
 HSalsa20.c: Hacl.Symmetric.HSalsa20.fst 
@@ -109,8 +108,8 @@ XSalsa20.c: Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst
 		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.UInt.\*'
 	./xsalsa20.exe
 
-extract-c: Chacha20.c Salsa20.c HSalsa20.c XSalsa20.c Salsa.c
+extract-c: Chacha20.c Salsa20.c HSalsa20.c XSalsa20.c
 
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ salsa-c salsa2-c chacha-c chacha-cc hsalsa-c xsalsa-c chacha2-c *.graph
+	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c hsalsa-c xsalsa-c *.graph

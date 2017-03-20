@@ -10,8 +10,8 @@ void print_results(char *txt, double t1, unsigned long long d1, int rounds, int 
   printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
-#define PLAINLEN (1024*1024)
-#define ROUNDS 1000
+#define PLAINLEN (16*1024)
+#define ROUNDS 3000
 #define MACSIZE 32
 
 __attribute__ ((aligned (16)))  uint8_t
@@ -305,11 +305,7 @@ int32_t test_salsa()
   memset(nonce, 0, noncesize * sizeof nonce[0]);
 
 
-  Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(ciphertext,
-    plaintext,
-    (uint64_t )512,
-    nonce,
-    key);
+  Salsa20_salsa20(ciphertext,plaintext,(uint64_t )512,key,nonce,(uint64_t)0);
   TestLib_compare_and_print("HACL Salsa20", expected1, ciphertext + (uint32_t )0, (uint32_t )64);
   TestLib_compare_and_print("HACL Salsa20", expected2, ciphertext + (uint32_t )192, (uint32_t )64);
   TestLib_compare_and_print("HACL Salsa20", expected3, ciphertext + (uint32_t )256, (uint32_t )64);
@@ -358,15 +354,9 @@ int32_t perf_salsa() {
   cycles a,b;
   clock_t t1,t2;
   t1 = clock();
-
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    //memcpy(block+32,plain,32);
-    //Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, nonce, key);
-    //    memcpy(cipher,block+32,32);
-    Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(cipher, plain, len, nonce, key);
-    //Poly1305_64_crypto_onetimeauth(subkey_, cipher, len, subkey);
-    //Salsa20_crypto_stream_salsa20_xor_block0(block_, block, 64, nonce_, subkey);
+    Salsa20_salsa20(plain, plain, len, key, nonce, 0);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
