@@ -151,13 +151,13 @@ let compute i output st n counter len =
       let chacha_state = Buffer.create 0ul 16ul in
       if len = 64ul then (
         CHACHA.setup chacha_state st nbuf counter;
-        CHACHA.chacha20_stream output chacha_state
+        CHACHA.chacha20_stream (Buffer.sub output 0ul 64ul) chacha_state
         (* CHACHA.chacha_keysetup chacha_state st; *)
         (* CHACHA.chacha_ietf_ivsetup chacha_state nbuf counter; *)
         (* CHACHA.chacha_encrypt_bytes_stream chacha_state output) *)
       ) else (
         CHACHA.setup chacha_state st nbuf counter;
-        CHACHA.chacha20_stream_finish output len chacha_state
+        CHACHA.chacha20_stream_finish (Buffer.sub output 0ul len) len chacha_state
         (* CHACHA.chacha_keysetup chacha_state st; *)
         (* CHACHA.chacha_ietf_ivsetup chacha_state nbuf counter; *)
         (* CHACHA.chacha_encrypt_bytes_finish_stream chacha_state output len *)
