@@ -502,7 +502,7 @@ val chacha20_core:
       /\ live h1 k /\ invariant updated_log h1 st /\ modifies_2 k st h0 h1
       /\ (let key = reveal_h32s (as_seq h1 k) in
           let stv = reveal_h32s (as_seq h1 st) in
-          Seq.index stv 12 == uint32_to_sint32 ctr /\
+          Seq.index stv 12 == ctr /\
          (match Ghost.reveal log, Ghost.reveal updated_log with
          | MkLog k n, MkLog k' n' ->
              key == chacha20_core stv /\ k == k' /\ n == n'))))
