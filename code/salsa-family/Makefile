@@ -23,6 +23,8 @@ SALSA_MODULES= $(basename $(SALSA_FILES))
 
 SLOW=Hacl.Symmetric.Salsa20.fst \
 
+BROKEN=	Hacl.Impl.Salsa20.fst \
+
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
@@ -45,7 +47,7 @@ all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 
 # For CI, all modules restricted from incomplete or slow ones
-all-ci: $(addsuffix -verify, $(filter-out $(SLOW), $(SALSA_FAMILY_FILES)))
+all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SALSA_FAMILY_FILES)))
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
@@ -57,7 +59,7 @@ all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 %.fst-hints: %.fst
 	-$(FSTARB) $^ --use_hints --record_hints
 
-all-hints: $(addsuffix -hints, $(SALSA_FAMILY_FILES))
+all-hints: $(addsuffix -hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES))
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experimental -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -drop 'Hacl.UInt8' $(KREMLIN_ARGS) \
