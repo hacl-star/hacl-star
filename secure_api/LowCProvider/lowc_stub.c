@@ -17,14 +17,11 @@
 #include "tmp-vale/Prims.h"
 #include "tmp-vale/Crypto_Indexing.h"
 #include "tmp-vale/Crypto_Symmetric_Bytes.h"
-#include "tmp-vale/Crypto_Symmetric_PRF.h"
-#include "tmp-vale/Crypto_Symmetric_UF1CMA.h"
 #include "tmp-vale/Crypto_AEAD_Invariant.h"
 #include "tmp-vale/Crypto_AEAD_Encrypt.h"
 #include "tmp-vale/Crypto_AEAD_Decrypt.h"
 #include "tmp-vale/Crypto_AEAD.h"
 
-typedef Crypto_Symmetric_PRF_state____ PRF_ST;
 typedef Crypto_AEAD_Invariant_aead_state_______ AEAD_ST;
 typedef Crypto_Indexing_id ID;
 
@@ -53,8 +50,6 @@ static void ocaml_ST_finalize(value st) {
     if(s != NULL) {
         AEAD_ST *st = s->st;
         if(st != NULL) {
-                // Free PRF state
-                if(&(st->x02) != NULL) free(&(st->x02));
                 free(st);
         }
         free(s);
@@ -88,42 +83,9 @@ CAMLprim value ocaml_AEAD_create(value alg, value key) {
                         caml_failwith("LowCProvider: unsupported AEAD alg");
         }
         Crypto_Indexing_id id = calg;
-       	// {.cipher = calg, .aes=Crypto_Config_aesImpl_ValeAES, .uniq = 0};
-        uint8_t* ckey = (uint8_t*) String_val(key);
-        uint32_t keylen = caml_string_length(key);
-
-        uint8_t *keystate = calloc(Crypto_Symmetric_PRF_statelen(id), sizeof (uint8_t));
-        Crypto_Symmetric_Cipher_init(id, ckey, keystate);
-  
-        PRF_ST* prf = malloc(sizeof(PRF_ST));
-
-        prf->x00 = FStar_HyperHeap_root;
-        prf->x01 = FStar_HyperHeap_root;
-        prf->x02 = keystate;
-        prf->x03 = (Crypto_Symmetric_PRF_no_table(id, FStar_HyperHeap_root, FStar_HyperHeap_root), (void *)0);
-
-        void *log = FStar_ST_ralloc(FStar_HyperHeap_root, FStar_Seq_createEmpty((uint8_t )0));
-        Prims_option__uint8_t_ ak;
-
-        if (Crypto_Symmetric_UF1CMA_skeyed(id))
-        {
-                Crypto_Symmetric_PRF_domain____ x = { .iv = FStar_Int_Cast_uint64_to_uint128((uint64_t )0), .ctr = (uint32_t )0 };
-                uint8_t *keyBuffer = calloc(Crypto_Symmetric_UF1CMA_skeylen(id), sizeof (uint8_t ));
-                Crypto_Symmetric_PRF_getBlock(id, *prf, x, Crypto_Symmetric_UF1CMA_skeylen(id), keyBuffer);
-    
-                ak = (Prims_option__uint8_t_ ){
-                        .tag = Prims_option__uint8_t__Some,
-                                { .case_Some = { .v = keyBuffer } }
-                };
-        }
-        else
-                ak = (Prims_option__uint8_t_ ){ .tag = Prims_option__uint8_t__None, { .case_None = {  } } };
 
         AEAD_ST* st = malloc(sizeof(AEAD_ST));
-        st->x00 = FStar_HyperHeap_root;
-        st->x01 = log;
-        st->x02 = *prf;
-        st->x03 = ak;
+       	*st = Crypto_AEAD_gen(id, FStar_HyperHeap_root);
 
         ST *s = malloc(sizeof(ST));
         s->st = st;
