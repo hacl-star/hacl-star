@@ -82,7 +82,13 @@ let enxor_h0_h1
 				                 (v plainlen) 0 (v plainlen)
 					         (Plain.sel_plain h1 plainlen plain)
 					         (Buffer.as_seq h1 cipher)))))) /\
-  (prf i ==> prf_mac_inv (HS.sel h1 (itable i aead_st.prf)) h1)  //prf_mac_inv continues to hold after enxor
+  (prf i ==>  //AR: repeating it here, this should be under prf flag so that we can prove prf_mac_inv going forward
+     (let prf = itable i aead_st.prf in
+      let table_0 = HS.sel h0 prf in
+      let table_1 = HS.sel h1 prf in
+      HS.modifies rgns h0 h1                                                            /\    //enxor only modifies the PRF region, and the cipher buffer region
+      HS.modifies_ref aead_st.prf.rgn (TSet.singleton (Heap.Ref (HS.as_ref prf))) h0 h1 /\    //in the PRF region, enxor only modifies the PRF table reference
+      table_differs_only_above_x (PRF.incr i dom_0) table_0 table_1))                            //table_1 = table_0 ++ (otp entries)
 
 let fresh_nonces_are_unused_except (#i:id) (#mac_rgn:region) (nonce:Cipher.iv (alg i))
 				   (prf_table:prf_table mac_rgn i) (aead_entries:aead_entries i) 

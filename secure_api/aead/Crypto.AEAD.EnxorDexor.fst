@@ -921,3 +921,7 @@ let dexor #i st iv #aadlen aad #len plain cipher_tagged p =
        forall_intro (move_requires (find_fresh_iv_none st iv blocks h1));
        forall_intro (move_requires (frame_unused_aead_iv_for_prf_append prf_entries_0 blocks h1'));
        assert (fresh_nonces_are_unused prf_entries_1 aead_entries_1 h1)
+  else if prf i then begin
+    let table_1 = HS.sel h1 (PRF.itable i st.prf) in
+    assume (prf_mac_inv table_1 h1)
+  end
