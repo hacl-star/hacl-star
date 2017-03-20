@@ -58,7 +58,7 @@ private let sanity_check i = assert(safeId i ==> prf i)
 
 type region = rgn:HH.rid {HS.is_eternal_region rgn}
 
-
+#reset-options "--max_fuel 0 --z3rlimit 100"
 // to be adjusted, controlling concrete bound.
 //16-10-15 how to ensure it is reduced at compile-time?
 let maxCtr i = 16384ul /^ blocklen i

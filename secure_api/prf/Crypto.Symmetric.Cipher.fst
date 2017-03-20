@@ -131,7 +131,7 @@ val compute:
     (requires (fun h -> live h st /\ live h output))
     (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
 
-#set-options "--z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let compute i output st n counter len = 
   let h0 = ST.get() in 
