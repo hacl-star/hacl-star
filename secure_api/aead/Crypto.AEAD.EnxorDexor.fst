@@ -885,7 +885,6 @@ val dexor:
 	    decrypt_ok iv st aad plain cipher_tagged h1))
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 open Crypto.AEAD.Encoding
-(* AR: TODO: this fails *)
 let dexor #i st iv #aadlen aad #len plain cipher_tagged p =
   let x_1 = {iv=iv; ctr=otp_offset i} in
   let t = st.prf in
@@ -894,6 +893,28 @@ let dexor #i st iv #aadlen aad #len plain cipher_tagged p =
   counter_dexor i t x_1 len len plain cipher p;
   let h1 = get () in
   decrypted_up_to_end plain p h1;
+
+  if prf i && not (safeId i) then begin
+    let table_0 = HS.sel h0 (PRF.itable i st.prf) in
+    let table_1 = HS.sel h1 (PRF.itable i st.prf) in
+    let blocks = Seq.slice table_1 (Seq.length table_0) (Seq.length table_1) in
+    assert (Seq.equal table_1 (Seq.append table_0 blocks)); //AR: this is a simpler Seq proof
+    let dom_0 = {iv=iv; ctr=PRF.ctr_0 i} in
+    let h1:(h1:mem{prf i}) = h1 in
+    let aux (x:domain_mac i) :Lemma (PRF.prf_mac_inv table_1 x h1)
+      = let _ = if x.iv = iv then find_mac_all_above_1 blocks x.iv else find_other_iv_all_above blocks dom_0 x in
+	frame_prf_mac_inv_append_blocks table_0 blocks x h0;
+	frame_prf_prf_mac_inv table_1 h0 h1 x
+    in
+    let open FStar.Classical in
+    forall_intro aux;
+    assert (prf_mac_inv (HS.sel h1 (PRF.itable i st.prf)) h1)
+  end
+  else ();
+
+  (* AR: TODO: we can prove it with prf i && not (safeId i) *)
+  assume (prf i ==> prf_mac_inv (HS.sel h1 (PRF.itable i st.prf)) h1);
+
   if not (prf i) || safeId i
   then begin
     FStar.Buffer.lemma_reveal_modifies_1 (as_buffer plain) h0 h1;
@@ -922,7 +943,3 @@ let dexor #i st iv #aadlen aad #len plain cipher_tagged p =
        forall_intro (move_requires (find_fresh_iv_none st iv blocks h1));
        forall_intro (move_requires (frame_unused_aead_iv_for_prf_append prf_entries_0 blocks h1'));
        assert (fresh_nonces_are_unused prf_entries_1 aead_entries_1 h1)
-  else if prf i then begin
-    let table_1 = HS.sel h1 (PRF.itable i st.prf) in
-    assume (prf_mac_inv table_1 h1)
-  end
