@@ -18,9 +18,9 @@ Chacha20Poly1305_aead_encrypt(
   uint8_t *n
 )
 {
-  Chacha20_chacha20(c, m, mlen, k, n, (uint32_t )1);
   uint8_t b[64] = { 0 };
-  Chacha20_chacha20_key_block(b, k, n, (uint32_t )0);
+  crypto_stream(b, 32, n, k);
+  crypto_stream_xor_ic(c, m, mlen, n, k, (uint32_t )1);
   uint8_t *mk = b;
   uint8_t *key_s = mk + (uint32_t )16;
   uint64_t buf[6] = { 0 };
@@ -75,7 +75,7 @@ Chacha20Poly1305_aead_decrypt(
 )
 {
   uint8_t b[64] = { 0 };
-  Chacha20_chacha20_key_block(b, k, n, (uint32_t )0);
+  crypto_stream(b, 32, n, k);
   uint8_t *mk = b;
   uint8_t *key_s = mk + (uint32_t )16;
   uint8_t rmac[16] = { 0 };
@@ -103,7 +103,7 @@ Chacha20Poly1305_aead_decrypt(
   uint32_t res;
   if (verify == (uint8_t )0)
   {
-    Chacha20_chacha20(m, c, mlen, k, n, (uint32_t )1);
+    crypto_stream_xor_ic(m, c, mlen, n, k, (uint32_t )1);
     res = (uint32_t )0;
   }
   else

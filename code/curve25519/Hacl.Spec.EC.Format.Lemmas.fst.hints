@@ -1,0 +1,682 @@
+[
+  "ª„O‹…,W7 Ž»\u000b\u007f7fS",
+  [
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_little_endian_split",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_little_endian_split",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_little_endian_split",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Endianness.bytes",
+        "equation_FStar.Endianness.lbytes", "equation_FStar.Mul.op_Star",
+        "equation_FStar.UInt8.t", "equation_Prims.nat", "int_inversion",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2fd2ca5ba5888b39b1231badbe38fb2e",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_bc1e295f2a145a708c162f71b3994441"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_little_endian_split",
+      4,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Endianness.bytes",
+        "equation_FStar.Endianness.lbytes",
+        "equation_FStar.List.Tot.Base.test_sort",
+        "equation_FStar.Mul.op_Star", "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_FStar.UInt128.n", "equation_FStar.UInt8.t",
+        "equation_Prims._assert", "equation_Prims.nat",
+        "fuel_correspondence_FStar.Endianness.little_endian.fuel_instrumented",
+        "function_token_typing_FStar.List.Tot.Base.test_sort",
+        "function_token_typing_FStar.UInt128.n", "int_inversion",
+        "int_typing", "kinding_FStar.UInt8.t_@tok",
+        "lemma_FStar.Seq.Base.lemma_eq_elim",
+        "lemma_FStar.Seq.Base.lemma_index_app1",
+        "lemma_FStar.Seq.Base.lemma_index_app2",
+        "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0c39788a35c67ccb2b6c008a42650895",
+        "refinement_interpretation_Tm_refine_2fd2ca5ba5888b39b1231badbe38fb2e",
+        "refinement_interpretation_Tm_refine_5ec5b64a8a200c47ed44dad76f0de705",
+        "refinement_interpretation_Tm_refine_5f9282a7d9f2c30a6bfdb03f7a7798c6",
+        "refinement_interpretation_Tm_refine_641a4cf36484c6d725c0070fa6553252",
+        "refinement_interpretation_Tm_refine_a341af39caff669bb0afe0b53bc92beb",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_bc1e295f2a145a708c162f71b3994441",
+        "refinement_interpretation_Tm_refine_ec8c52b60e5c33b3ae66e4063643ec19",
+        "typing_FStar.Endianness.little_endian",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar",
+        "unit_inversion"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_little_endian_split",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_little_endian_split",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_little_endian_of_partial_load",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_little_endian_of_partial_load",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Endianness.bytes",
+        "equation_FStar.Endianness.lbytes", "equation_FStar.Mul.op_Star",
+        "equation_FStar.UInt8.t", "equation_Prims.nat", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2491d5019738bba2a2b875344ad37d00",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_bc1e295f2a145a708c162f71b3994441",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_little_endian_of_partial_load",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Endianness.bytes",
+        "equation_FStar.Endianness.lbytes", "equation_FStar.UInt32.n",
+        "equation_FStar.UInt8.t", "equation_Prims.nat",
+        "function_token_typing_FStar.UInt32.n", "int_inversion",
+        "int_typing", "kinding_FStar.UInt8.t_@tok",
+        "lemma_FStar.Seq.Base.lemma_eq_elim",
+        "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0c39788a35c67ccb2b6c008a42650895",
+        "refinement_interpretation_Tm_refine_2491d5019738bba2a2b875344ad37d00",
+        "refinement_interpretation_Tm_refine_5ab6164904c12d09e7c99180b6e7c8dd",
+        "refinement_interpretation_Tm_refine_5ec5b64a8a200c47ed44dad76f0de705",
+        "refinement_interpretation_Tm_refine_65ed4d1e56f6d8d7d8508896273131f1",
+        "refinement_interpretation_Tm_refine_a341af39caff669bb0afe0b53bc92beb",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_bc1e295f2a145a708c162f71b3994441",
+        "refinement_interpretation_Tm_refine_e38fb3de1305bc851aa1b100ac367bc2",
+        "typing_FStar.Seq.Base.length"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand_i",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand_i",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_654aa35f6df4693ac17113c3d1309ded",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand_i",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_654aa35f6df4693ac17113c3d1309ded",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_k",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_k",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_k",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_k",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_k",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_k",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_k",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Endianness.bytes",
+        "equation_FStar.Endianness.lbytes", "equation_FStar.UInt8.t",
+        "equation_Prims.pos", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_bc1e295f2a145a708c162f71b3994441",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Endianness.bytes",
+        "equation_FStar.Endianness.lbytes", "equation_FStar.Mul.op_Star",
+        "equation_FStar.UInt8.n", "equation_FStar.UInt8.t",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_correspondence_FStar.Endianness.little_endian.fuel_instrumented",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "function_token_typing_FStar.Mul.op_Star",
+        "function_token_typing_FStar.UInt8.n", "int_inversion", "int_typing",
+        "interpretation_Tm_arrow_44faff5d8543c30ad9bf2eeaf1b3abcf",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_bc1e295f2a145a708c162f71b3994441",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "token_correspondence_FStar.Mul.op_Star",
+        "typing_FStar.Endianness.little_endian", "typing_FStar.Mul.op_Star",
+        "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      8,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      9,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fexpand",
+      10,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.u51",
+      1,
+      0,
+      1,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base_i",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base_i",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_549922dec476765936d594ad414db417",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ffe115b9ce303f5b013dc4ba51dc996a"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base_i",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.nonzero", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_549922dec476765936d594ad414db417",
+        "refinement_interpretation_Tm_refine_7075614a0e8c0bdbec6de0d0ef7f1280",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_ffe115b9ce303f5b013dc4ba51dc996a",
+        "typing_FStar.Mul.op_Star", "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base_i",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base_i",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base_j",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base_j",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.nat", "int_inversion",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base_j",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_FStar.Mul.op_Star", "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base",
+      2,
+      0,
+      1,
+      [
+        "@query", "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_FStar.UInt64.n",
+        "equation_Hacl.Spec.EC.Format.Lemmas.u51", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "function_token_typing_FStar.UInt64.n", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_9d05adfb7f718a6629fcf74458c1400b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_base",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_bounds",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_bounds",
+      2,
+      0,
+      1,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_bounds",
+      3,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.Mul.op_Star", "equation_FStar.UInt64.n",
+        "equation_Hacl.Spec.EC.Format.Lemmas.u51", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "function_token_typing_FStar.UInt64.n", "int_inversion",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_9d05adfb7f718a6629fcf74458c1400b",
+        "refinement_interpretation_Tm_refine_af34355352a8a1353fd25b7e30be7ee6",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract_bounds",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract",
+      2,
+      0,
+      1,
+      [
+        "@query", "b2t_def", "equation_FStar.Mul.op_Star",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt32.n", "equation_FStar.UInt64.n",
+        "equation_Hacl.Spec.EC.Format.Lemmas.u51", "equation_Prims.nat",
+        "equation_Prims.nonzero", "equation_Prims.pos",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt64.n", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_7075614a0e8c0bdbec6de0d0ef7f1280",
+        "refinement_interpretation_Tm_refine_9d05adfb7f718a6629fcf74458c1400b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract",
+      3,
+      0,
+      2,
+      [
+        "@query", "b2t_def", "equation_FStar.Endianness.bytes",
+        "equation_FStar.Endianness.lbytes", "equation_FStar.Mul.op_Star",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt128.n",
+        "equation_FStar.UInt32.n", "equation_FStar.UInt64.n",
+        "equation_FStar.UInt8.t", "equation_Hacl.Spec.EC.Format.Lemmas.u51",
+        "equation_Prims.nat", "equation_Prims.nonzero", "equation_Prims.pos",
+        "fuel_correspondence_FStar.Endianness.little_endian.fuel_instrumented",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "function_token_typing_FStar.UInt128.n",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt64.n", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_427a598ab7b3d73247dbad7b0bd06de0",
+        "refinement_interpretation_Tm_refine_4fbda56933ca065039878dda55127eaa",
+        "refinement_interpretation_Tm_refine_6cd2856c91d29b14fadd7f6b08d4fb47",
+        "refinement_interpretation_Tm_refine_7075614a0e8c0bdbec6de0d0ef7f1280",
+        "refinement_interpretation_Tm_refine_9d05adfb7f718a6629fcf74458c1400b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_bc1e295f2a145a708c162f71b3994441",
+        "refinement_interpretation_Tm_refine_c1992a81f3d85b6adbddccbec72d041d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.EC.Format.Lemmas.lemma_fcontract",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ]
+  ]
+]

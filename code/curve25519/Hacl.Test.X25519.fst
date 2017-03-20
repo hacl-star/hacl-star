@@ -8,7 +8,7 @@ val main: unit -> ST FStar.Int32.t
 let main () =
   push_frame();
   let keysize = 32ul in
-  let result = create 0uy keysize in
+  let result = create 0uy 32ul in
   let scalar1 = createL [
     0xa5uy; 0x46uy; 0xe3uy; 0x6buy; 0xf0uy; 0x52uy; 0x7cuy; 0x9duy;
     0x3buy; 0x16uy; 0x15uy; 0x4buy; 0x82uy; 0x46uy; 0x5euy; 0xdduy;

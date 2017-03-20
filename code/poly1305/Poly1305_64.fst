@@ -361,7 +361,7 @@ val poly1305_blocks_continue:
          /\ Hacl.Spe.Poly1305_64.invariant (Hacl.Spec.Poly1305_64.MkState r acc' log')
          /\ log' == Seq.append (Spec.Poly1305.encode_bytes (pad_16 m)) log)
     ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 let poly1305_blocks_continue log st input len =
   let len_16 = U32.(len >>^ 4ul) in
   let rem_16 = U32.(len &^ 15ul)  in

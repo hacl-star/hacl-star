@@ -107,7 +107,7 @@ private val fmul_:
       /\ fmul_pre (as_seq h0 input) (as_seq h0 input2)
       /\ as_seq h1 output == fmul_spec (as_seq h0 input) (as_seq h0 input2)
       ))
-#reset-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1"
+#reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 [@"c_inline"]
 private let fmul_ output input input2 =
   let h0 = ST.get() in

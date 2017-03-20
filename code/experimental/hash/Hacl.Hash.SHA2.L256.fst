@@ -41,11 +41,17 @@ let suint8_p  = Buffer.buffer suint8_t
 
 
 (* Definitions of aliases for functions *)
+[@"substitute"]
 let u8_to_s8 = Cast.uint8_to_sint8
+[@"substitute"]
 let u32_to_s32 = Cast.uint32_to_sint32
+[@"substitute"]
 let u32_to_s64 = Cast.uint32_to_sint64
+[@"substitute"]
 let s32_to_s8  = Cast.sint32_to_sint8
+[@"substitute"]
 let s32_to_s64 = Cast.sint32_to_sint64
+[@"substitute"]
 let u64_to_s64 = Cast.uint64_to_sint64
 
 
@@ -70,44 +76,56 @@ inline_for_extraction let size_count_32  = 1ul   // 32 bits (UInt32)
 inline_for_extraction let size_state  = size_k_32 +^ size_ws_32 +^ size_whash_32 +^ size_count_32
 
 (* Positions of objects in the state *)
-inline_for_extraction let pos_k_32         = 0ul
-inline_for_extraction let pos_ws_32        = size_k_32
-inline_for_extraction let pos_whash_32     = size_k_32 +^ size_ws_32
-inline_for_extraction let pos_count_32     = size_k_32 +^ size_ws_32 +^ size_whash_32
+inline_for_extraction let pos_k_32       = 0ul
+inline_for_extraction let pos_ws_32      = size_k_32
+inline_for_extraction let pos_whash_32   = size_k_32 +^ size_ws_32
+inline_for_extraction let pos_count_32   = size_k_32 +^ size_ws_32 +^ size_whash_32
 
 
 
 (* [FIPS 180-4] section 4.1.2 *)
+[@"substitute"]
 private val _Ch: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _Ch x y z = S32.logxor (S32.logand x y) (S32.logand (S32.lognot x) z)
 
+[@"substitute"]
 private val _Maj: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _Maj x y z = S32.logxor (S32.logand x y) (S32.logxor (S32.logand x z) (S32.logand y z))
 
+[@"substitute"]
 private val _Sigma0: x:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _Sigma0 x = S32.logxor (rotate_right x 2ul) (S32.logxor (rotate_right x 13ul) (rotate_right x 22ul))
 
+[@"substitute"]
 private val _Sigma1: x:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _Sigma1 x = S32.logxor (rotate_right x 6ul) (S32.logxor (rotate_right x 11ul) (rotate_right x 25ul))
 
+[@"substitute"]
 private val _sigma0: x:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _sigma0 x = S32.logxor (rotate_right x 7ul) (S32.logxor (rotate_right x 18ul) (S32.shift_right x 3ul))
 
+[@"substitute"]
 private val _sigma1: x:suint32_t -> Tot suint32_t
+[@"substitute"]
 let _sigma1 x = S32.logxor (rotate_right x 17ul) (S32.logxor (rotate_right x 19ul) (S32.shift_right x 10ul))
 
 
 
 (* [FIPS 180-4] section 4.2.2 *)
-[@"c_inline"]
-private val set_k:
+[@"substitute"]
+private val constants_set_k:
   state:suint32_p{length state = U32.v size_state} ->
   Stack unit
         (requires (fun h -> live h state))
         (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-[@"c_inline"]
-let set_k state =
+[@"substitute"]
+let constants_set_k state =
   let k = Buffer.sub state pos_k_32 size_k_32 in
   upd4 k 0ul  0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul;
   upd4 k 4ul  0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul;
@@ -127,15 +145,14 @@ let set_k state =
   upd4 k 60ul 0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
 
 
-
-[@"c_inline"]
-private val set_whash:
+[@"substitute"]
+private val constants_set_h_0:
   state:suint32_p{length state = U32.v size_state} ->
   Stack unit (requires (fun h -> live h state))
                (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-[@"c_inline"]
-let set_whash state =
+[@"substitute"]
+private let constants_set_h_0 state =
   let whash = Buffer.sub state pos_whash_32 size_whash_32 in
   upd4 whash 0ul 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul;
   upd4 whash 4ul 0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
@@ -144,8 +161,7 @@ let set_whash state =
 
 (* [FIPS 180-4] section 6.2.2 *)
 (* Step 1 : Scheduling function for sixty-four 32bit words *)
-[@"c_inline"]
-private val ws_upd:
+inline_for_extraction private val ws_compute:
   state  :suint32_p {length state = v size_state} ->
   wblock :suint32_p {length wblock = v blocksize_32} ->
   t      :uint32_t  {v t + 64 < pow2 32} ->
@@ -153,97 +169,104 @@ private val ws_upd:
         (requires (fun h -> live h state /\ live h wblock))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-[@"c_inline"]
-let rec ws_upd state wblock t =
+let rec ws_compute state wblock t =
   (* Get necessary information from the state *)
   let ws = Buffer.sub state pos_ws_32 size_ws_32 in
 
   (* Perform computations *)
   if t <^ 16ul then begin
     ws.(t) <- wblock.(t);
-    ws_upd state wblock (t +^ 1ul) end
+    ws_compute state wblock (t +^ 1ul) end
   else if t <^ 64ul then begin
-    let _t16 = ws.(t -^ 16ul) in
-    let _t15 = ws.(t -^ 15ul) in
-    let _t7  = ws.(t -^ 7ul) in
-    let _t2  = ws.(t -^ 2ul) in
-
-    let v0 = _sigma1 _t2 in
-    let v1 = _sigma0 _t15 in
-
-    let v = (S32.add_mod v0
-                     (S32.add_mod _t7
-                              (S32.add_mod v1 _t16)))
-    in ws.(t) <- v;
-    ws_upd state wblock (t +^ 1ul) end
+    let t16 = ws.(t -^ 16ul) in
+    let t15 = ws.(t -^ 15ul) in
+    let t7  = ws.(t -^ 7ul) in
+    let t2  = ws.(t -^ 2ul) in
+    ws.(t) <- ((_sigma1 t2) +%^ (t7 +%^ ((_sigma0 t15) +%^ t16)));
+    ws_compute state wblock (t +^ 1ul) end
   else ()
 
 
-
-(* [FIPS 180-4] section 5.3.3 *)
-(* Define the initial hash value *)
-val init:
-  (state:suint32_p{length state = v size_state}) ->
+[@"c_inline"]
+private val shuffle_core:
+  state :suint32_p{length state = v size_state} ->
+  t     :uint32_t {v t < v size_k_32} ->
   Stack unit
-        (requires (fun h0 -> live h0 state))
-        (ensures  (fun h0 r h1 -> modifies_1 state h0 h1))
-let init state =
-  (* Initialize constant k *)
-  set_k state;
-  (* The schedule state is left to zeros *)
-  (* Initialize working hash *)
-  set_whash state
-  (* The total number of blocks is left to 0ul *)
+        (requires (fun h -> live h state ))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
+[@"c_inline"]
+let shuffle_core state t =
+
+  (* Get necessary information from the state *)
+  let hash = Buffer.sub state pos_whash_32 size_whash_32 in
+  let k = Buffer.sub state pos_k_32 size_k_32 in
+  let ws = Buffer.sub state pos_ws_32 size_ws_32 in
+
+  let a = Buffer.index hash 0ul in
+  let b = Buffer.index hash 1ul in
+  let c = Buffer.index hash 2ul in
+  let d = Buffer.index hash 3ul in
+  let e = Buffer.index hash 4ul in
+  let f = Buffer.index hash 5ul in
+  let g = Buffer.index hash 6ul in
+  let h = Buffer.index hash 7ul in
+
+  (* Perform computations *)
+  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (Buffer.index k t) +%^ (Buffer.index ws t) in
+  let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
+
+  (* Store the new working hash in the state *)
+  Buffer.upd hash 7ul g;
+  Buffer.upd hash 6ul f;
+  Buffer.upd hash 5ul e;
+  Buffer.upd hash 4ul (d +%^ t1);
+  Buffer.upd hash 3ul c;
+  Buffer.upd hash 2ul b;
+  Buffer.upd hash 1ul a;
+  Buffer.upd hash 0ul (t1 +%^ t2)
 
 
 (* Step 3 : Perform logical operations on the working variables *)
 [@"c_inline"]
-private val update_inner:
+private val shuffle:
   state :suint32_p{length state = v size_state} ->
-  t1    :suint32_t ->
-  t2    :suint32_t ->
   i     :uint32_t {v i + 64 < pow2 32} ->
   Stack unit
         (requires (fun h -> live h state ))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
 
 [@"c_inline"]
-let rec update_inner state t1 t2 t =
+let rec shuffle state t =
   if t <^ 64ul then begin
-
-    (* Get necessary information from the state *)
-    let whash = Buffer.sub state pos_whash_32 size_whash_32 in
-    let k = Buffer.sub state pos_k_32 size_k_32 in
-    let ws = Buffer.sub state pos_ws_32 size_ws_32 in
-
-    (* Perform computations *)
-    let _h  = whash.(7ul) in
-    let _kt = k.(t) in
-    let _wt = ws.(t) in
-    let v0 = _Sigma1 whash.(4ul) in
-    let v1 = _Ch whash.(4ul) whash.(5ul) whash.(6ul) in
-    let t1 = S32.add_mod _h (S32.add_mod v0 (S32.add_mod v1 (S32.add_mod _kt _wt))) in
-    let z0 = _Sigma0 whash.(0ul) in
-    let z1 = _Maj whash.(0ul) whash.(1ul) whash.(2ul) in
-    let t2 = S32.add_mod z0 z1 in
-    let _d = whash.(3ul) in
-
-    (* Store the new working hash in the state *)
-    whash.(7ul) <- whash.(6ul);
-    whash.(6ul) <- whash.(5ul);
-    whash.(5ul) <- whash.(4ul);
-    whash.(4ul) <- (S32.add_mod _d t1);
-    whash.(3ul) <- whash.(2ul);
-    whash.(2ul) <- whash.(1ul);
-    whash.(1ul) <- whash.(0ul);
-    whash.(0ul) <- (S32.add_mod t1 t2);
-    update_inner state t1 t2 (t +^ 1ul) end
+    shuffle_core state t;
+    shuffle state (t +^ 1ul) end
   else ()
 
 
-
 #set-options "--z3rlimit 50"
+
+
+val alloc:
+  unit ->
+  StackInline (state:suint32_p{length state = v size_state})
+        (requires (fun h0 -> True))
+        (ensures  (fun h0 state h1 -> modifies_0 h0 h1 /\ live h1 state))
+
+let alloc () = Buffer.create (u32_to_s32 0ul) size_state
+
+
+(* [FIPS 180-4] section 5.3.3 *)
+val init:
+  state:suint32_p{length state = v size_state} ->
+  Stack unit
+        (requires (fun h0 -> live h0 state))
+        (ensures  (fun h0 r h1 -> modifies_1 state h0 h1))
+
+let init state =
+  constants_set_k state;
+  constants_set_h_0 state
+
 
 (* [FIPS 180-4] section 6.2.2 *)
 (* Update running hash function *)
@@ -268,55 +291,45 @@ let update state data_8 =
   Hacl.Utils.Experimental.load32s_be data_32 data_8 blocksize;
 
   (* Get necessary information from the state *)
-  let whash = Buffer.sub state pos_whash_32 size_whash_32 in
+  let h = Buffer.sub state pos_whash_32 size_whash_32 in
 
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
-  ws_upd state data_32 0ul;
+  ws_compute state data_32 0ul;
 
   (* Step 2 : Initialize the eight working variables *)
-  let input_state0 = index whash 0ul in
-  let input_state1 = index whash 1ul in
-  let input_state2 = index whash 2ul in
-  let input_state3 = index whash 3ul in
-  let input_state4 = index whash 4ul in
-  let input_state5 = index whash 5ul in
-  let input_state6 = index whash 6ul in
-  let input_state7 = index whash 7ul in
+  let a_0 = h.(0ul) in
+  let b_0 = h.(1ul) in
+  let c_0 = h.(2ul) in
+  let d_0 = h.(3ul) in
+  let e_0 = h.(4ul) in
+  let f_0 = h.(5ul) in
+  let g_0 = h.(6ul) in
+  let h_0 = h.(7ul) in
 
   (* Step 3 : Perform logical operations on the working variables *)
-  update_inner state (u32_to_s32 0ul) (u32_to_s32 0ul) 0ul;
-
-  let current_state0 = whash.(0ul) in
-  let current_state1 = whash.(1ul) in
-  let current_state2 = whash.(2ul) in
-  let current_state3 = whash.(3ul) in
-  let current_state4 = whash.(4ul) in
-  let current_state5 = whash.(5ul) in
-  let current_state6 = whash.(6ul) in
-  let current_state7 = whash.(7ul) in
+  shuffle state 0ul;
 
   (* Step 4 : Compute the ith intermediate hash value *)
-  let output_state0 = S32.add_mod current_state0 input_state0 in
-  let output_state1 = S32.add_mod current_state1 input_state1 in
-  let output_state2 = S32.add_mod current_state2 input_state2 in
-  let output_state3 = S32.add_mod current_state3 input_state3 in
-  let output_state4 = S32.add_mod current_state4 input_state4 in
-  let output_state5 = S32.add_mod current_state5 input_state5 in
-  let output_state6 = S32.add_mod current_state6 input_state6 in
-  let output_state7 = S32.add_mod current_state7 input_state7 in
-  whash.(0ul) <- output_state0;
-  whash.(1ul) <- output_state1;
-  whash.(2ul) <- output_state2;
-  whash.(3ul) <- output_state3;
-  whash.(4ul) <- output_state4;
-  whash.(5ul) <- output_state5;
-  whash.(6ul) <- output_state6;
-  whash.(7ul) <- output_state7;
+  let a_1 = h.(0ul) in
+  let b_1 = h.(1ul) in
+  let c_1 = h.(2ul) in
+  let d_1 = h.(3ul) in
+  let e_1 = h.(4ul) in
+  let f_1 = h.(5ul) in
+  let g_1 = h.(6ul) in
+  let h_1 = h.(7ul) in
+
+  h.(0ul) <- (a_0 +%^ a_1);
+  h.(1ul) <- (b_0 +%^ b_1);
+  h.(2ul) <- (c_0 +%^ c_1);
+  h.(3ul) <- (d_0 +%^ d_1);
+  h.(4ul) <- (e_0 +%^ e_1);
+  h.(5ul) <- (f_0 +%^ f_1);
+  h.(6ul) <- (g_0 +%^ g_1);
+  h.(7ul) <- (h_0 +%^ h_1);
 
   (* Increment the total number of blocks processed *)
-  let pc = state.(pos_count_32) in
-  let npc = S32.add_mod pc (u32_to_s32 1ul) in
-  state.(pos_count_32) <- npc;
+  state.(pos_count_32) <- (state.(pos_count_32) +%^ (u32_to_s32 1ul));
 
   (* Pop the frame *)
   (**) pop_frame()
@@ -338,7 +351,7 @@ let rec update_multi state data n idx =
   else
 
     (* Get the current block for the data *)
-    let b = Buffer.sub data (U32.mul_mod idx blocksize) blocksize in
+    let b = Buffer.sub data (idx *%^ blocksize) blocksize in
 
     (* Call the update function on the current block *)
     update state b;
@@ -365,7 +378,7 @@ let update_last state data len =
   let len_64 = Buffer.create (uint8_to_sint8 0uy) 8ul in
 
   (* Alocate memory set to zeros for the last two blocks of data *)
-  let blocks = Buffer.create (uint8_to_sint8 0uy) (U32.mul 2ul blocksize) in
+  let blocks = Buffer.create (uint8_to_sint8 0uy) (2ul *^ blocksize) in
 
   (* Copy the data to the final construct *)
   Buffer.blit data 0ul blocks 0ul len;
@@ -375,9 +388,9 @@ let update_last state data len =
 
   (* Compute the final length of the data *)
   let count = state.(pos_count_32) in
-  let l_0 = S64.mul_mod (s32_to_s64 count) (u32_to_s64 blocksize) in
+  let l_0 = S64.((s32_to_s64 count) *%^ (u32_to_s64 blocksize)) in
   let l_1 = u32_to_s64 len in
-  let t_0 = S64.mul_mod S64.(l_0 +^ l_1) (u32_to_s64 8ul) in
+  let t_0 = S64.((l_0 +^ l_1) *%^ (u32_to_s64 8ul)) in
   Hacl.Endianness.hstore64_be len_64 t_0;
 
   (* Verification of how many blocks are necessary *)
@@ -436,7 +449,7 @@ val hash:
 let hash hash input len =
 
   (* Push a new memory frame *)
-  (**) push_frame();
+  (**) push_frame ();
 
   (* Allocate memory for the hash state *)
   let ctx = Buffer.create (u32_to_s32 0ul) size_state in
@@ -452,7 +465,7 @@ let hash hash input len =
   update_multi ctx input n 0ul;
 
   (* Get the last block *)
-  let input_last = Buffer.sub input (mul_mod n blocksize) r in
+  let input_last = Buffer.sub input (n *%^ blocksize) r in
 
   (* Process the last block of data *)
   update_last ctx input_last r;
@@ -461,4 +474,4 @@ let hash hash input len =
   finish ctx hash;
 
   (* Pop the memory frame *)
-  (**) pop_frame()
+  (**) pop_frame ()

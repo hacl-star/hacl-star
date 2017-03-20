@@ -36,7 +36,7 @@ and the state of the heap (program memory) before and after execution.
 [FSum]: https://github.com/mitls/hacl-star/blob/master/doc/tutorial/0-coding-field-arithmetic-in-fstar/Hacl.Bignum.Fsum.fst
 
 The code of this example can be typechecked using `make verify` in this directory.
-The code can be extracted using `make extract-c` in this directory.
+The code can be extracted using `make extract` in this directory.
 
 The result C code is split into a header file:
 ```c

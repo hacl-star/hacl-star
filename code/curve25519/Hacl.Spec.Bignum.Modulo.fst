@@ -113,14 +113,14 @@ let carry_top_spec s =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-private val lemma_carry_top_spec_: s:seqelem{carry_top_pre s} -> Lemma
+val lemma_carry_top_spec_: s:seqelem{carry_top_pre s} -> Lemma
   (let s' = carry_top_spec s in
     v (Seq.index s' 4) = v (Seq.index s 4) % pow2 limb_size
     /\ v (Seq.index s' 0) = 19 * (v (Seq.index s 4) / pow2 limb_size) + v (Seq.index s 0)
     /\ v (Seq.index s' 1) = v (Seq.index s 1)
     /\ v (Seq.index s' 2) = v (Seq.index s 2)
     /\ v (Seq.index s' 3) = v (Seq.index s 3))
-private let lemma_carry_top_spec_ s =
+let lemma_carry_top_spec_ s =
   let s' = carry_top_spec s in
   assert_norm((1 * pow2 limb_size) % pow2 word_size = pow2 limb_size);
   assert_norm(pow2 limb_size > 1);

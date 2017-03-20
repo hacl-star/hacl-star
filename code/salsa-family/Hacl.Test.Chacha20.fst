@@ -14,7 +14,7 @@ val main: unit -> ST FStar.Int32.t
 let main () =
   push_frame();
   let len = 114ul in
-  let ciphertext = FStar.Buffer.create 0uy len in
+  let ciphertext = FStar.Buffer.create 0uy 114ul in
   let plaintext = FStar.Buffer.createL [
     0x4cuy; 0x61uy; 0x64uy; 0x69uy; 0x65uy; 0x73uy; 0x20uy; 0x61uy; 
     0x6euy; 0x64uy; 0x20uy; 0x47uy; 0x65uy; 0x6euy; 0x74uy; 0x6cuy;

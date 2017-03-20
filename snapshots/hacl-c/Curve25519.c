@@ -10,18 +10,13 @@ inline static void Hacl_Bignum_Modulo_carry_top_wide(FStar_UInt128_t *b)
 {
   FStar_UInt128_t b4 = b[4];
   FStar_UInt128_t b0 = b[0];
-  FStar_UInt128_t
-  mask =
-    FStar_UInt128_sub(FStar_UInt128_shift_left(FStar_Int_Cast_uint64_to_uint128((uint64_t )1),
-        (uint32_t )51),
-      FStar_Int_Cast_uint64_to_uint128((uint64_t )1));
-  FStar_UInt128_t b4_ = FStar_UInt128_logand(b4, mask);
+  FStar_UInt128_t b4h = FStar_UInt128_split51(&b4);
+  uint64_t b4hl = FStar_Int_Cast_uint128_to_uint64(b4h);
   FStar_UInt128_t
   b0_ =
     FStar_UInt128_add(b0,
-      FStar_UInt128_mul_wide((uint64_t )19,
-        FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(b4, (uint32_t )51))));
-  b[4] = b4_;
+		      FStar_UInt128_mul32(b4hl,19));
+  b[4] = b4;
   b[0] = b0_;
 }
 
@@ -89,11 +84,9 @@ inline static void Hacl_Bignum_Fproduct_carry_wide_(FStar_UInt128_t *tmp, uint32
   {
     FStar_UInt128_t tctr = tmp[ctr];
     FStar_UInt128_t tctrp1 = tmp[ctr + (uint32_t )1];
-    uint64_t
-    r0 = FStar_Int_Cast_uint128_to_uint64(tctr) & ((uint64_t )1 << (uint32_t )51) - (uint64_t )1;
-    FStar_UInt128_t c = FStar_UInt128_shift_right(tctr, (uint32_t )51);
-    tmp[ctr] = FStar_Int_Cast_uint64_to_uint128(r0);
-    tmp[ctr + (uint32_t )1] = FStar_UInt128_add(tctrp1, c);
+    FStar_UInt128_t tctrh = FStar_UInt128_split51(&tctr);
+    tmp[ctr] = tctr;
+    tmp[ctr + (uint32_t )1] = FStar_UInt128_add(tctrp1, tctrh);
     Hacl_Bignum_Fproduct_carry_wide_(tmp, ctr + (uint32_t )1);
     return;
   }
@@ -950,6 +943,12 @@ void Hacl_EC_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *base
 }
 
 void Curve25519_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint)
+{
+  Hacl_EC_crypto_scalarmult(mypublic, secret, basepoint);
+  return;
+}
+
+void curve25519_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint)
 {
   Hacl_EC_crypto_scalarmult(mypublic, secret, basepoint);
   return;

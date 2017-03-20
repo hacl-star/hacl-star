@@ -72,11 +72,6 @@ private inline_for_extraction val upd_5: output:felem ->
     (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
       /\ as_seq h1 output == Hacl.Spec.EC.Format.seq_upd_5 o0 o1 o2 o3 o4
-      (* /\ get h1 output 0 == o0 *)
-      (* /\ get h1 output 1 == o1 *)
-      (* /\ get h1 output 2 == o2 *)
-      (* /\ get h1 output 3 == o3 *)
-      (* /\ get h1 output 4 == o4 *)
     ))
 private inline_for_extraction let upd_5 output output0 output1 output2 output3 output4 =
   output.(0ul) <- output0;
@@ -91,7 +86,29 @@ private inline_for_extraction let upd_5 output output0 output1 output2 output3 o
       /\ get h1 output 3 == output3
       /\ get h1 output 4 == output4 );
   Seq.lemma_eq_intro (as_seq h1 output) (Hacl.Spec.EC.Format.seq_upd_5 output0 output1 output2 output3 output4)
-  
+
+
+private inline_for_extraction val upd_5': output:felem ->
+  o0:limb -> o1:limb -> o2:limb -> o3:limb -> o4:limb ->
+  Stack unit
+    (requires (fun h -> Buffer.live h output))
+    (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
+      /\ as_seq h1 output == Hacl.Spec.EC.Format.seq_upd_5 o0 o1 o2 o3 o4
+    ))
+private inline_for_extraction let upd_5' output output0 output1 output2 output3 output4 =
+  output.(0ul) <- output0;
+  output.(1ul) <- output1;
+  output.(2ul) <- output2;
+  output.(3ul) <- output3;
+  output.(4ul) <- output4;
+  let h1 = ST.get() in
+  cut (get h1 output 0 == output0
+      /\ get h1 output 1 == output1
+      /\ get h1 output 2 == output2
+      /\ get h1 output 3 == output3
+      /\ get h1 output 4 == output4 );
+  Seq.lemma_eq_intro (as_seq h1 output) (Hacl.Spec.EC.Format.seq_upd_5 output0 output1 output2 output3 output4)
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
@@ -178,71 +195,190 @@ private let store_4 output v0 v1 v2 v3 =
                          @| hlittle_bytes 8ul (v v2) @| hlittle_bytes 8ul (v v3))
 
 
-private val fcontract: output:uint8_p{length output = 32} -> input:felem -> Stack unit
-  (requires (fun h -> Buffer.live h output /\ Buffer.live h input))
-  (ensures (fun h0 _ h1 -> Buffer.live h0 output /\ Buffer.live h0 input
-    /\ Buffer.live h1 output /\ modifies_1 output h0 h1
-    /\ as_seq h1 output == Hacl.Spec.EC.Format.fcontract_spec (as_seq h0 input)
-  ))
-private let fcontract output input =
-  let mask_51 = uint64_to_limb 0x7ffffffffffffuL in
-  let nineteen = uint64_to_limb 19uL in
+private val fcontract_first_carry_pass:
+  input:felem ->
+  Stack unit
+    (requires (fun h -> Buffer.live h input /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h input)))
+    (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 input)
+      /\ Buffer.live h1 input /\ modifies_1 input h0 h1
+      /\ as_seq h1 input == Hacl.Spec.EC.Format.fcontract_first_carry_pass (as_seq h0 input) ))
+private let fcontract_first_carry_pass input =
+  assert_norm(pow2 51 + pow2 13 = 0x8000000002000);
+  assert_norm(pow2 51 = 0x8000000000000);
+  assert_norm(pow2 0 = 1);
   let t0 = input.(0ul) in
   let t1 = input.(1ul) in
   let t2 = input.(2ul) in
   let t3 = input.(3ul) in
   let t4 = input.(4ul) in
-  let t1 = t1 +%^ (t0 >>^ 51ul) in
-  let t0 = t0 &^ mask_51 in
-  let t2 = t2 +%^ (t1 >>^ 51ul) in
-  let t1 = t1 &^ mask_51 in
-  let t3 = t3 +%^ (t2 >>^ 51ul) in
-  let t2 = t2 &^ mask_51 in
-  let t4 = t4 +%^ (t3 >>^ 51ul) in
-  let t3 = t3 &^ mask_51 in
-  let t0 = t0 +%^ (nineteen *%^ (t4 >>^ 51ul)) in
-  let t4 = t4 &^ mask_51 in
-  let t1 = t1 +%^ (t0 >>^ 51ul) in
-  let t0 = t0 &^ mask_51 in
-  let t2 = t2 +%^ (t1 >>^ 51ul) in
-  let t1 = t1 &^ mask_51 in
-  let t3 = t3 +%^ (t2 >>^ 51ul) in
-  let t2 = t2 &^ mask_51 in
-  let t4 = t4 +%^ (t3 >>^ 51ul) in
-  let t3 = t3 &^ mask_51 in
-  let t0 = t0 +%^ (nineteen *%^ (t4 >>^ 51ul)) in
-  let t4 = t4 &^ mask_51 in
-  let t0 = t0 +%^ nineteen in
-  let t1 = t1 +%^ (t0 >>^ 51ul) in
-  let t0 = t0 &^ mask_51 in
-  let t2 = t2 +%^ (t1 >>^ 51ul) in
-  let t1 = t1 &^ mask_51 in
-  let t3 = t3 +%^ (t2 >>^ 51ul) in
-  let t2 = t2 &^ mask_51 in
-  let t4 = t4 +%^ (t3 >>^ 51ul) in
-  let t3 = t3 &^ mask_51 in
-  let t0 = t0 +%^ (nineteen *%^ (t4 >>^ 51ul)) in
-  let t4 = t4 &^ mask_51 in
-  let two51 = uint64_to_sint64 0x8000000000000uL in
-  let t0 = t0 +%^ two51 -%^ nineteen in
-  let t1 = t1 +%^ two51 -%^ limb_one in
-  let t2 = t2 +%^ two51 -%^ limb_one in
-  let t3 = t3 +%^ two51 -%^ limb_one in
-  let t4 = t4 +%^ two51 -%^ limb_one in
-  let t1 = t1 +%^ (t0 >>^ 51ul) in
-  let t0 = t0 &^ mask_51 in
-  let t2 = t2 +%^ (t1 >>^ 51ul) in
-  let t1 = t1 &^ mask_51 in
-  let t3 = t3 +%^ (t2 >>^ 51ul) in
-  let t2 = t2 &^ mask_51 in
-  let t4 = t4 +%^ (t3 >>^ 51ul) in
-  let t3 = t3 &^ mask_51 in
-  let t4 = t4 &^ mask_51 in
-  let o0 = t0 |^ (t1 <<^ 51ul) in
-  let o1 = (t1 >>^ 13ul) |^ (t2 <<^ 38ul) in
-  let o2 = (t2 >>^ 26ul) |^ (t3 <<^ 25ul) in
-  let o3 = (t3 >>^ 39ul) |^ (t4 <<^ 12ul) in
+  let t1' = t1 +^ (t0 >>^ 51ul) in
+  let t0' = t0 &^ Hacl.Spec.EC.Format.mask_51 in
+  (* UInt.logand_mask (v t0) 51; *)
+  (* lemma_carry_local (v t0) (v t1) 0; *)
+  let t2' = t2 +^ (t1' >>^ 51ul) in
+  let t1'' = t1' &^ Hacl.Spec.EC.Format.mask_51 in
+  (* UInt.logand_mask (v t1') 51; *)
+  (* lemma_carry_local (v t1') (v t2) 51; *)
+  let t3' = t3 +^ (t2' >>^ 51ul) in
+  let t2'' = t2' &^ Hacl.Spec.EC.Format.mask_51 in
+  (* UInt.logand_mask (v t2') 51; *)
+  (* lemma_carry_local (v t2') (v t3) 102; *)
+  let t4' = t4 +^ (t3' >>^ 51ul) in
+  let t3'' = t3' &^ Hacl.Spec.EC.Format.mask_51 in
+  (* UInt.logand_mask (v t3') 51; *)
+  (* lemma_carry_local (v t3') (v t4) 153; *)
+  upd_5' input t0' t1'' t2'' t3'' t4'
+
+
+private 
+val fcontract_first_carry_full:
+  input:felem ->
+  Stack unit
+    (requires (fun h -> Buffer.live h input /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h input)))
+    (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 input)
+      /\ Buffer.live h1 input /\ modifies_1 input h0 h1
+      /\ as_seq h1 input == Hacl.Spec.EC.Format.fcontract_first_carry_full (as_seq h0 input) ))
+private let fcontract_first_carry_full input =
+  fcontract_first_carry_pass input;
+  assert_norm(19 * (pow2 64 / pow2 51) + pow2 51 < pow2 52);
+  Hacl.Bignum.Modulo.carry_top input
+
+
+private 
+val fcontract_second_carry_pass:
+  input:felem ->
+  Stack unit
+    (requires (fun h -> Buffer.live h input  /\ (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h input) (pow2 52) p51 p51 p51 p51)))
+    (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h0 input) (pow2 52) p51 p51 p51 p51)
+      /\ Buffer.live h1 input /\ modifies_1 input h0 h1
+      /\ as_seq h1 input == Hacl.Spec.EC.Format.fcontract_second_carry_pass (as_seq h0 input) ))
+private let fcontract_second_carry_pass input =
+  assert_norm(pow2 52 = 0x10000000000000);
+  assert_norm(pow2 51 = 0x8000000000000);
+  assert_norm(pow2 0 = 1);
+  let t0 = input.(0ul) in
+  let t1 = input.(1ul) in
+  let t2 = input.(2ul) in
+  let t3 = input.(3ul) in
+  let t4 = input.(4ul) in
+  let t1' = t1 +^ (t0 >>^ 51ul) in
+  let t0' = t0 &^ Hacl.Spec.EC.Format.mask_51 in
+  let t2' = t2 +^ (t1' >>^ 51ul) in
+  let t1'' = t1' &^ Hacl.Spec.EC.Format.mask_51 in
+  let t3' = t3 +^ (t2' >>^ 51ul) in
+  let t2'' = t2' &^ Hacl.Spec.EC.Format.mask_51 in
+  let t4' = t4 +^ (t3' >>^ 51ul) in
+  let t3'' = t3' &^ Hacl.Spec.EC.Format.mask_51 in
+  upd_5' input t0' t1'' t2'' t3'' t4'
+
+
+private 
+val fcontract_second_carry_full:
+  input:felem ->
+  Stack unit
+    (requires (fun h -> Buffer.live h input  /\ (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h input) (pow2 52) p51 p51 p51 p51)))
+    (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h0 input) (pow2 52) p51 p51 p51 p51)
+      /\ Buffer.live h1 input /\ modifies_1 input h0 h1
+      /\ as_seq h1 input == Hacl.Spec.EC.Format.fcontract_second_carry_full (as_seq h0 input) ))
+private let fcontract_second_carry_full input =
+  fcontract_second_carry_pass input;
+  let h = ST.get() in
+  Hacl.Spec.Bignum.Modulo.lemma_carry_top_spec_ (as_seq h input);
+  Hacl.Bignum.Modulo.carry_top input;
+  Hacl.Bignum.Fproduct.carry_0_to_1 input
+
+
+private 
+val fcontract_trim:
+  input:felem ->
+  Stack unit
+    (requires (fun h -> Buffer.live h input  /\ (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h input) p51 p51 p51 p51 p51)))
+    (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Buffer.live h1 input /\
+      modifies_1 input h0 h1 /\
+     (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h0 input) p51 p51 p51 p51 p51)
+     /\ (as_seq h1 input) == Hacl.Spec.EC.Format.fcontract_trim (as_seq h0 input)))
+private let fcontract_trim input =
+  let a0 = input.(0ul) in
+  let a1 = input.(1ul) in
+  let a2 = input.(2ul) in
+  let a3 = input.(3ul) in
+  let a4 = input.(4ul) in
+  let open Hacl.Bignum.Limb in
+  let mask0 = gte_mask a0 Hacl.Spec.EC.Format.p51m19 in
+  let mask1 = eq_mask a1 Hacl.Spec.EC.Format.p51m1 in
+  let mask2 = eq_mask a2 Hacl.Spec.EC.Format.p51m1 in
+  let mask3 = eq_mask a3 Hacl.Spec.EC.Format.p51m1 in
+  let mask4 = eq_mask a4 Hacl.Spec.EC.Format.p51m1 in
+  let mask  = mask0 &^ mask1 &^ mask2 &^ mask3 &^ mask4 in
+  UInt.logand_lemma_1 (v mask0); UInt.logand_lemma_1 (v mask1); UInt.logand_lemma_1 (v mask2);
+  UInt.logand_lemma_1 (v mask3); UInt.logand_lemma_1 (v mask4);
+  UInt.logand_lemma_2 (v mask0); UInt.logand_lemma_2 (v mask1); UInt.logand_lemma_2 (v mask2);
+  UInt.logand_lemma_2 (v mask3); UInt.logand_lemma_2 (v mask4);
+  UInt.logand_lemma_1 (v Hacl.Spec.EC.Format.p51m19); UInt.logand_lemma_1 (v Hacl.Spec.EC.Format.p51m1);
+  UInt.logand_lemma_2 (v Hacl.Spec.EC.Format.p51m19); UInt.logand_lemma_2 (v Hacl.Spec.EC.Format.p51m1);
+  let a0' = a0 -^ (Hacl.Spec.EC.Format.p51m19 &^ mask) in
+  let a1' = a1 -^ (Hacl.Spec.EC.Format.p51m1 &^ mask) in
+  let a2' = a2 -^ (Hacl.Spec.EC.Format.p51m1 &^ mask) in
+  let a3' = a3 -^ (Hacl.Spec.EC.Format.p51m1 &^ mask) in
+  let a4' = a4 -^ (Hacl.Spec.EC.Format.p51m1 &^ mask) in
+  upd_5' input a0' a1' a2' a3' a4'
+
+
+private 
+val fcontract_store:
+  output:buffer Hacl.UInt8.t{Buffer.length output = 32} ->
+  input:felem ->
+  Stack unit
+    (requires (fun h -> Buffer.live h input  /\ (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h input) p51 p51 p51 p51 p51)
+      /\ Buffer.live h output))
+    (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Buffer.live h1 input /\
+      modifies_1 output h0 h1 /\
+     (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h0 input) p51 p51 p51 p51 p51)
+     /\ Buffer.live h1 output
+     /\ (as_seq h1 output) == Hacl.Spec.EC.Format.fcontract_store (as_seq h0 input)))
+private let fcontract_store output input =
+  let t0 = input.(0ul) in
+  let t1 = input.(1ul) in
+  let t2 = input.(2ul) in
+  let t3 = input.(3ul) in
+  let t4 = input.(4ul) in
+  let o0 = (t1 <<^ 51ul) |^ t0 in
+  let o1 = (t2 <<^ 38ul) |^ (t1 >>^ 13ul) in
+  let o2 = (t3 <<^ 25ul) |^ (t2 >>^ 26ul) in
+  let o3 = (t4 <<^ 12ul) |^ (t3 >>^ 39ul) in
   store_4 output o0 o1 o2 o3
+  (* fcontract_store_lemma t0 0ul 0ul; *)
+  (* fcontract_store_lemma t1 51ul 13ul; *)
+  (* fcontract_store_lemma t2 38ul 26ul; *)
+  (* fcontract_store_lemma t3 25ul 39ul; *)
+  (* fcontract_store_lemma t4 12ul 0ul; *)
+  (* UInt.logor_disjoint (v (t1 <<^ 51ul)) (v t0) 51; *)
+  (* UInt.logor_disjoint (v (t2 <<^ 38ul)) (v (t1 >>^ 13ul)) 38; *)
+  (* UInt.logor_disjoint (v (t3 <<^ 25ul)) (v (t2 >>^ 26ul)) 25; *)
+  (* UInt.logor_disjoint (v (t4 <<^ 12ul)) (v (t3 >>^ 39ul)) 12; *)
+  
+
+private val fcontract: output:uint8_p{length output = 32} -> input:felem{disjoint output input} -> Stack unit
+  (requires (fun h -> Buffer.live h output /\ Buffer.live h input
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h input)))
+  (ensures (fun h0 _ h1 -> Buffer.live h0 output /\ Buffer.live h0 input
+    /\ Buffer.live h1 output /\ modifies_2 output input h0 h1
+    /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 input)
+    /\ as_seq h1 output == Hacl.Spec.EC.Format.fcontract_spec (as_seq h0 input)
+  ))
+private let fcontract output input =
+  fcontract_first_carry_full input;
+  fcontract_second_carry_full input;
+  fcontract_trim input;
+  fcontract_store output input
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"

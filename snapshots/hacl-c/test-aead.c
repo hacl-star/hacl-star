@@ -102,7 +102,7 @@ int32_t test_api()
 
 
 int32_t perf_api() {
-  uint8_t mac[16] = {0};
+  __attribute__ ((aligned (16))) uint8_t mac[16] = {0};
   uint32_t len = 1024*1024 * sizeof(char);
   uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(2*len);
@@ -115,6 +115,20 @@ int32_t perf_api() {
 
   cycles a,b;
   clock_t t1,t2;
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    Chacha20Poly1305_aead_encrypt(ciphertext, mac, plaintext, len, aad, 12, key, nonce);
+    plaintext[0] = mac[0];
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("Hacl ChachaPoly speed", (double)t2-t1,
+		(double) b - a, ROUNDS, 1024 * 1024);
+  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
+    res += (uint64_t) ciphertext[i];
+  printf("Composite result (ignore): %llx\n", res);
   
   long long unsigned int maclen;
   t1 = clock();
@@ -146,19 +160,6 @@ int32_t perf_api() {
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);
 
-  t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    Chacha20Poly1305_aead_encrypt(ciphertext, mac, plaintext, len, aad, 12, key, nonce);
-    plaintext[0] = mac[0];
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  print_results("Hacl ChachaPoly speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
-    res += (uint64_t) ciphertext[i];
-  printf("Composite result (ignore): %llx\n", res);
 
   
   return exit_success;

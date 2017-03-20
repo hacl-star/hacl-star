@@ -7,7 +7,7 @@ project (hacl)
 set(CMAKE_BUILD_TYPE Release)
 
 # Include directories
-include_directories(./snapshots/hacl-c ./snapshots/hacl-c-experimental)
+include_directories($ENV{KREMLIN_HOME}/kremlib ./snapshots/hacl-c ./snapshots/hacl-c-experimental)
 
 # Verified Files
 set(SOURCE_FILES_VERIFIED
@@ -28,7 +28,8 @@ set(SOURCE_FILES_EXPERIMENTAL
    snapshots/hacl-c-experimental/cpuid.c
    snapshots/hacl-c-experimental/drng.c
    snapshots/hacl-c-experimental/Random.c
-   snapshots/hacl-c-experimental/SHA2.c
+   snapshots/hacl-c-experimental/SHA2_256.c
+   snapshots/hacl-c-experimental/HMAC_SHA2_256.c
    snapshots/hacl-c-experimental/Chacha20.c
    snapshots/hacl-c-experimental/Poly1305_64.c
    snapshots/hacl-c-experimental/aead_chacha20_poly1305.c)

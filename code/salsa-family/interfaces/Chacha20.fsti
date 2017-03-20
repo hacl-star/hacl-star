@@ -24,7 +24,11 @@ val chacha20_key_block:
   ctr:UInt32.t ->
   Stack unit
     (requires (fun h -> live h block /\ live h k /\ live h n))
-    (ensures (fun h0 _ h1 -> live h1 block /\ modifies_1 block h0 h1))
+    (ensures (fun h0 _ h1 -> live h1 block /\ modifies_1 block h0 h1 /\ live h0 k /\ live h0 n
+      /\ (let block = reveal_sbytes (as_seq h1 block) in
+         let k     = reveal_sbytes (as_seq h0 k) in
+         let n     = reveal_sbytes (as_seq h0 n) in
+         block == Spec.Chacha20.chacha20_block k n (UInt32.v ctr))))
 
 
 val chacha20:
