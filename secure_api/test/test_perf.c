@@ -56,8 +56,8 @@ uint8_t ivBuffer[IVLEN] = {
   0x44, 0x45, 0x46, 0x47
 };
 
-#define ROUNDS 1000
-#define AES_ROUNDS 100
+#define ROUNDS 3000
+#define AES_ROUNDS 1000
 
 #define AES_128_GCM 0
 #define AES_256_GCM 1
@@ -120,6 +120,7 @@ int openssl_aead_encrypt(unsigned char *plaintext, int plaintext_len, unsigned c
     /* Get the tag */
     if(1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag))
       return EXIT_FAILURE;
+    plaintext[0] = ciphertext[0];
   }
   b = TestLib_cpucycles_end();
   c2 = clock();
