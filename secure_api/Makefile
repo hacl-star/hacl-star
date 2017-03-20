@@ -40,11 +40,11 @@ krml-test-hacl.exe:
 		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
 		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
 		-tmpdir tmp-hacl -add-include '"testlib.h"' -o krml-test-hacl.exe -drop Hacl.Spe.Poly1305_64 -bundle Spec.* -drop Spec \
-		-bundle "Crypto.AEAD=Crypto.AEAD.*,Crypto.Symmetric.*,Crypto.Plain,Hacl.*"
+		-bundle "Crypto.AEAD=Crypto.AEAD.*,Crypto.Symmetric.*,Hacl.*,Crypto.Plain"
 	./krml-test-hacl.exe
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
-	$(CC) -Ofast -m64 -flto -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
+	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
 	 -o test-perf-hacl.exe tmp-hacl/Crypto_AEAD*.c tmp-hacl/Crypto_Indexing*.c tmp-hacl/Buffer_Utils*.c $(KREMLIN_HOME)/kremlib/kremlib.c \
 		$(KREMLIN_HOME)/kremlib/testlib.c test/test_perf.c test/test_hacks.c -I tmp-hacl  \
 		-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test \
