@@ -208,6 +208,12 @@ val lemma_propagate_inv_mac_wrapper
   (ensures  (enxor_and_maybe_mac true aead_st nonce aad plain ct h1))
 let lemma_propagate_inv_mac_wrapper #i #rw #aadlen #plainlen aead_st nonce aad plain cipher_tagged mac_st h0 h1 =
   let open FStar.Classical in 
+  if prf i then begin
+    assert (prf_mac_inv (HS.sel h0 (PRF.itable i aead_st.prf)) h0);
+    (* AR: TODO: prove prf_mac_inv here *)
+    assume (prf_mac_inv (HS.sel h1 (PRF.itable i aead_st.prf)) h1)
+  end
+  else ();
   if safeMac i 
   then begin 
     frame_plain_and_cipher                          aead_st nonce aad plain cipher_tagged mac_st h0 h1;

@@ -197,7 +197,7 @@ let mac_wrapper_h0_h1
   (plain:plainBuffer i (v plainlen))
   (ct:ctagbuf plainlen)
   (mac_st:CMA.state (i, nonce))
-  (h0 h1:mem) =
+  (h0 h1:mem) =  
   let cipher = cbuf ct in
   let tag = ctag ct in
   HS.(is_stack_region h0.tip) /\
@@ -211,5 +211,5 @@ let mac_wrapper_h0_h1
     HS.modifies (Set.as_set [h0.tip; aead_st.prf.mac_rgn; Buffer.frameOf ct]) h0 h1 /\               //mac_wrapper modifies the tip of the stack, prf.mac_rgn (it sets the tag in the mac log), and the cipher text region (adds tag to the cipher text buffer)
     HS.modifies_ref aead_st.prf.mac_rgn !{HS.as_ref (as_hsref (CMA.(ilog mac_st.log)))} h0 h1  /\    //in the mac region, it only modifies the mac log associated with mac_st
     Buffer.modifies_buf_1 (Buffer.frameOf ct) tag h0 h1 /\    //mac_wrapper modifies the tag component of the ciphertext buffer
-    mac_is_set prf_table_1 nonce (Buffer.as_seq h1 aad) (v plainlen) (Buffer.as_seq h1 cipher) (Buffer.as_seq h1 tag) h1)) /\    //mac_is_set for nonce
-  (prf i ==> prf_mac_inv (HS.sel h1 (itable i aead_st.prf)) h1)  //prf_mac_inv continues to hold after enxor
+    mac_is_set prf_table_1 nonce (Buffer.as_seq h1 aad) (v plainlen) (Buffer.as_seq h1 cipher) (Buffer.as_seq h1 tag) h1))    //mac_is_set for nonce
+  (* AR: TODO: this is unusable in Crypto.AEAD.MAC_Wrapper.Invariant:lemma_propagate_inv_mac_wrapper, since modifes clauses are in safeMac, moving them under prf i don't help since we need mac_log *)
