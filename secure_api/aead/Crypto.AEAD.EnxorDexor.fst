@@ -884,7 +884,8 @@ val dexor:
 	    inv st h1 /\
 	    decrypt_ok iv st aad plain cipher_tagged h1))
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
-open Crypto.AEAD.Encoding 
+open Crypto.AEAD.Encoding
+(* AR: TODO: this fails *)
 let dexor #i st iv #aadlen aad #len plain cipher_tagged p =
   let x_1 = {iv=iv; ctr=otp_offset i} in
   let t = st.prf in
