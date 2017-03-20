@@ -59,7 +59,7 @@ all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 %.fst-hints: %.fst
 	-$(FSTARB) $^ --use_hints --record_hints
 
-all-hints: $(addsuffix -hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES))
+all-hints: $(addsuffix -hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES)))
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experimental -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -drop 'Hacl.UInt8' $(KREMLIN_ARGS) \
