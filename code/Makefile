@@ -25,6 +25,10 @@ ci: $(addsuffix -ci, $(DIRECTORIES))
 
 hints: $(addsuffix -hints, $(DIRECTORIES))
 
+bignum-hints:
+	$(MAKE) -C bignum all-hints
+	$(MAKE) -C poly1305 bignum-hints
+	$(MAKE) -C curve25519 bignum-hints
 
 clean:
 	rm -rf *~ *.exe *.out 
