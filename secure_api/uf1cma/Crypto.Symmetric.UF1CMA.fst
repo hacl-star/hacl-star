@@ -87,6 +87,7 @@ let akey_gen r i =
     Some k
   else None
 
+#reset-options "--max_fuel 0 --z3rlimit 40"
 
 val akey_coerce: r:erid -> i:id -> kb:lbuffer (UInt32.v (skeylen i)) -> ST (akey r i)
   (requires (fun h -> live h kb))
@@ -106,6 +107,8 @@ let akey_coerce r i kb =
     lemma_reveal_modifies_1 sk h1 h2;
     Some sk
   else None
+
+#reset-options
 
 (** One-time MAC instance *)
 type id = MAC.id
@@ -177,7 +180,7 @@ let genPost (i:id) (region:erid) m0 (st:state i) m1 =
   mac_is_fresh i region m0 st m1 /\
   mac_is_unset i region st m1
 
-#set-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 1000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 val alloc: region:erid -> i:id
   -> ak:akey region (fst i)

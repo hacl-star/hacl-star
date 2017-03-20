@@ -83,6 +83,8 @@ private val elem_vec_logand_lemma: a:BV.bv_t 128 -> i:nat{i < 128} ->
 let elem_vec_logand_lemma a i = ()
 
 
+#reset-options "--max_fuel 0 --z3rlimit 50"
+
 (* * ith_bit_mask return a mask corresponding to the i-th bit of num.            **)
 (* * This function should be in constant time.                                   **)
 
