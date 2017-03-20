@@ -481,7 +481,7 @@ val enxor  :
 		 fresh_nonce_st iv aead_st h1 /\
       	         is_mac_for_iv aead_st ak h1 /\
 	         CMA.mac_is_unset (i, iv) aead_st.prf.mac_rgn ak h1) /\
-	         enxor_h0_h1 aead_st iv aad plain cipher_tag h0 h1))
+	     enxor_h0_h1 aead_st iv aad plain cipher_tag h0 h1))
 let enxor #i iv aead_st #aadlen aad #len plain_b cipher_tag ak =
   let h_init = ST.get () in
   let x = {iv=iv; ctr=otp_offset i} in
