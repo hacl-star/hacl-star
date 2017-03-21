@@ -39,6 +39,7 @@ let max_input_len_8 = pow2 61
 type bytes = m:seq UInt8.t
 type word = Word.t
 type hash_w = m:seq word {length m = size_hash_w}
+type ws_w = m:seq word {length m = size_k_w}
 type block_w = m:seq word {length m = size_block_w}
 type blocks_w = m:seq block_w
 type counter = UInt.uint_t 32
@@ -78,7 +79,7 @@ let _sigma1 x = word_logxor (rotate_right x 17ul) (word_logxor (rotate_right x 1
 
 
 (* [FIPS 180-4] section 4.2.2 *)
-let k = [
+unfold let list_k = [
   0x428a2f98ul; 0x71374491ul; 0xb5c0fbcful; 0xe9b5dba5ul;
   0x3956c25bul; 0x59f111f1ul; 0x923f82a4ul; 0xab1c5ed5ul;
   0xd807aa98ul; 0x12835b01ul; 0x243185beul; 0x550c7dc3ul;
@@ -101,7 +102,15 @@ unfold let list_h_0 = [
   0x6a09e667ul; 0xbb67ae85ul; 0x3c6ef372ul; 0xa54ff53aul;
   0x510e527ful; 0x9b05688cul; 0x1f83d9abul; 0x5be0cd19ul]
 
-unfold let h_0 : hash_w = Seq.seq_of_list list_h_0
+
+let k : m:seq word {length m = size_k_w} =
+  assert_norm(List.Tot.length list_k = size_k_w);
+  Seq.seq_of_list list_k
+
+
+let h_0 : hash_w =
+  assert_norm(List.Tot.length list_h_0 = size_hash_w);
+  Seq.seq_of_list list_h_0
 
 
 let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
@@ -117,7 +126,15 @@ let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
     (s1 +%^ (t7 +%^ (s0 +%^ t16)))
 
 
-let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w}) : Tot hash_w =
+let rec ws_compute (wsched:ws_w) (b:block_w) (t:counter{t <= size_k_w}) : Tot ws_w (decreases (size_k_w - t)) =
+  if t < size_k_w then
+    let ws_i = ws b t in
+    let ws_n = Seq.upd wsched t ws_i in
+    ws_compute ws_n b (t + 1)
+  else wsched
+
+
+let shuffle_core (hash:hash_w) (wsched:ws_w) (t:counter{t < size_k_w}) : Tot hash_w =
   let a = index hash 0 in
   let b = index hash 1 in
   let c = index hash 2 in
@@ -127,8 +144,9 @@ let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w}) : Tot h
   let g = index hash 6 in
   let h = index hash 7 in
 
-  (**) assert_norm(List.Tot.length k = size_k_w);
-  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index k t) +%^ (ws block t) in
+  (**) assert_norm(List.Tot.length list_k = size_k_w);
+  (**) cut(Seq.length wsched = size_k_w);
+  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index list_k t) +%^ (Seq.index wsched t) in
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
 
   (**) cut(7 < Seq.length hash);
@@ -143,16 +161,18 @@ let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w}) : Tot h
   hash
 
 
-let rec shuffle (hash:hash_w) (block:block_w) (t:counter{t <= size_k_w}) : Tot hash_w (decreases (size_k_w - t)) =
+let rec shuffle (hash:hash_w) (wsched:ws_w) (t:counter{t <= size_k_w}) : Tot hash_w (decreases (size_k_w - t)) =
   if t < size_k_w then
-    let hash = shuffle_core hash block t in
-    shuffle hash block (t + 1)
+    let hash = shuffle_core hash wsched t in
+    shuffle hash wsched (t + 1)
   else hash
 
 
 let update_compress (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
   let b = words_from_be size_block_w block in
-  let hash_1 = shuffle hash b 0 in
+  let ws_l = Seq.create size_k_w 0ul in
+  let ws_l = ws_compute ws_l b 0 in
+  let hash_1 = shuffle hash ws_l 0 in
   Spec.Lib.map2 (fun x y -> x +%^ y) hash hash_1
 
 
