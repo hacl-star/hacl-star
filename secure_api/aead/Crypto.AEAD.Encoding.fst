@@ -1,4 +1,4 @@
-module Crypto.AEAD.Encoding 
+module Crypto.AEAD.Encoding
 
 // This file defines the encoding of additional data and ciphertext
 // authenticated by the one-time MACs, and proves their injectivity properties. 

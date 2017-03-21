@@ -914,9 +914,6 @@ let dexor #i st iv #aadlen aad #len plain cipher_tagged p =
   end
   else ();
 
-  (* AR: TODO: we can prove it with prf i && not (safeId i) *)
-  assume (prf i ==> prf_mac_inv (HS.sel h1 (PRF.itable i st.prf)) h1);
-
   if not (prf i) || safeId i
   then begin
     FStar.Buffer.lemma_reveal_modifies_1 (as_buffer plain) h0 h1;
