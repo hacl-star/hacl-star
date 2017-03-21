@@ -28,10 +28,10 @@ let op_String_Access = Seq.index
 inline_for_extraction
 let op_String_Assignment = Seq.upd
 
-inline_for_extraction
+unfold inline_for_extraction
 let iter n f x = Spec.Loops.repeat_spec n f x
 
-inline_for_extraction
+unfold inline_for_extraction
 let map2 f s1 s2 = Spec.Loops.seq_map2 f s1 s2
 
 let singleton x = Seq.create 1 x
@@ -84,6 +84,21 @@ let lemma_uint32_to_le_inj (b:UInt32.t) (b':UInt32.t) : Lemma
   (requires (uint32_to_le b == uint32_to_le b'))
   (ensures  (b = b'))
   = ()
+
+let lemma_uint32_to_from_bij (b:UInt32.t) : Lemma
+  (requires (True))
+  (ensures (uint32_from_le (uint32_to_le b) = b))
+  = ()
+
+let lemma_uint32_from_to_bij (b:lbytes 4) : Lemma
+  (requires (True))
+  (ensures (uint32_to_le (uint32_from_le b) = b))
+  = lemma_uint32_to_from_bij (uint32_from_le b);    
+    let lemma (s:lbytes 4) (s':lbytes 4):
+      Lemma (requires (s <> s'))
+            (ensures (uint32_from_le s <> uint32_from_le s'))
+      = if uint32_from_le s = uint32_from_le s' then lemma_uint32_from_le_inj s s' in
+    if uint32_to_le (uint32_from_le b) <> b then lemma (uint32_to_le (uint32_from_le b)) b
 
 val uint32s_from_le: len:nat -> b:lbytes (4 * len) -> Tot (s:seq UInt32.t{length s = len}) (decreases len)
 let rec uint32s_from_le len src =
@@ -210,6 +225,27 @@ let rec lemma_uint32s_from_le_inj (len:nat) (b:lbytes (4 * len)) (b':lbytes (4 *
           )
 
 
+#set-options "--max_fuel 0 --z3rlimit 100"
+
+let rec lemma_uint32s_from_le_bij (len:nat) (b:lbytes (4 * len)) : Lemma
+  (requires (True))
+  (ensures  (uint32s_to_le len (uint32s_from_le len b) == b))
+  = if len = 0 then (
+      lemma_uint32s_from_le_def_0 0 b;
+      lemma_uint32s_to_le_def_0 0 (createEmpty);
+      lemma_eq_intro (uint32s_to_le len (uint32s_from_le len b)) b
+    ) else (
+      lemma_uint32s_from_le_def_1 len b;
+      let b' = uint32s_from_le len b in
+      lemma_uint32s_to_le_def_1 len b';
+      lemma_uint32_from_to_bij (slice b 0 4);
+      lemma_uint32s_from_le_bij (len - 1) (slice b 4 (length b));
+      lemma_eq_intro b' (cons (uint32_from_le (slice b 0 4)) (uint32s_from_le (len-1) (slice b 4 (length b))));
+      lemma_eq_intro (slice b' 1 (length b')) (uint32s_from_le (len-1) (slice b 4 (length b)));
+      lemma_eq_intro (uint32s_to_le len b') (append (uint32_to_le (uint32_from_le (slice b 0 4))) (uint32s_to_le (len-1) (uint32s_from_le (len-1) (slice b 4 (length b)))));
+      lemma_eq_intro (uint32s_to_le len (uint32s_from_le len b)) b
+    )
+
 let rec lemma_uint32s_to_le_inj (len:nat) (b:seq UInt32.t{length b = len})
                                          (b':seq UInt32.t{length b' = len})  : Lemma
   (requires (uint32s_to_le len b == uint32s_to_le len b'))
@@ -239,8 +275,29 @@ let rec lemma_uint32s_to_le_inj (len:nat) (b:seq UInt32.t{length b = len})
       Seq.lemma_eq_intro b' (cons h' t')
     )
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
+let rec lemma_uint32s_to_le_bij (len:nat) (b:seq UInt32.t{length b = len}) : Lemma
+  (requires (True))
+  (ensures  (uint32s_from_le len (uint32s_to_le len b) == b))
+  = if len = 0 then (
+      lemma_uint32s_to_le_def_0 0 b;
+      lemma_uint32s_from_le_def_0 0 (createEmpty);
+      lemma_eq_intro (uint32s_from_le len (uint32s_to_le len b)) b
+    ) else (
+      lemma_uint32s_to_le_def_1 len b;
+      let b' = uint32s_to_le len b in
+      lemma_uint32s_from_le_def_1 len b';
+      lemma_uint32_to_from_bij (index b 0);
+      lemma_uint32s_to_le_bij (len - 1) (slice b 1 (length b));
+      lemma_eq_intro b' (append (uint32_to_le (index b 0)) (uint32s_to_le (len-1) (slice b 1 (length b))));
+      lemma_eq_intro (slice b' 4 (length b')) (uint32s_to_le (len-1) (slice b 1 (length b)));
+      lemma_eq_intro (slice b' 0 4) (uint32_to_le (index b 0));
+      lemma_eq_intro (uint32s_from_le len b') (cons (uint32_from_le (uint32_to_le (index b 0))) (uint32s_from_le (len-1) (uint32s_to_le (len-1) (slice b 1 (length b)))));
+      lemma_eq_intro (uint32s_from_le len (uint32s_to_le len b)) b
+    )
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 let lemma_append_assoc (#a:Type) (x:seq a) (y:seq a) (z:seq a) : Lemma
   (x @| (y @| z) == (x @| y) @| z) = lemma_eq_intro ((x @| y) @| z) (x @| (y @| z))
