@@ -417,6 +417,8 @@ val counter_enxor:
     (safeMac i ==> none_above_prf_st x t h) /\
     enxor_invariant t x len remaining_len plain cipher h_init h))
   (ensures (fun h0 _ h1 ->
+    let open HS in
+    h0.tip = h1.tip /\
     liveness t plain cipher h1 /\
     iteration_lengths_ok x len remaining_len /\
     // in all cases, we extend the table only at x and its successors.
