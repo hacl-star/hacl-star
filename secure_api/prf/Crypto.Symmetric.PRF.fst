@@ -320,6 +320,7 @@ let prf_mac i t k_0 x =
         let h0 = ST.get() in
         //16-12-20 TODO: replace this using monotonicity; NS: known limitation
         //assume (CMA.(MAC.norm_r h0 mc.r));
+        assert (CMA.(MAC.norm_r h0 mc.r));
         Buffer.recall (CMA.(mc.s));
         if mac_log then FStar.Monotonic.RRef.m_recall (CMA.(ilog mc.log));
         mc
