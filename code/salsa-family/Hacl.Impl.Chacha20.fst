@@ -388,11 +388,11 @@ let double_round st =
 
 [@ "c_inline"]
 val rounds:
-  st:buffer U32.t{length st = 16} ->
+  st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = as_seq h0 st in let s' = as_seq h1 st in
+      /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == Spec.Chacha20.rounds s)))
 [@ "c_inline"]
 let rounds st =
@@ -407,7 +407,7 @@ let rounds st =
     (requires (fun h -> inv h (UInt32.v i)))
     (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
   = double_round st;
-    Spec.Loops.lemma_repeat (UInt32.v i + 1) Spec.Chacha20.double_round (as_seq h0 st)
+    Spec.Loops.lemma_repeat (UInt32.v i + 1) Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st))
   in
   lemma_repeat_0 0 Spec.Chacha20.double_round (as_seq h0 st);
   for 0ul 10ul inv f'
@@ -777,6 +777,7 @@ let rec chacha20_counter_mode_ output plain len log st ctr =
     let _ = update_last output plain len log st ctr in ()
   )
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val chacha20_counter_mode:
@@ -797,7 +798,7 @@ val chacha20_counter_mode:
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 let rec chacha20_counter_mode output plain len log st ctr =
   let h0 = ST.get() in
-  if U32.(len <=^ 64ul) then chacha20_counter_mode_ output plain len log st ctr
+  if U32.(len <^ 64ul) then chacha20_counter_mode_ output plain len log st ctr
   else (
     let b  = Buffer.sub plain 0ul 64ul in
     let b' = Buffer.offset plain 64ul in
