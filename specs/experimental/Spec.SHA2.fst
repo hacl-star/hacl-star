@@ -78,7 +78,7 @@ let _sigma1 x = word_logxor (rotate_right x 17ul) (word_logxor (rotate_right x 1
 
 
 (* [FIPS 180-4] section 4.2.2 *)
-private let k = [
+let k = [
   0x428a2f98ul; 0x71374491ul; 0xb5c0fbcful; 0xe9b5dba5ul;
   0x3956c25bul; 0x59f111f1ul; 0x923f82a4ul; 0xab1c5ed5ul;
   0xd807aa98ul; 0x12835b01ul; 0x243185beul; 0x550c7dc3ul;
@@ -97,17 +97,14 @@ private let k = [
   0x90befffaul; 0xa4506cebul; 0xbef9a3f7ul; 0xc67178f2ul]
 
 
-private let h_0 : hash_w =
-  let l = [
-    0x6a09e667ul; 0xbb67ae85ul; 0x3c6ef372ul; 0xa54ff53aul;
-    0x510e527ful; 0x9b05688cul; 0x1f83d9abul; 0x5be0cd19ul] in
-    assert_norm(List.Tot.length
-      [ 0x6a09e667ul; 0xbb67ae85ul; 0x3c6ef372ul; 0xa54ff53aul;
-        0x510e527ful; 0x9b05688cul; 0x1f83d9abul; 0x5be0cd19ul] = size_hash_w);
-  Seq.seq_of_list l
+unfold let list_h_0 = [
+  0x6a09e667ul; 0xbb67ae85ul; 0x3c6ef372ul; 0xa54ff53aul;
+  0x510e527ful; 0x9b05688cul; 0x1f83d9abul; 0x5be0cd19ul]
+
+unfold let h_0 : hash_w = Seq.seq_of_list list_h_0
 
 
-private let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
+let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
   if t < size_block_w then index b t
   else
     let t16 = ws b (t - 16) in
@@ -120,7 +117,7 @@ private let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
     (s1 +%^ (t7 +%^ (s0 +%^ t16)))
 
 
-private let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w}) : Tot hash_w =
+let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w}) : Tot hash_w =
   let a = index hash 0 in
   let b = index hash 1 in
   let c = index hash 2 in
@@ -146,7 +143,7 @@ private let shuffle_core (hash:hash_w) (block:block_w) (t:counter{t < size_k_w})
   hash
 
 
-private let rec shuffle (hash:hash_w) (block:block_w) (t:counter{t <= size_k_w}) : Tot hash_w (decreases (size_k_w - t)) =
+let rec shuffle (hash:hash_w) (block:block_w) (t:counter{t <= size_k_w}) : Tot hash_w (decreases (size_k_w - t)) =
   if t < size_k_w then
     let hash = shuffle_core hash block t in
     shuffle hash block (t + 1)

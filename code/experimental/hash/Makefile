@@ -14,9 +14,11 @@ build:
 	mkdir -p sha2-c
 	$(KREMLIN_HOME)/krml -tmpdir sha2-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils \
+		-I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/experimental \
 		Hacl.Test.SHA2_256.fst -o sha2.exe -no-prefix Hacl.Test.SHA2_256 -no-prefix SHA2_256 \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop Prims -drop FStar Hacl.Test.SHA2_256.fst \
+		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop 'Spec.Lib' -drop 'Spec.SHA2' \
+		-drop Prims -drop FStar Hacl.Test.SHA2_256.fst \
 		-no-prefix 'Hacl.Utils.Experimental' \
 		-bundle "SHA2_256=Hacl.Utils.Experimental,Hacl.Hash.SHA2.L256,SHA2_256" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99 $(VERBOSE)

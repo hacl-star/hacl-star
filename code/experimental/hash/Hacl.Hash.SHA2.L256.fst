@@ -26,6 +26,8 @@ module S64 = Hacl.UInt64
 module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
+module Spec = Spec.SHA2
+
 
 (* Definition of base types *)
 let uint8_t   = FStar.UInt8.t
@@ -146,17 +148,52 @@ let constants_set_k state =
 
 
 [@"substitute"]
+private val _constants_set_h_0:
+  hash:suint32_p{length hash = U32.v hashsize_32} ->
+  Stack unit
+    (requires (fun h -> live h hash))
+    (ensures (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
+             /\ (let s = as_seq h1 hash in
+             U32.v (Seq.index s 0) = 0x6a09e667 /\
+             U32.v (Seq.index s 1) = 0xbb67ae85 /\
+             U32.v (Seq.index s 2) = 0x3c6ef372 /\
+             U32.v (Seq.index s 3) = 0xa54ff53a /\
+             U32.v (Seq.index s 4) = 0x510e527f /\
+             U32.v (Seq.index s 5) = 0x9b05688c /\
+             U32.v (Seq.index s 6) = 0x1f83d9ab /\
+             U32.v (Seq.index s 7) = 0x5be0cd19)))
+//             forall i. Seq.index s i = Seq.index Spec.list_h_0 i
+
+[@"substitute"]
+private let _constants_set_h_0 hash =
+  upd4 hash 0ul 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul;
+  upd4 hash 4ul 0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
+
+
+[@"substitute"]
 private val constants_set_h_0:
   state:suint32_p{length state = U32.v size_state} ->
-  Stack unit (requires (fun h -> live h state))
-               (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+  Stack unit 
+    (requires (fun h -> live h state))
+    (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1
+              /\ (let hash = Seq.slice (as_seq h1 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
+              Hacl.Spec.Endianness.reveal_h32s hash == Seq.createL Spec.list_h_0)))
 
 [@"substitute"]
 private let constants_set_h_0 state =
-  let whash = Buffer.sub state pos_whash_32 size_whash_32 in
-  upd4 whash 0ul 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul;
-  upd4 whash 4ul 0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
-
+  let hash = Buffer.sub state pos_whash_32 size_whash_32 in
+  _constants_set_h_0 hash;
+  let h = ST.get() in
+  assert_norm (Seq.length (Seq.createL Spec.list_h_0) = 8);
+  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 0 = 0x6a09e667ul);
+  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 1 = 0xbb67ae85ul);
+  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 2 = 0x3c6ef372ul);
+  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 3 = 0xa54ff53aul);
+  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 4 = 0x510e527ful);
+  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 5 = 0x9b05688cul);
+  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 6 = 0x1f83d9abul);
+  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 7 = 0x5be0cd19ul);
+  Seq.lemma_eq_intro (Hacl.Spec.Endianness.reveal_h32s (as_seq h hash)) (Seq.createL Spec.list_h_0)
 
 
 (* [FIPS 180-4] section 6.2.2 *)
@@ -167,7 +204,11 @@ inline_for_extraction private val ws_compute:
   t      :uint32_t  {v t + 64 < pow2 32} ->
   Stack unit
         (requires (fun h -> live h state /\ live h wblock))
-        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
+                  /\ (let ws = Seq.slice (as_seq h1 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in 
+                  let seq_ws = Hacl.Spec.Endianness.reveal_h32s ws in 
+                  let seq_wblock = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 wblock) in
+                  forall i. Seq.index seq_ws i == Spec.ws seq_wblock i)))
 
 let rec ws_compute state wblock t =
   (* Get necessary information from the state *)
@@ -192,8 +233,12 @@ private val shuffle_core:
   state :suint32_p{length state = v size_state} ->
   t     :uint32_t {v t < v size_k_32} ->
   Stack unit
-        (requires (fun h -> live h state ))
-        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+        (requires (fun h -> live h state))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
+                  /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
+                  let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
+                  let seq_ws = Seq.slice (as_seq h1 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in 
+                  forall t. seq_hash_1 == Spec.shuffle_core seq_hash_0 seq_ws t)))
 
 [@"c_inline"]
 let shuffle_core state t =
@@ -234,7 +279,11 @@ private val shuffle:
   i     :uint32_t {v i + 64 < pow2 32} ->
   Stack unit
         (requires (fun h -> live h state ))
-        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
+        /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
+        let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
+        let seq_ws = Seq.slice (as_seq h1 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in 
+        forall i. seq_hash_1 == Spec.shuffle seq_hash_0 seq_ws i)))
 
 [@"c_inline"]
 let rec shuffle state t =
@@ -246,13 +295,15 @@ let rec shuffle state t =
 
 #set-options "--z3rlimit 50"
 
-
+[@"c_inline"]
 val alloc:
   unit ->
   StackInline (state:suint32_p{length state = v size_state})
         (requires (fun h0 -> True))
-        (ensures  (fun h0 state h1 -> modifies_0 h0 h1 /\ live h1 state))
+        (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
+      /\ Map.domain h1.h == Map.domain h0.h))
 
+[@"c_inline"]
 let alloc () = Buffer.create (u32_to_s32 0ul) size_state
 
 
