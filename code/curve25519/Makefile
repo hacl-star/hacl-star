@@ -104,16 +104,16 @@ bignum-hints:
 specific-hints: $(addsuffix -hints, $(X25519_SPECIFIC))
 
 # For CI, all modules restricted from incomplete or slow ones
-all-ci2: $(addsuffix -ci, $(filter-out $(SLOW) $(TODO), $(X25519_FILES)))
+all-ci2: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_FILES)))
 all-ci:
 	cp bignum_hints/* ../bignum
 	$(MAKE) all-ci2
 	mv ../bignum/*.hints ./bignum_hints
 bignum-ci:
 	cp bignum_hints/* ../bignum
-	$(MAKE) $(addsuffix -ci, $(BIGNUM))
+	$(MAKE) $(addsuffix -verify, $(BIGNUM))
 	mv ../bignum/*.hints ./bignum_hints
-specific-ci: $(addsuffix -ci, $(X25519_SPECIFIC))
+specific-ci: $(addsuffix -verify, $(X25519_SPECIFIC))
 
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
