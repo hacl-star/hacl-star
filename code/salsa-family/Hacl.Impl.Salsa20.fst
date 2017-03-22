@@ -10,13 +10,16 @@ open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Salsa20
 open C.Loops
-
+open Hacl.Lib.LoadStore32
+open Hacl.Lib.Create
 
 module Spec = Spec.Salsa20
 
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
 module H32 = Hacl.UInt32
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let u32 = U32.t
 let h32 = H32.t
@@ -26,223 +29,6 @@ type state = b:Buffer.buffer h32{length b = 16}
 
 private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
-private val lemma_uint32s_from_le_bytes: h:mem -> output:buffer H32.t{live h output} ->
-  h':mem -> input:uint8_p{live h' input} ->
-  len:U32.t{length output = U32.v len /\ 4 * U32.v len = length input /\ U32.v len > 0} ->
-  Lemma
-    (requires (H32.v (Seq.index (as_seq h output) 0) =
-        U32.v (Spec.Lib.uint32_from_le (reveal_sbytes (as_seq h' (Buffer.sub input 0ul 4ul))))
-      /\ reveal_h32s (as_seq h (Buffer.offset output 1ul)) == 
-        Spec.Lib.uint32s_from_le (UInt32.v len - 1) (reveal_sbytes (as_seq h' (Buffer.offset input 4ul)))))
-    (ensures (reveal_h32s (as_seq h output)
-      == Spec.Lib.uint32s_from_le (U32.v len) (reveal_sbytes ((as_seq h' input)))))
-let lemma_uint32s_from_le_bytes h output h' input len =
-  let i' = reveal_sbytes (as_seq h' input) in
-  Spec.Lib.lemma_uint32s_from_le_def_1 (U32.v len) i';
-  Seq.lemma_eq_intro (as_seq h' (Buffer.sub input 0ul 4ul)) (Seq.slice (as_seq h' input) 0 4);
-  Seq.lemma_eq_intro (as_seq h' (Buffer.offset input 4ul)) (Seq.slice (as_seq h' input) 4 (length input));
-  Seq.lemma_eq_intro (as_seq h (Buffer.offset output 1ul)) (Seq.slice (as_seq h output) 1 (length output));
-  cut (Seq.index (Spec.Lib.uint32s_from_le (U32.v len) i') 0 == Spec.Lib.uint32_from_le (Seq.slice i' 0 4));
-  Seq.lemma_eq_intro (reveal_h32s (as_seq h output)) (Spec.Lib.uint32s_from_le (U32.v len) i')
-
-
-private val lemma_uint32s_from_le_bytes': h:mem -> h':mem -> output:buffer H32.t{live h output /\ live h' output /\ length output > 0} -> Lemma
-  (requires (modifies_1 (Buffer.offset output 1ul) h h'))
-  (ensures (Seq.index (as_seq h output) 0 == Seq.index (as_seq h' output) 0))
-private let lemma_uint32s_from_le_bytes' h h' output =
-  let output' = Buffer.sub output 0ul 1ul in
-  let output'' = Buffer.offset output 1ul in
-  no_upd_lemma_1 h h' output'' output';
-  Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 1) (as_seq h output');
-  Seq.lemma_eq_intro (Seq.append (as_seq h' output') (as_seq h' output'')) (as_seq h' output)
-
-
-[@ "c_inline"]
-val uint32s_from_le_bytes:
-  output:buffer H32.t ->
-  input:uint8_p{disjoint output input} ->
-  len:U32.t{length output = U32.v len /\ 4 * U32.v len = length input} ->
-  Stack unit
-    (requires (fun h -> live h output /\ live h input))
-    (ensures  (fun h0 _ h1 -> live h1 output /\ live h0 input /\ modifies_1 output h0 h1 /\
-      (let o = reveal_h32s (as_seq h1 output) in
-       let i = reveal_sbytes (as_seq h0 input) in
-       o == Spec.Lib.uint32s_from_le (U32.v len) i)))
-[@ "c_inline"]
-let rec uint32s_from_le_bytes output input len =
-  let h0 = ST.get() in
-  if U32.(len =^ 0ul) then (
-    Spec.Lib.lemma_uint32s_from_le_def_0 0 (reveal_sbytes (as_seq h0 input));
-    Seq.lemma_eq_intro (as_seq h0 output) Seq.createEmpty
-  )
-  else (
-    cut (U32.v len > 0);
-    output.(0ul) <- hload32_le (Buffer.sub input 0ul 4ul);
-    let h = ST.get() in
-    let output' = Buffer.offset output 1ul in
-    let input'  = Buffer.offset input 4ul in
-    uint32s_from_le_bytes output' input' U32.(len -^ 1ul);
-    let h1 = ST.get() in
-    lemma_uint32s_from_le_bytes' h h1 output;
-    lemma_uint32s_from_le_bytes h1 output h0 input len
-  )
-
-
-private val lemma_uint32s_to_le_bytes: h:mem -> output:uint8_p{live h output} ->
-  h':mem -> input:buffer H32.t{live h' input} ->
-  len:U32.t{length input = U32.v len /\ 4 * U32.v len = length output /\ U32.v len > 0} ->
-  Lemma
-    (requires (Seq.slice (reveal_sbytes (as_seq h output)) 0 4 = Spec.Lib.uint32_to_le (Seq.index (reveal_h32s (as_seq h' input)) 0)
-      /\ reveal_sbytes (as_seq h (Buffer.offset output 4ul)) == Spec.Lib.uint32s_to_le (UInt32.v len - 1) (reveal_h32s (as_seq h' (Buffer.offset input 1ul)))))
-    (ensures (reveal_sbytes (as_seq h output) == Spec.Lib.uint32s_to_le (U32.v len) (reveal_h32s ((as_seq h' input)))))
-let lemma_uint32s_to_le_bytes h output h' input len =
-  let i' = reveal_h32s (as_seq h' input) in
-  Spec.Lib.lemma_uint32s_to_le_def_1 (U32.v len) i';
-  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 0ul 4ul)) (Seq.slice (as_seq h output) 0 4);
-  Seq.lemma_eq_intro (as_seq h (Buffer.offset output 4ul)) (Seq.slice (as_seq h output) 4 (length output));
-  Seq.lemma_eq_intro (as_seq h' (Buffer.offset input 1ul)) (Seq.slice (as_seq h' input) 1 (length input));
-  Seq.lemma_eq_intro (Seq.slice (Spec.Lib.uint32s_to_le (U32.v len) i') 0 4)
-                     (Spec.Lib.uint32_to_le (Seq.index i' 0));
-  Seq.lemma_eq_intro (reveal_sbytes (as_seq h output)) (Spec.Lib.uint32s_to_le (U32.v len) i')
-
-
-private val lemma_uint32s_to_le_bytes': h:mem -> h':mem -> output:uint8_p{live h output /\ live h' output /\ length output >= 4} -> Lemma
-  (requires (modifies_1 (Buffer.offset output 4ul) h h'))
-  (ensures (Seq.slice (as_seq h output) 0 4 == Seq.slice (as_seq h' output) 0 4))
-private let lemma_uint32s_to_le_bytes' h h' output =
-  let output' = Buffer.sub output 0ul 4ul in
-  let output'' = Buffer.offset output 4ul in
-  no_upd_lemma_1 h h' output'' output';
-  Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 4) (as_seq h output')
-
-
-[@ "c_inline"]
-val uint32s_to_le_bytes:
-  output:uint8_p ->
-  input:buffer H32.t{disjoint output input} ->
-  len:U32.t{length input = U32.v len /\ 4 * U32.v len = length output} ->
-  Stack unit
-    (requires (fun h -> live h output /\ live h input))
-    (ensures  (fun h0 _ h1 -> live h1 output /\ live h0 input /\ modifies_1 output h0 h1 /\
-      (let o = reveal_sbytes (as_seq h1 output) in
-       let i = reveal_h32s (as_seq h0 input) in
-       o == Spec.Lib.uint32s_to_le (U32.v len) i)))
-[@ "c_inline"]
-let rec uint32s_to_le_bytes output input len =
-  let h0 = ST.get() in
-  if U32.(len =^ 0ul) then (
-    Spec.Lib.lemma_uint32s_to_le_def_0 0 (reveal_h32s (as_seq h0 input));
-    Seq.lemma_eq_intro (as_seq h0 output) Seq.createEmpty
-  )
-  else (
-    cut (U32.v len > 0);
-    let hd = input.(0ul) in
-    hstore32_le (Buffer.sub output 0ul 4ul) hd;
-    let h = ST.get() in
-    FStar.Endianness.lemma_little_endian_inj (Seq.slice (reveal_sbytes (as_seq h output)) 0 4)
-                                             (Spec.Lib.uint32_to_le (h32_to_u32 hd));
-    cut (Seq.slice (reveal_sbytes (as_seq h output)) 0 4 == Spec.Lib.uint32_to_le (h32_to_u32 hd));
-    let output' = Buffer.offset output 4ul in
-    let input'  = Buffer.offset input 1ul in
-    uint32s_to_le_bytes output' input' U32.(len -^ 1ul);
-    let h1 = ST.get() in
-    lemma_uint32s_to_le_bytes' h h1 output;
-    lemma_uint32s_to_le_bytes h1 output h0 input len
-  )
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
-
-[@ "substitute"]
-val upd_16:
-  st:state ->
-  v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
-  v8:H32.t -> v9:H32.t -> v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t ->
-  Stack unit
-    (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = as_seq h1 st in
-         Seq.index s 0 == v0 /\ Seq.index s 1 == v1 /\ Seq.index s 2 == v2 /\ Seq.index s 3 == v3 /\
-         Seq.index s 4 == v4 /\ Seq.index s 5 == v5 /\ Seq.index s 6 == v6 /\ Seq.index s 7 == v7 /\
-         Seq.index s 8 == v8 /\ Seq.index s 9 == v9 /\ Seq.index s 10 == v10 /\ Seq.index s 11 == v11 /\
-         Seq.index s 12 == v12 /\ Seq.index s 13 == v13 /\ Seq.index s 14 == v14 /\ Seq.index s 15 == v15)
-     ))
-[@ "substitute"]
-let upd_16 st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
-  st.(0ul) <- v0;
-  st.(1ul) <- v1;
-  st.(2ul) <- v2;
-  st.(3ul) <- v3;
-  st.(4ul) <- v4;
-  st.(5ul) <- v5;
-  st.(6ul) <- v6;
-  st.(7ul) <- v7;
-  st.(8ul) <- v8;
-  st.(9ul) <- v9;
-  st.(10ul) <- v10;
-  st.(11ul) <- v11;
-  st.(12ul) <- v12;
-  st.(13ul) <- v13;
-  st.(14ul) <- v14;
-  st.(15ul) <- v15
-
-
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
-
-private val lemma_seq_of_list: (#a:Type) -> (l:list a) -> Lemma
-  (forall (i:nat). {:pattern (Seq.index (Seq.seq_of_list l) i)} i < List.Tot.length l
-             ==> Seq.index (Seq.seq_of_list l) i == List.Tot.index l i)
-let rec lemma_seq_of_list #a l =
-  match l with
-  | [] -> Seq.lemma_eq_intro (Seq.seq_of_list l) Seq.createEmpty
-  | hd::tl -> (
-    lemma_seq_of_list #a tl;
-    Seq.lemma_eq_intro (Seq.seq_of_list l) (Seq.cons hd (Seq.seq_of_list tl))
-  )
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
-
-private val lemma_create_16:
-  s:Seq.seq H32.t{Seq.length s = 16} ->
-  v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
-  v8:H32.t -> v9:H32.t -> v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t ->
-  Lemma (requires (
-       Seq.index s 0 == v0 /\ Seq.index s 1 == v1 /\ Seq.index s 2 == v2 /\ Seq.index s 3 == v3 /\
-       Seq.index s 4 == v4 /\ Seq.index s 5 == v5 /\ Seq.index s 6 == v6 /\ Seq.index s 7 == v7 /\
-       Seq.index s 8 == v8 /\ Seq.index s 9 == v9 /\ Seq.index s 10 == v10 /\ Seq.index s 11 == v11 /\
-       Seq.index s 12 == v12 /\ Seq.index s 13 == v13 /\ Seq.index s 14 == v14 /\ Seq.index s 15 == v15))
-        (ensures (s == Seq.seq_of_list ([v0; v1; v2; v3; v4; v5; v6; v7;
-                                         v8; v9; v10; v11; v12; v13; v14; v15])))
-let lemma_create_16 s v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
-  assert_norm(List.Tot.length [v0; v1; v2; v3; v4; v5; v6; v7;
-                                         v8; v9; v10; v11; v12; v13; v14; v15] = 16);
-  let s' = Seq.seq_of_list ([v0; v1; v2; v3; v4; v5; v6; v7;
-                                         v8; v9; v10; v11; v12; v13; v14; v15]) in
-  lemma_seq_of_list [v0; v1; v2; v3; v4; v5; v6; v7;
-                                         v8; v9; v10; v11; v12; v13; v14; v15];
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 0 = v0);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 1 = v1);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 2 = v2);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 3 = v3);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 4 = v4);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 5 = v5);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 6 = v6);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 7 = v7);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 8 = v8);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 9 = v9);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 10 = v10);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 11 = v11);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 12 = v12);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 13 = v13);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 14 = v14);
-  assert_norm(List.Tot.index [v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15] 15 = v15);
-  Seq.lemma_eq_intro (Seq.seq_of_list [v0; v1; v2; v3; v4; v5; v6; v7;
-                                         v8; v9; v10; v11; v12; v13; v14; v15]) s
 
 
 [@ "c_inline"]
@@ -280,11 +66,8 @@ let setup st k n c =
   let n0 = n'.(0ul) in
   let n1 = n'.(1ul) in
   let h0 = ST.get() in
-  upd_16  st (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0 c1
-            (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3);
-  let h = ST.get() in
-  lemma_create_16 (as_seq h st) (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0 c1
-            (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3);
+  make_h32_16 st (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0 c1
+               (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3);
   pop_frame()
 
 
@@ -371,13 +154,7 @@ let double_round st =
     row_round st
 
 
-
-unfold let double_round' (b:Seq.seq H32.t{Seq.length b = 16}) : Tot (b':Seq.seq H32.t{Seq.length b' = Seq.length b /\ reveal_h32s b' == Spec.Salsa20.double_round (reveal_h32s b)}) =
-  let f (s:Seq.seq U32.t{Seq.length s = 16}) : Tot (s':Seq.seq U32.t{Seq.length s' = 16}) = Spec.Salsa20.double_round s in
-  lift_32 #(fun s -> Seq.length s = 16) f b
-
-
-#reset-options "--initial_fuel 0 --max_fuel 1 --z3rlimit 100"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 [@ "c_inline"]
 val rounds:
@@ -386,14 +163,27 @@ val rounds:
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
-         s' == rounds s)))
+         s' == Spec.Salsa20.rounds s)))
 [@ "c_inline"]
 let rounds st =
-  repeat #H32.t 16ul double_round' st 10ul double_round
+  let h0 = ST.get() in
+  let inv (h1: mem) (i: nat): Type0 =
+    live h1 st /\ modifies_1 st h0 h1 /\ i <= 10
+    /\ (let s' = reveal_h32s (as_seq h1 st) in
+       let s  = reveal_h32s (as_seq h0 st) in
+       s' == repeat_spec i Spec.Salsa20.double_round s)
+  in
+  let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < 10 ) }): Stack unit
+    (requires (fun h -> inv h (UInt32.v i)))
+    (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
+  = double_round st;
+    Spec.Loops.lemma_repeat (UInt32.v i + 1) Spec.Salsa20.double_round (reveal_h32s (as_seq h0 st))
+  in
+  lemma_repeat_0 0 Spec.Salsa20.double_round (reveal_h32s (as_seq h0 st));
+  for 0ul 10ul inv f'
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
 
 [@ "c_inline"]
 val sum_states:
@@ -427,7 +217,6 @@ let copy_state st st' =
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
 
 type log_t_ = | MkLog: k:Spec.key -> n:Spec.nonce -> (* c:Spec.counter -> *) log_t_
 type log_t = Ghost.erased log_t_
@@ -501,80 +290,20 @@ let lemma_invariant s k n c c' =
   let k7 = Seq.index k 7 in
   let n0 = Seq.index n 0 in
   let n1 = Seq.index n 1 in
-  assert_norm(List.Tot.length [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] = 16);
-  assert_norm(List.Tot.length [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] = 16);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 0 = (uint32_to_sint32 constant0));
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 1 = k0);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 2 = k1);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 3 = k2);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 4 = k3);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 5 = (uint32_to_sint32 constant1));
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 6 = n0);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 7 = n1);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 8 = c0);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 9 = c1);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 10 = (uint32_to_sint32 constant2));
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 11 = k4);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 12 = k5);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 13 = k6);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 14 = k7);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 15 = (uint32_to_sint32 constant3));
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 0 = (uint32_to_sint32 constant0));
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 1 = k0);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 2 = k1);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 3 = k2);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 4 = k3);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 5 = (uint32_to_sint32 constant1));
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 6 = n0);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 7 = n1);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 8 = c0');
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 9 = c1');
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 10 = (uint32_to_sint32 constant2));
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 11 = k4);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 12 = k5);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 13 = k6);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 14 = k7);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 15 = (uint32_to_sint32 constant3));
-  lemma_seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)];
-  cut (intro_h32s (Spec.Salsa20.setup kk nn (UInt64.v c)) == Seq.seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)]);
-  cut (intro_h32s (Spec.Salsa20.setup kk nn (UInt64.v c')) == Seq.seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)]);
-  lemma_seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)];
-  lemma_create_16 s (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0 c1
-            (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3);
-  lemma_create_16 s' (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0' c1'
-            (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3);
-  Seq.lemma_eq_intro s' (Seq.seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0'; c1'; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)])
+  cut (intro_h32s (Spec.Salsa20.setup kk nn (UInt64.v c)) ==
+                  Seq.Create.create_16 (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0 c1 (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3));
+  cut (intro_h32s (Spec.Salsa20.setup kk nn (UInt64.v c')) ==
+                  Seq.Create.create_16 (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0' c1' (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3));
+  Seq.lemma_eq_intro s' (Seq.Create.create_16 (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0' c1' (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3))
 
 
 private val lemma_state_counter:
   k:Spec.key -> n:Spec.nonce -> c:Spec.counter ->
   Lemma (U32.v (Seq.index (Spec.setup k n c) 8) == c % pow2 32 /\ U32.v (Seq.index (Spec.setup k n c) 9) == c / pow2 32)
-let lemma_state_counter k n c =
-  let c0 = low32_of_u64 (UInt64.uint_to_t c) in
-  let c1 = high32_of_u64 (UInt64.uint_to_t c) in
-  let c0 = uint32_to_sint32 c0 in
-  let c1 = uint32_to_sint32 c1 in
-  let s = Spec.setup k n c in
-  let k = Spec.Lib.uint32s_from_le 8 k in
-  let n = Spec.Lib.uint32s_from_le 2 n in
-  let k = intro_h32s k in
-  let n = intro_h32s n in
-  let k0 = Seq.index k 0 in
-  let k1 = Seq.index k 1 in
-  let k2 = Seq.index k 2 in
-  let k3 = Seq.index k 3 in
-  let k4 = Seq.index k 4 in
-  let k5 = Seq.index k 5 in
-  let k6 = Seq.index k 6 in
-  let k7 = Seq.index k 7 in
-  let n0 = Seq.index n 0 in
-  let n1 = Seq.index n 1 in
-  assert_norm(List.Tot.length [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] = 16);
-  lemma_seq_of_list [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)];
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 8 = c0);
-  assert_norm(List.Tot.index [(uint32_to_sint32 constant0); k0; k1; k2; k3; (uint32_to_sint32 constant1); n0; n1; c0; c1; (uint32_to_sint32 constant2); k4; k5; k6; k7; (uint32_to_sint32 constant3)] 9 = c1)
+let lemma_state_counter k n c = ()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 private let lemma_u64_of_u32s (low:U32.t) (high:U32.t) : Lemma (low32_of_u64 (u64_of_u32s low high) = low /\ high32_of_u64 (u64_of_u32s low high) = high) =
   let low' = low32_of_u64 (u64_of_u32s low high) in
@@ -584,8 +313,6 @@ private let lemma_u64_of_u32s (low:U32.t) (high:U32.t) : Lemma (low32_of_u64 (u6
   cut (U32.v low' = U32.v low);
   Math.Lemmas.lemma_div_mod (UInt64.v (u64_of_u32s low high)) (pow2 32)
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 [@ "c_inline"]
 val salsa20_core:
@@ -599,8 +326,8 @@ val salsa20_core:
       /\ live h1 k /\ invariant updated_log h1 st /\ modifies_2 k st h0 h1
       /\ (let key = reveal_h32s (as_seq h1 k) in
           let stv = reveal_h32s (as_seq h1 st) in
-          Seq.index stv 12 == low32_of_u64 ctr /\
-          Seq.index stv 13 == high32_of_u64 ctr /\
+          Seq.index stv 8 == low32_of_u64 ctr /\
+          Seq.index stv 9 == high32_of_u64 ctr /\
          (match Ghost.reveal log, Ghost.reveal updated_log with
          | MkLog k n, MkLog k' n' ->
              key == salsa20_core stv /\ k == k' /\ n == n'))))
@@ -696,12 +423,10 @@ let init st k n =
   Ghost.elift2 (fun (k:uint8_p{length k = 32 /\ live h k}) (n:uint8_p{length n = 8 /\ live h n}) -> MkLog (reveal_sbytes (as_seq h k)) (reveal_sbytes (as_seq h n))) (Ghost.hide k) (Ghost.hide n)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
 val lemma_salsa20_counter_mode_1:
   ho:mem -> output:uint8_p{live ho output} ->
   hi:mem -> input:uint8_p{live hi input} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len <= 64 /\ U32.v len > 0} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len < 64 /\ U32.v len > 0} ->
   k:Spec.key -> n:Spec.nonce -> ctr:UInt64.t{UInt64.v ctr + (length input / 64) < pow2 64} -> Lemma
     (Spec.CTR.counter_mode salsa20_ctx salsa20_cipher k n (UInt64.v ctr) (reveal_sbytes (as_seq hi input))
      == seq_map2 (fun x y -> FStar.UInt8.(x ^^ y))
@@ -710,12 +435,13 @@ val lemma_salsa20_counter_mode_1:
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let lemma_salsa20_counter_mode_1 ho output hi input len k n ctr = ()
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 val lemma_salsa20_counter_mode_2:
   ho:mem -> output:uint8_p{live ho output} ->
   hi:mem -> input:uint8_p{live hi input} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len > 64} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len >= 64} ->
   k:Spec.key -> n:Spec.nonce -> ctr:UInt64.t{UInt64.v ctr + (length input / 64) < pow2 64} -> Lemma
     (Spec.CTR.counter_mode salsa20_ctx salsa20_cipher k n (UInt64.v ctr) (reveal_sbytes (as_seq hi input))
      == (let b, plain = Seq.split (reveal_sbytes (as_seq hi input)) 64 in
@@ -741,12 +467,12 @@ let lemma_salsa20_counter_mode_0 ho output hi input len k n ctr =
   Seq.lemma_eq_intro (as_seq ho output) Seq.createEmpty
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 val update_last:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= 64 /\ U32.v len > 0} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len < 64 /\ U32.v len > 0} ->
   log:log_t ->
   st:state{disjoint st output /\ disjoint st plain} ->
   ctr:UInt64.t{UInt64.v ctr + (length plain / 64) < pow2 64} ->
