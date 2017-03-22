@@ -17,8 +17,7 @@ SALSA_FAMILY_FILES= \
 	Hacl.Impl.HSalsa20.fst \
 	Hacl.SecureAPI.Chacha20.fst \
 	Chacha20.fst \
-	Salsa20.fst \
-	HSalsa20.fst
+	Salsa20.fst
 
 SALSA_MODULES= $(basename $(SALSA_FILES))
 
@@ -98,16 +97,8 @@ salsa20.exe: Hacl.Impl.Salsa20.fst Salsa20.fst Hacl.Test.Salsa20.fst
 		$^ -o salsa20.exe
 	./salsa20.exe
 
-# HSalsa20.c: HSalsa20.fst 
-# 	mkdir -p hsalsa-c
-# 	$(KRML) $(KREMLIN_ARGS) -tmpdir hsalsa-c -skip-compilation \
-# 		-bundle "HSalsa20=HSalsa20,Hacl.Impl.HSalsa20" \
-# 		-drop "Hacl.Impl.Salsa20" -drop "Hacl.Lib.\*" -drop "Hacl.Impl.Xor.Lemmas" \
-# 		$(addprefix -drop , "C.Loops" "Hacl.Spec.\*" "Spec.\*" "Seq.\*") \
-# 		$^
-
 extract-c: Chacha20.c Salsa20.c
 
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c hsalsa-c xsalsa-c *.graph
+	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c *.graph
