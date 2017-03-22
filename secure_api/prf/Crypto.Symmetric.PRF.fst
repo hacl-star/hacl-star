@@ -251,6 +251,15 @@ let getBlock #i t x len output =
   Buffer.recall t.key;
   Block.compute i output t.key x.iv x.ctr len
 
+(*
+ * existing macs are norm
+ *)
+let prf_mac_inv
+  (#i:id) (#mac_rgn:region) (blocks:Seq.seq (entry mac_rgn i)) (x:domain_mac i)
+  (h:mem{prf i})
+  = match find_mac blocks x with
+    | None    -> True
+    | Some mc -> CMA.(MAC.norm_r h mc.r)
 
 // We encapsulate our 4 usages of the PRF in specific functions.
 // But we still use a single, ctr-dependent range in the table.
@@ -263,7 +272,7 @@ let getBlock #i t x len output =
 
 val prf_mac: 
   i:id -> t:state i -> k_0: CMA.akey t.mac_rgn i -> x:domain_mac i -> ST (CMA.state (i,x.iv))
-  (requires (fun h0 -> True))
+  (requires (fun h0 -> if prf i then prf_mac_inv (HS.sel h0 (itable i t)) x h0 else True))
   (ensures (fun h0 mc h1 -> (* beware: mac shadowed by CMA.mac *)
     if prf i then
       let r = itable i t in
@@ -309,8 +318,7 @@ let prf_mac i t k_0 x =
     match find_mac contents x with
     | Some mc ->  (* beware: mac shadowed by CMA.mac *)
         let h0 = ST.get() in
-        //16-12-20 TODO: replace this using monotonicity; NS: known limitation
-        assume (CMA.(MAC.norm_r h0 mc.r));
+        assert (CMA.(MAC.norm_r h0 mc.r));
         Buffer.recall (CMA.(mc.s));
         if mac_log then FStar.Monotonic.RRef.m_recall (CMA.(ilog mc.log));
         mc
@@ -329,7 +337,6 @@ let prf_mac i t k_0 x =
     let h3 = ST.get() in 
     Buffer.lemma_reveal_modifies_1 keyBuffer h1 h3;
     mc
-
 
 val prf_sk0: 
   #i:id{ CMA.skeyed i } -> t:state i -> ST (CMA.skey t.mac_rgn i)

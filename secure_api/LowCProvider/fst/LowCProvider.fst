@@ -9,9 +9,13 @@ effect EXT (a:Type) = ST a
 
 assume type aead_state: Type0
 assume val alg: aead_state -> GTot aead_cipher
+type aes_impl =
+  | HaclAES
+  | ValeAES
 
 assume val aead_create:
   a: aead_cipher ->
+  aes_impl ->
   k: lbytes (aeadKeySize a) -> 
   EXT (st:aead_state{alg st = a})
 
@@ -28,3 +32,4 @@ assume val aead_decrypt:
   ad:bytes ->
   cipher:bytes{length cipher >= aeadTagSize (alg st)} ->
   EXT (o:option bytes)
+
