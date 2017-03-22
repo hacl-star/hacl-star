@@ -380,7 +380,7 @@ private val lemma_state_counter:
 let lemma_state_counter k n c = ()
 
 
-#reset-options "--max_fuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400"
 
 [@ "c_inline"]
 val chacha20_core:
