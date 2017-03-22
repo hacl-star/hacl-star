@@ -141,8 +141,8 @@ static int hacl_poly1305_init(EVP_MD_CTX *ctx) {
   #if IMPL==IMPL_HACL
   Poly1305_64_state *state = EVP_MD_CTX_md_data(ctx);
   uint64_t *buf = malloc(sizeof (uint64_t) * 6);
-  state->x00 = buf;
-  state->x01 = buf + 3;
+  state->r = buf;
+  state->h = buf + 3;
 
   Poly1305_64_init(*state, poly1305_dummy_key);
   #elif IMPL == IMPL_OPENSSL
