@@ -33,7 +33,9 @@ POLY1305_SPECIFIC= \
 	Hacl.Bignum.AddAndMultiply.fst \
 	Hacl.Impl.Poly1305_64.fst \
 	Hacl.Standalone.Poly1305_64.fst \
-	Poly1305_64.fst
+	Poly1305_64.fst \
+	Hacl.Spec.Poly1305_64.Lemmas1.fst \
+	AEAD.Poly1305_64.fst
 
 
 SLOW=
