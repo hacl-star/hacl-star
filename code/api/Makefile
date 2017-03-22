@@ -24,13 +24,15 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
 		-I ../poly1305/interfaces -I ../../specs \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
-		-drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
+		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
+		-drop Hacl.Types
 
 
 KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
 		-I ../poly1305 -I ../../specs \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
-		-drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
+		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
+		-drop Hacl.Types
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -65,23 +67,17 @@ extract-c: extract-api extract-box extract-aead
 
 extract-api:
 	mkdir -p api-c
-	$(KRML) -tmpdir api-c NaCl.fst -verbose \
-		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
-		-drop Hacl.Constants -drop "Hacl.Endianness" \
-		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box" \
-		-add-include '"testlib.h"' -skip-compilation -add-include '"Salsa20.h"' \
-		-add-include '"Poly1305_64.h"' -add-include '"Curve25519.h"'  -add-include '"Hacl_Symmetric_HSalsa20.h"'
+	$(KRML) -tmpdir api-c NaCl.fst -verbose -skip-compilation \
+		$(addprefix -drop , 'Spec.\*' 'Hacl.Spec.\*' 'Hacl.Spe.\*' 'Hacl.Impl.\*' "Seq.\*" \
+				    Hacl.Constants Hacl.Endianness) \
+		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box"
 
 extract-box:
 	mkdir -p box-c
-	$(KRML) -tmpdir box-c NaCl.fst -verbose \
-		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
-		-drop Hacl.Constants -drop "Hacl.Endianness" \
-		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad" \
-		-add-include '"testlib.h"' -skip-compilation -add-include '"Salsa20.h"' \
-		-add-include '"Poly1305_64.h"' -add-include '"Curve25519.h"' 
+	$(KRML) -tmpdir box-c NaCl.fst -verbose -skip-compilation \
+		$(addprefix -drop , 'Spec.\*' 'Hacl.Spec.\*' 'Hacl.Spe.\*' 'Hacl.Impl.\*' "Seq.\*" \
+				    Hacl.Constants Hacl.Endianness) \
+		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad"
 
 
 extract-aead:

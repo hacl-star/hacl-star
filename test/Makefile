@@ -48,10 +48,9 @@ build-snapshot:
 	mkdir -p snapshot
 	cp ../code/poly1305/poly-c/Poly1305_64.* ../code/curve25519/x25519-c/Curve25519.* \
 		../code/salsa-family/chacha-c/Chacha20.* ../code/salsa-family/salsa-c/Salsa20.* \
-		../code/salsa-family/hsalsa-c/Hacl_Symmetric_HSalsa20.* snapshot
+		 snapshot
 	cp $(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) snapshot
 	cp $(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) snapshot
-	mv snapshot/Hacl_Symmetric_HSalsa20.c snapshot/HSalsa20.c
 	cp ./c/* snapshot/
 
 CCOMP=gcc-6 -flto -std=c11 -D_GNU_SOURCE
