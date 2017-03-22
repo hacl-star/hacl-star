@@ -14,13 +14,14 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
-#include "tmp-vale/Prims.h"
-#include "tmp-vale/Crypto_Indexing.h"
-#include "tmp-vale/Crypto_Symmetric_Bytes.h"
-#include "tmp-vale/Crypto_AEAD_Invariant.h"
-#include "tmp-vale/Crypto_AEAD_Encrypt.h"
-#include "tmp-vale/Crypto_AEAD_Decrypt.h"
-#include "tmp-vale/Crypto_AEAD.h"
+#include "tmp/Prims.h"
+#include "tmp/Crypto_Indexing.h"
+#include "tmp/Crypto_Symmetric_Bytes.h"
+#include "tmp/Crypto_Symmetric_MAC.h"
+#include "tmp/Crypto_AEAD_Invariant.h"
+#include "tmp/Crypto_AEAD_Encrypt.h"
+#include "tmp/Crypto_AEAD_Decrypt.h"
+#include "tmp/Crypto_AEAD.h"
 
 typedef Crypto_AEAD_Invariant_aead_state_______ AEAD_ST;
 typedef Crypto_Indexing_id ID;
@@ -65,10 +66,11 @@ static struct custom_operations st_ops = {
   .deserialize = custom_deserialize_default,
 };
 
-// NS, JP: Why not just call AEAD.gen?
-CAMLprim value ocaml_AEAD_create(value alg, value key) {
+CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
         CAMLparam2(alg, key);
         Crypto_Indexing_cipherAlg calg;
+	Crypto_Indexing_aesImpl aesimpl;
+
         switch(Int_val(alg)){
                 case 0:
                         calg = Crypto_Indexing_aeadAlg_AES_128_GCM;
@@ -82,7 +84,20 @@ CAMLprim value ocaml_AEAD_create(value alg, value key) {
                 default:
                         caml_failwith("LowCProvider: unsupported AEAD alg");
         }
-        Crypto_Indexing_id id = calg;
+
+	switch(Int_val(impl)){
+		case 0:
+			aesimpl = Crypto_Indexing_aesImpl_HaclAES;
+			break;
+		case 1:
+			aesimpl = Crypto_Indexing_aesImpl_ValeAES;
+			break;
+		default:
+			caml_failwith("LowCProvider: invalid AES implementation");
+	}
+
+        Crypto_Indexing_id id = Crypto_Indexing_testId(calg);
+	id.aesi = aesimpl;
 
         AEAD_ST* st = malloc(sizeof(AEAD_ST));
        	*st = Crypto_AEAD_gen(id, FStar_HyperHeap_root);
@@ -111,13 +126,8 @@ CAMLprim value ocaml_AEAD_encrypt(value state, value iv, value ad, value plain) 
         uint32_t plainlen = caml_string_length(plain);
 
         CAMLlocal1(cipher);
-        // ADL: hardcoded taglen here TODO
-	// NS, JP: Why zero out the ccipher before calling encrypt?
-        cipher = caml_alloc_string(plainlen + 16);
+        cipher = caml_alloc_string(plainlen + Crypto_Symmetric_MAC_taglen);
         uint8_t* ccipher = (uint8_t*) String_val(cipher);
-        for (uint32_t i = 0; i < plainlen + 16; ++i)
-          ccipher[i] = (uint8_t )0;
-
         Crypto_AEAD_Encrypt_encrypt(id, *ast, n, adlen, cad, plainlen, cplain, ccipher);
         CAMLreturn(cipher);
 }
@@ -129,26 +139,24 @@ CAMLprim value ocaml_AEAD_decrypt(value state, value iv, value ad, value cipher)
         AEAD_ST *ast = st->st;
         ID id = st->id;
         uint8_t* civ = (uint8_t*) String_val(iv);
-        FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128((uint32_t )caml_string_length(iv), civ);
+        FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128((uint32_t)caml_string_length(iv), civ);
         uint8_t* cad = (uint8_t*) String_val(ad);
         uint32_t adlen = caml_string_length(ad);
         uint8_t* ccipher = (uint8_t*) String_val(cipher);
         uint32_t cipherlen = caml_string_length(cipher);
-        if(cipherlen < 16) CAMLreturn(Val_none);
+        if(cipherlen < Crypto_Symmetric_MAC_taglen)
+	     	CAMLreturn(Val_none);
 
         CAMLlocal1(plain);
-        // ADL: hardcoded taglen here TODO
-	// NS, JP: Why zero out the cipher before calling decrypt? 
-        uint32_t plainlen = cipherlen - 16;
+        uint32_t plainlen = cipherlen - Crypto_Symmetric_MAC_taglen;
         plain = caml_alloc_string(plainlen);
         uint8_t* cplain = (uint8_t*) String_val(plain);
-        for (uint32_t i = 0; i < plainlen; ++i)
-          cplain[i] = (uint8_t )0;
         
         if(Crypto_AEAD_Decrypt_decrypt(id, *ast, n, adlen, cad, plainlen, cplain, ccipher))
         {
                 CAMLreturn(Val_some(plain));
         }
-        CAMLreturn(Val_none);
+
+	CAMLreturn(Val_none);
 }
 

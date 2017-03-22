@@ -22,6 +22,19 @@ KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 vale/aes/aes.o:
 	make -C vale/aes
 
+LowCProvider/tmp:
+	$(KRML) LowCProvider/Crypto.Indexing.fst \
+		test/Flag.fst utils/Hacl.Spec.fst \
+		aead/Crypto.AEAD.fst test/test_vale/vale.c \
+		$(KREMLIN_HOME)/test/../kremlib/testlib.c \
+	       	vale/aes/aes.o test/test_hacks.c \
+		-tmpdir LowCProvider/tmp \
+		-skip-linking -add-include '"testlib.h"' \
+		-bundle Hacl.Bignum.* -bundle Hacl.Impl.* \
+		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* \
+		-drop Hacl.Spec -drop Spec.\*
+	cp vale/aes/aes.o LowCProvider/tmp
+
 krml-test-vale.exe: vale/aes/aes.o
 	$(KRML) test/test_vale/Crypto.Indexing.fst \
 	       	test/test_vale/vale.c vale/aes/aes.o \
@@ -46,12 +59,12 @@ krml-test-hacl.exe:
 	./krml-test-hacl.exe
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
-	$(CC) -Ofast -m64 -flto -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
+	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
 	 -o test-perf-hacl.exe tmp-hacl/FStar.c tmp-hacl/Crypto_AEAD*.c tmp-hacl/Crypto_Indexing*.c tmp-hacl/Crypto_Symmetric*.c tmp-hacl/Hacl_Impl*.c tmp-hacl/Hacl_Bignum*.c tmp-hacl/Hacl_Symmetric_Chacha20.c tmp-hacl/Buffer_Utils*.c tmp-hacl/Crypto_Plain*.c $(KREMLIN_HOME)/kremlib/kremlib.c \
 		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_perf.c test/test_hacks.c -I tmp-hacl  \
 		-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test \
 		-I $(OPENSSL_HOME)/include -L $(OPENSSL_HOME) -lcrypto $(CFLAGS)
-	PATH=$(OPENSSL_HOME):$(PATH) LD_LIBRARY_PATH=$(OPENSSL_HOME):$(LD_LIBRARY_PATH) DYLD_LIBRARY_PATH=$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH) ./test-perf-hacl.exe
+	PATH="$(OPENSSL_HOME):$(PATH)" LD_LIBRARY_PATH="$(OPENSSL_HOME):$(LD_LIBRARY_PATH)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH)" ./test-perf-hacl.exe
 
 # Cleaning
 clean:

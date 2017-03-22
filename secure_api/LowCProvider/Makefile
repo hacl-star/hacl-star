@@ -6,7 +6,7 @@ INCLUDE=-package batteries,zarith -I $(PLATFORM) -I $(CORECRYPTO)
 MARCH?=x86_64
 
 KREMLIN_HOME ?= ../../../kremlin
-KRML_INCLUDES=$(addprefix -I ,.. $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,$(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=-verbose -ccopt -Wno-error=pointer-sign $(KOPTS)
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 
@@ -45,10 +45,10 @@ endif
 
 .PHONY: test dep
 
-all: ../krml-test-vale.exe LowCProvider.cmxa
+all: tmp LowCProvider.cmxa
 
-../krml-test-vale.exe:
-	$(MAKE) -C .. krml-test-vale.exe
+tmp:
+	$(MAKE) -C .. LowCProvider/tmp
 
 %.cmi: %.mli
 	$(OCAMLC) -c $<
@@ -62,9 +62,8 @@ all: ../krml-test-vale.exe LowCProvider.cmxa
 $(CORECRYPTO)/CoreCrypto.cmx: $(CORECRYPTO)/CoreCrypto.ml
 	$(MAKE) -C $(CORECRYPTO)
 
-libllcrypto.a: ../krml-test-vale.exe
-	$(AR) -cr libllcrypto.a ../vale/aes/aes.o ../tmp-vale/*.o
-	$(AR) -d libllcrypto.a Crypto_KrmlTest.o
+libllcrypto.a: tmp
+	$(AR) -cr libllcrypto.a tmp/*.o
 
 lowc_stub.o: libllcrypto.a
 	$(OCAMLOPT) $(CCOPTS) $(EXTRA_OPTS) $(KRML_INCLUDES) -c lowc_stub.c
