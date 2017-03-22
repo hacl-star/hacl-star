@@ -399,6 +399,10 @@ let enc_dec_liveness_and_separation (#i:id) (#rw:rw) (aead_st:aead_state i rw)
     enc_dec_separation aead_st aad plain cipher /\
     aead_liveness aead_st h
 
+let prf_mac_inv (#i:id) (#mac_rgn:region) (blocks:prf_table mac_rgn i) (h:mem{prf i}) :Type0 =
+  (forall (x:domain_mac i).{:pattern (find_mac blocks x)}
+                      PRF.prf_mac_inv blocks x h)
+
 (*** inv st h:
        The final stateful invariant,
        refines and aead_state_live ***)
@@ -407,7 +411,8 @@ let inv (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) : Type0 =
   (safeMac i ==>
      (let prf_table = HS.sel h (itable i st.prf) in
       let aead_entries = HS.sel h st.log in
-      refines prf_table aead_entries h))
+      refines prf_table aead_entries h)) /\
+  (prf i ==> prf_mac_inv (HS.sel h (itable i st.prf)) h)
 
 (*** SEPARATION AND LIVENESS
      REQUIREMENTS OF THE INTERFACE ***)
@@ -504,6 +509,25 @@ let frame_refines (i:id{safeMac i}) (mac_rgn:region)
      forall_intro (move_requires (frame_unused_aead_iv_for_prf_h h h' blocks));
      if safeId i then forall_intro (move_requires (frame_refines_one_entry h h' blocks))
 
+let frame_prf_prf_mac_inv
+  (#i:id) (#mac_rgn:region) (blocks:prf_table mac_rgn i) (h:mem) (h':mem{prf i}) (x:domain_mac i) 
+  :Lemma (requires (let open HS in
+                    PRF.prf_mac_inv blocks x h                   /\
+                    HH.modifies_rref mac_rgn TSet.empty h.h h'.h /\
+		    HS.live_region h' mac_rgn))
+	 (ensures  (PRF.prf_mac_inv blocks x h'))
+  = ()
+
+let frame_prf_mac_inv
+  (#i:id) (#mac_rgn:region) (blocks:prf_table mac_rgn i) (h:mem) (h':mem{prf i})
+  :Lemma (requires (let open HS in
+                    prf_mac_inv blocks h                         /\
+		    HH.modifies_rref mac_rgn TSet.empty h.h h'.h /\
+		    HS.live_region h' mac_rgn))
+         (ensures  (prf_mac_inv blocks h'))
+  = let open FStar.Classical in
+    forall_intro (move_requires (frame_prf_prf_mac_inv blocks h h'))
+
 let frame_inv_modifies_0 (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
    : Lemma (requires (inv st h /\ 
 		      Buffer.modifies_0 h h1))
@@ -511,6 +535,7 @@ let frame_inv_modifies_0 (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
    = Buffer.lemma_reveal_modifies_0 h h1;
      if safeMac i
      then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1
+     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_modifies_1 (#i:id) (#rw:rw) (#a:Type) (b:FStar.Buffer.buffer a) 
 			(st:aead_state i rw) (h:mem) (h1:mem)
@@ -521,6 +546,7 @@ let frame_inv_modifies_1 (#i:id) (#rw:rw) (#a:Type) (b:FStar.Buffer.buffer a)
    = Buffer.lemma_reveal_modifies_1 b h h1;
      if safeMac i
      then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1
+     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_modifies_tip (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
    : Lemma (requires (let open HS in 
@@ -530,6 +556,7 @@ let frame_inv_modifies_tip (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem
 	   (ensures  (inv st h1))
    = if safeMac i
      then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1
+     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_push (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
    : Lemma (requires (inv st h /\ 
@@ -537,12 +564,14 @@ let frame_inv_push (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
 	   (ensures  (inv st h1))
    = if safeMac i
      then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1
+     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_pop (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem{HS.poppable h})
    : Lemma (requires (inv st h))
 	   (ensures  (inv st (HS.pop h)))
    = if safeMac i
      then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h (HS.pop h)
+     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h (HS.pop h)
 
 let weaken_all_above (#rgn:region) (#i:id) (s:Seq.seq (PRF.entry rgn i)) 
 		    (x:PRF.domain i) (y:PRF.domain i{y `above` x})
@@ -1142,3 +1171,15 @@ let aead_entries_are_refined_snoc
 		       (safeId i ==> refines_one_entry prf_table e h)))
             (ensures (aead_entries_are_refined prf_table (Seq.snoc aead_entries e) h))
     = FStar.Seq.contains_snoc aead_entries e
+
+let frame_prf_mac_inv_append_blocks
+  (#i:id)
+  (#mac_rgn:region)
+  (s_1:prf_table mac_rgn i)
+  (s_2:prf_table mac_rgn i)
+  (x:domain_mac i)
+  (h:mem{prf i})
+  :Lemma (requires (PRF.prf_mac_inv s_1 x h /\
+                    None? (PRF.find s_2 x)))
+         (ensures  (PRF.prf_mac_inv (Seq.append s_1 s_2) x h))
+  = lemma_prf_find_append_none s_1 s_2 x

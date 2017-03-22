@@ -26,12 +26,12 @@ module TestAead = struct
     Printf.printf "key:\t\t%S\niv:\t\t%S\naad:\t\t%S\ntag:\t\t%S\nplaintext:\t%S\nciphertext:\t%S\n"
       v.key v.iv v.aad v.tag v.plaintext v.ciphertext
 
-  let test v =
+  let test v i =
     let key = Bytes.bytes_of_hex v.key in
     let iv  = Bytes.bytes_of_hex v.iv  in
     let aad = Bytes.bytes_of_hex v.aad in
     let plaintext = Bytes.bytes_of_hex v.plaintext in
-    let st = LowCProvider.aead_create v.cipher key in
+    let st = LowCProvider.aead_create v.cipher i key in
     let c = LowCProvider.aead_encrypt st iv aad plaintext in
     let c',t = Bytes.split c (Z.sub (Bytes.length c) (Z.of_int 16)) in
     if not (Bytes.hex_of_bytes c' = v.ciphertext && Bytes.hex_of_bytes t = v.tag) then
@@ -240,7 +240,7 @@ let run_test section test_vectors print_test_vector test_vector =
   let total  = ref 0 in
   let doit v =
     total := !total + 1;
-    if test_vector v then
+    if test_vector v LowCProvider.ValeAES && test_vector v LowCProvider.HaclAES then
       let () = Printf.printf "Test %d OK\n" (!total) in
       passed := !passed + 1
     else (
