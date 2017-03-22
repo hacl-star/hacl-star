@@ -5,6 +5,7 @@ open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness
 open Spec.Lib
+open Seq.Create
 
 (* This should go elsewhere! *)
 
@@ -72,14 +73,10 @@ let setup (k:key) (n:nonce) (c:counter): state =
   let c64 = UInt64.uint_to_t c in
   let c0 = FStar.Int.Cast.uint64_to_uint32 c64 in
   let c1 = FStar.Int.Cast.uint64_to_uint32 FStar.UInt64.(c64 >>^ 32ul) in
-  assert_norm (List.Tot.length ([constant0    ; (index ks 0) ; (index ks 1) ; (index ks 2) ;
-              (index ks 3) ; constant1    ; (index ns 0) ; (index ns 1) ;
-	      c0 	     	; c1	       ; constant2    ; (index ks 4) ; 
-	      (index ks 5) ; (index ks 6) ; (index ks 7) ; constant3    ]) = 16);
-  seq_of_list ([constant0    ; (index ks 0) ; (index ks 1) ; (index ks 2) ;
-              (index ks 3) ; constant1    ; (index ns 0) ; (index ns 1) ;
-	      c0 	     	; c1	       ; constant2    ; (index ks 4) ; 
-	      (index ks 5) ; (index ks 6) ; (index ks 7) ; constant3    ])
+  create_16 constant0    (index ks 0) (index ks 1) (index ks 2)
+          (index ks 3) constant1    (index ns 0) (index ns 1)
+	  c0 	       c1	    constant2    (index ks 4)
+          (index ks 5) (index ks 6) (index ks 7) constant3
 	   
 
 let salsa20_block (k:key) (n:nonce) (c:counter): block =

@@ -4,6 +4,7 @@ module Hacl.SecureAPI.Chacha20
 open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
+open Hacl.Lib.LoadStore32
 open Hacl.Impl.Chacha20
 
 
