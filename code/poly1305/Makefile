@@ -33,7 +33,9 @@ POLY1305_SPECIFIC= \
 	Hacl.Bignum.AddAndMultiply.fst \
 	Hacl.Impl.Poly1305_64.fst \
 	Hacl.Standalone.Poly1305_64.fst \
-	Poly1305_64.fst
+	Poly1305_64.fst \
+	Hacl.Spec.Poly1305_64.Lemmas1.fst \
+	AEAD.Poly1305_64.fst
 
 
 SLOW=
@@ -83,7 +85,16 @@ bignum-hints:
 specific-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
 # For CI, all modules restricted from incomplete or slow ones
-all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
+all-ci2: $(addsuffix -ci, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
+all-ci:
+	cp bignum_hints/* ../bignum
+	$(MAKE) all-ci2
+	mv ../bignum/*.hints ./bignum_hints
+bignum-ci:
+	cp bignum_hints/* ../bignum
+	$(MAKE) $(addsuffix -ci, $(BIGNUM))
+	mv ../bignum/*.hints ./bignum_hints
+specific-ci: $(addsuffix -ci, $(POLY1305_SPECIFIC))
 
 
 test-c:

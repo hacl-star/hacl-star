@@ -1,3 +1,4 @@
+(* A large chunk of this module is taken from FStar/examples/low-level/crypto *)
 module Hacl.Spec.Poly1305_64.Lemmas1
 
 open FStar.Mul
@@ -60,7 +61,7 @@ let snoc_encode_bytes s w =
 
 module U32 = FStar.UInt32
 
-private val encode_bytes_append: len:nat -> s:Seq.seq U8.t -> w:word -> Lemma
+val encode_bytes_append: len:nat -> s:Seq.seq U8.t -> w:word -> Lemma
   (requires (0 < Seq.length w /\ Seq.length s == len /\ len % 16 == 0))
   (ensures  (Seq.equal (encode_bytes ((Seq.append s w)))
                       (Seq.cons (w) (encode_bytes (s)))))

@@ -34,7 +34,8 @@ let maclen = 16
 type state = Hacl.Impl.Poly1305_64.poly1305_state
 inline_for_extraction let log_t = Ghost.erased (Spec.Poly1305.text)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+#reset-options "--max_fuel 0 --z3rlimit 400"
 
 private val lemma_aead_encrypt_poly:
   h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem ->
@@ -54,26 +55,14 @@ private let lemma_aead_encrypt_poly h0 h1 h2 h3 h4 r acc mac =
   lemma_intro_modifies_2_1 mac h0 h4
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 open FStar.Mul
-
-assume val lemma_encode_bytes_append: s1:Seq.seq U8.t -> s2:Seq.seq U8.t -> l:nat{l * 16 = Seq.length s1} ->
-  Lemma (requires (True))
-        (ensures (Spec.Poly1305.encode_bytes (s1 @| s2) == Spec.Poly1305.encode_bytes s2 @| Spec.Poly1305.encode_bytes s1))
-        (* (decreases (l)) *)
-
-assume private val encode_bytes_append: len:nat -> s:Seq.seq U8.t -> w:Spec.Poly1305.word -> Lemma
-  (requires (0 < Seq.length w /\ Seq.length s == len /\ len % 16 == 0))
-  (ensures  (Seq.equal (Spec.Poly1305.encode_bytes ((Seq.append s w)))
-                      (Seq.cons (w) (Spec.Poly1305.encode_bytes (s)))))
-
 open FStar.Endianness 
 
 private val lemma_aead_encrypt_poly_2:
   k:Spec.Poly1305.key ->
   mac:Spec.Poly1305.tag ->
-  aad:Seq.seq H8.t ->
-  c:Seq.seq H8.t ->
+  aad:Seq.seq H8.t{Seq.length aad < pow2 32} ->
+  c:Seq.seq H8.t{Seq.length c < pow2 32} ->
   lb:Spec.Poly1305.word_16 ->
   Lemma (requires (
     let r = Spec.Poly1305.encode_r (slice k 0 16) in
@@ -82,16 +71,15 @@ private val lemma_aead_encrypt_poly_2:
     let aad = reveal_sbytes aad in
     little_endian mac = (Spec.Poly1305.poly (Seq.cons lb (Spec.Poly1305.encode_bytes (pad_16 c) @| Spec.Poly1305.encode_bytes (pad_16 aad))) r + s) % pow2 128))
         (ensures (mac == Spec.Poly1305.poly1305 (pad_16 (reveal_sbytes aad) @| pad_16 (reveal_sbytes c) @| lb) k))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let lemma_aead_encrypt_poly_2 k mac aad c lb =
   let aad = reveal_sbytes aad in
   let c   = reveal_sbytes c   in
   Math.Lemmas.lemma_div_mod (Seq.length (pad_16 aad)) 16;
-  lemma_encode_bytes_append (pad_16 aad) (pad_16 c) (Seq.length (pad_16 aad) / 16);
+  Hacl.Spec.Poly1305_64.Lemmas1.lemma_encode_bytes_append (pad_16 aad) (pad_16 c) (Seq.length (pad_16 aad) / 16);
   cut (Spec.Poly1305.encode_bytes (pad_16 aad @| pad_16 c) == Spec.Poly1305.encode_bytes (pad_16 c) @| Spec.Poly1305.encode_bytes (pad_16 aad));
   let s = (pad_16 aad @| pad_16 c) in
   Seq.lemma_eq_intro (pad_16 aad @| pad_16 c @| lb) ((pad_16 aad @| pad_16 c) @| lb);
-  encode_bytes_append (Seq.length s) s lb;  
+  Hacl.Spec.Poly1305_64.Lemmas1.encode_bytes_append (Seq.length s) s lb;  
   cut (Seq.cons lb (Spec.Poly1305.encode_bytes (pad_16 c) @| Spec.Poly1305.encode_bytes (pad_16 aad))
     == Spec.Poly1305.encode_bytes (pad_16 aad @| pad_16 c @| lb));
   lemma_little_endian_inj (Spec.Poly1305.poly1305 (pad_16 aad @| pad_16 c @| lb) k) mac
@@ -125,22 +113,22 @@ private let aead_encrypt_poly  c mlen mac aad aadlen tmp =
   push_frame();
   let h0 = ST.get() in
   let tmp = Buffer.create (uint64_to_sint64 0uL) 6ul in
-  let st = Poly1305_64.mk_state (Buffer.sub tmp 0ul 3ul) (Buffer.sub tmp 3ul 3ul) in
+  let st = AEAD.Poly1305_64.mk_state (Buffer.sub tmp 0ul 3ul) (Buffer.sub tmp 3ul 3ul) in
   let h1 = ST.get() in
-  let log:log_t = Poly1305_64.poly1305_blocks_init st aad aadlen mk in
+  let log:log_t = AEAD.Poly1305_64.poly1305_blocks_init st aad aadlen mk in
   let h2 = ST.get() in
   cut (let aad = reveal_sbytes (as_seq h0 aad) in
        let r   = Spec.Poly1305.encode_r (reveal_sbytes (as_seq h0 (Buffer.sub mk 0ul 16ul))) in
        let acc = Hacl.Spec.Poly1305_64.selem (as_seq h2 Hacl.Impl.Poly1305_64.(st.h)) in
        acc     = Spec.Poly1305.poly (Spec.Poly1305.encode_bytes (pad_16 aad)) r);
-  let log:log_t = Poly1305_64.poly1305_blocks_continue log st c mlen in
+  let log:log_t = AEAD.Poly1305_64.poly1305_blocks_continue log st c mlen in
   let h3 = ST.get() in
   cut (let aad = reveal_sbytes (as_seq h0 aad) in
        let r   = Spec.Poly1305.encode_r (reveal_sbytes (as_seq h0 (Buffer.sub mk 0ul 16ul))) in
        let acc = Hacl.Spec.Poly1305_64.selem (as_seq h3 Hacl.Impl.Poly1305_64.(st.h)) in
        let c   = reveal_sbytes (as_seq h0 c) in
        acc     = Spec.Poly1305.poly (Spec.Poly1305.encode_bytes (pad_16 c) @| Spec.Poly1305.encode_bytes (pad_16 aad)) r);
-  Poly1305_64.poly1305_blocks_finish log st lb mac key_s;
+  AEAD.Poly1305_64.poly1305_blocks_finish log st lb mac key_s;
   let h4 = ST.get() in
   cut (let lb  = as_seq h0 lb in
        let c   = reveal_sbytes (as_seq h0 c) in
@@ -156,6 +144,7 @@ private let aead_encrypt_poly  c mlen mac aad aadlen tmp =
   pop_frame()
 
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 private val lemma_aead_encrypt:
   h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem ->
@@ -167,7 +156,6 @@ private val lemma_aead_encrypt:
     /\ live h4 c /\ live h4 mac /\ live h4 b
     /\ modifies_0 h0 h1 /\ modifies_1 c h1 h2 /\ modifies_1 b h2 h3 /\ modifies_1 mac h3 h4))
         (ensures (modifies_3_2 c mac h0 h4))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 private let lemma_aead_encrypt h0 h1 h2 h3 h4 c b mac =
   lemma_reveal_modifies_0 h0 h1;
   lemma_reveal_modifies_1 c h1 h2;
