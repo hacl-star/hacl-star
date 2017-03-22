@@ -1,4 +1,4 @@
-module Hacl.Impl.Chacha20.Lemmas
+module Hacl.Impl.Xor.Lemmas
 
 open FStar.Mul
 open FStar.Seq

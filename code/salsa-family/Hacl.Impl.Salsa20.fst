@@ -515,25 +515,28 @@ val update:
 let update output plain log st ctr =
   let h0 = ST.get() in
   push_frame();
-  let k = create (uint32_to_sint32 0ul) 16ul in
-  let l = salsa20_core log k st ctr in
-  let ib = create (uint32_to_sint32 0ul) 16ul in
-  let ob = create (uint32_to_sint32 0ul) 16ul in
+  let b  = create (uint32_to_sint32 0ul) 48ul in
+  let k  = Buffer.sub b 0ul  16ul in
+  let ib = Buffer.sub b 16ul 16ul in
+  let ob = Buffer.sub b 32ul 16ul in
+  let l  = salsa20_core log k st ctr in
   uint32s_from_le_bytes ib plain 16ul;
+  let h  = ST.get() in
   map2 ob ib k 16ul (fun x y -> H32.(x ^^ y));
   uint32s_to_le_bytes output ob 16ul;
+  Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes (reveal_sbytes (as_seq h0 plain))
+                                                       (reveal_h32s (as_seq h k));
   pop_frame();
   l
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
-
 val lemma_salsa20_counter_mode:
   h0:mem -> h1:mem -> h2:mem ->
   output:uint8_p{live h1 output /\ live h2 output /\ live h0 output} ->
   plain:uint8_p{live h0 plain /\ live h1 plain /\ live h2 plain} ->
-  len:UInt32.t{length output = U32.v len /\ length output = length plain /\ U32.v len > 64} ->
+  len:UInt32.t{length output = U32.v len /\ length output = length plain /\ U32.v len >= 64} ->
   k:Spec.key -> n:Spec.nonce -> ctr:Spec.counter{ctr + U32.v len / 64 < pow2 64} ->
   Lemma (requires (
     (let o = reveal_sbytes (as_seq h2 (Buffer.sub output 0ul 64ul)) in
@@ -565,12 +568,12 @@ let lemma_salsa20_counter_mode h0 h1 h2 output plain len k n ctr =
   lemma_salsa20_counter_mode_2 h2 output h0 plain len k n (UInt64.uint_to_t ctr)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 val salsa20_counter_mode_:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= 64} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len < 64} ->
   log:log_t ->
   st:state{disjoint st output /\ disjoint st plain} ->
   ctr:UInt64.t{UInt64.v ctr + (length plain / 64) < pow2 64} ->
@@ -591,7 +594,8 @@ let rec salsa20_counter_mode_ output plain len log st ctr =
     let _ = update_last output plain len log st ctr in ()
   )
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 val salsa20_counter_mode:
   output:uint8_p ->
@@ -611,7 +615,7 @@ val salsa20_counter_mode:
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 let rec salsa20_counter_mode output plain len log st ctr =
   let h0 = ST.get() in
-  if U32.(len <=^ 64ul) then salsa20_counter_mode_ output plain len log st ctr
+  if U32.(len <^ 64ul) then salsa20_counter_mode_ output plain len log st ctr
   else (
     let b  = Buffer.sub plain 0ul 64ul in
     let b' = Buffer.offset plain 64ul in
@@ -635,8 +639,6 @@ let rec salsa20_counter_mode output plain len log st ctr =
     lemma_salsa20_counter_mode h0 h h' output plain len (Ghost.reveal log).k (Ghost.reveal log).n (UInt64.v ctr)
   )
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val salsa20:
   output:uint8_p ->

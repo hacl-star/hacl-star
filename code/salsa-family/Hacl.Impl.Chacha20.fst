@@ -578,7 +578,7 @@ let update output plain log st ctr =
   let h  = ST.get() in
   map2 ob ib k 16ul (fun x y -> H32.(x ^^ y));
   uint32s_to_le_bytes output ob 16ul;
-  Hacl.Impl.Chacha20.Lemmas.lemma_xor_uint32s_to_bytes (reveal_sbytes (as_seq h0 plain))
+  Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes (reveal_sbytes (as_seq h0 plain))
                                                        (reveal_h32s (as_seq h k));
   pop_frame();
   l
