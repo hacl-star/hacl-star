@@ -15,20 +15,6 @@ module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
-
-private val lemma_max_uint32: n:nat -> Lemma
-  (requires (n = 32))
-  (ensures  (pow2 n = 4294967296))
-  [SMTPat (pow2 n)]
-let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296)
-private val lemma_max_uint64: n:nat -> Lemma
-  (requires (n = 64))
-  (ensures  (pow2 n = 18446744073709551616))
-  [SMTPat (pow2 n)]
-let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616)
-
-
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val crypto_box_beforenm:
@@ -46,7 +32,7 @@ let crypto_box_beforenm k pk sk =
   let hsalsa_n = sub tmp 32ul 16ul in
   (* Compute shared key *)
   Curve25519.crypto_scalarmult hsalsa_k sk pk;
-  Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 k hsalsa_n hsalsa_k;
+  HSalsa20.hsalsa20 k hsalsa_k hsalsa_n;
   pop_frame();
   0ul
 
@@ -101,7 +87,7 @@ let crypto_box_detached c mac m mlen n pk sk =
   Curve25519.crypto_scalarmult k sk pk;
   let h1 = ST.get() in
   cut (modifies_0 h0 h1);
-  Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey hsalsa_n k;
+  HSalsa20.hsalsa20 subkey k hsalsa_n;
   let h2 = ST.get() in
   cut (modifies_0 h0 h2);
   let z = crypto_secretbox_detached c mac m mlen n subkey in
@@ -133,7 +119,7 @@ let crypto_box_open_detached m c mac mlen n pk sk =
   let hsalsa_n = sub key 64ul 16ul in
   (* Compute shared key *)
   Curve25519.crypto_scalarmult k sk pk;
-  Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey hsalsa_n k;
+  HSalsa20.hsalsa20 subkey k hsalsa_n;
   let z = crypto_secretbox_open_detached m c mac mlen n subkey in
   pop_frame();
   z

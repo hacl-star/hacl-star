@@ -19,17 +19,6 @@ module H64 = Hacl.UInt64
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
-(* private val lemma_max_uint32: n:nat -> Lemma *)
-(*   (requires (n = 32)) *)
-(*   (ensures  (pow2 n = 4294967296)) *)
-(*   [SMTPat (pow2 n)] *)
-(* let lemma_max_uint32 n = assert_norm(pow2 32 = 4294967296) *)
-(* private val lemma_max_uint64: n:nat -> Lemma *)
-(*   (requires (n = 64)) *)
-(*   (ensures  (pow2 n = 18446744073709551616)) *)
-(*   [SMTPat (pow2 n)] *)
-(* let lemma_max_uint64 n = assert_norm(pow2 64 = 18446744073709551616) *)
-
 private val set_zero_bytes:
   b:uint8_p{length b >= 32} ->
   Stack unit
@@ -75,7 +64,7 @@ let crypto_secretbox_detached c mac m mlen n k =
   let mlen0_32 = Int.Cast.uint64_to_uint32 mlen0 in
   Math.Lemmas.modulo_lemma (U32.v mlen0_32) (pow2 32);
   blit m 0ul block0 zerobytes mlen0_32;
-  Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey (sub n 0ul 16ul) k;
+  HSalsa20.hsalsa20 subkey k (sub n 0ul 16ul);
   Salsa20.salsa20 block0 block0 (U32.(mlen0_32 +^ zerobytes)) subkey (sub n 16ul 8ul) 0uL;
   let h1 = ST.get() in
   cut (modifies_1 hsalsa_state h0' h1);
@@ -113,7 +102,7 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let block0 = sub hsalsa_state 32ul 64ul in
   let tmp_mac = sub hsalsa_state 96ul 16ul in
   let h0' = ST.get() in
-  Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey (sub n 0ul 16ul) k;
+  HSalsa20.hsalsa20 subkey k (sub n 0ul 16ul);
   Salsa20.salsa20 block0 block0 32ul subkey (sub n 16ul 8ul) 0uL;
   let h1 = ST.get() in
   cut(modifies_0 h0 h1);

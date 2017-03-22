@@ -6,24 +6,25 @@ include ../Makefile.include
 
 SALSA_FILES= \
 	Hacl.Test.Chacha20.fst \
-	Hacl.Test.Salsa20.fst \
-	Hacl.Test.XSalsa20.fst 
+	Hacl.Test.Salsa20.fst
 
 SALSA_FAMILY_FILES= \
+	Hacl.Lib.LoadStore32.fst \
+	Hacl.Lib.Create.fst \
+	Hacl.Impl.Xor.Lemmas.fst \
 	Hacl.Impl.Chacha20.fst \
-	Hacl.Symmetric.Salsa20.fst \
 	Hacl.Impl.Salsa20.fst \
-	Hacl.Symmetric.HSalsa20.fst \
-	Hacl.Symmetric.XSalsa20.fst \
-	Chacha20.fst \
+	Hacl.Impl.HSalsa20.fst \
 	Hacl.SecureAPI.Chacha20.fst \
-	Salsa20.fst
+	Chacha20.fst \
+	Salsa20.fst \
+	HSalsa20.fst
 
 SALSA_MODULES= $(basename $(SALSA_FILES))
 
-SLOW=Hacl.Symmetric.Salsa20.fst \
+SLOW=
 
-BROKEN=	Hacl.Impl.Salsa20.fst \
+BROKEN=
 
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
@@ -69,13 +70,15 @@ KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experi
 Chacha20.c: Hacl.Impl.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
 	$(KRML) -tmpdir chacha-c \
-		-bundle 'Chacha20=Hacl.Impl.Chacha20,Chacha20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*' -drop "C.Loops" \
+		-bundle 'Chacha20=Hacl.Impl.\*,Chacha20,Hacl.Lib.\*' \
+		$(addprefix -drop , "C.Loops" "Hacl.Spec.\*" "Spec.\*" "Seq.\*") \
 		Chacha20.fst $(VERBOSE) -skip-linking
 
 chacha20.exe: Hacl.Impl.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
-	$(KRML) $(KREMLIN_ARGS) -tmpdir chacha-c  -no-prefix Hacl.Test.Chacha20 -I . -drop "C.Loops" \
-		-bundle 'Chacha20=Chacha20,Hacl.Impl.Chacha20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*'  \
+	$(KRML) $(KREMLIN_ARGS) -tmpdir chacha-c  -no-prefix Hacl.Test.Chacha20 -I . \
+		$(addprefix -drop , "C.Loops" "Hacl.Spec.\*" "Spec.\*" "Seq.\*") \
+		-bundle 'Chacha20=Chacha20,Hacl.Impl.\*,Hacl.Lib.\*' \
 		Chacha20.fst Hacl.Test.Chacha20.fst -o chacha20.exe
 	./chacha20.exe
 
@@ -83,34 +86,27 @@ chacha20.exe: Hacl.Impl.Chacha20.fst Hacl.Test.Chacha20.fst Chacha20.fst
 Salsa20.c: Hacl.Impl.Salsa20.fst Salsa20.fst
 	mkdir -p salsa-c
 	$(KRML) $(KREMLIN_ARGS) -tmpdir salsa-c -I . -skip-compilation \
-		-bundle 'Salsa20=Salsa20,Hacl.Impl.Salsa20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*' -drop "C.Loops" \
+		-bundle 'Salsa20=Salsa20,Hacl.Impl.\*,Hacl.Lib.\*' \
+		$(addprefix -drop , "C.Loops" "Hacl.Spec.\*" "Spec.\*" "Seq.\*") \
 		$^
 
 salsa20.exe: Hacl.Impl.Salsa20.fst Salsa20.fst Hacl.Test.Salsa20.fst
 	mkdir -p salsa-c
 	$(KRML) $(KREMLIN_ARGS) -tmpdir salsa-c  -no-prefix Hacl.Test.Salsa20 \
-		-bundle 'Salsa20=Salsa20,Hacl.Impl.Salsa20' -drop 'Hacl.Spec.\*' -drop 'Spec.\*' -drop "C.Loops" \
+		-bundle 'Salsa20=Salsa20,Hacl.Impl.\*,Hacl.Lib.\*' \
+		$(addprefix -drop , "C.Loops" "Hacl.Spec.\*" "Spec.\*" "Seq.\*") \
 		$^ -o salsa20.exe
 	./salsa20.exe
 
-HSalsa20.c: Hacl.Symmetric.HSalsa20.fst 
+HSalsa20.c: HSalsa20.fst 
 	mkdir -p hsalsa-c
-	$(KREMLIN_HOME)/krml $(KREMLIN_ARGS) -tmpdir hsalsa-c \
-		-I ../bignum -I ../lib/kremlin \
-		Hacl.Symmetric.HSalsa20.fst \
-		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
+	$(KRML) $(KREMLIN_ARGS) -tmpdir hsalsa-c -skip-compilation \
+		-bundle "HSalsa20=HSalsa20,Hacl.Impl.\*,Hacl.Lib.\*" \
 		-drop Prims -drop FStar \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -skip-compilation  -ccopt -std=gnu99
+		$(addprefix -drop , "C.Loops" "Hacl.Spec.\*" "Spec.\*" "Seq.\*") \
+		$^
 
-XSalsa20.c: Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst
-	mkdir -p xsalsa-c
-	$(KRML) $(KREMLIN_ARGS) -tmpdir xsalsa-c \
-		Hacl.Symmetric.XSalsa20.fst Hacl.Test.XSalsa20.fst -o xsalsa20.exe -no-prefix Hacl.Test.XSalsa20 \
-		-drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.UInt.\*'
-	./xsalsa20.exe
-
-extract-c: Chacha20.c Salsa20.c HSalsa20.c XSalsa20.c
+extract-c: Chacha20.c Salsa20.c HSalsa20.c
 
 
 clean:
