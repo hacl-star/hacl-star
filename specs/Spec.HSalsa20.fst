@@ -7,6 +7,8 @@ open FStar.Endianness
 open Seq.Create
 open Spec.Lib
 
+module Salsa20 = Spec.Salsa20
+
 let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
 let noncelen = 16  (* in bytes *)
@@ -15,7 +17,7 @@ type key = lbytes keylen
 type nonce = lbytes noncelen
 type block = lbytes blocklen
 
-type state = Spec.Salsa20.state
+type state = Salsa20.state
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
@@ -24,11 +26,10 @@ let setup (k:key) (n:nonce): state =
   let ns = uint32s_from_le 4 n in
   let k_fst_half = slice ks 0 4 in
   let k_snd_half = slice ks 4 8 in
-  let c0 = singleton (Spec.Salsa20.constant0) in
-  let c1 = singleton (Spec.Salsa20.constant1) in
-  let c2 = singleton (Spec.Salsa20.constant2) in
-  let c3 = singleton (Spec.Salsa20.constant3) in
-  c0 @| k_fst_half @| c1 @| ns @| c2 @| k_snd_half @| c3
+  create_16 Salsa20.constant0 (index ks 0)      (index ks 1)      (index ks 2)
+          (index ks 3)       Salsa20.constant1 (index ns 0)      (index ns 1)
+	  (index ns 2)       (index ns 3)      Salsa20.constant2 (index ks 4)
+          (index ks 5)       (index ks 6)      (index ks 7)      Salsa20.constant3
 
 let hsalsa20 (k:key) (n:nonce) : Tot key = 
   let st = setup k n in
