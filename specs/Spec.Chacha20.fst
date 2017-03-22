@@ -54,7 +54,8 @@ let rounds : shuffle =
     iter 10 double_round (* 20 rounds *)
 
 let chacha20_core (s:state) : Tot state = 
-    map2 (+%^) (rounds s) s
+    let s' = rounds s in
+    Spec.Loops.seq_map2 (fun x y -> x +%^ y) s' s
 
 (* state initialization *) 
 unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
