@@ -50,10 +50,6 @@ X25519_SPECIFIC= \
 
 # Files that are too slow and for which verification speed must improve
 SLOW= Hacl.Spec.Bignum.Fsquare.fst \
-	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
-	../bignum/Hacl.Spec.Bignum.Fmul.fst \
-	Hacl.EC.Format.fst \
-	Hacl.EC.fst \
 
 # Files that still have errors
 TODO=
@@ -111,9 +107,9 @@ all-ci:
 	mv ../bignum/*.hints ./bignum_hints
 bignum-ci:
 	cp bignum_hints/* ../bignum
-	$(MAKE) $(addsuffix -verify, $(BIGNUM))
+	$(MAKE) $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
 	mv ../bignum/*.hints ./bignum_hints
-specific-ci: $(addsuffix -verify, $(X25519_SPECIFIC))
+specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_SPECIFIC)))
 
 extract-c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
