@@ -41,6 +41,8 @@ typedef void *Hacl_Spec_Poly1305_64_word_16;
 
 typedef void *Hacl_Spec_Poly1305_64_tag;
 
+typedef void *Hacl_Spec_Poly1305_64_seqelem;
+
 typedef void *Hacl_Spec_Poly1305_64_word_;
 
 typedef void *Hacl_Spec_Poly1305_64_text;
@@ -56,14 +58,6 @@ typedef struct {
 }
 Hacl_Spec_Poly1305_64_poly1305_state_;
 
-extern uint64_t Hacl_Spec_Poly1305_64_load64_le_spec(void *x0);
-
-extern void *Hacl_Spec_Poly1305_64_store64_le_spec(uint64_t x0);
-
-extern FStar_UInt128_t Hacl_Spec_Poly1305_64_load128_le_spec(void *x0);
-
-extern void *Hacl_Spec_Poly1305_64_store128_le_spec(FStar_UInt128_t x0);
-
 typedef void *Hacl_Impl_Poly1305_64_log_t;
 
 typedef uint64_t *Hacl_Impl_Poly1305_64_bigint;
@@ -77,8 +71,8 @@ typedef uint8_t *Hacl_Impl_Poly1305_64_wordB;
 typedef uint8_t *Hacl_Impl_Poly1305_64_wordB_16;
 
 typedef struct {
-  uint64_t *x00;
-  uint64_t *x01;
+  uint64_t *r;
+  uint64_t *h;
 }
 Hacl_Impl_Poly1305_64_poly1305_state;
 
@@ -87,6 +81,8 @@ typedef uint8_t *Poly1305_64_uint8_p;
 typedef uint8_t *Poly1305_64_key;
 
 typedef Hacl_Impl_Poly1305_64_poly1305_state Poly1305_64_state;
+
+Hacl_Impl_Poly1305_64_poly1305_state Poly1305_64_mk_state(uint64_t *r, uint64_t *acc);
 
 void Poly1305_64_init(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *k);
 
@@ -103,6 +99,16 @@ void Poly1305_64_finish(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *mac, u
 
 void Poly1305_64_crypto_onetimeauth(uint8_t *output, uint8_t *input, uint64_t len, uint8_t *k);
 
+uint32_t Poly1305_64_mul_div_16(uint32_t len);
+
+void
+Poly1305_64_pad_last(
+  void *log,
+  Hacl_Impl_Poly1305_64_poly1305_state st,
+  uint8_t *input,
+  uint32_t len
+);
+
 void
 Poly1305_64_poly1305_blocks_init(
   Hacl_Impl_Poly1305_64_poly1305_state st,
@@ -113,13 +119,22 @@ Poly1305_64_poly1305_blocks_init(
 
 void
 Poly1305_64_poly1305_blocks_continue(
+  void *log,
   Hacl_Impl_Poly1305_64_poly1305_state st,
   uint8_t *input,
   uint32_t len
 );
 
 void
+Poly1305_64_poly1305_blocks_finish_(
+  void *log,
+  Hacl_Impl_Poly1305_64_poly1305_state st,
+  uint8_t *input
+);
+
+void
 Poly1305_64_poly1305_blocks_finish(
+  void *log,
   Hacl_Impl_Poly1305_64_poly1305_state st,
   uint8_t *input,
   uint8_t *mac,

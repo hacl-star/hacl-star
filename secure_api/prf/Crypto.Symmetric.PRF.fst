@@ -32,13 +32,14 @@ module MAC   = Crypto.Symmetric.MAC
 module CMA   = Crypto.Symmetric.UF1CMA
 module Block = Crypto.Symmetric.Cipher
 
+
 // PRF TABLE
 
 let blocklen i = Block.blocklen (cipherAlg_of_id i)
 type block i = b:lbytes (v (blocklen i))
 let keylen i = Block.keylen (cipherAlg_of_id i)
 let statelen i = Block.statelen (cipherAlg_of_id i)
-let stlen i = Block.stlen (cipherAlg_of_id i)
+(* let stlen i = Block.stlen (cipherAlg_of_id i) *)
 
 (*
 private let lemma_lengths (i:id) : Lemma(keylen i <^ blocklen i) = 
@@ -57,7 +58,7 @@ private let sanity_check i = assert(safeId i ==> prf i)
 
 type region = rgn:HH.rid {HS.is_eternal_region rgn}
 
-
+#reset-options "--max_fuel 0 --z3rlimit 100"
 // to be adjusted, controlling concrete bound.
 //16-10-15 how to ensure it is reduced at compile-time?
 let maxCtr i = 16384ul /^ blocklen i
@@ -250,6 +251,15 @@ let getBlock #i t x len output =
   Buffer.recall t.key;
   Block.compute i output t.key x.iv x.ctr len
 
+(*
+ * existing macs are norm
+ *)
+let prf_mac_inv
+  (#i:id) (#mac_rgn:region) (blocks:Seq.seq (entry mac_rgn i)) (x:domain_mac i)
+  (h:mem{prf i})
+  = match find_mac blocks x with
+    | None    -> True
+    | Some mc -> CMA.(MAC.norm_r h mc.r)
 
 // We encapsulate our 4 usages of the PRF in specific functions.
 // But we still use a single, ctr-dependent range in the table.
@@ -262,7 +272,7 @@ let getBlock #i t x len output =
 
 val prf_mac: 
   i:id -> t:state i -> k_0: CMA.akey t.mac_rgn i -> x:domain_mac i -> ST (CMA.state (i,x.iv))
-  (requires (fun h0 -> True))
+  (requires (fun h0 -> if prf i then prf_mac_inv (HS.sel h0 (itable i t)) x h0 else True))
   (ensures (fun h0 mc h1 -> (* beware: mac shadowed by CMA.mac *)
     if prf i then
       let r = itable i t in
@@ -293,7 +303,7 @@ val prf_mac:
       HS.modifies_ref t.mac_rgn TSet.empty h0 h1 )))
 
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 100"
 
 let prf_mac i t k_0 x =
   Buffer.recall t.key;
@@ -308,7 +318,7 @@ let prf_mac i t k_0 x =
     match find_mac contents x with
     | Some mc ->  (* beware: mac shadowed by CMA.mac *)
         let h0 = ST.get() in
-        assume (CMA.(MAC.norm_r h0 mc.r)); //16-12-20 TODO: replace this using monotonicity; NS: known limitation
+        assert (CMA.(MAC.norm_r h0 mc.r));
         Buffer.recall (CMA.(mc.s));
         if mac_log then FStar.Monotonic.RRef.m_recall (CMA.(ilog mc.log));
         mc
@@ -321,12 +331,12 @@ let prf_mac i t k_0 x =
   else
     let keyBuffer = Buffer.rcreate t.mac_rgn 0uy (CMA.keylen i) in
     let h1 = ST.get() in
+    Crypto.Indexing.aeadAlg_cipherAlg i;
     getBlock t x (CMA.keylen i) keyBuffer;
     let mc = CMA.coerce t.mac_rgn macId k_0 keyBuffer in
     let h3 = ST.get() in 
     Buffer.lemma_reveal_modifies_1 keyBuffer h1 h3;
     mc
-
 
 val prf_sk0: 
   #i:id{ CMA.skeyed i } -> t:state i -> ST (CMA.skey t.mac_rgn i)

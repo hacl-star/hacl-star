@@ -41,8 +41,6 @@ test-curve:
 
 test-secretbox:
 	$(CC) $(CCOPTS) \
-	HSalsa20.c -c -o HSalsa20.o
-	$(CC) $(CCOPTS) \
 	Salsa20.c -c -o Salsa20.o
 	$(CC) $(CCOPTS) \
 	Poly1305_64.c -c -o Poly1305_64.o
@@ -50,7 +48,7 @@ test-secretbox:
 	Curve25519.c -c -o Curve25519.o
 	$(CC) $(CCOPTS) \
 	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
-	HSalsa20.o Salsa20.o Poly1305_64.o Curve25519.o kremlib.c testlib.c Hacl_Policies.c NaCl.c test-secretbox.c -l sodium -o test-secretbox.exe
+	Salsa20.o Poly1305_64.o Curve25519.o kremlib.c testlib.c Hacl_Policies.c NaCl.c test-secretbox.c -l sodium -o test-secretbox.exe
 	./test-secretbox.exe
 
 test-aead:
@@ -65,8 +63,6 @@ test-aead:
 
 test-box:
 	$(CC) $(CCOPTS) \
-	HSalsa20.c -c -o HSalsa20.o
-	$(CC) $(CCOPTS) \
 	Salsa20.c -c -o Salsa20.o
 	$(CC) $(CCOPTS) \
 	Poly1305_64.c -c -o Poly1305_64.o
@@ -74,12 +70,10 @@ test-box:
 	Curve25519.c -c -o Curve25519.o
 	$(CC) $(CCOPTS) \
 	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
-	HSalsa20.o Salsa20.o Poly1305_64.o Curve25519.o kremlib.c testlib.c Hacl_Policies.c NaCl.c test-box.c -l sodium -o test-box.exe
+	Salsa20.o Poly1305_64.o Curve25519.o kremlib.c testlib.c Hacl_Policies.c NaCl.c test-box.c -l sodium -o test-box.exe
 	./test-box.exe
 
 lib:
-	$(CC) $(CCOPTS) \
-	HSalsa20.c -c -o HSalsa20.o
 	$(CC) $(CCOPTS) \
 	Salsa20.c -c -o Salsa20.o
 	$(CC) $(CCOPTS) \
@@ -89,7 +83,7 @@ lib:
 	$(CC) $(CCOPTS) \
 	Chacha20Poly1305.c -c -o Chacha20Poly1305.o
 	$(CC) -shared  $(CCOPTS) \
-	HSalsa20.o Salsa20.o Poly1305_64.o Chacha20.o Chacha20Poly1305.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c \
+	Salsa20.o Poly1305_64.o Chacha20.o Chacha20Poly1305.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c \
 	-o libhacl.so
 
 lib-test: lib

@@ -265,6 +265,68 @@ let frame_fresh_nonces_are_unused_prf_mac #i #rw aead_st k_0 x h0 h1 mac =
   forall_intro (move_requires (frame_fresh_nonce_st_prf_mac aead_st k_0 x h0 h1 mac));
   forall_intro (move_requires (frame_unused_aead_iv_for_prf_prf_mac aead_st k_0 x mac h0 h1))
 
+private let frame_prf_prf_mac_inv_prf_mac_same_iv
+  (#i:id)
+  (#rw:rw)
+  (aead_st:aead_state i rw)
+  (k_0:CMA.akey aead_st.prf.mac_rgn i)
+  (x:PRF.domain_mac i)
+  (mac:CMA.state (i, x.iv))
+  (h0:mem) (h1:mem{prf i})
+  :Lemma (requires (prf_mac_ensures i aead_st.prf k_0 x h0 mac h1))
+         (ensures  (let table = HS.sel h1 (itable i aead_st.prf) in
+	            PRF.prf_mac_inv table x h1))
+  = ()
+
+private let frame_prf_prf_mac_inv_prf_mac_different_iv
+  (#i:id)
+  (#rw:rw)
+  (aead_st:aead_state i rw)
+  (k_0:CMA.akey aead_st.prf.mac_rgn i)
+  (x:PRF.domain_mac i)
+  (mac:CMA.state (i, x.iv))
+  (y:PRF.domain_mac i)
+  (h0:mem) (h1:mem{prf i})
+  :Lemma (requires (let table = HS.sel h0 (itable i aead_st.prf) in
+                    prf_mac_ensures i aead_st.prf k_0 x h0 mac h1 /\
+                    PRF.prf_mac_inv table y h0                   /\
+		    x <> y))
+         (ensures  (let table = HS.sel h1 (itable i aead_st.prf) in
+	            PRF.prf_mac_inv table y h1))
+  = let r = itable i aead_st.prf in
+    let t_0 = HS.sel h0 r in
+    let t_1 = HS.sel h1 r in
+    match find_mac t_0 x with
+    | Some _ -> ()
+    | None   ->
+      let e:(PRF.entry aead_st.prf.mac_rgn i) = PRF.Entry x mac in
+      find_singleton e y;
+      frame_prf_mac_inv_append_blocks t_0 (Seq.create 1 e) y h0;
+      frame_prf_prf_mac_inv t_1 h0 h1 y
+
+private let frame_prf_mac_inv_prf_mac
+  (#i:id)
+  (#rw:rw)
+  (aead_st:aead_state i rw)
+  (k_0:CMA.akey aead_st.prf.mac_rgn i)
+  (x:PRF.domain_mac i)
+  (mac:CMA.state (i, x.iv))
+  (h0:mem) (h1:mem{prf i})
+  :Lemma (requires (let table = HS.sel h0 (itable i aead_st.prf) in
+                    prf_mac_inv table h0 /\
+                    prf_mac_ensures i aead_st.prf k_0 x h0 mac h1))
+         (ensures  (let table = HS.sel h1 (itable i aead_st.prf) in
+	            prf_mac_inv table h1))
+  = let aux (y:PRF.domain_mac i) :Lemma (ensures (let table = HS.sel h1 (itable i aead_st.prf) in
+                                                  PRF.prf_mac_inv table y h1))
+      = if y = x then frame_prf_prf_mac_inv_prf_mac_same_iv aead_st k_0 x mac h0 h1
+        else frame_prf_prf_mac_inv_prf_mac_different_iv aead_st k_0 x mac y h0 h1
+    in
+    let open FStar.Classical in
+    forall_intro aux
+
+#set-options "--z3rlimit 100"
+
 (*
  * framing of inv by prf_mac
  *)
@@ -284,6 +346,7 @@ let frame_inv_prf_mac #i #rw aead_st k_0 x h0 h1 mac =
     frame_refines_aead_entries_prf_mac aead_st k_0 x h0 h1 mac;
     frame_fresh_nonces_are_unused_prf_mac aead_st k_0 x h0 h1 mac
   end
+  else if prf i then frame_prf_mac_inv_prf_mac aead_st k_0 x mac h0 h1
 
 private val prf_mac_find_unchanged (#i:id) (#rw:rw) (aead_st:aead_state i rw)
 			           (k_0:CMA.akey aead_st.prf.mac_rgn i)
@@ -321,7 +384,7 @@ private val prf_mac_0
   (k_0:CMA.akey aead_st.prf.mac_rgn i)
   (x:PRF.domain_mac i)
   : ST (CMA.state (i,x.iv))
-       (requires (fun h0 -> True))
+       (requires (fun h0 -> inv aead_st h0))  //AR: this is much more than we need, we only need the prf_mac_inv for x
        (ensures (fun h0 mac h1 -> prf_mac_ensures i aead_st.prf k_0 x h0 mac h1))
 let prf_mac_0 #i #rw aead_st k_0 x =
   let h0 = get () in

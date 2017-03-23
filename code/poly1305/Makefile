@@ -3,7 +3,7 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../..
 include ../Makefile.include
 
-SPECS=../../specs ../../specs/generic ../../specs/experimental
+SPECS=../../specs
 
 INCLUDE_DIRS=../bignum ../lib/kremlin $(SPECS)
 
@@ -33,7 +33,9 @@ POLY1305_SPECIFIC= \
 	Hacl.Bignum.AddAndMultiply.fst \
 	Hacl.Impl.Poly1305_64.fst \
 	Hacl.Standalone.Poly1305_64.fst \
-	Poly1305_64.fst
+	Poly1305_64.fst \
+	Hacl.Spec.Poly1305_64.Lemmas1.fst \
+	AEAD.Poly1305_64.fst
 
 
 SLOW=
@@ -76,9 +78,23 @@ all-hints:
 	cp bignum_hints/* ../bignum
 	$(MAKE) all-hints2
 	mv ../bignum/*.hints ./bignum_hints
+bignum-hints:
+	cp bignum_hints/* ../bignum
+	$(MAKE) $(addsuffix -hints, $(BIGNUM))
+	mv ../bignum/*.hints ./bignum_hints
+specific-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
 # For CI, all modules restricted from incomplete or slow ones
-all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
+all-ci2: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
+all-ci:
+	cp bignum_hints/* ../bignum
+	$(MAKE) all-ci2
+	mv ../bignum/*.hints ./bignum_hints
+bignum-ci:
+	cp bignum_hints/* ../bignum
+	$(MAKE) $(addsuffix -verify, $(BIGNUM))
+	mv ../bignum/*.hints ./bignum_hints
+specific-ci: $(addsuffix -verify, $(POLY1305_SPECIFIC))
 
 
 test-c:

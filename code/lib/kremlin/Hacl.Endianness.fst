@@ -117,6 +117,21 @@ inline_for_extraction val store128_le:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ little_endian (as_seq h1 b) = U128.v z))
 
 [@"substitute" ]
+inline_for_extraction val load128_be:
+  b:buffer U8.t{length b = 16} ->
+  Stack U128.t
+    (requires (fun h -> live h b))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ big_endian (as_seq h0 b) = U128.v z))
+
+[@"substitute" ]
+inline_for_extraction val store128_be:
+  b:buffer U8.t{length b = 16} ->
+  z:U128.t ->
+  Stack unit
+    (requires (fun h -> live h b))
+    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ big_endian (as_seq h1 b) = U128.v z))
+
+[@"substitute" ]
 inline_for_extraction val hstore32_le:
   b:buffer H8.t{length b = 4} ->
   z:H32.t ->
@@ -187,6 +202,28 @@ inline_for_extraction val hstore128_le:
   Stack unit
     (requires (fun h -> live h b))
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ hlittle_endian (as_seq h1 b) = H128.v z))
+    
+[@"substitute" ]
+inline_for_extraction val hload128_le:
+  b:buffer H8.t{length b = 16} ->
+  Stack H128.t
+    (requires (fun h -> live h b))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ hlittle_endian (as_seq h0 b) = H128.v z))
+
+[@"substitute" ]
+inline_for_extraction val hstore128_be:
+  b:buffer H8.t{length b = 16} ->
+  z:H128.t ->
+  Stack unit
+    (requires (fun h -> live h b))
+    (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ hbig_endian (as_seq h1 b) = H128.v z))
+    
+[@"substitute" ]
+inline_for_extraction val hload128_be:
+  b:buffer H8.t{length b = 16} ->
+  Stack H128.t
+    (requires (fun h -> live h b))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ hbig_endian (as_seq h0 b) = H128.v z))
 
 [@"substitute" ]
 inline_for_extraction let store32_le b z  = store32_le b z
@@ -198,6 +235,8 @@ inline_for_extraction let store64_le b z  = store64_le b z
 inline_for_extraction let store64_be b z  = store64_be b z
 [@"substitute" ]
 inline_for_extraction let store128_le b z = store128_le b z
+[@"substitute" ]
+inline_for_extraction let store128_be b z = store128_be b z
 
 
 [@"substitute" ]
@@ -210,6 +249,8 @@ inline_for_extraction let load64_le b  = load64_le b
 inline_for_extraction let load64_be b  = load64_be b
 [@"substitute" ]
 inline_for_extraction let load128_le b = load128_le b
+[@"substitute" ]
+inline_for_extraction let load128_be b = load128_be b
 
 [@"substitute" ]
 inline_for_extraction let hstore32_le b z  = store32_le b z
@@ -221,6 +262,8 @@ inline_for_extraction let hstore64_le b z  = store64_le b z
 inline_for_extraction let hstore64_be b z  = store64_be b z
 [@"substitute" ]
 inline_for_extraction let hstore128_le b z = store128_le b z
+[@"substitute" ]
+inline_for_extraction let hstore128_be b z = store128_be b z
 
 [@"substitute" ]
 inline_for_extraction let hload32_le b  = load32_le b
@@ -231,10 +274,6 @@ inline_for_extraction let hload64_le b  = load64_le b
 [@"substitute" ]
 inline_for_extraction let hload64_be b  = load64_be b
 [@"substitute" ]
-inline_for_extraction val hload128_le:
-  b:buffer H8.t{length b = 16} ->
-  Stack H128.t
-    (requires (fun h -> live h b))
-    (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ hlittle_endian (as_seq h0 b) = H128.v z))
-[@"substitute" ]
 inline_for_extraction let hload128_le b = load128_le b
+[@"substitute" ]
+inline_for_extraction let hload128_be b = load128_be b

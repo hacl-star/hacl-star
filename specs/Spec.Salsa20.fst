@@ -5,6 +5,7 @@ open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness
 open Spec.Lib
+open Seq.Create
 
 (* This should go elsewhere! *)
 
@@ -48,12 +49,12 @@ let row_round : shuffle =
 let double_round: shuffle = 
   column_round @ row_round (* 2 rounds *)
 
-let rec rounds : shuffle = 
-    C.Loops.repeat_spec 10 double_round (* 20 rounds *)
+let rounds : shuffle = 
+    Spec.Loops.repeat_spec 10 double_round (* 20 rounds *)
 
 let salsa20_core (s:state) : Tot state = 
     let s' = rounds s in
-    C.Loops.seq_map2 (fun x y -> x +%^ y) s' s
+    Spec.Loops.seq_map2 (fun x y -> x +%^ y) s' s
 
 (* state initialization *) 
 
@@ -72,14 +73,10 @@ let setup (k:key) (n:nonce) (c:counter): state =
   let c64 = UInt64.uint_to_t c in
   let c0 = FStar.Int.Cast.uint64_to_uint32 c64 in
   let c1 = FStar.Int.Cast.uint64_to_uint32 FStar.UInt64.(c64 >>^ 32ul) in
-  assert_norm (List.Tot.length ([constant0    ; (index ks 0) ; (index ks 1) ; (index ks 2) ;
-              (index ks 3) ; constant1    ; (index ns 0) ; (index ns 1) ;
-	      c0 	     	; c1	       ; constant2    ; (index ks 4) ; 
-	      (index ks 5) ; (index ks 6) ; (index ks 7) ; constant3    ]) = 16);
-  seq_of_list ([constant0    ; (index ks 0) ; (index ks 1) ; (index ks 2) ;
-              (index ks 3) ; constant1    ; (index ns 0) ; (index ns 1) ;
-	      c0 	     	; c1	       ; constant2    ; (index ks 4) ; 
-	      (index ks 5) ; (index ks 6) ; (index ks 7) ; constant3    ])
+  create_16 constant0    (index ks 0) (index ks 1) (index ks 2)
+          (index ks 3) constant1    (index ns 0) (index ns 1)
+	  c0 	       c1	    constant2    (index ks 4)
+          (index ks 5) (index ks 6) (index ks 7) constant3
 	   
 
 let salsa20_block (k:key) (n:nonce) (c:counter): block =
@@ -94,7 +91,8 @@ let salsa20_ctx: Spec.CTR.block_cipher_ctx =
     keylen = keylen;
     blocklen = blocklen;
     noncelen = noncelen;
-    counterbits = 64
+    counterbits = 64;
+    incr = 1
     }
 
 let salsa20_cipher: Spec.CTR.block_cipher salsa20_ctx = salsa20_block

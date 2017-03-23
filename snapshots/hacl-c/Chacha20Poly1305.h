@@ -8,12 +8,36 @@
 #include "Hacl_Policies.h"
 #include "kremlib.h"
 #include "testlib.h"
+#include "Chacha20.h"
+#include "Poly1305_64.h"
 
 extern Prims_int Chacha20Poly1305_noncelen;
 
 extern Prims_int Chacha20Poly1305_keylen;
 
 extern Prims_int Chacha20Poly1305_maclen;
+
+typedef Hacl_Impl_Poly1305_64_poly1305_state Chacha20Poly1305_state;
+
+typedef void *Chacha20Poly1305_log_t;
+
+extern void Chacha20Poly1305_lemma_encode_bytes_append(void *x0, void *x1, Prims_nat x2);
+
+extern void Chacha20Poly1305_encode_bytes_append(Prims_nat x0, void *x1, void *x2);
+
+void Chacha20Poly1305_encode_length(uint8_t *lb, uint32_t aad_len, uint32_t mlen);
+
+uint32_t
+Chacha20Poly1305_aead_encrypt_(
+  uint8_t *c,
+  uint8_t *mac,
+  uint8_t *m,
+  uint32_t mlen,
+  uint8_t *aad,
+  uint32_t aadlen,
+  uint8_t *k,
+  uint8_t *n
+);
 
 uint32_t
 Chacha20Poly1305_aead_encrypt(

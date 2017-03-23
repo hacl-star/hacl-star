@@ -75,12 +75,12 @@ uint8_t sk2[secretbox_KEYBYTES] = {
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d times 2^20 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
-  printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
+  printf("Cycles for %d times %d bytes: %llu (%.2fcycles/byte)\n", rounds, plainlen, d1, (double)d1/plainlen/rounds);
+  printf("User time for %d times %d bytes: %f (%fus/byte)\n", rounds, plainlen, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
-#define PLAINLEN (1024*1024)
-#define ROUNDS 1000
+#define PLAINLEN (16*1024)
+#define ROUNDS 3000
 
 int32_t test_api()
 {
@@ -119,7 +119,7 @@ int32_t test_api()
   memset(decrypted,0,MESSAGE_LEN);
 
   i = crypto_box_easy(ciphertext+16, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
-  res = NaCl_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN+16, nonce, pk2, sk1);
+  res = NaCl_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN, nonce, pk2, sk1);
   printf("Box decryption of libsodium box easy was a %s.\n", res == 0 ? "success" : "failure");  
   TestLib_compare_and_print("Box", msg+32, decrypted+32, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
@@ -128,7 +128,7 @@ int32_t test_api()
 }
 
 int32_t perf_api() {
-  uint32_t len = 1024*1024 * sizeof(char);
+  uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(len+16*sizeof(char));
   int fd = open("/dev/urandom", O_RDONLY);
@@ -151,7 +151,7 @@ int32_t perf_api() {
   b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Hacl Box speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
+		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < CIPHERTEXT_LEN; i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);
@@ -164,7 +164,7 @@ int32_t perf_api() {
   b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("Sodium Box speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
+		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);
@@ -177,7 +177,7 @@ int32_t perf_api() {
   b = TestLib_cpucycles_end();
   t2 = clock();
   print_results("TweetNacl Box speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
+		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %llx\n", res);

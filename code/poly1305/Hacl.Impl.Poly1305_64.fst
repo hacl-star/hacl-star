@@ -38,7 +38,7 @@ let wordB : Type0  = b:uint8_p{length b <= 16}
 let wordB_16 : Type0 = b:uint8_p{length b = 16}
 
 
-noeq type poly1305_state = | MkState: r:bigint -> h:bigint -> poly1305_state
+noeq type poly1305_state =  {r:bigint; h:bigint}
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
@@ -561,7 +561,7 @@ val poly1305_update_last:
 [@"substitute"]
 let poly1305_update_last log st m len =
   let log' = poly1305_finish__ log st m len in
-  let acc  = MkState?.h st in
+  let acc  = st.h in
   poly1305_last_pass acc
 
 
@@ -572,15 +572,15 @@ val poly1305_finish:
   k:uint8_p{length k = 16} ->
   Stack unit
     (requires (fun h -> live_st h st /\ live h mac /\ live h k
-      /\ bounds (as_seq h (MkState?.h st)) p44 p44 p42))
+      /\ bounds (as_seq h (st.h)) p44 p44 p42))
     (ensures (fun h0 _ h1 -> modifies_1 mac h0 h1 /\ live_st h0 st /\ live h0 mac /\ live h0 k /\ live h1 mac
-      /\ bounds (as_seq h0 (MkState?.h st)) p44 p44 p42
-      /\ as_seq h1 mac == Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 (MkState?.h st)) (as_seq h0 k)
+      /\ bounds (as_seq h0 (st.h)) p44 p44 p42
+      /\ as_seq h1 mac == Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 (st.h)) (as_seq h0 k)
     ))
 [@"substitute"]
 let poly1305_finish st mac key_s =
   let h0 = ST.get() in
-  let acc = MkState?.h st in
+  let acc = st.h in
   let k'  = hload128_le key_s in
   let open Hacl.Bignum.Wide in
   let acc' = bignum_to_128 acc in
@@ -589,6 +589,8 @@ let poly1305_finish st mac key_s =
   let h1 = ST.get() in
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 acc) (as_seq h0 key_s)))
 
+
+let mk_state r h : Tot poly1305_state = {r=r;h=h}
 
 val alloc:
   unit -> StackInline poly1305_state
@@ -599,4 +601,4 @@ let alloc () =
   let buf = create limb_zero U32.(clen +^ clen) in
   let r = sub buf 0ul clen in
   let h = sub buf clen clen in
-  MkState r h
+  mk_state r h

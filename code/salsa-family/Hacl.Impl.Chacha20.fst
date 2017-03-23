@@ -10,6 +10,7 @@ open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Chacha20
 open C.Loops
+open Hacl.Lib.LoadStore32
 
 module Spec = Spec.Chacha20
 
@@ -28,127 +29,6 @@ private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
-private val lemma_uint32s_from_le_bytes: h:mem -> output:buffer H32.t{live h output} ->
-  h':mem -> input:uint8_p{live h' input} ->
-  len:U32.t{length output = U32.v len /\ 4 * U32.v len = length input /\ U32.v len > 0} ->
-  Lemma
-    (requires (H32.v (Seq.index (as_seq h output) 0) =
-        U32.v (Spec.Lib.uint32_from_le (reveal_sbytes (as_seq h' (Buffer.sub input 0ul 4ul))))
-      /\ reveal_h32s (as_seq h (Buffer.offset output 1ul)) == 
-        Spec.Lib.uint32s_from_le (UInt32.v len - 1) (reveal_sbytes (as_seq h' (Buffer.offset input 4ul)))))
-    (ensures (reveal_h32s (as_seq h output)
-      == Spec.Lib.uint32s_from_le (U32.v len) (reveal_sbytes ((as_seq h' input)))))
-let lemma_uint32s_from_le_bytes h output h' input len =
-  let i' = reveal_sbytes (as_seq h' input) in
-  Spec.Lib.lemma_uint32s_from_le_def_1 (U32.v len) i';
-  Seq.lemma_eq_intro (as_seq h' (Buffer.sub input 0ul 4ul)) (Seq.slice (as_seq h' input) 0 4);
-  Seq.lemma_eq_intro (as_seq h' (Buffer.offset input 4ul)) (Seq.slice (as_seq h' input) 4 (length input));
-  Seq.lemma_eq_intro (as_seq h (Buffer.offset output 1ul)) (Seq.slice (as_seq h output) 1 (length output));
-  cut (Seq.index (Spec.Lib.uint32s_from_le (U32.v len) i') 0 == Spec.Lib.uint32_from_le (Seq.slice i' 0 4));
-  Seq.lemma_eq_intro (reveal_h32s (as_seq h output)) (Spec.Lib.uint32s_from_le (U32.v len) i')
-
-
-private val lemma_uint32s_from_le_bytes': h:mem -> h':mem -> output:buffer H32.t{live h output /\ live h' output /\ length output > 0} -> Lemma
-  (requires (modifies_1 (Buffer.offset output 1ul) h h'))
-  (ensures (Seq.index (as_seq h output) 0 == Seq.index (as_seq h' output) 0))
-private let lemma_uint32s_from_le_bytes' h h' output =
-  let output' = Buffer.sub output 0ul 1ul in
-  let output'' = Buffer.offset output 1ul in
-  no_upd_lemma_1 h h' output'' output';
-  Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 1) (as_seq h output');
-  Seq.lemma_eq_intro (Seq.append (as_seq h' output') (as_seq h' output'')) (as_seq h' output)
-
-
-val uint32s_from_le_bytes:
-  output:buffer H32.t ->
-  input:uint8_p{disjoint output input} ->
-  len:U32.t{length output = U32.v len /\ 4 * U32.v len = length input} ->
-  Stack unit
-    (requires (fun h -> live h output /\ live h input))
-    (ensures  (fun h0 _ h1 -> live h1 output /\ live h0 input /\ modifies_1 output h0 h1 /\
-      (let o = reveal_h32s (as_seq h1 output) in
-       let i = reveal_sbytes (as_seq h0 input) in
-       o == Spec.Lib.uint32s_from_le (U32.v len) i)))
-let rec uint32s_from_le_bytes output input len =
-  let h0 = ST.get() in
-  if U32.(len =^ 0ul) then (
-    Spec.Lib.lemma_uint32s_from_le_def_0 0 (reveal_sbytes (as_seq h0 input));
-    Seq.lemma_eq_intro (as_seq h0 output) Seq.createEmpty
-  )
-  else (
-    cut (U32.v len > 0);
-    output.(0ul) <- hload32_le (Buffer.sub input 0ul 4ul);
-    let h = ST.get() in
-    let output' = Buffer.offset output 1ul in
-    let input'  = Buffer.offset input 4ul in
-    uint32s_from_le_bytes output' input' U32.(len -^ 1ul);
-    let h1 = ST.get() in
-    lemma_uint32s_from_le_bytes' h h1 output;
-    lemma_uint32s_from_le_bytes h1 output h0 input len
-  )
-
-
-private val lemma_uint32s_to_le_bytes: h:mem -> output:uint8_p{live h output} ->
-  h':mem -> input:buffer H32.t{live h' input} ->
-  len:U32.t{length input = U32.v len /\ 4 * U32.v len = length output /\ U32.v len > 0} ->
-  Lemma
-    (requires (Seq.slice (reveal_sbytes (as_seq h output)) 0 4 = Spec.Lib.uint32_to_le (Seq.index (reveal_h32s (as_seq h' input)) 0)
-      /\ reveal_sbytes (as_seq h (Buffer.offset output 4ul)) == Spec.Lib.uint32s_to_le (UInt32.v len - 1) (reveal_h32s (as_seq h' (Buffer.offset input 1ul)))))
-    (ensures (reveal_sbytes (as_seq h output) == Spec.Lib.uint32s_to_le (U32.v len) (reveal_h32s ((as_seq h' input)))))
-let lemma_uint32s_to_le_bytes h output h' input len =
-  let i' = reveal_h32s (as_seq h' input) in
-  Spec.Lib.lemma_uint32s_to_le_def_1 (U32.v len) i';
-  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 0ul 4ul)) (Seq.slice (as_seq h output) 0 4);
-  Seq.lemma_eq_intro (as_seq h (Buffer.offset output 4ul)) (Seq.slice (as_seq h output) 4 (length output));
-  Seq.lemma_eq_intro (as_seq h' (Buffer.offset input 1ul)) (Seq.slice (as_seq h' input) 1 (length input));
-  Seq.lemma_eq_intro (Seq.slice (Spec.Lib.uint32s_to_le (U32.v len) i') 0 4)
-                     (Spec.Lib.uint32_to_le (Seq.index i' 0));
-  Seq.lemma_eq_intro (reveal_sbytes (as_seq h output)) (Spec.Lib.uint32s_to_le (U32.v len) i')
-
-
-private val lemma_uint32s_to_le_bytes': h:mem -> h':mem -> output:uint8_p{live h output /\ live h' output /\ length output >= 4} -> Lemma
-  (requires (modifies_1 (Buffer.offset output 4ul) h h'))
-  (ensures (Seq.slice (as_seq h output) 0 4 == Seq.slice (as_seq h' output) 0 4))
-private let lemma_uint32s_to_le_bytes' h h' output =
-  let output' = Buffer.sub output 0ul 4ul in
-  let output'' = Buffer.offset output 4ul in
-  no_upd_lemma_1 h h' output'' output';
-  Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 4) (as_seq h output')
-
-
-val uint32s_to_le_bytes:
-  output:uint8_p ->
-  input:buffer H32.t{disjoint output input} ->
-  len:U32.t{length input = U32.v len /\ 4 * U32.v len = length output} ->
-  Stack unit
-    (requires (fun h -> live h output /\ live h input))
-    (ensures  (fun h0 _ h1 -> live h1 output /\ live h0 input /\ modifies_1 output h0 h1 /\
-      (let o = reveal_sbytes (as_seq h1 output) in
-       let i = reveal_h32s (as_seq h0 input) in
-       o == Spec.Lib.uint32s_to_le (U32.v len) i)))
-let rec uint32s_to_le_bytes output input len =
-  let h0 = ST.get() in
-  if U32.(len =^ 0ul) then (
-    Spec.Lib.lemma_uint32s_to_le_def_0 0 (reveal_h32s (as_seq h0 input));
-    Seq.lemma_eq_intro (as_seq h0 output) Seq.createEmpty
-  )
-  else (
-    cut (U32.v len > 0);
-    let hd = input.(0ul) in
-    hstore32_le (Buffer.sub output 0ul 4ul) hd;
-    let h = ST.get() in
-    FStar.Endianness.lemma_little_endian_inj (Seq.slice (reveal_sbytes (as_seq h output)) 0 4)
-                                             (Spec.Lib.uint32_to_le (h32_to_u32 hd));
-    cut (Seq.slice (reveal_sbytes (as_seq h output)) 0 4 == Spec.Lib.uint32_to_le (h32_to_u32 hd));
-    let output' = Buffer.offset output 4ul in
-    let input'  = Buffer.offset input 1ul in
-    uint32s_to_le_bytes output' input' U32.(len -^ 1ul);
-    let h1 = ST.get() in
-    lemma_uint32s_to_le_bytes' h h1 output;
-    lemma_uint32s_to_le_bytes h1 output h0 input len
-  )
-
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -219,6 +99,7 @@ val ivsetup:
 [@ "substitute"]
 let ivsetup st iv =
   uint32s_from_le_bytes st iv 3ul
+
 
 [@ "substitute"]
 val ctrsetup:
@@ -375,12 +256,8 @@ let double_round st =
     column_round st;
     diagonal_round st
 
-unfold let double_round' (b:Seq.seq H32.t{Seq.length b = 16}) : Tot (b':Seq.seq H32.t{Seq.length b' = Seq.length b /\ reveal_h32s b' == Spec.Chacha20.double_round (reveal_h32s b)}) =
-  let f (s:Seq.seq U32.t{Seq.length s = 16}) : Tot (s':Seq.seq U32.t{Seq.length s' = 16}) = Spec.Chacha20.double_round s in
-  lift_32 #(fun s -> Seq.length s = 16) f b
 
-
-#reset-options "--initial_fuel 0 --max_fuel 1 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 
 [@ "c_inline"]
 val rounds:
@@ -389,14 +266,27 @@ val rounds:
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
-         s' == rounds s)))
+         s' == Spec.Chacha20.rounds s)))
 [@ "c_inline"]
 let rounds st =
-  repeat #H32.t 16ul (double_round') st 10ul double_round
+  let h0 = ST.get() in
+  let inv (h1: mem) (i: nat): Type0 =
+    live h1 st /\ modifies_1 st h0 h1 /\ i <= 10
+    /\ (let s' = reveal_h32s (as_seq h1 st) in
+       let s  = reveal_h32s (as_seq h0 st) in
+       s' == repeat_spec i Spec.Chacha20.double_round s)
+  in
+  let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < 10 ) }): Stack unit
+    (requires (fun h -> inv h (UInt32.v i)))
+    (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
+  = double_round st;
+    Spec.Loops.lemma_repeat (UInt32.v i + 1) Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st))
+  in
+  lemma_repeat_0 0 Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st));
+  for 0ul 10ul inv f'
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
 
 [@ "c_inline"]
 val sum_states:
@@ -490,6 +380,8 @@ private val lemma_state_counter:
 let lemma_state_counter k n c = ()
 
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400"
+
 [@ "c_inline"]
 val chacha20_core:
   log:log_t ->
@@ -502,7 +394,7 @@ val chacha20_core:
       /\ live h1 k /\ invariant updated_log h1 st /\ modifies_2 k st h0 h1
       /\ (let key = reveal_h32s (as_seq h1 k) in
           let stv = reveal_h32s (as_seq h1 st) in
-          Seq.index stv 12 == uint32_to_sint32 ctr /\
+          Seq.index stv 12 == ctr /\
          (match Ghost.reveal log, Ghost.reveal updated_log with
          | MkLog k n, MkLog k' n' ->
              key == chacha20_core stv /\ k == k' /\ n == n'))))
@@ -512,7 +404,11 @@ let chacha20_core log k st ctr =
   st.(12ul) <- uint32_to_sint32 ctr;
   lemma_invariant (reveal_h32s (as_seq h_0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (get h_0 st 12) (uint32_to_sint32 ctr);
   copy_state k st;
+  let h' = ST.get() in
+  cut (as_seq h' k == as_seq h' st);
   rounds k;
+  let h'' = ST.get() in
+  cut (reveal_h32s (as_seq h'' k) == Spec.Chacha20.rounds (reveal_h32s (as_seq h' st)));
   sum_states k st;
   let h = ST.get() in
   cut (reveal_h32s (as_seq h k) == chacha20_core (reveal_h32s (as_seq h st)));
@@ -582,8 +478,8 @@ let init st k n =
 val lemma_chacha20_counter_mode_1:
   ho:mem -> output:uint8_p{live ho output} ->
   hi:mem -> input:uint8_p{live hi input} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len <= 64 /\ U32.v len > 0} ->
-  k:Spec.key -> n:Spec.nonce -> ctr:U32.t{U32.v ctr + (length input / 64) < pow2 32} -> Lemma
+  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len < 64 /\ U32.v len > 0} ->
+  k:Spec.key -> n:Spec.nonce -> ctr:U32.t{U32.v ctr + 1 * (length input / 64) < pow2 32} -> Lemma
     (Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr) (reveal_sbytes (as_seq hi input))
      == seq_map2 (fun x y -> FStar.UInt8.(x ^^ y))
                              (reveal_sbytes (as_seq hi input))
@@ -591,12 +487,13 @@ val lemma_chacha20_counter_mode_1:
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let lemma_chacha20_counter_mode_1 ho output hi input len k n ctr = ()
 
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val lemma_chacha20_counter_mode_2:
   ho:mem -> output:uint8_p{live ho output} ->
   hi:mem -> input:uint8_p{live hi input} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len > 64} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length input /\ U32.v len >= 64} ->
   k:Spec.key -> n:Spec.nonce -> ctr:U32.t{U32.v ctr + (length input / 64) < pow2 32} -> Lemma
     (Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n (U32.v ctr) (reveal_sbytes (as_seq hi input))
      == (let b, plain = Seq.split (reveal_sbytes (as_seq hi input)) 64 in
@@ -622,12 +519,14 @@ let lemma_chacha20_counter_mode_0 ho output hi input len k n ctr =
   Seq.lemma_eq_intro (as_seq ho output) Seq.createEmpty
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
 val update_last:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= 64 /\ U32.v len > 0} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len < 64 /\ U32.v len > 0} ->
   log:log_t ->
   st:state{disjoint st output /\ disjoint st plain} ->
   ctr:U32.t{U32.v ctr + (length plain / 64) < pow2 32} ->
@@ -645,12 +544,12 @@ let update_last output plain len log st ctr =
   let block = create (uint8_to_sint8 0uy) 64ul in
   let l = chacha20_block log block st ctr in
   let mask = Buffer.sub block 0ul len in
-  map2 output plain block len (fun x y -> H8.(x ^^ y));
+  map2 output plain mask len (fun x y -> H8.(x ^^ y));
   let h1 = ST.get() in
   lemma_chacha20_counter_mode_1 h1 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr;
   pop_frame();
   l
-
+         
 
 val update:
   output:uint8_p{length output = 64} ->
@@ -670,9 +569,17 @@ val update:
 let update output plain log st ctr =
   let h0 = ST.get() in
   push_frame();
-  let block = create (uint8_to_sint8 0uy) 64ul in
-  let l = chacha20_block log block st ctr in
-  map2 output plain block 64ul (fun x y -> H8.(x ^^ y));
+  let b  = create (uint32_to_sint32 0ul) 48ul in
+  let k  = Buffer.sub b 0ul  16ul in
+  let ib = Buffer.sub b 16ul 16ul in
+  let ob = Buffer.sub b 32ul 16ul in
+  let l  = chacha20_core log k st ctr in
+  uint32s_from_le_bytes ib plain 16ul;
+  let h  = ST.get() in
+  map2 ob ib k 16ul (fun x y -> H32.(x ^^ y));
+  uint32s_to_le_bytes output ob 16ul;
+  Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes (reveal_sbytes (as_seq h0 plain))
+                                                       (reveal_h32s (as_seq h k));
   pop_frame();
   l
 
@@ -684,7 +591,7 @@ val lemma_chacha20_counter_mode:
   h0:mem -> h1:mem -> h2:mem ->
   output:uint8_p{live h1 output /\ live h2 output /\ live h0 output} ->
   plain:uint8_p{live h0 plain /\ live h1 plain /\ live h2 plain} ->
-  len:UInt32.t{length output = U32.v len /\ length output = length plain /\ U32.v len > 64} ->
+  len:UInt32.t{length output = U32.v len /\ length output = length plain /\ U32.v len >= 64} ->
   k:Spec.key -> n:Spec.nonce -> ctr:Spec.counter{ctr + U32.v len / 64 < pow2 32} ->
   Lemma (requires (
     (let o = reveal_sbytes (as_seq h2 (Buffer.sub output 0ul 64ul)) in
@@ -722,7 +629,7 @@ let lemma_chacha20_counter_mode h0 h1 h2 output plain len k n ctr =
 val chacha20_counter_mode_:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len <= 64} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len < 64} ->
   log:log_t ->
   st:state{disjoint st output /\ disjoint st plain} ->
   ctr:U32.t{U32.v ctr + (length plain / 64) < pow2 32} ->
@@ -742,6 +649,7 @@ let rec chacha20_counter_mode_ output plain len log st ctr =
   ) else  (
     let _ = update_last output plain len log st ctr in ()
   )
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
@@ -763,7 +671,7 @@ val chacha20_counter_mode:
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 let rec chacha20_counter_mode output plain len log st ctr =
   let h0 = ST.get() in
-  if U32.(len <=^ 64ul) then chacha20_counter_mode_ output plain len log st ctr
+  if U32.(len <^ 64ul) then chacha20_counter_mode_ output plain len log st ctr
   else (
     let b  = Buffer.sub plain 0ul 64ul in
     let b' = Buffer.offset plain 64ul in

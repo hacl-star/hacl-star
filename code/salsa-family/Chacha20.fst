@@ -29,14 +29,14 @@ let chacha20_key_block block k n ctr =
   pop_frame()
 
 
-// JK : this is only necessary as long as the 'loop.h' hack is alive (double_round is otherwise
-// killed by the bundling
-val double_round:
-  st:buffer Hacl.UInt32.t{length st = 16} ->
-  Stack unit
-    (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
-let double_round st = double_round st
+(* // JK : this is only necessary as long as the 'loop.h' hack is alive (double_round is otherwise *)
+(* // killed by the bundling *)
+(* val double_round: *)
+(*   st:buffer Hacl.UInt32.t{length st = 16} -> *)
+(*   Stack unit *)
+(*     (requires (fun h -> live h st)) *)
+(*     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1)) *)
+(* let double_round st = double_round st *)
 
 
 let value_at m (h:HyperStack.mem{live h m}) = reveal_sbytes (as_seq h m)

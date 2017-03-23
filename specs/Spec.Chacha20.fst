@@ -25,11 +25,9 @@ type state = m:seq UInt32.t {length m = 16}
 type idx = n:nat{n < 16}
 type shuffle = state -> Tot state 
 
-val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> shuffle
-let line a b d s m = 
-  let m = upd m a (index m a +%^ index m b) in
-  let m = upd m d ((index m d ^^  index m a) <<< s) in
-  m
+let line (a:idx) (b:idx) (d:idx) (s:t{v s < 32}) (m:state) : Tot state = 
+  let m = m.[a] <- (m.[a] +%^ m.[b]) in
+  let m = m.[d] <- ((m.[d] ^^ m.[a]) <<< s) in m
 
 let quarter_round a b c d : shuffle = 
   line a b d 16ul @ 
@@ -57,7 +55,7 @@ let rounds : shuffle =
 
 let chacha20_core (s:state) : Tot state = 
     let s' = rounds s in
-    map2 (fun x y -> x +%^ y) s' s
+    Spec.Loops.seq_map2 (fun x y -> x +%^ y) s' s
 
 (* state initialization *) 
 unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
@@ -78,7 +76,8 @@ let chacha20_ctx: Spec.CTR.block_cipher_ctx =
     keylen = keylen;
     blocklen = blocklen;
     noncelen = noncelen;
-    counterbits = 32
+    counterbits = 32;
+    incr = 1
     }
 
 let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block

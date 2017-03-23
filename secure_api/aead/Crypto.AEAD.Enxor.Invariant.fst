@@ -54,7 +54,7 @@ private val frame_mac_region_enxor
   (#rw:rw)
   (#aadlen:aadlen_32)
   (#plainlen:nz_ok_len_32 i)
-  (aead_st:aead_state i rw{safeMac i})
+  (aead_st:aead_state i rw{prf i})
   (nonce:Cipher.iv (alg i))
   (aad:lbuffer (v aadlen))
   (plain:plainBuffer i (v plainlen))
@@ -181,6 +181,22 @@ val lemma_propagate_inv_enxor
 let lemma_propagate_inv_enxor #i #rw #aadlen #plainlen aead_st nonce aad plain ct h0 h1 =
   let open FStar.Classical in
   let cipher = cbuf ct in
+  if prf i then begin
+    let table_0     = HS.sel h0 (itable i aead_st.prf) in
+    let table_1     = HS.sel h1 (itable i aead_st.prf) in
+    let suffix = Seq.slice table_1 (Seq.length table_0) (Seq.length table_1) in
+    assert (Seq.equal table_1 (Seq.append table_0 suffix));
+    let dom_0 = {iv=nonce; ctr=PRF.ctr_0 i} in
+    let h1:(h1:mem{prf i}) = h1 in
+    let aux (x:domain_mac i) :Lemma (PRF.prf_mac_inv table_1 x h1)
+      = let _ = if x.iv = nonce then find_mac_all_above_1 suffix x.iv else find_other_iv_all_above suffix dom_0 x in
+	frame_prf_mac_inv_append_blocks table_0 suffix x h0;
+	frame_mac_region_enxor aead_st nonce aad plain ct h0 h1;
+	frame_prf_prf_mac_inv table_1 h0 h1 x
+    in
+    forall_intro aux
+  end
+  else ();
   if safeMac i then begin
     let dom_0 = {iv=nonce; ctr=PRF.ctr_0 i} in
     let entries_0   = HS.sel #(aead_entries i) h0 (st_ilog aead_st) in

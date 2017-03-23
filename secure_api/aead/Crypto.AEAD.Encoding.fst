@@ -1,4 +1,4 @@
-module Crypto.AEAD.Encoding 
+module Crypto.AEAD.Encoding
 
 // This file defines the encoding of additional data and ciphertext
 // authenticated by the one-time MACs, and proves their injectivity properties. 
@@ -44,16 +44,15 @@ type txtlen_32 = l:UInt32.t {l <=^ txtmax}
 //16-09-18 where is it in the libraries?
 private let min (a:nat) (b:nat) : nat = if a <= b then a else b
 
-//val lemma_append_nil: #a:_ -> s:Seq.seq a -> Lemma (s == Seq.append s Seq.createEmpty)
-//let lemma_append_nil #a s = assert (Seq.equal s (Seq.append s Seq.createEmpty))
-
 
 (* * *********************************************)
 (* *            Encoding                         *)
 (* * *********************************************)
 
 noextract let pad_0 b l = Seq.append b (Seq.create l 0uy)
- 
+
+#set-options "--z3rlimit 100"
+
 // spec for encoding bytestrings into sequences of words. // Note the refined refinement interferes with type instantiation
 noextract val encode_bytes: txt:Seq.seq UInt8.t -> 
   GTot (r:MAC.text{Seq.length r = (Seq.length txt + 15)/16}) 
@@ -155,14 +154,7 @@ let pad_16 b len =
   let h1 = ST.get() in
   Seq.lemma_eq_intro (Buffer.as_seq h1 b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))
 
-//16-12-07 copied from UF1CMA for now; ad hoc
 open FStar.HyperStack
-let modifies_buf_and_ref (#a:Type) (#b:Type) (buf:Buffer.buffer a) (ref:HS.reference b) (h:mem) (h':mem) : GTot Type0 =
-  (forall rid. Set.mem rid (Map.domain h.h) ==>
-    HH.modifies_rref rid !{Buffer.as_ref buf, HS.as_ref ref} h.h h'.h
-    /\ (forall (#a:Type) (b:Buffer.buffer a). 
-      (Buffer.frameOf b == rid /\ Buffer.live h b /\ Buffer.disjoint b buf
-      /\ Buffer.disjoint_ref_1 b (HS.as_aref ref)) ==> Buffer.equal h b h' b))
 let modifies_nothing (h:mem) (h':mem) : GTot Type0 =
   (forall rid. Set.mem rid (Map.domain h.h) ==>
     HH.modifies_rref rid !{} h.h h'.h
@@ -192,11 +184,11 @@ private val add_bytes:
         let l0 = FStar.HyperStack.sel h0 log in
         let l1 = FStar.HyperStack.sel h1 log in
         Seq.equal l1 (Seq.append (encode_bytes (Buffer.as_seq h1 txt)) l0) /\ 
-        modifies_buf_and_ref b log h0 h1 
+        CMA.modifies_buf_and_ref b log h0 h1
       else 
         Buffer.modifies_1 b h0 h1 )))
 
-#reset-options "--z3rlimit 200" 
+#reset-options "--z3rlimit 100" 
 // not sure why I need lemmas unfolding encode_bytes; maybe just Z3 complexity
 private let lemma_encode_loop (b:_ {Seq.length b >= 16}) : Lemma ( 
   Seq.equal (encode_bytes b) (Seq.snoc (encode_bytes (Seq.slice b 16 (Seq.length b))) (Seq.slice b 0 16)))
@@ -290,8 +282,6 @@ private let encode_lengths_poly1305 (aadlen:UInt32.t) (plainlen:UInt32.t) : b:lb
   Seq.append_slices b0 (bp @| b0);
   Seq.append_slices bp b0;
   b
-//16-11-01 unclear why verification is slow above, fast below
-(* #reset-options *)
 
 private val store_lengths_poly1305: aadlen:UInt32.t ->  plainlen:UInt32.t -> w:lbuffer 16 ->
   StackInline unit 
@@ -363,10 +353,12 @@ let store_lengths_ghash aadlen txtlen w =
   assert(Seq.equal (Buffer.as_seq h1 w2) (Seq.create 4 0uy));
   lemma_big_endian_inj (uint32_be 4ul (8ul *^ txtlen)) (Buffer.as_seq h1 w3)
 
+#set-options "--initial_ifuel 1 --max_ifuel 1"
 private let encode_lengths (i:id) (aadlen:aadlen_32) (txtlen:txtlen_32) : lbytes 16 =
   match macAlg_of_id i with 
   | POLY1305 -> encode_lengths_poly1305 aadlen txtlen 
   | GHASH -> encode_lengths_ghash aadlen txtlen
+#reset-options "--z3rlimit 100"
 
 noextract let encode_both (i:id) (aadlen:aadlen_32) (aad:lbytes (v aadlen)) (txtlen:txtlen_32) (cipher:lbytes (v txtlen)) :
   GTot (e:MAC.text {Seq.length e > 0 /\ Seq.head e = encode_lengths i aadlen txtlen}) = 
@@ -400,8 +392,14 @@ let lemma_encode_both_inj i (al0:aadlen_32) (pl0:txtlen_32) (al1:aadlen_32) (pl1
   lemma_encode_bytes_injective p0 p1;
   lemma_encode_bytes_injective a0 a1
 
+
+let fresh_sref (#a:Type0) h0 h1 (r:HS.reference a) = 
+  ~(h0 `HS.contains` r) /\
+  HS.frameOf r == HS.(h1.tip) /\
+  h1 `HS.contains` r
+
 val accumulate: 
-  #i: MAC.id -> st: CMA.state i -> 
+  #i:MAC.id -> st:CMA.state i ->
   aadlen:aadlen_32 -> aad:lbuffer (v aadlen) ->
   txtlen:txtlen_32 -> cipher:lbuffer (v txtlen) -> 
   StackInline (CMA.accBuffer i)   // StackInline required for stack-allocated accumulator
@@ -412,29 +410,29 @@ val accumulate:
     Buffer.disjoint_2 CMA.(MAC.as_buffer st.r) aad cipher))
   (ensures (fun h0 a h1 -> 
     Buffer.modifies_0 h0 h1 /\ // modifies only fresh buffers on the current stack
-    ~ (h0 `Buffer.contains` CMA.(MAC.as_buffer (abuf a))) /\
-    Buffer.live h1 aad /\ 
+    // fresh_sref h0 h1 (Buffer.content (MAC.as_buffer (CMA.abuf a))) /\
+    ~ (h0 `Buffer.contains` (MAC.as_buffer (CMA.abuf a))) /\
+    Buffer.frameOf (MAC.as_buffer (CMA.abuf a)) == h1.tip /\
+    Buffer.live h1 aad /\
     Buffer.live h1 cipher /\
-    Buffer.frameOf CMA.(MAC.as_buffer (abuf a)) = h1.tip /\
     CMA.acc_inv st a h1 /\
     (if mac_log then
-        let log = CMA.alog a in
-        //16-12-15 settle for a weaker property? modifies_nothing h0 h1 /\ 
-        FStar.HyperStack.sel h1 log == encode_both (fst i) aadlen (Buffer.as_seq h1 aad) txtlen (Buffer.as_seq h1 cipher)
-      else
-        Buffer.modifies_0 h0 h1)))
+       let log = CMA.alog a in
+       fresh_sref h0 h1 log /\
+       //16-12-15 settle for a weaker property? modifies_nothing h0 h1 /\
+       HS.sel h1 log ==
+       encode_both (fst i) aadlen (Buffer.as_seq h1 aad) txtlen (Buffer.as_seq h1 cipher)
+     else
+       Buffer.modifies_0 h0 h1)))
 
-val lemma_append_nil: #a:_ -> s:Seq.seq a -> Lemma (s == Seq.append s Seq.createEmpty)
-let lemma_append_nil #a s = assert (Seq.equal s (Seq.append s Seq.createEmpty))
- 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 5000"
-let accumulate #i st aadlen aad txtlen cipher  = 
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 2000"
+let accumulate #i st aadlen aad txtlen cipher  =
   let h = ST.get() in 
   let acc = CMA.start st in
   let h0 = ST.get() in
-  //assert(mac_log ==> h0 `contains` (CMA.alog acc));
+  assert (mac_log ==> fresh_sref h h0 (CMA.alog acc));
   Buffer.lemma_reveal_modifies_0 h h0;
-  //assert (Buffer.disjoint_2 (MAC.as_buffer (CMA.(abuf acc))) aad cipher);
+  assert (Buffer.disjoint_2 (MAC.as_buffer (CMA.(abuf acc))) aad cipher);
   add_bytes st acc aadlen aad;
   let h1 = ST.get() in 
   add_bytes st acc txtlen cipher;
@@ -442,38 +440,36 @@ let accumulate #i st aadlen aad txtlen cipher  =
   let final_word = Buffer.create 0uy 16ul in 
   let h3 = ST.get() in
   Buffer.lemma_reveal_modifies_0 h2 h3;
-  //assert(mac_log ==> h3 `contains` (CMA.alog acc)); 
+  assert(mac_log ==> h3 `contains` (CMA.alog acc));
   let id, _ = i in  // JP: removed a call to Prims.fst
-  ( match macAlg_of_id id with 
+  (match macAlg_of_id id with
     | POLY1305 -> store_lengths_poly1305 aadlen txtlen final_word
-    | GHASH -> store_lengths_ghash aadlen txtlen final_word );
+    | GHASH    -> store_lengths_ghash    aadlen txtlen final_word);
   let h4 = ST.get() in 
   Buffer.lemma_reveal_modifies_1 final_word h3 h4;
   CMA.frame_acc_inv st acc h2 h3;
   CMA.frame_acc_inv st acc h3 h4;
   CMA.update st acc final_word;
-  let h5 = ST.get() in 
-
+  let h5 = ST.get() in
   if mac_log then 
     begin
       let open FStar.Seq in 
       let al = CMA.alog acc in
+      assert (fresh_sref h h5 al);
       let cbytes = Buffer.as_seq h cipher in 
       let abytes = Buffer.as_seq h aad in 
       let lbytes = Buffer.as_seq h4 final_word in 
       assert(equal (HS.sel h0 al) createEmpty);
-      lemma_append_nil (encode_bytes abytes);
+      Seq.append_empty_r (encode_bytes abytes);
       assert(equal (HS.sel h1 al) (encode_bytes abytes));
       assert(equal (HS.sel h2 al) (encode_bytes cbytes @| encode_bytes abytes));
       assert(equal (HS.sel h5 al) (Seq.cons lbytes (encode_bytes cbytes @| encode_bytes abytes)));
       assert(equal (HS.sel h5 al) (encode_both (fst i) aadlen abytes txtlen cbytes));
-
-      //16-12-15 can't prove Buffer.modifies_0 from current CMA posts?
       assert(HS.modifies_one h.tip h h0);
-      assume(HS.modifies_one h.tip h0 h2); //NS: cf. issue #788 (known limitation)
+      assert(HS.modifies_one h.tip h0 h2);
       assert(HS.modifies_one h.tip h2 h3);
       assert(HS.modifies_one h.tip h3 h4);
-      assume(HS.modifies_one h.tip h4 h5); //NS: cf. issue #788 (known limitation)
+      assert(HS.modifies_one h.tip h4 h5);
       assert(HS.modifies_one h.tip h h5);
       assert(Buffer.modifies_buf_0 h.tip h h5);
       Buffer.lemma_intro_modifies_0 h h5
@@ -481,8 +477,6 @@ let accumulate #i st aadlen aad txtlen cipher  =
   else 
     begin
       Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.(abuf acc))) h0 h2;
-      Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc))  h4 h5
+      Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h4 h5
     end;
   acc
-
- 

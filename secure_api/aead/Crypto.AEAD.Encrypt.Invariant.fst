@@ -66,12 +66,14 @@ let enxor_h0_h1
   let rgns = Set.as_set [aead_st.prf.rgn; Buffer.frameOf cipher] in
   HS.(is_stack_region h0.tip) /\
   HS.(is_stack_region h1.tip) /\    //the tip of the stack is not root
+  HS.(h0.tip = h1.tip)        /\  //AR: cleanup, remove the clause above as it should be derivable now
   enxor_pre aead_st nonce aad plain cipher h0                 /\          //enxor_pre holds for h0
   enc_dec_liveness_and_separation aead_st aad plain cipher_tagged h1 /\   //liveness and separation ghold in h1
   (safeMac i ==>  (
      let prf = itable i aead_st.prf in
      let table_0 = HS.sel h0 prf in
      let table_1 = HS.sel h1 prf in
+
      HS.modifies rgns h0 h1                                                            /\    //enxor only modifies the PRF region, and the cipher buffer region
      HS.modifies_ref aead_st.prf.rgn (TSet.singleton (Heap.Ref (HS.as_ref prf))) h0 h1 /\    //in the PRF region, enxor only modifies the PRF table reference
      table_differs_only_above_x (PRF.incr i dom_0) table_0 table_1 /\                            //table_1 = table_0 ++ (otp entries)
@@ -81,8 +83,14 @@ let enxor_h0_h1
 						 (PRF.incr i dom_0)
 				                 (v plainlen) 0 (v plainlen)
 					         (Plain.sel_plain h1 plainlen plain)
-					         (Buffer.as_seq h1 cipher))))))
-
+					         (Buffer.as_seq h1 cipher)))))) /\
+  (prf i ==>  //AR: repeating it here, this should be under prf flag so that we can prove prf_mac_inv going forward
+     (let prf = itable i aead_st.prf in
+      let table_0 = HS.sel h0 prf in
+      let table_1 = HS.sel h1 prf in
+      HS.modifies rgns h0 h1                                                            /\    //enxor only modifies the PRF region, and the cipher buffer region
+      HS.modifies_ref aead_st.prf.rgn (TSet.singleton (Heap.Ref (HS.as_ref prf))) h0 h1 /\    //in the PRF region, enxor only modifies the PRF table reference
+      table_differs_only_above_x (PRF.incr i dom_0) table_0 table_1))                            //table_1 = table_0 ++ (otp entries)
 
 let fresh_nonces_are_unused_except (#i:id) (#mac_rgn:region) (nonce:Cipher.iv (alg i))
 				   (prf_table:prf_table mac_rgn i) (aead_entries:aead_entries i) 
@@ -121,7 +129,8 @@ let enxor_and_maybe_mac
      else unused_mac_exists table_1 dom_0 h1) /\                         //if maybe_mac is false, then unused mac exists for nonce
     (safeId i ==> prf_contains_all_otp_blocks (PRF.incr i dom_0) 0     //prf table contains all the otp entries for nonce
 	                        (Plain.sel_plain h1 plainlen plain)
-	                        (Buffer.as_seq h1 cipher) table_1)))
+	                        (Buffer.as_seq h1 cipher) table_1))) /\
+  (prf i ==> prf_mac_inv (HS.sel h1 (itable i aead_st.prf)) h1)  //prf_mac_inv continues to hold after enxor
 
 (*
  * lemma for propagating the invariant across accumulate
@@ -174,6 +183,7 @@ let lemma_propagate_inv_accumulate #i #rw #aadlen #plainlen maybe_mac aead_st no
     then frame_mac_is_set_h table_0 nonce ad_0 (v plainlen) c0 t0 h0 h1
     else frame_unused_mac_exists_h table_0 dom_0 h0 h1
   end
+  else if prf i then frame_prf_mac_inv (HS.sel h0 (PRF.itable i aead_st.prf)) h0 h1
 
 (*
  * predicate relating the initial and final state for mac_wrapper
@@ -189,7 +199,7 @@ let mac_wrapper_h0_h1
   (plain:plainBuffer i (v plainlen))
   (ct:ctagbuf plainlen)
   (mac_st:CMA.state (i, nonce))
-  (h0 h1:mem) =
+  (h0 h1:mem) =  
   let cipher = cbuf ct in
   let tag = ctag ct in
   HS.(is_stack_region h0.tip) /\
@@ -203,4 +213,5 @@ let mac_wrapper_h0_h1
     HS.modifies (Set.as_set [h0.tip; aead_st.prf.mac_rgn; Buffer.frameOf ct]) h0 h1 /\               //mac_wrapper modifies the tip of the stack, prf.mac_rgn (it sets the tag in the mac log), and the cipher text region (adds tag to the cipher text buffer)
     HS.modifies_ref aead_st.prf.mac_rgn !{HS.as_ref (as_hsref (CMA.(ilog mac_st.log)))} h0 h1  /\    //in the mac region, it only modifies the mac log associated with mac_st
     Buffer.modifies_buf_1 (Buffer.frameOf ct) tag h0 h1 /\    //mac_wrapper modifies the tag component of the ciphertext buffer
-    mac_is_set prf_table_1 nonce (Buffer.as_seq h1 aad) (v plainlen) (Buffer.as_seq h1 cipher) (Buffer.as_seq h1 tag) h1))    //and finally, mac_is_set for nonce
+    mac_is_set prf_table_1 nonce (Buffer.as_seq h1 aad) (v plainlen) (Buffer.as_seq h1 cipher) (Buffer.as_seq h1 tag) h1))    //mac_is_set for nonce
+  (* AR: TODO: this is unusable in Crypto.AEAD.MAC_Wrapper.Invariant:lemma_propagate_inv_mac_wrapper, since modifes clauses are in safeMac, moving them under prf i don't help since we need mac_log *)

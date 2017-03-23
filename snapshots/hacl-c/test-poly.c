@@ -13,14 +13,16 @@ void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
   Poly1305_Final(&state,mac);
 }
 
+
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d times 2^20 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
-  printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
+  printf("Cycles for %d times %d bytes: %llu (%.2fcycles/byte)\n", rounds, plainlen, d1, (double)d1/plainlen/rounds);
+  printf("User time for %d times %d bytes: %f (%fus/byte)\n", rounds, plainlen, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
-#define PLAINLEN (1024*1024)
-#define ROUNDS 1000
+
+#define PLAINLEN (16*1024)
+#define ROUNDS 3000
 #define MACSIZE 32
 
 uint8_t
