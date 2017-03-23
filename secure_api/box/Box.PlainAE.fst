@@ -4,7 +4,7 @@ open FStar.Seq
 
 open Box.Flags
 open Box.Indexing
-open Box.PlainPKAE
+open Box.PlainBox
 
 type bytes = seq UInt8.t
 
@@ -13,14 +13,14 @@ abstract type protected_ae_plain (i:id{AE_id? i}) = p:protected_pkae_plain{get_i
 type ae_plain = b:bytes{Seq.length b / Spec.Salsa20.blocklen < pow2 32}
 
 val length: #i:id{AE_id? i} -> (protected_ae_plain i) -> Tot (n:nat {n / Spec.Salsa20.blocklen < pow2 32})
-let length #i p = PlainPKAE.length p
+let length #i p = PlainBox.length p
 
 (**
    Coerced messages can only be flagged as not honest.
 *)
 val coerce: #i:id{AE_id? i} -> p:ae_plain{not ae_ind_cca \/ (dishonest i)} -> Tot (protected_ae_plain i)
 let coerce #i p = 
-  PlainPKAE.coerce #i p
+  PlainBox.coerce #i p
 
 
 (**
@@ -29,7 +29,7 @@ let coerce #i p =
 *)
 val repr: #i:id{AE_id? i} -> p:protected_ae_plain i{not ae_ind_cca \/ (dishonest i)} -> Tot (ae_plain)
 let repr #i p = 
-    PlainPKAE.repr p 
+    PlainBox.repr p 
 
 
 (**

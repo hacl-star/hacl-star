@@ -75,7 +75,7 @@ let empty_log i = MM.empty_map log_key (log_range i)
 noeq abstract type key =
   | Key: #i:id{AE_id? i /\ unfresh i /\ registered i} -> #(region:rid{extends region ae_key_region /\ is_below region ae_key_region /\ is_eternal_region region}) -> raw:aes_key -> log:log_t i region -> key
 
-val get_index: k:key -> Tot (i:id{i=k.i})
+val get_index: k:key -> Tot (i:id{i=k.i /\ AE_id? i})
 let get_index k = k.i
 
 #set-options "--z3rlimit 25"
@@ -187,7 +187,7 @@ let get_regionGT k =
 #set-options "--z3rlimit 100"
 val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i) -> ST cipher
   (requires (fun h0 -> 
-    MM.fresh k.log n h0 // Nonce freshness
+    ((honest i) ==> MM.fresh k.log n h0) // Nonce freshness
     /\ MR.m_contains k.log h0
     /\ registered i
   ))

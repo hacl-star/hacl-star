@@ -17,7 +17,7 @@ original NaCl library by Bernstein et al. can be found
 ```
   +---------------------------+                  +---------------------------+
   |                           |                  |                           |
-  | Box.PKAE                  |                  | Box.PlainPKAE             |
+  | Box                       |                  | Box.PlainBox              |
   |                           |                  |                           |
   | * Top level module        |                  | * Provides functions to   |
   | * Provides access to      |                  |   manipulate plaintext    |
@@ -25,7 +25,7 @@ original NaCl library by Bernstein et al. can be found
   |   crypto_box_open         |                  |   restrictions on honest  |                     |
   | * Receives Plaintext type |                  |   plaintexts              |                     |
   |   and functionality from  |<------+          |                           |                     |
-  |   Box.PlainPKAE           |       |          |                           |                     |
+  |   Box.PlainBox            |       |          |                           |                     |
   |                           |       |          |                           |                     |
   +------------+--------------+       |          +---------------------------+                     |
                ^                      |                                                            |
@@ -33,7 +33,7 @@ original NaCl library by Bernstein et al. can be found
                |                      |                                                            v
   +------------+--------------+       |          +---------------------------+        +---------------------------+
   |                           |       |          |                           |        |                           |
-  | Box.DH                    |       |          | Box.AE                    |        | Box.PlainAE               |
+  | Box.ODH                   |       |          | Box.AE                    |        | Box.PlainAE               |
   |                           |       |          |                           |        |                           |
   | * Provides functions to   |       |          | * Provides functions for  |        | * Provides a plaintext    |
   |   create a symmetric key  |       |          |   symmetric encryption    |        |   type and functions to   |

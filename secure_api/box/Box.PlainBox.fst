@@ -1,7 +1,7 @@
 (**
    TODO: Documentation and some cleaup.
 *)
-module Box.PlainPKAE
+module Box.PlainBox
 
 open Box.Flags
 open Box.Indexing
