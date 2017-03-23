@@ -44,8 +44,8 @@ private let suint8_p  = Buffer.buffer suint8_t
 //
 
 (* Define algorithm parameters *)
-let hash_hashsize_256 = Hacl.Hash.SHA2.L256.hashsize
-let hash_blocksize_256 = Hacl.Hash.SHA2.L256.blocksize
+let hash_hashsize_256 = Hacl.Hash.SHA2.L256.size_hash
+let hash_blocksize_256 = Hacl.Hash.SHA2.L256.size_block
 let hash_size_state_256 = Hacl.Hash.SHA2.L256.size_state
 
 
