@@ -38,12 +38,12 @@ let crypto_box_beforenm k pk sk =
   0ul
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 val crypto_box_detached_afternm:
   c:uint8_p ->
   mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ disjoint c mac} ->
-  m:uint8_p ->
+  m:uint8_p{disjoint m c} ->
   mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
@@ -63,12 +63,12 @@ let lemma_modifies_3_2 (c:uint8_p) (mac:uint8_p) h0 h1 h2 : Lemma
   = lemma_reveal_modifies_0 h0 h1; lemma_reveal_modifies_2 c mac h1 h2; lemma_intro_modifies_3_2 c mac h0 h2
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 val crypto_box_detached:
   c:uint8_p ->
   mac:uint8_p{length mac = crypto_box_MACBYTES /\ disjoint c mac} ->
-  m:uint8_p ->
+  m:uint8_p{disjoint m c} ->
   mlen:u64{let len = U64.v mlen in length c = len + 32 /\ len + 32 = length m}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
@@ -130,7 +130,7 @@ let crypto_box_open_detached m c mac mlen n pk sk =
 
 val crypto_box_easy_afternm:
   c:uint8_p ->
-  m:uint8_p ->
+  m:uint8_p{disjoint m c} ->
   mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
@@ -146,7 +146,6 @@ let crypto_box_easy_afternm c m mlen n k =
   blit cmac 0ul c 16ul 16ul;
   pop_frame();
   z
-  (* crypto_box_detached_afternm (sub c 16ul mlen') (sub c 0ul 16ul) (sub m 0ul mlen') mlen n k *)
 
 
 val crypto_box_easy:

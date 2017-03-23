@@ -162,6 +162,8 @@ let num_blocks_for_entry (#i:id) (e:aead_entry i) : Tot nat =
   let AEADEntry nonce ad l plain cipher_tagged = e in
   num_blocks_for_len i l
 
+#set-options "--z3rlimit 100"
+
 noextract let encode_ad_cipher (i:id) (ad:adata) (l:ok_len i) (cipher:lbytes l) =
   encode_both i (FStar.UInt32.uint_to_t (Seq.length ad)) ad (FStar.UInt32.uint_to_t l) cipher
 

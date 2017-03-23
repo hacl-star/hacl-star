@@ -638,7 +638,7 @@ let lemma_mul_ineq (a:nat) (b:nat) (c:nat{a < c}) (d:nat{b < d}) : Lemma (a * b 
 let lemma_mul_ineq1 (a:pos) (c:nat) (d:nat{c < d}) : Lemma (a * c < a * d) = ()
 
 
-#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0"
 
 val lemma_52_to_fsquare_is_fine: s:seqelem{red_52 s} ->
  Lemma (fsquare_pre_ s /\ bounds' (fsquare_spec_ s) (77 * p104) (59 * p104) (41 * p104) (23 * p104) (5 * p104))
@@ -674,7 +674,7 @@ val lemma_104_smaller_than_108: s:seqelem_wide{bounds' s (77 * p104) (59 * p104)
 let lemma_104_smaller_than_108 s = ()
 
 
-#reset-options "--z3rlimit 1000 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction let p106 : p:pos{p = 0x400000000000000000000000000} =
   assert_norm(pow2 106 = 0x400000000000000000000000000); pow2 106

@@ -325,6 +325,8 @@ private let frame_prf_mac_inv_prf_mac
     let open FStar.Classical in
     forall_intro aux
 
+#set-options "--z3rlimit 100"
+
 (*
  * framing of inv by prf_mac
  *)

@@ -50,7 +50,9 @@ private let min (a:nat) (b:nat) : nat = if a <= b then a else b
 (* * *********************************************)
 
 noextract let pad_0 b l = Seq.append b (Seq.create l 0uy)
- 
+
+#set-options "--z3rlimit 100"
+
 // spec for encoding bytestrings into sequences of words. // Note the refined refinement interferes with type instantiation
 noextract val encode_bytes: txt:Seq.seq UInt8.t -> 
   GTot (r:MAC.text{Seq.length r = (Seq.length txt + 15)/16}) 
@@ -186,7 +188,7 @@ private val add_bytes:
       else 
         Buffer.modifies_1 b h0 h1 )))
 
-#reset-options "--z3rlimit 20" 
+#reset-options "--z3rlimit 100" 
 // not sure why I need lemmas unfolding encode_bytes; maybe just Z3 complexity
 private let lemma_encode_loop (b:_ {Seq.length b >= 16}) : Lemma ( 
   Seq.equal (encode_bytes b) (Seq.snoc (encode_bytes (Seq.slice b 16 (Seq.length b))) (Seq.slice b 0 16)))
@@ -356,7 +358,7 @@ private let encode_lengths (i:id) (aadlen:aadlen_32) (txtlen:txtlen_32) : lbytes
   match macAlg_of_id i with 
   | POLY1305 -> encode_lengths_poly1305 aadlen txtlen 
   | GHASH -> encode_lengths_ghash aadlen txtlen
-#reset-options
+#reset-options "--z3rlimit 100"
 
 noextract let encode_both (i:id) (aadlen:aadlen_32) (aad:lbytes (v aadlen)) (txtlen:txtlen_32) (cipher:lbytes (v txtlen)) :
   GTot (e:MAC.text {Seq.length e > 0 /\ Seq.head e = encode_lengths i aadlen txtlen}) = 
