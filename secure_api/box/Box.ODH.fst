@@ -1,7 +1,7 @@
 (**
    TODO: - Documentation, some cleanup.
 *)
-module Box.DH
+module Box.ODH
 
 open FStar.Set
 open FStar.HyperHeap
