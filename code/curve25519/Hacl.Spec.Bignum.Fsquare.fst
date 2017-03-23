@@ -447,7 +447,7 @@ let lemma_sum_mod a b c d e =
   lemma_sum_mod_0 (a + (19 * pow2 51) * c + (19 * pow2 102) * d + (19 * pow2 153) * e) (pow2 255) b
 
 
-#reset-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsquare_spec_5_1: r0:nat -> r1:nat -> r2:nat -> r3:nat -> r4:nat -> Lemma
   ((r0 * r0
