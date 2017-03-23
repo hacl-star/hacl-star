@@ -173,7 +173,7 @@ private let _constants_set_h_0 hash =
 [@"substitute"]
 private val constants_set_h_0:
   state:suint32_p{length state = U32.v size_state} ->
-  Stack unit 
+  Stack unit
     (requires (fun h -> live h state))
     (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1
               /\ (let hash = Seq.slice (as_seq h1 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
@@ -198,17 +198,18 @@ private let constants_set_h_0 state =
 
 (* [FIPS 180-4] section 6.2.2 *)
 (* Step 1 : Scheduling function for sixty-four 32bit words *)
-inline_for_extraction private val ws_compute:
+inline_for_extraction
+val ws_compute:
   state  :suint32_p {length state = v size_state} ->
   wblock :suint32_p {length wblock = v blocksize_32} ->
   t      :uint32_t  {v t + 64 < pow2 32} ->
   Stack unit
         (requires (fun h -> live h state /\ live h wblock))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
-                  /\ (let ws = Seq.slice (as_seq h1 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in 
-                  let seq_ws = Hacl.Spec.Endianness.reveal_h32s ws in 
-                  let seq_wblock = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 wblock) in
-                  forall i. Seq.index seq_ws i == Spec.ws seq_wblock i)))
+                  /\ (let seq_ws_0 = Seq.slice (as_seq h0 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in
+                  let seq_ws_1 = Seq.slice (as_seq h1 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in
+                  let seq_wblock = as_seq h1 wblock in
+                  seq_ws_1 == Spec.ws_compute seq_ws_0 seq_wblock (U32.v t))))
 
 let rec ws_compute state wblock t =
   (* Get necessary information from the state *)
@@ -237,8 +238,8 @@ private val shuffle_core:
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
                   let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
-                  let seq_ws = Seq.slice (as_seq h1 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in 
-                  forall t. seq_hash_1 == Spec.shuffle_core seq_hash_0 seq_ws t)))
+                  let seq_ws = Seq.slice (as_seq h1 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in
+                  seq_hash_1 == Spec.shuffle_core seq_hash_0 seq_ws (U32.v t))))
 
 [@"c_inline"]
 let shuffle_core state t =
@@ -282,8 +283,8 @@ private val shuffle:
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
         /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
         let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
-        let seq_ws = Seq.slice (as_seq h1 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in 
-        forall i. seq_hash_1 == Spec.shuffle seq_hash_0 seq_ws i)))
+        let seq_ws = Seq.slice (as_seq h1 state) (U32.v pos_ws_32) (U32.(v pos_ws_32 + v size_ws_32)) in
+        seq_hash_1 == Spec.shuffle seq_hash_0 seq_ws (U32.v i))))
 
 [@"c_inline"]
 let rec shuffle state t =
@@ -291,6 +292,23 @@ let rec shuffle state t =
     shuffle_core state t;
     shuffle state (t +^ 1ul) end
   else ()
+
+
+[@ "c_inline"]
+val sum_hash:
+  hash_0:suint32_p{length hash_0 = v hashsize_32} ->
+  hash_1:suint32_p{length hash_0 = v hashsize_32 /\ disjoint hash_0 hash_1} ->
+  Stack unit
+    (requires (fun h -> live h hash_0 /\ live h hash_1))
+    (ensures  (fun h0 _ h1 -> live h0 hash_0 /\ live h1 hash_0 /\ live h0 hash_1 /\ modifies_1 hash_0 h0 h1
+              /\ (let new_seq_hash_0 = as_seq h1 hash_0 in
+              let seq_hash_0 = as_seq h0 hash_0 in
+              let seq_hash_1 = as_seq h0 hash_1 in
+              new_seq_hash_0 == C.Loops.seq_map2 (fun x y -> S32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
+
+[@"c_inline"]
+let sum_hash hash_0 hash_1 =
+  C.Loops.in_place_map2 hash_0 hash_1 hashsize_32 (fun x y -> S32.(x +%^ y))
 
 
 #set-options "--z3rlimit 50"
@@ -312,7 +330,11 @@ val init:
   state:suint32_p{length state = v size_state} ->
   Stack unit
         (requires (fun h0 -> live h0 state))
-        (ensures  (fun h0 r h1 -> modifies_1 state h0 h1))
+        (ensures  (fun h0 r h1 -> modifies_1 state h0 h1
+                  /\ (let seq_k = Seq.slice (as_seq h1 state) (U32.v pos_k_32) (U32.(v pos_k_32 + v size_k_32)) in
+                  Hacl.Spec.Endianness.reveal_h32s seq_k == Seq.createL Spec.list_k)
+                  /\ (let seq_h_0 = Seq.slice (as_seq h1 state) (U32.v pos_whash_32) (U32.(v pos_whash_32 + v size_whash_32)) in
+                  Hacl.Spec.Endianness.reveal_h32s seq_h_0 == Seq.createL Spec.list_h_0)))
 
 let init state =
   constants_set_k state;
@@ -323,10 +345,11 @@ let init state =
 (* Update running hash function *)
 val update:
   state:suint32_p{length state = v size_state} ->
-  data_8 :suint8_p {length data_8 = v blocksize} ->
+  data_8:suint8_p {length data_8 = v blocksize} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data_8))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+
 let update state data_8 =
 
   (* Push a new frame *)
@@ -334,6 +357,7 @@ let update state data_8 =
 
   (* Allocate space for converting the data block *)
   let data_32 = create (u32_to_s32 0ul) blocksize_32 in
+  let hash_0 = create (u32_to_s32 0ul) hashsize_32 in
 
   (* Cast the data bytes into a uint32_t buffer *)
   (**) cut(v blocksize % 4 = 0);
@@ -341,43 +365,22 @@ let update state data_8 =
   (**) cut(v blocksize <= 4 * length data_32);
   Hacl.Utils.Experimental.load32s_be data_32 data_8 blocksize;
 
-  (* Get necessary information from the state *)
-  let h = Buffer.sub state pos_whash_32 size_whash_32 in
+  (* Keep track of the the current working hash from the state *)
+  Buffer.blit state pos_whash_32 hash_0 0ul size_whash_32;
 
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
   ws_compute state data_32 0ul;
 
   (* Step 2 : Initialize the eight working variables *)
-  let a_0 = h.(0ul) in
-  let b_0 = h.(1ul) in
-  let c_0 = h.(2ul) in
-  let d_0 = h.(3ul) in
-  let e_0 = h.(4ul) in
-  let f_0 = h.(5ul) in
-  let g_0 = h.(6ul) in
-  let h_0 = h.(7ul) in
-
   (* Step 3 : Perform logical operations on the working variables *)
+  (* Step 4 : Compute the ith intermediate hash value *)
   shuffle state 0ul;
 
-  (* Step 4 : Compute the ith intermediate hash value *)
-  let a_1 = h.(0ul) in
-  let b_1 = h.(1ul) in
-  let c_1 = h.(2ul) in
-  let d_1 = h.(3ul) in
-  let e_1 = h.(4ul) in
-  let f_1 = h.(5ul) in
-  let g_1 = h.(6ul) in
-  let h_1 = h.(7ul) in
+  (* Retrieve the current working hash *)
+  let hash_1 = Buffer.sub state pos_whash_32 size_whash_32 in
 
-  h.(0ul) <- (a_0 +%^ a_1);
-  h.(1ul) <- (b_0 +%^ b_1);
-  h.(2ul) <- (c_0 +%^ c_1);
-  h.(3ul) <- (d_0 +%^ d_1);
-  h.(4ul) <- (e_0 +%^ e_1);
-  h.(5ul) <- (f_0 +%^ f_1);
-  h.(6ul) <- (g_0 +%^ g_1);
-  h.(7ul) <- (h_0 +%^ h_1);
+  (* Use the previous one to update it inplace *)
+  sum_hash hash_1 hash_0;
 
   (* Increment the total number of blocks processed *)
   state.(pos_count_32) <- (state.(pos_count_32) +%^ (u32_to_s32 1ul));
