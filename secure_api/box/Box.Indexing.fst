@@ -8,14 +8,17 @@ open Box.Flags
 
 module MR = FStar.Monotonic.RRef
 module MM = MonotoneMap
+module Curve = Spec.Curve25519
 
-type dh_id = int
+let lbytes (l:ℕ) = b:seq UInt8.t {length b = l}
+type dh_id = lbytes 32 // same as dh_share
 abstract type ae_id = (i:(dh_id*dh_id){fst i <= snd i})
 
 type id =
   | DH_id of dh_id
   | AE_id of ae_id
 
+// TODO: Implement total ordering on lbytes 32.
 val generate_ae_id: i1:id{DH_id? i1} -> i2:id{DH_id? i2} -> Tot (i3:id{AE_id? i3})
 let generate_ae_id i1 i2 =
   match i1,i2 with
