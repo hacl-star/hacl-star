@@ -65,8 +65,7 @@ let enxor_h0_h1
   let cipher = cbuf cipher_tagged in
   let rgns = Set.as_set [aead_st.prf.rgn; Buffer.frameOf cipher] in
   HS.(is_stack_region h0.tip) /\
-  HS.(is_stack_region h1.tip) /\    //the tip of the stack is not root
-  HS.(h0.tip = h1.tip)        /\  //AR: cleanup, remove the clause above as it should be derivable now
+  HS.(h0.tip = h1.tip)        /\
   enxor_pre aead_st nonce aad plain cipher h0                 /\          //enxor_pre holds for h0
   enc_dec_liveness_and_separation aead_st aad plain cipher_tagged h1 /\   //liveness and separation ghold in h1
   (prf i ==>
