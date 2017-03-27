@@ -177,8 +177,8 @@ private val constants_set_h_0:
   Stack unit
     (requires (fun h -> live h state))
     (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1
-              /\ (let hash = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-              Hacl.Spec.Endianness.reveal_h32s hash == Seq.createL Spec.list_h_0)))
+              /\ (let seq_hash_0 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+              Hacl.Spec.Endianness.reveal_h32s seq_hash_0 == Seq.createL Spec.list_h_0)))
 
 [@"substitute"]
 private let constants_set_h_0 state =
@@ -346,12 +346,16 @@ let init state =
 (* Update running hash function *)
 val update:
   state:suint32_p{length state = v size_state} ->
-  data_8:suint8_p {length data_8 = v size_block} ->
+  data:suint8_p {length data = v size_block} ->
   Stack unit
-        (requires (fun h0 -> live h0 state /\ live h0 data_8))
-        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+        (requires (fun h0 -> live h0 state /\ live h0 data))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
+        /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+        let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+        let seq_wblock = as_seq h1 data in
+        seq_hash_1 == Spec.update_compress seq_hash_0 seq_wblock)))
 
-let update state data_8 =
+let update state data =
 
   (* Push a new frame *)
   (**) push_frame();
@@ -362,9 +366,9 @@ let update state data_8 =
 
   (* Cast the data bytes into a uint32_t buffer *)
   (**) cut(v size_block % 4 = 0);
-  (**) cut(v size_block <= length data_8);
+  (**) cut(v size_block <= length data);
   (**) cut(v size_block <= 4 * length data_w);
-  Hacl.Utils.Experimental.load32s_be data_w data_8 size_block;
+  Hacl.Utils.Experimental.load32s_be data_w data size_block;
 
   (* Keep track of the the current working hash from the state *)
   Buffer.blit state pos_whash_w hash_0 0ul size_whash_w;
@@ -397,7 +401,11 @@ val update_multi:
   n     :uint32_t{v n * v size_block <= length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
-        (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+        (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1
+                  /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+                  let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+                  let seq_wblock = as_seq h1 data in
+                  seq_hash_1 == Spec.update_multi seq_hash_0 seq_wblock)))
 
 let rec update_multi state data n =
 
