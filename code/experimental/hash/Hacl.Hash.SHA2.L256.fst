@@ -395,24 +395,26 @@ val update_multi:
   state :suint32_p{length state = v size_state} ->
   data  :suint8_p ->
   n     :uint32_t{v n * v size_block <= length data} ->
-  idx   :uint32_t{v idx <= v n} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-let rec update_multi state data n idx =
+let rec update_multi state data n =
 
-  if (idx =^ n) then ()
+  if (n =^ 0ul) then ()
   else
 
     (* Get the current block for the data *)
-    let b = Buffer.sub data (idx *%^ size_block) size_block in
+    let b = Buffer.sub data 0ul size_block in
 
     (* Call the update function on the current block *)
     update state b;
 
+    (* Remove the current block from the data left to process *)
+    let data = Buffer.sub data size_block ((n -^ 1ul) *^ size_block) in
+
     (* Recursive call *)
-    update_multi state data n (idx +^ 1ul)
+    update_multi state data (n -^ 1ul)
 
 
 
@@ -518,7 +520,7 @@ let hash hash input len =
   init ctx;
 
   (* Update the state with data blocks *)
-  update_multi ctx input n 0ul;
+  update_multi ctx input n;
 
   (* Get the last block *)
   let input_last = Buffer.sub input (n *%^ size_block) r in

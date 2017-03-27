@@ -82,12 +82,11 @@ val sha2_update_multi_256:
   state :suint32_p{length state = v hash_size_state_256} ->
   data  :suint8_p ->
   n     :uint32_t{v n * v hash_blocksize_256 <= length data} ->
-  idx   :uint32_t{v idx <= v n} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
 
-let sha2_update_multi_256 state data n idx = Hacl.Hash.SHA2.L256.update_multi state data n idx
+let sha2_update_multi_256 state data n = Hacl.Hash.SHA2.L256.update_multi state data n
 
 
 
