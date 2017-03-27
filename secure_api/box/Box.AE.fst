@@ -184,7 +184,7 @@ let get_regionGT k =
    Encrypt a a message under a key. Idealize if the key is honest and ae_ind_cca true.
 *)
 #reset-options
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 100 --initial_fuel 10 --initial_ifuel 10"
 val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i) -> ST cipher
   (requires (fun h0 -> 
     ((honest i) ==> MM.fresh k.log n h0) // Nonce freshness
@@ -204,6 +204,9 @@ val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_pla
     /\ MR.witnessed (MM.contains k.log n (c,m))
     ))
 let encrypt #i n k m =
+  MR.m_recall id_log;
+  MR.m_recall id_honesty_log;
+  recall_log k;
   let honest_i = is_honest i in
   let p = 
     if (ae_ind_cpa && honest_i) then (
@@ -212,7 +215,8 @@ let encrypt #i n k m =
       repr m )
   in
   let  c = SPEC.secretbox_easy p k.raw n in
-  MM.extend k.log n (c,m);
+  if honest_i then (
+    MM.extend k.log n (c,m));
   c
 
 
@@ -253,20 +257,3 @@ let decrypt #i n k c =
     match p with
     | Some p' -> Some (PlainAE.coerce #i p')
     | None -> None
-
-
-//val functional_correctness_lemma: #i:id{AE_id? i} -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i ) -> ST bool
-//  (requires (fun h0 ->
-//    (honest i /\ (b2t ae_ind_cca) ==> MM.fresh k.log n h0)
-//    /\ MR.m_contains k.log h0
-//    /\ registered i
-//    /\ Map.contains h0.h k.region
-//    /\ MR.m_contains k.log h0
-//    /\ registered i
-//  ))
-//  (ensures (fun h0 b h1 -> b2t b))
-//let functional_correctness_lemma #i n k m =
-//  let c = encrypt n k m in
-//  match decrypt n k c with
-//  | Some m' -> m = m'
-//  | None -> false
