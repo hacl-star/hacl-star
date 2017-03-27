@@ -38,7 +38,7 @@ let dh_basepoint = [
 type dh_exponent = Curve.scalar // is equal to Curve.serialized_point
 
 val share_from_exponent: dh_exponent -> Tot dh_share
-let share_from_exponent dh_exp = Curve.scalarmult dh_exp dh_basepoint
+let share_from_exponent dh_exp = Curve.scalarmult dh_exp (createL dh_basepoint)
 
 (**
    Nonce to use with HSalsa.hsalsa20.
@@ -95,24 +95,30 @@ let pk_get_share k = k.pk_share
 val sk_get_share: sk:dh_skey -> Tot (dh_sh:dh_share{dh_sh = share_from_exponent sk.sk_exp})
 let sk_get_share sk = sk.pk.pk_share
 
-val get_skey: sk:dh_skey -> GTot (raw:dh_exponent{raw=sk.rawsk})
+val get_skey: sk:dh_skey -> GTot (raw:dh_exponent{raw=sk.sk_exp})
 let get_skey sk = 
-  sk.rawsk
+  sk.sk_exp
 
-val leak_skey: sk:dh_skey{dishonest sk.pk.pk_share} -> Tot (raw:dh_exponent{raw=sk.rawsk})
+
+val leak_skey: sk:dh_skey{dishonest (DH_id sk.pk.pk_share)} -> Tot (raw:dh_exponent{raw=sk.sk_exp})
 let leak_skey sk = 
-  sk.rawsk
+  sk.sk_exp
 
-val keygen: unit -> ST (dh_pair:(pk:dh_pkey) * (sk:dh_skey{sk.pk = pk}))
+
+val keygen: unit -> ST (dh_pair:(dh_pkey * dh_skey){fst dh_pair == (snd dh_pair).pk})
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 -> h0==h1))
 let keygen () =
+  let h0 = ST.get() in
   let dh_exponent = random_bytes (UInt32.uint_to_t 32) in
+  let h1 = ST.get() in
+  assert(modifies Set.empty h0 h1);
   let dh_pk = DH_pkey (share_from_exponent dh_exponent) in
   let dh_sk = DH_skey dh_exponent dh_pk in
   dh_pk,dh_sk
 
-val coerce_pkey: dh_sh:dh_share{dishonest dh_sh} -> Tot (pk:dh_pkey{pk.pk_share=dh_sh})
+
+val coerce_pkey: dh_sh:dh_share{dishonest (DH_id dh_sh)} -> Tot (pk:dh_pkey{pk.pk_share=dh_sh})
 let coerce_pkey dh_sh =
   DH_pkey dh_sh
 
@@ -120,11 +126,11 @@ let coerce_pkey dh_sh =
    coerce_keypair allows the adversary to coerce a DH exponent into a DH private key. The corresponding DH public key
    is generated along with it. Both keys are considered dishonest and the id is considered unfresh after coercion.
 *)
-val coerce_keypair: dh_exp:dh_exponent{dishonest (share_from_exponent dh_exp)} -> Tot (dh_pair:(k:dh_pkey{k.pk_share = share_from_exponent dh_exp}) * (k:dh_skey{k.sk_exponent=dh_exp}))
+val coerce_keypair: dh_exp:dh_exponent{dishonest (DH_id (share_from_exponent dh_exp))} -> Tot (dh_pair:(k:dh_pkey{k.pk_share = share_from_exponent dh_exp}) * (k:dh_skey{k.sk_exp=dh_exp}))
 let coerce_keypair dh_ex =
   let dh_sh = share_from_exponent dh_ex in
-  let pk = DH_pkey #i dh_sh in
-  let sk = DH_skey #i dh_ex pk in
+  let pk = DH_pkey dh_sh in
+  let sk = DH_skey dh_ex pk in
   pk,sk
 
 (**
@@ -132,10 +138,8 @@ let coerce_keypair dh_ex =
 *)
 val prf_odhGT: dh_skey -> dh_pkey -> GTot aes_key
 let prf_odhGT dh_sk dh_pk =
-  let pk_id = dh_pk.pk_id in
-  let sk_id = dh_sk.sk_id in
-  let i = generate_ae_id pk_id sk_id in
-  let raw_k = Curve.scalarmult dh_sk.rawsk dh_pk.rawpk in
+  let i = generate_ae_id (DH_id dh_pk.pk_share) (DH_id dh_sk.pk.pk_share) in
+  let raw_k = Curve.scalarmult dh_sk.sk_exp dh_pk.pk_share in
   let k = HSalsa.hsalsa20 raw_k zero_nonce in
   k
 
@@ -164,7 +168,6 @@ val handle_honest_i: i:id{AE_id? i /\ honest i} -> ST (k:Key.key)
     /\ MM.contains dh_key_log i k h1
   ))
 let handle_honest_i i = 
-  //lemma_honest_not_dishonest i;
   MR.m_recall dh_key_log;
   match MM.lookup dh_key_log i with
   | Some  k' ->
@@ -186,7 +189,7 @@ let handle_honest_i i =
 #set-options "--z3rlimit 100"
 val handle_dishonest_i: dh_sk:dh_skey 
 		      -> dh_pk:dh_pkey 
-		      -> i:id{i = generate_ae_id dh_sk.pk.pk_share dh_pk.pk_share}
+		      -> i:id{i = generate_ae_id (DH_id dh_sk.pk.pk_share) (DH_id dh_pk.pk_share)}
 		      -> ST (k:Key.key{Key.ae_key_get_index k = i})
   (requires (fun h0 -> registered i))
   (ensures (fun h0 k h1 -> 
@@ -200,7 +203,7 @@ val handle_dishonest_i: dh_sk:dh_skey
   ))
 let handle_dishonest_i dh_sk dh_pk i =
     lemma_dishonest_not_honest i;
-    let raw_k = Curve.scalarmult dh_sk.rawsk dh_pk.rawpk in
+    let raw_k = Curve.scalarmult dh_sk.sk_exp dh_pk.pk_share in
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
     let k=Key.coerce_key i hashed_raw_k in
     fresh_unfresh_contradiction i;
@@ -210,13 +213,13 @@ let handle_dishonest_i dh_sk dh_pk i =
 // This everifies now. Inlining handler functions for honest and dishonest case breaks things...
 val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
   ( requires (fun h0 -> 
-    let i = generate_ae_id pk.pk_id sk.sk_id in
+    let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
     ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==>  fresh i h0)
     /\ m_contains id_log h0
     /\ registered i
   ))
   ( ensures (fun h0 k h1 ->
-    let i = generate_ae_id pk.pk_id sk.sk_id in
+    let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
     let regions_modified_dishonest:Set.set (r:HH.rid) = (Set.singleton id_log_region) in
     let regions_modified_honest = Set.union regions_modified_dishonest (Set.singleton dh_key_log_region) in
     let k_log = Key.get_logGT k in
@@ -241,35 +244,17 @@ val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
   ))
 let prf_odh dh_sk dh_pk =
   let h0 = ST.get() in
-  let i = generate_ae_id dh_pk.pk_id dh_sk.sk_id in
+  let i = generate_ae_id (DH_id dh_pk.pk_share) (DH_id dh_sk.pk.pk_share) in
   let honest_i = is_honest i in
   MR.m_recall dh_key_log;
   MR.m_recall id_log;
   MR.m_recall id_honesty_log;
   if honest_i then (
-    // This branch checks out!
     lemma_honest_not_dishonest i;
     let k = handle_honest_i i in
     k
-//    MR.m_recall dh_key_log;
-//    match MM.lookup dh_key_log i with
-//    | Some  k' ->
-//	Key.recall_log k'; 
-//	fresh_unfresh_contradiction i;
-//        k'
-//    | None ->
-//        let k' = Key.keygen i in
-//        MM.extend dh_key_log i k';
-//	fresh_unfresh_contradiction i;
-//        k'
   ) else (
-    // Getting an "unknown assertion failed" error in this branch
     lemma_dishonest_not_honest i;
     let k = handle_dishonest_i dh_sk dh_pk i in
     k
-//    let raw_k = Curve.scalarmult dh_sk.rawsk dh_pk.rawpk in
-//    let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
-//    let k=Key.coerce_key i hashed_raw_k in
-//    fresh_unfresh_contradiction i;
-//    k
   )
