@@ -352,7 +352,7 @@ val update:
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
         /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
         let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-        let seq_wblock = as_seq h1 data in
+        let seq_wblock = as_seq h0 data in
         seq_hash_1 == Spec.update_compress seq_hash_0 seq_wblock)))
 
 let update state data =
@@ -404,7 +404,7 @@ val update_multi:
         (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-                  let seq_wblock = as_seq h1 data in
+                  let seq_wblock = as_seq h0 data in
                   seq_hash_1 == Spec.update_multi seq_hash_0 seq_wblock)))
 
 let rec update_multi state data n =
@@ -429,10 +429,16 @@ let rec update_multi state data n =
 val update_last:
   state :suint32_p{length state = v size_state} ->
   data  :suint8_p {length data <= v size_block} ->
-  len   :uint32_t {U32.v len = length data} ->
+  len   :uint32_t {v len = length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
-        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
+        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
+                  /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+                  let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+                  let seq_data = as_seq h0 data in
+                  let count = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.v pos_count_w + 1) in
+                  let prevlen = U32.(v (Seq.index count 0) * (v size_block)) in
+                  seq_hash_1 == Spec.update_last seq_hash_0 prevlen seq_data)))
 
 let update_last state data len =
 
@@ -494,7 +500,10 @@ val finish:
   hash  :suint8_p{length hash = v size_hash} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
-        (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1))
+        (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
+                  /\ (let seq_hash_w = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+                  let seq_hash = as_seq h1 hash in
+                  seq_hash = Spec.words_to_be (U32.v size_hash_w) seq_hash_w)))
 
 let finish state hash =
 
@@ -510,7 +519,10 @@ val hash:
   len  :uint32_t{v len = length input} ->
   Stack unit
         (requires (fun h0 -> live h0 hash /\ live h0 input))
-        (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1))
+        (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
+                  /\ ( let seq_input = as_seq h0 input in
+                  let seq_hash = as_seq h1 hash in
+                  seq_hash == Spec.hash seq_input)))
 
 let hash hash input len =
 
