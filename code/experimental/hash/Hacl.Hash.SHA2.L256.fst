@@ -447,50 +447,35 @@ let update_last state data len =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  (* Allocate memory for integer conversions *)
-  let len_64 = Buffer.create (uint8_to_sint8 0uy) 8ul in
-
   (* Alocate memory set to zeros for the last two blocks of data *)
   let blocks = Buffer.create (uint8_to_sint8 0uy) (2ul *^ size_block) in
-
-  (* Copy the data to the final construct *)
-  (* Leakage model : allowed because the length is public *)
-  Buffer.blit data 0ul blocks 0ul len;
-
-  (* Set the first byte of the padding *)
-  blocks.(len) <- (u8_to_s8 0x80uy);
 
   (* Compute the final length of the data *)
   let count = state.(pos_count_w) in
   let l_0 = S64.((s32_to_s64 count) *%^ (u32_to_s64 size_block)) in
   let l_1 = u32_to_s64 len in
   let t_0 = S64.((l_0 +^ l_1) *%^ (u32_to_s64 8ul)) in
+
+  (* Encode the total length at the end of the padding *)
+  let len_64 = Buffer.sub blocks (size_block +^ size_block -^ 8ul) 8ul in
   Hacl.Endianness.hstore64_be len_64 t_0;
 
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length are considered public here ! *)
-  if U32.(len <^ 55ul) then (
+  let (n,final_blocks) =
+    if U32.(len <^ 55ul) then (1ul, Buffer.sub blocks size_block size_block)
+    else (2ul, Buffer.sub blocks 0ul (2ul *^ size_block))
+  in
 
-    (* Encode the total length at the end of the padding *)
-    Buffer.blit len_64 0ul blocks (size_block -^ 8ul) 8ul;
+  (* Copy the data to the final construct *)
+  (* Leakage model : allowed because the length is public *)
+  Buffer.blit data 0ul final_blocks 0ul len;
 
-    (* Get the first block *)
-    let block_0 = Buffer.sub blocks 0ul size_block in
+  (* Set the first byte of the padding *)
+  final_blocks.(len) <- (u8_to_s8 0x80uy);
 
-    (* Process a single block *)
-    update state block_0)
-  else (
-
-    (* Encode the total length at the end of the padding *)
-    Buffer.blit len_64 0ul blocks (size_block +^ size_block -^ 8ul) 8ul;
-
-    (* Split the final data into two blocks *)
-    let block_0 = Buffer.sub blocks 0ul size_block in
-    let block_1 = Buffer.sub blocks size_block size_block in
-
-    (* Process two blocks *)
-    update state block_0;
-    update state block_1);
+  (* Call the update function on one or two blocks *)
+  update_multi state final_blocks n;
 
   (* Pop the memory frame *)
   (**) pop_frame()
