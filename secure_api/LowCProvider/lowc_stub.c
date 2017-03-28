@@ -18,9 +18,6 @@
 #include "tmp/Crypto_Indexing.h"
 #include "tmp/Crypto_Symmetric_Bytes.h"
 #include "tmp/Crypto_Symmetric_MAC.h"
-#include "tmp/Crypto_AEAD_Invariant.h"
-#include "tmp/Crypto_AEAD_Encrypt.h"
-#include "tmp/Crypto_AEAD_Decrypt.h"
 #include "tmp/Crypto_AEAD.h"
 
 typedef Crypto_AEAD_Invariant_aead_state_______ AEAD_ST;

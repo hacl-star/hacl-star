@@ -345,8 +345,8 @@ let frame_inv_prf_mac #i #rw aead_st k_0 x h0 h1 mac =
   if safeMac i then begin
     frame_refines_aead_entries_prf_mac aead_st k_0 x h0 h1 mac;
     frame_fresh_nonces_are_unused_prf_mac aead_st k_0 x h0 h1 mac
-  end
-  else if prf i then frame_prf_mac_inv_prf_mac aead_st k_0 x mac h0 h1
+  end;
+  if prf i then frame_prf_mac_inv_prf_mac aead_st k_0 x mac h0 h1
 
 private val prf_mac_find_unchanged (#i:id) (#rw:rw) (aead_st:aead_state i rw)
 			           (k_0:CMA.akey aead_st.prf.mac_rgn i)
