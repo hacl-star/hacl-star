@@ -164,17 +164,24 @@ int32_t perf_api() {
   return exit_success;
 }
 
-int32_t main()
+int32_t main(int argc, char *argv[])
 {
-  if (sodium_init() == -1) {
-    printf("libsodium not installed? sodium_init failed\n");
-    exit(EXIT_FAILURE);
+  if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
+    if (sodium_init() == -1) {
+      printf("libsodium not installed? sodium_init failed\n");
+      exit(EXIT_FAILURE);
+    }
+    int32_t res;
+    res = test_api();
+    if (res == exit_success) {
+      res = perf_api();
+    }
+    return res;
+  } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
+    return test_api();
+  } else {    
+    printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
+    return exit_failure;
   }
-  int32_t res;
-  res = test_api();
-  if (res == exit_success) {
-    res = perf_api();
-  }
-  return res;
 }
   

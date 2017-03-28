@@ -375,12 +375,19 @@ int32_t perf_curve() {
   return exit_success;
 }
 
-int32_t main()
+int32_t main(int argc, char *argv[])
 {
-  int32_t res = test_curve();
-  if (res == exit_success) {
-    res = perf_curve();
+  if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
+    int32_t res = test_curve();
+    if (res == exit_success) {
+      res = perf_curve();
+    }
+    return res;
+  } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
+    return test_curve();
+  } else {    
+    printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
+    return exit_failure;
   }
-  return res;
 }
   

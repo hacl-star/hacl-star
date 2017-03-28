@@ -201,13 +201,19 @@ int32_t perf_poly() {
 
   return exit_success;
 }
-
-int32_t main()
-{
-  int32_t res = test_poly();
-  if (res == exit_success) {
-    res = perf_poly();
-  }
-  return res;
-}
   
+int32_t main(int argc, char *argv[])
+{
+  if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
+    int32_t res = test_poly();
+    if (res == exit_success) {
+      res = perf_poly();
+    }
+    return res;
+  } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
+    return test_poly();
+  } else {    
+    printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
+    return exit_failure;
+  }
+}
