@@ -392,12 +392,18 @@ int32_t perf_chacha() {
   return exit_success;
 }
 
-int32_t main()
+int32_t main(int argc, char *argv[])
 {
-  int32_t res = test_chacha();
-  if (res == exit_success) {
-    res = perf_chacha();
+  if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
+    int32_t res = test_chacha();
+    if (res == exit_success) {
+      res = perf_chacha();
+    }
+    return res;
+    } else if (argc == 2 && strcmp(argv[1], "unit-test") == 0 ) {
+    return test_chacha();
+  } else {
+    printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
+    return exit_failure;
   }
-  return res;
 }
-  
