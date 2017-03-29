@@ -5,6 +5,7 @@ open FStar.Seq
 open FStar.UInt32
 
 open Spec.Loops
+open Spec.Lib
 
 
 module Word = FStar.UInt32
@@ -118,7 +119,7 @@ let h_0 : hash_w =
 
 
 let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
-  if t < size_block_w then index b t
+  if t < size_block_w then b.[t]
   else
     let t16 = ws b (t - 16) in
     let t15 = ws b (t - 15) in
@@ -134,35 +135,35 @@ let ws_compute (wsched:ws_w) (b:block_w) : Tot ws_w =
   let f : ws_w -> (t:counter{t < size_ws_w}) -> Tot ws_w =
     fun wsched t ->
       let ws_i = ws b t in
-      Seq.upd wsched t ws_i
+      wsched.[t] <- ws_i
   in
   Spec.Loops.repeat_range_spec 0 size_ws_w f wsched
 
 
 let shuffle_core (hash:hash_w) (wsched:ws_w) (t:counter{t < size_k_w}) : Tot hash_w =
-  let a = index hash 0 in
-  let b = index hash 1 in
-  let c = index hash 2 in
-  let d = index hash 3 in
-  let e = index hash 4 in
-  let f = index hash 5 in
-  let g = index hash 6 in
-  let h = index hash 7 in
+  let a = hash.[0] in
+  let b = hash.[1] in
+  let c = hash.[2] in
+  let d = hash.[3] in
+  let e = hash.[4] in
+  let f = hash.[5] in
+  let g = hash.[6] in
+  let h = hash.[7] in
 
   (**) assert_norm(List.Tot.length list_k = size_k_w);
   (**) cut(Seq.length wsched = size_k_w);
-  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index list_k t) +%^ (Seq.index wsched t) in
+  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index list_k t) +%^ wsched.[t] in
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
 
   (**) cut(7 < Seq.length hash);
-  let hash = upd hash 7 g in
-  let hash = upd hash 6 f in
-  let hash = upd hash 5 e in
-  let hash = upd hash 4 (d +%^ t1) in
-  let hash = upd hash 3 c in
-  let hash = upd hash 2 b in
-  let hash = upd hash 1 a in
-  let hash = upd hash 0 (t1 +%^ t2) in
+  let hash = hash.[7] <- g in
+  let hash = hash.[6] <- f in
+  let hash = hash.[5] <- e in
+  let hash = hash.[4] <- (d +%^ t1) in
+  let hash = hash.[3] <- c in
+  let hash = hash.[2] <- b in
+  let hash = hash.[1] <- a in
+  let hash = hash.[0] <- (t1 +%^ t2) in
   hash
 
 
