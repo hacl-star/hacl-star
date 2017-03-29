@@ -4,6 +4,9 @@ open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
 
+open Spec.Loops
+
+
 module Word = FStar.UInt32
 
 val pow2_values: x:nat -> Lemma
@@ -32,6 +35,7 @@ let size_block_w = 16
 let size_hash = 4 * size_hash_w
 let size_block = 4 * size_block_w
 let size_k_w = 64
+let size_ws_w = size_k_w
 let size_len_8 = 8
 let size_len_ul_8 = 8ul
 let max_input_len_8 = pow2 61
@@ -39,10 +43,10 @@ let max_input_len_8 = pow2 61
 type bytes = m:seq UInt8.t
 type word = Word.t
 type hash_w = m:seq word {length m = size_hash_w}
-type ws_w = m:seq word {length m = size_k_w}
+type ws_w = m:seq word {length m = size_ws_w}
 type block_w = m:seq word {length m = size_block_w}
 type blocks_w = m:seq block_w
-type counter = UInt.uint_t 32
+type counter = nat
 
 (* Define word based operators *)
 let words_to_be = Spec.Lib.uint32s_to_be
@@ -126,12 +130,13 @@ let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
     (s1 +%^ (t7 +%^ (s0 +%^ t16)))
 
 
-let rec ws_compute (wsched:ws_w) (b:block_w) (t:counter{t <= size_k_w}) : Tot ws_w (decreases (size_k_w - t)) =
-  if t < size_k_w then
-    let ws_i = ws b t in
-    let ws_n = Seq.upd wsched t ws_i in
-    ws_compute ws_n b (t + 1)
-  else wsched
+let ws_compute (wsched:ws_w) (b:block_w) : Tot ws_w =
+  let f : ws_w -> (t:counter{t < size_ws_w}) -> Tot ws_w =
+    fun wsched t ->
+      let ws_i = ws b t in
+      Seq.upd wsched t ws_i
+  in
+  Spec.Loops.repeat_range_spec 0 size_ws_w f wsched
 
 
 let shuffle_core (hash:hash_w) (wsched:ws_w) (t:counter{t < size_k_w}) : Tot hash_w =
@@ -161,18 +166,16 @@ let shuffle_core (hash:hash_w) (wsched:ws_w) (t:counter{t < size_k_w}) : Tot has
   hash
 
 
-let rec shuffle (hash:hash_w) (wsched:ws_w) (t:counter{t <= size_k_w}) : Tot hash_w (decreases (size_k_w - t)) =
-  if t < size_k_w then
-    let hash = shuffle_core hash wsched t in
-    shuffle hash wsched (t + 1)
-  else hash
+let shuffle (hash:hash_w) (wsched:ws_w) : Tot hash_w =
+  let f : hash_w -> (t:counter{t < size_ws_w}) -> Tot hash_w = fun hash t -> shuffle_core hash wsched t in
+  Spec.Loops.repeat_range_spec 0 size_ws_w f hash
 
 
 let update_compress (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
   let b = words_from_be size_block_w block in
   let ws_l = Seq.create size_k_w 0ul in
-  let ws_l = ws_compute ws_l b 0 in
-  let hash_1 = shuffle hash ws_l 0 in
+  let ws_l = ws_compute ws_l b in
+  let hash_1 = shuffle hash ws_l in
   Spec.Lib.map2 (fun x y -> x +%^ y) hash hash_1
 
 
