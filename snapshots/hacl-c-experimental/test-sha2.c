@@ -1,8 +1,10 @@
 #include "kremlib.h"
 #include "testlib.h"
-#include "sodium.h"
+#include <fcntl.h>
+#include <sys/stat.h>
 #include "openssl/evp.h"
-#include "SHA2.h"
+#include "SHA2_256.h"
+
 
 void ossl_sha256(unsigned char* hash, const unsigned char *message, size_t message_len)
 {
@@ -50,8 +52,8 @@ void test_1a()
       (uint8_t )0xB4, (uint8_t )0x10, (uint8_t )0xFF, (uint8_t )0x61, (uint8_t )0xF2, (uint8_t )0x00,
       (uint8_t )0x15, (uint8_t )0xAD
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_init_256(ctx);
   sha2_update_last_256(ctx, plaintext, plaintext_len);
   sha2_finish_256(ctx, output);
@@ -75,8 +77,8 @@ void test_1b()
       (uint8_t )0xb4, (uint8_t )0x10, (uint8_t )0xff, (uint8_t )0x61, (uint8_t )0xf2, (uint8_t )0x00,
       (uint8_t )0x15, (uint8_t )0xad
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_256(output, plaintext, plaintext_len);
   TestLib_compare_and_print("Test 1b", expected, output, (uint32_t )32);
 }
@@ -98,8 +100,8 @@ void test_2a()
       (uint8_t )0xa4, (uint8_t )0x95, (uint8_t )0x99, (uint8_t )0x1b, (uint8_t )0x78, (uint8_t )0x52,
       (uint8_t )0xb8, (uint8_t )0x55
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_init_256(ctx);
   sha2_update_last_256(ctx, plaintext, plaintext_len);
   sha2_finish_256(ctx, output);
@@ -123,8 +125,8 @@ void test_2b()
       (uint8_t )0xa4, (uint8_t )0x95, (uint8_t )0x99, (uint8_t )0x1b, (uint8_t )0x78, (uint8_t )0x52,
       (uint8_t )0xb8, (uint8_t )0x55
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_256(output, plaintext, plaintext_len);
   TestLib_compare_and_print("Test 2b", expected, output, (uint32_t )32);
 }
@@ -159,8 +161,8 @@ void test_3a()
       (uint8_t )0xf6, (uint8_t )0xec, (uint8_t )0xed, (uint8_t )0xd4, (uint8_t )0x19, (uint8_t )0xdb,
       (uint8_t )0x06, (uint8_t )0xc1
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_init_256(ctx);
   sha2_update_last_256(ctx, plaintext, plaintext_len);
   sha2_finish_256(ctx, output);
@@ -197,8 +199,8 @@ void test_3b()
       (uint8_t )0xf6, (uint8_t )0xec, (uint8_t )0xed, (uint8_t )0xd4, (uint8_t )0x19, (uint8_t )0xdb,
       (uint8_t )0x06, (uint8_t )0xc1
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_256(output, plaintext, plaintext_len);
   TestLib_compare_and_print("Test 3b", expected, output, (uint32_t )32);
 }
@@ -242,8 +244,8 @@ void test_4a()
       (uint8_t )0xaf, (uint8_t )0xac, (uint8_t )0x45, (uint8_t )0x03, (uint8_t )0x7a, (uint8_t )0xfe,
       (uint8_t )0xe9, (uint8_t )0xd1
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_init_256(ctx);
   sha2_update_last_256(ctx, plaintext, plaintext_len);
   sha2_finish_256(ctx, output);
@@ -289,8 +291,8 @@ void test_4b()
       (uint8_t )0xaf, (uint8_t )0xac, (uint8_t )0x45, (uint8_t )0x03, (uint8_t )0x7a, (uint8_t )0xfe,
       (uint8_t )0xe9, (uint8_t )0xd1
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_256(output, plaintext, plaintext_len);
   TestLib_compare_and_print("Test 4b", expected, output, (uint32_t )32);
 }
@@ -314,8 +316,8 @@ void test_5()
       (uint8_t )0x04, (uint8_t )0x6d, (uint8_t )0x39, (uint8_t )0xcc, (uint8_t )0xc7, (uint8_t )0x11,
       (uint8_t )0x2c, (uint8_t )0xd0
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_256(output, plaintext, plaintext_len);
   TestLib_compare_and_print("Test 5", expected, output, (uint32_t )32);
 }
@@ -363,8 +365,8 @@ void test_6()
       (uint8_t )0x2a, (uint8_t )0xe4, (uint8_t )0x35, (uint8_t )0x26, (uint8_t )0x6f, (uint8_t )0xcd,
       (uint8_t )0x05, (uint8_t )0x5e
     };
-  uint32_t ctx[size_state_256];
-  memset(ctx, 0, size_state_256 * sizeof ctx[0]);
+  uint32_t ctx[hash_size_state_256];
+  memset(ctx, 0, hash_size_state_256 * sizeof ctx[0]);
   sha2_init_256(ctx);
   test_6_loop(plaintext, ctx, (uint32_t )16777215, (uint32_t )0);
   sha2_update_last_256(ctx, plaintext, plaintext_len);
@@ -387,7 +389,7 @@ int32_t perf_sha() {
   }
 
   uint8_t hash[32];
-  cycles a,b;
+  TestLib_cycles a,b;
   clock_t t1,t2;
 
   t1 = clock();
