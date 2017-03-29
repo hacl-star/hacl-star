@@ -24,7 +24,7 @@ module HSalsa = Spec.HSalsa20
 module Curve = Spec.Curve25519
 module Key = Box.AE.Key
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 100 --lax"
 let dh_element_size = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
 let dh_exponent_size = 32 // Size of scalar in Curve25519. Replace with constant in spec?
 type dh_share = Curve.serialized_point //
@@ -50,7 +50,7 @@ type aes_key = Key.aes_key
 assume val dh_key_log_region: (r:HH.rid{ extends r root 
 					 /\ is_eternal_region r 
 					 /\ is_below r root 
-					 /\ disjoint r Key.ae_key_region
+					 /\ disjoint r Key.ae_log_region
 					 /\ disjoint r id_log_region
 					 /\ disjoint r id_honesty_log_region
 					 })
@@ -107,12 +107,11 @@ let leak_skey sk =
 
 val keygen: unit -> ST (dh_pair:(dh_pkey * dh_skey){fst dh_pair == (snd dh_pair).pk})
   (requires (fun h0 -> True))
-  (ensures (fun h0 _ h1 -> h0==h1))
+  (ensures (fun h0 _ h1 -> modifies Set.empty h0 h1))
 let keygen () =
   let h0 = ST.get() in
   let dh_exponent = random_bytes (UInt32.uint_to_t 32) in
   let h1 = ST.get() in
-  assert(modifies Set.empty h0 h1);
   let dh_pk = DH_pkey (share_from_exponent dh_exponent) in
   let dh_sk = DH_skey dh_exponent dh_pk in
   dh_pk,dh_sk
@@ -144,34 +143,26 @@ let prf_odhGT dh_sk dh_pk =
   k
 
 
-#reset-options
-#set-options "--z3rlimit 100"
 val handle_honest_i: i:id{AE_id? i /\ honest i} -> ST (k:Key.key)
   (requires (fun h0 -> 
     ((AE_id? i /\ honest i) ==> (MM.defined dh_key_log i h0 \/ fresh i h0))
   ))
   (ensures (fun h0 k h1 ->
     let regions_modified_honest = Set.union (Set.singleton id_log_region) (Set.singleton dh_key_log_region) in
-    let k_log = Key.get_logGT k in
     let current_log = MR.m_sel h0 dh_key_log in
     i = Key.ae_key_get_index k
-    /\ MR.m_contains k_log h1
-    /\ (fresh i h0 ==> (MR.m_sel h1 (Key.get_logGT k) == Key.empty_log i))
     /\ MR.witnessed (MM.contains dh_key_log i k)
     /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
-    			          /\ MR.m_sel h1 k_log == Key.empty_log i     // and the log of the key will be empty.
     				  /\ makes_unfresh_just i h0 h1
-				  /\ HS.modifies regions_modified_honest h0 h1))
+    				  /\ HS.modifies regions_modified_honest h0 h1))
     /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
-    			            /\ MR.m_sel h0 k_log == MR.m_sel h1 k_log
-				    /\ h0 == h1))       // and the log of the key will be the same as before.
+    				    /\ h0 == h1))       // and the log of the key will be the same as before.
     /\ MM.contains dh_key_log i k h1
   ))
 let handle_honest_i i = 
   MR.m_recall dh_key_log;
   match MM.lookup dh_key_log i with
   | Some  k' ->
-    Key.recall_log k'; 
     MR.m_recall id_log;
     fresh_unfresh_contradiction i;
     k'
@@ -181,36 +172,41 @@ let handle_honest_i i =
     MR.m_recall dh_key_log;
     MR.m_recall id_log;
     MM.extend dh_key_log i k';
-    Key.recall_log k';
     fresh_unfresh_contradiction i;
     k'
 
+
 #reset-options
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 50 --max_ifuel 10 --max_fuel 10"
 val handle_dishonest_i: dh_sk:dh_skey 
 		      -> dh_pk:dh_pkey 
 		      -> i:id{i = generate_ae_id (DH_id dh_sk.pk.pk_share) (DH_id dh_pk.pk_share)}
 		      -> ST (k:Key.key{Key.ae_key_get_index k = i})
-  (requires (fun h0 -> registered i))
+  (requires (fun h0 -> 
+    registered i
+    /\ dishonest i
+  ))
   (ensures (fun h0 k h1 -> 
     let regions_modified_dishonest:Set.set (r:HH.rid) = (Set.singleton id_log_region) in
-    let k_log = Key.get_logGT k in
     HS.modifies regions_modified_dishonest h0 h1
+    /\ Key.ae_key_get_index k = i
+    /\ dishonest i
     /\ Key.leak_key k = prf_odhGT dh_sk dh_pk
-    /\ MR.m_contains k_log h1
     /\ makes_unfresh_just i h0 h1
-    /\ MR.m_sel h1 (Key.get_logGT k) == Key.empty_log i
   ))
 let handle_dishonest_i dh_sk dh_pk i =
+    MR.m_recall id_log;
+    MR.m_recall id_honesty_log;
+    let h0 = ST.get() in
     lemma_dishonest_not_honest i;
     let raw_k = Curve.scalarmult dh_sk.sk_exp dh_pk.pk_share in
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
     let k=Key.coerce_key i hashed_raw_k in
     fresh_unfresh_contradiction i;
+    let h1 = ST.get() in
     k
 
 
-// This everifies now. Inlining handler functions for honest and dishonest case breaks things...
 val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
   ( requires (fun h0 -> 
     let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
@@ -222,19 +218,14 @@ val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
     let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
     let regions_modified_dishonest:Set.set (r:HH.rid) = (Set.singleton id_log_region) in
     let regions_modified_honest = Set.union regions_modified_dishonest (Set.singleton dh_key_log_region) in
-    let k_log = Key.get_logGT k in
     (i = Key.ae_key_get_index k)
-    /\ MR.m_contains k_log h1
-    /\ (fresh i h0 ==> (MR.m_sel h1 (Key.get_logGT k) == Key.empty_log i))
     /\ (honest i ==> (let current_log = MR.m_sel h0 dh_key_log in
     		   MR.witnessed (MM.contains dh_key_log i k)
 		   /\ MM.contains dh_key_log i k h1
     		   /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
-    						  /\ MR.m_sel h1 k_log == Key.empty_log i // and the log of the key will be empty.
 						  /\ makes_unfresh_just i h0 h1
     						  /\ modifies regions_modified_honest h0 h1))
     		   /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
-    						    /\ MR.m_sel h0 k_log == MR.m_sel h1 k_log
 						    /\ h0==h1))       // and the log of the key will be the same as before.
       ))
     /\ (dishonest i
@@ -252,9 +243,14 @@ let prf_odh dh_sk dh_pk =
   if honest_i then (
     lemma_honest_not_dishonest i;
     let k = handle_honest_i i in
+    admit();
     k
   ) else (
     lemma_dishonest_not_honest i;
+    assert(dishonest i /\ registered i);
+    assert(i = generate_ae_id (DH_id dh_pk.pk_share) (DH_id dh_sk.pk.pk_share));
+    admit();
     let k = handle_dishonest_i dh_sk dh_pk i in
+    admit();
     k
   )

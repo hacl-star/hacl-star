@@ -1,6 +1,7 @@
 module Box.Indexing
 
 open FStar.Set
+open FStar.Seq
 open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.Endianness
@@ -16,9 +17,22 @@ let lbytes (l:nat) = b:Seq.seq UInt8.t {Seq.length b = l}
 type dh_id = Curve.serialized_point // same as dh_share
 abstract type ae_id = (i:(dh_id*dh_id){little_endian (fst i) <= little_endian (snd i)})
 
+
+#set-options "--z3rlimit 100 --max_ifuel 10 --max_fuel 10"
+val smaller_equal: i1:dh_id -> i2:dh_id{length i1 = length i2} -> Tot bool
+let rec smaller_equal i1 i2 =
+  let id1 = little_endian i1 in
+  let id2 = little_endian i2 in
+  id1 <= id2
+  
+
 type id =
   | DH_id of dh_id
   | AE_id of ae_id
+
+assume Index_hasEq: hasEq id
+assume DH_Index_hasEq: hasEq dh_id
+assume AE_Index_hasEq: hasEq ae_id
 
 val generate_ae_id: i1:id{DH_id? i1} -> i2:id{DH_id? i2} -> Tot (i3:id{AE_id? i3})
 let generate_ae_id i1 i2 =
@@ -29,16 +43,13 @@ let generate_ae_id i1 i2 =
   else
     AE_id (i2',i1')
 
-#set-options "--z3rlimit 100"
 //TODO: Fix this!
-//val symmetric_id_generation: i1:id{AE_id? i1} -> i2:id{AE_id? i2} -> Lemma
-//  (requires (True))
-//  (ensures (forall id1 id2. generate_ae_id id1 id2 = generate_ae_id id2 id1))
-//  [SMTPat (generate_ae_id i1 i2)]
-//let symmetric_id_generation i1 i2 = ()
+val symmetric_id_generation: i1:id{AE_id? i1} -> i2:id{AE_id? i2} -> Lemma
+  (requires (True))
+  (ensures (forall id1 id2. generate_ae_id id1 id2 = generate_ae_id id2 id1))
+  [SMTPat (generate_ae_id i1 i2)]
+let symmetric_id_generation i1 i2 = ()
 
-assume Index_hasEq: hasEq id
-assume AE_Index_hasEq: hasEq ae_id
 
 type id_log_key = id
 type id_log_value = unit
@@ -55,7 +66,7 @@ type id_honesty_log_value = b:bool{~prf_odh ==> b=false}
 type id_honesty_log_range = fun id_honesty_log_key -> id_honesty_log_value
 let id_honesty_log_inv (m:MM.map' id_honesty_log_key id_honesty_log_range) = True
        
-assume val id_honesty_log_region: (r:MR.rid{ extends r root /\ is_eternal_region r /\ is_below r root /\ disjoint r id_log_region})
+assume val id_honesty_log_region: (r:MR.rid{ extends r root /\ is_eternal_region r /\ is_below r root})
 
 assume val id_honesty_log: MM.t id_honesty_log_region id_honesty_log_key id_honesty_log_range id_honesty_log_inv
 
