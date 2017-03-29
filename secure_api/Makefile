@@ -163,7 +163,7 @@ all: all-ver $(addsuffix .fst-lax, $(LAX))
 
 extra: all-ver $(addsuffix .fst-ver, $(EXTRA))
 
-all-ver: $(addsuffix .fst-ver, $(VERIFY))
+all-ver: $(addsuffix .fst-ver, $(filter-out $(LAX), $(VERIFY)))
 
 all-hints: $(addsuffix .fst-hints, $(VERIFY))
 
