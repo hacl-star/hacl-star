@@ -6,6 +6,8 @@ open FStar.HyperStack
 open FStar.ST
 open FStar.Buffer
 
+open C.Loops
+
 open Hacl.Cast
 open Hacl.UInt8
 open Hacl.UInt32
@@ -23,6 +25,7 @@ module S8 = Hacl.UInt8
 module S32 = Hacl.UInt32
 module S64 = Hacl.UInt64
 
+module HS = FStar.HyperStack
 module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
@@ -210,7 +213,7 @@ val ws_compute:
                   /\ (let seq_ws_0 = as_seq h0 ws_w in
                   let seq_ws_1 = as_seq h1 ws_w in
                   let seq_block_w = as_seq h1 block_w in
-                  seq_ws_1 == Spec.ws_compute seq_ws_0 seq_block_w (U32.v t))))
+                  seq_ws_1 == Spec.ws_compute seq_ws_0 seq_block_w)))
 
 [@"c_inline"]
 let rec ws_compute ws_w block_w t =
@@ -273,21 +276,42 @@ private val shuffle:
   hash_w :suint32_p {length hash_w = v size_hash_w} ->
   ws_w   :suint32_p {length ws_w = v size_ws_w} ->
   k_w    :suint32_p {length k_w = v size_k_w} ->
-  t      :uint32_t {v t < v size_k_w} ->
   Stack unit
         (requires (fun h -> live h hash_w /\ live h ws_w /\ live h k_w))
         (ensures  (fun h0 r h1 -> live h1 hash_w /\ live h1 ws_w /\ live h1 k_w /\ modifies_1 hash_w h0 h1
                   /\ (let seq_hash_0 = as_seq h0 hash_w in
                   let seq_hash_1 = as_seq h1 hash_w in
                   let seq_ws = as_seq h1 ws_w in
-                  seq_hash_1 == Spec.shuffle seq_hash_0 seq_ws (U32.v t))))
+                  seq_hash_1 == Spec.shuffle seq_hash_0 seq_ws)))
 
 [@"c_inline"]
-let rec shuffle hash ws k t =
-  if t <^ 64ul then begin
+let shuffle hash ws k =
+  let h0 = ST.get() in
+  let inv (h1: HS.mem) (i: nat) : Type0 =
+    live h1 hash /\ modifies_1 hash h0 h1 /\ i <= v size_ws_w
+    /\ (let seq_ws = as_seq h0 ws in
+    let f : Spec.hash_w -> (t:Spec.counter{t < Spec.size_ws_w}) -> Tot Spec.hash_w =
+    fun seq_hash t -> Spec.shuffle_core seq_hash seq_ws t in
+    as_seq h1 hash == repeat_range_spec 0 i f (as_seq h0 hash))
+  in
+
+  let f' (t:uint32_t {v t < v size_ws_w}) :
+    Stack unit
+      (requires (fun h -> inv h (UInt32.v t)))
+      (ensures (fun h_1 _ h_2 -> inv h_2 (UInt32.v t + 1)))
+    =
     shuffle_core hash ws k t;
-    shuffle hash ws k (t +^ 1ul) end
-  else ()
+    lemma_repeat_range_spec 0 (UInt32.v t + 1) (
+      let seq_ws = as_seq h0 ws in
+      let f : Spec.hash_w -> (t:Spec.counter{t < Spec.size_ws_w}) -> Tot Spec.hash_w =
+    fun seq_hash t -> Spec.shuffle_core seq_hash seq_ws t in f) (as_seq h0 hash)
+  in
+  lemma_repeat_range_0 0 0 (
+      let seq_ws = as_seq h0 ws in
+      let f : Spec.hash_w -> (t:Spec.counter{t < Spec.size_ws_w}) -> Tot Spec.hash_w =
+    fun seq_hash t -> Spec.shuffle_core seq_hash seq_ws t in f)
+  (as_seq h0 hash);
+  for 0ul size_ws_w inv f'
 
 
 [@"substitute"]
@@ -379,7 +403,7 @@ let update state data =
   (* Step 2 : Initialize the eight working variables *)
   (* Step 3 : Perform logical operations on the working variables *)
   (* Step 4 : Compute the ith intermediate hash value *)
-  shuffle hash_0 ws_w k_w 0ul;
+  shuffle hash_0 ws_w k_w;
 
   (* Retrieve the current working hash *)
   let hash_1 = Buffer.sub state pos_whash_w size_whash_w in
