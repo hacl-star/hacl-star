@@ -18,7 +18,7 @@ LDFLAGS=-lcrypto
 # ODR.
 
 ifeq ($(OS),Windows_NT)
-CC?=x86_64-w64-mingw32-gcc
+CC=x86_64-w64-mingw32-gcc
 SO=dll
 PWD=$(shell cygpath -m $$(pwd))
 BCRYPTDLL=BCryptEngine.dll
