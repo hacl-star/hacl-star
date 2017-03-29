@@ -1,6 +1,7 @@
 FSTAR_HOME   ?= ../../dependencies/FStar
 KREMLIN_HOME ?= ../../dependencies/kremlin
 OPENSSL_HOME ?= ../../dependencies/openssl
+LIBSODIUM_HOME ?= ../../dependencies/libsodium
 
 
 CC=gcc-6 -flto
@@ -21,7 +22,7 @@ test-random:
 
 test-sha2:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	-I $(OPENSSL_HOME)/include -I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c SHA2_256.c test-sha2.c -o test-sha2.exe $(OPENSSL_HOME)/libcrypto.a
+	-I $(OPENSSL_HOME)/include -I $(LIBSODIUM)/local/include -I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c SHA2_256.c test-sha2.c -o test-sha2.exe $(OPENSSL_HOME)/libcrypto.a $(LIBSODIUM_HOME)/local/lib/libsodium.a
 	./test-sha2.exe
 
 clean:

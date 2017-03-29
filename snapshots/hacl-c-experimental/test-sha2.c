@@ -1,5 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
+#include "sodium.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "openssl/evp.h"
@@ -392,6 +393,7 @@ int32_t perf_sha() {
   TestLib_cycles a,b;
   clock_t t1,t2;
 
+  // HaCl
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
@@ -406,20 +408,21 @@ int32_t perf_sha() {
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %llx\n", res);
 
-  /*
+  // Libsodium
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    crypto_stream_chacha20_ietf_xor(plain,plain, len, nonce, key);
+    crypto_hash_sha256(hash, plain, len);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
-  print_results("Sodium ChaCha20 speed", (double)t2-t1,
+  print_results("Sodium SHA256 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %llx\n", res);
-  */
+
+  // OpenSSL
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
