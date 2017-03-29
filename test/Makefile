@@ -13,7 +13,7 @@ all:
 	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
 	$(MAKE) ct
 	$(MAKE) verify
-	#$(MAKE) -C openssl-engine
+	$(MAKE) -C openssl-engine
 
 travis:
 	$(MAKE) extract-c
