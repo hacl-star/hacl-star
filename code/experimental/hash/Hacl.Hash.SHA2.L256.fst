@@ -199,14 +199,14 @@ private let constants_set_h_0 state =
   Seq.lemma_eq_intro (Hacl.Spec.Endianness.reveal_h32s (as_seq h hash)) (Seq.createL Spec.list_h_0)
 
 
+
 (* [FIPS 180-4] section 6.2.2 *)
 (* Step 1 : Scheduling function for sixty-four 32bit words *)
-[@"c_inline"]
+[@"substitute"]
 inline_for_extraction
-val ws_compute:
+val ws_compute_part_1:
   ws_w    :suint32_p {length ws_w = v size_ws_w} ->
   block_w :suint32_p {length block_w = v size_block_w} ->
-  t       :uint32_t  {v t + 64 < pow2 32} ->
   Stack unit
         (requires (fun h -> live h ws_w /\ live h block_w))
         (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1
@@ -215,19 +215,126 @@ val ws_compute:
                   let seq_block_w = as_seq h1 block_w in
                   seq_ws_1 == Spec.ws_compute seq_ws_0 seq_block_w)))
 
-[@"c_inline"]
-let rec ws_compute ws_w block_w t =
-  if t <^ 16ul then begin
+[@"substitute"]
+let ws_compute_part_1 ws_w block_w =
+  let h0 = ST.get() in
+  let inv (h1: HS.mem) (i: nat) : Type0 =
+    live h1 ws_w /\ modifies_1 ws_w h0 h1 /\ i <= 16
+    /\ (let seq_ws = as_seq h0 ws_w in
+    let seq_block = as_seq h0 block_w in
+    let f : Spec.ws_w -> (t:Spec.counter{t < 16}) -> Tot Spec.ws_w =
+    fun seq_ws t -> Seq.upd seq_ws t (Seq.index seq_block t) in
+    as_seq h1 ws_w == repeat_range_spec 0 i f (as_seq h0 ws_w))
+  in
+
+  let f' (t:uint32_t {v t < v size_ws_w}) :
+    Stack unit
+      (requires (fun h -> inv h (UInt32.v t)))
+      (ensures (fun h_1 _ h_2 -> inv h_2 (UInt32.v t + 1)))
+    =
     ws_w.(t) <- block_w.(t);
-    ws_compute ws_w block_w (t +^ 1ul) end
-  else if t <^ 64ul then begin
+    lemma_repeat_range_spec 0 (UInt32.v t + 1) (
+    let seq_ws = as_seq h0 ws_w in
+    let seq_block = as_seq h0 block_w in
+    let f : Spec.ws_w -> (t:Spec.counter{t < 16}) -> Tot Spec.ws_w =
+    fun seq_ws t -> Seq.upd seq_ws t (Seq.index seq_block t) in f) (as_seq h0 ws_w)
+  in
+  lemma_repeat_range_0 0 0 (
+    let seq_ws = as_seq h0 ws_w in
+    let seq_block = as_seq h0 block_w in
+    let f : Spec.ws_w -> (t:Spec.counter{t < 16}) -> Tot Spec.ws_w =
+    fun seq_ws t -> Seq.upd seq_ws t (Seq.index seq_block t) in f)
+  (as_seq h0 ws_w);
+  for 0ul 16ul inv f'
+
+
+[@"substitute"]
+inline_for_extraction
+val ws_compute_part_2:
+  ws_w    :suint32_p {length ws_w = v size_ws_w} ->
+  block_w :suint32_p {length block_w = v size_block_w} ->
+  Stack unit
+        (requires (fun h -> live h ws_w /\ live h block_w))
+        (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1
+                  /\ (let seq_ws_0 = as_seq h0 ws_w in
+                  let seq_ws_1 = as_seq h1 ws_w in
+                  let seq_block_w = as_seq h1 block_w in
+                  seq_ws_1 == Spec.ws_compute seq_ws_0 seq_block_w)))
+
+[@"substitute"]
+let ws_compute_part_2 ws_w block_w =
+  let h0 = ST.get() in
+  let inv (h1: HS.mem) (i: nat) : Type0 =
+    live h1 ws_w /\ modifies_1 ws_w h0 h1 /\ i <= 64
+    /\ (let seq_ws = as_seq h0 ws_w in
+    let seq_block = as_seq h0 block_w in
+    let f : Spec.ws_w -> (t:Spec.counter{t < 64}) -> Tot Spec.ws_w =
+    fun seq_ws t ->
+      let t16 = Seq.index seq_ws (t - 16) in
+      let t15 = Seq.index seq_ws (t - 15) in
+      let t7  = Seq.index seq_ws (t - 7) in
+      let t2  = Seq.index seq_ws (t - 2) in
+      Seq.upd seq_ws t ((Spec._sigma1 t2) +%^ (t7 +%^ ((Spec._sigma0 t15) +%^ t16)))
+    in
+    as_seq h1 ws_w == repeat_range_spec 16 i f (as_seq h0 ws_w))
+  in
+
+  let f' (t:uint32_t {v t < v size_ws_w}) :
+    Stack unit
+      (requires (fun h -> inv h (UInt32.v t)))
+      (ensures (fun h_1 _ h_2 -> inv h_2 (UInt32.v t + 1)))
+    =
     let t16 = ws_w.(t -^ 16ul) in
     let t15 = ws_w.(t -^ 15ul) in
     let t7  = ws_w.(t -^ 7ul) in
     let t2  = ws_w.(t -^ 2ul) in
     ws_w.(t) <- ((_sigma1 t2) +%^ (t7 +%^ ((_sigma0 t15) +%^ t16)));
-    ws_compute ws_w block_w (t +^ 1ul) end
-  else ()
+    lemma_repeat_range_spec 0 (UInt32.v t + 1) (
+    let seq_ws = as_seq h0 ws_w in
+    let seq_block = as_seq h0 block_w in
+    let f : Spec.ws_w -> (t:Spec.counter{t < 64}) -> Tot Spec.ws_w =
+      fun seq_ws t ->
+        let t16 = Seq.index seq_ws (t - 16) in
+        let t15 = Seq.index seq_ws (t - 15) in
+        let t7  = Seq.index seq_ws (t - 7) in
+        let t2  = Seq.index seq_ws (t - 2) in
+        Seq.upd seq_ws t ((Spec._sigma1 t2) +%^ (t7 +%^ ((Spec._sigma0 t15) +%^ t16)))
+      in f) (as_seq h0 ws_w)
+  in
+  lemma_repeat_range_0 0 0 (
+    let seq_ws = as_seq h0 ws_w in
+    let seq_block = as_seq h0 block_w in
+    let f : Spec.ws_w -> (t:Spec.counter{t < 64}) -> Tot Spec.ws_w =
+    fun seq_ws t ->
+      let t16 = Seq.index seq_ws (t - 16) in
+      let t15 = Seq.index seq_ws (t - 15) in
+      let t7  = Seq.index seq_ws (t - 7) in
+      let t2  = Seq.index seq_ws (t - 2) in
+      Seq.upd seq_ws t ((Spec._sigma1 t2) +%^ (t7 +%^ ((Spec._sigma0 t15) +%^ t16))) in f)
+  (as_seq h0 ws_w);
+  for 16ul 64ul inv f'
+
+
+
+(* [FIPS 180-4] section 6.2.2 *)
+(* Step 1 : Scheduling function for sixty-four 32bit words *)
+[@"substitute"]
+inline_for_extraction
+val ws_compute:
+  ws_w    :suint32_p {length ws_w = v size_ws_w} ->
+  block_w :suint32_p {length block_w = v size_block_w} ->
+  Stack unit
+        (requires (fun h -> live h ws_w /\ live h block_w))
+        (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1
+                  /\ (let seq_ws_0 = as_seq h0 ws_w in
+                  let seq_ws_1 = as_seq h1 ws_w in
+                  let seq_block_w = as_seq h1 block_w in
+                  seq_ws_1 == Spec.ws_compute seq_ws_0 seq_block_w)))
+
+[@"substitute"]
+let ws_compute ws_w block_w =
+  ws_compute_part_1 ws_w block_w;
+  ws_compute_part_2 ws_w block_w
 
 
 [@"substitute"]
@@ -398,7 +505,7 @@ let update state data =
   Buffer.blit state pos_whash_w hash_0 0ul size_whash_w;
 
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
-  ws_compute ws_w data_w 0ul;
+  ws_compute ws_w data_w;
 
   (* Step 2 : Initialize the eight working variables *)
   (* Step 3 : Perform logical operations on the working variables *)
