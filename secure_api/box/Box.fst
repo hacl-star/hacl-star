@@ -144,7 +144,7 @@ val box_beforenm: pk:pkae_pkey ->
     // Id sanity
     (AE.get_index k = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)))
     // If honest, something is inserted into the log
-    /\ ((AE_id?i /\ honest i)
+    /\ ((AE_id? i /\ honest i)
       ==> (let current_log = MR.m_sel h0 box_key_log in
          (MM.fresh box_key_log i h0 ==> (MR.m_sel h1 box_key_log == MM.upd current_log i k
     					 /\ makes_unfresh_just i h0 h1))))
@@ -176,6 +176,11 @@ let box_beforenm pk sk =
   MR.m_recall box_key_log;
   let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
   let k = prf_odh sk pk in
+  MR.m_recall id_log;
+  MR.m_recall id_honesty_log;
+  MR.m_recall dh_key_log;
+  MR.m_recall box_log;
+  MR.m_recall box_key_log;
   (if is_honest i then
     match MM.lookup box_key_log i with
     | Some _ ->
@@ -191,7 +196,12 @@ let box_beforenm pk sk =
   let h = ST.get() in
   assert(
   MR.m_sel h box_key_log == MR.m_sel h dh_key_log
-  //MR.m_sel h box_log == MR.m_sel h ae_log
+  /\ MR.m_sel h box_log == MR.m_sel h ae_log
+  );
+  admit();
+  let h1 = ST.get() in
+  assert(let current_log = MR.m_sel h box_key_log in
+         (AE_id? i /\ honest i /\ MM.fresh box_key_log i h) ==> (MR.m_sel h1 box_key_log == MM.upd current_log i k)
   );
   admit();
   k

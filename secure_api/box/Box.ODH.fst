@@ -176,11 +176,9 @@ let handle_honest_i i =
     k'
 
 
-#reset-options
-#set-options "--z3rlimit 50 --max_ifuel 10 --max_fuel 10"
 val handle_dishonest_i: dh_sk:dh_skey 
 		      -> dh_pk:dh_pkey 
-		      -> i:id{i = generate_ae_id (DH_id dh_sk.pk.pk_share) (DH_id dh_pk.pk_share)}
+		      -> i:id{i = generate_ae_id (DH_id dh_pk.pk_share) (DH_id dh_sk.pk.pk_share)}
 		      -> ST (k:Key.key{Key.ae_key_get_index k = i})
   (requires (fun h0 -> 
     registered i
@@ -207,6 +205,8 @@ let handle_dishonest_i dh_sk dh_pk i =
     k
 
 
+#reset-options
+#set-options "--z3rlimit 50 --max_ifuel 10 --max_fuel 10"
 val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
   ( requires (fun h0 -> 
     let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
@@ -221,17 +221,17 @@ val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
     (i = Key.ae_key_get_index k)
     /\ (honest i ==> (let current_log = MR.m_sel h0 dh_key_log in
     		   MR.witnessed (MM.contains dh_key_log i k)
-		   /\ MM.contains dh_key_log i k h1
+    		   /\ MM.contains dh_key_log i k h1
     		   /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
-						  /\ makes_unfresh_just i h0 h1
+    						  /\ makes_unfresh_just i h0 h1
     						  /\ modifies regions_modified_honest h0 h1))
     		   /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
-						    /\ h0==h1))       // and the log of the key will be the same as before.
+    						    /\ h0==h1))       // and the log of the key will be the same as before.
       ))
     /\ (dishonest i
     	==> (modifies regions_modified_dishonest h0 h1
     	   /\ Key.leak_key k = prf_odhGT sk pk
-	   /\ makes_unfresh_just i h0 h1))
+    	   /\ makes_unfresh_just i h0 h1))
   ))
 let prf_odh dh_sk dh_pk =
   let h0 = ST.get() in
@@ -243,14 +243,10 @@ let prf_odh dh_sk dh_pk =
   if honest_i then (
     lemma_honest_not_dishonest i;
     let k = handle_honest_i i in
-    admit();
     k
   ) else (
     lemma_dishonest_not_honest i;
-    assert(dishonest i /\ registered i);
-    assert(i = generate_ae_id (DH_id dh_pk.pk_share) (DH_id dh_sk.pk.pk_share));
-    admit();
+    // TODO: Need to make sure that generation of ids is symmetric!
     let k = handle_dishonest_i dh_sk dh_pk i in
-    admit();
     k
   )
