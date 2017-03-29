@@ -60,26 +60,26 @@ let word_shift_right = Word.shift_right
 
 
 
-private let rotate_right (a:word) (s:word {v s<32}) : Tot word =
+let rotate_right (a:word) (s:word {v s<32}) : Tot word =
   ((a >>^ s) |^ (a <<^ (32ul -^ s)))
 
 (* [FIPS 180-4] section 4.1.2 *)
-private val _Ch: x:word -> y:word -> z:word -> Tot word
+val _Ch: x:word -> y:word -> z:word -> Tot word
 let _Ch x y z = word_logxor (word_logand x y) (word_logand (word_lognot x) z)
 
-private val _Maj: x:word -> y:word -> z:word -> Tot word
+val _Maj: x:word -> y:word -> z:word -> Tot word
 let _Maj x y z = word_logxor (word_logand x y) (word_logxor (word_logand x z) (word_logand y z))
 
-private val _Sigma0: x:word -> Tot word
+val _Sigma0: x:word -> Tot word
 let _Sigma0 x = word_logxor (rotate_right x 2ul) (word_logxor (rotate_right x 13ul) (rotate_right x 22ul))
 
-private val _Sigma1: x:word -> Tot word
+val _Sigma1: x:word -> Tot word
 let _Sigma1 x = word_logxor (rotate_right x 6ul) (word_logxor (rotate_right x 11ul) (rotate_right x 25ul))
 
-private val _sigma0: x:word -> Tot word
+val _sigma0: x:word -> Tot word
 let _sigma0 x = word_logxor (rotate_right x 7ul) (word_logxor (rotate_right x 18ul) (word_shift_right x 3ul))
 
-private val _sigma1: x:word -> Tot word
+val _sigma1: x:word -> Tot word
 let _sigma1 x = word_logxor (rotate_right x 17ul) (word_logxor (rotate_right x 19ul) (word_shift_right x 10ul))
 
 
