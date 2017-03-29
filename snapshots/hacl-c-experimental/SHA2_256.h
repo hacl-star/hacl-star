@@ -3,7 +3,7 @@
 #define __SHA2_256_H
 
 
-#include "Spec_Loops.h"
+
 #include "kremlib.h"
 #include "testlib.h"
 

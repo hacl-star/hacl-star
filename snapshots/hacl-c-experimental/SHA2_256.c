@@ -60,9 +60,9 @@ inline static void ws_compute(uint32_t *ws_w, uint32_t *block_w, uint32_t t)
     return;
 }
 
-inline static void shuffle(uint32_t *hash1, uint32_t *ws1, uint32_t *k1, uint32_t t)
+inline static void shuffle(uint32_t *hash1, uint32_t *ws1, uint32_t *k1)
 {
-  if (t < (uint32_t )64)
+  for (uint32_t i = (uint32_t )0; i < (uint32_t )64; i = i + (uint32_t )1)
   {
     uint32_t a = hash1[0];
     uint32_t b = hash1[1];
@@ -72,7 +72,7 @@ inline static void shuffle(uint32_t *hash1, uint32_t *ws1, uint32_t *k1, uint32_
     uint32_t f1 = hash1[5];
     uint32_t g = hash1[6];
     uint32_t h = hash1[7];
-    uint32_t uu____376 = k1[t];
+    uint32_t uu____376 = k1[i];
     uint32_t
     uu____375 =
       h
@@ -83,7 +83,7 @@ inline static void shuffle(uint32_t *hash1, uint32_t *ws1, uint32_t *k1, uint32_
           ^ (e >> (uint32_t )25 | e << (uint32_t )32 - (uint32_t )25))
       + (e & f1 ^ ~e & g)
       + uu____376;
-    uint32_t uu____377 = ws1[t];
+    uint32_t uu____377 = ws1[i];
     uint32_t t1 = uu____375 + uu____377;
     uint32_t
     t2 =
@@ -100,11 +100,7 @@ inline static void shuffle(uint32_t *hash1, uint32_t *ws1, uint32_t *k1, uint32_
     hash1[2] = b;
     hash1[1] = a;
     hash1[0] = t1 + t2;
-    shuffle(hash1, ws1, k1, t + (uint32_t )1);
-    return;
   }
-  else
-    return;
 }
 
 static void init(uint32_t *state)
@@ -197,7 +193,7 @@ static void update(uint32_t *state, uint8_t *data)
   load32s_be(data_w, data, (uint32_t )64);
   memcpy(hash_0, state + (uint32_t )128, (uint32_t )8 * sizeof state[0]);
   ws_compute(ws_w, data_w, (uint32_t )0);
-  shuffle(hash_0, ws_w, k_w, (uint32_t )0);
+  shuffle(hash_0, ws_w, k_w);
   uint32_t *hash_1 = state + (uint32_t )128;
   for (uint32_t i = (uint32_t )0; i < (uint32_t )8; i = i + (uint32_t )1)
   {
@@ -206,9 +202,9 @@ static void update(uint32_t *state, uint8_t *data)
     uint32_t uu____762 = uu____763 + uu____766;
     hash_1[i] = uu____762;
   }
-  uint32_t uu____619 = state[136];
-  uint32_t uu____618 = uu____619 + (uint32_t )1;
-  state[136] = uu____618;
+  uint32_t uu____707 = state[136];
+  uint32_t uu____706 = uu____707 + (uint32_t )1;
+  state[136] = uu____706;
 }
 
 static void update_multi(uint32_t *state, uint8_t *data, uint32_t n1)
@@ -241,7 +237,7 @@ static void update_last(uint32_t *state, uint8_t *data, uint32_t len)
     scrut = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )64 });
   else
   {
-    bool uu____761 = scrut0;
+    bool uu____849 = scrut0;
     scrut = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
   }
   uint32_t n1 = scrut.fst;
