@@ -163,7 +163,6 @@ private val _constants_set_h_0:
              U32.v (Seq.index s 5) = 0x9b05688c /\
              U32.v (Seq.index s 6) = 0x1f83d9ab /\
              U32.v (Seq.index s 7) = 0x5be0cd19)))
-//             forall i. Seq.index s i = Seq.index Spec.list_h_0 i
 
 [@"substitute"]
 private let _constants_set_h_0 hash =
@@ -244,28 +243,28 @@ private val shuffle_core:
 
 [@"substitute"]
 let shuffle_core hash ws k t =
-  let a = Buffer.index hash 0ul in
-  let b = Buffer.index hash 1ul in
-  let c = Buffer.index hash 2ul in
-  let d = Buffer.index hash 3ul in
-  let e = Buffer.index hash 4ul in
-  let f = Buffer.index hash 5ul in
-  let g = Buffer.index hash 6ul in
-  let h = Buffer.index hash 7ul in
+  let a = hash.(0ul) in
+  let b = hash.(1ul) in
+  let c = hash.(2ul) in
+  let d = hash.(3ul) in
+  let e = hash.(4ul) in
+  let f = hash.(5ul) in
+  let g = hash.(6ul) in
+  let h = hash.(7ul) in
 
   (* Perform computations *)
-  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (Buffer.index k t) +%^ (Buffer.index ws t) in
+  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ k.(t) +%^ ws.(t) in
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
 
   (* Store the new working hash in the state *)
-  Buffer.upd hash 7ul g;
-  Buffer.upd hash 6ul f;
-  Buffer.upd hash 5ul e;
-  Buffer.upd hash 4ul (d +%^ t1);
-  Buffer.upd hash 3ul c;
-  Buffer.upd hash 2ul b;
-  Buffer.upd hash 1ul a;
-  Buffer.upd hash 0ul (t1 +%^ t2)
+  hash.(7ul) <- g;
+  hash.(6ul) <- f;
+  hash.(5ul) <- e;
+  hash.(4ul) <- (d +%^ t1);
+  hash.(3ul) <- c;
+  hash.(2ul) <- b;
+  hash.(1ul) <- a;
+  hash.(0ul) <- (t1 +%^ t2)
 
 
 (* Step 3 : Perform logical operations on the working variables *)
