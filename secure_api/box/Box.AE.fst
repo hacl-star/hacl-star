@@ -145,8 +145,8 @@ val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_pla
     /\ m_contains ae_log h1
     /\ ((honest i /\ b2t ae_ind_cpa)
       ==> (c = SPEC.secretbox_easy (create_zero_bytes (length m)) k.raw n))
-    ///\ ((dishonest i \/ ~(b2t ae_ind_cpa))
-    //  ==> (c = SPEC.secretbox_easy (repr m) k.raw n))
+    /\ ((~(b2t ae_ind_cpa) \/ dishonest i)
+      ==> (c = SPEC.secretbox_easy (repr m) k.raw n))
     ///\ (dishonest i \/ honest i)
     ///\ ((AE_id? i /\ honest i) ==> (MR.witnessed (MM.contains ae_log (n,i) (c,m))
     //                            /\ MR.m_sel h1 ae_log == MM.upd current_log (n,i) (c,m)))
@@ -156,15 +156,34 @@ let encrypt #i n k m =
   MR.m_recall id_honesty_log;
   MR.m_recall ae_log;
   let honest_i = is_honest i in
-  let p = 
+  //let p = 
+  //  if (ae_ind_cpa && honest_i) then (
+  //    Seq.create (length m) (UInt8.uint_to_t 0)
+  //  ) else (
+  //    assert(~(b2t ae_ind_cpa) \/ dishonest i);
+  //    repr m )
+  //in
+  //let  c = SPEC.secretbox_easy p k.raw n in
+  let c = 
     if (ae_ind_cpa && honest_i) then (
-      Seq.create (length m) (UInt8.uint_to_t 0)
+      admit();
+      SPEC.secretbox_easy (Seq.create (length m) (UInt8.uint_to_t 0)) k.raw n
     ) else (
-      repr m )
+      let c' = SPEC.secretbox_easy (repr m) k.raw n in
+  assert(
+     ((c' = SPEC.secretbox_easy (repr m) k.raw n))
+     );
+  admit();
+  c'
+    )
   in
-  let  c = SPEC.secretbox_easy p k.raw n in
   if honest_i then (
     MM.extend ae_log (n,i) (c,m));
+  assert(
+    ((~(b2t ae_ind_cpa) \/ dishonest i)
+     ==> (c = SPEC.secretbox_easy (repr m) k.raw n))
+     );
+  admit();
   c
 
 
