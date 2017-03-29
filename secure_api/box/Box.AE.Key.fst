@@ -17,12 +17,6 @@ let coerce_key = AE.coerce_key
 
 let leak_key = AE.leak_key
 
-let ae_key_region = AE.ae_key_region
-
-let get_logGT = AE.get_logGT
-
-let recall_log = AE.recall_log
-
-let empty_log = AE.empty_log
+let ae_log_region = AE.ae_log_region
 
 let aes_key = AE.aes_key
