@@ -30,9 +30,8 @@ LowCProvider/tmp:
 	       	vale/aes/aes.o test/test_hacks.c \
 		-tmpdir LowCProvider/tmp \
 		-skip-linking -add-include '"testlib.h"' \
-		-bundle Hacl.Bignum.* -bundle Hacl.Impl.* \
-		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* \
-		-drop Hacl.Spec -drop Spec.\*
+		-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
+		-bundle Hacl.*
 	cp vale/aes/aes.o LowCProvider/tmp
 
 krml-test-vale.exe: vale/aes/aes.o
@@ -42,9 +41,8 @@ krml-test-vale.exe: vale/aes/aes.o
 	       	test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
 	       	$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
 		-tmpdir tmp-vale -add-include '"testlib.h"' -o krml-test-vale.exe \
-		-bundle Hacl.Bignum.* -bundle Hacl.Impl.* \
-		-bundle Hacl.Spec=Hacl.Spec.*,Hacl.Spe.* \
-	       	-drop Hacl.Spec -drop Spec.\*
+		-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
+		-bundle Hacl.* -bundle "Crypto.AEAD=Crypto.AEAD.*"
 	./krml-test-vale.exe
 
 krml-test-hacl.exe:
@@ -52,8 +50,9 @@ krml-test-hacl.exe:
 		test/Flag.fst utils/Hacl.Spec.fst \
 		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
 		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
-		-tmpdir tmp-hacl -add-include '"testlib.h"' -o krml-test-hacl.exe -drop Hacl.Spe.Poly1305_64 -bundle Spec.* -drop Spec \
-		-bundle "Crypto.AEAD=Crypto.AEAD.*,Crypto.Symmetric.*,Hacl.*,Crypto.Plain"
+		-tmpdir tmp-hacl -add-include '"testlib.h"' -o krml-test-hacl.exe \
+	       	-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
+	       	-bundle Hacl.* -bundle "Crypto.AEAD=Crypto.AEAD.*"
 	./krml-test-hacl.exe
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
@@ -146,7 +145,12 @@ SLOW= \
 # Files not yet fully typechecking -- possibly due to timeouts.
 # Please move files that you know fully typecheck to VERIFY
 # Files commented out are broken, uncomment once fixed
-LAX=
+LAX=aead/Crypto.AEAD.Encrypt \
+	aead/Crypto.AEAD.Enxor.Invariant \
+	aead/Crypto.AEAD.MAC_Wrapper.Invariant \
+	prf/Crypto.Symmetric.PRF \
+	aead/Crypto.AEAD.Wrappers.CMA \
+	aead/Crypto.AEAD.Encoding
 
 # \
 #   Crypto.Symmetric.Poly1305 \
@@ -159,7 +163,7 @@ all: all-ver $(addsuffix .fst-lax, $(LAX))
 
 extra: all-ver $(addsuffix .fst-ver, $(EXTRA))
 
-all-ver: $(addsuffix .fst-ver, $(VERIFY))
+all-ver: $(addsuffix .fst-ver, $(filter-out $(LAX), $(VERIFY)))
 
 all-hints: $(addsuffix .fst-hints, $(VERIFY))
 

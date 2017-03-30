@@ -536,8 +536,8 @@ let frame_inv_modifies_0 (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
 	   (ensures  (inv st h1))
    = Buffer.lemma_reveal_modifies_0 h h1;
      if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1
-     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1;
+     if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_modifies_1 (#i:id) (#rw:rw) (#a:Type) (b:FStar.Buffer.buffer a) 
 			(st:aead_state i rw) (h:mem) (h1:mem)
@@ -547,8 +547,8 @@ let frame_inv_modifies_1 (#i:id) (#rw:rw) (#a:Type) (b:FStar.Buffer.buffer a)
 	   (ensures  (inv st h1))
    = Buffer.lemma_reveal_modifies_1 b h h1;
      if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1
-     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1;
+     if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_modifies_tip (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
    : Lemma (requires (let open HS in 
@@ -557,23 +557,23 @@ let frame_inv_modifies_tip (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem
 		      modifies_one h.tip h h1))
 	   (ensures  (inv st h1))
    = if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1
-     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1;
+     if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_push (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
    : Lemma (requires (inv st h /\ 
 		      HS.fresh_frame h h1))
 	   (ensures  (inv st h1))
    = if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1
-     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1;
+     if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_pop (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem{HS.poppable h})
    : Lemma (requires (inv st h))
 	   (ensures  (inv st (HS.pop h)))
    = if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h (HS.pop h)
-     else if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h (HS.pop h)
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h (HS.pop h);
+     if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h (HS.pop h)
 
 let weaken_all_above (#rgn:region) (#i:id) (s:Seq.seq (PRF.entry rgn i)) 
 		    (x:PRF.domain i) (y:PRF.domain i{y `above` x})

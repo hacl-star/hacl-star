@@ -65,32 +65,28 @@ let enxor_h0_h1
   let cipher = cbuf cipher_tagged in
   let rgns = Set.as_set [aead_st.prf.rgn; Buffer.frameOf cipher] in
   HS.(is_stack_region h0.tip) /\
-  HS.(is_stack_region h1.tip) /\    //the tip of the stack is not root
-  HS.(h0.tip = h1.tip)        /\  //AR: cleanup, remove the clause above as it should be derivable now
+  HS.(h0.tip = h1.tip)        /\
   enxor_pre aead_st nonce aad plain cipher h0                 /\          //enxor_pre holds for h0
   enc_dec_liveness_and_separation aead_st aad plain cipher_tagged h1 /\   //liveness and separation ghold in h1
+  (prf i ==>
+     (let prf = itable i aead_st.prf in
+      let table_0 = HS.sel h0 prf in
+      let table_1 = HS.sel h1 prf in
+      HS.modifies rgns h0 h1                                                            /\    //enxor only modifies the PRF region, and the cipher buffer region
+      HS.modifies_ref aead_st.prf.rgn (TSet.singleton (Heap.Ref (HS.as_ref prf))) h0 h1 /\    //in the PRF region, enxor only modifies the PRF table reference
+      table_differs_only_above_x (PRF.incr i dom_0) table_0 table_1)) /\                            //table_1 = table_0 ++ (otp entries)
   (safeMac i ==>  (
      let prf = itable i aead_st.prf in
      let table_0 = HS.sel h0 prf in
      let table_1 = HS.sel h1 prf in
 
-     HS.modifies rgns h0 h1                                                            /\    //enxor only modifies the PRF region, and the cipher buffer region
-     HS.modifies_ref aead_st.prf.rgn (TSet.singleton (Heap.Ref (HS.as_ref prf))) h0 h1 /\    //in the PRF region, enxor only modifies the PRF table reference
-     table_differs_only_above_x (PRF.incr i dom_0) table_0 table_1 /\                            //table_1 = table_0 ++ (otp entries)
      (safeId i ==> 
       Seq.equal table_1 (Seq.append table_0                                                    //where otp entries are exactly the ones returned by counterblocks
 		                  (counterblocks i aead_st.prf.mac_rgn 
 						 (PRF.incr i dom_0)
 				                 (v plainlen) 0 (v plainlen)
 					         (Plain.sel_plain h1 plainlen plain)
-					         (Buffer.as_seq h1 cipher)))))) /\
-  (prf i ==>  //AR: repeating it here, this should be under prf flag so that we can prove prf_mac_inv going forward
-     (let prf = itable i aead_st.prf in
-      let table_0 = HS.sel h0 prf in
-      let table_1 = HS.sel h1 prf in
-      HS.modifies rgns h0 h1                                                            /\    //enxor only modifies the PRF region, and the cipher buffer region
-      HS.modifies_ref aead_st.prf.rgn (TSet.singleton (Heap.Ref (HS.as_ref prf))) h0 h1 /\    //in the PRF region, enxor only modifies the PRF table reference
-      table_differs_only_above_x (PRF.incr i dom_0) table_0 table_1))                            //table_1 = table_0 ++ (otp entries)
+					         (Buffer.as_seq h1 cipher))))))
 
 let fresh_nonces_are_unused_except (#i:id) (#mac_rgn:region) (nonce:Cipher.iv (alg i))
 				   (prf_table:prf_table mac_rgn i) (aead_entries:aead_entries i) 
@@ -214,4 +210,3 @@ let mac_wrapper_h0_h1
     HS.modifies_ref aead_st.prf.mac_rgn !{HS.as_ref (as_hsref (CMA.(ilog mac_st.log)))} h0 h1  /\    //in the mac region, it only modifies the mac log associated with mac_st
     Buffer.modifies_buf_1 (Buffer.frameOf ct) tag h0 h1 /\    //mac_wrapper modifies the tag component of the ciphertext buffer
     mac_is_set prf_table_1 nonce (Buffer.as_seq h1 aad) (v plainlen) (Buffer.as_seq h1 cipher) (Buffer.as_seq h1 tag) h1))    //mac_is_set for nonce
-  (* AR: TODO: this is unusable in Crypto.AEAD.MAC_Wrapper.Invariant:lemma_propagate_inv_mac_wrapper, since modifes clauses are in safeMac, moving them under prf i don't help since we need mac_log *)

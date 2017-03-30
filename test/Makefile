@@ -4,8 +4,13 @@ FSTAR_HOME?=$(HACL_HOME)/kremlin
 
 .PHONY: snapshot
 
+HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
+HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
+
 all:
 	$(MAKE) extract-c
+	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
+	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
 	$(MAKE) ct
 	$(MAKE) verify
 	$(MAKE) -C openssl-engine
@@ -46,11 +51,13 @@ verify: verify-code verify-crypto
 
 build-snapshot:
 	mkdir -p snapshot
-	cp ../code/poly1305/poly-c/Poly1305_64.* ../code/curve25519/x25519-c/Curve25519.* \
-		../code/salsa-family/chacha-c/Chacha20.* ../code/salsa-family/salsa-c/Salsa20.* \
+	cp $(addprefix ../code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
+		../code/curve25519/x25519-c/Curve25519.* \
+		../code/salsa-family/chacha-c/Chacha20.* \
+		../code/salsa-family/salsa-c/Salsa20.* \
+		$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
+		$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
 		 snapshot
-	cp $(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) snapshot
-	cp $(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) snapshot
 	cp ./c/* snapshot/
 
 CCOMP=gcc-6 -flto -std=c11 -D_GNU_SOURCE
