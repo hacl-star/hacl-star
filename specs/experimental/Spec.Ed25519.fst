@@ -152,7 +152,6 @@ let sign (secret:lbytes 32) (msg:bytes) =
   let r' = point_mul (little_bytes 32ul r) g in
   let rs = point_compress r' in
   let h = sha512_modq (rs @| a' @| msg) in
-  (* let s = (r `fadd` (h `fmul` (little_endian a))) % q in *)
   let s = (r + (h * (little_endian a))) % q in
   rs @| little_bytes 32ul s
 
