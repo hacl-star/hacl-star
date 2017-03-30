@@ -126,7 +126,6 @@ let rec lemma_encode_bytes_injective t0 t1 =
   if l = 0 then Seq.lemma_eq_intro t0 t1
   else  if l < 16 then
     begin
-    admit();
     let w0 = pad_0 t0 (16 - l) in
     let w1 = pad_0 t1 (16 - l) in
     assert(Seq.head (encode_bytes t0) == Seq.head (encode_bytes t1));
@@ -134,7 +133,6 @@ let rec lemma_encode_bytes_injective t0 t1 =
     end
   else
     begin
-    admit();
     let w0, t0' = Seq.split_eq t0 16 in
     let w1, t1' = Seq.split_eq t1 16 in
     Seq.lemma_eq_refl (encode_bytes t0) (encode_bytes t1);
