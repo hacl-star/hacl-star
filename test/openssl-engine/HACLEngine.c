@@ -113,6 +113,7 @@ static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
 #define CHACHA20_KEY_SIZE 32
 #define CHACHA20_IV_SIZE 12
 
+// TODO: use a struct here rather than a contiguous chunk of memory
 #if IMPL == IMPL_HACL
 static int Wrapper_Chacha20_Init(EVP_CIPHER_CTX *ctx, const unsigned char *key, const unsigned char *iv, int enc) {
   uint8_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
@@ -154,7 +155,16 @@ static int hacl_poly1305_init(EVP_MD_CTX *ctx) {
 static int hacl_poly1305_update(EVP_MD_CTX *ctx, const void *data, size_t count) {
   #if IMPL==IMPL_HACL
   Poly1305_64_state *state = EVP_MD_CTX_md_data(ctx);
-  Poly1305_64_update(*state, (uint8_t *) data, (uint32_t) count);
+  // update takes a number of blocks (16 bytes) while update_last takes the
+  // number of remaining bytes...
+  // i) If OpenSSL always calls us with multiples of 16 bytes except for the
+  //    last chunk, we could call update_last here
+  // ii) If this doesn't hold, we could have a buffer of bytes in our state
+  //     until we match a block boundary (this is what OpenSSL does in
+  //     poly1305.c) -- JK says this is not constant time
+  // iii) Right now, we just ignore any bytes that are not on the boundary.
+  uint32_t n_blocks = count / 16;
+  Poly1305_64_update(*state, (uint8_t *) data, (uint32_t) n_blocks);
   #elif IMPL == IMPL_OPENSSL
   Poly1305_Update(EVP_MD_CTX_md_data(ctx), data, count);
   #endif

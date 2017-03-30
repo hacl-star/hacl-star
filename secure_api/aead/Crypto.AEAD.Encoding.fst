@@ -425,6 +425,7 @@ val accumulate:
      else
        Buffer.modifies_0 h0 h1)))
 
+// TODO FIXME
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 200"
 let accumulate #i st aadlen aad txtlen cipher  =
   let h = ST.get() in 

@@ -4,8 +4,13 @@ FSTAR_HOME?=$(HACL_HOME)/kremlin
 
 .PHONY: snapshot
 
+HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
+HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
+
 all:
 	$(MAKE) extract-c
+	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
+	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
 	$(MAKE) ct
 	$(MAKE) verify
 	$(MAKE) -C openssl-engine
