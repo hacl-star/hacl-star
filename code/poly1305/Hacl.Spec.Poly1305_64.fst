@@ -286,7 +286,7 @@ let poly1305_update_spec st m =
   MkState r acc' log
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 private val lemma_append_one_to_zeros_: unit -> Lemma
   (hlittle_endian (Seq.create 1 (uint8_to_sint8 1uy)) = 1)
@@ -542,7 +542,7 @@ let poly1305_last_pass_spec acc =
   acc5
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 
 val lemma_bignum_to_128_:
