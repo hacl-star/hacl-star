@@ -21,9 +21,8 @@ module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
-module S8 = Hacl.UInt8
-module S32 = Hacl.UInt32
-module S64 = Hacl.UInt64
+module H32 = Hacl.UInt32
+module H64 = Hacl.UInt64
 
 module HS = FStar.HyperStack
 module Buffer = FStar.Buffer
@@ -37,12 +36,12 @@ let uint8_t   = FStar.UInt8.t
 let uint32_t  = FStar.UInt32.t
 let uint64_t  = FStar.UInt64.t
 
-let suint8_t  = Hacl.UInt8.t
-let suint32_t = Hacl.UInt32.t
-let suint64_t = Hacl.UInt64.t
+let huint8_t  = Hacl.UInt8.t
+let huint32_t = Hacl.UInt32.t
+let huint64_t = Hacl.UInt64.t
 
-let suint32_p = Buffer.buffer suint32_t
-let suint8_p  = Buffer.buffer suint8_t
+let huint32_p = Buffer.buffer huint32_t
+let huint8_p  = Buffer.buffer huint8_t
 
 
 (* Definitions of aliases for functions *)
@@ -66,66 +65,67 @@ let u64_to_s64 = Cast.uint64_to_sint64
 // SHA-256
 //
 
-inline_for_extraction let wlen = 4ul // Size of the word in bytes
+(* Define word size *)
+inline_for_extraction let size_word = 4ul // Size of the word in bytes
 
 (* Define algorithm parameters *)
-inline_for_extraction let size_hash_w = 8ul // 8 words (Final hash output size)
-inline_for_extraction let size_hash   = wlen *^ size_hash_w
+inline_for_extraction let size_hash_w  = 8ul // 8 words (Final hash output size)
+inline_for_extraction let size_hash    = size_word *^ size_hash_w
 inline_for_extraction let size_block_w = 16ul  // 16 words (Working data block size)
-inline_for_extraction let size_block   = wlen *^ size_block_w
+inline_for_extraction let size_block   = size_word *^ size_block_w
 
 (* Sizes of objects in the state *)
-inline_for_extraction let size_k_w      = 64ul  // 2048 bits = 64 words of 32 bits (size_block)
-inline_for_extraction let size_ws_w     = size_k_w
-inline_for_extraction let size_whash_w  = size_hash_w
-inline_for_extraction let size_count_w  = 1ul  // 1 word
-inline_for_extraction let size_state  = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
+inline_for_extraction let size_k_w     = 64ul  // 2048 bits = 64 words of 32 bits (size_block)
+inline_for_extraction let size_ws_w    = size_k_w
+inline_for_extraction let size_whash_w = size_hash_w
+inline_for_extraction let size_count_w = 1ul  // 1 word
+inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
 
 (* Positions of objects in the state *)
-inline_for_extraction let pos_k_w       = 0ul
-inline_for_extraction let pos_ws_w      = size_k_w
-inline_for_extraction let pos_whash_w   = size_k_w +^ size_ws_w
-inline_for_extraction let pos_count_w   = size_k_w +^ size_ws_w +^ size_whash_w
+inline_for_extraction let pos_k_w      = 0ul
+inline_for_extraction let pos_ws_w     = size_k_w
+inline_for_extraction let pos_whash_w  = size_k_w +^ size_ws_w
+inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
 
 (* [FIPS 180-4] section 4.1.2 *)
 [@"substitute"]
-private val _Ch: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
+private val _Ch: x:huint32_t -> y:huint32_t -> z:huint32_t -> Tot huint32_t
 [@"substitute"]
-let _Ch x y z = S32.logxor (S32.logand x y) (S32.logand (S32.lognot x) z)
+let _Ch x y z = H32.logxor (H32.logand x y) (H32.logand (H32.lognot x) z)
 
 [@"substitute"]
-private val _Maj: x:suint32_t -> y:suint32_t -> z:suint32_t -> Tot suint32_t
+private val _Maj: x:huint32_t -> y:huint32_t -> z:huint32_t -> Tot huint32_t
 [@"substitute"]
-let _Maj x y z = S32.logxor (S32.logand x y) (S32.logxor (S32.logand x z) (S32.logand y z))
+let _Maj x y z = H32.logxor (H32.logand x y) (H32.logxor (H32.logand x z) (H32.logand y z))
 
 [@"substitute"]
-private val _Sigma0: x:suint32_t -> Tot suint32_t
+private val _Sigma0: x:huint32_t -> Tot huint32_t
 [@"substitute"]
-let _Sigma0 x = S32.logxor (rotate_right x 2ul) (S32.logxor (rotate_right x 13ul) (rotate_right x 22ul))
+let _Sigma0 x = H32.logxor (rotate_right x 2ul) (H32.logxor (rotate_right x 13ul) (rotate_right x 22ul))
 
 [@"substitute"]
-private val _Sigma1: x:suint32_t -> Tot suint32_t
+private val _Sigma1: x:huint32_t -> Tot huint32_t
 [@"substitute"]
-let _Sigma1 x = S32.logxor (rotate_right x 6ul) (S32.logxor (rotate_right x 11ul) (rotate_right x 25ul))
+let _Sigma1 x = H32.logxor (rotate_right x 6ul) (H32.logxor (rotate_right x 11ul) (rotate_right x 25ul))
 
 [@"substitute"]
-private val _sigma0: x:suint32_t -> Tot suint32_t
+private val _sigma0: x:huint32_t -> Tot huint32_t
 [@"substitute"]
-let _sigma0 x = S32.logxor (rotate_right x 7ul) (S32.logxor (rotate_right x 18ul) (S32.shift_right x 3ul))
+let _sigma0 x = H32.logxor (rotate_right x 7ul) (H32.logxor (rotate_right x 18ul) (H32.shift_right x 3ul))
 
 [@"substitute"]
-private val _sigma1: x:suint32_t -> Tot suint32_t
+private val _sigma1: x:huint32_t -> Tot huint32_t
 [@"substitute"]
-let _sigma1 x = S32.logxor (rotate_right x 17ul) (S32.logxor (rotate_right x 19ul) (S32.shift_right x 10ul))
+let _sigma1 x = H32.logxor (rotate_right x 17ul) (H32.logxor (rotate_right x 19ul) (H32.shift_right x 10ul))
 
 
 
 (* [FIPS 180-4] section 4.2.2 *)
 [@"substitute"]
 private val constants_set_k:
-  k:suint32_p{length k = v size_k_w} ->
+  k:huint32_p{length k = v size_k_w} ->
   Stack unit
         (requires (fun h -> live h k))
         (ensures (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1))
@@ -152,7 +152,7 @@ let constants_set_k k =
 
 [@"substitute"]
 private val _constants_set_h_0:
-  hash:suint32_p{length hash = U32.v size_hash_w} ->
+  hash:huint32_p{length hash = U32.v size_hash_w} ->
   Stack unit
     (requires (fun h -> live h hash))
     (ensures (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
@@ -174,7 +174,7 @@ private let _constants_set_h_0 hash =
 
 [@"substitute"]
 private val constants_set_h_0:
-  hash:suint32_p{length hash = U32.v size_hash_w} ->
+  hash:huint32_p{length hash = U32.v size_hash_w} ->
   Stack unit
     (requires (fun h -> live h hash))
     (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
@@ -200,8 +200,8 @@ private let constants_set_h_0 hash =
 [@"substitute"]
 inline_for_extraction
 val ws_compute_part_1:
-  ws_w    :suint32_p {length ws_w = v size_ws_w} ->
-  block_w :suint32_p {length block_w = v size_block_w} ->
+  ws_w    :huint32_p {length ws_w = v size_ws_w} ->
+  block_w :huint32_p {length block_w = v size_block_w} ->
   Stack unit
         (requires (fun h -> live h ws_w /\ live h block_w))
         (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1
@@ -246,8 +246,8 @@ let ws_compute_part_1 ws_w block_w =
 [@"substitute"]
 inline_for_extraction
 val ws_compute_part_2:
-  ws_w    :suint32_p {length ws_w = v size_ws_w} ->
-  block_w :suint32_p {length block_w = v size_block_w} ->
+  ws_w    :huint32_p {length ws_w = v size_ws_w} ->
+  block_w :huint32_p {length block_w = v size_block_w} ->
   Stack unit
         (requires (fun h -> live h ws_w /\ live h block_w))
         (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1
@@ -316,8 +316,8 @@ let ws_compute_part_2 ws_w block_w =
 [@"substitute"]
 inline_for_extraction
 val ws_compute:
-  ws_w    :suint32_p {length ws_w = v size_ws_w} ->
-  block_w :suint32_p {length block_w = v size_block_w} ->
+  ws_w    :huint32_p {length ws_w = v size_ws_w} ->
+  block_w :huint32_p {length block_w = v size_block_w} ->
   Stack unit
         (requires (fun h -> live h ws_w /\ live h block_w))
         (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1
@@ -334,9 +334,9 @@ let ws_compute ws_w block_w =
 
 [@"substitute"]
 private val shuffle_core:
-  hash_w :suint32_p {length hash_w = v size_hash_w} ->
-  ws_w   :suint32_p {length ws_w = v size_ws_w} ->
-  k_w    :suint32_p {length k_w = v size_k_w} ->
+  hash_w :huint32_p {length hash_w = v size_hash_w} ->
+  ws_w   :huint32_p {length ws_w = v size_ws_w} ->
+  k_w    :huint32_p {length k_w = v size_k_w} ->
   t      :uint32_t {v t < v size_k_w} ->
   Stack unit
         (requires (fun h -> live h hash_w /\ live h ws_w /\ live h k_w))
@@ -375,9 +375,9 @@ let shuffle_core hash ws k t =
 (* Step 3 : Perform logical operations on the working variables *)
 [@"c_inline"]
 private val shuffle:
-  hash_w :suint32_p {length hash_w = v size_hash_w} ->
-  ws_w   :suint32_p {length ws_w = v size_ws_w} ->
-  k_w    :suint32_p {length k_w = v size_k_w} ->
+  hash_w :huint32_p {length hash_w = v size_hash_w} ->
+  ws_w   :huint32_p {length ws_w = v size_ws_w} ->
+  k_w    :huint32_p {length k_w = v size_k_w} ->
   Stack unit
         (requires (fun h -> live h hash_w /\ live h ws_w /\ live h k_w))
         (ensures  (fun h0 r h1 -> live h1 hash_w /\ live h1 ws_w /\ live h1 k_w /\ modifies_1 hash_w h0 h1
@@ -417,27 +417,25 @@ let shuffle hash ws k =
 
 [@"substitute"]
 val sum_hash:
-  hash_0:suint32_p{length hash_0 = v size_hash_w} ->
-  hash_1:suint32_p{length hash_0 = v size_hash_w /\ disjoint hash_0 hash_1} ->
+  hash_0:huint32_p{length hash_0 = v size_hash_w} ->
+  hash_1:huint32_p{length hash_0 = v size_hash_w /\ disjoint hash_0 hash_1} ->
   Stack unit
     (requires (fun h -> live h hash_0 /\ live h hash_1))
     (ensures  (fun h0 _ h1 -> live h0 hash_0 /\ live h1 hash_0 /\ live h0 hash_1 /\ modifies_1 hash_0 h0 h1
               /\ (let new_seq_hash_0 = as_seq h1 hash_0 in
               let seq_hash_0 = as_seq h0 hash_0 in
               let seq_hash_1 = as_seq h0 hash_1 in
-              new_seq_hash_0 == C.Loops.seq_map2 (fun x y -> S32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
+              new_seq_hash_0 == C.Loops.seq_map2 (fun x y -> H32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
 
 [@"substitute"]
 let sum_hash hash_0 hash_1 =
-  C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> S32.(x +%^ y))
+  C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H32.(x +%^ y))
 
-
-#set-options "--z3rlimit 50"
 
 [@"c_inline"]
 val alloc:
   unit ->
-  StackInline (state:suint32_p{length state = v size_state})
+  StackInline (state:huint32_p{length state = v size_state})
         (requires (fun h0 -> True))
         (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
       /\ Map.domain h1.h == Map.domain h0.h))
@@ -446,9 +444,8 @@ val alloc:
 let alloc () = Buffer.create (u32_to_s32 0ul) size_state
 
 
-(* [FIPS 180-4] section 5.3.3 *)
 val init:
-  state:suint32_p{length state = v size_state} ->
+  state:huint32_p{length state = v size_state} ->
   Stack unit
         (requires (fun h0 -> live h0 state))
         (ensures  (fun h0 r h1 -> modifies_1 state h0 h1
@@ -464,11 +461,9 @@ let init state =
   constants_set_h_0 h_0
 
 
-(* [FIPS 180-4] section 6.2.2 *)
-(* Update running hash function *)
 val update:
-  state:suint32_p{length state = v size_state} ->
-  data:suint8_p {length data = v size_block} ->
+  state:huint32_p{length state = v size_state} ->
+  data:huint8_p {length data = v size_block} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
@@ -521,10 +516,9 @@ let update state data =
   (**) pop_frame()
 
 
-
 val update_multi:
-  state :suint32_p{length state = v size_state} ->
-  data  :suint8_p ->
+  state :huint32_p{length state = v size_state} ->
+  data  :huint8_p ->
   n     :uint32_t{v n * v size_block <= length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
@@ -553,10 +547,9 @@ let rec update_multi state data n =
     update_multi state data (n -^ 1ul)
 
 
-
 val update_last:
-  state :suint32_p{length state = v size_state} ->
-  data  :suint8_p {length data <= v size_block} ->
+  state :huint32_p{length state = v size_state} ->
+  data  :huint8_p {length data <= v size_block} ->
   len   :uint32_t {v len = length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
@@ -578,9 +571,9 @@ let update_last state data len =
 
   (* Compute the final length of the data *)
   let count = state.(pos_count_w) in
-  let l_0 = S64.((s32_to_s64 count) *%^ (u32_to_s64 size_block)) in
+  let l_0 = H64.((s32_to_s64 count) *%^ (u32_to_s64 size_block)) in
   let l_1 = u32_to_s64 len in
-  let t_0 = S64.((l_0 +^ l_1) *%^ (u32_to_s64 8ul)) in
+  let t_0 = H64.((l_0 +^ l_1) *%^ (u32_to_s64 8ul)) in
 
   (* Encode the total length at the end of the padding *)
   let len_64 = Buffer.sub blocks (size_block +^ size_block -^ 8ul) 8ul in
@@ -607,10 +600,9 @@ let update_last state data len =
   (**) pop_frame()
 
 
-
 val finish:
-  state :suint32_p{length state = v size_state} ->
-  hash  :suint8_p{length hash = v size_hash} ->
+  state :huint32_p{length state = v size_state} ->
+  hash  :huint8_p{length hash = v size_hash} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
         (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
@@ -625,10 +617,9 @@ let finish state hash =
   store32s_be hash whash size_hash_w
 
 
-
 val hash:
-  hash :suint8_p{length hash = v size_hash} ->
-  input:suint8_p ->
+  hash :huint8_p{length hash = v size_hash} ->
+  input:huint8_p ->
   len  :uint32_t{v len = length input} ->
   Stack unit
         (requires (fun h0 -> live h0 hash /\ live h0 input))
