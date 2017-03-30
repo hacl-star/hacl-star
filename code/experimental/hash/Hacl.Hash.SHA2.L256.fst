@@ -32,31 +32,31 @@ module Spec = Spec.SHA2
 
 
 (* Definition of base types *)
-let uint8_t   = FStar.UInt8.t
-let uint32_t  = FStar.UInt32.t
-let uint64_t  = FStar.UInt64.t
+private let uint8_t   = FStar.UInt8.t
+private let uint32_t  = FStar.UInt32.t
+private let uint64_t  = FStar.UInt64.t
 
-let huint8_t  = Hacl.UInt8.t
-let huint32_t = Hacl.UInt32.t
-let huint64_t = Hacl.UInt64.t
+private let huint8_t  = Hacl.UInt8.t
+private let huint32_t = Hacl.UInt32.t
+private let huint64_t = Hacl.UInt64.t
 
-let huint32_p = Buffer.buffer huint32_t
-let huint8_p  = Buffer.buffer huint8_t
+private let huint32_p = Buffer.buffer huint32_t
+private let huint8_p  = Buffer.buffer huint8_t
 
 
 (* Definitions of aliases for functions *)
 [@"substitute"]
-let u8_to_s8 = Cast.uint8_to_sint8
+private let u8_to_s8 = Cast.uint8_to_sint8
 [@"substitute"]
-let u32_to_s32 = Cast.uint32_to_sint32
+private let u32_to_s32 = Cast.uint32_to_sint32
 [@"substitute"]
-let u32_to_s64 = Cast.uint32_to_sint64
+private let u32_to_s64 = Cast.uint32_to_sint64
 [@"substitute"]
-let s32_to_s8  = Cast.sint32_to_sint8
+private let s32_to_s8  = Cast.sint32_to_sint8
 [@"substitute"]
-let s32_to_s64 = Cast.sint32_to_sint64
+private let s32_to_s64 = Cast.sint32_to_sint64
 [@"substitute"]
-let u64_to_s64 = Cast.uint64_to_sint64
+private let u64_to_s64 = Cast.uint64_to_sint64
 
 
 
@@ -66,26 +66,26 @@ let u64_to_s64 = Cast.uint64_to_sint64
 //
 
 (* Define word size *)
-inline_for_extraction let size_word = 4ul // Size of the word in bytes
+inline_for_extraction private let size_word = 4ul // Size of the word in bytes
 
 (* Define algorithm parameters *)
-inline_for_extraction let size_hash_w  = 8ul // 8 words (Final hash output size)
+inline_for_extraction private let size_hash_w  = 8ul // 8 words (Final hash output size)
 inline_for_extraction let size_hash    = size_word *^ size_hash_w
-inline_for_extraction let size_block_w = 16ul  // 16 words (Working data block size)
+inline_for_extraction private let size_block_w = 16ul  // 16 words (Working data block size)
 inline_for_extraction let size_block   = size_word *^ size_block_w
 
 (* Sizes of objects in the state *)
-inline_for_extraction let size_k_w     = 64ul  // 2048 bits = 64 words of 32 bits (size_block)
-inline_for_extraction let size_ws_w    = size_k_w
-inline_for_extraction let size_whash_w = size_hash_w
-inline_for_extraction let size_count_w = 1ul  // 1 word
+inline_for_extraction private let size_k_w     = 64ul  // 2048 bits = 64 words of 32 bits (size_block)
+inline_for_extraction private let size_ws_w    = size_k_w
+inline_for_extraction private let size_whash_w = size_hash_w
+inline_for_extraction private let size_count_w = 1ul  // 1 word
 inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
 
 (* Positions of objects in the state *)
-inline_for_extraction let pos_k_w      = 0ul
-inline_for_extraction let pos_ws_w     = size_k_w
-inline_for_extraction let pos_whash_w  = size_k_w +^ size_ws_w
-inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
+inline_for_extraction private let pos_k_w      = 0ul
+inline_for_extraction private let pos_ws_w     = size_k_w
+inline_for_extraction private let pos_whash_w  = size_k_w +^ size_ws_w
+inline_for_extraction private let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
 
@@ -198,8 +198,7 @@ private let constants_set_h_0 hash =
 
 
 [@"substitute"]
-inline_for_extraction
-val ws_compute_part_1:
+private val ws_compute_part_1:
   ws_w    :huint32_p {length ws_w = v size_ws_w} ->
   block_w :huint32_p {length block_w = v size_block_w} ->
   Stack unit
@@ -244,8 +243,7 @@ let ws_compute_part_1 ws_w block_w =
 
 
 [@"substitute"]
-inline_for_extraction
-val ws_compute_part_2:
+private val ws_compute_part_2:
   ws_w    :huint32_p {length ws_w = v size_ws_w} ->
   block_w :huint32_p {length block_w = v size_block_w} ->
   Stack unit
@@ -314,8 +312,7 @@ let ws_compute_part_2 ws_w block_w =
 (* [FIPS 180-4] section 6.2.2 *)
 (* Step 1 : Scheduling function for sixty-four 32bit words *)
 [@"substitute"]
-inline_for_extraction
-val ws_compute:
+private val ws_compute:
   ws_w    :huint32_p {length ws_w = v size_ws_w} ->
   block_w :huint32_p {length block_w = v size_block_w} ->
   Stack unit
@@ -373,7 +370,7 @@ let shuffle_core hash ws k t =
 
 
 (* Step 3 : Perform logical operations on the working variables *)
-[@"c_inline"]
+[@"substitute"]
 private val shuffle:
   hash_w :huint32_p {length hash_w = v size_hash_w} ->
   ws_w   :huint32_p {length ws_w = v size_ws_w} ->
@@ -386,7 +383,7 @@ private val shuffle:
                   let seq_ws = as_seq h1 ws_w in
                   seq_hash_1 == Spec.shuffle seq_hash_0 seq_ws)))
 
-[@"c_inline"]
+[@"substitute"]
 let shuffle hash ws k =
   let h0 = ST.get() in
   let inv (h1: HS.mem) (i: nat) : Type0 =
@@ -416,7 +413,7 @@ let shuffle hash ws k =
 
 
 [@"substitute"]
-val sum_hash:
+private val sum_hash:
   hash_0:huint32_p{length hash_0 = v size_hash_w} ->
   hash_1:huint32_p{length hash_0 = v size_hash_w /\ disjoint hash_0 hash_1} ->
   Stack unit
