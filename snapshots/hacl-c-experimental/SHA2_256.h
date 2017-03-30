@@ -29,15 +29,15 @@ typedef uint32_t uint32_t0;
 
 typedef uint64_t uint64_t0;
 
-typedef uint8_t suint8_t0;
+typedef uint8_t huint8_t;
 
-typedef uint32_t suint32_t0;
+typedef uint32_t huint32_t;
 
-typedef uint64_t suint64_t0;
+typedef uint64_t huint64_t;
 
-typedef uint32_t *suint32_p0;
+typedef uint32_t *huint32_p;
 
-typedef uint8_t *suint8_p0;
+typedef uint8_t *huint8_p;
 
 typedef struct {
   uint32_t fst;
@@ -51,15 +51,15 @@ typedef uint32_t uint32_t1;
 
 typedef uint64_t uint64_t1;
 
-typedef uint8_t suint8_t1;
+typedef uint8_t suint8_t0;
 
-typedef uint32_t suint32_t1;
+typedef uint32_t suint32_t0;
 
-typedef uint64_t suint64_t1;
+typedef uint64_t suint64_t0;
 
-typedef uint32_t *suint32_p1;
+typedef uint32_t *suint32_p0;
 
-typedef uint8_t *suint8_p1;
+typedef uint8_t *suint8_p0;
 
 extern uint32_t hash_hashsize_256;
 

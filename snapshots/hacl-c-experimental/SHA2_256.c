@@ -29,52 +29,10 @@ static void store32s_be(uint8_t *buf_8, uint32_t *buf_32, uint32_t len_32)
   }
 }
 
-inline static void shuffle(uint32_t *hash1, uint32_t *ws1, uint32_t *k1)
-{
-  for (uint32_t i = (uint32_t )0; i < (uint32_t )64; i = i + (uint32_t )1)
-  {
-    uint32_t a = hash1[0];
-    uint32_t b = hash1[1];
-    uint32_t c = hash1[2];
-    uint32_t d = hash1[3];
-    uint32_t e = hash1[4];
-    uint32_t f1 = hash1[5];
-    uint32_t g = hash1[6];
-    uint32_t h = hash1[7];
-    uint32_t uu____672 = k1[i];
-    uint32_t
-    uu____671 =
-      h
-      +
-        ((e >> (uint32_t )6 | e << (uint32_t )32 - (uint32_t )6)
-        ^
-          (e >> (uint32_t )11 | e << (uint32_t )32 - (uint32_t )11)
-          ^ (e >> (uint32_t )25 | e << (uint32_t )32 - (uint32_t )25))
-      + (e & f1 ^ ~e & g)
-      + uu____672;
-    uint32_t uu____673 = ws1[i];
-    uint32_t t1 = uu____671 + uu____673;
-    uint32_t
-    t2 =
-      ((a >> (uint32_t )2 | a << (uint32_t )32 - (uint32_t )2)
-      ^
-        (a >> (uint32_t )13 | a << (uint32_t )32 - (uint32_t )13)
-        ^ (a >> (uint32_t )22 | a << (uint32_t )32 - (uint32_t )22))
-      + (a & b ^ a & c ^ b & c);
-    hash1[7] = g;
-    hash1[6] = f1;
-    hash1[5] = e;
-    hash1[4] = d + t1;
-    hash1[3] = c;
-    hash1[2] = b;
-    hash1[1] = a;
-    hash1[0] = t1 + t2;
-  }
-}
-
 static void init(uint32_t *state)
 {
   uint32_t *k1 = state;
+  uint32_t *h_01 = state + (uint32_t )128;
   k1[(uint32_t )0 + (uint32_t )0] = (uint32_t )0x428a2f98;
   k1[(uint32_t )0 + (uint32_t )1] = (uint32_t )0x71374491;
   k1[(uint32_t )0 + (uint32_t )2] = (uint32_t )0xb5c0fbcf;
@@ -139,15 +97,14 @@ static void init(uint32_t *state)
   k1[(uint32_t )60 + (uint32_t )1] = (uint32_t )0xa4506ceb;
   k1[(uint32_t )60 + (uint32_t )2] = (uint32_t )0xbef9a3f7;
   k1[(uint32_t )60 + (uint32_t )3] = (uint32_t )0xc67178f2;
-  uint32_t *hash1 = state + (uint32_t )128;
-  hash1[(uint32_t )0 + (uint32_t )0] = (uint32_t )0x6a09e667;
-  hash1[(uint32_t )0 + (uint32_t )1] = (uint32_t )0xbb67ae85;
-  hash1[(uint32_t )0 + (uint32_t )2] = (uint32_t )0x3c6ef372;
-  hash1[(uint32_t )0 + (uint32_t )3] = (uint32_t )0xa54ff53a;
-  hash1[(uint32_t )4 + (uint32_t )0] = (uint32_t )0x510e527f;
-  hash1[(uint32_t )4 + (uint32_t )1] = (uint32_t )0x9b05688c;
-  hash1[(uint32_t )4 + (uint32_t )2] = (uint32_t )0x1f83d9ab;
-  hash1[(uint32_t )4 + (uint32_t )3] = (uint32_t )0x5be0cd19;
+  h_01[(uint32_t )0 + (uint32_t )0] = (uint32_t )0x6a09e667;
+  h_01[(uint32_t )0 + (uint32_t )1] = (uint32_t )0xbb67ae85;
+  h_01[(uint32_t )0 + (uint32_t )2] = (uint32_t )0x3c6ef372;
+  h_01[(uint32_t )0 + (uint32_t )3] = (uint32_t )0xa54ff53a;
+  h_01[(uint32_t )4 + (uint32_t )0] = (uint32_t )0x510e527f;
+  h_01[(uint32_t )4 + (uint32_t )1] = (uint32_t )0x9b05688c;
+  h_01[(uint32_t )4 + (uint32_t )2] = (uint32_t )0x1f83d9ab;
+  h_01[(uint32_t )4 + (uint32_t )3] = (uint32_t )0x5be0cd19;
 }
 
 static void update(uint32_t *state, uint8_t *data)
@@ -163,8 +120,8 @@ static void update(uint32_t *state, uint8_t *data)
   memcpy(hash_0, state + (uint32_t )128, (uint32_t )8 * sizeof state[0]);
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint32_t uu____333 = data_w[i];
-    ws_w[i] = uu____333;
+    uint32_t uu____264 = data_w[i];
+    ws_w[i] = uu____264;
   }
   for (uint32_t i = (uint32_t )16; i < (uint32_t )64; i = i + (uint32_t )1)
   {
@@ -182,7 +139,45 @@ static void update(uint32_t *state, uint8_t *data)
           ^ (t15 >> (uint32_t )18 | t15 << (uint32_t )32 - (uint32_t )18) ^ t15 >> (uint32_t )3)
           + t16;
   }
-  shuffle(hash_0, ws_w, k_w);
+  for (uint32_t i = (uint32_t )0; i < (uint32_t )64; i = i + (uint32_t )1)
+  {
+    uint32_t a = hash_0[0];
+    uint32_t b = hash_0[1];
+    uint32_t c = hash_0[2];
+    uint32_t d = hash_0[3];
+    uint32_t e = hash_0[4];
+    uint32_t f1 = hash_0[5];
+    uint32_t g = hash_0[6];
+    uint32_t h = hash_0[7];
+    uint32_t uu____603 = k_w[i];
+    uint32_t
+    uu____602 =
+      h
+      +
+        ((e >> (uint32_t )6 | e << (uint32_t )32 - (uint32_t )6)
+        ^
+          (e >> (uint32_t )11 | e << (uint32_t )32 - (uint32_t )11)
+          ^ (e >> (uint32_t )25 | e << (uint32_t )32 - (uint32_t )25))
+      + (e & f1 ^ ~e & g)
+      + uu____603;
+    uint32_t uu____604 = ws_w[i];
+    uint32_t t1 = uu____602 + uu____604;
+    uint32_t
+    t2 =
+      ((a >> (uint32_t )2 | a << (uint32_t )32 - (uint32_t )2)
+      ^
+        (a >> (uint32_t )13 | a << (uint32_t )32 - (uint32_t )13)
+        ^ (a >> (uint32_t )22 | a << (uint32_t )32 - (uint32_t )22))
+      + (a & b ^ a & c ^ b & c);
+    hash_0[7] = g;
+    hash_0[6] = f1;
+    hash_0[5] = e;
+    hash_0[4] = d + t1;
+    hash_0[3] = c;
+    hash_0[2] = b;
+    hash_0[1] = a;
+    hash_0[0] = t1 + t2;
+  }
   uint32_t *hash_1 = state + (uint32_t )128;
   for (uint32_t i = (uint32_t )0; i < (uint32_t )8; i = i + (uint32_t )1)
   {
@@ -191,9 +186,9 @@ static void update(uint32_t *state, uint8_t *data)
     uint32_t uu____762 = uu____763 + uu____766;
     hash_1[i] = uu____762;
   }
-  uint32_t uu____1001 = state[136];
-  uint32_t uu____1000 = uu____1001 + (uint32_t )1;
-  state[136] = uu____1000;
+  uint32_t uu____954 = state[136];
+  uint32_t uu____953 = uu____954 + (uint32_t )1;
+  state[136] = uu____953;
 }
 
 static void update_multi(uint32_t *state, uint8_t *data, uint32_t n1)
@@ -226,7 +221,7 @@ static void update_last(uint32_t *state, uint8_t *data, uint32_t len)
     scrut = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )64 });
   else
   {
-    bool uu____1143 = scrut0;
+    bool uu____1096 = scrut0;
     scrut = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
   }
   uint32_t n1 = scrut.fst;
