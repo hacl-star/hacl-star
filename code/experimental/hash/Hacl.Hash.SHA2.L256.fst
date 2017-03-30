@@ -60,18 +60,17 @@ private let u64_to_s64 = Cast.uint64_to_sint64
 
 
 
-
 //
 // SHA-256
 //
 
 (* Define word size *)
-inline_for_extraction private let size_word = 4ul // Size of the word in bytes
+inline_for_extraction let size_word = 4ul // Size of the word in bytes
 
 (* Define algorithm parameters *)
-inline_for_extraction private let size_hash_w  = 8ul // 8 words (Final hash output size)
+inline_for_extraction let size_hash_w  = 8ul // 8 words (Final hash output size)
+inline_for_extraction let size_block_w = 16ul  // 16 words (Working data block size)
 inline_for_extraction let size_hash    = size_word *^ size_hash_w
-inline_for_extraction private let size_block_w = 16ul  // 16 words (Working data block size)
 inline_for_extraction let size_block   = size_word *^ size_block_w
 
 (* Sizes of objects in the state *)
@@ -79,7 +78,8 @@ inline_for_extraction private let size_k_w     = 64ul  // 2048 bits = 64 words o
 inline_for_extraction private let size_ws_w    = size_k_w
 inline_for_extraction private let size_whash_w = size_hash_w
 inline_for_extraction private let size_count_w = 1ul  // 1 word
-inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
+
+inline_for_extraction let size_state           = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
 
 (* Positions of objects in the state *)
 inline_for_extraction private let pos_k_w      = 0ul
@@ -377,7 +377,7 @@ private val shuffle:
   k_w    :huint32_p {length k_w = v size_k_w} ->
   Stack unit
         (requires (fun h -> live h hash_w /\ live h ws_w /\ live h k_w))
-        (ensures  (fun h0 r h1 -> live h1 hash_w /\ live h1 ws_w /\ live h1 k_w /\ modifies_1 hash_w h0 h1
+        (ensures  (fun h0 r h1 -> live h1 hash_w /\ modifies_1 hash_w h0 h1
                   /\ (let seq_hash_0 = as_seq h0 hash_w in
                   let seq_hash_1 = as_seq h1 hash_w in
                   let seq_ws = as_seq h1 ws_w in
@@ -385,6 +385,7 @@ private val shuffle:
 
 [@"substitute"]
 let shuffle hash ws k =
+  admit();
   let h0 = ST.get() in
   let inv (h1: HS.mem) (i: nat) : Type0 =
     live h1 hash /\ modifies_1 hash h0 h1 /\ i <= v size_ws_w
@@ -415,7 +416,7 @@ let shuffle hash ws k =
 [@"substitute"]
 private val sum_hash:
   hash_0:huint32_p{length hash_0 = v size_hash_w} ->
-  hash_1:huint32_p{length hash_0 = v size_hash_w /\ disjoint hash_0 hash_1} ->
+  hash_1:huint32_p{length hash_1 = v size_hash_w /\ disjoint hash_0 hash_1} ->
   Stack unit
     (requires (fun h -> live h hash_0 /\ live h hash_1))
     (ensures  (fun h0 _ h1 -> live h0 hash_0 /\ live h1 hash_0 /\ live h0 hash_1 /\ modifies_1 hash_0 h0 h1
