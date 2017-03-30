@@ -125,14 +125,13 @@ let _sigma1 x = S32.logxor (rotate_right x 17ul) (S32.logxor (rotate_right x 19u
 (* [FIPS 180-4] section 4.2.2 *)
 [@"substitute"]
 private val constants_set_k:
-  state:suint32_p{length state = U32.v size_state} ->
+  k:suint32_p{length k = v size_k_w} ->
   Stack unit
-        (requires (fun h -> live h state))
-        (ensures (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
+        (requires (fun h -> live h k))
+        (ensures (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1))
 
 [@"substitute"]
-let constants_set_k state =
-  let k = Buffer.sub state pos_k_w size_k_w in
+let constants_set_k k =
   upd4 k 0ul  0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul;
   upd4 k 4ul  0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul;
   upd4 k 8ul  0xd807aa98ul 0x12835b01ul 0x243185beul 0x550c7dc3ul;
@@ -175,16 +174,15 @@ private let _constants_set_h_0 hash =
 
 [@"substitute"]
 private val constants_set_h_0:
-  state:suint32_p{length state = U32.v size_state} ->
+  hash:suint32_p{length hash = U32.v size_hash_w} ->
   Stack unit
-    (requires (fun h -> live h state))
-    (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1
-              /\ (let seq_hash_0 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+    (requires (fun h -> live h hash))
+    (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
+              /\ (let seq_hash_0 = as_seq h1 hash in
               Hacl.Spec.Endianness.reveal_h32s seq_hash_0 == Seq.createL Spec.list_h_0)))
 
 [@"substitute"]
-private let constants_set_h_0 state =
-  let hash = Buffer.sub state pos_whash_w size_whash_w in
+private let constants_set_h_0 hash =
   _constants_set_h_0 hash;
   let h = ST.get() in
   assert_norm (Seq.length (Seq.createL Spec.list_h_0) = 8);
@@ -199,9 +197,6 @@ private let constants_set_h_0 state =
   Seq.lemma_eq_intro (Hacl.Spec.Endianness.reveal_h32s (as_seq h hash)) (Seq.createL Spec.list_h_0)
 
 
-
-(* [FIPS 180-4] section 6.2.2 *)
-(* Step 1 : Scheduling function for sixty-four 32bit words *)
 [@"substitute"]
 inline_for_extraction
 val ws_compute_part_1:
@@ -401,7 +396,6 @@ let shuffle hash ws k =
     fun seq_hash t -> Spec.shuffle_core seq_hash seq_ws t in
     as_seq h1 hash == repeat_range_spec 0 i f (as_seq h0 hash))
   in
-
   let f' (t:uint32_t {v t < v size_ws_w}) :
     Stack unit
       (requires (fun h -> inv h (UInt32.v t)))
@@ -464,8 +458,10 @@ val init:
                   Hacl.Spec.Endianness.reveal_h32s seq_h_0 == Seq.createL Spec.list_h_0)))
 
 let init state =
-  constants_set_k state;
-  constants_set_h_0 state
+  let k = Buffer.sub state pos_k_w size_k_w in
+  let h_0 = Buffer.sub state pos_whash_w size_whash_w in
+  constants_set_k k;
+  constants_set_h_0 h_0
 
 
 (* [FIPS 180-4] section 6.2.2 *)
