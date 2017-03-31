@@ -166,9 +166,9 @@ let rec load32s_be buf_32 buf_8 len_8 =
   if FStar.UInt32.(len_8 =^ 0ul) then ()
   else
     begin
-      (**) cut((FStar.UInt32.v len_8 - 4) % 4 = 0);
-      (**) cut(FStar.UInt32.v len_8 - 4 <= length buf_8);
-      (**) cut(FStar.UInt32.v len_8 <= (4 * length buf_32));
+      (**) assert((FStar.UInt32.v len_8 - 4) % 4 = 0);
+      (**) assert(FStar.UInt32.v len_8 - 4 <= length buf_8);
+      (**) assert(FStar.UInt32.v len_8 <= (4 * length buf_32));
       let x_8 = Buffer.sub buf_8 FStar.UInt32.(len_8 -^ 4ul) 4ul in
       let i_32 = len_8 /^ 4ul in
       let x_32 = Hacl.Endianness.hload32_be x_8 in
