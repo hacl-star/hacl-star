@@ -265,6 +265,7 @@ val encrypt:
 	      encrypt_modifies st cipher_tag h0 h1 /\
  	      inv st h1))
 
+#reset-options "--z3rlimit 2000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let encrypt i st n aadlen aad plainlen plain cipher_tagged =
   recall_aead_liveness st;
   let h_init = get() in

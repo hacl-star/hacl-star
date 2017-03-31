@@ -391,7 +391,12 @@ val lemma_poly_last_pass: s:seqelem{bounds s p44 p44 p42} -> Lemma
 let lemma_poly_last_pass s =
   Hacl.Spec.Bignum.Modulo.lemma_seval_3 s;
   assert_norm(pow2 44 = 0x100000000000); assert_norm(pow2 88 = 0x10000000000000000000000);
-  assert_norm(pow2 44 - 5 + pow2 44 * (pow2 44 - 1) + pow2 88 * (pow2 42 - 1) = pow2 130 - 5)
+  assert_norm(pow2 44 - 5 + pow2 44 * (pow2 44 - 1) + pow2 88 * (pow2 42 - 1) = pow2 130 - 5);
+  let a0' = Seq.index s 0 in let a1' = Seq.index s 1 in let a2' = Seq.index s 2 in
+  if v a0'  <= 4 && v a1' = 0 && v a2' = 0 then Math.Lemmas.modulo_lemma (seval s) prime
+  else (
+    assert (v a0' + pow2 44 * v a1' + pow2 88 * v a2' < pow2 44 - 5 + pow2 44 * (pow2 44 - 1) + pow2 88 * (pow2 42 - 1));
+    Math.Lemmas.modulo_lemma (seval s) prime)
 
 val lemma_poly_last_pass': a0:limb -> a1:limb -> a2:limb -> Lemma
   (requires (let open Hacl.Bignum.Limb in

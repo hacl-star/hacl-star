@@ -38,14 +38,17 @@ POLY1305_SPECIFIC= \
 	AEAD.Poly1305_64.fst
 
 
-SLOW=Hacl.Spec.Poly1305_64.fst
+SLOW=
 
 TODO=
 
 POLY1305_FILES= $(BIGNUM) $(POLY1305_SPECIFIC)
 
+HINTS_ENABLED?=--use_hints --record_hints
+
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-	$(addprefix --include , $(INCLUDE_DIRS)) --include $(KREMLIN_HOME)/kremlib
+	$(addprefix --include , $(INCLUDE_DIRS)) --include $(KREMLIN_HOME)/kremlib \
+	$(HINTS_ENABLED) $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib --include ../bignum $(addprefix --include , $(SPECS)) \
@@ -59,7 +62,7 @@ all-ct: $(addsuffix -ct, $(POLY1305_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^
 
 all-ver: $(addsuffix -verify, $(POLY1305_FILES))
 
@@ -71,7 +74,7 @@ all-lax: $(addsuffix -lax, $(POLY1305_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	-$(FSTARB) $^
 
 all-hints2: $(addsuffix -hints, $(POLY1305_FILES))
 all-hints:
