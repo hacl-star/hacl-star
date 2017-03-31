@@ -150,12 +150,12 @@ let shuffle_core (hash:hash_w) (wsched:ws_w) (t:counter{t < size_k_w}) : Tot has
   let g = hash.[6] in
   let h = hash.[7] in
 
-  (**) assert_norm(List.Tot.length list_k = size_k_w);
   (**) cut(Seq.length wsched = size_k_w);
-  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ (List.Tot.index list_k t) +%^ wsched.[t] in
+  (**) cut(Seq.length k = size_k_w);
+  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ k.[t] +%^ wsched.[t] in
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
 
-  (**) cut(7 < Seq.length hash);
+  (**) cut(t < Seq.length k);
   let hash = hash.[7] <- g in
   let hash = hash.[6] <- f in
   let hash = hash.[5] <- e in
