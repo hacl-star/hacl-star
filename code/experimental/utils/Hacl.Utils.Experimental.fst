@@ -96,7 +96,7 @@ let hupd_4 buf v0 v1 v2 v3 =
 
 
 [@"substitute"]
-val hupd_8: buf:huint32_p{length buf = 8} ->
+val aux_hupd_8: buf:huint32_p{length buf = 8} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
   Stack unit (requires (fun h -> live h buf))
              (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
@@ -105,11 +105,25 @@ val hupd_8: buf:huint32_p{length buf = 8} ->
                          Seq.index s 4 == v4 /\ Seq.index s 5 == v5 /\ Seq.index s 6 == v6 /\ Seq.index s 7 == v7)))
 
 [@"substitute"]
-let hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
+let aux_hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
   let p1 = Buffer.sub buf 0ul 4ul in
   let p2 = Buffer.sub buf 4ul 4ul in
   hupd_4 p1 v0 v1 v2 v3;
   hupd_4 p2 v4 v5 v6 v7
+
+
+[@"substitute"]
+val hupd_8: buf:huint32_p{length buf = 8} ->
+  v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in Seq.Create.create_8 v0 v1 v2 v3 v4 v5 v6 v7 == s)))
+
+[@"substitute"]
+let hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
+  aux_hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7;
+  let h1 = ST.get () in
+  Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_8 v0 v1 v2 v3 v4 v5 v6 v7)
 
 
 [@"substitute"]
