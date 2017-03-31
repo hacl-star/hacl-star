@@ -29,6 +29,7 @@ module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2
+module Utils = Hacl.Utils.Experimental
 
 
 (* Definition of base types *)
@@ -79,7 +80,7 @@ inline_for_extraction private let size_ws_w    = size_k_w
 inline_for_extraction private let size_whash_w = size_hash_w
 inline_for_extraction private let size_count_w = 1ul  // 1 word
 
-inline_for_extraction let size_state           = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
+inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
 
 (* Positions of objects in the state *)
 inline_for_extraction private let pos_k_w      = 0ul
@@ -132,69 +133,44 @@ private val constants_set_k:
 
 [@"substitute"]
 let constants_set_k k =
-  upd4 k 0ul  0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul;
-  upd4 k 4ul  0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul;
-  upd4 k 8ul  0xd807aa98ul 0x12835b01ul 0x243185beul 0x550c7dc3ul;
-  upd4 k 12ul 0x72be5d74ul 0x80deb1feul 0x9bdc06a7ul 0xc19bf174ul;
-  upd4 k 16ul 0xe49b69c1ul 0xefbe4786ul 0x0fc19dc6ul 0x240ca1ccul;
-  upd4 k 20ul 0x2de92c6ful 0x4a7484aaul 0x5cb0a9dcul 0x76f988daul;
-  upd4 k 24ul 0x983e5152ul 0xa831c66dul 0xb00327c8ul 0xbf597fc7ul;
-  upd4 k 28ul 0xc6e00bf3ul 0xd5a79147ul 0x06ca6351ul 0x14292967ul;
-  upd4 k 32ul 0x27b70a85ul 0x2e1b2138ul 0x4d2c6dfcul 0x53380d13ul;
-  upd4 k 36ul 0x650a7354ul 0x766a0abbul 0x81c2c92eul 0x92722c85ul;
-  upd4 k 40ul 0xa2bfe8a1ul 0xa81a664bul 0xc24b8b70ul 0xc76c51a3ul;
-  upd4 k 44ul 0xd192e819ul 0xd6990624ul 0xf40e3585ul 0x106aa070ul;
-  upd4 k 48ul 0x19a4c116ul 0x1e376c08ul 0x2748774cul 0x34b0bcb5ul;
-  upd4 k 52ul 0x391c0cb3ul 0x4ed8aa4aul 0x5b9cca4ful 0x682e6ff3ul;
-  upd4 k 56ul 0x748f82eeul 0x78a5636ful 0x84c87814ul 0x8cc70208ul;
-  upd4 k 60ul 0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
+  let pk = Buffer.sub k 0ul  4ul in Utils.pupd_4 pk 0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul;
+  let pk = Buffer.sub k 4ul  4ul in Utils.pupd_4 pk 0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul;
+  let pk = Buffer.sub k 8ul  4ul in Utils.pupd_4 pk 0xd807aa98ul 0x12835b01ul 0x243185beul 0x550c7dc3ul;
+  let pk = Buffer.sub k 12ul 4ul in Utils.pupd_4 pk 0x72be5d74ul 0x80deb1feul 0x9bdc06a7ul 0xc19bf174ul;
+  let pk = Buffer.sub k 16ul 4ul in Utils.pupd_4 pk 0xe49b69c1ul 0xefbe4786ul 0x0fc19dc6ul 0x240ca1ccul;
+  let pk = Buffer.sub k 20ul 4ul in Utils.pupd_4 pk 0x2de92c6ful 0x4a7484aaul 0x5cb0a9dcul 0x76f988daul;
+  let pk = Buffer.sub k 24ul 4ul in Utils.pupd_4 pk 0x983e5152ul 0xa831c66dul 0xb00327c8ul 0xbf597fc7ul;
+  let pk = Buffer.sub k 28ul 4ul in Utils.pupd_4 pk 0xc6e00bf3ul 0xd5a79147ul 0x06ca6351ul 0x14292967ul;
+  let pk = Buffer.sub k 32ul 4ul in Utils.pupd_4 pk 0x27b70a85ul 0x2e1b2138ul 0x4d2c6dfcul 0x53380d13ul;
+  let pk = Buffer.sub k 36ul 4ul in Utils.pupd_4 pk 0x650a7354ul 0x766a0abbul 0x81c2c92eul 0x92722c85ul;
+  let pk = Buffer.sub k 40ul 4ul in Utils.pupd_4 pk 0xa2bfe8a1ul 0xa81a664bul 0xc24b8b70ul 0xc76c51a3ul;
+  let pk = Buffer.sub k 44ul 4ul in Utils.pupd_4 pk 0xd192e819ul 0xd6990624ul 0xf40e3585ul 0x106aa070ul;
+  let pk = Buffer.sub k 48ul 4ul in Utils.pupd_4 pk 0x19a4c116ul 0x1e376c08ul 0x2748774cul 0x34b0bcb5ul;
+  let pk = Buffer.sub k 52ul 4ul in Utils.pupd_4 pk 0x391c0cb3ul 0x4ed8aa4aul 0x5b9cca4ful 0x682e6ff3ul;
+  let pk = Buffer.sub k 56ul 4ul in Utils.pupd_4 pk 0x748f82eeul 0x78a5636ful 0x84c87814ul 0x8cc70208ul;
+  let pk = Buffer.sub k 60ul 4ul in Utils.pupd_4 pk 0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
 
 
 [@"substitute"]
-private val _constants_set_h_0:
+val constants_set_h_0:
   hash:huint32_p{length hash = U32.v size_hash_w} ->
   Stack unit
     (requires (fun h -> live h hash))
     (ensures (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
-             /\ (let s = as_seq h1 hash in
-             U32.v (Seq.index s 0) = 0x6a09e667 /\
-             U32.v (Seq.index s 1) = 0xbb67ae85 /\
-             U32.v (Seq.index s 2) = 0x3c6ef372 /\
-             U32.v (Seq.index s 3) = 0xa54ff53a /\
-             U32.v (Seq.index s 4) = 0x510e527f /\
-             U32.v (Seq.index s 5) = 0x9b05688c /\
-             U32.v (Seq.index s 6) = 0x1f83d9ab /\
-             U32.v (Seq.index s 7) = 0x5be0cd19)))
+             /\ (let s = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 hash) in
+             Seq.index s 0 = Seq.index Spec.h_0 0 /\
+             Seq.index s 1 = Seq.index Spec.h_0 1 /\
+             Seq.index s 2 = Seq.index Spec.h_0 2 /\
+             Seq.index s 3 = Seq.index Spec.h_0 3 /\
+             Seq.index s 4 = Seq.index Spec.h_0 4 /\
+             Seq.index s 5 = Seq.index Spec.h_0 5 /\
+             Seq.index s 6 = Seq.index Spec.h_0 6 /\
+             Seq.index s 7 = Seq.index Spec.h_0 7)))
 
 [@"substitute"]
-private let _constants_set_h_0 hash =
-  upd4 hash 0ul 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul;
-  upd4 hash 4ul 0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
-
-
-[@"substitute"]
-private val constants_set_h_0:
-  hash:huint32_p{length hash = U32.v size_hash_w} ->
-  Stack unit
-    (requires (fun h -> live h hash))
-    (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
-              /\ (let seq_hash_0 = as_seq h1 hash in
-              Hacl.Spec.Endianness.reveal_h32s seq_hash_0 == Seq.createL Spec.list_h_0)))
-
-[@"substitute"]
-private let constants_set_h_0 hash =
-  _constants_set_h_0 hash;
-  let h = ST.get() in
-  assert_norm (Seq.length (Seq.createL Spec.list_h_0) = 8);
-  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 0 = 0x6a09e667ul);
-  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 1 = 0xbb67ae85ul);
-  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 2 = 0x3c6ef372ul);
-  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 3 = 0xa54ff53aul);
-  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 4 = 0x510e527ful);
-  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 5 = 0x9b05688cul);
-  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 6 = 0x1f83d9abul);
-  assert_norm(let s = (Seq.createL Spec.list_h_0) in Seq.index s 7 = 0x5be0cd19ul);
-  Seq.lemma_eq_intro (Hacl.Spec.Endianness.reveal_h32s (as_seq h hash)) (Seq.createL Spec.list_h_0)
+let constants_set_h_0 hash =
+  let ph = Buffer.sub hash 0ul 4ul in Utils.pupd_4 ph 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul;
+  let ph = Buffer.sub hash 4ul 4ul in Utils.pupd_4 ph 0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
 
 
 [@"substitute"]
@@ -337,7 +313,7 @@ private val shuffle_core:
   t      :uint32_t {v t < v size_k_w} ->
   Stack unit
         (requires (fun h -> live h hash_w /\ live h ws_w /\ live h k_w))
-        (ensures  (fun h0 r h1 -> live h1 hash_w /\ live h1 ws_w /\ live h1 k_w /\ modifies_1 hash_w h0 h1
+        (ensures  (fun h0 r h1 -> live h0 hash_w /\ live h0 ws_w /\ live h0 k_w /\ live h1 hash_w /\ modifies_1 hash_w h0 h1
                   /\ (let seq_hash_0 = as_seq h0 hash_w in
                   let seq_hash_1 = as_seq h1 hash_w in
                   let seq_ws = as_seq h1 ws_w in
