@@ -55,18 +55,37 @@ let mac_modifies
        modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
        modifies_buf_1 (frameOf tbuf) tbuf h0 h1
 
-#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
-let weaken_mac_modifies         
+#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+val weaken_mac_modifies
         (i:id) (iv:Cipher.iv (Cipher.algi i))
 	(tbuf:lbuffer (v MAC.taglen))
 	(ak:CMA.state (i, iv))
 	(acc:CMA.accBuffer (i, iv)) 
 	(h0 h1:mem)
-   : Lemma (let abuf = MAC.as_buffer (CMA.abuf acc) in
-	    Buffer.frameOf abuf = HS.(h0.tip) /\
-	    mac_modifies i iv tbuf ak acc h0 h1 ==>
-	    BufferUtils.mac_modifies CMA.(ak.region) abuf tbuf h0 h1)
-   = ()
+   : Lemma (requires
+                 (let abuf = MAC.as_buffer (CMA.abuf acc) in
+	          Buffer.frameOf abuf = HS.(h0.tip) /\
+	          mac_modifies i iv tbuf ak acc h0 h1))
+          (ensures (let abuf = MAC.as_buffer (CMA.abuf acc) in
+                   BufferUtils.mac_modifies CMA.(ak.region) abuf tbuf h0 h1))
+let weaken_mac_modifies i iv tbuf ak acc h0 h1
+   = let open FStar.HyperStack in
+     let open FStar.Buffer in
+     let abuf = MAC.as_buffer (CMA.abuf acc) in
+     if safeMac i
+     then begin
+          assert (Buffer.modifies_buf_1 (frameOf tbuf) tbuf h0 h1);
+          let s0 = (Set.as_set [h0.tip; frameOf tbuf; CMA.(ak.region)]) in
+          let s1 = (Set.as_set [h0.tip; CMA.(ak.region); frameOf tbuf]) in
+          BufferUtils.weaken_modifies s0 s1 h0 h1
+     end
+     else begin
+          assert (Buffer.modifies_buf_1 (frameOf tbuf) tbuf h0 h1);
+          let s0 = (Set.as_set [h0.tip; frameOf tbuf]) in
+          assert (HS.modifies s0 h0 h1);
+          let s1 = (Set.as_set [h0.tip; CMA.(ak.region); frameOf tbuf]) in
+          BufferUtils.weaken_modifies s0 s1 h0 h1
+     end
 
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let mac_wrapper (#i:EncodingWrapper.mac_id) (ak:CMA.state i) (acc:CMA.accBuffer i) 
@@ -387,6 +406,7 @@ val frame_accumulate_ensures: #i:CMA.id -> #rw:rw ->
 		     Buffer.modifies_1 (MAC.as_buffer (CMA.abuf acc)) h1 h2))
           (ensures (let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
 		    acc_ensures_weak ak aad cipher h0 acc h2))
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let frame_accumulate_ensures #i #rw aead_st ak #aadlen aad #txtlen plain cipher_tagged h0 acc h1 h2 =
   FStar.Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h1 h2;
   let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
