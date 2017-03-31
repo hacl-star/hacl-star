@@ -38,7 +38,7 @@ POLY1305_SPECIFIC= \
 	AEAD.Poly1305_64.fst
 
 
-SLOW=
+SLOW=Hacl.Spec.Poly1305_64.fst
 
 TODO=
 
