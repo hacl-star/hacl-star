@@ -455,9 +455,9 @@ let update state data =
   let k_w = Buffer.sub state pos_k_w size_k_w in
 
   (* Cast the data bytes into a uint32_t buffer *)
-  (**) cut(v size_block % 4 = 0);
-  (**) cut(v size_block <= length data);
-  (**) cut(v size_block <= 4 * length data_w);
+  (**) assert(v size_block % 4 = 0);
+  (**) assert(v size_block <= length data);
+  (**) assert(v size_block <= 4 * length data_w);
   Hacl.Utils.Experimental.load32s_be data_w data size_block;
 
   (* Keep track of the the current working hash from the state *)
