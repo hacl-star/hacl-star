@@ -92,9 +92,9 @@ all-ci:
 	mv ../bignum/*.hints ./bignum_hints
 bignum-ci:
 	cp bignum_hints/* ../bignum
-	$(MAKE) $(addsuffix -verify, $(BIGNUM))
+	$(MAKE) $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
 	mv ../bignum/*.hints ./bignum_hints
-specific-ci: $(addsuffix -verify, $(POLY1305_SPECIFIC))
+specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_SPECIFIC)))
 
 
 poly1305.exe:
