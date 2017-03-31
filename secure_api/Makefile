@@ -148,8 +148,7 @@ SLOW= \
 LAX=aead/Crypto.AEAD.Encrypt \
 	aead/Crypto.AEAD.MAC_Wrapper.Invariant \
 	prf/Crypto.Symmetric.PRF \
-	aead/Crypto.AEAD.Wrappers.CMA \
-	aead/Crypto.AEAD.Encoding
+	aead/Crypto.AEAD.Wrappers.CMA
 
 # \
 #   Crypto.Symmetric.Poly1305 \
