@@ -1,5 +1,5 @@
 [
-  "¡à4\u0005Vmw\u001b¨ì\u0013∑\u0007Z\u0006(",
+  "2\"ﬁZÉ¢!\u0006c√‰~:ò\u0013î",
   [
     [
       "Spec.Poly1305.prime",
@@ -246,6 +246,7 @@
         "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.n",
         "equation_FStar.UInt8.t", "equation_Prims.nat",
         "equation_Spec.Poly1305.key", "equation_Spec.Poly1305.prime",
+        "fuel_correspondence_Prims.pow2.fuel_instrumented",
         "function_token_typing_FStar.Int16.n",
         "function_token_typing_FStar.UInt32.n", "int_typing",
         "kinding_FStar.UInt8.t_@tok", "lemma_FStar.Seq.Base.lemma_len_slice",
@@ -269,11 +270,10 @@
       0,
       1,
       [
-        "@query", "b2t_def", "bool_inversion", "bool_typing",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt8.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt8.n",
+        "@query", "b2t_def", "bool_inversion", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt8.n",
+        "equation_Prims.nat", "function_token_typing_FStar.UInt8.n",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
@@ -294,14 +294,13 @@
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
         "equation_FStar.UInt8.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt8.n", "int_typing",
+        "function_token_typing_FStar.UInt8.n",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_FStar.UInt.fits"
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0
     ],
