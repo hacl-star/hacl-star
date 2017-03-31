@@ -156,15 +156,7 @@ let shuffle_core (hash:hash_w) (wsched:ws_w) (t:counter{t < size_k_w}) : Tot has
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
 
   (**) cut(t < Seq.length k);
-  let hash = hash.[7] <- g in
-  let hash = hash.[6] <- f in
-  let hash = hash.[5] <- e in
-  let hash = hash.[4] <- (d +%^ t1) in
-  let hash = hash.[3] <- c in
-  let hash = hash.[2] <- b in
-  let hash = hash.[1] <- a in
-  let hash = hash.[0] <- (t1 +%^ t2) in
-  hash
+  Seq.Create.create_8 (t1 +%^ t2) a b c (d +%^ t1) e f g
 
 
 let shuffle (hash:hash_w) (wsched:ws_w) : Tot hash_w =

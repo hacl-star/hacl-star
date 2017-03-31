@@ -60,6 +60,8 @@ private let s32_to_s64 = Cast.sint32_to_sint64
 private let u64_to_s64 = Cast.uint64_to_sint64
 
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
 
 //
 // SHA-256
@@ -312,7 +314,7 @@ private val shuffle_core:
   k_w    :huint32_p {length k_w = v size_k_w} ->
   t      :uint32_t {v t < v size_k_w} ->
   Stack unit
-        (requires (fun h -> live h hash_w /\ live h ws_w /\ live h k_w))
+        (requires (fun h -> live h hash_w /\ live h ws_w /\ live h k_w /\ as_seq h k_w == Spec.k))
         (ensures  (fun h0 r h1 -> live h0 hash_w /\ live h0 ws_w /\ live h0 k_w /\ live h1 hash_w /\ modifies_1 hash_w h0 h1
                   /\ (let seq_hash_0 = as_seq h0 hash_w in
                   let seq_hash_1 = as_seq h1 hash_w in
@@ -335,17 +337,9 @@ let shuffle_core hash ws k t =
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
 
   (* Store the new working hash in the state *)
-  hash.(7ul) <- g;
-  hash.(6ul) <- f;
-  hash.(5ul) <- e;
-  hash.(4ul) <- (d +%^ t1);
-  hash.(3ul) <- c;
-  hash.(2ul) <- b;
-  hash.(1ul) <- a;
-  hash.(0ul) <- (t1 +%^ t2)
+  Utils.hupd_8 hash (t1 +%^ t2) a b c (d +%^ t1) e f g
 
 
-(* Step 3 : Perform logical operations on the working variables *)
 [@"substitute"]
 private val shuffle:
   hash_w :huint32_p {length hash_w = v size_hash_w} ->
