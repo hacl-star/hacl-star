@@ -54,6 +54,7 @@ assume val dh_key_log_region: (r:HH.rid{ extends r root
 					 /\ disjoint r id_log_region
 					 /\ disjoint r id_honesty_log_region
 					 })
+
 type dh_key_log_key = i:id{AE_id? i /\ honest i}
 type dh_key_log_value = (AE.key)
 type dh_key_log_range = fun (i:dh_key_log_key) -> (k:dh_key_log_value{AE.get_index k = i})
@@ -158,6 +159,10 @@ val handle_honest_i: i:id{AE_id? i /\ honest i} -> ST (k:Key.key)
     /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
     				    /\ h0 == h1))       // and the log of the key will be the same as before.
     /\ MM.contains dh_key_log i k h1
+    /\ ~(MM.fresh dh_key_log i h1)
+    /\ ~(fresh i h1)
+    /\  ((MR.m_sel h1 dh_key_log == MM.upd (MR.m_sel h0 dh_key_log) i k)
+        \/ (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log))
   ))
 let handle_honest_i i = 
   MR.m_recall dh_key_log;
@@ -183,6 +188,7 @@ val handle_dishonest_i: dh_sk:dh_skey
   (requires (fun h0 -> 
     registered i
     /\ dishonest i
+    /\ MR.m_contains dh_key_log h0
   ))
   (ensures (fun h0 k h1 -> 
     let regions_modified_dishonest:Set.set (r:HH.rid) = (Set.singleton id_log_region) in
@@ -191,37 +197,42 @@ val handle_dishonest_i: dh_sk:dh_skey
     /\ dishonest i
     /\ Key.leak_key k = prf_odhGT dh_sk dh_pk
     /\ makes_unfresh_just i h0 h1
+    /\ MR.m_contains dh_key_log h1
+    /\ MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log
   ))
 let handle_dishonest_i dh_sk dh_pk i =
     MR.m_recall id_log;
     MR.m_recall id_honesty_log;
-    let h0 = ST.get() in
+    MR.m_recall dh_key_log;
     lemma_dishonest_not_honest i;
     let raw_k = Curve.scalarmult dh_sk.sk_exp dh_pk.pk_share in
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
     let k=Key.coerce_key i hashed_raw_k in
     fresh_unfresh_contradiction i;
-    let h1 = ST.get() in
     k
 
-
+//TODO: There is a weird error here. It fails, but the "unknown assertion failed" seems to be in the pre- or post condition. Maybe try with all quantifiers instead of == comparisons?
 #reset-options
 #set-options "--z3rlimit 50 --max_ifuel 10 --max_fuel 10"
 val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
   ( requires (fun h0 -> 
     let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
     ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==>  fresh i h0)
-    /\ m_contains id_log h0
+    /\ MR.m_contains id_log h0
+    /\ MR.m_contains dh_key_log h0
     /\ registered i
+    /\ (honest i \/ dishonest i)
   ))
   ( ensures (fun h0 k h1 ->
     let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
     let regions_modified_dishonest:Set.set (r:HH.rid) = (Set.singleton id_log_region) in
     let regions_modified_honest = Set.union regions_modified_dishonest (Set.singleton dh_key_log_region) in
     (i = Key.ae_key_get_index k)
+    /\ (honest i \/ dishonest i)
     /\ (honest i ==> (let current_log = MR.m_sel h0 dh_key_log in
     		   MR.witnessed (MM.contains dh_key_log i k)
     		   /\ MM.contains dh_key_log i k h1
+    		   /\ MM.defined dh_key_log i h1
     		   /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
     						  /\ makes_unfresh_just i h0 h1
     						  /\ modifies regions_modified_honest h0 h1))
@@ -231,7 +242,19 @@ val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
     /\ (dishonest i
     	==> (modifies regions_modified_dishonest h0 h1
     	   /\ Key.leak_key k = prf_odhGT sk pk
-    	   /\ makes_unfresh_just i h0 h1))
+    	   /\ makes_unfresh_just i h0 h1
+    	   /\ MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log))
+    /\ (modifies regions_modified_honest h0 h1
+      \/ h0 == h1
+      \/ modifies regions_modified_dishonest h0 h1)
+    /\ ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h1) ==>  fresh i h1)
+    /\ ((honest i /\ MM.fresh dh_key_log i h0) ==> (MR.m_sel h1 dh_key_log == MM.upd (MR.m_sel h0 dh_key_log) i k))
+    /\ ((honest i /\ MM.defined dh_key_log i h0) ==> (MR.m_sel h1 dh_key_log == MR.m_sel h0 dh_key_log))
+    /\ (dishonest i ==> (MR.m_sel h1 dh_key_log == MR.m_sel h0 dh_key_log))
+    /\ ~(fresh i h1)
+    /\ MR.m_contains dh_key_log h1
+    /\ (honest i ==> ((MR.m_sel h1 dh_key_log == MM.upd (MR.m_sel h0 dh_key_log) i k)
+        \/ (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log)))
   ))
 let prf_odh dh_sk dh_pk =
   let h0 = ST.get() in
@@ -243,10 +266,12 @@ let prf_odh dh_sk dh_pk =
   if honest_i then (
     lemma_honest_not_dishonest i;
     let k = handle_honest_i i in
+    MR.m_recall dh_key_log;
     k
   ) else (
     lemma_dishonest_not_honest i;
     // TODO: Need to make sure that generation of ids is symmetric!
     let k = handle_dishonest_i dh_sk dh_pk i in
+    MR.m_recall dh_key_log;
     k
   )

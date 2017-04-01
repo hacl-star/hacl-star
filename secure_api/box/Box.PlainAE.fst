@@ -27,7 +27,7 @@ let coerce #i p =
    We allow a transition from protected_ae_plain to ae_plain only if either there is no
    idealization or if if the message is not honest.
 *)
-val repr: #i:id{AE_id? i} -> p:protected_ae_plain i{not ae_ind_cca \/ (dishonest i)} -> Tot (ae_plain)
+val repr: #i:id{AE_id? i} -> p:protected_ae_plain i{not ae_ind_cpa \/ (dishonest i)} -> Tot (ae_plain)
 let repr #i p = 
     PlainBox.repr p 
 
