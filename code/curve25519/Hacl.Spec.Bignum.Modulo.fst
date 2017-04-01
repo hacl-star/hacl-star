@@ -183,6 +183,10 @@ private let lemma_reduce_spec_ s = ()
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400"
 
+private let lemma_distr_5 a b c d e n : Lemma (n * (a + b + c + d + e) = n*a + n*b + n*c + n*d + n*e)
+ = ()
+
+
 private let lemma_reduce_spec_1_1 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemma
   ((pow2 limb_size * (a + pow2 51 * b + pow2 102 * c + pow2 153 * d + pow2 204 * e))
     = (pow2 51 * a + pow2 102 * b + pow2 153 * c + pow2 204 * d + pow2 255 * e))
@@ -190,7 +194,7 @@ private let lemma_reduce_spec_1_1 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemm
     Math.Lemmas.pow2_plus limb_size 102;
     Math.Lemmas.pow2_plus limb_size 153;
     Math.Lemmas.pow2_plus limb_size 204;
-    admit() //FIXME!!! <-- NS:trying to get this file back into CI 03/31
+    lemma_distr_5 (pow2 limb_size) a (pow2 51 * b) (pow2 102 * c) (pow2 153 * d) (pow2 204 * e)
 
 
 private let lemma_reduce_spec_1 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemma
