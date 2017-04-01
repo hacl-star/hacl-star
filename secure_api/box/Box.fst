@@ -165,16 +165,46 @@ let beforenm_memory_equality_framing_lemma h0 h1 i = ()
 
 #reset-options
 #set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 1"
-val beforenm_freshness_equality_framing_lemma: h0:mem -> h1:mem -> i:id{AE_id? i /\ honest i} -> k:AE.key{AE.get_index k = i} -> Lemma
+val beforenm_freshness_equality_framing_lemma: h0:mem -> h1:mem -> i:id -> k:AE.key{AE.get_index k = i} -> Lemma
   (requires (
     log_invariant h0 i
-    /\ (MR.m_sel h1 dh_key_log == MM.upd (MR.m_sel h0 dh_key_log) i k)
+    /\ MR.m_contains id_log h0
+    /\ MR.m_contains id_log h1
+    /\ MR.m_contains dh_key_log h0
+    /\ MR.m_contains dh_key_log h1
+    /\ ((AE_id? i /\ honest i) ==> (MR.m_sel h1 dh_key_log == MM.upd (MR.m_sel h0 dh_key_log) i k))
     /\ fresh i h0
-    /\ unfresh i 
+    /\ MM.defined id_log i h1
   ))
   (ensures (
-    ((honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) // all keys that are not in the dh_key_log are fresh
+    ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) // all keys that are not in the dh_key_log are fresh
   ))
+let beforenm_freshness_equality_framing_lemma h0 h1 i k = ()
+
+
+val beforenm_nonce_freshness_framing_lemma: h0:mem -> h1:mem -> i:id -> k:AE.key{AE.get_index k = i} -> Lemma
+  (requires (
+    let regions_modified_dishonest = [id_log_region] in
+    let regions_modified_honest_set = Set.as_set (regions_modified_dishonest @ [dh_key_log_region;box_key_log_region]) in
+    let regions_modified_dishonest_set:Set.set (r:HH.rid) = Set.as_set regions_modified_dishonest in
+    log_invariant h0 i
+    /\ MR.m_contains id_log h0
+    /\ MR.m_contains id_log h1
+    /\ MR.m_contains dh_key_log h0
+    /\ MR.m_contains dh_key_log h1
+    /\ ((honest i) ==> (MR.m_sel h1 dh_key_log == MM.upd (MR.m_sel h0 dh_key_log) i k))
+    /\ fresh i h0
+    /\ MM.defined id_log i h1
+    /\ (modifies regions_modified_honest_set h0 h1
+      \/ h0 == h1
+      \/ modifies regions_modified_dishonest_set h0 h1)
+    /\ MR.m_sel h0 box_log == MR.m_sel h1 box_log
+  ))
+  (ensures (
+    ((honest i) ==> (MM.fresh dh_key_log i h0 ==> (forall n. MM.fresh box_log (n,i) h0))) // for fresh keys, all nonces are fresh
+  ))
+let beforenm_nonce_freshness_framing_lemma h0 h1 i k = ()
+
  
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 (**
@@ -285,91 +315,171 @@ let box_beforenm pk sk =
   k
 
 
+#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
+val afternm_memory_equality_framing_lemma: h0:mem -> h1:mem -> i:id -> Lemma
+  (requires (
+    let modified_regions:Set.set (r:HH.rid) = Set.singleton ae_log_region in
+    log_invariant h0 i
+    /\ (modifies modified_regions h0 h1 \/ h0 == h1)
+    /\ MR.m_contains id_log h0
+    /\ MR.m_contains id_log h1
+  ))
+  (ensures (
+    MR.m_sel h1 box_key_log == MR.m_sel h1 dh_key_log
+    /\ MR.m_sel h0 id_log == MR.m_sel h1 id_log
+    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) // dh_key_log and box_key_log are in sync
+  ))
+let afternm_memory_equality_framing_lemma h0 h1 i = ()
 
+
+#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
+assume val afternm_log_append_framing_lemma: h0:mem -> h1:mem -> i:id{AE_id? i} -> n:nonce -> c:c -> p:protected_pkae_plain{PlainBox.get_index p = i} -> Lemma
+  (requires (
+    let m = AE.message_wrap #i p in
+    let key = (n,i) in
+    let value = (c,m) in
+    MR.m_contains ae_log h0
+    /\ MR.m_contains ae_log h1
+    /\ MR.m_contains box_log h0
+    /\ MR.m_contains box_log h1
+    /\ MR.m_sel h0 ae_log == MR.m_sel h0 box_log
+    /\ MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) key value
+    /\ MR.m_sel h1 ae_log == MM.upd (MR.m_sel h0 ae_log) key value
+  ))
+  (ensures (
+    MR.m_sel h1 box_log == MR.m_sel h1 ae_log
+  ))
+//let afternm_log_append_framing_lemma h0 h1 i  c k n p = ()
+
+
+#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
+val afternm_nonce_freshness_framing_lemma: h0:mem -> h1:mem -> i:id{AE_id? i} -> n:nonce -> c:c -> p:protected_pkae_plain{PlainBox.get_index p = i} -> Lemma
+  (requires (
+    let m = AE.message_wrap #i p in
+    let key = (n,i) in
+    let value = (c,m) in
+    let modified_regions:Set.set (r:HH.rid) = Set.singleton ae_log_region in
+    honest i
+    /\ MR.m_contains ae_log h0
+    /\ MR.m_contains ae_log h1
+    /\ MR.m_contains box_log h0
+    /\ MR.m_contains box_log h1
+    /\ MR.m_contains dh_key_log h0
+    /\ MR.m_contains dh_key_log h1
+    /\ (modifies modified_regions h0 h1 \/ h0 == h1)
+    /\ (honest i ==> MR.m_sel h0 ae_log == MR.m_sel h0 box_log)
+    /\ (honest i ==> MR.m_sel h1 box_log == MR.m_sel h1 ae_log)
+    /\ (honest i ==> MR.m_sel h1 ae_log == MM.upd (MR.m_sel h0 ae_log) key value)
+    /\ (honest i ==> MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) key value)
+    /\ ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h0))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
+    /\ MM.defined dh_key_log i h0
+    /\ MM.defined dh_key_log i h1
+  ))
+  (ensures (
+    ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h1) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h1))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
+  ))
+let afternm_nonce_freshness_framing_lemma h0 h1 i n c p = ()
+
+
+#reset-options
+#set-options "--z3rlimit 200 --max_ifuel 1 --max_fuel 1"
 (**
    box_afternm is used to encrypt a plaintext under an AE key using a nonce. If idealized and if the AE id is honest,
    the plaintext is stored in the box_log indexed by the AE id and the nonce.
 *)
+val box_afternm: k:AE.key ->
+		     n:nonce ->
+		     p:protected_pkae_plain{PlainBox.get_index p = AE.get_index k} ->
+		     ST c
+  (requires (fun h0 -> 
+    let i = AE.get_index k in
+    // Liveness of global logs and local key log of the returned key.
+    MR.m_contains id_log h0
+    /\ MR.m_contains id_honesty_log h0
+    /\ MR.m_contains ae_log h0
+    /\ MR.m_contains box_log h0
+    /\ MR.m_contains box_key_log h0
+    /\ MR.m_contains dh_key_log h0
+    ///\ log_invariant h0 i
+    // Nonce freshness
+    /\ ((honest i) ==> MM.fresh box_log (n,i) h0)
+    // If the key is honest, it needs to be in the box_key_log
+    /\ ((honest i) ==> MM.defined box_key_log i h0)
+    // The key isn't fresh
+    /\ ~(fresh i h0)
+    /\ MR.m_sel h0 box_key_log == MR.m_sel h0 dh_key_log
+    /\ MR.m_sel h0 ae_log == MR.m_sel h0 box_log
+    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // dh_key_log and box_key_log are in sync
+    /\ ((AE_id? i /\ honest i /\ MM.fresh box_key_log i h0) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h0))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
+  ))
+  (ensures (fun h0 c h1 -> 
+    let i = AE.get_index k in
+    let modified_regions:Set.set (r:HH.rid) = Set.union (Set.singleton box_log_region) (Set.singleton ae_log_region) in
+    let k_raw = get_keyGT k in
+    // If dishonest or not idealizing, then we encrypt the actual message.
+    ((~(b2t pkae_ind_cpa) \/ dishonest i)
+      ==> (c = SPEC.secretbox_easy (PlainBox.repr p) (AE.get_keyGT k) n))
+    // If honest and idealizing, we encrypt zeros.
+    /\ ((b2t pkae /\ honest i)
+      ==> (c == SPEC.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n))
+    //// We have put the message both in the local key log and in the box_log
+    /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))
+                                /\ MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))))
+    /\ ((dishonest i) ==> h0 == h1)
+    /\ ((honest i) ==> modifies modified_regions h0 h1)
+    //// Liveness of global logs and the local key log.
+    ///\ MR.m_contains id_log h1
+    ///\ MR.m_contains id_honesty_log h1
+    ///\ MR.m_contains box_log h1
+    ///\ MR.m_contains box_key_log h1
+    ///\ MR.m_contains dh_key_log h1
+    ///\ log_invariant h1 i
+    // Both of these done via framing lemma.
+    ///\ MR.m_sel h1 box_key_log == MR.m_sel h1 dh_key_log
+    ///\ MR.m_sel h1 ae_log == MR.m_sel h1 box_log
+    ///\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // dh_key_log and box_key_log are in sync
+    ///\ ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h1) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h1))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
+  ))
 
 
-//val box_afternm: k:AE.key ->
-//		     n:nonce ->
-//		     p:protected_pkae_plain{PlainBox.get_index p = AE.get_index k} ->
-//		     ST c
-//  (requires (fun h0 -> 
-//    let i = AE.get_index k in
-//    // Liveness of global logs and local key log of the returned key.
-//    MR.m_contains id_log h0
-//    /\ MR.m_contains id_honesty_log h0
-//    /\ MR.m_contains box_log h0
-//    /\ MR.m_contains box_key_log h0
-//    /\ MR.m_contains dh_key_log h0
-//    // Sync of box_log and the local log of the returned key
-//    // id is fresh if it is in the box_key_log, 
-//    // sync between box_key_log and dh_key_log and
-//    // if id is fresh, then there are no entries for it in the box_log
-//    /\ log_invariant h0 i
-//    // Nonce freshness
-//    /\ ((honest i) ==> MM.fresh box_log (n,i) h0)
-//    // If the key is honest, it needs to be in the box_key_log
-//    /\ ((honest i) ==> MM.defined box_key_log i h0)
-//    // The key isn't fresh
-//    /\ ~(fresh i h0)
-//    /\ MR.m_sel h0 box_key_log == MR.m_sel h0 dh_key_log
-//    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // dh_key_log and box_key_log are in sync
-//    /\ ((AE_id? i /\ honest i /\ MM.fresh box_key_log i h0) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h0))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
-//  ))
-//  (ensures (fun h0 c h1 -> 
-//    let i = AE.get_index k in
-//    let k_raw = get_keyGT k in
-//    // If dishonest or not idealizing, then we encrypt the actual message.
-//    ((dishonest i \/ ~(b2t pkae))
-//      ==> (c = SPEC.secretbox_easy (PlainBox.repr p) (AE.get_keyGT k) n))
-//    // If honest and idealizing, we encrypt zeros.
-//    /\ ((honest i /\ b2t pkae)
-//      ==> (c == SPEC.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n))
-//    // We have put the message both in the local key log and in the box_log
-//    /\ MR.witnessed (MM.contains box_log (n,i) (c,AE.message_wrap p))
-//    ///\ MR.witnessed (MM.contains box_log (n,i) (c,p))
-//    // Liveness of global logs and the local key log.
-//    /\ MR.m_contains id_log h1
-//    /\ MR.m_contains id_honesty_log h1
-//    /\ MR.m_contains box_log h1
-//    /\ MR.m_contains box_key_log h1
-//    /\ MR.m_contains dh_key_log h1
-//    /\ log_invariant h1 i
-//  ))
-//let box_afternm k n p =
-//  MR.m_recall id_honesty_log;
-//  MR.m_recall box_key_log;
-//  MR.m_recall id_log;
-//  MR.m_recall dh_key_log;
-//  MR.m_recall box_log;
-//  let i = AE.get_index k in
-//  fresh_unfresh_contradiction i;
-//  let ae_m = AE.message_wrap #i p in
-//  let c = AE.encrypt #i n k ae_m in
-//  let honest_i = is_honest i in
-//  (if honest_i then
-//    MM.extend box_log (n,i) (c,p));
-//  MR.m_recall id_honesty_log;
-//  MR.m_recall box_key_log;
-//  MR.m_recall id_log;
-//  MR.m_recall dh_key_log;
-//  MR.m_recall box_log;
-//  c
-//  
-//
-//val box: #(pk_id:id{DH_id? pk_id}) -> 
-//	     #(sk_id:id{DH_id? sk_id}) -> 
-//	     pk:pkae_pkey pk_id{registered pk_id} -> 
-//	     sk:pkae_skey sk_id{registered sk_id} -> 
+let box_afternm k n p =
+  MR.m_recall id_honesty_log;
+  MR.m_recall box_key_log;
+  MR.m_recall id_log;
+  MR.m_recall dh_key_log;
+  MR.m_recall box_log;
+  let i = AE.get_index k in
+  fresh_unfresh_contradiction i;
+  let c = AE.encrypt #i n k (AE.message_wrap #i p) in
+  MR.m_recall id_honesty_log;
+  MR.m_recall box_key_log;
+  MR.m_recall id_log;
+  MR.m_recall dh_key_log;
+  MR.m_recall box_log;
+  let honest_i = is_honest i in
+  (if honest_i then (
+    //lemma_honest_not_dishonest i;
+    MM.extend box_log (n,i) (c,AE.message_wrap #i p)
+  ) else (
+    //lemma_dishonest_not_honest i;
+    ()));
+  MR.m_recall id_honesty_log;
+  MR.m_recall box_key_log;
+  MR.m_recall id_log;
+  MR.m_recall dh_key_log;
+  MR.m_recall box_log;
+  c
+  
+
+//val box: pk:pkae_pkey -> 
+//	     sk:pkae_skey -> 
 //	     n:nonce -> 
 //	     p:protected_pkae_plain{PlainBox.get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))} 
 //	     -> ST c
 //  (requires (fun h0 ->
 //    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
 //    registered i
+//    /\ (honest i \/ dishonest i)
 //    // Liveness of global logs
 //    /\ MR.m_contains id_log h0
 //    /\ MR.m_contains id_honesty_log h0
@@ -377,25 +487,50 @@ let box_beforenm pk sk =
 //    /\ MR.m_contains box_key_log h0
 //    /\ MR.m_contains dh_key_log h0
 //    // Make sure that log_invariants hold.
-//    /\ log_invariant h0 i
+//    ///\ log_invariant h0 i
 //    // Make sure that nonce is fresh
 //    /\ MM.fresh box_log (n,i) h0
+//    /\ MR.m_sel h0 box_key_log == MR.m_sel h0 dh_key_log  // dh_key_log and box_key_log are in sync
+//    /\ MR.m_sel h0 box_log == MR.m_sel h0 ae_log  // ae_log and box_log are in sync
+//    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // all keys that are not in the dh_key_log are fresh
+//    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 ==> (forall n. MM.fresh box_log (n,i) h0))) // for fresh keys, all nonces are fresh
 //  ))
 //  (ensures (fun h0 c h1 -> 
 //    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
 //    // Make sure that log_invariants hold. Would like to ensure "all_keys" variant, but too expensive to verify currently.
 //    log_invariant h1 i
+//    /\ ((~(b2t pkae_ind_cpa) \/ dishonest i)
+//      ==> (c = SPEC.secretbox_easy (PlainBox.repr p) (prf_odhGT sk pk) n))
+//    // If honest and idealizing, we encrypt zeros.
+//    // TODO: How to get hold of the key?
+//    ///\ ((b2t pkae /\ honest i)
+//    //  ==> (c == SPEC.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n))
+//    //// We have put the message both in the local key log and in the box_log
+//    /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))
+//                                /\ MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))))
 //    /\ MR.m_contains id_log h1
 //    /\ MR.m_contains id_honesty_log h1
 //    /\ MR.m_contains box_log h1
 //    /\ MR.m_contains box_key_log h1
 //    /\ MR.m_contains dh_key_log h1
 //  ))
-//let box #pk_id #sk_id pkae_pk pkae_sk n p =
-//  let k = box_beforenm #pk_id #sk_id pkae_pk pkae_sk in
+//let box pk sk n p =
+//  let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
+//  let h0 = ST.get() in
+//  let k = box_beforenm pk sk in
+//  let h1 = ST.get() in
+//  beforenm_memory_equality_framing_lemma h0 h1 i;
+//  beforenm_freshness_equality_framing_lemma h0 h1 i k;
+//  beforenm_nonce_freshness_framing_lemma h0 h1 i k;
+//  let h0 = ST.get() in
 //  let c = box_afternm k n p in
+//  let h1 = ST.get() in
+//  afternm_memory_equality_framing_lemma h0 h1 i;
+//  afternm_log_append_framing_lemma h0 h1 i;
+//  afternm_nonce_freshness_framing_lemma h0 h1 i n c p;
 //  c
-//
+
+
 //val box_open: #(sk_id:id{DH_id? sk_id}) -> 
 //	     #(pk_id:id{DH_id? pk_id}) -> 
 //	     n:nonce ->  

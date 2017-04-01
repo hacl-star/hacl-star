@@ -44,11 +44,11 @@ let generate_ae_id i1 i2 =
     AE_id (i2',i1')
 
 //TODO: Fix this!
-val symmetric_id_generation: i1:id{AE_id? i1} -> i2:id{AE_id? i2} -> Lemma
+assume val symmetric_id_generation: i1:id{AE_id? i1} -> i2:id{AE_id? i2} -> Lemma
   (requires (True))
   (ensures (forall id1 id2. generate_ae_id id1 id2 = generate_ae_id id2 id1))
   [SMTPat (generate_ae_id i1 i2)]
-let symmetric_id_generation i1 i2 = ()
+//let symmetric_id_generation i1 i2 = ()
 
 
 type id_log_key = id
@@ -66,7 +66,7 @@ type id_honesty_log_value = b:bool{~prf_odh ==> b=false}
 type id_honesty_log_range = fun id_honesty_log_key -> id_honesty_log_value
 let id_honesty_log_inv (m:MM.map' id_honesty_log_key id_honesty_log_range) = True
        
-assume val id_honesty_log_region: (r:MR.rid{ extends r root /\ is_eternal_region r /\ is_below r root})
+assume val id_honesty_log_region: (r:MR.rid{ extends r root /\ is_eternal_region r /\ is_below r root /\ disjoint r id_log_region})
 
 assume val id_honesty_log: MM.t id_honesty_log_region id_honesty_log_key id_honesty_log_range id_honesty_log_inv
 

@@ -14,10 +14,14 @@ val prf_odh : bool
 
 val ae_int_ctxt : bool
 
-val ae_ind_cpa : bool
+val ae_ind_cpa : b:bool{b ==> ae_int_ctxt} // ae_int_ctxt needs to be idealized before ae_ind_cpa
 
-val ae_ind_cca : b:bool{b <==> (ae_ind_cpa /\ ae_int_ctxt)}
+val ae_ind_cca : b:bool{b <==> (b2t ae_ind_cpa /\ ae_int_ctxt)}
 
-val pkae : b:bool{b <==> ((b2t ae_ind_cca) /\ prf_odh)}
+val pkae_int_ctxt : b:bool{b <==> ae_int_ctxt}
+
+val pkae_ind_cpa : b:bool{b <==> b2t ae_ind_cpa}
+
+val pkae : b:bool{b ==> (((b2t ae_ind_cca) /\ prf_odh) /\ (b2t pkae_int_ctxt /\ b2t pkae_ind_cpa))}
 
 val state : bool

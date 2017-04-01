@@ -128,7 +128,7 @@ let get_keyGT k =
 
 
 #reset-options
-#set-options "--z3rlimit 50 --max_ifuel 10 --max_fuel 10"
+#set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 1"
 (**
    Encrypt a a message under a key. Idealize if the key is honest and ae_ind_cca true.
 *)
@@ -147,9 +147,11 @@ val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_pla
       ==> (c = SPEC.secretbox_easy (create_zero_bytes (length m)) k.raw n))
     /\ ((~(b2t ae_ind_cpa) \/ dishonest i)
       ==> (c = SPEC.secretbox_easy (repr m) k.raw n))
-    ///\ (dishonest i \/ honest i)
-    ///\ ((AE_id? i /\ honest i) ==> (MR.witnessed (MM.contains ae_log (n,i) (c,m))
-    //                            /\ MR.m_sel h1 ae_log == MM.upd current_log (n,i) (c,m)))
+    /\ (dishonest i \/ honest i)
+    /\ ((honest i) ==> (MR.witnessed (MM.contains ae_log (n,i) (c,m))
+                                /\ MR.m_sel h1 ae_log == MM.upd current_log (n,i) (c,m)))
+    /\ ((dishonest i) ==> h0 == h1)
+    /\ (modifies modified_regions h0 h1 \/ h0 == h1)
   ))
 let encrypt #i n k m =
   MR.m_recall id_log;
@@ -166,24 +168,15 @@ let encrypt #i n k m =
   //let  c = SPEC.secretbox_easy p k.raw n in
   let c = 
     if (ae_ind_cpa && honest_i) then (
-      admit();
-      SPEC.secretbox_easy (Seq.create (length m) (UInt8.uint_to_t 0)) k.raw n
+      let c' = SPEC.secretbox_easy (Seq.create (length m) (UInt8.uint_to_t 0)) k.raw n in
+      c'
     ) else (
       let c' = SPEC.secretbox_easy (repr m) k.raw n in
-  assert(
-     ((c' = SPEC.secretbox_easy (repr m) k.raw n))
-     );
-  admit();
-  c'
+      c'
     )
   in
   if honest_i then (
     MM.extend ae_log (n,i) (c,m));
-  assert(
-    ((~(b2t ae_ind_cpa) \/ dishonest i)
-     ==> (c = SPEC.secretbox_easy (repr m) k.raw n))
-     );
-  admit();
   c
 
 
@@ -195,12 +188,11 @@ let encrypt #i n k m =
 *)
 val decrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} -> ST (option (protected_ae_plain i))
   (requires (fun h -> 
-    Map.contains h.h ae_log_region
-    /\ MR.m_contains ae_log h
+    MR.m_contains ae_log h
     /\ registered i
   ))
   (ensures  (fun h0 p h1 -> 
-    modifies_none h0 h1
+    h0 == h1
     /\ m_contains ae_log h1
     /\ ((~(b2t ae_int_ctxt) \/ dishonest i)
       ==> (Some? (SPEC.secretbox_open_easy c k.raw n)
