@@ -267,6 +267,7 @@ val box_beforenm: pk:pkae_pkey ->
     /\ (dishonest i (*x*)
       ==> (modifies regions_modified_dishonest_set h0 h1
          /\ leak_key k = ODH.prf_odhGT sk pk))
+    /\ ~(fresh i h1)
     //// id is fresh if it is in the box_key_log, 
     //// sync between box_key_log and dh_key_log and
     //// if id is fresh, then there are no entries for it in the box_log
@@ -318,7 +319,7 @@ let box_beforenm pk sk =
 #set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
 val afternm_memory_equality_framing_lemma: h0:mem -> h1:mem -> i:id -> Lemma
   (requires (
-    let modified_regions:Set.set (r:HH.rid) = Set.singleton ae_log_region in
+    let modified_regions:Set.set (r:HH.rid) = Set.union (Set.singleton box_log_region) (Set.singleton ae_log_region) in
     log_invariant h0 i
     /\ (modifies modified_regions h0 h1 \/ h0 == h1)
     /\ MR.m_contains id_log h0
@@ -343,8 +344,10 @@ assume val afternm_log_append_framing_lemma: h0:mem -> h1:mem -> i:id{AE_id? i} 
     /\ MR.m_contains box_log h0
     /\ MR.m_contains box_log h1
     /\ MR.m_sel h0 ae_log == MR.m_sel h0 box_log
-    /\ MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) key value
-    /\ MR.m_sel h1 ae_log == MM.upd (MR.m_sel h0 ae_log) key value
+    /\ ((honest i) ==> MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) key value)
+    ///\ ((honest i) ==> MR.m_sel h1 ae_log == MM.upd (MR.m_sel h0 ae_log) key value)
+    /\ ((dishonest i) ==> MR.m_sel h0 ae_log == MR.m_sel h1 ae_log)
+    ///\ ((dishonest i) ==> MR.m_sel h0 box_log == MR.m_sel h1 box_log)
   ))
   (ensures (
     MR.m_sel h1 box_log == MR.m_sel h1 ae_log
@@ -358,22 +361,20 @@ val afternm_nonce_freshness_framing_lemma: h0:mem -> h1:mem -> i:id{AE_id? i} ->
     let m = AE.message_wrap #i p in
     let key = (n,i) in
     let value = (c,m) in
-    let modified_regions:Set.set (r:HH.rid) = Set.singleton ae_log_region in
-    honest i
-    /\ MR.m_contains ae_log h0
+    let modified_regions:Set.set (r:HH.rid) = Set.union (Set.singleton box_log_region) (Set.singleton ae_log_region) in
+    MR.m_contains ae_log h0
     /\ MR.m_contains ae_log h1
     /\ MR.m_contains box_log h0
     /\ MR.m_contains box_log h1
     /\ MR.m_contains dh_key_log h0
     /\ MR.m_contains dh_key_log h1
     /\ (modifies modified_regions h0 h1 \/ h0 == h1)
-    /\ (honest i ==> MR.m_sel h0 ae_log == MR.m_sel h0 box_log)
     /\ (honest i ==> MR.m_sel h1 box_log == MR.m_sel h1 ae_log)
-    /\ (honest i ==> MR.m_sel h1 ae_log == MM.upd (MR.m_sel h0 ae_log) key value)
     /\ (honest i ==> MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) key value)
     /\ ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h0))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
-    /\ MM.defined dh_key_log i h0
-    /\ MM.defined dh_key_log i h1
+    /\ ~(fresh i h0)
+    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // dh_key_log and box_key_log are in sync
+    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) // dh_key_log and box_key_log are in sync
   ))
   (ensures (
     ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h1) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h1))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
@@ -423,16 +424,17 @@ val box_afternm: k:AE.key ->
     /\ ((b2t pkae /\ honest i)
       ==> (c == SPEC.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n))
     //// We have put the message both in the local key log and in the box_log
-    /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))
-                                /\ MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))))
+    /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))))
+    /\ ((honest i) ==> (MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))))
     /\ ((dishonest i) ==> h0 == h1)
     /\ ((honest i) ==> modifies modified_regions h0 h1)
-    //// Liveness of global logs and the local key log.
-    ///\ MR.m_contains id_log h1
-    ///\ MR.m_contains id_honesty_log h1
-    ///\ MR.m_contains box_log h1
-    ///\ MR.m_contains box_key_log h1
-    ///\ MR.m_contains dh_key_log h1
+    // Liveness of global logs and the local key log.
+    /\ MR.m_contains id_log h1
+    /\ MR.m_contains id_honesty_log h1
+    /\ MR.m_contains box_log h1
+    /\ MR.m_contains ae_log h1
+    /\ MR.m_contains box_key_log h1
+    /\ MR.m_contains dh_key_log h1
     ///\ log_invariant h1 i
     // Both of these done via framing lemma.
     ///\ MR.m_sel h1 box_key_log == MR.m_sel h1 dh_key_log
@@ -448,6 +450,7 @@ let box_afternm k n p =
   MR.m_recall id_log;
   MR.m_recall dh_key_log;
   MR.m_recall box_log;
+  MR.m_recall ae_log;
   let i = AE.get_index k in
   fresh_unfresh_contradiction i;
   let c = AE.encrypt #i n k (AE.message_wrap #i p) in
@@ -456,6 +459,7 @@ let box_afternm k n p =
   MR.m_recall id_log;
   MR.m_recall dh_key_log;
   MR.m_recall box_log;
+  MR.m_recall ae_log;
   let honest_i = is_honest i in
   (if honest_i then (
     //lemma_honest_not_dishonest i;
@@ -468,6 +472,7 @@ let box_afternm k n p =
   MR.m_recall id_log;
   MR.m_recall dh_key_log;
   MR.m_recall box_log;
+  MR.m_recall ae_log;
   c
   
 
@@ -526,18 +531,19 @@ let box pk sk n p =
   beforenm_memory_equality_framing_lemma h0 h1 i;
   beforenm_freshness_equality_framing_lemma h0 h1 i k;
   beforenm_nonce_freshness_framing_lemma h0 h1 i k;
-  admit()
-  // It verifies until here. Continue here.
-
   let h0 = ST.get() in
   let c = box_afternm k n p in
   let h1 = ST.get() in
   afternm_memory_equality_framing_lemma h0 h1 i;
-  afternm_log_append_framing_lemma h0 h1 i;
+  afternm_log_append_framing_lemma h0 h1 i n c p;
   afternm_nonce_freshness_framing_lemma h0 h1 i n c p;
+  let h0 = ST.get() in
+  assert(log_invariant h0 i);
+  admit()
+  // This goes through. TODO: Properly specify post-conditions.
   c
 
-
+// Does not verify. Error is line 409
 //val box_open: #(sk_id:id{DH_id? sk_id}) -> 
 //	     #(pk_id:id{DH_id? pk_id}) -> 
 //	     n:nonce ->  
