@@ -195,8 +195,7 @@ let lemma_propagate_inv_enxor #i #rw #aadlen #plainlen aead_st nonce aad plain c
 	frame_prf_prf_mac_inv table_1 h0 h1 x
     in
     forall_intro aux
-  end
-  else ();
+  end;
   if safeMac i then begin
     let dom_0 = {iv=nonce; ctr=PRF.ctr_0 i} in
     let entries_0   = HS.sel #(aead_entries i) h0 (st_ilog aead_st) in
