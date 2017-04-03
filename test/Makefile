@@ -12,7 +12,8 @@ all:
 	#if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
 	#if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
 	#$(MAKE) ct
-	$(MAKE) verify
+	#$(MAKE) verify
+	$(MAKE) verify-crypto
 	$(MAKE) -C openssl-engine
 
 travis:
