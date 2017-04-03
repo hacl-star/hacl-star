@@ -148,6 +148,7 @@ let shuffle_core (block:block_w) (hash:hash_w) (t:counter{t < size_k_w}) : Tot h
   (**) assert(t < Seq.length k);
   Seq.Create.create_8 (t1 +%^ t2) a b c (d +%^ t1) e f g
 
+
 let shuffle (hash:hash_w) (block:block_w) : Tot hash_w =
   Spec.Loops.repeat_range_spec 0 size_ws_w (shuffle_core block) hash
 

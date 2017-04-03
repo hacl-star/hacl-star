@@ -190,8 +190,8 @@ let lemma_ws_def_0 b t = ()
 
 private
 val lemma_ws_def_1: (b:Spec.block_w) -> (t:Spec.counter{16 <= t /\ t < 64}) -> Lemma
-  (Spec.ws b t = 
-    (let open Spec.SHA2 in 
+  (Spec.ws b t =
+    (let open Spec.SHA2 in
      let t16 = ws b (t - 16) in
      let t15 = ws b (t - 15) in
      let t7  = ws b (t - 7) in
@@ -240,7 +240,7 @@ let rec ws ws_w block_w t =
       let h = ST.get() in
       lemma_ws_def_0 (as_seq h0 block_w) (UInt32.v t);
       assert(Seq.index (as_seq h ws_w) (UInt32.v t) == Spec.ws (as_seq h0 block_w) (UInt32.v t))
-    )    
+    )
     else (
       assert (UInt32.v t >= 16);
       assert (UInt32.v t < 64);
@@ -409,7 +409,7 @@ private val shuffle_core:
           (let w = as_seq h ws_w in
            let b = as_seq h block_w in
            (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i)) ))
-        (ensures  (fun h0 r h1 -> live h0 hash_w /\ live h0 ws_w /\ live h0 k_w /\ live h0 block_w 
+        (ensures  (fun h0 r h1 -> live h0 hash_w /\ live h0 ws_w /\ live h0 k_w /\ live h0 block_w
           /\ live h1 hash_w /\ modifies_1 hash_w h0 h1
                   /\ (let seq_hash_0 = as_seq h0 hash_w in
                   let seq_hash_1 = as_seq h1 hash_w in
@@ -450,7 +450,7 @@ private val shuffle:
           as_seq h k_w == Spec.k /\
           (let w = as_seq h ws_w in
            let b = as_seq h block_w in
-           (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i)) )) 
+           (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i)) ))
         (ensures  (fun h0 r h1 -> live h1 hash_w /\ modifies_1 hash_w h0 h1 /\ live h0 block_w
                   /\ live h0 hash_w
                   /\ (let seq_hash_0 = as_seq h0 hash_w in
@@ -478,7 +478,7 @@ let shuffle hash block ws k =
   in
   lemma_repeat_range_0 0 0 (Spec.shuffle_core (as_seq h0 block)) (as_seq h0 hash);
   for 0ul size_ws_w inv f'
-  
+
 
 
 [@"substitute"]
@@ -562,12 +562,12 @@ let update state data =
   Buffer.blit state pos_whash_w hash_0 0ul size_whash_w;
 
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
-  ws_compute ws_w data_w;
+  ws ws_w data_w 0ul;
 
   (* Step 2 : Initialize the eight working variables *)
   (* Step 3 : Perform logical operations on the working variables *)
   (* Step 4 : Compute the ith intermediate hash value *)
-  shuffle hash_0 ws_w k_w;
+  shuffle hash_0 data_w ws_w k_w;
 
   (* Retrieve the current working hash *)
   let hash_1 = Buffer.sub state pos_whash_w size_whash_w in
@@ -576,7 +576,7 @@ let update state data =
   sum_hash hash_1 hash_0;
 
   (* Increment the total number of blocks processed *)
-  (* JK: proposal 
+  (* JK: proposal
      let st_len = Buffer.sub state (pos_count_w) 1ul in
      st_len.(0ul) <- (st_len.(0ul) +%^ (u32_to_s32 1ul)); *)
   state.(pos_count_w) <- (state.(pos_count_w) +%^ (u32_to_s32 1ul));
