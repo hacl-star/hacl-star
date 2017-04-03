@@ -1,4 +1,4 @@
-FSTAR_HOME?=../../../dependencies/FStar
+FSTAR_HOME?=../../dependencies/FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../..
 include ../Makefile.include
@@ -49,8 +49,7 @@ X25519_SPECIFIC= \
 	Hacl.EC.fst
 
 # Files that are too slow and for which verification speed must improve
-SLOW= Hacl.Spec.Bignum.Fsquare.fst \
-	Hacl.Spec.Bignum.Modulo.fst
+SLOW=
 
 # Files that still have errors
 TODO=
@@ -58,13 +57,16 @@ TODO=
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 
 
+HINTS_ENABLED?=--use_hints --record_hints
+
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs
+		 --include ../../specs \
+		$(HINTS_ENABLED) $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs
+		--include ../../specs
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -74,7 +76,7 @@ all-ct: $(addsuffix -ct, $(X25519_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^
 
 all-ver: $(addsuffix -verify, $(X25519_FILES))
 
@@ -86,7 +88,7 @@ all-lax: $(addsuffix -lax, $(X25519_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	-$(FSTARB) $^
 
 all-hints2: $(addsuffix -hints, $(X25519_FILES))
 

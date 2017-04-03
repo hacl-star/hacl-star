@@ -197,7 +197,7 @@ private let lemma_aux_2 a b c d : Lemma ( (b * d) * a * c = (b * a) * (d * c) ) 
 private let lemma_aux_3 a b c : Lemma ( a * b * c = (a * b) * c ) = ()
 
 
-#set-options "--z3rlimit 50"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 val lemma_fsquare_spec_2_2_0: r0:nat -> r1:nat -> r2:nat -> r3:nat -> r4:nat -> Lemma
   ( r0 * r0 + r0 * (pow2 51 * r1) + r0 * (pow2 102 * r2) + r0 * (pow2 153 * r3) + r0 * (pow2 204 * r4)
@@ -210,7 +210,7 @@ let lemma_fsquare_spec_2_2_0 r0 r1 r2 r3 r4 =
   lemma_aux_1 r0 (pow2 204) r4
 
 
-#set-options "--z3rlimit 10"
+#reset-options "--z3rlimit 10"
 
 val lemma_fsquare_spec_2_2_1: r0:nat -> r1:nat -> r2:nat -> r3:nat -> r4:nat -> Lemma
   ( (pow2 51 * r1) * r0 + (pow2 51 * r1) * (pow2 51 * r1) + (pow2 51 * r1) * (pow2 102 * r2) + (pow2 51 * r1) * (pow2 153 * r3) + (pow2 51 * r1) * (pow2 204 * r4)

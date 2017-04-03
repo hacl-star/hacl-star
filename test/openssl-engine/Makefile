@@ -3,7 +3,7 @@ KREMLIN_HOME?=../../../kremlin
 CURVE_HOME=../../code/curve25519/x25519-c
 CHACHA_HOME=../../code/salsa-family/chacha-c
 POLY_HOME=../../code/poly1305/poly-c
-ifeq ($(uname),Linux)
+ifeq ($(shell uname),Linux)
   PIC=-fPIC
 else
   PIC=

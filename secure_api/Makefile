@@ -145,12 +145,7 @@ SLOW= \
 # Files not yet fully typechecking -- possibly due to timeouts.
 # Please move files that you know fully typecheck to VERIFY
 # Files commented out are broken, uncomment once fixed
-LAX=aead/Crypto.AEAD.Encrypt \
-	aead/Crypto.AEAD.Enxor.Invariant \
-	aead/Crypto.AEAD.MAC_Wrapper.Invariant \
-	prf/Crypto.Symmetric.PRF \
-	aead/Crypto.AEAD.Wrappers.CMA \
-	aead/Crypto.AEAD.Encoding
+LAX=
 
 # \
 #   Crypto.Symmetric.Poly1305 \
