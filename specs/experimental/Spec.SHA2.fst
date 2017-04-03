@@ -153,7 +153,7 @@ let shuffle (hash:hash_w) (block:block_w) : Tot hash_w =
   Spec.Loops.repeat_range_spec 0 size_ws_w (shuffle_core block) hash
 
 
-let update_compress (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
+let update (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
   let b = words_from_be size_block_w block in
   let ws_l = Seq.create size_k_w 0ul in
   let hash_1 = shuffle hash b in
@@ -164,7 +164,7 @@ let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}
   if Seq.length blocks = 0 then hash
   else
     let (h,t) = Seq.split blocks size_block in
-    update_multi (update_compress hash h) t
+    update_multi (update hash h) t
 
 
 private let pad0_length (len:nat) : Tot (n:nat{(len + 1 + n + size_len_8) % size_block = 0}) =
