@@ -46,6 +46,9 @@ inline_for_extraction let s32_to_s64 = Cast.sint32_to_sint64
 inline_for_extraction let u64_to_s64 = Cast.uint64_to_sint64
 
 
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
+
 [@"substitute"]
 val pupd_4: buf:huint32_p{length buf = 4} ->
   v0:uint32_t -> v1:uint32_t -> v2:uint32_t -> v3:uint32_t ->
@@ -124,6 +127,122 @@ let hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
   aux_hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7;
   let h1 = ST.get () in
   Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_8 v0 v1 v2 v3 v4 v5 v6 v7)
+
+
+[@"substitute"]
+val aux_hupd_16: buf:huint32_p{length buf = 16} ->
+  v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
+  v8:H32.t -> v9:H32.t -> v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                         Seq.index s 0 == v0 /\ Seq.index s 1 == v1 /\ Seq.index s 2 == v2 /\ Seq.index s 3 == v3 /\
+                         Seq.index s 4 == v4 /\ Seq.index s 5 == v5 /\ Seq.index s 6 == v6 /\ Seq.index s 7 == v7 /\
+                         Seq.index s 8 == v8 /\ Seq.index s 9 == v9 /\ Seq.index s 10 == v10 /\ Seq.index s 11 == v11 /\
+                         Seq.index s 12 == v12 /\ Seq.index s 13 == v13 /\ Seq.index s 14 == v14 /\ Seq.index s 15 == v15)))
+
+[@"substitute"]
+let aux_hupd_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
+  let p1 = Buffer.sub buf 0ul 8ul in
+  let p2 = Buffer.sub buf 8ul 8ul in
+  hupd_8 p1 v0 v1 v2 v3 v4 v5 v6 v7;
+  hupd_8 p2 v8 v9 v10 v11 v12 v13 v14 v15
+
+
+[@"substitute"]
+val hupd_16: buf:huint32_p{length buf = 16} ->
+  v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
+  v8:H32.t -> v9:H32.t -> v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                         Seq.Create.create_16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 == s)))
+
+[@"substitute"]
+let hupd_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
+  aux_hupd_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15;
+  let h1 = ST.get () in
+  Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)
+
+
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+
+[@"substitute"]
+val aux_hupd_64: buf:huint32_p{length buf = 64} ->
+  v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
+  v8:H32.t -> v9:H32.t ->
+  v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t -> v16:H32.t -> v17:H32.t ->
+  v18:H32.t -> v19:H32.t ->
+  v20:H32.t -> v21:H32.t -> v22:H32.t -> v23:H32.t -> v24:H32.t -> v25:H32.t -> v26:H32.t -> v27:H32.t ->
+  v28:H32.t -> v29:H32.t ->
+  v30:H32.t -> v31:H32.t -> v32:H32.t -> v33:H32.t -> v34:H32.t -> v35:H32.t -> v36:H32.t -> v37:H32.t ->
+  v38:H32.t -> v39:H32.t ->
+  v40:H32.t -> v41:H32.t -> v42:H32.t -> v43:H32.t -> v44:H32.t -> v45:H32.t -> v46:H32.t -> v47:H32.t ->
+  v48:H32.t -> v49:H32.t ->
+  v50:H32.t -> v51:H32.t -> v52:H32.t -> v53:H32.t -> v54:H32.t -> v55:H32.t -> v56:H32.t -> v57:H32.t ->
+  v58:H32.t -> v59:H32.t ->
+  v60:H32.t -> v61:H32.t -> v62:H32.t -> v63:H32.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                           Seq.index s 0 == v0 /\ Seq.index s 1 == v1 /\ Seq.index s 2 == v2 /\ Seq.index s 3 == v3
+                         /\ Seq.index s 4 == v4 /\ Seq.index s 5 == v5 /\ Seq.index s 6 == v6 /\ Seq.index s 7 == v7
+                         /\ Seq.index s 8 == v8 /\ Seq.index s 9 == v9
+                         /\ Seq.index s 10 == v10 /\ Seq.index s 11 == v11 /\ Seq.index s 12 == v12 /\ Seq.index s 13 == v13
+                         /\ Seq.index s 14 == v14 /\ Seq.index s 15 == v15 /\ Seq.index s 16 == v16 /\ Seq.index s 17 == v17
+                         /\ Seq.index s 18 == v18 /\ Seq.index s 19 == v19
+                         /\ Seq.index s 20 == v20 /\ Seq.index s 21 == v21 /\ Seq.index s 22 == v22 /\ Seq.index s 23 == v23
+                         /\ Seq.index s 24 == v24 /\ Seq.index s 25 == v25 /\ Seq.index s 26 == v26 /\ Seq.index s 27 == v27
+                         /\ Seq.index s 28 == v28 /\ Seq.index s 29 == v29
+                         /\ Seq.index s 30 == v30 /\ Seq.index s 31 == v31 /\ Seq.index s 32 == v32 /\ Seq.index s 33 == v33
+                         /\ Seq.index s 34 == v34 /\ Seq.index s 35 == v35 /\ Seq.index s 36 == v36 /\ Seq.index s 37 == v37
+                         /\ Seq.index s 38 == v38 /\ Seq.index s 39 == v39
+                         /\ Seq.index s 40 == v40 /\ Seq.index s 41 == v41 /\ Seq.index s 42 == v42 /\ Seq.index s 43 == v43
+                         /\ Seq.index s 44 == v44 /\ Seq.index s 45 == v45 /\ Seq.index s 46 == v46 /\ Seq.index s 47 == v47
+                         /\ Seq.index s 48 == v48 /\ Seq.index s 49 == v49
+                         /\ Seq.index s 50 == v50 /\ Seq.index s 51 == v51 /\ Seq.index s 52 == v52 /\ Seq.index s 53 == v53
+                         /\ Seq.index s 54 == v54 /\ Seq.index s 55 == v55 /\ Seq.index s 56 == v56 /\ Seq.index s 57 == v57
+                         /\ Seq.index s 58 == v58 /\ Seq.index s 59 == v59
+                         /\ Seq.index s 60 == v60 /\ Seq.index s 61 == v61 /\ Seq.index s 62 == v62 /\ Seq.index s 63 == v63)))
+
+[@"substitute"]
+let aux_hupd_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63 =
+  let p1 = Buffer.sub buf 0ul 16ul in
+  let p2 = Buffer.sub buf 16ul 16ul in
+  let p3 = Buffer.sub buf 32ul 16ul in
+  let p4 = Buffer.sub buf 48ul 16ul in
+  hupd_16 p1 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15;
+  hupd_16 p2 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31;
+  hupd_16 p3 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47;
+  hupd_16 p4 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63
+
+
+[@"substitute"]
+val hupd_64: buf:huint32_p{length buf = 64} ->
+  v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
+  v8:H32.t -> v9:H32.t ->
+  v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t -> v16:H32.t -> v17:H32.t ->
+  v18:H32.t -> v19:H32.t ->
+  v20:H32.t -> v21:H32.t -> v22:H32.t -> v23:H32.t -> v24:H32.t -> v25:H32.t -> v26:H32.t -> v27:H32.t ->
+  v28:H32.t -> v29:H32.t ->
+  v30:H32.t -> v31:H32.t -> v32:H32.t -> v33:H32.t -> v34:H32.t -> v35:H32.t -> v36:H32.t -> v37:H32.t ->
+  v38:H32.t -> v39:H32.t ->
+  v40:H32.t -> v41:H32.t -> v42:H32.t -> v43:H32.t -> v44:H32.t -> v45:H32.t -> v46:H32.t -> v47:H32.t ->
+  v48:H32.t -> v49:H32.t ->
+  v50:H32.t -> v51:H32.t -> v52:H32.t -> v53:H32.t -> v54:H32.t -> v55:H32.t -> v56:H32.t -> v57:H32.t ->
+  v58:H32.t -> v59:H32.t ->
+  v60:H32.t -> v61:H32.t -> v62:H32.t -> v63:H32.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                         Seq.Create.create_64  v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63 == s)))
+
+[@"substitute"]
+let hupd_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63 =
+  aux_hupd_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63;
+  let h1 = ST.get () in
+  Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_64 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63)
 
 
 [@"substitute"]
