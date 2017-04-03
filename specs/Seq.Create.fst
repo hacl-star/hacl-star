@@ -2,6 +2,10 @@ module Seq.Create
 
 open FStar.Seq
 
+
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+
+
 private let op_String_Assignment = upd
 
 abstract val create_1: #a:Type -> s0:a -> Tot (s:seq a{length s = 1 /\ index s 0 == s0})
@@ -109,7 +113,7 @@ let create_10 #a s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 =
 
 abstract val create_11: #a:Type ->
   s0:a -> s1:a -> s2:a -> s3:a -> s4:a -> s5:a -> s6:a -> s7:a ->
-  s8:a -> s9:a -> s10:a -> 
+  s8:a -> s9:a -> s10:a ->
   Tot (s:seq a{length s = 11
     /\ index s 0 == s0 /\ index s 1 == s1 /\ index s 2 == s2 /\ index s 3 == s3
     /\ index s 4 == s4 /\ index s 5 == s5 /\ index s 6 == s6 /\ index s 7 == s7
@@ -197,7 +201,7 @@ let create_14 #a s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 =
 
 abstract val create_15: #a:Type ->
   s0:a -> s1:a -> s2:a -> s3:a -> s4:a -> s5:a -> s6:a -> s7:a ->
-  s8:a -> s9:a -> s10:a -> s11:a -> s12:a -> s13:a -> s14:a -> 
+  s8:a -> s9:a -> s10:a -> s11:a -> s12:a -> s13:a -> s14:a ->
   Tot (s:seq a{length s = 15
     /\ index s 0 == s0 /\ index s 1 == s1 /\ index s 2 == s2 /\ index s 3 == s3
     /\ index s 4 == s4 /\ index s 5 == s5 /\ index s 6 == s6 /\ index s 7 == s7
@@ -245,3 +249,109 @@ let create_16 #a s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15 =
   let s = s.[13] <- s13 in
   let s = s.[14] <- s14 in
   let s = s.[15] <- s15 in s
+
+
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 1000"
+
+abstract val create_64: #a:Type ->
+  s0:a -> s1:a -> s2:a -> s3:a -> s4:a -> s5:a -> s6:a -> s7:a ->
+  s8:a -> s9:a ->
+  s10:a -> s11:a -> s12:a -> s13:a -> s14:a -> s15:a -> s16:a -> s17:a ->
+  s18:a -> s19:a ->
+  s20:a -> s21:a -> s22:a -> s23:a -> s24:a -> s25:a -> s26:a -> s27:a ->
+  s28:a -> s29:a ->
+  s30:a -> s31:a -> s32:a -> s33:a -> s34:a -> s35:a -> s36:a -> s37:a ->
+  s38:a -> s39:a ->
+  s40:a -> s41:a -> s42:a -> s43:a -> s44:a -> s45:a -> s46:a -> s47:a ->
+  s48:a -> s49:a ->
+  s50:a -> s51:a -> s52:a -> s53:a -> s54:a -> s55:a -> s56:a -> s57:a ->
+  s58:a -> s59:a ->
+  s60:a -> s61:a -> s62:a -> s63:a ->
+  Tot (s:seq a{length s = 64
+    /\ index s 0 == s0 /\ index s 1 == s1 /\ index s 2 == s2 /\ index s 3 == s3
+    /\ index s 4 == s4 /\ index s 5 == s5 /\ index s 6 == s6 /\ index s 7 == s7
+    /\ index s 8 == s8 /\ index s 9 == s9
+    /\ index s 10 == s10 /\ index s 11 == s11 /\ index s 12 == s12 /\ index s 13 == s13
+    /\ index s 14 == s14 /\ index s 15 == s15 /\ index s 16 == s16 /\ index s 17 == s17
+    /\ index s 18 == s18 /\ index s 19 == s19
+    /\ index s 20 == s20 /\ index s 21 == s21 /\ index s 22 == s22 /\ index s 23 == s23
+    /\ index s 24 == s24 /\ index s 25 == s25 /\ index s 26 == s26 /\ index s 27 == s27
+    /\ index s 28 == s28 /\ index s 29 == s29
+    /\ index s 30 == s30 /\ index s 31 == s31 /\ index s 32 == s32 /\ index s 33 == s33
+    /\ index s 34 == s34 /\ index s 35 == s35 /\ index s 36 == s36 /\ index s 37 == s37
+    /\ index s 38 == s38 /\ index s 39 == s39
+    /\ index s 40 == s40 /\ index s 41 == s41 /\ index s 42 == s42 /\ index s 43 == s43
+    /\ index s 44 == s44 /\ index s 45 == s45 /\ index s 46 == s46 /\ index s 47 == s47
+    /\ index s 48 == s48 /\ index s 49 == s49
+    /\ index s 50 == s50 /\ index s 51 == s51 /\ index s 52 == s52 /\ index s 53 == s53
+    /\ index s 54 == s54 /\ index s 55 == s55 /\ index s 56 == s56 /\ index s 57 == s57
+    /\ index s 58 == s58 /\ index s 59 == s59
+    /\ index s 60 == s60 /\ index s 61 == s61 /\ index s 62 == s62 /\ index s 63 == s63})
+
+let create_64 #a s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15 s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31 s32 s33 s34 s35 s36 s37 s38 s39 s40 s41 s42 s43 s44 s45 s46 s47 s48 s49 s50 s51 s52 s53 s54 s55 s56 s57 s58 s59 s60 s61 s62 s63
+ =
+  admit();
+  let s = create 64 s0 in
+  let s = s.[1] <- s1 in
+  let s = s.[2] <- s2 in
+  let s = s.[3] <- s3 in
+  let s = s.[4] <- s4 in
+  let s = s.[5] <- s5 in
+  let s = s.[6] <- s6 in
+  let s = s.[7] <- s7 in
+  let s = s.[8] <- s8 in
+  let s = s.[9] <- s9 in
+  let s = s.[10] <- s10 in
+  let s = s.[11] <- s11 in
+  let s = s.[12] <- s12 in
+  let s = s.[13] <- s13 in
+  let s = s.[14] <- s14 in
+  let s = s.[15] <- s15 in
+  let s = s.[16] <- s16 in
+  let s = s.[17] <- s17 in
+  let s = s.[18] <- s18 in
+  let s = s.[19] <- s19 in
+  let s = s.[20] <- s20 in
+  let s = s.[21] <- s21 in
+  let s = s.[22] <- s22 in
+  let s = s.[23] <- s23 in
+  let s = s.[24] <- s24 in
+  let s = s.[25] <- s25 in
+  let s = s.[26] <- s26 in
+  let s = s.[27] <- s27 in
+  let s = s.[28] <- s28 in
+  let s = s.[29] <- s29 in
+  let s = s.[30] <- s30 in
+  let s = s.[31] <- s31 in
+  let s = s.[32] <- s32 in
+  let s = s.[33] <- s33 in
+  let s = s.[34] <- s34 in
+  let s = s.[35] <- s35 in
+  let s = s.[36] <- s36 in
+  let s = s.[37] <- s37 in
+  let s = s.[38] <- s38 in
+  let s = s.[39] <- s39 in
+  let s = s.[40] <- s40 in
+  let s = s.[41] <- s41 in
+  let s = s.[42] <- s42 in
+  let s = s.[43] <- s43 in
+  let s = s.[44] <- s44 in
+  let s = s.[45] <- s45 in
+  let s = s.[46] <- s46 in
+  let s = s.[47] <- s47 in
+  let s = s.[48] <- s48 in
+  let s = s.[49] <- s49 in
+  let s = s.[50] <- s50 in
+  let s = s.[51] <- s51 in
+  let s = s.[52] <- s52 in
+  let s = s.[53] <- s53 in
+  let s = s.[54] <- s54 in
+  let s = s.[55] <- s55 in
+  let s = s.[56] <- s56 in
+  let s = s.[57] <- s57 in
+  let s = s.[58] <- s58 in
+  let s = s.[59] <- s59 in
+  let s = s.[60] <- s60 in
+  let s = s.[61] <- s61 in
+  let s = s.[62] <- s62 in
+  let s = s.[63] <- s63 in s
