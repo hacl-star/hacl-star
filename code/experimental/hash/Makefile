@@ -17,7 +17,7 @@ build:
 		-I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/experimental \
 		Hacl.Test.SHA2_256.fst -o sha2.exe -no-prefix Hacl.Test.SHA2_256 -no-prefix SHA2_256 \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop 'Spec.Lib' -drop 'Spec.Loops' -drop 'Spec.SHA2' \
+		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop 'Spec.Lib' -drop 'Spec.Loops' -drop 'Seq.Create' -drop 'Spec.SHA2' \
 		-drop Prims -drop FStar Hacl.Test.SHA2_256.fst \
 		-no-prefix 'Hacl.Utils.Experimental' -no-prefix 'Hacl.Hash.SHA2.L256' -no-prefix 'SHA2_256'\
 		-bundle "SHA2_256=Hacl.Utils.Experimental,Hacl.Hash.SHA2.L256,SHA2_256" \
