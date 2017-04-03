@@ -29,6 +29,7 @@ module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2
+module Lemmas = Hacl.Hash.SHA2.Lemmas
 module Utils = Hacl.Utils.Experimental
 
 
@@ -132,6 +133,8 @@ private val constants_set_k:
                  /\ (let s = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 k) in
                    s == Spec.SHA2.k)))
 
+#set-options "--lax"
+
 [@"substitute"]
 let constants_set_k k =
   Hacl.Utils.Experimental.hupd_64 k 0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul
@@ -152,6 +155,8 @@ let constants_set_k k =
                                    0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
 
 
+#reset-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 100"
+
 [@"substitute"]
 val constants_set_h_0:
   hash:huint32_p{length hash = v size_hash_w} ->
@@ -165,48 +170,6 @@ val constants_set_h_0:
 let constants_set_h_0 hash =
   Hacl.Utils.Experimental.hupd_8 hash 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul
                                      0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
-
-
-private let lemma_aux_0 (t:UInt32.t{UInt32.v t >= 16 /\ UInt32.v t < 64}) : Lemma
-  (UInt32.v (t -^ 16ul) >= 0 /\ UInt32.v (t -^ 15ul) >= 0
-   /\ UInt32.v (t -^ 7ul) >= 0 /\ UInt32.v (t -^ 2ul) >= 0
-   /\ UInt32.v (t -^ 16ul) < 64 /\ UInt32.v (t -^ 15ul) < 64
-   /\ UInt32.v (t -^ 7ul) < 64 /\ UInt32.v (t -^ 2ul) < 64)
-  = ()
-
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
-
-private
-val lemma_ws_def_0: (b:Spec.block_w) -> (t:Spec.counter{t < 16}) -> Lemma
-  (Spec.ws b t = Seq.index b t)
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
-let lemma_ws_def_0 b t = ()
-
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
-
-private
-val lemma_ws_def_1: (b:Spec.block_w) -> (t:Spec.counter{16 <= t /\ t < 64}) -> Lemma
-  (Spec.ws b t =
-    (let open Spec.SHA2 in
-     let t16 = ws b (t - 16) in
-     let t15 = ws b (t - 15) in
-     let t7  = ws b (t - 7) in
-     let t2  = ws b (t - 2) in
-     let s1 = _sigma1 t2 in
-     let s0 = _sigma0 t15 in
-     s1 +%^ (t7 +%^ (s0 +%^ t16))))
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
-let lemma_ws_def_1 b t = ()
-
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
-
-private
-let lemma_modifies_0_is_modifies_1 (#a:Type) (h:HyperStack.mem) (b:buffer a{live h b}) : Lemma
-  (modifies_1 b h h) =
-  lemma_intro_modifies_1 b h h
 
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
@@ -231,12 +194,12 @@ private val ws:
 let rec ws ws_w block_w t =
   let h0 = ST.get() in
   if t =^ 64ul then (
-    lemma_modifies_0_is_modifies_1 h0 ws_w
+    Lemmas.lemma_modifies_0_is_modifies_1 h0 ws_w
   ) else (
     if t <^ 16ul then (
       ws_w.(t) <- block_w.(t);
       let h = ST.get() in
-      lemma_ws_def_0 (as_seq h0 block_w) (UInt32.v t);
+      Lemmas.lemma_ws_def_0 (as_seq h0 block_w) (UInt32.v t);
       assert(Seq.index (as_seq h ws_w) (UInt32.v t) == Spec.ws (as_seq h0 block_w) (UInt32.v t))
     )
     else (
@@ -246,14 +209,14 @@ let rec ws ws_w block_w t =
       let tm15 = t -^ 15ul in
       let tm7 = t -^ 7ul in
       let tm2 = t -^ 2ul in
-      lemma_aux_0 t;
+      Lemmas.lemma_aux_0 t;
       let t16 = ws_w.(tm16) in
       let t15 = ws_w.(tm15) in
       let t7  = ws_w.(tm7) in
       let t2  = ws_w.(tm2) in
       ws_w.(t) <- ((_sigma1 t2) +%^ (t7 +%^ ((_sigma0 t15) +%^ t16)));
       let h = ST.get() in
-      lemma_ws_def_1 (as_seq h0 block_w) (UInt32.v t);
+      Lemmas.lemma_ws_def_1 (as_seq h0 block_w) (UInt32.v t);
       assert(Seq.index (as_seq h ws_w) (UInt32.v t) == Spec.ws (as_seq h0 block_w) (UInt32.v t))
     );
     let h = ST.get() in
@@ -340,9 +303,9 @@ let shuffle hash block ws k =
       (ensures (fun h_1 _ h_2 -> inv h_2 (UInt32.v t + 1)))
     =
     shuffle_core hash block ws k t;
-    lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (as_seq h0 block)) (as_seq h0 hash)
+    C.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (as_seq h0 block)) (as_seq h0 hash)
   in
-  lemma_repeat_range_0 0 0 (Spec.shuffle_core (as_seq h0 block)) (as_seq h0 hash);
+  C.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core (as_seq h0 block)) (as_seq h0 hash);
   for 0ul size_ws_w inv f'
 
 
@@ -404,6 +367,8 @@ val update:
         let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
         let seq_block = as_seq h0 data in
         seq_hash_1 == Spec.update seq_hash_0 seq_block)))
+
+#set-options "--lax"
 
 let update state data =
 
