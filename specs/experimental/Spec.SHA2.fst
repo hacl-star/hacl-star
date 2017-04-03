@@ -114,8 +114,8 @@ let k : m:seq word {length m = size_k_w} =
 
 
 let h_0 : hash_w =
-  assert_norm(List.Tot.length list_h_0 = size_hash_w);
-  Seq.seq_of_list list_h_0
+  Seq.Create.create_8 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul
+                     0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
 
 
 let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
@@ -131,16 +131,7 @@ let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
     (s1 +%^ (t7 +%^ (s0 +%^ t16)))
 
 
-let ws_compute (wsched:ws_w) (b:block_w) : Tot ws_w =
-  let f : ws_w -> (t:counter{t < size_ws_w}) -> Tot ws_w =
-    fun wsched t ->
-      let ws_i = ws b t in
-      wsched.[t] <- ws_i
-  in
-  Spec.Loops.repeat_range_spec 0 size_ws_w f wsched
-
-
-let shuffle_core (hash:hash_w) (wsched:ws_w) (t:counter{t < size_k_w}) : Tot hash_w =
+let shuffle_core (block:block_w) (hash:hash_w) (t:counter{t < size_k_w}) : Tot hash_w =
   let a = hash.[0] in
   let b = hash.[1] in
   let c = hash.[2] in
@@ -150,25 +141,21 @@ let shuffle_core (hash:hash_w) (wsched:ws_w) (t:counter{t < size_k_w}) : Tot has
   let g = hash.[6] in
   let h = hash.[7] in
 
-  (**) assert(Seq.length wsched = size_k_w);
   (**) assert(Seq.length k = size_k_w);
-  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ k.[t] +%^ wsched.[t] in
+  let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ k.[t] +%^ ws block t in
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
 
   (**) assert(t < Seq.length k);
   Seq.Create.create_8 (t1 +%^ t2) a b c (d +%^ t1) e f g
 
-
-let shuffle (hash:hash_w) (wsched:ws_w) : Tot hash_w =
-  let f : hash_w -> (t:counter{t < size_ws_w}) -> Tot hash_w = fun hash t -> shuffle_core hash wsched t in
-  Spec.Loops.repeat_range_spec 0 size_ws_w f hash
+let shuffle (hash:hash_w) (block:block_w) : Tot hash_w =
+  Spec.Loops.repeat_range_spec 0 size_ws_w (shuffle_core block) hash
 
 
 let update_compress (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
   let b = words_from_be size_block_w block in
   let ws_l = Seq.create size_k_w 0ul in
-  let ws_l = ws_compute ws_l b in
-  let hash_1 = shuffle hash ws_l in
+  let hash_1 = shuffle hash b in
   Spec.Lib.map2 (fun x y -> x +%^ y) hash hash_1
 
 
