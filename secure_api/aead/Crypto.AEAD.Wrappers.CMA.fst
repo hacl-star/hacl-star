@@ -32,12 +32,14 @@ module BufferUtils = Crypto.AEAD.BufferUtils
 let mac_requires (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) (tag:MAC.tagB) (h:mem) =
   let open CMA in
   let open HS in
-  EncodingWrapper.ak_acc_tag_separate ak acc tag /\
-  verify_liveness ak tag h /\ // liveness of ak.r not needed
   acc_inv ak acc h /\
-  (mac_log ==> Buffer.frameOf tag <> (alog acc).id) /\ // also works if they're just disjoint
+  Buffer.live h tag /\
+  Buffer.live h ak.s /\
+  EncodingWrapper.ak_acc_tag_separate ak acc tag /\
+  (mac_log ==> Buffer.frameOf tag <> (alog acc).id \/
+               Buffer.disjoint_ref_1 tag (HS.as_aref (alog acc))) /\
   (authId i ==> CMA.mac_is_unset i ak.region ak h) // implies MAC.norm m st.r; already in acc_inv
- 
+
 let mac_modifies 
   (i:id) (iv:Cipher.iv (Cipher.algi i))
   (tbuf:lbuffer (v MAC.taglen))
@@ -84,12 +86,13 @@ private val mac_wrapper_aux: #a:Type -> #b:Type ->
   abuf:Buffer.buffer a -> tbuf:Buffer.buffer b -> h0:mem -> h1:mem -> Lemma
   (requires (Buffer.frameOf abuf <> Buffer.frameOf tbuf /\
              Buffer.modifies_2 abuf tbuf h0 h1))
-  (ensures  (Buffer.modifies_buf_1 (Buffer.frameOf abuf) abuf h0 h1 /\
+  (ensures  (HS.modifies (Set.as_set [Buffer.frameOf abuf; Buffer.frameOf tbuf]) h0 h1 /\
+             Buffer.modifies_buf_1 (Buffer.frameOf abuf) abuf h0 h1 /\
              Buffer.modifies_buf_1 (Buffer.frameOf tbuf) tbuf h0 h1))
 let mac_wrapper_aux #a #b abuf tbuf h0 h1 =
   Buffer.lemma_reveal_modifies_2 abuf tbuf h0 h1
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let mac_wrapper (#i:EncodingWrapper.mac_id) (ak:CMA.state i) (acc:CMA.accBuffer i)
   (tag:MAC.tagB{CMA.pairwise_distinct 
     (Buffer.frameOf (MAC.as_buffer (CMA.abuf acc))) (Buffer.frameOf tag) ak.CMA.region})
@@ -100,8 +103,18 @@ let mac_wrapper (#i:EncodingWrapper.mac_id) (ak:CMA.state i) (acc:CMA.accBuffer 
   = let h0 = ST.get () in
     CMA.mac #i ak acc tag;
     let h1 = ST.get () in
-    if not (CMA.authId i) then
-      mac_wrapper_aux (MAC.as_buffer (CMA.abuf acc)) tag h0 h1
+    let open FStar.Buffer in
+    let abuf = MAC.as_buffer (CMA.abuf acc) in
+    if safeMac (fst i) then
+      begin
+      // Takes a long time without this useless line
+      let log = RR.as_hsref CMA.(ilog ak.log) in
+      assert (mac_modifies (fst i) (snd i) tag ak acc h0 h1)
+      end
+    else
+      mac_wrapper_aux (MAC.as_buffer (CMA.abuf acc)) tag h0 h1;
+      // Takes a long time without this useless line
+      assert (mac_modifies (fst i) (snd i) tag ak acc h0 h1)
 
 
 #set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
