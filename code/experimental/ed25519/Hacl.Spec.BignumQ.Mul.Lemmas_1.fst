@@ -62,7 +62,6 @@ private
 val lemma_mul_paren_3': a:int -> b:int -> c:int -> Lemma ( (a * b) * c == a * (b * c))
 let lemma_mul_paren_3' a b c = ()
 
-private
 val lemma_mul_5':
   x1:int -> x2:int -> x3:int -> x4:int -> x5:int ->
   y1:int -> y2:int -> y3:int -> y4:int -> y5:int ->
