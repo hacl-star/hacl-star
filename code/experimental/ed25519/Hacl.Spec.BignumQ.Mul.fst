@@ -159,6 +159,16 @@ let split_56 x =
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
+inline_for_extraction
+val mod_40: x:UInt128.t -> Tot (z:U64.t{v z = UInt128.v x % (pow2 40)})
+inline_for_extraction
+let mod_40 x =
+  let x' = Int.Cast.uint128_to_uint64 x in
+  let x'' = x' &^ 0xffffffffffuL in
+  UInt.logand_mask (v x') 40;
+  assert_norm(pow2 40   = 0x10000000000);
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (UInt128.v x) 40 64;
+  x''
 
 val low_mul_5:
   x:qelem_56 ->
@@ -203,11 +213,13 @@ let low_mul_5 x y =
   let carry, t1 = split_56 (xy01 +^ xy10 +^ carry) in
   let carry, t2 = split_56 (xy02 +^ xy11 +^ xy20 +^ carry) in
   let carry, t3 = split_56 (xy03 +^ xy12 +^ xy21 +^ xy30 +^ carry) in
-  let carry, t4' = split_56 (xy04 +^ xy13 +^ xy22 +^ xy31 +^ xy40 +^ carry) in
+  let        t4 = mod_40   (xy04 +^ xy13 +^ xy22 +^ xy31 +^ xy40 +^ carry) in
   let open FStar.UInt64 in
-  let t4 = t4' &^ 0xffffffffffuL in
-  UInt.logand_mask (v t4') 40;
-  assert(v t4 = v t4' % (pow2 40));
+  assert(v t0 = (v x0 * v y0) % pow2 56);
+  assert(v t1 = ((v x1 * v y0 + v x0 * v y1 + ((v x0 * v y0) / pow2 56)) % pow2 56));
+  assert(v t2 = ((v x2 * v y0 + v x1 * v y1 + v x0 * v y2 + ((v x1 * v y0 + v x0 * v y1 + ((v x0 * v y0) / pow2 56)) / pow2 56)) % pow2 56));
+  assert(v t3 = ((v x3 * v y0 + v x2 * v y1 + v x1 * v y2 + v x0 * v y3 + ((v x2 * v y0 + v x1 * v y1 + v x0 * v y2 + ((v x1 * v y0 + v x0 * v y1 + ((v x0 * v y0) / pow2 56)) / pow2 56)) / pow2 56)) % pow2 56));
+  assert(v t4 = (v x4 * v y0 + v x3 * v y1 + v x2 * v y2 + v x1 * v y3 + v x0 * v y4 + ((v x3 * v y0 + v x2 * v y1 + v x1 * v y2 + v x0 * v y3 + ((v x2 * v y0 + v x1 * v y1 + v x0 * v y2 + ((v x1 * v y0 + v x0 * v y1 + ((v x0 * v y0) / pow2 56)) / pow2 56)) / pow2 56)) / pow2 56)) % pow2 40);
   Hacl.Spec.BignumQ.Mul.Lemmas_1.lemma_mul_5_low_264 (v x0) (v x1) (v x2) (v x3) (v x4) (v y0) (v y1) (v y2) (v y3) (v y4);
   Seq.Create.create_5 t0 t1 t2 t3 t4
 
@@ -215,7 +227,19 @@ let low_mul_5 x y =
 val mul_5:
   x:qelem_56 ->
   y:qelem_56 ->
-  Tot (z:{eval_q z = (eval_q x * eval_q y) / pow2 248})
+  Tot (z:seq UInt128.t{
+    length z = 9
+    /\ (eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8]
+    = eval_q x * eval_q y)
+    /\ UInt128.v z.[0] < 0x10000000000000000000000000000
+    /\ UInt128.v z.[1] < 0x20000000000000000000000000000
+    /\ UInt128.v z.[2] < 0x30000000000000000000000000000
+    /\ UInt128.v z.[3] < 0x40000000000000000000000000000
+    /\ UInt128.v z.[4] < 0x50000000000000000000000000000
+    /\ UInt128.v z.[5] < 0x40000000000000000000000000000
+    /\ UInt128.v z.[6] < 0x30000000000000000000000000000
+    /\ UInt128.v z.[7] < 0x20000000000000000000000000000
+    /\ UInt128.v z.[8] < 0x10000000000000000000000000000 })    
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 let mul_5 x y =
   assert_norm(pow2 128  = 0x100000000000000000000000000000000);
@@ -276,20 +300,79 @@ let mul_5 x y =
   let z9 = Int.Cast.uint64_to_uint128 0uL in
   Hacl.Spec.BignumQ.Mul.Lemmas_1.lemma_mul_5' (U64.v x0) (U64.v x1) (U64.v x2) (U64.v x3) (U64.v x4) (U64.v y0) (U64.v y1) (U64.v y2) (U64.v y3) (U64.v y4);
   assert(eval_q x * eval_q y == eval_q_wide z0 z1 z2 z3 z4 z5 z6 z7 z8);
-  Seq.Create.create_8 z0 z1 z2 z3 z4 z5 z6 z7 z8;
-  (* assert(eval_q_wide  *)
-  let carry, t0 = split_56 xy00 in
-  let carry, t1 = split_56 (xy01 +^ xy10 +^ carry) in
-  let carry, t2 = split_56 (xy02 +^ xy11 +^ xy20 +^ carry) in
-  let carry, t3 = split_56 (xy03 +^ xy12 +^ xy21 +^ xy30 +^ carry) in
-  let carry, t4 = split_56 (xy04 +^ xy13 +^ xy22 +^ xy31 +^ xy40 +^ carry) in
-  let carry, t5 = split_56 (        xy14 +^ xy23 +^ xy32 +^ xy41 +^ carry) in
-  let carry, t6 = split_56 (                xy24 +^ xy33 +^ xy42 +^ carry) in
-  let carry, t7 = split_56 (                        xy34 +^ xy43 +^ carry) in
-  let carry, t8 = split_56 (                                xy44 +^ carry) in
-  let open FStar.UInt64 in
-  let t4 = t4' &^ 0xffffffffffuL in
-  UInt.logand_mask (v t4') 40;
-  assert(v t4 = v t4' % (pow2 40));
-  Hacl.Spec.BignumQ.Mul.Lemmas_1.lemma_mul_5_low_264 (v x0) (v x1) (v x2) (v x3) (v x4) (v y0) (v y1) (v y2) (v y3) (v y4);
-  Seq.Create.create_5 t0 t1 t2 t3 t4
+  Seq.Create.create_9 z0 z1 z2 z3 z4 z5 z6 z7 z8
+
+
+val carry_step:
+  x:UInt128.t -> y:UInt128.t{UInt128.v y < 0x50000000000000000000000000000} ->
+  Tot (t:tuple2 UInt64.t UInt128.t{
+    UInt128.v x + 0x100000000000000 * UInt128.v y == v (fst t) + 0x100000000000000 * UInt128.v (snd t)
+    /\ v (fst t) < 0x100000000000000})
+let carry_step x y =
+  let carry = FStar.UInt128.(x >>^ 56ul) in
+  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  assert_norm(pow2 56 = 0x100000000000000);
+  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (FStar.UInt128.v x) 56 64;
+  t, FStar.UInt128.add y carry
+
+
+val carry:
+  z:seq UInt128.t{length z = 9 /\ 
+    eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8] < (pow2 256 - 1) * (pow2 256 - 1)
+    /\ UInt128.v z.[0] < 0x10000000000000000000000000000
+    /\ UInt128.v z.[1] < 0x20000000000000000000000000000
+    /\ UInt128.v z.[2] < 0x30000000000000000000000000000
+    /\ UInt128.v z.[3] < 0x40000000000000000000000000000
+    /\ UInt128.v z.[4] < 0x50000000000000000000000000000
+    /\ UInt128.v z.[5] < 0x40000000000000000000000000000
+    /\ UInt128.v z.[6] < 0x30000000000000000000000000000
+    /\ UInt128.v z.[7] < 0x20000000000000000000000000000
+    /\ UInt128.v z.[8] < 0x10000000000000000000000000000 } ->
+  Tot (t:tuple2 qelem_56 qelem{
+      let r = fst t in let q = snd t in
+      eval_q r = eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8] % pow2 264
+      /\ eval_q q = eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8] / pow2 224
+      /\ v q.[0] < 0x100000000000000
+      /\ v q.[1] < 0x100000000000000
+      /\ v q.[2] < 0x100000000000000
+      /\ v q.[3] < 0x100000000000000
+    })
+let carry z =
+  let z0 = z.[0] in
+  let z1 = z.[1] in
+  let z2 = z.[2] in
+  let z3 = z.[3] in
+  let z4 = z.[4] in
+  let z5 = z.[5] in
+  let z6 = z.[6] in
+  let z7 = z.[7] in
+  let z8 = z.[8] in
+  let x0, z1' = carry_step z0 z1 in
+  let x1, z2' = carry_step z1' z2 in
+  let x2, z3' = carry_step z2' z3 in
+  let x3, z4' = carry_step z3' z4 in
+  let x4, z5' = carry_step z4' z5 in
+  let x5, z6' = carry_step z5' z6 in
+  let x6, z7' = carry_step z6' z7 in
+  let x7, z8' = carry_step z7' z8 in
+  assert(eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8]
+    =   UInt64.v x0 + p1 * UInt64.v x1 + p2 * UInt64.v x2 + p3 * UInt64.v x3 + p4 * UInt64.v x4
+  + p5 * UInt64.v x5 + p6 * UInt64.v x6 + p7 * UInt64.v x7 + p8 * UInt128.v z8');
+  assert_norm((pow2 256 - 1) * (pow2 256 - 1) < 0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
+  assert(UInt128.v z8' < 0x10000000000000000);
+  assert_norm(pow2 64 = 0x10000000000000000);
+  let x8 = Int.Cast.uint128_to_uint64 z8' in
+  Math.Lemmas.modulo_lemma (UInt128.v z8') (pow2 64);
+  assert(eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8]
+    = v x0 + p1 * v x1 + p2 * v x2 + p3 * v x3 + p4 * v x4
+      + p5 * v x5 + p6 * v x6 + p7 * v x7 + p8 * v x8);
+  let x4' = x4 &^ 0xffffffffffuL in
+  assert_norm(pow2 40 = 0x10000000000);
+  UInt.logand_mask (v x4) 40;
+  assert(v x4' = v x4 % pow2 40);
+  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_mod_264 x0 x1 x2 x3 x4 x5 x6 x7 x8;
+  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_div_224 x0 x1 x2 x3 x4 x5 x6 x7 x8;
+  let r = Seq.Create.create_5 x0 x1 x2 x3 x4' in
+  let q = Seq.Create.create_5 x4 x5 x6 x7 x8 in
+  r, q
