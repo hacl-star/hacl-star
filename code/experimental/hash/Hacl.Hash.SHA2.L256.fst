@@ -38,12 +38,11 @@ private let uint8_t   = FStar.UInt8.t
 private let uint32_t  = FStar.UInt32.t
 private let uint64_t  = FStar.UInt64.t
 
-private let huint8_t  = Hacl.UInt8.t
-private let huint32_t = Hacl.UInt32.t
-private let huint64_t = Hacl.UInt64.t
+private let uint8_ht  = Hacl.UInt8.t
+private let uint32_ht = Hacl.UInt32.t
 
-private let uint32_p = Buffer.buffer huint32_t
-private let uint8_p  = Buffer.buffer huint8_t
+private let uint32_p = Buffer.buffer uint32_ht
+private let uint8_p  = Buffer.buffer uint8_ht
 
 
 (* Definitions of aliases for functions *)
@@ -92,32 +91,32 @@ inline_for_extraction private let pos_count_w  = size_k_w +^ size_ws_w +^ size_w
 
 
 [@"substitute"]
-private val _Ch: x:huint32_t -> y:huint32_t -> z:huint32_t -> Tot huint32_t
+private val _Ch: x:uint32_ht -> y:uint32_ht -> z:uint32_ht -> Tot uint32_ht
 [@"substitute"]
 let _Ch x y z = H32.logxor (H32.logand x y) (H32.logand (H32.lognot x) z)
 
 [@"substitute"]
-private val _Maj: x:huint32_t -> y:huint32_t -> z:huint32_t -> Tot huint32_t
+private val _Maj: x:uint32_ht -> y:uint32_ht -> z:uint32_ht -> Tot uint32_ht
 [@"substitute"]
 let _Maj x y z = H32.logxor (H32.logand x y) (H32.logxor (H32.logand x z) (H32.logand y z))
 
 [@"substitute"]
-private val _Sigma0: x:huint32_t -> Tot huint32_t
+private val _Sigma0: x:uint32_ht -> Tot uint32_ht
 [@"substitute"]
 let _Sigma0 x = H32.logxor (rotate_right x 2ul) (H32.logxor (rotate_right x 13ul) (rotate_right x 22ul))
 
 [@"substitute"]
-private val _Sigma1: x:huint32_t -> Tot huint32_t
+private val _Sigma1: x:uint32_ht -> Tot uint32_ht
 [@"substitute"]
 let _Sigma1 x = H32.logxor (rotate_right x 6ul) (H32.logxor (rotate_right x 11ul) (rotate_right x 25ul))
 
 [@"substitute"]
-private val _sigma0: x:huint32_t -> Tot huint32_t
+private val _sigma0: x:uint32_ht -> Tot uint32_ht
 [@"substitute"]
 let _sigma0 x = H32.logxor (rotate_right x 7ul) (H32.logxor (rotate_right x 18ul) (H32.shift_right x 3ul))
 
 [@"substitute"]
-private val _sigma1: x:huint32_t -> Tot huint32_t
+private val _sigma1: x:uint32_ht -> Tot uint32_ht
 [@"substitute"]
 let _sigma1 x = H32.logxor (rotate_right x 17ul) (H32.logxor (rotate_right x 19ul) (H32.shift_right x 10ul))
 
