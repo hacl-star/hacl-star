@@ -42,23 +42,23 @@ private let huint8_t  = Hacl.UInt8.t
 private let huint32_t = Hacl.UInt32.t
 private let huint64_t = Hacl.UInt64.t
 
-private let huint32_p = Buffer.buffer huint32_t
-private let huint8_p  = Buffer.buffer huint8_t
+private let uint32_p = Buffer.buffer huint32_t
+private let uint8_p  = Buffer.buffer huint8_t
 
 
 (* Definitions of aliases for functions *)
 [@"substitute"]
-private let u8_to_s8 = Cast.uint8_to_sint8
+private let u8_to_h8 = Cast.uint8_to_sint8
 [@"substitute"]
-private let u32_to_s32 = Cast.uint32_to_sint32
+private let u32_to_h32 = Cast.uint32_to_sint32
 [@"substitute"]
-private let u32_to_s64 = Cast.uint32_to_sint64
+private let u32_to_h64 = Cast.uint32_to_sint64
 [@"substitute"]
-private let s32_to_s8  = Cast.sint32_to_sint8
+private let h32_to_h8  = Cast.sint32_to_sint8
 [@"substitute"]
-private let s32_to_s64 = Cast.sint32_to_sint64
+private let h32_to_h64 = Cast.sint32_to_sint64
 [@"substitute"]
-private let u64_to_s64 = Cast.uint64_to_sint64
+private let u64_to_h64 = Cast.uint64_to_sint64
 
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
@@ -126,7 +126,7 @@ let _sigma1 x = H32.logxor (rotate_right x 17ul) (H32.logxor (rotate_right x 19u
 
 [@"substitute"]
 private val constants_set_k:
-  k:huint32_p{length k = v size_k_w} ->
+  k:uint32_p{length k = v size_k_w} ->
   Stack unit
         (requires (fun h -> live h k))
         (ensures (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1
@@ -158,7 +158,7 @@ let constants_set_k k =
 
 [@"substitute"]
 val constants_set_h_0:
-  hash:huint32_p{length hash = v size_hash_w} ->
+  hash:uint32_p{length hash = v size_hash_w} ->
   Stack unit
     (requires (fun h -> live h hash))
     (ensures (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
@@ -175,8 +175,8 @@ let constants_set_h_0 hash =
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 private val ws:
-  ws_w    :huint32_p {length ws_w = 64} ->
-  block_w :huint32_p {length block_w = v size_block_w /\ disjoint ws_w block_w} ->
+  ws_w    :uint32_p {length ws_w = 64} ->
+  block_w :uint32_p {length block_w = v size_block_w /\ disjoint ws_w block_w} ->
   t       :uint32_t {v t <= Spec.size_k_w} ->
   Stack unit
         (requires (fun h -> live h block_w /\ live h ws_w /\
@@ -227,10 +227,10 @@ let rec ws ws_w block_w t =
 
 [@"substitute"]
 private val shuffle_core:
-  hash_w :huint32_p {length hash_w = v size_hash_w} ->
-  block_w:huint32_p {length block_w = v size_block_w} ->
-  ws_w   :huint32_p {length ws_w = v size_ws_w} ->
-  k_w    :huint32_p {length k_w = v size_k_w} ->
+  hash_w :uint32_p {length hash_w = v size_hash_w} ->
+  block_w:uint32_p {length block_w = v size_block_w} ->
+  ws_w   :uint32_p {length ws_w = v size_ws_w} ->
+  k_w    :uint32_p {length k_w = v size_k_w} ->
   t      :uint32_t {v t < v size_k_w} ->
   Stack unit
         (requires (fun h -> live h hash_w /\ live h ws_w /\ live h k_w /\ live h block_w /\
@@ -270,10 +270,10 @@ let shuffle_core hash block ws k t =
 
 [@"substitute"]
 private val shuffle:
-  hash_w :huint32_p {length hash_w = v size_hash_w} ->
-  block_w:huint32_p {length block_w = v size_block_w /\ disjoint block_w hash_w} ->
-  ws_w   :huint32_p {length ws_w = v size_ws_w /\ disjoint ws_w hash_w} ->
-  k_w    :huint32_p {length k_w = v size_k_w /\ disjoint k_w hash_w} ->
+  hash_w :uint32_p {length hash_w = v size_hash_w} ->
+  block_w:uint32_p {length block_w = v size_block_w /\ disjoint block_w hash_w} ->
+  ws_w   :uint32_p {length ws_w = v size_ws_w /\ disjoint ws_w hash_w} ->
+  k_w    :uint32_p {length k_w = v size_k_w /\ disjoint k_w hash_w} ->
   Stack unit
         (requires (fun h -> live h hash_w /\ live h ws_w /\ live h k_w /\ live h block_w /\
           as_seq h k_w == Spec.k /\
@@ -311,8 +311,8 @@ let shuffle hash block ws k =
 
 [@"substitute"]
 private val sum_hash:
-  hash_0:huint32_p{length hash_0 = v size_hash_w} ->
-  hash_1:huint32_p{length hash_1 = v size_hash_w /\ disjoint hash_0 hash_1} ->
+  hash_0:uint32_p{length hash_0 = v size_hash_w} ->
+  hash_1:uint32_p{length hash_1 = v size_hash_w /\ disjoint hash_0 hash_1} ->
   Stack unit
     (requires (fun h -> live h hash_0 /\ live h hash_1))
     (ensures  (fun h0 _ h1 -> live h0 hash_0 /\ live h1 hash_0 /\ live h0 hash_1 /\ modifies_1 hash_0 h0 h1
@@ -329,17 +329,17 @@ let sum_hash hash_0 hash_1 =
 [@"c_inline"]
 val alloc:
   unit ->
-  StackInline (state:huint32_p{length state = v size_state})
+  StackInline (state:uint32_p{length state = v size_state})
         (requires (fun h0 -> True))
         (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
       /\ Map.domain h1.h == Map.domain h0.h))
 
 [@"c_inline"]
-let alloc () = Buffer.create (u32_to_s32 0ul) size_state
+let alloc () = Buffer.create (u32_to_h32 0ul) size_state
 
 
 val init:
-  state:huint32_p{length state = v size_state} ->
+  state:uint32_p{length state = v size_state} ->
   Stack unit
         (requires (fun h0 -> live h0 state))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
@@ -359,8 +359,8 @@ let init state =
 #set-options "--lax"
 
 val update:
-  state:huint32_p{length state = v size_state} ->
-  data:huint8_p {length data = v size_block /\ disjoint state data} ->
+  state:uint32_p{length state = v size_state} ->
+  data:uint8_p {length data = v size_block /\ disjoint state data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 r h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
@@ -375,8 +375,8 @@ let update state data =
   (**) push_frame();
 
   (* Allocate space for converting the data block *)
-  let data_w = create (u32_to_s32 0ul) size_block_w in
-  let hash_0 = create (u32_to_s32 0ul) size_hash_w in
+  let data_w = create (u32_to_h32 0ul) size_block_w in
+  let hash_0 = create (u32_to_h32 0ul) size_hash_w in
 
   (* Retreive values from the state *)
   let hash_w = Buffer.sub state pos_whash_w size_whash_w in
@@ -409,16 +409,16 @@ let update state data =
   (* Increment the total number of blocks processed *)
   (* JK: proposal
      let st_len = Buffer.sub state (pos_count_w) 1ul in
-     st_len.(0ul) <- (st_len.(0ul) +%^ (u32_to_s32 1ul)); *)
-  state.(pos_count_w) <- (state.(pos_count_w) +%^ (u32_to_s32 1ul));
+     st_len.(0ul) <- (st_len.(0ul) +%^ (u32_to_h32 1ul)); *)
+  state.(pos_count_w) <- (state.(pos_count_w) +%^ (u32_to_h32 1ul));
 
   (* Pop the frame *)
   (**) pop_frame()
 
 
 val update_multi:
-  state :huint32_p{length state = v size_state} ->
-  data  :huint8_p ->
+  state :uint32_p{length state = v size_state} ->
+  data  :uint8_p ->
   n     :uint32_t{v n * v size_block <= length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
@@ -448,8 +448,8 @@ let rec update_multi state data n =
 
 
 val update_last:
-  state :huint32_p{length state = v size_state} ->
-  data  :huint8_p {length data <= v size_block} ->
+  state :uint32_p{length state = v size_state} ->
+  data  :uint8_p {length data <= v size_block} ->
   len   :uint32_t {v len = length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
@@ -471,9 +471,9 @@ let update_last state data len =
 
   (* Compute the final length of the data *)
   let count = state.(pos_count_w) in
-  let l_0 = H64.((s32_to_s64 count) *%^ (u32_to_s64 size_block)) in
-  let l_1 = u32_to_s64 len in
-  let t_0 = H64.((l_0 +^ l_1) *%^ (u32_to_s64 8ul)) in
+  let l_0 = H64.((h32_to_h64 count) *%^ (u32_to_h64 size_block)) in
+  let l_1 = u32_to_h64 len in
+  let t_0 = H64.((l_0 +^ l_1) *%^ (u32_to_h64 8ul)) in
 
   (* Encode the total length at the end of the padding *)
   let len_64 = Buffer.sub blocks (size_block +^ size_block -^ 8ul) 8ul in
@@ -491,7 +491,7 @@ let update_last state data len =
   Buffer.blit data 0ul final_blocks 0ul len;
 
   (* Set the first byte of the padding *)
-  final_blocks.(len) <- (u8_to_s8 0x80uy);
+  final_blocks.(len) <- (u8_to_h8 0x80uy);
 
   (* Call the update function on one or two blocks *)
   update_multi state final_blocks n;
@@ -501,8 +501,8 @@ let update_last state data len =
 
 
 val finish:
-  state :huint32_p{length state = v size_state} ->
-  hash  :huint8_p{length hash = v size_hash} ->
+  state :uint32_p{length state = v size_state} ->
+  hash  :uint8_p{length hash = v size_hash} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
         (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
@@ -518,8 +518,8 @@ let finish state hash =
 
 
 val hash:
-  hash :huint8_p{length hash = v size_hash} ->
-  input:huint8_p ->
+  hash :uint8_p{length hash = v size_hash} ->
+  input:uint8_p ->
   len  :uint32_t{v len = length input} ->
   Stack unit
         (requires (fun h0 -> live h0 hash /\ live h0 input))
@@ -534,26 +534,26 @@ let hash hash input len =
   (**) push_frame ();
 
   (* Allocate memory for the hash state *)
-  let ctx = Buffer.create (u32_to_s32 0ul) size_state in
+  let state = Buffer.create (u32_to_h32 0ul) size_state in
 
   (* Compute the number of blocks to process *)
   let n = U32.div len size_block in
   let r = U32.rem len size_block in
 
   (* Initialize the hash function *)
-  init ctx;
+  init state;
 
   (* Update the state with data blocks *)
-  update_multi ctx input n;
+  update_multi state input n;
 
   (* Get the last block *)
   let input_last = Buffer.sub input (n *%^ size_block) r in
 
   (* Process the last block of data *)
-  update_last ctx input_last r;
+  update_last state input_last r;
 
   (* Finalize the hash output *)
-  finish ctx hash;
+  finish state hash;
 
   (* Pop the memory frame *)
   (**) pop_frame ()
