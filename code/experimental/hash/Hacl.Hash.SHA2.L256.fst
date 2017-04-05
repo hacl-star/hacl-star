@@ -130,29 +130,28 @@ private val constants_set_k:
   Stack unit
         (requires (fun h -> live h k))
         (ensures (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1
-                 /\ (let s = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 k) in
-                   s == Spec.SHA2.k)))
-
-#set-options "--lax"
+                 /\ (let seq_k = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 k) in
+                   seq_k == Spec.k)))
 
 [@"substitute"]
 let constants_set_k k =
-  Hacl.Utils.Experimental.hupd_64 k 0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul
-                                   0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul
-                                   0xd807aa98ul 0x12835b01ul 0x243185beul 0x550c7dc3ul
-                                   0x72be5d74ul 0x80deb1feul 0x9bdc06a7ul 0xc19bf174ul
-                                   0xe49b69c1ul 0xefbe4786ul 0x0fc19dc6ul 0x240ca1ccul
-                                   0x2de92c6ful 0x4a7484aaul 0x5cb0a9dcul 0x76f988daul
-                                   0x983e5152ul 0xa831c66dul 0xb00327c8ul 0xbf597fc7ul
-                                   0xc6e00bf3ul 0xd5a79147ul 0x06ca6351ul 0x14292967ul
-                                   0x27b70a85ul 0x2e1b2138ul 0x4d2c6dfcul 0x53380d13ul
-                                   0x650a7354ul 0x766a0abbul 0x81c2c92eul 0x92722c85ul
-                                   0xa2bfe8a1ul 0xa81a664bul 0xc24b8b70ul 0xc76c51a3ul
-                                   0xd192e819ul 0xd6990624ul 0xf40e3585ul 0x106aa070ul
-                                   0x19a4c116ul 0x1e376c08ul 0x2748774cul 0x34b0bcb5ul
-                                   0x391c0cb3ul 0x4ed8aa4aul 0x5b9cca4ful 0x682e6ff3ul
-                                   0x748f82eeul 0x78a5636ful 0x84c87814ul 0x8cc70208ul
-                                   0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
+  Hacl.Utils.Experimental.hupd_64 k
+  0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul
+  0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul
+  0xd807aa98ul 0x12835b01ul 0x243185beul 0x550c7dc3ul
+  0x72be5d74ul 0x80deb1feul 0x9bdc06a7ul 0xc19bf174ul
+  0xe49b69c1ul 0xefbe4786ul 0x0fc19dc6ul 0x240ca1ccul
+  0x2de92c6ful 0x4a7484aaul 0x5cb0a9dcul 0x76f988daul
+  0x983e5152ul 0xa831c66dul 0xb00327c8ul 0xbf597fc7ul
+  0xc6e00bf3ul 0xd5a79147ul 0x06ca6351ul 0x14292967ul
+  0x27b70a85ul 0x2e1b2138ul 0x4d2c6dfcul 0x53380d13ul
+  0x650a7354ul 0x766a0abbul 0x81c2c92eul 0x92722c85ul
+  0xa2bfe8a1ul 0xa81a664bul 0xc24b8b70ul 0xc76c51a3ul
+  0xd192e819ul 0xd6990624ul 0xf40e3585ul 0x106aa070ul
+  0x19a4c116ul 0x1e376c08ul 0x2748774cul 0x34b0bcb5ul
+  0x391c0cb3ul 0x4ed8aa4aul 0x5b9cca4ful 0x682e6ff3ul
+  0x748f82eeul 0x78a5636ful 0x84c87814ul 0x8cc70208ul
+  0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
 
 
 #reset-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 100"
@@ -163,13 +162,14 @@ val constants_set_h_0:
   Stack unit
     (requires (fun h -> live h hash))
     (ensures (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
-             /\ (let s = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 hash) in
-                s == Spec.SHA2.h_0)))
+             /\ (let seq_h_0 = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 hash) in
+                seq_h_0 == Spec.SHA2.h_0)))
 
 [@"substitute"]
 let constants_set_h_0 hash =
-  Hacl.Utils.Experimental.hupd_8 hash 0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul
-                                     0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
+  Hacl.Utils.Experimental.hupd_8 hash
+  0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul
+  0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
 
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
@@ -177,7 +177,7 @@ let constants_set_h_0 hash =
 private val ws:
   ws_w    :huint32_p {length ws_w = 64} ->
   block_w :huint32_p {length block_w = v size_block_w /\ disjoint ws_w block_w} ->
-  t:uint32_t{UInt32.v t <= Spec.size_k_w} ->
+  t       :uint32_t {v t <= Spec.size_k_w} ->
   Stack unit
         (requires (fun h -> live h block_w /\ live h ws_w /\
                           (let w = as_seq h ws_w in
@@ -343,10 +343,11 @@ val init:
   Stack unit
         (requires (fun h0 -> live h0 state))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
-                  /\ (let seq_k = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
-                  Hacl.Spec.Endianness.reveal_h32s seq_k == Spec.k)
-                  /\ (let seq_h_0 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-                  Hacl.Spec.Endianness.reveal_h32s seq_h_0 == Spec.h_0)))
+                  /\ (let slice_k = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+                  let slice_h_0 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+                  let seq_k = Hacl.Spec.Endianness.reveal_h32s slice_k in
+                  let seq_h_0 = Hacl.Spec.Endianness.reveal_h32s slice_h_0 in
+                  seq_k == Spec.k /\ seq_h_0 == Spec.h_0)))
 
 let init state =
   let k = Buffer.sub state pos_k_w size_k_w in
@@ -355,7 +356,7 @@ let init state =
   constants_set_h_0 h_0
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#set-options "--lax"
 
 val update:
   state:huint32_p{length state = v size_state} ->
@@ -367,8 +368,6 @@ val update:
         let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
         let seq_block = as_seq h0 data in
         seq_hash_1 == Spec.update seq_hash_0 seq_block)))
-
-#set-options "--lax"
 
 let update state data =
 
