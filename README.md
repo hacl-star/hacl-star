@@ -55,10 +55,8 @@ and is available in [snapshots/hacl-c](snapshots/hacl-c).
 To build the library, you need a modern C compiler (preferably GCC-6) and CMake.
 
 To build a static and shared versions of this library:
-```make build```
 
-To build a static and shared versions of the experimental library:
-```make build-experimental```
+```make build```
 
 
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
@@ -102,7 +100,12 @@ The [code/experimental](code/experimental) directory includes other (partially v
 * MACs: HMAC, GCM
 * Key Derivation: HKDF
 
+To build a static and shared versions of the experimental library:
+
+```make build-experimental```
+
 We are also working on a JavaScript backend to F* that would enable us to extract HACL* as a JavaScript library.
+
 
 # Maintainers
 
