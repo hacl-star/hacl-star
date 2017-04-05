@@ -195,12 +195,21 @@ val decrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> c:cipher{Seq.length
     h0 == h1
     /\ m_contains ae_log h1
     /\ ((~(b2t ae_int_ctxt) \/ dishonest i)
-      ==> (Some? (SPEC.secretbox_open_easy c k.raw n)
-        ==> Some? p /\ Some?.v p == coerce (Some?.v (SPEC.secretbox_open_easy c k.raw n))))
-    /\ (( (b2t ae_int_ctxt) /\ honest i /\ Some? p) 
-      ==> (MM.defined ae_log (n,i) h0 /\ (fst (MM.value ae_log (n,i) h0) == c ) 
-         /\ Some?.v p == snd (MM.value ae_log (n,i) h0)))
+      ==> ((Some? (SPEC.secretbox_open_easy c k.raw n)
+        ==> Some? p /\ Some?.v p == coerce (Some?.v (SPEC.secretbox_open_easy c k.raw n)))
+	/\ ((None? (SPEC.secretbox_open_easy c k.raw n))
+	  ==> None? p)
+      ))
+    /\ ((b2t ae_int_ctxt /\ honest i)
+        ==> (Some? p
+          ==> (MM.defined ae_log (n,i) h0 /\ (fst (MM.value ae_log (n,i) h0) == c ) 
+            /\ Some?.v p == snd (MM.value ae_log (n,i) h0)))
+	  /\ (None? p
+	  ==> (MM.fresh ae_log (n,i) h0 \/ c =!= fst (MM.value ae_log (n,i) h0)))
+	 )
   ))
+
+
 let decrypt #i n k c =
   let honest_i = is_honest i in
   if ae_int_ctxt && honest_i then

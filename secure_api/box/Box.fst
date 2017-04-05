@@ -502,23 +502,41 @@ val box: pk:pkae_pkey ->
     /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 ==> (forall n. MM.fresh box_log (n,i) h0))) // for fresh keys, all nonces are fresh
   ))
   (ensures (fun h0 c h1 -> 
+    let regions_modified_beforenm_dishonest = [id_log_region] in
+    let regions_modified_beforenm_honest = (regions_modified_beforenm_dishonest @ [dh_key_log_region;box_key_log_region]) in
+    let regions_modified_afternm_honest = ([box_log_region;ae_log_region]) in
+    let regions_modified_honest_set = Set.as_set (regions_modified_beforenm_honest @ regions_modified_afternm_honest) in
+    let regions_modified_dishonest_set:Set.set (r:HH.rid) = Set.as_set regions_modified_beforenm_dishonest in
     let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
     // Make sure that log_invariants hold. Would like to ensure "all_keys" variant, but too expensive to verify currently.
     log_invariant h1 i
-    /\ ((~(b2t pkae_ind_cpa) \/ dishonest i)
+    /\ ((dishonest i)
       ==> (c = SPEC.secretbox_easy (PlainBox.repr p) (prf_odhGT sk pk) n))
     // If honest and idealizing, we encrypt zeros.
     // TODO: How to get hold of the key?
     ///\ ((b2t pkae /\ honest i)
     //  ==> (c == SPEC.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n))
-    //// We have put the message both in the local key log and in the box_log
     /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))
                                 /\ MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))))
     /\ MR.m_contains id_log h1
     /\ MR.m_contains id_honesty_log h1
     /\ MR.m_contains box_log h1
+    /\ MR.m_contains ae_log h1
     /\ MR.m_contains box_key_log h1
     /\ MR.m_contains dh_key_log h1
+    /\ log_invariant h1 i
+    // TODO: How to get hold of the key?
+    ///\ ((honest i /\ MM.fresh box_key_log i h0) ==> (MR.m_sel h1 box_key_log == MM.upd (MR.m_sel h0 box_key_log) i k))
+    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (makes_unfresh_just i h0 h1))
+    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (modifies regions_modified_honest_set h0 h1))
+    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log))
+    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (modifies (Set.as_set (regions_modified_afternm_honest)) h0 h1))
+    ///\ ((honest i) ==> (MR.witnessed (MM.contains box_key_log i k)))
+    ///\ ((honest i) ==> (MM.contains box_key_log i k h1))
+    /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))))
+    /\ ((honest i) ==> (MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))))
+    /\ ((honest i) ==> (modifies regions_modified_honest_set h0 h1))
+    /\ ((dishonest i) ==> (modifies regions_modified_dishonest_set h0 h1))
   ))
 
 
@@ -538,34 +556,69 @@ let box pk sk n p =
   afternm_log_append_framing_lemma h0 h1 i n c p;
   afternm_nonce_freshness_framing_lemma h0 h1 i n c p;
   let h0 = ST.get() in
-  assert(log_invariant h0 i);
-  admit()
-  // This goes through. TODO: Properly specify post-conditions.
   c
 
-// Does not verify. Error is line 409
-//val box_open: #(sk_id:id{DH_id? sk_id}) -> 
-//	     #(pk_id:id{DH_id? pk_id}) -> 
-//	     n:nonce ->  
-//	     sk:pkae_skey sk_id{registered sk_id} ->
-//	     pk:pkae_pkey pk_id{registered pk_id} -> 
-//	     c:cipher ->
-//	     ST(option (p:protected_pkae_plain))
-//  (requires (fun h0 ->
-//    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
-//    registered i
-//    // Liveness of global logs
-//    /\ MR.m_contains box_log h0
-//    /\ MR.m_contains id_log h0
-//    /\ MR.m_contains box_key_log h0
-//    /\ MR.m_contains dh_key_log h0
-//    // Make sure that log_invariant holds.
-//    /\ log_invariant h0 i
-//  ))
-//  (ensures (fun h0 p h1 -> 
-//    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
-//    log_invariant h1 i
-//  ))
+  
+val box_open: n:nonce ->  
+	      sk:pkae_skey ->
+	      pk:pkae_pkey -> 
+	      c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
+	      ST(option (p:protected_pkae_plain{get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))}))
+  (requires (fun h0 ->
+    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
+    registered i
+    // Liveness of global logs
+    /\ MR.m_contains box_log h0
+    /\ MR.m_contains id_log h0
+    /\ MR.m_contains box_key_log h0
+    /\ MR.m_contains dh_key_log h0
+    /\ ((honest i) ==> MM.fresh box_log (n,i) h0)
+    // Make sure that log_invariant holds.
+    /\ log_invariant h0 i
+  ))
+  (ensures (fun h0 p h1 -> 
+    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
+    let modified_regions = Set.union (Set.singleton dh_key_log_region) (Set.singleton box_key_log_region) in
+    log_invariant h1 i
+    /\ MR.m_contains box_log h1
+    /\ MR.m_contains ae_log h1
+    /\ MR.m_contains id_log h1
+    /\ MR.m_contains box_key_log h1
+    /\ MR.m_contains dh_key_log h1
+    /\ (honest i ==> MM.defined box_key_log i h1)
+    /\ ((honest i) ==> (let k_raw = AE.get_keyGT (MM.value box_key_log i h1) in
+                     (~(b2t pkae) 
+		       ==> ((Some? (SPEC.secretbox_open_easy c k_raw n) 
+		         ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))
+		            /\ h0 == h1)))
+			 /\ ((None? (SPEC.secretbox_open_easy c k_raw n))
+			   ==> (None? p)))
+                     /\ ((b2t pkae) 
+		       ==> ((Some? p)  
+		         ==> (let p' = AE.message_wrap (Some?.v p) in 
+			   MM.defined box_log (n,i) h0 /\ (fst (MM.value box_log (n,i) h0) == c )
+		           /\ p' == snd (MM.value box_log (n,i) h0)))
+			 /\ ((None? p)
+			   ==>(MM.fresh box_log (n,i) h0 \/ c =!= fst (MM.value box_log (n,i) h0)))
+			   )))
+    /\ ((dishonest i) ==> (let k_raw = prf_odhGT sk pk in
+                     (~(b2t pkae) 
+		       ==> ((Some? (SPEC.secretbox_open_easy c k_raw n) 
+		         ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))
+		            /\ h0 == h1)))
+			 /\ ((None? (SPEC.secretbox_open_easy c k_raw n))
+			   ==> (None? p)))
+                     /\ ((b2t pkae) 
+		       ==> ((Some? p)  
+		         ==> (let p' = AE.message_wrap (Some?.v p) in 
+			   MM.defined box_log (n,i) h0 /\ (fst (MM.value box_log (n,i) h0) == c )
+		           /\ p' == snd (MM.value box_log (n,i) h0)))
+			 /\ ((None? p)
+			   ==> (MM.fresh box_log (n,i) h0 \/ c =!= fst (MM.value box_log (n,i) h0)))
+			   )))
+  ))
+
+
 //let box_open #sk_id #pk_id n sk pk c =
 //  let k = box_beforenm #pk_id #sk_id pk sk in
 //  let i = AE.get_index k in
