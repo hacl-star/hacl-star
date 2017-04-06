@@ -361,13 +361,15 @@ let init state =
   constants_set_k k;
   constants_set_h_0 h_0
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-(* let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:buffer t) (b:buffer t) (len:nat{len = length a /\ len = length b}): Lemma *)
-(*   (requires (let slice_a = Seq.slice (as_seq h1 a) 0 len in *)
-(*              let slice_b = Seq.slice (as_seq h0 b) 0 len in *)
-(*              slice_a == slice_b)) *)
-(*   (ensures  (as_seq h1 a == as_seq h0 b)) = () *)
-
+let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:buffer t{live h1 a}) (b:buffer t{live h0 b}) (len:nat{len = length a /\ len = length b}): Lemma
+  (requires (let slice_a = Seq.slice (as_seq h1 a) 0 len in
+             let slice_b = Seq.slice (as_seq h0 b) 0 len in
+             slice_a == slice_b))
+  (ensures  (as_seq h1 a == as_seq h0 b)) =
+  Seq.lemma_eq_intro (as_seq h1 a) (Seq.slice (as_seq h1 a) 0 len);
+  Seq.lemma_eq_intro (as_seq h0 b) (Seq.slice (as_seq h0 b) 0 len)
 
 [@"substitute"]
 private val copy_hash:
@@ -383,7 +385,8 @@ let copy_hash hash_w_1 hash_w_2 =
   let h0 = ST.get () in
   Buffer.blit hash_w_2 0ul hash_w_1 0ul size_hash_w;
   let h1 = ST.get () in
-  assert(Seq.slice (as_seq h1 hash_w_1) 0 (v size_hash_w) == Seq.slice (as_seq h0 hash_w_2) 0 (v size_hash_w))
+  assert(Seq.slice (as_seq h1 hash_w_1) 0 (v size_hash_w) == Seq.slice (as_seq h0 hash_w_2) 0 (v size_hash_w));
+  lemma_blit_slices_eq h0 h1 hash_w_1 hash_w_2 8
 
 
 [@"substitute"]
@@ -396,7 +399,8 @@ private val update_core:
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 data /\ live h0 data_w /\ live h0 ws_w /\ live h0 k_w
                   /\ as_seq h0 k_w == Spec.k
-                  /\ (as_seq h0 data = Spec.Lib.uint32s_to_be (v size_block_w) (as_seq h0 data_w))
+                  (* /\ (as_seq h0 data = Spec.Lib.uint32s_to_be (v size_block_w) (as_seq h0 data_w)) *)
+                  /\ (as_seq h0 data_w = Spec.Lib.uint32s_from_be (v size_block_w) (as_seq h0 data))
                   /\ (let w = as_seq h0 ws_w in
                   let b = as_seq h0 data_w in
                   (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i))))
@@ -406,7 +410,7 @@ private val update_core:
                   let seq_block = as_seq h0 data in
                   seq_hash_1 == Spec.update seq_hash_0 seq_block)))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 [@"substitute"]
 let update_core hash_w data data_w ws_w k_w =
@@ -436,7 +440,9 @@ let update_core hash_w data data_w ws_w k_w =
   state :uint32_p{length state = v size_state} ->
   data  :uint8_p {length data = v size_block /\ disjoint state data} ->
   Stack unit
-        (requires (fun h0 -> live h0 state /\ live h0 data))
+        (requires (fun h0 -> live h0 state /\ live h0 data
+          (* Assume that current length < 2**32 - 1 *)
+        ))
         (ensures  (fun h0 r h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
         /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
         let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
