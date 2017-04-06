@@ -166,12 +166,12 @@ all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
 # Parameter for interactive mode
 %.fst-in: 
-	@echo $(OPTIONS) \
+	@echo $(OPTIONS) --hint_info \
 	$(FSTAR_INCLUDE_PATHS) 
 
 # Verifying one file at a time
 %.fst-ver:
-	@$(FSTAR) $(OPTIONS) \
+	@$(FSTAR) $(OPTIONS) --hint_info \
 	$(FSTAR_INCLUDE_PATHS) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	--verify_module $(basename $(notdir $@)) \
