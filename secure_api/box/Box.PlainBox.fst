@@ -20,15 +20,13 @@ let get_index p =
   p.i
 
 (* two pure functions, never called when ideal *)
-val repr: p:protected_pkae_plain{not pkae \/ (dishonest p.i) } -> Tot pkae_plain
+val repr: p:protected_pkae_plain{not pkae_ind_cpa \/ (dishonest p.i) } -> Tot (b:pkae_plain{Seq.length b / Spec.Salsa20.blocklen < pow2 32})
 let repr p = p.b
 
 // Change this if we want to use signcryption with pkae_int-ctxt
-val coerce: #i:id{AE_id? i} -> p:pkae_plain{not pkae \/ (dishonest i)} -> Tot (prot:protected_pkae_plain{i=prot.i})
+val coerce: #i:id{AE_id? i} -> p:pkae_plain{not pkae_int_ctxt \/ (dishonest i)} -> Tot (prot:protected_pkae_plain{i=prot.i})
 let coerce #i p = 
   Prot_pkae_p #i p  
 
 val length:  protected_pkae_plain -> Tot (n:nat{n / Spec.Salsa20.blocklen < pow2 32})
 let length p = Seq.length p.b
-
-// Create coece_keyshare function

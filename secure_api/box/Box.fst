@@ -390,7 +390,7 @@ let afternm_nonce_freshness_framing_lemma h0 h1 i n c p = ()
 *)
 val box_afternm: k:AE.key ->
 		     n:nonce ->
-		     p:protected_pkae_plain{PlainBox.get_index p = AE.get_index k} ->
+		     p:protected_pkae_plain{PlainBox.get_index p = AE.get_index k /\ length p / Spec.Salsa20.blocklen < pow2 32} ->
 		     ST c
   (requires (fun h0 -> 
     let i = AE.get_index k in
@@ -419,9 +419,9 @@ val box_afternm: k:AE.key ->
     let k_raw = get_keyGT k in
     // If dishonest or not idealizing, then we encrypt the actual message.
     ((~(b2t pkae_ind_cpa) \/ dishonest i)
-      ==> (c = SPEC.secretbox_easy (PlainBox.repr p) (AE.get_keyGT k) n))
+      ==> (c == SPEC.secretbox_easy (PlainBox.repr p) (AE.get_keyGT k) n))
     // If honest and idealizing, we encrypt zeros.
-    /\ ((b2t pkae /\ honest i)
+    /\ ((b2t pkae_ind_cpa /\ honest i)
       ==> (c == SPEC.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n))
     //// We have put the message both in the local key log and in the box_log
     /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))))
@@ -444,6 +444,7 @@ val box_afternm: k:AE.key ->
   ))
 
 
+#set-options "--z3rlimit 200 --max_ifuel 1 --max_fuel 0"
 let box_afternm k n p =
   MR.m_recall id_honesty_log;
   MR.m_recall box_key_log;
@@ -558,11 +559,62 @@ let box pk sk n p =
   let h0 = ST.get() in
   c
 
+
+val box_open_afternm: n:nonce -> k:AE.key -> c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} -> ST(option (p:protected_pkae_plain{get_index p = AE.get_index k}))
+  (requires (fun h0 -> 
+    let i = AE.get_index k in
+    registered i
+    // Liveness of global logs
+    /\ MR.m_contains box_log h0
+    /\ MR.m_contains id_log h0
+    /\ MR.m_contains box_key_log h0
+    /\ MR.m_contains dh_key_log h0
+    /\ (honest i ==> MM.defined box_key_log i h0)
+    // Make sure that log_invariant holds.
+    /\ log_invariant h0 i
+  ))
+  (ensures (fun h0 p h1 -> 
+    let i = AE.get_index k in
+    let k_raw = AE.get_keyGT k in
+    log_invariant h1 i
+    /\ MR.m_contains box_log h1
+    /\ MR.m_contains ae_log h1
+    /\ MR.m_contains id_log h1
+    /\ MR.m_contains box_key_log h1
+    /\ MR.m_contains dh_key_log h1
+    /\ ((~(b2t pkae_int_ctxt) \/ dishonest i)
+      ==> ((Some? (SPEC.secretbox_open_easy c k_raw n) 
+        ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))
+          /\ h0 == h1)))
+        /\ ((None? (SPEC.secretbox_open_easy c k_raw n))
+          ==> (None? p)))
+    /\ ((b2t pkae /\ honest i) 
+      ==> ((Some? p)  
+        ==> (let p' = AE.message_wrap (Some?.v p) in 
+          MM.defined box_log (n,i) h0 /\ (fst (MM.value box_log (n,i) h0) == c )
+          /\ p' == snd (MM.value box_log (n,i) h0)))
+        /\ ((None? p)
+          ==>(MM.fresh box_log (n,i) h0 \/ c =!= fst (MM.value box_log (n,i) h0)))
+      )
+    /\ h0 == h1
+  ))
+
+
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
+let box_open_afternm n k c =
+  let i = AE.get_index k in
+  match AE.decrypt #i n k c with
+  | Some p -> 
+    let p' = (AE.message_unwrap #i p) in 
+    Some p'
+  | None -> None
   
+
+
 val box_open: n:nonce ->  
 	      sk:pkae_skey ->
 	      pk:pkae_pkey -> 
-	      c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
+	      c:cipher ->
 	      ST(option (p:protected_pkae_plain{get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))}))
   (requires (fun h0 ->
     let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
@@ -586,6 +638,8 @@ val box_open: n:nonce ->
     /\ MR.m_contains box_key_log h1
     /\ MR.m_contains dh_key_log h1
     /\ (honest i ==> MM.defined box_key_log i h1)
+    /\ (honest i ==> modifies modified_regions h0 h1)
+    /\ (dishonest i ==> h0==h1)
     /\ ((honest i) ==> (let k_raw = AE.get_keyGT (MM.value box_key_log i h1) in
                      (~(b2t pkae) 
 		       ==> ((Some? (SPEC.secretbox_open_easy c k_raw n) 
@@ -602,28 +656,14 @@ val box_open: n:nonce ->
 			   ==>(MM.fresh box_log (n,i) h0 \/ c =!= fst (MM.value box_log (n,i) h0)))
 			   )))
     /\ ((dishonest i) ==> (let k_raw = prf_odhGT sk pk in
-                     (~(b2t pkae) 
-		       ==> ((Some? (SPEC.secretbox_open_easy c k_raw n) 
+		       (Some? (SPEC.secretbox_open_easy c k_raw n) 
 		         ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))
-		            /\ h0 == h1)))
-			 /\ ((None? (SPEC.secretbox_open_easy c k_raw n))
-			   ==> (None? p)))
-                     /\ ((b2t pkae) 
-		       ==> ((Some? p)  
-		         ==> (let p' = AE.message_wrap (Some?.v p) in 
-			   MM.defined box_log (n,i) h0 /\ (fst (MM.value box_log (n,i) h0) == c )
-		           /\ p' == snd (MM.value box_log (n,i) h0)))
-			 /\ ((None? p)
-			   ==> (MM.fresh box_log (n,i) h0 \/ c =!= fst (MM.value box_log (n,i) h0)))
-			   )))
+		           /\ h0 == h1))
+		       /\ (None? (SPEC.secretbox_open_easy c k_raw n)
+			   ==> None? p)))
   ))
 
 
-//let box_open #sk_id #pk_id n sk pk c =
-//  let k = box_beforenm #pk_id #sk_id pk sk in
-//  let i = AE.get_index k in
-//  match AE.decrypt #i n k c with
-//  | Some p -> 
-//    let p' = (AE.message_unwrap #i p) in 
-//    Some p'
-//  | None -> None
+let box_open n sk pk c =
+  let k = box_beforenm #pk_id #sk_id pk sk in
+  box_open_afternm n k c

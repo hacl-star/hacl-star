@@ -128,11 +128,11 @@ let get_keyGT k =
 
 
 #reset-options
-#set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 1"
+#set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 0"
 (**
    Encrypt a a message under a key. Idealize if the key is honest and ae_ind_cca true.
 *)
-val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i) -> ST cipher
+val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i{length m / Spec.Salsa20.blocklen < pow2 32}) -> ST bytes
   (requires (fun h0 -> 
     MR.m_contains ae_log h0
     /\ ((honest i) ==> MM.fresh ae_log (n,i) h0) // Nonce freshness
@@ -142,39 +142,31 @@ val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_pla
     let current_log = MR.m_sel h0 ae_log in
     let modified_regions:Set.set (r:HH.rid) = Set.singleton ae_log_region in
     (honest i ==> HS.modifies modified_regions h0 h1)
-    /\ m_contains ae_log h1
+    /\ (dishonest i ==> h0 == h1)
+    /\ (honest i \/ dishonest i)
+    /\ MR.m_contains ae_log h1
     /\ ((honest i /\ b2t ae_ind_cpa)
-      ==> (c = SPEC.secretbox_easy (create_zero_bytes (length m)) k.raw n))
+        ==> (c = SPEC.secretbox_easy (create_zero_bytes (length m)) k.raw n))
     /\ ((~(b2t ae_ind_cpa) \/ dishonest i)
-      ==> (c = SPEC.secretbox_easy (repr m) k.raw n))
-    /\ (dishonest i \/ honest i)
+        ==> (c = SPEC.secretbox_easy (repr m) k.raw n))
     /\ ((honest i) ==> (MR.witnessed (MM.contains ae_log (n,i) (c,m))
-                                /\ MR.m_sel h1 ae_log == MM.upd current_log (n,i) (c,m)))
-    /\ ((dishonest i) ==> h0 == h1)
+                    /\ MR.m_sel h1 ae_log == MM.upd current_log (n,i) (c,m)))
     /\ (modifies modified_regions h0 h1 \/ h0 == h1)
   ))
+
+
 let encrypt #i n k m =
   MR.m_recall id_log;
   MR.m_recall id_honesty_log;
   MR.m_recall ae_log;
   let honest_i = is_honest i in
-  //let p = 
-  //  if (ae_ind_cpa && honest_i) then (
-  //    Seq.create (length m) (UInt8.uint_to_t 0)
-  //  ) else (
-  //    assert(~(b2t ae_ind_cpa) \/ dishonest i);
-  //    repr m )
-  //in
-  //let  c = SPEC.secretbox_easy p k.raw n in
-  let c = 
+  let p = 
     if (ae_ind_cpa && honest_i) then (
-      let c' = SPEC.secretbox_easy (Seq.create (length m) (UInt8.uint_to_t 0)) k.raw n in
-      c'
+      Seq.create (length m) (UInt8.uint_to_t 0)
     ) else (
-      let c' = SPEC.secretbox_easy (repr m) k.raw n in
-      c'
-    )
+      repr m )
   in
+  let  c = SPEC.secretbox_easy p k.raw n in
   if honest_i then (
     MM.extend ae_log (n,i) (c,m));
   c
@@ -186,9 +178,9 @@ let encrypt #i n k m =
    Decrypt a ciphertext c using a key k. If the key is honest and ae_int_ctxt is idealized,
    try to obtain the ciphertext from the log. Else decrypt via concrete implementation.
 *)
-val decrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} -> ST (option (protected_ae_plain i))
-  (requires (fun h -> 
-    MR.m_contains ae_log h
+val decrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> c:cipher -> ST (option (protected_ae_plain i))
+  (requires (fun h0 ->
+    MR.m_contains ae_log h0
     /\ registered i
   ))
   (ensures  (fun h0 p h1 -> 
