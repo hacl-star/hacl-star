@@ -57,7 +57,7 @@ let mac_modifies (#a:Type)
 		 (acc:FStar.Buffer.buffer a)
 		 (cipher:buffer)
 		 (h0 h1 :mem) : GTot Type0 =
-  HS.modifies (Set.as_set [h0.tip; mac_region; frameOf cipher]) h0 h1 /\
+  HS.modifies (Set.as_set [h0.tip; frameOf cipher; mac_region]) h0 h1 /\
   Buffer.modifies_buf_1 (frameOf cipher) cipher h0 h1
 
 let enxor_modifies (log_region:rid) (cipher:buffer) (h0 h1:mem) : GTot Type0 = 
