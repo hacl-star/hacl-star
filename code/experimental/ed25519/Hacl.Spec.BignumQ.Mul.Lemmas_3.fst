@@ -50,3 +50,62 @@ let lemma_div_224 x0 x1 x2 x3 x4 x5 x6 x7 x8 =
   assert_norm(pow2 336 = 0x1000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
   assert_norm(pow2 392 = 0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
   assert_norm(pow2 448 = 0x10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+
+private
+let lemma_distr_5 x a b c d e : Lemma (x * (a + b + c + d + e) = x * a + x * b + x * c + x * d + x * e)
+ = ()
+
+
+val lemma_div_24:
+  x0:u56 -> x1:u56 -> x2:u56 -> x3:u56 -> x4:u56 ->
+  Lemma ((v x0 + p1 * v x1 + p2 * v x2 + p3 * v x3 + p4 * v x4) / pow2 24
+         = v x0 / pow2 24 + (v x1 % pow2 24) * pow2 32
+           + p1 * (v x1 / pow2 24 + (v x2 % pow2 24) * pow2 32)
+           + p2 * (v x2 / pow2 24 + (v x3 % pow2 24) * pow2 32)
+           + p3 * (v x3 / pow2 24 + (v x4 % pow2 24) * pow2 32)
+           + p4 * (v x4 / pow2 24))
+let lemma_div_24 x0 x1 x2 x3 x4 =
+  assert_norm(pow2 24 = 0x1000000);
+  assert_norm(pow2 32 = 0x100000000);
+  assert_norm(pow2 56  = 0x100000000000000);
+  assert_norm(pow2 112 = 0x10000000000000000000000000000);
+  assert_norm(pow2 168 = 0x1000000000000000000000000000000000000000000);
+  assert_norm(pow2 224 = 0x100000000000000000000000000000000000000000000000000000000);
+  Math.Lemmas.lemma_div_mod (v x0) (pow2 24);
+  lemma_distr_5 0x1000000 (v x0 / pow2 24) (0x100000000 * v x1) (0x10000000000000000000000 * v x2) (0x1000000000000000000000000000000000000 * v x3) (0x100000000000000000000000000000000000000000000000000 * v x4);
+  Math.Lemmas.division_addition_lemma (v x0 % pow2 24) (pow2 24) ((v x0 / pow2 24)+(0x100000000 * v x1)+(0x10000000000000000000000 * v x2)+(0x1000000000000000000000000000000000000 * v x3)+(0x100000000000000000000000000000000000000000000000000 * v x4));
+  Math.Lemmas.small_division_lemma_1 (v x0 % pow2 24) (pow2 24);
+  assert((v x0 + p1 * v x1 + p2 * v x2 + p3 * v x3 + p4 * v x4) / pow2 24
+    = (v x0 / pow2 24 + (0x100000000 * v x1)+(0x10000000000000000000000 * v x2)+(0x1000000000000000000000000000000000000 * v x3)+(0x100000000000000000000000000000000000000000000000000 * v x4)));
+    Math.Lemmas.lemma_div_mod (v x1) (pow2 24);
+    Math.Lemmas.lemma_div_mod (v x2) (pow2 24);
+    Math.Lemmas.lemma_div_mod (v x3) (pow2 24);
+    Math.Lemmas.lemma_div_mod (v x4) (pow2 24)
+
+
+val lemma_div_40:
+  x0:u56 -> x1:u56 -> x2:u56 -> x3:u56 -> x4:u56 ->
+  Lemma ((v x0 + p1 * v x1 + p2 * v x2 + p3 * v x3 + p4 * v x4) / pow2 40
+         = v x0 / pow2 40 + (v x1 % pow2 40) * pow2 16
+           + p1 * (v x1 / pow2 40 + (v x2 % pow2 40) * pow2 16)
+           + p2 * (v x2 / pow2 40 + (v x3 % pow2 40) * pow2 16)
+           + p3 * (v x3 / pow2 40 + (v x4 % pow2 40) * pow2 16)
+           + p4 * (v x4 / pow2 40))
+let lemma_div_40 x0 x1 x2 x3 x4 =
+  assert_norm(pow2 16 = 0x10000);
+  assert_norm(pow2 32 = 0x100000000);
+  assert_norm(pow2 40 = 0x10000000000);
+  assert_norm(pow2 56  = 0x100000000000000);
+  assert_norm(pow2 112 = 0x10000000000000000000000000000);
+  assert_norm(pow2 168 = 0x1000000000000000000000000000000000000000000);
+  assert_norm(pow2 224 = 0x100000000000000000000000000000000000000000000000000000000);
+  Math.Lemmas.lemma_div_mod (v x0) (pow2 40);
+  lemma_distr_5 0x1000000 (v x0 / pow2 40) (0x10000 * v x1) (0x1000000000000000000 * v x2) (0x100000000000000000000000000000000 * v x3) (0x10000000000000000000000000000000000000000000000 * v x4);
+  Math.Lemmas.division_addition_lemma (v x0 % pow2 40) (pow2 40) ((v x0 / pow2 40)+(0x10000 * v x1)+(0x1000000000000000000 * v x2)+(0x100000000000000000000000000000000 * v x3)+(0x10000000000000000000000000000000000000000000000 * v x4));
+  Math.Lemmas.small_division_lemma_1 (v x0 % pow2 40) (pow2 40);
+  assert((v x0 + p1 * v x1 + p2 * v x2 + p3 * v x3 + p4 * v x4) / pow2 40
+    = (v x0 / pow2 40 + (0x10000 * v x1)+(0x1000000000000000000 * v x2)+(0x100000000000000000000000000000000 * v x3)+(0x10000000000000000000000000000000000000000000000 * v x4))); 
+    Math.Lemmas.lemma_div_mod (v x1) (pow2 40);
+    Math.Lemmas.lemma_div_mod (v x2) (pow2 40);
+    Math.Lemmas.lemma_div_mod (v x3) (pow2 40);
+    Math.Lemmas.lemma_div_mod (v x4) (pow2 40)
