@@ -342,6 +342,9 @@ let carry_step x y =
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (FStar.UInt128.v x) 56 64;
   t, FStar.UInt128.add y carry
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
+let u56 = x:UInt64.t{v x < 0x100000000000000}
 
 val carry:
   z:seq UInt128.t{length z = 9 /\ 
@@ -355,17 +358,9 @@ val carry:
     /\ UInt128.v z.[6] < 0x30000000000000000000000000000
     /\ UInt128.v z.[7] < 0x20000000000000000000000000000
     /\ UInt128.v z.[8] < 0x10000000000000000000000000000} ->
-  Tot (t:tuple2 qelem_56 (seq UInt64.t){
-      let r, q = t in
-      eval_q r = eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8] % pow2 264
-      /\ length q = 6
-      /\ eval_q_6 q.[0] q.[1] q.[2] q.[3] q.[4] q.[5] = eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8] / pow2 224
-      /\ v q.[0] < 0x100000000000000
-      /\ v q.[1] < 0x100000000000000
-      /\ v q.[2] < 0x100000000000000
-      /\ v q.[3] < 0x100000000000000
-      /\ v q.[4] < 0x100000000000000
-    })
+  Tot (t:seq u56{length t = 10 /\
+    eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]
+                 = eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8]})
 let carry z =
   let z0 = z.[0] in
   let z1 = z.[1] in
@@ -384,26 +379,41 @@ let carry z =
   let x5, z6' = carry_step z5' z6 in
   let x6, z7' = carry_step z6' z7 in
   let x7, z8' = carry_step z7' z8 in
+  let x8, z9' = carry_step z8' (Int.Cast.uint64_to_uint128 0uL) in
   assert(eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8]
     =   UInt64.v x0 + p1 * UInt64.v x1 + p2 * UInt64.v x2 + p3 * UInt64.v x3 + p4 * UInt64.v x4
-  + p5 * UInt64.v x5 + p6 * UInt64.v x6 + p7 * UInt64.v x7 + p8 * UInt128.v z8');
+  + p5 * UInt64.v x5 + p6 * UInt64.v x6 + p7 * UInt64.v x7 + p8 * UInt64.v x8 + p9 * UInt128.v z9');
   assert_norm(pow2 528 = 0x1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
-  assert(UInt128.v z8' < 0x10000000000000000);
+  assert(UInt128.v z9' < 0x100000000000000);
   assert_norm(pow2 64 = 0x10000000000000000);
-  let x8 = Int.Cast.uint128_to_uint64 z8' in
-  Math.Lemmas.modulo_lemma (UInt128.v z8') (pow2 64);
+  let x9 = Int.Cast.uint128_to_uint64 z9' in
+  Math.Lemmas.modulo_lemma (UInt128.v z9') (pow2 64);
+  assert(v x9 < 0x100000000000000);
   assert(eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8]
     = v x0 + p1 * v x1 + p2 * v x2 + p3 * v x3 + p4 * v x4
-      + p5 * v x5 + p6 * v x6 + p7 * v x7 + p8 * v x8);
-  let x4' = x4 &^ 0xffffffffffuL in
+      + p5 * v x5 + p6 * v x6 + p7 * v x7 + p8 * v x8 + p9 * v x9);
+  Seq.Create.create_10 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9
+
+
+val mod_264:
+  t:seq u56{length t = 10} ->
+  Tot (r:qelem_56{eval_q r = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] % pow2 264})
+let mod_264 t =
   assert_norm(pow2 40 = 0x10000000000);
+  let x0 = t.[0] in
+  let x1 = t.[1] in
+  let x2 = t.[2] in
+  let x3 = t.[3] in
+  let x4 = t.[4] in
+  let x5 = t.[5] in
+  let x6 = t.[6] in
+  let x7 = t.[7] in
+  let x8 = t.[8] in
+  let x9 = t.[9] in
+  let x4' = x4 &^ 0xffffffffffuL in
   UInt.logand_mask (v x4) 40;
-  assert(v x4' = v x4 % pow2 40);
-  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_mod_264 x0 x1 x2 x3 x4 x5 x6 x7 x8;
-  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_div_224 x0 x1 x2 x3 x4 x5 x6 x7 x8;
-  let r = Seq.Create.create_5 x0 x1 x2 x3 x4' in
-  let q = Seq.Create.create_5 x4 x5 x6 x7 x8 in
-  r, q
+  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_mod_264 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9;
+  Seq.Create.create_5 x0 x1 x2 x3 x4'
 
 
 val div_2_24_step:
@@ -421,28 +431,6 @@ let div_2_24_step x y =
   Math.Lemmas.modulo_lemma ((v y % pow2 24) * pow2 32) (pow2 64);
   assert(v y' = (v y % pow2 24) * pow2 32);
   UInt.logor_disjoint #64 (v y') (v x') 32;
-  z
-
-val div_2_24:
-  q:qelem{v q.[0] < 0x100000000000000 /\ v q.[1] < 0x100000000000000 /\ v q.[2] < 0x100000000000000
-      /\ v q.[3] < 0x100000000000000} ->
-  Tot (q':qelem_56{eval_q q' = eval_q q / pow2 24})
-let div_2_24 q =
-  assert_norm(pow2 24 = 0x1000000);
-  assert_norm(pow2 56 = 0x100000000000000);
-  assert_norm(pow2 64 = 0x10000000000000000);
-  let q0 = q.[0] in
-  let q1 = q.[1] in
-  let q2 = q.[2] in
-  let q3 = q.[3] in
-  let q4 = q.[4] in
-  let z0 = div_2_24_step q0 q1 in
-  let z1 = div_2_24_step q1 q2 in
-  let z2 = div_2_24_step q2 q3 in
-  let z3 = div_2_24_step q3 q4 in
-  let z4 = q4 >>^ 24ul in
-  let z:qelem_56 = Seq.Create.create_5 z0 z1 z2 z3 z4 in
-  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_div_24 z0 z1 z2 z3 z4;
   z
 
 
@@ -464,76 +452,116 @@ let div_2_40_step x y =
   z
 
 
-val div_2_40:
-  q:qelem{v q.[0] < 0x100000000000000 /\ v q.[1] < 0x100000000000000 /\ v q.[2] < 0x100000000000000
-      /\ v q.[3] < 0x100000000000000} ->
-  Tot (q':qelem_56{eval_q q' = eval_q q / pow2 40})
-let div_2_40 q =
+val div_248:
+  t:seq u56{length t = 10 /\ eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512} ->
+  Tot (q:qelem_56{eval_q q = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] / pow2 248})
+let div_248 t =
+  let x0 = t.[0] in
+  let x1 = t.[1] in
+  let x2 = t.[2] in
+  let x3 = t.[3] in
+  let x4 = t.[4] in
+  let x5 = t.[5] in
+  let x6 = t.[6] in
+  let x7 = t.[7] in
+  let x8 = t.[8] in
+  let x9 = t.[9] in
+  assert_norm(pow2 512 = 0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
+  assert(v x9 < 0x100);
+  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_div_224 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9;
+  assert_norm(pow2 24 = 0x1000000);
+  assert_norm(pow2 32 = 0x100000000);
+  assert_norm(pow2 56 = 0x100000000000000);
+  assert_norm(pow2 64 = 0x10000000000000000);
+  let z0 = div_2_24_step x4 x5 in
+  let z1 = div_2_24_step x5 x6 in
+  let z2 = div_2_24_step x6 x7 in
+  let z3 = div_2_24_step x7 x8 in
+  let z4 = div_2_24_step x8 x9 in
+  let z:qelem_56 = Seq.Create.create_5 z0 z1 z2 z3 z4 in
+  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_div_24 x4 x5 x6 x7 x8 x9;
+  Math.Lemmas.division_multiplication_lemma (eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) (pow2 224) (pow2 24);
+  Math.Lemmas.pow2_plus 224 24;
+  z
+
+
+val div_264:
+  t:seq u56{length t = 10 /\ eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 528} ->
+  Tot (q:qelem_56{eval_q q = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] / pow2 264})
+let div_264 t =
+  let x0 = t.[0] in
+  let x1 = t.[1] in
+  let x2 = t.[2] in
+  let x3 = t.[3] in
+  let x4 = t.[4] in
+  let x5 = t.[5] in
+  let x6 = t.[6] in
+  let x7 = t.[7] in
+  let x8 = t.[8] in
+  let x9 = t.[9] in
+  assert_norm(pow2 528 = 0x1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
+  assert(v x9 < 0x1000000);
+  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_div_224 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9;
+  assert_norm(pow2 32 = 0x100000000);
   assert_norm(pow2 40 = 0x10000000000);
   assert_norm(pow2 56 = 0x100000000000000);
   assert_norm(pow2 64 = 0x10000000000000000);
-  let q0 = q.[0] in
-  let q1 = q.[1] in
-  let q2 = q.[2] in
-  let q3 = q.[3] in
-  let q4 = q.[4] in
-  let z0 = div_2_40_step q0 q1 in
-  let z1 = div_2_40_step q1 q2 in
-  let z2 = div_2_40_step q2 q3 in
-  let z3 = div_2_40_step q3 q4 in
-  let z4 = q4 >>^ 40ul in
+  let z0 = div_2_40_step x4 x5 in
+  let z1 = div_2_40_step x5 x6 in
+  let z2 = div_2_40_step x6 x7 in
+  let z3 = div_2_40_step x7 x8 in
+  let z4 = div_2_40_step x8 x9 in
   let z:qelem_56 = Seq.Create.create_5 z0 z1 z2 z3 z4 in
-  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_div_40 z0 z1 z2 z3 z4;
+  Hacl.Spec.BignumQ.Mul.Lemmas_3.lemma_div_40 x4 x5 x6 x7 x8 x9;
+  Math.Lemmas.division_multiplication_lemma (eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) (pow2 224) (pow2 40);
+  Math.Lemmas.pow2_plus 224 40;
   z
+
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 private
-let lemma_mul_ineq_ (a:nat) (b:nat) (x:nat) : Lemma (requires (a <= x /\ b <= x)) (ensures (a * b <= x * x))
+let lemma_mul_ineq_ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < x /\ b < y)) (ensures (a * b < x * y))
   = ()
+
+private
+let lemma_mul_ineq__ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < pow2 x /\ b < pow2 y)) (ensures (a * b < pow2 (x+y)))
+  = lemma_mul_ineq_ a b (pow2 x) (pow2 y);
+    Math.Lemmas.pow2_plus x y
 
 private 
 let lemma_ineq (a:nat) (b:nat) : Lemma (requires (a < b)) (ensures (a <= b - 1)) = ()
 
-val mul_r_q:
-  x:qelem_56{eval_q x < pow2 256} ->
-  y:qelem_56{eval_q y < pow2 256} ->
-  Tot (t:tuple2 qelem_56 qelem_56{let r,q = t in
-    eval_q r = (eval_q x * eval_q y) % pow2 264
-    /\ eval_q q = (eval_q x * eval_q y) / pow2 248})
-let mul_r_q x y =
-  lemma_mul_ineq_ (eval_q x) (eval_q y) (pow2 256 - 1);
-  let z = mul_5 x y in
-  let (r:qelem_56),(q:qelem) = carry z in
-  let q':qelem_56 = div_2_24 q in
-  assert(eval_q r = (eval_q x * eval_q y) % pow2 264);
-  assert(eval_q q = (eval_q x * eval_q y) / pow2 224);
-  assert(eval_q q' = ((eval_q x * eval_q y) / pow2 224) / pow2 24);
-  Math.Lemmas.division_multiplication_lemma (eval_q x * eval_q y) (pow2 224) (pow2 24);
-  Math.Lemmas.pow2_plus 224 24;
-  r, q'
-
-
-val mul_then_div_2_264:
-  x:qelem_56{eval_q x < pow2 256} ->
-  y:qelem_56{eval_q y < pow2 256} ->
-  Tot (q:qelem_56{eval_q q = (eval_q x * eval_q y) / pow2 264})
-let mul_then_div_2_264 x y =
-  lemma_mul_ineq_ (eval_q x) (eval_q y) (pow2 256 - 1);
-  let z = mul_5 x y in
-  let _,(q:qelem) = carry z in
-  let q':qelem_56 = div_2_40 q in
-  assert(eval_q q = (eval_q x * eval_q y) / pow2 224);
-  assert(eval_q q' = ((eval_q x * eval_q y) / pow2 224) / pow2 40);
-  Math.Lemmas.division_multiplication_lemma (eval_q x * eval_q y) (pow2 224) (pow2 40);
-  Math.Lemmas.pow2_plus 224 40;
-  q'
 
 val barrett_reduction:
-  q:qelem_56{eval_q q < pow2 264} ->
-  r:qelem_56{eval_q r < pow2 264} ->
-  Tot (z:qelem_56{eval_q z = eval_q r - (((eval_q q * eval_q mu) / pow2 264) * eval_q m) % pow2 264})
-let barrett_reduction q r =
-  let qmu = mul_then_div_2_264 q mu in
-  let qmul = low_mul_5 qmu m in
-  sub r qmul
+  t:seq u56{length t = 10 /\
+    eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512} ->
+  Tot (z:qelem_56{eval_q z = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed})
+let barrett_reduction t =
+  let q = div_248 t in
+  Math.Lemmas.lemma_div_lt (eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9])
+                           512 248;
+  let r = mod_264 t in
+  assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
+  lemma_mul_ineq__ (eval_q q) (eval_q mu) 264 264;
+  let qmu = mul_5 q mu in
+  let qmu' = carry qmu in
+  let qmu_264 = div_264 qmu' in
+  let qmul = low_mul_5 qmu_264 m in
+  assume (eval_q r - eval_q qmul >= 0 /\ eval_q r - eval_q qmul < 2 * 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  let s = sub r qmul in
+  let s' = subm_conditional s in
+  assume (eval_q s' = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  s'
+
+
+val mul_modq:
+  x:qelem_56{eval_q x < pow2 256} ->
+  y:qelem_56{eval_q y < pow2 256} ->
+  Tot (z:qelem_56{eval_q z = (eval_q x * eval_q y) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed})
+let mul_modq x y =
+  lemma_mul_ineq__ (eval_q x) (eval_q y) 256 256;
+  let z = mul_5 x y in
+  Math.Lemmas.pow2_lt_compat 528 512;
+  let z' = carry z in
+  barrett_reduction z'
