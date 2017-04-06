@@ -23,9 +23,8 @@ inline static void Hacl_Bignum_Modulo_carry_top(uint64_t *b)
 
 inline static void Hacl_Bignum_Modulo_carry_top_wide(uint128_t *b)
 {
-  uint128_t b2h;
-  uint128_split(b2h,b[2],b[2],42);
-  uint64_t b2_42 = FStar_Int_Cast_uint128_to_uint64(b2h);
+  uint64_t b2_42 = uint128_split_high64(b[2],42);
+  uint128_split_low(b[2],b[2],42);
   uint128_add64(b[0], b[0], b2_42 * 5);
 
 		//(b2_42 << (uint32_t )2) + b2_42);
@@ -72,9 +71,11 @@ Hacl_Bignum_Fproduct_sum_scalar_multiplication_(
 inline static void Hacl_Bignum_Fproduct_carry_wide_(uint128_t *tmp, uint32_t ctr)
 {
     uint128_t th,tp1;
-    uint128_split(th,tmp[ctr],tmp[ctr],44);
+    uint128_split_high(th,tmp[ctr],44);
+    uint128_split_low(tmp[ctr],tmp[ctr],44);
     uint128_add(tp1,tmp[ctr+1], th);
-    uint128_split(th,tmp[ctr+1],tp1,44);
+    uint128_split_high(th,tp1,44);
+    uint128_split_low(tmp[ctr+1],tp1,44);
     uint128_add(tmp[ctr+2],tmp[ctr+2], th);
 }
 
@@ -211,11 +212,10 @@ Hacl_Impl_Poly1305_64_poly1305_update(
   uint64_t tmp[3] = { 0 };
   uint128_t m0_,m0, m1_, m1, m2;
   load128_le(m0_,m);
-  uint128_split(m1_,m0,m0_,44);
-  uint128_split(m2,m1,m1_,44);
-  tmp[0] = FStar_Int_Cast_uint128_to_uint64(m0);
-  tmp[1] = FStar_Int_Cast_uint128_to_uint64(m1);
-  tmp[2] = FStar_Int_Cast_uint128_to_uint64(m2);
+  uint128_split_high(m1_,m0_,44);
+  tmp[0] = uint128_split_low64(m0_,44);
+  tmp[2] = uint128_split_high64(m1_,44);
+  tmp[1] = uint128_split_low64(m1_,44);
   uint64_t b2 = tmp[2];
   uint64_t b2_ = (uint64_t )0x10000000000 | b2;
   tmp[2] = b2_;
@@ -236,11 +236,10 @@ Hacl_Impl_Poly1305_64_poly1305_process_last_block_(
   uint64_t tmp[3] = { 0 };
   uint128_t m0_,m0, m1_, m1, m2;
   load128_le(m0_,block);
-  uint128_split(m1_,m0,m0_,44);
-  uint128_split(m2,m1,m1_,44);
-  tmp[0] = FStar_Int_Cast_uint128_to_uint64(m0);
-  tmp[1] = FStar_Int_Cast_uint128_to_uint64(m1);
-  tmp[2] = FStar_Int_Cast_uint128_to_uint64(m2);
+  uint128_split_high(m1_,m0_,44);
+  tmp[0] = uint128_split_low64(m0_,44);
+  tmp[2] = uint128_split_high64(m1_,44);
+  tmp[1] = uint128_split_low64(m1_,44);
   Hacl_Bignum_AddAndMultiply_add_and_multiply(Hacl_Impl_Poly1305_64___proj__MkState__item__h(st),
     tmp,
     Hacl_Impl_Poly1305_64___proj__MkState__item__r(st));
@@ -330,11 +329,18 @@ Hacl_Standalone_Poly1305_64_poly1305_partial(
   uint128_t msk;
   load128_64(msk, 0x0ffffffc0fffffff, 0x0ffffffc0ffffffc);
   uint128_logand(m0_,m0_,msk);
-  uint128_split(m1_,m0,m0_,44);
-  uint128_split(m2,m1,m1_,44);
+  uint128_split_high(m1_,m0_,44);
+  x0[0] = uint128_split_low64(m0_,44);
+  x0[2] = uint128_split_high64(m1_,44);
+  x0[1] = uint128_split_low64(m1_,44);
+  /*
+  uint128_split_low(m0,m0_,44);
+  uint128_split_high(m2,m1_,44);
+  uint128_split_low(m1,m1_,44);
   x0[0] = FStar_Int_Cast_uint128_to_uint64(m0);
   x0[1] = FStar_Int_Cast_uint128_to_uint64(m1);
   x0[2] = FStar_Int_Cast_uint128_to_uint64(m2);
+  */
   uint64_t *x00 = Hacl_Impl_Poly1305_64___proj__MkState__item__h(st);
   x00[0] = (uint64_t )0;
   x00[1] = (uint64_t )0;
@@ -425,11 +431,10 @@ void Poly1305_64_init(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *k)
   uint128_t msk;
   load128_64(msk, 0x0ffffffc0fffffff, 0x0ffffffc0ffffffc);
   uint128_logand(m0_,m0__,msk);
-  uint128_split(m1_,m0,m0_,44);
-  uint128_split(m2,m1,m1_,44);
-  x0[0] = FStar_Int_Cast_uint128_to_uint64(m0);
-  x0[1] = FStar_Int_Cast_uint128_to_uint64(m1);
-  x0[2] = FStar_Int_Cast_uint128_to_uint64(m2);
+  uint128_split_high(m1_,m0_,44);
+  x0[0] = uint128_split_low64(m0_,44);
+  x0[2] = uint128_split_high64(m1_,44);
+  x0[1] = uint128_split_low64(m1_,44);
   uint64_t *x00 = Hacl_Impl_Poly1305_64___proj__MkState__item__h(st);
   x00[0] = (uint64_t )0;
   x00[1] = (uint64_t )0;
