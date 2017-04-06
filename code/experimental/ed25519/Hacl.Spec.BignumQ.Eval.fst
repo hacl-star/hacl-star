@@ -38,6 +38,9 @@ let eval_q_4 s0 s1 s2 s3 : Tot nat =
 let eval_q_5 s0 s1 s2 s3 s4 : Tot nat =
   v (s0) + p1 * v (s1) + p2 * v (s2) + p3 * v (s3) + p4 * v (s4)
 
+let eval_q_6 s0 s1 s2 s3 s4 s5 : Tot nat =
+  v (s0) + p1 * v (s1) + p2 * v (s2) + p3 * v (s3) + p4 * v (s4) + p5 * v s5
+
 let eval_q_10 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Tot nat =
   v (s0) + p1 * v (s1) + p2 * v (s2) + p3 * v (s3) + p4 * v (s4)
   + p5 * v (s5) + p6 * v (s6) + p7 * v (s7) + p8 * v (s8) + p9 * v (s9)
