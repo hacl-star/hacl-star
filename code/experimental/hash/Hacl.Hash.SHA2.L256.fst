@@ -308,6 +308,8 @@ let shuffle hash block ws k =
   for 0ul size_ws_w inv f'
 
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
 [@"substitute"]
 private val sum_hash:
   hash_0:uint32_p{length hash_0 = v size_hash_w} ->
@@ -318,7 +320,7 @@ private val sum_hash:
               /\ (let new_seq_hash_0 = as_seq h1 hash_0 in
               let seq_hash_0 = as_seq h0 hash_0 in
               let seq_hash_1 = as_seq h0 hash_1 in
-              new_seq_hash_0 == C.Loops.seq_map2 (fun x y -> H32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
+              new_seq_hash_0 == Spec.Lib.map2 (fun x y -> H32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
 
 [@"substitute"]
 let sum_hash hash_0 hash_1 =
@@ -329,9 +331,9 @@ let sum_hash hash_0 hash_1 =
 val alloc:
   unit ->
   StackInline (state:uint32_p{length state = v size_state})
-        (requires (fun h0 -> True))
-        (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
-      /\ Map.domain h1.h == Map.domain h0.h))
+    (requires (fun h0 -> True))
+    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
+             /\ Map.domain h1.h == Map.domain h0.h))
 
 [@"c_inline"]
 let alloc () = Buffer.create (u32_to_h32 0ul) size_state
@@ -340,13 +342,13 @@ let alloc () = Buffer.create (u32_to_h32 0ul) size_state
 val init:
   state:uint32_p{length state = v size_state} ->
   Stack unit
-        (requires (fun h0 -> live h0 state))
-        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
-                  /\ (let slice_k = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
-                  let slice_h_0 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-                  let seq_k = Hacl.Spec.Endianness.reveal_h32s slice_k in
-                  let seq_h_0 = Hacl.Spec.Endianness.reveal_h32s slice_h_0 in
-                  seq_k == Spec.k /\ seq_h_0 == Spec.h_0)))
+    (requires (fun h0 -> live h0 state))
+    (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
+              /\ (let slice_k = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+              let slice_h_0 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+              let seq_k = Hacl.Spec.Endianness.reveal_h32s slice_k in
+              let seq_h_0 = Hacl.Spec.Endianness.reveal_h32s slice_h_0 in
+              seq_k == Spec.k /\ seq_h_0 == Spec.h_0)))
 
 let init state =
   let k = Buffer.sub state pos_k_w size_k_w in
