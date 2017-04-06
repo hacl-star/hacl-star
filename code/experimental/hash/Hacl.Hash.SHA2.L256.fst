@@ -501,21 +501,34 @@ let update_last state data len =
   (**) pop_frame()
 
 
+[@"substitute"]
+val finish_core:
+  hash_w :uint32_p {length hash_w = v size_hash_w} ->
+  hash   :uint8_p  {length hash = v size_hash} ->
+  Stack unit
+        (requires (fun h0 -> live h0 hash_w /\ live h0 hash))
+        (ensures  (fun h0 _ h1 -> live h0 hash_w /\ live h0 hash /\ live h1 hash /\ modifies_1 hash h0 h1
+                  /\ (let seq_hash_w = as_seq h0 hash_w in
+                  let seq_hash = as_seq h1 hash in
+                  seq_hash = Spec.words_to_be (U32.v size_hash_w) seq_hash_w)))
+
+[@"substitute"]
+let finish_core hash_w hash = store32s_be hash hash_w size_hash_w
+
+
 val finish:
   state :uint32_p{length state = v size_state} ->
   hash  :uint8_p{length hash = v size_hash} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
-        (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
+        (ensures  (fun h0 _ h1 -> live h0 state /\ live h1 hash /\ modifies_1 hash h0 h1
                   /\ (let seq_hash_w = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash = as_seq h1 hash in
-                  seq_hash = Spec.words_to_be (U32.v size_hash_w) seq_hash_w)))
+                  seq_hash = Spec.finish seq_hash_w)))
 
 let finish state hash =
-
-  (* Store the final hash to the output location *)
-  let whash = Buffer.sub state pos_whash_w size_whash_w in
-  store32s_be hash whash size_hash_w
+  let hash_w = Buffer.sub state pos_whash_w size_whash_w in
+  finish_core hash_w hash
 
 
 val hash:
