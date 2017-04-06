@@ -440,6 +440,7 @@ let rec uint32_bytes len n =
     in 
     Seq.cons byte b'
 
+#reset-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 50"
 noextract val uint32_be: 
   len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> 
   Tot (b:lbytes (v len) { UInt32.v n == big_endian b}) (decreases (v len))
