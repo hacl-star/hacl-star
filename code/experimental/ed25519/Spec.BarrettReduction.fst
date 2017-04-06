@@ -91,18 +91,7 @@ val lemma_optimized_barrett_reduce:
     /\ a - (((a / pow2 248) * m) / pow2 264) * l >= 0)
 let lemma_optimized_barrett_reduce a =
   assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
-  assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000)  
-
-
-private
-val lemma_optimized_barrett_reduce:
-  a:nat{a < pow2 512} ->
-  Lemma (a % pow2 264 - ((((a / pow2 248) * m) / pow2 264) * l) % pow2 264 < 2 * l
-    /\ a - (((a / pow2 248) * m) / pow2 264) * l >= 0)
-let lemma_optimized_barrett_reduce a =
-  assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
-  assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000)  
-
+  assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000)
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -110,34 +99,32 @@ private
 let lemma_mod_sub_ (a:nat) (b:pos{b <= a}) : Lemma ((a - b) % b = a % b) =
   Math.Lemmas.lemma_mod_plus (a-b) 1 b
 
-(* private *)
-(* let lemma_mod_sub (a:nat) (b:pos) : Lemma ((a - b) % b = a % b) = *)
-(*   if a >= b then  lemma_mod_sub_ a b *)
-(*   else if -(a-b) < b then ( *)
-(*     Math.Lemmas.lemma_mod_sub_1 (b-a) b; *)
-(*     cut (((a - b)) % b = b - ((b-a)%b))); *)
-(*     lemma_mod_sub_ *)
-(*     lemma_mod_sub_ (-a) b *)
-(*   ) *)
-
-assume val lemma_mod_sub_distr: (a:nat) -> (b:nat{b <= a}) -> (c:pos) ->
-  Lemma ((a - b) % c = ((a % c) - (b % c)) % c)
-
+private
+let lemma_0 (x:nat) (y:nat) (c:pos) : Lemma
+  (requires (x >= y /\ x - y < c))
+  (ensures (x / c - y / c <= 1))
+  = if x / c - y / c > 1 then (
+      Math.Lemmas.lemma_div_mod x c;
+      Math.Lemmas.lemma_div_mod y c;
+      Math.Lemmas.distributivity_sub_right c (x / c) (y / c))
 
 private
-let lemma_test (x:nat) (y:nat) (b:pos) (c:pos) : Lemma
-  (requires (x < b /\ y < b /\ c < b))
-  (ensures  ((x - y) % c = (if (x % c) - (y % c) < 0 then b + (x % c) - (y % c)
-             else (x % c)- (y % c))))
-  =  admit()
-
-(* assume *)
-(* val  *)
+let lemma_1 (x:nat) (y:nat) (c:pos) : Lemma
+  (requires (x - y < c /\ x >= y))
+  (ensures  (x - y = (if (x % c) - (y % c) < 0 then c + (x % c) - (y % c)
+             else (x % c) - (y % c))))
+  = Math.Lemmas.lemma_div_mod x c;
+    Math.Lemmas.lemma_div_mod y c;
+    Math.Lemmas.distributivity_sub_right c (y/c) (x/c);
+    assert( (x%c) - (y%c) = x - y - c*((x/c) - (y/c)));
+    lemma_0 x y c
 
 val lemma_barrett_reduce':
   x:nat{x < pow2 512} ->
-  Lemma (let y = (x % pow2 264) - (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
-         let z = if y < l then y else y - l in
+  Lemma (let r = x % pow2 264 in
+         let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
+         let u = if r < qml then pow2 264 + r - qml else r - qml in
+         let z = if u < l then u else u - l in
          z = x % l)
 let lemma_barrett_reduce' x =
   assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
@@ -145,34 +132,17 @@ let lemma_barrett_reduce' x =
   let a' = (x % pow2 264) - (q * l) % pow2 264 in
   lemma_optimized_barrett_reduce x;
   Math.Lemmas.modulo_lemma (x - q * l) (pow2 264);
-  cut ( x - ((x * m) / pow2k) * l < 2 * l);
+  assert ( x - ((x * m) / pow2k) * l < 2 * l);
   Math.Lemmas.modulo_lemma (x - ((x * m) / pow2k) * l) (pow2 264);
   Math.Lemmas.lemma_mod_sub x l ((x*m)/pow2k);
-  lemma_mod_sub_distr x (((q*m)/pow2k)*l) (pow2 264);
-  (* assert(x - (((q*m)/pow2k)*l) *)
-  Math.Lemmas.lemma_mod_sub (x % pow2 264) l ((q*m)/pow2k);
-  Math.Lemmas.lemma_mod_plus_distr_l x (q * l) (pow2 264);
-  Math.Lemmas.lemma_mod_plus_distr_l (q * l) (x % pow2 264) (pow2 264);
-  Math.Lemmas.lemma_mod_plus_distr_l x (((x*m)/pow2k) * l) (pow2 264);
-  Math.Lemmas.lemma_mod_plus_distr_l (((x*m)/pow2k) * l) (x % pow2 264) (pow2 264);
-  let y = (x % pow2 264) - (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
-  assume (((x % pow2 264) - (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264)) % l
-          = (x - ((x * m) / pow2k)*l) % l);
-  if y >= l then lemma_mod_sub_distr x (((x * m)/pow2 512)*l) (pow2 264)
-
-
-let barrett_reduce_2 (a:nat{a < l * l}) : Tot (b:nat{b < 2 * l}) =
-  let q = ((a / pow2 248) * m) / pow2 264 in
-  let a' = (a % pow2 264) - (q * l) % pow2 264 in
-  lemma_optimized_barrett_reduce a;
-  Math.Lemmas.lemma_mod_p
-  assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
-  Math.Lemmas.modulo_lemma (a - q * l) (pow2 264);
-  cut ( a - ((a * m) / pow2k) * l < 2 * l);
-  Math.Lemmas.modulo_lemma (a - ((a * m) / pow2k) * l) (pow2 264);
-  Math.Lemmas.lemma_mod_plus_distr_l a (q * l) (pow2 264);
-  Math.Lemmas.lemma_mod_plus_distr_l (q * l) (a % pow2 264) (pow2 264);
-  Math.Lemmas.lemma_mod_plus_distr_l a (((a*m)/pow2k) * l) (pow2 264);
-  Math.Lemmas.lemma_mod_plus_distr_l (((a*m)/pow2k) * l) (a % pow2 264) (pow2 264);
-  (* lemma_barrett_reduce a; *)
-  if l <= a' then a' - l else a'
+  lemma_1 x (q*l) (pow2 264);
+  let r = x % pow2 264 in
+  let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
+  let u = if r < qml then pow2 264 + r - qml else r - qml in
+  let z = if u < l then u else u - l in
+  assert (u < 2 * l);
+  assert (u = x - q * l);
+  Math.Lemmas.distributivity_add_left 1 q l;
+  if u >= l then Math.Lemmas.lemma_mod_sub x l (q+1)
+  else Math.Lemmas.lemma_mod_sub x l (q);
+  Math.Lemmas.modulo_lemma z l

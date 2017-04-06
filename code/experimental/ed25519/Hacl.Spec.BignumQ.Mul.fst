@@ -79,12 +79,10 @@ let choose x y b =
   z
 
 
-inline_for_extraction
 let lt (a:u64{v a < pow2 63}) (b:u64{v b < pow2 63}) :
   Tot (c:u64{if v a >= v b then c == 0x0uL else c == 0x1uL})
   = let r = (a -%^ b) >>^ 63ul in r
 
-inline_for_extraction
 let shiftl_56 (b:u64{b == 0uL \/ b == 1uL}) :
   Tot (c:u64{(b == 1uL ==> c == 0x100000000000000uL) /\ (b == 0uL ==> c == 0uL)})
   = assert_norm(pow2 56 = 0x100000000000000);
@@ -102,6 +100,52 @@ let subm_step x y =
   let b  = lt x y in
   let t = (shiftl_56 b +^ x) -^ y in
   b, t
+
+let shiftl_40 (b:u64{b == 0uL \/ b == 1uL}) :
+  Tot (c:u64{(b == 1uL ==> c == 0x10000000000uL) /\ (b == 0uL ==> c == 0uL)})
+  = assert_norm(pow2 40 = 0x10000000000);
+    b <<^ 40ul
+
+val subm_last_step:
+  x:u64{v x < 0x10000000000} ->
+  y:u64{v y <= 0x10000000000} ->
+  Tot (t:(tuple2 u64 u64){(fst t == 0uL \/ fst t == 1uL)
+    /\ v x - v y == v (snd t) - 0x10000000000 * v (fst t)
+    /\ v (snd t) < 0x10000000000})
+let subm_last_step x y =
+  let b  = lt x y in
+  let t = (shiftl_40 b +^ x) -^ y in
+  b, t
+
+val sub_mod_264:
+  x:qelem_56{eval_q x < pow2 264} ->
+  y:qelem_56{eval_q y < pow2 264} ->
+  Tot (z:qelem_56{eval_q z = (if eval_q x < eval_q y then pow2 264 + eval_q x - eval_q y
+                             else eval_q x - eval_q y)})
+let sub_mod_264 x y =
+  assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
+  assert_norm(pow2 64 = 0x10000000000000000);
+  assert_norm(pow2 56 = 0x100000000000000);
+  assert_norm(pow2 40 = 0x10000000000);
+  assert_norm(pow2 32 = 0x100000000);
+  let x0 = x.[0] in
+  let x1 = x.[1] in
+  let x2 = x.[2] in
+  let x3 = x.[3] in
+  let x4 = x.[4] in
+  let y0 = y.[0] in
+  let y1 = y.[1] in
+  let y2 = y.[2] in
+  let y3 = y.[3] in
+  let y4 = y.[4] in
+  let pb = y0 in
+  let b, t0 = subm_step x0 y0 in
+  let b, t1 = subm_step x1 (y1+^b) in
+  let b, t2 = subm_step x2 (y2+^b) in
+  let b, t3 = subm_step x3 (y3+^b) in
+  let b, t4 = subm_last_step x4 (y4+^b) in
+  Seq.Create.create_5 t0 t1 t2 t3 t4
+
 
 val sub:
   x:qelem_56 ->
@@ -159,11 +203,11 @@ let subm_conditional r =
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
-private let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
-                                                        (ensures  (a * b < c * c))
+private
+let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
+                                               (ensures  (a * b < c * c))
   = ()
 
-inline_for_extraction
 let op_Star_Star (x:u64{v x < 0x100000000000000}) (y:u64{v y < 0x100000000000000}) :
   Tot (z:UInt128.t{UInt128.v z < 0x10000000000000000000000000000 /\ UInt128.v z = v x * v y})
   = assert_norm(0x100000000000000 * 0x100000000000000 = 0x10000000000000000000000000000);
@@ -184,11 +228,10 @@ let split_56 x =
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (FStar.UInt128.v x) 56 64;
   carry, t
 
+
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-inline_for_extraction
 val mod_40: x:UInt128.t -> Tot (z:U64.t{v z = UInt128.v x % (pow2 40)})
-inline_for_extraction
 let mod_40 x =
   let x' = Int.Cast.uint128_to_uint64 x in
   let x'' = x' &^ 0xffffffffffuL in
@@ -341,6 +384,7 @@ let carry_step x y =
   UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (FStar.UInt128.v x) 56 64;
   t, FStar.UInt128.add y carry
+
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
@@ -548,10 +592,9 @@ let barrett_reduction t =
   let qmu' = carry qmu in
   let qmu_264 = div_264 qmu' in
   let qmul = low_mul_5 qmu_264 m in
-  assume (eval_q r - eval_q qmul >= 0 /\ eval_q r - eval_q qmul < 2 * 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
-  let s = sub r qmul in
+  let s = sub_mod_264 r qmul in
   let s' = subm_conditional s in
-  assume (eval_q s' = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  Spec.BarrettReduction.lemma_barrett_reduce' (eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]);
   s'
 
 
