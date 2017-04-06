@@ -357,11 +357,61 @@ let init state =
   constants_set_h_0 h_0
 
 
-#set-options "--lax"
+[@"substitute"]
+private val update_core:
+  hash_w :uint32_p {length hash_w = v size_hash_w} ->
+  data   :uint8_p  {length data = v size_block} ->
+  data_w :uint32_p {length data_w = v size_block_w} ->
+  ws_w   :uint32_p {length ws_w = v size_ws_w} ->
+  k_w    :uint32_p {length k_w = v size_k_w} ->
+  Stack unit
+        (requires (fun h0 -> live h0 hash_w /\ live h0 data /\ live h0 data_w /\ live h0 ws_w /\ live h0 k_w
+                  /\ as_seq h0 k_w == Spec.k
+                  /\ (as_seq h0 data = Spec.Lib.uint32s_to_be (v size_block_w) (as_seq h0 data_w))
+                  /\ (let w = as_seq h0 ws_w in
+                  let b = as_seq h0 data_w in
+                  (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i))))
+        (ensures  (fun h0 r h1 -> live h0 hash_w /\ live h0 data /\ live h0 data_w /\ live h1 hash_w /\ modifies_1 hash_w h0 h1
+                  /\ (let seq_hash_0 = as_seq h0 hash_w in
+                  let seq_hash_1 = as_seq h1 hash_w in
+                  let seq_block = as_seq h0 data in
+                  seq_hash_1 == Spec.update seq_hash_0 seq_block)))
 
-val update:
-  state:uint32_p{length state = v size_state} ->
-  data:uint8_p {length data = v size_block /\ disjoint state data} ->
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+
+[@"substitute"]
+let update_core hash_w data data_w ws_w k_w =
+
+  let h0 = ST.get() in
+
+  (* Push a new frame *)
+  (**) push_frame();
+
+  (* Allocate space for converting the data block *)
+  let hash_0 = Buffer.create (u32_to_h32 0ul) size_hash_w in
+
+  (* Keep track of the the current working hash from the state *)
+  Buffer.blit hash_w 0ul hash_0 0ul size_whash_w;
+
+  (**) let h1 = ST.get () in
+  (**) assert(as_seq h1 hash_0 == as_seq h1 hash_w);
+  (**) assert(disjoint hash_0 hash_w);
+
+  (* Step 2 : Initialize the eight working variables *)
+  (* Step 3 : Perform logical operations on the working variables *)
+  (* Step 4 : Compute the ith intermediate hash value *)
+  shuffle hash_0 data_w ws_w k_w;
+
+  (* Use the previous one to update it inplace *)
+  sum_hash hash_w hash_0;
+
+  (* Pop the frame *)
+  (**) pop_frame()
+
+
+ val update:
+  state :uint32_p{length state = v size_state} ->
+  data  :uint8_p {length data = v size_block /\ disjoint state data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 r h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
@@ -376,13 +426,9 @@ let update state data =
   (**) push_frame();
 
   (* Allocate space for converting the data block *)
-  let data_w = create (u32_to_h32 0ul) size_block_w in
-  let hash_0 = create (u32_to_h32 0ul) size_hash_w in
-
-  (* Retreive values from the state *)
-  let hash_w = Buffer.sub state pos_whash_w size_whash_w in
-  let ws_w = Buffer.sub state pos_ws_w size_ws_w in
-  let k_w = Buffer.sub state pos_k_w size_k_w in
+  let temp = Buffer.create (u32_to_h32 0ul) (size_block_w +^ size_hash_w) in
+  let data_w = Buffer.sub temp 0ul size_block_w in
+  let hash_0 = Buffer.sub temp 0ul size_hash_w in
 
   (* Cast the data bytes into a uint32_t buffer *)
   (**) assert(v size_block % 4 = 0);
@@ -390,8 +436,10 @@ let update state data =
   (**) assert(v size_block <= 4 * length data_w);
   Hacl.Utils.Experimental.load32s_be data_w data size_block;
 
-  (* Keep track of the the current working hash from the state *)
-  Buffer.blit state pos_whash_w hash_0 0ul size_whash_w;
+  (* Retreive values from the state *)
+  let hash_w = Buffer.sub state pos_whash_w size_whash_w in
+  let ws_w = Buffer.sub state pos_ws_w size_ws_w in
+  let k_w = Buffer.sub state pos_k_w size_k_w in
 
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
   ws ws_w data_w 0ul;
@@ -399,21 +447,13 @@ let update state data =
   (* Step 2 : Initialize the eight working variables *)
   (* Step 3 : Perform logical operations on the working variables *)
   (* Step 4 : Compute the ith intermediate hash value *)
-  shuffle hash_0 data_w ws_w k_w;
-
-  (* Retrieve the current working hash *)
-  let hash_1 = Buffer.sub state pos_whash_w size_whash_w in
-
-  (* Use the previous one to update it inplace *)
-  sum_hash hash_1 hash_0;
+  update_core hash_w data data_w ws_w k_w;
 
   (* Increment the total number of blocks processed *)
-  (* JK: proposal
-     let st_len = Buffer.sub state (pos_count_w) 1ul in
-     st_len.(0ul) <- (st_len.(0ul) +%^ (u32_to_h32 1ul)); *)
-  state.(pos_count_w) <- (state.(pos_count_w) +%^ (u32_to_h32 1ul));
+  let state_len = Buffer.sub state (pos_count_w) 1ul in
+  state_len.(0ul) <- (state_len.(0ul) +%^ (u32_to_h32 1ul));
 
-  (* Pop the frame *)
+  (* Pop the memory frame *)
   (**) pop_frame()
 
 
