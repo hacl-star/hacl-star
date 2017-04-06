@@ -532,13 +532,13 @@ let finish state hash =
 
 
 val hash:
-  hash :uint8_p{length hash = v size_hash} ->
-  input:uint8_p ->
+  hash :uint8_p {length hash = v size_hash} ->
+  input:uint8_p {length input < Spec.max_input_len_8} ->
   len  :uint32_t{v len = length input} ->
   Stack unit
         (requires (fun h0 -> live h0 hash /\ live h0 input))
-        (ensures  (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
-                  /\ ( let seq_input = as_seq h0 input in
+        (ensures  (fun h0 _ h1 -> live h0 input /\ live h0 hash /\ live h1 hash /\ modifies_1 hash h0 h1
+                  /\ (let seq_input = as_seq h0 input in
                   let seq_hash = as_seq h1 hash in
                   seq_hash == Spec.hash seq_input)))
 
@@ -554,14 +554,14 @@ let hash hash input len =
   let n = U32.div len size_block in
   let r = U32.rem len size_block in
 
+  (* Get the last block *)
+  let input_last = Buffer.sub input (n *%^ size_block) r in
+
   (* Initialize the hash function *)
   init state;
 
   (* Update the state with data blocks *)
   update_multi state input n;
-
-  (* Get the last block *)
-  let input_last = Buffer.sub input (n *%^ size_block) r in
 
   (* Process the last block of data *)
   update_last state input_last r;
