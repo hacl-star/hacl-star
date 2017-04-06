@@ -18,6 +18,15 @@ let u8  = UInt8.t
 let u32 = UInt32.t
 let u64 = UInt64.t
 
+
+(** TODO: Move. Used only in AEAD.EnxorDexor, much faster to prove here *)
+val eq_snoc_slice: #a:Type -> s_0:Seq.seq a -> s_1:Seq.seq a -> x:a -> Lemma
+  (requires (Seq.length s_1 == Seq.length s_0 + 1 /\
+             Seq.index s_1 (Seq.length s_0) == x /\
+             Seq.equal (Seq.slice s_1 0 (Seq.length s_0)) s_0))
+  (ensures  (Seq.equal s_1 (Seq.snoc s_0 x)))
+let eq_snoc_slice #a s_0 s_1 x = ()
+
 // TODO: rename and move to FStar.Buffer
 // bytes  -> uint8_s; lbytes  -> uint8_sl
 // buffer -> uint8_p; lbuffer -> uint8_sl

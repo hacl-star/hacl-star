@@ -22,7 +22,6 @@ module CMA = Crypto.Symmetric.UF1CMA
 module Cipher = Crypto.Symmetric.Cipher
 module PRF = Crypto.Symmetric.PRF
 
-
 type region = rgn:HH.rid {HS.is_eternal_region rgn}
 
 let alg (i:id) = cipherAlg_of_id i
@@ -161,14 +160,6 @@ let pad_16 b len =
   let h1 = ST.get() in
   Seq.lemma_eq_intro (Buffer.as_seq h1 b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))
 
-open FStar.HyperStack
-let modifies_nothing (h:mem) (h':mem) : GTot Type0 =
-  (forall rid. Set.mem rid (Map.domain h.h) ==>
-    HH.modifies_rref rid !{} h.h h'.h
-    /\ (forall (#a:Type) (b:Buffer.buffer a).
-      (Buffer.frameOf b == rid /\ Buffer.live h b ==> Buffer.equal h b h' b)))
-
-
 // add variable-length bytes to a MAC accumulator, one 16-byte word at a time
 private val add_bytes:
   #i: MAC.id ->
@@ -182,7 +173,7 @@ private val add_bytes:
     Buffer.disjoint (MAC.as_buffer (CMA.abuf acc)) txt /\
     Buffer.disjoint CMA.(MAC.as_buffer st.r) txt /\
     (mac_log ==>
-      Buffer.frameOf txt <> (CMA.alog acc).id \/
+      Buffer.frameOf txt <> (CMA.alog acc).HS.id \/
       Buffer.disjoint_ref_1 txt CMA.(HS.as_aref (alog acc))) ))
   (ensures (fun h0 () h1 ->
     let b = CMA.(MAC.as_buffer (CMA.abuf acc)) in
@@ -190,8 +181,8 @@ private val add_bytes:
     CMA.acc_inv st acc h1 /\
     (if mac_log then
        let log = CMA.alog acc in
-       let l0 = FStar.HyperStack.sel h0 log in
-       let l1 = FStar.HyperStack.sel h1 log in
+       let l0 = HS.sel h0 log in
+       let l1 = HS.sel h1 log in
        Seq.equal l1 (Seq.append (encode_bytes (Buffer.as_seq h1 txt)) l0) /\
        CMA.modifies_buf_and_ref b log h0 h1
      else
@@ -210,7 +201,7 @@ let lemma_encode_final b = ()
 #reset-options "--z3rlimit 400 --max_fuel 0"
 let rec add_bytes #i st acc len txt =
   let h0 = ST.get() in
-  assert(mac_log ==> h0 `contains` (CMA.alog acc));
+  assert(mac_log ==> h0 `HS.contains` (CMA.alog acc));
   push_frame();
   let h1 = ST.get() in
   CMA.frame_acc_inv st acc h0 h1;
@@ -403,7 +394,7 @@ let lemma_encode_both_inj i (al0:aadlen_32) (pl0:txtlen_32) (al1:aadlen_32) (pl1
 #reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 private val store_lengths: i:id -> aadlen:aadlen_32 -> txtlen:txtlen_32 -> w:lbuffer 16 ->
   StackInline unit
-  (requires (fun h0 -> Buffer.live h0 w /\ Buffer.as_seq h0 w = Seq.create 16 0uy))
+  (requires (fun h0 -> Buffer.live h0 w /\ Buffer.as_seq h0 w == Seq.create 16 0uy))
   (ensures (fun h0 _ h1 ->
     Buffer.live h1 w /\ Buffer.modifies_1 w h0 h1 /\
     Seq.equal (Buffer.as_seq h1 w) (encode_lengths i aadlen txtlen)))
@@ -417,6 +408,26 @@ let fresh_sref (#a:Type0) h0 h1 (r:HS.reference a) =
   ~(h0 `HS.contains` r) /\
   HS.frameOf r == HS.(h1.tip) /\
   h1 `HS.contains` r
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+private val frame_modifies_buf_and_ref: #a:Type -> #b:Type -> #c:Type -> h0:mem -> h1:mem ->
+  buf:Buffer.buffer a ->
+  ref:HS.reference b{Buffer.frameOf buf == ref.HS.id} ->
+  buf':Buffer.buffer c -> Lemma
+  (requires (CMA.modifies_buf_and_ref #a #b buf ref h0 h1 /\
+             (Buffer.frameOf buf' <> Buffer.frameOf buf \/
+              (Buffer.disjoint buf buf' /\ Buffer.disjoint_ref_1 buf' (HS.as_aref ref))) /\
+              Buffer.live h0 buf'))
+  (ensures  (Buffer.live h1 buf' /\ Buffer.equal h0 buf' h1 buf'))
+let frame_modifies_buf_and_ref #a #b #c h0 h1 buf ref buf' = ()
+
+private val modifies_0_acc_inv: #i:MAC.id -> st:CMA.state i -> acc:CMA.accBuffer i
+  -> h0:mem -> h1:mem -> Lemma
+  (requires (CMA.acc_inv st acc h0 /\ Buffer.modifies_0 h0 h1))
+  (ensures (CMA.acc_inv st acc h1))
+let modifies_0_acc_inv #i st acc h0 h1 =
+  Buffer.lemma_reveal_modifies_0 h0 h1;
+  CMA.frame_acc_inv #i st acc h0 h1
 
 val accumulate:
   #i:MAC.id -> st:CMA.state i ->
@@ -433,7 +444,7 @@ val accumulate:
     // This doesn't seem to work, so inlining it below:
     // fresh_sref h0 h1 (Buffer.content abuf) /\
     ~(h0 `Buffer.contains` (MAC.as_buffer (CMA.abuf a))) /\
-    Buffer.frameOf (MAC.as_buffer (CMA.abuf a)) == h1.tip /\
+    Buffer.frameOf (MAC.as_buffer (CMA.abuf a)) == h1.HS.tip /\
     //h1 `Buffer.contains` (MAC.as_buffer buf) /\
     Buffer.live h1 aad /\
     Buffer.live h1 cipher /\
@@ -448,50 +459,59 @@ let accumulate #i st aadlen aad txtlen cipher =
   let h = ST.get() in
   let acc = CMA.start st in
   let h0 = ST.get() in
-  //assert (mac_log ==> Buffer.live h0 cipher /\ fresh_sref h h0 (CMA.alog acc));
-  Buffer.lemma_reveal_modifies_0 h h0;
-  //assert (Buffer.disjoint (MAC.as_buffer (CMA.abuf acc)) cipher);
-  //assert (Buffer.disjoint (MAC.as_buffer (CMA.abuf acc)) aad);
   add_bytes st acc aadlen aad;
   let h1 = ST.get() in
   add_bytes st acc txtlen cipher;
-  let h2 = ST.get() in  
-  FStar.UInt.pow2_values 32;
+  let h2 = ST.get() in
   assert_norm (16 <= pow2 32 - 1);
   let final_word = Buffer.create 0uy 16ul in
   let h3 = ST.get() in
-  let id, _ = i in  // JP: removed a call to Prims.fst
+  let id, _ = i in
   store_lengths id aadlen txtlen final_word;
   let h4 = ST.get() in
   Buffer.lemma_modifies_0_1' final_word h2 h3 h4;
-  Buffer.lemma_reveal_modifies_0 h2 h4;
-  CMA.frame_acc_inv st acc h2 h4;
+  modifies_0_acc_inv st acc h2 h4;
   CMA.update st acc final_word;
-  let h5 = ST.get() in
+  let h5 = ST.get () in
   if mac_log then
     begin
       let open FStar.Seq in
-      let al = CMA.alog acc in
-      let cbytes = Buffer.as_seq h cipher in
-      let abytes = Buffer.as_seq h aad in
-      let lbytes = Buffer.as_seq h4 final_word in
-      assert (fresh_sref h h5 al);
+      let buf = CMA.(MAC.as_buffer (abuf acc)) in
+      let log = CMA.alog acc in
+      let cbytes = Buffer.as_seq h cipher in 
+      let abytes = Buffer.as_seq h aad in 
+      Buffer.lemma_reveal_modifies_0 h h0;
+      //modifies_buf_and_ref_trans buf log h0 h1 h2;
+      Buffer.lemma_reveal_modifies_0 h2 h4;
+      //assert HS.(modifies_one h.tip h h0);
+      assert HS.(modifies_one h.tip h0 h2);
+      //assert HS.(modifies_one h.tip h2 h4);
+      assert HS.(modifies_one h.tip h4 h5);
+      assert HS.(modifies_one h.tip h h5);
+      Buffer.lemma_intro_modifies_0 h h5;
+      lemma_eq_intro (HS.sel h0 log) createEmpty;
+      Buffer.no_upd_lemma_0 h h0 aad;
+      frame_modifies_buf_and_ref h0 h1 buf log aad;
+      frame_modifies_buf_and_ref h1 h2 buf log aad;
+      Buffer.no_upd_lemma_0 h h0 cipher;
+      frame_modifies_buf_and_ref h0 h1 buf log cipher;
+      frame_modifies_buf_and_ref h1 h2 buf log cipher;
       append_empty_r (encode_bytes abytes);
-      assert (equal (HS.sel h0 al) createEmpty);
-      assert (equal (HS.sel h1 al) (encode_bytes abytes));
-      assert (equal (HS.sel h2 al) (encode_bytes cbytes @| encode_bytes abytes));
-      assert (equal (HS.sel h5 al) (cons lbytes (encode_bytes cbytes @| encode_bytes abytes)));
-      assert (equal (HS.sel h5 al) (encode_both (fst i) aadlen abytes txtlen cbytes));
-      assert (HS.modifies_one h.tip h h0);
-      assert (HS.modifies_one h.tip h0 h2);
-      assert (HS.modifies_one h.tip h2 h4);
-      assert (HS.modifies_one h.tip h4 h5);
-      assert (HS.modifies_one h.tip h h5)
+      lemma_eq_intro (HS.sel h1 log) (append (encode_bytes abytes) createEmpty);
+      lemma_eq_intro (HS.sel h1 log) (encode_bytes abytes);
+      lemma_eq_intro (HS.sel h2 log) (encode_bytes cbytes @| encode_bytes abytes)
     end
   else
     begin
-      Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h2;
-      Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h4 h5
+      let buf = CMA.(MAC.as_buffer (abuf acc)) in
+      Buffer.lemma_modifies_1_trans buf h0 h1 h2;
+      Buffer.lemma_modifies_0_1' buf h h0 h2;
+      Buffer.lemma_modifies_0_0 h h2 h4;
+      Buffer.lemma_modifies_0_1' buf h h4 h5;
+      Buffer.lemma_reveal_modifies_0 h h0;
+      Buffer.lemma_reveal_modifies_0 h2 h4;
+      Buffer.lemma_reveal_modifies_1 buf h0 h1;
+      Buffer.lemma_reveal_modifies_1 buf h1 h2;
+      Buffer.lemma_reveal_modifies_1 buf h4 h5
     end;
-  Buffer.lemma_intro_modifies_0 h h5;
   acc
