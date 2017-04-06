@@ -60,7 +60,7 @@ private let h32_to_h64 = Cast.sint32_to_sint64
 private let u64_to_h64 = Cast.uint64_to_sint64
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
 //
 // SHA-256
@@ -121,7 +121,7 @@ private val _sigma1: x:uint32_ht -> Tot uint32_ht
 let _sigma1 x = H32.logxor (rotate_right x 17ul) (H32.logxor (rotate_right x 19ul) (H32.shift_right x 10ul))
 
 
-#reset-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
 private val constants_set_k:
@@ -153,7 +153,7 @@ let constants_set_k k =
   0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
 
 
-#reset-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
 val constants_set_h_0:
@@ -171,7 +171,7 @@ let constants_set_h_0 hash =
   0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
 private val ws:
   ws_w    :uint32_p {length ws_w = 64} ->
@@ -189,7 +189,8 @@ private val ws:
                       let b = as_seq h0 block_w in
                       (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i))))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
 let rec ws ws_w block_w t =
   let h0 = ST.get() in
   if t =^ 64ul then (
@@ -224,6 +225,8 @@ let rec ws ws_w block_w t =
   )
 
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+
 [@"substitute"]
 private val shuffle_core:
   hash_w :uint32_p {length hash_w = v size_hash_w} ->
@@ -244,7 +247,7 @@ private val shuffle_core:
                   let seq_block = as_seq h0 block_w in
                   seq_hash_1 == Spec.shuffle_core seq_block seq_hash_0 (U32.v t))))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 [@"substitute"]
 let shuffle_core hash block ws k t =
@@ -265,7 +268,7 @@ let shuffle_core hash block ws k t =
   Utils.hupd_8 hash (t1 +%^ t2) a b c (d +%^ t1) e f g
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
 [@"substitute"]
 private val shuffle:
@@ -286,7 +289,7 @@ private val shuffle:
                   let seq_block = as_seq h0 block_w in
                   seq_hash_1 == Spec.shuffle seq_hash_0 seq_block)))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 [@"substitute"]
 let shuffle hash block ws k =
@@ -327,6 +330,8 @@ let sum_hash hash_0 hash_1 =
   C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H32.(x +%^ y))
 
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+
 [@"c_inline"]
 val alloc:
   unit ->
@@ -357,6 +362,30 @@ let init state =
   constants_set_h_0 h_0
 
 
+(* let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:buffer t) (b:buffer t) (len:nat{len = length a /\ len = length b}): Lemma *)
+(*   (requires (let slice_a = Seq.slice (as_seq h1 a) 0 len in *)
+(*              let slice_b = Seq.slice (as_seq h0 b) 0 len in *)
+(*              slice_a == slice_b)) *)
+(*   (ensures  (as_seq h1 a == as_seq h0 b)) = () *)
+
+
+[@"substitute"]
+private val copy_hash:
+  hash_w_1 :uint32_p {length hash_w_1 = v size_hash_w} ->
+  hash_w_2 :uint32_p {length hash_w_2 = v size_hash_w /\ disjoint hash_w_1 hash_w_2} ->
+  Stack unit
+        (requires (fun h0 -> live h0 hash_w_1 /\ live h0 hash_w_2))
+        (ensures  (fun h0 _ h1 -> live h0 hash_w_1 /\ live h0 hash_w_2 /\ live h1 hash_w_1 /\ modifies_1 hash_w_1 h0 h1
+                  /\ (as_seq h1 hash_w_1 == as_seq h0 hash_w_2)))
+
+[@"substitute"]
+let copy_hash hash_w_1 hash_w_2 =
+  let h0 = ST.get () in
+  Buffer.blit hash_w_2 0ul hash_w_1 0ul size_hash_w;
+  let h1 = ST.get () in
+  assert(Seq.slice (as_seq h1 hash_w_1) 0 (v size_hash_w) == Seq.slice (as_seq h0 hash_w_2) 0 (v size_hash_w))
+
+
 [@"substitute"]
 private val update_core:
   hash_w :uint32_p {length hash_w = v size_hash_w} ->
@@ -377,12 +406,10 @@ private val update_core:
                   let seq_block = as_seq h0 data in
                   seq_hash_1 == Spec.update seq_hash_0 seq_block)))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 [@"substitute"]
 let update_core hash_w data data_w ws_w k_w =
-
-  let h0 = ST.get() in
 
   (* Push a new frame *)
   (**) push_frame();
@@ -391,11 +418,7 @@ let update_core hash_w data data_w ws_w k_w =
   let hash_0 = Buffer.create (u32_to_h32 0ul) size_hash_w in
 
   (* Keep track of the the current working hash from the state *)
-  Buffer.blit hash_w 0ul hash_0 0ul size_whash_w;
-
-  (**) let h1 = ST.get () in
-  (**) assert(as_seq h1 hash_0 == as_seq h1 hash_w);
-  (**) assert(disjoint hash_0 hash_w);
+  copy_hash hash_0 hash_w;
 
   (* Step 2 : Initialize the eight working variables *)
   (* Step 3 : Perform logical operations on the working variables *)
@@ -426,9 +449,10 @@ let update state data =
   (**) push_frame();
 
   (* Allocate space for converting the data block *)
-  let temp = Buffer.create (u32_to_h32 0ul) (size_block_w +^ size_hash_w) in
-  let data_w = Buffer.sub temp 0ul size_block_w in
-  let hash_0 = Buffer.sub temp 0ul size_hash_w in
+  let data_w = Buffer.create (u32_to_h32 0ul) size_block_w in
+//  let temp = Buffer.create (u32_to_h32 0ul) (size_block_w +^ size_hash_w) in
+//  let data_w = Buffer.sub temp 0ul size_block_w in
+//  let hash_0 = Buffer.sub temp 0ul size_hash_w in
 
   (* Cast the data bytes into a uint32_t buffer *)
   (**) assert(v size_block % 4 = 0);
