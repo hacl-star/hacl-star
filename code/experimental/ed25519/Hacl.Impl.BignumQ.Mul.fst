@@ -207,3 +207,183 @@ let subm_conditional z x =
   choose z tmp z b;
   pop_frame()
 
+private
+let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
+                                               (ensures  (a * b < c * c))
+  = ()
+
+inline_for_extraction
+let op_Star_Star (x:u64{v x < 0x100000000000000}) (y:u64{v y < 0x100000000000000}) :
+  Tot (z:UInt128.t{UInt128.v z < 0x10000000000000000000000000000 /\ UInt128.v z = v x * v y})
+  = assert_norm(0x100000000000000 * 0x100000000000000 = 0x10000000000000000000000000000);
+  lemma_mul_ineq (v x) (v y) 0x100000000000000;
+  FStar.UInt128.mul_wide x y
+
+inline_for_extraction
+val split_56:
+  x:UInt128.t{UInt128.v x < 0x100000000000000000000000000000} ->
+  Tot (t:tuple2 UInt128.t u64{
+    UInt128.v (fst t) == UInt128.v x / 0x100000000000000
+    /\ UInt64.v (snd t) == UInt128.v x % 0x100000000000000
+    /\ UInt128.v (fst t) <= 0x1000000000000000})
+let split_56 x =
+  let carry = FStar.UInt128.(x >>^ 56ul) in
+  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  assert_norm(pow2 56 = 0x100000000000000);
+  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (FStar.UInt128.v x) 56 64;
+  carry, t
+
+inline_for_extraction
+val mod_40: x:UInt128.t -> Tot (z:h64{v z = UInt128.v x % (pow2 40)})
+let mod_40 x =
+  let x' = Int.Cast.uint128_to_uint64 x in
+  let x'' = x' &^ 0xffffffffffuL in
+  UInt.logand_mask (v x') 40;
+  assert_norm(pow2 40   = 0x10000000000);
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (UInt128.v x) 40 64;
+  x''
+
+
+val low_mul_5:
+  z:qelemB ->
+  x:qelemB ->
+  y:qelemB ->
+  Stack unit
+    (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y))
+    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ modifies_1 z h0 h1
+      /\ within_56 h0 x /\ within_56 h0 y /\
+      as_seq h1 z == Spec.low_mul_5 (as_seq h0 x) (as_seq h0 y)))
+let low_mul_5 z x y =
+  assert_norm(pow2 128  = 0x100000000000000000000000000000000);
+  assert_norm(pow2 40   = 0x10000000000);
+  assert_norm(pow2 56   = 0x100000000000000);
+  assert_norm(pow2 112  = 0x10000000000000000000000000000);
+  assert_norm(pow2 168  = 0x1000000000000000000000000000000000000000000);
+  assert_norm(pow2 224  = 0x100000000000000000000000000000000000000000000000000000000);
+  assert_norm(pow2 264  = 0x1000000000000000000000000000000000000000000000000000000000000000000);
+  let x0 = x.(0ul) in
+  let x1 = x.(1ul) in
+  let x2 = x.(2ul) in
+  let x3 = x.(3ul) in
+  let x4 = x.(4ul) in
+  let y0 = y.(0ul) in
+  let y1 = y.(1ul) in
+  let y2 = y.(2ul) in
+  let y3 = y.(3ul) in
+  let y4 = y.(4ul) in
+  let xy00 = x0 ** y0 in
+  let xy01 = x0 ** y1 in
+  let xy02 = x0 ** y2 in
+  let xy03 = x0 ** y3 in
+  let xy04 = x0 ** y4 in
+  let xy10 = x1 ** y0 in
+  let xy11 = x1 ** y1 in
+  let xy12 = x1 ** y2 in
+  let xy13 = x1 ** y3 in
+  let xy20 = x2 ** y0 in
+  let xy21 = x2 ** y1 in
+  let xy22 = x2 ** y2 in
+  let xy30 = x3 ** y0 in
+  let xy31 = x3 ** y1 in
+  let xy40 = x4 ** y0 in
+  let x    = xy00 in
+  let carry = Hacl.UInt128.(x >>^ 56ul) in
+  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  assert_norm(pow2 56 = 0x100000000000000);
+  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
+  let t0  = t in
+  let x = Hacl.UInt128.(xy01 +^ xy10 +^ carry) in
+  let carry = Hacl.UInt128.(x >>^ 56ul) in
+  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  assert_norm(pow2 56 = 0x100000000000000);
+  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
+  let t1 = t in
+  let x = Hacl.UInt128.(xy02 +^ xy11 +^ xy20 +^ carry) in
+  let carry = Hacl.UInt128.(x >>^ 56ul) in
+  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  assert_norm(pow2 56 = 0x100000000000000);
+  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
+  let t2 = t in
+  let x = Hacl.UInt128.(xy03 +^ xy12 +^ xy21 +^ xy30 +^ carry) in
+  let carry = Hacl.UInt128.(x >>^ 56ul) in
+  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  assert_norm(pow2 56 = 0x100000000000000);
+  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
+  let t3 = t in
+  let open Hacl.UInt128 in
+  let        t4 = mod_40   (xy04 +^ xy13 +^ xy22 +^ xy31 +^ xy40 +^ carry) in
+  Hacl.Lib.Create64.make_h64_5 z t0 t1 t2 t3 t4
+
+
+val mul_5:
+  z:buffer Hacl.UInt128.t{length z = 9} ->
+  x:qelemB ->
+  y:qelemB ->
+  Stack unit
+    (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y))
+    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ modifies_1 z h0 h1
+      /\ within_56 h0 x /\ within_56 h0 y /\
+      as_seq h1 z == Spec.mul_5 (as_seq h0 x) (as_seq h0 y)))
+let mul_5 z x y =
+  assert_norm(pow2 128  = 0x100000000000000000000000000000000);
+  assert_norm(pow2 40   = 0x10000000000);
+  assert_norm(pow2 56   = 0x100000000000000);
+  assert_norm(pow2 112  = 0x10000000000000000000000000000);
+  assert_norm(pow2 168  = 0x1000000000000000000000000000000000000000000);
+  assert_norm(pow2 224  = 0x100000000000000000000000000000000000000000000000000000000);
+  assert_norm(pow2 280  = 0x10000000000000000000000000000000000000000000000000000000000000000000000);
+  assert_norm(pow2 336  = 0x1000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
+  assert_norm(pow2 392  = 0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
+  assert_norm(pow2 448  = 0x10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
+  let x0 = x.(0ul) in
+  let x1 = x.(1ul) in
+  let x2 = x.(2ul) in
+  let x3 = x.(3ul) in
+  let x4 = x.(4ul) in
+  let y0 = y.(0ul) in
+  let y1 = y.(1ul) in
+  let y2 = y.(2ul) in
+  let y3 = y.(3ul) in
+  let y4 = y.(4ul) in
+  let xy00 = x0 ** y0 in
+  let xy01 = x0 ** y1 in
+  let xy02 = x0 ** y2 in
+  let xy03 = x0 ** y3 in
+  let xy04 = x0 ** y4 in
+  let xy10 = x1 ** y0 in
+  let xy11 = x1 ** y1 in
+  let xy12 = x1 ** y2 in
+  let xy13 = x1 ** y3 in
+  let xy14 = x1 ** y4 in
+  let xy20 = x2 ** y0 in
+  let xy21 = x2 ** y1 in
+  let xy22 = x2 ** y2 in
+  let xy23 = x2 ** y3 in
+  let xy24 = x2 ** y4 in
+  let xy30 = x3 ** y0 in
+  let xy31 = x3 ** y1 in
+  let xy32 = x3 ** y2 in
+  let xy33 = x3 ** y3 in
+  let xy34 = x3 ** y4 in
+  let xy40 = x4 ** y0 in
+  let xy41 = x4 ** y1 in
+  let xy42 = x4 ** y2 in
+  let xy43 = x4 ** y3 in
+  let xy44 = x4 ** y4 in
+  let open FStar.UInt128 in
+  let z0 = xy00 in
+  let z1 = xy01 +^ xy10 in
+  let z2 = xy02 +^ xy11 +^ xy20 in
+  let z3 = xy03 +^ xy12 +^ xy21 +^ xy30 in
+  let z4 = xy04 +^ xy13 +^ xy22 +^ xy31 +^ xy40 in
+  let z5 =         xy14 +^ xy23 +^ xy32 +^ xy41 in
+  let z6 =                 xy24 +^ xy33 +^ xy42 in
+  let z7 =                         xy34 +^ xy43 in
+  let z8 =                                 xy44 in
+  Hacl.Lib.Create128.make_h128_9 z z0 z1 z2 z3 z4 z5 z6 z7 z8
+
