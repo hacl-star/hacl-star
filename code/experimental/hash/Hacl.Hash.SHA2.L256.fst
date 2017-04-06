@@ -361,15 +361,6 @@ let init state =
   constants_set_k k;
   constants_set_h_0 h_0
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
-
-let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:buffer t{live h1 a}) (b:buffer t{live h0 b}) (len:nat{len = length a /\ len = length b}): Lemma
-  (requires (let slice_a = Seq.slice (as_seq h1 a) 0 len in
-             let slice_b = Seq.slice (as_seq h0 b) 0 len in
-             slice_a == slice_b))
-  (ensures  (as_seq h1 a == as_seq h0 b)) =
-  Seq.lemma_eq_intro (as_seq h1 a) (Seq.slice (as_seq h1 a) 0 len);
-  Seq.lemma_eq_intro (as_seq h0 b) (Seq.slice (as_seq h0 b) 0 len)
 
 [@"substitute"]
 private val copy_hash:
@@ -386,8 +377,10 @@ let copy_hash hash_w_1 hash_w_2 =
   Buffer.blit hash_w_2 0ul hash_w_1 0ul size_hash_w;
   let h1 = ST.get () in
   assert(Seq.slice (as_seq h1 hash_w_1) 0 (v size_hash_w) == Seq.slice (as_seq h0 hash_w_2) 0 (v size_hash_w));
-  lemma_blit_slices_eq h0 h1 hash_w_1 hash_w_2 8
+  Lemmas.lemma_blit_slices_eq h0 h1 hash_w_1 hash_w_2 (v size_hash_w)
 
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
 [@"substitute"]
 private val update_core:
