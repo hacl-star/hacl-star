@@ -392,7 +392,6 @@ private val update_core:
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 data /\ live h0 data_w /\ live h0 ws_w /\ live h0 k_w
                   /\ as_seq h0 k_w == Spec.k
-                  (* /\ (as_seq h0 data = Spec.Lib.uint32s_to_be (v size_block_w) (as_seq h0 data_w)) *)
                   /\ (as_seq h0 data_w = Spec.Lib.uint32s_from_be (v size_block_w) (as_seq h0 data))
                   /\ (let w = as_seq h0 ws_w in
                   let b = as_seq h0 data_w in
@@ -429,18 +428,22 @@ let update_core hash_w data data_w ws_w k_w =
   (**) pop_frame()
 
 
- val update:
-  state :uint32_p{length state = v size_state} ->
-  data  :uint8_p {length data = v size_block /\ disjoint state data} ->
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
+val update:
+  state :uint32_p {length state = v size_state} ->
+  data  :uint8_p  {length data = v size_block /\ disjoint state data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data
-          (* Assume that current length < 2**32 - 1 *)
-        ))
+                  /\ (let seq_k = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+                  seq_k == Spec.k) (* Assume that current length < 2**32 - 1 *)))
         (ensures  (fun h0 r h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
         /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
         let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
         let seq_block = as_seq h0 data in
         seq_hash_1 == Spec.update seq_hash_0 seq_block)))
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 let update state data =
 
@@ -449,14 +452,8 @@ let update state data =
 
   (* Allocate space for converting the data block *)
   let data_w = Buffer.create (u32_to_h32 0ul) size_block_w in
-//  let temp = Buffer.create (u32_to_h32 0ul) (size_block_w +^ size_hash_w) in
-//  let data_w = Buffer.sub temp 0ul size_block_w in
-//  let hash_0 = Buffer.sub temp 0ul size_hash_w in
 
   (* Cast the data bytes into a uint32_t buffer *)
-  (**) assert(v size_block % 4 = 0);
-  (**) assert(v size_block <= length data);
-  (**) assert(v size_block <= 4 * length data_w);
   Hacl.Utils.Experimental.load32s_be data_w data size_block;
 
   (* Retreive values from the state *)
@@ -479,6 +476,8 @@ let update state data =
   (* Pop the memory frame *)
   (**) pop_frame()
 
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 val update_multi:
   state :uint32_p{length state = v size_state} ->
