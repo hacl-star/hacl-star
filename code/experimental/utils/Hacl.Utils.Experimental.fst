@@ -275,19 +275,18 @@ let rotate_right (a:huint32_t) (b:uint32_t{v b <= 32}) : Tot huint32_t =
 
 val load32s_be:
   buf_32 :Buffer.buffer Hacl.UInt32.t ->
-  buf_8  :Buffer.buffer Hacl.UInt8.t ->
-  len_8 :FStar.UInt32.t{FStar.UInt32.v len_8 % 4 = 0 /\ FStar.UInt32.v len_8 <= length buf_8 /\ FStar.UInt32.v len_8 <= (4 * length buf_32)} ->
+  buf_8  :Buffer.buffer Hacl.UInt8.t {length buf_8 = 4 * length buf_32} ->
+  len_8 :FStar.UInt32.t{v len_8 = length buf_8} ->
   Stack unit
         (requires (fun h0 -> live h0 buf_32 /\ live h0 buf_8))
-        (ensures  (fun h0 _ h1 -> live h1 buf_32 /\ modifies_1 buf_32 h0 h1))
+        (ensures  (fun h0 _ h1 -> live h0 buf_32 /\ live h0 buf_8 /\ live h1 buf_32 /\ modifies_1 buf_32 h0 h1
+                  /\ (as_seq h1 buf_32 == Spec.Lib.uint32s_from_be (length buf_32) (as_seq h0 buf_8))))
 
 let rec load32s_be buf_32 buf_8 len_8 =
+  admit();
   if FStar.UInt32.(len_8 =^ 0ul) then ()
   else
     begin
-      (**) assert((FStar.UInt32.v len_8 - 4) % 4 = 0);
-      (**) assert(FStar.UInt32.v len_8 - 4 <= length buf_8);
-      (**) assert(FStar.UInt32.v len_8 <= (4 * length buf_32));
       let x_8 = Buffer.sub buf_8 FStar.UInt32.(len_8 -^ 4ul) 4ul in
       let i_32 = len_8 /^ 4ul in
       let x_32 = Hacl.Endianness.hload32_be x_8 in
