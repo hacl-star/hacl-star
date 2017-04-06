@@ -436,14 +436,22 @@ val update:
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data
                   /\ (let seq_k = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
-                  seq_k == Spec.k) (* Assume that current length < 2**32 - 1 *)))
+                  let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+                  let counter = Seq.index seq_counter 0 in
+                  seq_k == Spec.k /\ H32.v counter < (pow2 32 - 1))))
         (ensures  (fun h0 r h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_k_0 = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
                   let seq_k_1 = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
                   let seq_block = as_seq h0 data in
-                  seq_hash_1 == Spec.update seq_hash_0 seq_block /\ seq_k_0 == seq_k_1)))
+                  let seq_counter_0 = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+                  let seq_counter_1 = Seq.slice (as_seq h1 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+                  let counter_0 = Seq.index seq_counter_0 0 in
+                  let counter_1 = Seq.index seq_counter_1 0 in
+                  seq_k_0 == seq_k_1
+                  /\ H32.v counter_1 = H32.v counter_0 + 1 /\ H32.v counter_1 < pow2 32
+                  /\ seq_hash_1 == Spec.update seq_hash_0 seq_block)))
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
