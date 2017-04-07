@@ -154,8 +154,9 @@ let update (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
 let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}) : Tot hash_w (decreases (Seq.length blocks)) =
   if Seq.length blocks = 0 then hash
   else
-    let (h,t) = Seq.split blocks size_block in
-    update_multi (update hash h) t
+    let (block,rem) = Seq.split blocks size_block in
+    let hash = update hash block in
+    update_multi hash rem
 
 
 private let pad0_length (len:nat) : Tot (n:nat{(len + 1 + n + size_len_8) % size_block = 0}) =
