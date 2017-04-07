@@ -487,18 +487,18 @@ let update state data =
   (**) pop_frame()
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 val update_multi:
   state :uint32_p{length state = v size_state} ->
   data  :uint8_p {length data % v size_block = 0 /\ disjoint state data} ->
-  n     :uint32_t{v n * v size_block <= length data} ->
+  n     :uint32_t{v n * v size_block = length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data
                   /\ (let seq_k = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
                   let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
                   let counter = Seq.index seq_counter 0 in
-                  seq_k == Spec.k /\ H32.v counter < (pow2 32 - (v n) - 1))))
+                  seq_k == Spec.k /\ H32.v counter < (pow2 32 - (v n)))))
         (ensures  (fun h0 _ h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
@@ -513,36 +513,48 @@ val update_multi:
                   /\ H32.v counter_1 = H32.v counter_0 + (v n) /\ H32.v counter_1 < pow2 32
                   /\ seq_hash_1 == Spec.update_multi seq_hash_0 seq_blocks)))
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
+private
+let lemma_aux_0 (a:nat) (b:nat) : Lemma (requires (a = 0)) (ensures (a * b = 0)) = ()
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+
+private
+let lemma_aux_1 (a:nat) (b:pos) : Lemma (requires (a > 0)) (ensures (a * b > 0)) = ()
+
 let rec update_multi state data n =
   let h0 = ST.get() in
-  if n =^ 0ul then
-    Lemmas.lemma_modifies_0_is_modifies_1 h0 state
-  else begin
-    assert(v size_block <= Buffer.length data);
+  if n =^ 0ul then (
+    assert (v n = 0);
+    lemma_aux_0 (v n) (v size_block);
+    assert (length data = 0);
+    Lemmas.lemma_modifies_0_is_modifies_1 h0 state;
+    Lemmas.lemma_update_multi_def (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w))) (as_seq h0 data)
+  )
+  else 
+    begin
+    assert(v n > 0);
+    lemma_aux_1 (v n) (v size_block);
+    assert(length data > 0);
+    Lemmas.lemma_update_multi_def (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w))) (as_seq h0 data);
+    (* assert(v size_block <= Buffer.length data); *)
     
     (* Get the current block for the data *)
     let b = Buffer.sub data 0ul size_block in
+    let data = Buffer.offset data size_block in
+    assert(disjoint b data);
 
-    admit();
+    (* admit(); *)
 
     (* Call the update function on the current block *)
     update state b;
 
     (* Remove the current block from the data left to process *)
-    let data = Buffer.offset data size_block in
+    (* let data = Buffer.offset data size_block in *)
 
     (* Recursive call *)
     update_multi state data (n -^ 1ul) end
-
-
-
-let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}) : Tot hash_w (decreases (Seq.length blocks)) =
-  if Seq.length blocks = 0 then hash
-  else
-    let (block,rem) = Seq.split blocks size_block in
-    let hash = update hash block in
-    update_multi hash rem
-
 
 
 

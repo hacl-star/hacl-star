@@ -74,5 +74,7 @@ val lemma_update_multi_def: (hash:Spec.SHA2.hash_w) -> (blocks:Spec.SHA2.bytes{S
                  let hash = Spec.SHA2.update hash block in
                  Spec.SHA2.update_multi hash rem)))
 
+#reset-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 20"
+
 let lemma_update_multi_def hash blocks = ()
  
