@@ -517,6 +517,7 @@ val mod_264:
   Stack unit
     (requires (fun h -> live h r /\ live h t /\ Spec.all_10_bellow_56 (as_seq h t)))
     (ensures (fun h0 _ h1 -> live h1 r /\ live h0 t /\ Spec.all_10_bellow_56 (as_seq h0 t)
+      /\ modifies_1 r h0 h1
       /\ as_seq h1 r == Spec.mod_264 (as_seq h0 t)))
 let mod_264 r t =
   let x0 = t.(0ul) in
@@ -573,6 +574,7 @@ val div_248:
     (requires (fun h -> live h q /\ live h t /\ Spec.all_10_bellow_56 (as_seq h t)
       /\ (let t = as_seq h t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)))
     (ensures (fun h0 _ h1 -> live h1 q /\ live h0 t /\ Spec.all_10_bellow_56 (as_seq h0 t)
+      /\ modifies_1 q h0 h1
       /\ (let t = as_seq h0 t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
       /\ as_seq h1 q == Spec.div_248 (as_seq h0 t)))
 let div_248 out t =
@@ -606,6 +608,7 @@ val div_264:
     (requires (fun h -> live h q /\ live h t /\ Spec.all_10_bellow_56 (as_seq h t)
       /\ (let t = as_seq h t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 528)))
     (ensures (fun h0 _ h1 -> live h1 q /\ live h0 t /\ Spec.all_10_bellow_56 (as_seq h0 t)
+      /\ modifies_1 q h0 h1
       /\ (let t = as_seq h0 t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 528)
       /\ as_seq h1 q == Spec.div_264 (as_seq h0 t)))
 let div_264 out t =
@@ -645,6 +648,152 @@ private
 let lemma_ineq (a:nat) (b:nat) : Lemma (requires (a < b)) (ensures (a <= b - 1)) = ()
 
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+val barrett_reduction__1:
+  qmu:buffer Hacl.UInt128.t{length qmu = 9} ->
+  t:buffer h64{length t = 10} ->
+  mu:qelemB ->
+  tmp:buffer h64{length tmp = 30 /\ disjoint tmp mu /\ disjoint tmp qmu} ->
+  Stack unit
+    (requires (fun h -> live h t /\ live h qmu /\ live h mu /\ live h tmp /\
+      (let t = as_seq h t in
+      Spec.all_10_bellow_56 t /\
+      eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512) /\
+      as_seq h mu == Spec.mu
+      ))
+    (ensures (fun h0 _ h1 -> live h0 t /\ live h1 tmp /\ (let t = as_seq h0 t in
+      Spec.all_10_bellow_56 t /\
+      eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
+      /\ within_56 h1 (Buffer.sub tmp 20ul 5ul)
+      /\ (let qmu_264' = Buffer.sub tmp 20ul 5ul in
+         let t = as_seq h0 t in
+         let q = Spec.div_248 t in
+         Math.Lemmas.lemma_div_lt (eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
+         assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
+         lemma_mul_ineq__ (eval_q q) (eval_q Spec.mu) 264 264;
+         let qmu = Spec.mul_5 q Spec.mu in
+         let qmu' = Spec.carry qmu in
+         let qmu_264 = Spec.div_264 qmu' in
+         as_seq h1 qmu_264' == qmu_264)
+      /\ modifies_2 qmu tmp h0 h1
+    ))
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+let barrett_reduction__1 qmu t mu tmp =
+  let q   = Buffer.sub tmp 0ul 5ul in
+  let qmu'  = Buffer.sub tmp 10ul 10ul in
+  let qmu_264 = Buffer.sub tmp 20ul 5ul in
+  let h0' = ST.get() in
+  div_248 q t;
+  let h1 = ST.get() in
+  no_upd_lemma_1 h0' h1 q qmu;
+  no_upd_lemma_1 h0' h1 q mu;
+  Math.Lemmas.lemma_div_lt (let t = as_seq h0' t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
+  let h2 = ST.get() in
+  assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
+  lemma_mul_ineq__ (eval_q (as_seq h2 q)) (eval_q (as_seq h2 mu)) 264 264;
+  mul_5 qmu q mu;
+  let h3 = ST.get() in
+  carry qmu' qmu;
+  let h4 = ST.get() in
+  div_264 qmu_264 qmu'
+
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+val barrett_reduction__2:
+  t:buffer h64{length t = 10} ->
+  m:qelemB ->
+  tmp:buffer h64{length tmp = 30 /\ disjoint tmp m /\ disjoint tmp t} ->
+  Stack unit
+    (requires (fun h -> live h t /\ live h m /\ live h tmp /\
+      (let t = as_seq h t in
+      Spec.all_10_bellow_56 t /\
+      eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512) /\
+      as_seq h m == Spec.m /\
+      within_56 h (Buffer.sub tmp 20ul 5ul)
+      ))
+    (ensures (fun h0 _ h1 -> live h0 t /\ live h1 tmp /\ live h0 tmp /\ live h0 m /\ (let t = as_seq h0 t in
+      Spec.all_10_bellow_56 t /\
+      eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
+      /\ within_56 h0 (Buffer.sub tmp 20ul 5ul)
+      /\ within_56 h1 (Buffer.sub tmp 25ul 5ul)
+      /\ (let qmu_264 = as_seq h0 (Buffer.sub tmp 20ul 5ul) in
+         let s' = as_seq h1 (Buffer.sub tmp 25ul 5ul) in
+         let qmul = Spec.low_mul_5 qmu_264 Spec.m in
+         let r    = Spec.mod_264 (as_seq h0 t) in
+         let s = Spec.sub_mod_264 r qmul in
+         s' == s)
+      /\ modifies_1 tmp h0 h1
+    ))
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+let barrett_reduction__2 t m tmp =
+  let qmul = Buffer.sub tmp 0ul 5ul in
+  let r    = Buffer.sub tmp 5ul 5ul in
+  let qmu_264 = Buffer.sub tmp 20ul 5ul in
+  let s    = Buffer.sub tmp 25ul 5ul in
+  let h1   = ST.get() in
+  Math.Lemmas.lemma_div_lt (let t = as_seq h1 t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
+  mod_264 r t;
+  let h2 = ST.get() in
+  no_upd_lemma_1 h1 h2 r m;
+  let h5 = ST.get() in
+  low_mul_5 qmul qmu_264 m;
+  let h6 = ST.get() in
+  no_upd_lemma_1 h5 h6 qmul r;
+  sub_mod_264 s r qmul
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+val barrett_reduction__:
+  z:qelemB ->
+  t:buffer h64{length t = 10} ->
+  m:qelemB ->
+  mu:qelemB ->
+  tmp:buffer h64{length tmp = 30 /\ disjoint tmp t /\ disjoint tmp mu /\ disjoint tmp m} ->
+  Stack unit
+    (requires (fun h -> live h z /\ live h t /\ live h m /\ live h mu /\ live h tmp /\
+      (let t = as_seq h t in
+      Spec.all_10_bellow_56 t /\
+      eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512) /\
+      as_seq h m == Spec.m /\
+      as_seq h mu == Spec.mu
+      ))
+    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 t /\ (let t = as_seq h0 t in
+      Spec.all_10_bellow_56 t /\
+      eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
+      /\ as_seq h1 z == Spec.barrett_reduction (as_seq h0 t)
+      /\ modifies_2 z tmp h0 h1
+    ))
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+
+let barrett_reduction__ z t m mu tmp =
+  let s   = Buffer.sub tmp 25ul 5ul in
+  push_frame();
+  let qmu = create (uint64_to_sint128 0uL) 9ul in
+  barrett_reduction__1 qmu t mu tmp;
+  barrett_reduction__2 t m tmp;
+  pop_frame();
+  subm_conditional z s
+
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+private
+val lemma_modifies_0_2_: #a:Type -> #a':Type -> #a'':Type -> h0:mem -> h1:mem -> h2:mem -> b:buffer a -> b':buffer a' -> b'':buffer a'' ->
+  Lemma (requires (live h0 b /\ live h0 b' /\ ~(contains h0 b'') /\ live h1 b'' /\ frameOf b'' = h0.tip
+    /\ modifies_0 h0 h1 /\ modifies_2 b b' h1 h2))
+       (ensures (modifies_3_2 b b' h0 h2))
+let lemma_modifies_0_2_ #a #a' #a'' h0 h1 h2 b b' b'' =
+  lemma_reveal_modifies_0 h0 h1;
+  lemma_reveal_modifies_2 b b' h1 h2;
+  lemma_intro_modifies_3_2 b b' h0 h2
+
 val barrett_reduction:
   z:qelemB ->
   t:buffer h64{length t = 10} ->
@@ -652,64 +801,52 @@ val barrett_reduction:
     (requires (fun h -> live h z /\ live h t /\ (let t = as_seq h t in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)))
-    (ensures (fun h0 _ h1 ->live h1 z /\ live h0 t /\ (let t = as_seq h0 t in
+    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 t /\ (let t = as_seq h0 t in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
       /\ as_seq h1 z == Spec.barrett_reduction (as_seq h0 t)
+      /\ modifies_1 z h0 h1
     ))
 let barrett_reduction z t =
   let h0 = ST.get() in
   push_frame();
-  let qmu = create (uint64_to_sint128 0uL) 9ul in
-  push_frame();
-  let tmp = create (uint64_to_sint64 0uL) 40ul in
-  let q   = Buffer.sub tmp 0ul 5ul in
-  let r   = Buffer.sub tmp 5ul 5ul in
-  let qmu'  = Buffer.sub tmp 10ul 10ul in
-  let qmu_264 = Buffer.sub tmp 20ul 5ul in
-  let m   = Buffer.sub tmp 25ul 5ul in
-  let s   = Buffer.sub tmp 30ul 5ul in
-  let mu  = Buffer.sub tmp 35ul 5ul in
-  div_248 q t;
-  Math.Lemmas.lemma_div_lt (let t = as_seq h0 t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
-  mod_264 r t;
   let h1 = ST.get() in
-  assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
-  lemma_mul_ineq__ (eval_q (as_seq h1 q)) (eval_q (as_seq h1 mu)) 264 264;
-  make_mu mu;
-  mul_5 qmu q mu;
-  carry qmu' qmu; admit()
-  div_264 qmu_264 qmu';
-  let qmul = q in
+  let tmp = create (uint64_to_sint64 0uL) 40ul in
+  let m   = Buffer.sub tmp 0ul 5ul in
+  let mu  = Buffer.sub tmp 5ul 5ul in
+  let tmp = Buffer.sub tmp 10ul 30ul in
   make_m m;
-  low_mul_5 qmul qmu_264 m;
-  sub_mod_264 s r qmul;
-  subm_conditional z s;
-  pop_frame();
+  make_mu mu;
+  let h2 = ST.get() in
+  barrett_reduction__ z t m mu tmp;
   pop_frame()
-  (* let q = div_248 t in *)
-  (* Math.Lemmas.lemma_div_lt (eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) *)
-  (*                          512 248; *)
-  (* let r = mod_264 t in *)
-  (* assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000); *)
-  (* lemma_mul_ineq__ (eval_q q) (eval_q mu) 264 264; *)
-  (* let qmu = mul_5 q mu in *)
-  (* let qmu' = carry qmu in *)
-  (* let qmu_264 = div_264 qmu' in *)
-  (* let qmul = low_mul_5 qmu_264 m in *)
-  (* let s = sub_mod_264 r qmul in *)
-  (* let s' = subm_conditional s in *)
-  (* Spec.BarrettReduction.lemma_barrett_reduce' (eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]); *)
-  (* s' *)
 
 
-(* val mul_modq: *)
-(*   x:qelem_56{eval_q x < pow2 256} -> *)
-(*   y:qelem_56{eval_q y < pow2 256} -> *)
-(*   Tot (z:qelem_56{eval_q z = (eval_q x * eval_q y) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed}) *)
-(* let mul_modq x y = *)
-(*   lemma_mul_ineq__ (eval_q x) (eval_q y) 256 256; *)
-(*   let z = mul_5 x y in *)
-(*   Math.Lemmas.pow2_lt_compat 528 512; *)
-(*   let z' = carry z in *)
-(*   barrett_reduction z' *)
+val mul_modq:
+  z:qelemB ->
+  x:qelemB ->
+  y:qelemB ->
+  Stack unit
+    (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y /\
+      (let x = as_seq h x in let y = as_seq h y in
+      eval_q x < pow2 256 /\ eval_q y < pow2 256)))
+    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ 
+      (let x = as_seq h0 x in let y = as_seq h0 y in
+       eval_q x < pow2 256 /\ eval_q y < pow2 256) /\
+       eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) * eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed))
+let mul_modq out x y =
+  let h0 = ST.get() in
+  push_frame();
+  let z' = create (uint64_to_sint64 0uL) 10ul in
+  let h1 = ST.get() in
+  push_frame();
+  let z  = create (uint64_to_sint128 0uL) 9ul in
+  let h2 = ST.get() in
+  lemma_mul_ineq__ (eval_q (as_seq h0 x)) (eval_q (as_seq h0 y)) 256 256;
+  mul_5 z x y;
+  Math.Lemmas.pow2_lt_compat 528 512;
+  carry z' z;
+  let h3 = ST.get() in
+  pop_frame();
+  barrett_reduction out z';
+  pop_frame()

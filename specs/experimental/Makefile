@@ -68,12 +68,12 @@ chacha20-vec256.exe: Spec.Chacha20_vec256.fst
 	$(OCAMLOPT) -I chacha-spec-vec256 $(OCAML_INCLUDES) $(addprefix chacha-spec-vec256/, $(EXTRACTED)) chacha-spec-vec256/Spec_Loops.ml chacha-spec-vec256/Spec_Lib.ml chacha-spec-vec256/Spec_CTR.ml chacha-spec-vec256/Spec_Chacha20_vec256.ml -o chacha20-vec256.exe
 	./chacha20-vec256.exe
 
-ed25519.exe: Spec.Ed25519.fst
+ed25519.exe: Spec.Sha512.fst  Spec.Ed25519.fst
 	$(MAKE) lib
 	mkdir -p ed25519-spec
 	$(FSTAR) $(ARGS) --odir ed25519-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> ed25519-spec/Spec_Ed25519.ml
-	$(OCAMLOPT) -I ed25519-spec $(OCAML_INCLUDES) $(addprefix ed25519-spec/, $(EXTRACTED)) ed25519-spec/Spec_Loops.ml ed25519-spec/Spec_Lib.ml ed25519-spec/Spec_SHA2_Specialization.ml ed25519-spec/Spec_SHA2_Word.ml ed25519-spec/Spec_SHA2_Core.ml ed25519-spec/Spec_Curve25519.ml ed25519-spec/Spec_Ed25519.ml -o ed25519.exe
+	$(OCAMLOPT) -I ed25519-spec $(OCAML_INCLUDES) $(addprefix ed25519-spec/, $(EXTRACTED)) ed25519-spec/Spec_Loops.ml ed25519-spec/Spec_Lib.ml ed25519-spec/Spec_SHA2_Specialization.ml ed25519-spec/Spec_SHA2_Word.ml ed25519-spec/Spec_SHA2_Core.ml ed25519-spec/Spec_Sha512.ml ed25519-spec/Spec_Curve25519.ml ed25519-spec/Spec_Ed25519.ml -o ed25519.exe
 	./ed25519.exe
 
 clean:

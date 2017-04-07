@@ -5,7 +5,8 @@ open FStar.Seq
 open FStar.Endianness
 open FStar.UInt8
 open Spec.Lib
-open Spec.SHA2.Core
+(* open Spec.SHA2.Core *)
+open Spec.Sha512
 open Spec.Curve25519
 
 
@@ -16,7 +17,7 @@ type aff_point = tuple2 elem elem           // Affine point
 type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
 
 let sha512 (b:bytes{length b < pow2 125}) : Tot (lbytes 64) = 
-  hash' b
+  sha512 b
 
 let modp_inv (x:elem) : Tot elem =
   x ** (prime - 2)

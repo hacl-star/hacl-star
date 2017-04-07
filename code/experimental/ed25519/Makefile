@@ -104,4 +104,4 @@ extract-c:
 	./x25519.exe
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ x25519-c 
+	rm -rf *.exe *.exe.* *.out *~ x25519-c *.graph
