@@ -388,7 +388,18 @@ let carry_step x y =
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-let u56 = x:UInt64.t{v x < 0x100000000000000}
+let all_10_bellow_56 t : GTot Type0 =
+  length t = 10
+  /\ v t.[0] < 0x100000000000000
+  /\ v t.[1] < 0x100000000000000
+  /\ v t.[2] < 0x100000000000000
+  /\ v t.[3] < 0x100000000000000
+  /\ v t.[4] < 0x100000000000000
+  /\ v t.[5] < 0x100000000000000
+  /\ v t.[6] < 0x100000000000000
+  /\ v t.[7] < 0x100000000000000
+  /\ v t.[8] < 0x100000000000000
+  /\ v t.[9] < 0x100000000000000
 
 val carry:
   z:seq UInt128.t{length z = 9 /\ 
@@ -402,7 +413,7 @@ val carry:
     /\ UInt128.v z.[6] < 0x30000000000000000000000000000
     /\ UInt128.v z.[7] < 0x20000000000000000000000000000
     /\ UInt128.v z.[8] < 0x10000000000000000000000000000} ->
-  Tot (t:seq u56{length t = 10 /\
+  Tot (t:seq u64{all_10_bellow_56 t /\
     eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]
                  = eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8]})
 let carry z =
@@ -440,7 +451,7 @@ let carry z =
 
 
 val mod_264:
-  t:seq u56{length t = 10} ->
+  t:seq u64{all_10_bellow_56 t} ->
   Tot (r:qelem_56{eval_q r = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] % pow2 264})
 let mod_264 t =
   assert_norm(pow2 40 = 0x10000000000);
@@ -497,7 +508,7 @@ let div_2_40_step x y =
 
 
 val div_248:
-  t:seq u56{length t = 10 /\ eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512} ->
+  t:seq u64{all_10_bellow_56 t /\ eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512} ->
   Tot (q:qelem_56{eval_q q = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] / pow2 248})
 let div_248 t =
   let x0 = t.[0] in
@@ -530,7 +541,7 @@ let div_248 t =
 
 
 val div_264:
-  t:seq u56{length t = 10 /\ eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 528} ->
+  t:seq u64{all_10_bellow_56 t /\ eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 528} ->
   Tot (q:qelem_56{eval_q q = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] / pow2 264})
 let div_264 t =
   let x0 = t.[0] in
@@ -578,7 +589,7 @@ let lemma_ineq (a:nat) (b:nat) : Lemma (requires (a < b)) (ensures (a <= b - 1))
 
 
 val barrett_reduction:
-  t:seq u56{length t = 10 /\
+  t:seq u64{all_10_bellow_56 t /\
     eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512} ->
   Tot (z:qelem_56{eval_q z = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed})
 let barrett_reduction t =
