@@ -62,3 +62,17 @@ let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:bu
   (ensures  (as_seq h1 a == as_seq h0 b)) =
   Seq.lemma_eq_intro (as_seq h1 a) (Seq.slice (as_seq h1 a) 0 len);
   Seq.lemma_eq_intro (as_seq h0 b) (Seq.slice (as_seq h0 b) 0 len)
+
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+
+val lemma_update_multi_def: (hash:Spec.SHA2.hash_w) -> (blocks:Spec.SHA2.bytes{Seq.length blocks % Spec.SHA2.size_block = 0}) -> Lemma
+  (Spec.SHA2.update_multi hash blocks = (
+               if Seq.length blocks = 0 then hash
+               else (
+                 let (block,rem) = Seq.split blocks Spec.SHA2.size_block in
+                 let hash = Spec.SHA2.update hash block in
+                 Spec.SHA2.update_multi hash rem)))
+
+let lemma_update_multi_def hash blocks = ()
+ 

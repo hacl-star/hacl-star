@@ -491,33 +491,59 @@ let update state data =
 
 val update_multi:
   state :uint32_p{length state = v size_state} ->
-  data  :uint8_p ->
+  data  :uint8_p {length data % v size_block = 0 /\ disjoint state data} ->
   n     :uint32_t{v n * v size_block <= length data} ->
   Stack unit
-        (requires (fun h0 -> live h0 state /\ live h0 data))
-        (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1
+        (requires (fun h0 -> live h0 state /\ live h0 data
+                  /\ (let seq_k = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+                  let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+                  let counter = Seq.index seq_counter 0 in
+                  seq_k == Spec.k /\ H32.v counter < (pow2 32 - (v n) - 1))))
+        (ensures  (fun h0 _ h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-                  let seq_wblock = as_seq h0 data in
-                  seq_hash_1 == Spec.update_multi seq_hash_0 seq_wblock)))
+                  let seq_k_0 = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+                  let seq_k_1 = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+                  let seq_blocks = as_seq h0 data in
+                  let seq_counter_0 = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+                  let seq_counter_1 = Seq.slice (as_seq h1 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+                  let counter_0 = Seq.index seq_counter_0 0 in
+                  let counter_1 = Seq.index seq_counter_1 0 in
+                  seq_k_0 == seq_k_1
+                  /\ H32.v counter_1 = H32.v counter_0 + (v n) /\ H32.v counter_1 < pow2 32
+                  /\ seq_hash_1 == Spec.update_multi seq_hash_0 seq_blocks)))
 
 let rec update_multi state data n =
-
-  if (n =^ 0ul) then ()
-  else
-
+  let h0 = ST.get() in
+  if n =^ 0ul then
+    Lemmas.lemma_modifies_0_is_modifies_1 h0 state
+  else begin
+    assert(v size_block <= Buffer.length data);
+    
     (* Get the current block for the data *)
     let b = Buffer.sub data 0ul size_block in
+
+    admit();
 
     (* Call the update function on the current block *)
     update state b;
 
     (* Remove the current block from the data left to process *)
-    let data = Buffer.sub data size_block ((n -^ 1ul) *^ size_block) in
-    // Buffer.offset
+    let data = Buffer.offset data size_block in
 
     (* Recursive call *)
-    update_multi state data (n -^ 1ul)
+    update_multi state data (n -^ 1ul) end
+
+
+
+let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}) : Tot hash_w (decreases (Seq.length blocks)) =
+  if Seq.length blocks = 0 then hash
+  else
+    let (block,rem) = Seq.split blocks size_block in
+    let hash = update hash block in
+    update_multi hash rem
+
+
 
 
 val update_last:
