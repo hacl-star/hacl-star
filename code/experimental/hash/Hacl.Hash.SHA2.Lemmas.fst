@@ -23,6 +23,13 @@ let lemma_aux_0 (t:UInt32.t{UInt32.v t >= 16 /\ UInt32.v t < 64}) : Lemma
    /\ UInt32.v (t -^ 7ul) < 64 /\ UInt32.v (t -^ 2ul) < 64)
   = ()
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
+let lemma_aux_1 (a:nat) (b:nat) : Lemma (requires (a = 0)) (ensures (a * b = 0)) = ()
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
+let lemma_aux_2 (a:nat) (b:pos) : Lemma (requires (a > 0)) (ensures (a * b > 0)) = ()
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
@@ -68,13 +75,12 @@ let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:bu
 
 val lemma_update_multi_def: (hash:Spec.SHA2.hash_w) -> (blocks:Spec.SHA2.bytes{Seq.length blocks % Spec.SHA2.size_block = 0}) -> Lemma
   (Spec.SHA2.update_multi hash blocks = (
-               if Seq.length blocks = 0 then hash
-               else (
-                 let (block,rem) = Seq.split blocks Spec.SHA2.size_block in
-                 let hash = Spec.SHA2.update hash block in
-                 Spec.SHA2.update_multi hash rem)))
+    if Seq.length blocks = 0 then hash
+    else (
+      let (block,rem) = Seq.split blocks Spec.SHA2.size_block in
+      let hash = Spec.SHA2.update hash block in
+      Spec.SHA2.update_multi hash rem)))
 
 #reset-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 20"
 
 let lemma_update_multi_def hash blocks = ()
- 

@@ -513,50 +513,39 @@ val update_multi:
                   /\ H32.v counter_1 = H32.v counter_0 + (v n) /\ H32.v counter_1 < pow2 32
                   /\ seq_hash_1 == Spec.update_multi seq_hash_0 seq_blocks)))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
-
-private
-let lemma_aux_0 (a:nat) (b:nat) : Lemma (requires (a = 0)) (ensures (a * b = 0)) = ()
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
-
-private
-let lemma_aux_1 (a:nat) (b:pos) : Lemma (requires (a > 0)) (ensures (a * b > 0)) = ()
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 let rec update_multi state data n =
   let h0 = ST.get() in
   if n =^ 0ul then (
     assert (v n = 0);
-    lemma_aux_0 (v n) (v size_block);
+    Lemmas.lemma_aux_1 (v n) (v size_block);
     assert (length data = 0);
     Lemmas.lemma_modifies_0_is_modifies_1 h0 state;
     Lemmas.lemma_update_multi_def (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w))) (as_seq h0 data)
   )
-  else 
+  else
     begin
     assert(v n > 0);
-    lemma_aux_1 (v n) (v size_block);
+    Lemmas.lemma_aux_2 (v n) (v size_block);
     assert(length data > 0);
     Lemmas.lemma_update_multi_def (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w))) (as_seq h0 data);
-    (* assert(v size_block <= Buffer.length data); *)
-    
+
     (* Get the current block for the data *)
     let b = Buffer.sub data 0ul size_block in
+
+    (* Remove the current block from the data left to process *)
     let data = Buffer.offset data size_block in
     assert(disjoint b data);
 
-    (* admit(); *)
-
     (* Call the update function on the current block *)
     update state b;
-
-    (* Remove the current block from the data left to process *)
-    (* let data = Buffer.offset data size_block in *)
 
     (* Recursive call *)
     update_multi state data (n -^ 1ul) end
 
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 val update_last:
   state :uint32_p{length state = v size_state} ->
@@ -571,6 +560,8 @@ val update_last:
                   let count = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.v pos_count_w + 1) in
                   let prevlen = U32.(v (Seq.index count 0) * (v size_block)) in
                   seq_hash_1 == Spec.update_last seq_hash_0 prevlen seq_data)))
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
 
 let update_last state data len =
 
