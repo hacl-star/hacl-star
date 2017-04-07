@@ -142,7 +142,7 @@ let gf128_cond_fadd x y z i =
   FStar.UInt.logxor_lemma_1 (H128.v zv);
   z.(0ul) <- H128.(zv ^^ msk_x)
 
-#reset-options "--z3rlimit 20 --max_fuel 1 --initial_fuel 1"
+#reset-options "--z3rlimit 40 --max_fuel 1 --initial_fuel 1"
 
 private val fmul_loop_lemma: #f:field -> a:felem f -> b:felem f -> n:nat{n < f.bits} -> Lemma
   (requires True)
