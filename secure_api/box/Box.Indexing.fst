@@ -24,7 +24,7 @@ let rec smaller_equal i1 i2 =
   let id1 = little_endian i1 in
   let id2 = little_endian i2 in
   id1 <= id2
-  
+
 
 type id =
   | DH_id of dh_id
@@ -65,7 +65,7 @@ type id_honesty_log_key = dh_id
 type id_honesty_log_value = b:bool{~prf_odh ==> b=false}
 type id_honesty_log_range = fun id_honesty_log_key -> id_honesty_log_value
 let id_honesty_log_inv (m:MM.map' id_honesty_log_key id_honesty_log_range) = True
-       
+
 assume val id_honesty_log_region: (r:MR.rid{ extends r root /\ is_eternal_region r /\ is_below r root /\ disjoint r id_log_region})
 
 assume val id_honesty_log: MM.t id_honesty_log_region id_honesty_log_key id_honesty_log_range id_honesty_log_inv
@@ -77,7 +77,7 @@ type unfresh (i:id) =
   MR.witnessed (MM.defined id_log i)
 
 val fresh_unfresh_contradiction: i:id -> ST unit
-  (requires (fun h0 -> 
+  (requires (fun h0 ->
     unfresh i
   ))
   (ensures (fun h0 _ h1 ->
@@ -131,7 +131,7 @@ let rec registered (i:id) =
   match i with
   | DH_id i' -> MR.witnessed (MM.defined id_honesty_log i')
   | AE_id (i1,i2) -> registered (DH_id i1) /\ registered (DH_id i2)
-  
+
 val honest: (i:id) -> Tot (t:Type0{t ==> registered i}) (decreases (measure_id i))
 let rec honest (i:id) =
   if prf_odh then
@@ -162,11 +162,11 @@ let rec lemma_honest_or_dishonest i =
   | DH_id i' ->
     MR.testify (MM.defined id_honesty_log i');
     match MM.lookup id_honesty_log i' with
-    | Some b -> 
+    | Some b ->
       if b then
-	MR.testify (MM.contains id_honesty_log i' true)
+  MR.testify (MM.contains id_honesty_log i' true)
       else
-	MR.testify (MM.contains id_honesty_log i' false)
+  MR.testify (MM.contains id_honesty_log i' false)
 
 
 type absurd_honest (i:id{registered i /\ dishonest i}) = honest i
@@ -176,11 +176,11 @@ assume val lemma_dishonest_and_honest_tot: i:id{registered i /\ honest i} -> abs
 
 
 val lemma_dishonest_not_honest: (i:id) -> ST unit
-  (requires (fun h0 -> 
-    registered i 
+  (requires (fun h0 ->
+    registered i
     /\ dishonest i
   ))
-  (ensures (fun h0 _ h1 -> 
+  (ensures (fun h0 _ h1 ->
     ~(honest i)
     /\ h0==h1
   ))
@@ -190,11 +190,11 @@ let lemma_dishonest_not_honest i =
   assert(honest i ==> False)
 
 val lemma_honest_not_dishonest: (i:id) -> ST unit
-  (requires (fun h0 -> 
-    registered i 
+  (requires (fun h0 ->
+    registered i
     /\ honest i
   ))
-  (ensures (fun h0 _ h1 -> 
+  (ensures (fun h0 _ h1 ->
     ~(dishonest i)
     /\ h0==h1
   ))
@@ -206,7 +206,7 @@ let lemma_honest_not_dishonest i =
 val is_honest: i:id{registered i} -> ST(b:bool{(b <==> (honest i)) /\ (not b <==> dishonest i)}) (decreases (measure_id i))
   (requires (fun h0 -> True))
   (ensures (fun h0 b h1 ->
-    modifies_none h0 h1 
+    modifies_none h0 h1
     /\ h0==h1
     /\ (honest i \/ dishonest i)
   ))
@@ -216,7 +216,7 @@ let rec is_honest i =
   | DH_id i' -> (
     MR.testify (MM.defined id_honesty_log i');
     match MM.lookup id_honesty_log i' with
-    |Some b -> 
+    |Some b ->
       if b then (
         lemma_honest_not_dishonest i;
         b
@@ -225,7 +225,7 @@ let rec is_honest i =
         b
       )
       )
-  | AE_id (i1,i2) -> 
+  | AE_id (i1,i2) ->
     let b1 = is_honest (DH_id i1) in
     let b2 = is_honest (DH_id i2) in
     let b  = b1 && b2 in
@@ -246,9 +246,9 @@ val honest_dishonest_lemma: dh_i:dh_id -> ST(unit)
     /\ ( ~(honest i) ==> dishonest i )
     /\ ( ~(dishonest i) ==> honest i )
   ))
-let honest_dishonest_lemma i = 
+let honest_dishonest_lemma i =
   let h = get() in
-  MR.testify (MM.defined id_honesty_log i); 
+  MR.testify (MM.defined id_honesty_log i);
   match MM.lookup id_honesty_log i with
   |Some v -> ()
 
@@ -256,6 +256,6 @@ val honest_dishonest_contradiction_lemma: i:dh_id -> ST(unit)
   (requires (fun h -> honest (DH_id i) /\ dishonest (DH_id i)))
   (ensures (fun h0 _ h1 -> False
   ))
-let honest_dishonest_contradiction_lemma i = 
+let honest_dishonest_contradiction_lemma i =
   MR.testify(MM.contains id_honesty_log i true);
   MR.testify(MM.contains id_honesty_log i false)

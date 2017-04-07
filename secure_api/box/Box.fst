@@ -30,25 +30,25 @@ module PlainBox = Box.PlainBox
 *)
 type c = AE.cipher
 
-assume val box_log_region: (r:MR.rid{ extends r root 
-					 /\ is_eternal_region r 
-					 /\ is_below r root 
-					 /\ disjoint r ae_log_region 
-					 /\ disjoint r dh_key_log_region
-					 /\ disjoint r id_log_region
-					 /\ disjoint r id_honesty_log_region
-					 })
+assume val box_log_region: (r:MR.rid{ extends r root
+           /\ is_eternal_region r
+           /\ is_below r root
+           /\ disjoint r ae_log_region
+           /\ disjoint r dh_key_log_region
+           /\ disjoint r id_log_region
+           /\ disjoint r id_honesty_log_region
+           })
 
-assume val box_key_log_region: (r:MR.rid{ extends r root 
-					 /\ is_eternal_region r 
-					 /\ is_below r root 
-					 /\ disjoint r ae_log_region 
-					 /\ disjoint r dh_key_log_region
-					 /\ disjoint r id_honesty_log_region
-					 /\ disjoint r id_log_region
-					 /\ disjoint r box_log_region
-					 })
-					 
+assume val box_key_log_region: (r:MR.rid{ extends r root
+           /\ is_eternal_region r
+           /\ is_below r root
+           /\ disjoint r ae_log_region
+           /\ disjoint r dh_key_log_region
+           /\ disjoint r id_honesty_log_region
+           /\ disjoint r id_log_region
+           /\ disjoint r box_log_region
+           })
+
 
 //type box_log_key = (nonce*(i:id{AE_id? i /\ honest i}))
 //type box_log_value = (cipher*protected_pkae_plain)
@@ -83,7 +83,7 @@ type box_key_log_range = ODH.dh_key_log_range
 type box_key_log_inv (f:MM.map' box_key_log_key box_key_log_range) = True
 (**
    This monotone map maps an AE id to a key. It is used when box_beforenm generates a key using an honest DH-public key and an honest DH-private key.
-   If PKAE is idealized, box_beforenm generates a random key instead of computing it from its DH components. We thus need this monotone log to guarantee that 
+   If PKAE is idealized, box_beforenm generates a random key instead of computing it from its DH components. We thus need this monotone log to guarantee that
    for a given set of DH ids a single unique key is generated.
 *)
 assume val box_key_log:  MM.t box_key_log_region ODH.dh_key_log_key ODH.dh_key_log_range ODH.dh_key_log_inv
@@ -125,7 +125,7 @@ let log_invariant (h:mem) (i:id) =
   // Do we need this?
   /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h ==> (forall n. MM.fresh box_log (n,i) h)))
 
-	    
+
 #reset-options
 //#set-options "--z3rlimit 300 --max_ifuel 12 --max_fuel 12"
 #set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 1"
@@ -204,17 +204,17 @@ val beforenm_nonce_freshness_framing_lemma: h0:mem -> h1:mem -> i:id -> k:AE.key
   ))
 let beforenm_nonce_freshness_framing_lemma h0 h1 i k = ()
 
- 
+
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 (**
    box_beforenm is used to generate a key using a DH public and private key. The AE id of the resulting key is a combination of the DH ids of the
    DH keys used to generate it. If idealized, the key resulting from this function will be random if both DH key ids are honest. To ensure that
    only one key is generated per DH id pair, it is stored in the box_key_log and a lookup is performed before each key is generated.
 *)
-val box_beforenm: pk:pkae_pkey -> 
-	          sk:pkae_skey ->
-		  ST (k:AE.key)
-  (requires (fun h0 -> 
+val box_beforenm: pk:pkae_pkey ->
+            sk:pkae_skey ->
+      ST (k:AE.key)
+  (requires (fun h0 ->
     let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
     registered i
     ///\ log_invariant h0 i
@@ -222,13 +222,12 @@ val box_beforenm: pk:pkae_pkey ->
     /\ MR.m_contains dh_key_log h0
     /\ MR.m_contains box_log h0
     /\ MR.m_contains ae_log h0
-    /\ (honest i \/ dishonest i)
     /\ MR.m_sel h0 box_key_log == MR.m_sel h0 dh_key_log  // dh_key_log and box_key_log are in sync
     /\ MR.m_sel h0 box_log == MR.m_sel h0 ae_log  // ae_log and box_log are in sync
     /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // all keys that are not in the dh_key_log are fresh
     /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 ==> (forall n. MM.fresh box_log (n,i) h0))) // for fresh keys, all nonces are fresh
   ))
-  (ensures (fun h0 k h1 -> 
+  (ensures (fun h0 k h1 ->
     let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
     let regions_modified_dishonest = [id_log_region] in
     let regions_modified_honest_set = Set.as_set (regions_modified_dishonest @ [dh_key_log_region;box_key_log_region]) in
@@ -257,18 +256,18 @@ val box_beforenm: pk:pkae_pkey ->
     /\ ((honest i /\ MM.defined box_key_log i h0) ==> (h0==h1))
     /\ ((honest i) ==> (MR.witnessed (MM.contains box_key_log i k)))
     /\ ((honest i) ==> (MM.contains box_key_log i k h1))
-    					        ///\ makes_unfresh_just i h0 h1)))
-    					 ///\ modifies regions_modified_honest_set h0 h1))))
-    	 ///\ (MM.defined box_key_log i h0 ==> (//MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log))))
-    	 //				   h0 == h1))))
-    	 ///\ MR.witnessed (MM.contains box_key_log i k)
-    	 ///\ MM.contains box_key_log i k h1))
+                      ///\ makes_unfresh_just i h0 h1)))
+               ///\ modifies regions_modified_honest_set h0 h1))))
+       ///\ (MM.defined box_key_log i h0 ==> (//MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log))))
+       //          h0 == h1))))
+       ///\ MR.witnessed (MM.contains box_key_log i k)
+       ///\ MM.contains box_key_log i k h1))
     // If dishonest, the returned key is actually computed from both DH keys.
     /\ (dishonest i (*x*)
       ==> (modifies regions_modified_dishonest_set h0 h1
          /\ leak_key k = ODH.prf_odhGT sk pk))
     /\ ~(fresh i h1)
-    //// id is fresh if it is in the box_key_log, 
+    //// id is fresh if it is in the box_key_log,
     //// sync between box_key_log and dh_key_log and
     //// if id is fresh, then there are no entries for it in the box_log
     ///\ log_invariant h1 i (*x*)
@@ -279,7 +278,7 @@ val box_beforenm: pk:pkae_pkey ->
     ///\ MR.m_contains box_key_log h1 (*x*)
     ///\ MR.m_contains dh_key_log h1 (*x*)
   ))
- 
+
 let box_beforenm pk sk =
   MR.m_recall id_log;
   MR.m_recall id_honesty_log;
@@ -300,7 +299,7 @@ let box_beforenm pk sk =
     match MM.lookup box_key_log i with
     | Some _ ->
       ()
-    | None -> 
+    | None ->
       MM.extend box_key_log i k;
       ()
   ));
@@ -389,10 +388,10 @@ let afternm_nonce_freshness_framing_lemma h0 h1 i n c p = ()
    the plaintext is stored in the box_log indexed by the AE id and the nonce.
 *)
 val box_afternm: k:AE.key ->
-		     n:nonce ->
-		     p:protected_pkae_plain{PlainBox.get_index p = AE.get_index k /\ length p / Spec.Salsa20.blocklen < pow2 32} ->
-		     ST c
-  (requires (fun h0 -> 
+         n:nonce ->
+         p:protected_pkae_plain{PlainBox.get_index p = AE.get_index k /\ length p / Spec.Salsa20.blocklen < pow2 32} ->
+         ST c
+  (requires (fun h0 ->
     let i = AE.get_index k in
     // Liveness of global logs and local key log of the returned key.
     MR.m_contains id_log h0
@@ -413,7 +412,7 @@ val box_afternm: k:AE.key ->
     /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // dh_key_log and box_key_log are in sync
     /\ ((AE_id? i /\ honest i /\ MM.fresh box_key_log i h0) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h0))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
   ))
-  (ensures (fun h0 c h1 -> 
+  (ensures (fun h0 c h1 ->
     let i = AE.get_index k in
     let modified_regions:Set.set (r:HH.rid) = Set.union (Set.singleton box_log_region) (Set.singleton ae_log_region) in
     let k_raw = get_keyGT k in
@@ -475,13 +474,13 @@ let box_afternm k n p =
   MR.m_recall box_log;
   MR.m_recall ae_log;
   c
-  
 
-val box: pk:pkae_pkey -> 
-	     sk:pkae_skey -> 
-	     n:nonce -> 
-	     p:protected_pkae_plain{PlainBox.get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))} 
-	     -> ST c
+
+val box: pk:pkae_pkey ->
+       sk:pkae_skey ->
+       n:nonce ->
+       p:protected_pkae_plain{PlainBox.get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))}
+       -> ST c
   (requires (fun h0 ->
     let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
     registered i
@@ -502,7 +501,7 @@ val box: pk:pkae_pkey ->
     /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // all keys that are not in the dh_key_log are fresh
     /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 ==> (forall n. MM.fresh box_log (n,i) h0))) // for fresh keys, all nonces are fresh
   ))
-  (ensures (fun h0 c h1 -> 
+  (ensures (fun h0 c h1 ->
     let regions_modified_beforenm_dishonest = [id_log_region] in
     let regions_modified_beforenm_honest = (regions_modified_beforenm_dishonest @ [dh_key_log_region;box_key_log_region]) in
     let regions_modified_afternm_honest = ([box_log_region;ae_log_region]) in
@@ -561,7 +560,7 @@ let box pk sk n p =
 
 
 val box_open_afternm: n:nonce -> k:AE.key -> c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} -> ST(option (p:protected_pkae_plain{get_index p = AE.get_index k}))
-  (requires (fun h0 -> 
+  (requires (fun h0 ->
     let i = AE.get_index k in
     registered i
     // Liveness of global logs
@@ -573,7 +572,7 @@ val box_open_afternm: n:nonce -> k:AE.key -> c:cipher{Seq.length c >= 16 /\ (Seq
     // Make sure that log_invariant holds.
     /\ log_invariant h0 i
   ))
-  (ensures (fun h0 p h1 -> 
+  (ensures (fun h0 p h1 ->
     let i = AE.get_index k in
     let k_raw = AE.get_keyGT k in
     log_invariant h1 i
@@ -583,14 +582,14 @@ val box_open_afternm: n:nonce -> k:AE.key -> c:cipher{Seq.length c >= 16 /\ (Seq
     /\ MR.m_contains box_key_log h1
     /\ MR.m_contains dh_key_log h1
     /\ ((~(b2t pkae_int_ctxt) \/ dishonest i)
-      ==> ((Some? (SPEC.secretbox_open_easy c k_raw n) 
+      ==> ((Some? (SPEC.secretbox_open_easy c k_raw n)
         ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))
           /\ h0 == h1)))
         /\ ((None? (SPEC.secretbox_open_easy c k_raw n))
           ==> (None? p)))
-    /\ ((b2t pkae /\ honest i) 
-      ==> ((Some? p)  
-        ==> (let p' = AE.message_wrap (Some?.v p) in 
+    /\ ((b2t pkae /\ honest i)
+      ==> ((Some? p)
+        ==> (let p' = AE.message_wrap (Some?.v p) in
           MM.defined box_log (n,i) h0 /\ (fst (MM.value box_log (n,i) h0) == c )
           /\ p' == snd (MM.value box_log (n,i) h0)))
         /\ ((None? p)
@@ -604,21 +603,21 @@ val box_open_afternm: n:nonce -> k:AE.key -> c:cipher{Seq.length c >= 16 /\ (Seq
 let box_open_afternm n k c =
   let i = AE.get_index k in
   match AE.decrypt #i n k c with
-  | Some p -> 
-    let p' = (AE.message_unwrap #i p) in 
+  | Some p ->
+    let p' = (AE.message_unwrap #i p) in
     Some p'
   | None -> None
-  
 
 
-val box_open: n:nonce ->  
-	      sk:pkae_skey ->
-	      pk:pkae_pkey -> 
-	      c:cipher ->
-	      ST(option (p:protected_pkae_plain{get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))}))
+val box_open: n:nonce ->
+        sk:pkae_skey ->
+        pk:pkae_pkey ->
+        c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
+          ST(option (p:protected_pkae_plain{PlainBox.get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))}))
   (requires (fun h0 ->
     let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
     registered i
+    /\ (honest i \/ dishonest i)
     // Liveness of global logs
     /\ MR.m_contains box_log h0
     /\ MR.m_contains id_log h0
@@ -628,7 +627,7 @@ val box_open: n:nonce ->
     // Make sure that log_invariant holds.
     /\ log_invariant h0 i
   ))
-  (ensures (fun h0 p h1 -> 
+  (ensures (fun h0 p h1 ->
     let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
     let modified_regions = Set.union (Set.singleton dh_key_log_region) (Set.singleton box_key_log_region) in
     log_invariant h1 i
@@ -640,30 +639,31 @@ val box_open: n:nonce ->
     /\ (honest i ==> MM.defined box_key_log i h1)
     /\ (honest i ==> modifies modified_regions h0 h1)
     /\ (dishonest i ==> h0==h1)
-    /\ ((honest i) ==> (let k_raw = AE.get_keyGT (MM.value box_key_log i h1) in
-                     (~(b2t pkae) 
-		       ==> ((Some? (SPEC.secretbox_open_easy c k_raw n) 
-		         ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))
-		            /\ h0 == h1)))
-			 /\ ((None? (SPEC.secretbox_open_easy c k_raw n))
-			   ==> (None? p)))
-                     /\ ((b2t pkae) 
-		       ==> ((Some? p)  
-		         ==> (let p' = AE.message_wrap (Some?.v p) in 
-			   MM.defined box_log (n,i) h0 /\ (fst (MM.value box_log (n,i) h0) == c )
-		           /\ p' == snd (MM.value box_log (n,i) h0)))
-			 /\ ((None? p)
-			   ==>(MM.fresh box_log (n,i) h0 \/ c =!= fst (MM.value box_log (n,i) h0)))
-			   )))
-    /\ ((dishonest i) ==> (let k_raw = prf_odhGT sk pk in
-		       (Some? (SPEC.secretbox_open_easy c k_raw n) 
-		         ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))
-		           /\ h0 == h1))
-		       /\ (None? (SPEC.secretbox_open_easy c k_raw n)
-			   ==> None? p)))
+    /\ ((honest i)
+      ==> (let k_raw = AE.get_keyGT (MM.value box_key_log i h1) in
+          (~(b2t pkae_int_ctxt)
+          ==> ((Some? (SPEC.secretbox_open_easy c k_raw n)
+              ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))))
+              /\ ((None? (SPEC.secretbox_open_easy c k_raw n))
+                ==> (None? p))))
+          /\ ((b2t pkae_int_ctxt)
+            ==> (((Some? p)
+                ==> (let p' = AE.message_wrap (Some?.v p) in
+                    MM.defined box_log (n,i) h0 /\ (fst (MM.value box_log (n,i) h0) == c )
+                    /\ p' == snd (MM.value box_log (n,i) h0)))
+                /\ ((None? p)
+                  ==>(MM.fresh box_log (n,i) h0 \/ c =!= fst (MM.value box_log (n,i) h0))))
+         )))
+    /\ ((dishonest i)
+      ==> (let k_raw = prf_odhGT sk pk in
+         (Some? (SPEC.secretbox_open_easy c k_raw n)
+           ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))))
+         /\ (None? (SPEC.secretbox_open_easy c k_raw n)
+           ==> None? p)))
   ))
 
-
+// Weird error on line 338 or prims.fst removal of the refinement of the return type yields another
+// weird error on the return type.
 let box_open n sk pk c =
-  let k = box_beforenm #pk_id #sk_id pk sk in
+  let k = box_beforenm pk sk in
   box_open_afternm n k c
