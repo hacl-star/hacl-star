@@ -49,7 +49,7 @@ X25519_SPECIFIC= \
 	Hacl.EC.fst
 
 # Files that are too slow and for which verification speed must improve
-SLOW=
+SLOW=Hacl.Spec.Bignum.Fsquare.fst
 
 # Files that still have errors
 TODO=

@@ -1,5 +1,5 @@
 [
-  "k§'•\b<\u001e\b+á0#9;„©",
+  "Å°\u0005¤,­°+#èÝÈ´¹j\t",
   [
     [
       "Hacl.EC.Point.point",
@@ -490,8 +490,9 @@
       1,
       1,
       [
-        "@query", "assumption_FStar.HyperHeap.HasEq_rid", "b2t_def",
-        "bool_inversion", "bool_typing", "data_elim_FStar.UInt32.Mk",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.HyperHeap.HasEq_rid", "b2t_def", "bool_inversion",
+        "bool_typing", "data_elim_FStar.UInt32.Mk",
         "data_elim_FStar.UInt64.Mk", "equation_FStar.Buffer.as_seq",
         "equation_FStar.Buffer.buffer", "equation_FStar.Buffer.contains",
         "equation_FStar.Buffer.live",
@@ -503,9 +504,8 @@
         "equation_FStar.Set.eqtype", "equation_FStar.UInt.eq",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.sub", "equation_FStar.UInt.uint_t",
-        "equation_FStar.UInt32.eq", "equation_FStar.UInt32.n",
-        "equation_FStar.UInt32.sub", "equation_FStar.UInt32.t",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.eq",
+        "equation_FStar.UInt32.n", "equation_FStar.UInt32.t",
         "equation_FStar.UInt32.uint_to_t", "equation_FStar.UInt32.v",
         "equation_FStar.UInt64.n", "equation_FStar.UInt64.t",
         "equation_FStar.UInt64.uint_to_t",
@@ -561,7 +561,6 @@
         "proj_equation_FStar.UInt32.Mk_v",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.UInt32.Mk_v",
         "projection_inverse_Prims.Mktuple2__1",
         "projection_inverse_Prims.Mktuple2__2",
         "refinement_interpretation_Tm_refine_03d0bed5c0733099844f268aecd0836d",
@@ -577,8 +576,7 @@
         "typing_FStar.Heap.domain",
         "typing_FStar.HyperStack.__proj__HS__item__h",
         "typing_FStar.Map.domain", "typing_FStar.Map.sel",
-        "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.v",
-        "unit_inversion"
+        "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.v"
       ],
       0
     ],
