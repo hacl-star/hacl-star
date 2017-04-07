@@ -45,15 +45,15 @@ let share_from_exponent dh_exp = Curve.scalarmult dh_exp (createL dh_basepoint)
 *)
 private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
 
-type aes_key = Key.aes_key 
+type aes_key = Key.aes_key
 
-assume val dh_key_log_region: (r:HH.rid{ extends r root 
-					 /\ is_eternal_region r 
-					 /\ is_below r root 
-					 /\ disjoint r Key.ae_log_region
-					 /\ disjoint r id_log_region
-					 /\ disjoint r id_honesty_log_region
-					 })
+assume val dh_key_log_region: (r:HH.rid{ extends r root
+           /\ is_eternal_region r
+           /\ is_below r root
+           /\ disjoint r Key.ae_log_region
+           /\ disjoint r id_log_region
+           /\ disjoint r id_honesty_log_region
+           })
 
 type dh_key_log_key = i:id{AE_id? i /\ honest i}
 type dh_key_log_value = (AE.key)
@@ -74,7 +74,7 @@ assume val dh_key_log: MM.t dh_key_log_region dh_key_log_key dh_key_log_range dh
    or dishonest).
    TODO: Does the public key have to be abstract?
 *)
-noeq abstract type dh_pkey = 
+noeq abstract type dh_pkey =
   | DH_pkey: pk_share:dh_share -> dh_pkey
 
 (**
@@ -82,7 +82,7 @@ noeq abstract type dh_pkey =
    or dishonest).
 *)
 noeq abstract type dh_skey =
-  | DH_skey: sk_exp:dh_exponent -> pk:dh_pkey{pk.pk_share = share_from_exponent sk_exp} -> dh_skey 
+  | DH_skey: sk_exp:dh_exponent -> pk:dh_pkey{pk.pk_share = share_from_exponent sk_exp} -> dh_skey
 
 (**
    A helper function to obtain the raw bytes of a DH public key.
@@ -97,12 +97,12 @@ val sk_get_share: sk:dh_skey -> Tot (dh_sh:dh_share{dh_sh = share_from_exponent 
 let sk_get_share sk = sk.pk.pk_share
 
 val get_skey: sk:dh_skey -> GTot (raw:dh_exponent{raw=sk.sk_exp})
-let get_skey sk = 
+let get_skey sk =
   sk.sk_exp
 
 
 val leak_skey: sk:dh_skey{dishonest (DH_id sk.pk.pk_share)} -> Tot (raw:dh_exponent{raw=sk.sk_exp})
-let leak_skey sk = 
+let leak_skey sk =
   sk.sk_exp
 
 
@@ -147,13 +147,12 @@ let prf_odhGT dh_sk dh_pk =
 #reset-options
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
-  ( requires (fun h0 -> 
+  ( requires (fun h0 ->
     let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
     ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==>  fresh i h0)
     /\ MR.m_contains id_log h0
     /\ MR.m_contains dh_key_log h0
     /\ registered i
-    /\ (honest i \/ dishonest i)
   ))
   ( ensures (fun h0 k h1 ->
     let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
@@ -162,20 +161,20 @@ val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
     (i = Key.ae_key_get_index k)
     /\ (honest i \/ dishonest i)
     /\ (honest i ==> (let current_log = MR.m_sel h0 dh_key_log in
-    		   MR.witnessed (MM.contains dh_key_log i k)
-    		   /\ MM.contains dh_key_log i k h1
-    		   /\ MM.defined dh_key_log i h1
-    		   /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
-    						  /\ makes_unfresh_just i h0 h1
-    						  /\ modifies regions_modified_honest h0 h1))
-    		   /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
-    						    /\ h0==h1))       // and the log of the key will be the same as before.
+           MR.witnessed (MM.contains dh_key_log i k)
+           /\ MM.contains dh_key_log i k h1
+           /\ MM.defined dh_key_log i h1
+           /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
+                  /\ makes_unfresh_just i h0 h1
+                  /\ modifies regions_modified_honest h0 h1))
+           /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
+                    /\ h0==h1))       // and the log of the key will be the same as before.
       ))
     /\ (dishonest i
-    	==> (modifies regions_modified_dishonest h0 h1
-    	   /\ Key.leak_key k = prf_odhGT sk pk
-    	   /\ makes_unfresh_just i h0 h1
-    	   /\ MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log))
+      ==> (modifies regions_modified_dishonest h0 h1
+         /\ Key.leak_key k = prf_odhGT sk pk
+         /\ makes_unfresh_just i h0 h1
+         /\ MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log))
     /\ (modifies regions_modified_honest h0 h1
       \/ h0 == h1
       \/ modifies regions_modified_dishonest h0 h1)

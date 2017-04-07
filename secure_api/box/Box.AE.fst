@@ -29,7 +29,7 @@ open Box.PlainAE
 // TODO: implement an init function for all the global state.
 type noncesize = SPEC.noncelen
 type keysize = SPEC.keylen
-type aes_key = SPEC.key 
+type aes_key = SPEC.key
 type bytes = SPEC.bytes
 type cipher = b:bytes
 type nonce = SPEC.nonce
@@ -39,12 +39,12 @@ let create_zero_bytes n =
   Seq.create n (UInt8.uint_to_t 0)
 
 
-assume val ae_log_region: (r:MR.rid{ extends r root 
-				     /\ is_eternal_region r 
-				     /\ is_below r root
-				     /\ disjoint r id_log_region
-				     /\ disjoint r id_honesty_log_region
-				     })
+assume val ae_log_region: (r:MR.rid{ extends r root
+             /\ is_eternal_region r
+             /\ is_below r root
+             /\ disjoint r id_log_region
+             /\ disjoint r id_honesty_log_region
+             })
 
 type ae_log_key = (nonce*(i:id{AE_id? i}))
 type ae_log_value (i:id{AE_id? i}) = (cipher*protected_ae_plain i)
@@ -69,11 +69,11 @@ let get_index k = k.i
    only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
 *)
 val keygen: i:id{AE_id? i} -> ST (k:key{k.i=i})
-  (requires (fun h -> 
+  (requires (fun h ->
     fresh i h // Prevents multiple keys with the same id
     /\ registered i // We require this to enforce a static corruption model.
   ))
-  (ensures  (fun h0 k h1 -> 
+  (ensures  (fun h0 k h1 ->
     let (s:Set.set (HH.rid)) = Set.singleton id_log_region in
     HH.modifies_just s h0.h h1.h
     /\ makes_unfresh_just i h0 h1
@@ -89,7 +89,7 @@ let keygen i =
    with this function.
 *)
 val coerce_key: i:id{AE_id? i /\ (dishonest i)} -> raw_k:aes_key -> ST (k:key{k.i=i /\ k.raw = raw_k})
-  (requires (fun h0 -> 
+  (requires (fun h0 ->
     registered i
   ))
   (ensures  (fun h0 k h1 ->
@@ -99,7 +99,7 @@ val coerce_key: i:id{AE_id? i /\ (dishonest i)} -> raw_k:aes_key -> ST (k:key{k.
     /\ makes_unfresh_just i h0 h1
     /\ dishonest i
   ))
-let coerce_key i raw = 
+let coerce_key i raw =
   make_unfresh i;
   fresh_unfresh_contradiction i;
   Key #i raw
@@ -133,7 +133,7 @@ let get_keyGT k =
    Encrypt a a message under a key. Idealize if the key is honest and ae_ind_cca true.
 *)
 val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i{length m / Spec.Salsa20.blocklen < pow2 32}) -> ST bytes
-  (requires (fun h0 -> 
+  (requires (fun h0 ->
     MR.m_contains ae_log h0
     /\ ((honest i) ==> MM.fresh ae_log (n,i) h0) // Nonce freshness
     /\ registered i
@@ -160,7 +160,7 @@ let encrypt #i n k m =
   MR.m_recall id_honesty_log;
   MR.m_recall ae_log;
   let honest_i = is_honest i in
-  let p = 
+  let p =
     if (ae_ind_cpa && honest_i) then (
       Seq.create (length m) (UInt8.uint_to_t 0)
     ) else (
@@ -183,22 +183,22 @@ val decrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> c:cipher -> ST (opt
     MR.m_contains ae_log h0
     /\ registered i
   ))
-  (ensures  (fun h0 p h1 -> 
+  (ensures  (fun h0 p h1 ->
     h0 == h1
     /\ m_contains ae_log h1
     /\ ((~(b2t ae_int_ctxt) \/ dishonest i)
       ==> ((Some? (SPEC.secretbox_open_easy c k.raw n)
         ==> Some? p /\ Some?.v p == coerce (Some?.v (SPEC.secretbox_open_easy c k.raw n)))
-	/\ ((None? (SPEC.secretbox_open_easy c k.raw n))
-	  ==> None? p)
+  /\ ((None? (SPEC.secretbox_open_easy c k.raw n))
+    ==> None? p)
       ))
     /\ ((b2t ae_int_ctxt /\ honest i)
         ==> (Some? p
-          ==> (MM.defined ae_log (n,i) h0 /\ (fst (MM.value ae_log (n,i) h0) == c ) 
+          ==> (MM.defined ae_log (n,i) h0 /\ (fst (MM.value ae_log (n,i) h0) == c )
             /\ Some?.v p == snd (MM.value ae_log (n,i) h0)))
-	  /\ (None? p
-	  ==> (MM.fresh ae_log (n,i) h0 \/ c =!= fst (MM.value ae_log (n,i) h0)))
-	 )
+    /\ (None? p
+    ==> (MM.fresh ae_log (n,i) h0 \/ c =!= fst (MM.value ae_log (n,i) h0)))
+   )
   ))
 
 
@@ -206,13 +206,13 @@ let decrypt #i n k c =
   let honest_i = is_honest i in
   if ae_int_ctxt && honest_i then
     match MM.lookup ae_log (n,i) with
-    | Some (c',m') -> 
-      if c' = c then 
-	Some m'
-      else 
-	None
+    | Some (c',m') ->
+      if c' = c then
+  Some m'
+      else
+  None
     | None -> None
-  else 
+  else
     let p = (SPEC.secretbox_open_easy c k.raw n) in
     match p with
     | Some p' -> Some (PlainAE.coerce #i p')
