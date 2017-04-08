@@ -1,4 +1,4 @@
-module Hacl.Ed25519.ExtPoint
+module Hacl.Impl.Ed25519.ExtPoint
 
 
 (* A point is buffer of size 20, that is 4 consecutive buffers of size 5 *)
