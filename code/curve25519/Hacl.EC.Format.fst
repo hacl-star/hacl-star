@@ -330,6 +330,22 @@ private let fcontract_trim input =
   upd_5' input a0' a1' a2' a3' a4'
 
 
+val reduce:
+  input:felem ->
+  Stack unit
+    (requires (fun h -> Buffer.live h input /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h input)))
+    (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Buffer.live h1 input /\ modifies_1 input h0 h1 /\
+      Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 input) /\
+      (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h1 input) p51 p51 p51 p51 p51) /\
+      Hacl.Spec.Bignum.Bigint.seval (as_seq h1 input)
+      == Hacl.Spec.Bignum.Bigint.seval (as_seq h0 input) % (pow2 255 - 19)))
+let reduce out =
+  fcontract_first_carry_full out;
+  fcontract_second_carry_full out;
+  fcontract_trim out
+
+
 private 
 val fcontract_store:
   output:buffer Hacl.UInt8.t{Buffer.length output = 32} ->

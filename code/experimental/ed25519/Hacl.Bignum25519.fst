@@ -2,6 +2,7 @@ module Hacl.Bignum25519
 
 #set-options "--lax"
 
+let red_51 s = Hacl.Spec.EC.AddAndDouble.(bounds s p51 p51 p51 p51 p51)
 let red_513 s = Hacl.Spec.EC.AddAndDouble.red_513 s
 let red_53 s = Hacl.Spec.EC.AddAndDouble.red_53 s
 let red_5413 s = Hacl.Spec.EC.AddAndDouble.red_5413 s
@@ -44,5 +45,11 @@ let fsquare out a =
 let fsquare_times out a n =
   Hacl.Bignum.Fsquare.fsquare_times out a n
 
+let fsquare_times_input output count =
+  Hacl.Bignum.Fsquare.fsquare_times_inplace output count
+
 let inverse out a =
   Hacl.Bignum.Crecip.crecip out a
+
+let reduce out =
+  Hacl.EC.Format.reduce out

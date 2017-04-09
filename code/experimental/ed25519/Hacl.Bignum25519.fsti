@@ -2,6 +2,7 @@ module Hacl.Bignum25519
 
 #set-options "--lax"
 
+val red_51: Hacl.Bignum.Parameters.seqelem -> GTot Type0
 val red_513: Hacl.Bignum.Parameters.seqelem -> GTot Type0
 val red_53: Hacl.Bignum.Parameters.seqelem -> GTot Type0
 val red_5413: Hacl.Bignum.Parameters.seqelem -> GTot Type0
@@ -63,7 +64,16 @@ val fsquare_times:
   n:UInt32.t ->
   St unit
 
+val fsquare_times_inplace:
+  out:felem ->
+  n:UInt32.t ->
+  St unit
+
 val inverse:
   out:felem ->
   a:felem ->
+  St unit
+
+val reduce:
+  out:felem ->
   St unit
