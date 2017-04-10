@@ -33,8 +33,9 @@ let huint8_t  = Hacl.UInt8.t
 let huint32_t = Hacl.UInt32.t
 let huint64_t = Hacl.UInt64.t
 
-let huint32_p = Buffer.buffer huint32_t
 let huint8_p  = Buffer.buffer huint8_t
+let huint32_p = Buffer.buffer huint32_t
+let huint64_p = Buffer.buffer huint64_t
 
 
 (* Definitions of aliases for functions *)
@@ -69,6 +70,25 @@ let pupd_4 buf v0 v1 v2 v3 =
 
 
 [@"substitute"]
+val pupd64_4: buf:huint64_p{length buf = 4} ->
+  v0:uint64_t -> v1:uint64_t -> v2:uint64_t -> v3:uint64_t ->
+  Stack unit (requires (fun h -> live h buf))
+               (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = Hacl.Spec.Endianness.reveal_h64s (as_seq h1 buf) in
+                           Seq.index s 0 == v0
+                         /\ Seq.index s 1 == v1
+                         /\ Seq.index s 2 == v2
+                         /\ Seq.index s 3 == v3)))
+
+[@"substitute"]
+let pupd64_4 buf v0 v1 v2 v3 =
+  buf.(0ul) <- u64_to_s64 v0;
+  buf.(1ul) <- u64_to_s64 v1;
+  buf.(2ul) <- u64_to_s64 v2;
+  buf.(3ul) <- u64_to_s64 v3
+
+
+[@"substitute"]
 val upd_4: buf:huint32_p{length buf <= pow2 32} -> idx:uint32_t{U32.v idx + 3 < length buf /\ U32.v idx + 3 <= pow2 32} -> v0:uint32_t -> v1:uint32_t -> v2:uint32_t -> v3:uint32_t
   -> Stack unit (requires (fun h -> live h buf))
                (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
@@ -83,6 +103,18 @@ let upd_4 buf idx v0 v1 v2 v3 =
 
 
 [@"substitute"]
+val upd64_4: buf:huint64_p{length buf <= pow2 32} -> idx:uint32_t{U32.v idx + 3 < length buf /\ U32.v idx + 3 <= pow2 32} -> v0:uint64_t -> v1:uint64_t -> v2:uint64_t -> v3:uint64_t
+  -> Stack unit (requires (fun h -> live h buf))
+               (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1))
+[@"substitute"]
+let upd64_4 buf idx v0 v1 v2 v3 =
+  buf.(idx +^ 0ul) <- u64_to_s64 v0;
+  buf.(idx +^ 1ul) <- u64_to_s64 v1;
+  buf.(idx +^ 2ul) <- u64_to_s64 v2;
+  buf.(idx +^ 3ul) <- u64_to_s64 v3
+
+
+[@"substitute"]
 val hupd_4: buf:huint32_p{length buf = 4} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t ->
   Stack unit (requires (fun h -> live h buf))
@@ -92,6 +124,22 @@ val hupd_4: buf:huint32_p{length buf = 4} ->
 
 [@"substitute"]
 let hupd_4 buf v0 v1 v2 v3 =
+  buf.(0ul) <- v0;
+  buf.(1ul) <- v1;
+  buf.(2ul) <- v2;
+  buf.(3ul) <- v3
+
+
+[@"substitute"]
+val hupd64_4: buf:huint64_p{length buf = 4} ->
+  v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                         Seq.index s 0 == v0 /\ Seq.index s 1 == v1 /\ Seq.index s 2 == v2 /\ Seq.index s 3 == v3)))
+
+[@"substitute"]
+let hupd64_4 buf v0 v1 v2 v3 =
   buf.(0ul) <- v0;
   buf.(1ul) <- v1;
   buf.(2ul) <- v2;
@@ -116,6 +164,23 @@ let aux_hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
 
 
 [@"substitute"]
+val aux_hupd64_8: buf:huint64_p{length buf = 8} ->
+  v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                         Seq.index s 0 == v0 /\ Seq.index s 1 == v1 /\ Seq.index s 2 == v2 /\ Seq.index s 3 == v3 /\
+                         Seq.index s 4 == v4 /\ Seq.index s 5 == v5 /\ Seq.index s 6 == v6 /\ Seq.index s 7 == v7)))
+
+[@"substitute"]
+let aux_hupd64_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
+  let p1 = Buffer.sub buf 0ul 4ul in
+  let p2 = Buffer.sub buf 4ul 4ul in
+  hupd64_4 p1 v0 v1 v2 v3;
+  hupd64_4 p2 v4 v5 v6 v7
+
+
+[@"substitute"]
 val hupd_8: buf:huint32_p{length buf = 8} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
   Stack unit (requires (fun h -> live h buf))
@@ -125,6 +190,21 @@ val hupd_8: buf:huint32_p{length buf = 8} ->
 [@"substitute"]
 let hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
   aux_hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7;
+  let h1 = ST.get () in
+  Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_8 v0 v1 v2 v3 v4 v5 v6 v7)
+
+
+
+[@"substitute"]
+val hupd64_8: buf:huint64_p{length buf = 8} ->
+  v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in Seq.Create.create_8 v0 v1 v2 v3 v4 v5 v6 v7 == s)))
+
+[@"substitute"]
+let hupd64_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
+  aux_hupd64_8 buf v0 v1 v2 v3 v4 v5 v6 v7;
   let h1 = ST.get () in
   Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_8 v0 v1 v2 v3 v4 v5 v6 v7)
 
@@ -149,6 +229,27 @@ let aux_hupd_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
   hupd_8 p2 v8 v9 v10 v11 v12 v13 v14 v15
 
 
+
+[@"substitute"]
+val aux_hupd64_16: buf:huint64_p{length buf = 16} ->
+  v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
+  v8:H64.t -> v9:H64.t -> v10:H64.t -> v11:H64.t -> v12:H64.t -> v13:H64.t -> v14:H64.t -> v15:H64.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                         Seq.index s 0 == v0 /\ Seq.index s 1 == v1 /\ Seq.index s 2 == v2 /\ Seq.index s 3 == v3 /\
+                         Seq.index s 4 == v4 /\ Seq.index s 5 == v5 /\ Seq.index s 6 == v6 /\ Seq.index s 7 == v7 /\
+                         Seq.index s 8 == v8 /\ Seq.index s 9 == v9 /\ Seq.index s 10 == v10 /\ Seq.index s 11 == v11 /\
+                         Seq.index s 12 == v12 /\ Seq.index s 13 == v13 /\ Seq.index s 14 == v14 /\ Seq.index s 15 == v15)))
+
+[@"substitute"]
+let aux_hupd64_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
+  let p1 = Buffer.sub buf 0ul 8ul in
+  let p2 = Buffer.sub buf 8ul 8ul in
+  hupd64_8 p1 v0 v1 v2 v3 v4 v5 v6 v7;
+  hupd64_8 p2 v8 v9 v10 v11 v12 v13 v14 v15
+
+
 [@"substitute"]
 val hupd_16: buf:huint32_p{length buf = 16} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
@@ -161,6 +262,22 @@ val hupd_16: buf:huint32_p{length buf = 16} ->
 [@"substitute"]
 let hupd_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
   aux_hupd_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15;
+  let h1 = ST.get () in
+  Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)
+
+
+[@"substitute"]
+val hupd64_16: buf:huint64_p{length buf = 16} ->
+  v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
+  v8:H64.t -> v9:H64.t -> v10:H64.t -> v11:H64.t -> v12:H64.t -> v13:H64.t -> v14:H64.t -> v15:H64.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                         Seq.Create.create_16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 == s)))
+
+[@"substitute"]
+let hupd64_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
+  aux_hupd64_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15;
   let h1 = ST.get () in
   Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)
 
@@ -218,6 +335,57 @@ let aux_hupd_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v1
   hupd_16 p4 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63
 
 
+
+[@"substitute"]
+val aux_hupd64_64: buf:huint64_p{length buf = 64} ->
+  v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
+  v8:H64.t -> v9:H64.t ->
+  v10:H64.t -> v11:H64.t -> v12:H64.t -> v13:H64.t -> v14:H64.t -> v15:H64.t -> v16:H64.t -> v17:H64.t ->
+  v18:H64.t -> v19:H64.t ->
+  v20:H64.t -> v21:H64.t -> v22:H64.t -> v23:H64.t -> v24:H64.t -> v25:H64.t -> v26:H64.t -> v27:H64.t ->
+  v28:H64.t -> v29:H64.t ->
+  v30:H64.t -> v31:H64.t -> v32:H64.t -> v33:H64.t -> v34:H64.t -> v35:H64.t -> v36:H64.t -> v37:H64.t ->
+  v38:H64.t -> v39:H64.t ->
+  v40:H64.t -> v41:H64.t -> v42:H64.t -> v43:H64.t -> v44:H64.t -> v45:H64.t -> v46:H64.t -> v47:H64.t ->
+  v48:H64.t -> v49:H64.t ->
+  v50:H64.t -> v51:H64.t -> v52:H64.t -> v53:H64.t -> v54:H64.t -> v55:H64.t -> v56:H64.t -> v57:H64.t ->
+  v58:H64.t -> v59:H64.t ->
+  v60:H64.t -> v61:H64.t -> v62:H64.t -> v63:H64.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                           Seq.index s 0 == v0 /\ Seq.index s 1 == v1 /\ Seq.index s 2 == v2 /\ Seq.index s 3 == v3
+                         /\ Seq.index s 4 == v4 /\ Seq.index s 5 == v5 /\ Seq.index s 6 == v6 /\ Seq.index s 7 == v7
+                         /\ Seq.index s 8 == v8 /\ Seq.index s 9 == v9
+                         /\ Seq.index s 10 == v10 /\ Seq.index s 11 == v11 /\ Seq.index s 12 == v12 /\ Seq.index s 13 == v13
+                         /\ Seq.index s 14 == v14 /\ Seq.index s 15 == v15 /\ Seq.index s 16 == v16 /\ Seq.index s 17 == v17
+                         /\ Seq.index s 18 == v18 /\ Seq.index s 19 == v19
+                         /\ Seq.index s 20 == v20 /\ Seq.index s 21 == v21 /\ Seq.index s 22 == v22 /\ Seq.index s 23 == v23
+                         /\ Seq.index s 24 == v24 /\ Seq.index s 25 == v25 /\ Seq.index s 26 == v26 /\ Seq.index s 27 == v27
+                         /\ Seq.index s 28 == v28 /\ Seq.index s 29 == v29
+                         /\ Seq.index s 30 == v30 /\ Seq.index s 31 == v31 /\ Seq.index s 32 == v32 /\ Seq.index s 33 == v33
+                         /\ Seq.index s 34 == v34 /\ Seq.index s 35 == v35 /\ Seq.index s 36 == v36 /\ Seq.index s 37 == v37
+                         /\ Seq.index s 38 == v38 /\ Seq.index s 39 == v39
+                         /\ Seq.index s 40 == v40 /\ Seq.index s 41 == v41 /\ Seq.index s 42 == v42 /\ Seq.index s 43 == v43
+                         /\ Seq.index s 44 == v44 /\ Seq.index s 45 == v45 /\ Seq.index s 46 == v46 /\ Seq.index s 47 == v47
+                         /\ Seq.index s 48 == v48 /\ Seq.index s 49 == v49
+                         /\ Seq.index s 50 == v50 /\ Seq.index s 51 == v51 /\ Seq.index s 52 == v52 /\ Seq.index s 53 == v53
+                         /\ Seq.index s 54 == v54 /\ Seq.index s 55 == v55 /\ Seq.index s 56 == v56 /\ Seq.index s 57 == v57
+                         /\ Seq.index s 58 == v58 /\ Seq.index s 59 == v59
+                         /\ Seq.index s 60 == v60 /\ Seq.index s 61 == v61 /\ Seq.index s 62 == v62 /\ Seq.index s 63 == v63)))
+
+[@"substitute"]
+let aux_hupd64_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63 =
+  let p1 = Buffer.sub buf 0ul 16ul in
+  let p2 = Buffer.sub buf 16ul 16ul in
+  let p3 = Buffer.sub buf 32ul 16ul in
+  let p4 = Buffer.sub buf 48ul 16ul in
+  hupd64_16 p1 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15;
+  hupd64_16 p2 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31;
+  hupd64_16 p3 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47;
+  hupd64_16 p4 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63
+
+
 [@"substitute"]
 val hupd_64: buf:huint32_p{length buf = 64} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
@@ -246,6 +414,33 @@ let hupd_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v1
 
 
 [@"substitute"]
+val hupd64_64: buf:huint64_p{length buf = 64} ->
+  v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
+  v8:H64.t -> v9:H64.t ->
+  v10:H64.t -> v11:H64.t -> v12:H64.t -> v13:H64.t -> v14:H64.t -> v15:H64.t -> v16:H64.t -> v17:H64.t ->
+  v18:H64.t -> v19:H64.t ->
+  v20:H64.t -> v21:H64.t -> v22:H64.t -> v23:H64.t -> v24:H64.t -> v25:H64.t -> v26:H64.t -> v27:H64.t ->
+  v28:H64.t -> v29:H64.t ->
+  v30:H64.t -> v31:H64.t -> v32:H64.t -> v33:H64.t -> v34:H64.t -> v35:H64.t -> v36:H64.t -> v37:H64.t ->
+  v38:H64.t -> v39:H64.t ->
+  v40:H64.t -> v41:H64.t -> v42:H64.t -> v43:H64.t -> v44:H64.t -> v45:H64.t -> v46:H64.t -> v47:H64.t ->
+  v48:H64.t -> v49:H64.t ->
+  v50:H64.t -> v51:H64.t -> v52:H64.t -> v53:H64.t -> v54:H64.t -> v55:H64.t -> v56:H64.t -> v57:H64.t ->
+  v58:H64.t -> v59:H64.t ->
+  v60:H64.t -> v61:H64.t -> v62:H64.t -> v63:H64.t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                         /\ (let s = as_seq h1 buf in
+                         Seq.Create.create_64  v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63 == s)))
+
+[@"substitute"]
+let hupd64_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63 =
+  aux_hupd64_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63;
+  let h1 = ST.get () in
+  Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_64 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 v32 v33 v34 v35 v36 v37 v38 v39 v40 v41 v42 v43 v44 v45 v46 v47 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63)
+
+
+[@"substitute"]
 val pupd_8: buf:huint32_p{length buf = 8} ->
   v0:uint32_t -> v1:uint32_t -> v2:uint32_t -> v3:uint32_t ->
   v4:uint32_t -> v5:uint32_t -> v6:uint32_t -> v7:uint32_t ->
@@ -267,10 +462,36 @@ let pupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
   hupd_8 buf h0 h1 h2 h3 h4 h5 h6 h7
 
 
+[@"substitute"]
+val pupd64_8: buf:huint64_p{length buf = 8} ->
+  v0:uint64_t -> v1:uint64_t -> v2:uint64_t -> v3:uint64_t ->
+  v4:uint64_t -> v5:uint64_t -> v6:uint64_t -> v7:uint64_t ->
+  Stack unit (requires (fun h -> live h buf))
+             (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
+                       /\ (let s = Hacl.Spec.Endianness.reveal_h64s (as_seq h1 buf) in
+                         Seq.index s 0 == v0 /\ Seq.index s 1 == v1 /\ Seq.index s 2 == v2 /\ Seq.index s 3 == v3 /\
+                         Seq.index s 4 == v4 /\ Seq.index s 5 == v5 /\ Seq.index s 6 == v6 /\ Seq.index s 7 == v7)))
+[@"substitute"]
+let pupd64_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
+  let h0 = u64_to_s64 v0 in
+  let h1 = u64_to_s64 v1 in
+  let h2 = u64_to_s64 v2 in
+  let h3 = u64_to_s64 v3 in
+  let h4 = u64_to_s64 v4 in
+  let h5 = u64_to_s64 v5 in
+  let h6 = u64_to_s64 v6 in
+  let h7 = u64_to_s64 v7 in
+  hupd64_8 buf h0 h1 h2 h3 h4 h5 h6 h7
+
+
 (* Definition of the right rotation function for UInt32.t *)
 [@"substitute"]
 let rotate_right (a:huint32_t) (b:uint32_t{v b <= 32}) : Tot huint32_t =
   H32.logor (H32.shift_right a b) (H32.shift_left a (U32.sub 32ul b))
+
+[@"substitute"]
+let rotate_right64 (a:huint64_t) (b:uint32_t{v b <= 64}) : Tot huint64_t =
+  H64.logor (H64.shift_right a b) (H64.shift_left a (U32.sub 64ul b))
 
 
 val load32s_be:
@@ -314,6 +535,50 @@ let rec store32s_be buf_8 buf_32 len_32 =
       let x_8 = Buffer.sub buf_8 FStar.UInt32.((len_32 -^ 1ul) *^ 4ul) 4ul in
       Hacl.Endianness.hstore32_be x_8 x_32;
       store32s_be buf_8 buf_32 FStar.UInt32.(len_32 -^ 1ul)
+    end
+
+
+val load64s_be:
+  buf_64 :Buffer.buffer Hacl.UInt64.t ->
+  buf_8  :Buffer.buffer Hacl.UInt8.t {length buf_8 = 4 * length buf_64} ->
+  len_8 :FStar.UInt32.t{v len_8 = length buf_8} ->
+  Stack unit
+        (requires (fun h0 -> live h0 buf_64 /\ live h0 buf_8))
+        (ensures  (fun h0 _ h1 -> live h0 buf_64 /\ live h0 buf_8 /\ live h1 buf_64 /\ modifies_1 buf_64 h0 h1
+                  /\ (as_seq h1 buf_64 == Spec.Lib.uint64s_from_be (length buf_64) (as_seq h0 buf_8))))
+
+let rec load64s_be buf_64 buf_8 len_8 =
+  admit();
+  if FStar.UInt32.(len_8 =^ 0ul) then ()
+  else
+    begin
+      let x_8 = Buffer.sub buf_8 FStar.UInt32.(len_8 -^ 8ul) 8ul in
+      let i_64 = len_8 /^ 8ul in
+      let x_64 = Hacl.Endianness.hload64_be x_8 in
+      Buffer.upd buf_64 FStar.UInt32.(i_64 -^ 1ul) x_64;
+      load64s_be buf_64 buf_8 FStar.UInt32.(len_8 -^ 8ul)
+    end
+
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100"
+
+val store64s_be:
+  buf_8  :Buffer.buffer Hacl.UInt8.t ->
+  buf_64 :Buffer.buffer Hacl.UInt64.t {length buf_64 * 8 = length buf_8}->
+  len_64 :FStar.UInt32.t{FStar.UInt32.v len_64 = length buf_64 } ->
+  Stack unit
+        (requires (fun h0 -> live h0 buf_8 /\ live h0 buf_64))
+        (ensures  (fun h0 _ h1 -> live h0 buf_64 /\ live h0 buf_8 /\ live h1 buf_8 /\ modifies_1 buf_8 h0 h1
+                  /\ (as_seq h1 buf_8 == Spec.Lib.uint64s_to_be (length buf_64) (as_seq h0 buf_64))))
+
+let rec store64s_be buf_8 buf_64 len_64 =
+  admit();
+  if FStar.UInt32.(len_64 =^ 0ul) then ()
+  else
+    begin
+      let x_64 = Buffer.index buf_64 FStar.UInt32.(len_64 -^ 1ul) in
+      let x_8 = Buffer.sub buf_8 FStar.UInt32.((len_64 -^ 1ul) *^ 8ul) 8ul in
+      Hacl.Endianness.hstore64_be x_8 x_64;
+      store64s_be buf_8 buf_64 FStar.UInt32.(len_64 -^ 1ul)
     end
 
 
