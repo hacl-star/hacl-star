@@ -4,7 +4,7 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
 
-open Hacl.Bignum.Parameters
+(* open Hacl.Bignum.Parameters *)
 open Hacl.Bignum25519
 (* open Hacl.Spec.Bignum.Bigint *)
 (* open Hacl.Bignum.Limb *)
@@ -340,24 +340,24 @@ private inline_for_extraction let crecip_3 out buf =
   (* lemma_crecip_3_modifies h0 h1 h2 h3 h4 h5 h6 h7 buf out *)
 
 
-[@"c_inline"]
-val pow2_252m2:
-  out:felem ->
-  z:felem{disjoint out z} ->
-  Stack unit
-  (requires (fun h -> live h out /\ live h z (* /\ crecip_pre (as_seq h z) *) /\ red_513 (as_seq h z)))
-  (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1 /\ live h0 z
-    /\ red_513 (as_seq h0 z)
-    (* /\ crecip_pre (as_seq h0 z) *)
-    (* /\ as_seq h1 out == crecip_tot (as_seq h0 z) *)
-    /\ Hacl.Spec.Bignum.Bigint.seval (as_seq h1 out) == Spec.Curve25519.(Hacl.Spec.Bignum.Bigint.seval (as_seq h0 z) ** ((prime + 3) / 8))
-    /\ red_513 (as_seq h1 out)
-    (* /\ crecip_pre (as_seq h1 out) *)
-  ))
+(* [@"c_inline"] *)
+(* val pow2_252m2: *)
+(*   out:felem -> *)
+(*   z:felem{disjoint out z} -> *)
+(*   Stack unit *)
+(*   (requires (fun h -> live h out /\ live h z (\* /\ crecip_pre (as_seq h z) *\) /\ red_513 (as_seq h z))) *)
+(*   (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1 /\ live h0 z *)
+(*     /\ red_513 (as_seq h0 z) *)
+(*     (\* /\ crecip_pre (as_seq h0 z) *\) *)
+(*     (\* /\ as_seq h1 out == crecip_tot (as_seq h0 z) *\) *)
+(*     /\ Hacl.Spec.Bignum.Bigint.seval (as_seq h1 out) == Spec.Curve25519.(Hacl.Spec.Bignum.Bigint.seval (as_seq h0 z) ** ((prime + 3) / 8)) *)
+(*     /\ red_513 (as_seq h1 out) *)
+(*     (\* /\ crecip_pre (as_seq h1 out) *\) *)
+(*   )) *)
 [@"c_inline"]
 let pow2_252m2 out z =
   push_frame();
-  let buf = create limb_zero 20ul in
+  let buf = create 0uL 20ul in
   crecip_1 buf z;
   crecip_2 buf;
   crecip_3 out buf;

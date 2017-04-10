@@ -127,4 +127,3 @@ let verify public msg len signature =
   ) else false in
   pop_frame();
   res
-

@@ -89,19 +89,61 @@ bignum-ci:
 	mv ../bignum/*.hints ./bignum_hints
 specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_SPECIFIC)))
 
-extract-c:
+ed25519-c/Hacl_Bignum25519.c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
-	mkdir -p x25519-c
-	$(KREMLIN_HOME)/krml -tmpdir x25519-c $(KREMLIN_ARGS) \
-		-I ../bignum -I ../lib/kremlin -I ../../specs \
-		Curve25519.fst Hacl.Test.ED25519.fst \
+	mkdir -p ed25519-c
+	$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
+		-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
+		-I ../../../specs/experimental \
+		Hacl.Bignum25519.fst \
 		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*' \
+		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
+		-drop Prims -drop FStar -bundle 'Hacl.Bignum25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum25519' \
 		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-                -no-prefix Hacl.Test.ED25519 -o x25519.exe
-	./x25519.exe
+		-skip-linking
+
+ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c:
+	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
+	mkdir -p ed25519-c
+	$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
+		-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
+		-I ../../../specs/experimental \
+		Hacl.Impl.Ed25519.Pow2_252m2.fst \
+		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
+		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
+		-drop Prims -drop FStar -bundle 'Hacl.Impl.Ed25519.Pow2_252m2=Hacl.Impl.Ed25519.Pow2_252m2,Hacl.Bignum.\*' \
+		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" -drop 'Hacl.Bignum25519' \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' \
+		-skip-linking
+
+extract-c: ed25519-c/Hacl_Bignum25519.c ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c
+	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
+	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
+	 	-I ../../../specs/experimental \
+	 	Ed25519.fst \
+	 	-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
+	 	-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
+	 	-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*' \
+		-drop "Hacl.Bignum25519" \
+	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
+	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' -add-include '"Hacl_Impl_Ed25519_Pow2_252m2.h"' \
+	 	-skip-linking
+
+
+ed25519.exe: ed25519-c/Hacl_Bignum25519.c ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c
+	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
+	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
+	 	-I ../../../specs/experimental \
+	 	$^ Hacl_Impl_Sha512.c Ed25519.fst Hacl.Test.Ed25519.fst -no-prefix 'Hacl.Test.Ed25519' \
+	 	-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
+	 	-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
+	 	-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*' \
+		-drop "Hacl.Bignum25519" -drop "Hacl.Impl.Ed25519.Pow2_252m2" \
+	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
+	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' -add-include '"Hacl_Impl_Ed25519_Pow2_252m2.h"' \
+	 	-o ed25519.exe -ldopt '-lsodium'
+	./ed25519.exe
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ x25519-c *.graph
+	rm -rf *.exe *.exe.* *.out *~ ed25519-c *.graph

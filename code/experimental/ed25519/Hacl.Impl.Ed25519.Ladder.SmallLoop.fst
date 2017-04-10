@@ -75,8 +75,6 @@ private inline_for_extraction let cmult_small_loop_step_2 nq nqpq nq2 nqpq2 byt 
   ()
 
 
-open Hacl.Spec.EC.Ladder
-
 private inline_for_extraction val cmult_small_loop_step:
   nq:point ->
   nqpq:point ->

@@ -11,7 +11,8 @@ val red_5413: Hacl.Bignum.Parameters.seqelem -> GTot Type0
 (* abstract let red_53 s = Hacl.Spec.EC.AddAndDouble.red_53 s *)
 (* abstract let red_5413 s = Hacl.Spec.EC.AddAndDouble.red_5413 s *)
 
-let felem = Hacl.Bignum.Parameters.felem
+let limb  = Hacl.UInt64.t
+let felem = b:FStar.Buffer.buffer limb{Buffer.length b = 5}
 
 val fsum:
   a:felem ->
@@ -77,3 +78,8 @@ val inverse:
 val reduce:
   out:felem ->
   St unit
+
+(* val pow2_252m2: *)
+(*   out:felem -> *)
+(*   a:felem -> *)
+(*   St unit *)

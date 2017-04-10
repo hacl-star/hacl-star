@@ -4,7 +4,6 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
 
-open Hacl.Bignum.Parameters
 open Hacl.Bignum25519
 
 val pow2_252m2:

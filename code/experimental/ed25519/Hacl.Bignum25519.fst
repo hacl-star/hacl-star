@@ -7,6 +7,9 @@ let red_513 s = Hacl.Spec.EC.AddAndDouble.red_513 s
 let red_53 s = Hacl.Spec.EC.AddAndDouble.red_53 s
 let red_5413 s = Hacl.Spec.EC.AddAndDouble.red_5413 s
 
+(* let limb  = Hacl.Bignum.Parameters.limb *)
+(* let felme = Hacl.Bignum.Parameters.felem *)
+  
 let fsum a b = Hacl.Bignum.fsum a b
 
 let fdifference a b = Hacl.Bignum.fdifference a b
@@ -45,7 +48,7 @@ let fsquare out a =
 let fsquare_times out a n =
   Hacl.Bignum.Fsquare.fsquare_times out a n
 
-let fsquare_times_input output count =
+let fsquare_times_inplace output count =
   Hacl.Bignum.Fsquare.fsquare_times_inplace output count
 
 let inverse out a =
@@ -53,3 +56,6 @@ let inverse out a =
 
 let reduce out =
   Hacl.EC.Format.reduce out
+
+(* let pow2_252m2 out a = *)
+(*   Hacl.Impl.Ed25519.Pow2_252m2.pow2_252m2' out a *)

@@ -170,13 +170,13 @@ inline_for_extraction let copy output input =
   blit (getx input) 0ul (getx output) 0ul clen;
   blit (gety input) 0ul (gety output) 0ul clen;
   blit (getz input) 0ul (getz output) 0ul clen;
-  blit (gett input) 0ul (gett output) 0ul clen;
-  let h' = ST.get() in
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' (getx output));
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' (getz output));
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gety input));
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gett input));
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' (getx output));
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' (getz output));
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gety input));
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gett input))
+  blit (gett input) 0ul (gett output) 0ul clen(* ; *)
+  (* let h' = ST.get() in *)
+  (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' (getx output)); *)
+  (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' (getz output)); *)
+  (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gety input)); *)
+  (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gett input)); *)
+  (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' (getx output)); *)
+  (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' (getz output)); *)
+  (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gety input)); *)
+  (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gett input)) *)
