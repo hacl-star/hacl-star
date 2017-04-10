@@ -188,6 +188,10 @@ let point_mul result n q =
   let h2 = ST.get() in
   lemma_reveal_modifies_0 h1 h2;
   cmult_ result point_buf n q;
+  (* Hacl.Bignum25519.reduce (Hacl.Impl.Ed25519.ExtPoint.getx result); *)
+  (* Hacl.Bignum25519.reduce (Hacl.Impl.Ed25519.ExtPoint.gety result); *)
+  (* Hacl.Bignum25519.reduce (Hacl.Impl.Ed25519.ExtPoint.getz result); *)
+  (* Hacl.Bignum25519.reduce (Hacl.Impl.Ed25519.ExtPoint.gett result); *)
   pop_frame();
   let h4 = ST.get() in
   lemma_intro_modifies_1 result h0 h4
