@@ -850,3 +850,76 @@ let mul_modq out x y =
   pop_frame();
   barrett_reduction out z';
   pop_frame()
+
+
+(* TODO: proof *)
+
+val add_modq:
+  z:qelemB ->
+  x:qelemB ->
+  y:qelemB ->
+  Stack unit
+    (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y /\
+      (let x = as_seq h x in let y = as_seq h y in
+      eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
+      eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)))
+    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ 
+      (let x = as_seq h0 x in let y = as_seq h0 y in
+       eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
+       eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed) /\
+       eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) + eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed))
+let add_modq out x y =
+  let h0 = ST.get() in
+  push_frame();
+  let tmp = create (uint64_to_sint64 0uL) 5ul in
+  let x0 = x.(0ul) in
+  let x1 = x.(1ul) in
+  let x2 = x.(2ul) in
+  let x3 = x.(3ul) in
+  let x4 = x.(4ul) in
+  let y0 = y.(0ul) in
+  let y1 = y.(1ul) in
+  let y2 = y.(2ul) in
+  let y3 = y.(3ul) in
+  let y4 = y.(4ul) in
+  let z0 = x0 +^ y0 in
+  let z1 = x1 +^ y1 in
+  let z2 = x2 +^ y2 in
+  let z3 = x3 +^ y3 in
+  let z4 = x4 +^ y4 in
+
+  let x = z0  in let y = z1 in
+  let carry = Hacl.UInt64.(x >>^ 56ul) in
+  let t     = x &^ 0xffffffffffffffuL in
+  assert_norm(pow2 56 = 0x100000000000000);
+  UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
+  let x0 = t in let z1' = Hacl.UInt64.add y carry in
+  let x = z1' in let y = z2 in
+  let carry = Hacl.UInt64.(x >>^ 56ul) in
+  let t     = x &^ 0xffffffffffffffuL in
+  UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
+  let x1 = t in let z2' = Hacl.UInt64.add y carry in
+  let x = z2' in let y = z3 in
+  let carry = Hacl.UInt64.(x >>^ 56ul) in
+  let t     = x &^ 0xffffffffffffffuL in
+  UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
+  let x2 = t in let z3' = Hacl.UInt64.add y carry in
+  let x = z3' in let y = z4 in
+  let carry = Hacl.UInt64.(x >>^ 56ul) in
+  let t     = x &^ 0xffffffffffffffuL in
+  UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
+  let x3 = t in let z4' = Hacl.UInt64.add y carry in
+  let x = z4' in let y = 0uL in
+  let carry = Hacl.UInt64.(x >>^ 56ul) in
+  let t     = x &^ 0xffffffffffffffuL in
+  UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
+  let x4 = t in let z5' = Hacl.UInt64.add y carry in
+  Hacl.Lib.Create64.make_h64_5 tmp x0 x1 x2 x3 x4;
+  subm_conditional out tmp;
+  pop_frame()
+

@@ -1,8 +1,8 @@
-module Hacl.Ed25519.PointDouble
+module Hacl.Impl.Ed25519.PointDouble
 
 open FStar.Buffer
 open Hacl.Bignum25519
-open Hacl.Ed25519.ExtPoint
+open Hacl.Impl.Ed25519.ExtPoint
 
 #set-options "--lax"
 
