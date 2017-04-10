@@ -101,7 +101,7 @@ ed25519-c/Hacl_Bignum25519.c:
 		-drop Prims -drop FStar -bundle 'Hacl.Bignum25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum25519' \
 		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-		-skip-linking
+		-skip-compilation
 
 ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
@@ -117,7 +117,7 @@ ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c:
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' \
 		-skip-linking
 
-extract-c: ed25519-c/Hacl_Bignum25519.c ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c
+extract-c:
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
 	 	-I ../../../specs/experimental \
@@ -128,22 +128,36 @@ extract-c: ed25519-c/Hacl_Bignum25519.c ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c
 		-drop "Hacl.Bignum25519" \
 	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' -add-include '"Hacl_Impl_Ed25519_Pow2_252m2.h"' \
-	 	-skip-linking
+	 	-skip-compilation
 
 
-ed25519.exe: ed25519-c/Hacl_Bignum25519.c ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c
+ed25519-c/Ed25519.c:
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
 	 	-I ../../../specs/experimental \
-	 	$^ Hacl_Impl_Sha512.c Ed25519.fst Hacl.Test.Ed25519.fst -no-prefix 'Hacl.Test.Ed25519' \
+	 	Ed25519.fst \
 	 	-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
 	 	-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
 	 	-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*' \
 		-drop "Hacl.Bignum25519" -drop "Hacl.Impl.Ed25519.Pow2_252m2" \
 	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
-	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' -add-include '"Hacl_Impl_Ed25519_Pow2_252m2.h"' \
+	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' -add-include '"Hacl_Impl_Ed25519_Pow2_252m2.h"' -skip-compilation
+
+
+ed25519.exe: Hacl_Impl_Sha512.c ed25519-c/Hacl_Bignum25519.c ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c ed25519-c/Ed25519.c
+	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
+	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
+	 	-I ../../../specs/experimental \
+	 	$^  Hacl.Test.Ed25519.fst -no-prefix 'Hacl.Test.Ed25519' \
+	 	-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
+	 	-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
+	 	-drop Prims -drop FStar \
+		-drop "Hacl.Bignum25519" -drop "Hacl.Impl.Ed25519.Pow2_252m2" -drop "Ed25519" \
+	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
+	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' -add-include '"Hacl_Impl_Ed25519_Pow2_252m2.h"' -add-include '"Ed25519.h"' \
 	 	-o ed25519.exe -ldopt '-lsodium'
 	./ed25519.exe
+
 
 clean:
 	rm -rf *.exe *.exe.* *.out *~ ed25519-c *.graph

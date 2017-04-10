@@ -76,6 +76,10 @@ ed25519.exe: Spec.Sha512.fst  Spec.Ed25519.fst
 	$(OCAMLOPT) -I ed25519-spec $(OCAML_INCLUDES) $(addprefix ed25519-spec/, $(EXTRACTED)) ed25519-spec/Spec_Loops.ml ed25519-spec/Spec_Lib.ml ed25519-spec/Spec_SHA2_Specialization.ml ed25519-spec/Spec_SHA2_Word.ml ed25519-spec/Spec_SHA2_Core.ml ed25519-spec/Spec_Sha512.ml ed25519-spec/Spec_Curve25519.ml ed25519-spec/Spec_Ed25519.ml -o ed25519.exe
 	./ed25519.exe
 
+test-ed:
+	$(OCAMLOPT) -I ed25519-spec $(OCAML_INCLUDES) $(addprefix ed25519-spec/, $(EXTRACTED)) ed25519-spec/Spec_Loops.ml ed25519-spec/Spec_Lib.ml ed25519-spec/Spec_SHA2_Specialization.ml ed25519-spec/Spec_SHA2_Word.ml ed25519-spec/Spec_SHA2_Core.ml ed25519-spec/Spec_Sha512.ml ed25519-spec/Spec_Curve25519.ml ed25519-spec/Spec_Ed25519.ml -o ed25519.exe
+	./ed25519.exe
+
 clean:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml clean
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 ed25519-spec chacha-spec-vec2 chacha-spec-vec sha2-spec

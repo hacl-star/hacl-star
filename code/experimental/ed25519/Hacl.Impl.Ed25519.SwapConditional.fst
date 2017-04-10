@@ -16,19 +16,19 @@ module U32 = FStar.UInt32
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
-val point : Type0
-let point =
-  let _ = () in
-  b:buffer limb{length b = 10}
+(* val point : Type0 *)
+(* let point = *)
+(*   let _ = () in *)
+(*   b:buffer limb{length b = 10} *)
 
 
-(** Coordinate getters *)
-unfold inline_for_extraction val getx: point -> Tot felem
-unfold inline_for_extraction val gety: point -> Tot felem
-unfold inline_for_extraction val getz: point -> Tot felem
-unfold inline_for_extraction let getx p = Buffer.sub p 0ul 5ul
-unfold inline_for_extraction let gety p = Buffer.sub p 0ul 5ul
-unfold inline_for_extraction let getz p = Buffer.sub p 5ul 5ul
+(* (\** Coordinate getters *\) *)
+(* (\* unfold inline_for_extraction val getx: point -> Tot felem *\) *)
+(* (\* unfold inline_for_extraction val gety: point -> Tot felem *\) *)
+(* (\* unfold inline_for_extraction val getz: point -> Tot felem *\) *)
+(* (\* unfold inline_for_extraction let getx p = Buffer.sub p 0ul 5ul *\) *)
+(* (\* unfold inline_for_extraction let gety p = Buffer.sub p 0ul 5ul *\) *)
+(* (\* unfold inline_for_extraction let getz p = Buffer.sub p 5ul 5ul *\) *)
 
 unfold val live_coords: mem -> felem -> felem -> felem -> felem -> GTot Type0
 let live_coords h x y z t =
@@ -180,3 +180,4 @@ inline_for_extraction let copy output input =
   (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' (getz output)); *)
   (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gety input)); *)
   (* Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h (gett input)) *)
+  

@@ -86,6 +86,18 @@ let mul_modp_sqrt_m1 x =
   Hacl.Bignum25519.reduce x;
   pop_frame()
 
+val gte_q:
+  x:elemB ->
+  Stack bool
+    (requires (fun h -> live h x))
+    (ensures (fun h0 _ h1 -> live h0 x /\ h0 == h1))
+let gte_q x =
+  let x0 = x.(0ul) in
+  let x1 = x.(1ul) in
+  let x2 = x.(2ul) in
+  let x3 = x.(3ul) in
+  let x4 = x.(4ul) in
+  FStar.UInt64.(x0 >=^ 0x7ffffffffffeduL && x1 =^ 0x7ffffffffffffuL && x2 =^ 0x7ffffffffffffuL && x3 =^ 0x7ffffffffffffuL && x4 =^ 0x7ffffffffffffuL)
 
 val recover_x:
   x:elemB ->
@@ -101,10 +113,9 @@ let recover_x x y sign =
   let x3  = Buffer.sub tmp 5ul 5ul in
   let t0  = Buffer.sub tmp 10ul 5ul in
   let t1  = Buffer.sub tmp 15ul 5ul in
-  Hacl.Impl.BignumQ.Mul.subm_conditional x y;
-  let x4 = x.(4ul) in
+  let b = gte_q y in
   let res =
-  if x4 >=^ 0x10000000000uL then false
+  if b then false
   else (
     recover_x_step_1 x2 y;
     Hacl.Impl.Ed25519.Pow2_252m2.pow2_252m2 x3 x2;
