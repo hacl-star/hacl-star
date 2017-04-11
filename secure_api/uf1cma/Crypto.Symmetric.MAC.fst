@@ -478,11 +478,11 @@ let finish #i s a t =
 val lemma_poly_finish_to_mac:
   i:id -> ht:mem -> t:tagB -> a:elem i -> hs:mem -> s:tagB -> log:text -> r:elem i ->
   Lemma (requires (Buffer.live ht t /\ Buffer.live hs s
-    /\ a == MAC.poly log r
+    /\ a == poly log r
     /\ (match alg i with
     | POLY1305 -> Seq.equal (Buffer.as_seq ht t) (Spec.Poly1305.finish a (Buffer.as_seq hs s))
     | GHASH    -> Seq.equal (Buffer.as_seq ht t) (GS.finish a (Buffer.as_seq hs s) ))
     ))
        (ensures (Buffer.live ht t /\ Buffer.live hs s
-         /\ Buffer.as_seq ht t == MAC.mac log r (Buffer.as_seq hs s)))
+         /\ Buffer.as_seq ht t == mac log r (Buffer.as_seq hs s)))
 let lemma_poly_finish_to_mac i ht t a hs s log r = ()
