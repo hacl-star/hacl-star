@@ -223,6 +223,7 @@ let main () =
   let sig3' = create 0uy 64ul in
   (* let sig4' = create 0uy 64ul in *)
 
+  let ret = C.exit_success in
   let res = Ed25519.verify pk1 msg1 0ul sig1 in
   let ret =
     if res then (

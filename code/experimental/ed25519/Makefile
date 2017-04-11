@@ -115,7 +115,7 @@ ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c:
 		-drop Prims -drop FStar -bundle 'Hacl.Impl.Ed25519.Pow2_252m2=Hacl.Impl.Ed25519.Pow2_252m2,Hacl.Bignum.\*' \
 		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" -drop 'Hacl.Bignum25519' \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' \
-		-skip-linking
+		-skip-compilation
 
 extract-c:
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
@@ -143,6 +143,7 @@ ed25519-c/Ed25519.c:
 	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Hacl_Bignum25519.h"' -add-include '"Hacl_Impl_Ed25519_Pow2_252m2.h"' -skip-compilation
 
+extract-c:ed25519-c/Hacl_Bignum25519.c ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c ed25519-c/Ed25519.c
 
 ed25519.exe: Hacl_Impl_Sha512.c ed25519-c/Hacl_Bignum25519.c ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c ed25519-c/Ed25519.c
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
