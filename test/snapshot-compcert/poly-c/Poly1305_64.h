@@ -2,8 +2,6 @@
 #ifndef __Poly1305_64_H
 #define __Poly1305_64_H
 
-
-
 #include "kremlib.h"
 #include "testlib.h"
 #include "uint128.h"

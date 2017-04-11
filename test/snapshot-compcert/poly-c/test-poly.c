@@ -9,13 +9,14 @@
 #include "sys/stat.h"
 #include "fcntl.h"
 
+/*
 void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
   POLY1305 state;
   Poly1305_Init(&state,key);
   Poly1305_Update(&state,plain,len);
   Poly1305_Final(&state,mac);
 }
-
+*/
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
@@ -139,10 +140,10 @@ int32_t test_poly()
 
 int32_t perf_poly() {
   uint32_t len = PLAINLEN * sizeof(char);
-  uint8_t* plain = malloc(len);
+  uint8_t plain[128*1024];
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plain, len);
-  uint8_t* macs = malloc(ROUNDS * MACSIZE * sizeof(char));
+  uint8_t macs[ROUNDS * MACSIZE];
   if (res != len) {
     printf("Error on reading, got %llu bytes\n", res);
     return 1;
@@ -163,6 +164,7 @@ int32_t perf_poly() {
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
 
+  /*
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
@@ -175,7 +177,7 @@ int32_t perf_poly() {
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
-
+  */
   /*
   t1 = clock();
   a = TestLib_cpucycles_begin();

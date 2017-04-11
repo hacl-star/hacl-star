@@ -12,10 +12,11 @@
 #include <WinCrypt.h>
 #endif
 
-
+/*
 void ossl_curve25519(uint8_t* result, uint8_t* scalar, uint8_t* input){
   X25519(result, scalar, input);
 }
+*/
 
 unsigned long long median(unsigned long long* a, int rounds) {
   int i, j, temp;
@@ -270,12 +271,12 @@ int32_t test_curve()
   TestLib_compare_and_print("HACL Curve25519", expected1, result, keysize);
   Curve25519_crypto_scalarmult(result, scalar2, input2);
   TestLib_compare_and_print("HACL Curve25519", expected2, result, keysize);
-
+  /*
   int res = crypto_scalarmult_curve25519(result, scalar1, input1);
   TestLib_compare_and_print("Sodium Curve25519", expected1, result, keysize);
   res = crypto_scalarmult_curve25519(result, scalar2, input2);
   TestLib_compare_and_print("Sodium Curve25519", expected2, result, keysize);
-  
+  */
   return exit_success;
 }
 
@@ -381,10 +382,11 @@ int32_t perf_curve() {
 
 int32_t main()
 {
-  int32_t res = test_curve();
-  if (res == exit_success) {
-    res = perf_curve();
-  }
+  int32_t res;
+  res = test_curve();
+  //if (res == exit_success) {
+  res = perf_curve();
+    //}
   return res;
 }
   

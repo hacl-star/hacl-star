@@ -3,13 +3,19 @@
 static void
 Hacl_Impl_Chacha20_uint32s_from_le_bytes(uint32_t *output, uint8_t *input, uint32_t len)
 {
-  memcpy((uint8_t*) output, input, len * 4);
+  for (int i = 0; i < len; i++) {
+    output[i] = load32_le(input + (4*i));
+  }
+  //memcpy((uint8_t*) output, input, len * 4);
 }
 
 static void
 Hacl_Impl_Chacha20_uint32s_to_le_bytes(uint8_t *output, uint32_t *input, uint32_t len)
 {
-  memcpy((uint8_t*) output, (uint8_t*) input, len * 4);
+  for (int i = 0; i < len; i++) {
+   store32_le(output + (4*i),input[i]);
+  }
+  //memcpy((uint8_t*) output, (uint8_t*) input, len * 4);
 }
 
 static void Hacl_Impl_Chacha20_setup(uint32_t *st, uint8_t *k, uint8_t *n, uint32_t c)
@@ -101,7 +107,9 @@ static void Hacl_Impl_Chacha20_sum_states(uint32_t *st, uint32_t *st_)
 
 static void Hacl_Impl_Chacha20_copy_state(uint32_t *st, uint32_t *st_)
 {
-  memcpy(st, st_, (uint32_t )16 * sizeof st_[0]);
+  for (int i = 0; i < 16; i++) 
+    st[i] = st_[i];
+  //  memcpy(st, st_, (uint32_t )16 * sizeof st_[0]);
 }
 
 inline static void
@@ -117,14 +125,14 @@ Hacl_Impl_Chacha20_chacha20_core(void *log, uint32_t *k, uint32_t *st, uint32_t 
 inline static void
 Hacl_Impl_Chacha20_chacha20_block(void *log, uint8_t *stream_block, uint32_t *st, uint32_t ctr)
 {
-  KRML_CHECK_SIZE((uint32_t )0, (uint32_t )16);
+  //  KRML_CHECK_SIZE((uint32_t )0, (uint32_t )16);
   uint32_t st_[16] = { 0 };
   Hacl_Impl_Chacha20_chacha20_core((void *)(uint8_t )0, st_, st, ctr);
   Hacl_Impl_Chacha20_uint32s_to_le_bytes(stream_block, st_, (uint32_t )16);
   return;
 }
 
-static void Hacl_Impl_Chacha20_init(uint32_t *st, uint8_t *k, uint8_t *n)
+inline static void Hacl_Impl_Chacha20_init(uint32_t *st, uint8_t *k, uint8_t *n)
 {
   Hacl_Impl_Chacha20_setup(st, k, n, (uint32_t )0);
   return;
@@ -140,7 +148,7 @@ Hacl_Impl_Chacha20_update_last(
   uint32_t ctr
 )
 {
-  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )64);
+  //  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )64);
   uint8_t block[64] = { 0 };
   Hacl_Impl_Chacha20_chacha20_block((void *)(uint8_t )0, block, st, ctr);
   uint8_t *mask = block;
@@ -162,7 +170,7 @@ Hacl_Impl_Chacha20_update(
   uint32_t ctr
 )
 {
-  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )64);
+  //  KRML_CHECK_SIZE((uint8_t )0, (uint32_t )64);
   // uint8_t block[64] = { 0 };
   uint32_t block[16] = { 0 };
   Hacl_Impl_Chacha20_chacha20_core((void *)(uint8_t )0, (uint32_t*) block, st, ctr);
@@ -204,26 +212,20 @@ Hacl_Impl_Chacha20_chacha20_counter_mode(
   uint32_t ctr
 )
 {
-  if (len <= (uint32_t )64)
+  uint32_t blocks = len >> 6;
+  uint8_t *b = plain;
+  uint8_t *o = output;
+  uint32_t c = ctr;
+
+  for (int i = 0; i < blocks; i++)
   {
-    Hacl_Impl_Chacha20_chacha20_counter_mode_(output, plain, len, (void *)(uint8_t )0, st, ctr);
-    return;
+    Hacl_Impl_Chacha20_update(o, b, (void *)(uint8_t )0, st, c);
+    b = b + 64;
+    o = o + 64;
+    c = c + 1;
   }
-  else
-  {
-    uint8_t *b = plain;
-    uint8_t *b_ = plain + (uint32_t )64;
-    uint8_t *o = output;
-    uint8_t *o_ = output + (uint32_t )64;
-    Hacl_Impl_Chacha20_update(o, b, (void *)(uint8_t )0, st, ctr);
-    Hacl_Impl_Chacha20_chacha20_counter_mode(o_,
-      b_,
-      len - (uint32_t )64,
-      (void *)(uint8_t )0,
-      st,
-      ctr + (uint32_t )1);
-    return;
-  }
+  len = len & 0x3f;
+  Hacl_Impl_Chacha20_chacha20_counter_mode_(o, b, len, (void *)(uint8_t )0, st, c);
 }
 
 static void
@@ -236,7 +238,7 @@ Hacl_Impl_Chacha20_chacha20(
   uint32_t ctr
 )
 {
-  KRML_CHECK_SIZE((uint32_t )0, (uint32_t )16);
+  //  KRML_CHECK_SIZE((uint32_t )0, (uint32_t )16);
   uint32_t buf[16] = { 0 };
   uint32_t *st = buf;
   Hacl_Impl_Chacha20_init(st, k, n);
@@ -245,7 +247,7 @@ Hacl_Impl_Chacha20_chacha20(
 
 void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n, uint32_t ctr)
 {
-  KRML_CHECK_SIZE((uint32_t )0, (uint32_t )16);
+  //  KRML_CHECK_SIZE((uint32_t )0, (uint32_t )16);
   uint32_t buf[16] = { 0 };
   uint32_t *st = buf;
   Hacl_Impl_Chacha20_init(st, k, n);
