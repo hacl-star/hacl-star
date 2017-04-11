@@ -37,7 +37,7 @@ let sign signature secret msg len =
   let r = create 0uL 5ul in
   Hacl.Impl.SHA512.ModQ.sha512_modq r prefix_at_message (len+^32ul);
   let rb = create 0uy 32ul in
-  Hacl.Impl.Store51.store_51 rb r;
+  Hacl.Impl.Store56.store_56 rb r;
   let r' = create 0uL 20ul in
   Hacl.Impl.Ed25519.Ladder.point_mul r' rb g;
   let rs = create 0uL 20ul in
