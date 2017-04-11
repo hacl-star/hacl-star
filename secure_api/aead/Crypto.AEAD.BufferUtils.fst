@@ -8,6 +8,13 @@ module HS = FStar.HyperStack
 
 type buffer = Buffer.buffer UInt8.t
 
+let weaken_modifies (s0:Set.set rid) (s1:Set.set rid)
+                    (h0:HS.mem) (h1:HS.mem)
+   : Lemma (requires (HS.modifies s0 h0 h1 /\
+                      Set.subset s0 s1))
+           (ensures (HS.modifies s1 h0 h1))
+   = ()
+
 abstract let prf_mac_modifies (prf_region:rid) (mac_region:rid) h0 h1 = 
   h0 == h1  \/
   (HS.modifies_transitively (as_set [prf_region]) h0 h1       /\ //only touched the prf's region (and its children)
@@ -50,7 +57,7 @@ let mac_modifies (#a:Type)
 		 (acc:FStar.Buffer.buffer a)
 		 (cipher:buffer)
 		 (h0 h1 :mem) : GTot Type0 =
-  HS.modifies (Set.as_set [h0.tip; mac_region; frameOf cipher]) h0 h1 /\
+  HS.modifies (Set.as_set [h0.tip; frameOf cipher; mac_region]) h0 h1 /\
   Buffer.modifies_buf_1 (frameOf cipher) cipher h0 h1
 
 let enxor_modifies (log_region:rid) (cipher:buffer) (h0 h1:mem) : GTot Type0 = 

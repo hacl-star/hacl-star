@@ -185,7 +185,7 @@ val encrypt_write_effect :
 	      let h_final = HS.pop h_ideal in
 	      encrypt_ensures st n aad plain cipher_tag h_init h_final /\
 	      encrypt_modifies st cipher_tag h_init h_final)))
-#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 let encrypt_write_effect i st n #aadlen aad #plainlen plain cipher_tag k_0 ak acc
 			 h_init h_push h_prf h_enx h_acc h_mac h_ideal =
   let open HS in			 
@@ -265,6 +265,7 @@ val encrypt:
 	      encrypt_modifies st cipher_tag h0 h1 /\
  	      inv st h1))
 
+#reset-options "--z3rlimit 2000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let encrypt i st n aadlen aad plainlen plain cipher_tagged =
   recall_aead_liveness st;
   let h_init = get() in

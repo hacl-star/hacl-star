@@ -108,11 +108,11 @@ private val frame_unused_aead_id_for_prf_mac_wrapper
 	     nonce <> nonce'))
   (ensures  (let table_0 = HS.sel h0 (itable i aead_st.prf) in
              unused_aead_iv_for_prf table_0 nonce' h1))
-#reset-options "--z3rlimit 120 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 300 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let frame_unused_aead_id_for_prf_mac_wrapper #i #rw #aadlen #plainlen aead_st nonce aad plain ct mac_st h0 h1 nonce' =
    let dom_0 = {iv=nonce'; ctr=PRF.ctr_0 i} in
    let prf_table = HS.sel h0 (itable i aead_st.prf) in
-   assert (none_above (PRF.incr i dom_0) prf_table)
+   assert (none_above (PRF.incr i dom_0) prf_table);
    (match PRF.find_mac prf_table dom_0 with
     | None           -> ()
     | Some mac_range -> 

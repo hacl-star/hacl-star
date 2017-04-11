@@ -3,9 +3,14 @@ KREMLIN_HOME?=../../../kremlin
 CURVE_HOME=../../code/curve25519/x25519-c
 CHACHA_HOME=../../code/salsa-family/chacha-c
 POLY_HOME=../../code/poly1305/poly-c
+ifeq ($(shell uname),Linux)
+  PIC=-fPIC
+else
+  PIC=
+endif
 CFLAGS=-I$(OPENSSL_HOME)/include -L$(OPENSSL_HOME) -I$(KREMLIN_HOME)/kremlib \
   -I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(CHACHA_HOME)/.. -I$(POLY_HOME) -I$(OPENSSL_HOME) \
-  -shared -Wall -Wno-unused-variable -Wno-parentheses -O3 -flto
+  -shared -Wall -Wno-unused-variable -Wno-parentheses -O3 -flto $(PIC)
 LDFLAGS=-lcrypto
 
 # Some notes. OpenSSL does not expose its implementation of Poly1305 standalone,
