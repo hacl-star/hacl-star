@@ -41,7 +41,7 @@ let lemma_shift_reduce_spec s =
 let rec mul_shift_reduce_pre_ (output:seqelem_wide) (input:seqelem) (input2:seqelem) (ctr:nat{ctr <= len}) : GTot Type0 (decreases ctr) =
   (if ctr > 0 then (
     sum_scalar_multiplication_pre_ output input (Seq.index input2 (len-ctr)) len
-    /\ (let output' = sum_scalar_multiplication_spec output input (Seq.index input2 (len-ctr)) len in
+    /\ (let output' = sum_scalar_multiplication_spec output input (Seq.index input2 (len-ctr)) in
        (ctr > 1 ==> shift_reduce_pre input) /\
          (let input'  = if ctr > 1 then shift_reduce_spec input else input in
           mul_shift_reduce_pre_ output' input' input2 (ctr-1))))
@@ -157,7 +157,7 @@ let rec mul_shift_reduce_spec_ output input_init input input2 ctr =
     let i = ctr - 1 in
     let j = len - i - 1 in
     let input2j = Seq.index input2 j in
-    let output' = sum_scalar_multiplication_spec output input input2j len in
+    let output' = sum_scalar_multiplication_spec output input input2j in
     lemma_sum_scalar_multiplication_ output input input2j len;
     cut (seval_wide output' = seval_wide output + (seval input * v input2j));
     let input'  = if ctr > 1 then shift_reduce_spec input else input in
@@ -194,9 +194,9 @@ let rec mul_shift_reduce_spec input input2 =
 let fmul_pre (input:seqelem) (input2:seqelem) : GTot Type0 =
   mul_shift_reduce_pre (Seq.create len wide_zero) input input input2 len
   /\ carry_wide_pre (mul_shift_reduce_spec input input2) 0
-  /\ carry_top_wide_pre (carry_wide_spec (mul_shift_reduce_spec input input2) 0)
-  /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (mul_shift_reduce_spec input input2) 0))
-  /\ carry_0_to_1_pre (copy_from_wide_spec (carry_top_wide_spec (carry_wide_spec (mul_shift_reduce_spec input input2) 0)))
+  /\ carry_top_wide_pre (carry_wide_spec (mul_shift_reduce_spec input input2))
+  /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (mul_shift_reduce_spec input input2)))
+  /\ carry_0_to_1_pre (copy_from_wide_spec (carry_top_wide_spec (carry_wide_spec (mul_shift_reduce_spec input input2))))
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
@@ -205,7 +205,7 @@ val fmul_spec:
   Tot (output:seqelem{seval output % prime = (seval input * seval input2) % prime})
 let fmul_spec input input2 =
   let output1 = mul_shift_reduce_spec input input2 in
-  let output2 = carry_wide_spec output1 0 in
+  let output2 = carry_wide_spec output1 in
   lemma_carry_top_wide_spec output2;
   let output3 = carry_top_wide_spec output2 in
   lemma_copy_from_wide output3;

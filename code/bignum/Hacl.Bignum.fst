@@ -45,7 +45,7 @@ val fsum:
 [@"c_inline"]
 let fsum a b =
   let h0 = ST.get() in
-  fsum_ a b clen;
+  fsum_ a b;
   let h1 = ST.get() in
   Hacl.Spec.Bignum.Fsum.lemma_fsum_eval (as_seq h0 a) (as_seq h0 b)
 
@@ -83,7 +83,7 @@ let fdifference a b =
   add_zero tmp;
   let h' = ST.get() in
   cut (eval h' tmp % prime = eval hinit b % prime);
-  fdifference_ a tmp clen;
+  fdifference_ a tmp;
   let h1 = ST.get() in
   Hacl.Spec.Bignum.Fdifference.lemma_fdifference_eval (as_seq hinit a) (as_seq h' tmp);
   lemma_diff (eval h' tmp) (eval hinit a) prime;
@@ -103,13 +103,13 @@ val fscalar:
   Stack unit
     (requires (fun h -> live h b /\ live h a
       /\ carry_wide_pre (fscalar_spec (as_seq h b) s) 0
-      /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec (as_seq h b) s) 0)
-      /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec (as_seq h b) s) 0)) ))
+      /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec (as_seq h b) s))
+      /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec (as_seq h b) s))) ))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ modifies_1 a h0 h1 /\ live h1 a
       /\ eval h1 a % prime = (eval h0 b * v s) % prime
       /\ carry_wide_pre (fscalar_spec (as_seq h0 b) s) 0
-      /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec (as_seq h0 b) s) 0)
-      /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec (as_seq h0 b) s) 0))
+      /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec (as_seq h0 b) s))
+      /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec (as_seq h0 b) s)))
       /\ as_seq h1 a == fscalar_tot (as_seq h0 b) s
     ))
 [@"c_inline"]
@@ -119,13 +119,13 @@ let fscalar output b s =
   let tmp = create wide_zero clen in
   fscalar tmp b s;
   lemma_fscalar_eval (as_seq hinit b) s;
-  carry_wide_ tmp 0ul;
+  carry_wide_ tmp ;
   let h' = ST.get() in
   cut (eval_wide h' tmp = eval hinit b * v s);
   carry_top_wide tmp;
   let h'' = ST.get() in
   lemma_carry_top_wide_spec (as_seq h' tmp);
-  copy_from_wide_ output tmp clen;
+  copy_from_wide_ output tmp;
   lemma_copy_from_wide (as_seq h'' tmp);
   pop_frame()
 

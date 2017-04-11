@@ -609,9 +609,9 @@ let fsquare_pre s =
   let _ = () in
   fsquare_pre_ s
   /\ carry_wide_pre (fsquare_spec_ s) 0
-  /\ carry_top_wide_pre (carry_wide_spec (fsquare_spec_ s) 0)
-  /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s) 0))
-  /\ carry_0_to_1_pre (copy_from_wide_spec (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s) 0)))
+  /\ carry_top_wide_pre (carry_wide_spec (fsquare_spec_ s))
+  /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s)))
+  /\ carry_0_to_1_pre (copy_from_wide_spec (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s))))
 
 val fsquare_spec: s:seqelem{fsquare_pre s} ->
   Tot (s':seqelem{selem s' = selem s *@ selem s})
@@ -619,7 +619,7 @@ let fsquare_spec s =
   lemma_fsquare_spec_ s;
   let output1 = fsquare_spec_ s in
   cut (seval_wide output1 % prime = (seval s * seval s) % prime);
-  let output2 = carry_wide_spec output1 0 in
+  let output2 = carry_wide_spec output1 in
   lemma_carry_top_wide_spec output2;
   let output3 = carry_top_wide_spec output2 in
   lemma_copy_from_wide output3;
@@ -721,7 +721,7 @@ let fsquare_53_is_fine s1 =
   let o = fsquare_spec_ s1 in
   lemma_106_smaller_than_108 o;
   lemma_53_55_is_fine_to_carry o;
-  let o' = carry_wide_spec o 0 in
+  let o' = carry_wide_spec o in
   lemma_53_55_is_fine_to_carry_top o';
   let o'' = carry_top_wide_spec o' in
   lemma_53_55_is_fine_to_copy o'';
@@ -776,7 +776,7 @@ let lemma_5413_to_fsquare_is_fine s =
 
 val lemma_5413_is_fine_to_carry:
   s:seqelem_wide{bounds' (s) (77 * pmax) (59 * pmax) (41 * pmax) (23 * pmax) (5 * pmax)} ->
-  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s 0) p51 p51 p51 p51 (5*pmax+p77))
+  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s) p51 p51 p51 p51 (5*pmax+p77))
 let lemma_5413_is_fine_to_carry s =
   assert_norm (pow2 53 = 0x20000000000000);
   assert_norm (pow2 55 = 0x80000000000000);
@@ -822,7 +822,7 @@ let fsquare_5413_is_fine s1 =
   lemma_5413_to_fsquare_is_fine s1;
   let o = fsquare_spec_ s1 in
   lemma_5413_is_fine_to_carry o;
-  let o' = carry_wide_spec o 0 in
+  let o' = carry_wide_spec o in
   lemma_5413_is_fine_to_carry_top o';
   let o'' = carry_top_wide_spec o' in
   lemma_5413_is_fine_to_copy o'';

@@ -13,58 +13,68 @@ open Hacl.Spec.Bignum.Fproduct
 
 module U32 = FStar.UInt32
 
-#set-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_fuel 0"
 
 [@"c_inline"]
 val copy_from_wide_:
   output:felem ->
   input:felem_wide{disjoint output input} ->
-  ctr:U32.t{U32.v ctr <= len} ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ copy_from_wide_pre (as_seq h input)
-      /\ (forall (i:nat). (i >= U32.v ctr /\ i < len) ==> v (get h output i) == w (get h input i))))
+      /\ (forall (i:nat). (i < len) ==> v (get h output i) == w (get h input i))))
     (ensures (fun h0 _ h1 -> live h0 input /\ copy_from_wide_pre (as_seq h0 input) /\ live h1 output
       /\ modifies_1 output h0 h1
       /\ as_seq h1 output == copy_from_wide_spec (as_seq h0 input) ))
 [@"c_inline"]
-let rec copy_from_wide_ output input ctr =
-  if U32.(ctr =^ 0ul) then (
-    let h = ST.get() in
-    assert(forall (i:nat). i < len ==> v (Seq.index (as_seq h output) i) = w (Seq.index (as_seq h input) i));
-    Seq.lemma_eq_intro (as_seq h output) (copy_from_wide_spec (as_seq h input))
-  )
-  else (
-    let i = U32.(ctr -^ 1ul) in
-    let inputi = input.(i) in
-    Math.Lemmas.modulo_lemma (w inputi) (pow2 n);
-    output.(i) <- wide_to_limb inputi;
-    copy_from_wide_ output input i
-  )
+let rec copy_from_wide_ output input  =
+  C.Loops.map output input clen (fun x -> wide_to_limb x)
 
 
-#set-options "--z3rlimit 50"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_fuel 0"
+
+private
+let lemma_variable_change h h0 (b:felem{live h0 b /\ live h b}) : Lemma
+  (requires (forall (i:nat). (i <= len - 1 /\ i > 0) ==> v (get h b i) == v (get h0 b (i-1))))
+  (ensures (forall (i:nat). (i < len - 1) ==> v (get h b (i+1)) == v (get h0 b (i))))
+  = ()
 
 [@"c_inline"]
 val shift_:
   output:felem ->
-  ctr:U32.t{U32.v ctr < len} ->
+  (* ctr:U32.t{U32.v ctr < len} -> *)
   Stack unit
     (requires (fun h -> live h output))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
-      /\ (forall (i:nat). (i < U32.v ctr) ==> v (get h1 output (i+1)) = v (get h0 output i))
-      /\ (forall (i:nat). (i > U32.v ctr /\ i < len) ==> get h1 output i == get h0 output i)))
+      /\ (forall (i:nat). (i < (* U32.v ctr *) len - 1) ==> v (get h1 output (i+1)) = v (get h0 output i))
+      (* /\ (forall (i:nat). (i > (\* U32.v ctr *\) len - 1 /\ i < len) ==> get h1 output i == get h0 output i) *)))
 [@"c_inline"]
-let rec shift_ output ctr =
+let (* rec *) shift_ output (* ctr  *)=
+  let h0 = ST.get() in
+  let inv (h1: HyperStack.mem) (j: nat): Type0 =
+    live h1 output /\ modifies_1 output h0 h1 /\ j <= len - 1 /\ 0 <= j
+    /\ (forall (i:nat). {:pattern (v (get h1 output (i)))} (i <= len - 1 /\ i > (len-1-j)) ==> v (get h1 output (i)) = v (get h0 output (i-1)))
+    /\ (forall (i:nat). {:pattern (v (get h1 output (i)))} (i < (len - 1 - j) (* /\ i < len *)) ==> get h1 output i == get h0 output i)
+  in
   let open FStar.UInt32 in
-  if (ctr =^ 0ul) then ()
-  else (
+  let f' (i:UInt32.t{FStar.UInt32.( 0 <= v i /\ v i < len - 1) }): Stack unit
+    (requires (fun h -> inv h (UInt32.v i)))
+    (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
+  = let h = ST.get() in
+    assert(forall (j:nat). (j <= len - 1 /\ j > len - 1 - v i) ==> Hacl.Bignum.Limb.v (get h output (j)) = Hacl.Bignum.Limb.v (get h0 output (j-1)));
+    assert(forall (j:nat). (j < len - 1 - v i) ==> Hacl.Bignum.Limb.v (get h output (j)) = Hacl.Bignum.Limb.v (get h0 output j));
+    let ctr = clen -^ i -^ 1ul in
     let z = output.(ctr -^ 1ul) in
     output.(ctr) <- z;
-    shift_ output (ctr -^ 1ul)
-  )
+    let h' = ST.get() in
+    assert(Hacl.Bignum.Limb.v (get h' output (v ctr)) = Hacl.Bignum.Limb.v (get h0 output (v ctr-1)));
+    assert(forall (j:nat). (j <= len - 1 /\ j > len - 1 - (v i+1)) ==> Hacl.Bignum.Limb.v (get h' output (j)) = Hacl.Bignum.Limb.v (get h0 output (j-1)))
+  in
+  C.Loops.for 0ul (clen -^ 1ul) inv f';
+  let h = ST.get() in
+  assert(forall (i:nat). (i <= len - 1 /\ i > 0) ==> Hacl.Bignum.Limb.v (get h output (i)) == Hacl.Bignum.Limb.v (get h0 output (i-1)));
+  lemma_variable_change h h0 output
 
-#set-options "--z3rlimit 50"
-
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 [@"c_inline"]
 val shift:
@@ -78,52 +88,66 @@ let rec shift output =
   let h0 = ST.get() in
   let open FStar.UInt32 in
   let tmp = output.(clen -^ 1ul) in
-  shift_ output (clen -^ 1ul);
+  shift_ output (* (clen -^ 1ul) *);
   output.(0ul) <- tmp;
   let h = ST.get() in
   Seq.lemma_eq_intro (as_seq h output) (shift_spec (as_seq h0 output))
 
 
-#set-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 [@"c_inline"]
 val sum_scalar_multiplication_:
   output:felem_wide ->
   input:felem{disjoint output input} ->
   s:limb ->
-  ctr:U32.t{U32.v ctr <= len} ->
+  (* ctr:U32.t{U32.v ctr <= len} -> *)
   Stack unit
-    (requires (fun h -> live h output /\ live h input /\ sum_scalar_multiplication_pre_ (as_seq h output) (as_seq h input) s (U32.v ctr)))
+    (requires (fun h -> live h output /\ live h input /\ sum_scalar_multiplication_pre_ (as_seq h output) (as_seq h input) s (len)))
     (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 /\ live h0 input /\ live h0 output
-      /\ sum_scalar_multiplication_pre_ (as_seq h0 output) (as_seq h0 input) s (U32.v ctr)
-      /\ (as_seq h1 output) == sum_scalar_multiplication_spec (as_seq h0 output) (as_seq h0 input) s (U32.v ctr)))
+      /\ sum_scalar_multiplication_pre_ (as_seq h0 output) (as_seq h0 input) s (len)
+      /\ (as_seq h1 output) == sum_scalar_multiplication_spec (as_seq h0 output) (as_seq h0 input) s))
 [@"c_inline"]
-let rec sum_scalar_multiplication_ output input s ctr =
-  if U32.(ctr =^ 0ul) then ()
-  else (
-    let i = U32.(ctr -^ 1ul) in
-    let oi = output.(i) in let ii = input.(i) in
-    let open Hacl.Bignum.Wide in
-    output.(i) <- (oi +^ (ii *^ s));
-    let h = ST.get() in
-    sum_scalar_multiplication_ output input s i
-  )
+let rec sum_scalar_multiplication_ output input s =
+  C.Loops.in_place_map2 output input clen (fun x y -> Hacl.Bignum.Wide.(x +%^ (y *^ s)))
 
-#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+
+#reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+
+val lemma_carry_wide_spec_0: s:seqelem_wide{carry_wide_pre s 0} -> Lemma
+  (carry_wide_spec_ s 0 0 == s)
+let lemma_carry_wide_spec_0 s = ()
+
+val lemma_carry_wide_spec_1: s:seqelem_wide -> i:nat{i < len - 1 /\ carry_wide_pre s i} -> Lemma
+  (carry_wide_spec_ s i (len-1) == (let s'' = carry_wide_step' s i in
+                                  (* lemma_carry_wide_step s i; *)
+                                  (* Math.Lemmas.lemma_div_lt (w (Seq.index s i)) (FStar.Mul.op_Star 2 word_size) limb_size; *)
+                                  carry_wide_spec_ s'' (i+1) (len-1)))
+let lemma_carry_wide_spec_1 s i = ()
+
+
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 
 [@"c_inline"]
 val carry_wide_:
   t:felem_wide ->
-  ctr:U32.t{U32.v ctr < len} ->
   Stack unit
-    (requires (fun h -> live h t /\ carry_wide_pre (as_seq h t) (U32.v ctr)))
+    (requires (fun h -> live h t /\ carry_wide_pre (as_seq h t) 0))
     (ensures (fun h0 _ h1 -> live h0 t /\ live h1 t /\ modifies_1 t h0 h1
-      /\ carry_wide_pre (as_seq h0 t) (U32.v ctr)
-      /\ as_seq h1 t == carry_wide_spec (as_seq h0 t) (U32.v ctr)))
+      /\ carry_wide_pre (as_seq h0 t) 0
+      /\ as_seq h1 t == carry_wide_spec (as_seq h0 t)))
 [@"c_inline"]
-let rec carry_wide_ tmp ctr =
-  if U32.(ctr =^ clen -^ 1ul) then ()
-  else (
+let rec carry_wide_ tmp =
+  let h0 = ST.get() in
+  let inv (h1: HyperStack.mem) (j: nat): Type0 =
+    live h1 tmp /\ modifies_1 tmp h0 h1 /\ 0 <= j /\ j <= len - 1
+    /\ as_seq h1 tmp == carry_wide_spec_ (as_seq h0 tmp) 0 j
+  in
+  let f' (i:UInt32.t{FStar.UInt32.( 0 <= v i /\ v i < len - 1) }): Stack unit
+    (requires (fun h -> inv h (UInt32.v i)))
+    (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
+  = let h = ST.get() in
+    let ctr = i in
     let tctr = tmp.(ctr) in
     let tctrp1 = tmp.(U32.(ctr+^1ul)) in
     assert_norm(pow2 0 = 1);
@@ -144,25 +168,74 @@ let rec carry_wide_ tmp ctr =
     Math.Lemmas.pow2_le_compat (wide_n - 1) (wide_n - limb_size);
     tmp.(ctr) <- limb_to_wide r0;
     tmp.(U32.(ctr +^ 1ul)) <- tctrp1 +^ c;
-    carry_wide_ tmp (U32.(ctr +^ 1ul))
-  )
+    lemma_carry_wide_spec_ 0 (UInt32.v i + 1) (as_seq h0 tmp)
+  in
+  lemma_carry_wide_spec_0 (as_seq h0 tmp);
+  C.Loops.for 0ul FStar.UInt32.(clen -^ 1ul) inv f'
 
 
-#reset-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1"
+(* [@"c_inline"] *)
+(* val carry_limb_: *)
+(*   t:felem -> *)
+(*   ctr:U32.t{U32.v ctr < len} -> *)
+(*   Stack unit *)
+(*     (requires (fun h -> live h t /\ carry_limb_pre (as_seq h t) (U32.v ctr))) *)
+(*     (ensures (fun h0 _ h1 -> live h0 t /\ live h1 t /\ modifies_1 t h0 h1 *)
+(*       /\ carry_limb_pre (as_seq h0 t) (U32.v ctr) *)
+(*       /\ as_seq h1 t == carry_limb_spec (as_seq h0 t) (U32.v ctr))) *)
+(* [@"c_inline"] *)
+(* let rec carry_limb_ tmp ctr = *)
+(*   if U32.(ctr =^ clen -^ 1ul) then () *)
+(*   else ( *)
+(*     let tctr = tmp.(ctr) in *)
+(*     let tctrp1 = tmp.(U32.(ctr+^1ul)) in *)
+(*     assert_norm(pow2 0 = 1); *)
+(*     Math.Lemmas.pow2_lt_compat limb_size 0; *)
+(*     Math.Lemmas.pow2_lt_compat limb_n limb_size; *)
+(*     Math.Lemmas.modulo_lemma (pow2 limb_size) (pow2 limb_n); *)
+(*     let r0 = (tctr) &^ ((limb_one <<^ climb_size) -^ limb_one) in *)
+(*     UInt.logand_mask #limb_n (v ( tctr)) limb_size; *)
+(*     Math.Lemmas.pow2_plus (limb_n - limb_size) (limb_size); *)
+(*     Math.Lemmas.modulo_modulo_lemma (v tctr) (pow2 limb_size) (pow2 (limb_n - limb_size)); *)
+(*     assert(v r0 = v tctr % pow2 limb_size); *)
+(*     assert(v r0 < pow2 limb_size); *)
+(*     let open Hacl.Bignum.Limb in *)
+(*     let c  = tctr >>^ climb_size in *)
+(*     Math.Lemmas.pow2_double_sum (limb_n - 1); *)
+(*     Math.Lemmas.lemma_div_lt (v tctr) (limb_n) (limb_size); *)
+(*     Math.Lemmas.pow2_le_compat (limb_n - 1) (limb_n - limb_size); *)
+(*     tmp.(ctr) <-  r0; *)
+(*     tmp.(U32.(ctr +^ 1ul)) <- tctrp1 +^ c; *)
+(*     carry_limb_ tmp (U32.(ctr +^ 1ul)) *)
+(*   ) *)
+
+#reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+
+val lemma_carry_limb_spec_0: s:seqelem{carry_limb_pre s 0} -> Lemma (carry_limb_spec_ s 0 0 == s)
+let lemma_carry_limb_spec_0 s = ()
+
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 [@"c_inline"]
 val carry_limb_:
   t:felem ->
-  ctr:U32.t{U32.v ctr < len} ->
   Stack unit
-    (requires (fun h -> live h t /\ carry_limb_pre (as_seq h t) (U32.v ctr)))
+    (requires (fun h -> live h t /\ carry_limb_pre (as_seq h t) 0))
     (ensures (fun h0 _ h1 -> live h0 t /\ live h1 t /\ modifies_1 t h0 h1
-      /\ carry_limb_pre (as_seq h0 t) (U32.v ctr)
-      /\ as_seq h1 t == carry_limb_spec (as_seq h0 t) (U32.v ctr)))
+      /\ carry_limb_pre (as_seq h0 t) 0
+      /\ as_seq h1 t == carry_limb_spec (as_seq h0 t)))
 [@"c_inline"]
-let rec carry_limb_ tmp ctr =
-  if U32.(ctr =^ clen -^ 1ul) then ()
-  else (
+let rec carry_limb_ tmp =
+  let h0 = ST.get() in
+  let inv (h1: HyperStack.mem) (j: nat): Type0 =
+    live h1 tmp /\ modifies_1 tmp h0 h1 /\ 0 <= j /\ j <= len - 1
+    /\ as_seq h1 tmp == carry_limb_spec_ (as_seq h0 tmp) 0 j
+  in
+  let f' (i:UInt32.t{FStar.UInt32.( 0 <= v i /\ v i < len - 1) }): Stack unit
+    (requires (fun h -> inv h (UInt32.v i)))
+    (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
+  = let h = ST.get() in
+    let ctr = i in
     let tctr = tmp.(ctr) in
     let tctrp1 = tmp.(U32.(ctr+^1ul)) in
     assert_norm(pow2 0 = 1);
@@ -182,8 +255,11 @@ let rec carry_limb_ tmp ctr =
     Math.Lemmas.pow2_le_compat (limb_n - 1) (limb_n - limb_size);
     tmp.(ctr) <-  r0;
     tmp.(U32.(ctr +^ 1ul)) <- tctrp1 +^ c;
-    carry_limb_ tmp (U32.(ctr +^ 1ul))
-  )
+    lemma_carry_limb_spec_ 0 (UInt32.v i + 1) (as_seq h0 tmp)
+  in
+  lemma_carry_limb_spec_0 (as_seq h0 tmp);
+  C.Loops.for 0ul FStar.UInt32.(clen -^ 1ul) inv f'
+
 
 
 #set-options "--z3rlimit 20"

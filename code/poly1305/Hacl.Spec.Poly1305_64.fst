@@ -535,7 +535,7 @@ val poly1305_last_pass_spec: acc:seqelem{red_45 acc} -> Tot (acc':seqelem{
 let poly1305_last_pass_spec acc =
   last_pass_is_fine acc;
   lemma_carried_is_fine_to_carry acc;
-  let acc1 = Hacl.Spec.Bignum.Fproduct.carry_limb_spec acc 0 in
+  let acc1 = Hacl.Spec.Bignum.Fproduct.carry_limb_spec acc in
   cut (bounds acc1 p44 p44 (p45 + p20));
   lemma_carried_is_fine_to_carry_top acc1;
   let acc2 = Hacl.Spec.Bignum.Modulo.carry_top_spec acc1 in

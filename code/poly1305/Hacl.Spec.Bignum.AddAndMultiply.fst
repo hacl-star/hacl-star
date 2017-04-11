@@ -48,7 +48,7 @@ let fsum_unrolled a b =
 #set-options "--z3rlimit 10 --initial_fuel 4 --max_fuel 4"
 
 val lemma_fsum_unrolled: s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} -> Lemma
-  (fsum_unrolled s1 s2 == fsum_spec s1 s2 len)
+  (fsum_unrolled s1 s2 == fsum_spec s1 s2)
 let lemma_fsum_unrolled s1 s2 = ()
 
 
@@ -56,7 +56,7 @@ let lemma_fsum_unrolled s1 s2 = ()
 
 val lemma_fsum_def:
   s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} ->
-  Lemma (let s = fsum_spec s1 s2 len in
+  Lemma (let s = fsum_spec s1 s2 in
     v (Seq.index s 0) = v (Seq.index s1 0) + v (Seq.index s2 0)
     /\ v (Seq.index s 1) = v (Seq.index s1 1) + v (Seq.index s2 1)
     /\ v (Seq.index s 2) = v (Seq.index s1 2) + v (Seq.index s2 2))
@@ -69,11 +69,11 @@ let lemma_fsum_def s1 s2 =
 let mul_shift_reduce_pre' (input:seqelem) (input2:seqelem) : GTot Type0 =
   sum_scalar_multiplication_pre_ (Seq.create len wide_zero) input (Seq.index input2 0) len
   /\ shift_reduce_pre input
-  /\ (let output1 = sum_scalar_multiplication_spec (Seq.create len wide_zero) input (Seq.index input2 0) len in
+  /\ (let output1 = sum_scalar_multiplication_spec (Seq.create len wide_zero) input (Seq.index input2 0) in
      let input1 = shift_reduce_spec input in
      sum_scalar_multiplication_pre_ output1 input1 (Seq.index input2 1) len
      /\ shift_reduce_pre input1
-     /\ (let output2 = sum_scalar_multiplication_spec output1 input1 (Seq.index input2 1) len in
+     /\ (let output2 = sum_scalar_multiplication_spec output1 input1 (Seq.index input2 1) in
         let input2' = shift_reduce_spec input1 in
         sum_scalar_multiplication_pre_ output2 input2' (Seq.index input2 2) len
         /\ shift_reduce_pre input2'))
@@ -92,12 +92,12 @@ private let lemma_mul_shift_reduce_pre_0 (output:seqelem_wide) (input:seqelem) (
 #set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
 private let lemma_mul_shift_reduce_pre_1 (output:seqelem_wide) (input:seqelem) (input2:seqelem) : Lemma
-  (mul_shift_reduce_pre_ output input input2 2 <==> (sum_scalar_multiplication_pre_ output input (Seq.index input2 1) len /\ shift_reduce_pre input /\ mul_shift_reduce_pre_ (sum_scalar_multiplication_spec output input (Seq.index input2 1) len) (shift_reduce_spec input) input2 1)) = ()
+  (mul_shift_reduce_pre_ output input input2 2 <==> (sum_scalar_multiplication_pre_ output input (Seq.index input2 1) len /\ shift_reduce_pre input /\ mul_shift_reduce_pre_ (sum_scalar_multiplication_spec output input (Seq.index input2 1)) (shift_reduce_spec input) input2 1)) = ()
 
 #set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 
 private let lemma_mul_shift_reduce_pre_2 (output:seqelem_wide) (input:seqelem) (input2:seqelem) : Lemma
-  (mul_shift_reduce_pre_ output input input2 3 <==> (sum_scalar_multiplication_pre_ output input (Seq.index input2 0) len /\ shift_reduce_pre input /\ mul_shift_reduce_pre_ (sum_scalar_multiplication_spec output input (Seq.index input2 0) len) (shift_reduce_spec input) input2 2)) = ()
+  (mul_shift_reduce_pre_ output input input2 3 <==> (sum_scalar_multiplication_pre_ output input (Seq.index input2 0) len /\ shift_reduce_pre input /\ mul_shift_reduce_pre_ (sum_scalar_multiplication_spec output input (Seq.index input2 0)) (shift_reduce_spec input) input2 2)) = ()
 
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
 
@@ -105,13 +105,13 @@ let lemma_mul_shift_reduce_pre (input:seqelem) (input2:seqelem) : Lemma
   (requires (mul_shift_reduce_pre' input input2))
   (ensures (mul_shift_reduce_pre_ (Seq.create len wide_zero) input input2 len))
   = lemma_mul_shift_reduce_pre_2 (Seq.create len wide_zero) input input2;
-    let output3 = sum_scalar_multiplication_spec (Seq.create len wide_zero) input (Seq.index input2 0) len in
+    let output3 = sum_scalar_multiplication_spec (Seq.create len wide_zero) input (Seq.index input2 0) in
     let input3 = shift_reduce_spec input in
     lemma_mul_shift_reduce_pre_1 output3 input3 input2;
-    let output4 = sum_scalar_multiplication_spec output3 input3 (Seq.index input2 1) len in
+    let output4 = sum_scalar_multiplication_spec output3 input3 (Seq.index input2 1) in
     let input4 = shift_reduce_spec input3 in
     lemma_mul_shift_reduce_pre_0 output4 input4 input2;
-    let output5 = sum_scalar_multiplication_spec output4 input4 (Seq.index input2 2) len in
+    let output5 = sum_scalar_multiplication_spec output4 input4 (Seq.index input2 2) in
     ()
 
 
@@ -136,11 +136,11 @@ let lemma_mul_shift_reduce_pre2 (input:seqelem) (input2:seqelem) : Lemma
 private val mul_shift_reduce_unrolled__:
   input:seqelem{shift_reduce_pre input} -> input2:seqelem{
     sum_scalar_multiplication_pre_ (Seq.create len wide_zero) input (Seq.index input2 0) len
-    /\ (let output1 = sum_scalar_multiplication_spec (Seq.create len wide_zero) input (Seq.index input2 0) len in
+    /\ (let output1 = sum_scalar_multiplication_spec (Seq.create len wide_zero) input (Seq.index input2 0) in
        let input1 = shift_reduce_spec input in
        sum_scalar_multiplication_pre_ output1 input1 (Seq.index input2 1) len
        /\ shift_reduce_pre input1
-       /\ (let output2 = sum_scalar_multiplication_spec output1 input1 (Seq.index input2 1) len in
+       /\ (let output2 = sum_scalar_multiplication_spec output1 input1 (Seq.index input2 1) in
           let input2' = shift_reduce_spec input1 in
           sum_scalar_multiplication_pre_ output2 input2' (Seq.index input2 2) len
           /\ shift_reduce_pre input2'))} ->
@@ -148,11 +148,11 @@ private val mul_shift_reduce_unrolled__:
 private let mul_shift_reduce_unrolled__ input input2 =
   let input_init = input in
   let output = Seq.create len wide_zero in
-  let output1   = sum_scalar_multiplication_spec output input (Seq.index input2 0) len in
+  let output1   = sum_scalar_multiplication_spec output input (Seq.index input2 0) in
   let input1    = shift_reduce_spec input in
-  let output2   = sum_scalar_multiplication_spec output1 input1 (Seq.index input2 1) len in
+  let output2   = sum_scalar_multiplication_spec output1 input1 (Seq.index input2 1) in
   let input2'   = shift_reduce_spec input1 in
-  sum_scalar_multiplication_spec output2 input2' (Seq.index input2 2) len
+  sum_scalar_multiplication_spec output2 input2' (Seq.index input2 2)
 
 
 let bounds (s:seqelem) (s0:nat) (s1:nat) (s2:nat) : GTot Type0 =
@@ -223,7 +223,7 @@ let lemma_shift_reduce_spec_ s =
 val lemma_sum_scalar_muitiplication_spec_: sw:seqelem_wide -> s:seqelem -> sc:limb ->
   Lemma (requires (sum_scalar_multiplication_pre_ sw s sc len))
         (ensures (sum_scalar_multiplication_pre_ sw s sc len
-          /\ (let sw' = sum_scalar_multiplication_spec sw s sc len in
+          /\ (let sw' = sum_scalar_multiplication_spec sw s sc in
              w (Seq.index sw' 0) = w (Seq.index sw 0) + (v (Seq.index s 0) * v sc)
              /\ w (Seq.index sw' 1) = w (Seq.index sw 1) + (v (Seq.index s 1) * v sc)
              /\ w (Seq.index sw' 2) = w (Seq.index sw 2) + (v (Seq.index s 2) * v sc)) ))
@@ -237,7 +237,7 @@ val lemma_shift_reduce_then_carry_wide_0:
   Lemma (sum_scalar_multiplication_pre_ (Seq.create len wide_zero) s1 (Seq.index s2 0) len
     /\ shift_reduce_pre s1
     /\ bounds (shift_reduce_spec s1) (20 * p46) p46 p46
-    /\ bounds' (sum_scalar_multiplication_spec (Seq.create len wide_zero) s1 (Seq.index s2 0) len)
+    /\ bounds' (sum_scalar_multiplication_spec (Seq.create len wide_zero) s1 (Seq.index s2 0))
               p90 p90 p90)
 let lemma_shift_reduce_then_carry_wide_0 s1 s2 =
   assert_norm (pow2 64 = 0x10000000000000000);
@@ -262,7 +262,7 @@ val lemma_shift_reduce_then_carry_wide_1:
   Lemma (sum_scalar_multiplication_pre_ o s1 (Seq.index s2 1) len
     /\ shift_reduce_pre s1
     /\ bounds (shift_reduce_spec s1) (20 * p46) (20 * p46) p46
-    /\ bounds' (sum_scalar_multiplication_spec o s1 (Seq.index s2 1) len)
+    /\ bounds' (sum_scalar_multiplication_spec o s1 (Seq.index s2 1))
               (21 * p90) (2*p90) (2*p90) )
 let lemma_shift_reduce_then_carry_wide_1 o s1 s2 =
   assert_norm (pow2 64 = 0x10000000000000000);
@@ -285,7 +285,7 @@ val lemma_shift_reduce_then_carry_wide_2:
   Lemma (sum_scalar_multiplication_pre_ o s1 (Seq.index s2 2) len
     /\ shift_reduce_pre s1
     /\ bounds (shift_reduce_spec s1) (20 * p46) (20 *p46) (20*p46)
-    /\ bounds' (sum_scalar_multiplication_spec o s1 (Seq.index s2 2) len)
+    /\ bounds' (sum_scalar_multiplication_spec o s1 (Seq.index s2 2))
               (41 * p90) (22*p90) (3*p90) )
 let lemma_shift_reduce_then_carry_wide_2 o s1 s2 =
   assert_norm (pow2 64 = 0x10000000000000000);
@@ -309,7 +309,7 @@ private val mul_shift_reduce_unrolled_0:
   input2:seqelem{mul_shift_reduce_pre output input_init input input2 1} ->
   Tot (s:seqelem_wide{s == mul_shift_reduce_spec_ output input_init input input2 1})
 private let mul_shift_reduce_unrolled_0 output input_init input input2 =
-  let output1   = sum_scalar_multiplication_spec output input (Seq.index input2 2) len in
+  let output1   = sum_scalar_multiplication_spec output input (Seq.index input2 2) in
   output1
 
 
@@ -322,7 +322,7 @@ private val mul_shift_reduce_unrolled_1:
   input2:seqelem{mul_shift_reduce_pre output input_init input input2 2} ->
   Tot (s:seqelem_wide{s == mul_shift_reduce_spec_ output input_init input input2 2})
 private let mul_shift_reduce_unrolled_1 output input_init input input2 =
-  let output1   = sum_scalar_multiplication_spec output input (Seq.index input2 1) len in
+  let output1   = sum_scalar_multiplication_spec output input (Seq.index input2 1) in
   lemma_sum_scalar_multiplication_ output input (Seq.index input2 1) len;
   let input1    = shift_reduce_spec input in
   lemma_shift_reduce_spec input;
@@ -339,7 +339,7 @@ private val mul_shift_reduce_unrolled_:
   input2:seqelem{mul_shift_reduce_pre output input_init input input2 3} ->
   Tot (s:seqelem_wide{s == mul_shift_reduce_spec_ output input_init input input2 3})
 private let mul_shift_reduce_unrolled_ output input_init input input2 =
-  let output1   = sum_scalar_multiplication_spec output input (Seq.index input2 0) len in
+  let output1   = sum_scalar_multiplication_spec output input (Seq.index input2 0) in
   lemma_sum_scalar_multiplication_ output input (Seq.index input2 0) len;
   let input1    = shift_reduce_spec input in
   lemma_shift_reduce_spec input;
@@ -372,11 +372,11 @@ val lemma_shift_reduce_then_carry_wide:
     bounds' (mul_shift_reduce_unrolled__ s1 s2) (41 * p90) (22*p90) (3*p90) )
 let lemma_shift_reduce_then_carry_wide s1 s2 =
   lemma_shift_reduce_then_carry_wide_0 s1 s2;
-  let o1 = sum_scalar_multiplication_spec (Seq.create len wide_zero) s1 (Seq.index s2 0) len in
+  let o1 = sum_scalar_multiplication_spec (Seq.create len wide_zero) s1 (Seq.index s2 0) in
   let s11 = shift_reduce_spec s1 in
   lemma_shift_reduce_then_carry_wide_1 o1 s11 s2;
 
-  let o2 = sum_scalar_multiplication_spec o1 s11 (Seq.index s2 1) len in
+  let o2 = sum_scalar_multiplication_spec o1 s11 (Seq.index s2 1) in
   let s12 = shift_reduce_spec s11 in
   lemma_shift_reduce_then_carry_wide_2 o2 s12 s2
 
@@ -398,7 +398,7 @@ private let carry_wide_spec_unrolled s =
 #set-options "--z3rlimit 20 --initial_fuel 5 --max_fuel 5"
 
 private val lemma_carry_wide_spec_unrolled:
-  s:seqelem_wide{carry_wide_pre s 0} -> Lemma (carry_wide_spec_unrolled s == carry_wide_spec s 0)
+  s:seqelem_wide{carry_wide_pre s 0} -> Lemma (carry_wide_spec_unrolled s == carry_wide_spec s)
 let lemma_carry_wide_spec_unrolled s = ()
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
@@ -409,7 +409,7 @@ inline_for_extraction let p84 : p:pos{p = 0x1000000000000000000000} = assert_nor
 
 val lemma_46_44_is_fine_to_carry:
   s:seqelem_wide{bounds' s (41*p90) (22*p90) (3*p90)} ->
-  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s 0) p44 p44 (3*p90+p84))
+  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s) p44 p44 (3*p90+p84))
 let lemma_46_44_is_fine_to_carry s =
   assert_norm (pow2 64 = 0x10000000000000000);
   assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
@@ -439,7 +439,7 @@ let lemma_carry_top_wide_then_copy s =
 val lemma_carry_wide_then_carry_top: s:seqelem_wide{carry_wide_pre s 0} -> Lemma
   (((w (Seq.index s 2) + pow2 (2*word_size - limb_size))/ pow2 42 < pow2 word_size
     /\ 5 * (w (Seq.index s 2) + pow2 (2*word_size - limb_size) / pow2 42) + pow2 limb_size < pow2 word_size)
-    ==> carry_top_wide_pre (carry_wide_spec s 0) )
+    ==> carry_top_wide_pre (carry_wide_spec s) )
 let lemma_carry_wide_then_carry_top s =
   let s' = carry_wide_spec_unrolled s in
   lemma_carry_wide_spec_unrolled s;
@@ -503,7 +503,7 @@ let fmul_46_44_is_fine s1 s2 =
   lemma_mul_shift_reduce_unrolled s1 s2;
   let o = mul_shift_reduce_spec s1 s2 in
   lemma_46_44_is_fine_to_carry o;
-  let o' = carry_wide_spec o 0 in
+  let o' = carry_wide_spec o in
   lemma_46_44_is_fine_to_carry_top o';
   let o'' = carry_top_wide_spec o' in
   lemma_46_44_is_fine_to_copy o'';
@@ -524,7 +524,7 @@ val add_and_multiply_tot:
     /\ seval acc' % prime = ((seval acc + seval block) * seval r) % prime})
 let add_and_multiply_tot acc block r =
   assert_norm(pow2 63 = 0x8000000000000000);
-  let acc_p_block = fsum_spec acc block len in
+  let acc_p_block = fsum_spec acc block in
   lemma_fsum_def acc block;
   lemma_fsum_eval acc block;
   fmul_46_44_is_fine acc_p_block r;
@@ -549,7 +549,7 @@ private let carry_spec_unrolled s =
 #set-options "--z3rlimit 5 --initial_fuel 5 --max_fuel 5"
 
 private val lemma_carry_spec_unrolled:
-  s:seqelem{carry_limb_pre s 0} -> Lemma (carry_spec_unrolled s == carry_limb_spec s 0)
+  s:seqelem{carry_limb_pre s 0} -> Lemma (carry_spec_unrolled s == carry_limb_spec s)
 let lemma_carry_spec_unrolled s = ()
 
 
@@ -557,7 +557,7 @@ let lemma_carry_spec_unrolled s = ()
 
 val lemma_carried_is_fine_to_carry:
   s:seqelem{bounds s p45 p45 p45} ->
-  Lemma (carry_limb_pre s 0 /\ bounds (carry_limb_spec s 0) p44 p44 (p45+p20))
+  Lemma (carry_limb_pre s 0 /\ bounds (carry_limb_spec s) p44 p44 (p45+p20))
 let lemma_carried_is_fine_to_carry s =
   assert_norm (pow2 64 = 0x10000000000000000);
   assert_norm (pow2 (limb_n-1) = 0x8000000000000000);
@@ -569,7 +569,7 @@ let lemma_carried_is_fine_to_carry s =
 val lemma_carry_then_carry_top: s:seqelem{carry_limb_pre s 0} -> Lemma
   (((v (Seq.index s 2) + pow2 (word_size - limb_size))/ pow2 42 < pow2 word_size
     /\ 5 * (v (Seq.index s 2) + pow2 (word_size - limb_size) / pow2 42) + pow2 limb_size < pow2 word_size)
-    ==> carry_top_pre (carry_limb_spec s 0) )
+    ==> carry_top_pre (carry_limb_spec s) )
 let lemma_carry_then_carry_top s =
   let s' = carry_spec_unrolled s in
   lemma_carry_spec_unrolled s;
@@ -614,11 +614,11 @@ let lemma_carried_is_fine_to_carry_last s =
 val last_pass_is_fine:
   s:seqelem{red_45 s} ->
   Lemma (carry_limb_pre s 0
-    /\ carry_top_pre (carry_limb_spec s 0)
-    /\ carry_0_to_1_pre (carry_top_spec (carry_limb_spec s 0)))
+    /\ carry_top_pre (carry_limb_spec s)
+    /\ carry_0_to_1_pre (carry_top_spec (carry_limb_spec s)))
 let last_pass_is_fine s =
   lemma_carried_is_fine_to_carry s;
-  let o' = carry_limb_spec s 0 in
+  let o' = carry_limb_spec s in
   lemma_carried_is_fine_to_carry_top o';
   let o'' = carry_top_spec o' in
   lemma_carried_is_fine_to_carry_last o''

@@ -59,7 +59,7 @@ let rec mul_shift_reduce_ output init_input input input2 ctr =
     let input2i = input2.(j) in
     Hacl.Spec.Bignum.Fproduct.lemma_sum_scalar_multiplication_ (as_seq h0 output) (as_seq h0 input)
                                                                (input2i) len;
-    sum_scalar_multiplication_ output input input2i clen;
+    sum_scalar_multiplication_ output input input2i;
     if (ctr >^ 1ul) then shift_reduce input;
     let h' = ST.get() in
     if (ctr >^ 1ul) then (
@@ -85,11 +85,11 @@ let rec mul_shift_reduce_ output init_input input input2 ctr =
 let as_seq' (h:mem) (b:felem{live h b}) : GTot seqelem = as_seq h b
 
 [@"substitute"]
-private inline_for_extraction val get_seq: b:felem -> Stack (Ghost.erased (seqelem))
+private val get_seq: b:felem -> Stack (Ghost.erased (seqelem))
   (requires (fun h -> live h b))
   (ensures (fun h0 s h1 -> live h0 b /\ h1 == h0 /\ (Ghost.reveal s == as_seq h0 b)))
 [@"substitute"]
-private inline_for_extraction let get_seq b =
+private let get_seq b =
   let h2 = ST.get() in
   Ghost.elift1 #(b:felem{live h2 b}) (as_seq' h2) (Ghost.hide b)
   
@@ -117,13 +117,13 @@ private let fmul_ output input input2 =
   let h2 = ST.get() in
   let input_init = get_seq input in
   mul_shift_reduce_ t input_init input input2 clen;
-  carry_wide_ t 0ul;
+  carry_wide_ t;
   let h3 = ST.get() in
   Hacl.Spec.Bignum.Modulo.lemma_carry_top_wide_spec (as_seq h3 t);
   carry_top_wide t;
   let h4 = ST.get() in
   Hacl.Spec.Bignum.Fproduct.lemma_copy_from_wide (as_seq h4 t);
-  copy_from_wide_ output t clen;
+  copy_from_wide_ output t;
   carry_0_to_1 output;
   let h3 = ST.get() in
   (* assume (modifies_2 output input h1 h3); *)
