@@ -145,12 +145,7 @@ SLOW= \
 # Files not yet fully typechecking -- possibly due to timeouts.
 # Please move files that you know fully typecheck to VERIFY
 # Files commented out are broken, uncomment once fixed
-LAX=aead/Crypto.AEAD.Encrypt \
-	aead/Crypto.AEAD.Enxor.Invariant \
-	aead/Crypto.AEAD.MAC_Wrapper.Invariant \
-	prf/Crypto.Symmetric.PRF \
-	aead/Crypto.AEAD.Wrappers.CMA \
-	aead/Crypto.AEAD.Encoding
+LAX=
 
 # \
 #   Crypto.Symmetric.Poly1305 \
@@ -171,12 +166,12 @@ all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
 # Parameter for interactive mode
 %.fst-in: 
-	@echo $(OPTIONS) \
+	@echo $(OPTIONS) --hint_info \
 	$(FSTAR_INCLUDE_PATHS) 
 
 # Verifying one file at a time
 %.fst-ver:
-	@$(FSTAR) $(OPTIONS) \
+	@$(FSTAR) $(OPTIONS) --hint_info \
 	$(FSTAR_INCLUDE_PATHS) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	--verify_module $(basename $(notdir $@)) \

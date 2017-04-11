@@ -486,9 +486,9 @@ val mac:
     Buffer.disjoint st.s tag /\
     (mac_log ==> frameOf tag <> (alog acc).id \/
                  Buffer.disjoint_ref_1 tag (HS.as_aref (alog acc))) /\
-    (authId i ==> RR.m_sel h0 (ilog st.log) == (snd i, None)) ))
+    (authId i ==> snd (RR.m_sel h0 (ilog st.log)) == None)))
   (ensures (fun h0 _ h1 -> mac_ensures i st acc tag h0 h1))
-    
+
 
 #reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 let mac #i st acc tag =

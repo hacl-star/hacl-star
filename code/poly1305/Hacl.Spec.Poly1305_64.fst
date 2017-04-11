@@ -286,7 +286,7 @@ let poly1305_update_spec st m =
   MkState r acc' log
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 private val lemma_append_one_to_zeros_: unit -> Lemma
   (hlittle_endian (Seq.create 1 (uint8_to_sint8 1uy)) = 1)
@@ -391,7 +391,12 @@ val lemma_poly_last_pass: s:seqelem{bounds s p44 p44 p42} -> Lemma
 let lemma_poly_last_pass s =
   Hacl.Spec.Bignum.Modulo.lemma_seval_3 s;
   assert_norm(pow2 44 = 0x100000000000); assert_norm(pow2 88 = 0x10000000000000000000000);
-  assert_norm(pow2 44 - 5 + pow2 44 * (pow2 44 - 1) + pow2 88 * (pow2 42 - 1) = pow2 130 - 5)
+  assert_norm(pow2 44 - 5 + pow2 44 * (pow2 44 - 1) + pow2 88 * (pow2 42 - 1) = pow2 130 - 5);
+  let a0' = Seq.index s 0 in let a1' = Seq.index s 1 in let a2' = Seq.index s 2 in
+  if v a0'  <= 4 && v a1' = 0 && v a2' = 0 then Math.Lemmas.modulo_lemma (seval s) prime
+  else (
+    assert (v a0' + pow2 44 * v a1' + pow2 88 * v a2' < pow2 44 - 5 + pow2 44 * (pow2 44 - 1) + pow2 88 * (pow2 42 - 1));
+    Math.Lemmas.modulo_lemma (seval s) prime)
 
 val lemma_poly_last_pass': a0:limb -> a1:limb -> a2:limb -> Lemma
   (requires (let open Hacl.Bignum.Limb in
@@ -542,7 +547,7 @@ let poly1305_last_pass_spec acc =
   acc5
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 
 val lemma_bignum_to_128_:
