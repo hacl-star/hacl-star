@@ -184,7 +184,7 @@ let point_mul result n q =
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in
-  let point_buf = create limb_zero 40ul in
+  let point_buf = create limb_zero 80ul in
   let h2 = ST.get() in
   lemma_reveal_modifies_0 h1 h2;
   cmult_ result point_buf n q;

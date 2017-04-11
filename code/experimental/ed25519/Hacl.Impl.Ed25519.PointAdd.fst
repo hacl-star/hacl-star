@@ -56,7 +56,7 @@ let point_add out p q =
 
   blit x1 0ul tmp1 0ul 5ul; // tmp1 = x1
   blit x2 0ul tmp2 0ul 5ul; // tmp2 = x2
-  fdifference tmp1 y1;    // tmp1 = y1 - x1
+  fdifference_reduced tmp1 y1;    // tmp1 = y1 - x1
   fdifference tmp2 y2;    // tmp2 = y2 - x2
   fmul tmp3 tmp1 tmp2;    // tmp3 = a
 
@@ -74,9 +74,9 @@ let point_add out p q =
   blit tmp3 0ul tmp1 0ul 5ul; // tmp1 = a
   blit tmp2 0ul tmp6 0ul 5ul; // tmp6 = c
   fdifference_reduced tmp1 tmp4; // tmp1 = e
-  fdifference_reduced tmp6 tmp5; // tmp6 = f
+  fdifference tmp6 tmp5; // tmp6 = f
   fsum tmp5 tmp2;                // tmp5 = g
-  fsum tmp4 tmp1;                // tmp4 = h
+  fsum tmp4 tmp3;                // tmp4 = h
 
   fmul x3 tmp1 tmp6;
   fmul y3 tmp5 tmp4;

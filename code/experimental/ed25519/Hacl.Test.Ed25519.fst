@@ -42,6 +42,5 @@ let main () =
       TestLib.compare_and_print (C.string_of_literal "Ed25519 sig1") sig1 sig1' 64ul;
       C.exit_success
     ) else C.exit_failure in
-
   pop_frame();
   ret

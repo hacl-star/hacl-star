@@ -59,12 +59,12 @@ let point_double out p =
   fsum tmp5 y1;             // tmp5 = x1 + y1
   fsquare tmp6 tmp5;        // tmp6 = (x1 + y1) ** 2
   blit tmp3 0ul tmp5 0ul 5ul; // tmp5 = h
-  fsum tmp5 tmp6;             // tmp5 = e
-  fsum tmp1 tmp2;             // tmp1 = g
-  fsum tmp4 tmp1;             // tmp4 = f
-  fmul x3 tmp5 tmp4;
-  fmul y3 tmp1 tmp3;
-  fmul t3 tmp5 tmp3;
-  fmul z3 tmp4 tmp1;
+  fdifference tmp6 tmp5;      // tmp6 = e
+  fdifference tmp2 tmp1;      // tmp2 = g
+  fsum tmp4 tmp2;             // tmp4 = f
+  fmul x3 tmp6 tmp4;
+  fmul y3 tmp2 tmp3;
+  fmul t3 tmp6 tmp3;
+  fmul z3 tmp4 tmp2;
 
   pop_frame()

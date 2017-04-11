@@ -94,10 +94,10 @@ private inline_for_extraction val cmult_small_loop_step:
       (*    (spointa1, spointb1) == cmult_small_loop_step_spec (spointa0) (spointb0) pointq byte) *)
     ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-private inline_for_extraction let cmult_small_loop_step nq nqpq nq2 nqpq2 byt (* i *) =
-  cmult_small_loop_step_1 nq nqpq nq2 nqpq2 byt (* i *);
-  cmult_small_loop_step_2 nq nqpq nq2 nqpq2 byt (* i *);
-  cmult_small_loop_step_1 nq2 nqpq2 nq nqpq byt (* i *)
+private inline_for_extraction let cmult_small_loop_step nq nqpq nq2 nqpq2 byt =
+  cmult_small_loop_step_1 nq nqpq nq2 nqpq2 byt;
+  cmult_small_loop_step_2 nq nqpq nq2 nqpq2 byt;
+  cmult_small_loop_step_1 nq2 nqpq2 nq nqpq byt
 
 
 private inline_for_extraction val cmult_small_loop_double_step:

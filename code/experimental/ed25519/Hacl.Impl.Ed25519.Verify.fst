@@ -58,11 +58,11 @@ val point_equal:
     (ensures (fun h0 _ h1 -> live h0 p /\ live h0 q /\ modifies_0 h0 h1))
 let point_equal p q =
   push_frame();
-  let tmp = create 0uL 80ul in
-  let pxqz = Buffer.sub tmp 0ul 20ul in
-  let qxpz = Buffer.sub tmp 20ul 20ul in
-  let pyqz = Buffer.sub tmp 40ul 20ul in
-  let qypz = Buffer.sub tmp 60ul 20ul in
+  let tmp = create 0uL 20ul in
+  let pxqz = Buffer.sub tmp 0ul 5ul in
+  let qxpz = Buffer.sub tmp 5ul 5ul in
+  let pyqz = Buffer.sub tmp 10ul 5ul in
+  let qypz = Buffer.sub tmp 15ul 5ul in
   Hacl.Bignum25519.fmul pxqz (Hacl.Impl.Ed25519.ExtPoint.getx p) (Hacl.Impl.Ed25519.ExtPoint.getz q);
   Hacl.Bignum25519.fmul qxpz (Hacl.Impl.Ed25519.ExtPoint.getx q) (Hacl.Impl.Ed25519.ExtPoint.getz p);
   Hacl.Bignum25519.reduce pxqz;

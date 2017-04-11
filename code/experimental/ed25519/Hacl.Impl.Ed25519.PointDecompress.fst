@@ -23,9 +23,11 @@ let point_decompress out s =
   let y2 = y.(2ul) in
   let y3 = y.(3ul) in
   let y4 = y.(4ul) in
-  let sign = (y4 >>^ 50ul) &^ 1uL in
-  let y4' = y4 &^ 0x7ffffffffffffuL in
-  Hacl.Lib.Create64.make_h64_5 y y0 y1 y2 y3 y4'; (* TODO: make sure that part is necessary *)
+  let s31 = s.(31ul) in
+  let sign = FStar.UInt8.((s31 >>^ 7ul) &^ 1uy) in
+  let sign = Int.Cast.uint8_to_uint64 sign in
+  (* let y4' = y4 &^ 0x7ffffffffffffuL in *)
+  Hacl.Lib.Create64.make_h64_5 y y0 y1 y2 y3 y4;
   let z = Hacl.Impl.Ed25519.RecoverX.recover_x x y sign in
   let res =
   if z = false then false
