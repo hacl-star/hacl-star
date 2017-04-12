@@ -44,7 +44,7 @@ all-ci: verify
 
 %-hints: %.fst
 	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib $^ --record_hints --use_hints
+		--include ../lib $^ --record_hints --use_hints $(OTHERFLAGS)
 
 ALL_HINTS=$(addsuffix -hints, $(BIGNUM_MODULES))
 
