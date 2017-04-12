@@ -305,11 +305,12 @@ int32_t test_salsa()
   memset(nonce, 0, noncesize * sizeof nonce[0]);
 
 
-  Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(ciphertext,
-    plaintext,
-    (uint64_t )512,
-    nonce,
-    key);
+  Salsa20_salsa20(ciphertext,
+                  plaintext,
+                  (uint64_t )512,
+                  key,
+                  nonce,
+                  0);
   TestLib_compare_and_print("HACL Salsa20", expected1, ciphertext + (uint32_t )0, (uint32_t )64);
   TestLib_compare_and_print("HACL Salsa20", expected2, ciphertext + (uint32_t )192, (uint32_t )64);
   TestLib_compare_and_print("HACL Salsa20", expected3, ciphertext + (uint32_t )256, (uint32_t )64);
@@ -364,7 +365,7 @@ int32_t perf_salsa() {
     //memcpy(block+32,plain,32);
     //Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, nonce, key);
     //    memcpy(cipher,block+32,32);
-    Hacl_Symmetric_Salsa20_crypto_stream_salsa20_xor(cipher, plain, len, nonce, key);
+    Salsa20_salsa20(cipher, plain, len, key, nonce, 0);
     //Poly1305_64_crypto_onetimeauth(subkey_, cipher, len, subkey);
     //Salsa20_crypto_stream_salsa20_xor_block0(block_, block, 64, nonce_, subkey);
   }
@@ -405,13 +406,18 @@ int32_t perf_salsa() {
   return exit_success;
 }
 
-int32_t main()
+int32_t main(int argc, char *argv[])
 {
-  int32_t res = exit_success;
-  res = test_salsa();
-  if (res == exit_success) {
-    res = perf_salsa();
+  if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
+    int32_t res = test_salsa();
+    if (res == exit_success) {
+      res = perf_salsa();
+    }
+    return res;
+  } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
+    return test_salsa();
+  } else {    
+    printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
+    return exit_failure;
   }
-  return res;
 }
-  

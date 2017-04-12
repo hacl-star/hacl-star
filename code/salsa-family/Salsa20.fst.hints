@@ -1,0 +1,168 @@
+[
+  "*vé\"×-w\u0014‹Ž\u0002ÇL'Ol",
+  [
+    [
+      "Salsa20.state",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [ "Salsa20.op_String_Access", 1, 2, 1, [ "@query" ], 0 ],
+    [
+      "Salsa20.salsa20",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "haseqTm_refine_89ca984d58100ebf87df2ad1ed88d530",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Salsa20.salsa20",
+      2,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "haseqTm_refine_89ca984d58100ebf87df2ad1ed88d530",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Salsa20.salsa20",
+      3,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Salsa20.salsa20",
+      4,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Salsa20.salsa20",
+      5,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Buffer.equal", "equation_FStar.Mul.op_Star",
+        "equation_FStar.UInt64.n", "equation_FStar.UInt64.t",
+        "equation_FStar.UInt64.v", "equation_FStar.UInt8.t",
+        "equation_Hacl.UInt8.t", "equation_Salsa20.op_String_Access",
+        "equation_Salsa20.uint8_p", "equation_Spec.Salsa20.blocklen",
+        "equation_Spec.Salsa20.keylen", "equation_Spec.Salsa20.noncelen",
+        "equation_Spec.Salsa20.salsa20_ctx",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "kinding_FStar.UInt8.t_@tok", "lemma_FStar.Buffer.no_upd_lemma_1",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Multiply",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_blocklen",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_counterbits",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_incr",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_keylen",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_noncelen",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_blocklen",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_counterbits",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_incr",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_keylen",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_noncelen",
+        "refinement_interpretation_Tm_refine_37a0857914d89104011d086c3ad059e7",
+        "refinement_interpretation_Tm_refine_3bc04952e495dc70c0ea20124c41a18c",
+        "refinement_interpretation_Tm_refine_6925cb0f165c2ed09ea63ef366099574",
+        "refinement_interpretation_Tm_refine_790772d82e6c5382184d4482620e08ca",
+        "refinement_interpretation_Tm_refine_7e3beb6acccffb41919f80afab550fdd",
+        "refinement_interpretation_Tm_refine_c32bdda13bfb14d0d2f58700b5fc6c38",
+        "typing_FStar.Buffer.as_seq"
+      ],
+      0
+    ],
+    [
+      "Salsa20.salsa20",
+      6,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Buffer.buffer", "equation_FStar.UInt32.t",
+        "equation_FStar.UInt64.v", "equation_FStar.UInt8.t",
+        "equation_Hacl.UInt8.t", "equation_Salsa20.op_String_Access",
+        "equation_Salsa20.uint8_p",
+        "equation_Spec.Salsa20.salsa20_encrypt_bytes",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "refinement_interpretation_Tm_refine_aef6ec9d3290a1c96570fbfd09471f2e"
+      ],
+      0
+    ],
+    [
+      "Salsa20.hsalsa20",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Salsa20.hsalsa20",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Salsa20.hsalsa20",
+      3,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Salsa20.hsalsa20",
+      4,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Buffer.buffer", "equation_FStar.UInt8.t",
+        "equation_Hacl.UInt8.t", "equation_Salsa20.op_String_Access",
+        "equation_Salsa20.uint8_p", "equation_Spec.HSalsa20.keylen",
+        "equation_Spec.HSalsa20.noncelen",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "kinding_FStar.UInt8.t_@tok",
+        "refinement_interpretation_Tm_refine_3201164f3fd34668bc5e4add1cefd491",
+        "refinement_interpretation_Tm_refine_3bc04952e495dc70c0ea20124c41a18c",
+        "refinement_interpretation_Tm_refine_7e3beb6acccffb41919f80afab550fdd",
+        "refinement_interpretation_Tm_refine_c32bdda13bfb14d0d2f58700b5fc6c38",
+        "typing_FStar.Buffer.as_seq"
+      ],
+      0
+    ],
+    [
+      "Salsa20.hsalsa20",
+      5,
+      2,
+      1,
+      [
+        "@query", "equation_Hacl.Impl.HSalsa20.op_String_Access",
+        "equation_Salsa20.op_String_Access",
+        "fuel_guarded_inversion_FStar.HyperStack.mem"
+      ],
+      0
+    ]
+  ]
+]

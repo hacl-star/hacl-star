@@ -18,7 +18,7 @@ module H32 = Hacl.UInt32
 module H64 = Hacl.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 private val set_zero_bytes:
   b:uint8_p{length b >= 32} ->
@@ -36,7 +36,8 @@ let set_zero_bytes b =
   b.(24ul) <- zero; b.(25ul) <- zero; b.(26ul) <- zero; b.(27ul) <- zero;
   b.(28ul) <- zero; b.(29ul) <- zero; b.(30ul) <- zero; b.(31ul) <- zero
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 private val lemma_crypto_secretbox_detached:
   h0:mem -> h2:mem -> h3:mem -> h4:mem -> h5:mem -> h6:mem ->
@@ -59,20 +60,17 @@ private let lemma_crypto_secretbox_detached h0 h2 h3 h4 h5 h6 sk mac c =
   lemma_intro_modifies_3_2 c mac h0 h6
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
-
 (* We assume that the first 32 bytes of c and m are 0s and will remain 0s *)
 val crypto_secretbox_detached:
   c:uint8_p ->
   mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ disjoint mac c} ->
-  m:uint8_p ->
+  m:uint8_p{disjoint m c} ->
   mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
   Stack u32
     (requires (fun h -> live h c /\ live h mac /\ live h m /\ live h n /\ live h k))
     (ensures  (fun h0 z h1 -> modifies_2 c mac h0 h1 /\ live h1 c /\ live h1 mac))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let crypto_secretbox_detached c mac m mlen n k =
   let mlen_ = Int.Cast.uint64_to_uint32 mlen in
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
@@ -81,13 +79,9 @@ let crypto_secretbox_detached c mac m mlen n k =
   let h0 = ST.get() in
   let subkey = create (uint8_to_sint8 0uy) 32ul in
   let h1 = ST.get() in
-  Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey (sub n 0ul 16ul) k;
+  Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
   let h2 = ST.get() in
-  Salsa20.crypto_stream_salsa20_xor c
-                                    m
-                                    U64.(mlen +^ 32uL)
-                                    (sub n 16ul 8ul)
-                                    subkey;
+  Salsa20.salsa20 c m U32.(mlen_ +^ 32ul) subkey (sub n 16ul 8ul) 0uL;
   let h3 = ST.get() in
   Poly1305_64.crypto_onetimeauth mac (sub c 32ul mlen_) mlen (sub c 0ul 32ul);
   let h4 = ST.get() in
@@ -100,14 +94,12 @@ let crypto_secretbox_detached c mac m mlen n k =
   0ul
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 private let lemma_crypto_secretbox_open_detached_decrypt (h:mem) (m:uint8_p) (subkey:uint8_p) :
   Lemma (modifies_2 m subkey h h)
   = lemma_intro_modifies_2 m subkey h h
 
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 private val crypto_secretbox_open_detached_decrypt:
   m:uint8_p ->
@@ -121,12 +113,9 @@ private val crypto_secretbox_open_detached_decrypt:
     (ensures (fun h0 _ h1 -> modifies_2 m subkey h0 h1 /\ live h1 m /\ live h1 subkey))
 let crypto_secretbox_open_detached_decrypt m c clen n subkey verify =
     let h = ST.get() in
+    let clen_ = Int.Cast.uint64_to_uint32 clen in
     if U8.(verify =^ 0uy) then (
-      Salsa20.crypto_stream_salsa20_xor m
-                                        c
-					U64.(clen +^ 32uL)
- 					(sub n 16ul 8ul)
-                                    	subkey;
+      Salsa20.salsa20 m c U32.(clen_ +^ 32ul) subkey (sub n 16ul 8ul) 0uL;
       set_zero_bytes subkey;
       set_zero_bytes m;
       0ul)
@@ -153,33 +142,22 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let h0 = ST.get() in
   let tmp    = create (uint8_to_sint8 0uy) 112ul in
   let subkey = Buffer.sub tmp 0ul 32ul in
-  let mackey = Buffer.sub tmp 32ul 64ul in
+  let mackey = Buffer.sub tmp 32ul 32ul in
+  let mackey' = Buffer.sub tmp 64ul 32ul in
   let cmac   = Buffer.sub tmp 96ul 16ul in
-  (* let subkey = create (uint8_to_sint8 0uy) 32ul in *)
-  (* let mackey = create (uint8_to_sint8 0uy) 64ul in *)
-  (* let cmac   = create (uint8_to_sint8 0uy) 16ul in *)
   let h0' = ST.get() in
-  Hacl.Symmetric.HSalsa20.crypto_core_hsalsa20 subkey (sub n 0ul 16ul) k;
-  Salsa20.crypto_stream_salsa20 mackey 32uL (sub n 16ul 8ul) subkey;
+  Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
+  Salsa20.salsa20 mackey mackey' 32ul subkey (sub n 16ul 8ul) 0uL;
   let clen_ = Int.Cast.uint64_to_uint32 clen in
-  Poly1305_64.crypto_onetimeauth cmac (sub c 32ul clen_) clen (Buffer.sub mackey 0ul 32ul);
+  Poly1305_64.crypto_onetimeauth cmac (sub c 32ul clen_) clen mackey;
   let h1 = ST.get() in
   cut (modifies_0 h0 h1);
   assume (Hacl.Policies.declassifiable cmac);
   let verify = cmp_bytes mac cmac 16ul in
   let z = crypto_secretbox_open_detached_decrypt m c clen n subkey verify in
-    (* if U8.(verify =^ 0uy) then ( *)
-    (*   Salsa20.crypto_stream_salsa20_xor m *)
-    (*                                     c *)
-    (*     				U64.(clen +^ 32uL) *)
-    (*     				(sub n 16ul 8ul) *)
-    (*                                 	subkey; *)
-    (*   set_zero_bytes subkey; *)
-    (*   set_zero_bytes m; *)
-    (*   0ul) *)
-    (* else 0xfffffffful in *)
   pop_frame();
   z
+
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 

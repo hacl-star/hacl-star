@@ -32,66 +32,90 @@ module BufferUtils = Crypto.AEAD.BufferUtils
 let mac_requires (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) (tag:MAC.tagB) (h:mem) =
   let open CMA in
   let open HS in
-  EncodingWrapper.ak_acc_tag_separate ak acc tag /\
-  verify_liveness ak tag h /\
   acc_inv ak acc h /\
-  (mac_log ==> Buffer.frameOf tag <> (alog acc).id) /\
-  (authId i ==> CMA.mac_is_unset i ak.region ak h)
+  Buffer.live h tag /\
+  Buffer.live h ak.s /\
+  EncodingWrapper.ak_acc_tag_separate ak acc tag /\
+  (mac_log ==> Buffer.frameOf tag <> (alog acc).id \/
+               Buffer.disjoint_ref_1 tag (HS.as_aref (alog acc))) /\
+  (authId i ==> CMA.mac_is_unset i ak.region ak h) // implies MAC.norm m st.r; already in acc_inv
 
-let pairwise_distinct (r1:HH.rid) (r2:HH.rid) (r3:HH.rid) = 
-  r1 <> r2 /\ r2 <> r3 /\ r3 <> r1
-  
-let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type)
-    (buf1:Buffer.buffer a)
-    (buf2:Buffer.buffer b)
-    (reff:HS.reference c{pairwise_distinct (Buffer.frameOf buf1) (Buffer.frameOf buf2) HS.(reff.id)})
-    (h0 h1:mem) : GTot Type0 =
- let open FStar.HyperStack in
- let open FStar.Buffer in
- HS.modifies (Set.as_set [frameOf buf1; frameOf buf2; reff.id]) h0 h1 /\
- HS.modifies_ref reff.id !{HS.as_ref reff} h0 h1 /\
- Buffer.modifies_buf_1 (frameOf buf1) buf1 h0 h1 /\
- Buffer.modifies_buf_1 (frameOf buf2) buf2 h0 h1
- 
 let mac_modifies 
-        (i:id) (iv:Cipher.iv (Cipher.algi i))
-	(tbuf:lbuffer (v MAC.taglen))
-	(ak:CMA.state (i, iv))
-	(acc:CMA.accBuffer (i, iv)) 
-	(h0 h1:mem) = 
+  (i:id) (iv:Cipher.iv (Cipher.algi i))
+  (tbuf:lbuffer (v MAC.taglen))
+  (ak:CMA.state (i, iv))
+  (acc:CMA.accBuffer (i, iv)) 
+  (h0 h1:mem) 
+= 
   let open FStar.Buffer in	  
   let abuf = MAC.as_buffer (CMA.abuf acc) in
   if safeMac i 
-  then let log = RR.as_hsref CMA.(ilog ak.log) in
-       pairwise_distinct (frameOf abuf) (frameOf tbuf) HS.(log.id) /\
-       modifies_bufs_and_ref abuf tbuf log h0 h1
-  else frameOf abuf <> frameOf tbuf /\
-       HS.modifies (Set.as_set [frameOf abuf; frameOf tbuf]) h0 h1 /\
-       modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
-       modifies_buf_1 (frameOf tbuf) tbuf h0 h1
-       
-let weaken_mac_modifies         
-        (i:id) (iv:Cipher.iv (Cipher.algi i))
-	(tbuf:lbuffer (v MAC.taglen))
-	(ak:CMA.state (i, iv))
-	(acc:CMA.accBuffer (i, iv)) 
-	(h0 h1:mem)
-   : Lemma (let abuf = MAC.as_buffer (CMA.abuf acc) in
-	    Buffer.frameOf abuf = HS.(h0.tip) /\
-	    mac_modifies i iv tbuf ak acc h0 h1 ==>
-	    BufferUtils.mac_modifies CMA.(ak.region) abuf tbuf h0 h1)
-   = ()	    
+  then
+    let log = RR.as_hsref CMA.(ilog ak.log) in
+    CMA.pairwise_distinct (frameOf abuf) (frameOf tbuf) HS.(log.id) /\
+    CMA.modifies_bufs_and_ref abuf tbuf log h0 h1
+  else 
+    frameOf abuf <> frameOf tbuf /\
+    HS.modifies (Set.as_set [frameOf abuf; frameOf tbuf]) h0 h1 /\
+    modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
+    modifies_buf_1 (frameOf tbuf) tbuf h0 h1
 
-#set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
-let mac_wrapper (#i:EncodingWrapper.mac_id) (ak:CMA.state i) (acc:CMA.accBuffer i) (tag:MAC.tagB)
+#reset-options "--z3rlimit 40 --max_fuel 0 --max_ifuel 0"
+val weaken_mac_modifies: i:id -> 
+  iv:Cipher.iv (Cipher.algi i) ->
+  tbuf:lbuffer (v MAC.taglen) ->
+  ak:CMA.state (i, iv) ->
+  acc:CMA.accBuffer (i, iv) -> 
+  h0:mem -> h1:mem -> Lemma 
+  (requires (let abuf = MAC.as_buffer (CMA.abuf acc) in
+             Buffer.frameOf abuf == HS.(h0.tip) /\
+             mac_modifies i iv tbuf ak acc h0 h1))
+  (ensures  (let abuf = MAC.as_buffer (CMA.abuf acc) in
+             BufferUtils.mac_modifies CMA.(ak.region) abuf tbuf h0 h1))
+let weaken_mac_modifies i iv tbuf ak acc h0 h1 = 
+  let open FStar.Buffer in	    
+  let abuf = MAC.as_buffer (CMA.abuf acc) in
+  if safeMac i
+  then ()
+  else
+    BufferUtils.weaken_modifies
+      (Set.as_set [frameOf abuf; frameOf tbuf]) 
+      (Set.as_set [frameOf abuf; frameOf tbuf; CMA.(ak.region)]) h0 h1
+
+private val mac_wrapper_aux: #a:Type -> #b:Type -> 
+  abuf:Buffer.buffer a -> tbuf:Buffer.buffer b -> h0:mem -> h1:mem -> Lemma
+  (requires (Buffer.frameOf abuf <> Buffer.frameOf tbuf /\
+             Buffer.modifies_2 abuf tbuf h0 h1))
+  (ensures  (HS.modifies (Set.as_set [Buffer.frameOf abuf; Buffer.frameOf tbuf]) h0 h1 /\
+             Buffer.modifies_buf_1 (Buffer.frameOf abuf) abuf h0 h1 /\
+             Buffer.modifies_buf_1 (Buffer.frameOf tbuf) tbuf h0 h1))
+let mac_wrapper_aux #a #b abuf tbuf h0 h1 =
+  Buffer.lemma_reveal_modifies_2 abuf tbuf h0 h1
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+let mac_wrapper (#i:EncodingWrapper.mac_id) (ak:CMA.state i) (acc:CMA.accBuffer i)
+  (tag:MAC.tagB{CMA.pairwise_distinct 
+    (Buffer.frameOf (MAC.as_buffer (CMA.abuf acc))) (Buffer.frameOf tag) ak.CMA.region})
   : ST unit
   (requires (fun h0 -> mac_requires ak acc tag h0))
   (ensures (fun h0 _ h1 -> CMA.mac_ensures i ak acc tag h0 h1 /\
 		        mac_modifies (fst i) (snd i) tag ak acc h0 h1))
-  = let h0 = get () in
-    CMA.mac #i ak acc tag; 
-    let h1 = get () in
-    assume (mac_modifies (fst i) (snd i) tag ak acc h0 h1) //NS: need to revise the write effect of UF1CMA.mac, which is currently in an unusable style; see discussion in issue #788 in FStar (known limitation)
+  = let h0 = ST.get () in
+    CMA.mac #i ak acc tag;
+    let h1 = ST.get () in
+    let open FStar.Buffer in
+    let abuf = MAC.as_buffer (CMA.abuf acc) in
+    if safeMac (fst i) then
+      begin
+      // Takes a long time without this useless line
+      let log = RR.as_hsref CMA.(ilog ak.log) in
+      assert (mac_modifies (fst i) (snd i) tag ak acc h0 h1)
+      end
+    else
+      mac_wrapper_aux (MAC.as_buffer (CMA.abuf acc)) tag h0 h1;
+      // Takes a long time without this useless line
+      assert (mac_modifies (fst i) (snd i) tag ak acc h0 h1)
+
 
 #set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let mac_is_set_st 
@@ -254,12 +278,12 @@ let mac #i st #aadlen aad #txtlen plain cipher_tagged ak acc h_init =
    let tag = Buffer.sub cipher_tagged txtlen MAC.taglen in
    let h0 = get () in
    recall_aead_liveness st;
-   mac_wrapper ak acc tag; 
+   mac_wrapper ak acc tag;
    let h1 = get () in
-   assume (enc_dec_liveness st aad plain cipher_tagged h1);
    intro_mac_is_set st aad plain cipher_tagged ak acc h_init h0 h1
-   
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 (*** UF1CMA.verify ***)
 
 (*+ The main work of wrapping UF1CMA.verify is to 
@@ -373,6 +397,7 @@ let acc_inv_weak (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) h : Type0 =
     Buffer.disjoint_ref_1 (MAC.as_buffer (CMA.abuf acc)) (HS.as_aref (CMA.alog acc)) /\
     Buffer.disjoint_ref_1 (MAC.as_buffer ak.r)  (HS.as_aref (CMA.alog acc))))
 
+#reset-options "--z3rlimit 40 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let acc_ensures_weak (#i: MAC.id) (ak: CMA.state i) 
 		     (#aadlen:aadlen_32) (aad:lbuffer (v aadlen))
 		     (#txtlen:txtlen_32) (cipher:lbuffer (v txtlen))
@@ -397,6 +422,7 @@ val frame_accumulate_ensures: #i:CMA.id -> #rw:rw ->
 		     Buffer.modifies_1 (MAC.as_buffer (CMA.abuf acc)) h1 h2))
           (ensures (let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
 		    acc_ensures_weak ak aad cipher h0 acc h2))
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let frame_accumulate_ensures #i #rw aead_st ak #aadlen aad #txtlen plain cipher_tagged h0 acc h1 h2 =
   FStar.Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h1 h2;
   let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in

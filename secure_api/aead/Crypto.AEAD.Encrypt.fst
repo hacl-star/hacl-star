@@ -185,7 +185,7 @@ val encrypt_write_effect :
 	      let h_final = HS.pop h_ideal in
 	      encrypt_ensures st n aad plain cipher_tag h_init h_final /\
 	      encrypt_modifies st cipher_tag h_init h_final)))
-#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 let encrypt_write_effect i st n #aadlen aad #plainlen plain cipher_tag k_0 ak acc
 			 h_init h_push h_prf h_enx h_acc h_mac h_ideal =
   let open HS in			 
@@ -232,13 +232,16 @@ val reestablish_inv:
               then ideal_ensures st n aad plain cipher_tag h3 h4
               else h3 == h4)))
   (ensures    (inv st h4))
+
+#reset-options "--z3rlimit 2000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let reestablish_inv i st n #aadlen aad #plainlen plain cipher_tag ak acc h0 h1 h2 h3 h4 =
   let cipher : lbuffer (v plainlen) = Buffer.sub cipher_tag 0ul plainlen in
   lemma_propagate_inv_enxor st n aad plain cipher_tag h0 h1;
   FStar.Buffer.lemma_intro_modifies_0 h1 h2;
   lemma_propagate_inv_accumulate false st n aad plain cipher_tag h1 h2;
-  lemma_propagate_inv_mac_wrapper st n aad plain cipher_tag ak h2 h3;
+  lemma_propagate_inv_mac_wrapper st n aad plain cipher_tag ak acc h2 h3;
   reestablish_inv st n aad plain cipher_tag h3 h4 //needs some optimization
+#reset-options
 
 ////////////////////////////////////////////////////////////////////////////////
        
@@ -262,6 +265,7 @@ val encrypt:
 	      encrypt_modifies st cipher_tag h0 h1 /\
  	      inv st h1))
 
+#reset-options "--z3rlimit 2000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let encrypt i st n aadlen aad plainlen plain cipher_tagged =
   recall_aead_liveness st;
   let h_init = get() in

@@ -1,9 +1,9 @@
-FSTAR_HOME?=../../../dependencies/FStar
+FSTAR_HOME?=../../dependencies/FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../..
 include ../Makefile.include
 
-SPECS=../../specs ../../specs/generic ../../specs/experimental
+SPECS=../../specs
 
 INCLUDE_DIRS=../bignum ../lib/kremlin $(SPECS)
 
@@ -33,7 +33,9 @@ POLY1305_SPECIFIC= \
 	Hacl.Bignum.AddAndMultiply.fst \
 	Hacl.Impl.Poly1305_64.fst \
 	Hacl.Standalone.Poly1305_64.fst \
-	Poly1305_64.fst
+	Poly1305_64.fst \
+	Hacl.Spec.Poly1305_64.Lemmas1.fst \
+	AEAD.Poly1305_64.fst
 
 
 SLOW=
@@ -42,8 +44,11 @@ TODO=
 
 POLY1305_FILES= $(BIGNUM) $(POLY1305_SPECIFIC)
 
+HINTS_ENABLED?=--use_hints --record_hints
+
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-	$(addprefix --include , $(INCLUDE_DIRS)) --include $(KREMLIN_HOME)/kremlib
+	$(addprefix --include , $(INCLUDE_DIRS)) --include $(KREMLIN_HOME)/kremlib \
+	$(HINTS_ENABLED) $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib --include ../bignum $(addprefix --include , $(SPECS)) \
@@ -57,7 +62,7 @@ all-ct: $(addsuffix -ct, $(POLY1305_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^
 
 all-ver: $(addsuffix -verify, $(POLY1305_FILES))
 
@@ -69,19 +74,33 @@ all-lax: $(addsuffix -lax, $(POLY1305_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	-$(FSTARB) $^
 
 all-hints2: $(addsuffix -hints, $(POLY1305_FILES))
 all-hints:
 	cp bignum_hints/* ../bignum
 	$(MAKE) all-hints2
 	mv ../bignum/*.hints ./bignum_hints
+bignum-hints:
+	cp bignum_hints/* ../bignum
+	$(MAKE) $(addsuffix -hints, $(BIGNUM))
+	mv ../bignum/*.hints ./bignum_hints
+specific-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
 # For CI, all modules restricted from incomplete or slow ones
-all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
+all-ci2: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
+all-ci:
+	cp bignum_hints/* ../bignum
+	$(MAKE) all-ci2
+	mv ../bignum/*.hints ./bignum_hints
+bignum-ci:
+	cp bignum_hints/* ../bignum
+	$(MAKE) $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
+	mv ../bignum/*.hints ./bignum_hints
+specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_SPECIFIC)))
 
 
-test-c:
+poly1305.exe:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p poly-c
 	$(KREMLIN_HOME)/krml -tmpdir poly-c $(KREMLIN_ARGS) \
@@ -97,7 +116,7 @@ test-c:
                 -no-prefix Hacl.Test.Poly1305_64 -o poly1305.exe
 	./poly1305.exe
 
-extract-c:
+Poly1305_64.c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p poly-c
 	$(KREMLIN_HOME)/krml -tmpdir poly-c $(KREMLIN_ARGS) \
@@ -112,6 +131,22 @@ extract-c:
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
                 -skip-linking
 
+AEAD_Poly1305_64.c:
+	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
+	mkdir -p poly-c
+	$(KREMLIN_HOME)/krml -tmpdir poly-c $(KREMLIN_ARGS) \
+		$(addprefix -I , $(INCLUDE_DIRS)) \
+		AEAD.Poly1305_64.fst \
+		-drop 'Combinators' -drop 'Hacl.Endianness' -drop 'Spec.\*' \
+		-bundle 'Hacl.Spec.\*' -bundle 'Hacl.Spe.\*' \
+		-drop 'Hacl.Bignum.Parameters' -drop 'Hacl.Endianness' \
+		-drop 'Hacl.Spec' -drop 'Hacl.Spe' -drop 'Hacl.Cast' \
+		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
+		-drop Prims -drop FStar -bundle 'AEAD.Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,AEAD.Poly1305_64,Hacl.Spec.\*,Hacl.Spe.\*' \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
+                -skip-linking
+
+extract-c: Poly1305_64.c AEAD_Poly1305_64.c
 
 include $(FSTAR_HOME)/src/gmake/fstar.mk
 include $(FSTAR_HOME)/ulib/ml/Makefile.include

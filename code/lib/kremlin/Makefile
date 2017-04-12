@@ -1,4 +1,4 @@
-FSTAR_HOME?=../../../../FStar
+FSTAR_HOME?=../../../dependencies/FStar
 FSTAR?=$(FSTAR_HOME)/bin/fstar.exe
 FSTAR_ARGS=
 

@@ -1,6 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
-#include "Hacl_AEAD_Chacha20Poly1305.h"
+#include "Chacha20Poly1305.h"
 #include "sodium.h"
 #include "openssl/evp.h"
 
@@ -84,7 +84,7 @@ int32_t test_api()
           mac[MACLEN], decrypted[MESSAGE_LEN];
   uint32_t res;
   int i;
-  Hacl_AEAD_Chacha20Poly1305_aead_encrypt(ciphertext, mac, plaintext, MESSAGE_LEN, aad, 12, key, nonce); 
+  Chacha20Poly1305_aead_encrypt(ciphertext, mac, plaintext, MESSAGE_LEN, aad, 12, key, nonce); 
   TestLib_compare_and_print("HACL aead cipher", xciphertext, ciphertext, MESSAGE_LEN);
   TestLib_compare_and_print("HACL aead mac", xmac, mac, MACLEN);
 
@@ -149,7 +149,7 @@ int32_t perf_api() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Hacl_AEAD_Chacha20Poly1305_aead_encrypt(ciphertext, mac, plaintext, len, aad, 12, key, nonce);
+    Chacha20Poly1305_aead_encrypt(ciphertext, mac, plaintext, len, aad, 12, key, nonce);
     plaintext[0] = mac[0];
   }
   b = TestLib_cpucycles_end();
@@ -164,17 +164,24 @@ int32_t perf_api() {
   return exit_success;
 }
 
-int32_t main()
+int32_t main(int argc, char *argv[])
 {
-  if (sodium_init() == -1) {
-    printf("libsodium not installed? sodium_init failed\n");
-    exit(EXIT_FAILURE);
+  if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
+    if (sodium_init() == -1) {
+      printf("libsodium not installed? sodium_init failed\n");
+      exit(EXIT_FAILURE);
+    }
+    int32_t res;
+    res = test_api();
+    if (res == exit_success) {
+      res = perf_api();
+    }
+    return res;
+  } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
+    return test_api();
+  } else {    
+    printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
+    return exit_failure;
   }
-  int32_t res;
-  res = test_api();
-  if (res == exit_success) {
-    res = perf_api();
-  }
-  return res;
 }
   

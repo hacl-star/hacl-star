@@ -1,4 +1,4 @@
-FSTAR_HOME?=../../../FStar
+FSTAR_HOME?=../../../dependencies/FStar
 
 FSTAR_FILES=$(addprefix $(FSTAR_HOME)/ulib/ml/, prims.cmx FStar_Mul.cmx FStar_Float.cmx FStar_Char.cmx \
       FStar_Int8.cmx FStar_UInt8.cmx FStar_Int16.cmx FStar_UInt16.cmx \

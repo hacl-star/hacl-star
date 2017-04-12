@@ -11,12 +11,16 @@ let aeadRealIVSize = CoreCrypto.aeadRealIVSize
 let aeadTagSize = CoreCrypto.aeadTagSize
 
 type aead_state
-external ocaml_AEAD_create: aead_cipher -> string -> aead_state = "ocaml_AEAD_create"
+type aes_impl =
+  | HaclAES
+  | ValeAES
+
+external ocaml_AEAD_create: aead_cipher -> aes_impl -> string -> aead_state = "ocaml_AEAD_create"
 external ocaml_AEAD_encrypt: aead_state -> string -> string -> string -> string = "ocaml_AEAD_encrypt"
 external ocaml_AEAD_decrypt: aead_state -> string -> string -> string -> string option = "ocaml_AEAD_decrypt"
 
-let aead_create (c:aead_cipher) (k:bytes) =
-  ocaml_AEAD_create c (string_of_bytes k)
+let aead_create (c:aead_cipher) (i:aes_impl) (k:bytes) =
+  ocaml_AEAD_create c i (string_of_bytes k)
 
 let aead_encrypt (st:aead_state) (iv:bytes) (ad:bytes) (d:bytes) =
   let c = ocaml_AEAD_encrypt st (string_of_bytes iv) (string_of_bytes ad) (string_of_bytes d) in

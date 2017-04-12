@@ -38,7 +38,7 @@ void print_results(char *txt, double t1, unsigned long long d1, int rounds, int 
 }
 
 #define KEYSIZE 32
-#define ROUNDS 1000
+#define ROUNDS 3000
 
   uint8_t
   scalar1[32] =

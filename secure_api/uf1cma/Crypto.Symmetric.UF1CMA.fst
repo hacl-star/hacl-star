@@ -1,3 +1,6 @@
+(*--build-config
+options:--trace_error --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../../FStar/ulib/hyperstack --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../../secure_api/vale --include ../../secure_api/uf1cma --include ../../secure_api/utils --include ../../specs --include ../../../kremlin/kremlib
+--*)
 (**
    This file states our probabilistic security assumption on
    polynomial MACs, and provides an idealized implementation,
@@ -12,7 +15,7 @@ open FStar.UInt64
 open FStar.Buffer
 
 (* open Crypto.Symmetric.Poly1305.Spec *)
-(* open Crypto.Symmetric.Poly1305 // avoid? *)
+(* open Crypto.Symmetric.Poly1305 / avoid? *)
 (* module PS_ = Hacl.Spec.Poly1305_64 *)
 module PS_ = Hacl.Spe.Poly1305_64
 module PS = Spec.Poly1305
@@ -28,7 +31,7 @@ module RR = FStar.Monotonic.RRef
 module MAC = Crypto.Symmetric.MAC
 
 
-//16-12-19 should go to HyperStack? 
+//16-12-19 should go to HyperStack?
 
 
 // should go elsewhere
@@ -39,7 +42,7 @@ type alg = macAlg
 let alg_of_id = macAlg_of_id
 
 (** Length of the single-use part of the key *)
-let keylen (i:id) = 
+let keylen (i:id) =
   match aeadAlg_of_id i with
   | AES_128_GCM       -> 16ul
   | AES_256_GCM       -> 16ul
@@ -53,7 +56,7 @@ let skeylen (i:id) =  // can't refine with {skeyed i} here
   | _                 ->  0ul // dummy; never allocated.
 
 (** Does the algorithm use a static key? *)
-let skeyed (i:id) = 
+let skeyed (i:id) =
   match aeadAlg_of_id i with
   | AES_128_GCM       -> true
   | AES_256_GCM       -> true
@@ -64,7 +67,7 @@ type skey (rgn:rid) (i:id) =
 
 //16-10-16 can't make it abstract?
 (** Conditionally-allocated abstract key (accessed only in this module) *)
-let akey (rgn:rid) (i:id) = 
+let akey (rgn:rid) (i:id) =
   o:option (skey rgn i) {Some? o <==> skeyed i}
   // using a sum type for KreMLin. Was: if skeyed i then skey rgn i else unit
 
@@ -87,6 +90,7 @@ let akey_gen r i =
     Some k
   else None
 
+#reset-options "--max_fuel 0 --z3rlimit 40"
 
 val akey_coerce: r:erid -> i:id -> kb:lbuffer (UInt32.v (skeylen i)) -> ST (akey r i)
   (requires (fun h -> live h kb))
@@ -106,6 +110,8 @@ let akey_coerce r i kb =
     lemma_reveal_modifies_1 sk h1 h2;
     Some sk
   else None
+
+#reset-options
 
 (** One-time MAC instance *)
 type id = MAC.id
@@ -157,7 +163,7 @@ noeq type state (i:id) =
     log: log_ref i region ->
     state i
 
-let live_ak #r (#i:id) m (ak:akey r (fst i)) = 
+let live_ak #r (#i:id) m (ak:akey r (fst i)) =
   skeyed (fst i) ==> live m (get_skey #r #(fst i) ak)
 
 let mac_is_fresh (i:id) (region:erid) m0 (st:state i) m1 =
@@ -177,7 +183,7 @@ let genPost (i:id) (region:erid) m0 (st:state i) m1 =
   mac_is_fresh i region m0 st m1 /\
   mac_is_unset i region st m1
 
-#reset-options "--z3rlimit 2000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 1000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 val alloc: region:erid -> i:id
   -> ak:akey region (fst i)
@@ -185,8 +191,8 @@ val alloc: region:erid -> i:id
   -> k:lbuffer (UInt32.v (keylen (fst i))){frameOf k == region}
   -> ST (state i)
   (requires (fun m0 -> live m0 k /\ live_ak m0 ak))
-  (ensures  (fun m0 st m1 -> 
-    genPost i region m0 st m1 /\ 
+  (ensures  (fun m0 st m1 ->
+    genPost i region m0 st m1 /\
     Buffer.modifies_1 k m0 m1 ))
 let alloc region i ak k =
   let h0 = ST.get () in
@@ -203,9 +209,7 @@ let alloc region i ak k =
   assert(modifies_ref region TSet.empty h0 hz);
   MAC.encode_r r rb;
   let h2 = ST.get () in
-  (* if skeyed (fst i)  *)
-  (* then *) lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
-  (* else  lemma_reveal_modifies_2 (MAC.as_buffer r) rb h1 h2; *)
+  lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
   lemma_intro_modifies_1 k h0 h2;
   Buffer.blit sb 0ul s 0ul 16ul;
   let h3 = ST.get () in
@@ -215,23 +219,25 @@ let alloc region i ak k =
     begin
     log_cmp_monotonic i;
     let log = RR.m_alloc #(log i) #log_cmp region (snd i, None) in
-    let h4 = ST.get() in 
+    let h4 = ST.get() in
     lemma_intro_modifies_1 k h0 h4;
     State #i #region r s log
     end
   else
     begin
-    let h4 = ST.get() in 
+    let h4 = ST.get() in
     lemma_intro_modifies_1 k h0 h4;
     State #i #region r s ()
     end
 
 
+#set-options " --initial_ifuel 0 --max_ifuel 0"
+
 val gen: region:erid -> i:id -> ak:akey region (fst i) -> ST (state i)
   (requires (fun m0 -> live_ak m0 ak))
-  (ensures (fun m0 st m1 -> 
-    genPost i region m0 st m1 /\ 
-    modifies_one region m0 m1 /\ 
+  (ensures (fun m0 st m1 ->
+    genPost i region m0 st m1 /\
+    modifies_one region m0 m1 /\
     modifies_ref region TSet.empty m0 m1 ))
 let gen region i ak =
   let len = keylen (fst i) in
@@ -239,7 +245,7 @@ let gen region i ak =
   let h1 = ST.get() in
   random (UInt32.v len) k;
   let st =  alloc region i ak k in
-  let h3 = ST.get() in 
+  let h3 = ST.get() in
   lemma_reveal_modifies_1 k h1 h3;
   st
 
@@ -248,12 +254,12 @@ val coerce: region:erid -> i:id{~(authId i)}
   -> k:lbuffer (UInt32.v (keylen (fst i))){frameOf k == region}
   -> ST (state i)
   (requires (fun m0 -> live m0 k /\ live_ak m0 ak))
-  (ensures (fun m0 st m1 -> 
-    genPost i region m0 st m1 /\ 
+  (ensures (fun m0 st m1 ->
+    genPost i region m0 st m1 /\
     modifies_1 k m0 m1))
 let coerce region i ak k =
-  alloc region i ak k 
-  
+  alloc region i ak k
+
 
 (** Hash accumulators (several per instance)
 
@@ -315,11 +321,13 @@ val start: #i:id -> st:state i -> StackInline (accBuffer i)
   (ensures  (fun h0 a h1 ->
     Buffer.frameOf (MAC.as_buffer a.a) == h1.tip /\
     ~(h0 `Buffer.contains` (MAC.as_buffer (abuf a))) /\
-    (mac_log ==> 
+    (mac_log ==>
       HS.sel h1 (alog a) = Seq.createEmpty /\
       ~(h0 `HS.contains` (alog a))) /\
     acc_inv st a h1 /\
     modifies_0 h0 h1))
+
+#set-options " --initial_ifuel 1 --max_ifuel 1"
 
 let start #i st =
   let h0 = ST.get () in
@@ -339,13 +347,16 @@ let start #i st =
     Acc #i a ()
 
 
-let modifies_buf_and_ref (#a:Type) (#b:Type) (buf:Buffer.buffer a) (ref:reference b) h h' : GTot Type0 =
-  (forall rid. Set.mem rid (Map.domain h.h) ==>
-    HH.modifies_rref rid !{Buffer.as_ref buf, HS.as_ref ref} h.h h'.h
-    /\ (forall (#a:Type) (b:Buffer.buffer a). 
-      (frameOf b == rid /\ live h b /\ disjoint b buf
-      /\ disjoint_ref_1 b (HS.as_aref ref)) ==> equal h b h' b))
 
+let modifies_buf_and_ref (#a:Type) (#b:Type)
+  (buf:Buffer.buffer a)
+  (ref:reference b{frameOf buf == ref.id}) h0 h1 : GTot Type0 =
+  HS.modifies_one ref.id h0 h1 /\
+  HS.modifies_ref ref.id !{HS.as_ref ref, Buffer.as_ref buf} h0 h1 /\
+  (forall (#t:Type) (buf':Buffer.buffer t).
+    (frameOf buf' == ref.id /\ Buffer.live h0 buf' /\
+    Buffer.disjoint buf buf' /\ Buffer.disjoint_ref_1 buf' (HS.as_aref ref)) ==>
+    equal h0 buf' h1 buf')
 
 (* TODO: begin here *)
 
@@ -354,7 +365,7 @@ noextract val sel_word: h:mem -> b:PL.wordB{live h b} -> GTot word
 let sel_word h b = as_seq h b
 
 (** Only used when mac_log is true *)
-private noextract val _read_word: len:u32 -> b:PL.wordB{length b == UInt32.v len} 
+private noextract val _read_word: len:u32 -> b:PL.wordB{length b == UInt32.v len}
   -> s:Seq.seq UInt8.t -> i:u32{UInt32.v i <= UInt32.v len} -> ST word
   (requires (fun h -> live h b /\ Seq.slice (sel_word h b) 0 (UInt32.v i) == s))
   (ensures  (fun h0 s h1 -> h0 == h1 /\ live h1 b /\ s == sel_word h1 b))
@@ -402,18 +413,11 @@ val update: #i:id -> st:state i -> acc:accBuffer i -> w:lbuffer 16 ->
        Seq.cons (Buffer.as_seq h0 w) (HS.sel h0 (alog acc)) /\
        (let buf = MAC.as_buffer acc.a in
         let rid = frameOf buf in
-        //Alternative 1:
-        //HS.modifies (Set.singleton rid) h0 h1 /\
-        //HS.modifies_ref rid (TSet.singleton (FStar.Heap.Ref (HS.as_ref (alog acc)))) h0 h1 /\
-        //Buffer.modifies_buf_1 rid buf h0 h1)
-        // Alternative 2:
-        //modifies_bufs_and_refs 
-        //  (Buffer.only buf) (TSet.singleton (HS.as_aref (alog acc))) h0 h1)
-        // Alternative 3 (works):
-        modifies_buf_and_ref buf (alog acc) h0 h1) 
+        modifies_buf_and_ref buf (alog acc) h0 h1)
      else
        Buffer.modifies_1 (MAC.as_buffer acc.a) h0 h1) ))
 
+#reset-options "--z3rlimit 100"
 let update #i st acc w =
   let h0 = ST.get () in
   if mac_log then
@@ -431,28 +435,24 @@ let update #i st acc w =
   let h2 = ST.get () in
   lemma_reveal_modifies_1 (MAC.as_buffer acc.a) h1 h2;
   MAC.frame_sel_elem h1 h2 st.r
+#reset-options
 
 
-abstract let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type)
-  (buf1:Buffer.buffer a) (buf2:Buffer.buffer b) (ref:reference c) h h' : GTot Type0 =
-  (forall rid. Set.mem rid (Map.domain h.h) ==>
-    HH.modifies_rref rid !{Buffer.as_ref buf1, Buffer.as_ref buf2, HS.as_ref ref} h.h h'.h
-    /\ (forall (#a:Type) (b:Buffer.buffer a).
-      (frameOf b == rid /\ live h b /\ disjoint_2 b buf1 buf2
-      /\ disjoint_ref_1 b (HS.as_aref ref)) ==> equal h b h' b))
+let pairwise_distinct (r1:HH.rid) (r2:HH.rid) (r3:HH.rid) =
+  r1 <> r2 /\ r2 <> r3 /\ r3 <> r1
 
-(** Auxiliary lemma to prove modifies clause of `mac` *)
-private val modifies_mac_aux: #a:Type -> #b:Type -> #c:Type ->
-  buf1:Buffer.buffer a -> buf2:Buffer.buffer b -> ref:reference c -> v:c ->
-  h0:mem -> h1:mem -> h2:mem -> Lemma
-  (requires (modifies_2 buf1 buf2 h0 h1 /\
-             h1 `HS.contains` ref /\ h2 == HS.upd h1 ref v))
-  (ensures (modifies_bufs_and_ref buf1 buf2 ref h0 h2))
-let modifies_mac_aux #a #b #c buf1 buf2 ref v h0 h1 h2 =
-  lemma_reveal_modifies_2 buf1 buf2 h0 h1
+let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type)
+  (buf1:Buffer.buffer a) (buf2:Buffer.buffer b)
+  (ref:reference c{pairwise_distinct (frameOf buf1) (frameOf buf2) ref.id}) h0 h1 : GTot Type0 =
+  HS.modifies (Set.as_set [frameOf buf1; frameOf buf2; ref.id]) h0 h1 /\
+  HS.modifies_ref ref.id !{HS.as_ref ref} h0 h1 /\
+  Buffer.modifies_buf_1 (frameOf buf1) buf1 h0 h1 /\
+  Buffer.modifies_buf_1 (frameOf buf2) buf2 h0 h1
 
 let mac_ensures
-  (i:id) (st:state i) (acc:accBuffer i) (tag:MAC.tagB) (h0:mem) (h1:mem) =
+  (i:id) (st:state i) (acc:accBuffer i)
+  (tag:MAC.tagB{pairwise_distinct (frameOf (MAC.as_buffer (abuf acc))) (frameOf tag) st.region})
+  (h0:mem) (h1:mem) =
   Buffer.live h1 st.s /\
   MAC.live h1 st.r /\
   Buffer.live h1 tag /\
@@ -478,7 +478,7 @@ val mac:
   #i:id ->
   st:state i ->
   acc:accBuffer i ->
-  tag:lbuffer 16 ->
+  tag:lbuffer 16{pairwise_distinct (frameOf (MAC.as_buffer (abuf acc))) (frameOf tag) st.region} ->
   Stack unit
   (requires (fun h0 ->
     acc_inv st acc h0 /\
@@ -489,9 +489,9 @@ val mac:
     Buffer.disjoint st.s tag /\
     (mac_log ==> frameOf tag <> (alog acc).id \/
                  Buffer.disjoint_ref_1 tag (HS.as_aref (alog acc))) /\
-    (authId i ==> RR.m_sel h0 (ilog st.log) == (snd i, None)) ))
+    (authId i ==> snd (RR.m_sel h0 (ilog st.log)) == None)))
   (ensures (fun h0 _ h1 -> mac_ensures i st acc tag h0 h1))
-    
+
 
 #reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0"
 let mac #i st acc tag =
@@ -515,12 +515,10 @@ let mac #i st acc tag =
     let r = MAC.sel_elem h2 st.r in
     let s = Buffer.as_seq h2 st.s in
     let t = MAC.mac vs r s in
-    MAC.lemma_poly_finish_to_mac i h2 tag (MAC.sel_elem h0 acc.a) h0 st.s vs r;
-    if authId i then
-      modifies_mac_aux (MAC.as_buffer acc.a) tag (RR.as_hsref (ilog st.log))
-        (snd i, Some (vs,t)) h0 h1 h2
+    MAC.lemma_poly_finish_to_mac i h2 tag (MAC.sel_elem h0 acc.a) h0 st.s vs r
     end
 #reset-options
+
 
 let verify_liveness (#i:id) (st:state i) (tag:MAC.tagB) (h:mem) =
   Buffer.live h st.s /\
@@ -600,7 +598,7 @@ let verify #i st acc tag =
       MAC.frame_sel_elem h2 h3 st.r;
       MAC.frame_sel_elem h0 h2 acc.a;
       RR.m_recall #st.region #(log i) #(log_cmp #i) (ilog st.log);
-      modifies_verify_aux (ilog st.log) (alog acc) (MAC.as_buffer acc.a) computed 
+      modifies_verify_aux (ilog st.log) (alog acc) (MAC.as_buffer acc.a) computed
         h0 h1 h2 h3;
       let t = read_word 16ul computed in
       let vs = !(alog acc) in
