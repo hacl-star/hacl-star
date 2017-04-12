@@ -28,7 +28,7 @@ module U32 = FStar.UInt32
 module F   = Hacl.Spec.Bignum.Field
 
 
-#set-options "--initial_fuel 0 --max_fuel 0"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 [@"c_inline"]
 val fsum:
