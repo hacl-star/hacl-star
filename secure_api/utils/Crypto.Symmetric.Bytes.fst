@@ -85,7 +85,7 @@ let rec load_bytes l buf =
   if l = 0ul then
     Seq.createEmpty
   else
-    let b = Buffer.index buf 1ul in
+    let b = Buffer.index buf 0ul in
     let t = load_bytes (l -^ 1ul) (Buffer.sub buf 1ul (l -^ 1ul)) in
     Seq.cons b t
 
