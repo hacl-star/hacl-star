@@ -77,11 +77,12 @@ let fsum_unrolled a b =
     c
 
 
-#set-options "--z3rlimit 40 --initial_fuel 6 --max_fuel 6"
+#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsum_unrolled: s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} -> Lemma
   (fsum_unrolled s1 s2 == fsum_spec s1 s2)
-let lemma_fsum_unrolled s1 s2 = ()
+let lemma_fsum_unrolled s1 s2 =
+  Seq.lemma_eq_intro (fsum_unrolled s1 s2) (fsum_spec s1 s2)
 
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
@@ -116,11 +117,12 @@ let fdifference_unrolled a b =
     c
 
 
-#set-options "--z3rlimit 40 --initial_fuel 6 --max_fuel 6"
+#set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fdifference_unrolled: s1:seqelem -> s2:seqelem{gte_limbs s1 s2 len} -> Lemma
   (fdifference_unrolled s1 s2 == fdifference_spec s1 s2)
-let lemma_fdifference_unrolled s1 s2 = ()
+let lemma_fdifference_unrolled s1 s2 =
+  Seq.lemma_eq_intro (fdifference_unrolled s1 s2) (fdifference_spec s1 s2)
 
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
@@ -860,11 +862,12 @@ let fscalar_unrolled a sc =
     c
 
 
-#set-options "--z3rlimit 40 --initial_fuel 6 --max_fuel 6"
+#set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fscalar_unrolled: s1:seqelem -> sc:limb -> Lemma
   (fscalar_unrolled s1 sc == Hacl.Spec.Bignum.Fscalar.fscalar_spec s1 sc)
-let lemma_fscalar_unrolled s1 s2 = ()
+let lemma_fscalar_unrolled s1 sc =
+  Seq.lemma_eq_intro (fscalar_unrolled s1 sc) (Hacl.Spec.Bignum.Fscalar.fscalar_spec s1 sc)
 
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
