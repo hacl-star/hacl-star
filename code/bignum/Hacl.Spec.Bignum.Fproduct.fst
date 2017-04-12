@@ -167,7 +167,7 @@ val lemma_carry_wide_step_1: s:seqelem_wide -> i:nat{i < len - 1 /\ carry_wide_p
 let rec lemma_carry_wide_step_1 s i j =
   if j = 0 then () else lemma_carry_wide_step_1 s i (j-1)
 
-#reset-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --max_fuel 0"
 
 val lemma_carry_wide_step_2_1: s1':nat -> s0':nat -> s1:nat -> s0:nat -> i:nat -> Lemma
   (requires (s0' = s0 % pow2 limb_size /\ s1' = s1 + s0 / pow2 limb_size))
@@ -175,11 +175,15 @@ val lemma_carry_wide_step_2_1: s1':nat -> s0':nat -> s1:nat -> s0:nat -> i:nat -
     = pow2 (limb_size * (i+1)) * s1 + pow2 (limb_size * (i)) * s0))
 let lemma_carry_wide_step_2_1 s1' s0' s1 s0 i =
   Math.Lemmas.lemma_div_mod s0 (pow2 limb_size);
-  Math.Lemmas.pow2_plus (limb_size * i) limb_size;
+  assert(s0 = (pow2 limb_size) * (s0 / pow2 limb_size) + (s0 % pow2 limb_size));
   Math.Lemmas.distributivity_add_right (limb_size) i 1;
+  assert(pow2 (limb_size * (i + 1)) = pow2 (limb_size * i + limb_size));
+  Math.Lemmas.pow2_plus (limb_size * i) limb_size;
+  assert(pow2 (limb_size * (i + 1)) = pow2 (limb_size * i) * pow2 limb_size);
+  Math.Lemmas.distributivity_add_right (pow2 (limb_size * (i+1))) s1 (s0 / pow2 limb_size);
+  Math.Lemmas.paren_mul_right (pow2 limb_size * i) (pow2 limb_size) (s0 / pow2 limb_size);
   Math.Lemmas.distributivity_add_right (pow2 (limb_size * i)) (pow2 limb_size * s1) s0;
-  Math.Lemmas.paren_mul_right (pow2 (limb_size * i)) (pow2 limb_size) s1;
-  Math.Lemmas.distributivity_add_right (pow2 (limb_size * i)) (pow2 limb_size * s1') s0'
+  Math.Lemmas.distributivity_add_right (pow2 (limb_size * i)) (pow2 limb_size * (s0 / pow2 limb_size)) (s0 % pow2 limb_size)
 
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
