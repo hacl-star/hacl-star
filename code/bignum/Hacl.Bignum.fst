@@ -54,7 +54,7 @@ assume val lemma_diff: a:int -> b:int -> p:pos ->
   Lemma ( (a - b) % p = ((a%p) - b) % p /\ (a - b) % p = (a - (b % p)) % p)
 
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 [@"c_inline"]
 val fdifference:
@@ -112,6 +112,7 @@ val fscalar:
       /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec (as_seq h0 b) s)))
       /\ as_seq h1 a == fscalar_tot (as_seq h0 b) s
     ))
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 [@"c_inline"]
 let fscalar output b s =
   let hinit = ST.get() in
@@ -125,6 +126,7 @@ let fscalar output b s =
   carry_top_wide tmp;
   let h'' = ST.get() in
   lemma_carry_top_wide_spec (as_seq h' tmp);
+  assert(forall (i:nat). i < len ==> w (Seq.index (as_seq h'' tmp) i) < pow2 n);
   copy_from_wide_ output tmp;
   lemma_copy_from_wide (as_seq h'' tmp);
   pop_frame()

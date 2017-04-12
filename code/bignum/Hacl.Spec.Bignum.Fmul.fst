@@ -47,6 +47,20 @@ let rec mul_shift_reduce_pre_ (output:seqelem_wide) (input:seqelem) (input2:seqe
           mul_shift_reduce_pre_ output' input' input2 (ctr-1))))
           else true)
 
+#reset-options "--max_fuel 0 --max_fuel 2 --z3rlimit 50"
+
+val lemma_mul_shift_reduce_pre_def: output:seqelem_wide -> input:seqelem -> input2:seqelem -> ctr:nat{ctr <= len /\ ctr > 0} -> Lemma (
+    mul_shift_reduce_pre_ output input input2 ctr == (
+    sum_scalar_multiplication_pre_ output input (Seq.index input2 (len-ctr)) len
+    /\ (let output' = sum_scalar_multiplication_spec output input (Seq.index input2 (len-ctr)) in
+       (ctr > 1 ==> shift_reduce_pre input) /\
+         (let input'  = if ctr > 1 then shift_reduce_spec input else input in
+          mul_shift_reduce_pre_ output' input' input2 (ctr-1)))))
+let lemma_mul_shift_reduce_pre_def output input input2 ctr = ()
+
+
+#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 50"
+
 
 let mul_shift_reduce_pre (output:seqelem_wide) (input_init:seqelem) (input:seqelem) (input2:seqelem) (ctr:nat{ctr <= len}) : GTot Type0 (decreases ctr) =
   seval_wide output % prime = (seval input_init * seval_ input2 (len - ctr)) % prime
@@ -54,7 +68,7 @@ let mul_shift_reduce_pre (output:seqelem_wide) (input_init:seqelem) (input:seqel
   /\ mul_shift_reduce_pre_ output input input2 ctr
 
 
-#set-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1"
+#set-options "--z3rlimit 20 --max_ifuel 1 --max_fuel 0"
 
 val lemma_mod_mul_distr: a:nat -> b:nat -> p:pos -> Lemma ((a+b)%p = ((a%p) + b) % p)
 let lemma_mod_mul_distr a b p = Math.Lemmas.lemma_mod_plus_distr_l a b p
@@ -143,34 +157,66 @@ val mul_shift_reduce_spec_:
   output:seqelem_wide ->
   input_init:seqelem ->
   input:seqelem ->
-  input2:seqelem ->
-  ctr:nat{ctr <= len /\ mul_shift_reduce_pre output input_init input input2 ctr} ->
-  Tot (s:seqelem_wide{seval_wide s % prime = (seval input_init * seval input2) % prime})
-  (decreases ctr)
+  input2:seqelem{mul_shift_reduce_pre output input_init input input2 len} ->
+  ctr:nat{ctr <= len} ->
+  Tot (t:tuple2 seqelem_wide seqelem{
+    let output', input' = t in mul_shift_reduce_pre output' input_init input' input2 ctr})
+  (decreases (len - ctr))
 
-#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
-
+#reset-options "--z3rlimit 500 --initial_fuel 1 --max_fuel 1"
 
 let rec mul_shift_reduce_spec_ output input_init input input2 ctr =
-  if ctr = 0 then output
+  if ctr = len then output, input
   else (
-    let i = ctr - 1 in
+    let output, input = mul_shift_reduce_spec_ output input_init input input2 (ctr+1) in
+    let i = ctr in
     let j = len - i - 1 in
     let input2j = Seq.index input2 j in
     let output' = sum_scalar_multiplication_spec output input input2j in
     lemma_sum_scalar_multiplication_ output input input2j len;
     cut (seval_wide output' = seval_wide output + (seval input * v input2j));
-    let input'  = if ctr > 1 then shift_reduce_spec input else input in
-    if ctr = 1 then (
+    let input'  = if ctr > 0 then shift_reduce_spec input else input in
+    if ctr = 0 then (
       lemma_mul_shift_reduce_spec_2 output' output input_init input input' input2 (v input2j);
       ()
     ) else (
       lemma_shift_reduce_spec input;
-      lemma_mul_shift_reduce_spec_1 output' output input_init input input' input2 (v input2j) ctr;
+      lemma_mul_shift_reduce_spec_1 output' output input_init input input' input2 (v input2j) (ctr+1);
       ()
     );
-    mul_shift_reduce_spec_ output' input_init input' input2 i
+    (* mul_shift_reduce_spec_ output' input_init input' input2 i *)
+    output', input'
   )
+
+val lemma_mul_shift_reduce_spec_def:
+  output:seqelem_wide ->
+  input_init:seqelem ->
+  input:seqelem ->
+  input2:seqelem{mul_shift_reduce_pre output input_init input input2 len} ->
+  ctr:nat{ctr < len} ->
+  Lemma (
+    mul_shift_reduce_spec_ output input_init input input2 ctr ==
+      (let output, input = mul_shift_reduce_spec_ output input_init input input2 (ctr+1) in
+      let i = ctr in
+      let j = len - i - 1 in
+      let input2j = Seq.index input2 j in
+      let output' = Hacl.Spec.Bignum.Fproduct.sum_scalar_multiplication_spec output input input2j in
+      Hacl.Spec.Bignum.Fproduct.lemma_sum_scalar_multiplication_ output input input2j len;
+      assert (seval_wide output' = seval_wide output + (seval input * v input2j));
+      let input'  = if ctr > 0 then shift_reduce_spec input else input in
+      (output', input')) )
+let lemma_mul_shift_reduce_spec_def output input_init input input2 ctr =
+  ()
+
+val lemma_mul_shift_reduce_spec_def_0:
+  output:seqelem_wide ->
+  input_init:seqelem ->
+  input:seqelem ->
+  input2:seqelem{mul_shift_reduce_pre output input_init input input2 len} ->
+  Lemma (
+    mul_shift_reduce_spec_ output input_init input input2 len == (output, input))
+let lemma_mul_shift_reduce_spec_def_0 output input_init input input2 =
+  ()
 
 
 val lemma_seval_wide_null: a:seqelem_wide -> ctr:nat{ctr <= len} -> Lemma
@@ -180,16 +226,19 @@ let rec lemma_seval_wide_null a ctr =
   if ctr = 0 then () else lemma_seval_wide_null a (ctr-1)
 
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
 val mul_shift_reduce_spec:
   input:seqelem -> input2:seqelem{mul_shift_reduce_pre (Seq.create len wide_zero) input input input2 len} ->
   Tot (s:seqelem_wide{seval_wide s % prime = (seval input * seval input2) % prime})
-let rec mul_shift_reduce_spec input input2 =
+let mul_shift_reduce_spec input input2 =
   lemma_seval_wide_null (Seq.create len wide_zero) len;
   assert_norm (pow2 0 = 1);
-  mul_shift_reduce_spec_ (Seq.create len wide_zero) input input input2 len
+  let output, _ = mul_shift_reduce_spec_ (Seq.create len wide_zero) input input input2 0 in
+  output
 
 
-#set-options "--z3rlimit 5 --initial_fuel 2 --max_fuel 2"
+#set-options "--z3rlimit 20 --initial_fuel 2 --max_fuel 2"
 
 let fmul_pre (input:seqelem) (input2:seqelem) : GTot Type0 =
   mul_shift_reduce_pre (Seq.create len wide_zero) input input input2 len

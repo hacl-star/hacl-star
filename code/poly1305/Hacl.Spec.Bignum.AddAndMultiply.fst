@@ -10,7 +10,7 @@ open Hacl.Spec.Bignum.Fmul
 open Hacl.Spec.Bignum.Modulo
 
 
-#set-options "--initial_fuel 0 --max_fuel 0"
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction let p42 : p:pos{p = 0x40000000000} = assert_norm (pow2 42 = 0x40000000000);
   pow2 42
@@ -31,7 +31,7 @@ let red_46 (s:seqelem) =
   v (Seq.index s 0) < p46 /\ v (Seq.index s 1) < p46 /\ v (Seq.index s 2) < p46
 
 
-#set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
 
 val fsum_unrolled: s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} -> Tot (s:seqelem{
   v (Seq.index s 0) = v (Seq.index s1 0) + v (Seq.index s2 0)
@@ -45,14 +45,13 @@ let fsum_unrolled a b =
     let c = Seq.upd c 0 ((Seq.index a 0) +^ (Seq.index b 0)) in
     c
 
-#set-options "--z3rlimit 10 --initial_fuel 4 --max_fuel 4"
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 val lemma_fsum_unrolled: s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} -> Lemma
   (fsum_unrolled s1 s2 == fsum_spec s1 s2)
-let lemma_fsum_unrolled s1 s2 = ()
+let lemma_fsum_unrolled s1 s2 =
+  Seq.lemma_eq_intro (fsum_unrolled s1 s2) (fsum_spec s1 s2)
 
-
-#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsum_def:
   s1:seqelem{red s1 len} -> s2:seqelem{red s2 len} ->
@@ -354,7 +353,7 @@ private val shift_reduce_unrolled:
 private let shift_reduce_unrolled input input2 =
   mul_shift_reduce_unrolled_ (Seq.create len wide_zero) input input input2
 
-#set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
 val lemma_mul_shift_reduce_unrolled: input:seqelem -> input2:seqelem -> Lemma
   (requires (mul_shift_reduce_pre' input input2))
@@ -493,7 +492,7 @@ let lemma_46_44_is_fine_to_carry_last s =
   assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000)
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val fmul_46_44_is_fine:
   s1:seqelem{red_46 s1} -> s2:seqelem{red_44 s2} ->
@@ -546,7 +545,7 @@ private let carry_spec_unrolled s =
   s2
 
 
-#set-options "--z3rlimit 5 --initial_fuel 5 --max_fuel 5"
+#reset-options "--z3rlimit 50 --initial_fuel 5 --max_fuel 5"
 
 private val lemma_carry_spec_unrolled:
   s:seqelem{carry_limb_pre s 0} -> Lemma (carry_spec_unrolled s == carry_limb_spec s)
@@ -609,7 +608,7 @@ let lemma_carried_is_fine_to_carry_last s =
   assert_norm (pow2 64 = 0x10000000000000000)
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val last_pass_is_fine:
   s:seqelem{red_45 s} ->

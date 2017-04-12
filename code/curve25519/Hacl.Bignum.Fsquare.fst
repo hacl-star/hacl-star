@@ -68,7 +68,7 @@ private let fsquare__ tmp output =
   Seq.lemma_eq_intro (as_seq h1 tmp) (fsquare_spec_ (as_seq h0 output))
 
 
-#set-options "--z3rlimit 5"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 [@"c_inline"]
 private val fsquare_:
