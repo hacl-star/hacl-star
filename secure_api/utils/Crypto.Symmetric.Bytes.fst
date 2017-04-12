@@ -76,7 +76,6 @@ let sel_bytes h l buf = Buffer.as_seq h buf
 // Should be polymorphic on the integer size
 // This will be leaky (using implicitly the heap)
 // TODO: We should isolate it in a different module, e.g. Buffer.Alloc
-#set-options "--detail_errors"
 val load_bytes: l:UInt32.t -> buf:lbuffer (v l) -> Stack (lbytes (v l))
   (requires (fun h0 -> Buffer.live h0 buf))
   (ensures  (fun h0 r h1 -> h0 == h1 /\ Buffer.live h0 buf /\
