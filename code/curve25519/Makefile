@@ -29,8 +29,6 @@ X25519_SPECIFIC= \
 	Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.Spec.Bignum.Crecip.fst \
 	Hacl.Bignum.Modulo.fst \
-	Hacl.Bignum.Fsum.fst \
-	Hacl.Bignum.Fdifference.fst \
 	Hacl.Bignum.Fsquare.fst \
 	Hacl.Bignum.Crecip.fst \
 	Hacl.Spec.EC.Point.fst \

@@ -60,13 +60,13 @@ let live_st m (st:poly1305_state) : Type0 =
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 [@"substitute"]
-inline_for_extraction val upd_3: b:felem -> b0:limb -> b1:limb -> b2:limb ->
+val upd_3: b:felem -> b0:limb -> b1:limb -> b2:limb ->
   Stack unit
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == Hacl.Spec.Poly1305_64.create_3 b0 b1 b2))
 [@"substitute"]
-inline_for_extraction let upd_3 b b0 b1 b2 =
+let upd_3 b b0 b1 b2 =
   b.(0ul) <- b0;
   b.(1ul) <- b1;
   b.(2ul) <- b2;
@@ -241,7 +241,7 @@ let poly1305_update log st m =
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 
 [@"substitute"]
-inline_for_extraction val poly1305_concat:
+val poly1305_concat:
   b:uint8_p{length b = 16} ->
   m:uint8_p{disjoint b m} ->
   len:U64.t{U64.v len < 16 /\ U64.v len = length m} ->
@@ -252,7 +252,7 @@ inline_for_extraction val poly1305_concat:
       /\ as_seq h1 b == Seq.append (as_seq h0 m) (Seq.create (16 - U64.v len) (uint8_to_sint8 0uy))
     ))
 [@"substitute"]
-inline_for_extraction let poly1305_concat b m len =
+let poly1305_concat b m len =
   assert_norm(pow2 32 = 0x100000000);
   let h0 = ST.get() in
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h0 m);
@@ -432,7 +432,7 @@ let poly1305_last_pass acc =
   let h = ST.get() in
   last_pass_is_fine (as_seq h acc);
   lemma_carried_is_fine_to_carry (as_seq h acc);
-  Hacl.Bignum.Fproduct.carry_limb_ acc 0ul;
+  Hacl.Bignum.Fproduct.carry_limb_ acc;
   let h1 = ST.get() in
   lemma_carried_is_fine_to_carry_top (as_seq h1 acc);
   Hacl.Spec.Bignum.Modulo.lemma_carry_top_spec (as_seq h1 acc);
@@ -463,7 +463,6 @@ let bignum_to_128 acc =
 
 
 [@"substitute"]
-inline_for_extraction
 val poly1305_finish__:
   log:log_t ->
   st:poly1305_state ->
@@ -485,7 +484,7 @@ val poly1305_finish__:
            else Hacl.Spec.Poly1305_64.poly1305_process_last_block_spec (Spec.MkState r0 acc0 log) m len))
       ))
 [@"substitute"]
-inline_for_extraction let poly1305_finish__ log st m len =
+let poly1305_finish__ log st m len =
   let h0 = ST.get() in
   if U64.(len =^ 0uL) then (log)
   else (

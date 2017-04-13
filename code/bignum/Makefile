@@ -30,13 +30,13 @@ BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
 
 %.fst-ct: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib $^ --lax
+		--include ../lib $^ --lax --include $(KREMLIN_HOME)/kremlib
 
 all-ct: $(addsuffix -ct, $(BIGNUM_FILES))
 
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib $^ --use_hints --record_hints
+		--include ../lib $^ --use_hints --record_hints --include $(KREMLIN_HOME)/kremlib
 
 verify: $(addsuffix -verify, $(BIGNUM_FILES))
 
@@ -44,7 +44,7 @@ all-ci: verify
 
 %-hints: %.fst
 	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib $^ --record_hints --use_hints $(OTHERFLAGS)
+		--include ../lib $^ --record_hints --use_hints --include $(KREMLIN_HOME)/kremlib
 
 ALL_HINTS=$(addsuffix -hints, $(BIGNUM_MODULES))
 
