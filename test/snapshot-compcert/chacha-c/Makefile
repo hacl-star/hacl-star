@@ -10,7 +10,7 @@ gcc:
 	gcc-6 -O3 testlib.c -shared -o libkremlin.so -fPIC
 	gcc-6 -O3 -c -S Chacha20.c -g
 	mv Chacha20.s Chacha20-gcc.s
-	gcc-6 -v -O3 -mtune=native Chacha20.c kremlib.c Combinators.c test-chacha.c ../../../other_providers/openssl/libcrypto.a -lsodium -lkremlin -L. -g3 -gdwarf-3
+	gcc-6 -O3 Chacha20.c kremlib.c Combinators.c test-chacha.c ../../../other_providers/openssl/libcrypto.a -lsodium -lkremlin -L. -g3 -gdwarf-3
 	mv a.out test-chacha-gcc.exe
 	./test-chacha-gcc.exe
 
