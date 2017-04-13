@@ -238,7 +238,6 @@ val carry_0_to_1:
       /\ as_seq h1 output == carry_0_to_1_spec (as_seq h0 output)))
 [@"c_inline"]
 let carry_0_to_1 output =
-  assume (length output > 1);
   let i0 = output.(0ul) in
   let i1 = output.(1ul) in
   assert_norm(pow2 0 = 1);
