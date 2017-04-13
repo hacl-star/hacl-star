@@ -49,7 +49,7 @@ inline_for_extraction private let fmul output a b =
   fmul output a b
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 [@"substitute"]
 inline_for_extraction private val fsquare_times:
