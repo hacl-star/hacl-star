@@ -25,14 +25,14 @@ inline_for_extraction let mask_51 : x:limb{v x = pow2 51 - 1} =
 #set-options "--z3rlimit 20"
 
 [@"substitute"]
-private inline_for_extraction val add_zero_:
+private val add_zero_:
   b:felem ->
   Stack unit
     (requires (fun h -> live h b /\ add_zero_pre (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 b /\ add_zero_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == add_zero_spec (as_seq h0 b)))
 [@"substitute"]
-private inline_for_extraction let add_zero_ b =
+private let add_zero_ b =
   assert_norm (pow2 63 > 0x3fffffffffff68);
   assert_norm (pow2 63 > 0x3ffffffffffff8);
   Math.Lemmas.pow2_double_sum 63;
@@ -49,7 +49,7 @@ private inline_for_extraction let add_zero_ b =
 
 
 [@"substitute"]
-inline_for_extraction val add_zero:
+val add_zero:
   b:felem ->
   Stack unit
     (requires (fun h -> live h b /\ add_zero_pre (as_seq h b)))
@@ -57,19 +57,19 @@ inline_for_extraction val add_zero:
       /\ as_seq h1 b == add_zero_spec (as_seq h0 b)
       /\ eval h1 b % prime = eval h0 b % prime))
 [@"substitute"]
-inline_for_extraction let add_zero b =
+let add_zero b =
   let h0 = ST.get() in
   add_zero_ b;
   lemma_add_zero_spec (as_seq h0 b)
 
 
-inline_for_extraction val carry_top:
+val carry_top:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ carry_top_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == carry_top_spec (as_seq h0 b)))
-inline_for_extraction let carry_top b =
+let carry_top b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in
   assert_norm((1 * pow2 limb_size) % pow2 word_size = pow2 limb_size);
@@ -82,27 +82,27 @@ inline_for_extraction let carry_top b =
 
 
 [@"c_inline"]
-inline_for_extraction val reduce:
+val reduce:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ reduce_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ reduce_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == reduce_spec (as_seq h0 b)))
 [@"c_inline"]
-inline_for_extraction let reduce b =
+let reduce b =
   let b0 = b.(0ul) in
   b.(0ul) <- nineteen *^ b0
 
 
 [@"c_inline"]
-inline_for_extraction val carry_top_wide:
+val carry_top_wide:
   b:felem_wide ->
   Stack unit
     (requires (fun h -> live h b /\ carry_top_wide_pre (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_wide_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == carry_top_wide_spec (as_seq h0 b)))
 [@"c_inline"]
-inline_for_extraction let carry_top_wide b =
+let carry_top_wide b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in
   let open Hacl.Bignum.Wide in

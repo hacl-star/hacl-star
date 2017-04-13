@@ -26,7 +26,7 @@ module U64  = FStar.UInt64
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
 
 [@"c_inline"]
-inline_for_extraction val add_and_multiply:
+val add_and_multiply:
   acc:felem ->
   block:felem{disjoint acc block} ->
   r:felem{disjoint acc r} ->
@@ -40,7 +40,7 @@ inline_for_extraction val add_and_multiply:
       /\ as_seq h1 acc == add_and_multiply_tot (as_seq h0 acc) (as_seq h0 block) (as_seq h0 r)
       ))
 [@"c_inline"]
-inline_for_extraction let add_and_multiply acc block r =
+let add_and_multiply acc block r =
   assert_norm(pow2 63 = 0x8000000000000000);
   let h0 = ST.get() in
   lemma_fsum_def (as_seq h0 acc) (as_seq h0 block);

@@ -22,14 +22,14 @@ inline_for_extraction let mask_2_42' : p:t{v p = pow2 42 - 1} =
   uint64_to_limb 0x3ffffffffffuL
 
 [@"c_inline"]
-inline_for_extraction val reduce:
+val reduce:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ reduce_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ reduce_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == reduce_spec (as_seq h0 b)))
 [@"c_inline"]
-inline_for_extraction let reduce b =
+let reduce b =
   assert_norm(pow2 4 = 16);
   assert_norm(pow2 2 = 4);
   let b0 = b.(0ul) in
