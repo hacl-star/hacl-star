@@ -42,11 +42,11 @@ val mul_shift_reduce_:
   ctr:U32.t{U32.v ctr <= len} ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h input2
-      /\ mul_shift_reduce_pre (as_seq h output) (Ghost.reveal init_input) (as_seq h input) (as_seq h input2) (U32.v ctr)))
+      /\ mul_shift_reduce_pre (as_seq h output) (Ghost.reveal #seqelem init_input) (as_seq h input) (as_seq h input2) (U32.v ctr)))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 input /\ live h0 input2 /\ modifies_2 output input h0 h1
       /\ live h1 output /\ live h1 input
-      /\ mul_shift_reduce_pre (as_seq h0 output) (Ghost.reveal init_input) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)
-      /\ as_seq h1 output == mul_shift_reduce_spec_ (as_seq h0 output) (Ghost.reveal init_input) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)
+      /\ mul_shift_reduce_pre (as_seq h0 output) (Ghost.reveal #seqelem init_input) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)
+      /\ as_seq h1 output == mul_shift_reduce_spec_ (as_seq h0 output) (Ghost.reveal #seqelem init_input) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr)
       ))
 [@"c_inline"]
 let rec mul_shift_reduce_ output init_input input input2 ctr =
@@ -65,18 +65,18 @@ let rec mul_shift_reduce_ output init_input input input2 ctr =
     if (ctr >^ 1ul) then (
       let open Hacl.Bignum.Limb in
       lemma_shift_reduce_spec (as_seq h0 input);
-      lemma_mul_shift_reduce_spec_1 (as_seq h' output) (as_seq h0 output) (Ghost.reveal init_input)
+      lemma_mul_shift_reduce_spec_1 (as_seq h' output) (as_seq h0 output) (Ghost.reveal #seqelem init_input)
                                    (as_seq h0 input) (as_seq h' input) (as_seq h0 input2)
                                    (v input2i) (FStar.UInt32.v ctr);
       ()
     ) else (
       let open Hacl.Bignum.Limb in
-      lemma_mul_shift_reduce_spec_2 (as_seq h' output) (as_seq h0 output) (Ghost.reveal init_input)
+      lemma_mul_shift_reduce_spec_2 (as_seq h' output) (as_seq h0 output) (Ghost.reveal #seqelem init_input)
                                    (as_seq h0 input) (as_seq h' input) (as_seq h0 input2)
                                    (v input2i);
       ()
     );
-    mul_shift_reduce_ output init_input input input2 i
+    mul_shift_reduce_ output init_input input input2 i 
   )
 
 #reset-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
