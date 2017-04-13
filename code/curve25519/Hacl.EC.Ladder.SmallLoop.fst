@@ -31,7 +31,7 @@ private inline_for_extraction let last_bit byt =
   bit
 
 
-private inline_for_extraction val cmult_small_loop_step_1:
+private val cmult_small_loop_step_1:
   nq:point ->
   nqpq:point ->
   nq2:point ->
@@ -50,7 +50,7 @@ private inline_for_extraction val cmult_small_loop_step_1:
           swap_conditional_spec (as_seq h0 (getx nq), as_seq h0 (getz nq)) (as_seq h0 (getx nqpq), as_seq h0 (getz nqpq)) (last_bit byte))
     ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-private inline_for_extraction let cmult_small_loop_step_1 nq nqpq nq2 nqpq2 q byt (* i *) =
+private let cmult_small_loop_step_1 nq nqpq nq2 nqpq2 q byt (* i *) =
   let bit = last_bit byt in
   let h0 = ST.get() in
   swap_conditional nq nqpq bit;
@@ -58,7 +58,7 @@ private inline_for_extraction let cmult_small_loop_step_1 nq nqpq nq2 nqpq2 q by
   lemma_reveal_modifies_2 nq nqpq h0 h1
 
 
-private inline_for_extraction val cmult_small_loop_step_2:
+private val cmult_small_loop_step_2:
   nq:point ->
   nqpq:point ->
   nq2:point ->
@@ -74,12 +74,12 @@ private inline_for_extraction val cmult_small_loop_step_2:
       /\ (as_seq h1 (getx nq2), as_seq h1 (getz nq2), as_seq h1 (getx nqpq2), as_seq h1 (getz nqpq2)) ==
           Hacl.Spec.EC.AddAndDouble2.fmonty_tot (as_seq h0 (getx nq)) (as_seq h0 (getz nq)) (as_seq h0 (getx nqpq)) (as_seq h0 (getz nqpq)) (as_seq h0 (getx q))))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-private inline_for_extraction let cmult_small_loop_step_2 nq nqpq nq2 nqpq2 q byt (* i *) =
+private let cmult_small_loop_step_2 nq nqpq nq2 nqpq2 q byt (* i *) =
   fmonty nq2 nqpq2 nq nqpq q
 
 open Hacl.Spec.EC.Ladder
 
-private inline_for_extraction val cmult_small_loop_step:
+private val cmult_small_loop_step:
   nq:point ->
   nqpq:point ->
   nq2:point ->
@@ -100,13 +100,13 @@ private inline_for_extraction val cmult_small_loop_step:
          (spointa1, spointb1) == cmult_small_loop_step_spec (spointa0) (spointb0) pointq byte)
     ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-private inline_for_extraction let cmult_small_loop_step nq nqpq nq2 nqpq2 q byt (* i *) =
+private let cmult_small_loop_step nq nqpq nq2 nqpq2 q byt (* i *) =
   cmult_small_loop_step_1 nq nqpq nq2 nqpq2 q byt (* i *);
   cmult_small_loop_step_2 nq nqpq nq2 nqpq2 q byt (* i *);
   cmult_small_loop_step_1 nq2 nqpq2 nq nqpq q byt (* i *)
 
 
-private inline_for_extraction val cmult_small_loop_double_step:
+private val cmult_small_loop_double_step:
   nq:point ->
   nqpq:point ->
   nq2:point ->
@@ -127,7 +127,7 @@ private inline_for_extraction val cmult_small_loop_double_step:
          (spointa1, spointb1) == cmult_small_loop_double_step_spec (spointa0) (spointb0) pointq byte)
     ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
-private inline_for_extraction let cmult_small_loop_double_step nq nqpq nq2 nqpq2 q byt (* i *) =
+private let cmult_small_loop_double_step nq nqpq nq2 nqpq2 q byt (* i *) =
   cmult_small_loop_step nq nqpq nq2 nqpq2 q byt (* i *);
   let byt = H8.(byt <<^ 1ul) in
   cmult_small_loop_step nq2 nqpq2 nq nqpq q byt (* U32.(i-^1ul) *)
