@@ -4,36 +4,38 @@ module Hacl.Bignum25519
 
 open FStar.Buffer
 
-val red_51: Hacl.Bignum.Parameters.seqelem -> GTot Type0
-val red_513: Hacl.Bignum.Parameters.seqelem -> GTot Type0
-val red_53: Hacl.Bignum.Parameters.seqelem -> GTot Type0
-val red_5413: Hacl.Bignum.Parameters.seqelem -> GTot Type0
-
 let limb  = Hacl.UInt64.t
-let felem = b:FStar.Buffer.buffer limb{Buffer.length b = 5}
+let felem = b:Buffer.buffer limb{Buffer.length b = 5}
+let seqelem = b:Seq.seq limb{Seq.length b = 5}
+
+val red_51: seqelem -> GTot Type0
+val red_513: seqelem -> GTot Type0
+val red_53: seqelem -> GTot Type0
+val red_5413: seqelem -> GTot Type0
 
 
-val seval: Hacl.Bignum.Parameters.seqelem -> Tot Spec.Curve25519.elem
+val seval: seqelem -> GTot Spec.Curve25519.elem
 
 
 val fsum:
   a:felem ->
-  b:felem ->
+  b:felem{disjoint a b} ->
   Stack unit
     (requires (fun h -> live h a /\ live h b /\ red_513 (as_seq h a) /\ red_513 (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ red_513 (as_seq h0 a) /\ red_513 (as_seq h0 b)
       /\ live h1 a /\ modifies_1 a h0 h1 /\ red_53 (as_seq h1 a)
       /\ seval (as_seq h1 a) == Spec.Curve25519.fadd (seval (as_seq h0 a)) (seval (as_seq h0 b))))
-
+  
 
 val fdifference:
   a:felem ->
-  b:felem ->
+  b:felem{disjoint a b} ->
   Stack unit
     (requires (fun h -> live h a /\ live h b /\ red_513 (as_seq h a) /\ red_513 (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ red_513 (as_seq h0 a) /\ red_513 (as_seq h0 b)
       /\ live h1 a /\ modifies_1 a h0 h1 /\ red_5413 (as_seq h1 a)
       /\ seval (as_seq h1 a) == Spec.Curve25519.fsub (seval (as_seq h0 b)) (seval (as_seq h0 a))))
+
 
 val reduce_513:
   a:felem -> 
@@ -46,24 +48,22 @@ val reduce_513:
 
 val fdifference_reduced:
   a:felem ->
-  b:felem ->
+  b:felem{disjoint a b} ->
   Stack unit
     (requires (fun h -> live h a /\ live h b /\ red_513 (as_seq h a) /\ red_513 (as_seq h b)))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\ red_513 (as_seq h0 a) /\ red_513 (as_seq h0 b)
       /\ live h1 a /\ modifies_1 a h0 h1 /\ red_513 (as_seq h1 a)
       /\ seval (as_seq h1 a) == Spec.Curve25519.fsub (seval (as_seq h0 b)) (seval (as_seq h0 a))))
 
-
 val fmul:
   out:felem ->
   a:felem ->
   b:felem ->
   Stack unit
-    (requires (fun h -> live h out /\ live h a /\ live h b /\ red_5413 (as_seq h a) /\ red_53 (as_seq h b)))
-    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 a /\ live h0 b /\ red_5413 (as_seq h0 a) /\ red_53 (as_seq h0 b) /\
+    (requires (fun h -> live h out /\ live h a /\ live h b /\ red_53 (as_seq h a) /\ red_5413 (as_seq h b)))
+    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 a /\ live h0 b /\ red_53 (as_seq h0 a) /\ red_5413 (as_seq h0 b) /\
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
       seval (as_seq h1 out) == Spec.Curve25519.fmul (seval (as_seq h0 a)) (seval (as_seq h0 b))))
-
 
 val times_2:
   out:felem ->
@@ -81,7 +81,7 @@ val times_d:
   Stack unit
     (requires (fun h -> live h out /\ live h a /\ red_513 (as_seq h a)))
     (ensures (fun h0 _ h1 -> live h0 out /\ live h0 a /\ red_513 (as_seq h0 a)
-      /\ live h1 out /\ modifies_1 out h0 h1 /\ red_53 (as_seq h1 out)
+      /\ live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out)
       /\ seval (as_seq h1 out) == Spec.Curve25519.fmul Spec.Ed25519.d (seval (as_seq h0 a))))
 
 

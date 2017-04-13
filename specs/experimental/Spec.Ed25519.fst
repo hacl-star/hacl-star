@@ -16,14 +16,14 @@ open Spec.Curve25519
 type aff_point = tuple2 elem elem           // Affine point
 type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
 
-let sha512 (b:bytes{length b < pow2 125}) : Tot (lbytes 64) = 
+let sha512 (b:bytes{length b < pow2 32}) : Tot (lbytes 64) = 
   sha512 b
 
 let modp_inv (x:elem) : Tot elem =
   x ** (prime - 2)
 
-let d : elem =
-  ( - 121665 * modp_inv 121666 ) % prime
+let d : elem = 37095705934669439343138083508754565189542113879843219016388785533085940283555
+  (* ( - 121665 * modp_inv 121666 ) % prime *)
 
 let q: elem = 
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
