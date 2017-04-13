@@ -44,7 +44,7 @@ inline_for_extraction let add_and_multiply acc block r =
   assert_norm(pow2 63 = 0x8000000000000000);
   let h0 = ST.get() in
   lemma_fsum_def (as_seq h0 acc) (as_seq h0 block);
-  Hacl.Bignum.Fsum.fsum_ acc block clen;
+  Hacl.Bignum.Fsum.fsum_ acc block;
   let h1 = ST.get() in
   fmul_46_44_is_fine (as_seq h1 acc) (as_seq h1 r);
   Hacl.Bignum.Fmul.fmul acc acc r

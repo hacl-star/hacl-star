@@ -1,5 +1,5 @@
 [
-  "Å°\u0005¤,­°+#èÝÈ´¹j\t",
+  "|\u0019L\u0005üi§F]ûé©lD¡ä",
   [
     [
       "Hacl.EC.Point.point",
@@ -490,8 +490,9 @@
       1,
       1,
       [
-        "@query", "assumption_FStar.HyperHeap.HasEq_rid", "b2t_def",
-        "bool_inversion", "bool_typing", "data_elim_FStar.UInt32.Mk",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.HyperHeap.HasEq_rid", "b2t_def", "bool_inversion",
+        "bool_typing", "data_elim_FStar.UInt32.Mk",
         "data_elim_FStar.UInt64.Mk", "equation_FStar.Buffer.as_seq",
         "equation_FStar.Buffer.buffer", "equation_FStar.Buffer.contains",
         "equation_FStar.Buffer.live",
@@ -577,8 +578,7 @@
         "typing_FStar.Heap.domain",
         "typing_FStar.HyperStack.__proj__HS__item__h",
         "typing_FStar.Map.domain", "typing_FStar.Map.sel",
-        "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.v",
-        "unit_inversion"
+        "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.v"
       ],
       0
     ],

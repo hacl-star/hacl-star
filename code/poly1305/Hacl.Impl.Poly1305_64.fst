@@ -432,7 +432,7 @@ let poly1305_last_pass acc =
   let h = ST.get() in
   last_pass_is_fine (as_seq h acc);
   lemma_carried_is_fine_to_carry (as_seq h acc);
-  Hacl.Bignum.Fproduct.carry_limb_ acc 0ul;
+  Hacl.Bignum.Fproduct.carry_limb_ acc;
   let h1 = ST.get() in
   lemma_carried_is_fine_to_carry_top (as_seq h1 acc);
   Hacl.Spec.Bignum.Modulo.lemma_carry_top_spec (as_seq h1 acc);

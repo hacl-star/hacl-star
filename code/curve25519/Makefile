@@ -29,8 +29,6 @@ X25519_SPECIFIC= \
 	Hacl.Spec.Bignum.Fsquare.fst \
 	Hacl.Spec.Bignum.Crecip.fst \
 	Hacl.Bignum.Modulo.fst \
-	Hacl.Bignum.Fsum.fst \
-	Hacl.Bignum.Fdifference.fst \
 	Hacl.Bignum.Fsquare.fst \
 	Hacl.Bignum.Crecip.fst \
 	Hacl.Spec.EC.Point.fst \
@@ -49,7 +47,7 @@ X25519_SPECIFIC= \
 	Hacl.EC.fst
 
 # Files that are too slow and for which verification speed must improve
-SLOW=
+SLOW=Hacl.Spec.Bignum.Fsquare.fst
 
 # Files that still have errors
 TODO=

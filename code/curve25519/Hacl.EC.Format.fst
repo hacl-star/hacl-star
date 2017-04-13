@@ -61,7 +61,7 @@ open Hacl.Endianness
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-private inline_for_extraction val upd_5: output:felem ->
+private val upd_5: output:felem ->
   o0:limb{v o0 < pow2 51} ->
   o1:limb{v o1 < pow2 51} ->
   o2:limb{v o2 < pow2 51} ->
@@ -73,7 +73,7 @@ private inline_for_extraction val upd_5: output:felem ->
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
       /\ as_seq h1 output == Hacl.Spec.EC.Format.seq_upd_5 o0 o1 o2 o3 o4
     ))
-private inline_for_extraction let upd_5 output output0 output1 output2 output3 output4 =
+private let upd_5 output output0 output1 output2 output3 output4 =
   output.(0ul) <- output0;
   output.(1ul) <- output1;
   output.(2ul) <- output2;
@@ -88,14 +88,14 @@ private inline_for_extraction let upd_5 output output0 output1 output2 output3 o
   Seq.lemma_eq_intro (as_seq h1 output) (Hacl.Spec.EC.Format.seq_upd_5 output0 output1 output2 output3 output4)
 
 
-private inline_for_extraction val upd_5': output:felem ->
+private val upd_5': output:felem ->
   o0:limb -> o1:limb -> o2:limb -> o3:limb -> o4:limb ->
   Stack unit
     (requires (fun h -> Buffer.live h output))
     (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
       /\ as_seq h1 output == Hacl.Spec.EC.Format.seq_upd_5 o0 o1 o2 o3 o4
     ))
-private inline_for_extraction let upd_5' output output0 output1 output2 output3 output4 =
+private let upd_5' output output0 output1 output2 output3 output4 =
   output.(0ul) <- output0;
   output.(1ul) <- output1;
   output.(2ul) <- output2;

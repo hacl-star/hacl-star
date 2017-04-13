@@ -42,10 +42,6 @@ let statelen i = Block.statelen (cipherAlg_of_id i)
 (* let stlen i = Block.stlen (cipherAlg_of_id i) *)
 
 (*
-private let lemma_lengths (i:id) : Lemma(keylen i <^ blocklen i) = 
-  match i.cipher with 
-  | AES_256_GCM -> ()
-  | CHACHA20_POLY1305 -> ()
 *)
 
 // IDEALIZATION
@@ -61,16 +57,15 @@ type region = rgn:HH.rid {HS.is_eternal_region rgn}
 #reset-options "--max_fuel 0 --z3rlimit 100"
 // to be adjusted, controlling concrete bound.
 //16-10-15 how to ensure it is reduced at compile-time?
-let maxCtr i = 16384ul /^ blocklen i
+let maxCtr i = assert_norm (16384 <= UInt.max_int 32); 16384ul /^ blocklen i
 type ctrT i = x:u32 {x <=^ maxCtr i}
 
 // The PRF domain: an IV and a counter.
 
-type domain (i:id) = { iv:Block.iv (cipherAlg_of_id i); ctr:ctrT i} 
+type domain (i:id) = { iv:Block.iv (cipherAlg_of_id i); ctr:ctrT i }
 let incr (i:id) (x:domain i {x.ctr <^ maxCtr i}) = { iv = x.iv; ctr = x.ctr +^ 1ul }
 
-val above: #i:id -> domain i -> domain i -> GTot bool
-let above #i x z = x.iv = z.iv && x.ctr >=^ z.ctr
+let above (#i:id) (x:domain i) (z:domain i) = x.iv == z.iv /\ x.ctr >=^ z.ctr
 
 // the range of our PRF, after idealization and "reverse inlining."
 // for one-time-pads, we keep both the plain and cipher blocks, instead of their XOR.
@@ -86,8 +81,8 @@ let range (mac_rgn:region) (i:id) (x:domain i): Type0 =
                           else lbytes (v (blocklen i))
 
 inline_for_extraction let iv_0 () = FStar.Int.Cast.uint64_to_uint128 0UL
-noextract let domain_sk0 (i:id) = x:domain i{x.ctr <^ ctr_0 i /\ x.iv = iv_0 () } 
-noextract let domain_mac (i:id) = x:domain i{x.ctr = ctr_0 i} 
+noextract let domain_sk0 (i:id) = x:domain i{x.ctr <^ ctr_0 i /\ x.iv == iv_0 () }
+noextract let domain_mac (i:id) = x:domain i{x.ctr == ctr_0 i} 
 noextract let domain_otp (i:id) = x:domain i{x.ctr >^ ctr_0 i /\ safeId i}
 noextract let domain_blk (i:id) = x:domain i{x.ctr >^ ctr_0 i /\ ~ (safeId i)}
 
@@ -138,7 +133,7 @@ let lemma_find_snoc #rgn #i s e =
 // What's in the table stays there. And the table does not have two entries with the same x.
 // TODO consider using a monotonic map to enforce those
 let table_t rgn mac_rgn (i:id) = 
-  if prf i then r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r = rgn}
+  if prf i then r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r == rgn}
   else unit
 
 // the PRF instance, 
@@ -156,11 +151,11 @@ noeq type state (i:id) =
 
 // boring...
 val itable: i:id {prf i} -> s:state i 
-  -> Tot (r:HS.ref (Seq.seq (entry s.mac_rgn i)) {HS.frameOf r = s.rgn})
+  -> Tot (r:HS.ref (Seq.seq (entry s.mac_rgn i)) {HS.frameOf r == s.rgn})
 let itable i s = s.table
 
 val mktable: i:id {prf i} -> rgn:region -> mac_rgn:region{mac_rgn `HH.extends` rgn}
-  -> r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r = rgn} -> Tot (table_t rgn mac_rgn i)
+  -> r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r == rgn} -> Tot (table_t rgn mac_rgn i)
 let mktable i rgn mac_rgn r = r 
 
 val no_table: i:id {~(prf i)} -> rgn:region -> mac_rgn:region{mac_rgn `HH.extends` rgn} -> Tot (table_t rgn mac_rgn i)
@@ -270,8 +265,11 @@ let prf_mac_inv
 
 // the first block (ctr=0) is used to generate a single-use MAC
 
+val lemma_lengths: i:id -> Lemma (CMA.keylen i <=^ blocklen i)
+let lemma_lengths i = aeadAlg_cipherAlg i
+
 val prf_mac: 
-  i:id -> t:state i -> k_0: CMA.akey t.mac_rgn i -> x:domain_mac i -> ST (CMA.state (i,x.iv))
+  i:id -> t:state i -> k_0:CMA.akey t.mac_rgn i -> x:domain_mac i -> ST (CMA.state (i,x.iv))
   (requires (fun h0 -> if prf i then prf_mac_inv (HS.sel h0 (itable i t)) x h0 else True))
   (ensures (fun h0 mc h1 -> (* beware: mac shadowed by CMA.mac *)
     if prf i then
@@ -302,14 +300,16 @@ val prf_mac:
       HS.modifies_ref t.rgn TSet.empty h0 h1  /\              //but modifies nothing in them
       HS.modifies_ref t.mac_rgn TSet.empty h0 h1 )))
 
-
-#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0"
-
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 let prf_mac i t k_0 x =
+  let macId = (i,x.iv) in
   Buffer.recall t.key;
   recall_region t.mac_rgn;
   if CMA.skeyed i then Buffer.recall (CMA.get_skey #t.mac_rgn #i k_0);
-  let macId = (i,x.iv) in
+  let h0 = ST.get() in
+  // When present the skey is in an eternal region (t.mac_rgn) and isn't manually managed.
+  // so recalling it ensures it's live.
+  assert (CMA.live_ak #t.mac_rgn #macId h0 k_0);
   if prf i then
     begin
     let r = itable i t in
@@ -317,7 +317,6 @@ let prf_mac i t k_0 x =
     let contents = !r in
     match find_mac contents x with
     | Some mc ->  (* beware: mac shadowed by CMA.mac *)
-        let h0 = ST.get() in
         assert (CMA.(MAC.norm_r h0 mc.r));
         Buffer.recall (CMA.(mc.s));
         if mac_log then FStar.Monotonic.RRef.m_recall (CMA.(ilog mc.log));
@@ -329,16 +328,32 @@ let prf_mac i t k_0 x =
         mc
     end
   else
+    begin
+    cut (~(CMA.authId macId));
     let keyBuffer = Buffer.rcreate t.mac_rgn 0uy (CMA.keylen i) in
     let h1 = ST.get() in
     Crypto.Indexing.aeadAlg_cipherAlg i;
+    lemma_lengths i; 
+    assert (Buffer.disjoint t.key keyBuffer);
     getBlock t x (CMA.keylen i) keyBuffer;
+    let h2 = ST.get() in
+    //assert (Buffer.modifies_1 keyBuffer h1 h2);
+    let r:CMA.erid = t.mac_rgn in
+    //let i:CMA.id = macId in
+    //let ak:CMA.akey t.mac_rgn (fst i) = k_0 in
+    //let k:k:lbuffer (UInt32.v (CMA.keylen (fst i))){Buffer.frameOf k == r} = keyBuffer in
+    //assert (Buffer.live h2 k);
+    //assert (CMA.live_ak #t.mac_rgn h2 ak);
     let mc = CMA.coerce t.mac_rgn macId k_0 keyBuffer in
-    let h3 = ST.get() in 
+    let h3 = ST.get() in
+    //assert (Buffer.modifies_1 keyBuffer h2 h3);
+    Buffer.lemma_modifies_1_trans keyBuffer h1 h2 h3;
     Buffer.lemma_reveal_modifies_1 keyBuffer h1 h3;
     mc
+    end
 
-val prf_sk0: 
+
+val prf_sk0:
   #i:id{ CMA.skeyed i } -> t:state i -> ST (CMA.skey t.mac_rgn i)
   (requires (fun h0 -> True))
   (ensures (fun h0 k h1 ->
@@ -399,8 +414,8 @@ let extends (#rgn:region) (#i:id) (s0:Seq.seq (entry rgn i))
   let open FStar.Seq in 
   match find s0 x with 
   | Some _ -> s0 == s1
-  | None   -> Seq.length s1 = Seq.length s0 + 1 /\ 
-	     (Seq.index s1 (Seq.length s0)).x = x /\
+  | None   -> Seq.length s1 == Seq.length s0 + 1 /\ 
+	     (Seq.index s1 (Seq.length s0)).x == x /\
 	     Seq.equal (Seq.slice s1 0 (Seq.length s0)) s0
 
 // modifies a table (at most at x) and a buffer.
@@ -468,7 +483,7 @@ let contains_cipher_block  (#i:id) (#r:rid) (l:nat)
 			   (cipher:lbytes l)
 			   (blocks:Seq.seq (entry r i))
   = match find_otp blocks x with
-    | Some (OTP l' p c) -> l == v l' /\ c ==  cipher
+    | Some (OTP l' p c) -> l == v l' /\ c == cipher
     | None -> False
 
 let prf_dexor_requires (i:id) (t:state i) (x:domain i{ctr_0 i <^ x.ctr}) 
