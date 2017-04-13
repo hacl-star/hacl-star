@@ -197,7 +197,7 @@ private let lemma_aux_2 a b c d : Lemma ( (b * d) * a * c = (b * a) * (d * c) ) 
 private let lemma_aux_3 a b c : Lemma ( a * b * c = (a * b) * c ) = ()
 
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 00"
 
 val lemma_fsquare_spec_2_2_0: r0:nat -> r1:nat -> r2:nat -> r3:nat -> r4:nat -> Lemma
   ( r0 * r0 + r0 * (pow2 51 * r1) + r0 * (pow2 102 * r2) + r0 * (pow2 153 * r3) + r0 * (pow2 204 * r4)
@@ -638,7 +638,7 @@ let lemma_mul_ineq (a:nat) (b:nat) (c:nat{a < c}) (d:nat{b < d}) : Lemma (a * b 
 let lemma_mul_ineq1 (a:pos) (c:nat) (d:nat{c < d}) : Lemma (a * c < a * d) = ()
 
 
-#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 1000 --max_fuel 0"
 
 val lemma_52_to_fsquare_is_fine: s:seqelem{red_52 s} ->
  Lemma (fsquare_pre_ s /\ bounds' (fsquare_spec_ s) (77 * p104) (59 * p104) (41 * p104) (23 * p104) (5 * p104))
@@ -674,7 +674,7 @@ val lemma_104_smaller_than_108: s:seqelem_wide{bounds' s (77 * p104) (59 * p104)
 let lemma_104_smaller_than_108 s = ()
 
 
-#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 1000 --max_fuel 0"
 
 inline_for_extraction let p106 : p:pos{p = 0x400000000000000000000000000} =
   assert_norm(pow2 106 = 0x400000000000000000000000000); pow2 106
