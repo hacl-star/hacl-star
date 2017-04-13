@@ -41,10 +41,10 @@ let ok_plain_len_32 (i:I.id) = l:UInt32.t{safelen i (v l)}
 
 (*** The main stateful API ***)
 //still heavily underspecified in this interface
-val gen (i:I.id) (rgn:eternal_region) 
-  : ST (aead_state i I.Writer) 
-    (requires (fun h -> True)) 
-    (ensures (fun _ _ _ -> True)) 
+val gen (i:I.id) (rgn:eternal_region)
+  : ST (aead_state i I.Writer)
+    (requires (fun h -> True))
+    (ensures (fun _ _ _ -> True))
 
 val genReader
            (#i: I.id)
@@ -69,7 +69,7 @@ val leak
     : ST (lbuffer (v (statelen i)))
   (requires (fun _ -> ~(Flag.prf i)))
   (ensures  (fun _ _ _ -> True))
-  
+
 val encrypt
           (i: I.id)
          (st: aead_state i I.Writer)

@@ -6,17 +6,17 @@ module HS = FStar.HyperStack
 module I = Crypto.Indexing
 module PRF = Crypto.Symmetric.PRF
 
-let aead_state = Invariant.aead_state 
+let aead_state = Invariant.aead_state
 let keylen = PRF.keylen
 let statelen = PRF.statelen
 let plain = Crypto.Plain.plain
 let plainBuffer = Crypto.Plain.plainBuffer
 let safelen (i:I.id) (n:nat) = Invariant.safelen i n (Invariant.otp_offset i)
 
-let gen (i:I.id) (rgn:eternal_region) 
-  : ST (aead_state i I.Writer) 
-    (requires (fun h -> True)) 
-    (ensures (fun _ _ _ -> True)) 
+let gen (i:I.id) (rgn:eternal_region)
+  : ST (aead_state i I.Writer)
+    (requires (fun h -> True))
+    (ensures (fun _ _ _ -> True))
   = Crypto.AEAD.gen i rgn
 
 let genReader
@@ -45,7 +45,7 @@ let leak
   (requires (fun _ -> ~(Flag.prf i)))
   (ensures  (fun _ _ _ -> True))
   = Crypto.AEAD.leak #i st
-  
+
 let encrypt
           (i: I.id)
          (st: aead_state i I.Writer)
