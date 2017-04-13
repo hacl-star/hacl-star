@@ -4,7 +4,9 @@ open FStar.Buffer
 open FStar.UInt32
 
 let hint8_p = buffer Hacl.UInt8.t
+let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 val sign:
   signature:hint8_p{length signature = 64} ->
@@ -13,7 +15,9 @@ val sign:
   len:UInt32.t{UInt32.v len = length msg} ->
   Stack unit
     (requires (fun h -> live h signature /\ live h msg /\ live h secret))
-    (ensures (fun h0 _ h1 -> live h0 secret /\ live h0 secret /\ live h1 signature /\ modifies_1 signature h0 h1))
+    (ensures (fun h0 _ h1 -> live h0 signature /\ live h0 msg /\ live h0 secret /\
+      live h1 signature /\ modifies_1 signature h0 h1 /\
+      h1.[signature] == Spec.Ed25519.sign h0.[secret] h0.[msg]))
 let sign signature secret msg len =
   push_frame();
   let tmp = create 0uL 40ul in

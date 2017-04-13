@@ -1,15 +1,16 @@
 module Hacl.Bignum25519
 
-#set-options "--lax"
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 let red_51 s = Hacl.Spec.EC.AddAndDouble.(bounds s p51 p51 p51 p51 p51)
 let red_513 s = Hacl.Spec.EC.AddAndDouble.red_513 s
 let red_53 s = Hacl.Spec.EC.AddAndDouble.red_53 s
 let red_5413 s = Hacl.Spec.EC.AddAndDouble.red_5413 s
 
-(* let limb  = Hacl.Bignum.Parameters.limb *)
-(* let felme = Hacl.Bignum.Parameters.felem *)
-  
+let seval s = Hacl.Spec.Bignum.Bigint.seval s
+
+
 let fsum a b = Hacl.Bignum.fsum a b
 
 let fdifference a b = Hacl.Bignum.fdifference a b

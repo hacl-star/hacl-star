@@ -5,14 +5,21 @@ open Hacl.UInt64
 open Hacl.Bignum25519
 
 
-let hint64_p = buffer t
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
+let hint8_p = buffer Hacl.UInt8.t
+let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
+
 
 val point_compress:
-  out:hint64_p{length out = 5} ->
+  out:hint64_p{length out = 32} ->
   p:Hacl.Impl.Ed25519.ExtPoint.point ->
   Stack unit
     (requires (fun h -> live h out /\ live h p))
-    (ensures (fun h0 _ h1 -> live h1 out /\ live h0 p /\ modifies_1 out h0 h1))
+    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 p /\ 
+      live h1 out /\ modifies_1 out h0 h1 /\
+      h1.[out] == Spec.point_compress 
+      ))
 let point_compress out p =
   push_frame();
   let tmp  = create (Hacl.Cast.uint64_to_sint64 0uL) 10ul in
