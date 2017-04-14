@@ -38,7 +38,7 @@ unfold inline_for_extraction let be64toh x = be64toh x
 
 
 [@"substitute" ]
-inline_for_extraction val store32_le:
+val store32_le:
   b:buffer U8.t{length b = 4} ->
   z:U32.t ->
   Stack unit
@@ -47,7 +47,7 @@ inline_for_extraction val store32_le:
       /\ little_endian (as_seq h1 b) = U32.v z))
 
 [@"substitute" ]
-inline_for_extraction val load32_le:
+val load32_le:
   b:buffer U8.t{length b = 4} ->
   Stack U32.t
     (requires (fun h -> Buffer.live h b))
@@ -55,7 +55,7 @@ inline_for_extraction val load32_le:
       /\ little_endian (as_seq h0 b) = U32.v z))
 
 [@"substitute" ]
-inline_for_extraction val store32_be:
+val store32_be:
   b:buffer U8.t{length b = 4} ->
   z:U32.t ->
   Stack unit
@@ -64,7 +64,7 @@ inline_for_extraction val store32_be:
       /\ big_endian (as_seq h1 b) = U32.v z))
 
 [@"substitute" ]
-inline_for_extraction val load32_be:
+val load32_be:
   b:buffer U8.t{length b = 4} ->
   Stack U32.t
     (requires (fun h -> Buffer.live h b))
@@ -72,7 +72,7 @@ inline_for_extraction val load32_be:
       /\ big_endian (as_seq h0 b) = U32.v z))
 
 [@"substitute" ]
-inline_for_extraction val store64_le:
+val store64_le:
   b:buffer U8.t{length b = 8} ->
   z:U64.t ->
   Stack unit
@@ -80,14 +80,14 @@ inline_for_extraction val store64_le:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ little_endian (as_seq h1 b) = U64.v z))
 
 [@"substitute" ]
-inline_for_extraction val load64_le:
+val load64_le:
   b:buffer U8.t{length b = 8} ->
   Stack U64.t
     (requires (fun h -> Buffer.live h b))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h1 b /\ little_endian (as_seq h0 b) = U64.v z))
 
 [@"substitute" ]
-inline_for_extraction val store64_be:
+val store64_be:
   b:buffer U8.t{length b = 8} ->
   z:U64.t ->
   Stack unit
@@ -95,21 +95,21 @@ inline_for_extraction val store64_be:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ big_endian (as_seq h1 b) = U64.v z))
 
 [@"substitute" ]
-inline_for_extraction val load64_be:
+val load64_be:
   b:buffer U8.t{length b = 8} ->
   Stack U64.t
     (requires (fun h -> Buffer.live h b))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ big_endian (as_seq h0 b) = U64.v z))
 
 [@"substitute" ]
-inline_for_extraction val load128_le:
+val load128_le:
   b:buffer U8.t{length b = 16} ->
   Stack U128.t
     (requires (fun h -> live h b))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ little_endian (as_seq h0 b) = U128.v z))
 
 [@"substitute" ]
-inline_for_extraction val store128_le:
+val store128_le:
   b:buffer U8.t{length b = 16} ->
   z:U128.t ->
   Stack unit
@@ -117,14 +117,14 @@ inline_for_extraction val store128_le:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ little_endian (as_seq h1 b) = U128.v z))
 
 [@"substitute" ]
-inline_for_extraction val load128_be:
+val load128_be:
   b:buffer U8.t{length b = 16} ->
   Stack U128.t
     (requires (fun h -> live h b))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ big_endian (as_seq h0 b) = U128.v z))
 
 [@"substitute" ]
-inline_for_extraction val store128_be:
+val store128_be:
   b:buffer U8.t{length b = 16} ->
   z:U128.t ->
   Stack unit
@@ -132,7 +132,7 @@ inline_for_extraction val store128_be:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ big_endian (as_seq h1 b) = U128.v z))
 
 [@"substitute" ]
-inline_for_extraction val hstore32_le:
+val hstore32_le:
   b:buffer H8.t{length b = 4} ->
   z:H32.t ->
   Stack unit
@@ -141,7 +141,7 @@ inline_for_extraction val hstore32_le:
       /\ hlittle_endian (as_seq h1 b) = H32.v z))
 
 [@"substitute" ]
-inline_for_extraction val hload32_le:
+val hload32_le:
   b:buffer H8.t{length b = 4} ->
   Stack H32.t
     (requires (fun h -> Buffer.live h b))
@@ -149,7 +149,7 @@ inline_for_extraction val hload32_le:
       /\ hlittle_endian (as_seq h0 b) = H32.v z))
 
 [@"substitute" ]
-inline_for_extraction val hstore32_be:
+val hstore32_be:
   b:buffer H8.t{length b = 4} ->
   z:H32.t ->
   Stack unit
@@ -158,7 +158,7 @@ inline_for_extraction val hstore32_be:
       /\ hbig_endian (as_seq h1 b) = H32.v z))
 
 [@"substitute" ]
-inline_for_extraction val hload32_be:
+val hload32_be:
   b:buffer H8.t{length b = 4} ->
   Stack H32.t
     (requires (fun h -> Buffer.live h b))
@@ -166,7 +166,7 @@ inline_for_extraction val hload32_be:
       /\ hbig_endian (as_seq h0 b) = H32.v z))
 
 [@"substitute" ]
-inline_for_extraction val hstore64_le:
+val hstore64_le:
   b:buffer H8.t{length b = 8} ->
   z:H64.t ->
   Stack unit
@@ -174,14 +174,14 @@ inline_for_extraction val hstore64_le:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ hlittle_endian (as_seq h1 b) = H64.v z))
 
 [@"substitute" ]
-inline_for_extraction val hload64_le:
+val hload64_le:
   b:buffer H8.t{length b = 8} ->
   Stack H64.t
     (requires (fun h -> Buffer.live h b))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h1 b /\ hlittle_endian (as_seq h0 b) = H64.v z))
 
 [@"substitute" ]
-inline_for_extraction val hstore64_be:
+val hstore64_be:
   b:buffer H8.t{length b = 8} ->
   z:H64.t ->
   Stack unit
@@ -189,14 +189,14 @@ inline_for_extraction val hstore64_be:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ hbig_endian (as_seq h1 b) = H64.v z))
 
 [@"substitute" ]
-inline_for_extraction val hload64_be:
+val hload64_be:
   b:buffer H8.t{length b = 8} ->
   Stack H64.t
     (requires (fun h -> Buffer.live h b))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ hbig_endian (as_seq h0 b) = H64.v z))
 
 [@"substitute" ]
-inline_for_extraction val hstore128_le:
+val hstore128_le:
   b:buffer H8.t{length b = 16} ->
   z:H128.t ->
   Stack unit
@@ -204,14 +204,14 @@ inline_for_extraction val hstore128_le:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ hlittle_endian (as_seq h1 b) = H128.v z))
     
 [@"substitute" ]
-inline_for_extraction val hload128_le:
+val hload128_le:
   b:buffer H8.t{length b = 16} ->
   Stack H128.t
     (requires (fun h -> live h b))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ hlittle_endian (as_seq h0 b) = H128.v z))
 
 [@"substitute" ]
-inline_for_extraction val hstore128_be:
+val hstore128_be:
   b:buffer H8.t{length b = 16} ->
   z:H128.t ->
   Stack unit
@@ -219,61 +219,61 @@ inline_for_extraction val hstore128_be:
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b /\ hbig_endian (as_seq h1 b) = H128.v z))
     
 [@"substitute" ]
-inline_for_extraction val hload128_be:
+val hload128_be:
   b:buffer H8.t{length b = 16} ->
   Stack H128.t
     (requires (fun h -> live h b))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ hbig_endian (as_seq h0 b) = H128.v z))
 
 [@"substitute" ]
-inline_for_extraction let store32_le b z  = store32_le b z
+let store32_le b z  = store32_le b z
 [@"substitute" ]
-inline_for_extraction let store32_be b z  = store32_be b z
+let store32_be b z  = store32_be b z
 [@"substitute" ]
-inline_for_extraction let store64_le b z  = store64_le b z
+let store64_le b z  = store64_le b z
 [@"substitute" ]
-inline_for_extraction let store64_be b z  = store64_be b z
+let store64_be b z  = store64_be b z
 [@"substitute" ]
-inline_for_extraction let store128_le b z = store128_le b z
+let store128_le b z = store128_le b z
 [@"substitute" ]
-inline_for_extraction let store128_be b z = store128_be b z
+let store128_be b z = store128_be b z
 
 
 [@"substitute" ]
-inline_for_extraction let load32_le b  = load32_le b
+let load32_le b  = load32_le b
 [@"substitute" ]
-inline_for_extraction let load32_be b  = load32_be b
+let load32_be b  = load32_be b
 [@"substitute" ]
-inline_for_extraction let load64_le b  = load64_le b
+let load64_le b  = load64_le b
 [@"substitute" ]
-inline_for_extraction let load64_be b  = load64_be b
+let load64_be b  = load64_be b
 [@"substitute" ]
-inline_for_extraction let load128_le b = load128_le b
+let load128_le b = load128_le b
 [@"substitute" ]
-inline_for_extraction let load128_be b = load128_be b
+let load128_be b = load128_be b
 
 [@"substitute" ]
-inline_for_extraction let hstore32_le b z  = store32_le b z
+let hstore32_le b z  = store32_le b z
 [@"substitute" ]
-inline_for_extraction let hstore32_be b z  = store32_be b z
+let hstore32_be b z  = store32_be b z
 [@"substitute" ]
-inline_for_extraction let hstore64_le b z  = store64_le b z
+let hstore64_le b z  = store64_le b z
 [@"substitute" ]
-inline_for_extraction let hstore64_be b z  = store64_be b z
+let hstore64_be b z  = store64_be b z
 [@"substitute" ]
-inline_for_extraction let hstore128_le b z = store128_le b z
+let hstore128_le b z = store128_le b z
 [@"substitute" ]
-inline_for_extraction let hstore128_be b z = store128_be b z
+let hstore128_be b z = store128_be b z
 
 [@"substitute" ]
-inline_for_extraction let hload32_le b  = load32_le b
+let hload32_le b  = load32_le b
 [@"substitute" ]
-inline_for_extraction let hload32_be b  = load32_be b
+let hload32_be b  = load32_be b
 [@"substitute" ]
-inline_for_extraction let hload64_le b  = load64_le b
+let hload64_le b  = load64_le b
 [@"substitute" ]
-inline_for_extraction let hload64_be b  = load64_be b
+let hload64_be b  = load64_be b
 [@"substitute" ]
-inline_for_extraction let hload128_le b = load128_le b
+let hload128_le b = load128_le b
 [@"substitute" ]
-inline_for_extraction let hload128_be b = load128_be b
+let hload128_be b = load128_be b

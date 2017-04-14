@@ -54,7 +54,7 @@ val fsum_tot:
 let fsum_tot a b =
   Math.Lemmas.lemma_mod_plus_distr_l (seval a) (seval b) prime;
   Math.Lemmas.lemma_mod_plus_distr_l (seval b) (selem a) prime;
-  let c = fsum_spec a b len in
+  let c = fsum_spec a b in
   lemma_fsum_eval a b;
   c
 
@@ -68,7 +68,7 @@ val fdifference_tot:
 let fdifference_tot a b =
   let b' = add_zero_spec b in
   lemma_add_zero_spec b;
-  let c = fdifference_spec a b' len in
+  let c = fdifference_spec a b' in
   lemma_fdifference_eval a b';
   lemma_mod_sub_distr_l_l (seval b') (seval a) prime;
   lemma_mod_sub_distr_l_r (selem b') (seval a) prime;
@@ -78,14 +78,14 @@ open FStar.Mul
 
 val fscalar_tot: a:seqelem -> s:limb{
   carry_wide_pre (fscalar_spec a s) 0
-  /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec a s) 0)
-  /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec a s) 0)) } ->
+  /\ carry_top_wide_pre (carry_wide_spec (fscalar_spec a s))
+  /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fscalar_spec a s) )) } ->
   Tot (c:seqelem{selem c = ((v s % prime) *@ selem a)})
 let fscalar_tot a s =
   let x = fscalar_spec a s in
   lemma_fscalar_eval a s;
   cut (seval_wide x == v s * seval a);
-  let y = carry_wide_spec x 0 in
+  let y = carry_wide_spec x in
   cut (seval_wide y == v s * seval a);
   let z = carry_top_wide_spec y in
   lemma_carry_top_wide_spec y;

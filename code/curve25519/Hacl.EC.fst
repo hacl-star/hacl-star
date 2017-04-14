@@ -20,7 +20,7 @@ module H8 = Hacl.UInt8
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-inline_for_extraction val crypto_scalarmult__:
+val crypto_scalarmult__:
   mypublic:uint8_p{length mypublic = 32} ->
   secret:uint8_p{length secret = 32} ->
   basepoint:uint8_p{length basepoint = 32} ->
@@ -44,7 +44,7 @@ inline_for_extraction val crypto_scalarmult__:
          mypublic == Spec.Curve25519.(encodePoint (montgomery_ladder q secret)))
       ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
-inline_for_extraction let crypto_scalarmult__ mypublic scalar basepoint q =
+let crypto_scalarmult__ mypublic scalar basepoint q =
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in
@@ -76,7 +76,7 @@ inline_for_extraction let crypto_scalarmult__ mypublic scalar basepoint q =
   ()
 
 
-inline_for_extraction val crypto_scalarmult_:
+val crypto_scalarmult_:
   mypublic:uint8_p{length mypublic = 32} ->
   secret:uint8_p{length secret = 32} ->
   basepoint:uint8_p{length basepoint = 32} ->
@@ -99,7 +99,7 @@ inline_for_extraction val crypto_scalarmult_:
          let q        = Hacl.Spec.Bignum.selem (as_seq h0 (getx q)) in
         mypublic == Spec.Curve25519.(encodePoint (montgomery_ladder q (decodeScalar25519 secret))))
     ))
-inline_for_extraction let crypto_scalarmult_ mypublic secret basepoint q =
+let crypto_scalarmult_ mypublic secret basepoint q =
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in

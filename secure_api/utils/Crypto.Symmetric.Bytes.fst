@@ -1,3 +1,6 @@
+(*--build-config
+options:--trace_error --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../../FStar/ulib/hyperstack --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../../secure_api/vale --include ../../secure_api/uf1cma --include ../../secure_api/utils --include ../../specs --include ../../../kremlin/kremlib
+--*)
 module Crypto.Symmetric.Bytes
 
 open FStar.HyperHeap
@@ -40,15 +43,15 @@ type lbuffer (l:nat) = b:buffer {Buffer.length b == l}
 let uint128_to_uint8 (a:UInt128.t) : Tot (b:UInt8.t{UInt8.v b == UInt128.v a % pow2 8})
   = uint64_to_uint8 (uint128_to_uint64 a)
 
-private let hex1 (x:UInt8.t {FStar.UInt8.(x <^ 16uy)}) = 
+private let hex1 (x:UInt8.t {FStar.UInt8.(x <^ 16uy)}) =
   FStar.UInt8.(
-    if x <^ 10uy then UInt8.to_string x else 
-    if x = 10uy then "a" else 
-    if x = 11uy then "b" else 
-    if x = 12uy then "c" else 
-    if x = 13uy then "d" else 
+    if x <^ 10uy then UInt8.to_string x else
+    if x = 10uy then "a" else
+    if x = 11uy then "b" else
+    if x = 12uy then "c" else
+    if x = 13uy then "d" else
     if x = 14uy then "e" else "f")
-private let hex2 x = 
+private let hex2 x =
   FStar.UInt8.(hex1 (x /^ 16uy) ^ hex1 (x %^ 16uy))
 
 val print_buffer: s:buffer -> i:UInt32.t{UInt32.v i <= length s} -> len:UInt32.t{UInt32.v len <= length s} -> Stack unit
@@ -77,7 +80,7 @@ val load_bytes: l:UInt32.t -> buf:lbuffer (v l) -> Stack (lbytes (v l))
   (requires (fun h0 -> Buffer.live h0 buf))
   (ensures  (fun h0 r h1 -> h0 == h1 /\ Buffer.live h0 buf /\
 		         Seq.equal r (sel_bytes h1 l buf)))
-let rec load_bytes l buf = 
+let rec load_bytes l buf =
   if l = 0ul then
     Seq.createEmpty
   else
@@ -277,10 +280,10 @@ let lemma_little_endian_lt_2_128 b = FStar.Endianness.lemma_little_endian_lt_2_1
 (** Loads a machine integer from a buffer of len bytes *)
 val load_uint32: len:UInt32.t { v len <= 4 } -> buf:lbuffer (v len) -> ST UInt32.t
   (requires (fun h0 -> live h0 buf))
-  (ensures (fun h0 n h1 -> 
-    h0 == h1 /\ live h0 buf /\ 
+  (ensures (fun h0 n h1 ->
+    h0 == h1 /\ live h0 buf /\
     UInt32.v n == little_endian (sel_bytes h1 len buf)))
-let rec load_uint32 len buf = 
+let rec load_uint32 len buf =
   if len = 0ul then 0ul
   else
     let len = len -^ 1ul in
@@ -292,10 +295,10 @@ let rec load_uint32 len buf =
 
 val load_big32: len:UInt32.t { v len <= 4 } -> buf:lbuffer (v len) -> ST UInt32.t
   (requires (fun h0 -> live h0 buf))
-  (ensures (fun h0 n h1 -> 
-    h0 == h1 /\ live h0 buf /\ 
+  (ensures (fun h0 n h1 ->
+    h0 == h1 /\ live h0 buf /\
     UInt32.v n == big_endian (sel_bytes h1 len buf)))
-let rec load_big32 len buf = 
+let rec load_big32 len buf =
   if len = 0ul then 0ul
   else
     let len = len -^ 1ul in
@@ -309,10 +312,10 @@ let rec load_big32 len buf =
 #reset-options "--z3rlimit 100"
 val load_big64: len:UInt32.t { v len <= 8 } -> buf:lbuffer (v len) -> ST UInt64.t
   (requires (fun h0 -> live h0 buf))
-  (ensures (fun h0 n h1 -> 
-    h0 == h1 /\ live h0 buf /\ 
+  (ensures (fun h0 n h1 ->
+    h0 == h1 /\ live h0 buf /\
     UInt64.v n == big_endian (sel_bytes h1 len buf)))
-let rec load_big64 len buf = 
+let rec load_big64 len buf =
   if len = 0ul then 0UL
   else
     let len = len -^ 1ul in
@@ -329,16 +332,16 @@ let uint8_to_uint128 a = uint64_to_uint128 (uint8_to_uint64 a)
 
 val load_uint128: len:UInt32.t { v len <= 16 } -> buf:lbuffer (v len) -> ST UInt128.t
   (requires (fun h0 -> live h0 buf))
-  (ensures (fun h0 n h1 -> 
-    h0 == h1 /\ live h0 buf /\ 
+  (ensures (fun h0 n h1 ->
+    h0 == h1 /\ live h0 buf /\
     UInt128.v n == little_endian (sel_bytes h1 len buf)))
-let rec load_uint128 len buf = 
+let rec load_uint128 len buf =
   if len = 0ul then uint64_to_uint128 0UL // Need 128-bit constants?
   else
     let n = load_uint128 (len -^ 1ul) (sub buf 1ul (len -^ 1ul)) in
-    let b = buf.(0ul) in 
+    let b = buf.(0ul) in
     let h = ST.get () in
-    lemma_little_endian_is_bounded 
+    lemma_little_endian_is_bounded
       (sel_bytes h (len -^ 1ul) (sub buf 1ul (len -^ 1ul)));
     assert (UInt128.v n <= pow2 (8 * v len - 8) - 1);
     assert (256 * UInt128.v n <= 256 * pow2 (8 * v len - 8) - 256);
@@ -361,9 +364,9 @@ let rec load_big128 len buf =
   if len = 0ul then uint64_to_uint128 0UL
   else
     let n = load_big128 (len -^ 1ul) (sub buf 0ul (len -^ 1ul)) in
-    let b = buf.(len -^ 1ul) in 
+    let b = buf.(len -^ 1ul) in
     let h = ST.get () in
-    lemma_big_endian_is_bounded 
+    lemma_big_endian_is_bounded
       (sel_bytes h (len -^ 1ul) (sub buf 0ul (len -^ 1ul)));
     assert (UInt128.v n <= pow2 (8 * v len - 8) - 1);
     assert (256 * UInt128.v n <= 256 * pow2 (8 * v len - 8) - 256);
@@ -379,19 +382,19 @@ let rec load_big128 len buf =
 (* stores a machine integer into a buffer of len bytes *)
 // 16-10-02 subsumes Buffer.Utils.bytes_of_uint32 ?
 // check efficient compilation for all back-ends
-val store_uint32: 
-  len:UInt32.t {v len <= 4} -> buf:lbuffer (v len) -> 
+val store_uint32:
+  len:UInt32.t {v len <= 4} -> buf:lbuffer (v len) ->
   n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> StackInline unit
   (requires (fun h0 -> Buffer.live h0 buf))
-  (ensures (fun h0 r h1 -> 
+  (ensures (fun h0 r h1 ->
     Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
     UInt32.v n == little_endian (sel_bytes h1 len buf)))
-let rec store_uint32 len buf n = 
+let rec store_uint32 len buf n =
   if len <> 0ul then
-    let len = len -^ 1ul in 
+    let len = len -^ 1ul in
     let b = uint32_to_uint8 n in
     let n1 = n in (* n defined in FStar.UInt32, so was shadowed, so renamed into n1 *)
-    let n' = FStar.UInt32.(n1 >>^ 8ul) in 
+    let n' = FStar.UInt32.(n1 >>^ 8ul) in
     assert(v n = UInt8.v b + 256 * v n');
     let buf' = Buffer.sub buf 1ul len in
     Math.Lemmas.pow2_plus 8 (8 * v len);
@@ -399,19 +402,19 @@ let rec store_uint32 len buf n =
     store_uint32 len buf' n';
     buf.(0ul) <- b // updating after the recursive call helps verification
 
-val store_big32: 
-  len:UInt32.t {v len <= 4} -> buf:lbuffer (v len) -> 
+val store_big32:
+  len:UInt32.t {v len <= 4} -> buf:lbuffer (v len) ->
   n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> StackInline unit
   (requires (fun h0 -> Buffer.live h0 buf))
-  (ensures (fun h0 r h1 -> 
+  (ensures (fun h0 r h1 ->
     Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
     UInt32.v n == big_endian (sel_bytes h1 len buf)))
-let rec store_big32 len buf n = 
+let rec store_big32 len buf n =
   if len <> 0ul then
-    let len = len -^ 1ul in 
+    let len = len -^ 1ul in
     let b = uint32_to_uint8 n in
     let n1 = n in (* n shadowed by FStar.UInt32.n *)
-    let n' = FStar.UInt32.(n1 >>^ 8ul) in 
+    let n' = FStar.UInt32.(n1 >>^ 8ul) in
     assert(v n = UInt8.v b + 256 * v n');
     let buf' = Buffer.sub buf 0ul len in
     Math.Lemmas.pow2_plus 8 (8 * v len);
@@ -419,51 +422,51 @@ let rec store_big32 len buf n =
     store_big32 len buf' n';
     buf.(len) <- b // updating after the recursive call helps verification
 
-noextract val uint32_bytes: 
-  len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> 
+noextract val uint32_bytes:
+  len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} ->
   Tot (b:lbytes (v len) { UInt32.v n == little_endian b}) (decreases (v len))
-let rec uint32_bytes len n = 
-  if len = 0ul then 
+let rec uint32_bytes len n =
+  if len = 0ul then
     let e = Seq.createEmpty #UInt8.t in
     assert_norm(0 = little_endian e);
     e
   else
-    let len = len -^ 1ul in 
+    let len = len -^ 1ul in
     let byte = uint32_to_uint8 n in
     let n1 = n in (* n defined in FStar.UInt32, so was shadowed, so renamed into n1 *)
-    let n' = FStar.UInt32.(n1 >>^ 8ul) in 
+    let n' = FStar.UInt32.(n1 >>^ 8ul) in
     assert(v n = UInt8.v byte + 256 * v n');
     Math.Lemmas.pow2_plus 8 (8 * v len);
     assert_norm (pow2 8 == 256);
     assert(v n' < pow2 (8 * v len ));
     let b' = uint32_bytes len n'
-    in 
+    in
     Seq.cons byte b'
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 50"
 noextract val uint32_be: 
   len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> 
   Tot (b:lbytes (v len) { UInt32.v n == big_endian b}) (decreases (v len))
-let rec uint32_be len n = 
-  if len = 0ul then 
+let rec uint32_be len n =
+  if len = 0ul then
     let e = Seq.createEmpty #UInt8.t in
     assert_norm(0 = big_endian e);
     e
   else
-    let len = len -^ 1ul in 
+    let len = len -^ 1ul in
     let byte = uint32_to_uint8 n in
     let n1 = n in (* n shadowed by FStar.UInt32.n *)
-    let n' = FStar.UInt32.(n1 >>^ 8ul) in 
+    let n' = FStar.UInt32.(n1 >>^ 8ul) in
     assert(v n = UInt8.v byte + 256 * v n');
     Math.Lemmas.pow2_plus 8 (8 * v len);
     assert_norm (pow2 8 == 256);
     assert(v n' < pow2 (8 * v len ));
     let b' = uint32_be len n'
-    in 
-    Seq.snoc b' byte 
+    in
+    Seq.snoc b' byte
 
 // turns an integer into a bytestream, little-endian
-inline_for_extraction val little_bytes: 
+inline_for_extraction val little_bytes:
   len:UInt32.t -> n:nat{n < pow2 (8 * v len)} ->
   Tot (b:lbytes (v len) {n == little_endian b})(*  (decreases (v len)) *)
 inline_for_extraction let little_bytes len n = FStar.Endianness.little_bytes len n
@@ -484,16 +487,16 @@ inline_for_extraction let little_bytes len n = FStar.Endianness.little_bytes len
 #reset-options "--z3rlimit 400"
 
 // turns an integer into a bytestream, big-endian
-val big_bytes: 
+val big_bytes:
   len:UInt32.t -> n:nat{n < pow2 (8 * v len)} ->
   Tot (b:lbytes (v len) {n == big_endian b}) (decreases (v len))
-let rec big_bytes len n = 
-  if len = 0ul then 
-    Seq.createEmpty 
+let rec big_bytes len n =
+  if len = 0ul then
+    Seq.createEmpty
   else
-    let len = len -^ 1ul in 
+    let len = len -^ 1ul in
     let byte = UInt8.uint_to_t (n % 256) in
-    let n' = n / 256 in 
+    let n' = n / 256 in
     Math.Lemmas.pow2_plus 8 (8 * v len);
     assert(n' < pow2 (8 * v len ));
     let b' = big_bytes len n' in
@@ -503,19 +506,19 @@ let rec big_bytes len n =
     b
 
 // check efficient compilation for all back-ends
-val store_uint128: 
-  len:UInt32.t {v len <= 16} -> buf:lbuffer (v len) -> 
+val store_uint128:
+  len:UInt32.t {v len <= 16} -> buf:lbuffer (v len) ->
   n:UInt128.t {UInt128.v n < pow2 (8 * v len)} -> Stack unit
   (requires (fun h0 -> Buffer.live h0 buf))
-  (ensures (fun h0 r h1 -> 
+  (ensures (fun h0 r h1 ->
     Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
     UInt128.v n == little_endian (sel_bytes h1 len buf)))
-let rec store_uint128 len buf n = 
+let rec store_uint128 len buf n =
   if len <> 0ul then
-    let len = len -^ 1ul in 
+    let len = len -^ 1ul in
     let b = uint128_to_uint8 n in
     let n1 = n in (* n defined in FStar.UInt128, so was shadowed, so renamed into n1 *)
-    let n' = FStar.UInt128.(n1 >>^ 8ul) in 
+    let n' = FStar.UInt128.(n1 >>^ 8ul) in
     assert(UInt128.v n = UInt8.v b + 256 * UInt128.v n');
     let buf' = Buffer.sub buf 1ul len in
     Math.Lemmas.pow2_plus 8 (8 * v len);
@@ -523,19 +526,19 @@ let rec store_uint128 len buf n =
     store_uint128 len buf' n';
     buf.(0ul) <- b // updating after the recursive call helps verification
 
-val store_big128: 
-  len:UInt32.t {v len <= 16} -> buf:lbuffer (v len) -> 
+val store_big128:
+  len:UInt32.t {v len <= 16} -> buf:lbuffer (v len) ->
   n:UInt128.t {UInt128.v n < pow2 (8 * v len)} -> Stack unit
   (requires (fun h0 -> Buffer.live h0 buf))
-  (ensures (fun h0 r h1 -> 
+  (ensures (fun h0 r h1 ->
     Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
     UInt128.v n == big_endian (sel_bytes h1 len buf)))
-let rec store_big128 len buf n = 
+let rec store_big128 len buf n =
   if len <> 0ul then
-    let len = len -^ 1ul in 
+    let len = len -^ 1ul in
     let b = uint128_to_uint8 n in
     let n1 = n in (* n defined in FStar.UInt128, so was shadowed, so renamed into n1 *)
-    let n' = FStar.UInt128.(n1 >>^ 8ul) in 
+    let n' = FStar.UInt128.(n1 >>^ 8ul) in
     assert(UInt128.v n = UInt8.v b + 256 * UInt128.v n');
     let buf' = Buffer.sub buf 0ul len in
     Math.Lemmas.pow2_plus 8 (8 * v len);
@@ -548,20 +551,20 @@ let rec store_big128 len buf n =
 #reset-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 
 
-(* injectivity proofs for byte encodings *) 
+(* injectivity proofs for byte encodings *)
 
 type word = b:Seq.seq UInt8.t {Seq.length b <= 16}
 open FStar.Math.Lib
 open FStar.Math.Lemmas
 open FStar.Seq
-open FStar.Seq 
+open FStar.Seq
 
 private let endian_is_injective q r q' r' : Lemma
   (requires UInt8.v r + pow2 8 * q = UInt8.v r' + pow2 8 * q')
   (ensures r = r' /\ q = q') =
   lemma_mod_injective (pow2 8) (UInt8.v r) (UInt8.v r')
 
-private let big_endian_step (b:word{length b > 0}) : 
+private let big_endian_step (b:word{length b > 0}) :
   Lemma (big_endian b = U8.v (last b) + pow2 8 * big_endian (slice b 0 (length b - 1))) =
   ()
 
@@ -570,16 +573,16 @@ val lemma_big_endian_inj: b:word -> b':word {length b = length b'} -> Lemma
   (requires big_endian b = big_endian b')
   (ensures b == b')
   (decreases (length b))
-let rec lemma_big_endian_inj s s' = 
-  let len = length s in 
+let rec lemma_big_endian_inj s s' =
+  let len = length s in
   if len = 0 then lemma_eq_intro s s'
   else
-    let t = slice s 0 (len - 1) in 
-    let x = last s in 
+    let t = slice s 0 (len - 1) in
+    let x = last s in
     lemma_eq_intro s (snoc t x);
     big_endian_step s;
-    let t' = slice s' 0 (len - 1) in 
-    let x' = last s' in 
+    let t' = slice s' 0 (len - 1) in
+    let x' = last s' in
     lemma_eq_intro s' (snoc t' x');
     big_endian_step s';
     endian_is_injective (big_endian t) x (big_endian t') x';
@@ -598,7 +601,7 @@ let lemma_little_endian_is_injective_1 b q r q' r' =
 
 (* a sequence associativity property: ... @ ([x] @ s) == ... @ [x]) @ s *)
 private val lemma_little_endian_is_injective_2: b:word -> len:pos{len <= length b} -> Lemma
-  (let s = slice b (length b - len) (length b) in 
+  (let s = slice b (length b - len) (length b) in
    let s' = slice s 1 (length s) in
    let s'' = slice b (length b - (len - 1)) (length b) in
    s'' == s')
@@ -610,16 +613,16 @@ let lemma_little_endian_is_injective_2 b len =
 
 (* a sequence injectivity property *)
 private val lemma_little_endian_is_injective_3: b:word -> b':word -> len:pos{len <= length b /\ len <= length b'} -> Lemma
-  (requires 
-    slice b (length b - (len - 1)) (length b) == slice b' (length b' - (len-1)) (length b') /\ 
+  (requires
+    slice b (length b - (len - 1)) (length b) == slice b' (length b' - (len-1)) (length b') /\
     Seq.index b (length b - len) = Seq.index b' (length b' - len))
   (ensures slice b (length b - len) (length b) == slice b' (length b' - len) (length b'))
 let lemma_little_endian_is_injective_3 b b' len =
   lemma_eq_intro (slice b (length b - len) (length b)) (cons (index b (length b - len)) (slice b (length b - (len-1)) (length b)));
   lemma_eq_intro (slice b' (length b' - len) (length b')) (cons (index b' (length b' - len)) (slice b' (length b' - (len-1)) (length b')))
 
-private let little_endian_step (b:word{length b > 0}): 
-  Lemma (little_endian b = U8.v (head b) + pow2 8 * little_endian (tail b)) 
+private let little_endian_step (b:word{length b > 0}):
+  Lemma (little_endian b = U8.v (head b) + pow2 8 * little_endian (tail b))
   = ()
 
 val lemma_little_endian_is_injective: b:word -> b':word -> len:nat{len <= length b /\ len <= length b'} -> Lemma
@@ -631,7 +634,7 @@ let rec lemma_little_endian_is_injective b b' len =
   else
     let s = slice b (length b - len) (length b) in
     let s' = slice b' (length b' - len) (length b') in
-    little_endian_step s; 
+    little_endian_step s;
     little_endian_step s';
     endian_is_injective (little_endian (tail s)) (head s) (little_endian (tail s')) (head s');
     lemma_little_endian_is_injective_2 b len;
@@ -643,7 +646,7 @@ val lemma_little_endian_inj: b:word -> b':word {length b = length b'} -> Lemma
   (requires little_endian b = little_endian b')
   (ensures b == b')
 let lemma_little_endian_inj b b' =
-  let len = length b in 
+  let len = length b in
   Seq.lemma_eq_intro b (Seq.slice b 0  len);
   Seq.lemma_eq_intro b' (Seq.slice b' 0  len);
   lemma_little_endian_is_injective b b' len

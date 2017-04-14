@@ -104,7 +104,7 @@ private let lemma_point_inf s s' =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
-private inline_for_extraction val cmult_: result:point ->
+private val cmult_: result:point ->
   buf:buffer limb{length buf = 40} ->
   scalar:uint8_p{length scalar = keylen} ->
   q:point ->
@@ -129,7 +129,7 @@ private inline_for_extraction val cmult_: result:point ->
        nq == Hacl.Spec.EC.Ladder.cmult_spec n q)
   ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 2000"
-private inline_for_extraction let cmult_ result point_buf n q =
+private let cmult_ result point_buf n q =
   assert_norm(pow2 32 = 0x100000000);
   let nq    = Buffer.sub point_buf 0ul 10ul in
   let nqpq  = Buffer.sub point_buf 10ul 10ul in
