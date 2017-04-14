@@ -40,6 +40,7 @@ private let uint64_t  = FStar.UInt64.t
 
 private let uint8_ht  = Hacl.UInt8.t
 private let uint32_ht = Hacl.UInt32.t
+private let uint64_ht = Hacl.UInt64.t
 
 private let uint32_p = Buffer.buffer uint32_ht
 private let uint8_p  = Buffer.buffer uint8_ht
@@ -80,6 +81,7 @@ inline_for_extraction private let size_k_w     = 64ul  // 2048 bits = 64 words o
 inline_for_extraction private let size_ws_w    = size_k_w
 inline_for_extraction private let size_whash_w = size_hash_w
 inline_for_extraction private let size_count_w = 1ul  // 1 word
+inline_for_extraction private let size_len_8 = 2ul *^ size_word
 
 inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
 
@@ -545,15 +547,29 @@ let rec update_multi state data n =
     update_multi state data (n -^ 1ul) end
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+
+let pad0_length (len:uint32_t{v len + 1 + v size_len_8 < pow2 32}) : Tot (n:uint32_t{v n = Spec.pad0_length (v len)}) =
+  size_block -^ ((len +^ size_len_8 +^ 1ul) %^ size_block)
+
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+
+let total_length (count:uint32_ht) (len:uint32_t) (const_size_block:uint32_t{ const_size_block = size_block }) : Tot (l:uint64_ht{H64.v l = (v count * v size_block + v len) * 8}) =
+  let l_0 = H64.((h32_to_h64 count) *%^ (u32_to_h64 size_block)) in
+  let l_1 = u32_to_h64 len in
+  H64.((l_0 +^ l_1) *%^ (u32_to_h64 8ul))
+
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
 val update_last:
   state :uint32_p{length state = v size_state} ->
-  data  :uint8_p {length data <= v size_block} ->
+  data  :uint8_p {length data <= v size_block /\ disjoint state data} ->
   len   :uint32_t {v len = length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
-        (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
+        (ensures  (fun h0 r h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_data = as_seq h0 data in
@@ -570,16 +586,14 @@ let update_last state data len =
 
   (* Alocate memory set to zeros for the last two blocks of data *)
   let blocks = Buffer.create (uint8_to_sint8 0uy) (2ul *^ size_block) in
+  let len_64 = Buffer.sub blocks (size_block +^ size_block -^ 8ul) 8ul in
 
   (* Compute the final length of the data *)
-  let count = state.(pos_count_w) in
-  let l_0 = H64.((h32_to_h64 count) *%^ (u32_to_h64 size_block)) in
-  let l_1 = u32_to_h64 len in
-  let t_0 = H64.((l_0 +^ l_1) *%^ (u32_to_h64 8ul)) in
+  let n = state.(pos_count_w) in
+  let encodedlen = total_length n len size_block in
 
   (* Encode the total length at the end of the padding *)
-  let len_64 = Buffer.sub blocks (size_block +^ size_block -^ 8ul) 8ul in
-  Hacl.Endianness.hstore64_be len_64 t_0;
+  Hacl.Endianness.hstore64_be len_64 encodedlen;
 
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length are considered public here ! *)
