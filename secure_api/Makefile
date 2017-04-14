@@ -17,7 +17,7 @@ FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack -
 
 KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/aes prf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=-ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS) -ccopt -std=gnu99
-KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES) 
+KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 
 vale/aes/aes.o:
 	make -C vale/aes
@@ -27,7 +27,7 @@ LowCProvider/tmp:
 		test/Flag.fst utils/Hacl.Spec.fst \
 		aead/Crypto.AEAD.fst test/test_vale/vale.c \
 		$(KREMLIN_HOME)/test/../kremlib/testlib.c \
-	       	vale/aes/aes.o test/test_hacks.c \
+		vale/aes/aes.o test/test_hacks.c \
 		-tmpdir LowCProvider/tmp \
 		-skip-linking -add-include '"testlib.h"' \
 		-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
@@ -36,10 +36,10 @@ LowCProvider/tmp:
 
 krml-test-vale.exe: vale/aes/aes.o
 	$(KRML) test/test_vale/Crypto.Indexing.fst \
-	       	test/test_vale/vale.c vale/aes/aes.o \
+		test/test_vale/vale.c vale/aes/aes.o \
 		test/Flag.fst utils/Hacl.Spec.fst \
-	       	test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
-	       	$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
+		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
+		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
 		-tmpdir tmp-vale -add-include '"testlib.h"' -o krml-test-vale.exe \
 		-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
 		-bundle Hacl.* -bundle "Crypto.AEAD=Crypto.AEAD.*"
@@ -51,8 +51,8 @@ krml-test-hacl.exe:
 		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
 		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
 		-tmpdir tmp-hacl -add-include '"testlib.h"' -o krml-test-hacl.exe \
-	       	-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
-	       	-bundle Hacl.* -bundle "Crypto.AEAD=Crypto.AEAD.*"
+		-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
+		-bundle Hacl.* -bundle "Crypto.AEAD=Crypto.AEAD.*"
 	./krml-test-hacl.exe
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
@@ -135,7 +135,7 @@ EXTRA= \
 #  Crypto.Symmetric.Poly1305.Lemmas  # verification target is not passing reliably so commenting out
 
 #16-10-30 removed files specific to Poly1305:
-#  Crypto.Symmetric.Poly1305.MAC 
+#  Crypto.Symmetric.Poly1305.MAC
 #  Crypto.AEAD.Chacha20Poly1305
 
 
@@ -166,9 +166,13 @@ all-hints: $(addsuffix .fst-hints, $(VERIFY))
 all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
 # Parameter for interactive mode
-%.fst-in: 
+%.fst-in:
 	@echo $(OPTIONS) --hint_info \
-	$(FSTAR_INCLUDE_PATHS) 
+	$(FSTAR_INCLUDE_PATHS)
+
+%.fsti-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDE_PATHS)
 
 # Verifying one file at a time
 %.fst-ver:
