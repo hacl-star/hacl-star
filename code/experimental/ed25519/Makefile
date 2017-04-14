@@ -37,11 +37,14 @@ HINTS_ENABLED?=--use_hints --record_hints
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs  --include $(HACL_HOME)/specs/experimental \
+		--include $(HACL_HOME)/code/curve25519 \
 		$(HINTS_ENABLED) $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
-		--include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental
+		--include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
+		--include $(HACL_HOME)/code/curve25519
+
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst

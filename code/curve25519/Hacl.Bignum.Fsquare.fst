@@ -71,7 +71,7 @@ private let fsquare__ tmp output =
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 [@"c_inline"]
-private val fsquare_:
+val fsquare_:
   tmp:felem_wide ->
   output:felem{disjoint tmp output} ->
   Stack unit
@@ -81,7 +81,7 @@ private val fsquare_:
       /\ fsquare_pre (as_seq h0 output)
       /\ as_seq h1 output == fsquare_spec (as_seq h0 output)))
 [@"c_inline"]
-private let fsquare_ tmp output =
+let fsquare_ tmp output =
   let h0 = ST.get() in
   fsquare__ tmp output;
   let h3  = ST.get() in

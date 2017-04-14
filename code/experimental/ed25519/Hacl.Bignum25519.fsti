@@ -4,16 +4,43 @@ module Hacl.Bignum25519
 
 open FStar.Buffer
 
+
+(* Type abbreviations *)
 let limb  = Hacl.UInt64.t
 let felem = b:Buffer.buffer limb{Buffer.length b = 5}
 let seqelem = b:Seq.seq limb{Seq.length b = 5}
 
+(* Bound conditions *)
 val red_51: seqelem -> GTot Type0
 val red_513: seqelem -> GTot Type0
 val red_53: seqelem -> GTot Type0
 val red_5413: seqelem -> GTot Type0
+val red_55: seqelem -> GTot Type0
+
+(* Bound lemmas *)
+val lemma_red_51_is_red_513: s:seqelem -> Lemma (requires (red_51 s))
+                                                                       (ensures (red_513 s))
+val lemma_red_51_is_red_53: s:seqelem -> Lemma (requires (red_51 s))
+                                                                       (ensures (red_53 s))
+val lemma_red_51_is_red_5413: s:seqelem -> Lemma (requires (red_51 s))
+                                                                       (ensures (red_5413 s))
+val lemma_red_51_is_red_55: s:seqelem -> Lemma (requires (red_51 s))
+                                                                       (ensures (red_55 s))
+val lemma_red_513_is_red_53: s:seqelem -> Lemma (requires (red_513 s))
+                                                                       (ensures (red_53 s))
+val lemma_red_513_is_red_5413: s:seqelem -> Lemma (requires (red_513 s))
+                                                                       (ensures (red_5413 s))
+val lemma_red_513_is_red_55: s:seqelem -> Lemma (requires (red_513 s))
+                                                                       (ensures (red_55 s))
+val lemma_red_53_is_red_5413: s:seqelem -> Lemma (requires (red_53 s))
+                                                                       (ensures (red_5413 s))
+val lemma_red_53_is_red_55: s:seqelem -> Lemma (requires (red_53 s))
+                                                                       (ensures (red_55 s))
+val lemma_red_5413_is_red_55: s:seqelem -> Lemma (requires (red_5413 s))
+                                                                       (ensures (red_55 s))
 
 
+(* Functional mapping to mathematical integers *)
 val seval: seqelem -> GTot Spec.Curve25519.elem
 
 
@@ -97,38 +124,38 @@ val times_2d:
 
 val fsquare:
   out:felem ->
-  a:felem ->
+  a:felem{disjoint a out} ->
   Stack unit
-    (requires (fun h -> live h out /\ live h a /\ red_513 (as_seq h a)))
-    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 a /\ red_513 (as_seq h0 a) /\
+    (requires (fun h -> live h out /\ live h a /\ red_5413 (as_seq h a)))
+    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 a /\ red_5413 (as_seq h0 a) /\
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
       seval (as_seq h1 out) == Spec.Curve25519.fmul (seval (as_seq h0 a)) (seval (as_seq h0 a))))
 
 
 val fsquare_times:
   out:felem ->
-  a:felem ->
-  n:UInt32.t ->
+  a:felem{disjoint out a} ->
+  n:UInt32.t{UInt32.v n > 0} ->
   Stack unit
-    (requires (fun h -> live h out /\ live h a /\ red_513 (as_seq h a)))
-    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 a /\ red_513 (as_seq h0 a) /\
+    (requires (fun h -> live h out /\ live h a /\ red_5413 (as_seq h a)))
+    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 a /\ red_5413 (as_seq h0 a) /\
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
-      seval (as_seq h1 out) == Spec.Curve25519.((seval (as_seq h0 a)) ** (pow2 (UInt32.v n)))))
+      seval (as_seq h1 out) == Spec.Curve25519.op_Star_Star (seval (as_seq h0 a)) (pow2 (UInt32.v n))))
 
 
 val fsquare_times_inplace:
   out:felem ->
-  n:UInt32.t ->
+  n:UInt32.t{UInt32.v n > 0} ->
   Stack unit
-    (requires (fun h -> live h out /\ red_513 (as_seq h out)))
-    (ensures (fun h0 _ h1 -> live h0 out /\ red_513 (as_seq h0 out) /\
+    (requires (fun h -> live h out /\ red_5413 (as_seq h out)))
+    (ensures (fun h0 _ h1 -> live h0 out /\ red_5413 (as_seq h0 out) /\
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
       seval (as_seq h1 out) == Spec.Curve25519.((seval (as_seq h0 out)) ** (pow2 (UInt32.v n)))))
 
 
 val inverse:
   out:felem ->
-  a:felem ->
+  a:felem{disjoint a out} ->
   Stack unit
     (requires (fun h -> live h out /\ live h a /\ red_513 (as_seq h a)))
     (ensures (fun h0 _ h1 -> live h0 out /\ live h0 a /\ red_513 (as_seq h0 a) /\

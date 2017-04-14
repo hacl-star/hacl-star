@@ -1,12 +1,24 @@
 module Hacl.Bignum25519
 
 
-#reset-options "--max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let red_51 s = Hacl.Spec.EC.AddAndDouble.(bounds s p51 p51 p51 p51 p51)
 let red_513 s = Hacl.Spec.EC.AddAndDouble.red_513 s
 let red_53 s = Hacl.Spec.EC.AddAndDouble.red_53 s
 let red_5413 s = Hacl.Spec.EC.AddAndDouble.red_5413 s
+let red_55 s = Hacl.Spec.EC.AddAndDouble.red_55 s
+
+let lemma_red_51_is_red_513 s = ()
+let lemma_red_51_is_red_53 s = ()
+let lemma_red_51_is_red_5413 s = ()
+let lemma_red_51_is_red_55 s = ()
+let lemma_red_513_is_red_53 s = ()
+let lemma_red_513_is_red_5413 s = ()
+let lemma_red_513_is_red_55 s = ()
+let lemma_red_53_is_red_5413 s = ()
+let lemma_red_53_is_red_55 s = ()
+let lemma_red_5413_is_red_55 s = ()
 
 let seval s = Hacl.Spec.Bignum.Bigint.seval s % Spec.Curve25519.prime
 
@@ -225,19 +237,33 @@ let times_2d out a =
 
 
 let fsquare out a =
-  Hacl.Bignum.Fsquare.fsquare_times out a 1ul
+  push_frame();
+  let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) 5ul in
+  let h = ST.get() in
+  blit a 0ul out 0ul 5ul;
+  let h' = ST.get() in
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h a);
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' out);
+  Hacl.Spec.Bignum.Fsquare.fsquare_5413_is_fine (as_seq h' out);
+  Hacl.Bignum.Fsquare.fsquare_ tmp out;
+  pop_frame()
 
 let fsquare_times out a n =
+  let h = ST.get() in
+  Hacl.Spec.Bignum.Crecip.lemma_fsquare_times_tot (as_seq h a) (UInt32.v n);
+  Hacl.Spec.Bignum.Crecip.Lemmas.lemma_exp_eq (seval (as_seq h a)) (pow2 (UInt32.v n));
   Hacl.Bignum.Fsquare.fsquare_times out a n
 
-let fsquare_times_inplace output count =
-  Hacl.Bignum.Fsquare.fsquare_times_inplace output count
+let fsquare_times_inplace out n =
+  let h = ST.get() in
+  Hacl.Spec.Bignum.Crecip.lemma_fsquare_times_tot (as_seq h out) (UInt32.v n);
+  Hacl.Spec.Bignum.Crecip.Lemmas.lemma_exp_eq (seval (as_seq h out)) (pow2 (UInt32.v n));
+  Hacl.Bignum.Fsquare.fsquare_times_inplace out n
 
 let inverse out a =
   Hacl.Bignum.Crecip.crecip out a
 
 let reduce out =
-  Hacl.EC.Format.reduce out
-
-(* let pow2_252m2 out a = *)
-(*   Hacl.Impl.Ed25519.Pow2_252m2.pow2_252m2' out a *)
+  Hacl.EC.Format.reduce out;
+  let h = ST.get() in
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h out)
