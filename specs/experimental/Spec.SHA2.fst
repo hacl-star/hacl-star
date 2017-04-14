@@ -159,11 +159,10 @@ let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}
     update_multi hash rem
 
 
-private let pad0_length (len:nat) : Tot (n:nat{(len + 1 + n + size_len_8) % size_block = 0}) =
+let pad0_length (len:nat) : Tot (n:nat{(len + 1 + n + size_len_8) % size_block = 0}) =
   size_block - ((len + size_len_8 + 1) % size_block)
 
 
-(* Pad the data up to the block length and encode the total length *)
 let pad (len:nat{len < max_input_len_8}) : Tot (b:bytes{(length b + len) % size_block = 0}) =
   let firstbyte = Seq.create 1 0x80uy in
   let zeros = Seq.create (pad0_length len) 0uy in
