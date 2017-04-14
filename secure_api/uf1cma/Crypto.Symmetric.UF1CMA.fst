@@ -180,8 +180,8 @@ let genPost (i:id) (region:erid) m0 (st:state i) m1 =
   mac_is_fresh i region m0 st m1 /\
   mac_is_unset i region st m1
 
-#reset-options "--z3rlimit 1000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
-
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+// Brittle proof. Merging the branches of the first conditional breaks it
 val alloc: region:erid -> i:id
   -> ak:akey region (fst i)
   // Could live in a different region, but this simplifies the spec
@@ -190,39 +190,50 @@ val alloc: region:erid -> i:id
   (requires (fun m0 -> live m0 k /\ live_ak m0 ak))
   (ensures  (fun m0 st m1 -> 
     genPost i region m0 st m1 /\ 
-    Buffer.modifies_1 k m0 m1 ))
+    Buffer.modifies_1 k m0 m1))
 let alloc region i ak k =
   let h0 = ST.get () in
   let r = MAC.rcreate region i in
   let s = FStar.Buffer.rcreate region 0uy 16ul in
   let h1 = ST.get () in
-  let rb, sb =
-    if skeyed (fst i) then
-      get_skey #region #(fst i) ak, k
-    else
-      sub k 0ul 16ul, sub k 16ul 16ul
-  in
-  let hz = ST.get () in
-  assert(modifies_ref region TSet.empty h0 hz);
-  MAC.encode_r r rb;
-  let h2 = ST.get () in
-  lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
-  lemma_intro_modifies_1 k h0 h2;
-  Buffer.blit sb 0ul s 0ul 16ul;
-  let h3 = ST.get () in
-  lemma_reveal_modifies_1 s h2 h3;
-  lemma_intro_modifies_1 k h0 h3;
+  assert_norm (UInt32.v 16ul == 16);
+  if skeyed (fst i) then
+    begin
+    let rb = get_skey #region #(fst i) ak in
+    let sb = k in
+    MAC.encode_r r rb;
+    let h2 = ST.get () in
+    lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
+    lemma_intro_modifies_1 k h0 h2;
+    Buffer.blit sb 0ul s 0ul 16ul;
+    let h3 = ST.get () in
+    lemma_reveal_modifies_1 s h2 h3;
+    lemma_intro_modifies_1 k h0 h3
+    end
+  else
+    begin
+    let rb = sub k 0ul  16ul in
+    let sb = sub k 16ul 16ul in
+    MAC.encode_r r rb;
+    let h2 = ST.get () in
+    lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
+    lemma_intro_modifies_1 k h0 h2;
+    Buffer.blit sb 0ul s 0ul 16ul;
+    let h3 = ST.get () in
+    lemma_reveal_modifies_1 s h2 h3;
+    lemma_intro_modifies_1 k h0 h3
+    end;
   if mac_log then
     begin
     log_cmp_monotonic i;
     let log = RR.m_alloc #(log i) #log_cmp region (snd i, None) in
-    let h4 = ST.get() in 
+    let h4 = ST.get() in
     lemma_intro_modifies_1 k h0 h4;
     State #i #region r s log
     end
-  else
+   else
     begin
-    let h4 = ST.get() in 
+    let h4 = ST.get() in
     lemma_intro_modifies_1 k h0 h4;
     State #i #region r s ()
     end
@@ -342,7 +353,6 @@ let start #i st =
     Acc #i a log
   else
     Acc #i a ()
-
 
 
 let modifies_buf_and_ref (#a:Type) (#b:Type)
@@ -560,6 +570,7 @@ private val modifies_verify_aux: #a:Type -> #b:Type -> #c:Type -> #d:Type ->
     (RR.m_contains mref h0 /\ RR.m_contains mref h3 /\
      HS.contains h0 ref /\ HS.contains h3 ref) ==>
     RR.m_sel h0 mref == RR.m_sel h3 mref /\ HS.sel h0 ref == HS.sel h3 ref))
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 let modifies_verify_aux #a #b #c #d #r #rel mref ref buf1 buf2 h0 h1 h2 h3 =
   lemma_reveal_modifies_0 h1 h2;
   lemma_reveal_modifies_2 buf1 buf2 h2 h3
