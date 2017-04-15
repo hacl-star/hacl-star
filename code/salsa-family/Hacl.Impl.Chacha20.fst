@@ -268,7 +268,6 @@ let double_round st =
 #reset-options " --max_fuel 0 --z3rlimit 500"
 
 [@ "c_inline"]
-private
 val rounds:
   st:state ->
   Stack unit
@@ -298,7 +297,6 @@ let rounds st =
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
 [@ "c_inline"]
-private
 val sum_states:
   st:state ->
   st':state{disjoint st st'} ->
@@ -313,7 +311,6 @@ let sum_states st st' =
 
 
 [@ "c_inline"]
-private
 val copy_state:
   st:state ->
   st':state{disjoint st st'} ->
