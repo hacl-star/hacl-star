@@ -19,7 +19,7 @@ module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
 module H32 = Hacl.UInt32
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 let u32 = U32.t
 let h32 = H32.t
@@ -32,6 +32,7 @@ private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32
 
 
 [@ "c_inline"]
+private
 val setup:
   st:state ->
   k:uint8_p{length k = 32 /\ disjoint st k} ->
@@ -74,6 +75,7 @@ let setup st k n c =
 let idx = a:U32.t{U32.v a < 16}
 
 [@ "c_inline"]
+private
 val line:
   st:state ->
   a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s < 32} ->
@@ -92,6 +94,7 @@ let line st a b d s =
 
 
 [@ "c_inline"]
+private
 val quarter_round:
   st:state ->
   a:idx -> b:idx -> c:idx -> d:idx ->
@@ -109,6 +112,7 @@ let quarter_round st a b c d =
 
 
 [@ "substitute"]
+private
 val column_round:
   st:state ->
   Stack unit
@@ -125,6 +129,7 @@ let column_round st =
 
 
 [@ "substitute"]
+private
 val row_round:
   st:state ->
   Stack unit
@@ -141,6 +146,7 @@ let row_round st =
 
 
 [@ "c_inline"]
+private
 val double_round:
   st:buffer H32.t{length st = 16} ->
   Stack unit
@@ -154,7 +160,7 @@ let double_round st =
     row_round st
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 [@ "c_inline"]
 val rounds:
@@ -183,9 +189,10 @@ let rounds st =
   for 0ul 10ul inv f'
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@ "c_inline"]
+private
 val sum_states:
   st:state ->
   st':state{disjoint st st'} ->
@@ -200,6 +207,7 @@ let sum_states st st' =
 
 
 [@ "c_inline"]
+private
 val copy_state:
   st:state ->
   st':state{disjoint st st'} ->
@@ -216,13 +224,13 @@ let copy_state st st' =
   Seq.lemma_eq_intro (as_seq h st) (as_seq h st')
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
-type log_t_ = | MkLog: k:Spec.key -> n:Spec.nonce -> (* c:Spec.counter -> *) log_t_
+type log_t_ = | MkLog: k:Spec.key -> n:Spec.nonce -> log_t_
 type log_t = Ghost.erased log_t_
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 inline_for_extraction
 let u64_of_u32s (low:U32.t) (high:U32.t) : Tot (x:UInt64.t{UInt64.v x = pow2 32 * UInt32.v high + UInt32.v low}) =
@@ -255,9 +263,10 @@ let invariant (log:log_t) (h:mem) (st:state) : GTot Type0 =
 module H64 = Hacl.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
-private val lemma_invariant:
+private
+val lemma_invariant:
   st:Spec.state ->
   k:Spec.key -> n:Spec.nonce -> c:H64.t -> c':H64.t -> Lemma
     (requires (st == Spec.setup k n (H64.v c)))
@@ -297,15 +306,17 @@ let lemma_invariant s k n c c' =
   Seq.lemma_eq_intro s' (Seq.Create.create_16 (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0' c1' (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3))
 
 
-private val lemma_state_counter:
+private
+val lemma_state_counter:
   k:Spec.key -> n:Spec.nonce -> c:Spec.counter ->
   Lemma (U32.v (Seq.index (Spec.setup k n c) 8) == c % pow2 32 /\ U32.v (Seq.index (Spec.setup k n c) 9) == c / pow2 32)
 let lemma_state_counter k n c = ()
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
-private let lemma_u64_of_u32s (low:U32.t) (high:U32.t) : Lemma (low32_of_u64 (u64_of_u32s low high) = low /\ high32_of_u64 (u64_of_u32s low high) = high) =
+private
+let lemma_u64_of_u32s (low:U32.t) (high:U32.t) : Lemma (low32_of_u64 (u64_of_u32s low high) = low /\ high32_of_u64 (u64_of_u32s low high) = high) =
   let low' = low32_of_u64 (u64_of_u32s low high) in
   cut (U32.v low' = (U32.v low + pow2 32 * U32.v high) % pow2 32);
   Math.Lemmas.lemma_mod_plus (U32.v low) (U32.v high) (pow2 32);
@@ -315,6 +326,7 @@ private let lemma_u64_of_u32s (low:U32.t) (high:U32.t) : Lemma (low32_of_u64 (u6
 
 
 [@ "c_inline"]
+private
 val salsa20_core:
   log:log_t ->
   k:state ->
@@ -422,7 +434,7 @@ let init st k n =
   cut (reveal_h32s (as_seq h st) == Spec.setup (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) 0);
   Ghost.elift2 (fun (k:uint8_p{length k = 32 /\ live h k}) (n:uint8_p{length n = 8 /\ live h n}) -> MkLog (reveal_sbytes (as_seq h k)) (reveal_sbytes (as_seq h n))) (Ghost.hide k) (Ghost.hide n)
 
-
+private
 val lemma_salsa20_counter_mode_1:
   ho:mem -> output:uint8_p{live ho output} ->
   hi:mem -> input:uint8_p{live hi input} ->
@@ -448,7 +460,7 @@ let lemma_salsa20_counter_mode_1 ho output hi input len k n ctr =
     Math.Lemmas.lemma_div_le (blocks_len) len ctx.blocklen;
     (* End TODO *)
   let blocks, last_block = Seq.split (as_seq hi input) blocks_len in
-  let cipher_blocks = counter_mode_blocks ctx salsa20_cipher k n counter blocks in
+  let cipher_blocks = counter_mode_blocks ctx salsa20_cipher k n counter (reveal_sbytes blocks) in
   Seq.lemma_eq_intro cipher_blocks Seq.createEmpty;
   assert(ctx.incr * (Seq.length (as_seq hi input) / ctx.blocklen) = 0);
   Seq.lemma_eq_intro (Seq.append Seq.createEmpty (xor #len (reveal_sbytes (as_seq hi input)) (Seq.slice (Spec.salsa20_block k n (UInt64.v ctr)) 0 len))) (xor #len (reveal_sbytes (as_seq hi input)) (Seq.slice (Spec.salsa20_block k n (UInt64.v ctr)) 0 len));
@@ -458,6 +470,7 @@ let lemma_salsa20_counter_mode_1 ho output hi input len k n ctr =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+private
 val lemma_salsa20_counter_mode_2:
   ho:mem -> output:uint8_p{live ho output} ->
   hi:mem -> input:uint8_p{live hi input} ->
@@ -470,9 +483,9 @@ val lemma_salsa20_counter_mode_2:
       Math.Lemmas.lemma_mod_plus (Seq.length prefix) 1 (64);
       Math.Lemmas.lemma_div_le (Seq.length prefix) (UInt32.v len) 64;
       Spec.CTR.Lemmas.lemma_div (UInt32.v len) (64);
-    let cipher        = Spec.CTR.counter_mode_blocks salsa20_ctx salsa20_cipher k n (UInt64.v ctr) prefix in
+    let cipher        = Spec.CTR.counter_mode_blocks salsa20_ctx salsa20_cipher k n (UInt64.v ctr) (reveal_sbytes prefix) in
     let mask          = salsa20_cipher k n (UInt64.v ctr + (UInt32.v len / 64 - 1) ) in
-    let eb            = Spec.CTR.xor block mask in
+    let eb            = Spec.CTR.xor (reveal_sbytes block) mask in
     Seq.append cipher eb))
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let lemma_salsa20_counter_mode_2 ho output hi input len k n ctr = ()
@@ -480,6 +493,7 @@ let lemma_salsa20_counter_mode_2 ho output hi input len k n ctr = ()
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+private
 val lemma_salsa20_counter_mode_0:
   ho:mem -> output:uint8_p{live ho output} ->
   hi:mem -> input:uint8_p{live hi input} ->
@@ -558,72 +572,8 @@ let update output plain log st ctr =
   l
 
 
-#reset-options "--max_fuel 0 --z3rlimit 500"
 
-(* val lemma_salsa20_counter_mode: *)
-(*   h0:mem -> h1:mem -> h2:mem -> *)
-(*   output:uint8_p{live h1 output /\ live h2 output /\ live h0 output} -> *)
-(*   plain:uint8_p{live h0 plain /\ live h1 plain /\ live h2 plain} -> *)
-(*   len:UInt32.t{length output = U32.v len /\ length output = length plain /\ U32.v len >= 64} -> *)
-(*   k:Spec.key -> n:Spec.nonce -> ctr:Spec.counter{ctr + U32.v len / 64 < pow2 64} -> *)
-(*   Lemma (requires ( *)
-(*     (let o = reveal_sbytes (as_seq h2 (Buffer.sub output 0ul 64ul)) in *)
-(*      let p = reveal_sbytes (as_seq h0 (Buffer.sub plain 0ul 64ul)) in *)
-(*      let o' = reveal_sbytes (as_seq h2 (Buffer.offset output 64ul)) in *)
-(*      let p' = reveal_sbytes (as_seq h0 (Buffer.offset plain 64ul)) in *)
-(*      o == seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p (salsa20_cipher k n (ctr)) *)
-(*      /\ o' == Spec.CTR.counter_mode salsa20_ctx salsa20_cipher k n (ctr + 1) p'))) *)
-(*      (ensures ( *)
-(*        (let o = reveal_sbytes (as_seq h2 output) in *)
-(*         let plain = reveal_sbytes (as_seq h0 plain) in *)
-(*         o == Spec.CTR.counter_mode salsa20_ctx salsa20_cipher k n (ctr) plain))) *)
-(* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500" *)
-(* let lemma_salsa20_counter_mode h0 h1 h2 output plain len k n ctr = *)
-(*   cut (ctr + 1 < pow2 64); *)
-(*   Seq.lemma_eq_intro (as_seq h2 (Buffer.sub output 0ul 64ul)) (Seq.slice (as_seq h2 output) 0 64); *)
-(*   Seq.lemma_eq_intro (as_seq h0 (Buffer.sub plain 0ul 64ul)) (Seq.slice (as_seq h0 plain) 0 64); *)
-(*   Seq.lemma_eq_intro (as_seq h2 (Buffer.offset output 64ul)) (Seq.slice (as_seq h2 output) 64 (length output)); *)
-(*   Seq.lemma_eq_intro (as_seq h0 (Buffer.offset plain 64ul)) (Seq.slice (as_seq h0 plain) 64 (length output)); *)
-(*   let b, plainn = Seq.split (reveal_sbytes (as_seq h0 plain)) 64 in *)
-(*   Seq.lemma_eq_intro b (reveal_sbytes (as_seq h0 (Buffer.sub plain 0ul 64ul))); *)
-(*   Seq.lemma_eq_intro plainn (reveal_sbytes (as_seq h0 (Buffer.offset plain 64ul))); *)
-(*   let mask = Spec.salsa20_block k n (ctr) in *)
-(*   let eb = seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) b mask in *)
-(*   Seq.lemma_eq_intro eb (reveal_sbytes (as_seq h2 (Buffer.sub output 0ul 64ul))); *)
-(*   let cipher = Spec.CTR.counter_mode salsa20_ctx salsa20_cipher k n (ctr + 1) plainn in *)
-(*   Seq.lemma_eq_intro cipher (reveal_sbytes (as_seq h2 (Buffer.offset output 64ul))); *)
-(*   Seq.lemma_eq_intro (Seq.append eb cipher) (reveal_sbytes (as_seq h2 output)); *)
-(*   lemma_salsa20_counter_mode_2 h2 output h0 plain len k n (UInt64.uint_to_t ctr) *)
-
-
-(* #reset-options "--max_fuel 0 --z3rlimit 100" *)
-
-(* val salsa20_counter_mode_: *)
-(*   output:uint8_p -> *)
-(*   plain:uint8_p{disjoint output plain} -> *)
-(*   len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len < 64} -> *)
-(*   log:log_t -> *)
-(*   st:state{disjoint st output /\ disjoint st plain} -> *)
-(*   ctr:UInt64.t{UInt64.v ctr + (length plain / 64) < pow2 64} -> *)
-(*   Stack unit *)
-(*     (requires (fun h -> live h output /\ live h plain /\ invariant log h st)) *)
-(*     (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ live h1 st *)
-(*       /\ modifies_2 output st h0 h1 *)
-(*       /\ (let o = reveal_sbytes (as_seq h1 output) in *)
-(*          let plain = reveal_sbytes (as_seq h0 plain) in *)
-(*          match Ghost.reveal log with | MkLog k n -> *)
-(*          o == Spec.CTR.counter_mode salsa20_ctx salsa20_cipher k n (UInt64.v ctr) plain))) *)
-(* let rec salsa20_counter_mode_ output plain len log st ctr = *)
-(*   let h0 = ST.get() in *)
-(*   if U32.(len =^ 0ul) then ( *)
-(*     lemma_salsa20_counter_mode_0 h0 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr; *)
-(*     Seq.lemma_eq_intro (as_seq h0 output) Seq.createEmpty *)
-(*   ) else  ( *)
-(*     let _ = update_last output plain len log st ctr in () *)
-(*   ) *)
-
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 private
 val lemma_aux_modifies_2: #a:Type -> #a':Type -> h:mem -> b:buffer a{live h b} -> b':buffer a'{live h b'} -> Lemma
@@ -644,7 +594,7 @@ let lemma_salsa20_counter_mode_def_0 s k n ctr =
   Seq.lemma_eq_intro s Seq.createEmpty
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 private
 val salsa20_counter_mode_blocks:
@@ -669,7 +619,7 @@ let rec salsa20_counter_mode_blocks output plain len log st ctr =
     live h1 output /\ invariant log h1 st /\ modifies_2 output st h0 h1 /\ 0 <= i /\ i <= UInt32.v len
     /\ (match Ghost.reveal log with | MkLog k n ->
       reveal_sbytes (Seq.slice (as_seq h1 output) 0 (64 * i))
-      == Spec.CTR.counter_mode_blocks salsa20_ctx salsa20_cipher k n (UInt64.v ctr) (Seq.slice (as_seq h0 plain) 0 (64 * i)))
+      == Spec.CTR.counter_mode_blocks salsa20_ctx salsa20_cipher k n (UInt64.v ctr) (reveal_sbytes (Seq.slice (as_seq h0 plain) 0 (64 * i))))
   in
   let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < v len ) }): Stack unit
     (requires (fun h -> inv h (UInt32.v i)))
@@ -709,7 +659,6 @@ let rec salsa20_counter_mode_blocks output plain len log st ctr =
   let i0 = Buffer.sub plain  0ul 0ul in
   Seq.lemma_eq_intro (as_seq h0 o0) (Seq.slice (as_seq h0 output) 0 0);
   Seq.lemma_eq_intro (as_seq h0 i0) (Seq.slice (as_seq h0 plain) 0 0);
-  (* lemma_salsa20_counter_mode_0 h0 o0 h0 i0 0ul (Ghost.reveal log).k (Ghost.reveal log).n ctr; *)
   lemma_aux_modifies_2 h0 output st;
   lemma_salsa20_counter_mode_def_0 (Seq.slice (as_seq h0 plain) 0 0) (Ghost.reveal log).k (Ghost.reveal log).n ctr;
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 0) Seq.createEmpty;
@@ -720,6 +669,7 @@ let rec salsa20_counter_mode_blocks output plain len log st ctr =
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 (64 * UInt32.v len)) (as_seq h plain)
 
 
+private
 val salsa20_counter_mode:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
@@ -757,7 +707,7 @@ let salsa20_counter_mode output plain len log st ctr =
   Seq.lemma_eq_intro (Seq.append (as_seq h output') Seq.createEmpty) (as_seq h output');
   Seq.lemma_eq_intro (as_seq h output) (Seq.append (as_seq h output') (as_seq h output''));
   Seq.lemma_eq_intro (as_seq h0 plain) (Seq.append (as_seq h0 plain') (as_seq h0 plain''));
-  Seq.lemma_eq_intro (as_seq h output) (Spec.CTR.counter_mode salsa20_ctx salsa20_cipher (Ghost.reveal log).k (Ghost.reveal log).n (UInt64.v ctr) (as_seq h0 plain));
+  Seq.lemma_eq_intro (reveal_sbytes (as_seq h output)) (Spec.CTR.counter_mode salsa20_ctx salsa20_cipher (Ghost.reveal log).k (Ghost.reveal log).n (UInt64.v ctr) (reveal_sbytes (as_seq h0 plain)));
   ()
 
 
