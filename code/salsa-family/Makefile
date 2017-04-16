@@ -42,7 +42,7 @@ all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^ --use_hints --record_hints
 
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 
