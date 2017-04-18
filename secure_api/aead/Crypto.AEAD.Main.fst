@@ -6,11 +6,11 @@ module HS = FStar.HyperStack
 module I = Crypto.Indexing
 module PRF = Crypto.Symmetric.PRF
 
-let aead_state = Invariant.aead_state
-let keylen = PRF.keylen
-let statelen = PRF.statelen
-let plain = Crypto.Plain.plain
-let plainBuffer = Crypto.Plain.plainBuffer
+let aead_state i rw = Invariant.aead_state i rw
+let keylen i = PRF.keylen i
+let statelen i = PRF.statelen i
+let plain i l = Crypto.Plain.plain i l
+let plainBuffer i l = Crypto.Plain.plainBuffer i l
 let safelen (i:I.id) (n:nat) = Invariant.safelen i n (Invariant.otp_offset i)
 
 let gen (i:I.id) (rgn:eternal_region)
