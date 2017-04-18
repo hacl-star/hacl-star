@@ -24,7 +24,6 @@ module HSalsa = Spec.HSalsa20
 module Curve = Spec.Curve25519
 module Key = Box.AE.Key
 
-#set-options "--z3rlimit 100 --lax"
 let dh_element_size = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
 let dh_exponent_size = 32 // Size of scalar in Curve25519. Replace with constant in spec?
 type dh_share = Curve.serialized_point //

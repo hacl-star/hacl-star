@@ -2,7 +2,7 @@
    Box.AE provides cryptographically verified authenticated encryption for use by Box.PKAE. Plaintext types and functions
    to create new plaintext or break the plaintext down to bytes are provided in PlainAE. Some functions and variables are
    only present for purposes of modelling the cryptographic AE game. Of interest for other modules that are not concerned
-   with cryptographic verification are coerce_key, encrypt and decrpyt.
+   with cryptographic verification are coerce_key, leak_key, keygen, encrypt and decrpyt.
 *)
 module Box.AE
 
@@ -25,7 +25,6 @@ module SPEC = Spec.SecretBox
 
 open Box.PlainAE
 
-#set-options "--z3rlimit 100 --lax"
 // TODO: implement an init function for all the global state.
 type noncesize = SPEC.noncelen
 type keysize = SPEC.keylen
@@ -53,6 +52,10 @@ type ae_log_inv (f:MM.map' ae_log_key ae_log_range) = True
 
 
 assume val ae_log: MM.t ae_log_region ae_log_key ae_log_range ae_log_inv
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// The following functions belong to the formal KEY module in the model.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 (**
    The key type is abstract and can only be accessed via the leak and coerce_key functions. This means that the adversary has no means
@@ -105,12 +108,6 @@ let coerce_key i raw =
   Key #i raw
 
 (**
-   The message wrap- and unwrap functions are provided here for use in the PKAE module.
-*)
-let message_wrap #i = PlainAE.ae_message_wrap #i
-let message_unwrap #i = PlainAE.ae_message_unwrap #i
-
-(**
    The leak_key function transforms an abstract key into a raw aes_key.
    The refinement type on the key makes sure that no honest keys can be leaked.
 *)
@@ -126,6 +123,15 @@ val get_keyGT: k:key -> GTot (raw_k:aes_key{raw_k=k.raw})
 let get_keyGT k =
   k.raw
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// The following functions belong to the formal AE module in the model.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+(**
+   The message wrap- and unwrap functions are provided here for use in the Box module.
+*)
+let message_wrap #i = PlainAE.ae_message_wrap #i
+let message_unwrap #i = PlainAE.ae_message_unwrap #i
 
 #reset-options
 #set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 0"
@@ -153,8 +159,6 @@ val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_pla
                     /\ MR.m_sel h1 ae_log == MM.upd current_log (n,i) (c,m)))
     /\ (modifies modified_regions h0 h1 \/ h0 == h1)
   ))
-
-
 let encrypt #i n k m =
   MR.m_recall id_log;
   MR.m_recall id_honesty_log;
@@ -200,8 +204,6 @@ val decrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> c:cipher -> ST (opt
     ==> (MM.fresh ae_log (n,i) h0 \/ c =!= fst (MM.value ae_log (n,i) h0)))
    )
   ))
-
-
 let decrypt #i n k c =
   let honest_i = is_honest i in
   if ae_int_ctxt && honest_i then
