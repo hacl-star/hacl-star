@@ -61,7 +61,7 @@ private let h32_to_h64 = Cast.sint32_to_sint64
 private let u64_to_h64 = Cast.uint64_to_sint64
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 10"
 
 //
 // SHA-256
@@ -123,7 +123,7 @@ private val _sigma1: x:uint32_ht -> Tot uint32_ht
 let _sigma1 x = H32.logxor (rotate_right x 17ul) (H32.logxor (rotate_right x 19ul) (H32.shift_right x 10ul))
 
 
-#reset-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options " --max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
 private val constants_set_k:
@@ -155,7 +155,7 @@ let constants_set_k k =
   0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
 
 
-#reset-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options " --max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
 val constants_set_h_0:
@@ -173,7 +173,7 @@ let constants_set_h_0 hash =
   0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 10"
 
 private val ws:
   ws_w    :uint32_p {length ws_w = 64} ->
@@ -191,7 +191,7 @@ private val ws:
                       let b = as_seq h0 block_w in
                       (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i))))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 let rec ws ws_w block_w t =
   let h0 = ST.get() in
@@ -227,7 +227,7 @@ let rec ws ws_w block_w t =
   )
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 10"
 
 [@"substitute"]
 private val shuffle_core:
@@ -249,7 +249,7 @@ private val shuffle_core:
                   let seq_block = as_seq h0 block_w in
                   seq_hash_1 == Spec.shuffle_core seq_block seq_hash_0 (U32.v t))))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 let shuffle_core hash block ws k t =
@@ -270,7 +270,7 @@ let shuffle_core hash block ws k t =
   Utils.hupd_8 hash (t1 +%^ t2) a b c (d +%^ t1) e f g
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 10"
 
 [@"substitute"]
 private val shuffle:
@@ -291,7 +291,7 @@ private val shuffle:
                   let seq_block = as_seq h0 block_w in
                   seq_hash_1 == Spec.shuffle seq_hash_0 seq_block)))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 [@"substitute"]
 let shuffle hash block ws k =
@@ -313,7 +313,7 @@ let shuffle hash block ws k =
   for 0ul size_ws_w inv f'
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 private val sum_hash:
@@ -332,7 +332,7 @@ let sum_hash hash_0 hash_1 =
   C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H32.(x +%^ y))
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 10"
 
 [@"c_inline"]
 val alloc:
@@ -382,7 +382,7 @@ let copy_hash hash_w_1 hash_w_2 =
   Lemmas.lemma_blit_slices_eq h0 h1 hash_w_1 hash_w_2 (v size_hash_w)
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 10"
 
 [@"substitute"]
 private val update_core:
@@ -404,7 +404,7 @@ private val update_core:
                   let seq_block = as_seq h0 data in
                   seq_hash_1 == Spec.update seq_hash_0 seq_block)))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0  --z3rlimit 200"
 
 [@"substitute"]
 let update_core hash_w data data_w ws_w k_w =
@@ -430,7 +430,7 @@ let update_core hash_w data data_w ws_w k_w =
   (**) pop_frame()
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 val update:
   state :uint32_p {length state = v size_state} ->
@@ -455,7 +455,7 @@ val update:
                   /\ H32.v counter_1 = H32.v counter_0 + 1 /\ H32.v counter_1 < pow2 32
                   /\ seq_hash_1 == Spec.update seq_hash_0 seq_block)))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0  --z3rlimit 200"
 
 let update state data =
 
@@ -489,7 +489,7 @@ let update state data =
   (**) pop_frame()
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 val update_multi:
   state :uint32_p{length state = v size_state} ->
@@ -515,7 +515,7 @@ val update_multi:
                   /\ H32.v counter_1 = H32.v counter_0 + (v n) /\ H32.v counter_1 < pow2 32
                   /\ seq_hash_1 == Spec.update_multi seq_hash_0 seq_blocks)))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0  --z3rlimit 200"
 
 let rec update_multi state data n =
   let h0 = ST.get() in
@@ -577,7 +577,7 @@ val update_last:
                   let prevlen = U32.(v (Seq.index count 0) * (v size_block)) in
                   seq_hash_1 == Spec.update_last seq_hash_0 prevlen seq_data)))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0  --z3rlimit 500"
 
 let update_last state data len =
 
