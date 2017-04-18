@@ -1,3 +1,12 @@
+(**
+   This module contains functions and various lemmas concerning indices. Indices (ids) are used to link keys and plaintexts to a
+   certain instance in the cryptographic model. This module also contains tables to reflect freshness and honesty of ids.
+   TODO: Remove all state from this module.
+   * move honesty information into the AE and DH module
+   * use "registered" instead of fresh
+   * remove unused lemmas
+   * get rid of the assumes
+*)
 module Box.Indexing
 
 open FStar.Set

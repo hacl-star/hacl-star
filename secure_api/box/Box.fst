@@ -613,7 +613,7 @@ val box_open: n:nonce ->
         sk:pkae_skey ->
         pk:pkae_pkey ->
         c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
-          ST(option (p:protected_pkae_plain{PlainBox.get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))}))
+        ST(option (p:protected_pkae_plain{PlainBox.get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))}))
   (requires (fun h0 ->
     let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
     registered i
@@ -629,16 +629,33 @@ val box_open: n:nonce ->
   ))
   (ensures (fun h0 p h1 ->
     let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
-    let modified_regions = Set.union (Set.singleton dh_key_log_region) (Set.singleton box_key_log_region) in
-    log_invariant h1 i
-    /\ MR.m_contains box_log h1
-    /\ MR.m_contains ae_log h1
+    let regions_modified_dishonest = [id_log_region] in
+    let regions_modified_honest_set = Set.as_set (regions_modified_dishonest @ [dh_key_log_region;box_key_log_region]) in
+    let regions_modified_dishonest_set:Set.set (r:HH.rid) = Set.as_set regions_modified_dishonest in
+    // Id sanity
+    MR.m_contains dh_key_log h1
     /\ MR.m_contains id_log h1
     /\ MR.m_contains box_key_log h1
-    /\ MR.m_contains dh_key_log h1
-    /\ (honest i ==> MM.defined box_key_log i h1)
-    /\ (honest i ==> modifies modified_regions h0 h1)
-    /\ (dishonest i ==> h0==h1)
+    /\ MR.m_contains box_log h1
+    /\ MR.m_contains ae_log h1
+    /\ MR.m_sel h1 box_key_log == MR.m_sel h1 dh_key_log // dh_key_log and box_key_log are in sync
+    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) // all keys that are not in the dh_key_log are fresh
+    // If honest, something is inserted into the log
+    // TODO: Get key via log (see presentation(?))
+    ///\ ((honest i /\ MM.fresh box_key_log i h0) ==> (MR.m_sel h1 box_key_log == MM.upd (MR.m_sel h0 box_key_log) i k))
+    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (makes_unfresh_just i h0 h1))
+    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (modifies regions_modified_honest_set h0 h1))
+    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log))
+    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (h0==h1))
+    ///\ ((honest i) ==> (MR.witnessed (MM.contains box_key_log i k)))
+    ///\ ((honest i) ==> (MM.contains box_key_log i k h1))
+    // If dishonest, the returned key is actually computed from both DH keys.
+    ///\ (dishonest i (*x*)
+    //  ==> (modifies regions_modified_dishonest_set h0 h1
+    //     /\ leak_key k = ODH.prf_odhGT sk pk))
+    /\ ~(fresh i h1)
+    /\ log_invariant h1 i
+    ///\ (dishonest i ==> h0==h1)
     /\ ((honest i)
       ==> (let k_raw = AE.get_keyGT (MM.value box_key_log i h1) in
           (~(b2t pkae_int_ctxt)
@@ -662,8 +679,25 @@ val box_open: n:nonce ->
            ==> None? p)))
   ))
 
-// Weird error on line 338 or prims.fst removal of the refinement of the return type yields another
-// weird error on the return type.
+// Calling box_open_afternm does not seem to work due to some obscure error. Inlining for now.
 let box_open n sk pk c =
   let k = box_beforenm pk sk in
-  box_open_afternm n k c
+  let i = AE.get_index k in
+  match AE.decrypt #i n k c with
+  | Some p ->
+    let p' = (AE.message_unwrap #i p) in
+    MR.m_recall id_honesty_log;
+    MR.m_recall box_key_log;
+    MR.m_recall id_log;
+    MR.m_recall dh_key_log;
+    MR.m_recall box_log;
+    MR.m_recall ae_log;
+    Some p'
+  | None ->
+    MR.m_recall id_honesty_log;
+    MR.m_recall box_key_log;
+    MR.m_recall id_log;
+    MR.m_recall dh_key_log;
+    MR.m_recall box_log;
+    MR.m_recall ae_log;
+    None
