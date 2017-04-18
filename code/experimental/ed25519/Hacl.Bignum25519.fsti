@@ -174,15 +174,22 @@ val reduce:
                                + pow2 51 * v (Seq.index s 1)
                                + pow2 102 * v (Seq.index s 2)
                                + pow2 153 * v (Seq.index s 3)
-                               + pow2 204 * v (Seq.index s 4) == seval (as_seq h0 out))))))
+                               + pow2 204 * v (Seq.index s 4) < Spec.Curve25519.prime))) /\
+      seval (as_seq h1 out) == seval (as_seq h0 out)))
 
 val lemma_reveal_red_51: s:seqelem ->
-  Lemma (let open Hacl.UInt64 in
-         v (Seq.index s 0) < pow2 51 /\
-         v (Seq.index s 1) < pow2 51 /\
-         v (Seq.index s 2) < pow2 51 /\
-         v (Seq.index s 3) < pow2 51 /\
-         v (Seq.index s 4) < pow2 51)
+  Lemma (requires (red_51 s))
+        (ensures (let open Hacl.UInt64 in
+         v (Seq.index s 0) < pow2 51 /\ v (Seq.index s 1) < pow2 51 /\
+         v (Seq.index s 2) < pow2 51 /\ v (Seq.index s 3) < pow2 51 /\
+         v (Seq.index s 4) < pow2 51))
+
+val lemma_intro_red_51: s:seqelem ->
+  Lemma (requires (let open Hacl.UInt64 in
+         v (Seq.index s 0) < pow2 51 /\ v (Seq.index s 1) < pow2 51 /\
+         v (Seq.index s 2) < pow2 51 /\ v (Seq.index s 3) < pow2 51 /\
+         v (Seq.index s 4) < pow2 51))
+        (ensures (red_51 s))
 
 val lemma_reveal_seval: s:seqelem ->
   Lemma (FStar.Mul.(Hacl.UInt64.((v (Seq.index s 0)
@@ -190,4 +197,5 @@ val lemma_reveal_seval: s:seqelem ->
                                + pow2 102 * v (Seq.index s 2)
                                + pow2 153 * v (Seq.index s 3)
                                + pow2 204 * v (Seq.index s 4)) % (pow2 255 - 19) == seval s)))
+
 

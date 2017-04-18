@@ -74,7 +74,7 @@ inline_for_extraction let seq_upd_5 s0 s1 s2 s3 s4 =
   s
 
 
-val fexpand_spec: input:uint8_s{Seq.length input = 32} -> GTot (s:seqelem{Hacl.Spec.EC.AddAndDouble.red_513 s /\ Hacl.Spec.Bignum.Bigint.seval s = hlittle_endian input % pow2 255})
+val fexpand_spec: input:uint8_s{Seq.length input = 32} -> GTot (s:seqelem{Hacl.Spec.EC.AddAndDouble.red_513 s /\ Hacl.Spec.EC.AddAndDouble.(bounds s p51 p51 p51 p51 p51) /\ Hacl.Spec.Bignum.Bigint.seval s = hlittle_endian input % pow2 255})
 let fexpand_spec input =
   let i0 = load64_le_spec (Seq.slice input 0 8) in
   let i1 = load64_le_spec (Seq.slice input 6 14) in

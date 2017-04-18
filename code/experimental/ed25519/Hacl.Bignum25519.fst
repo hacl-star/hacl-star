@@ -151,7 +151,7 @@ val reduce_513_:
       /\ as_seq h1 a == reduce_513_s (as_seq h0 a)))
 
 
-#reset-options "--max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 500"
 
 [@ "substitute"]
 let reduce_513_ a =
@@ -268,7 +268,8 @@ let reduce out =
   let h = ST.get() in
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h out)
 
-let lemma_reveal_red_51 s = ()
+let lemma_reveal_red_51 s =
+  assert_norm(pow2 51 = 0x8000000000000)
 
 let lemma_reveal_seval s =
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 s

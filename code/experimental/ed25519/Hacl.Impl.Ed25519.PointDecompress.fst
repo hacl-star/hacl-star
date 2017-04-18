@@ -6,12 +6,25 @@ open Hacl.Bignum25519
 open Hacl.Impl.Ed25519.ExtPoint
 
 
+
+private
+val split_2_255:
+  y:felem ->
+  Stack sign
+    (requires (fun h -> live h y /\ red_51 (as_seq h y)))
+    (ensures (fun h0 z h1 -> live h1 y /\ live h0 y /\ modifies_1 y h0 h1 /\
+      
+
 val point_decompress:
   out:Hacl.Impl.Ed25519.ExtPoint.point ->
   s:buffer Hacl.UInt8.t{length s = 32} ->
   Stack bool
     (requires (fun h -> live h out /\ live h s))
-    (ensures (fun h0 b h1 -> live h0 s /\ live h1 out /\ modifies_1 out h0 h1))
+    (ensures (fun h0 b h1 -> live h0 s /\ live h1 out /\ modifies_1 out h0 h1 /\
+      (let x, y, z, t = as_point h1 out in
+       (seval x, seval y, seval z, seval t) == Spec.Ed25519.point_decompress (as_seq h0 s) /\
+       red_513 x /\ red_513 y /\ red_513 z /\ red_513 t)
+    ))
 let point_decompress out s =
   push_frame();
   let tmp  = Buffer.create 0uL 10ul in
