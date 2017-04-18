@@ -5,6 +5,7 @@ open Hacl.UInt8
 
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
+
 let secret_expand expanded secret =
   let h0 = ST.get() in
   Hacl.Impl.Sha512.sha512 expanded secret 32ul;

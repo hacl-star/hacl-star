@@ -6,7 +6,8 @@ open FStar.UInt32
 let hint8_p = buffer Hacl.UInt8.t
 let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val sign:
   signature:hint8_p{length signature = 64} ->

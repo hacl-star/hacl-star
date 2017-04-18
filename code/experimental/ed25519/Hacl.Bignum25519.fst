@@ -267,3 +267,8 @@ let reduce out =
   Hacl.EC.Format.reduce out;
   let h = ST.get() in
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h out)
+
+let lemma_reveal_red_51 s = ()
+
+let lemma_reveal_seval s =
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 s
