@@ -29,7 +29,7 @@ let q: elem =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   pow2 252 + 27742317777372353535851937790883648493 // Group order
 
-let sha512_modq (s:bytes{length s < pow2 125}) : Tot elem =
+let sha512_modq (s:bytes{length s < pow2 32}) : Tot elem =
   little_endian (sha512 s) % q
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
@@ -95,10 +95,10 @@ let modp_sqrt_m1 : elem = 2 ** ((prime - 1) / 4)
 
 noeq type record = { s:(s':seq bool{length s' = 3})}
 
-let recover_x (y:elem) (sign:bool) : Tot (option elem) =
+let recover_x (y:nat) (sign:bool) : Tot (option elem) =
   if y >= prime then None
   else (
-    let x2 = ((y `fmul` y) `fsub` 1) `fmul` (modp_inv ((d `fmul` y `fmul` y) `fadd` one)) in
+    let x2 = ((y `fmul` y) `fsub` 1) `fmul` (modp_inv ((d `fmul` (y `fmul` y)) `fadd` one)) in
     if x2 = zero then (
       if sign then None
       else Some zero
@@ -109,7 +109,7 @@ let recover_x (y:elem) (sign:bool) : Tot (option elem) =
       else (
         let x = if (x % 2 = 1) <> sign then prime `fsub` x else x in
         Some x)))
-        
+
 let g_y : elem = 4 `fmul` (modp_inv 5)
 let g_x : elem = 
   assume (Some? (recover_x g_y false));
