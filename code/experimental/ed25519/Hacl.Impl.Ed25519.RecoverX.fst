@@ -7,10 +7,9 @@ open Hacl.Bignum25519
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 
-let elemB = b:buffer Hacl.UInt64.t{length b = 5}
-
 open FStar.Mul
 
+private
 let norm h (x:elemB{live h x}) : GTot Type0 =
   live h x /\ red_51 (as_seq h x) /\ (let s = as_seq h x in
   v (Seq.index s 0) + pow2 51 * v (Seq.index s 1) + pow2 102 * v (Seq.index s 2) + pow2 153 * v (Seq.index s 3) + pow2 204 * v (Seq.index s 4) < Spec.Curve25519.prime)
@@ -132,6 +131,7 @@ let is_0 x =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+[@ "substitute"]
 private
 val mul_modp_sqrt_m1:
   x:elemB ->
@@ -141,14 +141,9 @@ val mul_modp_sqrt_m1:
       /\ red_513 (as_seq h0 x) /\ red_513 (as_seq h1 x) /\
       seval (as_seq h1 x)
       == Spec.Curve25519.(seval (as_seq h0 x) `fmul` (Spec.Ed25519.modp_sqrt_m1))
-      (* (let s = as_seq h1 x in *)
-      (*  FStar.Mul.(Hacl.UInt64.(v (Seq.index s 0) *)
-      (*                          + pow2 51 * v (Seq.index s 1) *)
-      (*                          + pow2 102 * v (Seq.index s 2) *)
-      (*                          + pow2 153 * v (Seq.index s 3) *)
-      (*                          + pow2 204 * v (Seq.index s 4) < Spec.Curve25519.prime))) *)
     ))
 #reset-options "--max_fuel 0 --z3rlimit 200"
+[@ "substitute"]
 let mul_modp_sqrt_m1 x =
   let open FStar.Mul in
   assert_norm(pow2 51 = 0x8000000000000);
@@ -163,12 +158,13 @@ let mul_modp_sqrt_m1 x =
   lemma_red_513_is_red_53 (as_seq h x);
   lemma_red_51_is_red_5413 (as_seq h sqrt_m1);
   Hacl.Bignum25519.fmul x x sqrt_m1;
-  (* Hacl.Bignum25519.reduce x; *)
   pop_frame()
 
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+[@ "substitute"]
+private
 val gte_q:
   x:elemB ->
   Stack bool
@@ -178,6 +174,7 @@ val gte_q:
        FStar.Mul.(v (Seq.index s 0) + pow2 51 * v (Seq.index s 1)
                   + pow2 102 * v (Seq.index s 2) + pow2 153 * v (Seq.index s 3)
                   + pow2 204 * v (Seq.index s 4)) >= pow2 255 - 19)) ))
+[@ "substitute"]
 let gte_q x =
   let h = ST.get() in
   lemma_reveal_red_51 (as_seq h x);
@@ -245,13 +242,15 @@ let fdifference_norm x y =
   reduce x
 
 
-private let lemma_distr_4 a b c d e : Lemma (a * (b + c + d + e) == a * b + a * c + a * d + a * e)
+private
+let lemma_distr_4 a b c d e : Lemma (a * (b + c + d + e) == a * b + a * c + a * d + a * e)
   = Math.Lemmas.distributivity_add_right a (b + c + d) e;
     Math.Lemmas.distributivity_add_right a (b + c) d;
     Math.Lemmas.distributivity_add_right a (b) c
 
 
-private let lemma_x_mod_2 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) :
+private
+let lemma_x_mod_2 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) :
   Lemma ((a + pow2 51 * b + pow2 102 * c + pow2 153 * d + pow2 204 * e) % 2 = a % 2)
   = assert_norm(pow2 51 = 2 * pow2 50);
     assert_norm(pow2 102 = 2 * pow2 101);
@@ -293,20 +292,24 @@ let x_mod_2 x =
   z
 
 
+private
 let lemma_modifies_2 #a #a' h (b:buffer a{live h b}) (b':buffer a'{live h b'}) :
   Lemma (modifies_2 b b' h h)
   = lemma_intro_modifies_2 b b' h h
 
+
+private
 let lemma_modifies_1 #a h (b:buffer a{live h b}) :
   Lemma (modifies_1 b h h)
   = lemma_intro_modifies_1 b h h
 
-
+[@ "substitute"]
+private
 val recover_x_step_2:
   x:elemB ->
   sign:Hacl.UInt64.t{v sign < 2} ->
   x2:elemB{disjoint x x2} ->
-  Stack bool
+  Stack UInt8.t
     (requires (fun h -> live h x2 /\ live h x /\
       (let s = as_seq h x2 in
        red_51 s /\
@@ -318,165 +321,231 @@ val recover_x_step_2:
     (ensures (fun h0 z h1 -> live h0 x2 /\ live h0 x /\ live h1 x /\ live h1 x2 /\
       (let x2 = as_seq h0 x2 in
        if seval x2 = 0 && v sign = 0
-       then (modifies_1 x h0 h1 /\ norm h1 x /\ seval (as_seq h1 x) = 0 /\ z == true)
+       then (modifies_1 x h0 h1 /\ norm h1 x /\ seval (as_seq h1 x) = 0 /\ z == 1uy)
        else if seval x2 = 0 && v sign = 1
-       then (h0 == h1 /\ z == false)
-       else (h0 == h1 /\ z == true))))
+       then (h0 == h1 /\ z == 0uy)
+       else (h0 == h1 /\ z == 2uy))))
+[@ "substitute"]
 let recover_x_step_2 x sign x2 =
   let x2_is_0 = is_0 x2 in
   if x2_is_0 then (
     if sign =^ 0uL then (
       make_zero x;
-      true
-    ) else false
-  ) else true
-
+      1uy
+    ) else 0uy
+  ) else 2uy
 
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+
+[@ "substitute"]
+private
+val recover_x_step_3:
+  tmp:buffer Hacl.UInt64.t{length tmp = 20} ->
+  Stack unit
+    (requires (fun h -> live h tmp /\
+      (let x2 = as_seq h (Buffer.sub tmp 0ul 5ul) in
+       red_513 x2)))
+    (ensures (fun h0 _ h1 -> live h0 tmp /\ live h1 tmp /\ modifies_1 tmp h0 h1 /\
+      (let x2 = as_seq h0 (Buffer.sub tmp 0ul 5ul) in
+       let x2' = as_seq h1 (Buffer.sub tmp 0ul 5ul) in
+       let x3 = as_seq h1 (Buffer.sub tmp 5ul 5ul) in
+       let x = Spec.Curve25519.(seval x2 ** ((prime + 3) / 8)) in
+       let y = if Spec.Curve25519.((x `fmul` x) `fsub` seval x2) <> 0 then Spec.Curve25519.(x `fmul` Spec.Ed25519.modp_sqrt_m1) else x in
+       seval x3 == y /\ red_51 x3 /\ x2' == x2 /\ v (Seq.index x3 0) + pow2 51 * v (Seq.index x3 1)
+       + pow2 102 * v (Seq.index x3 2) + pow2 153 * v (Seq.index x3 3)
+       + pow2 204 * v (Seq.index x3 4) < Spec.Curve25519.prime)))
+[@ "substitute"]
+let recover_x_step_3 tmp =
+  let x2  = Buffer.sub tmp 0ul 5ul in
+  let x3  = Buffer.sub tmp 5ul 5ul in
+  let t0  = Buffer.sub tmp 10ul 5ul in
+  let t1  = Buffer.sub tmp 15ul 5ul in
+  Hacl.Impl.Ed25519.Pow2_252m2.pow2_252m2 x3 x2;
+  let h' = ST.get() in
+  lemma_red_513_is_red_5413 (as_seq h' x3);
+  Hacl.Bignum25519.fsquare t0 x3;
+  copy x2 t1;
+  fdifference_norm t1 t0;
+  let t1_is_0 = is_0 t1 in
+  if t1_is_0 then ()
+  else (
+    mul_modp_sqrt_m1 x3
+  );
+  Hacl.Bignum25519.reduce x3
+
+
+[@ "substitute"]
+private
+val recover_x_step_4:
+  tmp:buffer Hacl.UInt64.t{length tmp = 20} ->
+  Stack bool
+    (requires (fun h -> live h tmp /\
+      (let x2 = as_seq h (Buffer.sub tmp 0ul 5ul) in
+       let x3 = as_seq h (Buffer.sub tmp 5ul 5ul) in
+       red_513 x2 /\ red_51 x3 /\ v (Seq.index x3 0) + pow2 51 * v (Seq.index x3 1)
+       + pow2 102 * v (Seq.index x3 2) + pow2 153 * v (Seq.index x3 3)
+       + pow2 204 * v (Seq.index x3 4) < Spec.Curve25519.prime)))
+    (ensures (fun h0 z h1 -> live h0 tmp /\ live h1 tmp /\ modifies_1 tmp h0 h1 /\
+      (let x2 = as_seq h0 (Buffer.sub tmp 0ul 5ul) in
+       let x3 = as_seq h0 (Buffer.sub tmp 5ul 5ul) in
+       let x2' = as_seq h1 (Buffer.sub tmp 0ul 5ul) in
+       let x3' = as_seq h1 (Buffer.sub tmp 5ul 5ul) in
+       let u = seval x3 in let v = seval x2 in
+       let y = Spec.Curve25519.((u `fmul` u) `fsub` v) in
+       if y <> 0 then z == false
+       else (x2' == x2 /\ x3' == x3 /\ z == true))))
+#reset-options "--max_fuel 0 --z3rlimit 100"
+[@ "substitute"]
+let recover_x_step_4 tmp =
+  let h0 = ST.get() in
+  let x2  = Buffer.sub tmp 0ul 5ul in
+  let x3  = Buffer.sub tmp 5ul 5ul in
+  let t0  = Buffer.sub tmp 10ul 5ul in
+  let t1  = Buffer.sub tmp 15ul 5ul in
+  lemma_red_51_is_red_5413 (as_seq h0 x3);
+  Hacl.Bignum25519.fsquare t0 x3;
+  let h = ST.get() in
+  copy x2 t1;
+  let h' = ST.get() in
+  no_upd_lemma_1 h0 h t0 x2;
+  no_upd_lemma_1 h h' t1 x2;
+  fdifference_norm t1 t0;
+  is_0 t1
+
+
+private
+val lemma_fdiff_prime:
+  x:Spec.Curve25519.elem ->
+  Lemma (Spec.Curve25519.(0 `fsub` x == prime `fsub` x))
+let lemma_fdiff_prime x =
+  FStar.Math.Axioms.lemma_mod_sub_distr_l_l Spec.Curve25519.prime x Spec.Curve25519.prime
+
+
+[@ "substitute"]
+private
+val recover_x_step_5:
+  x:elemB ->
+  sign:Hacl.UInt64.t{v sign < 2} ->
+  tmp:buffer Hacl.UInt64.t{length tmp = 20 /\ disjoint x tmp} ->
+  Stack unit
+    (requires (fun h -> live h x /\ live h tmp /\
+      (let x3 = as_seq h (Buffer.sub tmp 5ul 5ul) in
+       red_51 x3 /\ v (Seq.index x3 0) + pow2 51 * v (Seq.index x3 1)
+       + pow2 102 * v (Seq.index x3 2) + pow2 153 * v (Seq.index x3 3)
+       + pow2 204 * v (Seq.index x3 4) < Spec.Curve25519.prime)))
+    (ensures (fun h0 _ h1 -> live h0 x /\ live h0 tmp /\ live h1 x /\ live h1 tmp /\
+      modifies_2 x tmp h0 h1 /\
+      (let x3  = as_seq h0 (Buffer.sub tmp 5ul 5ul) in
+       let x   = as_seq h1 x in
+       let r   = if (seval x3 % 2) <> v sign then Spec.Curve25519.(prime `fsub` seval x3) else seval x3 in
+       seval x == r /\ red_51 x)))
+#reset-options "--max_fuel 0 --z3rlimit 100"
+let recover_x_step_5 x sign tmp =
+  let h0 = ST.get() in
+  let x3  = Buffer.sub tmp 5ul 5ul in
+  lemma_red_51_is_red_513 (as_seq h0 x3);
+  let t0  = Buffer.sub tmp 10ul 5ul in
+  let x0 = x_mod_2 x3 in
+  if not(x0 =^ sign) then (
+    make_zero t0;
+    fdifference_norm x3 t0;
+    let h = ST.get() in
+    lemma_fdiff_prime (seval (as_seq h0 x3))
+  ) else (
+    let h = ST.get() in
+    lemma_modifies_1 h tmp);
+  let h' = ST.get() in
+  assert(modifies_1 tmp h0 h');
+  assert(red_51 (as_seq h' x3));
+  copy x3 x
+
+[@ "substitute"]
+private
 val recover_x_:
   x:elemB ->
   y:elemB{disjoint x y} ->
   sign:UInt64.t{v sign = 0 \/ v sign = 1} ->
-  tmp:buffer Hacl.UInt64.t{length tmp = 20} ->
+  tmp:buffer Hacl.UInt64.t{length tmp = 20 /\ disjoint tmp x /\ disjoint tmp y} ->
   Stack bool
-    (requires (fun h -> live h x /\ live h y /\ red_51 (as_seq h y)))
-    (ensures (fun h0 z h1 -> live h1 x /\ live h0 y /\ modifies_1 x h0 h1 /\
+    (requires (fun h -> live h x /\ live h y /\ red_51 (as_seq h y) /\ live h tmp))
+    (ensures (fun h0 z h1 -> live h1 x /\ live h0 y /\ modifies_2 x tmp h0 h1 /\
       (let op_String_Access = Seq.index in
        let y = as_seq h0 y in
+       lemma_mul_5 (v y.[0]) (v y.[1]) (v y.[2]) (v y.[3]) (v y.[4]);
        let y:nat = v y.[0] + pow2 51 * v y.[1] + pow2 102 * v y.[2] + pow2 153 * v y.[3]
                + pow2 204 * v y.[4] in
        let x = as_seq h1 x in
        let sign = (v sign = 1) in
-       let res  = Spec.Ed25519.recover_x y sign in True)
-       (* (z <==> Some? res) *)
-       (* /\ (Some? res ==> (seval x = Some?.v res /\ red_51 x))) *)
+       let res  = Spec.Ed25519.recover_x y sign in
+       (z <==> Some? res)
+       /\ (Some? res ==> (seval x = Some?.v res /\ red_51 x)))
       ))
 #reset-options "--max_fuel 0 --z3rlimit 500"
-let recover_x_ x y sign =
+let recover_x_ x y sign tmp =
   assert_norm(pow2 32 = 0x100000000);
-  push_frame();
-  let tmp = create 0uL 20ul in
   let x2  = Buffer.sub tmp 0ul 5ul in
   let x3  = Buffer.sub tmp 5ul 5ul in
   let t0  = Buffer.sub tmp 10ul 5ul in
   let t1  = Buffer.sub tmp 15ul 5ul in
   let b = gte_q y in
+  let h0 = ST.get() in
   let res =
   if b then (
     let hf = ST.get() in
     lemma_modifies_2 hf x tmp;
+    assert(modifies_2 x tmp h0 hf);
     false
   ) else (
     let h = ST.get() in
     lemma_reveal_seval (as_seq h y);
+    lemma_mul_5 (v (get h y 0)) (v (get h y 1)) (v (get h y 2)) (v (get h y 3)) (v (get h y 4));
+    Math.Lemmas.modulo_lemma (let op_String_Access = Seq.index in let y = as_seq h y in
+      v y.[0] + pow2 51 * v y.[1] + pow2 102 * v y.[2] + pow2 153 * v y.[3] + pow2 204 * v y.[4]) Spec.Curve25519.prime;
     recover_x_step_1 x2 y;
-    Hacl.Impl.Ed25519.Pow2_252m2.pow2_252m2 x3 x2;
-    let h' = ST.get() in
-    lemma_red_513_is_red_5413 (as_seq h' x3);
-    Hacl.Bignum25519.fsquare t0 x3;
-    copy x2 t1;
-    fdifference_norm t1 t0;
-    let t1_is_0 = is_0 t1 in
-    if t1_is_0 then ()
-    else (
-      mul_modp_sqrt_m1 x3
-    );
-    Hacl.Bignum25519.fsquare t0 x3;
-    copy x2 t1;
-    fdifference_norm t1 t0;
-    Hacl.Bignum25519.reduce x3;
-    let t1_is_0 = is_0 t1 in
-    if t1_is_0 then (
-      let x0 = x_mod_2 x3 in
-      (* let x0 = x3.(0ul) &^ 1uL in *)
-      if not(x0 =^ sign) then (
-        make_zero t0;
-        fdifference_norm x3 t0
-      ) else (
-        let h = ST.get() in
-        lemma_modifies_1 h tmp);
-      copy x3 x;
-      true
-    )
-    else (
+    let h1 = ST.get() in
+    assert(modifies_1 tmp h0 h1);
+    let z = recover_x_step_2 x sign x2 in
+    if z = 0uy then (
       let h = ST.get() in
-      lemma_modifies_2 h x tmp;
-      false)
-  ) in
-  pop_frame();
-  res
+      lemma_modifies_1 h x;
+      assert(modifies_2 x tmp h0 h);
+      false
+    ) else if z = 1uy then (
+      let h = ST.get() in
+      assert(modifies_2 x tmp h0 h);
+      true
+    ) else (
+      let h = ST.get() in
+      lemma_red_51_is_red_513 (as_seq h x2);
+      recover_x_step_3 tmp;
+      let z = recover_x_step_4 tmp in
+      if z = false then (
+        let h = ST.get() in
+        assert(modifies_1 tmp h0 h);
+        lemma_modifies_1 h x;
+        assert(modifies_2 x tmp h0 h);
+        false)
+      else (
+        recover_x_step_5 x sign tmp;
+        let h = ST.get() in
+        assert(modifies_2 x tmp h0 h);
+        true
+          )
+        )
+        ) in
+   let h1 = ST.get() in
+   assert(modifies_2 x tmp h0 h1);
+   res
 
 
-val recover_x:
-  x:elemB ->
-  y:elemB{disjoint x y} ->
-  sign:UInt64.t{v sign = 0 \/ v sign = 1} ->
-  Stack bool
-    (requires (fun h -> live h x /\ live h y /\ red_51 (as_seq h y)))
-    (ensures (fun h0 z h1 -> live h1 x /\ live h0 y /\ modifies_1 x h0 h1 /\
-      (let op_String_Access = Seq.index in
-       let y = as_seq h0 y in
-       let y:nat = v y.[0] + pow2 51 * v y.[1] + pow2 102 * v y.[2] + pow2 153 * v y.[3]
-               + pow2 204 * v y.[4]in
-       let x = as_seq h1 x in
-       let sign = (v sign = 1) in
-       let res  = Spec.Ed25519.recover_x y sign in True)
-       (* (z <==> Some? res) *)
-       (* /\ (Some? res ==> (seval x = Some?.v res /\ red_51 x))) *)
-      ))
-#reset-options "--max_fuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
 let recover_x x y sign =
   assert_norm(pow2 32 = 0x100000000);
   push_frame();
   let tmp = create 0uL 20ul in
-  let x2  = Buffer.sub tmp 0ul 5ul in
-  let x3  = Buffer.sub tmp 5ul 5ul in
-  let t0  = Buffer.sub tmp 10ul 5ul in
-  let t1  = Buffer.sub tmp 15ul 5ul in
-  let b = gte_q y in
-  let res =
-  if b then (
-    let hf = ST.get() in
-    lemma_modifies_2 hf x tmp;
-    false
-  ) else (
-    let h = ST.get() in
-    lemma_reveal_seval (as_seq h y);
-    recover_x_step_1 x2 y;
-    Hacl.Impl.Ed25519.Pow2_252m2.pow2_252m2 x3 x2;
-    let h' = ST.get() in
-    lemma_red_513_is_red_5413 (as_seq h' x3);
-    Hacl.Bignum25519.fsquare t0 x3;
-    copy x2 t1;
-    fdifference_norm t1 t0;
-    let t1_is_0 = is_0 t1 in
-    if t1_is_0 then ()
-    else (
-      mul_modp_sqrt_m1 x3
-    );
-    Hacl.Bignum25519.fsquare t0 x3;
-    copy x2 t1;
-    fdifference_norm t1 t0;
-    Hacl.Bignum25519.reduce x3;
-    let t1_is_0 = is_0 t1 in
-    if t1_is_0 then (
-      let x0 = x_mod_2 x3 in
-      (* let x0 = x3.(0ul) &^ 1uL in *)
-      if not(x0 =^ sign) then (
-        make_zero t0;
-        fdifference_norm x3 t0
-      ) else (
-        let h = ST.get() in
-        lemma_modifies_1 h tmp);
-      copy x3 x;
-      true
-    )
-    else (
-      let h = ST.get() in
-      lemma_modifies_2 h x tmp;
-      false)
-  ) in
+  let res = recover_x_ x y sign tmp in
   pop_frame();
   res
