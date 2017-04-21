@@ -7,6 +7,7 @@ open Hacl.Bignum25519
 
 let elemB = b:buffer Hacl.UInt64.t{length b = 5}
 
+
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 val recover_x:
@@ -19,7 +20,7 @@ val recover_x:
       (let op_String_Access = Seq.index in
        let y = as_seq h0 y in
        let y:nat = v y.[0] + pow2 51 * v y.[1] + pow2 102 * v y.[2] + pow2 153 * v y.[3]
-               + pow2 204 * v y.[4]in
+               + pow2 204 * v y.[4] in
        let x = as_seq h1 x in
        let sign = (v sign = 1) in
        let res  = Spec.Ed25519.recover_x y sign in

@@ -37,8 +37,8 @@ let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
   let x2, y2, z2, t2 = q in
   let a = (y1 `fsub` x1) `fmul` (y2 `fsub` x2) in
   let b = (y1 `fadd` x1) `fmul` (y2 `fadd` x2) in
-  let c = t1 `fmul` 2 `fmul` d `fmul` t2 in
-  let d = z1 `fmul` 2 `fmul` z2 in
+  let c = (2 `fmul` d `fmul` t1) `fmul` t2 in
+  let d = (2 `fmul` z1) `fmul` z2 in
   let e = b `fsub` a in
   let f = d `fsub` c in
   let g = d `fadd` c in
@@ -51,11 +51,11 @@ let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
 
 let point_double (p:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
-  let a = x1 ** 2 in
-  let b = y1 ** 2 in
-  let c = 2 `fmul` (z1 ** 2) in
+  let a = x1 `fmul` x1 in
+  let b = y1 `fmul` y1 in
+  let c = 2 `fmul` (z1 `fmul` z1) in
   let h = a `fadd` b in
-  let e = h `fsub` ((x1 `fadd` y1) ** 2) in
+  let e = h `fsub` ((x1 `fadd` y1) `fmul` (x1 `fadd` y1)) in
   let g = a `fsub` b in
   let f = c `fadd` g in
   let x3 = e `fmul` f in
@@ -130,7 +130,7 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   let y = y % (pow2 255) in
   let x = recover_x y sign in
   match x with
-  | Some x -> Some (x, y, one, x `fmul` y)
+  | Some x -> Some (x, y % prime, one, x `fmul` (y % prime))
   | _ -> None
 
 let secret_expand (secret:lbytes 32) =

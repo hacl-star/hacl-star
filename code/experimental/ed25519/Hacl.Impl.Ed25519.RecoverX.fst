@@ -15,6 +15,7 @@ let norm h (x:elemB{live h x}) : GTot Type0 =
   v (Seq.index s 0) + pow2 51 * v (Seq.index s 1) + pow2 102 * v (Seq.index s 2) + pow2 153 * v (Seq.index s 3) + pow2 204 * v (Seq.index s 4) < Spec.Curve25519.prime)
 
 
+[@ "substitute"]
 private
 val make_zero:
   b:elemB ->
@@ -23,6 +24,7 @@ val make_zero:
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 0
       /\ norm h1 b
       /\ Hacl.Bignum25519.red_513 (as_seq h1 b)))
+[@ "substitute"]
 let make_zero b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   Hacl.Lib.Create64.make_h64_5 b zero zero zero zero zero;
@@ -33,6 +35,7 @@ let make_zero b =
   lemma_red_51_is_red_513 (as_seq h b)
 
 
+[@ "substitute"]
 private
 val make_one:
   b:elemB ->
@@ -40,6 +43,7 @@ val make_one:
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 1
       /\ Hacl.Bignum25519.red_513 (as_seq h1 b)))
+[@ "substitute"]
 let make_one b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   let one  = Hacl.Cast.uint64_to_sint64 1uL in
