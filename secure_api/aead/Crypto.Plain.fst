@@ -101,7 +101,7 @@ let create (i:id) (zero:UInt8.t) (len:UInt32.t) :
        let b = as_buffer p in
        let open FStar.Buffer in
        let live = live' in (* to undo shadowing by FStar.Buffer.live *)
-         ~(contains h0 b)
+         (b `unused_in` h0)
        /\ live h1 p' /\ idx b = 0 /\ length b = v len
        /\ frameOf b = h0.tip
        /\ Map.domain h1.h == Map.domain h0.h

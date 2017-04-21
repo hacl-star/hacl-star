@@ -37,7 +37,7 @@ let mac_requires (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) (tag:MAC.tag
   Buffer.live h ak.s /\
   EncodingWrapper.ak_acc_tag_separate ak acc tag /\
   (mac_log ==> Buffer.frameOf tag <> (alog acc).id \/
-               Buffer.disjoint_ref_1 tag (HS.as_aref (alog acc))) /\
+               Buffer.disjoint_ref_1 tag (alog acc)) /\
   (authId i ==> CMA.mac_is_unset i ak.region ak h) // implies MAC.norm m st.r; already in acc_inv
 
 let mac_modifies 
@@ -54,9 +54,10 @@ let mac_modifies
     let log = RR.as_hsref CMA.(ilog ak.log) in
     CMA.pairwise_distinct (frameOf abuf) (frameOf tbuf) HS.(log.id) /\
     CMA.modifies_bufs_and_ref abuf tbuf log h0 h1
-  else 
+  else
     frameOf abuf <> frameOf tbuf /\
-    HS.modifies (Set.as_set [frameOf abuf; frameOf tbuf]) h0 h1 /\
+    HS.modifies (Set.union (Set.singleton (frameOf abuf))
+                           (Set.singleton (frameOf tbuf))) h0 h1 /\
     modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
     modifies_buf_1 (frameOf tbuf) tbuf h0 h1
 
@@ -394,8 +395,8 @@ let acc_inv_weak (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) h : Type0 =
   Buffer.disjoint (MAC.as_buffer ak.r) (MAC.as_buffer (abuf acc)) /\
   (mac_log ==> (
     HS.contains h (alog acc) /\
-    Buffer.disjoint_ref_1 (MAC.as_buffer (CMA.abuf acc)) (HS.as_aref (CMA.alog acc)) /\
-    Buffer.disjoint_ref_1 (MAC.as_buffer ak.r)  (HS.as_aref (CMA.alog acc))))
+    Buffer.disjoint_ref_1 (MAC.as_buffer (CMA.abuf acc)) (CMA.alog acc) /\
+    Buffer.disjoint_ref_1 (MAC.as_buffer ak.r)  (CMA.alog acc)))
 
 #reset-options "--z3rlimit 40 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let acc_ensures_weak (#i: MAC.id) (ak: CMA.state i) 

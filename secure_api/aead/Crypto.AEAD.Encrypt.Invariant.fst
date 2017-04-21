@@ -73,7 +73,7 @@ let enxor_h0_h1
       let table_0 = HS.sel h0 prf in
       let table_1 = HS.sel h1 prf in
       HS.modifies rgns h0 h1                                                            /\    //enxor only modifies the PRF region, and the cipher buffer region
-      HS.modifies_ref aead_st.prf.rgn (TSet.singleton (Heap.Ref (HS.as_ref prf))) h0 h1 /\    //in the PRF region, enxor only modifies the PRF table reference
+      HS.modifies_ref aead_st.prf.rgn (Set.singleton (HS.as_addr prf)) h0 h1 /\    //in the PRF region, enxor only modifies the PRF table reference
       table_differs_only_above_x (PRF.incr i dom_0) table_0 table_1)) /\                            //table_1 = table_0 ++ (otp entries)
   (safeMac i ==>  (
      let prf = itable i aead_st.prf in
@@ -206,7 +206,9 @@ let mac_wrapper_h0_h1
   (safeMac i ==>  (
     let open HS in
     let prf_table_1 = HS.sel h1 (itable i aead_st.prf) in
-    HS.modifies (Set.as_set [h0.tip; aead_st.prf.mac_rgn; Buffer.frameOf ct]) h0 h1 /\               //mac_wrapper modifies the tip of the stack, prf.mac_rgn (it sets the tag in the mac log), and the cipher text region (adds tag to the cipher text buffer)
-    HS.modifies_ref aead_st.prf.mac_rgn !{HS.as_ref (as_hsref (CMA.(ilog mac_st.log)))} h0 h1  /\    //in the mac region, it only modifies the mac log associated with mac_st
+    HS.modifies (Set.union (Set.singleton h0.tip)
+                           (Set.union (Set.singleton aead_st.prf.mac_rgn)
+			              (Set.singleton (Buffer.frameOf ct)))) h0 h1 /\               //mac_wrapper modifies the tip of the stack, prf.mac_rgn (it sets the tag in the mac log), and the cipher text region (adds tag to the cipher text buffer)
+    HS.modifies_ref aead_st.prf.mac_rgn (Set.singleton (HS.as_addr (as_hsref (CMA.(ilog mac_st.log))))) h0 h1  /\    //in the mac region, it only modifies the mac log associated with mac_st
     Buffer.modifies_buf_1 (Buffer.frameOf ct) tag h0 h1 /\    //mac_wrapper modifies the tag component of the ciphertext buffer
     mac_is_set prf_table_1 nonce (Buffer.as_seq h1 aad) (v plainlen) (Buffer.as_seq h1 cipher) (Buffer.as_seq h1 tag) h1))    //mac_is_set for nonce

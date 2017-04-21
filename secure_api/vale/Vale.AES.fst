@@ -16,4 +16,4 @@ assume val cipher:
   w:buffer u8 ->
   sb:buffer u8 -> STL unit
   (requires (fun h -> live h out /\ live h input /\ live h w /\ live h sb))
-  (ensures (fun h0 _ h1 -> modifies_1 out h0 h1))
+  (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1))
