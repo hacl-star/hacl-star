@@ -163,15 +163,16 @@ let pad0_length (len:nat) : Tot (n:nat{(len + 1 + n + size_len_8) % size_block =
   size_block - ((len + size_len_8 + 1) % size_block)
 
 
-let pad (len:nat{len < max_input_len_8}) : Tot (b:bytes{(length b + len) % size_block = 0}) =
+let pad (prevlen:nat{prevlen % size_block = 0}) (len:nat{prevlen + len < max_input_len_8}) : Tot (b:bytes{(length b + len) % size_block = 0}) =
+  let tlen = prevlen + len in
   let firstbyte = Seq.create 1 0x80uy in
   let zeros = Seq.create (pad0_length len) 0uy in
-  let encodedlen = Endianness.big_bytes size_len_ul_8 (len * 8) in
+  let encodedlen = Endianness.big_bytes size_len_ul_8 (tlen * 8) in
   firstbyte @| zeros @| encodedlen
 
 
 let update_last (hash:hash_w) (prevlen:nat{prevlen % size_block = 0}) (input:bytes{(Seq.length input) + prevlen < max_input_len_8}) : Tot hash_w =
-  let blocks = pad (prevlen + Seq.length input) in
+  let blocks = pad prevlen (Seq.length input) in
   update_multi hash (input @| blocks)
 
 
@@ -187,7 +188,7 @@ let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
 
 
 let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
-  let blocks = pad (Seq.length input) in
+  let blocks = pad 0 (Seq.length input) in
   finish (update_multi h_0 (input @| blocks))
 
 
