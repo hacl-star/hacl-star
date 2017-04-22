@@ -292,7 +292,8 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "FStar.HyperStack_pretyping_730e633374418435590e5214be2471d4",
         "assumption_FStar.HyperHeap.HasEq_rid", "b2t_def", "bool_inversion",
         "bool_typing", "constructor_distinct_Crypto.Indexing.AES128",
@@ -360,7 +361,6 @@
         "equation_Hacl.UInt32.t", "equation_Hacl.UInt8.t",
         "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
         "equation_Vale.AES.u8",
-        "fuel_correspondence_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Crypto.Indexing.aesImpl",
         "fuel_guarded_inversion_Crypto.Indexing.cipherAlg",
         "fuel_guarded_inversion_FStar.Buffer._buffer",

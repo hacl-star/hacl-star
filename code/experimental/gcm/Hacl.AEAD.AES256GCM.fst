@@ -33,7 +33,7 @@ let aes256 key input out =
   let w = sub tmp 0ul 240ul in
   let sbox = sub tmp 240ul 256ul in
   let inv_sbox = sub tmp 496ul 256ul in
-  assert(~(contains h0 w) /\ ~(contains h0 inv_sbox) /\ ~(contains h0 sbox));
+  assert((w `unused_in` h0) /\ (inv_sbox `unused_in` h0) /\ (sbox `unused_in` h0));
   lemma_aux_001 w;
   let h1 = ST.get() in
   mk_sbox sbox;

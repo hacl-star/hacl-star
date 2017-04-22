@@ -1,5 +1,5 @@
 [
-  "*vé\"×-w\u0014‹Ž\u0002ÇL'Ol",
+  "\u001dh\u001eÓí=ë:\u0003¾E­JX2ª",
   [
     [
       "Salsa20.state",
@@ -17,7 +17,7 @@
       1,
       [
         "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "haseqTm_refine_89ca984d58100ebf87df2ad1ed88d530",
+        "haseqSalsa20_Tm_refine_530be526726c3b66223dd819f9d65058",
         "projection_inverse_BoxInt_proj_0"
       ],
       0
@@ -29,7 +29,7 @@
       1,
       [
         "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "haseqTm_refine_89ca984d58100ebf87df2ad1ed88d530",
+        "haseqSalsa20_Tm_refine_530be526726c3b66223dd819f9d65058",
         "projection_inverse_BoxInt_proj_0"
       ],
       0
@@ -56,7 +56,7 @@
       2,
       1,
       [
-        "@query", "equation_FStar.Buffer.buffer",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Buffer.buffer",
         "equation_FStar.Buffer.equal", "equation_FStar.Mul.op_Star",
         "equation_FStar.UInt64.n", "equation_FStar.UInt64.t",
         "equation_FStar.UInt64.v", "equation_FStar.UInt8.t",
@@ -80,12 +80,12 @@
         "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_incr",
         "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_keylen",
         "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_noncelen",
-        "refinement_interpretation_Tm_refine_37a0857914d89104011d086c3ad059e7",
-        "refinement_interpretation_Tm_refine_3bc04952e495dc70c0ea20124c41a18c",
-        "refinement_interpretation_Tm_refine_6925cb0f165c2ed09ea63ef366099574",
-        "refinement_interpretation_Tm_refine_790772d82e6c5382184d4482620e08ca",
-        "refinement_interpretation_Tm_refine_7e3beb6acccffb41919f80afab550fdd",
-        "refinement_interpretation_Tm_refine_c32bdda13bfb14d0d2f58700b5fc6c38",
+        "refinement_interpretation_FStar.Buffer_Tm_refine_347cdcabc7e8becd6dd649804986fa75",
+        "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
+        "refinement_interpretation_Salsa20_Tm_refine_0aaf78738bfac8fed3c5ec5ff4dc12d2",
+        "refinement_interpretation_Salsa20_Tm_refine_94403ae1db118a2daa8d61fa9d371d82",
+        "refinement_interpretation_Salsa20_Tm_refine_ea0cdb077ae78da455b9677f874da9dd",
+        "refinement_interpretation_Salsa20_Tm_refine_f7f92882b9facb724e48fab91677a95d",
         "typing_FStar.Buffer.as_seq"
       ],
       0
@@ -137,17 +137,17 @@
       2,
       1,
       [
-        "@query", "equation_FStar.Buffer.buffer", "equation_FStar.UInt8.t",
-        "equation_Hacl.UInt8.t", "equation_Salsa20.op_String_Access",
-        "equation_Salsa20.uint8_p", "equation_Spec.HSalsa20.keylen",
-        "equation_Spec.HSalsa20.noncelen",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Buffer.buffer",
+        "equation_FStar.UInt8.t", "equation_Hacl.UInt8.t",
+        "equation_Salsa20.op_String_Access", "equation_Salsa20.uint8_p",
+        "equation_Spec.HSalsa20.keylen", "equation_Spec.HSalsa20.noncelen",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "kinding_FStar.UInt8.t_@tok",
-        "refinement_interpretation_Tm_refine_3201164f3fd34668bc5e4add1cefd491",
-        "refinement_interpretation_Tm_refine_3bc04952e495dc70c0ea20124c41a18c",
-        "refinement_interpretation_Tm_refine_7e3beb6acccffb41919f80afab550fdd",
-        "refinement_interpretation_Tm_refine_c32bdda13bfb14d0d2f58700b5fc6c38",
+        "refinement_interpretation_FStar.Buffer_Tm_refine_347cdcabc7e8becd6dd649804986fa75",
+        "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
+        "refinement_interpretation_Salsa20_Tm_refine_8a5c399dafa059395457579161aa775e",
+        "refinement_interpretation_Salsa20_Tm_refine_94403ae1db118a2daa8d61fa9d371d82",
         "typing_FStar.Buffer.as_seq"
       ],
       0

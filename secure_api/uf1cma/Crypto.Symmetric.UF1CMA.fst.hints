@@ -2857,7 +2857,9 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Crypto.Symmetric.MAC.text_to_PS_text.fuel_instrumented",
+        "@query",
         "Crypto.Symmetric.UF1CMA_interpretation_Tm_arrow_866fc433f55808ec53aa431616a40200",
         "FStar.Buffer_interpretation_Tm_arrow_83cbe0e8e9616d9ffaed79909c83e6f1",
         "FStar.Heap_interpretation_Tm_arrow_5d6c37e383c847dd7568a6302aaa4d9e",
@@ -2951,7 +2953,6 @@
         "equation_Spec.GF128.elem", "equation_Spec.GF128.mac",
         "equation_Spec.GF128.word", "equation_Spec.Poly1305.tag",
         "equation_Spec.Poly1305.word_16",
-        "fuel_correspondence_Crypto.Symmetric.MAC.text_to_PS_text.fuel_instrumented",
         "fuel_guarded_inversion_Crypto.Symmetric.UF1CMA.accBuffer",
         "fuel_guarded_inversion_Crypto.Symmetric.UF1CMA.state",
         "fuel_guarded_inversion_FStar.Buffer._buffer",

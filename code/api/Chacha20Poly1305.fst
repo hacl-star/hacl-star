@@ -40,7 +40,7 @@ inline_for_extraction let log_t = Ghost.erased (Spec.Poly1305.text)
 private val lemma_aead_encrypt_poly:
   h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem ->
   r:buffer Hacl.UInt64.t -> acc:buffer Hacl.UInt64.t -> mac:uint8_p ->
-  Lemma (requires (live h0 mac /\ ~(contains h0 r) /\ ~(contains h0 acc)
+  Lemma (requires (live h0 mac /\ (r `unused_in` h0) /\ (acc `unused_in`h0)
     /\ live h1 mac /\ live h1 r /\ live h1 acc
     /\ live h2 mac /\ live h2 r /\ live h2 acc
     /\ live h3 mac /\ live h3 r /\ live h3 acc
@@ -149,7 +149,7 @@ private let aead_encrypt_poly  c mlen mac aad aadlen tmp =
 private val lemma_aead_encrypt:
   h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem ->
   c:uint8_p -> b:uint8_p -> mac:uint8_p ->
-  Lemma (requires (live h0 c /\ live h0 mac /\ ~(contains h0 b)
+  Lemma (requires (live h0 c /\ live h0 mac /\ (b `unused_in` h0)
     /\ live h1 c /\ live h1 mac /\ live h1 b
     /\ live h2 c /\ live h2 mac /\ live h2 b
     /\ live h3 c /\ live h3 mac /\ live h3 b
@@ -286,7 +286,7 @@ private let lemma_aead_decrypt_ (h:mem) (h':mem) (m:uint8_p) : Lemma
 private val lemma_aead_decrypt:
   h0:mem -> h1:mem -> h2:mem ->
   tmp:uint8_p -> m:uint8_p ->
-  Lemma (requires (~(contains h0 tmp) /\ live h0 m /\ live h1 tmp /\ live h1 m /\ live h2 tmp /\ live h2 m
+  Lemma (requires ((tmp `unused_in` h0) /\ live h0 m /\ live h1 tmp /\ live h1 m /\ live h2 tmp /\ live h2 m
     /\ modifies_0 h0 h1 /\ (modifies_1 m h1 h2 \/ h1 == h2)))
         (ensures (modifies_2_1 m h0 h2))
 let lemma_aead_decrypt h0 h1 h2 tmp m =

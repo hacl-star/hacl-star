@@ -918,7 +918,8 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "FStar.StrongExcludedMiddle_interpretation_Tm_arrow_336dce3cf2c3097e7e0beb765572b67d",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
         "assumption_FStar.HyperHeap.HasEq_rid", "b2t_def", "bool_inversion",
@@ -978,7 +979,6 @@
         "equation_Spec.GaloisField.gf8", "equation_Spec.GaloisField.irr",
         "equation_Spec.GaloisField.mk_field",
         "equation_Spec.GaloisField.to_felem",
-        "fuel_correspondence_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "fuel_guarded_inversion_FStar.HyperStack.reference",

@@ -1,4 +1,4 @@
-FSTAR_HOME?=../../dependencies/FStar
+FSTAR_HOME?=../../../FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../..
 include ../Makefile.include

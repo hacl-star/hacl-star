@@ -49,6 +49,7 @@ let ref_as_aead_log (#r:rgn) (#i:id) (x:rref r (aead_entries i){safeMac i})
   : aead_log r i
   = x
 
+#set-options "--z3rlimit 50"
 let gen i rgn = 
   let prf = PRF.gen rgn i in 
   if Flag.prf i then recall (PRF.itable i prf);
@@ -58,6 +59,7 @@ let gen i rgn =
     else () in
   let ak = if CMA.skeyed i then Some (PRF.prf_sk0 #i prf) else None in 
   AEADState #i #Writer #rgn log prf ak
+#reset-options
 
 val coerce: 
     i:id{~(prf i)} -> 
