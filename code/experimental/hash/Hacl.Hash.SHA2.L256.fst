@@ -75,6 +75,7 @@ inline_for_extraction let size_hash_w  = 8ul // 8 words (Final hash output size)
 inline_for_extraction let size_block_w = 16ul  // 16 words (Working data block size)
 inline_for_extraction let size_hash    = size_word *^ size_hash_w
 inline_for_extraction let size_block   = size_word *^ size_block_w
+inline_for_extraction let max_input_len = 2305843009213693952uL
 
 (* Sizes of objects in the state *)
 inline_for_extraction private let size_k_w     = 64ul  // 2048 bits = 64 words of 32 bits (size_block)
@@ -663,59 +664,68 @@ Seq.lemma_eq_intro (as_seq h g) (Seq.append (Seq.append seq_a seq_b) seq_c)
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
-let lemma_pad_aux (len:uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block)}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
+let lemma_pad_aux_seq (n:uint32_ht) (len:uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block) /\ v n * v size_block + v len < U64.v max_input_len}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
   (requires (a == Seq.create 1 0x80uy
             /\ (b == Seq.create (Spec.pad0_length (v len)) 0uy)
-            /\ (c == Endianness.big_bytes size_len_8 (v len * 8))))
-  (ensures  (Seq.append (Seq.append a b) c == Spec.pad (v len))) =
+            /\ (c == Endianness.big_bytes size_len_8 ((v n * v size_block + v len) * 8))))
+  (ensures  (Seq.append (Seq.append a b) c == Spec.pad (v n * v size_block) (v len))) =
 Seq.lemma_eq_intro (Seq.append (Seq.append a b) c) (Seq.append a (Seq.append b c))
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#reset-options "--max_fuel 0  --z3rlimit 200"
 
-let lemma_pad_aux2 (h:HyperStack.mem) (len:uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block)}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
+let lemma_pad_aux (h:HyperStack.mem) (n:uint32_ht) (len:uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block) /\ v n * v size_block + v len < U64.v max_input_len}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
   (requires (live h a /\ live h b /\ live h c
             /\ (let seq_a = as_seq h a in
             let seq_b = as_seq h b in
             let seq_c = as_seq h c in
             seq_a == Seq.create 1 0x80uy
             /\ (seq_b == Seq.create (Spec.pad0_length (v len)) 0uy)
-            /\ (seq_c == Endianness.big_bytes size_len_8 (v len * 8)))))
+            /\ (seq_c == Endianness.big_bytes size_len_8 ((v n * v size_block + v len) * 8)))))
   (ensures  (live h a /\ live h b /\ live h c
             /\ (let seq_a = as_seq h a in
             let seq_b = as_seq h b in
             let seq_c = as_seq h c in
-            (Seq.append (Seq.append seq_a seq_b) seq_c == Spec.pad (v len))))) =
+            (Seq.append (Seq.append seq_a seq_b) seq_c == Spec.pad (v n * v size_block) (v len))))) =
 let seq_a = as_seq h a in
 let seq_b = as_seq h b in
 let seq_c = as_seq h c in
-lemma_pad_aux len seq_a seq_b seq_c
+lemma_pad_aux_seq n len seq_a seq_b seq_c
 
 
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
 [@"substitute"]
 val pad:
-  len        :uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block)} ->
-  padding    :uint8_p  {length padding = (1 + v (pad0_length len) + v size_len_8) /\ (length padding + v len) % v size_block = 0} ->
-  prevlen    :uint64_ht{H64.v prevlen % v size_block = 0} ->
-  encodedlen :uint64_ht{H64.v encodedlen = (H64.v prevlen + v len) * 8} ->
+  padding :uint8_p ->
+  n       :uint32_ht ->
+  len     :uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block)
+                     /\ v n * v size_block + v len < U64.v max_input_len
+                     /\ length padding = (1 + v (pad0_length len) + v size_len_8)
+                     /\ (length padding + v len) % v size_block = 0} ->
   Stack unit
         (requires (fun h0 -> live h0 padding
                   /\ (let seq_padding = as_seq h0 padding in
                   seq_padding == Seq.create (1 + v (pad0_length len) + v size_len_8) 0uy )))
         (ensures  (fun h0 _ h1 -> live h0 padding /\ live h1 padding /\ modifies_1 padding h0 h1
                   /\ (let seq_padding = as_seq h1 padding in
-                  seq_padding == Spec.pad (H64.v prevlen + v len))))
+                  seq_padding == Spec.pad (v n * v size_block) (v len))))
 
-#reset-options "--max_fuel 0  --z3rlimit 500"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 [@"substitute"]
-let pad len padding prevlen encodedlen =
+let pad padding n len =
+
+  (* Compute the length of zeros *)
   let pad0len = pad0_length len in
+
+  (* Retreive the different parts of the padding *)
   let buf1 = Buffer.sub padding 0ul 1ul in
   let zeros = Buffer.sub padding 1ul pad0len in
   let buf2 = Buffer.sub padding (1ul +^ pad0len) size_len_8 in
+
+  (* Compute and encode the total length *)
+  let encodedlen = encode_length n len size_block in
 
   let h0 = ST.get () in
   Seq.lemma_eq_intro (as_seq h0 zeros) (Seq.create (v pad0len) 0uy);
@@ -736,14 +746,14 @@ let pad len padding prevlen encodedlen =
   assert(as_seq h1 zeros == Seq.create (v (pad0_length len)) 0uy);
   assert(as_seq h1 buf2 == Endianness.big_bytes size_len_8 (H64.v encodedlen));
   lemma_sub_append_3 h1 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8);
-  lemma_pad_aux2 h1 len buf1 zeros buf2
+  lemma_pad_aux h1 n len buf1 zeros buf2
 
 
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
 val update_last:
   state :uint32_p{length state = v size_state} ->
-  data  :uint8_p {length data <= v size_block /\ disjoint state data} ->
+  data  :uint8_p {(length data + v size_len_8 + 1) < (2 * v size_block) /\ disjoint state data} ->
   len   :uint32_t {v len = length data /\ v len + v size_len_8 + 1 < pow2 32} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
@@ -767,11 +777,10 @@ let update_last state data len =
 
   (* Compute the final length of the data *)
   let n = state.(pos_count_w) in
-  let encodedlen = encode_length n len size_block in
 
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length are considered public here ! *)
-  let (n,final_blocks) =
+  let (nb,final_blocks) =
     if U32.(len <^ 55ul) then (1ul, Buffer.sub blocks size_block size_block)
     else (2ul, Buffer.sub blocks 0ul (2ul *^ size_block))
   in
@@ -782,13 +791,14 @@ let update_last state data len =
 
   (* Set the padding *)
   let padding = Buffer.offset final_blocks len in
-  pad len padding (n *^ size_block) encodedlen;
+  pad padding n len;
 
   (* Proof that final_blocks = data @| padding *)
-  (**) lemma_sub_append_2 final_blocks 0ul data len padding (n *^ size_block);
+  (**) let h = ST.get () in
+  (**) lemma_sub_append_2 h final_blocks 0ul data len padding (n *^ size_block);
 
   (* Call the update function on one or two blocks *)
-  update_multi state final_blocks n;
+  update_multi state final_blocks nb;
 
   (* Pop the memory frame *)
   (**) pop_frame()
