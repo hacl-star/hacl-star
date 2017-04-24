@@ -1,5 +1,5 @@
 [
-  "\u0015‰\u0013U4ÚôR}=ƒ“ÁêÈ¥",
+  "}˘*ƒœƒÍ©W;\fø÷~Ú\u0003",
   [
     [
       "Hacl.Spe.Poly1305_64.poly1305_init_spec",
@@ -2471,7 +2471,9 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.Endianness.little_endian.fuel_instrumented",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "FStar.UInt32_interpretation_Tm_arrow_15569832cb7b48ce3fe999c98911dd3f",
         "b2t_def", "bool_inversion", "bool_typing",
         "data_elim_FStar.UInt64.Mk", "data_typing_intro_FStar.UInt64.Mk@tok",
@@ -2541,8 +2543,6 @@
         "equation_Spec.Poly1305.op_Amp_Bar",
         "equation_Spec.Poly1305.poly1305", "equation_Spec.Poly1305.tag",
         "equation_Spec.Poly1305.word_16",
-        "fuel_correspondence_FStar.Endianness.little_endian.fuel_instrumented",
-        "fuel_correspondence_Prims.pow2.fuel_instrumented",
         "function_token_typing_FStar.Int16.n",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_FStar.UInt64.n",
@@ -2553,7 +2553,6 @@
         "int_inversion", "int_typing", "kinding_FStar.UInt64.t_@tok",
         "kinding_FStar.UInt8.t_@tok", "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "proj_equation_FStar.UInt32.Mk_v",
         "proj_equation_FStar.UInt64.Mk_v",
@@ -2585,9 +2584,8 @@
         "token_correspondence_Hacl.Bignum.Parameters.v",
         "typing_FStar.Int.Cast.uint64_to_uint128",
         "typing_FStar.Seq.Base.index", "typing_FStar.Seq.Base.length",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt.shift_left",
-        "typing_FStar.UInt.shift_right", "typing_FStar.UInt128.shift_left",
-        "typing_FStar.UInt32.uint_to_t",
+        "typing_FStar.UInt.shift_left", "typing_FStar.UInt.shift_right",
+        "typing_FStar.UInt128.shift_left", "typing_FStar.UInt32.uint_to_t",
         "typing_Hacl.Bignum.Limb.op_Bar_Hat",
         "typing_Hacl.Bignum.Limb.op_Less_Less_Hat",
         "typing_Hacl.Bignum.Parameters.limb_to_wide",

@@ -1,5 +1,5 @@
 [
-  "e2ñ)Üð,í\u001f\r¤¥\u0013+º\u001a",
+  "ÙF—š.\u000f€ÎBÂ²ôyX]\u0000",
   [
     [
       "Hacl.Spec.Poly1305_64.word_16",
@@ -3890,10 +3890,11 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_FStar.Mul.op_Star",
-        "equation_FStar.UInt.max_int", "equation_FStar.UInt64.t",
-        "equation_FStar.UInt64.uint_to_t", "equation_FStar.UInt64.v",
-        "equation_Hacl.Bignum.Constants.limb",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Mul.op_Star", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt64.t", "equation_FStar.UInt64.uint_to_t",
+        "equation_FStar.UInt64.v", "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.limb",
         "equation_Hacl.Bignum.Parameters.uint64_to_limb",
@@ -3904,7 +3905,6 @@
         "equation_Hacl.Spec.Bignum.AddAndMultiply.p44",
         "equation_Hacl.Spec.Poly1305_64.mask_40", "equation_Hacl.UInt64.t",
         "equation_Hacl.UInt64.v", "equation_Prims.nat", "equation_Prims.pos",
-        "fuel_correspondence_Prims.pow2.fuel_instrumented",
         "function_token_typing_Hacl.Bignum.Parameters.wide_n",
         "function_token_typing_Hacl.Spec.Bignum.AddAndMultiply.p44",
         "function_token_typing_Hacl.Spec.Poly1305_64.mask_40",
