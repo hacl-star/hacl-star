@@ -186,15 +186,19 @@ private let lemma_reduce_spec_ s = ()
 private let lemma_distr_5 a b c d e n : Lemma (n * (a + b + c + d + e) = n*a + n*b + n*c + n*d + n*e)
  = ()
 
-
 private let lemma_reduce_spec_1_1 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemma
   ((pow2 limb_size * (a + pow2 51 * b + pow2 102 * c + pow2 153 * d + pow2 204 * e))
     = (pow2 51 * a + pow2 102 * b + pow2 153 * c + pow2 204 * d + pow2 255 * e))
-  = Math.Lemmas.pow2_plus limb_size 51;
+  = 
+    let p51  = pow2 51 in
+    let p102 = pow2 102 in
+    let p153 = pow2 153 in
+    let p204 = pow2 204 in
+    Math.Lemmas.pow2_plus limb_size 51;
     Math.Lemmas.pow2_plus limb_size 102;
     Math.Lemmas.pow2_plus limb_size 153;
     Math.Lemmas.pow2_plus limb_size 204;
-    lemma_distr_5 (pow2 limb_size) a (pow2 51 * b) (pow2 102 * c) (pow2 153 * d) (pow2 204 * e)
+    lemma_distr_5 (pow2 limb_size) a (p51 * b) (p102 * c) (p153 * d) (p204 * e)
 
 
 private let lemma_reduce_spec_1 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemma
