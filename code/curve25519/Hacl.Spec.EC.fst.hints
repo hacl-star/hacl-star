@@ -28,12 +28,12 @@
     [
       "Hacl.Spec.EC.crypto_scalarmult_spec",
       4,
-      2,
+      0,
       1,
       [
-        "@query", "equation_Hacl.Bignum.Constants.keylen",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt8.t",
         "equation_Hacl.Spec.EC.Ladder.uint8_s", "equation_Hacl.UInt8.t",
-        "refinement_interpretation_Tm_refine_e4709a98785625bbc8bc7b1f80969def"
+        "refinement_interpretation_Hacl.Spec.EC.Format_Tm_refine_8274173e0780491dcfd7be1a7e81e7bb"
       ],
       0
     ],
@@ -43,7 +43,7 @@
       0,
       1,
       [
-        "@query", "equation_FStar.UInt8.t",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt8.t",
         "equation_Hacl.Bignum.Constants.keylen",
         "equation_Hacl.Bignum.Constants.prime",
         "equation_Hacl.Bignum.Parameters.prime",
@@ -58,10 +58,10 @@
         "equation_Spec.Curve25519.scalarmult",
         "proj_equation_Prims.Mktuple2__1",
         "projection_inverse_Prims.Mktuple2__1",
-        "refinement_interpretation_Tm_refine_1ace4ae984d5d08da3699379738ba95e",
-        "refinement_interpretation_Tm_refine_8a47e4d47f4b274995430c6bc80e7643",
-        "refinement_interpretation_Tm_refine_d82a3c8d1a04a753dab44d06adbd9f9e",
-        "refinement_interpretation_Tm_refine_e4709a98785625bbc8bc7b1f80969def"
+        "refinement_interpretation_Hacl.Spec.EC.Format_Tm_refine_8274173e0780491dcfd7be1a7e81e7bb",
+        "refinement_interpretation_Hacl.Spec.EC.Format_Tm_refine_ab4fa6cc5a6ebdd7bf71390c7a325347",
+        "refinement_interpretation_Hacl.Spec.EC.Format_Tm_refine_d9a7c18c5165633f7bcdb2432c508e8c",
+        "refinement_interpretation_Hacl.Spec.EC.Ladder_Tm_refine_b6ba0d8fc16e527086d7d877559ca971"
       ],
       0
     ]

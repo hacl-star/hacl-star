@@ -1,6 +1,3 @@
-(*--build-config
-options:--trace_error --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../../FStar/ulib/hyperstack --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../../secure_api/vale --include ../../secure_api/uf1cma --include ../../secure_api/utils --include ../../specs --include ../../../kremlin/kremlib
---*)
 (**
    This file states our probabilistic security assumption on
    polynomial MACs, and provides an idealized implementation,
@@ -31,7 +28,7 @@ module RR = FStar.Monotonic.RRef
 module MAC = Crypto.Symmetric.MAC
 
 
-//16-12-19 should go to HyperStack?
+//16-12-19 should go to HyperStack? 
 
 
 // should go elsewhere
@@ -42,7 +39,7 @@ type alg = macAlg
 let alg_of_id = macAlg_of_id
 
 (** Length of the single-use part of the key *)
-let keylen (i:id) =
+let keylen (i:id) = 
   match aeadAlg_of_id i with
   | AES_128_GCM       -> 16ul
   | AES_256_GCM       -> 16ul
@@ -56,7 +53,7 @@ let skeylen (i:id) =  // can't refine with {skeyed i} here
   | _                 ->  0ul // dummy; never allocated.
 
 (** Does the algorithm use a static key? *)
-let skeyed (i:id) =
+let skeyed (i:id) = 
   match aeadAlg_of_id i with
   | AES_128_GCM       -> true
   | AES_256_GCM       -> true
@@ -67,7 +64,7 @@ type skey (rgn:rid) (i:id) =
 
 //16-10-16 can't make it abstract?
 (** Conditionally-allocated abstract key (accessed only in this module) *)
-let akey (rgn:rid) (i:id) =
+let akey (rgn:rid) (i:id) = 
   o:option (skey rgn i) {Some? o <==> skeyed i}
   // using a sum type for KreMLin. Was: if skeyed i then skey rgn i else unit
 
@@ -163,7 +160,7 @@ noeq type state (i:id) =
     log: log_ref i region ->
     state i
 
-let live_ak #r (#i:id) m (ak:akey r (fst i)) =
+let live_ak #r (#i:id) m (ak:akey r (fst i)) = 
   skeyed (fst i) ==> live m (get_skey #r #(fst i) ak)
 
 let mac_is_fresh (i:id) (region:erid) m0 (st:state i) m1 =
@@ -183,38 +180,49 @@ let genPost (i:id) (region:erid) m0 (st:state i) m1 =
   mac_is_fresh i region m0 st m1 /\
   mac_is_unset i region st m1
 
-#reset-options "--z3rlimit 1000 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
-
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+// Brittle proof. Merging the branches of the first conditional breaks it
 val alloc: region:erid -> i:id
   -> ak:akey region (fst i)
   // Could live in a different region, but this simplifies the spec
   -> k:lbuffer (UInt32.v (keylen (fst i))){frameOf k == region}
   -> ST (state i)
   (requires (fun m0 -> live m0 k /\ live_ak m0 ak))
-  (ensures  (fun m0 st m1 ->
-    genPost i region m0 st m1 /\
-    Buffer.modifies_1 k m0 m1 ))
+  (ensures  (fun m0 st m1 -> 
+    genPost i region m0 st m1 /\ 
+    Buffer.modifies_1 k m0 m1))
 let alloc region i ak k =
   let h0 = ST.get () in
   let r = MAC.rcreate region i in
   let s = FStar.Buffer.rcreate region 0uy 16ul in
   let h1 = ST.get () in
-  let rb, sb =
-    if skeyed (fst i) then
-      get_skey #region #(fst i) ak, k
-    else
-      sub k 0ul 16ul, sub k 16ul 16ul
-  in
-  let hz = ST.get () in
-  assert(modifies_ref region TSet.empty h0 hz);
-  MAC.encode_r r rb;
-  let h2 = ST.get () in
-  lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
-  lemma_intro_modifies_1 k h0 h2;
-  Buffer.blit sb 0ul s 0ul 16ul;
-  let h3 = ST.get () in
-  lemma_reveal_modifies_1 s h2 h3;
-  lemma_intro_modifies_1 k h0 h3;
+  assert_norm (UInt32.v 16ul == 16);
+  if skeyed (fst i) then
+    begin
+    let rb = get_skey #region #(fst i) ak in
+    let sb = k in
+    MAC.encode_r r rb;
+    let h2 = ST.get () in
+    lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
+    lemma_intro_modifies_1 k h0 h2;
+    Buffer.blit sb 0ul s 0ul 16ul;
+    let h3 = ST.get () in
+    lemma_reveal_modifies_1 s h2 h3;
+    lemma_intro_modifies_1 k h0 h3
+    end
+  else
+    begin
+    let rb = sub k 0ul  16ul in
+    let sb = sub k 16ul 16ul in
+    MAC.encode_r r rb;
+    let h2 = ST.get () in
+    lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
+    lemma_intro_modifies_1 k h0 h2;
+    Buffer.blit sb 0ul s 0ul 16ul;
+    let h3 = ST.get () in
+    lemma_reveal_modifies_1 s h2 h3;
+    lemma_intro_modifies_1 k h0 h3
+    end;
   if mac_log then
     begin
     log_cmp_monotonic i;
@@ -223,7 +231,7 @@ let alloc region i ak k =
     lemma_intro_modifies_1 k h0 h4;
     State #i #region r s log
     end
-  else
+   else
     begin
     let h4 = ST.get() in
     lemma_intro_modifies_1 k h0 h4;
@@ -235,9 +243,9 @@ let alloc region i ak k =
 
 val gen: region:erid -> i:id -> ak:akey region (fst i) -> ST (state i)
   (requires (fun m0 -> live_ak m0 ak))
-  (ensures (fun m0 st m1 ->
-    genPost i region m0 st m1 /\
-    modifies_one region m0 m1 /\
+  (ensures (fun m0 st m1 -> 
+    genPost i region m0 st m1 /\ 
+    modifies_one region m0 m1 /\ 
     modifies_ref region TSet.empty m0 m1 ))
 let gen region i ak =
   let len = keylen (fst i) in
@@ -245,7 +253,7 @@ let gen region i ak =
   let h1 = ST.get() in
   random (UInt32.v len) k;
   let st =  alloc region i ak k in
-  let h3 = ST.get() in
+  let h3 = ST.get() in 
   lemma_reveal_modifies_1 k h1 h3;
   st
 
@@ -254,12 +262,12 @@ val coerce: region:erid -> i:id{~(authId i)}
   -> k:lbuffer (UInt32.v (keylen (fst i))){frameOf k == region}
   -> ST (state i)
   (requires (fun m0 -> live m0 k /\ live_ak m0 ak))
-  (ensures (fun m0 st m1 ->
-    genPost i region m0 st m1 /\
+  (ensures (fun m0 st m1 -> 
+    genPost i region m0 st m1 /\ 
     modifies_1 k m0 m1))
 let coerce region i ak k =
-  alloc region i ak k
-
+  alloc region i ak k 
+  
 
 (** Hash accumulators (several per instance)
 
@@ -321,7 +329,7 @@ val start: #i:id -> st:state i -> StackInline (accBuffer i)
   (ensures  (fun h0 a h1 ->
     Buffer.frameOf (MAC.as_buffer a.a) == h1.tip /\
     ~(h0 `Buffer.contains` (MAC.as_buffer (abuf a))) /\
-    (mac_log ==>
+    (mac_log ==> 
       HS.sel h1 (alog a) = Seq.createEmpty /\
       ~(h0 `HS.contains` (alog a))) /\
     acc_inv st a h1 /\
@@ -347,7 +355,6 @@ let start #i st =
     Acc #i a ()
 
 
-
 let modifies_buf_and_ref (#a:Type) (#b:Type)
   (buf:Buffer.buffer a)
   (ref:reference b{frameOf buf == ref.id}) h0 h1 : GTot Type0 =
@@ -365,7 +372,7 @@ noextract val sel_word: h:mem -> b:PL.wordB{live h b} -> GTot word
 let sel_word h b = as_seq h b
 
 (** Only used when mac_log is true *)
-private noextract val _read_word: len:u32 -> b:PL.wordB{length b == UInt32.v len}
+private noextract val _read_word: len:u32 -> b:PL.wordB{length b == UInt32.v len} 
   -> s:Seq.seq UInt8.t -> i:u32{UInt32.v i <= UInt32.v len} -> ST word
   (requires (fun h -> live h b /\ Seq.slice (sel_word h b) 0 (UInt32.v i) == s))
   (ensures  (fun h0 s h1 -> h0 == h1 /\ live h1 b /\ s == sel_word h1 b))
@@ -563,6 +570,7 @@ private val modifies_verify_aux: #a:Type -> #b:Type -> #c:Type -> #d:Type ->
     (RR.m_contains mref h0 /\ RR.m_contains mref h3 /\
      HS.contains h0 ref /\ HS.contains h3 ref) ==>
     RR.m_sel h0 mref == RR.m_sel h3 mref /\ HS.sel h0 ref == HS.sel h3 ref))
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 let modifies_verify_aux #a #b #c #d #r #rel mref ref buf1 buf2 h0 h1 h2 h3 =
   lemma_reveal_modifies_0 h1 h2;
   lemma_reveal_modifies_2 buf1 buf2 h2 h3
@@ -598,7 +606,7 @@ let verify #i st acc tag =
       MAC.frame_sel_elem h2 h3 st.r;
       MAC.frame_sel_elem h0 h2 acc.a;
       RR.m_recall #st.region #(log i) #(log_cmp #i) (ilog st.log);
-      modifies_verify_aux (ilog st.log) (alog acc) (MAC.as_buffer acc.a) computed
+      modifies_verify_aux (ilog st.log) (alog acc) (MAC.as_buffer acc.a) computed 
         h0 h1 h2 h3;
       let t = read_word 16ul computed in
       let vs = !(alog acc) in

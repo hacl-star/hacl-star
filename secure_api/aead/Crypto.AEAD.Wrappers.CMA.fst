@@ -422,7 +422,7 @@ val frame_accumulate_ensures: #i:CMA.id -> #rw:rw ->
 		     Buffer.modifies_1 (MAC.as_buffer (CMA.abuf acc)) h1 h2))
           (ensures (let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
 		    acc_ensures_weak ak aad cipher h0 acc h2))
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let frame_accumulate_ensures #i #rw aead_st ak #aadlen aad #txtlen plain cipher_tagged h0 acc h1 h2 =
   FStar.Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h1 h2;
   let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
