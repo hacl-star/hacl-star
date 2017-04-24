@@ -54,7 +54,7 @@ private val frame_aead_entries_are_refined_mac_wrapper
 	      entries_0 == entries_1 /\
 	      table_0 == table_1 /\
 	      aead_entries_are_refined table_0 entries_0 h1)))
-#set-options "--z3rlimit 100" //17-02-14 doubled
+#set-options "--z3rlimit 150" //17-02-14 doubled
 let frame_aead_entries_are_refined_mac_wrapper #i #rw #aadlen #plainlen aead_st nonce aad plain cipher_tagged mac_st h0 h1 =
   let open FStar.Seq in
   let open FStar.Classical in
@@ -262,6 +262,9 @@ let mac_modifies_preserves_norm_keys #i #j #aadlen #plainlen st n aad plain ct a
   let b = MAC.reveal_elemB r in
   assert (Buffer.disjoint b tag);
   assert (Buffer.disjoint b abuf);
+  let _ =
+    if safeMac i then assume (Buffer.disjoint_ref_1 b (FStar.Monotonic.RRef.as_hsref (CMA.(ilog ak.log)))) else ()
+  in
   match macAlg_of_id i with
   | POLY1305 -> 
     assert (Buffer.live h1 b);
