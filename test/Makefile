@@ -33,11 +33,11 @@ ct:
 	$(MAKE) -C ../code ct
 
 verify-code:
-	$(MAKE) -C ../code ci
+	$(MAKE) -C ../code ci OTHERFLAGS=--hint_info
 
 verify-crypto:
 	# Note: the all-hints target fails silently.
-	$(MAKE) -C ../secure_api all-ver OTHERFLAGS=--record_hints
+	$(MAKE) -C ../secure_api all-ver OTHERFLAGS="--record_hints --hint_info"
 
 hints-code:
 	$(MAKE) -C ../code hints
