@@ -89,7 +89,7 @@ private let fsquare_times_inplace output count =
 
 private val lemma_crecip_1_modifies': h0:mem -> h1:mem -> b:buffer limb -> Lemma (requires (equal_domains h0 h1 /\ live h0 b /\ modifies_1 b h0 h1))
   (ensures (live h1 b))
-private let lemma_crecip_1_modifies' h0 h1 b = ()
+private let lemma_crecip_1_modifies' h0 h1 b = lemma_reveal_modifies_1  b h0 h1
  
 
 private val lemma_crecip_1_modifies'': h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> h5:mem -> h6:mem -> h7:mem -> buf:buffer limb{length buf = 20} ->
@@ -267,7 +267,18 @@ private val lemma_crecip_3_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:
     /\ modifies_1 c h0 h1 /\ modifies_1 t0 h1 h2 /\ modifies_1 t0 h2 h3 /\ modifies_1 t0 h3 h4
     /\ modifies_1 t0 h4 h5 /\ modifies_1 t0 h5 h6 /\ modifies_1 out h6 h7 /\ equal_domains h0 h7))
         (ensures (modifies_2 out buf h0 h7 /\ live h7 out))
-private let lemma_crecip_3_modifies h0 h1 h2 h3 h4 h5 h6 h7 buf out = ()
+private let lemma_crecip_3_modifies h0 h1 h2 h3 h4 h5 h6 h7 buf out =
+  let a  = Buffer.sub buf 0ul  5ul in
+  let t0 = Buffer.sub buf 5ul  5ul in
+  let b  = Buffer.sub buf 10ul 5ul in
+  let c  = Buffer.sub buf 15ul 5ul in
+  lemma_reveal_modifies_1 c h0 h1;
+  lemma_reveal_modifies_1 t0 h1 h2;
+  lemma_reveal_modifies_1 t0 h2 h3;
+  lemma_reveal_modifies_1 t0 h3 h4;
+  lemma_reveal_modifies_1 t0 h4 h5;
+  lemma_reveal_modifies_1 t0 h5 h6;
+  lemma_reveal_modifies_1 out h6 h7
 
 
 [@"substitute"]

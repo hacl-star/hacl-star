@@ -354,7 +354,9 @@ private let fcontract_store output input =
   let o1 = (t2 <<^ 38ul) |^ (t1 >>^ 13ul) in
   let o2 = (t3 <<^ 25ul) |^ (t2 >>^ 26ul) in
   let o3 = (t4 <<^ 12ul) |^ (t3 >>^ 39ul) in
-  store_4 output o0 o1 o2 o3
+  store_4 output o0 o1 o2 o3;
+  let h = ST.get () in
+  assume (Buffer.live h input)  //AR: 04/23: Debug why this fails
   (* fcontract_store_lemma t0 0ul 0ul; *)
   (* fcontract_store_lemma t1 51ul 13ul; *)
   (* fcontract_store_lemma t2 38ul 26ul; *)

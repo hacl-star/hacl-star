@@ -181,7 +181,7 @@ private val lemma_reduce_spec_: s:seqelem{reduce_pre s} -> Lemma
 private let lemma_reduce_spec_ s = ()
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400"
+#reset-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 400"
 
 private let lemma_distr_5 a b c d e n : Lemma (n * (a + b + c + d + e) = n*a + n*b + n*c + n*d + n*e)
  = ()

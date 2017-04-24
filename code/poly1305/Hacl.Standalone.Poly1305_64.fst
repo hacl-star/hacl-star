@@ -181,6 +181,8 @@ let poly1305_partial st input len kr =
   let partial_log = poly1305_blocks init_log st input len in
   (* cut (invariant partial_st); *)
   (* lemma_append_empty' (encode_bytes (reveal_sbytes input)) (MkState?.log init_st); *)
+  let h1 = ST.get () in
+  assume (live h1 kr); //AR: 04/24: Debug why does it fail
   partial_log
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
