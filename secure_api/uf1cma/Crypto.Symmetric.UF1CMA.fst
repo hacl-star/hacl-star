@@ -447,7 +447,9 @@ let pairwise_distinct (r1:HH.rid) (r2:HH.rid) (r3:HH.rid) =
 let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type)
   (buf1:Buffer.buffer a) (buf2:Buffer.buffer b)
   (ref:reference c{pairwise_distinct (frameOf buf1) (frameOf buf2) ref.id}) h0 h1 : GTot Type0 =
-  HS.modifies (Set.as_set [frameOf buf1; frameOf buf2; ref.id]) h0 h1 /\
+  HS.modifies (Set.union (Set.singleton (frameOf buf1))
+                         (Set.union (Set.singleton (frameOf buf2))
+			            (Set.singleton ref.id))) h0 h1 /\
   HS.modifies_ref ref.id (Set.singleton (HS.as_addr ref)) h0 h1 /\
   Buffer.modifies_buf_1 (frameOf buf1) buf1 h0 h1 /\
   Buffer.modifies_buf_1 (frameOf buf2) buf2 h0 h1

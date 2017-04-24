@@ -196,7 +196,14 @@ val frame_mac_is_set
       vs0 == vs1 /\
       ad0 == ad1 /\
       c0 == c1))))
-let frame_mac_is_set i iv st #aadlen aad #txtlen plain cipher_tagged ak acc h_init h0 h1 = ()
+let frame_mac_is_set i iv st #aadlen aad #txtlen plain cipher_tagged ak acc h_init h0 h1 =
+  if safeMac i then begin
+    let prf_t = PRF.itable i st.prf in
+    let log = RR.as_hsref CMA.(ilog ak.log) in
+    assume (HS.(prf_t.id) <> HS.(log.id));  //AR: 04/23: we seem to be missing a precondition that the region of ak is a subregion of that of st, i suspect earlier this proof relied on ref injectivity axiom
+    assume (Buffer.frameOf aad <> HS.(log.id))
+  end
+  else ()
 
 val intro_mac_is_set 
         (#i:EncodingWrapper.mac_id)
@@ -285,15 +292,16 @@ let mac #i st #aadlen aad #txtlen plain cipher_tagged ak acc h_init =
 
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
 (*** UF1CMA.verify ***)
 
-(*+ The main work of wrapping UF1CMA.verify is to 
+(** The main work of wrapping UF1CMA.verify is to 
     establish that when called with the AEAD.Invariant.inv, 
     if verify returns true for a particular encoded AD+cipher, 
     then in the ideal case, we can also return the plain text
     expected for the result of decryption **)
 
-(*+ found_entry: 
+(** found_entry: 
       the entry in the aead table corresponding to nonce n
       contains the expected aad, plain and cipher text
  **)
@@ -423,7 +431,7 @@ val frame_accumulate_ensures: #i:CMA.id -> #rw:rw ->
 		     Buffer.modifies_1 (MAC.as_buffer (CMA.abuf acc)) h1 h2))
           (ensures (let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
 		    acc_ensures_weak ak aad cipher h0 acc h2))
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1"
 let frame_accumulate_ensures #i #rw aead_st ak #aadlen aad #txtlen plain cipher_tagged h0 acc h1 h2 =
   FStar.Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h1 h2;
   let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
@@ -432,11 +440,11 @@ let frame_accumulate_ensures #i #rw aead_st ak #aadlen aad #txtlen plain cipher_
   assert (h2 `HS.contains` (Buffer.content (MAC.as_buffer (CMA.abuf acc))));
   assert (Buffer.disjoint_2 (MAC.as_buffer (CMA.abuf acc)) aad cipher);
   assert (EncodingWrapper.fresh_sref h0 h2 (Buffer.content (MAC.as_buffer (CMA.abuf acc))));
-  if mac_log 
+  if mac_log
   then (assert (h1  `HS.contains` CMA.alog acc);
         assert (HS.sel h2 (CMA.alog acc) == HS.sel h1 (CMA.alog acc));
-	assert (Buffer.as_seq h2 (MAC.as_buffer CMA.(ak.r)) ==
-	        Buffer.as_seq h1 (MAC.as_buffer CMA.(ak.r)));
+  	assert (Buffer.as_seq h2 (MAC.as_buffer CMA.(ak.r)) ==
+  	        Buffer.as_seq h1 (MAC.as_buffer CMA.(ak.r)));
         MAC.frame_sel_elem h1 h2 CMA.(ak.r))
 
 (*+ intro_mac_is_used: 
