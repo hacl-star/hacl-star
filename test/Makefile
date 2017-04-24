@@ -37,7 +37,7 @@ verify-code:
 
 verify-crypto:
 	# Note: the all-hints target fails silently.
-	$(MAKE) -C ../secure_api all-ver OTHERFLAGS=--record_hints
+	$(MAKE) -C ../secure_api all-ver OTHERFLAGS="--record_hints"
 
 hints-code:
 	$(MAKE) -C ../code hints
