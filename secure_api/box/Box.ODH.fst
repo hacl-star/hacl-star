@@ -46,13 +46,18 @@ private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
 
 type aes_key = Key.aes_key
 
-assume val dh_key_log_region: (r:HH.rid{ extends r root
+val dh_key_log_region: (r:HH.rid{ extends r root
            /\ is_eternal_region r
            /\ is_below r root
            /\ disjoint r Key.ae_log_region
            /\ disjoint r id_log_region
            /\ disjoint r id_honesty_log_region
            })
+let dh_key_log_region =
+  recall_region Key.ae_log_region;
+  recall_region id_log_region;
+  recall_region id_honesty_log_region;
+  new_region root
 
 type dh_key_log_key = i:id{AE_id? i /\ honest i}
 type dh_key_log_value = (AE.key)
@@ -64,9 +69,8 @@ type dh_key_log_inv (f:MM.map' dh_key_log_key dh_key_log_range) = True
    that serve as its input are honest. Such honest keys are stored in the dh_key_log to ensure that only one AE key is generated for each
    pair of DH keys. This is ensured by the monotone nature of the log and the composition of AE ids through DH ids.
 *)
-assume val dh_key_log: MM.t dh_key_log_region dh_key_log_key dh_key_log_range dh_key_log_inv
-//assume val dh_key_log: MM.t dh_key_log_region (i:id{AE_id? i /\ honest i}) dh_key_log_range dh_key_log_inv
-
+val dh_key_log: MM.t dh_key_log_region dh_key_log_key dh_key_log_range dh_key_log_inv
+let dh_key_log = MM.alloc #dh_key_log_region #dh_key_log_key #dh_key_log_range #dh_key_log_inv
 
 (**
    A DH public key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
@@ -104,6 +108,9 @@ val leak_skey: sk:dh_skey{dishonest (DH_id sk.pk.pk_share)} -> Tot (raw:dh_expon
 let leak_skey sk =
   sk.sk_exp
 
+val get_skeyGT: sk:dh_skey -> Tot (raw:dh_exponent{raw=sk.sk_exp})
+let get_skeyGT sk =
+  sk.sk_exp
 
 val keygen: unit -> ST (dh_pair:(dh_pkey * dh_skey){fst dh_pair == (snd dh_pair).pk})
   (requires (fun h0 -> True))

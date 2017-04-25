@@ -25,25 +25,31 @@ module SPEC = Spec.SecretBox
 
 open Box.PlainAE
 
-// TODO: implement an init function for all the global state.
 type noncesize = SPEC.noncelen
 type keysize = SPEC.keylen
 type aes_key = SPEC.key
 type bytes = SPEC.bytes
-type cipher = b:bytes
+type cipher = b:bytes{Seq.length b >= 16 /\ (Seq.length b - 16) / Spec.Salsa20.blocklen < pow2 32}
 type nonce = SPEC.nonce
 
 val create_zero_bytes: n:nat -> Tot (b:bytes{Seq.length b = n})
 let create_zero_bytes n =
   Seq.create n (UInt8.uint_to_t 0)
 
-
-assume val ae_log_region: (r:MR.rid{ extends r root
+val ae_log_region:
+  r:MR.rid{ extends r root
              /\ is_eternal_region r
              /\ is_below r root
              /\ disjoint r id_log_region
              /\ disjoint r id_honesty_log_region
-             })
+             }
+
+
+#set-options "--z3rlimit 500 --max_ifuel 2 --max_fuel 0"
+let ae_log_region =
+  recall_region id_log_region;
+  recall_region id_honesty_log_region;
+  new_region root
 
 type ae_log_key = (nonce*(i:id{AE_id? i}))
 type ae_log_value (i:id{AE_id? i}) = (cipher*protected_ae_plain i)
@@ -51,7 +57,10 @@ type ae_log_range = fun (k:ae_log_key) -> ae_log_value (snd k)
 type ae_log_inv (f:MM.map' ae_log_key ae_log_range) = True
 
 
-assume val ae_log: MM.t ae_log_region ae_log_key ae_log_range ae_log_inv
+val ae_log:
+  MM.t ae_log_region ae_log_key ae_log_range ae_log_inv
+let ae_log =
+  MM.alloc #ae_log_region #ae_log_key #ae_log_range #ae_log_inv
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The following functions belong to the formal KEY module in the model.
@@ -71,6 +80,7 @@ let get_index k = k.i
    This function generates a fresh random key. Honest, as well as dishonest ids can be created using keygen. However, note that the adversary can
    only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
 *)
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 val keygen: i:id{AE_id? i} -> ST (k:key{k.i=i})
   (requires (fun h ->
     fresh i h // Prevents multiple keys with the same id
@@ -134,31 +144,33 @@ let message_wrap #i = PlainAE.ae_message_wrap #i
 let message_unwrap #i = PlainAE.ae_message_unwrap #i
 
 #reset-options
-#set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 0"
+#set-options "--z3rlimit 400 --max_ifuel 3 --max_fuel 0"
 (**
    Encrypt a a message under a key. Idealize if the key is honest and ae_ind_cca true.
 *)
-val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i{length m / Spec.Salsa20.blocklen < pow2 32}) -> ST bytes
+val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i{length m / Spec.Salsa20.blocklen < pow2 32}) -> ST cipher
   (requires (fun h0 ->
-    MR.m_contains ae_log h0
-    /\ ((honest i) ==> MM.fresh ae_log (n,i) h0) // Nonce freshness
+    ((honest i) ==>
+      (MR.m_contains ae_log h0
+      /\ MM.fresh ae_log (n,i) h0)) // Nonce freshness
     /\ registered i
   ))
   (ensures  (fun h0 c h1 ->
-    let current_log = MR.m_sel h0 ae_log in
-    let modified_regions:Set.set (r:HH.rid) = Set.singleton ae_log_region in
+    let modified_regions = Set.singleton ae_log_region in
     (honest i ==> HS.modifies modified_regions h0 h1)
     /\ (dishonest i ==> h0 == h1)
     /\ (honest i \/ dishonest i)
-    /\ MR.m_contains ae_log h1
     /\ ((honest i /\ b2t ae_ind_cpa)
         ==> (c = SPEC.secretbox_easy (create_zero_bytes (length m)) k.raw n))
-    /\ ((~(b2t ae_ind_cpa) \/ dishonest i)
-        ==> (c = SPEC.secretbox_easy (repr m) k.raw n))
-    /\ ((honest i) ==> (MR.witnessed (MM.contains ae_log (n,i) (c,m))
-                    /\ MR.m_sel h1 ae_log == MM.upd current_log (n,i) (c,m)))
+    /\ ((dishonest i \/ ~(b2t ae_ind_cpa))
+        ==> (eq2 #cipher c (SPEC.secretbox_easy (repr #(i) m) k.raw n)))
+    /\ ((honest i) ==> (MR.m_contains ae_log h1
+                      /\ MR.witnessed (MM.contains ae_log (n,i) (c,m))
+                      /\ MR.m_sel h1 ae_log == MM.upd (MR.m_sel h0 ae_log) (n,i) (c,m)))
     /\ (modifies modified_regions h0 h1 \/ h0 == h1)
   ))
+
+
 let encrypt #i n k m =
   MR.m_recall id_log;
   MR.m_recall id_honesty_log;
