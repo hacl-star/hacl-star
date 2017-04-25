@@ -27,11 +27,11 @@ original NaCl library by Bernstein et al. can be found
   |   and functionality from  |<------+          |                           |                     |
   |   Box.PlainBox            |       |          |                           |                     |
   |                           |       |          |                           |                     |
-  +------------+--------------+       |          +---------------------------+                     |
+  +------------|--------------+       |          +---------------------------+                     |
                ^                      |                                                            |
                |                      |                                                            |
                |                      |                                                            v
-  +------------+--------------+       |          +---------------------------+        +---------------------------+
+  +------------|--------------+       |          +---------------------------+        +---------------------------+
   |                           |       |          |                           |        |                           |
   | Box.ODH                   |       |          | Box.AE                    |        | Box.PlainAE               |
   |                           |       |          |                           |        |                           |
@@ -41,19 +41,19 @@ original NaCl library by Bernstein et al. can be found
   |   and a DH private key    |       +----------+ * If idealized, AE works  |<-------+ * Imports the "inner"     |
   | * Imports functions and   |                  |   as follows for honest   |        |   plaintext type from     |
   |   types to handle keys    |                  |   plaintexts              |        |   Box.PKAE and provides   |
-  |   from Box.PlainDH        |                  |   * Encryption: Nonces,   |        |   restricted wrapper      |
+  |   from Box.AE.Key         |                  |   * Encryption: Nonces,   |        |   restricted wrapper      |
   |                           |                  |   plaintexts and cipher-  |        |   functions to handle     |
-  +------------+--------------+                  |   texts are stored in a   |        |   those plaintexts        |
+  +------------|--------------+                  |   texts are stored in a   |        |   those plaintexts        |
                ^                                 |   global log              |        |                           |
                |                                 |   * Decryption: Upon re-  |        +---------------------------+
                |                                 |   ception of a nonce and  |
-  +------------+--------------+                  |   a ciphertexts, a look-  |
+  +------------|--------------+                  |   a ciphertexts, a look-  |
   |                           |                  |   up is performed on the  |
   | Box.AE.Key                |                  |   global log.             |
   |                           |                  |                           |
-  | * Provides a  functions   |                  +------------+--------------+
+  | * Provides a  functions   |                  +------------|--------------+
   |   and types from Box.AE   |                               |
-  |   for Box.DH to use       |                               |
+  |   for Box.ODH to use      |                               |
   | * This module exists to   |<------------------------------+
   |   preserve modularity     |
   |                           |
@@ -75,12 +75,12 @@ original NaCl library by Bernstein et al. can be found
   |   honesty of indices      |               |             +-------------------+
   |                           |               |
   |                           |               |
-  +------------+--------------+               |
+  +------------|--------------+               |
                ^                              |
                |                              |
                |                              |
                |                              |
-  +------------+--------------+               |
+  +------------|--------------+               |
   |                           |               |
   | Box.Flags                 |               |
   |                           |               |
@@ -95,10 +95,9 @@ original NaCl library by Bernstein et al. can be found
 ```
 
 TODO:
-- construct better log_invariants so we can verify them in a reasonable time
 - clean up the api and follow naming conventions from the original nacl code and/or other secure_api examples
-  - split up functions accordingly?
-
+- move state from Box.Indexing to Box.AE and Box.ODH
+- implement erasure
 
 Notes:
 * Module architecture figure created with [this tool](http://asciiflow.com/).

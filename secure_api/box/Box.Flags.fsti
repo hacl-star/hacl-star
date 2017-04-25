@@ -6,7 +6,6 @@
    Note, that for purposes of type-checking, the flags are not set. This
    ensures that the program is well typed for any permutation of set flags (that is permissible
    by the refinements).
-   TODO: Restrict access to functions for creation of ids?
 *)
 module Box.Flags
 
@@ -24,4 +23,4 @@ val pkae_ind_cpa : b:bool{b <==> b2t ae_ind_cpa}
 
 val pkae : b:bool{b ==> (((b2t ae_ind_cca) /\ prf_odh) /\ (b2t pkae_int_ctxt /\ b2t pkae_ind_cpa))}
 
-val state : bool
+val state : b:bool{b2t ae_ind_cca \/ prf_odh ==> b}

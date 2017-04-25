@@ -24,60 +24,85 @@ module Curve = Spec.Curve25519
 let lbytes (l:nat) = b:Seq.seq UInt8.t {Seq.length b = l}
 
 type dh_id = Curve.serialized_point // same as dh_share
-abstract type ae_id = (i:(dh_id*dh_id){little_endian (fst i) <= little_endian (snd i)})
+
+#set-options "--z3rlimit 500 --max_ifuel 2 --max_fuel 1"
+//val smaller_equal: b1:bytes -> b2:bytes{Seq.length b1 = Seq.length b2} -> Tot bool (decreases (Seq.length b1))
+//let rec smaller_equal b1 b2 =
+//  if Seq.length b1 = 0 then
+//    false
+//  else
+//    if UInt8.v (head b1) <= UInt8.v (head b2) then
+//      true
+//    else
+//      smaller_equal (tail b1) (tail b2)
 
 
-#set-options "--z3rlimit 100 --max_ifuel 10 --max_fuel 10"
 val smaller_equal: i1:dh_id -> i2:dh_id{length i1 = length i2} -> Tot bool
-let rec smaller_equal i1 i2 =
+let smaller_equal i1 i2 =
   let id1 = little_endian i1 in
   let id2 = little_endian i2 in
   id1 <= id2
 
 
+val larger: i1:dh_id -> i2:dh_id{length i1 = length i2} -> Tot bool
+let larger i1 i2 =
+  let id1 = little_endian i1 in
+  let id2 = little_endian i2 in
+  id1 > id2
+
+abstract type ae_id = (i:(dh_id*dh_id){smaller_equal (fst i) (snd i)})
+
 type id =
   | DH_id of dh_id
   | AE_id of ae_id
 
-assume Index_hasEq: hasEq id
-assume DH_Index_hasEq: hasEq dh_id
-assume AE_Index_hasEq: hasEq ae_id
 
+#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
 val generate_ae_id: i1:id{DH_id? i1} -> i2:id{DH_id? i2} -> Tot (i3:id{AE_id? i3})
 let generate_ae_id i1 i2 =
   match i1,i2 with
   | DH_id i1',DH_id i2' ->
-  if little_endian i1' <= little_endian i2' then
+    if smaller_equal i1' i2' then (
+    assert((smaller_equal i1' i2'));
     AE_id (i1',i2')
-  else
-    AE_id (i2',i1')
+  ) else (
+    AE_id (i2',i1'))
 
-//TODO: Fix this!
-assume val symmetric_id_generation: i1:id{AE_id? i1} -> i2:id{AE_id? i2} -> Lemma
+
+//TODO: Fix this! #reset-options
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 1"
+assume val symmetric_id_generation: i1:id{DH_id? i1} -> i2:id{DH_id? i2} -> Lemma
   (requires (True))
   (ensures (forall id1 id2. generate_ae_id id1 id2 = generate_ae_id id2 id1))
   [SMTPat (generate_ae_id i1 i2)]
 //let symmetric_id_generation i1 i2 = ()
-
 
 type id_log_key = id
 type id_log_value = unit
 type id_log_range = fun id_log_key -> id_log_value
 let id_log_inv (f:MM.map' id_log_key id_log_range) = True
 
-assume val id_log_region: (r:MR.rid{extends r root /\ is_eternal_region r /\ is_below r root})
+val id_log_region: (r:MR.rid{extends r root /\ is_eternal_region r /\ is_below r root})
+let id_log_region = new_region root
 
-assume val id_log: MM.t id_log_region id_log_key id_log_range id_log_inv
+val id_honesty_log_region: (r:MR.rid{ extends r root /\ is_eternal_region r /\ is_below r root /\ disjoint r id_log_region})
+let id_honesty_log_region =
+  recall_region id_log_region;
+  new_region root
 
+
+val id_log: MM.t id_log_region id_log_key id_log_range id_log_inv
+let id_log = MM.alloc #id_log_region #id_log_key #id_log_range #id_log_inv
 
 type id_honesty_log_key = dh_id
 type id_honesty_log_value = b:bool{~prf_odh ==> b=false}
 type id_honesty_log_range = fun id_honesty_log_key -> id_honesty_log_value
 let id_honesty_log_inv (m:MM.map' id_honesty_log_key id_honesty_log_range) = True
 
-assume val id_honesty_log_region: (r:MR.rid{ extends r root /\ is_eternal_region r /\ is_below r root /\ disjoint r id_log_region})
 
-assume val id_honesty_log: MM.t id_honesty_log_region id_honesty_log_key id_honesty_log_range id_honesty_log_inv
+val id_honesty_log: MM.t id_honesty_log_region id_honesty_log_key id_honesty_log_range id_honesty_log_inv
+let id_honesty_log = MM.alloc #id_honesty_log_region #id_honesty_log_key #id_honesty_log_range #id_honesty_log_inv
+
 
 let fresh (i:id) h =
   MM.fresh id_log i h
@@ -149,6 +174,12 @@ let rec honest (i:id) =
     | AE_id (i1,i2) -> honest (DH_id i1) /\ honest (DH_id i2)
   else
     False
+
+val state_lemma: i:id -> Lemma
+  (requires True)
+  (ensures (honest i ==> b2t state))
+  [SMTPat (honest i)]
+let state_lemma i = ()
 
 val dishonest: (i:id) -> Tot (t:Type0{(t /\ DH_id? i) ==> registered i}) (decreases (measure_id i))
 let rec dishonest (i:id) =

@@ -9,8 +9,6 @@ module Box
 open FStar.HyperHeap
 open FStar.HyperStack
 open Box.Flags
-open Box.AE
-open Box.ODH
 open Box.PlainBox
 open Box.Indexing
 
@@ -18,7 +16,8 @@ module MR = FStar.Monotonic.RRef
 module MM = MonotoneMap
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
-module SPEC = Spec.SecretBox
+module SecretSpec = Spec.SecretBox
+module CryptoSpec = Spec.CryptoBox
 module AE = Box.AE
 module ODH = Box.ODH
 module PlainBox = Box.PlainBox
@@ -28,37 +27,39 @@ module PlainBox = Box.PlainBox
 (**
    The type of the ciphertext that box and box_open use.
 *)
-type c = AE.cipher
 
-assume val box_log_region: (r:MR.rid{ extends r root
+val box_log_region: (r:MR.rid{ extends r root
            /\ is_eternal_region r
            /\ is_below r root
-           /\ disjoint r ae_log_region
-           /\ disjoint r dh_key_log_region
+           /\ disjoint r AE.ae_log_region
+           /\ disjoint r ODH.dh_key_log_region
            /\ disjoint r id_log_region
            /\ disjoint r id_honesty_log_region
            })
+let box_log_region =
+  recall_region AE.ae_log_region;
+  recall_region ODH.dh_key_log_region;
+  recall_region id_log_region;
+  recall_region id_honesty_log_region;
+  new_region root
 
-assume val box_key_log_region: (r:MR.rid{ extends r root
+val box_key_log_region: (r:MR.rid{ extends r root
            /\ is_eternal_region r
            /\ is_below r root
-           /\ disjoint r ae_log_region
-           /\ disjoint r dh_key_log_region
+           /\ disjoint r AE.ae_log_region
+           /\ disjoint r ODH.dh_key_log_region
            /\ disjoint r id_honesty_log_region
            /\ disjoint r id_log_region
            /\ disjoint r box_log_region
            })
+let box_key_log_region =
+  recall_region AE.ae_log_region;
+  recall_region ODH.dh_key_log_region;
+  recall_region id_log_region;
+  recall_region id_honesty_log_region;
+  recall_region box_log_region;
+  new_region root
 
-
-//type box_log_key = (nonce*(i:id{AE_id? i /\ honest i}))
-//type box_log_value = (cipher*protected_pkae_plain)
-//type box_log_range = fun box_log_key -> box_log_value
-//type box_log_inv (f:MM.map' box_log_key box_log_range) = True
-
-type box_log_key = AE.ae_log_key
-type box_log_value = AE.ae_log_value
-type box_log_range = AE.ae_log_range
-type box_log_inv (f:MM.map' ae_log_key ae_log_range) = True
 (**
    This monotone map maps a tuple of (nonce*ciphertext) to a plaintext message. It is used if a message is
    encrypted under an honest key while PKAE is idealized. During encryption, the plaintext will be stored in the log, indexed by the id and the nonce.
@@ -69,35 +70,26 @@ type box_log_inv (f:MM.map' ae_log_key ae_log_range) = True
    * Uniqueness of nonces: Only one entry can exist for any combination of nonce and key. This means that a nonce can not be used a second time with the
      same key.
 *)
-assume val box_log: MM.t box_log_region box_log_key box_log_range box_log_inv
-//let box_log = MM.alloc #pkae_table_region #pkae_table_key #pkae_table_range #pkae_table_inv
+val box_log: MM.t box_log_region AE.ae_log_key AE.ae_log_range AE.ae_log_inv
+let box_log = MM.alloc #box_log_region #AE.ae_log_key #AE.ae_log_range #AE.ae_log_inv
 
-//type box_key_log_key = i:id{AE_id? i /\ honest i}
-//type box_key_log_value = (AE.key)
-//type box_key_log_range = fun (i:box_key_log_key) -> (k:box_key_log_value{AE.get_index k = i})
-//type box_key_log_inv (f:MM.map' box_key_log_key box_key_log_range) = True
-
-type box_key_log_key = ODH.dh_key_log_key
-type box_key_log_value = ODH.dh_key_log_value
-type box_key_log_range = ODH.dh_key_log_range
-type box_key_log_inv (f:MM.map' box_key_log_key box_key_log_range) = True
 (**
    This monotone map maps an AE id to a key. It is used when box_beforenm generates a key using an honest DH-public key and an honest DH-private key.
    If PKAE is idealized, box_beforenm generates a random key instead of computing it from its DH components. We thus need this monotone log to guarantee that
    for a given set of DH ids a single unique key is generated.
 *)
-assume val box_key_log:  MM.t box_key_log_region ODH.dh_key_log_key ODH.dh_key_log_range ODH.dh_key_log_inv
-//let box_key_log = MM.alloc #pkae_table_region #pkae_table_key #pkae_table_range #pkae_table_inv
+val box_key_log:  MM.t box_key_log_region ODH.dh_key_log_key ODH.dh_key_log_range ODH.dh_key_log_inv
+let box_key_log = MM.alloc #box_key_log_region #ODH.dh_key_log_key #ODH.dh_key_log_range #ODH.dh_key_log_inv
 
 (**
    A PKAE public key, containing a DH public key.
 *)
-type pkae_pkey = dh_pkey
+type pkae_pkey = ODH.dh_pkey
 
 (**
    A PKAE private key, containing a DH private key.
 *)
-type pkae_skey = dh_skey
+type pkae_skey = ODH.dh_skey
 
 (**
    Generate a PKAE keypair, consisting of a public and a private key.
@@ -112,189 +104,93 @@ let keygen = ODH.keygen
 // TODO - invariants:
 // Remove indexing table. If we do this, we have to separate honesty tables and either (1) restrict the usage of the honesty oracle until after ODH is idealized or (2) implement a set_honest
 // funtion that allows communicating to the Key (AE) module which keys are honest.
-// Use a functional style instead of the logical (replace forall quantifiers).
-// Use "views" -> see StreamAE. Go via ODH to reason about keys in the ODH log to get rid of the "forall" quantifiers above.
 let log_invariant (h:mem) (i:id) =
   MR.m_contains box_key_log h
-  /\ MR.m_contains dh_key_log h
+  /\ MR.m_contains ODH.dh_key_log h
   /\ MR.m_contains box_log h
-  /\ MR.m_contains ae_log h
-  /\ MR.m_sel h box_key_log == MR.m_sel h dh_key_log
-  /\ MR.m_sel h box_log == MR.m_sel h ae_log
-  /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h <==> fresh i h)) // dh_key_log and box_key_log are in sync
-  // Do we need this?
-  /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h ==> (forall n. MM.fresh box_log (n,i) h)))
+  /\ MR.m_contains AE.ae_log h
+  /\ MR.m_contains id_log h
+  /\ MR.m_contains id_honesty_log h
+  /\ MR.m_sel h box_key_log == MR.m_sel h ODH.dh_key_log
+  /\ MR.m_sel h box_log == MR.m_sel h AE.ae_log
+  /\ ((AE_id? i /\ honest i) ==> (MM.fresh ODH.dh_key_log i h <==> fresh i h)) // dh_key_log and box_key_log are in sync
+  /\ ((AE_id? i /\ honest i) ==> (MM.fresh ODH.dh_key_log i h ==> (forall n. MM.fresh box_log (n,i) h)))
+
+val recall_global_logs: unit -> ST unit
+  (requires (fun h0 -> True))
+  (ensures (fun h0 _ h1 ->
+    h0 == h1
+    /\ MR.m_contains ODH.dh_key_log h1
+    /\ MR.m_contains box_log h1
+    /\ MR.m_contains AE.ae_log h1
+    /\ MR.m_contains id_log h1
+    /\ MR.m_contains id_honesty_log h1
+  ))
+let recall_global_logs () =
+  MR.m_recall id_honesty_log;
+  MR.m_recall id_log;
+  MR.m_recall ODH.dh_key_log;
+  MR.m_recall box_key_log;
+  MR.m_recall box_log;
+  MR.m_recall AE.ae_log
 
 
 #reset-options
-//#set-options "--z3rlimit 300 --max_ifuel 12 --max_fuel 12"
-#set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 1"
-
-
-//val unchanging_log_lemma: h0:mem -> h1:mem -> i:id -> Lemma
-//  (requires (
-//    let regions_modified_dishonest = [id_log_region] in
-//    let regions_modified_honest_set = Set.as_set (regions_modified_dishonest @ [dh_key_log_region;box_key_log_region]) in
-//    let regions_modified_dishonest_set:Set.set (r:HH.rid) = Set.as_set regions_modified_dishonest in
-//    log_invariant h0 i
-//    /\ MR.m_sel h0 box_log == MR.m_sel h1 box_log
-//    /\ ((AE_id? i /\ honest i) ==> ((forall n. MM.fresh box_log (n,i) h0))) // for fresh keys, all nonces are fresh
-//  ))
-//  (ensures (
-//    ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 ==> (forall n. MM.fresh box_log (n,i) h1))) // for fresh keys, all nonces are fresh
-//  ))
-//let unchanging_log_lemma h0 h1 i = ()
-
-
-val beforenm_memory_equality_framing_lemma: h0:mem -> h1:mem -> i:id -> Lemma
-  (requires (
-    let regions_modified_dishonest = [id_log_region] in
-    let regions_modified_honest_set = Set.as_set (regions_modified_dishonest @ [dh_key_log_region;box_key_log_region]) in
-    let regions_modified_dishonest_set:Set.set (r:HH.rid) = Set.as_set regions_modified_dishonest in
-    log_invariant h0 i
-    /\ (modifies regions_modified_honest_set h0 h1
-      \/ h0 == h1
-      \/ modifies regions_modified_dishonest_set h0 h1)
-    /\ MR.m_sel h0 box_log == MR.m_sel h1 box_log
-  ))
-  (ensures (
-    MR.m_sel h1 box_log == MR.m_sel h1 ae_log  // ae_log and box_log are in sync
-  ))
-let beforenm_memory_equality_framing_lemma h0 h1 i = ()
-
-
-#reset-options
-#set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 1"
-val beforenm_freshness_equality_framing_lemma: h0:mem -> h1:mem -> i:id -> k:AE.key{AE.get_index k = i} -> Lemma
-  (requires (
-    log_invariant h0 i
-    /\ MR.m_contains id_log h0
-    /\ MR.m_contains id_log h1
-    /\ MR.m_contains dh_key_log h0
-    /\ MR.m_contains dh_key_log h1
-    /\ ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==> (MR.m_sel h1 dh_key_log == MM.upd (MR.m_sel h0 dh_key_log) i k))
-    /\ ((AE_id? i /\ honest i /\ MM.defined dh_key_log i h0) ==> (MR.m_sel h1 dh_key_log == MR.m_sel h0 dh_key_log))
-    /\ ((AE_id? i /\ honest i) ==> MM.defined id_log i h1)
-  ))
-  (ensures (
-    ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) // all keys that are not in the dh_key_log are fresh
-  ))
-let beforenm_freshness_equality_framing_lemma h0 h1 i k = ()
-
-
-val beforenm_nonce_freshness_framing_lemma: h0:mem -> h1:mem -> i:id -> k:AE.key{AE.get_index k = i} -> Lemma
-  (requires (
-    let regions_modified_dishonest = [id_log_region] in
-    let regions_modified_honest_set = Set.as_set (regions_modified_dishonest @ [dh_key_log_region;box_key_log_region]) in
-    let regions_modified_dishonest_set:Set.set (r:HH.rid) = Set.as_set regions_modified_dishonest in
-    log_invariant h0 i
-    /\ MR.m_contains id_log h0
-    /\ MR.m_contains id_log h1
-    /\ MR.m_contains dh_key_log h0
-    /\ MR.m_contains dh_key_log h1
-    /\ ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==> (MR.m_sel h1 dh_key_log == MM.upd (MR.m_sel h0 dh_key_log) i k))
-    /\ ((AE_id? i /\ honest i /\ MM.defined dh_key_log i h0) ==> (MR.m_sel h1 dh_key_log == MR.m_sel h0 dh_key_log))
-    /\ (modifies regions_modified_honest_set h0 h1
-      \/ h0 == h1
-      \/ modifies regions_modified_dishonest_set h0 h1)
-    /\ MR.m_sel h0 box_log == MR.m_sel h1 box_log
-  ))
-  (ensures (
-    ((honest i) ==> (MM.fresh dh_key_log i h0 ==> (forall n. MM.fresh box_log (n,i) h0))) // for fresh keys, all nonces are fresh
-  ))
-let beforenm_nonce_freshness_framing_lemma h0 h1 i k = ()
-
-
-#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
+#set-options "--z3rlimit 500 --max_ifuel 2 --max_fuel 0"
 (**
    box_beforenm is used to generate a key using a DH public and private key. The AE id of the resulting key is a combination of the DH ids of the
    DH keys used to generate it. If idealized, the key resulting from this function will be random if both DH key ids are honest. To ensure that
    only one key is generated per DH id pair, it is stored in the box_key_log and a lookup is performed before each key is generated.
 *)
 val box_beforenm: pk:pkae_pkey ->
-            sk:pkae_skey ->
-      ST (k:AE.key)
+                  sk:pkae_skey ->
+                  ST (k:AE.key)
   (requires (fun h0 ->
-    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
+    let i = generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)) in
     registered i
-    ///\ log_invariant h0 i
-    /\ MR.m_contains box_key_log h0
-    /\ MR.m_contains dh_key_log h0
-    /\ MR.m_contains box_log h0
-    /\ MR.m_contains ae_log h0
-    /\ MR.m_sel h0 box_key_log == MR.m_sel h0 dh_key_log  // dh_key_log and box_key_log are in sync
-    /\ MR.m_sel h0 box_log == MR.m_sel h0 ae_log  // ae_log and box_log are in sync
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // all keys that are not in the dh_key_log are fresh
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 ==> (forall n. MM.fresh box_log (n,i) h0))) // for fresh keys, all nonces are fresh
+    /\ log_invariant h0 i
   ))
   (ensures (fun h0 k h1 ->
-    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
+    let i = generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)) in
     let regions_modified_dishonest = [id_log_region] in
-    let regions_modified_honest_set = Set.as_set (regions_modified_dishonest @ [dh_key_log_region;box_key_log_region]) in
+    let regions_modified_honest_set = Set.as_set (regions_modified_dishonest @ [ODH.dh_key_log_region;box_key_log_region]) in
     let regions_modified_dishonest_set:Set.set (r:HH.rid) = Set.as_set regions_modified_dishonest in
     // Id sanity
-    (AE.get_index k = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)))
-    /\ MR.m_contains dh_key_log h1
-    /\ MR.m_contains id_log h1
+    (AE.get_index k = generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)))
+    //\ log_invariant h1 i
     /\ MR.m_contains box_key_log h1
+    /\ MR.m_contains ODH.dh_key_log h1
     /\ MR.m_contains box_log h1
-    /\ MR.m_contains ae_log h1
-    /\ (modifies regions_modified_honest_set h0 h1
-      \/ h0 == h1
-      \/ modifies regions_modified_dishonest_set h0 h1)
-    ///\ log_invariant h1 i
-    /\ MR.m_sel h1 box_key_log == MR.m_sel h1 dh_key_log (*x*)  // dh_key_log and box_key_log are in sync
-    // Use the framing lemma for this!
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) (*x*) // all keys that are not in the dh_key_log are fresh
-    // Do we need this?
-    ///\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 ==> (forall n. MM.fresh box_log (n,i) h1))) // for fresh keys, all nonces are fresh
+    /\ MR.m_contains AE.ae_log h1
+    /\ MR.m_contains id_log h1
+    /\ MR.m_contains id_honesty_log h1
+    /\ MR.m_sel h1 box_key_log == MR.m_sel h1 ODH.dh_key_log
+    /\ MR.m_sel h1 box_log == MR.m_sel h1 AE.ae_log
+    /\ ((AE_id? i /\ honest i) ==> (MM.fresh ODH.dh_key_log i h1 <==> fresh i h1)) // dh_key_log and box_key_log are in sync
+    /\ ((AE_id? i /\ honest i) ==> (MM.fresh ODH.dh_key_log i h1 ==> (forall n. MM.fresh box_log (n,i) h1)))
     // If honest, something is inserted into the log
-    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (MR.m_sel h1 box_key_log == MM.upd (MR.m_sel h0 box_key_log) i k))
-    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (makes_unfresh_just i h0 h1))
-    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (modifies regions_modified_honest_set h0 h1))
-    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log))
-    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (h0==h1))
-    /\ ((honest i) ==> (MR.witnessed (MM.contains box_key_log i k)))
-    /\ ((honest i) ==> (MM.contains box_key_log i k h1))
-                      ///\ makes_unfresh_just i h0 h1)))
-               ///\ modifies regions_modified_honest_set h0 h1))))
-       ///\ (MM.defined box_key_log i h0 ==> (//MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log))))
-       //          h0 == h1))))
-       ///\ MR.witnessed (MM.contains box_key_log i k)
-       ///\ MM.contains box_key_log i k h1))
-    // If dishonest, the returned key is actually computed from both DH keys.
+    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (MR.m_sel h1 box_key_log == MM.upd (MR.m_sel h0 box_key_log) i k
+                                                  /\ makes_unfresh_just i h0 h1
+                                                  /\ modifies (Set.union
+                                                    (Set.singleton id_log_region)
+                                                    (Set.union
+                                                      (Set.singleton ODH.dh_key_log_region)
+                                                      (Set.singleton box_key_log_region))) h0 h1))
+    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log
+                                                    /\ h0==h1))
+    /\ ((honest i) ==> (MR.witnessed (MM.contains box_key_log i k)
+                      /\ MM.contains box_key_log i k h1))
     /\ (dishonest i (*x*)
-      ==> (modifies regions_modified_dishonest_set h0 h1
-         /\ leak_key k = ODH.prf_odhGT sk pk))
+      ==> (modifies (Set.singleton id_log_region) h0 h1
+         /\ AE.leak_key k = ODH.prf_odhGT sk pk))
     /\ ~(fresh i h1)
-    //// id is fresh if it is in the box_key_log,
-    //// sync between box_key_log and dh_key_log and
-    //// if id is fresh, then there are no entries for it in the box_log
-    ///\ log_invariant h1 i (*x*)
-    ////// Liveness of global logs and local key log of the returned key.
-    ///\ MR.m_contains id_log h1 (*x*)
-    ///\ MR.m_contains id_honesty_log h1 (*x*)
-    ///\ MR.m_contains box_log h1 (*x*)
-    ///\ MR.m_contains box_key_log h1 (*x*)
-    ///\ MR.m_contains dh_key_log h1 (*x*)
+    /\ (dishonest i ==> AE.leak_key k = CryptoSpec.cryptobox_beforenm (ODH.pk_get_share pk) (ODH.get_skeyGT sk))
   ))
 
 let box_beforenm pk sk =
-  MR.m_recall id_log;
-  MR.m_recall id_honesty_log;
-  MR.m_recall dh_key_log;
-  MR.m_recall box_key_log;
-  MR.m_recall box_log;
-  MR.m_recall ae_log;
-  let h0 = ST.get() in
-  let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
-  let k = prf_odh sk pk in
-  MR.m_recall id_log;
-  MR.m_recall id_honesty_log;
-  MR.m_recall dh_key_log;
-  MR.m_recall box_key_log;
-  MR.m_recall box_log;
-  MR.m_recall ae_log;
+  let i = generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)) in
+  let k = ODH.prf_odh sk pk in
+  recall_global_logs();
   (if is_honest i then (
     match MM.lookup box_key_log i with
     | Some _ ->
@@ -303,163 +199,55 @@ let box_beforenm pk sk =
       MM.extend box_key_log i k;
       ()
   ));
-  MR.m_recall id_log;
-  MR.m_recall id_honesty_log;
-  MR.m_recall dh_key_log;
-  MR.m_recall box_key_log;
-  MR.m_recall box_log;
-  MR.m_recall ae_log;
-  let h1 = ST.get() in
-  //assert((honest i /\ MM.fresh box_key_log i h0) ==> makes_unfresh_just i h0 h1);
-  //assert((honest i /\ MM.fresh box_key_log i h0) ==> (MR.m_sel h1 box_key_log == MM.upd (MR.m_sel h0 box_key_log) i k));
   k
 
-
-#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
-val afternm_memory_equality_framing_lemma: h0:mem -> h1:mem -> i:id -> Lemma
-  (requires (
-    let modified_regions:Set.set (r:HH.rid) = Set.union (Set.singleton box_log_region) (Set.singleton ae_log_region) in
-    log_invariant h0 i
-    /\ (modifies modified_regions h0 h1 \/ h0 == h1)
-    /\ MR.m_contains id_log h0
-    /\ MR.m_contains id_log h1
-  ))
-  (ensures (
-    MR.m_sel h1 box_key_log == MR.m_sel h1 dh_key_log
-    /\ MR.m_sel h0 id_log == MR.m_sel h1 id_log
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) // dh_key_log and box_key_log are in sync
-  ))
-let afternm_memory_equality_framing_lemma h0 h1 i = ()
-
-
-#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
-assume val afternm_log_append_framing_lemma: h0:mem -> h1:mem -> i:id{AE_id? i} -> n:nonce -> c:c -> p:protected_pkae_plain{PlainBox.get_index p = i} -> Lemma
-  (requires (
-    let m = AE.message_wrap #i p in
-    let key = (n,i) in
-    let value = (c,m) in
-    MR.m_contains ae_log h0
-    /\ MR.m_contains ae_log h1
-    /\ MR.m_contains box_log h0
-    /\ MR.m_contains box_log h1
-    /\ MR.m_sel h0 ae_log == MR.m_sel h0 box_log
-    /\ ((honest i) ==> MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) key value)
-    ///\ ((honest i) ==> MR.m_sel h1 ae_log == MM.upd (MR.m_sel h0 ae_log) key value)
-    /\ ((dishonest i) ==> MR.m_sel h0 ae_log == MR.m_sel h1 ae_log)
-    ///\ ((dishonest i) ==> MR.m_sel h0 box_log == MR.m_sel h1 box_log)
-  ))
-  (ensures (
-    MR.m_sel h1 box_log == MR.m_sel h1 ae_log
-  ))
-//let afternm_log_append_framing_lemma h0 h1 i  c k n p = ()
-
-
-#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
-val afternm_nonce_freshness_framing_lemma: h0:mem -> h1:mem -> i:id{AE_id? i} -> n:nonce -> c:c -> p:protected_pkae_plain{PlainBox.get_index p = i} -> Lemma
-  (requires (
-    let m = AE.message_wrap #i p in
-    let key = (n,i) in
-    let value = (c,m) in
-    let modified_regions:Set.set (r:HH.rid) = Set.union (Set.singleton box_log_region) (Set.singleton ae_log_region) in
-    MR.m_contains ae_log h0
-    /\ MR.m_contains ae_log h1
-    /\ MR.m_contains box_log h0
-    /\ MR.m_contains box_log h1
-    /\ MR.m_contains dh_key_log h0
-    /\ MR.m_contains dh_key_log h1
-    /\ (modifies modified_regions h0 h1 \/ h0 == h1)
-    /\ (honest i ==> MR.m_sel h1 box_log == MR.m_sel h1 ae_log)
-    /\ (honest i ==> MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) key value)
-    /\ ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h0))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
-    /\ ~(fresh i h0)
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // dh_key_log and box_key_log are in sync
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) // dh_key_log and box_key_log are in sync
-  ))
-  (ensures (
-    ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h1) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h1))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
-  ))
-let afternm_nonce_freshness_framing_lemma h0 h1 i n c p = ()
-
-
 #reset-options
-#set-options "--z3rlimit 200 --max_ifuel 1 --max_fuel 1"
+#set-options "--z3rlimit 200 --max_ifuel 1 --max_fuel 0"
 (**
    box_afternm is used to encrypt a plaintext under an AE key using a nonce. If idealized and if the AE id is honest,
    the plaintext is stored in the box_log indexed by the AE id and the nonce.
 *)
 val box_afternm: k:AE.key ->
-         n:nonce ->
-         p:protected_pkae_plain{PlainBox.get_index p = AE.get_index k /\ length p / Spec.Salsa20.blocklen < pow2 32} ->
-         ST c
+         n:AE.nonce ->
+         p:protected_pkae_plain (AE.get_index k) ->
+         ST AE.cipher
   (requires (fun h0 ->
     let i = AE.get_index k in
-    // Liveness of global logs and local key log of the returned key.
-    MR.m_contains id_log h0
-    /\ MR.m_contains id_honesty_log h0
-    /\ MR.m_contains ae_log h0
-    /\ MR.m_contains box_log h0
-    /\ MR.m_contains box_key_log h0
-    /\ MR.m_contains dh_key_log h0
-    ///\ log_invariant h0 i
+    registered i
+    /\ log_invariant h0 i
     // Nonce freshness
     /\ ((honest i) ==> MM.fresh box_log (n,i) h0)
     // If the key is honest, it needs to be in the box_key_log
     /\ ((honest i) ==> MM.defined box_key_log i h0)
     // The key isn't fresh
     /\ ~(fresh i h0)
-    /\ MR.m_sel h0 box_key_log == MR.m_sel h0 dh_key_log
-    /\ MR.m_sel h0 ae_log == MR.m_sel h0 box_log
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // dh_key_log and box_key_log are in sync
-    /\ ((AE_id? i /\ honest i /\ MM.fresh box_key_log i h0) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h0))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
   ))
   (ensures (fun h0 c h1 ->
     let i = AE.get_index k in
-    let modified_regions:Set.set (r:HH.rid) = Set.union (Set.singleton box_log_region) (Set.singleton ae_log_region) in
-    let k_raw = get_keyGT k in
+    let modified_regions:Set.set (r:HH.rid) = Set.union (Set.singleton box_log_region) (Set.singleton AE.ae_log_region) in
+    let k_raw = AE.get_keyGT k in
     // If dishonest or not idealizing, then we encrypt the actual message.
     ((~(b2t pkae_ind_cpa) \/ dishonest i)
-      ==> (c == SPEC.secretbox_easy (PlainBox.repr p) (AE.get_keyGT k) n))
+      ==> (eq2 #AE.cipher c (SecretSpec.secretbox_easy (PlainBox.repr p) (AE.get_keyGT k) n)))
     // If honest and idealizing, we encrypt zeros.
     /\ ((b2t pkae_ind_cpa /\ honest i)
-      ==> (c == SPEC.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n))
+      ==> (c == SecretSpec.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n))
     //// We have put the message both in the local key log and in the box_log
     /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))))
     /\ ((honest i) ==> (MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))))
     /\ ((dishonest i) ==> h0 == h1)
+    /\ ((dishonest i) ==> eq2 #AE.cipher c (CryptoSpec.cryptobox_afternm (PlainBox.repr p) n (AE.get_keyGT k)))
     /\ ((honest i) ==> modifies modified_regions h0 h1)
-    // Liveness of global logs and the local key log.
-    /\ MR.m_contains id_log h1
-    /\ MR.m_contains id_honesty_log h1
-    /\ MR.m_contains box_log h1
-    /\ MR.m_contains ae_log h1
-    /\ MR.m_contains box_key_log h1
-    /\ MR.m_contains dh_key_log h1
-    ///\ log_invariant h1 i
-    // Both of these done via framing lemma.
-    ///\ MR.m_sel h1 box_key_log == MR.m_sel h1 dh_key_log
-    ///\ MR.m_sel h1 ae_log == MR.m_sel h1 box_log
-    ///\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // dh_key_log and box_key_log are in sync
-    ///\ ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h1) ==> (forall (n:nonce) . (MM.fresh box_log (n,i) h1))) // if it is not in the box_key_log, then there should be no nonces recorded in the box_log
+    /\ log_invariant h1 i
   ))
 
 
 #set-options "--z3rlimit 200 --max_ifuel 1 --max_fuel 0"
 let box_afternm k n p =
-  MR.m_recall id_honesty_log;
-  MR.m_recall box_key_log;
-  MR.m_recall id_log;
-  MR.m_recall dh_key_log;
-  MR.m_recall box_log;
-  MR.m_recall ae_log;
   let i = AE.get_index k in
+  lemma_honest_or_dishonest i;
   fresh_unfresh_contradiction i;
   let c = AE.encrypt #i n k (AE.message_wrap #i p) in
-  MR.m_recall id_honesty_log;
-  MR.m_recall box_key_log;
-  MR.m_recall id_log;
-  MR.m_recall dh_key_log;
-  MR.m_recall box_log;
-  MR.m_recall ae_log;
   let honest_i = is_honest i in
   (if honest_i then (
     //lemma_honest_not_dishonest i;
@@ -467,107 +255,69 @@ let box_afternm k n p =
   ) else (
     //lemma_dishonest_not_honest i;
     ()));
-  MR.m_recall id_honesty_log;
-  MR.m_recall box_key_log;
-  MR.m_recall id_log;
-  MR.m_recall dh_key_log;
-  MR.m_recall box_log;
-  MR.m_recall ae_log;
+  recall_global_logs();
   c
 
 
 val box: pk:pkae_pkey ->
        sk:pkae_skey ->
-       n:nonce ->
-       p:protected_pkae_plain{PlainBox.get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))}
-       -> ST c
+       n:AE.nonce ->
+       p:protected_pkae_plain (generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk))) ->
+       ST AE.cipher
   (requires (fun h0 ->
-    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
+    let i = generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)) in
     registered i
-    /\ (honest i \/ dishonest i)
-    // Liveness of global logs
-    /\ MR.m_contains id_log h0
-    /\ MR.m_contains id_honesty_log h0
-    /\ MR.m_contains box_log h0
-    /\ MR.m_contains ae_log h0
-    /\ MR.m_contains box_key_log h0
-    /\ MR.m_contains dh_key_log h0
     // Make sure that log_invariants hold.
-    ///\ log_invariant h0 i
+    /\ log_invariant h0 i
     // Make sure that nonce is fresh
     /\ MM.fresh box_log (n,i) h0
-    /\ MR.m_sel h0 box_key_log == MR.m_sel h0 dh_key_log  // dh_key_log and box_key_log are in sync
-    /\ MR.m_sel h0 box_log == MR.m_sel h0 ae_log  // ae_log and box_log are in sync
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 <==> fresh i h0)) // all keys that are not in the dh_key_log are fresh
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h0 ==> (forall n. MM.fresh box_log (n,i) h0))) // for fresh keys, all nonces are fresh
   ))
   (ensures (fun h0 c h1 ->
-    let regions_modified_beforenm_dishonest = [id_log_region] in
-    let regions_modified_beforenm_honest = (regions_modified_beforenm_dishonest @ [dh_key_log_region;box_key_log_region]) in
-    let regions_modified_afternm_honest = ([box_log_region;ae_log_region]) in
-    let regions_modified_honest_set = Set.as_set (regions_modified_beforenm_honest @ regions_modified_afternm_honest) in
-    let regions_modified_dishonest_set:Set.set (r:HH.rid) = Set.as_set regions_modified_beforenm_dishonest in
-    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
-    // Make sure that log_invariants hold. Would like to ensure "all_keys" variant, but too expensive to verify currently.
+    let regions_modified_beforenm_dishonest = Set.singleton id_log_region in
+    let regions_modified_beforenm_honest = Set.union regions_modified_beforenm_dishonest (Set.union (Set.singleton ODH.dh_key_log_region) (Set.singleton box_key_log_region)) in
+    let regions_modified_afternm_honest = Set.union (Set.singleton box_log_region) (Set.singleton AE.ae_log_region) in
+    let regions_modified_honest = Set.union regions_modified_beforenm_honest regions_modified_afternm_honest in
+    let i = generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)) in
     log_invariant h1 i
+    /\ ~(fresh i h1)
+    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (makes_unfresh_just i h0 h1
+                                                  /\ modifies regions_modified_honest h0 h1))
+    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log
+                                                    /\ modifies regions_modified_afternm_honest h0 h1))
+    /\ ((honest i)
+      ==> (let k_raw = AE.get_keyGT (MM.value box_key_log i h1) in
+          (~(b2t pkae_ind_cpa)
+              ==> (eq2 #AE.cipher c (SecretSpec.secretbox_easy (PlainBox.repr p) k_raw n)))
+          /\ ((b2t pkae_ind_cpa)
+              ==> (c == SecretSpec.secretbox_easy (AE.create_zero_bytes (length p)) k_raw n))
+          /\ MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))
+          /\ MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))
+         ))
     /\ ((dishonest i)
-      ==> (c = SPEC.secretbox_easy (PlainBox.repr p) (prf_odhGT sk pk) n))
-    // If honest and idealizing, we encrypt zeros.
-    // TODO: How to get hold of the key?
-    ///\ ((b2t pkae /\ honest i)
-    //  ==> (c == SPEC.secretbox_easy (AE.create_zero_bytes (length p)) (AE.get_keyGT k) n))
-    /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))
-                                /\ MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))))
-    /\ MR.m_contains id_log h1
-    /\ MR.m_contains id_honesty_log h1
-    /\ MR.m_contains box_log h1
-    /\ MR.m_contains ae_log h1
-    /\ MR.m_contains box_key_log h1
-    /\ MR.m_contains dh_key_log h1
-    /\ log_invariant h1 i
-    // TODO: How to get hold of the key?
-    ///\ ((honest i /\ MM.fresh box_key_log i h0) ==> (MR.m_sel h1 box_key_log == MM.upd (MR.m_sel h0 box_key_log) i k))
-    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (makes_unfresh_just i h0 h1))
-    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (modifies regions_modified_honest_set h0 h1))
-    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log))
-    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (modifies (Set.as_set (regions_modified_afternm_honest)) h0 h1))
-    ///\ ((honest i) ==> (MR.witnessed (MM.contains box_key_log i k)))
-    ///\ ((honest i) ==> (MM.contains box_key_log i k h1))
-    /\ ((honest i) ==> (MR.witnessed (MM.contains box_log (n,i) (c,(AE.message_wrap #i p)))))
-    /\ ((honest i) ==> (MR.m_sel h1 box_log == MM.upd (MR.m_sel h0 box_log) (n,i) (c,(AE.message_wrap #i p))))
-    /\ ((honest i) ==> (modifies regions_modified_honest_set h0 h1))
-    /\ ((dishonest i) ==> (modifies regions_modified_dishonest_set h0 h1))
+      ==> (let k_raw = ODH.prf_odhGT sk pk in
+          eq2 #AE.cipher c (SecretSpec.secretbox_easy (PlainBox.repr p) k_raw n)
+          /\ modifies regions_modified_beforenm_dishonest h0 h1))
+    /\ (dishonest i ==> eq #AE.cipher c CryptoSpec.cryptobox (PlainBox.repr p) n (ODH.pk_get_share pk) (ODH.get_skeyGT sk))
+    // Making unfresh just i, together with the log invariant proves that we only add one entry to the
+    // box_key_log. Arguing the same thing directly directly via the log itself is difficult, as we have
+    // no means of getting hold of the (random) key other than pulling it from the log itself.
   ))
 
 
 #set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
 let box pk sk n p =
-  let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
-  let h0 = ST.get() in
+  let i = generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)) in
+  lemma_honest_or_dishonest i;
   let k = box_beforenm pk sk in
-  let h1 = ST.get() in
-  beforenm_memory_equality_framing_lemma h0 h1 i;
-  beforenm_freshness_equality_framing_lemma h0 h1 i k;
-  beforenm_nonce_freshness_framing_lemma h0 h1 i k;
-  let h0 = ST.get() in
   let c = box_afternm k n p in
-  let h1 = ST.get() in
-  afternm_memory_equality_framing_lemma h0 h1 i;
-  afternm_log_append_framing_lemma h0 h1 i n c p;
-  afternm_nonce_freshness_framing_lemma h0 h1 i n c p;
-  let h0 = ST.get() in
   c
 
 
-val box_open_afternm: n:nonce -> k:AE.key -> c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} -> ST(option (p:protected_pkae_plain{get_index p = AE.get_index k}))
+val box_open_afternm: n:AE.nonce -> k:AE.key -> c:AE.cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} -> ST(option (p:protected_pkae_plain (AE.get_index k)))
   (requires (fun h0 ->
     let i = AE.get_index k in
     registered i
     // Liveness of global logs
-    /\ MR.m_contains box_log h0
-    /\ MR.m_contains id_log h0
-    /\ MR.m_contains box_key_log h0
-    /\ MR.m_contains dh_key_log h0
     /\ (honest i ==> MM.defined box_key_log i h0)
     // Make sure that log_invariant holds.
     /\ log_invariant h0 i
@@ -576,18 +326,13 @@ val box_open_afternm: n:nonce -> k:AE.key -> c:cipher{Seq.length c >= 16 /\ (Seq
     let i = AE.get_index k in
     let k_raw = AE.get_keyGT k in
     log_invariant h1 i
-    /\ MR.m_contains box_log h1
-    /\ MR.m_contains ae_log h1
-    /\ MR.m_contains id_log h1
-    /\ MR.m_contains box_key_log h1
-    /\ MR.m_contains dh_key_log h1
     /\ ((~(b2t pkae_int_ctxt) \/ dishonest i)
-      ==> ((Some? (SPEC.secretbox_open_easy c k_raw n)
-        ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))
+      ==> ((Some? (SecretSpec.secretbox_open_easy c k_raw n)
+        ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SecretSpec.secretbox_open_easy c k_raw n))
           /\ h0 == h1)))
-        /\ ((None? (SPEC.secretbox_open_easy c k_raw n))
+        /\ ((None? (SecretSpec.secretbox_open_easy c k_raw n))
           ==> (None? p)))
-    /\ ((b2t pkae /\ honest i)
+    /\ ((b2t pkae_int_ctxt /\ honest i)
       ==> ((Some? p)
         ==> (let p' = AE.message_wrap (Some?.v p) in
           MM.defined box_log (n,i) h0 /\ (fst (MM.value box_log (n,i) h0) == c )
@@ -609,59 +354,36 @@ let box_open_afternm n k c =
   | None -> None
 
 
-val box_open: n:nonce ->
+val box_open: n:AE.nonce ->
         sk:pkae_skey ->
         pk:pkae_pkey ->
-        c:cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
-        ST(option (p:protected_pkae_plain{PlainBox.get_index p = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk))}))
+        c:AE.cipher{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32} ->
+        ST(option (p:protected_pkae_plain (generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)))))
   (requires (fun h0 ->
-    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
+    let i = generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)) in
     registered i
     /\ (honest i \/ dishonest i)
     // Liveness of global logs
-    /\ MR.m_contains box_log h0
-    /\ MR.m_contains id_log h0
-    /\ MR.m_contains box_key_log h0
-    /\ MR.m_contains dh_key_log h0
     /\ ((honest i) ==> MM.fresh box_log (n,i) h0)
     // Make sure that log_invariant holds.
     /\ log_invariant h0 i
   ))
   (ensures (fun h0 p h1 ->
-    let i = generate_ae_id (DH_id (pk_get_share pk)) (DH_id (sk_get_share sk)) in
-    let regions_modified_dishonest = [id_log_region] in
-    let regions_modified_honest_set = Set.as_set (regions_modified_dishonest @ [dh_key_log_region;box_key_log_region]) in
-    let regions_modified_dishonest_set:Set.set (r:HH.rid) = Set.as_set regions_modified_dishonest in
-    // Id sanity
-    MR.m_contains dh_key_log h1
-    /\ MR.m_contains id_log h1
-    /\ MR.m_contains box_key_log h1
-    /\ MR.m_contains box_log h1
-    /\ MR.m_contains ae_log h1
-    /\ MR.m_sel h1 box_key_log == MR.m_sel h1 dh_key_log // dh_key_log and box_key_log are in sync
-    /\ ((AE_id? i /\ honest i) ==> (MM.fresh dh_key_log i h1 <==> fresh i h1)) // all keys that are not in the dh_key_log are fresh
-    // If honest, something is inserted into the log
-    // TODO: Get key via log (see presentation(?))
-    ///\ ((honest i /\ MM.fresh box_key_log i h0) ==> (MR.m_sel h1 box_key_log == MM.upd (MR.m_sel h0 box_key_log) i k))
-    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (makes_unfresh_just i h0 h1))
-    /\ ((honest i /\ MM.fresh box_key_log i h0) ==> (modifies regions_modified_honest_set h0 h1))
-    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log))
-    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (h0==h1))
-    ///\ ((honest i) ==> (MR.witnessed (MM.contains box_key_log i k)))
-    ///\ ((honest i) ==> (MM.contains box_key_log i k h1))
-    // If dishonest, the returned key is actually computed from both DH keys.
-    ///\ (dishonest i (*x*)
-    //  ==> (modifies regions_modified_dishonest_set h0 h1
-    //     /\ leak_key k = ODH.prf_odhGT sk pk))
+    let i = generate_ae_id (DH_id (ODH.pk_get_share pk)) (DH_id (ODH.sk_get_share sk)) in
+    let regions_modified_dishonest = Set.singleton id_log_region in
+    let regions_modified_honest = Set.union regions_modified_dishonest (Set.union (Set.singleton ODH.dh_key_log_region) (Set.singleton box_key_log_region)) in
+    ((honest i /\ MM.fresh box_key_log i h0) ==> (makes_unfresh_just i h0 h1
+                                                  /\ modifies regions_modified_honest h0 h1))
+    /\ ((honest i /\ MM.defined box_key_log i h0) ==> (MR.m_sel h0 box_key_log == MR.m_sel h1 box_key_log
+                                                   /\ h0==h1))
     /\ ~(fresh i h1)
     /\ log_invariant h1 i
-    ///\ (dishonest i ==> h0==h1)
     /\ ((honest i)
       ==> (let k_raw = AE.get_keyGT (MM.value box_key_log i h1) in
           (~(b2t pkae_int_ctxt)
-          ==> ((Some? (SPEC.secretbox_open_easy c k_raw n)
-              ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))))
-              /\ ((None? (SPEC.secretbox_open_easy c k_raw n))
+          ==> ((Some? (SecretSpec.secretbox_open_easy c k_raw n)
+              ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SecretSpec.secretbox_open_easy c k_raw n))))
+              /\ ((None? (SecretSpec.secretbox_open_easy c k_raw n))
                 ==> (None? p))))
           /\ ((b2t pkae_int_ctxt)
             ==> (((Some? p)
@@ -672,32 +394,14 @@ val box_open: n:nonce ->
                   ==>(MM.fresh box_log (n,i) h0 \/ c =!= fst (MM.value box_log (n,i) h0))))
          )))
     /\ ((dishonest i)
-      ==> (let k_raw = prf_odhGT sk pk in
-         (Some? (SPEC.secretbox_open_easy c k_raw n)
-           ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SPEC.secretbox_open_easy c k_raw n))))
-         /\ (None? (SPEC.secretbox_open_easy c k_raw n)
-           ==> None? p)))
+      ==> (let k_raw = ODH.prf_odhGT sk pk in
+         (Some? (SecretSpec.secretbox_open_easy c k_raw n)
+           ==> (Some? p /\ Some?.v p == coerce #i (Some?.v (SecretSpec.secretbox_open_easy c k_raw n))))
+         /\ (None? (SecretSpec.secretbox_open_easy c k_raw n)
+           ==> None? p)
+         /\ modifies regions_modified_dishonest h0 h1))
   ))
 
-// Calling box_open_afternm does not seem to work due to some obscure error. Inlining for now.
 let box_open n sk pk c =
   let k = box_beforenm pk sk in
-  let i = AE.get_index k in
-  match AE.decrypt #i n k c with
-  | Some p ->
-    let p' = (AE.message_unwrap #i p) in
-    MR.m_recall id_honesty_log;
-    MR.m_recall box_key_log;
-    MR.m_recall id_log;
-    MR.m_recall dh_key_log;
-    MR.m_recall box_log;
-    MR.m_recall ae_log;
-    Some p'
-  | None ->
-    MR.m_recall id_honesty_log;
-    MR.m_recall box_key_log;
-    MR.m_recall id_log;
-    MR.m_recall dh_key_log;
-    MR.m_recall box_log;
-    MR.m_recall ae_log;
-    None
+  box_open_afternm n k c
