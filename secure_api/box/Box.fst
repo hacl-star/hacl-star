@@ -297,7 +297,7 @@ val box: pk:pkae_pkey ->
       ==> (let k_raw = ODH.prf_odhGT sk pk in
           eq2 #AE.cipher c (SecretSpec.secretbox_easy (PlainBox.repr p) k_raw n)
           /\ modifies regions_modified_beforenm_dishonest h0 h1))
-    /\ (dishonest i ==> eq #AE.cipher c CryptoSpec.cryptobox (PlainBox.repr p) n (ODH.pk_get_share pk) (ODH.get_skeyGT sk))
+    /\ (dishonest i ==> eq2 #AE.cipher c (CryptoSpec.cryptobox (PlainBox.repr p) n (ODH.pk_get_share pk) (ODH.get_skeyGT sk)))
     // Making unfresh just i, together with the log invariant proves that we only add one entry to the
     // box_key_log. Arguing the same thing directly directly via the log itself is difficult, as we have
     // no means of getting hold of the (random) key other than pulling it from the log itself.
@@ -341,6 +341,10 @@ val box_open_afternm: n:AE.nonce -> k:AE.key -> c:AE.cipher{Seq.length c >= 16 /
           ==>(MM.fresh box_log (n,i) h0 \/ c =!= fst (MM.value box_log (n,i) h0)))
       )
     /\ h0 == h1
+    /\ (dishonest i ==> (let spec_p = CryptoSpec.cryptobox_open_afternm c n (AE.get_keyGT k) in
+                      match p with
+                      | Some p' -> Some? spec_p /\ PlainBox.repr p' = Some?.v spec_p
+                      | None -> None? spec_p))
   ))
 
 
@@ -400,6 +404,10 @@ val box_open: n:AE.nonce ->
          /\ (None? (SecretSpec.secretbox_open_easy c k_raw n)
            ==> None? p)
          /\ modifies regions_modified_dishonest h0 h1))
+         /\ (dishonest i ==> (let spec_p = CryptoSpec.cryptobox_open c n (ODH.pk_get_share pk) (ODH.get_skeyGT sk) in
+                            match p with
+                            | Some p' -> Some? spec_p /\ PlainBox.repr p' = Some?.v spec_p
+                            | None -> None? spec_p))
   ))
 
 let box_open n sk pk c =
