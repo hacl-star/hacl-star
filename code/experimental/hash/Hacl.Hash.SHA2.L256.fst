@@ -75,7 +75,7 @@ inline_for_extraction let size_hash_w  = 8ul // 8 words (Final hash output size)
 inline_for_extraction let size_block_w = 16ul  // 16 words (Working data block size)
 inline_for_extraction let size_hash    = size_word *^ size_hash_w
 inline_for_extraction let size_block   = size_word *^ size_block_w
-inline_for_extraction let max_input_len = 2305843009213693952uL
+inline_for_extraction let max_input_len = 2305843009213693952uL // 2^61 Bytes
 
 (* Sizes of objects in the state *)
 inline_for_extraction private let size_k_w     = 64ul  // 2048 bits = 64 words of 32 bits (size_block)
