@@ -923,16 +923,17 @@ let hash hash input len =
   let n = U32.div len size_block in
   let r = U32.rem len size_block in
 
-  (* Get the last block *)
+  (* Get all full blocks the last block *)
+  let input_blocks = Buffer.sub input 0ul (n *%^ size_block) in
   let input_last = Buffer.sub input (n *%^ size_block) r in
 
   (* Initialize the hash function *)
   init state;
 
-  (* Update the state with data blocks *)
-  update_multi state input n;
+  (* Update the state with input blocks *)
+  update_multi state input_blocks n;
 
-  (* Process the last block of data *)
+  (* Process the last block of input *)
   update_last state input_last r;
 
   (* Finalize the hash output *)
