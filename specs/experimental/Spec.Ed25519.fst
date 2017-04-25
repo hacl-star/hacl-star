@@ -76,17 +76,10 @@ let rec montgomery_ladder_ (x:ext_point) (xp1:ext_point) (k:bytes) (ctr:nat{ ctr
   else (
     let x, xp1 = montgomery_ladder_ x xp1 k (ctr-1) in
     let ctr' = 8 * length k - ctr in
-    (* let (x', xp1') = *)
-    if ith_bit k ctr' = 1 then (
-      let nqp2 = point_double xp1 in
-      let nqp1 = point_add x xp1 in
-      nqp1, nqp2
-    ) else (
-      let nqp1 = point_double x in
-      let nqp2 = point_add x xp1 in
-      nqp1, nqp2
-    ) (* in *)
-    (* montgomery_ladder_ x' xp1' k ctr' *)
+    let x, xp1 = if ith_bit k ctr' = 1 then xp1, x else x, xp1 in
+    let xx = point_double x in
+    let xxp1 = point_add x xp1 in
+    if ith_bit k ctr' = 1 then xxp1, xx else xx, xxp1
   )
 
 let point_mul (a:bytes) (p:ext_point) =
