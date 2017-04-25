@@ -862,6 +862,8 @@ let update_last state data len =
   (**) pop_frame()
 
 
+#reset-options "--max_fuel 0  --z3rlimit 10"
+
 [@"substitute"]
 val finish_core:
   hash_w :uint32_p {length hash_w = v size_hash_w} ->
@@ -876,6 +878,8 @@ val finish_core:
 [@"substitute"]
 let finish_core hash_w hash = store32s_be hash hash_w size_hash_w
 
+
+#reset-options "--max_fuel 0  --z3rlimit 10"
 
 val finish:
   state :uint32_p{length state = v size_state} ->
@@ -892,6 +896,8 @@ let finish state hash =
   finish_core hash_w hash
 
 
+#reset-options "--max_fuel 0  --z3rlimit 10"
+
 val hash:
   hash :uint8_p {length hash = v size_hash} ->
   input:uint8_p {length input < Spec.max_input_len_8} ->
@@ -902,6 +908,8 @@ val hash:
                   /\ (let seq_input = as_seq h0 input in
                   let seq_hash = as_seq h1 hash in
                   seq_hash == Spec.hash seq_input)))
+
+#reset-options "--max_fuel 0  --z3rlimit 50"
 
 let hash hash input len =
 
