@@ -155,7 +155,7 @@ let mac_ensures
        
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 400"
-val frame_mac_is_set
+private val frame_mac_is_set
         (i:id) (iv:Cipher.iv (alg i))
 	(st:aead_state i Writer)
 	(#aadlen:aadlen) (aad:lbuffer (v aadlen))
@@ -171,10 +171,11 @@ val frame_mac_is_set
      let open CMA in
      let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
      let tag = Buffer.sub cipher_tagged txtlen MAC.taglen in
-     HS.is_stack_region HS.(h0.tip) /\
-     enc_dec_separation st aad plain cipher_tagged /\
+     HS.is_stack_region HS.(h0.tip)                 /\
+     enc_dec_separation st aad plain cipher_tagged  /\
      enc_dec_liveness st aad plain cipher_tagged h0 /\
-     aead_liveness st h0 /\
+     aead_liveness st h0                            /\
+     ak.region == PRF.(st.prf.mac_rgn)              /\
      EncodingWrapper.ak_acc_tag_separate ak acc tag /\
      EncodingWrapper.accumulate_ensures ak aad cipher h_init acc h0 /\
      mac_modifies i iv tag ak acc h0 h1))
@@ -196,16 +197,9 @@ val frame_mac_is_set
       vs0 == vs1 /\
       ad0 == ad1 /\
       c0 == c1))))
-let frame_mac_is_set i iv st #aadlen aad #txtlen plain cipher_tagged ak acc h_init h0 h1 =
-  if safeMac i then begin
-    let prf_t = PRF.itable i st.prf in
-    let log = RR.as_hsref CMA.(ilog ak.log) in
-    assume (HS.(prf_t.id) <> HS.(log.id));  //AR: 04/23: we seem to be missing a precondition that the region of ak is a subregion of that of st, i suspect earlier this proof relied on ref injectivity axiom
-    assume (Buffer.frameOf aad <> HS.(log.id))
-  end
-  else ()
+let frame_mac_is_set i iv st #aadlen aad #txtlen plain cipher_tagged ak acc h_init h0 h1 = ()
 
-val intro_mac_is_set 
+private val intro_mac_is_set 
         (#i:EncodingWrapper.mac_id)
 	(st:aead_state (fst i) Writer)
 	(#aadlen:aadlen) (aad:lbuffer (v aadlen))
@@ -222,10 +216,11 @@ val intro_mac_is_set
      let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
      let tag = Buffer.sub cipher_tagged txtlen MAC.taglen in
      HS.is_stack_region HS.(h0.tip) /\
-     enc_dec_separation st aad plain cipher_tagged /\
+     enc_dec_separation st aad plain cipher_tagged  /\
      enc_dec_liveness st aad plain cipher_tagged h0 /\
      enc_dec_liveness st aad plain cipher_tagged h1 /\
-     aead_liveness st h0 /\
+     aead_liveness st h0                            /\
+     ak.region == PRF.(st.prf.mac_rgn)              /\
      EncodingWrapper.ak_acc_tag_separate ak acc tag /\
      EncodingWrapper.accumulate_ensures ak aad cipher h_init acc h0 /\
      verify_liveness ak tag h0 /\
@@ -267,13 +262,13 @@ val mac (#i:EncodingWrapper.mac_id)
      let open CMA in
      let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
      let tag = Buffer.sub cipher_tagged txtlen MAC.taglen in
-     HS.is_stack_region HS.(h0.tip) /\
-     enc_dec_separation st aad plain cipher_tagged /\
+     HS.is_stack_region HS.(h0.tip)                 /\
+     enc_dec_separation st aad plain cipher_tagged  /\
      enc_dec_liveness st aad plain cipher_tagged h0 /\
      EncodingWrapper.ak_acc_tag_separate ak acc tag /\
      EncodingWrapper.accumulate_ensures ak aad cipher h_init acc h0 /\
      verify_liveness ak tag h0 /\
-     acc_inv ak acc h0 /\
+     acc_inv ak acc h0         /\
      ak.region == PRF.(st.prf.mac_rgn) /\
      (CMA.authId i ==> 
        fresh_nonce_st (snd i) st h0 /\
