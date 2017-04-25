@@ -757,46 +757,73 @@ let frame_unused_aead_iv_for_prf_append #mac_rgn #i table blocks h nonce =
 	and inductive form based on snoc.
         Each recursive invocation effectively snoc's a PRF block **)
 #reset-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-val counterblocks_snoc: #i:id{safeId i} -> (rgn:region) -> (x:domain i{ctr_0 i <^ x.ctr}) -> (k:nat{v x.ctr <= k}) ->
+private val counterblocks_snoc_aux: 
+        #i:id{safeId i} -> (rgn:region) -> (x:domain i{ctr_0 i <^ x.ctr}) -> (k:nat{v x.ctr <= k}) ->
 			 (len:nz_ok_len i) ->
 			 (next:nat{0 < next /\ next <= v (PRF.blocklen i)}) ->
 			 (completed_len:nat{ completed_len + next <= len /\ 
 					   FStar.Mul.((k - v (otp_offset i)) * v (PRF.blocklen i) = completed_len)}) ->
 			 (plain:Plain.plain i len) ->
 			 (cipher:lbytes len) ->
-     Lemma (requires True)
+                         (last_entry:PRF.entry rgn i) ->
+     Lemma (requires (
+     	      let plain_last = Plain.slice plain completed_len (completed_len + next) in
+	      let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
+              last_entry == PRF.Entry ({x with ctr=UInt32.uint_to_t k}) 
+                                      (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last)))
 	   (ensures
 	     (let open FStar.Mul in
-	      let plain_last = Plain.slice plain completed_len (completed_len + next) in
-	      let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
 	      let from = (v x.ctr - (v (otp_offset i))) * v (PRF.blocklen i) in
 	      Seq.equal (counterblocks i rgn x len from (completed_len + next) plain cipher)
-			(Seq.snoc (counterblocks i rgn x len from completed_len plain cipher)
-							   (PRF.Entry ({x with ctr=UInt32.uint_to_t k}) 
-							              (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last)))))
+			(Seq.snoc (counterblocks i rgn x len from completed_len plain cipher) 
+                                  last_entry)))
 	   (decreases (completed_len - v x.ctr))
-#reset-options "--z3rlimit 2000 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-let rec counterblocks_snoc #i rgn x k len next completed_len plain cipher =
+#reset-options "--z3rlimit 2000 --max_fuel 1 --max_ifuel 0"
+let rec counterblocks_snoc_aux #i rgn x k len next completed_len plain cipher last_entry =
    let open FStar.Mul in
    let from_pos = (v x.ctr - (v (otp_offset i))) * v (PRF.blocklen i) in
    let to_pos = completed_len + next in
    if completed_len - from_pos = 0
    then counterblocks_emp i rgn (PRF.incr i x) len to_pos plain cipher
-   else   let y = PRF.incr i x in
-	  let remaining = to_pos - from_pos in 
-	  let l0 = minNat remaining (v (PRF.blocklen i)) in
-	  let plain_hd = Plain.slice plain from_pos (from_pos + l0) in
-	  let cipher_hd = Seq.slice cipher from_pos (from_pos + l0) in
-	  let plain_last = Plain.slice plain completed_len (completed_len + next) in
-	  let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
-	  let head = PRF.Entry x (PRF.OTP (UInt32.uint_to_t l0) plain_hd cipher_hd) in
-	  let recursive_call = counterblocks i rgn y len (from_pos + l0) to_pos plain cipher in
-	  let middle = counterblocks i rgn y len (from_pos + l0) completed_len plain cipher in
-	  let last_entry = PRF.Entry ({x with ctr=UInt32.uint_to_t k}) (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last) in
-	  assert (counterblocks i rgn x len from_pos to_pos plain cipher == Seq.cons head recursive_call);
-	  counterblocks_snoc rgn y k len next completed_len plain cipher;
-	  assert (recursive_call == Seq.snoc middle last_entry);
-          Seq.lemma_cons_snoc head middle last_entry //REVIEW: THIS PROOF TAKES A WHILE ...optimize //17-02-14 increased rlimit again.
+   else let y = PRF.incr i x in
+        let remaining = to_pos - from_pos in
+        let l0 = minNat remaining (v (PRF.blocklen i)) in
+        let plain_hd = Plain.slice plain from_pos (from_pos + l0) in
+        let cipher_hd = Seq.slice cipher from_pos (from_pos + l0) in
+        let plain_last = Plain.slice plain completed_len (completed_len + next) in
+        let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
+        let head = PRF.Entry x (PRF.OTP (UInt32.uint_to_t l0) plain_hd cipher_hd) in
+        let recursive_call = counterblocks i rgn y len (from_pos + l0) to_pos plain cipher in
+        let middle = counterblocks i rgn y len (from_pos + l0) completed_len plain cipher in
+        (* let last_entry = PRF.Entry ({x with ctr=UInt32.uint_to_t k}) (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last) in *)
+        assert (counterblocks i rgn x len from_pos to_pos plain cipher == Seq.cons head recursive_call);
+        counterblocks_snoc_aux rgn y k len next completed_len plain cipher last_entry;
+        assert (recursive_call == Seq.snoc middle last_entry);
+        Seq.lemma_cons_snoc head middle last_entry //REVIEW: THIS PROOF TAKES A WHILE ...optimize //17-02-14 increased rlimit again.
+
+let counterblocks_snoc
+  (#i:id{safeId i}) (rgn:region) (x:domain i{ctr_0 i <^ x.ctr}) (k:nat{v x.ctr <= k}) 
+  (len:nz_ok_len i)
+  (next:nat{0 < next /\ next <= v (PRF.blocklen i)})
+  (completed_len:nat{ completed_len + next <= len /\
+   		    FStar.Mul.((k - v (otp_offset i)) * v (PRF.blocklen i) = completed_len)})
+  (plain:Plain.plain i len) ->
+  (cipher:lbytes len)
+  :  Lemma (requires True)
+	   (ensures
+	     (let open FStar.Mul in
+              let plain_last = Plain.slice plain completed_len (completed_len + next) in
+	      let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
+	      let from = (v x.ctr - (v (otp_offset i))) * v (PRF.blocklen i) in
+	      Seq.equal (counterblocks i rgn x len from (completed_len + next) plain cipher)
+			(Seq.snoc (counterblocks i rgn x len from completed_len plain cipher) 
+                                  (PRF.Entry ({x with ctr=UInt32.uint_to_t k}) 
+                                             (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last)))))
+ = let plain_last = Plain.slice plain completed_len (completed_len + next) in
+   let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
+   let last_entry = PRF.Entry ({x with ctr=UInt32.uint_to_t k}) 
+                              (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last) in
+   counterblocks_snoc_aux #i rgn x k len next completed_len plain cipher last_entry
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 (*+ counterblocks_slice: 
