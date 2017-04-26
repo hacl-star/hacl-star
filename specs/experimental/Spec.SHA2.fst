@@ -7,8 +7,8 @@ open FStar.UInt32
 open Spec.Loops
 open Spec.Lib
 
-
 module Word = FStar.UInt32
+
 
 val pow2_values: x:nat -> Lemma
   (requires True)
@@ -176,10 +176,10 @@ let update_last (hash:hash_w) (prevlen:nat{prevlen % size_block = 0}) (input:byt
   update_multi hash (input @| blocks)
 
 
-let finish (hash:hash_w) : Tot bytes = words_to_be size_hash_w hash
+let finish (hashw:hash_w) : Tot (hash:bytes{length hash = size_hash}) = words_to_be size_hash_w hashw
 
 
-let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
+let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{length hash = size_hash}) =
   let n = Seq.length input / size_block in
   let (bs,l) = Seq.split input (n * size_block) in
   let hash = update_multi h_0 bs in
@@ -187,7 +187,7 @@ let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
   finish hash
 
 
-let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes) =
+let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{length hash = size_hash}) =
   let blocks = pad 0 (Seq.length input) in
   finish (update_multi h_0 (input @| blocks))
 
