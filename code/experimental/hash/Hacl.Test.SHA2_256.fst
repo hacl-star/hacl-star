@@ -3,7 +3,7 @@ module Hacl.Test.SHA2_256
 open FStar.Buffer
 open FStar.UInt32
 
-module SHA = SHA2_256
+module Hash = SHA2_256
 
 val test_1a: unit -> ST unit
   (requires (fun h -> True))
@@ -29,12 +29,12 @@ let test_1a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
-  SHA.sha2_init_256 ctx;
-  SHA.sha2_update_last_256 ctx plaintext plaintext_len;
-  SHA.sha2_finish_256 ctx output;
+  Hash.init ctx;
+  Hash.update_last ctx plaintext plaintext_len;
+  Hash.finish ctx output;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 1a") expected output 32ul;
@@ -67,10 +67,10 @@ let test_1b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
-  SHA.sha2_256 output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 1b") expected output 32ul;
@@ -102,12 +102,12 @@ let test_2a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
-  SHA.sha2_init_256 ctx;
-  SHA.sha2_update_last_256 ctx plaintext plaintext_len;
-  SHA.sha2_finish_256 ctx output;
+  Hash.init ctx;
+  Hash.update_last ctx plaintext plaintext_len;
+  Hash.finish ctx output;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 2a") expected output 32ul;
@@ -138,10 +138,10 @@ let test_2b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
-  SHA.sha2_256 output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 2b") expected output 32ul;
@@ -181,12 +181,12 @@ let test_3a () =
   ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
-  SHA.sha2_init_256 ctx;
-  SHA.sha2_update_last_256 ctx plaintext plaintext_len;
-  SHA.sha2_finish_256 ctx output;
+  Hash.init ctx;
+  Hash.update_last ctx plaintext plaintext_len;
+  Hash.finish ctx output;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 3a") expected output 32ul;
@@ -225,10 +225,10 @@ let test_3b () =
   ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
-  SHA.sha2_256 output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 3b") expected output 32ul;
@@ -275,12 +275,12 @@ let test_4a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
-  SHA.sha2_init_256 ctx;
-  SHA.sha2_update_last_256 ctx plaintext plaintext_len;
-  SHA.sha2_finish_256 ctx output;
+  Hash.init ctx;
+  Hash.update_last ctx plaintext plaintext_len;
+  Hash.finish ctx output;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 4a") expected output 32ul;
@@ -326,10 +326,10 @@ let test_4b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
-  SHA.sha2_256 output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 4b") expected output 32ul;
@@ -361,10 +361,10 @@ let test_5 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
   (* Call the hash function *)
-  SHA.sha2_256 output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 5") expected output 32ul;
@@ -385,7 +385,7 @@ val test_6_loop:
 let rec test_6_loop plaintext ctx max idx =
   if (idx =^ max) then ()
   else (
-    SHA.sha2_update_256 ctx plaintext;
+    Hash.update ctx plaintext;
     test_6_loop plaintext ctx max (idx +^ 1ul))
 
 
@@ -420,15 +420,15 @@ let test_6 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul SHA.hash_size_state_256 in
+  let ctx = FStar.Buffer.create 0ul Hash.size_state in
 
-  (* Sha2_Init_256ialize the hash state *)
-  SHA.sha2_init_256 ctx;
+  (* initialize the hash state *)
+  Hash.init ctx;
 
   test_6_loop plaintext ctx 16777215ul 0ul;
 
-  SHA.sha2_update_last_256 ctx plaintext plaintext_len;
-  SHA.sha2_finish_256 ctx output;
+  Hash.update_last ctx plaintext plaintext_len;
+  Hash.finish ctx output;
 
   (* Display the result *)
   TestLib.compare_and_print (C.string_of_literal "Test 6") expected output 32ul;
