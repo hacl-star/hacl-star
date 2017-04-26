@@ -444,7 +444,7 @@ let update_core hash_w data data_w ws_w k_w =
   (**) pop_frame()
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#reset-options "--max_fuel 0  --z3rlimit 50"
 
 val update:
   state :uint32_p {length state = v size_state} ->
