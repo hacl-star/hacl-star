@@ -596,21 +596,7 @@ let set_pad_part1 buf1 =
   let h = ST.get () in
   Seq.lemma_eq_intro (as_seq h buf1) (Seq.create 1 0x80uy)
 
-
-#reset-options "--max_fuel 0  --z3rlimit 100"
-
-let lemma_eq_endianness (h:HyperStack.mem) (buf:uint8_p{length buf = 8}) (n:uint64_ht) : Lemma
-  (requires (live h buf /\
-            (let seq_buf = as_seq h buf in
-             Hacl.Spec.Endianness.hbig_endian seq_buf = (H64.v n))))
-  (ensures  (live h buf /\
-            (let seq_buf = as_seq h buf in
-            seq_buf == Endianness.big_bytes 8ul (H64.v n)))) =
-  admit();
-  Seq.lemma_eq_intro (as_seq h buf) (Endianness.big_bytes 8ul (H64.v n))
-
-
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 val set_pad_part2:
@@ -622,88 +608,13 @@ val set_pad_part2:
                   /\ (let seq_buf2 = as_seq h1 buf2 in
                   seq_buf2 == Endianness.big_bytes size_len_8 (H64.v encodedlen))))
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#reset-options "--max_fuel 0  --z3rlimit 30"
 
 [@"substitute"]
 let set_pad_part2 buf2 encodedlen =
   Hacl.Endianness.hstore64_be buf2 encodedlen;
   let h = ST.get () in
-  lemma_eq_endianness h buf2 encodedlen
-
-
-#reset-options "--max_fuel 0  --z3rlimit 20"
-
-let lemma_sub_append_2 (h:HyperStack.mem) (g:uint8_p) (p0:uint32_t{v p0 = 0}) (a:uint8_p) (p1:uint32_t{v p0 <= v p1 /\ v p1 <= length g}) (b:uint8_p) (p2:uint32_t{v p1 <= v p2 /\ v p2 = length g}) : Lemma
-  (requires (live h g /\ live h a /\ live h b
-            /\ (let seq_g = as_seq h g in
-               let seq_a = as_seq h a in
-               let seq_b = as_seq h b in
-               seq_a == Seq.slice seq_g (v p0) (v p1)
-               /\ seq_b == Seq.slice seq_g (v p1) (v p2))))
-  (ensures  (live h g /\ live h a /\ live h b
-            /\ (let seq_g = as_seq h g in
-               let seq_a = as_seq h a in
-               let seq_b = as_seq h b in
-               seq_g == Seq.append seq_a seq_b))) =
-let seq_g = as_seq h g in
-let seq_a = as_seq h a in
-let seq_b = as_seq h b in
-Seq.lemma_eq_intro (as_seq h g) (Seq.append seq_a seq_b)
-
-
-#reset-options "--max_fuel 0  --z3rlimit 20"
-
-let lemma_sub_append_3 (h:HyperStack.mem) (g:uint8_p) (p0:uint32_t{v p0 = 0}) (a:uint8_p) (p1:uint32_t{v p0 <= v p1 /\ v p1 <= length g}) (b:uint8_p) (p2:uint32_t{v p1 <= v p2 /\ v p2 <= length g}) (c:uint8_p) (p3:uint32_t{v p2 <= v p3 /\ v p3 = length g}): Lemma
-  (requires (live h g /\ live h a /\ live h b /\ live h c
-            /\ (let seq_g = as_seq h g in
-               let seq_a = as_seq h a in
-               let seq_b = as_seq h b in
-               let seq_c = as_seq h c in
-               seq_a == Seq.slice seq_g (v p0) (v p1)
-               /\ seq_b == Seq.slice seq_g (v p1) (v p2)
-               /\ seq_c == Seq.slice seq_g (v p2) (v p3))))
-  (ensures  (live h g /\ live h a /\ live h b /\ live h c
-            /\ (let seq_g = as_seq h g in
-               let seq_a = as_seq h a in
-               let seq_b = as_seq h b in
-               let seq_c = as_seq h c in
-               seq_g == Seq.append (Seq.append seq_a seq_b) seq_c))) =
-let seq_g = as_seq h g in
-let seq_a = as_seq h a in
-let seq_b = as_seq h b in
-let seq_c = as_seq h c in
-Seq.lemma_eq_intro (as_seq h g) (Seq.append (Seq.append seq_a seq_b) seq_c)
-
-
-#reset-options "--max_fuel 0  --z3rlimit 20"
-
-let lemma_pad_aux_seq (n:uint32_ht) (len:uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block) /\ v n * v size_block + v len < U64.v max_input_len}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
-  (requires (a == Seq.create 1 0x80uy
-            /\ (b == Seq.create (Spec.pad0_length (v len)) 0uy)
-            /\ (c == Endianness.big_bytes size_len_8 ((v n * v size_block + v len) * 8))))
-  (ensures  (Seq.append (Seq.append a b) c == Spec.pad (v n * v size_block) (v len))) =
-Seq.lemma_eq_intro (Seq.append (Seq.append a b) c) (Seq.append a (Seq.append b c))
-
-
-#reset-options "--max_fuel 0  --z3rlimit 200"
-
-let lemma_pad_aux (h:HyperStack.mem) (n:uint32_ht) (len:uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block) /\ v n * v size_block + v len < U64.v max_input_len}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
-  (requires (live h a /\ live h b /\ live h c
-            /\ (let seq_a = as_seq h a in
-            let seq_b = as_seq h b in
-            let seq_c = as_seq h c in
-            seq_a == Seq.create 1 0x80uy
-            /\ (seq_b == Seq.create (Spec.pad0_length (v len)) 0uy)
-            /\ (seq_c == Endianness.big_bytes size_len_8 ((v n * v size_block + v len) * 8)))))
-  (ensures  (live h a /\ live h b /\ live h c
-            /\ (let seq_a = as_seq h a in
-            let seq_b = as_seq h b in
-            let seq_c = as_seq h c in
-            (Seq.append (Seq.append seq_a seq_b) seq_c == Spec.pad (v n * v size_block) (v len))))) =
-let seq_a = as_seq h a in
-let seq_b = as_seq h b in
-let seq_c = as_seq h c in
-lemma_pad_aux_seq n len seq_a seq_b seq_c
+  Lemmas.lemma_eq_endianness h buf2 encodedlen
 
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
@@ -758,8 +669,8 @@ let pad padding n len =
   assert(as_seq h1 buf1 == Seq.create 1 0x80uy);
   assert(as_seq h1 zeros == Seq.create (v (pad0_length len)) 0uy);
   assert(as_seq h1 buf2 == Endianness.big_bytes size_len_8 (H64.v encodedlen));
-  lemma_sub_append_3 h1 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8);
-  lemma_pad_aux h1 n len buf1 zeros buf2
+  Lemmas.lemma_sub_append_3 h1 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8);
+  Lemmas.lemma_pad_aux h1 n len buf1 zeros buf2
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -844,7 +755,7 @@ let update_last state data len =
   (**) Seq.lemma_eq_intro (as_seq h3 (Buffer.offset final_blocks len)) (Seq.slice (as_seq h3 final_blocks) (v len) (v nb * v size_block));
   (**) Seq.lemma_eq_intro (as_seq h3 padding) (Seq.slice (as_seq h3 final_blocks) (v len) (v nb * v size_block));
   (**) assert(as_seq h3 padding == Seq.slice (as_seq h3 final_blocks) (v len) (v nb * v size_block));
-  (**) lemma_sub_append_2 h3 final_blocks 0ul data len padding (nb *^ size_block);
+  (**) Lemmas.lemma_sub_append_2 h3 final_blocks 0ul data len padding (nb *^ size_block);
   (**) assert(as_seq h3 final_blocks == Seq.append (as_seq h3 data) (as_seq h3 padding));
 
   (* Call the update function on one or two blocks *)
