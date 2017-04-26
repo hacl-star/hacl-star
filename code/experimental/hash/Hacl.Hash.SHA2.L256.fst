@@ -250,7 +250,7 @@ private val shuffle_core:
                   let seq_block = as_seq h0 block_w in
                   seq_hash_1 == Spec.shuffle_core seq_block seq_hash_0 (U32.v t))))
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#reset-options "--max_fuel 0  --z3rlimit 50"
 
 [@"substitute"]
 let shuffle_core hash block ws k t =
@@ -347,7 +347,7 @@ val alloc:
 let alloc () = Buffer.create (u32_to_h32 0ul) size_state
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 val init:
   state:uint32_p{length state = v size_state} ->
@@ -706,7 +706,7 @@ let seq_c = as_seq h c in
 lemma_pad_aux_seq n len seq_a seq_b seq_c
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 50"
 
 [@"substitute"]
 val pad:
