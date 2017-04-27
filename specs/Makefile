@@ -40,7 +40,8 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Poly1305.fst \
 		Spec.Poly1305.Lemmas.fst \
 		Spec.Salsa20.fst \
-		Spec.SecretBox.fst
+		Spec.SecretBox.fst \
+		Spec.SHA2_256.fst
 
 %.fst-verify: %.fst
 	$(FSTAR)  --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin $*.fst
@@ -118,4 +119,4 @@ sha2.exe: Spec.SHA2_256.fst
 
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec
