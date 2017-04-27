@@ -1,4 +1,4 @@
-module Hacl.Hash.SHA2.L256
+module Hacl.Hash.SHA2_256
 
 open FStar.Mul
 open FStar.Ghost
@@ -28,8 +28,8 @@ module HS = FStar.HyperStack
 module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
-module Spec = Spec.SHA2
-module Lemmas = Hacl.Hash.SHA2.Lemmas
+module Spec = Spec.SHA2_256
+module Lemmas = Hacl.Hash.SHA2_256.Lemmas
 module Utils = Hacl.Utils.Experimental
 
 
@@ -165,7 +165,7 @@ val constants_set_h_0:
     (requires (fun h -> live h hash))
     (ensures (fun h0 _ h1 -> live h1 hash /\ modifies_1 hash h0 h1
              /\ (let seq_h_0 = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 hash) in
-                seq_h_0 == Spec.SHA2.h_0)))
+                seq_h_0 == Spec.h_0)))
 
 [@"substitute"]
 let constants_set_h_0 hash =

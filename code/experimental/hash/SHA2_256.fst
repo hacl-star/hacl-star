@@ -11,7 +11,7 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
-open Hacl.Hash.SHA2.L256
+open Hacl.Hash.SHA2_256
 
 
 (* Definition of aliases for modules *)
@@ -25,8 +25,8 @@ module H64 = Hacl.UInt64
 module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
-module Spec = Spec.SHA2
-module Hash = Hacl.Hash.SHA2.L256
+module Spec = Spec.SHA2_256
+module Hash = Hacl.Hash.SHA2_256
 
 
 (* Definition of base types *)

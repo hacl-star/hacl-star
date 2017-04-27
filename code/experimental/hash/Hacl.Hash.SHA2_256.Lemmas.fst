@@ -1,4 +1,4 @@
-module Hacl.Hash.SHA2.Lemmas
+module Hacl.Hash.SHA2_256.Lemmas
 
 open FStar.Mul
 open FStar.Ghost
@@ -27,7 +27,7 @@ module HS = FStar.HyperStack
 module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
-module Spec = Spec.SHA2
+module Spec = Spec.SHA2_256
 module Utils = Hacl.Utils.Experimental
 
 
@@ -97,17 +97,17 @@ let lemma_aux_2 (a:nat) (b:pos) : Lemma (requires (a > 0)) (ensures (a * b > 0))
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
-val lemma_ws_def_0: (b:Spec.SHA2.block_w) -> (t:Spec.SHA2.counter{t < 16}) -> Lemma
-  (Spec.SHA2.ws b t = Seq.index b t)
+val lemma_ws_def_0: (b:Spec.block_w) -> (t:Spec.counter{t < 16}) -> Lemma
+  (Spec.ws b t = Seq.index b t)
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 let lemma_ws_def_0 b t = ()
 
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
-val lemma_ws_def_1: (b:Spec.SHA2.block_w) -> (t:Spec.SHA2.counter{16 <= t /\ t < 64}) -> Lemma
-  (Spec.SHA2.ws b t =
-    (let open Spec.SHA2 in
+val lemma_ws_def_1: (b:Spec.block_w) -> (t:Spec.counter{16 <= t /\ t < 64}) -> Lemma
+  (Spec.ws b t =
+    (let open Spec in
      let t16 = ws b (t - 16) in
      let t15 = ws b (t - 15) in
      let t7  = ws b (t - 7) in
@@ -139,13 +139,13 @@ let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:bu
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
-val lemma_update_multi_def: (hash:Spec.SHA2.hash_w) -> (blocks:Spec.SHA2.bytes{Seq.length blocks % Spec.SHA2.size_block = 0}) -> Lemma
-  (Spec.SHA2.update_multi hash blocks = (
+val lemma_update_multi_def: (hash:Spec.hash_w) -> (blocks:Spec.bytes{Seq.length blocks % Spec.size_block = 0}) -> Lemma
+  (Spec.update_multi hash blocks = (
     if Seq.length blocks = 0 then hash
     else (
-      let (block,rem) = Seq.split blocks Spec.SHA2.size_block in
-      let hash = Spec.SHA2.update hash block in
-      Spec.SHA2.update_multi hash rem)))
+      let (block,rem) = Seq.split blocks Spec.size_block in
+      let hash = Spec.update hash block in
+      Spec.update_multi hash rem)))
 
 
 #reset-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 20"
