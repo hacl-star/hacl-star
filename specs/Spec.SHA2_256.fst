@@ -1,4 +1,4 @@
-module Spec.SHA2
+module Spec.SHA2_256
 
 open FStar.Mul
 open FStar.Seq

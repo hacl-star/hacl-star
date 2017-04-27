@@ -28,14 +28,6 @@ OCAML_INCLUDES=-I $(HACL_HOME)/code/lib/ml $(HACL_HOME)/code/lib/ml/hacllib.cmxa
 lib:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml MEM=HST
 
-sha2.exe: Spec.SHA2.fst
-	$(MAKE) lib
-	mkdir -p sha2-spec
-	$(FSTAR) $(ARGS) --odir sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2.ml
-	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2.ml -o sha2.exe
-	./sha2.exe
-
 chacha20-vec.exe: Spec.Chacha20_vec.fst
 	$(MAKE) lib
 	mkdir -p chacha-spec-vec
