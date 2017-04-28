@@ -122,4 +122,8 @@ static inline uint128_t uint128_mul_wide_(uint64_t x, uint64_t y) {
   return (((uint128_t)x)*y);
 }
 
+static inline uint128_t uint128_mul_add_(uint128_t r, uint64_t x, uint64_t y) {
+  return (r+(((uint128_t)x)*y));
+}
+
 #endif

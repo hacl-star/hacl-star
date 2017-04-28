@@ -6,13 +6,6 @@
 #include "poly1305_local.h"
 #include "tweetnacl.h"
 
-void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
-  POLY1305 state;
-  Poly1305_Init(&state,key);
-  Poly1305_Update(&state,plain,len);
-  Poly1305_Final(&state,mac);
-}
-
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
   printf("Cycles for %d times 2^20 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
@@ -127,8 +120,6 @@ int32_t test_poly()
   memset(mac, 0, macsize * sizeof mac[0]);
   Poly1305_32_crypto_onetimeauth(mac, plaintext, 34, key);
   TestLib_compare_and_print("HACL Poly1305", expected, mac, macsize);
-  crypto_onetimeauth(mac, plaintext, len_, key);
-  TestLib_compare_and_print("Sodium Poly1305", expected, mac, macsize);
   return exit_success;
 }
 
@@ -158,6 +149,7 @@ int32_t perf_poly() {
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
 
+  /*
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
@@ -170,7 +162,7 @@ int32_t perf_poly() {
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
-
+  */
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
@@ -186,6 +178,7 @@ int32_t perf_poly() {
   printf("Composite result (ignore): %llx\n", res);
 
 
+  /*
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
@@ -198,7 +191,7 @@ int32_t perf_poly() {
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
   printf("Composite result (ignore): %llx\n", res);
-
+  */
   return exit_success;
 }
 

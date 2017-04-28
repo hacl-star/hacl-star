@@ -7,6 +7,7 @@
 #include "sys/stat.h"
 #include "fcntl.h"
 
+/*
 void ossl_chacha20(uint8_t* cipher, uint8_t* plain, int len, uint8_t* nonce, uint8_t* key){
   EVP_CIPHER_CTX *ctx;
   int clen;
@@ -16,7 +17,7 @@ void ossl_chacha20(uint8_t* cipher, uint8_t* plain, int len, uint8_t* nonce, uin
   EVP_EncryptFinal_ex(ctx, cipher + clen, &clen);
   EVP_CIPHER_CTX_free(ctx);
 }
-
+*/
 
 void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
@@ -328,8 +329,8 @@ int32_t test_chacha()
   Chacha20_chacha20(ciphertext,plaintext,len, key, nonce, counter);
   TestLib_compare_and_print("HACL Chacha20", expected, ciphertext, len);
 
-  crypto_stream_chacha20_ietf_xor_ic(ciphertext,plaintext, len, nonce, 1, key);
-  TestLib_compare_and_print("Sodium Chacha20", expected, ciphertext, len);
+  //  crypto_stream_chacha20_ietf_xor_ic(ciphertext,plaintext, len, nonce, 1, key);
+  //TestLib_compare_and_print("Sodium Chacha20", expected, ciphertext, len);
 
   return exit_success;
 }
@@ -365,6 +366,7 @@ int32_t perf_chacha() {
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %llx\n", res);
 
+  /*
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
@@ -390,7 +392,7 @@ int32_t perf_chacha() {
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %llx\n", res);
-
+  */
   return exit_success;
 }
 

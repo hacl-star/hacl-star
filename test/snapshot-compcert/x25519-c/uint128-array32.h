@@ -2,7 +2,10 @@
 #define __U128_CC_H
 
 #include "kremlib.h"
-
+#if defined(__GNUC__) || defined(__clang__)
+#include "x86intrin.h"
+#endif 
+#define inline __attribute__((always_inline))
 typedef uint64_t uint128_t[2];
 
 #define CONSTANT_TIME_CARRY(a, b)                                              \
@@ -40,44 +43,80 @@ static inline void store128_be(uint8_t *b, uint128_t n) {
 
 static inline void uint128_add(uint128_t r, uint128_t x, uint128_t y) {
 #if defined(__GNUC__) || defined(__clang__)
-   asm("movq %[y0], %%rax; movq %[y1], %%rdx; addq %[x0], %%rax; adcq %[x1], %%rdx; movq %%rax, %[r0]; movq %%rdx, %[r1];":
-       [r0] "=r" (r[0]),
-       [r1] "=r" (r[1]):
-       [x0] "r" (x[0]),
-       [x1] "r" (x[1]),
-       [y0] "r" (y[0]),
-       [y1] "r" (y[1]):"rax","rdx");
-#elif 0
-   //defined(__COMPCERT__)
-   asm("movq %[y0], %%rax; movq %[y1], %%rdx; addq %[x0], %%rax; adcq %[x1], %%rdx; movq %%rax, %[r];":
-       [r] "=r" (r[0]):
-       [x0] "r" (x[0]),
-       [x1] "r" (x[1]),
-       [y0] "r" (y[0]),
-       [y1] "r" (y[1]):"rax","rdx");
-   asm("movq %%rdx, %[r];": [r] "=r" (r[1]): );
+  uint32_t x0 = (uint32_t) x[0];
+  uint32_t x1 = (uint32_t) (x[0]>>32);
+  uint32_t x2 = (uint32_t) (x[1]);
+  uint32_t x3 = (uint32_t) (x[1]>>32);
+  uint32_t y0 = (uint32_t) y[0];
+  uint32_t y1 = (uint32_t) (y[0]>>32);
+  uint32_t y2 = (uint32_t) (y[1]);
+  uint32_t y3 = (uint32_t) (y[1]>>32);
+  uint32_t r0,r1,r2,r3;
+  char c = 0;
+  c = _addcarry_u32(c,x0,y0,&r0);
+  c = _addcarry_u32(c,x1,y1,&r1);
+  c = _addcarry_u32(c,x2,y2,&r2);
+  c = _addcarry_u32(c,x3,y3,&r3);
+  r[0] = (((uint64_t)r1) << 32) ^ r0;
+  r[1] = (((uint64_t)r3) << 32) ^ r2;
+  /*
+  asm("addl %[x0], %[y0]; adcl %[x1], %[y1]; adcl %[x2], %[y2]; adcl %[x3], %[y3];":
+       [y0] "r" (y0),
+       [y1] "r" (y1),
+       [y2] "r" (y2),
+       [y3] "r" (y3),
+       [x0] "r" (x0),
+       [x1] "r" (x1),
+       [x2] "r" (x2),
+      [x3] "r" (x3));
+  r[0] = (((uint64_t)y1) << 32) + y0;
+  r[1] = (((uint64_t)y3) << 32) + y2;
+  */
+  
+
 #else
   uint64_t x0 = x[0];
   r[0] = x0 + y[0];
-  r[1] = x[1] + y[1] + CONSTANT_TIME_CARRY(r[0],x0);
+  r[1] = x[1] + y[1] + CONSTANT_TIME_CARRY(r[0],x0);//(r[0] < x0);
 #endif
 }
 
 static inline void uint128_add64(uint128_t r, uint128_t x, uint64_t y) {
 #if defined(__GNUC__) || defined(__clang__)
-   asm("movq %[x0], %%rax; movq %[x1], %%rdx; addq %[y0], %%rax; adcq %[y1], %%rdx; movq %%rax, %[r0]; movq %%rdx, %[r1];":
-       [r0] "=r" (r[0]),
-       [r1] "=r" (r[1]):
-       [x0] "r" (x[0]),
-       [x1] "r" (x[1]),
-       [y0] "r" (y),
-       [y1] "i" (0): "rax","rdx");
+  uint32_t x0 = (uint32_t) x[0];
+  uint32_t x1 = (uint32_t) (x[0]>>32);
+  uint32_t x2 = (uint32_t) (x[1]);
+  uint32_t x3 = (uint32_t) (x[1]>>32);
+  uint32_t y0 = (uint32_t) y;
+  uint32_t y1 = (uint32_t) (y>>32);
+  uint32_t r0,r1,r2,r3;
+  char c = 0;
+  c = _addcarry_u32(c,x0,y0,&r0);
+  c = _addcarry_u32(c,x1,y1,&r1);
+  c = _addcarry_u32(c,x2,0,&r2);
+  c = _addcarry_u32(c,x3,0,&r3);
+  r[0] = (((uint64_t)r1) << 32) ^ r0;
+  r[1] = (((uint64_t)r3) << 32) ^ r2;
+
+  /*
+   asm("movl %[y0], %%eax; movl %[y1], %%ebx; xor %%ecx, %%ecx; xor %%edx, %%edx;"
+       "addl %[x0], %%eax; adcl %[x1], %%ebx; adcl %[x2], %%ecx; adcl %[x3], %%edx;"
+       "movl %%eax, %[r0]; movl %%ebx, %[r1]; movl %%ecx, %[r2]; movl %%edx, %[r3];":
+       [r0] "=r" (r0),
+       [r1] "=r" (r1),
+       [r2] "=r" (r2),
+       [r3] "=r" (r3):
+       [x0] "r" (x0),
+       [x1] "r" (x1),
+       [x2] "r" (x2),
+       [x3] "r" (x3),
+       [y0] "r" (y0),
+       [y1] "r" (y1):
+       "eax","ebx", "ecx","edx");
+  */
 #else
-   //   uint128_t yy;
-   //load128_64(yy,y,0);
-   //uint128_add(r,x,yy);
-   r[0] = x[0] + y;
-   r[1] = x[1] + CONSTANT_TIME_CARRY(r[0],y);
+  r[0] = x[0] + y;
+  r[1] = x[1] + CONSTANT_TIME_CARRY(r[0],y);
 #endif
 }
 
@@ -161,10 +200,49 @@ static inline uint64_t uint128_split_high64(uint128_t src, uint32_t idx) {
 }
 
 static inline void uint128_sub(uint128_t r, uint128_t x, uint128_t y) {
+#if defined(__GNUC__) || defined(__clang__)
+  uint32_t x0 = (uint32_t) x[0];
+  uint32_t x1 = (uint32_t) (x[0]>>32);
+  uint32_t x2 = (uint32_t) (x[1]);
+  uint32_t x3 = (uint32_t) (x[1]>>32);
+  uint32_t y0 = (uint32_t) y[0];
+  uint32_t y1 = (uint32_t) (y[0]>>32);
+  uint32_t y2 = (uint32_t) (y[1]);
+  uint32_t y3 = (uint32_t) (y[1]>>32);
+  uint32_t r0,r1,r2,r3;
+  char c = 0;
+  c = _subborrow_u32(c,x0,y0,&r0);
+  c = _subborrow_u32(c,x1,y1,&r1);
+  c = _subborrow_u32(c,x2,y2,&r2);
+  c = _subborrow_u32(c,x3,y3,&r3);
+  r[0] = (((uint64_t)r1) << 32) ^ r0;
+  r[1] = (((uint64_t)r3) << 32) ^ r2;
+
+  /*
+  asm("movl %[y0], %%eax; movl %[y1], %%ebx; movl %[y2], %%ecx; movl %[y3], %%edx;"
+       "subl %[x0], %%eax; sbbl %[x1], %%ebx; sbbl %[x2], %%ecx; sbbl %[x3], %%edx;"
+       "movl %%eax, %[r0]; movl %%ebx, %[r1]; movl %%ecx, %[r2]; movl %%edx, %[r3];":
+       [r0] "=r" (r0),
+       [r1] "=r" (r1),
+       [r2] "=r" (r2),
+       [r3] "=r" (r3):
+       [x0] "r" (x0),
+       [x1] "r" (x1),
+       [x2] "r" (x2),
+       [x3] "r" (x3),
+       [y0] "r" (y0),
+       [y1] "r" (y1),
+       [y2] "r" (y2),
+       [y3] "r" (y3):
+       "eax","ebx", "ecx","edx");
+  */
+#else
   uint64_t x0 = x[0];
   r[0] = x0 - y[0];
-  r[1] = x[1] - y[1] - CONSTANT_TIME_CARRY(x0,r[0]);
+  r[1] = x[1] - y[1] + CONSTANT_TIME_CARRY(x0,r[0]);
+#endif
 }
+
 
 static inline void uint128_sub_mod(uint128_t r, uint128_t x, uint128_t y) {
   uint128_sub(r,x, y);
@@ -200,22 +278,7 @@ static inline uint64_t FStar_Int_Cast_uint128_to_uint64(uint128_t x) {
 }
 
 static inline void uint128_mul_wide(uint128_t r, uint64_t x, uint64_t y) {
-  uint64_t lo;
-  uint64_t hi;
-#if defined(__GNUC__) || defined(__clang__)
-  unsigned __int128 z = ((unsigned __int128) x) * y;
-  lo = (uint64_t) z;
-  hi = (uint64_t) (z >> 64);
-#elif defined(__COMPCERT__)
-  lo = x * y; 
-  asm("movq %[inp1], %%rax;"
-      "mulq %[inp2];"
-      "movq %%rdx, %[output];"
-      : [output] "=r" (hi)
-      : [inp1] "r" (x), [inp2] "r" (y)
-      :"rax", "rdx");
-#else
-  uint64_t u1, v1, t, w3, k, w1;
+  uint64_t u1, v1, t, w3, k, w1, lo, hi;
   u1 = (x & 0xffffffff);
   v1 = (y & 0xffffffff);
   t = (u1 * v1);
@@ -230,30 +293,54 @@ static inline void uint128_mul_wide(uint128_t r, uint64_t x, uint64_t y) {
   k = (t >> 32);
   hi = (x * y) + w1 + k;
   lo = (t << 32) + w3;
-#endif
   r[0] = lo;
   r[1] = hi;
+  
+  /*
+  uint32_t x0 = (uint32_t) x;
+  uint32_t x1 = (uint32_t) (x>>32);
+  uint32_t y0 = (uint32_t) y;
+  uint32_t y1 = (uint32_t) (y>>32);
+
+  uint64_t x0y0 = x0 * y0;
+  uint64_t x0y1 = x0 * y1;
+  uint64_t x1y0 = x1 * y0;
+  uint64_t x1y1 = x1 * y1;
+
+  uint32_t r0,r1,r2,r3;
+  r0 = (uint32_t) x0y0;
+  uint32_t r1_0 = x0y0 >> 32;
+  uint32_t r1_1 = x0y1;
+  uint32_t r1_2 = x1y0;
+
+  uint32_t r2_0 = x1y1; 
+  uint32_t r2_1 = x0y1 >> 32;
+  uint32_t r2_2 = x1y0 >> 32;
+
+  r3 = x1y1 >> 32;
+
+  char c1 = 0;
+  char c2 = 0;
+  c1 = _addcarry_u32(0,r1_0,r1_1,&r1);
+  c2 = _addcarry_u32(0,r1,r1_2,&r1);
+  c1 = _addcarry_u32(c1,r2_0,r2_1,&r2);
+  c2 = _addcarry_u32(c2,r2,r2_2,&r2);
+  c1 = _addcarry_u32(c1,r3,0,&r3);
+  c2 = _addcarry_u32(c2,r3,0,&r3);
+
+  r[0] = (((uint64_t)r1) << 32) + r0;
+  r[1] = (((uint64_t)r3) << 32) + r2;
+
+  */
+
 }
 
 
-static inline uint64_t uint128_mul_wide_64(uint64_t* lo, uint64_t x, uint64_t y) {
-#if defined(__GNUC__) || defined(__clang__)
-  uint64_t hi;
-  unsigned __int128 z = ((unsigned __int128) x) * y;
-  *lo = (uint64_t) z;
-  hi = (uint64_t) (z >> 64);
-  return hi;
-#elif defined(__COMPCERT__)
-  uint64_t hi;
-   asm("movq %[inp1], %%rax;"
-       "imulq %[inp2];"
-       "movq %%rdx, %[output];"
-      : [output] "=r" (hi)
-      : [inp1] "r" (x), [inp2] "r" (y)
-      :"rax", "rdx");
-  *lo = x * y; 
-  return hi;
-#endif
+static inline void uint128_mul_add(uint128_t r, uint64_t x, uint64_t y) {
+  uint128_t tmp;
+  uint128_mul_wide(tmp,x,y);
+  uint128_add(r,r,tmp);
 }
+
 
 #endif
