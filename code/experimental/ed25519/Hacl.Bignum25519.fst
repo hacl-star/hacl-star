@@ -271,5 +271,8 @@ let reduce out =
 let lemma_reveal_red_51 s =
   assert_norm(pow2 51 = 0x8000000000000)
 
+let lemma_intro_red_51 s =
+  assert_norm (pow2 51 = 0x8000000000000)
+
 let lemma_reveal_seval s =
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 s

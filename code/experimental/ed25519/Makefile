@@ -92,6 +92,16 @@ bignum-ci:
 	mv ../bignum/*.hints ./bignum_hints
 specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_SPECIFIC)))
 
+KEMLIN_SKIP_COMPILATION=$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
+		-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
+		-I ../../../specs/experimental \
+		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
+		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
+		-drop Prims -drop FStar -bundle 'Hacl.Bignum25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum25519' \
+		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
+		-skip-compilation
+
 ed25519-c/Hacl_Bignum25519.c:
 	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
 	mkdir -p ed25519-c
@@ -121,7 +131,18 @@ ed25519-c/Hacl_Impl_Ed25519_Pow2_252m2.c:
 		-skip-compilation
 
 
-ed25519-c/Ed25519.c: Hacl.Impl.Ed25519.SecretExpand.fst Ed25519.fst
+ed25519-c/Ed25519.c: Hacl.Impl.Ed25519.PointAdd.fst \
+	Hacl.Impl.Ed25519.PointDouble.fst \
+	Hacl.Impl.Load56.fst \
+	Hacl.Impl.Load51.fst \
+	Hacl.Impl.Ed25519.SecretExpand.fst \
+	Hacl.Impl.Ed25519.PointCompress.fst \
+	Hacl.Impl.Ed25519.PointDecompress.fst \
+	Hacl.Impl.SHA512.ModQ.fst \
+	Hacl.Impl.Sha512.fst \
+	Hacl.Impl.Ed25519.Ladder.Step.fst \
+	Hacl.Impl.Ed25519.Ladder.fst \
+	Ed25519.fst 
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
 	 	-I ../../../specs/experimental \

@@ -131,7 +131,8 @@ val make_point_inf:
   b:buffer Hacl.UInt64.t{length b = 20} ->
   Stack unit
     (requires (fun h -> live h b))
-    (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ (as_point h1 b) == (0, 1, 1, 0)))
+    (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ (as_point h1 b) == (0, 1, 1, 0) /\
+     point_inv h1 b))
 let make_point_inf b =
   let x = Buffer.sub b 0ul 5ul in
   let y = Buffer.sub b 5ul 5ul in
@@ -153,24 +154,6 @@ let make_point_inf b =
   no_upd_lemma_1 h3 h4 t z
 
 
-[@ "substitute"]
-private
-val copy:
-  src:elemB ->
-  dest:elemB{disjoint src dest} ->
-  Stack unit
-    (requires (fun h -> live h src /\ live h dest))
-    (ensures (fun h0 _ h1 -> live h0 src /\ live h1 dest /\ modifies_1 dest h0 h1 /\
-      as_seq h1 dest == as_seq h0 src))
-[@ "substitute"]
-let copy src dest =
-  let h0 = ST.get() in
-  blit src 0ul dest 0ul 5ul;
-  let h1 = ST.get() in
-  Seq.lemma_eq_intro (Seq.slice (as_seq h0 src) 0 5) (as_seq h0 src);
-  Seq.lemma_eq_intro (Seq.slice (as_seq h1 dest) 0 5) (as_seq h1 dest)
-
-
 val point_mul:
   result:point ->
   scalar:buffer Hacl.UInt8.t{length scalar = 32} ->
@@ -183,14 +166,14 @@ val point_mul:
      let n  = as_seq h0 scalar in
      let q  = as_point h0 q in
      r == Spec.Ed25519.point_mul n q) ))
-#reset-options "--max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 500"
 let point_mul result scalar q =
   push_frame();
   let b = create 0uL 80ul in
   let nq   = Buffer.sub b  0ul 20ul in
-  let nqoq = Buffer.sub b 20ul 20ul in
+  let nqpq = Buffer.sub b 20ul 20ul in
   make_point_inf nq;
-  copy q nqpq;
+  Hacl.Impl.Ed25519.SwapConditional.copy q nqpq;
   point_mul_ b scalar;
-  copy nq result;
+  Hacl.Impl.Ed25519.SwapConditional.copy nq result;
   pop_frame()
