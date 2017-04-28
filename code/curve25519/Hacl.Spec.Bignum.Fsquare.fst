@@ -197,7 +197,7 @@ private let lemma_aux_2 a b c d : Lemma ( (b * d) * a * c = (b * a) * (d * c) ) 
 private let lemma_aux_3 a b c : Lemma ( a * b * c = (a * b) * c ) = ()
 
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 00"
 
 val lemma_fsquare_spec_2_2_0: r0:nat -> r1:nat -> r2:nat -> r3:nat -> r4:nat -> Lemma
   ( r0 * r0 + r0 * (pow2 51 * r1) + r0 * (pow2 102 * r2) + r0 * (pow2 153 * r3) + r0 * (pow2 204 * r4)
@@ -609,9 +609,9 @@ let fsquare_pre s =
   let _ = () in
   fsquare_pre_ s
   /\ carry_wide_pre (fsquare_spec_ s) 0
-  /\ carry_top_wide_pre (carry_wide_spec (fsquare_spec_ s) 0)
-  /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s) 0))
-  /\ carry_0_to_1_pre (copy_from_wide_spec (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s) 0)))
+  /\ carry_top_wide_pre (carry_wide_spec (fsquare_spec_ s))
+  /\ copy_from_wide_pre (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s)))
+  /\ carry_0_to_1_pre (copy_from_wide_spec (carry_top_wide_spec (carry_wide_spec (fsquare_spec_ s))))
 
 val fsquare_spec: s:seqelem{fsquare_pre s} ->
   Tot (s':seqelem{selem s' = selem s *@ selem s})
@@ -619,7 +619,7 @@ let fsquare_spec s =
   lemma_fsquare_spec_ s;
   let output1 = fsquare_spec_ s in
   cut (seval_wide output1 % prime = (seval s * seval s) % prime);
-  let output2 = carry_wide_spec output1 0 in
+  let output2 = carry_wide_spec output1 in
   lemma_carry_top_wide_spec output2;
   let output3 = carry_top_wide_spec output2 in
   lemma_copy_from_wide output3;
@@ -638,7 +638,7 @@ let lemma_mul_ineq (a:nat) (b:nat) (c:nat{a < c}) (d:nat{b < d}) : Lemma (a * b 
 let lemma_mul_ineq1 (a:pos) (c:nat) (d:nat{c < d}) : Lemma (a * c < a * d) = ()
 
 
-#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 1000 --max_fuel 0"
 
 val lemma_52_to_fsquare_is_fine: s:seqelem{red_52 s} ->
  Lemma (fsquare_pre_ s /\ bounds' (fsquare_spec_ s) (77 * p104) (59 * p104) (41 * p104) (23 * p104) (5 * p104))
@@ -674,7 +674,7 @@ val lemma_104_smaller_than_108: s:seqelem_wide{bounds' s (77 * p104) (59 * p104)
 let lemma_104_smaller_than_108 s = ()
 
 
-#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 1000 --max_fuel 0"
 
 inline_for_extraction let p106 : p:pos{p = 0x400000000000000000000000000} =
   assert_norm(pow2 106 = 0x400000000000000000000000000); pow2 106
@@ -721,7 +721,7 @@ let fsquare_53_is_fine s1 =
   let o = fsquare_spec_ s1 in
   lemma_106_smaller_than_108 o;
   lemma_53_55_is_fine_to_carry o;
-  let o' = carry_wide_spec o 0 in
+  let o' = carry_wide_spec o in
   lemma_53_55_is_fine_to_carry_top o';
   let o'' = carry_top_wide_spec o' in
   lemma_53_55_is_fine_to_copy o'';
@@ -776,7 +776,7 @@ let lemma_5413_to_fsquare_is_fine s =
 
 val lemma_5413_is_fine_to_carry:
   s:seqelem_wide{bounds' (s) (77 * pmax) (59 * pmax) (41 * pmax) (23 * pmax) (5 * pmax)} ->
-  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s 0) p51 p51 p51 p51 (5*pmax+p77))
+  Lemma (carry_wide_pre s 0 /\ bounds' (carry_wide_spec s) p51 p51 p51 p51 (5*pmax+p77))
 let lemma_5413_is_fine_to_carry s =
   assert_norm (pow2 53 = 0x20000000000000);
   assert_norm (pow2 55 = 0x80000000000000);
@@ -822,7 +822,7 @@ let fsquare_5413_is_fine s1 =
   lemma_5413_to_fsquare_is_fine s1;
   let o = fsquare_spec_ s1 in
   lemma_5413_is_fine_to_carry o;
-  let o' = carry_wide_spec o 0 in
+  let o' = carry_wide_spec o in
   lemma_5413_is_fine_to_carry_top o';
   let o'' = carry_top_wide_spec o' in
   lemma_5413_is_fine_to_copy o'';

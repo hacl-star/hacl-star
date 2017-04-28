@@ -115,6 +115,9 @@ let as_buffer #i e =
 val live: mem -> #i:id -> elemB i -> Type0
 let live h #i b = Buffer.live h (as_buffer b)
 
+val unmapped_in: #i:id -> elemB i -> mem -> Type0
+let unmapped_in #i b h = Buffer.unmapped_in (as_buffer b) h
+
 //17-02-11 should red_45 and red_44 really be part of the poly1305 API??
 //17-02-11 what's the purpose of norm vs norm_r?
 
@@ -193,22 +196,28 @@ val rcreate: rgn:HH.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
   (requires (fun h0 -> True))
   (ensures  (fun h0 r h1 ->
     HS.modifies (Set.singleton rgn) h0 h1 /\
-    HS.modifies_ref rgn TSet.empty h0 h1 /\
-    ~(HS.((Buffer.content (as_buffer r)).mm)) /\
+    HS.modifies_ref rgn Set.empty h0 h1 /\
+    ~(HS.is_mm (Buffer.content (as_buffer r))) /\
     Buffer.frameOf (as_buffer r) == rgn /\
-    ~(live h0 r) /\ live h1 r))
+    r `unmapped_in` h0 /\ live h1 r))
 let rcreate rgn i =
   match alg i with
   | POLY1305 ->
-    let b : Buffer.buffer UInt64.t = FStar.Buffer.rcreate rgn 0UL 3ul in b
+    let b : Buffer.buffer UInt64.t = FStar.Buffer.rcreate rgn 0UL 3ul in
+    let r : elemB i = b in
+    assert (~ (HS.is_mm (Buffer.content (as_buffer r))));
+    r
   | GHASH ->
-    let b : Buffer.buffer UInt128.t = FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in b
+    let b : Buffer.buffer UInt128.t = FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in
+    let r : elemB i = b in
+    assert (~ (HS.is_mm (Buffer.content (as_buffer r))));
+    r
 
 val create: i:id -> StackInline (elemB i)
   (requires (fun h0 -> True))
   (ensures  (fun h0 r h1 ->
      let b = as_buffer r in
-     ~(Buffer.contains h0 b) /\
+     b `unused_in` h0 /\
      norm h1 r /\
      sel_elem h1 r = zero i /\
      Buffer.frameOf b = HS.(h0.tip) /\ // /\ Map.domain h1.h == Map.domain h0.h
@@ -298,7 +307,7 @@ val start: #i:id -> StackInline (elemB i)
   (requires (fun h0 -> True))
   (ensures  (fun h0 r h1 ->
      let b = as_buffer r in
-       ~(Buffer.contains h0 b)
+       b `unused_in` h0
      /\ norm h1 r
      /\ sel_elem h1 r = zero i
      /\ Buffer.frameOf b = HS.(h0.tip) // /\ Map.domain h1.h == Map.domain h0.h
@@ -478,11 +487,11 @@ let finish #i s a t =
 val lemma_poly_finish_to_mac:
   i:id -> ht:mem -> t:tagB -> a:elem i -> hs:mem -> s:tagB -> log:text -> r:elem i ->
   Lemma (requires (Buffer.live ht t /\ Buffer.live hs s
-    /\ a == MAC.poly log r
+    /\ a == poly log r
     /\ (match alg i with
     | POLY1305 -> Seq.equal (Buffer.as_seq ht t) (Spec.Poly1305.finish a (Buffer.as_seq hs s))
     | GHASH    -> Seq.equal (Buffer.as_seq ht t) (GS.finish a (Buffer.as_seq hs s) ))
     ))
        (ensures (Buffer.live ht t /\ Buffer.live hs s
-         /\ Buffer.as_seq ht t == MAC.mac log r (Buffer.as_seq hs s)))
+         /\ Buffer.as_seq ht t == mac log r (Buffer.as_seq hs s)))
 let lemma_poly_finish_to_mac i ht t a hs s log r = ()

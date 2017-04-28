@@ -47,7 +47,7 @@ let mk_buf_t (len:nat) =
      (ensures (fun (h0:mem) b h1 ->
        let open FStar.HyperStack in
        let open FStar.Buffer in
-       ~(contains h0 b)
+       (b `unused_in` h0)
        /\ live h1 b /\ idx b = 0 /\ Buffer.length b = len
        /\ frameOf b = h0.tip
        /\ Map.domain h1.h == Map.domain h0.h

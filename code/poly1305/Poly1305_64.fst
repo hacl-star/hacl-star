@@ -38,7 +38,7 @@ val alloc:
   unit -> StackInline state
     (requires (fun h -> True))
     (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ I.live_st h1 st /\ frameOf I.(st.h) == h0.tip
-      /\ frameOf I.(st.r) = h0.tip /\ ~(contains h0 I.(st.r)) /\ ~(contains h0 I.(st.h))))
+      /\ frameOf I.(st.r) = h0.tip /\ (I.(st.r) `unused_in` h0) /\ (I.(st.h) `unused_in` h0)))
 let alloc () =
   I.alloc()
 
@@ -86,7 +86,10 @@ let rec update st m len =
     let block = Buffer.sub m 0ul 16ul in
     let m'    = Buffer.offset m 16ul  in
     let len   = FStar.UInt32.(len -^ 1ul) in
+    let h0    = ST.get () in
     let _ = update_block st block in
+    let h1    = ST.get () in
+    Buffer.lemma_reveal_modifies_1 (get_accumulator st) h0 h1;
     update st m' len
 
   

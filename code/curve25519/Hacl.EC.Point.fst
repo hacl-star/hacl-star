@@ -51,7 +51,7 @@ unfold inline_for_extraction let make x y z = join x z
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-private inline_for_extraction val swap_conditional_step: a:felem -> b:felem -> swap:limb{v swap = pow2 64 - 1 \/ v swap = 0} -> ctr:U32.t{U32.v ctr <= len /\ U32.v ctr > 0} ->
+private val swap_conditional_step: a:felem -> b:felem -> swap:limb{v swap = pow2 64 - 1 \/ v swap = 0} -> ctr:U32.t{U32.v ctr <= len /\ U32.v ctr > 0} ->
   Stack unit
     (requires (fun h -> disjoint a b /\ Buffer.live h a /\ Buffer.live h b
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h a)
@@ -65,7 +65,7 @@ private inline_for_extraction val swap_conditional_step: a:felem -> b:felem -> s
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 b)
       /\ (as_seq h1 a, as_seq h1 b) == swap_conditional_step_spec (as_seq h0 a) (as_seq h0 b) swap ctr
     ))
-private inline_for_extraction let swap_conditional_step a b swap ctr =
+private let swap_conditional_step a b swap ctr =
   let i = U32.(ctr -^ 1ul) in
   let ai = a.(i) in
   let bi = b.(i) in
@@ -146,7 +146,7 @@ let swap_conditional a b iswap =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30"
 
-inline_for_extraction val copy:
+val copy:
   output:point ->
   input:point ->
   Stack unit
@@ -163,7 +163,7 @@ inline_for_extraction val copy:
       /\ as_seq h1 (getx output) == as_seq h0 (getx input)
       /\ as_seq h1 (getz output) == as_seq h0 (getz input)
     ))
-inline_for_extraction let copy output input =
+let copy output input =
   let h = ST.get() in
   blit (getx input) 0ul (getx output) 0ul clen;
   blit (getz input) 0ul (getz output) 0ul clen;

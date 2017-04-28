@@ -216,4 +216,8 @@ let crypto_box_open_easy_afternm m c mlen n k =
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   let mac = sub c 0ul 16ul in
   assume (Hacl.Policies.declassifiable mac);
-  crypto_box_open_detached_afternm m c mac mlen n k
+  let h0 = ST.get () in
+  let t = crypto_box_open_detached_afternm m c mac mlen n k in
+  let h1 = ST.get () in
+  lemma_reveal_modifies_1 m h0 h1;
+  t

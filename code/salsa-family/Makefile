@@ -28,7 +28,7 @@ BROKEN=
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs
+		 --include ../../specs $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
@@ -42,7 +42,7 @@ all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^ --use_hints --record_hints
 
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 

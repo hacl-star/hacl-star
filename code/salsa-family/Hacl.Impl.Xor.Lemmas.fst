@@ -262,30 +262,31 @@ let rec lemma_xor_uint32s_to_bytes_ in1 in2 =
                    (uint32s_to_le (length in1) (map2 (fun x y -> FStar.UInt32.logxor x y) in1 in2))
     )
   else (
+    let len = length in1 in
     lemma_uint32s_to_le_def_1 (length in1) in1;
     lemma_uint32s_to_le_def_1 (length in1) in2;
     lemma_uint32s_to_le_def_1 (length in1) (map2 (fun x y -> FStar.UInt32.logxor x y) in1 in2);
-    let h1 = index in1 0 in
-    let h2 = index in2 0 in
+    let h1 = index in1 (len-1) in
+    let h2 = index in2 (len-1) in
     lemma_xor_uint32_to_bytes h1 h2;
-    let t1 = slice in1 1 (length in1) in
-    let t2 = slice in2 1 (length in2) in
+    let t1 = slice in1 0 (length in1 - 1) in
+    let t2 = slice in2 0 (length in2 - 1) in
     lemma_xor_uint32s_to_bytes_ t1 t2;
     let out1 = uint32s_to_le (length in1) in1 in
     let out2 = uint32s_to_le (length in2) in2 in
     let f = (fun x y -> FStar.UInt8.logxor x y) in
     lemma_eq_intro (map2 f out1 out2) 
-                    (append (map2 f (uint32_to_le h1) (uint32_to_le h2))
-                            (map2 f (uint32s_to_le (length t1) t1) (uint32s_to_le (length t1) t2)));
+                    (append (map2 f (uint32s_to_le (length t1) t1) (uint32s_to_le (length t1) t2))
+                            (map2 f (uint32_to_le h1) (uint32_to_le h2)));
     lemma_eq_intro (map2 (fun x y -> FStar.UInt32.logxor x y) in1 in2)
-                   (cons (FStar.UInt32.logxor h1 h2) (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2));
-    lemma_eq_intro (slice ((cons (FStar.UInt32.logxor h1 h2) (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2))) 1 (length in1)) (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2);
+                   (snoc (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2) (FStar.UInt32.logxor h1 h2));
+    lemma_eq_intro (slice ((snoc (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2) (FStar.UInt32.logxor h1 h2))) 0 (length in1 - 1)) (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2);
     lemma_eq_intro (uint32s_to_le (length in1) (map2 (fun x y -> FStar.UInt32.logxor x y) in1 in2))
-                   (uint32s_to_le (length in1) (cons (FStar.UInt32.logxor h1 h2) (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2)));
-    cut (index (cons (FStar.UInt32.logxor h1 h2) (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2)) 0
+                   (uint32s_to_le (length in1) (snoc (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2) (FStar.UInt32.logxor h1 h2)));
+    cut (index (snoc (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2) (FStar.UInt32.logxor h1 h2)) (len-1)
        == FStar.UInt32.logxor h1 h2);
-    lemma_eq_intro (append (uint32_to_le (FStar.UInt32.logxor h1 h2)) (uint32s_to_le (length t1) ((map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2))))
-                   (uint32s_to_le (length in1) (cons (FStar.UInt32.logxor h1 h2) (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2)));
+    lemma_eq_intro (append (uint32s_to_le (length t1) ((map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2))) (uint32_to_le (FStar.UInt32.logxor h1 h2)))
+                   (uint32s_to_le (length in1) (snoc (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2) (FStar.UInt32.logxor h1 h2)));
     lemma_eq_intro (map2 (fun x y -> FStar.UInt8.logxor x y) (uint32s_to_le (length t1) t1)
                                                            (uint32s_to_le (length t1) t2))
                    (uint32s_to_le (length t1) (map2 (fun x y -> FStar.UInt32.logxor x y) t1 t2));

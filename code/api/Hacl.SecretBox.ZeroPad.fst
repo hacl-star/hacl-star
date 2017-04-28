@@ -42,7 +42,7 @@ let set_zero_bytes b =
 private val lemma_crypto_secretbox_detached:
   h0:mem -> h2:mem -> h3:mem -> h4:mem -> h5:mem -> h6:mem ->
   sk:uint8_p -> mac:uint8_p -> c:uint8_p ->
-  Lemma (requires (~(contains h0 sk) /\ live h0 mac /\ live h0 c /\ modifies_0 h0 h2
+  Lemma (requires ((sk `unused_in` h0) /\ live h0 mac /\ live h0 c /\ modifies_0 h0 h2
     /\ modifies_1 c h2 h3 /\ modifies_1 mac h3 h4 /\ modifies_1 c h4 h5 /\ modifies_1 sk h5 h6
     /\ live h2 sk /\ live h2 mac /\ live h2 c
     /\ live h3 sk /\ live h3 mac /\ live h3 c
