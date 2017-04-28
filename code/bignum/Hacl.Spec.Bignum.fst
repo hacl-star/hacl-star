@@ -40,9 +40,10 @@ let op_Star_At e1 e2 = fmul e1 e2
 val selem: seqelem -> GTot elem
 let selem s = seval s % prime
 
-(* TODO: move the the standard libraries *)
-assume val lemma_mod_sub_distr_l_l: a:nat -> b:nat -> p:pos -> Lemma ((a - b) % p = ((a % p) - b) % p)
-assume val lemma_mod_sub_distr_l_r: a:nat -> b:nat -> p:pos -> Lemma ((a - b) % p = (a - (b % p)) % p)
+val lemma_mod_sub_distr_l_l: a:nat -> b:nat -> p:pos -> Lemma ((a - b) % p = ((a % p) - b) % p)
+let lemma_mod_sub_distr_l_l a b p = FStar.Math.Axioms.lemma_mod_sub_distr_l_l a b p
+val lemma_mod_sub_distr_l_r: a:nat -> b:nat -> p:pos -> Lemma ((a - b) % p = (a - (b % p)) % p)
+let lemma_mod_sub_distr_l_r a b p = FStar.Math.Axioms.lemma_mod_sub_distr_l_r a b p
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
