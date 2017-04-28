@@ -3,6 +3,7 @@ open FStar.UInt32
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 module I = Crypto.Indexing
+module Plain = Crypto.Plain
 
 (* Several constants that the interface relies on *)
 type eternal_region =
@@ -34,7 +35,6 @@ val aead_state  : I.id -> I.rw -> Type0
 val keylen      : I.id -> UInt32.t
 val statelen    : I.id -> UInt32.t
 val plain       : I.id -> nat -> Type0
-val plainBuffer : I.id -> nat -> Type0
 val safelen     : I.id -> nat -> bool //Leaving this abstract for now; but it should imply Crypto.AEAD.Invariant.safelen i len (otp_offset i)
 
 let ok_plain_len_32 (i:I.id) = l:UInt32.t{safelen i (v l)}
@@ -77,7 +77,7 @@ val encrypt
      (aadlen: aadlen_32)
         (aad: lbuffer (v aadlen))
    (plainlen: ok_plain_len_32 i)
-      (plain: plainBuffer i (v plainlen))
+      (plain: Plain.plainBuffer i (v plainlen))
  (cipher_tag: lbuffer (v plainlen + v taglen))
             : ST unit
   (requires (fun h -> True))
@@ -90,8 +90,9 @@ val decrypt
      (aadlen: aadlen_32)
         (aad: lbuffer (v aadlen))
    (plainlen: ok_plain_len_32 i)
-      (plain: plainBuffer i (v plainlen))
+      (plain: Plain.plainBuffer i (v plainlen))
  (cipher_tag: lbuffer (v plainlen + v taglen))
             : ST bool
   (requires (fun h -> True))
   (ensures (fun h0 verified h1 -> True))
+

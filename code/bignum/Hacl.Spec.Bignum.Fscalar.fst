@@ -21,7 +21,7 @@ let fscalar_spec input s =
   Spec.Loops.seq_map (fun x -> Hacl.Bignum.Wide.mul_wide x s) input
 
 
-#set-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 400"
 
 private
 val lemma_fscalar_eval_: b:seqelem -> s:limb ->

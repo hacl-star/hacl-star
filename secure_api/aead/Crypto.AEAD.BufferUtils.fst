@@ -18,12 +18,12 @@ let weaken_modifies (s0:Set.set rid) (s1:Set.set rid)
 abstract let prf_mac_modifies (prf_region:rid) (mac_region:rid) h0 h1 = 
   h0 == h1  \/
   (HS.modifies_transitively (as_set [prf_region]) h0 h1       /\ //only touched the prf's region (and its children)
-   HS.modifies_ref mac_region TSet.empty h0 h1)                 //in the mac region, didn't touch any existing ref
+   HS.modifies_ref mac_region Set.empty h0 h1)                  //in the mac region, didn't touch any existing ref
 
 let intro_prf_mac_modifies (prf_region:rid) (mac_region:rid) (h0:mem) (h1:mem)
   : Lemma (requires (h0 == h1  \/
 		     (HS.modifies_transitively (as_set [prf_region]) h0 h1 /\ 
-		      HS.modifies_ref mac_region TSet.empty h0 h1)))
+		      HS.modifies_ref mac_region Set.empty h0 h1)))
           (ensures (prf_mac_modifies prf_region mac_region h0 h1))
   = ()
 
@@ -31,7 +31,7 @@ let reveal_prf_mac_modifies (prf_region:rid) (mac_region:rid) (h0:mem) (h1:mem)
   : Lemma (requires (prf_mac_modifies prf_region mac_region h0 h1))
           (ensures  (h0 == h1  \/
 		     (HS.modifies_transitively (as_set [prf_region]) h0 h1 /\ 
-		      HS.modifies_ref mac_region TSet.empty h0 h1)))
+		      HS.modifies_ref mac_region Set.empty h0 h1)))
   = ()
 
 let dexor_modifies (c:bool) (prf_region:rid) (plain:buffer) (h0:mem) (h1:mem) =
@@ -44,7 +44,7 @@ let decrypt_modifies (prf_region:rid) (mac_region:rid)
 		     (plain:buffer) (h0:mem) (h1:mem) : Type0 =  //TODO: strange, seem to need the Type0 annotation otherwise code below fails
   HS.modifies_transitively (as_set [prf_region; frameOf plain]) h0 h1 /\ 
   Buffer.modifies_buf_1 (Buffer.frameOf plain) plain h0 h1 /\
-  HS.modifies_ref mac_region TSet.empty h0 h1
+  HS.modifies_ref mac_region Set.empty h0 h1
 
 let accumulate_modifies_nothing h0 h1 = 
   let open HS in

@@ -8,9 +8,9 @@ HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
 HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
 
 all:
-	$(MAKE) extract-c
 	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
 	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
+	$(MAKE) extract-c
 	$(MAKE) ct
 	$(MAKE) verify
 	$(MAKE) -C openssl-engine
@@ -37,7 +37,7 @@ verify-code:
 
 verify-crypto:
 	# Note: the all-hints target fails silently.
-	$(MAKE) -C ../secure_api all-ver OTHERFLAGS=--record_hints
+	$(MAKE) -C ../secure_api all-ver OTHERFLAGS="--record_hints"
 
 hints-code:
 	$(MAKE) -C ../code hints

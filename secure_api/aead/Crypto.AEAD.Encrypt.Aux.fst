@@ -45,7 +45,7 @@ val extend_refines_aux: (i:id) -> (st:state i Writer) -> (nonce:Cipher.iv (alg i
 		      pre_refines_one_entry i st nonce len plain cipher h0 h1 /\
 		      inv h0 st /\
 		      refines_one_entry #_ #i h1 entry blocks_1 /\
-      		      HS.modifies_ref mac_rgn TSet.empty h0 h1 /\
+      		      HS.modifies_ref mac_rgn Set.empty h0 h1 /\
 		      HS.live_region h1 mac_rgn))))
 		      
           (ensures ( safeId i ==> (
@@ -130,7 +130,7 @@ val finish_after_mac: h0:mem -> h3:mem -> i:id -> st:state i Writer ->
     HH.disjoint (HS.(h4.tip)) st.log_region /\
     HH.disjoint (HS.(h4.tip)) (Buffer.frameOf cipher_tagged) /\
     HS.modifies_transitively (Set.as_set [st.log_region; Buffer.frameOf cipher_tagged; HS.(h4.tip)]) h0 h3 /\
-    HS.modifies_ref st.prf.mac_rgn TSet.empty h0 h3 /\
+    HS.modifies_ref st.prf.mac_rgn Set.empty h0 h3 /\
     (prf i ==> none_above ({iv=n; ctr=ctr_0 i}) st.prf h0) /\ // The nonce must be fresh!
     pre_refines_one_entry i st n (v plainlen) plain cipher_tagged h0 h3 /\
     mac_ensures (i, n) ak acc tag h3 h4 /\
@@ -152,7 +152,7 @@ val finish_after_mac: h0:mem -> h3:mem -> i:id -> st:state i Writer ->
       FStar.HyperStack.sel h3 (CMA.alog acc) ==
       encode_both i aadlen (Buffer.as_seq h3 aad) plainlen (Buffer.as_seq h3 cipher)) /\ //from accumulate
     (safeId i ==>
-	HS.modifies_ref st.log_region (TSet.singleton (FStar.Heap.Ref (HS.as_ref (PRF.itable i st.prf)))) h0 h3 /\ (
+	HS.modifies_ref st.log_region (Set.singleton (FStar.Heap.as_addr (HS.as_ref (PRF.itable i st.prf)))) h0 h3 /\ (
 	let tab = HS.sel h3 (PRF.itable i st.prf) in
 	match PRF.find_mac tab x0 with
 	| None -> False
