@@ -85,7 +85,7 @@ val init:
 let init state = Hash.init state
 
 
-#reset-options "--max_fuel 0  --z3rlimit 30"
+#reset-options "--max_fuel 0  --z3rlimit 50"
 
 val update:
   state :uint32_p {length state = v size_state} ->
