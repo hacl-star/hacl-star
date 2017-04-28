@@ -4,6 +4,7 @@ open FStar.Mul
 open FStar.Buffer
 open FStar.UInt64
 open Hacl.Bignum25519
+open Hacl.Impl.Ed25519.Pow2_252m2
 
 let elemB = b:buffer Hacl.UInt64.t{length b = 5}
 
