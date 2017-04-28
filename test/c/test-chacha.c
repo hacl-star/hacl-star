@@ -15,9 +15,9 @@ void ossl_chacha20(uint8_t* cipher, uint8_t* plain, int len, uint8_t* nonce, uin
 }
 
 
-void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
+void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d * %d bytes: %llu (%.2fcycles/byte)\n", rounds, plainlen, d1, (double)d1/plainlen/rounds);
+  printf("Cycles for %d * %d bytes: %" PRIu64 " (%.2fcycles/byte)\n", rounds, plainlen, d1, (double)d1/plainlen/rounds);
   double ts = t1/CLOCKS_PER_SEC;
   printf("User time for %d times %d bytes: %fs (%fus/byte)\n", rounds, plainlen, ts, (double)(ts*1000000)/(plainlen*rounds));
 }
@@ -339,7 +339,7 @@ int32_t perf_chacha() {
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plain, len);
   if (res != len) {
-    printf("Error on reading, got %llu bytes\n", res);
+    printf("Error on reading, got %" PRIu64 " bytes\n", res);
     return 1;
   }
 
@@ -361,7 +361,7 @@ int32_t perf_chacha() {
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
@@ -374,7 +374,7 @@ int32_t perf_chacha() {
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
@@ -387,7 +387,7 @@ int32_t perf_chacha() {
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   return exit_success;
 }

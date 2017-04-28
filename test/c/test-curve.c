@@ -14,7 +14,7 @@ void ossl_curve25519(uint8_t* result, uint8_t* scalar, uint8_t* input){
   X25519(result, scalar, input);
 }
 
-unsigned long long median(unsigned long long* a, int rounds) {
+unsigned long long median(uint64_t* a, int rounds) {
   int i, j, temp;
   for (i = 0; i < rounds - 1; ++i)
     {
@@ -31,9 +31,9 @@ unsigned long long median(unsigned long long* a, int rounds) {
   return a[rounds/4];
 }
 
-void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
+void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d scalar mults: %llu (%.2fcycles/mul)\n", rounds, d1, (double)d1/rounds);
+  printf("Cycles for %d scalar mults: %" PRIu64 " (%.2fcycles/mul)\n", rounds, d1, (double)d1/rounds);
   printf("User time for %d scalar mults: %f (%fus/mul)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/rounds);
 }
 
@@ -306,17 +306,17 @@ int32_t perf_curve() {
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, sk, len);
   if (res != len) {
-    printf("Error on reading, got %llu bytes\n", res);
+    printf("Error on reading, got %" PRIu64 " bytes\n", res);
     return 1;
   }
   res = read(fd, pk, len);
   if (res != len) {
-    printf("Error on reading, got %llu bytes\n", res);
+    printf("Error on reading, got %" PRIu64 " bytes\n", res);
     return 1;
   }
 #endif
 
-  unsigned long long d[ROUNDS];
+  uint64_t d[ROUNDS];
   cycles a,b;
   clock_t t1,t2;
   t1 = clock();
@@ -330,7 +330,7 @@ int32_t perf_curve() {
   print_results("HACL Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   t1 = clock();
   for (int i = 0; i < ROUNDS; i++){
@@ -343,7 +343,7 @@ int32_t perf_curve() {
   print_results("Sodium Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
 
   t1 = clock();
@@ -357,7 +357,7 @@ int32_t perf_curve() {
   print_results("TweetNacl Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   t1 = clock();
   for (int i = 0; i < ROUNDS; i++){
@@ -370,7 +370,7 @@ int32_t perf_curve() {
   print_results("OpenSSL Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   return exit_success;
 }

@@ -13,9 +13,9 @@ void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
   Poly1305_Final(&state,mac);
 }
 
-void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
+void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d times 2^20 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
+  printf("Cycles for %d times 2^20 bytes: %" PRIu64 " (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
   printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
@@ -139,7 +139,7 @@ int32_t perf_poly() {
   uint64_t res = read(fd, plain, len);
   uint8_t* macs = malloc(ROUNDS * MACSIZE * sizeof(char));
   if (res != len) {
-    printf("Error on reading, got %llu bytes\n", res);
+    printf("Error on reading, got %" PRIu64 " bytes\n", res);
     return 1;
   }
 
@@ -156,7 +156,7 @@ int32_t perf_poly() {
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
@@ -169,7 +169,7 @@ int32_t perf_poly() {
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
 
   t1 = clock();
@@ -183,7 +183,7 @@ int32_t perf_poly() {
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
 
   t1 = clock();
@@ -197,7 +197,7 @@ int32_t perf_poly() {
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   return exit_success;
 }

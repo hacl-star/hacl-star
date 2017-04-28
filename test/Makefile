@@ -1,4 +1,4 @@
-HACL_HOME?=../..
+HACL_HOME?=..
 KREMLIN_HOME?=$(HACL_HOME)/kremlin
 FSTAR_HOME?=$(HACL_HOME)/kremlin
 
@@ -6,6 +6,8 @@ FSTAR_HOME?=$(HACL_HOME)/kremlin
 
 HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
 HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
+
+SNAPSHOT_DIR=snapshot
 
 all:
 	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
@@ -21,7 +23,10 @@ travis:
 	$(MAKE) -C .. world
 
 extract-c-code:
-	$(MAKE) -C ../code extract-c
+	$(MAKE) -C $(HACL_HOME)/code extract-c
+
+extract-c-code-experimental:
+	$(MAKE) -C $(HACL_HOME)/code/experimental/ extract-c
 
 extract-c-crypto:
 	$(MAKE) -C ../secure_api krml-test-vale.exe
@@ -50,15 +55,16 @@ hints: hints-code hints-crypto
 verify: verify-code verify-crypto
 
 build-snapshot:
-	mkdir -p snapshot
+	mkdir -p $(SNAPSHOT_DIR)
 	cp $(addprefix ../code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
 		../code/curve25519/x25519-c/Curve25519.* \
 		../code/salsa-family/chacha-c/Chacha20.* \
 		../code/salsa-family/salsa-c/Salsa20.* \
 		$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
 		$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
-		 snapshot
-	cp ./c/* snapshot/
+		$(addprefix ../code/experimental/ed25519/ed25519-c/, Ed25519.* ../Hacl_Impl_Sha512.c) \
+		 $(SNAPSHOT_DIR)
+	cp ./c/* $(SNAPSHOT_DIR)/
 
 CCOMP=gcc-6 -flto -std=c11 -D_GNU_SOURCE
 
@@ -66,9 +72,17 @@ test-snapshot:
 	$(MAKE) -C snapshot CC="$(CCOMP)" test
 
 snapshot:
-	$(MAKE) extract-c-code
+	$(MAKE) extract-c-code extract-c-code-experimental
 	$(MAKE) build-snapshot
 	$(MAKE) test-snapshot
+
+all-snapshots:
+	if $(HAS_CCOMP); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert"; fi
+	if $(HAS_CCOMP); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
+	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc msvc"; fi
+	if $(HAS_CL); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-msvc; fi
+	$(MAKE) extract-c-code extract-c-code-experimental
+	$(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-gcc
 
 update-snapshot:
 	$(build-snapshot)
@@ -78,4 +92,4 @@ update-snapshot:
 clean:
 	$(MAKE) -C ../code clean
 	$(MAKE) -C ../secure_api clean
-	rm -rf snapshot *.o *.exe *~
+	rm -rf snapshot snapshot-ccomp snapshot-msvc snapshot-gcc *.o *.exe *~

@@ -70,9 +70,9 @@ uint8_t xmac[16] = {
 
 };
 
-void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
+void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d times 2^20 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
+  printf("Cycles for %d times 2^20 bytes: %" PRIu64 " (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
   printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
@@ -88,7 +88,7 @@ int32_t test_api()
   TestLib_compare_and_print("HACL aead cipher", xciphertext, ciphertext, MESSAGE_LEN);
   TestLib_compare_and_print("HACL aead mac", xmac, mac, MACLEN);
 
-  long long unsigned int maclen;
+  long long unsigned maclen;
   res = crypto_aead_chacha20poly1305_ietf_encrypt_detached(ciphertext, mac, &maclen, plaintext, MESSAGE_LEN, aad, 12, NULL, nonce, key); 
   TestLib_compare_and_print("Sodium aead cipher", xciphertext, ciphertext, MESSAGE_LEN);
   TestLib_compare_and_print("Sodium aead mac", xmac, mac, MACLEN);
@@ -109,14 +109,14 @@ int32_t perf_api() {
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plaintext, len);
   if (res != len) {
-    printf("Error on reading, got %llu bytes\n", res);
+    printf("Error on reading, got %" PRIu64 " bytes\n", res);
     return 1;
   }
 
   cycles a,b;
   clock_t t1,t2;
   
-  long long unsigned int maclen;
+  long long unsigned maclen;
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
@@ -129,7 +129,7 @@ int32_t perf_api() {
 		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
 
   t1 = clock();
@@ -144,7 +144,7 @@ int32_t perf_api() {
 		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
@@ -158,7 +158,7 @@ int32_t perf_api() {
 		(double) b - a, ROUNDS, 1024 * 1024);
   for (int i = 0; i < CIPHERTEXT_LEN; i++) 
     res += (uint64_t) ciphertext[i];
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "x\n", res);
 
   
   return exit_success;

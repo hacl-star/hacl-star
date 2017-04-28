@@ -6,9 +6,9 @@ LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
 CC=gcc-6 -fno-tree-vectorize -flto
 CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
 
-test: unit-test-poly unit-test-chacha unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead
+test: unit-test-poly unit-test-chacha unit-test-salsa unit-test-curve unit-test-ed25519 unit-test-secretbox unit-test-box unit-test-aead
 
-perf: perf-test-poly perf-test-chacha perf-test-salsa perf-test-curve perf-test-secretbox perf-test-box perf-test-aead
+perf: perf-test-poly perf-test-chacha perf-test-salsa perf-test-curve perf-test-ed25519 perf-test-secretbox perf-test-box perf-test-aead
 
 test-poly.exe:
 	$(CC) $(CCOPTS) \
@@ -60,6 +60,19 @@ perf-test-curve: test-curve.exe
 
 unit-test-curve: test-curve.exe
 	./test-curve.exe unit-test
+
+test-ed25519.exe:
+	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
+	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c Hacl_Impl_Sha512.c \
+	kremlib.c testlib.c Ed25519.c test-ed25519.c -o test-ed25519.exe \
+	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -l sodium -lpthread -ldl
+
+perf-test-ed25519: test-ed25519.exe
+	./test-ed25519.exe perf
+
+unit-test-ed25519: test-ed25519.exe
+	./test-ed25519.exe unit-test
 
 test-secretbox.exe:
 	$(CC) $(CCOPTS) \
