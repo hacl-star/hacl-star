@@ -490,9 +490,9 @@ val recover_x_:
 let recover_x_ x y sign tmp =
   assert_norm(pow2 32 = 0x100000000);
   let x2  = Buffer.sub tmp 0ul 5ul in
-  let x3  = Buffer.sub tmp 5ul 5ul in
-  let t0  = Buffer.sub tmp 10ul 5ul in
-  let t1  = Buffer.sub tmp 15ul 5ul in
+  (* let x3  = Buffer.sub tmp 5ul 5ul in *)
+  (* let t0  = Buffer.sub tmp 10ul 5ul in *)
+  (* let t1  = Buffer.sub tmp 15ul 5ul in *)
   let b = gte_q y in
   let h0 = ST.get() in
   let res =

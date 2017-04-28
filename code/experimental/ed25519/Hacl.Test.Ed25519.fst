@@ -234,7 +234,7 @@ let main () =
 
   let res = Ed25519.verify pk2 msg2 1ul sig2 in
   let ret =
-    if res then (
+    if res && (ret = C.exit_success) then (
       Ed25519.sign sig2' sk2 msg2 1ul;
       TestLib.compare_and_print (C.string_of_literal "Ed25519 sig2") sig2 sig2' 64ul;
       C.exit_success
@@ -242,7 +242,7 @@ let main () =
 
   let res = Ed25519.verify pk3 msg3 2ul sig3 in
   let ret =
-    if res then (
+    if res && (ret = C.exit_success) then (
       Ed25519.sign sig3' sk3 msg3 2ul;
       TestLib.compare_and_print (C.string_of_literal "Ed25519 sig3") sig3 sig3' 64ul;
       C.exit_success

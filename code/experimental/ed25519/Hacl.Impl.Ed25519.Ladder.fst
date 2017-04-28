@@ -173,7 +173,7 @@ let point_mul result scalar q =
   let nq   = Buffer.sub b  0ul 20ul in
   let nqpq = Buffer.sub b 20ul 20ul in
   make_point_inf nq;
-  Hacl.Impl.Ed25519.SwapConditional.copy q nqpq;
+  Hacl.Impl.Ed25519.SwapConditional.copy nqpq q;
   point_mul_ b scalar;
-  Hacl.Impl.Ed25519.SwapConditional.copy nq result;
+  Hacl.Impl.Ed25519.SwapConditional.copy result nq;
   pop_frame()
