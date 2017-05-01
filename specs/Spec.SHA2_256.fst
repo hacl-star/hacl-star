@@ -197,23 +197,35 @@ let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{le
 // Test 1
 //
 
-let test_plaintext_1 = [
+let test_plaintext1 = [
   0x61uy; 0x62uy; 0x63uy;
 ]
 
-let test_expected_1 = [
+let test_expected1 = [
   0xbauy; 0x78uy; 0x16uy; 0xbfuy; 0x8fuy; 0x01uy; 0xcfuy; 0xeauy;
   0x41uy; 0x41uy; 0x40uy; 0xdeuy; 0x5duy; 0xaeuy; 0x22uy; 0x23uy;
   0xb0uy; 0x03uy; 0x61uy; 0xa3uy; 0x96uy; 0x17uy; 0x7auy; 0x9cuy;
   0xb4uy; 0x10uy; 0xffuy; 0x61uy; 0xf2uy; 0x00uy; 0x15uy; 0xaduy
 ]
 
-
 //
 // Test 2
 //
 
-let test_plaintext_2 = [
+let test_plaintext2 = []
+
+let test_expected2 = [
+  0xe3uy; 0xb0uy; 0xc4uy; 0x42uy; 0x98uy; 0xfcuy; 0x1cuy; 0x14uy;
+  0x9auy; 0xfbuy; 0xf4uy; 0xc8uy; 0x99uy; 0x6fuy; 0xb9uy; 0x24uy;
+  0x27uy; 0xaeuy; 0x41uy; 0xe4uy; 0x64uy; 0x9buy; 0x93uy; 0x4cuy;
+  0xa4uy; 0x95uy; 0x99uy; 0x1buy; 0x78uy; 0x52uy; 0xb8uy; 0x55uy
+]
+
+//
+// Test 3
+//
+
+let test_plaintext3 = [
   0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy;
   0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy;
   0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
@@ -223,7 +235,7 @@ let test_plaintext_2 = [
   0x6duy; 0x6euy; 0x6fuy; 0x70uy; 0x6euy; 0x6fuy; 0x70uy; 0x71uy
 ]
 
-let test_expected_2 = [
+let test_expected3 = [
   0x24uy; 0x8duy; 0x6auy; 0x61uy; 0xd2uy; 0x06uy; 0x38uy; 0xb8uy;
   0xe5uy; 0xc0uy; 0x26uy; 0x93uy; 0x0cuy; 0x3euy; 0x60uy; 0x39uy;
   0xa3uy; 0x3cuy; 0xe4uy; 0x59uy; 0x64uy; 0xffuy; 0x21uy; 0x67uy;
@@ -232,10 +244,10 @@ let test_expected_2 = [
 
 
 //
-// Test 3
+// Test 4
 //
 
-let test_plaintext_3 = [
+let test_plaintext4 = [
   0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
   0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
   0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy; 0x6auy;
@@ -252,11 +264,22 @@ let test_plaintext_3 = [
   0x6euy; 0x6fuy; 0x70uy; 0x71uy; 0x72uy; 0x73uy; 0x74uy; 0x75uy
 ]
 
-let test_expected_3 = [
+let test_expected4 = [
   0xcfuy; 0x5buy; 0x16uy; 0xa7uy; 0x78uy; 0xafuy; 0x83uy; 0x80uy;
   0x03uy; 0x6cuy; 0xe5uy; 0x9euy; 0x7buy; 0x04uy; 0x92uy; 0x37uy;
   0x0buy; 0x24uy; 0x9buy; 0x11uy; 0xe8uy; 0xf0uy; 0x7auy; 0x51uy;
   0xafuy; 0xacuy; 0x45uy; 0x03uy; 0x7auy; 0xfeuy; 0xe9uy; 0xd1uy
+]
+
+//
+// Test 5
+//
+
+let test_expected5 = [
+  0xcduy; 0xc7uy; 0x6euy; 0x5cuy; 0x99uy; 0x14uy; 0xfbuy; 0x92uy;
+  0x81uy; 0xa1uy; 0xc7uy; 0xe2uy; 0x84uy; 0xd7uy; 0x3euy; 0x67uy;
+  0xf1uy; 0x80uy; 0x9auy; 0x48uy; 0xa4uy; 0x97uy; 0x20uy; 0x0euy;
+  0x04uy; 0x6duy; 0x39uy; 0xccuy; 0xc7uy; 0x11uy; 0x2cuy; 0xd0uy
 ]
 
 
@@ -265,19 +288,28 @@ let test_expected_3 = [
 //
 
 let test () =
-  assert_norm(List.Tot.length test_plaintext_1 = 3);
-  assert_norm(List.Tot.length test_expected_1 = 32);
-  assert_norm(List.Tot.length test_plaintext_2 = 56);
-  assert_norm(List.Tot.length test_expected_2 = 32);
-  assert_norm(List.Tot.length test_plaintext_3 = 112);
-  assert_norm(List.Tot.length test_expected_3 = 32);
-  let test_plaintext_1 = createL test_plaintext_1 in
-  let test_expected_1 = createL test_expected_1 in
-  let test_plaintext_2 = createL test_plaintext_2 in
-  let test_expected_2 = createL test_expected_2 in
-  let test_plaintext_3 = createL test_plaintext_3 in
-  let test_expected_3 = createL test_expected_3 in
+  assert_norm(List.Tot.length test_plaintext1 = 3);
+  assert_norm(List.Tot.length test_expected1 = 32);
+//  assert_norm(List.Tot.length test_plaintext2 = 0);
+  assert_norm(List.Tot.length test_expected2 = 32);
+  assert_norm(List.Tot.length test_plaintext3 = 56);
+  assert_norm(List.Tot.length test_expected3 = 32);
+  assert_norm(List.Tot.length test_plaintext4 = 112);
+  assert_norm(List.Tot.length test_expected4 = 32);
+  assert_norm(List.Tot.length test_expected5 = 32);
+  let test_plaintext1 = createL test_plaintext1 in
+  let test_expected1 = createL test_expected1 in
+  let test_plaintext2 = createL test_plaintext2 in
+  let test_expected2 = createL test_expected2 in
+  let test_plaintext3 = createL test_plaintext3 in
+  let test_expected3 = createL test_expected3 in
+  let test_plaintext4 = createL test_plaintext4 in
+  let test_expected4 = createL test_expected4 in
+//  let test_plaintext5 = create 1000000 0x61uy in
+//  let test_expected5 = createL test_expected5 in
 
-  (hash test_plaintext_1 = test_expected_1) && (hash' test_plaintext_1 = test_expected_1) &&
-  (hash test_plaintext_2 = test_expected_2) && (hash' test_plaintext_2 = test_expected_2) &&
-  (hash test_plaintext_3 = test_expected_3) && (hash' test_plaintext_3 = test_expected_3)
+  (hash test_plaintext1 = test_expected1) && (hash' test_plaintext1 = test_expected1) &&
+  (hash test_plaintext2 = test_expected2) && (hash' test_plaintext2 = test_expected2) &&
+  (hash test_plaintext3 = test_expected3) && (hash' test_plaintext3 = test_expected3) &&
+  (hash test_plaintext4 = test_expected4) && (hash' test_plaintext4 = test_expected4) // &&
+//  (hash test_plaintext5 = test_expected5) && (hash' test_plaintext5 = test_expected5)
