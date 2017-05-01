@@ -40,7 +40,8 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Poly1305.fst \
 		Spec.Poly1305.Lemmas.fst \
 		Spec.Salsa20.fst \
-		Spec.SecretBox.fst
+		Spec.SecretBox.fst \
+		Spec.SHA2_256.fst
 
 %.fst-verify: %.fst
 	$(FSTAR)  --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin $*.fst
@@ -108,7 +109,22 @@ chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 	$(OCAMLOPT) -I chacha-poly-spec $(OCAML_INCLUDES) $(addprefix chacha-poly-spec/, $(EXTRACTED)) chacha-poly-spec/Spec_Loops.ml chacha-poly-spec/Spec_Lib.ml chacha-poly-spec/Spec_CTR.ml chacha-poly-spec/Spec_Chacha20.ml chacha-poly-spec/Spec_Poly1305_Lemmas.ml chacha-poly-spec/Spec_Poly1305.ml chacha-poly-spec/Spec_Chacha20Poly1305.ml -o chacha20poly1305.exe
 	./chacha20poly1305.exe
 
+sha2_256.exe: Spec.SHA2_256.fst
+	$(MAKE) lib
+	mkdir -p sha2-spec
+	$(FSTAR) $(ARGS) --odir sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_256.ml
+	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_256.ml -o sha2_256.exe
+	./sha2_256.exe
+
+sha2_512.exe: Spec.SHA2_512.fst
+	$(MAKE) lib
+	mkdir -p sha2-spec
+	$(FSTAR) $(ARGS) --odir sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_512.ml
+	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_512.ml -o sha2_512.exe
+	./sha2_512.exe
 
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec
