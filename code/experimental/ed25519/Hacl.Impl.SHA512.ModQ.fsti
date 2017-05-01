@@ -1,14 +1,13 @@
 module Hacl.Impl.SHA512.ModQ
 
 open FStar.Buffer
-open Hacl.Impl.BignumQ.Mul
 open Hacl.UInt64
 
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 val sha512_modq:
-  out:qelemB ->
+  out:buffer Hacl.UInt64.t{length out = 5} ->
   input:buffer Hacl.UInt8.t ->
   len  :UInt32.t{UInt32.v len = length input} ->
   Stack unit

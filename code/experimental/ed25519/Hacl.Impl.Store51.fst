@@ -167,22 +167,6 @@ let store_51_ output input =
   let o3 = (t4 <<^ 12ul) |^ (t3 >>^ 39ul) in
   store_4 output o0 o1 o2 o3
 
-
-[@ "substitute"]
-val store_51:
-  output:buffer Hacl.UInt8.t{Buffer.length output = 32} ->
-  input:felem ->
-  Stack unit
-    (requires (fun h -> Buffer.live h input /\
-      Hacl.Bignum25519.red_51 (as_seq h input) /\
-      (let s = as_seq h input in v (Seq.index s 0) + pow2 51 * v (Seq.index s 1)
-                               + pow2 102 * v (Seq.index s 2) + pow2 153 * v (Seq.index s 3)
-                               + pow2 204 * v (Seq.index s 4) < pow2 255 - 19) /\
-      Buffer.live h output))
-    (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Buffer.live h1 input /\
-      modifies_1 output h0 h1 /\
-      Buffer.live h1 output /\
-      little_endian (as_seq h1 output) == Hacl.Bignum25519.seval (as_seq h0 input)))
 [@ "substitute"]
 let store_51 output input =
   store_51_ output input

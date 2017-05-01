@@ -12,12 +12,6 @@ module Spec = Hacl.Spec.BignumQ.Mul
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 let h64 = Hacl.UInt64.t
-let qelemB = b:buffer h64{length b = 5}
-
-let within_56 (h:mem) (b:qelemB) : GTot Type0 =
-  live h b /\ (let b = as_seq h b in
-    v b.[0] < 0x100000000000000 /\ v b.[1] < 0x100000000000000 /\ v b.[2] < 0x100000000000000 /\ 
-    v b.[3] < 0x100000000000000 /\ v b.[4] < 0x100000000000000)
 
 val make_m:
   m:qelemB ->
@@ -822,18 +816,18 @@ let barrett_reduction z t =
   pop_frame()
 
 
-val mul_modq:
-  z:qelemB ->
-  x:qelemB ->
-  y:qelemB ->
-  Stack unit
-    (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y /\
-      (let x = as_seq h x in let y = as_seq h y in
-      eval_q x < pow2 256 /\ eval_q y < pow2 256)))
-    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ 
-      (let x = as_seq h0 x in let y = as_seq h0 y in
-       eval_q x < pow2 256 /\ eval_q y < pow2 256) /\
-       eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) * eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed))
+(* val mul_modq: *)
+(*   z:qelemB -> *)
+(*   x:qelemB -> *)
+(*   y:qelemB -> *)
+(*   Stack unit *)
+(*     (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y /\ *)
+(*       (let x = as_seq h x in let y = as_seq h y in *)
+(*       eval_q x < pow2 256 /\ eval_q y < pow2 256))) *)
+(*     (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\  *)
+(*       (let x = as_seq h0 x in let y = as_seq h0 y in *)
+(*        eval_q x < pow2 256 /\ eval_q y < pow2 256) /\ *)
+(*        eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) * eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
 let mul_modq out x y =
   let h0 = ST.get() in
   push_frame();
@@ -854,20 +848,20 @@ let mul_modq out x y =
 
 (* TODO: proof *)
 
-val add_modq:
-  z:qelemB ->
-  x:qelemB ->
-  y:qelemB ->
-  Stack unit
-    (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y /\
-      (let x = as_seq h x in let y = as_seq h y in
-      eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
-      eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)))
-    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ 
-      (let x = as_seq h0 x in let y = as_seq h0 y in
-       eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
-       eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed) /\
-       eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) + eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed))
+(* val add_modq: *)
+(*   z:qelemB -> *)
+(*   x:qelemB -> *)
+(*   y:qelemB -> *)
+(*   Stack unit *)
+(*     (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y /\ *)
+(*       (let x = as_seq h x in let y = as_seq h y in *)
+(*       eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\ *)
+(*       eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed))) *)
+(*     (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\  *)
+(*       (let x = as_seq h0 x in let y = as_seq h0 y in *)
+(*        eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\ *)
+(*        eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed) /\ *)
+(*        eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) + eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
 let add_modq out x y =
   let h0 = ST.get() in
   push_frame();

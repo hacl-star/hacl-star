@@ -107,6 +107,8 @@ ed25519-c/Ed25519.c: \
 	Hacl.Bignum25519.fst \
 	Hacl.Impl.Load56.fst \
 	Hacl.Impl.Load51.fst \
+	Hacl.Impl.Store51.fst \
+	Hacl.Impl.BignumQ.Mul.fst \
 	Hacl.Impl.SHA512.ModQ.fst \
 	Hacl.Impl.Sha512.fst \
 	Hacl.Impl.Ed25519.Pow2_252m2.fst \
