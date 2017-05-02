@@ -5,7 +5,7 @@ include ../Makefile.include
 
 SPECS=../../specs
 
-INCLUDE_DIRS=../bignum ../lib/kremlin $(SPECS)
+INCLUDE_DIRS=../bignum ../lib/kremlin $(KREMLIN_HOME)/kremlib $(SPECS)
 
 
 BIGNUM= \
@@ -99,54 +99,42 @@ bignum-ci:
 	mv ../bignum/*.hints ./bignum_hints
 specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_SPECIFIC)))
 
+# An exemplary Makefile for extraction that splits out the out.krml generation
+# and the .c file generation, with proper dependencies on .fst files.
 
-poly1305.exe:
-	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
-	mkdir -p poly-c
-	$(KREMLIN_HOME)/krml -tmpdir poly-c $(KREMLIN_ARGS) \
-		$(addprefix -I , $(INCLUDE_DIRS)) \
-		Poly1305_64.fst Hacl.Test.Poly1305_64.fst \
-		-drop 'Combinators' -drop 'Hacl.Endianness' -drop 'Spec.\*' \
-		-bundle 'Hacl.Spec.\*' -bundle 'Hacl.Spe.\*' \
-		-drop 'Hacl.Bignum.Parameters' -drop 'Hacl.Endianness' \
-		-drop 'Hacl.Spec' -drop 'Hacl.Spe' -drop 'Hacl.Cast' \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64,Hacl.Spec.\*,Hacl.Spe.\*' \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-                -no-prefix Hacl.Test.Poly1305_64 -o poly1305.exe
-	./poly1305.exe
+# By default, KreMLin drops a bunch of spec-related module that are not meant to
+# extract.
+INCLUDES=$(addprefix -I , $(INCLUDE_DIRS))
+CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
+KRML=$(KREMLIN_HOME)/krml $(KREMLIN_ARGS) $(INCLUDES) -tmpdir poly-c \
+  -bundle 'Hacl.Spec.\*' -bundle 'Hacl.Spe.\*' -fparentheses \
+  -add-include '"testlib.h"' \
+  -drop Combinators,Hacl.Endianness,Spec.*,Hacl.Bignum.Parameters,Hacl.Endianness,Hacl.Spec,Hacl.Spe,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims,FStar
 
-Poly1305_64.c:
-	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
-	mkdir -p poly-c
-	$(KREMLIN_HOME)/krml -tmpdir poly-c $(KREMLIN_ARGS) \
-		$(addprefix -I , $(INCLUDE_DIRS)) \
-		Poly1305_64.fst \
-		-drop 'Combinators' -drop 'Hacl.Endianness' -drop 'Spec.\*' \
-		-bundle 'Hacl.Spec.\*' -bundle 'Hacl.Spe.\*' \
-		-drop 'Hacl.Bignum.Parameters' -drop 'Hacl.Endianness' \
-		-drop 'Hacl.Spec' -drop 'Hacl.Spe' -drop 'Hacl.Cast' \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop Prims -drop FStar -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64,Hacl.Spec.\*,Hacl.Spe.\*' \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-                -skip-linking
+# Acknowledge the F* dependency graph
+.PHONY: depend
+depend:
+	$(FSTARB) --dep make $(POLY1305_FILES) > .depend
+-include .depend
 
-AEAD_Poly1305_64.c:
-	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
-	mkdir -p poly-c
-	$(KREMLIN_HOME)/krml -tmpdir poly-c $(KREMLIN_ARGS) \
-		$(addprefix -I , $(INCLUDE_DIRS)) \
-		AEAD.Poly1305_64.fst \
-		-drop 'Combinators' -drop 'Hacl.Endianness' -drop 'Spec.\*' \
-		-bundle 'Hacl.Spec.\*' -bundle 'Hacl.Spe.\*' \
-		-drop 'Hacl.Bignum.Parameters' -drop 'Hacl.Endianness' \
-		-drop 'Hacl.Spec' -drop 'Hacl.Spe' -drop 'Hacl.Cast' \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop Prims -drop FStar -bundle 'AEAD.Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,AEAD.Poly1305_64,Hacl.Spec.\*,Hacl.Spe.\*' \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-                -skip-linking
+# The F* -> out.krml step only depends on F* files.
+poly-c/out.krml: $(POLY1305_FILES)
+	$(KRML) -skip-translation $^
 
-extract-c: Poly1305_64.c AEAD_Poly1305_64.c
+# We need one invocation of kremlin for each bundle because of KreMLin bug #43
+poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml
+	$(KRML) -skip-compilation $^ \
+	  -no-prefix Hacl.Test.Poly1305_64 \
+	  -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64' \
+
+poly-c/AEAD_Poly1305_64.c: poly-c/out.krml
+	$(KRML) -skip-compilation $^ \
+	  -bundle 'AEAD.Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,AEAD.Poly1305_64'
+
+poly1305.exe: poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c
+	$(CC) $(INCLUDES) $(CFLAGS) $^ -o $@
+
+extract-c: poly-c/Poly1305_64.c poly-c/AEAD_Poly1305_64.c
 
 include $(FSTAR_HOME)/src/gmake/fstar.mk
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
