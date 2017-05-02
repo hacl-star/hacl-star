@@ -28,8 +28,8 @@ let suint8_p  = Buffer.buffer suint8_t
 // HMAC
 //
 
-inline_for_extraction let hmac_hashsize_256 = MAC.hashsize
-inline_for_extraction let hmac_blocksize_256 = MAC.blocksize
+inline_for_extraction let hmac_hashsize_256 = MAC.size_hash
+inline_for_extraction let hmac_blocksize_256 = MAC.size_block
 inline_for_extraction let hmac_size_state_256 = MAC.size_state
 
 

@@ -23,26 +23,10 @@ ARGS=--codegen OCaml --lax --include $(HACL_HOME)/code/lib/kremlin $(NOEXTRACT) 
 OCAML_INCLUDES=-I $(HACL_HOME)/code/lib/ml $(HACL_HOME)/code/lib/ml/hacllib.cmxa 
 
 %.fst-ver: %.fst
-	$(FSTAR) --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib $*.fst
+	$(FSTAR) --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib --include .. --use_hints $*.fst
 
 lib:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml MEM=HST
-
-sha2.exe: Spec.SHA2.fst
-	$(MAKE) lib
-	mkdir -p sha2-spec
-	$(FSTAR) $(ARGS) --odir sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2.ml
-	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Spec_SHA2.ml -o sha2.exe
-	./sha2.exe
-
-sha2-512.exe: Spec.Test.SHA2_512.fst
-	$(MAKE) lib
-	mkdir -p sha2-512-spec
-	$(FSTAR) $(ARGS) --odir sha2-512-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-512-spec/Spec_Test_SHA2_512.ml
-	$(OCAMLOPT) -I sha2-512-spec $(OCAML_INCLUDES) $(addprefix sha2-512-spec/, $(EXTRACTED)) sha2-512-spec/Spec_Loops.ml sha2-512-spec/Spec_Lib.ml sha2-512-spec/Spec_SHA2_Specialization.ml sha2-512-spec/Spec_SHA2_Word.ml sha2-512-spec/Spec_SHA2_Core.ml sha2-512-spec/Spec_Test_SHA2_512.ml -o sha2-512.exe
-	./sha2-512.exe
 
 chacha20-vec.exe: Spec.Chacha20_vec.fst
 	$(MAKE) lib
@@ -68,18 +52,7 @@ chacha20-vec256.exe: Spec.Chacha20_vec256.fst
 	$(OCAMLOPT) -I chacha-spec-vec256 $(OCAML_INCLUDES) $(addprefix chacha-spec-vec256/, $(EXTRACTED)) chacha-spec-vec256/Spec_Loops.ml chacha-spec-vec256/Spec_Lib.ml chacha-spec-vec256/Spec_CTR.ml chacha-spec-vec256/Spec_Chacha20_vec256.ml -o chacha20-vec256.exe
 	./chacha20-vec256.exe
 
-ed25519.exe: Spec.Sha512.fst  Spec.Ed25519.fst
-	$(MAKE) lib
-	mkdir -p ed25519-spec
-	$(FSTAR) $(ARGS) --odir ed25519-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> ed25519-spec/Spec_Ed25519.ml
-	$(OCAMLOPT) -I ed25519-spec $(OCAML_INCLUDES) $(addprefix ed25519-spec/, $(EXTRACTED)) ed25519-spec/Spec_Loops.ml ed25519-spec/Spec_Lib.ml ed25519-spec/Spec_SHA2_Specialization.ml ed25519-spec/Spec_SHA2_Word.ml ed25519-spec/Spec_SHA2_Core.ml ed25519-spec/Spec_Sha512.ml ed25519-spec/Spec_Curve25519.ml ed25519-spec/Spec_Ed25519.ml -o ed25519.exe
-	./ed25519.exe
-
-test-ed:
-	$(OCAMLOPT) -I ed25519-spec $(OCAML_INCLUDES) $(addprefix ed25519-spec/, $(EXTRACTED)) ed25519-spec/Spec_Loops.ml ed25519-spec/Spec_Lib.ml ed25519-spec/Spec_SHA2_Specialization.ml ed25519-spec/Spec_SHA2_Word.ml ed25519-spec/Spec_SHA2_Core.ml ed25519-spec/Spec_Sha512.ml ed25519-spec/Spec_Curve25519.ml ed25519-spec/Spec_Ed25519.ml -o ed25519.exe
-	./ed25519.exe
-
 clean:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 ed25519-spec chacha-spec-vec2 chacha-spec-vec sha2-spec
+	$(MAKE) -C experimental clean
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 chacha-spec-vec2 chacha-spec-vec sha2-spec
