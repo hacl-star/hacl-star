@@ -104,10 +104,10 @@ let recover_x (y:nat) (sign:bool) : Tot (option elem) =
         let x = if (x % 2 = 1) <> sign then prime `fsub` x else x in
         Some x)))
 
-let g_y : elem = 4 `fmul` (modp_inv 5)
-let g_x : elem = 
-  assume (Some? (recover_x g_y false));
-  Some?.v (recover_x g_y false)
+let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
+let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
+  (* assume (Some? (recover_x g_y false)); *)
+  (* Some?.v (recover_x g_y false) *)
 
 let g: ext_point = (g_x, g_y, 1, g_x `fmul` g_y)
 
@@ -155,8 +155,8 @@ let sign (secret:lbytes 32) (msg:bytes{length msg < pow2 32 - 64}) =
 let point_equal (p:ext_point) (q:ext_point) =
   let px, py, pz, pt = p in
   let qx, qy, qz, qt = q in
-  if ((px `fmul` qz) `fsub` (qx `fmul` pz)) <> zero then false
-  else if ((py `fmul` qz) `fsub` (qy `fmul` pz)) <> zero then false
+  if ((px `fmul` qz) <> (qx `fmul` pz)) then false
+  else if ((py `fmul` qz) <> (qy `fmul` pz)) then false
   else true
 
 let verify (public:lbytes 32) (msg:bytes{length msg < pow2 32 - 64}) (signature:lbytes 64) =
