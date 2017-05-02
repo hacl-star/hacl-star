@@ -55,17 +55,18 @@ val verify_step_2:
         FStar.Endianness.(little_bytes 32ul (Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 rs @| as_seq h0 public @| as_seq h0 msg))) ))
 
 let verify_step_2 r msg len rs public =
-  admit();
-  push_frame();
-  let rs_public_msg = create 0uy (len +^ 64ul) in
+  (* admit(); *)
+  (* push_frame(); *)
+  (* let rs_public_msg = create 0uy (len +^ 64ul) in *)
   push_frame();
   let r' = create 0uL 5ul in
-  blit rs 0ul rs_public_msg 0ul 32ul;
-  blit public 0ul rs_public_msg 32ul 32ul;
-  blit msg 0ul rs_public_msg 64ul len;
-  Hacl.Impl.SHA512.ModQ.sha512_modq r' rs_public_msg (len +^ 64ul);
+  (* blit rs 0ul rs_public_msg 0ul 32ul; *)
+  (* blit public 0ul rs_public_msg 32ul 32ul; *)
+  (* blit msg 0ul rs_public_msg 64ul len; *)
+  (* Hacl.Impl.SHA512.ModQ.sha512_modq r' rs_public_msg (len +^ 64ul); *)
+  Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2 r' rs public msg len;  
   Hacl.Impl.Store56.store_56 r r';
-  pop_frame();
+  (* pop_frame(); *)
   pop_frame()
 
 

@@ -8,7 +8,7 @@ open Hacl.UInt8
 
 let secret_expand expanded secret =
   let h0 = ST.get() in
-  Hacl.Impl.Sha512.sha512 expanded secret 32ul;
+  SHA2_512.hash expanded secret 32ul;
   let h = ST.get() in
   assert_norm(pow2 125 > 32);
   let h_low  = Buffer.sub expanded 0ul  32ul in

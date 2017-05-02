@@ -3,7 +3,7 @@ KREMLIN_HOME?=$(HACL_HOME)/kremlin
 FSTAR_HOME?=$(HACL_HOME)/kremlin
 
 
-DIRECTORIES=ed25519
+DIRECTORIES=ed25519 hash
 
 %-c: %
 	$(MAKE) -C $< extract-c
