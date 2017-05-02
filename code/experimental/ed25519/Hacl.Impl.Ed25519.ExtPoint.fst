@@ -1,5 +1,10 @@
 module Hacl.Impl.Ed25519.ExtPoint
 
+open FStar.Buffer
+
+
+open Hacl.Bignum25519
+
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 (* A point is buffer of size 20, that is 4 consecutive buffers of size 5 *)
@@ -18,3 +23,8 @@ let as_point h p =
   let z = Buffer.as_seq h (getz p) in
   let t = Buffer.as_seq h (gett p) in
   Hacl.Bignum25519.seval x, Hacl.Bignum25519.seval y, Hacl.Bignum25519.seval z, Hacl.Bignum25519.seval t
+
+
+let point_inv h (p:point) : GTot Type0 =
+  live h p /\ (let x = getx p in let y = gety p in let z = getz p in let t = gett p in
+  red_513 (as_seq h x) /\ red_513 (as_seq h y) /\ red_513 (as_seq h z) /\ red_513 (as_seq h t))
