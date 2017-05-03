@@ -35,7 +35,8 @@ POLY1305_SPECIFIC= \
 	Hacl.Standalone.Poly1305_64.fst \
 	Poly1305_64.fst \
 	Hacl.Spec.Poly1305_64.Lemmas1.fst \
-	AEAD.Poly1305_64.fst
+	AEAD.Poly1305_64.fst \
+	Hacl.Test.Poly1305_64.fst
 
 
 SLOW=
@@ -127,7 +128,7 @@ poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml $(KRML_BIN)
 	$(KRML) -skip-compilation $< \
 	  -drop AEAD_Poly1305_64 \
 	  -no-prefix Hacl.Test.Poly1305_64 \
-	  -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64' \
+	  -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64'
 
 poly-c/AEAD_Poly1305_64.c: poly-c/out.krml $(KRML_BIN)
 	$(KRML) -skip-compilation $< \
