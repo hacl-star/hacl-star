@@ -87,6 +87,7 @@ extract-aead:
 		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
 		-drop Hacl.Constants -drop "Hacl.Endianness" -drop 'Combinators' \
 		-drop "Hacl.Bignum.\*" -drop "Hacl.Spe.\*" -drop "Hacl.Impl.\*" -drop "Hacl.Standalone.\*" \
+		-drop AEAD_Poly1305_64 \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
 		-add-include '"AEAD_Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs
 

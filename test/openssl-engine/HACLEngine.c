@@ -18,9 +18,12 @@
 #include <openssl/ec.h>
 #include <openssl/evp.h>
 
+#define Hacl_Impl_Poly1305_64_poly1305_state whatever
 #include "Curve25519.h"
 #include "Poly1305_64.h"
+#undef Hacl_Impl_Poly1305_64_poly1305_state
 #include "Chacha20.h"
+#include "Chacha20Poly1305.h"
 
 // OpenSSL private header for benchmarking purposes
 #include "crypto/include/internal/poly1305.h"
@@ -182,6 +185,48 @@ static int hacl_poly1305_final(EVP_MD_CTX *ctx, unsigned char *md) {
   return 1;
 }
 
+// Chacha-Poly -----------------------------------------------------------------
+int hacl_chachapoly_init (EVP_CIPHER_CTX *ctx,
+  const unsigned char *key,
+  const unsigned char *iv,
+  int enc)
+{
+  return 1;
+}
+
+int hacl_chachapoly_do_cipher(EVP_CIPHER_CTX *ctx,
+  unsigned char *out,
+  const unsigned char *in,
+  size_t inl)
+{
+  printf("Trace: out=%p, in=%p, inl=%zu\n", out, in, inl);
+  /* static bool warned = false; */
+  /* if (!warned) { */
+  /*   printf("Warning: this is a non-functional cipher intended for benchmarking " */
+  /*     "purposes only!\n"); */
+  /*   warned = true; */
+  /* } */
+
+  /* Chacha20Poly1305_aead_encrypt(out, */
+  /*   uint8_t *mac, */
+  /*   in, */
+  /*   inl, */
+  /*   uint8_t *aad1, */
+  /*   uint32_t aadlen, */
+  /*   uint8_t *k1, */
+  /*   uint8_t *n1); */
+
+  return 1;
+}
+
+int hacl_chachapoly_cleanup(EVP_CIPHER_CTX *ctx) {
+  return 1;
+}
+
+int hacl_chachapoly_ctrl(EVP_CIPHER_CTX *ctx, int type, int arg, void *ptr) {
+  return 1;
+}
+
 // Registering our algorithms within the engine infrastructure -----------------
 
 static int Everest_digest_nids(const int **nids)
@@ -207,6 +252,7 @@ static int Everest_ciphers_nids(const int **nids)
 
   if (!init) {
     cipher_nids[count++] = NID_chacha20;
+    cipher_nids[count++] = NID_chacha20_poly1305;
 
     // NULL-terminate the lst
     cipher_nids[count] = 0;
@@ -250,6 +296,7 @@ int Everest_digest(ENGINE *e, const EVP_MD **digest, const int **nids, int nid)
 }
 
 static EVP_CIPHER *hacl_chacha20_cipher = NULL;
+static EVP_CIPHER *hacl_chachapoly_cipher = NULL;
 
 int Everest_ciphers(ENGINE *e, const EVP_CIPHER **cipher, const int **nids, int nid)
 {
@@ -257,6 +304,9 @@ int Everest_ciphers(ENGINE *e, const EVP_CIPHER **cipher, const int **nids, int 
     return Everest_ciphers_nids(nids);
   } else if (nid == NID_chacha20) {
     *cipher = hacl_chacha20_cipher;
+    return 1;
+  } else if (nid == NID_chacha20_poly1305) {
+    *cipher = hacl_chachapoly_cipher;
     return 1;
   } else {
     return 0;
@@ -351,6 +401,19 @@ void Everest_create_all_the_things() {
   #error "Unsupported implementation"
   #endif
   EVP_MD_meth_set_input_blocksize(hacl_poly1305_digest, 16);
+
+  // Chacha-Poly
+  // -----------
+  hacl_chachapoly_cipher = EVP_CIPHER_meth_dup(EVP_chacha20_poly1305());
+  #if IMPL == IMPL_HACL
+  EVP_CIPHER_meth_set_init(hacl_chachapoly_cipher, hacl_chachapoly_init);
+  EVP_CIPHER_meth_set_do_cipher(hacl_chachapoly_cipher, hacl_chachapoly_do_cipher);
+  EVP_CIPHER_meth_set_cleanup(hacl_chachapoly_cipher, hacl_chachapoly_cleanup);
+  EVP_CIPHER_meth_set_ctrl(hacl_chachapoly_cipher, hacl_chachapoly_ctrl);
+  #elif IMPL == IMPL_OPENSSL
+  #else
+  #error "Unsupported implementation"
+  #endif
 }
 
 // Registering everything as an engine -----------------------------------------
