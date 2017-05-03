@@ -12,7 +12,7 @@ open Hacl.UInt32
 open FStar.UInt32
 
 (* Definition of aliases for modules *)
-module Spec = Spec.SHA2_512
+module Spec = Spec.SHA512
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
@@ -59,6 +59,7 @@ inline_for_extraction let pos_ws_w     = size_k_w
 inline_for_extraction let pos_whash_w  = size_k_w +^ size_ws_w
 inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 [@"c_inline"]
 val alloc:
@@ -152,7 +153,7 @@ val update_last:
                   let seq_data = as_seq h0 data in
                   let count = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.v pos_count_w + 1) in
                   let prevlen = U64.(v (Seq.index count 0) * (U32.v size_block)) in
-                  seq_hash_1 == Spec.update_last seq_hash_0 prevlen seq_data)))
+                  prevlen + Seq.length seq_data < pow2 125 /\ seq_hash_1 == Spec.update_last seq_hash_0 prevlen seq_data)))
 
 
 val finish:

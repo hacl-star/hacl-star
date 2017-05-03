@@ -13,7 +13,7 @@ module U32 = FStar.UInt32
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 
-[@"c_inline"]
+[@"substitute"]
 val fscalar:
   output:felem_wide ->
   input:felem{disjoint output input} ->
@@ -22,6 +22,6 @@ val fscalar:
     (requires (fun h -> live h output /\ live h input))
     (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 input /\ live h1 output /\ modifies_1 output h0 h1
       /\ as_seq h1 output == fscalar_spec (as_seq h0 input) s))
-[@"c_inline"]
+[@"substitute"]
 let fscalar output b s =
   C.Loops.map output b clen (fun x -> Hacl.Bignum.Wide.mul_wide x s)

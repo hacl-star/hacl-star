@@ -37,22 +37,20 @@ let lemma_variable_change h h0 (b:felem{live h0 b /\ live h b}) : Lemma
   (ensures (forall (i:nat). (i < len - 1) ==> v (get h b (i+1)) == v (get h0 b (i))))
   = ()
 
-[@"c_inline"]
+[@"substitute"]
 val shift_:
   output:felem ->
-  (* ctr:U32.t{U32.v ctr < len} -> *)
   Stack unit
     (requires (fun h -> live h output))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
-      /\ (forall (i:nat). (i < (* U32.v ctr *) len - 1) ==> v (get h1 output (i+1)) = v (get h0 output i))
-      (* /\ (forall (i:nat). (i > (\* U32.v ctr *\) len - 1 /\ i < len) ==> get h1 output i == get h0 output i) *)))
-[@"c_inline"]
-let (* rec *) shift_ output (* ctr  *)=
+      /\ (forall (i:nat). (i < len - 1) ==> v (get h1 output (i+1)) = v (get h0 output i)) ))
+[@"substitute"]
+let shift_ output =
   let h0 = ST.get() in
   let inv (h1: HyperStack.mem) (j: nat): Type0 =
     live h1 output /\ modifies_1 output h0 h1 /\ j <= len - 1 /\ 0 <= j
     /\ (forall (i:nat). {:pattern (v (get h1 output (i)))} (i <= len - 1 /\ i > (len-1-j)) ==> v (get h1 output (i)) = v (get h0 output (i-1)))
-    /\ (forall (i:nat). {:pattern (v (get h1 output (i)))} (i < (len - 1 - j) (* /\ i < len *)) ==> get h1 output i == get h0 output i)
+    /\ (forall (i:nat). {:pattern (v (get h1 output (i)))} (i < (len - 1 - j)) ==> get h1 output i == get h0 output i)
   in
   let open FStar.UInt32 in
   let f' (i:UInt32.t{FStar.UInt32.( 0 <= v i /\ v i < len - 1) }): Stack unit
@@ -87,7 +85,7 @@ let rec shift output =
   let h0 = ST.get() in
   let open FStar.UInt32 in
   let tmp = output.(clen -^ 1ul) in
-  shift_ output (* (clen -^ 1ul) *);
+  shift_ output;
   output.(0ul) <- tmp;
   let h = ST.get() in
   Seq.lemma_eq_intro (as_seq h output) (shift_spec (as_seq h0 output))
@@ -100,7 +98,6 @@ val sum_scalar_multiplication_:
   output:felem_wide ->
   input:felem{disjoint output input} ->
   s:limb ->
-  (* ctr:U32.t{U32.v ctr <= len} -> *)
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ sum_scalar_multiplication_pre_ (as_seq h output) (as_seq h input) s (len)))
     (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 /\ live h0 input /\ live h0 output
@@ -119,9 +116,7 @@ let lemma_carry_wide_spec_0 s = ()
 
 val lemma_carry_wide_spec_1: s:seqelem_wide -> i:nat{i < len - 1 /\ carry_wide_pre s i} -> Lemma
   (carry_wide_spec_ s i (len-1) == (let s'' = carry_wide_step' s i in
-                                  (* lemma_carry_wide_step s i; *)
-                                  (* Math.Lemmas.lemma_div_lt (w (Seq.index s i)) (FStar.Mul.op_Star 2 word_size) limb_size; *)
-                                  carry_wide_spec_ s'' (i+1) (len-1)))
+                                    carry_wide_spec_ s'' (i+1) (len-1)))
 let lemma_carry_wide_spec_1 s i = ()
 
 
@@ -225,10 +220,9 @@ let rec carry_limb_ tmp =
   C.Loops.for 0ul FStar.UInt32.(clen -^ 1ul) inv f'
 
 
-
 #set-options "--z3rlimit 20"
 
-[@"c_inline"]
+[@"substitute"]
 val carry_0_to_1:
   output:felem ->
   Stack unit
@@ -236,7 +230,7 @@ val carry_0_to_1:
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
       /\ carry_0_to_1_pre (as_seq h0 output)
       /\ as_seq h1 output == carry_0_to_1_spec (as_seq h0 output)))
-[@"c_inline"]
+[@"substitute"]
 let carry_0_to_1 output =
   let i0 = output.(0ul) in
   let i1 = output.(1ul) in
