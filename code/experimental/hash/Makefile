@@ -1,6 +1,6 @@
 HACL_HOME    ?= ../../../hacl-star
-FSTAR_HOME   ?= $(HACL_HOME)/../FStar
-KREMLIN_HOME ?= $(HACL_HOME)/../kremlin
+FSTAR_HOME   ?= $(HACL_HOME)/dependencies/FStar
+KREMLIN_HOME ?= $(HACL_HOME)/dependencies/kremlin
 
 FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
