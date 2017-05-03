@@ -186,6 +186,8 @@ static int hacl_poly1305_final(EVP_MD_CTX *ctx, unsigned char *md) {
 }
 
 // Chacha-Poly -----------------------------------------------------------------
+
+#if IMPL==IMPL_HACL
 int hacl_chachapoly_init (EVP_CIPHER_CTX *ctx,
   const unsigned char *key,
   const unsigned char *iv,
@@ -194,27 +196,61 @@ int hacl_chachapoly_init (EVP_CIPHER_CTX *ctx,
   return 1;
 }
 
+// Begin copy/paste from OpenSSL
+#define CHACHA_KEY_SIZE		32
+#define CHACHA_CTR_SIZE		16
+#define CHACHA_BLK_SIZE		64
+
+typedef struct {
+    union {
+        double align;   /* this ensures even sizeof(EVP_CHACHA_KEY)%8==0 */
+        unsigned int d[CHACHA_KEY_SIZE / 4];
+    } key;
+    unsigned int  counter[CHACHA_CTR_SIZE / 4];
+    unsigned char buf[CHACHA_BLK_SIZE];
+    unsigned int  partial_len;
+} EVP_CHACHA_KEY;
+
+typedef struct {
+    EVP_CHACHA_KEY key;
+    unsigned int nonce[12/4];
+    unsigned char tag[POLY1305_BLOCK_SIZE];
+    struct { uint64_t aad, text; } len;
+    int aad, mac_inited, tag_len, nonce_len;
+    size_t tls_payload_length;
+} EVP_CHACHA_AEAD_CTX;
+// End copy/paste
+
 int hacl_chachapoly_do_cipher(EVP_CIPHER_CTX *ctx,
   unsigned char *out,
   const unsigned char *in,
   size_t inl)
 {
-  printf("Trace: out=%p, in=%p, inl=%zu\n", out, in, inl);
-  /* static bool warned = false; */
-  /* if (!warned) { */
-  /*   printf("Warning: this is a non-functional cipher intended for benchmarking " */
-  /*     "purposes only!\n"); */
-  /*   warned = true; */
-  /* } */
+  /* printf("Trace: out=%p, in=%p, inl=%zu\n", out, in, inl); */
 
-  /* Chacha20Poly1305_aead_encrypt(out, */
-  /*   uint8_t *mac, */
-  /*   in, */
-  /*   inl, */
-  /*   uint8_t *aad1, */
-  /*   uint32_t aadlen, */
-  /*   uint8_t *k1, */
-  /*   uint8_t *n1); */
+  // Note: the benchmarking engine never uses a CTRL call to set the AAD; it
+  // also never calls us with out = NULL which, according to the OpenSSL source
+  // code, is the way the caller indicates that it's about to switch to AAD.
+  // Therefore, we provide a NULL AAD pointer, which is enough to have a
+  // representative performance test. This is, naturally, highly non-functional.
+  static bool warned = false;
+  if (!warned) {
+    printf("Warning: this is a non-functional cipher intended for benchmarking "
+      "purposes only!\n");
+    warned = true;
+  }
+
+  EVP_CHACHA_AEAD_CTX *aead_data = EVP_CIPHER_CTX_get_cipher_data(ctx);
+
+  uint8_t mac[16] = { 0 };
+  Chacha20Poly1305_aead_encrypt(out,
+    mac,
+    in,
+    inl,
+    NULL,
+    0,
+    aead_data->key.buf,
+    aead_data->nonce);
 
   return 1;
 }
@@ -226,6 +262,7 @@ int hacl_chachapoly_cleanup(EVP_CIPHER_CTX *ctx) {
 int hacl_chachapoly_ctrl(EVP_CIPHER_CTX *ctx, int type, int arg, void *ptr) {
   return 1;
 }
+#endif
 
 // Registering our algorithms within the engine infrastructure -----------------
 
@@ -406,9 +443,9 @@ void Everest_create_all_the_things() {
   // -----------
   hacl_chachapoly_cipher = EVP_CIPHER_meth_dup(EVP_chacha20_poly1305());
   #if IMPL == IMPL_HACL
-  EVP_CIPHER_meth_set_init(hacl_chachapoly_cipher, hacl_chachapoly_init);
+  //EVP_CIPHER_meth_set_init(hacl_chachapoly_cipher, hacl_chachapoly_init);
   EVP_CIPHER_meth_set_do_cipher(hacl_chachapoly_cipher, hacl_chachapoly_do_cipher);
-  EVP_CIPHER_meth_set_cleanup(hacl_chachapoly_cipher, hacl_chachapoly_cleanup);
+  //EVP_CIPHER_meth_set_cleanup(hacl_chachapoly_cipher, hacl_chachapoly_cleanup);
   EVP_CIPHER_meth_set_ctrl(hacl_chachapoly_cipher, hacl_chachapoly_ctrl);
   #elif IMPL == IMPL_OPENSSL
   #else
