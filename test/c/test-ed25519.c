@@ -111,6 +111,32 @@ int32_t perf_ed25519() {
 				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
+  bool bools[ROUNDS];
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    bools[i] = Ed25519_verify(pk11, plain, len, macs + SIGSIZE * i);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("HACL Ed25519 verify speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)bools[i];
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    crypto_sign_verify_detached(macs + SIGSIZE * i, plain, len, pk11);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  print_results("Sodium Ed25519 verify speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+
+  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)bools[i];
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
+
   return exit_success;
 }
   

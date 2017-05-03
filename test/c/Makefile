@@ -64,7 +64,7 @@ unit-test-curve: test-curve.exe
 test-ed25519.exe:
 	$(CC) $(CCOPTS) \
 	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
-	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c Hacl_Impl_Sha512.c \
+	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c SHA2_512.c \
 	kremlib.c testlib.c Ed25519.c test-ed25519.c -o test-ed25519.exe \
 	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -l sodium -lpthread -ldl
 

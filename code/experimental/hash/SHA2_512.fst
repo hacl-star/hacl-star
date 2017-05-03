@@ -72,7 +72,7 @@ let update state data = update state data
 
 #reset-options "--max_fuel 0  --z3rlimit 200"
 
-let rec update_multi state data n = update_multi state data n
+let update_multi state data n = update_multi state data n
 
 #reset-options "--max_fuel 0  --z3rlimit 200"
 
