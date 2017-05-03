@@ -106,7 +106,8 @@ specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_SPECI
 # extract.
 INCLUDES=$(addprefix -I , $(INCLUDE_DIRS))
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
-KRML=$(KREMLIN_HOME)/krml $(KREMLIN_ARGS) $(INCLUDES) -tmpdir poly-c \
+KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
+KRML=$(KRML_BIN) $(KREMLIN_ARGS) $(INCLUDES) -tmpdir poly-c \
   -bundle 'Hacl.Spec.\*' -bundle 'Hacl.Spe.\*' -fparentheses \
   -add-include '"testlib.h"' \
   -drop Combinators,Hacl.Endianness,Spec.*,Hacl.Bignum.Parameters,Hacl.Endianness,Hacl.Spec,Hacl.Spe,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims,FStar
@@ -122,13 +123,15 @@ poly-c/out.krml: $(POLY1305_FILES)
 	$(KRML) -skip-translation $^
 
 # We need one invocation of kremlin for each bundle because of KreMLin bug #43
-poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml
-	$(KRML) -skip-compilation $^ \
+poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml $(KRML_BIN)
+	$(KRML) -skip-compilation $< \
+	  -drop AEAD_Poly1305_64 \
 	  -no-prefix Hacl.Test.Poly1305_64 \
 	  -bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64' \
 
-poly-c/AEAD_Poly1305_64.c: poly-c/out.krml
-	$(KRML) -skip-compilation $^ \
+poly-c/AEAD_Poly1305_64.c: poly-c/out.krml $(KRML_BIN)
+	$(KRML) -skip-compilation $< \
+	  -drop Poly1305_64 \
 	  -bundle 'AEAD.Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,AEAD.Poly1305_64'
 
 poly1305.exe: poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c
