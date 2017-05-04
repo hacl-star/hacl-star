@@ -60,11 +60,11 @@ let sign__ signature secret msg len g tmp_bytes tmp_ints =
 
   sign_step_2 signature secret msg len g tmp_bytes' tmp_ints;
 
-  sign_step_3 signature secret msg len g tmp_bytes' tmp_ints;
+  sign_step_3 signature secret msg len tmp_bytes' tmp_ints;
 
   sign_step_4 signature secret msg len g tmp_bytes' tmp_ints;
 
-  sign_step_5 signature secret msg len g tmp_bytes' tmp_ints;
+  sign_step_5 len tmp_bytes' tmp_ints;
 
   copy_bytes (Buffer.sub signature 0ul 32ul) rs' 32ul;
   copy_bytes (Buffer.sub signature 32ul 32ul) s' 32ul;

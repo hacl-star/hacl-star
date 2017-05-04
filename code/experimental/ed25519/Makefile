@@ -37,13 +37,13 @@ HINTS_ENABLED?=--use_hints --record_hints
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs  --include $(HACL_HOME)/specs/experimental \
-		--include $(HACL_HOME)/code/curve25519 \
+		--include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/code/experimental/hash \
 		$(HINTS_ENABLED) $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		--include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
-		--include $(HACL_HOME)/code/curve25519
+		--include $(HACL_HOME)/code/curve25519  --include $(HACL_HOME)/code/experimental/hash
 
 
 # Lax typechecking against the restricted integer interface
@@ -100,7 +100,7 @@ KEMLIN_SKIP_COMPILATION=$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 		-drop Prims -drop FStar -bundle 'Hacl.Bignum25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum25519' \
 		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-		-skip-compilation
+		-skip-compilation -fsopt '--eager_inference'
 
 ../hash/sha2-c/SHA2_512.c:
 	$(MAKE) -C ../hash sha2-c/SHA2_512.c

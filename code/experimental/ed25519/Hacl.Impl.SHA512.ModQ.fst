@@ -42,7 +42,7 @@ open Hacl.UInt64
 
 
 private
-val lemma_modifies_0_2: #a:Type -> #a':Type -> h0:HyperStack.mem -> h1:HyperStack.mem -> h2:HyperStack.mem -> b:buffer a -> b':buffer a' -> Lemma (requires (live h0 b /\ ~(contains h0 b') /\ live h1 b' /\ frameOf b' = FStar.HyperStack.(h0.tip)
+val lemma_modifies_0_2: #a:Type -> #a':Type -> h0:HyperStack.mem -> h1:HyperStack.mem -> h2:HyperStack.mem -> b:buffer a -> b':buffer a' -> Lemma (requires (live h0 b /\ b' `unused_in` h0 /\ live h1 b' /\ frameOf b' = FStar.HyperStack.(h0.tip)
     /\ modifies_0 h0 h1 /\ modifies_2 b b' h1 h2))
        (ensures (modifies_2_1 b h0 h2))
 let lemma_modifies_0_2 #a #a' h0 h1 h2 b b' =
@@ -64,17 +64,20 @@ let lemma_modifies_0_2 #a #a' h0 h1 h2 b b' =
 (*   pop_frame() *)
 
 
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
 [@ "substitute"]
 private
 val sha512_modq_pre_:
   out:qelemB ->
-  prefix:buffer Hacl.UInt8.t{length prefix = 32} ->
-  input:buffer Hacl.UInt8.t ->
+  prefix:buffer Hacl.UInt8.t{length prefix = 32 /\ disjoint prefix out} ->
+  input:buffer Hacl.UInt8.t{disjoint input out} ->
   len  :UInt32.t{UInt32.v len = length input /\ length input < pow2 32 - 32} ->
   tmp:buffer Hacl.UInt64.t{length tmp = 10 /\ disjoint out tmp} ->
   Stack unit
-        (requires (fun h0 -> live h0 input /\ live h0 out /\ live h0 tmp))
+        (requires (fun h0 -> live h0 input /\ live h0 out /\ live h0 tmp /\ live h0 prefix))
         (ensures  (fun h0 _ h1 -> live h0 input /\ live h1 out /\ modifies_2 out tmp h0 h1 /\
+          live h0 prefix /\ live h1 prefix /\
           Hacl.Spec.BignumQ.Eval.eval_q (as_seq h1 out) == Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 prefix @| as_seq h0 input) /\
           (let out = as_seq h1 out in let op_String_Access = Seq.index in
            v (out.[0]) < 0x100000000000000 /\ v (out.[1]) < 0x100000000000000 /\
@@ -91,7 +94,7 @@ let sha512_modq_pre_ out prefix input len tmp =
   pop_frame();
   let h1 = ST.get() in
   assert(modifies_1 tmp h0 h1);
-  assert(let t = as_seq h1 tmp in Hacl.Spec.BignumQ.Mul.all_10_bellow_56 t);
+  assert(let t = as_seq h1 tmp in Hacl.Impl.BignumQ.Mul.all_10_bellow_56 t);
   assert(let t = as_seq h1 tmp in let op_String_Access = Seq.index in
     Hacl.Spec.BignumQ.Eval.eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512);
   Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;
@@ -117,14 +120,15 @@ let sha512_modq_pre out prefix input len =
 private
 val sha512_modq_pre_pre2_:
   out:qelemB ->
-  prefix:buffer Hacl.UInt8.t{length prefix = 32} ->
-  prefix2:buffer Hacl.UInt8.t{length prefix2 = 32} ->
-  input:buffer Hacl.UInt8.t ->
+  prefix:buffer Hacl.UInt8.t{length prefix = 32 /\ disjoint out prefix} ->
+  prefix2:buffer Hacl.UInt8.t{length prefix2 = 32 /\ disjoint out prefix2} ->
+  input:buffer Hacl.UInt8.t{disjoint out input} ->
   len  :UInt32.t{UInt32.v len = length input /\ length input < pow2 32 - 32} ->
   tmp:buffer Hacl.UInt64.t{length tmp = 10 /\ disjoint out tmp} ->
   Stack unit
         (requires (fun h0 -> live h0 input /\ live h0 out /\ live h0 tmp))
         (ensures  (fun h0 _ h1 -> live h0 input /\ live h1 out /\ modifies_2 out tmp h0 h1 /\
+          live h0 prefix /\ live h1 prefix /\ live h0 prefix2 /\ live h1 prefix2 /\
           Hacl.Spec.BignumQ.Eval.eval_q (as_seq h1 out) == Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 prefix @| as_seq h0 prefix2 @| as_seq h0 input) /\
           (let out = as_seq h1 out in let op_String_Access = Seq.index in
            v (out.[0]) < 0x100000000000000 /\ v (out.[1]) < 0x100000000000000 /\
@@ -141,7 +145,7 @@ let sha512_modq_pre_pre2_ out prefix prefix2 input len tmp =
   pop_frame();
   let h1 = ST.get() in
   assert(modifies_1 tmp h0 h1);
-  assert(let t = as_seq h1 tmp in Hacl.Spec.BignumQ.Mul.all_10_bellow_56 t);
+  assert(let t = as_seq h1 tmp in Hacl.Impl.BignumQ.Mul.all_10_bellow_56 t);
   assert(let t = as_seq h1 tmp in let op_String_Access = Seq.index in
     Hacl.Spec.BignumQ.Eval.eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512);
   Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;

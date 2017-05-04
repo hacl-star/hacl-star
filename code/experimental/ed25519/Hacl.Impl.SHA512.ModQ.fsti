@@ -10,7 +10,7 @@ val sha512_modq_pre:
   out:buffer Hacl.UInt64.t{length out = 5} ->
   prefix:buffer Hacl.UInt8.t{length prefix = 32 /\ disjoint prefix out} ->
   input:buffer Hacl.UInt8.t{disjoint out input} ->
-  len  :UInt32.t{UInt32.v len = length input} ->
+  len  :UInt32.t{UInt32.v len = length input /\ length input < pow2 32 - 32} ->
   Stack unit
         (requires (fun h0 -> live h0 input /\ live h0 out /\ live h0 prefix))
         (ensures  (fun h0 _ h1 -> live h0 input /\ live h1 out /\ modifies_1 out h0 h1 /\
@@ -26,7 +26,7 @@ val sha512_modq_pre_pre2:
   prefix:buffer Hacl.UInt8.t{length prefix = 32 /\ disjoint prefix out} ->
   prefix2:buffer Hacl.UInt8.t{length prefix2 = 32 /\ disjoint prefix2 out} ->
   input:buffer Hacl.UInt8.t ->
-  len  :UInt32.t{UInt32.v len = length input} ->
+  len  :UInt32.t{UInt32.v len = length input /\ length input < pow2 32 - 64} ->
   Stack unit
         (requires (fun h0 -> live h0 input /\ live h0 out))
         (ensures  (fun h0 _ h1 -> live h0 input /\ live h1 out /\ modifies_1 out h0 h1 /\

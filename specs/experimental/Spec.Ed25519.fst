@@ -5,7 +5,7 @@ open FStar.Seq
 open FStar.Endianness
 open FStar.UInt8
 open Spec.Lib
-open Spec.SHA2_512
+open Spec.SHA512
 open Spec.Curve25519
 
 
