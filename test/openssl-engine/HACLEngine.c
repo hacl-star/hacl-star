@@ -226,7 +226,7 @@ int hacl_chachapoly_do_cipher(EVP_CIPHER_CTX *ctx,
   const unsigned char *in,
   size_t inl)
 {
-  /* printf("Trace: out=%p, in=%p, inl=%zu\n", out, in, inl); */
+  // printf("Trace: out=%p, in=%p, inl=%zu\n", out, in, inl);
 
   // Note: the benchmarking engine never uses a CTRL call to set the AAD; it
   // also never calls us with out = NULL which, according to the OpenSSL source
@@ -260,7 +260,11 @@ int hacl_chachapoly_cleanup(EVP_CIPHER_CTX *ctx) {
 }
 
 int hacl_chachapoly_ctrl(EVP_CIPHER_CTX *ctx, int type, int arg, void *ptr) {
-  return 1;
+  // This should implement all the operations that its counterpart in
+  // e_chacha20_poly1305.c implements; specifically, the minute we start to
+  // implement this, we should at least implement EVP_CTRL_INIT to make sure we
+  // properly allocate our data structures, and make sure we return 0 otherwise.
+  return 0;
 }
 #endif
 
@@ -446,7 +450,7 @@ void Everest_create_all_the_things() {
   //EVP_CIPHER_meth_set_init(hacl_chachapoly_cipher, hacl_chachapoly_init);
   EVP_CIPHER_meth_set_do_cipher(hacl_chachapoly_cipher, hacl_chachapoly_do_cipher);
   //EVP_CIPHER_meth_set_cleanup(hacl_chachapoly_cipher, hacl_chachapoly_cleanup);
-  EVP_CIPHER_meth_set_ctrl(hacl_chachapoly_cipher, hacl_chachapoly_ctrl);
+  //EVP_CIPHER_meth_set_ctrl(hacl_chachapoly_cipher, hacl_chachapoly_ctrl);
   #elif IMPL == IMPL_OPENSSL
   #else
   #error "Unsupported implementation"
