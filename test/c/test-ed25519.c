@@ -127,7 +127,7 @@ int32_t perf_ed25519() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    crypto_sign_verify_detached(macs + SIGSIZE * i, plain, len, pk11);
+    bools[i] = crypto_sign_verify_detached(macs + SIGSIZE * i, plain, len, pk11);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

@@ -109,6 +109,14 @@ let point_mul_g result scalar =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+val lemma_modifies_none:
+  h:HyperStack.mem -> h':HyperStack.mem -> h'':HyperStack.mem -> h''':HyperStack.mem -> (* b:buffer Hacl.UInt64.t -> *)
+  Lemma (requires (HyperStack.fresh_frame h h' /\ modifies_0 h' h'' /\ HyperStack.popped h'' h'''))
+        (ensures (modifies_none h h'''))
+let lemma_modifies_none h h' h'' h''' =
+  lemma_reveal_modifies_0 h' h''
+
+
 val verify_step_4:
   s:buffer UInt8.t{length s = 32} ->
   h':buffer UInt8.t{length h' = 32} ->
