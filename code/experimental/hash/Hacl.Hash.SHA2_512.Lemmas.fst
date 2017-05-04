@@ -22,6 +22,7 @@ module U64 = FStar.UInt64
 
 module H32 = Hacl.UInt32
 module H64 = Hacl.UInt64
+module H128 = Hacl.UInt128
 
 module HS = FStar.HyperStack
 module Buffer = FStar.Buffer
@@ -39,6 +40,7 @@ private let uint64_t  = FStar.UInt64.t
 private let uint8_ht  = Hacl.UInt8.t
 private let uint32_ht = Hacl.UInt32.t
 private let uint64_ht = Hacl.UInt64.t
+private let uint128_ht = Hacl.UInt128.t
 
 private let uint64_p = Buffer.buffer uint64_ht
 private let uint8_p  = Buffer.buffer uint8_ht
@@ -59,7 +61,7 @@ inline_for_extraction let size_hash     = size_word *^ size_hash_w
 inline_for_extraction let size_block    = size_word *^ size_block_w
 
 (* Sizes of objects in the state *)
-inline_for_extraction let size_k_w     = 64ul  // 80 words of 64 bits (size_block)
+inline_for_extraction let size_k_w     = 80ul  // 80 words of 64 bits (size_block)
 inline_for_extraction let size_ws_w    = size_k_w
 inline_for_extraction let size_whash_w = size_hash_w
 inline_for_extraction let size_count_w = 1ul  // 1 word
@@ -154,15 +156,15 @@ let lemma_update_multi_def hash blocks = ()
 
 #reset-options "--max_fuel 0  --z3rlimit 100"
 
-let lemma_eq_endianness (h:HyperStack.mem) (buf:uint8_p{length buf = 8}) (n:uint64_ht) : Lemma
+let lemma_eq_endianness (h:HyperStack.mem) (buf:uint8_p{length buf = 16}) (n:uint128_ht) : Lemma
   (requires (live h buf /\
             (let seq_buf = as_seq h buf in
-             Hacl.Spec.Endianness.hbig_endian seq_buf = (H64.v n))))
+             Hacl.Spec.Endianness.hbig_endian seq_buf = (H128.v n))))
   (ensures  (live h buf /\
             (let seq_buf = as_seq h buf in
-            seq_buf == Endianness.big_bytes 8ul (H64.v n)))) =
+            seq_buf == Endianness.big_bytes 16ul (H128.v n)))) =
   admit();
-  Seq.lemma_eq_intro (as_seq h buf) (Endianness.big_bytes 8ul (H64.v n))
+  Seq.lemma_eq_intro (as_seq h buf) (Endianness.big_bytes 16ul (H128.v n))
 
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
@@ -211,29 +213,29 @@ Seq.lemma_eq_intro (as_seq h g) (Seq.append (Seq.append seq_a seq_b) seq_c)
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
 
-let lemma_pad_aux_seq (n:uint32_ht) (len:uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block) /\ v n * v size_block + v len < Spec.max_input_len_8}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
+let lemma_pad_aux_seq (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) < (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
   (requires (a == Seq.create 1 0x80uy
-            /\ (b == Seq.create (Spec.pad0_length (v len)) 0uy)
-            /\ (c == Endianness.big_bytes size_len_8 ((v n * v size_block + v len) * 8))))
-  (ensures  (Seq.append (Seq.append a b) c == Spec.pad (v n * v size_block) (v len))) =
+            /\ (b == Seq.create (Spec.pad0_length (H64.v len)) 0uy)
+            /\ (c == Endianness.big_bytes size_len_8 ((H64.v n * v size_block + U64.v len) * 8))))
+  (ensures  (Seq.append (Seq.append a b) c == Spec.pad (H64.v n * v size_block) (U64.v len))) =
 Seq.lemma_eq_intro (Seq.append (Seq.append a b) c) (Seq.append a (Seq.append b c))
 
 
 #reset-options "--max_fuel 0  --z3rlimit 200"
 
-let lemma_pad_aux (h:HyperStack.mem) (n:uint32_ht) (len:uint32_t {(v len + v size_len_8 + 1) < (2 * v size_block) /\ v n * v size_block + v len < Spec.max_input_len_8}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
+let lemma_pad_aux (h:HyperStack.mem) (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) < (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
   (requires (live h a /\ live h b /\ live h c
             /\ (let seq_a = as_seq h a in
             let seq_b = as_seq h b in
             let seq_c = as_seq h c in
             seq_a == Seq.create 1 0x80uy
-            /\ (seq_b == Seq.create (Spec.pad0_length (v len)) 0uy)
-            /\ (seq_c == Endianness.big_bytes size_len_8 ((v n * v size_block + v len) * 8)))))
+            /\ (seq_b == Seq.create (Spec.pad0_length (U64.v len)) 0uy)
+            /\ (seq_c == Endianness.big_bytes size_len_8 ((H64.v n * v size_block + U64.v len) * 8)))))
   (ensures  (live h a /\ live h b /\ live h c
             /\ (let seq_a = as_seq h a in
             let seq_b = as_seq h b in
             let seq_c = as_seq h c in
-            (Seq.append (Seq.append seq_a seq_b) seq_c == Spec.pad (v n * v size_block) (v len))))) =
+            (Seq.append (Seq.append seq_a seq_b) seq_c == Spec.pad (H64.v n * v size_block) (U64.v len))))) =
 let seq_a = as_seq h a in
 let seq_b = as_seq h b in
 let seq_c = as_seq h c in
