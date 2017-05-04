@@ -24,6 +24,28 @@ val lemma_point_inv:
 let lemma_point_inv h p h' p' = ()
 
 
+private
+val lemma_modifies_2_modifies_none:
+  #a:Type -> #a':Type -> h:HyperStack.mem -> h':HyperStack.mem -> h'':HyperStack.mem ->
+  b:buffer a -> b':buffer a' -> Lemma
+    (requires (live h b /\ live h b' /\ modifies_2 b b' h h' /\ modifies_none h' h''))
+    (ensures (modifies_2 b b' h h''))
+let lemma_modifies_2_modifies_none #a #a' h h' h'' b b' =
+  lemma_reveal_modifies_2 b b' h h';
+  lemma_intro_modifies_2 b b' h h''
+
+
+private
+val lemma_modifies_1_is_modifies_2:
+  #a:Type -> #a':Type -> h:HyperStack.mem -> h':HyperStack.mem ->
+  b:buffer a -> b':buffer a' -> Lemma
+    (requires (live h b /\ live h b' /\ modifies_1 b h h'))
+    (ensures (modifies_2 b b' h h'))
+let lemma_modifies_1_is_modifies_2 #a #a' h h' b b' =
+  lemma_reveal_modifies_1 b h h';
+  lemma_intro_modifies_2 b b' h h'
+
+
 val verify__:
   public:uint8_p{length public = 32} ->
   msg:uint8_p ->
@@ -33,7 +55,7 @@ val verify__:
   tmp':buffer UInt8.t{length tmp' = 32 /\ disjoint tmp tmp' /\ disjoint tmp' signature /\ disjoint tmp' public /\ disjoint tmp' msg} ->
   Stack bool
     (requires (fun h -> live h public /\ live h msg /\ live h signature /\ live h tmp /\ live h tmp'))
-    (ensures (fun h0 z h1 -> modifies_1 tmp h0 h1 /\ live h0 msg /\ live h0 public /\ live h0 signature /\
+    (ensures (fun h0 z h1 -> modifies_2 tmp tmp' h0 h1 /\ live h0 msg /\ live h0 public /\ live h0 signature /\
       z == Spec.Ed25519.(verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature))
     ))
 
@@ -41,6 +63,7 @@ val verify__:
 
 let verify__ public msg len signature tmp tmp' =
   assert_norm(Spec.Ed25519.q = 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  assert_norm(pow2 256 = 0x10000000000000000000000000000000000000000000000000000000000000000);
   let a' = Buffer.sub tmp 0ul  20ul in
   let r' = Buffer.sub tmp 20ul 20ul in
   let s  = Buffer.sub tmp 40ul 5ul  in
@@ -51,18 +74,20 @@ let verify__ public msg len signature tmp tmp' =
   no_upd_lemma_1 h0 h1 a' msg;
   no_upd_lemma_1 h0 h1 a' signature;
   no_upd_lemma_1 h0 h1 a' public;
+  lemma_modifies_1_is_modifies_2 h0 h1 tmp tmp';
   let res =
   if b then (
     let h1' = ST.get() in
     assert(point_inv h1' a');
     let rs = Buffer.sub signature 0ul 32ul in
-    (* let b' = Hacl.Impl.Ed25519.PointDecompress.point_decompress r' rs in *)
     let b' = verify_step_1 r' signature in
     let h2 = ST.get() in
     no_upd_lemma_1 h1 h2 r' a';
     no_upd_lemma_1 h1 h2 r' msg;
     no_upd_lemma_1 h1 h2 r' signature;
     no_upd_lemma_1 h1 h2 r' public;
+    lemma_modifies_1_is_modifies_2 h1 h2 tmp tmp';
+    lemma_modifies_2_trans tmp tmp' h0 h1 h2;
     if b' then (
       let h2' = ST.get() in
       Seq.lemma_eq_intro (as_seq h2' (Buffer.sub signature 32ul 32ul)) (Seq.slice (as_seq h0 signature) 32 64);
@@ -78,17 +103,21 @@ let verify__ public msg len signature tmp tmp' =
       no_upd_lemma_1 h2 h3 s public;
       lemma_point_inv h2' a' h3 a';
       lemma_point_inv h2' r' h3 r';
+      lemma_modifies_1_is_modifies_2 h2 h3 tmp tmp';
+      lemma_modifies_2_trans tmp tmp' h1 h2 h3;
       let b'' = Hacl.Impl.Ed25519.PointEqual.gte_q s in
       if b'' then (
-        (* assert( *)
-        (* let public = as_seq h0 public in *)
-        (* let msg = as_seq h0 msg in *)
-        (* let signature = as_seq h0 signature in *)
-        (* false == Spec.Ed25519.(verify public msg signature)); *)
+        assert(
+        let public = as_seq h0 public in
+        let msg = as_seq h0 msg in
+        let signature = as_seq h0 signature in
+        false == Spec.Ed25519.(verify public msg signature));
         false)
       else (      
         verify_step_2 h' msg len rs public;
         let h4 = ST.get() in
+        Endianness.lemma_little_endian_inj (as_seq h4 h') Spec.Ed25519.(Endianness.little_bytes 32ul (sha512_modq FStar.Seq.(as_seq h2 rs @| as_seq h0 public @| as_seq h0 msg)));
+        Endianness.lemma_little_endian_inj (as_seq h4 (Buffer.sub signature 32ul 32ul)) Spec.Ed25519.(Endianness.little_bytes 32ul (Endianness.little_endian (Seq.slice (as_seq h0 signature) 32 64)));
         no_upd_lemma_1 h3 h4 h' a';
         no_upd_lemma_1 h3 h4 h' r';
         no_upd_lemma_1 h3 h4 h' msg;
@@ -96,43 +125,21 @@ let verify__ public msg len signature tmp tmp' =
         no_upd_lemma_1 h3 h4 h' public;
         lemma_point_inv h3 a' h4 a';
         lemma_point_inv h3 r' h4 r';        
+        lemma_modifies_1_is_modifies_2 h3 h4 tmp' tmp;
+        assert(modifies_2 tmp tmp' h0 h4);
+        lemma_modifies_2_comm tmp tmp' h3 h4;
+        lemma_modifies_2_trans tmp tmp' h2 h3 h4;
         let b = verify_step_4 (Buffer.sub signature 32ul 32ul) h' a' r' in
         let h5 = ST.get() in
+        lemma_modifies_2_modifies_none h0 h4 h5 tmp tmp';
         b
-        (* let rs_public_msg = create 0uy (len +^ 64ul) in *)
-        (* blit rs 0ul rs_public_msg 0ul 32ul; *)
-        (* blit public 0ul rs_public_msg 32ul 32ul; *)
-        (* blit msg 0ul rs_public_msg 64ul len; *)
-        (* let h = create 0uL 5ul in *)
-        (* Hacl.Impl.SHA512.ModQ.sha512_modq h rs_public_msg (len +^ 64ul); *)
-        (* let g = create 0uL 20ul in *)
-        (* Hacl.Impl.Ed25519.G.make_g g; *)
-        (* Hacl.Impl.Ed25519.Ladder.point_mul sB (Buffer.sub signature 32ul 32ul) g; *)
-        (* let h' = create 0uy 32ul in *)
-        (* Hacl.Impl.Store56.store_56 h' h; *)
-        (* Hacl.Impl.Ed25519.Ladder.point_mul hA h' a'; *)
-        (* Hacl.Impl.Ed25519.PointAdd.point_add rhA r' hA; *)
-        (* Hacl.Impl.Ed25519.PointEqual.point_equal sB rhA *)
       )
-    ) else (    
-        assert(
-        let public = as_seq h0 public in
-        let msg = as_seq h0 msg in
-        let signature = as_seq h0 signature in
-        false == Spec.Ed25519.(verify public msg signature));
-        false )
-  ) else (
-    let h = ST.get() in
-    assert(
-      let public = as_seq h0 public in
-      let msg = as_seq h0 msg in
-      let signature = as_seq h0 signature in
-      false == Spec.Ed25519.(verify public msg signature));
-    false) in
+    ) else false
+  ) else false in
   let hfin = ST.get() in
-  assume (modifies_1 tmp h0 hfin);
   res
 
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val verify_:
   public:uint8_p{length public = 32} ->
@@ -142,23 +149,27 @@ val verify_:
   Stack bool
     (requires (fun h -> live h public /\ live h msg /\ live h signature))
     (ensures (fun h0 z h1 -> modifies_0 h0 h1 /\ live h0 msg /\ live h0 public /\ live h0 signature /\
-      z == Spec.Ed25519.(verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature))
-    ))
+      z == Spec.Ed25519.(verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature))))
 let verify_ public msg len signature =
+  let h0 = ST.get() in
   push_frame();
+  let h1 = ST.get() in
   let tmp = create 0uL 45ul in
   push_frame();
   let tmp' = create 0uy 32ul in
   let res = verify__ public msg len signature tmp tmp' in
   pop_frame();
+  let h2 = ST.get() in
   pop_frame();
+  let h3 = ST.get() in
+  lemma_modifies_none h0 h1 h2 h3;
   res
 
 
 val verify:
   public:uint8_p{length public = 32} ->
   msg:uint8_p ->
-  len:UInt32.t{length msg = UInt32.v len} ->
+  len:UInt32.t{length msg = UInt32.v len /\ length msg < pow2 32 - 64} ->
   signature:uint8_p{length signature = 64} ->
   Stack bool
     (requires (fun h -> live h public /\ live h msg /\ live h signature))

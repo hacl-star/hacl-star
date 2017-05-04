@@ -110,12 +110,13 @@ let point_mul_g result scalar =
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 val lemma_modifies_none:
-  h:HyperStack.mem -> h':HyperStack.mem -> h'':HyperStack.mem -> h''':HyperStack.mem -> (* b:buffer Hacl.UInt64.t -> *)
+  h:HyperStack.mem -> h':HyperStack.mem -> h'':HyperStack.mem -> h''':HyperStack.mem ->
   Lemma (requires (HyperStack.fresh_frame h h' /\ modifies_0 h' h'' /\ HyperStack.popped h'' h'''))
         (ensures (modifies_none h h'''))
 let lemma_modifies_none h h' h'' h''' =
   lemma_reveal_modifies_0 h' h''
 
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val verify_step_4:
   s:buffer UInt8.t{length s = 32} ->
@@ -125,7 +126,7 @@ val verify_step_4:
   Stack bool
     (requires (fun h -> live h s  /\ live h h' /\ live h a' /\ live h r' /\ point_inv h a' /\ point_inv h r'))
     (ensures (fun h0 z h1 -> live h0 s /\ live h0 h' /\ live h0 a' /\ live h0 r' /\
-      live h1 s /\ live h1 h' /\ live h1 a' /\ modifies_0 h0 h1 /\ live h1 r' /\
+      live h1 s /\ live h1 h' /\ live h1 a' /\ modifies_none h0 h1 /\ live h1 r' /\
       z == Spec.Ed25519.(
         let sB = point_mul (as_seq h0 s) g in
         let hA = point_mul (as_seq h0 h') (as_point h0 a') in
@@ -134,6 +135,7 @@ val verify_step_4:
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
 let verify_step_4 s h' a' r' =
+  let h00 = ST.get() in
   push_frame();
   let h0 = ST.get() in
   let tmp = Buffer.create 0uL 60ul in
@@ -160,4 +162,6 @@ let verify_step_4 s h' a' r' =
   let b = Hacl.Impl.Ed25519.PointEqual.point_equal sB rhA in
   let h5 = ST.get() in
   pop_frame();
+  let h01 = ST.get() in
+  lemma_modifies_none h00 h0 h5 h01;
   b
