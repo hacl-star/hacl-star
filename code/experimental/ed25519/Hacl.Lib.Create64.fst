@@ -1,6 +1,6 @@
 module Hacl.Lib.Create64
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 open FStar.Buffer
 open Seq.Create

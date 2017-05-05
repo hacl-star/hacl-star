@@ -77,7 +77,7 @@ SLOW=
 # Files that still have errors
 TODO=
 
-ED25519_FILES= $(BIGNUM) $(ED25519_SPECIFIC)
+ED25519_FILES= $(ED25519_SPECIFIC) # $(BIGNUM) 
 
 
 HINTS_ENABLED?=--use_hints --record_hints
@@ -103,6 +103,8 @@ all-ct: $(addsuffix -ct, $(ED25519_FILES))
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
 	$(FSTARB) $^
+%.fsti-verify: %.fsti
+	$(FSTARB) $^
 
 all-ver: $(addsuffix -verify, $(ED25519_FILES))
 
@@ -114,6 +116,8 @@ all-lax: $(addsuffix -lax, $(ED25519_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
+	-$(FSTARB) $^
+%.fsti-hints: %.fsti
 	-$(FSTARB) $^
 
 all-hints2: $(addsuffix -hints, $(ED25519_FILES))
