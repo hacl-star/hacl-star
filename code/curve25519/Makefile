@@ -1,8 +1,4 @@
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=../..
 include ../Makefile.include
-
 
 BIGNUM= \
 	../bignum/Hacl.Bignum.Limb.fst \
@@ -54,17 +50,13 @@ TODO=
 
 X25519_FILES= $(BIGNUM) $(X25519_SPECIFIC)
 
-
-HINTS_ENABLED?=--use_hints --record_hints
-
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTARB=$(FSTAR_BASE) \
 		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs \
-		$(HINTS_ENABLED) $(OTHERFLAGS)
-
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
 		--include ../../specs
+
+FSTAR_CT=$(FSTAR_BASE) \
+		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+		--include ../../specs $(HINTS_ENABLED) $(OTHERFLAGS)
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -86,7 +78,7 @@ all-lax: $(addsuffix -lax, $(X25519_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^
+	-$(FSTARB) --record_hints $^
 
 all-hints2: $(addsuffix -hints, $(X25519_FILES))
 

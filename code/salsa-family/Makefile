@@ -1,8 +1,4 @@
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=../..
 include ../Makefile.include
-
 
 SALSA_FILES= \
 	Hacl.Test.Chacha20.fst \
@@ -26,13 +22,13 @@ SLOW=
 BROKEN=
 
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs $(OTHERFLAGS)
+FSTARB=$(FSTAR_BASE) \
+	--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+	--include ../../specs 
 
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs
+FSTAR_CT=$(FSTAR_BASE) \
+	--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+	--include ../../specs 
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -42,7 +38,7 @@ all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^
 
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 
@@ -57,7 +53,7 @@ all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	-$(FSTARB) --record_hints $^
 
 all-hints: $(addsuffix -hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES)))
 
