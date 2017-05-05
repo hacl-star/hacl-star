@@ -4,29 +4,14 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
 
-(* open Hacl.Bignum.Parameters *)
 open Hacl.Bignum25519
-(* open Hacl.Spec.Bignum.Bigint *)
-(* open Hacl.Bignum.Limb *)
-(* open Hacl.Bignum.Fsquare *)
-(* open Hacl.Bignum.Fmul *)
-(* open Hacl.Spec.Bignum.Crecip *)
-(* open Hacl.Spec.EC.AddAndDouble *)
 
 
-(* #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10" *)
-
-(* private let lemma_53_is_5413 (s:seqelem{red_53 s}) : Lemma (red_5413 s) = () *)
-(* private let lemma_513_is_53 (s:seqelem{red_513 s}) : Lemma (red_53 s) = () *)
-(* private let lemma_513_is_55 (s:seqelem{red_513 s}) : Lemma (red_55 s) = () *)
-(* private let lemma_513_is_5413 (s:seqelem{red_513 s}) : Lemma (red_5413 s) = () *)
-(* private let lemma_513_is_52 (s:seqelem{red_513 s}) : Lemma (red_52 s) = () *)
-(* private let lemma_5413_is_55 (s:seqelem{red_5413 s}) : Lemma (Hacl.Spec.EC.AddAndDouble.red_55 s) = () *)
-
-(* #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20" *)
+#reset-options "--max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
-inline_for_extraction private val fmul:
+private
+val fmul:
   output:felem ->
   a:felem ->
   b:felem ->
@@ -36,21 +21,20 @@ inline_for_extraction private val fmul:
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 a /\ live h0 b
       /\ red_513 (as_seq h0 a) /\ red_513 (as_seq h0 b)
       /\ modifies_1 output h0 h1 /\ live h1 output
-      /\ red_513 (as_seq h1 output)
+      /\ red_513 (as_seq h1 output) /\
+      seval (as_seq h1 output) == Spec.Curve25519.(seval (as_seq h0 a) *@ seval (as_seq h0 b))
       (* /\ Hacl.Spec.Bignum.Fmul.fmul_pre (as_seq h0 a) (as_seq h0 b) *)
-      (* /\ eval h1 output % prime = (eval h0 a * eval h0 b) % prime *)
       (* /\ as_seq h1 output == Hacl.Spec.Bignum.fmul_tot (as_seq h0 a) (as_seq h0 b) *)
       ))
 [@"substitute"]
-inline_for_extraction private let fmul output a b =
-  (* let h = ST.get() in *)
-  (* lemma_513_is_53 (as_seq h a); *)
-  (* lemma_513_is_55 (as_seq h b); *)
-  (* fmul_53_55_is_fine (as_seq h a) (as_seq h b); *)
+private let fmul output a b =
+  let h = ST.get() in
+  lemma_red_513_is_red_53 (as_seq h a);
+  lemma_red_513_is_red_5413 (as_seq h b);
   fmul output a b
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
 inline_for_extraction private val fsquare_times:
@@ -61,8 +45,8 @@ inline_for_extraction private val fsquare_times:
     (requires (fun h -> live h output /\ live h input
       /\ red_513 (as_seq h input)))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ live h0 input /\ modifies_1 output h0 h1
-      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 input)
-      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
+      /\ red_513 (as_seq h0 input)
+      /\ red_513 (as_seq h1 output)
       (* /\ (as_seq h1 output) == Hacl.Spec.Bignum.Fsquare.fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count))) *)
       ))
 [@"substitute"]
@@ -79,8 +63,8 @@ inline_for_extraction private val fsquare_times_inplace:
   Stack unit
     (requires (fun h -> live h output /\ red_513 (as_seq h output)))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
-      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 output)
-      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
+      /\ red_513 (as_seq h0 output)
+      /\ red_513 (as_seq h1 output)
       (* /\ (as_seq h1 output) == Hacl.Spec.Bignum.Fsquare.fsquare_times_tot (as_seq h0 output) (FStar.UInt32.v count) *)
     ))
 [@"substitute"]
