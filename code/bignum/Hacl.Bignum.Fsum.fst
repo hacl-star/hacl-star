@@ -14,7 +14,7 @@ module U32 = FStar.UInt32
 
 let red_c h (f:felem) ctr = live h f /\ red (as_seq h f) ctr
 
-[@"c_inline"]
+[@"substitute"]
 val fsum_:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -22,6 +22,6 @@ val fsum_:
     (requires (fun h -> red_c h a len /\ red_c h b len))
     (ensures (fun h0 _ h1 -> red_c h0 a len /\ red_c h0 b len /\ live h1 a /\ modifies_1 a h0 h1
       /\ as_seq h1 a == fsum_spec (as_seq h0 a) (as_seq h0 b)))
-[@"c_inline"]
+[@"substitute"]
 let rec fsum_ a b =
   C.Loops.in_place_map2 a b clen (fun x y -> x +%^ y)

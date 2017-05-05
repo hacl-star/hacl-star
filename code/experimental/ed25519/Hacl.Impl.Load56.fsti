@@ -46,5 +46,11 @@ val load_32_bytes:
     (requires (fun h -> live h out /\ live h b))
     (ensures (fun h0 _ h1 -> live h1 out /\ modifies_1 out h0 h1 /\ live h0 b
       /\ (let out = as_seq h1 out in
+         let op_String_Access = Seq.index in
+         v out.[0] < 0x100000000000000
+         /\ v out.[1] < 0x100000000000000
+         /\ v out.[2] < 0x100000000000000
+         /\ v out.[3] < 0x100000000000000
+         /\ v out.[4] < 0x100000000000000 /\
          little_endian (as_seq h0 b)
           == Hacl.Spec.BignumQ.Eval.eval_q out)))

@@ -14,6 +14,58 @@ let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 open Hacl.Impl.Ed25519.Sign.Steps
 
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
+val lemma_modifies_3:
+  h0:HyperStack.mem ->
+  h1:HyperStack.mem ->
+  h2:HyperStack.mem ->
+  h3:HyperStack.mem ->
+  h4:HyperStack.mem ->
+  h5:HyperStack.mem ->
+  h6:HyperStack.mem ->
+  a:hint8_p -> b:hint8_p{disjoint a b} -> c:buffer Hacl.UInt64.t{disjoint b c /\ disjoint a c} ->
+  Lemma (requires (live h0 a /\ live h0 b /\ live h0 c /\ modifies_1 b h0 h1 /\ modifies_1 c h1 h2 /\ modifies_1 b h2 h3 /\ modifies_1 c h3 h4 /\ modifies_2 b c h4 h5 /\ modifies_1 a h5 h6 /\ HyperStack.equal_domains h0 h1 /\ HyperStack.equal_domains h1 h2 /\ HyperStack.equal_domains h2 h3 /\ HyperStack.equal_domains h3 h4 /\ HyperStack.equal_domains h4 h5 /\ HyperStack.equal_domains h5 h6))
+        (ensures (modifies_3 a b c h0 h6))
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+let lemma_modifies_3 h0 h1 h2 h3 h4 h5 h6 a b c =
+  assert(modifies_2 b c h0 h2);
+  assert(live h2 b /\ live h2 c);
+  assert(modifies_2 b c h2 h4);
+  assert(modifies_2 b c h0 h5);
+  lemma_reveal_modifies_2 b c h0 h5;
+  lemma_reveal_modifies_1 a h5 h6;
+  lemma_intro_modifies_3 a b c h0 h6
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
+private
+val append_to_sig:
+  signature:hint8_p{length signature = 64} ->
+  a:hint8_p{length a = 32 /\ disjoint a signature} -> 
+  b:hint8_p{length b = 32 /\ disjoint b signature} ->
+  Stack unit
+    (requires (fun h -> live h signature /\ live h a /\ live h b))
+    (ensures (fun h0 _ h1 -> live h1 signature /\ live h0 a /\ live h0 b /\ modifies_1 signature h0 h1
+      /\ as_seq h1 signature == FStar.Seq.(as_seq h0 a @| as_seq h0 b)))
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+let append_to_sig signature a b =
+  let h0 = ST.get() in
+  copy_bytes (Buffer.sub signature 0ul 32ul) a 32ul;
+  let h1 = ST.get() in
+  no_upd_lemma_1 h0 h1 signature b;
+  copy_bytes (Buffer.sub signature 32ul 32ul) b 32ul;
+  let h2 = ST.get() in
+  no_upd_lemma_1 h1 h2 (Buffer.sub signature 32ul 32ul) (Buffer.sub signature 0ul 32ul);
+  Seq.lemma_eq_intro (as_seq h2 signature) FStar.Seq.(as_seq h0 a @| as_seq h0 b)
+  
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
 [@ "substitute"]
 private
 val sign__:
@@ -21,57 +73,75 @@ val sign__:
   secret:hint8_p{length secret = 32} ->
   msg:hint8_p{length msg < pow2 32 - 64} ->
   len:UInt32.t{UInt32.v len = length msg} ->
-  g:point ->
-  tmp_bytes:hint8_p{length tmp_bytes = 352 + UInt32.v len} ->
-  tmp_ints:buffer Hacl.UInt64.t{length tmp_ints = 65} ->
+  tmp_bytes:hint8_p{length tmp_bytes = 352 /\ disjoint tmp_bytes signature /\ disjoint tmp_bytes secret /\ disjoint tmp_bytes msg} ->
+  tmp_ints:buffer Hacl.UInt64.t{length tmp_ints = 65 /\ disjoint tmp_ints tmp_bytes /\ disjoint tmp_ints signature /\ disjoint tmp_ints secret /\ disjoint tmp_ints msg} ->
   Stack unit
-    (requires (fun h -> live h signature /\ live h msg /\ live h secret /\ live h g /\ 
-      live h tmp_bytes /\ live h tmp_ints /\ as_point h g == Spec.Ed25519.g /\
-      as_seq h (Buffer.sub tmp_bytes 64ul len) == as_seq h msg))
+    (requires (fun h -> live h signature /\ live h msg /\ live h secret /\
+      live h tmp_bytes /\ live h tmp_ints))
     (ensures (fun h0 _ h1 -> live h0 signature /\ live h0 msg /\ live h0 secret /\
       live h1 signature /\ modifies_3 signature tmp_bytes tmp_ints h0 h1 /\
       h1.[signature] == Spec.Ed25519.sign h0.[secret] h0.[msg]))
 
 
-#reset-options "--max_fuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --z3rlimit 500"
 
-let sign__ signature secret msg len g tmp_bytes tmp_ints =
-  let tmp_bytes' = tmp_bytes in
-  let tmpa = Buffer.sub tmp_ints 0ul  20ul in
+let sign__ signature secret msg len tmp_bytes tmp_ints =
+  assert_norm(pow2 56 = 0x100000000000000);
+  assert_norm(Spec.Ed25519.q = 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  assert_norm(pow2 256 = 0x10000000000000000000000000000000000000000000000000000000000000000);
   let r    = Buffer.sub tmp_ints 20ul 5ul  in
-  let r'   = Buffer.sub tmp_ints 25ul 20ul in
-  let aq   = Buffer.sub tmp_ints 45ul 5ul  in
-  let ha   = Buffer.sub tmp_ints 50ul 5ul  in
-  let s    = Buffer.sub tmp_ints 55ul 5ul  in
   let h    = Buffer.sub tmp_ints 60ul 5ul  in
-  let prefix_at_message = Buffer.sub tmp_bytes 0ul FStar.UInt32.(64ul +^ len) in
-  let tmp_bytes         = Buffer.offset tmp_bytes FStar.UInt32.(64ul +^ len) in
-  let buf  = Buffer.sub tmp_bytes 0ul   96ul in
-  let a''  = Buffer.sub tmp_bytes 96ul  32ul in
-  let rb   = Buffer.sub tmp_bytes 128ul 32ul in
   let rs'  = Buffer.sub tmp_bytes 160ul 32ul in
   let s'   = Buffer.sub tmp_bytes 192ul 32ul in
-  let apre = Buffer.sub tmp_bytes 224ul 64ul in
-  
-  sign_step_1 signature secret msg len g tmp_bytes' tmp_ints;
-
-  (* TODO: use an incremental version of SHA instead so as to minimize
-  the copies and enable compilation with CompCert *)
-
-  sign_step_2 signature secret msg len g tmp_bytes' tmp_ints;
-
-  sign_step_3 signature secret msg len g tmp_bytes' tmp_ints;
-
-  sign_step_4 signature secret msg len g tmp_bytes' tmp_ints;
-
-  sign_step_5 signature secret msg len g tmp_bytes' tmp_ints;
-
-  copy_bytes (Buffer.sub signature 0ul 32ul) rs' 32ul;
-  copy_bytes (Buffer.sub signature 32ul 32ul) s' 32ul;
-  let h'' = ST.get() in
-  (* lemma_append2 h'' signature 32ul 32ul; *)
+  let h0 = ST.get() in
+  sign_step_1 secret tmp_bytes tmp_ints;
+  let h1 = ST.get() in
+  no_upd_lemma_1 h0 h1 tmp_bytes msg;
+  no_upd_lemma_1 h0 h1 tmp_bytes tmp_ints;
+  sign_step_2 msg len tmp_bytes tmp_ints;
+  let h2 = ST.get() in
+  no_upd_lemma_1 h1 h2 tmp_ints msg;
+  no_upd_lemma_1 h1 h2 tmp_ints tmp_bytes;
+  sign_step_3 tmp_bytes tmp_ints;
+  let h3 = ST.get() in
+  no_upd_lemma_1 h2 h3 tmp_bytes msg;
+  no_upd_lemma_1 h2 h3 tmp_bytes tmp_ints;
+  sign_step_4 msg len tmp_bytes tmp_ints;
+  let h4 = ST.get() in
+  no_upd_lemma_1 h2 h3 tmp_bytes msg;
+  no_upd_lemma_1 h2 h3 tmp_bytes tmp_ints;
+  assert(Hacl.Spec.BignumQ.Eval.eval_q (as_seq h4 r) < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  assert(Hacl.Spec.BignumQ.Eval.eval_q (as_seq h4 h) < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  sign_step_5 tmp_bytes tmp_ints;
+  let h5 = ST.get() in
+  append_to_sig signature rs' s';
+  let h6 = ST.get() in
+  lemma_modifies_3 h0 h1 h2 h3 h4 h5 h6 signature tmp_bytes tmp_ints;
   ()
 
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
+
+val lemma_modifies_3_to_modifies_2:
+  #a:Type -> #a':Type -> #a'':Type ->
+  h0:HyperStack.mem ->
+  h1:HyperStack.mem ->
+  h2:HyperStack.mem ->
+  h3:HyperStack.mem ->
+  h4:HyperStack.mem ->
+  b:buffer a -> b':buffer a' -> b'':buffer a'' ->
+  Lemma (requires (live h0 b /\ live h0 b' /\ HyperStack.fresh_frame h0 h1 /\ modifies_0 h1 h2 /\
+    b'' `unused_in` h1 /\ live h2 b'' /\ frameOf b'' = FStar.HyperStack.(h1.tip) /\ modifies_3 b b' b'' h2 h3 /\
+    HyperStack.popped h3 h4 /\ HyperStack.equal_domains h2 h3))
+        (ensures (modifies_2 b b' h0 h4))
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+let lemma_modifies_3_to_modifies_2 #a #a' #a'' h0 h1 h2 h3 h4 b b' b'' =
+  lemma_reveal_modifies_0 h1 h2;
+  lemma_reveal_modifies_3 b b' b'' h2 h3;
+  lemma_intro_modifies_2 b b' h0 h4
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
@@ -80,34 +150,34 @@ val sign_:
   secret:hint8_p{length secret = 32} ->
   msg:hint8_p{length msg < pow2 32 - 64} ->
   len:UInt32.t{UInt32.v len = length msg /\ UInt32.v len + 352 < pow2 32} ->
-  g:point ->
   Stack unit
-    (requires (fun h -> live h signature /\ live h msg /\ live h secret /\ live h g /\ 
-      as_point h g == Spec.Ed25519.g))
+    (requires (fun h -> live h signature /\ live h msg /\ live h secret))
     (ensures (fun h0 _ h1 -> live h0 signature /\ live h0 msg /\ live h0 secret /\
       live h1 signature /\ modifies_1 signature h0 h1 /\
       h1.[signature] == Spec.Ed25519.sign h0.[secret] h0.[msg]))
 
-#reset-options "--max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
-let sign_ signature secret msg len g =
+let sign_ signature secret msg len =
+  let hh0 = ST.get() in
   push_frame();
-  let tmp_bytes = Buffer.create 0uy (352ul +^ len) in
-  push_frame();
+  let hh1 = ST.get() in
+  let tmp_bytes = Buffer.create 0uy (352ul) in
   let h0 = ST.get() in
-  let tmp_ints  = Buffer.create 0uL 65ul in
-  let msg'      = Buffer.sub tmp_bytes 64ul len in
+  push_frame();
   let h1 = ST.get() in
-  no_upd_lemma_0 h0 h1 g;
-  no_upd_lemma_0 h0 h1 msg;
-  copy_bytes msg' msg len;
+  let tmp_ints  = Buffer.create 0uL 65ul in
   let h2 = ST.get() in
-  no_upd_lemma_1 h1 h2 msg' g;
-  assert(modifies_0 h0 h2);
-  sign__ signature secret msg len g tmp_bytes tmp_ints;
+  no_upd_lemma_0 h1 h2 secret;
+  no_upd_lemma_0 h1 h2 msg;
+  sign__ signature secret msg len tmp_bytes tmp_ints;
   let h3 = ST.get() in
   pop_frame();
-  pop_frame()
+  let h4 = ST.get() in
+  lemma_modifies_3_to_modifies_2 h0 h1 h2 h3 h4 signature tmp_bytes tmp_ints;
+  pop_frame();
+  let hh1 = ST.get() in
+  ()
 
 
 val sign:
@@ -124,12 +194,4 @@ val sign:
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 let sign signature secret msg len =
-  push_frame();
-  let h0 = ST.get() in
-  let g = create 0uL 20ul in
-  Hacl.Impl.Ed25519.G.make_g g;
-  let h1 = ST.get() in
-  assume (as_point h1 g == Spec.Ed25519.g);
-  sign_ signature secret msg len g;
-  let h2 = ST.get() in
-  pop_frame()
+  sign_ signature secret msg len

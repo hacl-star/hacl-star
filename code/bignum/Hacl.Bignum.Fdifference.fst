@@ -16,7 +16,7 @@ let gte_limbs_c h (a:felem) h' (b:felem) (l:nat{l <= len}) : GTot Type0 =
   live h a /\ live h' b /\ gte_limbs (as_seq h a) (as_seq h' b) l
 
 
-[@"c_inline"]
+[@"substitute"]
 val fdifference_:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -24,6 +24,6 @@ val fdifference_:
     (requires (fun h -> gte_limbs_c h a h b len))
     (ensures (fun h0 _ h1 -> gte_limbs_c h0 a h0 b len /\ live h1 a /\ modifies_1 a h0 h1
       /\ as_seq h1 a == fdifference_spec (as_seq h0 a) (as_seq h0 b)))
-[@"c_inline"]
+[@"substitute"]
 let rec fdifference_ a b =
   C.Loops.in_place_map2 a b clen (fun x y -> y -%^ x)

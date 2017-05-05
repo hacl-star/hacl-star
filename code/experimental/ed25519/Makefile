@@ -37,13 +37,13 @@ HINTS_ENABLED?=--use_hints --record_hints
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs  --include $(HACL_HOME)/specs/experimental \
-		--include $(HACL_HOME)/code/curve25519 \
+		--include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/code/experimental/hash \
 		$(HINTS_ENABLED) $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		--include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
-		--include $(HACL_HOME)/code/curve25519
+		--include $(HACL_HOME)/code/curve25519  --include $(HACL_HOME)/code/experimental/hash
 
 
 # Lax typechecking against the restricted integer interface
@@ -94,14 +94,16 @@ specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_SPECIF
 
 KEMLIN_SKIP_COMPILATION=$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 		-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
-		-I ../../../specs/experimental \
+		-I ../../../specs/experimental -I ../hash \
 		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
 		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
 		-drop Prims -drop FStar -bundle 'Hacl.Bignum25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum25519' \
 		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-		-skip-compilation
+		-skip-compilation -fsopt '--eager_inference'
 
+../hash/sha2-c/SHA2_512.c:
+	$(MAKE) -C ../hash sha2-c/SHA2_512.c
 
 ed25519-c/Ed25519.c: \
 	Hacl.Bignum25519.fst \
@@ -121,10 +123,10 @@ ed25519-c/Ed25519.c: \
 	Hacl.Impl.Ed25519.Ladder.Step.fst \
 	Hacl.Impl.Ed25519.Ladder.fst \
 	Hacl.Impl.Ed25519.PointEqual.fst \
-	Ed25519.fst 
+	Ed25519.fst
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
-	 	-I ../../../specs/experimental \
+	 	-I ../../../specs/experimental -I ../hash \
 	 	$^ \
 	 	-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
 	 	-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
@@ -134,7 +136,7 @@ ed25519-c/Ed25519.c: \
 
 extract-c:ed25519-c/Ed25519.c
 
-ed25519.exe: Hacl_Impl_Sha512.c ed25519-c/Ed25519.c
+ed25519.exe: ../hash/sha2-c/SHA2_512.c ed25519-c/Ed25519.c
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
 	 	-I ../../../specs/experimental \

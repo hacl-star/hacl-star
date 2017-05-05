@@ -6,7 +6,6 @@ open FStar.HyperStack
 open FStar.Buffer
 
 open Hacl.Impl.Ed25519.ExtPoint
-open Hacl.Impl.Ed25519.Ladder.Step
 
 
 #reset-options "--max_fuel 0 --z3rlimit 20"

@@ -55,20 +55,68 @@ val verify_step_2:
         FStar.Endianness.(little_bytes 32ul (Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 rs @| as_seq h0 public @| as_seq h0 msg))) ))
 
 let verify_step_2 r msg len rs public =
-  admit();
+  assert_norm(pow2 56 = 0x100000000000000);
   push_frame();
-  let rs_public_msg = create 0uy (len +^ 64ul) in
-  push_frame();
+  let h0 = ST.get() in
   let r' = create 0uL 5ul in
-  blit rs 0ul rs_public_msg 0ul 32ul;
-  blit public 0ul rs_public_msg 32ul 32ul;
-  blit msg 0ul rs_public_msg 64ul len;
-  Hacl.Impl.SHA512.ModQ.sha512_modq r' rs_public_msg (len +^ 64ul);
+  let h1 = ST.get() in
+  no_upd_lemma_0 h0 h1 rs;
+  no_upd_lemma_0 h0 h1 public;
+  no_upd_lemma_0 h0 h1 msg;
+  Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2 r' rs public msg len;  
+  let h2 = ST.get() in
+  no_upd_lemma_1 h1 h2 r' rs;
+  no_upd_lemma_1 h1 h2 r' public;
+  no_upd_lemma_1 h1 h2 r' msg;
   Hacl.Impl.Store56.store_56 r r';
-  pop_frame();
+  let h3 = ST.get() in
+  no_upd_lemma_1 h2 h3 r rs;
+  no_upd_lemma_1 h2 h3 r public;
+  no_upd_lemma_1 h2 h3 r msg;
+  Endianness.lemma_little_endian_inj (as_seq h3 r)
+                                     (Endianness.little_bytes 32ul (Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 rs @| as_seq h0 public @| as_seq h0 msg)));
   pop_frame()
 
 
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
+val point_mul_g:
+  result:point ->
+  scalar:buffer Hacl.UInt8.t{length scalar = 32 /\ disjoint result scalar} ->
+  Stack unit
+  (requires (fun h -> Buffer.live h scalar /\ live h result))
+  (ensures (fun h0 _ h1 -> Buffer.live h0 scalar /\ live h0 result /\
+    live h1 result /\ modifies_1 result h0 h1 /\ point_inv h1 result /\
+    (let r = as_point h1 result in
+     let n  = as_seq h0 scalar in
+     r == Spec.Ed25519.point_mul n Spec.Ed25519.g) ))
+
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
+let point_mul_g result scalar =
+  push_frame();
+  let h0 = ST.get() in
+  let g = create 0uL 20ul in
+  Hacl.Impl.Ed25519.G.make_g g;
+  let h1 = ST.get() in
+  no_upd_lemma_0 h0 h1 scalar;
+  Hacl.Impl.Ed25519.Ladder.point_mul result scalar g;
+  let h2 = ST.get() in
+  no_upd_lemma_1 h1 h2 result scalar;
+  pop_frame()
+
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
+val lemma_modifies_none:
+  h:HyperStack.mem -> h':HyperStack.mem -> h'':HyperStack.mem -> h''':HyperStack.mem ->
+  Lemma (requires (HyperStack.fresh_frame h h' /\ modifies_0 h' h'' /\ HyperStack.popped h'' h'''))
+        (ensures (modifies_none h h'''))
+let lemma_modifies_none h h' h'' h''' =
+  lemma_reveal_modifies_0 h' h''
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val verify_step_4:
   s:buffer UInt8.t{length s = 32} ->
@@ -76,28 +124,44 @@ val verify_step_4:
   a':point ->
   r':point ->
   Stack bool
-    (requires (fun h -> live h s  /\ live h h' /\ live h a' /\ live h r'))
+    (requires (fun h -> live h s  /\ live h h' /\ live h a' /\ live h r' /\ point_inv h a' /\ point_inv h r'))
     (ensures (fun h0 z h1 -> live h0 s /\ live h0 h' /\ live h0 a' /\ live h0 r' /\
-      live h1 s /\ live h1 h' /\ live h1 a' /\ modifies_0 h0 h1 /\ live h1 r' /\
+      live h1 s /\ live h1 h' /\ live h1 a' /\ modifies_none h0 h1 /\ live h1 r' /\
       z == Spec.Ed25519.(
         let sB = point_mul (as_seq h0 s) g in
         let hA = point_mul (as_seq h0 h') (as_point h0 a') in
         point_equal sB (point_add (as_point h0 r') hA))))
 
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
 let verify_step_4 s h' a' r' =
-  admit();
+  let h00 = ST.get() in
   push_frame();
-  let g = create 0uL 20ul in
-  Hacl.Impl.Ed25519.G.make_g g;
-  push_frame();
+  let h0 = ST.get() in
   let tmp = Buffer.create 0uL 60ul in
   let hA   = Buffer.sub tmp  0ul  20ul in
   let rhA  = Buffer.sub tmp 20ul  20ul in
   let sB   = Buffer.sub tmp 40ul  20ul in
-  Hacl.Impl.Ed25519.Ladder.point_mul sB s g;
+  let h1 = ST.get() in
+  no_upd_lemma_0 h0 h1 h';
+  no_upd_lemma_0 h0 h1 a';
+  no_upd_lemma_0 h0 h1 r';
+  no_upd_lemma_0 h0 h1 s;
+  point_mul_g sB s;
+  let h2 = ST.get() in
+  no_upd_lemma_1 h1 h2 sB h';
+  no_upd_lemma_1 h1 h2 sB a';
+  no_upd_lemma_1 h1 h2 sB r';
   Hacl.Impl.Ed25519.Ladder.point_mul hA h' a';
+  let h3 = ST.get() in
+  no_upd_lemma_1 h2 h3 hA r';
+  no_upd_lemma_1 h2 h3 hA sB;
   Hacl.Impl.Ed25519.PointAdd.point_add rhA r' hA;
+  let h4 = ST.get() in
+  no_upd_lemma_1 h3 h4 rhA sB;
   let b = Hacl.Impl.Ed25519.PointEqual.point_equal sB rhA in
+  let h5 = ST.get() in
   pop_frame();
-  pop_frame();
+  let h01 = ST.get() in
+  lemma_modifies_none h00 h0 h5 h01;
   b
