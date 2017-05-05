@@ -156,7 +156,7 @@ let shuffle (hash:hash_w) (block:block_w) : Tot hash_w =
 let update (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
   let b = words_from_be size_block_w block in
   let hash_1 = shuffle hash b in
-  Spec.Lib.map2 (fun x y -> x +%^ y) hash hash_1
+  Spec.Loops.seq_map2 (fun x y -> x +%^ y) hash hash_1
 
 
 let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}) : Tot hash_w (decreases (Seq.length blocks)) =

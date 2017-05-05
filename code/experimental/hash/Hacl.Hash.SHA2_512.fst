@@ -332,11 +332,16 @@ private val sum_hash:
               /\ (let new_seq_hash_0 = as_seq h1 hash_0 in
               let seq_hash_0 = as_seq h0 hash_0 in
               let seq_hash_1 = as_seq h0 hash_1 in
-              new_seq_hash_0 == Spec.Lib.map2 (fun x y -> H64.(x +%^ y)) seq_hash_0 seq_hash_1 )))
+              let res        = Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) seq_hash_0 seq_hash_1 in
+              new_seq_hash_0 == res)))
 
 [@"substitute"]
 let sum_hash hash_0 hash_1 =
-  C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H64.(x +%^ y))
+  let h0 = ST.get() in
+  C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H64.(x +%^ y));
+  let h1 = ST.get() in
+  Seq.lemma_eq_intro (Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) (as_seq h0 hash_0) (as_seq  h0 hash_1)) (as_seq h1 hash_0)
+
 
 
 #reset-options "--max_fuel 0  --z3rlimit 10"
@@ -407,10 +412,10 @@ let copy_hash hash_w_1 hash_w_2 =
 [@"substitute"]
 private val update_core:
   hash_w :uint64_p {length hash_w = v size_hash_w} ->
-  data   :uint8_p  {length data = v size_block} ->
-  data_w :uint64_p {length data_w = v size_block_w} ->
-  ws_w   :uint64_p {length ws_w = v size_ws_w} ->
-  k_w    :uint64_p {length k_w = v size_k_w} ->
+  data   :uint8_p  {length data = v size_block /\ disjoint data hash_w} ->
+  data_w :uint64_p {length data_w = v size_block_w /\ disjoint data_w hash_w} ->
+  ws_w   :uint64_p {length ws_w = v size_ws_w /\ disjoint ws_w hash_w} ->
+  k_w    :uint64_p {length k_w = v size_k_w /\ disjoint k_w hash_w} ->
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 data /\ live h0 data_w /\ live h0 ws_w /\ live h0 k_w
                   /\ as_seq h0 k_w == Spec.k
@@ -422,32 +427,88 @@ private val update_core:
                   /\ (let seq_hash_0 = as_seq h0 hash_w in
                   let seq_hash_1 = as_seq h1 hash_w in
                   let seq_block = as_seq h0 data in
-                  seq_hash_1 == Spec.update seq_hash_0 seq_block)))
+                  let res = Spec.update seq_hash_0 seq_block in
+                  seq_hash_1 == res)))
 
-#reset-options "--max_fuel 0  --z3rlimit 500"
+#reset-options "--max_fuel 0  --z3rlimit 400"
 
 [@"substitute"]
 let update_core hash_w data data_w ws_w k_w =
+  assert_norm(pow2 32 = 0x100000000);
+  assert_norm(pow2 64 = 0x10000000000000000);
+  assert_norm(pow2 125 = 42535295865117307932921825928971026432);
+
+  let h0 = ST.get() in
 
   (* Push a new frame *)
   (**) push_frame();
 
+  let h1 = ST.get() in
+
+  assert(  let b = Spec.words_from_be Spec.size_block_w (as_seq h0 data) in
+           as_seq h0 data_w == b);
+
   (* Allocate space for converting the data block *)
   let hash_0 = Buffer.create (u64_to_h64 0uL) size_hash_w in
 
+  let h2 = ST.get() in
+  no_upd_lemma_0 h1 h2 data;
+  no_upd_lemma_0 h1 h2 data_w;
+  no_upd_lemma_0 h1 h2 ws_w;
+  no_upd_lemma_0 h1 h2 k_w;
+  no_upd_lemma_0 h1 h2 hash_w;
+
   (* Keep track of the the current working hash from the state *)
   copy_hash hash_0 hash_w;
+
+  let h3 = ST.get() in
+
+  no_upd_lemma_1 h2 h3 hash_0 data;
+  no_upd_lemma_1 h2 h3 hash_0 data_w;
+  no_upd_lemma_1 h2 h3 hash_0 ws_w;
+  no_upd_lemma_1 h2 h3 hash_0 k_w;
+  no_upd_lemma_1 h2 h3 hash_0 hash_w;
 
   (* Step 2 : Initialize the eight working variables *)
   (* Step 3 : Perform logical operations on the working variables *)
   (* Step 4 : Compute the ith intermediate hash value *)
   shuffle hash_0 data_w ws_w k_w;
 
+  let h4 = ST.get() in
+  assert(let b = Spec.words_from_be Spec.size_block_w (as_seq h0 data) in
+         let ha = Spec.shuffle (as_seq h0 hash_w) b in
+         as_seq h4 hash_w == as_seq h0 hash_w /\
+         as_seq h4 hash_0 == ha);
+
+  no_upd_lemma_1 h3 h4 hash_0 data;
+  no_upd_lemma_1 h3 h4 hash_0 data_w;
+  no_upd_lemma_1 h3 h4 hash_0 ws_w;
+  no_upd_lemma_1 h3 h4 hash_0 k_w;
+  no_upd_lemma_1 h3 h4 hash_0 hash_w;
+
   (* Use the previous one to update it inplace *)
   sum_hash hash_w hash_0;
 
+  let h5 = ST.get() in
+
+   assert(let x = as_seq h4 hash_w in
+          let y = as_seq h4 hash_0 in
+          x == as_seq h0 hash_w /\
+          y == Spec.shuffle (as_seq h0 hash_w) (Spec.words_from_be Spec.size_block_w (as_seq h0 data)));
+
+  assert(let x = as_seq h0 hash_w in
+         let y = Spec.shuffle (as_seq h0 hash_w) (Spec.words_from_be Spec.size_block_w (as_seq h0 data)) in
+         let z = as_seq h5 hash_w in
+         let z' = Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) x y in
+         z == z');
+
+  no_upd_lemma_1 h4 h5 hash_w data;
+  no_upd_lemma_1 h4 h5 hash_w data_w;
+  no_upd_lemma_1 h4 h5 hash_w ws_w;
+  no_upd_lemma_1 h4 h5 hash_w k_w;
+
   (* Pop the frame *)
-  (**) pop_frame(); admit()
+  (**) pop_frame()
 
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
@@ -583,8 +644,8 @@ let encode_length (count:uint64_ht) (len:uint64_t{H64.v count * v size_block + U
   let l0 = H128.mul_wide count (u32_to_h64 size_block) in
   let l1 = u64_to_h128 len in
   assert(H128.v l0 + H128.v l1 < pow2 125);
-  admit();
-//  FStar.Math.Lemmas.modulo_lemma (H128.shift_left (l0 +^ l1) 3ul) (pow2 128);
+  assert_norm(pow2 3 = 8);
+  Math.Lemmas.modulo_lemma Hacl.UInt128.(v (shift_left (l0 +^ l1) 3ul)) (pow2 128);
   H128.(H128.shift_left (l0 +^ l1) 3ul) // Multiplication by 2^3; Call modulo_lemma
 
 
