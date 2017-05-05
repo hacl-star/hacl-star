@@ -35,9 +35,7 @@ POLY1305_SPECIFIC= \
 	Hacl.Standalone.Poly1305_64.fst \
 	Poly1305_64.fst \
 	Hacl.Spec.Poly1305_64.Lemmas1.fst \
-	AEAD.Poly1305_64.fst \
-	Hacl.Test.Poly1305_64.fst
-
+	AEAD.Poly1305_64.fst
 
 SLOW=
 
@@ -59,7 +57,7 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
 
-all-ct: $(addsuffix -ct, $(filter-out Hacl.Test.Poly1305_64.fst, $(POLY1305_FILES)))
+all-ct: $(addsuffix -ct, $(POLY1305_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
