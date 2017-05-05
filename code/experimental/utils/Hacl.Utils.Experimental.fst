@@ -538,14 +538,17 @@ let rec store32s_be buf_8 buf_32 len_32 =
     end
 
 
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 50"
 val load64s_be:
   buf_64 :Buffer.buffer Hacl.UInt64.t ->
-  buf_8  :Buffer.buffer Hacl.UInt8.t {length buf_8 = 4 * length buf_64} ->
+  buf_8  :Buffer.buffer Hacl.UInt8.t {length buf_8 = 8 * length buf_64} ->
   len_8 :FStar.UInt32.t{v len_8 = length buf_8} ->
   Stack unit
         (requires (fun h0 -> live h0 buf_64 /\ live h0 buf_8))
         (ensures  (fun h0 _ h1 -> live h0 buf_64 /\ live h0 buf_8 /\ live h1 buf_64 /\ modifies_1 buf_64 h0 h1
                   /\ (as_seq h1 buf_64 == Spec.Lib.uint64s_from_be (length buf_64) (as_seq h0 buf_8))))
+
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100"
 
 let rec load64s_be buf_64 buf_8 len_8 =
   admit();
@@ -558,6 +561,7 @@ let rec load64s_be buf_64 buf_8 len_8 =
       Buffer.upd buf_64 FStar.UInt32.(i_64 -^ 1ul) x_64;
       load64s_be buf_64 buf_8 FStar.UInt32.(len_8 -^ 8ul)
     end
+
 
 #set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100"
 
@@ -726,6 +730,8 @@ let aux_hupd64_80 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 
   hupd64_16 p4 v48 v49 v50 v51 v52 v53 v54 v55 v56 v57 v58 v59 v60 v61 v62 v63;
   hupd64_16 p5 v64 v65 v66 v67 v68 v69 v70 v71 v72 v73 v74 v75 v76 v77 v78 v79
 
+
+#reset-options "--max_fuel 0 --z3rlimit 25"
 
 [@"substitute"]
 val hupd64_80: buf:huint64_p{length buf = 80} ->
