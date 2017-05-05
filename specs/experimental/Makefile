@@ -12,7 +12,7 @@ OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 
 all:
 	$(MAKE) lib
-	$(MAKE) sha2.exe chacha20-vec.exe chacha20-vec2.exe chacha20-vec256.exe
+	$(MAKE) sha2.exe chacha20-vec.exe chacha20-vec2.exe chacha20-vec256.exe rsa.exe
 
 EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  FStar_Endianness.ml
 
@@ -60,7 +60,15 @@ chacha20-vec256.exe: Spec.Chacha20_vec256.fst
 	$(OCAMLOPT) -I chacha-spec-vec256 $(OCAML_INCLUDES) $(addprefix chacha-spec-vec256/, $(EXTRACTED)) chacha-spec-vec256/Spec_Loops.ml chacha-spec-vec256/Spec_Lib.ml chacha-spec-vec256/Spec_CTR.ml chacha-spec-vec256/Spec_Chacha20_vec256.ml -o chacha20-vec256.exe
 	./chacha20-vec256.exe
 
+rsa.exe: Spec.RSA.fst
+	$(MAKE) lib
+	mkdir -p rsa-spec
+	$(FSTAR) $(ARGS) --odir rsa-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> rsa-spec/Spec_RSA.ml
+	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES)  $(addprefix rsa-spec/, $(EXTRACTED)) rsa-spec/Spec_Loops.ml rsa-spec/Spec_Lib.ml rsa-spec/Spec_SHA2.ml rsa-spec/Spec_RSA.ml -o rsa.exe
+	./rsa.exe
+
 clean:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml clean
 	$(MAKE) -C experimental clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 chacha-spec-vec2 chacha-spec-vec sha2-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 chacha-spec-vec2 chacha-spec-vec sha2-spec rsa-spec

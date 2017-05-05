@@ -13,7 +13,7 @@ FSTAR_ARGS=$(OTHERFLAGS)
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 
 all: lib
-	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe secretbox.exe chacha20poly1305.exe gf128.exe rsa.exe
+	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe secretbox.exe chacha20poly1305.exe gf128.exe
 
 lib:
 	$(MAKE) -C ../code/lib/ml MEM=HST
@@ -40,8 +40,7 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Poly1305.fst \
 		Spec.Poly1305.Lemmas.fst \
 		Spec.Salsa20.fst \
-		Spec.SecretBox.fst \
-		Spec.RSA.fst
+		Spec.SecretBox.fst
 
 %.fst-verify: %.fst
 	$(FSTAR)  --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin $*.fst
@@ -108,14 +107,6 @@ chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> chacha-poly-spec/Spec_Chacha20Poly1305.ml
 	$(OCAMLOPT) -I chacha-poly-spec $(OCAML_INCLUDES) $(addprefix chacha-poly-spec/, $(EXTRACTED)) chacha-poly-spec/Spec_Loops.ml chacha-poly-spec/Spec_Lib.ml chacha-poly-spec/Spec_CTR.ml chacha-poly-spec/Spec_Chacha20.ml chacha-poly-spec/Spec_Poly1305_Lemmas.ml chacha-poly-spec/Spec_Poly1305.ml chacha-poly-spec/Spec_Chacha20Poly1305.ml -o chacha20poly1305.exe
 	./chacha20poly1305.exe
-
-rsa.exe: Spec.RSA.fst
-	$(MAKE) -C ../code/lib/ml MEM=HST
-	mkdir -p rsa-spec
-	$(FSTAR) $(ARGS) --odir rsa-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> rsa-spec/Spec_RSA.ml
-	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES) rsa-spec/Spec_RSA.ml -o rsa.exe
-	./rsa.exe
 
 clean:
 	$(MAKE) -C ../code/lib/ml clean
