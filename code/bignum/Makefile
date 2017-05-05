@@ -42,6 +42,8 @@ verify: $(addsuffix -verify, $(BIGNUM_FILES))
 
 all-ci: verify
 
+all-ver: verify
+
 %-hints: %.fst
 	-$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
 		--include ../lib $^ --record_hints --use_hints --include $(KREMLIN_HOME)/kremlib
