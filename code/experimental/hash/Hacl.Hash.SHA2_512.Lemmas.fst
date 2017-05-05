@@ -163,7 +163,7 @@ let lemma_eq_endianness (h:HyperStack.mem) (buf:uint8_p{length buf = 16}) (n:uin
   (ensures  (live h buf /\
             (let seq_buf = as_seq h buf in
             seq_buf == Endianness.big_bytes 16ul (H128.v n)))) =
-  admit();
+  Endianness.lemma_big_endian_inj (Endianness.big_bytes 16ul (H128.v n)) (as_seq h buf);
   Seq.lemma_eq_intro (as_seq h buf) (Endianness.big_bytes 16ul (H128.v n))
 
 
