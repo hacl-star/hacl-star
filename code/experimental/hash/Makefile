@@ -44,4 +44,3 @@ build512:
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf sha2-c
-	rm -rf sha2-512-c

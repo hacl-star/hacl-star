@@ -69,11 +69,6 @@ let word_add_mod = Word.add_mod
 let rotate_right (a:word) (s:UInt32.t{UInt32.v s < 64}) : Tot word =
   Word.((a >>^ s) |^ (a <<^ (UInt32.sub 64ul s)))
 
-let constants_Sigma0 = Seq.seq_of_list [28ul; 34ul; 39ul]
-let constants_Sigma1 = Seq.seq_of_list [14ul; 18ul; 41ul]
-let constants_sigma0 = Seq.seq_of_list [ 1ul;  8ul;  7ul]
-let constants_sigma1 = Seq.seq_of_list [19ul; 61ul;  6ul]
-
 val _Ch: x:word -> y:word -> z:word -> Tot word
 let _Ch x y z = word_logxor (word_logand x y) (word_logand (word_lognot x) z)
 

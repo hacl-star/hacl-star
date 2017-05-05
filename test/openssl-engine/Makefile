@@ -3,6 +3,7 @@ KREMLIN_HOME?=../../../kremlin
 CURVE_HOME=../../code/curve25519/x25519-c
 CHACHA_HOME=../../code/salsa-family/chacha-c
 POLY_HOME=../../code/poly1305/poly-c
+AEAD_HOME=../../code/api/aead-c
 ifeq ($(shell uname),Linux)
   PIC=-fPIC
 else
@@ -10,6 +11,7 @@ else
 endif
 CFLAGS=-I$(OPENSSL_HOME)/include -L$(OPENSSL_HOME) -I$(KREMLIN_HOME)/kremlib \
   -I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(CHACHA_HOME)/.. -I$(POLY_HOME) -I$(OPENSSL_HOME) \
+  -I$(AEAD_HOME) \
   -shared -Wall -Wno-unused-variable -Wno-parentheses -O3 -flto $(PIC)
 LDFLAGS=-lcrypto
 
@@ -41,7 +43,11 @@ all: OpenSSLEngine.$(SO) HaclEngine.$(SO) $(BCRYPTDLL)
 OpenSSLEngine.$(SO): HACLEngine.c
 	$(CC) $(CFLAGS) -DIMPL=IMPL_OPENSSL $< $(BONUS_OBJ) -o $@ -shared $(LDFLAGS)
 
-HaclEngine.$(SO): HACLEngine.c $(CURVE_HOME)/Curve25519.c $(CHACHA_HOME)/Chacha20.c $(POLY_HOME)/Poly1305_64.c
+HACL_IMPL_FILES= $(CURVE_HOME)/Curve25519.c $(CHACHA_HOME)/Chacha20.c \
+  $(POLY_HOME)/AEAD_Poly1305_64.c $(POLY_HOME)/Poly1305_64.c \
+  $(AEAD_HOME)/Chacha20Poly1305.c $(AEAD_HOME)/Hacl_Policies.c
+
+HaclEngine.$(SO): HACLEngine.c $(HACL_IMPL_FILES)
 	$(CC) $(CFLAGS) -DIMPL=IMPL_HACL $^ -o $@ -shared $(LDFLAGS)
 
 BCryptEngine.$(SO): BCryptEngine.c
