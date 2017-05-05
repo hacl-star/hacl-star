@@ -47,7 +47,7 @@ inline_for_extraction let s32_to_s64 = Cast.sint32_to_sint64
 inline_for_extraction let u64_to_s64 = Cast.uint64_to_sint64
 
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 
 [@"substitute"]
@@ -282,7 +282,7 @@ let hupd64_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
   Seq.lemma_eq_intro (as_seq h1 buf) (Seq.Create.create_16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)
 
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 0 --z3rlimit 100"
 
 
 [@"substitute"]
