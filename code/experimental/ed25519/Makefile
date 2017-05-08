@@ -159,6 +159,7 @@ KEMLIN_SKIP_COMPILATION=$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 
 ed25519-c/Ed25519.c: \
 	Hacl.Bignum25519.fst \
+	../hash/Hacl.Impl.SHA512.Ed25519.fst \
 	Hacl.Impl.Load56.fst \
 	Hacl.Impl.Load51.fst \
 	Hacl.Impl.Store51.fst \
@@ -178,11 +179,11 @@ ed25519-c/Ed25519.c: \
 	Ed25519.fst
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
-	 	-I ../../../specs/experimental -I ../hash \
+	 	-I ../../../specs/experimental -I ../hash -I ../utils \
 	 	$^ \
 	 	-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
 	 	-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
-	 	-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*,Hacl.Bignum25519,Hacl.Bignum' \
+	 	-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Utils.\*,Hacl.Hash.\*,SHA2_512' \
 	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -skip-compilation
 

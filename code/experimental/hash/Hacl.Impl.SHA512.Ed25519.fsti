@@ -1,11 +1,10 @@
-module Hacl.Impl.Sha512
+module Hacl.Impl.SHA512.Ed25519
 
-
+open FStar.Mul
 open FStar.UInt32
+open FStar.HyperStack
+open FStar.Seq
 open FStar.Buffer
-
-open Hacl.Impl.SHA512.Ed25519
-
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
@@ -25,10 +24,6 @@ val sha512_pre_msg:
       as_seq h1 hash == Spec.Ed25519.sha512 FStar.Seq.(as_seq h0 prefix @| as_seq h0 input)))
 
 
-let sha512_pre_msg h prefix input len =
-  sha512_pre_msg h prefix input len
-
-
 val sha512_pre_pre2_msg:
   hash:hint8_p{length hash = 64} ->
   prefix:hint8_p{length prefix = 32 /\ disjoint prefix hash} ->
@@ -39,8 +34,4 @@ val sha512_pre_pre2_msg:
     (requires (fun h -> live h hash /\ live h prefix /\ live h prefix2 /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 hash /\ live h0 prefix /\ live h0 input /\ live h0 prefix2 /\
       live h1 hash /\ live h1 prefix /\ live h1 input /\ modifies_1 hash h0 h1 /\
-      as_seq h1 hash == Spec.Ed25519.sha512 FStar.Seq.(as_seq h0 prefix @| as_seq h0 prefix2 @| as_seq h0 input)))
-
-
-let sha512_pre_pre2_msg h prefix prefix2 input len =
-  sha512_pre_pre2_msg h prefix prefix2 input len
+      as_seq h1 hash == Spec.Ed25519.sha512 (as_seq h0 prefix @| as_seq h0 prefix2 @| as_seq h0 input)))

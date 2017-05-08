@@ -47,7 +47,7 @@ sha2-c/SHA2_512.c:
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils -I $(HACL_HOME)/specs \
 		SHA2_512.fst \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop 'Spec.Lib' -drop 'Spec.Loops' -drop 'Seq.Create' -drop 'Spec.SHA2_512' \
+		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop 'Spec.Lib' -drop 'Spec.Loops' -drop 'Seq.Create' -drop 'Spec.\*' \
 		-drop 'Hacl.Hash.SHA2_512.Lemmas' -drop Prims -drop FStar \
 		-bundle "SHA2_512=Hacl.Utils.Experimental,Hacl.Hash.SHA2_512,SHA2_512" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99 -skip-compilation
