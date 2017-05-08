@@ -9,7 +9,7 @@ open Spec.Lib
 module U32 = FStar.UInt32
 (* This should go elsewhere! *)
 
-#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
@@ -52,10 +52,16 @@ let shuffle_row (i:idx) (n:idx) (s:state) : Tot state =
        upd s i (shuffle_right (index s i) n)
 
 val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> st:state -> Tot state
-let line a b d s m = 
-  let m = upd m a (index m a +%^ index m b) in
-  let m = upd m d ((index m d ^^  index m a) <<< s) in
+let line a b d s m =
+  let ma = index m a in let mb = index m b in let md = index m d in
+  let ma = ma +%^ mb in
+  let md = (md ^^  ma) <<< s in
+  let m = upd m a ma in
+  let m = upd m d md in
   m
+  (* let m = upd m a (index m a +%^ index m b) in *)
+  (* let m = upd m d ((index m d ^^  index m a) <<< s) in *)
+  (* m *)
 
 
 let round (st:state) : Tot state =
@@ -106,16 +112,18 @@ let chacha20_core (s:state) : Tot state =
 (* state initialization *) 
 
 unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
+let c0 = 0x61707865ul
+let c1 = 0x3320646eul
+let c2 = 0x79622d32ul
+let c3 = 0x6b206574ul
 
 // JK: I have to add those assertions to typechecks, would be nice to get rid of it
 let setup (k:key) (n:nonce) (c:counter): Tot state =
-  assert_norm(List.Tot.length constants = 4); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
-  let constants:vec = createL constants in
+  let constants : vec = Seq.Create.create_4 c0 c1 c2 c3 in
   let key_part_1:vec = uint32s_from_le 4 (Seq.slice k 0 16)  in
   let key_part_2:vec = uint32s_from_le 4 (Seq.slice k 16 32) in
   let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) in
-  assert_norm(List.Tot.length [constants; key_part_1; key_part_2; nonce] = 4);
-  Seq.seq_of_list [constants; key_part_1; key_part_2; nonce]
+  Seq.Create.create_4 constants key_part_1 key_part_2 nonce
 
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
@@ -143,6 +151,7 @@ let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
 let chacha20_encrypt_bytes key nonce counter m = 
     Spec.CTR.counter_mode chacha20_ctx chacha20_cipher key nonce counter m
 
+#set-options "--lax"
 
 unfold let test_plaintext = [
     0x4cuy; 0x61uy; 0x64uy; 0x69uy; 0x65uy; 0x73uy; 0x20uy; 0x61uy;

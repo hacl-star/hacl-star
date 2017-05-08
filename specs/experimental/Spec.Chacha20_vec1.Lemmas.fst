@@ -6,6 +6,7 @@ open FStar.UInt32
 open FStar.Endianness
 open Spec.Lib
 
+open Seq.Create
 open Spec.Chacha20
 open Spec.Chacha20_vec
 
@@ -16,16 +17,7 @@ let state = S.state
 let vec_state = V.state
 
 
-#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
-
-abstract
-let create_4 (#a:Type) (x0:a) (x1:a) (x2:a) (x3:a) :
-  Tot (s:seq a{length s = 4 /\ index s 0 == x0 /\ index s 1 == x1 /\ index s 2 == x2 /\ index s 3 == x3})
-  = let s = create 4 x0 in
-    let s = upd s 1 x1 in
-    let s = upd s 2 x2 in
-    let s = upd s 3 x3 in
-    s
+#set-options "--max_fuel 0 --z3rlimit 100"
 
 
 let state_to_vec_state (s:state) : Tot vec_state =
@@ -130,7 +122,7 @@ let line_ a b d s m =
   m
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --z3rlimit 500"
 
 let new_line (s:state) (a:S.idx) (b:S.idx) (d:S.idx{a <> b /\ a <> d /\ b <> d}) (ss:UInt32.t{UInt32.v ss < 32}) : Tot (s':state{
   let sa = index s a in let sb = index s b in let sd = index s d in
@@ -154,7 +146,7 @@ let quarter_round_standard
   s
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --z3rlimit 500"
 
 let lemma_quarter_round_standard
   (s:state) (a:S.idx) (b:S.idx) (c:S.idx) (d:S.idx{a <> b /\ a <> c /\ a <> d /\ b <> c /\ b <> d /\ c <> d}) :
@@ -168,7 +160,7 @@ let lemma_quarter_round_standard
    = ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
+#reset-options "--max_fuel 0 --z3rlimit 1000"
 
 let lemma_quarter_round_vectorized (s:vec_state) : Lemma
   (let s' = quarter_round_vec s in
@@ -195,7 +187,7 @@ let lemma_quarter_round_vectorized (s:vec_state) : Lemma
    = ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#reset-options "--max_fuel 0 --z3rlimit 5"
 
 val lemma_forall_elim: p:(nat -> Type) ->  q:(nat -> Type) -> j:nat{p j} ->
   Lemma (requires (forall (i:nat). p i ==> q i))
@@ -463,7 +455,8 @@ let lemma_column_round_standard_4 s s' =
   lemma_forall_elim p q 13;
   lemma_forall_elim p q 14
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+
+#reset-options "--max_fuel 0"
 
 val lemma_column_round_def: s:state -> Lemma
   (let s' = S.quarter_round 0 4 8 12 s in
@@ -504,10 +497,7 @@ let column_round_standard s =
   s''''
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val shuffle_right: x:vec -> n:V.idx -> Tot (x':vec{
   index x' 0 == index x (n % 4)
@@ -518,7 +508,7 @@ let shuffle_right x n =
   V.shuffle_right x n
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val shuffle_rous_1: s:vec_state -> Tot (s':vec_state{
    let s0' = index (index s' 0) 0 in   let s1' = index (index s' 0) 1 in
@@ -610,7 +600,7 @@ let shuffle_rous_2 s =
   s'''
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#reset-options "--max_fuel 0 --z3rlimit 5"
 
 val lemma_diagonal_round_standard_1: s:state -> s':state -> Lemma
   (requires ((forall (i:nat). {:pattern (index s' i)} (i < 16 /\ i <> 0 /\ i <> 5 /\ i <> 10 /\ i <> 15)  ==> index s' i == index s i)))
@@ -874,7 +864,7 @@ let lemma_diagonal_round_standard_4 s s' =
   lemma_forall_elim p q 15
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --z3rlimit 10"
 
 val lemma_diagonal_round_def: s:state -> Lemma
   (let s' = S.quarter_round 0 5 10 15 s in
@@ -944,7 +934,7 @@ let diagonal_round_vectorized s =
   s'''
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 
 val lemma_quarter_round: s:vec_state -> Lemma
@@ -985,36 +975,28 @@ let lemma_double_round_def s =
   let s = quarter_round_vec s in
   lemma_diagonal_round_vec s
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
+(* #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100" *)
 
-// TODO: move somewhere else
-private val lemma_seq_of_list: (#a:Type) -> (l:list a) -> Lemma
-  (forall (i:nat). {:pattern (Seq.index (Seq.seq_of_list l) i)} i < List.Tot.length l
-             ==> Seq.index (Seq.seq_of_list l) i == List.Tot.index l i)
-let rec lemma_seq_of_list #a l =
-  match l with
-  | [] -> Seq.lemma_eq_intro (Seq.seq_of_list l) Seq.createEmpty
-  | hd::tl -> (
-    lemma_seq_of_list #a tl;
-    Seq.lemma_eq_intro (Seq.seq_of_list l) (Seq.cons hd (Seq.seq_of_list tl))
-  )
+(* // TODO: move somewhere else *)
+(* private val lemma_seq_of_list: (#a:Type) -> (l:list a) -> Lemma *)
+(*   (forall (i:nat). {:pattern (Seq.index (Seq.seq_of_list l) i)} i < List.Tot.length l *)
+(*              ==> Seq.index (Seq.seq_of_list l) i == List.Tot.index l i) *)
+(* let rec lemma_seq_of_list #a l = *)
+(*   match l with *)
+(*   | [] -> Seq.lemma_eq_intro (Seq.seq_of_list l) Seq.createEmpty *)
+(*   | hd::tl -> ( *)
+(*     lemma_seq_of_list #a tl; *)
+(*     Seq.lemma_eq_intro (Seq.seq_of_list l) (Seq.cons hd (Seq.seq_of_list tl)) *)
+(*   ) *)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val lemma_setup_standard_1: k:S.key -> n:S.nonce -> c:S.counter -> Lemma
   (let s = S.setup k n c in
    let s0 = index s 0 in   let s1 = index s 1 in
    let s2 = index s 2 in   let s3 = index s 3 in
    s0 == 0x61707865ul /\ s1 == 0x3320646eul /\ s2 == 0x79622d32ul /\ s3 == 0x6b206574ul)
-let lemma_setup_standard_1 k n c =
-  assert_norm(List.Tot.length S.constants = 4);
-  assert_norm(List.Tot.index S.constants 0 == 0x61707865ul);
-  assert_norm(List.Tot.index S.constants 1 == 0x3320646eul);
-  assert_norm(List.Tot.index S.constants 2 == 0x79622d32ul);
-  assert_norm(List.Tot.index S.constants 3 == 0x6b206574ul);
-  lemma_seq_of_list S.constants;
-  lemma_eq_intro (slice (S.setup k n c) 0 4) (seq_of_list S.constants)
-
+let lemma_setup_standard_1 k n c = ()
 
 val lemma_setup_standard_2: k:S.key -> n:S.nonce -> c:S.counter -> Lemma
   (let s = S.setup k n c in
@@ -1029,9 +1011,6 @@ let lemma_setup_standard_2 k n c =
   lemma_eq_intro (slice (S.setup k n c) 4 12) (uint32s_from_le 8 k)
 
 
-private let lemma_singleton (#a:Type) (x:a) : Lemma (length (singleton x) = 1 /\ index (singleton x) 0 == x) = ()
-
-
 val lemma_setup_standard_3: k:S.key -> n:S.nonce -> c:S.counter -> Lemma
   (let s = S.setup k n c in
    let n = uint32s_from_le 3 n in
@@ -1040,7 +1019,6 @@ val lemma_setup_standard_3: k:S.key -> n:S.nonce -> c:S.counter -> Lemma
    s12 == UInt32.uint_to_t c /\ s13 == index n 0 /\ s14 == index n 1 /\ s15 == index n 2)
 let lemma_setup_standard_3 k n c =
   lemma_eq_intro (slice (S.setup k n c) 12 13) (singleton (UInt32.uint_to_t c));
-  lemma_singleton (UInt32.uint_to_t c);
   lemma_eq_intro (slice (S.setup k n c) 13 16) (uint32s_from_le 3 n)
 
 
@@ -1077,22 +1055,7 @@ val lemma_setup_vec_1: k:V.key -> n:V.nonce -> c:V.counter -> Lemma
    let s12 = index (index s 3) 0 in  let s13 = index (index s 3) 1 in
    let s14 = index (index s 3) 2 in  let s15 = index (index s 3) 3 in
    s0 == 0x61707865ul /\ s1 == 0x3320646eul /\ s2 == 0x79622d32ul /\ s3 == 0x6b206574ul)
-let lemma_setup_vec_1 k n c =
-  assert_norm(List.Tot.length V.constants = 4);
-  assert_norm(List.Tot.index V.constants 0 == 0x61707865ul);
-  assert_norm(List.Tot.index V.constants 1 == 0x3320646eul);
-  assert_norm(List.Tot.index V.constants 2 == 0x79622d32ul);
-  assert_norm(List.Tot.index V.constants 3 == 0x6b206574ul);
-  lemma_seq_of_list V.constants;
-  assert_norm(List.Tot.length constants = 4); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
-  let constants:vec = createL constants in
-  let key_part_1:vec = uint32s_from_le 4 (Seq.slice k 0 16)  in
-  let key_part_2:vec = uint32s_from_le 4 (Seq.slice k 16 32) in
-  let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) in
-  assert_norm(List.Tot.length [constants; key_part_1; key_part_2; nonce] = 4);
-  lemma_seq_of_list [constants; key_part_1; key_part_2; nonce];
-  assert_norm(List.Tot.index [constants; key_part_1; key_part_2; nonce] 0 == constants);
-  lemma_eq_intro (index (V.setup k n c) 0) (seq_of_list V.constants)
+let lemma_setup_vec_1 k n c = ()
 
 
 val lemma_setup_vec_2: k:S.key -> n:S.nonce -> c:S.counter -> Lemma
@@ -1106,16 +1069,10 @@ val lemma_setup_vec_2: k:S.key -> n:S.nonce -> c:S.counter -> Lemma
    /\ s8 == index k 4 /\ s9 == index k 5 /\ s10 == index k 6 /\ s11 == index k 7)
 let lemma_setup_vec_2 k n c =
   lemma_uint32s_from_le_slice 8 k 4;
-  assert_norm(List.Tot.length constants = 4); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
-  let constants:vec = createL constants in
   let key_part_1:vec = uint32s_from_le 4 (Seq.slice k 0 16)  in
   let key_part_2:vec = uint32s_from_le 4 (Seq.slice k 16 32) in
   lemma_eq_intro (key_part_1 @| key_part_2) (uint32s_from_le 8 k);
   let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) in
-  assert_norm(List.Tot.length [constants; key_part_1; key_part_2; nonce] = 4);
-  lemma_seq_of_list [constants; key_part_1; key_part_2; nonce];
-  assert_norm(List.Tot.index [constants; key_part_1; key_part_2; nonce] 1 == key_part_1);
-  assert_norm(List.Tot.index [constants; key_part_1; key_part_2; nonce] 2 == key_part_2);
   lemma_eq_intro (index (V.setup k n c) 1) (uint32s_from_le 4 (slice k 0 16));
   lemma_eq_intro (index (V.setup k n c) 2) (uint32s_from_le 4 (slice k 16 32))
 
@@ -1127,15 +1084,8 @@ val lemma_setup_vec_3: k:V.key -> n:V.nonce -> c:V.counter -> Lemma
    let s14 = index (index s 3) 2 in  let s15 = index (index s 3) 3 in
    s12 == UInt32.uint_to_t c /\ s13 == index n 0 /\ s14 == index n 1 /\ s15 == index n 2)
 let lemma_setup_vec_3 k n c =
-  assert_norm(List.Tot.length constants = 4); assert_norm(List.Tot.length [UInt32.uint_to_t c] = 1);
-  let constants:vec = createL constants in
-  let key_part_1:vec = uint32s_from_le 4 (Seq.slice k 0 16)  in
-  let key_part_2:vec = uint32s_from_le 4 (Seq.slice k 16 32) in
   let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) in
-  lemma_eq_intro (slice nonce 1 4) (uint32s_from_le 3 n);
-  assert_norm(List.Tot.length [constants; key_part_1; key_part_2; nonce] = 4);
-  lemma_seq_of_list [constants; key_part_1; key_part_2; nonce];
-  assert_norm(List.Tot.index [constants; key_part_1; key_part_2; nonce] 3 == nonce)
+  lemma_eq_intro (slice nonce 1 4) (uint32s_from_le 3 n)
 
 
 val lemma_setup_vec: k:V.key -> n:V.nonce -> c:V.counter -> Lemma
@@ -1180,7 +1130,7 @@ let rec lemma_iter_state s sv f fv n =
   )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --z3rlimit 10"
 
 val lemma_column_round_eq : s:state -> sv:vec_state{eq_states' s sv} -> Lemma
   (let s = S.column_round s in let sv = V.column_round sv in eq_states' s sv)
@@ -1331,7 +1281,7 @@ let lemma_double_round_eq_forall () =
     (forall sv. eq_states' s sv ==> eq_states' (S.double_round s) (V.double_round sv)) in
   FStar.Classical.forall_intro #_ #post lemma_double_round_eq_forall_1
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#reset-options "--max_fuel 0 --z3rlimit 5"
 
 val lemma_chacha_rounds_vec: s:state -> sv:vec_state{eq_states' s sv} -> Lemma
   (let s' = S.rounds s in let sv' = V.rounds sv in
@@ -1345,7 +1295,7 @@ let lemma_chacha_rounds_vec s sv =
 
 
 val lemma_chacha_core_std: s:state -> s':state -> Lemma
-  (let s'' = C.Loops.seq_map2 FStar.UInt32.op_Plus_Percent_Hat s' s in
+  (let s'' = Spec.Loops.seq_map2 FStar.UInt32.op_Plus_Percent_Hat s' s in
   let s0 = index s 0 in   let s1 = index s 1 in
   let s2 = index s 2 in   let s3 = index s 3 in
   let s4 = index s 4 in   let s5 = index s 5 in
@@ -1387,11 +1337,11 @@ val lemma_chacha_core_std: s:state -> s':state -> Lemma
   /\ s13'' == s13' +%^ s13
   /\ s14'' == s14' +%^ s14
   /\ s15'' == s15' +%^ s15))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 let lemma_chacha_core_std s s' = ()
 
 val lemma_chacha_core_vec: s:vec_state -> s':vec_state -> Lemma
-  (let s'' = C.Loops.seq_map2 V.op_Plus_Percent_Hat s' s in
+  (let s'' = Spec.Loops.seq_map2 V.op_Plus_Percent_Hat s' s in
   let s0 = index (index s 0) 0 in   let s1 = index (index s 0) 1 in
   let s2 = index (index s 0) 2 in   let s3 = index (index s 0) 3 in
   let s4 = index (index s 1) 0 in   let s5 = index (index s 1) 1 in
@@ -1433,7 +1383,7 @@ val lemma_chacha_core_vec: s:vec_state -> s':vec_state -> Lemma
   /\ s13'' == s13' +%^ s13
   /\ s14'' == s14' +%^ s14
   /\ s15'' == s15' +%^ s15))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 let lemma_chacha_core_vec s s' = ()
 
 val lemma_chacha_core: s:state -> sv:vec_state{eq_states' s sv} -> Lemma
@@ -1455,7 +1405,7 @@ val lemma_chacha_block_slice: s:state -> Lemma
                          @| uint32s_to_le 4 (slice s 4  8)
                          @| uint32s_to_le 4 (slice s 8  12)
                          @| uint32s_to_le 4 (slice s 12 16))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 let lemma_chacha_block_slice b =
   lemma_uint32s_to_le_slice 16 b 8;
   let b0 = slice b 0 8 in
@@ -1498,17 +1448,45 @@ let lemma_chacha20_block k n c =
   lemma_eq_intro (uint32s_to_le 4 (index sv' 0) @|  uint32s_to_le 4 (index sv' 1) @|  uint32s_to_le 4 (index sv' 2) @|  uint32s_to_le 4 (index sv' 3)) (uint32s_to_le 16 s')
 
 
+val lemma_chacha20_counter_mode_blocks: k:key -> n:nonce -> c:counter -> m:bytes{c + 1 * (length m / 64) < pow2 32 /\
+    length m % (64 * 1) = 0} -> Lemma
+  (requires (True))
+  (ensures (Spec.CTR.counter_mode_blocks S.chacha20_ctx S.chacha20_cipher k n c m ==
+            Spec.CTR.counter_mode_blocks V.chacha20_ctx V.chacha20_cipher k n c m))
+  (decreases (length m))
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 50"
+let rec lemma_chacha20_counter_mode_blocks k n c m =
+  if length m = 0 then ()
+  else (
+    let len = length m in
+    let len' = len / (64 * 1) in
+    Math.Lemmas.lemma_div_mod len (64 * 1);
+    let prefix, block = split m (len - 64 * 1) in    
+      (* TODO: move to a single lemma for clarify *)
+      Math.Lemmas.lemma_mod_plus (length prefix) 1 (64 * 1);
+      Math.Lemmas.lemma_div_le (length prefix) len 64;
+      Spec.CTR.Lemmas.lemma_div len (64 * 1);
+      (* End TODO *)
+    lemma_chacha20_counter_mode_blocks k n c prefix;
+    lemma_chacha20_block k n ((c + (len / 64 - 1)) * 1)
+  )
+  
+
 val lemma_chacha20_encrypt_bytes: k:key -> n:nonce -> c:counter -> m:bytes{c + length m / 64 < pow2 32} -> Lemma
   (requires (True))
   (ensures (V.chacha20_encrypt_bytes k n c m == S.chacha20_encrypt_bytes k n c m))
   (decreases (length m))
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 500"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 let rec lemma_chacha20_encrypt_bytes k n c m =
-  if length m = 0 then ()
-  else if length m <= 64 then (
-    lemma_chacha20_block k n c
-  ) else (
-    let b, plain = split m 64 in
-    lemma_chacha20_encrypt_bytes k n (c+1) plain;
-    lemma_chacha20_block k n c
-  )
+  let len = length m in
+  let blocks_len = (1 * 64) * (len / (64 * 1)) in
+  let part_len   = len % (64 * 1) in
+  Math.Lemmas.lemma_div_mod len (64 * 1);
+  Math.Lemmas.multiple_modulo_lemma (len / (64 * 1)) (64 * 1);
+  Math.Lemmas.lemma_div_le (blocks_len) len 64;
+  let blocks, last_block = split m blocks_len in
+  lemma_chacha20_counter_mode_blocks k n c blocks;
+  if part_len > 0
+  then
+    lemma_chacha20_block k n (c+1*(length m / 64))
+  else ()
