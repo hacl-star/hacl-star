@@ -27,7 +27,7 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 %.fst-hints: %.fst
 	-$(FSTARB) $^ --use_hints --record_hints
 
-SPECS_DIRS=$(HACL_HOME)/specs $(HACL_HOME)/specs/generic $(HACL_HOME)/specs/experimental
+SPECS_DIRS=$(HACL_HOME)/specs $(HACL_HOME)/specs/experimental
 
 KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin $(addprefix -I , $(SPECS_DIRS)) -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -drop 'Hacl.UInt8' $(KREMLIN_ARGS) \
@@ -40,6 +40,18 @@ Chacha20_vec.c: Hacl.UInt32x4N.fst Loops_vec.fst interfaces/Spec.Chacha20_vec256
 		-bundle 'Chacha20_vec=Loops_vec,Hacl.Impl.Chacha20_state,Hacl.Impl.Chacha20_vec,Chacha20_vec' -drop 'Hacl.Spec.\*' -add-include '"loops_vec.h"' -drop 'Spec.\*' -drop "C.Loops" -add-include '"vec32x4N.h"' \
 		$^ $(VERBOSE) -skip-linking
 
+chacha-vec128/Chacha20_Vec128.c: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20.Vec128.fst Chacha20.Vec128.fst
+	mkdir -p chacha-vec128
+	$(KRML) -tmpdir chacha-vec128 -no-prefix Hacl.UInt32x4 -I $(HACL_HOME)/specs -drop "Spec.\*,C.Loops,Hacl.Spec.\*,Seq.\*,Hacl.UInt32x4" -bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.\*" \
+	-add-include '"vec128.h"' -I . \
+	$^ -skip-compilation
+
+chacha20_vec128.exe: chacha-vec128/Chacha20_Vec128.c Hacl.Test.Chacha20.Vec128.fst
+	$(KRML) -tmpdir chacha-vec128 \
+	-add-include '"vec128.h"' -I . -drop 'Spec.\*,Seq.\*,Chacha20.Vec128' -add-include '"Chacha20_Vec128.h"' \
+	-no-prefix Hacl.Test.Chacha20.Vec128 $^ -o chacha20_vec128.exe
+	./chacha20_vec128.exe
+
 Chacha20_vec2.c: interfaces/Hacl.UInt32x4N.fst Loops_vec.fst Hacl.Impl.Chacha20_vec2.fst Chacha20_vec2.fst
 	mkdir -p chacha-vec2-c
 	$(KRML) -tmpdir chacha-vec2-c -no-prefix Loops_vec -no-prefix Hacl.UInt32x4N -I . -drop "Loops_vec" -drop "Hacl.UInt32x4N" \
@@ -50,4 +62,4 @@ extract-c: Chacha20_vec.c Chacha20_vec2.c
 
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ chacha-vec-c chacha-vec2-c
+	rm -rf *.exe *.exe.* *.out *~ chacha-vec-c chacha-vec2-c chacha-vec128

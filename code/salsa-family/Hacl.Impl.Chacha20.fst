@@ -661,7 +661,7 @@ val chacha20_counter_mode_blocks:
          match Ghost.reveal log with | MkLog k n ->
          o == Spec.CTR.counter_mode_blocks chacha20_ctx chacha20_cipher k n (UInt32.v ctr) plain)))
 #reset-options "--max_fuel 0 --z3rlimit 200"
-let rec chacha20_counter_mode_blocks output plain len log st ctr =
+let chacha20_counter_mode_blocks output plain len log st ctr =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ invariant log h1 st /\ modifies_2 output st h0 h1 /\ 0 <= i /\ i <= UInt32.v len

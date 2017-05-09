@@ -5,7 +5,8 @@
 #include <tmmintrin.h>
 
 #define VEC128
-static const int vec_size = 4;
+#define vec_size 4
+/* static const int vec_size = 4; */
 
 typedef unsigned int vec128 __attribute__ ((vector_size (16)));
 

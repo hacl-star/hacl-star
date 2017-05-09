@@ -14,6 +14,7 @@ module Spec = Spec.Chacha20
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8
 module H32 = Hacl.UInt32
+
 open Hacl.UInt32x4
 
 let u32 = U32.t
@@ -46,7 +47,11 @@ val state_incr:
       (ensures  (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1 /\ live h0 k /\
         (let st0 = as_seq h0 k in
          let st1 = as_seq h1 k in
-         st1 == Seq.upd st0 3 (Spec.Chacha20_vec.op_Plus_Percent_Hat (Seq.index st0 3) one_le))))
+         let op_String_Access = Seq.index in
+         st1.[0] == st0.[0] /\
+         st1.[1] == st0.[1] /\
+         st1.[2] == st0.[2] /\
+         vec_as_seq st1.[3] == (Spec.Chacha20_vec.op_Plus_Percent_Hat (vec_as_seq st0.[3])) (vec_as_seq one_le))))
 [@ "c_inline"]
 let state_incr k =
     let k3 = k.(3ul) in
@@ -101,7 +106,7 @@ val constant_setup_:
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1 /\ live h0 c /\
       (let st0 = as_seq h0 c in let st1 = as_seq h1 c in let op_String_Access = Seq.index in
        let open Spec.Chacha20_vec in let open FStar.Seq in
-       st1.[0] == Seq.Create.create_4 c0 c1 c2 c3 /\
+       vec_as_seq st1.[0] == Seq.Create.create_4 c0 c1 c2 c3 /\
        st0.[1] == st1.[1] /\ st0.[2] == st1.[2] /\ st0.[3] == st1.[3])))
 [@ "substitute"]
 let constant_setup_ st =
@@ -119,7 +124,7 @@ val constant_setup:
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1 /\ live h0 c /\
       (let st0 = as_seq h0 c in let st1 = as_seq h1 c in let op_String_Access = Seq.index in
        let open Spec.Chacha20_vec in let open FStar.Seq in
-       st1.[0] == Seq.Create.create_4 c0 c1 c2 c3 /\
+       vec_as_seq st1.[0] == Seq.Create.create_4 c0 c1 c2 c3 /\
        st0.[1] == st1.[1] /\ st0.[2] == st1.[2] /\ st0.[3] == st1.[3])))
 [@ "substitute"]
 let constant_setup st =
@@ -136,8 +141,8 @@ val keysetup:
       (let st0 = as_seq h0 st in let st1 = as_seq h1 st in let op_String_Access = Seq.index in
        st1.[0] == st0.[0] /\
        st1.[3] == st0.[3] /\
-       st1.[1] == Spec.Lib.uint32s_from_le 4 (Seq.slice (as_seq h0 k) 0 16) /\
-       st1.[2] == Spec.Lib.uint32s_from_le 4 (Seq.slice (as_seq h0 k) 16 32)
+       vec_as_seq st1.[1] == Spec.Lib.uint32s_from_le 4 (Seq.slice (as_seq h0 k) 0 16) /\
+       vec_as_seq st1.[2] == Spec.Lib.uint32s_from_le 4 (Seq.slice (as_seq h0 k) 16 32)
        )))
 [@ "substitute"]
 let keysetup st k =
@@ -159,7 +164,7 @@ val ctr_ivsetup:
        st1.[0] == st0.[0] /\
        st1.[1] == st0.[1] /\
        st1.[2] == st0.[2] /\
-       st1.[3] == Seq.cons ctr (Spec.Lib.uint32s_from_le 3 (as_seq h0 iv))) ))
+       vec_as_seq st1.[3] == Seq.cons ctr (Spec.Lib.uint32s_from_le 3 (as_seq h0 iv))) ))
 [@ "substitute"]
 let ctr_ivsetup st ctr iv =
   let n0 = load32_le (Buffer.sub iv 0ul 4ul) in
@@ -184,7 +189,10 @@ val state_setup:
   Stack unit
     (requires (fun h -> live h st /\ live h k /\ live h n))
     (ensures (fun h0 _ h1 -> live h0 k /\ live h0 n /\ live h1 st /\ modifies_1 st h0 h1 /\
-      as_seq h1 st == Spec.Chacha20_vec.setup (as_seq h0 k) (as_seq h0 n) (U32.v c)))
+      (let st = as_seq h1 st in
+       let op_String_Access = Seq.index in
+       Seq.Create.create_4 (vec_as_seq st.[0]) (vec_as_seq st.[1]) (vec_as_seq st.[2]) (vec_as_seq st.[3])
+       == Spec.Chacha20_vec.setup (as_seq h0 k) (as_seq h0 n) (U32.v c))))
 [@ "c_inline"]
 let state_setup st k n c =
   let h0 = ST.get() in
@@ -192,4 +200,8 @@ let state_setup st k n c =
   keysetup st k;
   ctr_ivsetup st c n;
   let h = ST.get() in
-  Seq.lemma_eq_intro (as_seq h st) (Spec.Chacha20_vec.setup (as_seq h0 k) (as_seq h0 n) (U32.v c))
+  Seq.lemma_eq_intro (let st = as_seq h st in
+                     let op_String_Access = Seq.index in
+                     Seq.Create.create_4 (vec_as_seq st.[0]) (vec_as_seq st.[1])
+                                         (vec_as_seq st.[2]) (vec_as_seq st.[3]))
+                     (Spec.Chacha20_vec.setup (as_seq h0 k) (as_seq h0 n) (U32.v c))
