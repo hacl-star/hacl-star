@@ -259,19 +259,19 @@ void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
 
 int32_t test_curve()
 {
-  uint32_t keysize = (uint32_t )32;
-  uint8_t result[keysize];
-  memset(result, 0, keysize * sizeof result[0]);
+  /* uint32_t keysize = (uint32_t )32; */
+  uint8_t result[KEYSIZE];
+  memset(result, 0, KEYSIZE * sizeof result[0]);
 
   Curve25519_crypto_scalarmult(result, scalar1, input1);
-  TestLib_compare_and_print("HACL Curve25519", expected1, result, keysize);
+  TestLib_compare_and_print("HACL Curve25519", expected1, result, KEYSIZE);
   Curve25519_crypto_scalarmult(result, scalar2, input2);
-  TestLib_compare_and_print("HACL Curve25519", expected2, result, keysize);
+  TestLib_compare_and_print("HACL Curve25519", expected2, result, KEYSIZE);
 
   int res = crypto_scalarmult_curve25519(result, scalar1, input1);
-  TestLib_compare_and_print("Sodium Curve25519", expected1, result, keysize);
+  TestLib_compare_and_print("Sodium Curve25519", expected1, result, KEYSIZE);
   res = crypto_scalarmult_curve25519(result, scalar2, input2);
-  TestLib_compare_and_print("Sodium Curve25519", expected2, result, keysize);
+  TestLib_compare_and_print("Sodium Curve25519", expected2, result, KEYSIZE);
   
   return exit_success;
 }

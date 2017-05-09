@@ -25,14 +25,14 @@ KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../
 		-I ../poly1305/interfaces -I ../../specs \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
-		-drop Hacl.Types
+		-drop Hacl.Types $(KREMLIN_ARGS)
 
 
 KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
 		-I ../poly1305 -I ../../specs \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
-		-drop Hacl.Types
+		-drop Hacl.Types $(KREMLIN_ARGS)
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst

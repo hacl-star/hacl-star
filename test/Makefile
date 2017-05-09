@@ -2,7 +2,7 @@ HACL_HOME?=..
 KREMLIN_HOME?=$(HACL_HOME)/kremlin
 FSTAR_HOME?=$(HACL_HOME)/kremlin
 
-.PHONY: snapshot
+.PHONY: snapshot snapshot-gcc snapshot-ccomp snapshot-msvc snapshot-gcc-unrolled
 
 HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
 HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
@@ -73,23 +73,53 @@ CCOMP=gcc-6 -flto -std=c11 -D_GNU_SOURCE
 test-snapshot:
 	$(MAKE) -C snapshot CC="$(CCOMP)" test
 
+test-ccomp:
+	$(MAKE) -C snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" test
+
+test-gcc:
+	$(MAKE) -C snapshot-gcc CC="gcc-6 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
+
+test-gcc-unrolled:
+	$(MAKE) -C snapshot-gcc-unrolled CC="gcc-6 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
+
+perf-ccomp:
+	$(MAKE) -C snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" perf
+
+perf-gcc:
+	$(MAKE) -C snapshot-gcc CC="gcc-6 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
+
+perf-gcc-unrolled:
+	$(MAKE) -C snapshot-gcc-unrolled CC="gcc-6 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
+
 snapshot:
 	$(MAKE) extract-c-code extract-c-code-experimental
 	$(MAKE) build-snapshot
 	$(MAKE) test-snapshot
 
-all-snapshots:
-	if $(HAS_CCOMP); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert -funroll-loops 10"; fi
+snapshot-ccomp:
+	if $(HAS_CCOMP); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
 	if $(HAS_CCOMP); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
-	$(MAKE) -C ../code clean
+
+snapshot-msvc:
 	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc msvc"; fi
 	if $(HAS_CL); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-msvc; fi
-	$(MAKE) -C ../code clean
+
+snapshot-gcc:
 	$(MAKE) extract-c-code extract-c-code-experimental
 	$(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-gcc
-	$(MAKE) -C ../code clean
+
+snapshot-gcc-unrolled:
 	$(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-funroll-loops 5"
 	$(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-gcc-unrolled
+
+all-snapshots:
+	$(MAKE) snapshot-ccomp
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-msvc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
 	$(MAKE) -C ../code clean
 
 update-snapshot:
@@ -100,4 +130,4 @@ update-snapshot:
 clean:
 	$(MAKE) -C ../code clean
 	$(MAKE) -C ../secure_api clean
-	rm -rf snapshot snapshot-ccomp snapshot-msvc snapshot-gcc *.o *.exe *~
+	rm -rf snapshot snapshot-ccomp snapshot-msvc snapshot-gcc snapshot-gcc-unrolled *.o *.exe *~

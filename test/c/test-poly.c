@@ -21,7 +21,7 @@ void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
 
 #define PLAINLEN (1024*1024)
 #define ROUNDS 1000
-#define MACSIZE 32
+#define MACSIZE 16
 
 uint8_t
 plaintext[34] =
@@ -122,13 +122,12 @@ key[32] =
 int32_t test_poly()
 {
   uint64_t len_ = (uint64_t )34;
-  uint32_t macsize = (uint32_t )16;
-  uint8_t mac[macsize];
-  memset(mac, 0, macsize * sizeof mac[0]);
+  uint8_t mac[MACSIZE];
+  memset(mac, 0, MACSIZE * sizeof mac[0]);
   Poly1305_64_crypto_onetimeauth(mac, plaintext, 34, key);
-  TestLib_compare_and_print("HACL Poly1305", expected, mac, macsize);
+  TestLib_compare_and_print("HACL Poly1305", expected, mac, MACSIZE);
   Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
-  TestLib_compare_and_print("Sodium Poly1305", expected, mac, macsize);
+  TestLib_compare_and_print("Sodium Poly1305", expected, mac, MACSIZE);
   return exit_success;
 }
 

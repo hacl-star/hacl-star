@@ -53,10 +53,8 @@ void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
 
 int32_t test_ed25519()
 {
-  uint64_t len_ = (uint64_t )34;
-  uint32_t sigsize = (uint32_t )64;
-  uint8_t sig[sigsize];
-  memset(sig, 0, sigsize * sizeof sig[0]);
+  uint8_t sig[SIGSIZE];
+  memset(sig, 0, SIGSIZE * sizeof sig[0]);
   bool res = Ed25519_verify(pk11, msg11, (uint32_t )0, sig11);
   int32_t ret1;
   if (res)
@@ -66,7 +64,7 @@ int32_t test_ed25519()
     ret1 = exit_success;
   }
   else {
-    printf("Verification failed");
+    printf("Verification failed\n");
     ret1 = exit_failure;
   }
   return ret1;

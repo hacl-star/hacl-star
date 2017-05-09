@@ -288,21 +288,21 @@ __attribute__ ((aligned (16)))  uint8_t
     };
 
 
+#define TEST_LEN 512
+#define TEST_KEYSIZE 32
+#define TEST_NONCESIZE 32
 
 int32_t test_salsa()
 {
-  uint32_t len = (uint32_t )512;
-  uint32_t keysize = (uint32_t )32;
-  uint32_t noncesize = (uint32_t )8;
-  __attribute__ ((aligned (16)))uint8_t ciphertext[len];
-  memset(ciphertext, 0, len * sizeof ciphertext[0]);
-  __attribute__ ((aligned (16)))uint8_t plaintext[len];
-  memset(plaintext, 0, len * sizeof plaintext[0]);
-  __attribute__ ((aligned (16)))uint8_t key[keysize];
-  memset(key, 0, keysize * sizeof key[0]);
+  __attribute__ ((aligned (16)))uint8_t ciphertext[TEST_LEN];
+  memset(ciphertext, 0, TEST_LEN * sizeof ciphertext[0]);
+  __attribute__ ((aligned (16)))uint8_t plaintext[TEST_LEN];
+  memset(plaintext, 0, TEST_LEN * sizeof plaintext[0]);
+  __attribute__ ((aligned (16)))uint8_t key[TEST_KEYSIZE];
+  memset(key, 0, TEST_KEYSIZE * sizeof key[0]);
   key[(uint32_t )0] = (uint8_t )0x80;
-  __attribute__ ((aligned (16)))uint8_t nonce[noncesize];
-  memset(nonce, 0, noncesize * sizeof nonce[0]);
+  __attribute__ ((aligned (16)))uint8_t nonce[TEST_NONCESIZE];
+  memset(nonce, 0, TEST_NONCESIZE * sizeof nonce[0]);
 
 
   Salsa20_salsa20(ciphertext,
@@ -326,35 +326,34 @@ int32_t test_salsa()
   return exit_success;
 }
 
+#define LEN (PLAINLEN * sizeof(char))
+
 int32_t perf_salsa() {
-  uint32_t len = PLAINLEN * sizeof(char);
-  __attribute__ ((aligned (16)))uint8_t plain[len];
-  __attribute__ ((aligned (16)))uint8_t cipher[len];
+  __attribute__ ((aligned (16)))uint8_t plain[LEN];
+  __attribute__ ((aligned (16)))uint8_t cipher[LEN];
   int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plain, len);
-  if (res != len) {
+  uint64_t res = read(fd, plain, LEN);
+  if (res != LEN) {
     printf("Error on reading, got %" PRIu64 " bytes\n", res);
     return 1;
   }
 
-  uint32_t keysize = (uint32_t )32;
-  uint32_t noncesize = (uint32_t )8;
-  __attribute__ ((aligned (16)))uint8_t key[keysize];
-  memset(key, 0, keysize * sizeof key[0]);
-  __attribute__ ((aligned (16)))uint8_t subkey[keysize];
-  memset(subkey, 0, keysize * sizeof subkey[0]);
+  __attribute__ ((aligned (16)))uint8_t key[TEST_KEYSIZE];
+  memset(key, 0, TEST_KEYSIZE * sizeof key[0]);
+  __attribute__ ((aligned (16)))uint8_t subkey[TEST_KEYSIZE];
+  memset(subkey, 0, TEST_KEYSIZE * sizeof subkey[0]);
   key[(uint32_t )0] = (uint8_t )0x80;
-  __attribute__ ((aligned (16)))uint8_t nonce[noncesize];
-  memset(nonce, 0, noncesize * sizeof nonce[0]);
+  __attribute__ ((aligned (16)))uint8_t nonce[TEST_NONCESIZE];
+  memset(nonce, 0, TEST_NONCESIZE * sizeof nonce[0]);
   __attribute__ ((aligned (16)))uint8_t block[64];
   memset(block, 0, 64 * sizeof block[0]);
   __attribute__ ((aligned (16)))uint8_t block_[64];
   memset(block_, 0, 64 * sizeof block_[0]);
 
-  __attribute__ ((aligned (16)))uint8_t nonce_[noncesize];
-  memset(nonce_, 0, noncesize * sizeof nonce_[0]);
-  __attribute__ ((aligned (16)))uint8_t subkey_[keysize];
-  memset(subkey_, 0, keysize * sizeof subkey_[0]);
+  __attribute__ ((aligned (16)))uint8_t nonce_[TEST_NONCESIZE];
+  memset(nonce_, 0, TEST_NONCESIZE * sizeof nonce_[0]);
+  __attribute__ ((aligned (16)))uint8_t subkey_[TEST_KEYSIZE];
+  memset(subkey_, 0, TEST_KEYSIZE * sizeof subkey_[0]);
 
   cycles a,b;
   clock_t t1,t2;
@@ -365,7 +364,7 @@ int32_t perf_salsa() {
     //memcpy(block+32,plain,32);
     //Hacl_Symmetric_HSalsa20_crypto_core_hsalsa20(subkey, nonce, key);
     //    memcpy(cipher,block+32,32);
-    Salsa20_salsa20(cipher, plain, len, key, nonce, 0);
+    Salsa20_salsa20(cipher, plain, LEN, key, nonce, 0);
     //Poly1305_64_crypto_onetimeauth(subkey_, cipher, len, subkey);
     //Salsa20_crypto_stream_salsa20_xor_block0(block_, block, 64, nonce_, subkey);
   }
@@ -380,7 +379,7 @@ int32_t perf_salsa() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    crypto_stream_salsa20_xor(plain,plain, len, nonce, key);
+    crypto_stream_salsa20_xor(plain,plain, LEN, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
@@ -393,7 +392,7 @@ int32_t perf_salsa() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    tweet_crypto_stream_salsa20_xor(plain,plain, len, nonce, key);
+    tweet_crypto_stream_salsa20_xor(plain,plain, LEN, nonce, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

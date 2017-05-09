@@ -318,16 +318,15 @@ nonce[12] =
 
 int32_t test_chacha()
 {
-  uint32_t len = (uint32_t )114;
-  uint8_t ciphertext[len];
-  memset(ciphertext, 0, len * sizeof ciphertext[0]); 
+  uint8_t ciphertext[114];
+  memset(ciphertext, 0, 114 * sizeof ciphertext[0]); 
   uint32_t counter = (uint32_t )1;
   uint32_t ctx[32] = { 0 };
-  Chacha20_chacha20(ciphertext,plaintext,len, key, nonce, counter);
-  TestLib_compare_and_print("HACL Chacha20", expected, ciphertext, len);
+  Chacha20_chacha20(ciphertext,plaintext,114, key, nonce, counter);
+  TestLib_compare_and_print("HACL Chacha20", expected, ciphertext, 114);
 
-  crypto_stream_chacha20_ietf_xor_ic(ciphertext,plaintext, len, nonce, 1, key);
-  TestLib_compare_and_print("Sodium Chacha20", expected, ciphertext, len);
+  crypto_stream_chacha20_ietf_xor_ic(ciphertext,plaintext, 114, nonce, 1, key);
+  TestLib_compare_and_print("Sodium Chacha20", expected, ciphertext, 114);
 
   return exit_success;
 }

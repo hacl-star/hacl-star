@@ -1,5 +1,21 @@
 #include "kremlib.h"
 #include "testlib.h"
+
+#if defined(__COMPCERT__)
+
+int32_t test_chacha()
+{
+  printf("\nWARNING:Skipping the Chacha20 vectorized unit tests as it is not supported by CompCert\n");
+  return exit_success;
+}
+
+int32_t perf_chacha() {
+  printf("\nWARNING:\nSkipping the Chacha20 vectorized performace tests as it is not supported by CompCert\n");
+  return exit_success;
+}
+
+#else
+
 #include "Chacha20_Vec128.h"
 #include "sodium.h"
 #include "openssl/evp.h"
@@ -391,6 +407,8 @@ int32_t perf_chacha() {
 
   return exit_success;
 }
+
+#endif
 
 int32_t main(int argc, char *argv[])
 {

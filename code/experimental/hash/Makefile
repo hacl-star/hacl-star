@@ -4,7 +4,8 @@ KREMLIN_HOME ?= $(HACL_HOME)/dependencies/kremlin
 
 FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
-
+KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
+KRML=$(KRML_BIN) $(KREMLIN_ARGS)
 
 verify: Hacl.Hash.SHA2_256.Lemmas.fst Hacl.Hash.SHA2_256.fst SHA2_256.fst
 	$(FSTAR) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/experimental/utils --include $(HACL_HOME)/specs --use_hints $^
@@ -16,7 +17,7 @@ record-hints: Hacl.Hash.SHA2_256.Lemmas.fst Hacl.Hash.SHA2_256.fst SHA2_256.fst
 
 build:
 	mkdir -p sha2-c
-	$(KREMLIN_HOME)/krml -verbose -tmpdir sha2-c \
+	$(KRML) -verbose -tmpdir sha2-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils -I $(HACL_HOME)/specs \
 		Hacl.Test.SHA2_256.fst -o sha2_256.exe -no-prefix Hacl.Test.SHA2_256 -no-prefix SHA2_256 \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
@@ -29,7 +30,7 @@ build:
 
 build512:
 	mkdir -p sha2-c
-	$(KREMLIN_HOME)/krml -verbose -tmpdir sha2-c \
+	$(KRML) -verbose -tmpdir sha2-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils -I $(HACL_HOME)/specs \
 		SHA2_512.fst Hacl.Test.SHA2_512.fst -o sha2_512.exe -no-prefix Hacl.Test.SHA2_512 -no-prefix SHA2_512 \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
@@ -43,7 +44,7 @@ build512:
 
 sha2-c/SHA2_512.c:
 	mkdir -p sha2-c
-	$(KREMLIN_HOME)/krml -verbose -tmpdir sha2-c \
+	$(KRML) -verbose -tmpdir sha2-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/experimental/utils -I $(HACL_HOME)/specs \
 		SHA2_512.fst \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
