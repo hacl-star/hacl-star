@@ -18,7 +18,7 @@ all:
 	$(MAKE) -C openssl-engine
 
 travis:
-	$(MAKE) extract-c
+	$(MAKE) extract-c-code
 	$(MAKE) ct
 	$(MAKE) -C .. world
 
