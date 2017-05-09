@@ -169,7 +169,7 @@ let setup st k n c =
   no_upd_lemma_1 h3 h4 stn stk;
   no_upd_lemma_1 h3 h4 stn stc;
   lemma_setup h4 st;
-  Seq.lemma_eq_intro (as_seq h4 st) (Spec.setup (as_seq h0 k) (as_seq h0 n) (U32.v c))
+  Seq.lemma_eq_intro (reveal_h32s (as_seq h4 st)) (Spec.setup (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) (U32.v c))
 
 
 let idx = a:U32.t{U32.v a < 16}
