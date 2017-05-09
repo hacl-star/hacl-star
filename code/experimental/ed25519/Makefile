@@ -69,13 +69,19 @@ ED25519_SPECIFIC= \
 	Hacl.Impl.Ed25519.PointEqual.fst \
 	Hacl.Impl.Ed25519.Verify.Steps.fst \
 	Hacl.Impl.Ed25519.Verify.fst \
-	Ed25519.fsti
+	Ed25519.fsti \
+	Ed25519.fst
 
 # Files that are too slow and for which verification speed must improve
 SLOW=
 
 # Files that still have errors
-TODO=
+TODO=Hacl.Impl.SHA512.ModQ.fst \
+	Ed25519.fsti \
+	Ed25519.fst \
+	Hacl.Impl.Ed25519.Pow2_252m2.fst \
+	Hacl.Impl.Ed25519.SecretExpand.fst \
+	Hacl.Impl.BignumQ.Mul.fst
 
 ED25519_FILES= $(ED25519_SPECIFIC) # $(BIGNUM) 
 
