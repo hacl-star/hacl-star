@@ -62,11 +62,6 @@ val constant_setup:
 let constant_setup st =
   constant_setup_ st;
   let h = ST.get() in
-  (* assert_norm (Seq.length (Seq.createL constants) = 4); *)
-  (* assert_norm(let s = (Seq.createL constants) in Seq.index s 0 = 0x61707865ul); *)
-  (* assert_norm(let s = (Seq.createL constants) in Seq.index s 1 = 0x3320646eul); *)
-  (* assert_norm(let s = (Seq.createL constants) in Seq.index s 2 = 0x79622d32ul); *)
-  (* assert_norm(let s = (Seq.createL constants) in Seq.index s 3 = 0x6b206574ul); *)
   Seq.lemma_eq_intro (reveal_h32s (as_seq h st)) (Seq.Create.create_4 c0 c1 c2 c3)
 
 
@@ -173,7 +168,8 @@ let setup st k n c =
   no_upd_lemma_1 h3 h4 stn stcst;
   no_upd_lemma_1 h3 h4 stn stk;
   no_upd_lemma_1 h3 h4 stn stc;
-  lemma_setup h4 st
+  lemma_setup h4 st;
+  Seq.lemma_eq_intro (as_seq h4 st) (Spec.setup (as_seq h0 k) (as_seq h0 n) (U32.v c))
 
 
 let idx = a:U32.t{U32.v a < 16}
@@ -328,7 +324,6 @@ let copy_state st st' =
 
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
-
 
 type log_t_ = | MkLog: k:Spec.key -> n:Spec.nonce -> log_t_
 type log_t = Ghost.erased log_t_
