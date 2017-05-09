@@ -196,8 +196,163 @@ let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{len
 
 
 let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{length hash = size_hash}) =
-  let blocks = pad 0 (Seq.length input) in
-  finish (update_multi h_0 (input @| blocks))
+  let padding = pad 0 (Seq.length input) in
+  finish (update_multi h_0 (input @| padding))
+
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+let lemma_update_multi_partial (h0:hash_w) (blocks:bytes{Seq.length blocks >= size_block /\ Seq.length blocks % size_block = 0}) : Lemma
+  (ensures  (let (block,rem) = Seq.split blocks size_block in
+             Seq.length blocks = Seq.length (block @| rem) /\
+             update_multi h0 blocks == update_multi h0 (block @| rem))) =
+  let (block,rem) = Seq.split blocks size_block in
+  lemma_eq_intro blocks (block @| rem)
+
+
+let lemma_modulo (l:nat) (s:nat{s <> 0 /\ l >= s /\ l % s = 0}) : Lemma
+  (ensures ((l - s) % s = 0)) =
+Math.Lemmas.lemma_mod_plus (l - s) 1 s
+
+
+#reset-options "--max_fuel 1 --z3rlimit 100"
+
+val lemma_update_update_multi: (h0:hash_w) -> (blocks:bytes{Seq.length blocks >= size_block /\ Seq.length blocks % size_block = 0}) -> Lemma
+  (ensures  (let (block,rem) = Seq.split blocks size_block in
+             let h1 = update h0 block in
+             let h2 = update_multi h1 rem in
+             h2 == update_multi h0 blocks))
+
+let lemma_update_update_multi h0 blocks =
+  let (block,rem) = Seq.split blocks size_block in
+  assert(size_block <> 0);
+  assert(length blocks >= size_block);
+  assert(length blocks % size_block = 0);
+  lemma_modulo (length blocks) size_block;
+  assert((length blocks - size_block) % size_block = 0);
+  assert(Seq.length rem  % size_block = 0);
+  let h1 = update h0 block in
+  let h2 = update_multi h1 rem in
+  Seq.lemma_eq_intro h2 (update_multi h0 blocks)
+
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+val lemma_update_multi_extend: (h0:hash_w) -> (block:bytes{Seq.length block = size_block}) -> (blocks:bytes{Seq.length blocks % size_block = 0}) -> Lemma
+  (ensures (update_multi (update h0 block) blocks == update_multi h0 (block @| blocks)))
+
+let lemma_update_multi_extend h0 block blocks =
+  lemma_update_update_multi h0 (block @| blocks);
+  let a,b = Seq.split (block @| blocks) size_block in
+  Seq.lemma_eq_intro a block;
+  Seq.lemma_eq_intro b blocks;
+  Seq.lemma_eq_intro (update_multi (update h0 block) blocks) (update_multi h0 (block @| blocks))
+
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+val lemma_eq_incremental: (h0:hash_w) -> (a:bytes{Seq.length a % size_block = 0}) -> (b:bytes{Seq.length b % size_block = 0}) -> (c:bytes{Seq.length c % size_block = 0 /\ c = a @| b}) -> (last:bytes{Seq.length c + Seq.length last < max_input_len_8}) -> Lemma
+  (ensures  ((finish (update_last (update_multi h0 (a @| b)) (Seq.length a + Seq.length b) last))
+            == finish (update_last (update_multi h0 c) (Seq.length c) last)))
+
+let lemma_eq_incremental h0 a b c last = ()
+
+
+(* #reset-options "--max_fuel 0 --z3rlimit 10" *)
+
+(* val lemma_eq_incremental2: (h0:hash_w) -> (a:bytes{Seq.length a % size_block = 0}) -> (b:bytes{Seq.length b % size_block = 0}) -> (c:bytes{Seq.length c % size_block = 0 /\ c = a @| b}) -> (last:bytes{Seq.length c + Seq.length last < max_input_len_8}) -> Lemma *)
+(*   (ensures  ((finish (update_last (update_multi h0 (a @| b)) (Seq.length a + Seq.length b) last)) *)
+(*             == hash (a @| b @| last))) *)
+
+(* let lemma_eq_incremental2 h0 a b c last = *)
+(*   lemma_eq_intro (c @| last) (a @| b @| last); *)
+(*   lemma_eq_incremental h0 a b (a @| b) last *)
+
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+val lemma_hash_def: (h0:hash_w) -> (input:bytes{Seq.length input < max_input_len_8}) -> Lemma
+  (ensures  (let n = Seq.length input / size_block in
+            let (blocks,last) = Seq.split input (n * size_block) in
+            let hash1 = update_multi h_0 blocks in
+            let hash2 = update_last hash1 (n * size_block) last in
+            finish hash2 == hash input))
+
+let lemma_hash_def h0 input = ()
+
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+val lemma_hash_def2: (h0:hash_w) -> (input:bytes{Seq.length input < max_input_len_8}) -> Lemma
+  (ensures  (let n = Seq.length input / size_block in
+            let (blocks,last) = Seq.split input (n * size_block) in
+            let hash1 = update_multi h_0 blocks in
+            let hash2 = update_last hash1 (n * size_block) last in
+            finish hash2 == hash input /\ finish hash2 == hash (blocks @| last)))
+
+let lemma_hash_def2 h0 input =
+  let n = Seq.length input / size_block in
+  let (blocks,last) = Seq.split input (n * size_block) in
+  lemma_eq_intro input (blocks @| last);
+  lemma_hash_def h0 (blocks @| last)
+
+(* #reset-options "--max_fuel 0 --z3rlimit 10" *)
+
+(* val lemma_hash_eq_incremental: (h0:hash_w) -> (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length block + Seq.length msg < max_input_len_8}) -> Lemma *)
+(*   (ensures (let n = Seq.length msg / size_block in *)
+(*             let (msg_blocks, msg_last) = Seq.split msg (n * size_block) in *)
+(*             (hash (block @| msg) == hash (block @| msg_blocks @| msg_last)))) *)
+
+(* let lemma_hash_eq_incremental h0 block msg = *)
+(*   let n = Seq.length msg / size_block in *)
+(*   let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in *)
+(*   let hash1 = update h_0 block in *)
+(*   let hash2 = update_multi hash1 msg_blocks in *)
+(*   lemma_update_multi_extend h_0 block msg_blocks; *)
+(*   lemma_eq_intro (block @| msg) (block @| msg_blocks @| msg_last) *)
+
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+val lemma_hash_prepend: (h0:hash_w) -> (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length block + Seq.length msg < max_input_len_8}) -> Lemma
+  (ensures (let n = Seq.length msg / size_block in
+            let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
+            let hash0 = update h_0 block in
+            let hash1 = update_multi hash0 msg_blocks in
+            let hash2 = update_last hash1 (size_block + (n * size_block)) msg_last in
+            finish hash2 == hash (block @| msg)))
+
+let lemma_hash_prepend h0 block msg =
+  let n = Seq.length msg / size_block in
+  let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
+  let hash1 = update h_0 block in
+  let hash2 = update_multi hash1 msg_blocks in
+  lemma_update_multi_extend h_0 block msg_blocks;
+  lemma_eq_intro (block @| msg) (block @| msg_blocks @| msg_last)
+
+
+
+
+
+#reset-options "--max_fuel 0 --z3rlimit 50"
+
+let hash_block_and_rest (block:bytes{Seq.length block = size_block}) (msg:bytes{Seq.length msg + Seq.length block < max_input_len_8}) :
+  Tot (output:bytes{output == hash (block @| msg)}) =
+
+  let n = Seq.length msg / size_block in
+  let (msg_blocks, msg_last) = Seq.split msg (n * size_block) in
+
+  let hash0 = update h_0 block in
+  let hash1 = update_multi hash0 msg_blocks in
+  lemma_update_multi_extend h_0 block msg_blocks;
+
+  let hash2 = update_last hash1 ((n + 1) * size_block) msg_last in
+  let hash3 = finish hash2 in
+
+  lemma_hash_eq_prepend h_0 block msg;
+
+  hash3
+
 
 
 
