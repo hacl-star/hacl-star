@@ -312,7 +312,7 @@ let lemma_hash_def2 h0 input =
 (*   lemma_eq_intro (block @| msg) (block @| msg_blocks @| msg_last) *)
 
 
-#reset-options "--max_fuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val lemma_hash_prepend: (h0:hash_w) -> (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length block + Seq.length msg < max_input_len_8}) -> Lemma
   (ensures (let n = Seq.length msg / size_block in
@@ -327,11 +327,18 @@ let lemma_hash_prepend h0 block msg =
   let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
   let hash1 = update h_0 block in
   let hash2 = update_multi hash1 msg_blocks in
+  let hash3 = update_last hash2 (size_block + (n * size_block)) msg_last in
+  let hash4 = finish hash3 in
   lemma_update_multi_extend h_0 block msg_blocks;
-  lemma_eq_intro (block @| msg) (block @| msg_blocks @| msg_last)
-
-
-
+  lemma_eq_intro (block @| msg) (block @| msg_blocks @| msg_last);
+  assert(hash2 == update_multi h_0 (block @| msg_blocks));
+  let banana = block @| msg in
+  let n' = Seq.length banana / size_block in
+  let (msg_blocks',msg_last') = Seq.split banana (n' * size_block) in
+  Math.Lemmas.distributivity_add_left n 1 size_block;
+  assert(n' == n + 1);
+  Seq.lemma_eq_intro (msg_last') (msg_last);
+  Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
 
 
 #reset-options "--max_fuel 0 --z3rlimit 50"
@@ -349,7 +356,7 @@ let hash_block_and_rest (block:bytes{Seq.length block = size_block}) (msg:bytes{
   let hash2 = update_last hash1 ((n + 1) * size_block) msg_last in
   let hash3 = finish hash2 in
 
-  lemma_hash_eq_prepend h_0 block msg;
+  lemma_hash_prepend h_0 block msg;
 
   hash3
 
