@@ -54,3 +54,4 @@ clean:
 	$(MAKE) -C poly1305 clean
 	$(MAKE) -C curve25519 clean
 	$(MAKE) -C api clean
+	$(MAKE) -C experimental clean

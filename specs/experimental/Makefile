@@ -55,4 +55,4 @@ chacha20-vec256.exe: Spec.Chacha20_vec256.fst
 clean:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml clean
 	$(MAKE) -C experimental clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 chacha-spec-vec2 chacha-spec-vec sha2-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 chacha-spec-vec2 chacha-spec-vec sha2-spec ed25519-spec

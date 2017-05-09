@@ -79,12 +79,18 @@ snapshot:
 	$(MAKE) test-snapshot
 
 all-snapshots:
-	if $(HAS_CCOMP); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert"; fi
+	if $(HAS_CCOMP); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert -funroll-loops 10"; fi
 	if $(HAS_CCOMP); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
+	$(MAKE) -C ../code clean
 	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc msvc"; fi
 	if $(HAS_CL); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-msvc; fi
+	$(MAKE) -C ../code clean
 	$(MAKE) extract-c-code extract-c-code-experimental
 	$(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-funroll-loops 5"
+	$(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
 
 update-snapshot:
 	$(build-snapshot)
