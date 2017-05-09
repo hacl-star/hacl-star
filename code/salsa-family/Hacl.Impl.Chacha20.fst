@@ -57,17 +57,17 @@ val constant_setup:
   Stack unit
     (requires (fun h -> live h c))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1
-      /\ reveal_h32s (as_seq h1 c) == Seq.createL constants))
+      /\ reveal_h32s (as_seq h1 c) == Seq.Create.create_4 c0 c1 c2 c3))
 [@ "substitute"]
 let constant_setup st =
   constant_setup_ st;
   let h = ST.get() in
-  assert_norm (Seq.length (Seq.createL constants) = 4);
-  assert_norm(let s = (Seq.createL constants) in Seq.index s 0 = 0x61707865ul);
-  assert_norm(let s = (Seq.createL constants) in Seq.index s 1 = 0x3320646eul);
-  assert_norm(let s = (Seq.createL constants) in Seq.index s 2 = 0x79622d32ul);
-  assert_norm(let s = (Seq.createL constants) in Seq.index s 3 = 0x6b206574ul);
-  Seq.lemma_eq_intro (reveal_h32s (as_seq h st)) (Seq.createL constants)
+  (* assert_norm (Seq.length (Seq.createL constants) = 4); *)
+  (* assert_norm(let s = (Seq.createL constants) in Seq.index s 0 = 0x61707865ul); *)
+  (* assert_norm(let s = (Seq.createL constants) in Seq.index s 1 = 0x3320646eul); *)
+  (* assert_norm(let s = (Seq.createL constants) in Seq.index s 2 = 0x79622d32ul); *)
+  (* assert_norm(let s = (Seq.createL constants) in Seq.index s 3 = 0x6b206574ul); *)
+  Seq.lemma_eq_intro (reveal_h32s (as_seq h st)) (Seq.Create.create_4 c0 c1 c2 c3)
 
 
 [@ "substitute"]

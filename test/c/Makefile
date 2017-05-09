@@ -6,9 +6,9 @@ LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
 CC=gcc-6 -fno-tree-vectorize -flto
 CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
 
-test: unit-test-poly unit-test-chacha unit-test-salsa unit-test-curve unit-test-ed25519 unit-test-secretbox unit-test-box unit-test-aead
+test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-ed25519 unit-test-secretbox unit-test-box unit-test-aead
 
-perf: perf-test-poly perf-test-chacha perf-test-salsa perf-test-curve perf-test-ed25519 perf-test-secretbox perf-test-box perf-test-aead
+perf: perf-test-poly perf-test-chacha perf-test-chacha-vec128 perf-test-salsa perf-test-curve perf-test-ed25519 perf-test-secretbox perf-test-box perf-test-aead
 
 test-poly.exe:
 	$(CC) $(CCOPTS) \
@@ -47,6 +47,18 @@ perf-test-chacha: test-chacha.exe
 
 unit-test-chacha: test-chacha.exe
 	./test-chacha.exe unit-test
+
+test-chacha-vec128.exe:
+	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I ../../other_providers/tweetnacl \
+	../../other_providers/tweetnacl/tweetnacl.c kremlib.c testlib.c Chacha20_Vec128.c test-chacha-vec128.c -o test-chacha-vec128.exe \
+	 $(OPENSSL_HOME)/libcrypto.a -l sodium -lpthread -ldl
+
+perf-test-chacha-vec128: test-chacha-vec128.exe
+	./test-chacha-vec128.exe perf
+
+unit-test-chacha-vec128: test-chacha-vec128.exe
+	./test-chacha-vec128.exe unit-test
 
 test-curve.exe:
 	$(CC) $(CCOPTS) \

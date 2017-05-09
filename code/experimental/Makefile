@@ -3,7 +3,7 @@ KREMLIN_HOME?=$(HACL_HOME)/kremlin
 FSTAR_HOME?=$(HACL_HOME)/kremlin
 
 
-DIRECTORIES=ed25519 hash
+DIRECTORIES=ed25519 hash salsa-family
 
 %-c: %
 	$(MAKE) -C $< extract-c

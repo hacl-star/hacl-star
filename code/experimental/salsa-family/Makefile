@@ -58,7 +58,7 @@ Chacha20_vec2.c: interfaces/Hacl.UInt32x4N.fst Loops_vec.fst Hacl.Impl.Chacha20_
 		-bundle 'Chacha20_vec2=Loops_vec,Hacl.Impl.Chacha20_state2,Hacl.Impl.Chacha20_vec2,Chacha20_vec2' -drop 'Hacl.Spec.\*' -add-include '"loops_vec.h"' -drop 'Spec.\*' -drop "C.Loops" -add-include '"vec32x4N.h"' \
 		$^ $(VERBOSE) -skip-linking
 
-extract-c: Chacha20_vec.c Chacha20_vec2.c
+extract-c: chacha-vec128/Chacha20_Vec128.c
 
 
 clean:
