@@ -5,7 +5,7 @@ KREMLIN_HOME ?= $(HACL_HOME)/dependencies/kremlin
 FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
-KRML=$(KRML_BIN) $(KREMLIN_ARGS)
+KRML=$(KRML_BIN) $(KREMLIN_ARGS) -ccopt -Wno-unknown-warning-option -ccopt -Wno-tautological-constant-out-of-range-compare
 
 
 
