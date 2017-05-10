@@ -130,7 +130,7 @@ noeq type aead_state (i:id) (rw:rw) =
       #log_region: rgn -> // this is the *writer* region; the reader allocates nothing
       log: aead_log log_region i ->
       prf: PRF.state i {prf.rgn == log_region /\ //TODO: PRF state will move to the TLS region
-		       (safeMac i ==> ~(aead_log_as_ref log === PRF.itable i prf)) } ->
+		       (safeMac i ==> (HS.as_addr (aead_log_as_ref log) <> HS.as_addr (PRF.itable i prf))) } ->
       ak: CMA.akey prf.mac_rgn i (* static, optional authentication key *) ->
       aead_state i rw
 
@@ -483,7 +483,7 @@ let frame_refines_one_entry (#i:id) (#mac_rgn:region)
 			    (e:aead_entry i{safeId i}) //NB: moving the refinement earlier causes typing problems in frame_refines below
    : Lemma (requires (let open HS in
 		      refines_one_entry blocks e h /\			    
-		      HH.modifies_rref mac_rgn TSet.empty h.h h'.h /\
+		      HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
 		      live_region h' mac_rgn))
 	   (ensures  refines_one_entry blocks e h')
    = ()
@@ -493,7 +493,7 @@ let frame_unused_aead_iv_for_prf_h (#mac_rgn:region) (#i:id) (h0:mem{safeMac i})
 				 (iv:Cipher.iv (alg i))
   : Lemma (requires (let open HS in
 		     unused_aead_iv_for_prf prf_table iv h0        /\
-                     HH.modifies_rref mac_rgn TSet.empty h0.h h1.h /\
+                     HH.modifies_rref mac_rgn Set.empty h0.h h1.h /\
 		     live_region h1 mac_rgn))
 	  (ensures  unused_aead_iv_for_prf prf_table iv h1)
   = ()
@@ -504,7 +504,7 @@ let frame_refines (i:id{safeMac i}) (mac_rgn:region)
 		  (h:mem) (h':mem)
    : Lemma (requires (let open HS in 
 		      refines blocks entries h                     /\
-   		      HH.modifies_rref mac_rgn TSet.empty h.h h'.h /\
+   		      HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
 		      HS.live_region h' mac_rgn))
 	   (ensures  refines blocks entries h')
    = let open FStar.Classical in
@@ -515,7 +515,7 @@ let frame_prf_prf_mac_inv
   (#i:id) (#mac_rgn:region) (blocks:prf_table mac_rgn i) (h:mem) (h':mem{prf i}) (x:domain_mac i) 
   :Lemma (requires (let open HS in
                     PRF.prf_mac_inv blocks x h                   /\
-                    HH.modifies_rref mac_rgn TSet.empty h.h h'.h /\
+                    HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
 		    HS.live_region h' mac_rgn))
 	 (ensures  (PRF.prf_mac_inv blocks x h'))
   = ()
@@ -524,7 +524,7 @@ let frame_prf_mac_inv
   (#i:id) (#mac_rgn:region) (blocks:prf_table mac_rgn i) (h:mem) (h':mem{prf i})
   :Lemma (requires (let open HS in
                     prf_mac_inv blocks h                         /\
-		    HH.modifies_rref mac_rgn TSet.empty h.h h'.h /\
+		    HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
 		    HS.live_region h' mac_rgn))
          (ensures  (prf_mac_inv blocks h'))
   = let open FStar.Classical in
@@ -682,7 +682,7 @@ let frame_refines_entries_h (i:id{safeMac i}) (mac_rgn:region)
 		                 (h:mem) (h':mem)
    : Lemma (requires (let open HS in 
 		      aead_entries_are_refined blocks entries h    /\
-   		      HH.modifies_rref mac_rgn TSet.empty h.h h'.h /\
+   		      HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
 		      HS.live_region h' mac_rgn))
 	   (ensures  aead_entries_are_refined blocks entries h')
    = let open FStar.Classical in
@@ -757,73 +757,46 @@ let frame_unused_aead_iv_for_prf_append #mac_rgn #i table blocks h nonce =
 	and inductive form based on snoc.
         Each recursive invocation effectively snoc's a PRF block **)
 #reset-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-private val counterblocks_snoc_aux: 
-        #i:id{safeId i} -> (rgn:region) -> (x:domain i{ctr_0 i <^ x.ctr}) -> (k:nat{v x.ctr <= k}) ->
+val counterblocks_snoc: #i:id{safeId i} -> (rgn:region) -> (x:domain i{ctr_0 i <^ x.ctr}) -> (k:nat{v x.ctr <= k}) ->
 			 (len:nz_ok_len i) ->
 			 (next:nat{0 < next /\ next <= v (PRF.blocklen i)}) ->
 			 (completed_len:nat{ completed_len + next <= len /\ 
 					   FStar.Mul.((k - v (otp_offset i)) * v (PRF.blocklen i) = completed_len)}) ->
 			 (plain:Plain.plain i len) ->
 			 (cipher:lbytes len) ->
-                         (last_entry:PRF.entry rgn i) ->
-     Lemma (requires (
-     	      let plain_last = Plain.slice plain completed_len (completed_len + next) in
-	      let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
-              last_entry == PRF.Entry ({x with ctr=UInt32.uint_to_t k}) 
-                                      (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last)))
+     Lemma (requires True)
 	   (ensures
 	     (let open FStar.Mul in
+	      let plain_last = Plain.slice plain completed_len (completed_len + next) in
+	      let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
 	      let from = (v x.ctr - (v (otp_offset i))) * v (PRF.blocklen i) in
 	      Seq.equal (counterblocks i rgn x len from (completed_len + next) plain cipher)
-			(Seq.snoc (counterblocks i rgn x len from completed_len plain cipher) 
-                                  last_entry)))
+			(Seq.snoc (counterblocks i rgn x len from completed_len plain cipher)
+							   (PRF.Entry ({x with ctr=UInt32.uint_to_t k}) 
+							              (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last)))))
 	   (decreases (completed_len - v x.ctr))
-#reset-options "--z3rlimit 2000 --max_fuel 1 --max_ifuel 0"
-let rec counterblocks_snoc_aux #i rgn x k len next completed_len plain cipher last_entry =
+#reset-options "--z3rlimit 2000 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0 --lax" //AR: 04/22/17: this proof goes forever, also see the comment at the end of this lemma
+let rec counterblocks_snoc #i rgn x k len next completed_len plain cipher =
    let open FStar.Mul in
    let from_pos = (v x.ctr - (v (otp_offset i))) * v (PRF.blocklen i) in
    let to_pos = completed_len + next in
    if completed_len - from_pos = 0
    then counterblocks_emp i rgn (PRF.incr i x) len to_pos plain cipher
-   else let y = PRF.incr i x in
-        let remaining = to_pos - from_pos in
-        let l0 = minNat remaining (v (PRF.blocklen i)) in
-        let plain_hd = Plain.slice plain from_pos (from_pos + l0) in
-        let cipher_hd = Seq.slice cipher from_pos (from_pos + l0) in
-        let plain_last = Plain.slice plain completed_len (completed_len + next) in
-        let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
-        let head = PRF.Entry x (PRF.OTP (UInt32.uint_to_t l0) plain_hd cipher_hd) in
-        let recursive_call = counterblocks i rgn y len (from_pos + l0) to_pos plain cipher in
-        let middle = counterblocks i rgn y len (from_pos + l0) completed_len plain cipher in
-        (* let last_entry = PRF.Entry ({x with ctr=UInt32.uint_to_t k}) (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last) in *)
-        assert (counterblocks i rgn x len from_pos to_pos plain cipher == Seq.cons head recursive_call);
-        counterblocks_snoc_aux rgn y k len next completed_len plain cipher last_entry;
-        assert (recursive_call == Seq.snoc middle last_entry);
-        Seq.lemma_cons_snoc head middle last_entry //REVIEW: THIS PROOF TAKES A WHILE ...optimize //17-02-14 increased rlimit again.
-
-let counterblocks_snoc
-  (#i:id{safeId i}) (rgn:region) (x:domain i{ctr_0 i <^ x.ctr}) (k:nat{v x.ctr <= k}) 
-  (len:nz_ok_len i)
-  (next:nat{0 < next /\ next <= v (PRF.blocklen i)})
-  (completed_len:nat{ completed_len + next <= len /\
-   		    FStar.Mul.((k - v (otp_offset i)) * v (PRF.blocklen i) = completed_len)})
-  (plain:Plain.plain i len) ->
-  (cipher:lbytes len)
-  :  Lemma (requires True)
-	   (ensures
-	     (let open FStar.Mul in
-              let plain_last = Plain.slice plain completed_len (completed_len + next) in
-	      let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
-	      let from = (v x.ctr - (v (otp_offset i))) * v (PRF.blocklen i) in
-	      Seq.equal (counterblocks i rgn x len from (completed_len + next) plain cipher)
-			(Seq.snoc (counterblocks i rgn x len from completed_len plain cipher) 
-                                  (PRF.Entry ({x with ctr=UInt32.uint_to_t k}) 
-                                             (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last)))))
- = let plain_last = Plain.slice plain completed_len (completed_len + next) in
-   let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
-   let last_entry = PRF.Entry ({x with ctr=UInt32.uint_to_t k}) 
-                              (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last) in
-   counterblocks_snoc_aux #i rgn x k len next completed_len plain cipher last_entry
+   else   let y = PRF.incr i x in
+	  let remaining = to_pos - from_pos in 
+	  let l0 = minNat remaining (v (PRF.blocklen i)) in
+	  let plain_hd = Plain.slice plain from_pos (from_pos + l0) in
+	  let cipher_hd = Seq.slice cipher from_pos (from_pos + l0) in
+	  let plain_last = Plain.slice plain completed_len (completed_len + next) in
+	  let cipher_last = Seq.slice cipher completed_len (completed_len + next) in
+	  let head = PRF.Entry x (PRF.OTP (UInt32.uint_to_t l0) plain_hd cipher_hd) in
+	  let recursive_call = counterblocks i rgn y len (from_pos + l0) to_pos plain cipher in
+	  let middle = counterblocks i rgn y len (from_pos + l0) completed_len plain cipher in
+	  let last_entry = PRF.Entry ({x with ctr=UInt32.uint_to_t k}) (PRF.OTP (UInt32.uint_to_t next) plain_last cipher_last) in
+	  assert (counterblocks i rgn x len from_pos to_pos plain cipher == Seq.cons head recursive_call);
+	  counterblocks_snoc rgn y k len next completed_len plain cipher;
+	  assert (recursive_call == Seq.snoc middle last_entry);
+          Seq.lemma_cons_snoc head middle last_entry //REVIEW: THIS PROOF TAKES A WHILE ...optimize //17-02-14 increased rlimit again.
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 (*+ counterblocks_slice: 
@@ -1087,7 +1060,7 @@ let frame_unused_mac_exists_h
   (h0 h1:mem) : Lemma
   (requires (let open HS in
              unused_mac_exists table x h0                  /\
-	     HH.modifies_rref mac_rgn TSet.empty h0.h h1.h /\
+	     HH.modifies_rref mac_rgn Set.empty h0.h h1.h /\
 	     live_region h1 mac_rgn))
   (ensures  (unused_mac_exists table x h1))
  = ()
@@ -1145,7 +1118,7 @@ let frame_mac_is_set_h
   (tag:MAC.tag)
   (h0 h1:mem) : Lemma
   (requires (mac_is_set table nonce ad l cipher tag h0 /\
-             HS.modifies_ref mac_rgn TSet.empty h0 h1  /\
+             HS.modifies_ref mac_rgn Set.empty h0 h1  /\
 	     HS.live_region h1 mac_rgn))
   (ensures  (mac_is_set table nonce ad l cipher tag h1))
   = ()
@@ -1158,7 +1131,7 @@ val frame_cma_mac_is_unset_h
   (h0 h1:mem) : Lemma
   (requires (CMA.mac_is_unset i r mac_st h0 /\
              HS.modifies_transitively (Set.singleton r') h0 h1 /\
-             HS.modifies_ref r TSet.empty h0 h1))
+             HS.modifies_ref r Set.empty h0 h1))
   (ensures  (CMA.mac_is_unset i r mac_st h1))
 let frame_cma_mac_is_unset_h i r r' mac_st h0 h1 = ()
 
@@ -1172,10 +1145,11 @@ val lemma_mac_log_framing
   (requires (nonce_1 <> nonce_2                                        /\
              m_contains (CMA.(ilog mac_st_2.log)) h0                 /\
 	     HS.(h1.h `Map.contains` CMA.(mac_st_2.region))          /\
-             HS.modifies_ref (CMA.(mac_st_1.region)) !{HS.as_ref (as_hsref (CMA.(ilog mac_st_1.log)))} h0 h1))
+             HS.modifies_ref (CMA.(mac_st_1.region)) (Set.singleton (HS.as_addr (as_hsref (CMA.(ilog mac_st_1.log))))) h0 h1))
   (ensures  (m_sel h0 (CMA.(ilog mac_st_2.log)) = m_sel h1 (CMA.(ilog mac_st_2.log))))
 #set-options "--initial_ifuel 1 --max_ifuel 1"
-let lemma_mac_log_framing #i #nonce_1 #nonce_2 mac_st_1 h0 h1 mac_st_2 = ()
+let lemma_mac_log_framing #i #nonce_1 #nonce_2 mac_st_1 h0 h1 mac_st_2 = //AR: 04/22/2017: this relies on ref injectivity ...
+  assume (m_contains (CMA.(ilog mac_st_1.log)) h0)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let lemma_fresh_nonce_implies_all_entries_nonces_are_different

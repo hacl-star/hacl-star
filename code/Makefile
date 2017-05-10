@@ -1,6 +1,6 @@
 all: extract-c ct verify
 
-DIRECTORIES= salsa-family bignum poly1305 curve25519 api
+DIRECTORIES=salsa-family bignum poly1305 curve25519 api
 
 %-c: %
 	$(MAKE) -C $< extract-c

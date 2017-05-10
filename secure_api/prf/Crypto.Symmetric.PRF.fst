@@ -145,7 +145,7 @@ noeq type state (i:id) =
 	   #mac_rgn: region{mac_rgn `HH.extends` rgn} ->
            // key is immutable once generated, we should make it private
            key: lbuffer (v (statelen i)) 
-             {Buffer.frameOf key = rgn /\ ~(HS.MkRef?.mm (Buffer.content key))} ->
+             {Buffer.frameOf key = rgn /\ ~(HS.is_mm (Buffer.content key))} ->
            table: table_t rgn mac_rgn i ->
            state i
 
@@ -166,7 +166,7 @@ val gen: rgn:region -> i:id -> ST (state i)
   (ensures  (fun h0 s h1 ->
     s.rgn == rgn /\ 
     (prf i ==> 
-        ~ (h0 `HS.contains` (itable i s))
+            ((itable i s) `HS.unused_in` h0)
 	  /\ HS.sel h1 (itable i s) == Seq.createEmpty #(entry s.mac_rgn i))))
 let gen rgn i =
   (* match cipherAlg_of_id i with *)
@@ -291,14 +291,14 @@ val prf_mac:
               t1 == Seq.snoc t0 (Entry x mc) /\
               CMA.genPost (i,x.iv) t.mac_rgn h0 mc h1 /\
               HS.modifies_transitively (Set.singleton t.rgn) h0 h1 /\
-              HS.modifies_ref t.rgn !{HS.as_ref r} h0 h1 /\
-	 HS.modifies_ref t.mac_rgn TSet.empty h0 h1
+              HS.modifies_ref t.rgn (Set.singleton (HS.as_addr r)) h0 h1 /\
+	 HS.modifies_ref t.mac_rgn Set.empty h0 h1
           | None -> False ))
     else (
       CMA.genPost (i,x.iv) t.mac_rgn h0 mc h1 /\
       HS.modifies_transitively (Set.singleton t.rgn) h0 h1 /\ //allocates in t.rgn and t.mac_rgn
-      HS.modifies_ref t.rgn TSet.empty h0 h1  /\              //but modifies nothing in them
-      HS.modifies_ref t.mac_rgn TSet.empty h0 h1 )))
+      HS.modifies_ref t.rgn Set.empty h0 h1  /\              //but modifies nothing in them
+      HS.modifies_ref t.mac_rgn Set.empty h0 h1 )))
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 let prf_mac i t k_0 x =
@@ -337,13 +337,13 @@ let prf_mac i t k_0 x =
     assert (Buffer.disjoint t.key keyBuffer);
     getBlock t x (CMA.keylen i) keyBuffer;
     let h2 = ST.get() in
+    Buffer.lemma_reveal_modifies_1 keyBuffer h1 h2;
     //assert (Buffer.modifies_1 keyBuffer h1 h2);
     let r:CMA.erid = t.mac_rgn in
     //let i:CMA.id = macId in
     //let ak:CMA.akey t.mac_rgn (fst i) = k_0 in
     //let k:k:lbuffer (UInt32.v (CMA.keylen (fst i))){Buffer.frameOf k == r} = keyBuffer in
     //assert (Buffer.live h2 k);
-    //assert (CMA.live_ak #t.mac_rgn h2 ak);
     let mc = CMA.coerce t.mac_rgn macId k_0 keyBuffer in
     let h3 = ST.get() in
     //assert (Buffer.modifies_1 keyBuffer h2 h3);
@@ -372,14 +372,14 @@ val prf_sk0:
               k == r1 /\
               t1 == Seq.snoc t0 (Entry x r1) /\
               HS.modifies_transitively (Set.singleton t.rgn) h0 h1 /\
-              HS.modifies_ref t.rgn !{HS.as_ref r} h0 h1 /\
-              HS.modifies_ref t.mac_rgn TSet.empty h0 h1
+              HS.modifies_ref t.rgn (Set.singleton (HS.as_addr r)) h0 h1 /\
+              HS.modifies_ref t.mac_rgn Set.empty h0 h1
           | None -> False ))
     else (
       Buffer.live h1 k /\
       HS.modifies_transitively (Set.singleton t.rgn) h0 h1 /\ //allocates in t.rgn
-      HS.modifies_ref t.rgn TSet.empty h0 h1  /\              //but nothing within it is modified
-      HS.modifies_ref t.mac_rgn TSet.empty h0 h1 )))
+      HS.modifies_ref t.rgn Set.empty h0 h1  /\              //but nothing within it is modified
+      HS.modifies_ref t.mac_rgn Set.empty h0 h1 )))
 
 let prf_sk0 #i t = 
   let x = { ctr=0ul; iv=iv_0() } in 
@@ -427,7 +427,7 @@ let modifies_x_buffer_1 #i (t:state i) x b h0 h1 =
     // can't use !{ t.rgn, rb}, why?
     let rgns = Set.union (Set.singleton #HH.rid t.rgn) (Set.singleton #HH.rid rb) in
     HS.modifies rgns h0 h1 /\
-    HS.modifies_ref t.rgn !{HS.as_ref r} h0 h1 /\
+    HS.modifies_ref t.rgn (Set.singleton (HS.as_addr r)) h0 h1 /\
     extends (HS.sel h0 r) (HS.sel h1 r) x /\
     Buffer.modifies_buf_1 rb b h0 h1 
   else

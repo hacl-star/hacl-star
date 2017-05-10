@@ -1,6 +1,3 @@
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=../..
 include ../Makefile.include
 
 API_FILES= \
@@ -11,22 +8,21 @@ API_FILES= \
 #	Hacl.SecretBox.fst \
 	Hacl.Box.fst
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTARB=$(FSTAR_BASE) \
 		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
 		--include ../poly1305/interfaces --include ../../specs \
-		--include $(KREMLIN_HOME)/kremlib
+		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
 
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTAR_CT=$(FSTAR_BASE) \
 		--include ../lib/ --include ../salsa-family/interfaces --include ../curve25519/interfaces \
 		--include ../poly1305/interfaces --include ../../specs \
-		--include $(KREMLIN_HOME)/kremlib
+		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
 		-I ../poly1305/interfaces -I ../../specs \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
 		-drop Hacl.Types
-
 
 KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
 		-I ../poly1305 -I ../../specs \
@@ -42,7 +38,7 @@ all-ct: $(addsuffix -ct, $(API_FILES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^
 
 all-ver: $(addsuffix -verify, $(API_FILES))
 
@@ -54,7 +50,7 @@ all-lax: $(addsuffix -lax, $(API_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	-$(FSTARB) --record_hints $^
 
 all-hints: $(addsuffix -hints, $(API_FILES))
 

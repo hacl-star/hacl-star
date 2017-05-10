@@ -27,6 +27,9 @@ extract-c-crypto:
 
 extract-c: extract-c-code extract-c-crypto
 
+compile-vale:
+	$(MAKE) -C ../secure_api/vale/aes
+
 ct:
 	$(MAKE) -C ../code ct
 

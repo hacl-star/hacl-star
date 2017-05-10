@@ -515,7 +515,7 @@ private val fmonty__:
       /\ modifies (Set.union (Set.singleton (frameOf tmp)) (Set.singleton (frameOf ppx))) h0 h1
       /\ as_seq h1 qx == as_seq h0 qx
     ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 150"
 [@"substitute"]
 private let fmonty__ buf x2 z2 x3 z3 x z xprime zprime qx =
   let origx      = Buffer.sub buf 0ul  5ul in

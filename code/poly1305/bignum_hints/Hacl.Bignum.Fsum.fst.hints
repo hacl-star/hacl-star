@@ -1,11 +1,11 @@
 [
-  "ti‡0\u0015\u0013„Oý”\u001b\u0017ŠSî{",
+  " \u001f\u0013rð<\u0012µšo¥.›ú[",
   [
     [
       "Hacl.Bignum.Fsum.red_c",
       1,
-      1,
-      1,
+      0,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_FStar.UInt64.t",
         "equation_Hacl.Bignum.Constants.len",
@@ -21,8 +21,8 @@
     [
       "Hacl.Bignum.Fsum.fsum_",
       1,
-      1,
-      1,
+      0,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
         "equation_FStar.UInt64.t", "equation_Hacl.Bignum.Constants.len",
@@ -39,30 +39,23 @@
     [
       "Hacl.Bignum.Fsum.fsum_",
       2,
-      1,
-      1,
+      0,
+      0,
       [
-        "@MaxIFuel_assumption", "@query", "data_elim_FStar.UInt32.Mk",
-        "equation_FStar.Buffer.as_seq", "equation_FStar.Buffer.buffer",
-        "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.n",
-        "equation_FStar.UInt32.t", "equation_FStar.UInt32.v",
-        "equation_FStar.UInt64.t", "equation_Hacl.Bignum.Constants.len",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Buffer.as_seq",
+        "equation_FStar.Buffer.buffer", "equation_FStar.UInt64.t",
+        "equation_Hacl.Bignum.Constants.len",
         "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Fsum.red_c",
-        "equation_Hacl.Bignum.Parameters.ctr",
         "equation_Hacl.Bignum.Parameters.felem",
         "equation_Hacl.Bignum.Parameters.len",
         "equation_Hacl.Bignum.Parameters.limb", "equation_Hacl.UInt64.t",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
-        "fuel_guarded_inversion_FStar.UInt32.t_",
-        "lemma_FStar.Buffer.lemma_size", "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
-        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
-        "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_bbcdeb8b5a71bbffe7267869c266e591",
         "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_ea0cdb077ae78da455b9677f874da9dd",
-        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882",
-        "typing_FStar.UInt32.v"
+        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882"
       ],
       0
     ],

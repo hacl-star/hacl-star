@@ -174,7 +174,7 @@ private val add_bytes:
     Buffer.disjoint CMA.(MAC.as_buffer st.r) txt /\
     (mac_log ==>
       Buffer.frameOf txt <> (CMA.alog acc).HS.id \/
-      Buffer.disjoint_ref_1 txt CMA.(HS.as_aref (alog acc))) ))
+      Buffer.disjoint_ref_1 txt CMA.(alog acc))))
   (ensures (fun h0 () h1 ->
     let b = CMA.(MAC.as_buffer (CMA.abuf acc)) in
     Buffer.live h1 txt /\
@@ -405,7 +405,7 @@ let store_lengths i aadlen txtlen w =
   | GHASH    -> store_lengths_ghash    aadlen txtlen w
 
 let fresh_sref (#a:Type0) h0 h1 (r:HS.reference a) =
-  ~(h0 `HS.contains` r) /\
+  (r `HS.unused_in` h0) /\
   HS.frameOf r == HS.(h1.tip) /\
   h1 `HS.contains` r
 
@@ -416,7 +416,7 @@ private val frame_modifies_buf_and_ref: #a:Type -> #b:Type -> #c:Type -> h0:mem 
   buf':Buffer.buffer c -> Lemma
   (requires (CMA.modifies_buf_and_ref #a #b buf ref h0 h1 /\
              (Buffer.frameOf buf' <> Buffer.frameOf buf \/
-              (Buffer.disjoint buf buf' /\ Buffer.disjoint_ref_1 buf' (HS.as_aref ref))) /\
+              (Buffer.disjoint buf buf' /\ Buffer.disjoint_ref_1 buf' ref)) /\
               Buffer.live h0 buf'))
   (ensures  (Buffer.live h1 buf' /\ Buffer.equal h0 buf' h1 buf'))
 let frame_modifies_buf_and_ref #a #b #c h0 h1 buf ref buf' = ()
@@ -443,7 +443,7 @@ val accumulate:
     Buffer.modifies_0 h0 h1 /\ // modifies only fresh buffers on the current stack
     // This doesn't seem to work, so inlining it below:
     // fresh_sref h0 h1 (Buffer.content abuf) /\
-    ~(h0 `Buffer.contains` (MAC.as_buffer (CMA.abuf a))) /\
+    ((MAC.as_buffer (CMA.abuf a)) `Buffer.unused_in` h0) /\
     Buffer.frameOf (MAC.as_buffer (CMA.abuf a)) == h1.HS.tip /\
     //h1 `Buffer.contains` (MAC.as_buffer buf) /\
     Buffer.live h1 aad /\

@@ -19,7 +19,7 @@ The primitives and constructions supported currently are:
 
 HACL* can be used in two ways. The verified primitives can be directly
 used in larger verification projects.  For example, HACL* code is used
-as the basis for cryptograrphic proofs of the TLS record layer in
+as the basis for cryptographic proofs of the TLS record layer in
 [miTLS].  Alternatively, developers can use HACL* through the [NaCl API]. 
 In particular, we implement the same C API as [libsodium] for the
 Box and SecretBox primitives, so any application that runs on

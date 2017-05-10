@@ -459,7 +459,7 @@ val alloc:
   unit ->
   StackInline state
     (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
+    (ensures (fun h0 st h1 -> (st `unused_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
       /\ Map.domain h1.h == Map.domain h0.h))
 [@ "c_inline"]
 let alloc () =
