@@ -99,6 +99,19 @@ perf-test-ed25519: test-ed25519.exe
 unit-test-ed25519: test-ed25519.exe
 	./test-ed25519.exe unit-test
 
+test-sha512.exe: SHA2_512.c test-sha512.c
+	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
+	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	kremlib.c testlib.c $^ -o test-sha512.exe \
+	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+
+perf-test-sha512: test-sha512.exe
+	./test-sha512.exe perf
+
+unit-test-sha512: test-sha512.exe
+	./test-sha512.exe unit-test
+
 test-secretbox.exe:
 	$(CC) $(CCOPTS) \
 	Salsa20.c -c -o Salsa20.o
