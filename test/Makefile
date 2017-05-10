@@ -1,4 +1,4 @@
-HACL_	HOME?=../..
+HACL_HOME?=../..
 KREMLIN_HOME?=$(HACL_HOME)/kremlin
 FSTAR_HOME?=$(HACL_HOME)/kremlin
 
@@ -11,7 +11,7 @@ all:
 	$(MAKE) go -k
 
 go:
-	$(MAKE) verify -k
+	$(MAKE) verify
 
 travis:
 	$(MAKE) extract-c
