@@ -13,6 +13,7 @@ all:
 	$(MAKE) extract-c
 	$(MAKE) ct
 	$(MAKE) verify
+	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
 
 travis:
@@ -28,6 +29,9 @@ extract-c-crypto:
 	$(MAKE) -C ../secure_api krml-test-hacl.exe
 
 extract-c: extract-c-code extract-c-crypto
+
+compile-vale:
+	$(MAKE) -C ../secure_api/vale/aes
 
 ct:
 	$(MAKE) -C ../code ct
