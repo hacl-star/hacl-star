@@ -117,6 +117,14 @@ sha2_256.exe: Spec.SHA2_256.fst
 	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_256.ml -o sha2_256.exe
 	./sha2_256.exe
 
+sha2_384.exe: Spec.SHA2_384.fst
+	$(MAKE) lib
+	mkdir -p sha2-spec
+	$(FSTAR) $(ARGS) --odir sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_384.ml
+	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_384.ml -o sha2_384.exe
+	./sha2_384.exe
+
 sha2_512.exe: Spec.SHA2_512.fst
 	$(MAKE) lib
 	mkdir -p sha2-spec
