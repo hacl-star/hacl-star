@@ -75,4 +75,5 @@ static __inline__ TestLib_cycles TestLib_cpucycles_end(void)
 
 void TestLib_print_cycles_per_round(TestLib_cycles c1, TestLib_cycles c2, uint32_t rounds);
 
+
 #endif

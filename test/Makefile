@@ -82,14 +82,31 @@ test-gcc:
 test-gcc-unrolled:
 	$(MAKE) -C snapshot-gcc-unrolled CC="gcc-6 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
 
+echo-perf-ccomp:
+	$(shell (echo -e "Benchmarking results with ccomp -O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-ccomp/bench.txt) > benchmark-compcert.txt)
+
 perf-ccomp:
-	$(MAKE) -C snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" perf
+	-$(MAKE) -C snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" perf
+	$(MAKE) echo-perf-ccomp
+
+echo-perf-gcc:
+	$(shell (echo -e "Benchmarking results with gcc-6 -fno-tree-vectorize -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc/bench.txt) > benchmark-gcc.txt)
 
 perf-gcc:
 	$(MAKE) -C snapshot-gcc CC="gcc-6 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
+	$(MAKE) echo-perf-gcc
+
+echo-gcc-unrolled:
+	$(shell (echo -e "Benchmarking results with gcc-6 -fno-tree-vectorize -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops with KreMLin loop unrolling\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc-unrolled/bench.txt) > benchmark-gcc-unrolled.txt)
 
 perf-gcc-unrolled:
 	$(MAKE) -C snapshot-gcc-unrolled CC="gcc-6 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
+	$(MAKE) echo-gcc-unrolled
+
+all-perf:
+	$(MAKE) perf-gcc
+	$(MAKE) perf-gcc-unrolled
+	$(MAKE) perf-ccomp
 
 snapshot:
 	$(MAKE) extract-c-code extract-c-code-experimental

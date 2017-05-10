@@ -22,6 +22,56 @@ void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
   printf("User time for %d times %d bytes: %fs (%fus/byte)\n", rounds, plainlen, ts, (double)(ts*1000000)/(plainlen*rounds));
 }
 
+
+void flush_results(char *txt, uint64_t hacl_cy, uint64_t sodium_cy, uint64_t ossl_cy, uint64_t tweet_cy, double hacl_utime, double sodium_utime, double ossl_utime, double tweet_utime, int rounds, int plainlen){
+  FILE *fp;
+  char hacl_cy_s[24], sodium_cy_s[24], ossl_cy_s[24], tweet_cy_s[24], hacl_utime_s[24], sodium_utime_s[24], ossl_utime_s[24], tweet_utime_s[24];
+  if (hacl_cy == 0) {
+    sprintf(hacl_cy_s, "NA");
+  } else {
+    sprintf(hacl_cy_s, "%.2f", (double)hacl_cy/plainlen/rounds);
+  }
+  if (sodium_cy == 0) {
+    sprintf(sodium_cy_s, "NA");
+  } else {
+    sprintf(sodium_cy_s, "%.2f", (double)sodium_cy/plainlen/rounds);
+  }
+  if (ossl_cy == 0) {
+    sprintf(ossl_cy_s, "NA");
+  } else {
+    sprintf(ossl_cy_s, "%.2f", (double)ossl_cy/plainlen/rounds);
+  }
+  if (tweet_cy == 0) {
+    sprintf(tweet_cy_s, "NA");
+  } else {
+    sprintf(tweet_cy_s, "%.2f", (double)tweet_cy/plainlen/rounds);
+  }
+  if (hacl_utime == 0) {
+    sprintf(hacl_utime_s, "NA");
+  } else {
+    sprintf(hacl_utime_s, "%f", (double)(hacl_utime/CLOCKS_PER_SEC*1000000)/(plainlen*rounds));
+  }
+  if (sodium_utime == 0) {
+    sprintf(sodium_utime_s, "NA");
+  } else {
+    sprintf(sodium_utime_s, "%f", (double)(sodium_utime/CLOCKS_PER_SEC*1000000)/(plainlen*rounds));
+  }
+  if (ossl_utime == 0) {
+    sprintf(ossl_utime_s, "NA");
+  } else {
+    sprintf(ossl_utime_s, "%f", (double)(ossl_utime/CLOCKS_PER_SEC*1000000)/(plainlen*rounds));
+  }
+  if (tweet_utime == 0) {
+    sprintf(tweet_utime_s, "NA");
+  } else {
+    sprintf(tweet_utime_s, "%f", (double)(tweet_utime/CLOCKS_PER_SEC*1000000)/(plainlen*rounds));
+  }
+  fp = fopen("./bench.txt", "a");
+  fprintf(fp, "%-16s%-16s%-16s%-16s%-16s%-16s%-16s%-16s%-16s\n", txt, hacl_cy_s, sodium_cy_s, ossl_cy_s, tweet_cy_s, hacl_utime_s, sodium_utime_s, ossl_utime_s, tweet_utime_s);
+  fclose(fp);
+}
+
+
 #define PLAINLEN (1024*1024)
 #define ROUNDS 1000
 #define MACSIZE 32
@@ -332,6 +382,7 @@ int32_t test_chacha()
 }
 
 int32_t perf_chacha() {
+  double hacl_cy, sodium_cy, ossl_cy, hacl_utime, sodium_utime, ossl_utime;
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
   uint8_t* cipher = malloc(len);
@@ -356,8 +407,10 @@ int32_t perf_chacha() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
-  print_results("HACL ChaCha20 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, PLAINLEN);
+  hacl_cy = (double) b - a;
+  hacl_utime = (double) t2 - t1;
+  print_results("HACL ChaCha20 speed", (double) t2 - t1,
+	        (double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
@@ -369,6 +422,8 @@ int32_t perf_chacha() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
+  sodium_cy = (double) b - a;
+  sodium_utime = (double) t2 - t1;
   print_results("Sodium ChaCha20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < PLAINLEN; i++) 
@@ -382,12 +437,17 @@ int32_t perf_chacha() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
+  ossl_cy = (double) b - a;
+  ossl_utime = (double) t2 - t1;
   print_results("OpenSSL ChaCha20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < PLAINLEN; i++) 
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
+  
+  flush_results("CHACHA20", hacl_cy, sodium_cy, ossl_cy, 0, hacl_utime, sodium_utime, ossl_utime, 0, ROUNDS, PLAINLEN);
+  
   return exit_success;
 }
 

@@ -6,9 +6,9 @@ LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
 CC?=gcc-6 -fno-tree-vectorize -flto
 CCOPTS?= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
 
-test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-ed25519 unit-test-secretbox unit-test-box unit-test-aead
+test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead unit-test-ed25519
 
-perf: perf-test-poly perf-test-chacha perf-test-chacha-vec128 perf-test-salsa perf-test-curve perf-test-ed25519 perf-test-secretbox perf-test-box perf-test-aead
+perf: perf-test-poly perf-test-chacha perf-test-chacha-vec128 perf-test-salsa perf-test-curve perf-test-secretbox perf-test-box perf-test-aead perf-test-ed25519
 
 test-poly.exe:
 	$(CC) $(CCOPTS) \
@@ -201,4 +201,4 @@ lib-test: lib
 
 
 clean:
-	rm -rf *~ *.exe *.out *.o
+	rm -rf *~ *.exe *.out *.o *.txt
