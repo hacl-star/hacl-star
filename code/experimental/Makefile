@@ -13,5 +13,10 @@ DIRECTORIES=ed25519 hash salsa-family
 
 extract-c: $(addsuffix -c, $(DIRECTORIES))
 
+ed25519-ci:
+	$(MAKE) -C ed25519 all-ci
+
+all-ci: ed25519-ci
+
 clean: $(addsuffix -clean, $(DIRECTORIES))
 	rm -rf *~ *.exe *.out *.graph

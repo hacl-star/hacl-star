@@ -45,7 +45,10 @@ poly1305-specific-ci:
 x25519-specific-ci:
 	$(MAKE) -C curve25519 specific-ci
 
-ci: $(addsuffix -ci, salsa-family api) bignum-ci poly1305-specific-ci x25519-specific-ci
+experimental-ci:
+	$(MAKE) -C experimental all-ci
+
+ci: $(addsuffix -ci, salsa-family api) bignum-ci poly1305-specific-ci x25519-specific-ci experimental-ci
 
 clean:
 	rm -rf *~ *.exe *.out 

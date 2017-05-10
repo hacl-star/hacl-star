@@ -15,7 +15,7 @@ all:
 	$(MAKE) extract-c
 	$(MAKE) ct
 	$(MAKE) verify
-	$(MAKE) -C openssl-engine
+	# $(MAKE) -C openssl-engine
 
 travis:
 	$(MAKE) extract-c-code

@@ -69,13 +69,20 @@ ED25519_SPECIFIC= \
 	Hacl.Impl.Ed25519.PointEqual.fst \
 	Hacl.Impl.Ed25519.Verify.Steps.fst \
 	Hacl.Impl.Ed25519.Verify.fst \
-	Ed25519.fsti
+	Ed25519.fsti \
+	Ed25519.fst
 
 # Files that are too slow and for which verification speed must improve
 SLOW=
 
 # Files that still have errors
-TODO=
+TODO=Hacl.Impl.SHA512.ModQ.fst \
+	Ed25519.fsti \
+	Ed25519.fst \
+	Hacl.Impl.Ed25519.Pow2_252m2.fst \
+	Hacl.Impl.Ed25519.SecretExpand.fst \
+	Hacl.Impl.BignumQ.Mul.fst \
+	Hacl.Bignum25519.fst 
 
 ED25519_FILES= $(ED25519_SPECIFIC) # $(BIGNUM) 
 
@@ -133,15 +140,16 @@ bignum-hints:
 specific-hints: $(addsuffix -hints, $(ED25519_SPECIFIC))
 
 # For CI, all modules restricted from incomplete or slow ones
-all-ci2: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_FILES)))
-all-ci:
-	cp bignum_hints/* ../bignum
-	$(MAKE) all-ci2
-	mv ../bignum/*.hints ./bignum_hints
-bignum-ci:
-	cp bignum_hints/* ../bignum
-	$(MAKE) $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
-	mv ../bignum/*.hints ./bignum_hints
+# all-ci2: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_FILES)))
+# all-ci:
+# 	cp bignum_hints/* ../bignum
+# 	$(MAKE) all-ci2
+# 	mv ../bignum/*.hints ./bignum_hints
+# bignum-ci:
+# 	cp bignum_hints/* ../bignum
+# 	$(MAKE) $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
+# 	mv ../bignum/*.hints ./bignum_hints
+all-ci:specific-ci
 specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_SPECIFIC)))
 
 KEMLIN_SKIP_COMPILATION=$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
