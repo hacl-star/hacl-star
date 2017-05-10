@@ -139,6 +139,8 @@ int32_t perf_ed25519() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
+  hacl_cy = (double)b - a;
+  hacl_utime = (double)t2 - t1;
   print_results("HACL Ed25519 sign speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
@@ -152,8 +154,6 @@ int32_t perf_ed25519() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
-  hacl_cy = (double)b - a;
-  hacl_utime = (double)t2 - t1;
   sodium_cy = (double)b - a;
   sodium_utime = (double)t2 - t1;
   print_results("Sodium Ed25519 sign speed", (double)t2-t1,
