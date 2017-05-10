@@ -125,6 +125,14 @@ sha2_512.exe: Spec.SHA2_512.fst
 	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_512.ml -o sha2_512.exe
 	./sha2_512.exe
 
+hmac_sha2_256.exe: Spec.HMAC.SHA2_256.fst
+	$(MAKE) lib
+	mkdir -p hmac-sha2-spec
+	$(FSTAR) $(ARGS) --odir hmac-sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_SHA2_256.ml
+	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) $(addprefix hmac-sha2-spec/, $(EXTRACTED)) hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_256.ml hmac-sha2-spec/Spec_HMAC_SHA2_256.ml -o hmac_sha2_256.exe
+	./hmac_sha2_256.exe
+
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec hmac-sha2-spec
