@@ -250,14 +250,20 @@ let times_2d out a =
   Hacl.Lib.Create64.make_h64_5 d2 0x00069b9426b2f159uL 0x00035050762add7auL 0x0003cf44c0038052uL
                                   0x0006738cc7407977uL 0x0002406d9dc56dffuL;
   let h2 = ST.get() in
+  no_upd_lemma_0 h1 h2 a;
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h2 d2);
   assert_norm (0x00069b9426b2f159 + pow2 51 * 0x00035050762add7a + pow2 102 * 0x0003cf44c0038052 +
                pow2 153 * 0x0006738cc7407977 + pow2 204 * 0x0002406d9dc56dff
                = (2 * Spec.Ed25519.d) % Spec.Curve25519.prime);
+  assert(as_seq h0 a == as_seq h2 a);
   fmul out a d2;
   let h3 = ST.get() in
+  lemma_modifies_0_1 out h1 h2 h3;
+  assert(modifies_2_1 out h1 h3);
   pop_frame();
   let h4 = ST.get() in
+  modifies_popped_1 out h0 h1 h3 h4;
+  assert(modifies_1 out h0 h4);
   ()
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
