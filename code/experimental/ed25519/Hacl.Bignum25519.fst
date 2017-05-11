@@ -96,6 +96,7 @@ let fcontract_first_carry_pass_s s =
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 s';
   s'
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@ "substitute"]
 private val fcontract_first_carry_pass:
@@ -125,6 +126,8 @@ private let fcontract_first_carry_pass input =
   let t3'' = t3' &^ Hacl.Spec.EC.Format.mask_51 in
   Hacl.Lib.Create64.make_h64_5 input t0' t1'' t2'' t3'' t4'
 
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 private
 val reduce_513_s: input:Hacl.Bignum.Parameters.seqelem{red_5413 input} ->
@@ -179,6 +182,7 @@ let fmul out a b =
   Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine (as_seq h a) (as_seq h b);
   Hacl.Bignum.fmul out a b
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 private let lemma_distributivity_5 x a b c d e : Lemma (x * (a + b + c + d + e) = x * a + x * b + x * c + x * d + x * e) = ()
 
@@ -207,34 +211,56 @@ let times_2 out a =
   let h' = ST.get() in
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h' out)
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let times_d out a =
+  assert_norm(pow2 51 = 0x8000000000000);
+  let h0 = ST.get() in
   push_frame();
+  let h1 = ST.get() in
   let d = Buffer.create (Hacl.Cast.uint64_to_sint64 0uL) 5ul in
   Hacl.Lib.Create64.make_h64_5 d 0x00034dca135978a3uL 0x0001a8283b156ebduL 0x0005e7a26001c029uL 
                                  0x000739c663a03cbbuL 0x00052036cee2b6ffuL;
-  let h = ST.get() in
-  Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h d);
+  let h2 = ST.get() in
+  no_upd_lemma_0 h1 h2 a;
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h2 d);
   assert_norm (0x00034dca135978a3 + pow2 51 * 0x0001a8283b156ebd + pow2 102 * 0x0005e7a26001c029 +
                pow2 153 * 0x000739c663a03cbb + pow2 204 * 0x00052036cee2b6ff
                = Spec.Ed25519.d);
+  assert(as_seq h0 a == as_seq h2 a);
   fmul out d a;
-  pop_frame()
+  let h3 = ST.get() in
+  lemma_modifies_0_1 out h1 h2 h3;
+  assert(modifies_2_1 out h1 h3);
+  pop_frame();
+  let h4 = ST.get() in
+  modifies_popped_1 out h0 h1 h3 h4;
+  assert(modifies_1 out h0 h4);
+  ()
 
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let times_2d out a =
+  assert_norm(pow2 51 = 0x8000000000000);
+  let h0 = ST.get() in
   push_frame();
+  let h1 = ST.get() in
   let d2 = Buffer.create (Hacl.Cast.uint64_to_sint64 0uL) 5ul in
   Hacl.Lib.Create64.make_h64_5 d2 0x00069b9426b2f159uL 0x00035050762add7auL 0x0003cf44c0038052uL
                                   0x0006738cc7407977uL 0x0002406d9dc56dffuL;
-  let h = ST.get() in
-  Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h d2);
+  let h2 = ST.get() in
+  Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h2 d2);
   assert_norm (0x00069b9426b2f159 + pow2 51 * 0x00035050762add7a + pow2 102 * 0x0003cf44c0038052 +
                pow2 153 * 0x0006738cc7407977 + pow2 204 * 0x0002406d9dc56dff
                = (2 * Spec.Ed25519.d) % Spec.Curve25519.prime);
   fmul out a d2;
-  pop_frame()
+  let h3 = ST.get() in
+  pop_frame();
+  let h4 = ST.get() in
+  admit()
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let fsquare out a =
   push_frame();
@@ -248,11 +274,15 @@ let fsquare out a =
   Hacl.Bignum.Fsquare.fsquare_ tmp out;
   pop_frame()
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
 let fsquare_times out a n =
   let h = ST.get() in
   Hacl.Spec.Bignum.Crecip.lemma_fsquare_times_tot (as_seq h a) (UInt32.v n);
   Hacl.Spec.Bignum.Crecip.Lemmas.lemma_exp_eq (seval (as_seq h a)) (pow2 (UInt32.v n));
   Hacl.Bignum.Fsquare.fsquare_times out a n
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let fsquare_times_inplace out n =
   let h = ST.get() in
@@ -260,19 +290,41 @@ let fsquare_times_inplace out n =
   Hacl.Spec.Bignum.Crecip.Lemmas.lemma_exp_eq (seval (as_seq h out)) (pow2 (UInt32.v n));
   Hacl.Bignum.Fsquare.fsquare_times_inplace out n
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
 let inverse out a =
   Hacl.Bignum.Crecip.crecip out a
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let reduce out =
   Hacl.EC.Format.reduce out;
   let h = ST.get() in
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h out)
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
 let lemma_reveal_red_51 s =
   assert_norm(pow2 51 = 0x8000000000000)
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
 let lemma_intro_red_51 s =
   assert_norm (pow2 51 = 0x8000000000000)
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
+let lemma_reveal_red_513 s =
+  assert_norm(pow2 51 = 0x8000000000000);
+  assert_norm(pow2 13 = 0x2000)
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
+let lemma_intro_red_513 s =
+  assert_norm (pow2 51 = 0x8000000000000);
+  assert_norm(pow2 13 = 0x2000)
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let lemma_reveal_seval s =
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 s

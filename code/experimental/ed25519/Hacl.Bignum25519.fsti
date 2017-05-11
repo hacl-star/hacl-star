@@ -191,6 +191,21 @@ val lemma_intro_red_51: s:seqelem ->
          v (Seq.index s 4) < pow2 51))
         (ensures (red_51 s))
 
+
+val lemma_reveal_red_513: s:seqelem ->
+  Lemma (requires (red_513 s))
+        (ensures (let open Hacl.UInt64 in
+         v (Seq.index s 0) < pow2 51 + pow2 13 /\ v (Seq.index s 1) < pow2 51 + pow2 13 /\
+         v (Seq.index s 2) < pow2 51 + pow2 13 /\ v (Seq.index s 3) < pow2 51 + pow2 13 /\
+         v (Seq.index s 4) < pow2 51 + pow2 13))
+
+val lemma_intro_red_513: s:seqelem ->
+  Lemma (requires (let open Hacl.UInt64 in
+         v (Seq.index s 0) < pow2 51 + pow2 13 /\ v (Seq.index s 1) < pow2 51 + pow2 13 /\
+         v (Seq.index s 2) < pow2 51 + pow2 13 /\ v (Seq.index s 3) < pow2 51 + pow2 13 /\
+         v (Seq.index s 4) < pow2 51 + pow2 13))
+        (ensures (red_513 s))
+
 val lemma_reveal_seval: s:seqelem ->
   Lemma (FStar.Mul.(Hacl.UInt64.((v (Seq.index s 0)
                                + pow2 51 * v (Seq.index s 1)

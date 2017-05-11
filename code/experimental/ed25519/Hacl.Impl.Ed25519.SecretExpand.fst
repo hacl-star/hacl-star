@@ -4,9 +4,11 @@ open FStar.Buffer
 open Hacl.UInt8
 
 
-#reset-options "--max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 let secret_expand expanded secret =
+  assert_norm(pow2 32 = 0x100000000);
+  assert_norm(pow2 125 = 0x20000000000000000000000000000000);
   let h0 = ST.get() in
   SHA2_512.hash expanded secret 32ul;
   let h = ST.get() in

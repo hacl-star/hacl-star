@@ -149,7 +149,7 @@ val sign_:
   signature:hint8_p{length signature = 64} ->
   secret:hint8_p{length secret = 32} ->
   msg:hint8_p{length msg < pow2 32 - 64} ->
-  len:UInt32.t{UInt32.v len = length msg /\ UInt32.v len + 352 < pow2 32} ->
+  len:UInt32.t{UInt32.v len = length msg} ->
   Stack unit
     (requires (fun h -> live h signature /\ live h msg /\ live h secret))
     (ensures (fun h0 _ h1 -> live h0 signature /\ live h0 msg /\ live h0 secret /\
@@ -184,7 +184,7 @@ val sign:
   signature:hint8_p{length signature = 64} ->
   secret:hint8_p{length secret = 32} ->
   msg:hint8_p{length msg < pow2 32 - 64} ->
-  len:UInt32.t{UInt32.v len = length msg /\ UInt32.v len + 352 < pow2 32} ->
+  len:UInt32.t{UInt32.v len = length msg} ->
   Stack unit
     (requires (fun h -> live h signature /\ live h msg /\ live h secret))
     (ensures (fun h0 _ h1 -> live h0 signature /\ live h0 msg /\ live h0 secret /\

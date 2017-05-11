@@ -29,18 +29,9 @@ let chacha20_key_block block k n ctr =
   pop_frame()
 
 
-(* // JK : this is only necessary as long as the 'loop.h' hack is alive (double_round is otherwise *)
-(* // killed by the bundling *)
-(* val double_round: *)
-(*   st:buffer Hacl.UInt32.t{length st = 16} -> *)
-(*   Stack unit *)
-(*     (requires (fun h -> live h st)) *)
-(*     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1)) *)
-(* let double_round st = double_round st *)
+let op_String_Access (h:HyperStack.mem) (m:uint8_p{live h m}) = reveal_sbytes (as_seq h m)
 
-
-let value_at m (h:HyperStack.mem{live h m}) = reveal_sbytes (as_seq h m)
-
+open Spec.Chacha20
 
 val chacha20:
   output:uint8_p ->
@@ -52,11 +43,6 @@ val chacha20:
   Stack unit
     (requires (fun h -> live h output /\ live h plain /\ live h nonce /\ live h key))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_1 output h0 h1
-      /\ live h0 nonce /\ live h0 key
-      /\ (let o = output `value_at` h1 in
-         let plain = plain `value_at` h0 in
-         let k = key `value_at` h0 in
-         let n = nonce `value_at` h0 in
-         let ctr = U32.v ctr in
-         o == Spec.Chacha20.chacha20_encrypt_bytes k n ctr plain)))
+      /\ live h0 nonce /\ live h0 key /\
+      h1.[output] == chacha20_encrypt_bytes h0.[key] h0.[nonce] (U32.v ctr) h0.[plain]))
 let chacha20 output plain len k n ctr = chacha20 output plain len k n ctr

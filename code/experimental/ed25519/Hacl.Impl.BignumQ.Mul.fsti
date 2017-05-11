@@ -47,9 +47,9 @@ val barrett_reduction:
       let t = as_seq h0 t in let op_String_Access = Seq.index in
       all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512 /\
-      eval_q z = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)
+      eval_q z = eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed) /\
+      within_56 h1 z /\ modifies_1 z h0 h1
        (* /\ as_seq h1 z == Spec.barrett_reduction (as_seq h0 t) *)
-      /\ modifies_1 z h0 h1
     ))
 
 

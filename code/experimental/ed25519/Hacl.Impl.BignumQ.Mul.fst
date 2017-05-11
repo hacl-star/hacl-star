@@ -9,7 +9,8 @@ open Hacl.Spec.BignumQ.Eval
 
 module Spec = Hacl.Spec.BignumQ.Mul
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 let h64 = Hacl.UInt64.t
 
@@ -105,7 +106,7 @@ let subm_last_step x y =
   let t = (shiftl_40 b +^ x) -^ y in
   b, t
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val sub_mod_264:
   z:qelemB ->
@@ -138,11 +139,6 @@ let sub_mod_264 z x y =
   let y3 = y.(3ul) in
   let y4 = y.(4ul) in
   let pb = y0 in
-  (* let (b, t0) : Tot _ (\* : Tot (tuple2 h64 h64) *\) = subm_step x0 y0 <: Tot (tuple2 h64 h64) in *)
-  (* let (b, t1) (\* : Tot _) *\) = subm_step x1 (y1+^b) <: Tot (tuple2 h64 h64) in *)
-  (* let (b, t2) (\* : Tot _) *\) = subm_step x2 (y2+^b) <: Tot (tuple2 h64 h64) in *)
-  (* let (b, t3) (\* : Tot _)  *\)= subm_step x3 (y3+^b) <: Tot (tuple2 h64 h64) in *)
-  (* let (b, t4) (\* : Tot _) *\) = subm_last_step x4 (y4+^b) <: Tot (tuple2 h64 h64) in *)
   let b  = lt x0 y0 in
   let t0 = (shiftl_56 b +^ x0) -^ (y0) in
   let y1 = y1 +^ b in
@@ -158,6 +154,7 @@ let sub_mod_264 z x y =
   let b  = lt x4 (y4) in
   let t4 = (shiftl_40 b +^ x4) -^ (y4) in
   Hacl.Lib.Create64.make_h64_5 z t0 t1 t2 t3 t4
+
 
 val subm_conditional:
   z:qelemB ->
@@ -200,6 +197,7 @@ let subm_conditional z x =
   Hacl.Lib.Create64.make_h64_5 z t0 t1 t2 t3 t4;
   choose z tmp z b;
   pop_frame()
+
 
 private
 let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
@@ -396,7 +394,7 @@ let carry_step x y =
   t, Hacl.UInt128.add y carry
 
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 
 val carry:
@@ -541,6 +539,7 @@ let div_2_24_step x y =
   UInt.logor_disjoint #64 (v y') (v x') 32;
   z
 
+
 inline_for_extraction
 val div_2_40_step:
   x:h64{v x < 0x100000000000000} -> y:h64 ->
@@ -642,7 +641,7 @@ private
 let lemma_ineq (a:nat) (b:nat) : Lemma (requires (a < b)) (ensures (a <= b - 1)) = ()
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val barrett_reduction__1:
   qmu:buffer Hacl.UInt128.t{length qmu = 9} ->
@@ -673,7 +672,7 @@ val barrett_reduction__1:
       /\ modifies_2 qmu tmp h0 h1
     ))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let barrett_reduction__1 qmu t mu tmp =
   let q   = Buffer.sub tmp 0ul 5ul in
@@ -695,7 +694,7 @@ let barrett_reduction__1 qmu t mu tmp =
   div_264 qmu_264 qmu'
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val barrett_reduction__2:
   t:buffer h64{length t = 10} ->
@@ -723,7 +722,7 @@ val barrett_reduction__2:
       /\ modifies_1 tmp h0 h1
     ))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let barrett_reduction__2 t m tmp =
   let qmul = Buffer.sub tmp 0ul 5ul in
@@ -741,14 +740,14 @@ let barrett_reduction__2 t m tmp =
   no_upd_lemma_1 h5 h6 qmul r;
   sub_mod_264 s r qmul
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val barrett_reduction__:
   z:qelemB ->
   t:buffer h64{length t = 10} ->
   m:qelemB ->
   mu:qelemB ->
-  tmp:buffer h64{length tmp = 30 /\ disjoint tmp t /\ disjoint tmp mu /\ disjoint tmp m} ->
+  tmp:buffer h64{length tmp = 30 /\ disjoint tmp t /\ disjoint tmp mu /\ disjoint tmp m /\ disjoint tmp z} ->
   Stack unit
     (requires (fun h -> live h z /\ live h t /\ live h m /\ live h mu /\ live h tmp /\
       (let t = as_seq h t in
@@ -764,19 +763,53 @@ val barrett_reduction__:
       /\ modifies_2 z tmp h0 h1
     ))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
+let lemma_modifies_1 #a #a' h h' (b:buffer a) (b':buffer a') : Lemma
+  (requires (live h b /\ live h b' /\ modifies_1 b h h'))
+  (ensures (live h' b'))
+  = lemma_reveal_modifies_1 b h h'
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+let lemma_sub_eq h h' (b:buffer h64{live h b /\ live h' b /\ length b = 30}) : Lemma
+  (requires (within_56 h (Buffer.sub b 25ul 5ul) /\ as_seq h' b == as_seq h b))
+  (ensures (within_56 h' (Buffer.sub b 25ul 5ul)))
+  = ()
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 let barrett_reduction__ z t m mu tmp =
   let s   = Buffer.sub tmp 25ul 5ul in
+  let h0 = ST.get() in
   push_frame();
+  let h1 = ST.get() in
   let qmu = create (uint64_to_sint128 0uL) 9ul in
+  let h2 = ST.get() in
+  no_upd_lemma_0 h1 h2 m;
+  no_upd_lemma_0 h1 h2 mu;
+  no_upd_lemma_0 h1 h2 t;
   barrett_reduction__1 qmu t mu tmp;
+  let h3 = ST.get() in
+  assert(modifies_2_1 tmp h1 h3);
+  no_upd_lemma_2 h2 h3 qmu tmp t;
+  no_upd_lemma_2 h2 h3 qmu tmp m;
   barrett_reduction__2 t m tmp;
+  let h4 = ST.get() in
+  assert(within_56 h4 s);
   pop_frame();
-  subm_conditional z s
+  let h5 = ST.get() in
+  assert(as_seq h4 tmp == as_seq h5 tmp);
+  lemma_sub_eq h4 h5 tmp;
+  assert(within_56 h5 s);
+  assert(modifies_1 tmp h0 h5);
+  lemma_modifies_1 h0 h5 tmp z;
+  subm_conditional z s;
+  let h6 = ST.get() in
+  ()
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 private
 val lemma_modifies_0_2_: #a:Type -> #a':Type -> #a'':Type -> h0:mem -> h1:mem -> h2:mem -> b:buffer a -> b':buffer a' -> b'':buffer a'' ->
@@ -788,7 +821,7 @@ let lemma_modifies_0_2_ #a #a' #a'' h0 h1 h2 b b' b'' =
   lemma_reveal_modifies_2 b b' h1 h2;
   lemma_intro_modifies_3_2 b b' h0 h2
 
-val barrett_reduction:
+val barrett_reduction_:
   z:qelemB ->
   t:buffer h64{length t = 10} ->
   Stack unit
@@ -801,7 +834,10 @@ val barrett_reduction:
       /\ as_seq h1 z == Spec.barrett_reduction (as_seq h0 t)
       /\ modifies_1 z h0 h1
     ))
-let barrett_reduction z t =
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+let barrett_reduction_ z t =
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in
@@ -809,11 +845,26 @@ let barrett_reduction z t =
   let m   = Buffer.sub tmp 0ul 5ul in
   let mu  = Buffer.sub tmp 5ul 5ul in
   let tmp = Buffer.sub tmp 10ul 30ul in
-  make_m m;
-  make_mu mu;
   let h2 = ST.get() in
+  no_upd_lemma_0 h1 h2 t;
+  make_m m;
+  let h3 = ST.get() in
+  no_upd_lemma_1 h2 h3 m t;
+  make_mu mu;
+  let h4 = ST.get() in
+  no_upd_lemma_1 h3 h4 mu m;
+  no_upd_lemma_1 h3 h4 mu t;
   barrett_reduction__ z t m mu tmp;
-  pop_frame()
+  let h5 = ST.get() in
+  assert(modifies_2_1 z h1 h5);
+  pop_frame();
+  let h6 = ST.get() in
+  assert(modifies_1 z h0 h6);
+  assert(as_seq h6 z == as_seq h5 z);
+  assert(as_seq h4 t == as_seq h0 t)
+
+let barrett_reduction z t =
+  barrett_reduction_ z t
 
 
 (* val mul_modq: *)
@@ -828,25 +879,45 @@ let barrett_reduction z t =
 (*       (let x = as_seq h0 x in let y = as_seq h0 y in *)
 (*        eval_q x < pow2 256 /\ eval_q y < pow2 256) /\ *)
 (*        eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) * eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
 let mul_modq out x y =
   let h0 = ST.get() in
   push_frame();
-  let z' = create (uint64_to_sint64 0uL) 10ul in
   let h1 = ST.get() in
-  push_frame();
-  let z  = create (uint64_to_sint128 0uL) 9ul in
+  let z' = create (uint64_to_sint64 0uL) 10ul in
   let h2 = ST.get() in
+  no_upd_lemma_0 h1 h2 x;
+  no_upd_lemma_0 h1 h2 y;
+  push_frame();
+  let h3 = ST.get() in
+  let z  = create (uint64_to_sint128 0uL) 9ul in
+  let h4 = ST.get() in
+  no_upd_lemma_0 h3 h4 x;
+  no_upd_lemma_0 h3 h4 y;
   lemma_mul_ineq__ (eval_q (as_seq h0 x)) (eval_q (as_seq h0 y)) 256 256;
+  assert(as_seq h4 x == as_seq h0 x);
+  assert(as_seq h4 y == as_seq h0 y);
   mul_5 z x y;
+  let h5 = ST.get() in
+  assert(modifies_0 h3 h5);
   Math.Lemmas.pow2_lt_compat 528 512;
   carry z' z;
-  let h3 = ST.get() in
+  let h6 = ST.get() in
+  assert(modifies_2_1 z' h3 h6);
   pop_frame();
+  let h7 = ST.get() in
+  modifies_popped_1 z' h2 h3 h6 h7;
+  assert(modifies_0 h1 h7);
   barrett_reduction out z';
-  pop_frame()
+  let h8 = ST.get() in
+  assert(modifies_2_1 out h1 h8);
+  pop_frame();
+  let h9 = ST.get() in
+  modifies_popped_1 z' h0 h1 h8 h9;
+  ()
 
-
-(* TODO: proof *)
 
 (* val add_modq: *)
 (*   z:qelemB -> *)
@@ -863,6 +934,7 @@ let mul_modq out x y =
 (*        eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed) /\ *)
 (*        eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) + eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
 let add_modq out x y =
+  admit();
   let h0 = ST.get() in
   push_frame();
   let tmp = create (uint64_to_sint64 0uL) 5ul in

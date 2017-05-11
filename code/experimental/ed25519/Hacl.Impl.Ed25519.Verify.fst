@@ -173,6 +173,7 @@ val verify:
   signature:uint8_p{length signature = 64} ->
   Stack bool
     (requires (fun h -> live h public /\ live h msg /\ live h signature))
-    (ensures (fun h0 _ h1 -> modifies_0 h0 h1 /\ live h0 msg /\ live h0 public /\ live h0 signature))
+    (ensures (fun h0 z h1 -> modifies_0 h0 h1 /\ live h0 msg /\ live h0 public /\ live h0 signature /\
+      z == Spec.Ed25519.(verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature))))
 let verify public msg len signature =
   verify_ public msg len signature
