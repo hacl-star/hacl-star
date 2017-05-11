@@ -48,7 +48,7 @@ endif
 all: tmp LowCProvider.cmxa
 
 tmp:
-	$(MAKE) -C .. LowCProvider/tmp
+	$(MAKE) -C .. LowCProvider-tmp
 
 %.cmi: %.mli
 	$(OCAMLC) -c $<
