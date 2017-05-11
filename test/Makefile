@@ -12,9 +12,9 @@ SNAPSHOT_DIR=snapshot
 all:
 	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
 	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
-	$(MAKE) extract-c
-	$(MAKE) ct
-	$(MAKE) verify
+	$(MAKE) extract-c OTHERFLAGS="--trace_error"
+	$(MAKE) ct OTHERFLAGS="--trace_error"
+	$(MAKE) verify OTHERFLAGS="--trace_error"
 	# $(MAKE) -C openssl-engine
 
 travis:
