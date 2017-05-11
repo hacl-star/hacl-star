@@ -22,7 +22,7 @@ KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 vale/aes/aes.o:
 	make -C vale/aes
 
-LowCProvider/tmp: vale/aes/aes.o
+LowCProvider-tmp: vale/aes/aes.o
 	$(KRML) LowCProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
 		aead/Crypto.AEAD.fst test/test_vale/vale.c \

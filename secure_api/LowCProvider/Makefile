@@ -48,7 +48,7 @@ endif
 all: tmp LowCProvider.cmxa
 
 tmp:
-	$(MAKE) -C .. LowCProvider/tmp
+	$(MAKE) -C .. LowCProvider-tmp
 
 %.cmi: %.mli
 	$(OCAMLC) -c $<
@@ -68,7 +68,7 @@ libllcrypto.a: tmp
 lowc_stub.o: libllcrypto.a
 	$(OCAMLOPT) $(CCOPTS) $(EXTRA_OPTS) $(KRML_INCLUDES) -c lowc_stub.c
 
-LowCProvider.cmxa: $(CORECRYPTO)/CoreCrypto.cmx libllcrypto.a lowc_stub.o LowCProvider.cmx
+LowCProvider.cmxa: $(CORECRYPTO)/CoreCrypto.cmx lowc_stub.o LowCProvider.cmx
 	$(OCAMLMKLIB) $(EXTRA_LIBS) $(CCLIBS) -o LowCProvider $^
 
 Tests.exe: LowCProvider.cmxa Tests.cmx
