@@ -1,5 +1,5 @@
 [
-  "õ”Å∏ádu«F¢¨\u0003\u0015\u00029 ",
+  "ßUı¢Ù7\u001b3\f„¢d8”I£",
   [
     [
       "Hacl.Impl.Ed25519.Verify.felem",
@@ -660,7 +660,20 @@
       4,
       0,
       1,
-      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Buffer.equal", "equation_FStar.UInt32.t",
+        "equation_FStar.UInt8.t",
+        "equation_Hacl.Impl.Ed25519.Verify.uint8_p",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "kinding_FStar.UInt8.t_@tok", "lemma_FStar.Buffer.no_upd_lemma_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
+        "refinement_interpretation_Hacl.Impl.Ed25519.Verify_Tm_refine_19ac6f41cf659862d4009e4e13fd7e43",
+        "refinement_interpretation_Hacl.Impl.Ed25519.Verify_Tm_refine_7b8277f4aac7937ca94306760a67d045",
+        "refinement_interpretation_Hacl.Impl.Ed25519.Verify_Tm_refine_94403ae1db118a2daa8d61fa9d371d82"
+      ],
       0
     ],
     [

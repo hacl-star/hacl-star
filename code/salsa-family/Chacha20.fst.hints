@@ -1,5 +1,5 @@
 [
-  "R@P4¨±«h_®]\u001d\u0001\u0002?d",
+  "7\u001d\u001e\u0013ÐèªîJÏ@\u007fh«a>",
   [
     [
       "Chacha20.chacha20_key_block",
@@ -122,18 +122,7 @@
       ],
       0
     ],
-    [
-      "Chacha20.value_at",
-      1,
-      0,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt8.t",
-        "equation_Hacl.UInt8.t",
-        "refinement_interpretation_Chacha20_Tm_refine_da7e4b12bdd35cdd9797f4be26aa9fb5"
-      ],
-      0
-    ],
+    [ "Chacha20.op_String_Access", 1, 0, 1, [ "@query" ], 0 ],
     [
       "Chacha20.chacha20",
       1,
@@ -180,8 +169,9 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Chacha20.value_at",
-        "equation_FStar.Buffer.buffer", "equation_FStar.Mul.op_Star",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Chacha20.op_String_Access", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Buffer.equal", "equation_FStar.Mul.op_Star",
         "equation_FStar.UInt32.n", "equation_FStar.UInt32.t",
         "equation_FStar.UInt32.v", "equation_FStar.UInt8.t",
         "equation_Hacl.Impl.Chacha20.uint8_p", "equation_Hacl.UInt8.t",
@@ -189,8 +179,10 @@
         "equation_Spec.Chacha20.chacha20_ctx",
         "equation_Spec.Chacha20.keylen", "equation_Spec.Chacha20.noncelen",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
-        "kinding_FStar.UInt8.t_@tok", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "kinding_FStar.UInt8.t_@tok", "lemma_FStar.Buffer.no_upd_lemma_1",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Multiply",
         "proj_equation_Spec.CTR.Mkblock_cipher_ctx_blocklen",
         "proj_equation_Spec.CTR.Mkblock_cipher_ctx_counterbits",
         "proj_equation_Spec.CTR.Mkblock_cipher_ctx_incr",
@@ -218,16 +210,15 @@
       0,
       1,
       [
-        "@query", "equation_Chacha20.value_at",
-        "equation_FStar.Buffer.buffer", "equation_FStar.UInt32.t",
-        "equation_FStar.UInt32.v", "equation_FStar.UInt8.t",
-        "equation_Hacl.Impl.Chacha20.uint8_p", "equation_Hacl.UInt8.t",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Chacha20.op_String_Access", "equation_FStar.Buffer.buffer",
+        "equation_FStar.UInt32.t", "equation_FStar.UInt32.v",
+        "equation_FStar.UInt8.t", "equation_Hacl.Impl.Chacha20.uint8_p",
+        "equation_Hacl.UInt8.t",
         "equation_Spec.Chacha20.chacha20_encrypt_bytes",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
-        "refinement_interpretation_Tm_refine_3bc04952e495dc70c0ea20124c41a18c",
-        "refinement_interpretation_Tm_refine_4da732858c1839b149e8684641f13f57",
-        "refinement_interpretation_Tm_refine_aef6ec9d3290a1c96570fbfd09471f2e"
+        "refinement_interpretation_Chacha20_Tm_refine_5ecfbc3b1fb0a18cc9b570ff75576d79"
       ],
       0
     ]
