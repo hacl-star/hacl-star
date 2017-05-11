@@ -43,19 +43,30 @@ let state_alloc () =
 val state_incr:
     k:state ->
     Stack unit
-      (requires (fun h -> live h k))
+      (requires (fun h -> live h k /\ (let st0 = as_seq h k in
+         let z = vec_as_seq (Seq.index st0 3) in
+         let c = Seq.index z 0 in
+         UInt32.v c < pow2 32 - 1)))
       (ensures  (fun h0 _ h1 -> live h1 k /\ modifies_1 k h0 h1 /\ live h0 k /\
         (let st0 = as_seq h0 k in
          let st1 = as_seq h1 k in
          let op_String_Access = Seq.index in
+         let c = (Seq.index (vec_as_seq (Seq.index st0 3)) 0) in
+         UInt32.v c < pow2 32 - 1 /\
          st1.[0] == st0.[0] /\
          st1.[1] == st0.[1] /\
          st1.[2] == st0.[2] /\
-         vec_as_seq st1.[3] == (Spec.Chacha20_vec.op_Plus_Percent_Hat (vec_as_seq st0.[3])) (vec_as_seq one_le))))
+         vec_as_seq st1.[3] == (Seq.upd (vec_as_seq st0.[3]) 0 FStar.UInt32.(c +^ 1ul)))
+         (* vec_as_seq st1.[3] == (Spec.Chacha20_vec.op_Plus_Percent_Hat (vec_as_seq st0.[3])) (vec_as_seq one_le)) *)
+         ))
+#reset-options "--max_fuel 0 --z3rlimit 100"
 [@ "c_inline"]
 let state_incr k =
-    let k3 = k.(3ul) in
-    k.(3ul) <- vec_add k3 one_le
+  let h0 = ST.get() in
+  let k3 = k.(3ul) in
+  k.(3ul) <- vec_add k3 one_le;
+  let h1 = ST.get() in
+  ()
 
 [@ "c_inline"]
 val state_to_key:

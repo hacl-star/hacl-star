@@ -426,10 +426,10 @@ val chacha20_core:
     (requires (fun h -> live h k /\ live h st /\ invariant log h st))
     (ensures  (fun h0 updated_log h1 -> live h1 k /\ live h1 st /\ modifies_1 k h0 h1 /\ live h0 st /\
       invariant log h0 st /\ (
-      match log with | MkLog k n ctr ->
-        as_state h1 k == Spec.(chacha20_core (setup k n c))) ))
+      match Ghost.reveal log with | MkLog k' n ctr ->
+        as_state h1 k == Spec.(chacha20_core (setup k' n (UInt32.v ctr)))) ))
 [@ "c_inline"]
-let chacha20_core k st =
+let chacha20_core log k st =
   let h0 = ST.get() in
   copy_state k st;
   let h1 = ST.get() in
@@ -481,6 +481,24 @@ let chacha20_core k st =
 (*   (\* state_incr st; *\) *)
 (*   sum_states k1 st *)
 
+val state_incr:
+  log:log_t ->
+  st:state ->
+  Stack unit
+    (requires (fun h -> live h st /\ invariant log h st /\ (match Ghost.reveal log with
+      | MkLog k n c -> UInt32.v c < pow2 32 - 1)))
+    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ invariant log h0 st /\ (
+      match Ghost.reveal log with
+      | MkLog k n c -> UInt32.v c < pow2 32 - 1 /\ as_state h1 st == Spec.setup k n (UInt32.v c + 1))))
+let state_incr log st =
+  let h0 = ST.get() in
+  assert(as_state h0 st == (match Ghost.reveal log with | MkLog k n c -> Spec.setup k n (UInt32.v c )));
+  state_incr st;
+  let h1 = ST.get() in
+  (* assert(Seq.index (Seq.index (as_state h1 st) 3) *)
+  Seq.lemma_eq_intro (as_state h1 st) (match Ghost.reveal log with | MkLog k n c ->
+                                       Spec.setup k n (UInt32.v c + 1))
+
 
 [@ "c_inline"]
 val chacha20_core3:
@@ -490,16 +508,19 @@ val chacha20_core3:
   k2:state ->
   st:state ->
   Stack unit
-    (requires (fun h -> live h k0 /\ live h k1 /\ live h k2 /\ live h st))
+    (requires (fun h -> live h k0 /\ live h k1 /\ live h k2 /\ live h st /\ invariant log h st /\
+      (match Ghost.reveal log with
+      | MkLog k n ctr -> UInt32.v ctr < pow2 32 - 2)))
     (ensures  (fun h0 updated_log h1 -> live h1 k0 /\ live h1 k1 /\ live h1 k2 /\ live h1 st /\
       invariant log h0 st /\
       modifies_3 st k0 k1 h0 h1 /\ (
-      match log with | MkLog k n ctr ->
-      as_state h1 k == Spec.(chacha20_core (setup k n c)) /\
-      as_state h1 k == Spec.(chacha20_core (setup k n c)) /\
-      as_state h1 k == Spec.(chacha20_core (setup k n c)) ) ))
+      match Ghost.reveal log with | MkLog k n ctr ->
+      UInt32.v ctr < pow2 32 - 2 /\
+      as_state h1 k0 == Spec.(chacha20_core (setup k n (UInt32.v ctr))) /\
+      as_state h1 k1 == Spec.(chacha20_core (setup k n (UInt32.v ctr + 1))) /\
+      as_state h1 k2 == Spec.(chacha20_core (setup k n (UInt32.v ctr + 2))) ) ))
 [@ "c_inline"]
-let chacha20_core3 k0 k1 k2 st =
+let chacha20_core3 log k0 k1 k2 st =
   copy_state k0 st;
   copy_state k1 st;
   state_incr k1;
