@@ -3,7 +3,6 @@
 #define __SHA2_512_H
 
 
-
 #include "kremlib.h"
 #include "testlib.h"
 
@@ -67,11 +66,35 @@ typedef uint64_t *uint64_p;
 
 typedef uint8_t *uint8_p;
 
+extern uint32_t size_word;
+
+extern uint32_t size_hash_w;
+
+extern uint32_t size_block_w;
+
 extern uint32_t size_hash;
 
 extern uint32_t size_block;
 
+extern uint32_t size_k_w;
+
+extern uint32_t size_ws_w;
+
+extern uint32_t size_whash_w;
+
+extern uint32_t size_count_w;
+
+extern uint32_t size_len_8;
+
 extern uint32_t size_state;
+
+extern uint32_t pos_k_w;
+
+extern uint32_t pos_ws_w;
+
+extern uint32_t pos_whash_w;
+
+extern uint32_t pos_count_w;
 
 void init(uint64_t *state);
 
