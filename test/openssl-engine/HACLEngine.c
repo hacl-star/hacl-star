@@ -277,6 +277,8 @@ static int Everest_digest_nids(const int **nids)
   int count = 0;
 
   if (!init) {
+    digest_nids[count++] = NID_poly1305;
+
     // NULL-terminate the list
     digest_nids[count] = 0;
     init = 1;
