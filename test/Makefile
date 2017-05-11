@@ -8,10 +8,13 @@ HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
 HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
 
 all:
-	$(MAKE) go -k
-
-go:
+	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
+	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
+	$(MAKE) extract-c
+	$(MAKE) ct
 	$(MAKE) verify
+	$(MAKE) compile-vale
+	$(MAKE) -C openssl-engine
 
 travis:
 	$(MAKE) extract-c
