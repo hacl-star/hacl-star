@@ -619,3 +619,61 @@ let mul_modq x y =
   Math.Lemmas.pow2_lt_compat 528 512;
   let z' = carry z in
   barrett_reduction z'
+
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+val carry_step':
+  x:UInt64.t -> y:UInt64.t{UInt64.v y < 0x8000000000000000} ->
+  Tot (t:tuple2 UInt64.t UInt64.t{
+    UInt64.v x + 0x100000000000000 * UInt64.v y == v (fst t) + 0x100000000000000 * UInt64.v (snd t)
+    /\ v (fst t) < 0x100000000000000})
+let carry_step' x y =
+  let carry = FStar.UInt64.(x >>^ 56ul) in
+  let t     = x &^ 0xffffffffffffffuL in
+  assert_norm(pow2 56 = 0x100000000000000);
+  UInt.logand_mask #64 (UInt64.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (FStar.UInt64.v x) 56 64;
+  t, FStar.UInt64.add y carry
+
+val add_modq:
+  x:qelem_56{eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed} ->
+  y:qelem_56{eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed} ->
+  Tot (z:qelem_56{eval_q z == (eval_q x + eval_q y) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed})
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
+let add_modq x y =
+  assert_norm(pow2 128  = 0x100000000000000000000000000000000);
+  assert_norm(pow2 40   = 0x10000000000);
+  assert_norm(pow2 56   = 0x100000000000000);
+  assert_norm(pow2 112  = 0x10000000000000000000000000000);
+  assert_norm(pow2 168  = 0x1000000000000000000000000000000000000000000);
+  assert_norm(pow2 224  = 0x100000000000000000000000000000000000000000000000000000000);
+  assert_norm(pow2 264  = 0x1000000000000000000000000000000000000000000000000000000000000000000);
+  let x0 = x.[0] in
+  let x1 = x.[1] in
+  let x2 = x.[2] in
+  let x3 = x.[3] in
+  let x4 = x.[4] in
+  let y0 = y.[0] in
+  let y1 = y.[1] in
+  let y2 = y.[2] in
+  let y3 = y.[3] in
+  let y4 = y.[4] in
+  let z0 = x0 +^ y0 in
+  let z1 = x1 +^ y1 in
+  let z2 = x2 +^ y2 in
+  let z3 = x3 +^ y3 in
+  let z4 = x4 +^ y4 in
+  let t0, z1' = carry_step' z0 z1 in
+  let t1, z2' = carry_step' z1' z2 in
+  let t2, z3' = carry_step' z2' z3 in
+  let t3, t4 = carry_step' z3' z4 in
+  let t = Seq.Create.create_5 t0 t1 t2 t3 t4 in
+  assert(eval_q t = eval_q x + eval_q y);
+  let w = subm_conditional t in
+  if eval_q t >= 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed then
+    Math.Lemmas.lemma_mod_plus (eval_q t) 1 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed
+  else Math.Lemmas.modulo_lemma (eval_q t) 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed;
+  w

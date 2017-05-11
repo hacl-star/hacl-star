@@ -867,20 +867,22 @@ let barrett_reduction z t =
   barrett_reduction_ z t
 
 
-(* val mul_modq: *)
+(* val mul_modq_: *)
 (*   z:qelemB -> *)
 (*   x:qelemB -> *)
 (*   y:qelemB -> *)
+(*   z':buffer Hacl.UInt64.t{length z' = 10 /\ disjoint } -> *)
+(*   z'':buffer Hacl.UInt64.t{length z'' = 9} -> *)
 (*   Stack unit *)
 (*     (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y /\ *)
 (*       (let x = as_seq h x in let y = as_seq h y in *)
 (*       eval_q x < pow2 256 /\ eval_q y < pow2 256))) *)
-(*     (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\  *)
+(*     (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ *)
 (*       (let x = as_seq h0 x in let y = as_seq h0 y in *)
 (*        eval_q x < pow2 256 /\ eval_q y < pow2 256) /\ *)
 (*        eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) * eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
 
-#reset-options "--max_fuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --z3rlimit 400"
 
 let mul_modq out x y =
   let h0 = ST.get() in
@@ -890,33 +892,45 @@ let mul_modq out x y =
   let h2 = ST.get() in
   no_upd_lemma_0 h1 h2 x;
   no_upd_lemma_0 h1 h2 y;
+  no_upd_lemma_0 h1 h2 out;
   push_frame();
   let h3 = ST.get() in
   let z  = create (uint64_to_sint128 0uL) 9ul in
   let h4 = ST.get() in
   no_upd_lemma_0 h3 h4 x;
   no_upd_lemma_0 h3 h4 y;
+  no_upd_lemma_0 h3 h4 out;
+  no_upd_lemma_0 h3 h4 z';
   lemma_mul_ineq__ (eval_q (as_seq h0 x)) (eval_q (as_seq h0 y)) 256 256;
   assert(as_seq h4 x == as_seq h0 x);
   assert(as_seq h4 y == as_seq h0 y);
   mul_5 z x y;
   let h5 = ST.get() in
+  no_upd_lemma_1 h4 h5 z out;
+  no_upd_lemma_1 h4 h5 z z';
   assert(modifies_0 h3 h5);
   Math.Lemmas.pow2_lt_compat 528 512;
   carry z' z;
   let h6 = ST.get() in
+  no_upd_lemma_1 h5 h6 z' out;
   assert(modifies_2_1 z' h3 h6);
   pop_frame();
   let h7 = ST.get() in
   modifies_popped_1 z' h2 h3 h6 h7;
   assert(modifies_0 h1 h7);
-  barrett_reduction out z';
+  barrett_reduction_ out z';
   let h8 = ST.get() in
+  assert(live h8 out);
+  assert(live h0 x);
+  assert(live h0 y);
+  assert(let out = as_seq h8 out in
+         let x = as_seq h0 x in
+         let y = as_seq h0 y in
+         out == Spec.mul_modq x y);
   assert(modifies_2_1 out h1 h8);
   pop_frame();
   let h9 = ST.get() in
-  modifies_popped_1 z' h0 h1 h8 h9;
-  ()
+  modifies_popped_1 out h0 h1 h8 h9
 
 
 (* val add_modq: *)
@@ -933,8 +947,28 @@ let mul_modq out x y =
 (*        eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\ *)
 (*        eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed) /\ *)
 (*        eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) + eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
-let add_modq out x y =
-  admit();
+
+
+val add_modq_:
+  z:qelemB ->
+  x:qelemB ->
+  y:qelemB ->
+  Stack unit
+    (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y /\
+      (let x = as_seq h x in let y = as_seq h y in
+      eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
+      eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)))
+    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ within_56 h0 x /\ within_56 h0 y /\
+      modifies_1 z h0 h1 /\
+      (let x = as_seq h0 x in let y = as_seq h0 y in
+       eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
+       eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed) /\
+       as_seq h1 z == Spec.add_modq (as_seq h0 x) (as_seq h0 y)))
+       (* eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) + eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+let add_modq_ out x y =
   let h0 = ST.get() in
   push_frame();
   let tmp = create (uint64_to_sint64 0uL) 5ul in
@@ -953,7 +987,6 @@ let add_modq out x y =
   let z2 = x2 +^ y2 in
   let z3 = x3 +^ y3 in
   let z4 = x4 +^ y4 in
-
   let x = z0  in let y = z1 in
   let carry = Hacl.UInt64.(x >>^ 56ul) in
   let t     = x &^ 0xffffffffffffffuL in
@@ -978,14 +1011,15 @@ let add_modq out x y =
   let t     = x &^ 0xffffffffffffffuL in
   UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
-  let x3 = t in let z4' = Hacl.UInt64.add y carry in
-  let x = z4' in let y = 0uL in
-  let carry = Hacl.UInt64.(x >>^ 56ul) in
-  let t     = x &^ 0xffffffffffffffuL in
-  UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
-  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
-  let x4 = t in let z5' = Hacl.UInt64.add y carry in
+  let x3 = t in let x4 = Hacl.UInt64.add y carry in
+  (* let x = z4' in let y = 0uL in *)
+  (* let carry = Hacl.UInt64.(x >>^ 56ul) in *)
+  (* let t     = x &^ 0xffffffffffffffuL in *)
+  (* UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56; *)
+  (* Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64; *)
+  (* let x4 = t in let z5' = Hacl.UInt64.add y carry in *)
   Hacl.Lib.Create64.make_h64_5 tmp x0 x1 x2 x3 x4;
   subm_conditional out tmp;
   pop_frame()
 
+let add_modq out x y = add_modq_ out x y
