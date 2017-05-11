@@ -23,7 +23,7 @@ SHA2_FILES = \
 verify: verification
 
 # Extraction
-extract-c: tests #sha2-c/SHA2_256.c sha2-c/SHA2_512.c
+extract-c: sha2-c/SHA2_256.c sha2-c/SHA2_512.c
 
 # Test vectors
 tests: test-sha2_256.exe test-sha2_512.exe
@@ -68,7 +68,7 @@ sha2-c/SHA2_512.c:
 		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' -drop 'Spec.Lib' -drop 'Spec.Loops' -drop 'Seq.Create' -drop 'Spec.\*' \
 		-drop 'Hacl.Hash.SHA2_512.Lemmas' -drop Prims -drop FStar \
 		-bundle "SHA2_512=Hacl.Utils.Experimental,Hacl.Hash.SHA2_512,SHA2_512" \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99 -skip-compilation
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -skip-compilation
 
 
 test-sha2_256.exe:
