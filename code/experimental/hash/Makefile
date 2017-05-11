@@ -23,7 +23,7 @@ SHA2_FILES = \
 verify: verification
 
 # Extraction
-extract-c: tests #sha2-c/SHA2_256.c sha2-c/SHA2_512.c
+extract-c: sha2-c/SHA2_256.c sha2-c/SHA2_512.c
 
 # Test vectors
 tests: test-sha2_256.exe test-sha2_512.exe
