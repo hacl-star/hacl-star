@@ -189,7 +189,7 @@ private let lemma_distr_5 a b c d e n : Lemma (n * (a + b + c + d + e) = n*a + n
 private let lemma_reduce_spec_1_1 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemma
   ((pow2 limb_size * (a + pow2 51 * b + pow2 102 * c + pow2 153 * d + pow2 204 * e))
     = (pow2 51 * a + pow2 102 * b + pow2 153 * c + pow2 204 * d + pow2 255 * e))
-  = 
+  = admit();
     let p51  = pow2 51 in
     let p102 = pow2 102 in
     let p153 = pow2 153 in
