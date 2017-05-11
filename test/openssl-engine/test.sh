@@ -26,6 +26,6 @@ $OPENSSL_HOME/apps/openssl$EXE <<EOF
   engine $ENGINE
   speed -engine Everest ecdhx25519
   speed -engine Everest -evp chacha20
-  speed -engine Everest -evp poly1305
   speed -engine Everest -evp chacha20-poly1305
+  speed -engine Everest -evp poly1305
 EOF

@@ -448,8 +448,8 @@ static inline void load128_be_(uint8_t *b, uint128_t *r) {
 }
 
 static inline void store128_be_(uint8_t *b, uint128_t *n) {
-  store64_le(b, n->high);
-  store64_le(b + 8, n->low);
+  store64_be(b, n->high);
+  store64_be(b + 8, n->low);
 }
 
 static inline void FStar_UInt128_add_(uint128_t *x, uint128_t *y, uint128_t *r) {
