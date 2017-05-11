@@ -258,7 +258,7 @@ let times_2d out a =
   let h3 = ST.get() in
   pop_frame();
   let h4 = ST.get() in
-  admit()
+  ()
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 

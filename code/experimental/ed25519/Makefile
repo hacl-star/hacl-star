@@ -76,7 +76,7 @@ ED25519_SPECIFIC= \
 SLOW=
 
 # Files that still have errors
-TODO=Hacl.Impl.BignumQ.Mul.fst \
+TODO=
 
 ED25519_FILES= $(ED25519_SPECIFIC) # $(BIGNUM) 
 

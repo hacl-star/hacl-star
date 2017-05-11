@@ -128,11 +128,6 @@ let point_equal_1 p q tmp =
   let h1 = ST.get() in
   Hacl.Bignum25519.lemma_reveal_seval (as_seq h1 pxqz);
   lemma_pos' (as_seq h1 pxqz);
-  (* assume ((let s = as_seq h1 pxqz in Hacl.UInt64.(v (Seq.index s 0) *)
-  (*                              + pow2 51 * v (Seq.index s 1) *)
-  (*                              + pow2 102 * v (Seq.index s 2) *)
-  (*                              + pow2 153 * v (Seq.index s 3) *)
-  (*                              + pow2 204 * v (Seq.index s 4))) >= 0); *)
   Math.Lemmas.modulo_lemma (let s = as_seq h1 pxqz in Hacl.UInt64.(v (Seq.index s 0)
                                + pow2 51 * v (Seq.index s 1)
                                + pow2 102 * v (Seq.index s 2)
@@ -151,11 +146,6 @@ let point_equal_1 p q tmp =
   let h2 = ST.get() in
   Hacl.Bignum25519.lemma_reveal_seval (as_seq h2 qxpz);
   lemma_pos' (as_seq h2 qxpz);
-  (* assume ((let s = as_seq h2 qxpz in Hacl.UInt64.(v (Seq.index s 0) *)
-  (*                              + pow2 51 * v (Seq.index s 1) *)
-  (*                              + pow2 102 * v (Seq.index s 2) *)
-  (*                              + pow2 153 * v (Seq.index s 3) *)
-  (*                              + pow2 204 * v (Seq.index s 4))) >= 0); *)
   Math.Lemmas.modulo_lemma (let s = as_seq h2 qxpz in Hacl.UInt64.(v (Seq.index s 0)
                                + pow2 51 * v (Seq.index s 1)
                                + pow2 102 * v (Seq.index s 2)
@@ -203,11 +193,6 @@ let point_equal_2 p q tmp =
   let h1 = ST.get() in
   Hacl.Bignum25519.lemma_reveal_seval (as_seq h1 pyqz);
   lemma_pos' (as_seq h1 pyqz);  
-  (* assume ((let s = as_seq h1 pyqz in Hacl.UInt64.(v (Seq.index s 0) *)
-  (*                              + pow2 51 * v (Seq.index s 1) *)
-  (*                              + pow2 102 * v (Seq.index s 2) *)
-  (*                              + pow2 153 * v (Seq.index s 3) *)
-  (*                              + pow2 204 * v (Seq.index s 4))) >= 0); *)
   Math.Lemmas.modulo_lemma (let s = as_seq h1 pyqz in Hacl.UInt64.(v (Seq.index s 0)
                                + pow2 51 * v (Seq.index s 1)
                                + pow2 102 * v (Seq.index s 2)
@@ -226,11 +211,6 @@ let point_equal_2 p q tmp =
   let h2 = ST.get() in
   Hacl.Bignum25519.lemma_reveal_seval (as_seq h2 qypz);
   lemma_pos' (as_seq h2 qypz);  
-  (* assume ((let s = as_seq h2 qypz in Hacl.UInt64.(v (Seq.index s 0) *)
-  (*                              + pow2 51 * v (Seq.index s 1) *)
-  (*                              + pow2 102 * v (Seq.index s 2) *)
-  (*                              + pow2 153 * v (Seq.index s 3) *)
-  (*                              + pow2 204 * v (Seq.index s 4))) >= 0); *)
   Math.Lemmas.modulo_lemma (let s = as_seq h2 qypz in Hacl.UInt64.(v (Seq.index s 0)
                                + pow2 51 * v (Seq.index s 1)
                                + pow2 102 * v (Seq.index s 2)
