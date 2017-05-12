@@ -1,10 +1,9 @@
 #include "crypto_verify_16.h"
 #include "crypto_onetimeauth.h"
-#include "Poly1305.h"
 
 int crypto_onetimeauth(unsigned char *output, const unsigned char *input, unsigned long long len, const unsigned char *k)
 {
-  Poly1305_64_crypto_onetimeauth(output, input, len, k);
+  Hacl_Impl_Poly1305_64_crypto_onetimeauth(output, input, len, k);
   return 0;
 }
 

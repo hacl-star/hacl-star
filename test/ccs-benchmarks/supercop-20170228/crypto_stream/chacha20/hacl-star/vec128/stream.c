@@ -1,5 +1,5 @@
 #include "crypto_stream.h"
-#include "Chacha20.h"
+#include "Chacha20_Vec128.h"
 
 int crypto_stream_xor(
         unsigned char *out,
@@ -9,7 +9,7 @@ int crypto_stream_xor(
         const unsigned char *k
 		      ){
 
-  Chacha20_chacha20(out, in, inlen, k, n, 0);
+  Chacha20_Vec128_chacha20(out, in, inlen, k, n, 0);
   return 0;
 }
 
@@ -21,17 +21,6 @@ int crypto_stream(
                                   const unsigned char *k
                                   )
 {
-  uint32_t ctr = 0;
-  uint8_t block[64];
-  while (outlen >= 64) {
-    Chacha20_chacha20_key_block(out,k,n,ctr);
-    out += 64;
-    ctr ++;
-    outlen -= 64;
-  }
-  if (outlen > 0) {
-    Chacha20_chacha20_key_block(block,k,n,ctr);
-    memcpy(out,block,outlen);
-  }
-  return 0;
+    memset(out,0,outlen);
+    return crypto_stream_xor(out,out,outlen,n,k);
 }
