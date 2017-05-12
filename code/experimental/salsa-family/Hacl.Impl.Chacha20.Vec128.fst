@@ -174,6 +174,30 @@ val double_round3:
 
 #reset-options "--max_fuel 0 --z3rlimit 10"
 
+val lemma_modifies_double_round3:
+  h0:HyperStack.mem ->
+  h1:HyperStack.mem ->
+  h2:HyperStack.mem ->
+  h3:HyperStack.mem ->
+  st:state ->
+  st':state{disjoint st st'} ->
+  st'':state{disjoint st st' /\ disjoint st' st''} ->
+  Lemma (requires (live h0 st /\ live h0 st' /\ live h0 st'' /\ HyperStack.equal_domains h0 h1 /\ 
+    HyperStack.equal_domains h1 h2 /\ HyperStack.equal_domains h2 h3 /\
+    modifies_1 st h0 h1 /\ modifies_1 st' h1 h2 /\ modifies_1 st'' h2 h3))
+        (ensures (modifies_3 st st' st'' h0 h3))
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
+let lemma_modifies_double_round3 h0 h1 h2 h3 st st' st'' =
+  lemma_reveal_modifies_1 st   h0 h1;
+  lemma_reveal_modifies_1 st'  h1 h2;
+  lemma_reveal_modifies_1 st'' h2 h3;
+  lemma_intro_modifies_3 st st' st'' h0 h3
+
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
 [@ "c_inline"]
 let double_round3 st st' st'' =
   let h0 = ST.get() in
@@ -197,7 +221,7 @@ let double_round3 st st' st'' =
   assert(as_state h3 st'' == Spec.double_round (as_state h0 st''));
   assert(as_state h3 st == Spec.double_round (as_state h0 st));
   assert(as_state h3 st' == Spec.double_round (as_state h0 st'));
-  assume (modifies_3 st st' st'' h0 h3)
+  lemma_modifies_double_round3 h0 h1 h2 h3 st st' st''
 
 
 [@ "substitute"]
@@ -878,6 +902,8 @@ let update_last log output plain len st =
 (*       vec_as_seq (Seq.index st 3) == Spec.Lib.uint32s_from_le 4 (Seq.slice plain 48 64) ))) *)
 (* let load_bytes_to_state st plain = *)  
 
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
 val lemma_uint32s_fragments:
   h:HyperStack.mem ->
   output:uint8_p{length output = 64 /\ live h output} ->
@@ -890,8 +916,87 @@ val lemma_uint32s_fragments:
                    as_seq h (Buffer.sub output 32ul 16ul) == Spec.Lib.uint32s_to_le 4 c /\
                    as_seq h (Buffer.sub output 48ul 16ul) == Spec.Lib.uint32s_to_le 4 d))
         (ensures (as_seq h output == Spec.Lib.uint32s_to_le 16 FStar.Seq.(a @| b @| c @| d)))
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
+let lemma_append_assoc a b c : Lemma (let open FStar.Seq in a @| b @| c == (a @| b) @| c) =
+  let open FStar.Seq in
+  Seq.lemma_eq_intro ((a @| b) @| c) (a @| b @| c)
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
 let lemma_uint32s_fragments h output a b c d =
-  admit()
+  let open FStar.Seq in
+  let s = a @| b @| c @| d in
+  let s02 = a @| b @| c in
+  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 0ul  16ul)) (Seq.slice (as_seq h output) 0 16);
+  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 16ul 16ul)) (Seq.slice (as_seq h output) 16 32);
+  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 32ul 16ul)) (Seq.slice (as_seq h output) 32 48);
+  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 48ul 16ul)) (Seq.slice (as_seq h output) 48 64);
+  Seq.lemma_eq_intro (a @| b @| c) (slice s 0 12);
+  Seq.lemma_eq_intro d (slice s 12 16);
+  Spec.Lib.lemma_uint32s_to_le_slice 16 s 12;
+  assert(Spec.Lib.uint32s_to_le 16 s == Spec.Lib.uint32s_to_le 12 s02 @| Spec.Lib.uint32s_to_le 4 d);
+  let s01 = a @| b in
+  Seq.lemma_eq_intro s01 (slice s02 0 8);
+  Seq.lemma_eq_intro c (slice s02 8 12);
+  Spec.Lib.lemma_uint32s_to_le_slice 12 s02 8;
+  Seq.lemma_eq_intro (Spec.Lib.uint32s_to_le 16 s)
+                     (Spec.Lib.uint32s_to_le 8 s01 @| Spec.Lib.uint32s_to_le 4 c @| Spec.Lib.uint32s_to_le 4 d);
+  lemma_append_assoc (Spec.Lib.uint32s_to_le 8 s01) (Spec.Lib.uint32s_to_le 4 c) (Spec.Lib.uint32s_to_le 4 d);
+  Seq.lemma_eq_intro a (slice s01 0 4);
+  Seq.lemma_eq_intro b (slice s01 4 8);
+  Spec.Lib.lemma_uint32s_to_le_slice 8 s01 4;
+  Seq.lemma_eq_intro (Spec.Lib.uint32s_to_le 16 s)
+                     (Spec.Lib.uint32s_to_le 4 a @| Spec.Lib.uint32s_to_le 4 b @| Spec.Lib.uint32s_to_le 4 c @| Spec.Lib.uint32s_to_le 4 d);
+  Seq.lemma_eq_intro (slice (as_seq h output) 0 16 @| slice (as_seq h output) 16 32 @| slice (as_seq h output) 32 48 @| slice (as_seq h output) 48 64) (as_seq h output);
+  Seq.lemma_eq_intro (Spec.Lib.uint32s_to_le 16 s) (as_seq h output)
+
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
+val lemma_uint32s_fragments2:
+  h:HyperStack.mem ->
+  output:uint8_p{length output = 64 /\ live h output} ->
+  a:Seq.seq UInt32.t{Seq.length a = 4} ->
+  b:Seq.seq UInt32.t{Seq.length b = 4} ->
+  c:Seq.seq UInt32.t{Seq.length c = 4} ->
+  d:Seq.seq UInt32.t{Seq.length d = 4} ->
+  Lemma (requires (Spec.Lib.uint32s_from_le 4 (as_seq h (Buffer.sub output 0ul  16ul)) == a /\
+                   Spec.Lib.uint32s_from_le 4 (as_seq h (Buffer.sub output 16ul 16ul)) == b /\
+                   Spec.Lib.uint32s_from_le 4 (as_seq h (Buffer.sub output 32ul 16ul)) == c /\
+                   Spec.Lib.uint32s_from_le 4 (as_seq h (Buffer.sub output 48ul 16ul)) == d))
+        (ensures (Spec.Lib.uint32s_from_le 16 (as_seq h output) == FStar.Seq.(a @| b @| c @| d)))
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+let lemma_uint32s_fragments2 h output a b c d =
+  let open FStar.Seq in
+  let s' = as_seq h output in
+  let s  = s' in
+  let s0 = slice s' 0  16 in
+  let s1 = slice s' 16 32 in
+  let s2 = slice s' 32 48 in
+  let s3 = slice s' 48 64 in
+  let s02 = slice s' 0 48 in
+  let s01 = slice s' 0 32 in
+  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 0ul  16ul)) (Seq.slice (as_seq h output) 0 16);
+  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 16ul 16ul)) (Seq.slice (as_seq h output) 16 32);
+  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 32ul 16ul)) (Seq.slice (as_seq h output) 32 48);
+  Seq.lemma_eq_intro (as_seq h (Buffer.sub output 48ul 16ul)) (Seq.slice (as_seq h output) 48 64);
+  Spec.Lib.lemma_uint32s_from_le_slice 16 s 12;
+  assert(Spec.Lib.uint32s_from_le 16 s == Spec.Lib.uint32s_from_le 12 s02 @| Spec.Lib.uint32s_from_le 4 s3);
+  Seq.lemma_eq_intro s01 (slice s02 0 32);
+  Seq.lemma_eq_intro s2 (slice s02 32 48);
+  Spec.Lib.lemma_uint32s_from_le_slice 12 s02 8;
+  Seq.lemma_eq_intro (Spec.Lib.uint32s_from_le 16 s)
+                     (Spec.Lib.uint32s_from_le 8 s01 @| Spec.Lib.uint32s_from_le 4 s2 @| Spec.Lib.uint32s_from_le 4 s3);
+  lemma_append_assoc (Spec.Lib.uint32s_from_le 8 s01) (Spec.Lib.uint32s_from_le 4 s2) (Spec.Lib.uint32s_from_le 4 s3);
+  Seq.lemma_eq_intro s0 (slice s01 0 16);
+  Seq.lemma_eq_intro s1 (slice s01 16 32);
+  Spec.Lib.lemma_uint32s_from_le_slice 8 s01 4;
+  Seq.lemma_eq_intro (Spec.Lib.uint32s_from_le 16 s)
+                     (Spec.Lib.uint32s_from_le 4 s0 @| Spec.Lib.uint32s_from_le 4 s1 @| Spec.Lib.uint32s_from_le 4 s2 @| Spec.Lib.uint32s_from_le 4 s3)
 
 
 val store_4_vec:
@@ -979,7 +1084,8 @@ let xor_block output plain st =
   Seq.lemma_eq_intro (let k = FStar.Seq.(vec_as_seq k0 @| vec_as_seq k1 @| vec_as_seq k2 @| vec_as_seq k3) in let p = FStar.Seq.(vec_as_seq p0 @| vec_as_seq p1 @| vec_as_seq p2 @| vec_as_seq p3) in
     Spec.Loops.seq_map2 FStar.UInt32.logxor p k)
                      FStar.Seq.(vec_as_seq o0 @| vec_as_seq o1 @| vec_as_seq o2 @| vec_as_seq o3);
-  assume (FStar.Seq.(vec_as_seq p0 @| vec_as_seq p1 @| vec_as_seq p2 @| vec_as_seq p3) ==
+  lemma_uint32s_fragments2 h0 plain (vec_as_seq p0) (vec_as_seq p1) (vec_as_seq p2) (vec_as_seq p3);
+  assert (FStar.Seq.(vec_as_seq p0 @| vec_as_seq p1 @| vec_as_seq p2 @| vec_as_seq p3) ==
     Spec.Lib.uint32s_from_le 16 (as_seq h0 plain));
   Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes (as_seq h0 plain) FStar.Seq.(vec_as_seq k0 @| vec_as_seq k1 @| vec_as_seq k2 @| vec_as_seq k3);
   store_4_vec output o0 o1 o2 o3;
@@ -991,6 +1097,7 @@ let xor_block output plain st =
                                          vec_as_seq (Seq.index st 0) @| vec_as_seq (Seq.index st 1) @|
                                         vec_as_seq (Seq.index st 2) @| vec_as_seq (Seq.index st 3))) in
                                          Spec.Loops.seq_map2 UInt8.logxor plain stbytes)
+
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
@@ -1065,6 +1172,24 @@ let update log output plain st =
 (*   pop_frame() *)
 
 
+val lemma_live_update3:
+  h0:HyperStack.mem ->
+  h1:HyperStack.mem ->
+  st:state ->
+  k0:state{disjoint k0 st /\ frameOf st <> frameOf k0} ->
+  k1:state{disjoint k1 st /\ disjoint k1 k0 /\ frameOf k0 == frameOf k1} ->
+  k2:state{disjoint k0 k2 /\ disjoint k1 k2 /\ disjoint k2 st /\ frameOf k2 == frameOf k1} ->
+  buf:uint8_p{disjoint st buf /\ frameOf buf <> frameOf k0} ->
+  Lemma (requires (live h0 st /\ live h0 k0 /\ live h0 k1 /\ live h0 k2 /\ live h0 buf /\
+      modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h1 /\
+      modifies_buf_1 (frameOf st) st h0 h1 /\
+      HyperHeap.modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) ))
+        (ensures (live h1 buf /\ live h0 buf /\ as_seq h0 buf == as_seq h1 buf))
+let lemma_live_update3 h0 h1 st k0 k1 k2 buf =
+  ()
+  
+
+
 val update3:
   log:log_t{UInt32.v (MkLog?.ctr (Ghost.reveal log)) < pow2 32 - 2} ->
   output:uint8_p{length output = 192} ->
@@ -1085,13 +1210,51 @@ val update3:
     let o2 = seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p2 (Spec.chacha20_cipher k n (U32.v ctr+2)) in
        o == FStar.Seq.(o0 @| o1 @| o2) )
        ))
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
 let update3 log output plain st =
   let h0 = ST.get() in
   push_frame();
+  let h1 = ST.get() in
   let k0 = Buffer.create zero 4ul in
   let k1 = Buffer.create zero 4ul in
   let k2 = Buffer.create zero 4ul in
+  let h2 = ST.get() in
+  assert(live h2 plain);
   chacha20_core3 log k0 k1 k2 st;
+  let h3 = ST.get() in
+  lemma_live_update3 h2 h3 st k0 k1 k2 plain;
+  lemma_live_update3 h2 h3 st k0 k1 k2 output;
+  assert(live h3 plain);  
+  assert(as_seq h3 plain == as_seq h0 plain);
+  assume (let st = as_seq h3 k0 in
+          let stbytes = FStar.Seq.(Spec.Lib.uint32s_to_le 16 (
+                               vec_as_seq (Seq.index st 0) @| vec_as_seq (Seq.index st 1) @|
+                               vec_as_seq (Seq.index st 2) @| vec_as_seq (Seq.index st 3))) in
+          let stbytes' = FStar.Seq.(Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 0)) @|
+                               Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 1)) @|
+                               Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 2)) @|
+                               Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 3))) in
+          stbytes == stbytes');
+  assume (let st = as_seq h3 k1 in
+          let stbytes = FStar.Seq.(Spec.Lib.uint32s_to_le 16 (
+                               vec_as_seq (Seq.index st 0) @| vec_as_seq (Seq.index st 1) @|
+                               vec_as_seq (Seq.index st 2) @| vec_as_seq (Seq.index st 3))) in
+          let stbytes' = FStar.Seq.(Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 0)) @|
+                               Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 1)) @|
+                               Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 2)) @|
+                               Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 3))) in
+          stbytes == stbytes');
+  assume (let st = as_seq h3 k2 in
+          let stbytes = FStar.Seq.(Spec.Lib.uint32s_to_le 16 (
+                               vec_as_seq (Seq.index st 0) @| vec_as_seq (Seq.index st 1) @|
+                               vec_as_seq (Seq.index st 2) @| vec_as_seq (Seq.index st 3))) in
+          let stbytes' = FStar.Seq.(Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 0)) @|
+                               Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 1)) @|
+                               Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 2)) @|
+                               Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 3))) in
+          stbytes == stbytes');
   let p0 = Buffer.sub plain 0ul   64ul in
   let p1 = Buffer.sub plain 64ul  64ul in
   let p2 = Buffer.sub plain 128ul 64ul in
@@ -1099,10 +1262,35 @@ let update3 log output plain st =
   let o1 = Buffer.sub output 64ul  64ul in
   let o2 = Buffer.sub output 128ul 64ul in
   xor_block o0 p0 k0;
+  let h4 = ST.get() in
+  no_upd_lemma_1 h3 h4 o0 p1;
+  no_upd_lemma_1 h3 h4 o0 p1;
+  no_upd_lemma_1 h3 h4 o0 p2;
+  no_upd_lemma_1 h3 h4 o0 k1;
+  no_upd_lemma_1 h3 h4 o0 k2;
   xor_block o1 p1 k1;
+  let h5 = ST.get() in
+  no_upd_lemma_1 h4 h5 o1 o0;
+  no_upd_lemma_1 h4 h5 o1 p2;
+  no_upd_lemma_1 h4 h5 o1 k2;
   xor_block o2 p2 k2;
-  (* state_incr st; *)
-  pop_frame()
+  let h6 = ST.get() in
+  no_upd_lemma_1 h5 h6 o2 o0;
+  no_upd_lemma_1 h5 h6 o2 p1;
+  Seq.lemma_eq_intro (match Ghost.reveal log with | MkLog k n ctr ->
+                    let p0 = as_seq h0 p0 in
+                    seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p0 (Spec.chacha20_cipher k n (U32.v ctr)))
+                    (as_seq h6 o0);
+  Seq.lemma_eq_intro (match Ghost.reveal log with | MkLog k n ctr ->
+                    let p1 = as_seq h0 p1 in
+                    seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p1 (Spec.chacha20_cipher k n (U32.v ctr+1)))
+                    (as_seq h6 o1);
+  Seq.lemma_eq_intro (match Ghost.reveal log with | MkLog k n ctr ->
+                    let p2 = as_seq h0 p2 in
+                    seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p2 (Spec.chacha20_cipher k n (U32.v ctr+2)))
+                    (as_seq h6 o2);
+  pop_frame();
+  admit()
 
 
 #reset-options "--max_fuel 0 --z3rlimit 300"
