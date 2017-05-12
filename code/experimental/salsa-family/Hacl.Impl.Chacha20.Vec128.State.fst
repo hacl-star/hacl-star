@@ -66,7 +66,32 @@ let state_incr k =
   let k3 = k.(3ul) in
   k.(3ul) <- vec_add k3 one_le;
   let h1 = ST.get() in
-  ()
+  assert(let vec  = vec_as_seq (Seq.index (as_seq h0 k) 3) in
+         let vec' = vec_as_seq (Seq.index (as_seq h1 k) 3) in
+         let x = Seq.index vec 0 in
+         let x' = Seq.index vec' 0 in
+         UInt32.v x' = UInt32.v x + 1);
+  assert(let vec  = vec_as_seq (Seq.index (as_seq h0 k) 3) in
+         let vec' = vec_as_seq (Seq.index (as_seq h1 k) 3) in
+         let x = Seq.index vec 1 in
+         let x' = Seq.index vec' 1 in
+         x' == x);
+  assert(let vec  = vec_as_seq (Seq.index (as_seq h0 k) 3) in
+         let vec' = vec_as_seq (Seq.index (as_seq h1 k) 3) in
+         let x = Seq.index vec 2 in
+         let x' = Seq.index vec' 2 in
+         x' == x);
+  assert(let vec  = vec_as_seq (Seq.index (as_seq h0 k) 3) in
+         let vec' = vec_as_seq (Seq.index (as_seq h1 k) 3) in
+         let x = Seq.index vec 2 in
+         let x' = Seq.index vec' 2 in
+         x' == x);
+  Seq.lemma_eq_intro (vec_as_seq (Seq.index (as_seq h1 k) 3))
+                     (Seq.upd (vec_as_seq (Seq.index (as_seq h0 k) 3)) 0
+                              (let vec = vec_as_seq (Seq.index (as_seq h0 k) 3) in
+                               let c = Seq.index vec 0 in
+                               FStar.UInt32.(c +^ 1ul)))
+
 
 [@ "c_inline"]
 val state_to_key:
@@ -80,7 +105,7 @@ let state_to_key k = ()
 
 [@ "c_inline"]
 val state_to_key_block:
-    stream_block:uint8_p{length stream_block = 64 * U32.v blocks} ->
+    stream_block:uint8_p{length stream_block = 64} ->
     k:state{disjoint k stream_block} ->
     Stack unit
       (requires (fun h -> live h k))
