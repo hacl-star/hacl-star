@@ -2,6 +2,8 @@ module Ed25519
 
 open FStar.Buffer
 
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
 (* Abbreviations *)
 let uint8_p = buffer UInt8.t
 let hint8_p = buffer Hacl.UInt8.t
@@ -30,3 +32,12 @@ val verify:
     (ensures (fun h0 b h1 -> live h0 public /\ live h0 msg /\ live h0 signature /\
       modifies_0 h0 h1 /\ 
       b == Spec.Ed25519.verify h0.[public] h0.[msg] h0.[signature]))
+
+
+val secret_to_public:
+  out:hint8_p{length out = 32} ->
+  secret:hint8_p{length secret = 32 /\ disjoint out secret} ->
+  Stack unit
+    (requires (fun h -> live h out /\ live h secret))
+    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 secret /\ live h1 out /\ modifies_1 out h0 h1 /\
+      as_seq h1 out == Spec.Ed25519.secret_to_public h0.[secret]))

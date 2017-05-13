@@ -217,6 +217,9 @@ let main () =
   (*           0x5euy; 0x8fuy; 0xcduy; 0x4fuy; 0x68uy; 0x1euy; 0x30uy; 0xa6uy; *)
   (*           0xacuy; 0x00uy; 0xa9uy; 0x70uy; 0x4auy; 0x18uy; 0x8auy; 0x03uy] in *)
   
+  let pubkey = create 0uy 32ul in
+  Ed25519.secret_to_public pubkey sk1;
+  TestLib.compare_and_print (C.string_of_literal "Public key generation") pk1 pubkey 32ul;
 
   let sig1' = create 0uy 64ul in
   let sig2' = create 0uy 64ul in
