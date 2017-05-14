@@ -128,7 +128,7 @@ void flush_results(char *txt, uint64_t hacl_cy, uint64_t sodium_cy, uint64_t oss
   fclose(fp);
 }
 
-#define PLAINLEN (1024*1024)
+#define PLAINLEN (16*1024)
 #define ROUNDS 1000
 
 int32_t test_api()
@@ -178,7 +178,7 @@ int32_t test_api()
 
 int32_t perf_api() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
-  uint32_t len = 1024*1024 * sizeof(char);
+  uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(len+16*sizeof(char));
   int fd = open("/dev/urandom", O_RDONLY);
@@ -203,7 +203,7 @@ int32_t perf_api() {
   hacl_cy = (double)b - a;
   hacl_utime = (double)t2 - t1;
   print_results("Hacl Box speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
+		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < CIPHERTEXT_LEN; i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
@@ -218,7 +218,7 @@ int32_t perf_api() {
   sodium_cy = (double)b - a;
   sodium_utime = (double)t2 - t1;
   print_results("Sodium Box speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
+		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
@@ -233,7 +233,7 @@ int32_t perf_api() {
   tweet_cy = (double)b - a;
   tweet_utime = (double)t2 - t1;
   print_results("TweetNacl Box speed", (double)t2-t1,
-		(double) b - a, ROUNDS, 1024 * 1024);
+		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < len + 16 * sizeof(char); i++) 
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
