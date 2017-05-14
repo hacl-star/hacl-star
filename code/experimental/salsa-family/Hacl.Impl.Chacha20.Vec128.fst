@@ -1295,40 +1295,40 @@ let update3 log output plain st =
 
 #reset-options "--max_fuel 0 --z3rlimit 300"
 
-val chacha20_counter_mode_blocks:
-  log:log_t ->
-  output:uint8_p ->
-  plain:uint8_p ->
-  len:UInt32.t{64 * UInt32.v len = length output /\ length output == length plain} ->
-  st:state{disjoint st output /\ disjoint st plain} ->
-  Stack log_t
-    (requires (fun h -> live h output /\ live h plain /\ invariant log h st /\
-      (match Ghost.reveal log with | MkLog _ _ ctr -> (U32.v ctr + U32.v len < pow2 32))))
-    (ensures (fun h0 updated_log h1 -> live h0 plain /\ live h0 st /\ invariant log h0 st /\
-      live h1 st /\ invariant updated_log h1 st /\ live h1 output /\ modifies_2 output st h0 h1 /\
-      (match Ghost.reveal log, Ghost.reveal updated_log with
-       | MkLog k n ctr, MkLog k' n' ctr' ->
-         let output = as_seq h1 output in let plain = as_seq h0 plain in
-         k' == k /\ n' == n /\ (U32.v ctr + U32.v len < pow2 32) /\
-         ctr' = U32.(ctr +^ len) /\
-         output == Spec.CTR.counter_mode_blocks Spec.chacha20_ctx Spec.chacha20_cipher k n (U32.v ctr) plain)))
-let chacha20_counter_mode_blocks log output plain len st =
-  let h0 = ST.get() in
-  let inv (h1:HyperStack.mem) (i:nat) : Type0 = True in
-  let f' (i:UInt32.t{0 <= U32.v i /\ U32.v i < U32.v len}) : Stack unit
-    (requires (fun h -> inv h (U32.v i)))
-    (ensures (fun h0 _ h1 -> inv h1 (U32.v i + 1)))
-  =
-    let out_sub = Buffer.sub output 0ul U32.(64ul *^ i +^ 64ul) in
-    let plain_sub = Buffer.sub plain 0ul U32.(64ul *^ i +^ 64ul) in
-    let out_block = Buffer.sub output U32.(64ul *^ i) 64ul in
-    let plain_block = Buffer.sub plain U32.(64ul *^ i) 64ul in
-    let out_prefix = Buffer.sub output 0ul U32.(64ul *^ i) in
-    let plain_prefix = Buffer.sub plain 0ul U32.(64ul *^ i) in
-    update log out_block plain_block st;
-    state_incr log st in
-  C.Loops.for 0ul len inv f';
-  log
+(* val chacha20_counter_mode_blocks: *)
+(*   log:log_t -> *)
+(*   output:uint8_p -> *)
+(*   plain:uint8_p -> *)
+(*   len:UInt32.t{64 * UInt32.v len = length output /\ length output == length plain} -> *)
+(*   st:state{disjoint st output /\ disjoint st plain} -> *)
+(*   Stack log_t *)
+(*     (requires (fun h -> live h output /\ live h plain /\ invariant log h st /\ *)
+(*       (match Ghost.reveal log with | MkLog _ _ ctr -> (U32.v ctr + U32.v len < pow2 32)))) *)
+(*     (ensures (fun h0 updated_log h1 -> live h0 plain /\ live h0 st /\ invariant log h0 st /\ *)
+(*       live h1 st /\ invariant updated_log h1 st /\ live h1 output /\ modifies_2 output st h0 h1 /\ *)
+(*       (match Ghost.reveal log, Ghost.reveal updated_log with *)
+(*        | MkLog k n ctr, MkLog k' n' ctr' -> *)
+(*          let output = as_seq h1 output in let plain = as_seq h0 plain in *)
+(*          k' == k /\ n' == n /\ (U32.v ctr + U32.v len < pow2 32) /\ *)
+(*          ctr' = U32.(ctr +^ len) /\ *)
+(*          output == Spec.CTR.counter_mode_blocks Spec.chacha20_ctx Spec.chacha20_cipher k n (U32.v ctr) plain))) *)
+(* let chacha20_counter_mode_blocks log output plain len st = *)
+(*   let h0 = ST.get() in *)
+(*   let inv (h1:HyperStack.mem) (i:nat) : Type0 = True in *)
+(*   let f' (i:UInt32.t{0 <= U32.v i /\ U32.v i < U32.v len}) : Stack unit *)
+(*     (requires (fun h -> inv h (U32.v i))) *)
+(*     (ensures (fun h0 _ h1 -> inv h1 (U32.v i + 1))) *)
+(*   = *)
+(*     let out_sub = Buffer.sub output 0ul U32.(64ul *^ i +^ 64ul) in *)
+(*     let plain_sub = Buffer.sub plain 0ul U32.(64ul *^ i +^ 64ul) in *)
+(*     let out_block = Buffer.sub output U32.(64ul *^ i) 64ul in *)
+(*     let plain_block = Buffer.sub plain U32.(64ul *^ i) 64ul in *)
+(*     let out_prefix = Buffer.sub output 0ul U32.(64ul *^ i) in *)
+(*     let plain_prefix = Buffer.sub plain 0ul U32.(64ul *^ i) in *)
+(*     update log out_block plain_block st; *)
+(*     state_incr log st in *)
+(*   C.Loops.for 0ul len inv f'; *)
+(*   log *)
 
 
 val chacha20_counter_mode_blocks3:
