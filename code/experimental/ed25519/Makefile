@@ -69,6 +69,8 @@ ED25519_SPECIFIC= \
 	Hacl.Impl.Ed25519.PointEqual.fst \
 	Hacl.Impl.Ed25519.Verify.Steps.fst \
 	Hacl.Impl.Ed25519.Verify.fst \
+	Hacl.Impl.Ed25519.SecretToPublic.fsti \
+	Hacl.Impl.Ed25519.SecretToPublic.fst \
 	Ed25519.fsti \
 	Ed25519.fst
 
@@ -179,6 +181,7 @@ ed25519-c/Ed25519.c: \
 	Hacl.Impl.Ed25519.Ladder.Step.fst \
 	Hacl.Impl.Ed25519.Ladder.fst \
 	Hacl.Impl.Ed25519.PointEqual.fst \
+	Hacl.Impl.Ed25519.SecretToPublic.fst \
 	Ed25519.fst
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \

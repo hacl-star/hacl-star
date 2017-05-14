@@ -10,9 +10,9 @@ HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
 SNAPSHOT_DIR=snapshot
 
 all:
-	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error"; fi
-	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error"; fi
-	$(MAKE) extract-c OTHERFLAGS="--trace_error"
+	if $(HAS_CCOMP); then $(MAKE) extract-c-code KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error"; fi
+	if $(HAS_CL); then $(MAKE) extract-c-code KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error"; fi
+	$(MAKE) extract-c-code OTHERFLAGS="--trace_error"
 	$(MAKE) ct OTHERFLAGS="--trace_error"
 	$(MAKE) verify OTHERFLAGS="--trace_error"
 	# $(MAKE) -C openssl-engine
