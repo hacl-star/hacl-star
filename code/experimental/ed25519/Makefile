@@ -74,6 +74,44 @@ ED25519_SPECIFIC= \
 	Ed25519.fsti \
 	Ed25519.fst
 
+# List of modules which "sign" and "secret_to_public" depend on, to typecheck
+# for the constant-time discipline
+ED25519_CT_MODULES= \
+	Hacl.Lib.Create64.fst \
+	Hacl.Bignum25519.fsti \
+	Hacl.Bignum25519.fst \
+	Hacl.Impl.Ed25519.ExtPoint.fst \
+	Hacl.Impl.Ed25519.SwapConditional.fst \
+	Hacl.Impl.Ed25519.PointDouble.fsti \
+	Hacl.Impl.Ed25519.PointDouble.fst \
+	Hacl.Impl.Ed25519.PointAdd.fsti \
+	Hacl.Impl.Ed25519.PointAdd.fst \
+	Hacl.Impl.Ed25519.Ladder.Step.fsti \
+	Hacl.Impl.Ed25519.Ladder.Step.fst \
+	Hacl.Impl.Ed25519.Ladder.fsti \
+	Hacl.Impl.Ed25519.Ladder.fst \
+	Hacl.Impl.Store51.fsti \
+	Hacl.Impl.Store51.fst \
+	Hacl.Impl.Ed25519.PointCompress.fst \
+	Hacl.Impl.Ed25519.G.fst \
+	Hacl.Impl.Ed25519.SecretExpand.fsti \
+	Hacl.Impl.Ed25519.SecretExpand.fst \
+	Hacl.Spec.BignumQ.Eval.fst \
+	Hacl.Spec.BignumQ.Mul.Lemmas_1.fst \
+	Hacl.Spec.BignumQ.Mul.Lemmas_3.fst \
+	Spec.BarrettReduction.fst \
+	Hacl.Spec.BignumQ.Mul.fst \
+	Hacl.Lib.Create128.fst \
+	Hacl.Impl.BignumQ.Mul.fsti \
+	Hacl.Impl.BignumQ.Mul.fst \
+	Hacl.Impl.Sha512.fst \
+	Hacl.Impl.Load56.fsti \
+	Hacl.Impl.Load56.fst \
+	Hacl.Impl.SHA512.ModQ.fsti \
+	Hacl.Impl.SHA512.ModQ.fst \
+	Hacl.Impl.Store56.fst \
+	Hacl.Impl.Ed25519.Sign.Steps.fst
+
 # Files that are too slow and for which verification speed must improve
 SLOW=
 
@@ -100,10 +138,10 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
-%.fsti-ct: %.fst
+%.fsti-ct: %.fsti
 	$(FSTAR_CT) --lax $^
 
-all-ct: $(addsuffix -ct, $(ED25519_FILES))
+all-ct: $(addsuffix -ct, $(ED25519_CT_MODULES))
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst

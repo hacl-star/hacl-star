@@ -1,7 +1,7 @@
 module Hacl.Impl.Ed25519.PointDecompress
 
 open FStar.Buffer
-open Hacl.UInt64
+open FStar.UInt64
 open Hacl.Bignum25519
 open Hacl.Impl.Ed25519.ExtPoint
 
@@ -32,8 +32,8 @@ let lemma_most_significant_bit s =
 [@ "substitute"]
 private
 val most_significant_bit:
-  s:buffer Hacl.UInt8.t{length s = 32} ->
-  Stack Hacl.UInt64.t
+  s:buffer UInt8.t{length s = 32} ->
+  Stack UInt64.t
     (requires (fun h -> live h s))
     (ensures (fun h0 z h1 -> live h0 s /\ h1 == h0 /\
       v z == (Endianness.little_endian (as_seq h0 s) / pow2 255) % 2))
@@ -43,7 +43,7 @@ let most_significant_bit s =
   let s31 = s.(31ul) in
   lemma_most_significant_bit (as_seq h s);
   assert(UInt8.v s31 = Endianness.little_endian (as_seq h s) / pow2 248);
-  let z   = Hacl.UInt8.(s31 >>^ 7ul) in
+  let z   = FStar.UInt8.(s31 >>^ 7ul) in
   Math.Lemmas.division_multiplication_lemma (Endianness.little_endian (as_seq h s)) (pow2 248) (pow2 7);
   Math.Lemmas.pow2_plus 248 7;
   assert(UInt8.v z = (Endianness.little_endian (as_seq h s) / pow2 255));
@@ -51,7 +51,7 @@ let most_significant_bit s =
   Math.Lemmas.lemma_div_lt (Endianness.little_endian (as_seq h s)) 256 255;
   assert_norm(pow2 1 = 2);
   Math.Lemmas.modulo_lemma (UInt8.v z) 2;
-  Hacl.Cast.sint8_to_sint64 z
+  Int.Cast.uint8_to_uint64 z
 
 
 [@ "substitute"]
@@ -110,8 +110,8 @@ let lemma_modifies_1 #a h (b:buffer a{live h b}) :
 [@ "substitute"]
 private
 val point_decompress_step_1:
-  s:buffer Hacl.UInt8.t{length s = 32} ->
-  tmp:buffer Hacl.UInt64.t{length tmp = 10 /\ disjoint s tmp} ->
+  s:buffer UInt8.t{length s = 32} ->
+  tmp:buffer UInt64.t{length tmp = 10 /\ disjoint s tmp} ->
   Stack bool
     (requires (fun h -> live h s /\ live h tmp))
     (ensures (fun h0 b h1 -> live h0 s /\ modifies_1 tmp h0 h1 /\ live h1 tmp /\
@@ -124,13 +124,6 @@ val point_decompress_step_1:
        if b then (Some? x /\ seval x' == Some?.v x /\ seval y' == y % Spec.Curve25519.prime /\ 
                   red_513 x' /\ red_513 y' /\ b == true)
        else (None? x))
-       (* | None   -> (b == false)) *)
-       (* (b <==> Some? (Spec.Ed25519.point_decompress (as_seq h0 s))) /\ *)
-       (* (if b then ( *)
-       (*   Some? (Spec.Ed25519.point_decompress (as_seq h0 s)) (\* /\ *\) *)
-       (*   (\* (seval px, seval py, seval pz, seval pt) == Some?.v (Spec.Ed25519.point_decompress (as_seq h0 s)) /\ *\) *)
-       (*   (\* red_513 px /\ red_513 py /\ red_513 pz /\ red_513 pt *\)) *)
-       (* else None? (Spec.Ed25519.point_decompress (as_seq h0 s)) *)
     ))
 
 #reset-options "--max_fuel 0 --z3rlimit 500"
