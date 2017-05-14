@@ -100,6 +100,8 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
+%.fsti-ct: %.fst
+	$(FSTAR_CT) --lax $^
 
 all-ct: $(addsuffix -ct, $(ED25519_FILES))
 

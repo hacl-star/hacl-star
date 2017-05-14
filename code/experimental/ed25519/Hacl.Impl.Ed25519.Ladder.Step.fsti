@@ -4,6 +4,8 @@ open FStar.Buffer
 
 open Hacl.Bignum25519
 open Hacl.Impl.Ed25519.ExtPoint
+open Hacl.Spec.Endianness
+
 
 module U32 = FStar.UInt32
 module H8 = Hacl.UInt8
@@ -38,10 +40,10 @@ val loop_step:
        let x' = as_point h1 nq in
        let xp1' = as_point h1 nqpq in
        let x'', xp1'' = Spec.Ed25519.(
-         let x, xp1 = if ith_bit (as_seq h0 k) ctr' = 1 then xp1, x else x, xp1 in
+         let x, xp1 = if ith_bit (reveal_sbytes (as_seq h0 k)) ctr' = 1 then xp1, x else x, xp1 in
          let xx = point_double x in
          let xxp1 = point_add x xp1 in
-         if ith_bit (as_seq h0 k) ctr' = 1 then xxp1, xx else xx, xxp1) in
+         if ith_bit (reveal_sbytes (as_seq h0 k)) ctr' = 1 then xxp1, xx else xx, xxp1) in
        point_inv h0 nq /\ point_inv h0 nqpq /\ point_inv h1 nq /\ point_inv h1 nqpq /\
        (x'', xp1'') == (x', xp1')
     )))

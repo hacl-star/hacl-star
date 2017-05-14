@@ -54,7 +54,7 @@ let x_mod_2 x =
                                + pow2 204 * v (Seq.index s 4)) Spec.Curve25519.prime;
   lemma_x_mod_2 (v (get h x 0)) (v (get h x 1)) (v (get h x 2)) (v (get h x 3)) (v (get h x 4));
   let x0 = x.(0ul) in
-  let z  = x0 &^ 1uL in
+  let z  = x0 &^ Hacl.Cast.uint64_to_sint64 1uL in
   assert_norm(pow2 1 = 2);
   UInt.logand_mask (v x0) 1;
   z
@@ -63,9 +63,9 @@ let x_mod_2 x =
 
 private
 val add_sign_spec:
-  out:Seq.seq Hacl.UInt8.t{Seq.length out = 32 /\ Endianness.little_endian out < pow2 255} ->
+  out:Seq.seq Hacl.UInt8.t{Seq.length out = 32 /\ Hacl.Spec.Endianness.hlittle_endian out < pow2 255} ->
   x:Hacl.UInt64.t{v x < 2} ->  
-  GTot (s:Seq.seq Hacl.UInt8.t{Seq.length s = 32 /\ Endianness.little_endian s == Endianness.little_endian out + pow2 255 * v x})
+  GTot (s:Seq.seq Hacl.UInt8.t{Seq.length s = 32 /\ Hacl.Spec.Endianness.hlittle_endian s == Hacl.Spec.Endianness.hlittle_endian out + pow2 255 * v x})
 #reset-options "--max_fuel 0 --z3rlimit 100"
 let add_sign_spec out x =
   assert_norm(pow2 7 = 128);
@@ -76,12 +76,12 @@ let add_sign_spec out x =
   let xbyte = Hacl.Cast.sint64_to_sint8 x in
   Math.Lemmas.modulo_lemma (v x) (pow2 8);
   Seq.lemma_eq_intro out (Seq.append (Seq.slice out 0 31) (Seq.slice out 31 32));
-  Endianness.lemma_little_endian_is_bounded (Seq.slice (out) 0 31);
-  Endianness.little_endian_append (Seq.slice (out) 0 31) (Seq.slice (out) 31 32);
+  Endianness.lemma_little_endian_is_bounded (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out) 0 31));
+  Endianness.little_endian_append (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out) 0 31)) (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out) 31 32));
   let o31 = Seq.index out (31) in
   Seq.lemma_eq_intro (Seq.slice out 31 32) (Seq.create 1 o31);
-  Endianness.little_endian_singleton o31;
-  assert(Endianness.little_endian (out) == Endianness.little_endian (Seq.slice (out) 0 31)  + pow2 248 * (Hacl.UInt8.v (Seq.index (out) 31)));
+  Endianness.little_endian_singleton (Hacl.Spec.Endianness.h8_to_u8 o31);
+  assert(Hacl.Spec.Endianness.hlittle_endian (out) == Hacl.Spec.Endianness.hlittle_endian (Seq.slice (out) 0 31)  + pow2 248 * (Hacl.UInt8.v (Seq.index (out) 31)));
   let o31' = Hacl.UInt8.(o31 +%^ (xbyte <<^ 7ul)) in
   Math.Lemmas.modulo_lemma (Hacl.UInt8.v xbyte * pow2 7) (pow2 8);
   assert(Hacl.UInt8.v o31 < 128);
@@ -90,8 +90,8 @@ let add_sign_spec out x =
   Seq.lemma_eq_intro (Seq.slice (out) 0 31) (Seq.slice (out') 0 31);
   Seq.lemma_eq_intro out' (Seq.append (Seq.slice out 0 31) (Seq.slice out' 31 32));
   Seq.lemma_eq_intro (Seq.slice out' 31 32) (Seq.create 1 o31');
-  Endianness.little_endian_singleton o31';
-  Endianness.little_endian_append (Seq.slice (out') 0 31) (Seq.slice (out') 31 32);
+  Endianness.little_endian_singleton (Hacl.Spec.Endianness.h8_to_u8 o31');
+  Endianness.little_endian_append (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out') 0 31)) (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out') 31 32));
   out'
   
 
@@ -101,9 +101,9 @@ val add_sign:
   out:hint8_p{length out = 32} ->
   x:Hacl.UInt64.t{v x < 2} ->
   Stack unit
-    (requires (fun h -> live h out /\ Endianness.little_endian (as_seq h out) < pow2 255))
+    (requires (fun h -> live h out /\ Hacl.Spec.Endianness.hlittle_endian (as_seq h out) < pow2 255))
     (ensures (fun h0 _ h1 -> live h0 out /\ live h1 out /\ modifies_1 out h0 h1
-      /\ Endianness.little_endian (as_seq h1 out) == Endianness.little_endian (as_seq h0 out) + pow2 255 * v x))
+      /\ Hacl.Spec.Endianness.hlittle_endian (as_seq h1 out) == Hacl.Spec.Endianness.hlittle_endian (as_seq h0 out) + pow2 255 * v x))
 [@ "substitute"]
 let add_sign out x =
   let h0 = ST.get() in
@@ -216,5 +216,5 @@ let point_compress z p =
   Hacl.Impl.Store51.store_51 z out;
   add_sign z b;
   let h = ST.get() in
-  Endianness.lemma_little_endian_inj (as_seq h z) (Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p));
+  Endianness.lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h z)) (Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p));
   pop_frame()

@@ -7,7 +7,7 @@ open FStar.Buffer
 
 open Hacl.Impl.Ed25519.ExtPoint
 open Hacl.Impl.Ed25519.Ladder.Step
-
+open Hacl.Spec.Endianness
 
 #reset-options "--max_fuel 1 --z3rlimit 10"
 
@@ -51,7 +51,7 @@ val point_mul_:
        let nqpq = Buffer.sub b 20ul 20ul in
        point_inv h1 nq /\ point_inv h1 nqpq /\
        (as_point h1 nq, as_point h1 nqpq) == Spec.Ed25519.montgomery_ladder_ (as_point h0 nq) (as_point h0 nqpq)
-                                                                (as_seq h0 k) 256)))
+                                                                (reveal_sbytes (as_seq h0 k)) 256)))
 
 #reset-options "--max_fuel 0 --z3rlimit 500"
 
@@ -63,7 +63,7 @@ let point_mul_ b k =
      let nqpq = Buffer.sub b 20ul 20ul in
      point_inv h1 nq /\ point_inv h1 nqpq /\
      (as_point h1 nq, as_point h1 nqpq) == Spec.Ed25519.montgomery_ladder_ (as_point h0 nq) (as_point h0 nqpq)
-                                                              (as_seq h0 k) i)
+                                                              (reveal_sbytes (as_seq h0 k)) i)
   in
   let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < 256) }): Stack unit
     (requires (fun h -> inv h (UInt32.v i)))
@@ -74,11 +74,11 @@ let point_mul_ b k =
     let h  = ST.get() in
     loop_step b k FStar.UInt32.(256ul -^ i -^ 1ul);
     let h' = ST.get() in
-    lemma_montgomery_ladder_def_1 (as_point h0 nq) (as_point h0 nqpq) (as_seq h0 k) (UInt32.v i + 1)
+    lemma_montgomery_ladder_def_1 (as_point h0 nq) (as_point h0 nqpq) (reveal_sbytes (as_seq h0 k)) (UInt32.v i + 1)
   in
   let nq   = Buffer.sub b  0ul 20ul in
   let nqpq = Buffer.sub b 20ul 20ul in
-  lemma_montgomery_ladder_def_0 (as_point h0 nq) (as_point h0 nqpq) (as_seq h0 k);
+  lemma_montgomery_ladder_def_0 (as_point h0 nq) (as_point h0 nqpq) (reveal_sbytes (as_seq h0 k));
   C.Loops.for 0ul 256ul inv f'
 
 let elemB = b:buffer Hacl.UInt64.t{length b = 5}
@@ -157,7 +157,7 @@ let make_point_inf b =
 #reset-options "--max_fuel 0 --z3rlimit 500"
 let point_mul result scalar q =
   push_frame();
-  let b = create 0uL 80ul in
+  let b = create (Hacl.Cast.uint64_to_sint64 0uL) 80ul in
   let nq   = Buffer.sub b  0ul 20ul in
   let nqpq = Buffer.sub b 20ul 20ul in
   make_point_inf nq;

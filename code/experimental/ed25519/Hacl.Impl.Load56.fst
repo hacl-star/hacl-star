@@ -7,6 +7,8 @@ open Hacl.Endianness
 open Hacl.UInt64
 
 
+open Hacl.Spec.Endianness
+
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 
@@ -18,7 +20,7 @@ val hload56_le:
   Stack h64
     (requires (fun h -> live h b))
     (ensures (fun h0 z h1 -> h0 == h1 /\ live h0 b /\
-      v z == little_endian (Seq.slice (as_seq h0 b) (UInt32.v off) (UInt32.v off + 7)) /\
+      v z == hlittle_endian (Seq.slice (as_seq h0 b) (UInt32.v off) (UInt32.v off + 7)) /\
       v z < pow2 56))
 [@ "substitute"]
 let hload56_le b off =
@@ -30,8 +32,8 @@ let hload56_le b off =
   assert(v z' = v z % pow2 56);
   let h  = ST.get() in
   Seq.lemma_eq_intro (as_seq h b8) (Seq.append (Seq.slice (as_seq h b8) 0 7) (Seq.slice (as_seq h b8) 7 8));
-  Endianness.little_endian_append (Seq.slice (as_seq h b8) 0 7) (Seq.slice (as_seq h b8) 7 8);
-  Endianness.lemma_little_endian_is_bounded (Seq.slice (as_seq h b8) 0 7);
+  Endianness.little_endian_append (reveal_sbytes (Seq.slice (as_seq h b8) 0 7)) (reveal_sbytes (Seq.slice (as_seq h b8) 7 8));
+  Endianness.lemma_little_endian_is_bounded (reveal_sbytes (Seq.slice (as_seq h b8) 0 7));
   Seq.lemma_eq_intro (as_seq h (Buffer.sub b off 7ul)) (Seq.slice (as_seq h b8) 0 7);
   z'
 
@@ -49,32 +51,32 @@ val lemma_append_10:
   b7:Seq.seq Hacl.UInt8.t{Seq.length b7 = 7} ->
   b8:Seq.seq Hacl.UInt8.t{Seq.length b8 = 7} ->
   b9:Seq.seq Hacl.UInt8.t{Seq.length b9 = 1} ->
-  Lemma (Endianness.little_endian FStar.Seq.(b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7 @| b8 @| b9)
-  == Endianness.little_endian b0 + pow2 56 * Endianness.little_endian b1
-    + pow2 112 * Endianness.little_endian b2 + pow2 168 * Endianness.little_endian b3
-    + pow2 224 * Endianness.little_endian b4 + pow2 280 * Endianness.little_endian b5
-    + pow2 336 * Endianness.little_endian b6 + pow2 392 * Endianness.little_endian b7
-    + pow2 448 * Endianness.little_endian b8 + pow2 504 * Endianness.little_endian b9)
+  Lemma (hlittle_endian FStar.Seq.(b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7 @| b8 @| b9)
+  == hlittle_endian b0 + pow2 56 * hlittle_endian b1
+    + pow2 112 * hlittle_endian b2 + pow2 168 * hlittle_endian b3
+    + pow2 224 * hlittle_endian b4 + pow2 280 * hlittle_endian b5
+    + pow2 336 * hlittle_endian b6 + pow2 392 * hlittle_endian b7
+    + pow2 448 * hlittle_endian b8 + pow2 504 * hlittle_endian b9)
 let lemma_append_10 b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 =
   let open FStar.Seq in
   let b = b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7 @| b8 @| b9 in
   Seq.lemma_eq_intro ((b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7 @| b8) @| b9) b;
-  Endianness.little_endian_append (b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7 @| b8) b9;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7 @| b8)) (reveal_sbytes b9);
   Seq.lemma_eq_intro ((b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7) @| b8) (b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7 @| b8);
-  Endianness.little_endian_append (b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7) b8;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7)) (reveal_sbytes b8);
   Seq.lemma_eq_intro ((b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6) @| b7) (b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6 @| b7);
-  Endianness.little_endian_append (b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6) b7;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6)) (reveal_sbytes b7);
   Seq.lemma_eq_intro ((b0 @| b1 @| b2 @| b3 @| b4 @| b5) @| b6) (b0 @| b1 @| b2 @| b3 @| b4 @| b5 @| b6);
-  Endianness.little_endian_append (b0 @| b1 @| b2 @| b3 @| b4 @| b5) b6;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2 @| b3 @| b4 @| b5)) (reveal_sbytes b6);
   Seq.lemma_eq_intro ((b0 @| b1 @| b2 @| b3 @| b4) @| b5) (b0 @| b1 @| b2 @| b3 @| b4 @| b5);
-  Endianness.little_endian_append (b0 @| b1 @| b2 @| b3 @| b4) b5;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2 @| b3 @| b4)) (reveal_sbytes b5);
   Seq.lemma_eq_intro ((b0 @| b1 @| b2 @| b3) @| b4) (b0 @| b1 @| b2 @| b3 @| b4);
-  Endianness.little_endian_append (b0 @| b1 @| b2 @| b3) b4;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2 @| b3)) (reveal_sbytes b4);
   Seq.lemma_eq_intro ((b0 @| b1 @| b2) @| b3) (b0 @| b1 @| b2 @| b3);
-  Endianness.little_endian_append (b0 @| b1 @| b2) b3;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2)) (reveal_sbytes b3);
   Seq.lemma_eq_intro ((b0 @| b1) @| b2) (b0 @| b1 @| b2);
-  Endianness.little_endian_append (b0 @| b1) b2;
-  Endianness.little_endian_append (b0) b1
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1)) (reveal_sbytes b2);
+  Endianness.little_endian_append (reveal_sbytes b0) (reveal_sbytes b1)
 
 
 private
@@ -84,18 +86,18 @@ val lemma_append_5:
   b2:Seq.seq Hacl.UInt8.t{Seq.length b2 = 7} ->
   b3:Seq.seq Hacl.UInt8.t{Seq.length b3 = 7} ->
   b4:Seq.seq Hacl.UInt8.t{Seq.length b4 = 4} ->
-  Lemma (Endianness.little_endian FStar.Seq.(b0 @| b1 @| b2 @| b3 @| b4) ==
-    Endianness.little_endian b0 + pow2 56 * Endianness.little_endian b1 + pow2 112 * Endianness.little_endian b2 + pow2 168 * Endianness.little_endian b3 + pow2 224 * Endianness.little_endian b4)
+  Lemma (hlittle_endian FStar.Seq.(b0 @| b1 @| b2 @| b3 @| b4) ==
+    hlittle_endian b0 + pow2 56 * hlittle_endian b1 + pow2 112 * hlittle_endian b2 + pow2 168 * hlittle_endian b3 + pow2 224 * hlittle_endian b4)
 let lemma_append_5 b0 b1 b2 b3 b4 =
   let open FStar.Seq in
   let b = b0 @| b1 @| b2 @| b3 @| b4 in
   Seq.lemma_eq_intro ((b0 @| b1 @| b2 @| b3) @| b4) b;
-  Endianness.little_endian_append (b0 @| b1 @| b2 @| b3) b4;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2 @| b3)) (reveal_sbytes b4);
   Seq.lemma_eq_intro ((b0 @| b1 @| b2) @| b3) (b0 @| b1 @| b2 @| b3);
-  Endianness.little_endian_append (b0 @| b1 @| b2) b3;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2)) (reveal_sbytes b3);
   Seq.lemma_eq_intro ((b0 @| b1) @| b2) (b0 @| b1 @| b2);
-  Endianness.little_endian_append (b0 @| b1) b2;
-  Endianness.little_endian_append (b0) b1
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1)) (reveal_sbytes b2);
+  Endianness.little_endian_append (reveal_sbytes b0) (reveal_sbytes b1)
 
 
 let load_64_bytes out b =
@@ -112,17 +114,17 @@ let load_64_bytes out b =
   let b63 = b.(63ul) in
   let b9 = Hacl.Cast.sint8_to_sint64 b63 in
   Seq.lemma_eq_intro (Seq.create 1 b63) (Seq.slice (as_seq h0 b) 63 64);
-  assert(v b0 = little_endian (Seq.slice (as_seq h0 b) 0 7));
-  assert(v b1 = little_endian (Seq.slice (as_seq h0 b) 7 14));
-  assert(v b2 = little_endian (Seq.slice (as_seq h0 b) 14 21));
-  assert(v b3 = little_endian (Seq.slice (as_seq h0 b) 21 28));
-  assert(v b4 = little_endian (Seq.slice (as_seq h0 b) 28 35));
-  assert(v b5 = little_endian (Seq.slice (as_seq h0 b) 35 42));
-  assert(v b6 = little_endian (Seq.slice (as_seq h0 b) 42 49));
-  assert(v b7 = little_endian (Seq.slice (as_seq h0 b) 49 56));
-  assert(v b8 = little_endian (Seq.slice (as_seq h0 b) 56 63));
-  Endianness.little_endian_singleton b63;
-  assert(v b9 = little_endian (Seq.slice (as_seq h0 b) 63 64));
+  assert(v b0 = hlittle_endian (Seq.slice (as_seq h0 b) 0 7));
+  assert(v b1 = hlittle_endian (Seq.slice (as_seq h0 b) 7 14));
+  assert(v b2 = hlittle_endian (Seq.slice (as_seq h0 b) 14 21));
+  assert(v b3 = hlittle_endian (Seq.slice (as_seq h0 b) 21 28));
+  assert(v b4 = hlittle_endian (Seq.slice (as_seq h0 b) 28 35));
+  assert(v b5 = hlittle_endian (Seq.slice (as_seq h0 b) 35 42));
+  assert(v b6 = hlittle_endian (Seq.slice (as_seq h0 b) 42 49));
+  assert(v b7 = hlittle_endian (Seq.slice (as_seq h0 b) 49 56));
+  assert(v b8 = hlittle_endian (Seq.slice (as_seq h0 b) 56 63));
+  Endianness.little_endian_singleton (h8_to_u8 b63);
+  assert(v b9 = hlittle_endian (Seq.slice (as_seq h0 b) 63 64));
   Seq.lemma_eq_intro (as_seq h0 b) FStar.Seq.(slice (as_seq h0 b) 0 7 @| slice (as_seq h0 b) 7 14 @| slice (as_seq h0 b) 14 21 @| slice (as_seq h0 b) 21 28 @| slice (as_seq h0 b) 28 35 @| slice (as_seq h0 b) 35 42 @| slice (as_seq h0 b) 42 49 @| slice (as_seq h0 b) 49 56 @| slice (as_seq h0 b) 56 63 @| slice (as_seq h0 b) 63 64);
   lemma_append_10 (Seq.slice (as_seq h0 b) 0 7) (Seq.slice (as_seq h0 b) 7 14) (Seq.slice (as_seq h0 b) 14 21) (Seq.slice (as_seq h0 b) 21 28) (Seq.slice (as_seq h0 b) 28 35) (Seq.slice (as_seq h0 b) 35 42) (Seq.slice (as_seq h0 b) 42 49) (Seq.slice (as_seq h0 b) 49 56) (Seq.slice (as_seq h0 b) 56 63) (Seq.slice (as_seq h0 b) 63 64);
   assert_norm(pow2 56 = Hacl.Spec.BignumQ.Eval.p1);
@@ -134,7 +136,7 @@ let load_64_bytes out b =
   assert_norm(pow2 392 = Hacl.Spec.BignumQ.Eval.p7);
   assert_norm(pow2 448 = Hacl.Spec.BignumQ.Eval.p8);
   assert_norm(pow2 504 = Hacl.Spec.BignumQ.Eval.p9);
-  Endianness.lemma_little_endian_is_bounded (as_seq h0 b);
+  Endianness.lemma_little_endian_is_bounded (reveal_sbytes (as_seq h0 b));
   Hacl.Lib.Create64.make_h64_10 out b0 b1 b2 b3 b4 b5 b6 b7 b8 b9
 
 
@@ -146,7 +148,7 @@ val hload56_le':
   Stack h64
     (requires (fun h -> live h b))
     (ensures (fun h0 z h1 -> h0 == h1 /\ live h0 b /\
-      v z == little_endian (Seq.slice (as_seq h0 b) (UInt32.v off) (UInt32.v off + 7)) /\
+      v z == hlittle_endian (Seq.slice (as_seq h0 b) (UInt32.v off) (UInt32.v off + 7)) /\
       v z < pow2 56))
 [@ "substitute"]
 let hload56_le' b off =
@@ -158,8 +160,8 @@ let hload56_le' b off =
   assert(v z' = v z % pow2 56);
   let h  = ST.get() in
   Seq.lemma_eq_intro (as_seq h b8) (Seq.append (Seq.slice (as_seq h b8) 0 7) (Seq.slice (as_seq h b8) 7 8));
-  Endianness.little_endian_append (Seq.slice (as_seq h b8) 0 7) (Seq.slice (as_seq h b8) 7 8);
-  Endianness.lemma_little_endian_is_bounded (Seq.slice (as_seq h b8) 0 7);
+  Endianness.little_endian_append (reveal_sbytes (Seq.slice (as_seq h b8) 0 7)) (reveal_sbytes (Seq.slice (as_seq h b8) 7 8));
+  Endianness.lemma_little_endian_is_bounded (reveal_sbytes (Seq.slice (as_seq h b8) 0 7));
   Seq.lemma_eq_intro (as_seq h (Buffer.sub b off 7ul)) (Seq.slice (as_seq h b8) 0 7);
   z'
 

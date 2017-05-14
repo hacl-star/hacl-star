@@ -25,7 +25,7 @@ val ith_bit:
   Stack Hacl.UInt8.t
     (requires (fun h -> live h k))
     (ensures (fun h0 z h1 -> h0 == h1 /\ live h0 k /\
-      Hacl.UInt8.v z == Spec.Ed25519.ith_bit (as_seq h0 k) (UInt32.v i)
+      Hacl.UInt8.v z == Spec.Ed25519.ith_bit (reveal_sbytes (as_seq h0 k)) (UInt32.v i)
       /\ (Hacl.UInt8.v z == 0 \/ Hacl.UInt8.v z == 1)))
 
 let ith_bit k i =
@@ -42,7 +42,7 @@ let ith_bit k i =
   Math.Lemmas.lemma_div_lt (v i) 8 3;
   let kq = k.(q) in
   let kq' = Hacl.UInt8.(kq >>^ r) in
-  let z = Hacl.UInt8.(kq' &^ 1uy) in
+  let z = Hacl.UInt8.(kq' &^ Hacl.Cast.uint8_to_sint8 1uy) in
   UInt.logand_mask (Hacl.UInt8.v kq') 1;
   assert(Hacl.UInt8.v z = (Hacl.UInt8.v kq / pow2 (v r)) % 2);
   z
@@ -308,36 +308,6 @@ let loop_step_3 b k ctr i =
   swap_cond nq nqpq nq2 nqpq2 bit
 
 
-(* val loop_step: *)
-(*   b:buffer Hacl.UInt64.t{length b = 80} -> *)
-(*   k:uint8_p{length k = 32 /\ disjoint k b} -> *)
-(*   ctr:UInt32.t{UInt32.v ctr < 256} -> *)
-(*   Stack unit *)
-(*     (requires (fun h -> live h b /\ live h k /\ *)
-(*       (let nq = Buffer.sub b 0ul 20ul in *)
-(*        let nqpq = Buffer.sub b 20ul 20ul in *)
-(*        let nq2 = Buffer.sub b 40ul 20ul in *)
-(*        let nqpq2 = Buffer.sub b 60ul 20ul in *)
-(*        point_inv h nq /\ point_inv h nqpq))) *)
-(*     (ensures (fun h0 _ h1 -> live h0 b /\ live h0 k /\ live h1 b /\ modifies_1 b h0 h1 /\ *)
-(*       (let nq = Buffer.sub b 0ul 20ul in *)
-(*        let nqpq = Buffer.sub b 20ul 20ul in *)
-(*        let nq2 = Buffer.sub b 40ul 20ul in *)
-(*        let nqpq2 = Buffer.sub b 60ul 20ul in *)
-(*        let ctr' = UInt32.v ctr in *)
-(*        let x = as_point h0 nq in *)
-(*        let xp1 = as_point h0 nqpq in *)
-(*        let x' = as_point h1 nq in *)
-(*        let xp1' = as_point h1 nqpq in *)
-(*        let x'', xp1'' = Spec.Ed25519.( *)
-(*          let x, xp1 = if ith_bit (as_seq h0 k) ctr' = 1 then xp1, x else x, xp1 in *)
-(*          let xx = point_double x in *)
-(*          let xxp1 = point_add x xp1 in *)
-(*          if ith_bit (as_seq h0 k) ctr' = 1 then xxp1, xx else xx, xxp1) in *)
-(*        point_inv h0 nq /\ point_inv h0 nqpq /\ point_inv h1 nq /\ point_inv h1 nqpq /\ *)
-(*        (x'', xp1'') == (x', xp1') *)
-(*     ))) *)
-
 #reset-options "--max_fuel 0 --z3rlimit 1000"
 
 let loop_step b k ctr =
@@ -349,94 +319,3 @@ let loop_step b k ctr =
   loop_step_1 b k ctr bit;
   loop_step_2 b k ctr;
   loop_step_3 b k ctr bit
-
-
-(* private *)
-(* val loop_step: *)
-(*   b:buffer Hacl.UInt64.t{length b = 80} -> *)
-(*   k:uint8_p{length k = 32 /\ disjoint k b} -> *)
-(*   ctr:UInt32.t{UInt32.v ctr < 256} -> *)
-(*   Stack unit *)
-(*     (requires (fun h -> live h b /\ live h k /\ *)
-(*       (let nq = Buffer.sub b 0ul 20ul in *)
-(*        let nqpq = Buffer.sub b 20ul 20ul in *)
-(*        let nq2 = Buffer.sub b 40ul 20ul in *)
-(*        let nqpq2 = Buffer.sub b 60ul 20ul in *)
-(*        point_inv h nq /\ point_inv h nqpq))) *)
-(*     (ensures (fun h0 _ h1 -> live h0 b /\ live h0 k /\ live h1 b /\ modifies_1 b h0 h1 /\ *)
-(*       (let nq = Buffer.sub b 0ul 20ul in *)
-(*        let nqpq = Buffer.sub b 20ul 20ul in *)
-(*        let nq2 = Buffer.sub b 40ul 20ul in *)
-(*        let nqpq2 = Buffer.sub b 60ul 20ul in *)
-(*        let ctr' = UInt32.v ctr in *)
-(*        let x = as_point h0 nq in *)
-(*        let xp1 = as_point h0 nqpq in *)
-(*        let x' = as_point h1 nq in *)
-(*        let xp1' = as_point h1 nqpq in *)
-(*        let x'', xp1'' = Spec.Ed25519.(if ith_bit (as_seq h0 k) ctr' = 1 then ( *)
-(*                                          let nqp2 = point_double xp1 in *)
-(*                                          let nqp1 = point_add x xp1 in nqp1, nqp2 *)
-(*                                       ) else ( *)
-(*                                         let nqp1 = point_double x in *)
-(*                                         let nqp2 = point_add x xp1 in nqp1, nqp2)) in *)
-(*        point_inv h0 nq /\ point_inv h0 nqpq /\ point_inv h1 nq /\ point_inv h1 nqpq /\ *)
-(*        (x'', xp1'') == (x', xp1') *)
-(*     ))) *)
-
-(* #reset-options "--max_fuel 0 --z3rlimit 100" *)
-
-(* let loop_step b k ctr = loop_step_ b k ctr *)
-
-  (* let nq    = Buffer.sub b 0ul 20ul in *)
-  (* let nqpq  = Buffer.sub b 20ul 20ul in *)
-  (* let nq2   = Buffer.sub b 40ul 20ul in *)
-  (* let nqpq2 = Buffer.sub b 60ul 20ul in *)
-  (* let bit   = ith_bit k ctr in *)
-  (* loop_step_1 b k ctr bit; *)
-  (* loop_step_2 b k ctr; *)
-  (* loop_step_3 b k ctr bit *)
-
-
-  (* let bit   = Hacl.Cast.sint8_to_sint64 bit in *)
-  (* let h0    = ST.get() in *)
-  (* swap_cond_inplace nq nqpq bit; *)
-  (* let h1    = ST.get() in *)
-  (* Hacl.Impl.Ed25519.PointDouble.point_double nq2 nq; *)
-  (* let h     = ST.get() in *)
-  (* let x = getx nq in *)
-  (* let y = gety nq in *)
-  (* let z = getz nq in *)
-  (* let t = gett nq in *)
-  (* let x' = getx nqpq in *)
-  (* let y' = gety nqpq in *)
-  (* let z' = getz nqpq in *)
-  (* let t' = gett nqpq in *)
-  (* no_upd_lemma_1 h1 h nq2 x; *)
-  (* no_upd_lemma_1 h1 h nq2 y; *)
-  (* no_upd_lemma_1 h1 h nq2 z; *)
-  (* no_upd_lemma_1 h1 h nq2 t; *)
-  (* no_upd_lemma_1 h1 h nq2 x'; *)
-  (* no_upd_lemma_1 h1 h nq2 y'; *)
-  (* no_upd_lemma_1 h1 h nq2 z'; *)
-  (* no_upd_lemma_1 h1 h nq2 t'; *)
-  (* Hacl.Impl.Ed25519.PointAdd.point_add nqpq2 nq nqpq; *)
-  (* let h2    = ST.get() in *)
-  (* let x'' = getx nq2 in *)
-  (* let y'' = gety nq2 in *)
-  (* let z'' = getz nq2 in *)
-  (* let t'' = gett nq2 in *)
-  (* no_upd_lemma_1 h h2 nqpq2 x; *)
-  (* no_upd_lemma_1 h h2 nqpq2 y; *)
-  (* no_upd_lemma_1 h h2 nqpq2 z; *)
-  (* no_upd_lemma_1 h h2 nqpq2 t; *)
-  (* no_upd_lemma_1 h h2 nqpq2 x'; *)
-  (* no_upd_lemma_1 h h2 nqpq2 y'; *)
-  (* no_upd_lemma_1 h h2 nqpq2 z'; *)
-  (* no_upd_lemma_1 h h2 nqpq2 t'; *)
-  (* no_upd_lemma_1 h h2 nqpq2 x''; *)
-  (* no_upd_lemma_1 h h2 nqpq2 y''; *)
-  (* no_upd_lemma_1 h h2 nqpq2 z''; *)
-  (* no_upd_lemma_1 h h2 nqpq2 t''; *)
-  (* swap_cond nq nqpq nq2 nqpq2 bit; *)
-  (* let h3    = ST.get() in *)
-  (* () *)

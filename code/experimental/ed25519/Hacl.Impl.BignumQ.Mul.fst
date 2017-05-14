@@ -19,20 +19,26 @@ val make_m:
   Stack unit
     (requires (fun h -> live h m))
     (ensures (fun h0 _ h1 -> live h1 m /\ modifies_1 m h0 h1
-      /\ as_seq h1 m == Spec.m))
+      /\ reveal_h64s (as_seq h1 m) == Spec.m))
 let make_m m =
-  Hacl.Lib.Create64.make_h64_5 m 0x12631a5cf5d3eduL 0xf9dea2f79cd658uL 0x000000000014deuL
-                              0x00000000000000uL 0x00000010000000uL
+  Hacl.Lib.Create64.make_h64_5 m (uint64_to_sint64 0x12631a5cf5d3eduL)
+                                 (uint64_to_sint64 0xf9dea2f79cd658uL)
+                                 (uint64_to_sint64 0x000000000014deuL)
+                                 (uint64_to_sint64 0x00000000000000uL)
+                                 (uint64_to_sint64 0x00000010000000uL)
 
 val make_mu:
   m:qelemB ->
   Stack unit
     (requires (fun h -> live h m))
     (ensures (fun h0 _ h1 -> live h1 m /\ modifies_1 m h0 h1
-      /\ as_seq h1 m == Spec.mu))
+      /\ reveal_h64s (as_seq h1 m) == Spec.mu))
 let make_mu m =
-  Hacl.Lib.Create64.make_h64_5 m 0x9ce5a30a2c131buL 0x215d086329a7eduL 0xffffffffeb2106uL
-                              0xffffffffffffffuL 0x00000fffffffffuL
+  Hacl.Lib.Create64.make_h64_5 m (uint64_to_sint64 0x9ce5a30a2c131buL)
+                                 (uint64_to_sint64 0x215d086329a7eduL)
+                                 (uint64_to_sint64 0xffffffffeb2106uL)
+                                 (uint64_to_sint64 0xffffffffffffffuL)
+                                 (uint64_to_sint64 0x00000fffffffffuL)
 
 val choose:
   z:qelemB ->
@@ -42,9 +48,9 @@ val choose:
   Stack unit
     (requires (fun h -> live h x /\ live h y /\ live h z))
     (ensures (fun h0 _ h1 -> live h0 x /\ live h0 y /\ live h1 z /\ modifies_1 z h0 h1
-      /\ (as_seq h1 z == Spec.choose (as_seq h0 x) (as_seq h0 y) (b))))
+      /\ (reveal_h64s (as_seq h1 z) == Spec.choose (reveal_h64s (as_seq h0 x)) (reveal_h64s (as_seq h0 y)) (h64_to_u64 b))))
 let choose z x y b =
-  let mask = b -%^ 1uL in
+  let mask = b -%^ (uint64_to_sint64 1uL) in
   let x0 = x.(0ul) in
   let x1 = x.(1ul) in
   let x2 = x.(2ul) in
@@ -67,7 +73,7 @@ let lt (a:h64{v a < pow2 63}) (b:h64{v b < pow2 63}) :
   Tot (c:h64{if v a >= v b then v c == 0x0 else v c == 0x1})
   = let r = (a -%^ b) >>^ 63ul in r
 
-let shiftl_56 (b:h64{b == 0uL \/ b == 1uL}) :
+let shiftl_56 (b:h64{v b == 0 \/ v b == 1}) :
   Tot (c:h64{(v b == 1 ==> v c == 0x100000000000000) /\ (v b == 0 ==> v c == 0)})
   = assert_norm(pow2 56 = 0x100000000000000);
     b <<^ 56ul
@@ -89,16 +95,16 @@ let subm_step x y =
   b, t
 
 inline_for_extraction
-let shiftl_40 (b:u64{b == 0uL \/ b == 1uL}) :
-  Tot (c:u64{(b == 1uL ==> c == 0x10000000000uL) /\ (b == 0uL ==> c == 0uL)})
+let shiftl_40 (b:h64{v b == 0 \/ v b == 1}) :
+  Tot (c:h64{(v b == 1 ==> v c == 0x10000000000) /\ (v b == 0 ==> v c == 0)})
   = assert_norm(pow2 40 = 0x10000000000);
     b <<^ 40ul
 
 inline_for_extraction
 val subm_last_step:
-  x:u64{v x < 0x10000000000} ->
-  y:u64{v y <= 0x10000000000} ->
-  Tot (t:(tuple2 u64 u64){(fst t == 0uL \/ fst t == 1uL)
+  x:h64{v x < 0x10000000000} ->
+  y:h64{v y <= 0x10000000000} ->
+  Tot (t:(tuple2 h64 h64){(v (fst t) == 0 \/ v (fst t) == 1)
     /\ v x - v y == v (snd t) - 0x10000000000 * v (fst t)
     /\ v (snd t) < 0x10000000000})
 let subm_last_step x y =
@@ -115,13 +121,13 @@ val sub_mod_264:
   Stack unit
     (requires (fun h -> live h x /\ live h y /\ live h z
       /\ within_56 h x /\ within_56 h y
-      /\ eval_q (as_seq h x) < pow2 264
-      /\ eval_q (as_seq h y) < pow2 264))
+      /\ eval_q (reveal_h64s (as_seq h x)) < pow2 264
+      /\ eval_q (reveal_h64s (as_seq h y)) < pow2 264))
     (ensures (fun h0 _ h1 -> live h0 x /\ live h0 y /\ live h1 z /\ modifies_1 z h0 h1
       /\ within_56 h0 x /\ within_56 h0 y
-      /\ eval_q (as_seq h0 x) < pow2 264
-      /\ eval_q (as_seq h0 y) < pow2 264
-      /\ (as_seq h1 z == Spec.sub_mod_264 (as_seq h0 x) (as_seq h0 y))))
+      /\ eval_q (reveal_h64s (as_seq h0 x)) < pow2 264
+      /\ eval_q (reveal_h64s (as_seq h0 y)) < pow2 264
+      /\ (reveal_h64s (as_seq h1 z) == Spec.sub_mod_264 (reveal_h64s (as_seq h0 x)) (reveal_h64s (as_seq h0 y)))))
 let sub_mod_264 z x y =
   assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
   assert_norm(pow2 64 = 0x10000000000000000);
@@ -162,24 +168,24 @@ val subm_conditional:
   Stack unit
     (requires (fun h -> live h x /\ live h z /\ within_56 h x))
     (ensures (fun h0 _ h1 -> live h0 x /\ live h1 z /\ modifies_1 z h0 h1 /\ within_56 h0 x
-      /\ (as_seq h1 z == Spec.subm_conditional (as_seq h0 x))))
+      /\ (reveal_h64s (as_seq h1 z) == Spec.subm_conditional (reveal_h64s (as_seq h0 x)))))
 let subm_conditional z x =
   assert_norm(pow2 64 = 0x10000000000000000);
   assert_norm(pow2 56 = 0x100000000000000);
   assert_norm(pow2 32 = 0x100000000);
   push_frame();
-  let tmp = create 0uL 5ul in
+  let tmp = create (uint64_to_sint64 0uL) 5ul in
   let x0 = x.(0ul) in
   let x1 = x.(1ul) in
   let x2 = x.(2ul) in
   let x3 = x.(3ul) in
   let x4 = x.(4ul) in
   Hacl.Lib.Create64.make_h64_5 tmp x0 x1 x2 x3 x4;
-  let y0 = 0x12631a5cf5d3eduL in
-  let y1 = 0xf9dea2f79cd658uL in
-  let y2 = 0x000000000014deuL in
-  let y3 = 0x00000000000000uL in
-  let y4 = 0x00000010000000uL in
+  let y0 = uint64_to_sint64 0x12631a5cf5d3eduL in
+  let y1 = uint64_to_sint64 0xf9dea2f79cd658uL in
+  let y2 = uint64_to_sint64 0x000000000014deuL in
+  let y3 = uint64_to_sint64 0x00000000000000uL in
+  let y4 = uint64_to_sint64 0x00000010000000uL in
   let b  = lt x0 y0 in
   let t0 = (shiftl_56 b +^ x0) -^ (y0) in
   let y1 = y1 +^ b in
@@ -205,35 +211,35 @@ let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
   = ()
 
 inline_for_extraction
-let op_Star_Star (x:u64{v x < 0x100000000000000}) (y:u64{v y < 0x100000000000000}) :
-  Tot (z:UInt128.t{UInt128.v z < 0x10000000000000000000000000000 /\ UInt128.v z = v x * v y})
+let op_Star_Star (x:h64{v x < 0x100000000000000}) (y:h64{v y < 0x100000000000000}) :
+  Tot (z:Hacl.UInt128.t{Hacl.UInt128.v z < 0x10000000000000000000000000000 /\ Hacl.UInt128.v z = v x * v y})
   = assert_norm(0x100000000000000 * 0x100000000000000 = 0x10000000000000000000000000000);
   lemma_mul_ineq (v x) (v y) 0x100000000000000;
-  FStar.UInt128.mul_wide x y
+  Hacl.UInt128.mul_wide x y
 
 inline_for_extraction
 val split_56:
-  x:UInt128.t{UInt128.v x < 0x100000000000000000000000000000} ->
-  Tot (t:tuple2 UInt128.t u64{
-    UInt128.v (fst t) == UInt128.v x / 0x100000000000000
-    /\ UInt64.v (snd t) == UInt128.v x % 0x100000000000000
-    /\ UInt128.v (fst t) <= 0x1000000000000000})
+  x:Hacl.UInt128.t{Hacl.UInt128.v x < 0x100000000000000000000000000000} ->
+  Tot (t:tuple2 Hacl.UInt128.t h64{
+    Hacl.UInt128.v (fst t) == Hacl.UInt128.v x / 0x100000000000000
+    /\ Hacl.UInt64.v (snd t) == Hacl.UInt128.v x % 0x100000000000000
+    /\ Hacl.UInt128.v (fst t) <= 0x1000000000000000})
 let split_56 x =
-  let carry = FStar.UInt128.(x >>^ 56ul) in
-  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  let carry = Hacl.UInt128.(x >>^ 56ul) in
+  let t     = sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   assert_norm(pow2 56 = 0x100000000000000);
-  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
-  Math.Lemmas.pow2_modulo_modulo_lemma_1 (FStar.UInt128.v x) 56 64;
+  UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   carry, t
 
 inline_for_extraction
-val mod_40: x:UInt128.t -> Tot (z:h64{v z = UInt128.v x % (pow2 40)})
+val mod_40: x:Hacl.UInt128.t -> Tot (z:h64{v z = Hacl.UInt128.v x % (pow2 40)})
 let mod_40 x =
-  let x' = Int.Cast.uint128_to_uint64 x in
-  let x'' = x' &^ 0xffffffffffuL in
+  let x' = sint128_to_sint64 x in
+  let x'' = x' &^ (uint64_to_sint64 0xffffffffffuL) in
   UInt.logand_mask (v x') 40;
   assert_norm(pow2 40   = 0x10000000000);
-  Math.Lemmas.pow2_modulo_modulo_lemma_1 (UInt128.v x) 40 64;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 40 64;
   x''
 
 
@@ -245,7 +251,7 @@ val low_mul_5:
     (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y))
     (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ modifies_1 z h0 h1
       /\ within_56 h0 x /\ within_56 h0 y /\
-      as_seq h1 z == Spec.low_mul_5 (as_seq h0 x) (as_seq h0 y)))
+      reveal_h64s (as_seq h1 z) == Spec.low_mul_5 (reveal_h64s (as_seq h0 x)) (reveal_h64s (as_seq h0 y))))
 let low_mul_5 z x y =
   assert_norm(pow2 128  = 0x100000000000000000000000000000000);
   assert_norm(pow2 40   = 0x10000000000);
@@ -281,30 +287,30 @@ let low_mul_5 z x y =
   let xy40 = x4 ** y0 in
   let x    = xy00 in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  let t     = sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   assert_norm(pow2 56 = 0x100000000000000);
-  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let t0  = t in
   let x = Hacl.UInt128.(xy01 +^ xy10 +^ carry) in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  let t     = sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   assert_norm(pow2 56 = 0x100000000000000);
-  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let t1 = t in
   let x = Hacl.UInt128.(xy02 +^ xy11 +^ xy20 +^ carry) in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  let t     = sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   assert_norm(pow2 56 = 0x100000000000000);
-  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let t2 = t in
   let x = Hacl.UInt128.(xy03 +^ xy12 +^ xy21 +^ xy30 +^ carry) in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  let t     = sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   assert_norm(pow2 56 = 0x100000000000000);
-  UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
+  UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let t3 = t in
   let open Hacl.UInt128 in
@@ -320,7 +326,7 @@ val mul_5:
     (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y))
     (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ modifies_1 z h0 h1
       /\ within_56 h0 x /\ within_56 h0 y /\
-      as_seq h1 z == Spec.mul_5 (as_seq h0 x) (as_seq h0 y)))
+      reveal_h128s (as_seq h1 z) == Spec.mul_5 (reveal_h64s (as_seq h0 x)) (reveal_h64s (as_seq h0 y))))
 let mul_5 z x y =
   assert_norm(pow2 128  = 0x100000000000000000000000000000000);
   assert_norm(pow2 40   = 0x10000000000);
@@ -367,7 +373,7 @@ let mul_5 z x y =
   let xy42 = x4 ** y2 in
   let xy43 = x4 ** y3 in
   let xy44 = x4 ** y4 in
-  let open FStar.UInt128 in
+  let open Hacl.UInt128 in
   let z0 = xy00 in
   let z1 = xy01 +^ xy10 in
   let z2 = xy02 +^ xy11 +^ xy20 in
@@ -383,11 +389,11 @@ let mul_5 z x y =
 val carry_step:
   x:Hacl.UInt128.t -> y:Hacl.UInt128.t{Hacl.UInt128.v y < 0x50000000000000000000000000000} ->
   Tot (t:tuple2 Hacl.UInt64.t Hacl.UInt128.t{
-    Hacl.UInt128.v x + 0x100000000000000 * Hacl.UInt128.v y == v (fst t) + 0x100000000000000 * UInt128.v (snd t)
+    Hacl.UInt128.v x + 0x100000000000000 * Hacl.UInt128.v y == v (fst t) + 0x100000000000000 * Hacl.UInt128.v (snd t)
     /\ v (fst t) < 0x100000000000000})
 let carry_step x y =
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   assert_norm(pow2 56 = 0x100000000000000);
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
@@ -402,7 +408,7 @@ val carry:
   z:buffer Hacl.UInt128.t{length z = 9} ->
   Stack unit
     (requires (fun h -> live h z /\ live h t /\
-      (let z = as_seq h z in eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8] < pow2 528
+      (let z = as_seq h z in eval_q_wide (h128_to_u128 z.[0]) (h128_to_u128 z.[1]) (h128_to_u128 z.[2]) (h128_to_u128 z.[3]) (h128_to_u128 z.[4]) (h128_to_u128 z.[5]) (h128_to_u128 z.[6]) (h128_to_u128 z.[7]) (h128_to_u128 z.[8]) < pow2 528
     /\ Hacl.UInt128.v z.[0] < 0x10000000000000000000000000000
     /\ Hacl.UInt128.v z.[1] < 0x20000000000000000000000000000
     /\ Hacl.UInt128.v z.[2] < 0x30000000000000000000000000000
@@ -414,7 +420,7 @@ val carry:
     /\ Hacl.UInt128.v z.[8] < 0x10000000000000000000000000000)))
    (ensures (fun h0 _ h1 -> live h1 t /\ live h0 z /\ modifies_1 t h0 h1 /\
      (let z = as_seq h0 z in 
-     eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8] < pow2 528
+     eval_q_wide (h128_to_u128 z.[0]) (h128_to_u128 z.[1]) (h128_to_u128 z.[2]) (h128_to_u128 z.[3]) (h128_to_u128 z.[4]) (h128_to_u128 z.[5]) (h128_to_u128 z.[6]) (h128_to_u128 z.[7]) (h128_to_u128 z.[8]) < pow2 528
      /\ Hacl.UInt128.v z.[0] < 0x10000000000000000000000000000
      /\ Hacl.UInt128.v z.[1] < 0x20000000000000000000000000000
      /\ Hacl.UInt128.v z.[2] < 0x30000000000000000000000000000
@@ -424,7 +430,7 @@ val carry:
      /\ Hacl.UInt128.v z.[6] < 0x30000000000000000000000000000
      /\ Hacl.UInt128.v z.[7] < 0x20000000000000000000000000000
      /\ Hacl.UInt128.v z.[8] < 0x10000000000000000000000000000
-     /\ as_seq h1 t == Spec.carry z)))
+     /\ reveal_h64s (as_seq h1 t) == Spec.carry (reveal_h128s (z)))))
 let carry out z =
   let z0 = z.(0ul) in
   let z1 = z.(1ul) in
@@ -438,7 +444,7 @@ let carry out z =
   
   let x = z0  in let y = z1 in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   assert_norm(pow2 56 = 0x100000000000000);
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
@@ -446,56 +452,56 @@ let carry out z =
 
   let x = z1' in let y = z2 in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let x1 = t in let z2' = Hacl.UInt128.add y carry in
 
   let x = z2' in let y = z3 in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let x2 = t in let z3' = Hacl.UInt128.add y carry in
 
   let x = z3' in let y = z4 in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let x3 = t in let z4' = Hacl.UInt128.add y carry in
 
   let x = z4' in let y = z5 in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let x4 = t in let z5' = Hacl.UInt128.add y carry in
 
   let x = z5' in let y = z6 in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let x5 = t in let z6' = Hacl.UInt128.add y carry in
 
   let x = z6' in let y = z7 in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let x6 = t in let z7' = Hacl.UInt128.add y carry in
 
   let x = z7' in let y = z8 in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let x7 = t in let z8' = Hacl.UInt128.add y carry in
 
   let x = z8' in let y = sint64_to_sint128 (uint64_to_sint64 0uL) in
   let carry = Hacl.UInt128.(x >>^ 56ul) in
-  let t     = Hacl.Cast.sint128_to_sint64 x &^ 0xffffffffffffffuL in
+  let t     = Hacl.Cast.sint128_to_sint64 x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   UInt.logand_mask #64 (Hacl.UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt128.v x) 56 64;
   let x8 = t in let z9' = Hacl.UInt128.add y carry in
@@ -507,17 +513,17 @@ val mod_264:
   r:qelemB ->
   t:buffer h64{length t = 10} ->
   Stack unit
-    (requires (fun h -> live h r /\ live h t /\ Spec.all_10_bellow_56 (as_seq h t)))
-    (ensures (fun h0 _ h1 -> live h1 r /\ live h0 t /\ Spec.all_10_bellow_56 (as_seq h0 t)
+    (requires (fun h -> live h r /\ live h t /\ Spec.all_10_bellow_56 (reveal_h64s (as_seq h t))))
+    (ensures (fun h0 _ h1 -> live h1 r /\ live h0 t /\ Spec.all_10_bellow_56 (reveal_h64s (as_seq h0 t))
       /\ modifies_1 r h0 h1
-      /\ as_seq h1 r == Spec.mod_264 (as_seq h0 t)))
+      /\ reveal_h64s (as_seq h1 r) == Spec.mod_264 (reveal_h64s (as_seq h0 t))))
 let mod_264 r t =
   let x0 = t.(0ul) in
   let x1 = t.(1ul) in
   let x2 = t.(2ul) in
   let x3 = t.(3ul) in
   let x4 = t.(4ul) in
-  let x4' = x4 &^ 0xffffffffffuL in
+  let x4' = x4 &^ (uint64_to_sint64 0xffffffffffuL) in
   Hacl.Lib.Create64.make_h64_5 r x0 x1 x2 x3 x4'
 
 inline_for_extraction
@@ -526,7 +532,7 @@ val div_2_24_step:
   Tot (z:h64{v z = v x / pow2 24 + pow2 32 * (v y % pow2 24) /\ v z < pow2 56})
 inline_for_extraction
 let div_2_24_step x y =
-  let y' = (y &^ 0xffffffuL) <<^ 32ul in
+  let y' = (y &^ uint64_to_sint64 0xffffffuL) <<^ 32ul in
   let x' = x >>^ 24ul in
   let z = y' |^ x' in
   assert_norm(pow2 24 = 0x1000000);
@@ -546,7 +552,7 @@ val div_2_40_step:
   Tot (z:h64{v z = v x / pow2 40 + pow2 16 * (v y % pow2 40) /\ v z < pow2 56})
 inline_for_extraction
 let div_2_40_step x y =
-  let y' = (y &^ 0xffffffffffuL) <<^ 16ul in
+  let y' = (y &^ uint64_to_sint64 0xffffffffffuL) <<^ 16ul in
   let x' = x >>^ 40ul in
   let z = y' |^ x' in
   assert_norm(pow2 16 = 0x10000);
@@ -564,12 +570,12 @@ val div_248:
   q:qelemB ->
   t:buffer h64 ->
   Stack unit
-    (requires (fun h -> live h q /\ live h t /\ Spec.all_10_bellow_56 (as_seq h t)
-      /\ (let t = as_seq h t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)))
-    (ensures (fun h0 _ h1 -> live h1 q /\ live h0 t /\ Spec.all_10_bellow_56 (as_seq h0 t)
+    (requires (fun h -> live h q /\ live h t /\ Spec.all_10_bellow_56 (reveal_h64s (as_seq h t))
+      /\ (let t = reveal_h64s (as_seq h t) in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)))
+    (ensures (fun h0 _ h1 -> live h1 q /\ live h0 t /\ Spec.all_10_bellow_56 (reveal_h64s (as_seq h0 t))
       /\ modifies_1 q h0 h1
-      /\ (let t = as_seq h0 t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
-      /\ as_seq h1 q == Spec.div_248 (as_seq h0 t)))
+      /\ (let t = reveal_h64s (as_seq h0 t) in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
+      /\ reveal_h64s (as_seq h1 q) == Spec.div_248 (reveal_h64s (as_seq h0 t))))
 let div_248 out t =
   let x0 = t.(0ul) in
   let x1 = t.(1ul) in
@@ -598,12 +604,12 @@ val div_264:
   q:qelemB ->
   t:buffer h64 ->
   Stack unit
-    (requires (fun h -> live h q /\ live h t /\ Spec.all_10_bellow_56 (as_seq h t)
-      /\ (let t = as_seq h t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 528)))
-    (ensures (fun h0 _ h1 -> live h1 q /\ live h0 t /\ Spec.all_10_bellow_56 (as_seq h0 t)
+    (requires (fun h -> live h q /\ live h t /\ Spec.all_10_bellow_56 (reveal_h64s (as_seq h t))
+      /\ (let t = reveal_h64s (as_seq h t) in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 528)))
+    (ensures (fun h0 _ h1 -> live h1 q /\ live h0 t /\ Spec.all_10_bellow_56 (reveal_h64s (as_seq h0 t))
       /\ modifies_1 q h0 h1
-      /\ (let t = as_seq h0 t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 528)
-      /\ as_seq h1 q == Spec.div_264 (as_seq h0 t)))
+      /\ (let t = reveal_h64s (as_seq h0 t) in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 528)
+      /\ reveal_h64s (as_seq h1 q) == Spec.div_264 (reveal_h64s (as_seq h0 t))))
 let div_264 out t =
   let x0 = t.(0ul) in
   let x1 = t.(1ul) in
@@ -650,17 +656,17 @@ val barrett_reduction__1:
   tmp:buffer h64{length tmp = 30 /\ disjoint tmp mu /\ disjoint tmp qmu} ->
   Stack unit
     (requires (fun h -> live h t /\ live h qmu /\ live h mu /\ live h tmp /\
-      (let t = as_seq h t in
+      (let t = reveal_h64s (as_seq h t) in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512) /\
-      as_seq h mu == Spec.mu
+      reveal_h64s (as_seq h mu) == Spec.mu
       ))
-    (ensures (fun h0 _ h1 -> live h0 t /\ live h1 tmp /\ (let t = as_seq h0 t in
+    (ensures (fun h0 _ h1 -> live h0 t /\ live h1 tmp /\ (let t = reveal_h64s (as_seq h0 t) in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
       /\ within_56 h1 (Buffer.sub tmp 20ul 5ul)
       /\ (let qmu_264' = Buffer.sub tmp 20ul 5ul in
-         let t = as_seq h0 t in
+         let t = reveal_h64s (as_seq h0 t) in
          let q = Spec.div_248 t in
          Math.Lemmas.lemma_div_lt (eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
          assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
@@ -668,7 +674,7 @@ val barrett_reduction__1:
          let qmu = Spec.mul_5 q Spec.mu in
          let qmu' = Spec.carry qmu in
          let qmu_264 = Spec.div_264 qmu' in
-         as_seq h1 qmu_264' == qmu_264)
+         reveal_h64s (as_seq h1 qmu_264') == qmu_264)
       /\ modifies_2 qmu tmp h0 h1
     ))
 
@@ -683,10 +689,10 @@ let barrett_reduction__1 qmu t mu tmp =
   let h1 = ST.get() in
   no_upd_lemma_1 h0' h1 q qmu;
   no_upd_lemma_1 h0' h1 q mu;
-  Math.Lemmas.lemma_div_lt (let t = as_seq h0' t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
+  Math.Lemmas.lemma_div_lt (let t = reveal_h64s (as_seq h0' t) in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
   let h2 = ST.get() in
   assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
-  lemma_mul_ineq__ (eval_q (as_seq h2 q)) (eval_q (as_seq h2 mu)) 264 264;
+  lemma_mul_ineq__ (eval_q (reveal_h64s (as_seq h2 q))) (eval_q (reveal_h64s (as_seq h2 mu))) 264 264;
   mul_5 qmu q mu;
   let h3 = ST.get() in
   carry qmu' qmu;
@@ -702,21 +708,21 @@ val barrett_reduction__2:
   tmp:buffer h64{length tmp = 30 /\ disjoint tmp m /\ disjoint tmp t} ->
   Stack unit
     (requires (fun h -> live h t /\ live h m /\ live h tmp /\
-      (let t = as_seq h t in
+      (let t = reveal_h64s (as_seq h t) in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512) /\
-      as_seq h m == Spec.m /\
+      reveal_h64s (as_seq h m) == Spec.m /\
       within_56 h (Buffer.sub tmp 20ul 5ul)
       ))
-    (ensures (fun h0 _ h1 -> live h0 t /\ live h1 tmp /\ live h0 tmp /\ live h0 m /\ (let t = as_seq h0 t in
+    (ensures (fun h0 _ h1 -> live h0 t /\ live h1 tmp /\ live h0 tmp /\ live h0 m /\ (let t = reveal_h64s (as_seq h0 t) in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
       /\ within_56 h0 (Buffer.sub tmp 20ul 5ul)
       /\ within_56 h1 (Buffer.sub tmp 25ul 5ul)
-      /\ (let qmu_264 = as_seq h0 (Buffer.sub tmp 20ul 5ul) in
-         let s' = as_seq h1 (Buffer.sub tmp 25ul 5ul) in
+      /\ (let qmu_264 = reveal_h64s (as_seq h0 (Buffer.sub tmp 20ul 5ul)) in
+         let s' = reveal_h64s (as_seq h1 (Buffer.sub tmp 25ul 5ul)) in
          let qmul = Spec.low_mul_5 qmu_264 Spec.m in
-         let r    = Spec.mod_264 (as_seq h0 t) in
+         let r    = Spec.mod_264 (reveal_h64s (as_seq h0 t)) in
          let s = Spec.sub_mod_264 r qmul in
          s' == s)
       /\ modifies_1 tmp h0 h1
@@ -730,7 +736,7 @@ let barrett_reduction__2 t m tmp =
   let qmu_264 = Buffer.sub tmp 20ul 5ul in
   let s    = Buffer.sub tmp 25ul 5ul in
   let h1   = ST.get() in
-  Math.Lemmas.lemma_div_lt (let t = as_seq h1 t in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
+  Math.Lemmas.lemma_div_lt (let t = reveal_h64s (as_seq h1 t) in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
   mod_264 r t;
   let h2 = ST.get() in
   no_upd_lemma_1 h1 h2 r m;
@@ -750,16 +756,16 @@ val barrett_reduction__:
   tmp:buffer h64{length tmp = 30 /\ disjoint tmp t /\ disjoint tmp mu /\ disjoint tmp m /\ disjoint tmp z} ->
   Stack unit
     (requires (fun h -> live h z /\ live h t /\ live h m /\ live h mu /\ live h tmp /\
-      (let t = as_seq h t in
+      (let t = reveal_h64s (as_seq h t) in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512) /\
-      as_seq h m == Spec.m /\
-      as_seq h mu == Spec.mu
+      reveal_h64s (as_seq h m) == Spec.m /\
+      reveal_h64s (as_seq h mu) == Spec.mu
       ))
-    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 t /\ (let t = as_seq h0 t in
+    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 t /\ (let t = reveal_h64s (as_seq h0 t) in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
-      /\ as_seq h1 z == Spec.barrett_reduction (as_seq h0 t)
+      /\ reveal_h64s (as_seq h1 z) == Spec.barrett_reduction (reveal_h64s (as_seq h0 t))
       /\ modifies_2 z tmp h0 h1
     ))
 
@@ -825,13 +831,13 @@ val barrett_reduction_:
   z:qelemB ->
   t:buffer h64{length t = 10} ->
   Stack unit
-    (requires (fun h -> live h z /\ live h t /\ (let t = as_seq h t in
+    (requires (fun h -> live h z /\ live h t /\ (let t = reveal_h64s (as_seq h t) in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)))
-    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 t /\ (let t = as_seq h0 t in
+    (ensures (fun h0 _ h1 -> live h1 z /\ live h0 t /\ (let t = reveal_h64s (as_seq h0 t) in
       Spec.all_10_bellow_56 t /\
       eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512)
-      /\ as_seq h1 z == Spec.barrett_reduction (as_seq h0 t)
+      /\ reveal_h64s (as_seq h1 z) == Spec.barrett_reduction (reveal_h64s (as_seq h0 t))
       /\ modifies_1 z h0 h1
     ))
 
@@ -901,7 +907,7 @@ let mul_modq out x y =
   no_upd_lemma_0 h3 h4 y;
   no_upd_lemma_0 h3 h4 out;
   no_upd_lemma_0 h3 h4 z';
-  lemma_mul_ineq__ (eval_q (as_seq h0 x)) (eval_q (as_seq h0 y)) 256 256;
+  lemma_mul_ineq__ (eval_q (reveal_h64s (as_seq h0 x))) (eval_q (reveal_h64s (as_seq h0 y))) 256 256;
   assert(as_seq h4 x == as_seq h0 x);
   assert(as_seq h4 y == as_seq h0 y);
   mul_5 z x y;
@@ -923,9 +929,9 @@ let mul_modq out x y =
   assert(live h8 out);
   assert(live h0 x);
   assert(live h0 y);
-  assert(let out = as_seq h8 out in
-         let x = as_seq h0 x in
-         let y = as_seq h0 y in
+  assert(let out = reveal_h64s (as_seq h8 out) in
+         let x = reveal_h64s (as_seq h0 x) in
+         let y = reveal_h64s (as_seq h0 y) in
          out == Spec.mul_modq x y);
   assert(modifies_2_1 out h1 h8);
   pop_frame();
@@ -955,15 +961,15 @@ val add_modq_:
   y:qelemB ->
   Stack unit
     (requires (fun h -> live h z /\ live h x /\ live h y /\ within_56 h x /\ within_56 h y /\
-      (let x = as_seq h x in let y = as_seq h y in
+      (let x = reveal_h64s (as_seq h x) in let y = reveal_h64s (as_seq h y) in
       eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
       eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)))
     (ensures (fun h0 _ h1 -> live h1 z /\ live h0 x /\ live h0 y /\ within_56 h0 x /\ within_56 h0 y /\
       modifies_1 z h0 h1 /\
-      (let x = as_seq h0 x in let y = as_seq h0 y in
+      (let x = reveal_h64s (as_seq h0 x) in let y = reveal_h64s (as_seq h0 y) in
        eval_q x < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
        eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed) /\
-       as_seq h1 z == Spec.add_modq (as_seq h0 x) (as_seq h0 y)))
+       reveal_h64s (as_seq h1 z) == Spec.add_modq (reveal_h64s (as_seq h0 x)) (reveal_h64s (as_seq h0 y))))
        (* eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) + eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
@@ -989,35 +995,29 @@ let add_modq_ out x y =
   let z4 = x4 +^ y4 in
   let x = z0  in let y = z1 in
   let carry = Hacl.UInt64.(x >>^ 56ul) in
-  let t     = x &^ 0xffffffffffffffuL in
+  let t     = x &^ (uint64_to_sint64 0xffffffffffffffuL) in
   assert_norm(pow2 56 = 0x100000000000000);
   UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
   let x0 = t in let z1' = Hacl.UInt64.add y carry in
   let x = z1' in let y = z2 in
   let carry = Hacl.UInt64.(x >>^ 56ul) in
-  let t     = x &^ 0xffffffffffffffuL in
+  let t     = x &^ uint64_to_sint64 0xffffffffffffffuL in
   UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
   let x1 = t in let z2' = Hacl.UInt64.add y carry in
   let x = z2' in let y = z3 in
   let carry = Hacl.UInt64.(x >>^ 56ul) in
-  let t     = x &^ 0xffffffffffffffuL in
+  let t     = x &^ uint64_to_sint64 0xffffffffffffffuL in
   UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
   let x2 = t in let z3' = Hacl.UInt64.add y carry in
   let x = z3' in let y = z4 in
   let carry = Hacl.UInt64.(x >>^ 56ul) in
-  let t     = x &^ 0xffffffffffffffuL in
+  let t     = x &^ uint64_to_sint64 0xffffffffffffffuL in
   UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64;
   let x3 = t in let x4 = Hacl.UInt64.add y carry in
-  (* let x = z4' in let y = 0uL in *)
-  (* let carry = Hacl.UInt64.(x >>^ 56ul) in *)
-  (* let t     = x &^ 0xffffffffffffffuL in *)
-  (* UInt.logand_mask #64 (Hacl.UInt64.v x % pow2 64) 56; *)
-  (* Math.Lemmas.pow2_modulo_modulo_lemma_1 (Hacl.UInt64.v x) 56 64; *)
-  (* let x4 = t in let z5' = Hacl.UInt64.add y carry in *)
   Hacl.Lib.Create64.make_h64_5 tmp x0 x1 x2 x3 x4;
   subm_conditional out tmp;
   pop_frame()

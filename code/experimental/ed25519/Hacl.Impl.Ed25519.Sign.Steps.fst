@@ -42,7 +42,7 @@ let point_mul_compress out s p =
   let h = ST.get() in
   push_frame();
   let h0 = ST.get() in
-  let tmp:point = Buffer.create 0uL 20ul in
+  let tmp:point = Buffer.create (Hacl.Cast.uint64_to_sint64 0uL) 20ul in
   let h' = ST.get() in
   lemma_point_inv h p h' p;
   Hacl.Impl.Ed25519.Ladder.point_mul tmp s p;
@@ -56,6 +56,7 @@ let point_mul_compress out s p =
   pop_frame()
 
 
+open Hacl.Spec.Endianness
 
 [@ "substitute"]
 private
@@ -67,7 +68,7 @@ val point_mul_g:
   (ensures (fun h0 _ h1 -> Buffer.live h0 scalar /\ live h0 result /\
     live h1 result /\ modifies_1 result h0 h1 /\ point_inv h1 result /\
     (let r = as_point h1 result in
-     let n  = as_seq h0 scalar in
+     let n  = reveal_sbytes (as_seq h0 scalar) in
      r == Spec.Ed25519.point_mul n Spec.Ed25519.g) ))
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
@@ -75,7 +76,7 @@ val point_mul_g:
 let point_mul_g result scalar =
   push_frame();
   let h0 = ST.get() in
-  let g = create 0uL 20ul in
+  let g = create (Hacl.Cast.uint64_to_sint64 0uL) 20ul in
   Hacl.Impl.Ed25519.G.make_g g;
   let h1 = ST.get() in
   no_upd_lemma_0 h0 h1 scalar;
@@ -103,7 +104,7 @@ let point_mul_g_compress out s =
   let h = ST.get() in
   push_frame();
   let h0 = ST.get() in
-  let tmp:point = Buffer.create 0uL 20ul in
+  let tmp:point = Buffer.create (Hacl.Cast.uint64_to_sint64 0uL) 20ul in
   let h' = ST.get() in
   point_mul_g tmp s;
   let h1 = ST.get() in
@@ -190,8 +191,8 @@ val sign_step_1:
         let apre = Buffer.sub tmp_bytes 224ul 64ul in
         let a      = Buffer.sub apre 0ul 32ul in
         let prefix = Buffer.sub apre 32ul 32ul in
-        (as_seq h1 a, as_seq h1 prefix) == Spec.Ed25519.(secret_expand (as_seq h0 secret)) /\
-        as_seq h1 a'' == Spec.Ed25519.(point_compress (point_mul (as_seq h1 a) g)))
+        (reveal_sbytes (as_seq h1 a), reveal_sbytes (as_seq h1 prefix)) == Spec.Ed25519.(secret_expand (reveal_sbytes (as_seq h0 secret))) /\
+        (reveal_sbytes (as_seq h1 a'') == Spec.Ed25519.(point_compress (point_mul (reveal_sbytes (as_seq h1 a)) g))))
    ))
 
 
@@ -229,13 +230,13 @@ val sign_step_2:
         let apre = Buffer.sub tmp_bytes 224ul 64ul in
         let a      = Buffer.sub apre 0ul  32ul in
         let prefix = Buffer.sub apre 32ul 32ul in
-        let s = as_seq h1 r in
+        let s = reveal_h64s (as_seq h1 r) in
         Hacl.Spec.BignumQ.Eval.eval_q s == 
-          Spec.Ed25519.(sha512_modq FStar.Seq.(as_seq h0 prefix @| as_seq h0 msg)) /\
+          Spec.Ed25519.(sha512_modq FStar.Seq.(reveal_sbytes (as_seq h0 prefix @| as_seq h0 msg))) /\
         Hacl.Impl.BignumQ.Mul.within_56 h1 r /\
-        Hacl.Spec.BignumQ.Eval.eval_q s < pow2 256 /\ Hacl.UInt64.v (Seq.index s 0) < pow2 56 /\
-        Hacl.UInt64.v (Seq.index s 1) < pow2 56 /\ Hacl.UInt64.v (Seq.index s 2) < pow2 56 /\
-        Hacl.UInt64.v (Seq.index s 3) < pow2 56 /\ Hacl.UInt64.v (Seq.index s 4) < pow2 32 /\
+        Hacl.Spec.BignumQ.Eval.eval_q s < pow2 256 /\ UInt64.v (Seq.index s 0) < pow2 56 /\
+        UInt64.v (Seq.index s 1) < pow2 56 /\ UInt64.v (Seq.index s 2) < pow2 56 /\
+        UInt64.v (Seq.index s 3) < pow2 56 /\ UInt64.v (Seq.index s 4) < pow2 32 /\
         as_seq h1 a == as_seq h0 a /\
         as_seq h1 a'' == as_seq h0 a''
         )
@@ -289,8 +290,8 @@ val sign_step_4:
         let apre = Buffer.sub tmp_bytes 224ul 64ul in
         let a      = Buffer.sub apre 0ul 32ul in
         let prefix = Buffer.sub apre 32ul 32ul in
-        Hacl.Spec.BignumQ.Eval.eval_q (as_seq h1 h) == 
-          Spec.Ed25519.(sha512_modq FStar.Seq.(as_seq h0 rs' @| as_seq h0 a'' @| as_seq h0 msg)) /\
+        Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h1 h)) == 
+          Spec.Ed25519.(sha512_modq FStar.Seq.(reveal_sbytes (as_seq h0 rs' @| as_seq h0 a'' @| as_seq h0 msg))) /\
         Hacl.Impl.BignumQ.Mul.within_56 h1 h /\
         as_seq h1 a == as_seq h0 a /\
         as_seq h1 rs' == as_seq h0 rs' /\
@@ -358,7 +359,7 @@ val sign_step_3:
   Stack unit
     (requires (fun h -> live h tmp_bytes /\ live h tmp_ints /\ (
         let s = as_seq h (Buffer.sub tmp_ints 20ul 5ul) in
-        Hacl.Spec.BignumQ.Eval.eval_q s < pow2 256 /\ Hacl.UInt64.v (Seq.index s 0) < pow2 56 /\
+        Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s s) < pow2 256 /\ Hacl.UInt64.v (Seq.index s 0) < pow2 56 /\
         Hacl.UInt64.v (Seq.index s 1) < pow2 56 /\ Hacl.UInt64.v (Seq.index s 2) < pow2 56 /\
         Hacl.UInt64.v (Seq.index s 3) < pow2 56 /\ Hacl.UInt64.v (Seq.index s 4) < pow2 32)
       ))
@@ -379,9 +380,9 @@ val sign_step_3:
         let apre = Buffer.sub tmp_bytes 224ul 64ul in
         let a      = Buffer.sub apre 0ul 32ul in
         let prefix = Buffer.sub apre 32ul 32ul in
-        Hacl.Spec.BignumQ.Eval.eval_q (as_seq h0 r) < pow2 256 /\
-        as_seq h1 rs' == Spec.Ed25519.(
-            let r = Hacl.Spec.BignumQ.Eval.eval_q (as_seq h0 r) in
+        Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) < pow2 256 /\
+        reveal_sbytes (as_seq h1 rs') == Spec.Ed25519.(
+            let r = Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) in
             let x = point_mul (Endianness.little_bytes 32ul r) g in
             point_compress x) /\
         as_seq h1 r == as_seq h0 r /\
@@ -398,7 +399,7 @@ let sign_step_3 tmp_bytes tmp_ints =
   let a      = Buffer.sub apre 0ul 32ul in
   push_frame();
   let h0 = ST.get() in
-  let rb = create 0uy 32ul in
+  let rb = create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
   let h1 = ST.get() in
   let r    = Buffer.sub tmp_ints 20ul 5ul  in
   no_upd_lemma_0 h0 h1 r;
@@ -407,8 +408,8 @@ let sign_step_3 tmp_bytes tmp_ints =
   let rs'  = Buffer.sub tmp_bytes 160ul 32ul in  
   Hacl.Impl.Store56.store_56 rb r;
   let h2 = ST.get() in
-  Endianness.lemma_little_endian_inj (as_seq h2 rb)
-                                     (Endianness.little_bytes 32ul (Hacl.Spec.BignumQ.Eval.eval_q (as_seq h0 r)));
+  Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h2 rb))
+                                     (Endianness.little_bytes 32ul (Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r))));
   no_upd_lemma_0 h0 h2 r;
   no_upd_lemma_0 h0 h2 a;
   no_upd_lemma_0 h0 h2 a'';
@@ -430,8 +431,8 @@ val sign_step_5:
     (requires (fun h -> live h tmp_bytes /\ live h tmp_ints /\ (
       let h'    = Buffer.sub tmp_ints 60ul 5ul in
       let r    = Buffer.sub tmp_ints 20ul 5ul  in
-      Hacl.Impl.BignumQ.Mul.within_56 h r /\ Hacl.Spec.BignumQ.Eval.eval_q (as_seq h r) < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
-      Hacl.Impl.BignumQ.Mul.within_56 h h' /\ Hacl.Spec.BignumQ.Eval.eval_q (as_seq h h') < pow2 256)
+      Hacl.Impl.BignumQ.Mul.within_56 h r /\ Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h r)) < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed /\
+      Hacl.Impl.BignumQ.Mul.within_56 h h' /\ Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h h')) < pow2 256)
     ))
     (ensures (fun h0 _ h1 -> live h0 tmp_bytes /\ live h1 tmp_bytes /\
       live h0 tmp_ints /\ live h1 tmp_ints /\ modifies_2 tmp_bytes tmp_ints h0 h1 /\ (
@@ -450,9 +451,9 @@ val sign_step_5:
         let apre = Buffer.sub tmp_bytes 224ul 64ul in
         let a      = Buffer.sub apre 0ul 32ul in
         let prefix = Buffer.sub apre 32ul 32ul in
-        as_seq h1 s' ==
-          Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (as_seq h0 r) +
-                          ((Hacl.Spec.BignumQ.Eval.eval_q (as_seq h0 h) * (Endianness.little_endian (as_seq h0 a))) % q)) % q)) /\
+        reveal_sbytes (as_seq h1 s') ==
+          Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) +
+                          ((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 h)) * (hlittle_endian (as_seq h0 a))) % q)) % q)) /\
         as_seq h1 rs' == as_seq h0 rs'
         )
     ))
@@ -474,10 +475,10 @@ let sign_step_5 tmp_bytes tmp_ints =
   let rs'  = Buffer.sub tmp_bytes 160ul 32ul in
   let a      = Buffer.sub apre 0ul 32ul in
   let h0 = ST.get() in
-  Endianness.lemma_little_endian_is_bounded (as_seq h0 a);
+  Endianness.lemma_little_endian_is_bounded (reveal_sbytes (as_seq h0 a));
   Hacl.Impl.Load56.load_32_bytes aq a;
   let h1 = ST.get() in
-  assert(Hacl.Spec.BignumQ.Eval.eval_q (as_seq h1 aq) < pow2 256);
+  assert(Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h1 aq)) < pow2 256);
   no_upd_lemma_1 h0 h1 aq h;
   no_upd_lemma_1 h0 h1 aq ha;
   no_upd_lemma_1 h0 h1 aq r;
@@ -492,6 +493,6 @@ let sign_step_5 tmp_bytes tmp_ints =
   Hacl.Impl.Store56.store_56 s' s;
   let h4 = ST.get() in
   no_upd_lemma_1 h3 h4 s' rs';
-  Endianness.lemma_little_endian_inj (as_seq h4 s') (Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (as_seq h0 r) +
-                          ((Hacl.Spec.BignumQ.Eval.eval_q (as_seq h0 h) * (Endianness.little_endian (as_seq h0 a))) % q)) % q)));
+  Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 s')) (Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) +
+                          ((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 h)) * (hlittle_endian (as_seq h0 a))) % q)) % q)));
   ()

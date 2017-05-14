@@ -114,7 +114,7 @@ let swap_conditional_step a' b' a b swap =
 private
 inline_for_extraction let mk_mask (iswap:Hacl.UInt64.t{v iswap = 0 \/ v iswap = 1}) :
   Tot (z:Hacl.UInt64.t{if v iswap = 1 then v z = pow2 64 - 1 else v z = 0})
-  = let swap = 0uL -%^ iswap in
+  = let swap = Hacl.Cast.uint64_to_sint64 0uL -%^ iswap in
     assert_norm((0 - 1) % pow2 64 = pow2 64 - 1);
     assert_norm((0 - 0) % pow2 64 = 0);
     swap

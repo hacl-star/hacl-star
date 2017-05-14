@@ -135,22 +135,22 @@ val fsquare:
 val fsquare_times:
   out:felem ->
   a:felem{disjoint out a} ->
-  n:UInt32.t{UInt32.v n > 0} ->
+  n:FStar.UInt32.t{FStar.UInt32.v n > 0} ->
   Stack unit
     (requires (fun h -> live h out /\ live h a /\ red_5413 (as_seq h a)))
     (ensures (fun h0 _ h1 -> live h0 out /\ live h0 a /\ red_5413 (as_seq h0 a) /\
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
-      seval (as_seq h1 out) == Spec.Curve25519.op_Star_Star (seval (as_seq h0 a)) (pow2 (UInt32.v n))))
+      seval (as_seq h1 out) == Spec.Curve25519.op_Star_Star (seval (as_seq h0 a)) (pow2 (FStar.UInt32.v n))))
 
 
 val fsquare_times_inplace:
   out:felem ->
-  n:UInt32.t{UInt32.v n > 0} ->
+  n:FStar.UInt32.t{FStar.UInt32.v n > 0} ->
   Stack unit
     (requires (fun h -> live h out /\ red_5413 (as_seq h out)))
     (ensures (fun h0 _ h1 -> live h0 out /\ red_5413 (as_seq h0 out) /\
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
-      seval (as_seq h1 out) == Spec.Curve25519.((seval (as_seq h0 out)) ** (pow2 (UInt32.v n)))))
+      seval (as_seq h1 out) == Spec.Curve25519.((seval (as_seq h0 out)) ** (pow2 (FStar.UInt32.v n)))))
 
 
 val inverse:
@@ -212,5 +212,3 @@ val lemma_reveal_seval: s:seqelem ->
                                + pow2 102 * v (Seq.index s 2)
                                + pow2 153 * v (Seq.index s 3)
                                + pow2 204 * v (Seq.index s 4)) % (pow2 255 - 19) == seval s)))
-
-
