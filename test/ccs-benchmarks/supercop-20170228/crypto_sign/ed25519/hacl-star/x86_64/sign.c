@@ -16,12 +16,9 @@ int crypto_sign(
   const unsigned char *sk
 )
 {
-  uint8_t sig[64];
-  Ed25519_sign(sig,sk,m,mlen);
-  memmove(sm,sig,64);
-  memmove(sm+64,m,mlen);
+  memmove(sm+64, m, mlen);
+  Ed25519_sign(sm, sk, m, mlen);
   *smlen = mlen + 64;
-  return 0;
 }
 
 int crypto_sign_open(
@@ -30,15 +27,13 @@ int crypto_sign_open(
   const unsigned char *pk
 )
 {
-  if (Ed25519_verify(pk,sm+64,smlen-64,sm)) {
+  if (Ed25519_verify(pk,sm+64,smlen-64,sm)){
     *mlen = smlen - 64;
     memmove(m,sm+64,smlen-64);
-    memset(m+smlen-64,0,64);
     return 0;
   }
   else {
     *mlen = (unsigned long long) -1;
-    memset(m,0,smlen);
     return -1;
   }
 }
