@@ -1,5 +1,5 @@
 #include "crypto_stream.h"
-#include "Chacha20.h"
+#include "Chacha20_Vec128.h"
 
 int crypto_stream_xor(
         unsigned char *out,
@@ -9,7 +9,7 @@ int crypto_stream_xor(
         const unsigned char *k
 		      ){
 
-  Hacl_Impl_Chacha20_chacha20(out, in, inlen, k, n, 0);
+  Chacha20_Vec128_chacha20(out, in, inlen, k, n, 0);
   return 0;
 }
 

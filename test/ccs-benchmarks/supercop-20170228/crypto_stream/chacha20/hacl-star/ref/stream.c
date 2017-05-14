@@ -21,17 +21,6 @@ int crypto_stream(
                                   const unsigned char *k
                                   )
 {
-  uint32_t ctr = 0;
-  uint8_t block[64];
-  while (outlen >= 64) {
-    Chacha20_chacha20_key_block(out,k,n,ctr);
-    out += 64;
-    ctr ++;
-    outlen -= 64;
-  }
-  if (outlen > 0) {
-    Chacha20_chacha20_key_block(block,k,n,ctr);
-    memcpy(out,block,outlen);
-  }
-  return 0;
+    memset(out,0,outlen);
+    return crypto_stream_xor(out,out,outlen,n,k);
 }

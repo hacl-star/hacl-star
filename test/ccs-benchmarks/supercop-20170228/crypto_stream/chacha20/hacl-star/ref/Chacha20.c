@@ -27,14 +27,15 @@ inline static void Hacl_Impl_Chacha20_setup(uint32_t *st, uint8_t *k, uint8_t *n
   uint32_t *stcst = st;
   uint32_t *stk = st + (uint32_t )4;
   uint32_t *stc = st + (uint32_t )12;
-  uint32_t *stn = st + (uint32_t )13;
+  uint32_t *stn = st + (uint32_t )14;
   stcst[0] = (uint32_t )0x61707865;
   stcst[1] = (uint32_t )0x3320646e;
   stcst[2] = (uint32_t )0x79622d32;
   stcst[3] = (uint32_t )0x6b206574;
   Hacl_Lib_LoadStore32_uint32s_from_le_bytes(stk, k, (uint32_t )8);
   stc[0] = c;
-  Hacl_Lib_LoadStore32_uint32s_from_le_bytes(stn, n1, (uint32_t )3);
+  stc[1] = 0;
+  Hacl_Lib_LoadStore32_uint32s_from_le_bytes(stn, n1, (uint32_t )2);
   return;
 }
 
@@ -86,7 +87,15 @@ inline static void Hacl_Impl_Chacha20_double_round(uint32_t *st)
 
 inline static void Hacl_Impl_Chacha20_rounds(uint32_t *st)
 {
-  for (uint32_t i = (uint32_t )0; i < (uint32_t )10; i = i + (uint32_t )1)
+    Hacl_Impl_Chacha20_double_round(st);
+    Hacl_Impl_Chacha20_double_round(st);
+    Hacl_Impl_Chacha20_double_round(st);
+    Hacl_Impl_Chacha20_double_round(st);
+    Hacl_Impl_Chacha20_double_round(st);
+    Hacl_Impl_Chacha20_double_round(st);
+    Hacl_Impl_Chacha20_double_round(st);
+    Hacl_Impl_Chacha20_double_round(st);
+    Hacl_Impl_Chacha20_double_round(st);
     Hacl_Impl_Chacha20_double_round(st);
 }
 

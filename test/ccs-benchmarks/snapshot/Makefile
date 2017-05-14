@@ -1,9 +1,9 @@
 .PHONY: test clean
 
-TWEETNACL_HOME?=../../other_providers/tweetnacl
-OPENSSL_HOME?=../../other_providers/openssl
-LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
-CC=gcc-6 -fno-tree-vectorize -flto
+TWEETNACL_HOME?=../../../other_providers/tweetnacl
+OPENSSL_HOME?=../../../other_providers/openssl
+LIBSODIUM_HOME ?=../../../other_providers/libsodium/src/libsodium
+CC?=gcc-6 -fno-tree-vectorize -flto
 CCOPTS?= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
 
 test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead unit-test-ed25519
@@ -39,7 +39,7 @@ unit-test-salsa: test-salsa.exe
 test-chacha.exe:
 	$(CC) $(CCOPTS) \
 	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I ../../other_providers/tweetnacl \
-	../../other_providers/tweetnacl/tweetnacl.c kremlib.c testlib.c Chacha20.c test-chacha.c -o test-chacha.exe \
+	$(TWEETNACL_HOME)/tweetnacl.c kremlib.c testlib.c Chacha20.c test-chacha.c -o test-chacha.exe \
 	 $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread -ldl
 
 perf-test-chacha: test-chacha.exe
@@ -54,8 +54,8 @@ ifeq ($(CC),ccomp)
 	@echo "Empty" > test-chacha-vec128.exe
 else
 	$(CC) $(CCOPTS) \
-	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I ../../other_providers/tweetnacl \
-	../../other_providers/tweetnacl/tweetnacl.c kremlib.c testlib.c Chacha20_Vec128.c test-chacha-vec128.c -o test-chacha-vec128.exe \
+	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I $(TWEETNACL_HOME) \
+	$(TWEETNACL_HOME)/tweetnacl.c kremlib.c testlib.c Chacha20_Vec128.c test-chacha-vec128.c -o test-chacha-vec128.exe \
 	 $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread -ldl
 endif
 

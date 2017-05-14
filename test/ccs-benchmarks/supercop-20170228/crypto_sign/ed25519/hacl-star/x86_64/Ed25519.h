@@ -7,6 +7,8 @@
 #include "kremlib.h"
 #include "testlib.h"
 
+typedef uint64_t Hacl_Lib_Create64_h64;
+
 typedef uint64_t Hacl_Bignum_Constants_limb;
 
 typedef FStar_UInt128_t Hacl_Bignum_Constants_wide;
@@ -35,8 +37,6 @@ typedef uint64_t *Hacl_EC_Point_point;
 
 typedef uint8_t *Hacl_EC_Format_uint8_p;
 
-typedef uint64_t Hacl_Lib_Create64_h64;
-
 typedef uint64_t Hacl_Bignum25519_limb;
 
 typedef uint64_t *Hacl_Bignum25519_felem;
@@ -45,39 +45,19 @@ typedef void *Hacl_Bignum25519_seqelem;
 
 typedef uint64_t *Hacl_Impl_Ed25519_ExtPoint_point;
 
+typedef uint8_t *Hacl_Impl_Store51_uint8_p;
+
+typedef uint64_t *Hacl_Impl_Store51_felem;
+
+typedef uint8_t *Hacl_Impl_Ed25519_PointCompress_hint8_p;
+
+typedef uint64_t *Hacl_Impl_Ed25519_PointCompress_hint64_p;
+
 typedef uint64_t *Hacl_Impl_Ed25519_SwapConditional_felem;
 
 typedef uint8_t *Hacl_Impl_Ed25519_Ladder_Step_uint8_p;
 
-typedef Prims_nat Hacl_Impl_Ed25519_Verify_Lemmas_u51;
-
-typedef uint8_t *Hacl_Impl_Ed25519_PointEqual_uint8_p;
-
-typedef uint64_t *Hacl_Impl_Ed25519_PointEqual_felem;
-
-typedef uint32_t Hacl_Impl_Load56_u32;
-
-typedef uint8_t Hacl_Impl_Load56_h8;
-
-typedef uint64_t Hacl_Impl_Load56_h64;
-
-typedef uint8_t *Hacl_Impl_Load56_hint8_p;
-
-typedef uint64_t *Hacl_Impl_Ed25519_RecoverX_elemB;
-
-typedef uint32_t Hacl_Impl_Load51_u32;
-
-typedef uint8_t Hacl_Impl_Load51_h8;
-
-typedef uint64_t Hacl_Impl_Load51_h64;
-
-typedef uint8_t *Hacl_Impl_Load51_hint8_p;
-
 typedef uint64_t *Hacl_Impl_Ed25519_Ladder_elemB;
-
-typedef uint8_t *Hacl_Impl_Store56_hint8_p;
-
-typedef uint64_t *Hacl_Impl_Store56_qelem;
 
 typedef uint8_t Hacl_Utils_Experimental_uint8_t;
 
@@ -139,6 +119,56 @@ typedef struct {
 }
 K___uint32_t_uint8_t_;
 
+typedef uint8_t SHA2_512_uint8_t;
+
+typedef uint32_t SHA2_512_uint32_t;
+
+typedef uint64_t SHA2_512_uint64_t;
+
+typedef uint8_t SHA2_512_uint8_ht;
+
+typedef uint32_t SHA2_512_uint32_ht;
+
+typedef uint64_t SHA2_512_uint64_ht;
+
+typedef FStar_UInt128_t SHA2_512_uint128_ht;
+
+typedef uint64_t *SHA2_512_uint64_p;
+
+typedef uint8_t *SHA2_512_uint8_p;
+
+typedef uint8_t *Hacl_Impl_Ed25519_SecretExpand_hint8_p;
+
+typedef uint8_t *Hacl_Impl_Ed25519_SecretToPublic_hint8_p;
+
+typedef Prims_nat Hacl_Impl_Ed25519_Verify_Lemmas_u51;
+
+typedef uint8_t *Hacl_Impl_Ed25519_PointEqual_uint8_p;
+
+typedef uint64_t *Hacl_Impl_Ed25519_PointEqual_felem;
+
+typedef uint32_t Hacl_Impl_Load56_u32;
+
+typedef uint8_t Hacl_Impl_Load56_h8;
+
+typedef uint64_t Hacl_Impl_Load56_h64;
+
+typedef uint8_t *Hacl_Impl_Load56_hint8_p;
+
+typedef uint64_t *Hacl_Impl_Ed25519_RecoverX_elemB;
+
+typedef uint32_t Hacl_Impl_Load51_u32;
+
+typedef uint8_t Hacl_Impl_Load51_h8;
+
+typedef uint64_t Hacl_Impl_Load51_h64;
+
+typedef uint8_t *Hacl_Impl_Load51_hint8_p;
+
+typedef uint8_t *Hacl_Impl_Store56_hint8_p;
+
+typedef uint64_t *Hacl_Impl_Store56_qelem;
+
 typedef uint8_t *Hacl_Impl_SHA512_Ed25519_1_hint8_p;
 
 typedef uint8_t *Hacl_Impl_SHA512_Ed25519_hint8_p;
@@ -159,48 +189,6 @@ typedef uint8_t *Hacl_Impl_Ed25519_Verify_uint8_p;
 
 typedef uint64_t *Hacl_Impl_Ed25519_Verify_felem;
 
-typedef uint8_t SHA2_512_uint8_t;
-
-typedef uint32_t SHA2_512_uint32_t;
-
-typedef uint64_t SHA2_512_uint64_t;
-
-typedef uint8_t SHA2_512_uint8_ht;
-
-typedef uint32_t SHA2_512_uint32_ht;
-
-typedef uint64_t SHA2_512_uint64_ht;
-
-typedef FStar_UInt128_t SHA2_512_uint128_ht;
-
-typedef uint64_t *SHA2_512_uint64_p;
-
-typedef uint8_t *SHA2_512_uint8_p;
-
-extern uint64_t *SHA2_512_alloc();
-
-extern void SHA2_512_init(uint64_t *x0);
-
-extern void SHA2_512_update(uint64_t *x0, uint8_t *x1);
-
-extern void SHA2_512_update_multi(uint64_t *x0, uint8_t *x1, uint32_t x2);
-
-extern void SHA2_512_update_last(uint64_t *x0, uint8_t *x1, uint64_t x2);
-
-extern void SHA2_512_finish(uint64_t *x0, uint8_t *x1);
-
-extern void SHA2_512_hash(uint8_t *x0, uint8_t *x1, uint32_t x2);
-
-typedef uint8_t *Hacl_Impl_Ed25519_SecretExpand_hint8_p;
-
-typedef uint8_t *Hacl_Impl_Store51_uint8_p;
-
-typedef uint64_t *Hacl_Impl_Store51_felem;
-
-typedef uint8_t *Hacl_Impl_Ed25519_PointCompress_hint8_p;
-
-typedef uint64_t *Hacl_Impl_Ed25519_PointCompress_hint64_p;
-
 typedef uint8_t *Hacl_Impl_Ed25519_Sign_Steps_hint8_p;
 
 typedef uint8_t *Hacl_Impl_Ed25519_Sign_hint8_p;
@@ -214,4 +202,6 @@ void *Ed25519_op_String_Access(FStar_HyperStack_mem h, uint8_t *b);
 void Ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32_t len1);
 
 bool Ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t len1, uint8_t *signature);
+
+void Ed25519_secret_to_public(uint8_t *out, uint8_t *secret);
 #endif

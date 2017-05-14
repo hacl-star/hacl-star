@@ -33,7 +33,7 @@ typedef void *Hacl_Impl_Chacha20_log_t;
 
 void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32_t ctr);
 
-void *Chacha20_value_at(uint8_t *m, FStar_HyperStack_mem h);
+void *Chacha20_op_String_Access(FStar_HyperStack_mem h, uint8_t *m);
 
 void
 Chacha20_chacha20(

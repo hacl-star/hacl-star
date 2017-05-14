@@ -53,9 +53,9 @@ Hacl_Impl_Chacha20_Vec128_State_state_setup(vec *st, uint8_t *k, uint8_t *n1, ui
   uint32_t n0 = load32_le(x00);
   uint8_t *x01 = n1 + (uint32_t )4;
   uint32_t n10 = load32_le(x01);
-  uint8_t *x0 = n1 + (uint32_t )8;
-  uint32_t n2 = load32_le(x0);
-  vec v1 = vec_load_32x4(c, n0, n10, n2);
+  //  uint8_t *x0 = n1 + (uint32_t )8;
+  //uint32_t n2 = load32_le(x0);
+  vec v1 = vec_load_32x4(c, 0, n0, n10);
   st[3] = v1;
 }
 
@@ -140,7 +140,7 @@ inline static void Hacl_Impl_Chacha20_Vec128_chacha20_core3(vec *k0, vec *k1, ve
   Hacl_Impl_Chacha20_Vec128_copy_state(k0, st);
   Hacl_Impl_Chacha20_Vec128_copy_state(k1, st);
   Hacl_Impl_Chacha20_Vec128_State_state_incr(k1);
-  Hacl_Impl_Chacha20_Vec128_copy_state(k2, st);
+  Hacl_Impl_Chacha20_Vec128_copy_state(k2, k1);
   Hacl_Impl_Chacha20_Vec128_State_state_incr(k2);
   for (uint32_t i = (uint32_t )0; i < (uint32_t )10; i = i + (uint32_t )1) {
       Hacl_Impl_Chacha20_Vec128_double_round(k0);

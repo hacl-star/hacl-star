@@ -1,6 +1,6 @@
 #include "crypto_verify_16.h"
 #include "crypto_onetimeauth.h"
-#include "Poly1305.h"
+#include "Poly1305_64.h"
 
 int crypto_onetimeauth(unsigned char *output, const unsigned char *input, unsigned long long len, const unsigned char *k)
 {

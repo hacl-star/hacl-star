@@ -242,7 +242,7 @@ void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32
   Hacl_Impl_Chacha20_chacha20_block(block, st, ctr);
 }
 
-void *Chacha20_value_at(uint8_t *m, FStar_HyperStack_mem h)
+void *Chacha20_op_String_Access(FStar_HyperStack_mem h, uint8_t *m)
 {
   return (void *)(uint8_t )0;
 }
