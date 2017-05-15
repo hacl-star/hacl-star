@@ -21,5 +21,10 @@ sha2-ci:
 
 all-ci: ed25519-ci sha2-ci
 
+ed25519-ct:
+	$(MAKE) -C ed25519 all-ct
+
+all-ct: ed25519-ct
+
 clean: $(addsuffix -clean, $(DIRECTORIES))
 	rm -rf *~ *.exe *.out *.graph
