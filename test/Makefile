@@ -73,7 +73,7 @@ build-snapshot:
 		 $(SNAPSHOT_DIR)
 	cp ./c/* $(SNAPSHOT_DIR)/
 
-GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc)
+GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
 GCC_OPTS=-flto -std=c11 -D_GNU_SOURCE
 
 test-snapshot:
@@ -83,10 +83,10 @@ test-ccomp:
 	$(MAKE) -C snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" test
 
 test-gcc:
-	$(MAKE) -C snapshot-gcc CC="gcc-7 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
+	$(MAKE) -C snapshot-gcc CC="$(GCC) -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
 
 test-gcc-unrolled:
-	$(MAKE) -C snapshot-gcc-unrolled CC="gcc-7 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
+	$(MAKE) -C snapshot-gcc-unrolled CC="$(GCC) -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
 
 echo-perf-ccomp:
 	$(shell (echo -e "Benchmarking results with ccomp -O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-ccomp/bench.txt) > benchmark-compcert.txt)
@@ -96,17 +96,17 @@ perf-ccomp:
 	$(MAKE) echo-perf-ccomp
 
 echo-perf-gcc:
-	$(shell (echo -e "Benchmarking results with gcc-7 -fno-tree-vectorize -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc/bench.txt) > benchmark-gcc.txt)
+	$(shell (echo -e "Benchmarking results with $(GCC) -fno-tree-vectorize -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc/bench.txt) > benchmark-gcc.txt)
 
 perf-gcc:
-	$(MAKE) -C snapshot-gcc CC="gcc-7 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
+	$(MAKE) -C snapshot-gcc CC="$(GCC) -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
 	$(MAKE) echo-perf-gcc
 
 echo-gcc-unrolled:
-	$(shell (echo -e "Benchmarking results with gcc-7 -fno-tree-vectorize -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops with KreMLin loop unrolling\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc-unrolled/bench.txt) > benchmark-gcc-unrolled.txt)
+	$(shell (echo -e "Benchmarking results with $(GCC) -fno-tree-vectorize -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops with KreMLin loop unrolling\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc-unrolled/bench.txt) > benchmark-gcc-unrolled.txt)
 
 perf-gcc-unrolled:
-	$(MAKE) -C snapshot-gcc-unrolled CC="gcc-7 -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
+	$(MAKE) -C snapshot-gcc-unrolled CC="$(GCC) -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
 	$(MAKE) echo-gcc-unrolled
 
 all-perf:
