@@ -191,38 +191,40 @@ private val ws_part_1:
                   let b = as_seq h0 block_w in
                   (forall (i:nat). {:pattern (Seq.index w i)} i < 16 ==> Seq.index w i == Spec.ws b i))))
 
-#reset-options " --max_fuel 0 --z3rlimit 100"
+#reset-options " --max_fuel 0 --z3rlimit 20"
 
 [@"substitute"]
 let ws_part_1 ws_w block_w =
   let h0 = ST.get() in
   let inv (h1: HS.mem) (i: nat) : Type0 =
-    live h0 ws_w /\ live h1 ws_w /\ live h0 block_w /\ live h1 block_w /\ modifies_1 ws_w h0 h1
+    i <= 16 /\ live h1 ws_w /\ live h1 block_w /\ modifies_1 ws_w h0 h1 /\
+    as_seq h1 block_w == as_seq h0 block_w
     /\ (let seq_ws = as_seq h0 ws_w in
-    let seq_block = as_seq h0 block_w in
-    let f : Spec.ws_w -> (t:Spec.counter{t < 16}) -> Tot Spec.ws_w =
-    fun seq_ws t -> Seq.upd seq_ws t (Seq.index seq_block t) in
-    as_seq h1 ws_w == repeat_range_spec 0 i f (as_seq h0 ws_w))
+       let seq_block = as_seq h0 block_w in
+       let w = as_seq h1 ws_w in
+    (forall (j:nat). {:pattern (Seq.index w j)} j < i ==> Seq.index w j == Spec.ws seq_block j))
   in
-  let f' (t:uint32_t {v t < v size_ws_w}) :
+  let f' (t:uint32_t {v t < 16}) :
     Stack unit
       (requires (fun h -> inv h (UInt32.v t)))
       (ensures (fun h_1 _ h_2 -> inv h_2 (UInt32.v t + 1)))
     =
+    let h = ST.get() in
     ws_w.(t) <- block_w.(t);
-    lemma_repeat_range_spec 0 (UInt32.v t + 1) (
-    let seq_ws = as_seq h0 ws_w in
-    let seq_block = as_seq h0 block_w in
-    let f : Spec.ws_w -> (t:Spec.counter{t < 16}) -> Tot Spec.ws_w =
-    fun seq_ws t -> Seq.upd seq_ws t (Seq.index seq_block t) in f) (as_seq h0 ws_w)
+    let h' = ST.get() in
+    (* TODO: lemma that says that block_w.(t) == Spec.ws (as_seq h0 block_w) (UInt32.v t) *)
+    (* TODO: following assume: *)
+    assume(
+      let w = as_seq h' ws_w in
+      let b = as_seq h0 block_w in
+      forall (j:nat). {:pattern (Seq.index w j)} j < UInt32.v t + 1 ==> Seq.index w j == Spec.ws b j);
+    no_upd_lemma_1 h h' ws_w block_w;
+    assert(as_seq h' block_w == as_seq h block_w)
   in
-  lemma_repeat_range_0 0 16 (
-    let seq_ws = as_seq h0 ws_w in
-    let seq_block = as_seq h0 block_w in
-    let f : Spec.ws_w -> (t:Spec.counter{t < 16}) -> Tot Spec.ws_w =
-    fun seq_ws t -> Seq.upd seq_ws t (Seq.index seq_block t) in f)
-  (as_seq h0 ws_w);
-  for 0ul 16ul inv f'
+  assume (modifies_1 ws_w h0 h0);
+  for 0ul 16ul inv f';
+  let h1 = ST.get() in
+  ()
 
 
 #reset-options " --max_fuel 0 --z3rlimit 10"
