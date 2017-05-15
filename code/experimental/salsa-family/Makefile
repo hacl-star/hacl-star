@@ -4,12 +4,12 @@ HACL_HOME?=../../..
 include $(HACL_HOME)/code/Makefile.include
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
+		--include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
+		--include $(HACL_HOME)/code/lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst

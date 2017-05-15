@@ -66,7 +66,7 @@ val counter_mode:
   k:key Spec.Chacha20_vec.chacha20_ctx ->
   n:nonce Spec.Chacha20_vec.chacha20_ctx ->
   c:counter Spec.Chacha20_vec.chacha20_ctx ->
-  plain:seq UInt8.t{c + length plain / 64 + 1 < pow2 32} ->
+  plain:seq UInt8.t{c + length plain / 64 < pow2 32} ->
   Tot (lbytes (length plain))
 #reset-options "--z3rlimit 20 --max_fuel 0"
 let counter_mode key nonce counter plain =
@@ -303,7 +303,7 @@ val lemma_counter_mode3_eq:
   k:key Spec.Chacha20_vec.chacha20_ctx ->
   n:nonce Spec.Chacha20_vec.chacha20_ctx ->
   c:counter Spec.Chacha20_vec.chacha20_ctx ->
-  plain:seq UInt8.t{c + length plain / 64 + 1 < pow2 32} ->
+  plain:seq UInt8.t{c + length plain / 64 < pow2 32} ->
   Lemma (Spec.CTR.counter_mode Spec.Chacha20_vec.chacha20_ctx Spec.Chacha20_vec.chacha20_cipher k n c plain == counter_mode k n c plain)
 let lemma_counter_mode3_eq k n c plain =
   let len = length plain / 64 in
