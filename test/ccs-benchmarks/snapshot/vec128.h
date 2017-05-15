@@ -121,8 +121,7 @@ static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned in
 }
 #endif
 
-#else
-#if defined(__ARM_NEON__)
+#elif defined(__ARM_NEON__)
 
 #define VEC128
 #define vec_size 4
@@ -175,7 +174,7 @@ static inline vec vec_load_32(uint32_t x1) {
 
 static inline vec vec_load_32x8(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4, uint32_t x5, uint32_t x6, uint32_t x7, uint32_t x8){
   vec v;
-  v.v = (vec128) {x4,x3,x2,x1};
+  v.v = (vec128) {x1,x2,x3,x4};
   return v;
 }
 
@@ -248,5 +247,7 @@ static inline vec vec_interleave64_low(vec v1, vec v2) {
 #else
 #error "vec128 only defined for SSSE3 and ARM NEON"
 
+
+#endif
 
 #endif
