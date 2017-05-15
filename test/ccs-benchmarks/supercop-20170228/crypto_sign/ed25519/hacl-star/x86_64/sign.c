@@ -17,8 +17,9 @@ int crypto_sign(
 )
 {
   memmove(sm+64, m, mlen);
-  Ed25519_sign(sm, sk, m, mlen);
+  Ed25519_sign(sm, sk, sm+64, mlen);
   *smlen = mlen + 64;
+  return 0;
 }
 
 int crypto_sign_open(
