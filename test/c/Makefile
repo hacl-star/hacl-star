@@ -7,7 +7,7 @@ CC?=gcc-6 -fno-tree-vectorize -flto
 CCOPTS := -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
 CFLAGS= $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
-	-I $(LIBSODIUM_HOME)/include -L $(LIBSODIUM_HOME)/lib \
+	-I $(LIBSODIUM_HOME)/include -L$(LIBSODIUM_HOME)/lib \
 	-I $(TWEETNACL_HOME)
 
 test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead unit-test-ed25519
