@@ -343,7 +343,7 @@ static const uint64_t two51_1 = 2251799813685247;
 // Platform-specific 128-bit arithmetic. These are static functions in a header,
 // so that each translation unit gets its own copy and the C compiler can
 // optimize.
-#ifndef KRML_NOUINT128
+#if defined(__SIZEOF_INT128__)
 typedef unsigned __int128 FStar_UInt128_t, FStar_UInt128_t_, uint128_t;
 
 static inline void print128(unsigned char *where, uint128_t n) {
