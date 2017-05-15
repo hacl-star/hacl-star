@@ -17,7 +17,8 @@ all:
 	# KREMLIN_ARGS environment variable.
 	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error"; $(GFIND) ../code -name out.krml -exec touch {} \; ; fi
 	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error"; $(GFIND) ../code -name out.krml -exec touch {} \; ; fi
-	$(MAKE) extract-c OTHERFLAGS="--trace_error"
+	# JP FIXME XXX why was this disabled?
+	$(MAKE) extract-c-code OTHERFLAGS="--trace_error"
 	$(MAKE) ct OTHERFLAGS="--trace_error"
 	$(MAKE) verify OTHERFLAGS="--trace_error"
 	# $(MAKE) -C openssl-engine
