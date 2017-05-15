@@ -178,26 +178,32 @@ let constants_set_h_0 hash =
   0x510e527fade682d1uL 0x9b05688c2b3e6c1fuL 0x1f83d9abfb41bd6buL 0x5be0cd19137e2179uL
 
 
-[@"substitute"]
-private val ws_compute_part_1:
-  ws_w    :uint64_p {length ws_w = v size_ws_w} ->
-  block_w :uint64_p {length block_w = v size_block_w} ->
-  Stack unit
-        (requires (fun h -> live h ws_w /\ live h block_w))
-        (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1))
+#reset-options " --max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
-let ws_compute_part_1 ws_w block_w =
+private val ws_part_1:
+  ws_w    :uint64_p {length ws_w = v size_ws_w} ->
+  block_w :uint64_p {length block_w = v size_block_w /\ disjoint ws_w block_w} ->
+  Stack unit
+        (requires (fun h -> live h ws_w /\ live h block_w))
+        (ensures  (fun h0 r h1 -> live h0 ws_w /\ live h1 ws_w /\ live h0 block_w /\ live h1 block_w /\ modifies_1 ws_w h0 h1
+                  /\ (let w = as_seq h1 ws_w in
+                  let b = as_seq h0 block_w in
+                  (forall (i:nat). {:pattern (Seq.index w i)} i < 16 ==> Seq.index w i == Spec.ws b i))))
+
+#reset-options " --max_fuel 0 --z3rlimit 100"
+
+[@"substitute"]
+let ws_part_1 ws_w block_w =
   let h0 = ST.get() in
   let inv (h1: HS.mem) (i: nat) : Type0 =
-    live h1 ws_w /\ modifies_1 ws_w h0 h1 /\ i <= 16
+    live h0 ws_w /\ live h1 ws_w /\ live h0 block_w /\ live h1 block_w /\ modifies_1 ws_w h0 h1
     /\ (let seq_ws = as_seq h0 ws_w in
     let seq_block = as_seq h0 block_w in
     let f : Spec.ws_w -> (t:Spec.counter{t < 16}) -> Tot Spec.ws_w =
     fun seq_ws t -> Seq.upd seq_ws t (Seq.index seq_block t) in
     as_seq h1 ws_w == repeat_range_spec 0 i f (as_seq h0 ws_w))
   in
-
   let f' (t:uint32_t {v t < v size_ws_w}) :
     Stack unit
       (requires (fun h -> inv h (UInt32.v t)))
@@ -210,7 +216,7 @@ let ws_compute_part_1 ws_w block_w =
     let f : Spec.ws_w -> (t:Spec.counter{t < 16}) -> Tot Spec.ws_w =
     fun seq_ws t -> Seq.upd seq_ws t (Seq.index seq_block t) in f) (as_seq h0 ws_w)
   in
-  lemma_repeat_range_0 0 0 (
+  lemma_repeat_range_0 0 16 (
     let seq_ws = as_seq h0 ws_w in
     let seq_block = as_seq h0 block_w in
     let f : Spec.ws_w -> (t:Spec.counter{t < 16}) -> Tot Spec.ws_w =
@@ -219,16 +225,21 @@ let ws_compute_part_1 ws_w block_w =
   for 0ul 16ul inv f'
 
 
+#reset-options " --max_fuel 0 --z3rlimit 10"
+
 [@"substitute"]
-private val ws_compute_part_2:
+private val ws_part_2:
   ws_w    :uint64_p {length ws_w = v size_ws_w} ->
   block_w :uint64_p {length block_w = v size_block_w} ->
   Stack unit
         (requires (fun h -> live h ws_w /\ live h block_w))
-        (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1))
+        (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1
+                  /\ (let w = as_seq h1 ws_w in
+                  let b = as_seq h0 block_w in
+                  (forall (i:nat). {:pattern (Seq.index w i)} 16 < i /\ i < 80 ==> Seq.index w i == Spec.ws b i))))
 
 [@"substitute"]
-let ws_compute_part_2 ws_w block_w =
+let ws_part_2 ws_w block_w =
   let h0 = ST.get() in
   let inv (h1: HS.mem) (i: nat) : Type0 =
     live h1 ws_w /\ modifies_1 ws_w h0 h1 /\ i <= 64
@@ -244,7 +255,6 @@ let ws_compute_part_2 ws_w block_w =
     in
     as_seq h1 ws_w == repeat_range_spec 16 i f (as_seq h0 ws_w))
   in
-
   let f' (t:uint32_t {v t < v size_ws_w}) :
     Stack unit
       (requires (fun h -> inv h (UInt32.v t)))
@@ -267,7 +277,7 @@ let ws_compute_part_2 ws_w block_w =
         Seq.upd seq_ws t H64.((Spec._sigma1 t2) +%^ (t7 +%^ ((Spec._sigma0 t15) +%^ t16)))
       in f) (as_seq h0 ws_w)
   in
-  lemma_repeat_range_0 0 0 (
+  lemma_repeat_range_0 16 80 (
     let seq_ws = as_seq h0 ws_w in
     let seq_block = as_seq h0 block_w in
     let f : Spec.ws_w -> (t:Spec.counter{t < 80}) -> Tot Spec.ws_w =
@@ -281,22 +291,23 @@ let ws_compute_part_2 ws_w block_w =
   for 16ul 80ul inv f'
 
 
-
-(* [FIPS 180-4] section 6.2.2 *)
-(* Step 1 : Scheduling function for sixty-four 32bit words *)
 [@"substitute"]
 private val ws:
   ws_w    :uint64_p {length ws_w = v size_ws_w} ->
   block_w :uint64_p {length block_w = v size_block_w} ->
   Stack unit
         (requires (fun h -> live h ws_w /\ live h block_w))
-        (ensures  (fun h0 r h1 -> live h1 ws_w /\ modifies_1 ws_w h0 h1))
+        (ensures  (fun h0 r h1 -> live h1 ws_w /\ live h0 ws_w /\ live h1 block_w /\ live h0 block_w
+                  /\ modifies_1 ws_w h0 h1
+                  /\ (let w = as_seq h1 ws_w in
+                  let b = as_seq h0 block_w in
+                  (forall (i:nat). {:pattern (Seq.index w i)} i < 80 ==> Seq.index w i == Spec.ws b i))))
 
 [@"substitute"]
 let ws ws_w block_w =
-  ws_compute_part_1 ws_w block_w;
-  ws_compute_part_2 ws_w block_w
-  
+  ws_part_1 ws_w block_w;
+  ws_part_2 ws_w block_w
+
 
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
@@ -848,13 +859,13 @@ let update_last state data len =
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length are considered public here ! *)
   let (nb, final_blocks) =
-    if U64.(len <^ 111uL) then (1ul, Buffer.offset blocks size_block)
+    if U64.(len <^ 112uL) then (1ul, Buffer.offset blocks size_block)
     else (2ul, blocks)
   in
 
   (**) let h1 = ST.get () in
   (**) Seq.lemma_eq_intro (as_seq h1 final_blocks)
-                          (if U64.(len <^ 111uL) then
+                          (if U64.(len <^ 112uL) then
                               Seq.create (v size_block) 0uy
                            else Seq.create (2 * v size_block) 0uy);
   (**) Seq.lemma_eq_intro (as_seq h1 final_blocks) (Seq.create (v nb * v size_block) 0uy);
