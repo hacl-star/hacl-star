@@ -393,7 +393,8 @@ static inline void store128_be(uint8_t *b, uint128_t n) {
 }
 
 static inline uint128_t uint128_add(uint128_t x, uint128_t y) {
-#if defined(__GNUC__) || defined(__clang__)
+#if 0
+  //defined(__GNUC__) || defined(__clang__)
   uint128_t r;
   uint32_t x0 = (uint32_t) x.low;
   uint32_t x1 = (uint32_t) (x.low>>32);

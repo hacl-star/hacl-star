@@ -22,7 +22,7 @@ inline static void Hacl_Bignum_Modulo_carry_top_wide(FStar_UInt128_t *b)
   FStar_UInt128_t b2_ = uint128_split_low(b2,42);
   uint64_t b2_42 = uint128_split_high64(b2,42);
   FStar_UInt128_t
-    b0_ = FStar_UInt128_add(b0, FStar_Int_Cast_uint64_to_uint128((b2_42 << (uint32_t )2) + b2_42));
+    b0_ = FStar_UInt128_add(b0, FStar_Int_Cast_uint64_to_uint128(b2_42 * 5));
   b[2] = b2_;
   b[0] = b0_;
 }
@@ -358,11 +358,9 @@ Hacl_Standalone_Poly1305_64_poly1305_partial(
 )
 {
   uint8_t *x1 = kr;
-  uint64_t k10 = load64_le(x1);
-  uint64_t k11 = load64_le(x1 + 8);
-  k10 = k10 & (uint64_t )0x0ffffffc0fffffff;
-  k11 = k11 & (uint64_t )0x0ffffffc0ffffffc;
-  FStar_UInt128_t  k_clamped = load128_64(k10,k11);
+  uint128_t k1 = load128_le(x1);
+  uint128_t msk = load128_64(0x0ffffffc0fffffff, 0x0ffffffc0ffffffc);
+  uint128_t k_clamped = uint128_logand(k1,msk);
   uint64_t r0 = uint128_split_low64(k_clamped,44);
   uint64_t r1 = uint128_split_high64(k_clamped,44) & (uint64_t )0xfffffffffff;
   uint64_t r2 = uint128_split_high64(k_clamped,88);
@@ -421,8 +419,8 @@ Hacl_Standalone_Poly1305_64_crypto_onetimeauth_(
   uint64_t h0 = acc[0];
   uint64_t h1 = acc[1];
   uint64_t h2 = acc[2];
-  uint64_t hi = h1 << 24 | h1 >> 20;
-  uint64_t lo = h1 << 44 | h0;
+  uint64_t hi = (h2 << 24) ^ (h1 >> 20);
+  uint64_t lo = (h1 << 44) ^ h0;
   FStar_UInt128_t acc_ = load128_64(lo,hi);
   FStar_UInt128_t mac_ = FStar_UInt128_add_mod(acc_, k_);
   store128_le(output, mac_);
@@ -449,11 +447,9 @@ void Poly1305_64_init(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *k1)
 {
   uint8_t *x1 = k1;
   uint8_t *x10 = x1;
-  uint64_t k10 = load64_le(x1);
-  uint64_t k11 = load64_le(x1 + 8);
-  k10 = k10 & (uint64_t )0x0ffffffc0fffffff;
-  k11 = k11 & (uint64_t )0x0ffffffc0ffffffc;
-  FStar_UInt128_t  k_clamped = load128_64(k10,k11);
+  uint128_t k = load128_le(x1);
+  uint128_t msk = load128_64(0x0ffffffc0fffffff, 0x0ffffffc0ffffffc);
+  FStar_UInt128_t  k_clamped = uint128_logand(k,msk);
   uint64_t r0 = uint128_split_low64(k_clamped,44);
   uint64_t r1 = uint128_split_high64(k_clamped,44) & (uint64_t )0xfffffffffff;
   uint64_t r2 = uint128_split_high64(k_clamped,88);
@@ -509,8 +505,8 @@ void Poly1305_64_finish(Hacl_Impl_Poly1305_64_poly1305_state st, uint8_t *mac, u
   uint64_t h0 = acc[0];
   uint64_t h1 = acc[1];
   uint64_t h2 = acc[2];
-  uint64_t hi = h1 << 24 | h1 >> 20;
-  uint64_t lo = h1 << 44 | h0;
+  uint64_t hi = (h2 << 24) ^ (h1 >> 20);
+  uint64_t lo = (h1 << 44) ^ h0;
   FStar_UInt128_t acc_ = load128_64(lo,hi);
   FStar_UInt128_t mac_ = FStar_UInt128_add_mod(acc_, k_);
   store128_le(mac, mac_);
