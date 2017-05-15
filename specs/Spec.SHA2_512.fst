@@ -168,7 +168,7 @@ let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}
 
 
 let pad0_length (len:nat) : Tot (n:nat{(len + 1 + n + size_len_8) % size_block = 0}) =
-  size_block - ((len + size_len_8 + 1) % size_block)
+  (size_block - (len + size_len_8 + 1)) % size_block
 
 
 let pad (prevlen:nat{prevlen % size_block = 0}) (len:nat{prevlen + len < max_input_len_8}) : Tot (b:bytes{(length b + len) % size_block = 0}) =
@@ -339,27 +339,6 @@ let lemma_hash_prepend h0 block msg =
   assert(n' == n + 1);
   Seq.lemma_eq_intro (msg_last') (msg_last);
   Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
-
-
-#reset-options "--max_fuel 0 --z3rlimit 50"
-
-let hash_block_and_rest (block:bytes{Seq.length block = size_block}) (msg:bytes{Seq.length msg + Seq.length block < max_input_len_8}) :
-  Tot (output:bytes{output == hash (block @| msg)}) =
-
-  let n = Seq.length msg / size_block in
-  let (msg_blocks, msg_last) = Seq.split msg (n * size_block) in
-
-  let hash0 = update h_0 block in
-  let hash1 = update_multi hash0 msg_blocks in
-  lemma_update_multi_extend h_0 block msg_blocks;
-
-  let hash2 = update_last hash1 ((n + 1) * size_block) msg_last in
-  let hash3 = finish hash2 in
-
-  lemma_hash_prepend h_0 block msg;
-
-  hash3
-
 
 
 

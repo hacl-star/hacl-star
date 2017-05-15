@@ -169,7 +169,7 @@ let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}
 
 
 let pad0_length (len:nat) : Tot (n:nat{(len + 1 + n + size_len_8) % size_block = 0}) =
-  size_block - ((len + size_len_8 + 1) % size_block)
+  (size_block - (len + size_len_8 + 1)) % size_block
 
 
 let pad (prevlen:nat{prevlen % size_block = 0}) (len:nat{prevlen + len < max_input_len_8}) : Tot (b:bytes{(length b + len) % size_block = 0}) =
