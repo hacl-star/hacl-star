@@ -3,8 +3,8 @@
 TWEETNACL_HOME?=../../../other_providers/tweetnacl
 OPENSSL_HOME?=../../../other_providers/openssl
 LIBSODIUM_HOME ?=../../../other_providers/libsodium/src/libsodium
-CC?=gcc-6 -fno-tree-vectorize -flto
-CCOPTS?= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
+CC=gcc-6 -fno-tree-vectorize -flto
+CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
 
 test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead unit-test-ed25519
 
@@ -54,7 +54,7 @@ test-chacha.exe:
 	$(CC) $(CCOPTS) \
 	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I ../../other_providers/tweetnacl \
 	$(TWEETNACL_HOME)/tweetnacl.c kremlib.c testlib.c Chacha20.c test-chacha.c -o test-chacha.exe \
-	 $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread -ldl
+	 -lsodium -lpthread -ldl $(OPENSSL_HOME)/libcrypto.a
 
 perf-test-chacha: test-chacha.exe
 	./test-chacha.exe perf
@@ -70,7 +70,7 @@ else
 	$(CC) $(CCOPTS) \
 	-I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I $(TWEETNACL_HOME) \
 	$(TWEETNACL_HOME)/tweetnacl.c kremlib.c testlib.c Chacha20_Vec128.c test-chacha-vec128.c -o test-chacha-vec128.exe \
-	 $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread -ldl
+	-lsodium -lpthread -ldl $(OPENSSL_HOME)/libcrypto.a
 endif
 
 perf-test-chacha-vec128: test-chacha-vec128.exe
@@ -92,7 +92,7 @@ test-curve.exe:
 	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
 	kremlib.c testlib.c Curve25519.c test-curve.c -o test-curve.exe \
-	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+	 $(OPENSSL_HOME)/libcrypto.a  $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
 
 perf-test-curve: test-curve.exe
 	./test-curve.exe perf
@@ -105,7 +105,7 @@ test-ed25519.exe: Ed25519.c test-ed25519.c
 	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c SHA2_512.c \
 	kremlib.c testlib.c $^ -o test-ed25519.exe \
-	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+	-lcrypto -lssl -lsodium -lpthread -ldl
 
 perf-test-ed25519: test-ed25519.exe
 	./test-ed25519.exe perf
