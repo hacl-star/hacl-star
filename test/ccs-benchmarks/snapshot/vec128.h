@@ -124,6 +124,8 @@ static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned in
 #else
 #if defined(__ARM_NEON__)
 
+#include "arm_neon.h"
+
 #define VEC128
 #define vec_size 4
 
@@ -161,7 +163,7 @@ static inline vec vec_shuffle_left(vec x, unsigned int n) {
 
 static inline vec vec_load_32x4(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4){
   vec v;
-  v.v = (vec128) {x4,x3,x2,x1};
+  v.v = (vec128) {x1,x2,x3,x4};
   return v;
 }
 
@@ -192,7 +194,6 @@ static inline vec vec_load128_le(const unsigned char* in) {
 static inline void vec_store_le(unsigned char* out, vec v) {
   vst1q_u32((uint32_t*)out,v.v);
 }
-
 
 static inline vec vec_add(vec v1, vec v2) {
   vec r;
@@ -247,6 +248,6 @@ static inline vec vec_interleave64_low(vec v1, vec v2) {
 
 #else
 #error "vec128 only defined for SSSE3 and ARM NEON"
-
-
+#endif
+#endif
 #endif

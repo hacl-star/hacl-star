@@ -344,9 +344,6 @@ static const uint64_t two51_1 = 2251799813685247;
 // so that each translation unit gets its own copy and the C compiler can
 // optimize.
 
-#if defined(__GNUC__) || defined(__clang__)
-#include "x86intrin.h"
-#endif 
 
 #define inline __attribute__((always_inline))
 typedef struct {uint64_t low; uint64_t high;} uint128_t, FStar_UInt128_t;
@@ -393,8 +390,7 @@ static inline void store128_be(uint8_t *b, uint128_t n) {
 }
 
 static inline uint128_t uint128_add(uint128_t x, uint128_t y) {
-#if 0
-  //defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
   uint128_t r;
   uint32_t x0 = (uint32_t) x.low;
   uint32_t x1 = (uint32_t) (x.low>>32);
@@ -417,11 +413,11 @@ static inline uint128_t uint128_add(uint128_t x, uint128_t y) {
   r.high = (((uint64_t)r3) << 32) ^ r2;
   */
   
-  asm("addl %[x0], %[y0]; adcl %[x1], %[y1]; adcl %[x2], %[y2]; adcl %[x3], %[y3];":
-       [y0] "=r" (y0),
-       [y1] "=r" (y1),
-       [y2] "=r" (y2),
-       [y3] "=r" (y3) :
+  asm("adds %[y0], %[x0], %[y0]; adcs %[y1], %[x1], %[y1]; adcs %[y2], %[x2], %[y2]; adcs %[y3], %[x3], %[y3];":
+       [y0] "+r" (y0),
+       [y1] "+r" (y1),
+       [y2] "+r" (y2),
+       [y3] "+r" (y3) :
        [x0] "r" (x0),
        [x1] "r" (x1),
        [x2] "r" (x2),

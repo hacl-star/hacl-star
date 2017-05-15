@@ -3,8 +3,8 @@
 TWEETNACL_HOME?=../../../other_providers/tweetnacl
 OPENSSL_HOME?=../../../other_providers/openssl
 LIBSODIUM_HOME ?=../../../other_providers/libsodium/src/libsodium
-CC=gcc-6 -fno-tree-vectorize -flto
-CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
+CC=gcc-6 -flto
+CCOPTS= -Ofast -march=native -fwrapv -fomit-frame-pointer -funroll-loops -mfpu=neon
 
 test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead unit-test-ed25519
 
@@ -100,12 +100,25 @@ perf-test-curve: test-curve.exe
 unit-test-curve: test-curve.exe
 	./test-curve.exe unit-test
 
+test-curve32.exe: Curve25519_32.c kremlib.h
+	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
+	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	kremlib.c testlib.c Curve25519_32.c test-curve.c -o test-curve32.exe \
+	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+
+perf-test-curve32: test-curve32.exe
+	./test-curve32.exe perf
+
+unit-test-curve32: test-curve32.exe
+	./test-curve32.exe unit-test
+
 test-ed25519.exe: Ed25519.c test-ed25519.c
 	$(CC) $(CCOPTS) \
 	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c SHA2_512.c \
 	kremlib.c testlib.c $^ -o test-ed25519.exe \
-	-lcrypto -lssl -lsodium -lpthread -ldl
+	 $(OPENSSL_HOME)/libcrypto.a  $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
 
 perf-test-ed25519: test-ed25519.exe
 	./test-ed25519.exe perf
@@ -149,6 +162,7 @@ test-aead.exe:
 	$(CC) $(CCOPTS) \
 	AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
 	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	Chacha20.o AEAD_Poly1305_64.o kremlib.c testlib.c Hacl_Policies.c Chacha20Poly1305.c test-aead.c -o test-aead.exe \
 	-lsodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread -ldl
 
