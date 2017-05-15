@@ -23,6 +23,20 @@ perf-test-poly: test-poly.exe
 unit-test-poly: test-poly.exe
 	./test-poly.exe unit-test
 
+
+test-poly32.exe: Poly1305_32.c kremlib-32.h
+	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
+	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	kremlib.c testlib.c Poly1305_32.c test-poly.c -o test-poly32.exe \
+	-lsodium $(OPENSSL_HOME)/libcrypto.a
+
+perf-test-poly32: test-poly32.exe
+	./test-poly32.exe perf
+
+unit-test-poly32: test-poly32.exe
+	./test-poly32.exe unit-test
+
 test-salsa.exe:
 	$(CC) $(CCOPTS) \
 	Salsa20.c -c -o Salsa20.o
