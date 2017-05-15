@@ -19,8 +19,7 @@ all:
 	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error"; $(GFIND) ../code -name out.krml -exec touch {} \; ; fi
 	# JP FIXME XXX why was this disabled?
 	$(MAKE) extract-c-code OTHERFLAGS="--trace_error"
-	$(MAKE) ct OTHERFLAGS="--trace_error"
-	$(MAKE) verify OTHERFLAGS="--trace_error"
+	$(MAKE) ct verify OTHERFLAGS="--trace_error"
 	# $(MAKE) -C openssl-engine
 
 travis:
