@@ -1272,15 +1272,86 @@ let update3 log output plain st =
   Seq.lemma_eq_intro (as_seq h6 output) FStar.Seq.(as_seq h6 o0 @| as_seq h6 o1 @| as_seq h6 o2);
   pop_frame();
   let h7 = ST.get() in
-  lemma_modifies_update3 h0 h1 h2 h3 h4 h5 h6 h7 output st k0 k1 k2  
+  lemma_modifies_update3 h0 h1 h2 h3 h4 h5 h6 h7 output st k0 k1 k2
 
 
-#reset-options "--max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 50"
+
+
+val update3':
+  log:log_t ->
+  output:uint8_p ->
+  plain:uint8_p{disjoint plain output} ->
+  len:UInt32.t{192 * UInt32.v len = length output /\ length output == length plain} ->
+  st:state{disjoint st output /\ disjoint st plain} ->
+  i:UInt32.t{UInt32.v i < UInt32.v len} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h plain /\
+      (match Ghost.reveal log with | MkLog k n ctr -> U32.v ctr + 3 * U32.v len < pow2 32 /\
+       (let c' = U32.(ctr +^ 3ul *^  i) in
+        let log' = Ghost.hide (MkLog k n c') in
+        let plain = Seq.slice (as_seq h plain) 0 (192 * U32.v i) in
+        invariant log' h st /\
+        Seq.slice (as_seq h output) 0 (192 * U32.v i) == Spec.CTR3.counter_mode_blocks3 k n (U32.v ctr) plain (U32.v i)))))
+    (ensures (fun h0 _ h1 -> live h0 output /\ live h0 plain /\ live h0 st /\
+        live h1 output /\ live h1 plain /\ live h1 st /\ modifies_2 output st h0 h1 /\
+        as_seq h1 plain == as_seq h0 plain /\
+      (match Ghost.reveal log with | MkLog k n ctr -> U32.v ctr + 3 * U32.v len < pow2 32 /\
+       (let c' = U32.(ctr +^ 3ul *^ i +^ 3ul) in
+        let log' = Ghost.hide (MkLog k n c') in
+        let plain = Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192) in
+        invariant log' h1 st /\
+        Seq.slice (as_seq h1 output) 0 (192 * U32.v i + 192) == Spec.CTR3.counter_mode_blocks3 k n (U32.v ctr) plain (U32.v i + 1)))))
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+let update3' log output plain len st i =
+  let h0  = ST.get() in
+  let h   = ST.get() in
+  (* Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192)) *)
+  let out_sub      = Buffer.sub output 0ul U32.(192ul *^ i +^ 192ul) in
+  let plain_sub    = Buffer.sub plain 0ul U32.(192ul *^ i +^ 192ul)  in
+  let out_block    = Buffer.sub output U32.(192ul *^ i) 192ul        in
+  let plain_block  = Buffer.sub plain U32.(192ul *^ i) 192ul         in
+  let out_prefix   = Buffer.sub output 0ul U32.(192ul *^ i)          in
+  let plain_prefix = Buffer.sub plain 0ul U32.(192ul *^ i)           in
+  Seq.lemma_eq_intro (as_seq h out_sub) (Seq.slice (as_seq h output) 0 (192 * U32.v i + 192));
+  Seq.lemma_eq_intro (as_seq h plain_sub) (Seq.slice (as_seq h plain) 0 (192 * U32.v i + 192));
+  Seq.lemma_eq_intro (as_seq h plain_prefix) (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i));
+  Seq.lemma_eq_intro (as_seq h plain_sub) (Seq.append (as_seq h plain_prefix) (as_seq h plain_block));
+  Seq.lemma_eq_intro (as_seq h plain_block) (Seq.slice (as_seq h0 plain) (192 * U32.v i) (192 * U32.v i + 192));
+  Seq.lemma_eq_intro FStar.Seq.(slice (as_seq h0 plain) 0 (192 * U32.v i) @| slice (as_seq h0 plain) (192 * U32.v i) (192 * U32.v i + 192))
+                     (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192));
+  let log' = log_incrn log U32.(3ul *^ i) in
+  Spec.CTR3.lemma_counter_mode_blocks3_def1 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr ) (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192)) (U32.v i + 1);
+  update3 log' out_block plain_block st;
+  let h'  = ST.get() in
+  Seq.lemma_eq_intro FStar.Seq.(slice (as_seq h' output) 0 (192 * U32.v i) @| slice (as_seq h' output) (192 * U32.v i) (192 * U32.v i + 192))
+                       (Seq.slice (as_seq h' output) 0 (192 * U32.v i + 192));
+  no_upd_lemma_2 h h' out_block st out_prefix;
+  no_upd_lemma_2 h h' out_block st plain_prefix;
+  no_upd_lemma_2 h h' out_block st plain_block;
+  no_upd_lemma_2 h h' out_block st plain;
+  let log'' = log_incrn log' 2ul in
+  state_incr log'' st;
+  let h'' = ST.get() in
+  no_upd_lemma_1 h' h'' st output;
+  no_upd_lemma_1 h' h'' st plain;
+  no_upd_lemma_1 h' h'' st out_block;
+  assert(match Ghost.reveal log with | MkLog k n c ->
+    let c' = U32.(c +^ 3ul *^ (i+^1ul)) in
+    let log' = Ghost.hide (MkLog k n c') in
+    invariant log' h'' st);
+  Seq.lemma_eq_intro (as_seq h'' out_sub) (Seq.append (as_seq h out_prefix) (as_seq h' out_block));
+  Seq.lemma_eq_intro (as_seq h'' out_sub)
+                     (match Ghost.reveal log with | MkLog k n c ->
+                      Spec.CTR3.counter_mode_blocks3 k n (UInt32.v c) (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192)) (U32.v i+1))
+
 
 val chacha20_counter_mode_blocks3:
   log:log_t ->
   output:uint8_p ->
-  plain:uint8_p ->
+  plain:uint8_p{disjoint plain output} ->
   len:UInt32.t{192 * UInt32.v len = length output /\ length output == length plain} ->
   st:state{disjoint st output /\ disjoint st plain} ->
   Stack unit
@@ -1293,10 +1364,10 @@ val chacha20_counter_mode_blocks3:
          U32.v ctr + 3 * UInt32.v len < pow2 32 /\ (
          let updated_log = Ghost.hide (MkLog k n U32.(ctr +^ 3ul *^ len)) in
          let output = as_seq h1 output in let plain = as_seq h0 plain in
-         invariant updated_log h1 st /\ 
+         invariant updated_log h1 st /\
          output == Spec.CTR3.counter_mode_blocks3 k n (U32.v ctr) plain (U32.v len)))))
 
-#reset-options "--max_fuel 0 --z3rlimit 300"
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 let chacha20_counter_mode_blocks3 log output plain len st =
   let len3 = U32.(len /^ 3ul) in
@@ -1304,6 +1375,7 @@ let chacha20_counter_mode_blocks3 log output plain len st =
   let h0 = ST.get() in
   let inv (h1:HyperStack.mem) (i:nat{i <= UInt32.v len3}) : Type0 =
     live h1 output /\ live h1 plain /\ live h1 st /\ modifies_2 output st h0 h1 /\
+    as_seq h1 plain == as_seq h0 plain /\
     (match Ghost.reveal log with | MkLog k n c ->
      let c' = U32.(c +^ 3ul *^ UInt32.uint_to_t i) in
      let log' = Ghost.hide (MkLog k n c') in
@@ -1315,14 +1387,45 @@ let chacha20_counter_mode_blocks3 log output plain len st =
     (requires (fun h -> inv h (U32.v i)))
     (ensures (fun h0 _ h1 -> inv h1 (U32.v i + 1)))
   =
-    let out_sub = Buffer.sub output 0ul U32.(192ul *^ i +^ 192ul) in
-    let plain_sub = Buffer.sub plain 0ul U32.(192ul *^ i +^ 192ul) in
-    let out_block = Buffer.sub output U32.(192ul *^ i) 192ul in
-    let plain_block = Buffer.sub plain U32.(192ul *^ i) 192ul in
-    let out_prefix = Buffer.sub output 0ul U32.(192ul *^ i) in
-    let plain_prefix = Buffer.sub plain 0ul U32.(192ul *^ i) in
-    update3 log out_block plain_block st;
-    state_incr log st in
+    let h   = ST.get() in
+    (* Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192)) *)
+    let out_sub      = Buffer.sub output 0ul U32.(192ul *^ i +^ 192ul) in
+    let plain_sub    = Buffer.sub plain 0ul U32.(192ul *^ i +^ 192ul)  in
+    let out_block    = Buffer.sub output U32.(192ul *^ i) 192ul        in
+    let plain_block  = Buffer.sub plain U32.(192ul *^ i) 192ul         in
+    let out_prefix   = Buffer.sub output 0ul U32.(192ul *^ i)          in
+    let plain_prefix = Buffer.sub plain 0ul U32.(192ul *^ i)           in
+    let plain'       = Buffer.sub plain 0ul U32.(192ul *^ i +^ 192ul)  in
+    let output'      = Buffer.sub output 0ul U32.(192ul *^ i +^ 192ul) in
+    Seq.lemma_eq_intro (as_seq h plain_prefix) (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i));
+    Seq.lemma_eq_intro (as_seq h plain_block) (Seq.slice (as_seq h0 plain) (192 * U32.v i) (192 * U32.v i + 192));
+    Seq.lemma_eq_intro FStar.Seq.(slice (as_seq h0 plain) 0 (192 * U32.v i) @| slice (as_seq h0 plain) (192 * U32.v i) (192 * U32.v i + 192))
+                       (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192));
+    let log' = log_incrn log U32.(3ul *^ i) in
+    Spec.CTR3.lemma_counter_mode_blocks3_def1 (Ghost.reveal log').k (Ghost.reveal log').n (U32.v (Ghost.reveal log').ctr ) (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192)) (U32.v i + 1);
+    update3 log' out_block plain_block st;
+    let h'  = ST.get() in
+    Seq.lemma_eq_intro FStar.Seq.(slice (as_seq h' output) 0 (192 * U32.v i) @| slice (as_seq h' output) (192 * U32.v i) (192 * U32.v i + 192))
+                       (Seq.slice (as_seq h' output) 0 (192 * U32.v i + 192));
+    no_upd_lemma_2 h h' out_block st out_prefix;
+    no_upd_lemma_2 h h' out_block st plain_prefix;
+    no_upd_lemma_2 h h' out_block st plain_block;
+    no_upd_lemma_2 h h' out_block st plain;
+    let log'' = log_incrn log' 2ul in
+    state_incr log'' st;
+    let h'' = ST.get() in
+    no_upd_lemma_1 h' h'' st output;
+    no_upd_lemma_1 h' h'' st plain;
+    no_upd_lemma_1 h' h'' st out_block;
+    assert(match Ghost.reveal log with | MkLog k n c ->
+      let c' = U32.(c +^ 3ul *^ (i+^1ul)) in
+      let log' = Ghost.hide (MkLog k n c') in
+      invariant log' h'' st);
+    Seq.lemma_eq_intro (Seq.slice (as_seq h'' output) 0 (192 * U32.v i + 192))
+                       (match Ghost.reveal log with | MkLog k n c ->
+                        Spec.CTR3.counter_mode_blocks3 k n (UInt32.v c) (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192)) (U32.v i+1))
+    in
+  admit();
   C.Loops.for 0ul len3 inv f'
 
 
