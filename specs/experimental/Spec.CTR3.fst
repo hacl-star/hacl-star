@@ -55,7 +55,11 @@ let counter_mode_blocks key nonce counter plain len =
     let mask0  = Spec.Chacha20_vec.chacha20_block key nonce (counter + 3 * len3) in
     let mask1  = Spec.Chacha20_vec.chacha20_block key nonce (counter + 3 * len3 + 1) in
     let mask   = mask0 @| mask1 in
-    xor #128 plain3' mask
+    let block0  = slice plain3' 0   64  in
+    let block1  = slice plain3' 64  128 in
+    let cipher0 = xor #64 block0 mask0 in
+    let cipher1 = xor #64 block1 mask1 in
+    cipher0 @| cipher1
   else if rest3 = 1 then
     let mask   = Spec.Chacha20_vec.chacha20_block key nonce (counter + 3 * len3) in
     xor #64 plain3' mask
