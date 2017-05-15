@@ -3,8 +3,8 @@
 TWEETNACL_HOME?=../../../other_providers/tweetnacl
 OPENSSL_HOME?=../../../other_providers/openssl
 LIBSODIUM_HOME ?=../../../other_providers/libsodium/src/libsodium
-CC=gcc-6 -flto
-CCOPTS= -Ofast -march=native -fwrapv -fomit-frame-pointer -funroll-loops -mfpu=neon
+CC=gcc-6 -fno-tree-vectorize -flto
+CCOPTS= -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops 
 
 test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead unit-test-ed25519
 

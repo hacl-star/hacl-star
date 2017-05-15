@@ -249,6 +249,3 @@ static inline vec vec_interleave64_low(vec v1, vec v2) {
 #error "vec128 only defined for SSSE3 and ARM NEON"
 #endif
 #endif
-#endif
-
-#endif
