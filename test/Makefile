@@ -15,8 +15,8 @@ all:
 	# Ugly hack because we can't encode the fact that the generation of C
 	# files depends on i) Kremlin.native ii) the out.krml files iii) the
 	# KREMLIN_ARGS environment variable.
-	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error"; $(GFIND) ../code -name out.krml -exec touch {} \; ; fi
-	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error"; $(GFIND) ../code -name out.krml -exec touch {} \; ; fi
+	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error" ; fi
+	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error" ; fi
 	$(MAKE) extract-c OTHERFLAGS="--trace_error"
 	$(MAKE) ct OTHERFLAGS="--trace_error"
 	$(MAKE) verify OTHERFLAGS="--trace_error"
@@ -28,6 +28,7 @@ travis:
 	$(MAKE) -C .. world
 
 extract-c-code:
+	$(GFIND) ../code -name out.krml -exec touch {} \;
 	$(MAKE) -C $(HACL_HOME)/code extract-c
 
 extract-c-code-experimental:
