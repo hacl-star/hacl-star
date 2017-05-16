@@ -156,7 +156,7 @@ let pad_last log st input len =
   l
 
 
-#reset-options "--max_fuel 0 -max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 private val lemma_pad_16_:
   s:Seq.seq U8.t{Seq.length s % 16 = 0 /\ Seq.length s < pow2 32} ->

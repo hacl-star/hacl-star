@@ -172,7 +172,7 @@ val prf_enxor_leaves_none_strictly_above_x:
 		     Buffer.frameOf c <> t.rgn)
            (ensures none_above_prf_st (PRF.incr i x) t h_1)
 
-#reset-options "--max_fuel 0 --max_ifuel 0 -z3rlimit 200 --z3refresh"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200 --z3refresh"
 let prf_enxor_leaves_none_strictly_above_x #i t x len remaining_len c h_0 h_1 =
   if prf i && x.ctr <^ maxCtr i then
     begin
