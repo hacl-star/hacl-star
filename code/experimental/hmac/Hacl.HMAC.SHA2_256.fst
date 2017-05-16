@@ -72,17 +72,43 @@ val wrap_key:
   key    :uint8_p  {disjoint output key} ->
   len    :uint32_t {v len = length key /\ v len < Spec_Hash.max_input_len_8} ->
   Stack unit
-        (requires (fun h -> live h output /\ live h key))
-        (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
+        (requires (fun h -> live h output /\ live h key /\ as_seq h output == Seq.create (v Hash.size_block) 0uy))
+        (ensures  (fun h0 _ h1 -> live h1 output /\ live h1 key /\ live h0 output /\ live h0 key /\ modifies_1 output h0 h1
+                  /\ as_seq h0 output == Seq.create (v Hash.size_block) 0uy
+                  /\ as_seq h1 output == Spec.wrap_key (as_seq h0 key)))
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 250"
 
 let wrap_key output key len =
-  if len <=^ Hash.size_block  then
-    Buffer.blit key 0ul output 0ul len
+ (**) let h0 = ST.get () in
+  if len <=^ Hash.size_block then begin
+    (**) assert(v Hash.size_block - v len >= 0);
+    (**) assert(as_seq h0 output == Seq.create (v Hash.size_block) 0uy);
+    Buffer.blit key 0ul output 0ul len;
+    (**) let h1 = ST.get () in
+    (**) Seq.lemma_eq_intro (Seq.slice (as_seq h1 output) 0 (v len)) (as_seq h0 key);
+    (**) assert(Seq.slice (as_seq h1 output) 0 (v len) == as_seq h0 key);
+    (**) Seq.lemma_eq_intro (Seq.slice (as_seq h1 output) (v len) (v Hash.size_block)) (Seq.create (v Hash.size_block - v len) 0uy);
+    (**) assert(Seq.slice (as_seq h1 output) (v len) (v Hash.size_block) == Seq.create (v Hash.size_block - v len) 0uy);
+    (**) Seq.lemma_eq_intro (as_seq h1 output) (Seq.append (as_seq h0 key) (Seq.create (v Hash.size_block - v len) 0uy));
+    (**) assert(as_seq h1 output == Seq.append (as_seq h0 key) (Seq.create (v Hash.size_block - v len) 0uy)) end
   else begin
+    (**) assert(v Hash.size_block - v Hash.size_hash >= 0);
+    (**) assert(as_seq h0 output == Seq.create (v Hash.size_block) 0uy);
+    (**) Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 (v Hash.size_hash)) (Seq.create (v Hash.size_hash) 0uy);
+    (**) assert(Seq.slice (as_seq h0 output) 0 (v Hash.size_hash) == Seq.create (v Hash.size_hash) 0uy);
+    (**) Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) (v Hash.size_hash) (v Hash.size_block)) (Seq.create (v Hash.size_block - v Hash.size_hash) 0uy);
+    (**) assert(Seq.slice (as_seq h0 output) (v Hash.size_hash) (v Hash.size_block) == Seq.create (v Hash.size_block - v Hash.size_hash) 0uy);
     let nkey = Buffer.sub output 0ul Hash.size_hash in
-    Hash.hash nkey key len
+    Hash.hash nkey key len;
+    (**) let h1' = ST.get () in
+    (**) assert(as_seq h1' nkey == Spec_Hash.hash (as_seq h0 key));
+    (**) assert(Seq.slice (as_seq h1' output) 0 (v Hash.size_hash) == Spec_Hash.hash (as_seq h0 key));
+    (**) no_upd_lemma_1 h0 h1' (Buffer.sub output 0ul Hash.size_hash) (Buffer.sub output Hash.size_hash (Hash.size_block -^ Hash.size_hash));
+    (**) Seq.lemma_eq_intro (Seq.slice (as_seq h1' output) (v Hash.size_hash) (v Hash.size_block)) (Seq.create (v Hash.size_block - v Hash.size_hash) 0uy);
+    (**) assert(Seq.slice (as_seq h1' output) (v Hash.size_hash) (v Hash.size_block) == Seq.create (v Hash.size_block - v Hash.size_hash) 0uy);
+    (**) Seq.lemma_eq_intro (as_seq h1' output) (Seq.append (as_seq h1' nkey) (Seq.create (v Hash.size_block - v Hash.size_hash) 0uy));
+    (**) assert(as_seq h1' output == Seq.append (as_seq h1' nkey) (Seq.create (v Hash.size_block - v Hash.size_hash) 0uy))
   end
 
 
