@@ -17,15 +17,16 @@ module H32 = Hacl.UInt32
 
 open Hacl.UInt32x4
 
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
 let u32 = U32.t
 let h32 = H32.t
 let uint8_p = buffer H8.t
 
 type state = b:Buffer.buffer vec{length b = 4}
 let blocks = U32.(vec_size /^ 4ul)
-let vecsizebytes = U32.(vec_size *^ 4ul)
-
-#reset-options "--max_fuel 0 --z3rlimit 100"
+let vecsizebytes = 16ul
 
 [@ "c_inline"]
 val state_alloc:
@@ -102,14 +103,15 @@ val state_to_key:
 [@ "c_inline"]
 let state_to_key k = ()
 
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 [@ "c_inline"]
 val state_to_key_block:
     stream_block:uint8_p{length stream_block = 64} ->
     k:state{disjoint k stream_block} ->
     Stack unit
-      (requires (fun h -> live h k))
-      (ensures  (fun h0 _ h1 -> live h0 k /\ modifies_1 k h0 h1 /\ live h1 stream_block /\
+      (requires (fun h -> live h k /\ live h stream_block))
+      (ensures  (fun h0 _ h1 -> live h0 k /\ modifies_1 stream_block h0 h1 /\ live h1 stream_block /\
         (let stream_block = as_seq h1 stream_block in
          let k = as_seq h0 k in
          let op_String_Access = Seq.index in
@@ -117,21 +119,52 @@ val state_to_key_block:
                                     Spec.Lib.uint32s_to_le 4 (vec_as_seq k.[1]) @|
                                     Spec.Lib.uint32s_to_le 4 (vec_as_seq k.[2]) @|
                                     Spec.Lib.uint32s_to_le 4 (vec_as_seq k.[3])))))
+
+#reset-options "--max_fuel 0 --z3rlimit 20"
+
+val lemma_state_to_key_block:
+  a:Seq.seq Hacl.UInt8.t{Seq.length a = 16} ->
+  b:Seq.seq Hacl.UInt32.t{Seq.length b = 4} ->
+  Lemma (requires (Spec.Lib.uint32s_from_le 4 a == b))
+        (ensures (a == Spec.Lib.uint32s_to_le 4 b))
+let lemma_state_to_key_block a b =
+  Spec.Lib.lemma_uint32s_to_le_bij 4 b;
+  Spec.Lib.lemma_uint32s_from_le_bij 4 a;
+  Spec.Lib.lemma_uint32s_from_le_inj 4 a (Spec.Lib.uint32s_to_le 4 b);
+  Seq.lemma_eq_intro a (Spec.Lib.uint32s_to_le 4 b)
+  
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
 [@ "c_inline"]
 let state_to_key_block stream_block k =
-  admit();
-  state_to_key k;
-  let bb = U32.(blocks *^ 16ul) in
-  let bb2 = U32.(bb *^ 2ul) in
-  let bb3 = U32.(bb *^ 3ul) in
   let k0 = k.(0ul) in
   let k1 = k.(1ul) in
   let k2 = k.(2ul) in
   let k3 = k.(3ul) in
-  vec_store_le (Buffer.sub stream_block 0ul bb) k.(0ul);
-  vec_store_le (Buffer.sub stream_block bb  16ul) k.(1ul);
-  vec_store_le (Buffer.sub stream_block bb2 16ul) k.(2ul);
-  vec_store_le (Buffer.sub stream_block bb3 16ul) k.(3ul)
+  let a = Buffer.sub stream_block 0ul  16ul in
+  let b = Buffer.sub stream_block 16ul 16ul in
+  let c = Buffer.sub stream_block 32ul 16ul in
+  let d = Buffer.sub stream_block 48ul 16ul in
+  let h0 = ST.get() in
+  vec_store_le a k0;
+  let h1 = ST.get() in
+  lemma_state_to_key_block (as_seq h1 a) (vec_as_seq k0);
+  vec_store_le b k1;
+  let h2 = ST.get() in
+  lemma_state_to_key_block (as_seq h2 b) (vec_as_seq k1);
+  no_upd_lemma_1 h1 h2 b a;
+  vec_store_le c k2;
+  let h3 = ST.get() in
+  lemma_state_to_key_block (as_seq h3 c) (vec_as_seq k2);
+  no_upd_lemma_1 h2 h3 c a;
+  no_upd_lemma_1 h2 h3 c b;
+  vec_store_le d k3;
+  let h4 = ST.get() in
+  lemma_state_to_key_block (as_seq h4 d) (vec_as_seq k3);
+  no_upd_lemma_1 h3 h4 d a;
+  no_upd_lemma_1 h3 h4 d b;
+  no_upd_lemma_1 h3 h4 d c;
+  Seq.lemma_eq_intro (as_seq h4 stream_block) FStar.Seq.(as_seq h4 a @| as_seq h4 b @| as_seq h4 c @| as_seq h4 d)
 
 
 [@ "substitute"]
@@ -201,21 +234,44 @@ val ctr_ivsetup:
        st1.[1] == st0.[1] /\
        st1.[2] == st0.[2] /\
        vec_as_seq st1.[3] == Seq.cons ctr (Spec.Lib.uint32s_from_le 3 (as_seq h0 iv))) ))
+
+
+val lemma_ctr_ivsetup:
+  iv:Seq.seq Hacl.UInt8.t{Seq.length iv = 12} ->
+  Lemma (let s = Spec.Lib.uint32s_from_le 3 iv in
+         Seq.index s 0 == Spec.Lib.uint32_from_le (Seq.slice iv 0 4) /\
+         Seq.index s 1 == Spec.Lib.uint32_from_le (Seq.slice iv 4 8) /\
+         Seq.index s 2 == Spec.Lib.uint32_from_le (Seq.slice iv 8 12))
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+let lemma_ctr_ivsetup iv =
+  Spec.Lib.lemma_uint32s_from_le_def_1 3 iv;
+  assert(Seq.index (Spec.Lib.uint32s_from_le 3 iv) 2 == Spec.Lib.uint32_from_le (Seq.slice iv 8 12));
+  Spec.Lib.lemma_uint32s_from_le_def_1 2 (Seq.slice iv 0 8);
+  Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 8) 4 8) (Seq.slice iv 4 8);
+  Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 8) 0 4) (Seq.slice iv 0 4);
+  assert(Seq.index (Spec.Lib.uint32s_from_le 3 iv) 1 == Spec.Lib.uint32_from_le (Seq.slice iv 4 8));
+  Spec.Lib.lemma_uint32s_from_le_def_1 1 (Seq.slice iv 0 4);
+  Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 4) 0 4) (Seq.slice iv 0 4);
+  Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 4) 0 0) Seq.createEmpty;
+  Spec.Lib.lemma_uint32s_from_le_def_0 0 (Seq.slice iv 0 0)
+  
+
 [@ "substitute"]
 let ctr_ivsetup st ctr iv =
   let n0 = load32_le (Buffer.sub iv 0ul 4ul) in
   let n1 = load32_le (Buffer.sub iv 4ul 4ul) in
   let n2 = load32_le (Buffer.sub iv 8ul 4ul) in
   let h = ST.get() in
-  assume (Seq.index (Spec.Lib.uint32s_from_le 3 (as_seq h iv)) 0 == n0);
-  assume (Seq.index (Spec.Lib.uint32s_from_le 3 (as_seq h iv)) 1 == n1);
-  assume (Seq.index (Spec.Lib.uint32s_from_le 3 (as_seq h iv)) 2 == n2);
+  Seq.lemma_eq_intro (as_seq h iv) FStar.Seq.(as_seq h (Buffer.sub iv 0ul 4ul) @| as_seq h (Buffer.sub iv 4ul 4ul) @| as_seq h (Buffer.sub iv 8ul 4ul));
+  lemma_ctr_ivsetup (as_seq h iv);
   let v =  vec_load_32x4 ctr n0 n1 n2 in
   Seq.lemma_eq_intro (Seq.slice (vec_as_seq v) 1 4) (Spec.Lib.uint32s_from_le 3 (as_seq h iv));
   Seq.lemma_eq_intro (vec_as_seq v) (Seq.cons ctr (Spec.Lib.uint32s_from_le 3 (as_seq h iv)));
   st.(3ul) <- v
 
-
+  
 [@ "c_inline"]
 val state_setup:
   st:state ->

@@ -5,11 +5,13 @@ include $(HACL_HOME)/code/Makefile.include
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental
+		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
+		--include $(HACL_HOME)/code/salsa-family
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental
+		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
+		--include $(HACL_HOME)/code/salsa-family
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst

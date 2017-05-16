@@ -24,11 +24,11 @@ let u32 = U32.t
 let h32 = H32.t
 let uint8_p = buffer H8.t
 
-unfold let vecsizebytes2 = 32ul
-unfold let vecsizebytes3 = 48ul
-unfold let vecsizebytes4 = 64ul
-unfold let vecsizebytes8 = 128ul
-unfold let vecsizebytes12 = 192ul
+let vecsizebytes2 = 32ul
+let vecsizebytes3 = 48ul
+let vecsizebytes4 = 64ul
+let vecsizebytes8 = 128ul
+let vecsizebytes12 = 192ul
 
 let idx = a:U32.t{U32.v a < 4}
 
@@ -483,7 +483,7 @@ let log_incr log =
   Ghost.elift1 (fun l -> match l with | MkLog k n c -> MkLog k n FStar.UInt32.(c +%^ 1ul)) log
 
 
-#reset-options "--max_fuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --z3rlimit 50"
 
 [@ "c_inline"]
 val chacha20_incr3:
