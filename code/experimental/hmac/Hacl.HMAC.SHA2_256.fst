@@ -142,3 +142,36 @@ let hmac_core mac key data len =
 
   (* Pop the memory frame *)
   (**) pop_frame ()
+
+
+
+#reset-options "--max_fuel 0  --z3rlimit 10"
+
+val hmac:
+  mac     :uint8_p  {length mac = v Hash.size_hash} ->
+  key     :uint8_p  {length key = v Hash.size_block /\ disjoint key mac} ->
+  keylen  :uint32_t {v keylen = length key} ->
+  data    :uint8_p  {length data + v Hash.size_block < Spec_Hash.max_input_len_8 /\ disjoint data mac /\ disjoint data key} ->
+  datalen :uint32_t {v datalen = length data} ->
+  Stack unit
+        (requires (fun h -> live h mac /\ live h key /\ live h data))
+        (ensures  (fun h0 _ h1 -> live h1 mac /\ modifies_1 mac h0 h1))
+
+#reset-options "--max_fuel 0  --z3rlimit 25"
+
+let hmac mac key keylen data datalen =
+
+  (* Push a new memory frame *)
+  (**) push_frame ();
+
+  (* Allocate memory for the wrapped key *)
+  let nkey = Buffer.create (u8_to_h8 0x00uy) Hash.size_block in
+
+  (* Call the key wrapping function *)
+  wrap_key nkey key keylen;
+
+  (* Call the core HMAC function *)
+  hmac_core mac nkey data datalen;
+
+  (* Pop the memory frame *)
+  (**) pop_frame ()
