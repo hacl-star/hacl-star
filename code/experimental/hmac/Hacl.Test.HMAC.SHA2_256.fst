@@ -2,7 +2,7 @@ module Hacl.Test.HMAC.SHA2_256
 
 open FStar.Buffer
 
-module Hash = SHA2_256
+module Hash = Hacl.Hash.SHA2_256
 module MAC = HMAC_SHA2_256
 
 
