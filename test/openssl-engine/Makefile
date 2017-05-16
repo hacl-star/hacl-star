@@ -4,15 +4,17 @@ CURVE_HOME=../../code/curve25519/x25519-c
 CHACHA_HOME=../../code/salsa-family/chacha-c
 POLY_HOME=../../code/poly1305/poly-c
 AEAD_HOME=../../code/api/aead-c
+SNAPSHOT_HOME=../ccs-benchmarks/snapshot
 ifeq ($(shell uname),Linux)
   PIC=-fPIC
 else
   PIC=
 endif
+CFLAGS_EXTRACTED=-I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(CHACHA_HOME)/.. -I$(POLY_HOME) -I$(AEAD_HOME)
+CFLAGS_SNAPSHOT=-I$(SNAPSHOT_HOME)
 CFLAGS=-I$(OPENSSL_HOME)/include -L$(OPENSSL_HOME) -I$(KREMLIN_HOME)/kremlib \
-  -I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(CHACHA_HOME)/.. -I$(POLY_HOME) -I$(OPENSSL_HOME) \
-  -I$(AEAD_HOME) \
-  -shared -Wall -Wno-unused-variable -Wno-parentheses -O3 -flto $(PIC)
+  -shared -Wall -Wno-unused-variable -Wno-parentheses -O3 -flto $(PIC) -I$(OPENSSL_HOME) \
+  $(CFLAGS_SNAPSHOT)
 LDFLAGS=-lcrypto
 
 # Some notes. OpenSSL does not expose its implementation of Poly1305 standalone,
@@ -53,8 +55,11 @@ HaclEngine.$(SO): HACLEngine.c $(HACL_IMPL_FILES)
 BCryptEngine.$(SO): BCryptEngine.c
 	$(CC) $(CFLAGS) -DIMPL=IMPL_HACL $< -o $@ -shared $(LDFLAGS) -lbcrypt
 
-.PHONY: test
+.PHONY: test clean
 test: test-OpenSSLEngine.$(SO) test-HaclEngine.$(SO)
 
 test-%: all
 	./test.sh "$(OPENSSL_HOME)" "$(PWD)/$*"
+
+clean:
+	rm -rf *.o *.so *.dll
