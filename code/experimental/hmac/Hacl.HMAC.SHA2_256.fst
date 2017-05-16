@@ -114,6 +114,77 @@ let wrap_key output key len =
 
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
+val hmac_part1:
+  output :uint8_p {length output = v Hash.size_hash} ->
+  ipad   :uint8_p {length ipad = v Hash.size_block /\ disjoint ipad output} ->
+  data   :uint8_p  {length data + v Hash.size_block < Spec_Hash.max_input_len_8 /\ disjoint data output /\ disjoint data ipad} ->
+  len    :uint32_t {length data = v len} ->
+  Stack unit
+        (requires (fun h -> live h output /\ live h ipad /\ live h data))
+        (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
+
+#reset-options "--max_fuel 0  --z3rlimit 25"
+
+let hmac_part1 output ipad data len =
+
+  (* Push a new memory frame *)
+  (**) push_frame ();
+
+  (* Allocate memory for the Hash function state *)
+  let state0 = Hash.alloc () in
+
+  (* Step 3: append data to "result of step 2" *)
+  (* Step 4: apply Hash to "result of step 3" *)
+  let n0 = U32.div len Hash.size_block in
+  let r0 = U32.rem len Hash.size_block in
+  let last0 = Buffer.offset data (n0 *^ Hash.size_block) in
+  Hash.init state0;
+  Hash.update state0 ipad; (* s2 = ipad *)
+  Hash.update_multi state0 data n0;
+  Hash.update_last state0 last0 r0;
+
+  let hash0 = Buffer.sub ipad 0ul Hash.size_hash in (* Salvage memory *)
+  Hash.finish state0 output; (* s4 = hash (s2 @| data) *)
+
+  (* Pop the memory frame *)
+  (**) pop_frame ()
+
+
+#reset-options "--max_fuel 0  --z3rlimit 10"
+
+val hmac_part2:
+  mac   :uint8_p {length mac = v Hash.size_hash} ->
+  opad  :uint8_p {length opad = v Hash.size_block /\ disjoint opad mac} ->
+  hash0 :uint8_p {length hash0 = v Hash.size_hash} ->
+  Stack unit
+        (requires (fun h -> live h mac /\ live h opad /\ live h hash0))
+        (ensures  (fun h0 _ h1 -> live h1 mac /\ modifies_1 mac h0 h1))
+
+#reset-options "--max_fuel 0  --z3rlimit 25"
+
+let hmac_part2 mac opad hash0 =
+
+  (* Push a new memory frame *)
+  (**) push_frame ();
+
+  (* Allocate memory for the Hash function state *)
+  let state1 = Hash.alloc () in
+
+  (* Step 6: append "result of step 4" to "result of step 5" *)
+  (* Step 7: apply H to "result of step 6" *)
+  let n1 = 2ul in (* Hash.size_block + Hash.size_hash fits in 2 blocks *)
+  let r1 = Hash.size_block -^ Hash.size_hash in
+  Hash.init state1;
+  Hash.update state1 opad; (* s5 = opad *)
+  Hash.update_last state1 hash0 r1;
+  Hash.finish state1 mac; (* s7 = hash (s5 @| s4) *)
+
+  (* Pop the memory frame *)
+  (**) pop_frame ()
+
+
+#reset-options "--max_fuel 0  --z3rlimit 10"
+
 val hmac_core:
   mac  :uint8_p  {length mac = v Hash.size_hash} ->
   key  :uint8_p  {length key = v Hash.size_block /\ disjoint key mac} ->
@@ -135,7 +206,6 @@ let hmac_core mac key data len =
   let opad = Buffer.create (u8_to_h8 0x5cuy) Hash.size_block in
 
   (* Allocate memory for the Hash states *)
-  let state0 = Hash.alloc () in
   let state1 = Hash.alloc () in
 
   (* Step 2: xor "result of step 1" with ipad *)
@@ -143,28 +213,15 @@ let hmac_core mac key data len =
 
   (* Step 3: append data to "result of step 2" *)
   (* Step 4: apply Hash to "result of step 3" *)
-  let n0 = U32.div len Hash.size_block in
-  let r0 = U32.rem len Hash.size_block in
-  let last0 = Buffer.offset data (n0 *^ Hash.size_block) in
-  Hash.init state0;
-  Hash.update state0 ipad; (* s2 = ipad *)
-  Hash.update_multi state0 data n0;
-  Hash.update_last state0 last0 r0;
-
   let hash0 = Buffer.sub ipad 0ul Hash.size_hash in (* Salvage memory *)
-  Hash.finish state0 hash0; (* s4 = hash (s2 @| data) *)
+  hmac_part1 hash0 ipad data len;
 
   (* Step 5: xor "result of step 1" with opad *)
   xor_bytes_inplace opad key Hash.size_block;
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   (* Step 7: apply H to "result of step 6" *)
-  let n1 = 2ul in (* Hash.size_block + Hash.size_hash fits in 2 blocks *)
-  let r1 = Hash.size_block -^ Hash.size_hash in
-  Hash.init state1;
-  Hash.update state1 opad; (* s5 = opad *)
-  Hash.update_last state1 hash0 r1;
-  Hash.finish state1 mac; (* s7 = hash (s5 @| s4) *)
+  hmac_part2 mac opad hash0;
 
   (* Pop the memory frame *)
   (**) pop_frame ()
