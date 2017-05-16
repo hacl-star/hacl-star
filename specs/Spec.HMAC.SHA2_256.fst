@@ -25,14 +25,14 @@ let xor_bytes b0 b1 = Spec.Lib.map2 (fun x y -> U8.logxor x y) b0 b1
 
 (* Define a function to wrap the key length after size_block bytes *)
 let wrap_key (key:bytes{Seq.length key < Hash.max_input_len_8}) : Tot (okey:bytes{Seq.length okey = Hash.size_block}) =
-  if Seq.length key > Hash.size_block then
+  if Seq.length key <= Hash.size_block then
+    let pad = Seq.create (Hash.size_block - (Seq.length key)) 0uy in
+    Seq.append key pad
+  else begin
     let nkey = Hash.hash key in
     let pad = Seq.create (Hash.size_block - Hash.size_hash) 0uy in
     Seq.append nkey pad
-  else
-    let pad = Seq.create (Hash.size_block - (Seq.length key)) 0uy in
-    Seq.append key pad
-
+  end
 
 #reset-options "--max_fuel 0 --z3rlimit 10"
 
