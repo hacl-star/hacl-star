@@ -40,7 +40,7 @@ CHACHA_VEC_FILES=Hacl.Impl.Chacha20.Vec128.State.fst \
 
 all-ver: $(addsuffix -verify, $(CHACHA_VEC_FILES))
 
-all-ci: $(addsuffix -ci, $(CHACHA_VEC_FILES))
+all-ci: $(addsuffix -verify, $(CHACHA_VEC_FILES))
 
 all-ct: $(addsuffix -ct, $(CHACHA_VEC_FILES))
 
