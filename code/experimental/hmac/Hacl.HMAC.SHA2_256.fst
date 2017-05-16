@@ -200,7 +200,10 @@ val hmac_core:
   len  :uint32_t {length data = v len} ->
   Stack unit
         (requires (fun h -> live h mac /\ live h key /\ live h data))
-        (ensures  (fun h0 _ h1 -> live h1 mac /\ modifies_1 mac h0 h1))
+        (ensures  (fun h0 _ h1 -> live h1 mac /\ live h0 mac
+                             /\ live h1 key /\ live h0 key
+                             /\ live h1 data /\ live h0 data /\ modifies_1 mac h0 h1
+                             /\ (as_seq h1 mac == Spec.hmac_core (as_seq h0 key) (as_seq h0 data))))
 
 #reset-options "--max_fuel 0  --z3rlimit 25"
 
@@ -232,7 +235,6 @@ let hmac_core mac key data len =
   (**) pop_frame ()
 
 
-
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
 val hmac:
@@ -243,7 +245,10 @@ val hmac:
   datalen :uint32_t {v datalen = length data} ->
   Stack unit
         (requires (fun h -> live h mac /\ live h key /\ live h data))
-        (ensures  (fun h0 _ h1 -> live h1 mac /\ modifies_1 mac h0 h1))
+        (ensures  (fun h0 _ h1 -> live h1 mac /\ live h0 mac
+                             /\ live h1 key /\ live h0 key
+                             /\ live h1 data /\ live h0 data /\ modifies_1 mac h0 h1
+                             /\ (as_seq h1 mac == Spec.hmac (as_seq h0 key) (as_seq h0 data))))
 
 #reset-options "--max_fuel 0  --z3rlimit 25"
 
