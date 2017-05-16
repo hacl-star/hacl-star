@@ -710,13 +710,13 @@ let update_last state data len =
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length are considered public here ! *)
   let (nb, final_blocks) =
-    if U32.(len <^ 55ul) then (1ul, Buffer.offset blocks size_block)
+    if U32.(len <^ 56ul) then (1ul, Buffer.offset blocks size_block)
     else (2ul, blocks)
   in
 
   (**) let h1 = ST.get () in
   (**) Seq.lemma_eq_intro (as_seq h1 final_blocks)
-                          (if U32.(len <^ 55ul) then
+                          (if U32.(len <^ 56ul) then
                               Seq.create (v size_block) 0uy
                            else Seq.create (2 * v size_block) 0uy);
   (**) Seq.lemma_eq_intro (as_seq h1 final_blocks) (Seq.create (v nb * v size_block) 0uy);
