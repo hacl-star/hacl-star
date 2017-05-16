@@ -126,5 +126,38 @@ extract-c:
                 -no-prefix Hacl.Test.X25519 -o x25519.exe
 	./x25519.exe
 
+X25519_LIB= \
+	Hacl.Bignum.Parameters.fst \
+	Hacl.Spec.Bignum.Modulo.fst \
+	Hacl.Spec.EC.AddAndDouble.fst \
+	Hacl.Spec.Bignum.Fsquare.fst \
+	Hacl.Spec.Bignum.Crecip.fst \
+	Hacl.Bignum.Modulo.fst \
+	Hacl.Bignum.Fsquare.fst \
+	Hacl.Bignum.Crecip.fst \
+	Hacl.EC.Point.fst \
+	Hacl.Spec.EC.Format.Lemmas.fst \
+	Hacl.Spec.EC.Format.fst \
+	Hacl.EC.Format.fst \
+
+
+X25519_ONLY=Hacl.Spec.EC.Point.fst \
+	Hacl.Spec.Curve25519.Lemmas.fst \
+	Hacl.Spec.EC.AddAndDouble2.fst \
+	Hacl.EC.AddAndDouble.fst \
+	Hacl.Spec.EC.Ladder.Lemmas.fst \
+	Hacl.Spec.EC.Ladder.fst \
+	Hacl.EC.Ladder.SmallLoop.fst \
+	Hacl.EC.Ladder.BigLoop.fst \
+	Hacl.EC.Ladder.fst \
+	Hacl.Spec.EC.fst \
+	Hacl.EC.fst
+
+count-line:
+	@echo "X25519 LIB LOC"
+	cloc --force-lang=ocaml $(X25519_LIB)
+	@echo "X25519 ONLY LOC"
+	cloc --force-lang=ocaml $(X25519_ONLY)
+
 clean:
 	rm -rf *.exe *.exe.* *.out *~ x25519-c 

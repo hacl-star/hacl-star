@@ -77,6 +77,8 @@ Chacha20_vec2.c: interfaces/Hacl.UInt32x4N.fst Loops_vec.fst Hacl.Impl.Chacha20_
 
 extract-c: chacha-vec128/Chacha20_Vec128.c
 
+count-line:
+	cloc --force-lang=ocaml $(CHACHA_VEC_FILES)
 
 clean:
 	rm -rf *.exe *.exe.* *.out *~ chacha-vec-c chacha-vec2-c chacha-vec128

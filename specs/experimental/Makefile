@@ -52,6 +52,14 @@ chacha20-vec256.exe: Spec.Chacha20_vec256.fst
 	$(OCAMLOPT) -I chacha-spec-vec256 $(OCAML_INCLUDES) $(addprefix chacha-spec-vec256/, $(EXTRACTED)) chacha-spec-vec256/Spec_Loops.ml chacha-spec-vec256/Spec_Lib.ml chacha-spec-vec256/Spec_CTR.ml chacha-spec-vec256/Spec_Chacha20_vec256.ml -o chacha20-vec256.exe
 	./chacha20-vec256.exe
 
+sha2_256.exe: Spec.SHA256.fst
+	$(MAKE) lib
+	mkdir -p sha2-spec
+	$(FSTAR) $(ARGS) --odir sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA256.ml
+	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA256.ml -o sha2_256.exe
+	./sha2_256.exe
+
 clean:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml clean
 	$(MAKE) -C experimental clean

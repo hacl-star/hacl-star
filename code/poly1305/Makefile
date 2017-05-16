@@ -154,5 +154,8 @@ extract-ml:
 compile-ml:
 	$(OCAMLOPT) -I poly-ml -I ../lib/ml -I $(FSTAR_HOME)/ulib/ml/hyperstack -I $(FSTAR_HOME)/ulib/ml $(addprefix poly-ml/,$(POLY_EXTRACTED)) 
 
+count-line:
+	cloc --force-lang=ocaml $(POLY1305_SPECIFIC)
+
 clean:
 	rm -rf *.exe *.exe.* *.out *~ poly-c

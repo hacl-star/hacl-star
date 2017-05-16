@@ -208,6 +208,8 @@ ed25519.exe: ed25519-c/Ed25519.c
 	 	-o ed25519.exe -ldopt '-lsodium'
 	./ed25519.exe
 
+count-line:
+	cloc --force-lang=ocaml $(ED25519_FILES)
 
 clean:
 	rm -rf *.exe *.exe.* *.out *~ ed25519-c *.graph
