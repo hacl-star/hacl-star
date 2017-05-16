@@ -445,6 +445,7 @@ let chacha20_core log k st =
 
 #reset-options "--max_fuel 0 --z3rlimit 10"
 
+[@ "substitute"]
 val state_incr:
   log:log_t ->
   st:state ->
@@ -485,7 +486,8 @@ let log_incr log =
 
 #reset-options "--max_fuel 0 --z3rlimit 50"
 
-[@ "c_inline"]
+
+[@ "substitute"]
 val chacha20_incr3:
   log:log_t ->
   k0:state ->

@@ -31,7 +31,7 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 
 SPECS_DIRS=$(HACL_HOME)/specs $(HACL_HOME)/specs/experimental
 
-KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin $(addprefix -I , $(SPECS_DIRS)) -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
+KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin $(addprefix -I , $(SPECS_DIRS) $(HACL_HOME)/code/salsa-family) -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -drop 'Hacl.UInt8' $(KREMLIN_ARGS) \
 	-drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 	-drop 'Hacl.Endianness' -drop 'Hacl.Cast'
