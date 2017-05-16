@@ -116,16 +116,19 @@ let wrap_key output key len =
 
 val hmac_part1:
   output :uint8_p {length output = v Hash.size_hash} ->
-  ipad   :uint8_p {length ipad = v Hash.size_block /\ disjoint ipad output} ->
-  data   :uint8_p  {length data + v Hash.size_block < Spec_Hash.max_input_len_8 /\ disjoint data output /\ disjoint data ipad} ->
+  s2   :uint8_p {length s2 = v Hash.size_block /\ disjoint s2 output} ->
+  data   :uint8_p  {length data + v Hash.size_block < Spec_Hash.max_input_len_8 /\ disjoint data output /\ disjoint data s2} ->
   len    :uint32_t {length data = v len} ->
   Stack unit
-        (requires (fun h -> live h output /\ live h ipad /\ live h data))
-        (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
+        (requires (fun h -> live h output /\ live h s2 /\ live h data))
+        (ensures  (fun h0 _ h1 -> live h1 output /\ live h0 output
+                             /\ live h1 s2 /\ live h0 s2
+                             /\ live h1 data /\ live h0 data /\ modifies_1 output h0 h1
+                             /\ (as_seq h1 output == Spec_Hash.hash (Seq.append (as_seq h0 s2) (as_seq h0 data)))))
 
 #reset-options "--max_fuel 0  --z3rlimit 25"
 
-let hmac_part1 output ipad data len =
+let hmac_part1 output s2 data len =
 
   (* Push a new memory frame *)
   (**) push_frame ();
@@ -139,11 +142,11 @@ let hmac_part1 output ipad data len =
   let r0 = U32.rem len Hash.size_block in
   let last0 = Buffer.offset data (n0 *^ Hash.size_block) in
   Hash.init state0;
-  Hash.update state0 ipad; (* s2 = ipad *)
+  Hash.update state0 s2;
   Hash.update_multi state0 data n0;
   Hash.update_last state0 last0 r0;
 
-  let hash0 = Buffer.sub ipad 0ul Hash.size_hash in (* Salvage memory *)
+  let hash0 = Buffer.sub s2 0ul Hash.size_hash in (* Salvage memory *)
   Hash.finish state0 output; (* s4 = hash (s2 @| data) *)
 
   (* Pop the memory frame *)
@@ -153,17 +156,21 @@ let hmac_part1 output ipad data len =
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
 val hmac_part2:
-  mac   :uint8_p {length mac = v Hash.size_hash} ->
-  opad  :uint8_p {length opad = v Hash.size_block /\ disjoint opad mac} ->
-  hash0 :uint8_p {length hash0 = v Hash.size_hash} ->
+  mac :uint8_p {length mac = v Hash.size_hash} ->
+  s5  :uint8_p {length s5 = v Hash.size_block /\ disjoint s5 mac} ->
+  s4  :uint8_p {length s4 = v Hash.size_hash /\ disjoint s4 mac /\ disjoint s4 s5} ->
   Stack unit
-        (requires (fun h -> live h mac /\ live h opad /\ live h hash0))
-        (ensures  (fun h0 _ h1 -> live h1 mac /\ modifies_1 mac h0 h1))
+        (requires (fun h -> live h mac /\ live h s5 /\ live h s4))
+        (ensures  (fun h0 _ h1 -> live h1 mac /\ live h0 mac
+                             /\ live h1 s5 /\ live h0 s5
+                             /\ live h1 s4 /\ live h0 s4 /\ modifies_1 mac h0 h1
+                             /\ (as_seq h1 mac == Spec_Hash.hash (Seq.append (as_seq h0 s5) (as_seq h0 s4)))))
 
 #reset-options "--max_fuel 0  --z3rlimit 25"
 
-let hmac_part2 mac opad hash0 =
+let hmac_part2 mac s5 s4 =
 
+  (**) let h0 = ST.get () in
   (* Push a new memory frame *)
   (**) push_frame ();
 
@@ -175,9 +182,10 @@ let hmac_part2 mac opad hash0 =
   let n1 = 2ul in (* Hash.size_block + Hash.size_hash fits in 2 blocks *)
   let r1 = Hash.size_block -^ Hash.size_hash in
   Hash.init state1;
-  Hash.update state1 opad; (* s5 = opad *)
-  Hash.update_last state1 hash0 r1;
+  Hash.update state1 s5; (* s5 = opad *)
+  Hash.update_last state1 s4 r1;
   Hash.finish state1 mac; (* s7 = hash (s5 @| s4) *)
+  (**) Spec_Hash.lemma_hash_prepend (as_seq h0 s5) (as_seq h0 s4);
 
   (* Pop the memory frame *)
   (**) pop_frame ()
@@ -205,23 +213,20 @@ let hmac_core mac key data len =
   let ipad = Buffer.create (u8_to_h8 0x36uy) Hash.size_block in
   let opad = Buffer.create (u8_to_h8 0x5cuy) Hash.size_block in
 
-  (* Allocate memory for the Hash states *)
-  let state1 = Hash.alloc () in
-
   (* Step 2: xor "result of step 1" with ipad *)
   xor_bytes_inplace ipad key Hash.size_block;
 
   (* Step 3: append data to "result of step 2" *)
   (* Step 4: apply Hash to "result of step 3" *)
-  let hash0 = Buffer.sub ipad 0ul Hash.size_hash in (* Salvage memory *)
-  hmac_part1 hash0 ipad data len;
+  let s4 = Buffer.sub ipad 0ul Hash.size_hash in (* Salvage memory *)
+  hmac_part1 s4 ipad data len; (* s2 = ipad *)
 
   (* Step 5: xor "result of step 1" with opad *)
   xor_bytes_inplace opad key Hash.size_block;
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   (* Step 7: apply H to "result of step 6" *)
-  hmac_part2 mac opad hash0;
+  hmac_part2 mac opad s4; (* s5 = opad *)
 
   (* Pop the memory frame *)
   (**) pop_frame ()
