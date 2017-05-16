@@ -192,6 +192,75 @@ let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{le
   finish (update_multi h_0 (input @| blocks))
 
 
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+let lemma_modulo (l:nat) (s:nat{s <> 0 /\ l >= s /\ l % s = 0}) : Lemma
+  (ensures ((l - s) % s = 0)) =
+Math.Lemmas.lemma_mod_plus (l - s) 1 s
+
+
+#reset-options "--max_fuel 1 --z3rlimit 100"
+
+val lemma_update_update_multi: (h0:hash_w) -> (blocks:bytes{Seq.length blocks >= size_block /\ Seq.length blocks % size_block = 0}) -> Lemma
+  (ensures  (let (block,rem) = Seq.split blocks size_block in
+             let h1 = update h0 block in
+             let h2 = update_multi h1 rem in
+             h2 == update_multi h0 blocks))
+
+let lemma_update_update_multi h0 blocks =
+  let (block,rem) = Seq.split blocks size_block in
+  assert(size_block <> 0);
+  assert(length blocks >= size_block);
+  assert(length blocks % size_block = 0);
+  lemma_modulo (length blocks) size_block;
+  assert((length blocks - size_block) % size_block = 0);
+  assert(Seq.length rem  % size_block = 0);
+  let h1 = update h0 block in
+  let h2 = update_multi h1 rem in
+  Seq.lemma_eq_intro h2 (update_multi h0 blocks)
+
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
+
+val lemma_update_multi_extend: (h0:hash_w) -> (block:bytes{Seq.length block = size_block}) -> (blocks:bytes{Seq.length blocks % size_block = 0}) -> Lemma
+  (ensures (update_multi (update h0 block) blocks == update_multi h0 (block @| blocks)))
+
+let lemma_update_multi_extend h0 block blocks =
+  lemma_update_update_multi h0 (block @| blocks);
+  let a,b = Seq.split (block @| blocks) size_block in
+  Seq.lemma_eq_intro a block;
+  Seq.lemma_eq_intro b blocks;
+  Seq.lemma_eq_intro (update_multi (update h0 block) blocks) (update_multi h0 (block @| blocks))
+
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
+val lemma_hash_prepend: (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length block + Seq.length msg < max_input_len_8}) -> Lemma
+  (ensures (let n = Seq.length msg / size_block in
+            let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
+            let hash0 = update h_0 block in
+            let hash1 = update_multi hash0 msg_blocks in
+            let hash2 = update_last hash1 (size_block + (n * size_block)) msg_last in
+            finish hash2 == hash (block @| msg)))
+
+let lemma_hash_prepend block msg =
+  let n = Seq.length msg / size_block in
+  let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
+  let hash1 = update h_0 block in
+  let hash2 = update_multi hash1 msg_blocks in
+  let hash3 = update_last hash2 (size_block + (n * size_block)) msg_last in
+  let hash4 = finish hash3 in
+  lemma_update_multi_extend h_0 block msg_blocks;
+  lemma_eq_intro (block @| msg) (block @| msg_blocks @| msg_last);
+  assert(hash2 == update_multi h_0 (block @| msg_blocks));
+  let banana = block @| msg in
+  let n' = Seq.length banana / size_block in
+  let (msg_blocks',msg_last') = Seq.split banana (n' * size_block) in
+  Math.Lemmas.distributivity_add_left n 1 size_block;
+  assert(n' == n + 1);
+  Seq.lemma_eq_intro (msg_last') (msg_last);
+  Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
+
 
 //
 // Test 1
