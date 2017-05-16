@@ -217,6 +217,15 @@ let main () =
   (*           0x5euy; 0x8fuy; 0xcduy; 0x4fuy; 0x68uy; 0x1euy; 0x30uy; 0xa6uy; *)
   (*           0xacuy; 0x00uy; 0xa9uy; 0x70uy; 0x4auy; 0x18uy; 0x8auy; 0x03uy] in *)
   
+  let pk1' = create 0uy 32ul in
+  let pk2' = create 0uy 32ul in
+  let pk3' = create 0uy 32ul in
+  Ed25519.secret_to_public pk1' sk1;
+  Ed25519.secret_to_public pk2' sk2;
+  Ed25519.secret_to_public pk3' sk3;
+  TestLib.compare_and_print (C.string_of_literal "Public key 1 generation") pk1 pk1' 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Public key 2 generation") pk2 pk2' 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Public key 3 generation") pk3 pk3' 32ul;
 
   let sig1' = create 0uy 64ul in
   let sig2' = create 0uy 64ul in

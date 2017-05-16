@@ -4,7 +4,7 @@ OPENSSL_HOME ?= ../../dependencies/openssl
 LIBSODIUM_HOME ?= ../../dependencies/libsodium
 
 
-CC=gcc-6 -flto
+CC=gcc-7 -flto
 
 .PHONY: test clean
 
