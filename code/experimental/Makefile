@@ -19,7 +19,10 @@ ed25519-ci:
 sha2-ci:
 	$(MAKE) -C hash all-ci
 
-all-ci: ed25519-ci sha2-ci
+salsa-family-ci:
+	$(MAKE) -C salsa-family all-ci
+
+all-ci: ed25519-ci sha2-ci salsa-family-ci
 
 ed25519-ct:
 	$(MAKE) -C ed25519 all-ct

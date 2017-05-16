@@ -13,13 +13,22 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
 		--include $(HACL_HOME)/code/salsa-family
 
+CHACHA_VEC_FILES=Hacl.Impl.Chacha20.Vec128.State.fst \
+	Hacl.Impl.Chacha20.Vec128.fst \
+	Chacha20.Vec128.fst \
+	Chacha20.Vec128.fsti
+
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
+	$(FSTAR_CT) --lax $^
+%.fsti-ct: %.fsti
 	$(FSTAR_CT) --lax $^
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^ --use_hints --record_hints
+%.fsti-verify: %.fsti
+	$(FSTARB) $^ --use_hints --record_hints
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
@@ -28,6 +37,12 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 # Hints regeneration
 %.fst-hints: %.fst
 	-$(FSTARB) $^ --use_hints --record_hints
+
+all-ver: $(addsuffix -verify, $(CHACHA_VEC_FILES))
+
+all-ci: $(addsuffix -ci, $(CHACHA_VEC_FILES))
+
+all-ct: $(addsuffix -ct, $(CHACHA_VEC_FILES))
 
 SPECS_DIRS=$(HACL_HOME)/specs $(HACL_HOME)/specs/experimental
 
