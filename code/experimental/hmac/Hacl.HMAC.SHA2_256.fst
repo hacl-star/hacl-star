@@ -65,7 +65,7 @@ private let u64_to_h64 = Hacl.Cast.uint64_to_sint64
 let xor_bytes_inplace a b len = C.Loops.in_place_map2 a b len (fun x y -> H8.logxor x y)
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 val wrap_key:
   output :uint8_p  {length output = v Hash.size_block} ->
@@ -125,25 +125,30 @@ val hmac_part1:
                              /\ (let hash0 = Seq.slice (as_seq h1 s2) 0 (v Hash.size_hash) in
                              hash0 == Spec_Hash.hash (Seq.append (as_seq h0 s2) (as_seq h0 data)))))
 
-#reset-options "--max_fuel 0  --z3rlimit 250"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 let hmac_part1 s2 data len =
 
-  let h0 = ST.get () in
   (* Push a new memory frame *)
   (**) push_frame ();
+  (**) let h0 = ST.get () in
 
   (* Allocate memory for the Hash function state *)
-  let state0 = Hash.alloc () in
+  // let state0 = Hash.alloc () in
+  let state0 = Buffer.create (u32_to_h32 0ul) Hash.size_state in
 
   (* Step 3: append data to "result of step 2" *)
   (* Step 4: apply Hash to "result of step 3" *)
+  assert(Hash.size_block <> 0ul);
   let n0 = U32.div len Hash.size_block in
   let r0 = U32.rem len Hash.size_block in
+  Math.Lemmas.lemma_div_mod (v len) (v Hash.size_block);
+
+  let blocks0 = Buffer.sub data 0ul (n0 *^ Hash.size_block) in
   let last0 = Buffer.offset data (n0 *^ Hash.size_block) in
   Hash.init state0;
   Hash.update state0 s2;
-  Hash.update_multi state0 data n0;
+  Hash.update_multi state0 blocks0 n0;
   Hash.update_last state0 last0 r0;
   (**) let h1 = ST.get () in
 
@@ -168,26 +173,25 @@ val hmac_part2:
                              /\ live h1 s4 /\ live h0 s4 /\ modifies_1 mac h0 h1
                              /\ (as_seq h1 mac == Spec_Hash.hash (Seq.append (as_seq h0 s5) (as_seq h0 s4)))))
 
-#reset-options "--max_fuel 0  --z3rlimit 25"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 let hmac_part2 mac s5 s4 =
 
-  (**) let h0 = ST.get () in
   (* Push a new memory frame *)
   (**) push_frame ();
+  (**) let h0 = ST.get () in
 
   (* Allocate memory for the Hash function state *)
-  let state1 = Hash.alloc () in
+  (* let state1 = Hash.alloc () in *)
+  let state1 = Buffer.create (u32_to_h32 0ul) Hash.size_state in
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   (* Step 7: apply H to "result of step 6" *)
-  let n1 = 2ul in (* Hash.size_block + Hash.size_hash fits in 2 blocks *)
-  let r1 = Hash.size_block -^ Hash.size_hash in
   Hash.init state1;
   Hash.update state1 s5; (* s5 = opad *)
-  Hash.update_last state1 s4 r1;
+  Hash.update_last state1 s4 Hash.size_hash;
   Hash.finish state1 mac; (* s7 = hash (s5 @| s4) *)
-  (**) Spec_Hash.lemma_hash_prepend (as_seq h0 s5) (as_seq h0 s4);
+  (**) Spec_Hash.lemma_hash_prepend_single (as_seq h0 s5) (as_seq h0 s4);
 
   (* Pop the memory frame *)
   (**) pop_frame ()
