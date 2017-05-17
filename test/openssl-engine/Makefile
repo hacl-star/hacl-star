@@ -56,7 +56,10 @@ HACL_IMPL_FILES= $(CURVE_HOME)/Curve25519.c $(CHACHA_HOME)/Chacha20.c \
   $(AEAD_HOME)/Chacha20Poly1305.c $(AEAD_HOME)/Hacl_Policies.c \
   $(SHA_HOME)/SHA2_512.c
 
-HaclEngine.$(SO): HACLEngine.c $(HACL_IMPL_FILES)
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+HaclEngine.$(SO): HACLEngine.c $(patsubst %.c,%.o,$(HACL_IMPL_FILES))
 	$(CC) $(CFLAGS) -DIMPL=IMPL_HACL $^ -o $@ -shared $(LDFLAGS)
 
 BCryptEngine.$(SO): BCryptEngine.c
