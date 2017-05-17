@@ -8,6 +8,8 @@ API_FILES= \
 #	Hacl.SecretBox.fst \
 	Hacl.Box.fst
 
+FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces --include ../poly1305/interfaces --include ../../specs --include $(FSTAR_HOME)/../kremlin/kremlib
+
 FSTARB=$(FSTAR_BASE) \
 		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
 		--include ../poly1305/interfaces --include ../../specs \
@@ -33,6 +35,11 @@ KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ..
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
+
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDE_PATHS)
 
 all-ct: $(addsuffix -ct, $(API_FILES))
 

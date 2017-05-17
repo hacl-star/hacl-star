@@ -223,11 +223,13 @@ let aead_encrypt_ c mac m mlen aad aadlen k n =
   cut (modifies_0 h0 h1);
   Chacha20.chacha20 c m mlen k n 1ul;
   let h2 = ST.get() in
-  cut (let m = reveal_sbytes (as_seq h0 m) in
-       let c = reveal_sbytes (as_seq h2 c) in
-       let k = reveal_sbytes (as_seq h0 k) in
-       let n = reveal_sbytes (as_seq h0 n) in
-    c == Spec.Chacha20.chacha20_encrypt_bytes k n 1 m);
+  let _ =
+    let m = reveal_sbytes (as_seq h0 m) in
+    let c = reveal_sbytes (as_seq h2 c) in
+    let k = reveal_sbytes (as_seq h0 k) in
+    let n = reveal_sbytes (as_seq h0 n) in
+    assert (c == Spec.Chacha20.chacha20_encrypt_bytes k n 1 m)
+  in
   Chacha20.chacha20_key_block b k n 0ul;
   let h3 = ST.get() in
   no_upd_lemma_1 h2 h3 b c;
@@ -295,7 +297,6 @@ let lemma_aead_decrypt h0 h1 h2 tmp m =
   lemma_reveal_modifies_1 m h1 h2;
   lemma_intro_modifies_2_1 m h0 h2
 
-
 val aead_decrypt:
   m:uint8_p ->
   c:uint8_p{disjoint m c} ->
@@ -318,7 +319,7 @@ val aead_decrypt:
          let plain = aead_chacha20_poly1305_decrypt k n c mac aad in
          (z == 0ul ==> (Some? plain /\ m == Some?.v plain)
          /\ (z == 1ul ==> (None? plain))))))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
+#reset-options "--initial_fuel 0 --max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 let aead_decrypt m c mlen mac aad aadlen k n =
   push_frame();
   let h0 = ST.get() in
@@ -336,7 +337,8 @@ let aead_decrypt m c mlen mac aad aadlen k n =
   (* Declassication assumption on mac *)
   assume (Hacl.Policies.declassifiable mac /\ Hacl.Policies.declassifiable rmac);
   let verify = cmp_bytes mac rmac 16ul in
-  let res =
+  assume (1 + (length c / 64) < pow2 32); //NS:05.17. Without this assume, this proof takes 15mins; TODO, revise
+  let res : u32 =
     if U8.(verify =^ 0uy) then (
       	 Chacha20.chacha20 m c mlen k n 1ul;
 	 0ul
