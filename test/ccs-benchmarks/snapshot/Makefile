@@ -126,6 +126,19 @@ perf-test-ed25519: test-ed25519.exe
 unit-test-ed25519: test-ed25519.exe
 	./test-ed25519.exe unit-test
 
+test-sha256.exe: SHA2_256.c test-sha256.c
+	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
+	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	kremlib.c testlib.c $^ -o test-sha256.exe \
+	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+
+perf-test-sha256: test-sha256.exe
+	./test-sha256.exe perf
+
+unit-test-sha256: test-sha256.exe
+	./test-sha256.exe unit-test
+
 test-sha512.exe: SHA2_512.c test-sha512.c
 	$(CC) $(CCOPTS) \
 	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \

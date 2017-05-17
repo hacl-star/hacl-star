@@ -24,4 +24,4 @@ val chacha20:
       let nonce = as_seq h0 nonce in
       let ctr = UInt32.v ctr in      
       let plain = as_seq h0 plain in
-      output == Spec.Chacha20_vec.chacha20_encrypt_bytes key nonce ctr plain) ))
+      output == Spec.Chacha20.chacha20_encrypt_bytes key nonce ctr plain) ))

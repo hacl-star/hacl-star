@@ -4,20 +4,31 @@ HACL_HOME?=../../..
 include $(HACL_HOME)/code/Makefile.include
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
+		--include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
+		--include $(HACL_HOME)/code/salsa-family
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include ../../specs --include ../../specs/generic --include ../../specs/experimental
+		--include $(HACL_HOME)/code/lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
+		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
+		--include $(HACL_HOME)/code/salsa-family
+
+CHACHA_VEC_FILES=Hacl.Impl.Chacha20.Vec128.State.fst \
+	Hacl.Impl.Chacha20.Vec128.fst \
+	Chacha20.Vec128.fst \
+	Chacha20.Vec128.fsti
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
+%.fsti-ct: %.fsti
+	$(FSTAR_CT) --lax $^
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^ --use_hints --record_hints
+%.fsti-verify: %.fsti
+	$(FSTARB) $^ --use_hints --record_hints
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
@@ -27,9 +38,15 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 %.fst-hints: %.fst
 	-$(FSTARB) $^ --use_hints --record_hints
 
+all-ver: $(addsuffix -verify, $(CHACHA_VEC_FILES))
+
+all-ci: $(addsuffix -verify, $(CHACHA_VEC_FILES))
+
+all-ct: $(addsuffix -ct, $(CHACHA_VEC_FILES))
+
 SPECS_DIRS=$(HACL_HOME)/specs $(HACL_HOME)/specs/experimental
 
-KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin $(addprefix -I , $(SPECS_DIRS)) -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
+KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin $(addprefix -I , $(SPECS_DIRS) $(HACL_HOME)/code/salsa-family) -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -drop 'Hacl.UInt8' $(KREMLIN_ARGS) \
 	-drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 	-drop 'Hacl.Endianness' -drop 'Hacl.Cast'
@@ -60,6 +77,8 @@ Chacha20_vec2.c: interfaces/Hacl.UInt32x4N.fst Loops_vec.fst Hacl.Impl.Chacha20_
 
 extract-c: chacha-vec128/Chacha20_Vec128.c
 
+count-line:
+	cloc --force-lang=ocaml $(CHACHA_VEC_FILES)
 
 clean:
 	rm -rf *.exe *.exe.* *.out *~ chacha-vec-c chacha-vec2-c chacha-vec128

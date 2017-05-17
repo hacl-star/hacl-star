@@ -56,5 +56,8 @@ all-hints:
 	$(MAKE) all-hints2
 	mv *.hints ./bignum_hints
 
+count-line:
+	cloc --force-lang=ocaml $(BIGNUM_FILES)
+
 clean:
 	rm -rf *.exe *.out *~ x25519/*~ poly1305/*~ interfaces/*~ tmp tmppoly

@@ -59,10 +59,6 @@ let line a b d s m =
   let m = upd m a ma in
   let m = upd m d md in
   m
-  (* let m = upd m a (index m a +%^ index m b) in *)
-  (* let m = upd m d ((index m d ^^  index m a) <<< s) in *)
-  (* m *)
-
 
 let round (st:state) : Tot state =
   let st = line 0 1 3 16ul st in
@@ -71,13 +67,11 @@ let round (st:state) : Tot state =
   let st = line 2 3 1 7ul  st in
   st
 
-
 let shuffle_rows_0123 (st:state) : Tot state =
   let st = shuffle_row 1 1 st in
   let st = shuffle_row 2 2 st in
   let st = shuffle_row 3 3 st in
   st
-
 
 let shuffle_rows_0321 (st:state) : Tot state =
   let st = shuffle_row 1 3 st in
@@ -85,9 +79,7 @@ let shuffle_rows_0321 (st:state) : Tot state =
   let st = shuffle_row 3 1 st in
   st
 
-
 let column_round (st:state) : Tot state = round st
-
 
 let diagonal_round (st:state) : Tot state =
   let st = shuffle_rows_0123 st in
@@ -95,12 +87,10 @@ let diagonal_round (st:state) : Tot state =
   let st = shuffle_rows_0321 st in
   st
 
-
 let double_round (st:state) : Tot state =
   let st = column_round st in
   let st = diagonal_round st in
   st
-
 
 let rounds (st:state) : Tot state = 
     iter 10 double_round st (* 20 rounds *)
@@ -110,7 +100,6 @@ let chacha20_core (s:state) : Tot state =
     Spec.Loops.seq_map2 op_Plus_Percent_Hat s' s
 
 (* state initialization *) 
-
 unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
 let c0 = 0x61707865ul
 let c1 = 0x3320646eul
@@ -125,7 +114,6 @@ let setup (k:key) (n:nonce) (c:counter): Tot state =
   let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) in
   Seq.Create.create_4 constants key_part_1 key_part_2 nonce
 
-
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     let st = setup k n c in
     let st' = chacha20_core st in
@@ -133,8 +121,6 @@ let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     uint32s_to_le 4 (index st' 1) @|
     uint32s_to_le 4 (index st' 2) @|
     uint32s_to_le 4 (index st' 3) 
-
-
 
 let chacha20_ctx: Spec.CTR.block_cipher_ctx = 
     let open Spec.CTR in

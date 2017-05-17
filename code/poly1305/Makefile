@@ -135,6 +135,7 @@ poly-c/AEAD_Poly1305_64.c: poly-c/out.krml $(KRML_BIN)
 
 poly1305.exe: poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c
 	$(CC) $(INCLUDES) $(CFLAGS) $^ -o $@
+	./$@
 
 extract-c: poly-c/Poly1305_64.c poly-c/AEAD_Poly1305_64.c
 
@@ -153,6 +154,9 @@ extract-ml:
 
 compile-ml:
 	$(OCAMLOPT) -I poly-ml -I ../lib/ml -I $(FSTAR_HOME)/ulib/ml/hyperstack -I $(FSTAR_HOME)/ulib/ml $(addprefix poly-ml/,$(POLY_EXTRACTED)) 
+
+count-line:
+	cloc --force-lang=ocaml $(POLY1305_SPECIFIC)
 
 clean:
 	rm -rf *.exe *.exe.* *.out *~ poly-c

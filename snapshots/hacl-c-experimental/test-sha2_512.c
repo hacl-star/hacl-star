@@ -459,7 +459,7 @@ void test_6()
   TestLib_compare_and_print("Test 6", expected, output, (uint32_t )64);
 }
 
-#define PLAINLEN (1024*1024)
+#define PLAINLEN (16*1024)
 #define ROUNDS 1000
 
 int32_t perf_sha() {

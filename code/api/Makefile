@@ -91,5 +91,13 @@ extract-aead:
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
 		-add-include '"AEAD_Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs
 
+count-line:
+	@echo "LOC for AEAD CHACHAPOLY"
+	cloc --force-lang=ocaml Chacha20Poly1305.fst
+	@echo "LOC for SECRETBOX"
+	cloc --force-lang=ocaml Hacl.SecretBox.ZeroPad.fst
+	@echo "LOC for BOX"
+	cloc --force-lang=ocaml Hacl.Box.ZeroPad.fst
+
 clean:
 	rm -rf api-c *~ *.exe *.graph *.o *.out aead-c box-c
