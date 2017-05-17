@@ -7,39 +7,39 @@
 #include "kremlib.h"
 #include "testlib.h"
 
-typedef uint8_t uint8_t;
+typedef uint8_t Hacl_Utils_Experimental_uint8_t;
 
-typedef uint32_t uint32_t;
+typedef uint32_t Hacl_Utils_Experimental_uint32_t;
 
-typedef uint64_t uint64_t;
+typedef uint64_t Hacl_Utils_Experimental_uint64_t;
 
-typedef uint8_t huint8_t;
+typedef uint8_t Hacl_Utils_Experimental_huint8_t;
 
-typedef uint32_t huint32_t;
+typedef uint32_t Hacl_Utils_Experimental_huint32_t;
 
-typedef uint64_t huint64_t;
+typedef uint64_t Hacl_Utils_Experimental_huint64_t;
 
-typedef uint8_t *huint8_p;
+typedef uint8_t *Hacl_Utils_Experimental_huint8_p;
 
-typedef uint32_t *huint32_p;
+typedef uint32_t *Hacl_Utils_Experimental_huint32_p;
 
-typedef uint64_t *huint64_p;
+typedef uint64_t *Hacl_Utils_Experimental_huint64_p;
 
-typedef uint8_t Hacl_Hash_SHA2_L256_uint8_t;
+typedef uint8_t Hacl_Hash_SHA2_256_uint8_t;
 
-typedef uint32_t Hacl_Hash_SHA2_L256_uint32_t;
+typedef uint32_t Hacl_Hash_SHA2_256_uint32_t;
 
-typedef uint64_t Hacl_Hash_SHA2_L256_uint64_t;
+typedef uint64_t Hacl_Hash_SHA2_256_uint64_t;
 
-typedef uint8_t Hacl_Hash_SHA2_L256_uint8_ht;
+typedef uint8_t Hacl_Hash_SHA2_256_uint8_ht;
 
-typedef uint32_t Hacl_Hash_SHA2_L256_uint32_ht;
+typedef uint32_t Hacl_Hash_SHA2_256_uint32_ht;
 
-typedef uint64_t Hacl_Hash_SHA2_L256_uint64_ht;
+typedef uint64_t Hacl_Hash_SHA2_256_uint64_ht;
 
-typedef uint32_t *Hacl_Hash_SHA2_L256_uint32_p;
+typedef uint32_t *Hacl_Hash_SHA2_256_uint32_p;
 
-typedef uint8_t *Hacl_Hash_SHA2_L256_uint8_p;
+typedef uint8_t *Hacl_Hash_SHA2_256_uint8_p;
 
 typedef struct {
   uint32_t fst;
@@ -47,11 +47,11 @@ typedef struct {
 }
 K___uint32_t_uint8_t_;
 
-typedef uint8_t uint8_t0;
+typedef uint8_t uint8_t;
 
-typedef uint32_t uint32_t0;
+typedef uint32_t uint32_t;
 
-typedef uint64_t uint64_t0;
+typedef uint64_t uint64_t;
 
 typedef uint8_t uint8_ht;
 
