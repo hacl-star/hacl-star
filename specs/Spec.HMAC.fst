@@ -23,13 +23,15 @@ let xor_bytes b0 b1 = Spec.Lib.map2 (fun x y -> U8.logxor x y) b0 b1
 
 #reset-options "--max_fuel 0 --z3rlimit 25"
 
-(* Define a function to wrap the key length after size_block bytes *)
 let wrap_key (key:bytes{Seq.length key < Hash.max_input_len_8}) : Tot (okey:bytes{Seq.length okey = Hash.size_block}) =
-  if Seq.length key > Hash.size_block then
+  if Seq.length key <= Hash.size_block then
+    let pad = Seq.create (Hash.size_block - (Seq.length key)) 0uy in
+    Seq.append key pad
+  else begin
     let nkey = Hash.hash key in
-    Seq.append nkey (Seq.create (Hash.size_block - Hash.size_hash) 0uy)
-  else
-    Seq.append key (Seq.create (Hash.size_block - (Seq.length key)) 0uy)
+    let pad = Seq.create (Hash.size_block - Hash.size_hash) 0uy in
+    Seq.append nkey pad
+  end
 
 
 #reset-options "--max_fuel 0 --z3rlimit 10"
@@ -58,7 +60,7 @@ let hmac_core key data =
   let s4 = Hash.hash s3 in
 
   (* Step 5: xor "result of step 1" with opad *)
-  let s5 = xor_bytes key opad in
+  let s5 = xor_bytes opad key in
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   let s6 = Seq.append s5 s4 in
