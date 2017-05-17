@@ -98,20 +98,20 @@ int32_t perf_sha256() {
 				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
-    t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    tweet_crypto_hash_sha256_tweet(macs + SIGSIZE * i, plain, len);
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  tweet_cy = (double)b - a;
-  tweet_utime = (double)t2 - t1;
-  print_results("TweetNaCl SHA256 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
-				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
-  printf("Composite result (ignore): %" PRIx64 "\n", res);
+  /*   t1 = clock(); */
+  /* a = TestLib_cpucycles_begin(); */
+  /* for (int i = 0; i < ROUNDS; i++){ */
+  /*   tweet_crypto_hash_sha256_tweet(macs + SIGSIZE * i, plain, len); */
+  /* } */
+  /* b = TestLib_cpucycles_end(); */
+  /* t2 = clock(); */
+  /* tweet_cy = (double)b - a; */
+  /* tweet_utime = (double)t2 - t1; */
+  /* print_results("TweetNaCl SHA256 speed", (double)t2-t1, */
+  /*  	(double) b - a, ROUNDS, PLAINLEN); */
+  /* for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8) */
+  /*  			     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24); */
+  /* printf("Composite result (ignore): %" PRIx64 "\n", res); */
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
