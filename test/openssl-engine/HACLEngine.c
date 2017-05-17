@@ -24,6 +24,7 @@
 #undef Hacl_Impl_Poly1305_64_poly1305_state
 #include "Chacha20.h"
 #include "Chacha20Poly1305.h"
+#include "SHA2_512.h"
 
 // OpenSSL private header for benchmarking purposes
 #include "crypto/include/internal/poly1305.h"
@@ -131,6 +132,50 @@ static int Wrapper_Chacha20_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out, cons
   return 1;
 }
 #endif // IMPL_HACL
+
+// SHA2_512 --------------------------------------------------------------------
+
+#if IMPL==IMPL_HACL
+
+// In 64-bit words
+#define HACL_SHA2_512_STATE_SIZE 169
+// In bytes
+#define HACL_SHA2_512_BLOCK_SIZE_B 16
+
+static int hacl_sha2_512_init(EVP_MD_CTX *ctx) {
+  uint64_t *state = EVP_MD_CTX_md_data(ctx);
+  SHA2_512_init(state);
+  return 1;
+}
+
+static int hacl_sha2_512_update(EVP_MD_CTX *ctx, const void *data_r, size_t count) {
+  uint64_t *state = EVP_MD_CTX_md_data(ctx);
+  // Same remark as poly1305
+  uint32_t n_blocks = count / HACL_SHA2_512_BLOCK_SIZE_B;
+  uint8_t *data = data_r;
+  while (n_blocks--) {
+    SHA2_512_update(state, data);
+    data += HACL_SHA2_512_BLOCK_SIZE_B;
+  }
+  return 1;
+}
+
+static int hacl_sha2_512_final(EVP_MD_CTX *ctx, unsigned char *md) {
+  uint64_t *state = EVP_MD_CTX_md_data(ctx);
+  SHA2_512_update_last(state, NULL, 0);
+  SHA2_512_finish(state, md);
+  return 1;
+}
+
+static int hacl_sha2_512_copy(EVP_MD_CTX *to, const EVP_MD_CTX *from) {
+  return 1;
+}
+
+static int hacl_sha2_512_cleanup(EVP_MD_CTX *ctx) {
+  return 1;
+}
+
+#endif
 
 // Poly1305 --------------------------------------------------------------------
 
@@ -278,6 +323,7 @@ static int Everest_digest_nids(const int **nids)
 
   if (!init) {
     digest_nids[count++] = NID_poly1305;
+    digest_nids[count++] = NID_sha512;
 
     // NULL-terminate the list
     digest_nids[count] = 0;
@@ -323,6 +369,7 @@ static int Everest_pkey_meths_nids(const int **nids)
 }
 
 static EVP_MD *hacl_poly1305_digest = NULL;
+static EVP_MD *hacl_sha2_512_digest = NULL;
 
 // These three functions follow the protocol explained in
 // include/openssl/engine.h near line 280.
@@ -332,6 +379,9 @@ int Everest_digest(ENGINE *e, const EVP_MD **digest, const int **nids, int nid)
     return Everest_digest_nids(nids);
   } else if (nid == NID_poly1305) {
     *digest = hacl_poly1305_digest;
+    return 1;
+  } else if (nid == NID_sha512) {
+    *digest = hacl_sha2_512_digest;
     return 1;
   } else {
     return 0;
@@ -423,6 +473,31 @@ void Everest_create_all_the_things() {
   // Let the benchmarking go through the Engine framework, but redirect back to
   // OpenSSL.
   hacl_chacha20_cipher = EVP_chacha20();
+  #else
+  #error "Unsupported implementation"
+  #endif
+
+  // SHA512
+  // --------
+  #if IMPL == IMPL_HACL
+  hacl_sha2_512_digest = EVP_MD_meth_new(NID_sha512, NID_undef);
+  if (hacl_sha2_512_digest == NULL ||
+    !EVP_MD_meth_set_result_size(hacl_sha2_512_digest, 64) ||
+    !EVP_MD_meth_set_init(hacl_sha2_512_digest, hacl_sha2_512_init) ||
+    !EVP_MD_meth_set_update(hacl_sha2_512_digest, hacl_sha2_512_update) ||
+    !EVP_MD_meth_set_final(hacl_sha2_512_digest, hacl_sha2_512_final) ||
+    !EVP_MD_meth_set_cleanup(hacl_sha2_512_digest, hacl_sha2_512_cleanup) ||
+    !EVP_MD_meth_set_copy(hacl_sha2_512_digest, hacl_sha2_512_copy) ||
+    !EVP_MD_meth_set_app_datasize(hacl_sha2_512_digest, HACL_SHA2_512_STATE_SIZE * 8) ||
+    !EVP_MD_meth_set_input_blocksize(hacl_sha2_512_digest, HACL_SHA2_512_BLOCK_SIZE_B) ||
+    !EVP_MD_meth_set_flags(hacl_sha2_512_digest, EVP_MD_FLAG_ONESHOT))
+  {
+    fprintf(stderr, "Error creating SHA512\n");
+    EVP_MD_meth_free(hacl_sha2_512_digest);
+    exit(1);
+  }
+  #elif IMPL == IMPL_OPENSSL
+  hacl_sha2_512_digest = EVP_sha512();
   #else
   #error "Unsupported implementation"
   #endif
