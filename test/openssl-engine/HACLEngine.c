@@ -92,23 +92,23 @@ static int X25519(uint8_t out_shared_key[32], uint8_t private_key[32],
 // API and ii) calls our own X25519 function
 static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
 {
-    const X25519_KEY *pkey, *peerkey;
+  const X25519_KEY *pkey, *peerkey;
 
-    pkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_pkey(ctx));
-    peerkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_peerkey(ctx));
+  pkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_pkey(ctx));
+  peerkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_peerkey(ctx));
 
-    if (pkey == NULL || pkey->privkey == NULL) {
-        ECerr(EC_F_PKEY_ECX_DERIVE, EC_R_INVALID_PRIVATE_KEY);
-        return 0;
-    }
-    if (peerkey == NULL) {
-        ECerr(EC_F_PKEY_ECX_DERIVE, EC_R_INVALID_PEER_KEY);
-        return 0;
-    }
-    *keylen = X25519_KEYLEN;
-    if (key != NULL && X25519(key, pkey->privkey, peerkey->pubkey) == 0)
-        return 0;
-    return 1;
+  if (pkey == NULL || pkey->privkey == NULL) {
+    ECerr(EC_F_PKEY_ECX_DERIVE, EC_R_INVALID_PRIVATE_KEY);
+    return 0;
+  }
+  if (peerkey == NULL) {
+    ECerr(EC_F_PKEY_ECX_DERIVE, EC_R_INVALID_PEER_KEY);
+    return 0;
+  }
+  *keylen = X25519_KEYLEN;
+  if (key != NULL && X25519(key, pkey->privkey, peerkey->pubkey) == 0)
+    return 0;
+  return 1;
 }
 #endif // IMPL_HACL
 
@@ -141,6 +141,11 @@ static int Wrapper_Chacha20_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out, cons
 #define HACL_SHA2_512_STATE_SIZE 169
 // In bytes
 #define HACL_SHA2_512_BLOCK_SIZE_B 16
+
+#define SHA2_512_init init
+#define SHA2_512_update update
+#define SHA2_512_update_last update_last
+#define SHA2_512_finish finish
 
 static int hacl_sha2_512_init(EVP_MD_CTX *ctx) {
   uint64_t *state = EVP_MD_CTX_md_data(ctx);
@@ -381,6 +386,7 @@ int Everest_digest(ENGINE *e, const EVP_MD **digest, const int **nids, int nid)
     *digest = hacl_poly1305_digest;
     return 1;
   } else if (nid == NID_sha512) {
+    fflush(stdout);
     *digest = hacl_sha2_512_digest;
     return 1;
   } else {
@@ -396,6 +402,7 @@ int Everest_ciphers(ENGINE *e, const EVP_CIPHER **cipher, const int **nids, int 
   if (cipher == NULL) {
     return Everest_ciphers_nids(nids);
   } else if (nid == NID_chacha20) {
+    fflush(stdout);
     *cipher = hacl_chacha20_cipher;
     return 1;
   } else if (nid == NID_chacha20_poly1305) {
