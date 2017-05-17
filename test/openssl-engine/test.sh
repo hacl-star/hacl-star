@@ -22,8 +22,12 @@ fi
 tput setaf 1
 echo Running with engine: $ENGINE
 tput sgr0
+# Due to a bug in OpenSSL: ciphers first, message digests later.
 $OPENSSL_HOME/apps/openssl$EXE <<EOF
   engine $ENGINE
-  speed -engine Everest -evp sha512
+  speed -engine Everest ecdhx25519
   speed -engine Everest -evp chacha20
+  speed -engine Everest -evp chacha20-poly1305
+  speed -engine Everest -evp sha512
+  speed -engine Everest -evp poly1305
 EOF
