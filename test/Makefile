@@ -18,9 +18,9 @@ all:
 	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error" ; fi
 	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error" ; fi
 	# JP FIXME XXX why was this disabled?
-	$(MAKE) extract-c-code OTHERFLAGS="--trace_error"
+	$(MAKE) extract-c OTHERFLAGS="--trace_error"
 	$(MAKE) ct verify OTHERFLAGS="--trace_error"
-	# $(MAKE) -C openssl-engine
+	$(MAKE) -C openssl-engine
 
 travis:
 	$(MAKE) extract-c-code
