@@ -15,8 +15,9 @@ all:
 	# Ugly hack because we can't encode the fact that the generation of C
 	# files depends on i) Kremlin.native ii) the out.krml files iii) the
 	# KREMLIN_ARGS environment variable.
-	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error"; $(GFIND) ../code -name out.krml -exec touch {} \; ; fi
-	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error"; $(GFIND) ../code -name out.krml -exec touch {} \; ; fi
+	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error" ; fi
+	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error" ; fi
+	# JP FIXME XXX why was this disabled?
 	$(MAKE) extract-c OTHERFLAGS="--trace_error"
 	$(MAKE) ct verify OTHERFLAGS="--trace_error"
 	$(MAKE) -C openssl-engine
@@ -27,6 +28,7 @@ travis:
 	$(MAKE) -C .. world
 
 extract-c-code:
+	$(GFIND) ../code -name out.krml -exec touch {} \;
 	$(MAKE) -C $(HACL_HOME)/code extract-c
 
 extract-c-code-experimental:
@@ -91,22 +93,22 @@ echo-perf-ccomp:
 	$(shell (echo -e "Benchmarking results with ccomp -O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-ccomp/bench.txt) > benchmark-compcert.txt)
 
 perf-ccomp:
-	-$(MAKE) -C snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" perf
-	$(MAKE) echo-perf-ccomp
+	-$(MAKE) -B -C snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" perf
+	$(MAKE) -B echo-perf-ccomp
 
 echo-perf-gcc:
 	$(shell (echo -e "Benchmarking results with $(GCC) -fno-tree-vectorize -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc/bench.txt) > benchmark-gcc.txt)
 
 perf-gcc:
-	$(MAKE) -C snapshot-gcc CC="$(GCC) -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
-	$(MAKE) echo-perf-gcc
+	$(MAKE) -B -C snapshot-gcc CC="$(GCC) -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
+	$(MAKE) -B echo-perf-gcc
 
 echo-gcc-unrolled:
 	$(shell (echo -e "Benchmarking results with $(GCC) -fno-tree-vectorize -flto -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops with KreMLin loop unrolling\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc-unrolled/bench.txt) > benchmark-gcc-unrolled.txt)
 
 perf-gcc-unrolled:
-	$(MAKE) -C snapshot-gcc-unrolled CC="$(GCC) -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
-	$(MAKE) echo-gcc-unrolled
+	$(MAKE) -B -C snapshot-gcc-unrolled CC="$(GCC) -fno-tree-vectorize -flto" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
+	$(MAKE) -B echo-gcc-unrolled
 
 all-perf:
 	$(MAKE) perf-gcc
@@ -119,20 +121,20 @@ snapshot:
 	$(MAKE) test-snapshot
 
 snapshot-ccomp:
-	if $(HAS_CCOMP); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
-	if $(HAS_CCOMP); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
+	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
+	if $(HAS_CCOMP); then $(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
 
 snapshot-msvc:
 	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc msvc"; fi
 	if $(HAS_CL); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-msvc; fi
 
 snapshot-gcc:
-	$(MAKE) extract-c-code extract-c-code-experimental
-	$(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-gcc
+	$(MAKE) -B extract-c-code extract-c-code-experimental
+	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
 
 snapshot-gcc-unrolled:
-	$(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-funroll-loops 5"
-	$(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-gcc-unrolled
+	$(MAKE) -B extract-c-code extract-c-code-experimental KREMLIN_ARGS="-funroll-loops 5"
+	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc-unrolled
 
 all-snapshots:
 	$(MAKE) snapshot-ccomp

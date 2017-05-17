@@ -43,7 +43,7 @@ else
 SO=so
 PWD=$(shell pwd)
 BCRYPTDLL=
-BONUS_OBJ=
+BONUS_OBJ=$(addprefix $(OPENSSL_HOME)/crypto/poly1305/,poly1305.o)
 endif
 
 all: OpenSSLEngine.$(SO) HaclEngine.$(SO) $(BCRYPTDLL)

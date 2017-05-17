@@ -135,6 +135,7 @@ poly-c/AEAD_Poly1305_64.c: poly-c/out.krml $(KRML_BIN)
 
 poly1305.exe: poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c
 	$(CC) $(INCLUDES) $(CFLAGS) $^ -o $@
+	./$@
 
 extract-c: poly-c/Poly1305_64.c poly-c/AEAD_Poly1305_64.c
 
