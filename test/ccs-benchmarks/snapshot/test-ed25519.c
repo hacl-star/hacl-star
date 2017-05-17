@@ -121,7 +121,7 @@ int32_t test_ed25519()
 int32_t perf_ed25519() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = PLAINLEN * sizeof(char);
-  uint8_t* plain = malloc(len);
+  uint8_t* plain = malloc(len + SIGSIZE);
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plain, len);
   uint8_t* macs = malloc(ROUNDS * SIGSIZE * sizeof(char));
@@ -162,7 +162,23 @@ int32_t perf_ed25519() {
 				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
-  flush_results("ED25519 SIGN", hacl_cy, sodium_cy, 0, 0, hacl_utime, sodium_utime, 0, 0, ROUNDS, PLAINLEN);
+
+  uint64_t smlen;
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    tweet_crypto_sign(plain, &smlen, plain, len, sk11);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  tweet_cy = (double)b - a;
+  tweet_utime = (double)t2 - t1;
+  print_results("TweetNaCl Ed25519 sign speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+  for (int i = 0; i < len+SIGSIZE; i++) res += plain[i];
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
+
+ flush_results("ED25519 SIGN", hacl_cy, sodium_cy, 0, tweet_cy, hacl_utime, sodium_utime, 0, tweet_utime, ROUNDS, PLAINLEN);
   
   bool bools[ROUNDS];
   t1 = clock();
@@ -194,7 +210,22 @@ int32_t perf_ed25519() {
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)bools[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
-  flush_results("ED25519 VERIFY", hacl_cy, sodium_cy, 0, 0, hacl_utime, sodium_utime, 0, 0, ROUNDS, PLAINLEN);
+
+  t1 = clock();
+  a = TestLib_cpucycles_begin();
+  for (int i = 0; i < ROUNDS; i++){
+    tweet_crypto_sign_open(plain, &smlen, plain, len+SIGSIZE, pk11);
+  }
+  b = TestLib_cpucycles_end();
+  t2 = clock();
+  tweet_cy = (double)b - a;
+  tweet_utime = (double)t2 - t1;
+  print_results("TweetNaCl Ed25519 verify speed", (double)t2-t1,
+		(double) b - a, ROUNDS, PLAINLEN);
+  for (int i = 0; i < len+SIGSIZE; i++) res += plain[i];
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
+
+ flush_results("ED25519 VERIFY", hacl_cy, sodium_cy, 0, tweet_cy, hacl_utime, sodium_utime, 0, tweet_utime, ROUNDS, PLAINLEN);
 
   return exit_success;
 }
