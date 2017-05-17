@@ -17,7 +17,7 @@ else
 endif
 CFLAGS=-I$(OPENSSL_HOME)/include -L$(OPENSSL_HOME) -I$(KREMLIN_HOME)/kremlib \
   -shared -Wall -Wno-unused-variable -Wno-parentheses -O3 -flto $(PIC) \
-  -Wno-unused-but-set-variable \
+  -Wno-unused-but-set-variable -Wno-unknown-warning-option \
   -I$(OPENSSL_HOME) \
   -I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(CHACHA_HOME)/.. -I$(POLY_HOME) -I$(AEAD_HOME) \
   -I$(SHA_HOME)
