@@ -116,7 +116,7 @@ int32_t perf_sha512() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    SHA2_512_hash(macs + SIGSIZE * i, plain, len);
+    hash(macs + SIGSIZE * i, plain, len);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
