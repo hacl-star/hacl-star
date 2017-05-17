@@ -17,7 +17,7 @@ module Hash = Spec.SHA2_256
 (* Base types *)
 type bytes = m:seq UInt8.t
 
-private val xor_bytes: (b0:bytes) -> (b1:bytes{length b0 = length b1}) -> Tot bytes
+val xor_bytes: (b0:bytes) -> (b1:bytes{length b0 = length b1}) -> Tot bytes
 let xor_bytes b0 b1 = Spec.Lib.map2 (fun x y -> U8.logxor x y) b0 b1
 
 
