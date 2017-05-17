@@ -185,7 +185,7 @@ let lemma_pad_16 h b len_16 rem_16 =
   Hacl.Spec.Poly1305_64.Lemmas1.lemma_pad_16 (reveal_sbytes (as_seq h b)) (U32.v len_16) (U32.v rem_16)
 
 
-#reset-options "--max_fuel 0 -max_ifuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 val poly1305_blocks_init:
   st:I.poly1305_state ->
