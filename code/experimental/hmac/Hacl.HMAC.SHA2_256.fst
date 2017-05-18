@@ -154,7 +154,7 @@ let hmac_part1 s2 data len =
 
   let hash0 = Buffer.sub s2 0ul Hash.size_hash in (* Salvage memory *)
   Hash.finish state0 hash0; (* s4 = hash (s2 @| data) *)
-  (**) Spec_Hash.lemma_hash_prepend (as_seq h0 s2) (as_seq h0 data);
+  (**) Spec_Hash.lemma_hash_all_prepend_block (as_seq h0 s2) (as_seq h0 data);
 
   (* Pop the memory frame *)
   (**) pop_frame ()
@@ -191,7 +191,7 @@ let hmac_part2 mac s5 s4 =
   Hash.update state1 s5; (* s5 = opad *)
   Hash.update_last state1 s4 Hash.size_hash;
   Hash.finish state1 mac; (* s7 = hash (s5 @| s4) *)
-  (**) Spec_Hash.lemma_hash_prepend_single (as_seq h0 s5) (as_seq h0 s4);
+  (**) Spec_Hash.lemma_hash_single_prepend_block (as_seq h0 s5) (as_seq h0 s4);
 
   (* Pop the memory frame *)
   (**) pop_frame ()
