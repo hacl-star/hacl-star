@@ -235,7 +235,7 @@ let lemma_update_multi_extend h0 block blocks =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-val lemma_hash_prepend_block: (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length block + Seq.length msg < max_input_len_8}) -> Lemma
+val lemma_hash_all_prepend_block: (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length block + Seq.length msg < max_input_len_8}) -> Lemma
   (ensures (let n = Seq.length msg / size_block in
             let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
             let hash0 = update h_0 block in
@@ -243,7 +243,7 @@ val lemma_hash_prepend_block: (block:bytes{Seq.length block = size_block}) -> (m
             let hash2 = update_last hash1 (size_block + (n * size_block)) msg_last in
             finish hash2 == hash (block @| msg)))
 
-let lemma_hash_prepend_block block msg =
+let lemma_hash_all_prepend_block block msg =
   let n = Seq.length msg / size_block in
   let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
   let hash1 = update h_0 block in
