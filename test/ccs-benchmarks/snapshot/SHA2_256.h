@@ -47,35 +47,35 @@ typedef struct {
 }
 K___uint32_t_uint8_t_;
 
-typedef uint8_t uint8_t;
+typedef uint8_t SHA2_256_uint8_t;
 
-typedef uint32_t uint32_t;
+typedef uint32_t SHA2_256_uint32_t;
 
-typedef uint64_t uint64_t;
+typedef uint64_t SHA2_256_uint64_t;
 
-typedef uint8_t uint8_ht;
+typedef uint8_t SHA2_256_uint8_ht;
 
-typedef uint32_t uint32_ht;
+typedef uint32_t SHA2_256_uint32_ht;
 
-typedef uint32_t *uint32_p;
+typedef uint32_t *SHA2_256_uint32_p;
 
-typedef uint8_t *uint8_p;
+typedef uint8_t *SHA2_256_uint8_p;
 
-extern uint32_t size_hash;
+extern uint32_t SHA2_256_size_hash;
 
-extern uint32_t size_block;
+extern uint32_t SHA2_256_size_block;
 
-extern uint32_t size_state;
+extern uint32_t SHA2_256_size_state;
 
-void init(uint32_t *state);
+void SHA2_256_init(uint32_t *state);
 
-void update(uint32_t *state, uint8_t *data_8);
+void SHA2_256_update(uint32_t *state, uint8_t *data_8);
 
-void update_multi(uint32_t *state, uint8_t *data, uint32_t n1);
+void SHA2_256_update_multi(uint32_t *state, uint8_t *data, uint32_t n1);
 
-void update_last(uint32_t *state, uint8_t *data, uint32_t len);
+void SHA2_256_update_last(uint32_t *state, uint8_t *data, uint32_t len);
 
-void finish(uint32_t *state, uint8_t *hash1);
+void SHA2_256_finish(uint32_t *state, uint8_t *hash1);
 
-void hash(uint8_t *hash1, uint8_t *input, uint32_t len);
+void SHA2_256_hash(uint8_t *hash1, uint8_t *input, uint32_t len);
 #endif

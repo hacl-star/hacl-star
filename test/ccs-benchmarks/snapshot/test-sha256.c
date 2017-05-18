@@ -116,7 +116,7 @@ int32_t perf_sha256() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    hash(macs + SIGSIZE * i, plain, len);
+    SHA2_256_hash(macs + SIGSIZE * i, plain, len);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
