@@ -131,14 +131,6 @@ let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
     FStar.UInt64.(s1 +%^ (t7 +%^ (s0 +%^ t16)))
 
 
-private
-val lemma_spec_ws_def:
-  b:Seq.seq UInt64.t{Seq.length b = size_block_w} ->
-  i:nat{i < size_k_w} ->
-  Lemma (ws b i == index b i)
-let lemma_spec_ws_def b i = ()
-
-
 let shuffle_core (block:block_w) (hash:hash_w) (t:counter{t < size_k_w}) : Tot hash_w =
   let a = hash.[0] in
   let b = hash.[1] in
@@ -347,6 +339,7 @@ let lemma_hash_prepend h0 block msg =
   assert(n' == n + 1);
   Seq.lemma_eq_intro (msg_last') (msg_last);
   Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
+
 
 
 //
