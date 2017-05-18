@@ -11,6 +11,8 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
+open Hacl.Spec.Endianness
+
 (* Definition of aliases for modules *)
 module Spec = Spec.SHA512
 module U8 = FStar.UInt8
@@ -95,7 +97,7 @@ val update:
                   /\ (let seq_k = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
                   let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
                   let counter = Seq.index seq_counter 0 in
-                  seq_k == Spec.k /\ H64.v counter < (pow2 64 - 1))))
+                  reveal_h64s seq_k == Spec.k /\ H64.v counter < (pow2 64 - 1))))
         (ensures  (fun h0 r h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
@@ -108,7 +110,7 @@ val update:
                   let counter_1 = Seq.index seq_counter_1 0 in
                   seq_k_0 == seq_k_1
                   /\ H64.v counter_1 = H64.v counter_0 + 1 /\ H64.v counter_1 < pow2 64
-                  /\ seq_hash_1 == Spec.update seq_hash_0 seq_block)))
+                  /\ reveal_h64s seq_hash_1 == Spec.update (reveal_h64s seq_hash_0) (reveal_sbytes seq_block))))
 
 
 val update_multi:
@@ -120,7 +122,7 @@ val update_multi:
                   /\ (let seq_k = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
                   let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
                   let counter = Seq.index seq_counter 0 in
-                  seq_k == Spec.k /\ H64.v counter < (pow2 64 - (v n)))))
+                  reveal_h64s seq_k == Spec.k /\ H64.v counter < (pow2 64 - (v n)))))
         (ensures  (fun h0 _ h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
@@ -133,7 +135,7 @@ val update_multi:
                   let counter_1 = Seq.index seq_counter_1 0 in
                   seq_k_0 == seq_k_1
                   /\ H64.v counter_1 = H64.v counter_0 + (v n) /\ H64.v counter_1 < pow2 64
-                  /\ seq_hash_1 == Spec.update_multi seq_hash_0 seq_blocks)))
+                  /\ reveal_h64s seq_hash_1 == Spec.update_multi (reveal_h64s seq_hash_0) (reveal_sbytes seq_blocks))))
 
 
 val update_last:
@@ -146,14 +148,14 @@ val update_last:
                   let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
                   let counter = Seq.index seq_counter 0 in
                   let nb = U64.div len (Int.Cast.uint32_to_uint64 size_block) in
-                  seq_k == Spec.k /\ H64.v counter < (pow2 64 - 2))))
+                  reveal_h64s seq_k == Spec.k /\ H64.v counter < (pow2 64 - 2))))
         (ensures  (fun h0 r h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_data = as_seq h0 data in
                   let count = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.v pos_count_w + 1) in
-                  let prevlen = U64.(v (Seq.index count 0) * (U32.v size_block)) in
-                  prevlen + Seq.length seq_data < pow2 125 /\ seq_hash_1 == Spec.update_last seq_hash_0 prevlen seq_data)))
+                  let prevlen = H64.(v (Seq.index count 0) * (U32.v size_block)) in
+                  prevlen + Seq.length seq_data < pow2 125 /\ reveal_h64s seq_hash_1 == Spec.update_last (reveal_h64s seq_hash_0) prevlen (reveal_sbytes seq_data))))
 
 
 val finish:
@@ -162,8 +164,8 @@ val finish:
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
         (ensures  (fun h0 _ h1 -> live h0 state /\ live h1 hash /\ modifies_1 hash h0 h1
-                  /\ (let seq_hash_w = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-                  let seq_hash = as_seq h1 hash in
+                  /\ (let seq_hash_w = reveal_h64s (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w))) in
+                  let seq_hash = reveal_sbytes (as_seq h1 hash) in
                   seq_hash = Spec.finish seq_hash_w)))
 
 val hash:
@@ -173,6 +175,6 @@ val hash:
   Stack unit
         (requires (fun h0 -> live h0 hash /\ live h0 input))
         (ensures  (fun h0 _ h1 -> live h0 input /\ live h0 hash /\ live h1 hash /\ modifies_1 hash h0 h1
-                  /\ (let seq_input = as_seq h0 input in
-                  let seq_hash = as_seq h1 hash in
+                  /\ (let seq_input = reveal_sbytes (as_seq h0 input) in
+                  let seq_hash = reveal_sbytes (as_seq h1 hash) in
                   seq_hash == Spec.hash seq_input)))

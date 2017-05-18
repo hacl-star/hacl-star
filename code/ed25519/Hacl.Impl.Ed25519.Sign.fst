@@ -13,6 +13,7 @@ let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 
 open Hacl.Impl.Ed25519.Sign.Steps
+open Hacl.Spec.Endianness
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
@@ -110,8 +111,8 @@ let sign__ signature secret msg len tmp_bytes tmp_ints =
   let h4 = ST.get() in
   no_upd_lemma_1 h2 h3 tmp_bytes msg;
   no_upd_lemma_1 h2 h3 tmp_bytes tmp_ints;
-  assert(Hacl.Spec.BignumQ.Eval.eval_q (as_seq h4 r) < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
-  assert(Hacl.Spec.BignumQ.Eval.eval_q (as_seq h4 h) < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  assert(Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h4 r)) < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  assert(Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h4 h)) < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
   sign_step_5 tmp_bytes tmp_ints;
   let h5 = ST.get() in
   append_to_sig signature rs' s';
@@ -162,11 +163,11 @@ let sign_ signature secret msg len =
   let hh0 = ST.get() in
   push_frame();
   let hh1 = ST.get() in
-  let tmp_bytes = Buffer.create 0uy (352ul) in
+  let tmp_bytes = Buffer.create (Hacl.Cast.uint8_to_sint8 0uy) (352ul) in
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in
-  let tmp_ints  = Buffer.create 0uL 65ul in
+  let tmp_ints  = Buffer.create (Hacl.Cast.uint64_to_sint64 0uL) 65ul in
   let h2 = ST.get() in
   no_upd_lemma_0 h1 h2 secret;
   no_upd_lemma_0 h1 h2 msg;

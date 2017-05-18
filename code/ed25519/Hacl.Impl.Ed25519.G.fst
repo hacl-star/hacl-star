@@ -29,25 +29,25 @@ let make_g g =
   let gz = Hacl.Impl.Ed25519.ExtPoint.getz g in
   let gt = Hacl.Impl.Ed25519.ExtPoint.gett g in
   let h0 = ST.get() in
-  Hacl.Lib.Create64.make_h64_5 gx 0x00062d608f25d51auL 0x000412a4b4f6592auL 0x00075b7171a4b31duL 0x0001ff60527118feuL 0x000216936d3cd6e5uL;
+  Hacl.Lib.Create64.make_h64_5 gx (Hacl.Cast.uint64_to_sint64 0x00062d608f25d51auL) (Hacl.Cast.uint64_to_sint64 0x000412a4b4f6592auL) (Hacl.Cast.uint64_to_sint64 0x00075b7171a4b31duL) (Hacl.Cast.uint64_to_sint64 0x0001ff60527118feuL) (Hacl.Cast.uint64_to_sint64 0x000216936d3cd6e5uL);
   let h1 = ST.get() in
   lemma_intro_red_51 (as_seq h1 gx);
   lemma_red_51_is_red_513 (as_seq h1 gx);
   lemma_reveal_seval (as_seq h1 gx);
-  Hacl.Lib.Create64.make_h64_5 gy 0x0006666666666658uL 0x0004ccccccccccccuL 0x0001999999999999uL 0x0003333333333333uL 0x0006666666666666uL;
+  Hacl.Lib.Create64.make_h64_5 gy (Hacl.Cast.uint64_to_sint64 0x0006666666666658uL) (Hacl.Cast.uint64_to_sint64 0x0004ccccccccccccuL) (Hacl.Cast.uint64_to_sint64 0x0001999999999999uL) (Hacl.Cast.uint64_to_sint64 0x0003333333333333uL) (Hacl.Cast.uint64_to_sint64 0x0006666666666666uL);
   let h2 = ST.get() in
   lemma_intro_red_51 (as_seq h2 gy);
   lemma_red_51_is_red_513 (as_seq h2 gy);
   lemma_reveal_seval (as_seq h2 gy);
   no_upd_lemma_1 h1 h2 gy gx;
-  Hacl.Lib.Create64.make_h64_5 gz 0x0000000000000001uL 0x0000000000000000uL 0x0000000000000000uL 0x0000000000000000uL 0x0000000000000000uL;
+  Hacl.Lib.Create64.make_h64_5 gz (Hacl.Cast.uint64_to_sint64 0x0000000000000001uL) (Hacl.Cast.uint64_to_sint64 0x0000000000000000uL) (Hacl.Cast.uint64_to_sint64 0x0000000000000000uL) (Hacl.Cast.uint64_to_sint64 0x0000000000000000uL) (Hacl.Cast.uint64_to_sint64 0x0000000000000000uL);
   let h3 = ST.get() in
   lemma_intro_red_51 (as_seq h3 gz);
   lemma_red_51_is_red_513 (as_seq h3 gz);
   lemma_reveal_seval (as_seq h3 gz);
   no_upd_lemma_1 h2 h3 gz gx;
   no_upd_lemma_1 h2 h3 gz gy;
-  Hacl.Lib.Create64.make_h64_5 gt 0x00068ab3a5b7dda3uL 0x00000eea2a5eadbbuL 0x0002af8df483c27euL 0x000332b375274732uL 0x00067875f0fd78b7uL;
+  Hacl.Lib.Create64.make_h64_5 gt (Hacl.Cast.uint64_to_sint64 0x00068ab3a5b7dda3uL) (Hacl.Cast.uint64_to_sint64 0x00000eea2a5eadbbuL) (Hacl.Cast.uint64_to_sint64 0x0002af8df483c27euL) (Hacl.Cast.uint64_to_sint64 0x000332b375274732uL) (Hacl.Cast.uint64_to_sint64 0x00067875f0fd78b7uL);
   let h4 = ST.get() in
   lemma_intro_red_51 (as_seq h4 gt);
   lemma_red_51_is_red_513 (as_seq h4 gt);

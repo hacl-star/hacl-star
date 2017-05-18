@@ -5,11 +5,12 @@ open Hacl.UInt64
 open Hacl.Bignum25519
 open Hacl.Impl.Ed25519.ExtPoint
 
+
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 val point_decompress:
   out:point ->
-  s:buffer Hacl.UInt8.t{length s = 32} ->
+  s:buffer UInt8.t{length s = 32} ->
   Stack bool
     (requires (fun h -> live h out /\ live h s))
     (ensures (fun h0 b h1 -> live h0 s /\ live h1 out /\ modifies_1 out h0 h1 /\

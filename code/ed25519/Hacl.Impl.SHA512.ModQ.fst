@@ -7,6 +7,7 @@ open Hacl.UInt64
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+open Hacl.Spec.Endianness
 
 private
 val lemma_modifies_0_2: #a:Type -> #a':Type -> h0:HyperStack.mem -> h1:HyperStack.mem -> h2:HyperStack.mem -> b:buffer a -> b':buffer a' -> Lemma (requires (live h0 b /\ b' `unused_in` h0 /\ live h1 b' /\ frameOf b' = FStar.HyperStack.(h0.tip)
@@ -32,7 +33,7 @@ val sha512_modq_pre_:
         (requires (fun h0 -> live h0 input /\ live h0 out /\ live h0 tmp /\ live h0 prefix))
         (ensures  (fun h0 _ h1 -> live h0 input /\ live h1 out /\ modifies_2 out tmp h0 h1 /\
           live h0 prefix /\ live h1 prefix /\
-          Hacl.Spec.BignumQ.Eval.eval_q (as_seq h1 out) == Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 prefix @| as_seq h0 input) /\
+          Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h1 out)) == Spec.Ed25519.sha512_modq FStar.Seq.(reveal_sbytes (as_seq h0 prefix @| as_seq h0 input)) /\
           (let out = as_seq h1 out in let op_String_Access = Seq.index in
            v (out.[0]) < 0x100000000000000 /\ v (out.[1]) < 0x100000000000000 /\
            v (out.[2]) < 0x100000000000000 /\ v (out.[3]) < 0x100000000000000 /\
@@ -57,7 +58,7 @@ let sha512_modq_pre_ out prefix input len tmp =
   let h5 = ST.get() in
   assert(modifies_1 tmp h0 h5);
   assert(let t = as_seq h5 tmp in Hacl.Impl.BignumQ.Mul.all_10_bellow_56 t);
-  assert(let t = as_seq h5 tmp in let op_String_Access = Seq.index in
+  assert(let t = reveal_h64s (as_seq h5 tmp) in let op_String_Access = Seq.index in
     Hacl.Spec.BignumQ.Eval.eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512);
   Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 =
@@ -93,7 +94,7 @@ val sha512_modq_pre_pre2_:
         (requires (fun h -> live h input /\ live h out /\ live h tmp /\ live h prefix /\ live h prefix2))
         (ensures  (fun h0 _ h1 -> live h0 input /\ live h1 out /\ modifies_2 out tmp h0 h1 /\
           live h0 prefix /\ live h1 prefix /\ live h0 prefix2 /\ live h1 prefix2 /\
-          Hacl.Spec.BignumQ.Eval.eval_q (as_seq h1 out) == Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 prefix @| as_seq h0 prefix2 @| as_seq h0 input) /\
+          Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h1 out)) == Spec.Ed25519.sha512_modq FStar.Seq.(reveal_sbytes (as_seq h0 prefix @| as_seq h0 prefix2 @| as_seq h0 input)) /\
           (let out = as_seq h1 out in let op_String_Access = Seq.index in
            v (out.[0]) < 0x100000000000000 /\ v (out.[1]) < 0x100000000000000 /\
            v (out.[2]) < 0x100000000000000 /\ v (out.[3]) < 0x100000000000000 /\
@@ -114,7 +115,7 @@ let sha512_modq_pre_pre2_ out prefix prefix2 input len tmp =
   let h1 = ST.get() in
   assert(modifies_1 tmp h0 h1);
   assert(let t = as_seq h1 tmp in Hacl.Impl.BignumQ.Mul.all_10_bellow_56 t);
-  assert(let t = as_seq h1 tmp in let op_String_Access = Seq.index in
+  assert(let t = reveal_h64s (as_seq h1 tmp) in let op_String_Access = Seq.index in
     Hacl.Spec.BignumQ.Eval.eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512);
   Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 =

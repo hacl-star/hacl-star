@@ -25,4 +25,4 @@ val store_51:
     (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Buffer.live h1 input /\
       modifies_1 output h0 h1 /\
       Buffer.live h1 output /\
-      little_endian (as_seq h1 output) == Hacl.Bignum25519.seval (as_seq h0 input)))
+      hlittle_endian (as_seq h1 output) == Hacl.Bignum25519.seval (as_seq h0 input)))

@@ -191,6 +191,7 @@ private let lemma_times_2 a b c d e : Lemma
    = 2 * (a + pow2 51 * (b) + pow2 102 * (c) + pow2 153 * (d) + pow2 204 * (e)))
   = lemma_distributivity_5 2 a (pow2 51 * b) (pow2 102 * c) (pow2 153 * d) (pow2 204 * e)
 
+open Hacl.Cast
 
 let times_2 out a =
   let h = ST.get() in
@@ -200,11 +201,11 @@ let times_2 out a =
   let a3 = a.(3ul) in
   let a4 = a.(4ul) in
   let open Hacl.UInt64 in
-  let o0 = 2uL *^ a0 in
-  let o1 = 2uL *^ a1 in
-  let o2 = 2uL *^ a2 in
-  let o3 = 2uL *^ a3 in
-  let o4 = 2uL *^ a4 in
+  let o0 = uint64_to_sint64 2uL *^ a0 in
+  let o1 = uint64_to_sint64 2uL *^ a1 in
+  let o2 = uint64_to_sint64 2uL *^ a2 in
+  let o3 = uint64_to_sint64 2uL *^ a3 in
+  let o4 = uint64_to_sint64 2uL *^ a4 in
   lemma_times_2 (v a0) (v a1) (v a2) (v a3) (v a4);
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h a);
   Hacl.Lib.Create64.make_h64_5 out o0 o1 o2 o3 o4;
@@ -219,8 +220,11 @@ let times_d out a =
   push_frame();
   let h1 = ST.get() in
   let d = Buffer.create (Hacl.Cast.uint64_to_sint64 0uL) 5ul in
-  Hacl.Lib.Create64.make_h64_5 d 0x00034dca135978a3uL 0x0001a8283b156ebduL 0x0005e7a26001c029uL 
-                                 0x000739c663a03cbbuL 0x00052036cee2b6ffuL;
+  Hacl.Lib.Create64.make_h64_5 d (uint64_to_sint64 0x00034dca135978a3uL)
+                                 (uint64_to_sint64 0x0001a8283b156ebduL)
+                                 (uint64_to_sint64 0x0005e7a26001c029uL)
+                                 (uint64_to_sint64 0x000739c663a03cbbuL)
+                                 (uint64_to_sint64 0x00052036cee2b6ffuL);
   let h2 = ST.get() in
   no_upd_lemma_0 h1 h2 a;
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h2 d);
@@ -247,8 +251,11 @@ let times_2d out a =
   push_frame();
   let h1 = ST.get() in
   let d2 = Buffer.create (Hacl.Cast.uint64_to_sint64 0uL) 5ul in
-  Hacl.Lib.Create64.make_h64_5 d2 0x00069b9426b2f159uL 0x00035050762add7auL 0x0003cf44c0038052uL
-                                  0x0006738cc7407977uL 0x0002406d9dc56dffuL;
+  Hacl.Lib.Create64.make_h64_5 d2 (uint64_to_sint64 0x00069b9426b2f159uL)
+                                  (uint64_to_sint64 0x00035050762add7auL)
+                                  (uint64_to_sint64 0x0003cf44c0038052uL)
+                                  (uint64_to_sint64 0x0006738cc7407977uL)
+                                  (uint64_to_sint64 0x0002406d9dc56dffuL);
   let h2 = ST.get() in
   no_upd_lemma_0 h1 h2 a;
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h2 d2);
@@ -284,16 +291,16 @@ let fsquare out a =
 
 let fsquare_times out a n =
   let h = ST.get() in
-  Hacl.Spec.Bignum.Crecip.lemma_fsquare_times_tot (as_seq h a) (UInt32.v n);
-  Hacl.Spec.Bignum.Crecip.Lemmas.lemma_exp_eq (seval (as_seq h a)) (pow2 (UInt32.v n));
+  Hacl.Spec.Bignum.Crecip.lemma_fsquare_times_tot (as_seq h a) (FStar.UInt32.v n);
+  Hacl.Spec.Bignum.Crecip.Lemmas.lemma_exp_eq (seval (as_seq h a)) (pow2 (FStar.UInt32.v n));
   Hacl.Bignum.Fsquare.fsquare_times out a n
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 let fsquare_times_inplace out n =
   let h = ST.get() in
-  Hacl.Spec.Bignum.Crecip.lemma_fsquare_times_tot (as_seq h out) (UInt32.v n);
-  Hacl.Spec.Bignum.Crecip.Lemmas.lemma_exp_eq (seval (as_seq h out)) (pow2 (UInt32.v n));
+  Hacl.Spec.Bignum.Crecip.lemma_fsquare_times_tot (as_seq h out) (FStar.UInt32.v n);
+  Hacl.Spec.Bignum.Crecip.Lemmas.lemma_exp_eq (seval (as_seq h out)) (pow2 (FStar.UInt32.v n));
   Hacl.Bignum.Fsquare.fsquare_times_inplace out n
 
 #reset-options "--max_fuel 0 --z3rlimit 100"

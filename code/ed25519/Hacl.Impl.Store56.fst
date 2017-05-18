@@ -4,6 +4,7 @@ open FStar.Buffer
 open Hacl.UInt64
 open Hacl.Endianness
 open Hacl.Spec.BignumQ.Eval
+open Hacl.Spec.Endianness
 
 let hint8_p = buffer Hacl.UInt8.t
 let qelem   = buffer Hacl.UInt64.t
@@ -21,7 +22,7 @@ val hstore56_le:
     (requires (fun h -> live h out))
     (ensures (fun h0 _ h1 ->
       live h1 out /\ modifies_1 (Buffer.sub out off 8ul) h0 h1 /\
-      Endianness.little_endian (as_seq h1 (Buffer.sub out off 7ul)) == v x))
+      hlittle_endian (as_seq h1 (Buffer.sub out off 7ul)) == v x))
 #reset-options "--max_fuel 0 --z3rlimit 200"
 [@ "substitute"]
 let hstore56_le out off x =
@@ -29,8 +30,8 @@ let hstore56_le out off x =
   hstore64_le b8 x;
   let h = ST.get() in
   Seq.lemma_eq_intro (as_seq h b8) (Seq.append (Seq.slice (as_seq h b8) 0 7) (Seq.slice (as_seq h b8) 7 8));
-  Endianness.little_endian_append (Seq.slice (as_seq h b8) 0 7) (Seq.slice (as_seq h b8) 7 8);
-  Endianness.lemma_little_endian_is_bounded (Seq.slice (as_seq h b8) 0 7);
+  Endianness.little_endian_append (reveal_sbytes (Seq.slice (as_seq h b8) 0 7)) (reveal_sbytes (Seq.slice (as_seq h b8) 7 8));
+  Endianness.lemma_little_endian_is_bounded (reveal_sbytes (Seq.slice (as_seq h b8) 0 7));
   Seq.lemma_eq_intro (as_seq h (Buffer.sub out off 7ul)) (Seq.slice (as_seq h b8) 0 7)
 
 
@@ -43,18 +44,18 @@ val lemma_append_5:
   b2:Seq.seq Hacl.UInt8.t{Seq.length b2 = 7} ->
   b3:Seq.seq Hacl.UInt8.t{Seq.length b3 = 7} ->
   b4:Seq.seq Hacl.UInt8.t{Seq.length b4 = 4} ->
-  Lemma (Endianness.little_endian FStar.Seq.(b0 @| b1 @| b2 @| b3 @| b4) ==
-    Endianness.little_endian b0 + pow2 56 * Endianness.little_endian b1 + pow2 112 * Endianness.little_endian b2 + pow2 168 * Endianness.little_endian b3 + pow2 224 * Endianness.little_endian b4)
+  Lemma (hlittle_endian FStar.Seq.(b0 @| b1 @| b2 @| b3 @| b4) ==
+    hlittle_endian b0 + pow2 56 * hlittle_endian b1 + pow2 112 * hlittle_endian b2 + pow2 168 * hlittle_endian b3 + pow2 224 * hlittle_endian b4)
 let lemma_append_5 b0 b1 b2 b3 b4 =
   let open FStar.Seq in
   let b = b0 @| b1 @| b2 @| b3 @| b4 in
-  Seq.lemma_eq_intro ((b0 @| b1 @| b2 @| b3) @| b4) b;
-  Endianness.little_endian_append (b0 @| b1 @| b2 @| b3) b4;
+  Seq.lemma_eq_intro (((b0 @| b1 @| b2 @| b3) @| b4)) (b);
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2 @| b3)) (reveal_sbytes b4);
   Seq.lemma_eq_intro ((b0 @| b1 @| b2) @| b3) (b0 @| b1 @| b2 @| b3);
-  Endianness.little_endian_append (b0 @| b1 @| b2) b3;
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1 @| b2)) (reveal_sbytes b3);
   Seq.lemma_eq_intro ((b0 @| b1) @| b2) (b0 @| b1 @| b2);
-  Endianness.little_endian_append (b0 @| b1) b2;
-  Endianness.little_endian_append (b0) b1
+  Endianness.little_endian_append (reveal_sbytes (b0 @| b1)) (reveal_sbytes b2);
+  Endianness.little_endian_append (reveal_sbytes b0) (reveal_sbytes b1)
 
 
 private
@@ -84,7 +85,7 @@ val store_56:
         v (Seq.index s 3) < pow2 56 /\
         v (Seq.index s 4) < pow2 32)))
     (ensures (fun h0 _ h1 -> live h1 out /\ live h0 b /\ modifies_1 out h0 h1 /\
-      Endianness.little_endian (as_seq h1 out) == Hacl.Spec.BignumQ.Eval.eval_q (as_seq h0 b)))
+      hlittle_endian (as_seq h1 out) == Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 b))))
 let store_56 out b =
   assert_norm(pow2 56 = 0x100000000000000);
   assert_norm(pow2 112 = 0x10000000000000000000000000000);
@@ -119,11 +120,11 @@ let store_56 out b =
   no_upd_lemma_1 h4 h (Buffer.sub out 28ul 4ul) (Buffer.sub out 7ul 7ul);
   no_upd_lemma_1 h4 h (Buffer.sub out 28ul 4ul) (Buffer.sub out 14ul 7ul);
   no_upd_lemma_1 h4 h (Buffer.sub out 28ul 4ul) (Buffer.sub out 21ul 7ul);
-  assert(Endianness.little_endian (as_seq h (Buffer.sub out 0ul 7ul)) = v b0);
-  assert(Endianness.little_endian (as_seq h (Buffer.sub out 7ul 7ul)) = v b1);
-  assert(Endianness.little_endian (as_seq h (Buffer.sub out 14ul 7ul)) = v b2);
-  assert(Endianness.little_endian (as_seq h (Buffer.sub out 21ul 7ul)) = v b3);
-  assert(Endianness.little_endian (as_seq h (Buffer.sub out 28ul 4ul)) = Hacl.UInt32.v b4);
+  assert(hlittle_endian (as_seq h (Buffer.sub out 0ul 7ul)) = v b0);
+  assert(hlittle_endian (as_seq h (Buffer.sub out 7ul 7ul)) = v b1);
+  assert(hlittle_endian (as_seq h (Buffer.sub out 14ul 7ul)) = v b2);
+  assert(hlittle_endian (as_seq h (Buffer.sub out 21ul 7ul)) = v b3);
+  assert(hlittle_endian (as_seq h (Buffer.sub out 28ul 4ul)) = Hacl.UInt32.v b4);
   lemma_append_5 (as_seq h (Buffer.sub out 0ul 7ul))
                  (as_seq h (Buffer.sub out 7ul 7ul))
                  (as_seq h (Buffer.sub out 14ul 7ul))
