@@ -1,6 +1,6 @@
 all: extract-c ct verify
 
-DIRECTORIES= salsa-family bignum poly1305 curve25519 api
+DIRECTORIES= salsa-family bignum poly1305 curve25519 api ed25519
 
 %-c: %
 	$(MAKE) -C $< extract-c
@@ -48,7 +48,7 @@ x25519-specific-ci:
 experimental-ci:
 	$(MAKE) -C experimental all-ci
 
-ci: $(addsuffix -ci, salsa-family api) bignum-ci poly1305-specific-ci x25519-specific-ci experimental-ci
+ci: $(addsuffix -ci, salsa-family api ed25519) bignum-ci poly1305-specific-ci x25519-specific-ci experimental-ci
 
 clean:
 	rm -rf *~ *.exe *.out 

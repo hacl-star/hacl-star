@@ -44,7 +44,8 @@ X25519_SPECIFIC= \
 	Hacl.EC.Ladder.BigLoop.fst \
 	Hacl.EC.Ladder.fst \
 	Hacl.Spec.EC.fst \
-	Hacl.EC.fst
+	Hacl.EC.fst \
+	Curve25519.fst
 
 # Files that are too slow and for which verification speed must improve
 SLOW=Hacl.Spec.Bignum.Fsquare.fst
@@ -70,7 +71,10 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
 
-all-ct: $(addsuffix -ct, $(X25519_FILES))
+# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
+all-ct:
+	$(FSTAR_CT) --lax --verify_all Curve25519.fst
+
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
