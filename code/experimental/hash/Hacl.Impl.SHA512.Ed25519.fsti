@@ -21,7 +21,7 @@ val sha512_pre_msg:
     (requires (fun h -> live h hash /\ live h prefix /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 hash /\ live h0 prefix /\ live h0 input /\
       live h1 hash /\ live h1 prefix /\ live h1 input /\ modifies_1 hash h0 h1 /\
-      as_seq h1 hash == Spec.Ed25519.sha512 FStar.Seq.(as_seq h0 prefix @| as_seq h0 input)))
+      h1.[hash] == Spec.Ed25519.sha512 FStar.Seq.(h0.[prefix] @| h0.[input])))
 
 
 val sha512_pre_pre2_msg:
@@ -34,4 +34,4 @@ val sha512_pre_pre2_msg:
     (requires (fun h -> live h hash /\ live h prefix /\ live h prefix2 /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 hash /\ live h0 prefix /\ live h0 input /\ live h0 prefix2 /\
       live h1 hash /\ live h1 prefix /\ live h1 input /\ modifies_1 hash h0 h1 /\
-      as_seq h1 hash == Spec.Ed25519.sha512 (as_seq h0 prefix @| as_seq h0 prefix2 @| as_seq h0 input)))
+      h1.[hash] == Spec.Ed25519.sha512 (h0.[prefix] @| h0.[prefix2] @| h0.[input])))

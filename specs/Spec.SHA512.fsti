@@ -1,8 +1,13 @@
+(* NOTE: This is an interface module aimed at reducing the size of
+   Ed25519 dependencies.  For the full detailed SHA2-512 specification
+   refer to the Spec.SHA2_512 module *)
 module Spec.SHA512
 
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt64
+
+#reset-options "max_fuel 0 --z3rlimit 20"
 
 val k:     k:seq UInt64.t{length k = 80}
 val h_0: h_0:seq UInt64.t{length h_0 = 8}

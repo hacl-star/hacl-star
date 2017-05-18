@@ -68,9 +68,9 @@ build-snapshot:
 		../code/salsa-family/salsa-c/Salsa20.* \
 		$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
 		$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
-		$(addprefix ../code/experimental/ed25519/ed25519-c/, Ed25519.*) \
+		$(addprefix ../code/ed25519/ed25519-c/, Ed25519.*) \
 		$(addprefix ../code/experimental/hash/sha2-c/, SHA2_512.*) \
-		$(addprefix ../code/experimental/salsa-family/chacha-vec128/, Chacha20_Vec128.* ../vec128.h) \
+		$(addprefix ../code/salsa-family/chacha-vec128/, Chacha20_Vec128.* ../vec128.h) \
 		 $(SNAPSHOT_DIR)
 	cp ./c/* $(SNAPSHOT_DIR)/
 
