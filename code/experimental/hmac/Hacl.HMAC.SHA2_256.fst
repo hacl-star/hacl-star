@@ -67,6 +67,7 @@ let xor_bytes_inplace a b len = C.Loops.in_place_map2 a b len (fun x y -> H8.log
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
+[@"substitute"]
 val wrap_key:
   output :uint8_p  {length output = v Hash.size_block} ->
   key    :uint8_p  {disjoint output key} ->
@@ -79,6 +80,7 @@ val wrap_key:
 
 #reset-options "--max_fuel 0  --z3rlimit 250"
 
+[@"substitute"]
 let wrap_key output key len =
  (**) let h0 = ST.get () in
   if len <=^ Hash.size_block then begin
@@ -112,8 +114,9 @@ let wrap_key output key len =
   end
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
+[@"substitute"]
 val hmac_part1:
   s2     :uint8_p {length s2 = v Hash.size_block} ->
   data   :uint8_p  {length data + v Hash.size_block < pow2 32 /\ disjoint data s2} ->
@@ -125,8 +128,9 @@ val hmac_part1:
                              /\ (let hash0 = Seq.slice (as_seq h1 s2) 0 (v Hash.size_hash) in
                              hash0 == Spec_Hash.hash (Seq.append (as_seq h0 s2) (as_seq h0 data)))))
 
-#reset-options "--max_fuel 0  --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 150"
 
+[@"substitute"]
 let hmac_part1 s2 data len =
 
   (* Push a new memory frame *)
@@ -160,8 +164,9 @@ let hmac_part1 s2 data len =
   (**) pop_frame ()
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
+[@"substitute"]
 val hmac_part2:
   mac :uint8_p {length mac = v Hash.size_hash} ->
   s5  :uint8_p {length s5 = v Hash.size_block /\ disjoint s5 mac} ->
@@ -173,8 +178,9 @@ val hmac_part2:
                              /\ live h1 s4 /\ live h0 s4 /\ modifies_1 mac h0 h1
                              /\ (as_seq h1 mac == Spec_Hash.hash (Seq.append (as_seq h0 s5) (as_seq h0 s4)))))
 
-#reset-options "--max_fuel 0  --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 200"
 
+[@"substitute"]
 let hmac_part2 mac s5 s4 =
 
   (* Push a new memory frame *)
@@ -190,8 +196,10 @@ let hmac_part2 mac s5 s4 =
   Hash.init state1;
   Hash.update state1 s5; (* s5 = opad *)
   Hash.update_last state1 s4 Hash.size_hash;
-  Hash.finish state1 mac; (* s7 = hash (s5 @| s4) *)
+  Hash.finish state1 mac; //(* s7 = hash (s5 @| s4) *)
+  (**) let h1 = ST.get() in
   (**) Spec_Hash.lemma_hash_single_prepend_block (as_seq h0 s5) (as_seq h0 s4);
+  (**) assert(as_seq h1 mac == Spec_Hash.hash (Seq.append (as_seq h0 s5) (as_seq h0 s4)));
 
   (* Pop the memory frame *)
   (**) pop_frame ()
