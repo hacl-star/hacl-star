@@ -41,7 +41,9 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Poly1305.Lemmas.fst \
 		Spec.Salsa20.fst \
 		Spec.SecretBox.fst \
-		Spec.SHA2_256.fst
+		Spec.SHA2_256.fst \
+		Spec.SHA2_512.fst \
+		Spec.Ed25519.fst
 
 %.fst-verify: %.fst
 	$(FSTAR)  --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin $*.fst
@@ -141,6 +143,14 @@ hmac_sha2_256.exe: Spec.HMAC.SHA2_256.fst
 	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) $(addprefix hmac-sha2-spec/, $(EXTRACTED)) hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_256.ml hmac-sha2-spec/Spec_HMAC_SHA2_256.ml -o hmac_sha2_256.exe
 	./hmac_sha2_256.exe
 
+ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
+	$(MAKE) lib
+	mkdir -p ed25519-spec
+	$(FSTAR) $(ARGS) --odir ed25519-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> ed25519-spec/Spec_Ed25519.ml
+	$(OCAMLOPT) -I ed25519-spec  $(OCAML_INCLUDES) $(addprefix ed25519-spec/, $(EXTRACTED) Spec_Loops.ml Spec_Lib.ml Spec_Curve25519.ml Seq_Create.ml Spec_SHA2_512.ml Spec_SHA512.ml Spec_Ed25519.ml) -o ed25519.exe
+	./ed25519.exe
+
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec hmac-sha2-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec secretbox-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec hmac-sha2-spec ed25519-spec
