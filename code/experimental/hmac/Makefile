@@ -49,11 +49,11 @@ clean:
 
 
 verification: $(HMAC_SHA2_FILES)
-	$(FSTAR) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/experimental/utils --include $(HACL_HOME)/specs --use_hints $^
+	$(FSTAR) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/experimental/utils --include $(HACL_HOME)/code/experimental/hash --include $(HACL_HOME)/specs --use_hints $^
 
 
 record-hints: $(HMAC_SHA2_FILES)
-	$(FSTAR) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/experimental/utils --include $(HACL_HOME)/specs --use_hints --record_hints $^
+	$(FSTAR) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/experimental/utils --include $(HACL_HOME)/code/experimental/hash --include $(HACL_HOME)/specs --use_hints --record_hints $^
 
 
 hmac-c/HMAC_SHA2_256.c:
