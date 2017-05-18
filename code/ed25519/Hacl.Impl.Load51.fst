@@ -10,7 +10,7 @@ open Hacl.Endianness
 open Hacl.UInt64
 
 
-#reset-options "--max_fuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let load_51 output input =
   Hacl.EC.Format.fexpand output input;
