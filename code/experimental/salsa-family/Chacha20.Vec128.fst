@@ -8,9 +8,10 @@ open FStar.Buffer
 
 
 open Hacl.Impl.Chacha20.Vec128
+open Hacl.Spec.Endianness
 
 let chacha20 output plain len k n ctr =
   let h0 = ST.get() in
   chacha20 output plain len k n ctr;
   let h1 = ST.get() in
-  Spec.Chacha20_vec1.Lemmas.lemma_chacha20_encrypt_bytes (as_seq h0 k) (as_seq h0 n) (UInt32.v ctr) (as_seq h0 plain)
+  Spec.Chacha20_vec1.Lemmas.lemma_chacha20_encrypt_bytes (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) (UInt32.v ctr) (reveal_sbytes (as_seq h0 plain))

@@ -750,7 +750,7 @@ val init:
     (requires (fun h -> live h k /\ live h n /\ live h st))
     (ensures  (fun h0 log h1 -> live h1 st /\ live h0 k /\ live h0 n /\ modifies_1 st h0 h1 /\
       invariant log h1 st /\
-      Ghost.reveal log == MkLog (as_seq h0 k) (as_seq h0 n) ctr))
+      Ghost.reveal log == MkLog (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) ctr))
 [@ "c_inline"]
 let init st k n ctr =
   let h = ST.get() in
@@ -771,8 +771,8 @@ val update_last:
     (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_1 output h0 h1 /\
       invariant log h1 st /\ invariant log h0 st /\
       (match Ghost.reveal log with | MkLog k n ctr ->
-        let o = as_seq h1 output in
-        let plain = as_seq h0 plain in
+        let o = reveal_sbytes (as_seq h1 output) in
+        let plain = reveal_sbytes (as_seq h0 plain) in
          o == (let mask = Spec.chacha20_cipher k n (U32.v ctr) in
                let mask = Seq.slice mask 0 (UInt32.v len) in
                Spec.CTR.xor #(UInt32.v len) plain mask)) ))
@@ -803,11 +803,11 @@ val lemma_uint32s_fragments:
   b:Seq.seq UInt32.t{Seq.length b = 4} ->
   c:Seq.seq UInt32.t{Seq.length c = 4} ->
   d:Seq.seq UInt32.t{Seq.length d = 4} ->
-  Lemma (requires (as_seq h (Buffer.sub output 0ul  16ul) == Spec.Lib.uint32s_to_le 4 a /\
-                   as_seq h (Buffer.sub output 16ul 16ul) == Spec.Lib.uint32s_to_le 4 b /\
-                   as_seq h (Buffer.sub output 32ul 16ul) == Spec.Lib.uint32s_to_le 4 c /\
-                   as_seq h (Buffer.sub output 48ul 16ul) == Spec.Lib.uint32s_to_le 4 d))
-        (ensures (as_seq h output == Spec.Lib.uint32s_to_le 16 FStar.Seq.(a @| b @| c @| d)))
+  Lemma (requires (reveal_sbytes (as_seq h (Buffer.sub output 0ul  16ul)) == Spec.Lib.uint32s_to_le 4 a /\
+                   reveal_sbytes (as_seq h (Buffer.sub output 16ul 16ul)) == Spec.Lib.uint32s_to_le 4 b /\
+                   reveal_sbytes (as_seq h (Buffer.sub output 32ul 16ul)) == Spec.Lib.uint32s_to_le 4 c /\
+                   reveal_sbytes (as_seq h (Buffer.sub output 48ul 16ul)) == Spec.Lib.uint32s_to_le 4 d))
+        (ensures (reveal_sbytes (as_seq h output) == Spec.Lib.uint32s_to_le 16 FStar.Seq.(a @| b @| c @| d)))
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
@@ -842,7 +842,7 @@ let lemma_uint32s_fragments h output a b c d =
   Seq.lemma_eq_intro (Spec.Lib.uint32s_to_le 16 s)
                      (Spec.Lib.uint32s_to_le 4 a @| Spec.Lib.uint32s_to_le 4 b @| Spec.Lib.uint32s_to_le 4 c @| Spec.Lib.uint32s_to_le 4 d);
   Seq.lemma_eq_intro (slice (as_seq h output) 0 16 @| slice (as_seq h output) 16 32 @| slice (as_seq h output) 32 48 @| slice (as_seq h output) 48 64) (as_seq h output);
-  Seq.lemma_eq_intro (Spec.Lib.uint32s_to_le 16 s) (as_seq h output)
+  Seq.lemma_eq_intro (Spec.Lib.uint32s_to_le 16 s) (reveal_sbytes (as_seq h output))
 
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
@@ -854,17 +854,17 @@ val lemma_uint32s_fragments2:
   b:Seq.seq UInt32.t{Seq.length b = 4} ->
   c:Seq.seq UInt32.t{Seq.length c = 4} ->
   d:Seq.seq UInt32.t{Seq.length d = 4} ->
-  Lemma (requires (Spec.Lib.uint32s_from_le 4 (as_seq h (Buffer.sub output 0ul  16ul)) == a /\
-                   Spec.Lib.uint32s_from_le 4 (as_seq h (Buffer.sub output 16ul 16ul)) == b /\
-                   Spec.Lib.uint32s_from_le 4 (as_seq h (Buffer.sub output 32ul 16ul)) == c /\
-                   Spec.Lib.uint32s_from_le 4 (as_seq h (Buffer.sub output 48ul 16ul)) == d))
-        (ensures (Spec.Lib.uint32s_from_le 16 (as_seq h output) == FStar.Seq.(a @| b @| c @| d)))
+  Lemma (requires (Spec.Lib.uint32s_from_le 4 (reveal_sbytes (as_seq h (Buffer.sub output 0ul  16ul))) == a /\
+                   Spec.Lib.uint32s_from_le 4 (reveal_sbytes (as_seq h (Buffer.sub output 16ul 16ul))) == b /\
+                   Spec.Lib.uint32s_from_le 4 (reveal_sbytes (as_seq h (Buffer.sub output 32ul 16ul))) == c /\
+                   Spec.Lib.uint32s_from_le 4 (reveal_sbytes (as_seq h (Buffer.sub output 48ul 16ul))) == d))
+        (ensures (Spec.Lib.uint32s_from_le 16 (reveal_sbytes (as_seq h output)) == FStar.Seq.(a @| b @| c @| d)))
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
 let lemma_uint32s_fragments2 h output a b c d =
   let open FStar.Seq in
-  let s' = as_seq h output in
+  let s' = reveal_sbytes (as_seq h output) in
   let s  = s' in
   let s0 = slice s' 0  16 in
   let s1 = slice s' 16 32 in
@@ -944,7 +944,7 @@ val store_4_vec:
   Stack unit
     (requires (fun h -> live h output))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1 /\
-      as_seq h1 output == FStar.Seq.(Spec.Lib.uint32s_to_le 16 (vec_as_seq v0 @| vec_as_seq v1 @|
+      reveal_sbytes (as_seq h1 output) == FStar.Seq.(Spec.Lib.uint32s_to_le 16 (vec_as_seq v0 @| vec_as_seq v1 @|
                                                                 vec_as_seq v2 @| vec_as_seq v3)) ))
 let store_4_vec output v0 v1 v2 v3 =
   let o0 = (Buffer.sub output 0ul  16ul) in
@@ -966,18 +966,18 @@ let store_4_vec output v0 v1 v2 v3 =
   no_upd_lemma_1 h3 h4 o3 o0;
   no_upd_lemma_1 h3 h4 o3 o1;
   no_upd_lemma_1 h3 h4 o3 o2;
-  assert(Spec.Lib.uint32s_from_le 4 (as_seq h4 o0) == vec_as_seq v0);
-  Spec.Lib.lemma_uint32s_from_le_bij 4 (as_seq h4 o0);
-  Spec.Lib.lemma_uint32s_from_le_inj 4 (as_seq h4 o0) (Spec.Lib.uint32s_to_le 4 (vec_as_seq v0));
-  assert(Spec.Lib.uint32s_from_le 4 (as_seq h4 o1) == vec_as_seq v1);
-  Spec.Lib.lemma_uint32s_from_le_bij 4 (as_seq h4 o1);
-  Spec.Lib.lemma_uint32s_from_le_inj 4 (as_seq h4 o1) (Spec.Lib.uint32s_to_le 4 (vec_as_seq v1));
-  assert(Spec.Lib.uint32s_from_le 4 (as_seq h4 o2) == vec_as_seq v2);
-  Spec.Lib.lemma_uint32s_from_le_bij 4 (as_seq h4 o2);
-  Spec.Lib.lemma_uint32s_from_le_inj 4 (as_seq h4 o2) (Spec.Lib.uint32s_to_le 4 (vec_as_seq v2));
-  assert(Spec.Lib.uint32s_from_le 4 (as_seq h4 o3) == vec_as_seq v3);
-  Spec.Lib.lemma_uint32s_from_le_bij 4 (as_seq h4 o3);
-  Spec.Lib.lemma_uint32s_from_le_inj 4 (as_seq h4 o3) (Spec.Lib.uint32s_to_le 4 (vec_as_seq v3));
+  assert(Spec.Lib.uint32s_from_le 4 (reveal_sbytes (as_seq h4 o0)) == vec_as_seq v0);
+  Spec.Lib.lemma_uint32s_from_le_bij 4 (reveal_sbytes (as_seq h4 o0));
+  Spec.Lib.lemma_uint32s_from_le_inj 4 (reveal_sbytes (as_seq h4 o0)) (Spec.Lib.uint32s_to_le 4 (vec_as_seq v0));
+  assert(Spec.Lib.uint32s_from_le 4 (reveal_sbytes (as_seq h4 o1)) == vec_as_seq v1);
+  Spec.Lib.lemma_uint32s_from_le_bij 4 (reveal_sbytes (as_seq h4 o1));
+  Spec.Lib.lemma_uint32s_from_le_inj 4 (reveal_sbytes (as_seq h4 o1)) (Spec.Lib.uint32s_to_le 4 (vec_as_seq v1));
+  assert(Spec.Lib.uint32s_from_le 4 (reveal_sbytes (as_seq h4 o2)) == vec_as_seq v2);
+  Spec.Lib.lemma_uint32s_from_le_bij 4 (reveal_sbytes (as_seq h4 o2));
+  Spec.Lib.lemma_uint32s_from_le_inj 4 (reveal_sbytes (as_seq h4 o2)) (Spec.Lib.uint32s_to_le 4 (vec_as_seq v2));
+  assert(Spec.Lib.uint32s_from_le 4 (reveal_sbytes (as_seq h4 o3)) == vec_as_seq v3);
+  Spec.Lib.lemma_uint32s_from_le_bij 4 (reveal_sbytes (as_seq h4 o3));
+  Spec.Lib.lemma_uint32s_from_le_inj 4 (reveal_sbytes (as_seq h4 o3)) (Spec.Lib.uint32s_to_le 4 (vec_as_seq v3));
   lemma_uint32s_fragments h4 output (vec_as_seq v0) (vec_as_seq v1) (vec_as_seq v2) (vec_as_seq v3)
 
 
@@ -992,8 +992,8 @@ val xor_block:
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 st /\ live h0 plain /\
       live h1 output /\ modifies_1 output h0 h1 /\ (
       let st = as_seq h0 st in
-      let output = as_seq h1 output in
-      let plain = as_seq h0 plain in
+      let output = reveal_sbytes (as_seq h1 output) in
+      let plain = reveal_sbytes (as_seq h0 plain) in
       let stbytes = FStar.Seq.(Spec.Lib.uint32s_to_le 16 (
                                vec_as_seq (Seq.index st 0) @| vec_as_seq (Seq.index st 1) @|
                                vec_as_seq (Seq.index st 2) @| vec_as_seq (Seq.index st 3))) in
@@ -1021,13 +1021,13 @@ let xor_block output plain st =
                      FStar.Seq.(vec_as_seq o0 @| vec_as_seq o1 @| vec_as_seq o2 @| vec_as_seq o3);
   lemma_uint32s_fragments2 h0 plain (vec_as_seq p0) (vec_as_seq p1) (vec_as_seq p2) (vec_as_seq p3);
   assert (FStar.Seq.(vec_as_seq p0 @| vec_as_seq p1 @| vec_as_seq p2 @| vec_as_seq p3) ==
-    Spec.Lib.uint32s_from_le 16 (as_seq h0 plain));
-  Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes (as_seq h0 plain) FStar.Seq.(vec_as_seq k0 @| vec_as_seq k1 @| vec_as_seq k2 @| vec_as_seq k3);
+    Spec.Lib.uint32s_from_le 16 (reveal_sbytes (as_seq h0 plain)));
+  Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes (reveal_sbytes (as_seq h0 plain)) FStar.Seq.(vec_as_seq k0 @| vec_as_seq k1 @| vec_as_seq k2 @| vec_as_seq k3);
   store_4_vec output o0 o1 o2 o3;
   let h1 = ST.get() in
-  Seq.lemma_eq_intro (as_seq h1 output) (let st = as_seq h0 st in
-                                         let output = as_seq h1 output in
-                                         let plain = as_seq h0 plain in
+  Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 output)) (let st = as_seq h0 st in
+                                         let output = reveal_sbytes (as_seq h1 output) in
+                                         let plain = reveal_sbytes (as_seq h0 plain) in
                                          let stbytes = FStar.Seq.(Spec.Lib.uint32s_to_le 16 (
                                          vec_as_seq (Seq.index st 0) @| vec_as_seq (Seq.index st 1) @|
                                         vec_as_seq (Seq.index st 2) @| vec_as_seq (Seq.index st 3))) in
@@ -1072,8 +1072,8 @@ let update log output plain st =
   no_upd_lemma_1 h2 h3 k st;
   xor_block output plain k;
   let h4 = ST.get() in
-  Seq.lemma_eq_intro (as_seq h4 output)
-                     (let plain = as_seq h0 plain in
+  Seq.lemma_eq_intro (reveal_sbytes (as_seq h4 output))
+                     (let plain = reveal_sbytes (as_seq h0 plain) in
                       match Ghost.reveal log with | MkLog k n ctr ->
                       seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) plain (Spec.chacha20_cipher k n (U32.v ctr)));
   pop_frame();
@@ -1210,17 +1210,17 @@ let update3 log output plain st =
   no_upd_lemma_1 h5 h6 o2 p1;
   no_upd_lemma_1 h5 h6 o2 st;
   Seq.lemma_eq_intro (match Ghost.reveal log with | MkLog k n ctr ->
-                    let p0 = as_seq h0 p0 in
+                    let p0 = reveal_sbytes (as_seq h0 p0) in
                     seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p0 (Spec.chacha20_cipher k n (U32.v ctr)))
-                    (as_seq h6 o0);
+                    (reveal_sbytes (as_seq h6 o0));
   Seq.lemma_eq_intro (match Ghost.reveal log with | MkLog k n ctr ->
-                    let p1 = as_seq h0 p1 in
+                    let p1 = reveal_sbytes (as_seq h0 p1) in
                     seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p1 (Spec.chacha20_cipher k n (U32.v ctr+1)))
-                    (as_seq h6 o1);
+                    (reveal_sbytes (as_seq h6 o1));
   Seq.lemma_eq_intro (match Ghost.reveal log with | MkLog k n ctr ->
-                    let p2 = as_seq h0 p2 in
+                    let p2 = reveal_sbytes (as_seq h0 p2) in
                     seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) p2 (Spec.chacha20_cipher k n (U32.v ctr+2)))
-                    (as_seq h6 o2);
+                    (reveal_sbytes (as_seq h6 o2));
   Seq.lemma_eq_intro (as_seq h6 output) FStar.Seq.(as_seq h6 o0 @| as_seq h6 o1 @| as_seq h6 o2);
   pop_frame();
   let h7 = ST.get() in
@@ -1242,18 +1242,18 @@ val update3':
       (match Ghost.reveal log with | MkLog k n ctr -> U32.v ctr + 3 * U32.v len < pow2 32 /\
        (let c' = U32.(ctr +^ 3ul *^  i) in
         let log' = Ghost.hide (MkLog k n c') in
-        let plain = Seq.slice (as_seq h plain) 0 (192 * U32.v i) in
+        let plain = Seq.slice (reveal_sbytes (as_seq h plain)) 0 (192 * U32.v i) in
         invariant log' h st /\
-        Seq.slice (as_seq h output) 0 (192 * U32.v i) == Spec.CTR3.counter_mode_blocks3 k n (U32.v ctr) plain (U32.v i)))))
+        Seq.slice (reveal_sbytes (as_seq h output)) 0 (192 * U32.v i) == Spec.CTR3.counter_mode_blocks3 k n (U32.v ctr) plain (U32.v i)))))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 plain /\ live h0 st /\
         live h1 output /\ live h1 plain /\ live h1 st /\ modifies_2 output st h0 h1 /\
         as_seq h1 plain == as_seq h0 plain /\
       (match Ghost.reveal log with | MkLog k n ctr -> U32.v ctr + 3 * U32.v len < pow2 32 /\
        (let c' = U32.(ctr +^ 3ul *^ i +^ 3ul) in
         let log' = Ghost.hide (MkLog k n c') in
-        let plain = Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192) in
+        let plain = Seq.slice (reveal_sbytes (as_seq h0 plain)) 0 (192 * U32.v i + 192) in
         invariant log' h1 st /\
-        Seq.slice (as_seq h1 output) 0 (192 * U32.v i + 192) == Spec.CTR3.counter_mode_blocks3 k n (U32.v ctr) plain (U32.v i + 1)))))
+        Seq.slice (reveal_sbytes (as_seq h1 output)) 0 (192 * U32.v i + 192) == Spec.CTR3.counter_mode_blocks3 k n (U32.v ctr) plain (U32.v i + 1)))))
 
 #reset-options "--max_fuel 0 --z3rlimit 300"
 
@@ -1278,7 +1278,7 @@ let update3' log output plain len st i =
   Seq.lemma_eq_intro (Seq.slice (as_seq h plain_sub) (0) (192 * U32.v i))
                      (as_seq h plain_prefix);
   let log' = log_incrn log U32.(3ul *^ i) in
-  Spec.CTR3.lemma_counter_mode_blocks3_def1 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr ) (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192)) (U32.v i + 1);
+  Spec.CTR3.lemma_counter_mode_blocks3_def1 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr ) (Seq.slice (reveal_sbytes (as_seq h0 plain)) 0 (192 * U32.v i + 192)) (U32.v i + 1);
   update3 log' out_block plain_block st;
   let h'  = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h' out_sub) (192 * U32.v i) (192 * U32.v i + 192))
@@ -1287,9 +1287,9 @@ let update3' log output plain len st i =
                      (as_seq h' out_prefix);
   Seq.lemma_eq_intro FStar.Seq.(slice (as_seq h' output) 0 (192 * U32.v i) @| slice (as_seq h' output) (192 * U32.v i) (192 * U32.v i + 192))
                        (Seq.slice (as_seq h' output) 0 (192 * U32.v i + 192));
-  Seq.lemma_eq_intro (Seq.append (as_seq h out_prefix) (as_seq h' out_block))
+  Seq.lemma_eq_intro (Seq.append (reveal_sbytes (as_seq h out_prefix)) (reveal_sbytes (as_seq h' out_block)))
                      (match Ghost.reveal log with | MkLog k n c ->
-                       Spec.CTR3.counter_mode_blocks3 k n (U32.v c) (as_seq h plain_sub) (U32.v i+1));
+                       Spec.CTR3.counter_mode_blocks3 k n (U32.v c) (reveal_sbytes (as_seq h plain_sub)) (U32.v i+1));
   no_upd_lemma_2 h h' out_block st out_prefix;
   no_upd_lemma_2 h h' out_block st plain_prefix;
   no_upd_lemma_2 h h' out_block st plain_block;
@@ -1310,9 +1310,9 @@ let update3' log output plain len st i =
     let log' = Ghost.hide (MkLog k n c') in
     invariant log' h'' st);
   Seq.lemma_eq_intro (as_seq h'' out_sub) (Seq.append (as_seq h out_prefix) (as_seq h' out_block));
-  Seq.lemma_eq_intro (Seq.slice (as_seq h'' output) 0 (192 * U32.v i + 192))
+  Seq.lemma_eq_intro (Seq.slice (reveal_sbytes (as_seq h'' output)) 0 (192 * U32.v i + 192))
                      (match Ghost.reveal log with | MkLog k n c ->
-                      Spec.CTR3.counter_mode_blocks3 k n (UInt32.v c) (Seq.slice (as_seq h0 plain) 0 (192 * U32.v i + 192)) (U32.v i+1))
+                      Spec.CTR3.counter_mode_blocks3 k n (UInt32.v c) (Seq.slice (reveal_sbytes (as_seq h0 plain)) 0 (192 * U32.v i + 192)) (U32.v i+1))
 
 
 val chacha20_counter_mode_blocks3:
@@ -1330,7 +1330,7 @@ val chacha20_counter_mode_blocks3:
        | MkLog k n ctr ->
          U32.v ctr + 3 * UInt32.v len < pow2 32 /\ (
          let updated_log = Ghost.hide (MkLog k n U32.(ctr +^ 3ul *^ len)) in
-         let output = as_seq h1 output in let plain = as_seq h0 plain in
+         let output = reveal_sbytes (as_seq h1 output) in let plain = reveal_sbytes (as_seq h0 plain) in
          invariant updated_log h1 st /\
          output == Spec.CTR3.counter_mode_blocks3 k n (U32.v ctr) plain (U32.v len)))))
 
@@ -1354,9 +1354,9 @@ let chacha20_counter_mode_blocks3 log output plain len st =
     (match Ghost.reveal log with | MkLog k n c ->
      let c' = U32.(c +^ 3ul *^ UInt32.uint_to_t i) in
      let log' = Ghost.hide (MkLog k n c') in
-     let plain = Seq.slice (as_seq h0 plain) 0 (192 * i) in
+     let plain = Seq.slice (reveal_sbytes (as_seq h0 plain)) 0 (192 * i) in
      invariant log' h1 st /\
-     Seq.slice (as_seq h1 output) 0 (192 * i) == Spec.CTR3.counter_mode_blocks3 k n (UInt32.v c) plain i)
+     Seq.slice (reveal_sbytes (as_seq h1 output)) 0 (192 * i) == Spec.CTR3.counter_mode_blocks3 k n (UInt32.v c) plain i)
   in
   let f' (i:UInt32.t{0 <= U32.v i /\ U32.v i < U32.v len}) : Stack unit
     (requires (fun h -> inv h (U32.v i)))
@@ -1368,13 +1368,13 @@ let chacha20_counter_mode_blocks3 log output plain len st =
     ()
     in
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) (Seq.createEmpty);
-  Spec.CTR3.lemma_counter_mode_blocks3_def0 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr) (Seq.slice (as_seq h0 plain) 0 0);
+  Spec.CTR3.lemma_counter_mode_blocks3_def0 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr) (Seq.slice (reveal_sbytes (as_seq h0 plain)) 0 0);
   C.Loops.for 0ul len inv f';
   let h1 = ST.get() in
   Seq.lemma_eq_intro (as_seq h1 output) (Seq.slice (as_seq h1 output) 0 (length output));
   Seq.lemma_eq_intro (as_seq h0 plain) (Seq.slice (as_seq h0 plain) 0 (length plain));
-  Seq.lemma_eq_intro (as_seq h1 output)
-                     (Spec.CTR3.counter_mode_blocks3 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr) (as_seq h0 plain) (U32.v len))
+  Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 output))
+                     (Spec.CTR3.counter_mode_blocks3 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr) (reveal_sbytes (as_seq h0 plain)) (U32.v len))
 
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
@@ -1394,7 +1394,7 @@ val chacha20_counter_mode_blocks:
        | MkLog k n ctr ->
          U32.v ctr + U32.v len < pow2 32 /\
          (let updated_log = Ghost.hide (MkLog k n U32.(ctr +^ len)) in
-         let output = as_seq h1 output in let plain = as_seq h0 plain in
+         let output = reveal_sbytes (as_seq h1 output) in let plain = reveal_sbytes (as_seq h0 plain) in
          invariant updated_log h1 st /\
          output == Spec.CTR3.counter_mode_blocks k n (U32.v ctr) plain (U32.v len)))))
 
@@ -1426,7 +1426,7 @@ let chacha20_counter_mode_blocks log output plain len st =
     let out1   = Buffer.sub outs 64ul 64ul in
     update log' out0 block0 st;
     let h2 = ST.get() in
-    Seq.lemma_eq_intro (as_seq h2 out0) (Spec.CTR.xor #64 (as_seq h0 block0) (match Ghost.reveal log' with | MkLog k n c -> Spec.Chacha20_vec.chacha20_block k n (UInt32.v c)));
+    Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 out0)) (Spec.CTR.xor #64 (reveal_sbytes (as_seq h0 block0)) (match Ghost.reveal log' with | MkLog k n c -> Spec.Chacha20_vec.chacha20_block k n (UInt32.v c)));
     no_upd_lemma_1 h1 h2 out0 output';
     no_upd_lemma_1 h1 h2 out0 block1;
     no_upd_lemma_1 h1 h2 out0 st;
@@ -1437,7 +1437,7 @@ let chacha20_counter_mode_blocks log output plain len st =
     let log'' = log_incr log' in
     update log'' out1 block1 st;
     let h4 = ST.get() in
-    Seq.lemma_eq_intro (as_seq h4 out1) (Spec.CTR.xor #64 (as_seq h0 block1) (match Ghost.reveal log' with | MkLog k n c -> Spec.Chacha20_vec.chacha20_block k n (UInt32.v c+1)));
+    Seq.lemma_eq_intro (reveal_sbytes (as_seq h4 out1)) (Spec.CTR.xor #64 (reveal_sbytes (as_seq h0 block1)) (match Ghost.reveal log' with | MkLog k n c -> Spec.Chacha20_vec.chacha20_block k n (UInt32.v c+1)));
     no_upd_lemma_1 h3 h4 out1 out0;
     Seq.lemma_eq_intro (as_seq h4 output) FStar.Seq.(as_seq h2 output' @| (as_seq h4 out0 @| as_seq h4 out1));
     state_incr log'' st;
@@ -1447,7 +1447,7 @@ let chacha20_counter_mode_blocks log output plain len st =
     no_upd_lemma_2 h0 h1 output' st blocks;
     update log' outs blocks st;
     let h2 = ST.get() in
-    Seq.lemma_eq_intro (as_seq h2 outs) (Spec.CTR.xor #64 (as_seq h0 blocks) (match Ghost.reveal log' with | MkLog k n c -> Spec.Chacha20_vec.chacha20_block k n (UInt32.v c)));
+    Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 outs)) (Spec.CTR.xor #64 (reveal_sbytes (as_seq h0 blocks)) (match Ghost.reveal log' with | MkLog k n c -> Spec.Chacha20_vec.chacha20_block k n (UInt32.v c)));
     no_upd_lemma_1 h1 h2 outs output';
     Seq.lemma_eq_intro (as_seq h2 output) (Seq.append (as_seq h2 output') (as_seq h2 outs));
     state_incr log' st;
@@ -1519,11 +1519,11 @@ val chacha20:
     (requires (fun h -> live h output /\ live h plain /\ live h key /\ live h nonce))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ live h0 key /\ live h0 nonce
       /\ modifies_1 output h0 h1 /\ (
-        let output = as_seq h1 output in
-        let key    = as_seq h0 key in
-        let nonce  = as_seq h0 nonce in
+        let output = reveal_sbytes (as_seq h1 output) in
+        let key    = reveal_sbytes (as_seq h0 key) in
+        let nonce  = reveal_sbytes (as_seq h0 nonce) in
         let ctr    = UInt32.v ctr in
-        let plain  = as_seq h0 plain in
+        let plain  = reveal_sbytes (as_seq h0 plain) in
         output == Spec.Chacha20_vec.chacha20_encrypt_bytes key nonce ctr plain)))
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
@@ -1540,11 +1540,11 @@ let chacha20 output plain len k n ctr =
   no_upd_lemma_0 h0 h1 n;
   assert(as_seq h1 plain == as_seq h plain);
   assert(invariant log h1 st);
-  assert(Ghost.reveal log == MkLog (as_seq h0 k) (as_seq h0 n) ctr);
+  assert(Ghost.reveal log == MkLog (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) ctr);
   chacha20_counter_mode log output plain len st;
   let h2 = ST.get() in
   assert(
-    let k = as_seq h0 k in let n = as_seq h0 n in let plain = as_seq h1 plain in
-    as_seq h2 output == Spec.CTR3.counter_mode k n (UInt32.v ctr) plain);
-  Spec.CTR3.lemma_counter_mode3_eq (as_seq h0 k) (as_seq h0 n) (UInt32.v ctr) (as_seq h0 plain);
+    let k = reveal_sbytes (as_seq h0 k) in let n = reveal_sbytes (as_seq h0 n) in let plain = reveal_sbytes (as_seq h1 plain) in
+    reveal_sbytes (as_seq h2 output) == Spec.CTR3.counter_mode k n (UInt32.v ctr) plain);
+  Spec.CTR3.lemma_counter_mode3_eq (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) (UInt32.v ctr) (reveal_sbytes (as_seq h0 plain));
   pop_frame()
