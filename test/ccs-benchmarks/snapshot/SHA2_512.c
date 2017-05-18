@@ -31,29 +31,6 @@ Hacl_Utils_Experimental_store64s_be(uint8_t *buf_8, uint64_t *buf_64, uint32_t l
   }
 }
 
-static void Hacl_Hash_SHA2_512_ws_part_1_core(uint64_t *ws_w, uint64_t *block_w, uint32_t t)
-{
-  uint64_t uu____220 = block_w[t];
-  ws_w[t] = uu____220;
-}
-
-static void Hacl_Hash_SHA2_512_ws_part_2_core(uint64_t *ws_w, uint64_t *block_w, uint32_t t)
-{
-  uint64_t t16 = ws_w[t - (uint32_t )16];
-  uint64_t t15 = ws_w[t - (uint32_t )15];
-  uint64_t t7 = ws_w[t - (uint32_t )7];
-  uint64_t t2 = ws_w[t - (uint32_t )2];
-  ws_w[t] =
-    ((t2 >> (uint32_t )19 | t2 << (uint32_t )64 - (uint32_t )19)
-    ^ (t2 >> (uint32_t )61 | t2 << (uint32_t )64 - (uint32_t )61) ^ t2 >> (uint32_t )6)
-    +
-      t7
-      +
-        ((t15 >> (uint32_t )1 | t15 << (uint32_t )64 - (uint32_t )1)
-        ^ (t15 >> (uint32_t )8 | t15 << (uint32_t )64 - (uint32_t )8) ^ t15 >> (uint32_t )7)
-        + t16;
-}
-
 static void Hacl_Hash_SHA2_512_init(uint64_t *state)
 {
   (void )(state + (uint32_t )168);
@@ -197,9 +174,26 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
   uint64_t *ws_w = state + (uint32_t )80;
   uint64_t *k_w = state;
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
-    Hacl_Hash_SHA2_512_ws_part_1_core(ws_w, data_w, i);
+  {
+    uint64_t uu____220 = data_w[i];
+    ws_w[i] = uu____220;
+  }
   for (uint32_t i = (uint32_t )16; i < (uint32_t )80; i = i + (uint32_t )1)
-    Hacl_Hash_SHA2_512_ws_part_2_core(ws_w, data_w, i);
+  {
+    uint64_t t16 = ws_w[i - (uint32_t )16];
+    uint64_t t15 = ws_w[i - (uint32_t )15];
+    uint64_t t7 = ws_w[i - (uint32_t )7];
+    uint64_t t2 = ws_w[i - (uint32_t )2];
+    ws_w[i] =
+      ((t2 >> (uint32_t )19 | t2 << (uint32_t )64 - (uint32_t )19)
+      ^ (t2 >> (uint32_t )61 | t2 << (uint32_t )64 - (uint32_t )61) ^ t2 >> (uint32_t )6)
+      +
+        t7
+        +
+          ((t15 >> (uint32_t )1 | t15 << (uint32_t )64 - (uint32_t )1)
+          ^ (t15 >> (uint32_t )8 | t15 << (uint32_t )64 - (uint32_t )8) ^ t15 >> (uint32_t )7)
+          + t16;
+  }
   uint64_t hash_0[8] = { 0 };
   memcpy(hash_0, hash_w, (uint32_t )8 * sizeof hash_w[0]);
   for (uint32_t i = (uint32_t )0; i < (uint32_t )80; i = i + (uint32_t )1)
