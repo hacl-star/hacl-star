@@ -21,6 +21,8 @@ BIGNUM= \
 	../bignum/Hacl.Bignum.fst
 
 ED25519_SPECIFIC= \
+	Hacl.Impl.BignumQ.Mul.fst \
+	Hacl.Spec.BignumQ.Mul.fst \
 	Hacl.Lib.Create64.fst \
 	Hacl.Bignum25519.fsti \
 	Hacl.Bignum25519.fst \
@@ -44,10 +46,8 @@ ED25519_SPECIFIC= \
 	Hacl.Spec.BignumQ.Mul.Lemmas_1.fst \
 	Hacl.Spec.BignumQ.Mul.Lemmas_3.fst \
 	Spec.BarrettReduction.fst \
-	Hacl.Spec.BignumQ.Mul.fst \
 	Hacl.Lib.Create128.fst \
 	Hacl.Impl.BignumQ.Mul.fsti \
-	Hacl.Impl.BignumQ.Mul.fst \
 	Hacl.Impl.Sha512.fst \
 	Hacl.Impl.Load56.fsti \
 	Hacl.Impl.Load56.fst \
