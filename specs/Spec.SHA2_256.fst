@@ -271,15 +271,18 @@ let lemma_update_multi_empty (h:hash_w) (empty:bytes{Seq.length empty = 0}) : Le
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 val lemma_hash_single_prepend_block: (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length msg = size_hash}) -> Lemma
-  (ensures (let n = Seq.length msg / size_block in
-            let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
+  (ensures ((* let n = Seq.length msg / size_block in *)
+            (* let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in *)
             let hash0 = update h_0 block in
-            let hash1 = update_last hash0 (size_block + (n * size_block)) msg_last in
+            let hash1 = update_last hash0 (size_block) msg in
             finish hash1 == hash (block @| msg)))
 
 let lemma_hash_single_prepend_block block msg =
   let n = Seq.length msg / size_block in
+  assert_norm(n = 0);
   let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
+  lemma_eq_intro msg_blocks createEmpty;
+  lemma_eq_intro msg_last msg;
   let hash1 = update h_0 block in
   let hash2 = update_multi hash1 msg_blocks in // This is 0
   assert(Seq.length msg_blocks = 0);
@@ -300,7 +303,7 @@ let lemma_hash_single_prepend_block block msg =
   Seq.lemma_eq_intro (msg_last') (msg_last);
   Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
 
-
+#set-options "--lax"
 
 //
 // Test 1

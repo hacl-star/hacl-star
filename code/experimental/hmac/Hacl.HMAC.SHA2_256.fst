@@ -114,6 +114,17 @@ let wrap_key output key len =
   end
 
 
+#reset-options "--max_fuel 0  --z3rlimit 50"
+
+val lemma_alloc:
+  s:Seq.seq UInt32.t{Seq.length s = UInt32.v Hash.size_state} ->
+  Lemma (requires (s == Seq.create (UInt32.v Hash.size_state) 0ul))
+        (ensures (let seq_counter = Seq.slice s (U32.v Hash.pos_count_w) (U32.(v Hash.pos_count_w + v Hash.size_count_w)) in
+              let counter = Seq.index seq_counter 0 in
+              H32.v counter = 0))
+let lemma_alloc s = ()
+
+
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
@@ -128,7 +139,12 @@ val hmac_part1:
                              /\ (let hash0 = Seq.slice (as_seq h1 s2) 0 (v Hash.size_hash) in
                              hash0 == Spec_Hash.hash (Seq.append (as_seq h0 s2) (as_seq h0 data)))))
 
-#reset-options "--max_fuel 0  --z3rlimit 150"
+#reset-options "--max_fuel 0  --z3rlimit 200"
+
+(* inline_for_extraction let div (a:UInt32.t) (b:UInt32.t{UInt32.v b <> 0}) : Tot (c:UInt32.t{U32.v c = U32.v a / U32.v b}) = *)
+(*   Math.Lemmas.lemma_div_mod (U32.v a) (UInt32.v b); *)
+(*   U32.div a b *)
+
 
 [@"substitute"]
 let hmac_part1 s2 data len =
@@ -140,22 +156,39 @@ let hmac_part1 s2 data len =
   (* Allocate memory for the Hash function state *)
   // let state0 = Hash.alloc () in
   let state0 = Buffer.create (u32_to_h32 0ul) Hash.size_state in
+  
+  let h = ST.get() in
+  lemma_alloc (as_seq h state0);
+  no_upd_lemma_0 h0 h s2;
+  no_upd_lemma_0 h0 h data;
 
   (* Step 3: append data to "result of step 2" *)
   (* Step 4: apply Hash to "result of step 3" *)
   assert(Hash.size_block <> 0ul);
+  Math.Lemmas.lemma_div_mod (v len) (v Hash.size_block);
   let n0 = U32.div len Hash.size_block in
   let r0 = U32.rem len Hash.size_block in
-  Math.Lemmas.lemma_div_mod (v len) (v Hash.size_block);
-
   let blocks0 = Buffer.sub data 0ul (n0 *^ Hash.size_block) in
   let last0 = Buffer.offset data (n0 *^ Hash.size_block) in
+  Seq.lemma_eq_intro (Seq.slice (as_seq h data) 0 (U32.v (n0 *^ Hash.size_block))) (as_seq h blocks0);
+  Seq.lemma_eq_intro (Seq.slice (as_seq h data) (U32.v (n0 *^ Hash.size_block)) (length data)) (as_seq h last0);
   Hash.init state0;
+  let h' = ST.get() in
+  no_upd_lemma_1 h h' state0 s2;
+  no_upd_lemma_1 h h' state0 data;
+  no_upd_lemma_1 h h' state0 blocks0;
+  no_upd_lemma_1 h h' state0 last0;
   Hash.update state0 s2;
+  let h'' = ST.get() in
+  no_upd_lemma_1 h' h'' state0 blocks0;
+  no_upd_lemma_1 h' h'' state0 last0;
   Hash.update_multi state0 blocks0 n0;
+  let h''' = ST.get() in
+  no_upd_lemma_1 h'' h''' state0 last0;
   Hash.update_last state0 last0 r0;
   (**) let h1 = ST.get () in
 
+  let h'''' = ST.get() in
   let hash0 = Buffer.sub s2 0ul Hash.size_hash in (* Salvage memory *)
   Hash.finish state0 hash0; (* s4 = hash (s2 @| data) *)
   (**) Spec_Hash.lemma_hash_all_prepend_block (as_seq h0 s2) (as_seq h0 data);
@@ -182,30 +215,56 @@ val hmac_part2:
 
 [@"substitute"]
 let hmac_part2 mac s5 s4 =
-
+  assert_norm(pow2 32 = 0x100000000);
+  let hinit = ST.get() in
+  
   (* Push a new memory frame *)
   (**) push_frame ();
   (**) let h0 = ST.get () in
 
   (* Allocate memory for the Hash function state *)
   (* let state1 = Hash.alloc () in *)
+
   let state1 = Buffer.create (u32_to_h32 0ul) Hash.size_state in
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   (* Step 7: apply H to "result of step 6" *)
+  let h = ST.get() in
+  no_upd_lemma_0 h0 h s5;
+  no_upd_lemma_0 h0 h s4;
+  no_upd_lemma_0 h0 h mac;
+  lemma_alloc (as_seq h state1);
   Hash.init state1;
+  let h' = ST.get() in
+  assert(
+    let st_h0 = Seq.slice (as_seq h' state1) (U32.v Hash.pos_whash_w) (U32.(v Hash.pos_whash_w + v Hash.size_whash_w)) in
+    st_h0 == Spec_Hash.h_0);
+  no_upd_lemma_1 h h' state1 s5;
+  no_upd_lemma_1 h h' state1 s4;
+  no_upd_lemma_1 h h' state1 mac;
   Hash.update state1 s5; (* s5 = opad *)
+  let h'' = ST.get() in
+  assert(
+    let st_h0 = Seq.slice (as_seq h'' state1) (U32.v Hash.pos_whash_w) (U32.(v Hash.pos_whash_w + v Hash.size_whash_w)) in
+    st_h0 == Spec_Hash.(update h_0 (as_seq h0 s5)));
+  no_upd_lemma_1 h' h'' state1 s4;
+  no_upd_lemma_1 h' h'' state1 mac;
+  assert(as_seq h'' s4 == as_seq hinit s4);
   Hash.update_last state1 s4 Hash.size_hash;
+  let h''' = ST.get() in
+  no_upd_lemma_1 h' h'' state1 s4;
+  no_upd_lemma_1 h' h'' state1 mac;
+  assert(live h''' mac);
   Hash.finish state1 mac; //(* s7 = hash (s5 @| s4) *)
   (**) let h1 = ST.get() in
   (**) Spec_Hash.lemma_hash_single_prepend_block (as_seq h0 s5) (as_seq h0 s4);
+  Seq.lemma_eq_intro (as_seq h1 mac) (Spec_Hash.hash (Seq.append (as_seq h0 s5) (as_seq h0 s4)));
   (**) assert(as_seq h1 mac == Spec_Hash.hash (Seq.append (as_seq h0 s5) (as_seq h0 s4)));
-
   (* Pop the memory frame *)
   (**) pop_frame ()
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 val hmac_core:
   mac  :uint8_p  {length mac = v Hash.size_hash} ->
