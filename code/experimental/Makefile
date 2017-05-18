@@ -16,7 +16,7 @@ extract-c: $(addsuffix -c, $(DIRECTORIES))
 sha2-ci:
 	$(MAKE) -C hash all-ci
 
-all-ci: ed25519-ci sha2-ci salsa-family-ci
+all-ci: sha2-ci
 
 all-ct:
 
