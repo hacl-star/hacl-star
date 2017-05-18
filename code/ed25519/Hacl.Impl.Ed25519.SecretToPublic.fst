@@ -4,6 +4,8 @@ module Hacl.Impl.Ed25519.SecretToPublic
 open FStar.HyperStack
 open FStar.Buffer
 
+open Hacl.Spec.Endianness
+
 open Hacl.Impl.Ed25519.ExtPoint
 open Hacl.Impl.Ed25519.SecretExpand
 open Hacl.Impl.Ed25519.Ladder
@@ -23,7 +25,7 @@ val point_mul_g:
   (ensures (fun h0 _ h1 -> Buffer.live h0 scalar /\ live h0 result /\
     live h1 result /\ modifies_1 result h0 h1 /\ point_inv h1 result /\
     (let r = as_point h1 result in
-     let n  = as_seq h0 scalar in
+     let n  = reveal_sbytes (as_seq h0 scalar) in
      r == Spec.Ed25519.point_mul n Spec.Ed25519.g) ))
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
@@ -31,7 +33,7 @@ val point_mul_g:
 let point_mul_g result scalar =
   push_frame();
   let h0 = ST.get() in
-  let g = create 0uL 20ul in
+  let g = create (Hacl.Cast.uint64_to_sint64 0uL) 20ul in
   Hacl.Impl.Ed25519.G.make_g g;
   let h1 = ST.get() in
   no_upd_lemma_0 h0 h1 scalar;
@@ -51,14 +53,14 @@ val secret_to_public_:
       let low = Buffer.sub expanded 0ul 32ul in let high = Buffer.sub expanded 32ul 32ul in
       (h.[low], h.[high]) == Spec.Ed25519.secret_expand h.[secret])))
     (ensures (fun h0 _ h1 -> live h0 out /\ live h0 secret /\ live h1 out /\ modifies_1 out h0 h1 /\
-      as_seq h1 out == Spec.Ed25519.secret_to_public h0.[secret]))
+      h1.[out] == Spec.Ed25519.secret_to_public h0.[secret]))
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 let secret_to_public_ out secret expanded_secret =
   let a               = sub expanded_secret 0ul 32ul in
   push_frame();
-  let res             = create 0uL 20ul in
+  let res             = create (Hacl.Cast.uint64_to_sint64 0uL) 20ul in
   point_mul_g res a;
   point_compress out res;
   pop_frame()
@@ -66,7 +68,7 @@ let secret_to_public_ out secret expanded_secret =
 
 let secret_to_public out secret =
   push_frame();
-  let expanded = create 0uy 64ul in
+  let expanded = create (Hacl.Cast.uint8_to_sint8 0uy) 64ul in
   secret_expand expanded secret;
   secret_to_public_ out secret expanded;
   pop_frame()

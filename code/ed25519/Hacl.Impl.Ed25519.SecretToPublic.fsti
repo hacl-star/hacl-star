@@ -14,4 +14,4 @@ val secret_to_public:
   Stack unit
     (requires (fun h -> live h out /\ live h secret))
     (ensures (fun h0 _ h1 -> live h0 out /\ live h0 secret /\ live h1 out /\ modifies_1 out h0 h1 /\
-      as_seq h1 out == Spec.Ed25519.secret_to_public h0.[secret]))
+      h1.[out] == Spec.Ed25519.secret_to_public h0.[secret]))

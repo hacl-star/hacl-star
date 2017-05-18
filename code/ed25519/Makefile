@@ -110,7 +110,11 @@ ED25519_CT_MODULES= \
 	Hacl.Impl.SHA512.ModQ.fsti \
 	Hacl.Impl.SHA512.ModQ.fst \
 	Hacl.Impl.Store56.fst \
-	Hacl.Impl.Ed25519.Sign.Steps.fst
+	Hacl.Impl.Ed25519.Sign.Steps.fst \
+	Hacl.Impl.Ed25519.SecretToPublic.fsti \
+	Hacl.Impl.Ed25519.SecretToPublic.fst \
+	Hacl.Impl.Ed25519.Sign.fst 
+
 
 # Files that are too slow and for which verification speed must improve
 SLOW=
