@@ -142,11 +142,6 @@ static int Wrapper_Chacha20_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out, cons
 // In bytes
 #define HACL_SHA2_512_BLOCK_SIZE_B 16
 
-#define SHA2_512_init init
-#define SHA2_512_update update
-#define SHA2_512_update_last update_last
-#define SHA2_512_finish finish
-
 static int hacl_sha2_512_init(EVP_MD_CTX *ctx) {
   uint64_t *state = EVP_MD_CTX_md_data(ctx);
   SHA2_512_init(state);
