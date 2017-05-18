@@ -373,7 +373,7 @@ Hacl_Standalone_Poly1305_64_poly1305_partial(
   k_clamped =
     FStar_UInt128_logand(k1,
       FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_uint64_to_uint128((uint64_t )0x0ffffffc0ffffffc),
-						   (uint32_t )64),
+          (uint32_t )64),
         FStar_Int_Cast_uint64_to_uint128((uint64_t )0x0ffffffc0fffffff)));
   uint64_t r0 = FStar_Int_Cast_uint128_to_uint64(k_clamped) & (uint64_t )0xfffffffffff;
   uint64_t
