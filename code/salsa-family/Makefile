@@ -34,7 +34,8 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs
 
-KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experimental -drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
+KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
+	-drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -drop 'Hacl.UInt8' $(KREMLIN_ARGS) \
 	-drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 	-drop 'Hacl.Endianness' -drop 'Hacl.Cast'
@@ -42,11 +43,17 @@ KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../../specs -I ../../specs/experi
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
+%.fsti-ct: %.fsti
+	$(FSTAR_CT) --lax $^
 
-all-ct: $(addsuffix -ct, $(SALSA_FAMILY_FILES))
+# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
+all-ct:
+	$(FSTAR_CT) --lax --verify_all Chacha20.fst Salsa20.fst Chacha20.Vec128.fst
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
+	$(FSTARB) $^ --use_hints --record_hints
+%.fsti-verify: %.fsti
 	$(FSTARB) $^ --use_hints --record_hints
 
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
@@ -57,11 +64,15 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SALSA_FAMILY_FILE
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
 	$(FSTARB) --lax $^
+%.fsti-lax: %.fsti
+	$(FSTARB) --lax $^
 
 all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
+	-$(FSTARB) $^ --use_hints --record_hints
+%.fsti-hints: %.fsti
 	-$(FSTARB) $^ --use_hints --record_hints
 
 all-hints: $(addsuffix -hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES)))
@@ -102,7 +113,7 @@ chacha-vec128/Chacha20_Vec128.c: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.C
 	-add-include '"vec128.h"' -I . \
 	$^ -skip-compilation
 
-extract-c: chacha-c/Chacha20.c salsa-c/Salsa20.c chacha-vec128/
+extract-c: chacha-c/Chacha20.c salsa-c/Salsa20.c chacha-vec128/Chacha20_Vec128.c
 
 clean:
 	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c chacha-vec128 *.graph

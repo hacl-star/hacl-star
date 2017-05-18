@@ -57,7 +57,9 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
 
-all-ct: $(addsuffix -ct, $(POLY1305_FILES))
+# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
+all-ct:
+	$(FSTAR_CT) --lax --verify_all Poly1305_64.fst
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst

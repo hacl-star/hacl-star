@@ -1,6 +1,6 @@
-FSTAR_HOME?=../../../dependencies/FStar
+HACL_HOME?=../..
+FSTAR_HOME?=$(HACL_HOME)/dependencies/FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=../../..
 include $(HACL_HOME)/code/Makefile.include
 
 
@@ -94,14 +94,18 @@ FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		--include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
-		--include $(HACL_HOME)/code/curve25519  --include $(HACL_HOME)/code/experimental/hash
+		--include $(HACL_HOME)/code/curve25519  --include $(HACL_HOME)/code/experimental/hash \
+		--include $(HACL_HOME)/code/experimental/utils
 
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
+%.fsti-ct: %.fsti
+	$(FSTAR_CT) --lax $^
 
-all-ct: $(addsuffix -ct, $(ED25519_FILES))
+all-ct:
+	$(FSTAR_CT) --lax --verify_all Ed25519.fst
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
@@ -113,6 +117,8 @@ all-ver: $(addsuffix -verify, $(ED25519_FILES))
 
 # Minimal lax typechecking, pre-requisite to any extraction
 %.fst-lax: %.fst
+	$(FSTARB) --lax $^
+%.fsti-lax: %.fsti
 	$(FSTARB) --lax $^
 
 all-lax: $(addsuffix -lax, $(ED25519_FILES))
@@ -135,16 +141,6 @@ bignum-hints:
 	mv ../bignum/*.hints ./bignum_hints
 specific-hints: $(addsuffix -hints, $(ED25519_SPECIFIC))
 
-# For CI, all modules restricted from incomplete or slow ones
-# all-ci2: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_FILES)))
-# all-ci:
-# 	cp bignum_hints/* ../bignum
-# 	$(MAKE) all-ci2
-# 	mv ../bignum/*.hints ./bignum_hints
-# bignum-ci:
-# 	cp bignum_hints/* ../bignum
-# 	$(MAKE) $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
-# 	mv ../bignum/*.hints ./bignum_hints
 all-ci:specific-ci
 specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_SPECIFIC)))
 
@@ -158,13 +154,13 @@ KEMLIN_SKIP_COMPILATION=$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
 		-skip-compilation -fsopt '--eager_inference'
 
-../hash/sha2-c/SHA2_512.c:
+../experimental/hash/sha2-c/SHA2_512.c:
 	$(MAKE) -C ../hash sha2-c/SHA2_512.c
 
 ed25519-c/Ed25519.c: \
 	Hacl.Bignum25519.fst \
-	../hash/Hacl.Impl.SHA512.Ed25519.fst \
-	../hash/SHA2_512.fst \
+	../experimental/hash/Hacl.Impl.SHA512.Ed25519.fst \
+	../experimental/hash/SHA2_512.fst \
 	Hacl.Impl.Load56.fst \
 	Hacl.Impl.Load51.fst \
 	Hacl.Impl.Store51.fst \
@@ -184,8 +180,8 @@ ed25519-c/Ed25519.c: \
 	Hacl.Impl.Ed25519.SecretToPublic.fst \
 	Ed25519.fst
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
-	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
-	 	-I ../../../specs/experimental -I ../hash -I ../utils \
+	 	-I $(HACL_HOME)/code/bignum -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(HACL_HOME)/code/curve25519 \
+	 	-I $(HACL_HOME)/code/../specs/experimental -I $(HACL_HOME)/code/experimental/hash -I $(HACL_HOME)/code/experimental/utils \
 	 	$^ \
 	 	-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
 	 	-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
@@ -197,15 +193,16 @@ extract-c:ed25519-c/Ed25519.c
 
 ed25519.exe: ed25519-c/Ed25519.c
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
-	 	-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
-	 	-I ../../../specs/experimental \
+	 	-I $(HACL_HOME)/code/bignum -I ../../lib/kremlin -I $(HACL_HOME)/code/../specs \
+		-I $(HACL_HOME)/code/curve25519 \
+	 	-I $(HACL_HOME)/code/../specs/experimental \
 	 	$^  Hacl.Test.Ed25519.fst -no-prefix 'Hacl.Test.Ed25519' \
 	 	-drop 'Hacl.Spec,Hacl.Cast,Hacl.UInt.\*,Hacl.Endianness' \
 	 	-drop 'Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.\*' \
 	 	-drop 'Prims,FStar,Hacl.Bignum25519,Hacl.Impl.Ed25519.Pow2_252m2,Ed25519' \
 	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
-	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -add-include '"Ed25519.h"' \
-	 	-o ed25519.exe -ldopt '-lsodium'
+	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
+		-add-include '"Ed25519.h"' -o ed25519.exe -ldopt '-lsodium'
 	./ed25519.exe
 
 count-line:
