@@ -1,33 +1,24 @@
 #include "SHA2_256.h"
 
 static void
-Hacl_Utils_Experimental_load32s_be(uint32_t *buf_32, uint8_t *buf_8, uint32_t len_8)
+Hacl_Hash_Lib_LoadStore_uint32s_from_be_bytes(uint32_t *output, uint8_t *input, uint32_t len)
 {
-  if (len_8 == (uint32_t )0)
-    return;
-  else
+  for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
   {
-    uint8_t *x_8 = buf_8 + len_8 - (uint32_t )4;
-    uint32_t i_32 = len_8 / (uint32_t )4;
-    uint32_t x_32 = load32_be(x_8);
-    buf_32[i_32 - (uint32_t )1] = x_32;
-    Hacl_Utils_Experimental_load32s_be(buf_32, buf_8, len_8 - (uint32_t )4);
-    return;
+    uint8_t *x0 = input + (uint32_t )4 * i;
+    uint32_t inputi = load32_be(x0);
+    output[i] = inputi;
   }
 }
 
 static void
-Hacl_Utils_Experimental_store32s_be(uint8_t *buf_8, uint32_t *buf_32, uint32_t len_32)
+Hacl_Hash_Lib_LoadStore_uint32s_to_be_bytes(uint8_t *output, uint32_t *input, uint32_t len)
 {
-  if (len_32 == (uint32_t )0)
-    return;
-  else
+  for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
   {
-    uint32_t x_32 = buf_32[len_32 - (uint32_t )1];
-    uint8_t *x_8 = buf_8 + (len_32 - (uint32_t )1) * (uint32_t )4;
-    store32_be(x_8, x_32);
-    Hacl_Utils_Experimental_store32s_be(buf_8, buf_32, len_32 - (uint32_t )1);
-    return;
+    uint32_t hd1 = input[i];
+    uint8_t *x0 = output + (uint32_t )4 * i;
+    store32_be(x0, hd1);
   }
 }
 
@@ -143,14 +134,14 @@ static void Hacl_Hash_SHA2_256_init(uint32_t *state)
 static void Hacl_Hash_SHA2_256_update(uint32_t *state, uint8_t *data)
 {
   uint32_t data_w[16] = { 0 };
-  Hacl_Utils_Experimental_load32s_be(data_w, data, (uint32_t )64);
+  Hacl_Hash_Lib_LoadStore_uint32s_from_be_bytes(data_w, data, (uint32_t )16);
   uint32_t *hash_w = state + (uint32_t )128;
   uint32_t *ws_w = state + (uint32_t )64;
   uint32_t *k_w = state;
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint32_t uu____189 = data_w[i];
-    ws_w[i] = uu____189;
+    uint32_t uu____201 = data_w[i];
+    ws_w[i] = uu____201;
   }
   for (uint32_t i = (uint32_t )16; i < (uint32_t )64; i = i + (uint32_t )1)
   {
@@ -180,9 +171,10 @@ static void Hacl_Hash_SHA2_256_update(uint32_t *state, uint8_t *data)
     uint32_t f1 = hash_0[5];
     uint32_t g = hash_0[6];
     uint32_t h = hash_0[7];
-    uint32_t uu____584 = k_w[i];
+    uint32_t kt = k_w[i];
+    uint32_t wst = ws_w[i];
     uint32_t
-    uu____583 =
+    t1 =
       h
       +
         ((e >> (uint32_t )6 | e << (uint32_t )32 - (uint32_t )6)
@@ -190,9 +182,8 @@ static void Hacl_Hash_SHA2_256_update(uint32_t *state, uint8_t *data)
           (e >> (uint32_t )11 | e << (uint32_t )32 - (uint32_t )11)
           ^ (e >> (uint32_t )25 | e << (uint32_t )32 - (uint32_t )25))
       + (e & f1 ^ ~e & g)
-      + uu____584;
-    uint32_t uu____585 = ws_w[i];
-    uint32_t t1 = uu____583 + uu____585;
+      + kt
+      + wst;
     uint32_t
     t2 =
       ((a >> (uint32_t )2 | a << (uint32_t )32 - (uint32_t )2)
@@ -221,9 +212,8 @@ static void Hacl_Hash_SHA2_256_update(uint32_t *state, uint8_t *data)
     hash_w[i] = uu____794;
   }
   uint32_t *state_len = state + (uint32_t )136;
-  uint32_t uu____1057 = state_len[0];
-  uint32_t uu____1056 = uu____1057 + (uint32_t )1;
-  state_len[0] = uu____1056;
+  uint32_t state_len0 = state_len[0];
+  state_len[0] = state_len0 + (uint32_t )1;
 }
 
 static void Hacl_Hash_SHA2_256_update_multi(uint32_t *state, uint8_t *data, uint32_t n1)
@@ -243,12 +233,12 @@ static void Hacl_Hash_SHA2_256_update_multi(uint32_t *state, uint8_t *data, uint
 static void Hacl_Hash_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint32_t len)
 {
   uint8_t blocks[128] = { 0 };
-  K___uint32_t_uint8_t_ uu____1483;
+  K___uint32_t_uint8_t_ uu____1482;
   if (len < (uint32_t )56)
-    uu____1483 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )64 });
+    uu____1482 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )64 });
   else
-    uu____1483 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
-  K___uint32_t_uint8_t_ scrut = uu____1483;
+    uu____1482 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
+  K___uint32_t_uint8_t_ scrut = uu____1482;
   uint32_t nb = scrut.fst;
   uint8_t *final_blocks = scrut.snd;
   memcpy(final_blocks, data, len * sizeof data[0]);
@@ -271,7 +261,7 @@ static void Hacl_Hash_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint3
 static void Hacl_Hash_SHA2_256_finish(uint32_t *state, uint8_t *hash1)
 {
   uint32_t *hash_w = state + (uint32_t )128;
-  Hacl_Utils_Experimental_store32s_be(hash1, hash_w, (uint32_t )8);
+  Hacl_Hash_Lib_LoadStore_uint32s_to_be_bytes(hash1, hash_w, (uint32_t )8);
   return;
 }
 

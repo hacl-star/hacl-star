@@ -7,23 +7,25 @@
 #include "kremlib.h"
 #include "testlib.h"
 
-typedef uint8_t Hacl_Utils_Experimental_uint8_t;
+typedef uint8_t Hacl_Hash_Lib_Create_uint8_t;
 
-typedef uint32_t Hacl_Utils_Experimental_uint32_t;
+typedef uint32_t Hacl_Hash_Lib_Create_uint32_t;
 
-typedef uint64_t Hacl_Utils_Experimental_uint64_t;
+typedef uint64_t Hacl_Hash_Lib_Create_uint64_t;
 
-typedef uint8_t Hacl_Utils_Experimental_huint8_t;
+typedef uint8_t Hacl_Hash_Lib_Create_huint8_t;
 
-typedef uint32_t Hacl_Utils_Experimental_huint32_t;
+typedef uint32_t Hacl_Hash_Lib_Create_huint32_t;
 
-typedef uint64_t Hacl_Utils_Experimental_huint64_t;
+typedef uint64_t Hacl_Hash_Lib_Create_huint64_t;
 
-typedef uint8_t *Hacl_Utils_Experimental_huint8_p;
+typedef uint8_t *Hacl_Hash_Lib_Create_huint8_p;
 
-typedef uint32_t *Hacl_Utils_Experimental_huint32_p;
+typedef uint32_t *Hacl_Hash_Lib_Create_huint32_p;
 
-typedef uint64_t *Hacl_Utils_Experimental_huint64_p;
+typedef uint64_t *Hacl_Hash_Lib_Create_huint64_p;
+
+typedef uint8_t *Hacl_Hash_Lib_LoadStore_uint8_p;
 
 typedef uint8_t Hacl_Hash_SHA2_256_uint8_t;
 

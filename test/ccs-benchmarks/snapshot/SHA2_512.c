@@ -1,33 +1,24 @@
 #include "SHA2_512.h"
 
 static void
-Hacl_Utils_Experimental_load64s_be(uint64_t *buf_64, uint8_t *buf_8, uint32_t len_8)
+Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(uint64_t *output, uint8_t *input, uint32_t len)
 {
-  if (len_8 == (uint32_t )0)
-    return;
-  else
+  for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
   {
-    uint8_t *x_8 = buf_8 + len_8 - (uint32_t )8;
-    uint32_t i_64 = len_8 / (uint32_t )8;
-    uint64_t x_64 = load64_be(x_8);
-    buf_64[i_64 - (uint32_t )1] = x_64;
-    Hacl_Utils_Experimental_load64s_be(buf_64, buf_8, len_8 - (uint32_t )8);
-    return;
+    uint8_t *x0 = input + (uint32_t )8 * i;
+    uint64_t inputi = load64_be(x0);
+    output[i] = inputi;
   }
 }
 
 static void
-Hacl_Utils_Experimental_store64s_be(uint8_t *buf_8, uint64_t *buf_64, uint32_t len_64)
+Hacl_Hash_Lib_LoadStore_uint64s_to_be_bytes(uint8_t *output, uint64_t *input, uint32_t len)
 {
-  if (len_64 == (uint32_t )0)
-    return;
-  else
+  for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
   {
-    uint64_t x_64 = buf_64[len_64 - (uint32_t )1];
-    uint8_t *x_8 = buf_8 + (len_64 - (uint32_t )1) * (uint32_t )8;
-    store64_be(x_8, x_64);
-    Hacl_Utils_Experimental_store64s_be(buf_8, buf_64, len_64 - (uint32_t )1);
-    return;
+    uint64_t hd1 = input[i];
+    uint8_t *x0 = output + (uint32_t )8 * i;
+    store64_be(x0, hd1);
   }
 }
 
@@ -169,14 +160,14 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
   uint64_t data_w[16];
   for (uintmax_t _i = 0; _i < (uint32_t )16; ++_i)
     data_w[_i] = (uint64_t )(uint32_t )0;
-  Hacl_Utils_Experimental_load64s_be(data_w, data, (uint32_t )128);
+  Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(data_w, data, (uint32_t )16);
   uint64_t *hash_w = state + (uint32_t )160;
   uint64_t *ws_w = state + (uint32_t )80;
   uint64_t *k_w = state;
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint64_t uu____220 = data_w[i];
-    ws_w[i] = uu____220;
+    uint64_t uu____232 = data_w[i];
+    ws_w[i] = uu____232;
   }
   for (uint32_t i = (uint32_t )16; i < (uint32_t )80; i = i + (uint32_t )1)
   {
@@ -269,12 +260,12 @@ static void Hacl_Hash_SHA2_512_update_multi(uint64_t *state, uint8_t *data, uint
 static void Hacl_Hash_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint64_t len)
 {
   uint8_t blocks[256] = { 0 };
-  K___uint32_t_uint8_t_ uu____1684;
+  K___uint32_t_uint8_t_ uu____1661;
   if (len < (uint64_t )112)
-    uu____1684 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )128 });
+    uu____1661 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )128 });
   else
-    uu____1684 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
-  K___uint32_t_uint8_t_ scrut = uu____1684;
+    uu____1661 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
+  K___uint32_t_uint8_t_ scrut = uu____1661;
   uint32_t nb = scrut.fst;
   uint8_t *final_blocks = scrut.snd;
   memcpy(final_blocks, data, (uint32_t )len * sizeof data[0]);
@@ -301,7 +292,7 @@ static void Hacl_Hash_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint6
 static void Hacl_Hash_SHA2_512_finish(uint64_t *state, uint8_t *hash1)
 {
   uint64_t *hash_w = state + (uint32_t )160;
-  Hacl_Utils_Experimental_store64s_be(hash1, hash_w, (uint32_t )8);
+  Hacl_Hash_Lib_LoadStore_uint64s_to_be_bytes(hash1, hash_w, (uint32_t )8);
   return;
 }
 
@@ -321,11 +312,35 @@ static void Hacl_Hash_SHA2_512_hash(uint8_t *hash1, uint8_t *input, uint32_t len
   Hacl_Hash_SHA2_512_finish(state, hash1);
 }
 
+uint32_t SHA2_512_size_word = (uint32_t )8;
+
+uint32_t SHA2_512_size_hash_w = (uint32_t )8;
+
+uint32_t SHA2_512_size_block_w = (uint32_t )16;
+
 uint32_t SHA2_512_size_hash = (uint32_t )64;
 
 uint32_t SHA2_512_size_block = (uint32_t )128;
 
+uint32_t SHA2_512_size_k_w = (uint32_t )80;
+
+uint32_t SHA2_512_size_ws_w = (uint32_t )80;
+
+uint32_t SHA2_512_size_whash_w = (uint32_t )8;
+
+uint32_t SHA2_512_size_count_w = (uint32_t )1;
+
+uint32_t SHA2_512_size_len_8 = (uint32_t )16;
+
 uint32_t SHA2_512_size_state = (uint32_t )169;
+
+uint32_t SHA2_512_pos_k_w = (uint32_t )0;
+
+uint32_t SHA2_512_pos_ws_w = (uint32_t )80;
+
+uint32_t SHA2_512_pos_whash_w = (uint32_t )160;
+
+uint32_t SHA2_512_pos_count_w = (uint32_t )168;
 
 void SHA2_512_init(uint64_t *state)
 {
@@ -333,9 +348,9 @@ void SHA2_512_init(uint64_t *state)
   return;
 }
 
-void SHA2_512_update(uint64_t *state, uint8_t *data_8)
+void SHA2_512_update(uint64_t *state, uint8_t *data)
 {
-  Hacl_Hash_SHA2_512_update(state, data_8);
+  Hacl_Hash_SHA2_512_update(state, data);
   return;
 }
 
