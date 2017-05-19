@@ -136,8 +136,7 @@ FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 		--include $(HACL_HOME)/code/lib --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		--include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
-		--include $(HACL_HOME)/code/curve25519  --include $(HACL_HOME)/code/experimental/hash \
-		--include $(HACL_HOME)/code/experimental/utils
+		--include $(HACL_HOME)/code/curve25519  --include $(HACL_HOME)/code/experimental/hash
 
 
 # Lax typechecking against the restricted integer interface
@@ -222,11 +221,11 @@ ed25519-c/Ed25519.c: \
 	Ed25519.fst
 	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 	 	-I $(HACL_HOME)/code/bignum -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(HACL_HOME)/code/curve25519 \
-	 	-I $(HACL_HOME)/code/../specs/experimental -I $(HACL_HOME)/code/experimental/hash -I $(HACL_HOME)/code/experimental/utils \
+	 	-I $(HACL_HOME)/code/../specs/experimental -I $(HACL_HOME)/code/experimental/hash \
 	 	$^ \
 	 	-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
 	 	-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
-	 	-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Utils.\*,Hacl.Hash.\*,SHA2_512' \
+	 	-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Hash.\*,SHA2_512' \
 	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -skip-compilation
 
