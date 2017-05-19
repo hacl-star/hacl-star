@@ -7,7 +7,7 @@ FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 KRML=$(KRML_BIN) $(KREMLIN_ARGS)
 
-HINTS_ENABLED= --hint_info --use_hints
+HINTS_ENABLED= --use_hints
 
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
@@ -36,7 +36,9 @@ SHA2_FILES = \
 	$(FSTARB) $^
 
 # CI
-all-ci: $(addsuffix -verify, $(SHA2_FILES))
+all-ci: test
+# all-ci: $(addsuffix -verify, $(SHA2_FILES)) This is too costly for the CI
+
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
