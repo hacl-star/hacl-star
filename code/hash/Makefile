@@ -62,7 +62,7 @@ clean:
 KRML_COMMON_SHA2_256 = \
 $(KRML) -verbose -tmpdir sha2-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
-		-I $(HACL_HOME)/code/experimental/hash \
+		-I $(HACL_HOME)/code/hash \
 		-drop Prims -drop FStar \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' \
@@ -74,7 +74,7 @@ $(KRML) -verbose -tmpdir sha2-c \
 KRML_COMMON_SHA2_512 = \
 $(KRML) -verbose -tmpdir sha2-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
-		-I $(HACL_HOME)/code/experimental/hash \
+		-I $(HACL_HOME)/code/hash \
 		-drop Prims -drop FStar \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' \

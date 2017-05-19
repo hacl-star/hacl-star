@@ -14,12 +14,12 @@ HINTS_ENABLED= --use_hints
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
         --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
          --include $(HACL_HOME)/specs \
-			--include $(HACL_HOME)/code/experimental/hash \
+			--include $(HACL_HOME)/code/hash \
         $(HINTS_ENABLED) $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
         --include $(HACL_HOME)/code/lib  --include $(KREMLIN_HOME)/kremlib \
-			--include $(HACL_HOME)/code/experimental/hash \
+			--include $(HACL_HOME)/code/hash \
         --include $(HACL_HOME)/specs
 
 
@@ -61,7 +61,7 @@ clean:
 KRML_COMMON_HMAC_SHA2_256 = \
 $(KRML) -verbose -tmpdir hmac-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
-		-I $(HACL_HOME)/code/experimental/hash \
+		-I $(HACL_HOME)/code/hash \
 		-drop Prims -drop FStar \
 		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' \
