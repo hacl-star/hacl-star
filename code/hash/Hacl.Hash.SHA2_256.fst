@@ -947,7 +947,7 @@ let update_last state data len =
 [@"substitute"]
 val finish_core:
   hash_w :uint32_p {length hash_w = v size_hash_w} ->
-  hash   :uint8_p  {length hash = v size_hash} ->
+  hash   :uint8_p  {length hash = v size_hash /\ disjoint hash_w hash} ->
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 hash))
         (ensures  (fun h0 _ h1 -> live h0 hash_w /\ live h0 hash /\ live h1 hash /\ modifies_1 hash h0 h1
@@ -963,7 +963,7 @@ let finish_core hash_w hash = uint32s_to_be_bytes hash hash_w size_hash_w
 
 val finish:
   state :uint32_p{length state = v size_state} ->
-  hash  :uint8_p{length hash = v size_hash} ->
+  hash  :uint8_p{length hash = v size_hash /\ disjoint state hash} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
         (ensures  (fun h0 _ h1 -> live h0 state /\ live h1 hash /\ modifies_1 hash h0 h1
@@ -980,7 +980,7 @@ let finish state hash =
 
 val hash:
   hash :uint8_p {length hash = v size_hash} ->
-  input:uint8_p {length input < Spec.max_input_len_8} ->
+  input:uint8_p {length input < Spec.max_input_len_8 /\ disjoint hash input} ->
   len  :uint32_t{v len = length input} ->
   Stack unit
         (requires (fun h0 -> live h0 hash /\ live h0 input))

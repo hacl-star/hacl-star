@@ -1069,7 +1069,7 @@ let finish state hash =
 
 val hash:
   hash :uint8_p {length hash = v size_hash} ->
-  input:uint8_p {length input < Spec.max_input_len_8} ->
+  input:uint8_p {length input < Spec.max_input_len_8 /\ disjoint hash input} ->
   len  :uint32_t{v len = length input} ->
   Stack unit
         (requires (fun h0 -> live h0 hash /\ live h0 input))
