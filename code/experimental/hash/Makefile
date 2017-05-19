@@ -24,10 +24,8 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 SHA2_FILES = \
 	Hacl.Hash.SHA2_512.Lemmas.fst \
 	Hacl.Hash.SHA2_512.fst \
-	SHA2_512.fst \
 	Hacl.Hash.SHA2_256.Lemmas.fst \
-	Hacl.Hash.SHA2_256.fst \
-	SHA2_256.fst
+	Hacl.Hash.SHA2_256.fst
 
 
 # Full typechecking against the transparent integer interface
