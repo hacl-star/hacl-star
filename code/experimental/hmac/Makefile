@@ -8,10 +8,44 @@ KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 KRML=$(KRML_BIN) $(KREMLIN_ARGS)
 
 
+HINTS_ENABLED= --use_hints
+
+
+FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+        --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
+         --include $(HACL_HOME)/specs  --include $(HACL_HOME)/code/experimental/utils \
+			--include $(HACL_HOME)/code/experimental/hash \
+        $(HINTS_ENABLED) $(OTHERFLAGS)
+
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+        --include $(HACL_HOME)/code/lib  --include $(KREMLIN_HOME)/kremlib \
+			--include $(HACL_HOME)/code/experimental/utils --include $(HACL_HOME)/code/experimental/hash \
+        --include $(HACL_HOME)/specs
+
+
 # Files for verification
-HMAC_SHA2_FILES = \
-	Hacl.HMAC.SHA2_256.fst \
-	HMAC_SHA2_256.fst
+HMAC_SHA2_FILES = Hacl.HMAC.SHA2_256.fst
+#	               HMAC_SHA2_256.fst
+
+
+# Full typechecking against the transparent integer interface
+%.fst-verify: %.fst
+	$(FSTARB) $^
+
+%.fsti-verify: %.fsti
+	$(FSTARB) $^
+
+
+# CI
+all-ci: test
+# all-ci: $(addsuffix -verify, $(HMAC_SHA2_FILES)) This is too costly for the CI
+
+
+# Lax typechecking against the restricted integer interface
+%.fst-ct: %.fst
+	$(FSTAR_CT) --lax $^
+
+all-ct: $(addsuffix -ct, $(HMAC_SHA2_FILES))
 
 
 # Common call to Kremlin for both extraction and tests
@@ -28,40 +62,12 @@ $(KRML) -verbose -tmpdir hmac-c \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99
 
 
-
-# Verification
-verify: verification
-
-# Extraction
-extract-c: tests #hmac-c/HMAC_SHA2_256.c
-
-# Test vectors
-test: test-hmac_sha2_256.exe
-
-# CI
-all-ci:
-
-# Reset
-clean:
-	rm -rf *~ *.exe *.exe.dSYM
-	rm -rf hmac-c
-
-
-
-verification: $(HMAC_SHA2_FILES)
-	$(FSTAR) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/experimental/utils --include $(HACL_HOME)/code/experimental/hash --include $(HACL_HOME)/specs --use_hints $^
-
-
-record-hints: $(HMAC_SHA2_FILES)
-	$(FSTAR) --include $(FSTAR_HOME)/ulib/hyperstack --include $(KREMLIN_HOME)/kremlib --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/experimental/utils --include $(HACL_HOME)/code/experimental/hash --include $(HACL_HOME)/specs --use_hints --record_hints $^ --hint_info
-
-
-hmac-c/HMAC_SHA2_256.c:
+hmac-c/HMAC_SHA2_256.c: HMAC_SHA2_256.fst
 	mkdir -p hmac-c
-	$(KRML_COMMON_HMAC_SHA2_256) -skip-compilation -no-prefix 'HMAC_SHA2_256' HMAC_SHA2_256.fst
+	$(KRML_COMMON_HMAC_SHA2_256) -skip-compilation -no-prefix 'HMAC_SHA2_256' $^
 
 
-test-hmac_sha2_256.exe:
+test-hmac_sha2_256.exe: Hacl.Test.HMAC.SHA2_256.fst
 	mkdir -p hmac-c
-	$(KRML_COMMON_HMAC_SHA2_256) -o test-hmac_sha2_256.exe -no-prefix 'Hacl.Test.HMAC.SHA2_256' Hacl.Test.HMAC.SHA2_256.fst
+	$(KRML_COMMON_HMAC_SHA2_256) -o test-hmac_sha2_256.exe -no-prefix 'Hacl.Test.HMAC.SHA2_256' $^
 	./test-hmac_sha2_256.exe
