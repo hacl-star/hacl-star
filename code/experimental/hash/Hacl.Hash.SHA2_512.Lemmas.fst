@@ -46,6 +46,7 @@ private let uint64_p = Buffer.buffer uint64_ht
 private let uint8_p  = Buffer.buffer uint8_ht
 
 
+#reset-options "--max_fuel 0  --z3rlimit 10"
 
 //
 // SHA-512
@@ -91,7 +92,7 @@ let lemma_aux_0 (t:UInt32.t{UInt32.v t >= 16 /\ UInt32.v t < 80}) : Lemma
 let lemma_aux_1 (a:nat) (b:nat) : Lemma (requires (a = 0)) (ensures (a * b = 0)) = ()
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 let lemma_aux_2 (a:nat) (b:pos) : Lemma (requires (a > 0)) (ensures (a * b > 0)) = ()
 
@@ -167,7 +168,7 @@ let lemma_eq_endianness (h:HyperStack.mem) (buf:uint8_p{length buf = 16}) (n:uin
   Seq.lemma_eq_intro (as_seq h buf) (Endianness.big_bytes 16ul (H128.v n))
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 let lemma_sub_append_2 (h:HyperStack.mem) (g:uint8_p) (p0:uint32_t{v p0 = 0}) (a:uint8_p) (p1:uint32_t{v p0 <= v p1 /\ v p1 <= length g}) (b:uint8_p) (p2:uint32_t{v p1 <= v p2 /\ v p2 = length g}) : Lemma
   (requires (live h g /\ live h a /\ live h b

@@ -214,6 +214,7 @@ let lemma_spec_ws_def b i = ()
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
+[@ "substitute"]
 let ws_part_1_core ws_w block_w t =
     let h0 = ST.get() in
     let h = ST.get() in
@@ -311,6 +312,7 @@ let lemma_spec_ws_def2 b i = ()
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
+[@ "substitute"]
 let ws_part_2_core ws_w block_w t =
     let h0 = ST.get () in
     let t16 = ws_w.(t -^ 16ul) in
@@ -409,7 +411,7 @@ private val shuffle_core:
                   let seq_block = as_seq h0 block_w in
                   seq_hash_1 == Spec.shuffle_core seq_block seq_hash_0 (U32.v t))))
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 [@"substitute"]
 let shuffle_core hash block ws k t =
@@ -509,11 +511,13 @@ val alloc:
     (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
              /\ Map.domain h1.h == Map.domain h0.h))
 
+#reset-options "--max_fuel 0  --z3rlimit 20"
+
 [@"c_inline"]
 let alloc () = Buffer.create (u32_to_h64 0ul) size_state
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#reset-options "--max_fuel 0  --z3rlimit 50"
 
 val init:
   state:uint64_p{length state = v size_state} ->
@@ -666,7 +670,7 @@ let update_core hash_w data data_w ws_w k_w =
   (**) pop_frame()
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#reset-options "--max_fuel 0  --z3rlimit 75"
 
 val update:
   state :uint64_p {length state = v size_state} ->
@@ -789,7 +793,7 @@ let rec update_multi state data n =
 
 inline_for_extraction
 let pad0_length (len:uint32_t{v len + 1 + v size_len_8 < pow2 32}) : Tot (n:uint32_t{v n = Spec.pad0_length (v len)}) =
-  (size_block -^ (len +^ size_len_8 +^ 1ul)) %^ size_block
+  (size_block -^ (len +^ size_len_8 +^ 1ul) %^ size_block) %^ size_block
 
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
@@ -804,7 +808,7 @@ let encode_length (count:uint64_ht) (len:uint64_t{H64.v count * v size_block + U
   H128.(H128.shift_left (l0 +^ l1) 3ul) // Multiplication by 2^3; Call modulo_lemma
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 val set_pad_part1:
@@ -815,7 +819,7 @@ val set_pad_part1:
                              /\ (let seq_buf1 = as_seq h1 buf1 in
                              seq_buf1 = Seq.create 1 0x80uy)))
 
-#reset-options "--max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@"substitute"]
 let set_pad_part1 buf1 =
@@ -900,7 +904,7 @@ let pad padding n len =
   Lemmas.lemma_pad_aux h1 n len buf1 zeros buf2
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 val update_last:
   state :uint64_p {length state = v size_state} ->
@@ -1017,7 +1021,7 @@ val finish_core:
 let finish_core hash_w hash = store64s_be hash hash_w size_hash_w
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 val finish:
   state :uint64_p{length state = v size_state} ->
