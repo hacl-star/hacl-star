@@ -54,7 +54,7 @@ OpenSSLEngine.$(SO): HACLEngine.c
 HACL_IMPL_FILES= $(CURVE_HOME)/Curve25519.c $(CHACHA_HOME)/Chacha20.c \
   $(POLY_HOME)/AEAD_Poly1305_64.c $(POLY_HOME)/Poly1305_64.c \
   $(AEAD_HOME)/Chacha20Poly1305.c $(AEAD_HOME)/Hacl_Policies.c \
-  $(SHA_HOME)/SHA2_512.c
+  $(SHA_HOME)/SHA2_512.c $(SHA_HOME)/SHA2_256.c
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
