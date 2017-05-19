@@ -3,7 +3,7 @@ KREMLIN_HOME?=$(HACL_HOME)/kremlin
 FSTAR_HOME?=$(HACL_HOME)/kremlin
 
 
-DIRECTORIES=hash
+DIRECTORIES=
 
 %-c: %
 	$(MAKE) -C $< extract-c
@@ -13,10 +13,7 @@ DIRECTORIES=hash
 
 extract-c: $(addsuffix -c, $(DIRECTORIES))
 
-sha2-ci:
-	$(MAKE) -C hash all-ci
-
-all-ci: sha2-ci
+all-ci:
 
 all-ct:
 
