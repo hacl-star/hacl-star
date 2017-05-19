@@ -6,6 +6,8 @@ open FStar.HyperStack
 open FStar.ST
 open FStar.Buffer
 
+open Hacl.Spec.Endianness
+
 open Hacl.Cast
 open Hacl.UInt8
 open Hacl.UInt32
@@ -501,7 +503,7 @@ val load32s_be:
   Stack unit
         (requires (fun h0 -> live h0 buf_32 /\ live h0 buf_8))
         (ensures  (fun h0 _ h1 -> live h0 buf_32 /\ live h0 buf_8 /\ live h1 buf_32 /\ modifies_1 buf_32 h0 h1
-                  /\ (as_seq h1 buf_32 == Spec.Lib.uint32s_from_be (length buf_32) (as_seq h0 buf_8))))
+                  /\ (reveal_h32s (as_seq h1 buf_32) == Spec.Lib.uint32s_from_be (length buf_32) (reveal_sbytes (as_seq h0 buf_8)))))
 
 let rec load32s_be buf_32 buf_8 len_8 =
   admit();
@@ -524,7 +526,7 @@ val store32s_be:
   Stack unit
         (requires (fun h0 -> live h0 buf_8 /\ live h0 buf_32))
         (ensures  (fun h0 _ h1 -> live h0 buf_32 /\ live h0 buf_8 /\ live h1 buf_8 /\ modifies_1 buf_8 h0 h1
-                  /\ (as_seq h1 buf_8 == Spec.Lib.uint32s_to_be (length buf_32) (as_seq h0 buf_32))))
+                  /\ (reveal_sbytes (as_seq h1 buf_8) == Spec.Lib.uint32s_to_be (length buf_32) (reveal_h32s (as_seq h0 buf_32)))))
 
 let rec store32s_be buf_8 buf_32 len_32 =
   admit();
@@ -546,7 +548,7 @@ val load64s_be:
   Stack unit
         (requires (fun h0 -> live h0 buf_64 /\ live h0 buf_8))
         (ensures  (fun h0 _ h1 -> live h0 buf_64 /\ live h0 buf_8 /\ live h1 buf_64 /\ modifies_1 buf_64 h0 h1
-                  /\ (as_seq h1 buf_64 == Spec.Lib.uint64s_from_be (length buf_64) (as_seq h0 buf_8))))
+                  /\ (reveal_h64s (as_seq h1 buf_64) == Spec.Lib.uint64s_from_be (length buf_64) (reveal_sbytes (as_seq h0 buf_8)))))
 
 #set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100"
 
@@ -572,7 +574,7 @@ val store64s_be:
   Stack unit
         (requires (fun h0 -> live h0 buf_8 /\ live h0 buf_64))
         (ensures  (fun h0 _ h1 -> live h0 buf_64 /\ live h0 buf_8 /\ live h1 buf_8 /\ modifies_1 buf_8 h0 h1
-                  /\ (as_seq h1 buf_8 == Spec.Lib.uint64s_to_be (length buf_64) (as_seq h0 buf_64))))
+                  /\ (reveal_sbytes (as_seq h1 buf_8) == Spec.Lib.uint64s_to_be (length buf_64) (reveal_h64s (as_seq h0 buf_64)))))
 
 let rec store64s_be buf_8 buf_64 len_64 =
   admit();
