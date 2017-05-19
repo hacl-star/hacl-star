@@ -9,6 +9,9 @@ fi
 OPENSSL_HOME=$1
 ENGINE=$2
 EXE=
+SO=$(basename $2)
+SO=${SO%%.*}
+echo $SO
 
 if [[ $(uname) == "Darwin" ]]; then
   export DYLD_LIBRARY_PATH=$OPENSSL_HOME:"$DYLD_LIBRARY_PATH"
@@ -38,7 +41,6 @@ if command -v gsed >/dev/null 2>&1; then
   sed=gsed
 fi
 
-SO=$(basename $2)
 tput setaf 1
 echo Generating CSV results in log-$SO.csv
 tput sgr0
@@ -47,4 +49,6 @@ cat log | \
   egrep -v "^(OpenSSL|--|Warning)" | \
   $sed 's/for 3s.*//' | \
   $sed 's/\ \{2,\}/,/g' | \
+  $sed 's/k//g' | \
+  $sed 's/^/$SO\//g' | \
   uniq > log-$SO.csv
