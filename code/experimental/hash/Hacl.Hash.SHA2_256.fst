@@ -210,6 +210,7 @@ let lemma_spec_ws_def b i = ()
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
+[@ "substitute"]
 let ws_part_1_core ws_w block_w t =
     let h0 = ST.get() in
     let h = ST.get() in
@@ -307,6 +308,7 @@ let lemma_spec_ws_def2 b i = ()
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
+[@ "substitute"]
 let ws_part_2_core ws_w block_w t =
     let h0 = ST.get () in
     let t16 = ws_w.(t -^ 16ul) in
@@ -483,6 +485,8 @@ private val sum_hash:
               let seq_hash_1 = as_seq h0 hash_1 in
               new_seq_hash_0 == Spec.Lib.map2 (fun x y -> H32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
 
+#reset-options "--max_fuel 0  --z3rlimit 20"
+
 [@"substitute"]
 let sum_hash hash_0 hash_1 =
   C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H32.(x +%^ y))
@@ -502,7 +506,7 @@ val alloc:
 let alloc () = Buffer.create (u32_to_h32 0ul) size_state
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#reset-options "--max_fuel 0  --z3rlimit 50"
 
 val init:
   state:uint32_p{length state = v size_state} ->
@@ -533,6 +537,8 @@ let init state =
   (**) no_upd_lemma_2 h0 h1 k h_0 n
 
 
+#reset-options "--max_fuel 0  --z3rlimit 10"
+
 [@"substitute"]
 private val copy_hash:
   hash_w_1 :uint32_p {length hash_w_1 = v size_hash_w} ->
@@ -541,6 +547,8 @@ private val copy_hash:
         (requires (fun h0 -> live h0 hash_w_1 /\ live h0 hash_w_2))
         (ensures  (fun h0 _ h1 -> live h0 hash_w_1 /\ live h0 hash_w_2 /\ live h1 hash_w_1 /\ modifies_1 hash_w_1 h0 h1
                   /\ (as_seq h1 hash_w_1 == as_seq h0 hash_w_2)))
+
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 let copy_hash hash_w_1 hash_w_2 =
@@ -720,7 +728,7 @@ let rec update_multi state data n =
 
 inline_for_extraction
 let pad0_length (len:uint32_t{v len + 1 + v size_len_8 < pow2 32}) : Tot (n:uint32_t{v n = Spec.pad0_length (v len)}) =
-  (size_block -^ (len +^ size_len_8 +^ 1ul)) %^ size_block
+  (size_block -^ (len +^ size_len_8 +^ 1ul) %^ size_block) %^ size_block
 
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
@@ -804,7 +812,7 @@ let pad padding n len =
   let buf2 = Buffer.sub padding (1ul +^ pad0len) size_len_8 in
 
   (* Compute and encode the total length *)
-  let encodedlen = encode_length n len size_block in
+  let encodedlen = encode_length n len in
 
   let h0 = ST.get () in
   Seq.lemma_eq_intro (as_seq h0 zeros) (Seq.create (v pad0len) 0uy);
