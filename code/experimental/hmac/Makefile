@@ -52,7 +52,7 @@ extract-c: hmac-c/HMAC_SHA2_256.c
 test: test-hmac_sha2_256.exe
 
 clean:
-	rm -f *~ *.exe
+	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf hmac-c
 
 
