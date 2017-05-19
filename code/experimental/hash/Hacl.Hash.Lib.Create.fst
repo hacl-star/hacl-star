@@ -49,6 +49,9 @@ inline_for_extraction let s32_to_s64 = Cast.sint32_to_sint64
 inline_for_extraction let u64_to_s64 = Cast.uint64_to_sint64
 
 
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
 [@"substitute"]
 val hupd_4: buf:huint32_p{length buf = 4} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t ->

@@ -7,7 +7,7 @@ FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 KRML=$(KRML_BIN) $(KREMLIN_ARGS)
 
-HINTS_ENABLED= --use_hints
+HINTS_ENABLED= --use_hints --record_hints
 
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
@@ -21,6 +21,8 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 
 # Files for verification
 SHA2_FILES = \
+	Hacl.Hash.Lib.LoadStore.fst \
+	Hacl.Hash.Lib.Create.fst \
 	Hacl.Hash.SHA2_512.Lemmas.fst \
 	Hacl.Hash.SHA2_512.fst \
 	Hacl.Hash.SHA2_256.Lemmas.fst \
@@ -36,8 +38,9 @@ SHA2_FILES = \
 
 # CI
 all-ci: test
-# all-ci: $(addsuffix -verify, $(SHA2_FILES)) This is too costly for the CI
 
+# Verification
+all-verif: $(addsuffix -verify, $(SHA2_FILES)) # This is too costly for the CI
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -51,7 +54,7 @@ extract-c: sha2-c/SHA2_256.c sha2-c/SHA2_512.c
 test: test-sha2_256.exe test-sha2_512.exe
 
 clean:
-	rm -f *~ *.exe
+	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf sha2-c
 
 
