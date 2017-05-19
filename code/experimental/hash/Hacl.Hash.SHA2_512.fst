@@ -731,7 +731,7 @@ let update state data =
   let data_w = Buffer.create (u32_to_h64 0ul) size_block_w in
 
   (* Cast the data bytes into a uint32_t buffer *)
-  load64s_be data_w data size_block;
+  uint64s_from_be_bytes data_w data size_block_w;
 
   (* Retreive values from the state *)
   let hash_w = Buffer.sub state pos_whash_w size_whash_w in
@@ -1034,7 +1034,7 @@ let update_last state data len =
 [@"substitute"]
 val finish_core:
   hash_w :uint64_p {length hash_w = v size_hash_w} ->
-  hash   :uint8_p  {length hash = v size_hash} ->
+  hash   :uint8_p  {length hash = v size_hash /\ disjoint hash_w hash} ->
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 hash))
         (ensures  (fun h0 _ h1 -> live h0 hash_w /\ live h0 hash /\ live h1 hash /\ modifies_1 hash h0 h1
@@ -1042,15 +1042,17 @@ val finish_core:
                   let seq_hash = reveal_sbytes (as_seq h1 hash) in
                   seq_hash = Spec.words_to_be (U32.v size_hash_w) seq_hash_w)))
 
+#reset-options "--max_fuel 0  --z3rlimit 50"
+
 [@"substitute"]
-let finish_core hash_w hash = store64s_be hash hash_w size_hash_w
+let finish_core hash_w hash = uint64s_to_be_bytes hash hash_w size_hash_w
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
 val finish:
   state :uint64_p{length state = v size_state} ->
-  hash  :uint8_p{length hash = v size_hash} ->
+  hash  :uint8_p{length hash = v size_hash /\ disjoint state hash} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
         (ensures  (fun h0 _ h1 -> live h0 state /\ live h1 hash /\ modifies_1 hash h0 h1

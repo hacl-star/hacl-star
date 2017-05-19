@@ -648,7 +648,7 @@ let update state data =
   let data_w = Buffer.create (u32_to_h32 0ul) size_block_w in
 
   (* Cast the data bytes into a uint32_t buffer *)
-  load32s_be data_w data size_block;
+  uint32s_from_be_bytes data_w data size_block_w;
 
   (* Retreive values from the state *)
   let hash_w = Buffer.sub state pos_whash_w size_whash_w in
@@ -956,7 +956,7 @@ val finish_core:
                   seq_hash = Spec.words_to_be (U32.v size_hash_w) seq_hash_w)))
 
 [@"substitute"]
-let finish_core hash_w hash = store32s_be hash hash_w size_hash_w
+let finish_core hash_w hash = uint32s_to_be_bytes hash hash_w size_hash_w
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
