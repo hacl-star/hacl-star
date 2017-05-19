@@ -14,7 +14,8 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
-open Hacl.Utils.Experimental
+open Hacl.Hash.Lib.Create
+open Hacl.Hash.Lib.LoadStore
 
 
 (* Definition of aliases for modules *)
@@ -31,7 +32,6 @@ module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2_256
 module Lemmas = Hacl.Hash.SHA2_256.Lemmas
-module Utils = Hacl.Utils.Experimental
 
 
 (* Definition of base types *)
@@ -95,6 +95,10 @@ inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
 [@"substitute"]
+let rotate_right (a:huint32_t) (b:uint32_t{v b <= 32}) : Tot huint32_t =
+  H32.logor (H32.shift_right a b) (H32.shift_left a (U32.sub 32ul b))
+
+[@"substitute"]
 private val _Ch: x:uint32_ht -> y:uint32_ht -> z:uint32_ht -> Tot uint32_ht
 [@"substitute"]
 let _Ch x y z = H32.logxor (H32.logand x y) (H32.logand (H32.lognot x) z)
@@ -137,8 +141,7 @@ private val constants_set_k:
                    seq_k == Spec.k)))
 
 [@"substitute"]
-let constants_set_k k =
-  Hacl.Utils.Experimental.hupd_64 k
+let constants_set_k k = hupd_64 k
   (u32_to_h32 0x428a2f98ul) (u32_to_h32 0x71374491ul) (u32_to_h32 0xb5c0fbcful) (u32_to_h32 0xe9b5dba5ul)
   (u32_to_h32 0x3956c25bul) (u32_to_h32 0x59f111f1ul) (u32_to_h32 0x923f82a4ul) (u32_to_h32 0xab1c5ed5ul)
   (u32_to_h32 0xd807aa98ul) (u32_to_h32 0x12835b01ul) (u32_to_h32 0x243185beul) (u32_to_h32 0x550c7dc3ul)
@@ -169,8 +172,7 @@ val constants_set_h_0:
                 seq_h_0 == Spec.h_0)))
 
 [@"substitute"]
-let constants_set_h_0 hash =
-  Hacl.Utils.Experimental.hupd_8 hash
+let constants_set_h_0 hash = hupd_8 hash
   (u32_to_h32 0x6a09e667ul) (u32_to_h32 0xbb67ae85ul) (u32_to_h32 0x3c6ef372ul) (u32_to_h32 0xa54ff53aul)
   (u32_to_h32 0x510e527ful) (u32_to_h32 0x9b05688cul) (u32_to_h32 0x1f83d9abul) (u32_to_h32 0x5be0cd19ul)
 
@@ -428,7 +430,7 @@ let shuffle_core hash block ws k t =
   let t2 = H32.((_Sigma0 a) +%^ (_Maj a b c)) in
 
   (* Store the new working hash in the state *)
-  Utils.hupd_8 hash H32.(t1 +%^ t2) a b c H32.(d +%^ t1) e f g
+  hupd_8 hash H32.(t1 +%^ t2) a b c H32.(d +%^ t1) e f g
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -646,7 +648,7 @@ let update state data =
   let data_w = Buffer.create (u32_to_h32 0ul) size_block_w in
 
   (* Cast the data bytes into a uint32_t buffer *)
-  Hacl.Utils.Experimental.load32s_be data_w data size_block;
+  load32s_be data_w data size_block;
 
   (* Retreive values from the state *)
   let hash_w = Buffer.sub state pos_whash_w size_whash_w in

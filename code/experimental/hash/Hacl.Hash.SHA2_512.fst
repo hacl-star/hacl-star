@@ -14,7 +14,8 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
-open Hacl.Utils.Experimental
+open Hacl.Hash.Lib.Create
+open Hacl.Hash.Lib.LoadStore
 
 
 (* Definition of aliases for modules *)
@@ -32,7 +33,6 @@ module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2_512
 module Lemmas = Hacl.Hash.SHA2_512.Lemmas
-module Utils = Hacl.Utils.Experimental
 
 
 (* Definition of base types *)
@@ -95,6 +95,10 @@ inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
 [@"substitute"]
+let rotate_right64 (a:huint64_t) (b:uint32_t{v b <= 64}) : Tot huint64_t =
+  H64.logor (H64.shift_right a b) (H64.shift_left a (U32.sub 64ul b))
+
+[@"substitute"]
 private val _Ch: x:uint64_ht -> y:uint64_ht -> z:uint64_ht -> Tot uint64_ht
 [@"substitute"]
 let _Ch x y z = H64.logxor (H64.logand x y) (H64.logand (H64.lognot x) z)
@@ -137,8 +141,7 @@ private val constants_set_k:
                    seq_k == Spec.k)))
 
 [@"substitute"]
-let constants_set_k k =
-  Hacl.Utils.Experimental.hupd64_80 k
+let constants_set_k k = hupd64_80 k
   (u64_to_h64 0x428a2f98d728ae22uL) (u64_to_h64 0x7137449123ef65cduL)
   (u64_to_h64 0xb5c0fbcfec4d3b2fuL) (u64_to_h64 0xe9b5dba58189dbbcuL)
   (u64_to_h64 0x3956c25bf348b538uL) (u64_to_h64 0x59f111f1b605d019uL)
@@ -193,10 +196,11 @@ val constants_set_h_0:
                 seq_h_0 == Spec.h_0)))
 
 [@"substitute"]
-let constants_set_h_0 hash =
-  Hacl.Utils.Experimental.hupd64_8 hash
-  (u64_to_h64 0x6a09e667f3bcc908uL) (u64_to_h64 0xbb67ae8584caa73buL) (u64_to_h64 0x3c6ef372fe94f82buL) (u64_to_h64 0xa54ff53a5f1d36f1uL)
-  (u64_to_h64 0x510e527fade682d1uL) (u64_to_h64 0x9b05688c2b3e6c1fuL) (u64_to_h64 0x1f83d9abfb41bd6buL) (u64_to_h64 0x5be0cd19137e2179uL)
+let constants_set_h_0 hash = hupd64_8 hash
+  (u64_to_h64 0x6a09e667f3bcc908uL) (u64_to_h64 0xbb67ae8584caa73buL)
+  (u64_to_h64 0x3c6ef372fe94f82buL) (u64_to_h64 0xa54ff53a5f1d36f1uL)
+  (u64_to_h64 0x510e527fade682d1uL) (u64_to_h64 0x9b05688c2b3e6c1fuL)
+  (u64_to_h64 0x1f83d9abfb41bd6buL) (u64_to_h64 0x5be0cd19137e2179uL)
 
 
 #reset-options " --max_fuel 0 --z3rlimit 20"
@@ -452,7 +456,7 @@ let shuffle_core hash block ws k t =
   let t2 = H64.((_Sigma0 a) +%^ (_Maj a b c)) in
 
   (* Store the new working hash in the state *)
-  Utils.hupd64_8 hash H64.(t1 +%^ t2) a b c H64.(d +%^ t1) e f g
+  hupd64_8 hash H64.(t1 +%^ t2) a b c H64.(d +%^ t1) e f g
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -727,7 +731,7 @@ let update state data =
   let data_w = Buffer.create (u32_to_h64 0ul) size_block_w in
 
   (* Cast the data bytes into a uint32_t buffer *)
-  Hacl.Utils.Experimental.load64s_be data_w data size_block;
+  load64s_be data_w data size_block;
 
   (* Retreive values from the state *)
   let hash_w = Buffer.sub state pos_whash_w size_whash_w in

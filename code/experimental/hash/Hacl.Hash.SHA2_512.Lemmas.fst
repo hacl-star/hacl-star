@@ -14,6 +14,8 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
+open Hacl.Hash.Lib.Create
+open Hacl.Hash.Lib.LoadStore
 
 
 (* Definition of aliases for modules *)
@@ -30,7 +32,6 @@ module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2_512
-module Utils = Hacl.Utils.Experimental
 
 
 (* Definition of base types *)
