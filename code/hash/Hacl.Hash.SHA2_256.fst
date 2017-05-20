@@ -95,7 +95,7 @@ inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
 [@"substitute"]
-let rotate_right (a:huint32_t) (b:uint32_t{v b <= 32}) : Tot huint32_t =
+let rotate_right (a:uint32_t) (b:uint32_t{v b <= 32}) : Tot uint32_t =
   H32.logor (H32.shift_right a b) (H32.shift_left a (U32.sub 32ul b))
 
 [@"substitute"]
