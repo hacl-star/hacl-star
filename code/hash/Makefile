@@ -7,7 +7,7 @@ FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 KRML=$(KRML_BIN) $(KREMLIN_ARGS)
 
-HINTS_ENABLED= --use_hints --record_hints
+HINTS_ENABLED= --use_hints
 
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
