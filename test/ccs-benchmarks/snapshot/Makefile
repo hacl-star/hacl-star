@@ -152,6 +152,19 @@ perf-test-sha512: test-sha512.exe
 unit-test-sha512: test-sha512.exe
 	./test-sha512.exe unit-test
 
+test-hmac-sha256.exe: HMAC_SHA2_256.c test-hmac-sha256.c
+	$(CC) $(CCOPTS) \
+	-I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
+	-I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	kremlib.c testlib.c $^ -o test-hmac-sha256.exe \
+	$(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+
+perf-test-hmac-sha256: test-hmac-sha256.exe
+	./test-hmac-sha256.exe perf
+
+unit-test-hmac-sha256: test-hmac-sha256.exe
+	./test-hmac-sha256.exe unit-test
+
 test-secretbox.exe:
 	$(CC) $(CCOPTS) \
 	Salsa20.c -c -o Salsa20.o
