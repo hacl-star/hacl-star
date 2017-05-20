@@ -31,13 +31,13 @@ let uint8_t   = FStar.UInt8.t
 let uint32_t  = FStar.UInt32.t
 let uint64_t  = FStar.UInt64.t
 
-let huint8_t  = Hacl.UInt8.t
-let huint32_t = Hacl.UInt32.t
-let huint64_t = Hacl.UInt64.t
+let uint8_ht  = Hacl.UInt8.t
+let uint32_ht = Hacl.UInt32.t
+let uint64_ht = Hacl.UInt64.t
 
-let huint8_p  = Buffer.buffer huint8_t
-let huint32_p = Buffer.buffer huint32_t
-let huint64_p = Buffer.buffer huint64_t
+let uint8_p  = Buffer.buffer uint8_ht
+let uint32_p = Buffer.buffer uint32_ht
+let uint64_p = Buffer.buffer uint64_ht
 
 
 (* Definitions of aliases for functions *)
@@ -53,7 +53,7 @@ inline_for_extraction let u64_to_s64 = Cast.uint64_to_sint64
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
 [@"substitute"]
-val hupd_4: buf:huint32_p{length buf = 4} ->
+val hupd_4: buf:uint32_p{length buf = 4} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t ->
   Stack unit (requires (fun h -> live h buf))
              (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
@@ -69,7 +69,7 @@ let hupd_4 buf v0 v1 v2 v3 =
 
 
 [@"substitute"]
-private val aux_hupd_8: buf:huint32_p{length buf = 8} ->
+private val aux_hupd_8: buf:uint32_p{length buf = 8} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
   Stack unit (requires (fun h -> live h buf))
              (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
@@ -86,7 +86,7 @@ let aux_hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
 
 
 [@"substitute"]
-val hupd_8: buf:huint32_p{length buf = 8} ->
+val hupd_8: buf:uint32_p{length buf = 8} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
   Stack unit (requires (fun h -> live h buf))
              (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
@@ -100,7 +100,7 @@ let hupd_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
 
 
 [@"substitute"]
-private val aux_hupd_16: buf:huint32_p{length buf = 16} ->
+private val aux_hupd_16: buf:uint32_p{length buf = 16} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
   v8:H32.t -> v9:H32.t -> v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t ->
   Stack unit (requires (fun h -> live h buf))
@@ -120,7 +120,7 @@ let aux_hupd_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
 
 
 [@"substitute"]
-val hupd_16: buf:huint32_p{length buf = 16} ->
+val hupd_16: buf:uint32_p{length buf = 16} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
   v8:H32.t -> v9:H32.t -> v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t ->
   Stack unit (requires (fun h -> live h buf))
@@ -136,7 +136,7 @@ let hupd_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
 
 
 [@"substitute"]
-private val aux_hupd_64: buf:huint32_p{length buf = 64} ->
+private val aux_hupd_64: buf:uint32_p{length buf = 64} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
   v8:H32.t -> v9:H32.t ->
   v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t -> v16:H32.t -> v17:H32.t ->
@@ -186,7 +186,7 @@ let aux_hupd_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v1
 
 
 [@"substitute"]
-val hupd_64: buf:huint32_p{length buf = 64} ->
+val hupd_64: buf:uint32_p{length buf = 64} ->
   v0:H32.t -> v1:H32.t -> v2:H32.t -> v3:H32.t -> v4:H32.t -> v5:H32.t -> v6:H32.t -> v7:H32.t ->
   v8:H32.t -> v9:H32.t ->
   v10:H32.t -> v11:H32.t -> v12:H32.t -> v13:H32.t -> v14:H32.t -> v15:H32.t -> v16:H32.t -> v17:H32.t ->
@@ -213,7 +213,7 @@ let hupd_64 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v1
 
 
 [@"substitute"]
-val hupd64_4: buf:huint64_p{length buf = 4} ->
+val hupd64_4: buf:uint64_p{length buf = 4} ->
   v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t ->
   Stack unit (requires (fun h -> live h buf))
              (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
@@ -229,7 +229,7 @@ let hupd64_4 buf v0 v1 v2 v3 =
 
 
 [@"substitute"]
-private val aux_hupd64_8: buf:huint64_p{length buf = 8} ->
+private val aux_hupd64_8: buf:uint64_p{length buf = 8} ->
   v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
   Stack unit (requires (fun h -> live h buf))
              (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
@@ -246,7 +246,7 @@ let aux_hupd64_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
 
 
 [@"substitute"]
-val hupd64_8: buf:huint64_p{length buf = 8} ->
+val hupd64_8: buf:uint64_p{length buf = 8} ->
   v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
   Stack unit (requires (fun h -> live h buf))
              (ensures  (fun h0 _ h1 -> live h1 buf /\ modifies_1 buf h0 h1
@@ -260,7 +260,7 @@ let hupd64_8 buf v0 v1 v2 v3 v4 v5 v6 v7 =
 
 
 [@"substitute"]
-private val aux_hupd64_16: buf:huint64_p{length buf = 16} ->
+private val aux_hupd64_16: buf:uint64_p{length buf = 16} ->
   v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
   v8:H64.t -> v9:H64.t -> v10:H64.t -> v11:H64.t -> v12:H64.t -> v13:H64.t -> v14:H64.t -> v15:H64.t ->
   Stack unit (requires (fun h -> live h buf))
@@ -280,7 +280,7 @@ let aux_hupd64_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
 
 
 [@"substitute"]
-val hupd64_16: buf:huint64_p{length buf = 16} ->
+val hupd64_16: buf:uint64_p{length buf = 16} ->
   v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
   v8:H64.t -> v9:H64.t -> v10:H64.t -> v11:H64.t -> v12:H64.t -> v13:H64.t -> v14:H64.t -> v15:H64.t ->
   Stack unit (requires (fun h -> live h buf))
@@ -296,7 +296,7 @@ let hupd64_16 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
 
 
  [@"substitute"]
-private val aux_hupd64_80: buf:huint64_p{length buf = 80} ->
+private val aux_hupd64_80: buf:uint64_p{length buf = 80} ->
   v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
   v8:H64.t -> v9:H64.t ->
   v10:H64.t -> v11:H64.t -> v12:H64.t -> v13:H64.t -> v14:H64.t -> v15:H64.t -> v16:H64.t -> v17:H64.t ->
@@ -358,7 +358,7 @@ let aux_hupd64_80 buf v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 
 #reset-options "--max_fuel 0 --z3rlimit 25"
 
 [@"substitute"]
-val hupd64_80: buf:huint64_p{length buf = 80} ->
+val hupd64_80: buf:uint64_p{length buf = 80} ->
   v0:H64.t -> v1:H64.t -> v2:H64.t -> v3:H64.t -> v4:H64.t -> v5:H64.t -> v6:H64.t -> v7:H64.t ->
   v8:H64.t -> v9:H64.t ->
   v10:H64.t -> v11:H64.t -> v12:H64.t -> v13:H64.t -> v14:H64.t -> v15:H64.t -> v16:H64.t -> v17:H64.t ->
