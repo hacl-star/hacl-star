@@ -133,6 +133,8 @@ static int Wrapper_Chacha20_Init(EVP_CIPHER_CTX *ctx, const unsigned char *key, 
 static int Wrapper_Chacha20_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out, const unsigned char *in, size_t len) {
   uint8_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
   Chacha20_chacha20(out, (uint8_t *) in, len, my_ctx, my_ctx + CHACHA20_KEY_SIZE, 0);
+  // Replace with line below for the vectorized version.
+  // Chacha20_Vec128_chacha20(out, (uint8_t *) in, len, my_ctx, my_ctx + CHACHA20_KEY_SIZE, 0);
   return 1;
 }
 #endif // IMPL_HACL
