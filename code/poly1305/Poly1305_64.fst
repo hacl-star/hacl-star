@@ -123,17 +123,4 @@ val finish:
 let finish st mac k =
   I.poly1305_finish st mac k
 
-
-val crypto_onetimeauth:
-  output:uint8_p{length output = 16} ->
-  input:uint8_p{disjoint input output} ->
-  len:U64.t{U64.v len < pow2 32 /\ U64.v len = length input} ->
-  k:uint8_p{disjoint output k /\ length k = 32} ->
-  Stack unit
-    (requires (fun h -> live h output /\ live h input /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1 /\ live h0 input /\ live h0 k
-      /\ (let mac     = Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 output) in
-         let message = Hacl.Spec.Endianness.reveal_sbytes (as_seq h0 input) in
-         let key     = Hacl.Spec.Endianness.reveal_sbytes (as_seq h0 k) in
-         mac == Spec.Poly1305.poly1305 message key)))
 let crypto_onetimeauth output input len k = Hacl.Standalone.Poly1305_64.crypto_onetimeauth output input len k

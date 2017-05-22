@@ -19,6 +19,8 @@ open Hacl.Spec.Bignum.AddAndMultiply
 open Hacl.Spe.Poly1305_64
 open Hacl.Bignum.AddAndMultiply
 
+include Hacl.Impl.Poly1305_64.State
+
 module H8   = Hacl.UInt8
 module Limb = Hacl.Bignum.Limb
 module Wide = Hacl.Bignum.Wide
@@ -38,18 +40,12 @@ let wordB : Type0  = b:uint8_p{length b <= 16}
 let wordB_16 : Type0 = b:uint8_p{length b = 16}
 
 
-noeq type poly1305_state =  {r:bigint; h:bigint}
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#reset-options "--max_fuel 0 --z3rlimit 5"
 
 (** From the current memory state, returns the integer corresponding to a elemB, (before
    computing the modulo)  *)
 private val sel_int: h:mem -> b:elemB{live h b} -> GTot nat
 private let sel_int h b = eval h b
-
-let live_st m (st:poly1305_state) : Type0 =
-  live m st.h /\ live m st.r /\ disjoint st.h st.r
 
 
 (* ############################################################################# *)
@@ -57,7 +53,7 @@ let live_st m (st:poly1305_state) : Type0 =
 (* ############################################################################# *)
 
 
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 0"
 
 [@"substitute"]
 val upd_3: b:felem -> b0:limb -> b1:limb -> b2:limb ->
