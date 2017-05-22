@@ -79,6 +79,8 @@ all-ct:
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
 	$(FSTARB) $^
+%.fsti-verify: %.fsti
+	$(FSTARB) $^
 
 all-ver: $(addsuffix -verify, $(X25519_FILES))
 
