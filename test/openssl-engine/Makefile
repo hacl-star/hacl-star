@@ -18,6 +18,7 @@ endif
 CFLAGS=-I$(OPENSSL_HOME)/include -L$(OPENSSL_HOME) -I$(KREMLIN_HOME)/kremlib \
   -shared -Wall -Wno-unused-variable -Wno-parentheses -O3 -flto $(PIC) \
   -Wno-unused-but-set-variable -Wno-unknown-warning-option \
+  -Wno-tautological-constant-out-of-range-compare \
   -I$(OPENSSL_HOME) \
   -I$(CURVE_HOME) -I$(CHACHA_HOME) -I$(CHACHA_HOME)/.. -I$(POLY_HOME) -I$(AEAD_HOME) \
   -I$(SHA_HOME)
@@ -54,7 +55,8 @@ OpenSSLEngine.$(SO): HACLEngine.c
 HACL_IMPL_FILES= $(CURVE_HOME)/Curve25519.c $(CHACHA_HOME)/Chacha20.c \
   $(POLY_HOME)/AEAD_Poly1305_64.c $(POLY_HOME)/Poly1305_64.c \
   $(AEAD_HOME)/Chacha20Poly1305.c $(AEAD_HOME)/Hacl_Policies.c \
-  $(SHA_HOME)/SHA2_512.c $(SHA_HOME)/SHA2_256.c
+  $(SHA_HOME)/SHA2_512.c $(SHA_HOME)/SHA2_256.c \
+  $(CHACHA_HOME)/Chacha20_Vec128.c
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@

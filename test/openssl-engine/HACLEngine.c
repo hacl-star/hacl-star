@@ -23,6 +23,7 @@
 #include "Poly1305_64.h"
 #undef Hacl_Impl_Poly1305_64_poly1305_state
 #include "Chacha20.h"
+#include "Chacha20_Vec128.h"
 #include "Chacha20Poly1305.h"
 #define K___uint32_t_uint8_t_ whateveer
 #include "SHA2_256.h"
@@ -187,7 +188,7 @@ static int hacl_sha2_256_cleanup(EVP_MD_CTX *ctx) {
 // In 64-bit words
 #define HACL_SHA2_512_STATE_SIZE 169
 // In bytes
-#define HACL_SHA2_512_BLOCK_SIZE_B 16
+#define HACL_SHA2_512_BLOCK_SIZE_B 128
 
 static int hacl_sha2_512_init(EVP_MD_CTX *ctx) {
   uint64_t *state = EVP_MD_CTX_md_data(ctx);
