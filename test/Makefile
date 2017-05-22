@@ -11,16 +11,19 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
+###########################################################
+# FIXME: temporarily disable extraction in CI for testing #
+###########################################################
 all:
 	# Ugly hack because we can't encode the fact that the generation of C
 	# files depends on i) Kremlin.native ii) the out.krml files iii) the
 	# KREMLIN_ARGS environment variable.
-	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error" ; fi
-	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error" ; fi
+#	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error" ; fi
+#	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error" ; fi
 	# JP FIXME XXX why was this disabled?
-	$(MAKE) extract-c OTHERFLAGS="--trace_error"
+#	$(MAKE) extract-c-code OTHERFLAGS="--trace_error"
 	$(MAKE) ct verify OTHERFLAGS="--trace_error"
-	$(MAKE) -C openssl-engine
+#	$(MAKE) -C openssl-engine
 
 travis:
 	$(MAKE) extract-c-code
