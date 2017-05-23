@@ -205,16 +205,11 @@ let subm_conditional z x =
   pop_frame()
 
 
-private
-let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
-                                               (ensures  (a * b < c * c))
-  = ()
-
 inline_for_extraction
 let op_Star_Star (x:h64{v x < 0x100000000000000}) (y:h64{v y < 0x100000000000000}) :
   Tot (z:Hacl.UInt128.t{Hacl.UInt128.v z < 0x10000000000000000000000000000 /\ Hacl.UInt128.v z = v x * v y})
   = assert_norm(0x100000000000000 * 0x100000000000000 = 0x10000000000000000000000000000);
-  lemma_mul_ineq (v x) (v y) 0x100000000000000;
+  Spec.lemma_mul_ineq (v x) (v y) 0x100000000000000;
   Hacl.UInt128.mul_wide x y
 
 inline_for_extraction
@@ -634,17 +629,17 @@ let div_264 out t =
   Hacl.Lib.Create64.make_h64_5 out z0 z1 z2 z3 z4
 
 
-private
-let lemma_mul_ineq_ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < x /\ b < y)) (ensures (a * b < x * y))
-  = ()
+(* private *)
+(* let lemma_mul_ineq_ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < x /\ b < y)) (ensures (a * b < x * y)) *)
+(*   = () *)
 
-private
-let lemma_mul_ineq__ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < pow2 x /\ b < pow2 y)) (ensures (a * b < pow2 (x+y)))
-  = lemma_mul_ineq_ a b (pow2 x) (pow2 y);
-    Math.Lemmas.pow2_plus x y
+(* private *)
+(* let lemma_mul_ineq__ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < pow2 x /\ b < pow2 y)) (ensures (a * b < pow2 (x+y))) *)
+(*   = lemma_mul_ineq_ a b (pow2 x) (pow2 y); *)
+(*     Math.Lemmas.pow2_plus x y *)
 
-private 
-let lemma_ineq (a:nat) (b:nat) : Lemma (requires (a < b)) (ensures (a <= b - 1)) = ()
+(* private  *)
+(* let lemma_ineq (a:nat) (b:nat) : Lemma (requires (a < b)) (ensures (a <= b - 1)) = () *)
 
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
@@ -670,7 +665,7 @@ val barrett_reduction__1:
          let q = Spec.div_248 t in
          Math.Lemmas.lemma_div_lt (eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
          assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
-         lemma_mul_ineq__ (eval_q q) (eval_q Spec.mu) 264 264;
+         Spec.lemma_mul_ineq__ (eval_q q) (eval_q Spec.mu) 264 264;
          let qmu = Spec.mul_5 q Spec.mu in
          let qmu' = Spec.carry qmu in
          let qmu_264 = Spec.div_264 qmu' in
@@ -692,7 +687,7 @@ let barrett_reduction__1 qmu t mu tmp =
   Math.Lemmas.lemma_div_lt (let t = reveal_h64s (as_seq h0' t) in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
   let h2 = ST.get() in
   assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
-  lemma_mul_ineq__ (eval_q (reveal_h64s (as_seq h2 q))) (eval_q (reveal_h64s (as_seq h2 mu))) 264 264;
+  Spec.lemma_mul_ineq__ (eval_q (reveal_h64s (as_seq h2 q))) (eval_q (reveal_h64s (as_seq h2 mu))) 264 264;
   mul_5 qmu q mu;
   let h3 = ST.get() in
   carry qmu' qmu;
@@ -728,6 +723,7 @@ val barrett_reduction__2:
       /\ modifies_1 tmp h0 h1
     ))
 
+
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 let barrett_reduction__2 t m tmp =
@@ -745,6 +741,7 @@ let barrett_reduction__2 t m tmp =
   let h6 = ST.get() in
   no_upd_lemma_1 h5 h6 qmul r;
   sub_mod_264 s r qmul
+
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
@@ -768,6 +765,7 @@ val barrett_reduction__:
       /\ reveal_h64s (as_seq h1 z) == Spec.barrett_reduction (reveal_h64s (as_seq h0 t))
       /\ modifies_2 z tmp h0 h1
     ))
+
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
@@ -907,7 +905,7 @@ let mul_modq out x y =
   no_upd_lemma_0 h3 h4 y;
   no_upd_lemma_0 h3 h4 out;
   no_upd_lemma_0 h3 h4 z';
-  lemma_mul_ineq__ (eval_q (reveal_h64s (as_seq h0 x))) (eval_q (reveal_h64s (as_seq h0 y))) 256 256;
+  Spec.lemma_mul_ineq__ (eval_q (reveal_h64s (as_seq h0 x))) (eval_q (reveal_h64s (as_seq h0 y))) 256 256;
   assert(as_seq h4 x == as_seq h0 x);
   assert(as_seq h4 y == as_seq h0 y);
   mul_5 z x y;

@@ -10,22 +10,18 @@ module U64 = FStar.UInt64
 #reset-options "--max_fuel 0"
 
 
-private
 let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
                                                (ensures  (a * b < c * c))
   = assert(c > 0);
     ()
 
-private
 let lemma_mul_ineq_ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < x /\ b < y)) (ensures (a * b < x * y))
   = ()
 
-private
 let lemma_mul_ineq__ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < pow2 x /\ b < pow2 y)) (ensures (a * b < pow2 (x+y)))
   = lemma_mul_ineq_ a b (pow2 x) (pow2 y);
     Math.Lemmas.pow2_plus x y
 
-private 
 let lemma_ineq (a:nat) (b:nat) : Lemma (requires (a < b)) (ensures (a <= b - 1)) = ()
 
 let qelem_56 = x:qelem{v x.[0] < 0x100000000000000 /\ v x.[1] < 0x100000000000000 /\
