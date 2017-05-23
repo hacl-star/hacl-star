@@ -11,6 +11,7 @@ open Hacl.Hash.SHA2_512
 open Hacl.Impl.SHA512.Ed25519_1
 open Hacl.Impl.SHA512.Ed25519_2
 
+let op_String_Access h (b:buffer Hacl.UInt8.t{live h b}) = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
@@ -53,7 +54,7 @@ val sha512_pre_msg_2:
     (requires (fun h -> live h hash /\ live h prefix /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 hash /\ live h0 prefix /\ live h0 input /\
       live h1 hash /\ live h1 prefix /\ live h1 input /\ modifies_1 hash h0 h1 /\
-      as_seq h1 hash == Spec.SHA2_512.hash FStar.Seq.(as_seq h0 prefix @| as_seq h0 input)))
+      h1.[hash] == Spec.SHA2_512.hash FStar.Seq.(h0.[prefix] @| h0.[input])))
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
@@ -65,7 +66,7 @@ let sha512_pre_msg_2 h prefix input len =
   lemma_eq_intro (as_seq h0 input2) (slice (as_seq h0 input) 96 (v len));
   push_frame();
   let h1 = ST.get() in
-  let block = create 0uy 128ul in
+  let block = create (Hacl.Cast.uint8_to_sint8 0uy) 128ul in
   let h2 = ST.get() in
   no_upd_lemma_0 h1 h2 input1;
   no_upd_lemma_0 h1 h2 input2;
@@ -90,7 +91,7 @@ val sha512_pre_msg:
     (requires (fun h -> live h hash /\ live h prefix /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 hash /\ live h0 prefix /\ live h0 input /\
       live h1 hash /\ live h1 prefix /\ live h1 input /\ modifies_1 hash h0 h1 /\
-      as_seq h1 hash == Spec.SHA2_512.hash FStar.Seq.(as_seq h0 prefix @| as_seq h0 input)))
+      h1.[hash] == Spec.SHA2_512.hash FStar.Seq.(h0.[prefix] @| h0.[input])))
 
 
 let sha512_pre_msg h prefix input len =
@@ -108,7 +109,7 @@ val sha512_pre_pre2_msg_2:
     (requires (fun h -> live h hash /\ live h prefix /\ live h prefix2 /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 hash /\ live h0 prefix /\ live h0 prefix2 /\ live h0 input /\
       live h1 hash /\ live h1 prefix /\ live h1 prefix2 /\ live h1 input /\ modifies_1 hash h0 h1 /\
-      as_seq h1 hash == Spec.SHA2_512.hash FStar.Seq.(as_seq h0 prefix @| as_seq h0 prefix2 @| as_seq h0 input)))
+      h1.[hash] == Spec.SHA2_512.hash FStar.Seq.(h0.[prefix] @| h0.[prefix2] @| h0.[input])))
 
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
@@ -121,7 +122,7 @@ let sha512_pre_pre2_msg_2 h prefix prefix2 input len =
   lemma_eq_intro (as_seq h0 input2) (slice (as_seq h0 input) 64 (v len));
   push_frame();
   let h1 = ST.get() in
-  let block = create 0uy 128ul in
+  let block = create (Hacl.Cast.uint8_to_sint8 0uy) 128ul in
   let h2 = ST.get() in
   no_upd_lemma_0 h1 h2 prefix;
   no_upd_lemma_0 h1 h2 prefix2;
@@ -149,7 +150,7 @@ val sha512_pre_pre2_msg:
     (requires (fun h -> live h hash /\ live h prefix /\ live h prefix2 /\ live h input))
     (ensures (fun h0 _ h1 -> live h0 hash /\ live h0 prefix /\ live h0 input /\ live h0 prefix2 /\
       live h1 hash /\ live h1 prefix /\ live h1 input /\ modifies_1 hash h0 h1 /\
-      as_seq h1 hash == Spec.SHA2_512.hash (as_seq h0 prefix @| as_seq h0 prefix2 @| as_seq h0 input)))
+      h1.[hash] == Spec.SHA2_512.hash (h0.[prefix] @| h0.[prefix2] @| h0.[input])))
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 

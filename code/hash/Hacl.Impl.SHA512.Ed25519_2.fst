@@ -10,6 +10,7 @@ open Hacl.Hash.SHA2_512
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+let op_String_Access h (b:buffer Hacl.UInt8.t{live h b}) = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 val hash_block_and_rest:
   out:buffer Hacl.UInt8.t{length out = 64} ->
@@ -19,7 +20,7 @@ val hash_block_and_rest:
   Stack unit
     (requires (fun h -> live h out /\ live h block /\ live h msg))
     (ensures (fun h0 _ h1 -> live h0 block /\ live h0 msg /\ live h1 out /\ modifies_1 out h0 h1 /\
-      as_seq h1 out == Spec.SHA2_512.hash (as_seq h0 block @| as_seq h0 msg)))
+      h1.[out] == Spec.SHA2_512.hash (h0.[block] @| h0.[msg])))
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
@@ -32,7 +33,7 @@ let hash_block_and_rest out block msg len =
   UInt.logand_mask (UInt32.v len) 7;
   assert(UInt32.v nblocks = UInt32.v len / 128);
   assert(UInt64.v rest = UInt32.v len % 128);
-  let st      = create 0uL 169ul in
+  let st      = create (Hacl.Cast.uint64_to_sint64 0uL) 169ul in
   let h1 = ST.get() in
   no_upd_lemma_0 h0 h1 block;
   no_upd_lemma_0 h0 h1 msg;
@@ -50,6 +51,6 @@ let hash_block_and_rest out block msg len =
   let h5 = ST.get() in
   finish st out;
   let h6 = ST.get() in
-  Spec.SHA2_512.(lemma_hash_prepend h_0 (as_seq h0 block) (as_seq h0 msg));
+  Spec.SHA2_512.(lemma_hash_prepend h_0 (h0.[block]) (h0.[msg]));
   pop_frame()
 
