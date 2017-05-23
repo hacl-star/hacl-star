@@ -22,7 +22,7 @@ all:
 #	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error" ; fi
 	# JP FIXME XXX why was this disabled?
 #	$(MAKE) extract-c-code OTHERFLAGS="--trace_error"
-	$(MAKE) ct verify OTHERFLAGS="--trace_error"
+	$(MAKE) ct verify-code OTHERFLAGS="--trace_error --z3rlimit_factor 3"
 #	$(MAKE) -C openssl-engine
 
 travis:
