@@ -165,7 +165,7 @@ let mul_modp_sqrt_m1 x =
   pop_frame()
 
 
-#reset-options "--max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@ "substitute"]
 private

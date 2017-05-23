@@ -352,23 +352,28 @@ let salsa20_core log k st ctr =
   let c1 = uint32_to_sint32 (high32_of_u64 ctr) in
   let h1 = ST.get() in
   st.(8ul) <- c0;
-  let h_ = ST.get() in
-  cut (as_seq h_ st == Seq.upd (as_seq h1 st) 8 (c0));
+  let h' = ST.get() in
+  cut (as_seq h' st == Seq.upd (as_seq h1 st) 8 (c0));
   st.(9ul) <- c1;
   let h2 = ST.get() in
-  cut (as_seq h2 st == Seq.upd (as_seq h_ st) 9 (c1));
+  cut (as_seq h2 st == Seq.upd (as_seq h' st) 9 (c1));
   cut (get h2 st 8 == c0 /\ get h2 st 9 == c1);
   cut (let s = as_seq h0 st in let s' = as_seq h2 st in s' == Seq.upd (Seq.upd s 8 c0) 9 c1);
   lemma_invariant (reveal_h32s (as_seq h0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (uint64_to_sint64 (u64_of_u32s (h32_to_u32 (get h0 st 8)) (h32_to_u32 (get h0 st 9)))) (uint64_to_sint64 ctr);
   lemma_u64_of_u32s (h32_to_u32 c0) (h32_to_u32 c1);
   cut (invariant log h2 st);
   copy_state k st;
+  let h3 = ST.get() in
+  no_upd_lemma_1 h2 h3 k st;
   rounds k;
+  let h4 = ST.get() in
+  no_upd_lemma_1 h3 h4 k st;
   sum_states k st;
-  let h_3 = ST.get() in
+  let h5 = ST.get() in
+  no_upd_lemma_1 h4 h5 k st;
   let h = ST.get() in
-  cut (reveal_h32s (as_seq h k) == salsa20_core (reveal_h32s (as_seq h st)));
-  Ghost.elift1 (fun l -> match l with | MkLog k n -> MkLog k n) log
+  Seq.lemma_eq_intro (reveal_h32s (as_seq h k)) (salsa20_core (reveal_h32s (as_seq h st)));
+  log
 
 
 [@ "c_inline"]
@@ -416,6 +421,21 @@ let alloc () =
   create (uint32_to_sint32 0ul) 16ul
 
 
+(* val intro_log: *)
+(*   h:HyperStack.mem -> *)
+(*   k:uint8_p{length k = 32 /\ live h k} -> *)
+(*   n:uint8_p{length n = 8 /\ live h n} -> *)
+(*   Tot (l:log_t{as_seq h k == (Ghost.reveal l).k /\ as_seq h n == (Ghost.reveal l).n}) *)
+(* let intro_log h k n = *)
+(*   let log = *)
+(*   Ghost.elift2 (fun (k:uint8_p{length k = 32 /\ live h k}) (n:uint8_p{length n = 8 /\ live h n}) -> MkLog (reveal_sbytes (as_seq h k)) (reveal_sbytes (as_seq h n))) (Ghost.hide k) (Ghost.hide n) in *)
+(*   log *)
+(*   (\* assert(Ghost.reveal log == (fun (k:uint8_p{length k = 32 /\ live h k}) (n:uint8_p{length n = 8 /\ live h n}) -> MkLog (reveal_sbytes (as_seq h k)) (reveal_sbytes (as_seq h n))) k n); *\) *)
+(*   (\* assert((Ghost.reveal log).k == as_seq h k); admit() *\) *)
+(*   (\* Seq.lemma_eq_intro (as_seq h k) (Ghost.reveal log).k; admit() *\) *)
+
+
+
 [@ "c_inline"]
 val init:
   st:state ->
@@ -435,6 +455,7 @@ let init st k n =
   lemma_state_counter (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) 0;
   cut (reveal_h32s (as_seq h st) == Spec.setup (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) 0);
   Ghost.elift2 (fun (k:uint8_p{length k = 32 /\ live h k}) (n:uint8_p{length n = 8 /\ live h n}) -> MkLog (reveal_sbytes (as_seq h k)) (reveal_sbytes (as_seq h n))) (Ghost.hide k) (Ghost.hide n)
+
 
 private
 val lemma_salsa20_counter_mode_1:
