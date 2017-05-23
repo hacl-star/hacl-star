@@ -48,8 +48,7 @@ X25519_SPECIFIC= \
 	Curve25519.fst
 
 # Files that are too slow and for which verification speed must improve
-SLOW=Hacl.Spec.Bignum.Fsquare.fst \
-	Hacl.Spec.Bignum.Modulo.fst
+SLOW=Hacl.Spec.Bignum.Fsquare.fst
 
 # Files that still have errors
 TODO=

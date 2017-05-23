@@ -9,6 +9,25 @@ module U64 = FStar.UInt64
 
 #reset-options "--max_fuel 0"
 
+
+private
+let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
+                                               (ensures  (a * b < c * c))
+  = assert(c > 0);
+    ()
+
+private
+let lemma_mul_ineq_ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < x /\ b < y)) (ensures (a * b < x * y))
+  = ()
+
+private
+let lemma_mul_ineq__ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < pow2 x /\ b < pow2 y)) (ensures (a * b < pow2 (x+y)))
+  = lemma_mul_ineq_ a b (pow2 x) (pow2 y);
+    Math.Lemmas.pow2_plus x y
+
+private 
+let lemma_ineq (a:nat) (b:nat) : Lemma (requires (a < b)) (ensures (a <= b - 1)) = ()
+
 let qelem_56 = x:qelem{v x.[0] < 0x100000000000000 /\ v x.[1] < 0x100000000000000 /\
                      v x.[2] < 0x100000000000000 /\ v x.[3] < 0x100000000000000 /\
                      v x.[4] < 0x100000000000000}
@@ -20,6 +39,7 @@ let m: m:qelem_56{eval_q m == 0x1000000000000000000000000000000014def9dea2f79cd6
 let mu: mu:qelem_56{eval_q mu == 0xfffffffffffffffffffffffffffffffeb2106215d086329a7ed9ce5a30a2c131b} =
   Seq.Create.create_5 0x9ce5a30a2c131buL 0x215d086329a7eduL 0xffffffffeb2106uL 0xffffffffffffffuL
 	             0x00000fffffffffuL
+
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
@@ -201,12 +221,7 @@ let subm_conditional r =
   choose r z b
 
 
-#reset-options "--max_fuel 0 --z3rlimit 10"
-
-private
-let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
-                                               (ensures  (a * b < c * c))
-  = ()
+#reset-options "--max_fuel 0 --z3rlimit 50"
 
 let op_Star_Star (x:u64{v x < 0x100000000000000}) (y:u64{v y < 0x100000000000000}) :
   Tot (z:UInt128.t{UInt128.v z < 0x10000000000000000000000000000 /\ UInt128.v z = v x * v y})
@@ -574,18 +589,6 @@ let div_264 t =
 
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
-
-private
-let lemma_mul_ineq_ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < x /\ b < y)) (ensures (a * b < x * y))
-  = ()
-
-private
-let lemma_mul_ineq__ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < pow2 x /\ b < pow2 y)) (ensures (a * b < pow2 (x+y)))
-  = lemma_mul_ineq_ a b (pow2 x) (pow2 y);
-    Math.Lemmas.pow2_plus x y
-
-private 
-let lemma_ineq (a:nat) (b:nat) : Lemma (requires (a < b)) (ensures (a <= b - 1)) = ()
 
 
 val barrett_reduction:
