@@ -1,7 +1,16 @@
 module Hacl.Bignum25519
 
 
+open FStar.Mul
+
 #reset-options "--max_fuel 0 --z3rlimit 100"
+
+private let lemma_distributivity_5 x a b c d e : Lemma (x * (a + b + c + d + e) = x * a + x * b + x * c + x * d + x * e) = ()
+
+private let lemma_times_2 a b c d e : Lemma
+  (2 * a + pow2 51 * (2 * b) + pow2 102 * (2 * c) + pow2 153 * (2 * d) + pow2 204 * (2 * e)
+   = 2 * (a + pow2 51 * (b) + pow2 102 * (c) + pow2 153 * (d) + pow2 204 * (e)))
+  = lemma_distributivity_5 2 a (pow2 51 * b) (pow2 102 * c) (pow2 153 * d) (pow2 204 * e)
 
 let red_51 s = Hacl.Spec.EC.AddAndDouble.(bounds s p51 p51 p51 p51 p51)
 let red_513 s = Hacl.Spec.EC.AddAndDouble.red_513 s
@@ -43,8 +52,6 @@ open Hacl.Spec.EC.AddAndDouble
 
 inline_for_extraction let mask_51 : p:Hacl.UInt64.t{Hacl.UInt64.v p = pow2 51 - 1} = assert_norm(pow2 51 - 1 = 0x7ffffffffffff);
   Hacl.Cast.uint64_to_sint64 0x7ffffffffffffuL
-
-open FStar.Mul
 
 private val lemma_carry_local: x:nat -> y:nat -> n:nat -> Lemma
   (pow2 n * x + pow2 (n+51) * y = pow2 n * (x % (pow2 51)) + pow2 (n+51) * ((x / pow2 51) + y))
@@ -183,13 +190,6 @@ let fmul out a b =
   Hacl.Bignum.fmul out a b
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
-
-private let lemma_distributivity_5 x a b c d e : Lemma (x * (a + b + c + d + e) = x * a + x * b + x * c + x * d + x * e) = ()
-
-private let lemma_times_2 a b c d e : Lemma
-  (2 * a + pow2 51 * (2 * b) + pow2 102 * (2 * c) + pow2 153 * (2 * d) + pow2 204 * (2 * e)
-   = 2 * (a + pow2 51 * (b) + pow2 102 * (c) + pow2 153 * (d) + pow2 204 * (e)))
-  = lemma_distributivity_5 2 a (pow2 51 * b) (pow2 102 * c) (pow2 153 * d) (pow2 204 * e)
 
 open Hacl.Cast
 
