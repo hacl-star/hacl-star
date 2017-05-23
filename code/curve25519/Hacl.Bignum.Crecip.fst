@@ -49,7 +49,7 @@ private let fmul output a b =
   fmul output a b
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 50"
 
 [@"substitute"]
 private val fsquare_times:

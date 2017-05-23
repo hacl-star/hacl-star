@@ -22,7 +22,6 @@ module Poly = Hacl.Standalone.Poly1305_64
        	      
 
 (* Type Aliases *)
-type uint8_p = Buffer.buffer Hacl.UInt8.t
 type key = k:uint8_p{length k = 32}
 
 type state = I.poly1305_state

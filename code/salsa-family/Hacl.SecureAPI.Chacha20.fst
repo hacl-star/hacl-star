@@ -8,7 +8,7 @@ open Hacl.Lib.LoadStore32
 open Hacl.Impl.Chacha20
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 [@ "substitute"]
 val setup:

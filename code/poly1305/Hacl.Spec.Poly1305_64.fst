@@ -671,7 +671,7 @@ private let lemma_mod_distr acc block r0 =
   lemma_mod_plus_distr_l block (acc % prime) prime
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0  --z3rlimit 100"
 
 val poly1305_update_last_spec:
   st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
@@ -697,7 +697,7 @@ let poly1305_update_last_spec st m rem' =
   acc
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val poly1305_finish_spec':
   acc:seqelem{bounds acc p44 p44 p42} ->

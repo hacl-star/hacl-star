@@ -6,7 +6,7 @@ module Hacl.Lib.Create
 open FStar.Buffer
 open Seq.Create
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let h32 = Hacl.UInt32.t
 

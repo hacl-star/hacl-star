@@ -10,7 +10,7 @@ open Hacl.Spec.Bignum.Fsum
 
 module U32 = FStar.UInt32
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 let red_c h (f:felem) ctr = live h f /\ red (as_seq h f) ctr
 

@@ -23,7 +23,7 @@ module U32  = FStar.UInt32
 module U64  = FStar.UInt64
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0  --z3rlimit 20"
 
 val poly1305_init_spec: key:Seq.seq H8.t{Seq.length key = 16} ->
   GTot (st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)
@@ -33,7 +33,7 @@ let poly1305_init_spec key =
   poly1305_init_spec key
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 50"
+#reset-options "--initial_fuel 0 --max_fuel 0  --z3rlimit 50"
 
 private val lemma_mod_distr: acc0:nat -> block:nat -> r0:nat -> Lemma
   (((acc0 + block) * r0) % prime = (((acc0 % prime) +@ (block % prime)) *@ (r0 % prime)))
@@ -55,7 +55,7 @@ private let lemma_mod_distr_seq acc block r =
   lemma_mod_distr acc0 block r0
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0  --z3rlimit 100"
 
 val poly1305_update_spec: st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
   m:word_16 ->
@@ -87,7 +87,7 @@ val poly1305_finish_spec:
        if Seq.length m >= 1
        then reveal_sbytes mac == finish ((acc +@ m') *@ r) (reveal_sbytes key_s)
        else reveal_sbytes mac == finish acc (reveal_sbytes key_s)) })
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 let poly1305_finish_spec st m rem' key_s =
   if Seq.length m >= 1 then (
     lemma_mod_distr (seval (MkState?.h st)) (hlittle_endian m + pow2 (8*length m)) (seval (MkState?.r st))

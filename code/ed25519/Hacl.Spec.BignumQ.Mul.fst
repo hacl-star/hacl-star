@@ -7,7 +7,7 @@ open Hacl.Spec.BignumQ.Eval
 
 module U64 = FStar.UInt64
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--max_fuel 0"
 
 let qelem_56 = x:qelem{v x.[0] < 0x100000000000000 /\ v x.[1] < 0x100000000000000 /\
                      v x.[2] < 0x100000000000000 /\ v x.[3] < 0x100000000000000 /\
@@ -21,7 +21,7 @@ let mu: mu:qelem_56{eval_q mu == 0xfffffffffffffffffffffffffffffffeb2106215d0863
   Seq.Create.create_5 0x9ce5a30a2c131buL 0x215d086329a7eduL 0xffffffffeb2106uL 0xffffffffffffffuL
 	             0x00000fffffffffuL
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val choose:
   x:qelem ->
@@ -88,7 +88,7 @@ let shiftl_56 (b:u64{b == 0uL \/ b == 1uL}) :
   = assert_norm(pow2 56 = 0x100000000000000);
     b <<^ 56ul
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val subm_step:
   x:u64{v x < 0x100000000000000} ->
@@ -201,7 +201,7 @@ let subm_conditional r =
   choose r z b
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --z3rlimit 10"
 
 private
 let lemma_mul_ineq (a:nat) (b:nat) (c:nat) : Lemma (requires (a < c /\ b < c))
@@ -229,7 +229,7 @@ let split_56 x =
   carry, t
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val mod_40: x:UInt128.t -> Tot (z:U64.t{v z = UInt128.v x % (pow2 40)})
 let mod_40 x =
@@ -244,7 +244,7 @@ val low_mul_5:
   x:qelem_56 ->
   y:qelem_56 ->
   Tot (z:qelem_56{eval_q z = (eval_q x * eval_q y) % pow2 264})
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --z3rlimit 500"
 let low_mul_5 x y =
   assert_norm(pow2 128  = 0x100000000000000000000000000000000);
   assert_norm(pow2 40   = 0x10000000000);
@@ -310,7 +310,7 @@ val mul_5:
     /\ UInt128.v z.[6] < 0x30000000000000000000000000000
     /\ UInt128.v z.[7] < 0x20000000000000000000000000000
     /\ UInt128.v z.[8] < 0x10000000000000000000000000000 })    
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 let mul_5 x y =
   assert_norm(pow2 128  = 0x100000000000000000000000000000000);
   assert_norm(pow2 40   = 0x10000000000);
@@ -386,7 +386,7 @@ let carry_step x y =
   t, FStar.UInt128.add y carry
 
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 let all_10_bellow_56 t : GTot Type0 =
   length t = 10
@@ -573,7 +573,7 @@ let div_264 t =
   z
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 private
 let lemma_mul_ineq_ (a:nat) (b:nat) (x:nat) (y:nat) : Lemma (requires (a < x /\ b < y)) (ensures (a * b < x * y))

@@ -9,7 +9,7 @@ open Hacl.Spec.Bignum
 open Hacl.Spec.EC.Point
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 type uint8_s = Seq.seq Hacl.UInt8.t
 

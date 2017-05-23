@@ -24,7 +24,8 @@ let uint8_p = buffer H8.t
 
 type state = b:Buffer.buffer h32{length b = 16}
 
-private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
+private
+inline_for_extraction let ( <<< ) (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
@@ -91,8 +92,7 @@ val ivsetup:
     (ensures  (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 iv
       /\ (let s = reveal_h32s (as_seq h1 st) in
          let iv = reveal_sbytes (as_seq h0 iv) in
-         s == Spec.Lib.uint32s_from_le 3 iv)
-    ))
+         s == Spec.Lib.uint32s_from_le 3 iv) ))
 [@ "substitute"]
 let ivsetup st iv =
   uint32s_from_le_bytes st iv 3ul
@@ -107,8 +107,7 @@ val ctrsetup:
     (requires (fun h -> live h st))
     (ensures  (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1
       /\ (let s = as_seq h1 st in
-         s == Spec.Lib.singleton (uint32_to_sint32 ctr))
-    ))
+         s == Spec.Lib.singleton (uint32_to_sint32 ctr)) ))
 [@ "substitute"]
 let ctrsetup st ctr =
   st.(0ul) <- uint32_to_sint32 ctr;
@@ -127,6 +126,7 @@ private let lemma_setup h st =
   Seq.lemma_eq_intro (Seq.slice s 13 16) (as_seq h (Buffer.sub st 13ul 3ul));
   Seq.lemma_eq_intro s (FStar.Seq.(slice s 0 4 @| slice s 4 12 @| slice s 12 13 @| slice s 13 16))
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@ "c_inline"]
 val setup:

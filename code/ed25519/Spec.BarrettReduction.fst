@@ -17,7 +17,7 @@ open FStar.Mul
 
 *)
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--max_fuel 0"
 
 let l =
   assert_norm(0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed = pow2 252 +  27742317777372353535851937790883648493);
@@ -36,7 +36,7 @@ let barrett_reduce (a:nat{a < l * l}) : Tot (b:nat{b < l}) =
   let a = a - q * l in
   if l <= a then a - l else a
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --z3rlimit 50"
 
 
 let p (x:nat{x < l * l}) = (x - ((x * m) / pow2k) * l) % l
@@ -74,7 +74,7 @@ let lemma_barrett_reduce a =
   cut (a' <= ((l * l) * (l - 1) + (pow2k - 1) * l) / pow2k);
   cut (a' <= 2 * l)
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --z3rlimit 10"
 
 private let lemma_mul_div (a:nat) (b:nat) (c:pos) : Lemma ( (a*b) / c = (a / c) * b + ((a % c) * b) / c)
  = let open FStar.Math.Lemmas in
@@ -93,7 +93,7 @@ let lemma_optimized_barrett_reduce a =
   assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
   assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000)
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 private
 let lemma_mod_sub_ (a:nat) (b:pos{b <= a}) : Lemma ((a - b) % b = a % b) =

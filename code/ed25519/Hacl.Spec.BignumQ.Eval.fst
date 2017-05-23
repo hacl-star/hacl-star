@@ -7,7 +7,7 @@ open FStar.UInt64
 let op_String_Access = Seq.index
 let op_String_Assignment = Seq.upd
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--max_fuel 0"
 
 let qelem = s:seq FStar.UInt64.t{length s == 5}
 let u32 = FStar.UInt32.t

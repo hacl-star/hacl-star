@@ -145,7 +145,8 @@ FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
 %.fsti-ct: %.fsti
 	$(FSTAR_CT) --lax $^
 
-all-ct: $(addsuffix -ct, $(ED25519_CT_MODULES))
+all-ct:
+	$(FSTAR_CT) --lax --verify_all Hacl.Impl.Ed25519.SecretToPublic.fst Hacl.Impl.Ed25519.Sign.fst 
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst

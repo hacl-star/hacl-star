@@ -168,7 +168,7 @@ let poly1305_start a =
 
 module Spec = Hacl.Spec.Poly1305_64
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@"substitute"]
 val poly1305_init_:
@@ -188,7 +188,7 @@ let poly1305_init_ st key =
   log
 
 
-#set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 100 --max_fuel 0"
 
 [@"c_inline"]
 val poly1305_update:
@@ -208,7 +208,7 @@ val poly1305_update:
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log)
         == poly1305_update_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m)
       ))
-#set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --max_fuel 0"
 [@"c_inline"]
 let poly1305_update log st m =
   let acc = st.h in
@@ -234,7 +234,7 @@ let poly1305_update log st m =
   elift2 (fun (l:Spec.Poly1305.text) (m:Spec.Poly1305.word) -> FStar.Seq.((Seq.create 1 (m)) @| l)) log m'
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@"substitute"]
 val poly1305_concat:
@@ -301,7 +301,7 @@ let poly1305_process_last_block_ log block st m rem' =
   elift2 (fun (l:Spec.Poly1305.text) (m:Spec.Poly1305.word) -> FStar.Seq.((Seq.create 1 (m)) @| l)) log m'
   
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@"c_inline"]
 val poly1305_process_last_block:
@@ -391,7 +391,7 @@ let carry_limb_unrolled acc =
   upd_3 acc a0' a1' a2'
 
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 [@"substitute"]
 val carry_last_unrolled:
@@ -414,7 +414,7 @@ let carry_last_unrolled acc =
   Hacl.Bignum.Fproduct.carry_0_to_1 acc
 
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 [@"substitute"]
 val poly1305_last_pass:
@@ -489,7 +489,7 @@ let poly1305_finish__ log st m len =
     )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
+#reset-options "--max_fuel 0 --z3rlimit 1000"
 
 [@"substitute"]
 val poly1305_finish_:
