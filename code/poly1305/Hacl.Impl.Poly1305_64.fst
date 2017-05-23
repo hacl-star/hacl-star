@@ -208,7 +208,7 @@ val poly1305_update:
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log)
         == poly1305_update_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m)
       ))
-#set-options "--z3rlimit 50 --max_fuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 [@"c_inline"]
 let poly1305_update log st m =
   let acc = st.h in
