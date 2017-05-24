@@ -6,7 +6,7 @@
 
 all: build
 
-world: build
+world: build experimental
 
 prepare:
 	@echo $(CYAN)"\n# Installing OCaml packages required by F*"$(NORMAL)
