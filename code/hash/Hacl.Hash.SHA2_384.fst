@@ -98,7 +98,7 @@ inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
 [@"substitute"]
-let rotate_right64 (a:uint64_t) (b:uint32_t{v b <= 64}) : Tot uint64_t =
+let rotate_right64 (a:uint64_ht) (b:uint32_t{v b <= 64}) : Tot uint64_ht =
   H64.logor (H64.shift_right a b) (H64.shift_left a (U32.sub 64ul b))
 
 [@"substitute"]
@@ -1039,10 +1039,11 @@ val finish_core:
   hash   :uint8_p  {length hash = v size_hash_final /\ disjoint hash_w hash} ->
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 hash))
-        (ensures  (fun h0 _ h1 -> live h0 hash_w /\ live h0 hash /\ live h1 hash /\ modifies_1 hash h0 h1
+        (ensures  (fun h0 _ h1 -> live h1 hash_w /\ live h0 hash_w
+                  /\ live h1 hash /\ live h0 hash /\ modifies_1 hash h0 h1
                   /\ (let seq_hash_w = reveal_h64s (as_seq h0 hash_w) in
                   let seq_hash = reveal_sbytes (as_seq h1 hash) in
-                  seq_hash = Spec.words_to_be (U32.v size_hash_final_w) seq_hash_w)))
+                  seq_hash == Spec.words_to_be (U32.v size_hash_final_w) seq_hash_w)))
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
 
@@ -1057,13 +1058,19 @@ val finish:
   hash  :uint8_p{length hash = v size_hash_final /\ disjoint state hash} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
-        (ensures  (fun h0 _ h1 -> live h0 state /\ live h1 hash /\ modifies_1 hash h0 h1
+        (ensures  (fun h0 _ h1 -> live h1 state /\ live h0 state
+                  /\ live h1 hash /\ live h0 hash /\ modifies_1 hash h0 h1
                   /\ (let seq_hash_w = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash = reveal_sbytes (as_seq h1 hash) in
-                  seq_hash = Spec.finish (reveal_h64s seq_hash_w))))
+                  seq_hash == Spec.finish (reveal_h64s seq_hash_w))))
+
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 let finish state hash =
-  let hash_w = Buffer.sub state pos_whash_w size_hash_w in
+  let hash_w = Buffer.sub state pos_whash_w size_hash_final_w in
+  (**) let h0 = ST.get () in
+  (**) Seq.lemma_eq_intro (as_seq h0 (Buffer.sub state pos_whash_w size_hash_final_w))
+                          ((Seq.slice (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w))) 0 (v size_hash_final_w)));
   finish_core hash_w hash
 
 

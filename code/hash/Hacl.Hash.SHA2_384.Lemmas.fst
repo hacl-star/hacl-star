@@ -48,7 +48,7 @@ private let uint64_p = Buffer.buffer uint64_ht
 private let uint8_p  = Buffer.buffer uint8_ht
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--max_fuel 0  --z3rlimit 20"
 
 //
 // SHA-384
