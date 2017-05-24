@@ -71,7 +71,7 @@ sha2-c/SHA2_256.c sha2-c/Hacl_Test_SHA2_256.c: sha2-c/out.krml
 	$(KRML) $^ -skip-compilation -no-prefix Hacl_Test_SHA2_256.c -bundle "SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256"
 
 sha2-c/SHA2_512.c sha2-c/Hacl_Test_SHA2_512.c: sha2-c/out.krml
-	$(KRML) $^ -skip-compilation -no-prefix Hacl_Test_SHA2_512.c -bundle "SHA2_512=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_512,SHA2_512" \
+	$(KRML) $^ -skip-compilation -no-prefix Hacl_Test_SHA2_512.c -bundle "SHA2_512=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_512,SHA2_512"
 
 %.o: %.c
 	$(CC) -c $< -o $@
