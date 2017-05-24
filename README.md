@@ -20,7 +20,8 @@ The primitives and constructions supported currently are:
 * Stream ciphers: Chacha20, Salsa20, XSalsa20
 * MACs: Poly1305
 * Elliptic Curves: Curve25519
-* Hash functions: SHA2 (224,256,384,512)
+* Hash functions: SHA2 (256,384,512)
+* MAC: HMAC
 * NaCl API: secret_box, box
 
 HACL* can be used in two ways. The verified primitives can be directly
@@ -98,7 +99,7 @@ is a long-term goal.
 The [code/experimental](code/experimental) directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
 * Elliptic Curves: NIST P-256, Curve448
 * Encryption: AES-128, AES-256
-* MACs: HMAC, GCM
+* MACs: GCM
 * Key Derivation: HKDF
 
 To build a static and shared versions of the experimental library:
