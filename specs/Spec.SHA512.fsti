@@ -7,7 +7,7 @@ open FStar.Mul
 open FStar.Seq
 open FStar.UInt64
 
-#reset-options "max_fuel 0 --z3rlimit 20"
+#reset-options "--z3rlimit 20"
 
 val k:     k:seq UInt64.t{length k = 80}
 val h_0: h_0:seq UInt64.t{length h_0 = 8}

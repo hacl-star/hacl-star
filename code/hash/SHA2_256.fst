@@ -86,9 +86,9 @@ val init:
 
 let init state =
   match Config.provider with
-  | Hacl ->
+  | Config.Hacl ->
       Hash.init state
-  | Vale ->
+  | Config.Vale ->
       Vale.Hash.SHA2_256.init state
 
 

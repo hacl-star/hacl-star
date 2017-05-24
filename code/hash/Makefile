@@ -7,8 +7,8 @@ FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 INCLUDES= -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
-  -I ../config/ -I ../config/$(PROVIDER) \
-  -I $(HACL_HOME)/code/hash
+  -I ../config/ -I ../config/$(PROVIDER) -I $(KREMLIN_HOME)/kremlib \
+  -I $(HACL_HOME)/code/hash -I $(HACL_HOME)/other_providers/vale-glue
 KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
   -drop Prims,FStar,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
   -drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.*,Hacl.Hash.SHA2_256.Lemmas \
@@ -64,20 +64,29 @@ clean:
 
 extract-c: sha2-c/SHA2_256.c sha2-c/SHA2_512.c
 
-sha2-c/out.krml: $(SHA_FILES) SHA2_256.fst SHA2_512.fst
+sha2-c/out.krml: $(SHA2_FILES) SHA2_256.fst SHA2_512.fst Hacl.Test.SHA2_256.fst Hacl.Test.SHA2_512.fst
 	$(KRML) -skip-translation $^
 
 sha2-c/SHA2_256.c sha2-c/Hacl_Test_SHA2_256.c: sha2-c/out.krml
-	$(KRML) $^ -skip-compilation -no-prefix Hacl_Test_SHA2_256.c -bundle "SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256"
+	$(KRML) $^ -skip-compilation -no-prefix Hacl.Test.SHA2_256 -bundle "SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256"
 
 sha2-c/SHA2_512.c sha2-c/Hacl_Test_SHA2_512.c: sha2-c/out.krml
-	$(KRML) $^ -skip-compilation -no-prefix Hacl_Test_SHA2_512.c -bundle "SHA2_512=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_512,SHA2_512"
+	$(KRML) $^ -skip-compilation -no-prefix Hacl.Test.SHA2_512 -bundle "SHA2_512=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_512,SHA2_512"
+
+CC := $(CC) $(INCLUDES)
 
 %.o: %.c
 	$(CC) -c $< -o $@
 
-test-sha2_256.exe: sha2-c/SHA2_256.o sha2-c/Hacl_Test_SHA2_256.o
+VALE_A := ../../other_providers/vale-glue/vale.a
+
+$(VALE_A):
+	$(MAKE) -C $(dir $@)
+
+BASE_OBJ = $(VALE_A) sha2-c/Hacl_Config.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o
+
+test-sha2_256.exe: sha2-c/SHA2_256.o sha2-c/Hacl_Test_SHA2_256.o sha2-c/Hacl_Config.o $(BASE_OBJ)
 	$(CC) -o $@ $^
 
-test-sha2_512.exe: sha2-c/SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o
+test-sha2_512.exe: sha2-c/SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o sha2-c/Hacl_Config.o $(BASE_OBJ)
 	$(CC) -o $@ $^

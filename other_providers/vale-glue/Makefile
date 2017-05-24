@@ -25,7 +25,7 @@ CC:=$(CC) $(CCOPTS)
 
 all: vale.a
 
-vale.a: Vale_Hash_SHA2_256.o sha_asm.o
+vale.a: Vale_Hash_SHA2_256.o sha_asm.o $(VALE_HOME)/obj/crypto/hashing/sha256_main_i.o
 	ar -cr $@ $^
 
 sha_asm.s: $(SHA_S)
@@ -36,3 +36,6 @@ sha_asm.s: $(SHA_S)
 
 %.o: %.c
 	$(CC) -c $< -o $@
+
+clean:
+	rm -rf *.o *.a
