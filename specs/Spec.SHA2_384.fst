@@ -186,8 +186,8 @@ let update_last (hash:hash_w) (prevlen:nat{prevlen % size_block = 0}) (input:byt
 
 
 let finish (hashw:hash_w) : Tot (hash:bytes{length hash = size_hash}) =
-  let full_hash = words_to_be size_hash_w hashw in
-  Seq.slice full_hash 0 size_hash
+  let sliced_hash = Seq.slice hashw 0 size_hash_final_w in
+  words_to_be size_hash_final_w sliced_hash
 
 
 let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{length hash = size_hash}) =

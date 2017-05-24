@@ -1,4 +1,4 @@
-module Hacl.Hash.SHA2_512
+module Hacl.Hash.SHA2_384
 
 open FStar.Mul
 open FStar.Ghost
@@ -31,8 +31,8 @@ module HS = FStar.HyperStack
 module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
-module Spec = Spec.SHA2_512
-module Lemmas = Hacl.Hash.SHA2_512.Lemmas
+module Spec = Spec.SHA2_384
+module Lemmas = Hacl.Hash.SHA2_384.Lemmas
 
 
 (* Definition of base types *)
@@ -66,17 +66,20 @@ inline_for_extraction let  h64_to_h128 = Cast.sint64_to_sint128
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
 //
-// SHA-512
+// SHA-384
 //
 
 (* Define word size *)
 inline_for_extraction let size_word = 8ul // Size of the word in bytes
 
 (* Define algorithm parameters *)
-inline_for_extraction let size_hash_w   = 8ul // 8 words (Final hash output size)
+inline_for_extraction let size_hash_w   = 8ul // 8 words (Intermediate hash output size)
 inline_for_extraction let size_block_w  = 16ul  // 16 words (Working data block size)
 inline_for_extraction let size_hash     = size_word *^ size_hash_w
 inline_for_extraction let size_block    = size_word *^ size_block_w
+inline_for_extraction let size_hash_final_w = 6ul // 6 words (Final hash output size)
+inline_for_extraction let size_hash_final   = size_word *^ size_hash_final_w
+
 
 (* Sizes of objects in the state *)
 inline_for_extraction let size_k_w     = 80ul  // 80 words of 64 bits (size_block)
@@ -183,7 +186,6 @@ let constants_set_k k = hupd64_80 k
   (u64_to_h64 0x4cc5d4becb3e42b6uL) (u64_to_h64 0x597f299cfc657e2auL)
   (u64_to_h64 0x5fcb6fab3ad6faecuL) (u64_to_h64 0x6c44198c4a475817uL)
 
-
 #reset-options " --max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
@@ -197,10 +199,10 @@ val constants_set_h_0:
 
 [@"substitute"]
 let constants_set_h_0 hash = hupd64_8 hash
-  (u64_to_h64 0x6a09e667f3bcc908uL) (u64_to_h64 0xbb67ae8584caa73buL)
-  (u64_to_h64 0x3c6ef372fe94f82buL) (u64_to_h64 0xa54ff53a5f1d36f1uL)
-  (u64_to_h64 0x510e527fade682d1uL) (u64_to_h64 0x9b05688c2b3e6c1fuL)
-  (u64_to_h64 0x1f83d9abfb41bd6buL) (u64_to_h64 0x5be0cd19137e2179uL)
+  (u64_to_h64 0xcbbb9d5dc1059ed8uL) (u64_to_h64 0x629a292a367cd507uL)
+  (u64_to_h64 0x9159015a3070dd17uL) (u64_to_h64 0x152fecd8f70e5939uL)
+  (u64_to_h64 0x67332667ffc00b31uL) (u64_to_h64 0x8eb44a8768581511uL)
+  (u64_to_h64 0xdb0c2e0d64f98fa7uL) (u64_to_h64 0x47b5481dbefa4fa4uL)
 
 
 #reset-options " --max_fuel 0 --z3rlimit 20"
@@ -1033,42 +1035,49 @@ let update_last state data len =
 
 [@"substitute"]
 val finish_core:
-  hash_w :uint64_p {length hash_w = v size_hash_w} ->
-  hash   :uint8_p  {length hash = v size_hash /\ disjoint hash_w hash} ->
+  hash_w :uint64_p {length hash_w = v size_hash_final_w} ->
+  hash   :uint8_p  {length hash = v size_hash_final /\ disjoint hash_w hash} ->
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 hash))
-        (ensures  (fun h0 _ h1 -> live h0 hash_w /\ live h0 hash /\ live h1 hash /\ modifies_1 hash h0 h1
+        (ensures  (fun h0 _ h1 -> live h1 hash_w /\ live h0 hash_w
+                  /\ live h1 hash /\ live h0 hash /\ modifies_1 hash h0 h1
                   /\ (let seq_hash_w = reveal_h64s (as_seq h0 hash_w) in
                   let seq_hash = reveal_sbytes (as_seq h1 hash) in
-                  seq_hash = Spec.words_to_be (U32.v size_hash_w) seq_hash_w)))
+                  seq_hash == Spec.words_to_be (U32.v size_hash_final_w) seq_hash_w)))
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
 
 [@"substitute"]
-let finish_core hash_w hash = uint64s_to_be_bytes hash hash_w size_hash_w
+let finish_core hash_w hash = uint64s_to_be_bytes hash hash_w size_hash_final_w
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
 val finish:
   state :uint64_p{length state = v size_state} ->
-  hash  :uint8_p{length hash = v size_hash /\ disjoint state hash} ->
+  hash  :uint8_p{length hash = v size_hash_final /\ disjoint state hash} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 hash))
-        (ensures  (fun h0 _ h1 -> live h0 state /\ live h1 hash /\ modifies_1 hash h0 h1
+        (ensures  (fun h0 _ h1 -> live h1 state /\ live h0 state
+                  /\ live h1 hash /\ live h0 hash /\ modifies_1 hash h0 h1
                   /\ (let seq_hash_w = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_hash = reveal_sbytes (as_seq h1 hash) in
-                  seq_hash = Spec.finish (reveal_h64s seq_hash_w))))
+                  seq_hash == Spec.finish (reveal_h64s seq_hash_w))))
+
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 let finish state hash =
-  let hash_w = Buffer.sub state pos_whash_w size_whash_w in
+  let hash_w = Buffer.sub state pos_whash_w size_hash_final_w in
+  (**) let h0 = ST.get () in
+  (**) Seq.lemma_eq_intro (as_seq h0 (Buffer.sub state pos_whash_w size_hash_final_w))
+                          ((Seq.slice (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w))) 0 (v size_hash_final_w)));
   finish_core hash_w hash
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
 val hash:
-  hash :uint8_p {length hash = v size_hash} ->
+  hash :uint8_p {length hash = v size_hash_final} ->
   input:uint8_p {length input < Spec.max_input_len_8 /\ disjoint hash input} ->
   len  :uint32_t{v len = length input} ->
   Stack unit
