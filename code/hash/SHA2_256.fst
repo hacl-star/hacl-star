@@ -85,12 +85,7 @@ val init:
               seq_k == Spec.k /\ seq_h_0 == Spec.h_0 /\ H32.v counter = 0)))
 
 let init state =
-  match Config.provider with
-  | Config.Hacl ->
-      Hash.init state
-  | Config.Vale ->
-      Vale.Hash.SHA2_256.init state
-
+  Hash.init state
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
 
