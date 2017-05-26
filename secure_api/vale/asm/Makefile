@@ -1,13 +1,17 @@
 # Override to get cross-compilation
 MARCH?=$(shell uname -m)
 UNAME?=$(shell uname | cut -c 1-6)
+SED?=$(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
 
 ifeq ($(UNAME),CYGWIN)
   CC=$(MARCH)-w64-mingw32-gcc
+  AR=x86_64-w64-mingw32-ar
 else ifeq ($(MARCH),i686)
   CC=gcc -m32
+  AR=ar
 else
   CC=gcc
+  AR=ar
 endif
 
 ifeq ($(UNAME),Darwin)
@@ -17,9 +21,26 @@ else ifeq ($(UNAME),Linux)
 endif
 
 
-all: aes.o sha256.o
+VALE_HOME?=../../../vale
+KREMLIN_HOME?=../../../kremlin
+CCOPTS=-Wall -Wextra -Werror \
+  -I$(VALE_HOME)/obj/crypto/hashing -I$(KREMLIN_HOME)/kremlib \
+  -I$(VALE_HOME)/src/lib/util
+CC:=$(CC) $(CCOPTS)
 
-%.o: %-$(MARCH)$(VARIANT).S
+
+all: vale.a
+
+ALL_OBJ=Vale_Hash_SHA2_256.o sha256-$(MARCH)$(VARIANT).o sha_main.o \
+  aes-$(MARCH)$(VARIANT).o vale_aes_glue.o
+
+vale.a: $(ALL_OBJ)
+	ar -cr $@ $^
+
+%.o: %.S
+	$(CC) -c $< -o $@
+
+%.o: %.c
 	$(CC) -c $< -o $@
 
 .PHONY: import
@@ -31,7 +52,8 @@ import:
 	cp $(VALE_HOME)/obj/sha256-macos.S sha256-x86_64-Darwin.S
 	cp $(VALE_HOME)/obj/aes-linux.S aes-x86_64-Linux.S
 	cp $(VALE_HOME)/obj/sha256-linux.S sha256-x86_64-Linux.S
-	sed -i 's/.section .text/.text/' *.S
+	cp $(VALE_HOME)/obj/crypto/hashing/sha256_main_i.c sha_main.c
+	$(SED) -i 's/.section .text/.text/' *.S
 
 clean:
 	rm -f *.o *~
