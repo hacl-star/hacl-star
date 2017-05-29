@@ -1,6 +1,6 @@
 FSTAR_HOME?=../../dependencies/FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=../..
+HACL_HOME=../..
 include ../Makefile.include
 
 INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/bignum $(KREMLIN_HOME)/kremlib $(HACL_HOME)/specs

@@ -1,4 +1,4 @@
-HACL_HOME?=..
+HACL_HOME=..
 KREMLIN_HOME?=$(HACL_HOME)/kremlin
 FSTAR_HOME?=$(HACL_HOME)/kremlin
 
@@ -82,9 +82,8 @@ build-snapshot:
 GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
 GCC_OPTS=-flto -std=c11 -D_GNU_SOURCE
 
-haclib: snapshot
+snapshot/libhacl.so: snapshot
 	$(MAKE) -C snapshot CC="$(GCC) $(GCC_OPTS) -fPIC" lib
-
 
 test-snapshot: snapshot
 	$(MAKE) -C snapshot CC="$(GCC) $(GCC_OPTS)" test

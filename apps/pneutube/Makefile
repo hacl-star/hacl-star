@@ -18,9 +18,12 @@ FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --inc
 debug:
 	gcc-6 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_LIB/hyperstack -I ../../code/lib/kremlin -I ../../code/api/interfaces -I ../../code/curve25519/interfaces -I ../../test/snapshot -I c_bindings -I /home/jkz/dev/kremlin/kremlib -I tube -Wno-pointer-sign tube/Hacl_Types.o tube/Hacl_Policies.o tube/Box_Ideal.o tube/FileIO_Types.o tube/PaddedFileIO.c tube/SocketIO.c tube/Hacl_Tube_Send.c tube/Hacl_Tube_Receive.c tube/kremlib.o tube/tube.o tube/SocketIO_impl.o -D_GNU_SOURCE c_bindings/PaddedFileIO_impl.c -o tube-star.exe -lsodium -lhacl -L../../test/snapshot/
 
-tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_impl.c Hacl.Tube.Send.fst Hacl.Tube.Receive.fst tube.c
+../../test/snapshot/libhacl.so:
+	$(MAKE) -C $(HACL_HOME)/test snapshot/libhacl.so
+
+tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_impl.c Hacl.Tube.Send.fst Hacl.Tube.Receive.fst tube.c $(HACL_HOME)/test/snapshot/libhacl.so
 	mkdir -p tube
-	$(KRML) $^ \
+	$(KRML) $(filter %.c %.fst, $^) \
 		-I c_bindings \
 		-drop Libsodium,Hacl.Box,Curve25519,Hacl.Types,NaCl \
 		-bundle "Hacl.Tube.Send=Hacl.Tube.Send" \
