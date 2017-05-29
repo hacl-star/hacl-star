@@ -3,6 +3,7 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../..
 include ../Makefile.include
 
+INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/bignum $(KREMLIN_HOME)/kremlib $(HACL_HOME)/specs
 
 BIGNUM= \
 	../bignum/Hacl.Bignum.Limb.fst \
@@ -118,19 +119,32 @@ bignum-ci:
 	mv ../bignum/*.hints ./bignum_hints
 specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_SPECIFIC)))
 
-extract-c:
-	# Weird \* because of https://caml.inria.fr/mantis/view.php?id=7473
-	mkdir -p x25519-c
-	$(KREMLIN_HOME)/krml -tmpdir x25519-c $(KREMLIN_ARGS) \
-		-I ../bignum -I ../lib/kremlin -I ../../specs \
-		Curve25519.fst Hacl.Test.X25519.fst \
-		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop Prims -drop FStar -bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*' \
-		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-                -no-prefix Hacl.Test.X25519 -o x25519.exe
-	./x25519.exe
+INCLUDES=$(addprefix -I , $(INCLUDE_DIRS))
+CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
+KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
+KRML=$(KRML_BIN) $(KREMLIN_ARGS) $(INCLUDES) -tmpdir x25519-c \
+	-drop Spec.\*,Hacl.Spec.\*,Hacl.Cast,Hacl.UInt.\*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims,FStar \
+	-add-include '"testlib.h"' 
+
+# Acknowledge the F* dependency graph
+.PHONY: depend
+depend:
+	$(FSTARB) --dep make $(X25519_FILES) > .depend
+-include .depend
+
+x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
+	$(KRML) -skip-translation $^
+
+x25519-c/Curve25519.c x25519-c/Hacl_Test_X25519.c: x25519-c/out.krml $(KRML_BIN)
+	$(KRML) -skip-compilation $< \
+		-no-prefix Hacl.Test.X25519 \
+	 	-bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*'
+
+x25519.exe: x25519-c/Curve25519.c x25519-c/Hacl_Test_X25519.c $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c
+	$(CC) $(INCLUDES) $(CCFLAGS) $^ -o $@
+	./$@
+
+extract-c: x25519-c/Curve25519.c
 
 X25519_LIB= \
 	Hacl.Bignum.Parameters.fst \

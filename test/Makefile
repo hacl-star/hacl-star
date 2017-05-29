@@ -77,11 +77,16 @@ build-snapshot:
 		$(addprefix ../code/salsa-family/chacha-vec128/, Chacha20_Vec128.* ../vec128.h) \
 		 $(SNAPSHOT_DIR)
 	cp ./c/* $(SNAPSHOT_DIR)/
+	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
 GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
 GCC_OPTS=-flto -std=c11 -D_GNU_SOURCE
 
-test-snapshot:
+haclib: snapshot
+	$(MAKE) -C snapshot CC="$(GCC) $(GCC_OPTS) -fPIC" lib
+
+
+test-snapshot: snapshot
 	$(MAKE) -C snapshot CC="$(GCC) $(GCC_OPTS)" test
 
 test-ccomp:
@@ -122,7 +127,6 @@ all-perf:
 snapshot:
 	$(MAKE) extract-c-code extract-c-code-experimental
 	$(MAKE) build-snapshot
-	$(MAKE) test-snapshot
 
 snapshot-ccomp:
 	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
