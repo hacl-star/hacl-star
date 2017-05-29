@@ -24,7 +24,8 @@ let log_t = text
 
 let elem : Type0 = b:int{ b >= 0 /\ b < Spec.prime }
 
-inline_for_extraction let seqelem = Hacl.Bignum.Parameters.seqelem
+inline_for_extraction let seqelem = s:Seq.seq Hacl.UInt64.t{Seq.length s = 3}
+
 
 inline_for_extraction let p42 : p:pos{p = 0x40000000000} = assert_norm (pow2 42 = 0x40000000000);
   pow2 42

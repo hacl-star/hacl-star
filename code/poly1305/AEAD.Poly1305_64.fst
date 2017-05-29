@@ -22,9 +22,9 @@ module I = Hacl.Impl.Poly1305_64
 module S = Hacl.Spec.Poly1305_64
 module Poly = Hacl.Standalone.Poly1305_64
 
-let seval = Hacl.Spec.Bignum.Bigint.seval
+let seval = Hacl.Spec.Poly1305_64.State.seval
 
-let selem s = seval s % Spec.Poly1305.prime
+let selem = Hacl.Spec.Poly1305_64.State.selem
 
 
 #reset-options "--max_fuel 0 --z3rlimit 100"

@@ -47,7 +47,7 @@ tube-test: tube-star.exe
 		../tube-star.exe send banana.txt localhost:5001 \
 			-k 4d922658eb6d4aef64a83644a18e60e61a57c245aa8e5e9a93926cb2b317ffd7 \
 			-p 223fc224f2c9906fd4bbb1313236ecc4f36ed2f7e95b5fb1deafc459b19ab069
-	lsof -i tcp:5001 | awk 'NR!=1 {print $$2}' | xargs kill
+#	@lsof -i tcp:5001 | awk 'NR!=1 {print $$2}' | xargs kill
 #	@rm -r send receive
 
 

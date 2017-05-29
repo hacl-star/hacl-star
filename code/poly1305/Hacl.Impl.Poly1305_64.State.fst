@@ -18,7 +18,8 @@ let elemB : Type0  = b:bigint
 let wordB : Type0  = b:uint8_p{length b <= 16}
 let wordB_16 : Type0 = b:uint8_p{length b = 16}
 
-noeq type poly1305_state =  {r:bigint; h:bigint}
+noeq type poly1305_state =  | MkState: r:bigint -> h:bigint -> poly1305_state
+  (* {r:bigint; h:bigint} *)
 
 let live_st m (st:poly1305_state) : Type0 =
   live m st.h /\ live m st.r /\ disjoint st.h st.r
