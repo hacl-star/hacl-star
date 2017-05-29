@@ -12,24 +12,24 @@ API_FILES= \
 	Hacl.Box.fst
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
-		--include ../poly1305/interfaces --include ../../specs \
+		--include ../lib/kremlin --include ../salsa-family --include ../curve25519 \
+		--include ../poly1305 --include ../../specs --include $(HACL_HOME)/code/bignum \
 		--include $(KREMLIN_HOME)/kremlib
 
 FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/ --include ../salsa-family/interfaces --include ../curve25519/interfaces \
-		--include ../poly1305/interfaces --include ../../specs \
+		--include ../lib/ --include ../salsa-family --include ../curve25519 \
+		--include ../poly1305 --include ../../specs  --include $(HACL_HOME)/code/bignum  \
 		--include $(KREMLIN_HOME)/kremlib
 
-KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
-		-I ../poly1305/interfaces -I ../../specs \
+KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
+		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum  \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
 		-drop Hacl.Types $(KREMLIN_ARGS)
 
 
-KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
-		-I ../poly1305 -I ../../specs \
+KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
+		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
 		-drop Hacl.Types $(KREMLIN_ARGS)
@@ -38,7 +38,8 @@ KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ..
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
 
-all-ct: $(addsuffix -ct, $(API_FILES))
+all-ct:
+	$(FSTAR_CT) --lax $(API_FILES)
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst

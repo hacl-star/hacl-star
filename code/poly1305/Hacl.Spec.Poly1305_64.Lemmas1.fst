@@ -147,7 +147,7 @@ let poly_def_1 (log:text{length log > 0}) (r:elem) : Lemma
    = ()
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
+#reset-options "--max_fuel 0 --z3rlimit 1000"
 
 val lemma_pad_16:
   b:seq U8.t{length b < pow2 32} ->
