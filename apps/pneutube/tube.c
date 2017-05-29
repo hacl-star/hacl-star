@@ -1,7 +1,7 @@
 #define _POSIX_C_SOURCE 199309L
 
 #include "testlib.h"
-#include "Hacl_Box.h"
+#include "NaCl.h"
 #include <sodium.h>
 #include <sys/time.h>
 #include <sys/socket.h>

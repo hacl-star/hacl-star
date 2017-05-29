@@ -7,10 +7,10 @@ open Hacl.UInt64
 
 include Hacl.Spec.Poly1305_64.State
 
-let log_t = erased (Spec.Poly1305.text)
-let uint8_p = buffer Hacl.UInt8.t
+inline_for_extraction let log_t = erased (Spec.Poly1305.text)
+inline_for_extraction let uint8_p = buffer Hacl.UInt8.t
 
-let bigint  = b:Buffer.buffer Hacl.UInt64.t{Buffer.length b = 3}
+inline_for_extraction let bigint  = b:Buffer.buffer Hacl.UInt64.t{Buffer.length b = 3}
 let seqelem = s:Seq.seq Hacl.UInt64.t{Seq.length s = 3}
 
 let elemB : Type0  = b:bigint

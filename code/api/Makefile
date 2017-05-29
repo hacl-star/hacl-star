@@ -30,9 +30,8 @@ KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 
 
 KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
 		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum \
-		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
-		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
-		-drop Hacl.Types $(KREMLIN_ARGS)
+		-drop FStar,Hacl.Spec,Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64 \
+		-drop Hacl.UInt128,Hacl.Types $(KREMLIN_ARGS)
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -84,11 +83,10 @@ extract-box:
 extract-aead:
 	mkdir -p aead-c
 	$(KRML2) -tmpdir aead-c Chacha20Poly1305.fst -verbose \
-		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
-		-drop Hacl.Constants -drop "Hacl.Endianness" -drop 'Combinators' \
-		-drop "Hacl.Bignum.\*" -drop "Hacl.Spe.\*" -drop "Hacl.Impl.\*" -drop "Hacl.Standalone.\*" -drop "Seq.\*" \
-		-drop AEAD_Poly1305_64 \
+		-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide \
+		-drop Hacl.UInt16,Hacl.Types,Spec.\*,Hacl.Spec.\*,Hacl.Spe.\* \
+		-drop Hacl.Constants,Hacl.Endianness,Hacl.Bignum.\*,Hacl.Spe.\*,Seq.\*,Hacl.Impl.\* \
+		-drop AEAD_Poly1305_64,Chacha20 \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
 		-add-include '"AEAD_Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs
 

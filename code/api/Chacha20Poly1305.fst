@@ -31,7 +31,7 @@ let keylen = 32
 let maclen = 16
 
 
-type state = Hacl.Impl.Poly1305_64.State.poly1305_state
+let state = Hacl.Impl.Poly1305_64.State.poly1305_state
 inline_for_extraction let log_t = Ghost.erased (Spec.Poly1305.text)
 
 

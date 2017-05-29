@@ -163,13 +163,21 @@ lib:
 	$(CC) $(CFLAGS) \
 	  Salsa20.c -c -o Salsa20.o
 	$(CC) $(CFLAGS) \
+	  Chacha20.c -c -o Chacha20.o
+	$(CC) $(CFLAGS) \
 	  Poly1305_64.c -c -o Poly1305_64.o
+	$(CC) $(CFLAGS) \
+	  AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
+	$(CC) $(CFLAGS) \
+	  SHA2_512.c -c -o SHA2_512.o
+	$(CC) $(CFLAGS) \
+	  Ed25519.c -c -o Ed25519.o
 	$(CC) $(CFLAGS) \
 	  Curve25519.c -c -o Curve25519.o
 	$(CC) $(CFLAGS) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
 	$(CC) -shared  $(CFLAGS) \
-	  Salsa20.o Poly1305_64.o Chacha20.o Chacha20Poly1305.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c \
 	  -o libhacl.so
 
 lib-test: lib
