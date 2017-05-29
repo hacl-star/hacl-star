@@ -117,7 +117,7 @@ ED25519_CT_MODULES= \
 
 
 # Files that are too slow and for which verification speed must improve
-SLOW=
+SLOW=Hacl.Spec.BignumQ.Mul.fst
 
 # Files that still have errors
 TODO=
