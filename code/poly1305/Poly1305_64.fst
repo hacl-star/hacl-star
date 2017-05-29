@@ -58,7 +58,7 @@ val init:
 let init st k =
   let _ = I.poly1305_init_ st (Buffer.sub k 0ul 16ul) in ()
 
-let empty_log : I.log_t = Ghost.hide (Seq.createEmpty)
+let empty_log : I.log_t = Ghost.hide (Seq.createEmpty #Spec.Poly1305.word)
 
 val update_block:
   st:state ->
