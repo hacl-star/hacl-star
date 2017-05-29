@@ -135,7 +135,7 @@ poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml $(KRML_BIN)
 poly-c/AEAD_Poly1305_64.c: poly-c/out.krml $(KRML_BIN)
 	$(KRML) -skip-compilation $< \
 	  -drop Poly1305_64,Hacl.Test.Poly1305_64 \
-	  -bundle 'AEAD.Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,AEAD.Poly1305_64'
+	  -bundle 'AEAD.Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,AEAD.Poly1305_64,Poly1305_64,Hacl.Spec.\*'
 
 poly1305.exe: poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c
 	$(CC) $(INCLUDES) $(CFLAGS) $^ -o $@
