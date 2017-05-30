@@ -6,16 +6,16 @@ API_FILES= \
 	Hacl.SecretBox.ZeroPad.fst \
 	Hacl.Box.ZeroPad.fst
 
-FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces --include ../poly1305/interfaces --include ../../specs --include $(FSTAR_HOME)/../kremlin/kremlib
+FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include ../lib/kremlin --include ../../specs --include $(FSTAR_HOME)/../kremlin/kremlib
 
 FSTARB=$(FSTAR_BASE) \
-		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
-		--include ../poly1305/interfaces --include ../../specs \
+		--include ../lib/kremlin --include ../salsa-family --include $(HACL_HOME)/code/bignum --include ../curve25519 \
+		--include ../poly1305 --include ../../specs \
 		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_BASE) \
-		--include ../lib/ --include ../salsa-family/interfaces --include ../curve25519/interfaces \
-		--include ../poly1305/interfaces --include ../../specs \
+		--include ../lib/ --include ../salsa-family --include ../bignum --include ../curve25519 \
+		--include ../poly1305 --include ../../specs \
 		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
