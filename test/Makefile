@@ -15,15 +15,11 @@ SNAPSHOT_DIR=snapshot
 # FIXME: temporarily disable extraction in CI for testing #
 ###########################################################
 all:
-	# Ugly hack because we can't encode the fact that the generation of C
-	# files depends on i) Kremlin.native ii) the out.krml files iii) the
-	# KREMLIN_ARGS environment variable.
-#	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert" OTHERFLAGS="--trace_error" ; fi
-#	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc" OTHERFLAGS="--trace_error" ; fi
-	# JP FIXME XXX why was this disabled?
-#	$(MAKE) extract-c-code OTHERFLAGS="--trace_error"
-	$(MAKE) ct verify-code OTHERFLAGS="--trace_error --z3rlimit_factor 3"
-#	$(MAKE) -C openssl-engine
+	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
+	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
+	$(MAKE) extract-c ct verify OTHERFLAGS="--trace_error --z3rlimit_factor 3"
+	$(MAKE) compile-vale
+	$(MAKE) -C openssl-engine
 
 travis:
 	$(MAKE) extract-c-code
@@ -42,6 +38,9 @@ extract-c-crypto:
 	$(MAKE) -C ../secure_api krml-test-hacl.exe
 
 extract-c: extract-c-code extract-c-crypto
+
+compile-vale:
+	$(MAKE) -C ../secure_api/vale/aes
 
 ct:
 	$(MAKE) -C ../code ct

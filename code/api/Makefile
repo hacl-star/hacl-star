@@ -1,6 +1,3 @@
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME=../..
 include ../Makefile.include
 
 API_FILES= \
@@ -8,25 +5,24 @@ API_FILES= \
 	Chacha20Poly1305.fst \
 	Hacl.SecretBox.ZeroPad.fst \
 	Hacl.Box.ZeroPad.fst
-#	Hacl.SecretBox.fst \
-	Hacl.Box.fst
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../salsa-family --include ../curve25519 \
-		--include ../poly1305 --include ../../specs --include $(HACL_HOME)/code/bignum \
-		--include $(KREMLIN_HOME)/kremlib
+FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces --include ../poly1305/interfaces --include ../../specs --include $(FSTAR_HOME)/../kremlin/kremlib
 
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/ --include ../salsa-family --include ../curve25519 \
-		--include ../poly1305 --include ../../specs  --include $(HACL_HOME)/code/bignum  \
-		--include $(KREMLIN_HOME)/kremlib
+FSTARB=$(FSTAR_BASE) \
+		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
+		--include ../poly1305/interfaces --include ../../specs \
+		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
+
+FSTAR_CT=$(FSTAR_BASE) \
+		--include ../lib/ --include ../salsa-family/interfaces --include ../curve25519/interfaces \
+		--include ../poly1305/interfaces --include ../../specs \
+		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
 		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum  \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
 		-drop Hacl.Types $(KREMLIN_ARGS)
-
 
 KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
 		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum \
@@ -39,10 +35,14 @@ KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519
 
 all-ct:
 	$(FSTAR_CT) --lax $(API_FILES)
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDE_PATHS)
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^
 
 all-ver: $(addsuffix -verify, $(API_FILES))
 
@@ -54,7 +54,7 @@ all-lax: $(addsuffix -lax, $(API_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	-$(FSTARB) --record_hints $^
 
 all-hints: $(addsuffix -hints, $(API_FILES))
 

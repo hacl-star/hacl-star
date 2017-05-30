@@ -1,6 +1,3 @@
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME=../..
 include ../Makefile.include
 
 SPECS=../../specs
@@ -43,15 +40,12 @@ TODO=
 
 POLY1305_FILES= $(BIGNUM) $(POLY1305_SPECIFIC)
 
-HINTS_ENABLED?=--use_hints --record_hints
+FSTARB=$(FSTAR_BASE) \
+	$(addprefix --include , $(INCLUDE_DIRS)) --include $(KREMLIN_HOME)/kremlib	
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-	$(addprefix --include , $(INCLUDE_DIRS)) --include $(KREMLIN_HOME)/kremlib \
-	$(HINTS_ENABLED) $(OTHERFLAGS)
-
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib --include ../bignum $(addprefix --include , $(SPECS)) \
-		--include $(KREMLIN_HOME)/kremlib
+FSTAR_CT=$(FSTAR_BASE) \
+	--include ../lib --include ../bignum $(addprefix --include , $(SPECS)) \
+	--include $(KREMLIN_HOME)/kremlib
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -77,7 +71,7 @@ all-lax: $(addsuffix -lax, $(POLY1305_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^
+	-$(FSTARB) --record_hints $^
 
 all-hints2: $(addsuffix -hints, $(POLY1305_FILES))
 all-hints:

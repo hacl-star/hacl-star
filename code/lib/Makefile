@@ -1,6 +1,6 @@
-FSTAR_HOME?=../../dependencies/FStar
-HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe --include $(HYPERSTACK)
+include ../Makefile.include
+
+FSTAR=$(FSTAR_BASE)
 
 OPTIONS_VER=
 
