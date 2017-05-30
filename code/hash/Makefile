@@ -25,6 +25,8 @@ SHA2_FILES = \
 	Hacl.Hash.Lib.Create.fst \
 	Hacl.Hash.SHA2_512.Lemmas.fst \
 	Hacl.Hash.SHA2_512.fst \
+	Hacl.Hash.SHA2_384.Lemmas.fst \
+	Hacl.Hash.SHA2_384.fst \
 	Hacl.Hash.SHA2_256.Lemmas.fst \
 	Hacl.Hash.SHA2_256.fst
 
@@ -49,9 +51,9 @@ all-verif: $(addsuffix -verify, $(SHA2_FILES)) # This is too costly for the CI
 all-ct: $(addsuffix -ct, $(SHA2_FILES))
 
 # Extraction
-extract-c: sha2-c/SHA2_256.c sha2-c/SHA2_512.c
+extract-c: sha2-c/SHA2_256.c sha2-c/SHA2_384.c sha2-c/SHA2_512.c
 
-test: test-sha2_256.exe test-sha2_512.exe
+test: test-sha2_256.exe test-sha2_384.exe test-sha2_512.exe
 
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
@@ -71,6 +73,18 @@ $(KRML) -verbose -tmpdir sha2-c \
 		-bundle "SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99
 
+KRML_COMMON_SHA2_384 = \
+$(KRML) -verbose -tmpdir sha2-c \
+		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
+		-I $(HACL_HOME)/code/hash \
+		-drop Prims -drop FStar \
+		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
+		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' \
+		-drop 'Seq.Create' -drop 'Spec.\*' \
+		-drop 'Hacl.Hash.SHA2_384.Lemmas' \
+		-bundle "SHA2_384=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_384,SHA2_384" \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99
+
 KRML_COMMON_SHA2_512 = \
 $(KRML) -verbose -tmpdir sha2-c \
 		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
@@ -88,6 +102,10 @@ sha2-c/SHA2_256.c:
 	mkdir -p sha2-c
 	$(KRML_COMMON_SHA2_256) -skip-compilation SHA2_256.fst
 
+sha2-c/SHA2_384.c:
+	mkdir -p sha2-c
+	$(KRML_COMMON_SHA2_384) -skip-compilation SHA2_384.fst
+
 sha2-c/SHA2_512.c:
 	mkdir -p sha2-c
 	$(KRML_COMMON_SHA2_512) -skip-compilation SHA2_512.fst
@@ -97,6 +115,11 @@ test-sha2_256.exe: Hacl.Hash.SHA2_256.Lemmas.fst Hacl.Hash.SHA2_256.fst SHA2_256
 	mkdir -p sha2-c
 	$(KRML_COMMON_SHA2_256) -o test-sha2_256.exe -no-prefix 'Hacl.Test.SHA2_256' $^
 	./test-sha2_256.exe
+
+test-sha2_384.exe: Hacl.Hash.SHA2_384.Lemmas.fst Hacl.Hash.SHA2_384.fst SHA2_384.fst Hacl.Test.SHA2_384.fst
+	mkdir -p sha2-c
+	$(KRML_COMMON_SHA2_384) -o test-sha2_384.exe -no-prefix 'Hacl.Test.SHA2_384' $^
+	./test-sha2_384.exe
 
 test-sha2_512.exe: Hacl.Hash.SHA2_512.Lemmas.fst Hacl.Hash.SHA2_512.fst SHA2_512.fst Hacl.Test.SHA2_512.fst
 	mkdir -p sha2-c
