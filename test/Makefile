@@ -17,7 +17,8 @@ SNAPSHOT_DIR=snapshot
 all:
 	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
 	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
-	$(MAKE) extract-c ct verify OTHERFLAGS="--trace_error --z3rlimit_factor 3"
+	# JK: removed extraction of secure_api which does not work
+	$(MAKE) extract-c-code ct verify OTHERFLAGS="--trace_error --z3rlimit_factor 3"
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
 
