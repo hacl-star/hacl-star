@@ -29,7 +29,7 @@ module U32  = FStar.UInt32
 module U64  = FStar.UInt64
 
 
-inline_for_extraction let log_t = erased (Hacl.Spec.Poly1305_64.text)
+let log_t = erased (Hacl.Spec.Poly1305_64.text)
 
 inline_for_extraction let bigint = felem
 inline_for_extraction let uint8_p = buffer Hacl.UInt8.t
