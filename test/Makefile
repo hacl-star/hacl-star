@@ -17,7 +17,6 @@ all:
 	# $(MAKE) extract-c ct verify
 	# $(MAKE) compile-vale
 	# $(MAKE) -C openssl-engine
-	set
 	$(MAKE) snapshot-gcc
 	$(MAKE) -C snapshot-gcc
 
