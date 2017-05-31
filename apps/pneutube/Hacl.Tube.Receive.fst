@@ -148,29 +148,6 @@ let rec file_recv_loop_2 fb connb state mut_state seqno len =
   let ciphertext = Buffer.sub mut_state 0ul (ciphersize_32) in
   let nonce      = Buffer.sub mut_state ciphersize_32 24ul in
   if U64.(len <^ blocksize) then file_recv_loop_2_lt_blocksize fb connb state mut_state seqno len
-  (* if U64.(len =^ 0uL) then SocketOk *)
-  (* else *)
-  (* if U64.(len <^ blocksize) then ( *)
-  (*   let h0 = ST.get() in *)
-  (*   match tcp_read_all connb ciphertext (cipherlen len) with *)
-  (*   | SocketOk -> ( *)
-  (*       let h1 = ST.get() in *)
-  (*       (\* lemma_reveal_modifies_1 mut_state h0 h1; *\) *)
-  (*       let next = file_next_write_buffer fb blocksize in *)
-  (*       let h2 = ST.get() in *)
-  (*       store64_le (sub nonce 16ul 8ul) seqno; *)
-  (*       let h3 = ST.get() in *)
-  (*       lemma_reveal_modifies_1 mut_state h2 h3; *)
-  (*       let seqno = H64.(seqno +%^ one_64) in *)
-  (*       Math.Lemmas.modulo_lemma (U64.v len) (pow2 32); *)
-  (*       let ciphertext' = Buffer.sub ciphertext 0ul (cipherlen_32 (Int.Cast.uint64_to_uint32 len)) in *)
-  (*       let next' = Buffer.sub next 0ul (Int.Cast.uint64_to_uint32 len) in *)
-  (*       if U32.(Hacl.Box.crypto_box_open_easy_afternm next' ciphertext' (cipherlen len) nonce key =^ 0ul) then ( *)
-  (*         let h4 = ST.get() in *)
-  (*         lemma_reveal_modifies_1 next h3 h4; *)
-  (*         SocketOk ) *)
-  (*       else  (TestLib.perr(20ul); SocketError)) *)
-  (*   | SocketError -> TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); SocketError) *)
   else (
     let h0 = ST.get() in
     match tcp_read_all connb ciphertext ciphersize with
@@ -358,7 +335,7 @@ let file_recv p pkA skB =
   let header  = Buffer.sub state 220ul 1024ul in
   blit pkA 0ul pkA_cpy 0ul 32ul;
   getPublicKey skB pkB;
-  let keygen_res = U32.(crypto_box_beforenm key pkA skB =^ 0ul) in
+  let keygen_res = U32.(NaCl.crypto_box_beforenm key pkA skB =^ 0ul) in
   (* Initialization of the two sockets *)
   let s = init_socket() in
   let lb = Buffer.rcreate socket_rgn s 1ul in

@@ -421,7 +421,7 @@ let file_send fsize f r h p skA pkB =
   makeStreamID sid;
   blit pkB 0ul pkB_cpy 0ul 32ul;
   Buffer.blit f 0ul fname 0ul fsize;
-  let keygen_res = U32.(crypto_box_beforenm key pkB skA =^ 0ul) in
+  let keygen_res = U32.(NaCl.crypto_box_beforenm key pkB skA =^ 0ul) in
   let h1 = ST.get() in
   lemma_reveal_modifies_0 h0 h1;
   (* Initialization of the file_handle *)

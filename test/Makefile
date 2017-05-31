@@ -12,12 +12,12 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 SNAPSHOT_DIR=snapshot
 
 all:
-	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
-	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
-	$(MAKE) extract-c ct verify
-	$(MAKE) compile-vale
-	$(MAKE) -C openssl-engine
-	$(MAKE) snapshot-gcc
+#	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
+#	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
+	$(MAKE) extract-c #ct verify
+#	$(MAKE) compile-vale
+#	$(MAKE) -C openssl-engine
+#	$(MAKE) snapshot-gcc
 	# JP: fixme, doesn't work on build machine
 	# $(MAKE) -C snapshot-gcc
 
@@ -36,6 +36,9 @@ extract-c-code-experimental:
 extract-c-crypto:
 	$(MAKE) -C ../secure_api krml-test-vale.exe
 	$(MAKE) -C ../secure_api krml-test-hacl.exe
+
+extract-c-apps:
+	$(MAKE) -C ../apps/pneutube tube-star.exe
 
 extract-c: extract-c-code extract-c-crypto
 
