@@ -15,7 +15,7 @@ all:
 	$(MAKE) extract-specs extract-all-c ct verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
-	$(MAKE) snapshot-gcc
+	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
 	# JP: fixme, doesn't work on build machine
 	# $(MAKE) -C snapshot-gcc
 
