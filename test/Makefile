@@ -14,7 +14,7 @@ SNAPSHOT_DIR=snapshot
 all:
 	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
 	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
-	$(MAKE) extract-c ct verify
+	$(MAKE) extract-specs extract-c ct verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
 	$(MAKE) snapshot-gcc
@@ -25,6 +25,9 @@ travis:
 	$(MAKE) extract-c-code
 	$(MAKE) ct
 	$(MAKE) -C .. world
+
+extract-specs:
+	$(MAKE) -C $(HACL_HOME)/specs
 
 extract-c-code:
 	$(GFIND) ../code -name out.krml -exec touch {} \;
