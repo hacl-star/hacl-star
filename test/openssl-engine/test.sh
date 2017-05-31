@@ -50,5 +50,5 @@ cat log | \
   $sed 's/for 3s.*//' | \
   $sed 's/\ \{2,\}/,/g' | \
   $sed 's/k//g' | \
-  $sed 's/^/$SO\//g' | \
+  $sed 's/^/'$SO'\//g' | \
   uniq > log-$SO.csv

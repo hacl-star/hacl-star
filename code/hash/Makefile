@@ -1,11 +1,19 @@
-HACL_HOME     = ../../..
+HACL_HOME     = ../..
 FSTAR_HOME   ?= $(HACL_HOME)/dependencies/FStar
 KREMLIN_HOME ?= $(HACL_HOME)/dependencies/kremlin
+PROVIDER     ?= hacl
 
 FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
-KRML=$(KRML_BIN) $(KREMLIN_ARGS)
+INCLUDES= -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
+  -I $(KREMLIN_HOME)/kremlib \
+  -I $(HACL_HOME)/code/hash -I $(HACL_HOME)/other_providers/vale-glue
+KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
+  -drop Prims,FStar,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+  -drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.*,Hacl.Hash.SHA2_256.Lemmas \
+  $(KREMLIN_HOME)/kremlib/testlib.c -tmpdir sha2-c \
+  -add-include '"testlib.h"' -ccopt -march=native
 
 HINTS_ENABLED= --use_hints
 
@@ -29,7 +37,6 @@ SHA2_FILES = \
 	Hacl.Hash.SHA2_384.fst \
 	Hacl.Hash.SHA2_256.Lemmas.fst \
 	Hacl.Hash.SHA2_256.fst
-
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
@@ -59,69 +66,37 @@ clean:
 	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf sha2-c
 
+extract-c: sha2-c/SHA2_256.c sha2-c/SHA2_512.c
 
-# Common call to Kremlin for both extraction and tests
-KRML_COMMON_SHA2_256 = \
-$(KRML) -verbose -tmpdir sha2-c \
-		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
-		-I $(HACL_HOME)/code/hash \
-		-drop Prims -drop FStar \
-		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' \
-		-drop 'Seq.Create' -drop 'Spec.\*' \
-		-drop 'Hacl.Hash.SHA2_256.Lemmas' \
-		-bundle "SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256" \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99
+sha2-c/out.krml: $(SHA2_FILES) SHA2_256.fst SHA2_512.fst Hacl.Test.SHA2_256.fst Hacl.Test.SHA2_512.fst
+	$(KRML) -skip-translation $^
 
-KRML_COMMON_SHA2_384 = \
-$(KRML) -verbose -tmpdir sha2-c \
-		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
-		-I $(HACL_HOME)/code/hash \
-		-drop Prims -drop FStar \
-		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' \
-		-drop 'Seq.Create' -drop 'Spec.\*' \
-		-drop 'Hacl.Hash.SHA2_384.Lemmas' \
-		-bundle "SHA2_384=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_384,SHA2_384" \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99
+sha2-c/SHA2_256.c sha2-c/Hacl_Test_SHA2_256.c: sha2-c/out.krml
+	$(KRML) $^ -skip-compilation -no-prefix Hacl.Test.SHA2_256 -bundle "SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256"
 
-KRML_COMMON_SHA2_512 = \
-$(KRML) -verbose -tmpdir sha2-c \
-		-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
-		-I $(HACL_HOME)/code/hash \
-		-drop Prims -drop FStar \
-		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' \
-		-drop 'Seq.Create' -drop 'Spec.\*' \
-		-drop 'Hacl.Hash.SHA2_512.Lemmas' \
-		-bundle "SHA2_512=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_512,SHA2_512" \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99
+sha2-c/SHA2_384.c sha2-c/Hacl_Test_SHA2_384.c: sha2-c/out.krml
+	$(KRML) $^ -skip-compilation -no-prefix Hacl.Test.SHA2_384 -bundle "SHA2_384=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_384,SHA2_384"
 
+sha2-c/SHA2_512.c sha2-c/Hacl_Test_SHA2_512.c: sha2-c/out.krml
+	$(KRML) $^ -skip-compilation -no-prefix Hacl.Test.SHA2_512 -bundle "SHA2_512=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_512,SHA2_512"
 
-sha2-c/SHA2_256.c:
-	mkdir -p sha2-c
-	$(KRML_COMMON_SHA2_256) -skip-compilation SHA2_256.fst
+CC := $(CC) $(INCLUDES)
 
-sha2-c/SHA2_384.c:
-	mkdir -p sha2-c
-	$(KRML_COMMON_SHA2_384) -skip-compilation SHA2_384.fst
+%.o: %.c
+	$(CC) -c $< -o $@
 
-sha2-c/SHA2_512.c:
-	mkdir -p sha2-c
-	$(KRML_COMMON_SHA2_512) -skip-compilation SHA2_512.fst
+VALE_A := ../../other_providers/vale-glue/vale.a
 
+$(VALE_A):
+	$(MAKE) -C $(dir $@)
 
-test-sha2_256.exe: Hacl.Hash.SHA2_256.Lemmas.fst Hacl.Hash.SHA2_256.fst SHA2_256.fst Hacl.Test.SHA2_256.fst
-	mkdir -p sha2-c
-	$(KRML_COMMON_SHA2_256) -o test-sha2_256.exe -no-prefix 'Hacl.Test.SHA2_256' $^
-	./test-sha2_256.exe
+BASE_OBJ = $(VALE_A) sha2-c/Hacl_Config.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o
 
-test-sha2_384.exe: Hacl.Hash.SHA2_384.Lemmas.fst Hacl.Hash.SHA2_384.fst SHA2_384.fst Hacl.Test.SHA2_384.fst
-	mkdir -p sha2-c
-	$(KRML_COMMON_SHA2_384) -o test-sha2_384.exe -no-prefix 'Hacl.Test.SHA2_384' $^
-	./test-sha2_384.exe
+test-sha2_256.exe: sha2-c/SHA2_256.o sha2-c/Hacl_Test_SHA2_256.o sha2-c/Hacl_Config.o $(BASE_OBJ)
+	$(CC) -o $@ $^
 
-test-sha2_512.exe: Hacl.Hash.SHA2_512.Lemmas.fst Hacl.Hash.SHA2_512.fst SHA2_512.fst Hacl.Test.SHA2_512.fst
-	mkdir -p sha2-c
-	$(KRML_COMMON_SHA2_512) -o test-sha2_512.exe -no-prefix 'Hacl.Test.SHA2_512' $^
-	./test-sha2_512.exe
+test-sha2_384.exe: sha2-c/SHA2_384.o sha2-c/Hacl_Test_SHA2_384.o sha2-c/Hacl_Config.o $(BASE_OBJ)
+	$(CC) -o $@ $^
+
+test-sha2_512.exe: sha2-c/SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o sha2-c/Hacl_Config.o $(BASE_OBJ)
+	$(CC) -o $@ $^

@@ -82,8 +82,8 @@ val init:
               let seq_h_0 = Hacl.Spec.Endianness.reveal_h32s slice_h_0 in
               seq_k == Spec.k /\ seq_h_0 == Spec.h_0 /\ H32.v counter = 0)))
 
-let init state = Hash.init state
-
+let init state =
+  Hash.init state
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
 
