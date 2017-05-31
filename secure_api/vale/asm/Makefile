@@ -31,7 +31,7 @@ CC:=$(CC) $(CCOPTS)
 
 all: vale.a
 
-ALL_OBJ=Vale_Hash_SHA2_256.o sha256-$(MARCH)$(VARIANT).o sha_main.o \
+ALL_OBJ=Vale_Hash_SHA2_256.o sha256-$(MARCH)$(VARIANT).o sha256_main_i.o \
   aes-$(MARCH)$(VARIANT).o vale_aes_glue.o
 
 vale.a: $(ALL_OBJ)
@@ -52,8 +52,9 @@ import:
 	cp $(VALE_HOME)/obj/sha256-macos.S sha256-x86_64-Darwin.S
 	cp $(VALE_HOME)/obj/aes-linux.S aes-x86_64-Linux.S
 	cp $(VALE_HOME)/obj/sha256-linux.S sha256-x86_64-Linux.S
-	cp $(VALE_HOME)/obj/crypto/hashing/sha256_main_i.c sha_main.c
 	$(SED) -i 's/.section .text/.text/' *.S
+	# Suboptimal.
+	$(CC) -E $(VALE_HOME)/obj/crypto/hashing/sha256_main_i.c > sha256_main_i.c
 
 clean:
 	rm -f *.o *~
