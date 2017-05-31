@@ -66,8 +66,6 @@ let alloc () = Hash.alloc ()
 
 #reset-options "--max_fuel 0  --z3rlimit 30"
 
-module Config = Hacl.Config
-
 val init:
   state:uint32_p{length state = v size_state} ->
   Stack unit

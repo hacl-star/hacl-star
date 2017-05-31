@@ -7,7 +7,7 @@ FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 INCLUDES= -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
-  -I ../config/ -I ../config/$(PROVIDER) -I $(KREMLIN_HOME)/kremlib \
+  -I $(KREMLIN_HOME)/kremlib \
   -I $(HACL_HOME)/code/hash -I $(HACL_HOME)/other_providers/vale-glue
 KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
   -drop Prims,FStar,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
