@@ -12,11 +12,11 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 SNAPSHOT_DIR=snapshot
 
 all:
-	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
-	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
-	$(MAKE) extract-c ct verify
-	$(MAKE) compile-vale
-	$(MAKE) -C openssl-engine
+	# if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
+	# if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
+	# $(MAKE) extract-c ct verify
+	# $(MAKE) compile-vale
+	# $(MAKE) -C openssl-engine
 	$(MAKE) snapshot-gcc
 	$(MAKE) -C snapshot-gcc
 
