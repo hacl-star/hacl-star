@@ -11,15 +11,14 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
-###########################################################
-# FIXME: temporarily disable extraction in CI for testing #
-###########################################################
 all:
 	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
 	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
-	$(MAKE) extract-c-code ct verify
+	$(MAKE) extract-c ct verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C snapshot-gcc
 
 travis:
 	$(MAKE) extract-c-code
@@ -40,7 +39,7 @@ extract-c-crypto:
 extract-c: extract-c-code extract-c-crypto
 
 compile-vale:
-	$(MAKE) -C ../secure_api/vale/aes
+	$(MAKE) -C ../secure_api/vale/asm/
 
 ct:
 	$(MAKE) -C ../code ct
