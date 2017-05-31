@@ -12,8 +12,8 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 SNAPSHOT_DIR=snapshot
 
 all:
-#	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
-#	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
+	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
+	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
 	$(MAKE) extract-c #ct verify
 #	$(MAKE) compile-vale
 #	$(MAKE) -C openssl-engine
@@ -40,7 +40,7 @@ extract-c-crypto:
 extract-c-apps:
 	$(MAKE) -C ../apps/pneutube tube-star.exe
 
-extract-c: extract-c-code extract-c-crypto
+extract-c: extract-c-code extract-c-crypto extract-c-apps
 
 compile-vale:
 	$(MAKE) -C ../secure_api/vale/asm/
