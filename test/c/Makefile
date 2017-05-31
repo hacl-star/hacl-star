@@ -2,7 +2,7 @@
 
 TWEETNACL_HOME?=../../other_providers/tweetnacl
 OPENSSL_HOME?=../../other_providers/openssl
-LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
+LIBSODIUM_HOME?=$(shell if [ -d $HOME/libsodium-win64 ]; then echo $HOME/libsodium-win64; else echo ../../other_providers/libsodium/src/libsodium; fi)
 CC?=gcc-6 -fno-tree-vectorize -flto
 CCOPTS := -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
 CFLAGS= $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \

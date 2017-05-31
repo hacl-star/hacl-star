@@ -18,7 +18,8 @@ all:
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
 	$(MAKE) snapshot-gcc
-#	$(MAKE) -C snapshot-gcc
+	# JP: fixme, doesn't work on build machine
+	# $(MAKE) -C snapshot-gcc
 
 travis:
 	$(MAKE) extract-c-code
