@@ -67,7 +67,7 @@ clean:
 
 extract-c: sha2-c/SHA2_256.c sha2-c/SHA2_512.c
 
-sha2-c/out.krml: $(SHA2_FILES) SHA2_256.fst SHA2_512.fst Hacl.Test.SHA2_256.fst Hacl.Test.SHA2_512.fst
+sha2-c/out.krml: $(SHA2_FILES) SHA2_256.fst SHA2_384.fst SHA2_512.fst Hacl.Test.SHA2_256.fst Hacl.Test.SHA2_384.fst Hacl.Test.SHA2_512.fst
 	$(KRML) -skip-translation $^
 
 sha2-c/SHA2_256.c sha2-c/Hacl_Test_SHA2_256.c: sha2-c/out.krml
