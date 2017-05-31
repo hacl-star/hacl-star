@@ -24,11 +24,11 @@ let u32 = U32.t
 let h32 = H32.t
 let uint8_p = buffer H8.t
 
-let vecsizebytes2 = 32ul
-let vecsizebytes3 = 48ul
-let vecsizebytes4 = 64ul
-let vecsizebytes8 = 128ul
-let vecsizebytes12 = 192ul
+inline_for_extraction let vecsizebytes2 = 32ul
+inline_for_extraction let vecsizebytes3 = 48ul
+inline_for_extraction let vecsizebytes4 = 64ul
+inline_for_extraction let vecsizebytes8 = 128ul
+inline_for_extraction let vecsizebytes12 = 192ul
 
 let idx = a:U32.t{U32.v a < 4}
 
