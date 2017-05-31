@@ -25,7 +25,7 @@ tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_
 	mkdir -p tube
 	$(KRML) $(filter %.c %.fst, $^) \
 		-I c_bindings \
-		-drop Libsodium,Curve25519,Hacl.Types,NaCl,Spec.\* \
+		-drop Libsodium,Curve25519,Hacl.Types,NaCl,Spec.\*,Hacl.Spec.\* \
 		-bundle "Hacl.Tube.Send=Hacl.Tube.Send" \
 		-no-prefix Libsodium -add-include '<sodium.h>' -add-include '"testlib.h"' \
 		-add-include '"NaCl.h"' -add-include '"Curve25519.h"' \
