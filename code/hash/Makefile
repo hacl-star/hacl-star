@@ -57,15 +57,13 @@ all-verif: $(addsuffix -verify, $(SHA2_FILES)) # This is too costly for the CI
 all-ct: $(addsuffix -ct, $(SHA2_FILES))
 
 # Extraction
-extract-c: sha2-c/SHA2_256.c sha2-c/SHA2_384.c sha2-c/SHA2_512.c
+extract-c: sha2-256-c/SHA2_256.c sha2-384-c/SHA2_384.c sha2-512-c/SHA2_512.c
 
 test: test-sha2_256.exe test-sha2_384.exe test-sha2_512.exe
 
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf sha2-c sha2-*-c
-
-extract-c: sha2-256-c/SHA2_256.c sha2-384-c/SHA2_384.c sha2-512-c/SHA2_512.c
 
 sha2-c/out.krml: $(SHA2_FILES) SHA2_256.fst SHA2_384.fst SHA2_512.fst Hacl.Test.SHA2_256.fst Hacl.Test.SHA2_384.fst Hacl.Test.SHA2_512.fst
 	$(KRML) -tmpdir sha2-c -skip-translation $^
