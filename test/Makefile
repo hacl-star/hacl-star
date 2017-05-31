@@ -12,9 +12,7 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 SNAPSHOT_DIR=snapshot
 
 all:
-	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
-	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
-	$(MAKE) extract-specs extract-c ct verify
+	$(MAKE) extract-specs extract-all-c ct verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
 	$(MAKE) snapshot-gcc
@@ -46,6 +44,12 @@ extract-c-apps:
 # JK: fixme, extract-c-apps to be added to the regression tests when
 # LibSodium is added to the build machine
 extract-c: extract-c-code extract-c-crypto # extract-c-apps
+
+# These cannot benefit from parallelism, tests C extraction for available compilers
+extract-all-c:
+	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
+	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
+	$(MAKE) extract-c
 
 compile-vale:
 	$(MAKE) -C ../secure_api/vale/asm/
