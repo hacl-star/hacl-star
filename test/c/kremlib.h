@@ -77,7 +77,7 @@ void *Prims____Cons___tl(void *_);
 #define KRML_EABORT(t) (exit(255), *((t*)malloc(sizeof(t))))
 
 #define KRML_CHECK_SIZE(elt, size)                                             \
-  if ((size) > INTPTR_MAX / sizeof(elt)) {                                     \
+  if (((size_t)size) > SIZE_MAX / sizeof(elt)) {                                       \
     printf("Maximum allocatable size exceeded, aborting before overflow at "   \
            "%s:%d\n",                                                          \
            __FILE__, __LINE__);                                                \
@@ -103,12 +103,10 @@ bool FStar_HyperStack_is_eternal_color(Prims_int x0);
     (void)(x);                                                                 \
   } while (0)
 
-#define FStar_Monotonic_RRef_m_recall(x1,x2,x3,x4)                             \
+#define FStar_Monotonic_RRef_m_recall(x1,x2)                                   \
   do {                                                                         \
     (void)(x1);                                                                \
     (void)(x2);                                                                \
-    (void)(x3);                                                                \
-    (void)(x4);                                                                \
   } while (0)
 #define FStar_Monotonic_RRef_m_write(x1,x2,x3,x4,x5)                           \
   do {                                                                         \
@@ -126,8 +124,8 @@ bool FStar_HyperStack_is_eternal_color(Prims_int x0);
 // Misc; many of these are polymorphic, hence not extracted (yet) by Kremlin,
 // which means that a macro is the "right" way to make sure they don't generate
 // a compilation error.
-#define Prims_fst(x) (x).fst
-#define Prims_snd(x) (x).snd
+#define FStar_Pervasives_fst(x) (x).fst
+#define FStar_Pervasives_snd(x) (x).snd
 #define FStar_Seq_Base_createEmpty(x) 0
 #define FStar_Seq_Base_create(len, init) 0
 #define FStar_Seq_Base_upd(s, i, e) 0
