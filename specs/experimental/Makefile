@@ -12,7 +12,7 @@ OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 
 all:
 	$(MAKE) lib
-	$(MAKE) sha2.exe chacha20-vec.exe chacha20-vec2.exe chacha20-vec256.exe
+	$(MAKE) sha2.exe chacha20-vec.exe chacha20-vec2.exe chacha20-vec256.exe secretbox.exe
 
 EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  FStar_Endianness.ml
 
@@ -27,6 +27,14 @@ OCAML_INCLUDES=-I $(HACL_HOME)/code/lib/ml $(HACL_HOME)/code/lib/ml/hacllib.cmxa
 
 lib:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml MEM=HST
+
+secretbox.exe: Spec.HSalsa20.fst Spec.SecretBox.fst
+	$(MAKE) -C ../code/lib/ml MEM=HST
+	mkdir -p secretbox-spec
+	$(FSTAR) $(ARGS) --odir secretbox-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> secretbox-spec/Spec_SecretBox.ml
+	$(OCAMLOPT) -I secretbox-spec $(OCAML_INCLUDES) $(addprefix secretbox-spec/, $(EXTRACTED)) secretbox-spec/Spec_Loops.ml secretbox-spec/Spec_Lib.ml secretbox-spec/Spec_CTR.ml secretbox-spec/Spec_Salsa20.ml secretbox-spec/Spec_HSalsa20.ml secretbox-spec/Spec_Poly1305_Lemmas.ml secretbox-spec/Spec_Poly1305.ml secretbox-spec/Spec_SecretBox.ml -o secretbox.exe
+	./secretbox.exe
 
 chacha20-vec.exe: Spec.Chacha20_vec.fst
 	$(MAKE) lib
@@ -62,5 +70,4 @@ sha2_256.exe: Spec.SHA256.fst
 
 clean:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml clean
-	$(MAKE) -C experimental clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 chacha-spec-vec2 chacha-spec-vec sha2-spec ed25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 chacha-spec-vec2 chacha-spec-vec sha2-spec ed25519-spec secretbox-spec

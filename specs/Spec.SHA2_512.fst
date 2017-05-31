@@ -214,14 +214,15 @@ let lemma_modulo (l:nat) (s:nat{s <> 0 /\ l >= s /\ l % s = 0}) : Lemma
   (ensures ((l - s) % s = 0)) =
 Math.Lemmas.lemma_mod_plus (l - s) 1 s
 
-
-#reset-options "--max_fuel 1 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val lemma_update_update_multi: (h0:hash_w) -> (blocks:bytes{Seq.length blocks >= size_block /\ Seq.length blocks % size_block = 0}) -> Lemma
   (ensures  (let (block,rem) = Seq.split blocks size_block in
              let h1 = update h0 block in
              let h2 = update_multi h1 rem in
              h2 == update_multi h0 blocks))
+
+#reset-options "--max_fuel 1 --z3rlimit 100"
 
 let lemma_update_update_multi h0 blocks =
   let (block,rem) = Seq.split blocks size_block in

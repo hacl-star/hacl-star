@@ -45,6 +45,9 @@ compile-vale:
 ct:
 	$(MAKE) -C ../code ct
 
+verify-specs:
+	$(MAKE) -C ../specs all-ver
+
 verify-code:
 	$(MAKE) -C ../code ci
 
