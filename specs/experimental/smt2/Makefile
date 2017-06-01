@@ -1,6 +1,6 @@
 all: Chacha20.result
 
-Chacha20.result:
+Chacha20.result: Chacha20.smt
 	z3 -smt2 Chacha20.smt | tee  Chacha20.result | grep -B1 sat
 
 clean:

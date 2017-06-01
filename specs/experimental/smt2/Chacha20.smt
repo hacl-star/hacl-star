@@ -1,7 +1,10 @@
 ;(set-logic QF_ABV)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Chacha20: RFC 7539
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define-sort idx () (_ BitVec 4))
-(define-sort shift () (_ BitVec 32))
 (define-sort uint32 () (_ BitVec 32))
 (define-sort state () (Array idx uint32))
 (define-sort key () (_ BitVec 256))
@@ -9,10 +12,10 @@
 (define-sort counter () (_ BitVec 32))
 (define-sort block () (_ BitVec 512))
 
-(define-fun rol ((x uint32) (s shift)) uint32
+(define-fun rol ((x uint32) (s uint32)) uint32
 	    (bvor (bvshl x s) (bvlshr x (bvsub #x00000020 s))))
 
-(define-fun line ((a idx) (b idx) (d idx) (s shift) (m state)) state
+(define-fun line ((a idx) (b idx) (d idx) (s uint32) (m state)) state
  	    (let ((m1 (store m a (bvadd (select m a) (select m b)))))
 	         (store m1 d (rol (bvxor (select m1 d) (select m1 a)) s))))
 
@@ -85,8 +88,8 @@
             (let ((s16 (store s15 #xf (flip_endian ((_ extract 31 0) n)))))
 	         s16))))))))))))))))))
 
-(define-fun chacha20_block ((k key) (n nonce) (c counter)) block
-            (let ((st (chacha20_core (setup k n c))))
+(define-fun chacha20_block_state ((s0 state)) block
+            (let ((st (chacha20_core s0)))
 	         (concat (flip_endian (select st #x0))
 	         (concat (flip_endian (select st #x1))
 	         (concat (flip_endian (select st #x2))
@@ -105,6 +108,9 @@
 		         (flip_endian (select st #xf)))))))))))))))))))
 	  
 
+(define-fun chacha20_block ((k key) (n nonce) (c counter)) block
+	    (chacha20_block_state (setup k n c)))
+
 ;; Quarter Round RFC Test
 (declare-const s state)
 (assert (= (select s #x0) #x11111111))
@@ -117,7 +123,7 @@
 (assert (= (let ((x (quarter_round #x0 #x1 #x2 #x3 s))) (select x #x3)) #x5881c4bb))
 (echo "Running quarter_round RFC test:")
 (check-sat)
-(get-model)
+;(get-model)
 
 ;; Chacha20 Block Function RFC Test Vector
 (define-fun k () key #x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f)
@@ -143,7 +149,7 @@
 (assert (= (select s0 #xf) #x00000000))
 (echo "Running setup RFC test:")
 (check-sat)
-(get-model)
+;(get-model)
 
 (define-fun s20 () state (rounds s0))
 (assert (= (select s20 #x0) #x837778ab))
@@ -164,11 +170,160 @@
 (assert (= (select s20 #xf) #x4e3c50a2))
 (echo "Running rounds RFC test:")
 (check-sat)
-(get-model)
+;(get-model)
 
 (define-fun key1 () block (chacha20_block k n c))
 (assert (= key1 #x10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e))
 (echo "Running chacha20_block RFC test:")
 (check-sat)
-(get-model)
+;(get-model)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Vectorized Chacha20 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-sort idx2 () (_ BitVec 2))
+(define-sort uint32x4 () (Array idx2 uint32))
+(define-sort state2 () (Array idx2 uint32x4))
+
+(define-fun rol2 ((v uint32x4) (s uint32)) uint32x4
+	    (let ((v0 ((as const uint32x4) #x00000000)))
+	    (let ((v1 (store v0 #b00 (rol (select v #b00) s))))
+	    (let ((v2 (store v1 #b01 (rol (select v #b01) s))))
+	    (let ((v3 (store v2 #b10 (rol (select v #b10) s))))
+	    (let ((v4 (store v3 #b11 (rol (select v #b11) s))))
+	         v4))))))
+
+
+(define-fun add2 ((x uint32x4) (y uint32x4)) uint32x4
+	    ((_ map (bvadd (uint32 uint32) uint32)) x y))
+
+(define-fun xor2 ((x uint32x4) (y uint32x4)) uint32x4
+	    ((_ map (bvxor (uint32 uint32) uint32)) x y))
+
+
+(define-fun line2 ((a idx2) (b idx2) (d idx2) (s uint32) (m state2)) state2
+ 	    (let ((m1 (store m a (add2 (select m a) (select m b)))))
+	         (store m1 d (rol2 (xor2 (select m1 d) (select m1 a)) s))))
+
+
+(define-fun shuffle_right ((x uint32x4) (n idx2)) uint32x4
+	    (let ((v0 ((as const uint32x4) #x00000000)))
+	    (let ((v1 (store v0 #b00 (select x n))))
+	    (let ((v2 (store v1 #b01 (select x (bvadd n #b01)))))
+	    (let ((v3 (store v2 #b10 (select x (bvadd n #b10)))))
+	    (let ((v4 (store v3 #b11 (select x (bvadd n #b11)))))
+	         v4))))))
+
+(define-fun shuffle0123 ((m state2)) state2
+	    (let ((m1 (store m #b01 (shuffle_right (select m #b01) #b01))))
+	    (let ((m2 (store m1 #b10 (shuffle_right (select m #b10) #b10))))
+	    (let ((m3 (store m2 #b11 (shuffle_right (select m #b11) #b11))))
+	         m3))))
+
+(define-fun shuffle0321 ((m state2)) state2
+	    (let ((m1 (store m #b01 (shuffle_right (select m #b01) #b11))))
+	    (let ((m2 (store m1 #b10 (shuffle_right (select m #b10) #b10))))
+	    (let ((m3 (store m2 #b11 (shuffle_right (select m #b11) #b01))))
+	         m3))))
+	    
+(define-fun column_round2 ((m state2)) state2
+	    (let ((m1 (line2 #b00 #b01 #b11 #x00000010 m)))
+	    	 (let ((m2 (line2 #b10 #b11 #b01 #x0000000c m1)))
+		      (let ((m3 (line2 #b00 #b01 #b11 #x00000008 m2)))
+		           (line2 #b10 #b11 #b01 #x00000007 m3)))))
+
+
+(define-fun diagonal_round2 ((m state2)) state2
+	    (shuffle0321 (column_round2 (shuffle0123 m))))
+
+(define-fun double_round2 ((m state2)) state2  
+	    (diagonal_round2 (column_round2 m)))
+
+(define-fun rounds2 ((m state2)) state2  
+	    (double_round2 
+	    (double_round2 
+	    (double_round2 
+	    (double_round2 
+	    (double_round2 
+	    (double_round2 
+	    (double_round2 
+	    (double_round2 
+	    (double_round2 
+	    (double_round2 m)))))))))))
+
+(define-fun add_state ((x state2) (y state2)) state2
+	    (let ((v0 (store x #b00 (add2 (select x #b00) (select y #b00)))))
+	    (let ((v1 (store v0 #b01 (add2 (select x #b01) (select y #b01)))))
+	    (let ((v2 (store v1 #b10 (add2 (select x #b10) (select y #b10)))))
+	    (let ((v3 (store v2 #b11 (add2 (select x #b11) (select y #b11)))))
+	         v3)))))
+
+(define-fun chacha20_core2 ((m state2)) state2  
+	    (add_state m (rounds2 m)))
+
+(define-fun setup2 ((s0 state)) state2
+	    (let ((v0 ((as const uint32x4) #x00000000)))
+	    (let ((v00 (store v0  #b00 (select s0 #x0))))
+	    (let ((v01 (store v00 #b01 (select s0 #x1))))
+	    (let ((v02 (store v01 #b10 (select s0 #x2))))
+	    (let ((v03 (store v02 #b11 (select s0 #x3))))
+	    (let ((v10 (store v0  #b00 (select s0 #x4))))
+	    (let ((v11 (store v10 #b01 (select s0 #x5))))
+	    (let ((v12 (store v11 #b10 (select s0 #x6))))
+	    (let ((v13 (store v12 #b11 (select s0 #x7))))
+	    (let ((v20 (store v0  #b00 (select s0 #x8))))
+	    (let ((v21 (store v20 #b01 (select s0 #x9))))
+	    (let ((v22 (store v21 #b10 (select s0 #xa))))
+	    (let ((v23 (store v22 #b11 (select s0 #xb))))
+	    (let ((v30 (store v0  #b00 (select s0 #xc))))
+	    (let ((v31 (store v30 #b01 (select s0 #xd))))
+	    (let ((v32 (store v31 #b10 (select s0 #xe))))
+	    (let ((v33 (store v32 #b11 (select s0 #xf))))
+	    (let ((st ((as const state2) v0)))
+	    (let ((st0 (store st #b00 v03))) 
+	    (let ((st1 (store st0 #b01 v13))) 
+	    (let ((st2 (store st1 #b10 v23))) 
+	    (let ((st3 (store st2 #b11 v33)))
+	         st3)))))))))))))))))))))))
+	    
+	     
+(define-fun chacha20_block2_state ((s0 state)) block
+	    (let ((st (chacha20_core2 (setup2 s0))))
+	         (concat (flip_endian (select (select st #b00) #b00))
+	         (concat (flip_endian (select (select st #b00) #b01))
+	         (concat (flip_endian (select (select st #b00) #b10))
+	         (concat (flip_endian (select (select st #b00) #b11))
+	         (concat (flip_endian (select (select st #b01) #b00))
+	         (concat (flip_endian (select (select st #b01) #b01))
+	         (concat (flip_endian (select (select st #b01) #b10))
+	         (concat (flip_endian (select (select st #b01) #b11))
+	         (concat (flip_endian (select (select st #b10) #b00))
+	         (concat (flip_endian (select (select st #b10) #b01))
+	         (concat (flip_endian (select (select st #b10) #b10))
+	         (concat (flip_endian (select (select st #b10) #b11))
+	         (concat (flip_endian (select (select st #b11) #b00))
+	         (concat (flip_endian (select (select st #b11) #b01))
+	         (concat (flip_endian (select (select st #b11) #b10))
+	                 (flip_endian (select (select st #b11) #b11)))))))))))))))))))
+
+
+(define-fun chacha20_block2 ((k key) (n nonce) (c counter)) block
+	         (chacha20_block2_state (setup k n c)))
+
+;; Chacha20 Block Function RFC Test Vector
+(define-fun key2 () block (chacha20_block2 k n c))
+(assert (= key2 #x10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e))
+(echo "Running vectorized chacha20_block2 RFC test:")
+(check-sat)
+;(get-model)
+
+
+(assert (forall ((s0 state))
+        (= (chacha20_block k n c) (chacha20_block2 k n c))))
+
+(echo "Verifying chacha20_block = chacha_block2:")
+(check-sat)
+;(get-model)
 
