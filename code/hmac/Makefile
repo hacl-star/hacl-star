@@ -1,4 +1,4 @@
-HACL_HOME    ?= ../../..
+HACL_HOME    = ../..
 FSTAR_HOME   ?= $(HACL_HOME)/dependencies/FStar
 KREMLIN_HOME ?= $(HACL_HOME)/dependencies/kremlin
 
