@@ -10,7 +10,8 @@ INCLUDES= -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
   -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash
 KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
   -drop Prims,FStar,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
-  -drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.*,Hacl.Hash.SHA2_256.Lemmas \
+  -drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
+  -drop Hacl.Hash.SHA2_256.Lemmas,Hacl.Hash.SHA2_384.Lemmas,Hacl.Hash.SHA2_512.Lemmas \
   $(KREMLIN_HOME)/kremlib/testlib.c \
   -add-include '"testlib.h"' -ccopt -march=native
 
