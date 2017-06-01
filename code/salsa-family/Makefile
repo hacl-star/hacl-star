@@ -11,7 +11,6 @@ SALSA_FAMILY_FILES= \
 	Hacl.SecureAPI.Chacha20.fst \
 	Chacha20.fst \
 	Salsa20.fst \
-	Spec.Chacha20_vec.fst \
 	Spec.Chacha20_vec1.Lemmas.fst \
 	Spec.CTR3.fst \
 	Hacl.Impl.Chacha20.Vec128.State.fst \
