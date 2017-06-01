@@ -1,4 +1,5 @@
 ;(set-logic QF_ABV)
+(set-option :produce-models true)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Chacha20: RFC 7539
@@ -144,7 +145,7 @@
 (assert (= (let ((x (quarter_round #x0 #x1 #x2 #x3 s))) (select x #x3)) #x5881c4bb))
 (echo "Running quarter_round RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 ;; Chacha20 Block Function RFC Test Vector
 (define-fun k () key #x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f)
@@ -170,7 +171,7 @@
 (assert (= (select s0 #xf) #x00000000))
 (echo "Running setup RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 (define-fun s20 () state (rounds s0))
 (assert (= (select s20 #x0) #x837778ab))
@@ -191,13 +192,13 @@
 (assert (= (select s20 #xf) #x4e3c50a2))
 (echo "Running rounds RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 (define-fun key1 () block (chacha20_block k n c))
 (assert (= key1 #x10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e))
 (echo "Running chacha20_block RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -341,17 +342,24 @@
 
 ;; Chacha20 Block Function RFC Test Vector
 (define-fun key2 () block (chacha20_block2 k n c))
-(assert (= key2 #x10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e))
+;(assert (= key2 #x10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e))
 (echo "Running vectorized chacha20_block2 RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 
 (assert (forall ((m state))
         (= (chacha20_block_state m) (chacha20_block2_state m))))
-
 (echo "Verifying chacha20_block_state = chacha_block2_state:")
 (check-sat)
-;(get-model)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n c) (chacha20_block2 k n c))))
+(echo "Verifying chacha20_block = chacha_block2:")
+(check-sat)
+(get-model)
+
+
 
 
