@@ -2,7 +2,7 @@ UNAME := $(shell uname)
 
 FSTAR_HOME?=../../dependencies/FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=..
+HACL_HOME=../..
 HINTS_ENABLED?=--use_hints
 
 HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack

@@ -33,27 +33,22 @@ let shift_reduce output =
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-[@"c_inline"]
+[@"substitute"]
 val mul_shift_reduce_:
   output:felem_wide ->
-  (* init_input:Ghost.erased seqelem -> *)
   input:felem{disjoint output input} ->
   input2:felem{disjoint output input2 /\ disjoint input input2}  ->
-  (* ctr:U32.t{U32.v ctr <= len} -> *)
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ live h input2
-      (* /\ mul_shift_reduce_pre (as_seq h output) (Ghost.reveal init_input) (as_seq h input) (as_seq h input2) (U32.v ctr) *)
-      /\ mul_shift_reduce_pre (as_seq h output) (as_seq h input) (as_seq h input) (as_seq h input2) (len)
-      ))
+      /\ mul_shift_reduce_pre (as_seq h output) (as_seq h input) (as_seq h input) (as_seq h input2) (len) ))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 input /\ live h0 input2 /\ modifies_2 output input h0 h1
       /\ live h1 output /\ live h1 input
       /\ mul_shift_reduce_pre (as_seq h0 output) (as_seq h0 input) (as_seq h0 input) (as_seq h0 input2) (len)
-      (* /\ mul_shift_reduce_pre (as_seq h0 output) (Ghost.reveal init_input) (as_seq h0 input) (as_seq h0 input2) (U32.v ctr) *)
       /\ (let output', input' = mul_shift_reduce_spec_ (as_seq h0 output) (as_seq h0 input) (as_seq h0 input) (as_seq h0 input2) (0) in
          as_seq h1 output == output')
       ))
 #reset-options "--z3rlimit 1000 --initial_fuel 1 --max_fuel 1"
-let mul_shift_reduce_ output (* init_input  *)input input2 =
+let mul_shift_reduce_ output input input2 =
   let h0 = ST.get() in
   let inv (h1: HyperStack.mem) (i: nat): Type0 =
     live h1 output /\ live h1 input /\ modifies_2 output input h0 h1 /\ 0 <= i /\ i <= len /\
@@ -69,7 +64,6 @@ let mul_shift_reduce_ output (* init_input  *)input input2 =
     let i = FStar.UInt32.(ctr) in
     let j = FStar.UInt32.(clen -^ 1ul -^ i) in
     let input2i = input2.(j) in
-    (* lemma_mul_shift_reduce_pre_def (as_seq h0 output) (as_seq h0 input) (as_seq h0 input2) (UInt32.v ctr + 1); *)
     Hacl.Spec.Bignum.Fproduct.lemma_sum_scalar_multiplication_ (as_seq h0' output) (as_seq h0' input)
                                                                (input2i) len;
     sum_scalar_multiplication_ output input input2i;

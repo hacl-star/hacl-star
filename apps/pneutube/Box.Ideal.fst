@@ -41,7 +41,7 @@ let cipherlen m = m + 16
 
 assume val pubKey: sk:seq h8 -> GTot (pk:seq u8)
 assume val agreedKey: pkA: seq u8 -> pkB: seq u8 -> GTot (k: seq u8)
-assume val boxed: FStar.HyperStack.mem -> 
+assume val boxed: FStar.HyperStack.mem ->
        	   	  pkA:seq u8 ->
 		  pkB:seq u8 ->
 		  m:  seq h8 ->
@@ -54,7 +54,7 @@ val randombytes_buf:
   Stack unit
     (requires (fun h -> live h b))
     (ensures  (fun h0 _ h1 -> modifies_1 b h0 h1 /\ live h1 b))
-let randombytes_buf b l = 
+let randombytes_buf b l =
     Libsodium.randombytes_buf b l
 
 
@@ -63,13 +63,13 @@ val genPrivateKey:
     Stack unit
     (requires (fun h -> live h sk))
     (ensures  (fun h0 _ h1 -> live h1 sk /\ modifies_1 sk h0 h1))
-let genPrivateKey sk = 
+let genPrivateKey sk =
     Libsodium.randombytes_buf sk 32uL
 
 
-val getPublicKey: 
+val getPublicKey:
     sk:privateKey ->
-    pk:publicKey{disjoint sk pk} -> 
+    pk:publicKey{disjoint sk pk} ->
     Stack unit
     (requires (fun h -> live h pk /\ live h sk))
     (ensures  (fun h0 _ h1 -> live h0 sk /\ live h1 pk /\ modifies_1 pk h0 h1
@@ -85,72 +85,72 @@ let getPublicKey sk pk =
   assume (as_seq hfin pk == pubKey (as_seq hinit sk))
 
 
-val crypto_box_beforenm:
-  k:symmetricKey ->
-  pk:publicKey{disjoint k pk} ->
-  sk:privateKey{disjoint k sk /\ disjoint sk pk} ->
-  Stack u32
-    (requires (fun h -> live h k /\ live h pk /\ live h sk))
-    (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k /\ live h0 sk /\ live h0 pk
-    	      	      	/\ (let pkA = pubKey (as_seq h0 sk) in
-			 let pkB = as_seq h0 pk in
-			 as_seq h1 k == agreedKey pkA pkB)))
-let crypto_box_beforenm k pk sk =
-  let h0 = ST.get() in
-  let r = NaCl.crypto_box_beforenm k pk sk in
-  let h1 = ST.get() in
-  assume (let pkA = pubKey (as_seq h0 sk) in
-			 let pkB = as_seq h0 pk in
-			 as_seq h1 k == agreedKey pkA pkB);
-  r
+(* val crypto_box_beforenm: *)
+(*   k:symmetricKey -> *)
+(*   pk:publicKey{disjoint k pk} -> *)
+(*   sk:privateKey{disjoint k sk /\ disjoint sk pk} -> *)
+(*   Stack u32 *)
+(*     (requires (fun h -> live h k /\ live h pk /\ live h sk)) *)
+(*     (ensures  (fun h0 _ h1 -> modifies_1 k h0 h1 /\ live h1 k /\ live h0 sk /\ live h0 pk *)
+(*     	      	      	/\ (let pkA = pubKey (as_seq h0 sk) in *)
+(* 			 let pkB = as_seq h0 pk in *)
+(* 			 as_seq h1 k == agreedKey pkA pkB))) *)
+(* let crypto_box_beforenm k pk sk = *)
+(*   let h0 = ST.get() in *)
+(*   let r = NaCl.crypto_box_beforenm k pk sk in *)
+(*   let h1 = ST.get() in *)
+(*   assume (let pkA = pubKey (as_seq h0 sk) in *)
+(* 			 let pkB = as_seq h0 pk in *)
+(* 			 as_seq h1 k == agreedKey pkA pkB); *)
+(*   r *)
 
 
-val crypto_box_easy_afternm:
-  #pkA:uint8_p ->
-  #pkB:uint8_p ->
-  c:uint8_p ->
-  m:uint8_p ->
-  mlen:u64 ->
-  n:nonce ->
-  k:symmetricKey ->
-  Stack UInt32.t
-    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k /\
-    	                (let len = U64.v mlen in
-			 let spkA = as_seq h pkA in
-			 let spkB = as_seq h pkB in
-    	      	        as_seq h k == agreedKey spkA spkB /\
-           		 len <= length m /\
-	   		 cipherlen len = length c)))
-    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c /\ live h0 n /\ live h0 m /\
-    	      	      	      boxed h1 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h0 m) (as_seq h0 n)))
-let crypto_box_easy_afternm #pkA #pkB c m l n k =
-  let h0 = ST.get() in
-  let x = NaCl.crypto_box_easy_afternm c m l n k in
-  let h1 = ST.get() in
-  assume (boxed h1 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h0 m) (as_seq h0 n));
-  x
+(* val crypto_box_easy_afternm: *)
+(*   #pkA:uint8_p -> *)
+(*   #pkB:uint8_p -> *)
+(*   c:uint8_p -> *)
+(*   m:uint8_p -> *)
+(*   mlen:u64 -> *)
+(*   n:nonce -> *)
+(*   k:symmetricKey -> *)
+(*   Stack UInt32.t *)
+(*     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k /\ *)
+(*     	                (let len = U64.v mlen in *)
+(* 			 let spkA = as_seq h pkA in *)
+(* 			 let spkB = as_seq h pkB in *)
+(*     	      	        as_seq h k == agreedKey spkA spkB /\ *)
+(*            		 len <= length m /\ *)
+(* 	   		 cipherlen len = length c))) *)
+(*     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c /\ live h0 n /\ live h0 m /\ *)
+(*     	      	      	      boxed h1 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h0 m) (as_seq h0 n))) *)
+(* let crypto_box_easy_afternm #pkA #pkB c m l n k = *)
+(*   let h0 = ST.get() in *)
+(*   let x = NaCl.crypto_box_easy_afternm c m l n k in *)
+(*   let h1 = ST.get() in *)
+(*   assume (boxed h1 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h0 m) (as_seq h0 n)); *)
+(*   x *)
 
-val crypto_box_open_easy_afternm:
-  #pkA:uint8_p ->
-  #pkB:uint8_p ->
-  m:uint8_p ->
-  c:uint8_p ->
-  clen:u64 ->
-  n:nonce ->
-  k:symmetricKey ->
-  Stack UInt32.t
-    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k /\
-    	                (let len = U64.v clen in
-			 let spkA = as_seq h pkA in
-			 let spkB = as_seq h pkB in
-   			 as_seq h k == agreedKey spkA spkB /\
-           		 len = length c /\ len = length m + 16)))
-    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m /\ live h0 n
-    	      	      	    /\ U64.v clen = cipherlen (length m)
-			    /\ boxed h0 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h1 m) (as_seq h0 n)))
-let crypto_box_open_easy_afternm #pkA #pkB m c l n k =
-  let h0 = ST.get() in
-  let x = NaCl.crypto_box_open_easy_afternm m c l n k in
-  let h1 = ST.get() in
-  assume (boxed h0 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h1 m) (as_seq h0 n));
-  x
+(* val crypto_box_open_easy_afternm: *)
+(*   #pkA:uint8_p -> *)
+(*   #pkB:uint8_p -> *)
+(*   m:uint8_p -> *)
+(*   c:uint8_p -> *)
+(*   clen:u64 -> *)
+(*   n:nonce -> *)
+(*   k:symmetricKey -> *)
+(*   Stack UInt32.t *)
+(*     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k /\ *)
+(*     	                (let len = U64.v clen in *)
+(* 			 let spkA = as_seq h pkA in *)
+(* 			 let spkB = as_seq h pkB in *)
+(*    			 as_seq h k == agreedKey spkA spkB /\ *)
+(*            		 len = length c /\ len = length m + 16))) *)
+(*     (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m /\ live h0 n *)
+(*     	      	      	    /\ U64.v clen = cipherlen (length m) *)
+(* 			    /\ boxed h0 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h1 m) (as_seq h0 n))) *)
+(* let crypto_box_open_easy_afternm #pkA #pkB m c l n k = *)
+(*   let h0 = ST.get() in *)
+(*   let x = NaCl.crypto_box_open_easy_afternm m c l n k in *)
+(*   let h1 = ST.get() in *)
+(*   assume (boxed h0 (as_seq h0 pkA) (as_seq h0 pkB) (as_seq h1 m) (as_seq h0 n)); *)
+(*   x *)

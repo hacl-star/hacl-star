@@ -19,6 +19,8 @@ open Hacl.Spec.Bignum.AddAndMultiply
 open Hacl.Spe.Poly1305_64
 open Hacl.Bignum.AddAndMultiply
 
+include Hacl.Impl.Poly1305_64.State
+
 module H8   = Hacl.UInt8
 module Limb = Hacl.Bignum.Limb
 module Wide = Hacl.Bignum.Wide
@@ -38,18 +40,12 @@ let wordB : Type0  = b:uint8_p{length b <= 16}
 let wordB_16 : Type0 = b:uint8_p{length b = 16}
 
 
-noeq type poly1305_state =  {r:bigint; h:bigint}
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
+#reset-options "--max_fuel 0 --z3rlimit 5"
 
 (** From the current memory state, returns the integer corresponding to a elemB, (before
    computing the modulo)  *)
 private val sel_int: h:mem -> b:elemB{live h b} -> GTot nat
 private let sel_int h b = eval h b
-
-let live_st m (st:poly1305_state) : Type0 =
-  live m st.h /\ live m st.r /\ disjoint st.h st.r
 
 
 (* ############################################################################# *)
@@ -57,7 +53,7 @@ let live_st m (st:poly1305_state) : Type0 =
 (* ############################################################################# *)
 
 
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 0"
 
 [@"substitute"]
 val upd_3: b:felem -> b0:limb -> b1:limb -> b2:limb ->
@@ -172,7 +168,7 @@ let poly1305_start a =
 
 module Spec = Hacl.Spec.Poly1305_64
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@"substitute"]
 val poly1305_init_:
@@ -192,7 +188,22 @@ let poly1305_init_ st key =
   log
 
 
-#set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
+
+private val hide_log:
+  h0:HyperStack.mem ->
+  m:uint8_p{length m <= 16} ->
+  log:log_t{live h0 m} ->
+  Tot (log':log_t{Ghost.reveal log' == FStar.Seq.(create 1 (as_seq h0 m) @| Ghost.reveal log)})
+
+#reset-options "--z3rlimit 100 --max_fuel 0"
+
+let hide_log h0 m log =
+  let (m':erased Spec.Poly1305.word) = elift1 #(b:wordB{live h0 b}) #Spec.word'
+                    (fun m -> reveal_sbytes (as_seq h0 m)) (hide m) in
+  elift2 (fun (l:Spec.Poly1305.text) (m:Spec.Poly1305.word) -> FStar.Seq.((Seq.create 1 (m)) @| l)) log m'
+
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 [@"c_inline"]
 val poly1305_update:
@@ -212,7 +223,7 @@ val poly1305_update:
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log)
         == poly1305_update_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m)
       ))
-#set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 0"
 [@"c_inline"]
 let poly1305_update log st m =
   let acc = st.h in
@@ -233,12 +244,14 @@ let poly1305_update log st m =
   no_upd_lemma_1 h3 h4 acc r;
   pop_frame();
   let h5 = ST.get() in
-  let (m':erased Spec.Poly1305.word) = elift2_p #wordB_16 #HyperStack.mem #(fun m h -> live h m) #Spec.word'
-                    (fun m h -> reveal_sbytes (as_seq h m)) (hide m) (hide h0) in
-  elift2 (fun (l:Spec.Poly1305.text) (m:Spec.Poly1305.word) -> FStar.Seq.((Seq.create 1 (m)) @| l)) log m'
+  hide_log h0 m log
+
+  (* let (m':erased Spec.Poly1305.word) = elift2_p #wordB_16 #HyperStack.mem #(fun m h -> live h m) #Spec.word' *)
+  (*                   (fun m h -> reveal_sbytes (as_seq h m)) (hide m) (hide h0) in *)
+  (* elift2 (fun (l:Spec.Poly1305.text) (m:Spec.Poly1305.word) -> FStar.Seq.((Seq.create 1 (m)) @| l)) log m' *)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@"substitute"]
 val poly1305_concat:
@@ -267,6 +280,7 @@ let poly1305_concat b m len =
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h1 b);
   Seq.lemma_eq_intro (as_seq h1 b) (Seq.append (as_seq h0 m) (Seq.create (16 - U64.v len) (uint8_to_sint8 0uy)))
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@"c_inline"]
 val poly1305_process_last_block_:
@@ -286,6 +300,9 @@ val poly1305_process_last_block_:
       /\ modifies_1 st.h h0 h1
       /\ Spec.MkState (as_seq h1 st.r) (as_seq h1 st.h) (reveal updated_log) == Hacl.Spec.Poly1305_64.poly1305_process_last_block_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal current_log)) (as_seq h0 m) (len)
     ))
+
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
 [@"c_inline"]
 let poly1305_process_last_block_ log block st m rem' =
   let h0 = ST.get() in
@@ -300,12 +317,10 @@ let poly1305_process_last_block_ log block st m rem' =
   add_and_multiply st.h tmp st.r;
   let h2 = ST.get() in
   pop_frame();
-  let (m':erased Spec.Poly1305.word) = elift2_p #wordB #HyperStack.mem #(fun m h -> live h m) #Spec.word'
-                    (fun m h -> reveal_sbytes (as_seq h m)) (hide m) (hide h0) in
-  elift2 (fun (l:Spec.Poly1305.text) (m:Spec.Poly1305.word) -> FStar.Seq.((Seq.create 1 (m)) @| l)) log m'
+  hide_log h0 m log
   
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@"c_inline"]
 val poly1305_process_last_block:
@@ -395,7 +410,7 @@ let carry_limb_unrolled acc =
   upd_3 acc a0' a1' a2'
 
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 [@"substitute"]
 val carry_last_unrolled:
@@ -418,7 +433,7 @@ let carry_last_unrolled acc =
   Hacl.Bignum.Fproduct.carry_0_to_1 acc
 
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 [@"substitute"]
 val poly1305_last_pass:
@@ -493,7 +508,7 @@ let poly1305_finish__ log st m len =
     )
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
+#reset-options "--max_fuel 0 --z3rlimit 1000"
 
 [@"substitute"]
 val poly1305_finish_:
@@ -589,7 +604,7 @@ let poly1305_finish st mac key_s =
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 acc) (as_seq h0 key_s)))
 
 
-let mk_state r h : Tot poly1305_state = {r=r;h=h}
+let mk_state r h : Tot poly1305_state = MkState r h
 
 val alloc:
   unit -> StackInline poly1305_state

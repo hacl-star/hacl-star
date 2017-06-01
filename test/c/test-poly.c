@@ -6,6 +6,11 @@
 #include "poly1305_local.h"
 #include "tweetnacl.h"
 
+
+#define PLAINLEN (1024*1024)
+#define ROUNDS 1000
+#define MACSIZE 16
+
 void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
   POLY1305 state;
   Poly1305_Init(&state,key);
@@ -13,15 +18,60 @@ void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
   Poly1305_Final(&state,mac);
 }
 
-void print_results(char *txt, double t1, unsigned long long d1, int rounds, int plainlen){
+void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
-  printf("Cycles for %d times 2^20 bytes: %llu (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
+  printf("Cycles for %d times 2^20 bytes: %" PRIu64 " (%.2fcycles/byte)\n", rounds, d1, (double)d1/plainlen/rounds);
   printf("User time for %d times 2^20 bytes: %f (%fus/byte)\n", rounds, t1/CLOCKS_PER_SEC, (double)t1*1000000/CLOCKS_PER_SEC/plainlen/rounds);
 }
 
-#define PLAINLEN (1024*1024)
-#define ROUNDS 1000
-#define MACSIZE 32
+
+void flush_results(char *txt, uint64_t hacl_cy, uint64_t sodium_cy, uint64_t ossl_cy, uint64_t tweet_cy, double hacl_utime, double sodium_utime, double ossl_utime, double tweet_utime, int rounds, int plainlen){
+  FILE *fp;
+  char hacl_cy_s[24], sodium_cy_s[24], ossl_cy_s[24], tweet_cy_s[24], hacl_utime_s[24], sodium_utime_s[24], ossl_utime_s[24], tweet_utime_s[24];
+  if (hacl_cy == 0) {
+    sprintf(hacl_cy_s, "NA");
+  } else {
+    sprintf(hacl_cy_s, "%.2f", (double)hacl_cy/plainlen/rounds);
+  }
+  if (sodium_cy == 0) {
+    sprintf(sodium_cy_s, "NA");
+  } else {
+    sprintf(sodium_cy_s, "%.2f", (double)sodium_cy/plainlen/rounds);
+  }
+  if (ossl_cy == 0) {
+    sprintf(ossl_cy_s, "NA");
+  } else {
+    sprintf(ossl_cy_s, "%.2f", (double)ossl_cy/plainlen/rounds);
+  }
+  if (tweet_cy == 0) {
+    sprintf(tweet_cy_s, "NA");
+  } else {
+    sprintf(tweet_cy_s, "%.2f", (double)tweet_cy/plainlen/rounds);
+  }
+  if (hacl_utime == 0) {
+    sprintf(hacl_utime_s, "NA");
+  } else {
+    sprintf(hacl_utime_s, "%f", (double)(hacl_utime/CLOCKS_PER_SEC*1000000)/(plainlen*rounds));
+  }
+  if (sodium_utime == 0) {
+    sprintf(sodium_utime_s, "NA");
+  } else {
+    sprintf(sodium_utime_s, "%f", (double)(sodium_utime/CLOCKS_PER_SEC*1000000)/(plainlen*rounds));
+  }
+  if (ossl_utime == 0) {
+    sprintf(ossl_utime_s, "NA");
+  } else {
+    sprintf(ossl_utime_s, "%f", (double)(ossl_utime/CLOCKS_PER_SEC*1000000)/(plainlen*rounds));
+  }
+  if (tweet_utime == 0) {
+    sprintf(tweet_utime_s, "NA");
+  } else {
+    sprintf(tweet_utime_s, "%f", (double)(tweet_utime/CLOCKS_PER_SEC*1000000)/(plainlen*rounds));
+  }
+  fp = fopen("./bench.txt", "a");
+  fprintf(fp, "%-16s%-16s%-16s%-16s%-16s%-16s%-16s%-16s%-16s\n", txt, hacl_cy_s, sodium_cy_s, ossl_cy_s, tweet_cy_s, hacl_utime_s, sodium_utime_s, ossl_utime_s, tweet_utime_s);
+  fclose(fp);
+}
 
 uint8_t
 plaintext[34] =
@@ -122,24 +172,24 @@ key[32] =
 int32_t test_poly()
 {
   uint64_t len_ = (uint64_t )34;
-  uint32_t macsize = (uint32_t )16;
-  uint8_t mac[macsize];
-  memset(mac, 0, macsize * sizeof mac[0]);
+  uint8_t mac[MACSIZE];
+  memset(mac, 0, MACSIZE * sizeof mac[0]);
   Poly1305_64_crypto_onetimeauth(mac, plaintext, 34, key);
-  TestLib_compare_and_print("HACL Poly1305", expected, mac, macsize);
+  TestLib_compare_and_print("HACL Poly1305", expected, mac, MACSIZE);
   Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
-  TestLib_compare_and_print("Sodium Poly1305", expected, mac, macsize);
+  TestLib_compare_and_print("Sodium Poly1305", expected, mac, MACSIZE);
   return exit_success;
 }
 
 int32_t perf_poly() {
+  double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plain, len);
   uint8_t* macs = malloc(ROUNDS * MACSIZE * sizeof(char));
   if (res != len) {
-    printf("Error on reading, got %llu bytes\n", res);
+    printf("Error on reading, got %" PRIu64 " bytes\n", res);
     return 1;
   }
 
@@ -152,11 +202,13 @@ int32_t perf_poly() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
+  hacl_cy = (double)b - a;
+  hacl_utime = (double)t2 - t1;
   print_results("HACL Poly1305 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
@@ -165,11 +217,13 @@ int32_t perf_poly() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
+  sodium_cy = (double)b - a;
+  sodium_utime = (double)t2 - t1;
   print_results("Sodium Poly1305 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
 
   t1 = clock();
@@ -179,11 +233,13 @@ int32_t perf_poly() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
+  tweet_cy = (double)b - a;
+  tweet_utime = (double)t2 - t1;
   print_results("TweetNacl Poly1305 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
 
 
   t1 = clock();
@@ -193,11 +249,15 @@ int32_t perf_poly() {
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
+  ossl_cy = (double)b - a;
+  ossl_utime = (double)t2 - t1;
   print_results("OpenSSL Poly1305 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+MACSIZE*i) + (uint64_t)*(macs+MACSIZE*i+8)
 				     + (uint64_t)*(macs+MACSIZE*i+16) + (uint64_t)*(macs+MACSIZE*i+24);
-  printf("Composite result (ignore): %llx\n", res);
+  printf("Composite result (ignore): %" PRIx64 "\n", res);
+
+  flush_results("POLY1305", hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime, ROUNDS, PLAINLEN);
 
   return exit_success;
 }

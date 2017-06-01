@@ -201,6 +201,44 @@ let lemma_uint32s_to_le_def_1 (len:nat{len > 0}) (s:seq UInt32.t{length s = len}
   = ()
 
 
+let lemma_uint32s_from_be_def_0 (len:nat{len = 0}) (b:lbytes (4*len)) : Lemma
+  (uint32s_from_be len b == Seq.createEmpty)
+  = ()
+let lemma_uint32s_from_be_def_1 (len:nat{len > 0}) (b:lbytes (4*len)) : Lemma
+  (uint32s_from_be len b == Seq.snoc (uint32s_from_be (len-1) (slice b 0 (4*len - 4)))
+                                     (uint32_from_be (slice b (4*len - 4) (4*len)))
+  )
+  = ()
+
+
+let lemma_uint32s_to_be_def_0 (len:nat{len = 0}) (s:seq UInt32.t{length s = len}) : Lemma
+  (uint32s_to_be len s == Seq.createEmpty)
+  = ()
+let lemma_uint32s_to_be_def_1 (len:nat{len > 0}) (s:seq UInt32.t{length s = len}) : Lemma
+  (uint32s_to_be len s == Seq.append (uint32s_to_be (len-1) (slice s 0 (len-1)))
+                                     (uint32_to_be (index s (len-1))))
+  = ()
+
+
+let lemma_uint64s_from_be_def_0 (len:nat{len = 0}) (b:lbytes (8*len)) : Lemma
+  (uint64s_from_be len b == Seq.createEmpty)
+  = ()
+let lemma_uint64s_from_be_def_1 (len:nat{len > 0}) (b:lbytes (8*len)) : Lemma
+  (uint64s_from_be len b == Seq.snoc (uint64s_from_be (len-1) (slice b 0 (8*len - 8)))
+                                     (uint64_from_be (slice b (8*len - 8) (8*len)))
+  )
+  = ()
+
+
+let lemma_uint64s_to_be_def_0 (len:nat{len = 0}) (s:seq UInt64.t{length s = len}) : Lemma
+  (uint64s_to_be len s == Seq.createEmpty)
+  = ()
+let lemma_uint64s_to_be_def_1 (len:nat{len > 0}) (s:seq UInt64.t{length s = len}) : Lemma
+  (uint64s_to_be len s == Seq.append (uint64s_to_be (len-1) (slice s 0 (len-1)))
+                                     (uint64_to_be (index s (len-1))))
+  = ()
+
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 let rec lemma_uint32s_from_le_inj (len:nat) (b:lbytes (4 * len)) (b':lbytes (4 * len)) : Lemma

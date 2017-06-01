@@ -6,12 +6,13 @@ open FStar.UInt32
 open FStar.Endianness
 open Spec.Lib
 open Spec.Chacha20.Lemmas
+open Seq.Create
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#set-options "--max_fuel 0 --z3rlimit 100"
 
 (* Constants *)
-let keylen = 32 (* in bytes *)
-let blocklen = 64  (* in bytes *)
+let keylen = 32   (* in bytes *)
+let blocklen = 64 (* in bytes *)
 let noncelen = 12 (* in bytes *)
 
 type key = lbytes keylen
@@ -32,20 +33,20 @@ let line (a:idx) (b:idx) (d:idx) (s:t{v s < 32}) (m:state) : Tot state =
 let quarter_round a b c d : shuffle = 
   line a b d 16ul @ 
   line c d b 12ul @
-  line a b d 8ul @ 
+  line a b d 8ul  @ 
   line c d b 7ul 
 
 let column_round : shuffle = 
-  quarter_round 0 4 8 12 @
-  quarter_round 1 5 9 13 @
+  quarter_round 0 4 8  12 @
+  quarter_round 1 5 9  13 @
   quarter_round 2 6 10 14 @
   quarter_round 3 7 11 15
 
 let diagonal_round : shuffle = 
   quarter_round 0 5 10 15 @
   quarter_round 1 6 11 12 @
-  quarter_round 2 7 8 13 @
-  quarter_round 3 4 9 14
+  quarter_round 2 7 8  13 @
+  quarter_round 3 4 9  14
 
 let double_round: shuffle = 
     column_round @ diagonal_round (* 2 rounds *)
@@ -58,15 +59,19 @@ let chacha20_core (s:state) : Tot state =
     Spec.Loops.seq_map2 (fun x y -> x +%^ y) s' s
 
 (* state initialization *) 
-unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
+let c0 = 0x61707865ul
+let c1 = 0x3320646eul
+let c2 = 0x79622d32ul
+let c3 = 0x6b206574ul
+
 let setup (k:key) (n:nonce) (c:counter): Tot state =
-  createL constants @|
-  uint32s_from_le 8 k @|
-  singleton (UInt32.uint_to_t c) @|
+  create_4 c0 c1 c2 c3          @|
+  uint32s_from_le 8 k           @|
+  create_1 (UInt32.uint_to_t c) @|
   uint32s_from_le 3 n
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
-    let st = setup k n c in
+    let st  = setup k n c in
     let st' = chacha20_core st in
     uint32s_to_le 16 st'
 

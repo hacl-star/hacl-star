@@ -27,7 +27,9 @@ BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
 %.fst-ct: %.fst
 	$(FSTAR_BASE) --include interfaces --include ../lib --lax --include $(KREMLIN_HOME)/kremlib $^
 
-all-ct: $(addsuffix -ct, $(BIGNUM_FILES))
+all-ct:
+	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
+		--include ../lib $^ --lax --include $(KREMLIN_HOME)/kremlib $(BIGNUM_FILES)
 
 %.fst-verify: %.fst
 	$(FSTAR_BASE) --include interfaces --include ../lib --include $(KREMLIN_HOME)/kremlib $^
@@ -48,6 +50,9 @@ all-hints:
 	cp ./bignum_hints/* .
 	$(MAKE) all-hints2
 	mv *.hints ./bignum_hints
+
+count-line:
+	cloc --force-lang=ocaml $(BIGNUM_FILES)
 
 clean:
 	rm -rf *.exe *.out *~ x25519/*~ poly1305/*~ interfaces/*~ tmp tmppoly

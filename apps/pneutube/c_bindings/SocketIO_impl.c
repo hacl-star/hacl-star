@@ -130,7 +130,7 @@ FileIO_Types_sresult SocketIO_tcp_read_all(FileIO_Types_socket* conn, uint8_t* b
 
 FileIO_Types_sresult SocketIO_tcp_close(FileIO_Types_socket* conn) {
   shutdown(conn->socket_fd,2);
-  printf("Sent %lu bytes, Received %lu bytes\n",conn->sent_bytes,conn->received_bytes);
+  printf("Sent %" PRIu64 " bytes, Received %" PRIu64 " bytes\n",conn->sent_bytes,conn->received_bytes);
   return FileIO_Types_sresult_SocketOk;
 }
 

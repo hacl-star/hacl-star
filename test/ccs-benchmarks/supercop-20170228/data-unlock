@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# supercop/data-unlock
+# D. J. Bernstein
+# Public domain.
+
+. ./data-vars
+
+find "$top" -name LOCKED \
+| while read x
+do
+  y=`echo "$x" | sed 's/LOCKED$/LOCK/'`
+  mv "$x" "$y"
+done

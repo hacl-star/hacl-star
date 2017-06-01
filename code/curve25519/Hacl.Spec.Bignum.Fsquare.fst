@@ -542,7 +542,7 @@ let lemma_fsquare_spec_5_2 r0 r1 r2 r3 r4 =
   lemma_fsquare_spec_5_2_4 r0 r1 r2 r3 r4
 
 
-#reset-options "--z3rlimit 400"
+#reset-options "--max_fuel 0 --z3rlimit 400"
 
 val lemma_fsquare_spec_5_0: r0:nat -> r1:nat -> r2:nat -> r3:nat -> r4:nat -> Lemma
   ((r0 * r0

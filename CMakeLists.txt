@@ -16,23 +16,15 @@ set(SOURCE_FILES_VERIFIED
    snapshots/hacl-c/Salsa20.c
    snapshots/hacl-c/HSalsa20.c
    snapshots/hacl-c/Curve25519.c
-   snapshots/hacl-c/NaCl.c)
-
-# Verified files that are redefined in experimental
-set(SOURCE_FILES_VERIFIED_2
    snapshots/hacl-c/Chacha20.c
-   snapshots/hacl-c/Poly1305_64.c)
+   snapshots/hacl-c/Poly1305_64.c
+   snapshots/hacl-c/NaCl.c)
 
 # Experimental Files
 set(SOURCE_FILES_EXPERIMENTAL
    snapshots/hacl-c-experimental/cpuid.c
    snapshots/hacl-c-experimental/drng.c
-   snapshots/hacl-c-experimental/Random.c
-   snapshots/hacl-c-experimental/SHA2_256.c
-   snapshots/hacl-c-experimental/HMAC_SHA2_256.c
-   snapshots/hacl-c-experimental/Chacha20.c
-   snapshots/hacl-c-experimental/Poly1305_64.c
-   snapshots/hacl-c-experimental/aead_chacha20_poly1305.c)
+   snapshots/hacl-c-experimental/Random.c)
 
 # Define a user variable to determinate if experimental files are build
 option(Experimental "Include experimental code in HaCl build" OFF)
@@ -41,7 +33,7 @@ option(Experimental "Include experimental code in HaCl build" OFF)
 if (Experimental)
    set(SOURCE_FILES ${SOURCE_FILES_VERIFIED} ${SOURCE_FILES_EXPERIMENTAL})
 else ()
-   set(SOURCE_FILES ${SOURCE_FILES_VERIFIED_2} ${SOURCE_FILES_VERIFIED})
+   set(SOURCE_FILES ${SOURCE_FILES_VERIFIED})
 endif ()
 
 # Compilation options

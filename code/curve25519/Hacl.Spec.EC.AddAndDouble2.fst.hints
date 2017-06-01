@@ -1,5 +1,5 @@
 [
-  "Ô~y+´∫ù\u001a±\u001eV\u0014˚z≥?",
+  "°\u0000Ád\u007fÎyzŸÇ¶£Í\u001bbD",
   [
     [
       "Hacl.Spec.EC.AddAndDouble2.lemma_53_is_5413",
@@ -290,6 +290,14 @@
       0
     ],
     [
+      "Hacl.Spec.EC.AddAndDouble2.lemma_int_mod_mul_distr_l",
+      3,
+      0,
+      1,
+      [ "@query" ],
+      0
+    ],
+    [
       "Hacl.Spec.EC.AddAndDouble2.lemma_diff_square",
       1,
       0,
@@ -429,21 +437,26 @@
         "equation_Hacl.Spec.Bignum.fsum_tot",
         "equation_Hacl.Spec.Bignum.op_Plus_At",
         "equation_Hacl.Spec.Bignum.op_Star_At",
+        "equation_Hacl.Spec.Bignum.selem",
+        "equation_Hacl.Spec.EC.AddAndDouble2.fsquare_tot",
         "equation_Hacl.Spec.EC.AddAndDouble2.s_513",
         "equation_Hacl.UInt64.t", "equation_Prims.nonzero",
         "equation_Prims.pos",
         "function_token_typing_Hacl.Bignum.Constants.prime",
         "function_token_typing_Hacl.Spec.Bignum.Fsquare.p64",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "proj_equation_FStar.UInt64.Mk_v",
-        "proj_equation_Prims.Mktuple4__1", "proj_equation_Prims.Mktuple4__2",
-        "proj_equation_Prims.Mktuple4__3", "proj_equation_Prims.Mktuple4__4",
+        "primitive_Prims.op_Multiply",
+        "proj_equation_FStar.Pervasives.Mktuple4__1",
+        "proj_equation_FStar.Pervasives.Mktuple4__2",
+        "proj_equation_FStar.Pervasives.Mktuple4__3",
+        "proj_equation_FStar.Pervasives.Mktuple4__4",
+        "proj_equation_FStar.UInt64.Mk_v",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Mktuple4__1",
+        "projection_inverse_FStar.Pervasives.Mktuple4__2",
+        "projection_inverse_FStar.Pervasives.Mktuple4__3",
+        "projection_inverse_FStar.Pervasives.Mktuple4__4",
         "projection_inverse_FStar.UInt64.Mk_v",
-        "projection_inverse_Prims.Mktuple4__1",
-        "projection_inverse_Prims.Mktuple4__2",
-        "projection_inverse_Prims.Mktuple4__3",
-        "projection_inverse_Prims.Mktuple4__4",
         "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_1eb4a3c4f18e96dc54ef82d82cea6f5c",
         "refinement_interpretation_Hacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1",
         "refinement_interpretation_Hacl.Spec.Bignum.Fsquare_Tm_refine_da98c95d2af35788da839c6c05bdbc1c",
@@ -681,8 +694,7 @@
       0,
       1,
       [
-        "@query", "constructor_distinct_Prims.Mktuple4",
-        "equation_Hacl.Spec.EC.AddAndDouble2.fmonty_tot",
+        "@query", "equation_Hacl.Spec.EC.AddAndDouble2.fmonty_tot",
         "equation_Hacl.Spec.EC.AddAndDouble2.fmonty_tot_1",
         "equation_Hacl.Spec.EC.AddAndDouble2.fmonty_tot_2",
         "equation_Hacl.Spec.EC.AddAndDouble2.fmonty_tot_3",
@@ -690,14 +702,10 @@
         "equation_Hacl.Spec.EC.AddAndDouble2.s_513",
         "equation_Hacl.Spec.EC.AddAndDouble2.s_53",
         "equation_Hacl.Spec.EC.AddAndDouble2.s_5413",
-        "projection_inverse_Prims.Mktuple4__1",
-        "projection_inverse_Prims.Mktuple4__2",
-        "projection_inverse_Prims.Mktuple4__3",
-        "projection_inverse_Prims.Mktuple4__4",
-        "projection_inverse_Prims.Mktuple4__a",
-        "projection_inverse_Prims.Mktuple4__b",
-        "projection_inverse_Prims.Mktuple4__c",
-        "projection_inverse_Prims.Mktuple4__d", "unit_typing"
+        "projection_inverse_FStar.Pervasives.Mktuple4__1",
+        "projection_inverse_FStar.Pervasives.Mktuple4__2",
+        "projection_inverse_FStar.Pervasives.Mktuple4__3",
+        "projection_inverse_FStar.Pervasives.Mktuple4__4", "unit_typing"
       ],
       0
     ]

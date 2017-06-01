@@ -22,35 +22,100 @@ module U8   = FStar.UInt8
 module U32  = FStar.UInt32
 module U64  = FStar.UInt64
 
+include Hacl.Spec.Poly1305_64.State
 
-(* Types from Low-level crypto *)
-type byte = Hacl.UInt8.t
-type bytes = seq byte
-type word = w:bytes{length w <= 16}
-type word_16 = w:bytes{length w = 16}
-type tag = word_16
-
-
-(* Types from specs *)
-type seqelem = seqelem
-
-type word' = Spec.word
-type text = Spec.text
-
-let log_t = text
-
-let elem : Type0 = b:int{ b >= 0 /\ b < prime }
+(* (\* Types from Low-level crypto *\) *)
+(* type byte = Hacl.UInt8.t *)
+(* type bytes = seq byte *)
+(* type word = w:bytes{length w <= 16} *)
+(* type word_16 = w:bytes{length w = 16} *)
+(* type tag = word_16 *)
 
 
-inline_for_extraction let red_44 s = Hacl.Spec.Bignum.AddAndMultiply.red_44 s
-inline_for_extraction let red_45 s = Hacl.Spec.Bignum.AddAndMultiply.red_45 s
+(* (\* Types from specs *\) *)
+(* type seqelem = seqelem *)
 
-inline_for_extraction let p42  = Hacl.Spec.Bignum.AddAndMultiply.p42
-inline_for_extraction let p44  = Hacl.Spec.Bignum.AddAndMultiply.p44
+(* type word' = Spec.word *)
+(* type text = Spec.text *)
 
-noeq type poly1305_state_ = | MkState: r:seqelem -> h:seqelem -> log:log_t -> poly1305_state_
+(* let log_t = text *)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+(* let elem : Type0 = b:int{ b >= 0 /\ b < prime } *)
+
+
+(* inline_for_extraction let red_44 s = Hacl.Spec.Bignum.AddAndMultiply.red_44 s *)
+(* inline_for_extraction let red_45 s = Hacl.Spec.Bignum.AddAndMultiply.red_45 s *)
+
+(* inline_for_extraction let p42  = Hacl.Spec.Bignum.AddAndMultiply.p42 *)
+(* inline_for_extraction let p44  = Hacl.Spec.Bignum.AddAndMultiply.p44 *)
+
+(* noeq type poly1305_state_ = | MkState: r:seqelem -> h:seqelem -> log:log_t -> poly1305_state_ *)
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+
+val lemma_bignum_to_128_:
+  h0:limb{v h0 < pow2 44} -> h1:limb{v h1 < pow2 44} -> h2:limb{v h2 < pow2 42} ->
+  Lemma (((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 + ((v h1 * pow2 44) % pow2 64) + v h0
+    = (v h0 + pow2 44 * v h1 + pow2 88 * (v h2 % pow2 40)))
+let lemma_bignum_to_128_ h0 h1 h2 =
+  let v1 = ((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 in
+  Math.Lemmas.distributivity_add_left ((v h2 * pow2 24) % pow2 64) (v h1 / pow2 20) (pow2 64);
+  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 64 24;
+  Math.Lemmas.pow2_plus 64 24;
+  Math.Lemmas.pow2_multiplication_division_lemma_2 (v h1) 64 44;
+  cut (v1 = pow2 88 * (v h2 % pow2 40) + pow2 64 * ((v h1 * pow2 44)/ pow2 64));
+  Math.Lemmas.lemma_div_mod (v h1 * pow2 44) (pow2 64)
+
+private val lemma_aux: a:nat -> b:nat -> c:nat -> Lemma
+  (requires (a < pow2 44 /\ b < pow2 44 /\ c < pow2 40))
+  (ensures (a + pow2 44 * b + pow2 88 * c < pow2 128))
+let lemma_aux a b c =
+  assert_norm((pow2 44 - 1) + pow2 44 * (pow2 44 - 1) + (pow2 40 - 1) * pow2 88 < pow2 128)
+
+
+val lemma_bignum_to_128:
+  h0:limb{v h0 < pow2 44} -> h1:limb{v h1 < pow2 44} -> h2:limb{v h2 < pow2 42} ->
+  Lemma (((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 + ((v h1 * pow2 44) % pow2 64) + v h0
+    = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128)
+let lemma_bignum_to_128 h0 h1 h2 =
+  lemma_bignum_to_128_ h0 h1 h2;
+  let z = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128 in
+  Math.Lemmas.lemma_mod_plus_distr_l (pow2 88 * v h2) (v h0 + pow2 44 * v h1) (pow2 128);
+  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 128 88;
+  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 128 88;
+  cut (z = (v h0 + pow2 44 * v h1 + (v h2 % pow2 40) * pow2 88) % pow2 128);
+  assert_norm((pow2 44 - 1) + pow2 44 * (pow2 44 - 1) + (pow2 40 - 1) * pow2 88 < pow2 128);
+  lemma_aux (v h0) (v h1) (v h2 % pow2 40);
+  Math.Lemmas.modulo_lemma (v h0 + pow2 44 * v h1 + pow2 88 * (v h2 % pow2 40)) (pow2 128)
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
+val bignum_to_128: s:seqelem{bounds s p44 p44 p42} -> Tot (acc:wide{Wide.v acc = seval s % pow2 128})
+let bignum_to_128 s =
+  let h0 = Seq.index s 0 in
+  let h1 = Seq.index s 1 in
+  let h2 = Seq.index s 2 in
+  let open Hacl.Bignum.Limb in
+  let accl = (h1 <<^ 44ul) |^ h0 in
+  UInt.logor_disjoint (v (h1 <<^ 44ul)) (v h0) 44;
+  cut (v accl = ((v h1 * pow2 44) % pow2 64) + v h0);
+  let acch = (h2 <<^ 24ul) |^ (h1 >>^ 20ul) in
+  Math.Lemmas.lemma_div_lt (v h1) 44 20;
+  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 64 24;
+  Math.Lemmas.lemma_mod_plus 0 (v h2 % pow2 40) (pow2 24);
+  UInt.logor_disjoint (v (h2 <<^ 24ul)) (v (h1 >>^ 20ul)) 24;
+  cut (v acch = (v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20);
+  Math.Lemmas.multiple_modulo_lemma (v acch) (pow2 64);
+  let open Hacl.Bignum.Wide in  
+  let acc' = (limb_to_wide acch <<^ 64ul) |^ limb_to_wide accl in
+  UInt.logor_disjoint #128 (v (limb_to_wide acch <<^ 64ul)) (v (limb_to_wide accl)) 64;
+  lemma_bignum_to_128 h0 h1 h2;
+  Hacl.Spec.Bignum.Modulo.lemma_seval_3 s;
+  acc'
+
+
+#reset-options "--z3rlimit 20 --max_fuel 0"
 
 val load64_le_spec : b:bytes{Seq.length b = 8} -> GTot (r:limb{v r == hlittle_endian b})
 let load64_le_spec b = lemma_little_endian_is_bounded (reveal_sbytes b);
@@ -67,7 +132,7 @@ val store128_le_spec: r:wide -> GTot (b:word_16{Wide.v r == hlittle_endian b})
 let store128_le_spec r = hlittle_bytes 16ul (w r)
 
 
-#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0"
 
 (** From the current memory state, returns the field element corresponding to a elemB *)
 val selem: seqelem -> GTot elem
@@ -84,7 +149,7 @@ let seval s = seval s
 (* ############################################################################# *)
 
 
-#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0"
 
 inline_for_extraction val create_3: s0:limb -> s1:limb -> s2:limb -> Tot (s:seqelem{
   Seq.index s 0 == s0 /\ Seq.index s 1 == s1 /\ Seq.index s 2 == s2})
@@ -164,7 +229,7 @@ let lemma_encode_r2 (k:wide) : Lemma (let r2 = Limb.(sint128_to_sint64 Wide.(k >
     Math.Lemmas.modulo_lemma (Wide.(v (k >>^ 88ul))) (pow2 64)
 
 
-#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0"
 
 (* private *)
 let lemma_encode_r (k:wide) : Lemma (let r0 = Limb.(sint128_to_sint64 k &^ mask_44) in
@@ -181,7 +246,7 @@ let lemma_encode_r (k:wide) : Lemma (let r0 = Limb.(sint128_to_sint64 k &^ mask_
     Math.Lemmas.lemma_div_lt (Wide.v k) 128 88
 
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 val toField_spec: m:word_16 -> GTot (s':seqelem{red_44 s' /\ v (Seq.index s' 2) < pow2 40
   /\ seval s' = hlittle_endian m})
@@ -214,7 +279,7 @@ let poly1305_encode_r_spec key =
   s
 
 
-#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 50 --max_fuel 0"
 
 val toField_plus_2_128_spec: m:word_16 -> GTot (s:seqelem{red_44 s
   /\ seval s = hlittle_endian m + pow2 128})
@@ -238,7 +303,7 @@ let toField_plus_2_128_spec m =
   m'
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val poly1305_start_spec: unit -> Tot (s:seqelem{Seq.index s 0 == limb_zero /\ Seq.index s 1 == limb_zero /\ Seq.index s 2 == limb_zero /\ selem s = 0 /\ red_45 s
   /\ seval s = 0})
@@ -251,7 +316,7 @@ let poly1305_start_spec () =
   s
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val poly1305_init_spec: key:Seq.seq H8.t{Seq.length key = 16} ->
   GTot (st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)
@@ -286,7 +351,7 @@ let poly1305_update_spec st m =
   MkState r acc' log
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 50"
 
 private val lemma_append_one_to_zeros_: unit -> Lemma
   (hlittle_endian (Seq.create 1 (uint8_to_sint8 1uy)) = 1)
@@ -294,7 +359,7 @@ private let lemma_append_one_to_zeros_ () =
   little_endian_singleton (1uy)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 private val lemma_append_one_to_zeros: (n:nat{n >= 1 /\ n <= 16}) -> Lemma
   (hlittle_endian (Seq.create 1 (uint8_to_sint8 1uy) @| Seq.create (n-1) (uint8_to_sint8 0uy)) = 1)
@@ -328,7 +393,7 @@ private let lemma_seq_append_little_endian m =
   little_endian_append m (one @| zeros)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val poly1305_process_last_block_spec:
   st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
@@ -357,7 +422,7 @@ let poly1305_process_last_block_spec st m rem' =
   MkState r acc' log
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0"
+#reset-options "--max_fuel 0"
 
 inline_for_extraction let p44m5 : p:limb{v p = pow2 44 - 5} =
   assert_norm(pow2 44 - 5 = 0xffffffffffb); uint64_to_sint64 0xffffffffffbuL
@@ -369,7 +434,7 @@ inline_for_extraction let p42m1 : p:limb{v p = pow2 42 - 1} =
   assert_norm(pow2 42 - 1 = 0x3ffffffffff); uint64_to_sint64 0x3ffffffffffuL
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val seq_upd_3: a0:limb -> a1:limb -> a2:limb -> Tot (s:seqelem{Seq.index s 0 == a0
   /\ Seq.index s 1 == a1 /\ Seq.index s 2 == a2})
@@ -381,7 +446,7 @@ let seq_upd_3 a0 a1 a2 =
   s
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val lemma_poly_last_pass: s:seqelem{bounds s p44 p44 p42} -> Lemma
   (requires (bounds s p44 p44 p42 /\
@@ -423,7 +488,7 @@ let lemma_poly_last_pass'' a0 a1 a2 =
   then lemma_poly_last_pass' a0 a1 a2
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val poly1305_last_pass_spec_: acc:seqelem{bounds acc p44 p44 p42} -> Tot (acc':seqelem{
   bounds acc' p44 p44 p42 /\  seval acc' = seval acc % prime})
@@ -457,7 +522,7 @@ let poly1305_last_pass_spec_ acc =
   acc'
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val lemma_carry_limb_unrolled: a0:limb -> a1:limb -> a2:limb ->
   Lemma (v a0 % p44 + p44 * ((v a1 + v a0 / p44) % p44) + pow2 88 * (v a2 + ((v a1 + v a0 / p44) / p44))
@@ -477,7 +542,7 @@ let lemma_carry_limb_unrolled a0 a1 a2 =
   lemma_div_mod (v a0) p44
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val carry_limb_unrolled: acc:seqelem{bounds (acc) (p44+5*((p45+p20)/p42)) p44 p42} ->
   Tot (s:seqelem{bounds s p44 p44 (p42+1)
@@ -527,7 +592,7 @@ let carry_last_unrolled s =
   s''
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val poly1305_last_pass_spec: acc:seqelem{red_45 acc} -> Tot (acc':seqelem{
     seval acc' = seval acc % prime
@@ -547,71 +612,14 @@ let poly1305_last_pass_spec acc =
   acc5
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 
-val lemma_bignum_to_128_:
-  h0:limb{v h0 < pow2 44} -> h1:limb{v h1 < pow2 44} -> h2:limb{v h2 < pow2 42} ->
-  Lemma (((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 + ((v h1 * pow2 44) % pow2 64) + v h0
-    = (v h0 + pow2 44 * v h1 + pow2 88 * (v h2 % pow2 40)))
-let lemma_bignum_to_128_ h0 h1 h2 =
-  let v1 = ((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 in
-  Math.Lemmas.distributivity_add_left ((v h2 * pow2 24) % pow2 64) (v h1 / pow2 20) (pow2 64);
-  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 64 24;
-  Math.Lemmas.pow2_plus 64 24;
-  Math.Lemmas.pow2_multiplication_division_lemma_2 (v h1) 64 44;
-  cut (v1 = pow2 88 * (v h2 % pow2 40) + pow2 64 * ((v h1 * pow2 44)/ pow2 64));
-  Math.Lemmas.lemma_div_mod (v h1 * pow2 44) (pow2 64)
 
-private val lemma_aux: a:nat -> b:nat -> c:nat -> Lemma
-  (requires (a < pow2 44 /\ b < pow2 44 /\ c < pow2 40))
-  (ensures (a + pow2 44 * b + pow2 88 * c < pow2 128))
-let lemma_aux a b c =
-  assert_norm((pow2 44 - 1) + pow2 44 * (pow2 44 - 1) + (pow2 40 - 1) * pow2 88 < pow2 128)
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
-
-val lemma_bignum_to_128:
-  h0:limb{v h0 < pow2 44} -> h1:limb{v h1 < pow2 44} -> h2:limb{v h2 < pow2 42} ->
-  Lemma (((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 + ((v h1 * pow2 44) % pow2 64) + v h0
-    = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128)
-let lemma_bignum_to_128 h0 h1 h2 =
-  lemma_bignum_to_128_ h0 h1 h2;
-  let z = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128 in
-  Math.Lemmas.lemma_mod_plus_distr_l (pow2 88 * v h2) (v h0 + pow2 44 * v h1) (pow2 128);
-  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 128 88;
-  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 128 88;
-  cut (z = (v h0 + pow2 44 * v h1 + (v h2 % pow2 40) * pow2 88) % pow2 128);
-  assert_norm((pow2 44 - 1) + pow2 44 * (pow2 44 - 1) + (pow2 40 - 1) * pow2 88 < pow2 128);
-  lemma_aux (v h0) (v h1) (v h2 % pow2 40);
-  Math.Lemmas.modulo_lemma (v h0 + pow2 44 * v h1 + pow2 88 * (v h2 % pow2 40)) (pow2 128)
-
-
-val bignum_to_128: s:seqelem{bounds s p44 p44 p42} -> Tot (acc:wide{Wide.v acc = seval s % pow2 128})
-let bignum_to_128 s =
-  let h0 = Seq.index s 0 in
-  let h1 = Seq.index s 1 in
-  let h2 = Seq.index s 2 in
-  let open Hacl.Bignum.Limb in
-  let accl = (h1 <<^ 44ul) |^ h0 in
-  UInt.logor_disjoint (v (h1 <<^ 44ul)) (v h0) 44;
-  cut (v accl = ((v h1 * pow2 44) % pow2 64) + v h0);
-  let acch = (h2 <<^ 24ul) |^ (h1 >>^ 20ul)in
-  Math.Lemmas.lemma_div_lt (v h1) 44 20;
-  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 64 24;
-  Math.Lemmas.lemma_mod_plus 0 (v h2 % pow2 40) (pow2 24);
-  UInt.logor_disjoint (v (h2 <<^ 24ul)) (v (h1 >>^ 20ul)) 24;
-  cut (v acch = (v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20);
-  let open Hacl.Bignum.Wide in
-  let acc' = (limb_to_wide acch <<^ 64ul) |^ limb_to_wide accl in
-  UInt.logor_disjoint #128 (v (limb_to_wide acch <<^ 64ul)) (v (limb_to_wide accl)) 64;
-  lemma_bignum_to_128 h0 h1 h2;
-  Hacl.Spec.Bignum.Modulo.lemma_seval_3 s;
-  acc'
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val poly1305_finish_spec:
   st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
@@ -671,7 +679,7 @@ private let lemma_mod_distr acc block r0 =
   lemma_mod_plus_distr_l block (acc % prime) prime
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 val poly1305_update_last_spec:
   st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->
@@ -697,7 +705,7 @@ let poly1305_update_last_spec st m rem' =
   acc
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 val poly1305_finish_spec':
   acc:seqelem{bounds acc p44 p44 p42} ->

@@ -18,7 +18,7 @@ void randombytes(u8 * x,u64 len) {
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, x, len);
   if (res != len) {
-    printf("Error on reading, got %llu bytes\n", res);
+    printf("Error on reading, got %" PRIu64 " bytes\n", res);
     exit(1);
   }
 }
