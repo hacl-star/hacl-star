@@ -14,7 +14,6 @@ set(SOURCE_FILES_VERIFIED
    snapshots/hacl-c/kremlib.c
    snapshots/hacl-c/Hacl_Policies.c
    snapshots/hacl-c/Salsa20.c
-   snapshots/hacl-c/HSalsa20.c
    snapshots/hacl-c/Curve25519.c
    snapshots/hacl-c/Chacha20.c
    snapshots/hacl-c/Poly1305_64.c
