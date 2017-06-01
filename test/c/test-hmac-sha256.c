@@ -1,9 +1,10 @@
 #include "kremlib.h"
 #include "testlib.h"
-#include "SHA2_512.h"
+#include "HMAC_SHA2_256.h"
 #include "sodium.h"
 #include "tweetnacl.h"
-#include <openssl/sha.h>
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
 
 void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
@@ -63,87 +64,95 @@ void flush_results(char *txt, uint64_t hacl_cy, uint64_t sodium_cy, uint64_t oss
 #define ROUNDS 1000
 #define SIGSIZE 64
 
-int32_t test_sha512()
+int32_t test_hmac_sha256()
 {
   return exit_success;
 }
 
-int32_t perf_sha512() {
+int32_t perf_hmac_sha256() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = PLAINLEN * sizeof(char);
+  uint32_t key_len = 64 * sizeof(char);
   uint8_t* plain = malloc(len);
+  uint8_t* key = malloc(key_len);
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plain, len);
+  uint64_t res2 = read(fd, key, key_len);
   uint8_t* macs = malloc(ROUNDS * SIGSIZE * sizeof(char));
   if (res != len) {
     printf("Error on reading, got %" PRIu64 " bytes\n", res);
     return 1;
   }
-
+  if (res2 != key_len) {
+    printf("Error on reading, got %" PRIu64 " bytes\n", res2);
+    return 1;
+  }
+  
   cycles a,b;
   clock_t t1,t2;
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    crypto_hash_sha512(macs + SIGSIZE * i, plain, len);
+    crypto_auth_hmacsha512(macs + SIGSIZE * i, plain, len, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
   sodium_cy = (double)b - a;
   sodium_utime = (double)t2 - t1;
-  print_results("Sodium SHA512 speed", (double)t2-t1,
+  print_results("Sodium SHA256 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
 				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
-    t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    tweet_crypto_hash_sha512_tweet(macs + SIGSIZE * i, plain, len);
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  tweet_cy = (double)b - a;
-  tweet_utime = (double)t2 - t1;
-  print_results("TweetNaCl SHA512 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
-				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
-  printf("Composite result (ignore): %" PRIx64 "\n", res);
+  /*   t1 = clock(); */
+  /* a = TestLib_cpucycles_begin(); */
+  /* for (int i = 0; i < ROUNDS; i++){ */
+  /*   tweet_crypto_hash_sha256_tweet(macs + SIGSIZE * i, plain, len); */
+  /* } */
+  /* b = TestLib_cpucycles_end(); */
+  /* t2 = clock(); */
+  /* tweet_cy = (double)b - a; */
+  /* tweet_utime = (double)t2 - t1; */
+  /* print_results("TweetNaCl SHA256 speed", (double)t2-t1, */
+  /*  	(double) b - a, ROUNDS, PLAINLEN); */
+  /* for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8) */
+  /*  			     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24); */
+  /* printf("Composite result (ignore): %" PRIx64 "\n", res); */
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    SHA2_512_hash(macs + SIGSIZE * i, plain, len);
+    HMAC_SHA2_256_hmac_core(macs + SIGSIZE * i, key, plain, len);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
   hacl_cy = (double)b - a;
   hacl_utime = (double)t2 - t1;
-  print_results("HACL SHA512 speed", (double)t2-t1,
+  print_results("HACL SHA256 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
 				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
+  unsigned int *resultlen = 0;
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    SHA512(plain, len, macs + SIGSIZE * i);
+    HMAC(EVP_sha256(), key, key_len, plain, len, macs + SIGSIZE * i, resultlen);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
   ossl_cy = (double)b - a;
   ossl_utime = (double)t2 - t1;
-  print_results("OpenSSL SHA512 speed", (double)t2-t1,
+  print_results("OpenSSL SHA256 speed", (double)t2-t1,
         	(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
         			     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
-  flush_results("SHA512", hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime, ROUNDS, PLAINLEN);
+  flush_results("SHA256", hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime, ROUNDS, PLAINLEN);
 
   return exit_success;
 }
@@ -151,13 +160,13 @@ int32_t perf_sha512() {
 int32_t main(int argc, char *argv[])
 {
   if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
-    int32_t res = test_sha512();
+    int32_t res = test_hmac_sha256();
     if (res == exit_success) {
-      res = perf_sha512();
+      res = perf_hmac_sha256();
     }
     return res;
   } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
-    return test_sha512();
+    return test_hmac_sha256();
   } else {    
     printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
     return exit_failure;
