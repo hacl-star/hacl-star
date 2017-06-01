@@ -89,6 +89,7 @@ build-snapshot:
 		$(addprefix ../code/hash/sha2-256-c/, SHA2_256.*) \
 		$(addprefix ../code/hash/sha2-384-c/, SHA2_384.*) \
 		$(addprefix ../code/hash/sha2-512-c/, SHA2_512.*) \
+		$(addprefix ../code/hmac/hmac-c/, HMAC_SHA2_256.*) \
 		$(addprefix ../code/salsa-family/chacha-vec128/, Chacha20_Vec128.* ../vec128.h) \
 		 $(SNAPSHOT_DIR)
 	cp ./c/* $(SNAPSHOT_DIR)/
