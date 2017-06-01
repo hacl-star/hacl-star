@@ -55,8 +55,28 @@
 	    (double_round 
 	    (double_round m)))))))))))
 
+(define-fun add_state ((m state) (s state)) state
+	    (let ((s (store s #x0 (bvadd (select m #x0) (select s #x0)))))
+	    (let ((s (store s #x1 (bvadd (select m #x1) (select s #x1)))))
+	    (let ((s (store s #x2 (bvadd (select m #x2) (select s #x2)))))
+	    (let ((s (store s #x3 (bvadd (select m #x3) (select s #x3)))))
+	    (let ((s (store s #x4 (bvadd (select m #x4) (select s #x4)))))
+	    (let ((s (store s #x5 (bvadd (select m #x5) (select s #x5)))))
+	    (let ((s (store s #x6 (bvadd (select m #x6) (select s #x6)))))
+	    (let ((s (store s #x7 (bvadd (select m #x7) (select s #x7)))))
+	    (let ((s (store s #x8 (bvadd (select m #x8) (select s #x8)))))
+	    (let ((s (store s #x9 (bvadd (select m #x9) (select s #x9)))))
+	    (let ((s (store s #xa (bvadd (select m #xa) (select s #xa)))))
+	    (let ((s (store s #xb (bvadd (select m #xb) (select s #xb)))))
+	    (let ((s (store s #xc (bvadd (select m #xc) (select s #xc)))))
+	    (let ((s (store s #xd (bvadd (select m #xd) (select s #xd)))))
+	    (let ((s (store s #xe (bvadd (select m #xe) (select s #xe)))))
+	    (let ((s (store s #xf (bvadd (select m #xf) (select s #xf)))))	
+	         s)))))))))))))))))
+
 (define-fun chacha20_core ((m state)) state  
-	    ((_ map (bvadd (uint32 uint32) uint32)) m (rounds m)))
+	    (let ((s (rounds m)))
+	         (add_state s m)))
 
 (define-fun flip_endian ((x uint32)) uint32
 	    (concat ((_ extract 7 0) x)
@@ -68,9 +88,10 @@
 (define-fun c2 () uint32 #x79622d32)
 (define-fun c3 () uint32 #x6b206574)
 
+(declare-const sinit state)
+
 (define-fun setup ((k key) (n nonce) (c counter)) state
-	    (let ((s0 ((as const state) #x00000000)))
-            (let ((s1 (store s0 #x0 c0)))
+            (let ((s1 (store sinit #x0 c0)))
             (let ((s2 (store s1 #x1 c1)))
             (let ((s3 (store s2 #x2 c2)))
             (let ((s4 (store s3 #x3 c3)))
@@ -86,7 +107,7 @@
             (let ((s14 (store s13 #xd (flip_endian ((_ extract 95 64) n)))))
             (let ((s15 (store s14 #xe (flip_endian ((_ extract 63 32) n)))))
             (let ((s16 (store s15 #xf (flip_endian ((_ extract 31 0) n)))))
-	         s16))))))))))))))))))
+	         s16)))))))))))))))))
 
 (define-fun chacha20_block_state ((s0 state)) block
             (let ((st (chacha20_core s0)))
@@ -186,21 +207,29 @@
 (define-sort idx2 () (_ BitVec 2))
 (define-sort uint32x4 () (Array idx2 uint32))
 (define-sort state2 () (Array idx2 uint32x4))
+(declare-const vinit uint32x4)
 
 (define-fun rol2 ((v uint32x4) (s uint32)) uint32x4
-	    (let ((v0 ((as const uint32x4) #x00000000)))
-	    (let ((v1 (store v0 #b00 (rol (select v #b00) s))))
+	    (let ((v1 (store vinit #b00 (rol (select v #b00) s))))
 	    (let ((v2 (store v1 #b01 (rol (select v #b01) s))))
 	    (let ((v3 (store v2 #b10 (rol (select v #b10) s))))
 	    (let ((v4 (store v3 #b11 (rol (select v #b11) s))))
-	         v4))))))
+	         v4)))))
 
 
 (define-fun add2 ((x uint32x4) (y uint32x4)) uint32x4
-	    ((_ map (bvadd (uint32 uint32) uint32)) x y))
+	    (let ((v (store vinit #b00 (bvadd (select x #b00) (select y #b00)))))
+	    (let ((v (store v #b01 (bvadd (select x #b01) (select y #b01)))))
+	    (let ((v (store v #b10 (bvadd (select x #b10) (select y #b10)))))
+	    (let ((v (store v #b11 (bvadd (select x #b11) (select y #b11)))))
+	         v)))))
 
 (define-fun xor2 ((x uint32x4) (y uint32x4)) uint32x4
-	    ((_ map (bvxor (uint32 uint32) uint32)) x y))
+	    (let ((v (store vinit #b00 (bvxor (select x #b00) (select y #b00)))))
+	    (let ((v (store v #b01 (bvxor (select x #b01) (select y #b01)))))
+	    (let ((v (store v #b10 (bvxor (select x #b10) (select y #b10)))))
+	    (let ((v (store v #b11 (bvxor (select x #b11) (select y #b11)))))
+	         v)))))
 
 
 (define-fun line2 ((a idx2) (b idx2) (d idx2) (s uint32) (m state2)) state2
@@ -209,12 +238,11 @@
 
 
 (define-fun shuffle_right ((x uint32x4) (n idx2)) uint32x4
-	    (let ((v0 ((as const uint32x4) #x00000000)))
-	    (let ((v1 (store v0 #b00 (select x n))))
+	    (let ((v1 (store vinit #b00 (select x n))))
 	    (let ((v2 (store v1 #b01 (select x (bvadd n #b01)))))
 	    (let ((v3 (store v2 #b10 (select x (bvadd n #b10)))))
 	    (let ((v4 (store v3 #b11 (select x (bvadd n #b11)))))
-	         v4))))))
+	         v4)))))
 
 (define-fun shuffle0123 ((m state2)) state2
 	    (let ((m1 (store m #b01 (shuffle_right (select m #b01) #b01))))
@@ -253,7 +281,7 @@
 	    (double_round2 
 	    (double_round2 m)))))))))))
 
-(define-fun add_state ((x state2) (y state2)) state2
+(define-fun add_state2 ((x state2) (y state2)) state2
 	    (let ((v0 (store x #b00 (add2 (select x #b00) (select y #b00)))))
 	    (let ((v1 (store v0 #b01 (add2 (select x #b01) (select y #b01)))))
 	    (let ((v2 (store v1 #b10 (add2 (select x #b10) (select y #b10)))))
@@ -261,32 +289,31 @@
 	         v3)))))
 
 (define-fun chacha20_core2 ((m state2)) state2  
-	    (add_state m (rounds2 m)))
+	    (add_state2 m (rounds2 m)))
 
+(declare-const st0 state2)
 (define-fun setup2 ((s0 state)) state2
-	    (let ((v0 ((as const uint32x4) #x00000000)))
-	    (let ((v00 (store v0  #b00 (select s0 #x0))))
+	    (let ((v00 (store vinit  #b00 (select s0 #x0))))
 	    (let ((v01 (store v00 #b01 (select s0 #x1))))
 	    (let ((v02 (store v01 #b10 (select s0 #x2))))
 	    (let ((v03 (store v02 #b11 (select s0 #x3))))
-	    (let ((v10 (store v0  #b00 (select s0 #x4))))
+	    (let ((v10 (store vinit  #b00 (select s0 #x4))))
 	    (let ((v11 (store v10 #b01 (select s0 #x5))))
 	    (let ((v12 (store v11 #b10 (select s0 #x6))))
 	    (let ((v13 (store v12 #b11 (select s0 #x7))))
-	    (let ((v20 (store v0  #b00 (select s0 #x8))))
+	    (let ((v20 (store vinit  #b00 (select s0 #x8))))
 	    (let ((v21 (store v20 #b01 (select s0 #x9))))
 	    (let ((v22 (store v21 #b10 (select s0 #xa))))
 	    (let ((v23 (store v22 #b11 (select s0 #xb))))
-	    (let ((v30 (store v0  #b00 (select s0 #xc))))
+	    (let ((v30 (store vinit  #b00 (select s0 #xc))))
 	    (let ((v31 (store v30 #b01 (select s0 #xd))))
 	    (let ((v32 (store v31 #b10 (select s0 #xe))))
 	    (let ((v33 (store v32 #b11 (select s0 #xf))))
-	    (let ((st ((as const state2) v0)))
-	    (let ((st0 (store st #b00 v03))) 
+	    (let ((st0 (store st0 #b00 v03))) 
 	    (let ((st1 (store st0 #b01 v13))) 
 	    (let ((st2 (store st1 #b10 v23))) 
 	    (let ((st3 (store st2 #b11 v33)))
-	         st3)))))))))))))))))))))))
+	         st3)))))))))))))))))))))
 	    
 	     
 (define-fun chacha20_block2_state ((s0 state)) block
@@ -320,8 +347,8 @@
 ;(get-model)
 
 
-(assert (forall ((s0 state))
-        (= (chacha20_block_state s0) (chacha20_block2_state s0))))
+(assert (forall ((m state))
+        (= (chacha20_block_state m) (chacha20_block2_state m))))
 
 (echo "Verifying chacha20_block_state = chacha_block2_state:")
 (check-sat)
