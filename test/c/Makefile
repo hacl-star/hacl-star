@@ -98,6 +98,30 @@ perf-test-ed25519: test-ed25519.exe
 unit-test-ed25519: test-ed25519.exe
 	./test-ed25519.exe unit-test
 
+test-sha256.exe: SHA2_256.c test-sha256.c
+	$(CC) $(CFLAGS) \
+	  $(TWEETNACL_HOME)/tweetnacl.c \
+	  kremlib.c testlib.c $^ -o test-sha256.exe \
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+
+perf-test-sha256: test-sha256.exe
+	./test-sha256.exe perf
+
+unit-test-sha256: test-sha256.exe
+	./test-sha256.exe unit-test
+
+test-sha384.exe: SHA2_384.c test-sha384.c
+	$(CC) $(CFLAGS) \
+	  $(TWEETNACL_HOME)/tweetnacl.c \
+	  kremlib.c testlib.c $^ -o test-sha384.exe \
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+
+perf-test-sha384: test-sha384.exe
+	./test-sha384.exe perf
+
+unit-test-sha384: test-sha384.exe
+	./test-sha384.exe unit-test
+
 test-sha512.exe: SHA2_512.c test-sha512.c
 	$(CC) $(CFLAGS) \
 	  $(TWEETNACL_HOME)/tweetnacl.c \
@@ -109,6 +133,18 @@ perf-test-sha512: test-sha512.exe
 
 unit-test-sha512: test-sha512.exe
 	./test-sha512.exe unit-test
+
+test-hmac-sha256.exe: HMAC_SHA2_256.c test-hmac-sha256.c
+	$(CC) $(CFLAGS) \
+	  $(TWEETNACL_HOME)/tweetnacl.c \
+	  kremlib.c testlib.c $^ -o test-hmac-sha256.exe \
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+
+perf-test-hmac-sha256: test-hmac-sha256.exe
+	./test-hmac-sha256.exe perf
+
+unit-test-hmac-sha256: test-hmac-sha256.exe
+	./test-hmac-sha256.exe unit-test
 
 test-secretbox.exe:
 	$(CC) $(CFLAGS) \
