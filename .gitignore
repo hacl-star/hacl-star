@@ -21,12 +21,18 @@ pneutube/tube-star.exe
 pneutube/tube-star.exe.dSYM/
 pneutube/tube/
 
-code/hash/sha2-c
-code/hmac/hmac-c
-
+code/hash/sha2-c/
+code/hash/sha2-256-c/
+code/hash/sha2-384-c/
+code/hash/sha2-512-c/
+code/hmac/hmac-c/
+code/api/aead-c/
+code/api/box-c/
 code/curve25519/x25519-c/
+code/ed25519/ed25519-c/
 code/poly1305/poly-c/
 code/salsa-family/chacha-c/
+code/salsa-family/chacha-vec128/
 code/salsa-family/hsalsa-c/
 code/salsa-family/salsa-c/
 code/salsa-family/xsalsa-c/
@@ -35,4 +41,3 @@ doc/tutorial/0-coding-field-arithmetic-in-fstar/extracted_c/
 doc/tutorial/1-recursion-vs-loops/extracted_c/
 doc/tutorial/2-verifying-memory-safety/extracted_c/
 doc/tutorial/4-verifying-functional-correctness/extracted_c/
-

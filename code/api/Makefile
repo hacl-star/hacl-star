@@ -69,15 +69,15 @@ extract-c: box-c/NaCl.c aead-c/Chacha20Poly1305.c
 extract-api:
 	mkdir -p api-c
 	$(KRML) -tmpdir api-c NaCl.fst -verbose -skip-compilation \
-		$(addprefix -drop , 'Spec.\*' 'Hacl.Spec.\*' 'Hacl.Spe.\*' 'Hacl.Impl.\*' "Seq.\*" \
-				    Hacl.Constants Hacl.Endianness) \
+		-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\* \
+		-drop Hacl.Constants,Hacl.Endianness \
 		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box"
 
 box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst NaCl.fst
 	mkdir -p box-c
 	$(KRML) -tmpdir box-c NaCl.fst -skip-compilation \
-		$(addprefix -drop , 'Spec.\*' 'Hacl.Spec.\*' 'Hacl.Spe.\*' 'Hacl.Impl.\*' "Seq.\*" \
-				    Hacl.Constants Hacl.Endianness) \
+		-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\* \
+		-drop Hacl.Constants,Hacl.Endianness \
 		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad"
 
 aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Chacha20.fsti Chacha20Poly1305.fst
@@ -90,7 +90,7 @@ aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HA
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
 		-add-include '"AEAD_Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs
 	# TODO: FIX FOR KREMLIN EXTRACTION ISSUE, CHECK WITH JP
-	sed -i 's/(void \*)(uint8_t )0, //g' aead-c/Chacha20Poly1305.c
+	$(SED) -i 's/(void \*)(uint8_t )0, //g' aead-c/Chacha20Poly1305.c
 
 count-line:
 	@echo "LOC for AEAD CHACHAPOLY"
@@ -102,3 +102,9 @@ count-line:
 
 clean:
 	rm -rf api-c *~ *.exe *.graph *.o *.out aead-c box-c
+
+ifeq ($(UNAME),Darwin)
+  SED=gsed
+else
+  SED=sed
+endif
