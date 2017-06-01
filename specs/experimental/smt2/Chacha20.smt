@@ -365,7 +365,7 @@
 (define-sort block8 () (_ BitVec 4096))
 
 (define-fun rol3 ((v uint32x8) (s uint32)) uint32x8
-	    (let ((v (store v32x8 #b000 (rol (select v #b000) s))))
+	    (let ((v (store v #b000 (rol (select v #b000) s))))
 	    (let ((v (store v #b001 (rol (select v #b001) s))))
 	    (let ((v (store v #b010 (rol (select v #b010) s))))
 	    (let ((v (store v #b011 (rol (select v #b011) s))))
@@ -580,23 +580,23 @@
 	         v)))))))))
 
 (define-fun transpose16x8 ((m state3)) state3
-	    (let ((m (store m #x0 (column_top m #b000))))
-	    (let ((m (store m #x1 (column_bottom m #b000))))
-	    (let ((m (store m #x2 (column_top m #b001))))
-	    (let ((m (store m #x3 (column_bottom m #b001))))
-	    (let ((m (store m #x4 (column_top m #b010))))
-	    (let ((m (store m #x5 (column_bottom m #b010))))
-	    (let ((m (store m #x6 (column_top m #b011))))
-	    (let ((m (store m #x7 (column_bottom m #b011))))
-	    (let ((m (store m #x8 (column_top m #b100))))
-	    (let ((m (store m #x9 (column_bottom m #b100))))
-	    (let ((m (store m #xa (column_top m #b101))))
-	    (let ((m (store m #xb (column_bottom m #b101))))
-	    (let ((m (store m #xc (column_top m #b110))))
-	    (let ((m (store m #xd (column_bottom m #b110))))
-	    (let ((m (store m #xe (column_top m #b111))))
-	    (let ((m (store m #xf (column_bottom m #b111))))
-	         m)))))))))))))))))
+	    (let ((r (store m #x0 (column_top m #b000))))
+	    (let ((r (store r #x1 (column_bottom m #b000))))
+	    (let ((r (store r #x2 (column_top m #b001))))
+	    (let ((r (store r #x3 (column_bottom m #b001))))
+	    (let ((r (store r #x4 (column_top m #b010))))
+	    (let ((r (store r #x5 (column_bottom m #b010))))
+	    (let ((r (store r #x6 (column_top m #b011))))
+	    (let ((r (store r #x7 (column_bottom m #b011))))
+	    (let ((r (store r #x8 (column_top m #b100))))
+	    (let ((r (store r #x9 (column_bottom m #b100))))
+	    (let ((r (store r #xa (column_top m #b101))))
+	    (let ((r (store r #xb (column_bottom m #b101))))
+	    (let ((r (store r #xc (column_top m #b110))))
+	    (let ((r (store r #xd (column_bottom m #b110))))
+	    (let ((r (store r #xe (column_top m #b111))))
+	    (let ((r (store r #xf (column_bottom m #b111))))
+	         r)))))))))))))))))
 	    
 
 (define-fun chacha20_block3_state ((s0 state)) block8
@@ -638,7 +638,53 @@
 
 (assert (forall ((k key) (n nonce) (c counter))
         (= (chacha20_block k n c) ((_ extract 4095 3584) (chacha20_block3 k n c)))))
-(echo "Verifying chacha20_block = chacha_block3:")
+
+(echo "Verifying chacha20_block[0] = chacha_block3[0] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+         (= (chacha20_block k n (bvadd c #x00000001)) 
+            ((_ extract 3583 3072) (chacha20_block3 k n c)))))
+
+(echo "Verifying chacha20_block[1] = chacha_block3[1] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000010)) ((_ extract 3071 2560) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[2] = chacha_block3[2] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000011)) ((_ extract 2559 2048) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[3] = chacha_block3[3] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000100)) ((_ extract 2047 1536) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[4] = chacha_block3[4] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000101)) ((_ extract 1535 1024) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[5] = chacha_block3[5] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000110)) ((_ extract 1023 512) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[6] = chacha_block3[6] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000111)) ((_ extract 511 0) (chacha20_block3 k n c)))))
+
+(echo "Verifying chacha20_block[7] = chacha_block3[7] :")
 (check-sat)
 (get-model)
 
