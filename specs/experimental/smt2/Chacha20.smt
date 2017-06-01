@@ -321,9 +321,10 @@
 
 
 (assert (forall ((s0 state))
-        (= (chacha20_block k n c) (chacha20_block2 k n c))))
+        (= (chacha20_block_state s0) (chacha20_block2_state s0))))
 
-(echo "Verifying chacha20_block = chacha_block2:")
+(echo "Verifying chacha20_block_state = chacha_block2_state:")
 (check-sat)
 ;(get-model)
+
 
