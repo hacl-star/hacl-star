@@ -29,6 +29,7 @@ OCAML_INCLUDES=-I ../code/lib/ml ../code/lib/ml/hacllib.cmxa
 
 SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Chacha20.fst \
+		Spec.Chacha20_vec.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.CTR.fst \
 		Spec.Curve25519.Lemmas.fst \
