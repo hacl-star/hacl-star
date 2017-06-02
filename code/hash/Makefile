@@ -1,7 +1,6 @@
 HACL_HOME     = ../..
 FSTAR_HOME   ?= $(HACL_HOME)/dependencies/FStar
 KREMLIN_HOME ?= $(HACL_HOME)/dependencies/kremlin
-PROVIDER     ?= hacl
 
 FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
 
@@ -39,17 +38,17 @@ SHA2_FILES = \
 	Hacl.Hash.SHA2_256.fst
 
 # Full typechecking against the transparent integer interface
-%.fst-verify: %.fst
+%.fst-ver: %.fst
 	$(FSTARB) $^
 
-%.fsti-verify: %.fsti
+%.fsti-ver: %.fsti
 	$(FSTARB) $^
 
 # CI
 all-ci: test
 
 # Verification
-all-verif: $(addsuffix -verify, $(SHA2_FILES)) # This is too costly for the CI
+all-ver: $(addsuffix -ver, $(SHA2_FILES))
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst

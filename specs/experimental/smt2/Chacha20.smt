@@ -1,4 +1,5 @@
 ;(set-logic QF_ABV)
+(set-option :produce-models true)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Chacha20: RFC 7539
@@ -144,7 +145,7 @@
 (assert (= (let ((x (quarter_round #x0 #x1 #x2 #x3 s))) (select x #x3)) #x5881c4bb))
 (echo "Running quarter_round RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 ;; Chacha20 Block Function RFC Test Vector
 (define-fun k () key #x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f)
@@ -170,7 +171,7 @@
 (assert (= (select s0 #xf) #x00000000))
 (echo "Running setup RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 (define-fun s20 () state (rounds s0))
 (assert (= (select s20 #x0) #x837778ab))
@@ -191,17 +192,17 @@
 (assert (= (select s20 #xf) #x4e3c50a2))
 (echo "Running rounds RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 (define-fun key1 () block (chacha20_block k n c))
 (assert (= key1 #x10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e))
 (echo "Running chacha20_block RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Vectorized Chacha20 
+;;; Vectorized Chacha20 (128-bit)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-sort idx2 () (_ BitVec 2))
@@ -316,42 +317,377 @@
 	         st3)))))))))))))))))))))
 	    
 	     
+(define-fun uint32x4_serialize ((x uint32x4)) (_ BitVec 128)
+	    (concat (flip_endian (select x #b00))
+	    (concat (flip_endian (select x #b01))
+	    (concat (flip_endian (select x #b10))
+	    	    (flip_endian (select x #b11))))))
+
 (define-fun chacha20_block2_state ((s0 state)) block
 	    (let ((st (chacha20_core2 (setup2 s0))))
-	         (concat (flip_endian (select (select st #b00) #b00))
-	         (concat (flip_endian (select (select st #b00) #b01))
-	         (concat (flip_endian (select (select st #b00) #b10))
-	         (concat (flip_endian (select (select st #b00) #b11))
-	         (concat (flip_endian (select (select st #b01) #b00))
-	         (concat (flip_endian (select (select st #b01) #b01))
-	         (concat (flip_endian (select (select st #b01) #b10))
-	         (concat (flip_endian (select (select st #b01) #b11))
-	         (concat (flip_endian (select (select st #b10) #b00))
-	         (concat (flip_endian (select (select st #b10) #b01))
-	         (concat (flip_endian (select (select st #b10) #b10))
-	         (concat (flip_endian (select (select st #b10) #b11))
-	         (concat (flip_endian (select (select st #b11) #b00))
-	         (concat (flip_endian (select (select st #b11) #b01))
-	         (concat (flip_endian (select (select st #b11) #b10))
-	                 (flip_endian (select (select st #b11) #b11)))))))))))))))))))
-
+	         (concat (uint32x4_serialize (select st #b00))
+	         (concat (uint32x4_serialize (select st #b01))
+	         (concat (uint32x4_serialize (select st #b10))
+	         	 (uint32x4_serialize (select st #b11)))))))
 
 (define-fun chacha20_block2 ((k key) (n nonce) (c counter)) block
 	         (chacha20_block2_state (setup k n c)))
 
 ;; Chacha20 Block Function RFC Test Vector
 (define-fun key2 () block (chacha20_block2 k n c))
-(assert (= key2 #x10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e))
+;(assert (= key2 #x10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e))
 (echo "Running vectorized chacha20_block2 RFC test:")
 (check-sat)
-;(get-model)
+(get-model)
 
 
 (assert (forall ((m state))
         (= (chacha20_block_state m) (chacha20_block2_state m))))
-
 (echo "Verifying chacha20_block_state = chacha_block2_state:")
 (check-sat)
-;(get-model)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n c) (chacha20_block2 k n c))))
+(echo "Verifying chacha20_block = chacha_block2:")
+(check-sat)
+(get-model)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Vectorized Chacha20 (256-bit)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-sort idx3 () (_ BitVec 3))
+(define-sort uint32x8 () (Array idx3 uint32))
+(define-sort state3 () (Array idx uint32x8))
+(declare-const v32x8 uint32x8)
+(define-sort block8 () (_ BitVec 4096))
+
+(define-fun rol3 ((v uint32x8) (s uint32)) uint32x8
+	    (let ((v (store v #b000 (rol (select v #b000) s))))
+	    (let ((v (store v #b001 (rol (select v #b001) s))))
+	    (let ((v (store v #b010 (rol (select v #b010) s))))
+	    (let ((v (store v #b011 (rol (select v #b011) s))))
+	    (let ((v (store v #b100 (rol (select v #b100) s))))
+	    (let ((v (store v #b101 (rol (select v #b101) s))))
+	    (let ((v (store v #b110 (rol (select v #b110) s))))
+	    (let ((v (store v #b111 (rol (select v #b111) s))))
+	         v)))))))))
+
+
+(define-fun add3 ((x uint32x8) (y uint32x8)) uint32x8
+	    (let ((v (store v32x8 #b000 (bvadd (select x #b000) (select y #b000)))))
+	    (let ((v (store v #b001 (bvadd (select x #b001) (select y #b001)))))
+	    (let ((v (store v #b010 (bvadd (select x #b010) (select y #b010)))))
+	    (let ((v (store v #b011 (bvadd (select x #b011) (select y #b011)))))
+	    (let ((v (store v #b100 (bvadd (select x #b100) (select y #b100)))))
+	    (let ((v (store v #b101 (bvadd (select x #b101) (select y #b101)))))
+	    (let ((v (store v #b110 (bvadd (select x #b110) (select y #b110)))))
+	    (let ((v (store v #b111 (bvadd (select x #b111) (select y #b111)))))
+	         v)))))))))
+
+(define-fun xor3 ((x uint32x8) (y uint32x8)) uint32x8
+	    (let ((v (store v32x8 #b000 (bvxor (select x #b000) (select y #b000)))))
+	    (let ((v (store v #b001 (bvxor (select x #b001) (select y #b001)))))
+	    (let ((v (store v #b010 (bvxor (select x #b010) (select y #b010)))))
+	    (let ((v (store v #b011 (bvxor (select x #b011) (select y #b011)))))
+	    (let ((v (store v #b100 (bvxor (select x #b100) (select y #b100)))))
+	    (let ((v (store v #b101 (bvxor (select x #b101) (select y #b101)))))
+	    (let ((v (store v #b110 (bvxor (select x #b110) (select y #b110)))))
+	    (let ((v (store v #b111 (bvxor (select x #b111) (select y #b111)))))
+	         v)))))))))
+
+(define-fun line3 ((a idx) (b idx) (d idx) (s uint32) (m state3)) state3
+ 	    (let ((m1 (store m a (add3 (select m a) (select m b)))))
+	         (store m1 d (rol3 (xor3 (select m1 d) (select m1 a)) s))))
+
+
+(define-fun column_round3 ((m state3)) state3
+	    (let ((m (line3 #x0 #x4 #xc #x00000010 m)))
+       	    (let ((m (line3 #x1 #x5 #xd #x00000010 m)))
+	    (let ((m (line3 #x2 #x6 #xe #x00000010 m)))
+       	    (let ((m (line3 #x3 #x7 #xf #x00000010 m)))
+
+	    (let ((m (line3 #x8 #xc #x4 #x0000000c m)))
+       	    (let ((m (line3 #x9 #xd #x5 #x0000000c m)))
+	    (let ((m (line3 #xa #xe #x6 #x0000000c m)))
+       	    (let ((m (line3 #xb #xf #x7 #x0000000c m)))
+
+	    (let ((m (line3 #x0 #x4 #xc #x00000008 m)))
+       	    (let ((m (line3 #x1 #x5 #xd #x00000008 m)))
+	    (let ((m (line3 #x2 #x6 #xe #x00000008 m)))
+       	    (let ((m (line3 #x3 #x7 #xf #x00000008 m)))
+
+	    (let ((m (line3 #x8 #xc #x4 #x00000007 m)))
+       	    (let ((m (line3 #x9 #xd #x5 #x00000007 m)))
+	    (let ((m (line3 #xa #xe #x6 #x00000007 m)))
+       	    (let ((m (line3 #xb #xf #x7 #x00000007 m)))
+	         m)))))))))))))))))
+
+(define-fun diagonal_round3 ((m state3)) state3
+	    (let ((m (line3 #x0 #x5 #xf #x00000010 m)))
+       	    (let ((m (line3 #x1 #x6 #xc #x00000010 m)))
+	    (let ((m (line3 #x2 #x7 #xd #x00000010 m)))
+       	    (let ((m (line3 #x3 #x4 #xe #x00000010 m)))
+
+	    (let ((m (line3 #xa #xf #x5 #x0000000c m)))
+       	    (let ((m (line3 #xb #xc #x6 #x0000000c m)))
+	    (let ((m (line3 #x8 #xd #x7 #x0000000c m)))
+       	    (let ((m (line3 #x9 #xe #x4 #x0000000c m)))
+
+	    (let ((m (line3 #x0 #x5 #xf #x00000008 m)))
+       	    (let ((m (line3 #x1 #x6 #xc #x00000008 m)))
+	    (let ((m (line3 #x2 #x7 #xd #x00000008 m)))
+       	    (let ((m (line3 #x3 #x4 #xe #x00000008 m)))
+
+	    (let ((m (line3 #xa #xf #x5 #x00000007 m)))
+       	    (let ((m (line3 #xb #xc #x6 #x00000007 m)))
+	    (let ((m (line3 #x8 #xd #x7 #x00000007 m)))
+       	    (let ((m (line3 #x9 #xe #x4 #x00000007 m)))
+	         m)))))))))))))))))
+
+
+(define-fun double_round3 ((m state3)) state3  
+	    (diagonal_round3 (column_round3 m)))
+
+(define-fun rounds3 ((m state3)) state3  
+	    (double_round3 
+	    (double_round3 
+	    (double_round3 
+	    (double_round3 
+	    (double_round3 
+	    (double_round3 
+	    (double_round3 
+	    (double_round3 
+	    (double_round3 
+	    (double_round3 m)))))))))))
+
+(define-fun add_state3 ((x state3) (y state3)) state3
+	    (let ((x (store x #x0 (add3 (select x #x0) (select y #x0)))))
+	    (let ((x (store x #x1 (add3 (select x #x1) (select y #x1)))))
+	    (let ((x (store x #x2 (add3 (select x #x2) (select y #x2)))))
+	    (let ((x (store x #x3 (add3 (select x #x3) (select y #x3)))))
+	    (let ((x (store x #x4 (add3 (select x #x4) (select y #x4)))))
+	    (let ((x (store x #x5 (add3 (select x #x5) (select y #x5)))))
+	    (let ((x (store x #x6 (add3 (select x #x6) (select y #x6)))))
+	    (let ((x (store x #x7 (add3 (select x #x7) (select y #x7)))))
+	    (let ((x (store x #x8 (add3 (select x #x8) (select y #x8)))))
+	    (let ((x (store x #x9 (add3 (select x #x9) (select y #x9)))))
+	    (let ((x (store x #xa (add3 (select x #xa) (select y #xa)))))
+	    (let ((x (store x #xb (add3 (select x #xb) (select y #xb)))))
+	    (let ((x (store x #xc (add3 (select x #xc) (select y #xc)))))
+	    (let ((x (store x #xd (add3 (select x #xd) (select y #xd)))))
+	    (let ((x (store x #xe (add3 (select x #xe) (select y #xe)))))
+	    (let ((x (store x #xf (add3 (select x #xf) (select y #xf)))))
+	    	 x)))))))))))))))))
+
+(define-fun chacha20_core3 ((m state3)) state3  
+	    (add_state3 m (rounds3 m)))
+
+(declare-const stinit3 state3)
+
+(define-fun load32x8 ((x uint32)) uint32x8
+	     (let ((v (store v32x8 #b000 x)))
+	     (let ((v (store v #b001 x)))
+	     (let ((v (store v #b010 x)))
+	     (let ((v (store v #b011 x)))
+	     (let ((v (store v #b100 x)))
+	     (let ((v (store v #b101 x)))
+	     (let ((v (store v #b110 x)))
+	     (let ((v (store v #b111 x)))
+	          v)))))))))
+
+(define-fun load_counter ((c uint32)) uint32x8
+	     (let ((v (store v32x8 #b000 c)))
+	     (let ((v (store v #b001 (bvadd c #x00000001))))
+	     (let ((v (store v #b010 (bvadd c #x00000010))))
+	     (let ((v (store v #b011 (bvadd c #x00000011))))
+	     (let ((v (store v #b100 (bvadd c #x00000100))))
+	     (let ((v (store v #b101 (bvadd c #x00000101))))
+	     (let ((v (store v #b110 (bvadd c #x00000110))))
+	     (let ((v (store v #b111 (bvadd c #x00000111))))
+	          v)))))))))
+
+(define-fun setup3 ((s0 state)) state3
+	    (let ((v0 (load32x8 (select s0 #x0))))
+	    (let ((v1 (load32x8 (select s0 #x1))))
+	    (let ((v2 (load32x8 (select s0 #x2))))
+	    (let ((v3 (load32x8 (select s0 #x3))))
+	    (let ((v4 (load32x8 (select s0 #x4))))
+	    (let ((v5 (load32x8 (select s0 #x5))))
+	    (let ((v6 (load32x8 (select s0 #x6))))
+	    (let ((v7 (load32x8 (select s0 #x7))))
+	    (let ((v8 (load32x8 (select s0 #x8))))
+	    (let ((v9 (load32x8 (select s0 #x9))))
+	    (let ((v10 (load32x8 (select s0 #xa))))
+	    (let ((v11 (load32x8 (select s0 #xb))))
+	    (let ((v12 (load_counter (select s0 #xc))))
+	    (let ((v13 (load32x8 (select s0 #xd))))
+	    (let ((v14 (load32x8 (select s0 #xe))))
+	    (let ((v15 (load32x8 (select s0 #xf))))
+
+	    (let ((st (store stinit3 #x0 v0))) 
+	    (let ((st (store st #x1 v1)))
+	    (let ((st (store st #x2 v2)))
+	    (let ((st (store st #x3 v3)))
+	    (let ((st (store st #x4 v4)))
+	    (let ((st (store st #x5 v5)))
+	    (let ((st (store st #x6 v6)))
+	    (let ((st (store st #x7 v7)))
+	    (let ((st (store st #x8 v8)))
+	    (let ((st (store st #x9 v9)))
+	    (let ((st (store st #xa v10)))
+	    (let ((st (store st #xb v11)))
+	    (let ((st (store st #xc v12)))
+	    (let ((st (store st #xd v13)))
+	    (let ((st (store st #xe v14)))
+	    (let ((st (store st #xf v15)))
+	         st)))))))))))))))))))))))))))))))))
+	    
+	     
+(define-fun uint32x8_serialize ((x uint32x8)) (_ BitVec 256)
+	    (concat (flip_endian (select x #b000))
+	    (concat (flip_endian (select x #b001))
+	    (concat (flip_endian (select x #b010))
+	    (concat (flip_endian (select x #b011))
+	    (concat (flip_endian (select x #b100))
+	    (concat (flip_endian (select x #b101))
+	    (concat (flip_endian (select x #b110))
+	            (flip_endian (select x #b111))))))))))
+
+(define-fun column_top ((m state3) (i idx3)) uint32x8
+            (let ((v (store v32x8 #b000 (select (select m #x0) i))))
+            (let ((v (store v #b001 (select (select m #x1) i))))
+            (let ((v (store v #b010 (select (select m #x2) i))))
+            (let ((v (store v #b011 (select (select m #x3) i))))
+            (let ((v (store v #b100 (select (select m #x4) i))))
+            (let ((v (store v #b101 (select (select m #x5) i))))
+            (let ((v (store v #b110 (select (select m #x6) i))))
+            (let ((v (store v #b111 (select (select m #x7) i))))
+	         v)))))))))
+
+
+(define-fun column_bottom ((m state3) (i idx3)) uint32x8
+            (let ((v (store v32x8 #b000 (select (select m #x8) i))))
+            (let ((v (store v #b001 (select (select m #x9) i))))
+            (let ((v (store v #b010 (select (select m #xa) i))))
+            (let ((v (store v #b011 (select (select m #xb) i))))
+            (let ((v (store v #b100 (select (select m #xc) i))))
+            (let ((v (store v #b101 (select (select m #xd) i))))
+            (let ((v (store v #b110 (select (select m #xe) i))))
+            (let ((v (store v #b111 (select (select m #xf) i))))
+	         v)))))))))
+
+(define-fun transpose16x8 ((m state3)) state3
+	    (let ((r (store m #x0 (column_top m #b000))))
+	    (let ((r (store r #x1 (column_bottom m #b000))))
+	    (let ((r (store r #x2 (column_top m #b001))))
+	    (let ((r (store r #x3 (column_bottom m #b001))))
+	    (let ((r (store r #x4 (column_top m #b010))))
+	    (let ((r (store r #x5 (column_bottom m #b010))))
+	    (let ((r (store r #x6 (column_top m #b011))))
+	    (let ((r (store r #x7 (column_bottom m #b011))))
+	    (let ((r (store r #x8 (column_top m #b100))))
+	    (let ((r (store r #x9 (column_bottom m #b100))))
+	    (let ((r (store r #xa (column_top m #b101))))
+	    (let ((r (store r #xb (column_bottom m #b101))))
+	    (let ((r (store r #xc (column_top m #b110))))
+	    (let ((r (store r #xd (column_bottom m #b110))))
+	    (let ((r (store r #xe (column_top m #b111))))
+	    (let ((r (store r #xf (column_bottom m #b111))))
+	         r)))))))))))))))))
+	    
+
+(define-fun chacha20_block3_state ((s0 state)) block8
+	    (let ((st (chacha20_core3 (setup3 s0))))
+	    (let ((st (transpose16x8 st)))
+	         (concat (uint32x8_serialize (select st #x0))
+	         (concat (uint32x8_serialize (select st #x1))
+	         (concat (uint32x8_serialize (select st #x2))
+	         (concat (uint32x8_serialize (select st #x3))
+	         (concat (uint32x8_serialize (select st #x4))
+	         (concat (uint32x8_serialize (select st #x5))
+	         (concat (uint32x8_serialize (select st #x6))
+	         (concat (uint32x8_serialize (select st #x7))
+	         (concat (uint32x8_serialize (select st #x8))
+	         (concat (uint32x8_serialize (select st #x9))
+	         (concat (uint32x8_serialize (select st #xa))
+	         (concat (uint32x8_serialize (select st #xb))
+	         (concat (uint32x8_serialize (select st #xc))
+	         (concat (uint32x8_serialize (select st #xd))
+	         (concat (uint32x8_serialize (select st #xe))
+	                 (uint32x8_serialize (select st #xf))))))))))))))))))))
+
+(define-fun chacha20_block3 ((k key) (n nonce) (c counter)) block8
+	         (chacha20_block3_state (setup k n c)))
+
+;; Chacha20 Block Function RFC Test Vector
+(define-fun key3 () block ((_ extract 4095 3584) (chacha20_block3 k n c)))
+(assert (= key3 #x10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e))
+(echo "Running vectorized chacha20_block3 RFC test:")
+(check-sat)
+(get-model)
+
+
+(assert (forall ((m state))
+        (= (chacha20_block_state m) ((_ extract 4095 3584) (chacha20_block3_state m)))))
+(echo "Verifying chacha20_block_state = chacha_block3_state:")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n c) ((_ extract 4095 3584) (chacha20_block3 k n c)))))
+
+(echo "Verifying chacha20_block[0] = chacha_block3[0] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+         (= (chacha20_block k n (bvadd c #x00000001)) 
+            ((_ extract 3583 3072) (chacha20_block3 k n c)))))
+
+(echo "Verifying chacha20_block[1] = chacha_block3[1] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000010)) ((_ extract 3071 2560) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[2] = chacha_block3[2] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000011)) ((_ extract 2559 2048) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[3] = chacha_block3[3] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000100)) ((_ extract 2047 1536) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[4] = chacha_block3[4] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000101)) ((_ extract 1535 1024) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[5] = chacha_block3[5] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000110)) ((_ extract 1023 512) (chacha20_block3 k n c)))))
+(echo "Verifying chacha20_block[6] = chacha_block3[6] :")
+(check-sat)
+(get-model)
+
+(assert (forall ((k key) (n nonce) (c counter))
+        (= (chacha20_block k n (bvadd c #x00000111)) ((_ extract 511 0) (chacha20_block3 k n c)))))
+
+(echo "Verifying chacha20_block[7] = chacha_block3[7] :")
+(check-sat)
+(get-model)
+
+
 
 
