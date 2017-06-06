@@ -212,11 +212,10 @@ val ws_part_1_core:
   block_w :uint64_p {length block_w = v size_block_w /\ disjoint ws_w block_w} ->
   i:UInt32.t{UInt32.v i < 16} ->
   Stack unit
-        (requires (fun h -> live h ws_w /\ live h block_w /\
-          (let seq_ws = reveal_h64s (as_seq h ws_w) in
-           let seq_block = reveal_h64s (as_seq h block_w) in
-           (forall (j:nat). {:pattern (Seq.index seq_ws j)} j < UInt32.v i ==> Seq.index seq_ws j == Spec.ws seq_block j))
-        ))
+        (requires (fun h -> live h ws_w /\ live h block_w
+                  /\ (let seq_ws = reveal_h64s (as_seq h ws_w) in
+                  let seq_block = reveal_h64s (as_seq h block_w) in
+                  (forall (j:nat). {:pattern (Seq.index seq_ws j)} j < UInt32.v i ==> Seq.index seq_ws j == Spec.ws seq_block j))))
         (ensures  (fun h0 r h1 -> live h1 ws_w /\ live h0 ws_w
                   /\ live h1 block_w /\ live h0 block_w /\ modifies_1 ws_w h0 h1 /\
                   as_seq h1 block_w == as_seq h0 block_w
@@ -224,41 +223,21 @@ val ws_part_1_core:
                   let b = reveal_h64s (as_seq h0 block_w) in
                   (forall (j:nat). {:pattern (Seq.index w j)} j < UInt32.v i+1 ==> Seq.index w j == Spec.ws b j))))
 
-
-#reset-options " --max_fuel 0 --z3rlimit 20"
-
-private
-val lemma_spec_ws_def:
-  b:Seq.seq UInt64.t{Seq.length b = Spec.size_block_w} ->
-  i:nat{i < 16} ->
-  Lemma (Spec.ws b i == Seq.index b i)
-
-#reset-options " --max_fuel 1 --z3rlimit 20"
-
-let lemma_spec_ws_def b i = ()
-
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
 [@ "substitute"]
 let ws_part_1_core ws_w block_w t =
-    let h0 = ST.get() in
-    let h = ST.get() in
-    ws_w.(t) <- block_w.(t);
-    let h1 = ST.get() in
-    let h' = ST.get() in
-    no_upd_lemma_1 h0 h1 ws_w block_w;
-    lemma_spec_ws_def (reveal_h64s (as_seq h block_w)) (UInt32.v t);
-    assert(Seq.index (reveal_h64s (as_seq h1 ws_w)) (UInt32.v t) == Seq.index (reveal_h64s(as_seq h block_w)) (UInt32.v t))
+  (**) let h0 = ST.get() in
+  (**) let h = ST.get() in
+  ws_w.(t) <- block_w.(t);
+  (**) let h1 = ST.get() in
+  (**) let h' = ST.get() in
+  (**) no_upd_lemma_1 h0 h1 ws_w block_w;
+  (**) Lemmas.lemma_spec_ws_def (reveal_h64s (as_seq h block_w)) (UInt32.v t);
+  (**) assert(Seq.index (reveal_h64s (as_seq h1 ws_w)) (UInt32.v t) == Seq.index (reveal_h64s(as_seq h block_w)) (UInt32.v t))
 
 
-val lemma_modifies_0_is_modifies_1:
-  #a:Type ->
-  h:HyperStack.mem ->
-  b:buffer a{live h b} ->
-  Lemma (modifies_1 b h h)
-let lemma_modifies_0_is_modifies_1 #a h b =
-  lemma_intro_modifies_1 b h h
-
+#reset-options " --max_fuel 0 --z3rlimit 500"
 
 [@"substitute"]
 private val ws_part_1:
@@ -276,7 +255,7 @@ private val ws_part_1:
 
 [@"substitute"]
 let ws_part_1 ws_w block_w =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   let inv (h1: HS.mem) (i: nat) : Type0 =
     i <= 16 /\ live h1 ws_w /\ live h1 block_w /\ modifies_1 ws_w h0 h1 /\
     as_seq h1 block_w == as_seq h0 block_w
@@ -291,9 +270,9 @@ let ws_part_1 ws_w block_w =
     =
     ws_part_1_core ws_w block_w t
   in
-  lemma_modifies_0_is_modifies_1 h0 ws_w;
+  (**) Lemmas.lemma_modifies_0_is_modifies_1 h0 ws_w;
   for 0ul 16ul inv f';
-  let h1 = ST.get() in ()
+  (**) let h1 = ST.get() in ()
 
 
 #reset-options " --max_fuel 0 --z3rlimit 20"
@@ -316,39 +295,20 @@ val ws_part_2_core:
                   let b = reveal_h64s (as_seq h0 block_w) in
                   (forall (j:nat). {:pattern (Seq.index w j)} j < UInt32.v i+1 ==> Seq.index w j == Spec.ws b j))))
 
-
-#reset-options " --max_fuel 1 --z3rlimit 20"
-
-private
-val lemma_spec_ws_def2:
-  b:Seq.seq UInt64.t{Seq.length b = Spec.size_block_w} ->
-  t:nat{16 <= t /\ t < 80} ->
-  Lemma(let t16 = Spec.ws b (t - 16) in
-        let t15 = Spec.ws b (t - 15) in
-        let t7  = Spec.ws b (t - 7) in
-        let t2  = Spec.ws b (t - 2) in
-        let s1 = Spec._sigma1 t2 in
-        let s0 = Spec._sigma0 t15 in
-        Spec.ws b t == FStar.UInt64.(s1 +%^ (t7 +%^ (s0 +%^ t16))))
-
-#reset-options " --max_fuel 1 --z3rlimit 20"
-
-let lemma_spec_ws_def2 b i = ()
-
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
 [@ "substitute"]
 let ws_part_2_core ws_w block_w t =
-    let h0 = ST.get () in
-    let t16 = ws_w.(t -^ 16ul) in
-    let t15 = ws_w.(t -^ 15ul) in
-    let t7  = ws_w.(t -^ 7ul) in
-    let t2  = ws_w.(t -^ 2ul) in
-    ws_w.(t) <- H64.((_sigma1 t2) +%^ (t7 +%^ ((_sigma0 t15) +%^ t16)));
-    let h1 = ST.get () in
-    no_upd_lemma_1 h0 h1 ws_w block_w;
-    lemma_spec_ws_def2 (reveal_h64s (as_seq h0 block_w)) (UInt32.v t);
-    assert(Seq.index (reveal_h64s (as_seq h1 ws_w)) (UInt32.v t) == Spec.ws (reveal_h64s (as_seq h0 block_w)) (UInt32.v t))
+  (**) let h0 = ST.get () in
+  let t16 = ws_w.(t -^ 16ul) in
+  let t15 = ws_w.(t -^ 15ul) in
+  let t7  = ws_w.(t -^ 7ul) in
+  let t2  = ws_w.(t -^ 2ul) in
+  ws_w.(t) <- H64.((_sigma1 t2) +%^ (t7 +%^ ((_sigma0 t15) +%^ t16)));
+  (**) let h1 = ST.get () in
+  (**) no_upd_lemma_1 h0 h1 ws_w block_w;
+  (**) Lemmas.lemma_spec_ws_def2 (reveal_h64s (as_seq h0 block_w)) (UInt32.v t);
+  (**) assert(Seq.index (reveal_h64s (as_seq h1 ws_w)) (UInt32.v t) == Spec.ws (reveal_h64s (as_seq h0 block_w)) (UInt32.v t))
 
 
 #reset-options " --max_fuel 0 --z3rlimit 20"
@@ -372,7 +332,7 @@ private val ws_part_2:
 
 [@"substitute"]
 let ws_part_2 ws_w block_w =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   let inv (h1: HS.mem) (i: nat) : Type0 =
     live h1 ws_w /\ live h1 block_w /\ modifies_1 ws_w h0 h1 /\ 16 <= i /\ i <= 80
     /\ reveal_h64s (as_seq h1 block_w) == reveal_h64s (as_seq h0 block_w)
@@ -387,9 +347,9 @@ let ws_part_2 ws_w block_w =
     =
     ws_part_2_core ws_w block_w t
   in
-  lemma_modifies_0_is_modifies_1 h0 ws_w;
+  (**) Lemmas.lemma_modifies_0_is_modifies_1 h0 ws_w;
   for 16ul 80ul inv f';
-  let h1 = ST.get() in ()
+  (**) let h1 = ST.get() in ()
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -484,7 +444,7 @@ private val shuffle:
 
 [@"substitute"]
 let shuffle hash block ws k =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   let inv (h1: HS.mem) (i: nat) : Type0 =
     live h1 hash /\ modifies_1 hash h0 h1 /\ i <= v size_ws_w
     /\ (let seq_block = reveal_h64s (as_seq h0 block) in
@@ -496,9 +456,9 @@ let shuffle hash block ws k =
       (ensures (fun h_1 _ h_2 -> inv h_2 (UInt32.v t + 1)))
     =
     shuffle_core hash block ws k t;
-    C.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash))
+    (**) C.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash))
   in
-  C.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash));
+  (**) C.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash));
   for 0ul size_ws_w inv f'
 
 
@@ -519,11 +479,10 @@ private val sum_hash:
 
 [@"substitute"]
 let sum_hash hash_0 hash_1 =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H64.(x +%^ y));
-  let h1 = ST.get() in
-  Seq.lemma_eq_intro (Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) (reveal_h64s (as_seq h0 hash_0)) (reveal_h64s (as_seq  h0 hash_1))) (reveal_h64s (as_seq h1 hash_0))
-
+  (**) let h1 = ST.get() in
+  (**) Seq.lemma_eq_intro (Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) (reveal_h64s (as_seq h0 hash_0)) (reveal_h64s (as_seq  h0 hash_1))) (reveal_h64s (as_seq h1 hash_0))
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -584,11 +543,11 @@ private val copy_hash:
 
 [@"substitute"]
 let copy_hash hash_w_1 hash_w_2 =
-  let h0 = ST.get () in
+  (**) let h0 = ST.get () in
   Buffer.blit hash_w_2 0ul hash_w_1 0ul size_hash_w;
-  let h1 = ST.get () in
-  assert(Seq.slice (as_seq h1 hash_w_1) 0 (v size_hash_w) == Seq.slice (as_seq h0 hash_w_2) 0 (v size_hash_w));
-  Lemmas.lemma_blit_slices_eq h0 h1 hash_w_1 hash_w_2 (v size_hash_w)
+  (**) let h1 = ST.get () in
+  (**) assert(Seq.slice (as_seq h1 hash_w_1) 0 (v size_hash_w) == Seq.slice (as_seq h0 hash_w_2) 0 (v size_hash_w));
+  (**) Lemmas.lemma_blit_slices_eq h0 h1 hash_w_1 hash_w_2 (v size_hash_w)
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -618,78 +577,66 @@ private val update_core:
 
 [@"substitute"]
 let update_core hash_w data data_w ws_w k_w =
-  assert_norm(pow2 32 = 0x100000000);
-  assert_norm(pow2 64 = 0x10000000000000000);
-  assert_norm(pow2 125 = 42535295865117307932921825928971026432);
-
-  let h0 = ST.get() in
+  (**) assert_norm(pow2 32 = 0x100000000);
+  (**) assert_norm(pow2 64 = 0x10000000000000000);
+  (**) assert_norm(pow2 125 = 42535295865117307932921825928971026432);
+  (**) let h0 = ST.get() in
 
   (* Push a new frame *)
   (**) push_frame();
-
-  let h1 = ST.get() in
-
-  assert(  let b = Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
-           reveal_h64s (as_seq h0 data_w) == b);
+  (**) let h1 = ST.get() in
+  (**) assert(let b = Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
+              reveal_h64s (as_seq h0 data_w) == b);
 
   (* Allocate space for converting the data block *)
   let hash_0 = Buffer.create (u64_to_h64 0uL) size_hash_w in
-
-  let h2 = ST.get() in
-  no_upd_lemma_0 h1 h2 data;
-  no_upd_lemma_0 h1 h2 data_w;
-  no_upd_lemma_0 h1 h2 ws_w;
-  no_upd_lemma_0 h1 h2 k_w;
-  no_upd_lemma_0 h1 h2 hash_w;
+  (**) let h2 = ST.get() in
+  (**) no_upd_lemma_0 h1 h2 data;
+  (**) no_upd_lemma_0 h1 h2 data_w;
+  (**) no_upd_lemma_0 h1 h2 ws_w;
+  (**) no_upd_lemma_0 h1 h2 k_w;
+  (**) no_upd_lemma_0 h1 h2 hash_w;
 
   (* Keep track of the the current working hash from the state *)
   copy_hash hash_0 hash_w;
-
-  let h3 = ST.get() in
-
-  no_upd_lemma_1 h2 h3 hash_0 data;
-  no_upd_lemma_1 h2 h3 hash_0 data_w;
-  no_upd_lemma_1 h2 h3 hash_0 ws_w;
-  no_upd_lemma_1 h2 h3 hash_0 k_w;
-  no_upd_lemma_1 h2 h3 hash_0 hash_w;
+  (**) let h3 = ST.get() in
+  (**) no_upd_lemma_1 h2 h3 hash_0 data;
+  (**) no_upd_lemma_1 h2 h3 hash_0 data_w;
+  (**) no_upd_lemma_1 h2 h3 hash_0 ws_w;
+  (**) no_upd_lemma_1 h2 h3 hash_0 k_w;
+  (**) no_upd_lemma_1 h2 h3 hash_0 hash_w;
 
   (* Step 2 : Initialize the eight working variables *)
   (* Step 3 : Perform logical operations on the working variables *)
   (* Step 4 : Compute the ith intermediate hash value *)
   shuffle hash_0 data_w ws_w k_w;
-
-  let h4 = ST.get() in
-  assert(let b = Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
-         let ha = Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) b in
-         as_seq h4 hash_w == as_seq h0 hash_w /\
-         reveal_h64s (as_seq h4 hash_0) == ha);
-
-  no_upd_lemma_1 h3 h4 hash_0 data;
-  no_upd_lemma_1 h3 h4 hash_0 data_w;
-  no_upd_lemma_1 h3 h4 hash_0 ws_w;
-  no_upd_lemma_1 h3 h4 hash_0 k_w;
-  no_upd_lemma_1 h3 h4 hash_0 hash_w;
+  (**) let h4 = ST.get() in
+  (**) assert(let b = Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
+              let ha = Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) b in
+              as_seq h4 hash_w == as_seq h0 hash_w /\
+              reveal_h64s (as_seq h4 hash_0) == ha);
+  (**) no_upd_lemma_1 h3 h4 hash_0 data;
+  (**) no_upd_lemma_1 h3 h4 hash_0 data_w;
+  (**) no_upd_lemma_1 h3 h4 hash_0 ws_w;
+  (**) no_upd_lemma_1 h3 h4 hash_0 k_w;
+  (**) no_upd_lemma_1 h3 h4 hash_0 hash_w;
 
   (* Use the previous one to update it inplace *)
   sum_hash hash_w hash_0;
-
-  let h5 = ST.get() in
-
-   assert(let x = reveal_h64s (as_seq h4 hash_w) in
+  (**) let h5 = ST.get() in
+  (**) assert(let x = reveal_h64s (as_seq h4 hash_w) in
           let y = reveal_h64s (as_seq h4 hash_0) in
           x == reveal_h64s (as_seq h0 hash_w) /\
           y == Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) (Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data))));
-
-  assert(let x = reveal_h64s (as_seq h0 hash_w) in
+  (**) assert(let x = reveal_h64s (as_seq h0 hash_w) in
          let y = Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) (Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data))) in
          let z = reveal_h64s (as_seq h5 hash_w) in
          let z' = Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) x y in
          z == z');
-
-  no_upd_lemma_1 h4 h5 hash_w data;
-  no_upd_lemma_1 h4 h5 hash_w data_w;
-  no_upd_lemma_1 h4 h5 hash_w ws_w;
-  no_upd_lemma_1 h4 h5 hash_w k_w;
+  (**) no_upd_lemma_1 h4 h5 hash_w data;
+  (**) no_upd_lemma_1 h4 h5 hash_w data_w;
+  (**) no_upd_lemma_1 h4 h5 hash_w ws_w;
+  (**) no_upd_lemma_1 h4 h5 hash_w k_w;
 
   (* Pop the frame *)
   (**) pop_frame()
@@ -697,6 +644,7 @@ let update_core hash_w data data_w ws_w k_w =
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
+[@"substitute"]
 val counter_increment:
   counter_w :uint64_p{length counter_w = v size_count_w} ->
   Stack unit
@@ -710,6 +658,7 @@ val counter_increment:
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
 
+[@"substitute"]
 let counter_increment counter_w =
   let c0 = counter_w.(0ul) in
   let one = u32_to_h64 1ul in
@@ -741,29 +690,40 @@ val update:
                   /\ H64.v counter_1 = H64.v counter_0 + 1 /\ H64.v counter_1 < pow2 64
                   /\ reveal_h64s seq_hash_1 == Spec.update (reveal_h64s seq_hash_0) (reveal_sbytes seq_block))))
 
-#reset-options "--max_fuel 0  --z3rlimit 500"
+#reset-options "--max_fuel 0  --z3rlimit 250"
 
 let update state data =
 
   (* Push a new frame *)
   (**) let h0 = ST.get () in
-  // (**) Seq.lemma_eq_intro (as_seq h0 (Buffer.sub state pos_k_w size_k_w)) 
-  //                         (Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)));
-  (**) assume(reveal_h64s (as_seq h0 (Buffer.sub state pos_k_w size_k_w)) == Spec.k);
   (**) push_frame();
   (**) let h1 = ST.get () in
+  (**) Lemmas.lemma_eq_state_k_sub_slice h1 state;
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)))
+  (**)                    (Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)));
+  (**) Lemmas.lemma_eq_state_counter_sub_slice h1 state;
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)))
+                          (Seq.slice (as_seq h1 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)));
+  (**) Lemmas.lemma_eq_state_hash_sub_slice h1 state;
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))
+                          (Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)));
 
   (* Allocate space for converting the data block *)
   let data_w = Buffer.create (u32_to_h64 0ul) size_block_w in
   (**) let h2 = ST.get () in
   (**) no_upd_lemma_0 h1 h2 data;
   (**) no_upd_lemma_0 h1 h2 (Buffer.sub state pos_k_w size_k_w);
+  (**) no_upd_lemma_0 h1 h2 (Buffer.sub state pos_whash_w size_whash_w);
+  (**) no_upd_lemma_0 h1 h2 (Buffer.sub state pos_count_w size_count_w);
 
   (* Cast the data bytes into a uint32_t buffer *)
   uint64s_from_be_bytes data_w data size_block_w;
   (**) let h3 = ST.get () in
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_k_w size_k_w);
+  (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_whash_w size_whash_w);
+  (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_count_w size_count_w);
   (**) no_upd_lemma_1 h2 h3 data_w data;
+  (**) assert(reveal_h64s (as_seq h3 data_w) == Spec.Lib.uint64s_from_be (U32.v size_block_w) (reveal_sbytes (as_seq h3 data)));
 
   (* Retreive values from the state *)
   let hash_w = Buffer.sub state pos_whash_w size_whash_w in
@@ -776,8 +736,9 @@ let update state data =
   (**) let h4 = ST.get () in
   (**) no_upd_lemma_1 h3 h4 ws_w data;
   (**) no_upd_lemma_1 h3 h4 ws_w k_w;
+  (**) no_upd_lemma_1 h3 h4 ws_w hash_w;
   (**) no_upd_lemma_1 h3 h4 ws_w counter_w;
-  
+
   (* Step 2 : Initialize the eight working variables *)
   (* Step 3 : Perform logical operations on the working variables *)
   (* Step 4 : Compute the ith intermediate hash value *)
@@ -787,33 +748,44 @@ let update state data =
   (**) no_upd_lemma_1 h4 h5 hash_w data;
   (**) no_upd_lemma_1 h4 h5 hash_w k_w;
   (**) no_upd_lemma_1 h4 h5 hash_w counter_w;
+  (**) Lemmas.lemma_eq_state_k_sub_slice h5 state;
+  (**) Lemmas.lemma_eq_state_counter_sub_slice h5 state;
+  (**) Lemmas.lemma_eq_state_hash_sub_slice h5 state;
+  (**) Seq.lemma_eq_intro (as_seq h1 hash_w) (as_seq h4 hash_w);
+  (**) Seq.lemma_eq_intro (as_seq h1 data) (as_seq h4 data);
+  (**) assert(reveal_h64s (as_seq h5 hash_w) == Spec.update (reveal_h64s (as_seq h0 hash_w)) (reveal_sbytes (as_seq h0 data)));
 
   (* Increment the total number of blocks processed *)
-  (**) Seq.lemma_eq_intro (as_seq h5 (Buffer.sub state pos_count_w size_count_w)) 
-                          (Seq.slice (as_seq h5 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)));
   counter_increment counter_w;
   (**) let h6 = ST.get () in
   (**) no_upd_lemma_1 h5 h6 counter_w data;
   (**) no_upd_lemma_1 h5 h6 counter_w k_w;
-  
-  (* Pop the memory frame *)
-  (**) pop_frame();
-  (**) let h7 = ST.get () in
-  (**) assert(live h0 state /\ live h0 data /\ live h7 state /\ modifies_1 state h0 h7);
-  (**) Seq.lemma_eq_intro (as_seq h7 (Buffer.sub state pos_k_w size_k_w)) 
-                          (Seq.slice (as_seq h7 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)));
+  (**) no_upd_lemma_1 h5 h6 counter_w hash_w;
+  (**) Lemmas.lemma_eq_state_k_sub_slice h6 state;
+  (**) Lemmas.lemma_eq_state_counter_sub_slice h6 state;
+  (**) Lemmas.lemma_eq_state_hash_sub_slice h6 state;
   (**) assert(let seq_k_0 = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
-                  let seq_k_1 = Seq.slice (as_seq h7 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
-                  seq_k_0 == seq_k_1);
+              let seq_k_1 = Seq.slice (as_seq h6 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+              seq_k_0 == seq_k_1);
   (**) assert(let seq_counter_0 = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
-                  let seq_counter_1 = Seq.slice (as_seq h7 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+                  let seq_counter_1 = Seq.slice (as_seq h6 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
                   let counter_0 = Seq.index seq_counter_0 0 in
                   let counter_1 = Seq.index seq_counter_1 0 in
                   H64.v counter_1 = H64.v counter_0 + 1 /\ H64.v counter_1 < pow2 64);
   (**) assert(let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-                  let seq_hash_1 = Seq.slice (as_seq h7 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+                  let seq_hash_1 = Seq.slice (as_seq h6 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
                   let seq_block = as_seq h0 data in
-                  reveal_h64s seq_hash_1 == Spec.update (reveal_h64s seq_hash_0) (reveal_sbytes seq_block))
+                  reveal_h64s seq_hash_1 == Spec.update (reveal_h64s seq_hash_0) (reveal_sbytes seq_block));
+
+  (* Pop the memory frame *)
+  (**) pop_frame();
+  (**) let h7 = ST.get () in
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h6 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)))
+                          (Seq.slice (as_seq h7 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)));
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h6 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)))
+                          (Seq.slice (as_seq h7 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)));
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h6 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))
+                          (Seq.slice (as_seq h7 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))
 
 
 #reset-options "--max_fuel 0  --z3rlimit 100"
@@ -967,7 +939,6 @@ let pad padding n len =
 
   (* Compute and encode the total length *)
   let encodedlen = encode_length n len in
-
   (**) let h0 = ST.get () in
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h0 zeros)) (Seq.create (v pad0len) 0uy);
   (**) assert(reveal_sbytes (as_seq h0 zeros) == Seq.create (v pad0len) 0uy);
