@@ -79,20 +79,6 @@ inline_for_extraction let pos_whash_w  = size_k_w +^ size_ws_w
 inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
-
-val lemma_modifies_0_is_modifies_1:
-  #a:Type ->
-  h:HyperStack.mem ->
-  b:buffer a{live h b} ->
-  Lemma (modifies_1 b h h)
-
-#reset-options "--max_fuel 0  --z3rlimit 100"
-
-let lemma_modifies_0_is_modifies_1 #a h b =
-  lemma_intro_modifies_1 b h h
-
-
 #reset-options "--max_fuel 0  --z3rlimit 200"
 
 let lemma_aux_0 (t:UInt32.t{UInt32.v t >= 16 /\ UInt32.v t < 80}) : Lemma
