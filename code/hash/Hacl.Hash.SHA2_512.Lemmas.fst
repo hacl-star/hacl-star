@@ -161,6 +161,16 @@ let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:bu
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
+val lemma_update_multi_def0: (hash:Spec.hash_w) -> (blocks:Spec.bytes{Seq.length blocks = 0}) -> Lemma
+  (Spec.update_multi hash blocks = hash)
+
+#reset-options "--max_fuel 1 --z3rlimit 20"
+
+let lemma_update_multi_def0 hash blocks = ()
+
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
+
 val lemma_update_multi_def: (hash:Spec.hash_w) -> (blocks:Spec.bytes{Seq.length blocks % Spec.size_block = 0}) -> Lemma
   (Spec.update_multi hash blocks = (
     if Seq.length blocks = 0 then hash
@@ -168,7 +178,6 @@ val lemma_update_multi_def: (hash:Spec.hash_w) -> (blocks:Spec.bytes{Seq.length 
       let (block,rem) = Seq.split blocks Spec.size_block in
       let hash = Spec.update hash block in
       Spec.update_multi hash rem)))
-
 
 #reset-options "--max_fuel 1 --z3rlimit 20"
 
