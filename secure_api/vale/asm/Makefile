@@ -21,8 +21,8 @@ else ifeq ($(UNAME),Linux)
 endif
 
 
-VALE_HOME?=../../../vale
-KREMLIN_HOME?=../../../kremlin
+VALE_HOME?=../../../../vale
+KREMLIN_HOME?=../../../../kremlin
 CCOPTS=-Wall -Wextra -Werror -I$(KREMLIN_HOME)/kremlib
 CC:=$(CC) $(CCOPTS)
 
