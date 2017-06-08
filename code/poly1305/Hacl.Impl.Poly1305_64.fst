@@ -190,6 +190,7 @@ let poly1305_init_ st key =
 
 #reset-options "--z3rlimit 100 --max_fuel 0"
 
+noextract
 private val hide_log:
   h0:HyperStack.mem ->
   m:uint8_p{length m <= 16} ->
