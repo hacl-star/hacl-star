@@ -39,7 +39,7 @@ MAIN_FILES=
 vale/asm/vale.a:
 	make -C vale/asm
 
-LowCProvider-tmp: vale/aes/aes.o
+LowCProvider-tmp: vale/asm/vale.a
 	$(KRML) LowCProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
 		aead/Crypto.AEAD.fst \
