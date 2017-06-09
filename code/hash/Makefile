@@ -31,7 +31,7 @@ SHA2_FILES = \
 	Hacl.Hash.Lib.LoadStore.fst \
 	Hacl.Hash.Lib.Create.fst \
 	Hacl.Hash.SHA2_512.Lemmas.fst \
-	Hacl.Hash.SHA2_512.fst
+	Hacl.Hash.SHA2_512.fst \
 	Hacl.Hash.SHA2_384.Lemmas.fst \
 	Hacl.Hash.SHA2_384.fst \
 	Hacl.Hash.SHA2_256.Lemmas.fst \
