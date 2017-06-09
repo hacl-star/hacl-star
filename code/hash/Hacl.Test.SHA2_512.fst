@@ -413,18 +413,23 @@ let test_5 () =
 
 
 val test_6_loop:
-  plaintext:FStar.Buffer.buffer FStar.UInt8.t ->
   state:FStar.Buffer.buffer FStar.UInt64.t ->
-  max:FStar.UInt32.t ->
-  idx:FStar.UInt32.t ->
+  plaintext:FStar.Buffer.buffer FStar.UInt8.t ->
   ST unit
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
-let rec test_6_loop plaintext state max idx =
-  if (idx =^ max) then ()
-  else (
-    Hash.update state plaintext;
-    test_6_loop plaintext state max (idx +^ 1ul))
+let test_6_loop state plaintext =
+  let inv (h1: HyperStack.mem) (i: nat) : Type0 =
+    live h1 state /\ i <= v 8388607ul
+  in
+  let f' (t:FStar.UInt32.t) :
+    Stack unit
+      (requires (fun h -> True))
+      (ensures (fun h_1 _ h_2 -> True))
+    =
+    Hash.update state plaintext
+  in
+  C.Loops.for 0ul 8388607ul inv f'
 
 
 val test_6: unit -> ST unit
@@ -475,7 +480,7 @@ let test_6 () =
   (* initialize the hash state *)
   Hash.init state;
 
-  test_6_loop plaintext state 8388607ul 0ul;
+  test_6_loop state plaintext;
 
   let rem_len = UInt32.rem (128ul *%^ 8388607ul) Hash.size_block in
   Hash.update_last state plaintext (FStar.Int.Cast.uint32_to_uint64 plaintext_len);
