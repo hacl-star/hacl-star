@@ -14,7 +14,7 @@ KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
   $(KREMLIN_HOME)/kremlib/testlib.c \
   -add-include '"testlib.h"' -ccopt -march=native
 
-HINTS_ENABLED= --use_hints --hint_info --record_hints
+HINTS_ENABLED= --use_hints
 
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
