@@ -28,7 +28,6 @@ module H64 = Hacl.UInt64
 module H128 = Hacl.UInt128
 
 module HS = FStar.HyperStack
-module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2_512
@@ -390,7 +389,7 @@ private val shuffle_core:
            let b = reveal_h64s (as_seq h block_w) in
            (forall (i:nat). {:pattern (Seq.index w i)} i < 80 ==> Seq.index w i == Spec.ws b i)) ))
         (ensures  (fun h0 r h1 -> live h0 hash_w /\ live h0 ws_w /\ live h0 k_w /\ live h0 block_w
-          /\ live h1 hash_w /\ modifies_1 hash_w h0 h1
+                  /\ live h1 hash_w /\ modifies_1 hash_w h0 h1
                   /\ (let seq_hash_0 = reveal_h64s (as_seq h0 hash_w) in
                   let seq_hash_1 = reveal_h64s (as_seq h1 hash_w) in
                   let seq_block = reveal_h64s (as_seq h0 block_w) in
@@ -410,7 +409,7 @@ let shuffle_core hash block ws k t =
   let h = hash.(7ul) in
 
   (* Perform computations *)
-  let k_t = k.(t) in // Introduce these variables
+  let k_t = k.(t) in
   let ws_t = ws.(t) in
   let t1 = H64.(h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ k_t +%^ ws_t) in
   let t2 = H64.((_Sigma0 a) +%^ (_Maj a b c)) in
@@ -817,27 +816,27 @@ val update_multi:
 #reset-options "--max_fuel 0  --z3rlimit 200"
 
 let rec update_multi state data n =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   if n =^ 0ul then (
-    assert (v n = 0);
-    Lemmas.lemma_aux_1 (v n) (v size_block);
-    assert (length data = 0);
-    Lemmas.lemma_modifies_0_is_modifies_1 h0 state;
-    Lemmas.lemma_update_multi_def (reveal_h64s (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))) (reveal_sbytes (as_seq h0 data))
+    (**) assert (v n = 0);
+    (**) Lemmas.lemma_aux_1 (v n) (v size_block);
+    (**) assert (length data = 0);
+    (**) Lemmas.lemma_modifies_0_is_modifies_1 h0 state;
+    (**) Lemmas.lemma_update_multi_def (reveal_h64s (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))) (reveal_sbytes (as_seq h0 data))
   )
   else
     begin
-    assert(v n > 0);
-    Lemmas.lemma_aux_2 (v n) (v size_block);
-    assert(length data > 0);
-    Lemmas.lemma_update_multi_def (reveal_h64s (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))) (reveal_sbytes (as_seq h0 data));
+    (**) assert(v n > 0);
+    (**) Lemmas.lemma_aux_2 (v n) (v size_block);
+    (**) assert(length data > 0);
+    (**) Lemmas.lemma_update_multi_def (reveal_h64s (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))) (reveal_sbytes (as_seq h0 data));
 
     (* Get the current block for the data *)
     let b = Buffer.sub data 0ul size_block in
 
     (* Remove the current block from the data left to process *)
     let data = Buffer.offset data size_block in
-    assert(disjoint b data);
+    (**) assert(disjoint b data);
 
     (* Call the update function on the current block *)
     update state b;
@@ -859,9 +858,9 @@ inline_for_extraction
 let encode_length (count:uint64_ht) (len:uint64_t{H64.v count * v size_block + U64.v len < Spec.max_input_len_8}) : Tot (l:uint128_ht{H128.v l = (H64.v count * v size_block + U64.v len) * 8}) =
   let l0 = H128.mul_wide count (u32_to_h64 size_block) in
   let l1 = u64_to_h128 len in
-  assert(H128.v l0 + H128.v l1 < pow2 125);
-  assert_norm(pow2 3 = 8);
-  Math.Lemmas.modulo_lemma Hacl.UInt128.(v (shift_left (l0 +^ l1) 3ul)) (pow2 128);
+  (**) assert(H128.v l0 + H128.v l1 < pow2 125);
+  (**) assert_norm(pow2 3 = 8);
+  (**) Math.Lemmas.modulo_lemma Hacl.UInt128.(v (shift_left (l0 +^ l1) 3ul)) (pow2 128);
   H128.(H128.shift_left (l0 +^ l1) 3ul) // Multiplication by 2^3; Call modulo_lemma
 
 
@@ -881,8 +880,8 @@ val set_pad_part1:
 [@"substitute"]
 let set_pad_part1 buf1 =
   Buffer.upd buf1 0ul (u8_to_h8 0x80uy);
-  let h = ST.get () in
-  Seq.lemma_eq_intro (reveal_sbytes (as_seq h buf1)) (Seq.create 1 0x80uy)
+  (**) let h = ST.get () in
+  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h buf1)) (Seq.create 1 0x80uy)
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -902,8 +901,8 @@ val set_pad_part2:
 [@"substitute"]
 let set_pad_part2 buf2 encodedlen =
   Hacl.Endianness.hstore128_be buf2 encodedlen;
-  let h = ST.get () in
-  Lemmas.lemma_eq_endianness h buf2 encodedlen
+  (**) let h = ST.get () in
+  (**) Lemmas.lemma_eq_endianness h buf2 encodedlen
 
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
@@ -950,14 +949,14 @@ let pad padding n len =
   set_pad_part2 buf2 encodedlen;
 
   (* Proof that this is the concatenation of the three parts *)
-  let h1 = ST.get () in
-  Buffer.no_upd_lemma_2 h0 h1 buf1 buf2 zeros;
-  Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 zeros)) (Seq.create (v pad0len) 0uy);
-  assert(reveal_sbytes (as_seq h1 zeros) == Seq.create (v pad0len) 0uy);
-  assert(reveal_sbytes (as_seq h1 buf1) == Seq.create 1 0x80uy);
-  assert(reveal_sbytes (as_seq h1 buf2) == Endianness.big_bytes size_len_8 (H128.v encodedlen));
-  Lemmas.lemma_sub_append_3 h1 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8);
-  Lemmas.lemma_pad_aux h1 n len buf1 zeros buf2
+  (**) let h1 = ST.get () in
+  (**) Buffer.no_upd_lemma_2 h0 h1 buf1 buf2 zeros;
+  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 zeros)) (Seq.create (v pad0len) 0uy);
+  (**) assert(reveal_sbytes (as_seq h1 zeros) == Seq.create (v pad0len) 0uy);
+  (**) assert(reveal_sbytes (as_seq h1 buf1) == Seq.create 1 0x80uy);
+  (**) assert(reveal_sbytes (as_seq h1 buf2) == Endianness.big_bytes size_len_8 (H128.v encodedlen));
+  (**) Lemmas.lemma_sub_append_3 h1 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8);
+  (**) Lemmas.lemma_pad_aux h1 n len buf1 zeros buf2
 
 
 #reset-options "--max_fuel 0  --z3rlimit 100"
