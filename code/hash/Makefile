@@ -14,7 +14,7 @@ KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
   $(KREMLIN_HOME)/kremlib/testlib.c \
   -add-include '"testlib.h"' -ccopt -march=native
 
-HINTS_ENABLED= --use_hints
+HINTS_ENABLED= --use_hints --hint_info --record_hints
 
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
@@ -32,12 +32,10 @@ SHA2_FILES = \
 	Hacl.Hash.Lib.Create.fst \
 	Hacl.Hash.SHA2_512.Lemmas.fst \
 	Hacl.Hash.SHA2_512.fst
-
-# \
-	# Hacl.Hash.SHA2_384.Lemmas.fst \
-	# Hacl.Hash.SHA2_384.fst \
-	# Hacl.Hash.SHA2_256.Lemmas.fst \
-	# Hacl.Hash.SHA2_256.fst
+	Hacl.Hash.SHA2_384.Lemmas.fst \
+	Hacl.Hash.SHA2_384.fst \
+	Hacl.Hash.SHA2_256.Lemmas.fst \
+	Hacl.Hash.SHA2_256.fst
 
 # Full typechecking against the transparent integer interface
 %.fst-ver: %.fst
