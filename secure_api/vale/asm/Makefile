@@ -23,7 +23,7 @@ endif
 
 VALE_HOME?=../../../../vale
 KREMLIN_HOME?=../../../../kremlin
-CCOPTS=-Wall -Wextra -Werror -I$(KREMLIN_HOME)/kremlib
+CCOPTS=-fPIC -Wall -Wextra -Werror -I$(KREMLIN_HOME)/kremlib
 CC:=$(CC) $(CCOPTS)
 
 
@@ -62,4 +62,4 @@ import:
 	for f in $(VALE_UTIL_FILES); do cp $(VALE_HOME)/src/lib/util/$$f .; done
 
 clean:
-	rm -f *.o *~
+	rm -f *.a *.o *~

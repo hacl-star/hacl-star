@@ -26,7 +26,7 @@ OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real --include ../specs
 
 KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
-KRML_ARGS=-ccopt -maes \
+KRML_ARGS=$(FPIC) -ccopt -maes \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
   vale/asm/vale.a test/test_hacks.c \
   -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
