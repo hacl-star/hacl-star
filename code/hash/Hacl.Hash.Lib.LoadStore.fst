@@ -16,7 +16,7 @@ let uint8_p = b:buffer Hacl.UInt8.t
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@"c_inline"]
+
 val uint32s_from_be_bytes:
   output:buffer H32.t ->
   input:uint8_p{disjoint output input} ->
@@ -27,8 +27,6 @@ val uint32s_from_be_bytes:
       (let o = reveal_h32s (as_seq h1 output) in
        let i = reveal_sbytes (as_seq h0 input) in
        o == Spec.Lib.uint32s_from_be (U32.v len) i)))
-
-[@"c_inline"]
 let rec uint32s_from_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
@@ -68,7 +66,6 @@ let rec uint32s_from_be_bytes output input len =
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
-[@"c_inline"]
 val uint32s_to_be_bytes:
   output:uint8_p ->
   input:buffer H32.t{disjoint output input} ->
@@ -79,8 +76,6 @@ val uint32s_to_be_bytes:
       (let o = reveal_sbytes (as_seq h1 output) in
        let i = reveal_h32s (as_seq h0 input) in
        o == Spec.Lib.uint32s_to_be (U32.v len) i)))
-
-[@"c_inline"]
 let rec uint32s_to_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
@@ -127,7 +122,7 @@ let rec uint32s_to_be_bytes output input len =
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
-[@"c_inline"]
+
 val uint64s_from_be_bytes:
   output:buffer H64.t ->
   input:uint8_p{disjoint output input} ->
@@ -138,8 +133,6 @@ val uint64s_from_be_bytes:
       (let o = reveal_h64s (as_seq h1 output) in
        let i = reveal_sbytes (as_seq h0 input) in
        o == Spec.Lib.uint64s_from_be (U32.v len) i)))
-
-[@"c_inline"]
 let rec uint64s_from_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
@@ -178,7 +171,6 @@ let rec uint64s_from_be_bytes output input len =
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
-[@"c_inline"]
 val uint64s_to_be_bytes:
   output:uint8_p ->
   input:buffer H64.t{disjoint output input} ->
@@ -189,8 +181,6 @@ val uint64s_to_be_bytes:
       (let o = reveal_sbytes (as_seq h1 output) in
        let i = reveal_h64s (as_seq h0 input) in
        o == Spec.Lib.uint64s_to_be (U32.v len) i)))
-
-[@"c_inline"]
 let rec uint64s_to_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
