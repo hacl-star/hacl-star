@@ -25,7 +25,7 @@ NOEXTRACT=$(addprefix --no_extract FStar., Classical Ghost Int16 Int32 Int64 Int
 
 ARGS=--codegen OCaml --lax --include ../code/lib/kremlin $(NOEXTRACT) --include $(KREMLIN_HOME)/kremlib
 
-OCAML_INCLUDES=-I ../code/lib/ml ../code/lib/ml/hacllib.cmxa 
+OCAML_INCLUDES=-I ../code/lib/ml ../code/lib/ml/hacllib.cmxa
 
 SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Chacha20.fst \
@@ -42,6 +42,7 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Poly1305.Lemmas.fst \
 		Spec.Salsa20.fst \
 		Spec.SHA2_256.fst \
+		Spec.SHA2_384.fst \
 		Spec.SHA2_512.fst \
 		Spec.Ed25519.fst
 

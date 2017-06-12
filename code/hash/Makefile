@@ -45,7 +45,7 @@ SHA2_FILES = \
 	$(FSTARB) $^
 
 # CI
-all-ci: test
+all-ci: all-ver
 
 # Verification
 all-ver: $(addsuffix -ver, $(SHA2_FILES))
