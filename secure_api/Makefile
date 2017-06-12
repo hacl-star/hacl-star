@@ -23,7 +23,7 @@ endif
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
-FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real --include ../specs
+FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS)  --include crypto --include crypto/real --include ../specs
 
 KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=$(FPIC) -ccopt -maes \
@@ -85,7 +85,7 @@ OPTIONS=--max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit
 
 # A bit much!!
 FSTAR_INCLUDE_PATHS= \
---include $(FSTAR_HOME)/ulib/hyperstack \
+ \
 --include $(HACL_HOME)/code/bignum \
 --include $(HACL_HOME)/code/experimental/aesgcm \
 --include $(HACL_HOME)/code/lib/kremlin \

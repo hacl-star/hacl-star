@@ -2,7 +2,7 @@ module Hacl.Chacha20
 
 
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Ghost
 open FStar.Buffer
 open Hacl.Cast

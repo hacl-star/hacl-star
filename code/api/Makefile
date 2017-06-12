@@ -6,7 +6,7 @@ API_FILES= \
 	Hacl.SecretBox.ZeroPad.fst \
 	Hacl.Box.ZeroPad.fst
 
-FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include ../lib/kremlin --include ../../specs --include $(FSTAR_HOME)/../kremlin/kremlib
+FSTAR_INCLUDE_PATHS=--include ../lib/kremlin --include ../../specs --include $(FSTAR_HOME)/../kremlin/kremlib
 
 FSTARB=$(FSTAR_BASE) \
 		--include ../lib/kremlin --include ../salsa-family --include $(HACL_HOME)/code/bignum --include ../curve25519 \

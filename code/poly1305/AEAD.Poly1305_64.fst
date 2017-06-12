@@ -1,7 +1,7 @@
 module AEAD.Poly1305_64
 
 open FStar.Mul
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Ghost
 open FStar.Seq
 open FStar.HyperStack

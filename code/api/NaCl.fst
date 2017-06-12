@@ -1,7 +1,7 @@
 module NaCl
 
 open FStar.Buffer
-open FStar.ST
+open FStar.HyperStack.ST
 open Hacl.Constants
 open Hacl.Policies
 open Hacl.Cast

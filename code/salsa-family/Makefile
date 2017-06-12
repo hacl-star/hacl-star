@@ -22,11 +22,11 @@ SLOW=
 
 BROKEN=
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTARB=$(FSTAR_HOME)/bin/fstar.exe  \
 		--include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs $(OTHERFLAGS)
 
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe  \
 		--include $(HACL_HOME)/code/lib --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs
 

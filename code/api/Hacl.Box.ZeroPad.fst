@@ -1,7 +1,7 @@
 module Hacl.Box.ZeroPad
 
 open FStar.Buffer
-open FStar.ST
+open FStar.HyperStack.ST
 open Hacl.Cast
 
 open Hacl.Constants
