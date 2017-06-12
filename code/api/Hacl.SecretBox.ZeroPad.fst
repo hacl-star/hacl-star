@@ -2,7 +2,7 @@ module Hacl.SecretBox.ZeroPad
 
 open FStar.HyperStack
 open FStar.Buffer
-open FStar.ST
+open FStar.HyperStack.ST
 open Hacl.Constants
 open Hacl.Policies
 open Hacl.Cast

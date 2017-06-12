@@ -3,7 +3,7 @@ module Hacl.Hash.SHA2_256.PrePost
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 
 open Hacl.Cast

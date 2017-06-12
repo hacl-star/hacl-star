@@ -2,7 +2,7 @@ module Hacl.Bignum.AddAndMultiply
 
 
 open FStar.Mul
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 open FStar.Ghost
 open FStar.Seq

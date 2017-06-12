@@ -3,7 +3,7 @@ module Hacl.SBuffer
 open FStar.UInt32
 open FStar.HyperHeap
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 
 module HH = FStar.HyperHeap

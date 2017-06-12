@@ -2,7 +2,6 @@ FSTAR_HOME?=../../dependencies/FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME=../..
 
-#include ../lib/hyperstack/Makefile.include
 
 KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/api \
 	-I $(HACL_HOME)/code/curve25519 -I $(HACL_HOME)/specs -I $(HACL_HOME)/snapshots/hacl-c \
@@ -10,13 +9,13 @@ KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/
 	-drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'FStar' -drop 'Hacl.Cast' \
 	-ccopt '-Wno-pointer-sign' -ccopt "-D_GNU_SOURCE"
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/api \
+FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/api \
 	--include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/snapshots/hacl-c \
 	--include c_bindings --include $(KREMLIN_HOME)/kremlib
 
 
 debug:
-	gcc-6 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I FSTAR_LIB/hyperstack -I ../../code/lib/kremlin -I ../../code/api -I ../../code/curve25519 -I ../../snapshots/hacl-c -I c_bindings -I /home/jkz/dev/kremlin/kremlib -I tube -Wno-pointer-sign tube/Hacl_Types.o tube/Hacl_Policies.o tube/Box_Ideal.o tube/FileIO_Types.o tube/PaddedFileIO.c tube/SocketIO.c tube/Hacl_Tube_Send.c tube/Hacl_Tube_Receive.c tube/kremlib.o tube/tube.o tube/SocketIO_impl.o -D_GNU_SOURCE c_bindings/PaddedFileIO_impl.c -o tube-star.exe -lsodium -lhacl -L../../snapshots/hacl-c/
+	gcc-6 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I ../../code/lib/kremlin -I ../../code/api -I ../../code/curve25519 -I ../../snapshots/hacl-c -I c_bindings -I /home/jkz/dev/kremlin/kremlib -I tube -Wno-pointer-sign tube/Hacl_Types.o tube/Hacl_Policies.o tube/Box_Ideal.o tube/FileIO_Types.o tube/PaddedFileIO.c tube/SocketIO.c tube/Hacl_Tube_Send.c tube/Hacl_Tube_Receive.c tube/kremlib.o tube/tube.o tube/SocketIO_impl.o -D_GNU_SOURCE c_bindings/PaddedFileIO_impl.c -o tube-star.exe -lsodium -lhacl -L../../snapshots/hacl-c/
 
 ../../snapshots/hacl-c/libhacl.so:
 	$(MAKE) -C $(HACL_HOME)/snapshots libhacl
@@ -60,19 +59,19 @@ tube-test: tube-star.exe
 
 # send-ver: Hacl.Tube.Send.fst
 # 	$(FSTAR) -I $(HACL_KREMLIN) -I ../lib/io -I ../lib/io/c_bindings -I ../crypto/api --use_hints \
-# 		-I $(KREMLIB) -I $(KREMTEST) -I $(FSTAR_HOME)/ulib/hyperstack $^
+# 		-I $(KREMLIB) -I $(KREMTEST) $^
 
 # send-lax: Hacl.Tube.Send.fst
 # 	$(FSTAR) -I $(HACL_KREMLIN) -I ../lib/io -I ../lib/io/c_bindings -I ../crypto/api -fstop "--lax" \
-# 		-I $(KREMLIB) -I $(KREMTEST) -I $(FSTAR_HOME)/ulib/hyperstack $^
+# 		-I $(KREMLIB) -I $(KREMTEST) $^
 
 # receive-ver: Hacl.Tube.Receive.fst
 # 	$(FSTAR) -I $(HACL_KREMLIN) -I ../lib/io -I ../lib/io/c_bindings -I ../crypto/api --use_hints  \
-# 		-I $(KREMLIB) -I $(KREMTEST) -I $(FSTAR_HOME)/ulib/hyperstack $^
+# 		-I $(KREMLIB) -I $(KREMTEST) $^
 
 # receive-lax: Hacl.Tube.Receive.fst
 # 	$(FSTAR) -I $(HACL_KREMLIN) -I ../lib/io -I ../lib/io/c_bindings -I ../crypto/api -fsopt "--lax" \
-# 		-I $(KREMLIB) -I $(KREMTEST) -I $(FSTAR_HOME)/ulib/hyperstack $^ 
+# 		-I $(KREMLIB) -I $(KREMTEST) $^ 
 
 
 clean:

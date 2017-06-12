@@ -5,7 +5,6 @@ module Crypto.KrmlTest
    OCaml). Here's a suggested few lines you can put in your ~/.emacs:
 
 (setq fstar-subp-prover-args '(
-                               "--include" "D:/cygwin/home/protz/Code/fstar/ulib/hyperstack"
                                "--include" "D:/cygwin/home/protz/Code/fstar/examples/low-level/crypto/spartan"
                                "--include" "D:/cygwin/home/protz/Code/kremlin/kremlib"
                                "--include" "D:/cygwin/home/protz/Code/kremlin/test"

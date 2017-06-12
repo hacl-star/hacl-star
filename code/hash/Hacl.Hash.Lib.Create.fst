@@ -3,7 +3,7 @@ module Hacl.Hash.Lib.Create
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 
 open Hacl.Spec.Endianness

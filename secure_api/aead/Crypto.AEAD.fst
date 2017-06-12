@@ -22,6 +22,7 @@ open Crypto.Symmetric.PRF
 open Crypto.AEAD.Encoding 
 open Crypto.AEAD.Invariant
 (* open Crypto.AEAD.Wrappers *)
+open FStar.HyperStack.ST
 
 module HH       = FStar.HyperHeap
 module HS       = FStar.HyperStack

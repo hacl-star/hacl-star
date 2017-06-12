@@ -5,7 +5,6 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME=../..
 HINTS_ENABLED?=--use_hints
 
-HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
 
 HACL_LIB=$(HACL_HOME)/code/lib
 HACL_FILES=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Types.fst Hacl.Policies.fst
@@ -85,17 +84,17 @@ FSTAR_OPTIONS_KREMLIN=
 FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
 
 ifndef CLOUD_VERIFY
-  FSTAR_BASE=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) --include $(HYPERSTACK)
+  FSTAR_BASE=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS)
 else
   KREMLIN_HOME=\$$H/kremlin
   CURRENT_SUBDIR:=$(subst $(abspath $(HACL_HOME))/,,$(abspath $(shell pwd)))
-  FSTAR_BASE=/mnt/f/dev/sec/FStar-cloud-verify/bin/fabc-make.exe add -i $(HACL_HOME)/tmpids -d 'code/$(CURRENT_SUBDIR)' $(FABC_EXTRA) -- \$$H/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) --include \$$H/ulib/hyperstack
+  FSTAR_BASE=/mnt/f/dev/sec/FStar-cloud-verify/bin/fabc-make.exe add -i $(HACL_HOME)/tmpids -d 'code/$(CURRENT_SUBDIR)' $(FABC_EXTRA) -- \$$H/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS)
 endif
 
-OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
-	$(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \
+OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint,fstarlib -linkpkg -g \
+	-I $(FSTAR_HOME)/ulib/ml/ \
 	-I $(FSTAR_HOME)/ulib/ml/extracted \
-	-I $(FSTAR_HOME)/ulib/ml/hyperstack -w -20-26-3-8-58
+	-w -20-26-3-8-58
 OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
 OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
 
