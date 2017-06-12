@@ -20,10 +20,20 @@ else ifeq ($(UNAME),Linux)
   VARIANT=-Linux
 endif
 
+ifeq ($(OS),Windows_NT)
+  FPIC =
+else
+  ifeq ($(UNAME_S),Darwin)
+    FPIC =
+  else
+    FPIC = -ccopt -fPIC
+  endif
+endif
+
 
 VALE_HOME?=../../../../vale
 KREMLIN_HOME?=../../../../kremlin
-CCOPTS=-fPIC -Wall -Wextra -Werror -I$(KREMLIN_HOME)/kremlib
+CCOPTS=$(FPIC) -Wall -Wextra -Werror -I$(KREMLIN_HOME)/kremlib
 CC:=$(CC) $(CCOPTS)
 
 
