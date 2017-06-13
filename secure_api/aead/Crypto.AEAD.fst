@@ -1,5 +1,9 @@
 module Crypto.AEAD
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 // Implements agile, conditionally secure Authenticated Encryption
 // with Associated Data (AEAD) for TLS 1.2 and 1.3, given secure, 
 // agile PRF cipher and UF-1CMA MAC. 

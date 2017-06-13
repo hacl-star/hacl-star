@@ -1,5 +1,9 @@
 module Crypto.Indexing
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 abstract type id0 = aeadAlg
 let id : Type0 = id0
 

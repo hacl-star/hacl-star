@@ -1,5 +1,9 @@
 module Hacl.Impl.SHA512.ModQ
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 open Hacl.Impl.BignumQ.Mul
 open Hacl.UInt64

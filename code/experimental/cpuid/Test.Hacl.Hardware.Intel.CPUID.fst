@@ -1,5 +1,9 @@
 module Test.Hacl.Hardware.Intel.CPUID
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Hacl.Hardware.Intel.CPUID
 
 (* Entry point *)

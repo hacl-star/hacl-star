@@ -1,5 +1,9 @@
 module LowCProvider
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Platform.Bytes
 open CoreCrypto
 

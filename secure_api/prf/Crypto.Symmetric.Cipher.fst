@@ -1,5 +1,9 @@
 module Crypto.Symmetric.Cipher
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 // Multiplexing and hiding concrete implementations: AES128, AES256, and CHACHA20. 
 // Consider also enforcing key abstraction (but quite verbose to code; see Plain.fst).
 

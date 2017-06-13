@@ -1,5 +1,9 @@
 module Crypto.Symmetric.GF128.Spec
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Crypto.Symmetric.Bytes
 open FStar.Int.Cast
 open FStar.UInt128

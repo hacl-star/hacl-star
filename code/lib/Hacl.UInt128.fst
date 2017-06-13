@@ -1,4 +1,8 @@
 module Hacl.UInt128
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 (* This module generated automatically using [mk_int.sh] *)
 
 open FStar.UInt128

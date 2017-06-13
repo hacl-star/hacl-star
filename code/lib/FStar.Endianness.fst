@@ -1,5 +1,9 @@
 module FStar.Endianness
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.UInt32
 open FStar.Ghost
 open FStar.Mul

@@ -1,4 +1,8 @@
 module Crypto.AEAD.Invariant
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 // We implement ideal AEAD on top of ideal Chacha20 and ideal Poly1305. 
 // We precisely relate AEAD's log to their underlying state.
 

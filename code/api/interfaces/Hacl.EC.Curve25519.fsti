@@ -1,5 +1,9 @@
 module Hacl.EC.Curve25519
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.ST
 open Hacl.UInt8
 open Hacl.Cast

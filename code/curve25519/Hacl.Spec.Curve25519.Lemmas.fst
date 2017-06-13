@@ -1,5 +1,9 @@
 module Hacl.Spec.Curve25519.Lemmas
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Spec.Curve25519
 
 #reset-options "--max_fuel 0"

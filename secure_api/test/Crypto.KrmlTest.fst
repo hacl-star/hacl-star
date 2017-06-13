@@ -1,5 +1,9 @@
 module Crypto.KrmlTest
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 (* Note: this file uses the test library from KreMLin and should extract to both
    C (via kremlib.c) and OCaml (via jk's implementation of kremlib in
    OCaml). Here's a suggested few lines you can put in your ~/.emacs:
