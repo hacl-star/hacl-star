@@ -1,5 +1,7 @@
 module Spec.CTR3
 
+open Spec
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

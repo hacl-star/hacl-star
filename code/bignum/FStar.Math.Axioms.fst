@@ -1,5 +1,7 @@
 module FStar.Math.Axioms
 
+open FStar.Math
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

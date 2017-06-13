@@ -1,5 +1,7 @@
 module Hacl.Spec.BignumQ.Eval
 
+open Hacl.Spec.BignumQ
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

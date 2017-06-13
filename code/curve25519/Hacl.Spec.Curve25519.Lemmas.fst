@@ -1,5 +1,7 @@
 module Hacl.Spec.Curve25519.Lemmas
 
+open Hacl.Spec.Curve25519
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
