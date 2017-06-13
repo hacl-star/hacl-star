@@ -1,5 +1,9 @@
 module Crypto.Symmetric.AES
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 // FIPS197 ?
 // TODO factor it out in terms of https://en.wikipedia.org/wiki/AES_instruction_set
 // see also https://software.intel.com/sites/default/files/article/165683/aes-wp-2012-09-22-v01.pdf

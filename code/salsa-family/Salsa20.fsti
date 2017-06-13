@@ -1,5 +1,9 @@
 module Salsa20
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 open FStar.UInt32
 

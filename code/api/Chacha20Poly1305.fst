@@ -1,5 +1,9 @@
 module Chacha20Poly1305
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Seq
 open FStar.HyperStack
 open FStar.Buffer

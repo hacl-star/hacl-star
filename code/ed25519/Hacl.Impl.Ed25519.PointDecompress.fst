@@ -1,5 +1,9 @@
 module Hacl.Impl.Ed25519.PointDecompress
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 open FStar.UInt64
 open Hacl.Bignum25519

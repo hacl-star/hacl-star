@@ -1,5 +1,9 @@
 module Crypto.AEAD.Enxor.Invariant
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils

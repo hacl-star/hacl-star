@@ -3,6 +3,10 @@ options:--trace_error --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifue
 --*)
 module Crypto.Symmetric.Bytes
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.UInt32
