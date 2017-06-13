@@ -1,7 +1,14 @@
 module Crypto.Plain
 
+open Crypto
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.HyperHeap
 open FStar.HyperStack
+open FStar.HyperStack.ST
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils

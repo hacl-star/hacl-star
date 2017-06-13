@@ -1,4 +1,10 @@
 module Crypto.AEAD.Decrypt
+
+open Crypto.AEAD
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils

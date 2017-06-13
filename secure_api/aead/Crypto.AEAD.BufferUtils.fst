@@ -1,4 +1,10 @@
 module Crypto.AEAD.BufferUtils
+
+open Crypto.AEAD
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 open FStar.Set
 open FStar.HyperHeap
 open FStar.HyperStack

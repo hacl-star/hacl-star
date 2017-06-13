@@ -1,5 +1,5 @@
 (*--build-config
-options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../vale --include ../uf1cma --include ../utils --include ../../specs --include ../../../kremlin/kremlib --include ../../../FStar/ulib/hyperstack
+options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../vale --include ../uf1cma --include ../utils --include ../../specs --include ../../../kremlin/kremlib
 --*)
 (**
   This module multiplexes between different real implementations of polynomial
@@ -11,6 +11,12 @@ options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --m
   their ghost polynomial specification.
 *)
 module Crypto.Symmetric.MAC
+
+open Crypto.Symmetric
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 
 open Crypto.Symmetric.Bytes
 open Crypto.Indexing

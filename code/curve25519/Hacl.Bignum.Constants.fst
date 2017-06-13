@@ -1,5 +1,11 @@
 module Hacl.Bignum.Constants
 
+open Hacl.Bignum
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 inline_for_extraction let prime:pos = assert_norm(pow2 255 > 19); pow2 255 - 19
 inline_for_extraction let word_size = 64
 inline_for_extraction let len = 5

@@ -1,5 +1,11 @@
 module Hacl.Bignum.Constants
 
+open Hacl.Bignum
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 inline_for_extraction val prime : p:pos{p > 1}
 inline_for_extraction val word_size : w:int{w >= 8} // At least one byte
 inline_for_extraction val len : l:int{l > 1} // At least one limb

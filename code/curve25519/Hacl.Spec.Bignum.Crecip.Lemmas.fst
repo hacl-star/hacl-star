@@ -1,5 +1,11 @@
 module Hacl.Spec.Bignum.Crecip.Lemmas
 
+open Hacl.Spec.Bignum.Crecip
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Spec.Curve25519
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"

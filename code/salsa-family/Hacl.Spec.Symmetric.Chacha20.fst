@@ -1,5 +1,11 @@
 module Hacl.Spec.Symmetric.Chacha20
 
+open Hacl.Spec.Symmetric
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Seq
 open Hacl.Cast
 open Hacl.UInt32

@@ -1,5 +1,11 @@
 module Hacl.Spec.Endianness
 
+open Hacl.Spec
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Endianness
 
 module U8   = FStar.UInt8

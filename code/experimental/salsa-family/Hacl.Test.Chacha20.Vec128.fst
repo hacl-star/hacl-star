@@ -1,5 +1,11 @@
 module Hacl.Test.Chacha20.Vec128
 
+open Hacl.Test.Chacha20
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 
 module Chacha20=Chacha20.Vec128

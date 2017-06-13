@@ -1,5 +1,11 @@
 module Hacl.Types
 
+open Hacl
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 type u8    = FStar.UInt8.t
 type u16   = FStar.UInt16.t
 type u32   = FStar.UInt32.t

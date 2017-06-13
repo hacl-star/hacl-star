@@ -1,5 +1,11 @@
 module Hacl.Spec.EC.Format.Lemmas
 
+open Hacl.Spec.EC.Format
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.Seq
 open FStar.Endianness

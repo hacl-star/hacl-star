@@ -1,8 +1,14 @@
 module Hacl.Lib.LoadStore32
 
+open Hacl.Lib
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 open Hacl.UInt32
 open Hacl.Spec.Endianness

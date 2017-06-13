@@ -1,5 +1,11 @@
 module Crypto.AEAD.AES256GCM
 
+open Crypto.AEAD
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack

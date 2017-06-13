@@ -1,5 +1,11 @@
 module Hacl.Bignum.Limb
 
+open Hacl.Bignum
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open Hacl.Bignum.Parameters
 

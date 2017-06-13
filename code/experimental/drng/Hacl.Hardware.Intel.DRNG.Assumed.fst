@@ -1,6 +1,12 @@
 module Hacl.Hardware.Intel.DRNG.Assumed
 
-open FStar.ST
+open Hacl.Hardware.Intel.DRNG
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
+open FStar.HyperStack.ST
 open FStar.Buffer
 open FStar.HyperStack
 

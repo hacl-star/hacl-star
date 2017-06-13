@@ -1,5 +1,11 @@
 module Hacl.Impl.Ed25519.ExtPoint
 
+open Hacl.Impl.Ed25519
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 
 

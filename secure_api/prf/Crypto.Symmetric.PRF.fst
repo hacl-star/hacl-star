@@ -1,5 +1,11 @@
 module Crypto.Symmetric.PRF
 
+open Crypto.Symmetric
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 (* This file models our idealization of symmetric ciphers used only in
    forward mode, including CHACHA20 and several variants of AES for
    for GCM or CCM, modellied as a PRF to build authenticated

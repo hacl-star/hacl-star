@@ -1,5 +1,11 @@
 module Hacl.Impl.SHA512.Ed25519
 
+open Hacl.Impl.SHA512
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.UInt32
 open FStar.HyperStack

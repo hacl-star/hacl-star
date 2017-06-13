@@ -1,5 +1,11 @@
 module Crypto.Indexing
 
+open Crypto
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 let id : Type0 = aeadAlg
 
 inline_for_extraction let aeadAlg_of_id i = i

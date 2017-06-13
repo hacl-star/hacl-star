@@ -1,5 +1,11 @@
 module Crypto.AEAD.Encoding
 
+open Crypto.AEAD
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 // This file defines the encoding of additional data and ciphertext
 // authenticated by the one-time MACs, and proves their injectivity properties.
 

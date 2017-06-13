@@ -1,5 +1,11 @@
 module Hacl.Bignum.Fsum
 
+open Hacl.Bignum
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 
 open FStar.UInt64     // F* 64-bit unsigned machine integers
 open FStar.HyperStack // F* memory model

@@ -1,8 +1,14 @@
 module Hacl.Impl.Chacha20.Vec128
 
+open Hacl.Impl.Chacha20
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 open Hacl.Cast
 open Hacl.Spec.Endianness

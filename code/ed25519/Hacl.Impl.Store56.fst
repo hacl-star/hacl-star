@@ -1,5 +1,11 @@
 module Hacl.Impl.Store56
 
+open Hacl.Impl
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 open Hacl.UInt64
 open Hacl.Endianness

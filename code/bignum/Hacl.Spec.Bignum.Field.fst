@@ -1,5 +1,11 @@
 module Hacl.Spec.Bignum.Field
 
+open Hacl.Spec.Bignum
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open Hacl.Bignum.Constants
 

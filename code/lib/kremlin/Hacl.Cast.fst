@@ -1,5 +1,11 @@
 module Hacl.Cast
 
+open Hacl
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Int.Cast
 
 module U8 = FStar.UInt8

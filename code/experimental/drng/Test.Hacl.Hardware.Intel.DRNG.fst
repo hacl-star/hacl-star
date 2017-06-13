@@ -1,5 +1,11 @@
 module Test.Hacl.Hardware.Intel.DRNG
 
+open Test.Hacl.Hardware.Intel
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 open FStar.UInt32
 open Hacl.Hardware.Intel.DRNG

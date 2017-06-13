@@ -1,5 +1,11 @@
 module Hacl.Spec.Bignum.Fdifference
 
+open Hacl.Spec.Bignum
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint
 open Hacl.Bignum.Limb

@@ -1,8 +1,15 @@
 module Buffer.Utils
 
+open Buffer
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
+open FStar.HyperStack.ST
 open FStar.Int.Cast
 open FStar.UInt8
 open FStar.UInt32
@@ -12,6 +19,7 @@ open FStar.Math.Lemmas
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
+module ST = FStar.HyperStack.ST
 
 let u32 = FStar.UInt32.t
 let u8 = FStar.UInt8.t

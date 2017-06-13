@@ -1,5 +1,11 @@
 module Hacl.Test.XSalsa20
 
+open Hacl.Test
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 
 val main: unit -> ST FStar.Int32.t
