@@ -3,7 +3,7 @@
 #define __SHA2_256_H
 
 
-#include "Hacl_Hash_SHA2_384_Lemmas.h"
+
 #include "kremlib.h"
 #include "testlib.h"
 
