@@ -27,6 +27,18 @@ typedef uint64_t *Hacl_Hash_Lib_Create_uint64_p;
 
 typedef uint8_t *Hacl_Hash_Lib_LoadStore_uint8_p;
 
+void
+Hacl_Hash_Lib_LoadStore_uint32s_from_be_bytes(uint32_t *output, uint8_t *input, uint32_t len);
+
+void
+Hacl_Hash_Lib_LoadStore_uint32s_to_be_bytes(uint8_t *output, uint32_t *input, uint32_t len);
+
+void
+Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(uint64_t *output, uint8_t *input, uint32_t len);
+
+void
+Hacl_Hash_Lib_LoadStore_uint64s_to_be_bytes(uint8_t *output, uint64_t *input, uint32_t len);
+
 typedef uint8_t Hacl_Hash_SHA2_384_uint8_t;
 
 typedef uint32_t Hacl_Hash_SHA2_384_uint32_t;
@@ -39,7 +51,7 @@ typedef uint32_t Hacl_Hash_SHA2_384_uint32_ht;
 
 typedef uint64_t Hacl_Hash_SHA2_384_uint64_ht;
 
-typedef Hacl_UInt128_t Hacl_Hash_SHA2_384_uint128_ht;
+typedef FStar_UInt128_t Hacl_Hash_SHA2_384_uint128_ht;
 
 typedef uint64_t *Hacl_Hash_SHA2_384_uint64_p;
 
