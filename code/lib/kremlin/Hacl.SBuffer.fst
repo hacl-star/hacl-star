@@ -1,7 +1,5 @@
 module Hacl.SBuffer
 
-open Hacl
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

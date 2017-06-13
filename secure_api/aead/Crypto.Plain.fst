@@ -1,7 +1,5 @@
 module Crypto.Plain
 
-open Crypto
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

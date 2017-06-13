@@ -12,8 +12,6 @@ options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --m
 *)
 module Crypto.Symmetric.MAC
 
-open Crypto.Symmetric
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

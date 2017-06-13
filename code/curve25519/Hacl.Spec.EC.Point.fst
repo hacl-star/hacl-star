@@ -1,7 +1,5 @@
 module Hacl.Spec.EC.Point
 
-open Hacl.Spec.EC
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

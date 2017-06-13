@@ -1,7 +1,5 @@
 module Hacl.Bignum25519
 
-open Hacl
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

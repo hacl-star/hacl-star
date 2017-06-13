@@ -1,7 +1,5 @@
 module Test.Hacl.Hardware.Intel.DRNG
 
-open Test.Hacl.Hardware.Intel
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

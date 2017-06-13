@@ -1,7 +1,5 @@
 module Hacl.Impl.Xor.Lemmas
 
-open Hacl.Impl.Xor
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

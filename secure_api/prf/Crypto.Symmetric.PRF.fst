@@ -1,7 +1,5 @@
 module Crypto.Symmetric.PRF
 
-open Crypto.Symmetric
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

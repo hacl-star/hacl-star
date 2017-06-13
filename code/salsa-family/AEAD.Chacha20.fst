@@ -1,7 +1,5 @@
 module AEAD.Chacha20
 
-open AEAD
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

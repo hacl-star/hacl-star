@@ -1,7 +1,5 @@
 module Hacl.Impl.Ed25519.Ladder.Step
 
-open Hacl.Impl.Ed25519.Ladder
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

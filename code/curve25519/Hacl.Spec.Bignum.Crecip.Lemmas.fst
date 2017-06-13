@@ -1,7 +1,5 @@
 module Hacl.Spec.Bignum.Crecip.Lemmas
 
-open Hacl.Spec.Bignum.Crecip
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
