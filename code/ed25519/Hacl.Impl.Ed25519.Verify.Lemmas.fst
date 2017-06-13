@@ -1,7 +1,5 @@
 module Hacl.Impl.Ed25519.Verify.Lemmas
 
-open Hacl.Impl.Ed25519.Verify
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

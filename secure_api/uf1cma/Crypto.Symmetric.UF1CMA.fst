@@ -5,8 +5,6 @@
 *)
 module Crypto.Symmetric.UF1CMA
 
-open Crypto.Symmetric
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

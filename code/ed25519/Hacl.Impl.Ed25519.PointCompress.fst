@@ -1,7 +1,5 @@
 module Hacl.Impl.Ed25519.PointCompress
 
-open Hacl.Impl.Ed25519
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

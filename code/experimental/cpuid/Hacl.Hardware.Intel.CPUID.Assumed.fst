@@ -1,7 +1,5 @@
 module Hacl.Hardware.Intel.CPUID.Assumed
 
-open Hacl.Hardware.Intel.CPUID
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

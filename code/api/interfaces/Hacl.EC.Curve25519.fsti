@@ -1,7 +1,5 @@
 module Hacl.EC.Curve25519
 
-open Hacl.EC
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

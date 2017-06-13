@@ -1,7 +1,5 @@
 module Crypto.AEAD.Encrypt.Ideal.Invariant
 
-open Crypto.AEAD.Encrypt.Ideal
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

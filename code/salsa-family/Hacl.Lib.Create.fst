@@ -3,8 +3,6 @@
 
 module Hacl.Lib.Create
 
-open Hacl.Lib
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

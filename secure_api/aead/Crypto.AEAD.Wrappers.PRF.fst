@@ -1,7 +1,5 @@
 module Crypto.AEAD.Wrappers.PRF
 
-open Crypto.AEAD.Wrappers
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

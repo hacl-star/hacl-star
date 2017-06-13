@@ -1,7 +1,5 @@
 module Hacl.Test.Ed25519
 
-open Hacl.Test
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

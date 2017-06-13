@@ -1,7 +1,5 @@
 module Hacl.Impl.HSalsa20
 
-open Hacl.Impl
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

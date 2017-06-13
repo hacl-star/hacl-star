@@ -1,7 +1,5 @@
 module Hacl.Bignum.Crecip
 
-open Hacl.Bignum
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

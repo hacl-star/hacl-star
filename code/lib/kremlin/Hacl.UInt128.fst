@@ -1,7 +1,5 @@
 module Hacl.UInt128
 
-open Hacl
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

@@ -1,7 +1,5 @@
 module Hacl.SecretBox.ZeroPad
 
-open Hacl.SecretBox
-
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
