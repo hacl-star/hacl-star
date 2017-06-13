@@ -1,5 +1,7 @@
 module Hacl.Symmetric.GCM.Lemmas
 
+open Hacl.Symmetric.GCM
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

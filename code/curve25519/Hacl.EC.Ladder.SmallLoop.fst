@@ -1,5 +1,7 @@
 module Hacl.EC.Ladder.SmallLoop
 
+open Hacl.EC.Ladder
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

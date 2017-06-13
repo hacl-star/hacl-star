@@ -1,5 +1,7 @@
 module Hacl.Symmetric.AES
 
+open Hacl.Symmetric
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

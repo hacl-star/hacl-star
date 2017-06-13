@@ -1,5 +1,7 @@
 module Hacl.Hash.Lib.LoadStore
 
+open Hacl.Hash.Lib
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

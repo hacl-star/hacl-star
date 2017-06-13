@@ -1,5 +1,7 @@
 module Hacl.Spec.EC.Ladder.Lemmas
 
+open Hacl.Spec.EC.Ladder
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

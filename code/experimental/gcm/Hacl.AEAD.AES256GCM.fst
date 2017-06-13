@@ -1,5 +1,7 @@
 module Hacl.AEAD.AES256GCM
 
+open Hacl.AEAD
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

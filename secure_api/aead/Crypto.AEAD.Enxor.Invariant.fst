@@ -1,5 +1,7 @@
 module Crypto.AEAD.Enxor.Invariant
 
+open Crypto.AEAD.Enxor
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

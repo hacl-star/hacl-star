@@ -1,5 +1,7 @@
 module Hacl.Impl.Load51
 
+open Hacl.Impl
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

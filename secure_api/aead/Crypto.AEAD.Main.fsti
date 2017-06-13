@@ -1,5 +1,7 @@
 module Crypto.AEAD.Main
 
+open Crypto.AEAD
+
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
