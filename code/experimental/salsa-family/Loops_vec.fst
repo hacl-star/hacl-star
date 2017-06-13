@@ -1,5 +1,7 @@
 module Loops_vec
 
+open FStar.HyperStack.All
+
 module ST = FStar.HyperStack.ST
 
 open FStar.Buffer

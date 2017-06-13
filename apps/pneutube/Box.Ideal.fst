@@ -1,5 +1,7 @@
 module Box.Ideal
 
+open FStar.HyperStack.All
+
 module ST = FStar.HyperStack.ST
 
 open FStar.Seq

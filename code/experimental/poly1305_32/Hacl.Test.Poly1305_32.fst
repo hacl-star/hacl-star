@@ -1,5 +1,7 @@
 module Hacl.Test.Poly1305_32
 
+open FStar.HyperStack.All
+
 module ST = FStar.HyperStack.ST
 
 open FStar.Buffer

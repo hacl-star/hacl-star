@@ -1,5 +1,7 @@
 module Hacl.Impl.SHA512.Ed25519_3
 
+open FStar.HyperStack.All
+
 module ST = FStar.HyperStack.ST
 
 

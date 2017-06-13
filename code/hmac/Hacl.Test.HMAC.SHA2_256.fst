@@ -1,5 +1,7 @@
 module Hacl.Test.HMAC.SHA2_256
 
+open FStar.HyperStack.All
+
 module ST = FStar.HyperStack.ST
 
 open FStar.Buffer

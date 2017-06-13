@@ -1,5 +1,7 @@
 module Hacl.Test.SHA2_384
 
+open FStar.HyperStack.All
+
 module ST = FStar.HyperStack.ST
 
 open FStar.Buffer

@@ -1,6 +1,8 @@
 (* A large chunk of this module is taken from FStar/examples/low-level/crypto *)
 module Hacl.Spec.Poly1305_64.Lemmas1
 
+open FStar.HyperStack.All
+
 module ST = FStar.HyperStack.ST
 
 open FStar.Mul

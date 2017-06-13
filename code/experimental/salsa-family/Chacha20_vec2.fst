@@ -1,5 +1,7 @@
 module Chacha20_vec2
 
+open FStar.HyperStack.All
+
 module ST = FStar.HyperStack.ST
 
 open FStar.Buffer

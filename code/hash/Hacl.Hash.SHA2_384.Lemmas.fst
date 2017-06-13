@@ -1,5 +1,7 @@
 module Hacl.Hash.SHA2_384.Lemmas
 
+open FStar.HyperStack.All
+
 module ST = FStar.HyperStack.ST
 
 open FStar.Mul
