@@ -1,5 +1,7 @@
 module Poly1305_64
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Endianness
 open FStar.Buffer

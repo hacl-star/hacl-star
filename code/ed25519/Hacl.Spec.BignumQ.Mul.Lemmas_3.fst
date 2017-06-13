@@ -1,5 +1,7 @@
 module Hacl.Spec.BignumQ.Mul.Lemmas_3
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.UInt64
 open Hacl.Spec.BignumQ.Eval

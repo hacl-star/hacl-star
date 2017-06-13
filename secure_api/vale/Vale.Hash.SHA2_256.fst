@@ -1,5 +1,7 @@
 module Vale.Hash.SHA2_256
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack

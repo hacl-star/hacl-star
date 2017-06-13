@@ -1,5 +1,7 @@
 module Box.Plain
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Seq
 open FStar.Buffer
 

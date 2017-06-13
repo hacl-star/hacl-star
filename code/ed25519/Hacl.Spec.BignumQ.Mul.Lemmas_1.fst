@@ -1,5 +1,7 @@
 module Hacl.Spec.BignumQ.Mul.Lemmas_1
 
+module ST = FStar.HyperStack.ST
+
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 open FStar.Mul

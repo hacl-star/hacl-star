@@ -1,5 +1,7 @@
 module Spec.AdditiveLaw
 
+module ST = FStar.HyperStack.ST
+
 #set-options "--initial_fuel 0 --max_fuel 0"
 
 type additive_law (a:eqtype) (zero:a) = add:(x:a -> y:a -> Tot a)

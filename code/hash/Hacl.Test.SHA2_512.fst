@@ -1,5 +1,7 @@
 module Hacl.Test.SHA2_512
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Buffer
 open FStar.UInt32
 

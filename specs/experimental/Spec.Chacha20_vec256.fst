@@ -1,5 +1,7 @@
 module Spec.Chacha20_vec256
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness

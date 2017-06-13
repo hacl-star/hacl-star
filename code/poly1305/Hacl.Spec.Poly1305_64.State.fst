@@ -1,5 +1,7 @@
 module Hacl.Spec.Poly1305_64.State
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 

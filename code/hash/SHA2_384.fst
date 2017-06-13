@@ -1,5 +1,7 @@
 module SHA2_384
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack

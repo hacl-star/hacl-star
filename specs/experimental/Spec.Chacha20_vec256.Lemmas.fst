@@ -1,5 +1,7 @@
 module Spec.Chacha20_vec256.Lemmas
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open Seq.Lib

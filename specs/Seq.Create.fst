@@ -1,5 +1,7 @@
 module Seq.Create
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Seq
 
 

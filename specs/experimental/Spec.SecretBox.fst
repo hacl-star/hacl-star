@@ -1,4 +1,6 @@
 module Spec.SecretBox
+
+module ST = FStar.HyperStack.ST
 (* NaCl secretbox: https://cr.yp.to/highspeed/naclcrypto-20090310.pdf *)
 
 open FStar.Seq

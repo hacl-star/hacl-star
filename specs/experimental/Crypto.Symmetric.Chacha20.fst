@@ -3,6 +3,8 @@
 //17-02-12 I'd like to keep as a simple reference implementation.
 module Crypto.Symmetric.Chacha20
 
+module ST = FStar.HyperStack.ST
+
 // Concrete implementation of CHACHA20 and countermode encryption
 // Not much point verifying its against a more complex pure specification.
 

@@ -1,5 +1,7 @@
 module Hacl.Chacha20
 
+module ST = FStar.HyperStack.ST
+
 // proposed imperative API for Chacha20
 open FStar.HyperStack
 open FStar.ST

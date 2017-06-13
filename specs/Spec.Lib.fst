@@ -1,5 +1,7 @@
 module Spec.Lib
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt32

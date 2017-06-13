@@ -1,5 +1,7 @@
 module Poly1305_32
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.HyperStack.ST
 open FStar.Ghost

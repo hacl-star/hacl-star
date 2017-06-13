@@ -1,5 +1,7 @@
 module Crypto.AEAD.MAC_Wrapper.Invariant
 
+module ST = FStar.HyperStack.ST
+
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils

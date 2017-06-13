@@ -1,5 +1,7 @@
 module Spec.Chacha20_vec2
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt32

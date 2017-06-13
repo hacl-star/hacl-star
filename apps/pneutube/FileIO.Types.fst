@@ -1,5 +1,7 @@
 module FileIO.Types
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Seq
 open FStar.Buffer
 open Hacl.Cast

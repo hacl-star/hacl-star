@@ -1,5 +1,7 @@
 module Loops_vec
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Buffer
 open Spec.Chacha20
 open C.Loops
