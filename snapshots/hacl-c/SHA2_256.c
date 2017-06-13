@@ -5,8 +5,7 @@ Hacl_Hash_Lib_LoadStore_uint32s_from_be_bytes(uint32_t *output, uint8_t *input, 
 {
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
   {
-    uint8_t *x0 = input + (uint32_t )4 * i;
-    uint32_t inputi = load32_be(x0);
+    uint32_t inputi = Hacl_Endianness_hload32_be(input + (uint32_t )4 * i);
     output[i] = inputi;
   }
 }
@@ -17,30 +16,7 @@ Hacl_Hash_Lib_LoadStore_uint32s_to_be_bytes(uint8_t *output, uint32_t *input, ui
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
   {
     uint32_t hd1 = input[i];
-    uint8_t *x0 = output + (uint32_t )4 * i;
-    store32_be(x0, hd1);
-  }
-}
-
-void
-Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(uint64_t *output, uint8_t *input, uint32_t len)
-{
-  for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
-  {
-    uint8_t *x0 = input + (uint32_t )8 * i;
-    uint64_t inputi = load64_be(x0);
-    output[i] = inputi;
-  }
-}
-
-void
-Hacl_Hash_Lib_LoadStore_uint64s_to_be_bytes(uint8_t *output, uint64_t *input, uint32_t len)
-{
-  for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
-  {
-    uint64_t hd1 = input[i];
-    uint8_t *x0 = output + (uint32_t )8 * i;
-    store64_be(x0, hd1);
+    Hacl_Endianness_hstore32_be(output + (uint32_t )4 * i, hd1);
   }
 }
 
@@ -277,7 +253,7 @@ static void Hacl_Hash_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint3
     ((uint64_t )n1 * (uint64_t )(uint32_t )64 + (uint64_t )len)
     * (uint64_t )(uint32_t )8;
   buf1[0] = (uint8_t )0x80;
-  store64_be(buf2, encodedlen);
+  Hacl_Endianness_hstore64_be(buf2, encodedlen);
   Hacl_Hash_SHA2_256_update_multi(state, final_blocks, nb);
 }
 
