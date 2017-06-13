@@ -1,7 +1,6 @@
 UNAME := $(shell uname)
 
 # Caller needs to define HACL_HOME and KREMLIN_HOME
-HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
 
 HACL_LIB=$(HACL_HOME)/lib/hyperstack
 HACL_FILES=Hacl.UInt8.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Policies.fst
@@ -35,15 +34,13 @@ FSTAR_OPTIONS_VER=-fsopt "--use_hints" -skip-extraction
 FSTAR_OPTIONS_KREMLIN=
 FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
 
-OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
-                $(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \
-		-I $(FSTAR_HOME)/ulib/ml/extracted \
-		-I $(FSTAR_HOME)/ulib/ml/hyperstack -w -20-26-3-8-58
+include $(FSTAR_HOME)/ulib/ml/Makefile.include
+
+OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
 OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
-OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
 
 ml-lib:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml MEM=HST
+	$(MAKE) -C $(ULIB_ML)
 
 import-lib:
 	@cp $(HACL_LIB_FILES) .

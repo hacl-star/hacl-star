@@ -28,7 +28,7 @@ BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
 	$(FSTAR_BASE) --include interfaces --include ../lib --lax --include $(KREMLIN_HOME)/kremlib $^
 
 all-ct:
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
+	$(FSTAR_HOME)/bin/fstar.exe --include interfaces \
 		--include ../lib $^ --lax --include $(KREMLIN_HOME)/kremlib $(BIGNUM_FILES)
 
 %.fst-verify: %.fst

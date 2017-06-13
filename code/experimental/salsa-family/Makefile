@@ -3,12 +3,12 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../../..
 include $(HACL_HOME)/code/Makefile.include
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTARB=$(FSTAR_HOME)/bin/fstar.exe \
 		--include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
 		--include $(HACL_HOME)/code/salsa-family
 
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe \
 		--include $(HACL_HOME)/code/lib --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/experimental \
 		--include $(HACL_HOME)/code/salsa-family

@@ -11,13 +11,13 @@ KRML=$(KRML_BIN) $(KREMLIN_ARGS)
 HINTS_ENABLED= --use_hints
 
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTARB=$(FSTAR_HOME)/bin/fstar.exe \
         --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
          --include $(HACL_HOME)/specs \
 			--include $(HACL_HOME)/code/hash \
         $(HINTS_ENABLED) $(OTHERFLAGS)
 
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
+FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe \
         --include $(HACL_HOME)/code/lib  --include $(KREMLIN_HOME)/kremlib \
 			--include $(HACL_HOME)/code/hash \
         --include $(HACL_HOME)/specs

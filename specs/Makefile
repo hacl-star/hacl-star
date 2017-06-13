@@ -16,12 +16,12 @@ all: lib
 	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe chacha20poly1305.exe gf128.exe ed25519.exe curve25519.exe sha2_256.exe sha2_512.exe
 
 lib:
-	$(MAKE) -C ../code/lib/ml MEM=HST
+	$(MAKE) -C ../code/lib/ml
 
 
-EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  FStar_Endianness.ml
+EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  
 
-NOEXTRACT=$(addprefix --no_extract FStar., Classical Ghost Int16 Int32 Int64 Int63 Int16 Int8 Int.Cast Int List.Tot.Base List.Tot List.Tot.Properties Math.Lemmas Mul StrongExcludedMiddle UInt128 UInt16 UInt32 UInt63 UInt64 UInt8) $(addprefix --no_extract Hacl., UInt64 UInt32 UInt8)
+NOEXTRACT=$(FSTAR_DEFAULT_ARGS) $(addprefix --no_extract Hacl., UInt64 UInt32 UInt8)
 
 ARGS=--codegen OCaml --lax --include ../code/lib/kremlin $(NOEXTRACT) --include $(KREMLIN_HOME)/kremlib
 
@@ -57,51 +57,51 @@ all-ver: $(addsuffix -verify, $(SPEC_FILES))
 all-hints: $(addsuffix -hints, $(SPEC_FILES))
 
 gf128.exe: Spec.GF128.fst
-	$(MAKE) -C ../code/lib/ml MEM=HST
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p gf128-spec
 	$(FSTAR) $(ARGS) --odir gf128-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> gf128-spec/Spec_GF128.ml
-	$(OCAMLOPT) -I gf128-spec $(OCAML_INCLUDES) $(addprefix gf128-spec/, $(EXTRACTED)) gf128-spec/Spec_GaloisField.ml gf128-spec/Spec_GF128.ml -o gf128.exe
+	$(OCAMLOPT) -I gf128-spec $(OCAML_INCLUDES) gf128-spec/FStar_Endianness.ml gf128-spec/Spec_GaloisField.ml gf128-spec/Spec_GF128.ml -o gf128.exe
 	./gf128.exe
 
 poly1305.exe: Spec.Poly1305.fst
-	$(MAKE) -C ../code/lib/ml MEM=HST
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p poly-spec
 	$(FSTAR) $(ARGS) --odir poly-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> poly-spec/Spec_Poly1305.ml
-	$(OCAMLOPT) -I poly-spec $(OCAML_INCLUDES) $(addprefix poly-spec/, $(EXTRACTED)) poly-spec/Spec_Poly1305_Lemmas.ml poly-spec/Spec_Poly1305.ml -o poly1305.exe
+	$(OCAMLOPT) -I poly-spec $(OCAML_INCLUDES) poly-spec/FStar_Endianness.ml poly-spec/Spec_Poly1305_Lemmas.ml poly-spec/Spec_Poly1305.ml -o poly1305.exe
 	./poly1305.exe
 
 curve25519.exe: Spec.Curve25519.fst
-	$(MAKE) -C ../code/lib/ml MEM=HST
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p curve25519-spec
 	$(FSTAR) $(ARGS) --odir curve25519-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> curve25519-spec/Spec_Curve25519.ml
-	$(OCAMLOPT) -I curve25519-spec $(OCAML_INCLUDES) $(addprefix curve25519-spec/, $(EXTRACTED)) curve25519-spec/Spec_Loops.ml curve25519-spec/Spec_Lib.ml curve25519-spec/Spec_Curve25519.ml -o curve25519.exe
+	$(OCAMLOPT) -I curve25519-spec $(OCAML_INCLUDES) curve25519-spec/FStar_Endianness.ml curve25519-spec/Spec_Loops.ml curve25519-spec/Spec_Lib.ml curve25519-spec/Spec_Curve25519.ml -o curve25519.exe
 	./curve25519.exe
 
 chacha20.exe: Spec.Chacha20.fst
-	$(MAKE) -C ../code/lib/ml MEM=HST
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p chacha-spec
 	$(FSTAR) $(ARGS) --odir chacha-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> chacha-spec/Spec_Chacha20.ml
-	$(OCAMLOPT) -I chacha-spec $(OCAML_INCLUDES) $(addprefix chacha-spec/, $(EXTRACTED)) chacha-spec/Spec_Loops.ml chacha-spec/Seq_Create.ml chacha-spec/Spec_Lib.ml chacha-spec/Spec_CTR.ml chacha-spec/Spec_Chacha20.ml -o chacha20.exe
+	$(OCAMLOPT) -I chacha-spec $(OCAML_INCLUDES) chacha-spec/FStar_Endianness.ml chacha-spec/Spec_Loops.ml chacha-spec/Seq_Create.ml chacha-spec/Spec_Lib.ml chacha-spec/Spec_CTR.ml chacha-spec/Spec_Chacha20.ml -o chacha20.exe
 	./chacha20.exe
 
 salsa20.exe: Spec.Salsa20.fst
-	$(MAKE) -C ../code/lib/ml MEM=HST
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p salsa-spec
 	$(FSTAR) $(ARGS) --odir salsa-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> salsa-spec/Spec_Salsa20.ml
-	$(OCAMLOPT) -I salsa-spec $(OCAML_INCLUDES) $(addprefix salsa-spec/, $(EXTRACTED)) salsa-spec/Spec_Loops.ml salsa-spec/Seq_Create.ml salsa-spec/Spec_Lib.ml salsa-spec/Spec_CTR.ml salsa-spec/Spec_Salsa20.ml -o salsa20.exe
+	$(OCAMLOPT) -I salsa-spec $(OCAML_INCLUDES) salsa-spec/FStar_Endianness.ml salsa-spec/Spec_Loops.ml salsa-spec/Seq_Create.ml salsa-spec/Spec_Lib.ml salsa-spec/Spec_CTR.ml salsa-spec/Spec_Salsa20.ml -o salsa20.exe
 	./salsa20.exe
 
 chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
-	$(MAKE) -C ../code/lib/ml MEM=HST
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p chacha-poly-spec
 	$(FSTAR) $(ARGS) --odir chacha-poly-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> chacha-poly-spec/Spec_Chacha20Poly1305.ml
-	$(OCAMLOPT) -I chacha-poly-spec $(OCAML_INCLUDES) $(addprefix chacha-poly-spec/, $(EXTRACTED)) chacha-poly-spec/Spec_Loops.ml chacha-poly-spec/Seq_Create.ml chacha-poly-spec/Spec_Lib.ml chacha-poly-spec/Spec_CTR.ml chacha-poly-spec/Spec_Chacha20.ml chacha-poly-spec/Spec_Poly1305_Lemmas.ml chacha-poly-spec/Spec_Poly1305.ml chacha-poly-spec/Spec_Chacha20Poly1305.ml -o chacha20poly1305.exe
+	$(OCAMLOPT) -I chacha-poly-spec $(OCAML_INCLUDES) chacha-poly-spec/FStar_Endianness.ml chacha-poly-spec/Spec_Loops.ml chacha-poly-spec/Seq_Create.ml chacha-poly-spec/Spec_Lib.ml chacha-poly-spec/Spec_CTR.ml chacha-poly-spec/Spec_Chacha20.ml chacha-poly-spec/Spec_Poly1305_Lemmas.ml chacha-poly-spec/Spec_Poly1305.ml chacha-poly-spec/Spec_Chacha20Poly1305.ml -o chacha20poly1305.exe
 	./chacha20poly1305.exe
 
 sha2_256.exe: Spec.SHA2_256.fst
@@ -109,7 +109,7 @@ sha2_256.exe: Spec.SHA2_256.fst
 	mkdir -p sha2-spec
 	$(FSTAR) $(ARGS) --odir sha2-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_256.ml
-	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_256.ml -o sha2_256.exe
+	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) sha2-spec/FStar_Endianness.ml sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_256.ml -o sha2_256.exe
 	./sha2_256.exe
 
 sha2_384.exe: Spec.SHA2_384.fst
@@ -117,7 +117,7 @@ sha2_384.exe: Spec.SHA2_384.fst
 	mkdir -p sha2-spec
 	$(FSTAR) $(ARGS) --odir sha2-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_384.ml
-	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_384.ml -o sha2_384.exe
+	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) sha2-spec/FStar_Endianness.ml sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_384.ml -o sha2_384.exe
 	./sha2_384.exe
 
 sha2_512.exe: Spec.SHA2_512.fst
@@ -125,7 +125,7 @@ sha2_512.exe: Spec.SHA2_512.fst
 	mkdir -p sha2-spec
 	$(FSTAR) $(ARGS) --odir sha2-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_512.ml
-	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_512.ml -o sha2_512.exe
+	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) sha2-spec/FStar_Endianness.ml sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_512.ml -o sha2_512.exe
 	./sha2_512.exe
 
 hmac_sha2_256.exe: Spec.HMAC.SHA2_256.fst
@@ -133,7 +133,7 @@ hmac_sha2_256.exe: Spec.HMAC.SHA2_256.fst
 	mkdir -p hmac-sha2-spec
 	$(FSTAR) $(ARGS) --odir hmac-sha2-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_SHA2_256.ml
-	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) $(addprefix hmac-sha2-spec/, $(EXTRACTED)) hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_256.ml hmac-sha2-spec/Spec_HMAC_SHA2_256.ml -o hmac_sha2_256.exe
+	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) hmac-sha2-spec/FStar_Endianness.ml hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_256.ml hmac-sha2-spec/Spec_HMAC_SHA2_256.ml -o hmac_sha2_256.exe
 	./hmac_sha2_256.exe
 
 ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
@@ -141,7 +141,7 @@ ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	mkdir -p ed25519-spec
 	$(FSTAR) $(ARGS) --odir ed25519-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> ed25519-spec/Spec_Ed25519.ml
-	$(OCAMLOPT) -I ed25519-spec  $(OCAML_INCLUDES) $(addprefix ed25519-spec/, $(EXTRACTED) Spec_Loops.ml Spec_Lib.ml Spec_Curve25519.ml Seq_Create.ml Spec_SHA2_512.ml Spec_SHA512.ml Spec_Ed25519.ml) -o ed25519.exe
+	$(OCAMLOPT) -I ed25519-spec  $(OCAML_INCLUDES) $(addprefix ed25519-spec/, FStar_Endianness.ml Spec_Loops.ml Spec_Lib.ml Spec_Curve25519.ml Seq_Create.ml Spec_SHA2_512.ml Spec_SHA512.ml Spec_Ed25519.ml) -o ed25519.exe
 	./ed25519.exe
 
 clean:

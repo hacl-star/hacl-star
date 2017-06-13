@@ -15,7 +15,7 @@ HACL_HOME ?= ../..
 
 MODULES= Hacl.Symmetric.GCM.fst Hacl.Symmetric.AES.fst Hacl.AEAD.AES256GCM.fst
 
-FSTAR_INCLUDES:=--include $(FSTAR_HOME)/ulib/hyperstack --include $(HACL_HOME)/code/lib
+FSTAR_INCLUDES:=--include $(HACL_HOME)/code/lib
 
 lax:
 	$(FSTAR) $(FSTAR_INCLUDES) --lax $(MODULES)

@@ -16,13 +16,12 @@ FILES=$(addprefix ml/,Hacl_UInt8.mli Hacl_UInt8.ml Hacl_UInt16.mli Hacl_UInt16.m
 
 OBJS=$(FILES:.ml=.o)
 CMX=$(FILES:.ml=.cmx)
-OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g $(INCLUDES)
-OCAMLDEP=ocamlfind dep
-OCAMLMKLIB=ocamlfind mklib
+OCAMLOPT=$(OCAMLOPT) $(INCLUDES)
+
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
 
 %.o: %.ml
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) -c -I ml -I $(FSTAR_HOME)/ulib/ml -linkpkg $<
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) -c -I ml $<
 
 
 ml: $(CMX) $(OBJS)
