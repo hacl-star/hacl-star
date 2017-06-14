@@ -1,5 +1,9 @@
 module Hacl.Standalone.Poly1305_64
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 
 open FStar.Mul
 open FStar.HyperStack.ST

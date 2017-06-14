@@ -1,5 +1,9 @@
 module Hacl.Impl.Chacha20_vec
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST

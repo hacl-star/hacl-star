@@ -1,5 +1,7 @@
 module Spec.SecretBox2
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Seq
 open FStar.UInt32
 

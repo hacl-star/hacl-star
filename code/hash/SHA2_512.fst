@@ -1,5 +1,9 @@
 module SHA2_512
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack

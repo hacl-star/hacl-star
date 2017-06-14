@@ -1,5 +1,9 @@
 module Hacl.HMAC.SHA2_256.Incremental
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack

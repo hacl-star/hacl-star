@@ -20,10 +20,20 @@ else ifeq ($(UNAME),Linux)
   VARIANT=-Linux
 endif
 
+ifeq ($(OS),Windows_NT)
+  FPIC =
+else
+  ifeq ($(UNAME_S),Darwin)
+    FPIC =
+  else
+    FPIC = -ccopt -fPIC
+  endif
+endif
 
-VALE_HOME?=../../../vale
-KREMLIN_HOME?=../../../kremlin
-CCOPTS=-Wall -Wextra -Werror -I$(KREMLIN_HOME)/kremlib
+
+VALE_HOME?=../../../../vale
+KREMLIN_HOME?=../../../../kremlin
+CCOPTS=$(FPIC) -Wall -Wextra -Werror -I$(KREMLIN_HOME)/kremlib
 CC:=$(CC) $(CCOPTS)
 
 
@@ -62,4 +72,4 @@ import:
 	for f in $(VALE_UTIL_FILES); do cp $(VALE_HOME)/src/lib/util/$$f .; done
 
 clean:
-	rm -f *.o *~
+	rm -f *.a *.o *~

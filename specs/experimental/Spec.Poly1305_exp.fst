@@ -1,5 +1,7 @@
 module Spec.Poly1305_exp
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Seq
 open FStar.UInt8
 open FStar.Endianness

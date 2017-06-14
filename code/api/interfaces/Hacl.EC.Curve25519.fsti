@@ -4,7 +4,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 
-open FStar.ST
+open FStar.HyperStack.ST
 open Hacl.UInt8
 open Hacl.Cast
 open FStar.Buffer

@@ -3,6 +3,8 @@
    refer to the Spec.SHA2_512 module *)
 module Spec.SHA512
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt64

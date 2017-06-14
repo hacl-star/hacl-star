@@ -62,7 +62,11 @@ tmp:
 $(CORECRYPTO)/CoreCrypto.cmx: $(CORECRYPTO)/CoreCrypto.ml
 	$(MAKE) -C $(CORECRYPTO)
 
-libllcrypto.a: tmp
+../vale/asm/vale.a:
+	$(MAKE) -C ../vale/asm
+
+libllcrypto.a: tmp ../vale/asm/vale.a
+	cp ../vale/asm/vale.a libllcrypto.a
 	$(AR) -cr libllcrypto.a tmp/*.o
 
 lowc_stub.o: libllcrypto.a

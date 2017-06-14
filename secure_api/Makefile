@@ -26,7 +26,7 @@ OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS)  --include crypto --include crypto/real --include ../specs
 
 KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
-KRML_ARGS=-ccopt -maes \
+KRML_ARGS=$(FPIC) -ccopt -maes \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
   vale/asm/vale.a test/test_hacks.c \
   -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
@@ -39,7 +39,7 @@ MAIN_FILES=
 vale/asm/vale.a:
 	make -C vale/asm
 
-LowCProvider-tmp: vale/aes/aes.o
+LowCProvider-tmp: vale/asm/vale.a
 	$(KRML) LowCProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
 		aead/Crypto.AEAD.fst \
@@ -72,6 +72,7 @@ test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 
 # Cleaning
 clean:
+	$(MAKE) -C LowCProvider clean
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
 	@rm -f $(addprefix crypto/ml/, *.cmx *.o *.cmi *~)
 	@rm -rf tmp tmp-vale tmp-hacl kremlin *~ *.exe
