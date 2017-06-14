@@ -36,9 +36,7 @@ KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 
 MAIN_FILES=
 
-vale/asm/vale.a:
-	make -C vale/asm
-
+# JP: is this rule temporary?
 LowCProvider-tmp: vale/asm/vale.a
 	$(KRML) LowCProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
@@ -46,21 +44,20 @@ LowCProvider-tmp: vale/asm/vale.a
 		-tmpdir LowCProvider/tmp \
 		-skip-linking
 
-krml-test-vale.exe: vale/asm/vale.a
-	$(KRML) test/test_vale/Crypto.Indexing.fst \
-		test/Flag.fst utils/Hacl.Spec.fst \
-		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
-		-tmpdir tmp-vale -o krml-test-vale.exe \
-		-bundle "Crypto.AEAD=Crypto.AEAD.*"
-	./krml-test-vale.exe
+vale/asm/vale.a:
+	make -C vale/asm
 
-krml-test-hacl.exe:
-	$(KRML) test/test_hacl/Crypto.Indexing.fst \
-		test/Flag.fst utils/Hacl.Spec.fst \
-		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
-		-tmpdir tmp-hacl -o krml-test-hacl.exe \
-		-bundle "Crypto.AEAD=Crypto.AEAD.*"
-	./krml-test-hacl.exe
+tmp-%/out.krml: $(wildcard */*.fst)
+	$(KRML) test/test_$*/Crypto.Indexing.fst \
+	  test/Flag.fst utils/Hacl.Spec.fst \
+	  test/Crypto.KrmlTest.fst \
+	  -tmpdir tmp-$* -skip-translation
+
+krml-test-vale.exe: vale/asm/vale.a
+
+krml-test-%.exe: tmp-%/out.krml
+	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
+	./$@
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
@@ -74,6 +71,7 @@ test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 clean:
 	$(MAKE) -C LowCProvider clean
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
+	$(MAKE) -C vale/asm clean
 	@rm -f $(addprefix crypto/ml/, *.cmx *.o *.cmi *~)
 	@rm -rf tmp tmp-vale tmp-hacl kremlin *~ *.exe
 
