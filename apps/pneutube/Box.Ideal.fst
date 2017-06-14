@@ -6,7 +6,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.Seq
 open FStar.Buffer
-open FStar.ST
+open FStar.HyperStack.ST
 open Hacl.Constants
 open Libsodium
 

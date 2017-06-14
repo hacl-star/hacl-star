@@ -189,7 +189,7 @@ let gen rgn i =
   (*     in *)
   (*   pop_frame(); *)
   (*   State #i #rgn #mac_rgn keystate table *)
-  (*   // no need to demand prf i so far. *)
+  (*   / / no need to demand prf i so far. *)
   (*   end *)
   (* | _ ->  *)
     (* begin *)
