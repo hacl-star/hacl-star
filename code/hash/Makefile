@@ -70,14 +70,17 @@ sha2-c/out.krml: $(SHA2_FILES) SHA2_256.fst SHA2_384.fst SHA2_512.fst Hacl.Test.
 
 sha2-256-c/SHA2_256.c sha2-256-c/Hacl_Test_SHA2_256.c: sha2-c/out.krml
 	$(KRML) -tmpdir sha2-256-c $^ -skip-compilation -no-prefix Hacl.Test.SHA2_256 \
+     -drop SHA2_384,SHA2_512,Hacl.Hash.SHA2_384,Hacl.Hash.SHA2_512 \
 	  -bundle "SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256"
 
 sha2-384-c/SHA2_384.c sha2-384-c/Hacl_Test_SHA2_384.c: sha2-c/out.krml
 	$(KRML) -tmpdir sha2-384-c $^ -skip-compilation -no-prefix Hacl.Test.SHA2_384 \
+     -drop SHA2_256,SHA2_512,Hacl.Hash.SHA2_256,Hacl.Hash.SHA2_512 \
 	  -bundle "SHA2_384=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_384,SHA2_384"
 
 sha2-512-c/SHA2_512.c sha2-512-c/Hacl_Test_SHA2_512.c: sha2-c/out.krml
 	$(KRML) -tmpdir sha2-512-c $^ -skip-compilation -no-prefix Hacl.Test.SHA2_512 \
+     -drop SHA2_384,SHA2_256,Hacl.Hash.SHA2_384,Hacl.Hash.SHA2_256 \
 	  -bundle "SHA2_512=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_512,SHA2_512"
 
 CC := $(CC) $(INCLUDES)
