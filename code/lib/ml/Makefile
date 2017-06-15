@@ -11,15 +11,9 @@ all: hacllib.cmxa
 include ../Makefile.include
 
 hacllib.cmxa:
-<<<<<<< HEAD
-	$(MAKE) -C $(ULIB_ML)
-	$(OCAMLOPT) -c $(FILES)
-	OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind opt -a -package fstarlib $(FILESX) -o hacllib.cmxa
-=======
 	$(MAKE) -C $(FSTAR_LIB)
 	$(OCAMLOPT) -thread -w -58 -c $(FILES)
 	$(OCAMLOPT) -a $(FILESX) -o hacllib.cmxa
->>>>>>> migrating_sts
 
 clean:
 	$(MAKE) -C $(ULIB_ML) clean
