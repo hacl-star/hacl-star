@@ -23,7 +23,7 @@ endif
 ifeq ($(OS),Windows_NT)
   FPIC =
 else
-  ifeq ($(UNAME_S),Darwin)
+  ifeq ($(UNAME),Darwin)
     FPIC =
   else
     FPIC = -ccopt -fPIC
