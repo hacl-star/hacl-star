@@ -38,9 +38,10 @@ let fsquare_tot s =
   lemma_fsquare_times_tot s;
   fsquare_times_tot s 1
 
-// TODO: move to libraries
-assume val lemma_int_mod_mul_distr_l: a:int -> b:int -> p:pos -> Lemma
+val lemma_int_mod_mul_distr_l: a:int -> b:int -> p:pos -> Lemma
   (FStar.Mul.((a * b) % p = ((a % p) * b) % p))
+let lemma_int_mod_mul_distr_l a b p =
+  FStar.Math.Axioms.lemma_int_mod_mul_distr_l a b p
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"

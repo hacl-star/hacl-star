@@ -25,8 +25,8 @@ let u64 = UInt64.t
 (** TODO: Move. Used only in AEAD.EnxorDexor, much faster to prove here *)
 val eq_snoc_slice: #a:Type -> s_0:Seq.seq a -> s_1:Seq.seq a -> x:a -> Lemma
   (requires (Seq.length s_1 == Seq.length s_0 + 1 /\
-             Seq.index s_1 (Seq.length s_0) == x /\
-             Seq.equal (Seq.slice s_1 0 (Seq.length s_0)) s_0))
+            Seq.index s_1 (Seq.length s_0) == x /\
+            Seq.equal (Seq.slice s_1 0 (Seq.length s_0)) s_0))
   (ensures  (Seq.equal s_1 (Seq.snoc s_0 x)))
 let eq_snoc_slice #a s_0 s_1 x = ()
 
@@ -79,7 +79,7 @@ let sel_bytes h l buf = Buffer.as_seq h buf
 val load_bytes: l:UInt32.t -> buf:lbuffer (v l) -> Stack (lbytes (v l))
   (requires (fun h0 -> Buffer.live h0 buf))
   (ensures  (fun h0 r h1 -> h0 == h1 /\ Buffer.live h0 buf /\
-		         Seq.equal r (sel_bytes h1 l buf)))
+                         Seq.equal r (sel_bytes h1 l buf)))
 let rec load_bytes l buf =
   if l = 0ul then
     Seq.createEmpty
@@ -91,9 +91,9 @@ let rec load_bytes l buf =
 noextract private val store_bytes_aux: len:UInt32.t -> buf:lbuffer (v len)
   -> i:UInt32.t{i <=^ len} -> b:lbytes (v len) -> ST unit
   (requires (fun h0 -> Buffer.live h0 buf /\
-    Seq.equal (Seq.slice b 0 (v i)) (sel_bytes h0 i (Buffer.sub buf 0ul i))))
-  (ensures  (fun h0 r h1 -> Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
-    Seq.equal b (sel_bytes h1 len buf)))
+      Seq.equal (Seq.slice b 0 (v i)) (sel_bytes h0 i (Buffer.sub buf 0ul i))))
+    (ensures  (fun h0 r h1 -> Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
+      Seq.equal b (sel_bytes h1 len buf)))
 let rec store_bytes_aux len buf i b =
   if i <^ len then
     begin
@@ -162,7 +162,7 @@ let little_endian_null len = FStar.Endianness.little_endian_null len
 (*   else *)
 (*     begin *)
 (*     Seq.lemma_eq_intro (Seq.slice (Seq.create len 0uy) 1 len) *)
-(* 		       (Seq.create (len - 1) 0uy); *)
+(*                   (Seq.create (len - 1) 0uy); *)
 (*     assert (little_endian (Seq.create len 0uy) == *)
 (*       0 + pow2 8 * little_endian (Seq.slice (Seq.create len 0uy) 1 len)); *)
 (*     little_endian_null (len - 1) *)
@@ -272,7 +272,6 @@ let lemma_little_endian_lt_2_128 b = FStar.Endianness.lemma_little_endian_lt_2_1
   (* if Seq.length b = 16 then () *)
   (* else Math.Lemmas.pow2_lt_compat 128 (8 * Seq.length b) *)
 
-
 #reset-options "--z3rlimit 100 --max_fuel 1 --initial_fuel 1"
 
 (* REMARK: The trigger in lemma_little_endian_lt_2_128 is used to prove absence of
@@ -283,15 +282,26 @@ val load_uint32: len:UInt32.t { v len <= 4 } -> buf:lbuffer (v len) -> ST UInt32
   (ensures (fun h0 n h1 ->
     h0 == h1 /\ live h0 buf /\
     UInt32.v n == little_endian (sel_bytes h1 len buf)))
+
+#reset-options "--z3rlimit 100 --max_fuel 1 --initial_fuel 1"
+
 let rec load_uint32 len buf =
   if len = 0ul then 0ul
   else
+    let h = ST.get () in
     let len = len -^ 1ul in
-    let n = load_uint32 len (sub buf 1ul len) in
+    let m = load_uint32 len (sub buf 1ul len) in
+    lemma_little_endian_is_bounded (sel_bytes h len (sub buf 1ul len));
+    assert (UInt32.v len <= 3);
+    assert (UInt32.v m < pow2 (8 * (UInt32.v len)));
+    FStar.Math.Lemmas.pow2_le_compat (8 * 3) (8 * (UInt32.v len));
+    FStar.Math.Lemmas.pow2_plus 8 (8 * 3);
+    assert (pow2 (8 * (UInt32.v len)) <= pow2 (8 * 3));
+    assert (pow2 8 * pow2 (8 * 3) = UInt.max_int 32 + 1);
+    assert (UInt32.v m * pow2 8 <= UInt.max_int 32);
     let b = buf.(0ul) in
     assert_norm (pow2 8 == 256);
-    let n' = n in (* n defined in FStar.UInt32, so was shadowed, so renamed into n' *)
-    FStar.UInt32.(uint8_to_uint32 b +^ 256ul *^ n')
+    FStar.UInt32.(uint8_to_uint32 b +^ 256ul *^ m)
 
 val load_big32: len:UInt32.t { v len <= 4 } -> buf:lbuffer (v len) -> ST UInt32.t
   (requires (fun h0 -> live h0 buf))
@@ -425,6 +435,9 @@ let rec store_big32 len buf n =
 noextract val uint32_bytes:
   len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} ->
   Tot (b:lbytes (v len) { UInt32.v n == little_endian b}) (decreases (v len))
+
+#reset-options "--initial_fuel 1 --max_fuel 1"
+
 let rec uint32_bytes len n =
   if len = 0ul then
     let e = Seq.createEmpty #UInt8.t in
@@ -439,14 +452,17 @@ let rec uint32_bytes len n =
     Math.Lemmas.pow2_plus 8 (8 * v len);
     assert_norm (pow2 8 == 256);
     assert(v n' < pow2 (8 * v len ));
-    let b' = uint32_bytes len n'
-    in
-    Seq.cons byte b'
+    let b' = uint32_bytes len n' in
+    assert (little_endian b' = UInt32.v n');
+    let res = Seq.cons byte b' in
+    assert (Seq.equal (Seq.tail res) b'); //NS: added 05/15, cf #1028
+    res
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 50"
-noextract val uint32_be: 
-  len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> 
+noextract val uint32_be:
+  len:UInt32.t {v len <= 4} -> n:UInt32.t {UInt32.v n < pow2 (8 * v len)} ->
   Tot (b:lbytes (v len) { UInt32.v n == big_endian b}) (decreases (v len))
+
 let rec uint32_be len n =
   if len = 0ul then
     let e = Seq.createEmpty #UInt8.t in
@@ -463,7 +479,10 @@ let rec uint32_be len n =
     assert(v n' < pow2 (8 * v len ));
     let b' = uint32_be len n'
     in
-    Seq.snoc b' byte
+    let res = Seq.snoc b' byte in
+    let b0, last = Seq.un_snoc res in
+    assert (Seq.equal b0 b'); //NS: added 05/15, cf #1028
+    res
 
 // turns an integer into a bytestream, little-endian
 inline_for_extraction val little_bytes:

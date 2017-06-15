@@ -18,9 +18,17 @@
 #include <openssl/ec.h>
 #include <openssl/evp.h>
 
+#define Hacl_Impl_Poly1305_64_poly1305_state whatever
 #include "Curve25519.h"
 #include "Poly1305_64.h"
+#undef Hacl_Impl_Poly1305_64_poly1305_state
 #include "Chacha20.h"
+#include "Chacha20_Vec128.h"
+#include "Chacha20Poly1305.h"
+#define K___uint32_t_uint8_t_ whateveer
+#include "SHA2_256.h"
+#undef K___uint32_t_uint8_t_
+#include "SHA2_512.h"
 
 // OpenSSL private header for benchmarking purposes
 #include "crypto/include/internal/poly1305.h"
@@ -88,23 +96,23 @@ static int X25519(uint8_t out_shared_key[32], uint8_t private_key[32],
 // API and ii) calls our own X25519 function
 static int hacl_derive(EVP_PKEY_CTX *ctx, unsigned char *key, size_t *keylen)
 {
-    const X25519_KEY *pkey, *peerkey;
+  const X25519_KEY *pkey, *peerkey;
 
-    pkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_pkey(ctx));
-    peerkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_peerkey(ctx));
+  pkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_pkey(ctx));
+  peerkey = EVP_PKEY_get0(EVP_PKEY_CTX_get0_peerkey(ctx));
 
-    if (pkey == NULL || pkey->privkey == NULL) {
-        ECerr(EC_F_PKEY_ECX_DERIVE, EC_R_INVALID_PRIVATE_KEY);
-        return 0;
-    }
-    if (peerkey == NULL) {
-        ECerr(EC_F_PKEY_ECX_DERIVE, EC_R_INVALID_PEER_KEY);
-        return 0;
-    }
-    *keylen = X25519_KEYLEN;
-    if (key != NULL && X25519(key, pkey->privkey, peerkey->pubkey) == 0)
-        return 0;
-    return 1;
+  if (pkey == NULL || pkey->privkey == NULL) {
+    ECerr(EC_F_PKEY_ECX_DERIVE, EC_R_INVALID_PRIVATE_KEY);
+    return 0;
+  }
+  if (peerkey == NULL) {
+    ECerr(EC_F_PKEY_ECX_DERIVE, EC_R_INVALID_PEER_KEY);
+    return 0;
+  }
+  *keylen = X25519_KEYLEN;
+  if (key != NULL && X25519(key, pkey->privkey, peerkey->pubkey) == 0)
+    return 0;
+  return 1;
 }
 #endif // IMPL_HACL
 
@@ -124,10 +132,100 @@ static int Wrapper_Chacha20_Init(EVP_CIPHER_CTX *ctx, const unsigned char *key, 
 
 static int Wrapper_Chacha20_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out, const unsigned char *in, size_t len) {
   uint8_t *my_ctx = EVP_CIPHER_CTX_get_cipher_data(ctx);
-  Chacha20_chacha20(out, in, len, my_ctx, my_ctx + CHACHA20_KEY_SIZE, 0);
+  Chacha20_chacha20(out, (uint8_t *) in, len, my_ctx, my_ctx + CHACHA20_KEY_SIZE, 0);
+  // Replace with line below for the vectorized version.
+  // Chacha20_Vec128_chacha20(out, (uint8_t *) in, len, my_ctx, my_ctx + CHACHA20_KEY_SIZE, 0);
   return 1;
 }
 #endif // IMPL_HACL
+
+// SHA2_256 --------------------------------------------------------------------
+
+#if IMPL==IMPL_HACL
+
+// In 32-bit words
+#define HACL_SHA2_256_STATE_SIZE 133
+// In bytes
+#define HACL_SHA2_256_BLOCK_SIZE_B 64
+
+static int hacl_sha2_256_init(EVP_MD_CTX *ctx) {
+  uint32_t *state = EVP_MD_CTX_md_data(ctx);
+  SHA2_256_init(state);
+  return 1;
+}
+
+static int hacl_sha2_256_update(EVP_MD_CTX *ctx, const void *data_r, size_t count) {
+  uint32_t *state = EVP_MD_CTX_md_data(ctx);
+  // Same remark as poly1305
+  uint32_t n_blocks = count / HACL_SHA2_256_BLOCK_SIZE_B;
+  uint8_t *data = (uint8_t *) data_r;
+  while (n_blocks--) {
+    SHA2_256_update(state, data);
+    data += HACL_SHA2_256_BLOCK_SIZE_B;
+  }
+  return 1;
+}
+
+static int hacl_sha2_256_final(EVP_MD_CTX *ctx, unsigned char *md) {
+  uint32_t *state = EVP_MD_CTX_md_data(ctx);
+  SHA2_256_update_last(state, NULL, 0);
+  SHA2_256_finish(state, md);
+  return 1;
+}
+
+static int hacl_sha2_256_copy(EVP_MD_CTX *to, const EVP_MD_CTX *from) {
+  return 1;
+}
+
+static int hacl_sha2_256_cleanup(EVP_MD_CTX *ctx) {
+  return 1;
+}
+
+#endif
+
+// SHA2_512 --------------------------------------------------------------------
+
+#if IMPL==IMPL_HACL
+
+// In 64-bit words
+#define HACL_SHA2_512_STATE_SIZE 169
+// In bytes
+#define HACL_SHA2_512_BLOCK_SIZE_B 128
+
+static int hacl_sha2_512_init(EVP_MD_CTX *ctx) {
+  uint64_t *state = EVP_MD_CTX_md_data(ctx);
+  SHA2_512_init(state);
+  return 1;
+}
+
+static int hacl_sha2_512_update(EVP_MD_CTX *ctx, const void *data_r, size_t count) {
+  uint64_t *state = EVP_MD_CTX_md_data(ctx);
+  // Same remark as poly1305
+  uint32_t n_blocks = count / HACL_SHA2_512_BLOCK_SIZE_B;
+  uint8_t *data = (uint8_t *) data_r;
+  while (n_blocks--) {
+    SHA2_512_update(state, data);
+    data += HACL_SHA2_512_BLOCK_SIZE_B;
+  }
+  return 1;
+}
+
+static int hacl_sha2_512_final(EVP_MD_CTX *ctx, unsigned char *md) {
+  uint64_t *state = EVP_MD_CTX_md_data(ctx);
+  SHA2_512_update_last(state, NULL, 0);
+  SHA2_512_finish(state, md);
+  return 1;
+}
+
+static int hacl_sha2_512_copy(EVP_MD_CTX *to, const EVP_MD_CTX *from) {
+  return 1;
+}
+
+static int hacl_sha2_512_cleanup(EVP_MD_CTX *ctx) {
+  return 1;
+}
+
+#endif
 
 // Poly1305 --------------------------------------------------------------------
 
@@ -182,6 +280,89 @@ static int hacl_poly1305_final(EVP_MD_CTX *ctx, unsigned char *md) {
   return 1;
 }
 
+// Chacha-Poly -----------------------------------------------------------------
+
+#if IMPL==IMPL_HACL
+int hacl_chachapoly_init (EVP_CIPHER_CTX *ctx,
+  const unsigned char *key,
+  const unsigned char *iv,
+  int enc)
+{
+  return 1;
+}
+
+// Begin copy/paste from OpenSSL
+#define CHACHA_KEY_SIZE		32
+#define CHACHA_CTR_SIZE		16
+#define CHACHA_BLK_SIZE		64
+
+typedef struct {
+    union {
+        double align;   /* this ensures even sizeof(EVP_CHACHA_KEY)%8==0 */
+        unsigned int d[CHACHA_KEY_SIZE / 4];
+    } key;
+    unsigned int  counter[CHACHA_CTR_SIZE / 4];
+    unsigned char buf[CHACHA_BLK_SIZE];
+    unsigned int  partial_len;
+} EVP_CHACHA_KEY;
+
+typedef struct {
+    EVP_CHACHA_KEY key;
+    unsigned int nonce[12/4];
+    unsigned char tag[POLY1305_BLOCK_SIZE];
+    struct { uint64_t aad, text; } len;
+    int aad, mac_inited, tag_len, nonce_len;
+    size_t tls_payload_length;
+} EVP_CHACHA_AEAD_CTX;
+// End copy/paste
+
+int hacl_chachapoly_do_cipher(EVP_CIPHER_CTX *ctx,
+  unsigned char *out,
+  const unsigned char *in,
+  size_t inl)
+{
+  // printf("Trace: out=%p, in=%p, inl=%zu\n", out, in, inl);
+
+  // Note: the benchmarking engine never uses a CTRL call to set the AAD; it
+  // also never calls us with out = NULL which, according to the OpenSSL source
+  // code, is the way the caller indicates that it's about to switch to AAD.
+  // Therefore, we provide a NULL AAD pointer, which is enough to have a
+  // representative performance test. This is, naturally, highly non-functional.
+  static bool warned = false;
+  if (!warned) {
+    printf("Warning: this is a non-functional cipher intended for benchmarking "
+      "purposes only!\n");
+    warned = true;
+  }
+
+  EVP_CHACHA_AEAD_CTX *aead_data = EVP_CIPHER_CTX_get_cipher_data(ctx);
+
+  uint8_t mac[16] = { 0 };
+  Chacha20Poly1305_aead_encrypt(out,
+    mac,
+    (uint8_t *) in,
+    inl,
+    NULL,
+    0,
+    aead_data->key.buf,
+    (uint8_t *) aead_data->nonce);
+
+  return 1;
+}
+
+int hacl_chachapoly_cleanup(EVP_CIPHER_CTX *ctx) {
+  return 1;
+}
+
+int hacl_chachapoly_ctrl(EVP_CIPHER_CTX *ctx, int type, int arg, void *ptr) {
+  // This should implement all the operations that its counterpart in
+  // e_chacha20_poly1305.c implements; specifically, the minute we start to
+  // implement this, we should at least implement EVP_CTRL_INIT to make sure we
+  // properly allocate our data structures, and make sure we return 0 otherwise.
+  return 0;
+}
+#endif
+
 // Registering our algorithms within the engine infrastructure -----------------
 
 static int Everest_digest_nids(const int **nids)
@@ -191,6 +372,10 @@ static int Everest_digest_nids(const int **nids)
   int count = 0;
 
   if (!init) {
+    digest_nids[count++] = NID_poly1305;
+    digest_nids[count++] = NID_sha512;
+    digest_nids[count++] = NID_sha256;
+
     // NULL-terminate the list
     digest_nids[count] = 0;
     init = 1;
@@ -207,6 +392,7 @@ static int Everest_ciphers_nids(const int **nids)
 
   if (!init) {
     cipher_nids[count++] = NID_chacha20;
+    cipher_nids[count++] = NID_chacha20_poly1305;
 
     // NULL-terminate the lst
     cipher_nids[count] = 0;
@@ -234,6 +420,8 @@ static int Everest_pkey_meths_nids(const int **nids)
 }
 
 static EVP_MD *hacl_poly1305_digest = NULL;
+static EVP_MD *hacl_sha2_512_digest = NULL;
+static EVP_MD *hacl_sha2_256_digest = NULL;
 
 // These three functions follow the protocol explained in
 // include/openssl/engine.h near line 280.
@@ -244,19 +432,30 @@ int Everest_digest(ENGINE *e, const EVP_MD **digest, const int **nids, int nid)
   } else if (nid == NID_poly1305) {
     *digest = hacl_poly1305_digest;
     return 1;
+  } else if (nid == NID_sha512) {
+    *digest = hacl_sha2_512_digest;
+    return 1;
+  } else if (nid == NID_sha256) {
+    *digest = hacl_sha2_256_digest;
+    return 1;
   } else {
     return 0;
   }
 }
 
 static EVP_CIPHER *hacl_chacha20_cipher = NULL;
+static EVP_CIPHER *hacl_chachapoly_cipher = NULL;
 
 int Everest_ciphers(ENGINE *e, const EVP_CIPHER **cipher, const int **nids, int nid)
 {
   if (cipher == NULL) {
     return Everest_ciphers_nids(nids);
   } else if (nid == NID_chacha20) {
+    fflush(stdout);
     *cipher = hacl_chacha20_cipher;
+    return 1;
+  } else if (nid == NID_chacha20_poly1305) {
+    *cipher = hacl_chachapoly_cipher;
     return 1;
   } else {
     return 0;
@@ -329,7 +528,57 @@ void Everest_create_all_the_things() {
   #elif IMPL == IMPL_OPENSSL
   // Let the benchmarking go through the Engine framework, but redirect back to
   // OpenSSL.
-  hacl_chacha20_cipher = EVP_chacha20();
+  hacl_chacha20_cipher = (EVP_CIPHER *) EVP_chacha20();
+  #else
+  #error "Unsupported implementation"
+  #endif
+
+  // SHA256
+  // --------
+  #if IMPL == IMPL_HACL
+  hacl_sha2_256_digest = EVP_MD_meth_new(NID_sha256, NID_undef);
+  if (hacl_sha2_256_digest == NULL ||
+    !EVP_MD_meth_set_result_size(hacl_sha2_256_digest, 64) ||
+    !EVP_MD_meth_set_init(hacl_sha2_256_digest, hacl_sha2_256_init) ||
+    !EVP_MD_meth_set_update(hacl_sha2_256_digest, hacl_sha2_256_update) ||
+    !EVP_MD_meth_set_final(hacl_sha2_256_digest, hacl_sha2_256_final) ||
+    !EVP_MD_meth_set_cleanup(hacl_sha2_256_digest, hacl_sha2_256_cleanup) ||
+    !EVP_MD_meth_set_copy(hacl_sha2_256_digest, hacl_sha2_256_copy) ||
+    !EVP_MD_meth_set_app_datasize(hacl_sha2_256_digest, HACL_SHA2_256_STATE_SIZE * 8) ||
+    !EVP_MD_meth_set_input_blocksize(hacl_sha2_256_digest, HACL_SHA2_256_BLOCK_SIZE_B) ||
+    !EVP_MD_meth_set_flags(hacl_sha2_256_digest, EVP_MD_FLAG_ONESHOT))
+  {
+    fprintf(stderr, "Error creating SHA256\n");
+    EVP_MD_meth_free(hacl_sha2_256_digest);
+    exit(1);
+  }
+  #elif IMPL == IMPL_OPENSSL
+  hacl_sha2_256_digest = (EVP_MD *) EVP_sha256();
+  #else
+  #error "Unsupported implementation"
+  #endif
+
+  // SHA512
+  // --------
+  #if IMPL == IMPL_HACL
+  hacl_sha2_512_digest = EVP_MD_meth_new(NID_sha512, NID_undef);
+  if (hacl_sha2_512_digest == NULL ||
+    !EVP_MD_meth_set_result_size(hacl_sha2_512_digest, 64) ||
+    !EVP_MD_meth_set_init(hacl_sha2_512_digest, hacl_sha2_512_init) ||
+    !EVP_MD_meth_set_update(hacl_sha2_512_digest, hacl_sha2_512_update) ||
+    !EVP_MD_meth_set_final(hacl_sha2_512_digest, hacl_sha2_512_final) ||
+    !EVP_MD_meth_set_cleanup(hacl_sha2_512_digest, hacl_sha2_512_cleanup) ||
+    !EVP_MD_meth_set_copy(hacl_sha2_512_digest, hacl_sha2_512_copy) ||
+    !EVP_MD_meth_set_app_datasize(hacl_sha2_512_digest, HACL_SHA2_512_STATE_SIZE * 8) ||
+    !EVP_MD_meth_set_input_blocksize(hacl_sha2_512_digest, HACL_SHA2_512_BLOCK_SIZE_B) ||
+    !EVP_MD_meth_set_flags(hacl_sha2_512_digest, EVP_MD_FLAG_ONESHOT))
+  {
+    fprintf(stderr, "Error creating SHA512\n");
+    EVP_MD_meth_free(hacl_sha2_512_digest);
+    exit(1);
+  }
+  #elif IMPL == IMPL_OPENSSL
+  hacl_sha2_512_digest = (EVP_MD *) EVP_sha512();
   #else
   #error "Unsupported implementation"
   #endif
@@ -351,6 +600,19 @@ void Everest_create_all_the_things() {
   #error "Unsupported implementation"
   #endif
   EVP_MD_meth_set_input_blocksize(hacl_poly1305_digest, 16);
+
+  // Chacha-Poly
+  // -----------
+  hacl_chachapoly_cipher = EVP_CIPHER_meth_dup(EVP_chacha20_poly1305());
+  #if IMPL == IMPL_HACL
+  //EVP_CIPHER_meth_set_init(hacl_chachapoly_cipher, hacl_chachapoly_init);
+  EVP_CIPHER_meth_set_do_cipher(hacl_chachapoly_cipher, hacl_chachapoly_do_cipher);
+  //EVP_CIPHER_meth_set_cleanup(hacl_chachapoly_cipher, hacl_chachapoly_cleanup);
+  //EVP_CIPHER_meth_set_ctrl(hacl_chachapoly_cipher, hacl_chachapoly_ctrl);
+  #elif IMPL == IMPL_OPENSSL
+  #else
+  #error "Unsupported implementation"
+  #endif
 }
 
 // Registering everything as an engine -----------------------------------------

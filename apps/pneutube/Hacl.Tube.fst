@@ -517,7 +517,7 @@ let rec file_recv_loop_2 fb connb state mut_state seqno len =
         Math.Lemmas.modulo_lemma (U64.v len) (pow2 32);
         let ciphertext' = Buffer.sub ciphertext 0ul (cipherlen_32 (Int.Cast.uint64_to_uint32 len)) in
         let next' = Buffer.sub next 0ul (Int.Cast.uint64_to_uint32 len) in
-        if U32 (Hacl.Box.crypto_box_open_easy_afternm next' ciphertext' (cipherlen len) nonce key =^ 0ul) then (
+        if U32 (NaCl.crypto_box_open_easy_afternm next' ciphertext' (cipherlen len) nonce key =^ 0ul) then (
           let h4 = ST.get() in
           lemma_reveal_modifies_1 next h3 h4;
 	  SocketOk )
@@ -536,7 +536,7 @@ let rec file_recv_loop_2 fb connb state mut_state seqno len =
         let seqno = H64 (seqno +%^ one_64) in
         let h = ST.get() in
         lemma_reveal_modifies_1 mut_state h1 h;
-        if U32 (Hacl.Box.crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then (
+        if U32 (NaCl.crypto_box_open_easy_afternm next ciphertext ciphersize nonce key =^ 0ul) then (
           let h2 = ST.get() in
           lemma_reveal_modifies_1 next h h2;
           assume (live_file h2 fb /\ (let fh = get h2 fb 0 in file_state h2 fh = FileOpen));

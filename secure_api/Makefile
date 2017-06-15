@@ -11,48 +11,55 @@ include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
 FSTAR_ARGS=$(OTHERFLAGS)
 
+ifeq ($(OS),Windows_NT)
+  FPIC =
+else
+  ifeq ($(UNAME_S),Darwin)
+    FPIC =
+  else
+    FPIC = -ccopt -fPIC
+  endif
+endif
+
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real --include ../specs
 
-KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/aes prf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
-KRML_ARGS=-ccopt -maes -ccopt -Wno-error=pointer-sign $(KOPTS) -ccopt -std=gnu99
+KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_ARGS=-ccopt -maes \
+  $(KREMLIN_HOME)/test/../kremlib/testlib.c \
+  vale/asm/vale.a test/test_hacks.c \
+  -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
+  -add-include '"testlib.h"' -bundle Hacl.*
+
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 
-vale/aes/aes.o:
-	make -C vale/aes
+MAIN_FILES=
 
-LowCProvider/tmp:
+vale/asm/vale.a:
+	make -C vale/asm
+
+LowCProvider-tmp: vale/aes/aes.o
 	$(KRML) LowCProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
-		aead/Crypto.AEAD.fst test/test_vale/vale.c \
-		$(KREMLIN_HOME)/test/../kremlib/testlib.c \
-		vale/aes/aes.o test/test_hacks.c \
+		aead/Crypto.AEAD.fst \
 		-tmpdir LowCProvider/tmp \
-		-skip-linking -add-include '"testlib.h"' \
-		-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
-		-bundle Hacl.*
-	cp vale/aes/aes.o LowCProvider/tmp
+		-skip-linking
 
-krml-test-vale.exe: vale/aes/aes.o
+krml-test-vale.exe: vale/asm/vale.a
 	$(KRML) test/test_vale/Crypto.Indexing.fst \
-		test/test_vale/vale.c vale/aes/aes.o \
 		test/Flag.fst utils/Hacl.Spec.fst \
 		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
-		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
-		-tmpdir tmp-vale -add-include '"testlib.h"' -o krml-test-vale.exe \
-		-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
-		-bundle Hacl.* -bundle "Crypto.AEAD=Crypto.AEAD.*"
+		-tmpdir tmp-vale -o krml-test-vale.exe \
+		-bundle "Crypto.AEAD=Crypto.AEAD.*"
 	./krml-test-vale.exe
 
 krml-test-hacl.exe:
 	$(KRML) test/test_hacl/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
 		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
-		$(KREMLIN_HOME)/test/../kremlib/testlib.c test/test_hacks.c \
-		-tmpdir tmp-hacl -add-include '"testlib.h"' -o krml-test-hacl.exe \
-		-drop Hacl.Spe.* -drop Spec -drop Hacl.Spec -drop Spec.* -drop Hacl.Spec.* \
-		-bundle Hacl.* -bundle "Crypto.AEAD=Crypto.AEAD.*"
+		-tmpdir tmp-hacl -o krml-test-hacl.exe \
+		-bundle "Crypto.AEAD=Crypto.AEAD.*"
 	./krml-test-hacl.exe
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
@@ -179,7 +186,6 @@ all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 	@$(FSTAR) $(OPTIONS) \
 	$(FSTAR_INCLUDE_PATHS) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
-	--verify_module $(basename $(notdir $@)) \
 	$(basename $@).fst
 
 # (Re-)Generate hints

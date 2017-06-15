@@ -1,6 +1,3 @@
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=../..
 include ../Makefile.include
 
 API_FILES= \
@@ -8,41 +5,44 @@ API_FILES= \
 	Chacha20Poly1305.fst \
 	Hacl.SecretBox.ZeroPad.fst \
 	Hacl.Box.ZeroPad.fst
-#	Hacl.SecretBox.fst \
-	Hacl.Box.fst
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/kremlin --include ../salsa-family/interfaces --include ../curve25519/interfaces \
-		--include ../poly1305/interfaces --include ../../specs \
-		--include $(KREMLIN_HOME)/kremlib
+FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include ../lib/kremlin --include ../../specs --include $(FSTAR_HOME)/../kremlin/kremlib
 
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack \
-		--include ../lib/ --include ../salsa-family/interfaces --include ../curve25519/interfaces \
-		--include ../poly1305/interfaces --include ../../specs \
-		--include $(KREMLIN_HOME)/kremlib
+FSTARB=$(FSTAR_BASE) \
+		--include ../lib/kremlin --include ../salsa-family --include $(HACL_HOME)/code/bignum --include ../curve25519 \
+		--include ../poly1305 --include ../../specs \
+		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
 
-KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
-		-I ../poly1305/interfaces -I ../../specs \
+FSTAR_CT=$(FSTAR_BASE) \
+		--include ../lib/ --include ../salsa-family --include ../bignum --include ../curve25519 \
+		--include ../poly1305 --include ../../specs \
+		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
+
+KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
+		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum  \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
-		-drop Hacl.Types
+		-drop Hacl.Types $(KREMLIN_ARGS)
 
-
-KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family/interfaces -I ../curve25519/interfaces \
-		-I ../poly1305 -I ../../specs \
-		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
-		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
-		-drop Hacl.Types
+KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
+		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum \
+		-drop FStar,Hacl.Spec,Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64 \
+		-drop Hacl.UInt128,Hacl.Types $(KREMLIN_ARGS)
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
 
-all-ct: $(addsuffix -ct, $(API_FILES))
+all-ct:
+	$(FSTAR_CT) --lax $(API_FILES)
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDE_PATHS)
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^
 
 all-ver: $(addsuffix -verify, $(API_FILES))
 
@@ -54,7 +54,7 @@ all-lax: $(addsuffix -lax, $(API_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	-$(FSTARB) --record_hints $^
 
 all-hints: $(addsuffix -hints, $(API_FILES))
 
@@ -63,32 +63,48 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(API_FILES)))
 
 api: verify
 
-extract-c: extract-api extract-box extract-aead
+extract-c: box-c/NaCl.c aead-c/Chacha20Poly1305.c
 
+# Legacy, to be removed
 extract-api:
 	mkdir -p api-c
 	$(KRML) -tmpdir api-c NaCl.fst -verbose -skip-compilation \
-		$(addprefix -drop , 'Spec.\*' 'Hacl.Spec.\*' 'Hacl.Spe.\*' 'Hacl.Impl.\*' "Seq.\*" \
-				    Hacl.Constants Hacl.Endianness) \
+		-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\* \
+		-drop Hacl.Constants,Hacl.Endianness \
 		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box"
 
-extract-box:
+box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst NaCl.fst
 	mkdir -p box-c
-	$(KRML) -tmpdir box-c NaCl.fst -verbose -skip-compilation \
-		$(addprefix -drop , 'Spec.\*' 'Hacl.Spec.\*' 'Hacl.Spe.\*' 'Hacl.Impl.\*' "Seq.\*" \
-				    Hacl.Constants Hacl.Endianness) \
+	$(KRML) -tmpdir box-c NaCl.fst -skip-compilation \
+		-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\* \
+		-drop Hacl.Constants,Hacl.Endianness \
 		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad"
 
-
-extract-aead:
+aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Chacha20.fsti Chacha20Poly1305.fst
 	mkdir -p aead-c
-	$(KRML2) -tmpdir aead-c Chacha20Poly1305.fst -verbose \
-		-drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
-		-drop Hacl.UInt16 -drop Hacl.Types -drop 'Spec.\*' -drop 'Hacl.Spec.\*' -drop 'Hacl.Spe.\*' -drop 'Hacl.Impl.\*' \
-		-drop Hacl.Constants -drop "Hacl.Endianness" -drop 'Combinators' \
-		-drop "Hacl.Bignum.\*" -drop "Hacl.Spe.\*" -drop "Hacl.Impl.\*" -drop "Hacl.Standalone.\*" \
+	$(KRML2) -tmpdir aead-c Chacha20Poly1305.fst \
+		-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide \
+		-drop Hacl.UInt16,Hacl.Types,Spec.\*,Hacl.Spec.\*,Hacl.Spe.\* \
+		-drop Hacl.Constants,Hacl.Endianness,Hacl.Bignum.\*,Hacl.Spe.\*,Seq.\*,Hacl.Impl.\* \
+		-drop AEAD_Poly1305_64,Chacha20 \
 		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
 		-add-include '"AEAD_Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs
+	# TODO: FIX FOR KREMLIN EXTRACTION ISSUE, CHECK WITH JP
+	$(SED) -i 's/(void \*)(uint8_t )0, //g' aead-c/Chacha20Poly1305.c
+
+count-line:
+	@echo "LOC for AEAD CHACHAPOLY"
+	cloc --force-lang=ocaml Chacha20Poly1305.fst
+	@echo "LOC for SECRETBOX"
+	cloc --force-lang=ocaml Hacl.SecretBox.ZeroPad.fst
+	@echo "LOC for BOX"
+	cloc --force-lang=ocaml Hacl.Box.ZeroPad.fst
 
 clean:
 	rm -rf api-c *~ *.exe *.graph *.o *.out aead-c box-c
+
+ifeq ($(UNAME),Darwin)
+  SED=gsed
+else
+  SED=sed
+endif

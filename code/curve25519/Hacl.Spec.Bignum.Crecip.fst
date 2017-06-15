@@ -200,6 +200,29 @@ let crecip_tot_3 t0_7 b''' a' =
   fmul_tot t0_12 a'
 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+
+val crecip_tot_3': t0_7:s_513 -> b''':s_513 -> a':s_513 -> Tot (s:s_513{
+  selem s = (L.exp ((L.exp (selem t0_7 *@ selem b''') (pow2 150 + pow2 50)) *@ selem b''') (pow2 2)) *@ selem a'
+  })
+#reset-options "--max_fuel 0 --z3rlimit 100"
+let crecip_tot_3' t0_7 b''' a' =
+  let c' = fmul_tot t0_7 b''' in
+  cut (selem c' = selem t0_7 *@ selem b''');
+  let t0_8 = fsquare_times_tot c' 100 in
+  lemma_exp_1 (selem c');
+  let t0_9 = fmul_tot t0_8 c' in
+  L.lemma_exp_add (selem c') (pow2 100) 1;
+  let t0_10 = fsquare_times_tot t0_9 50 in
+  L.lemma_exp_mul (selem c') (pow2 100 + 1) (pow2 50);
+  assert_norm(FStar.Mul.((pow2 100 + 1) * (pow2 50) = pow2 150 + pow2 50));
+  cut (selem t0_10 = (L.exp (selem t0_7 *@ selem b''') (pow2 150 + pow2 50)));
+  let t0_11 = fmul_tot t0_10 b''' in
+  cut (selem t0_11 = selem t0_10 *@ selem b''');
+  let t0_12 = fsquare_times_tot t0_11 2 in
+  fmul_tot t0_12 a'
+
+
 val lemma_crecip_tot_0: z:elem -> t0'':elem -> b':elem -> a':elem -> t0_7:elem -> b''':elem ->
   Lemma (requires (pow2 10 > pow2 5 /\
     t0'' = L.exp z (pow2 10 - pow2 5) /\
@@ -255,6 +278,20 @@ let lemma_crecip_tot_1 z a' t0_7 b''' r =
   assert_norm(FStar.Mul.((pow2 250 - 1) * pow2 5 = pow2 255 - 32));
   L.lemma_exp_add (z) (pow2 255 - 32) 11
 
+val lemma_crecip_tot_1': z:elem -> a':elem -> t0_7:elem -> b''':elem -> r:elem ->
+  Lemma (requires (pow2 100 > pow2 50
+    /\ t0_7 = L.exp z (pow2 100 - pow2 50) /\ b''' = L.exp z (pow2 50 - 1) /\ a' = L.exp z 2
+    /\ r = (L.exp ((L.exp (t0_7 *@ b''') (pow2 150 + pow2 50)) *@ b''') (pow2 2)) *@ a'))
+        (ensures (pow2 252 > 2 /\ r = L.exp z (pow2 252 - 2)))
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
+let lemma_crecip_tot_1' z a' t0_7 b''' r =
+  assert_norm(pow2 252 > 2);
+  lemma_crecip_tot_10 z t0_7 b''';
+  cut (r = (L.exp (L.exp (z) (pow2 250 - 1)) (pow2 2)) *@ a');
+  L.lemma_exp_mul (z) (pow2 250 - 1) (pow2 2);
+  assert_norm(FStar.Mul.((pow2 250 - 1) * pow2 2 = pow2 252 - 4));
+  L.lemma_exp_add (z) (pow2 252 - 4) 2
+
 
 val crecip_tot:
   z:s_513 -> Tot (s':s_513{selem s' = Spec.Curve25519.(selem z ** (pow2 255 - 21))})
@@ -267,5 +304,24 @@ let crecip_tot z =
   let r = crecip_tot_3 t0_7 b''' a' in
   lemma_crecip_tot_1 (selem z) (selem a') (selem t0_7) (selem b''') (selem r);
   L.lemma_exp_eq (selem z) (pow2 255 - 21);
+  r
+
+#reset-options "--max_fuel 0 --z3rlimit 50"
+
+val crecip_tot':
+  z:s_513 -> Tot (s':s_513{pow2 252 > 2 /\ selem s' = Spec.Curve25519.(selem z ** (pow2 252 - 2))})
+let crecip_tot' z =
+  assert_norm(pow2 252 > 2);
+  let t0'', b', a' = crecip_tot_1 z in
+  assert_norm(31 = pow2 5 - pow2 0);
+  assert_norm(pow2 0 == 1);
+  let t0_7, b''', a' = crecip_tot_2 t0'' b' a' in
+  lemma_crecip_tot_0 (selem z) (selem t0'') (selem b') (selem a') (selem t0_7) (selem b''');
+  lemma_exp_1 (selem z);
+  cut (selem z = L.exp (selem z) 1);
+  let a' = fsquare_times_tot z 1 in  // z^2
+  let r = crecip_tot_3' t0_7 b''' a' in
+  lemma_crecip_tot_1' (selem z) (selem a') (selem t0_7) (selem b''') (selem r);
+  L.lemma_exp_eq (selem z) (pow2 252 - 2);
   r
   

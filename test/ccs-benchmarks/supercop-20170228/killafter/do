@@ -1,0 +1,30 @@
+#!/bin/sh -e
+
+mkdir bin
+
+(
+  echo pg
+) | (
+  while read n
+  do
+    okabi | (
+      while read abi
+      do
+        okc-$abi | (
+          while read c
+          do
+            echo "=== `date` === Trying $n.c with $c..." >&2
+            rm -f killafter.c
+	    cp $n.c killafter.c || continue
+            $c -o killafter killafter.c || continue
+	    cp killafter bin/killafter
+            exit 0
+          done
+          exit 111
+        ) && exit 0
+      done
+      exit 111
+    ) && exit 0
+  done
+  exit 111
+)

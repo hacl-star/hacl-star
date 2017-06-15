@@ -24,7 +24,8 @@ let uint8_p = buffer H8.t
 
 type state = b:Buffer.buffer h32{length b = 16}
 
-private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
+private
+inline_for_extraction let ( <<< ) (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
@@ -57,17 +58,12 @@ val constant_setup:
   Stack unit
     (requires (fun h -> live h c))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1
-      /\ reveal_h32s (as_seq h1 c) == Seq.createL constants))
+      /\ reveal_h32s (as_seq h1 c) == Seq.Create.create_4 c0 c1 c2 c3))
 [@ "substitute"]
 let constant_setup st =
   constant_setup_ st;
   let h = ST.get() in
-  assert_norm (Seq.length (Seq.createL constants) = 4);
-  assert_norm(let s = (Seq.createL constants) in Seq.index s 0 = 0x61707865ul);
-  assert_norm(let s = (Seq.createL constants) in Seq.index s 1 = 0x3320646eul);
-  assert_norm(let s = (Seq.createL constants) in Seq.index s 2 = 0x79622d32ul);
-  assert_norm(let s = (Seq.createL constants) in Seq.index s 3 = 0x6b206574ul);
-  Seq.lemma_eq_intro (reveal_h32s (as_seq h st)) (Seq.createL constants)
+  Seq.lemma_eq_intro (reveal_h32s (as_seq h st)) (Seq.Create.create_4 c0 c1 c2 c3)
 
 
 [@ "substitute"]
@@ -96,8 +92,7 @@ val ivsetup:
     (ensures  (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 iv
       /\ (let s = reveal_h32s (as_seq h1 st) in
          let iv = reveal_sbytes (as_seq h0 iv) in
-         s == Spec.Lib.uint32s_from_le 3 iv)
-    ))
+         s == Spec.Lib.uint32s_from_le 3 iv) ))
 [@ "substitute"]
 let ivsetup st iv =
   uint32s_from_le_bytes st iv 3ul
@@ -112,8 +107,7 @@ val ctrsetup:
     (requires (fun h -> live h st))
     (ensures  (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1
       /\ (let s = as_seq h1 st in
-         s == Spec.Lib.singleton (uint32_to_sint32 ctr))
-    ))
+         s == Spec.Lib.singleton (uint32_to_sint32 ctr)) ))
 [@ "substitute"]
 let ctrsetup st ctr =
   st.(0ul) <- uint32_to_sint32 ctr;
@@ -132,6 +126,7 @@ private let lemma_setup h st =
   Seq.lemma_eq_intro (Seq.slice s 13 16) (as_seq h (Buffer.sub st 13ul 3ul));
   Seq.lemma_eq_intro s (FStar.Seq.(slice s 0 4 @| slice s 4 12 @| slice s 12 13 @| slice s 13 16))
 
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@ "c_inline"]
 val setup:
@@ -173,7 +168,8 @@ let setup st k n c =
   no_upd_lemma_1 h3 h4 stn stcst;
   no_upd_lemma_1 h3 h4 stn stk;
   no_upd_lemma_1 h3 h4 stn stc;
-  lemma_setup h4 st
+  lemma_setup h4 st;
+  Seq.lemma_eq_intro (reveal_h32s (as_seq h4 st)) (Spec.setup (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) (U32.v c))
 
 
 let idx = a:U32.t{U32.v a < 16}
@@ -328,7 +324,6 @@ let copy_state st st' =
 
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
-
 
 type log_t_ = | MkLog: k:Spec.key -> n:Spec.nonce -> log_t_
 type log_t = Ghost.erased log_t_
@@ -661,7 +656,7 @@ val chacha20_counter_mode_blocks:
          match Ghost.reveal log with | MkLog k n ->
          o == Spec.CTR.counter_mode_blocks chacha20_ctx chacha20_cipher k n (UInt32.v ctr) plain)))
 #reset-options "--max_fuel 0 --z3rlimit 200"
-let rec chacha20_counter_mode_blocks output plain len log st ctr =
+let chacha20_counter_mode_blocks output plain len log st ctr =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ invariant log h1 st /\ modifies_2 output st h0 h1 /\ 0 <= i /\ i <= UInt32.v len

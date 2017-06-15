@@ -27,7 +27,7 @@ private let rotate (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 [@ "c_inline"]
 val setup:
@@ -68,7 +68,7 @@ let setup st k n =
   pop_frame()
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 100"
 
 let op_String_Access h (b:uint8_p{live h b}) = reveal_sbytes (as_seq h b)
 

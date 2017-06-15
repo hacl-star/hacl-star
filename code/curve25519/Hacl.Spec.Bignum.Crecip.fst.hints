@@ -1,5 +1,5 @@
 [
-  "Jhd∏Yh[.\nèê”’…XM",
+  "˛ì\"à\u001bTÕ¿¨ë±\fº¸’˘",
   [
     [
       "Hacl.Spec.Bignum.Crecip.lemma_53_is_5413",
@@ -507,30 +507,40 @@
       1,
       [
         "@MaxIFuel_assumption",
+        "@fuel_correspondence_Hacl.Spec.Bignum.Fsquare.fsquare_times_tot.fuel_instrumented",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.UInt64.t", "equation_Hacl.Bignum.Constants.len",
+        "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.len",
+        "equation_Hacl.Bignum.Parameters.limb",
         "equation_Hacl.Bignum.Parameters.prime",
         "equation_Hacl.Bignum.Parameters.seqelem",
+        "equation_Hacl.Spec.Bignum.Crecip.fmul_tot",
         "equation_Hacl.Spec.Bignum.Crecip.s_513",
         "equation_Hacl.Spec.Bignum.fmul",
-        "equation_Hacl.Spec.Bignum.op_Star_At", "equation_Prims.nat",
+        "equation_Hacl.Spec.Bignum.op_Star_At",
+        "equation_Hacl.Spec.Bignum.selem", "equation_Hacl.UInt64.t",
         "equation_Prims.pos", "equation_Spec.Curve25519.fmul",
         "equation_Spec.Curve25519.op_Star_At",
-        "equation_Spec.Curve25519.prime", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_Prims.Mktuple3__1", "proj_equation_Prims.Mktuple3__2",
-        "proj_equation_Prims.Mktuple3__3",
+        "equation_Spec.Curve25519.prime", "kinding_FStar.UInt64.t_@tok",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_FStar.Pervasives.Mktuple3__1",
+        "proj_equation_FStar.Pervasives.Mktuple3__2",
+        "proj_equation_FStar.Pervasives.Mktuple3__3",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Prims.Mktuple3__1",
-        "projection_inverse_Prims.Mktuple3__2",
-        "projection_inverse_Prims.Mktuple3__3",
+        "projection_inverse_FStar.Pervasives.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Mktuple3__3",
+        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_0031c7612656581c89f92512381c358f",
         "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_6f875a92ca6fad82af677f4b946debe6",
         "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_9ccff8e8f7b284556b7e8885f4f6080c",
         "refinement_interpretation_Hacl.Spec.Bignum_Tm_refine_9dc59c9e53c773c6b5b00a6e6d67aca8",
         "refinement_interpretation_Hacl.Spec.EC.AddAndDouble_Tm_refine_8ed80e5754ec40c80bc8e499121644eb",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_FStar.Seq.Base.length", "typing_Prims.pow2"
       ],
       0
     ],
@@ -770,6 +780,7 @@
       1,
       [
         "@MaxIFuel_assumption",
+        "@fuel_correspondence_Hacl.Spec.Bignum.Fsquare.fsquare_times_tot.fuel_instrumented",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "equation_FStar.Mul.op_Star", "equation_Hacl.Bignum.Constants.prime",
         "equation_Hacl.Bignum.Parameters.prime",
@@ -777,17 +788,19 @@
         "equation_Hacl.Spec.Bignum.Crecip.fmul_tot",
         "equation_Hacl.Spec.Bignum.Crecip.s_513",
         "equation_Hacl.Spec.Bignum.fmul",
-        "equation_Hacl.Spec.Bignum.op_Star_At", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.Curve25519.fmul",
+        "equation_Hacl.Spec.Bignum.op_Star_At",
+        "equation_Hacl.Spec.Bignum.selem", "equation_Prims.pos",
+        "equation_Spec.Curve25519.fmul",
         "equation_Spec.Curve25519.op_Star_At",
-        "equation_Spec.Curve25519.prime", "int_inversion", "int_typing",
+        "equation_Spec.Curve25519.prime", "int_inversion",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "proj_equation_Prims.Mktuple3__1", "proj_equation_Prims.Mktuple3__2",
-        "proj_equation_Prims.Mktuple3__3",
+        "proj_equation_FStar.Pervasives.Mktuple3__1",
+        "proj_equation_FStar.Pervasives.Mktuple3__2",
+        "proj_equation_FStar.Pervasives.Mktuple3__3",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Prims.Mktuple3__1",
-        "projection_inverse_Prims.Mktuple3__2",
-        "projection_inverse_Prims.Mktuple3__3",
+        "projection_inverse_FStar.Pervasives.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Mktuple3__3",
         "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_105a2003e6ea30506275d46f92db701c",
         "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_6cf3aef334e5772908fdcd9c2151b0d3",
         "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_c745131869da6921cc46a3d3b3698f62",
@@ -795,9 +808,8 @@
         "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_fd70e080ae45d2ba64950334700b1ad5",
         "refinement_interpretation_Hacl.Spec.Bignum_Tm_refine_9dc59c9e53c773c6b5b00a6e6d67aca8",
         "refinement_interpretation_Hacl.Spec.EC.AddAndDouble_Tm_refine_8ed80e5754ec40c80bc8e499121644eb",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
-        "typing_Hacl.Spec.Bignum.Crecip.fmul_tot", "typing_Prims.pow2"
+        "typing_Hacl.Spec.Bignum.Crecip.fmul_tot"
       ],
       0
     ],
@@ -1048,6 +1060,115 @@
     ],
     [
       "Hacl.Spec.Bignum.Crecip.crecip_tot_3",
+      7,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Hacl.Spec.Bignum.elem",
+        "haseqHacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot_3'",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Hacl.Spec.Bignum.elem",
+        "haseqHacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot_3'",
+      2,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime", "equation_Prims.pos",
+        "equation_Spec.Curve25519.prime", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot_3'",
+      3,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Mul.op_Star", "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Hacl.Bignum.Parameters.seqelem",
+        "equation_Hacl.Spec.Bignum.Crecip.fmul_tot",
+        "equation_Hacl.Spec.Bignum.Crecip.s_513",
+        "equation_Hacl.Spec.Bignum.fmul",
+        "equation_Hacl.Spec.Bignum.op_Star_At", "equation_Prims.pos",
+        "equation_Spec.Curve25519.fmul",
+        "equation_Spec.Curve25519.op_Star_At",
+        "equation_Spec.Curve25519.prime", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_5b5c552b467f6856e813df07bc2014bb",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_6f875a92ca6fad82af677f4b946debe6",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_c745131869da6921cc46a3d3b3698f62",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_ce00b3ddb63de9c5696bc8f007697b32",
+        "refinement_interpretation_Hacl.Spec.Bignum_Tm_refine_9dc59c9e53c773c6b5b00a6e6d67aca8",
+        "refinement_interpretation_Hacl.Spec.EC.AddAndDouble_Tm_refine_8ed80e5754ec40c80bc8e499121644eb",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Hacl.Spec.Bignum.Crecip.fmul_tot"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot_3'",
+      4,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Hacl.Spec.Bignum.elem",
+        "haseqHacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot_3'",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot_3'",
+      6,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Spec.Curve25519.prime",
+        "haseqHacl.Spec.Bignum.Crecip_Tm_refine_6e0a471ca00a9d33dee16d3ff819ec82"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot_3'",
       7,
       0,
       1,
@@ -1584,6 +1705,141 @@
       0
     ],
     [
+      "Hacl.Spec.Bignum.Crecip.lemma_crecip_tot_1'",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Spec.Curve25519.prime",
+        "haseqHacl.Spec.Bignum.Crecip_Tm_refine_6e0a471ca00a9d33dee16d3ff819ec82"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.lemma_crecip_tot_1'",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Spec.Curve25519.prime",
+        "haseqHacl.Spec.Bignum.Crecip_Tm_refine_6e0a471ca00a9d33dee16d3ff819ec82"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.lemma_crecip_tot_1'",
+      3,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Spec.Curve25519.prime",
+        "haseqHacl.Spec.Bignum.Crecip_Tm_refine_6e0a471ca00a9d33dee16d3ff819ec82"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.lemma_crecip_tot_1'",
+      4,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Hacl.Spec.Bignum.elem",
+        "haseqHacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.lemma_crecip_tot_1'",
+      5,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Spec.Curve25519.prime",
+        "haseqHacl.Spec.Bignum.Crecip_Tm_refine_6e0a471ca00a9d33dee16d3ff819ec82"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.lemma_crecip_tot_1'",
+      6,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Hacl.Spec.Bignum.elem", "equation_Prims.pos",
+        "equation_Spec.Curve25519.prime", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Hacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.lemma_crecip_tot_1'",
+      7,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Hacl.Spec.Bignum.Crecip.Lemmas.exp.fuel_instrumented",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Mul.op_Star", "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Hacl.Spec.Bignum.elem", "equation_Hacl.Spec.Bignum.fmul",
+        "equation_Hacl.Spec.Bignum.op_Star_At", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.Curve25519.fmul",
+        "equation_Spec.Curve25519.op_Star_At",
+        "equation_Spec.Curve25519.prime", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Hacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Prims.pow2"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.lemma_crecip_tot_1'",
+      8,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Hacl.Spec.Bignum.elem",
+        "haseqHacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.lemma_crecip_tot_1'",
+      9,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
       "Hacl.Spec.Bignum.Crecip.crecip_tot",
       1,
       0,
@@ -1630,14 +1886,15 @@
         "equation_Hacl.Spec.Bignum.Crecip.crecip_tot_3",
         "equation_Hacl.Spec.Bignum.Crecip.s_513",
         "equation_Spec.Curve25519.prime", "primitive_Prims.op_Subtraction",
-        "proj_equation_Prims.Mktuple3__1", "proj_equation_Prims.Mktuple3__2",
-        "proj_equation_Prims.Mktuple3__3",
+        "proj_equation_FStar.Pervasives.Mktuple3__1",
+        "proj_equation_FStar.Pervasives.Mktuple3__2",
+        "proj_equation_FStar.Pervasives.Mktuple3__3",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Prims.Mktuple3__1",
-        "projection_inverse_Prims.Mktuple3__2",
-        "projection_inverse_Prims.Mktuple3__3",
-        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_055b14e6a0edb0b21992bd39d52b1b4c",
-        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_2e131eba11abdfe8cdaa9a709c97fa63",
+        "projection_inverse_FStar.Pervasives.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Mktuple3__3",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_6154a256324cc7b9b44f705f0871cc3d",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_c27e82e572f2407ad8a62d6bdb447a95",
         "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_ee4682213af2fc5a35db58b91448db66",
         "refinement_interpretation_Hacl.Spec.EC.AddAndDouble_Tm_refine_8ed80e5754ec40c80bc8e499121644eb",
         "typing_Hacl.Spec.Bignum.Crecip.crecip_tot_2",
@@ -1651,6 +1908,90 @@
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot'",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Spec.Curve25519.prime",
+        "haseqHacl.Spec.Bignum.Crecip_Tm_refine_6e0a471ca00a9d33dee16d3ff819ec82"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot'",
+      2,
+      0,
+      1,
+      [
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Spec.Curve25519.prime", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot'",
+      3,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Hacl.Spec.Bignum.Fsquare.fsquare_times_tot.fuel_instrumented",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Hacl.Bignum.Parameters.seqelem",
+        "equation_Hacl.Spec.Bignum.Crecip.crecip_tot_2",
+        "equation_Hacl.Spec.Bignum.Crecip.crecip_tot_3_",
+        "equation_Hacl.Spec.Bignum.Crecip.s_513", "equation_Prims.nat",
+        "equation_Spec.Curve25519.prime", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_FStar.Pervasives.Mktuple3__1",
+        "proj_equation_FStar.Pervasives.Mktuple3__2",
+        "proj_equation_FStar.Pervasives.Mktuple3__3",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Mktuple3__3",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_6154a256324cc7b9b44f705f0871cc3d",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_9ccff8e8f7b284556b7e8885f4f6080c",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_c27e82e572f2407ad8a62d6bdb447a95",
+        "refinement_interpretation_Hacl.Spec.Bignum.Crecip_Tm_refine_dd2c6c865a09726a17c5646727f5634b",
+        "refinement_interpretation_Hacl.Spec.EC.AddAndDouble_Tm_refine_8ed80e5754ec40c80bc8e499121644eb",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_Hacl.Spec.Bignum.Crecip.crecip_tot_2"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot'",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Crecip.crecip_tot'",
+      5,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.prime",
+        "equation_Hacl.Bignum.Parameters.prime",
+        "equation_Spec.Curve25519.prime",
+        "haseqHacl.Spec.Bignum.Crecip_Tm_refine_6e0a471ca00a9d33dee16d3ff819ec82"
+      ],
       0
     ]
   ]

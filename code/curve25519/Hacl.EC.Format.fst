@@ -112,13 +112,14 @@ private let upd_5' output output0 output1 output2 output3 output4 =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 
-private val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack unit
+val fexpand: output:felem -> input:uint8_p{length input = 32} -> Stack unit
   (requires (fun h -> Buffer.live h output /\ Buffer.live h input))
   (ensures (fun h0 _ h1 -> Buffer.live h0 output /\ Buffer.live h0 input
     /\ Buffer.live h1 output /\ modifies_1 output h0 h1
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
+    /\ Hacl.Spec.EC.AddAndDouble.(bounds (as_seq h1 output) p51 p51 p51 p51 p51)
     /\ as_seq h1 output == Hacl.Spec.EC.Format.fexpand_spec (as_seq h0 input)))
-private let fexpand output input =
+let fexpand output input =
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h input) 0 8) (as_seq h (Buffer.sub input 0ul 8ul));
   Seq.lemma_eq_intro (Seq.slice (as_seq h input) 6 14) (as_seq h (Buffer.sub input 6ul 8ul));
@@ -328,6 +329,22 @@ private let fcontract_trim input =
   let a3' = a3 -^ (Hacl.Spec.EC.Format.p51m1 &^ mask) in
   let a4' = a4 -^ (Hacl.Spec.EC.Format.p51m1 &^ mask) in
   upd_5' input a0' a1' a2' a3' a4'
+
+
+val reduce:
+  input:felem ->
+  Stack unit
+    (requires (fun h -> Buffer.live h input /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h input)))
+    (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Buffer.live h1 input /\ modifies_1 input h0 h1 /\
+      Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 input) /\
+      (let p51 = Hacl.Spec.EC.Format.p51 in
+      Hacl.Spec.EC.AddAndDouble.bounds (as_seq h1 input) p51 p51 p51 p51 p51) /\
+      Hacl.Spec.Bignum.Bigint.seval (as_seq h1 input)
+      == Hacl.Spec.Bignum.Bigint.seval (as_seq h0 input) % (pow2 255 - 19)))
+let reduce out =
+  fcontract_first_carry_full out;
+  fcontract_second_carry_full out;
+  fcontract_trim out
 
 
 private 

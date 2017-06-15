@@ -78,16 +78,6 @@ noextract val lemma_poly1305_blocks_spec_1
 noextract let lemma_poly1305_blocks_spec_1 st m len =
   lemma_poly1305_blocks_spec_1_ st m len
 
-  (* assert(false) *)
-  (* let block = Seq.slice m 0 16 in *)
-  (*  let m'    = Seq.slice m 16 (Seq.length m) in *)
-  (*  let st'   = poly1305_update_spec st block in *)
-  (*  cut (Seq.length m' = 16*(U64.v len - 1) /\ invariant st'); admit() *)
-
-
-(* open Hacl.Spe.Poly1305_64 *)
-(* open Hacl.Impl.Poly1305_64 *)
-
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 

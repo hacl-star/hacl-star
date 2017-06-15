@@ -14,7 +14,6 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
-#include "tmp/Prims.h"
 #include "tmp/Crypto_Indexing.h"
 #include "tmp/Crypto_Symmetric_Bytes.h"
 #include "tmp/Crypto_Symmetric_MAC.h"
