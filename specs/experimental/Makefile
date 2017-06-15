@@ -73,7 +73,7 @@ rsa.exe: Spec.RSA.fst
 	mkdir -p rsa-spec
 	$(FSTAR) $(ARGS) --odir rsa-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> rsa-spec/Spec_RSA.ml
-	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES)  $(addprefix rsa-spec/, $(EXTRACTED)) rsa-spec/Spec_Loops.ml rsa-spec/Spec_Lib.ml rsa-spec/Spec_SHA2.ml rsa-spec/Spec_RSA.ml -o rsa.exe
+	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES)  $(addprefix rsa-spec/, $(EXTRACTED)) rsa-spec/Spec_Loops.ml rsa-spec/Spec_Lib.ml rsa-spec/Seq_Create.ml rsa-spec/Spec_SHA256.ml rsa-spec/Spec_RSA.ml -o rsa.exe
 	./rsa.exe
 	
 clean:
