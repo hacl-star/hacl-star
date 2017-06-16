@@ -48,7 +48,13 @@ x25519-specific-ci:
 experimental-ci:
 	$(MAKE) -C experimental all-ci
 
-ci: $(addsuffix -ci, salsa-family api ed25519 bignum poly1305-specific x25519-specific experimental)
+hash-ci:
+	$(MAKE) -C hash all-ci
+
+hmac-ci:
+	$(MAKE) -C hmac all-ci
+
+ci: $(addsuffix -ci, hash salsa-family api ed25519 bignum poly1305-specific x25519-specific experimental)
 
 clean:
 	rm -rf *~ *.exe *.out

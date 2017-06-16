@@ -102,7 +102,7 @@ let test_2a () =
     0x21uy; 0xfduy; 0xb7uy; 0x11uy; 0x14uy; 0xbeuy; 0x07uy; 0x43uy;
     0x4cuy; 0x0cuy; 0xc7uy; 0xbfuy; 0x63uy; 0xf6uy; 0xe1uy; 0xdauy;
     0x27uy; 0x4euy; 0xdeuy; 0xbfuy; 0xe7uy; 0x6fuy; 0x65uy; 0xfbuy;
-    0xd5uy; 0x1auy; 0xd2uy; 0xf1uy; 0x48uy; 0x98uy; 0xb9uy; 0x5buy    
+    0xd5uy; 0x1auy; 0xd2uy; 0xf1uy; 0x48uy; 0x98uy; 0xb9uy; 0x5buy
   ] in
 
   (* Allocate memory for state *)
@@ -230,7 +230,7 @@ let test_3b () =
     0xb0uy; 0x45uy; 0x5auy; 0x85uy; 0x20uy; 0xbcuy; 0x4euy; 0x6fuy;
     0x5fuy; 0xe9uy; 0x5buy; 0x1fuy; 0xe3uy; 0xc8uy; 0x45uy; 0x2buy
   ] in
-  
+
   (* Call the hash function *)
   Hash.hash output plaintext plaintext_len;
 
@@ -379,18 +379,23 @@ let test_5 () =
 
 
 val test_6_loop:
-  plaintext:FStar.Buffer.buffer FStar.UInt8.t ->
   state:FStar.Buffer.buffer FStar.UInt64.t ->
-  max:FStar.UInt32.t ->
-  idx:FStar.UInt32.t ->
+  plaintext:FStar.Buffer.buffer FStar.UInt8.t ->
   ST unit
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
-let rec test_6_loop plaintext state max idx =
-  if (idx =^ max) then ()
-  else (
-    Hash.update state plaintext;
-    test_6_loop plaintext state max (idx +^ 1ul))
+let test_6_loop state plaintext =
+  let inv (h1: HyperStack.mem) (i: nat) : Type0 =
+    live h1 state /\ i <= v 8388607ul
+  in
+  let f' (t:FStar.UInt32.t) :
+    Stack unit
+      (requires (fun h -> True))
+      (ensures (fun h_1 _ h_2 -> True))
+    =
+    Hash.update state plaintext
+  in
+  C.Loops.for 0ul 8388607ul inv f'
 
 
 val test_6: unit -> ST unit
@@ -430,7 +435,7 @@ let test_6 () =
     0xb5uy; 0xe5uy; 0xc0uy; 0x2auy; 0x3cuy; 0x5cuy; 0xb7uy; 0x1buy;
     0x5fuy; 0x63uy; 0xfbuy; 0x79uy; 0x34uy; 0x58uy; 0xd8uy; 0xfduy;
     0xaeuy; 0x59uy; 0x9cuy; 0x8cuy; 0xd8uy; 0x88uy; 0x49uy; 0x43uy;
-    0xc0uy; 0x4fuy; 0x11uy; 0xb3uy; 0x1buy; 0x89uy; 0xf0uy; 0x23uy; 
+    0xc0uy; 0x4fuy; 0x11uy; 0xb3uy; 0x1buy; 0x89uy; 0xf0uy; 0x23uy;
   ] in
 
   (* Allocate memory for state *)
@@ -439,7 +444,7 @@ let test_6 () =
   (* initialize the hash state *)
   Hash.init state;
 
-  test_6_loop plaintext state 8388607ul 0ul;
+  test_6_loop state plaintext;
 
   let rem_len = UInt32.rem (128ul *%^ 8388607ul) Hash.size_block in
   Hash.update_last state plaintext (FStar.Int.Cast.uint32_to_uint64 plaintext_len);

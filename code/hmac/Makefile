@@ -29,23 +29,23 @@ HMAC_SHA2_FILES = Hacl.HMAC.SHA2_256.fst
 
 
 # Full typechecking against the transparent integer interface
-%.fst-verify: %.fst
+%.fst-ver: %.fst
 	$(FSTARB) $^
 
-%.fsti-verify: %.fsti
+%.fsti-ver: %.fsti
 	$(FSTARB) $^
 
-
-# CI
-all-ci: test
-# all-ci: $(addsuffix -verify, $(HMAC_SHA2_FILES)) This is too costly for the CI
-
+# Verification
+all-ver: $(addsuffix -ver, $(HMAC_SHA2_FILES))
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR_CT) --lax $^
 
 all-ct: $(addsuffix -ct, $(HMAC_SHA2_FILES))
+
+# CI
+all-ci: all-ver
 
 extract-c: hmac-c/HMAC_SHA2_256.c
 
