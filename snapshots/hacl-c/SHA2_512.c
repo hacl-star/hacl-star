@@ -1,6 +1,6 @@
 #include "SHA2_512.h"
 
-void
+static void
 Hacl_Hash_Lib_LoadStore_uint32s_from_be_bytes(uint32_t *output, uint8_t *input, uint32_t len)
 {
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
@@ -11,7 +11,7 @@ Hacl_Hash_Lib_LoadStore_uint32s_from_be_bytes(uint32_t *output, uint8_t *input, 
   }
 }
 
-void
+static void
 Hacl_Hash_Lib_LoadStore_uint32s_to_be_bytes(uint8_t *output, uint32_t *input, uint32_t len)
 {
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
@@ -22,7 +22,7 @@ Hacl_Hash_Lib_LoadStore_uint32s_to_be_bytes(uint8_t *output, uint32_t *input, ui
   }
 }
 
-void
+static void
 Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(uint64_t *output, uint8_t *input, uint32_t len)
 {
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
@@ -33,7 +33,7 @@ Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(uint64_t *output, uint8_t *input, 
   }
 }
 
-void
+static void
 Hacl_Hash_Lib_LoadStore_uint64s_to_be_bytes(uint8_t *output, uint64_t *input, uint32_t len)
 {
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)

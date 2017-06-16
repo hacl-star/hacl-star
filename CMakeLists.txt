@@ -13,10 +13,16 @@ include_directories($ENV{KREMLIN_HOME}/kremlib ./snapshots/hacl-c ./snapshots/ha
 set(SOURCE_FILES_VERIFIED
    snapshots/hacl-c/kremlib.c
    snapshots/hacl-c/Hacl_Policies.c
-   snapshots/hacl-c/Salsa20.c
-   snapshots/hacl-c/Curve25519.c
+   snapshots/hacl-c/AEAD_Poly1305_64.c
    snapshots/hacl-c/Chacha20.c
+   snapshots/hacl-c/Chacha20Poly1305.c
+   snapshots/hacl-c/Curve25519.c
+   snapshots/hacl-c/Ed25519.c
    snapshots/hacl-c/Poly1305_64.c
+   snapshots/hacl-c/SHA2_256.c
+   snapshots/hacl-c/SHA2_384.c
+   snapshots/hacl-c/SHA2_512.c
+   snapshots/hacl-c/Salsa20.c
    snapshots/hacl-c/NaCl.c)
 
 # Experimental Files

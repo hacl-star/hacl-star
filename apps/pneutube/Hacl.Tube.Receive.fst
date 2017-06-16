@@ -66,7 +66,7 @@ let get_fh_stat fh = fh.stat
 module HS = FStar.HyperStack
 module HH = FStar.HyperHeap
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --z3rlimit 500"
 
 val file_recv_loop_2_lt_blocksize:
   fb:fh_ref ->
@@ -119,7 +119,7 @@ let file_recv_loop_2_lt_blocksize fb connb state mut_state seqno len =
     | SocketError -> (* TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); *)SocketError)
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
+#reset-options "--max_fuel 0 --z3rlimit 1000"
 
 val file_recv_loop_2:
   fb:fh_ref ->
