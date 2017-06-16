@@ -54,7 +54,7 @@ hash-ci:
 hmac-ci:
 	$(MAKE) -C hmac all-ci
 
-ci: hash-ci
+ci: $(addsuffix -ci, hash salsa-family api ed25519 bignum poly1305-specific x25519-specific experimental)
 
 clean:
 	rm -rf *~ *.exe *.out
