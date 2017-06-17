@@ -18,27 +18,32 @@
 //   limitations under the License.
 //
 
-module Hacl.Constants
+module Hacl.Hash
 
-(* Type abbreviations *)
-type u8  = FStar.UInt8.t
-type u32 = FStar.UInt32.t
-type u64 = FStar.UInt64.t
+open FStar.Buffer
+open FStar.ST
+open Hacl.Cast
+open Hacl.Constants
 
-type h8  = Hacl.UInt8.t
-type h32  = Hacl.UInt32.t
-type h64  = Hacl.UInt64.t
 
-type uint8_p = FStar.Buffer.buffer h8
+(* Module abbreviations *)
+module HS  = FStar.HyperStack
+module B   = FStar.Buffer
+module U8  = FStar.UInt8
+module U32 = FStar.UInt32
+module U64 = FStar.UInt64
 
-(* Size constants (for specifications) *)
-let crypto_box_NONCEBYTES     = 24
-let crypto_box_PUBLICKEYBYTES = 32
-let crypto_box_SECRETKEYBYTES = 32
-let crypto_box_MACBYTES       = 16
 
-let crypto_secretbox_NONCEBYTES = 24
-let crypto_secretbox_KEYBYTES   = 32
-let crypto_secretbox_MACBYTES   = 16
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
-let crypto_hash_BYTES = 64
+val crypto_hash:
+  output:uint8_p{length output = crypto_hash_BYTES} ->
+  input:uint8_p{disjoint output input} ->
+  inlen:u32{U32.v inlen = length input} ->
+  Stack u32
+    (requires (fun h -> live h output /\ live h input))
+    (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1))
+
+let crypto_hash output input inlen =
+  Hacl.Hash.SHA2_512.hash output input inlen;
+  0ul

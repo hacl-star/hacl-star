@@ -4,28 +4,29 @@ API_FILES= \
 	Hacl.Constants.fst \
 	Chacha20Poly1305.fst \
 	Hacl.SecretBox.ZeroPad.fst \
-	Hacl.Box.ZeroPad.fst
+	Hacl.Box.ZeroPad.fst \
+	Hacl.Hash.fst
 
 FSTAR_INCLUDE_PATHS=--include $(FSTAR_HOME)/ulib/hyperstack --include ../lib/kremlin --include ../../specs --include $(FSTAR_HOME)/../kremlin/kremlib
 
 FSTARB=$(FSTAR_BASE) \
 		--include ../lib/kremlin --include ../salsa-family --include $(HACL_HOME)/code/bignum --include ../curve25519 \
-		--include ../poly1305 --include ../../specs \
+		--include ../poly1305 --include ../hash --include ../../specs \
 		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
 
 FSTAR_CT=$(FSTAR_BASE) \
 		--include ../lib/ --include ../salsa-family --include ../bignum --include ../curve25519 \
-		--include ../poly1305 --include ../../specs \
+		--include ../poly1305 --include ../hash --include ../../specs \
 		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
-		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum  \
+		-I ../poly1305 -I ../hash -I ../../specs -I $(HACL_HOME)/code/bignum  \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
 		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
 		-drop Hacl.Types $(KREMLIN_ARGS)
 
 KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
-		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum \
+		-I ../poly1305 -I ../hash -I ../../specs -I $(HACL_HOME)/code/bignum \
 		-drop FStar,Hacl.Spec,Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64 \
 		-drop Hacl.UInt128,Hacl.Types $(KREMLIN_ARGS)
 
@@ -71,14 +72,14 @@ extract-api:
 	$(KRML) -tmpdir api-c NaCl.fst -verbose -skip-compilation \
 		-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\* \
 		-drop Hacl.Constants,Hacl.Endianness \
-		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box"
+		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box,Hacl.Hash"
 
-box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst NaCl.fst
+box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst Hacl.Hash.fst NaCl.fst
 	mkdir -p box-c
 	$(KRML) -tmpdir box-c NaCl.fst -skip-compilation \
 		-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\* \
 		-drop Hacl.Constants,Hacl.Endianness \
-		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad"
+		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad,Hacl.Hash"
 
 aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Chacha20.fsti Chacha20Poly1305.fst
 	mkdir -p aead-c
