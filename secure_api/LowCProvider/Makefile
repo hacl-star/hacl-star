@@ -59,7 +59,7 @@ tmp:
 %.cmx: %.ml
 	$(OCAMLOPT) -c $<
 
-LowCProvider.cmx: %.ml $(CORECRYPTO)/CoreCrypto.cmx
+LowCProvider.cmx: LowCProvider.ml $(CORECRYPTO)/CoreCrypto.cmx
 	$(OCAMLOPT) -c $<
 
 $(CORECRYPTO)/CoreCrypto.cmx: $(CORECRYPTO)/CoreCrypto.ml
