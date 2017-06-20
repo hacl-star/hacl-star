@@ -59,6 +59,9 @@ tmp:
 %.cmx: %.ml
 	$(OCAMLOPT) -c $<
 
+LowCProvider.cmx: %.ml $(CORECRYPTO)/CoreCrypto.cmx
+	$(OCAMLOPT) -c $<
+
 $(CORECRYPTO)/CoreCrypto.cmx: $(CORECRYPTO)/CoreCrypto.ml
 	$(MAKE) -C $(CORECRYPTO)
 
@@ -72,14 +75,13 @@ libllcrypto.a: tmp
 lowc_stub.o: libllcrypto.a
 	$(OCAMLOPT) $(CCOPTS) $(EXTRA_OPTS) $(KRML_INCLUDES) -c lowc_stub.c
 
-LowCProvider.cmxa: $(CORECRYPTO)/CoreCrypto.cmx lowc_stub.o LowCProvider.cmx
+LowCProvider.cmxa: lowc_stub.o LowCProvider.cmx
 	$(OCAMLMKLIB) -ocamloptflags "$(EXTRA_OPTS)" $(EXTRA_LIBS) $(CCLIBS) -o LowCProvider $^
 
 Tests.exe: LowCProvider.cmxa Tests.cmx
 	$(OCAMLOPT) $(EXTRA_OPTS) -I $(PLATFORM) -package batteries,zarith -linkpkg -o $@ libllcrypto.a lowc_stub.o CoreCrypto.cmxa LowCProvider.cmx Tests.cmx
 
 clean:
-	$(MAKE) -C $(PLATFORM) clean
 	$(MAKE) -C $(CORECRYPTO) clean
 	rm -fr tmp
 	rm -f Tests.exe *.[oa] *.so *.cm[ixoa] *.cmxa *.exe *.dll *.annot *~
