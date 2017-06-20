@@ -26,7 +26,7 @@ else
   ifeq ($(UNAME),Darwin)
     FPIC =
   else
-    FPIC = -ccopt -fPIC
+    FPIC =-fPIC
   endif
 endif
 

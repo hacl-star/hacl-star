@@ -1,18 +1,17 @@
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME=../..
+include ../../code/Makefile.include
 
+INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/api $(HACL_HOME)/code/curve25519 $(HACL_HOME)/specs $(HACL_HOME)/snapshots/hacl-c c_bindings
 
-KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/code/api \
-	-I $(HACL_HOME)/code/curve25519 -I $(HACL_HOME)/specs -I $(HACL_HOME)/snapshots/hacl-c \
-	-drop 'Prims' -drop 'Hacl.Constants' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' \
-	-drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'FStar' -drop 'Hacl.Cast' \
-	-ccopt '-Wno-pointer-sign' -ccopt "-D_GNU_SOURCE"
+INCLUDES=$(addprefix -I , $(INCLUDE_DIRS))
+KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
+KRML=$(KRML_BIN) $(KREMLIN_ARGS) $(INCLUDES) -tmpdir tube \
+	-drop Prims,Hacl.Constants,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,FStar,Hacl.Cast # -ccopt '-Wno-pointer-sign'
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/api \
-	--include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/snapshots/hacl-c \
-	--include c_bindings --include $(KREMLIN_HOME)/kremlib
+HINTS_ENABLED?=--use_hints
+FSTAR_INCLUDES=--include $(KREMLIN_HOME)/kremlib $(INCLUDE_DIRS)
+FSTARB=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(FSTAR_INCLUDES)
 
+TUBE_FILES=Hacl.Tube.Receive.fst Hacl.Tube.Send.fst
 
 debug:
 	gcc-6 -Wno-unused-but-set-variable -std=c11 -Wall -Werror -Wno-parentheses -Wno-unused-variable -g -O3 -fwrapv -I ../../code/lib/kremlin -I ../../code/api -I ../../code/curve25519 -I ../../snapshots/hacl-c -I c_bindings -I /home/jkz/dev/kremlin/kremlib -I tube -Wno-pointer-sign tube/Hacl_Types.o tube/Hacl_Policies.o tube/Box_Ideal.o tube/FileIO_Types.o tube/PaddedFileIO.c tube/SocketIO.c tube/Hacl_Tube_Send.c tube/Hacl_Tube_Receive.c tube/kremlib.o tube/tube.o tube/SocketIO_impl.o -D_GNU_SOURCE c_bindings/PaddedFileIO_impl.c -o tube-star.exe -lsodium -lhacl -L../../snapshots/hacl-c/
@@ -21,9 +20,7 @@ debug:
 	$(MAKE) -C $(HACL_HOME)/snapshots libhacl
 
 tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_impl.c Hacl.Tube.Send.fst Hacl.Tube.Receive.fst tube.c $(HACL_HOME)/snapshots/hacl-c/libhacl.so
-	mkdir -p tube
 	$(KRML) $(filter %.c %.fst, $^) \
-		-I c_bindings \
 		-drop Libsodium,Curve25519,Hacl.Types,NaCl,Spec.\*,Hacl.Spec.\* \
 		-bundle "Hacl.Tube.Send=Hacl.Tube.Send" \
 		-no-prefix Libsodium -add-include '<sodium.h>' -add-include '"testlib.h"' \
@@ -33,7 +30,12 @@ tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_
 tube-lax: Hacl.Tube.Receive.fst Hacl.Tube.Send.fst
 	$(FSTARB) --lax $^
 
-tube-ver: $(addsuffix -ver, Hacl.Tube.Send.fst Hacl.Tube.Receive.fst)
+%.fst-verify: %.fst
+	$(FSTARB) $^
+%.fsti-verify: %.fsti
+	$(FSTARB) $^
+
+all-ver: $(addsuffix -verify, $(TUBE_FILES))
 
 tube-test: tube-star.exe
 	mkdir -p send receive
