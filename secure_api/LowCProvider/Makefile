@@ -65,7 +65,7 @@ $(CORECRYPTO)/CoreCrypto.cmx: $(CORECRYPTO)/CoreCrypto.ml
 ../vale/asm/vale.a:
 	$(MAKE) -C ../vale/asm
 
-libllcrypto.a: tmp ../vale/asm/vale.a
+libllcrypto.a: tmp
 	cp ../vale/asm/vale.a libllcrypto.a
 	$(AR) -cr libllcrypto.a tmp/*.o
 

@@ -45,7 +45,7 @@ LowCProvider-tmp: vale/asm/vale.a
 		-skip-linking
 
 vale/asm/vale.a:
-	make -C vale/asm
+	$(MAKE) -C vale/asm
 
 tmp-%/out.krml: $(wildcard */*.fst)
 	$(KRML) test/test_$*/Crypto.Indexing.fst \
