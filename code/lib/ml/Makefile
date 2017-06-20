@@ -1,5 +1,5 @@
 FSTAR_HOME?=../../../dependencies/FStar
-
+FSTAR_LIB?=$(FSTAR_HOME)/ulib/ml
 FILES=Hacl_UInt32.mli Hacl_UInt32.ml Hacl_UInt64.mli Hacl_UInt64.ml Hacl_UInt8.mli Hacl_UInt8.ml  Hacl_UInt128.mli Hacl_UInt128.ml Hacl_Cast.ml
 FILESX=Hacl_UInt32.cmx Hacl_UInt64.cmx Hacl_UInt8.cmx  Hacl_UInt128.cmx Hacl_Cast.cmx
 
@@ -13,7 +13,7 @@ include ../Makefile.include
 hacllib.cmxa:
 	$(MAKE) -C $(FSTAR_LIB)
 	$(OCAMLOPT) -thread -w -58 -c $(FILES)
-	$(OCAMLOPT) -a $(FILESX) -o hacllib.cmxa
+	$(OCAMLOPT_BARE) -a $(FILESX) -o hacllib.cmxa
 
 clean:
 	$(MAKE) -C $(ULIB_ML) clean
