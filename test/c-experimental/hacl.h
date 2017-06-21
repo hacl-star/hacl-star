@@ -1,4 +1,25 @@
 #include "kremlib.h"
+#include "Curve25519.h"
+#include "Chacha20.h"
+#include "Salsa20.h"
+#define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_poly
+#include "Poly1305_64.h"
+#undef Hacl_Impl_Poly1305_64_State_poly1305_state
+#define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_aead
+#include "Chacha20Poly1305.h"
+#undef Hacl_Impl_Poly1305_64_State_poly1305_state
+
+#define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_ed
+#include "Ed25519.h"
+#undef K___uint32_t_uint8_t_
+#define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_sha256
+#include "SHA2_256.h"
+#undef K___uint32_t_uint8_t_
+#define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_sha512
+#include "SHA2_512.h"
+#undef K___uint32_t_uint8_t_
+#include "NaCl.h"
+
 
 /* API file for HACL* cryptographic primitives */
 
@@ -239,29 +260,6 @@ NaCl_crypto_box_open_detached(
 );
 
 uint32_t
-crypto_box_easy_afternm(uint8_t *c, uint8_t *m, uint64_t mlen, uint8_t *n1, uint8_t *k1);
-
-uint32_t
-crypto_box_easy(
-  uint8_t *c,
-  uint8_t *m,
-  uint64_t mlen,
-  uint8_t *n1,
-  uint8_t *pk,
-  uint8_t *sk
-);
-
-uint32_t
-crypto_box_open_easy(
-  uint8_t *m,
-  uint8_t *c,
-  uint64_t mlen,
-  uint8_t *n1,
-  uint8_t *pk,
-  uint8_t *sk
-);
-
-uint32_t
 crypto_box_open_detached_afternm(
   uint8_t *m,
   uint8_t *c,
@@ -271,20 +269,24 @@ crypto_box_open_detached_afternm(
   uint8_t *k1
 );
 
-uint32_t
-crypto_box_open_easy_afternm(
-  uint8_t *m,
-  uint8_t *c,
-  uint64_t mlen,
-  uint8_t *n1,
-  uint8_t *k1
-);
+int
+crypto_sign(
+            uint8_t *signed_msg,
+            uint64_t *signed_len,
+            uint8_t *msg,
+            uint64_t msg_len,
+            uint8_t *sk
+            );
 
-/* 
-   LibSodium specific AEAD curve25519xchacha20poly1305 construction
- */
-crypto_box_curve25519xchacha20poly1305_beforenm
-crypto_box_curve25519xchacha20poly1305_easy
-crypto_box_curve25519xchacha20poly1305_easy_afternm
-crypto_box_curve25519xchacha20poly1305_open_easy
-crypto_box_curve25519xchacha20poly1305_open_easy_afternm
+int crypto_sign_open(
+                     uint8_t *unsigned_msg,
+                     uint64_t *unsigned_msg_len,
+                     uint8_t *msg,
+                     uint64_t msg_len,
+                     uint8_t *pk
+                     );
+
+int crypto_sign_keypair(
+                        uint8_t pk[32],
+                        uint8_t sk[32]
+                        );
