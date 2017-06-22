@@ -84,6 +84,18 @@ bignum-hints:
 	mv ../bignum/*.hints ./bignum_hints
 specific-hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
+### CMW: Once we have an F* that supports --hint_info, the above can be replaced by the following:
+# # Hints regeneration
+# %.fst.hints: %.fst
+# 	-$(FSTARB) --record_hints $^
+# %.fst.bignum.hints: %.fst
+# 	-$(FSTARB) --hint_file $(subst .bignum,,$(@F)) --record_hints $^
+
+# bignum-hints: $(addsuffix .bignum.hints, $(BIGNUM))
+# specific-hints: $(addsuffix .hints, $(POLY1305_SPECIFIC))
+# all-hints: bignum-hints specific-hints
+### CMW: end
+
 # For CI, all modules restricted from incomplete or slow ones
 all-ci2: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_FILES)))
 all-ci:
