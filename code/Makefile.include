@@ -5,7 +5,6 @@ KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME=../..
 HINTS_ENABLED?=--use_hints
 
-
 HACL_LIB=$(HACL_HOME)/code/lib
 HACL_FILES=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Types.fst Hacl.Policies.fst
 HACL_LIB_FILES=$(addprefix $(HACL_LIB)/, $(HACL_FILES))
@@ -35,16 +34,18 @@ endif
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 
-FSTAR_OPTIONS_VER=-fsopt $(HINTS_ENABLED) -skip-extraction
-FSTAR_OPTIONS_KREMLIN=
-FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
+# FSTAR_OPTIONS_VER=-fsopt $(HINTS_ENABLED) -skip-extraction
+# FSTAR_OPTIONS_KREMLIN=
+# FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
 
-ifndef CLOUD_VERIFY
-  FSTAR_BASE=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS)
+FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs
+
+ifndef CLOUD_VERIFY  
+  FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
 else
   KREMLIN_HOME=\$$H/kremlin
   CURRENT_SUBDIR:=$(subst $(abspath $(HACL_HOME))/,,$(abspath $(shell pwd)))
-  FSTAR_BASE=/mnt/f/dev/sec/FStar-cloud-verify/bin/fabc-make.exe add -i $(HACL_HOME)/tmpids -d '$(CURRENT_SUBDIR)' $(FABC_EXTRA) -- \$$H/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS)
+  FSTAR=/mnt/f/dev/sec/FStar-cloud-verify/bin/fabc-make.exe add -i $(HACL_HOME)/tmpids -d '$(CURRENT_SUBDIR)' $(FABC_EXTRA) -- \$$H/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
 endif
 
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
@@ -62,10 +63,32 @@ import-kremlin:
 	@cp $(HACL_KREMLIN_FILES)) .
 
 %.fst-lax: %.fst
-	$(FSTAR) --lax $(FSTAR_INCLUDES) $^
+	$(FSTAR) --lax $^
+%.fsti-lax: %.fsti
+	$(FSTAR) --lax $^
 
-%.fst-ver: %.fst
-	$(FSTAR) $(addprefix -fsopt , $(FSTAR_OPTIONS_VER)) $(FSTAR_INCLUDES) --verify_module $(basename $(notdir $@)) $^
+# %.fst-ver: %.fst
+# 	$(FSTAR) $(addprefix -fsopt , $(FSTAR_OPTIONS_VER)) $(FSTAR_INCLUDES) --verify_module $(basename $(notdir $@)) $^
 
 %.fst-krml: %.fst
 	$(KREMLIN) $(KREMLIN_INCLUDES) $^
+
+%.fst-verify: %.fst
+	$(FSTAR) $^
+%.fsti-verify: %.fsti
+	$(FSTAR) $^
+
+%.fst.hints: %.fst
+	$(FSTAR) --record_hints $^
+%.fsti.hints: %.fsti
+	$(FSTAR) --record_hints $^
+
+# Custom verification targets for re-located hint files
+%.fst-reloc-verify: %.fst
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^
+%.fsti-reloc-verify: %.fsti
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^
+%.fst.reloc.hints: %.fst
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^
+%.fsti.reloc.hints: %.fsti
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^

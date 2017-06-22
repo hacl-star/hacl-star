@@ -33,7 +33,7 @@ poly1305-specific-hints:
 x25519-specific-hints:
 	$(MAKE) -C curve25519 specific-hints
 
-hints: $(addsuffix -hints, salsa-family api) bignum-hints poly1305-specific-hints x25519-specific-hints
+hints: $(addsuffix -hints, salsa-family api bignum poly1305-specific x25519-specific)
 
 bignum-ci:
 	$(MAKE) -C poly1305 bignum-ci

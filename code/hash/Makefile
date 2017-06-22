@@ -1,24 +1,5 @@
 include ../Makefile.include
 
-KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
-INCLUDES= -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
-  -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash
-KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
-  -drop Prims,FStar,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
-  -drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
-  -drop Hacl.Hash.SHA2_256.Lemmas,Hacl.Hash.SHA2_384.Lemmas,Hacl.Hash.SHA2_512.Lemmas \
-  $(KREMLIN_HOME)/kremlib/testlib.c \
-  -add-include '"testlib.h"' -ccopt -march=native
-
-
-FSTARB=$(FSTAR_BASE) \
-        --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
-        --include $(HACL_HOME)/specs
-
-FSTAR_CT=$(FSTAR_BASE) \
-        --include $(HACL_HOME)/code/lib  --include $(KREMLIN_HOME)/kremlib \
-        --include $(HACL_HOME)/specs
-
 # Files for verification
 SHA2_FILES = \
 	Hacl.Hash.Lib.LoadStore.fst \
@@ -30,24 +11,27 @@ SHA2_FILES = \
 	Hacl.Hash.SHA2_256.Lemmas.fst \
 	Hacl.Hash.SHA2_256.fst
 
-# Full typechecking against the transparent integer interface
-%.fst-ver: %.fst
-	$(FSTARB) $^
-
-%.fsti-ver: %.fsti
-	$(FSTARB) $^
-
-# CI
-all-ci: all-ver
-
-# Verification
-all-ver: $(addsuffix -ver, $(SHA2_FILES))
-
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
-	$(FSTAR_CT) --lax $^
+	$(FSTAR) --lax $^
 
 all-ct: $(addsuffix -ct, $(SHA2_FILES))
+
+verify: $(addsuffix -verify, $(SHA2_FILES))
+hints: $(addsuffix .hints, $(SHA2_FILES))
+all-ver: verify
+all-ci: verify
+all-hints: hints
+
+KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
+INCLUDES= -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
+  -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash
+KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
+  -drop Prims,FStar,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+  -drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
+  -drop Hacl.Hash.SHA2_256.Lemmas,Hacl.Hash.SHA2_384.Lemmas,Hacl.Hash.SHA2_512.Lemmas \
+  $(KREMLIN_HOME)/kremlib/testlib.c \
+  -add-include '"testlib.h"' -ccopt -march=native
 
 # Extraction
 extract-c: sha2-256-c/SHA2_256.c sha2-384-c/SHA2_384.c sha2-512-c/SHA2_512.c

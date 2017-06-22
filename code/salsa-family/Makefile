@@ -1,6 +1,5 @@
 include ../Makefile.include
 
-
 SALSA_FAMILY_FILES= \
 	Hacl.Lib.LoadStore32.fst \
 	Hacl.Lib.Create.fst \
@@ -22,56 +21,26 @@ SLOW=
 
 BROKEN=
 
-FSTARB=$(FSTAR_BASE) \
-		--include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
-		 --include $(HACL_HOME)/specs 
-
-FSTAR_CT=$(FSTAR_BASE) \
-		--include $(HACL_HOME)/code/lib --include $(KREMLIN_HOME)/kremlib \
-		 --include $(HACL_HOME)/specs
-
 KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs \
 	-drop FStar -drop Prims $(KREMLIN_HOME)/kremlib/testlib.c \
 	-add-include '"testlib.h"' -drop 'Hacl.UInt8' $(KREMLIN_ARGS) \
 	-drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
 	-drop 'Hacl.Endianness' -drop 'Hacl.Cast'
 
-# Lax typechecking against the restricted integer interface
-%.fst-ct: %.fst
-	$(FSTAR_CT) --lax $^
-%.fsti-ct: %.fsti
-	$(FSTAR_CT) --lax $^
-
 # Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
 all-ct:
-	$(FSTAR_CT) --lax --verify_all Chacha20.fst Salsa20.fst Chacha20.Vec128.fst
+	$(FSTAR) --lax --verify_all Chacha20.fst Salsa20.fst Chacha20.Vec128.fst
 
-# Full typechecking against the transparent integer interface
-%.fst-verify: %.fst
-	$(FSTARB) $^ --record_hints
-%.fsti-verify: %.fsti
-	$(FSTARB) $^ --record_hints
-
-all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
+verify: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
+all-ver: verify
 
 # For CI, all modules restricted from incomplete or slow ones
 all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SALSA_FAMILY_FILES)))
 
-# Minimal lax typechecking, pre-requisite to any extraction
-%.fst-lax: %.fst
-	$(FSTARB) --lax $^
-%.fsti-lax: %.fsti
-	$(FSTARB) --lax $^
-
 all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
-# Hints regeneration
-%.fst-hints: %.fst
-	-$(FSTARB) $^ --record_hints
-%.fsti-hints: %.fsti
-	-$(FSTARB) $^ --record_hints
-
-all-hints: $(addsuffix -hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES)))
+hints: $(addsuffix .hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES)))
+all-hints: hints
 
 chacha-c/Chacha20.c: Hacl.Lib.LoadStore32.fst Hacl.Lib.Create.fst Hacl.Impl.Xor.Lemmas.fst Hacl.Impl.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c

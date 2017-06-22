@@ -22,34 +22,20 @@ BIGNUM_FILES= \
 	Hacl.Bignum.Modulo.fsti \
 	Hacl.Bignum.Crecip.fsti \
 
-BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
+FSTAR_INCLUDES+=--include interfaces --include ../lib
 
 %.fst-ct: %.fst
-	$(FSTAR_BASE) --include interfaces --include ../lib --lax --include $(KREMLIN_HOME)/kremlib $^
+	$(FSTAR) --lax $^
 
 all-ct:
-	$(FSTAR_HOME)/bin/fstar.exe --include interfaces \
-		--include ../lib $^ --lax --include $(KREMLIN_HOME)/kremlib $(BIGNUM_FILES)
-
-%.fst-verify: %.fst
-	$(FSTAR_BASE) --include interfaces --include ../lib --include $(KREMLIN_HOME)/kremlib $^
+	$(FSTAR) $^ --lax $(BIGNUM_FILES)
 
 verify: $(addsuffix -verify, $(BIGNUM_FILES))
+hints: $(addsuffix .hints, $(BIGNUM_FILES))
 
 all-ci: verify
-
 all-ver: verify
-
-%-hints: %.fst
-	-$(FSTAR_BASE) --include interfaces --include ../lib --include $(KREMLIN_HOME)/kremlib --record_hints $^
-
-ALL_HINTS=$(addsuffix -hints, $(BIGNUM_MODULES))
-
-all-hints2: $(ALL_HINTS)
-all-hints:
-	cp ./bignum_hints/* .
-	$(MAKE) all-hints2
-	mv *.hints ./bignum_hints
+all-hints: hints
 
 count-line:
 	cloc --force-lang=ocaml $(BIGNUM_FILES)

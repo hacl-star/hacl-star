@@ -6,17 +6,7 @@ API_FILES= \
 	Hacl.SecretBox.ZeroPad.fst \
 	Hacl.Box.ZeroPad.fst
 
-FSTAR_INCLUDE_PATHS=--include ../lib/kremlin --include ../../specs --include $(FSTAR_HOME)/../kremlin/kremlib
-
-FSTARB=$(FSTAR_BASE) \
-		--include ../lib/kremlin --include ../salsa-family --include $(HACL_HOME)/code/bignum --include ../curve25519 \
-		--include ../poly1305 --include ../../specs \
-		--include $(KREMLIN_HOME)/kremlib 
-
-FSTAR_CT=$(FSTAR_BASE) \
-		--include ../lib/ --include ../salsa-family --include ../bignum --include ../curve25519 \
-		--include ../poly1305 --include ../../specs \
-		--include $(KREMLIN_HOME)/kremlib
+FSTAR_INCLUDES+=--include ../salsa-family --include $(HACL_HOME)/code/bignum --include ../curve25519 --include ../poly1305
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
 		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum  \
@@ -31,32 +21,22 @@ KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
-	$(FSTAR_CT) --lax $^
+	$(FSTAR) --lax $^
 
 all-ct:
-	$(FSTAR_CT) --lax $(API_FILES)
+	$(FSTAR) --lax $(API_FILES)
+
 # Parameter for interactive mode
 %.fst-in:
 	@echo $(OPTIONS) --hint_info \
-	$(FSTAR_INCLUDE_PATHS)
+	$(FSTAR_INCLUDES)
 
-# Full typechecking against the transparent integer interface
-%.fst-verify: %.fst
-	$(FSTARB) $^
-
-all-ver: $(addsuffix -verify, $(API_FILES))
-
-# Minimal lax typechecking, pre-requisite to any extraction
-%.fst-lax: %.fst
-	$(FSTARB) --lax $^
-
-all-lax: $(addsuffix -lax, $(API_FILES))
-
-# Hints regeneration
-%.fst-hints: %.fst
-	-$(FSTARB) --record_hints $^
-
-all-hints: $(addsuffix -hints, $(API_FILES))
+verify: $(addsuffix -verify, $(API_FILES))
+lax: $(addsuffix -lax, $(API_FILES))
+hints: $(addsuffix .hints, $(API_FILES))
+all-ver: verify
+all-lax: lax
+all-hints: hints
 
 # For CI, all modules restricted from incomplete or slow ones
 all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(API_FILES)))

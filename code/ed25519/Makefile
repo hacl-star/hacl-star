@@ -118,64 +118,30 @@ SLOW=
 # Files that still have errors
 TODO=
 
-ED25519_FILES= $(ED25519_SPECIFIC) # $(BIGNUM) 
+ED25519_FILES=$(ED25519_SPECIFIC) $(BIGNUM) 
 
-FSTARB=$(FSTAR_BASE) \
-		--include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
-		 --include $(HACL_HOME)/specs \
-		--include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/code/hash
-
-FSTAR_CT=$(FSTAR_BASE) \
-		--include $(HACL_HOME)/code/lib --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
-		--include $(HACL_HOME)/specs \
-		--include $(HACL_HOME)/code/curve25519  --include $(HACL_HOME)/code/hash
-
+FSTAR_INCLUDES+=--include $(HACL_HOME)/code/bignum --include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/code/hash
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
-	$(FSTAR_CT) --lax $^
+	$(FSTAR) --lax $^
 %.fsti-ct: %.fsti
-	$(FSTAR_CT) --lax $^
+	$(FSTAR) --lax $^
 
 all-ct:
-	$(FSTAR_CT) --lax --verify_all Hacl.Impl.Ed25519.SecretToPublic.fst Hacl.Impl.Ed25519.Sign.fst 
+	$(FSTAR) --lax --verify_all Hacl.Impl.Ed25519.SecretToPublic.fst Hacl.Impl.Ed25519.Sign.fst 
 
-# Full typechecking against the transparent integer interface
-%.fst-verify: %.fst
-	$(FSTARB) $^
-%.fsti-verify: %.fsti
-	$(FSTARB) $^
-
-all-ver: $(addsuffix -verify, $(ED25519_FILES))
-
-# Minimal lax typechecking, pre-requisite to any extraction
-%.fst-lax: %.fst
-	$(FSTARB) --lax $^
-%.fsti-lax: %.fsti
-	$(FSTARB) --lax $^
-
-all-lax: $(addsuffix -lax, $(ED25519_FILES))
-
-# Hints regeneration
-%.fst-hints: %.fst
-	-$(FSTARB) $^
-%.fsti-hints: %.fsti
-	-$(FSTARB) $^
-
-all-hints2: $(addsuffix -hints, $(ED25519_FILES))
-
-all-hints:
-	cp ./bignum_hints/* ../bignum/
-	$(MAKE) all-hints2
-	mv ../bignum/*.hints ./bignum_hints
-bignum-hints:
-	cp bignum_hints/* ../bignum
-	$(MAKE) $(addsuffix -hints, $(BIGNUM))
-	mv ../bignum/*.hints ./bignum_hints
-specific-hints: $(addsuffix -hints, $(ED25519_SPECIFIC))
-
-all-ci:specific-ci
+verify: $(addsuffix -verify, $(ED25519_FILES))
+lax: $(addsuffix -lax, $(ED25519_FILES))
 specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_SPECIFIC)))
+bignum-hints: $(addsuffix .reloc.hints, $(BIGNUM))
+specific-hints: $(addsuffix .hints, $(ED25519_SPECIFIC))
+hints: bignum-hints specific-hints
+
+all-ver: verify
+all-lax: lax 
+all-ci: specific-ci
+all-hints: hints
 
 KEMLIN_SKIP_COMPILATION=$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
 		-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \

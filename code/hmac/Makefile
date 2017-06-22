@@ -3,31 +3,11 @@ include ../Makefile.include
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 KRML=$(KRML_BIN) $(KREMLIN_ARGS)
 
-FSTARB=$(FSTAR_BASE) \
-        --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
-        --include $(HACL_HOME)/specs \
-		--include $(HACL_HOME)/code/hash
-
-FSTAR_CT=$(FSTAR_BASE) \
-        --include $(HACL_HOME)/code/lib  --include $(KREMLIN_HOME)/kremlib \
-		--include $(HACL_HOME)/code/hash \
-        --include $(HACL_HOME)/specs
-
-
 # Files for verification
 HMAC_SHA2_FILES = Hacl.HMAC.SHA2_256.fst
 #	               HMAC_SHA2_256.fst
 
-
-# Full typechecking against the transparent integer interface
-%.fst-ver: %.fst
-	$(FSTARB) $^
-
-%.fsti-ver: %.fsti
-	$(FSTARB) $^
-
-# Verification
-all-ver: $(addsuffix -ver, $(HMAC_SHA2_FILES))
+FSTAR_INCLUDES+=--include ../hash
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
@@ -35,8 +15,13 @@ all-ver: $(addsuffix -ver, $(HMAC_SHA2_FILES))
 
 all-ct: $(addsuffix -ct, $(HMAC_SHA2_FILES))
 
-# CI
-all-ci: all-ver
+
+hints: $(addsuffix .hints, $(HMAC_SHA2_FILES))
+verify: $(addsuffix -verify, $(HMAC_SHA2_FILES))
+
+all-ver: verify 
+all-ci: verify
+all-hints: hints
 
 extract-c: hmac-c/HMAC_SHA2_256.c
 
