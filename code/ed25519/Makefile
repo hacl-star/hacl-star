@@ -1,8 +1,4 @@
-HACL_HOME=../..
-FSTAR_HOME?=$(HACL_HOME)/dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-include $(HACL_HOME)/code/Makefile.include
-
+include ../Makefile.include
 
 BIGNUM= \
 	../bignum/Hacl.Bignum.Limb.fst \
@@ -127,13 +123,12 @@ ED25519_FILES= $(ED25519_SPECIFIC) # $(BIGNUM)
 
 HINTS_ENABLED?=--use_hints --record_hints
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe \
+FSTARB=$(FSTAR_BASE) \
 		--include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs \
-		--include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/code/hash \
-		$(HINTS_ENABLED) $(OTHERFLAGS)
+		--include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/code/hash
 
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe \
+FSTAR_CT=$(FSTAR_BASE) \
 		--include $(HACL_HOME)/code/lib --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		--include $(HACL_HOME)/specs \
 		--include $(HACL_HOME)/code/curve25519  --include $(HACL_HOME)/code/hash

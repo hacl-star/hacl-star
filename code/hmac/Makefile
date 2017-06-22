@@ -1,8 +1,4 @@
-HACL_HOME    = ../..
-FSTAR_HOME   ?= $(HACL_HOME)/dependencies/FStar
-KREMLIN_HOME ?= $(HACL_HOME)/dependencies/kremlin
-
-FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe
+include ../Makefile.include
 
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 KRML=$(KRML_BIN) $(KREMLIN_ARGS)
@@ -11,15 +7,14 @@ KRML=$(KRML_BIN) $(KREMLIN_ARGS)
 HINTS_ENABLED= --use_hints
 
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe \
+FSTARB=$(FSTAR_BASE) \
         --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
-         --include $(HACL_HOME)/specs \
-			--include $(HACL_HOME)/code/hash \
-        $(HINTS_ENABLED) $(OTHERFLAGS)
+        --include $(HACL_HOME)/specs \
+	--include $(HACL_HOME)/code/hash
 
-FSTAR_CT=$(FSTAR_HOME)/bin/fstar.exe \
+FSTAR_CT=$(FSTAR_BASE) \
         --include $(HACL_HOME)/code/lib  --include $(KREMLIN_HOME)/kremlib \
-			--include $(HACL_HOME)/code/hash \
+	--include $(HACL_HOME)/code/hash \
         --include $(HACL_HOME)/specs
 
 
