@@ -44,7 +44,7 @@ ifndef CLOUD_VERIFY
 else
   KREMLIN_HOME=\$$H/kremlin
   CURRENT_SUBDIR:=$(subst $(abspath $(HACL_HOME))/,,$(abspath $(shell pwd)))
-  FSTAR_BASE=/mnt/f/dev/sec/FStar-cloud-verify/bin/fabc-make.exe add -i $(HACL_HOME)/tmpids -d 'code/$(CURRENT_SUBDIR)' $(FABC_EXTRA) -- \$$H/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS)
+  FSTAR_BASE=/mnt/f/dev/sec/FStar-cloud-verify/bin/fabc-make.exe add -i $(HACL_HOME)/tmpids -d '$(CURRENT_SUBDIR)' $(FABC_EXTRA) -- \$$H/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS)
 endif
 
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
