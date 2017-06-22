@@ -10,13 +10,10 @@ KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
   $(KREMLIN_HOME)/kremlib/testlib.c \
   -add-include '"testlib.h"' -ccopt -march=native
 
-HINTS_ENABLED= --use_hints
-
 
 FSTARB=$(FSTAR_BASE) \
         --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \
-         --include $(HACL_HOME)/specs  \
-        $(HINTS_ENABLED) $(OTHERFLAGS)
+        --include $(HACL_HOME)/specs
 
 FSTAR_CT=$(FSTAR_BASE) \
         --include $(HACL_HOME)/code/lib  --include $(KREMLIN_HOME)/kremlib \

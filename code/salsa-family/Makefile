@@ -48,9 +48,9 @@ all-ct:
 
 # Full typechecking against the transparent integer interface
 %.fst-verify: %.fst
-	$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^ --record_hints
 %.fsti-verify: %.fsti
-	$(FSTARB) $^ --use_hints --record_hints
+	$(FSTARB) $^ --record_hints
 
 all-ver: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 
@@ -67,9 +67,9 @@ all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 
 # Hints regeneration
 %.fst-hints: %.fst
-	-$(FSTARB) $^ --use_hints --record_hints
+	-$(FSTARB) $^ --record_hints
 %.fsti-hints: %.fsti
-	-$(FSTARB) $^ --use_hints --record_hints
+	-$(FSTARB) $^ --record_hints
 
 all-hints: $(addsuffix -hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES)))
 
