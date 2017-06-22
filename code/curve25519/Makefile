@@ -59,7 +59,7 @@ FSTARB=$(FSTAR_BASE) \
 
 FSTAR_CT=$(FSTAR_BASE) \
 		--include ../lib --include ../bignum --include $(KREMLIN_HOME)/kremlib \
-		--include ../../specs $(HINTS_ENABLED) $(OTHERFLAGS)
+		--include ../../specs
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst

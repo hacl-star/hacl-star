@@ -120,9 +120,6 @@ TODO=
 
 ED25519_FILES= $(ED25519_SPECIFIC) # $(BIGNUM) 
 
-
-HINTS_ENABLED?=--use_hints --record_hints
-
 FSTARB=$(FSTAR_BASE) \
 		--include $(HACL_HOME)/code/lib/kremlin --include $(HACL_HOME)/code/bignum --include $(KREMLIN_HOME)/kremlib \
 		 --include $(HACL_HOME)/specs \

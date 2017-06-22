@@ -11,12 +11,12 @@ FSTAR_INCLUDE_PATHS=--include ../lib/kremlin --include ../../specs --include $(F
 FSTARB=$(FSTAR_BASE) \
 		--include ../lib/kremlin --include ../salsa-family --include $(HACL_HOME)/code/bignum --include ../curve25519 \
 		--include ../poly1305 --include ../../specs \
-		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
+		--include $(KREMLIN_HOME)/kremlib 
 
 FSTAR_CT=$(FSTAR_BASE) \
 		--include ../lib/ --include ../salsa-family --include ../bignum --include ../curve25519 \
 		--include ../poly1305 --include ../../specs \
-		--include $(KREMLIN_HOME)/kremlib $(HINTS_ENABLED) $(OTHERFLAGS)
+		--include $(KREMLIN_HOME)/kremlib
 
 KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
 		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum  \
