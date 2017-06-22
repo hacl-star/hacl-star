@@ -1,7 +1,18 @@
 [
-  "∂6?ÇyÁr~ëTû\f3ï\u000bê",
+  "ÿ|ó©£tÁ\u000fˇcæΩŒ\u0011Q∂",
   [
-    [ "Chacha20.op_String_Access", 1, 0, 1, [ "@query" ], 0 ],
+    [
+      "Chacha20.op_String_Access",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Chacha20.uint8_p",
+        "equation_FStar.UInt8.t",
+        "refinement_interpretation_Chacha20_Tm_refine_04d3395c881847f65dd2a6cf9d8a71b5"
+      ],
+      0
+    ],
     [
       "Chacha20.chacha20_key_block",
       1,
@@ -62,6 +73,7 @@
         "equation_FStar.Buffer.contains", "equation_FStar.Buffer.content",
         "equation_FStar.Buffer.equal", "equation_FStar.Buffer.frameOf",
         "equation_FStar.Buffer.live", "equation_FStar.HyperHeap.t",
+        "equation_FStar.HyperStack.ST.inline_stack_inv",
         "equation_FStar.HyperStack.contains",
         "equation_FStar.HyperStack.equal_domains",
         "equation_FStar.HyperStack.frameOf",
@@ -71,8 +83,7 @@
         "equation_FStar.HyperStack.pop",
         "equation_FStar.HyperStack.poppable",
         "equation_FStar.HyperStack.popped",
-        "equation_FStar.HyperStack.remove_elt",
-        "equation_FStar.ST.inline_stack_inv", "equation_FStar.Set.eqtype",
+        "equation_FStar.HyperStack.remove_elt", "equation_FStar.Set.eqtype",
         "equation_FStar.UInt32.t", "equation_FStar.UInt8.t",
         "equation_Hacl.Impl.Chacha20.h32",
         "equation_Hacl.Impl.Chacha20.state",
@@ -89,8 +100,10 @@
         "lemma_FStar.Buffer.lemma_fresh_poppable",
         "lemma_FStar.Buffer.lemma_live_disjoint",
         "lemma_FStar.Buffer.lemma_modifies_0_1_",
-        "lemma_FStar.Buffer.lemma_modifies_0_2",
+        "lemma_FStar.Buffer.lemma_modifies_0_2_",
+        "lemma_FStar.Buffer.lemma_modifies_2_comm",
         "lemma_FStar.Buffer.live_fresh", "lemma_FStar.Buffer.live_popped",
+        "lemma_FStar.Buffer.modifies_poppable_1",
         "lemma_FStar.Buffer.modifies_poppable_2",
         "lemma_FStar.Buffer.modifies_popped_1",
         "lemma_FStar.Buffer.no_upd_fresh",
@@ -112,7 +125,7 @@
         "proj_equation_FStar.HyperStack.MkRef_ref",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_FStar.HyperStack.HS_h",
-        "projection_inverse_FStar.Pervasives.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "refinement_interpretation_Chacha20_Tm_refine_7b8277f4aac7937ca94306760a67d045",
         "refinement_interpretation_Chacha20_Tm_refine_a8d9d65facbe58ecae7d831161c49ec1",
         "refinement_interpretation_Chacha20_Tm_refine_bae8aa75f60deecac89c8024dc0d620e",
@@ -124,9 +137,10 @@
         "typing_FStar.Buffer.__proj__MkBuffer__item__content",
         "typing_FStar.HyperStack.__proj__HS__item__h",
         "typing_FStar.HyperStack.__proj__HS__item__tip",
-        "typing_FStar.HyperStack.poppable", "typing_FStar.Map.contains",
-        "typing_FStar.Map.domain", "typing_FStar.Set.complement",
-        "typing_FStar.Set.intersect", "typing_FStar.Set.singleton"
+        "typing_FStar.HyperStack.poppable",
+        "typing_FStar.HyperStack.remove_elt", "typing_FStar.Map.contains",
+        "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
+        "typing_FStar.Set.complement", "typing_FStar.Set.singleton"
       ],
       0
     ],
