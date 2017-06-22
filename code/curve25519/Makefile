@@ -50,6 +50,8 @@ TODO=
 
 X25519_FILES=$(BIGNUM) $(X25519_SPECIFIC)
 
+FSTAR_INCLUDES+=--include ../bignum
+
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
 	$(FSTAR) --lax $^
