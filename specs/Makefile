@@ -1,7 +1,8 @@
 FSTAR_HOME?=../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
+KREMLIN_HOME?=..dependencies/kremlin
 HACL_HOME?=../..
 
+include $(FSTAR_HOME)/src/gmake/z3.mk
 include $(FSTAR_HOME)/src/gmake/fstar.mk
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
