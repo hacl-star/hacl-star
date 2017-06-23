@@ -67,9 +67,6 @@ import-kremlin:
 %.fsti-lax: %.fsti
 	$(FSTAR) --lax $^
 
-# %.fst-ver: %.fst
-# 	$(FSTAR) $(addprefix -fsopt , $(FSTAR_OPTIONS_VER)) $(FSTAR_INCLUDES) --verify_module $(basename $(notdir $@)) $^
-
 %.fst-krml: %.fst
 	$(KREMLIN) $(KREMLIN_INCLUDES) $^
 

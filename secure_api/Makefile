@@ -1,15 +1,12 @@
-FSTAR_HOME?=../../FStar
-HACL_HOME?=..
-KREMLIN_HOME?=../../kremlin
+HACL_HOME=..
+include $(HACL_HOME)/code/Makefile.include
+
 OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
 
 #17-02-13 in low-level, we used to have two Makefiles, merged here.
 MEM=HST
 
-include $(FSTAR_HOME)/src/gmake/fstar.mk
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
-
-FSTAR_ARGS=$(OTHERFLAGS)
 
 ifeq ($(OS),Windows_NT)
   FPIC =
@@ -20,10 +17,6 @@ else
     FPIC = -ccopt -fPIC
   endif
 endif
-
-# OCaml variables
-OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
-FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS)  --include crypto --include crypto/real --include ../specs
 
 KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=$(FPIC) -ccopt -maes \
@@ -75,15 +68,10 @@ clean:
 	@rm -f $(addprefix crypto/ml/, *.cmx *.o *.cmi *~)
 	@rm -rf tmp tmp-vale tmp-hacl kremlin *~ *.exe
 
-FSTAR?=$(FSTAR_HOME)/bin/fstar.exe
-
-HINTS_ENABLED?=--use_hints
-
-OPTIONS=--max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20  $(HINTS_ENABLED) $(OTHERFLAGS)
+OTHERFLAGS+=--max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20
 
 # A bit much!!
-FSTAR_INCLUDE_PATHS= \
- \
+OTHERFLAGS+= \
 --include $(HACL_HOME)/code/bignum \
 --include $(HACL_HOME)/code/experimental/aesgcm \
 --include $(HACL_HOME)/code/lib/kremlin \
@@ -165,40 +153,40 @@ all: all-ver $(addsuffix .fst-lax, $(LAX))
 
 extra: all-ver $(addsuffix .fst-ver, $(EXTRA))
 
-all-ver: $(addsuffix .fst-ver, $(filter-out $(LAX), $(VERIFY)))
+verify: $(addsuffix .fst-ver, $(filter-out $(LAX), $(VERIFY)))
+hints: $(addsuffix .fst.hints, $(VERIFY))
+lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
-all-hints: $(addsuffix .fst-hints, $(VERIFY))
+all-hints: hints
+all-ver: verify
+all-lax: lax
 
-all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
 # Parameter for interactive mode
 %.fst-in:
-	@echo $(OPTIONS) --hint_info \
+	@echo --hint_info \
 	$(FSTAR_INCLUDE_PATHS)
 
 %.fsti-in:
-	@echo $(OPTIONS) --hint_info \
+	@echo --hint_info \
 	$(FSTAR_INCLUDE_PATHS)
 
 # Verifying one file at a time
 %.fst-ver:
-	@$(FSTAR) $(OPTIONS) \
-	$(FSTAR_INCLUDE_PATHS) \
+	$(FSTAR) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	$(basename $@).fst
 
 # (Re-)Generate hints
-%.fst-hints:
-	-$(FSTAR) $(OPTIONS) --record_hints \
-	$(FSTAR_INCLUDE_PATHS) \
+%.fst.hints:
+	$(FSTAR) --record_hints \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	--verify_module $(basename $(notdir $@)) \
 	$(basename $@).fst
 
 # Lax verifying one file at a time
 %.fst-lax:
-	$(FSTAR) $(OPTIONS) \
-	$(FSTAR_INCLUDE_PATHS) --lax \
+	$(FSTAR) --lax \
 	--verify_module $(basename $(notdir $@)) \
 	$(basename $@).fst
 

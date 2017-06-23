@@ -1,6 +1,5 @@
 HACL_HOME=..
-KREMLIN_HOME?=$(HACL_HOME)/kremlin
-FSTAR_HOME?=$(HACL_HOME)/kremlin
+include ../code/Makefile.include
 
 .PHONY: snapshot snapshot-gcc snapshot-ccomp snapshot-msvc snapshot-gcc-unrolled
 
@@ -71,7 +70,7 @@ hints-code:
 	$(MAKE) -C ../code hints
 
 hints-crypto:
-	$(MAKE) -C ../secure_api all-hints
+	$(MAKE) -C ../secure_api hints
 
 hints: hints-code hints-crypto
 
