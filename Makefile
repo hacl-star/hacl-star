@@ -37,10 +37,8 @@ ci:
 	$(MAKE) -C test
 
 hints:
-	$(MAKE) -C code hints
-	$(MAKE) -C secure_api hints
+	$(MAKE) -C test hints # does code and secure_api
 	$(MAKE) -C specs hints
-	$(MAKE) -C test hints
 
 verify:
 	$(MAKE) -C code verify
