@@ -1,4 +1,4 @@
-HACL_HOME?=..
+HACL_HOME?=$(CURDIR)/..
 include $(HACL_HOME)/code/Makefile.include
 include $(FSTAR_HOME)/src/gmake/z3.mk
 include $(FSTAR_HOME)/ulib/ml/Makefile.include

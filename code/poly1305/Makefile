@@ -65,7 +65,7 @@ all-ci: bignum-ci specific-ci
 
 # By default, KreMLin drops a bunch of spec-related module that are not meant to
 # extract.
-INCLUDES=-I ../bignum
+KREMLIN_ARGS+=-I ../bignum
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 KRML=$(KRML_BIN) $(KREMLIN_ARGS) $(INCLUDES) -tmpdir poly-c \

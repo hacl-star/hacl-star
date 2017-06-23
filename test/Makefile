@@ -1,4 +1,4 @@
-HACL_HOME=..
+HACL_HOME=$(CURDIR)/..
 include ../code/Makefile.include
 
 .PHONY: snapshot snapshot-gcc snapshot-ccomp snapshot-msvc snapshot-gcc-unrolled

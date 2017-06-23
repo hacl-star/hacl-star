@@ -1,8 +1,8 @@
 UNAME := $(shell uname)
 
 HACL_HOME?=../..
-FSTAR_HOME?=$(HACL_HOME)/dependencies/FStar
-KREMLIN_HOME?=$(HACL_HOME)/dependencies/kremlin
+export FSTAR_HOME?=$(HACL_HOME)/dependencies/FStar
+export KREMLIN_HOME?=$(HACL_HOME)/dependencies/kremlin
 HINTS_ENABLED?=--use_hints
 
 HACL_LIB=$(HACL_HOME)/code/lib
@@ -33,12 +33,13 @@ endif
 
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
+KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(HACL_HOME)/specs
 
 # FSTAR_OPTIONS_VER=-fsopt $(HINTS_ENABLED) -skip-extraction
 # FSTAR_OPTIONS_KREMLIN=
 # FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
 
-FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs
+FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs 
 
 ifndef CLOUD_VERIFY  
   FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)

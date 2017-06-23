@@ -31,16 +31,16 @@ KRML=$(KREMLIN_HOME)/krml -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs
 all-ct:
 	$(FSTAR) --lax --verify_all Chacha20.fst Salsa20.fst Chacha20.Vec128.fst
 
-verify: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
-all-ver: verify
 
 # For CI, all modules restricted from incomplete or slow ones
-all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SALSA_FAMILY_FILES)))
-
-all-lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
-
+ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SALSA_FAMILY_FILES)))
+lax: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
+verify: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 hints: $(addsuffix .hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES)))
+all-ci: ci
+all-lax: lax
 all-hints: hints
+all-ver: verify
 
 chacha-c/Chacha20.c: Hacl.Lib.LoadStore32.fst Hacl.Lib.Create.fst Hacl.Impl.Xor.Lemmas.fst Hacl.Impl.Chacha20.fst Chacha20.fst
 	mkdir -p chacha-c
