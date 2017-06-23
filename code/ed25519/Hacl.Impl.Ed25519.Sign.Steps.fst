@@ -13,7 +13,10 @@ open Hacl.Impl.Ed25519.ExtPoint
 
 
 let hint8_p = buffer Hacl.UInt8.t
-let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
+
+let op_String_Access (h:HyperStack.mem) (b:hint8_p{live h b}) =
+  Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
+
 
 
 #reset-options "--max_fuel 0 --z3rlimit 200"

@@ -11,8 +11,9 @@ open Hacl.UInt8
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 let hint8_p = buffer Hacl.UInt8.t
-let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
+let op_String_Access (h:HyperStack.mem) (b:hint8_p{live h b}) =
+  Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 val secret_expand:
   expanded:hint8_p{length expanded = 64} ->

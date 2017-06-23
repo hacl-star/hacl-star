@@ -13,8 +13,9 @@ open Hacl.Impl.Ed25519.ExtPoint
 open Hacl.Impl.Ed25519.Ladder.Step
 
 let hint8_p = buffer Hacl.UInt8.t
-let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
+let op_String_Access (h:HyperStack.mem) (b:hint8_p{live h b}) =
+  Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 open Hacl.Impl.Ed25519.Sign.Steps
 open Hacl.Spec.Endianness

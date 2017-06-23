@@ -13,7 +13,9 @@ open Hacl.Bignum25519
 
 let hint8_p = buffer Hacl.UInt8.t
 let hint64_p = buffer Hacl.UInt64.t
-let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
+
+let op_String_Access (h:HyperStack.mem) (b:hint8_p{live h b}) =
+  Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 open FStar.Mul
 
