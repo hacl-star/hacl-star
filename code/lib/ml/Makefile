@@ -1,4 +1,5 @@
-FSTAR_HOME?=../../../dependencies/FStar
+include ../../Makefile.include
+
 FSTAR_LIB?=$(FSTAR_HOME)/ulib/ml
 FILES=Hacl_UInt32.mli Hacl_UInt32.ml Hacl_UInt64.mli Hacl_UInt64.ml Hacl_UInt8.mli Hacl_UInt8.ml  Hacl_UInt128.mli Hacl_UInt128.ml Hacl_Cast.ml
 FILESX=Hacl_UInt32.cmx Hacl_UInt64.cmx Hacl_UInt8.cmx  Hacl_UInt128.cmx Hacl_Cast.cmx

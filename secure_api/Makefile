@@ -1,5 +1,4 @@
-HACL_HOME=..
-include $(HACL_HOME)/code/Makefile.include
+include ../code/Makefile.include
 
 OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
 

@@ -101,6 +101,7 @@ poly1305.exe: poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c $(KREMLIN_HOME
 
 extract-c: poly-c/Poly1305_64.c poly-c/AEAD_Poly1305_64.c
 
+$(info $(FSTAR_HOME))
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 CODEGEN_ARGS=--lax --codegen OCaml --no_location_info $(FSTAR_DEFAULT_ARGS)
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10

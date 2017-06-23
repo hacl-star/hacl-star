@@ -1,4 +1,3 @@
-HACL_HOME?=../..
 include ../Makefile.include
 
 DIRECTORIES=

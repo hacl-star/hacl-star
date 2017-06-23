@@ -1,8 +1,4 @@
-FSTAR_HOME?=../../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=../..
 include ../../Makefile.include
-
 
 FSTAR_LIB_FILES= \
 	FStar.Mul.fst \

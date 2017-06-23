@@ -1,9 +1,18 @@
 UNAME := $(shell uname)
+.DEFAULT_GOAL=all
 
-HACL_HOME?=../..
+THIS_DIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+HACL_HOME_ABS:=$(realpath $(THIS_DIR)/..)
+HACL_HOME:=$(shell realpath --relative-to=$(CURDIR) $(HACL_HOME_ABS))
+
 FSTAR_HOME?=$(HACL_HOME)/dependencies/FStar
 KREMLIN_HOME?=$(HACL_HOME)/dependencies/kremlin
 HINTS_ENABLED?=--use_hints
+
+# $(info HACL_HOME (abs) is at $(HACL_HOME_ABS))
+# $(info HACL_HOME (rel) is at $(HACL_HOME))
+# $(info FSTAR_HOME (rel) is at $(FSTAR_HOME))
+# $(info KREMLIN_HOME (rel) is at $(KREMLIN_HOME))
 
 HACL_LIB=$(HACL_HOME)/code/lib
 HACL_FILES=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Types.fst Hacl.Policies.fst
@@ -51,7 +60,7 @@ endif
 
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
-OCAMLOPT=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
+OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
 OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
 
 ml-lib:

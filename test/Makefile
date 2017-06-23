@@ -1,4 +1,3 @@
-HACL_HOME=..
 include ../code/Makefile.include
 
 .PHONY: snapshot snapshot-gcc snapshot-ccomp snapshot-msvc snapshot-gcc-unrolled
@@ -66,13 +65,8 @@ verify-crypto:
 	# Note: the all-hints target fails silently.
 	$(MAKE) -C ../secure_api all-ver OTHERFLAGS="--record_hints"
 
-hints-code:
-	$(MAKE) -C ../code hints
-
-hints-crypto:
-	$(MAKE) -C ../secure_api hints
-
-hints: hints-code hints-crypto
+hints:
+	$(info This directory does not contain .fst files, so no hints to generate.)
 
 verify: verify-code verify-crypto
 
