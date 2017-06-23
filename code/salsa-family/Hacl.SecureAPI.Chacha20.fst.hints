@@ -1,11 +1,11 @@
 [
-  "¼œe“u)!µ¹s B\u0006©çU",
+  "•÷ÛaÇ>/\u001e\u001d\rEyªþ\t®",
   [
     [
       "Hacl.SecureAPI.Chacha20.setup",
       1,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -13,7 +13,7 @@
       "Hacl.SecureAPI.Chacha20.setup",
       2,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -21,14 +21,13 @@
       "Hacl.SecureAPI.Chacha20.setup",
       3,
       0,
-      0,
+      1,
       [
-        "@query", "equation_FStar.UInt32.t", "equation_FStar.UInt8.t",
-        "equation_Hacl.Impl.Chacha20.h32",
-        "equation_Hacl.Impl.Chacha20.uint8_p", "equation_Hacl.UInt32.t",
-        "equation_Hacl.UInt8.t",
-        "refinement_interpretation_Tm_refine_52aae501848f9ae2d8e96430a2c8ff75",
-        "refinement_interpretation_Tm_refine_d0248a37b555c45264d4be3b1e2a8bff"
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt32.t",
+        "equation_FStar.UInt8.t", "equation_Hacl.Impl.Chacha20.h32",
+        "equation_Hacl.Impl.Chacha20.uint8_p",
+        "refinement_interpretation_Hacl.SecureAPI.Chacha20_Tm_refine_59174d15900b1aac0e68774108209b07",
+        "refinement_interpretation_Hacl.SecureAPI.Chacha20_Tm_refine_5f29b00d62e71adc49cd00db98a25add"
       ],
       0
     ],
@@ -36,11 +35,11 @@
       "Hacl.SecureAPI.Chacha20.chacha20_core",
       1,
       0,
-      0,
+      1,
       [
         "@MaxIFuel_assumption", "@query", "equation_FStar.Buffer.buffer",
         "equation_FStar.UInt32.t", "equation_Hacl.Impl.Chacha20.h32",
-        "equation_Hacl.Impl.Chacha20.state", "equation_Hacl.UInt32.t",
+        "equation_Hacl.Impl.Chacha20.state",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "kinding_FStar.UInt32.t_@tok",
@@ -57,7 +56,7 @@
       "Hacl.SecureAPI.Chacha20.chacha20_stream",
       1,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -119,7 +118,7 @@
       "Hacl.SecureAPI.Chacha20.chacha20_stream_finish",
       1,
       0,
-      0,
+      1,
       [
         "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
         "haseqFStar.Buffer_Tm_refine_f2c63b31fd0059912139424a133143ce",
@@ -154,7 +153,7 @@
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "fuel_guarded_inversion_FStar.HyperStack.reference",
-        "fuel_guarded_inversion_FStar.UInt32.t_",
+        "fuel_guarded_inversion_FStar.UInt32.t_", "int_inversion",
         "kinding_FStar.UInt32.t_@tok", "kinding_FStar.UInt8.t_@tok",
         "lemma_FStar.Buffer.lemma_disjoint_symm",
         "lemma_FStar.Buffer.lemma_equal_domains_2",

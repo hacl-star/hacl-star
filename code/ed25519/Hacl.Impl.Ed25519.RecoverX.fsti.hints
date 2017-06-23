@@ -1,5 +1,5 @@
 [
-  "·?Uäå–WÉÎ27!¯",
+  "^÷\u0017$]\\Ö<_ìk7*Hy",
   [
     [
       "Hacl.Impl.Ed25519.RecoverX.elemB",
@@ -51,14 +51,15 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def",
-        "equation_FStar.Buffer.buffer", "equation_FStar.Mul.op_Star",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_FStar.UInt64.n", "equation_FStar.UInt64.t",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Mul.op_Star", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt64.n",
+        "equation_FStar.UInt64.t", "equation_FStar.UInt64.v",
         "equation_Hacl.Bignum25519.limb",
-        "equation_Hacl.Impl.Ed25519.RecoverX.elemB",
-        "equation_Hacl.UInt64.t", "equation_Prims.pos",
+        "equation_Hacl.Impl.Ed25519.RecoverX.elemB", "equation_Prims.pos",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",

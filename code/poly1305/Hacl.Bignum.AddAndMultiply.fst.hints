@@ -1,5 +1,5 @@
 [
-  "ª\u0013(Cà/iˆz\u0019F{«k~Ä",
+  "Â3Ù\u000bkùŸÁd\u001dyÏpÑÈh",
   [
     [
       "Hacl.Bignum.AddAndMultiply.add_and_multiply",
@@ -12,8 +12,7 @@
         "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Parameters.felem",
         "equation_Hacl.Bignum.Parameters.len",
-        "equation_Hacl.Bignum.Parameters.limb", "equation_Hacl.UInt64.t",
-        "equation_Prims.nat",
+        "equation_Hacl.Bignum.Parameters.limb", "equation_Prims.nat",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882"
       ],
@@ -31,12 +30,14 @@
         "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Parameters.felem",
         "equation_Hacl.Bignum.Parameters.len",
-        "equation_Hacl.Bignum.Parameters.limb", "equation_Hacl.UInt64.t",
+        "equation_Hacl.Bignum.Parameters.limb",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "kinding_FStar.UInt64.t_@tok",
         "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
         "refinement_interpretation_Hacl.Bignum.AddAndMultiply_Tm_refine_ea0cdb077ae78da455b9677f874da9dd",
-        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882"
+        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882",
+        "typing_FStar.Buffer.as_seq"
       ],
       0
     ],
@@ -46,9 +47,11 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_FStar.Buffer.as_seq",
-        "equation_FStar.Buffer.buffer", "equation_FStar.Buffer.equal",
-        "equation_FStar.UInt64.t", "equation_Hacl.Bignum.Constants.len",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Buffer.as_seq", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Buffer.equal", "equation_FStar.UInt64.t",
+        "equation_Hacl.Bignum.Constants.len",
         "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Fsum.red_c", "equation_Hacl.Bignum.Limb.n",
@@ -57,6 +60,7 @@
         "equation_Hacl.Bignum.Parameters.len",
         "equation_Hacl.Bignum.Parameters.limb",
         "equation_Hacl.Bignum.Parameters.limb_n",
+        "equation_Hacl.Bignum.Parameters.seqelem",
         "equation_Hacl.Bignum.Parameters.v",
         "equation_Hacl.Bignum.Parameters.word_size",
         "equation_Hacl.Spec.Bignum.AddAndMultiply.add_and_multiply_tot",
@@ -67,9 +71,8 @@
         "equation_Hacl.Spec.Bignum.AddAndMultiply.red_45",
         "equation_Hacl.Spec.Bignum.AddAndMultiply.red_46",
         "equation_Hacl.Spec.Bignum.Fsum.fsum_spec",
-        "equation_Hacl.Spec.Bignum.Fsum.red", "equation_Hacl.UInt64.t",
-        "equation_Prims.nat", "equation_Prims.pos",
-        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "equation_Hacl.Spec.Bignum.Fsum.red", "equation_Prims.nat",
+        "equation_Prims.pos", "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "function_token_typing_Hacl.Spec.Bignum.AddAndMultiply.p44",
         "function_token_typing_Hacl.Spec.Bignum.AddAndMultiply.p45",
@@ -80,15 +83,17 @@
         "lemma_FStar.HyperStack.lemma_equal_domains_trans",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.Buffer_Tm_refine_347cdcabc7e8becd6dd649804986fa75",
+        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
         "refinement_interpretation_Hacl.Bignum.AddAndMultiply_Tm_refine_ea0cdb077ae78da455b9677f874da9dd",
         "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882",
         "refinement_interpretation_Hacl.Spec.Bignum.AddAndMultiply_Tm_refine_bb94a36e3e9c5fc5849cab52b6af1e8b",
         "refinement_interpretation_Hacl.Spec.Bignum.AddAndMultiply_Tm_refine_e0f1d3e53d6a910ef2b693ca12f1931a",
         "refinement_interpretation_Hacl.Spec.Bignum.AddAndMultiply_Tm_refine_f533c5262364a68a658d77b1c9b16fe0",
+        "refinement_interpretation_Hacl.Spec.Bignum.Fsum_Tm_refine_dc0387dafb22d8c2d6fbfe233dc11940",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_FStar.Buffer.as_seq"
+        "typing_FStar.Buffer.as_seq",
+        "typing_Hacl.Spec.Bignum.Fsum.fsum_spec"
       ],
       0
     ],
