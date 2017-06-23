@@ -1,8 +1,8 @@
 UNAME := $(shell uname)
 
 HACL_HOME?=../..
-export FSTAR_HOME?=$(HACL_HOME)/dependencies/FStar
-export KREMLIN_HOME?=$(HACL_HOME)/dependencies/kremlin
+FSTAR_HOME?=$(HACL_HOME)/dependencies/FStar
+KREMLIN_HOME?=$(HACL_HOME)/dependencies/kremlin
 HINTS_ENABLED?=--use_hints
 
 HACL_LIB=$(HACL_HOME)/code/lib
