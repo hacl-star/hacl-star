@@ -1,5 +1,4 @@
-HACL_HOME=..
-include ../code/Makefile.include
+HACL_HOME?=..
 
 .PHONY: snapshot snapshot-gcc snapshot-ccomp snapshot-msvc snapshot-gcc-unrolled
 
@@ -17,6 +16,8 @@ all:
 	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
 	# JP: fixme, doesn't work on build machine
 	# $(MAKE) -C snapshot-gcc
+
+include ../code/Makefile.include
 
 travis:
 	$(MAKE) extract-c-code
