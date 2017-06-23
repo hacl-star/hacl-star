@@ -927,7 +927,7 @@ val pad:
                   /\ (let seq_padding = reveal_sbytes (as_seq h1 padding) in
                   seq_padding == Spec.pad (H64.v n * v size_block) (U64.v len))))
 
-#reset-options "--max_fuel 0  --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 [@"substitute"]
 let pad padding n len =
