@@ -11,7 +11,7 @@ FSTAR_INCLUDES+=--include ../hash
 
 # Lax typechecking against the restricted integer interface
 %.fst-ct: %.fst
-	$(FSTAR_CT) --lax $^
+	$(FSTAR) --lax $^
 
 all-ct: $(addsuffix -ct, $(HMAC_SHA2_FILES))
 
