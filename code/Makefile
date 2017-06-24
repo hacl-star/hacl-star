@@ -1,6 +1,6 @@
 all: extract-c ct verify
 
-DIRECTORIES=salsa-family bignum poly1305 curve25519 api ed25519 hash hmac
+DIRECTORIES=salsa-family bignum poly1305 curve25519 api ed25519 hmac # hash
 
 %-c: %
 	$(MAKE) -C $< extract-c
