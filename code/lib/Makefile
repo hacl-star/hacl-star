@@ -1,16 +1,9 @@
 include ../Makefile.include
-
-FSTAR=$(FSTAR_BASE)
-
-OPTIONS_VER=
+include Makefile.include
 
 ALL=Hacl.SBuffer.fst Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst
 
 all: $(addsuffix -ver, $(ALL))
-
-%-ver: %
-	$(FSTAR) $^
-
 
 FILES=$(addprefix ml/,Hacl_UInt8.mli Hacl_UInt8.ml Hacl_UInt16.mli Hacl_UInt16.ml Hacl_UInt32.ml Hacl_UInt64.ml Hacl_UInt128.ml Hacl_Cast.ml Hacl_Utils.ml Hacl_SBuffer.ml)
 
@@ -22,7 +15,6 @@ OCAMLOPT=$(OCAMLOPT) $(INCLUDES)
 
 %.o: %.ml
 	$(OCAMLOPT) $(OCAMLOPTFLAGS) -c -I ml $<
-
 
 ml: $(CMX) $(OBJS)
 

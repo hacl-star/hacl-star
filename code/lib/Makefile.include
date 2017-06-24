@@ -13,46 +13,14 @@ HACL_SYMMETRIC=$(HACL_API)/symmetric
 HACL_HASH=$(HACL_API)/hash
 HACL_EC=$(HACL_API)/ec
 
-ifeq ($(CI),true)
-VERBOSE=
-else
-VERBOSE=-verbose
-endif
 KREMLIN=$(KREMLIN_HOME)/krml
 KREMLIN_ARGS=$(VERBOSE) -ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
                         -ccopt -Wno-error=format=
-
-# Linux specific compilation instruction for PneuTube
-ifeq ($(UNAME), Linux)
-KREMLIN_ARGS+= -ccopt -D_GNU_SOURCE
-endif
-
-KREMLIB=$(KREMLIN_HOME)/kremlib
-KREMTEST=$(KREMLIN_HOME)/test
 
 FSTAR_OPTIONS_VER=-fsopt "--use_hints" -skip-extraction
 FSTAR_OPTIONS_KREMLIN=
 FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
 
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
 OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
 OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
-
-ml-lib:
-	$(MAKE) -C $(ULIB_ML)
-
-import-lib:
-	@cp $(HACL_LIB_FILES) .
-
-import-kremlin:
-	@cp $(HACL_KREMLIN_FILES)) .
-
-%.fst-lax: %.fst
-	$(FSTAR) --lax $(FSTAR_INCLUDES) $^
-
-%.fst-ver: %.fst
-	$(FSTAR) $(addprefix -fsopt , $(FSTAR_OPTIONS_VER)) $(FSTAR_INCLUDES) --verify_module $(basename $(notdir $@)) $^
-
-%.fst-krml: %.fst
-	$(KREMLIN) $(KREMLIN_INCLUDES) $^

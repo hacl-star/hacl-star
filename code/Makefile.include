@@ -1,15 +1,43 @@
 UNAME := $(shell uname)
 .DEFAULT_GOAL=all
 
-THIS_DIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-HACL_HOME_ABS:=$(realpath $(THIS_DIR)/..)
-HACL_HOME:=$(shell realpath --relative-to=$(CURDIR) $(HACL_HOME_ABS))
+ifndef HACL_HOME
+  THIS_DIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+  HACL_HOME_ABS:=$(realpath $(THIS_DIR)/..)
+  HACL_HOME:=$(shell realpath --relative-to=$(CURDIR) $(HACL_HOME_ABS))
+  # $(info HACL_HOME (abs) is at $(HACL_HOME_ABS))
+endif
 
-FSTAR_HOME?=$(HACL_HOME)/dependencies/FStar
-KREMLIN_HOME?=$(HACL_HOME)/dependencies/kremlin
+ifndef FSTAR_HOME 
+  FSTAR_HOME:=$(HACL_HOME)/dependencies/FStar
+  FSTAR_HOME_ABS:=$(abspath $(FSTAR_HOME))
+else
+  ifndef FSTAR_HOME_ABS
+    FSTAR_HOME_ABS:=$(abspath $(FSTAR_HOME))
+  endif
+  FSTAR_HOME:=$(shell realpath --relative-to=$(CURDIR) $(FSTAR_HOME_ABS))
+endif
+
+export FSTAR_HOME_ABS
+export FSTAR_HOME
+
+
+ifndef KREMLIN_HOME 
+  KREMLIN_HOME:=$(HACL_HOME)/dependencies/kremlin
+  KREMLIN_HOME_ABS:=$(abspath $(KREMLIN_HOME))
+else
+  ifndef KREMLIN_HOME_ABS
+    KREMLIN_HOME_ABS:=$(abspath $(KREMLIN_HOME))
+  endif
+  KREMLIN_HOME:=$(shell realpath --relative-to=$(CURDIR) $(KREMLIN_HOME_ABS))
+endif
+
+export KREMLIN_HOME_ABS
+export KREMLIN_HOME
+
 HINTS_ENABLED?=--use_hints
 
-# $(info HACL_HOME (abs) is at $(HACL_HOME_ABS))
+# $(info CURDIR is at $(CURDIR))
 # $(info HACL_HOME (rel) is at $(HACL_HOME))
 # $(info FSTAR_HOME (rel) is at $(FSTAR_HOME))
 # $(info KREMLIN_HOME (rel) is at $(KREMLIN_HOME))
@@ -43,10 +71,6 @@ endif
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(HACL_HOME)/specs
-
-# FSTAR_OPTIONS_VER=-fsopt $(HINTS_ENABLED) -skip-extraction
-# FSTAR_OPTIONS_KREMLIN=
-# FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
 
 FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs 
 
@@ -99,3 +123,4 @@ import-kremlin:
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^
 %.fsti.reloc.hints: %.fsti
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^
+
