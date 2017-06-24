@@ -63,13 +63,12 @@ verify-code:
 	$(MAKE) -C ../code ci
 
 verify-crypto:
-	# Note: the all-hints target fails silently.
-	$(MAKE) -C ../secure_api all-ver OTHERFLAGS="--record_hints"
+	$(MAKE) -C ../secure_api all-ver
 
 hints:
 	$(info This directory does not contain .fst files, so no hints to generate.)
 
-verify: verify-code # verify-crypto
+verify: verify-code verify-crypto
 
 build-snapshot:
 	mkdir -p $(SNAPSHOT_DIR)
