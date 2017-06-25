@@ -1,3 +1,5 @@
+include ../../../code/Makefile.include
+
 # Override to get cross-compilation
 MARCH?=$(shell uname -m)
 UNAME?=$(shell uname | cut -c 1-6)
@@ -33,7 +35,7 @@ endif
 
 VALE_HOME?=../../../../vale
 KREMLIN_HOME?=../../../../kremlin
-CCOPTS=$(FPIC) -Wall -Wextra -Werror -I$(KREMLIN_HOME)/kremlib
+CCOPTS=$(FPIC) -Wall -Wextra -Werror -I $(KREMLIN_HOME)/kremlib
 CC:=$(CC) $(CCOPTS)
 
 

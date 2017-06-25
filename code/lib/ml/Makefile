@@ -12,7 +12,7 @@ all: hacllib.cmxa
 include ../Makefile.include
 
 hacllib.cmxa:
-	$(MAKE) -C $(FSTAR_LIB)
+	FSTAR_HOME=$(abspath $(FSTAR_HOME)) $(MAKE) -C $(FSTAR_LIB)
 	$(OCAMLOPT) -thread -w -58 -c $(FILES)
 	$(OCAMLOPT_BARE) -a $(FILESX) -o hacllib.cmxa
 

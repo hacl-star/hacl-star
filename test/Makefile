@@ -10,10 +10,11 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 SNAPSHOT_DIR=snapshot
 
 all:
-	$(MAKE) extract-specs extract-all-c ct verify
-	$(MAKE) compile-vale
-	$(MAKE) -C openssl-engine
-	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
+	$(MAKE) verify
+	#$(MAKE) extract-specs extract-all-c ct verify
+	#$(MAKE) compile-vale
+	#$(MAKE) -C openssl-engine
+	#$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
 	# JP: fixme, doesn't work on build machine
 	# $(MAKE) -C snapshot-gcc
 
@@ -62,8 +63,7 @@ verify-code:
 	$(MAKE) -C ../code ci
 
 verify-crypto:
-	# Note: the all-hints target fails silently.
-	$(MAKE) -C ../secure_api all-ver OTHERFLAGS="--record_hints"
+	$(MAKE) -C ../secure_api all-ver
 
 hints:
 	$(info This directory does not contain .fst files, so no hints to generate.)
