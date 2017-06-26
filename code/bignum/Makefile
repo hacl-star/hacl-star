@@ -24,18 +24,14 @@ BIGNUM_FILES= \
 
 FSTAR_INCLUDES+=--include interfaces --include ../lib
 
-%.fst-ct: %.fst
-	$(FSTAR) --lax $^
-
-all-ct:
-	$(FSTAR) $^ --lax $(BIGNUM_FILES)
-
+ct: $(addsuffix -lax, $(BIGNUM_FILES))
 verify: $(addsuffix -verify, $(BIGNUM_FILES))
 hints: $(addsuffix .hints, $(BIGNUM_FILES))
 
 all-ci: verify
 all-ver: verify
 all-hints: hints
+all-ct: ct
 
 count-line:
 	cloc --force-lang=ocaml $(BIGNUM_FILES)

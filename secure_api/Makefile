@@ -62,7 +62,7 @@ test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 # Cleaning
 clean:
 	$(MAKE) -C LowCProvider clean
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
+	FSTAR_HOME=$(abspath $(FSTAR_HOME)) $(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
 	$(MAKE) -C vale/asm clean
 	@rm -f $(addprefix crypto/ml/, *.cmx *.o *.cmi *~)
 	@rm -rf tmp tmp-vale tmp-hacl kremlin *~ *.exe

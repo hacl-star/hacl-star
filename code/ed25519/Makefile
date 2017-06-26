@@ -2,19 +2,15 @@ include ../Makefile.include
 
 BIGNUM= \
 	../bignum/Hacl.Bignum.Limb.fst \
-	../bignum/Hacl.Spec.Bignum.Field.fst \
 	../bignum/Hacl.Bignum.Wide.fst \
-	../bignum/Hacl.Spec.Bignum.Bigint.fst \
-	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
-	../bignum/Hacl.Spec.Bignum.Fsum.fst \
-	../bignum/Hacl.Spec.Bignum.Fdifference.fst \
-	../bignum/Hacl.Spec.Bignum.Fmul.fst \
-	../bignum/Hacl.Spec.Bignum.Fscalar.fst \
-	../bignum/Hacl.Spec.Bignum.fst \
-	../bignum/Hacl.Bignum.Fscalar.fst \
+	../bignum/Hacl.Bignum.Fsum.fst \
 	../bignum/Hacl.Bignum.Fproduct.fst \
 	../bignum/Hacl.Bignum.Fmul.fst \
-	../bignum/Hacl.Bignum.fst
+	../bignum/Hacl.Spec.Bignum.Field.fst \
+	../bignum/Hacl.Spec.Bignum.Bigint.fst \
+	../bignum/Hacl.Spec.Bignum.Fsum.fst \
+	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
+	../bignum/Hacl.Spec.Bignum.Fmul.fst
 
 ED25519_SPECIFIC= \
 	Hacl.Impl.BignumQ.Mul.fst \
@@ -122,79 +118,47 @@ ED25519_FILES=$(ED25519_SPECIFIC) $(BIGNUM)
 
 FSTAR_INCLUDES+=--include $(HACL_HOME)/code/bignum --include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/code/hash
 
-# Lax typechecking against the restricted integer interface
-%.fst-ct: %.fst
-	$(FSTAR) --lax $^
-%.fsti-ct: %.fsti
-	$(FSTAR) --lax $^
-
-all-ct:
+ct: $(addsuffix -lax, $(ED25519_FILES))
 	$(FSTAR) --lax --verify_all Hacl.Impl.Ed25519.SecretToPublic.fst Hacl.Impl.Ed25519.Sign.fst 
+all-ct: ct
 
-verify: $(addsuffix -verify, $(ED25519_FILES))
-lax: $(addsuffix -lax, $(ED25519_FILES))
-specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_SPECIFIC)))
+bignum-ver: $(addsuffix -reloc-verify, $(BIGNUM))
+specific-ver: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_SPECIFIC)))
+verify: bignum-ver specific-ver
+hints: bignum-hints specific-hints
+all-ver: verify
+
+# Hints regeneration                                                          
 bignum-hints: $(addsuffix .reloc.hints, $(BIGNUM))
 specific-hints: $(addsuffix .hints, $(ED25519_SPECIFIC))
 hints: bignum-hints specific-hints
-
-all-ver: verify
-all-lax: lax 
-all-ci: specific-ci
 all-hints: hints
 
-KEMLIN_SKIP_COMPILATION=$(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
-		-I ../../bignum -I ../../lib/kremlin -I ../../../specs -I ../../curve25519 \
-		-I ../hash \
-		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
-		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
-		-drop Prims -drop FStar -bundle 'Hacl.Bignum25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum25519' \
-		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-		-skip-compilation -fsopt '--eager_inference'
+# For CI, all modules restricted from incomplete or slow ones
+bignum-ci: $(addsuffix -reloc-verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
+specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(ED25519_SPECIFIC)))
+ci: bignum-ci specific-ci
+all-ci: ci
 
 ../hash/sha2-c/SHA2_512.c:
 	$(MAKE) -C ../hash sha2-c/SHA2_512.c
 
-ed25519-c/Ed25519.c: \
-	Hacl.Bignum25519.fst \
-	../hash/Hacl.Impl.SHA512.Ed25519.fst \
-	../hash/SHA2_512.fst \
-	Hacl.Impl.Load56.fst \
-	Hacl.Impl.Load51.fst \
-	Hacl.Impl.Store51.fst \
-	Hacl.Impl.BignumQ.Mul.fst \
-	Hacl.Impl.SHA512.ModQ.fst \
-	Hacl.Impl.Sha512.fst \
-	Hacl.Impl.Ed25519.Pow2_252m2.fst \
-	Hacl.Impl.Ed25519.PointAdd.fst \
-	Hacl.Impl.Ed25519.PointDouble.fst \
-	Hacl.Impl.Ed25519.SecretExpand.fst \
-	Hacl.Impl.Ed25519.PointCompress.fst \
-	Hacl.Impl.Ed25519.PointDecompress.fst \
-	Hacl.Impl.Ed25519.RecoverX.fst \
-	Hacl.Impl.Ed25519.Ladder.Step.fst \
-	Hacl.Impl.Ed25519.Ladder.fst \
-	Hacl.Impl.Ed25519.PointEqual.fst \
-	Hacl.Impl.Ed25519.SecretToPublic.fst \
-	Ed25519.fst
-	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
-	 	-I $(HACL_HOME)/code/bignum -I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(HACL_HOME)/code/curve25519 \
-	 	-I $(HACL_HOME)/code/hash \
-	 	$^ \
-	 	-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
-	 	-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
-	 	-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Hash.\*,SHA2_512' \
-	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
-	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -skip-compilation
 
-extract-c:ed25519-c/Ed25519.c
+KREMLIN_ARGS+=-I ../bignum -I ../curve25519 -I ../hash
+
+ed25519-c/Ed25519.c: $(filter %.fst,$(ED25519_FILES))
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir ed25519-c $^ \
+		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
+		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
+		-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Hash.\*,SHA2_512' \
+		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
+		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -skip-compilation
+
+extract-c: ed25519-c/Ed25519.c
 
 ed25519.exe: ed25519-c/Ed25519.c
-	 $(KREMLIN_HOME)/krml -tmpdir ed25519-c $(KREMLIN_ARGS) \
-	 	-I $(HACL_HOME)/code/bignum -I ../../lib/kremlin -I $(HACL_HOME)/code/../specs \
-		-I $(HACL_HOME)/code/curve25519 \
-	 	$^  Hacl.Test.Ed25519.fst -no-prefix 'Hacl.Test.Ed25519' \
+	 $(KREMLIN)$(KREMLIN_ARGS) -tmpdir ed25519-c \
+	 	$^ Hacl.Test.Ed25519.fst -no-prefix 'Hacl.Test.Ed25519' \
 	 	-drop 'Hacl.Spec,Hacl.Cast,Hacl.UInt.\*,Hacl.Endianness' \
 	 	-drop 'Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.\*' \
 	 	-drop 'Prims,FStar,Hacl.Bignum25519,Hacl.Impl.Ed25519.Pow2_252m2,Ed25519' \

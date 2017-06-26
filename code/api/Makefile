@@ -19,23 +19,16 @@ KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519
 		-drop FStar,Hacl.Spec,Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64 \
 		-drop Hacl.UInt128,Hacl.Types $(KREMLIN_ARGS)
 
-# Lax typechecking against the restricted integer interface
-%.fst-ct: %.fst
-	$(FSTAR) --lax $^
-
-all-ct:
-	$(FSTAR) --lax $(API_FILES)
-
 # Parameter for interactive mode
 %.fst-in:
 	@echo $(OPTIONS) --hint_info \
 	$(FSTAR_INCLUDES)
 
+ct: $(addsuffix -lax, $(API_FILES))
 verify: $(addsuffix -verify, $(API_FILES))
-lax: $(addsuffix -lax, $(API_FILES))
 hints: $(addsuffix .hints, $(API_FILES))
 all-ver: verify
-all-lax: lax
+all-ct: ct
 all-hints: hints
 
 # For CI, all modules restricted from incomplete or slow ones

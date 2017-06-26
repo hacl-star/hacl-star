@@ -14,11 +14,14 @@ MODULES=Hacl.Symmetric.GCM.fst Hacl.Symmetric.AES.fst Hacl.AEAD.AES256GCM.fst
 
 FSTAR_INCLUDES+=--include $(HACL_HOME)/code/lib
 
-lax:
+ct:
 	$(FSTAR) --lax $(MODULES)
 
 ver:
 	$(FSTAR) $(MODULES)
+
+all-ct: ct
+all-ver: ver
 
 clean:
 	rm -f *~

@@ -29,6 +29,7 @@ ci: $(addsuffix -ci, $(DIRECTORIES) experimental)
 all-verify: verify
 all-hints: hints
 all-ci: ci
+all-ct: ct
 
 clean: $(addsuffix -clean, $(DIRECTORIES) experimental)
 	rm -rf *~ *.exe *.out

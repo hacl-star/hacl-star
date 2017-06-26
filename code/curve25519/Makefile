@@ -52,22 +52,15 @@ X25519_FILES=$(BIGNUM) $(X25519_SPECIFIC)
 
 FSTAR_INCLUDES+=--include ../bignum
 
-# Lax typechecking against the restricted integer interface
-%.fst-ct: %.fst
-	$(FSTAR) --lax $^
-
-# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
-all-ct:
+ct: $(addsuffix -lax, $(X25519_FILES))
+	# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
 	$(FSTAR) --lax --verify_all Curve25519.fst
-
-all-lax: $(addsuffix -lax, $(X25519_FILES))
 
 bignum-ver: $(addsuffix -reloc-verify, $(BIGNUM))
 specific-ver: $(addsuffix -verify, $(X25519_SPECIFIC))
 verify: bignum-ver specific-ver
 all-ver: verify
-
-all-lax: $(addsuffix -lax, $(X25519_FILES))
+all-ct: ct
 
 # Hints regeneration                                                          
 bignum-hints: $(addsuffix .reloc.hints, $(BIGNUM))
@@ -81,13 +74,8 @@ specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_SPECIFI
 all-ci: bignum-ci specific-ci
 
 
-
-
-INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/bignum $(KREMLIN_HOME)/kremlib $(HACL_HOME)/specs
-INCLUDES=$(addprefix -I , $(INCLUDE_DIRS))
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
-KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
-KRML=$(KRML_BIN) $(KREMLIN_ARGS) $(INCLUDES) -tmpdir x25519-c \
+KREMLIN_ARGS+=-I ../bignum -tmpdir x25519-c \
 	-drop Spec.\*,Hacl.Spec.\*,Hacl.Cast,Hacl.UInt.\*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims,FStar \
 	-add-include '"testlib.h"' 
 
@@ -98,12 +86,15 @@ depend:
 -include .depend
 
 x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
-	$(KRML) -skip-translation $^
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^
 
-x25519-c/Curve25519.c x25519-c/Hacl_Test_X25519.c: x25519-c/out.krml $(KRML_BIN)
-	$(KRML) -skip-compilation $< \
+x25519-c/Curve25519.c x25519-c/Hacl_Test_X25519.c: x25519-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation $< \
 		-no-prefix Hacl.Test.X25519 \
 	 	-bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.\*,Hacl.EC,Hacl.EC.\*'
+
+INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/bignum $(KREMLIN_HOME)/kremlib $(HACL_HOME)/specs
+INCLUDES=$(addprefix -I , $(INCLUDE_DIRS))
 
 x25519.exe: x25519-c/Curve25519.c x25519-c/Hacl_Test_X25519.c $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c
 	$(CC) $(INCLUDES) $(CCFLAGS) $^ -o $@

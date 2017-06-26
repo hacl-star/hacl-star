@@ -57,21 +57,24 @@ VERBOSE=-verbose
 endif
 
 KREMLIN=$(KREMLIN_HOME)/krml
-ifeq ($(CC),ccomp)
+ifdef USE_CCOMP
   KREMLIN_ARGS=-cc compcert $(VERBOSE)
+else ifdef USE_CL
+  KREMLIN_ARGS=-cc msvc $(VERBOSE)
 else
   KREMLIN_ARGS=-ccopt -march=native $(VERBOSE) -ldopt -flto
 endif
 
 # Linux specific compilation instruction for PneuTube
 ifeq ($(UNAME), Linux)
-KREMLIN_ARGS+= -ccopt -D_GNU_SOURCE
+KREMLIN_ARGS+=-ccopt -D_GNU_SOURCE
 endif
 
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
-KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(HACL_HOME)/specs
+KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs
 
+FSTAR_LIB=$(FSTAR_HOME)/ulib
 FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs 
 
 ifndef CLOUD_VERIFY  
@@ -102,7 +105,7 @@ import-kremlin:
 	$(FSTAR) --lax $^
 
 %.fst-krml: %.fst
-	$(KREMLIN) $(KREMLIN_INCLUDES) $^
+	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_INCLUDES) $^
 
 %.fst-verify: %.fst
 	$(FSTAR) $^

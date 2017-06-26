@@ -9,8 +9,7 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
-all:
-	$(MAKE) extract-specs extract-all-c ct
+all: extract-specs extract-all-c ct
 	$(MAKE) -C .. verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
@@ -18,9 +17,7 @@ all:
 	# JP: fixme, doesn't work on build machine
 	# $(MAKE) -C snapshot-gcc
 
-travis:
-	$(MAKE) extract-c-code
-	$(MAKE) ct
+travis: extract-c-code ct
 	$(MAKE) -C .. world
 
 extract-specs:
@@ -46,8 +43,8 @@ extract-c: extract-c-code extract-c-crypto # extract-c-apps
 
 # These cannot benefit from parallelism, tests C extraction for available compilers
 extract-all-c:
-	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
-	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
+	if $(HAS_CCOMP); then USE_CCOMP=true $(MAKE) extract-c ; fi
+	if $(HAS_CL); then USE_CL=true $(MAKE) extract-c ; fi
 	$(MAKE) extract-c
 
 compile-vale:
