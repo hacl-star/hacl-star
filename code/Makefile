@@ -1,6 +1,7 @@
 all: extract-c ct verify
 
-DIRECTORIES=salsa-family bignum poly1305 curve25519 api hmac # ed25519 hash
+DIRECTORIES=salsa-family bignum poly1305 curve25519 api hmac ed25519 hash
+TOOSLOW=ed25519 hash
 
 %-c: %
 	$(MAKE) -C $< extract-c
@@ -20,11 +21,11 @@ DIRECTORIES=salsa-family bignum poly1305 curve25519 api hmac # ed25519 hash
 %-clean: %
 	$(MAKE) -C $< clean
 
-verify: $(addsuffix -ver, $(DIRECTORIES))
+verify: $(addsuffix -ver, $(filter-out $(TOOSLOW),$(DIRECTORIES)))
 ct: $(addsuffix -ct, $(DIRECTORIES))
 extract-c: $(addsuffix -c, $(filter-out bignum, $(DIRECTORIES)))
 hints: $(addsuffix -hints, $(DIRECTORIES))
-ci: $(addsuffix -ci, $(DIRECTORIES) experimental)
+ci: $(addsuffix -ci, $(filter-out $(TOOSLOW),$(DIRECTORIES)) experimental)
 
 all-verify: verify
 all-hints: hints
