@@ -101,6 +101,7 @@ inline_for_extraction let computation_5 r0 r1 r2 r3 r4 d0 d1 =
   let open Hacl.Bignum.Wide in
   ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     ))
 
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
 val fsquare_spec_: s:seqelem{fsquare_pre_ s} -> Tot (s':seqelem_wide{
   let r0 = v (Seq.index s 0) in
@@ -397,7 +398,7 @@ let lemma_fsquare_spec_3 s =
 let lemma_mul_symm a b : Lemma (a * b + b * a = 2 * a * b) = ()
 
 
-#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsquare_spec_4: s:seqelem -> Lemma
   (let r0 = v (Seq.index s 0) in
