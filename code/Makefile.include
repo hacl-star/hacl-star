@@ -77,6 +77,8 @@ KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs
 FSTAR_LIB=$(FSTAR_HOME)/ulib
 FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs 
 
+OTHERFLAGS+=--n_cores 4
+
 ifndef CLOUD_VERIFY  
   FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
 else
