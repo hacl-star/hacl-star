@@ -1,5 +1,5 @@
 [
-  "Àu\nœ•YWØŠZ \u001c&?øþ",
+  "Ê\u001f¾ùÑ\u0010>À³\u0004\b\u0019ï~™!",
   [
     [
       "Crypto.AEAD.ref_as_aead_log",
@@ -22,6 +22,7 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_interpretation_Tm_arrow_257be5ee7da9f477702a7d2ee9bef0c9",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
         "assumption_FStar.HyperHeap.HasEq_rid", "bool_inversion",
         "constructor_distinct_FStar.Pervasives.Native.None",
@@ -32,7 +33,9 @@
         "equation_Crypto.AEAD.Invariant.eternal_region",
         "equation_Crypto.AEAD.Invariant.safeMac",
         "equation_Crypto.AEAD.ref_as_aead_log",
+        "equation_Crypto.Symmetric.PRF.itable",
         "equation_Crypto.Symmetric.PRF.region",
+        "equation_Crypto.Symmetric.PRF.table_t",
         "equation_Crypto.Symmetric.UF1CMA.skey",
         "equation_Crypto.Symmetric.UF1CMA.skeyed",
         "equation_FStar.HyperHeap.contains_ref",
@@ -46,10 +49,10 @@
         "equation_Prims._assert",
         "fuel_guarded_inversion_Crypto.Symmetric.PRF.state",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
-        "fuel_guarded_inversion_FStar.HyperStack.reference",
         "function_token_typing_FStar.Heap.heap",
         "function_token_typing_FStar.HyperHeap.rid",
         "function_token_typing_FStar.HyperHeap.test0",
+        "function_token_typing_FStar.Seq.Base.seq",
         "function_token_typing_Flag.mac_log",
         "kinding_Crypto.Symmetric.PRF.entry@tok",
         "lemma_FStar.Heap.lemma_contains_implies_used",
@@ -64,6 +67,7 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Some_a",
         "projection_inverse_FStar.Pervasives.Native.Some_v",
+        "refinement_interpretation_Crypto.Symmetric.PRF_Tm_refine_71e5af1853a508cd91094459cb8dd09f",
         "refinement_interpretation_Crypto.Symmetric.PRF_Tm_refine_934899033d2ffbc414bc7960eec13d2a",
         "refinement_interpretation_Crypto.Symmetric.PRF_Tm_refine_dafdc41985d9b3ea50f29b585da83a09",
         "refinement_interpretation_FStar.HyperStack_Tm_refine_957e65310ce1a9712607354807b9857b",
@@ -71,9 +75,12 @@
         "refinement_interpretation_FStar.Monotonic.RRef_Tm_refine_5a09de1efe4b8e150cfdaeaf95d864d4",
         "refinement_interpretation_FStar.StrongExcludedMiddle_Tm_refine_94f72bfda5e23ac3960136c8bc3f958c",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "token_correspondence_FStar.Seq.Base.seq",
         "typing_Crypto.AEAD.Invariant.aead_entries",
         "typing_Crypto.AEAD.Invariant.safeMac",
         "typing_Crypto.Symmetric.PRF.__proj__State__item__mac_rgn",
+        "typing_Crypto.Symmetric.PRF.__proj__State__item__table",
+        "typing_Crypto.Symmetric.UF1CMA.skeyed",
         "typing_FStar.Heap.contains", "typing_FStar.HyperHeap.as_ref",
         "typing_FStar.HyperStack.__proj__HS__item__h",
         "typing_FStar.HyperStack.__proj__MkRef__item__ref",
@@ -113,6 +120,7 @@
         "equation_Crypto.AEAD.Invariant.aead_log",
         "equation_Crypto.AEAD.Invariant.eternal_region",
         "equation_Crypto.AEAD.Invariant.safeMac",
+        "equation_Crypto.Symmetric.UF1CMA.skeyed",
         "equation_FStar.HyperHeap.test0",
         "equation_FStar.HyperStack.is_eternal_region", "equation_Flag.prf",
         "equation_Prims._assert",
@@ -125,6 +133,7 @@
         "projection_inverse_FStar.Pervasives.Native.Some_v",
         "refinement_interpretation_Crypto.Symmetric.PRF_Tm_refine_e42bd1dfc50070d9ac26b2f978da2876",
         "refinement_interpretation_FStar.Monotonic.RRef_Tm_refine_5a09de1efe4b8e150cfdaeaf95d864d4",
+        "typing_Crypto.Symmetric.UF1CMA.skeyed",
         "typing_FStar.HyperStack.is_eternal_region", "typing_Flag.prf",
         "typing_Flag.safeHS"
       ],
@@ -136,9 +145,13 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_FStar.Heap.equal_dom",
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Crypto.Indexing.Writer@tok",
+        "equation_FStar.Heap.equal_dom",
         "equation_FStar.HyperStack.equal_stack_domains",
-        "fuel_guarded_inversion_FStar.HyperStack.mem"
+        "fuel_guarded_inversion_Crypto.AEAD.Invariant.aead_state",
+        "fuel_guarded_inversion_FStar.HyperStack.mem",
+        "refinement_interpretation_Crypto.AEAD_Tm_refine_b4fa79349239555108f2edc7ce308aca"
       ],
       0
     ],
