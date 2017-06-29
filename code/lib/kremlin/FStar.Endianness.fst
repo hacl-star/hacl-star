@@ -27,7 +27,7 @@ type  lbytes  (l:nat) = b:bytes   {Seq.length b == l}
 
 let uint128_to_uint8 (a:UInt128.t) : Tot (b:UInt8.t{UInt8.v b = UInt128.v a % pow2 8})
   = Math.Lemmas.pow2_modulo_modulo_lemma_2 (UInt128.v a) 64 8;
-    uint64_to_uint8 (uint128_to_uint64 a)
+    uint64_to_uint8 (FStar.UInt128.uint128_to_uint64 a)
 
 #reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
@@ -178,7 +178,7 @@ let lemma_little_endian_lt_2_128 b =
 #reset-options "--z3rlimit 100 --max_fuel 1 --initial_fuel 1"
 
 val uint8_to_uint128: a:UInt8.t -> Tot (b:UInt128.t{UInt128.v b == UInt8.v a})
-let uint8_to_uint128 a = uint64_to_uint128 (uint8_to_uint64 a)
+let uint8_to_uint128 a = FStar.UInt128.uint64_to_uint128 (uint8_to_uint64 a)
 
 
 // turns an integer into a bytestream, little-endian

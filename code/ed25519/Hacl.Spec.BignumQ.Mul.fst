@@ -237,7 +237,7 @@ val split_56:
     /\ UInt128.v (fst t) <= 0x1000000000000000})
 let split_56 x =
   let carry = FStar.UInt128.(x >>^ 56ul) in
-  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  let t     = FStar.UInt128.uint128_to_uint64 x &^ 0xffffffffffffffuL in
   assert_norm(pow2 56 = 0x100000000000000);
   UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (FStar.UInt128.v x) 56 64;
@@ -248,7 +248,7 @@ let split_56 x =
 
 val mod_40: x:UInt128.t -> Tot (z:U64.t{v z = UInt128.v x % (pow2 40)})
 let mod_40 x =
-  let x' = Int.Cast.uint128_to_uint64 x in
+  let x' = FStar.UInt128.uint128_to_uint64 x in
   let x'' = x' &^ 0xffffffffffuL in
   UInt.logand_mask (v x') 40;
   assert_norm(pow2 40   = 0x10000000000);
@@ -394,7 +394,7 @@ val carry_step:
     /\ v (fst t) < 0x100000000000000})
 let carry_step x y =
   let carry = FStar.UInt128.(x >>^ 56ul) in
-  let t     = Int.Cast.uint128_to_uint64 x &^ 0xffffffffffffffuL in
+  let t     = FStar.UInt128.uint128_to_uint64 x &^ 0xffffffffffffffuL in
   assert_norm(pow2 56 = 0x100000000000000);
   UInt.logand_mask #64 (UInt128.v x % pow2 64) 56;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (FStar.UInt128.v x) 56 64;
@@ -449,14 +449,14 @@ let carry z =
   let x5, z6' = carry_step z5' z6 in
   let x6, z7' = carry_step z6' z7 in
   let x7, z8' = carry_step z7' z8 in
-  let x8, z9' = carry_step z8' (Int.Cast.uint64_to_uint128 0uL) in
+  let x8, z9' = carry_step z8' (FStar.UInt128.uint64_to_uint128 0uL) in
   assert(eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8]
     =   UInt64.v x0 + p1 * UInt64.v x1 + p2 * UInt64.v x2 + p3 * UInt64.v x3 + p4 * UInt64.v x4
   + p5 * UInt64.v x5 + p6 * UInt64.v x6 + p7 * UInt64.v x7 + p8 * UInt64.v x8 + p9 * UInt128.v z9');
   assert_norm(pow2 528 = 0x1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);
   assert(UInt128.v z9' < 0x100000000000000);
   assert_norm(pow2 64 = 0x10000000000000000);
-  let x9 = Int.Cast.uint128_to_uint64 z9' in
+  let x9 = FStar.UInt128.uint128_to_uint64 z9' in
   Math.Lemmas.modulo_lemma (UInt128.v z9') (pow2 64);
   assert(v x9 < 0x100000000000000);
   assert(eval_q_wide z.[0] z.[1] z.[2] z.[3] z.[4] z.[5] z.[6] z.[7] z.[8]

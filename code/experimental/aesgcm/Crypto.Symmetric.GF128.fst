@@ -270,8 +270,8 @@ private val mk_len_info: len_info:elemB ->
     (requires (fun h -> live h len_info))
     (ensures (fun h0 _ h1 -> live h1 len_info /\ modifies_1 len_info h0 h1))
 let mk_len_info len_info len_1 len_2 =
-  let l1 = uint64_to_uint128(uint32_to_uint64 len_1) in
-  let l2 = uint64_to_uint128(uint32_to_uint64 len_2) in
+  let l1 = FStar.UInt128.uint64_to_uint128(uint32_to_uint64 len_1) in
+  let l2 = FStar.UInt128.uint64_to_uint128(uint32_to_uint64 len_2) in
   let u = U128.((l1 <<^ 64ul) +^ l2) in
   len_info.(0ul) <- u
 
