@@ -193,7 +193,7 @@ let fmul out a b =
   Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine (as_seq h a) (as_seq h b);
   Hacl.Bignum.fmul out a b
 
-#reset-options "--max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 232" 
 
 open Hacl.Cast
 
