@@ -1,7 +1,7 @@
 all: extract-c ct verify
 
 DIRECTORIES=salsa-family bignum poly1305 curve25519 api hmac ed25519 hash
-TOOSLOW=ed25519 hash
+TOOSLOW=hash
 
 %-c: %
 	$(MAKE) -C $< extract-c
