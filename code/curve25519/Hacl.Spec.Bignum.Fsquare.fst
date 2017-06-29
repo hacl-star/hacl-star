@@ -398,7 +398,7 @@ let lemma_fsquare_spec_3 s =
 let lemma_mul_symm a b : Lemma (a * b + b * a = 2 * a * b) = ()
 
 
-#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 689 --initial_fuel 0 --max_fuel 0"
 
 val lemma_fsquare_spec_4: s:seqelem -> Lemma
   (let r0 = v (Seq.index s 0) in
