@@ -101,7 +101,7 @@ inline_for_extraction let computation_5 r0 r1 r2 r3 r4 d0 d1 =
   let open Hacl.Bignum.Wide in
   ( d0) *^ r4 +^ ( d1) *^ r3 +^ (( r2) *^ (r2     ))
 
-#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 71 --initial_fuel 0 --max_fuel 0"
 
 val fsquare_spec_: s:seqelem{fsquare_pre_ s} -> Tot (s':seqelem_wide{
   let r0 = v (Seq.index s 0) in
@@ -419,7 +419,6 @@ let lemma_fsquare_spec_4 s =
   lemma_mul_symm r2 r3; lemma_mul_symm r2 r4;
   lemma_mul_symm r3 r4
 
-
 #reset-options "--z3rlimit 10"
 
 val lemma_sum_mod_0: a:nat -> b:nat -> c:nat -> Lemma ( (a + b * c) % prime = (a + ((b % prime) * c)) % prime)
@@ -711,7 +710,6 @@ let lemma_53_to_fsquare_is_fine s =
   lemma_mul_ineq d1 r3 (2*p53) (p53);
   lemma_mul_ineq r2 r2 (p53) (p53);
   ()
-
 
 #set-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
 
