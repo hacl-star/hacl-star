@@ -569,7 +569,7 @@ let lemma_fsquare_spec_5_0 r0 r1 r2 r3 r4 =
   lemma_fsquare_spec_5_2 r0 r1 r2 r3 r4
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
 
 val lemma_fsquare_spec_1: s:seqelem -> Lemma
   (let r0 = v (Seq.index s 0) in
