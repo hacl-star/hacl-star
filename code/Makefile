@@ -6,6 +6,9 @@ TOOSLOW=hash
 %-c: %
 	$(MAKE) -C $< extract-c
 
+%-test: %
+	$(MAKE) -C $< test
+
 %-ver: %
 	$(MAKE) -C $< all-ver
 
@@ -22,6 +25,7 @@ TOOSLOW=hash
 	$(MAKE) -C $< clean
 
 verify: $(addsuffix -ver, $(filter-out $(TOOSLOW),$(DIRECTORIES)))
+test: $(addsuffix -test, $(DIRECTORIES))
 ct: $(addsuffix -ct, $(DIRECTORIES))
 extract-c: $(addsuffix -c, $(filter-out bignum, $(DIRECTORIES)))
 hints: $(addsuffix -hints, $(DIRECTORIES))
@@ -31,6 +35,7 @@ all-verify: verify
 all-hints: hints
 all-ci: ci
 all-ct: ct
+all-test: test
 
 clean: $(addsuffix -clean, $(DIRECTORIES) experimental)
 	rm -rf *~ *.exe *.out
