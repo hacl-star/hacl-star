@@ -8,16 +8,6 @@ API_FILES= \
 
 FSTAR_INCLUDES+=--include ../salsa-family --include $(HACL_HOME)/code/bignum --include ../curve25519 --include ../poly1305
 
-KRML=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
-		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum  \
-		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 \
-		-drop Hacl.UInt16 -drop Hacl.UInt32 -drop Hacl.UInt64 -drop Hacl.UInt128 \
-		-drop Hacl.Types $(KREMLIN_ARGS)
-
-KRML2=$(KREMLIN_HOME)/krml -I ../lib/kremlin -I ../salsa-family -I ../curve25519 \
-		-I ../poly1305 -I ../../specs -I $(HACL_HOME)/code/bignum \
-		-drop FStar,Hacl.Spec,Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64 \
-		-drop Hacl.UInt128,Hacl.Types $(KREMLIN_ARGS)
 
 # Parameter for interactive mode
 %.fst-in:
@@ -38,30 +28,23 @@ api: verify
 
 extract-c: box-c/NaCl.c aead-c/Chacha20Poly1305.c
 
-# Legacy, to be removed
-extract-api:
-	mkdir -p api-c
-	$(KRML) -tmpdir api-c NaCl.fst -verbose -skip-compilation \
-		-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\* \
-		-drop Hacl.Constants,Hacl.Endianness \
-		-bundle "NaCl=NaCl,Hacl.SecretBox,Hacl.Box"
+test:
+
+KREMLIN_ARGS+=-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\*,Hacl.Constants,Hacl.Endianness
 
 box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst NaCl.fst
 	mkdir -p box-c
-	$(KRML) -tmpdir box-c NaCl.fst -skip-compilation \
-		-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\* \
-		-drop Hacl.Constants,Hacl.Endianness \
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir box-c NaCl.fst -skip-compilation \
 		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad"
+
+
+KREMLIN_ARGS2=$(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -add-include '"Chacha20.h"' -add-include '"AEAD_Poly1305_64.h"' \
+	-I ../salsa-family -I ../poly1305 -I ../bignum \
+	-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide,Hacl.UInt16,Hacl.Types,Hacl.Bignum.\*,AEAD_Poly1305_64,Chacha20
 
 aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Chacha20.fsti Chacha20Poly1305.fst
 	mkdir -p aead-c
-	$(KRML2) -tmpdir aead-c Chacha20Poly1305.fst \
-		-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide \
-		-drop Hacl.UInt16,Hacl.Types,Spec.\*,Hacl.Spec.\*,Hacl.Spe.\* \
-		-drop Hacl.Constants,Hacl.Endianness,Hacl.Bignum.\*,Hacl.Spe.\*,Seq.\*,Hacl.Impl.\* \
-		-drop AEAD_Poly1305_64,Chacha20 \
-		-add-include '"testlib.h"' -skip-compilation -add-include '"Chacha20.h"' \
-		-add-include '"AEAD_Poly1305_64.h"' -I ../salsa-family -I ../poly1305 -I ../bignum -I ../../specs
+	$(KREMLIN) $(KREMLIN_ARGS2) -tmpdir aead-c Chacha20Poly1305.fst -skip-compilation
 	# TODO: FIX FOR KREMLIN EXTRACTION ISSUE, CHECK WITH JP
 	$(SED) -i 's/(void \*)(uint8_t )0, //g' aead-c/Chacha20Poly1305.c
 

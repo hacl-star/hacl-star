@@ -27,6 +27,7 @@ FSTAR_INCLUDES+=--include interfaces --include ../lib
 ct: $(addsuffix -lax, $(BIGNUM_FILES))
 verify: $(addsuffix -verify, $(BIGNUM_FILES))
 hints: $(addsuffix .hints, $(BIGNUM_FILES))
+test:
 
 all-ci: verify
 all-ver: verify
