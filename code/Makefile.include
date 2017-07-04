@@ -126,4 +126,3 @@ import-kremlin:
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^
 %.fsti.reloc.hints: %.fsti
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^
-
