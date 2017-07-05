@@ -3,8 +3,8 @@ UNAME := $(shell uname)
 
 ifndef HACL_HOME
   THIS_DIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-  HACL_HOME_ABS:=$(realpath $(THIS_DIR)/..)
-  HACL_HOME:=$(shell realpath --relative-to=$(CURDIR) $(HACL_HOME_ABS))
+  HACL_HOME_ABS:=$(shell python -c "import os.path; print os.path.realpath('$(THIS_DIR)/..')")
+  HACL_HOME:=$(shell python -c "import os.path; print os.path.relpath('$(HACL_HOME_ABS)', '$(CURDIR)')")
   # $(info HACL_HOME (abs) is at $(HACL_HOME_ABS))
 endif
 
@@ -15,7 +15,7 @@ else
   ifndef FSTAR_HOME_ABS
     FSTAR_HOME_ABS:=$(abspath $(FSTAR_HOME))
   endif
-  FSTAR_HOME:=$(shell realpath --relative-to=$(CURDIR) $(FSTAR_HOME_ABS))
+  FSTAR_HOME:=$(shell python -c "import os.path; print os.path.relpath('$(FSTAR_HOME_ABS)', '$(CURDIR)')")
 endif
 
 export FSTAR_HOME_ABS
@@ -29,7 +29,7 @@ else
   ifndef KREMLIN_HOME_ABS
     KREMLIN_HOME_ABS:=$(abspath $(KREMLIN_HOME))
   endif
-  KREMLIN_HOME:=$(shell realpath --relative-to=$(CURDIR) $(KREMLIN_HOME_ABS))
+  KREMLIN_HOME:=$(shell python -c "import os.path; print os.path.relpath('$(KREMLIN_HOME_ABS)', '$(CURDIR)')")
 endif
 
 export KREMLIN_HOME_ABS

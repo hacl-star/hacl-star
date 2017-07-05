@@ -3,7 +3,7 @@
 set -e
 
 if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-  sudo apt-get install --yes libssl-dev opam libgmp-dev libsqlite3-dev g++-5 gcc-5 libsodium-dev coreutils;
+  sudo apt-get install --yes libssl-dev opam libgmp-dev libsqlite3-dev g++-5 gcc-5 libsodium-dev python;
   sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 200;
   sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 200;
 fi
