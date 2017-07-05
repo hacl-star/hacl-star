@@ -220,7 +220,9 @@ lib-test: lib
 
 LIBFLAGS=$(CFLAGS) -fPIC -Wno-discarded-qualifiers
 
-nacllib:
+nacllib: libnacl.so
+
+libnacl.so:
 	$(CC) $(LIBFLAGS) \
 	  Salsa20.c -c -o Salsa20.o
 	$(CC) $(LIBFLAGS) \
@@ -240,6 +242,11 @@ nacllib:
 	$(CC) -shared  $(LIBFLAGS) -I ../../test/c-experimental -I . \
 	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c-experimental/randombytes.c ../../test/c-experimental/hacl.c \
 	  -o libnacl.so
+
+unit-tests: libnacl.so
+	$(CC) $(CFLAGS) -I ../../test/c-experimental -I . ../../test/c-experimental/unit_tests.c ../../other_providers/tweetnacl/tweetnacl.c -o unit_tests.exe $^
+	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. ./unit_tests.exe
+
 
 clean:
 	rm -rf *~ *.exe *.out *.o *.txt *.so

@@ -129,6 +129,14 @@ aead_chacha20_poly1305__decrypt(
 );
 
 /* 
+   Ed25519 Eddsa signature public key generation function
+   Takes:
+   - secret_key : private key
+   Stores:
+   - public_key: the public key associated with the private key */
+void ed25519_secret_to_public(uint8_t *public_key, uint8_t *secret_key);
+
+/* 
    Ed25519 Eddsa signature
    Takes:
    - secret: private key
@@ -161,7 +169,10 @@ bool ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t msg_len, uint8_t *si
 void sha2_512_hash(uint8_t *hash, uint8_t *input, uint32_t len);
 
 
+
 /* NaCl-like API */
+int crypto_onetimeauth(uint8_t *output, uint8_t *input, uint64_t input_len, uint8_t *key);
+
 int crypto_box_keypair(unsigned char *pk, unsigned char *sk);
 
 int crypto_box_easy(unsigned char *c, const unsigned char *m,
@@ -249,7 +260,7 @@ crypto_box_detached(
 );
 
 uint32_t
-NaCl_crypto_box_open_detached(
+crypto_box_open_detached(
   uint8_t *m,
   uint8_t *c,
   uint8_t *mac,
@@ -272,7 +283,7 @@ crypto_box_open_detached_afternm(
 int
 crypto_sign(
             uint8_t *signed_msg,
-            uint64_t *signed_len,
+            long long unsigned int *signed_len,
             uint8_t *msg,
             uint64_t msg_len,
             uint8_t *sk
@@ -280,7 +291,7 @@ crypto_sign(
 
 int crypto_sign_open(
                      uint8_t *unsigned_msg,
-                     uint64_t *unsigned_msg_len,
+                     long long unsigned int *unsigned_msg_len,
                      uint8_t *msg,
                      uint64_t msg_len,
                      uint8_t *pk
@@ -290,3 +301,21 @@ int crypto_sign_keypair(
                         uint8_t pk[32],
                         uint8_t sk[32]
                         );
+
+
+int crypto_box(uint8_t *cipher, uint8_t *message, uint64_t msg_len, uint8_t *nonce,  uint8_t *pk, uint8_t *sk);
+
+int crypto_box_open(uint8_t *msg, uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *pk, uint8_t *sk);
+
+int crypto_box_afternm(uint8_t *cipher, uint8_t *msg, uint64_t msg_len, uint8_t *nonce, uint8_t *key);
+
+int crypto_box_open_afternm(uint8_t *msg, uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *key);
+
+int crypto_secretbox(uint8_t *cipher, uint8_t *msg, uint64_t msg_len, uint8_t *nonce, uint8_t *key);
+
+int crypto_secretbox_open(uint8_t *msg, uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *key);
+
+
+int crypto_stream(uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *key);
+
+int crypto_stream_xor(uint8_t *cipher, uint8_t *msg, uint64_t cipher_len, uint8_t *nonce, uint8_t *key);
