@@ -26,7 +26,7 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(API_FILES)))
 
 api: verify
 
-extract-c: box-c/NaCl.c aead-c/Chacha20Poly1305.c
+extract-c: aead-c/Chacha20Poly1305.c # box-c/NaCl.c 
 
 test:
 

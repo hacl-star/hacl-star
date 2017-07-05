@@ -95,7 +95,7 @@ poly1305.exe: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
 		$^ -o $@
 	./$@
 
-extract-c: poly-c/Poly1305_64.c poly-c/AEAD_Poly1305_64.c
+extract-c: poly-c/Poly1305_64.c # poly-c/AEAD_Poly1305_64.c
 
 test: poly1305.exe
 
