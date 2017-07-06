@@ -240,7 +240,7 @@ libnacl.so:
 	$(CC) $(LIBFLAGS) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
 	$(CC) -shared  $(LIBFLAGS) -I ../../test/c-experimental -I . \
-	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c-experimental/randombytes.c ../../test/c-experimental/hacl.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c-experimental/randombytes.c ../../test/c-experimental/haclnacl.c \
 	  -o libnacl.so
 
 unit-tests: libnacl.so

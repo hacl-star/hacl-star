@@ -1,9 +1,20 @@
 #include <string.h>
-#include "hacl.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include "haclnacl.h"
 /* #include "sodium.h" */
 #include "tweetnacl.h"
 
 #define SIZE (1024 * 1024)
+#define POLY_MACSIZE 16
 #define POLY_BLOCKSIZE 16
 #define POLY_KEYSIZE 32
 #define CHACHA_BLOCKSIZE 64
@@ -11,19 +22,23 @@
 #define SALSA_BLOCK_SIZE 64
 
 bool unit_test_onetimeauth(){
+  // Global length
   uint64_t len = SIZE * sizeof(uint8_t);
-  uint8_t hacl_mac[16], expected_mac[16];
-  uint8_t *key = malloc(POLY_KEYSIZE * sizeof(uint8_t));
+  // Scratch buffers
+  uint8_t hacl_mac[POLY_MACSIZE], expected_mac[POLY_MACSIZE], key[POLY_KEYSIZE];
   uint8_t *plaintext = malloc(SIZE * sizeof (uint8_t));
+  // Initializing random plaintext
   int fd = open("/dev/urandom", O_RDONLY);
   uint64_t res = read(fd, plaintext, len);
   if (res != len) {
     printf("Error on reading, got %" PRIu64 " bytes\n", res);
     return 1;
   }
+  // Tests
   int a;
   bool pass = true;
   for (int i = 0; i < 3 * POLY_BLOCKSIZE; i++){
+    // Testing crypto_onetimeauth on different length
     tweet_crypto_onetimeauth(expected_mac, plaintext, i, key);
     crypto_onetimeauth(hacl_mac, plaintext, i, key);
     a = memcmp(hacl_mac, expected_mac, 16 * sizeof (uint8_t));
@@ -32,6 +47,7 @@ bool unit_test_onetimeauth(){
       printf("POLY1305 failed on input of size %d\n.", i);
       break;
     }
+    // Testing crypto_onetimeauth verify on different length
     a = crypto_onetimeauth_verify(hacl_mac, plaintext, i, key);
     if (a != 0){
       pass = false;
@@ -39,6 +55,7 @@ bool unit_test_onetimeauth(){
       break;
     }
     hacl_mac[i%16] = ~(hacl_mac[i%16]);
+    // Testing crypto_onetimeauth proper failure on different length
     a = crypto_onetimeauth_verify(hacl_mac, plaintext, i, key);
     if (a == 0){
       pass = false;
@@ -53,6 +70,10 @@ bool unit_test_onetimeauth(){
     pass = false;
     printf("POLY1305 failed on input of size %d\n.", SIZE);
   }
+
+  close(fd);
+  free(plaintext);
+
   return pass;
 }
 
@@ -130,6 +151,10 @@ bool unit_test_crypto_box(){
     pass = false;
     printf("BOX OPEN failed on input of size %d\n", SIZE);
   }
+
+  close(fd);
+  free(plaintext);
+
   return pass;
 }
 
@@ -168,6 +193,10 @@ bool unit_test_scalarmult(){
       break;
     }
   }
+
+  close(fd);
+  free(random_bytes);
+
   return pass;
 }
 
@@ -180,7 +209,7 @@ bool unit_test_crypto_keypair(){
   uint8_t hacl_pk_bytes[32 * NUM_KEYPAIR];
   for (int i = 0; i < NUM_KEYPAIR; i++){
     tweet_crypto_sign_keypair(expected_pk_bytes + 32 * i, sk_bytes + 64 * i);
-    ed25519_secret_to_public(hacl_pk_bytes + 32 * i, sk_bytes + 64 * i);
+    crypto_sign_secret_to_public(hacl_pk_bytes + 32 * i, sk_bytes + 64 * i);
   }
   int a = memcmp(hacl_pk_bytes, expected_pk_bytes, 32 * NUM_KEYPAIR * sizeof(uint8_t));
   bool pass = true;
@@ -245,6 +274,12 @@ bool unit_test_crypto_sign(){
     pass = false;
     printf("crypto_sign_open failed on input of size %d\n", SIZE);
   }
+
+  close(fd);
+  free(plaintext);
+  free(hacl_signed_msg);
+  free(expected_signed_msg);
+
   return pass;
 }
 
@@ -285,7 +320,8 @@ bool unit_test_crypto_secretbox(){
       pass = false;
       break;
     }
-    a = crypto_secretbox_open_detached(hacl_cipher/* +32 */, expected_cipher/* +32 */, expected_cipher + 16, i, nonce, key);
+    /* a = crypto_secretbox_open_detached(hacl_cipher/\* +32 *\/, expected_cipher/\* +32 *\/, expected_cipher + 16, i, nonce, key); */
+    a = crypto_secretbox_open(hacl_cipher, expected_cipher, crypto_secretbox_ZEROBYTES + i, nonce, key);
     if (a != 0) {
       pass = false;
       printf("SECRETBOX OPEN ******* failed to verify on input of size %d\n", i);
@@ -318,6 +354,10 @@ bool unit_test_crypto_secretbox(){
     pass = false;
     printf("SECRETBOX OPEN failed on input of size %d\n", SIZE);
   }
+
+  close(fd);
+  free(plaintext);
+
   return pass;
 }
 
@@ -358,6 +398,10 @@ bool unit_test_crypto_stream(){
     pass = false;
     printf("SECRETBOX failed on input of size %d\n.", SIZE);
   }
+
+  close(fd);
+  free(plaintext);
+
   return pass;
 }
 
