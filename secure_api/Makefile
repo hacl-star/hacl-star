@@ -17,7 +17,7 @@ else
   endif
 endif
 
-KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf hkdf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/hash ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=$(FPIC) -ccopt -maes \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
   vale/asm/vale.a test/test_hacks.c \
@@ -34,6 +34,13 @@ LowCProvider-tmp: vale/asm/vale.a
 		test/Flag.fst utils/Hacl.Spec.fst \
 		aead/Crypto.AEAD.fst \
 		-tmpdir LowCProvider/tmp \
+		-skip-linking
+
+QuicProvider-tmp: vale/asm/vale.a
+	$(KRML) LowCProvider/Crypto.Indexing.fst \
+		test/Flag.fst utils/Hacl.Spec.fst \
+		aead/Crypto.AEAD.fst hkdf/Crypto.HKDF.fst \
+		-tmpdir QuicProvider/tmp \
 		-skip-linking
 
 vale/asm/vale.a:
@@ -76,6 +83,7 @@ OTHERFLAGS+= \
 --include $(HACL_HOME)/code/lib/kremlin \
 --include $(HACL_HOME)/code/poly1305 \
 --include $(HACL_HOME)/code/salsa-family \
+--include $(HACL_HOME)/code/hash \
 --include $(HACL_HOME)/secure_api/aead \
 --include $(HACL_HOME)/secure_api/prf \
 --include $(HACL_HOME)/secure_api/vale \
