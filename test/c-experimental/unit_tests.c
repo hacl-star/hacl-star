@@ -10,7 +10,6 @@
 #include <fcntl.h>
 
 #include "haclnacl.h"
-/* #include "sodium.h" */
 #include "tweetnacl.h"
 
 #define SIZE (1024 * 1024)
