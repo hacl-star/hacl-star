@@ -57,12 +57,13 @@ VERBOSE=-verbose
 endif
 
 KREMLIN=$(KREMLIN_HOME)/krml
+KREMLIN_ARGS?=
 ifdef USE_CCOMP
-  KREMLIN_ARGS=-cc compcert $(VERBOSE)
+  KREMLIN_ARGS+=-cc compcert $(VERBOSE)
 else ifdef USE_CL
-  KREMLIN_ARGS=-cc msvc $(VERBOSE)
+  KREMLIN_ARGS+=-cc msvc $(VERBOSE)
 else
-  KREMLIN_ARGS=-ccopt -march=native $(VERBOSE) -ldopt -flto
+  KREMLIN_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
 endif
 
 # Linux specific compilation instruction for PneuTube
