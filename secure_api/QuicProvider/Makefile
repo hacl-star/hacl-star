@@ -22,6 +22,7 @@ CCLIBS = $(addprefix -cclib ,-L.)
 COPTS = -fPIC -std=c11 -I tmp -I $(MITLS_HOME)/libs/ffi -I $(KREMLIN_HOME)/kremlib
 
 ifeq ($(OS),Windows_NT)
+    LIBQUICCRYPTO=libquiccrypto.dll
     # On cygwin + cygwinports, DLLs are searched in the PATH, which is not
     # altered to include by default the mingw64 native DLLs. We also need to
     # find dllcorecrypto.dll; it is in the current directory, which Windows
@@ -32,6 +33,7 @@ ifeq ($(OS),Windows_NT)
     EXTRA_LIBS = -L.
     AR = $(MARCH)-w64-mingw32-ar
 else
+    LIBQUICCRYPTO=libquiccrypto.so
     EXTRA_PATH = LD_LIBRARY_PATH=.
     UNAME_S := $(shell uname -s)
     AR = ar
@@ -48,7 +50,7 @@ endif
 
 .PHONY: test dep
 
-all: libquiccrypto.dll
+all: $(LIBQUICCRYPTO)
 
 tmp:
 	$(MAKE) -C .. QuicProvider-tmp
@@ -63,11 +65,11 @@ libhacl.a: tmp ../vale/asm/vale.a
 %.o: %.c
 	$(CC) $(COPTS) -c $< -o $@
 
-libquiccrypto.dll: libhacl.a quic_provider.o
-	$(CC) $(COPTS) -shared -L. quic_provider.o -lhacl -o libquiccrypto.dll
+$(LIBQUICCRYPTO): libhacl.a quic_provider.o
+	$(CC) $(COPTS) -shared -L. quic_provider.o -lhacl -o $@
 
 clean:
-	rm -fr tmp *.[oa] *.so *.cm[ixoa] *.cmxa *.exe *.dll *.annot *~
+	rm -fr tmp *.[oa] *.so *.cm[ixoa] *.cmxa *.exe *.dll *.so *.annot *~
 
-test.exe: libquiccrypto.dll test.o
+test.exe: $(LIBQUICCRYPTO) test.o
 	$(CC) $(COPTS) -L. test.o -lquiccrypto -o test.exe
