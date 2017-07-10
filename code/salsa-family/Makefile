@@ -71,7 +71,7 @@ chacha20-vec128/Chacha20_Vec128.c: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl
 	-add-include '"vec128.h"' \
 	$^ -skip-compilation
 
-extract-c: chacha-c/Chacha20.c salsa-c/Salsa20.c chacha-vec128/Chacha20_Vec128.c
+extract-c: chacha-c/Chacha20.c salsa-c/Salsa20.c chacha20-vec128/Chacha20_Vec128.c
 
 test: chacha20.exe salsa20.exe
 
