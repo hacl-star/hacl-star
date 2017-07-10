@@ -6,7 +6,6 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
-#include <malloc.h>
 
 #include "mitlsffi.h"
 #include "quic_provider.h"
