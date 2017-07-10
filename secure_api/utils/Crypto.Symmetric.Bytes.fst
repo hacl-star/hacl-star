@@ -45,7 +45,7 @@ type lbytes  (l:nat) = b:bytes  {Seq.length b == l}
 type lbuffer (l:nat) = b:buffer {Buffer.length b == l}
 
 let uint128_to_uint8 (a:UInt128.t) : Tot (b:UInt8.t{UInt8.v b == UInt128.v a % pow2 8})
-  = uint64_to_uint8 (FStar.UInt128.uint128_to_uint64 a)
+  = uint64_to_uint8 (uint128_to_uint64 a)
 
 private let hex1 (x:UInt8.t {FStar.UInt8.(x <^ 16uy)}) =
   FStar.UInt8.(
@@ -342,7 +342,7 @@ let rec load_big64 len buf =
 
 (* TODO: Add to FStar.Int.Cast and Kremlin and OCaml implementations *)
 val uint8_to_uint128: a:UInt8.t -> Tot (b:UInt128.t{UInt128.v b == UInt8.v a})
-let uint8_to_uint128 a = FStar.UInt128.uint64_to_uint128 (uint8_to_uint64 a)
+let uint8_to_uint128 a = uint64_to_uint128 (uint8_to_uint64 a)
 
 val load_uint128: len:UInt32.t { v len <= 16 } -> buf:lbuffer (v len) -> ST UInt128.t
   (requires (fun h0 -> live h0 buf))
@@ -350,7 +350,7 @@ val load_uint128: len:UInt32.t { v len <= 16 } -> buf:lbuffer (v len) -> ST UInt
     h0 == h1 /\ live h0 buf /\
     UInt128.v n == little_endian (sel_bytes h1 len buf)))
 let rec load_uint128 len buf =
-  if len = 0ul then FStar.UInt128.uint64_to_uint128 0UL // Need 128-bit constants?
+  if len = 0ul then uint64_to_uint128 0UL // Need 128-bit constants?
   else
     let n = load_uint128 (len -^ 1ul) (sub buf 1ul (len -^ 1ul)) in
     let b = buf.(0ul) in
@@ -375,7 +375,7 @@ val load_big128: len:UInt32.t { v len <= 16 } -> buf:lbuffer (v len) -> ST UInt1
     h0 == h1 /\ live h0 buf /\
     UInt128.v n == big_endian (sel_bytes h1 len buf)))
 let rec load_big128 len buf =
-  if len = 0ul then FStar.UInt128.uint64_to_uint128 0UL
+  if len = 0ul then uint64_to_uint128 0UL
   else
     let n = load_big128 (len -^ 1ul) (sub buf 0ul (len -^ 1ul)) in
     let b = buf.(len -^ 1ul) in

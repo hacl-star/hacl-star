@@ -56,20 +56,78 @@ int quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, char *prk, ui
   return 1;
 }
 
+int quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, char *label)
+{
+  if(a < TLS_hash_SHA256) return 0;
+  uint32_t hlen = (a == TLS_hash_SHA256 ? 32 :
+    (a == TLS_hash_SHA384 ? 48 : 64));
+  size_t label_len = strlen(label);
+  if(label_len > 249) return 0;
+
+  info[1] = hlen;
+  info[2] = (char)(label_len + 6);
+  memcpy(info+3, "tls13 ", 6);
+  memcpy(info+9, label, label_len);
+  info[9+label_len] = (char)hlen;
+
+  // Empty hash
+  char hash[hlen];
+  if(!quic_crypto_hash(a, hash, label, 0)) return 0;
+
+  memcpy(info + label_len + 10, hash, hlen);
+  *info_len = label_len + 10 + hlen;
+  return 1;
+}
+
+int quic_crypto_tls_derive_secet(quic_secret *derived, quic_secret *secret, char *label)
+{
+  uint32_t hlen = (secret->hash == TLS_hash_SHA256 ? 32 :
+    (secret->hash == TLS_hash_SHA384 ? 48 : 64));
+  char info[323] = {0};
+  size_t info_len;
+
+  if(!quic_crypto_tls_label(secret->hash, info, &info_len, label))
+    return 0;
+
+  derived->hash = secret->hash;
+  derived->ae = secret->ae;
+
+  if(!quic_crypto_hkdf_expand(secret->hash, derived->secret, hlen,
+        secret->secret, hlen, info, info_len))
+    return 0;
+
+  return 1;
+}
+
 int quic_crypto_derive_key(/*out*/quic_key **k, quic_secret *secret)
 {
   quic_key *key = malloc(sizeof(quic_key));
   if(!(*k = key)) return 0;
 
   key->id = Crypto_Indexing_testId(secret->ae);
-  char keyiv[76] = {0};
+
   uint32_t klen = (secret->ae == TLS_aead_AES_128_GCM ? 16 : 32);
   uint32_t slen = (secret->hash == TLS_hash_SHA256 ? 32 :
     (secret->hash == TLS_hash_SHA384 ? 48 : 64));
-  quic_crypto_hkdf_extract(secret->hash, keyiv, secret->secret, slen, "key", 3);
-  memcpy(key->static_iv, keyiv+klen, 12);
 
-  key->st = Crypto_AEAD_coerce(key->id, FStar_HyperHeap_root, (uint8_t*)key);
+  char info[323] = {0};
+  char dkey[32];
+  size_t info_len;
+
+  if(!quic_crypto_tls_label(secret->hash, info, &info_len, "key"))
+    return 0;
+
+  // HKDF-Expand-Label(Secret, "key", "", key_length)
+  if(!quic_crypto_hkdf_expand(secret->hash, dkey, klen, secret->secret, slen, info, info_len))
+    return 0;
+
+  if(!quic_crypto_tls_label(secret->hash, info, &info_len, "iv"))
+    return 0;
+
+  if(!quic_crypto_hkdf_expand(secret->hash, key->static_iv, 12, secret->secret, slen, info, info_len))
+    return 0;
+
+  key->st = Crypto_AEAD_coerce(key->id, FStar_HyperHeap_root, (uint8_t*)dkey);
   return 1;
 }
 

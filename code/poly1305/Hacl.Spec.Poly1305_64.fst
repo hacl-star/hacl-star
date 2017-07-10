@@ -172,8 +172,8 @@ val load128: high:UInt64.t -> low:UInt64.t -> Tot (z:UInt128.t{UInt128.v z = pow
 inline_for_extraction
 let load128 h l =
   let open FStar.UInt128 in
-  let hs = FStar.UInt128.uint64_to_uint128 h <<^ 64ul in
-  let ls = FStar.UInt128.uint64_to_uint128 l in
+  let hs = uint64_to_uint128 h <<^ 64ul in
+  let ls = uint64_to_uint128 l in
   Math.Lemmas.modulo_lemma (UInt64.v h * pow2 64) (pow2 128);
   UInt.logor_disjoint #128 (v hs) (v ls) 64;
   hs |^ ls

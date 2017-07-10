@@ -67,6 +67,7 @@ let rec hkdf_expand_inner a state prk prklen info infolen n i =
   (* Note: here we favour readability over efficiency *)
   let size_Ti  = HMAC.hash_size a in
   let size_Til = size_Ti +^ infolen +^ 1ul in
+  let size_T = U32.mul_mod n size_Ti in
 
   let pos_Ti = 0ul in
   let pos_Til = size_Ti in
@@ -79,12 +80,11 @@ let rec hkdf_expand_inner a state prk prklen info infolen n i =
 
   if (i =^ 1ul) then begin
 
-    (* Concatenate T(i-1) | Info | i *)
     Buffer.blit info 0ul til 0ul infolen;
-    Buffer.upd til (size_Til -^ 1ul) (Int.Cast.uint32_to_uint8 i);
+    Buffer.upd til (infolen +^ 1ul) (Int.Cast.uint32_to_uint8 i);
 
     (* Compute the mac of to get block Ti *)
-    HMAC.hmac a ti prk prklen til size_Til;
+    HMAC.hmac a ti prk prklen til (infolen +^ 1ul);
 
     (* Store the resulting block in T *)
     Buffer.blit ti 0ul t 0ul size_Ti;
@@ -149,7 +149,7 @@ let hkdf_expand a okm prk prklen info infolen len =
   let state = Buffer.create 0uy (size_Ti +^ size_Til +^ size_T) in
 
   (* Call the inner expension function *)
-  hkdf_expand_inner a state prk prklen info infolen n 0ul;
+  hkdf_expand_inner a state prk prklen info infolen n 1ul;
 
   (* Extract T from the state *)
   let _T = Buffer.sub state pos_T size_T in

@@ -20,6 +20,7 @@ int quic_crypto_hkdf_extract(quic_hash a, char *prk, char *salt, uint32_t salt_l
 int quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, char *prk, uint32_t prk_len, char *info, uint32_t info_len);
 
 int quic_crypto_derive_key(/*out*/quic_key **key, quic_secret *secret);
+int quic_crypto_tls_derive_secet(quic_secret *derived, quic_secret *secret, char *label);
 int quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, char *ad, uint32_t ad_len, char *plain, uint32_t plain_len);
 int quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, char *ad, uint32_t ad_len, char *cipher, uint32_t cipher_len);
 int quic_crypto_free_key(quic_key *key);

@@ -20,6 +20,7 @@ open Crypto.Symmetric.Bytes
 open Crypto.Indexing
 open Flag
 open FStar.Buffer // no need?
+open FStar.Int.Cast
 
 module GS = Spec.GF128
 module GF = Crypto.Symmetric.GF128
@@ -212,7 +213,7 @@ let rcreate rgn i =
     assert (~ (HS.is_mm (Buffer.content (as_buffer r))));
     r
   | GHASH ->
-    let b : Buffer.buffer UInt128.t = FStar.Buffer.rcreate rgn (FStar.UInt128.uint64_to_uint128 0UL) 1ul in
+    let b : Buffer.buffer UInt128.t = FStar.Buffer.rcreate rgn (uint64_to_uint128 0UL) 1ul in
     let r : elemB i = b in
     assert (~ (HS.is_mm (Buffer.content (as_buffer r))));
     r
@@ -241,7 +242,7 @@ let create i =
       (* B_POLY1305 b *)
   | GHASH ->
       let b : Buffer.buffer UInt128.t =
-        FStar.Buffer.create (FStar.UInt128.uint64_to_uint128 0UL) 1ul in
+        FStar.Buffer.create (uint64_to_uint128 0UL) 1ul in
       let h1 = ST.get() in
       GF.fzero_lemma (Seq.index (as_seq h1 b) 0);
       b

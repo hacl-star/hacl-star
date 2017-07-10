@@ -53,6 +53,15 @@ int main(int argc, char **argv)
   memcpy(prk, hash, 32);
   dump(prk, 32);
 
+  char okm[42] = {0};
+  printf("\nokm = HKDF-EXPAND-SHA256(prk, '0xf0f1f2f3f4f5f6f7f8f9', 42)\n");
+  if(!quic_crypto_hkdf_expand(TLS_hash_SHA256, okm, 42, prk, 32, info, 10))
+  {
+    printf("Failed to call HKDF-expand\n");
+    return 1;
+  }
+  dump(okm, 42);
+
   quic_secret s = {0};
   s.hash = TLS_hash_SHA256;
   s.ae = TLS_aead_AES_128_GCM;
@@ -75,6 +84,29 @@ int main(int argc, char **argv)
   } else {
     printf("DECRYPT FAILED.\n");
   }
+  quic_crypto_free_key(k);
+
+  s.hash = TLS_hash_SHA256;
+  s.ae = TLS_aead_CHACHA20_POLY1305;
+
+  if(!quic_crypto_derive_key(&k, &s))
+  {
+    printf("Failed to derive key\n");
+    return 1;
+  }
+
+  printf("\nCHACHA20-POLY1305 encrypt test:\n");
+  quic_crypto_encrypt(k, cipher, 0, salt, 13, data, 28);
+  dump(cipher, 28+16);
+
+  if(quic_crypto_decrypt(k, hash, 0, salt, 13, cipher, 28+16)) {
+    printf("DECRYPT SUCCES: \n");
+    dump(hash, 28);
+  } else {
+    printf("DECRYPT FAILED.\n");
+  }
+
+  quic_crypto_free_key(k);
 
   return 0;
 }
