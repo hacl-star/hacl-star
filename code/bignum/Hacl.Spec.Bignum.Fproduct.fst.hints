@@ -1,5 +1,5 @@
 [
-  "\u0004ª·ÄM\u0003èµöÛ\u001dÊ\u001fΩÄD",
+  "©c\fl§˜Ìs{\u0012N:ÇF?N",
   [
     [
       "Hacl.Spec.Bignum.Fproduct.copy_from_wide_pre",
@@ -1690,6 +1690,100 @@
       "Hacl.Spec.Bignum.Fproduct.lemma_carry_limb_step_1",
       4,
       1,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Fproduct.lemma_carry_limb_step_2_1",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Fproduct.lemma_carry_limb_step_2_1",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Fproduct.lemma_carry_limb_step_2_1",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Fproduct.lemma_carry_limb_step_2_1",
+      4,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Mul.op_Star",
+        "equation_FStar.UInt32.t", "equation_Prims.nat",
+        "function_token_typing_Hacl.Bignum.Constants.limb_size",
+        "function_token_typing_Hacl.Bignum.Parameters.climb_size",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_bfe7a44898f64f243c29ec773ed8084f",
+        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_a30e8d969265dbda4e27b2da53852f2c",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Fproduct.lemma_carry_limb_step_2_1",
+      5,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_interpretation_Tm_arrow_9cb3c953faf527c316d427b2ce8bd81b",
+        "equation_FStar.Mul.op_Star", "equation_FStar.UInt32.t",
+        "equation_Hacl.Bignum.Parameters.word_size", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "function_token_typing_Hacl.Bignum.Constants.limb_size",
+        "function_token_typing_Hacl.Bignum.Parameters.climb_size",
+        "function_token_typing_Prims.pow2", "int_inversion", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_bfe7a44898f64f243c29ec773ed8084f",
+        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_a30e8d969265dbda4e27b2da53852f2c",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "token_correspondence_Prims.pow2",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_FStar.Mul.op_Star"
+      ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Fproduct.lemma_carry_limb_step_2_1",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Fproduct.lemma_carry_limb_step_2_1",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Spec.Bignum.Fproduct.lemma_carry_limb_step_2_1",
+      8,
+      0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
