@@ -25,25 +25,20 @@ clean:
 	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf hmac-c
 
-
-
 # Common call to Kremlin for both extraction and tests
 KREMLIN_ARGS+= \
 		-verbose -tmpdir hmac-c \
 		-I $(HACL_HOME)/code/hash \
-		-drop Prims -drop FStar \
-		-drop 'Hacl.Cast' -drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' \
-		-drop 'Hacl.Spec.Endianness' -drop 'Hacl.Endianness' \
-		-drop 'Seq.Create' -drop 'Spec.\*' \
-		-drop 'Hacl.Hash.SHA2_256.Lemmas' \
+		-drop Prims,FStar \
+		-drop Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+		-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.*,Hacl.Hash.SHA2_256.Lemmas \
 		-bundle "HMAC_SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,Hacl.HMAC.SHA2_256,HMAC_SHA2_256" \
-		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99
-
+		-ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99 \
+		$(KREMLIN_TESTLIB)
 
 hmac-c/HMAC_SHA2_256.c: HMAC_SHA2_256.fst
 	mkdir -p hmac-c
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix 'HMAC_SHA2_256' $^
-
 
 test-hmac_sha2_256.exe: Hacl.Test.HMAC.SHA2_256.fst
 	mkdir -p hmac-c
