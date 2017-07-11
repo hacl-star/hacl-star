@@ -65,8 +65,8 @@ salsa20.exe: Hacl.Impl.Salsa20.fst Salsa20.fst Hacl.Test.Salsa20.fst
 	./$@
 
 chacha20-vec128/Chacha20_Vec128.c: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20.Vec128.fst Chacha20.Vec128.fst
-	mkdir -p chacha-vec128
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128 -no-prefix Hacl.UInt32x4 -I $(HACL_HOME)/specs -drop "Hacl.UInt32x4" \
+	mkdir -p chacha20-vec128
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-vec128 -no-prefix Hacl.UInt32x4 -I $(HACL_HOME)/specs -drop "Hacl.UInt32x4" \
 	-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.\*" \
 	-add-include '"vec128.h"' \
 	$^ -skip-compilation
