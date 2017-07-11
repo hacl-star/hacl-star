@@ -26,40 +26,43 @@ KREMLIN_ARGS+=-verbose \
 	-drop Hacl.Hash.SHA2_256.Lemmas,Hacl.Hash.SHA2_384.Lemmas,Hacl.Hash.SHA2_512.Lemmas \
 	$(KREMLIN_TESTLIB) -ccopt -march=native
 
-extract-c: $(addprefix sha2-c/, $(foreach N,256 384 512, SHA2_$(N).c Hacl_Test_SHA2_$(N).c))
+MODULES=$(foreach N,256 384 512,SHA2_$(N) Hacl.Hash.SHA2_$(N))
+TESTMODS=$(foreach N,256 384 512,Hacl.Test.SHA2_$(N))
 
+extract-c: $(addprefix sha2-c/, $(foreach N,256 384 512,SHA2_$(N).c Hacl_Test_SHA2_$(N).c))
 test: test-sha2_256.exe test-sha2_384.exe test-sha2_512.exe
 
-SPACE=$(noop) $(noop)
-MODULES=SHA2_256 SHA2_384 SHA2_512 Hacl.Hash.SHA2_256 Hacl.Hash.SHA2_384 Hacl.Hash.SHA2_512
+SPACE=$(empty) $(empty)
+COMMA=,
 
-sha2-c/SHA2_%.c: SHA2_%.fst 
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation -no-prefix Hacl.Test.SHA2_$* \
+sha2-c/out.krml: $(SHA2_FILES) $(addsuffix .fst,$(MODULES)) $(addsuffix .fst,$(TESTMODS))
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-translation $^
+
+sha2-c/SHA2_%.c: sha2-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation \
 	-drop $(subst $(SPACE),,$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
 	-bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
 	$^ -o $@
 
-sha2-c/Hacl_Test_SHA2_%.c: Hacl.Test.SHA2_%.fst
+sha2-c/Hacl_Test_SHA2_%.c: sha2-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation -no-prefix Hacl.Test.SHA2_$* \
 	-drop $(subst $(SPACE),,$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
+	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Test.SHA2_$*,$(TESTMODS))) \
 	-bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
 	$^ -o $@
 
-test-sha2_%.exe: SHA2_%.fst Hacl.Test.SHA2_%.fst 
+test-sha2_%.exe: sha2-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-$*-c -no-prefix Hacl.Test.SHA2_$* \
-		-drop $(subst $(SPACE),,$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
-		-bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
-		$^ -o $@
+	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
+	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Test.SHA2_$*,$(TESTMODS))) \
+	-bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
+	$^ -o $@
 	./$@
-
 
 # The following 'native' test targets use CC and CFLAGS, which may be different from the compiler and 
 # flags that Kremlin uses/chooses. So, use with care.
 
 test-native: test-native-sha2_256.exe test-native-sha2_384.exe test-native-sha2_512.exe
-
-sha2-c/out.krml: $(SHA2_FILES) SHA2_256.fst SHA2_384.fst SHA2_512.fst Hacl.Test.SHA2_256.fst Hacl.Test.SHA2_384.fst Hacl.Test.SHA2_512.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-translation $^
 
 BASE_OBJ=$(VALE_A) sha2-c/testlib.o sha2-c/kremlib.o
 $(BASE_OBJ): sha2-c/out.krml
