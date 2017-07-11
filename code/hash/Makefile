@@ -26,51 +26,29 @@ KREMLIN_ARGS+=-verbose \
 	-drop Hacl.Hash.SHA2_256.Lemmas,Hacl.Hash.SHA2_384.Lemmas,Hacl.Hash.SHA2_512.Lemmas \
 	$(KREMLIN_TESTLIB) -ccopt -march=native
 
-# Extraction
-extract-c: sha2-256-c/SHA2_256.c sha2-384-c/SHA2_384.c sha2-512-c/SHA2_512.c
+extract-c: $(addprefix sha2-c/, $(foreach N,256 384 512, SHA2_$(N).c Hacl_Test_SHA2_$(N).c))
 
 test: test-sha2_256.exe test-sha2_384.exe test-sha2_512.exe
 
+SPACE=$(noop) $(noop)
+MODULES=SHA2_256 SHA2_384 SHA2_512 Hacl.Hash.SHA2_256 Hacl.Hash.SHA2_384 Hacl.Hash.SHA2_512
 
-sha2-c/out.krml: $(SHA2_FILES)
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c $^
+sha2-c/SHA2_%.c: SHA2_%.fst 
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation -no-prefix Hacl.Test.SHA2_$* \
+	-drop $(subst $(SPACE),,$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
+	-bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
+	$^ -o $@
 
-sha2-256-c/SHA2_256.c sha2-256-c/Hacl_Test_SHA2_256.c: sha2-c/out.krml SHA2_256.fst 
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-256-c -skip-compilation -no-prefix Hacl.Test.SHA2_256 \
-		-drop SHA2_384,SHA2_512,Hacl.Hash.SHA2_384,Hacl.Hash.SHA2_512 \
-		-bundle "SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256" \
-		$^ -o $@
+sha2-c/Hacl_Test_SHA2_%.c: Hacl.Test.SHA2_%.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation -no-prefix Hacl.Test.SHA2_$* \
+	-drop $(subst $(SPACE),,$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
+	-bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
+	$^ -o $@
 
-sha2-384-c/SHA2_384.c sha2-384-c/Hacl_Test_SHA2_384.c: sha2-c/out.krml SHA2_384.fst 
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-384-c -skip-compilation -no-prefix Hacl.Test.SHA2_384 \
-		-drop SHA2_256,SHA2_512,Hacl.Hash.SHA2_256,Hacl.Hash.SHA2_512 \
-		-bundle "SHA2_384=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_384,SHA2_384" \
-		$^ -o $@
-
-sha2-512-c/SHA2_512.c sha2-512-c/Hacl_Test_SHA2_512.c: sha2-c/out.krml SHA2_512.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-512-c -skip-compilation -no-prefix Hacl.Test.SHA2_512 \
-		-drop SHA2_384,SHA2_256,Hacl.Hash.SHA2_384,Hacl.Hash.SHA2_256 \
-		-bundle "SHA2_512=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_512,SHA2_512" \
-		$^ -o $@
-
-test-sha2_256.exe: SHA2_256.fst Hacl.Test.SHA2_256.fst 
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-256-c -no-prefix Hacl.Test.SHA2_256 \
-		-drop SHA2_384,SHA2_512,Hacl.Hash.SHA2_384,Hacl.Hash.SHA2_512 \
-		-bundle "SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256" \
-		$^ -o $@
-	./$@
-
-test-sha2_384.exe: SHA2_384.fst Hacl.Test.SHA2_384.fst 
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-384-c -no-prefix Hacl.Test.SHA2_384 \
-		-drop SHA2_256,SHA2_512,Hacl.Hash.SHA2_256,Hacl.Hash.SHA2_512 \
-		-bundle "SHA2_384=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_384,SHA2_384" \
-		$^ -o $@
-	./$@
-
-test-sha2_512.exe: SHA2_512.fst Hacl.Test.SHA2_512.fst 
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-512-c -no-prefix Hacl.Test.SHA2_512 \
-		-drop SHA2_384,SHA2_256,Hacl.Hash.SHA2_384,Hacl.Hash.SHA2_256 \
-		-bundle "SHA2_512=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_512,SHA2_512" \
+test-sha2_%.exe: SHA2_%.fst Hacl.Test.SHA2_%.fst 
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-$*-c -no-prefix Hacl.Test.SHA2_$* \
+		-drop $(subst $(SPACE),,$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
+		-bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
 		$^ -o $@
 	./$@
 
@@ -80,8 +58,10 @@ test-sha2_512.exe: SHA2_512.fst Hacl.Test.SHA2_512.fst
 
 test-native: test-native-sha2_256.exe test-native-sha2_384.exe test-native-sha2_512.exe
 
-BASE_OBJ=$(VALE_A) sha2-c/testlib.o sha2-c/kremlib.o
+sha2-c/out.krml: $(SHA2_FILES) SHA2_256.fst SHA2_384.fst SHA2_512.fst Hacl.Test.SHA2_256.fst Hacl.Test.SHA2_384.fst Hacl.Test.SHA2_512.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-translation $^
 
+BASE_OBJ=$(VALE_A) sha2-c/testlib.o sha2-c/kremlib.o
 $(BASE_OBJ): sha2-c/out.krml
 
 CFLAGS=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash
@@ -89,13 +69,13 @@ CFLAGS=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-test-native-sha2_256.exe: sha2-256-c/SHA2_256.o sha2-256-c/Hacl_Test_SHA2_256.o $(BASE_OBJ)
+test-native-sha2_256.exe: sha2-c/SHA2_256.o sha2-c/Hacl_Test_SHA2_256.o $(BASE_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
-test-native-sha2_384.exe: sha2-384-c/SHA2_384.o sha2-384-c/Hacl_Test_SHA2_384.o $(BASE_OBJ)
+test-native-sha2_384.exe: sha2-c/SHA2_384.o sha2-c/Hacl_Test_SHA2_384.o $(BASE_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
-test-native-sha2_512.exe: sha2-512-c/SHA2_512.o sha2-512-c/Hacl_Test_SHA2_512.o $(BASE_OBJ)
+test-native-sha2_512.exe: sha2-c/SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o $(BASE_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 
