@@ -937,7 +937,7 @@ val lemma_padding_bounds:
 let lemma_padding_bounds padding len = ()
 
 
-#reset-options "--z3refresh --max_fuel 0 --z3rlimit 50"
+#reset-options "--z3refresh --max_fuel 0 --z3rlimit 100"
 
 val lemma_eq_pad0_downcast: len:UInt64.t -> Lemma (ensures (Spec.pad0_length (UInt32.v (u64_to_u32 len)) = Spec.pad0_length (U64.v len)))
 let lemma_eq_pad0_downcast len = ()
@@ -961,10 +961,14 @@ val pad:
                   /\ (let seq_padding = reveal_sbytes (as_seq h1 padding) in
                   seq_padding == Spec.pad (H64.v n * v size_block) (U64.v len))))
 
-#reset-options "--z3refresh --max_fuel 0 --z3rlimit 15"
+#reset-options "--z3refresh --max_fuel 0 --z3rlimit 500"
 
 [@"substitute"]
 let pad padding n len =
+
+  (* Compute and encode the total length *)
+  let encodedlen = encode_length n len in
+  assert(H128.v encodedlen = ((H64.v n * v size_block + U64.v len) * 8));
 
   (* Get the memory *)
   (**) let h0 = ST.get () in
@@ -993,9 +997,6 @@ let pad padding n len =
   (**) assert(v (1ul +^ pad0len) + v size_len_8 <= length padding);
   let buf2 = Buffer.sub padding (1ul +^ pad0len) size_len_8 in
 
-  (* Compute and encode the total length *)
-  let encodedlen = encode_length n len in
-
   (* Set the first byte of the padding *)
   set_pad_part1 buf1;
   (**) no_upd_lemma_1 h0 h1 buf1 zeros;
@@ -1010,9 +1011,9 @@ let pad padding n len =
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h3 zeros)) (Seq.create (v pad0len) 0uy);
   (**) assert(reveal_sbytes (as_seq h3 zeros) == Seq.create (v pad0len) 0uy);
   (**) assert(reveal_sbytes (as_seq h3 buf1) == Seq.create 1 0x80uy);
-  (**) assert(reveal_sbytes (as_seq h3 buf2) == Endianness.big_bytes size_len_8 (H128.v encodedlen)); admit()
+  (**) assert(reveal_sbytes (as_seq h3 buf2) == Endianness.big_bytes size_len_8 (H128.v encodedlen));
   (**) Lemmas.lemma_sub_append_3 h3 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8);
-  (**) Lemmas.lemma_pad_aux h1 n len buf1 zeros buf2
+  (**) Lemmas.lemma_pad_aux h3 n len buf1 zeros buf2
 
 
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 100"
@@ -1039,15 +1040,16 @@ val update_last:
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 200"
 
 let update_last state data len =
+  assert_norm(pow2 32 = 0x100000000);
 
   (* Push a new memory frame *)
   (**) push_frame();
 
   (* Alocate memory set to zeros for the last two blocks of data *)
-  let blocks = Buffer.create (uint8_to_sint8 0uy) (2ul *^ size_block) in
+  let blocks = Buffer.create (uint8_to_sint8 0uy) (size_block +^ size_block) in
 
   (**) let h0 = ST.get () in
-  (**) assert(reveal_sbytes (as_seq h0 blocks) == Seq.create (2 * v size_block) 0uy);
+  // (**) assert(reveal_sbytes (as_seq h0 blocks) == Seq.create (2 * v size_block) 0uy);
 
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length is public ! *)
