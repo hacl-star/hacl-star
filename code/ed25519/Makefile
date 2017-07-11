@@ -150,18 +150,20 @@ ed25519-c/Ed25519.c: $(filter %.fst,$(ED25519_FILES))
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir ed25519-c $^ \
 		-drop 'Hacl.Spec' -drop 'Hacl.Cast' -drop 'Hacl.UInt.\*' -drop 'Hacl.Endianness' \
 		-drop 'Hacl.UInt8' -drop 'Hacl.UInt16' -drop 'Hacl.UInt32' -drop 'Hacl.UInt64' -drop 'Hacl.UInt128' -drop 'Seq.\*' \
-		-drop Prims -drop FStar -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Hash.\*,SHA2_512' \
+		-drop Prims -bundle 'Ed25519=Ed25519,Hacl.EC,Hacl.EC.\*,Hacl.Impl.\*,Hacl.Lib.\*,Hacl.Bignum.\*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Hash.\*,SHA2_512' \
 		-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 		$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -skip-compilation
 
 extract-c: ed25519-c/Ed25519.c
+
+test: ed25519.exe
 
 ed25519.exe: ed25519-c/Ed25519.c
 	 $(KREMLIN)$(KREMLIN_ARGS) -tmpdir ed25519-c \
 	 	$^ Hacl.Test.Ed25519.fst -no-prefix 'Hacl.Test.Ed25519' \
 	 	-drop 'Hacl.Spec,Hacl.Cast,Hacl.UInt.\*,Hacl.Endianness' \
 	 	-drop 'Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.\*' \
-	 	-drop 'Prims,FStar,Hacl.Bignum25519,Hacl.Impl.Ed25519.Pow2_252m2,Ed25519' \
+	 	-drop 'Prims,Hacl.Bignum25519,Hacl.Impl.Ed25519.Pow2_252m2,Ed25519' \
 	 	-bundle 'Hacl.Spec.\*' -drop "Spec.\*" \
 	 	$(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
 		-add-include '"Ed25519.h"' -o ed25519.exe -ldopt '-lsodium'
