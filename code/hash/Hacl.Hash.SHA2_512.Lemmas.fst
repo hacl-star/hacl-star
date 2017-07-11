@@ -257,7 +257,7 @@ Seq.lemma_eq_intro (Seq.append (Seq.append a b) c) (Seq.append a (Seq.append b c
 
 #reset-options "--max_fuel 0  --z3rlimit 200"
 
-let lemma_pad_aux (h:HyperStack.mem) (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) < (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
+let lemma_pad_aux (h:HyperStack.mem) (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) <= (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
   (requires (live h a /\ live h b /\ live h c
             /\ (let seq_a = reveal_sbytes (as_seq h a) in
             let seq_b = reveal_sbytes (as_seq h b) in
