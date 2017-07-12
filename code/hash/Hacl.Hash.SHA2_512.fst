@@ -484,7 +484,7 @@ let sum_hash hash_0 hash_1 =
   (**) let h0 = ST.get() in
   C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H64.(x +%^ y));
   (**) let h1 = ST.get() in
-  (**) Seq.lemma_eq_intro (Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) (reveal_h64s (as_seq h0 hash_0)) 
+  (**) Seq.lemma_eq_intro (Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) (reveal_h64s (as_seq h0 hash_0))
                           (reveal_h64s (as_seq  h0 hash_1))) (reveal_h64s (as_seq h1 hash_0))
 
 
@@ -1037,10 +1037,10 @@ val update_last:
                   let prevlen = H64.((H64.v (Seq.index count 0)) * (U32.v size_block)) in
                   reveal_h64s seq_hash_1 == Spec.update_last (reveal_h64s seq_hash_0) prevlen seq_data)))
 
-#reset-options "--z3refresh --max_fuel 0  --z3rlimit 200"
+#reset-options "--z3refresh --max_fuel 0  --z3rlimit 750"
 
 let update_last state data len =
-  assert_norm(pow2 32 = 0x100000000);
+  (**) assert_norm(pow2 32 = 0x100000000);
 
   (* Push a new memory frame *)
   (**) push_frame();
@@ -1054,24 +1054,33 @@ let update_last state data len =
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length is public ! *)
   let nb = if U64.(len <^ 112uL) then 1ul else 2ul in
-  let final_blocks = if nb =^ 1ul then Buffer.offset blocks size_block else blocks in
+  let final_blocks =
+    (**) let h1 = ST.get () in
+    if U64.(len <^ 112uL) then begin
+      (**) assert(v size_block <= length blocks);
+      (**) assert(live h1 blocks);
+      Buffer.offset blocks size_block end
+    else begin
+      (**) assert(live h1 blocks);
+      blocks end in
 
-  (**) let h1 = ST.get () in
-  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 final_blocks))
+  (**) let h2 = ST.get () in
+  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 final_blocks))
                           (if U64.(len <^ 112uL) then
                               Seq.create (v size_block) 0uy
-                           else Seq.create (2 * v size_block) 0uy);
-  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 final_blocks)) (Seq.create (v nb * v size_block) 0uy);
-  (**) assert(reveal_sbytes (as_seq h1 final_blocks) == Seq.create (v nb * v size_block) 0uy);
+                           else Seq.create (v size_block + v size_block) 0uy);
+  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 final_blocks)) (Seq.create (
+                          v (if U64.(len <^ 112uL) then 1ul else 2ul)  * v size_block) 0uy);
+  (**) assert(reveal_sbytes (as_seq h2 final_blocks) == Seq.create (v nb * v size_block) 0uy);
 
   (* Copy the data to the final construct *)
   (* Leakage model : allowed because the length is public *)
+//  (**) assert(length final_blocks)
   Buffer.blit data 0ul final_blocks 0ul (u64_to_u32 len);
-
-  (**) let h2 = ST.get () in
-  (**) Seq.lemma_eq_intro (as_seq h2 data) (Seq.slice (as_seq h2 data) 0 (U64.v len));
-  (**) Seq.lemma_eq_intro (as_seq h2 data) (Seq.slice (as_seq h2 final_blocks) 0 (U64.v len));
-  (**) assert(as_seq h2 data == Seq.slice (as_seq h2 final_blocks) 0 (U64.v len));
+  (**) let h3 = ST.get () in
+  (**) Seq.lemma_eq_intro (as_seq h3 data) (Seq.slice (as_seq h3 data) 0 (U64.v len));
+  (**) Seq.lemma_eq_intro (as_seq h3 data) (Seq.slice (as_seq h3 final_blocks) 0 (U64.v len));
+  (**) assert(as_seq h3 data == Seq.slice (as_seq h3 final_blocks) 0 (U64.v len));
 
   (* Compute the final length of the data *)
   let n = state.(pos_count_w) in
@@ -1082,30 +1091,30 @@ let update_last state data len =
   (**) assert(H64.v n * v size_block + U64.v len < Spec.max_input_len_8);
   (**) assert(length padding = (1 + (Spec.pad0_length (U64.v len)) + v size_len_8));
   (**) assert((length padding + U64.v len) % v size_block = 0);
-  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 padding)) (Seq.create (1 + (Spec.pad0_length (U64.v len)) + v size_len_8) 0uy);
-  (**) assert(reveal_sbytes (as_seq h2 padding) == Seq.create (1 + (Spec.pad0_length (U64.v len)) + v size_len_8) 0uy);
+  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h3 padding)) (Seq.create (1 + (Spec.pad0_length (U64.v len)) + v size_len_8) 0uy);
+  (**) assert(reveal_sbytes (as_seq h3 padding) == Seq.create (1 + (Spec.pad0_length (U64.v len)) + v size_len_8) 0uy);
   pad padding n len;
 
   (* Proof that final_blocks = data @| padding *)
-  (**) let h3 = ST.get () in
+  (**) let h4 = ST.get () in
   (**) assert(disjoint padding data);
-  (**) no_upd_lemma_1 h2 h3 padding data;
-  (**) Seq.lemma_eq_intro (as_seq h3 (Buffer.sub final_blocks 0ul (u64_to_u32 len))) (Seq.slice (as_seq h3 final_blocks) 0 (U64.v len));
-  (**) no_upd_lemma_1 h2 h3 padding (Buffer.sub final_blocks 0ul (u64_to_u32 len));
-  (**) assert(reveal_sbytes (as_seq h3 data) == Seq.slice (reveal_sbytes (as_seq h3 final_blocks)) 0 (U64.v len));
+  (**) no_upd_lemma_1 h3 h4 padding data;
+  (**) Seq.lemma_eq_intro (as_seq h4 (Buffer.sub final_blocks 0ul (u64_to_u32 len))) (Seq.slice (as_seq h4 final_blocks) 0 (U64.v len));
+  (**) no_upd_lemma_1 h3 h4 padding (Buffer.sub final_blocks 0ul (u64_to_u32 len));
+  (**) assert(reveal_sbytes (as_seq h4 data) == Seq.slice (reveal_sbytes (as_seq h4 final_blocks)) 0 (U64.v len));
 
-  (**) Seq.lemma_eq_intro (as_seq h3 (Buffer.offset final_blocks (u64_to_u32 len))) (Seq.slice (as_seq h3 final_blocks) (U64.v len) (v nb * v size_block));
-  (**) Seq.lemma_eq_intro (as_seq h3 padding) (Seq.slice (as_seq h3 final_blocks) (U64.v len) (v nb * v size_block));
-  (**) assert(as_seq h3 padding == Seq.slice (as_seq h3 final_blocks) (U64.v len) (v nb * v size_block));
-  (**) Lemmas.lemma_sub_append_2 h3 final_blocks 0ul data (u64_to_u32 len) padding (nb *^ size_block);
-  (**) assert(as_seq h3 final_blocks == Seq.append (as_seq h3 data) (as_seq h3 padding));
+  (**) Seq.lemma_eq_intro (as_seq h4 (Buffer.offset final_blocks (u64_to_u32 len))) (Seq.slice (as_seq h4 final_blocks) (U64.v len) (v nb * v size_block));
+  (**) Seq.lemma_eq_intro (as_seq h4 padding) (Seq.slice (as_seq h4 final_blocks) (U64.v len) (v nb * v size_block));
+  (**) assert(as_seq h4 padding == Seq.slice (as_seq h4 final_blocks) (U64.v len) (v nb * v size_block));
+  (**) Lemmas.lemma_sub_append_2 h4 final_blocks 0ul data (u64_to_u32 len) padding (nb *^ size_block);
+  (**) assert(as_seq h4 final_blocks == Seq.append (as_seq h4 data) (as_seq h4 padding));
 
   (* Call the update function on one or two blocks *)
   (**) assert(length final_blocks % v size_block = 0 /\ disjoint state data);
   (**) assert(v nb * v size_block = length final_blocks);
-  (**) assert(live h3 state /\ live h3 final_blocks);
-  (**) assert(let seq_k = Seq.slice (as_seq h3 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
-              let seq_counter = Seq.slice (as_seq h3 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+  (**) assert(live h4 state /\ live h4 final_blocks);
+  (**) assert(let seq_k = Seq.slice (as_seq h4 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+              let seq_counter = Seq.slice (as_seq h4 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
               let counter = Seq.index seq_counter 0 in
               reveal_h64s seq_k == Spec.k /\ H64.v counter < (pow2 64 - 2));
 
