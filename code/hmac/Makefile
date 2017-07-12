@@ -1,8 +1,5 @@
 include ../Makefile.include
 
-KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
-KRML=$(KRML_BIN) $(KREMLIN_ARGS)
-
 # Files for verification
 HMAC_SHA2_FILES = Hacl.HMAC.SHA2_256.fst
 #	               HMAC_SHA2_256.fst
@@ -37,10 +34,8 @@ KREMLIN_ARGS+= \
 		$(KREMLIN_TESTLIB)
 
 hmac-c/HMAC_SHA2_256.c: HMAC_SHA2_256.fst
-	mkdir -p hmac-c
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix 'HMAC_SHA2_256' $^
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix HMAC_SHA2_256 $^
 
 test-hmac_sha2_256.exe: Hacl.Test.HMAC.SHA2_256.fst
-	mkdir -p hmac-c
-	$(KREMLIN) $(KREMLIN_ARGS) -o test-hmac_sha2_256.exe -no-prefix 'Hacl.Test.HMAC.SHA2_256' $^
+	$(KREMLIN) $(KREMLIN_ARGS) -o test-hmac_sha2_256.exe -no-prefix Hacl.Test.HMAC.SHA2_256 $^
 	./test-hmac_sha2_256.exe
