@@ -122,7 +122,7 @@ import-kremlin:
 	$(FSTAR) --record_hints $^ 2>&1
 
 # Custom verification targets for re-located hint files
-%.fst-reloc-verify: %.fst 2>&1
+%.fst-reloc-verify: %.fst
 	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^ 2>&1
 %.fsti-reloc-verify: %.fsti
 	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^ 2>&1
