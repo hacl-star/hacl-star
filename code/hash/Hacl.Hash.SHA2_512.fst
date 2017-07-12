@@ -992,8 +992,8 @@ let pad padding n len =
   (**) assert(1 + UInt32.v pad0len <= length padding);
   let zeros = Buffer.sub padding 1ul pad0len in
   (**) let h2 = ST.get () in
-//  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 zeros)) (Seq.create (v pad0len) 0uy); admit()
-  (**) assume(reveal_sbytes (as_seq h2 zeros) == Seq.create (v pad0len) 0uy);
+  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 zeros)) (Seq.create (v pad0len) 0uy);
+  (**) assert(reveal_sbytes (as_seq h2 zeros) == Seq.create (v pad0len) 0uy);
   (**) assert(v (1ul +^ pad0len) + v size_len_8 <= length padding);
   let buf2 = Buffer.sub padding (1ul +^ pad0len) size_len_8 in
 
