@@ -11,18 +11,58 @@
 #include <time.h>
 
 #include "mitlsffi.h"
+// mitlsffi defines quic_secret: the type of exported secrets
+
+// Unlike secrets, AEAD keys are kept abstract; they hide the
+// negotiated encryption algorithm and its expanded key materials;
+// they are allocated internally by quic_crypto_derive_key and must be
+// explicitly freed. Each key is used only for encrypting or only for
+// decrypting.
 
 typedef struct quic_key quic_key;
 
-int quic_crypto_hash(quic_hash a, /*out*/ char *hash, char *data, size_t len);
-int quic_crypto_hmac(quic_hash a, /*out*/ char *mac, char *key, uint32_t key_len, char *data, uint32_t data_len);
-int quic_crypto_hkdf_extract(quic_hash a, char *prk, char *salt, uint32_t salt_len, char *ikm, uint32_t ikm_len);
-int quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, char *prk, uint32_t prk_len, char *info, uint32_t info_len);
+// Main functions for QUIC AEAD keying. Encryption keys for AEAD are
+// derived as follows (see quic-tls#4 section 5)
+//
+// (1) get exporter secret from TLS (optional early, then main secret)
+//
+// (2) derive encryption secrets from the exporter secrets:
+//
+//     early_secret, "EXPORTER-QUIC 0-RTT Secret" 
+//     main_secret, "EXPORTER-QUIC client 1-RTT Secret"
+//     main_secret, "EXPORTER-QUIC server 1-RTT Secret"
+//
+// (3) derive an encryption key from each encryption secret.
+//
+// (4) optionally derive the next encryption secret from the current
+//     ones (to be use for later rekeying, resuming from step 3)
+//
+// (5) erase all secrets used for derivation.  
+//
+int quic_crypto_tls_derive_secret(/*out*/ quic_secret *derived, const quic_secret *secret, const char *label);
+int quic_crypto_derive_key(/*out*/quic_key **key, const quic_secret *secret);
 
-int quic_crypto_derive_key(/*out*/quic_key **key, quic_secret *secret);
-int quic_crypto_tls_derive_secet(quic_secret *derived, quic_secret *secret, char *label);
-int quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, char *ad, uint32_t ad_len, char *plain, uint32_t plain_len);
-int quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, char *ad, uint32_t ad_len, char *cipher, uint32_t cipher_len);
+// AEAD-encrypts plain with additional data ad, using counter sn,
+// writing plain_len + 12 bytes to the output cipher. The input and
+// output buffer must not overlap.
+//
+// NB: do not encrypt twice with the same sn.
+//
+int quic_crypto_encrypt(quic_key *key, /*out*/ char *cipher, uint64_t sn, const char *ad, uint32_t ad_len, const char *plain, uint32_t plain_len);
+
+// AEAD-decrypts cipher and authenticate additional data ad, using
+// counter; when successful, writes cipher_len - 12 bytes to the
+// output plain. The input and output buffers must not overlap.
+//
+int quic_crypto_decrypt(quic_key *key, /*out*/ char *plain, uint64_t sn, const char *ad, uint32_t ad_len, const char *cipher, uint32_t cipher_len);
+
 int quic_crypto_free_key(quic_key *key);
+
+// Auxiliary crypto functions, possibly useful elsewhere in QUIC.
+//
+int quic_crypto_hash(quic_hash a, /*out*/ char *hash, const char *data, size_t data_len);
+int quic_crypto_hmac(quic_hash a, /*out*/ char *mac, const char *key, uint32_t key_len, const char *data, uint32_t data_len);
+int quic_crypto_hkdf_extract(quic_hash a, /*out*/ char *prk, const char *salt, uint32_t salt_len, const char *ikm, uint32_t ikm_len);
+int quic_crypto_hkdf_expand(quic_hash a, /*out*/ char *okm, uint32_t okm_len, const char *prk, uint32_t prk_len, const char *info, uint32_t info_len);
 
 #endif /* end of include guard:  */
