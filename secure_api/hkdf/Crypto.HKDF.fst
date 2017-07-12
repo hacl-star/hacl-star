@@ -81,7 +81,7 @@ let rec hkdf_expand_inner a state prk prklen info infolen n i =
   if (i =^ 1ul) then begin
 
     Buffer.blit info 0ul til 0ul infolen;
-    Buffer.upd til (infolen +^ 1ul) (Int.Cast.uint32_to_uint8 i);
+    Buffer.upd til infolen (Int.Cast.uint32_to_uint8 i);
 
     (* Compute the mac of to get block Ti *)
     HMAC.hmac a ti prk prklen til (infolen +^ 1ul);
@@ -135,7 +135,9 @@ let hkdf_expand a okm prk prklen info infolen len =
 
   (* Compute the number of blocks necessary to compute the output *)
   let size_Ti = HMAC.hash_size a in
-  let n = U32.(div len size_Ti) +^ 1ul in
+  // ceil
+  let n_0 = if U32.(rem len size_Ti) = 0ul then 0ul else 1ul in
+  let n = U32.(div len size_Ti) +^ n_0 in
 
   (* Describe the shape of memory used by the inner recursive function *)
   let size_T = U32.mul_mod n size_Ti in
@@ -149,7 +151,8 @@ let hkdf_expand a okm prk prklen info infolen len =
   let state = Buffer.create 0uy (size_Ti +^ size_Til +^ size_T) in
 
   (* Call the inner expension function *)
-  hkdf_expand_inner a state prk prklen info infolen n 1ul;
+  if n >^ 0ul then
+    hkdf_expand_inner a state prk prklen info infolen n 1ul;
 
   (* Extract T from the state *)
   let _T = Buffer.sub state pos_T size_T in

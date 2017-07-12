@@ -1,8 +1,5 @@
 include ../Makefile.include
 
-KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
-KRML=$(KRML_BIN) $(KREMLIN_ARGS)
-
 # Files for verification
 HMAC_SHA2_FILES = Hacl.HMAC.SHA2_256.fst
 #	               HMAC_SHA2_256.fst
@@ -29,7 +26,7 @@ clean:
 KREMLIN_ARGS+= \
 		-verbose -tmpdir hmac-c \
 		-I $(HACL_HOME)/code/hash \
-		-drop Prims,FStar \
+		-drop Prims \
 		-drop Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 		-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.*,Hacl.Hash.SHA2_256.Lemmas \
 		-bundle "HMAC_SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,Hacl.HMAC.SHA2_256,HMAC_SHA2_256" \
@@ -37,10 +34,8 @@ KREMLIN_ARGS+= \
 		$(KREMLIN_TESTLIB)
 
 hmac-c/HMAC_SHA2_256.c: HMAC_SHA2_256.fst
-	mkdir -p hmac-c
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix 'HMAC_SHA2_256' $^
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix HMAC_SHA2_256 $^
 
 test-hmac_sha2_256.exe: Hacl.Test.HMAC.SHA2_256.fst
-	mkdir -p hmac-c
-	$(KREMLIN) $(KREMLIN_ARGS) -o test-hmac_sha2_256.exe -no-prefix 'Hacl.Test.HMAC.SHA2_256' $^
+	$(KREMLIN) $(KREMLIN_ARGS) -o test-hmac_sha2_256.exe -no-prefix Hacl.Test.HMAC.SHA2_256 $^
 	./test-hmac_sha2_256.exe

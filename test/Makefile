@@ -43,9 +43,9 @@ extract-c: extract-c-code extract-c-crypto # extract-c-apps
 
 # These cannot benefit from parallelism, tests C extraction for available compilers
 extract-all-c:
-	if $(HAS_CCOMP); then USE_CCOMP=true $(MAKE) extract-c ; fi
-	if $(HAS_CL); then USE_CL=true $(MAKE) extract-c ; fi
-	$(MAKE) extract-c
+	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
+	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
+	$(MAKE) clean ; $(MAKE) extract-c
 
 compile-vale:
 	$(MAKE) -C ../secure_api/vale/asm/
