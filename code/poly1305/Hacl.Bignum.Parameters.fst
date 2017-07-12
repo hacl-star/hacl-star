@@ -126,8 +126,7 @@ inline_for_extraction let w x = Hacl.UInt128.v x
 val lemma_wide_injectivity: a:wide -> b:wide -> Lemma
   (requires (True))
   (ensures (w a = w b ==> a == b))
-(* Wintersteiger: Z3 4.5.1.1f29cebd4df6 gives up when these patterns are present. *)
-(* [SMTPat (w a); SMTPat (w b)] *)
+  [SMTPat (w a); SMTPat (w b)]
 let lemma_wide_injectivity a b = ()
 
 inline_for_extraction val wide_zero: x:wide{w x = 0}
