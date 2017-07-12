@@ -112,21 +112,21 @@ import-kremlin:
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_INCLUDES) $^
 
 %.fst-verify: %.fst
-	$(FSTAR) $^
+	$(FSTAR) $^ 2>&1
 %.fsti-verify: %.fsti
-	$(FSTAR) $^
+	$(FSTAR) $^ 2>&1
 
 %.fst.hints: %.fst
-	$(FSTAR) --record_hints $^
+	$(FSTAR) --record_hints $^ 2>&1
 %.fsti.hints: %.fsti
-	$(FSTAR) --record_hints $^
+	$(FSTAR) --record_hints $^ 2>&1
 
 # Custom verification targets for re-located hint files
-%.fst-reloc-verify: %.fst
-	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^
+%.fst-reloc-verify: %.fst 2>&1
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^ 2>&1
 %.fsti-reloc-verify: %.fsti
-	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^ 2>&1
 %.fst.reloc.hints: %.fst
-	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^ 2>&1
 %.fsti.reloc.hints: %.fsti
-	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^ 2>&1
