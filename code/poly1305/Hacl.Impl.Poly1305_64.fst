@@ -539,6 +539,9 @@ val poly1305_finish_:
          mac == poly1305_finish_spec (Spec.MkState r0 acc0 log) m len k)
     ))
 [@"substitute"]
+
+#reset-options "--max_fuel 0 --z3rlimit 2000"
+
 let poly1305_finish_ log st mac m len key_s =
   let acc = st.h in
   let h0 = ST.get() in
@@ -556,6 +559,7 @@ let poly1305_finish_ log st mac m len key_s =
   let h1 = ST.get() in
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (poly1305_finish_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal log)) (as_seq h0 m) len (as_seq h0 key_s)))
 
+#reset-options "--max_fuel 0 --z3rlimit 1000"
 
 [@"substitute"]
 val poly1305_update_last:
