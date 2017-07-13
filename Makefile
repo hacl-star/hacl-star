@@ -45,11 +45,10 @@ hints:
 refresh-hints:
 	$(MAKE) -B hints
 
-verify:
-	$(MAKE) -C code verify
-	$(MAKE) -C secure_api verify
-	$(MAKE) -C specs verify
-	$(MAKE) -C test verify
+%.verify-dir: %
+	$(MAKE) -C $^ verify
+
+verify: code.verify-dir secure_api.verify-dir specs.verify-dir test.verify-dir
 
 clean:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
