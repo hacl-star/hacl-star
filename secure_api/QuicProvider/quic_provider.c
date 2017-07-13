@@ -26,33 +26,33 @@ typedef struct quic_key {
   (a == TLS_hash_SHA256 ? Crypto_HMAC_alg_SHA256 : \
     (a == TLS_hash_SHA384 ? Crypto_HMAC_alg_SHA384 : Crypto_HMAC_alg_SHA512))
 
-int quic_crypto_hash(quic_hash a, /*out*/ char *hash, char *data, size_t len){
+int quic_crypto_hash(quic_hash a, /*out*/ char *hash, const char *data, size_t len){
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HMAC_agile_hash(CONVERT_ALG(a), hash, data, len);
+  Crypto_HMAC_agile_hash(CONVERT_ALG(a), hash, (char*)data, len);
   return 1;
 }
 
 int quic_crypto_hmac(quic_hash a, char *mac,
-                     char *key, uint32_t key_len,
-                     char *data, uint32_t data_len) {
+                     const char *key, uint32_t key_len,
+                     const char *data, uint32_t data_len) {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HMAC_hmac(CONVERT_ALG(a), mac, key, key_len, data, data_len);
+  Crypto_HMAC_hmac(CONVERT_ALG(a), mac, (uint8_t*)key, key_len, (uint8_t*)data, data_len);
   return 1;
 }
 
 int quic_crypto_hkdf_extract(quic_hash a, char *prk,
-                             char *salt, uint32_t salt_len,
-                             char *ikm, uint32_t ikm_len)
+                             const char *salt, uint32_t salt_len,
+                             const char *ikm, uint32_t ikm_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HKDF_hkdf_extract(CONVERT_ALG(a), prk, salt, salt_len, ikm, ikm_len);
+  Crypto_HKDF_hkdf_extract(CONVERT_ALG(a), prk, (uint8_t*)salt, salt_len, (uint8_t*)ikm, ikm_len);
   return 1;
 }
 
-int quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, char *prk, uint32_t prk_len, char *info, uint32_t info_len)
+int quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, const char *prk, uint32_t prk_len, const char *info, uint32_t info_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HKDF_hkdf_expand(CONVERT_ALG(a), okm, prk, prk_len, info, info_len, olen);
+  Crypto_HKDF_hkdf_expand(CONVERT_ALG(a), okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
   return 1;
 }
 
@@ -64,7 +64,8 @@ int quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, char *label
   size_t label_len = strlen(label);
   if(label_len > 249) return 0;
 
-  info[1] = hlen;
+  info[0] = 0;
+  info[1] = (char)hlen;
   info[2] = (char)(label_len + 6);
   memcpy(info+3, "tls13 ", 6);
   memcpy(info+9, label, label_len);
@@ -99,7 +100,7 @@ int quic_crypto_tls_derive_secet(quic_secret *derived, quic_secret *secret, char
   return 1;
 }
 
-int quic_crypto_derive_key(/*out*/quic_key **k, quic_secret *secret)
+int quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
 {
   quic_key *key = malloc(sizeof(quic_key));
   if(!(*k = key)) return 0;
@@ -131,23 +132,34 @@ int quic_crypto_derive_key(/*out*/quic_key **k, quic_secret *secret)
   return 1;
 }
 
-int quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, char *ad, uint32_t ad_len, char *plain, uint32_t plain_len)
+void sn_to_iv(char *iv, uint64_t sn)
+{
+  for(int i = 3; i < 12; i++)
+    iv[i] ^= (sn >> (80-i<<3)) & 255;
+}
+
+int quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, const char *ad, uint32_t ad_len, const char *plain, uint32_t plain_len)
 {
   char iv[12];
   memcpy(iv, key->static_iv, 12);
+  sn_to_iv(iv, sn);
   FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, iv);
-  Crypto_AEAD_Encrypt_encrypt(key->id, key->st, n, ad_len, ad, plain_len, plain, cipher);
+  Crypto_AEAD_Encrypt_encrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, cipher);
   return 1;
 }
 
-int quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, char *ad, uint32_t ad_len, char *cipher, uint32_t cipher_len)
+int quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, const char *ad, uint32_t ad_len, const char *cipher, uint32_t cipher_len)
 {
   char iv[12];
   memcpy(iv, key->static_iv, 12);
+  sn_to_iv(iv, sn);
+
+  if(cipher_len < Crypto_Symmetric_MAC_taglen)
+    return 0;
+
   FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, iv);
-  if(cipher_len < Crypto_Symmetric_MAC_taglen) return 0;
   uint32_t plain_len = cipher_len - Crypto_Symmetric_MAC_taglen;
-  return Crypto_AEAD_Decrypt_decrypt(key->id, key->st, n, ad_len, ad, plain_len, plain, cipher);
+  return Crypto_AEAD_Decrypt_decrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, plain, (uint8_t*)cipher);
 }
 
 int quic_crypto_free_key(quic_key *key)
