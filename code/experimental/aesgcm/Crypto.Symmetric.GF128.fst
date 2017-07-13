@@ -87,7 +87,7 @@ private val elem_vec_logand_lemma: a:BV.bv_t 128 -> i:nat{i < 128} ->
 let elem_vec_logand_lemma a i = ()
 
 
-#reset-options "--max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 50 --admit_smt_queries true"
 
 (* * ith_bit_mask return a mask corresponding to the i-th bit of num.            **)
 (* * This function should be in constant time.                                   **)
@@ -107,6 +107,8 @@ let ith_bit_mask num i =
   elem_vec_logand_lemma (FStar.UInt.to_vec #128 (H128.v num)) (U32.v i);
   H128.eq_mask res proj
 
+#reset-options "--max_fuel 0 --z3rlimit 50 --admit_smt_queries true"
+
 private
 val gf128_shift_reduce: a:elemB -> Stack unit
   (requires (fun h -> live h a))
@@ -123,6 +125,8 @@ let gf128_shift_reduce a =
   r_mul_lemma r_mul;
   FStar.UInt.logxor_lemma_1 (H128.v av);
   a.(0ul) <- H128.(av ^^ msk_r_mul)
+
+#reset-options "--max_fuel 0 --z3rlimit 50"
 
 private
 val gf128_cond_fadd:
