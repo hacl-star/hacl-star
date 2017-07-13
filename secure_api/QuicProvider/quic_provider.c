@@ -56,7 +56,7 @@ int quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, const char *p
   return 1;
 }
 
-int quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, char *label)
+int quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, const char *label)
 {
   if(a < TLS_hash_SHA256) return 0;
   uint32_t hlen = (a == TLS_hash_SHA256 ? 32 :
@@ -80,7 +80,7 @@ int quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, char *label
   return 1;
 }
 
-int quic_crypto_tls_derive_secet(quic_secret *derived, quic_secret *secret, char *label)
+int quic_crypto_tls_derive_secret(quic_secret *derived, const quic_secret *secret, const char *label)
 {
   uint32_t hlen = (secret->hash == TLS_hash_SHA256 ? 32 :
     (secret->hash == TLS_hash_SHA384 ? 48 : 64));
