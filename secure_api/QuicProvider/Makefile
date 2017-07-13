@@ -32,6 +32,7 @@ ifeq ($(OS),Windows_NT)
     EXTRA_OPTS =
     EXTRA_LIBS = -L.
     AR = $(MARCH)-w64-mingw32-ar
+    CC = $(MARCH)-w64-mingw32-gcc
 else
     LIBQUICCRYPTO=libquiccrypto.so
     EXTRA_PATH = LD_LIBRARY_PATH=.
