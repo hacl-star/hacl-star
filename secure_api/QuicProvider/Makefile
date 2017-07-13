@@ -1,4 +1,5 @@
 FSTAR_HOME ?= ../../../FStar
+include $(FSTAR_HOME)/ulib/ml/Makefile.include
 CONTRIB=ucontrib
 PLATFORM = $(FSTAR_HOME)/$(CONTRIB)/Platform/ml
 CORECRYPTO = $(FSTAR_HOME)/$(CONTRIB)/CoreCrypto/ml
