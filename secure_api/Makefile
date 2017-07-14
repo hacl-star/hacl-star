@@ -19,7 +19,7 @@ else
 endif
 
 KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf hkdf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/hash ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
-KRML_ARGS=$(FPIC) -ccopt -maes \
+KRML_ARGS=$(FPIC) -ccopt -maes -fnouint128 \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
   vale/asm/vale.a test/test_hacks.c \
   -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
