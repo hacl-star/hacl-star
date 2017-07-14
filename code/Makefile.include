@@ -16,7 +16,7 @@ endif
 ifndef KREMLIN_HOME 
   KREMLIN_HOME:=$(abspath $(HACL_HOME)/dependencies/kremlin)
 else
-  KREMLIN_HOME:=$(abspath KREMLIN_HOME)
+  KREMLIN_HOME:=$(abspath $(KREMLIN_HOME))
 endif
 
 export HACL_HOME
