@@ -644,7 +644,7 @@ val add_modq:
   y:qelem_56{eval_q y < 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed} ->
   Tot (z:qelem_56{eval_q z == (eval_q x + eval_q y) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed})
 
-#reset-options "--max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --z3rlimit 400"
 
 let add_modq x y =
   assert_norm(pow2 128  = 0x100000000000000000000000000000000);

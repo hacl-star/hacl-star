@@ -66,7 +66,9 @@ type ctrT i = x:u32 {x <=^ maxCtr i}
 
 // The PRF domain: an IV and a counter.
 
+#reset-options "--admit_smt_queries true"
 type domain (i:id) = { iv:Block.iv (cipherAlg_of_id i); ctr:ctrT i }
+#reset-options
 let incr (i:id) (x:domain i {x.ctr <^ maxCtr i}) = { iv = x.iv; ctr = x.ctr +^ 1ul }
 
 let above (#i:id) (x:domain i) (z:domain i) = x.iv == z.iv /\ x.ctr >=^ z.ctr
@@ -304,7 +306,7 @@ val prf_mac:
       HS.modifies_ref t.rgn Set.empty h0 h1  /\              //but modifies nothing in them
       HS.modifies_ref t.mac_rgn Set.empty h0 h1 )))
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 let prf_mac i t k_0 x =
   let macId = (i,x.iv) in
   Buffer.recall t.key;

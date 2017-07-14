@@ -63,7 +63,7 @@ all-ci: bignum-ci specific-ci
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 KREMLIN_ARGS+=-I ../bignum -tmpdir poly-c \
 	-bundle 'Hacl.Spec.\*,Hacl.Spe.\*' -fparentheses \
-	-drop Combinators,Hacl.Endianness,Spec.*,Hacl.Bignum.Parameters,Hacl.Endianness,Hacl.Spec,Hacl.Spe,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims,Seq.* \
+	-drop Combinators,Hacl.Endianness,Spec.*,Hacl.Bignum.Parameters,Hacl.Endianness,Hacl.Spec,Hacl.Spec.*,Hacl.Spe,Hacl.Spe.*,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims,Seq.* \
 	$(KREMLIN_TESTLIB)
 CFLAGS+= 
 
@@ -95,7 +95,7 @@ poly1305.exe: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
 		$^ -o $@
 	./$@
 
-extract-c: poly-c/Poly1305_64.c # poly-c/AEAD_Poly1305_64.c
+extract-c: poly-c/Poly1305_64.c poly-c/AEAD_Poly1305_64.c
 
 test: poly1305.exe
 
