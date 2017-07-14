@@ -6,7 +6,7 @@ CORECRYPTO = $(FSTAR_HOME)/$(CONTRIB)/CoreCrypto/ml
 INCLUDE=-package batteries,zarith -I $(PLATFORM) -I $(CORECRYPTO)
 MARCH?=x86_64
 
-KRML_INCLUDES=$(addprefix -I ,$(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,$(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test tmp)
 KRML_ARGS=-verbose -ccopt -Wno-error=pointer-sign $(KOPTS)
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 
@@ -15,7 +15,7 @@ OCAMLOPT = ocamlfind opt $(INCLUDE) -g -annot
 OCAMLMKLIB = ocamlfind mklib $(INCLUDE)
 OCAMLDEP = ocamlfind dep
 
-CCOPTS = $(addprefix -ccopt ,-Wall -std=c11 -D__USE_MINGW_ANSI_STDIO)
+CCOPTS = $(addprefix -ccopt ,-Wall -std=c11 -D__USE_MINGW_ANSI_STDIO -DKRML_NOUINT128)
 CCLIBS = $(addprefix -cclib ,-L.)
 
 ifeq ($(OS),Windows_NT)
@@ -43,7 +43,7 @@ else
     endif
 endif
 
-.PHONY: test dep
+.PHONY: test dep tmp
 
 all: tmp LowCProvider.cmxa
 
