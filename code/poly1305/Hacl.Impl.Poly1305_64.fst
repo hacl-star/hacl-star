@@ -538,11 +538,11 @@ val poly1305_finish_:
          let k    = as_seq h0 key_s in
          mac == poly1305_finish_spec (Spec.MkState r0 acc0 log) m len k)
     ))
-[@"substitute"]
 
 // Wintersteiger: admitting this query to unblock CI. It's likely solvable, but Z3 takes ages. 
-#reset-options "--max_fuel 0 --z3rlimit 1000 --admit_smt_queries true"
+#reset-options "--max_fuel 0 --z3rlimit 1000"
 
+[@"substitute"]
 let poly1305_finish_ log st mac m len key_s =
   let acc = st.h in
   let h0 = ST.get() in
@@ -552,13 +552,14 @@ let poly1305_finish_ log st mac m len key_s =
   let h2 = ST.get() in
   no_upd_lemma_1 h0 h2 acc key_s;
   let k'  = hload128_le key_s in
-  cut (k' = Hacl.Spec.Poly1305_64.load128_le_spec (as_seq h0 key_s));
+  (* cut *) assume (k' == Hacl.Spec.Poly1305_64.load128_le_spec (as_seq h0 key_s)); //NS: Used to be a "cut"; But, now without this targetted assume, Z3-4.5.1 takes forever;
   let open Hacl.Bignum.Wide in
   let acc' = bignum_to_128 acc in
   let mac' = acc' +%^ k' in
   hstore128_le mac mac';
   let h1 = ST.get() in
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (poly1305_finish_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal log)) (as_seq h0 m) len (as_seq h0 key_s)))
+
 
 #reset-options "--max_fuel 0 --z3rlimit 1000"
 
