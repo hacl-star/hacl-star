@@ -170,6 +170,18 @@ let sum_modifications (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem)
   lemma_reveal_modifies_1 b2 h1 h2;  
   lemma_intro_modifies_2 b1 b2 h0 h2
 
+let modifies_2_to_2_1 (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem)
+  : Lemma (requires (live h0 b2 /\
+                     b1 `unused_in` h0 /\
+                     modifies_0 h0 h1 /\
+                     frameOf b1 == h0.tip /\
+                     live h1 b1 /\
+                     modifies_2 b1 b2 h1 h2 ))
+          (ensures modifies_2_1 b2 h0 h2)
+  = lemma_reveal_modifies_0 h0 h1;
+    lemma_reveal_modifies_2 b1 b2 h1 h2;
+    lemma_intro_modifies_2_1 b2 h0 h2
+
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
 let point_mul result scalar q =
   let h0 = ST.get() in
@@ -200,6 +212,7 @@ let point_mul result scalar q =
   assert (modifies_2 b result hh0 hh4);
   assert (b `unused_in` hh);
   assert (frameOf b == hh.tip);
+  modifies_2_to_2_1 b result hh hh0 hh4;
   pop_frame();
-  let h1 = ST.get() in 
-  assume (modifies_1 result h0 h1)
+  let h1 = ST.get() in
+  FStar.Buffer.modifies_popped_1 result h0 hh hh4 h1
