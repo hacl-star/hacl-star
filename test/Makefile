@@ -10,6 +10,7 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 SNAPSHOT_DIR=snapshot
 
 all: extract-specs extract-all-c ct
+	$(MAKE) -C ../code test
 	$(MAKE) -C .. verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
@@ -63,10 +64,10 @@ verify-crypto:
 	$(MAKE) -C ../secure_api all-ver
 
 hints:
-	$(info The 'test' does not contain .fst files, so no hints to generate.)
+	$(info The 'test' directory does not contain .fst files, so no hints to generate.)
 
 verify: 
-	$(info The 'test' does not contain .fst files, so no verification to run.)
+	$(info The 'test' directory does not contain .fst files, so no verification to run.)
 
 build-snapshot:
 	mkdir -p $(SNAPSHOT_DIR)

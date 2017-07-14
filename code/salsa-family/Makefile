@@ -35,45 +35,67 @@ all-hints: hints
 all-ver: verify
 
 KREMLIN_ARGS+= \
-	-drop FStar,Prims,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Endianness,Hacl.Cast,Hacl.Spec.*,Spec.*,Seq.* \
+	-drop Prims,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Endianness,Hacl.Cast,Hacl.Spec.*,Spec.*,Seq.* \
 	$(KREMLIN_TESTLIB)
 
-chacha-c/Chacha20.c: Hacl.Lib.LoadStore32.fst Hacl.Lib.Create.fst Hacl.Impl.Xor.Lemmas.fst Hacl.Impl.Chacha20.fst Chacha20.fst
-	mkdir -p chacha-c
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c \
-		-bundle 'Chacha20=Hacl.Impl.\*,Chacha20,Hacl.Lib.\*' \
-		Chacha20.fst $(VERBOSE) -skip-compilation
 
-chacha20.exe: Hacl.Impl.Chacha20.fst Chacha20.fst Hacl.Test.Chacha20.fst
+chacha-c/out.krml: Hacl.Lib.LoadStore32.fst Hacl.Lib.Create.fst Hacl.Impl.Xor.Lemmas.fst Hacl.Impl.Chacha20.fst Chacha20.fst Hacl.Test.Chacha20.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c \
+		-bundle 'Chacha20=Hacl.Impl.*,Chacha20,Hacl.Lib.*' \
+		-skip-compilation $^ -o $@
+
+chacha-c/Chacha20.c: chacha-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c \
+		-bundle 'Chacha20=Hacl.Impl.*,Chacha20,Hacl.Lib.*' \
+		-skip-compilation $^ -o $@
+
+chacha20.exe: chacha-c/out.krml
 	mkdir -p chacha-c
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c  -no-prefix Hacl.Test.Chacha20 \
-		-bundle 'Chacha20=Chacha20,Hacl.Impl.\*,Hacl.Lib.\*' \
+		-bundle 'Chacha20=Chacha20,Hacl.Impl.*,Hacl.Lib.*' \
 		$^ -o $@
 	./$@
 
-salsa-c/Salsa20.c: Hacl.Impl.Salsa20.fst Salsa20.fst
-	mkdir -p salsa-c
+
+salsa-c/out.krml: Hacl.Impl.Salsa20.fst Salsa20.fst Hacl.Test.Salsa20.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c -skip-compilation \
-		-bundle 'Salsa20=Salsa20,Hacl.Impl.\*,Hacl.Lib.\*' \
-		Salsa20.fst
+		-bundle 'Salsa20=Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
+		$^ -o $@
 
-salsa20.exe: Hacl.Impl.Salsa20.fst Salsa20.fst Hacl.Test.Salsa20.fst
-	mkdir -p salsa-c
+salsa-c/Salsa20.c: salsa-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c -skip-compilation \
+		-bundle 'Salsa20=Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
+		$^ -o $@
+
+salsa20.exe: salsa-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c  -no-prefix Hacl.Test.Salsa20 \
-		-bundle 'Salsa20=Salsa20,Hacl.Impl.\*,Hacl.Lib.\*' \
+		-bundle 'Salsa20=Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
 		$^ -o $@
 	./$@
 
-chacha20-vec128/Chacha20_Vec128.c: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20.Vec128.fst Chacha20.Vec128.fst
-	mkdir -p chacha20-vec128
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-vec128 -no-prefix Hacl.UInt32x4 -I $(HACL_HOME)/specs -drop "Hacl.UInt32x4" \
-	-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.\*" \
-	-add-include '"vec128.h"' \
-	$^ -skip-compilation
 
-extract-c: chacha-c/Chacha20.c salsa-c/Salsa20.c chacha20-vec128/Chacha20_Vec128.c
+chacha-vec128-c/out.krml: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20.Vec128.fst Chacha20.Vec128.fst Hacl.Test.Chacha20.Vec128.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
+		-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
+		-add-include '"vec128.h"' \
+		-skip-compilation $^ -o $@
 
-test: chacha20.exe salsa20.exe
+chacha-vec128-c/Chacha20_Vec128.c: chacha-vec128-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
+		-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
+		-skip-compilation $^ -o $@
+
+chacha20-vec128.exe: chacha-vec128-c/out.krml
+	# Wintersteigr: Fix me; there is no Hacl.Test.Chacha20.Vec128 yet.
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c -no-prefix Hacl.Test.Chacha20.Vec128 \
+		-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
+		$^ -o $@
+	./$@
+
+
+extract-c: chacha-c/Chacha20.c salsa-c/Salsa20.c chacha-vec128-c/Chacha20_Vec128.c
+
+test: chacha20.exe salsa20.exe # chacha20-vec128.exe
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c chacha-vec128 *.graph
+	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c chacha-vec128-c *.graph
