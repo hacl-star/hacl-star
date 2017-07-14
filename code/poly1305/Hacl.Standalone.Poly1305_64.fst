@@ -177,7 +177,20 @@ let poly1305_partial st input len kr =
   (* lemma_append_empty' (encode_bytes (reveal_sbytes input)) (MkState?.log init_st); *)
   partial_log
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from Prims --using_facts_from FStar"
+let sum_modifications (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem)
+  : Lemma (requires (live h0 b1 /\
+                     live h0 b2 /\
+                     modifies_2 b1 b2 h0 h1 /\
+                     modifies_1 b1 h1 h2))
+          (ensures modifies_2 b1 b2 h0 h2)
+  =
+  lemma_reveal_modifies_2 b1 b2 h0 h1;
+  lemma_reveal_modifies_1 b1 h1 h2;
+  lemma_intro_modifies_2 b1 b2 h0 h2
+
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 2 --z3rlimit 50"
 val poly1305_complete:
   st:P.poly1305_state ->
   m:P.uint8_p ->
@@ -210,8 +223,12 @@ let poly1305_complete st m len k =
   Math.Lemmas.modulo_lemma (U64.v len) (pow2 32);
   let part_input = Buffer.sub m 0ul (Int.Cast.uint64_to_uint32 (U64.(16uL *^ len16))) in
   let last_block = Buffer.sub m (Int.Cast.uint64_to_uint32 (U64.(16uL *^ len16))) (Int.Cast.uint64_to_uint32 rem16) in
+  let h0 = ST.get () in
   let l = poly1305_partial st part_input len16 kr in
-  P.poly1305_update_last l st last_block rem16
+  let h1 = ST.get () in
+  P.poly1305_update_last l st last_block rem16;
+  let h2 = ST.get () in
+  P.(sum_modifications st.h st.r h0 h1 h2)
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 50"
