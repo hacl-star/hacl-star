@@ -6,7 +6,8 @@ API_FILES= \
 	Hacl.SecretBox.ZeroPad.fst \
 	Hacl.Box.ZeroPad.fst
 
-FSTAR_INCLUDES+=--include ../salsa-family --include $(HACL_HOME)/code/bignum --include ../curve25519 --include ../poly1305
+INCLUDE_DIRS=../salsa-family $(HACL_HOME)/code/bignum ../curve25519 ../poly1305
+FSTAR_INCLUDES+=$(addprefix --include ,$(INCLUDE_DIRS))
 
 
 # Parameter for interactive mode
@@ -26,11 +27,11 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(API_FILES)))
 
 api: verify
 
-extract-c: aead-c/Chacha20Poly1305.c # box-c/NaCl.c 
+extract-c: aead-c/Chacha20Poly1305.c box-c/NaCl.c 
 
 test:
 
-KREMLIN_ARGS+=-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\*,Hacl.Constants,Hacl.Endianness
+KREMLIN_ARGS+=-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\*,Hacl.Constants,Hacl.Endianness $(addprefix -I ,$(INCLUDE_DIRS))
 
 box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst NaCl.fst
 	mkdir -p box-c

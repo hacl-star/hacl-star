@@ -77,11 +77,11 @@ build-snapshot:
 		$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
 		$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
 		$(addprefix ../code/ed25519/ed25519-c/, Ed25519.*) \
-		$(addprefix ../code/hash/sha2-256-c/, SHA2_256.*) \
-		$(addprefix ../code/hash/sha2-384-c/, SHA2_384.*) \
-		$(addprefix ../code/hash/sha2-512-c/, SHA2_512.*) \
+		$(addprefix ../code/hash/sha2-c/, SHA2_256.*) \
+		$(addprefix ../code/hash/sha2-c/, SHA2_384.*) \
+		$(addprefix ../code/hash/sha2-c/, SHA2_512.*) \
 		$(addprefix ../code/hmac/hmac-c/, HMAC_SHA2_256.*) \
-		$(addprefix ../code/salsa-family/chacha-vec128/, Chacha20_Vec128.* ../vec128.h) \
+		$(addprefix ../code/salsa-family/chacha20-vec128/, Chacha20_Vec128.* ../vec128.h) \
 		 $(SNAPSHOT_DIR)
 	cp ./c/* $(SNAPSHOT_DIR)/
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
