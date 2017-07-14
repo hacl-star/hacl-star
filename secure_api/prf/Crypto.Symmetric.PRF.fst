@@ -66,9 +66,7 @@ type ctrT i = x:u32 {x <=^ maxCtr i}
 
 // The PRF domain: an IV and a counter.
 
-#reset-options "--admit_smt_queries true"
 type domain (i:id) = { iv:Block.iv (cipherAlg_of_id i); ctr:ctrT i }
-#reset-options
 let incr (i:id) (x:domain i {x.ctr <^ maxCtr i}) = { iv = x.iv; ctr = x.ctr +^ 1ul }
 
 let above (#i:id) (x:domain i) (z:domain i) = x.iv == z.iv /\ x.ctr >=^ z.ctr

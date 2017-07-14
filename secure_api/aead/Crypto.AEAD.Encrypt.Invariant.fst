@@ -92,14 +92,12 @@ let enxor_h0_h1
 					         (Plain.sel_plain h1 plainlen plain)
 					         (Buffer.as_seq h1 cipher))))))
 
-#reset-options "--admit_smt_queries true"
 let fresh_nonces_are_unused_except (#i:id) (#mac_rgn:region) (nonce:Cipher.iv (alg i))
 				   (prf_table:prf_table mac_rgn i) (aead_entries:aead_entries i) 
 				   (h:mem{safeMac i}) = 
    forall (nonce':Cipher.iv (alg i)). (fresh_nonce nonce' aead_entries /\ nonce' <> nonce) ==>
       unused_aead_iv_for_prf prf_table nonce' h
 
-#reset-options
 
 (*
  * predicate on the final state after enxor

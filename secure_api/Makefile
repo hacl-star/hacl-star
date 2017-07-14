@@ -173,11 +173,13 @@ all-lax: lax
 # Parameter for interactive mode
 %.fst-in:
 	@echo --hint_info \
-	$(FSTAR_INCLUDE_PATHS)
+	$(HINTS_ENABLED) \
+	$(OTHERFLAGS) \
+	$(FSTAR_INCLUDES)
 
 %.fsti-in:
 	@echo --hint_info \
-	$(FSTAR_INCLUDE_PATHS)
+	$(FSTAR_INCLUDES)
 
 # Verifying one file at a time
 %.fst-ver:

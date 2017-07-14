@@ -125,7 +125,7 @@ private val intro_fresh_nonces_are_unused_except_enxor
 	      let entries_1   = HS.sel #(aead_entries i) h1 (st_ilog aead_st) in
 	      let table_1     = HS.sel h1 (itable i aead_st.prf) in
 	      fresh_nonces_are_unused_except nonce table_1 entries_1 h1)))
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --admit_smt_queries true"
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let intro_fresh_nonces_are_unused_except_enxor
   (#i:id)
   (#rw:rw)
@@ -227,5 +227,3 @@ let lemma_propagate_inv_enxor #i #rw #aadlen #plainlen aead_st nonce aad plain c
 	  table_0
      end					     
   end
-
-#reset-options

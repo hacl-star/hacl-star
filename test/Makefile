@@ -9,13 +9,16 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
-all: extract-specs extract-all-c ct
-	$(MAKE) -C .. verify
-	$(MAKE) compile-vale
-	$(MAKE) -C openssl-engine
-	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
-	# JP: fixme, doesn't work on build machine
-	# $(MAKE) -C snapshot-gcc
+all:
+	$(MAKE) -C .. verify #NS, temporarily, on this branch, I only care about verification
+
+# all: extract-specs extract-all-c ct
+# 	$(MAKE) -C .. verify
+# 	$(MAKE) compile-vale
+# 	$(MAKE) -C openssl-engine
+# 	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
+# 	# JP: fixme, doesn't work on build machine
+# 	# $(MAKE) -C snapshot-gcc
 
 travis: extract-c-code ct
 	$(MAKE) -C .. world
