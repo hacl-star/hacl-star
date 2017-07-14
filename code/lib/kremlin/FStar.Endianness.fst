@@ -1,9 +1,13 @@
 module FStar.Endianness
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.UInt32
 open FStar.Ghost
 open FStar.Mul
-open FStar.Int.Cast
+open FStar.Int.Cast.Full
 
 module U8 = FStar.UInt8
 

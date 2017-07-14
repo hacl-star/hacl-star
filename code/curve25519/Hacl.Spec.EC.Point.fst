@@ -1,5 +1,9 @@
 module Hacl.Spec.EC.Point
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint

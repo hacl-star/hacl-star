@@ -1,9 +1,13 @@
 all: extract-c ct verify
 
-DIRECTORIES=salsa-family bignum poly1305 curve25519 api ed25519 hash hmac
+DIRECTORIES=salsa-family bignum poly1305 curve25519 api hmac ed25519 hash
+TOOSLOW=hash experimental
 
 %-c: %
 	$(MAKE) -C $< extract-c
+
+%-test: %
+	$(MAKE) -C $< test
 
 %-ver: %
 	$(MAKE) -C $< all-ver
@@ -15,54 +19,23 @@ DIRECTORIES=salsa-family bignum poly1305 curve25519 api ed25519 hash hmac
 	$(MAKE) -C $< all-ci
 
 %-hints: %
-	$(MAKE) -C $< all-hints
+	$(MAKE) -C $< hints
 
-verify: $(addsuffix -ver, $(DIRECTORIES))
+%-clean: %
+	$(MAKE) -C $< clean
+
+verify: $(addsuffix -ver, $(filter-out $(TOOSLOW),$(DIRECTORIES)))
+test: $(addsuffix -test, $(DIRECTORIES))
 ct: $(addsuffix -ct, $(DIRECTORIES))
 extract-c: $(addsuffix -c, $(filter-out bignum, $(DIRECTORIES)))
+hints: $(addsuffix -hints, $(DIRECTORIES))
+ci: $(addsuffix -ci, $(filter-out $(TOOSLOW),$(DIRECTORIES)))
 
-# Gathering all bignum verification code in one target to allow parallelization of the others
-bignum-hints:
-	$(MAKE) -C bignum all-hints
-	$(MAKE) -C poly1305 bignum-hints
-	$(MAKE) -C curve25519 bignum-hints
+all-verify: verify
+all-hints: hints
+all-ci: ci
+all-ct: ct
+all-test: test
 
-poly1305-specific-hints:
-	$(MAKE) -C poly1305 specific-hints
-
-x25519-specific-hints:
-	$(MAKE) -C curve25519 specific-hints
-
-hints: $(addsuffix -hints, salsa-family api) bignum-hints poly1305-specific-hints x25519-specific-hints
-
-bignum-ci:
-	$(MAKE) -C poly1305 bignum-ci
-	$(MAKE) -C curve25519 bignum-ci
-
-poly1305-specific-ci:
-	$(MAKE) -C poly1305 specific-ci
-
-x25519-specific-ci:
-	$(MAKE) -C curve25519 specific-ci
-
-experimental-ci:
-	$(MAKE) -C experimental all-ci
-
-hash-ci:
-	$(MAKE) -C hash all-ci
-
-hmac-ci:
-	$(MAKE) -C hmac all-ci
-
-ci: $(addsuffix -ci, hash hmac salsa-family api ed25519 bignum poly1305-specific x25519-specific experimental)
-
-clean:
+clean: $(addsuffix -clean, $(DIRECTORIES) experimental)
 	rm -rf *~ *.exe *.out
-	$(MAKE) -C salsa-family clean
-	$(MAKE) -C bignum clean
-	$(MAKE) -C poly1305 clean
-	$(MAKE) -C curve25519 clean
-	$(MAKE) -C api clean
-	$(MAKE) -C experimental clean
-	$(MAKE) -C hash clean
-	$(MAKE) -C hmac clean

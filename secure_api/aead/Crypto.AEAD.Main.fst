@@ -1,4 +1,8 @@
 module Crypto.AEAD.Main
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 open FStar.UInt32
 open Crypto.AEAD
 module HH = FStar.HyperHeap

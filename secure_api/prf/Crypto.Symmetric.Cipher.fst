@@ -1,5 +1,9 @@
 module Crypto.Symmetric.Cipher
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 // Multiplexing and hiding concrete implementations: AES128, AES256, and CHACHA20. 
 // Consider also enforcing key abstraction (but quite verbose to code; see Plain.fst).
 
@@ -131,7 +135,7 @@ val compute:
     (requires (fun h -> live h st /\ live h output))
     (ensures (fun h0 _ h1 -> live h1 output /\ modifies_1 output h0 h1))
 
-#reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 100"
+#reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 400"
 let compute i output st n counter len = 
   let h0 = ST.get() in 
   push_frame(); 

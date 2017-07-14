@@ -1,6 +1,10 @@
 module Hacl.Hardware.Intel.CPUID
 
-open FStar.ST
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
+open FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.Buffer
 open FStar.UInt32

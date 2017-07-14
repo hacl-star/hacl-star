@@ -1,5 +1,9 @@
 module Hacl.Impl.Ed25519.G
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.Buffer
 

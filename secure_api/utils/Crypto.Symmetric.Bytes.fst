@@ -1,7 +1,11 @@
 (*--build-config
-options:--trace_error --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../../FStar/ulib/hyperstack --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../../secure_api/vale --include ../../secure_api/uf1cma --include ../../secure_api/utils --include ../../specs --include ../../../kremlin/kremlib
+options:--trace_error --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../../secure_api/vale --include ../../secure_api/uf1cma --include ../../secure_api/utils --include ../../specs --include ../../../kremlin/kremlib
 --*)
 module Crypto.Symmetric.Bytes
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 
 open FStar.HyperHeap
 open FStar.HyperStack
@@ -9,7 +13,7 @@ open FStar.UInt32
 open FStar.Ghost
 open FStar.Buffer
 open FStar.Mul
-open FStar.Int.Cast
+open FStar.Int.Cast.Full
 
 module U8 = FStar.UInt8
 

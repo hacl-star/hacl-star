@@ -1,5 +1,9 @@
 module Hacl.Impl.Ed25519.PointDouble
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 open Hacl.Bignum25519
 open Hacl.Impl.Ed25519.ExtPoint

@@ -1,5 +1,9 @@
 module Crypto.Indexing
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 type rw =
   | Reader
   | Writer

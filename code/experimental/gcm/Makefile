@@ -1,3 +1,5 @@
+include ../code/Makefile.include
+
 all:
 	@echo
 	@echo "############## LAX TYPECHEKING #############"
@@ -8,20 +10,18 @@ all:
 	@echo
 	$(MAKE) ver
 
-FSTAR_HOME ?= ../../../FStar
-FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe 
-KREMLIN_HOME = $(FSTAR_HOME)/../kremlin
-HACL_HOME ?= ../..
+MODULES=Hacl.Symmetric.GCM.fst Hacl.Symmetric.AES.fst Hacl.AEAD.AES256GCM.fst
 
-MODULES= Hacl.Symmetric.GCM.fst Hacl.Symmetric.AES.fst Hacl.AEAD.AES256GCM.fst
+FSTAR_INCLUDES+=--include $(HACL_HOME)/code/lib
 
-FSTAR_INCLUDES:=--include $(FSTAR_HOME)/ulib/hyperstack --include $(HACL_HOME)/code/lib
-
-lax:
-	$(FSTAR) $(FSTAR_INCLUDES) --lax $(MODULES)
+ct:
+	$(FSTAR) --lax $(MODULES)
 
 ver:
-	$(FSTAR) $(FSTAR_INCLUDES) $(MODULES)
+	$(FSTAR) $(MODULES)
+
+all-ct: ct
+all-ver: ver
 
 clean:
 	rm -f *~

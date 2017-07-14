@@ -1,11 +1,11 @@
-FSTAR_HOME ?= ../../../FStar
+include ../../code/Makefile.include
+
 CONTRIB=ucontrib
 PLATFORM = $(FSTAR_HOME)/$(CONTRIB)/Platform/ml
 CORECRYPTO = $(FSTAR_HOME)/$(CONTRIB)/CoreCrypto/ml
 INCLUDE=-package batteries,zarith -I $(PLATFORM) -I $(CORECRYPTO)
 MARCH?=x86_64
 
-KREMLIN_HOME ?= ../../../kremlin
 KRML_INCLUDES=$(addprefix -I ,$(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=-verbose -ccopt -Wno-error=pointer-sign $(KOPTS)
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
@@ -59,28 +59,30 @@ tmp:
 %.cmx: %.ml
 	$(OCAMLOPT) -c $<
 
+LowCProvider.cmx: LowCProvider.ml $(CORECRYPTO)/CoreCrypto.cmx
+	$(OCAMLOPT) -c $<
+
 $(CORECRYPTO)/CoreCrypto.cmx: $(CORECRYPTO)/CoreCrypto.ml
 	$(MAKE) -C $(CORECRYPTO)
 
 ../vale/asm/vale.a:
 	$(MAKE) -C ../vale/asm
 
-libllcrypto.a: tmp ../vale/asm/vale.a
+libllcrypto.a: tmp
 	cp ../vale/asm/vale.a libllcrypto.a
 	$(AR) -cr libllcrypto.a tmp/*.o
 
 lowc_stub.o: libllcrypto.a
 	$(OCAMLOPT) $(CCOPTS) $(EXTRA_OPTS) $(KRML_INCLUDES) -c lowc_stub.c
 
-LowCProvider.cmxa: $(CORECRYPTO)/CoreCrypto.cmx lowc_stub.o LowCProvider.cmx
+LowCProvider.cmxa: lowc_stub.o LowCProvider.cmx
 	$(OCAMLMKLIB) -ocamloptflags "$(EXTRA_OPTS)" $(EXTRA_LIBS) $(CCLIBS) -o LowCProvider $^
 
 Tests.exe: LowCProvider.cmxa Tests.cmx
 	$(OCAMLOPT) $(EXTRA_OPTS) -I $(PLATFORM) -package batteries,zarith -linkpkg -o $@ libllcrypto.a lowc_stub.o CoreCrypto.cmxa LowCProvider.cmx Tests.cmx
 
 clean:
-	$(MAKE) -C $(PLATFORM) clean
-	$(MAKE) -C $(CORECRYPTO) clean
+	FSTAR_HOME=$(abspath $(FSTAR_HOME)) $(MAKE) -C $(CORECRYPTO) clean
 	rm -fr tmp
 	rm -f Tests.exe *.[oa] *.so *.cm[ixoa] *.cmxa *.exe *.dll *.annot *~
 

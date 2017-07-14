@@ -1,5 +1,7 @@
 module Spec.MontgomeryLadder
 
+module ST = FStar.HyperStack.ST
+
 open Spec.AdditiveLaw
 
 #set-options "--initial_fuel 0 --max_fuel 0"

@@ -1,5 +1,9 @@
 module Hacl.Impl.Ed25519.Ladder
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 
 open FStar.Mul
 open FStar.HyperStack
@@ -154,14 +158,48 @@ let make_point_inf b =
   no_upd_lemma_1 h3 h4 t z
 
 
-#reset-options "--max_fuel 0 --z3rlimit 500"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500 --using_facts_from Prims --using_facts_from FStar"
+let sum_modifications (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem) 
+  : Lemma (requires (live h0 b1 /\ 
+                     live h0 b2 /\
+                     modifies_1 b1 h0 h1 /\
+                     modifies_1 b2 h1 h2))
+          (ensures modifies_2 b1 b2 h0 h2)
+  =
+  lemma_reveal_modifies_1 b1 h0 h1;
+  lemma_reveal_modifies_1 b2 h1 h2;  
+  lemma_intro_modifies_2 b1 b2 h0 h2
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500"
 let point_mul result scalar q =
+  let h0 = ST.get() in
   push_frame();
+  let hh = ST.get () in
   let b = create (Hacl.Cast.uint64_to_sint64 0uL) 80ul in
+  let hh0 = ST.get () in
   let nq   = Buffer.sub b  0ul 20ul in
   let nqpq = Buffer.sub b 20ul 20ul in
   make_point_inf nq;
+  let hh1 = ST.get () in
+  assert (modifies_1 nq hh0 hh1);
+  assert (modifies_1 b hh0 hh1);  
   Hacl.Impl.Ed25519.SwapConditional.copy nqpq q;
+  let hh2 = ST.get () in
+  assert (modifies_1 nqpq hh1 hh2);  
+  assert (modifies_1 b hh1 hh2);
   point_mul_ b scalar;
+  let hh3 = ST.get () in 
+  assert (modifies_1 b hh2 hh3);
+  lemma_modifies_1_trans b hh0 hh1 hh2;
+  lemma_modifies_1_trans b hh0 hh2 hh3;  
+  assert (modifies_1 b hh0 hh3);
   Hacl.Impl.Ed25519.SwapConditional.copy result nq;
-  pop_frame()
+  let hh4 = ST.get () in
+  assert (modifies_1 result hh3 hh4);
+  sum_modifications b result hh0 hh3 hh4;
+  assert (modifies_2 b result hh0 hh4);
+  assert (b `unused_in` hh);
+  assert (frameOf b == hh.tip);
+  pop_frame();
+  let h1 = ST.get() in 
+  assume (modifies_1 result h0 h1)

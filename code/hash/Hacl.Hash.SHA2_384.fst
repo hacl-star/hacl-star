@@ -1,9 +1,13 @@
 module Hacl.Hash.SHA2_384
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 
 open C.Loops
@@ -575,7 +579,7 @@ private val update_core:
                   let res = Spec.update seq_hash_0 seq_block in
                   seq_hash_1 == res)))
 
-#reset-options "--max_fuel 0  --z3rlimit 400"
+#reset-options "--max_fuel 0  --z3rlimit 500"
 
 [@"substitute"]
 let update_core hash_w data data_w ws_w k_w =
@@ -920,7 +924,7 @@ let set_pad_part2 buf2 encodedlen =
   Lemmas.lemma_eq_endianness h buf2 encodedlen
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 [@"substitute"]
 val pad:

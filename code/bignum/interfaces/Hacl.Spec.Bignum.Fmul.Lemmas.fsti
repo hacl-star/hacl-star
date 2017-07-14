@@ -1,5 +1,9 @@
 module Hacl.Spec.Bignum.Fmul.Lemmas
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint

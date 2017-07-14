@@ -1,4 +1,8 @@
 module Crypto.AEAD.Encrypt
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
@@ -72,7 +76,7 @@ let do_ideal #i st n #aadlen aad #plainlen plain cipher_tag =
     let p = Plain.load plainlen plain in 
     let c_tagged = Buffer.to_seq_full cipher_tag in
     let entry = AEADEntry n ad (v plainlen) p c_tagged in
-    FStar.ST.recall (st_ilog st);
+    ST.recall (st_ilog st);
     st_ilog st := Seq.snoc !(st_ilog st) entry
 
 #reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"

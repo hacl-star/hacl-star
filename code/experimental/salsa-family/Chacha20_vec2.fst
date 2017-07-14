@@ -1,5 +1,9 @@
 module Chacha20_vec2
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Buffer
 open Hacl.Spec.Endianness
 open Hacl.Impl.Chacha20_state2

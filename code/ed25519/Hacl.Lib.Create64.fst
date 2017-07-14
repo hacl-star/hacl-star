@@ -1,5 +1,9 @@
 module Hacl.Lib.Create64
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 open FStar.Buffer

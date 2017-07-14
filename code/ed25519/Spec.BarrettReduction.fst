@@ -1,5 +1,9 @@
 module Spec.BarrettReduction
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 
 (*
@@ -36,7 +40,7 @@ let barrett_reduce (a:nat{a < l * l}) : Tot (b:nat{b < l}) =
   let a = a - q * l in
   if l <= a then a - l else a
 
-#set-options "--max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 164"
 
 
 let p (x:nat{x < l * l}) = (x - ((x * m) / pow2k) * l) % l

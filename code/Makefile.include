@@ -1,11 +1,48 @@
 UNAME := $(shell uname)
+.DEFAULT_GOAL=all
 
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME=../..
+PYTHON?=$(shell which python)
+
+ifndef HACL_HOME
+  THIS_DIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+  HACL_HOME_ABS:=$(shell $(PYTHON) -c "import posixpath; print posixpath.realpath('$(THIS_DIR)/..')")
+  HACL_HOME:=$(shell $(PYTHON) -c "import posixpath; print posixpath.relpath('$(HACL_HOME_ABS)', '$(CURDIR)')")
+  $(info HACL_HOME_ABS is at $(HACL_HOME_ABS))
+endif
+
+ifndef FSTAR_HOME 
+  FSTAR_HOME:=$(HACL_HOME)/dependencies/FStar
+  FSTAR_HOME_ABS:=$(abspath $(FSTAR_HOME))
+else
+  ifndef FSTAR_HOME_ABS
+    FSTAR_HOME_ABS:=$(abspath $(FSTAR_HOME))
+  endif
+  FSTAR_HOME:=$(shell python -c "import posixpath; print posixpath.relpath('$(FSTAR_HOME_ABS)', '$(CURDIR)')")
+endif
+
+export FSTAR_HOME_ABS
+export FSTAR_HOME
+
+ifndef KREMLIN_HOME 
+  KREMLIN_HOME:=$(HACL_HOME)/dependencies/kremlin
+  KREMLIN_HOME_ABS:=$(abspath $(KREMLIN_HOME))
+else
+  ifndef KREMLIN_HOME_ABS
+    KREMLIN_HOME_ABS:=$(abspath $(KREMLIN_HOME))
+  endif
+  KREMLIN_HOME:=$(shell python -c "import posixpath; print posixpath.relpath('$(KREMLIN_HOME_ABS)', '$(CURDIR)')")
+endif
+
+export KREMLIN_HOME_ABS
+export KREMLIN_HOME
+
 HINTS_ENABLED?=--use_hints
 
-HYPERSTACK=$(FSTAR_HOME)/ulib/hyperstack
+# $(info THIS_DIR is at $(THIS_DIR))
+# $(info CURDIR is at $(CURDIR))
+# $(info HACL_HOME (rel) is at $(HACL_HOME))
+# $(info FSTAR_HOME (rel) is at $(FSTAR_HOME))
+# $(info KREMLIN_HOME (rel) is at $(KREMLIN_HOME))
 
 HACL_LIB=$(HACL_HOME)/code/lib
 HACL_FILES=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Types.fst Hacl.Policies.fst
@@ -15,50 +52,6 @@ HACL_KREMLIN_FILES=$(addprefix $(HACL_KREMLIN)/, $(HACL_FILES))
 HACL_API=$(HACL_HOME)/code/api
 HACL_CRYPTO_UTILS=$(HACL_HOME)/code/lib
 
-FSTAR_LIB_FILES= \
-	FStar.Mul.fst \
-	FStar.Squash.fsti \
-	FStar.Squash.fst \
-	FStar.Classical.fst \
-	FStar.StrongExcludedMiddle.fst \
-	FStar.PropositionalExtensionality.fst \
-	FStar.FunctionalExtensionality.fst \
-	FStar.PredicateExtensionality.fst \
-	FStar.List.Tot.Base.fst \
-	FStar.List.Tot.Properties.fst \
-	FStar.List.Tot.fst \
-	FStar.Seq.Base.fst \
-	FStar.Seq.Properties.fst \
-	FStar.Seq.fst \
-	FStar.Math.Lib.fst \
-	FStar.Math.Lemmas.fst \
-	FStar.BitVector.fst \
-	FStar.Int.fst \
-	FStar.UInt.fst \
-	FStar.UInt32.fst \
-	FStar.Int32.fst \
-	FStar.Int8.fst \
-	FStar.Int16.fst \
-	FStar.Int63.fst \
-	FStar.Int64.fst \
-	FStar.Int128.fst \
-	FStar.UInt8.fst \
-	FStar.UInt16.fst \
-	FStar.UInt63.fst \
-	FStar.UInt64.fst \
-	FStar.UInt128.fst \
-	FStar.Int.Cast.fst \
-	FStar.TSet.fst \
-	FStar.Set.fst \
-	FStar.Map.fst \
-	FStar.Heap.fst \
-	FStar.Ghost.fst \
-	FStar.HyperHeap.fst \
-	FStar.HyperStack.fst \
-	FStar.ST.fst \
-	FStar.Buffer.fst
-
-
 ifeq ($(CI),true)
 VERBOSE=
 else
@@ -66,41 +59,61 @@ VERBOSE=-verbose
 endif
 
 KREMLIN=$(KREMLIN_HOME)/krml
-ifeq ($(CC),ccomp)
-  KREMLIN_ARGS=-cc compcert $(VERBOSE)
+KREMLIN_ARGS?=
+# Pass parameters to kremlin from the command-line
+KREMLIN_ARGS+=$(KOPTS)
+ifdef USE_CCOMP
+  KREMLIN_ARGS+=-cc compcert $(VERBOSE)
+else ifdef USE_CL
+  KREMLIN_ARGS+=-cc msvc $(VERBOSE)
 else
-  KREMLIN_ARGS=-ccopt -march=native $(VERBOSE) -ldopt -flto
+  KREMLIN_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
 endif
 
 # Linux specific compilation instruction for PneuTube
 ifeq ($(UNAME), Linux)
-KREMLIN_ARGS+= -ccopt -D_GNU_SOURCE
+KREMLIN_ARGS+=-ccopt -D_GNU_SOURCE
 endif
 
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
+KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
+KREMLIN_TESTLIB=-add-include '"testlib.h"' $(KREMLIB)/testlib.c
 
-FSTAR_OPTIONS_VER=-fsopt $(HINTS_ENABLED) -skip-extraction
-FSTAR_OPTIONS_KREMLIN=
-FSTAR=$(KREMLIN) -verify $(VERBOSE) -skip-compilation
+FSTAR_LIB=$(FSTAR_HOME)/ulib
+FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs 
 
-ifndef CLOUD_VERIFY
-  FSTAR_BASE=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) --include $(HYPERSTACK)
+ifndef CLOUD_VERIFY  
+  FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
+  export BATCH_ID_FILE:=
 else
-  KREMLIN_HOME=\$$H/kremlin
-  CURRENT_SUBDIR:=$(subst $(abspath $(HACL_HOME))/,,$(abspath $(shell pwd)))
-  FSTAR_BASE=/mnt/f/dev/sec/FStar-cloud-verify/bin/fabc-make.exe add -i $(HACL_HOME)/tmpids -d 'code/$(CURRENT_SUBDIR)' $(FABC_EXTRA) -- \$$H/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) --include \$$H/ulib/hyperstack
+  export BATCH_ID_FILE:=$(HACL_HOME)/batch_id.tmp
+  EABC=$(PYTHON) /mnt/f/dev/sec/eabc/eabc.py
+  CURRENT_SUBDIR:=$(subst $(abspath $(HACL_HOME))/,,$(abspath $(shell pwd)))  
+
+$(BATCH_ID_FILE):
+	$(info CREATING)
+	$(EABC) create > $@
+
+  BATCH_JOB_ID=$(subst job-id:,,$(filter job-id:%, $(shell cat $(BATCH_ID_FILE))))
+  FSTAR=$(EABC) -j $(BATCH_JOB_ID) -d 'hacl-star/$(CURRENT_SUBDIR)' $(EABC_EXTRA) add -- \$$H/FStar/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
+  KREMLIN=$(EABC) -j $(BATCH_JOB_ID) -d 'hacl-star/$(CURRENT_SUBDIR)' $(EABC_EXTRA) add -- \$$H/kremlin/krml
+
+# $(info goals: $(MAKECMDGOALS))
+# $(MAKECMDGOALS): $(BATCH_ID_FILE)
+# .PHONY: BATCH_CLEANUP
+# BATCH_CLEANUP: $(MAKECMDGOALS)
+# 	$(info CLEANUP)
+
 endif
 
-OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g \
-	$(FSTAR_HOME)/ulib/ml/fstarlib.cmxa -I $(FSTAR_HOME)/ulib/ml/ \
-	-I $(FSTAR_HOME)/ulib/ml/extracted \
-	-I $(FSTAR_HOME)/ulib/ml/hyperstack -w -20-26-3-8-58
+include $(FSTAR_HOME)/ulib/ml/Makefile.include
+
+OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
 OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
-OCAML_LIB=$(FSTAR_HOME)/ulib/ml/
 
 ml-lib:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml MEM=HST
+	$(MAKE) -C $(ULIB_ML)
 
 import-lib:
 	@cp $(HACL_LIB_FILES) .
@@ -109,10 +122,29 @@ import-kremlin:
 	@cp $(HACL_KREMLIN_FILES)) .
 
 %.fst-lax: %.fst
-	$(FSTAR) --lax $(FSTAR_INCLUDES) $^
-
-%.fst-ver: %.fst
-	$(FSTAR) $(addprefix -fsopt , $(FSTAR_OPTIONS_VER)) $(FSTAR_INCLUDES) --verify_module $(basename $(notdir $@)) $^
+	$(FSTAR) --lax $^
+%.fsti-lax: %.fsti
+	$(FSTAR) --lax $^
 
 %.fst-krml: %.fst
-	$(KREMLIN) $(KREMLIN_INCLUDES) $^
+	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_INCLUDES) $^
+
+%.fst-verify: %.fst $(BATCH_ID_FILE)
+	$(FSTAR) $< 2>&1
+%.fsti-verify: %.fsti $(BATCH_ID_FILE)
+	$(FSTAR) $< 2>&1
+
+%.fst.hints: %.fst $(BATCH_ID_FILE)
+	$(FSTAR) --record_hints $< 2>&1
+%.fsti.hints: %.fsti $(BATCH_ID_FILE)
+	$(FSTAR) --record_hints $< 2>&1
+
+# Custom verification targets for re-located hint files
+%.fst-reloc-verify: %.fst $(BATCH_ID_FILE)
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^ 2>&1
+%.fsti-reloc-verify: %.fsti $(BATCH_ID_FILE)
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^ 2>&1
+%.fst.reloc.hints: %.fst $(BATCH_ID_FILE)
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^ 2>&1
+%.fsti.reloc.hints: %.fsti $(BATCH_ID_FILE)
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^ 2>&1

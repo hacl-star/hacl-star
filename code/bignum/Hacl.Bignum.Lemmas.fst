@@ -1,5 +1,9 @@
 module Hacl.Bignum.Lemmas
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 
 (* Bound lemmas associated to SMT patterns *)
 

@@ -1,10 +1,10 @@
 [
-  "¢›É\"õå]\tÄ}ÒÏ…∫d\u001d",
+  "\u001f]ö°ø&Kî˛£$Ûù÷\u0004û",
   [
     [
       "Hacl.Spec.EC.crypto_scalarmult_spec",
       1,
-      2,
+      0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
@@ -12,7 +12,7 @@
     [
       "Hacl.Spec.EC.crypto_scalarmult_spec",
       2,
-      2,
+      0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
@@ -20,7 +20,7 @@
     [
       "Hacl.Spec.EC.crypto_scalarmult_spec",
       3,
-      2,
+      0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
@@ -32,7 +32,7 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "equation_FStar.UInt8.t",
-        "equation_Hacl.Spec.EC.Ladder.uint8_s", "equation_Hacl.UInt8.t",
+        "equation_Hacl.Spec.EC.Ladder.uint8_s",
         "refinement_interpretation_Hacl.Spec.EC.Format_Tm_refine_8274173e0780491dcfd7be1a7e81e7bb"
       ],
       0
@@ -43,8 +43,9 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_FStar.Pervasives.fst",
-        "equation_FStar.UInt8.t", "equation_Hacl.Bignum.Constants.keylen",
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Pervasives.Native.fst", "equation_FStar.UInt8.t",
+        "equation_Hacl.Bignum.Constants.keylen",
         "equation_Hacl.Bignum.Constants.prime",
         "equation_Hacl.Bignum.Parameters.prime",
         "equation_Hacl.Bignum.Parameters.seqelem",
@@ -56,12 +57,12 @@
         "equation_Spec.Curve25519.decodePoint",
         "equation_Spec.Curve25519.prime",
         "equation_Spec.Curve25519.scalarmult",
-        "proj_equation_FStar.Pervasives.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Mktuple2__1",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "refinement_interpretation_Hacl.Spec.EC.Format_Tm_refine_8274173e0780491dcfd7be1a7e81e7bb",
-        "refinement_interpretation_Hacl.Spec.EC.Format_Tm_refine_921964ca2fccdb5a16eedd1123be7e3d",
         "refinement_interpretation_Hacl.Spec.EC.Format_Tm_refine_ab4fa6cc5a6ebdd7bf71390c7a325347",
-        "refinement_interpretation_Hacl.Spec.EC.Ladder_Tm_refine_a962f4ba9ad097376246389f17d7b9e9"
+        "refinement_interpretation_Hacl.Spec.EC.Format_Tm_refine_ea169117aa5e6689565402ca8921f47d",
+        "refinement_interpretation_Hacl.Spec.EC.Ladder_Tm_refine_85ff5e2c2c494347cf673c7f5524ed82"
       ],
       0
     ]

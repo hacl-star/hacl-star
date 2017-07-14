@@ -1,8 +1,12 @@
 module Hacl.Impl.Chacha20.Vec128
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 open Hacl.Cast
 open Hacl.Spec.Endianness
@@ -1255,7 +1259,7 @@ val update3':
         invariant log' h1 st /\
         Seq.slice (reveal_sbytes (as_seq h1 output)) 0 (192 * U32.v i + 192) == Spec.CTR3.counter_mode_blocks3 k n (U32.v ctr) plain (U32.v i + 1)))))
 
-#reset-options "--max_fuel 0 --z3rlimit 300"
+#reset-options "--max_fuel 0 --z3rlimit 700"
 
 let update3' log output plain len st i =
   let h0  = ST.get() in

@@ -1,8 +1,12 @@
 module Hacl.Impl.HSalsa20
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 open Hacl.UInt32
 open Hacl.Cast

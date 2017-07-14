@@ -1,8 +1,12 @@
 module Hacl.Standalone.Poly1305_64
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 
 open FStar.Mul
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Ghost
 open FStar.Seq
 open FStar.HyperStack
@@ -192,7 +196,7 @@ val poly1305_complete:
          (* /\ acc == invariant (Spec.MkState r' acc' log') *)
          (* /\ Spec.MkState r' acc' log' == Hacl.Spe.Poly1305_64.poly1305_partial m len k)) *)
     ))
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 226"
 let poly1305_complete st m len k =
   let kr = Buffer.sub k 0ul 16ul in
   let len16 = U64.(len >>^  4ul) in

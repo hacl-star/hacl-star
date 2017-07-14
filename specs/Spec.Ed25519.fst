@@ -1,5 +1,7 @@
 module Spec.Ed25519
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open FStar.Endianness

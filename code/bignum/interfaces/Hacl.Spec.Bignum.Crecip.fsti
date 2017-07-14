@@ -1,5 +1,9 @@
 module Hacl.Spec.Bignum.Crecip
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint

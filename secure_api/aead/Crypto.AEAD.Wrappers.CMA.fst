@@ -1,4 +1,8 @@
 module Crypto.AEAD.Wrappers.CMA
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
@@ -61,7 +65,7 @@ let mac_modifies
     modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
     modifies_buf_1 (frameOf tbuf) tbuf h0 h1
 
-#reset-options "--z3rlimit 40 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 val weaken_mac_modifies: i:id -> 
   iv:Cipher.iv (Cipher.algi i) ->
   tbuf:lbuffer (v MAC.taglen) ->

@@ -1,44 +1,35 @@
-FSTAR_HOME?=../../FStar
-HACL_HOME?=..
-KREMLIN_HOME?=../../kremlin
+HACL_HOME ?= ..
+include $(HACL_HOME)/code/Makefile.include
+
 OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
 
 #17-02-13 in low-level, we used to have two Makefiles, merged here.
 MEM=HST
 
-include $(FSTAR_HOME)/src/gmake/fstar.mk
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
-
-FSTAR_ARGS=$(OTHERFLAGS)
 
 ifeq ($(OS),Windows_NT)
   FPIC =
 else
-  ifeq ($(UNAME_S),Darwin)
+  ifeq ($(UNAME),Darwin)
     FPIC =
   else
     FPIC = -ccopt -fPIC
   endif
 endif
 
-# OCaml variables
-OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
-FSTAR_EXTRACT=$(FSTAR) $(CODEGEN_ARGS) --include $(FSTAR_HOME)/ulib/hyperstack --include crypto --include crypto/real --include ../specs
-
-KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,aead uf1cma vale vale/asm prf hkdf utils indexing ../code/experimental/aesgcm ../code/bignum ../code/poly1305 ../code/salsa-family ../code/hash ../code/lib/kremlin ../specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
 KRML_ARGS=$(FPIC) -ccopt -maes \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
   vale/asm/vale.a test/test_hacks.c \
   -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
-  -add-include '"testlib.h"' -bundle Hacl.*
+  -add-include '"testlib.h"' -bundle Hacl.* $(KOPTS)
 
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 
 MAIN_FILES=
 
-vale/asm/vale.a:
-	make -C vale/asm
-
+# JP: is this rule temporary?
 LowCProvider-tmp: vale/asm/vale.a
 	$(KRML) LowCProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
@@ -46,21 +37,27 @@ LowCProvider-tmp: vale/asm/vale.a
 		-tmpdir LowCProvider/tmp \
 		-skip-linking
 
-krml-test-vale.exe: vale/asm/vale.a
-	$(KRML) test/test_vale/Crypto.Indexing.fst \
+QuicProvider-tmp: vale/asm/vale.a
+	$(KRML) LowCProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
-		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
-		-tmpdir tmp-vale -o krml-test-vale.exe \
-		-bundle "Crypto.AEAD=Crypto.AEAD.*"
-	./krml-test-vale.exe
+		aead/Crypto.AEAD.fst hkdf/Crypto.HKDF.fst \
+		-tmpdir QuicProvider/tmp \
+		-skip-linking
 
-krml-test-hacl.exe:
-	$(KRML) test/test_hacl/Crypto.Indexing.fst \
-		test/Flag.fst utils/Hacl.Spec.fst \
-		test/Crypto.KrmlTest.fst -no-prefix Crypto.KrmlTest \
-		-tmpdir tmp-hacl -o krml-test-hacl.exe \
-		-bundle "Crypto.AEAD=Crypto.AEAD.*"
-	./krml-test-hacl.exe
+vale/asm/vale.a:
+	$(MAKE) -C vale/asm
+
+tmp-%/out.krml: $(wildcard */*.fst)
+	$(KRML) test/test_$*/Crypto.Indexing.fst \
+	  test/Flag.fst utils/Hacl.Spec.fst \
+	  test/Crypto.KrmlTest.fst \
+	  -tmpdir tmp-$* -skip-translation
+
+krml-test-vale.exe: vale/asm/vale.a
+
+krml-test-%.exe: tmp-%/out.krml
+	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
+	./$@
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
@@ -73,24 +70,21 @@ test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 # Cleaning
 clean:
 	$(MAKE) -C LowCProvider clean
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
+	FSTAR_HOME=$(abspath $(FSTAR_HOME)) $(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
+	$(MAKE) -C vale/asm clean
 	@rm -f $(addprefix crypto/ml/, *.cmx *.o *.cmi *~)
 	@rm -rf tmp tmp-vale tmp-hacl kremlin *~ *.exe
 
-FSTAR?=$(FSTAR_HOME)/bin/fstar.exe
-
-HINTS_ENABLED?=--use_hints
-
-OPTIONS=--max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20  $(HINTS_ENABLED) $(OTHERFLAGS)
+OTHERFLAGS+=--max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20
 
 # A bit much!!
-FSTAR_INCLUDE_PATHS= \
---include $(FSTAR_HOME)/ulib/hyperstack \
+OTHERFLAGS+= \
 --include $(HACL_HOME)/code/bignum \
 --include $(HACL_HOME)/code/experimental/aesgcm \
 --include $(HACL_HOME)/code/lib/kremlin \
 --include $(HACL_HOME)/code/poly1305 \
 --include $(HACL_HOME)/code/salsa-family \
+--include $(HACL_HOME)/code/hash \
 --include $(HACL_HOME)/secure_api/aead \
 --include $(HACL_HOME)/secure_api/prf \
 --include $(HACL_HOME)/secure_api/vale \
@@ -167,40 +161,40 @@ all: all-ver $(addsuffix .fst-lax, $(LAX))
 
 extra: all-ver $(addsuffix .fst-ver, $(EXTRA))
 
-all-ver: $(addsuffix .fst-ver, $(filter-out $(LAX), $(VERIFY)))
+verify: $(addsuffix .fst-ver, $(filter-out $(LAX), $(VERIFY)))
+hints: $(addsuffix .fst.hints, $(VERIFY))
+lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
-all-hints: $(addsuffix .fst-hints, $(VERIFY))
+all-hints: hints
+all-ver: verify
+all-lax: lax
 
-all-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
 
 # Parameter for interactive mode
 %.fst-in:
-	@echo $(OPTIONS) --hint_info \
+	@echo --hint_info \
 	$(FSTAR_INCLUDE_PATHS)
 
 %.fsti-in:
-	@echo $(OPTIONS) --hint_info \
+	@echo --hint_info \
 	$(FSTAR_INCLUDE_PATHS)
 
 # Verifying one file at a time
 %.fst-ver:
-	@$(FSTAR) $(OPTIONS) \
-	$(FSTAR_INCLUDE_PATHS) \
+	$(FSTAR) \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	$(basename $@).fst
 
 # (Re-)Generate hints
-%.fst-hints:
-	-$(FSTAR) $(OPTIONS) --record_hints \
-	$(FSTAR_INCLUDE_PATHS) \
+%.fst.hints:
+	$(FSTAR) --record_hints \
 	--__temp_no_proj Crypto.Symmetric.MAC \
 	--verify_module $(basename $(notdir $@)) \
 	$(basename $@).fst
 
 # Lax verifying one file at a time
 %.fst-lax:
-	$(FSTAR) $(OPTIONS) \
-	$(FSTAR_INCLUDE_PATHS) --lax \
+	$(FSTAR) --lax \
 	--verify_module $(basename $(notdir $@)) \
 	$(basename $@).fst
 
