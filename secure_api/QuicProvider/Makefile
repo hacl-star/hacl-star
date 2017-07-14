@@ -1,24 +1,9 @@
 FSTAR_HOME ?= ../../../FStar
-CONTRIB=ucontrib
-PLATFORM = $(FSTAR_HOME)/$(CONTRIB)/Platform/ml
-CORECRYPTO = $(FSTAR_HOME)/$(CONTRIB)/CoreCrypto/ml
-INCLUDE=-package batteries,zarith -I $(PLATFORM) -I $(CORECRYPTO)
-MARCH?=x86_64
-
 KREMLIN_HOME ?= ../../../kremlin
-KRML_INCLUDES=$(addprefix -I ,$(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
-KRML_ARGS=-verbose -ccopt -Wno-error=pointer-sign $(KOPTS)
-KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
-
 MITLS_HOME ?= ../../../mitls-fstar
 
-OCAMLC = ocamlfind c $(INCLUDE) -g -annot
-OCAMLOPT = ocamlfind opt $(INCLUDE) -g -annot
-OCAMLMKLIB = ocamlfind mklib $(INCLUDE)
-OCAMLDEP = ocamlfind dep
+MARCH?=x86_64
 
-CCOPTS = $(addprefix -ccopt ,-Wall -std=c11 -D__USE_MINGW_ANSI_STDIO)
-CCLIBS = $(addprefix -cclib ,-L.)
 COPTS = -fPIC -std=c11 -I tmp -I $(MITLS_HOME)/libs/ffi -I $(KREMLIN_HOME)/kremlib
 
 ifeq ($(OS),Windows_NT)
