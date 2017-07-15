@@ -69,22 +69,23 @@ hints:
 verify: 
 	$(info The 'test' directory does not contain .fst files, so no verification to run.)
 
-build-snapshot:
+SNAPSHOT_FILES= ./c/* \
+	$(addprefix ../code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
+	../code/curve25519/x25519-c/Curve25519.* \
+	../code/salsa-family/chacha-c/Chacha20.* \
+	../code/salsa-family/salsa-c/Salsa20.* \
+	$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
+	$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
+	$(addprefix ../code/ed25519/ed25519-c/, Ed25519.*) \
+	$(addprefix ../code/hash/sha2-c/, SHA2_256.*) \
+	$(addprefix ../code/hash/sha2-c/, SHA2_384.*) \
+	$(addprefix ../code/hash/sha2-c/, SHA2_512.*) \
+	$(addprefix ../code/hmac/hmac-c/, HMAC_SHA2_256.*) \
+	$(addprefix ../code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
+
+build-snapshot: 
 	mkdir -p $(SNAPSHOT_DIR)
-	cp $(addprefix ../code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
-		../code/curve25519/x25519-c/Curve25519.* \
-		../code/salsa-family/chacha-c/Chacha20.* \
-		../code/salsa-family/salsa-c/Salsa20.* \
-		$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
-		$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
-		$(addprefix ../code/ed25519/ed25519-c/, Ed25519.*) \
-		$(addprefix ../code/hash/sha2-c/, SHA2_256.*) \
-		$(addprefix ../code/hash/sha2-c/, SHA2_384.*) \
-		$(addprefix ../code/hash/sha2-c/, SHA2_512.*) \
-		$(addprefix ../code/hmac/hmac-c/, HMAC_SHA2_256.*) \
-		$(addprefix ../code/salsa-family/chacha20-vec128/, Chacha20_Vec128.* ../vec128.h) \
-		 $(SNAPSHOT_DIR)
-	cp ./c/* $(SNAPSHOT_DIR)/
+	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
 GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))

@@ -102,6 +102,7 @@ let lemma_fexpand k =
 
 let u51 = x:nat{x < pow2 51}
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 160"
 
 val lemma_fcontract_base_i: s:nat -> s':nat -> a:nat{a >= 64} -> b:nat{b <= 39} -> c:nat{c <= 38} -> Lemma
   (pow2 a * ((s / pow2 b) + ((s' * pow2 c) % pow2 64)) = 
@@ -120,6 +121,8 @@ let lemma_fcontract_base_i s s' a b c =
 (* b - c = 64 - c *)
 (* c = a + c *)
 (* b = 64 + a *)
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val lemma_fcontract_base_j: x:nat -> a:nat -> b:nat -> Lemma
   (pow2 a * (x % pow2 b) + (pow2 (a+b) * (x / pow2 b)) = pow2 a * x)
