@@ -104,6 +104,7 @@ let u51 = x:nat{x < pow2 51}
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 160"
 
+#set-options "--z3rlimit 40"
 val lemma_fcontract_base_i: s:nat -> s':nat -> a:nat{a >= 64} -> b:nat{b <= 39} -> c:nat{c <= 38} -> Lemma
   (pow2 a * ((s / pow2 b) + ((s' * pow2 c) % pow2 64)) = 
    pow2 a * (s / pow2 b) + pow2 (a+c) * (s' % pow2 (64 - c)))
