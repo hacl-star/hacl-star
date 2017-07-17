@@ -4,7 +4,7 @@ MITLS_HOME ?= ../../../mitls-fstar
 
 MARCH?=x86_64
 
-COPTS = -fPIC -std=c11 -I tmp -I $(MITLS_HOME)/libs/ffi -I $(KREMLIN_HOME)/kremlib
+COPTS = -fPIC -std=c11 -DKRML_NOUINT128 -I tmp -I $(MITLS_HOME)/libs/ffi -I $(KREMLIN_HOME)/kremlib
 
 ifeq ($(OS),Windows_NT)
     LIBQUICCRYPTO=libquiccrypto.dll
