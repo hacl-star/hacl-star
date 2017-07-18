@@ -31,23 +31,21 @@ extract-c: aead-c/Chacha20Poly1305.c box-c/NaCl.c
 
 test:
 
-KREMLIN_ARGS+=-drop Spec.\*,Hacl.Spec.\*,Hacl.Spe.\*,Hacl.Impl.\*,Seq.\*,Hacl.Constants,Hacl.Endianness $(addprefix -I ,$(INCLUDE_DIRS))
+KREMLIN_ARGS+=$(addprefix -I ,$(INCLUDE_DIRS)) \
+	-drop Spec.*,Hacl.Spec.*,Hacl.Spe.*,Hacl.Impl.*,Seq.*,Hacl.Constants,Hacl.Endianness
 
 box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst NaCl.fst
-	mkdir -p box-c
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir box-c NaCl.fst -skip-compilation \
 		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad"
 
 
-KREMLIN_ARGS2=$(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -add-include '"Chacha20.h"' -add-include '"AEAD_Poly1305_64.h"' \
-	-I ../salsa-family -I ../poly1305 -I ../bignum \
-	-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide,Hacl.UInt16,Hacl.Types,Hacl.Bignum.\*,AEAD_Poly1305_64,Chacha20
+KREMLIN_ARGS+=$(KREMLIN_TESTLIB) -add-include '"Chacha20.h"' -add-include '"AEAD_Poly1305_64.h"' \
+	-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide,Hacl.UInt16,Hacl.Types,Hacl.Bignum.*,AEAD_Poly1305_64,Chacha20
 
 aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Chacha20.fsti Chacha20Poly1305.fst
-	mkdir -p aead-c
-	$(KREMLIN) $(KREMLIN_ARGS2) -tmpdir aead-c Chacha20Poly1305.fst -skip-compilation
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir aead-c Chacha20Poly1305.fst -skip-compilation
 	# TODO: FIX FOR KREMLIN EXTRACTION ISSUE, CHECK WITH JP
-	$(SED) -i 's/(void \*)(uint8_t )0, //g' aead-c/Chacha20Poly1305.c
+	$(SED) -i 's/(void *)(uint8_t )0, //g' aead-c/Chacha20Poly1305.c
 
 count-line:
 	@echo "LOC for AEAD CHACHAPOLY"

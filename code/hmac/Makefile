@@ -33,9 +33,15 @@ KREMLIN_ARGS+= \
 		-ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99 \
 		$(KREMLIN_TESTLIB)
 
-hmac-c/HMAC_SHA2_256.c: HMAC_SHA2_256.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix HMAC_SHA2_256 $^
+hmac-c/out.krml: HMAC_SHA2_256.fst Hacl.Test.HMAC.SHA2_256.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix HMAC_SHA2_256 \
+	$^ -o $@
 
-test-hmac_sha2_256.exe: Hacl.Test.HMAC.SHA2_256.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -o test-hmac_sha2_256.exe -no-prefix Hacl.Test.HMAC.SHA2_256 $^
+hmac-c/HMAC_SHA2_256.c: hmac-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix HMAC_SHA2_256 \
+		$^ -o $@
+
+test-hmac_sha2_256.exe: hmac-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -o test-hmac_sha2_256.exe -no-prefix Hacl.Test.HMAC.SHA2_256 \
+		$^ -o $@
 	./test-hmac_sha2_256.exe
