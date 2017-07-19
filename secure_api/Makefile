@@ -58,7 +58,7 @@ krml-test-vale.exe: vale/asm/vale.a
 
 krml-test-%.exe: tmp-%/out.krml
 	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
-	./$@
+	#./$@
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
@@ -66,7 +66,7 @@ test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 		$(KREMLIN_HOME)/kremlib/testlib.c test/test_perf.c test/test_hacks.c -I tmp-hacl  \
 		-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test \
 		-I $(OPENSSL_HOME)/include -L $(OPENSSL_HOME) -lcrypto $(CFLAGS)
-	PATH="$(OPENSSL_HOME):$(PATH)" LD_LIBRARY_PATH="$(OPENSSL_HOME):$(LD_LIBRARY_PATH)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH)" ./test-perf-hacl.exe
+	# PATH="$(OPENSSL_HOME):$(PATH)" LD_LIBRARY_PATH="$(OPENSSL_HOME):$(LD_LIBRARY_PATH)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH)" ./test-perf-hacl.exe
 
 # Cleaning
 clean:

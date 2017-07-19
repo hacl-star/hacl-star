@@ -82,7 +82,7 @@ KREMLIN_ARGS+=-I ../bignum -tmpdir x25519-c \
 # Acknowledge the F* dependency graph
 .PHONY: depend
 depend:
-	$(FSTARB) --dep make $(X25519_FILES) > .depend
+	$(FSTAR) --dep make $(X25519_FILES) > .depend
 -include .depend
 
 x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
@@ -90,12 +90,12 @@ x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
 
 x25519-c/Curve25519.c x25519-c/Hacl_Test_X25519.c: x25519-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -no-prefix Hacl.Test.X25519 \
-	 	-bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.\*' \
+	 	-bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
 		-skip-compilation $^ -o $@
 
-x25519.exe: x25519-c/out.krml Hacl.Test.X25519.fst
+x25519.exe: x25519-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -no-prefix Hacl.Test.X25519 \
-	 	-bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.\*' \
+	 	-bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
 		$^ -o $@
 	./$@
 

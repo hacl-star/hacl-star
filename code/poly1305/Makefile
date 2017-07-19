@@ -53,18 +53,6 @@ specific-hints: $(addsuffix .hints, $(POLY1305_SPECIFIC))
 hints: bignum-hints specific-hints
 all-hints: hints
 
-### CMW: Once we have an F* that supports --hint_info, the above can be replaced by the following:
-# # Hints regeneration
-# %.fst.hints: %.fst
-# 	-$(FSTARB) --record_hints $^
-# %.fst.bignum.hints: %.fst
-# 	-$(FSTARB) --hint_file $(subst .bignum,,$(@F)) --record_hints $^
-
-# bignum-hints: $(addsuffix .bignum.hints, $(BIGNUM))
-# specific-hints: $(addsuffix .hints, $(POLY1305_SPECIFIC))
-# all-hints: bignum-hints specific-hints
-### CMW: end
-
 # For CI, all modules restricted from incomplete or slow ones
 bignum-ci: $(addsuffix -reloc-verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
 specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_SPECIFIC)))
@@ -74,10 +62,9 @@ all-ci: bignum-ci specific-ci
 # extract.
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 KREMLIN_ARGS+=-I ../bignum -tmpdir poly-c \
-	-bundle 'Hacl.Spec.\*,Hacl.Spe.\*' -fparentheses \
+	-bundle 'Hacl.Spec.*,Hacl.Spe.*' -fparentheses \
 	-drop Combinators,Hacl.Endianness,Spec.*,Hacl.Bignum.Parameters,Hacl.Endianness,Hacl.Spec,Hacl.Spec.*,Hacl.Spe,Hacl.Spe.*,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims,Seq.* \
 	$(KREMLIN_TESTLIB)
-CFLAGS+= 
 
 # Acknowledge the F* dependency graph
 .PHONY: depend
@@ -86,24 +73,26 @@ depend:
 -include .depend
 
 # The F* -> out.krml step only depends on F* files.
-poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^
+poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst Hacl.Test.Poly1305_64.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
 # We need one invocation of kremlin for each bundle because of KreMLin bug #43
 poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation $^ \
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
 		-drop AEAD_Poly1305_64 -no-prefix Hacl.Test.Poly1305_64 \
-		-bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64'
+		-bundle 'Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Poly1305_64' \
+	$^ -o $@
 
 poly-c/AEAD_Poly1305_64.c: poly-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation $^ \
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
 		-drop Poly1305_64,Hacl.Test.Poly1305_64 \
-		-bundle 'AEAD.Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,AEAD.Poly1305_64,Poly1305_64,Hacl.Spec.\*'
+		-bundle 'AEAD.Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,AEAD.Poly1305_64,Poly1305_64,Hacl.Spec.*' \
+	$^ -o $@
 
-poly1305.exe: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
+poly1305.exe: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) \
 		-drop AEAD_Poly1305_64 -no-prefix Hacl.Test.Poly1305_64 \
-		-bundle 'Poly1305_64=Hacl.Bignum.\*,Hacl.Impl.\*,Hacl.Standalone.\*,Poly1305_64' \
+		-bundle 'Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Poly1305_64' \
 		$^ -o $@
 	./$@
 

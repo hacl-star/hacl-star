@@ -1,48 +1,31 @@
 UNAME := $(shell uname)
 .DEFAULT_GOAL=all
 
-PYTHON?=$(shell which python)
-
 ifndef HACL_HOME
-  THIS_DIR:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-  HACL_HOME_ABS:=$(shell $(PYTHON) -c "import posixpath; print posixpath.realpath('$(THIS_DIR)/..')")
-  HACL_HOME:=$(shell $(PYTHON) -c "import posixpath; print posixpath.relpath('$(HACL_HOME_ABS)', '$(CURDIR)')")
-  $(info HACL_HOME_ABS is at $(HACL_HOME_ABS))
+  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
+else
+  HACL_HOME:=$(abspath $(HACL_HOME))
 endif
 
 ifndef FSTAR_HOME 
-  FSTAR_HOME:=$(HACL_HOME)/dependencies/FStar
-  FSTAR_HOME_ABS:=$(abspath $(FSTAR_HOME))
+  FSTAR_HOME:=$(abspath $(HACL_HOME)/dependencies/FStar)
 else
-  ifndef FSTAR_HOME_ABS
-    FSTAR_HOME_ABS:=$(abspath $(FSTAR_HOME))
-  endif
-  FSTAR_HOME:=$(shell python -c "import posixpath; print posixpath.relpath('$(FSTAR_HOME_ABS)', '$(CURDIR)')")
+  FSTAR_HOME:=$(abspath $(FSTAR_HOME))
 endif
-
-export FSTAR_HOME_ABS
-export FSTAR_HOME
 
 ifndef KREMLIN_HOME 
-  KREMLIN_HOME:=$(HACL_HOME)/dependencies/kremlin
-  KREMLIN_HOME_ABS:=$(abspath $(KREMLIN_HOME))
+  KREMLIN_HOME:=$(abspath $(HACL_HOME)/dependencies/kremlin)
 else
-  ifndef KREMLIN_HOME_ABS
-    KREMLIN_HOME_ABS:=$(abspath $(KREMLIN_HOME))
-  endif
-  KREMLIN_HOME:=$(shell python -c "import posixpath; print posixpath.relpath('$(KREMLIN_HOME_ABS)', '$(CURDIR)')")
+  KREMLIN_HOME:=$(abspath $(KREMLIN_HOME))
 endif
 
-export KREMLIN_HOME_ABS
+export HACL_HOME
+export FSTAR_HOME
 export KREMLIN_HOME
 
-HINTS_ENABLED?=--use_hints
-
-# $(info THIS_DIR is at $(THIS_DIR))
-# $(info CURDIR is at $(CURDIR))
-# $(info HACL_HOME (rel) is at $(HACL_HOME))
-# $(info FSTAR_HOME (rel) is at $(FSTAR_HOME))
-# $(info KREMLIN_HOME (rel) is at $(KREMLIN_HOME))
+# $(info $(HACL_HOME))
+# $(info $(FSTAR_HOME))
+# $(info $(KREMLIN_HOME))
 
 HACL_LIB=$(HACL_HOME)/code/lib
 HACL_FILES=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Types.fst Hacl.Policies.fst
@@ -81,6 +64,7 @@ KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
 KREMLIN_TESTLIB=-add-include '"testlib.h"' $(KREMLIB)/testlib.c
 
 FSTAR_LIB=$(FSTAR_HOME)/ulib
+HINTS_ENABLED?=--use_hints
 FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs 
 
 ifndef CLOUD_VERIFY  
@@ -88,8 +72,8 @@ ifndef CLOUD_VERIFY
   export BATCH_ID_FILE:=
 else
   export BATCH_ID_FILE:=$(HACL_HOME)/batch_id.tmp
-  EABC=$(PYTHON) /mnt/f/dev/sec/eabc/eabc.py
-  CURRENT_SUBDIR:=$(subst $(abspath $(HACL_HOME))/,,$(abspath $(shell pwd)))  
+  EABC=python /mnt/f/dev/sec/eabc/eabc.py
+  CURRENT_SUBDIR:=$(subst $(HACL_HOME)/,,$(abspath $(shell pwd)))  
 
 $(BATCH_ID_FILE):
 	$(info CREATING)
