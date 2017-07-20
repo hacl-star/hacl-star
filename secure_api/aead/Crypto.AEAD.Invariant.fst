@@ -1153,7 +1153,8 @@ val lemma_mac_log_framing
   (ensures  (m_sel h0 (CMA.(ilog mac_st_2.log)) = m_sel h1 (CMA.(ilog mac_st_2.log))))
 #set-options "--initial_ifuel 1 --max_ifuel 1"
 let lemma_mac_log_framing #i #nonce_1 #nonce_2 mac_st_1 h0 h1 mac_st_2 = //AR: 04/22/2017: this relies on ref injectivity ...
-  assume (m_contains (CMA.(ilog mac_st_1.log)) h0)
+  admit()
+  //assume (m_contains (CMA.(ilog mac_st_1.log)) h0)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let lemma_fresh_nonce_implies_all_entries_nonces_are_different
