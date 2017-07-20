@@ -890,8 +890,7 @@ let barrett_reduction z t =
 (*        eval_q x < pow2 256 /\ eval_q y < pow2 256) /\ *)
 (*        eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) * eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
 
-// #reset-options "--max_fuel 0 --z3rlimit 400"
-#reset-options "--max_fuel 0 --z3rlimit 10"
+#reset-options "--max_fuel 0 --z3rlimit 40"
 
 let mul_modq out x y =
   assert_norm(pow2 32 = 0x100000000);
