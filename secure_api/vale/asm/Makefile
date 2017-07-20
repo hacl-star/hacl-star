@@ -57,7 +57,7 @@ vale.a: $(ALL_OBJ)
 # our wrappers to be standalone; note that HACL*'s CI does NOT bring Vale into
 # the picture, so this directory should compile WITHOUT
 # -I$(VALE_HOME)/obj/crypto/hashing
-VALE_OBJ_FILES=sha256_main_i.c sha256_main_i.h Prims.h
+VALE_OBJ_FILES=sha256_main_i.c sha256_main_i.h
 VALE_UTIL_FILES=DafnyLib.h
 
 .PHONY: import
