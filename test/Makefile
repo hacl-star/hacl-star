@@ -163,9 +163,16 @@ all-snapshots:
 	$(MAKE) -C ../code clean
 
 update-snapshot:
-	$(build-snapshot)
-	$(MAKE) -C snapshot clean
-	cp snapshot/*.c snapshot/*.h ../snapshots/hacl-c
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
+	$(MAKE) -C snapshot-gcc-unrolled clean
+	$(MAKE) -C snapshot-gcc clean
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/hacl-c
+	cp $(addprefix snapshot-gcc-runrolled/, Curve25519* Ed25519*) ../snapshots/hacl-c
+	$(MAKE) -C ../snapshots/hacl-c libnacl
+
 
 clean:
 	$(MAKE) -C ../code clean

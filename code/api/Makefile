@@ -4,7 +4,8 @@ API_FILES= \
 	Hacl.Constants.fst \
 	Chacha20Poly1305.fst \
 	Hacl.SecretBox.ZeroPad.fst \
-	Hacl.Box.ZeroPad.fst
+	Hacl.Box.ZeroPad.fst \
+	Hacl.Hash.fst
 
 INCLUDE_DIRS=../salsa-family $(HACL_HOME)/code/bignum ../curve25519 ../poly1305
 FSTAR_INCLUDES+=$(addprefix --include ,$(INCLUDE_DIRS))

@@ -52,3 +52,6 @@ let crypto_box_open_detached_afternm m c mac mlen n k =
 
 let crypto_box_open_easy_afternm m c mlen n k =
   Hacl.Box.ZeroPad.crypto_box_open_easy_afternm m c mlen n k 
+
+let crypto_hash output input inlen =
+  Hacl.Hash.crypto_hash output input inlen

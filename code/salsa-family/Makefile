@@ -88,6 +88,7 @@ chacha-vec128-c/Chacha20_Vec128.c: chacha-vec128-c/out.krml
 chacha20-vec128.exe: chacha-vec128-c/out.krml
 	# Wintersteigr: Fix me; there is no Hacl.Test.Chacha20.Vec128 yet.
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c -no-prefix Hacl.Test.Chacha20.Vec128 \
+		-no-prefix Hacl.UInt32x4 -add-include '"vec128.h"' -drop Hacl.UInt32x4 \
 		-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
 		$^ -o $@
 	./$@
