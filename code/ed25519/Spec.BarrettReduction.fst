@@ -40,7 +40,7 @@ let barrett_reduce (a:nat{a < l * l}) : Tot (b:nat{b < l}) =
   let a = a - q * l in
   if l <= a then a - l else a
 
-#reset-options "--max_fuel 0 --z3rlimit 164"
+#reset-options "--max_fuel 0 --z3rlimit 250"
 
 
 let p (x:nat{x < l * l}) = (x - ((x * m) / pow2k) * l) % l
