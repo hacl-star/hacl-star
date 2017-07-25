@@ -222,7 +222,7 @@ LIBFLAGS=$(CFLAGS) -fPIC -Wno-discarded-qualifiers
 
 nacllib: libnacl.so
 
-libnacl.so:
+libnacl.so: Salsa20.c Salsa20.h Chacha20.c Chacha20.h Poly1305_64.c Poly1305_64.h AEAD_Poly1305_64.c AEAD_Poly1305_64.h SHA2_512.c SHA2_512.h Ed25519.c Ed25519.h Curve25519.c Curve25519.h Chacha20Poly1305.c Chacha20Poly1305.h Hacl_Policies.c Hacl_Policies.h NaCl.c NaCl.h
 	$(CC) $(LIBFLAGS) \
 	  Salsa20.c -c -o Salsa20.o
 	$(CC) $(LIBFLAGS) \
@@ -239,7 +239,7 @@ libnacl.so:
 	  Curve25519.c -c -o Curve25519.o
 	$(CC) $(LIBFLAGS) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
-	$(CC) -shared  $(LIBFLAGS) -I ../../test/c-experimental -I . \
+	$(CC) -shared  $(LIBFLAGS) -I ../../test/c-experimental -I . -Wall \
 	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c-experimental/randombytes.c ../../test/c-experimental/haclnacl.c \
 	  -o libnacl.so
 

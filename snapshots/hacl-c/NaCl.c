@@ -275,6 +275,12 @@ Hacl_Box_ZeroPad_crypto_box_open_easy_afternm(
   return t;
 }
 
+static uint32_t Hacl_Hash_crypto_hash(uint8_t *output, uint8_t *input, uint32_t inlen)
+{
+  SHA2_512_hash(output, input, inlen);
+  return (uint32_t )0;
+}
+
 Prims_int NaCl_crypto_box_NONCEBYTES;
 
 Prims_int NaCl_crypto_box_PUBLICKEYBYTES;
@@ -288,6 +294,8 @@ Prims_int NaCl_crypto_secretbox_NONCEBYTES;
 Prims_int NaCl_crypto_secretbox_KEYBYTES;
 
 Prims_int NaCl_crypto_secretbox_MACBYTES;
+
+Prims_int NaCl_crypto_hash_BYTES;
 
 uint32_t
 NaCl_crypto_secretbox_detached(
@@ -434,5 +442,10 @@ NaCl_crypto_box_open_easy_afternm(
 )
 {
   return Hacl_Box_ZeroPad_crypto_box_open_easy_afternm(m, c, mlen, n1, k1);
+}
+
+uint32_t NaCl_crypto_hash(uint8_t *output, uint8_t *input, uint32_t inlen)
+{
+  return Hacl_Hash_crypto_hash(output, input, inlen);
 }
 

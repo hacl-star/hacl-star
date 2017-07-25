@@ -21,7 +21,7 @@
 module Hacl.Hash
 
 open FStar.Buffer
-open FStar.ST
+open FStar.HyperStack.ST
 open Hacl.Cast
 open Hacl.Constants
 
@@ -45,5 +45,5 @@ val crypto_hash:
     (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1))
 
 let crypto_hash output input inlen =
-  Hacl.Hash.SHA2_512.hash output input inlen;
+  SHA2_512.hash output input inlen;
   0ul
