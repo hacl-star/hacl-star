@@ -49,6 +49,7 @@ tmp-%/out.krml: $(wildcard */*.fst)
 	  test/Crypto.KrmlTest.fst \
 	  -tmpdir tmp-$* -skip-translation
 
+ifndef USE_CCOMP
 ifndef USE_CL # Wintersteiger: Vale doesn't build with Visual Studio.
 vale/asm/vale.a:
 	$(MAKE) -C vale/asm
@@ -56,12 +57,13 @@ vale/asm/vale.a:
 krml-test-vale.exe: tmp-vale/out.krml vale/asm/vale.a
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir tmp-vale $^ -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
 	./$@
-else
-krml-test-vale.exe:
 
 krml-test-hacl.exe: tmp-hacl/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir tmp-hacl $^ -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
 	./$@
+else
+krml-test-hacl.exe krml-test-vale.exe:
+endif
 endif
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
