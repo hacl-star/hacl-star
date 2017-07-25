@@ -9,7 +9,7 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
-all: extract-specs extract-all-c ct
+all: #extract-specs extract-all-c ct
 	# $(MAKE) -C ../code test
 	# $(MAKE) -C .. verify
 	# $(MAKE) compile-vale

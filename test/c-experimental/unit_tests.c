@@ -12,7 +12,7 @@
 #include "haclnacl.h"
 #include "tweetnacl.h"
 
-#define SIZE (1024 * 1024)
+#define SIZE (/* 1024 */ 1 * 1024)
 #define POLY_MACSIZE 16
 #define POLY_BLOCKSIZE 16
 #define POLY_KEYSIZE 32
