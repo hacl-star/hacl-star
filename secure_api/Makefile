@@ -43,22 +43,26 @@ QuicProvider-tmp: vale/asm/vale.a
 		-tmpdir QuicProvider/tmp \
 		-skip-linking
 
-vale/asm/vale.a:
-	$(MAKE) -C vale/asm
-
 tmp-%/out.krml: $(wildcard */*.fst)
 	$(KREMLIN) $(KREMLIN_ARGS) test/test_$*/Crypto.Indexing.fst \
 	  test/Flag.fst utils/Hacl.Spec.fst \
 	  test/Crypto.KrmlTest.fst \
 	  -tmpdir tmp-$* -skip-translation
 
+ifndef USE_CL # Wintersteiger: Vale doesn't build with Visual Studio.
+vale/asm/vale.a:
+	$(MAKE) -C vale/asm
+
 krml-test-vale.exe: tmp-vale/out.krml vale/asm/vale.a
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir tmp-vale $^ -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
 	./$@
+else
+krml-test-vale.exe:
 
 krml-test-hacl.exe: tmp-hacl/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir tmp-hacl $^ -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
 	./$@
+endif
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer -o $@ \
