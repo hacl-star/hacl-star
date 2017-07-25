@@ -10,11 +10,12 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 SNAPSHOT_DIR=snapshot
 
 all: extract-specs extract-all-c ct
-	$(MAKE) -C ../code test
-	$(MAKE) -C .. verify
-	$(MAKE) compile-vale
-	$(MAKE) -C openssl-engine
-	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
+	# $(MAKE) -C ../code test
+	# $(MAKE) -C .. verify
+	# $(MAKE) compile-vale
+	# $(MAKE) -C openssl-engine
+	# $(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
+	$(MAKE) -B update-snapshot
 	# JP: fixme, doesn't work on build machine
 	# $(MAKE) -C snapshot-gcc
 
