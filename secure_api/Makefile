@@ -1,12 +1,9 @@
-HACL_HOME ?= ..
-include $(HACL_HOME)/code/Makefile.include
+include ../code/Makefile.include
 
 OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
 
 #17-02-13 in low-level, we used to have two Makefiles, merged here.
 MEM=HST
-
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
 ifeq ($(OS),Windows_NT)
   FPIC =
@@ -18,28 +15,29 @@ else
   endif
 endif
 
+LDEPS=aead uf1cma vale vale/asm prf hkdf utils indexing
+CDEPS=experimental/aesgcm bignum poly1305 salsa-family hash
 
-KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_api/uf1cma $(HACL_HOME)/secure_api/vale $(HACL_HOME)/secure_api/vale/asm $(HACL_HOME)/secure_api/prf $(HACL_HOME)/secure_api/hkdf $(HACL_HOME)/secure_api/utils $(HACL_HOME)/secure_api/indexing $(HACL_HOME)/code/experimental/aesgcm $(HACL_HOME)/code/bignum $(HACL_HOME)/code/poly1305 $(HACL_HOME)/code/salsa-family $(HACL_HOME)/code/hash $(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
-KRML_ARGS=$(FPIC) -ccopt -maes -fnouint128 \
-  $(KREMLIN_HOME)/test/../kremlib/testlib.c \
-  vale/asm/vale.a test/test_hacks.c \
+KREMLIN_ARGS+=$(addprefix -I ,$(LDEPS)) \
+	$(addprefix -I $(HACL_HOME)/code/,$(CDEPS)) \
+	-I $(KREMLIN_HOME)/test
+
+KREMLIN_ARGS+=$(FPIC) -ccopt -maes -fnouint128 \
+  test/test_hacks.c \
   -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
-  -add-include '"testlib.h"' -bundle Hacl.* $(KOPTS)
-
-KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
-
-MAIN_FILES=
+  $(KREMLIN_TESTLIB) \
+  -bundle Hacl.* $(KOPTS)
 
 # JP: is this rule temporary?
 LowCProvider-tmp: vale/asm/vale.a
-	$(KRML) LowCProvider/Crypto.Indexing.fst \
+	$(KREMLIN) $(KREMLIN_ARGS) LowCProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
 		aead/Crypto.AEAD.fst \
 		-tmpdir LowCProvider/tmp \
 		-skip-linking
 
 QuicProvider-tmp: vale/asm/vale.a
-	$(KRML) LowCProvider/Crypto.Indexing.fst \
+	$(KREMLIN) $(KREMLIN_ARGS) LowCProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
 		aead/Crypto.AEAD.fst hkdf/Crypto.HKDF.fst \
 		-tmpdir QuicProvider/tmp \
@@ -49,51 +47,40 @@ vale/asm/vale.a:
 	$(MAKE) -C vale/asm
 
 tmp-%/out.krml: $(wildcard */*.fst)
-	$(KRML) test/test_$*/Crypto.Indexing.fst \
+	$(KREMLIN) $(KREMLIN_ARGS) test/test_$*/Crypto.Indexing.fst \
 	  test/Flag.fst utils/Hacl.Spec.fst \
 	  test/Crypto.KrmlTest.fst \
 	  -tmpdir tmp-$* -skip-translation
 
-krml-test-vale.exe: vale/asm/vale.a
+krml-test-vale.exe: tmp-vale/out.krml vale/asm/vale.a
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir tmp-vale $^ -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
+	./$@
 
-krml-test-%.exe: tmp-%/out.krml
-	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
-	#./$@
+krml-test-hacl.exe: tmp-hacl/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir tmp-hacl $^ -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
+	./$@
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
-	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
-	 -o test-perf-hacl.exe tmp-hacl/Crypto_AEAD*.c tmp-hacl/Crypto_Indexing*.c tmp-hacl/Buffer_Utils*.c $(KREMLIN_HOME)/kremlib/kremlib.c \
-		$(KREMLIN_HOME)/kremlib/testlib.c test/test_perf.c test/test_hacks.c -I tmp-hacl  \
+	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer -o $@ \
+		tmp-hacl/Crypto_AEAD*.c tmp-hacl/Crypto_Indexing*.c tmp-hacl/Buffer_Utils*.c \
 		-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/test \
-		-I $(OPENSSL_HOME)/include -L $(OPENSSL_HOME) -lcrypto $(CFLAGS)
-	# PATH="$(OPENSSL_HOME):$(PATH)" LD_LIBRARY_PATH="$(OPENSSL_HOME):$(LD_LIBRARY_PATH)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH)" ./test-perf-hacl.exe
+		-I $(OPENSSL_HOME)/include -L $(OPENSSL_HOME) -lcrypto $(CFLAGS) \
+		$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c \
+		test/test_perf.c test/test_hacks.c -I tmp-hacl
+	PATH="$(OPENSSL_HOME):$(PATH)" LD_LIBRARY_PATH="$(OPENSSL_HOME):$(LD_LIBRARY_PATH)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME):$(DYLD_LIBRARY_PATH)" ./$@
 
 # Cleaning
 clean:
 	$(MAKE) -C LowCProvider clean
-	FSTAR_HOME=$(abspath $(FSTAR_HOME)) $(MAKE) -C $(FSTAR_HOME)/ulib/ml clean
 	$(MAKE) -C vale/asm clean
 	@rm -f $(addprefix crypto/ml/, *.cmx *.o *.cmi *~)
 	@rm -rf tmp tmp-vale tmp-hacl kremlin *~ *.exe
 
 OTHERFLAGS+=--max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20
 
-# A bit much!!
-OTHERFLAGS+= \
---include $(HACL_HOME)/code/bignum \
---include $(HACL_HOME)/code/experimental/aesgcm \
---include $(HACL_HOME)/code/lib/kremlin \
---include $(HACL_HOME)/code/poly1305 \
---include $(HACL_HOME)/code/salsa-family \
---include $(HACL_HOME)/code/hash \
---include $(HACL_HOME)/secure_api/aead \
---include $(HACL_HOME)/secure_api/prf \
---include $(HACL_HOME)/secure_api/vale \
---include $(HACL_HOME)/secure_api/uf1cma \
---include $(HACL_HOME)/secure_api/utils \
---include $(HACL_HOME)/secure_api/indexing \
---include $(HACL_HOME)/specs \
---include $(KREMLIN_HOME)/kremlib
+OTHERFLAGS+=$(addprefix --include ,$(LDEPS)) \
+	$(addprefix --include $(HACL_HOME)/code/,$(CDEPS)) \
+	--include $(KREMLIN_HOME)/test
 
 # TODO integrate GF128 with specs and code
 # TODO recheck why we dropped TestMonotonic and AES256GCM
