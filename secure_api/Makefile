@@ -62,7 +62,8 @@ krml-test-hacl.exe: tmp-hacl/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir tmp-hacl $^ -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
 	./$@
 else
-krml-test-hacl.exe krml-test-vale.exe:
+vale/asm/vale.a krml-test-hacl.exe krml-test-vale.exe:
+	$(info Note: not building secure_api/$@ for MSVC and/or CompCert.")
 endif
 endif
 
