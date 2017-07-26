@@ -344,7 +344,7 @@ let verify_ok (#i:CMA.id) (st:CMA.state i) (acc:CMA.accBuffer i) (tag:lbuffer 16
       let m = MAC.mac log r s in
       let verified = Seq.eq m (MAC.sel_word h tag) in
       if authId i then
-      	match m_sel h (ilog (st_ilog st)) with
+      	match m_sel h (ilog st.log) with
       	| _, Some(l',m') ->
       	  let correct = m = m' && Seq.eq log l' in
       	  b == (verified && correct)
