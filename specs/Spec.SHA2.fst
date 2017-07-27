@@ -48,7 +48,7 @@ inline_for_extraction
 let size_hash_final_w: hash_alg -> Tot nat = function
   | SHA2_224 -> 7
   | SHA2_256 -> 8
-  | SHA2_384 -> 7
+  | SHA2_384 -> 6
   | SHA2_512 -> 8
 
 (* Define the final hash length in bytes *)
@@ -76,7 +76,7 @@ let size_len_8: hash_alg -> Tot nat = function
   | SHA2_384 | SHA2_512 -> 16
 
 inline_for_extraction
-let size_len_ul_8: hash_alg -> Tot UInt32.t = function
+let size_len_ul_8: a:hash_alg -> Tot (n:UInt32.t{UInt32.v n = size_len_8 a}) = function
   | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
 
@@ -107,76 +107,100 @@ let counter = nat
 
 
 (* Define word based operators *)
-inline_for_extraction
 let words_to_be: a:hash_alg -> Tot (len:nat -> s:seq (word a){length s = len} -> Tot (lbytes (size_word a * len))) = function
   | SHA2_224 | SHA2_256 -> Spec.Lib.uint32s_to_be
   | SHA2_384 | SHA2_512 -> Spec.Lib.uint64s_to_be
 
-inline_for_extraction
 let words_from_be: a:hash_alg -> Tot (len:nat -> b:lbytes (size_word a * len) -> Tot (s:seq (word a){length s = len})) = function
   | SHA2_224 | SHA2_256 -> Spec.Lib.uint32s_from_be
   | SHA2_384 | SHA2_512 -> Spec.Lib.uint64s_from_be
 
-inline_for_extraction
 let word_add_mod: a:hash_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> UInt32.add_mod
   | SHA2_384 | SHA2_512 -> UInt64.add_mod
 
-inline_for_extraction
 let word_logxor: a:hash_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> UInt32.logxor
   | SHA2_384 | SHA2_512 -> UInt64.logxor
 
-inline_for_extraction
 let word_logand: a:hash_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> UInt32.logand
   | SHA2_384 | SHA2_512 -> UInt64.logand
 
-inline_for_extraction
 let word_logor: a:hash_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> UInt32.logor
   | SHA2_384 | SHA2_512 -> UInt64.logor
 
-inline_for_extraction
 let word_lognot: a:hash_alg -> Tot ((word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> UInt32.lognot
   | SHA2_384 | SHA2_512 -> UInt64.lognot
 
-inline_for_extraction
 let word_shift_right: a:hash_alg -> Tot (word a -> s:UInt32.t -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> UInt32.shift_right
   | SHA2_384 | SHA2_512 -> UInt64.shift_right
 
-let rotate_right32 (x:UInt32.t) (s:UInt32.t{v s < 32}) : Tot UInt32.t =
+let rotate_right32 (x:UInt32.t) (s:UInt32.t{0 < v s /\ v s < 32}) : Tot UInt32.t =
   ((x >>^ s) |^ (x <<^ (32ul -^ s)))
 
-let rotate_right64 (a:UInt64.t) (s:UInt32.t{UInt32.v s < 64}) : Tot UInt64.t =
+let rotate_right64 (a:UInt64.t) (s:UInt32.t{0 < v s /\ v s < 64}) : Tot UInt64.t =
   FStar.UInt64.((a >>^ s) |^ (a <<^ (UInt32.sub 64ul s)))
 
-inline_for_extraction
-let word_rotate_right: a:hash_alg -> Tot (word a -> s:UInt32.t{UInt32.v s < word_n a} -> Tot (word a)) = function
+let word_rotate_right: a:hash_alg -> Tot (word a -> s:UInt32.t{0 < v s /\ v s < word_n a} -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> rotate_right32
   | SHA2_384 | SHA2_512 -> rotate_right64
 
 
+(* Definition of constants used in word functions *)
+let op224_256 : m:Seq.seq UInt32.t {length m = 12} =
+  Seq.Create.create_12
+  2ul  13ul 22ul
+  6ul  11ul 25ul
+  7ul  18ul  3ul
+  17ul 19ul 10ul
+
+let op384_512 : m:Seq.seq UInt32.t {length m = 12} =
+  Seq.Create.create_12
+  28ul 34ul 39ul
+  14ul 18ul 41ul
+  1ul   8ul  7ul
+  19ul 61ul  6ul
+
+let op0: a:hash_alg -> Tot (m:Seq.seq UInt32.t {length m = 12}) = function
+  | SHA2_224 -> op224_256
+  | SHA2_256 -> op224_256
+  | SHA2_384 -> op384_512
+  | SHA2_512 -> op384_512
+
+
 (* Definition of the SHA2 word functions *)
 val _Ch: a:hash_alg -> x:(word a) -> y:(word a) -> z:(word a) -> Tot (word a)
-let _Ch a x y z = word_logxor a (word_logand a x y) (word_logand a (word_lognot a x) z)
+let _Ch a x y z = word_logxor a (word_logand a x y)
+                                (word_logand a (word_lognot a x) z)
 
 val _Maj: a:hash_alg -> x:(word a) -> y:(word a) -> z:(word a) -> Tot (word a)
-let _Maj a x y z = word_logxor a (word_logand a x y) (word_logxor a (word_logand a x z) (word_logand a y z))
+let _Maj a x y z = word_logxor a (word_logand a x y)
+                                 (word_logxor a (word_logand a x z)
+                                                (word_logand a y z))
 
 val _Sigma0: a:hash_alg -> x:(word a) -> Tot (word a)
-let _Sigma0 a x = word_logxor a (word_rotate_right a x 2ul) (word_logxor a (word_rotate_right a x 13ul) (word_rotate_right a x 22ul))
+let _Sigma0 a x = word_logxor a (word_rotate_right a x (op0 a).[0])
+                                (word_logxor a (word_rotate_right a x (op0 a).[1])
+                                               (word_rotate_right a x (op0 a).[2]))
 
 val _Sigma1: a:hash_alg -> x:(word a) -> Tot (word a)
-let _Sigma1 a x = word_logxor a (word_rotate_right a x 6ul) (word_logxor a (word_rotate_right a x 11ul) (word_rotate_right a x 25ul))
+let _Sigma1 a x = word_logxor a (word_rotate_right a x (op0 a).[3])
+                                (word_logxor a (word_rotate_right a x (op0 a).[4])
+                                               (word_rotate_right a x (op0 a).[5]))
 
 val _sigma0: a:hash_alg -> x:(word a) -> Tot (word a)
-let _sigma0 a x = word_logxor a (word_rotate_right a x 7ul) (word_logxor a (word_rotate_right a x 18ul) (word_shift_right a x 3ul))
+let _sigma0 a x = word_logxor a (word_rotate_right a x (op0 a).[6])
+                                (word_logxor a (word_rotate_right a x (op0 a).[7])
+                                               (word_shift_right a x (op0 a).[8]))
 
 val _sigma1: a:hash_alg -> x:(word a) -> Tot (word a)
-let _sigma1 a x = word_logxor a (word_rotate_right a x 17ul) (word_logxor a (word_rotate_right a x 19ul) (word_shift_right a x 10ul))
+let _sigma1 a x = word_logxor a (word_rotate_right a x (op0 a).[9])
+                                (word_logxor a (word_rotate_right a x (op0 a).[10])
+                                               (word_shift_right a x (op0 a).[11]))
 
 
 (* Definition of the SHA2 constants *)
@@ -243,14 +267,12 @@ let h512 : m:Seq.seq UInt64.t {length m = size_hash_w} =
   0x510e527fade682d1uL 0x9b05688c2b3e6c1fuL 0x1f83d9abfb41bd6buL 0x5be0cd19137e2179uL
 
 
-inline_for_extraction
 let k0: a:hash_alg -> Tot (m:Seq.seq (word a) {length m = size_k_w a}) = function
   | SHA2_224 -> k224_256
   | SHA2_256 -> k224_256
   | SHA2_384 -> k384_512
   | SHA2_512 -> k384_512
 
-inline_for_extraction
 let h0: a:hash_alg -> Tot (m:Seq.seq (word a) {length m = size_hash_w}) = function
   | SHA2_224 -> h224
   | SHA2_256 -> h256
