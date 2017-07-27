@@ -13,7 +13,7 @@ lib:
 	$(MAKE) -C ../code/lib/ml
 
 
-EXTRACTED=FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  
+EXTRACTED=FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml
 
 NOEXTRACT=$(FSTAR_DEFAULT_ARGS) $(addprefix --no_extract Hacl., UInt64 UInt32 UInt8)
 
@@ -33,6 +33,7 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Poly1305.fst \
 		Spec.Poly1305.Lemmas.fst \
 		Spec.Salsa20.fst \
+		Spec.SHA2.fst \
 		Spec.SHA2_256.fst \
 		Spec.SHA2_384.fst \
 		Spec.SHA2_512.fst \
@@ -90,6 +91,14 @@ chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> chacha-poly-spec/Spec_Chacha20Poly1305.ml
 	$(OCAMLOPT) -I chacha-poly-spec $(OCAML_INCLUDES) chacha-poly-spec/FStar_Endianness.ml chacha-poly-spec/Spec_Loops.ml chacha-poly-spec/Seq_Create.ml chacha-poly-spec/Spec_Lib.ml chacha-poly-spec/Spec_CTR.ml chacha-poly-spec/Spec_Chacha20.ml chacha-poly-spec/Spec_Poly1305_Lemmas.ml chacha-poly-spec/Spec_Poly1305.ml chacha-poly-spec/Spec_Chacha20Poly1305.ml -o chacha20poly1305.exe
 	./chacha20poly1305.exe
+
+sha2.exe: Spec.SHA2.Test.fst
+	$(MAKE) lib
+	mkdir -p sha2-spec
+	$(FSTAR) --odir sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_Test.ml
+	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) sha2-spec/FStar_Endianness.ml sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2.ml sha2-spec/Spec_SHA2_Test.ml -o sha2.exe
+	./sha2.exe
 
 sha2_256.exe: Spec.SHA2_256.fst
 	$(MAKE) lib
