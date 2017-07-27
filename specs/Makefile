@@ -37,6 +37,7 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.SHA2_256.fst \
 		Spec.SHA2_384.fst \
 		Spec.SHA2_512.fst \
+		Spec.HMAC.fst \
 		Spec.Ed25519.fst
 
 hints: $(addsuffix .hints, $(SPEC_FILES))
@@ -123,6 +124,14 @@ sha2_512.exe: Spec.SHA2_512.fst
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_512.ml
 	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) sha2-spec/FStar_Endianness.ml sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_512.ml -o sha2_512.exe
 	./sha2_512.exe
+
+hmac_sha2.exe: Spec.HMAC.Test.fst
+	$(MAKE) lib
+	mkdir -p hmac-sha2-spec
+	$(FSTAR) --odir hmac-sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_Test.ml
+	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) hmac-sha2-spec/FStar_Endianness.ml hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2.ml hmac-sha2-spec/Spec_HMAC.ml hmac-sha2-spec/Spec_HMAC_Test.ml -o hmac_sha2.exe
+	./hmac_sha2.exe
 
 hmac_sha2_256.exe: Spec.HMAC.SHA2_256.fst
 	$(MAKE) lib
