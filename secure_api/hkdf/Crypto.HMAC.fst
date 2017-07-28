@@ -65,7 +65,7 @@ let block_size : alg -> Tot uint32_t = function
 
 let hash_size: alg -> Tot uint32_t = function
   | SHA256 -> H256.size_hash
-  | SHA384 -> H384.size_hash
+  | SHA384 -> H384.size_hash_final // Note that `size_hash` is 64, not 48
   | SHA512 -> H512.size_hash
 
 let state_size: alg -> Tot uint32_t = function

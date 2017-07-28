@@ -571,12 +571,15 @@ private val update_core:
                   /\ (let w = reveal_h64s (as_seq h0 ws_w) in
                   let b = reveal_h64s (as_seq h0 data_w) in
                   (forall (i:nat). {:pattern (Seq.index w i)} i < 80 ==> Seq.index w i == Spec.ws b i))))
-        (ensures  (fun h0 r h1 -> live h0 hash_w /\ live h0 data /\ live h0 data_w /\ live h1 hash_w /\ modifies_1 hash_w h0 h1
-                  /\ (let seq_hash_0 = reveal_h64s (as_seq h0 hash_w) in
-                  let seq_hash_1 = reveal_h64s (as_seq h1 hash_w) in
-                  let seq_block = reveal_sbytes (as_seq h0 data) in
-                  let res = Spec.update seq_hash_0 seq_block in
-                  seq_hash_1 == res)))
+        (ensures  (fun h0 r h1 ->
+                    live h0 hash_w /\ live h0 data /\
+                    live h0 data_w /\ live h1 hash_w /\
+                    modifies_1 hash_w h0 h1 /\
+                    (let seq_hash_0 = reveal_h64s (as_seq h0 hash_w) in
+                    let seq_hash_1 = reveal_h64s (as_seq h1 hash_w) in
+                    let seq_block = reveal_sbytes (as_seq h0 data) in
+                    let res = Spec.update seq_hash_0 seq_block in
+                    seq_hash_1 == res)))
 
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 400"
 
@@ -596,39 +599,34 @@ let update_core hash_w data data_w ws_w k_w =
   (* Allocate space for converting the data block *)
   let hash_0 = Buffer.create (u64_to_h64 0uL) size_hash_w in
   (**) let h2 = ST.get() in
-  (**) no_upd_lemma_0 h1 h2 data;
-  (**) no_upd_lemma_0 h1 h2 data_w;
-  (**) no_upd_lemma_0 h1 h2 ws_w;
-  (**) no_upd_lemma_0 h1 h2 k_w;
-  (**) no_upd_lemma_0 h1 h2 hash_w;
+  assert (modifies_0 h1 h2);
 
   (* Keep track of the the current working hash from the state *)
   copy_hash hash_0 hash_w;
   (**) let h3 = ST.get() in
-  (**) no_upd_lemma_1 h2 h3 hash_0 data;
-  (**) no_upd_lemma_1 h2 h3 hash_0 data_w;
-  (**) no_upd_lemma_1 h2 h3 hash_0 ws_w;
-  (**) no_upd_lemma_1 h2 h3 hash_0 k_w;
-  (**) no_upd_lemma_1 h2 h3 hash_0 hash_w;
+  assert (modifies_1 hash_0 h2 h3);
 
   (* Step 2 : Initialize the eight working variables *)
   (* Step 3 : Perform logical operations on the working variables *)
   (* Step 4 : Compute the ith intermediate hash value *)
   shuffle hash_0 data_w ws_w k_w;
   (**) let h4 = ST.get() in
+  assert (modifies_1 hash_0 h3 h4);
+  lemma_modifies_1_trans hash_0 h2 h3 h4;
+  assert (modifies_1 hash_0 h2 h4);
   (**) assert(let b = Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
               let ha = Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) b in
               as_seq h4 hash_w == as_seq h0 hash_w /\
               reveal_h64s (as_seq h4 hash_0) == ha);
-  (**) no_upd_lemma_1 h3 h4 hash_0 data;
-  (**) no_upd_lemma_1 h3 h4 hash_0 data_w;
-  (**) no_upd_lemma_1 h3 h4 hash_0 ws_w;
-  (**) no_upd_lemma_1 h3 h4 hash_0 k_w;
-  (**) no_upd_lemma_1 h3 h4 hash_0 hash_w;
 
   (* Use the previous one to update it inplace *)
   sum_hash hash_w hash_0;
   (**) let h5 = ST.get() in
+  assert (modifies_1 hash_w h4 h5);
+  lemma_modifies_1_1 hash_0 hash_w h2 h4 h5;
+  assert (modifies_2 hash_0 hash_w h2 h5);
+  lemma_modifies_0_2' hash_w hash_0 h1 h2 h5;
+  assert (modifies_2_1 hash_w h1 h5);
   (**) assert(let x = reveal_h64s (as_seq h4 hash_w) in
           let y = reveal_h64s (as_seq h4 hash_0) in
           x == reveal_h64s (as_seq h0 hash_w) /\
@@ -638,13 +636,11 @@ let update_core hash_w data data_w ws_w k_w =
          let z = reveal_h64s (as_seq h5 hash_w) in
          let z' = Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) x y in
          z == z');
-  (**) no_upd_lemma_1 h4 h5 hash_w data;
-  (**) no_upd_lemma_1 h4 h5 hash_w data_w;
-  (**) no_upd_lemma_1 h4 h5 hash_w ws_w;
-  (**) no_upd_lemma_1 h4 h5 hash_w k_w;
 
   (* Pop the frame *)
-  (**) pop_frame()
+  (**) pop_frame();
+  let h6 = ST.get () in
+  modifies_popped_1 hash_w h0 h1 h5 h6
 
 
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 20"

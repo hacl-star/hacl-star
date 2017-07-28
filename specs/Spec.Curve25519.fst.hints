@@ -1,5 +1,5 @@
 [
-  "†∏`l æ|úÜn≥~SË\t ",
+  "\nöJ§\u0001\u001cùO©’3ˆÊ.\u0011Y",
   [
     [
       "Spec.Curve25519.prime",
@@ -372,6 +372,89 @@
         "typing_FStar.UInt8.uint_to_t", "typing_FStar.UInt8.v",
         "typing_Spec.Lib.op_String_Access",
         "typing_Spec.Lib.op_String_Assignment"
+      ],
+      0
+    ],
+    [
+      "Spec.Curve25519.test",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.UInt8.t", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0
+    ],
+    [
+      "Spec.Curve25519.test",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Curve25519.test",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Curve25519.test",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Curve25519.test",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Curve25519.test",
+      6,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Curve25519.test",
+      7,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Curve25519.test",
+      8,
+      0,
+      1,
+      [
+        "@query", "assumption_FStar.Seq.Base.seq_haseq",
+        "assumption_FStar.UInt8.t__haseq", "equation_FStar.UInt8.t",
+        "kinding_FStar.UInt8.t_@tok"
+      ],
+      0
+    ],
+    [
+      "Spec.Curve25519.test",
+      9,
+      0,
+      1,
+      [
+        "@query", "assumption_FStar.Seq.Base.seq_haseq",
+        "assumption_FStar.UInt8.t__haseq", "equation_FStar.UInt8.t",
+        "kinding_FStar.UInt8.t_@tok"
       ],
       0
     ]

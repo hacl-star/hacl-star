@@ -66,9 +66,7 @@ type ctrT i = x:u32 {x <=^ maxCtr i}
 
 // The PRF domain: an IV and a counter.
 
-#reset-options "--admit_smt_queries true"
 type domain (i:id) = { iv:Block.iv (cipherAlg_of_id i); ctr:ctrT i }
-#reset-options
 let incr (i:id) (x:domain i {x.ctr <^ maxCtr i}) = { iv = x.iv; ctr = x.ctr +^ 1ul }
 
 let above (#i:id) (x:domain i) (z:domain i) = x.iv == z.iv /\ x.ctr >=^ z.ctr
@@ -568,7 +566,7 @@ val prf_enxor:
   (requires (fun h0 ->
      Crypto.Plain.live h0 plain /\ 
      Buffer.live h0 cipher /\
-     (safeId i ==> find_otp #t.mac_rgn #i (HS.sel h0 t.table) x == None)))
+     (safeId i ==> find_otp #t.mac_rgn #i (HS.sel h0 (itable i t)) x == None)))
   (ensures (fun h0 _ h1 ->
      Crypto.Plain.live h1 plain /\ Buffer.live h1 cipher /\
      modifies_x_buffer_1 t x cipher h0 h1 /\

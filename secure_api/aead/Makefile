@@ -1,2 +1,2 @@
-HACL_HOME=../..
+HACL_HOME=../../
 include ../Makefile

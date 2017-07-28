@@ -17,6 +17,7 @@ prepare:
 	git submodule update --init
 	@echo $(CYAN)"\n# Compiling F*"$(NORMAL)
 	$(MAKE) -C dependencies/FStar/src/ocaml-output
+	$(MAKE) -C dependencies/FStar/ulib/ml
 	@echo $(CYAN)"\n# Compiling KreMLin"$(NORMAL)
 	$(MAKE) -C dependencies/kremlin
 	@echo $(CYAN)"\nDone ! Run 'make' to compile the library."$(NORMAL)

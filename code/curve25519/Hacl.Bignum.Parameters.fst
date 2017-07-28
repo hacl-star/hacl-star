@@ -124,15 +124,13 @@ inline_for_extraction let wide_n = 2 * word_size
 inline_for_extraction val w: wide -> GTot (FStar.UInt.uint_t wide_n)
 inline_for_extraction let w x = Hacl.UInt128.v x
 
-#set-options "--admit_smt_queries true"
+(* #set-options "--admit_smt_queries true" *)
 
 val lemma_wide_injectivity: a:wide -> b:wide -> Lemma
   (requires (True))
   (ensures (w a = w b ==> a == b))
   [SMTPat (w a); SMTPat (w b)]
-let lemma_wide_injectivity a b = ()
-
-#reset-options
+let lemma_wide_injectivity a b = FStar.Classical.move_requires (FStar.UInt128.v_inj a) b
 
 inline_for_extraction val wide_zero: x:wide{w x = 0}
 inline_for_extraction val wide_one: x:wide{w x = 1}
