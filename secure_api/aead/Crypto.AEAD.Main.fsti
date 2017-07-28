@@ -37,10 +37,24 @@ type aadlen_32 =
 (* Specification functions, currently all abstract
    Although properties about them should be carefully revealed *)
 val aead_state  : I.id -> I.rw -> Type0
+val log_region  : #i:_ -> #rw:_ -> aead_state i rw -> eternal_region
+
 val keylen      : I.id -> UInt32.t
 val statelen    : I.id -> UInt32.t
 val plain       : I.id -> nat -> Type0
-val safelen     : I.id -> nat -> bool //Leaving this abstract for now; but it should imply Crypto.AEAD.Invariant.safelen i len (otp_offset i)
+
+noeq 
+type aead_entry (i:I.id) =
+  | AEADEntry:
+      (* nonce:Cipher.iv (I.alg i) -> *)
+      ad:adata ->
+      l:plainLen ->
+      p:plain i l ->
+      c:cipher i (Seq.length (as_bytes p)) ->
+      aead_entry i
+
+//Leaving this abstract for now; but it should imply Crypto.AEAD.Invariant.safelen i len (otp_offset i)
+val safelen     : I.id -> nat -> bool
 
 let ok_plain_len_32 (i:I.id) = l:UInt32.t{safelen i (v l)}
 
