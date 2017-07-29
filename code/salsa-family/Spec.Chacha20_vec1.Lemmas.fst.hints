@@ -298,13 +298,12 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_FStar.UInt32.n",
         "equation_FStar.UInt32.t", "equation_Prims.nat",
-        "equation_Spec.Chacha20.idx", "equation_Spec.Chacha20.state",
-        "equation_Spec.Chacha20_vec1.Lemmas.line_",
+        "equation_Spec.Chacha20.idx", "equation_Spec.Chacha20.line",
+        "equation_Spec.Chacha20.state",
         "equation_Spec.Chacha20_vec1.Lemmas.state",
         "equation_Spec.Lib.op_Less_Less_Less",
         "equation_Spec.Lib.op_String_Access",
         "equation_Spec.Lib.op_String_Assignment",
-        "equation_Spec.Lib.rotate_left",
         "fuel_guarded_inversion_FStar.UInt32.t_", "int_inversion",
         "kinding_FStar.UInt32.t_@tok",
         "lemma_FStar.Seq.Base.lemma_index_upd1",
@@ -319,11 +318,10 @@
         "refinement_interpretation_Spec.Chacha20_Tm_refine_aca10fb50cc7162d8b55c168416f714b",
         "refinement_interpretation_Spec.Chacha20_vec1.Lemmas_Tm_refine_093dab871fe8e5f25a20a00753c3ea85",
         "refinement_interpretation_Spec.Lib_Tm_refine_08b7b502ca9d52863cc90a1acbeae1a4",
-        "typing_FStar.Seq.Base.index", "typing_FStar.Seq.Base.upd",
-        "typing_FStar.UInt32.add_mod", "typing_FStar.UInt32.logxor",
-        "typing_Spec.Lib.op_Less_Less_Less",
+        "typing_FStar.Seq.Base.index", "typing_FStar.UInt32.add_mod",
+        "typing_FStar.UInt32.logxor", "typing_Spec.Lib.op_Less_Less_Less",
         "typing_Spec.Lib.op_String_Access",
-        "typing_Spec.Lib.op_String_Assignment"
+        "typing_Spec.Lib.op_String_Assignment", "typing_Spec.Lib.rotate_left"
       ],
       0
     ],
