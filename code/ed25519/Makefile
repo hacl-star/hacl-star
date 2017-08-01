@@ -185,7 +185,9 @@ ed25519.exe: ed25519-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $^ \
 	 	-no-prefix 'Hacl.Test.Ed25519' $(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
 		-add-include '"Ed25519.h"' -o ed25519.exe
-	./ed25519.exe
+
+test: ed25519.exe
+	./$^
 
 count-line:
 	cloc --force-lang=ocaml $(ED25519_FILES)

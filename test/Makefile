@@ -12,8 +12,8 @@ SNAPSHOT_DIR=snapshot
 all: extract-specs extract-all-c ct
 	$(MAKE) -C ../code test
 	$(MAKE) -C .. verify
-	$(MAKE) compile-vale
-	$(MAKE) -C openssl-engine
+#	$(MAKE) compile-vale
+#	$(MAKE) -C openssl-engine
 #	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
 	$(MAKE) -B update-snapshot
 #	JP: fixme, doesn't work on build machine
@@ -41,7 +41,8 @@ extract-c-apps:
 
 # JK: fixme, extract-c-apps to be added to the regression tests when
 # LibSodium is added to the build machine
-extract-c: extract-c-code extract-c-crypto # extract-c-apps
+# JK: 01/08/17 FIXME, removed secure_api extraction
+extract-c: extract-c-code # extract-c-crypto extract-c-apps
 
 # These cannot benefit from parallelism, tests C extraction for available compilers
 extract-all-c:

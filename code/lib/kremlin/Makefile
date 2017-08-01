@@ -15,11 +15,18 @@ lib-c/Hacl_Policies.c: Hacl.Policies.fst
 
 lib-c/FStar.h: $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int.Cast.Full.fst Hacl.UInt128.fst Hacl.Cast.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation $^ -fnouint128 -fnostruct-passing -fnoanonymous-unions
+	@cat lib-c/FStar.c >> lib-c/FStar.h
 	@sed -i 's/#include "kremlib.h"//g' lib-c/FStar.h
-	# @sed -i 's/#endif//g' lib-c/FStar.h
-	# @sed -i 's/#include "FStar.h"//g' lib-c/FStar.h
-	# @echo "#endif" >> lib-c/FStar.h
+	@sed -i 's/#endif//g' lib-c/FStar.h
+	@sed -i 's/#include "FStar.h"//g' lib-c/FStar.h
+	@echo "#endif" >> lib-c/FStar.h
 	@rm lib-c/Hacl_UInt128.*
+
+script.exe: script.ml
+	ocamlopt str.cmxa $^ -o script.exe
+
+test: script.exe
+	./$^
 
 extract-c: lib-c/FStar.h lib-c/Hacl_Policies.c
 
