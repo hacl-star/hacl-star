@@ -33,6 +33,10 @@ extern int exit_failure;
 void print_string(const char *s);
 void print_bytes(uint8_t *b, uint32_t len);
 
+// If some globals need to be initialized before the main, then kremlin will
+// generate and try to link last a function with this type:
+void kremlinit_globals();
+
 // Buffers (FIXME remove eqb!)
 #define FStar_Buffer_eqb(b1, b2, n)                                            \
   (memcmp((b1), (b2), (n) * sizeof((b1)[0])) == 0)
@@ -48,7 +52,7 @@ typedef void *Prims_pos, *Prims_nat, *Prims_nonzero, *FStar_Seq_Base_seq,
     *Prims_string, *Prims_list, *FStar_Map_t, *FStar_UInt63_t_, *FStar_Int63_t_,
     *FStar_UInt63_t, *FStar_Int63_t, *FStar_UInt_uint_t, *FStar_Int_int_t,
     *FStar_HyperStack_stackref, *FStar_Bytes_bytes, *FStar_HyperHeap_rid,
-    *FStar_Heap_aref;
+    *FStar_Heap_aref, *FStar_Monotonic_Heap_heap;
 
 // Prims; all of the functions below abort;
 bool Prims_op_GreaterThanOrEqual(Prims_int x, Prims_int y);
@@ -74,10 +78,12 @@ void *Prims____Cons___tl(void *_);
 
 // In expression position, use the comma-operator and a malloc to return an
 // expression of the right size. KreMLin passes t as the parameter to the macro.
-#define KRML_EABORT(t) (exit(255), *((t*)malloc(sizeof(t))))
+#define KRML_EABORT(t, msg) (                                                  \
+  printf("KreMLin abort at %s:%d\n%s\n", __FILE__, __LINE__, msg),             \
+  exit(255), *((t*)malloc(sizeof(t))))
 
 #define KRML_CHECK_SIZE(elt, size)                                             \
-  if (((size_t)size) > SIZE_MAX / sizeof(elt)) {                                       \
+  if (((size_t)size) > SIZE_MAX / sizeof(elt)) {                               \
     printf("Maximum allocatable size exceeded, aborting before overflow at "   \
            "%s:%d\n",                                                          \
            __FILE__, __LINE__);                                                \
@@ -89,16 +95,16 @@ void *Prims____Cons___tl(void *_);
 // KreMLin will think that this is a valid use, but then the C compiler, after
 // macro expansion, will error out.
 bool FStar_HyperStack_is_eternal_color(Prims_int x0);
-#define FStar_ST_op_Colon_Equals(x, v) KRML_EXIT
-#define FStar_ST_op_Bang(x) 0
-#define FStar_ST_salloc(x) 0
-#define FStar_ST_ralloc(x, y) 0
-#define FStar_ST_new_region(x) 0
-#define FStar_ST_recall(x)                                                     \
+#define FStar_HyperStack_ST_op_Colon_Equals(x, v) KRML_EXIT
+#define FStar_HyperStack_ST_op_Bang(x) 0
+#define FStar_HyperStack_ST_salloc(x) 0
+#define FStar_HyperStack_ST_ralloc(x, y) 0
+#define FStar_HyperStack_ST_new_region(x) 0
+#define FStar_HyperStack_ST_recall(x)                                          \
   do {                                                                         \
     (void)(x);                                                                 \
   } while (0)
-#define FStar_ST_recall_region(x)                                              \
+#define FStar_HyperStack_ST_recall_region(x)                                   \
   do {                                                                         \
     (void)(x);                                                                 \
   } while (0)
@@ -124,8 +130,8 @@ bool FStar_HyperStack_is_eternal_color(Prims_int x0);
 // Misc; many of these are polymorphic, hence not extracted (yet) by Kremlin,
 // which means that a macro is the "right" way to make sure they don't generate
 // a compilation error.
-#define FStar_Pervasives_fst(x) (x).fst
-#define FStar_Pervasives_snd(x) (x).snd
+#define FStar_Pervasives_Native_fst(x) (x).fst
+#define FStar_Pervasives_Native_snd(x) (x).snd
 #define FStar_Seq_Base_createEmpty(x) 0
 #define FStar_Seq_Base_create(len, init) 0
 #define FStar_Seq_Base_upd(s, i, e) 0
@@ -226,14 +232,38 @@ FStar_Seq_Base_seq FStar_Seq_Base_slice(FStar_Seq_Base_seq x,
 
 #endif
 
-// Loads and stores
+// Loads and stores. These avoid undefined behavior due to unaligned memory
+// accesses, via memcpy.
 
-#define load16(b) (*((uint16_t *)(b)))
-#define store16(b, i) (*((uint16_t *)(b)) = i)
-#define load32(b) (*((uint32_t *)(b)))
-#define store32(b, i) (*((uint32_t *)(b)) = i)
-#define load64(b) (*((uint64_t *)(b)))
-#define store64(b, i) (*((uint64_t *)(b)) = i)
+inline static uint16_t load16(uint8_t *b) {
+  uint16_t x;
+  memcpy(&x, b, 2);
+  return x;
+}
+
+inline static uint32_t load32(uint8_t *b) {
+  uint32_t x;
+  memcpy(&x, b, 4);
+  return x;
+}
+
+inline static uint64_t load64(uint8_t *b) {
+  uint64_t x;
+  memcpy(&x, b, 8);
+  return x;
+}
+
+inline static void store16(uint8_t *b, uint16_t i) {
+  memcpy(b, &i, 2);
+}
+
+inline static void store32(uint8_t *b, uint32_t i) {
+  memcpy(b, &i, 4);
+}
+
+inline static void store64(uint8_t *b, uint64_t i) {
+  memcpy(b, &i, 8);
+}
 
 #define load16_le(b) (le16toh(load16(b)))
 #define store16_le(b, i) (store16(b, htole16(i)))
@@ -336,8 +366,6 @@ static inline uint64_t FStar_UInt64_gte_mask(uint64_t x, uint64_t y) {
   return low63 & high_bit;
 }
 
-static const uint64_t two51_1 = 2251799813685247;
-
 // Platform-specific 128-bit arithmetic. These are static functions in a header,
 // so that each translation unit gets its own copy and the C compiler can
 // optimize.
@@ -384,7 +412,6 @@ static inline void store128_be(uint8_t *b, uint128_t n) {
 #define FStar_Int_Cast_Full_uint64_to_uint128(x) ((uint128_t)(x))
 #define FStar_Int_Cast_Full_uint128_to_uint64(x) ((uint64_t)(x))
 #define FStar_UInt128_mul_wide(x, y) ((__int128)(x) * (y))
-
 #define FStar_UInt128_op_Hat_Hat(x, y) ((x) ^ (y))
 
 static inline uint128_t FStar_UInt128_eq_mask(uint128_t x, uint128_t y) {
@@ -402,28 +429,13 @@ static inline uint128_t FStar_UInt128_gte_mask(uint128_t x, uint128_t y) {
   return ((uint128_t)mask) << 64 | mask;
 }
 
-static inline uint128_t FStar_UInt128_split51(uint128_t *src) {
-  uint128_t res = (*src) >> 51;
-  *src = (*src) & two51_1;
-  return res;
-}
-
-static inline uint128_t FStar_UInt128_mul32(uint64_t x, uint32_t y) {
-  return ((uint128_t)x * y);
-}
 
 #else // !defined(KRML_UINT128)
 
-#define CONSTANT_TIME_CARRY(a, b)                                              \
-  ((a ^ ((a ^ b) | ((a - b) ^ b))) >> (sizeof(a) * 8 - 1))
-//  (a < b) is faster but may not be constant time
-//  better to use intrinsics/assembly
+// This is a bad circular dependency... should fix it properly.
+#include "FStar.h"
 
-// The hand-written struct type we're using...
-typedef struct {
-  uint64_t high;
-  uint64_t low;
-} FStar_UInt128_t, FStar_UInt128_t_, uint128_t;
+typedef FStar_UInt128_uint128 FStar_UInt128_t_, uint128_t;
 
 // A series of definitions written using pointers.
 static inline void print128_(unsigned char *where, uint128_t *n) {
@@ -448,130 +460,6 @@ static inline void load128_be_(uint8_t *b, uint128_t *r) {
 static inline void store128_be_(uint8_t *b, uint128_t *n) {
   store64_be(b, n->high);
   store64_be(b + 8, n->low);
-}
-
-static inline void FStar_UInt128_add_(uint128_t *x, uint128_t *y, uint128_t *r) {
-  r->low = x->low + y->low;
-  r->high = x->high + y->high + CONSTANT_TIME_CARRY(r->low, y->low);
-}
-
-static inline void FStar_UInt128_add_mod_(uint128_t *x, uint128_t *y, uint128_t *r) {
-  FStar_UInt128_add_(x, y, r);
-}
-
-static inline void FStar_UInt128_split51_(uint128_t *src, uint128_t *y) {
-  uint128_t x;
-  x.low = src->low & two51_1;
-  x.high = 0;
-  y->low = (uint64_t)(src->low >> 51) & (src->high << 51);
-  y->high = src->high >> 51;
-  src->low = x.low;
-  src->high = x.high;
-}
-
-static inline void FStar_UInt128_sub_(uint128_t *x, uint128_t *y, uint128_t *r) {
-  r->low = x->low - y->low;
-  r->high = x->high - y->high - CONSTANT_TIME_CARRY(x->low, r->low);
-}
-
-static inline void FStar_UInt128_sub_mod_(uint128_t *x, uint128_t *y, uint128_t *r) {
-  FStar_UInt128_sub_(x, y, r);
-}
-
-static inline void FStar_UInt128_logand_(uint128_t *x, uint128_t *y, uint128_t *r) {
-  r->high = x->high & y->high;
-  r->low = x->low & y->low;
-}
-
-static inline void FStar_UInt128_logor_(uint128_t *x, uint128_t *y, uint128_t *r) {
-  r->high = x->high | y->high;
-  r->low = x->low | y->low;
-}
-
-static inline void FStar_UInt128_logxor_(uint128_t *x, uint128_t *y, uint128_t *r) {
-  r->high = x->high ^ y->high;
-  r->low = x->low ^ y->low;
-}
-
-static inline void FStar_UInt128_lognot_(uint128_t *x, uint128_t *r) {
-  r->high = ~x->high;
-  r->low = ~x->low;
-}
-
-/* y should not be a secret; y >= 128 should never happen */
-static inline void FStar_UInt128_shift_left_(uint128_t *x, FStar_UInt32_t y, uint128_t *r) {
-  if (y < 64) {
-    r->high = (x->high << y) | (x->low >> (64 - y));
-    r->low = x->low << y;
-  } else {
-    r->high = x->low << (y - 64);
-    r->low = 0;
-  }
-}
-/* y should not be a secret; y >= 128 should never happen */
-static inline void FStar_UInt128_shift_right_(uint128_t *x, FStar_UInt32_t y, uint128_t *r) {
-  if (y < 64) {
-    r->high = (x->high >> y);
-    r->low = (x->low >> y) | (x->high << (64 - y));
-  } else {
-    r->high = 0;
-    r->low = x->high >> (y - 64);
-  }
-}
-
-/* Conversions */
-static inline void FStar_Int_Cast_uint64_to_uint128_(uint64_t x, uint128_t *r) {
-  r->high = 0;
-  r->low = x;
-}
-
-static inline uint64_t FStar_Int_Cast_uint128_to_uint64_(uint128_t *x) {
-  return x->low;
-}
-
-static inline void FStar_UInt128_eq_mask_(uint128_t *x, uint128_t *y, uint128_t *r) {
-  r->low = FStar_UInt64_eq_mask(x->low, y->low);
-  r->high = FStar_UInt64_eq_mask(x->high, y->high);
-}
-
-static inline void FStar_UInt128_gte_mask_(uint128_t *x, uint128_t *y, uint128_t *r) {
-  uint64_t mask = (FStar_UInt64_gte_mask(x->high, y->high) &
-                   ~(FStar_UInt64_eq_mask(x->high, y->high))) |
-                  (FStar_UInt64_eq_mask(x->high, y->high) &
-                   FStar_UInt64_gte_mask(x->low, y->low));
-  r->high = mask;
-  r->low = mask;
-}
-
-static inline void FStar_UInt128_mul_wide_(uint64_t x, uint64_t y, uint128_t *r) {
-  uint64_t u1, v1, t, w3, k, w1;
-  u1 = (x & 0xffffffff);
-  v1 = (y & 0xffffffff);
-  t = (u1 * v1);
-  w3 = (t & 0xffffffff);
-  k = (t >> 32);
-  x >>= 32;
-  t = (x * v1) + k;
-  k = (t & 0xffffffff);
-  w1 = (t >> 32);
-  y >>= 32;
-  t = (u1 * y) + k;
-  k = (t >> 32);
-  r->high = (x * y) + w1 + k;
-  r->low = (t << 32) + w3;
-}
-
-static inline void FStar_UInt128_mul32_(uint64_t x, uint32_t y, uint128_t *r) {
-  uint64_t x0 = x & 0xffffffff;
-  uint64_t x1 = x >> 32;
-  uint64_t x0y = x0 * y;
-  uint64_t x0yl = x0y & 0xffffffff;
-  uint64_t x0yh = x0y >> 32;
-  uint64_t x1y = (x1 * y) + x0yh;
-  uint64_t r0 = x0yl + (x1y << 32);
-  uint64_t r1 = x1y >> 32;
-  r->high = r1;
-  r->low = r0;
 }
 
 #ifndef KRML_NOSTRUCT_PASSING
@@ -600,82 +488,6 @@ static inline void store128_be(uint8_t *b, uint128_t n) {
   store128_be_(b, &n);
 }
 
-static inline uint128_t FStar_UInt128_split51(uint128_t *src) {
-  uint128_t r;
-  FStar_UInt128_split51_(src, &r);
-  return r;
-}
-
-#define INT128_BINOP(NAME) \
-static inline uint128_t FStar_UInt128_##NAME(uint128_t x, uint128_t y) { \
-  uint128_t r; \
-  FStar_UInt128_##NAME##_(&x, &y, &r); \
-  return r; \
-}
-
-INT128_BINOP(add)
-INT128_BINOP(add_mod)
-INT128_BINOP(sub)
-INT128_BINOP(sub_mod)
-INT128_BINOP(logand)
-INT128_BINOP(logor)
-INT128_BINOP(logxor)
-
-static inline uint128_t FStar_UInt128_lognot(uint128_t x) {
-  uint128_t r;
-  FStar_UInt128_lognot_(&x, &r);
-  return r;
-}
-
-static inline uint128_t FStar_UInt128_shift_left(uint128_t x,
-                                                 FStar_UInt32_t y) {
-  uint128_t r;
-  FStar_UInt128_shift_left_(&x, y, &r);
-  return r;
-}
-
-static inline uint128_t FStar_UInt128_shift_right(uint128_t x,
-                                                  FStar_UInt32_t y) {
-  uint128_t r;
-  FStar_UInt128_shift_right_(&x, y, &r);
-  return r;
-}
-
-/* Conversions */
-static inline uint128_t FStar_Int_Cast_uint64_to_uint128(uint64_t x) {
-  uint128_t r;
-  FStar_Int_Cast_uint64_to_uint128_(x, &r);
-  return r;
-}
-
-static inline uint64_t FStar_Int_Cast_uint128_to_uint64(uint128_t x) {
-  return FStar_Int_Cast_uint128_to_uint64_(&x);;
-}
-
-static inline uint128_t FStar_UInt128_eq_mask(uint128_t x, uint128_t y) {
-  uint128_t r;
-  FStar_UInt128_eq_mask_(&x, &y, &r);
-  return r;
-}
-
-static inline uint128_t FStar_UInt128_gte_mask(uint128_t x, uint128_t y) {
-  uint128_t r;
-  FStar_UInt128_gte_mask_(&x, &y, &r);
-  return r;
-}
-
-static inline uint128_t FStar_UInt128_mul_wide(uint64_t x, uint64_t y) {
-  uint128_t r;
-  FStar_UInt128_mul_wide_(x, y, &r);
-  return r;
-}
-
-static inline uint128_t FStar_UInt128_mul32(uint64_t x, uint32_t y) {
-  uint128_t r;
-  FStar_UInt128_mul32_(x, y, &r);
-  return r;
-}
-
 #else // !defined(KRML_STRUCT_PASSING)
 
 #define print128 print128_
@@ -683,23 +495,6 @@ static inline uint128_t FStar_UInt128_mul32(uint64_t x, uint32_t y) {
 #define store128_le store128_le_
 #define load128_be load128_be_
 #define store128_be store128_be_
-#define FStar_UInt128_add FStar_UInt128_add_
-#define FStar_UInt128_add_mod FStar_UInt128_add_mod_
-#define FStar_UInt128_split51 FStar_UInt128_split51_
-#define FStar_UInt128_sub FStar_UInt128_sub_
-#define FStar_UInt128_sub_mod FStar_UInt128_sub_mod_
-#define FStar_UInt128_logand FStar_UInt128_logand_
-#define FStar_UInt128_logor FStar_UInt128_logor_
-#define FStar_UInt128_logxor FStar_UInt128_logxor_
-#define FStar_UInt128_lognot FStar_UInt128_lognot_
-#define FStar_UInt128_shift_left FStar_UInt128_shift_left_
-#define FStar_UInt128_shift_right FStar_UInt128_shift_right_
-#define FStar_Int_Cast_uint64_to_uint128 FStar_Int_Cast_uint64_to_uint128_
-#define FStar_Int_Cast_uint128_to_uint64 FStar_Int_Cast_uint128_to_uint64_
-#define FStar_UInt128_eq_mask FStar_UInt128_eq_mask_
-#define FStar_UInt128_gte_mask FStar_UInt128_gte_mask_
-#define FStar_UInt128_mul_wide FStar_UInt128_mul_wide_
-#define FStar_UInt128_mul32 FStar_UInt128_mul32_
 
 #endif // KRML_STRUCT_PASSING
 #endif // KRML_UINT128
