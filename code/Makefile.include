@@ -67,28 +67,19 @@ FSTAR_LIB=$(FSTAR_HOME)/ulib
 HINTS_ENABLED?=--use_hints
 FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs 
 
-ifndef CLOUD_VERIFY  
-  FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
-  export BATCH_ID_FILE:=
-else
-  export BATCH_ID_FILE:=$(HACL_HOME)/batch_id.tmp
-  EABC=python /mnt/f/dev/sec/eabc/eabc.py
-  CURRENT_SUBDIR:=$(subst $(HACL_HOME)/,,$(abspath $(shell pwd)))  
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
 
-$(BATCH_ID_FILE):
-	$(info CREATING)
-	$(EABC) create > $@
-
-  BATCH_JOB_ID=$(subst job-id:,,$(filter job-id:%, $(shell cat $(BATCH_ID_FILE))))
-  FSTAR=$(EABC) -j $(BATCH_JOB_ID) -d 'hacl-star/$(CURRENT_SUBDIR)' $(EABC_EXTRA) add -- \$$H/FStar/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
-  KREMLIN=$(EABC) -j $(BATCH_JOB_ID) -d 'hacl-star/$(CURRENT_SUBDIR)' $(EABC_EXTRA) add -- \$$H/kremlin/krml
-
-# $(info goals: $(MAKECMDGOALS))
-# $(MAKECMDGOALS): $(BATCH_ID_FILE)
-# .PHONY: BATCH_CLEANUP
-# BATCH_CLEANUP: $(MAKECMDGOALS)
-# 	$(info CLEANUP)
-
+ifdef CLOUD_VERIFY
+BATCH_JOB_ID=$(subst job-id:,,$(filter job-id:%, $(shell cat $(BATCH_ID_FILE))))
+BATCH_OUTPUT_SAS=$(subst output-sas:,,$(filter output-sas:%, $(shell cat $(BATCH_ID_FILE))))
+EABC=python /mnt/f/dev/sec/eabc/eabc.py
+CURRENT_SUBDIR:=$(subst $(HACL_HOME)/,,$(abspath $(shell pwd)))
+BATCH_ADD_CMD=$(EABC) add -d "hacl-star/$(CURRENT_SUBDIR)" $(EABC_EXTRA) "$(BATCH_OUTPUT_SAS)" $(BATCH_JOB_ID)
+BATCH_RUN_CMD=$(EABC) run -d "hacl-star/$(CURRENT_SUBDIR)" $(EABC_EXTRA) "$(BATCH_OUTPUT_SAS)" $(BATCH_JOB_ID)
+BATCH_CMD=$(BATCH_ADD_CMD)
+FSTAR_RELATIVIZED=$(subst $(abspath $(HACL_HOME)/..),\$$H,$(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES))
+FSTAR=$(BATCH_CMD) \$$H/FStar/bin/fstar.exe $(FSTAR_RELATIVIZED)
+KREMLIN=$(BATCH_CMD) \$$H/kremlin/krml
 endif
 
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
@@ -111,24 +102,24 @@ import-kremlin:
 	$(FSTAR) --lax $^
 
 %.fst-krml: %.fst
-	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_INCLUDES) $^
+	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_INCLUDES) $<
 
-%.fst-verify: %.fst $(BATCH_ID_FILE)
-	$(FSTAR) $< 2>&1
-%.fsti-verify: %.fsti $(BATCH_ID_FILE)
-	$(FSTAR) $< 2>&1
+%.fst-verify: %.fst
+	$(FSTAR) $<
+%.fsti-verify: %.fsti
+	$(FSTAR) $<
 
-%.fst.hints: %.fst $(BATCH_ID_FILE)
-	$(FSTAR) --record_hints $< 2>&1
-%.fsti.hints: %.fsti $(BATCH_ID_FILE)
-	$(FSTAR) --record_hints $< 2>&1
+%.fst.hints: %.fst
+	$(FSTAR) --record_hints $<
+%.fsti.hints: %.fsti
+	$(FSTAR) --record_hints $<
 
 # Custom verification targets for re-located hint files
-%.fst-reloc-verify: %.fst $(BATCH_ID_FILE)
-	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^ 2>&1
-%.fsti-reloc-verify: %.fsti $(BATCH_ID_FILE)
-	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $^ 2>&1
-%.fst.reloc.hints: %.fst $(BATCH_ID_FILE)
-	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^ 2>&1
-%.fsti.reloc.hints: %.fsti $(BATCH_ID_FILE)
-	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $^ 2>&1
+%.fst-reloc-verify: %.fst
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $<
+%.fsti-reloc-verify: %.fsti
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $<
+%.fst.reloc.hints: %.fst
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
+%.fsti.reloc.hints: %.fsti
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
