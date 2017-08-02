@@ -13,6 +13,7 @@ open FStar.Set
 open FStar.Seq
 open FStar.HyperHeap
 open FStar.HyperStack
+open FStar.HyperStack.ST
 open FStar.Endianness
 
 open Box.Flags

@@ -11,11 +11,11 @@ open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Monotonic.RRef
-open FStar.Endianness
 
 open Crypto.Symmetric.Bytes
 
 open Box.Flags
+open Box.Plain
 open Box.Indexing
 
 module MR = FStar.Monotonic.RRef
@@ -24,10 +24,9 @@ module HS = FStar.HyperStack
 module MM = MonotoneMap
 module SPEC = Spec.SecretBox
 
-open Box.PlainAE
 
-type noncesize = SPEC.noncelen
-type keysize = SPEC.keylen
+let noncesize = SPEC.noncelen
+let keysize = SPEC.keylen
 type aes_key = SPEC.key
 type bytes = SPEC.bytes
 type cipher = b:bytes{Seq.length b >= 16 /\ (Seq.length b - 16) / Spec.Salsa20.blocklen < pow2 32}
@@ -37,31 +36,30 @@ val create_zero_bytes: n:nat -> Tot (b:bytes{Seq.length b = n})
 let create_zero_bytes n =
   Seq.create n (UInt8.uint_to_t 0)
 
-val ae_log_region:
+type ae_log_region =
   r:MR.rid{ extends r root
              /\ is_eternal_region r
              /\ is_below r root
-             /\ disjoint r id_log_region
-             /\ disjoint r id_honesty_log_region
              }
 
-
 #set-options "--z3rlimit 500 --max_ifuel 2 --max_fuel 0"
-let ae_log_region =
-  recall_region id_log_region;
-  recall_region id_honesty_log_region;
-  new_region root
+type ae_log_key (im:index_module) = (nonce*(i:id im))
+type ae_log_value (im:index_module) (pm:plain_module) (i:id im) = (cipher*protected_plain_t im (get_plain pm) i)
+let ae_log_range (im:index_module) (pm:plain_module) = fun (k:ae_log_key im) -> (ae_log_value im pm (snd k))
+let ae_log_inv (im:index_module) (pm:plain_module) (f:MM.map' (ae_log_key im) (ae_log_range im pm)) = True
 
-type ae_log_key = (nonce*(i:id{AE_id? i}))
-type ae_log_value (i:id{AE_id? i}) = (cipher*protected_ae_plain i)
-type ae_log_range = fun (k:ae_log_key) -> ae_log_value (snd k)
-type ae_log_inv (f:MM.map' ae_log_key ae_log_range) = True
+type ae_log (rgn:ae_log_region) (im:index_module) (pm:plain_module) =
+  MM.t rgn (ae_log_key im) (ae_log_range im pm) (ae_log_inv im pm)
 
+(**
+   The unprotected plaintext type.
+*)
+type ae_plain = b:bytes{Seq.length b / Spec.Salsa20.blocklen < pow2 32}
 
-val ae_log:
-  MM.t ae_log_region ae_log_key ae_log_range ae_log_inv
-let ae_log =
-  MM.alloc #ae_log_region #ae_log_key #ae_log_range #ae_log_inv
+(**
+  A helper function to obtain the length of a protected plaintext.
+*)
+let length (b:bytes) = Seq.length b
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The following functions belong to the formal KEY module in the model.
@@ -72,9 +70,9 @@ let ae_log =
    of accessing the raw representation of any honest AE key if AE is idealized.
 *)
 noeq abstract type key =
-  | Key: #i:id{AE_id? i /\ unfresh i /\ registered i} -> raw:aes_key -> key
+  | Key: #i:id -> rgn:ae_log_region -> log:ae_log rgn -> raw:aes_key -> key
 
-val get_index: k:key -> Tot (i:id{i=k.i /\ AE_id? i})
+val get_index: k:key -> Tot (i:id{i=k.i})
 let get_index k = k.i
 
 (**
@@ -82,7 +80,7 @@ let get_index k = k.i
    only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
 *)
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
-val keygen: i:id{AE_id? i} -> ST (k:key{k.i=i})
+val gen: i:id -> ST (k:key{k.i=i})
   (requires (fun h ->
     fresh i h // Prevents multiple keys with the same id
     /\ registered i // We require this to enforce a static corruption model.
@@ -92,7 +90,7 @@ val keygen: i:id{AE_id? i} -> ST (k:key{k.i=i})
     HH.modifies_just s h0.h h1.h
     /\ makes_unfresh_just i h0 h1
   ))
-let keygen i =
+let gen i =
   MR.m_recall id_log;
   make_unfresh i;
   let rnd_k = random_bytes (UInt32.uint_to_t keysize) in
@@ -102,7 +100,7 @@ let keygen i =
    The coerce function transforms a raw aes_key into an abstract key. Only dishonest ids can be used
    with this function.
 *)
-val coerce_key: i:id{AE_id? i /\ (dishonest i)} -> raw_k:aes_key -> ST (k:key{k.i=i /\ k.raw = raw_k})
+val coerce: i:id{dishonest i} -> raw_k:aes_key -> ST (k:key{k.i=i /\ k.raw = raw_k})
   (requires (fun h0 ->
     registered i
   ))
@@ -113,7 +111,7 @@ val coerce_key: i:id{AE_id? i /\ (dishonest i)} -> raw_k:aes_key -> ST (k:key{k.
     /\ makes_unfresh_just i h0 h1
     /\ dishonest i
   ))
-let coerce_key i raw =
+let coerce i raw =
   make_unfresh i;
   fresh_unfresh_contradiction i;
   Key #i raw
@@ -122,8 +120,8 @@ let coerce_key i raw =
    The leak_key function transforms an abstract key into a raw aes_key.
    The refinement type on the key makes sure that no honest keys can be leaked.
 *)
-val leak_key: k:key{(dishonest k.i) \/ ~(b2t ae_ind_cca)} -> Tot (raw_k:aes_key{raw_k=k.raw})
-let leak_key k =
+val leak: k:key{(dishonest k.i) \/ ~(b2t ae_ind_cca)} -> Tot (raw_k:aes_key{raw_k=k.raw})
+let leak k =
   k.raw
 
 (**
@@ -149,7 +147,7 @@ let message_unwrap #i = PlainAE.ae_message_unwrap #i
 (**
    Encrypt a a message under a key. Idealize if the key is honest and ae_ind_cca true.
 *)
-val encrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i{length m / Spec.Salsa20.blocklen < pow2 32}) -> ST cipher
+val encrypt: #(i:id) -> n:nonce -> k:key{k.i=i} -> (m:protected_ae_plain i{length m / Spec.Salsa20.blocklen < pow2 32}) -> ST cipher
   (requires (fun h0 ->
     ((honest i) ==>
       (MR.m_contains ae_log h0
@@ -195,7 +193,7 @@ let encrypt #i n k m =
    Decrypt a ciphertext c using a key k. If the key is honest and ae_int_ctxt is idealized,
    try to obtain the ciphertext from the log. Else decrypt via concrete implementation.
 *)
-val decrypt: #(i:id{AE_id? i}) -> n:nonce -> k:key{k.i=i} -> c:cipher -> ST (option (protected_ae_plain i))
+val decrypt: #(i:id) -> n:nonce -> k:key{k.i=i} -> c:cipher -> ST (option (protected_ae_plain i))
   (requires (fun h0 ->
     MR.m_contains ae_log h0
     /\ registered i

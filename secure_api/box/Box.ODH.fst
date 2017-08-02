@@ -2,9 +2,9 @@
    TODO: - Documentation, some cleanup.
 *)
 module Box.ODH
-
 open FStar.Set
 open FStar.HyperHeap
+open FStar.HyperHeap.ST
 open FStar.HyperStack
 open FStar.Monotonic.RRef
 open FStar.Seq
@@ -112,13 +112,12 @@ val get_skeyGT: sk:dh_skey -> Tot (raw:dh_exponent{raw=sk.sk_exp})
 let get_skeyGT sk =
   sk.sk_exp
 
-val keygen: unit -> ST (dh_pair:(dh_pkey * dh_skey){fst dh_pair == (snd dh_pair).pk})
+
+val keygen: unit -> HyperStack.ST.ST (dh_pair:(dh_pkey * dh_skey){fst dh_pair == (snd dh_pair).pk})
   (requires (fun h0 -> True))
-  (ensures (fun h0 _ h1 -> modifies Set.empty h0 h1))
+  (ensures (fun h0 _ h1 -> HS.modifies Set.empty h0 h1))
 let keygen () =
-  let h0 = ST.get() in
   let dh_exponent = random_bytes (UInt32.uint_to_t 32) in
-  let h1 = ST.get() in
   let dh_pk = DH_pkey (share_from_exponent dh_exponent) in
   let dh_sk = DH_skey dh_exponent dh_pk in
   dh_pk,dh_sk
@@ -152,7 +151,7 @@ let prf_odhGT dh_sk dh_pk =
 
 #reset-options
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
-val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
+val prf_odh: sk:dh_skey -> pk:dh_pkey -> HyperStack.ST.ST (Key.key)
   ( requires (fun h0 ->
     let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
     ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==>  fresh i h0)
@@ -188,7 +187,6 @@ val prf_odh: sk:dh_skey -> pk:dh_pkey -> ST (Key.key)
     /\ MR.m_contains dh_key_log h1
   ))
 let prf_odh dh_sk dh_pk =
-  let h0 = ST.get() in
   let i = generate_ae_id (DH_id dh_pk.pk_share) (DH_id dh_sk.pk.pk_share) in
   let honest_i = is_honest i in
   MR.m_recall dh_key_log;
@@ -202,7 +200,6 @@ let prf_odh dh_sk dh_pk =
       fresh_unfresh_contradiction i;
       k
     | None ->
-      let h0 = ST.get() in
       let k = Key.keygen i in
       MR.m_recall dh_key_log;
       MR.m_recall id_log;
