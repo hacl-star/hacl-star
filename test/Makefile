@@ -177,6 +177,20 @@ update-snapshot:
 	$(MAKE) -C ../snapshots/hacl-c unit-tests
 	$(MAKE) -C ../snapshots/hacl-c clean
 
+nss-snapshot:
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
+	$(MAKE) -C snapshot-gcc-unrolled clean
+	$(MAKE) -C snapshot-gcc clean
+	mkdir -p ../snapshots/nss
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/nss
+	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) ../snapshots/nss
+	cp $(addprefix c-experimental/, kremlib.h FStar.h Makefile)  ../snapshots/nss
+	$(MAKE) -C ../snapshots/nss unit-tests
+	$(MAKE) -C ../snapshots/nss unit-tests-32
+	$(MAKE) -C ../snapshots/nss clean
 
 clean:
 	$(MAKE) -C ../code clean
