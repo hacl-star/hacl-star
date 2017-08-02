@@ -89,11 +89,31 @@ type refs_in_region =
 type fp = FStar.TSet.set (HH.rid * refs_in_region)
 val footprint     : #i:_ -> #rw:_ -> state i rw -> fp
 
+let regions_of_fp (fp:fp) = FStar.TSet.map fst fp
+let refs_of_region (rgn:HH.rid) (footprint:fp) : FStar.TSet.set refs_in_region =
+  FStar.TSet.map snd (FStar.TSet.filter (fun r -> fst r == rgn) footprint)
+
+//HH only provides modifies on sets, not tsets
+val hh_modifies_t (_:FStar.TSet.set HH.rid) (h0:HS.mem) (h1:HS.mem) : Type0
+
+let modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0 =
+  let open FStar.HyperStack in
+  hh_modifies_t (regions_of_fp fp) h0 h1 /\
+  (forall r. r `TSet.mem` (regions_of_fp fp) ==> (
+        let refs = refs_of_region r fp in
+        (forall a. a `TSet.mem` refs ==>
+              (match a with
+              | AllRefs -> True
+              | SomeRefs addrs -> FStar.Heap.modifies_t addrs (Map.sel h0.h r) (Map.sel h1.h r)))))
+
 //Leaving this abstract for now; but it should imply Crypto.AEAD.Invariant.safelen i len (otp_offset i)
 val safelen     : I.id -> nat -> bool
 let ok_plain_len_32 (i:I.id) = l:UInt32.t{safelen i (v l)}
 
 val invariant : #i:_ -> #rw:_ -> state i rw -> HS.mem -> Type0
+val frame_invariant: #i:_ -> #rw:_ -> st:state i rw -> h0:HS.mem -> h1:HS.mem -> 
+    Lemma (invariant st h0 /\ modifies_fp (footprint st) h0 h1 ==>
+           invariant st h1)
 
 //val as_set': #a:Type -> list a -> Tot (TSet.set a)
 let rec as_set (#a:Type) (l:list a) : TSet.set a =
@@ -164,24 +184,6 @@ val leak
   (ensures  (fun h0 _ h1 ->
                HS.modifies Set.empty h0 h1 /\
                invariant st h1))
-
-let regions_of_fp (fp:fp) = FStar.TSet.map fst fp
-let refs_of_region (rgn:HH.rid) (footprint:fp) : FStar.TSet.set refs_in_region =
-  FStar.TSet.map snd (FStar.TSet.filter (fun r -> fst r == rgn) footprint)
-
-//HH only provides modifies on sets, not tsets
-val hh_modifies_t (_:FStar.TSet.set HH.rid) (h0:HS.mem) (h1:HS.mem) : Type0
-
-let modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0 =
-  let open FStar.HyperStack in
-  hh_modifies_t (regions_of_fp fp) h0 h1 /\
-  (forall r. r `TSet.mem` (regions_of_fp fp) ==> (
-        let refs = refs_of_region r fp in
-        (forall a. a `TSet.mem` refs ==>
-              (match a with
-              | AllRefs -> True
-              | SomeRefs addrs -> FStar.Heap.modifies_t addrs (Map.sel h0.h r) (Map.sel h1.h r)))))
-
 
 // enc_dec_separation: Calling AEAD.encrypt/decrypt requires this separation
 let enc_dec_separation (#i:_) (#rw:_) (st:state i rw)

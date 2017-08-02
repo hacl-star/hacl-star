@@ -32,8 +32,11 @@ let prf_region #i #rw st = Invariant.AEADState?.log_region st //TODO: FIXME!!
 let log #i #rw s h = HS.sel h (Invariant.st_ilog s)
 
 let footprint #i #rw s = TSet.empty //TODO: FIXME!
+let hh_modifies_t (_:FStar.TSet.set HH.rid) (h0:HS.mem) (h1:HS.mem) = True //TODO: FIXME!
+
 let safelen (i:I.id) (n:nat) = Invariant.safelen i n (Invariant.otp_offset i)
 let invariant #i #rw s h = Invariant.inv s h
+let frame_invariant #i #rw st h0 h1 = admit() //TODO: FIXME!
 
 let gen i prf_rgn log_rgn =
     assume false;
@@ -51,7 +54,6 @@ let leak #i st
   = assume false;
     Crypto.AEAD.leak #i st
 
-let hh_modifies_t (_:FStar.TSet.set HH.rid) (h0:HS.mem) (h1:HS.mem) = True
 
 let encrypt i st n aadlen aad plainlen plain cipher_tag
   = assume false;
