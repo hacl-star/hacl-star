@@ -1,4 +1,5 @@
-include ../code/Makefile.include
+HACL_HOME?=../
+include $(HACL_HOME)/code/Makefile.include
 
 OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
 
@@ -85,7 +86,7 @@ clean:
 
 OTHERFLAGS+=--max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20
 
-OTHERFLAGS+=$(addprefix --include ,$(LDEPS)) \
+OTHERFLAGS+=$(addprefix --include $(HACL_HOME)/secure_api/,$(LDEPS)) \
 	$(addprefix --include $(HACL_HOME)/code/,$(CDEPS)) \
 	--include $(KREMLIN_HOME)/test
 
@@ -174,6 +175,8 @@ all-lax: lax
 
 %.fsti-in:
 	@echo --hint_info \
+	$(HINTS_ENABLED) \
+	$(OTHERFLAGS) \
 	$(FSTAR_INCLUDES)
 
 # Verifying one file at a time
