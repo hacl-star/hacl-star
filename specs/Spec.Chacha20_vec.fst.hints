@@ -1,5 +1,5 @@
 [
-  "T\u0016´íG&úI-Fº\u007f2eóí",
+  "`c¥\u0012¢ú≠∂†y\rZà©Å\t",
   [
     [
       "Spec.Chacha20_vec.key",
@@ -90,10 +90,17 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt32.t",
-        "equation_Prims.nat", "equation_Spec.Chacha20_vec.vec",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Spec.Loops.seq_map.fuel_instrumented",
+        "@query",
+        "Prims_interpretation_Tm_arrow_9cb3c953faf527c316d427b2ce8bd81b",
+        "Prims_interpretation_Tm_arrow_f82c3fb9ac6610efb97620a59b378092",
+        "equation_FStar.UInt32.t", "equation_Prims.nat",
+        "equation_Spec.Chacha20_vec.vec", "kinding_FStar.UInt32.t_@tok",
         "refinement_interpretation_Spec.Chacha20_vec_Tm_refine_93df21c232b9036c43f55597cf78cad5",
-        "refinement_interpretation_Spec.Chacha20_vec_Tm_refine_a5696227a8525cfb2a6577b02299d9d2"
+        "refinement_interpretation_Spec.Loops_Tm_refine_b5e6bf0afe978ce3dd595c1a3a4a6fae",
+        "typing_Spec.Chacha20_vec_Tm_abs_fe87556605c8785a8f5a07b921ec0c3a",
+        "typing_Spec.Loops.seq_map"
       ],
       0
     ],
@@ -141,15 +148,20 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Spec.Chacha20_vec.idx",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt32.t",
+        "equation_Prims.nat", "equation_Spec.Chacha20_vec.idx",
         "equation_Spec.Chacha20_vec.op_Plus_Percent_Hat",
         "equation_Spec.Chacha20_vec.state", "equation_Spec.Chacha20_vec.vec",
-        "function_token_typing_Spec.Chacha20_vec.vec",
+        "fuel_guarded_inversion_FStar.UInt32.t_",
+        "function_token_typing_Spec.Chacha20_vec.vec", "int_inversion",
         "lemma_FStar.Seq.Base.lemma_len_upd",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_2ca062977a42c36634b89c1c4f193f79",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Chacha20_vec_Tm_refine_93df21c232b9036c43f55597cf78cad5",
         "refinement_interpretation_Spec.Chacha20_vec_Tm_refine_fef6205e5051f619a8333726d8adfeb8",
+        "refinement_interpretation_Spec.Lib_Tm_refine_08b7b502ca9d52863cc90a1acbeae1a4",
+        "typing_Spec.Chacha20_vec.op_Hat_Hat",
+        "typing_Spec.Chacha20_vec.op_Less_Less_Less",
         "typing_Spec.Chacha20_vec.op_Plus_Percent_Hat"
       ],
       0

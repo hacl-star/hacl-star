@@ -19,10 +19,10 @@ let fsub e1 e2 = (e1 - e2) % prime
 let fmul e1 e2 = (e1 * e2) % prime
 let zero : elem = 0
 let one  : elem = 1
-let op_Plus_At = fadd
-let op_Star_At = fmul
+let ( +@ ) = fadd
+let ( *@ ) = fmul
 (** Exponentiation *)
-let rec op_Star_Star (e:elem) (n:pos) : Tot elem (decreases n) =
+let rec ( ** ) (e:elem) (n:pos) : Tot elem (decreases n) =
   if n = 1 then e
   else
     if n % 2 = 0 then op_Star_Star (e `fmul` e) (n / 2)
