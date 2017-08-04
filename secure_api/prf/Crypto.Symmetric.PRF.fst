@@ -132,13 +132,13 @@ let lemma_find_snoc #rgn #i s e =
   Seq.find_snoc s e (is_entry_domain e.x)
 *)
 
+let table_ideal_t rgn mac_rgn i = r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r == rgn}
 
 // The table exists only for idealization
 // What's in the table stays there. And the table does not have two entries with the same x.
 // TODO consider using a monotonic map to enforce those
 let table_t rgn mac_rgn (i:id) = 
-  if prf i then r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r == rgn}
-  else unit
+  if prf i then table_ideal_t rgn mac_rgn i else unit
 
 // the PRF instance, 
 // including its key and memoization table (in rgn) 
@@ -566,7 +566,9 @@ val prf_enxor:
   (requires (fun h0 ->
      Crypto.Plain.live h0 plain /\ 
      Buffer.live h0 cipher /\
-     (safeId i ==> find_otp #t.mac_rgn #i (HS.sel h0 t.table) x == None)))
+     (safeId i ==>
+       (let tbl : table_ideal_t t.rgn t.mac_rgn i = t.table in
+       find_otp (HS.sel h0 tbl) x == None))))
   (ensures (fun h0 _ h1 ->
      Crypto.Plain.live h1 plain /\ Buffer.live h1 cipher /\
      modifies_x_buffer_1 t x cipher h0 h1 /\
