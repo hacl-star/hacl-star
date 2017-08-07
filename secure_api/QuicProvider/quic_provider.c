@@ -164,5 +164,6 @@ int quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, const char *ad,
 
 int quic_crypto_free_key(quic_key *key)
 {
+  if(key && key->st.prf.key) free(key->st.prf.key);
   if(key) free(key);
 }

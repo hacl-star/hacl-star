@@ -309,8 +309,8 @@ val extending_counter_blocks: #i:id -> (t:PRF.state i) -> (x:domain i{ctr_0 i <^
 			let blocks_1 = HS.sel h1 (PRF.itable i t) in
 			none_above_prf_st x t h0 /\
 		        h0 `HS.contains` r /\
-			HS.sel h0 (itable i t) ==
-			  Seq.append (HS.sel h_init (itable i t))
+			HS.sel h0 (PRF.itable i t) == 
+			  Seq.append (HS.sel h_init (PRF.itable i t))
 				     (counterblocks i t.mac_rgn initial_domain
 						 len 0 completed_len
 						 (Plain.sel_plain h0 (u len) plain)
@@ -322,8 +322,8 @@ val extending_counter_blocks: #i:id -> (t:PRF.state i) -> (x:domain i{ctr_0 i <^
 		    let completed_len' = completed_len + l in
     		    let initial_domain = {x with ctr=ctr_0 i +^ 1ul} in
 		    safeId i ==>
-		      Seq.equal (HS.sel h1 (itable i t))
-				(Seq.append (HS.sel h_init (itable i t))
+		      Seq.equal (HS.sel h1 (PRF.itable i t))
+				(Seq.append (HS.sel h_init (PRF.itable i t))
 					    (counterblocks i t.mac_rgn initial_domain
 						 len 0 completed_len'
 						 (Plain.sel_plain h1 (u len) plain)
@@ -398,7 +398,7 @@ let enxor_invariant (#i:id) (t:PRF.state i) (x:PRF.domain i)
            let initial_domain = {x with ctr=ctr_0 i +^ 1ul} in
            let completed_len = len -^ remaining_len in
 	   Seq.equal prf_table
-    		     (Seq.append (HS.sel h_init (itable i t))
+    		     (Seq.append (HS.sel h_init (PRF.itable i t))
     				 (counterblocks i t.mac_rgn initial_domain
     				      (v len) 0 (v completed_len)
     				      (Plain.sel_plain h len plain)
