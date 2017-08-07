@@ -65,10 +65,10 @@ val nonce_of_entry (#i:_) (e:entry i) : nonce i
 let safeMac (i:I.id) = Flag.safeHS i && Flag.mac1 i
 let safeId  (i:I.id) = Flag.safeId i
 
-val state     : I.id -> I.rw -> Type0
-val log_region: #i:_ -> #rw:_ -> state i rw -> eternal_region
-val prf_region: #i:_ -> #rw:_ -> state i rw -> eternal_region
-val log       : #i:_ -> #rw:_ -> s:state i rw{safeMac i} -> HS.mem -> GTot (Seq.seq (entry i))
+val aead_state     : I.id -> I.rw -> Type0
+val log_region: #i:_ -> #rw:_ -> aead_state i rw -> eternal_region
+val prf_region: #i:_ -> #rw:_ -> aead_state i rw -> eternal_region
+val log       : #i:_ -> #rw:_ -> s:aead_state i rw{safeMac i} -> HS.mem -> GTot (Seq.seq (entry i))
 
 let address   = nat
 let addr_unused_in (rid:HH.rid) (a:address) (m0:HS.mem) =
@@ -87,7 +87,7 @@ type refs_in_region =
   | SomeRefs : FStar.TSet.set address -> refs_in_region
 
 type fp = FStar.TSet.set (HH.rid * refs_in_region)
-val footprint     : #i:_ -> #rw:_ -> state i rw -> fp
+val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> fp
 
 let regions_of_fp (fp:fp) = FStar.TSet.map fst fp
 let refs_of_region (rgn:HH.rid) (footprint:fp) : FStar.TSet.set refs_in_region =
@@ -106,13 +106,24 @@ let modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0 =
               | AllRefs -> True
               | SomeRefs addrs -> FStar.Heap.modifies_t addrs (Map.sel h0.h r) (Map.sel h1.h r)))))
 
+let preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0 =
+  let open FStar.HyperStack in
+  (forall r. r `TSet.mem` regions_of_fp fp ==> (
+        let refs = refs_of_region r fp in
+        (forall a. a `TSet.mem` refs ==> (
+              let mod_refs =
+                match a with
+                | AllRefs -> TSet.empty
+                | SomeRefs addrs -> TSet.complement addrs in
+              FStar.Heap.modifies_t mod_refs (Map.sel h0.h r) (Map.sel h1.h r)))))
+
 //Leaving this abstract for now; but it should imply Crypto.AEAD.Invariant.safelen i len (otp_offset i)
 val safelen     : I.id -> nat -> bool
 let ok_plain_len_32 (i:I.id) = l:UInt32.t{safelen i (v l)}
 
-val invariant : #i:_ -> #rw:_ -> state i rw -> HS.mem -> Type0
-val frame_invariant: #i:_ -> #rw:_ -> st:state i rw -> h0:HS.mem -> h1:HS.mem -> 
-    Lemma (invariant st h0 /\ modifies_fp (footprint st) h0 h1 ==>
+val invariant : #i:_ -> #rw:_ -> aead_state i rw -> HS.mem -> Type0
+val frame_invariant: #i:_ -> #rw:_ -> st:aead_state i rw -> h0:HS.mem -> h1:HS.mem ->
+    Lemma (invariant st h0 /\ preserves_fp (footprint st) h0 h1 ==>
            invariant st h1)
 
 //val as_set': #a:Type -> list a -> Tot (TSet.set a)
@@ -129,7 +140,7 @@ let rec as_set (#a:Type) (l:list a) : TSet.set a =
 val gen (i:I.id)
         (prf_rgn:eternal_region)
         (log_rgn:eternal_region{HH.disjoint prf_rgn log_rgn})
-  : ST (state i I.Writer)
+  : ST (aead_state i I.Writer)
     (requires (fun h -> True))
     (ensures (fun h0 s h1 ->
              log_region s == log_rgn /\
@@ -145,14 +156,14 @@ val gen (i:I.id)
 (** Building a reader from a writer **)
 
 (* A reader never writes to the log_region, but may write to the prf_region *)
-let read_footprint (#i:_) (wr:state i I.Writer) : fp =
+let read_footprint (#i:_) (wr:aead_state i I.Writer) : fp =
   FStar.TSet.filter (fun (rs:(HH.rid * refs_in_region)) -> fst rs == prf_region wr)
                     (footprint wr)
 
 val genReader
            (#i: I.id)
-           (wr: state i I.Writer)
- : ST (state i I.Reader)
+           (wr: aead_state i I.Writer)
+ : ST (aead_state i I.Reader)
   (requires (fun h -> invariant wr h))
   (ensures  (fun h0 rd h1 ->
                HS.modifies Set.empty h0 h1 /\
@@ -167,7 +178,7 @@ val coerce
          (i: I.id)
        (rgn: eternal_region)
        (key: lbuffer (v (keylen i)))
-      : ST  (state i I.Writer)
+      : ST  (aead_state i I.Writer)
   (requires (fun h ->
              ~ (Flag.prf i) /\
              Buffer.live h key))
@@ -178,7 +189,7 @@ val coerce
 (** [leak]: Only needed for modeling the adversary *)
 val leak
       (#i: I.id)
-      (st: state i I.Writer)
+      (st: aead_state i I.Writer)
     : ST (lbuffer (v (statelen i)))
   (requires (fun _ -> ~(Flag.prf i)))
   (ensures  (fun h0 _ h1 ->
@@ -186,7 +197,7 @@ val leak
                invariant st h1))
 
 // enc_dec_separation: Calling AEAD.encrypt/decrypt requires this separation
-let enc_dec_separation (#i:_) (#rw:_) (st:state i rw)
+let enc_dec_separation (#i:_) (#rw:_) (st:aead_state i rw)
                        (#aadlen:nat) (aad: lbuffer aadlen)
                        (#plainlen:nat) (plain: Plain.plainBuffer i plainlen)
                        (#cipherlen: nat) (cipher:lbuffer cipherlen) =
@@ -205,7 +216,7 @@ let enc_dec_separation (#i:_) (#rw:_) (st:state i rw)
     (* HS.is_eternal_region (Buffer.frameOf (Plain.as_buffer plain)) /\ //why? *)
     (* HS.is_eternal_region (Buffer.frameOf aad) /\ //why? *)
 
-let enc_dec_liveness (#i:_) (#rw:_) (st:state i rw)
+let enc_dec_liveness (#i:_) (#rw:_) (st:aead_state i rw)
                      (#aadlen:nat) (aad: lbuffer aadlen)
                      (#plainlen:nat) (plain: Plain.plainBuffer i plainlen)
                      (#cipherlen: nat) (cipher:lbuffer cipherlen) (h:HS.mem) =
@@ -230,11 +241,11 @@ let entry_of
   let c = Buffer.as_seq h cipher_tag in
   mk_entry n aad p c
 
-let entry_for_nonce (#i:_) (#rw:_) (n:nonce i) (st:state i rw) (h:HS.mem{safeMac i})
+let entry_for_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i})
   : GTot (option (entry i)) =
     Seq.find_l (fun e -> nonce_of_entry e = n) (log st h)
 
-let fresh_nonce (#i:_) (#rw:_) (n:nonce i) (st:state i rw) (h:HS.mem{safeMac i}) =
+let fresh_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i}) =
   None? (entry_for_nonce n st h)
 
 let just_one_buffer (#a:Type) (b:Buffer.buffer a) : GTot fp =
@@ -242,7 +253,7 @@ let just_one_buffer (#a:Type) (b:Buffer.buffer a) : GTot fp =
 
 val encrypt
           (i: I.id)
-         (st: state i I.Writer)
+         (st: aead_state i I.Writer)
           (n: iv (I.cipherAlg_of_id i))
      (aadlen: aadlen_32)
         (aad: lbuffer (v aadlen))
@@ -265,7 +276,7 @@ val encrypt
 
 val decrypt
           (i: I.id)
-         (st: state i I.Reader)
+         (st: aead_state i I.Reader)
           (n: iv (I.cipherAlg_of_id i))
      (aadlen: aadlen_32)
         (aad: lbuffer (v aadlen))

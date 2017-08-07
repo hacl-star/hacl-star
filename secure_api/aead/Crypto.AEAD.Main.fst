@@ -26,7 +26,7 @@ let entry_injective (#i:I.id)
   = ()
 let nonce_of_entry (#i:_) (e:entry i) = Crypto.AEAD.Invariant.AEADEntry?.nonce e
 
-let state i rw = Invariant.aead_state i rw
+let aead_state i rw = Invariant.aead_state i rw
 let log_region #i #rw st = Invariant.AEADState?.log_region st
 let prf_region #i #rw st = Invariant.AEADState?.log_region st //TODO: FIXME!!
 let log #i #rw s h = HS.sel h (Invariant.st_ilog s)
