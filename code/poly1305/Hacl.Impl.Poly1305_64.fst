@@ -618,7 +618,7 @@ let poly1305_finish st mac key_s =
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 acc) (as_seq h0 key_s)))
 
 
-let mk_state r h : Tot poly1305_state = MkState r h
+let mk_state r h = MkState r h
 
 val alloc:
   unit -> StackInline poly1305_state
