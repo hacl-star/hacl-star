@@ -30,14 +30,11 @@ abstract type protected_plain_t (im:index_module) (pt:Type0) (id:id im) = pt
 val index_module_lemma: im:index_module -> i:meta_id im -> ST unit
   (requires (fun h0 -> registered im i))
   (ensures (fun h0 _ h1 ->
-    (honest im i ==> (~(dishonest im i) /\ ~(undefined im i)))
-    /\ (dishonest im i ==> (~(honest im i) /\ ~(undefined im i)))
-    /\ (undefined im i ==> (~(honest im i) /\ ~(dishonest im i)))
+    (honest im i ==> (~(dishonest im i)))
+    /\ (dishonest im i ==> (~(honest im i)))
   ))
 let index_module_lemma im i =
   match get_honesty im i with
-  | UNDEFINED ->
-    lemma_undefined_not_others im i
   | DISHONEST ->
     lemma_dishonest_not_others im i
   | HONEST ->
