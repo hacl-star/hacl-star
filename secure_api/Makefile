@@ -186,6 +186,8 @@ all-lax: lax
 
 %.fsti-in:
 	@echo --hint_info \
+	$(HINTS_ENABLED) \
+	$(OTHERFLAGS) \
 	$(FSTAR_INCLUDES)
 
 # Verifying one file at a time

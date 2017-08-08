@@ -90,7 +90,7 @@ let live #i #l h (p:plainBuffer i l) = Buffer.live h (as_buffer p)
 private let live' = live (* live may be shadowed by Buffer.live in case of local open *)
 
 // unconditional access in specs; rename to as_plain? 
-noextract val sel_plain: h:mem -> #i:id -> l:UInt32.t -> buf:plainBuffer i (v l){live h buf} -> GTot (plain i (v l))
+noextract val sel_plain: h:mem -> #i:id -> l:UInt32.t -> buf:plainBuffer i (v l) -> GTot (plain i (v l))
 let sel_plain h #i l buf = sel_bytes h l buf
 
 // restricted 
