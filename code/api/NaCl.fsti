@@ -23,6 +23,8 @@ let crypto_secretbox_NONCEBYTES = 24
 let crypto_secretbox_KEYBYTES   = 32
 let crypto_secretbox_MACBYTES   = 16
 
+let crypto_hash_BYTES = 64
+
 
 val crypto_secretbox_detached:
   c:uint8_p ->
@@ -161,3 +163,11 @@ val crypto_box_open_easy_afternm:
   Stack u32
     (requires (fun h -> live h c /\ live h m /\ live h n /\ live h k))
     (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 c /\ live h1 k))
+
+val crypto_hash:
+  output:uint8_p{length output = crypto_hash_BYTES} ->
+  input:uint8_p{disjoint output input} ->
+  inlen:u32{U32.v inlen = length input} ->
+  Stack u32
+    (requires (fun h -> live h output /\ live h input))
+    (ensures  (fun h0 _ h1 -> modifies_1 output h0 h1))
