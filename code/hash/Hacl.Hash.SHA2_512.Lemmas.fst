@@ -247,7 +247,7 @@ Seq.lemma_eq_intro (as_seq h g) (Seq.append (Seq.append seq_a seq_b) seq_c)
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
 
-let lemma_pad_aux_seq (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) < (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
+let lemma_pad_aux_seq (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) <= (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
   (requires (a == Seq.create 1 0x80uy
             /\ (b == Seq.create (Spec.pad0_length (U64.v len)) 0uy)
             /\ (c == Endianness.big_bytes size_len_8 ((H64.v n * v size_block + U64.v len) * 8))))
