@@ -27,10 +27,8 @@ module S = Hacl.Spec.Poly1305_64.State
 type uint8_p = Buffer.buffer Hacl.UInt8.t
 type key = k:uint8_p{length k = 32}
 
-noextract let seval (b:Hacl.Spec.Poly1305_64.State.seqelem) : GTot nat =
-  Hacl.Spec.Poly1305_64.State.seval b 
-noextract let selem (s:Hacl.Spec.Poly1305_64.State.seqelem) : GTot Spec.Poly1305.elem =
-  Hacl.Spec.Poly1305_64.State.selem s
+let seval = Hacl.Spec.Poly1305_64.State.seval
+let selem = Hacl.Spec.Poly1305_64.State.selem
 
 type state = I.poly1305_state
 

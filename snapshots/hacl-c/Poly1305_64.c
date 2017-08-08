@@ -20,13 +20,11 @@ inline static void Hacl_Bignum_Modulo_carry_top_wide(FStar_UInt128_t *b)
   FStar_UInt128_t b2 = b[2];
   FStar_UInt128_t b0 = b[0];
   FStar_UInt128_t
-  b2_ = FStar_UInt128_logand(b2, FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0x3ffffffffff));
+  b2_ = FStar_UInt128_logand(b2, FStar_Int_Cast_uint64_to_uint128((uint64_t )0x3ffffffffff));
   uint64_t
-  b2_42 = FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(b2, (uint32_t )42));
+  b2_42 = FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(b2, (uint32_t )42));
   FStar_UInt128_t
-  b0_ =
-    FStar_UInt128_add(b0,
-      FStar_Int_Cast_Full_uint64_to_uint128((b2_42 << (uint32_t )2) + b2_42));
+  b0_ = FStar_UInt128_add(b0, FStar_Int_Cast_uint64_to_uint128((b2_42 << (uint32_t )2) + b2_42));
   b[2] = b2_;
   b[0] = b0_;
 }
@@ -36,9 +34,9 @@ Hacl_Bignum_Fproduct_copy_from_wide_(uint64_t *output, FStar_UInt128_t *input)
 {
   for (uint32_t i = (uint32_t )0; i < (uint32_t )3; i = i + (uint32_t )1)
   {
-    FStar_UInt128_t uu____429 = input[i];
-    uint64_t uu____428 = FStar_Int_Cast_Full_uint128_to_uint64(uu____429);
-    output[i] = uu____428;
+    FStar_UInt128_t uu____389 = input[i];
+    uint64_t uu____388 = FStar_Int_Cast_uint128_to_uint64(uu____389);
+    output[i] = uu____388;
   }
 }
 
@@ -63,11 +61,11 @@ Hacl_Bignum_Fproduct_sum_scalar_multiplication_(
 {
   for (uint32_t i = (uint32_t )0; i < (uint32_t )3; i = i + (uint32_t )1)
   {
-    FStar_UInt128_t uu____871 = output[i];
-    uint64_t uu____874 = input[i];
+    FStar_UInt128_t uu____795 = output[i];
+    uint64_t uu____798 = input[i];
     FStar_UInt128_t
-    uu____870 = FStar_UInt128_add_mod(uu____871, FStar_UInt128_mul_wide(uu____874, s));
-    output[i] = uu____870;
+    uu____794 = FStar_UInt128_add_mod(uu____795, FStar_UInt128_mul_wide(uu____798, s));
+    output[i] = uu____794;
   }
 }
 
@@ -79,11 +77,9 @@ inline static void Hacl_Bignum_Fproduct_carry_wide_(FStar_UInt128_t *tmp)
     FStar_UInt128_t tctr = tmp[ctr];
     FStar_UInt128_t tctrp1 = tmp[ctr + (uint32_t )1];
     uint64_t
-    r0 =
-      FStar_Int_Cast_Full_uint128_to_uint64(tctr)
-      & (((uint64_t )1 << (uint32_t )44) - (uint64_t )1);
+    r0 = FStar_Int_Cast_uint128_to_uint64(tctr) & (((uint64_t )1 << (uint32_t )44) - (uint64_t )1);
     FStar_UInt128_t c = FStar_UInt128_shift_right(tctr, (uint32_t )44);
-    tmp[ctr] = FStar_Int_Cast_Full_uint64_to_uint128(r0);
+    tmp[ctr] = FStar_Int_Cast_uint64_to_uint128(r0);
     tmp[ctr + (uint32_t )1] = FStar_UInt128_add(tctrp1, c);
   }
 }
@@ -108,7 +104,7 @@ static uint64_t
 )
 {
   Hacl_Impl_Poly1305_64_State_poly1305_state scrut = projectee;
-  uint64_t *r = scrut.r;
+  uint64_t *r = scrut.x00;
   return r;
 }
 
@@ -118,7 +114,7 @@ static uint64_t
 )
 {
   Hacl_Impl_Poly1305_64_State_poly1305_state scrut = projectee;
-  uint64_t *h = scrut.h;
+  uint64_t *h = scrut.x01;
   return h;
 }
 
@@ -126,6 +122,7 @@ inline static void Hacl_Bignum_Fmul_shift_reduce(uint64_t *output)
 {
   Hacl_Bignum_Fproduct_shift(output);
   Hacl_Bignum_Modulo_reduce(output);
+  return;
 }
 
 static void
@@ -145,10 +142,10 @@ Hacl_Bignum_Fmul_mul_shift_reduce_(FStar_UInt128_t *output, uint64_t *input, uin
 
 inline static void Hacl_Bignum_Fmul_fmul_(uint64_t *output, uint64_t *input, uint64_t *input2)
 {
-  KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )3);
+  KRML_CHECK_SIZE(FStar_Int_Cast_uint64_to_uint128((uint64_t )0), (uint32_t )3);
   FStar_UInt128_t t[3];
   for (uintmax_t _i = 0; _i < (uint32_t )3; ++_i)
-    t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
+    t[_i] = FStar_Int_Cast_uint64_to_uint128((uint64_t )0);
   Hacl_Bignum_Fmul_mul_shift_reduce_(t, input, input2);
   Hacl_Bignum_Fproduct_carry_wide_(t);
   Hacl_Bignum_Modulo_carry_top_wide(t);
@@ -173,12 +170,13 @@ Hacl_Bignum_AddAndMultiply_add_and_multiply(uint64_t *acc, uint64_t *block, uint
 {
   for (uint32_t i = (uint32_t )0; i < (uint32_t )3; i = i + (uint32_t )1)
   {
-    uint64_t uu____871 = acc[i];
-    uint64_t uu____874 = block[i];
-    uint64_t uu____870 = uu____871 + uu____874;
-    acc[i] = uu____870;
+    uint64_t uu____795 = acc[i];
+    uint64_t uu____798 = block[i];
+    uint64_t uu____794 = uu____795 + uu____798;
+    acc[i] = uu____794;
   }
   Hacl_Bignum_Fmul_fmul(acc, acc, r);
+  return;
 }
 
 inline static void
@@ -191,13 +189,12 @@ Hacl_Impl_Poly1305_64_poly1305_update(
   uint64_t *r = Hacl_Impl_Poly1305_64_State___proj__MkState__item__r(st);
   uint64_t tmp[3] = { 0 };
   FStar_UInt128_t m0 = load128_le(m);
-  uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(m0) & (uint64_t )0xfffffffffff;
+  uint64_t r0 = FStar_Int_Cast_uint128_to_uint64(m0) & (uint64_t )0xfffffffffff;
   uint64_t
   r1 =
-    FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(m0, (uint32_t )44))
+    FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(m0, (uint32_t )44))
     & (uint64_t )0xfffffffffff;
-  uint64_t
-  r2 = FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(m0, (uint32_t )88));
+  uint64_t r2 = FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(m0, (uint32_t )88));
   tmp[0] = r0;
   tmp[1] = r1;
   tmp[2] = r2;
@@ -217,13 +214,12 @@ Hacl_Impl_Poly1305_64_poly1305_process_last_block_(
 {
   uint64_t tmp[3] = { 0 };
   FStar_UInt128_t m0 = load128_le(block);
-  uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(m0) & (uint64_t )0xfffffffffff;
+  uint64_t r0 = FStar_Int_Cast_uint128_to_uint64(m0) & (uint64_t )0xfffffffffff;
   uint64_t
   r1 =
-    FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(m0, (uint32_t )44))
+    FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(m0, (uint32_t )44))
     & (uint64_t )0xfffffffffff;
-  uint64_t
-  r2 = FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(m0, (uint32_t )88));
+  uint64_t r2 = FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(m0, (uint32_t )88));
   tmp[0] = r0;
   tmp[1] = r1;
   tmp[2] = r2;
@@ -249,6 +245,7 @@ Hacl_Impl_Poly1305_64_poly1305_process_last_block(
   memcpy(block, m, i * sizeof m[0]);
   block[i0] = (uint8_t )1;
   Hacl_Impl_Poly1305_64_poly1305_process_last_block_(block, st, m, rem_);
+  return;
 }
 
 static void Hacl_Impl_Poly1305_64_poly1305_last_pass(uint64_t *acc)
@@ -291,7 +288,7 @@ static void Hacl_Impl_Poly1305_64_poly1305_last_pass(uint64_t *acc)
 static Hacl_Impl_Poly1305_64_State_poly1305_state
 Hacl_Impl_Poly1305_64_mk_state(uint64_t *r, uint64_t *h)
 {
-  return ((Hacl_Impl_Poly1305_64_State_poly1305_state ){ .r = r, .h = h });
+  return ((Hacl_Impl_Poly1305_64_State_poly1305_state ){ .x00 = r, .x01 = h });
 }
 
 static void
@@ -302,9 +299,7 @@ Hacl_Standalone_Poly1305_64_poly1305_blocks(
 )
 {
   if (len1 == (uint64_t )0)
-  {
-    
-  }
+    return;
   else
   {
     uint8_t *block = m;
@@ -312,6 +307,7 @@ Hacl_Standalone_Poly1305_64_poly1305_blocks(
     Hacl_Impl_Poly1305_64_poly1305_update(st, block);
     uint64_t len2 = len1 - (uint64_t )1;
     Hacl_Standalone_Poly1305_64_poly1305_blocks(st, tail1, len2);
+    return;
   }
 }
 
@@ -324,20 +320,21 @@ Hacl_Standalone_Poly1305_64_poly1305_partial(
 )
 {
   uint64_t *x0 = Hacl_Impl_Poly1305_64_State___proj__MkState__item__r(st);
-  FStar_UInt128_t k1 = load128_le(kr);
+  uint8_t *x1 = kr;
+  FStar_UInt128_t k1 = load128_le(x1);
   FStar_UInt128_t
   k_clamped =
     FStar_UInt128_logand(k1,
-      FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0x0ffffffc0ffffffc),
+      FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_uint64_to_uint128((uint64_t )0x0ffffffc0ffffffc),
           (uint32_t )64),
-        FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0x0ffffffc0fffffff)));
-  uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(k_clamped) & (uint64_t )0xfffffffffff;
+        FStar_Int_Cast_uint64_to_uint128((uint64_t )0x0ffffffc0fffffff)));
+  uint64_t r0 = FStar_Int_Cast_uint128_to_uint64(k_clamped) & (uint64_t )0xfffffffffff;
   uint64_t
   r1 =
-    FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )44))
+    FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )44))
     & (uint64_t )0xfffffffffff;
   uint64_t
-  r2 = FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )88));
+  r2 = FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )88));
   x0[0] = r0;
   x0[1] = r1;
   x0[2] = r2;
@@ -346,6 +343,7 @@ Hacl_Standalone_Poly1305_64_poly1305_partial(
   x00[1] = (uint64_t )0;
   x00[2] = (uint64_t )0;
   Hacl_Standalone_Poly1305_64_poly1305_blocks(st, input, len1);
+  return;
 }
 
 static void
@@ -370,6 +368,7 @@ Hacl_Standalone_Poly1305_64_poly1305_complete(
     Hacl_Impl_Poly1305_64_poly1305_process_last_block(st, last_block, rem16);
   uint64_t *acc = Hacl_Impl_Poly1305_64_State___proj__MkState__item__h(st);
   Hacl_Impl_Poly1305_64_poly1305_last_pass(acc);
+  return;
 }
 
 static void
@@ -384,6 +383,7 @@ Hacl_Standalone_Poly1305_64_crypto_onetimeauth_(
   uint64_t *r = buf;
   uint64_t *h = buf + (uint32_t )3;
   Hacl_Impl_Poly1305_64_State_poly1305_state st = Hacl_Impl_Poly1305_64_mk_state(r, h);
+  (void )k1;
   uint8_t *key_s = k1 + (uint32_t )16;
   Hacl_Standalone_Poly1305_64_poly1305_complete(st, input, len1, k1);
   uint64_t *acc = Hacl_Impl_Poly1305_64_State___proj__MkState__item__h(st);
@@ -393,11 +393,11 @@ Hacl_Standalone_Poly1305_64_crypto_onetimeauth_(
   uint64_t h2 = acc[2];
   FStar_UInt128_t
   acc_ =
-    FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_Full_uint64_to_uint128(h2
+    FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_uint64_to_uint128(h2
           << (uint32_t )24
           | h1 >> (uint32_t )20),
         (uint32_t )64),
-      FStar_Int_Cast_Full_uint64_to_uint128(h1 << (uint32_t )44 | h0));
+      FStar_Int_Cast_uint64_to_uint128(h1 << (uint32_t )44 | h0));
   FStar_UInt128_t mac_ = FStar_UInt128_add_mod(acc_, k_);
   store128_le(output, mac_);
 }
@@ -411,6 +411,7 @@ Hacl_Standalone_Poly1305_64_crypto_onetimeauth(
 )
 {
   Hacl_Standalone_Poly1305_64_crypto_onetimeauth_(output, input, len1, k1);
+  return;
 }
 
 void *Poly1305_64_op_String_Access(FStar_HyperStack_mem h, uint8_t *b)
@@ -425,21 +426,23 @@ Hacl_Impl_Poly1305_64_State_poly1305_state Poly1305_64_mk_state(uint64_t *r, uin
 
 void Poly1305_64_init(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *k1)
 {
+  uint8_t *x10 = k1;
   uint64_t *x0 = Hacl_Impl_Poly1305_64_State___proj__MkState__item__r(st);
-  FStar_UInt128_t k10 = load128_le(k1);
+  uint8_t *x1 = x10;
+  FStar_UInt128_t k10 = load128_le(x1);
   FStar_UInt128_t
   k_clamped =
     FStar_UInt128_logand(k10,
-      FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0x0ffffffc0ffffffc),
+      FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_uint64_to_uint128((uint64_t )0x0ffffffc0ffffffc),
           (uint32_t )64),
-        FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0x0ffffffc0fffffff)));
-  uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(k_clamped) & (uint64_t )0xfffffffffff;
+        FStar_Int_Cast_uint64_to_uint128((uint64_t )0x0ffffffc0fffffff)));
+  uint64_t r0 = FStar_Int_Cast_uint128_to_uint64(k_clamped) & (uint64_t )0xfffffffffff;
   uint64_t
   r1 =
-    FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )44))
+    FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )44))
     & (uint64_t )0xfffffffffff;
   uint64_t
-  r2 = FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )88));
+  r2 = FStar_Int_Cast_uint128_to_uint64(FStar_UInt128_shift_right(k_clamped, (uint32_t )88));
   x0[0] = r0;
   x0[1] = r1;
   x0[2] = r2;
@@ -460,9 +463,7 @@ void
 Poly1305_64_update(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m, uint32_t len1)
 {
   if (len1 == (uint32_t )0)
-  {
-    
-  }
+    return;
   else
   {
     uint8_t *block = m;
@@ -470,6 +471,7 @@ Poly1305_64_update(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m, ui
     uint32_t len2 = len1 - (uint32_t )1;
     Poly1305_64_update_block(st, block);
     Poly1305_64_update(st, m_, len2);
+    return;
   }
 }
 
@@ -480,14 +482,16 @@ Poly1305_64_update_last(
   uint32_t len1
 )
 {
+  uint8_t *x2 = m;
   if ((uint64_t )len1 == (uint64_t )0)
   {
     
   }
   else
-    Hacl_Impl_Poly1305_64_poly1305_process_last_block(st, m, (uint64_t )len1);
+    Hacl_Impl_Poly1305_64_poly1305_process_last_block(st, x2, (uint64_t )len1);
   uint64_t *acc = Hacl_Impl_Poly1305_64_State___proj__MkState__item__h(st);
   Hacl_Impl_Poly1305_64_poly1305_last_pass(acc);
+  return;
 }
 
 void
@@ -500,18 +504,20 @@ Poly1305_64_finish(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *mac, 
   uint64_t h2 = acc[2];
   FStar_UInt128_t
   acc_ =
-    FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_Full_uint64_to_uint128(h2
+    FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_Int_Cast_uint64_to_uint128(h2
           << (uint32_t )24
           | h1 >> (uint32_t )20),
         (uint32_t )64),
-      FStar_Int_Cast_Full_uint64_to_uint128(h1 << (uint32_t )44 | h0));
+      FStar_Int_Cast_uint64_to_uint128(h1 << (uint32_t )44 | h0));
   FStar_UInt128_t mac_ = FStar_UInt128_add_mod(acc_, k_);
   store128_le(mac, mac_);
+  return;
 }
 
 void
 Poly1305_64_crypto_onetimeauth(uint8_t *output, uint8_t *input, uint64_t len1, uint8_t *k1)
 {
   Hacl_Standalone_Poly1305_64_crypto_onetimeauth(output, input, len1, k1);
+  return;
 }
 

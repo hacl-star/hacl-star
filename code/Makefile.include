@@ -60,7 +60,7 @@ endif
 
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
-KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I . -drop FStar
+KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
 KREMLIN_TESTLIB=-add-include '"testlib.h"' $(KREMLIB)/testlib.c
 
 FSTAR_LIB=$(FSTAR_HOME)/ulib

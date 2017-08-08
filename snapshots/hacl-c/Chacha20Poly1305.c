@@ -30,9 +30,11 @@ Chacha20Poly1305_aead_encrypt_poly(
 
 void Chacha20Poly1305_encode_length(uint8_t *lb, uint32_t aad_len, uint32_t mlen)
 {
-  store64_le(lb, (uint64_t )aad_len);
-  uint8_t *x0 = lb + (uint32_t )8;
-  store64_le(x0, (uint64_t )mlen);
+  uint8_t *x0 = lb;
+  store64_le(x0, (uint64_t )aad_len);
+  uint8_t *x00 = lb + (uint32_t )8;
+  store64_le(x00, (uint64_t )mlen);
+  return;
 }
 
 uint32_t

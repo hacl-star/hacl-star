@@ -24,5 +24,3 @@ let crypto_box_MACBYTES       = 16
 let crypto_secretbox_NONCEBYTES = 24
 let crypto_secretbox_KEYBYTES   = 32
 let crypto_secretbox_MACBYTES   = 16
-
-let crypto_hash_BYTES = 64

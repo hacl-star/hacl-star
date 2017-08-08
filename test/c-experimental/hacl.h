@@ -1,25 +1,4 @@
 #include "kremlib.h"
-#include "Curve25519.h"
-#include "Chacha20.h"
-#include "Salsa20.h"
-#define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_poly
-#include "Poly1305_64.h"
-#undef Hacl_Impl_Poly1305_64_State_poly1305_state
-#define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_aead
-#include "Chacha20Poly1305.h"
-#undef Hacl_Impl_Poly1305_64_State_poly1305_state
-
-#define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_ed
-#include "Ed25519.h"
-#undef K___uint32_t_uint8_t_
-#define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_sha256
-#include "SHA2_256.h"
-#undef K___uint32_t_uint8_t_
-#define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_sha512
-#include "SHA2_512.h"
-#undef K___uint32_t_uint8_t_
-#include "NaCl.h"
-
 
 /* API file for HACL* cryptographic primitives */
 
@@ -129,14 +108,6 @@ aead_chacha20_poly1305__decrypt(
 );
 
 /* 
-   Ed25519 Eddsa signature public key generation function
-   Takes:
-   - secret_key : private key
-   Stores:
-   - public_key: the public key associated with the private key */
-void ed25519_secret_to_public(uint8_t *public_key, uint8_t *secret_key);
-
-/* 
    Ed25519 Eddsa signature
    Takes:
    - secret: private key
@@ -167,3 +138,153 @@ bool ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t msg_len, uint8_t *si
   - hash: 64-bytes of the resulting hash
  */
 void sha2_512_hash(uint8_t *hash, uint8_t *input, uint32_t len);
+
+
+/* NaCl-like API */
+int crypto_box_keypair(unsigned char *pk, unsigned char *sk);
+
+int crypto_box_easy(unsigned char *c, const unsigned char *m,
+                    unsigned long long mlen, const unsigned char *n,
+                    const unsigned char *pk, const unsigned char *sk)
+            __attribute__ ((warn_unused_result));
+
+int crypto_box_open_easy(unsigned char *m, const unsigned char *c,
+                         unsigned long long clen, const unsigned char *n,
+                         const unsigned char *pk, const unsigned char *sk)
+            __attribute__ ((warn_unused_result));
+
+int crypto_box_beforenm(unsigned char *k, const unsigned char *pk,
+                        const unsigned char *sk)
+            __attribute__ ((warn_unused_result));
+
+int crypto_box_easy_afternm(unsigned char *c, const unsigned char *m,
+                            unsigned long long mlen, const unsigned char *n,
+                            const unsigned char *k);
+
+int crypto_box_open_easy_afternm(unsigned char *m, const unsigned char *c,
+                                 unsigned long long clen, const unsigned char *n,
+                                 const unsigned char *k)
+            __attribute__ ((warn_unused_result));
+
+int crypto_scalarmult_base(unsigned char *q, const unsigned char *n);
+
+int crypto_scalarmult(unsigned char *q, const unsigned char *n,
+                      const unsigned char *p)
+            __attribute__ ((warn_unused_result));
+
+uint32_t
+crypto_secretbox_detached(
+  uint8_t *c,
+  uint8_t *mac,
+  uint8_t *m,
+  uint64_t mlen,
+  uint8_t *n1,
+  uint8_t *k1
+);
+
+uint32_t
+crypto_secretbox_open_detached(
+  uint8_t *m,
+  uint8_t *c,
+  uint8_t *mac,
+  uint64_t clen,
+  uint8_t *n1,
+  uint8_t *k1
+);
+
+uint32_t
+crypto_secretbox_easy(uint8_t *c, uint8_t *m, uint64_t mlen, uint8_t *n1, uint8_t *k1);
+
+uint32_t
+crypto_secretbox_open_easy(
+  uint8_t *m,
+  uint8_t *c,
+  uint64_t clen,
+  uint8_t *n1,
+  uint8_t *k1
+);
+
+uint32_t NaCl_crypto_box_beforenm(uint8_t *k1, uint8_t *pk, uint8_t *sk);
+
+uint32_t
+crypto_box_detached_afternm(
+  uint8_t *c,
+  uint8_t *mac,
+  uint8_t *m,
+  uint64_t mlen,
+  uint8_t *n1,
+  uint8_t *k1
+);
+
+uint32_t
+crypto_box_detached(
+  uint8_t *c,
+  uint8_t *mac,
+  uint8_t *m,
+  uint64_t mlen,
+  uint8_t *n1,
+  uint8_t *pk,
+  uint8_t *sk
+);
+
+uint32_t
+NaCl_crypto_box_open_detached(
+  uint8_t *m,
+  uint8_t *c,
+  uint8_t *mac,
+  uint64_t mlen,
+  uint8_t *n1,
+  uint8_t *pk,
+  uint8_t *sk
+);
+
+uint32_t
+crypto_box_easy_afternm(uint8_t *c, uint8_t *m, uint64_t mlen, uint8_t *n1, uint8_t *k1);
+
+uint32_t
+crypto_box_easy(
+  uint8_t *c,
+  uint8_t *m,
+  uint64_t mlen,
+  uint8_t *n1,
+  uint8_t *pk,
+  uint8_t *sk
+);
+
+uint32_t
+crypto_box_open_easy(
+  uint8_t *m,
+  uint8_t *c,
+  uint64_t mlen,
+  uint8_t *n1,
+  uint8_t *pk,
+  uint8_t *sk
+);
+
+uint32_t
+crypto_box_open_detached_afternm(
+  uint8_t *m,
+  uint8_t *c,
+  uint8_t *mac,
+  uint64_t mlen,
+  uint8_t *n1,
+  uint8_t *k1
+);
+
+uint32_t
+crypto_box_open_easy_afternm(
+  uint8_t *m,
+  uint8_t *c,
+  uint64_t mlen,
+  uint8_t *n1,
+  uint8_t *k1
+);
+
+/* 
+   LibSodium specific AEAD curve25519xchacha20poly1305 construction
+ */
+crypto_box_curve25519xchacha20poly1305_beforenm
+crypto_box_curve25519xchacha20poly1305_easy
+crypto_box_curve25519xchacha20poly1305_easy_afternm
+crypto_box_curve25519xchacha20poly1305_open_easy
+crypto_box_curve25519xchacha20poly1305_open_easy_afternm

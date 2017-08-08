@@ -55,14 +55,12 @@ private let uint8_p  = Buffer.buffer uint8_ht
 (* Definitions of aliases for functions *)
 inline_for_extraction let  u8_to_h8 = Cast.uint8_to_sint8
 inline_for_extraction let  u32_to_h32 = Cast.uint32_to_sint32
-// inline_for_extraction // Inline for extraction issue
-  let  u32_to_u64 x = FStar.Int.Cast.uint32_to_uint64 x
+inline_for_extraction let  u32_to_u64 = FStar.Int.Cast.uint32_to_uint64
 inline_for_extraction let  u32_to_h64 = Cast.uint32_to_sint64
 inline_for_extraction let  h32_to_h8  = Cast.sint32_to_sint8
 inline_for_extraction let  h32_to_h64 = Cast.sint32_to_sint64
 inline_for_extraction let  u32_to_h128 = Cast.uint32_to_sint128
-// inline_for_extraction // Inline for extraction issue
-  let  u64_to_u32 x = FStar.Int.Cast.uint64_to_uint32 x
+inline_for_extraction let  u64_to_u32 = FStar.Int.Cast.uint64_to_uint32
 inline_for_extraction let  u64_to_h64 = Cast.uint64_to_sint64
 inline_for_extraction let  u64_to_h128 = Cast.uint64_to_sint128
 inline_for_extraction let  h64_to_h128 = Cast.sint64_to_sint128

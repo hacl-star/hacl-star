@@ -14,10 +14,9 @@ all: extract-specs extract-all-c ct
 	$(MAKE) -C .. verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
-#	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
-	$(MAKE) -B update-snapshot
-#	JP: fixme, doesn't work on build machine
-#	$(MAKE) -C snapshot-gcc
+	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
+	# JP: fixme, doesn't work on build machine
+	# $(MAKE) -C snapshot-gcc
 
 travis: extract-c-code ct
 	$(MAKE) -C .. world
@@ -76,8 +75,7 @@ SNAPSHOT_FILES= ./c/* \
 	../code/salsa-family/chacha-c/Chacha20.* \
 	../code/salsa-family/salsa-c/Salsa20.* \
 	$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
-	$(addprefix ../code/api/box-c/, NaCl.*) \
-	$(addprefix ../code/api/policies-c/,  Hacl_Policies.*) \
+	$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
 	$(addprefix ../code/ed25519/ed25519-c/, Ed25519.*) \
 	$(addprefix ../code/hash/sha2-c/, SHA2_256.*) \
 	$(addprefix ../code/hash/sha2-c/, SHA2_384.*) \
@@ -139,19 +137,19 @@ snapshot:
 	$(MAKE) build-snapshot
 
 snapshot-ccomp:
-	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
+	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
 	if $(HAS_CCOMP); then $(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
 
 snapshot-msvc:
-	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc"; fi
+	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc msvc"; fi
 	if $(HAS_CL); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-msvc; fi
 
 snapshot-gcc:
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPS+="-fparentheses"
+	$(MAKE) -B extract-c-code extract-c-code-experimental
 	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
 
 snapshot-gcc-unrolled:
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS+="-funroll-loops 5 -fparentheses"
+	$(MAKE) -B extract-c-code extract-c-code-experimental KREMLIN_ARGS="-funroll-loops 5"
 	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc-unrolled
 
 all-snapshots:
@@ -165,17 +163,9 @@ all-snapshots:
 	$(MAKE) -C ../code clean
 
 update-snapshot:
-	$(MAKE) snapshot-gcc
-	$(MAKE) -C ../code clean
-	$(MAKE) snapshot-gcc-unrolled
-	$(MAKE) -C ../code clean
-	$(MAKE) -C snapshot-gcc-unrolled clean
-	$(MAKE) -C snapshot-gcc clean
-	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/hacl-c
-	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) ../snapshots/hacl-c
-	$(MAKE) -C ../snapshots/hacl-c unit-tests
-	$(MAKE) -C ../snapshots/hacl-c clean
-
+	$(build-snapshot)
+	$(MAKE) -C snapshot clean
+	cp snapshot/*.c snapshot/*.h ../snapshots/hacl-c
 
 clean:
 	$(MAKE) -C ../code clean
