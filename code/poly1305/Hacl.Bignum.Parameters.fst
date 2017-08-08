@@ -73,8 +73,8 @@ inline_for_extraction val limb_logor: a:limb -> b:limb -> Tot (c:limb{v c = UInt
 inline_for_extraction val limb_lognot: a:limb -> Tot (b:limb{v b = UInt.lognot (v a)})
 
 (* Shift operators *)
-inline_for_extraction val limb_shift_right: a:limb -> s:FStar.UInt32.t -> Tot (c:limb{FStar.UInt32.v s < limb_n ==> v c = (v a / (pow2 (FStar.UInt32.v s)))})
-inline_for_extraction val limb_shift_left: a:limb -> s:FStar.UInt32.t -> Tot (c:limb{FStar.UInt32.v s < limb_n ==> v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 limb_n)})
+inline_for_extraction val limb_shift_right: a:limb -> s:FStar.UInt32.t{FStar.UInt32.v s < limb_n} -> Tot (c:limb{v c = (v a / (pow2 (FStar.UInt32.v s)))})
+inline_for_extraction val limb_shift_left: a:limb -> s:FStar.UInt32.t{FStar.UInt32.v s < limb_n} -> Tot (c:limb{v c = (v a * pow2 (FStar.UInt32.v s)) % pow2 limb_n})
 
 inline_for_extraction val limb_eq_mask: a:limb -> b:limb -> Tot (c:limb{(v a = v b ==> v c = pow2 limb_n - 1) /\ (v a <> v b ==> v c = 0)})
 inline_for_extraction val limb_gte_mask: a:limb -> b:limb -> Tot (c:limb{(v a >= v b ==> v c = pow2 limb_n - 1) /\ (v a < v b ==> v c = 0)})
