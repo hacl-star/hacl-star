@@ -1,5 +1,9 @@
 module Crypto.Symmetric.GF128.Spec
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Crypto.Symmetric.Bytes
 open FStar.Int.Cast
 open FStar.UInt128
@@ -22,7 +26,7 @@ let ith_bit_mask num i = if (nth (v num) i) then ones_128 else zero_128
 val shift_right: elem -> Tot elem
 let shift_right a = a >>^ 1ul
 
-private let r_mul = uint64_to_uint128(225uL) <<^ 120ul
+private let r_mul = FStar.UInt128.uint64_to_uint128(225uL) <<^ 120ul
 
 val mask_add: a:elem -> b:elem -> r:elem -> dep:nat{dep < 128} -> Tot (s:elem{
     nth (v b) dep = true ==> s = r +@ a /\
@@ -59,7 +63,7 @@ val add_comm: a:elem -> b:elem -> Lemma (a +@ b == b +@ a)
 let add_comm a b = logxor_commutative (v a) (v b)
 
 val zero: elem
-let zero = FStar.Int.Cast.uint64_to_uint128(0uL)
+let zero = FStar.Int.Cast.FStar.UInt128.uint64_to_uint128(0uL)
 
 noextract val encode: lbytes 16 -> Tot elem
 let encode b = uint_to_t (big_endian b)

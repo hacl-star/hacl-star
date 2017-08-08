@@ -1,9 +1,13 @@
 module Hacl.Hash.SHA2_256
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 
 open C.Loops
@@ -88,7 +92,7 @@ inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
 [@"substitute"]
-let rotate_right (a:uint32_ht) (b:uint32_t{v b <= 32}) : Tot uint32_ht =
+let rotate_right (a:uint32_ht) (b:uint32_t{0 < v b && v b < 32}) : Tot uint32_ht =
   H32.logor (H32.shift_right a b) (H32.shift_left a (U32.sub 32ul b))
 
 [@"substitute"]

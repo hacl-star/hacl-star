@@ -1,5 +1,9 @@
 module Crypto.AEAD.Encrypt.Invariant
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
@@ -93,6 +97,7 @@ let fresh_nonces_are_unused_except (#i:id) (#mac_rgn:region) (nonce:Cipher.iv (a
 				   (h:mem{safeMac i}) = 
    forall (nonce':Cipher.iv (alg i)). (fresh_nonce nonce' aead_entries /\ nonce' <> nonce) ==>
       unused_aead_iv_for_prf prf_table nonce' h
+
 
 (*
  * predicate on the final state after enxor

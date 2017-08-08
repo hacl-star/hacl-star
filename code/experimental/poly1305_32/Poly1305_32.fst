@@ -1,7 +1,11 @@
 module Poly1305_32
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Ghost
 open FStar.Seq
 open FStar.Buffer

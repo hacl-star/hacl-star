@@ -1,6 +1,4 @@
-HACL_HOME=..
-KREMLIN_HOME?=$(HACL_HOME)/kremlin
-FSTAR_HOME?=$(HACL_HOME)/kremlin
+include ../code/Makefile.include
 
 .PHONY: snapshot snapshot-gcc snapshot-ccomp snapshot-msvc snapshot-gcc-unrolled
 
@@ -11,17 +9,16 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
-all:
-	$(MAKE) extract-specs extract-all-c ct verify
+all: extract-specs extract-all-c ct
+	$(MAKE) -C ../code test
+	$(MAKE) -C .. verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
 	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
 	# JP: fixme, doesn't work on build machine
 	# $(MAKE) -C snapshot-gcc
 
-travis:
-	$(MAKE) extract-c-code
-	$(MAKE) ct
+travis: extract-c-code ct
 	$(MAKE) -C .. world
 
 extract-specs:
@@ -47,9 +44,9 @@ extract-c: extract-c-code extract-c-crypto # extract-c-apps
 
 # These cannot benefit from parallelism, tests C extraction for available compilers
 extract-all-c:
-	if $(HAS_CCOMP); then $(MAKE) extract-c KREMLIN_ARGS="-cc compcert"; fi
-	if $(HAS_CL); then $(MAKE) extract-c KREMLIN_ARGS="-cc msvc"; fi
-	$(MAKE) extract-c
+	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
+	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
+	$(MAKE) clean ; $(MAKE) extract-c
 
 compile-vale:
 	$(MAKE) -C ../secure_api/vale/asm/
@@ -64,35 +61,31 @@ verify-code:
 	$(MAKE) -C ../code ci
 
 verify-crypto:
-	# Note: the all-hints target fails silently.
-	$(MAKE) -C ../secure_api all-ver OTHERFLAGS="--record_hints"
+	$(MAKE) -C ../secure_api all-ver
 
-hints-code:
-	$(MAKE) -C ../code hints
+hints:
+	$(info The 'test' directory does not contain .fst files, so no hints to generate.)
 
-hints-crypto:
-	$(MAKE) -C ../secure_api all-hints
+verify: 
+	$(info The 'test' directory does not contain .fst files, so no verification to run.)
 
-hints: hints-code hints-crypto
+SNAPSHOT_FILES= ./c/* \
+	$(addprefix ../code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
+	../code/curve25519/x25519-c/Curve25519.* \
+	../code/salsa-family/chacha-c/Chacha20.* \
+	../code/salsa-family/salsa-c/Salsa20.* \
+	$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
+	$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
+	$(addprefix ../code/ed25519/ed25519-c/, Ed25519.*) \
+	$(addprefix ../code/hash/sha2-c/, SHA2_256.*) \
+	$(addprefix ../code/hash/sha2-c/, SHA2_384.*) \
+	$(addprefix ../code/hash/sha2-c/, SHA2_512.*) \
+	$(addprefix ../code/hmac/hmac-c/, HMAC_SHA2_256.*) \
+	$(addprefix ../code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
 
-verify: verify-code verify-crypto
-
-build-snapshot:
+build-snapshot: 
 	mkdir -p $(SNAPSHOT_DIR)
-	cp $(addprefix ../code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
-		../code/curve25519/x25519-c/Curve25519.* \
-		../code/salsa-family/chacha-c/Chacha20.* \
-		../code/salsa-family/salsa-c/Salsa20.* \
-		$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
-		$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
-		$(addprefix ../code/ed25519/ed25519-c/, Ed25519.*) \
-		$(addprefix ../code/hash/sha2-256-c/, SHA2_256.*) \
-		$(addprefix ../code/hash/sha2-384-c/, SHA2_384.*) \
-		$(addprefix ../code/hash/sha2-512-c/, SHA2_512.*) \
-		$(addprefix ../code/hmac/hmac-c/, HMAC_SHA2_256.*) \
-		$(addprefix ../code/salsa-family/chacha-vec128/, Chacha20_Vec128.* ../vec128.h) \
-		 $(SNAPSHOT_DIR)
-	cp ./c/* $(SNAPSHOT_DIR)/
+	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
 GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))

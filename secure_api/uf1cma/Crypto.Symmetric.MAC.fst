@@ -1,5 +1,5 @@
 (*--build-config
-options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../vale --include ../uf1cma --include ../utils --include ../../specs --include ../../../kremlin/kremlib --include ../../../FStar/ulib/hyperstack
+options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../vale --include ../uf1cma --include ../utils --include ../../specs --include ../../../kremlin/kremlib
 --*)
 (**
   This module multiplexes between different real implementations of polynomial
@@ -11,6 +11,10 @@ options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --m
   their ghost polynomial specification.
 *)
 module Crypto.Symmetric.MAC
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 
 open Crypto.Symmetric.Bytes
 open Crypto.Indexing
@@ -208,7 +212,7 @@ let rcreate rgn i =
     assert (~ (HS.is_mm (Buffer.content (as_buffer r))));
     r
   | GHASH ->
-    let b : Buffer.buffer UInt128.t = FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in
+    let b : Buffer.buffer UInt128.t = FStar.Buffer.rcreate rgn (FStar.UInt128.uint64_to_uint128 0UL) 1ul in
     let r : elemB i = b in
     assert (~ (HS.is_mm (Buffer.content (as_buffer r))));
     r
@@ -237,7 +241,7 @@ let create i =
       (* B_POLY1305 b *)
   | GHASH ->
       let b : Buffer.buffer UInt128.t =
-        FStar.Buffer.create (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in
+        FStar.Buffer.create (FStar.UInt128.uint64_to_uint128 0UL) 1ul in
       let h1 = ST.get() in
       GF.fzero_lemma (Seq.index (as_seq h1 b) 0);
       b

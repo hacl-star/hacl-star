@@ -1,8 +1,12 @@
 module Hacl.Impl.Poly1305_64
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 
 open FStar.Mul
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Ghost
 open FStar.Seq
 open FStar.HyperStack
@@ -190,6 +194,7 @@ let poly1305_init_ st key =
 
 #reset-options "--z3rlimit 100 --max_fuel 0"
 
+noextract
 private val hide_log:
   h0:HyperStack.mem ->
   m:uint8_p{length m <= 16} ->
@@ -533,6 +538,10 @@ val poly1305_finish_:
          let k    = as_seq h0 key_s in
          mac == poly1305_finish_spec (Spec.MkState r0 acc0 log) m len k)
     ))
+
+// Wintersteiger: admitting this query to unblock CI. It's likely solvable, but Z3 takes ages. 
+#reset-options "--max_fuel 0 --z3rlimit 1000"
+
 [@"substitute"]
 let poly1305_finish_ log st mac m len key_s =
   let acc = st.h in
@@ -542,8 +551,11 @@ let poly1305_finish_ log st mac m len key_s =
   cut (disjoint acc mac);
   let h2 = ST.get() in
   no_upd_lemma_1 h0 h2 acc key_s;
+  assert (equal h0 key_s h2 key_s);
   let k'  = hload128_le key_s in
-  cut (k' = Hacl.Spec.Poly1305_64.load128_le_spec (as_seq h0 key_s));
+  assert (FStar.UInt128.v k' == FStar.Endianness.little_endian (as_seq h0 key_s));
+  FStar.UInt128.v_inj k' (FStar.UInt128.uint_to_t (FStar.Endianness.little_endian (as_seq h0 key_s))); //NS: 07/14 ... need to invoke injectivity explicitly; which is rather heavy
+  assert (k' == Hacl.Spec.Poly1305_64.load128_le_spec (as_seq h0 key_s));
   let open Hacl.Bignum.Wide in
   let acc' = bignum_to_128 acc in
   let mac' = acc' +%^ k' in
@@ -551,6 +563,8 @@ let poly1305_finish_ log st mac m len key_s =
   let h1 = ST.get() in
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (poly1305_finish_spec (Spec.MkState (as_seq h0 st.r) (as_seq h0 st.h) (reveal log)) (as_seq h0 m) len (as_seq h0 key_s)))
 
+
+#reset-options "--max_fuel 0 --z3rlimit 1000"
 
 [@"substitute"]
 val poly1305_update_last:
@@ -604,7 +618,7 @@ let poly1305_finish st mac key_s =
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 acc) (as_seq h0 key_s)))
 
 
-let mk_state r h : Tot poly1305_state = MkState r h
+let mk_state r h = MkState r h
 
 val alloc:
   unit -> StackInline poly1305_state

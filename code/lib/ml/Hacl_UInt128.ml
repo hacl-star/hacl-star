@@ -24,7 +24,7 @@ let mul (a:uint128) (b:uint128) : uint128 = Stdint.Uint128.mul a b
 let mul_underspec a b = mul a b
 let mul_mod a b = mul a b
 let mul_wide (a:Hacl_UInt64.t) (b:Hacl_UInt64.t) = Stdint.Uint128.mul (Stdint.Uint128.of_string (Hacl_UInt64.to_string a))
-                                                                          (Stdint.Uint128.of_string (Hacl_UInt64.to_string b))
+                                                                      (Stdint.Uint128.of_string (Hacl_UInt64.to_string b))
                                                           
 let div (a:uint128) (b:uint128) : uint128 = Stdint.Uint128.div a b
 

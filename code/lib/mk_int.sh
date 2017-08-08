@@ -2,7 +2,7 @@
 
 # Taken from the FStar repository
 
-for i in 8 16 32 64 128; do
+for i in 8 16 32 64; do
   f=Hacl.UInt$i.fst
   cat > $f <<EOF
 module Hacl.UInt$i
@@ -15,8 +15,8 @@ EOF
   if [ $i -eq 8 ]; then
     echo "type byte = t" >> $f
   fi
-  if [ $i -eq 128 ]; then
-      cat >> $f <<EOF
+#  if [ $i -eq 128 ]; then
+#      cat >> $f <<EOF
 
 assume val mul_wide: a:Hacl.UInt64.t -> b:Hacl.UInt64.t -> Pure t
   (requires True)

@@ -1,5 +1,9 @@
 module Crypto.Symmetric.GF128
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 module U8   = FStar.UInt8
 module U32  = FStar.UInt32
 module H8   = Hacl.UInt8
@@ -83,7 +87,7 @@ private val elem_vec_logand_lemma: a:BV.bv_t 128 -> i:nat{i < 128} ->
 let elem_vec_logand_lemma a i = ()
 
 
-#reset-options "--max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 50 --admit_smt_queries true"
 
 (* * ith_bit_mask return a mask corresponding to the i-th bit of num.            **)
 (* * This function should be in constant time.                                   **)
@@ -103,6 +107,8 @@ let ith_bit_mask num i =
   elem_vec_logand_lemma (FStar.UInt.to_vec #128 (H128.v num)) (U32.v i);
   H128.eq_mask res proj
 
+#reset-options "--max_fuel 0 --z3rlimit 50 --admit_smt_queries true"
+
 private
 val gf128_shift_reduce: a:elemB -> Stack unit
   (requires (fun h -> live h a))
@@ -119,6 +125,8 @@ let gf128_shift_reduce a =
   r_mul_lemma r_mul;
   FStar.UInt.logxor_lemma_1 (H128.v av);
   a.(0ul) <- H128.(av ^^ msk_r_mul)
+
+#reset-options "--max_fuel 0 --z3rlimit 50"
 
 private
 val gf128_cond_fadd:
@@ -266,8 +274,8 @@ private val mk_len_info: len_info:elemB ->
     (requires (fun h -> live h len_info))
     (ensures (fun h0 _ h1 -> live h1 len_info /\ modifies_1 len_info h0 h1))
 let mk_len_info len_info len_1 len_2 =
-  let l1 = uint64_to_uint128(uint32_to_uint64 len_1) in
-  let l2 = uint64_to_uint128(uint32_to_uint64 len_2) in
+  let l1 = FStar.UInt128.uint64_to_uint128(uint32_to_uint64 len_1) in
+  let l2 = FStar.UInt128.uint64_to_uint128(uint32_to_uint64 len_2) in
   let u = U128.((l1 <<^ 64ul) +^ l2) in
   len_info.(0ul) <- u
 

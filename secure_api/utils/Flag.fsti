@@ -1,5 +1,9 @@
 module Flag
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Crypto.Indexing
 
 (* All the idealization flags that we use for the cryptographic argument *)

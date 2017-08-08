@@ -1,5 +1,9 @@
 module Crypto.Symmetric.AES128
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 // THIS FILE IS GENERATED FROM Crypto.Symmetric.AES.fst WITH nk=4ul nr=10ul
 // (in the hope to get more code specialization)
 

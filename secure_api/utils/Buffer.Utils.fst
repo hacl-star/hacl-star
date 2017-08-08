@@ -1,8 +1,13 @@
 module Buffer.Utils
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
+open FStar.HyperStack.ST
 open FStar.Int.Cast
 open FStar.UInt8
 open FStar.UInt32
@@ -12,6 +17,7 @@ open FStar.Math.Lemmas
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
+module ST = FStar.HyperStack.ST
 
 let u32 = FStar.UInt32.t
 let u8 = FStar.UInt8.t
@@ -19,10 +25,11 @@ let uint32s = buffer u32
 let bytes = buffer u8
 
 (** Rotate operators on UInt32.t *)
-let op_Greater_Greater_Greater (a:u32) (s:u32{v s <= 32}) =
+let op_Greater_Greater_Greater (a:u32) (s:u32{0 < v s && v s < 32}) =
   let (m:u32{v m = 32}) = 32ul in
   (op_Greater_Greater_Hat a s) |^ (a <<^ (m -^ s))
-let op_Less_Less_Less (a:u32) (s:u32{v s <= 32}) =
+
+let op_Less_Less_Less (a:u32) (s:u32{0 < v s && v s < 32}) =
   let (m:u32{v m = 32}) = 32ul in
   (op_Less_Less_Hat a s) |^ (op_Greater_Greater_Hat a (m -^ s))
 

@@ -1,5 +1,9 @@
 module Hacl.Impl.BignumQ.Mul
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.HyperStack
 open FStar.Buffer
 open Hacl.Cast
@@ -886,9 +890,10 @@ let barrett_reduction z t =
 (*        eval_q x < pow2 256 /\ eval_q y < pow2 256) /\ *)
 (*        eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) * eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
 
-#reset-options "--max_fuel 0 --z3rlimit 400"
+#reset-options "--max_fuel 0 --z3rlimit 40"
 
 let mul_modq out x y =
+  assert_norm(pow2 32 = 0x100000000);
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in
@@ -910,17 +915,20 @@ let mul_modq out x y =
   assert(as_seq h4 y == as_seq h0 y);
   mul_5 z x y;
   let h5 = ST.get() in
+  lemma_modifies_0_1' z h3 h4 h5;
   no_upd_lemma_1 h4 h5 z out;
   no_upd_lemma_1 h4 h5 z z';
   assert(modifies_0 h3 h5);
   Math.Lemmas.pow2_lt_compat 528 512;
   carry z' z;
   let h6 = ST.get() in
+  lemma_modifies_0_1 z' h3 h5 h6;
   no_upd_lemma_1 h5 h6 z' out;
   assert(modifies_2_1 z' h3 h6);
   pop_frame();
   let h7 = ST.get() in
   modifies_popped_1 z' h2 h3 h6 h7;
+  lemma_modifies_0_1' z' h1 h2 h7;
   assert(modifies_0 h1 h7);
   barrett_reduction_ out z';
   let h8 = ST.get() in

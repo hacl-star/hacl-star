@@ -1,5 +1,9 @@
 module Hacl.Impl.Ed25519.Sign.Steps
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 
 open FStar.Mul
 open FStar.Buffer
@@ -9,7 +13,10 @@ open Hacl.Impl.Ed25519.ExtPoint
 
 
 let hint8_p = buffer Hacl.UInt8.t
-let op_String_Access h b = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
+
+let op_String_Access (h:HyperStack.mem) (b:hint8_p{live h b}) =
+  Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
+
 
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
@@ -249,19 +256,17 @@ let sign_step_2 msg len tmp_bytes tmp_ints =
   assert_norm(pow2 56 = 0x100000000000000);
   assert_norm(Spec.Ed25519.q = 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
   assert_norm(pow2 256 = 0x10000000000000000000000000000000000000000000000000000000000000000);
-  let tmp_bytes' = tmp_bytes in
-  let r    = Buffer.sub tmp_ints 20ul 5ul  in
-  let a''  = Buffer.sub tmp_bytes 96ul  32ul in
-  let rb   = Buffer.sub tmp_bytes 128ul 32ul in
-  let apre = Buffer.sub tmp_bytes 224ul 64ul in
+  let r      = Buffer.sub tmp_ints 20ul 5ul  in
+  let a''    = Buffer.sub tmp_bytes 96ul  32ul in
+  let apre   = Buffer.sub tmp_bytes 224ul 64ul in
   let a      = Buffer.sub apre 0ul 32ul in
-  let prefix = Buffer.sub apre 32ul 32ul in
+  let prefix = Buffer.sub apre 32ul 32ul in 
   let h0 = ST.get() in
   Hacl.Impl.SHA512.ModQ.sha512_modq_pre r prefix msg len;
   let h1 = ST.get() in
   no_upd_lemma_1 h0 h1 r a;
   no_upd_lemma_1 h0 h1 r a'';
-  ()
+  no_upd_lemma_1 h0 h1 r tmp_bytes
 
 
 #reset-options "--max_fuel 0 --z3rlimit 50"

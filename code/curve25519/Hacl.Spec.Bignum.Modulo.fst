@@ -1,5 +1,9 @@
 module Hacl.Spec.Bignum.Modulo
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
@@ -130,6 +134,8 @@ let lemma_carry_top_spec_ s =
   UInt.logand_mask (v (Seq.index s 4)) limb_size;
   assert(v (Seq.index s' 4) = v (Seq.index s 4) % pow2 limb_size)
 
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 private let lemma_carry_top_spec_1 (a:nat) (b:nat) : Lemma
   ((pow2 204 * a + b) % prime = (19 * (a / pow2 limb_size) + pow2 204 * (a % pow2 limb_size) + b) % prime)

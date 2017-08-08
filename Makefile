@@ -16,28 +16,40 @@ prepare:
 	@echo $(CYAN)"\n# Installing submodules for F* and KreMLin"$(NORMAL)
 	git submodule update --init
 	@echo $(CYAN)"\n# Compiling F*"$(NORMAL)
-	make -C dependencies/FStar/src/ocaml-output
+	$(MAKE) -C dependencies/FStar/src/ocaml-output
+	$(MAKE) -C dependencies/FStar/ulib/ml
 	@echo $(CYAN)"\n# Compiling KreMLin"$(NORMAL)
-	make -C dependencies/kremlin
+	$(MAKE) -C dependencies/kremlin
 	@echo $(CYAN)"\nDone ! Run 'make' to compile the library."$(NORMAL)
 
 build:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
 	mkdir -p build && cd build; \
-	cmake $(CMAKE_COMPILER_OPTION) .. && make
+	c$(MAKE) $(CMAKE_COMPILER_OPTION) .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
 
 experimental:
 	@echo $(CYAN)"# Compiling the HaCl* library (with experimental features)"$(NORMAL)
 	mkdir -p build-experimental && cd build-experimental; \
-	cmake $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
+	c$(MAKE) $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build-experimental'."$(NORMAL)
 
 ci:
 	$(MAKE) -C test
 
 hints:
-	$(MAKE) -C test hints
+	$(MAKE) -C code hints
+	$(MAKE) -C secure_api hints
+	$(MAKE) -C specs hints
+	$(MAKE) -C test hints 
+
+refresh-hints:
+	$(MAKE) -B hints
+
+%.verify-dir: %
+	$(MAKE) -C $^ verify
+
+verify: code.verify-dir secure_api.verify-dir specs.verify-dir test.verify-dir
 
 clean:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)

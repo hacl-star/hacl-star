@@ -1,31 +1,37 @@
 include ../Makefile.include
 
-FSTAR=$(FSTAR_BASE)
+HACL_API=$(HACL_HOME)/crypto
+HACL_CRYPTO_UTILS=$(HACL_API)/utils
+HACL_SYMMETRIC=$(HACL_API)/symmetric
+HACL_HASH=$(HACL_API)/hash
+HACL_EC=$(HACL_API)/ec
 
-OPTIONS_VER=
+KREMLIN_ARGS+=$(VERBOSE) \
+	-ccopt -Wno-error=pointer-sign \
+	-ccopt -Wno-error=incompatible-pointer-types \
+	-ccopt -Wno-error=format=
 
-ALL=Hacl.SBuffer.fst Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst
+KREMLIN_ARGS+=-fsopt "--use_hints" -skip-extraction -verify $(VERBOSE) -skip-compilation
 
-all: $(addsuffix -ver, $(ALL))
-
-%-ver: %
-	$(FSTAR) $^
+OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
+OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
 
 
-FILES=$(addprefix ml/,Hacl_UInt8.mli Hacl_UInt8.ml Hacl_UInt16.mli Hacl_UInt16.ml Hacl_UInt32.ml Hacl_UInt64.ml Hacl_UInt128.ml Hacl_Cast.ml Hacl_Utils.ml Hacl_SBuffer.ml)
+ALL=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst
 
+all: $(addsuffix -verify, $(ALL))
+
+ML=$(addprefix ml/, $(ALL:.fst=.ml))
 OBJS=$(FILES:.ml=.o)
 CMX=$(FILES:.ml=.cmx)
-OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g $(INCLUDES)
-OCAMLDEP=ocamlfind dep
-OCAMLMKLIB=ocamlfind mklib
+OCAMLOPT=$(OCAMLOPT) $(INCLUDES)
+
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
 
 %.o: %.ml
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) -c -I ml -I $(FSTAR_HOME)/ulib/ml -linkpkg $<
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) -c -I ml $<
 
-
-ml: $(CMX) $(OBJS)
+ml: $(ML) $(CMX) $(OBJS)
 
 clean:
 	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx)

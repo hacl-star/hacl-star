@@ -1,5 +1,9 @@
 module Crypto.Symmetric.PRF
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 (* This file models our idealization of symmetric ciphers used only in
    forward mode, including CHACHA20 and several variants of AES for
    for GCM or CCM, modellied as a PRF to build authenticated
@@ -80,7 +84,7 @@ let range (mac_rgn:region) (i:id) (x:domain i): Type0 =
   else if safeId i        then otp i
                           else lbytes (v (blocklen i))
 
-inline_for_extraction let iv_0 () = FStar.Int.Cast.uint64_to_uint128 0UL
+inline_for_extraction let iv_0 () = FStar.UInt128.uint64_to_uint128 0UL
 noextract let domain_sk0 (i:id) = x:domain i{x.ctr <^ ctr_0 i /\ x.iv == iv_0 () }
 noextract let domain_mac (i:id) = x:domain i{x.ctr == ctr_0 i} 
 noextract let domain_otp (i:id) = x:domain i{x.ctr >^ ctr_0 i /\ safeId i}
@@ -185,7 +189,7 @@ let gen rgn i =
   (*     in *)
   (*   pop_frame(); *)
   (*   State #i #rgn #mac_rgn keystate table *)
-  (*   // no need to demand prf i so far. *)
+  (*   / / no need to demand prf i so far. *)
   (*   end *)
   (* | _ ->  *)
     (* begin *)
@@ -300,7 +304,7 @@ val prf_mac:
       HS.modifies_ref t.rgn Set.empty h0 h1  /\              //but modifies nothing in them
       HS.modifies_ref t.mac_rgn Set.empty h0 h1 )))
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 let prf_mac i t k_0 x =
   let macId = (i,x.iv) in
   Buffer.recall t.key;
@@ -562,7 +566,7 @@ val prf_enxor:
   (requires (fun h0 ->
      Crypto.Plain.live h0 plain /\ 
      Buffer.live h0 cipher /\
-     (safeId i ==> find_otp #t.mac_rgn #i (HS.sel h0 t.table) x == None)))
+     (safeId i ==> find_otp #t.mac_rgn #i (HS.sel h0 (itable i t)) x == None)))
   (ensures (fun h0 _ h1 ->
      Crypto.Plain.live h1 plain /\ Buffer.live h1 cipher /\
      modifies_x_buffer_1 t x cipher h0 h1 /\

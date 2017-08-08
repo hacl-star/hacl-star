@@ -1,5 +1,9 @@
 module PaddedFileIO
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Seq
 open FStar.HyperHeap
 open FStar.HyperStack

@@ -1,4 +1,8 @@
 module Crypto.AEAD.Wrappers.CMA
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
@@ -61,7 +65,7 @@ let mac_modifies
     modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
     modifies_buf_1 (frameOf tbuf) tbuf h0 h1
 
-#reset-options "--z3rlimit 40 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 val weaken_mac_modifies: i:id -> 
   iv:Cipher.iv (Cipher.algi i) ->
   tbuf:lbuffer (v MAC.taglen) ->
@@ -309,7 +313,7 @@ let found_entry (#i:id) (n:Cipher.iv (Cipher.algi i)) (st:aead_state i Reader)
     (Buffer.live h cipher_tagged /\
      Buffer.live h aad /\
      safeId i) ==> 		
-    (let entries = HS.sel h st.log in 		
+    (let entries = HS.sel h (st_ilog st) in
      found_matching_entry n entries #aadlen
 	 (Buffer.as_seq h aad)
 	 (as_plain q)
@@ -486,14 +490,14 @@ val entry_exists_if_verify_ok : #i:id -> #n:Cipher.iv (alg i) -> (st:aead_state 
 		    accumulate_encoded aad #plainlen (Buffer.sub cipher_tagged 0ul plainlen) acc h /\
 		    verify_ok ak acc tag h true /\
 		    is_mac_for_iv st ak h))
-         (ensures (match find_aead_entry n (HS.sel h st.log) with
+         (ensures (match find_aead_entry n (HS.sel h (st_ilog st)) with
 		   | None -> False
 		   | Some (AEADEntry _ _ l p _) ->
 		     l == v plainlen /\
 		     found_entry n st aad cipher_tagged p h))
 #reset-options "--initial_ifuel 0 --max_ifuel 0 --initial_fuel 0 --max_fuel 0 --z3rlimit 400"
 let entry_exists_if_verify_ok #i #n st #aadlen aad #plainlen plain cipher_tagged_b ak acc tag_b h =
-    let aead_entries = HS.sel h st.log in
+    let aead_entries = HS.sel h (st_ilog st) in
     let prf_table = HS.sel h (PRF.itable i st.prf) in
     let x0 = {iv = n; ctr=ctr_0 i} in
     let cipher_tagged = Buffer.as_seq h cipher_tagged_b in
@@ -561,7 +565,7 @@ let get_verified_plain #i #n st #aadlen aad #plainlen plain cipher_tagged ak acc
     let h = get () in
     let tag = Buffer.sub cipher_tagged plainlen MAC.taglen in 
     entry_exists_if_verify_ok st aad plain cipher_tagged ak acc tag h;
-    let aead_entries = !st.log in 
+    let aead_entries = !(st_ilog st) in 
     let Some (AEADEntry _nonce _ad _l p _c) = find_aead_entry n aead_entries in
     let _ : unit = 
       let prf_table = HS.sel h (PRF.itable i st.prf) in

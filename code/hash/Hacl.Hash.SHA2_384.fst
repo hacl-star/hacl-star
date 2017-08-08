@@ -1,9 +1,13 @@
 module Hacl.Hash.SHA2_384
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 
 open C.Loops
@@ -97,7 +101,7 @@ inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
 [@"substitute"]
-let rotate_right64 (a:uint64_ht) (b:uint32_t{v b <= 64}) : Tot uint64_ht =
+let rotate_right64 (a:uint64_ht) (b:uint32_t{0 < v b && v b < 64}) : Tot uint64_ht =
   H64.logor (H64.shift_right a b) (H64.shift_left a (U32.sub 64ul b))
 
 [@"substitute"]
@@ -575,7 +579,7 @@ private val update_core:
                   let res = Spec.update seq_hash_0 seq_block in
                   seq_hash_1 == res)))
 
-#reset-options "--max_fuel 0  --z3rlimit 400"
+#reset-options "--max_fuel 0  --z3rlimit 500"
 
 [@"substitute"]
 let update_core hash_w data data_w ws_w k_w =
@@ -920,7 +924,7 @@ let set_pad_part2 buf2 encodedlen =
   Lemmas.lemma_eq_endianness h buf2 encodedlen
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 [@"substitute"]
 val pad:
@@ -1131,7 +1135,7 @@ val hash:
                   let seq_hash = reveal_sbytes (as_seq h1 hash) in
                   seq_hash == Spec.hash seq_input)))
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#reset-options "--max_fuel 0  --z3rlimit 200"
 
 let hash hash input len =
 

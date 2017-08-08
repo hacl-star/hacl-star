@@ -1,8 +1,12 @@
 module Hacl.Impl.HSalsa20
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 open Hacl.UInt32
 open Hacl.Cast
@@ -19,13 +23,6 @@ let h32     = Hacl.UInt32.t
 let u32     = FStar.UInt32.t
 let uint8_p = buffer Hacl.UInt8.t
 let state   = b:buffer h32{length b = 16}
-
-
-#reset-options "--initial_fuel 0 --max_fuel 0"
-
-private let rotate (a:h32) (s:u32{FStar.UInt32.v s <= 32}) : Tot h32 =
-  (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
-
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 

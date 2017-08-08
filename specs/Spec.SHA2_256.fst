@@ -1,5 +1,7 @@
 module Spec.SHA2_256
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
@@ -304,7 +306,7 @@ let lemma_hash_single_prepend_block block msg =
   Seq.lemma_eq_intro (msg_last') (msg_last);
   Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
 
-#set-options "--lax"
+
 
 //
 // Test 1

@@ -1,9 +1,4 @@
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=../..
-
-include $(FSTAR_HOME)/src/gmake/fstar.mk
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
+include ../../Makefile.include
 
 FSTAR_ARGS=$(OTHERFLAGS)
 

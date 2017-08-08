@@ -1,8 +1,12 @@
 module Hacl.Impl.Chacha20
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 open Hacl.Cast
 open Hacl.UInt32
@@ -25,7 +29,7 @@ let uint8_p = buffer H8.t
 type state = b:Buffer.buffer h32{length b = 16}
 
 private
-inline_for_extraction let ( <<< ) (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
+inline_for_extraction let ( <<< ) (a:h32) (s:u32{0 < U32.v s && U32.v s < 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 

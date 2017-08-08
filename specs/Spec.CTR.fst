@@ -1,5 +1,7 @@
 module Spec.CTR
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open Spec.Lib

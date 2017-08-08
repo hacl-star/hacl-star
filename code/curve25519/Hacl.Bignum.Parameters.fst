@@ -1,5 +1,9 @@
 module Hacl.Bignum.Parameters
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
@@ -70,8 +74,8 @@ inline_for_extraction val limb_logor: a:limb -> b:limb -> Tot (c:limb{v c = UInt
 inline_for_extraction val limb_lognot: a:limb -> Tot (b:limb{v b = UInt.lognot (v a)})
 
 (* Shift operators *)
-inline_for_extraction val limb_shift_right: a:limb -> s:FStar.UInt32.t -> Tot (c:limb{FStar.UInt32.v s < limb_n ==> v c = (v a / (pow2 (FStar.UInt32.v s)))})
-inline_for_extraction val limb_shift_left: a:limb -> s:FStar.UInt32.t -> Tot (c:limb{FStar.UInt32.v s < limb_n ==> v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 limb_n)})
+inline_for_extraction val limb_shift_right: a:limb -> s:FStar.UInt32.t{FStar.UInt32.v s < limb_n} -> Tot (c:limb{v c = (v a / (pow2 (FStar.UInt32.v s)))})
+inline_for_extraction val limb_shift_left: a:limb -> s:FStar.UInt32.t{FStar.UInt32.v s < limb_n} -> Tot (c:limb{v c = (v a * pow2 (FStar.UInt32.v s)) % pow2 limb_n})
 
 inline_for_extraction val limb_eq_mask: a:limb -> b:limb -> Tot (c:limb{(v a = v b ==> v c = pow2 limb_n - 1) /\ (v a <> v b ==> v c = 0)})
 inline_for_extraction val limb_gte_mask: a:limb -> b:limb -> Tot (c:limb{(v a >= v b ==> v c = pow2 limb_n - 1) /\ (v a < v b ==> v c = 0)})
@@ -120,11 +124,13 @@ inline_for_extraction let wide_n = 2 * word_size
 inline_for_extraction val w: wide -> GTot (FStar.UInt.uint_t wide_n)
 inline_for_extraction let w x = Hacl.UInt128.v x
 
+(* #set-options "--admit_smt_queries true" *)
+
 val lemma_wide_injectivity: a:wide -> b:wide -> Lemma
   (requires (True))
   (ensures (w a = w b ==> a == b))
   [SMTPat (w a); SMTPat (w b)]
-let lemma_wide_injectivity a b = ()
+let lemma_wide_injectivity a b = FStar.Classical.move_requires (FStar.UInt128.v_inj a) b
 
 inline_for_extraction val wide_zero: x:wide{w x = 0}
 inline_for_extraction val wide_one: x:wide{w x = 1}

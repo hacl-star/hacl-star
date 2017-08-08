@@ -1,5 +1,9 @@
 module Hacl.Impl.Ed25519.Verify.Steps
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.Buffer
 open FStar.UInt32

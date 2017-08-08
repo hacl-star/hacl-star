@@ -1,4 +1,8 @@
 module Flag
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 open Crypto.Indexing
 
 (* Settings *all* flags to false, for extracting real implementation *) 
