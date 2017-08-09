@@ -109,6 +109,18 @@ import-kremlin:
 %.fsti-verify: %.fsti
 	$(FSTAR) $<
 
+%.fst-in: %.fst
+	@echo --hint_info \
+	$(HINTS_ENABLED) \
+	$(OTHERFLAGS) \
+	$(FSTAR_INCLUDES)
+
+%.fsti-in: %.fsti
+	@echo --hint_info \
+	$(HINTS_ENABLED) \
+	$(OTHERFLAGS) \
+	$(FSTAR_INCLUDES)
+
 %.fst.hints: %.fst
 	$(FSTAR) --record_hints $<
 %.fsti.hints: %.fsti
