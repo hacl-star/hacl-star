@@ -130,12 +130,12 @@ let rec lemma_encode_bytes_injective t0 t1 =
   if l = 0 then Seq.lemma_eq_intro t0 t1
   else if l < 16 then
     begin
-    let w0 = pad_0 t0 (16 - l) in
-    let w1 = pad_0 t1 (16 - l) in
-    Seq.lemma_index_create 1 w0 0;
-    Seq.lemma_index_create 1 w1 0;
-    assert (Seq.head (encode_bytes t0) == Seq.head (encode_bytes t1));
-    assume (w0 == w1); //TODO NS 08/08: removing this results in a failed hint replay; the proof here is brittle
+    let w0 = pad_0 t0 (16 - l) in //w0 == t0 @ (Seq.create (16 - l) 0uy)
+    let w1 = pad_0 t1 (16 - l) in //w1 == t1 @ (Seq.create (16 - l) 0uy)
+    Seq.lemma_index_create 1 w0 0; // (index (encode_bytes t0) 0 == w0)
+    Seq.lemma_index_create 1 w1 0; // (index (encode_bytes t1) 0 == w1)
+    assert (Seq.index (encode_bytes t0) 0 == w0);
+    assert (Seq.index (encode_bytes t1) 0 == w1);
     lemma_pad_0_injective t0 t1 (16 - l)
     end
   else 
@@ -158,7 +158,7 @@ val pad_16: b:lbuffer 16 -> len:UInt32.t {0 < v len /\ v len <= 16} -> STL unit
     Buffer.live h1 b /\
     Buffer.modifies_1 b h0 h1 /\
     Seq.equal (Buffer.as_seq h1 b) (pad_0 (Buffer.as_seq h0 (Buffer.sub b 0ul len)) (16 - v len))))
-#reset-options "--max_ifuel 0 --z3rlimit 200"
+#reset-options "--max_ifuel 0 --z3rlimit 200 --detail_hint_replay"
 let pad_16 b len =
   let h0 = ST.get() in
   Buffer.Utils.memset (Buffer.sub b len (16ul -^ len)) 0uy (16ul -^ len);
