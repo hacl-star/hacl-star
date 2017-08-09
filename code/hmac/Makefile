@@ -6,6 +6,11 @@ HMAC_SHA2_FILES = Hacl.HMAC.SHA2_256.fst
 
 FSTAR_INCLUDES+=--include ../hash
 
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDES)
+
 ct: $(addsuffix -lax, $(HMAC_SHA2_FILES))
 hints: $(addsuffix .hints, $(HMAC_SHA2_FILES))
 verify: $(addsuffix -verify, $(HMAC_SHA2_FILES))

@@ -91,3 +91,7 @@ test-native-sha2_512.exe: sha2-c/SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o $(BASE_O
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf sha2-c sha2-*-c
+
+
+%.fst-in:
+	@echo $(FSTAR_INCLUDES)

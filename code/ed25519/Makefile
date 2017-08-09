@@ -99,6 +99,11 @@ ED25519_FILES=$(ED25519_SPECIFIC) $(BIGNUM)
 
 FSTAR_INCLUDES+=--include $(HACL_HOME)/code/bignum --include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/code/hash
 
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDES)
+
 ct: $(addsuffix -lax, $(ED25519_FILES))
 	$(FSTAR) --lax --verify_all Hacl.Impl.Ed25519.SecretToPublic.fst Hacl.Impl.Ed25519.Sign.fst 
 all-ct: ct
