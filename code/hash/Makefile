@@ -11,12 +11,17 @@ SHA2_FILES = \
 	Hacl.Hash.SHA2_256.Lemmas.fst \
 	Hacl.Hash.SHA2_256.fst
 
+SLOW=
+BROKEN=
+
 ct: $(addsuffix -lax, $(SHA2_FILES))
+# Excluding slow or broken files from the CI run
+ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SHA2_FILES)))
 verify: $(addsuffix -verify, $(SHA2_FILES))
 hints: $(addsuffix .hints, $(SHA2_FILES))
 all-ct: ct
 all-ver: verify
-all-ci: verify
+all-ci: ci
 all-hints: hints
 
 
