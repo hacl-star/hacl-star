@@ -1,4 +1,3 @@
-FSTAR_HOME=/Users/anonymous/everest/FStar
 include ../Makefile.include
 
 # Files for verification
