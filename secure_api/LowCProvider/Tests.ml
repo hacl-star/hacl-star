@@ -253,7 +253,7 @@ let run_test section test_vectors print_test_vector test_vector =
       let () = Printf.printf "Test %d OK\n\n" (!total) in
       passed := !passed + 1
     else (
-      Printf.printf "Test failed:\n";
+      Printf.printf "Test %d failed:\n" (!total);
       print_test_vector v
     )
   in
