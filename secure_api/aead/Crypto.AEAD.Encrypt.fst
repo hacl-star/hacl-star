@@ -141,7 +141,7 @@ val frame_aead_log :
   (ensures   (safeMac i ==> 	      
  	      HS.sel h_init (st_ilog st) == HS.sel h_mac (st_ilog st)))
 let frame_aead_log i st n #aadlen aad #plainlen plain cipher_tag k_0 ak acc
-		   h_init h_push h_prf h_enx h_acc h_mac h_ideal = admit() //TODO NS-08/08 taking too long. temporary
+		   h_init h_push h_prf h_enx h_acc h_mac h_ideal = ()
 
 val encrypt_write_effect : 
           i: id -> 
@@ -193,7 +193,6 @@ val encrypt_write_effect :
 let encrypt_write_effect i st n #aadlen aad #plainlen plain cipher_tag k_0 ak acc
 			 h_init h_push h_prf h_enx h_acc h_mac h_ideal =
   let open HS in			 
-  admit(); //TODO NS-08/08 taking too long. temporary
   let abuf = MAC.as_buffer (CMA.abuf acc) in
   let cipher : lbuffer (v plainlen) = Buffer.sub cipher_tag 0ul plainlen in
   let tag : lbuffer (v MAC.taglen) = Buffer.sub cipher_tag plainlen MAC.taglen in
