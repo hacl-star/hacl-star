@@ -430,10 +430,12 @@ private val modifies_0_acc_inv: #i:MAC.id -> st:CMA.state i -> acc:CMA.accBuffer
   -> h0:mem -> h1:mem -> Lemma
   (requires (CMA.acc_inv st acc h0 /\ Buffer.modifies_0 h0 h1))
   (ensures (CMA.acc_inv st acc h1))
+#reset-options "--using_facts_from Prims --using_facts_from FStar --using_facts_from Crypto.Symmetric"
 let modifies_0_acc_inv #i st acc h0 h1 =
   Buffer.lemma_reveal_modifies_0 h0 h1;
   CMA.frame_acc_inv #i st acc h0 h1
 
+#reset-options
 val accumulate:
   #i:MAC.id -> st:CMA.state i ->
   aadlen:aadlen_32 -> aad:lbuffer (v aadlen) ->
