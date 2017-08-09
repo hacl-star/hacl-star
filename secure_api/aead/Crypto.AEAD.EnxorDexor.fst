@@ -865,8 +865,7 @@ let find_fresh_iv_none (#i:id) (#r:rid)
                        (y:PRF.domain i)
   : Lemma (requires (fresh_nonce y.iv (HS.sel h (st_ilog st))))
           (ensures (PRF.find blocks y == None))
-  = assert (y.iv <> iv);
-    let x_1 = {iv=iv; ctr=otp_offset i} in
+  = let x_1 = {iv=iv; ctr=otp_offset i} in
     find_other_iv_all_above blocks x_1 y
 
 val dexor:
