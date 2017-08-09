@@ -22,9 +22,18 @@ module TestAead = struct
     ciphertext: string;
   }
 
+  let aead_cipher_to_string = function
+    | CHACHA20_POLY1305 -> "ChaCha20-Poly1305"
+    | AES_128_GCM -> "AES-128-GCM"
+    | AES_256_GCM -> "AES-256-GCM"
+    | AES_128_CCM -> "AES-128-CCM"
+    | AES_256_CCM -> "AES-256-CCM"
+    | AES_128_CCM_8 -> "AES-128-CCM-8"
+    | AES_256_CCM_8 -> "AES-256-CCM-8"
+
   let print_test_vector v =
-    Printf.printf "key:\t\t%S\niv:\t\t%S\naad:\t\t%S\ntag:\t\t%S\nplaintext:\t%S\nciphertext:\t%S\n"
-      v.key v.iv v.aad v.tag v.plaintext v.ciphertext
+    Printf.printf "cipher:\t\t%s\nkey:\t\t%S\niv:\t\t%S\naad:\t\t%S\ntag:\t\t%S\nplaintext:\t%S\nciphertext:\t%S\n\n"
+      (aead_cipher_to_string v.cipher) v.key v.iv v.aad v.tag v.plaintext v.ciphertext
 
   let test v i =
     let key = Bytes.bytes_of_hex v.key in
@@ -241,7 +250,7 @@ let run_test section test_vectors print_test_vector test_vector =
   let doit v =
     total := !total + 1;
     if test_vector v LowCProvider.ValeAES && test_vector v LowCProvider.HaclAES then
-      let () = Printf.printf "Test %d OK\n" (!total) in
+      let () = Printf.printf "Test %d OK\n\n" (!total) in
       passed := !passed + 1
     else (
       Printf.printf "Test failed:\n";
