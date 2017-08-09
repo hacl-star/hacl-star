@@ -946,12 +946,16 @@ val update_last:
                   let prevlen = U32.(H32.v (Seq.index count 0) * (v size_block)) in
                   (reveal_h32s seq_hash_1) == Spec.update_last (reveal_h32s seq_hash_0) prevlen seq_data)))
 
-#reset-options "--max_fuel 0  --z3rlimit 200"
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 let update_last state data len =
 
+  (**) let hinit = ST.get() in
+  
   (* Push a new memory frame *)
   (**) push_frame();
+
+  (**) let h00 = ST.get() in
 
   (* Alocate memory set to zeros for the last two blocks of data *)
   let blocks = Buffer.create (uint8_to_sint8 0uy) (2ul *^ size_block) in
@@ -965,8 +969,10 @@ let update_last state data len =
     if U32.(len <^ 56ul) then (1ul, Buffer.offset blocks size_block)
     else (2ul, blocks)
   in
+  (**) assert(blocks `includes` final_blocks);
 
   (**) let h1 = ST.get () in
+
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 final_blocks))
                           (if U32.(len <^ 56ul) then
                               Seq.create (v size_block) 0uy
@@ -979,6 +985,7 @@ let update_last state data len =
   Buffer.blit data 0ul final_blocks 0ul len;
 
   (**) let h2 = ST.get () in
+  (**) modifies_subbuffer_1 h1 h2 final_blocks blocks;
   (**) Seq.lemma_eq_intro (as_seq h2 data) (Seq.slice (as_seq h2 data) 0 (v len));
   (**) Seq.lemma_eq_intro (as_seq h2 data) (Seq.slice (as_seq h2 final_blocks) 0 (v len));
   (**) assert(as_seq h2 data == Seq.slice (as_seq h2 final_blocks) 0 (v len));
@@ -998,6 +1005,8 @@ let update_last state data len =
 
   (* Proof that final_blocks = data @| padding *)
   (**) let h3 = ST.get () in
+  (**) modifies_subbuffer_1 h2 h3 padding blocks;
+  (**) lemma_modifies_1_trans blocks h1 h2 h3;
   (**) assert(disjoint padding data);
   (**) no_upd_lemma_1 h2 h3 padding data;
   (**) Seq.lemma_eq_intro (as_seq h3 (Buffer.sub final_blocks 0ul len)) (Seq.slice (as_seq h3 final_blocks) 0 (v len));
@@ -1021,8 +1030,14 @@ let update_last state data len =
 
   update_multi state final_blocks nb;
 
+  (**) let h4 = ST.get() in
+  (**) lemma_modifies_0_1' blocks h00 h1 h3;
+  (**) lemma_modifies_0_1 state h00 h3 h4;
+
   (* Pop the memory frame *)
-  (**) pop_frame()
+  (**) pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 state hinit h00 h4 hfin
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"

@@ -21,6 +21,11 @@ SLOW=
 
 BROKEN=
 
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDES)
+
 # For CI, all modules restricted from incomplete or slow ones
 ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SALSA_FAMILY_FILES)))
 ct: $(addsuffix -lax, $(SALSA_FAMILY_FILES)) 
