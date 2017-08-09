@@ -113,16 +113,15 @@ ed25519-c/out.krml: $(FSTS) Hacl.Test.Ed25519.fst ../hash/SHA2_512.fst ../hash/H
 ed25519-c/ed25519.c: $(FSTS)
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation $^ -o $@
 
-# KREMLIN_ARGS+=-ldopt -lsodium
-
-ed25519.exe: ed25519-c/out.krml 
-	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -no-prefix Hacl.Test.Ed25519 \
-		$^ -o $@
-	./$@
-
 extract-c: ed25519-c/ed25519.c
-# CMW: Test target disabled. Is Hacl_Impl_Sha512.c supposed to depend on libsodium?
-test: # ed25519.exe
+
+ed25519.exe: ed25519-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) $^ \
+	 	-no-prefix 'Hacl.Test.Ed25519' $(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
+		-add-include '"Ed25519.h"' -o ed25519.exe
+
+test: ed25519.exe
+	./$^
 
 count-line:
 	cloc --force-lang=ocaml $(ED25519_FILES)

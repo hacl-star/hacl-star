@@ -12,11 +12,12 @@ SNAPSHOT_DIR=snapshot
 all: extract-specs extract-all-c ct
 	$(MAKE) -C ../code test
 	$(MAKE) -C .. verify
-	$(MAKE) compile-vale
-	$(MAKE) -C openssl-engine
-	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
-	# JP: fixme, doesn't work on build machine
-	# $(MAKE) -C snapshot-gcc
+#	$(MAKE) compile-vale
+#	$(MAKE) -C openssl-engine
+#	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
+	$(MAKE) -B update-snapshot
+#	JP: fixme, doesn't work on build machine
+#	$(MAKE) -C snapshot-gcc
 
 travis: extract-c-code ct
 	$(MAKE) -C .. world
@@ -40,7 +41,8 @@ extract-c-apps:
 
 # JK: fixme, extract-c-apps to be added to the regression tests when
 # LibSodium is added to the build machine
-extract-c: extract-c-code extract-c-crypto # extract-c-apps
+# JK: 01/08/17 FIXME, removed secure_api extraction
+extract-c: extract-c-code # extract-c-crypto extract-c-apps
 
 # These cannot benefit from parallelism, tests C extraction for available compilers
 extract-all-c:
@@ -163,9 +165,31 @@ all-snapshots:
 	$(MAKE) -C ../code clean
 
 update-snapshot:
-	$(build-snapshot)
-	$(MAKE) -C snapshot clean
-	cp snapshot/*.c snapshot/*.h ../snapshots/hacl-c
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
+	$(MAKE) -C snapshot-gcc-unrolled clean
+	$(MAKE) -C snapshot-gcc clean
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/hacl-c
+	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) ../snapshots/hacl-c
+	$(MAKE) -C ../snapshots/hacl-c unit-tests
+	$(MAKE) -C ../snapshots/hacl-c clean
+
+nss-snapshot:
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
+	$(MAKE) -C snapshot-gcc-unrolled clean
+	$(MAKE) -C snapshot-gcc clean
+	mkdir -p ../snapshots/nss
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/nss
+	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) ../snapshots/nss
+	cp $(addprefix c-experimental/, kremlib.h FStar.h Makefile)  ../snapshots/nss
+	$(MAKE) -C ../snapshots/nss unit-tests
+	$(MAKE) -C ../snapshots/nss unit-tests-32
+	$(MAKE) -C ../snapshots/nss clean
 
 clean:
 	$(MAKE) -C ../code clean
