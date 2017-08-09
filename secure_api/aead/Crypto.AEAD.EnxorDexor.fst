@@ -865,8 +865,7 @@ let find_fresh_iv_none (#i:id) (#r:rid)
                        (y:PRF.domain i)
   : Lemma (requires (fresh_nonce y.iv (HS.sel h (st_ilog st))))
           (ensures (PRF.find blocks y == None))
-  = assert (y.iv <> iv);
-    let x_1 = {iv=iv; ctr=otp_offset i} in
+  = let x_1 = {iv=iv; ctr=otp_offset i} in
     find_other_iv_all_above blocks x_1 y
 
 val dexor:
@@ -897,7 +896,7 @@ val dexor:
             dexor_modifies st.prf x_1 plain h0 h1 /\
             inv st h1 /\
             decrypt_ok iv st aad plain cipher_tagged h1))
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --using_facts_from FStar --using_facts_from Prims --using_facts_from Crypto.AEAD.Invariant --using_facts_from Crypto.Plain --using_facts_from Crypto.Symmetric --using_facts_from Crypto.AEAD.EnxorDexor --using_facts_from Crypto.AEAD.Encoding --using_facts_from Flag --using_facts_from Crypto.Indexing"
 open Crypto.AEAD.Encoding
 let dexor #i st iv #aadlen aad #len plain cipher_tagged p =
   let x_1 = {iv=iv; ctr=otp_offset i} in
