@@ -39,7 +39,7 @@ LowCProvider-tmp: vale/asm/vale.a
 		-skip-linking
 
 QuicProvider-tmp: vale/asm/vale.a
-	$(KRML) LowCProvider/Crypto.Indexing.fst \
+	$(KRML) QuicProvider/Crypto.Indexing.fst \
 		test/Flag.fst utils/Hacl.Spec.fst \
 		aead/Crypto.AEAD.fst hkdf/Crypto.HKDF.fst \
 		-tmpdir QuicProvider/tmp \
