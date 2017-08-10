@@ -40,7 +40,7 @@ let index_module_lemma im i =
   | HONEST ->
     lemma_honest_not_others im i
 
-val get_plain: pm:plain_module -> Type0
+val get_plain: pm:plain_module -> (t:Type0{t == pm.plain})
 let get_plain pm =
   pm.plain
 

@@ -39,9 +39,21 @@ abstract noeq type index_module =
   | IM:
     rgn: (id_log_region) ->
     subId: (t:Type0{hasEq t}) -> // express that there is a total order on ids
-    compose_ids: (subId -> subId -> (subId*subId)) ->
+    smaller: ((i1:subId) -> (i2:subId) -> (b:bool)) ->
+    total_order_lemma: (i1:subId -> i2:subId -> Lemma
+      (requires smaller i1 i2)
+      (ensures forall i. i <> i1 /\ i <> i2 /\ smaller i i1 ==> smaller i i2)
+      [SMTPat (smaller i1 i2)]) ->
+    compose_ids: (i1:subId -> i2:subId -> i:(subId*subId){smaller (fst i) (snd i) /\ (i = (i1,i2) \/ i = (i2,i1))}) ->
+    symmetric_id_generation: (i1:subId -> i2:subId -> Lemma
+    (requires (i1<>i2))
+    (ensures (forall id1 id2. compose_ids id1 id2 = compose_ids id2 id1))
+    [SMTPat (compose_ids i1 i2)]) ->
     id_log: (id_log_t rgn subId) ->
     index_module
+
+let create rgn subId smaller total_order_lemma compose_ids symmetric_id_generation id_log =
+  IM rgn subId smaller total_order_lemma compose_ids symmetric_id_generation id_log
 
 val get_rgn: im:index_module -> GTot id_log_region
 let get_rgn im =
@@ -50,6 +62,23 @@ let get_rgn im =
 val get_log: im:index_module -> GTot (id_log_t im.rgn im.subId)
 let get_log im =
   im.id_log
+
+val get_subId: im:index_module -> Type0
+let get_subId im =
+  im.subId
+
+val compose_ids: im:index_module -> i1:im.subId -> i2:im.subId -> (i:im.subId*im.subId)
+let compose_ids im i1 i2 =
+  im.compose_ids i1 i2
+
+
+val symmetric_id_generation: im:index_module -> i1:im.subId -> i2:im.subId -> Lemma
+  (requires (i1<>i2))
+  (ensures (forall id1 id2. im.compose_ids id1 id2 = im.compose_ids id2 id1))
+  [SMTPat (compose_ids im i1 i2)]
+let symmetric_id_generation im i1 i2 =
+  im.symmetric_id_generation i1 i2
+
 
 val recall_log: im:index_module -> ST unit
   (requires (fun h0 -> True))
@@ -60,18 +89,11 @@ val recall_log: im:index_module -> ST unit
 let recall_log im =
   MR.m_recall im.id_log
 
-type id (im:index_module) = i:(im.subId*im.subId){fst i <> snd i} // add refinement once total order on subids is established{fst i <= snd i}
+type id (im:index_module) = i:(im.subId*im.subId){im.smaller (fst i) (snd i)} // add refinement once total order on subids is established{fst i <= snd i}
 
 noeq type meta_id (im:index_module) =
   | ID of id im
   | SUBID of im.subId
-
-#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 1"
-assume val symmetric_id_generation (im:index_module): i1:im.subId -> i2:im.subId -> Lemma
-  (requires (True))
-  (ensures (forall id1 id2. im.compose_ids id1 id2 = im.compose_ids id2 id1))
-  [SMTPat (im.compose_ids i1 i2)]
-//let symmetric_id_generation i1 i2 = ()
 
 private let measure_id (im:index_module) (i:meta_id im) =
   match i with
@@ -124,7 +146,7 @@ val lemma_single_id_honest: im:index_module -> i1:im.subId -> Lemma
   (requires (honest im (SUBID i1)))
   (ensures (
     (forall (i2:im.subId) .
-      (i1 <> i2 /\ honest im (SUBID i2)) ==> (let ID i = ID (i1,i2) in honest im (ID i)))
+      (honest im (SUBID i2)) ==> (let ID i = ID (im.compose_ids i1 i2) in honest im (ID i)))
   ))
   [SMTPat (honest im (SUBID i1))]
 let lemma_single_id_honest im i1 = ()
@@ -202,7 +224,7 @@ val fresh: im:index_module ->
            i:meta_id im ->
            h:mem ->
            (t:Type0{
-             t ==>
+             (t <==>
                ((ID? i ==>
                  (let ID (i1,i2) = i in
                  MM.fresh im.id_log i1 h
@@ -210,7 +232,8 @@ val fresh: im:index_module ->
                /\ (SUBID? i ==>
                   (let SUBID i' = i in
                   MM.fresh im.id_log i' h
-                  /\ ~(MM.contains im.id_log i' true h))))
+                  /\ ~(MM.contains im.id_log i' true h)))))
+            /\ (~t /\ SUBID? i ==> (let SUBID i' = i in MM.defined im.id_log i' h))
            })
 
 let fresh im i h =
@@ -220,6 +243,26 @@ let fresh im i h =
   | ID i' ->
     MM.fresh im.id_log (fst i') h
     /\ MM.fresh im.id_log (snd i') h
+
+
+val lemma_fresh: im:index_module -> i:id im -> h:mem -> Lemma
+  (requires fresh im (ID i) h)
+  (ensures
+    (let i1,i2 = i in
+    fresh im (SUBID i2) h
+    /\ fresh im (SUBID i1) h))
+  [SMTPat (fresh im (ID i) h)]
+let lemma_fresh im i h =
+  ()
+
+val lemma_fresh2: im:index_module -> i:id im -> h:mem -> Lemma
+    (requires (let i1,i2 = i in
+    fresh im (SUBID i2) h
+    /\ fresh im (SUBID i1) h))
+    (ensures fresh im (ID i) h)
+    [SMTPat (fresh im (ID i) h)]
+let lemma_fresh2 im i h =
+  ()
 
 #set-options "--z3rlimit 500 --max_ifuel 2 --max_fuel 3"
 val is_registered: im:index_module -> i:meta_id im -> ST bool

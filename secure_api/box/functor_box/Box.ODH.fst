@@ -4,8 +4,8 @@
 module Box.ODH
 open FStar.Set
 open FStar.HyperHeap
-open FStar.HyperHeap.ST
 open FStar.HyperStack
+open FStar.HyperStack.ST
 open FStar.Monotonic.RRef
 open FStar.Seq
 open FStar.Monotonic.Seq
@@ -15,6 +15,8 @@ open Crypto.Symmetric.Bytes
 
 open Box.Flags
 open Box.Key
+open Box.Indexing
+open Box.Plain
 
 module MR = FStar.Monotonic.RRef
 module MM = MonotoneMap
@@ -22,7 +24,9 @@ module HS = FStar.HyperStack
 module HH = FStar.HyperHeap
 module HSalsa = Spec.HSalsa20
 module Curve = Spec.Curve25519
-
+module Plain = Box.Plain
+module Key = Box.Key
+module ID = Box.Indexing
 
 let dh_element_size = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
 let dh_exponent_size = 32 // Size of scalar in Curve25519. Replace with constant in spec?
@@ -43,6 +47,15 @@ private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
 val share_from_exponent: dh_exponent -> Tot dh_share
 let share_from_exponent dh_exp = Curve.scalarmult dh_exp (createL dh_basepoint)
 
+type dh_key_log_region (im:index_module) (km:key_module im) = (r:HH.rid{disjoint r (get_rgn im) /\ disjoint r (Key.get_rgn km)})
+
+type index_module = im:ID.index_module{get_subId im == dh_share}
+
+abstract noeq type odh_module (im:index_module) (km:key_module im) = // require subId type to be dh_share?
+  | ODH:
+    rgn:(r:HH.rid) ->
+    odh_module im km
+
 (**
   A DH public key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
     or dishonest).
@@ -58,21 +71,8 @@ noeq abstract type pkey =
 noeq abstract type skey =
   | SKEY: sk_exp:dh_exponent -> pk:pkey{pk.pk_share = share_from_exponent sk_exp} -> skey
 
-// ToDo: Implement these properly
-val honest: sh:dh_share -> Type0
-let honest sh =
-  True
-
-val dishonest: sh:dh_share -> Type0
-let dishonest sh =
-  True
-
-val honestST: sh:dh_share -> ST bool
-  (requires (fun h0 -> True))
-  (ensures (fun h0 b h1 -> True))  // b <==> honest pk /\ b <==> ~(dishonest pk)
-let honestST sh =
-  true
-
+let compatible_keys sk pk =
+  sk.pk.pk_share <> pk.pk_share
 
 (**
   A helper function to obtain the raw bytes of a DH public key.
@@ -91,8 +91,9 @@ let get_skey sk =
   sk.sk_exp
 
 
-val leak_skey: sk:skey{dishonest sk.pk.pk_share} -> Tot (raw:dh_exponent{raw=sk.sk_exp})
-let leak_skey sk =
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
+val leak_skey: im:index_module -> sk:skey{dishonest im (SUBID sk.pk.pk_share)} -> Tot (raw:dh_exponent{raw=sk.sk_exp})
+let leak_skey im sk =
   sk.sk_exp
 
 val get_skeyGT: sk:skey -> Tot (raw:dh_exponent{raw=sk.sk_exp})
@@ -100,9 +101,9 @@ let get_skeyGT sk =
   sk.sk_exp
 
 
-val keygen: unit -> HyperStack.ST.ST (dh_pair:(pkey * skey){fst dh_pair == (snd dh_pair).pk})
+val keygen: unit -> ST (dh_pair:(pkey * skey){fst dh_pair == (snd dh_pair).pk})
   (requires (fun h0 -> True))
-  (ensures (fun h0 _ h1 -> HS.modifies Set.empty h0 h1))
+  (ensures (fun h0 _ h1 -> modifies_none h0 h1))
 let keygen () =
   let dh_exponent = random_bytes (UInt32.uint_to_t 32) in
   let dh_pk = PKEY (share_from_exponent dh_exponent) in
@@ -110,68 +111,68 @@ let keygen () =
   dh_pk,dh_sk
 
 
-val coerce_pkey: dh_sh:dh_share{dishonest dh_sh} -> Tot (pk:pkey{pk.pk_share=dh_sh})
-let coerce_pkey dh_sh =
+val coerce_pkey: im:index_module -> dh_sh:dh_share{dishonest im (SUBID dh_sh)} -> Tot (pk:pkey{pk.pk_share=dh_sh})
+let coerce_pkey im dh_sh =
   PKEY dh_sh
 
 (**
    coerce_keypair allows the adversary to coerce a DH exponent into a DH private key. The corresponding DH public key
    is generated along with it. Both keys are considered dishonest and the id is considered unfresh after coercion.
 *)
-val coerce_keypair: dh_exp:dh_exponent{dishonest (share_from_exponent dh_exp)} -> Tot (dh_pair:(k:pkey{k.pk_share = share_from_exponent dh_exp}) * (k:skey{k.sk_exp=dh_exp}))
-let coerce_keypair dh_ex =
+val coerce_keypair: im:index_module -> dh_exp:dh_exponent{dishonest im (SUBID (share_from_exponent dh_exp))} -> Tot (dh_pair:(k:pkey{k.pk_share = share_from_exponent dh_exp}) * (k:skey{k.sk_exp=dh_exp}))
+let coerce_keypair im dh_ex =
   let dh_sh = share_from_exponent dh_ex in
   let pk = PKEY dh_sh in
   let sk = SKEY dh_ex pk in
   pk,sk
 
 
-type dh_key_log_key (km:key_module) = i:getIt km
-type dh_key_log_value (km:key_module) (i:getIt km) = (Key.key #(Key.getIt km) i)
-let dh_key_log_range (km:key_module)= fun (k:dh_key_log_key km) -> dh_key_log_value km k
-type dh_key_log_inv (km:key_module) (f:MM.map' (dh_key_log_key km) (dh_key_log_range km)) = True
-
-type dh_key_log_region= (r:HH.rid{ extends r root
-                       /\ is_eternal_region r
-                       /\ is_below r root
-                       })
-
-abstract noeq type odh_module (km:key_module) =
-  | ODH:
-    rgn:(r:dh_key_log_region{disjoint r (Key.get_region km)}) ->
-    composeKMId: (dh_share -> dh_share -> (getIt km)) -> // Ids should be independent of the order of pk1 pk2
-    dh_key_log: (MM.t rgn (dh_key_log_key km) (dh_key_log_range km) (dh_key_log_inv km)) ->
-    odh: (sk:skey -> pk:pkey -> ST (Key.key (composeKMId pk.pk_share sk.pk.pk_share))
-      (requires (fun h0 -> True))
-      (ensures (fun h0 k h1 -> True))) ->
-    odh_module km
-
-val compose_id: km:key_module -> odh_module km -> dh_share -> dh_share -> getIt km
-let compose_id km om sh1 sh2 =
-  om.composeKMId sh1 sh2
-
-
-//val honesty_invariant: (km:key_module) -> (om:odh_module km) -> (h:mem) -> Type0
-let honesty_invariant km om =
-  forall i1 i2 . ((honest i1 /\ honest i2) ==> Key.honest km (compose_id km om i1 i2))
-            /\ (dishonest i1 /\ honest i2 ==> Key.dishonest km (compose_id km om i1 i2))
+(**
+  GTot specification of the prf_odh function for use in type refinements.
+*)
+val prf_odhGT: im:index_module -> skey -> pkey -> GTot aes_key
+let prf_odhGT im sk pk =
+  let i = compose_ids im pk.pk_share sk.pk.pk_share in
+  let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
+  let k = HSalsa.hsalsa20 raw_k zero_nonce in
+  k
 
 
 #reset-options
-#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
-val prf_odh: km:key_module -> om:odh_module km -> sk:skey -> pk:pkey -> ST (Key.key #(getIt km) (compose_id km om pk.pk_share sk.pk.pk_share) )
-  (requires (fun h0 -> honesty_invariant km om))
-  (ensures (fun h0 k h1 -> honesty_invariant km om))
-let prf_odh km om sk pk =
-  let id = compose_id km om pk.pk_share sk.pk.pk_share in
-  let is_honestST = Key.honestST km id in
-  let is_dishonestST = Key.dishonestST km id in
-  if is_dishonestST then (
+#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
+val prf_odh: im:index_module -> pm:plain_module -> km:key_module im{pm==get_plain_module im km} -> om:odh_module im km  -> sk:skey -> pk:pkey{sk.pk.pk_share <> pk.pk_share} -> ST (k:Key.key_t2 im pm{Key.get_index im km k = (ID.compose_ids im pk.pk_share sk.pk.pk_share)} )
+  (requires (fun h0 ->
+    registered im (SUBID pk.pk_share)
+    /\ registered im (SUBID sk.pk.pk_share)
+  ))
+  (ensures (fun h0 k h1 ->
+    let i = ID.compose_ids im pk.pk_share sk.pk.pk_share in
+    (dishonest im (ID i) ==>
+                        (Key.leak im km k = prf_odhGT im sk pk
+                        /\ modifies (Set.singleton (Key.get_rgn km)) h0 h1))
+  ))
+let prf_odh im pm km om sk pk =
+  let i1 = pk.pk_share in
+  let i2 = sk.pk.pk_share in
+  let i = ID.compose_ids im i1 i2 in
+  //if is_fresh im (SUBID i1) then (
+  //   make_honest im (SUBID i1);
+  //   lemma_honest_not_others im (SUBID i1)
+  //);
+  //if is_fresh im (SUBID i2) then (
+  //   make_honest im (SUBID i2);
+  //   lemma_honest_not_others im (SUBID i2)
+  //);
+  let h0 = get() in
+  recall_log im;
+  lemma_honest_or_dishonest im (ID i);
+  let h = get_reg_honesty im (ID i) in
+  match h with
+  | HONEST ->
+    let k = Key.gen im km i in
+    k
+  | DISHONEST ->
     let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
-    let k=Key.coerce km id hashed_raw_k in
+    let k=Key.coerce im km i hashed_raw_k in
     k
-  ) else (
-    Key.make_honest km id;
-    Key.gen km id
-  )

@@ -7,8 +7,12 @@ module Box.Key
 
 open FStar.HyperHeap
 open FStar.HyperStack
-open FStar.HyperHeap.ST
+open FStar.HyperStack.ST
 open Crypto.Symmetric.Bytes
+
+open Box.Indexing
+open Box.Plain
+open Box.Flags
 
 module MR = FStar.Monotonic.RRef
 module HH = FStar.HyperHeap
@@ -22,121 +26,71 @@ assume val is_random: bytes -> Type0
 // Then we can use it in other places if we don't idealize.
 // What refinements to have on the leak function?
 
-type id = int
-type nonce = SPEC.nonce
-let noncesize = SPEC.noncelen
-let keysize = SPEC.keylen
+
+type log_region (im:index_module) =
+  r:MR.rid{disjoint r (get_rgn im)}
+
+
+type key_t (im:index_module) (pm:plain_module)= Type0
+
 type aes_key = SPEC.key
-type bytes = SPEC.bytes
 type cipher = b:bytes{Seq.length b >= 16 /\ (Seq.length b - 16) / Spec.Salsa20.blocklen < pow2 32}
+type nonce = SPEC.nonce
+noeq type key_t2 (im:index_module) =
+  | Key: i:id im -> raw:aes_key -> key_t2 im
 
-
-type ae_log_region =
-  r:MR.rid{ extends r root
-            /\ is_eternal_region r
-            /\ is_below r root
-            }
-
-#set-options "--z3rlimit 500 --max_ifuel 2 --max_fuel 0"
-type protected_ae_plain (i:id) = bytes
-type pairtype (i:id)= (cipher*protected_ae_plain i)
-type key_log_key = (nonce*(i:id))
-type key_log_value (i:id) = (cipher*protected_ae_plain i)
-type key_log_range (k:ae_log_key) = ae_log_value (snd k)
-type key_log_inv (f:MM.map' ae_log_key ae_log_range) = True
-
-type key_log (rgn:ae_log_region) =
-  MM.t rgn ae_log_key ae_log_range ae_log_inv
-
-noeq abstract type key (#it:Type0) (id:it) =
-  | Key: rgn:ae_log_region -> log:(ae_log rgn) -> raw:bytes -> key #it id
-
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 abstract noeq type key_module (im:index_module) =
   | KM:
-    key:Type0 ->
-    rgn:ae_log_region ->
-    fresh: (id:it -> Type0) ->
-    honest: (id:it -> Type0) ->
-    honestST: (id:it -> ST bool
-      (requires (fun h0 -> True))
-      (ensures (fun h0 b h1 -> b <==> honest id))) ->
-    dishonest: (id:it -> Type0) ->
-    dishonestST: (id:it -> ST bool
-      (requires (fun h0 -> True))
-      (ensures (fun h0 b h1 -> b <==> dishonest id))) ->
-    make_honest: (id:it -> ST unit
-      (requires (fun h0 -> ~(dishonest id)))
-      (ensures (fun h0 _ h1 -> honest id))) ->
-    make_dishonest: (id:it -> ST unit
-      (requires (fun h0 -> ~(honest id)))
-      (ensures (fun h0 _ h1 -> dishonest id))) ->
-    get_rawGT: (#id:it -> (k:key #it id) -> GTot (b:bytes{k.raw = b})) -> // Returns the raw bytes of the key. Needed for spec of gen/leak/coerce.
-    gen: (id:it -> ST (k:key id)
-      (requires fun h -> honest id)
-      (ensures fun h0 k h1 -> True)) ->
-    coerce: (id:it -> b:bytes -> ST (k:key id)
-      (requires fun h -> ~(honest id))
-      (ensures fun h0 k h1 -> True)) ->  // What requirments for coerce? Determinism?
-    leak: (#id:it -> k:key id -> ST (b:bytes)
-      (requires (fun h -> ~(honest id)))
-      (ensures (fun h0 k h1 -> True))) -> // What requirements here? Inverse of coerce?
-    key_module
+    get_index: (k:key_t2 im -> i:id im{k.i = i}) ->
+    get_rawGT: (#i:id im -> (k:key_t2 im) -> GTot (b:bytes{b=k.raw})) -> // Returns the raw bytes of the key. Needed for spec of gen/leak/coerce.
+    gen: (i:id im -> ST (k:key_t2 im{k.i = i}) // The spec should indicate that the result is random
+      (requires (fun h0 ->
+        fresh im (ID i) h0 \/ honest im (ID i)
+      ))
+      (ensures  (fun h0 k h1 ->
+        h0 == h1
+      ))) ->
+    coerce: (i:id im -> b:bytes -> ST (k:key_t2 im{k.i = i /\ b=k.raw})
+      (requires (fun h0 ->
+        dishonest im (ID i) \/ fresh im (ID i) h0
+      ))
+      (ensures  (fun h0 k h1 ->
+        h0 == h1
+      ))) ->
+    leak: (k:key_t2 im{(dishonest im (ID (get_index k))) \/ ~(b2t ae_ind_cca)} -> (b:bytes{b = k.raw})) ->
+    key_module im
 
-val get_region: km:key_module -> ae_log_region
-let get_region km =
-  km.rgn
+let create (im:index_module) (get_index:(k:key_t2 im -> i:id im{k.i = i})) get_rawGT gen coerce leak =
+  KM get_index get_rawGT gen coerce leak
 
-val getIt: km:key_module -> Type0
-let getIt km =
-  km.it
+val get_index: im:index_module -> km:key_module im -> k:key_t2 im -> i:id im{k.i = i}
+let get_index im km k =
+  km.get_index k
 
-val honest: km:key_module -> id:km.it -> Type0
-let honest km id =
-  km.honest id
+val gen: (im:index_module) -> (km:key_module im) -> (i:id im) -> ST (k:key_t2 im{k.i = i})
+  (requires (fun h0 ->
+    fresh im (ID i) h0 \/ honest im (ID i)
+  ))
+  (ensures  (fun h0 k h1 ->
+    h0 == h1
+    //let modified_regions_fresh_key = (Set.union (Set.singleton am.message_log_region) (Set.singleton am.key_log_region)) in
+    //(MM.fresh am.key_log i h0 ==> modifies modified_regions_fresh_key h0 h1)
+    ///\ (MM.defined am.key_log i h0 ==> h0 == h1)
+  ))
+let gen im km i =
+  km.gen i
 
-val honestST: km:key_module -> id:km.it -> ST bool
-  (requires (fun h0 -> True))
-  (ensures (fun h0 b h1 -> b <==> honest km id))
-let honestST km id =
-  km.honestST id
+val coerce: (im:index_module) -> (km:key_module im) -> (i:id im) -> (b:bytes) -> ST (k:key_t2 im{k.i = i /\ b = k.raw})
+  (requires (fun h0 ->
+    dishonest im (ID i) \/ fresh im (ID i) h0
+  ))
+  (ensures (fun h0 k h1 ->
+    h0 == h1
+  ))
+let coerce im km i b =
+  km.coerce i b
 
-
-val dishonest: km:key_module -> id:km.it -> Type0
-let dishonest km id =
-  km.dishonest id
-
-val dishonestST: km:key_module -> id:km.it -> ST bool
-  (requires (fun h0 -> True))
-  (ensures (fun h0 b h1 -> b <==> dishonest km id))
-let dishonestST km id =
-  km.dishonestST id
-
-val make_honest: km:key_module -> id:km.it -> ST unit
-  (requires (fun h0 -> ~(dishonest km id)))
-  (ensures (fun h0 b h1 -> honest km id))
-let make_honest km id =
-  km.make_honest id
-
-val make_dishonest: km:key_module -> id:km.it -> ST unit
-  (requires (fun h0 -> ~(honest km id)))
-  (ensures (fun h0 b h1 -> dishonest km id))
-let make_dishonest km id =
-  km.make_dishonest id
-
-val gen: (km:key_module) -> (id:km.it) -> ST (k:key #km.it id)
-  (requires (fun h0 -> km.fresh id))
-  (ensures (fun h0 k h1 -> True))
-let gen km id =
-  km.gen id
-
-val coerce: (km:key_module) -> (id:km.it) -> (b:bytes) -> ST (k:key #km.it id)
-  (requires (fun h0 -> ~(km.honest id)))
-  (ensures (fun h0 k h1 -> True))
-let coerce km id b =
-  km.coerce id b
-
-val leak: (km:key_module) -> (#id:km.it) -> (k:key id) -> ST (b:bytes)
-  (requires (fun h0 -> ~(km.honest id)))
-  (ensures (fun h0 k h1 -> True))
-let leak km #id k =
+val leak: im:index_module -> (km:key_module im) -> (k:key_t2 im{(dishonest im (ID k.i)) \/ ~(b2t ae_ind_cca)}) -> (b:bytes{b=k.raw})
+let leak im km k =
   km.leak k
