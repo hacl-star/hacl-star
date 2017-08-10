@@ -83,29 +83,57 @@ val recover_x_step_1:
 #reset-options "--max_fuel 0 --z3rlimit 200"
 [@ "substitute"]
 let recover_x_step_1 x2 y =
+  (**) let hinit = ST.get() in
   push_frame();
+  (**) let h = ST.get() in
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) 25ul in
+  (**) let h' = ST.get() in
   let one = Buffer.sub tmp 0ul 5ul in
   let y2  = Buffer.sub tmp 5ul 5ul in
   let dyyi = Buffer.sub tmp 10ul 5ul in
   let dyy = Buffer.sub tmp 15ul 5ul in
   let h0 = ST.get() in
   make_one one;
-  let h1 = ST.get() in
-  lemma_red_51_is_red_5413 (as_seq h1 y);
+  (**) let h1 = ST.get() in
+  (**) modifies_subbuffer_1 h0 h1 one tmp;
+  (**) lemma_red_51_is_red_5413 (as_seq h1 y);
   Hacl.Bignum25519.fsquare y2 y; // y2 = y `fmul` y
+  (**) let h1' = ST.get() in
+  (**) modifies_subbuffer_1 h1 h1' y2 tmp;
+  (**) lemma_modifies_1_trans tmp h0 h1 h1';
   Hacl.Bignum25519.times_d dyy y2; // dyy = d `fmul` (y `fmul` y)
+  (**) let h1'' = ST.get() in
+  (**) modifies_subbuffer_1 h1' h1'' dyy tmp;
+  (**) lemma_modifies_1_trans tmp h0 h1' h1'';
+  
   Hacl.Bignum25519.fsum dyy one;   // dyy = (d `fmul` (y `fmul` y)) `fadd` one
   let h4 = ST.get() in
-  lemma_red_53_is_red_5413 (as_seq h4 dyy);
+  (**) modifies_subbuffer_1 h1'' h4 dyy tmp;
+  (**) lemma_modifies_1_trans tmp h0 h1'' h4;
+  (**) lemma_red_53_is_red_5413 (as_seq h4 dyy);
   Hacl.Bignum25519.reduce_513 dyy;
+  (**) let h5 = ST.get() in
+  (**) modifies_subbuffer_1 h4 h5 dyy tmp;
+  (**) lemma_modifies_1_trans tmp h0 h4 h5;
   Hacl.Bignum25519.inverse dyyi dyy; // dyyi = modp_inv ((d `fmul` (y `fmul` y)) `fadd` one)
+  (**) let h6 = ST.get() in
+  (**) modifies_subbuffer_1 h5 h6 dyyi tmp;
+  (**) lemma_modifies_1_trans tmp h0 h5 h6;
   Hacl.Bignum25519.fdifference one y2; // one = (y `fmul` y) `fsub` 1
-  let h7 = ST.get() in
-  lemma_red_513_is_red_53 (as_seq h7 dyyi);
+  (**) let h7 = ST.get() in
+  (**) modifies_subbuffer_1 h6 h7 one tmp;
+  (**) lemma_modifies_1_trans tmp h0 h6 h7;
+  (**) lemma_modifies_0_1' tmp h h0 h7;
+  (**) lemma_red_513_is_red_53 (as_seq h7 dyyi);
   Hacl.Bignum25519.fmul x2 dyyi one; //
+  (**) let h8 = ST.get() in
   Hacl.Bignum25519.reduce x2;
-  pop_frame()
+  (**) let h9 = ST.get() in
+  (**) lemma_modifies_1_trans x2 h7 h8 h9;
+  (**) lemma_modifies_0_1 x2 h h7 h9;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 x2 hinit h h9 hfin
 
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
