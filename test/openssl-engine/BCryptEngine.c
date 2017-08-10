@@ -3,6 +3,7 @@
 #include <openssl/engine.h>
 #include <openssl/aes.h>
 #include <openssl/ec.h>
+#include <openssl/evp.h>
 #include <windows.h>
 #include <bcrypt.h>
 

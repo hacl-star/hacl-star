@@ -1,4 +1,11 @@
+*~
+tmp
+*.cm?
+*.annot
+*.a
 *.o
+*.cmxa
+*.dll
 *.exe
 *.exe.dSYM
 out.krml
@@ -6,16 +13,10 @@ out.krml
 build/
 build-experimental/
 
-lib/hst/ml/*.cmi
-lib/hst/ml/*.cmx
-lib/hst/ml/*.o
-
 test/hash/ml/*
-test/hash/*.exe
 test/hash/sha256
 
 test/hmac/ml/*
-test/hmac/*.exe
 test/hmac/hmac_sha256
 
 pneutube/tube-star.exe

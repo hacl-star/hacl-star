@@ -17,13 +17,12 @@ BROKEN=
 ct: $(addsuffix -lax, $(SHA2_FILES))
 # Excluding slow or broken files from the CI run
 ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SHA2_FILES)))
-verify: $(addsuffix -verify, $(SHA2_FILES))
+verify: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SHA2_FILES)))
 hints: $(addsuffix .hints, $(SHA2_FILES))
 all-ct: ct
 all-ver: verify
 all-ci: ci
 all-hints: hints
-
 
 KREMLIN_ARGS+=-verbose \
 	-drop Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
@@ -45,13 +44,14 @@ sha2-c/out.krml: $(SHA2_FILES) $(addsuffix .fst,$(MODULES)) $(addsuffix .fst,$(T
 
 sha2-c/SHA2_%.c: sha2-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation \
-	-drop $(subst $(SPACE),,$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
-	-bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
-	$^ -o $@
+	 -drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
+	-drop $(subst $(SPACE),$(COMMA),$(TESTMODS)) \
+	 -bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
+	 $^ -o $@
 
 sha2-c/Hacl_Test_SHA2_%.c: sha2-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation -no-prefix Hacl.Test.SHA2_$* \
-	-drop $(subst $(SPACE),,$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
+	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Hash.SHA2_$*,$(filter-out SHA2_$*,$(MODULES)))) \
 	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Test.SHA2_$*,$(TESTMODS))) \
 	-bundle "SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_$*,SHA2_$*" \
 	$^ -o $@
@@ -87,11 +87,6 @@ test-native-sha2_512.exe: sha2-c/SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o $(BASE_O
 	$(CC) $(CFLAGS) -o $@ $^
 
 
-
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf sha2-c sha2-*-c
-
-
-%.fst-in:
-	@echo $(FSTAR_INCLUDES)

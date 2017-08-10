@@ -68,10 +68,16 @@ let hash_size: alg -> Tot uint32_t = function
   | SHA384 -> H384.size_hash_final // Note that `size_hash` is 64, not 48
   | SHA512 -> H512.size_hash
 
-let state_size: alg -> Tot uint32_t = function
+// FIXME(adl): hash state allocation
+// The type of state a is a buffer of uint32 for SHA256
+// but a buffer of uint64 for SHA384 and SHA512
+// This is hard to do in KreMLin (see Crypto.Symmetric.PRF)
+// Instead we fake a u64[n] by allocation a u32[2*n]
+// and rely on the implicit cast in C
+inline_for_extraction let state_size: alg -> Tot uint32_t = function
   | SHA256 -> H256.size_state
-  | SHA384 -> H384.size_state
-  | SHA512 -> H512.size_state
+  | SHA384 -> U32.mul 2ul H384.size_state
+  | SHA512 -> U32.mul 2ul H512.size_state
 
 //#reset-options "--initial_ifuel 2 --initial_fuel 2 --z3rlimit 30"
 noextract let max_byte_length : alg -> Tot nat = function
@@ -208,6 +214,17 @@ val hmac_part1:
                              /\ (let hash0 = Seq.slice (as_seq h1 s2) 0 (v (hash_size a)) in
                              correct_agile_hash a (Seq.append (as_seq h0 s2) (as_seq h0 data)) hash0)))
 
+(*
+let agile_alloc (a:alg) : Stack (st:state a)
+  (requires fun h -> True)
+  (ensures fun h0 () h1 -> True)
+  =
+  match a with
+  | SHA256 -> Buffer.create 0ul (state_size a)
+  | SHA384 -> Buffer.create 0uL (state_size a)
+  | SHA512 -> Buffer.create 0uL (state_size a)
+*)
+
 let agile_init (a:alg) (st:state a) : Stack unit
  (requires fun h -> True)
  (ensures fun h0 () h1 -> True)
@@ -291,18 +308,18 @@ let hmac_part1 a s2 data len =
   (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) 0 (U32.v (n0 *^ (block_size a)))) (as_seq h blocks0);
   (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) (U32.v (n0 *^ (block_size a))) (length data)) (as_seq h last0);
   agile_init a state0;
-  (**) let h' = ST.get() in
-  (**) no_upd_lemma_1 h h' state0 s2;
-  (**) no_upd_lemma_1 h h' state0 data;
-  (**) no_upd_lemma_1 h h' state0 blocks0;
-  (**) no_upd_lemma_1 h h' state0 last0;
+//  (**) let h' = ST.get() in
+//  (**) no_upd_lemma_1 h h' state0 s2;
+//  (**) no_upd_lemma_1 h h' state0 data;
+//  (**) no_upd_lemma_1 h h' state0 blocks0;
+//  (**) no_upd_lemma_1 h h' state0 last0;
   agile_update a state0 s2;
-  (**) let h'' = ST.get() in
-  (**) no_upd_lemma_1 h' h'' state0 blocks0;
-  (**) no_upd_lemma_1 h' h'' state0 last0;
+//  (**) let h'' = ST.get() in
+//  (**) no_upd_lemma_1 h' h'' state0 blocks0;
+//  (**) no_upd_lemma_1 h' h'' state0 last0;
   agile_update_multi a state0 blocks0 n0;
-  (**) let h''' = ST.get() in
-  (**) no_upd_lemma_1 h'' h''' state0 last0;
+//  (**) let h''' = ST.get() in
+//  (**) no_upd_lemma_1 h'' h''' state0 last0;
   agile_update_last a state0 last0 r0;
   (**) let h1 = ST.get () in
 

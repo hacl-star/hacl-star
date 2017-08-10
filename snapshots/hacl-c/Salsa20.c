@@ -24,7 +24,6 @@ Hacl_Lib_Create_make_h32_8(
 {
   Hacl_Lib_Create_make_h32_4(b, s0, s1, s2, s3);
   Hacl_Lib_Create_make_h32_4(b + (uint32_t )4, s4, s5, s6, s7);
-  return;
 }
 
 static void
@@ -50,7 +49,6 @@ Hacl_Lib_Create_make_h32_16(
 {
   Hacl_Lib_Create_make_h32_8(b, s0, s1, s2, s3, s4, s5, s6, s7);
   Hacl_Lib_Create_make_h32_8(b + (uint32_t )8, s8, s9, s10, s11, s12, s13, s14, s15);
-  return;
 }
 
 static void
@@ -131,7 +129,6 @@ Hacl_Impl_Salsa20_quarter_round(uint32_t *st, uint32_t a, uint32_t b, uint32_t c
   Hacl_Impl_Salsa20_line(st, c, b, a, (uint32_t )9);
   Hacl_Impl_Salsa20_line(st, d, c, b, (uint32_t )13);
   Hacl_Impl_Salsa20_line(st, a, d, c, (uint32_t )18);
-  return;
 }
 
 inline static void Hacl_Impl_Salsa20_double_round(uint32_t *st)
@@ -148,7 +145,6 @@ inline static void Hacl_Impl_Salsa20_double_round(uint32_t *st)
     (uint32_t )12,
     (uint32_t )13,
     (uint32_t )14);
-  return;
 }
 
 inline static void Hacl_Impl_Salsa20_rounds(uint32_t *st)
@@ -161,10 +157,10 @@ inline static void Hacl_Impl_Salsa20_sum_states(uint32_t *st, uint32_t *st_)
 {
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint32_t uu____795 = st[i];
-    uint32_t uu____798 = st_[i];
-    uint32_t uu____794 = uu____795 + uu____798;
-    st[i] = uu____794;
+    uint32_t uu____871 = st[i];
+    uint32_t uu____874 = st_[i];
+    uint32_t uu____870 = uu____871 + uu____874;
+    st[i] = uu____870;
   }
 }
 
@@ -182,7 +178,6 @@ inline static void Hacl_Impl_Salsa20_salsa20_core(uint32_t *k, uint32_t *st, uin
   Hacl_Impl_Salsa20_copy_state(k, st);
   Hacl_Impl_Salsa20_rounds(k);
   Hacl_Impl_Salsa20_sum_states(k, st);
-  return;
 }
 
 inline static void
@@ -196,7 +191,6 @@ Hacl_Impl_Salsa20_salsa20_block(uint8_t *stream_block, uint32_t *st, uint64_t ct
 inline static void Hacl_Impl_Salsa20_init(uint32_t *st, uint8_t *k, uint8_t *n1)
 {
   Hacl_Impl_Salsa20_setup(st, k, n1, (uint64_t )0);
-  return;
 }
 
 static void
@@ -213,10 +207,10 @@ Hacl_Impl_Salsa20_update_last(
   uint8_t *mask = block;
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
   {
-    uint8_t uu____546 = plain[i];
-    uint8_t uu____549 = mask[i];
-    uint8_t uu____545 = uu____546 ^ uu____549;
-    output[i] = uu____545;
+    uint8_t uu____602 = plain[i];
+    uint8_t uu____605 = mask[i];
+    uint8_t uu____601 = uu____602 ^ uu____605;
+    output[i] = uu____601;
   }
 }
 
@@ -231,10 +225,10 @@ Hacl_Impl_Salsa20_update(uint8_t *output, uint8_t *plain, uint32_t *st, uint64_t
   Hacl_Lib_LoadStore32_uint32s_from_le_bytes(ib, plain, (uint32_t )16);
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint32_t uu____546 = ib[i];
-    uint32_t uu____549 = k[i];
-    uint32_t uu____545 = uu____546 ^ uu____549;
-    ob[i] = uu____545;
+    uint32_t uu____602 = ib[i];
+    uint32_t uu____605 = k[i];
+    uint32_t uu____601 = uu____602 ^ uu____605;
+    ob[i] = uu____601;
   }
   Hacl_Lib_LoadStore32_uint32s_to_le_bytes(output, ob, (uint32_t )16);
 }
@@ -248,16 +242,10 @@ Hacl_Impl_Salsa20_salsa20_counter_mode_blocks(
   uint64_t ctr
 )
 {
-  (void )output;
-  (void )plain;
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
   {
-    (void )output;
-    (void )plain;
     uint8_t *b = plain + (uint32_t )64 * i;
-    (void )plain;
     uint8_t *o = output + (uint32_t )64 * i;
-    (void )output;
     Hacl_Impl_Salsa20_update(o, b, st, ctr + (uint64_t )i);
   }
 }
@@ -279,12 +267,7 @@ Hacl_Impl_Salsa20_salsa20_counter_mode(
   uint8_t *plain__ = plain + (uint32_t )64 * blocks_len;
   Hacl_Impl_Salsa20_salsa20_counter_mode_blocks(output_, plain_, blocks_len, st, ctr);
   if (part_len > (uint32_t )0)
-  {
     Hacl_Impl_Salsa20_update_last(output__, plain__, part_len, st, ctr + (uint64_t )blocks_len);
-    return;
-  }
-  else
-    return;
 }
 
 static void
@@ -361,7 +344,7 @@ Hacl_Impl_HSalsa20_crypto_core_hsalsa20(uint8_t *output, uint8_t *nonce, uint8_t
   Hacl_Lib_LoadStore32_uint32s_to_le_bytes(output, hs, (uint32_t )8);
 }
 
-void *Salsa20_op_String_Access(FStar_HyperStack_mem h, uint8_t *b)
+void *Salsa20_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *b)
 {
   return (void *)(uint8_t )0;
 }
@@ -377,12 +360,10 @@ Salsa20_salsa20(
 )
 {
   Hacl_Impl_Salsa20_salsa20(output, plain, len, k, n1, ctr);
-  return;
 }
 
 void Salsa20_hsalsa20(uint8_t *output, uint8_t *key, uint8_t *nonce)
 {
   Hacl_Impl_HSalsa20_crypto_core_hsalsa20(output, nonce, key);
-  return;
 }
 
