@@ -43,12 +43,12 @@ else
     endif
 endif
 
-.PHONY: test dep tmp
+.PHONY: test depend clean
 
-all: tmp LowCProvider.cmxa
+all: test
 
 tmp:
-	$(MAKE) -C .. LowCProvider-tmp
+	$(MAKE) -C .. LowCProvider-tmp || (rm -fr tmp && false)
 
 %.cmi: %.mli
 	$(OCAMLC) -c $<
@@ -68,7 +68,7 @@ $(CORECRYPTO)/CoreCrypto.cmx: $(CORECRYPTO)/CoreCrypto.ml
 ../vale/asm/vale.a:
 	$(MAKE) -C ../vale/asm
 
-libllcrypto.a: tmp
+libllcrypto.a: ../vale/asm/vale.a tmp
 	cp ../vale/asm/vale.a libllcrypto.a
 	$(AR) -cr libllcrypto.a tmp/*.o
 
@@ -81,15 +81,17 @@ LowCProvider.cmxa: lowc_stub.o LowCProvider.cmx
 Tests.exe: LowCProvider.cmxa Tests.cmx
 	$(OCAMLOPT) $(EXTRA_OPTS) -I $(PLATFORM) -package batteries,zarith -linkpkg -o $@ libllcrypto.a lowc_stub.o CoreCrypto.cmxa LowCProvider.cmx Tests.cmx
 
+test: Tests.exe
+	./Tests.exe
+
 clean:
 	FSTAR_HOME=$(abspath $(FSTAR_HOME)) $(MAKE) -C $(CORECRYPTO) clean
 	rm -fr tmp
 	rm -f Tests.exe *.[oa] *.so *.cm[ixoa] *.cmxa *.exe *.dll *.annot *~
 
-.depend: depend
-
-depend:
-	$(OCAMLDEP) *.ml *.mli > .depend
-
-include .depend
+# we don't need ocamldep here
+#.depend: depend
+#depend:
+#	$(OCAMLDEP) *.ml *.mli > .depend
+#include .depend
 
