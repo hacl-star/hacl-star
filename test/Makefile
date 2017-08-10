@@ -9,12 +9,12 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
-all: extract-specs extract-all-c ct
+all: #extract-specs extract-all-c ct
 	# JK: Removing this, 'update-snapshot" should run unit tests already
 	# $(MAKE) -C ../code test
-	$(MAKE) -C .. verify
-	$(MAKE) compile-vale
-	$(MAKE) -C openssl-engine
+	#$(MAKE) -C .. verify
+	#$(MAKE) compile-vale
+	#$(MAKE) -C openssl-engine
 	$(MAKE) -B update-snapshot
 #	JP: fixme, doesn't work on build machine
 #	$(MAKE) -C snapshot-gcc
@@ -139,11 +139,11 @@ snapshot:
 	$(MAKE) build-snapshot
 
 snapshot-ccomp:
-	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
+	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
 	if $(HAS_CCOMP); then $(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
 
 snapshot-msvc:
-	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc msvc"; fi
+	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc"; fi
 	if $(HAS_CL); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-msvc; fi
 
 snapshot-gcc:
@@ -151,7 +151,7 @@ snapshot-gcc:
 	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
 
 snapshot-gcc-unrolled:
-	$(MAKE) -B extract-c-code extract-c-code-experimental KREMLIN_ARGS="-funroll-loops 5"
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5"
 	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc-unrolled
 
 all-snapshots:
