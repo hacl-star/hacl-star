@@ -38,7 +38,7 @@ endif
 
 all: $(LIBQUICCRYPTO)
 
-tmp:
+tmp: Crypto.Indexing.fst ../aead/*.fst ../prf/*.fst ../uf1cma/*.fst ../hkdf/*.fst ../utils/*.fst ../../code/*/*.fst ../../code/experimental/aesgcm/*.fst
 	$(MAKE) -C .. QuicProvider-tmp || (rm -fr tmp && false)
 
 ../vale/asm/vale.a:

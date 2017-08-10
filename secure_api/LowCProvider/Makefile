@@ -45,9 +45,9 @@ endif
 
 .PHONY: test depend clean
 
-all: test
+all: LowCProvider.cmxa
 
-tmp:
+tmp: Crypto.Indexing.fst ../aead/*.fst ../prf/*.fst ../uf1cma/*.fst ../utils/*.fst ../../code/*/*.fst ../../code/experimental/aesgcm/*.fst
 	$(MAKE) -C .. LowCProvider-tmp || (rm -fr tmp && false)
 
 %.cmi: %.mli
