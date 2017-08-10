@@ -9,15 +9,14 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
-all: #extract-specs extract-all-c ct
+all: extract-specs extract-all-c ct
 	# JK: Removing this, 'update-snapshot" should run unit tests already
 	# $(MAKE) -C ../code test
-	#$(MAKE) -C .. verify
-	#$(MAKE) compile-vale
-	#$(MAKE) -C openssl-engine
+	$(MAKE) -C .. verify
+	$(MAKE) compile-vale
+	$(MAKE) -C openssl-engine
 	$(MAKE) -B update-snapshot
-#	JP: fixme, doesn't work on build machine
-#	$(MAKE) -C snapshot-gcc
+	# JK: TODO MSVC & CompCert compilation tests
 
 travis: extract-c-code ct
 	$(MAKE) -C .. world
@@ -41,7 +40,6 @@ extract-c-apps:
 
 # JK: fixme, extract-c-apps to be added to the regression tests when
 # LibSodium is added to the build machine
-# JK: 01/08/17 FIXME, removed secure_api extraction
 extract-c: extract-c-code extract-c-crypto # extract-c-apps
 
 # These cannot benefit from parallelism, tests C extraction for available compilers
