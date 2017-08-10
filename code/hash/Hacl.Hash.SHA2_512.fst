@@ -720,6 +720,7 @@ let update state data =
   (* Cast the data bytes into a uint32_t buffer *)
   uint64s_from_be_bytes data_w data size_block_w;
   (**) let h3 = ST.get () in
+  (**) lemma_modifies_0_1' data_w h1 h2 h3;
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_k_w size_k_w);
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_whash_w size_whash_w);
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_count_w size_count_w);
@@ -735,6 +736,7 @@ let update state data =
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
   ws ws_w data_w;
   (**) let h4 = ST.get () in
+  (**) modifies_subbuffer_1 h3 h4 ws_w state;
   (**) no_upd_lemma_1 h3 h4 ws_w data;
   (**) no_upd_lemma_1 h3 h4 ws_w k_w;
   (**) no_upd_lemma_1 h3 h4 ws_w hash_w;
@@ -746,6 +748,8 @@ let update state data =
   (**) assert(reveal_h64s (as_seq h4 k_w) == Spec.k);
   update_core hash_w data data_w ws_w k_w;
   (**) let h5 = ST.get () in
+  (**) modifies_subbuffer_1 h4 h5 hash_w state;
+  (**) lemma_modifies_1_trans state h3 h4 h5;
   (**) no_upd_lemma_1 h4 h5 hash_w data;
   (**) no_upd_lemma_1 h4 h5 hash_w k_w;
   (**) no_upd_lemma_1 h4 h5 hash_w counter_w;
@@ -759,6 +763,9 @@ let update state data =
   (* Increment the total number of blocks processed *)
   counter_increment counter_w;
   (**) let h6 = ST.get () in
+  (**) modifies_subbuffer_1 h5 h6 counter_w state;
+  (**) lemma_modifies_1_trans state h3 h5 h6;
+  (**) lemma_modifies_0_1 state h1 h3 h6;
   (**) no_upd_lemma_1 h5 h6 counter_w data;
   (**) no_upd_lemma_1 h5 h6 counter_w k_w;
   (**) no_upd_lemma_1 h5 h6 counter_w hash_w;
@@ -781,6 +788,7 @@ let update state data =
   (* Pop the memory frame *)
   (**) pop_frame();
   (**) let h7 = ST.get () in
+  (**) modifies_popped_1 state h0 h1 h6 h7;
   (**) Seq.lemma_eq_intro (Seq.slice (as_seq h6 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)))
                           (Seq.slice (as_seq h7 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)));
   (**) Seq.lemma_eq_intro (Seq.slice (as_seq h6 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)))
@@ -837,14 +845,16 @@ let rec update_multi state data n =
     let b = Buffer.sub data 0ul size_block in
 
     (* Remove the current block from the data left to process *)
-    let data = Buffer.offset data size_block in
-    (**) assert(disjoint b data);
+    let data' = Buffer.offset data size_block in
+    // (**) assert(disjoint b data);
+    (**) lemma_disjoint_sub data b state;
+    (**) lemma_disjoint_sub data data' state;
 
     (* Call the update function on the current block *)
     update state b;
 
     (* Recursive call *)
-    update_multi state data (n -^ 1ul) end
+    update_multi state data' (n -^ 1ul) end
 
 
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 50"
@@ -1038,8 +1048,11 @@ val update_last:
 let update_last state data len =
   (**) assert_norm(pow2 32 = 0x100000000);
 
+  (**) let hinit = ST.get() in
+
   (* Push a new memory frame *)
   (**) push_frame();
+  (**) let h00 = ST.get() in
 
   (* Alocate memory set to zeros for the last two blocks of data *)
   let blocks = Buffer.create (uint8_to_sint8 0uy) (size_block +^ size_block) in
@@ -1060,6 +1073,8 @@ let update_last state data len =
       (**) assert(live h1 blocks);
       blocks end in
 
+  (**) assert(blocks `includes` final_blocks);
+
   (**) let h2 = ST.get () in
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 final_blocks))
                           (if U64.(len <^ 112uL) then
@@ -1074,6 +1089,8 @@ let update_last state data len =
 //  (**) assert(length final_blocks)
   Buffer.blit data 0ul final_blocks 0ul (u64_to_u32 len);
   (**) let h3 = ST.get () in
+  (**) modifies_subbuffer_1 h2 h3 final_blocks blocks;
+  (**) lemma_modifies_0_1' blocks h00 h0 h3;
   (**) Seq.lemma_eq_intro (as_seq h3 data) (Seq.slice (as_seq h3 data) 0 (U64.v len));
   (**) Seq.lemma_eq_intro (as_seq h3 data) (Seq.slice (as_seq h3 final_blocks) 0 (U64.v len));
   (**) assert(as_seq h3 data == Seq.slice (as_seq h3 final_blocks) 0 (U64.v len));
@@ -1093,6 +1110,10 @@ let update_last state data len =
 
   (* Proof that final_blocks = data @| padding *)
   (**) let h4 = ST.get () in
+  (**) assert(blocks `includes` padding);
+  (**) modifies_subbuffer_1 h3 h4 padding blocks;
+  (**) lemma_modifies_0_1' blocks h00 h3 h4;
+  (**) lemma_disjoint_sub blocks padding data;
   (**) assert(disjoint padding data);
   (**) no_upd_lemma_1 h3 h4 padding data;
   (**) Seq.lemma_eq_intro (as_seq h4 (Buffer.sub final_blocks 0ul (u64_to_u32 len))) (Seq.slice (as_seq h4 final_blocks) 0 (U64.v len));
@@ -1115,9 +1136,13 @@ let update_last state data len =
               reveal_h64s seq_k == Spec.k /\ H64.v counter < (pow2 64 - 2));
 
   update_multi state final_blocks nb;
+  (**) let h5 = ST.get() in
+  (**) lemma_modifies_0_1 state h00 h4 h5;
 
   (* Pop the memory frame *)
-  (**) pop_frame()
+  (**) pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 state hinit h00 h5 hfin
 
 
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 20"
@@ -1173,11 +1198,14 @@ val hash:
 
 let hash hash input len =
 
+  (**) let hinit = ST.get() in
   (* Push a new memory frame *)
   (**) push_frame ();
+  (**) let h0 = ST.get() in
 
   (* Allocate memory for the hash state *)
   let state = Buffer.create (u32_to_h64 0ul) size_state in
+  (**) let h1 = ST.get() in
 
   (* Compute the number of blocks to process *)
   let n = U32.div len size_block in
@@ -1189,15 +1217,25 @@ let hash hash input len =
 
   (* Initialize the hash function *)
   init state;
+  (**) let h2 = ST.get() in
+  (**) lemma_modifies_0_1' state h0 h1 h2;
 
   (* Update the state with input blocks *)
   update_multi state input_blocks n;
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1' state h0 h2 h3;
 
   (* Process the last block of input *)
   update_last state input_last (u32_to_u64 r);
+  (**) let h4 = ST.get() in
+  (**) lemma_modifies_0_1' state h0 h3 h4;
 
   (* Finalize the hash output *)
   finish state hash;
+  (**) let h5 = ST.get() in
+  (**) lemma_modifies_0_1 hash h0 h4 h5;
 
   (* Pop the memory frame *)
-  (**) pop_frame ()
+  (**) pop_frame ();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 hash hinit h0 h5 hfin

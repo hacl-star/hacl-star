@@ -566,6 +566,7 @@ let update_core hash_w data data_w ws_w k_w =
   (* Keep track of the the current working hash from the state *)
   copy_hash hash_0 hash_w;
   (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1' hash_0 h1 h2 h3;
   (**) no_upd_lemma_1 h2 h3 hash_0 data;
   (**) no_upd_lemma_1 h2 h3 hash_0 data_w;
   (**) no_upd_lemma_1 h2 h3 hash_0 ws_w;
@@ -577,6 +578,7 @@ let update_core hash_w data data_w ws_w k_w =
   (* Step 4 : Compute the ith intermediate hash value *)
   shuffle hash_0 data_w ws_w k_w;
   (**) let h4 = ST.get() in
+  (**) lemma_modifies_0_1' hash_0 h1 h3 h4;
   (**) assert(let b = Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
               let ha = Spec.shuffle (reveal_h32s (as_seq h0 hash_w)) b in
               as_seq h4 hash_w == as_seq h0 hash_w /\
@@ -590,6 +592,7 @@ let update_core hash_w data data_w ws_w k_w =
   (* Use the previous one to update it inplace *)
   sum_hash hash_w hash_0;
   (**) let h5 = ST.get() in
+  (**) lemma_modifies_0_1 hash_w h1 h4 h5;
   (**) assert(let x = reveal_h32s (as_seq h4 hash_w) in
           let y = reveal_h32s (as_seq h4 hash_0) in
           x == reveal_h32s (as_seq h0 hash_w) /\
@@ -605,7 +608,9 @@ let update_core hash_w data data_w ws_w k_w =
   (**) no_upd_lemma_1 h4 h5 hash_w k_w;
 
   (* Pop the frame *)
-  (**) pop_frame()
+  (**) pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 hash_w h0 h1 h5 hfin
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -685,6 +690,7 @@ let update state data =
   (* Cast the data bytes into a uint32_t buffer *)
   uint32s_from_be_bytes data_w data size_block_w;
   (**) let h3 = ST.get () in
+  (**) lemma_modifies_0_1' data_w h1 h2 h3;
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_k_w size_k_w);
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_whash_w size_whash_w);
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_count_w size_count_w);
@@ -700,6 +706,7 @@ let update state data =
   (* Step 1 : Scheduling function for sixty-four 32 bit words *)
   ws ws_w data_w;
   (**) let h4 = ST.get () in
+  (**) modifies_subbuffer_1 h3 h4 ws_w state;
   (**) no_upd_lemma_1 h3 h4 ws_w data;
   (**) no_upd_lemma_1 h3 h4 ws_w k_w;
   (**) no_upd_lemma_1 h3 h4 ws_w hash_w;
@@ -711,6 +718,8 @@ let update state data =
   (**) assert(reveal_h32s (as_seq h4 k_w) == Spec.k);
   update_core hash_w data data_w ws_w k_w;
   (**) let h5 = ST.get () in
+  (**) modifies_subbuffer_1 h4 h5 hash_w state;
+  (**) lemma_modifies_1_trans state h3 h4 h5;
   (**) no_upd_lemma_1 h4 h5 hash_w data;
   (**) no_upd_lemma_1 h4 h5 hash_w k_w;
   (**) no_upd_lemma_1 h4 h5 hash_w counter_w;
@@ -724,6 +733,9 @@ let update state data =
   (* Increment the total number of blocks processed *)
   counter_increment counter_w;
   (**) let h6 = ST.get () in
+  (**) modifies_subbuffer_1 h5 h6 counter_w state;
+  (**) lemma_modifies_1_trans state h3 h5 h6;
+  (**) lemma_modifies_0_1 state h1 h3 h6;
   (**) no_upd_lemma_1 h5 h6 counter_w data;
   (**) no_upd_lemma_1 h5 h6 counter_w k_w;
   (**) no_upd_lemma_1 h5 h6 counter_w hash_w;
@@ -751,7 +763,8 @@ let update state data =
   (**) Seq.lemma_eq_intro (Seq.slice (as_seq h6 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)))
                           (Seq.slice (as_seq h7 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)));
   (**) Seq.lemma_eq_intro (Seq.slice (as_seq h6 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))
-                          (Seq.slice (as_seq h7 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))
+                          (Seq.slice (as_seq h7 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)));
+  (**) modifies_popped_1 state h0 h1 h6 h7
 
 
 
@@ -803,14 +816,16 @@ let rec update_multi state data n =
     let b = Buffer.sub data 0ul size_block in
 
     (* Remove the current block from the data left to process *)
-    let data = Buffer.offset data size_block in
-    (**) assert(disjoint b data);
+    let data' = Buffer.offset data size_block in
+    // (**) assert(disjoint b data);
+    (**) lemma_disjoint_sub data b state;
+    (**) lemma_disjoint_sub data data' state;
 
     (* Call the update function on the current block *)
     update state b;
 
     (* Recursive call *)
-    update_multi state data (n -^ 1ul) end
+    update_multi state data' (n -^ 1ul) end
 
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
@@ -1091,11 +1106,15 @@ val hash:
 
 let hash hash input len =
 
+  (**) let hinit = ST.get() in
+
   (* Push a new memory frame *)
   (**) push_frame ();
+  (**) let h0 = ST.get() in
 
   (* Allocate memory for the hash state *)
   let state = Buffer.create (u32_to_h32 0ul) size_state in
+  (**) let h1 = ST.get() in
 
   (* Compute the number of blocks to process *)
   let n = U32.div len size_block in
@@ -1107,15 +1126,26 @@ let hash hash input len =
 
   (* Initialize the hash function *)
   init state;
+  (**) let h2 = ST.get() in
+  (**) lemma_modifies_0_1' state h0 h1 h2;
 
   (* Update the state with input blocks *)
   update_multi state input_blocks n;
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1' state h0 h2 h3;
 
   (* Process the last block of input *)
   update_last state input_last r;
+  (**) let h4 = ST.get() in
+  (**) lemma_modifies_0_1' state h0 h3 h4;
 
   (* Finalize the hash output *)
   finish state hash;
+  (**) let h5 = ST.get() in
+  (**) lemma_modifies_0_1 hash h0 h4 h5;
 
   (* Pop the memory frame *)
-  (**) pop_frame ()
+  (**) pop_frame ();
+
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 hash hinit h0 h5 hfin
