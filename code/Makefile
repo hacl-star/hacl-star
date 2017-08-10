@@ -4,7 +4,7 @@ all: extract-c ct verify
 # checked by curve25519 and poly1305 with specific parameters
 DIRECTORIES=salsa-family poly1305 curve25519 api hmac ed25519 hash
 # JK: removing hash & hmac from CI to prevent it from timing out
-TOOSLOW=experimental hash hmac
+TOOSLOW=experimental
 
 %-c: %
 	$(MAKE) -C $< extract-c

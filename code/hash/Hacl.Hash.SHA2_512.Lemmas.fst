@@ -151,7 +151,7 @@ let lemma_spec_ws_def2 b i = ()
 
 let lemma_modifies_0_is_modifies_1 (#a:Type) (h:HyperStack.mem) (b:buffer a{live h b}) : Lemma
   (modifies_1 b h h) =
-  lemma_intro_modifies_1 b h h
+  lemma_modifies_sub_1 h h b
 
 
 let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:buffer t{live h1 a}) (b:buffer t{live h0 b}) (len:nat{len = length a /\ len = length b}): Lemma

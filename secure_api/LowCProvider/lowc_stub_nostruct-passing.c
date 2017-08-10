@@ -92,15 +92,16 @@ CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
 			caml_failwith("LowCProvider: invalid AES implementation");
 	}
 
-        Crypto_Indexing_id id = Crypto_Indexing_testId(calg);
-	id.aesi = aesimpl;
+	Crypto_Indexing_id *id = malloc(sizeof(Crypto_Indexing_id));
+	Crypto_Indexing_testId(calg, id);
+	id->aesi = aesimpl;
 
-        AEAD_ST* st = malloc(sizeof(AEAD_ST));
-       	*st = Crypto_AEAD_coerce(id, FStar_HyperHeap_root, (uint8_t*)String_val(key));
+	AEAD_ST* st = malloc(sizeof(AEAD_ST));
+	Crypto_AEAD_gen(id, FStar_HyperHeap_root, st);
 
         ST *s = malloc(sizeof(ST));
         s->st = st;
-        s->id = id;
+        s->id = *id;
 
         CAMLlocal1(mlret);
         mlret = caml_alloc_custom(&st_ops, sizeof(ST*), 0, 1);
@@ -124,7 +125,7 @@ CAMLprim value ocaml_AEAD_encrypt(value state, value iv, value ad, value plain) 
         CAMLlocal1(cipher);
         cipher = caml_alloc_string(plainlen + Crypto_Symmetric_MAC_taglen);
         uint8_t* ccipher = (uint8_t*) String_val(cipher);
-        Crypto_AEAD_Encrypt_encrypt(id, *ast, n, adlen, cad, plainlen, cplain, ccipher);
+        Crypto_AEAD_Encrypt_encrypt(&id, ast, n, adlen, cad, plainlen, cplain, ccipher);
         CAMLreturn(cipher);
 }
 
@@ -148,7 +149,7 @@ CAMLprim value ocaml_AEAD_decrypt(value state, value iv, value ad, value cipher)
         plain = caml_alloc_string(plainlen);
         uint8_t* cplain = (uint8_t*) String_val(plain);
         
-        if(Crypto_AEAD_Decrypt_decrypt(id, *ast, n, adlen, cad, plainlen, cplain, ccipher))
+        if(Crypto_AEAD_Decrypt_decrypt(&id, ast, n, adlen, cad, plainlen, cplain, ccipher))
         {
                 CAMLreturn(Val_some(plain));
         }

@@ -65,6 +65,7 @@ int main(int argc, char **argv)
   s.hash = TLS_hash_SHA256;
   s.ae = TLS_aead_AES_128_GCM;
   memcpy(s.secret, hash, 32);
+  quic_crypto_tls_derive_secret(&s, &s, "EXPORTER-QUIC server 1-RTT Secret");
 
   quic_key* k;
   if(!quic_crypto_derive_key(&k, &s))
@@ -72,7 +73,8 @@ int main(int argc, char **argv)
     printf("Failed to derive key\n");
     return 1;
   }
-  char *cipher = malloc(1024);
+
+  char cipher[128];
   printf("\nAES-128-GCM encrypt test:\n");
   quic_crypto_encrypt(k, cipher, 0, salt, 13, data, 28);
   dump(cipher, 28+16);
@@ -95,10 +97,10 @@ int main(int argc, char **argv)
   }
 
   printf("\nCHACHA20-POLY1305 encrypt test:\n");
-  quic_crypto_encrypt(k, cipher, 0, salt, 13, data, 28);
+  quic_crypto_encrypt(k, cipher, 0x29e255a7, salt, 13, data, 28);
   dump(cipher, 28+16);
 
-  if(quic_crypto_decrypt(k, hash, 0, salt, 13, cipher, 28+16)) {
+  if(quic_crypto_decrypt(k, hash, 0x29e255a7, salt, 13, cipher, 28+16)) {
     printf("DECRYPT SUCCES: \n");
     dump(hash, 28);
   } else {

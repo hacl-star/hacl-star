@@ -12,7 +12,9 @@ SHA2_FILES = \
 	Hacl.Hash.SHA2_256.fst
 
 SLOW=
-BROKEN=
+# FIXME (10 August 17) these (correct) files need additional annotation to
+# smooth hint replays (see SHA256 or SHA512)
+BROKEN=Hacl.Hash.SHA2_384.Lemmas.fst Hacl.Hash.SHA2_384.fst
 
 ct: $(addsuffix -lax, $(SHA2_FILES))
 # Excluding slow or broken files from the CI run
