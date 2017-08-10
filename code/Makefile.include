@@ -123,3 +123,16 @@ import-kremlin:
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
 %.fsti.reloc.hints: %.fsti
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
+
+# Interactive verification
+%.fst-in: %.fst
+	@echo --hint_info \
+	$(HINTS_ENABLED) \
+	$(OTHERFLAGS) \
+	$(FSTAR_INCLUDES)
+
+%.fsti-in: %.fsti
+	@echo --hint_info \
+	$(HINTS_ENABLED) \
+	$(OTHERFLAGS) \
+	$(FSTAR_INCLUDES)
