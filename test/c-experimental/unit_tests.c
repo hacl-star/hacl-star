@@ -412,41 +412,41 @@ int main(){
   } else {
     printf("Unit tests for POLY1305 *** FAILED ***\n");
   }
-  res = unit_test_crypto_box();
+  res = res && unit_test_crypto_box();
   if (res == true) {
     printf("Unit tests for crypto_box succeeded\n");
   } else {
     printf("Unit tests for crypto_box *** FAILED ***\n");
   }
-  res = unit_test_scalarmult();
+  res = res && unit_test_scalarmult();
   if (res == true) {
     printf("Unit tests for crypto_scalarmult succeeded\n");
   } else {
     printf("Unit tests for crypto_scalarmult *** FAILED ***\n");
   }
-  res = unit_test_crypto_keypair();
+  res = res && unit_test_crypto_keypair();
   if (res == true) {
     printf("Unit tests for crypto_keypair succeeded\n");
   } else {
     printf("Unit tests for crypto_keypair *** FAILED ***\n");
   }
-  res = unit_test_crypto_sign();
+  res = res && unit_test_crypto_sign();
   if (res == true) {
     printf("Unit tests for crypto_sign succeeded\n");
   } else {
     printf("Unit tests for crypto_sign *** FAILED ***\n");
   }
-  res = unit_test_crypto_secretbox();
+  res = res && unit_test_crypto_secretbox();
   if (res == true) {
     printf("Unit tests for crypto_secretbox succeeded\n");
   } else {
     printf("Unit tests for crypto_secretbox *** FAILED ***\n");
   }
-  res = unit_test_crypto_stream();
+  res = res && unit_test_crypto_stream();
   if (res == true) {
     printf("Unit tests for crypto_stream succeeded\n");
   } else {
     printf("Unit tests for crypto_stream *** FAILED ***\n");
   }
-  return 0;
+  return res == true ? 0 : 255;
 }
