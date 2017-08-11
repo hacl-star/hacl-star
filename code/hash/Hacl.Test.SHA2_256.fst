@@ -9,6 +9,17 @@ open FStar.UInt32
 
 module Hash = SHA2_256
 
+
+inline_for_extraction let size_state = Hash.size_state
+inline_for_extraction let output_len = 32ul
+inline_for_extraction let plaintext_len1 = 3ul
+inline_for_extraction let plaintext_len2 = 0ul
+inline_for_extraction let plaintext_len3 = 56ul
+inline_for_extraction let plaintext_len4 = 112ul
+inline_for_extraction let plaintext_len5 = 1000000ul
+inline_for_extraction let plaintext_len6 = 64ul (* This is the size of the main block, it is iterated *)
+
+
 val test_1a: unit -> ST unit
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
@@ -17,10 +28,8 @@ let test_1a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 3ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy;
     ] in
@@ -33,15 +42,15 @@ let test_1a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* Call the hash function *)
   Hash.init ctx;
-  Hash.update_last ctx plaintext plaintext_len;
+  Hash.update_last ctx plaintext plaintext_len1;
   Hash.finish ctx output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 1a") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 1a") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -55,10 +64,8 @@ let test_1b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 3ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy;
     ] in
@@ -71,13 +78,13 @@ let test_1b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* Call the hash function *)
-  Hash.hash output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len1;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 1b") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 1b") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -92,10 +99,8 @@ let test_2a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 0ul in
   let plaintext = FStar.Buffer.createL [] in
 
   let expected = FStar.Buffer.createL [
@@ -106,15 +111,15 @@ let test_2a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* Call the hash function *)
   Hash.init ctx;
-  Hash.update_last ctx plaintext plaintext_len;
+  Hash.update_last ctx plaintext plaintext_len2;
   Hash.finish ctx output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 2a") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 2a") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -128,10 +133,8 @@ let test_2b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 0ul in
   let plaintext = FStar.Buffer.createL [] in
 
   let expected = FStar.Buffer.createL [
@@ -142,13 +145,13 @@ let test_2b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* Call the hash function *)
-  Hash.hash output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len2;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 2b") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 2b") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -163,10 +166,8 @@ let test_3a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 56ul in
   let plaintext = FStar.Buffer.createL [
     0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy;
     0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy;
@@ -185,15 +186,15 @@ let test_3a () =
   ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* Call the hash function *)
   Hash.init ctx;
-  Hash.update_last ctx plaintext plaintext_len;
+  Hash.update_last ctx plaintext plaintext_len3;
   Hash.finish ctx output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 3a") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 3a") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -207,10 +208,8 @@ let test_3b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 56ul in
   let plaintext = FStar.Buffer.createL [
     0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy;
     0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy;
@@ -229,13 +228,13 @@ let test_3b () =
   ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* Call the hash function *)
-  Hash.hash output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len3;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 3b") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 3b") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -250,10 +249,8 @@ let test_4a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 112ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
       0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
@@ -279,15 +276,15 @@ let test_4a () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* Call the hash function *)
   Hash.init ctx;
-  Hash.update_last ctx plaintext plaintext_len;
+  Hash.update_last ctx plaintext plaintext_len4;
   Hash.finish ctx output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 4a") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 4a") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -301,10 +298,8 @@ let test_4b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 112ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
       0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
@@ -330,13 +325,13 @@ let test_4b () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* Call the hash function *)
-  Hash.hash output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len4;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 4b") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 4b") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -351,11 +346,9 @@ let test_5 () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 1000000ul in
-  let plaintext = FStar.Buffer.create 0x61uy plaintext_len in
+  let plaintext = FStar.Buffer.create 0x61uy plaintext_len5 in
 
   let expected = FStar.Buffer.createL [
       0xcduy; 0xc7uy; 0x6euy; 0x5cuy; 0x99uy; 0x14uy; 0xfbuy; 0x92uy;
@@ -365,13 +358,13 @@ let test_5 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* Call the hash function *)
-  Hash.hash output plaintext plaintext_len;
+  Hash.hash output plaintext plaintext_len5;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 5") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 5") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -406,10 +399,8 @@ let test_6 () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 64ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
       0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
@@ -429,18 +420,18 @@ let test_6 () =
     ] in
 
   (* Allocate memory for state *)
-  let ctx = FStar.Buffer.create 0ul Hash.size_state in
+  let ctx = FStar.Buffer.create 0ul size_state in
 
   (* initialize the hash state *)
   Hash.init ctx;
 
   test_6_loop ctx plaintext;
 
-  Hash.update_last ctx plaintext plaintext_len;
+  Hash.update_last ctx plaintext plaintext_len6;
   Hash.finish ctx output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 6") expected output 32ul;
+  TestLib.compare_and_print (C.string_of_literal "Test 6") expected output output_len;
 
   (* Pop the memory frame *)
   (**) pop_frame()

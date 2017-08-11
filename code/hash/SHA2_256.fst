@@ -50,9 +50,9 @@ private let uint8_p  = Buffer.buffer uint8_ht
 //
 
 (* Define algorithm parameters *)
-let size_hash = Hash.size_hash
-let size_block = Hash.size_block
-let size_state = Hash.size_state
+inline_for_extraction let size_hash = Hash.size_hash
+inline_for_extraction let size_block = Hash.size_block
+inline_for_extraction let size_state = Hash.size_state
 
 
 #reset-options "--max_fuel 0  --z3rlimit 10"
