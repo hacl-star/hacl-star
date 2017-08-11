@@ -65,8 +65,12 @@ let length (b:bytes) = Seq.length b
 abstract type key (im:index_module) = Key.key_t2 im
 //  | Key: i:id im -> rgn:log_region im -> log:message_log im rgn pm -> raw:aes_key -> key im pm
 
+val convert_key: #im:index_module -> k:key im -> GTot (Key.key_t2 im)
+let convert_key #im k =
+  k
 
-val get_index: #im:index_module -> k:key im -> i:id im
+
+val get_index: #im:index_module -> k:key im -> i:id im{i = k.i}
 let get_index #im k =
   k.i
 
@@ -74,7 +78,7 @@ let get_index #im k =
   Similar to the leak_key function, get_keyGT provides access to the raw representation of an AE key.
   However, note that the GTot effect only allows use in type refinements and is erased upon extraction.
 *)
-val get_keyGT: #im:index_module -> k:key im -> GTot (raw_k:aes_key)
+val get_keyGT: #im:index_module -> k:key im -> GTot (b:aes_key{k.raw=b})
 let get_keyGT #im k =
   k.raw
 
@@ -107,7 +111,7 @@ let create im pm (klr:log_region im) message_log_region key_log =
 
 
 //val nonce_is_fresh: #im:index_module -> #pm:plain_module -> am:ae_module im pm -> i:id im -> n:nonce -> h:mem -> t:Type0{t <==> MM.fresh am.message_log (n,i) h}
-abstract let nonce_is_fresh #im #pm am i n h =
+abstract let nonce_is_fresh (#im:index_module) (#pm:plain_module) (am:ae_module im pm) (i:id im) (n:nonce) (h:mem) =
   MR.m_contains am.message_log h
   /\ MM.fresh am.message_log (n,i) h
 
@@ -122,19 +126,22 @@ abstract let log_freshness_invariant (#im:index_module) (#pm:plain_module) (am:a
    only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
 *)
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 0"
-val gen: im:index_module -> pm:plain_module -> am:ae_module im pm -> i:id im -> ST (k:key im{get_index k=i})
+val gen: #im:index_module -> #pm:plain_module -> am:ae_module im pm -> i:id im -> ST (k:key im{get_index k=i})
   (requires (fun h0 ->
     (fresh im (ID i) h0 \/ honest im (ID i))
     /\ log_freshness_invariant #im #pm am h0
     ///\ (forall (i:id im) (n:nonce) . ID.fresh im (ID i) h0 ==> MM.fresh am.message_log (n,i) h0)
   ))
   (ensures  (fun h0 k h1 ->
-    modifies Set.empty h0 h1
+    (MM.fresh am.key_log i h0 ==>
+              (modifies (Set.singleton am.key_log_region) h0 h1
+              /\ MR.m_sel h1 am.key_log == MM.upd (MR.m_sel h0 am.key_log) i k))
+    /\ (MM.defined am.key_log i h0 ==> modifies Set.empty h0 h1)
     /\ log_freshness_invariant #im #pm am h1
     ///\ (forall (i:id im) (n:nonce) . ID.fresh im (ID i) h1 ==> MM.fresh am.message_log (n,i) h1)
   ))
 
-let gen im pm am i =
+let gen #im #pm am i =
   match MM.lookup am.key_log i with
   | Some k -> k
   | None ->
@@ -142,7 +149,8 @@ let gen im pm am i =
     let k:key im = Key i rnd_k in
     recall_log im;
     MR.m_recall am.message_log;
-    MM.extend am.key_log i with
+    MR.m_recall am.key_log;
+    MM.extend am.key_log i k;
     k
 
 (**
@@ -150,17 +158,20 @@ let gen im pm am i =
    with this function.
 *)
 #set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
-val coerce: #im:index_module -> #pm:plain_module -> am:ae_module im pm -> i:id im -> raw_k:aes_key -> (k:key im{get_index k=i /\ get_keyGT k = raw_k})
-let coerce #im #pm am i raw_k =
+val coerce: #im:index_module -> i:id im{dishonest im (ID i)} -> raw_k:aes_key -> (k:key im{get_index k=i /\ get_keyGT k = raw_k})
+let coerce #im i raw_k =
   Key i raw_k
 
 (**
    The leak_key function transforms an abstract key into a raw aes_key.
    The refinement type on the key makes sure that no honest keys can be leaked.
 *)
-val leak: #im:index_module -> #pm:plain_module -> k:key im{(dishonest im (ID (get_index k))) \/ ~(b2t ae_ind_cca)} -> Tot (raw_k:aes_key{raw_k=get_keyGT k})
-let leak #im #pm k =
+val leak: #im:index_module -> k:key im{dishonest im (ID (get_index k))} -> Tot (raw_k:aes_key{raw_k=get_keyGT k})
+let leak #im k =
   k.raw
+
+
+let km (#im:ID.index_module) (#pm:plain_module) (am:ae_module im pm) = Key.create im (get_index) (get_keyGT) (log_freshness_invariant am) (gen am) (coerce) (leak)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The following functions belong to the formal AE module in the model.
@@ -173,24 +184,15 @@ let leak #im #pm k =
 *)
 val encrypt: #im:index_module -> #pm:plain_module{get_plain pm == ae_plain} -> am:ae_module im pm -> #(i:id im) -> n:nonce -> k:key im{get_index k=i} -> m:ae_protected_plain im pm i{Plain.length #im #pm #i m / Spec.Salsa20.blocklen < pow2 32} -> ST cipher
   (requires (fun h0 ->
-    registered im (ID i) // No in-between states of keys (i.e.) where one of the shares is fresh and one is registerd
+    registered im (ID i)
     /\ ((honest im (ID i)) ==>
-               (MR.m_contains am.message_log h0
-               /\ MM.fresh am.message_log (n,i) h0)) // Nonce freshness
-    ///\ (fresh im (ID i) h0 ==>
-    //         (m_sel h0 am.message_log == MM.empty_map (message_log_key im) (message_log_range im pm))) // If the key is fresh, so has to be its log.
+               (nonce_is_fresh #im #pm am i n h0)) // Nonce freshness
     /\ log_freshness_invariant #im #pm am h0
   ))
   (ensures  (fun h0 c h1 ->
     let modified_regions_fresh = Set.union (Set.singleton am.message_log_region) (Set.singleton (ID.get_rgn im)) in
     let modified_regions_honest = Set.singleton am.message_log_region in
     registered im (ID i)
-    /\ (fresh im (ID i) h0 ==>
-                       (let (i1,i2) = i in
-                       honest im (ID i)
-                       /\ MR.m_contains (ID.get_log im) h1
-                       /\ (MR.m_sel h1 (ID.get_log im) == MM.upd (MM.upd (MR.m_sel h0 (ID.get_log im)) i1 true) i2 true /\ modifies modified_regions_fresh h0 h1)))
-    /\ ((~(fresh im (ID i) h0) /\ honest im (ID i)) ==> HS.modifies modified_regions_honest h0 h1)
     /\ (dishonest im (ID i) ==> h0 == h1)
     /\ ((honest im (ID i) /\ b2t ae_ind_cpa)
         ==> (c = SPEC.secretbox_easy (create_zero_bytes (Plain.length #im #pm #i m)) (get_keyGT k) n))
@@ -207,6 +209,7 @@ val encrypt: #im:index_module -> #pm:plain_module{get_plain pm == ae_plain} -> a
 let encrypt #im #pm am #i n k m =
   MR.m_recall am.message_log;
   recall_log im;
+  lemma_registered_not_fresh im (ID i);
   lemma_honest_or_dishonest im (ID i);
   let h = get_reg_honesty im (ID i) in
   let ideal =
@@ -223,8 +226,6 @@ let encrypt #im #pm am #i n k m =
   in
   let  c = SPEC.secretbox_easy p k.raw n in
   if HONEST? h then (
-    let h1 = get() in
-    assert(h0==h1);
     MR.m_recall am.message_log;
     recall_log im;
     MM.extend am.message_log (n,i) (c,m)
@@ -238,19 +239,13 @@ let encrypt #im #pm am #i n k m =
 *)
 val decrypt: #im:index_module -> #pm:plain_module{get_plain pm == ae_plain} -> am:ae_module im pm -> #(i:id im) -> n:nonce -> k:key im{get_index k=i} -> c:cipher -> ST (option (ae_protected_plain im pm i))
   (requires (fun h0 ->
-    (fresh im (ID i) h0 \/ registered im (ID i)) // No in-between states of keys (i.e.) where one of the shares is fresh and one is registerd
+    registered im (ID i) // No in-between states of keys (i.e.) where one of the shares is fresh and one is registerd
     /\ log_freshness_invariant #im #pm am h0
   ))
   (ensures  (fun h0 p h1 ->
-    let modified_regions_fresh = Set.union (Set.singleton am.message_log_region) (Set.singleton (ID.get_rgn im)) in
     let modified_regions_honest = Set.singleton am.message_log_region in
     registered im (ID i)
-    /\ (fresh im (ID i) h0 ==>
-                (let (i1,i2) = i in
-                honest im (ID i)
-                /\ MR.m_contains (ID.get_log im) h1
-                /\ (MR.m_sel h1 (ID.get_log im) == MM.upd (MM.upd (MR.m_sel h0 (ID.get_log im)) i1 true) i2 true /\ modifies modified_regions_fresh h0 h1)))
-    /\ (((honest im (ID i) \/ dishonest im (ID i)) /\ ~(fresh im (ID i) h0) ) ==> h0 == h1)
+    /\ h0 == h1
     /\ ((~(b2t ae_int_ctxt) \/ dishonest im (ID i))
       ==> ((Some? (SPEC.secretbox_open_easy c (get_keyGT k) n)
         ==> Some? p /\ Some?.v p == Plain.coerce #im #pm #i (Some?.v (SPEC.secretbox_open_easy c (get_keyGT k) n)))
@@ -272,10 +267,7 @@ val decrypt: #im:index_module -> #pm:plain_module{get_plain pm == ae_plain} -> a
 let decrypt #im #pm am #i n k c =
   MR.m_recall am.message_log;
   recall_log im;
-  if is_fresh im (ID i) then (
-    make_honest im (ID i)
-  );
-  recall_log im;
+  lemma_registered_not_fresh im (ID i);
   lemma_honest_or_dishonest im (ID i);
   let h = get_reg_honesty im (ID i) in
   let ideal =

@@ -67,17 +67,6 @@ val get_subId: im:index_module -> Type0
 let get_subId im =
   im.subId
 
-val compose_ids: im:index_module -> i1:im.subId -> i2:im.subId -> (i:im.subId*im.subId)
-let compose_ids im i1 i2 =
-  im.compose_ids i1 i2
-
-
-val symmetric_id_generation: im:index_module -> i1:im.subId -> i2:im.subId -> Lemma
-  (requires (i1<>i2))
-  (ensures (forall id1 id2. im.compose_ids id1 id2 = im.compose_ids id2 id1))
-  [SMTPat (compose_ids im i1 i2)]
-let symmetric_id_generation im i1 i2 =
-  im.symmetric_id_generation i1 i2
 
 
 val recall_log: im:index_module -> ST unit
@@ -90,6 +79,19 @@ let recall_log im =
   MR.m_recall im.id_log
 
 type id (im:index_module) = i:(im.subId*im.subId){im.smaller (fst i) (snd i)}
+
+
+val compose_ids: im:index_module -> i1:im.subId -> i2:im.subId -> (i:id im)
+let compose_ids im i1 i2 =
+  im.compose_ids i1 i2
+
+
+val symmetric_id_generation: im:index_module -> i1:im.subId -> i2:im.subId -> Lemma
+(requires (i1<>i2))
+(ensures (forall id1 id2. im.compose_ids id1 id2 = im.compose_ids id2 id1))
+[SMTPat (compose_ids im i1 i2)]
+let symmetric_id_generation im i1 i2 =
+im.symmetric_id_generation i1 i2
 
 noeq type meta_id (im:index_module) =
   | ID of id im
@@ -124,7 +126,6 @@ val lemma_registered2: im:index_module -> i:id im -> Lemma
   [SMTPat (registered im (ID i))]
 let lemma_registered2 im i =
   ()
-
 
 // Put the correct flag here, as soon as we have flags for proof steps
 val honest: (im:index_module) -> (i:meta_id im) -> Tot (t:Type0{t ==> registered im i}) (decreases (measure_id im i))
@@ -263,6 +264,23 @@ val lemma_fresh2: im:index_module -> i:id im -> h:mem -> Lemma
     [SMTPat (fresh im (ID i) h)]
 let lemma_fresh2 im i h =
   ()
+
+#set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 1"
+val lemma_registered_not_fresh: im:index_module -> i:meta_id im -> ST unit
+  (requires (fun h0 -> registered im i))
+  (ensures (fun h0 _ h1 ->
+    h0==h1
+    /\ ~(fresh im i h0)
+  ))
+let rec lemma_registered_not_fresh im i =
+  match i with
+  | SUBID i' ->
+    MR.testify (MM.defined im.id_log i');
+    (match MM.lookup im.id_log i' with
+    | Some _ -> ())
+  | ID i' ->
+    lemma_registered_not_fresh im (SUBID (fst i'));
+    lemma_registered_not_fresh im (SUBID (snd i'))
 
 #set-options "--z3rlimit 500 --max_ifuel 2 --max_fuel 3"
 val is_registered: im:index_module -> i:meta_id im -> ST bool

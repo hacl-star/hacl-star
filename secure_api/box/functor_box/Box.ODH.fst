@@ -47,8 +47,6 @@ private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
 val share_from_exponent: dh_exponent -> Tot dh_share
 let share_from_exponent dh_exp = Curve.scalarmult dh_exp (createL dh_basepoint)
 
-type dh_key_log_region (im:index_module) (km:key_module im) = (r:HH.rid{disjoint r (get_rgn im) /\ disjoint r (Key.get_rgn km)})
-
 type index_module = im:ID.index_module{get_subId im == dh_share}
 
 abstract noeq type odh_module (im:index_module) (km:key_module im) = // require subId type to be dh_share?
@@ -140,30 +138,23 @@ let prf_odhGT im sk pk =
 
 #reset-options
 #set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
-val prf_odh: im:index_module -> pm:plain_module -> km:key_module im{pm==get_plain_module im km} -> om:odh_module im km  -> sk:skey -> pk:pkey{sk.pk.pk_share <> pk.pk_share} -> ST (k:Key.key_t2 im pm{Key.get_index im km k = (ID.compose_ids im pk.pk_share sk.pk.pk_share)} )
+val prf_odh: im:index_module -> km:key_module im -> om:odh_module im km  -> sk:skey -> pk:pkey{sk.pk.pk_share <> pk.pk_share} -> ST (k:Key.key_t2 im{Key.get_index im km k = (ID.compose_ids im pk.pk_share sk.pk.pk_share)} )
   (requires (fun h0 ->
-    registered im (SUBID pk.pk_share)
-    /\ registered im (SUBID sk.pk.pk_share)
+    let i = ID.compose_ids im pk.pk_share sk.pk.pk_share in
+    registered im (ID i)
+    /\ km_pre im km i h0
   ))
   (ensures (fun h0 k h1 ->
     let i = ID.compose_ids im pk.pk_share sk.pk.pk_share in
-    (dishonest im (ID i) ==>
+    (honest im (ID i) ==> km_post im km i h0 k h1)
+    /\ (dishonest im (ID i) ==>
                         (Key.leak im km k = prf_odhGT im sk pk
-                        /\ modifies (Set.singleton (Key.get_rgn km)) h0 h1))
+                        /\ h0 == h1))
   ))
-let prf_odh im pm km om sk pk =
+let prf_odh im km om sk pk =
   let i1 = pk.pk_share in
   let i2 = sk.pk.pk_share in
   let i = ID.compose_ids im i1 i2 in
-  //if is_fresh im (SUBID i1) then (
-  //   make_honest im (SUBID i1);
-  //   lemma_honest_not_others im (SUBID i1)
-  //);
-  //if is_fresh im (SUBID i2) then (
-  //   make_honest im (SUBID i2);
-  //   lemma_honest_not_others im (SUBID i2)
-  //);
-  let h0 = get() in
   recall_log im;
   lemma_honest_or_dishonest im (ID i);
   let h = get_reg_honesty im (ID i) in
