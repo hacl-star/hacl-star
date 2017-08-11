@@ -35,16 +35,12 @@ extract-c-crypto:
 	$(MAKE) -C ../secure_api krml-test-vale.exe
 	$(MAKE) -C ../secure_api krml-test-hacl.exe
 
-extract-c-tests:
-	$(MAKE) -C ../secure_api/LowCProvider test
-	$(MAKE) -C ../secure_api/QuicProvider test
-
 extract-c-apps:
 	$(MAKE) -C ../apps/pneutube tube-star.exe
 
 # JK: fixme, extract-c-apps to be added to the regression tests when
 # LibSodium is added to the build machine
-extract-c: extract-c-code extract-c-crypto extract-c-tests # extract-c-apps
+extract-c: extract-c-code extract-c-crypto # extract-c-apps
 
 # These cannot benefit from parallelism, tests C extraction for available compilers
 extract-all-c:

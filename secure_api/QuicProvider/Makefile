@@ -34,12 +34,12 @@ else
     endif
 endif
 
-.PHONY: test clean
+.PHONY: test dep
 
 all: $(LIBQUICCRYPTO)
 
 tmp:
-	$(MAKE) -C .. QuicProvider-tmp || (rm -fr tmp && false)
+	$(MAKE) -C .. QuicProvider-tmp
 
 ../vale/asm/vale.a:
 	$(MAKE) -C ../vale/asm
@@ -59,6 +59,3 @@ clean:
 
 test.exe: $(LIBQUICCRYPTO) test.o
 	$(CC) $(COPTS) -L. test.o -lquiccrypto -o test.exe
-
-test: test.exe
-	./test.exe
