@@ -7,7 +7,7 @@ OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 OCAML_INCLUDES=-I ../code/lib/ml ../code/lib/ml/hacllib.cmxa
 
 all: lib
-	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe chacha20poly1305.exe gf128.exe ed25519.exe curve25519.exe sha2_256.exe sha2_512.exe
+	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe chacha20poly1305.exe gf128.exe ed25519.exe curve25519.exe sha2_256.exe sha2_384.exe sha2_512.exe hmac_sha2_256.exe hmac_sha2_384.exe hmac_sha2_512.exe sha2.exe hmac_sha2.exe
 
 lib:
 	$(MAKE) -C ../code/lib/ml
@@ -140,6 +140,22 @@ hmac_sha2_256.exe: Spec.HMAC.SHA2_256.fst
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_SHA2_256.ml
 	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) hmac-sha2-spec/FStar_Endianness.ml hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_256.ml hmac-sha2-spec/Spec_HMAC_SHA2_256.ml -o hmac_sha2_256.exe
 	./hmac_sha2_256.exe
+
+hmac_sha2_384.exe: Spec.HMAC.SHA2_384.fst
+	$(MAKE) lib
+	mkdir -p hmac-sha2-spec
+	$(FSTAR) --odir hmac-sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_SHA2_384.ml
+	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) hmac-sha2-spec/FStar_Endianness.ml hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_384.ml hmac-sha2-spec/Spec_HMAC_SHA2_384.ml -o hmac_sha2_384.exe
+	./hmac_sha2_384.exe
+
+hmac_sha2_512.exe: Spec.HMAC.SHA2_512.fst
+	$(MAKE) lib
+	mkdir -p hmac-sha2-spec
+	$(FSTAR) --odir hmac-sha2-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_SHA2_512.ml
+	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) hmac-sha2-spec/FStar_Endianness.ml hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_512.ml hmac-sha2-spec/Spec_HMAC_SHA2_512.ml -o hmac_sha2_512.exe
+	./hmac_sha2_512.exe
 
 ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	$(MAKE) lib
