@@ -7,13 +7,13 @@ else
   HACL_HOME:=$(abspath $(HACL_HOME))
 endif
 
-ifndef FSTAR_HOME 
+ifndef FSTAR_HOME
   FSTAR_HOME:=$(abspath $(HACL_HOME)/dependencies/FStar)
 else
   FSTAR_HOME:=$(abspath $(FSTAR_HOME))
 endif
 
-ifndef KREMLIN_HOME 
+ifndef KREMLIN_HOME
   KREMLIN_HOME:=$(abspath $(HACL_HOME)/dependencies/kremlin)
 else
   KREMLIN_HOME:=$(abspath $(KREMLIN_HOME))
@@ -65,7 +65,7 @@ KREMLIN_TESTLIB=-add-include '"testlib.h"' $(KREMLIB)/testlib.c
 
 FSTAR_LIB=$(FSTAR_HOME)/ulib
 HINTS_ENABLED?=--use_hints
-FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs 
+FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
 
