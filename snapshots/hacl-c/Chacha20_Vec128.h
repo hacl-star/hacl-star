@@ -4,8 +4,9 @@
 #define __Chacha20_Vec128_H
 
 
-#include "Hacl_UInt32x4.h"
+
 #include "testlib.h"
+#include "vec128.h"
 
 typedef uint32_t Hacl_Impl_Xor_Lemmas_u32;
 
@@ -17,7 +18,7 @@ typedef uint32_t Hacl_Impl_Chacha20_Vec128_State_h32;
 
 typedef uint8_t *Hacl_Impl_Chacha20_Vec128_State_uint8_p;
 
-typedef Hacl_UInt32x4_vec *Hacl_Impl_Chacha20_Vec128_State_state;
+typedef vec *Hacl_Impl_Chacha20_Vec128_State_state;
 
 typedef uint32_t Hacl_Impl_Chacha20_Vec128_u32;
 
