@@ -1,5 +1,5 @@
 [
-  "ÓðÃ~]–\u0012âÞ\u0002ƒßÿš—à",
+  "\u001fåYs_A¢?…Å9\u0017è¾ñ²",
   [
     [
       "AEAD.Poly1305_64.key",
@@ -9,7 +9,19 @@
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
-    null,
+    [
+      "AEAD.Poly1305_64.seval",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Hacl.Bignum.Constants.len",
+        "equation_Hacl.Bignum.Constants.limb",
+        "equation_Hacl.Bignum.Parameters.len",
+        "equation_Hacl.Bignum.Parameters.limb"
+      ],
+      0
+    ],
     [
       "AEAD.Poly1305_64.mk_state",
       1,
