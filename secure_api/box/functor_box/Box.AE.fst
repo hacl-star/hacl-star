@@ -107,22 +107,17 @@ let create im pm (klr:log_region im) message_log_region key_log =
   AM klr message_log_region key_log
 
 
-val nonce_is_fresh: #im:index_module -> #pm:plain_module -> am:ae_module im pm -> i:id im -> n:nonce -> h:mem -> t:Type0{t <==> MM.fresh am.message_log (n,i) h}
-let nonce_is_fresh #im #pm am i n h =
-  MM.fresh am.message_log (n,i) h
+//val nonce_is_fresh: #im:index_module -> #pm:plain_module -> am:ae_module im pm -> i:id im -> n:nonce -> h:mem -> t:Type0{t <==> MM.fresh am.message_log (n,i) h}
+abstract let nonce_is_fresh #im #pm am i n h =
+  MR.m_contains am.message_log h
+  /\ MM.fresh am.message_log (n,i) h
 
-//val log_freshness_invariant: #im:index_module -> #pm:plain_module -> am:ae_module im pm -> h:mem -> Type0
-let log_freshness_invariant (#im:index_module) (#pm:plain_module) (am:ae_module im pm) (h:mem) =
+abstract let log_freshness_invariant (#im:index_module) (#pm:plain_module) (am:ae_module im pm) (h:mem) =
   MR.m_contains (get_log im) h
   /\ MR.m_contains am.message_log h
   /\ (forall i n . ID.fresh im (ID i) h ==> MM.fresh am.message_log (n,i) h)
 
 
-// Remove this later
-
-//assume val random_bytes: len:u32 -> ST (lbytes (UInt32.v len))
-//  (requires (fun h -> True))
-//  (ensures  (fun h0 _ h1 -> h0==h1))
 (**
    This function generates a fresh random key. Honest, as well as dishonest ids can be created using keygen. However, note that the adversary can
    only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
@@ -148,6 +143,7 @@ let gen im pm am i =
     let k:key im = Key i rnd_k in
     recall_log im;
     MR.m_recall am.message_log;
+    MM.extend am.key_log i with
     k
 
 (**
@@ -178,7 +174,7 @@ let leak #im #pm k =
 *)
 val encrypt: #im:index_module -> #pm:plain_module{get_plain pm == ae_plain} -> am:ae_module im pm -> #(i:id im) -> n:nonce -> k:key im{get_index k=i} -> m:ae_protected_plain im pm i{Plain.length #im #pm #i m / Spec.Salsa20.blocklen < pow2 32} -> ST cipher
   (requires (fun h0 ->
-    (fresh im (ID i) h0 \/ registered im (ID i)) // No in-between states of keys (i.e.) where one of the shares is fresh and one is registerd
+    registered im (ID i) // No in-between states of keys (i.e.) where one of the shares is fresh and one is registerd
     /\ ((honest im (ID i)) ==>
                (MR.m_contains am.message_log h0
                /\ MM.fresh am.message_log (n,i) h0)) // Nonce freshness
@@ -211,11 +207,6 @@ val encrypt: #im:index_module -> #pm:plain_module{get_plain pm == ae_plain} -> a
 #set-options "--z3rlimit 900 --max_ifuel 1 --max_fuel 0"
 let encrypt #im #pm am #i n k m =
   MR.m_recall am.message_log;
-  recall_log im;
-  if is_fresh im (ID i) then (
-    make_honest im (ID i)
-  );
-  let h0 = get() in
   recall_log im;
   lemma_honest_or_dishonest im (ID i);
   let h = get_reg_honesty im (ID i) in
