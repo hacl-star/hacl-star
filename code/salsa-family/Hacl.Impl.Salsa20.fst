@@ -35,7 +35,7 @@ private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
-[@ "c_inline"]
+[@ CInline]
 private
 val setup:
   st:state ->
@@ -49,7 +49,7 @@ val setup:
          let k = reveal_sbytes (as_seq h0 k) in
          let n = reveal_sbytes (as_seq h0 n) in
          s == setup k n (UInt64.v c))))
-[@ "c_inline"]
+[@ CInline]
 let setup st k n c =
   let h0 = ST.get() in
   push_frame();
@@ -78,7 +78,7 @@ let setup st k n c =
 
 let idx = a:U32.t{U32.v a < 16}
 
-[@ "c_inline"]
+[@ CInline]
 private
 val line:
   st:state ->
@@ -89,7 +89,7 @@ val line:
       /\ (let st1 = reveal_h32s (as_seq h1 st) in
          let st0 = reveal_h32s (as_seq h0 st) in
          st1 == line (U32.v a) (U32.v b) (U32.v d) s st0)))
-[@ "c_inline"]
+[@ CInline]
 let line st a b d s =
   let sa = st.(a) in let sb = st.(b) in let sd = st.(d) in
   let sbd = sb +%^ sd in
@@ -97,7 +97,7 @@ let line st a b d s =
   st.(a) <- (sa ^^ sbds)
 
 
-[@ "c_inline"]
+[@ CInline]
 private
 val quarter_round:
   st:state ->
@@ -107,7 +107,7 @@ val quarter_round:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == quarter_round (U32.v a) (U32.v b) (U32.v c) (U32.v d) s)))
-[@ "c_inline"]
+[@ CInline]
 let quarter_round st a b c d =
   line st b a d 7ul;
   line st c b a 9ul;
@@ -115,7 +115,7 @@ let quarter_round st a b c d =
   line st a d c 18ul
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val column_round:
   st:state ->
@@ -124,7 +124,7 @@ val column_round:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == column_round s)))
-[@ "substitute"]
+[@ Substitute]
 let column_round st =
   quarter_round st 0ul  4ul  8ul  12ul;
   quarter_round st 5ul  9ul  13ul 1ul;
@@ -132,7 +132,7 @@ let column_round st =
   quarter_round st 15ul 3ul  7ul  11ul
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val row_round:
   st:state ->
@@ -141,7 +141,7 @@ val row_round:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == row_round s)))
-[@ "substitute"]
+[@ Substitute]
 let row_round st =
   quarter_round st 0ul  1ul   2ul  3ul;
   quarter_round st 5ul  6ul   7ul  4ul;
@@ -149,7 +149,7 @@ let row_round st =
   quarter_round st 15ul 12ul 13ul 14ul
 
 
-[@ "c_inline"]
+[@ CInline]
 private
 val double_round:
   st:buffer H32.t{length st = 16} ->
@@ -158,7 +158,7 @@ val double_round:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == double_round s)))
-[@ "c_inline"]
+[@ CInline]
 let double_round st =
     column_round st;
     row_round st
@@ -166,7 +166,7 @@ let double_round st =
 
 #reset-options "--max_fuel 0  --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 val rounds:
   st:state ->
   Stack unit
@@ -174,7 +174,7 @@ val rounds:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == Spec.Salsa20.rounds s)))
-[@ "c_inline"]
+[@ CInline]
 let rounds st =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
@@ -195,7 +195,7 @@ let rounds st =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 private
 val sum_states:
   st:state ->
@@ -205,12 +205,12 @@ val sum_states:
     (ensures  (fun h0 _ h1 -> live h0 st /\ live h1 st /\ live h0 st' /\ modifies_1 st h0 h1
       /\ (let s1 = as_seq h1 st in let s = as_seq h0 st in let s' = as_seq h0 st' in
          s1 == seq_map2 (fun x y -> H32.(x +%^ y)) s s')))
-[@ "c_inline"]
+[@ CInline]
 let sum_states st st' =
   in_place_map2 st st' 16ul (fun x y -> H32.(x +%^ y))
 
 
-[@ "c_inline"]
+[@ CInline]
 private
 val copy_state:
   st:state ->
@@ -219,7 +219,7 @@ val copy_state:
     (requires (fun h -> live h st /\ live h st'))
     (ensures (fun h0 _ h1 -> live h1 st /\ live h0 st' /\ modifies_1 st h0 h1
       /\ (let s = as_seq h0 st' in let s' = as_seq h1 st in s' == s)))
-[@ "c_inline"]
+[@ CInline]
 let copy_state st st' =
   Buffer.blit st' 0ul st 0ul 16ul;
   let h = ST.get() in
@@ -331,7 +331,7 @@ let lemma_u64_of_u32s (low:U32.t) (high:U32.t) : Lemma (low32_of_u64 (u64_of_u32
 
 #reset-options "--max_fuel 0  --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 private
 val salsa20_core:
   log:log_t ->
@@ -349,7 +349,7 @@ val salsa20_core:
          (match Ghost.reveal log, Ghost.reveal updated_log with
          | MkLog k n, MkLog k' n' ->
              key == salsa20_core stv /\ k == k' /\ n == n'))))
-[@ "c_inline"]
+[@ CInline]
 let salsa20_core log k st ctr =
   let h0 = ST.get() in
   let c0 = uint32_to_sint32 (low32_of_u64 ctr) in
@@ -380,7 +380,7 @@ let salsa20_core log k st ctr =
   log
 
 
-[@ "c_inline"]
+[@ CInline]
 val salsa20_block:
   log:log_t ->
   stream_block:uint8_p{length stream_block = 64} ->
@@ -394,7 +394,7 @@ val salsa20_block:
          match Ghost.reveal log, Ghost.reveal updated_log with
          | MkLog k n, MkLog k' n' ->
              block == salsa20_block k n (UInt64.v ctr) /\ k == k' /\ n == n')))
-[@ "c_inline"]
+[@ CInline]
 let salsa20_block log stream_block st ctr =
   let h0 = ST.get() in
   push_frame();
@@ -414,13 +414,13 @@ let salsa20_block log stream_block st ctr =
   log
 
 
-[@ "c_inline"]
+[@ CInline]
 val alloc:
   unit ->
   StackInline state
     (requires (fun h -> True))
     (ensures (fun h0 st h1 -> (st `unmapped_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip))
-[@ "c_inline"]
+[@ CInline]
 let alloc () =
   create (uint32_to_sint32 0ul) 16ul
 
@@ -440,7 +440,7 @@ let alloc () =
 
 
 
-[@ "c_inline"]
+[@ CInline]
 val init:
   st:state ->
   k:uint8_p{length k = 32 /\ disjoint st k} ->
@@ -451,7 +451,7 @@ val init:
       /\ invariant log h1 st
       /\ (match Ghost.reveal log with MkLog k' n' -> k' == reveal_sbytes (as_seq h0 k)
           /\ n' == reveal_sbytes (as_seq h0 n))))
-[@ "c_inline"]
+[@ CInline]
 let init st k n =
   let h0 = ST.get() in
   setup st k n 0uL;
@@ -506,7 +506,7 @@ val lemma_salsa20_counter_mode_2:
   k:Spec.key -> n:Spec.nonce -> ctr:UInt64.t{UInt64.v ctr + (length input / 64) < pow2 64} -> Lemma
     (Spec.CTR.counter_mode_blocks salsa20_ctx salsa20_cipher k n (UInt64.v ctr)
                                   (reveal_sbytes (as_seq hi input))
-    == (let prefix, block = Seq.split (as_seq hi input) (UInt32.v len - 64) in    
+    == (let prefix, block = Seq.split (as_seq hi input) (UInt32.v len - 64) in
       Math.Lemmas.lemma_mod_plus (Seq.length prefix) 1 (64);
       Math.Lemmas.lemma_div_le (Seq.length prefix) (UInt32.v len) 64;
       Spec.CTR.Lemmas.lemma_div (UInt32.v len) (64);

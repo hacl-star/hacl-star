@@ -15,7 +15,7 @@ open Hacl.Endianness
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 val store_51:
   output:buffer Hacl.UInt8.t{Buffer.length output = 32} ->
   input:buffer Hacl.UInt64.t{Buffer.length input = 5} ->

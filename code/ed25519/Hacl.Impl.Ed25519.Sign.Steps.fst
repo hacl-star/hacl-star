@@ -31,7 +31,7 @@ let lemma_point_inv h p h' p' = ()
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_mul_compress:
   out:hint8_p{length out = 32} ->
@@ -65,7 +65,7 @@ let point_mul_compress out s p =
 
 open Hacl.Spec.Endianness
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_mul_g:
   result:point ->
@@ -95,7 +95,7 @@ let point_mul_g result scalar =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_mul_g_compress:
   out:hint8_p{length out = 32} ->
@@ -124,7 +124,7 @@ let point_mul_g_compress out s =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 val copy_bytes:
   output:hint8_p ->
   input:hint8_p{disjoint input output} ->
@@ -184,7 +184,7 @@ let lemma_append2 h buf len1 len2 =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 val sign_step_1:
   secret:hint8_p{length secret = 32} ->
   tmp_bytes:hint8_p{length tmp_bytes = 352 /\ disjoint tmp_bytes secret} ->
@@ -221,7 +221,7 @@ let sign_step_1 secret tmp_bytes tmp_ints =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 val sign_step_2:
   msg:hint8_p{length msg < pow2 32 - 64} ->
   len:UInt32.t{UInt32.v len = length msg} ->
@@ -238,7 +238,7 @@ val sign_step_2:
         let a      = Buffer.sub apre 0ul  32ul in
         let prefix = Buffer.sub apre 32ul 32ul in
         let s = reveal_h64s (as_seq h1 r) in
-        Hacl.Spec.BignumQ.Eval.eval_q s == 
+        Hacl.Spec.BignumQ.Eval.eval_q s ==
           Spec.Ed25519.(sha512_modq FStar.Seq.(reveal_sbytes (as_seq h0 prefix @| as_seq h0 msg))) /\
         Hacl.Impl.BignumQ.Mul.within_56 h1 r /\
         Hacl.Spec.BignumQ.Eval.eval_q s < pow2 256 /\ UInt64.v (Seq.index s 0) < pow2 56 /\
@@ -273,7 +273,7 @@ let sign_step_2 msg len tmp_bytes tmp_ints =
 
 #reset-options "--max_fuel 0 --z3rlimit 50"
 
-[@ "substitute"]
+[@ Substitute]
 val sign_step_4:
   msg:hint8_p{length msg < pow2 32 - 64} ->
   len:UInt32.t{UInt32.v len = length msg} ->
@@ -297,7 +297,7 @@ val sign_step_4:
         let apre = Buffer.sub tmp_bytes 224ul 64ul in
         let a      = Buffer.sub apre 0ul 32ul in
         let prefix = Buffer.sub apre 32ul 32ul in
-        Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h1 h)) == 
+        Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h1 h)) ==
           Spec.Ed25519.(sha512_modq FStar.Seq.(reveal_sbytes (as_seq h0 rs' @| as_seq h0 a'' @| as_seq h0 msg))) /\
         Hacl.Impl.BignumQ.Mul.within_56 h1 h /\
         as_seq h1 a == as_seq h0 a /\
@@ -394,7 +394,7 @@ val sign_step_3:
             point_compress x) /\
         as_seq h1 r == as_seq h0 r /\
         as_seq h1 a'' == as_seq h0 a'' /\
-        as_seq h1 a == as_seq h0 a    
+        as_seq h1 a == as_seq h0 a
         )
     ))
 
@@ -412,7 +412,7 @@ let sign_step_3 tmp_bytes tmp_ints =
   no_upd_lemma_0 h0 h1 r;
   no_upd_lemma_0 h0 h1 a;
   no_upd_lemma_0 h0 h1 a'';
-  let rs'  = Buffer.sub tmp_bytes 160ul 32ul in  
+  let rs'  = Buffer.sub tmp_bytes 160ul 32ul in
   Hacl.Impl.Store56.store_56 rb r;
   let h2 = ST.get() in
   Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h2 rb))

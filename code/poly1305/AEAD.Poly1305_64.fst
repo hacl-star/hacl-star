@@ -227,7 +227,7 @@ let poly1305_blocks_continue log st input len =
   l'
 
 
-[@ "substitute"]
+[@ Substitute]
 val poly1305_blocks_finish_:
   log:I.log_t ->
   st:I.poly1305_state ->
@@ -254,7 +254,7 @@ val poly1305_blocks_finish_:
          /\ Hacl.Spec.Bignum.AddAndMultiply.bounds acc' S.p44 S.p44 S.p42)
     ))
 #reset-options "--max_fuel 0 --z3rlimit 1000"
-[@ "substitute"]
+[@ Substitute]
 let poly1305_blocks_finish_ log st input =
   let h = ST.get() in
   Seq.lemma_eq_intro (as_seq h input) (Seq.slice (as_seq h input) 0 16);

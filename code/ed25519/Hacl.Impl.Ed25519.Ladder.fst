@@ -90,7 +90,7 @@ let elemB = b:buffer Hacl.UInt64.t{length b = 5}
 open Hacl.Bignum25519
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val make_zero:
   b:elemB ->
@@ -98,7 +98,7 @@ val make_zero:
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 0
       /\ red_513 (as_seq h1 b)))
-[@ "substitute"]
+[@ Substitute]
 let make_zero b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   Hacl.Lib.Create64.make_h64_5 b zero zero zero zero zero;
@@ -109,7 +109,7 @@ let make_zero b =
   lemma_red_51_is_red_513 (as_seq h b)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val make_one:
   b:elemB ->
@@ -117,7 +117,7 @@ val make_one:
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 1
       /\ Hacl.Bignum25519.red_513 (as_seq h1 b)))
-[@ "substitute"]
+[@ Substitute]
 let make_one b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   let one  = Hacl.Cast.uint64_to_sint64 1uL in
@@ -129,7 +129,7 @@ let make_one b =
   lemma_red_51_is_red_513 (as_seq h b)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val make_point_inf:
   b:buffer Hacl.UInt64.t{length b = 20} ->
@@ -159,15 +159,15 @@ let make_point_inf b =
 
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500 --using_facts_from Prims --using_facts_from FStar"
-let sum_modifications (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem) 
-  : Lemma (requires (live h0 b1 /\ 
+let sum_modifications (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem)
+  : Lemma (requires (live h0 b1 /\
                      live h0 b2 /\
                      modifies_1 b1 h0 h1 /\
                      modifies_1 b2 h1 h2))
           (ensures modifies_2 b1 b2 h0 h2)
   =
   lemma_reveal_modifies_1 b1 h0 h1;
-  lemma_reveal_modifies_1 b2 h1 h2;  
+  lemma_reveal_modifies_1 b2 h1 h2;
   lemma_intro_modifies_2 b1 b2 h0 h2
 
 let modifies_2_to_2_1 (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem)
@@ -194,16 +194,16 @@ let point_mul result scalar q =
   make_point_inf nq;
   let hh1 = ST.get () in
   assert (modifies_1 nq hh0 hh1);
-  assert (modifies_1 b hh0 hh1);  
+  assert (modifies_1 b hh0 hh1);
   Hacl.Impl.Ed25519.SwapConditional.copy nqpq q;
   let hh2 = ST.get () in
-  assert (modifies_1 nqpq hh1 hh2);  
+  assert (modifies_1 nqpq hh1 hh2);
   assert (modifies_1 b hh1 hh2);
   point_mul_ b scalar;
-  let hh3 = ST.get () in 
+  let hh3 = ST.get () in
   assert (modifies_1 b hh2 hh3);
   lemma_modifies_1_trans b hh0 hh1 hh2;
-  lemma_modifies_1_trans b hh0 hh2 hh3;  
+  lemma_modifies_1_trans b hh0 hh2 hh3;
   assert (modifies_1 b hh0 hh3);
   Hacl.Impl.Ed25519.SwapConditional.copy result nq;
   let hh4 = ST.get () in

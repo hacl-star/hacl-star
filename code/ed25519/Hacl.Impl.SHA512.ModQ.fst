@@ -25,7 +25,7 @@ let lemma_modifies_0_2 #a #a' h0 h1 h2 b b' =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val sha512_modq_pre_:
   out:qelemB ->
@@ -85,7 +85,7 @@ let sha512_modq_pre out prefix input len =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val sha512_modq_pre_pre2_:
   out:qelemB ->

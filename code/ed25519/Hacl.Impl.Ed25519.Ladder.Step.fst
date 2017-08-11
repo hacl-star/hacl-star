@@ -21,7 +21,7 @@ module H8 = Hacl.UInt8
 
 type uint8_p = buffer H8.t
 
-[@ "substitute"]
+[@ Substitute]
 private
 val ith_bit:
   k:buffer Hacl.UInt8.t{length k = 32} ->
@@ -55,7 +55,7 @@ let ith_bit k i =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val swap_cond_inplace:
   p:point -> q:point{disjoint p q} -> i:limb{Hacl.UInt64.v i = 0 \/ Hacl.UInt64.v i = 1} ->
@@ -106,7 +106,7 @@ let swap_cond_inplace p q iswap =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val swap_cond:
   p':point -> q':point{disjoint p' q'} ->
@@ -159,7 +159,7 @@ let swap_cond p' q' p q iswap =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val loop_step_1:
   b:buffer Hacl.UInt64.t{length b = 80} ->
@@ -198,7 +198,7 @@ let loop_step_1 b k ctr i =
   swap_cond_inplace nq nqpq bit
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val loop_step_2:
   b:buffer Hacl.UInt64.t{length b = 80} ->
@@ -272,7 +272,7 @@ let loop_step_2 b k ctr =
   no_upd_lemma_1 h h2 nqpq2 t''
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val loop_step_3:
   b:buffer Hacl.UInt64.t{length b = 80} ->

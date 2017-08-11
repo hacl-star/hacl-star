@@ -25,7 +25,7 @@ private let lemma_distr_4 a b c d e : Lemma (a * (b + c + d + e) == a * b + a * 
     Math.Lemmas.distributivity_add_right a (b) c
 
 
-private let lemma_x_mod_2 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : 
+private let lemma_x_mod_2 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) :
   Lemma ((a + pow2 51 * b + pow2 102 * c + pow2 153 * d + pow2 204 * e) % 2 = a % 2)
   = assert_norm(pow2 51 = 2 * pow2 50);
     assert_norm(pow2 102 = 2 * pow2 101);
@@ -70,7 +70,7 @@ let x_mod_2 x =
 private
 val add_sign_spec:
   out:Seq.seq Hacl.UInt8.t{Seq.length out = 32 /\ Hacl.Spec.Endianness.hlittle_endian out < pow2 255} ->
-  x:Hacl.UInt64.t{v x < 2} ->  
+  x:Hacl.UInt64.t{v x < 2} ->
   GTot (s:Seq.seq Hacl.UInt8.t{Seq.length s = 32 /\ Hacl.Spec.Endianness.hlittle_endian s == Hacl.Spec.Endianness.hlittle_endian out + pow2 255 * v x})
 #reset-options "--max_fuel 0 --z3rlimit 100"
 let add_sign_spec out x =
@@ -99,9 +99,9 @@ let add_sign_spec out x =
   Endianness.little_endian_singleton (Hacl.Spec.Endianness.h8_to_u8 o31');
   Endianness.little_endian_append (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out') 0 31)) (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out') 31 32));
   out'
-  
 
-[@ "substitute"]
+
+[@ Substitute]
 private
 val add_sign:
   out:hint8_p{length out = 32} ->
@@ -110,7 +110,7 @@ val add_sign:
     (requires (fun h -> live h out /\ Hacl.Spec.Endianness.hlittle_endian (as_seq h out) < pow2 255))
     (ensures (fun h0 _ h1 -> live h0 out /\ live h1 out /\ modifies_1 out h0 h1
       /\ Hacl.Spec.Endianness.hlittle_endian (as_seq h1 out) == Hacl.Spec.Endianness.hlittle_endian (as_seq h0 out) + pow2 255 * v x))
-[@ "substitute"]
+[@ Substitute]
 let add_sign out x =
   let h0 = ST.get() in
   let xbyte = Hacl.Cast.sint64_to_sint8 x in
@@ -120,7 +120,7 @@ let add_sign out x =
   assert(as_seq h1 out == add_sign_spec (as_seq h0 out) x)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_compress_:
   tmp:buffer Hacl.UInt64.t{length tmp = 15} ->
@@ -132,7 +132,7 @@ val point_compress_:
       /\ red_513 (as_seq h (Hacl.Impl.Ed25519.ExtPoint.getz p))
       /\ red_513 (as_seq h (Hacl.Impl.Ed25519.ExtPoint.gett p))
       ))
-    (ensures (fun h0 _ h1 -> live h0 p /\ 
+    (ensures (fun h0 _ h1 -> live h0 p /\
       live h1 tmp /\ modifies_1 tmp h0 h1 /\
       (let s = as_seq h1 (Buffer.sub tmp 5ul 5ul) in
        let s' = as_seq h1 (Buffer.sub tmp 10ul 5ul) in
@@ -151,7 +151,7 @@ val point_compress_:
         Hacl.Bignum25519.seval s' == Spec.Curve25519.(y `fmul` (z ** (prime - 2))))
     ))
 #reset-options "--max_fuel 0 --z3rlimit 100"
-[@ "substitute"]
+[@ Substitute]
 let point_compress_ tmp p =
   let h0 = ST.get() in
   let zinv = Buffer.sub tmp 0ul  5ul in
@@ -206,7 +206,7 @@ val point_compress:
       /\ red_513 (as_seq h (Hacl.Impl.Ed25519.ExtPoint.getz p))
       /\ red_513 (as_seq h (Hacl.Impl.Ed25519.ExtPoint.gett p))
       ))
-    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 p /\ 
+    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 p /\
       live h1 out /\ modifies_1 out h0 h1 /\
       h1.[out] == Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p)
     ))

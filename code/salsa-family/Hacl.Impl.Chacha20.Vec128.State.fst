@@ -32,19 +32,19 @@ type state = b:Buffer.buffer vec{length b = 4}
 let blocks = U32.(vec_size /^ 4ul)
 let vecsizebytes = 16ul
 
-[@ "c_inline"]
+[@ CInline]
 val state_alloc:
   unit ->
   StackInline state
     (requires (fun h -> True))
     (ensures (fun h0 st h1 -> (st `unused_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
       /\ Map.domain h1.h == Map.domain h0.h))
-[@ "c_inline"]
+[@ CInline]
 let state_alloc () =
   create zero 4ul
 
 
-[@ "c_inline"]
+[@ CInline]
 val state_incr:
     k:state ->
     Stack unit
@@ -65,7 +65,7 @@ val state_incr:
          (* vec_as_seq st1.[3] == (Spec.Chacha20_vec.op_Plus_Percent_Hat (vec_as_seq st0.[3])) (vec_as_seq one_le)) *)
          ))
 #reset-options "--max_fuel 0 --z3rlimit 100"
-[@ "c_inline"]
+[@ CInline]
 let state_incr k =
   let h0 = ST.get() in
   let k3 = k.(3ul) in
@@ -98,18 +98,18 @@ let state_incr k =
                                FStar.UInt32.(c +^ 1ul)))
 
 
-[@ "c_inline"]
+[@ CInline]
 val state_to_key:
     k:state ->
     Stack unit
       (requires (fun h -> live h k))
       (ensures  (fun h0 _ h1 -> h0 == h1))
-[@ "c_inline"]
+[@ CInline]
 let state_to_key k = ()
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ "c_inline"]
+[@ CInline]
 val state_to_key_block:
     stream_block:uint8_p{length stream_block = 64} ->
     k:state{disjoint k stream_block} ->
@@ -136,10 +136,10 @@ let lemma_state_to_key_block a b =
   Spec.Lib.lemma_uint32s_from_le_bij 4 a;
   Spec.Lib.lemma_uint32s_from_le_inj 4 a (Spec.Lib.uint32s_to_le 4 b);
   Seq.lemma_eq_intro a (Spec.Lib.uint32s_to_le 4 b)
-  
+
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ "c_inline"]
+[@ CInline]
 let state_to_key_block stream_block k =
   let k0 = k.(0ul) in
   let k1 = k.(1ul) in
@@ -171,7 +171,7 @@ let state_to_key_block stream_block k =
   Seq.lemma_eq_intro (as_seq h4 stream_block) FStar.Seq.(as_seq h4 a @| as_seq h4 b @| as_seq h4 c @| as_seq h4 d)
 
 
-[@ "substitute"]
+[@ Substitute]
 val constant_setup_:
   c:state ->
   Stack unit
@@ -181,7 +181,7 @@ val constant_setup_:
        let open Spec.Chacha20_vec in let open FStar.Seq in
        vec_as_seq st1.[0] == Seq.Create.create_4 c0 c1 c2 c3 /\
        st0.[1] == st1.[1] /\ st0.[2] == st1.[2] /\ st0.[3] == st1.[3])))
-[@ "substitute"]
+[@ Substitute]
 let constant_setup_ st =
   st.(0ul)  <- vec_load_32x4 (uint32_to_sint32 0x61707865ul)
   	       		     (uint32_to_sint32 0x3320646eul)
@@ -189,7 +189,7 @@ let constant_setup_ st =
 			     (uint32_to_sint32 0x6b206574ul)
 
 
-[@ "substitute"]
+[@ Substitute]
 val constant_setup:
   c:state ->
   Stack unit
@@ -199,12 +199,12 @@ val constant_setup:
        let open Spec.Chacha20_vec in let open FStar.Seq in
        vec_as_seq st1.[0] == Seq.Create.create_4 c0 c1 c2 c3 /\
        st0.[1] == st1.[1] /\ st0.[2] == st1.[2] /\ st0.[3] == st1.[3])))
-[@ "substitute"]
+[@ Substitute]
 let constant_setup st =
   constant_setup_ st
 
 
-[@ "substitute"]
+[@ Substitute]
 val keysetup:
   st:state ->
   k:uint8_p{length k = 32 /\ disjoint st k} ->
@@ -218,7 +218,7 @@ val keysetup:
        vec_as_seq st1.[1] == Spec.Lib.uint32s_from_le 4 (Seq.slice k 0 16) /\
        vec_as_seq st1.[2] == Spec.Lib.uint32s_from_le 4 (Seq.slice k 16 32)
        )))
-[@ "substitute"]
+[@ Substitute]
 let keysetup st k =
   let k0 = vec_load128_le (Buffer.sub k 0ul 16ul) in
   let k1 = vec_load128_le (Buffer.sub k 16ul 16ul) in
@@ -226,7 +226,7 @@ let keysetup st k =
   st.(2ul) <- k1
 
 
-[@ "substitute"]
+[@ Substitute]
 val ctr_ivsetup:
   st:state ->
   ctr:U32.t ->
@@ -261,9 +261,9 @@ let lemma_ctr_ivsetup iv =
   Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 4) 0 4) (Seq.slice iv 0 4);
   Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 4) 0 0) Seq.createEmpty;
   Spec.Lib.lemma_uint32s_from_le_def_0 0 (Seq.slice iv 0 0)
-  
 
-[@ "substitute"]
+
+[@ Substitute]
 let ctr_ivsetup st ctr iv =
   let n0 = hload32_le (Buffer.sub iv 0ul 4ul) in
   let n1 = hload32_le (Buffer.sub iv 4ul 4ul) in
@@ -276,8 +276,8 @@ let ctr_ivsetup st ctr iv =
   Seq.lemma_eq_intro (vec_as_seq v) (Seq.cons ctr (Spec.Lib.uint32s_from_le 3 (reveal_sbytes (as_seq h iv))));
   st.(3ul) <- v
 
-  
-[@ "c_inline"]
+
+[@ CInline]
 val state_setup:
   st:state ->
   k:uint8_p{length k = 32 /\ disjoint st k} ->
@@ -290,7 +290,7 @@ val state_setup:
        let op_String_Access = Seq.index in
        Seq.Create.create_4 (vec_as_seq st.[0]) (vec_as_seq st.[1]) (vec_as_seq st.[2]) (vec_as_seq st.[3])
        == Spec.Chacha20_vec.setup (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) (U32.v c))))
-[@ "c_inline"]
+[@ CInline]
 let state_setup st k n c =
   let h0 = ST.get() in
   constant_setup st;
