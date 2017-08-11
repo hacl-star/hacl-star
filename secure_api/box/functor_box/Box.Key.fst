@@ -35,7 +35,6 @@ type key_t (im:index_module) (pm:plain_module)= Type0
 
 type aes_key = SPEC.key
 type cipher = b:bytes{Seq.length b >= 16 /\ (Seq.length b - 16) / Spec.Salsa20.blocklen < pow2 32}
-type nonce = SPEC.nonce
 noeq type key_t2 (im:index_module) =
   | Key: i:id im -> raw:aes_key -> key_t2 im
 
@@ -51,14 +50,14 @@ abstract noeq type key_module (im:index_module) =
       (ensures  (fun h0 k h1 ->
         h0 == h1
       ))) ->
-    coerce: (i:id im -> b:bytes -> ST (k:key_t2 im{k.i = i /\ b=k.raw})
+    coerce: (i:id im -> b:bytes -> ST (k:key_t2 im{k.i = i /\ b=k.raw}) //TODO: make Total
       (requires (fun h0 ->
-        dishonest im (ID i) \/ fresh im (ID i) h0
+        dishonest im (ID i) \/ fresh im (ID i) h0 //TODO: require only dishonest
       ))
       (ensures  (fun h0 k h1 ->
         h0 == h1
       ))) ->
-    leak: (k:key_t2 im{(dishonest im (ID (get_index k))) \/ ~(b2t ae_ind_cca)} -> (b:bytes{b = k.raw})) ->
+    leak: (k:key_t2 im{(dishonest im (ID (get_index k))) \/ ~(b2t ae_ind_cca)} -> (b:bytes{b = k.raw})) -> //TODO: remove not ae_ind_cca
     key_module im
 
 let create (im:index_module) (get_index:(k:key_t2 im -> i:id im{k.i = i})) get_rawGT gen coerce leak =

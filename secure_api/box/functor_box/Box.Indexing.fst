@@ -89,7 +89,7 @@ val recall_log: im:index_module -> ST unit
 let recall_log im =
   MR.m_recall im.id_log
 
-type id (im:index_module) = i:(im.subId*im.subId){im.smaller (fst i) (snd i)} // add refinement once total order on subids is established{fst i <= snd i}
+type id (im:index_module) = i:(im.subId*im.subId){im.smaller (fst i) (snd i)}
 
 noeq type meta_id (im:index_module) =
   | ID of id im

@@ -28,7 +28,6 @@ module Plain = Box.Plain
 module Key = Box.Key
 module ID = Box.Indexing
 
-
 let noncesize = SPEC.noncelen
 let keysize = SPEC.keylen
 type aes_key = SPEC.key
