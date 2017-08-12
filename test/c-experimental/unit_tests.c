@@ -2,17 +2,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <string.h>
 #include <time.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 #include "haclnacl.h"
 #include "tweetnacl.h"
+#include "hacl_test_utils.h"
 
-#define SIZE (/* 1024 */ 1 * 1024)
+#define HACL_UNIT_TESTS_SIZE (1 * 1024)
 #define POLY_MACSIZE 16
 #define POLY_BLOCKSIZE 16
 #define POLY_KEYSIZE 32
@@ -20,19 +16,18 @@
 #define CHACHA_KEYSIZE 32
 #define SALSA_BLOCK_SIZE 64
 
+/* Try to read bytes, return if fails */
+#define READ_RANDOM_BYTES(len, buf) \
+  if (! (read_random_bytes((len), (buf)))) return false
+
 bool unit_test_onetimeauth(){
   // Global length
-  uint64_t len = SIZE * sizeof(uint8_t);
+  uint64_t len = HACL_UNIT_TESTS_SIZE * sizeof(uint8_t);
   // Scratch buffers
   uint8_t hacl_mac[POLY_MACSIZE], expected_mac[POLY_MACSIZE], key[POLY_KEYSIZE];
-  uint8_t *plaintext = malloc(SIZE * sizeof (uint8_t));
+  uint8_t *plaintext = malloc(HACL_UNIT_TESTS_SIZE * sizeof (uint8_t));
   // Initializing random plaintext
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plaintext, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return 1;
-  }
+  READ_RANDOM_BYTES(HACL_UNIT_TESTS_SIZE, plaintext);
   // Tests
   int a;
   bool pass = true;
@@ -62,15 +57,14 @@ bool unit_test_onetimeauth(){
       break;
     }
   }
-  tweet_crypto_onetimeauth(expected_mac, plaintext, SIZE, key);
-  crypto_onetimeauth(hacl_mac, plaintext, SIZE, key);
+  tweet_crypto_onetimeauth(expected_mac, plaintext, HACL_UNIT_TESTS_SIZE, key);
+  crypto_onetimeauth(hacl_mac, plaintext, HACL_UNIT_TESTS_SIZE, key);
   a = memcmp(hacl_mac, expected_mac, 16 * sizeof (uint8_t));
   if (a != 0){
     pass = false;
-    printf("POLY1305 failed on input of size %d\n.", SIZE);
+    printf("POLY1305 failed on input of size %d\n.", HACL_UNIT_TESTS_SIZE);
   }
 
-  close(fd);
   free(plaintext);
 
   return pass;
@@ -81,30 +75,21 @@ bool unit_test_onetimeauth(){
 
 bool unit_test_crypto_box(){
   // Global length
-  uint64_t len = SIZE * sizeof(uint8_t);
+  uint64_t len = HACL_UNIT_TESTS_SIZE * sizeof(uint8_t);
   // Scratch buffers
-  uint8_t hacl_cipher[SIZE + 32], expected_cipher[SIZE + 32];
+  uint8_t hacl_cipher[HACL_UNIT_TESTS_SIZE + 32], expected_cipher[HACL_UNIT_TESTS_SIZE + 32];
   // Generation of the public/secret key couple
   uint8_t sk1[32], pk1[32];
   uint8_t sk2[32], pk2[32];
   tweet_crypto_box_keypair(pk1, sk1);
   tweet_crypto_box_keypair(pk2, sk2);
   // Random plaintext
-  uint8_t *plaintext = malloc((SIZE + crypto_box_ZEROBYTES) * sizeof (uint8_t));
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plaintext + crypto_box_ZEROBYTES, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return false;
-  }
+  uint8_t *plaintext = malloc((HACL_UNIT_TESTS_SIZE + crypto_box_ZEROBYTES) * sizeof (uint8_t));
+  READ_RANDOM_BYTES(len, plaintext + crypto_box_ZEROBYTES);
   for (int i = 0; i < crypto_box_ZEROBYTES; i++) plaintext[i] = 0;
   // Random plaintext
   uint8_t nonce[24];
-  res = read(fd, nonce, 24);
-  if (res != 24) {
-    printf("Error on reading nonce, got %" PRIu64 " bytes\n", res);
-    return false;
-  }
+  READ_RANDOM_BYTES(24, nonce);
   // Test 1
   int a;
   bool pass = true;
@@ -133,25 +118,24 @@ bool unit_test_crypto_box(){
   if (!pass) return pass;
 
   // Test 2
-  tweet_crypto_box(expected_cipher, plaintext, crypto_box_ZEROBYTES + SIZE, nonce, pk1, sk2);
-  crypto_box(hacl_cipher, plaintext, crypto_box_ZEROBYTES + SIZE, nonce, pk1, sk2);
-  a = memcmp(hacl_cipher, expected_cipher, (crypto_box_ZEROBYTES + SIZE) * sizeof (uint8_t));
+  tweet_crypto_box(expected_cipher, plaintext, crypto_box_ZEROBYTES + HACL_UNIT_TESTS_SIZE, nonce, pk1, sk2);
+  crypto_box(hacl_cipher, plaintext, crypto_box_ZEROBYTES + HACL_UNIT_TESTS_SIZE, nonce, pk1, sk2);
+  a = memcmp(hacl_cipher, expected_cipher, (crypto_box_ZEROBYTES + HACL_UNIT_TESTS_SIZE) * sizeof (uint8_t));
   if (a != 0){
     pass = false;
-    printf("BOX failed on input of size %d\n.", SIZE);
+    printf("BOX failed on input of size %d\n.", HACL_UNIT_TESTS_SIZE);
   }
-  a = crypto_box_open(hacl_cipher, expected_cipher, SIZE + crypto_box_ZEROBYTES, nonce, pk2, sk1);
+  a = crypto_box_open(hacl_cipher, expected_cipher, HACL_UNIT_TESTS_SIZE + crypto_box_ZEROBYTES, nonce, pk2, sk1);
   if (a != 0) {
     pass = false;
-    printf("BOX OPEN failed to verify on input of size %d\n", SIZE);
+    printf("BOX OPEN failed to verify on input of size %d\n", HACL_UNIT_TESTS_SIZE);
   }
-  a = memcmp(hacl_cipher, plaintext, (crypto_box_ZEROBYTES + SIZE) * sizeof (uint8_t));
+  a = memcmp(hacl_cipher, plaintext, (crypto_box_ZEROBYTES + HACL_UNIT_TESTS_SIZE) * sizeof (uint8_t));
   if (a != 0) {
     pass = false;
-    printf("BOX OPEN failed on input of size %d\n", SIZE);
+    printf("BOX OPEN failed on input of size %d\n", HACL_UNIT_TESTS_SIZE);
   }
 
-  close(fd);
   free(plaintext);
 
   return pass;
@@ -162,12 +146,7 @@ bool unit_test_crypto_box(){
 bool unit_test_scalarmult(){
   // Random key values
   uint8_t *random_bytes = malloc(32 * NUM_SCALARMULT * sizeof(uint8_t));
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, random_bytes, 32 * NUM_SCALARMULT);
-  if (res != 32 * NUM_SCALARMULT) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return false;
-  }
+  READ_RANDOM_BYTES(32 * NUM_SCALARMULT, random_bytes);
   // Storage buffers
   uint8_t expected_bytes[32], hacl_bytes[32];
   int a, b;
@@ -193,7 +172,6 @@ bool unit_test_scalarmult(){
     }
   }
 
-  close(fd);
   free(random_bytes);
 
   return pass;
@@ -220,18 +198,13 @@ bool unit_test_crypto_keypair(){
 }
 
 bool unit_test_crypto_sign(){
-  uint64_t len = SIZE * sizeof(uint8_t);
-  uint8_t *plaintext = malloc(SIZE * sizeof (uint8_t));
-  uint8_t *expected_signed_msg = malloc((SIZE+64) * sizeof (uint8_t));
-  uint8_t *hacl_signed_msg = malloc((SIZE+64) * sizeof (uint8_t));
+  uint64_t len = HACL_UNIT_TESTS_SIZE * sizeof(uint8_t);
+  uint8_t *plaintext = malloc(HACL_UNIT_TESTS_SIZE * sizeof (uint8_t));
+  uint8_t *expected_signed_msg = malloc((HACL_UNIT_TESTS_SIZE+64) * sizeof (uint8_t));
+  uint8_t *hacl_signed_msg = malloc((HACL_UNIT_TESTS_SIZE+64) * sizeof (uint8_t));
   uint8_t sk[64], pk[32];
   crypto_sign_keypair(pk, sk);
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plaintext, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return false;
-  }
+  READ_RANDOM_BYTES(len, plaintext);
   int a;
   bool pass = true;
   long long unsigned int smlen;
@@ -257,24 +230,23 @@ bool unit_test_crypto_sign(){
     }
   }
   if (!pass) return pass;
-  tweet_crypto_sign(expected_signed_msg, &smlen, plaintext, SIZE, sk);
-  crypto_sign(hacl_signed_msg, &smlen, plaintext, SIZE, sk);
-  a = memcmp(hacl_signed_msg, expected_signed_msg, (SIZE+64) * sizeof (uint8_t));
+  tweet_crypto_sign(expected_signed_msg, &smlen, plaintext, HACL_UNIT_TESTS_SIZE, sk);
+  crypto_sign(hacl_signed_msg, &smlen, plaintext, HACL_UNIT_TESTS_SIZE, sk);
+  a = memcmp(hacl_signed_msg, expected_signed_msg, (HACL_UNIT_TESTS_SIZE+64) * sizeof (uint8_t));
   if (a != 0){
     pass = false;
-    printf("crypto_sign failed on input of size %d\n.", SIZE);
+    printf("crypto_sign failed on input of size %d\n.", HACL_UNIT_TESTS_SIZE);
   }
-  pass = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, SIZE + 64, pk);
+  pass = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, HACL_UNIT_TESTS_SIZE + 64, pk);
   if (pass == false) {
-    printf("crypto_sign_open returned value failed on input of size %d\n", SIZE);
+    printf("crypto_sign_open returned value failed on input of size %d\n", HACL_UNIT_TESTS_SIZE);
   }
-  a = memcmp(hacl_signed_msg, plaintext, SIZE * sizeof(uint8_t));
+  a = memcmp(hacl_signed_msg, plaintext, HACL_UNIT_TESTS_SIZE * sizeof(uint8_t));
   if (a != 0){
     pass = false;
-    printf("crypto_sign_open failed on input of size %d\n", SIZE);
+    printf("crypto_sign_open failed on input of size %d\n", HACL_UNIT_TESTS_SIZE);
   }
 
-  close(fd);
   free(plaintext);
   free(hacl_signed_msg);
   free(expected_signed_msg);
@@ -287,27 +259,18 @@ bool unit_test_crypto_sign(){
 
 bool unit_test_crypto_secretbox(){
   // Global length
-  uint64_t len = SIZE * sizeof(uint8_t);
+  uint64_t len = HACL_UNIT_TESTS_SIZE * sizeof(uint8_t);
   // Scratch buffers
-  uint8_t hacl_cipher[SIZE + 32], expected_cipher[SIZE + 32];
+  uint8_t hacl_cipher[HACL_UNIT_TESTS_SIZE + 32], expected_cipher[HACL_UNIT_TESTS_SIZE + 32];
   // Shared key
   uint8_t key[32];
   // Random plaintext
-  uint8_t *plaintext = malloc((SIZE + crypto_secretbox_ZEROBYTES) * sizeof (uint8_t));
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plaintext + crypto_secretbox_ZEROBYTES, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return false;
-  }
+  uint8_t *plaintext = malloc((HACL_UNIT_TESTS_SIZE + crypto_secretbox_ZEROBYTES) * sizeof (uint8_t));
+  READ_RANDOM_BYTES(len, plaintext + crypto_secretbox_ZEROBYTES);
   for (int i = 0; i < crypto_secretbox_ZEROBYTES; i++) plaintext[i] = 0;
   // Random plaintext
   uint8_t nonce[24];
-  res = read(fd, nonce, 24);
-  if (res != 24) {
-    printf("Error on reading nonce, got %" PRIu64 " bytes\n", res);
-    return false;
-  }
+  READ_RANDOM_BYTES(24, nonce);
   // Test 1
   int a;
   bool pass = true;
@@ -336,25 +299,24 @@ bool unit_test_crypto_secretbox(){
   if (!pass) return pass;
 
   // Test 2
-  tweet_crypto_secretbox(expected_cipher, plaintext, crypto_secretbox_ZEROBYTES + SIZE, nonce, key);
-  crypto_secretbox(hacl_cipher, plaintext, crypto_secretbox_ZEROBYTES + SIZE, nonce, key);
-  a = memcmp(hacl_cipher, expected_cipher, (crypto_secretbox_ZEROBYTES + SIZE) * sizeof (uint8_t));
+  tweet_crypto_secretbox(expected_cipher, plaintext, crypto_secretbox_ZEROBYTES + HACL_UNIT_TESTS_SIZE, nonce, key);
+  crypto_secretbox(hacl_cipher, plaintext, crypto_secretbox_ZEROBYTES + HACL_UNIT_TESTS_SIZE, nonce, key);
+  a = memcmp(hacl_cipher, expected_cipher, (crypto_secretbox_ZEROBYTES + HACL_UNIT_TESTS_SIZE) * sizeof (uint8_t));
   if (a != 0){
     pass = false;
-    printf("SECRETBOX failed on input of size %d\n.", SIZE);
+    printf("SECRETBOX failed on input of size %d\n.", HACL_UNIT_TESTS_SIZE);
   }
-  a = crypto_secretbox_open(hacl_cipher, expected_cipher, SIZE + crypto_secretbox_ZEROBYTES, nonce, key);
+  a = crypto_secretbox_open(hacl_cipher, expected_cipher, HACL_UNIT_TESTS_SIZE + crypto_secretbox_ZEROBYTES, nonce, key);
   if (a != 0) {
     pass = false;
-    printf("SECRETBOX OPEN failed to verify on input of size %d\n", SIZE);
+    printf("SECRETBOX OPEN failed to verify on input of size %d\n", HACL_UNIT_TESTS_SIZE);
   }
-  a = memcmp(hacl_cipher, plaintext, (crypto_secretbox_ZEROBYTES + SIZE) * sizeof (uint8_t));
+  a = memcmp(hacl_cipher, plaintext, (crypto_secretbox_ZEROBYTES + HACL_UNIT_TESTS_SIZE) * sizeof (uint8_t));
   if (a != 0) {
     pass = false;
-    printf("SECRETBOX OPEN failed on input of size %d\n", SIZE);
+    printf("SECRETBOX OPEN failed on input of size %d\n", HACL_UNIT_TESTS_SIZE);
   }
 
-  close(fd);
   free(plaintext);
 
   return pass;
@@ -362,19 +324,14 @@ bool unit_test_crypto_secretbox(){
 
 bool unit_test_crypto_stream(){
   // Global length
-  uint64_t len = SIZE * sizeof(uint8_t);
+  uint64_t len = HACL_UNIT_TESTS_SIZE * sizeof(uint8_t);
   // Scratch buffers
-  uint8_t hacl_cipher[SIZE], expected_cipher[SIZE];
+  uint8_t hacl_cipher[HACL_UNIT_TESTS_SIZE], expected_cipher[HACL_UNIT_TESTS_SIZE];
   // Shared key
   uint8_t key[32], nonce[24];
   // Random plaintext
-  uint8_t *plaintext = malloc(SIZE * sizeof (uint8_t));
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plaintext, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return false;
-  }
+  uint8_t *plaintext = malloc(HACL_UNIT_TESTS_SIZE * sizeof (uint8_t));
+  READ_RANDOM_BYTES(len, plaintext);
   // Test 1
   int a;
   bool pass = true;
@@ -390,15 +347,14 @@ bool unit_test_crypto_stream(){
   }
   if (!pass) return pass;
   // Test 2
-  tweet_crypto_stream_xor(expected_cipher, plaintext, SIZE, nonce, key);
-  crypto_stream_xor(hacl_cipher, plaintext, SIZE, nonce, key);
-  a = memcmp(hacl_cipher, expected_cipher, SIZE * sizeof(uint8_t));
+  tweet_crypto_stream_xor(expected_cipher, plaintext, HACL_UNIT_TESTS_SIZE, nonce, key);
+  crypto_stream_xor(hacl_cipher, plaintext, HACL_UNIT_TESTS_SIZE, nonce, key);
+  a = memcmp(hacl_cipher, expected_cipher, HACL_UNIT_TESTS_SIZE * sizeof(uint8_t));
   if (a != 0){
     pass = false;
-    printf("SECRETBOX failed on input of size %d\n.", SIZE);
+    printf("SECRETBOX failed on input of size %d\n.", HACL_UNIT_TESTS_SIZE);
   }
 
-  close(fd);
   free(plaintext);
 
   return pass;

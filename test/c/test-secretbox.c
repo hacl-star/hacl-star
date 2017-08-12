@@ -158,12 +158,8 @@ int32_t perf_api() {
   uint32_t len = 1024*1024 * sizeof(char);
   uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(len+16*sizeof(char));
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plaintext, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  if (! (read_random_bytes(len, plaintext)))
     return 1;
-  }
 
   cycles a,b;
   clock_t t1,t2;

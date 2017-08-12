@@ -3,12 +3,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include "hacl_test_utils.h"
 
 void randombytes(uint8_t * x,uint64_t len) {
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, x, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  if (! (read_random_bytes(len, x)))
     exit(1);
-  }
 }

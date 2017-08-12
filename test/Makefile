@@ -170,7 +170,7 @@ update-snapshot:
 	$(MAKE) -C ../code clean
 	$(MAKE) -C snapshot-gcc-unrolled clean
 	$(MAKE) -C snapshot-gcc clean
-	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) \
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) \
 	   $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
 	   $(addprefix c-experimental/, kremlib.h FStar.h Makefile)  \
 		../snapshots/hacl-c
@@ -186,7 +186,7 @@ nss-snapshot:
 	$(MAKE) -C snapshot-gcc-unrolled clean
 	$(MAKE) -C snapshot-gcc clean
 	mkdir -p ../snapshots/nss
-	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/nss
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/nss
 	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) ../snapshots/nss
 	cp $(addprefix c-experimental/, kremlib.h FStar.h Makefile)  ../snapshots/nss
 	$(MAKE) -C ../snapshots/nss unit-tests
