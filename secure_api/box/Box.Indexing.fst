@@ -44,6 +44,18 @@ let smaller_equal i1 i2 =
   let id2 = little_endian i2 in
   id1 <= id2
 
+(** This lemma is necessary to prove symmetric id generation *)
+val nat_smaller_equal_anti_symmetric: i1:nat -> i2:nat -> Lemma
+    (requires (True))
+    (ensures (i1 <= i2 /\ i2 <= i1 ==> i1 = i2))
+    let nat_smaller_equal_anti_symmetric i1 i2 = ()
+
+(* This lemma is necessary to prove symmetric id generation *)
+val smaller_equal_anti_symmetric: i1:dh_id -> i2:dh_id{length i1 = length i2}-> Lemma
+  (requires (smaller_equal i1 i2 /\ smaller_equal i2 i1 ))
+  (ensures (i1 = i2))
+let smaller_equal_anti_symmetric i1 i2 =
+  lemma_little_endian_inj i1 i2
 
 val larger: i1:dh_id -> i2:dh_id{length i1 = length i2} -> Tot bool
 let larger i1 i2 =
@@ -58,7 +70,6 @@ type id =
   | AE_id of ae_id
 
 
-#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
 val generate_ae_id: i1:id{DH_id? i1} -> i2:id{DH_id? i2} -> Tot (i3:id{AE_id? i3})
 let generate_ae_id i1 i2 =
   match i1,i2 with
@@ -66,43 +77,51 @@ let generate_ae_id i1 i2 =
     if smaller_equal i1' i2' then (
     assert((smaller_equal i1' i2'));
     AE_id (i1',i2')
-  ) else (
+    ) else (
     AE_id (i2',i1'))
 
 
-//TODO: Fix this! #reset-options
-#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 1"
-assume val symmetric_id_generation: i1:id{DH_id? i1} -> i2:id{DH_id? i2} -> Lemma
+val symmetric_id_generation: i1:id{DH_id? i1} -> i2:id{DH_id? i2} -> Lemma
   (requires (True))
-  (ensures (forall id1 id2. generate_ae_id id1 id2 = generate_ae_id id2 id1))
+  (ensures (generate_ae_id i1 i2 = generate_ae_id i2 i1))
   [SMTPat (generate_ae_id i1 i2)]
-//let symmetric_id_generation i1 i2 = ()
+let symmetric_id_generation i1 i2 =
+  match i1,i2 with
+  | DH_id i1',DH_id i2' ->
+    if smaller_equal i1' i2' && smaller_equal i2' i1' then (
+      smaller_equal_anti_symmetric i1' i2';
+      ()
+    )
+    else (
+      ()
+    )
 
-type id_log_key = id
-type id_log_value = unit
-type id_log_range = fun id_log_key -> id_log_value
-let id_log_inv (f:MM.map' id_log_key id_log_range) = True
+let id_log_range = fun id -> unit
+let id_log_inv = fun (_:MM.map' id id_log_range) -> True
 
 val id_log_region: (r:MR.rid{extends r root /\ is_eternal_region r /\ is_below r root})
 let id_log_region = new_region root
 
+val id_log: MM.t id_log_region
+  id           (*domain*)
+  id_log_range (*range*)
+  id_log_inv   (*invariant*)
+let id_log = MM.alloc #id_log_region #id #id_log_range #id_log_inv
+
+
+let id_honesty_log_range = fun dh_id -> b:bool{~prf_odh ==> b=false}
+let id_honesty_log_inv = fun (_:MM.map' dh_id id_honesty_log_range) -> True
+
 val id_honesty_log_region: (r:MR.rid{ extends r root /\ is_eternal_region r /\ is_below r root /\ disjoint r id_log_region})
 let id_honesty_log_region =
-  recall_region id_log_region;
-  new_region root
+    recall_region id_log_region;
+    new_region root
 
-
-val id_log: MM.t id_log_region id_log_key id_log_range id_log_inv
-let id_log = MM.alloc #id_log_region #id_log_key #id_log_range #id_log_inv
-
-type id_honesty_log_key = dh_id
-type id_honesty_log_value = b:bool{~prf_odh ==> b=false}
-type id_honesty_log_range = fun id_honesty_log_key -> id_honesty_log_value
-let id_honesty_log_inv (m:MM.map' id_honesty_log_key id_honesty_log_range) = True
-
-
-val id_honesty_log: MM.t id_honesty_log_region id_honesty_log_key id_honesty_log_range id_honesty_log_inv
-let id_honesty_log = MM.alloc #id_honesty_log_region #id_honesty_log_key #id_honesty_log_range #id_honesty_log_inv
+val id_honesty_log: MM.t id_honesty_log_region
+  dh_id                (*domain*)
+  id_honesty_log_range (*range*)
+  id_honesty_log_inv   (*invariant*)
+let id_honesty_log = MM.alloc #id_honesty_log_region #dh_id #id_honesty_log_range #id_honesty_log_inv
 
 
 let fresh (i:id) h =
