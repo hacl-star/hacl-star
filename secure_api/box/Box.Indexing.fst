@@ -44,12 +44,6 @@ let smaller_equal i1 i2 =
   let id2 = little_endian i2 in
   id1 <= id2
 
-(** This lemma is necessary to prove symmetric id generation *)
-val nat_smaller_equal_anti_symmetric: i1:nat -> i2:nat -> Lemma
-    (requires (True))
-    (ensures (i1 <= i2 /\ i2 <= i1 ==> i1 = i2))
-    let nat_smaller_equal_anti_symmetric i1 i2 = ()
-
 (* This lemma is necessary to prove symmetric id generation *)
 val smaller_equal_anti_symmetric: i1:dh_id -> i2:dh_id{length i1 = length i2}-> Lemma
   (requires (smaller_equal i1 i2 /\ smaller_equal i2 i1 ))
