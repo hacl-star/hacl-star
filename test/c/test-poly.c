@@ -5,7 +5,7 @@
 #include "internal/poly1305.h"
 #include "poly1305_local.h"
 #include "tweetnacl.h"
-
+#include "hacl_test_utils.h"
 
 #define PLAINLEN (1024*1024)
 #define ROUNDS 1000
@@ -185,6 +185,7 @@ int32_t perf_poly() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
+  uint64_t res = 0;
   if (! (read_random_bytes(len, plain)))
     return 1;
   uint8_t* macs = malloc(ROUNDS * MACSIZE * sizeof(char));

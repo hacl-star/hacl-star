@@ -3,6 +3,7 @@
 #include "NaCl.h"
 #include "sodium.h"
 #include "tweetnacl.h"
+#include "hacl_test_utils.h"
 
 
 #define MESSAGE_LEN 72
@@ -156,6 +157,7 @@ int32_t test_api()
 int32_t perf_api() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = 1024*1024 * sizeof(char);
+  uint64_t res = 0;
   uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(len+16*sizeof(char));
   if (! (read_random_bytes(len, plaintext)))

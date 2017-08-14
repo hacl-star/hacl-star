@@ -402,7 +402,8 @@ int32_t perf_chacha() {
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
   uint8_t* cipher = malloc(len);
-  if (! (read_random_bytes(len, plain))
+  uint64_t res = 0;
+  if (! (read_random_bytes(len, plain)))
     return 1;
 
   uint32_t counter = (uint32_t )1;

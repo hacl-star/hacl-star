@@ -155,6 +155,7 @@ int32_t perf_api() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint8_t mac[16] = {0};
   uint32_t len = 1024*1024 * sizeof(char);
+  uint64_t res = 0;  
   uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(2*len);
   if (! (read_random_bytes(len, plaintext)))

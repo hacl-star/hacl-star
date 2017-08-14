@@ -1,6 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
-#include "SHA2_512.h"
+#include "SHA2_384.h"
 #include "sodium.h"
 #include "tweetnacl.h"
 #include "hacl_test_utils.h"
@@ -64,12 +64,12 @@ void flush_results(char *txt, uint64_t hacl_cy, uint64_t sodium_cy, uint64_t oss
 #define ROUNDS 1000
 #define SIGSIZE 64
 
-int32_t test_sha512()
+int32_t test_sha384()
 {
   return exit_success;
 }
 
-int32_t perf_sha512() {
+int32_t perf_sha384() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
@@ -83,43 +83,43 @@ int32_t perf_sha512() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    crypto_hash_sha512(macs + SIGSIZE * i, plain, len);
+    crypto_hash_sha384(macs + SIGSIZE * i, plain, len);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
   sodium_cy = (double)b - a;
   sodium_utime = (double)t2 - t1;
-  print_results("Sodium SHA512 speed", (double)t2-t1,
+  print_results("Sodium SHA384 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
 				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
-    t1 = clock();
-  a = TestLib_cpucycles_begin();
-  for (int i = 0; i < ROUNDS; i++){
-    tweet_crypto_hash_sha512_tweet(macs + SIGSIZE * i, plain, len);
-  }
-  b = TestLib_cpucycles_end();
-  t2 = clock();
-  tweet_cy = (double)b - a;
-  tweet_utime = (double)t2 - t1;
-  print_results("TweetNaCl SHA512 speed", (double)t2-t1,
-		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
-				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
-  printf("Composite result (ignore): %" PRIx64 "\n", res);
+  /*   t1 = clock(); */
+  /* a = TestLib_cpucycles_begin(); */
+  /* for (int i = 0; i < ROUNDS; i++){ */
+  /*   tweet_crypto_hash_sha384_tweet(macs + SIGSIZE * i, plain, len); */
+  /* } */
+  /* b = TestLib_cpucycles_end(); */
+  /* t2 = clock(); */
+  /* tweet_cy = (double)b - a; */
+  /* tweet_utime = (double)t2 - t1; */
+  /* print_results("TweetNaCl SHA384 speed", (double)t2-t1, */
+  /*  	(double) b - a, ROUNDS, PLAINLEN); */
+  /* for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8) */
+  /*  			     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24); */
+  /* printf("Composite result (ignore): %" PRIx64 "\n", res); */
 
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    SHA2_512_hash(macs + SIGSIZE * i, plain, len);
+    SHA2_384_hash(macs + SIGSIZE * i, plain, len);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
   hacl_cy = (double)b - a;
   hacl_utime = (double)t2 - t1;
-  print_results("HACL SHA512 speed", (double)t2-t1,
+  print_results("HACL SHA384 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
 				     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
@@ -128,19 +128,19 @@ int32_t perf_sha512() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    SHA512(plain, len, macs + SIGSIZE * i);
+    SHA384(plain, len, macs + SIGSIZE * i);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();
   ossl_cy = (double)b - a;
   ossl_utime = (double)t2 - t1;
-  print_results("OpenSSL SHA512 speed", (double)t2-t1,
+  print_results("OpenSSL SHA384 speed", (double)t2-t1,
         	(double) b - a, ROUNDS, PLAINLEN);
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(macs+SIGSIZE*i) + (uint64_t)*(macs+SIGSIZE*i+8)
         			     + (uint64_t)*(macs+SIGSIZE*i+16) + (uint64_t)*(macs+SIGSIZE*i+24);
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
-  flush_results("SHA512", hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime, ROUNDS, PLAINLEN);
+  flush_results("SHA384", hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime, ROUNDS, PLAINLEN);
 
   return exit_success;
 }
@@ -148,13 +148,13 @@ int32_t perf_sha512() {
 int32_t main(int argc, char *argv[])
 {
   if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
-    int32_t res = test_sha512();
+    int32_t res = test_sha384();
     if (res == exit_success) {
-      res = perf_sha512();
+      res = perf_sha384();
     }
     return res;
   } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
-    return test_sha512();
+    return test_sha384();
   } else {    
     printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
     return exit_failure;

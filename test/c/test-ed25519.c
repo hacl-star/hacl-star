@@ -122,8 +122,9 @@ int32_t test_ed25519()
 int32_t perf_ed25519() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = PLAINLEN * sizeof(char);
+  uint64_t res = 0;
   uint8_t* plain = malloc(len);
-  if (! (read(len, plain)))
+  if (! (read_random_bytes(len, plain)))
     return 1;
   uint8_t* macs = malloc(ROUNDS * SIGSIZE * sizeof(char));
 

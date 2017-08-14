@@ -385,6 +385,7 @@ int32_t test_chacha()
 int32_t perf_chacha() {
   double hacl_cy, sodium_cy, ossl_cy, hacl_utime, sodium_utime, ossl_utime;
   uint32_t len = PLAINLEN * sizeof(char);
+  uint64_t res = 0;
   uint8_t* plain = malloc(len);
   uint8_t* cipher = malloc(len);
   if (! (read_random_bytes(len, plain)))

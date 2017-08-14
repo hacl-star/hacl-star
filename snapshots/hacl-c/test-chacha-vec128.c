@@ -1,5 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
+#include "hacl_test_utils.h"
 
 #if defined(__COMPCERT__)
 
@@ -401,12 +402,9 @@ int32_t perf_chacha() {
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
   uint8_t* cipher = malloc(len);
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plain, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  uint64_t res = 0;
+  if (! (read_random_bytes(len, plain)))
     return 1;
-  }
 
   uint32_t counter = (uint32_t )1;
   uint32_t ctx[32] = { 0 };

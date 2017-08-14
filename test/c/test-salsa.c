@@ -380,6 +380,7 @@ int32_t test_salsa()
 
 int32_t perf_salsa() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
+  uint64_t res = 0;
   __attribute__ ((aligned (16)))uint8_t plain[LEN];
   __attribute__ ((aligned (16)))uint8_t cipher[LEN];
   if (! (read_random_bytes(LEN, plain)))
