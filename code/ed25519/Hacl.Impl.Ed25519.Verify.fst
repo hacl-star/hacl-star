@@ -108,7 +108,7 @@ let verify__ public msg len signature tmp tmp' =
       lemma_point_inv h2' a' h3 a';
       lemma_point_inv h2' r' h3 r';
       lemma_modifies_1_is_modifies_2 h2 h3 tmp tmp';
-      lemma_modifies_2_trans tmp tmp' h1 h2 h3;
+      lemma_modifies_2_trans tmp tmp' h0 h2 h3;
       let b'' = Hacl.Impl.Ed25519.PointEqual.gte_q s in
       if b'' then (
         assert(
@@ -130,9 +130,8 @@ let verify__ public msg len signature tmp tmp' =
         lemma_point_inv h3 a' h4 a';
         lemma_point_inv h3 r' h4 r';        
         lemma_modifies_1_is_modifies_2 h3 h4 tmp' tmp;
-        assert(modifies_2 tmp tmp' h0 h4);
         lemma_modifies_2_comm tmp tmp' h3 h4;
-        lemma_modifies_2_trans tmp tmp' h2 h3 h4;
+        lemma_modifies_2_trans tmp tmp' h0 h3 h4;
         let b = verify_step_4 (Buffer.sub signature 32ul 32ul) h' a' r' in
         let h5 = ST.get() in
         lemma_modifies_2_modifies_none h0 h4 h5 tmp tmp';
@@ -155,17 +154,25 @@ val verify_:
     (ensures (fun h0 z h1 -> modifies_0 h0 h1 /\ live h0 msg /\ live h0 public /\ live h0 signature /\
       z == Spec.Ed25519.(verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature))))
 let verify_ public msg len signature =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   push_frame();
-  let h1 = ST.get() in
+  (**) let h1 = ST.get() in
   let tmp = create 0uL 45ul in
+  (**) let h1' = ST.get() in
   push_frame();
+  (**) let h1'' = ST.get() in
   let tmp' = create 0uy 32ul in
+  (**) let h1''' = ST.get() in
   let res = verify__ public msg len signature tmp tmp' in
+  (**) let h1'''' = ST.get() in
+  (**) lemma_modifies_0_2 tmp tmp' h1'' h1''' h1'''';
   pop_frame();
-  let h2 = ST.get() in
+  (**) let h2 = ST.get() in
+  (**) modifies_popped_1 tmp h1' h1'' h1'''' h2;
+  (**) lemma_modifies_0_1' tmp h1 h1' h2;
   pop_frame();
-  let h3 = ST.get() in
+  (**) let h3 = ST.get() in
+  (**) modifies_popped_0 h0 h1 h2 h3;
   lemma_modifies_none h0 h1 h2 h3;
   res
 

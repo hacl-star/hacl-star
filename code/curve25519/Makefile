@@ -52,6 +52,11 @@ X25519_FILES=$(BIGNUM) $(X25519_SPECIFIC)
 
 FSTAR_INCLUDES+=--include ../bignum
 
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDES)
+
 ct: $(addsuffix -lax, $(X25519_FILES))
 	# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
 	$(FSTAR) --lax --verify_all Curve25519.fst

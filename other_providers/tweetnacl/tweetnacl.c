@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include "hacl_test_utils.h"
 
 #define FOR(i,n) for (i = 0;i < n;++i)
 #define sv static void
@@ -15,12 +16,8 @@ typedef long long i64;
 typedef i64 gf[16];
 
 void randombytes(u8 * x,u64 len) {
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, x, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  if (! (read_random_bytes(len, x)))
     exit(1);
-  }
 }
 
 static const u8

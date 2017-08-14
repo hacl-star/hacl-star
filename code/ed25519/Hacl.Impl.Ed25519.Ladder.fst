@@ -158,7 +158,7 @@ let make_point_inf b =
   no_upd_lemma_1 h3 h4 t z
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500 --using_facts_from Prims --using_facts_from FStar"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 500 --using_facts_from Prims --using_facts_from FStar"
 let sum_modifications (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem) 
   : Lemma (requires (live h0 b1 /\ 
                      live h0 b2 /\

@@ -21,6 +21,11 @@ SLOW=
 
 BROKEN=
 
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDES)
+
 # For CI, all modules restricted from incomplete or slow ones
 ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SALSA_FAMILY_FILES)))
 ct: $(addsuffix -lax, $(SALSA_FAMILY_FILES)) 
@@ -74,7 +79,7 @@ salsa20.exe: salsa-c/out.krml
 	./$@
 
 
-chacha-vec128-c/out.krml: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20.Vec128.fst Chacha20.Vec128.fst # Hacl.Test.Chacha20.Vec128.fst
+chacha-vec128-c/out.krml: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20.Vec128.fst Chacha20.Vec128.fst Hacl.Test.Chacha20.Vec128.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
 		-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
 		-add-include '"vec128.h"' \
@@ -82,20 +87,21 @@ chacha-vec128-c/out.krml: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20
 
 chacha-vec128-c/Chacha20_Vec128.c: chacha-vec128-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
+		-no-prefix Hacl.UInt32x4 -add-include '"vec128.h"' -drop Hacl.UInt32x4 \
 		-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
 		-skip-compilation $^ -o $@
 
 chacha20-vec128.exe: chacha-vec128-c/out.krml
 	# Wintersteigr: Fix me; there is no Hacl.Test.Chacha20.Vec128 yet.
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c -no-prefix Hacl.Test.Chacha20.Vec128 \
+		-no-prefix Hacl.UInt32x4 -add-include '"vec128.h"' -drop Hacl.UInt32x4 \
 		-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
 		$^ -o $@
 	./$@
 
-
 extract-c: chacha-c/Chacha20.c salsa-c/Salsa20.c chacha-vec128-c/Chacha20_Vec128.c
 
-test: chacha20.exe salsa20.exe # chacha20-vec128.exe
+test: chacha20.exe salsa20.exe chacha20-vec128.exe
 
 clean:
 	rm -rf *.exe *.exe.* *.out *~ salsa-c chacha-c chacha-vec128-c *.graph

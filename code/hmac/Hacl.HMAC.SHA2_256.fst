@@ -149,6 +149,7 @@ val hmac_part1:
 
 [@"substitute"]
 let hmac_part1 s2 data len =
+  (**) let hinit = ST.get() in
 
   (* Push a new memory frame *)
   (**) push_frame ();
@@ -170,6 +171,8 @@ let hmac_part1 s2 data len =
   let r0 = U32.rem len Hash.size_block in
   let blocks0 = Buffer.sub data 0ul (n0 *^ Hash.size_block) in
   let last0 = Buffer.offset data (n0 *^ Hash.size_block) in
+  (**) lemma_disjoint_sub data last0 state0;
+  (**) lemma_disjoint_sub data blocks0 state0;
   (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) 0 (U32.v (n0 *^ Hash.size_block))) (as_seq h blocks0);
   (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) (U32.v (n0 *^ Hash.size_block)) (length data)) (as_seq h last0);
   Hash.init state0;
@@ -180,22 +183,30 @@ let hmac_part1 s2 data len =
   (**) no_upd_lemma_1 h h' state0 last0;
   Hash.update state0 s2;
   (**) let h'' = ST.get() in
+  (**) lemma_modifies_1_trans state0 h h' h'';
   (**) no_upd_lemma_1 h' h'' state0 blocks0;
   (**) no_upd_lemma_1 h' h'' state0 last0;
   Hash.update_multi state0 blocks0 n0;
   (**) let h''' = ST.get() in
+  (**) lemma_modifies_1_trans state0 h h'' h''';
   (**) no_upd_lemma_1 h'' h''' state0 last0;
   Hash.update_last state0 last0 r0;
   (**) let h1 = ST.get () in
+  (**) lemma_modifies_1_trans state0 h h''' h1;
+  (**) lemma_modifies_0_1' state0 h0 h h1;
 
   let h'''' = ST.get() in
   let hash0 = Buffer.sub s2 0ul Hash.size_hash in (* Salvage memory *)
   Hash.finish state0 hash0; (* s4 = hash (s2 @| data) *)
+  (**) let h2 = ST.get() in
+  (**) modifies_subbuffer_1 h1 h2 hash0 s2;
+  (**) lemma_modifies_0_1 s2 h0 h1 h2;
   (**) Spec_Hash.lemma_hash_all_prepend_block (reveal_sbytes (as_seq h0 s2)) (reveal_sbytes (as_seq h0 data));
 
   (* Pop the memory frame *)
-  (**) pop_frame ()
-
+  (**) pop_frame ();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 s2 hinit h0 h2 hfin
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
@@ -243,6 +254,7 @@ let hmac_part2 mac s5 s4 =
   (**) no_upd_lemma_1 h h' state1 mac;
   Hash.update state1 s5; (* s5 = opad *)
   (**) let h'' = ST.get() in
+  (**) lemma_modifies_1_trans state1 h h' h'';
   (**) assert(
        let st_h0 = Seq.slice (as_seq h'' state1) (U32.v Hash.pos_whash_w) (U32.(v Hash.pos_whash_w + v Hash.size_whash_w)) in
        reveal_h32s st_h0 == Spec_Hash.(update h_0 (reveal_sbytes (as_seq h0 s5))));
@@ -251,16 +263,21 @@ let hmac_part2 mac s5 s4 =
   (**) assert(as_seq h'' s4 == as_seq hinit s4);
   Hash.update_last state1 s4 Hash.size_hash;
   (**) let h''' = ST.get() in
+  (**) lemma_modifies_1_trans state1 h h'' h''';
+  (**) lemma_modifies_0_1' state1 h0 h h''';
   (**) no_upd_lemma_1 h' h'' state1 s4;
   (**) no_upd_lemma_1 h' h'' state1 mac;
   (**) assert(live h''' mac);
   Hash.finish state1 mac; //(* s7 = hash (s5 @| s4) *)
   (**) let h1 = ST.get() in
+  (**) lemma_modifies_0_1 mac h0 h''' h1;
   (**) Spec_Hash.lemma_hash_single_prepend_block (reveal_sbytes (as_seq h0 s5)) (reveal_sbytes (as_seq h0 s4));
   Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 mac)) (Spec_Hash.hash (Seq.append (reveal_sbytes (as_seq h0 s5)) (reveal_sbytes (as_seq h0 s4))));
   (**) assert(reveal_sbytes (as_seq h1 mac) == Spec_Hash.hash (Seq.append (reveal_sbytes (as_seq h0 s5)) (reveal_sbytes (as_seq h0 s4))));
   (* Pop the memory frame *)
-  (**) pop_frame ()
+  (**) pop_frame ();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 mac hinit h0 h1 hfin
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -282,20 +299,24 @@ val hmac_core:
 let hmac_core mac key data len =
 
   let h00 = ST.get () in
+  let hinit = h00 in
   (* Push a new memory frame *)
   (**) push_frame ();
   let h0 = ST.get () in
 
   (* Initialize constants *)
   let ipad = Buffer.create (u8_to_h8 0x36uy) Hash.size_block in
+  (**) let h0' = ST.get() in  
   let opad = Buffer.create (u8_to_h8 0x5cuy) Hash.size_block in
   (**) let h1 = ST.get () in
+  (**) lemma_modifies_0_0 h0 h0' h1;
   (**) assert(reveal_sbytes (as_seq h1 ipad) == Seq.create (v Hash.size_block) 0x36uy);
   (**) assert(reveal_sbytes (as_seq h1 opad) == Seq.create (v Hash.size_block) 0x5cuy);
 
   (* Step 2: xor "result of step 1" with ipad *)
   xor_bytes_inplace ipad key Hash.size_block;
   (**) let h2 = ST.get () in
+  (**) lemma_modifies_0_1' ipad h0 h1 h2;
   (**) assert(reveal_sbytes (as_seq h2 ipad) == Spec.xor_bytes (reveal_sbytes (as_seq h1 ipad)) (reveal_sbytes (as_seq h0 key)));
 
   (* Step 3: append data to "result of step 2" *)
@@ -303,6 +324,7 @@ let hmac_core mac key data len =
   hmac_part1 ipad data len; (* s2 = ipad *)
   let s4 = Buffer.sub ipad 0ul Hash.size_hash in (* Salvage memory *)
   (**) let h3 = ST.get () in
+  (**) lemma_modifies_0_1' ipad h0 h2 h3;
   (**) Seq.lemma_eq_intro (as_seq h3 (Buffer.sub ipad 0ul Hash.size_hash)) (Seq.slice (as_seq h3 ipad) 0 (v Hash.size_hash));
   (**) assert(reveal_sbytes (as_seq h3 s4) == Spec_Hash.hash (Seq.append (reveal_sbytes (as_seq h2 ipad)) (reveal_sbytes (as_seq h0 data))));
   (**) assert(reveal_sbytes (as_seq h3 s4) == Spec_Hash.hash (Seq.append (Spec.xor_bytes (reveal_sbytes (as_seq h1 ipad)) (reveal_sbytes (as_seq h0 key))) (reveal_sbytes (as_seq h0 data))));
@@ -310,16 +332,20 @@ let hmac_core mac key data len =
   (* Step 5: xor "result of step 1" with opad *)
   xor_bytes_inplace opad key Hash.size_block;
   (**) let h4 = ST.get () in
+  (**) lemma_modifies_0_1' opad h0 h3 h4;
   (**) assert(reveal_sbytes (as_seq h4 opad) == Spec.xor_bytes (reveal_sbytes (as_seq h1 opad)) (reveal_sbytes (as_seq h0 key)));
 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   (* Step 7: apply H to "result of step 6" *)
   hmac_part2 mac opad s4; (* s5 = opad *)
   (**) let h5 = ST.get () in
+  (**) lemma_modifies_0_1 mac h0 h4 h5;
   (**) assert(reveal_sbytes (as_seq h5 mac) == Spec.hmac_core (reveal_sbytes (as_seq h0 key)) (reveal_sbytes (as_seq h0 data)));
 
   (* Pop the memory frame *)
-  (**) pop_frame ()
+  (**) pop_frame ();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 mac hinit h0 h5 hfin
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
@@ -341,17 +367,28 @@ val hmac:
 
 let hmac mac key keylen data datalen =
 
+  (**) let hinit = ST.get() in
+
   (* Push a new memory frame *)
   (**) push_frame ();
+  (**) let h0 = ST.get() in
 
   (* Allocate memory for the wrapped key *)
   let nkey = Buffer.create (u8_to_h8 0x00uy) Hash.size_block in
+  (**) let h1 = ST.get() in
 
   (* Call the key wrapping function *)
   wrap_key nkey key keylen;
+  (**) let h2 = ST.get() in
+  (**) lemma_modifies_0_1' nkey h0 h1 h2;
 
   (* Call the core HMAC function *)
   hmac_core mac nkey data datalen;
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1 mac h0 h2 h3;
 
   (* Pop the memory frame *)
-  (**) pop_frame ()
+  (**) pop_frame ();
+
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 mac hinit h0 h3 hfin

@@ -211,16 +211,29 @@ val point_compress:
       h1.[out] == Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p)
     ))
 let point_compress z p =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   push_frame();
+  (**) let h1 = ST.get() in
   let tmp  = create (Hacl.Cast.uint64_to_sint64 0uL) 15ul in
   let zinv = Buffer.sub tmp 0ul  5ul in
   let x    = Buffer.sub tmp 5ul  5ul in
   let out  = Buffer.sub tmp 10ul 5ul in
+  (**) let h2 = ST.get() in
+  (**) no_upd_lemma_0 h1 h2 (Hacl.Impl.Ed25519.ExtPoint.getz p);
+  (**) Seq.lemma_eq_intro (as_seq h0 (Hacl.Impl.Ed25519.ExtPoint.getz p))
+                          (as_seq h2 (Hacl.Impl.Ed25519.ExtPoint.getz p));
   point_compress_ tmp p;
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1' tmp h1 h2 h3;
   let b = x_mod_2 x in
   Hacl.Impl.Store51.store_51 z out;
+  (**) let h4 = ST.get() in
   add_sign z b;
   let h = ST.get() in
-  Endianness.lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h z)) (Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p));
-  pop_frame()
+  (**) lemma_modifies_1_trans z h3 h4 h;
+  (**) lemma_modifies_0_1 z h1 h3 h;
+  (**) Endianness.lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h z))
+                                          (Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p));
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 z h0 h1 h hfin

@@ -3,7 +3,7 @@
 #include "NaCl.h"
 #include "sodium.h"
 #include "tweetnacl.h"
-
+#include "hacl_test_utils.h"
 
 #define MESSAGE_LEN 72
 #define secretbox_MACBYTES   16
@@ -179,14 +179,11 @@ int32_t test_api()
 int32_t perf_api() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = 1024*1024 * sizeof(char);
+  uint64_t res = 0;
   uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(len+16*sizeof(char));
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plaintext, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  if (! (read_random_bytes(len, plaintext)))
     return 1;
-  }
 
   uint8_t mac[16],mac2[16], pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES];
 

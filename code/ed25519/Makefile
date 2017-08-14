@@ -66,7 +66,28 @@ ED25519_SPECIFIC= \
 	Ed25519.fsti \
 	Ed25519.fst
 
-FSTS=$(filter %.fst,$(ED25519_FILES))
+FSTS=   Hacl.Bignum25519.fst \
+	../hash/Hacl.Impl.SHA512.Ed25519.fst \
+	../hash/SHA2_512.fst \
+	Hacl.Impl.Load56.fst \
+	Hacl.Impl.Load51.fst \
+	Hacl.Impl.Store51.fst \
+	Hacl.Impl.BignumQ.Mul.fst \
+	Hacl.Impl.SHA512.ModQ.fst \
+	Hacl.Impl.Sha512.fst \
+	Hacl.Impl.Ed25519.Pow2_252m2.fst \
+	Hacl.Impl.Ed25519.PointAdd.fst \
+	Hacl.Impl.Ed25519.PointDouble.fst \
+	Hacl.Impl.Ed25519.SecretExpand.fst \
+	Hacl.Impl.Ed25519.PointCompress.fst \
+	Hacl.Impl.Ed25519.PointDecompress.fst \
+	Hacl.Impl.Ed25519.RecoverX.fst \
+	Hacl.Impl.Ed25519.Ladder.Step.fst \
+	Hacl.Impl.Ed25519.Ladder.fst \
+	Hacl.Impl.Ed25519.PointEqual.fst \
+	Hacl.Impl.Ed25519.SecretToPublic.fst \
+	Ed25519.fst \
+	Hacl.Test.Ed25519.fst
 
 # Files that are too slow and for which verification speed must improve
 SLOW=
@@ -77,6 +98,11 @@ TODO=
 ED25519_FILES=$(ED25519_SPECIFIC) $(BIGNUM) 
 
 FSTAR_INCLUDES+=--include $(HACL_HOME)/code/bignum --include $(HACL_HOME)/code/curve25519 --include $(HACL_HOME)/code/hash
+
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDES)
 
 ct: $(addsuffix -lax, $(ED25519_FILES))
 	$(FSTAR) --lax --verify_all Hacl.Impl.Ed25519.SecretToPublic.fst Hacl.Impl.Ed25519.Sign.fst 
@@ -102,27 +128,24 @@ all-ci: ci
 
 KREMLIN_ARGS+=-tmpdir ed25519-c \
 		-I ../bignum -I ../curve25519 -I ../hash \
-		-drop Hacl.Spec,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness \
-		-drop Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.* \
-		-drop Prims,Spec.* \
-		-bundle Ed25519=Ed25519,Hacl.EC,Hacl.EC.*,Hacl.Impl.*,Hacl.Lib.*,Hacl.Bignum.*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Spec.*
+		-drop Hacl.Spec,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.*,Prims,Spec.* \
+		-bundle Ed25519=Ed25519,Hacl.EC,Hacl.EC.*,Hacl.Impl.*,Hacl.Lib.*,Hacl.Bignum.*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Spec.*,SHA2_512,Hacl.Hash.*
 
-ed25519-c/out.krml: $(FSTS) Hacl.Test.Ed25519.fst ../hash/SHA2_512.fst ../hash/Hacl.Hash.SHA2_512.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
+ed25519-c/out.krml: $(ED25519_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) $(FSTS) -skip-translation
 
-ed25519-c/ed25519.c: $(FSTS)
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation $^ -o $@
+ed25519-c/Ed25519.c: ed25519-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation
 
-# KREMLIN_ARGS+=-ldopt -lsodium
+extract-c:ed25519-c/Ed25519.c
 
-ed25519.exe: ed25519-c/out.krml 
-	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -no-prefix Hacl.Test.Ed25519 \
-		$^ -o $@
-	./$@
+ed25519.exe: ed25519-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) $^ \
+	 	-no-prefix 'Hacl.Test.Ed25519' $(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
+		-add-include '"Ed25519.h"' -o ed25519.exe
 
-extract-c: ed25519-c/ed25519.c
-# CMW: Test target disabled. Is Hacl_Impl_Sha512.c supposed to depend on libsodium?
-test: # ed25519.exe
+test: ed25519.exe
+	./$^
 
 count-line:
 	cloc --force-lang=ocaml $(ED25519_FILES)

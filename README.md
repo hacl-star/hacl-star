@@ -12,6 +12,8 @@ The goal of this library is to develop *reference* implementations
 for popular cryptographic primitives and to verify them for memory safety,
 side-channel resistance, and (where applicable) functional correctness.
 
+Research Paper: https://eprint.iacr.org/2017/536
+
 All code is written and verified in F\* and then compiled to C or to
 OCaml for execution.
 

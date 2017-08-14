@@ -3,6 +3,7 @@
 #include "SHA2_512.h"
 #include "sodium.h"
 #include "tweetnacl.h"
+#include "hacl_test_utils.h"
 #include <openssl/sha.h>
 
 void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
@@ -72,13 +73,9 @@ int32_t perf_sha512() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plain, len);
-  uint8_t* macs = malloc(ROUNDS * SIGSIZE * sizeof(char));
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  if (! (read_random_bytes(len, plain)))
     return 1;
-  }
+  uint8_t* macs = malloc(ROUNDS * SIGSIZE * sizeof(char));
 
   cycles a,b;
   clock_t t1,t2;

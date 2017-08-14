@@ -3,6 +3,7 @@
 #include "Chacha20Poly1305.h"
 #include "sodium.h"
 #include "openssl/evp.h"
+#include "hacl_test_utils.h"
 
 void ossl_chacha20poly1305(uint8_t* cipher, uint8_t* mac, uint8_t* plain, int len, uint8_t* aad, int aad_len, uint8_t* nonce, uint8_t* key){
   EVP_CIPHER_CTX *ctx;
@@ -154,14 +155,11 @@ int32_t perf_api() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint8_t mac[16] = {0};
   uint32_t len = 1024*1024 * sizeof(char);
+  uint64_t res = 0;  
   uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(2*len);
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plaintext, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  if (! (read_random_bytes(len, plaintext)))
     return 1;
-  }
 
   cycles a,b;
   clock_t t1,t2;

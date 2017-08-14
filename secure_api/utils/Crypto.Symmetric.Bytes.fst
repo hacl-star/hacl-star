@@ -71,8 +71,7 @@ let rec print_buffer s i len =
     ()
 
 // TODO: Deprecate?
-val sel_bytes: h:mem -> l:UInt32.t -> buf:lbuffer (v l){Buffer.live h buf}
-  -> GTot (lbytes (v l))
+val sel_bytes: h:mem -> l:UInt32.t -> buf:lbuffer (v l) -> GTot (lbytes (v l))
 let sel_bytes h l buf = Buffer.as_seq h buf
 
 #reset-options "--z3rlimit 20"

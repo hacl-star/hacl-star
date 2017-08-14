@@ -9,14 +9,15 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
-all: extract-specs extract-all-c ct
-	$(MAKE) -C ../code test
-	$(MAKE) -C .. verify
+all: extract-specs extract-all-c ct verify-all
+	# JK: Removing this, 'update-snapshot" should run unit tests already
+	# $(MAKE) -C ../code test
+	# JK: moved to parallel build (otherwise spec tests are too slow)
+	#$(MAKE) -C .. verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
-	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
-	# JP: fixme, doesn't work on build machine
-	# $(MAKE) -C snapshot-gcc
+	$(MAKE) -B update-snapshot
+	# JK: TODO MSVC & CompCert compilation tests
 
 travis: extract-c-code ct
 	$(MAKE) -C .. world
@@ -63,6 +64,9 @@ verify-code:
 verify-crypto:
 	$(MAKE) -C ../secure_api all-ver
 
+verify-all:
+	$(MAKE) -C .. verify
+
 hints:
 	$(info The 'test' directory does not contain .fst files, so no hints to generate.)
 
@@ -75,7 +79,8 @@ SNAPSHOT_FILES= ./c/* \
 	../code/salsa-family/chacha-c/Chacha20.* \
 	../code/salsa-family/salsa-c/Salsa20.* \
 	$(addprefix ../code/api/aead-c/, Chacha20Poly1305.*) \
-	$(addprefix ../code/api/box-c/, Hacl_Policies.* NaCl.*) \
+	$(addprefix ../code/api/box-c/, NaCl.*) \
+	$(addprefix ../code/api/policies-c/, Hacl_Policies.* ) \
 	$(addprefix ../code/ed25519/ed25519-c/, Ed25519.*) \
 	$(addprefix ../code/hash/sha2-c/, SHA2_256.*) \
 	$(addprefix ../code/hash/sha2-c/, SHA2_384.*) \
@@ -137,19 +142,19 @@ snapshot:
 	$(MAKE) build-snapshot
 
 snapshot-ccomp:
-	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
+	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
 	if $(HAS_CCOMP); then $(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
 
 snapshot-msvc:
-	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KREMLIN_ARGS="-cc msvc"; fi
+	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar"; fi
 	if $(HAS_CL); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-msvc; fi
 
 snapshot-gcc:
-	$(MAKE) -B extract-c-code extract-c-code-experimental
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar"
 	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
 
 snapshot-gcc-unrolled:
-	$(MAKE) -B extract-c-code extract-c-code-experimental KREMLIN_ARGS="-funroll-loops 5"
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar"
 	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc-unrolled
 
 all-snapshots:
@@ -163,9 +168,34 @@ all-snapshots:
 	$(MAKE) -C ../code clean
 
 update-snapshot:
-	$(build-snapshot)
-	$(MAKE) -C snapshot clean
-	cp snapshot/*.c snapshot/*.h ../snapshots/hacl-c
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
+	$(MAKE) -C snapshot-gcc-unrolled clean
+	$(MAKE) -C snapshot-gcc clean
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) \
+	   $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
+	   $(addprefix c-experimental/, kremlib.h FStar.h Makefile)  \
+		../snapshots/hacl-c
+	$(MAKE) -C ../snapshots/hacl-c unit-tests
+	$(MAKE) -C ../snapshots/hacl-c unit-tests-32
+	$(MAKE) -C ../snapshots/hacl-c clean
+
+nss-snapshot:
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
+	$(MAKE) -C snapshot-gcc-unrolled clean
+	$(MAKE) -C snapshot-gcc clean
+	mkdir -p ../snapshots/nss
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/nss
+	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) ../snapshots/nss
+	cp $(addprefix c-experimental/, kremlib.h FStar.h Makefile)  ../snapshots/nss
+	$(MAKE) -C ../snapshots/nss unit-tests
+	$(MAKE) -C ../snapshots/nss unit-tests-32
+	$(MAKE) -C ../snapshots/nss clean
 
 clean:
 	$(MAKE) -C ../code clean

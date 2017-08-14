@@ -63,7 +63,7 @@ let word_shift_right = Word.shift_right
 
 
 
-let rotate_right (a:word) (s:word {v s<32}) : Tot word =
+let rotate_right (a:word) (s:word {0 < v s /\ v s<32}) : Tot word =
   ((a >>^ s) |^ (a <<^ (32ul -^ s)))
 
 (* [FIPS 180-4] section 4.1.2 *)
