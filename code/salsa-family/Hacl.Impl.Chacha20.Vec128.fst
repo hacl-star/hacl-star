@@ -44,7 +44,7 @@ let as_state h st =
 [@ "c_inline"]
 val line:
   st:state ->
-  a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s < 32} ->
+  a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s > 0 /\ U32.v s < 32} ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st /\
