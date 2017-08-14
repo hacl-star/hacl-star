@@ -254,13 +254,13 @@ libnacl.so: Salsa20.c Salsa20.h Chacha20.c Chacha20.h Poly1305_64.c Poly1305_64.
 	  Curve25519.c -c -o Curve25519.o
 	$(CC) $(LIBFLAGS) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
-	$(CC) -shared  $(LIBFLAGS) -I ../../test/c-experimental -I . -Wall \
+	$(CC) -shared  $(LIBFLAGS) -I ../../test/c -I . -Wall \
 	  hacl_test_utils.c \
-	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c-experimental/randombytes.c ../../test/c-experimental/haclnacl.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c/randombytes.c ../../test/c/haclnacl.c \
 	  -o libnacl.so
 
 unit-tests: libnacl.so
-	$(CC) $(CFLAGS) -I ../../test/c-experimental -I . ../../test/c-experimental/unit_tests.c \
+	$(CC) $(CFLAGS) -I ../../test/c -I . ../../test/c/unit_tests.c \
 	  hacl_test_utils.c \
 	  ../../other_providers/tweetnacl/tweetnacl.c -o unit_tests.exe $^
 	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. ./unit_tests.exe
@@ -284,13 +284,13 @@ libnacl32.so: Salsa20.c Salsa20.h Chacha20.c Chacha20.h Poly1305_64.c Poly1305_6
 	  Curve25519.c -c -o Curve25519.o
 	$(CC) $(LIBFLAGS32) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
-	$(CC) -shared  $(LIBFLAGS32) -I ../../test/c-experimental -I . -Wall \
+	$(CC) -shared  $(LIBFLAGS32) -I ../../test/c -I . -Wall \
 	  hacl_test_utils.c \
-	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c-experimental/randombytes.c ../../test/c-experimental/haclnacl.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c/randombytes.c ../../test/c/haclnacl.c \
 	  -o libnacl32.so
 
 unit-tests-32: libnacl32.so
-	$(CC) $(CFLAGS) -DKRML_NOUINT128 -I ../../test/c-experimental -I . ../../test/c-experimental/unit_tests.c \
+	$(CC) $(CFLAGS) -DKRML_NOUINT128 -I ../../test/c -I . ../../test/c/unit_tests.c \
 	  hacl_test_utils.c \
 	  ../../other_providers/tweetnacl/tweetnacl.c -o unit_tests32.exe $^
 	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. ./unit_tests32.exe
