@@ -145,27 +145,38 @@ private let crecip_1 buf z =
   let t0 = Buffer.sub buf 5ul  5ul in
   let b  = Buffer.sub buf 10ul 5ul in
   let c  = Buffer.sub buf 15ul 5ul in
+  (**) lemma_disjoint_sub buf a z;
+  (**) lemma_disjoint_sub buf t0 z;
+  (**) lemma_disjoint_sub buf b z;
+  (**) lemma_disjoint_sub buf c z;
   let h0 = ST.get() in
   fsquare_times a z 1ul;
   let h1 = ST.get() in
+  (**) modifies_subbuffer_1 h0 h1 a buf;
   no_upd_lemma_1 h0 h1 a z;
   fsquare_times t0 a 2ul;
   let h2 = ST.get() in
+  (**) modifies_subbuffer_1 h1 h2 t0 buf;
   no_upd_lemma_1 h1 h2 t0 z;
   no_upd_lemma_1 h1 h2 t0 a;
   fmul b t0 z;
   let h3 = ST.get() in
+  (**) modifies_subbuffer_1 h2 h3 b buf;
   no_upd_lemma_1 h2 h3 b a;
   fmul a b a;
   let h4 = ST.get() in
+  (**) modifies_subbuffer_1 h3 h4 a buf;
   fsquare_times t0 a 1ul;
   let h5 = ST.get() in
+  (**) modifies_subbuffer_1 h4 h5 t0 buf;
   no_upd_lemma_1 h3 h4 a b;
   no_upd_lemma_1 h4 h5 t0 b;
   fmul b t0 b;
   let h6 = ST.get() in
+  (**) modifies_subbuffer_1 h5 h6 b buf;
   fsquare_times t0 b 5ul;
   let h7 = ST.get() in
+  (**) modifies_subbuffer_1 h6 h7 t0 buf;
   no_upd_lemma_1 h6 h7 t0 b;
   no_upd_lemma_1 h4 h5 t0 a;
   no_upd_lemma_1 h5 h6 b  a;
@@ -421,12 +432,26 @@ val crecip:
     /\ crecip_pre (as_seq h1 out)))
 [@"c_inline"]
 let crecip out z =
+  (**) let hinit = ST.get() in
   push_frame();
+  (**) let h0 = ST.get() in
   let buf = create limb_zero 20ul in
+  (**) let h1 = ST.get() in
+  (**) no_upd_lemma_0 h0 h1 out;
   crecip_1 buf z;
+  (**) let h2 = ST.get() in
+  (**) no_upd_lemma_1 h1 h2 buf out;
   crecip_2 buf;
+  (**) let h3 = ST.get() in
+  (**) no_upd_lemma_1 h2 h3 buf out;
+  (**) lemma_modifies_1_trans buf h1 h2 h3;
   crecip_3 out buf;
-  pop_frame()
+  (**) let h4 = ST.get() in
+  (**) lemma_modifies_1_2''' buf out h1 h3 h4;
+  (**) lemma_modifies_0_2 out buf h0 h1 h4;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 out hinit h0 h4 hfin
 
 
 [@"c_inline"]
@@ -444,11 +469,17 @@ val crecip':
 
 [@"c_inline"]
 let crecip' out z =
+  (**) let hinit = ST.get() in
   push_frame();
+  (**) let h0 = ST.get() in
   let buf = create limb_zero 20ul in
+  (**) let h1 = ST.get() in
   let h  = ST.get() in
   crecip_1 buf z;
+  (**) let h2 = ST.get() in
   crecip_2 buf;
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_1_trans buf h1 h2 h3;
   let h' = ST.get() in
   no_upd_lemma_1 h h' buf z;
   let a  = Buffer.sub buf 0ul  5ul in
@@ -457,10 +488,18 @@ let crecip' out z =
   let c  = Buffer.sub buf 15ul 5ul in
   let h  = ST.get() in
   fsquare_times a z 1ul;
+  (**) let h4 = ST.get() in
+  (**) modifies_subbuffer_1 h3 h4 a buf;
+  (**) lemma_modifies_1_trans buf h1 h3 h4;
   let h' = ST.get() in
   no_upd_lemma_1 h h' a t0;
   no_upd_lemma_1 h h' a b;
   no_upd_lemma_1 h h' a c;
   no_upd_lemma_1 h h' a z;
   crecip_3' out buf;
-  pop_frame()
+  (**) let h5 = ST.get() in
+  (**) lemma_modifies_1_2''' buf out h1 h4 h5;
+  (**) lemma_modifies_0_2 out buf h0 h1 h5;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 out hinit h0 h5 hfin
