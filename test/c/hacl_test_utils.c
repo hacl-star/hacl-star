@@ -31,6 +31,7 @@ bool read_random_bytes(uint64_t len, uint8_t * buf) {
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 bool read_random_bytes(uint64_t len, uint8_t * buf) {
   int fd = open("/dev/urandom", O_RDONLY);
