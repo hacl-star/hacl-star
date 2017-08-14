@@ -30,7 +30,6 @@ bool read_random_bytes(uint64_t len, uint8_t * buf) {
 /* assume POSIX here */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <fcntl.h>
 
 bool read_random_bytes(uint64_t len, uint8_t * buf) {
