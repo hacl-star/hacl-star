@@ -9,10 +9,11 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 SNAPSHOT_DIR=snapshot
 
-all: extract-specs extract-all-c ct
+all: extract-specs extract-all-c ct verify-all
 	# JK: Removing this, 'update-snapshot" should run unit tests already
 	# $(MAKE) -C ../code test
-	$(MAKE) -C .. verify
+	# JK: moved to parallel build (otherwise spec tests are too slow)
+	#$(MAKE) -C .. verify
 	$(MAKE) compile-vale
 	$(MAKE) -C openssl-engine
 	$(MAKE) -B update-snapshot
@@ -62,6 +63,9 @@ verify-code:
 
 verify-crypto:
 	$(MAKE) -C ../secure_api all-ver
+
+verify-all:
+	$(MAKE) -C .. verify
 
 hints:
 	$(info The 'test' directory does not contain .fst files, so no hints to generate.)

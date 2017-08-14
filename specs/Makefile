@@ -43,7 +43,7 @@ verify: $(addsuffix -verify, $(SPEC_FILES))
 all-hints: hints
 all-ver: verify
 
-FSTAR_EXTRACT=--codegen OCaml --lax $(NOEXTRACT)
+FSTAR_EXTRACT=$(FSTAR) --codegen OCaml --lax $(NOEXTRACT)
 
 gf128.exe: Spec.GF128.fst
 	$(MAKE) -C ../code/lib/ml
