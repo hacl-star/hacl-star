@@ -1,1 +1,0 @@
-for i in $(seq 1 10); do echo -e "engine d:/cygwin/home/protz/code/hacl-star/test/openssl-engine/opensslengine.dll\nspeed -engine Everest ecdhx25519" | rlwrap ../../../openssl/apps/openssl.exe 2>/dev/null |grep X25519 | awk '{print $6 };'; done
