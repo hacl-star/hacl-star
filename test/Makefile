@@ -10,8 +10,7 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 SNAPSHOT_DIR=snapshot
 
 all: extract-specs extract-all-c ct verify-all
-	# JK: Removing this, 'update-snapshot" should run unit tests already
-	# $(MAKE) -C ../code test
+	$(MAKE) -C ../code test
 	# JK: moved to parallel build (otherwise spec tests are too slow)
 	#$(MAKE) -C .. verify
 	$(MAKE) compile-vale
