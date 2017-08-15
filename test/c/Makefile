@@ -8,7 +8,7 @@ ifeq ($(OS),Windows_NT)
   LIBDL= # libdl not supported by MinGW. Anyway, is it really used?
   LIBWINSOCK=-lws2_32 # Necessary for chacha, chacha-vec128 and aead
 else
-  CC=gcc-6 -fno-tree-vectorize -flto
+  CC=$(shell which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc) -fno-tree-vectorize -flto
   LIBDL=-ldl
   LIBWINSOCK=
 endif
