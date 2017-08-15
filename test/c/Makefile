@@ -3,7 +3,15 @@
 TWEETNACL_HOME?=../../other_providers/tweetnacl
 OPENSSL_HOME?=../../other_providers/openssl
 LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
-CC?=gcc-6 -fno-tree-vectorize -flto
+ifeq ($(OS),Windows_NT)
+  CC=x86_64-w64-mingw32-gcc.exe
+  LIBDL= # libdl not supported by MinGW. Anyway, is it really used?
+  LIBWINSOCK=-lws2_32 # Necessary for chacha, chacha-vec128 and aead
+else
+  CC=gcc-6 -fno-tree-vectorize -flto
+  LIBDL=-ldl
+  LIBWINSOCK=
+endif
 CCOPTS := -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
 CFLAGS= $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
@@ -45,7 +53,7 @@ test-chacha.exe:
 	$(CC) $(CFLAGS) \
 	  hacl_test_utils.c \
 	  $(TWEETNACL_HOME)/tweetnacl.c kremlib.c testlib.c Chacha20.c test-chacha.c -o test-chacha.exe \
-	  $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread -ldl
+	  $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread $(LIBDL) $(LIBWINSOCK)
 
 perf-test-chacha: test-chacha.exe
 	./test-chacha.exe perf
@@ -61,7 +69,7 @@ else
 	$(CC) $(CFLAGS) \
 	  hacl_test_utils.c \
 	  ../../other_providers/tweetnacl/tweetnacl.c kremlib.c testlib.c Chacha20_Vec128.c test-chacha-vec128.c -o test-chacha-vec128.exe \
-	  $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread -ldl
+	  $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread $(LIBDL) $(LIBWINSOCK)
 endif
 
 perf-test-chacha-vec128: test-chacha-vec128.exe
@@ -83,7 +91,7 @@ test-curve.exe:
 	  hacl_test_utils.c \
 	  $(TWEETNACL_HOME)/tweetnacl.c \
 	  kremlib.c testlib.c Curve25519.c test-curve.c -o test-curve.exe \
-	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread $(LIBDL)
 
 perf-test-curve: test-curve.exe
 	./test-curve.exe perf
@@ -96,7 +104,7 @@ test-ed25519.exe: Ed25519.c test-ed25519.c
 	  hacl_test_utils.c \
 	  $(TWEETNACL_HOME)/tweetnacl.c SHA2_512.c \
 	  kremlib.c testlib.c $^ -o test-ed25519.exe \
-	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread $(LIBDL)
 
 perf-test-ed25519: test-ed25519.exe
 	./test-ed25519.exe perf
@@ -109,7 +117,7 @@ test-sha512.exe: SHA2_512.c test-sha512.c
 	  hacl_test_utils.c \
 	  $(TWEETNACL_HOME)/tweetnacl.c \
 	  kremlib.c testlib.c $^ -o test-sha512.exe \
-	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread $(LIBDL)
 
 perf-test-sha512: test-sha512.exe
 	./test-sha512.exe perf
@@ -142,7 +150,7 @@ test-aead.exe:
 	  AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
 	$(CC) $(CFLAGS) \
 	  Chacha20.o AEAD_Poly1305_64.o kremlib.c testlib.c Hacl_Policies.c Chacha20Poly1305.c hacl_test_utils.c test-aead.c -o test-aead.exe \
-	  -lsodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread -ldl
+	  -lsodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread $(LIBDL) $(LIBWINSOCK)
 
 perf-test-aead: test-aead.exe
 	./test-aead.exe	perf
@@ -205,7 +213,7 @@ lib-test: lib
 	  -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I ../../other_providers/tweetnacl \
 	  hacl_test_utils.c \
 	  ../../other_providers/tweetnacl/tweetnacl.c testlib.c test-chacha.c -o test-chacha.exe \
-	   $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread -ldl libhacl.so
+	   $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread $(LIBDL) libhacl.so
 	$(CC)  $(CFLAGS) \
 	  hacl_test_utils.c \
 	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
@@ -213,13 +221,13 @@ lib-test: lib
 	  -lsodium $(OPENSSL_HOME)/libcrypto.a libhacl.so
 	$(CC)  $(CFLAGS) \
 	  testlib.c hacl_test_utils.c test-aead.c -o test-aead.exe \
-	  -lsodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread -ldl libhacl.so
+	  -lsodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread $(LIBDL) libhacl.so
 	$(CC)  $(CFLAGS) \
 	  -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	  hacl_test_utils.c \
 	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
 	  testlib.c test-curve.c -o test-curve.exe \
-	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread -ldl libhacl.so
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread $(LIBDL) libhacl.so
 	$(CC)  $(CFLAGS) \
 	  hacl_test_utils.c \
 	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
