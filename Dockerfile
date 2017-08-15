@@ -6,6 +6,8 @@ MAINTAINER Benjamin Beurdouche <benjamin.beurdouche@inria.fr>
 # Define versions of dependencies
 ENV opamv 4.04.2
 ENV z3v 4.5.1.1f29cebd4df6-x64-ubuntu-14.04
+ENV fstarv 787a4fb921ea2ceee65396bb8c6276d3de99a94e
+ENV kremlinv 32c177d6622badce550aa08c1158f8b824480531
 
 # Install required packages and set versions
 RUN apt-get -qq update
@@ -36,7 +38,7 @@ WORKDIR /home/Work
 # Prepare and build F*
 RUN git clone https://github.com/FStarLang/FStar.git
 WORKDIR /home/Work/FStar
-RUN git checkout 787a4fb921ea2ceee65396bb8c6276d3de99a94e
+RUN git checkout ${fstarv}
 ENV PATH "~/FStar/bin:$PATH"
 RUN opam config exec -- make -C src/ocaml-output
 WORKDIR /home/Work
@@ -44,7 +46,7 @@ WORKDIR /home/Work
 # Prepare and build KreMLin
 RUN git clone https://github.com/FStarLang/kremlin.git
 WORKDIR /home/Work/kremlin
-# RUN git checkout 32c177d6622badce550aa08c1158f8b824480531
+RUN git checkout ${kremlinv}
 ENV PATH "~/kremlin:$PATH"
 RUN opam config exec -- make
 WORKDIR /home/Work
