@@ -21,4 +21,4 @@ ocamlfind ocamlopt -config
 gcc --version
 fstar.exe --version
 
-make -C test travis
+# Do nothing
