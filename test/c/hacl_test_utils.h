@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #if ((defined(_WIN32) || defined(_WIN64)) && (! (defined(__CYGWIN__))))
 #define HACL_TEST_IS_WINDOWS 1
