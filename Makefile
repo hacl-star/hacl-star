@@ -2,9 +2,9 @@
 # Main HACL* Makefile
 #
 
-.PHONY: verify verify_all test nss-ci clean
+.PHONY: verify verify_all test nss clean
 
-all: build nss-ci
+all: nss
 
 verify:
 	@echo $(CYAN)"# Verifying the HaCl* code (specialized for NSS)"$(NORMAL)
@@ -25,8 +25,11 @@ build:
 test: build
 	$(MAKE) -C snapshots/nss unit-tests unit-tests-32
 
-nss-ci: test
-	@echo $(CYAN)"# Comparing the HaCl* code to production code"$(NORMAL)
+nss: test
+	@echo $(CYAN)"# Generating production code from the NSS snapshot"$(NORMAL)
+	$(MAKE) nss-production -C test
+	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/nss-production'."$(NORMAL)
+
 
 clean:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
