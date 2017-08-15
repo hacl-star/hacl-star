@@ -2,7 +2,7 @@
 # Main HACL* Makefile
 #
 
-.PHONY: verify verify_all test nss clean
+.PHONY: verify verify_all test nss dependencies clean
 
 all: nss
 
@@ -30,12 +30,22 @@ nss: test
 	$(MAKE) nss-production -C test
 	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/nss-production'."$(NORMAL)
 
+dependencies:
+	@echo $(CYAN)"# Get and build F* and KreMLin"$(NORMAL)
+	opam switch 4.04.2
+	eval `opam config env`
+	git submodule update --init
+	opam config exec -- make -C dependencies/FStar/src/ocaml-output
+	opam config exec -- make -C dependencies/kremlin
+	PATH="$$PATH:$$PWD/FStar/bin:$$PWD/kremlin"
 
 clean:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
 	rm -rf *~ build snapshots
 	$(MAKE) -C specs clean
 	$(MAKE) -C code clean
+	$(MAKE) -C dependencies/FStar/src/ocaml-output clean
+	$(MAKE) -C dependencies/kremlin clean
 
 NORMAL="\\033[0;39m"
 CYAN="\\033[1;36m"
