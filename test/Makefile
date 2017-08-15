@@ -176,9 +176,6 @@ update-snapshot:
 	$(MAKE) -C ../code clean
 	$(MAKE) snapshot-gcc-unrolled
 	$(MAKE) -C ../code clean
-	$(MAKE) update-snapshot-postlude
-
-update-snapshot-postlude:
 	$(MAKE) -C snapshot-gcc-unrolled clean
 	$(MAKE) -C snapshot-gcc clean
 	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) \
