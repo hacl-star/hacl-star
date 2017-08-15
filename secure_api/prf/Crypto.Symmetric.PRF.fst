@@ -195,10 +195,12 @@ let gen rgn i =
     (* begin *)
     push_frame();
     let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
-    let keystate = Buffer.rcreate rgn 0uy (statelen i) in
     let key = Buffer.create 0uy (keylen i) in
-    let alg = cipherAlg_of_id i in
     Bytes.random (v (keylen i)) key;
+    let h = ST.get() in
+    let keystate = Buffer.rcreate rgn 0uy (statelen i) in
+    Buffer.lemma_live_disjoint h key keystate;
+    let alg = cipherAlg_of_id i in
     Block.init #i key keystate;
     let table: table_t rgn mac_rgn i =
       if prf i then 
@@ -226,7 +228,9 @@ let coerce rgn i key =
   (* | _ -> *)
     (* begin *)
     let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
+    let h = ST.get() in
     let keystate = Buffer.rcreate rgn 0uy (statelen i) in
+    Buffer.lemma_live_disjoint h key keystate;
     let alg = cipherAlg_of_id i in
     Cipher.init #i key keystate;
     State #i #rgn #mac_rgn keystate (no_table i rgn mac_rgn)
