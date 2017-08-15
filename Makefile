@@ -16,7 +16,7 @@ verify_all:
 	$(MAKE) verify -C specs
 	$(MAKE) verify -C code
 
-build:
+build: dependencies
 	@echo $(CYAN)"# Generating the HaCl* code (specialized for NSS)"$(NORMAL)
 	$(MAKE) nss-snapshot -C test
 	@touch build
@@ -37,7 +37,6 @@ dependencies:
 	git submodule update --init
 	opam config exec -- make -C dependencies/FStar/src/ocaml-output
 	opam config exec -- make -C dependencies/kremlin
-	PATH="$$PATH:$$PWD/FStar/bin:$$PWD/kremlin"
 
 clean:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
