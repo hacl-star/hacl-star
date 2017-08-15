@@ -69,7 +69,7 @@ verify-all:
 hints:
 	$(info The 'test' directory does not contain .fst files, so no hints to generate.)
 
-verify: 
+verify:
 	$(info The 'test' directory does not contain .fst files, so no verification to run.)
 
 SNAPSHOT_FILES= ./c/* \
@@ -87,7 +87,7 @@ SNAPSHOT_FILES= ./c/* \
 	$(addprefix ../code/hmac/hmac-c/, HMAC_SHA2_256.*) \
 	$(addprefix ../code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
 
-build-snapshot: 
+build-snapshot:
 	mkdir -p $(SNAPSHOT_DIR)
 	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
@@ -193,7 +193,14 @@ nss-snapshot:
 	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) ../snapshots/nss
 	cp $(addprefix c/, kremlib.h kremlib?c FStar.h Makefile)  ../snapshots/nss
 
+nss-production:
+	mkdir -p ../snapshots/nss-production
+	cp $(addprefix nss/, kremlib.h fstar_uint128.h)  ../snapshots/nss-production
+	patch snapshot-gcc-unrolled/Curve25519.h < patch/hacl_curve25519_64.h.patch
+	cp snapshot-gcc-unrolled/Curve25519.h ../snapshots/nss-production/hacl_curve25519_64.h
+	patch snapshot-gcc-unrolled/Curve25519.c < patch/hacl_curve25519_64.c.patch
+	cp snapshot-gcc-unrolled/Curve25519.c ../snapshots/nss-production/hacl_curve25519_64.c
+
 clean:
 	$(MAKE) -C ../code clean
-	$(MAKE) -C ../secure_api clean
 	rm -rf snapshot snapshot-ccomp snapshot-msvc snapshot-gcc snapshot-gcc-unrolled *.o *.exe *~
