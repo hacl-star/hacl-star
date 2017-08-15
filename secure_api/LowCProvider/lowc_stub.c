@@ -64,7 +64,7 @@ static struct custom_operations st_ops = {
 
 CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
         CAMLparam2(alg, key);
-        Crypto_Indexing_cipherAlg calg;
+        Crypto_Indexing_aeadAlg calg;
 	Crypto_Indexing_aesImpl aesimpl;
 
         switch(Int_val(alg)){

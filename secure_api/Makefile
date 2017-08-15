@@ -20,7 +20,15 @@ endif
 
 
 KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_api/uf1cma $(HACL_HOME)/secure_api/vale $(HACL_HOME)/secure_api/vale/asm $(HACL_HOME)/secure_api/prf $(HACL_HOME)/secure_api/hkdf $(HACL_HOME)/secure_api/utils $(HACL_HOME)/secure_api/indexing $(HACL_HOME)/code/experimental/aesgcm $(HACL_HOME)/code/bignum $(HACL_HOME)/code/poly1305 $(HACL_HOME)/code/salsa-family $(HACL_HOME)/code/hash $(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
-KRML_ARGS=$(FPIC) -ccopt -maes -fnouint128 \
+
+# 2017.08.15 SZ: Made these warnings non-fatal
+# - Warning 4 (dropping toplevel definition)
+# because the projectors of the indexed record type `Crypto.Symmetric.PRF.domain`
+# are dropped but they are not used in extracted code.
+# - Warning 9 (uninitialized globals)
+# because global constants in `Crypto.Symmetric.GF128` that are uninitialized but
+# marked as `inline_for_extraction`, so always inlined.
+KRML_ARGS=$(FPIC) -ccopt -maes -warn-error -4-9 \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
   vale/asm/vale.a test/test_hacks.c \
   -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
@@ -58,10 +66,10 @@ krml-test-vale.exe: vale/asm/vale.a
 
 krml-test-%.exe: tmp-%/out.krml
 	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
-	#./$@
+	./$@
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
-	$(CC) -DKRML_NOUINT128 -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
+	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
 	 -o test-perf-hacl.exe \
 	$(filter-out tmp-hacl/Crypto_KrmlTest.c, $(wildcard tmp-hacl/*.c)) \
 	$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c \
