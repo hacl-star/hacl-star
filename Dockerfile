@@ -32,30 +32,14 @@ RUN opam install ocamlfind batteries sqlite3 fileutils yojson ppx_deriving_yojso
 RUN wget https://github.com/FStarLang/binaries/raw/master/z3-tested/z3-${z3v}.zip
 RUN unzip z3-${z3v}.zip
 RUN mv z3-${z3v} z3
-ENV PATH "~/z3/bin:$PATH"
-WORKDIR /home/Work
-
-# Prepare and build F*
-RUN git clone https://github.com/FStarLang/FStar.git
-WORKDIR /home/Work/FStar
-RUN git checkout ${fstarv}
-ENV PATH "~/FStar/bin:$PATH"
-RUN opam config exec -- make -C src/ocaml-output
-WORKDIR /home/Work
-
-# Prepare and build KreMLin
-RUN git clone https://github.com/FStarLang/kremlin.git
-WORKDIR /home/Work/kremlin
-RUN git checkout ${kremlinv}
-ENV PATH "~/kremlin:$PATH"
-RUN opam config exec -- make
+ENV PATH "/home/Work/z3/bin:$PATH"
 WORKDIR /home/Work
 
 # Prepare and build HaCl*
 RUN git clone https://github.com/mitls/hacl-star.git
 WORKDIR /home/Work/hacl-star
 RUN git checkout production-nss
-ENV FSTAR_HOME /home/Work/FStar
-ENV KREMLIN_HOME /home/Work/kremlin
-RUN opam config exec -- make nss
+ENV FSTAR_HOME /home/Work/hacl-star/dependencies/FStar
+ENV KREMLIN_HOME /home/Work/hacl-star/dependencies/kremlin
+RUN opam config exec -- make
 WORKDIR /home/Work
