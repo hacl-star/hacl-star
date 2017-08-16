@@ -8,7 +8,7 @@ all: nss
 
 verify:
 	@echo $(CYAN)"# Verifying the HaCl* code (specialized for NSS)"$(NORMAL)
-	$(MAKE) verify -C specs/curve25519
+	$(MAKE) -C specs Spec.Curve25519.fst-verify
 	$(MAKE) verify -C code/curve25519
 
 verify_all:
