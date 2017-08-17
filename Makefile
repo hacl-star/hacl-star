@@ -20,7 +20,8 @@ display:
 # Verification targets
 #
 
-extract: $(MAKE) -C test snapshot
+extract:
+	$(MAKE) -C test snapshot
 
 %.verify-dir: %
 	$(MAKE) -C $^ verify
