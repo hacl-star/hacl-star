@@ -14,10 +14,10 @@ lib/hst/ml/*.o
 test/hash/ml/*
 test/hash/*.exe
 test/hash/sha256
-
 test/hmac/ml/*
 test/hmac/*.exe
 test/hmac/hmac_sha256
+test/snapshot/
 
 pneutube/tube-star.exe
 pneutube/tube-star.exe.dSYM/
@@ -46,11 +46,13 @@ code/hash/sha2-512-c/
 code/hmac/hmac-c/
 code/api/aead-c/
 code/api/box-c/
+code/api/policies-c/
 code/curve25519/x25519-c/
 code/ed25519/ed25519-c/
 code/poly1305/poly-c/
 code/salsa-family/chacha-c/
 code/salsa-family/chacha-vec128/
+code/salsa-family/chacha-vec128-c/
 code/salsa-family/hsalsa-c/
 code/salsa-family/salsa-c/
 code/salsa-family/xsalsa-c/
