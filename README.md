@@ -18,11 +18,10 @@ OCaml for execution.
 The primitives and constructions supported currently are:
 
 * Stream ciphers: Chacha20, Salsa20, XSalsa20
-* MACs: Poly1305
+* MACs: Poly1305, HMAC
 * Elliptic Curves: Curve25519
 * Elliptic Curves Signatures: Ed25519
 * Hash functions: SHA2 (256,384,512)
-* MAC: HMAC
 * NaCl API: secret_box, box
 
 HACL* can be used in two ways. The verified primitives can be directly
