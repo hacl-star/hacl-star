@@ -4,8 +4,6 @@ HaCl-star
 HaCl* is a formally verified cryptographic library in [F\*],
 developed as part of [Project Everest].
 
-[![Build Status](https://travis-ci.org/mitls/hacl-star.svg?branch=master)](https://travis-ci.org/mitls/hacl-star)
-
 HACL stands for High-Assurance Cryptographic Library and its design is
 inspired by discussions at the HACS series of workshops.
 The goal of this library is to develop *reference* implementations
@@ -104,11 +102,6 @@ The [code/experimental](code/experimental) directory includes other (partially v
 * Encryption: AES-128, AES-256
 * MACs: GCM
 * Key Derivation: HKDF
-
-To build a static and shared versions of the experimental library:
-```
-make build-experimental
-```
 
 We are also working on a JavaScript backend to F* that would enable us to extract HACL* as a JavaScript library.
 
