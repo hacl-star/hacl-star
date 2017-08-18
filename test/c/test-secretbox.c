@@ -135,14 +135,14 @@ void flush_results(char *txt, uint64_t hacl_cy, uint64_t sodium_cy, uint64_t oss
 int32_t test_api()
 {
   uint8_t    ciphertext[CIPHERTEXT_LEN+32] = {0};
-  uint8_t    mac[16] = {0}; 
+  uint8_t    mac[16] = {0};
   uint8_t    decrypted[MESSAGE_LEN+32] = {0};
   uint32_t res;
   int i;
 
-  /* Testing the secret box primitives */  
-  crypto_secretbox_detached(ciphertext+32, mac, msg+32, MESSAGE_LEN, nonce, key); 
-  res = NaCl_crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key); 
+  /* Testing the secret box primitives */
+  crypto_secretbox_detached(ciphertext+32, mac, msg+32, MESSAGE_LEN, nonce, key);
+  res = NaCl_crypto_secretbox_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, key);
   printf("HACL decryption of libsodium encryption was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("HACL secretbox", msg+32, decrypted+32, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
@@ -177,7 +177,7 @@ int32_t perf_api() {
   hacl_utime = (double)t2 - t1;
   print_results("Hacl SecretBox speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
+  for (int i = 0; i < CIPHERTEXT_LEN; i++)
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -192,7 +192,7 @@ int32_t perf_api() {
   sodium_utime = (double)t2 - t1;
   print_results("Sodium SecretBox speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < len + 16 * sizeof(char); i++) 
+  for (int i = 0; i < len + 16 * sizeof(char); i++)
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -207,7 +207,7 @@ int32_t perf_api() {
   tweet_utime = (double)t2 - t1;
   print_results("TweetNacl SecretBox speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < len + 16 * sizeof(char); i++) 
+  for (int i = 0; i < len + 16 * sizeof(char); i++)
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -216,7 +216,7 @@ int32_t perf_api() {
   return exit_success;
 }
 
-  
+
 int32_t main(int argc, char *argv[])
 {
   if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
@@ -231,7 +231,7 @@ int32_t main(int argc, char *argv[])
     return res;
   } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
     return test_api();
-  } else {    
+  } else {
     printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
     return exit_failure;
   }

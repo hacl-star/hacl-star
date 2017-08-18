@@ -396,7 +396,7 @@ int32_t test_salsa()
   hacl_aligned_free(key);
   hacl_aligned_free(plaintext);
   hacl_aligned_free(ciphertext);
-  
+
   return exit_success;
 }
 
@@ -427,7 +427,7 @@ int32_t perf_salsa() {
     hacl_aligned_free(cipher);
     free(plain);
     return exit_failure;
-  }      
+  }
   memset(key, 0, TEST_KEYSIZE * sizeof key[0]);
   uint8_t * subkey = hacl_aligned_malloc(16, TEST_KEYSIZE);
   if (subkey == NULL) {
@@ -513,7 +513,7 @@ int32_t perf_salsa() {
   hacl_utime = (double)t2 - t1;
   print_results("HACL Salsa20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < PLAINLEN; i++) 
+  for (int i = 0; i < PLAINLEN; i++)
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -528,10 +528,10 @@ int32_t perf_salsa() {
   sodium_utime = (double)t2 - t1;
   print_results("Sodium Salsa20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < PLAINLEN; i++) 
+  for (int i = 0; i < PLAINLEN; i++)
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
-  
+
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
@@ -543,10 +543,10 @@ int32_t perf_salsa() {
   tweet_utime = (double)t2 - t1;
   print_results("TweetNacl Salsa20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < PLAINLEN; i++) 
+  for (int i = 0; i < PLAINLEN; i++)
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
-  
+
   flush_results("SALSA20", hacl_cy, sodium_cy, 0, tweet_cy, hacl_utime, sodium_utime, 0, tweet_utime, ROUNDS, PLAINLEN);
 
   hacl_aligned_free(subkey_);
@@ -573,7 +573,7 @@ int32_t main(int argc, char *argv[])
     return res;
   } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
     return test_salsa();
-  } else {    
+  } else {
     printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
     return exit_failure;
   }
