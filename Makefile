@@ -51,7 +51,7 @@ include Makefile.build
 build:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
 	mkdir -p build && cd build; \
-	c$(MAKE) $(CMAKE_COMPILER_OPTION) .. && make
+	cmake $(CMAKE_COMPILER_OPTION) .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
 
 experimental:
