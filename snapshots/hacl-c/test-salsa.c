@@ -344,34 +344,14 @@ __attribute__ ((aligned (16)))  uint8_t
 
 int32_t test_salsa()
 {
-  /* TR: we now allocate in the free store rather than on the stack,
-     because of stack overflow on Windows. */
-  uint8_t * ciphertext = hacl_aligned_malloc(16, TEST_LEN);
-  if (ciphertext == NULL) {
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t ciphertext[TEST_LEN];
   memset(ciphertext, 0, TEST_LEN * sizeof ciphertext[0]);
-  uint8_t * plaintext = hacl_aligned_malloc(16, TEST_LEN);
-  if (plaintext == NULL) {
-    hacl_aligned_free(ciphertext);
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t plaintext[TEST_LEN];
   memset(plaintext, 0, TEST_LEN * sizeof plaintext[0]);
-  uint8_t * key = hacl_aligned_malloc(16, TEST_KEYSIZE);
-  if (key == NULL) {
-    hacl_aligned_free(plaintext);
-    hacl_aligned_free(ciphertext);
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t key[TEST_KEYSIZE];
   memset(key, 0, TEST_KEYSIZE * sizeof key[0]);
   key[(uint32_t )0] = (uint8_t )0x80;
-  uint8_t * nonce = hacl_aligned_malloc(16, TEST_NONCESIZE);
-  if (nonce == NULL) {
-    hacl_aligned_free(key);
-    hacl_aligned_free(plaintext);
-    hacl_aligned_free(ciphertext);
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t nonce[TEST_NONCESIZE];
   memset(nonce, 0, TEST_NONCESIZE * sizeof nonce[0]);
 
 
@@ -392,106 +372,35 @@ int32_t test_salsa()
   TestLib_compare_and_print("Sodium Salsa20", expected3, ciphertext + (uint32_t )256, (uint32_t )64);
   TestLib_compare_and_print("Sodium Salsa20", expected4, ciphertext + (uint32_t )448, (uint32_t )64);
 
-  hacl_aligned_free(nonce);
-  hacl_aligned_free(key);
-  hacl_aligned_free(plaintext);
-  hacl_aligned_free(ciphertext);
-  
+
   return exit_success;
 }
 
 #define LEN (PLAINLEN * sizeof(char))
 
 int32_t perf_salsa() {
-  /* TR: we now allocate in the free store rather than on the stack,
-     because of stack overflow on Windows. */
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint64_t res = 0;
-  uint8_t * plain = malloc(LEN);
-  if (plain == NULL) {
-    return exit_failure;
-  }
-  uint8_t * cipher = hacl_aligned_malloc(16, LEN);
-  if (cipher == NULL) {
-    free(plain);
-    return exit_failure;
-  }
-  if (! (read_random_bytes(LEN, plain))) {
-    hacl_aligned_free(cipher);
-    free(plain);
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t plain[LEN];
+  __attribute__ ((aligned (16)))uint8_t cipher[LEN];
+  if (! (read_random_bytes(LEN, plain)))
+    return 1;
 
-  uint8_t * key = hacl_aligned_malloc(16, TEST_KEYSIZE);
-  if (key == NULL) {
-    hacl_aligned_free(cipher);
-    free(plain);
-    return exit_failure;
-  }      
+  __attribute__ ((aligned (16)))uint8_t key[TEST_KEYSIZE];
   memset(key, 0, TEST_KEYSIZE * sizeof key[0]);
-  uint8_t * subkey = hacl_aligned_malloc(16, TEST_KEYSIZE);
-  if (subkey == NULL) {
-    hacl_aligned_free(key);
-    hacl_aligned_free(cipher);
-    free(plain);
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t subkey[TEST_KEYSIZE];
   memset(subkey, 0, TEST_KEYSIZE * sizeof subkey[0]);
   key[(uint32_t )0] = (uint8_t )0x80;
-  uint8_t * nonce = hacl_aligned_malloc(16, TEST_NONCESIZE);
-  if (nonce == NULL) {
-    hacl_aligned_free(subkey);
-    hacl_aligned_free(key);
-    hacl_aligned_free(cipher);
-    free(plain);
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t nonce[TEST_NONCESIZE];
   memset(nonce, 0, TEST_NONCESIZE * sizeof nonce[0]);
-  uint8_t * block = hacl_aligned_malloc(16, 64);
-  if (block == NULL) {
-    hacl_aligned_free(nonce);
-    hacl_aligned_free(subkey);
-    hacl_aligned_free(key);
-    hacl_aligned_free(cipher);
-    free(plain);
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t block[64];
   memset(block, 0, 64 * sizeof block[0]);
-  uint8_t * block_ = hacl_aligned_malloc(16, 64);
-  if (block_ == NULL) {
-    hacl_aligned_free(block);
-    hacl_aligned_free(nonce);
-    hacl_aligned_free(subkey);
-    hacl_aligned_free(key);
-    hacl_aligned_free(cipher);
-    free(plain);
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t block_[64];
   memset(block_, 0, 64 * sizeof block_[0]);
-  uint8_t * nonce_ = hacl_aligned_malloc(16, TEST_NONCESIZE);
-  if (nonce_ == NULL) {
-    hacl_aligned_free(block_);
-    hacl_aligned_free(block);
-    hacl_aligned_free(nonce);
-    hacl_aligned_free(subkey);
-    hacl_aligned_free(key);
-    hacl_aligned_free(cipher);
-    free(plain);
-    return exit_failure;
-  }
+
+  __attribute__ ((aligned (16)))uint8_t nonce_[TEST_NONCESIZE];
   memset(nonce_, 0, TEST_NONCESIZE * sizeof nonce_[0]);
-  uint8_t * subkey_ = hacl_aligned_malloc(16, TEST_KEYSIZE);
-  if (subkey_ == NULL) {
-    hacl_aligned_free(nonce_);
-    hacl_aligned_free(block_);
-    hacl_aligned_free(block);
-    hacl_aligned_free(nonce);
-    hacl_aligned_free(subkey);
-    hacl_aligned_free(key);
-    hacl_aligned_free(cipher);
-    free(plain);
-    return exit_failure;
-  }
+  __attribute__ ((aligned (16)))uint8_t subkey_[TEST_KEYSIZE];
   memset(subkey_, 0, TEST_KEYSIZE * sizeof subkey_[0]);
 
   cycles a,b;
@@ -549,16 +458,6 @@ int32_t perf_salsa() {
   
   flush_results("SALSA20", hacl_cy, sodium_cy, 0, tweet_cy, hacl_utime, sodium_utime, 0, tweet_utime, ROUNDS, PLAINLEN);
 
-  hacl_aligned_free(subkey_);
-  hacl_aligned_free(nonce_);
-  hacl_aligned_free(block_);
-  hacl_aligned_free(block);
-  hacl_aligned_free(nonce);
-  hacl_aligned_free(subkey);
-  hacl_aligned_free(key);
-  hacl_aligned_free(cipher);
-  free(plain);
-
   return exit_success;
 }
 
@@ -567,7 +466,6 @@ int32_t main(int argc, char *argv[])
   if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
     int32_t res = test_salsa();
     if (res == exit_success) {
-      printf("Before perf\n");
       res = perf_salsa();
     }
     return res;
