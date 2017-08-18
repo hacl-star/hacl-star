@@ -4,10 +4,7 @@
 #include "sodium.h"
 #include "tweetnacl.h"
 #include "ec_lcl.h"
-
-#ifdef _WIN32
-#include <WinCrypt.h>
-#endif
+#include "hacl_test_utils.h"
 
 
 void ossl_curve25519(uint8_t* result, uint8_t* scalar, uint8_t* input){
@@ -335,36 +332,10 @@ int32_t perf_curve() {
   sk = malloc(KEYSIZE * ROUNDS * sizeof(char));
   mul = malloc(KEYSIZE * ROUNDS * sizeof(char));
 
-#ifdef _WIN32
-  HCRYPTPROV hCryptProv;
-
-  if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
-    fprintf(stderr, "Error acquiring context\n");
+  if (!read_random_bytes(len, sk))
     exit(1);
-  }
-  if (!CryptGenRandom(hCryptProv, len, sk)) {
-    fprintf(stderr, "Error reading\n");
+  if (!read_random_bytes(len, pk))
     exit(1);
-  }
-  if (!CryptGenRandom(hCryptProv, len, pk)) {
-    fprintf(stderr, "Error reading\n");
-    exit(1);
-  }
-
-  uint64_t res = len;
-#else
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, sk, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return 1;
-  }
-  res = read(fd, pk, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return 1;
-  }
-#endif
 
   uint64_t d[ROUNDS];
   cycles a,b;
@@ -380,6 +351,7 @@ int32_t perf_curve() {
   hacl_cy = (double) median(d,ROUNDS);
   hacl_utime = (double)t2 - t1;
   print_results("HACL Curve25519 speed", (double)(t2-t1)/ROUNDS, (double) median(d,ROUNDS), 1, 1);
+  uint64_t res = 0;
   for (int i = 0; i < ROUNDS; i++) res += (uint64_t)*(mul+KEYSIZE*i) + (uint64_t)*(mul+KEYSIZE*i+8)
                                  + (uint64_t)*(mul+KEYSIZE*i+16) + (uint64_t)*(mul+KEYSIZE*i+24);
   printf("Composite result (ignore): %" PRIx64 "\n", res);
