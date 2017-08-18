@@ -173,7 +173,6 @@ let verify_ public msg len signature =
   pop_frame();
   (**) let h3 = ST.get() in
   (**) modifies_popped_0 h0 h1 h2 h3;
-  lemma_modifies_none h0 h1 h2 h3;
   res
 
 

@@ -224,27 +224,24 @@ let times_d out a =
   push_frame();
   let h1 = ST.get() in
   let d = Buffer.create (Hacl.Cast.uint64_to_sint64 0uL) 5ul in
+  let h1' = ST.get() in
   Hacl.Lib.Create64.make_h64_5 d (uint64_to_sint64 0x00034dca135978a3uL)
                                  (uint64_to_sint64 0x0001a8283b156ebduL)
                                  (uint64_to_sint64 0x0005e7a26001c029uL)
                                  (uint64_to_sint64 0x000739c663a03cbbuL)
                                  (uint64_to_sint64 0x00052036cee2b6ffuL);
   let h2 = ST.get() in
-  no_upd_lemma_0 h1 h2 a;
+  lemma_modifies_0_1' d h1 h1' h2;
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h2 d);
   assert_norm (0x00034dca135978a3 + pow2 51 * 0x0001a8283b156ebd + pow2 102 * 0x0005e7a26001c029 +
                pow2 153 * 0x000739c663a03cbb + pow2 204 * 0x00052036cee2b6ff
                = Spec.Ed25519.d);
-  assert(as_seq h0 a == as_seq h2 a);
   fmul out d a;
   let h3 = ST.get() in
   lemma_modifies_0_1 out h1 h2 h3;
-  assert(modifies_2_1 out h1 h3);
   pop_frame();
   let h4 = ST.get() in
-  modifies_popped_1 out h0 h1 h3 h4;
-  assert(modifies_1 out h0 h4);
-  ()
+  modifies_popped_1 out h0 h1 h3 h4
 
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
@@ -255,41 +252,47 @@ let times_2d out a =
   push_frame();
   let h1 = ST.get() in
   let d2 = Buffer.create (Hacl.Cast.uint64_to_sint64 0uL) 5ul in
+  let h1' = ST.get() in
   Hacl.Lib.Create64.make_h64_5 d2 (uint64_to_sint64 0x00069b9426b2f159uL)
                                   (uint64_to_sint64 0x00035050762add7auL)
                                   (uint64_to_sint64 0x0003cf44c0038052uL)
                                   (uint64_to_sint64 0x0006738cc7407977uL)
                                   (uint64_to_sint64 0x0002406d9dc56dffuL);
   let h2 = ST.get() in
-  no_upd_lemma_0 h1 h2 a;
+  lemma_modifies_0_1' d2 h1 h1' h2;
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 (as_seq h2 d2);
   assert_norm (0x00069b9426b2f159 + pow2 51 * 0x00035050762add7a + pow2 102 * 0x0003cf44c0038052 +
                pow2 153 * 0x0006738cc7407977 + pow2 204 * 0x0002406d9dc56dff
                = (2 * Spec.Ed25519.d) % Spec.Curve25519.prime);
-  assert(as_seq h0 a == as_seq h2 a);
   fmul out a d2;
   let h3 = ST.get() in
   lemma_modifies_0_1 out h1 h2 h3;
-  assert(modifies_2_1 out h1 h3);
   pop_frame();
   let h4 = ST.get() in
-  modifies_popped_1 out h0 h1 h3 h4;
-  assert(modifies_1 out h0 h4);
-  ()
+  modifies_popped_1 out h0 h1 h3 h4
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 let fsquare out a =
-  push_frame();
-  let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) 5ul in
   let h = ST.get() in
+  push_frame();
+  let h0 = ST.get() in
+  let tmp = create (Hacl.Cast.uint64_to_sint128 0uL) 5ul in
+  let h1 = ST.get() in
   blit a 0ul out 0ul 5ul;
-  let h' = ST.get() in
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h a);
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h' out);
-  Hacl.Spec.Bignum.Fsquare.fsquare_5413_is_fine (as_seq h' out);
+  let h2 = ST.get() in
+  lemma_modifies_0_1 out h0 h1 h2;
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h1 a);
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h2 out);
+  Hacl.Spec.Bignum.Fsquare.fsquare_5413_is_fine (as_seq h2 out);
   Hacl.Bignum.Fsquare.fsquare_ tmp out;
-  pop_frame()
+  let h3 = ST.get() in
+  pop_frame();
+  let h4 = ST.get() in
+  lemma_modifies_1_2'' out tmp h1 h2 h3;
+  lemma_modifies_0_2 out tmp h0 h1 h3;
+  modifies_popped_1 out h h0 h3 h4
+
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
