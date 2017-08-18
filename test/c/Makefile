@@ -41,7 +41,7 @@ test-salsa.exe:
 	$(CC) $(CFLAGS) \
 	  hacl_test_utils.c \
 	  $(TWEETNACL_HOME)/tweetnacl.c \
-	  kremlib.c testlib.c Salsa20.o test-salsa.c -lsodium -o test-salsa.exe 
+	  kremlib.c testlib.c Salsa20.o test-salsa.c -lsodium -o test-salsa.exe
 
 perf-test-salsa: test-salsa.exe
 	./test-salsa.exe perf
@@ -235,8 +235,8 @@ lib-test: lib
 	./test-chacha.exe
 	./test-salsa.exe
 	./test-poly.exe
-	./test-secretbox.exe	
-	./test-aead.exe	
+	./test-secretbox.exe
+	./test-aead.exe
 	./test-curve.exe
 	./test-box.exe
 

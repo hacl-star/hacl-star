@@ -227,7 +227,7 @@ crypto_box_detached(
                     uint8_t *n,
                     uint8_t *pk,
                     uint8_t *sk){
-  return NaCl_crypto_box_detached(c, mac, m, mlen, n, pk, sk);  
+  return NaCl_crypto_box_detached(c, mac, m, mlen, n, pk, sk);
 }
 
 uint32_t
