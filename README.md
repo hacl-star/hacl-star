@@ -5,7 +5,7 @@ HaCl* is a formally verified cryptographic library in [F\*],
 developed as part of [Project Everest].
 
 HACL stands for High-Assurance Cryptographic Library and its design is
-inspired by discussions at the HACS series of workshops.
+inspired by discussions at the [HACS series of workshops](https://github.com/HACS-workshop).
 The goal of this library is to develop *reference* implementations
 for popular cryptographic primitives and to verify them for memory safety,
 side-channel resistance, and (where applicable) functional correctness.
