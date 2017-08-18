@@ -43,7 +43,6 @@ instead.
 # Warning
 
 This library is at the pre-production stage.
-
 Please consult the authors before using it in production systems.
 
 
@@ -51,6 +50,7 @@ Please consult the authors before using it in production systems.
 
 
 To verify the F\* code, you need to install the [F\*] typechecker.
+
 To extract F\* code to C, you need to install the [KreMLin] compiler.
 
 See [INSTALL.md](INSTALL.md) for prerequisites.
