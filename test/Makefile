@@ -1,5 +1,5 @@
-include Makefile.include
-include Makefile.build
+include ../Makefile.include
+include ../Makefile.build
 
 #
 # Unit tests
