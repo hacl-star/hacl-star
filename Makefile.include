@@ -108,6 +108,14 @@ OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
 OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
 
 #
+# Compilers and tools
+#
+
+HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
+HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
+GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
+
+#
 # HaCl* generalized targets
 #
 

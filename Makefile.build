@@ -8,10 +8,6 @@
 
 .PHONY: snapshot snapshot-gcc snapshot-ccomp snapshot-msvc snapshot-gcc-unrolled
 
-HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
-HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
-GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
-
 SNAPSHOT_DIR=snapshot
 
 extract-c: extract-c-code extract-c-crypto # extract-c-apps
