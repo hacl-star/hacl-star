@@ -30,6 +30,7 @@ display:
 #
 
 include Makefile.include
+include Makefile.build
 
 #
 # Verification
@@ -57,17 +58,14 @@ extract:
 extract-specs:
 	$(MAKE) -C $(HACL_HOME)/specs
 
-extract-code:
-	$(GFIND) code -name out.krml -exec touch {} \;
-	$(MAKE) -C $(HACL_HOME)/code extract-c
+extract-code: extract-c-code
 
-extract-code-experimental:
-	$(MAKE) -C $(HACL_HOME)/code/experimental/ extract-c
+extract-code-experimental: extract-c-code-experimental
 
-extract-all-c:
-	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
-	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
-	$(MAKE) clean ; $(MAKE) extract-c
+# extract-all-c:
+# 	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
+# 	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
+# 	$(MAKE) clean ; $(MAKE) extract-c
 
 #
 # Compilation of the library
@@ -113,7 +111,7 @@ clean-build:
 	rm -rf build
 	rm -rf build-experimental
 
-clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean test.dir-clean
+clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
 
 #
 # Undocumented targets

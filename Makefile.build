@@ -1,5 +1,3 @@
-# include Makefile.include
-
 #
 # TODO
 # - MSVC and Compcert compilation tests
@@ -12,12 +10,17 @@ SNAPSHOT_DIR=snapshot
 
 extract-c: extract-c-code extract-c-crypto # extract-c-apps
 
-# These cannot benefit from parallelism, tests C extraction for available compilers
-extract-all-c:
-	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
-	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
-	$(MAKE) clean ; $(MAKE) extract-c
+extract-c-code:
+	$(GFIND) $(HACL_HOME)/code -name out.krml -exec touch {} \;
+	$(MAKE) -C $(HACL_HOME)/code extract-c
 
+extract-c-code-experimental:
+	$(MAKE) -C $(HACL_HOME)/code/experimental/ extract-c
+
+# extract-all-c:
+# 	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
+# 	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
+# 	$(MAKE) clean ; $(MAKE) extract-c
 
 SNAPSHOT_FILES= ./c/* \
 	$(addprefix ./code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
@@ -111,5 +114,5 @@ nss-snapshot:
 	$(MAKE) -C ../snapshots/nss unit-tests-32
 	$(MAKE) -C ../snapshots/nss clean
 
-clean:
-	rm -rf snapshot snapshot-ccomp snapshot-msvc snapshot-gcc snapshot-gcc-unrolled *.o *.exe *~
+# clean:
+# 	rm -rf snapshot snapshot-ccomp snapshot-msvc snapshot-gcc snapshot-gcc-unrolled *.o *.exe *~

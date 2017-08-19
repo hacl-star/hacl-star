@@ -9,11 +9,11 @@ all: extract-all-c
 	$(MAKE) -C ../code test
 	$(MAKE) test-vale
 	$(MAKE) test-vale-asm
-	$(MAKE) test-pneutube
 	$(MAKE) test-snapshot
 	$(MAKE) test-ccomp
 	$(MAKE) test-gcc
 	$(MAKE) test-gcc-unrolled
+	$(MAKE) test-pneutube
 	$(MAKE) -C openssl-engine
 
 test-vale:
