@@ -1,4 +1,4 @@
-include ../../Makefile.include
+include ../../../Makefile.include
 
 ALL=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst
 

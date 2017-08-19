@@ -1,7 +1,7 @@
 FSTAR_HOME?=../../../dependencies/FStar
 KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
 HACL_HOME?=../../..
-include ../../../code/Makefile.include
+include ../../../Makefile.include
 
 FILE=Hacl.Bignum.Fsum.fst
 

@@ -1,4 +1,4 @@
-include ../Makefile.include
+include ../../Makefile.include
 
 HACL_API=$(HACL_HOME)/crypto
 HACL_CRYPTO_UTILS=$(HACL_API)/utils

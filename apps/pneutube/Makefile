@@ -1,4 +1,4 @@
-include ../../code/Makefile.include
+include ../../Makefile.include
 
 INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/api $(HACL_HOME)/code/curve25519 $(HACL_HOME)/specs $(HACL_HOME)/snapshots/hacl-c c_bindings
 

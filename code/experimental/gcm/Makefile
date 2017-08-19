@@ -1,4 +1,4 @@
-include ../../Makefile.include
+include ../../../Makefile.include
 
 all:
 	@echo
@@ -20,7 +20,7 @@ INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/experimental/aesgcm
 FSTAR_INCLUDES+=$(addprefix --include , $(INCLUDE_DIRS))
 
 ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(AESGCM_FILES)))
-ct: $(addsuffix -lax, $(AESGCM_FILES)) 
+ct: $(addsuffix -lax, $(AESGCM_FILES))
 verify: $(addsuffix -verify, $(AESGCM_FILES))
 hints: $(addsuffix .hints, $(filter-out $(BROKEN), $(AESGCM_FILES)))
 

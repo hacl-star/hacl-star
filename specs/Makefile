@@ -1,4 +1,4 @@
-include ../code/Makefile.include
+include ../Makefile.include
 
 .PHONY=lib all
 
