@@ -1,4 +1,4 @@
-include ../Makefile.include
+include ../../Makefile.include
 
 API_FILES= \
 	Hacl.Constants.fst \

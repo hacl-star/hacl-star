@@ -1,4 +1,4 @@
-include ../Makefile.include
+include ../../Makefile.include
 
 BIGNUM= \
 	../bignum/Hacl.Bignum.Limb.fst \

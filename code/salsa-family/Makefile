@@ -1,4 +1,4 @@
-include ../Makefile.include
+include ../../Makefile.include
 
 SALSA_FAMILY_FILES= \
 	Hacl.Lib.LoadStore32.fst \
