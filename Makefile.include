@@ -41,9 +41,13 @@ else
 VERBOSE=-verbose
 endif
 
+#
+# Kremlin
+#
+
 KREMLIN=$(KREMLIN_HOME)/krml
 KREMLIN_ARGS?=
-# Pass parameters to kremlin from the command-line
+
 KREMLIN_ARGS+=$(KOPTS)
 ifdef USE_CCOMP
   KREMLIN_ARGS+=-cc compcert $(VERBOSE)
@@ -55,19 +59,31 @@ endif
 
 # Linux specific compilation instruction for PneuTube
 ifeq ($(UNAME), Linux)
-KREMLIN_ARGS+=-ccopt -D_GNU_SOURCE
+  KREMLIN_ARGS+=-ccopt -D_GNU_SOURCE
 endif
 
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMTEST=$(KREMLIN_HOME)/test
 KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
-KREMLIN_TESTLIB=-add-include '"testlib.h"' $(KREMLIB)/testlib.c
+ifdef HACL_NO_TESTLIB
+  KREMLIN_TESTLIB=
+else
+  KREMLIN_TESTLIB=-add-include '"testlib.h"' $(KREMLIB)/testlib.c
+endif
+
+#
+# FStar
+#
 
 FSTAR_LIB=$(FSTAR_HOME)/ulib
 HINTS_ENABLED?=--use_hints
 FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
+
+#
+# Azure cloud verification
+#
 
 ifdef CLOUD_VERIFY
 BATCH_JOB_ID=$(subst job-id:,,$(filter job-id:%, $(shell cat $(BATCH_ID_FILE))))
@@ -84,8 +100,16 @@ endif
 
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
+#
+# OCaml
+#
+
 OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
 OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
+
+#
+# HaCl* generalized targets
+#
 
 ml-lib:
 	$(MAKE) -C $(ULIB_ML)
@@ -148,3 +172,16 @@ import-kremlin:
 	$(HINTS_ENABLED) \
 	$(OTHERFLAGS) \
 	$(FSTAR_INCLUDES)
+
+# Directories
+%.dir-verify: %
+	$(MAKE) -C $^ verify
+
+%.dir-extract-c: %
+	$(MAKE) -C $^ extract-c
+
+%.dir-hints: %
+	$(MAKE) -C $^ hints
+
+%.dir-clean: %
+	$(MAKE) -C $^ clean

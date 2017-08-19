@@ -1,18 +1,119 @@
+# include Makefile.include
+
 #
-# Makefile to prepare for HaCl* setup
+# TODO
+# - MSVC and Compcert compilation tests
+# - Adding extract-c-apps to extract-c when libsodium is on the build machine
 #
 
-.PHONY: prepare
+.PHONY: snapshot snapshot-gcc snapshot-ccomp snapshot-msvc snapshot-gcc-unrolled
 
-prepare:
-	@echo "# Installing OCaml packages required by F*"
-	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
-	@echo "# Installing OCaml packages required by KreMLin"
-	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
-	@echo "# Installing submodules for F* and KreMLin"
-	git submodule update --init
-	@echo "# Compiling F*"
-	$(MAKE) -C dependencies/FStar/src/ocaml-output
-	$(MAKE) -C dependencies/FStar/ulib/ml
-	@echo "# Compiling KreMLin"
-	$(MAKE) -C dependencies/kremlin
+HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
+HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
+GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
+
+SNAPSHOT_DIR=snapshot
+
+extract-c: extract-c-code extract-c-crypto # extract-c-apps
+
+# These cannot benefit from parallelism, tests C extraction for available compilers
+extract-all-c:
+	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
+	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
+	$(MAKE) clean ; $(MAKE) extract-c
+
+
+SNAPSHOT_FILES= ./c/* \
+	$(addprefix ./code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
+	./code/curve25519/x25519-c/Curve25519.* \
+	./code/salsa-family/chacha-c/Chacha20.* \
+	./code/salsa-family/salsa-c/Salsa20.* \
+	$(addprefix ./code/api/aead-c/, Chacha20Poly1305.*) \
+	$(addprefix ./code/api/box-c/, NaCl.*) \
+	$(addprefix ./code/api/policies-c/, Hacl_Policies.* ) \
+	$(addprefix ./code/ed25519/ed25519-c/, Ed25519.*) \
+	$(addprefix ./code/hash/sha2-c/, SHA2_256.*) \
+	$(addprefix ./code/hash/sha2-c/, SHA2_384.*) \
+	$(addprefix ./code/hash/sha2-c/, SHA2_512.*) \
+	$(addprefix ./code/hmac/hmac-c/, HMAC_SHA2_256.*) \
+	$(addprefix ./code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
+
+build-snapshot:
+	mkdir -p $(SNAPSHOT_DIR)
+	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
+	$(MAKE) -C $(SNAPSHOT_DIR) clean
+
+ifeq ($(OS),Windows_NT)
+  GCC=x86_64-w64-mingw32-gcc.exe
+else
+  GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
+  ENABLE_LTO=-flto
+endif
+GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
+
+snapshot/libhacl.so: snapshot
+	$(MAKE) -C snapshot CC="$(GCC) $(GCC_OPTS) -fPIC" lib
+
+snapshot:
+	$(MAKE) extract-c-code extract-c-code-experimental
+	$(MAKE) build-snapshot
+
+snapshot-ccomp:
+	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
+	if $(HAS_CCOMP); then $(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
+
+snapshot-msvc:
+	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar"; fi
+	if $(HAS_CL); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-msvc; fi
+
+snapshot-gcc:
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar"
+	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
+
+snapshot-gcc-unrolled:
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar"
+	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc-unrolled
+
+all-snapshots:
+	$(MAKE) snapshot-ccomp
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-msvc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
+
+update-snapshot:
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
+	$(MAKE) -C snapshot-gcc-unrolled clean
+	$(MAKE) -C snapshot-gcc clean
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) \
+	   $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
+	   $(addprefix c/, kremlib.h kremlib.c FStar.h Makefile)  \
+		../snapshots/hacl-c
+	$(MAKE) -C ../snapshots/hacl-c unit-tests
+	$(MAKE) -C ../snapshots/hacl-c unit-tests-32
+	$(MAKE) -C ../snapshots/hacl-c perf
+	$(MAKE) -C ../snapshots/hacl-c clean
+
+nss-snapshot:
+	$(MAKE) snapshot-gcc
+	$(MAKE) -C ../code clean
+	$(MAKE) snapshot-gcc-unrolled
+	$(MAKE) -C ../code clean
+	$(MAKE) -C snapshot-gcc-unrolled clean
+	$(MAKE) -C snapshot-gcc clean
+	mkdir -p ../snapshots/nss
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/nss
+	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) ../snapshots/nss
+	cp $(addprefix c/, kremlib.h kremlib?c FStar.h Makefile)  ../snapshots/nss
+	$(MAKE) -C ../snapshots/nss unit-tests
+	$(MAKE) -C ../snapshots/nss unit-tests-32
+	$(MAKE) -C ../snapshots/nss clean
+
+clean:
+	rm -rf snapshot snapshot-ccomp snapshot-msvc snapshot-gcc snapshot-gcc-unrolled *.o *.exe *~
