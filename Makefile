@@ -2,7 +2,7 @@
 # Main HACL* Makefile
 #
 
-.PHONY: display verify clean
+.PHONY: display verify test clean
 
 all: display
 
@@ -85,9 +85,6 @@ build:
 
 test:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
-	mkdir -p build && cd build; \
-	cmake $(CMAKE_COMPILER_OPTION) .. && make
-	@echo $(CYAN)"\nDone !"$(NORMAL)
 
 #
 # Additional targets
