@@ -59,23 +59,21 @@ let registered pkm i = ID.registered pkm.im (ID.ID i)
 let honest pkm i = ID.honest pkm.im (ID.ID i)
 let dishonest pkm i = ID.dishonest pkm.im (ID.ID i)
 
-#set-options "--z3rlimit 5000 --max_ifuel 2 --max_fuel 0"
+#set-options "--z3rlimit 5000 --max_ifuel 1 --max_fuel 0"
 val encrypt: pkm:pkae_module -> #i:id pkm -> n:nonce -> sk:skey -> pk:pkey{ODH.compatible_keys sk pk /\ i = ID.compose_ids pkm.im (ODH.pk_get_share pk) (ODH.sk_get_share sk)} -> m:message pkm i{Plain.length #pkm.im #pkm.pm #i m / Spec.Salsa20.blocklen < pow2 32} -> ST cipher
   (requires (fun h0 ->
     registered pkm i
     /\ AE.nonce_is_fresh pkm.am i n h0
-    /\ Key.km_invariant pkm.im pkm.km h0
+    /\ Key.invariant pkm.im pkm.km h0
   ))
   (ensures  (fun h0 c h1 ->
-    Key.km_invariant pkm.im pkm.km h1
+    Key.invariant pkm.im pkm.km h1
   ))
 let encrypt pkm #i n sk pk m =
   let h0 = get() in
-  assert(Key.km_invariant pkm.im pkm.km h0);
   let k = ODH.prf_odh pkm.im pkm.km pkm.om sk pk in
   let h1 = get() in
-  assert(Key.km_invariant pkm.im pkm.km h1);
-  assert(Key.get_keytype pkm.im pkm.km == AE.key pkm.im);
+  AE.nonce_freshness_lemma #pkm.im #pkm.pm pkm.am i n h0 h1;
   let c = AE.encrypt pkm.am #i n k m in
   c
 

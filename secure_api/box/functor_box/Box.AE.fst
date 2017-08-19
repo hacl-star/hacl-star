@@ -112,15 +112,27 @@ let recall_logs #im #pm (am:ae_module im pm) =
   MR.m_recall am.key_log;
   MR.m_recall am.message_log
 
+val get_message_log_region: #im:index_module -> #pm:plain_module -> am:ae_module im pm -> (lr:log_region im{lr == am.message_log_region})
+let get_message_log_region #im #pm am =
+  am.message_log_region
 
 abstract let nonce_is_fresh (#im:index_module) (#pm:plain_module) (am:ae_module im pm) (i:id im) (n:nonce) (h:mem) =
   MR.m_contains am.message_log h
   /\ MM.fresh am.message_log (n,i) h
 
+(**
+  This invariant makes sure that there are no entries in the logs for fresh IDs. It should be maintained by any function handling the message log.
+*)
 abstract let log_freshness_invariant (#im:index_module) (#pm:plain_module) (am:ae_module im pm) (h:mem) =
   MR.m_contains (get_log im) h
   /\ MR.m_contains am.message_log h
   /\ (forall i n . ID.fresh im (ID i) h ==> MM.fresh am.message_log (n,i) h)
+
+val nonce_freshness_lemma: #im:index_module -> #pm:plain_module -> am:ae_module im pm -> i:id im -> n:nonce -> h0:mem -> h1:mem -> Lemma
+  (requires log_freshness_invariant am h0 /\ nonce_is_fresh am i n h0)
+  (ensures ((modifies (Set.singleton am.key_log_region) h0 h1 \/ h0 == h1) ==> nonce_is_fresh am i n h1))
+let nonce_freshness_lemma #im #pm am i n h0 h1 =
+ ()
 
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 0"
 val create: im:index_module -> pm:plain_module -> rgn:log_region im -> ST (am:ae_module im pm)
@@ -193,11 +205,14 @@ let leak #im k =
 #set-options "--z3rlimit 2000 --max_ifuel 2 --max_fuel 0"
 val instantiate_km: #im:index_module -> #pm:plain_module -> am:ae_module im pm -> km:key_module im{
     Key.get_keytype im km == key im
-    ///\ Key.get_index im km == get_index #im
-    ///\ Key.get_rawGT im km == get_rawGT #im
+    /\ Key.get_index im km == get_index #im
+    /\ Key.get_rawGT im km == get_rawGT #im
+    /\ Key.invariant im km == log_freshness_invariant am
+    /\ Key.get_log_region im km == am.key_log_region
+    /\ disjoint (Key.get_log_region im km) am.message_log_region
   }
 let instantiate_km #im #pm am =
-  let km = Key.create im key get_index get_rawGT (log_freshness_invariant am) (gen am) coerce leak in
+  let km = Key.create im key get_index get_rawGT (log_freshness_invariant am) (am.key_log_region) (gen am) coerce leak in
   //assert(Key.get_keytype im km == key im);
   //assert(Key.get_index im km == get_index #im);
   //admit();
@@ -223,12 +238,12 @@ val encrypt: #im:index_module -> #pm:plain_module{get_plain pm == ae_plain} -> a
   let modified_regions_fresh = Set.union (Set.singleton am.message_log_region) (Set.singleton (ID.get_rgn im)) in
   let modified_regions_honest = Set.singleton am.message_log_region in
   registered im (ID i)
-  /\ (dishonest im (ID i) ==> h0 == h1)
-  /\ ((honest im (ID i) /\ b2t ae_ind_cpa)
+  /\ (dishonest im (ID i) ==> h0 == h1) // No stateful changes if the id is dishonest.
+  /\ ((honest im (ID i) /\ b2t ae_ind_cpa) // Ideal behaviour if the id is honest and the assumption holds.
       ==> (c = SPEC.secretbox_easy (create_zero_bytes (Plain.length #im #pm #i m)) (get_rawGT k) n))
-  /\ ((dishonest im (ID i) \/ ~(b2t ae_ind_cpa))
+  /\ ((dishonest im (ID i) \/ ~(b2t ae_ind_cpa)) // Concrete behaviour otherwise.
       ==> (eq2 #cipher c (SPEC.secretbox_easy (Plain.repr #im #pm #i m) (get_rawGT k) n)))
-  /\ ((honest im (ID i)) ==>
+  /\ ((honest im (ID i)) ==> // A message is added to the log if the id is honest. This also guarantees nonce-uniqueness.
                     (MR.m_contains am.message_log h1
                     /\ MR.witnessed (MM.contains am.message_log (n,i) (c,m))
                     /\ MR.m_sel h1 am.message_log == MM.upd (MR.m_sel h0 am.message_log) (n,i) (c,m)))
@@ -276,13 +291,14 @@ val decrypt: #im:index_module -> #pm:plain_module{get_plain pm == ae_plain} -> a
     let modified_regions_honest = Set.singleton am.message_log_region in
     registered im (ID i)
     /\ h0 == h1
-    /\ ((~(b2t ae_int_ctxt) \/ dishonest im (ID i))
-      ==> ((Some? (SPEC.secretbox_open_easy c (get_rawGT k) n)
-        ==> Some? p /\ Some?.v p == Plain.coerce #im #pm #i (Some?.v (SPEC.secretbox_open_easy c (get_rawGT k) n)))
-  /\ ((None? (SPEC.secretbox_open_easy c (get_rawGT k) n))
-    ==> None? p)
+    /\ ((~(b2t ae_int_ctxt) \/ dishonest im (ID i)) ==> // Concrete behaviour of the id is dishonest or if the assumption doesn't hold.
+        (let option_m = SPEC.secretbox_open_easy c (get_rawGT k) n in // Functional correctness: we get a result iff the ciphertext is valid.
+          (Some? option_m ==>
+            Some? p /\ Some?.v p == Plain.coerce #im #pm #i (Some?.v option_m))
+          /\ (None? option_m ==>
+              None? p)
       ))
-    /\ ((b2t ae_int_ctxt /\ honest im (ID i))
+    /\ ((b2t ae_int_ctxt /\ honest im (ID i)) // Ideal behaviour otherwise: We get a result iff something is in the log.
         ==> (Some? p
           ==> (MM.defined am.message_log (n,i) h0 /\ (fst (MM.value am.message_log (n,i) h0) == c )
             /\ Some?.v p == snd (MM.value am.message_log (n,i) h0)))
