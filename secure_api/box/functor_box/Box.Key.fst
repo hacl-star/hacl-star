@@ -52,9 +52,9 @@ val get_keytype: im:index_module -> km:key_module im -> Type0
 let get_keytype im km =
   km.key_type im
 
-val get_index: im:index_module -> km:key_module im -> k:km.key_type im -> i:id im
-let get_index im km k =
-  km.get_index k
+val get_index: im:index_module -> km:key_module im -> gi:(k:km.key_type im -> i:id im){gi==km.get_index}
+let get_index im km =
+  km.get_index
 
 val get_rawGT: im:index_module -> km:key_module im -> k:km.key_type im -> GTot (b:aes_key)
 let get_rawGT im km k =
@@ -102,6 +102,6 @@ val create: (im:index_module) ->
 
 let create im km_key_type km_get_index km_get_rawGT km_invariant km_gen km_coerce km_leak =
   let km = KM km_key_type km_get_index km_get_rawGT km_invariant km_gen km_coerce km_leak in
-  //assert(get_index im km == km.get_index);
+  assert(get_index im km == km.get_index);
   //admit();
   km
