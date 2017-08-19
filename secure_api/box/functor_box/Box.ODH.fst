@@ -138,18 +138,20 @@ let prf_odhGT im sk pk =
 
 #reset-options
 #set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
-val prf_odh: im:index_module -> km:key_module im -> om:odh_module im km  -> sk:skey -> pk:pkey{sk.pk.pk_share <> pk.pk_share} -> ST (k:Key.key_t2 im{Key.get_index im km k = (ID.compose_ids im pk.pk_share sk.pk.pk_share)} )
+val prf_odh: im:index_module -> km:key_module im -> om:odh_module im km  -> sk:skey -> pk:pkey{sk.pk.pk_share <> pk.pk_share} -> ST (k:Key.get_keytype im km{Key.get_index im km k = (ID.compose_ids im pk.pk_share sk.pk.pk_share)} )
   (requires (fun h0 ->
     let i = ID.compose_ids im pk.pk_share sk.pk.pk_share in
     registered im (ID i)
-    /\ km_pre im km i h0
+    /\ km_invariant im km h0
   ))
   (ensures (fun h0 k h1 ->
     let i = ID.compose_ids im pk.pk_share sk.pk.pk_share in
-    (honest im (ID i) ==> km_post im km i h0 k h1)
+    (honest im (ID i) ==> True)
     /\ (dishonest im (ID i) ==>
                         (Key.leak im km k = prf_odhGT im sk pk
-                        /\ h0 == h1))
+                        /\ h0 == h1
+                        ))
+    /\ km_invariant im km h1
   ))
 let prf_odh im km om sk pk =
   let i1 = pk.pk_share in

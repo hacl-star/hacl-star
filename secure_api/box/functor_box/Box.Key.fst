@@ -30,33 +30,37 @@ type key_t (im:index_module) (pm:plain_module)= Type0
 
 type aes_key = SPEC.key
 type cipher = b:bytes{Seq.length b >= 16 /\ (Seq.length b - 16) / Spec.Salsa20.blocklen < pow2 32}
-noeq type key_t2 (im:index_module) =
-  | Key: i:id im -> raw:aes_key -> key_t2 im
+//noeq type key_t2 (im:index_module) =
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 abstract noeq type key_module (im:index_module) =
   | KM:
-    //key_type: (im:index_module -> t:Type0{t==key_t2 im}) ->
-    get_index: (k:key_t2 im -> i:id im{k.i = i}) ->
-    get_rawGT: ((k:key_t2 im) -> GTot (b:aes_key{b=k.raw})) -> // Returns the raw bytes of the key. Needed for spec of gen/leak/coerce.
+    key_type: (kim:index_module{kim == im} -> t:Type0) ->
+    get_index: (k:key_type im -> i:id im) -> // You have to have faith in this function...
+    get_rawGT: ((k:key_type im) -> GTot (b:aes_key)) -> // You have to have faith in this function...
     invariant: (h:mem -> Type0) ->
-    gen: (i:id im -> ST (k:key_t2 im{k.i = i}) // The spec should indicate that the result is random and that gen is idempotent
+    gen: (i:id im -> ST (k:key_type im{get_index k = i}) // The spec should indicate that the result is random and that gen is idempotent
       (requires (fun h0 ->
         (fresh im (ID i) h0 \/ honest im (ID i))
         /\ invariant h0))
       (ensures  (fun h0 k h1 -> invariant h1))) ->
-    coerce: (i:id im{dishonest im (ID i)} -> raw:aes_key -> (k:key_t2 im{k.i = i /\ raw=k.raw})) ->
-    leak: (k:key_t2 im{dishonest im (ID (get_index k))} -> (raw:aes_key{raw = k.raw})) ->
+    coerce: (i:id im{dishonest im (ID i)} -> raw:aes_key -> (k:key_type im{get_index k = i /\ raw=get_rawGT k})) ->
+    leak: (k:key_type im{dishonest im (ID (get_index k))} -> (raw:aes_key{raw = get_rawGT k})) ->
     key_module im
 
-let create (im:index_module) (get_index:(k:key_t2 im -> i:id im{k.i = i})) get_rawGT invariant gen coerce leak =
-  KM get_index get_rawGT invariant gen coerce leak
+val get_keytype: im:index_module -> km:key_module im -> Type0
+let get_keytype im km =
+  km.key_type im
 
-val get_index: im:index_module -> km:key_module im -> k:key_t2 im -> i:id im{k.i = i}
+val get_index: im:index_module -> km:key_module im -> k:km.key_type im -> i:id im
 let get_index im km k =
   km.get_index k
 
-val gen: (im:index_module) -> (km:key_module im) -> (i:id im) -> ST (k:key_t2 im{k.i = i})
+val get_rawGT: im:index_module -> km:key_module im -> k:km.key_type im -> GTot (b:aes_key)
+let get_rawGT im km k =
+  km.get_rawGT k
+
+val gen: (im:index_module) -> (km:key_module im) -> (i:id im) -> ST (k:km.key_type im{km.get_index k = i})
   (requires (fun h0 ->
     (fresh im (ID i) h0 \/ honest im (ID i))
     /\ km.invariant h0))
@@ -64,14 +68,40 @@ val gen: (im:index_module) -> (km:key_module im) -> (i:id im) -> ST (k:key_t2 im
 let gen im km i =
   km.gen i
 
-val coerce: (im:index_module) -> (km:key_module im) -> (i:id im{dishonest im (ID i)}) -> (b:bytes) -> (k:key_t2 im{k.i = i /\ b = k.raw})
+val coerce: (im:index_module) -> (km:key_module im) -> (i:id im{dishonest im (ID i)}) -> (b:aes_key) -> (k:km.key_type im{km.get_index k = i /\ b = km.get_rawGT k})
 let coerce im km i b =
   km.coerce i b
 
-val leak: im:index_module -> (km:key_module im) -> (k:key_t2 im{dishonest im (ID k.i)}) -> (b:bytes{b=k.raw})
+val leak: im:index_module -> (km:key_module im) -> (k:km.key_type im{dishonest im (ID (km.get_index k))}) -> (b:aes_key{b=km.get_rawGT k})
 let leak im km k =
   km.leak k
 
 val km_invariant: im:index_module -> km:key_module im -> h0:mem -> Type0
 let km_invariant im km h0 =
   km.invariant h0
+
+#set-options "--z3rlimit 2000 --max_ifuel 2 --max_fuel 0"
+val create: (im:index_module) ->
+            (km_key_type: (kim:index_module{kim == im} -> t:Type0)) ->
+            (km_get_index: (k:km_key_type im -> i:id im)) -> // You have to have faith in this function...
+            (km_get_rawGT: ((k:km_key_type im) -> GTot (b:aes_key))) -> // You have to have faith in this function...
+            (km_invariant: (h:mem -> Type0)) ->
+            (km_gen: (i:id im -> ST (k:km_key_type im{km_get_index k = i}) // The spec should indicate that the result is random and that gen is idempotent
+              (requires (fun h0 ->
+                (fresh im (ID i) h0 \/ honest im (ID i))
+                /\ km_invariant h0))
+              (ensures  (fun h0 k h1 -> km_invariant h1)))) ->
+            (km_coerce: (i:id im{dishonest im (ID i)} -> raw:aes_key -> (k:km_key_type im{km_get_index k = i /\ raw=km_get_rawGT k}))) ->
+            (km_leak: (k:km_key_type im{dishonest im (ID (km_get_index k))} -> (raw:aes_key{raw = km_get_rawGT k}))) ->
+            (km:key_module im{
+              get_keytype im km == km_key_type im
+              ///\ get_index im km == km_get_index
+              ///\ get_rawGTGT im km == km_get_rawGT
+    })
+
+
+let create im km_key_type km_get_index km_get_rawGT km_invariant km_gen km_coerce km_leak =
+  let km = KM km_key_type km_get_index km_get_rawGT km_invariant km_gen km_coerce km_leak in
+  //assert(get_index im km == km.get_index);
+  //admit();
+  km
