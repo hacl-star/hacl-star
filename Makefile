@@ -56,7 +56,7 @@ verify: verify-banner verify-ct verify-specs verify-code verify-secure_api
 extract: snapshot
 
 extract-specs:
-	$(MAKE) -C $(HACL_HOME)/specs
+	$(MAKE) -C specs
 
 extract-all-snapshots: snapshot-all
 
@@ -76,6 +76,7 @@ build:
 
 test:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
+	$(MAKE) -C tests
 
 #
 # Additional targets
