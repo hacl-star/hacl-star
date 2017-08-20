@@ -74,7 +74,9 @@ snapshot-gcc-unrolled:
 	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar"
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshot-gcc-unrolled
 
-snapshots-all:
+snapshot-all:
+	$(MAKE) snapshot
+	$(MAKE) -C $(HACL_HOME)/code clean
 	$(MAKE) snapshot-ccomp
 	$(MAKE) -C $(HACL_HOME)/code clean
 	$(MAKE) snapshot-msvc
