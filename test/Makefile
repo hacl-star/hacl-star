@@ -1,11 +1,12 @@
 include ../Makefile.include
-include ../Makefile.build
+#include ../Makefile.build
 
 #
 # Unit tests
 #
 
-all: extract-all-c
+all:
+	$(MAKE) -C ../specs
 	$(MAKE) -C ../code test
 	$(MAKE) test-vale
 	$(MAKE) test-vale-asm
@@ -26,17 +27,21 @@ test-pneutube:
 test-vale-asm:
 	$(MAKE) -C ../secure_api/vale/asm/
 
-test-snapshot: snapshot
-	$(MAKE) -C snapshot CC="$(GCC) $(GCC_OPTS)" test
+test-snapshot:
+	$(MAKE) -C .. snapshot
+	$(MAKE) -C ../snapshots/snapshot CC="$(GCC) $(GCC_OPTS)" test
 
 test-ccomp:
-	$(MAKE) -C snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" test
+	$(MAKE) -C .. snapshot-ccomp
+	$(MAKE) -C ../snapshots/snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" test
 
 test-gcc:
-	$(MAKE) -C snapshot-gcc CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
+	$(MAKE) -C .. snapshot-gcc
+	$(MAKE) -C ../snapshots/snapshot-gcc CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
 
 test-gcc-unrolled:
-	$(MAKE) -C snapshot-gcc-unrolled CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
+	$(MAKE) -C .. snapshot-gcc-unrolled
+	$(MAKE) -C ../snapshots/snapshot-gcc-unrolled CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
 
 
 #
