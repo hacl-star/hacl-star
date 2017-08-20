@@ -58,7 +58,7 @@ extract: snapshot
 extract-specs:
 	$(MAKE) -C $(HACL_HOME)/specs
 
-extract-all-snapshots: snapshots-all
+extract-all-snapshots: snapshot-all
 
 #
 # Compilation of the library
