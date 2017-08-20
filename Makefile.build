@@ -53,7 +53,7 @@ snapshot-collect:
 	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
-snapshot: extract-c-code extract-c-code-experimental snapshot-collect
+snapshot: extract-c-code extract-c-code-experimental
 
 snapshot-ccomp:
 	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi

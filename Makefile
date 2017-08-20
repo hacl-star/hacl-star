@@ -52,8 +52,7 @@ verify: verify-banner verify-ct verify-specs verify-code verify-secure_api
 # Code generation
 #
 
-extract:
-	$(MAKE) -C test snapshot
+extract: snapshot snapshot-collect
 
 extract-specs:
 	$(MAKE) -C $(HACL_HOME)/specs
@@ -107,6 +106,7 @@ clean-base:
 clean-build:
 	rm -rf build
 	rm -rf build-experimental
+	rm -rf snapshot
 
 clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
 
