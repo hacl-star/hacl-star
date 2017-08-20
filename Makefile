@@ -58,7 +58,7 @@ extract: snapshot
 extract-specs:
 	$(MAKE) -C $(HACL_HOME)/specs
 
-extract-all-snapshots: snapshot snapshot-gcc snapshot-gcc-unrolled snapshot-ccomp
+extract-all-snapshots: snapshots-all
 
 #
 # Compilation of the library
@@ -103,7 +103,6 @@ clean-base:
 clean-build:
 	rm -rf build
 	rm -rf build-experimental
-	rm -rf snapshot
 
 clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
 
