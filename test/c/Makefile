@@ -1,8 +1,15 @@
+include ../../Makefile.include
+
 .PHONY: test clean
 
-TWEETNACL_HOME?=../../other_providers/tweetnacl
-OPENSSL_HOME?=../../other_providers/openssl
-LIBSODIUM_HOME ?=../../other_providers/libsodium/src/libsodium
+TWEETNACL_HOME ?= $(HACL_HOME)/other_providers/tweetnacl
+OPENSSL_HOME   ?= $(HACL_HOME)/other_providers/openssl
+LIBSODIUM_HOME ?= $(HACL_HOME)/other_providers/libsodium/src/libsodium
+
+#
+# Compiler and settings
+#
+
 ifeq ($(OS),Windows_NT)
   CC=x86_64-w64-mingw32-gcc.exe
   LIBDL= # libdl not supported by MinGW. Anyway, is it really used?
@@ -12,11 +19,16 @@ else
   LIBDL=-ldl
   LIBWINSOCK=
 endif
+
 CCOPTS := -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
 CFLAGS= $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
 	-I $(LIBSODIUM_HOME)/include -L$(LIBSODIUM_HOME)/lib \
 	-I $(TWEETNACL_HOME) -I .
+
+#
+# Targets
+#
 
 test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead unit-test-ed25519
 
