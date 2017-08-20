@@ -9,7 +9,7 @@ all: display
 display:
 	@echo "HaCl* Makefile:"
 	@echo "- 'verify' will run F* verification on all specs, code and secure-api directories"
-	@echo "- 'extract' will generate all the C code and test it (no verification)"
+	@echo "- 'extract' will generate all the C code into a snapshot and test it (no verification)"
 	@echo "- 'build' will generate both static and shared libraries (no verification)"
 	@echo "- 'test' will generate and test everything (no verification)"
 	@echo "- 'world' will run everything (except make prepare)"
@@ -20,10 +20,11 @@ display:
 	@echo "- 'verify-code' will run F* verification on the code against the specification"
 	@echo "- 'verify-secure_api' will run F* verification of the secure_api directory"
 	@echo "- 'extract-specs' will generate OCaml code for the specifications"
-	@echo "- 'extract-code' will generate C code for all the stable primitives"
-	@echo "- 'extract-code-experimental' will generate C code for experimental primitives"
+	@echo "- 'extract-c-code' will generate C code for all the stable primitives"
+	@echo "- 'extract-c-code-experimental' will generate C code for experimental primitives"
 	@echo "- 'extract-all-snapshots' will generate C code for multiple compilers"
 	@echo "- 'prepare' will install F* and Kremlin (Requirements are still needed)"
+	@echo "- 'clean-snapshots' will remove all snapshots"
 	@echo "- 'clean' will remove all artifacts of other targets"
 
 #
@@ -105,6 +106,9 @@ clean-build:
 	rm -rf build
 	rm -rf build-experimental
 
+clean-snapshots:
+	rm -rf ./snapshots/snapshot*
+
 clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
 
 #
@@ -117,7 +121,7 @@ experimental:
 	cmake $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build-experimental'."$(NORMAL)
 
-hints: code.dir-hints secure_api.dir-hints specs.dir-hints test.dir-hints
+hints: code.dir-hints secure_api.dir-hints specs.dir-hints
 
 # Check if GCC-7 is installed, uses GCC otherwise
 GCC_EXEC := $(shell gcc-7 --version 2>/dev/null | cut -c -5 | head -n 1)
