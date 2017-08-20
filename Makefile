@@ -22,6 +22,7 @@ display:
 	@echo "- 'extract-specs' will generate OCaml code for the specifications"
 	@echo "- 'extract-code' will generate C code for all the stable primitives"
 	@echo "- 'extract-code-experimental' will generate C code for experimental primitives"
+	@echo "- 'extract-all-snapshots' will generate C code for multiple compilers"
 	@echo "- 'prepare' will install F* and Kremlin (Requirements are still needed)"
 	@echo "- 'clean' will remove all artifacts of other targets"
 
@@ -52,16 +53,12 @@ verify: verify-banner verify-ct verify-specs verify-code verify-secure_api
 # Code generation
 #
 
-extract: snapshot snapshot-collect
+extract: snapshot
 
 extract-specs:
 	$(MAKE) -C $(HACL_HOME)/specs
 
-extract-code: extract-c-code
-
-extract-code-experimental: extract-c-code-experimental
-
-#extract-code-all-snapshots: extract-all-c
+extract-all-snapshots: snapshot snapshot-gcc snapshot-gcc-unrolled snapshot-ccomp
 
 #
 # Compilation of the library

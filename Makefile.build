@@ -6,7 +6,9 @@
 
 .PHONY: snapshot snapshot-gcc snapshot-ccomp snapshot-msvc snapshot-gcc-unrolled
 
-SNAPSHOT_DIR=snapshot
+#
+# General extraction
+#
 
 extract-c: extract-c-code extract-c-crypto # extract-c-apps
 
@@ -15,12 +17,13 @@ extract-c-code:
 	$(MAKE) -C $(HACL_HOME)/code extract-c
 
 extract-c-code-experimental:
-	$(MAKE) -C $(HACL_HOME)/code/experimental/ extract-c
+	$(MAKE) -C $(HACL_HOME)/code/experimental extract-c
 
-extract-all-c:
-	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
-	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
-	$(MAKE) clean ; $(MAKE) extract-c
+#
+# Snapshot targets
+#
+
+SNAPSHOT_DIR=snapshot
 
 SNAPSHOT_FILES= ./test/c/* \
 	$(addprefix ./code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
@@ -53,7 +56,7 @@ snapshot-collect:
 	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
-snapshot: extract-c-code extract-c-code-experimental
+snapshot: extract-c-code extract-c-code-experimental snapshot-collect
 
 snapshot-ccomp:
 	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
@@ -71,46 +74,43 @@ snapshot-gcc-unrolled:
 	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar"
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshot-gcc-unrolled
 
-all-snapshots:
+snapshots-all:
 	$(MAKE) snapshot-ccomp
-	$(MAKE) -C ../code clean
+	$(MAKE) -C $(HACL_HOME)/code clean
 	$(MAKE) snapshot-msvc
-	$(MAKE) -C ../code clean
+	$(MAKE) -C $(HACL_HOME)/code clean
 	$(MAKE) snapshot-gcc
-	$(MAKE) -C ../code clean
+	$(MAKE) -C $(HACL_HOME)/code clean
 	$(MAKE) snapshot-gcc-unrolled
-	$(MAKE) -C ../code clean
+	$(MAKE) -C $(HACL_HOME)/code clean
 
-update-snapshot:
+snapshot-update:
 	$(MAKE) snapshot-gcc
-	$(MAKE) -C ../code clean
+	$(MAKE) -C $(HACL_HOME)/code clean
 	$(MAKE) snapshot-gcc-unrolled
-	$(MAKE) -C ../code clean
+	$(MAKE) -C $(HACL_HOME)/code clean
 	$(MAKE) -C snapshot-gcc-unrolled clean
 	$(MAKE) -C snapshot-gcc clean
 	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) \
 	   $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
 	   $(addprefix c/, kremlib.h kremlib.c FStar.h Makefile)  \
-		../snapshots/hacl-c
-	$(MAKE) -C ../snapshots/hacl-c unit-tests
-	$(MAKE) -C ../snapshots/hacl-c unit-tests-32
-	$(MAKE) -C ../snapshots/hacl-c perf
-	$(MAKE) -C ../snapshots/hacl-c clean
+		$(HACL_HOME)/snapshots/hacl-c
+	$(MAKE) -C $(HACL_HOME)/snapshots/hacl-c unit-tests
+	$(MAKE) -C $(HACL_HOME)/snapshots/hacl-c unit-tests-32
+	$(MAKE) -C $(HACL_HOME)/snapshots/hacl-c perf
+	$(MAKE) -C $(HACL_HOME)/snapshots/hacl-c clean
 
-nss-snapshot:
+snapshot-nss:
 	$(MAKE) snapshot-gcc
-	$(MAKE) -C ../code clean
+	$(MAKE) -C $(HACL_HOME)/code clean
 	$(MAKE) snapshot-gcc-unrolled
-	$(MAKE) -C ../code clean
+	$(MAKE) -C $(HACL_HOME)/code clean
 	$(MAKE) -C snapshot-gcc-unrolled clean
 	$(MAKE) -C snapshot-gcc clean
-	mkdir -p ../snapshots/nss
-	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) ../snapshots/nss
-	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) ../snapshots/nss
-	cp $(addprefix c/, kremlib.h kremlib?c FStar.h Makefile)  ../snapshots/nss
-	$(MAKE) -C ../snapshots/nss unit-tests
-	$(MAKE) -C ../snapshots/nss unit-tests-32
-	$(MAKE) -C ../snapshots/nss clean
-
-# clean:
-# 	rm -rf snapshot snapshot-ccomp snapshot-msvc snapshot-gcc snapshot-gcc-unrolled *.o *.exe *~
+	mkdir -p $(HACL_HOME)/snapshots/nss
+	cp $(addprefix snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* gcc_compat.h Hacl_Policies.* hacl_test_utils.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* test* vec128.h) $(HACL_HOME)/snapshots/nss
+	cp $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) $(HACL_HOME)/snapshots/nss
+	cp $(addprefix c/, kremlib.h kremlib?c FStar.h Makefile)  $(HACL_HOME)/snapshots/nss
+	$(MAKE) -C $(HACL_HOME)/snapshots/nss unit-tests
+	$(MAKE) -C $(HACL_HOME)/snapshots/nss unit-tests-32
+	$(MAKE) -C $(HACL_HOME)/snapshots/nss clean
