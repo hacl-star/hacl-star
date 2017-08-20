@@ -17,12 +17,12 @@ extract-c-code:
 extract-c-code-experimental:
 	$(MAKE) -C $(HACL_HOME)/code/experimental/ extract-c
 
-# extract-all-c:
-# 	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
-# 	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
-# 	$(MAKE) clean ; $(MAKE) extract-c
+extract-all-c:
+	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
+	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
+	$(MAKE) clean ; $(MAKE) extract-c
 
-SNAPSHOT_FILES= ./c/* \
+SNAPSHOT_FILES= ./test/c/* \
 	$(addprefix ./code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
 	./code/curve25519/x25519-c/Curve25519.* \
 	./code/salsa-family/chacha-c/Chacha20.* \
@@ -37,11 +37,6 @@ SNAPSHOT_FILES= ./c/* \
 	$(addprefix ./code/hmac/hmac-c/, HMAC_SHA2_256.*) \
 	$(addprefix ./code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
 
-build-snapshot:
-	mkdir -p $(SNAPSHOT_DIR)
-	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
-	$(MAKE) -C $(SNAPSHOT_DIR) clean
-
 ifeq ($(OS),Windows_NT)
   GCC=x86_64-w64-mingw32-gcc.exe
 else
@@ -53,25 +48,28 @@ GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
 snapshot/libhacl.so: snapshot
 	$(MAKE) -C snapshot CC="$(GCC) $(GCC_OPTS) -fPIC" lib
 
-snapshot:
-	$(MAKE) extract-c-code extract-c-code-experimental
-	$(MAKE) build-snapshot
+snapshot-collect:
+	mkdir -p $(SNAPSHOT_DIR)
+	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
+	$(MAKE) -C $(SNAPSHOT_DIR) clean
+
+snapshot: extract-c-code extract-c-code-experimental snapshot-collect
 
 snapshot-ccomp:
 	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
-	if $(HAS_CCOMP); then $(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-ccomp; fi
+	if $(HAS_CCOMP); then $(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshot-ccomp; fi
 
 snapshot-msvc:
 	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar"; fi
-	if $(HAS_CL); then $(MAKE) build-snapshot SNAPSHOT_DIR=snapshot-msvc; fi
+	if $(HAS_CL); then $(MAKE) snapshot-collect SNAPSHOT_DIR=snapshot-msvc; fi
 
 snapshot-gcc:
 	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar"
-	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc
+	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshot-gcc
 
 snapshot-gcc-unrolled:
 	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar"
-	$(MAKE) -B build-snapshot SNAPSHOT_DIR=snapshot-gcc-unrolled
+	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshot-gcc-unrolled
 
 all-snapshots:
 	$(MAKE) snapshot-ccomp

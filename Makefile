@@ -62,10 +62,7 @@ extract-code: extract-c-code
 
 extract-code-experimental: extract-c-code-experimental
 
-# extract-all-c:
-# 	if $(HAS_CCOMP); then $(MAKE) clean ; USE_CCOMP=true $(MAKE) extract-c ; fi
-# 	if $(HAS_CL); then $(MAKE) clean ; USE_CL=true $(MAKE) extract-c ; fi
-# 	$(MAKE) clean ; $(MAKE) extract-c
+#extract-code-all-snapshots: extract-all-c
 
 #
 # Compilation of the library
