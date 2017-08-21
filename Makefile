@@ -38,7 +38,7 @@ include Makefile.build
 # Verification
 #
 
-verify-banner:
+.verify-banner:
 	@echo $(CYAN)"# Verification of the HaCl*"$(NORMAL)
 
 verify-ct:
@@ -48,18 +48,18 @@ verify-specs: specs.dir-verify
 verify-code: code.dir-verify
 verify-secure_api: secure_api.dir-verify
 
-verify: verify-banner verify-ct verify-specs verify-code verify-secure_api
+verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
 
 #
 # Code generation
 #
 
-extract-banner:
+.extract-banner:
 	@echo $(CYAN)"# Generation of the HaCl* verified C code"$(NORMAL)
 	@echo $(CYAN)" (This is not running formal verification)"$(NORMAL)
 
-extract: extract-banner snapshots/snapshot-hacl-c
+extract: .extract-banner snapshots/snapshot-hacl-c
 	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/hacl-c'."$(NORMAL)
 
 extract-specs:
@@ -89,7 +89,7 @@ test:
 # Clean
 #
 
-clean-banner:
+.clean-banner:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
 
 clean-base:
@@ -101,7 +101,7 @@ clean-build:
 
 clean-snapshots: snapshots-remove
 
-clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
+clean: .clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
 
 #
 # Installation helper
@@ -124,11 +124,11 @@ prepare:
 # Packaging helper
 #
 
-package-banner:
+.package-banner:
 	@echo $(CYAN)"# Packaging the HaCl* generated code"$(NORMAL)
 	@echo $(CYAN)"  Make sure you have run verification before !"$(NORMAL)
 
-package: package-banner snapshots/hacl-c
+package: .package-banner snapshots/hacl-c
 	@tar -zcvf hacl-star.tar.gz snapshots/hacl-c
 	@echo $(CYAN)"\nDone ! Look in the root directory !"$(NORMAL)
 
