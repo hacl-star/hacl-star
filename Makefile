@@ -49,12 +49,18 @@ verify-code: code.dir-verify
 verify-secure_api: secure_api.dir-verify
 
 verify: verify-banner verify-ct verify-specs verify-code verify-secure_api
+	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
 
 #
 # Code generation
 #
 
-extract: snapshots/snapshot-hacl-c
+extract-banner:
+	@echo $(CYAN)"# Generation of the HaCl* verified C code"$(NORMAL)
+	@echo $(CYAN)" (This is not running formal verification)"$(NORMAL)
+
+extract: extract-banner snapshots/snapshot-hacl-c
+	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/hacl-c'."$(NORMAL)
 
 extract-specs:
 	$(MAKE) -C specs
@@ -80,7 +86,25 @@ test:
 	$(MAKE) -C tests
 
 #
-# Additional targets
+# Clean
+#
+
+clean-banner:
+	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
+
+clean-base:
+	rm -rf *~ *.tar.gz
+
+clean-build:
+	rm -rf build
+	rm -rf build-experimental
+
+clean-snapshots: snapshots-remove
+
+clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
+
+#
+# Installation helper
 #
 
 prepare:
@@ -96,19 +120,17 @@ prepare:
 	@echo "# Compiling and Installing KreMLin"
 	$(MAKE) -C dependencies/kremlin
 
-clean-banner:
-	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
+#
+# Packaging helper
+#
 
-clean-base:
-	rm -rf *~
+package-banner:
+	@echo $(CYAN)"# Packaging the HaCl* generated code"$(NORMAL)
+	@echo $(CYAN)"  Make sure you have run verification before !"$(NORMAL)
 
-clean-build:
-	rm -rf build
-	rm -rf build-experimental
-
-clean-snapshots: snapshots-remove
-
-clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
+package: package-banner snapshots/hacl-c
+	@tar -zcvf hacl-star.tar.gz snapshots/hacl-c
+	@echo $(CYAN)"\nDone ! Look in the root directory !"$(NORMAL)
 
 #
 # Undocumented targets
@@ -122,11 +144,3 @@ experimental:
 
 hints: code.dir-hints secure_api.dir-hints specs.dir-hints
 
-# Check if GCC-7 is installed, uses GCC otherwise
-GCC_EXEC := $(shell gcc-7 --version 2>/dev/null | cut -c -5 | head -n 1)
-ifdef GCC_EXEC
-   CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=gcc-7
-endif
-
-NORMAL="\\033[0;39m"
-CYAN="\\033[1;36m"

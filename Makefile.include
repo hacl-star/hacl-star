@@ -115,6 +115,12 @@ HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
 HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
 GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
+# Check if GCC-7 is installed, uses GCC otherwise
+GCC_EXEC := $(shell gcc-7 --version 2>/dev/null | cut -c -5 | head -n 1)
+ifdef GCC_EXEC
+	CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=gcc-7
+endif
+
 #
 # HaCl* generalized targets
 #
@@ -193,3 +199,7 @@ import-kremlin:
 
 %.dir-clean: %
 	$(MAKE) -C $^ clean
+
+# Colors
+NORMAL="\\033[0;39m"
+CYAN="\\033[1;36m"
