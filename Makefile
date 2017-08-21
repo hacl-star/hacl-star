@@ -107,6 +107,7 @@ clean-build:
 	rm -rf build-experimental
 
 clean-snapshots:
+	rm -rf ./snapshots/hacl-c
 	rm -rf ./snapshots/snapshot*
 
 clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
