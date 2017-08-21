@@ -19,7 +19,6 @@ open Box.Flags
 
 module MR = FStar.Monotonic.RRef
 module MM = MonotoneMap
-module Curve = Spec.Curve25519
 
 
 type id_log_region = (r:MR.rid{extends r root /\ is_eternal_region r /\ is_below r root})
@@ -74,7 +73,6 @@ let recall_log im =
   MR.m_recall im.id_log
 
 type id (im:index_module) = i:(im.subId*im.subId){im.smaller (fst i) (snd i)}
-
 
 val compose_ids: im:index_module -> i1:im.subId -> i2:im.subId -> (i:id im)
 let compose_ids im i1 i2 =
@@ -315,3 +313,18 @@ let rec set_honesty im i b =
     | ID (i1,i2) ->
     set_honesty im (SUBID i1) b;
     set_honesty im (SUBID i2) b
+
+
+val lemma_index_module: im:index_module -> i:meta_id im -> ST unit
+  (requires (fun h0 -> registered im i))
+  (ensures (fun h0 _ h1 ->
+    (honest im i ==> (~(dishonest im i)))
+    /\ (dishonest im i ==> (~(honest im i)))
+  ))
+let lemma_index_module im i =
+  match get_honesty im i with
+  | false ->
+    ()
+  | true ->
+    ()
+  
