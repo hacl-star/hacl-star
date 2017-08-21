@@ -35,9 +35,9 @@ val index_module_lemma: im:index_module -> i:meta_id im -> ST unit
   ))
 let index_module_lemma im i =
   match get_honesty im i with
-  | DISHONEST ->
+  | false ->
     lemma_dishonest_not_others im i
-  | HONEST ->
+  | true ->
     lemma_honest_not_others im i
 
 val get_plain: pm:plain_module -> (t:Type0{t == pm.plain})

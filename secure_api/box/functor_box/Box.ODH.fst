@@ -69,20 +69,34 @@ noeq abstract type pkey =
 noeq abstract type skey =
   | SKEY: sk_exp:dh_exponent -> pk:pkey{pk.pk_share = share_from_exponent sk_exp} -> skey
 
-let compatible_keys sk pk =
-  sk.pk.pk_share <> pk.pk_share
-
 (**
   A helper function to obtain the raw bytes of a DH public key.
 *)
 val pk_get_share: pk:pkey -> Tot (dh_sh:dh_share{dh_sh = pk.pk_share})
 let pk_get_share k = k.pk_share
 
+val lemma_pk_get_share_inj: pk:pkey -> Lemma
+  (requires (True))
+  (ensures (forall pk' . pk_get_share pk == pk_get_share pk' <==> pk == pk'))
+let lemma_pk_get_share_inj pk = ()
 (**
    A helper function to obtain the share that corresponds to a DH secret key.
 *)
 val sk_get_share: sk:skey -> Tot (dh_sh:dh_share{dh_sh = share_from_exponent sk.sk_exp})
 let sk_get_share sk = sk.pk.pk_share
+
+val sk_get_pk: sk:skey -> Tot (pk:pkey{sk.pk == pk})
+let sk_get_pk sk =
+  sk.pk
+//val lemma_sk_get_pk_inj: sk:skey -> Lemma
+//  (requires (True))
+//  (ensures (forall sk' . sk_get_pk sk == sk_get_pk sk' <==> sk == sk'))
+//let lemma_sk_get_pk_inj sk = ()
+
+val compatible_keys: sk:skey -> pk:pkey -> t:Type0{t ==> pk =!= sk_get_pk sk}
+let compatible_keys sk pk =
+  pk =!= sk_get_pk sk
+
 
 val get_skey: sk:skey -> GTot (raw:dh_exponent{raw=sk.sk_exp})
 let get_skey sk =
