@@ -314,7 +314,6 @@ let rec set_honesty im i b =
     set_honesty im (SUBID i1) b;
     set_honesty im (SUBID i2) b
 
-
 val lemma_index_module: im:index_module -> i:meta_id im -> ST unit
   (requires (fun h0 -> registered im i))
   (ensures (fun h0 _ h1 ->

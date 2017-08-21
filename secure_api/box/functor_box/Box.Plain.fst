@@ -33,6 +33,7 @@ val lemma_index_module: im:index_module -> i:meta_id im -> ST unit
     (honest im i ==> (~(dishonest im i)))
     /\ (dishonest im i ==> (~(honest im i)))
   ))
+
 let lemma_index_module im i =
   lemma_index_module im i
 
