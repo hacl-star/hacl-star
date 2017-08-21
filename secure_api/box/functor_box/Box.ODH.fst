@@ -160,12 +160,11 @@ let prf_odh im km om sk pk =
   let i = ID.compose_ids im i1 i2 in
   recall_log im;
   lemma_honest_or_dishonest im (ID i);
-  let h = get_reg_honesty im (ID i) in
-  match h with
-  | HONEST ->
+  match get_honesty im (ID i) with
+  | true ->
     let k = Key.gen im km i in
     k
-  | DISHONEST ->
+  | false ->
     let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
     let k=Key.coerce im km i hashed_raw_k in
