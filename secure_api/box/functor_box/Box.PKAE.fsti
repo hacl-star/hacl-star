@@ -43,7 +43,7 @@ val skey: Type0
 
 val subId_t: Type0
 val plain_t: Type0
-val aux_t: (im:index_module{ID.get_subId im == subId_t}) -> pm:plain_module -> t:Type
+val aux_t: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module) -> Type u#1
 
 noeq type pkae_module =
   | PKAE:
@@ -53,7 +53,7 @@ noeq type pkae_module =
     enc: ((Plain.get_plain pm) -> n:nonce -> pk:pkey -> sk:skey -> Tot cipher) ->
     dec: (c:cipher -> n:nonce -> pk:pkey -> sk:skey -> Tot (option (Plain.get_plain pm))) ->
     message_log: message_log im rgn pm ->
-    aux: aux_t im pm ->
+    aux: (aux_t im pm) ->
     pkae_module
 
 val get_message_log: pkm:pkae_module -> GTot (message_log pkm.im pkm.rgn pkm.pm)

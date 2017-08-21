@@ -38,16 +38,16 @@ let skey = ODH.skey
 
 let subId_t = ODH.dh_share
 let plain_t = AE.ae_plain
-#set-options "--z3rlimit 1900 --max_ifuel 1 --max_fuel 0"
-private noeq type box_pkae_module (im:index_module{ID.get_subId im == subId_t}) (pm:plain_module) =
+
+#set-options "--z3rlimit 1900 --max_ifuel 2 --max_fuel 1"
+private noeq type aux_t' (im:index_module{ID.get_subId im == subId_t}) (pm:plain_module) =
   | BP:
-    //pkm:pkae_module{ID.get_subId pkm.im == ODH.dh_share /\ Plain.get_plain pkm.pm == AE.ae_plain} ->
     am:AE.ae_module im pm ->
     km:Key.key_module im{km == AE.instantiate_km am} ->
     om:ODH.odh_module im km ->
-    box_pkae_module im pm
+    aux_t' im pm
 
-let aux_t im pm = box_pkae_module im pm
+let aux_t im pm = aux_t' im pm
 
 let get_message_log pkm =
   pkm.message_log
@@ -81,23 +81,23 @@ let compatible_keys sk pk = ODH.compatible_keys sk pk
 //  (ensures  (fun h0 c h1 ->
 //    Key.invariant pkm.im pkm.km h1
 //  ))
-let encrypt pkm #i n sk pk m =
-  let h0 = get() in
-  let k = ODH.prf_odh pkm.im pkm.km pkm.om sk pk in
-  let h1 = get() in
-  AE.nonce_freshness_lemma #pkm.im #pkm.pm pkm.am i n h0 h1;
-  let c = AE.encrypt pkm.am #i n k m in
-  c
-
-val decrypt: pkm:pkae_module -> #i:id pkm -> n:nonce -> sk:skey -> pk:pkey{ODH.compatible_keys sk pk /\ i = ID.compose_ids pkm.im (ODH.pk_get_share pk) (ODH.sk_get_share sk)} -> c:cipher -> ST (option (message pkm i))
-  (requires (fun h0 ->
-    registered pkm i
-    /\ Key.invariant pkm.im pkm.km h0
-  ))
-  (ensures  (fun h0 c h1 ->
-    Key.invariant pkm.im pkm.km h1
-  ))
-let decrypt pkm #i n sk pk c =
-  let k = ODH.prf_odh pkm.im pkm.km pkm.om sk pk in
-  let m = AE.decrypt pkm.am #i n k c in
-  m
+//let encrypt pkm #i n sk pk m =
+//  let h0 = get() in
+//  let k = ODH.prf_odh pkm.im pkm.aux.km pkm.aux.om sk pk in
+//  let h1 = get() in
+//  AE.nonce_freshness_lemma #pkm.im #pkm.pm pkm.aux.am i n h0 h1;
+//  let c = AE.encrypt pkm.aux.am #i n k m in
+//  c
+//
+//val decrypt: pkm:pkae_module -> #i:id pkm -> n:nonce -> sk:skey -> pk:pkey{ODH.compatible_keys sk pk /\ i = ID.compose_ids pkm.im (ODH.pk_get_share pk) (ODH.sk_get_share sk)} -> c:cipher -> ST (option (message pkm i))
+//  (requires (fun h0 ->
+//    registered pkm i
+//    /\ Key.invariant pkm.im pkm.km h0
+//  ))
+//  (ensures  (fun h0 c h1 ->
+//    Key.invariant pkm.im pkm.km h1
+//  ))
+//let decrypt pkm #i n sk pk c =
+//  let k = ODH.prf_odh pkm.im pkm.km pkm.om sk pk in
+//  let m = AE.decrypt pkm.am #i n k c in
+//  m
