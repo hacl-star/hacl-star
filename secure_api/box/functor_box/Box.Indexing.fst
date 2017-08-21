@@ -29,6 +29,7 @@ let id_log_inv (id_log_kt:Type0) (m:MM.map' id_log_kt id_log_range) = True
 
 type id_log_t (rgn:id_log_region) (id_log_kt:Type0) = MM.t rgn id_log_kt id_log_range (id_log_inv id_log_kt)
 
+
 abstract noeq type index_module =
   | IM:
     rgn: (id_log_region) ->
@@ -60,8 +61,6 @@ let get_log im =
 val get_subId: im:index_module -> Type0
 let get_subId im =
   im.subId
-
-
 
 val recall_log: im:index_module -> ST unit
   (requires (fun h0 -> True))
@@ -327,3 +326,40 @@ let lemma_index_module im i =
   | true ->
     ()
   
+
+noeq type index_module' = 
+  | SIM':
+    rgn: (id_log_region) ->
+    id_t: (t:eqtype) ->
+    registered: (id_t -> Tot Type0) ->
+    get_honesty: (id_t -> ST(bool) (requires (fun h0 -> True)) (ensures (fun h0 r h1 -> modifies (Set.singleton rgn) h0 h1))) ->
+    // id_log_t: Type0 ->
+    // id_log: id_log_t ->
+    index_module'
+    
+
+val smaller_int: i1:int -> i2:int -> t:Type0{t ==> i1 <> i2}
+let smaller_int i1 i2 = let b = i1 < i2 in b2t b
+
+assume val total_order_lemma_int: (i1:int -> i2:int -> Lemma
+  (requires i1 < i2)
+  (ensures forall i. i <> i1 /\ i <> i2 /\ i < i1 ==> i < i2)
+  [SMTPat (i1 < i2)])
+   
+assume val compose_int: i1:int -> i2:int -> i:(int*int){(fst i) < (snd i) /\ (i = (i1,i2) \/ i = (i2,i1))}
+
+assume val symmetric_id_generation_int: i1:int -> i2:int -> Lemma
+(requires (i1<>i2))
+(ensures (compose_int i1 i2 = compose_int i2 i1))
+[SMTPat (compose_int i1 i2)]
+
+let create' rgn id_t =
+  let id_log = MM.alloc #rgn #id_t #id_log_range #(id_log_inv id_t) in
+  let im = create rgn int smaller_int total_order_lemma_int compose_int symmetric_id_generation_int id_log in
+  SIM' rgn id_t (fun id -> registered im (SUBID id)) (fun id -> get_honesty im (SUBID id))
+
+let compose' rgn (im1:index_module'{im1.rgn=rgn}) (im2:index_module'{im2.rgn=rgn}) =
+  SIM' rgn (im1.id_t * im2.id_t) 
+    (fun id -> im1.registered (fst id) /\ im2.registered (snd id))
+    (fun id -> let (h1,h2) = (im1.get_honesty (fst id), im2.get_honesty (snd id)) in h1 && h2)
+ 
