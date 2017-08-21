@@ -13,8 +13,9 @@ display:
 	@echo "- 'build' will generate both static and shared libraries (no verification)"
 	@echo "- 'test' will generate and test everything (no verification)"
 	@echo "- 'world' will run everything (except make prepare)"
+	@echo "- 'clean' will remove all artifacts of other targets"
 	@echo ""
-	@echo "Specialized targets:"
+	@echo "Specialized targets for Experts:"
 	@echo "- 'verify-ct' will run F* verification of the code for the side-channel resistance"
 	@echo "- 'verify-specs' will run F* verification on the specifications"
 	@echo "- 'verify-code' will run F* verification on the code against the specification"
@@ -22,10 +23,9 @@ display:
 	@echo "- 'extract-specs' will generate OCaml code for the specifications"
 	@echo "- 'extract-c-code' will generate C code for all the stable primitives"
 	@echo "- 'extract-c-code-experimental' will generate C code for experimental primitives"
-	@echo "- 'extract-all-snapshots' will generate C code for multiple compilers"
+	@echo "- 'extract-all' will generate all versions of the C snapshots available"
 	@echo "- 'prepare' will install F* and Kremlin (Requirements are still needed)"
 	@echo "- 'clean-snapshots' will remove all snapshots"
-	@echo "- 'clean' will remove all artifacts of other targets"
 
 #
 # Includes
@@ -54,12 +54,12 @@ verify: verify-banner verify-ct verify-specs verify-code verify-secure_api
 # Code generation
 #
 
-extract: snapshot
+extract: snapshots/snapshot-hacl-c
 
 extract-specs:
 	$(MAKE) -C specs
 
-extract-all-snapshots: snapshot-all
+extract-all: snapshots-all
 
 #
 # Compilation of the library
@@ -106,9 +106,7 @@ clean-build:
 	rm -rf build
 	rm -rf build-experimental
 
-clean-snapshots:
-	rm -rf ./snapshots/hacl-c
-	rm -rf ./snapshots/snapshot*
+clean-snapshots: snapshots-remove
 
 clean: clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
 
