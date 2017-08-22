@@ -12,11 +12,11 @@
 extract-c: extract-c-code extract-c-crypto # extract-c-apps
 
 extract-c-code:
-	$(GFIND) ./code -name out.krml -exec touch {} \;
-	$(MAKE) -C ./code extract-c
+	$(GFIND) code -name out.krml -exec touch {} \;
+	$(MAKE) -C code extract-c
 
 extract-c-code-experimental:
-	$(MAKE) -C ./code/experimental extract-c
+	$(MAKE) -C code/experimental extract-c
 
 #
 # Snapshot targets
@@ -24,20 +24,20 @@ extract-c-code-experimental:
 
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
-SNAPSHOT_FILES= ./snapshots/c/* \
-	$(addprefix ./code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
+SNAPSHOT_FILES= snapshots/c/* \
+	$(addprefix code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
 	./code/curve25519/x25519-c/Curve25519.* \
 	./code/salsa-family/chacha-c/Chacha20.* \
 	./code/salsa-family/salsa-c/Salsa20.* \
-	$(addprefix ./code/api/aead-c/, Chacha20Poly1305.*) \
-	$(addprefix ./code/api/box-c/, NaCl.*) \
-	$(addprefix ./code/api/policies-c/, Hacl_Policies.* ) \
-	$(addprefix ./code/ed25519/ed25519-c/, Ed25519.*) \
-	$(addprefix ./code/hash/sha2-c/, SHA2_256.*) \
-	$(addprefix ./code/hash/sha2-c/, SHA2_384.*) \
-	$(addprefix ./code/hash/sha2-c/, SHA2_512.*) \
-	$(addprefix ./code/hmac/hmac-c/, HMAC_SHA2_256.*) \
-	$(addprefix ./code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
+	$(addprefix code/api/aead-c/, Chacha20Poly1305.*) \
+	$(addprefix code/api/box-c/, NaCl.*) \
+	$(addprefix code/api/policies-c/, Hacl_Policies.* ) \
+	$(addprefix code/ed25519/ed25519-c/, Ed25519.*) \
+	$(addprefix code/hash/sha2-c/, SHA2_256.*) \
+	$(addprefix code/hash/sha2-c/, SHA2_384.*) \
+	$(addprefix code/hash/sha2-c/, SHA2_512.*) \
+	$(addprefix code/hmac/hmac-c/, HMAC_SHA2_256.*) \
+	$(addprefix code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
 
 ifeq ($(OS),Windows_NT)
   GCC=x86_64-w64-mingw32-gcc.exe
@@ -53,31 +53,31 @@ snapshot-collect:
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
 snapshots/snapshot-ccomp:
-	$(MAKE) -C ./code clean
+	$(MAKE) -C code clean
 	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
 	if $(HAS_CCOMP); then $(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-ccomp; fi
 
 snapshots/snapshot-msvc:
-	$(MAKE) -C ./code clean
+	$(MAKE) -C code clean
 	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar"; fi
 	if $(HAS_CL); then $(MAKE) snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-msvc; fi
 
 snapshots/snapshot-gcc:
-	$(MAKE) -C ./code clean
+	$(MAKE) -C code clean
 	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar"
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc
 
 snapshots/snapshot-gcc-unrolled:
-	$(MAKE) -C ./code clean
+	$(MAKE) -C code clean
 	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar"
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
 # BB: This requires to have up-to-date snapshot-gcc and snapshot-gcc-unrolled
 # Maybe we should call 'snapshot-remove' before to enforce it (at the cost of two more extractions) ?
 snapshots/hacl-c:
-	$(MAKE) -C ./snapshots/snapshot-gcc
-	$(MAKE) -C ./snapshots/snapshot-gcc-unrolled
-	mkdir -p ./snapshots/hacl-c
+	$(MAKE) snapshots/snapshot-gcc
+	$(MAKE) snapshots/snapshot-gcc-unrolled
+	mkdir -p snapshots/hacl-c
 	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* Hacl_Policies.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* vec128.h) \
 	   $(addprefix snapshots/snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
 	   $(addprefix snapshots/c/, kremlib.h kremlib.c gcc_compat.h FStar.h Makefile)  \
@@ -86,20 +86,20 @@ snapshots/hacl-c:
 # BB: I now fail to see the difference between snapshot-hacl-c and snapshot-nss
 # I probably introduced a mistake here...
 snapshots/nss:
-	$(MAKE) -C ./snapshots/snapshot-gcc
-	$(MAKE) -C ./snapshots/snapshot-gcc-unrolled
-	mkdir -p ./snapshots/nss
-	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* Hacl_Policies.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* vec128.h) ./snapshots/nss
-	cp $(addprefix snapshots/snapshot-gcc-unrolled/, Curve25519* Ed25519*) ./snapshots/nss
-	cp $(addprefix snapshots/c/, kremlib.h kremlib.c gcc_compat.h FStar.h Makefile)  ./snapshots/nss
+	$(MAKE) snapshots/snapshot-gcc
+	$(MAKE) snapshots/snapshot-gcc-unrolled
+	mkdir -p snapshots/nss
+	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* Hacl_Policies.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* vec128.h) snapshots/nss
+	cp $(addprefix snapshots/snapshot-gcc-unrolled/, Curve25519* Ed25519*) snapshots/nss
+	cp $(addprefix snapshots/c/, kremlib.h kremlib.c gcc_compat.h FStar.h Makefile)  snapshots/nss
 
 snapshots-all:
-	$(MAKE) -C ./snapshots/snapshot-gcc
-	$(MAKE) -C ./snapshots/snapshot-gcc-unrolled
-	$(MAKE) -C ./snapshots/snapshot-ccomp
-	$(MAKE) -C ./snapshots/snapshot-msvc
-	$(MAKE) -C ./snapshots/hacl-c
-	$(MAKE) -C ./snapshots/nss
+	$(MAKE) snapshots/snapshot-gcc
+	$(MAKE) snapshots/snapshot-gcc-unrolled
+	$(MAKE) snapshots/snapshot-ccomp
+	$(MAKE) snapshots/snapshot-msvc
+	$(MAKE) snapshots/hacl-c
+	$(MAKE) snapshots/nss
 
 # BB: I think it is time to remove that target ?
 # I liked 'update-snapshot' but it is inconsistant with current names
@@ -107,8 +107,8 @@ snapshots-all:
 snapshots-update: snapshots/hacl-c
 
 snapshots-remove:
-	rm -rf ./snapshots/hacl-c
-	rm -rf ./snapshots/snapshot*
+	rm -rf snapshots/hacl-c
+	rm -rf snapshots/snapshot*
 
 #
 # Building the shared library
