@@ -39,14 +39,6 @@ SNAPSHOT_FILES= snapshots/c/* \
 	$(addprefix code/hmac/hmac-c/, HMAC_SHA2_256.*) \
 	$(addprefix code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
 
-ifeq ($(OS),Windows_NT)
-  GCC=x86_64-w64-mingw32-gcc.exe
-else
-  GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
-  ENABLE_LTO=-flto
-endif
-GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
-
 snapshot-collect:
 	mkdir -p $(SNAPSHOT_DIR)
 	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/

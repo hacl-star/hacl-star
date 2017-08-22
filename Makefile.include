@@ -115,11 +115,14 @@ HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
 HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
 GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
-# Check if GCC-7 is installed, uses GCC otherwise
-GCC_EXEC := $(shell gcc-7 --version 2>/dev/null | cut -c -5 | head -n 1)
-ifdef GCC_EXEC
-	CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=gcc-7
+ifeq ($(OS),Windows_NT)
+  GCC=x86_64-w64-mingw32-gcc.exe
+else
+  GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
+  CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=$(GCC)
+  ENABLE_LTO=-flto
 endif
+GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
 
 #
 # HaCl* generalized targets
