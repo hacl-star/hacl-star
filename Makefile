@@ -88,6 +88,12 @@ test:
 	$(MAKE) -C tests
 
 #
+# World
+#
+
+world: verify extract-specs extract-all build test package clean
+
+#
 # Clean
 #
 
