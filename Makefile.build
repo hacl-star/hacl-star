@@ -74,7 +74,9 @@ snapshots/snapshot-gcc-unrolled:
 
 # BB: This requires to have up-to-date snapshot-gcc and snapshot-gcc-unrolled
 # Maybe we should call 'snapshot-remove' before to enforce it (at the cost of two more extractions) ?
-snapshots/hacl-c: snapshots/snapshot-gcc snapshots/snapshot-gcc-unrolled
+snapshots/hacl-c:
+	$(MAKE) -C ./snapshots/snapshot-gcc
+	$(MAKE) -C ./snapshots/snapshot-gcc-unrolled
 	mkdir -p ./snapshots/hacl-c
 	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* Hacl_Policies.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* vec128.h) \
 	   $(addprefix snapshots/snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
@@ -83,13 +85,21 @@ snapshots/hacl-c: snapshots/snapshot-gcc snapshots/snapshot-gcc-unrolled
 
 # BB: I now fail to see the difference between snapshot-hacl-c and snapshot-nss
 # I probably introduced a mistake here...
-snapshots/nss: snapshots/snapshot-gcc snapshots/snapshot-gcc-unrolled
+snapshots/nss:
+	$(MAKE) -C ./snapshots/snapshot-gcc
+	$(MAKE) -C ./snapshots/snapshot-gcc-unrolled
 	mkdir -p ./snapshots/nss
 	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* Hacl_Policies.* kremlib.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* vec128.h) ./snapshots/nss
 	cp $(addprefix snapshots/snapshot-gcc-unrolled/, Curve25519* Ed25519*) ./snapshots/nss
 	cp $(addprefix snapshots/c/, kremlib.h kremlib.c gcc_compat.h FStar.h Makefile)  ./snapshots/nss
 
-snapshots-all: snapshots/snapshot-ccomp snapshots/snapshot-gcc snapshots/snapshot-gcc-unrolled snapshots/snapshot-msvc snapshots/hacl-c snapshots/nss
+snapshots-all:
+	$(MAKE) -C ./snapshots/snapshot-gcc
+	$(MAKE) -C ./snapshots/snapshot-gcc-unrolled
+	$(MAKE) -C ./snapshots/snapshot-ccomp
+	$(MAKE) -C ./snapshots/snapshot-msvc
+	$(MAKE) -C ./snapshots/hacl-c
+	$(MAKE) -C ./snapshots/nss
 
 # BB: I think it is time to remove that target ?
 # I liked 'update-snapshot' but it is inconsistant with current names
