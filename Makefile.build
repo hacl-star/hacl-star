@@ -114,5 +114,12 @@ snapshots-remove:
 # Building the shared library
 #
 
-build/libhacl.so: snapshots/snapshot-hacl-c
-	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" lib
+build/libhacl.so: snapshots/hacl-c
+	mkdir -p build
+	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libnacl.so
+	cp snapshots/hacl-c/libnacl.so build
+
+build/libhacl32.so: snapshots/hacl-c
+	mkdir -p build
+	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libnacl32.so
+	cp snapshots/hacl-c/libnacl32.so build
