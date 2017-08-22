@@ -1,5 +1,29 @@
 include ../Makefile.include
 
+TWEETNACL_HOME ?= $(HACL_HOME)/other_providers/tweetnacl
+OPENSSL_HOME   ?= $(HACL_HOME)/other_providers/openssl
+LIBSODIUM_HOME ?= $(HACL_HOME)/other_providers/libsodium/src/libsodium
+
+#
+# Compiler and settings
+#
+
+ifeq ($(OS),Windows_NT)
+  CC=x86_64-w64-mingw32-gcc.exe
+  LIBDL= # libdl not supported by MinGW. Anyway, is it really used?
+  LIBWINSOCK=-lws2_32 # Necessary for chacha, chacha-vec128 and aead
+else
+  CC=$(shell which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc) -fno-tree-vectorize -flto
+  LIBDL=-ldl
+  LIBWINSOCK=
+endif
+
+CCOPTS := -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
+CFLAGS= $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
+	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
+	-I $(LIBSODIUM_HOME)/include -L$(LIBSODIUM_HOME)/lib \
+	-I $(TWEETNACL_HOME) -I .
+
 #
 # Unit tests
 #
@@ -9,39 +33,50 @@ all:
 	$(MAKE) -C ../code test
 	$(MAKE) test-vale
 	$(MAKE) test-vale-asm
-	$(MAKE) test-snapshot
-	$(MAKE) test-ccomp
-	$(MAKE) test-gcc
-	$(MAKE) test-gcc-unrolled
-	$(MAKE) test-pneutube
-	$(MAKE) -C openssl-engine
+	#$(MAKE) test-pneutube
+	#$(MAKE) -C openssl-engine
+	#$(MAKE) test-snapshot
+	#$(MAKE) test-ccomp
+	#$(MAKE) test-gcc
+	#$(MAKE) test-gcc-unrolled
+
+#
+# Tests for Vale
+#
 
 test-vale:
 	$(MAKE) -C ../secure_api krml-test-vale.exe
 	$(MAKE) -C ../secure_api krml-test-hacl.exe
 
-test-pneutube:
-	$(MAKE) -C ../apps/pneutube tube-star.exe
-
 test-vale-asm:
 	$(MAKE) -C ../secure_api/vale/asm/
 
-test-snapshot:
-	$(MAKE) -C .. snapshot
-	$(MAKE) -C ../snapshots/snapshot CC="$(GCC) $(GCC_OPTS)" test
+#
+# Tests for applications
+#
 
-test-ccomp:
-	$(MAKE) -C .. snapshot-ccomp
+test-pneutube:
+	$(MAKE) -C ../apps/pneutube tube-star.exe
+
+#
+# Tests for snapshots
+#
+
+test-snapshot-hacl-c:
+	$(MAKE) -C .. snapshots/snapshot-hacl
+	$(MAKE) -C ../snapshots/snapshot-hacl CC="$(GCC) $(GCC_OPTS)" test
+
+test-snapshot-ccomp:
+	$(MAKE) -C .. snapshots/snapshot-ccomp
 	$(MAKE) -C ../snapshots/snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" test
 
-test-gcc:
-	$(MAKE) -C .. snapshot-gcc
+test-snapshot-gcc:
+	$(MAKE) -C .. snapshots/snapshot-gcc
 	$(MAKE) -C ../snapshots/snapshot-gcc CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
 
-test-gcc-unrolled:
-	$(MAKE) -C .. snapshot-gcc-unrolled
+test-snapshot-gcc-unrolled:
+	$(MAKE) -C .. snapshots/snapshot-gcc-unrolled
 	$(MAKE) -C ../snapshots/snapshot-gcc-unrolled CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
-
 
 #
 # Performance tests
@@ -72,3 +107,242 @@ all-perf:
 	$(MAKE) perf-gcc
 	$(MAKE) perf-gcc-unrolled
 	$(MAKE) perf-ccomp
+
+#
+# Targets for unit-tests on Primitives
+#
+
+test: unit-test-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead unit-test-ed25519
+
+perf: perf-test-poly perf-test-chacha perf-test-chacha-vec128 perf-test-salsa perf-test-curve perf-test-secretbox perf-test-box perf-test-aead perf-test-ed25519
+
+test-poly.exe:
+	$(CC) $(CFLAGS) \
+	  hacl_test_utils.c \
+	  $(TWEETNACL_HOME)/tweetnacl.c \
+	  kremlib.c testlib.c Poly1305_64.c test-poly.c -o test-poly.exe \
+	  -lsodium $(OPENSSL_HOME)/libcrypto.a
+
+perf-test-poly: test-poly.exe
+	./test-poly.exe perf
+
+unit-test-poly: test-poly.exe
+	./test-poly.exe unit-test
+
+test-salsa.exe:
+	$(CC) $(CFLAGS) \
+	  Salsa20.c -c -o Salsa20.o
+	$(CC) $(CFLAGS) \
+	  hacl_test_utils.c \
+	  $(TWEETNACL_HOME)/tweetnacl.c \
+	  kremlib.c testlib.c Salsa20.o test-salsa.c -lsodium -o test-salsa.exe
+
+perf-test-salsa: test-salsa.exe
+	./test-salsa.exe perf
+
+unit-test-salsa: test-salsa.exe
+	./test-salsa.exe unit-test
+
+test-chacha.exe:
+	$(CC) $(CFLAGS) \
+	  hacl_test_utils.c \
+	  $(TWEETNACL_HOME)/tweetnacl.c kremlib.c testlib.c Chacha20.c test-chacha.c -o test-chacha.exe \
+	  $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread $(LIBDL) $(LIBWINSOCK)
+
+perf-test-chacha: test-chacha.exe
+	./test-chacha.exe perf
+
+unit-test-chacha: test-chacha.exe
+	./test-chacha.exe unit-test
+
+test-chacha-vec128.exe:
+ifeq ($(CC),ccomp)
+	@echo "Skipping tests for vectorized chacha20 as CompCert does not support it"
+	@echo "Empty" > test-chacha-vec128.exe
+else
+	$(CC) $(CFLAGS) \
+	  hacl_test_utils.c \
+	  ../../other_providers/tweetnacl/tweetnacl.c kremlib.c testlib.c Chacha20_Vec128.c test-chacha-vec128.c -o test-chacha-vec128.exe \
+	  $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread $(LIBDL) $(LIBWINSOCK)
+endif
+
+perf-test-chacha-vec128: test-chacha-vec128.exe
+ifeq ($(CC),ccomp)
+	@echo "No unit tests for vectorized chacha20 with CompCert"
+else
+	./test-chacha-vec128.exe perf
+endif
+
+unit-test-chacha-vec128: test-chacha-vec128.exe
+ifeq ($(CC),ccomp)
+	@echo "No performance tests for vectorized chacha20 with CompCert"
+else
+	./test-chacha-vec128.exe unit-test
+endif
+
+test-curve.exe:
+	$(CC) $(CFLAGS) \
+	  hacl_test_utils.c \
+	  $(TWEETNACL_HOME)/tweetnacl.c \
+	  kremlib.c testlib.c Curve25519.c test-curve.c -o test-curve.exe \
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread $(LIBDL)
+
+perf-test-curve: test-curve.exe
+	./test-curve.exe perf
+
+unit-test-curve: test-curve.exe
+	./test-curve.exe unit-test
+
+test-ed25519.exe: Ed25519.c test-ed25519.c
+	$(CC) $(CFLAGS) \
+	  hacl_test_utils.c \
+	  $(TWEETNACL_HOME)/tweetnacl.c SHA2_512.c \
+	  kremlib.c testlib.c $^ -o test-ed25519.exe \
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread $(LIBDL)
+
+perf-test-ed25519: test-ed25519.exe
+	./test-ed25519.exe perf
+
+unit-test-ed25519: test-ed25519.exe
+	./test-ed25519.exe unit-test
+
+test-sha512.exe: SHA2_512.c test-sha512.c
+	$(CC) $(CFLAGS) \
+	  hacl_test_utils.c \
+	  $(TWEETNACL_HOME)/tweetnacl.c \
+	  kremlib.c testlib.c $^ -o test-sha512.exe \
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread $(LIBDL)
+
+perf-test-sha512: test-sha512.exe
+	./test-sha512.exe perf
+
+unit-test-sha512: test-sha512.exe
+	./test-sha512.exe unit-test
+
+test-secretbox.exe:
+	$(CC) $(CFLAGS) \
+	  Salsa20.c -c -o Salsa20.o
+	$(CC) $(CFLAGS) \
+	  Poly1305_64.c -c -o Poly1305_64.o
+	$(CC) $(CFLAGS) \
+	  Curve25519.c -c -o Curve25519.o
+	$(CC) $(CFLAGS) \
+	  hacl_test_utils.c \
+	  $(TWEETNACL_HOME)/tweetnacl.c \
+	  Salsa20.o Poly1305_64.o Curve25519.o kremlib.c testlib.c Hacl_Policies.c NaCl.c test-secretbox.c -lsodium -o test-secretbox.exe
+
+perf-test-secretbox: test-secretbox.exe
+	./test-secretbox.exe perf
+
+unit-test-secretbox: test-secretbox.exe
+	./test-secretbox.exe unit-test
+
+test-aead.exe:
+	$(CC) $(CFLAGS) \
+	  Chacha20.c -c -o Chacha20.o
+	$(CC) $(CFLAGS) \
+	  AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
+	$(CC) $(CFLAGS) \
+	  Chacha20.o AEAD_Poly1305_64.o kremlib.c testlib.c Hacl_Policies.c Chacha20Poly1305.c hacl_test_utils.c test-aead.c -o test-aead.exe \
+	  -lsodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread $(LIBDL) $(LIBWINSOCK)
+
+perf-test-aead: test-aead.exe
+	./test-aead.exe	perf
+
+unit-test-aead: test-aead.exe
+	./test-aead.exe	unit-test
+
+test-box.exe:
+	$(CC) $(CFLAGS) \
+	  Salsa20.c -c -o Salsa20.o
+	$(CC) $(CFLAGS) \
+	  Poly1305_64.c -c -o Poly1305_64.o
+	$(CC) $(CFLAGS) \
+	  Curve25519.c -c -o Curve25519.o
+	$(CC) $(CFLAGS) \
+	  hacl_test_utils.c \
+	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	  Salsa20.o Poly1305_64.o Curve25519.o kremlib.c testlib.c Hacl_Policies.c NaCl.c test-box.c -lsodium -o test-box.exe
+
+perf-test-box: test-box.exe
+	./test-box.exe perf
+
+unit-test-box: test-box.exe
+	./test-box.exe unit-test
+
+
+lib:
+	$(CC) $(CFLAGS) \
+	  Salsa20.c -c -o Salsa20.o
+	$(CC) $(CFLAGS) \
+	  Chacha20.c -c -o Chacha20.o
+	$(CC) $(CFLAGS) \
+	  Poly1305_64.c -c -o Poly1305_64.o
+	$(CC) $(CFLAGS) \
+	  AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
+	$(CC) $(CFLAGS) \
+	  SHA2_512.c -c -o SHA2_512.o
+	$(CC) $(CFLAGS) \
+	  Ed25519.c -c -o Ed25519.o
+	$(CC) $(CFLAGS) \
+	  Curve25519.c -c -o Curve25519.o
+	$(CC) $(CFLAGS) \
+	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
+	$(CC) -shared  $(CFLAGS) \
+	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c \
+	  -o libhacl.so
+
+lib-test: lib
+	$(CC)  $(CFLAGS) \
+	  -I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
+	  hacl_test_utils.c \
+	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	  testlib.c test-poly.c -o test-poly.exe \
+	  -lsodium $(OPENSSL_HOME)/libcrypto.a libhacl.so
+	$(CC)  $(CFLAGS) \
+	  hacl_test_utils.c \
+	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	  testlib.c test-salsa.c -o test-salsa.exe \
+	  -lsodium $(OPENSSL_HOME)/libcrypto.a libhacl.so
+	$(CC)  $(CFLAGS) \
+	  -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I ../../other_providers/tweetnacl \
+	  hacl_test_utils.c \
+	  ../../other_providers/tweetnacl/tweetnacl.c testlib.c test-chacha.c -o test-chacha.exe \
+	   $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread $(LIBDL) libhacl.so
+	$(CC)  $(CFLAGS) \
+	  hacl_test_utils.c \
+	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	  testlib.c test-secretbox.c -o test-secretbox.exe \
+	  -lsodium $(OPENSSL_HOME)/libcrypto.a libhacl.so
+	$(CC)  $(CFLAGS) \
+	  testlib.c hacl_test_utils.c test-aead.c -o test-aead.exe \
+	  -lsodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread $(LIBDL) libhacl.so
+	$(CC)  $(CFLAGS) \
+	  -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
+	  hacl_test_utils.c \
+	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	  testlib.c test-curve.c -o test-curve.exe \
+	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread $(LIBDL) libhacl.so
+	$(CC)  $(CFLAGS) \
+	  hacl_test_utils.c \
+	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
+	  testlib.c test-box.c -o test-box.exe -lsodium  libhacl.so
+	./test-chacha.exe
+	./test-salsa.exe
+	./test-poly.exe
+	./test-secretbox.exe
+	./test-aead.exe
+	./test-curve.exe
+	./test-box.exe
+
+unit-tests: libnacl.so
+	$(CC) $(CFLAGS) -I ../../test/c -I . ../../test/c/unit_tests.c \
+	  hacl_test_utils.c \
+	  ../../other_providers/tweetnacl/tweetnacl.c -o unit_tests.exe $^
+	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. ./unit_tests.exe
+
+unit-tests-32: libnacl32.so
+	$(CC) $(CFLAGS) -DKRML_NOUINT128 -I ../../test/c -I . ../../test/c/unit_tests.c \
+	  hacl_test_utils.c \
+	  ../../other_providers/tweetnacl/tweetnacl.c -o unit_tests32.exe $^
+	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. ./unit_tests32.exe
