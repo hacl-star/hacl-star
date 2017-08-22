@@ -107,6 +107,8 @@ clean-build:
 	rm -rf build
 	rm -rf build-experimental
 
+clean-package: clean-base clean-build
+
 clean-snapshots: snapshots-remove
 
 clean: .clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
@@ -136,9 +138,13 @@ prepare:
 	@echo $(CYAN)"# Packaging the HaCl* generated code"$(NORMAL)
 	@echo $(CYAN)"  Make sure you have run verification before !"$(NORMAL)
 
-package: .package-banner snapshots/hacl-c
-	@tar -zcvf hacl-star.tar.gz snapshots/hacl-c
-	@echo $(CYAN)"\nDone ! Look in the root directory !"$(NORMAL)
+package: .package-banner snapshots/hacl-c build
+	mkdir -p hacl
+	cp build/lib* hacl
+	cp -r snapshots/hacl-c/* hacl
+	tar -zcvf hacl-star.tar.gz hacl
+	rm -rf hacl
+	@echo $(CYAN)"\nDone ! Generated archive is 'hacl-star.tar.gz'. !"$(NORMAL)
 
 #
 # Undocumented targets
