@@ -14,13 +14,7 @@ LIBFLAGS32=$(LIBFLAGS) -DKRML_NOUINT128 -Wno-unused-function
 FILES = Salsa20.c Salsa20.h Chacha20.c Chacha20.h Poly1305_64.c Poly1305_64.h AEAD_Poly1305_64.c AEAD_Poly1305_64.h SHA2_512.c SHA2_512.h Ed25519.c Ed25519.h Curve25519.c Curve25519.h Chacha20Poly1305.c Chacha20Poly1305.h Hacl_Policies.c Hacl_Policies.h NaCl.c NaCl.h
 
 #
-# Library targets
-#
-
-nacllib: libnacl.so
-
-#
-# 64 bits
+# Library (64 bits)
 #
 
 libnacl.so: $(FILES)
@@ -41,12 +35,12 @@ libnacl.so: $(FILES)
 	$(CC) $(LIBFLAGS) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
 	$(CC) -shared  $(LIBFLAGS) -I ../../test/c -I . -Wall \
-	  hacl_test_utils.c \
+	  ../../test/c/hacl_test_utils.c \
 	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c/randombytes.c ../../test/c/haclnacl.c \
 	  -o libnacl.so
 
 #
-# 32 bits
+# Library (32 bits)
 #
 
 libnacl32.so: $(FILES)
@@ -67,7 +61,7 @@ libnacl32.so: $(FILES)
 	$(CC) $(LIBFLAGS32) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
 	$(CC) -shared  $(LIBFLAGS32) -I ../../test/c -I . -Wall \
-	  hacl_test_utils.c \
+	  ../../test/c/hacl_test_utils.c \
 	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c/randombytes.c ../../test/c/haclnacl.c \
 	  -o libnacl32.so
 
