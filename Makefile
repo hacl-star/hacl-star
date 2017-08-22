@@ -59,7 +59,7 @@ verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"# Generation of the HaCl* verified C code"$(NORMAL)
 	@echo $(CYAN)" (This is not running formal verification)"$(NORMAL)
 
-extract: .extract-banner snapshots/snapshot-hacl-c
+extract: .extract-banner snapshots/hacl-c
 	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/hacl-c'."$(NORMAL)
 
 extract-specs:
@@ -71,8 +71,10 @@ extract-all: snapshots-all
 # Compilation of the library
 #
 
-build:
+.build-banner:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
+
+build: .build-banner snapshots/hacl-c
 	mkdir -p build && cd build; \
 	cmake $(CMAKE_COMPILER_OPTION) .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
