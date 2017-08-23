@@ -29,20 +29,10 @@ let id_log_inv (id_log_kt:Type0) (m:MM.map' id_log_kt id_log_range) = True
 
 type id_log_t (rgn:id_log_region) (id_log_kt:Type0) = MM.t rgn id_log_kt id_log_range (id_log_inv id_log_kt)
 
-abstract noeq type index_module =
+noeq type index_module =
   | IM:
     im_rgn: (id_log_region) ->
     subId: (t:Type0{hasEq t}) -> // express that there is a total order on ids
-    smaller: (i1:subId -> i2:subId -> t:Type0{t ==> i1 <> i2}) ->
-    total_order_lemma: (i1:subId -> i2:subId -> Lemma
-      (requires smaller i1 i2)
-      (ensures forall i. i <> i1 /\ i <> i2 /\ smaller i i1 ==> smaller i i2)
-      [SMTPat (smaller i1 i2)]) ->
-    compose_ids: (i1:subId -> i2:subId{i2 <> i1} -> i:(subId*subId){smaller (fst i) (snd i) /\ (i = (i1,i2) \/ i = (i2,i1))}) ->
-    symmetric_id_generation: (i1:subId -> i2:subId{i2 <> i1} -> Lemma
-    (requires (i1<>i2))
-    (ensures (i1 <> i2 /\ compose_ids i1 i2 = compose_ids i2 i1))
-    [SMTPat (compose_ids i1 i2)]) ->
     id_log: (id_log_t im_rgn subId) ->
     index_module
 
@@ -64,16 +54,16 @@ noeq type index_module' =
     set_honesty: (i:id_t -> b:bool -> ST unit
       (requires (fun h0 ->
         fresh i h0
-      ))
+      )) 
       (ensures (fun h0 _ h1 ->
-        (b ==> honest i)
+        True
+        /\ (forall (i':id_t). ( i' =!= i /\ fresh i' h0 ) ==> fresh i' h1)
+        /\ (b ==> honest i)
         /\ (~b ==> dishonest i)))) ->
-    // id_log_t: Type0 ->
-    // id_log: id_log_t ->
     index_module'
 
-let create rgn subId smaller total_order_lemma compose_ids symmetric_id_generation id_log =
-  IM rgn subId smaller total_order_lemma compose_ids symmetric_id_generation id_log
+let create rgn subId id_log =
+  IM rgn subId id_log
 
 val recall_log: im:index_module -> ST unit
   (requires (fun h0 -> True))
@@ -84,93 +74,28 @@ val recall_log: im:index_module -> ST unit
 let recall_log im =
   MR.m_recall im.id_log
 
-type id (im:index_module) = i:(im.subId*im.subId){im.smaller (fst i) (snd i)}
-
-val compose_ids: im:index_module -> i1:im.subId -> i2:im.subId{i2 <> i1} -> (i:id im)
-let compose_ids im i1 i2 =
-  im.compose_ids i1 i2
-
-
-val symmetric_id_generation: im:index_module -> i1:im.subId -> i2:im.subId{i2 <> i1} -> Lemma
-(requires (i1<>i2))
-(ensures (im.compose_ids i1 i2 = im.compose_ids i2 i1))
-[SMTPat (compose_ids im i1 i2)]
-let symmetric_id_generation im i1 i2 =
-im.symmetric_id_generation i1 i2
-
-noeq type meta_id (im:index_module) =
-  | ID of id im
-  | SUBID of im.subId
-
-private let measure_id (im:index_module) (i:meta_id im) =
-  match i with
-  | SUBID i' -> 0
-  | _ -> 1
-
-val registered: (im:index_module) -> (i:meta_id im) -> Tot Type0 (decreases (measure_id im i))
-let rec registered (im:index_module) (i:meta_id im) =
-  match i with
-  | SUBID i' -> MR.witnessed (MM.defined im.id_log i')
-  | ID (i1,i2) -> registered im (SUBID i1) /\ registered im (SUBID i2)
-
-val lemma_registered: im:index_module -> i:id im -> Lemma
-  (requires registered im (ID i))
-  (ensures
-    (let i1,i2 = i in
-    registered im (SUBID (i2))
-    /\ registered im (SUBID (i1))))
-  [SMTPat (registered im (ID i))]
-let lemma_registered im i =
-  ()
-
-val lemma_registered2: im:index_module -> i:id im -> Lemma
-    (requires (let i1,i2 = i in
-    registered im (SUBID (i2))
-    /\ registered im (SUBID (i1))))
-  (ensures registered im (ID i))
-  [SMTPat (registered im (ID i))]
-let lemma_registered2 im i =
-  ()
+val registered: (im:index_module) -> (i:im.subId) -> Tot Type0
+let registered (im:index_module) (i:im.subId) =
+  MR.witnessed (MM.defined im.id_log i)
 
 // Put the correct flag here, as soon as we have flags for proof steps
-val honest: (im:index_module) -> (i:meta_id im) -> Tot (t:Type0 {t ==> registered im i}
-  ) (decreases (measure_id im i))
-let rec honest (im:index_module) (i:meta_id im) =
-  match i with
-  | SUBID i' -> MR.witnessed (MM.contains im.id_log i' true) /\ MR.witnessed (MM.defined im.id_log i')
-  | ID (i1,i2) -> honest im (SUBID i1) /\ honest im (SUBID i2)
+val honest: (im:index_module) -> (i:im.subId) -> Tot (t:Type0 {t ==> registered im i}
+  ) 
+let honest (im:index_module) (i:im.subId) =
+  let _=() in MR.witnessed (MM.contains im.id_log i true) /\ MR.witnessed (MM.defined im.id_log i)
 
-val lemma_both_ids_honest: im:index_module -> i:id im -> Lemma
-  (requires (honest im (ID i)))
-  (ensures (
-    (let i1,i2 = i in
-    honest im (SUBID i1) /\ honest im (SUBID i2))
-  ))
-  [SMTPat (honest im (ID i))]
-let lemma_both_ids_honest im i = ()
 
-val lemma_single_id_honest: im:index_module -> i1:im.subId -> Lemma
-  (requires (honest im (SUBID i1)))
-  (ensures (
-    (forall (i2:im.subId{i2 <> i2}) .
-      (honest im (SUBID i2)) ==> (let ID i = ID (im.compose_ids i1 i2) in honest im (ID i)))
-  ))
-  [SMTPat (honest im (SUBID i1))]
-let lemma_single_id_honest im i1 = ()
-
-val dishonest: (im:index_module) -> (i:meta_id im) -> Tot (t:Type0{(t /\ SUBID? i) ==> registered im i}) (decreases (measure_id im i))
+val dishonest: (im:index_module) -> (i:im.subId) -> Tot (t:Type0{t ==> registered im i}) 
 let rec dishonest im i =
-  match i with
-  | SUBID i' -> MR.witnessed (MM.contains im.id_log i' false) /\ MR.witnessed (MM.defined im.id_log i')
-  | ID (i1,i2) -> dishonest im (SUBID i1) \/ dishonest im (SUBID i2)
+  let _=() in MR.witnessed (MM.contains im.id_log i false) /\ MR.witnessed (MM.defined im.id_log i)
 
-type absurd_honest (im:index_module) (i:meta_id im{dishonest im i}) = honest im i
-type absurd_dishonest (im:index_module) (i:meta_id im{honest im i}) = dishonest im i
-assume val lemma_honest_and_others_tot: im:index_module -> i:meta_id im{dishonest im i} -> absurd_honest im i -> Lemma (False)
-assume val lemma_dishonest_and_others_tot: im:index_module -> i:meta_id im{honest im i} -> absurd_dishonest im i -> Lemma (False)
+type absurd_honest (im:index_module) (i:im.subId{dishonest im i}) = honest im i
+type absurd_dishonest (im:index_module) (i:im.subId{honest im i}) = dishonest im i
+assume val lemma_honest_and_others_tot: im:index_module -> i:im.subId{dishonest im i} -> absurd_honest im i -> Lemma (False)
+assume val lemma_dishonest_and_others_tot: im:index_module -> i:im.subId{honest im i} -> absurd_dishonest im i -> Lemma (False)
 
 
-val lemma_dishonest_not_others: (im:index_module) -> (i:meta_id im) -> ST unit
+val lemma_dishonest_not_others: (im:index_module) -> (i:im.subId) -> ST unit
   (requires (fun h0 ->
     dishonest im i
   ))
@@ -180,11 +105,11 @@ val lemma_dishonest_not_others: (im:index_module) -> (i:meta_id im) -> ST unit
     /\ h0==h1
   ))
 let lemma_dishonest_not_others im i =
-  let (j:(i:meta_id im{dishonest im i})) = i in
+  let (j:(i:im.subId{dishonest im i})) = i in
   FStar.Classical.impl_intro (lemma_honest_and_others_tot im j);
   assert(honest im i==> False)
 
-val lemma_honest_not_others: (im:index_module) -> (i:meta_id im) -> ST unit
+val lemma_honest_not_others: (im:index_module) -> (i:im.subId) -> ST unit
   (requires (fun h0 ->
     honest im i
   ))
@@ -193,11 +118,11 @@ val lemma_honest_not_others: (im:index_module) -> (i:meta_id im) -> ST unit
     /\ h0==h1
   ))
 let lemma_honest_not_others im i =
-  let (j:(i:meta_id im{registered im i /\ honest im i})) = i in
+  let (j:(i:im.subId{registered im i /\ honest im i})) = i in
   FStar.Classical.impl_intro (lemma_dishonest_and_others_tot im j);
   assert(dishonest im i ==> False)
 
-val lemma_honest_or_dishonest: im:index_module -> (i:meta_id im) -> ST unit
+val lemma_honest_or_dishonest: im:index_module -> (i:im.subId) -> ST unit
   (requires (fun h0 ->
     registered im i
   ))
@@ -207,128 +132,74 @@ val lemma_honest_or_dishonest: im:index_module -> (i:meta_id im) -> ST unit
   ))
 let rec lemma_honest_or_dishonest im i =
   MR.m_recall im.id_log;
-  match i with
-  | ID (i1,i2) -> lemma_honest_or_dishonest im (SUBID i1) ; lemma_honest_or_dishonest im (SUBID i2)
-  | SUBID i' ->
-    MR.testify (MM.defined im.id_log i');
-    match MM.lookup im.id_log i' with
-    | Some b ->
-      if b then
-  MR.testify (MM.contains im.id_log i' true)
-             else
-  MR.testify (MM.contains im.id_log i' false)
+  MR.testify (MM.defined im.id_log i);
+  match MM.lookup im.id_log i with
+  | Some b ->
+    if b then
+      MR.testify (MM.contains im.id_log i true)
+    else
+      MR.testify (MM.contains im.id_log i false)
 
 val fresh: im:index_module ->
-           i:meta_id im ->
+           i:im.subId ->
            h:mem ->
            (t:Type0{
              (t <==>
-               ((ID? i ==>
-                 (let ID (i1,i2) = i in
-                 MM.fresh im.id_log i1 h
-                 /\ MM.fresh im.id_log i2 h))
-               /\ (SUBID? i ==>
-                  (let SUBID i' = i in
-                  MM.fresh im.id_log i' h
-                  /\ ~(MM.contains im.id_log i' true h)))))
-            /\ (~t /\ SUBID? i ==> (let SUBID i' = i in MM.defined im.id_log i' h))
+                  MM.fresh im.id_log i h
+                  /\ ~(MM.contains im.id_log i true h))
+            /\ (~t ==> (MM.defined im.id_log i h))
            })
 
 let fresh im i h =
-  match i with
-  | SUBID i' ->
-    MM.fresh im.id_log i' h
-  | ID i' ->
-    MM.fresh im.id_log (fst i') h
-    /\ MM.fresh im.id_log (snd i') h
-
-
-val lemma_fresh: im:index_module -> i:id im -> h:mem -> Lemma
-  (requires fresh im (ID i) h)
-  (ensures
-    (let i1,i2 = i in
-    fresh im (SUBID i2) h
-    /\ fresh im (SUBID i1) h))
-  [SMTPat (fresh im (ID i) h)]
-let lemma_fresh im i h =
-  ()
-
-val lemma_fresh2: im:index_module -> i:id im -> h:mem -> Lemma
-    (requires (let i1,i2 = i in
-    fresh im (SUBID i2) h
-    /\ fresh im (SUBID i1) h))
-    (ensures fresh im (ID i) h)
-    [SMTPat (fresh im (ID i) h)]
-let lemma_fresh2 im i h =
-  ()
+    MM.fresh im.id_log i h
 
 #set-options "--z3rlimit 900 --max_ifuel 1 --max_fuel 2"
-val get_honesty: im:index_module -> i:meta_id im -> ST(b:bool) (decreases (measure_id im i))
+val get_honesty: im:index_module -> i:im.subId -> ST(b:bool)
   (requires (fun h0 ->
     registered im i
   ))
   (ensures (fun h0 b h1 ->
     modifies_none h0 h1
     /\ h0==h1
-    /\ (b <==> (honest im i))
-    /\ (~b <==> dishonest im i)
+      /\ (b <==> (honest im i))
+      /\ (~b <==> dishonest im i)
   ))
+
+
 let rec get_honesty im i =
   MR.m_recall im.id_log;
-  match i with
-  | SUBID i' ->
-    MR.testify (MM.defined im.id_log i');
-    (match MM.lookup im.id_log i' with
-    | Some b ->
-      (match b with
-      | true ->
-        lemma_honest_not_others im (SUBID i');
-        true
-      | false ->
-        lemma_dishonest_not_others im (SUBID i');
-        false))
-  | ID i' ->
-    let b1 = get_honesty im (SUBID (fst i')) in
-    let b2 = get_honesty im (SUBID (snd i')) in
-    match b1 && b2 with
+  MR.testify (MM.defined im.id_log i);
+  (match MM.lookup im.id_log i with
+  | Some b ->
+    (match b with
     | true ->
-      lemma_honest_not_others im (ID i');
+      lemma_honest_not_others im i;
       true
     | false ->
-      lemma_dishonest_not_others im (ID i');
-      false
+      lemma_dishonest_not_others im i;
+      false))
 
 
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 1"
-val set_honesty: im:index_module -> i:meta_id im -> b:bool -> ST unit
+val set_honesty: im:index_module -> i:im.subId -> b:bool -> ST unit
   (requires (fun h0 ->
     fresh im i h0
   ))
   (ensures (fun h0 _ h1 ->
-    (b ==> honest im i)
+           (b ==> honest im i)
     /\ (~b ==> dishonest im i)
-    /\ (SUBID? i ==>
-              (let SUBID i' = i in
-              MR.m_sel h1 im.id_log == MM.upd (MR.m_sel h0 im.id_log) i' b
+    /\ (forall (i':im.subId). ( i' =!= i /\ fresh im i' h0 ) ==> fresh im i' h1)
+    /\ MR.m_sel h1 im.id_log == MM.upd (MR.m_sel h0 im.id_log) i b
               /\ modifies (Set.singleton im.im_rgn) h0 h1
-              ))
-    /\ (ID? i ==>
-           (let ID (i1,i2) = i in
-           MR.m_sel h1 im.id_log == MM.upd (MM.upd (MR.m_sel h0 im.id_log) i1 b) i2 b /\ modifies (Set.singleton im.im_rgn) h0 h1))
   ))
 let rec set_honesty im i b =
-  match i with
-    | SUBID i' ->
-      (match MM.lookup im.id_log i' with
-      | Some b -> ()
-      | None ->
-        MM.extend im.id_log i' b)
-    | ID (i1,i2) ->
-    set_honesty im (SUBID i1) b;
-    set_honesty im (SUBID i2) b
+    (match MM.lookup im.id_log i with
+    | Some b -> ()
+    | None ->
+        MM.extend im.id_log i b)
 
-val lemma_index_module: im:index_module -> i:meta_id im -> ST unit
-  (requires (fun h0 -> registered im i))
+val lemma_index_module: im:index_module -> i:im.subId -> ST unit
+  (requires (fun h0 -> registered im i ))
   (ensures (fun h0 _ h1 ->
     (honest im i ==> (~(dishonest im i)))
     /\ (dishonest im i ==> (~(honest im i)))
@@ -362,19 +233,19 @@ let symmetric_id_generation_int i1 i2 = ()
 val create': rgn:id_log_region -> St index_module'
 let create' rgn =
   let id_log:id_log_t rgn int = MM.alloc #rgn #int #id_log_range #(id_log_inv int) in
-  let im = create rgn int smaller_int total_order_lemma_int compose_int symmetric_id_generation_int id_log in
+  let im = create rgn int id_log in
   // assert(False);
   IM' rgn int
-      (fun id -> registered im (SUBID id))
-      (fun id -> let b = honest im (SUBID id) in b)
-      (fun id -> dishonest im (SUBID id))
-      (fun id -> get_honesty im (SUBID id))
-      (fun id h -> fresh im (SUBID id) h)
-      (fun id b -> set_honesty im (SUBID id) b)
+      (fun i -> registered im i)
+      (fun i -> let b = honest im i in b)
+      (fun i -> dishonest im i)
+      (fun i -> get_honesty im i)
+      (fun i h -> fresh im i h)
+      (fun i b -> set_honesty im i b)
 
 
 val get_honesty': im:index_module' -> 
-              i:(im.id_t * im.id_t) ->
+              i:(im.id_t * im.id_t){fst i <> snd i} ->
               ST(bool)
   (requires (fun h0 -> im.registered (fst i) /\ im.registered (snd i)))
   (ensures  (fun h0 b h1 ->
@@ -385,33 +256,32 @@ val get_honesty': im:index_module' ->
 let get_honesty' im id =
   let (h1,h2) = (im.get_honesty (fst id), im.get_honesty (snd id)) in h1 && h2
 
-val set_honesty': im:index_module' -> i:(im.id_t * im.id_t) -> b:bool -> ST unit
+val fresh': im:index_module' -> i:(im.id_t * im.id_t) -> h:mem -> Tot Type0
+let fresh' im i h =
+  let _ = () in
+  im.fresh (fst i) h /\ im.fresh (snd i) h
+
+val set_honesty': im:index_module' -> i:(im.id_t * im.id_t){fst i <> snd i} -> b:bool -> ST unit
   (requires (fun h0 ->
    im.fresh (fst i) h0 /\ im.fresh (snd i) h0
    ))
    (ensures (fun h0 _ h1 ->
-   (b ==> im.honest (fst i) /\ im.honest (snd i))
+   True
+//   /\ (forall (i':(im.id_t * im.id_t)). ( i' =!= i /\ im.fresh (fst i') h0 ) ==> im.fresh (snd i') h1)
+   /\ (b ==> im.honest (fst i) /\ im.honest (snd i))
    /\ (~b ==> im.dishonest (fst i) \/ im.dishonest (snd i)))) 
-let set_honesty' im i b = im.set_honesty (fst i) b; admit(); im.set_honesty (snd i) b
+let set_honesty' im i b = im.set_honesty (fst i) b; im.set_honesty (snd i) b
 
 val compose: rgn:id_log_region -> 
              im:index_module'{im.rgn=rgn} ->
              smaller: (i1:im.id_t -> i2:im.id_t -> t:Type0{t ==> i1 <> i2}) ->
              im':index_module'
 let compose rgn (im:index_module'{im.rgn=rgn}) smaller=
-  IM' rgn (i:(im.id_t * im.id_t)// {smaller (fst i) (snd i)}
+  IM' rgn (i:(im.id_t * im.id_t){smaller (fst i) (snd i)}
   )
     (fun id -> im.registered (fst id) /\ im.registered (snd id))
     (fun id -> im.honest (fst id) /\ im.honest (snd id)) 
     (fun id -> im.dishonest (fst id) \/ im.dishonest (snd id)) 
-    (fun id -> get_honesty' im id)
-    (fun id h -> im.fresh (fst id) h /\ im.fresh (snd id) h)
-    (fun id b -> set_honesty' im id b)
-
-
-
-// let compose_two rgn (im1:index_module'{im1.im_rgn=rgn}) (im2:index_module'{im2.im_rgn=rgn}) =
-//   IM' rgn (im1.id_t * im2.id_t)
-//     (fun id -> im1.registered (fst id) /\ im2.registered (snd id))
-//     (fun id -> let (h1,h2) = (im1.get_honesty (fst id), im2.get_honesty (snd id)) in h1 && h2)
- 
+    (fun (id:(i:(im.id_t * im.id_t){smaller (fst i) (snd i)})) -> get_honesty' im id)
+    (fun id h -> fresh' im id h) 
+    (fun id b -> admit(); set_honesty' im id b)
