@@ -4,6 +4,9 @@ TWEETNACL_HOME ?= $(HACL_HOME)/other_providers/tweetnacl
 OPENSSL_HOME   ?= $(HACL_HOME)/other_providers/openssl
 LIBSODIUM_HOME ?= $(HACL_HOME)/other_providers/libsodium/src/libsodium
 
+# Default snapshot. Variable can be overwritten to choose a snapshot
+SNAPSHOT_DIR = snapshots/hacl-c
+
 #
 # Compiler and settings
 #
@@ -29,6 +32,7 @@ all:
 	$(MAKE) test-vale-asm
 	$(MAKE) unit-tests
 	$(MAKE) unit-tests32
+	$(MAKE) test-perf-all
 	#$(MAKE) test-pneutube
 	#$(MAKE) -C openssl-engine
 	#$(MAKE) test-snapshot
@@ -61,8 +65,6 @@ test-pneutube:
 .snapshot-all:
 	$(MAKE) -C .. snapshots-all
 
-SNAPSHOT_DIR = snapshots/hacl-c # Default snapshot. Variable can be overwritten to choose a snapshot
-
 #
 # Standalone unit-tests
 #
@@ -86,10 +88,10 @@ unit-tests-32:
 test-poly1305.exe:
 	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c c/test-poly.c -o test-poly1305.exe
 
-test-unit-poly: test-poly1305.exe
+test-unit-poly1305: test-poly1305.exe
 	./test-poly1305.exe unit-test
 
-test-perf-poly: test-poly1305.exe
+test-perf-poly1305: test-poly1305.exe
 	./test-poly1305.exe perf
 
 test-all-poly1305: .snapshot-all
@@ -104,7 +106,7 @@ test-all-poly1305: .snapshot-all
 #
 
 test-salsa20.exe:
-	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.o c/test-salsa.c -o test-salsa20.exe
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c c/test-salsa.c -o test-salsa20.exe
 
 test-unit-salsa20: test-salsa20.exe
 	./test-salsa20.exe unit-test
@@ -117,7 +119,7 @@ test-perf-salsa20: test-salsa20.exe
 #
 
 test-chacha20.exe:
-	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20.o c/test-chacha.c -o test-chacha20.exe
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20.c c/test-chacha.c -o test-chacha20.exe
 
 test-unit-chacha20: test-chacha20.exe
 	./test-chacha20.exe unit-test
@@ -240,16 +242,17 @@ test-unit-aead: test-aead.exe
 test-perf-aead: test-aead.exe
 	./test-aead.exe perf
 
-
-
-
 #
 # Targets for all primitives
 #
 
-test-unit-all: test-unit-poly unit-test-chacha unit-test-chacha-vec128 unit-test-salsa unit-test-curve unit-test-secretbox unit-test-box unit-test-aead unit-test-ed25519
+test-unit-all: test-unit-poly1305 test-unit-chacha20 test-unit-chacha20-vec128 test-unit-salsa20 test-unit-curve25519 test-unit-secretbox test-unit-box test-unit-aead test-unit-ed25519 # test-unit-sha512
 
-test-perf-all: perf-test-poly perf-test-chacha perf-test-chacha-vec128 perf-test-salsa perf-test-curve perf-test-secretbox perf-test-box perf-test-aead perf-test-ed25519
+test-perf-all: test-perf-poly1305 test-perf-chacha20 test-perf-salsa20 test-perf-curve25519 test-perf-secretbox test-perf-box test-perf-aead test-perf-ed25519 # test-perf-chacha20-vec128 test-perf-sha512
+
+#
+# Additionnal targets
+#
 
 clean:
 	rm -rf *~ *.o *.exe
