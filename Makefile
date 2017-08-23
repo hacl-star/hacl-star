@@ -85,7 +85,7 @@ build: .build-banner build/libhacl.so build/libhacl32.so
 
 test:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
-	$(MAKE) -C tests
+	$(MAKE) -C test
 
 #
 # World

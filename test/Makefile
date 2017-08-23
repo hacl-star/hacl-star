@@ -31,7 +31,7 @@ all:
 	$(MAKE) test-vale
 	$(MAKE) test-vale-asm
 	$(MAKE) unit-tests
-	$(MAKE) unit-tests32
+	$(MAKE) unit-tests-32
 	$(MAKE) test-perf-all
 	#$(MAKE) test-pneutube
 	#$(MAKE) -C openssl-engine
