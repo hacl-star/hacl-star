@@ -111,7 +111,7 @@ clean-package: clean-base clean-build
 
 clean-snapshots: snapshots-remove
 
-clean: .clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean
+clean: .clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean tests.dir-clean
 
 #
 # Installation helper
