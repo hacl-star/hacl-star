@@ -4,7 +4,7 @@
 # Compilation flags
 #
 
-LIBFLAGS=$(CFLAGS) -fPIC -Wno-discarded-qualifiers
+LIBFLAGS=$(CFLAGS) -Wno-discarded-qualifiers
 LIBFLAGS32=$(LIBFLAGS) -DKRML_NOUINT128 -Wno-unused-function
 
 #
