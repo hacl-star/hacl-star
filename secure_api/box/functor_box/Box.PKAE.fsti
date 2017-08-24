@@ -24,7 +24,7 @@ module ID = Box.Indexing
 
 type index_module = ID.index_module
 type plain_module = Plain.plain_module
-type id (im:index_module) = ID.id im
+let id (im:index_module) = ID.id im
 val nonce: t:Type0{hasEq t}
 val cipher: Type0
 type log_region (im:index_module) =
@@ -56,8 +56,9 @@ abstract noeq type pkae_module =
     aux: (aux_t im pm rgn message_log) ->
     pkae_module
 
+val get_message_log: pkm:pkae_module -> GTot (message_log pkm.im pkm.rgn)
 
-val create: rgn:log_region im -> pkae_module
+val create: #im:index_module -> rgn:log_region im -> pkae_module
 
 val get_message_log: pkm:pkae_module -> GTot (message_log pkm.im pkm.rgn)
 

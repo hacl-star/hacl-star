@@ -29,6 +29,7 @@ module Key = Box.Key
 module ID = Box.Indexing
 module ODH = Box.ODH
 module AE = Box.AE
+module LE = FStar.Endianness
 
 let nonce = AE.nonce
 let cipher = AE.cipher
@@ -51,6 +52,23 @@ private noeq type aux_t' (im:index_module{ID.get_subId im == subId_t}) (pm:plain
 
 let aux_t im pm = aux_t' im pm
 
+#set-options "--z3rlimit 1000 --max_ifuel 1 --max_fuel 0"
+val message_log_lemma: im:index_module -> rgn:log_region im -> Lemma
+  (requires True)
+  (ensures message_log im rgn === AE.message_log im rgn)
+let message_log_lemma im rgn =
+  assert(message_log_key im == AE.message_log_key im);
+  assert(FStar.FunctionalExtensionality.feq (message_log_value im) (AE.message_log_value im));
+  assert(message_log_value im == AE.message_log_value im);
+  assert(FStar.FunctionalExtensionality.feq (message_log_range im) (AE.message_log_range im));
+  assert(message_log_range im == AE.message_log_range im);
+  assert(FStar.FunctionalExtensionality.feq (message_log_inv im) (AE.message_log_inv im));
+  assert(message_log im rgn == AE.message_log im rgn);
+  admit();
+  ()
+
+let get_message_log pkm = AE.get_message_logGT pkm.im pkm.rgn
+
 
 val create_aux: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region im -> ml:message_log im rgn -> St (aux_t im pm rgn ml)
 let create_aux im pm rgn ml =
@@ -59,7 +77,23 @@ let create_aux im pm rgn ml =
   let om = ODH.create im km rgn in
   AUX am km om
 
+val smaller: i1:subId_t -> i2:subId_t -> t:Type0{t ==> i1 <> i2}
+let smaller i1 i2 =
+  let i1' = LE.little_endian i1 in
+  let i2' = LE.little_endian i2 in
+  ()
+
+
+val total_order_lemma: (i1:subId_t -> i2:subId_t -> Lemma
+  (requires smaller i1 i2)
+  (ensures forall i. i <> i1 /\ i <> i2 /\ smaller i i1 ==> smaller i i2)
+  [SMTPat (smaller i1 i2)])
+let total_order_lemma i1 i2 = ()
+
+
 let create rgn =
+  let im = ID.create rgn subId_t  in
+  ()
 
 
 

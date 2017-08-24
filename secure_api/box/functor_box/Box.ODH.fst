@@ -30,7 +30,7 @@ module ID = Box.Indexing
 
 let dh_element_size = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
 let dh_exponent_size = 32 // Size of scalar in Curve25519. Replace with constant in spec?
-type dh_share = Curve.serialized_point //
+let dh_share = Curve.serialized_point //
 let dh_basepoint = [
     0x09uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
     0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
