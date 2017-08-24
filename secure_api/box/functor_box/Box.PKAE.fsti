@@ -60,8 +60,6 @@ val get_message_log: pkm:pkae_module -> GTot (message_log pkm.im pkm.rgn)
 
 val create: #im:index_module -> rgn:log_region im -> pkae_module
 
-val get_message_log: pkm:pkae_module -> GTot (message_log pkm.im pkm.rgn)
-
 val zero_bytes: (n:nat) -> b:bytes{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)}
 
 val pkey_to_subId: #pkm:pkae_module -> pk:pkey -> ID.get_subId pkm.im

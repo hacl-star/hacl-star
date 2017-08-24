@@ -52,7 +52,17 @@ private noeq type aux_t' (im:index_module{ID.get_subId im == subId_t}) (pm:plain
 
 let aux_t im pm = aux_t' im pm
 
-#set-options "--z3rlimit 1000 --max_ifuel 1 --max_fuel 0"
+
+
+type efun2 (a:Type) (b:Type) (c:Type) = a -> b -> Tot c
+
+type feq2 (#a:Type) (#b:Type) (#c:Type) (f:efun2 a b c) (g:efun2 a b c) =
+(forall x. forall y. {:pattern (f x y) \/ (g x y)} f x y == g x y)
+
+assume Extensionality2 : forall (a:Type) (b:Type) (c:Type) (f: efun2 a b c) (g: efun2 a b c).
+{:pattern feq2 #a #b #c f g} feq2 #a #b #c f g <==> f==g
+
+#set-options "--z3rlimit 1000 --max_ifuel 1 --max_fuel 0 --print_universes"
 val message_log_lemma: im:index_module -> rgn:log_region im -> Lemma
   (requires True)
   (ensures message_log im rgn === AE.message_log im rgn)
@@ -62,7 +72,9 @@ let message_log_lemma im rgn =
   assert(message_log_value im == AE.message_log_value im);
   assert(FStar.FunctionalExtensionality.feq (message_log_range im) (AE.message_log_range im));
   assert(message_log_range im == AE.message_log_range im);
-//  assert(FStar.FunctionalExtensionality.feq (message_log_inv im) (AE.message_log_inv im));
+  assume(FStar.FunctionalExtensionality.feq 
+    #(MM.map' (AE.message_log_key im) (AE.message_log_range im )) #Type 
+    (message_log_inv im) (AE.message_log_inv im));
 //  assert(message_log im rgn == AE.message_log im rgn);
   admit();
   ()
@@ -121,8 +133,6 @@ let total_order_lemma i1 i2 = ()
 let create rgn =
   let im = ID.create rgn subId_t  in
   ()
-
-
 
 let get_message_log pkm =
   pkm.message_log
