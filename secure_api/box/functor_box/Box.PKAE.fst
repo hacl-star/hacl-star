@@ -62,13 +62,40 @@ let message_log_lemma im rgn =
   assert(message_log_value im == AE.message_log_value im);
   assert(FStar.FunctionalExtensionality.feq (message_log_range im) (AE.message_log_range im));
   assert(message_log_range im == AE.message_log_range im);
-  assert(FStar.FunctionalExtensionality.feq (message_log_inv im) (AE.message_log_inv im));
-  assert(message_log im rgn == AE.message_log im rgn);
+//  assert(FStar.FunctionalExtensionality.feq (message_log_inv im) (AE.message_log_inv im));
+//  assert(message_log im rgn == AE.message_log im rgn);
   admit();
   ()
 
-let get_message_log pkm = AE.get_message_logGT pkm.im pkm.rgn
+val coerce: t1:Type -> t2:Type{t1 == t2} -> x:t1 -> t2
+let coerce t1 t2 x = x
 
+let get_message_log pkm =
+  let im = pkm.im in
+  let rgn = (AE.AM?.message_log_region pkm.aux.am) in
+  let log = AE.get_message_logGT #pkm.im pkm.aux.am in
+  message_log_lemma im rgn; 
+  let (log:message_log im rgn) = coerce (AE.message_log im rgn) (message_log im rgn) log in
+  log
+
+
+(* "Box.PKAE.message_log 
+    (PKAE?.im pkm) 
+    (Box.AE.get_message_log_region (AUX?.am (PKAE?.aux pkm)))"
+    
+"(ml:Box.AE.message_log 
+    (PKAE?.im pkm) 
+    (AM?.message_log_region (AUX?.am (PKAE?.aux pkm)))
+    { ml == AM?.message_log (AUX?.am (PKAE?.aux pkm)) })"
+*)
+// "(ml:Box.AE.message_log (PKAE?.im pkm) 
+//  (AM?.message_log_region (AUX?.am (PKAE?.aux pkm)))
+//  { ml == AM?.message_log (AUX?.am (PKAE?.aux pkm)) })" 
+//  effect "GTot" 
+
+//     "Box.PKAE.message_log (PKAE?.im pkm) 
+//  (PKAE?.rgn pkm)" 
+//  effect "GTot"
 
 val create_aux: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region im -> ml:message_log im rgn -> St (aux_t im pm rgn ml)
 let create_aux im pm rgn ml =

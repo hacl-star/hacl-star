@@ -93,7 +93,7 @@ type message_log_inv (im:index_module) (f:MM.map' (message_log_key im) (message_
 type message_log (im:index_module) (rgn:log_region im) =
   MM.t rgn (message_log_key im) (message_log_range im) (message_log_inv im)
 
-abstract noeq type ae_module (im:index_module) =
+noeq type ae_module (im:index_module) =
   | AM :
     (pm:plain_module{get_plain pm == ae_plain}) ->
     key_log_region: log_region im ->

@@ -1,6 +1,8 @@
 (**
-   This module contains functions and various lemmas concerning indices. Indices (ids) are used to link keys and plaintexts to a
-   certain instance in the cryptographic model. This module also contains tables to reflect freshness and honesty of ids.
+   This module contains functions and various lemmas concerning indices. Indices (ids)
+   are used to link keys and plaintexts to a
+   certain instance in the cryptographic model. This module also contains tables to
+   reflect freshness and honesty of ids.
    TODO: Remove all state from this module.
    * move honesty information into the AE and DH module
    * use "registered" instead of fresh
@@ -31,30 +33,28 @@ type id_log_t (rgn:id_log_region) (id_log_kt:Type0) = MM.t rgn id_log_kt id_log_
 
 noeq type index_module =
   | IM:
-    im_rgn: (id_log_region) ->
-    subId: (t:Type0{hasEq t}) -> // express that there is a total order on ids
+    im_rgn: id_log_region ->
+    subId: eqtype -> 
     id_log: (id_log_t im_rgn subId) ->
     index_module
 
 noeq type index_module' = 
   | IM':
-    rgn: (id_log_region) ->
-    id_t: (t:eqtype) ->
+    rgn: id_log_region ->
+    id_t: eqtype ->
     registered: (id_t -> Tot Type0) ->
     honest:    (i:id_t -> Tot (t:Type0{t ==> registered i})) ->
     dishonest: (i:id_t -> Tot (t:Type0)) ->
     get_honesty: (i:id_t -> ST(bool)
       (requires (fun h0 -> registered i))
       (ensures  (fun h0 b h1 ->
-               modifies_none h0 h1
-               /\ h0==h1
-               /\ (b <==> honest i)
-               /\ (~b <==> dishonest i)))) ->
+          modifies_none h0 h1
+        /\ h0==h1
+        /\ (b <==> honest i)
+        /\ (~b <==> dishonest i)))) ->
     fresh: (i:id_t -> h:mem -> Tot Type0) ->
     set_honesty: (i:id_t -> b:bool -> ST unit
-      (requires (fun h0 ->
-        fresh i h0
-      )) 
+      (requires (fun h0 -> fresh i h0))
       (ensures (fun h0 _ h1 ->
         True
         /\ (forall (i':id_t). ( i' =!= i /\ fresh i' h0 ) ==> fresh i' h1)
@@ -82,7 +82,8 @@ let registered (im:index_module) (i:im.subId) =
 val honest: (im:index_module) -> (i:im.subId) -> Tot (t:Type0 {t ==> registered im i}
   ) 
 let honest (im:index_module) (i:im.subId) =
-  let _=() in MR.witnessed (MM.contains im.id_log i true) /\ MR.witnessed (MM.defined im.id_log i)
+  let _=() in MR.witnessed (MM.contains im.id_log i true) /\ MR.witnessed (MM.defined
+  im.id_log i)
 
 
 val dishonest: (im:index_module) -> (i:im.subId) -> Tot (t:Type0{t ==> registered im i}) 
@@ -140,7 +141,7 @@ let rec lemma_honest_or_dishonest im i =
     else
       MR.testify (MM.contains im.id_log i false)
 
-val fresh: im:index_module ->
+ val fresh: im:index_module ->
            i:im.subId ->
            h:mem ->
            (t:Type0{
@@ -186,7 +187,7 @@ val set_honesty: im:index_module -> i:im.subId -> b:bool -> ST unit
     fresh im i h0
   ))
   (ensures (fun h0 _ h1 ->
-           (b ==> honest im i)
+      (b ==> honest im i)
     /\ (~b ==> dishonest im i)
     /\ (forall (i':im.subId). ( i' =!= i /\ fresh im i' h0 ) ==> fresh im i' h1)
     /\ MR.m_sel h1 im.id_log == MM.upd (MR.m_sel h0 im.id_log) i b
@@ -245,10 +246,10 @@ let create' rgn =
 
 
 val get_honesty': im:index_module' -> 
-              i:(im.id_t * im.id_t){fst i <> snd i} ->
-              ST(bool)
-  (requires (fun h0 -> im.registered (fst i) /\ im.registered (snd i)))
-  (ensures  (fun h0 b h1 ->
+                  i:(im.id_t * im.id_t){fst i <> snd i} ->
+                  ST(bool)
+    (requires (fun h0 -> im.registered (fst i) /\ im.registered (snd i)))
+    (ensures  (fun h0 b h1 ->
             modifies_none h0 h1
             /\ h0==h1
             /\ (b <==> im.honest (fst i) /\ im.honest (snd i))
@@ -267,21 +268,22 @@ val set_honesty': im:index_module' -> i:(im.id_t * im.id_t){fst i <> snd i} -> b
    ))
    (ensures (fun h0 _ h1 ->
    True
-//   /\ (forall (i':(im.id_t * im.id_t)). ( i' =!= i /\ im.fresh (fst i') h0 ) ==> im.fresh (snd i') h1)
+   /\ (forall (i':(im.id_t * im.id_t)). ( i' =!= i /\ im.fresh (fst i') h0 /\ im.fresh (snd i') h0 ) 
+     ==> im.fresh(fst i') h1 /\ im.fresh (snd i') h1)
    /\ (b ==> im.honest (fst i) /\ im.honest (snd i))
    /\ (~b ==> im.dishonest (fst i) \/ im.dishonest (snd i)))) 
-let set_honesty' im i b = im.set_honesty (fst i) b; im.set_honesty (snd i) b
+let set_honesty' im i b = im.set_honesty (fst i) b; admit(); im.set_honesty (snd i) b
 
 val compose: rgn:id_log_region -> 
              im:index_module'{im.rgn=rgn} ->
              smaller: (i1:im.id_t -> i2:im.id_t -> t:Type0{t ==> i1 <> i2}) ->
              im':index_module'
 let compose rgn (im:index_module'{im.rgn=rgn}) smaller=
-  IM' rgn (i:(im.id_t * im.id_t){smaller (fst i) (snd i)}
-  )
-    (fun id -> im.registered (fst id) /\ im.registered (snd id))
-    (fun id -> im.honest (fst id) /\ im.honest (snd id)) 
-    (fun id -> im.dishonest (fst id) \/ im.dishonest (snd id)) 
-    (fun (id:(i:(im.id_t * im.id_t){smaller (fst i) (snd i)})) -> get_honesty' im id)
-    (fun id h -> fresh' im id h) 
-    (fun id b -> admit(); set_honesty' im id b)
+  IM' rgn 
+      (i:(im.id_t * im.id_t){smaller (fst i) (snd i)})
+      (fun id -> im.registered (fst id) /\ im.registered (snd id))
+      (fun id -> im.honest (fst id) /\ im.honest (snd id)) 
+      (fun id -> im.dishonest (fst id) \/ im.dishonest (snd id)) 
+      (fun id -> get_honesty' im id)
+      (fun id h -> fresh' im id h) 
+      (fun id b -> set_honesty' im id b)
