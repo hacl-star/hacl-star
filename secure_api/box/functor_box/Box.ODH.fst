@@ -53,6 +53,9 @@ abstract noeq type odh_module' (im:index_module) (km:key_module im) = // require
 
 let odh_module = odh_module'
 
+let create im km rgn =
+  ODH rgn
+
 noeq abstract type pkey' =
   | PKEY: pk_share:dh_share -> pkey'
 
@@ -65,10 +68,13 @@ let skey = skey'
 
 let get_pkey sk = sk.pk
 
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 let compatible_keys sk pk =
-  sk.pk.pk_share <> pk.pk_share
+  sk.pk =!= pk
 
 let pk_get_share k = k.pk_share
+
+let lemma_pk_get_share_inj pk = ()
 
 let get_skeyGT sk =
   sk.sk_exp
@@ -99,6 +105,9 @@ let prf_odhGT im sk pk =
   let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
   let k = HSalsa.hsalsa20 raw_k zero_nonce in
   k
+
+let lemma_shares sk = ()
+
 
 #reset-options
 #set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"

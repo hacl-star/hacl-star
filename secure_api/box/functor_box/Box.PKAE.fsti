@@ -30,33 +30,36 @@ val cipher: Type0
 type log_region (im:index_module) =
   r:MR.rid{disjoint r (ID.get_rgn im)}
 
+val subId_t: Type0
+val plain_t: Type0
 
 type message_log_key (im:index_module) = (nonce*(i:id im))
-type message_log_value (im:index_module) (pm:plain_module) (i:id im) = (cipher*Plain.protected_plain_t im (Plain.get_plain pm) i)
-let message_log_range (im:index_module) (pm:plain_module) = fun (k:message_log_key im) -> (message_log_value im pm (snd k))
-let message_log_inv (im:index_module) (pm:plain_module) (f:MM.map' (message_log_key im) (message_log_range im pm)) = True
-type message_log (im:index_module) (rgn:log_region im) (pm:plain_module) =
-  MM.t rgn (message_log_key im) (message_log_range im pm) (message_log_inv im pm)
+type message_log_value (im:index_module) (i:id im) = (cipher*Plain.protected_plain_t im plain_t i)
+type message_log_range (im:index_module) (k:message_log_key im) = (v:message_log_value im (snd k))
+type message_log_inv (im:index_module) (f:MM.map' (message_log_key im) (message_log_range im)) = True //t:Type0{t = True}
+type message_log (im:index_module) (rgn:log_region im) =
+  MM.t rgn (message_log_key im) (message_log_range im) (message_log_inv im)
 
 val pkey: Type0
 val skey: Type0
 
-val subId_t: Type0
-val plain_t: Type0
-val aux_t: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module) -> Type u#1
+val aux_t: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region im -> ml:message_log im rgn -> Type u#1
 
-noeq type pkae_module =
+abstract noeq type pkae_module =
   | PKAE:
     im:ID.index_module{ID.get_subId im == subId_t} ->
-    pm:Plain.plain_module ->
+    pm:Plain.plain_module{Plain.get_plain pm == plain_t} ->
     rgn:log_region im ->
     enc: ((Plain.get_plain pm) -> n:nonce -> pk:pkey -> sk:skey -> Tot cipher) ->
     dec: (c:cipher -> n:nonce -> pk:pkey -> sk:skey -> Tot (option (Plain.get_plain pm))) ->
-    message_log: message_log im rgn pm ->
-    aux: (aux_t im pm) ->
+    message_log: message_log im rgn ->
+    aux: (aux_t im pm rgn message_log) ->
     pkae_module
 
-val get_message_log: pkm:pkae_module -> GTot (message_log pkm.im pkm.rgn pkm.pm)
+
+val create: rgn:log_region im -> pkae_module
+
+val get_message_log: pkm:pkae_module -> GTot (message_log pkm.im pkm.rgn)
 
 val zero_bytes: (n:nat) -> b:bytes{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)}
 
@@ -106,8 +109,8 @@ val encrypt: pkm:pkae_module ->
                ==> (c == pkm.enc (zero_bytes (Plain.length #pkm.im #pkm.pm #i m)) n pk sk))
     /\ ((dishonest pkm i \/ ~(b2t ae_ind_cpa)) // Concrete behaviour otherwise.
                   ==> (eq2 #cipher c (pkm.enc (Plain.repr #pkm.im #pkm.pm #i m) n pk sk)))
-    /\ ((honest pkm i) ==> // A message is added to the log if the id is honest. This also guarantees nonce-uniqueness.
-                      (MR.m_contains pkm.message_log h1
-                      /\ MR.witnessed (MM.contains pkm.message_log (n,i) (c,m))
-                      /\ MR.m_sel h1 pkm.message_log == MM.upd (MR.m_sel h0 pkm.message_log) (n,i) (c,m)))
+    // The message is added to the log. This also guarantees nonce-uniqueness.
+    /\ MR.m_contains pkm.message_log h1
+    /\ MR.witnessed (MM.contains pkm.message_log (n,i) (c,m))
+    /\ MR.m_sel h1 pkm.message_log == MM.upd (MR.m_sel h0 pkm.message_log) (n,i) (c,m)
   ))
