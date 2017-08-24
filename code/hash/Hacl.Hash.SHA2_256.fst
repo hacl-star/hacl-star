@@ -953,7 +953,7 @@ let pad padding n len =
   (**) Lemmas.lemma_pad_aux h1 n len buf1 zeros buf2
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 50"
 
 val update_last:
   state :uint32_p {length state = v size_state} ->
@@ -974,7 +974,7 @@ val update_last:
                   let prevlen = U32.(H32.v (Seq.index count 0) * (v size_block)) in
                   (reveal_h32s seq_hash_1) == Spec.update_last (reveal_h32s seq_hash_0) prevlen seq_data)))
 
-#reset-options "--max_fuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 200"
 
 let update_last state data len =
 
