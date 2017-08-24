@@ -774,24 +774,26 @@ val update_multi:
   data  :uint8_p {length data % v size_block = 0 /\ disjoint state data} ->
   n     :uint32_t{v n * v size_block = length data} ->
   Stack unit
-        (requires (fun h0 -> live h0 state /\ live h0 data
-                  /\ (let seq_k = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+        (requires (fun h0 -> live h0 state /\ live h0 data /\
+                 (let seq_k = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
                   let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
                   let counter = Seq.index seq_counter 0 in
-                  (reveal_h32s seq_k == Spec.k) /\ H32.v counter < (pow2 32 - (v n)))))
-        (ensures  (fun h0 _ h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
-                  /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-                  let seq_hash_1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
-                  let seq_k_0 = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
-                  let seq_k_1 = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+                  reveal_h32s seq_k == Spec.k /\ H32.v counter < pow2 32 - (v n))))
+        (ensures  (fun h0 _ h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1 /\
+                 (let seq_hash0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+                  let seq_hash1 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
+                  let seq_k0 = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
+                  let seq_k1 = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
                   let seq_blocks = as_seq h0 data in
-                  let seq_counter_0 = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
-                  let seq_counter_1 = Seq.slice (as_seq h1 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
-                  let counter_0 = Seq.index seq_counter_0 0 in
-                  let counter_1 = Seq.index seq_counter_1 0 in
-                  seq_k_0 == seq_k_1
-                  /\ H32.v counter_1 = H32.v counter_0 + (v n) /\ H32.v counter_1 < pow2 32
-                  /\ (reveal_h32s seq_hash_1) == Spec.update_multi (reveal_h32s seq_hash_0) (reveal_sbytes seq_blocks))))
+                  let seq_counter0 = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+                  let seq_counter1 = Seq.slice (as_seq h1 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
+                  let counter0 = Seq.index seq_counter0 0 in
+                  let counter1 = Seq.index seq_counter1 0 in
+                  seq_k0 == seq_k1 /\
+                  H32.v counter1 = H32.v counter0 + (v n) /\
+                  H32.v counter1 < pow2 32 /\
+                  reveal_h32s seq_hash1 ==
+                  Spec.update_multi (reveal_h32s seq_hash0) (reveal_sbytes seq_blocks) )))
 
 let update_multi state data n =
   let h0 = ST.get () in
@@ -814,8 +816,9 @@ let update_multi state data n =
      reveal_h32s seq_hash ==
      Spec.update_multi (reveal_h32s hash0) (reveal_sbytes blocks) )
   in
-  let empty = Buffer.sub data 0ul (U32.uint_to_t 0 *^ size_block) in
+  let empty = Buffer.sub data 0ul (0ul *^ size_block) in
   Spec.lemma_update_multi_empty (reveal_h32s (Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)))) (reveal_sbytes (as_seq h0 empty));
+  Lemmas.lemma_modifies_0_is_modifies_1 h0 state;
 
   let f (i:uint32_t{0 <= v i /\ v i < v n}) : Stack unit
     (requires (fun h -> inv h (v i)))
@@ -831,6 +834,8 @@ let update_multi state data n =
     let blocks1 = Buffer.sub data 0ul ((i +^ 1ul) *^ size_block) in
     Seq.lemma_eq_intro (Seq.append (as_seq h blocks) (as_seq h b)) (as_seq h blocks1);
     lemma_disjoint_sub data b state;
+    lemma_disjoint_sub data blocks state;
+    lemma_disjoint_sub data blocks1 state;
     update state b
   in
   for 0ul n inv f
