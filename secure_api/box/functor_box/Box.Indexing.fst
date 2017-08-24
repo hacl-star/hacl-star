@@ -61,8 +61,6 @@ val get_subId: im:index_module -> Type0
 let get_subId im =
   im.subId
 
-
-
 val recall_log: im:index_module -> ST unit
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 ->
@@ -326,4 +324,4 @@ let lemma_index_module im i =
     ()
   | true ->
     ()
-  
+
