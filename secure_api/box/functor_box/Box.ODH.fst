@@ -27,6 +27,7 @@ module Curve = Spec.Curve25519
 module Plain = Box.Plain
 module Key = Box.Key
 module ID = Box.Indexing
+module LE = FStar.Endianness
 
 let dh_element_size = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
 let dh_exponent_size = 32 // Size of scalar in Curve25519. Replace with constant in spec?
@@ -38,7 +39,21 @@ let dh_basepoint = [
     0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
     ]
 
-type dh_exponent = Curve.scalar // is equal to Curve.serialized_point
+let dh_exponent = Curve.scalar // is equal to Curve.serialized_point
+
+let smaller i1 i2 =
+  let i1' = LE.little_endian i1 in
+  let i2' = LE.little_endian i2 in
+  i1' < i2'
+
+#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
+let total_order_lemma i1 i2 = admit()
+
+//val total_order_lemma': (i1:dh_share -> i2:dh_share -> Lemma
+//  (requires True)
+//  (ensures
+//    (b2t (smaller i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller i i1) ==> b2t (smaller i i2)))
+//    /\ (~ (b2t (smaller i1 i2)) <==> (i1 = i2 \/ b2t (smaller i2 i1)))))
 (**
 Nonce to use with HSalsa.hsalsa20.
 *)

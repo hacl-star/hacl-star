@@ -43,7 +43,7 @@ type message_log (im:index_module) (rgn:log_region im) =
 val pkey: Type0
 val skey: Type0
 
-val aux_t: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region im -> ml:message_log im rgn -> Type u#1
+val aux_t: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region im -> Type u#1
 
 abstract noeq type pkae_module =
   | PKAE:
@@ -52,11 +52,11 @@ abstract noeq type pkae_module =
     rgn:log_region im ->
     enc: ((Plain.get_plain pm) -> n:nonce -> pk:pkey -> sk:skey -> Tot cipher) ->
     dec: (c:cipher -> n:nonce -> pk:pkey -> sk:skey -> Tot (option (Plain.get_plain pm))) ->
-    message_log: message_log im rgn ->
-    aux: (aux_t im pm rgn message_log) ->
+    aux: (aux_t im pm rgn) ->
     pkae_module
 
-val get_message_log: pkm:pkae_module -> GTot (message_log pkm.im pkm.rgn)
+val get_message_log_region: pkm:pkae_module -> GTot (log_region pkm.im)
+val get_message_logGT: pkm:pkae_module -> GTot (message_log pkm.im (get_message_log_region pkm))
 
 val create: #im:index_module -> rgn:log_region im -> pkae_module
 

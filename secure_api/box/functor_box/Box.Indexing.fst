@@ -33,12 +33,14 @@ abstract noeq type index_module =
   | IM:
     rgn: (id_log_region) ->
     subId: (t:Type0{hasEq t}) -> // express that there is a total order on ids
-    smaller: (i1:subId -> i2:subId -> t:Type0{t ==> i1 <> i2}) ->
+    smaller: (i1:subId -> i2:subId -> b:bool{b ==> i1 <> i2}) ->
     total_order_lemma: (i1:subId -> i2:subId -> Lemma
-      (requires smaller i1 i2)
-      (ensures forall i. i <> i1 /\ i <> i2 /\ smaller i i1 ==> smaller i i2)
+      (requires True)
+      (ensures
+        (b2t (smaller i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller i i1) ==> b2t (smaller i i2)))
+        /\ (~ (b2t (smaller i1 i2)) <==> (i1 = i2 \/ b2t (smaller i2 i1))))
       [SMTPat (smaller i1 i2)]) ->
-    compose_ids: (i1:subId -> i2:subId -> i:(subId*subId){smaller (fst i) (snd i) /\ (i = (i1,i2) \/ i = (i2,i1))}) ->
+    compose_ids: (i1:subId -> i2:subId -> i:(subId*subId){b2t (smaller (fst i) (snd i)) /\ (i = (i1,i2) \/ i = (i2,i1))}) ->
     symmetric_id_generation: (i1:subId -> i2:subId -> Lemma
     (requires (i1<>i2))
     (ensures (forall id1 id2. compose_ids id1 id2 = compose_ids id2 id1))
@@ -70,19 +72,26 @@ val recall_log: im:index_module -> ST unit
 let recall_log im =
   MR.m_recall im.id_log
 
-type id (im:index_module) = i:(im.subId*im.subId){im.smaller (fst i) (snd i)}
+type id (im:index_module) = i:(im.subId*im.subId){b2t (im.smaller (fst i) (snd i))}
 
-val compose_ids: im:index_module -> i1:im.subId -> i2:im.subId -> (i:id im)
+val compose_ids: im:index_module -> i1:im.subId -> i2:im.subId{i2 <> i1} -> (i:id im)
 let compose_ids im i1 i2 =
-  im.compose_ids i1 i2
+  if im.smaller i1 i2 then
+    let i:id im = (i1,i2) in
+    i
+  else
+    (im.total_order_lemma i1 i2;
+    let i:id im = (i2,i1) in
+    i)
 
-
-val symmetric_id_generation: im:index_module -> i1:im.subId -> i2:im.subId -> Lemma
-(requires (i1<>i2))
-(ensures (forall id1 id2. im.compose_ids id1 id2 = im.compose_ids id2 id1))
-[SMTPat (compose_ids im i1 i2)]
+#set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
+val symmetric_id_generation: (im:index_module) -> (i1:im.subId) -> (i2:im.subId{i2 <> i1}) -> Lemma
+  (requires True)
+  (ensures (compose_ids im i1 i2 = compose_ids im i2 i1))
+  [SMTPat (compose_ids im i1 i2)]
 let symmetric_id_generation im i1 i2 =
-im.symmetric_id_generation i1 i2
+  im.total_order_lemma i1 i2;
+  ()
 
 noeq type meta_id (im:index_module) =
   | ID of id im
@@ -324,4 +333,3 @@ let lemma_index_module im i =
     ()
   | true ->
     ()
-

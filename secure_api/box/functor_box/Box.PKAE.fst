@@ -43,12 +43,12 @@ let pkey = ODH.pkey
 let skey = ODH.skey
 
 #set-options "--z3rlimit 1900 --max_ifuel 2 --max_fuel 1"
-private noeq type aux_t' (im:index_module{ID.get_subId im == subId_t}) (pm:plain_module) (rgn:log_region im) (ml:message_log im rgn)=
+private noeq type aux_t' (im:index_module{ID.get_subId im == subId_t}) (pm:plain_module) (rgn:log_region im) =
   | AUX:
-    am:AE.ae_module im{AE.get_message_log_region am == rgn /\ AE.get_message_logGT am === ml} ->
+    am:AE.ae_module im ->
     km:Key.key_module im{km == AE.instantiate_km am} ->
     om:ODH.odh_module im km ->
-    aux_t' im pm rgn ml
+    aux_t' im pm rgn
 
 let aux_t im pm = aux_t' im pm
 
@@ -66,80 +66,75 @@ assume Extensionality2 : forall (a:Type) (b:Type) (c:Type) (f: efun2 a b c) (g: 
 val coerce: t1:Type -> t2:Type{t1 == t2} -> x:t1 -> t2
 let coerce t1 t2 x = x
 
-#set-options "--z3rlimit 200 --max_ifuel 1 --max_fuel 0 --print_universes "
+#set-options "--z3rlimit 200 --max_ifuel 1 --max_fuel 0"
 val message_log_lemma: im:index_module -> rgn:log_region im -> Lemma
   (requires True)
   (ensures message_log im rgn === AE.message_log im rgn)
 let message_log_lemma im rgn =
-  assert(message_log_key im == AE.message_log_key im);
   assert(FStar.FunctionalExtensionality.feq (message_log_value im) (AE.message_log_value im));
-  assert(message_log_value im == AE.message_log_value im);
   assert(FStar.FunctionalExtensionality.feq (message_log_range im) (AE.message_log_range im));
-  assert(message_log_range im == AE.message_log_range im);
   let inv = message_log_inv im in
+  let map_t =MM.map' (message_log_key im) (message_log_range im) in
+  let inv_t = map_t -> Type0 in
   let ae_inv = AE.message_log_inv im in
-  let map_t =MonotoneMap.map' (message_log_key im) (message_log_range im) in
-  let ae_map_t =MonotoneMap.map' (AE.message_log_key im) (AE.message_log_range im) in
-  assert (ae_map_t==map_t);
-  let inv_t = (f:map_t) -> Type0 in
-  let ae_inv_t = (f:ae_map_t) -> Type0 in
-//  assert(FStar.FunctionalExtensionality.feq (inv_t) (ae_inv_t));
-  assume(ae_inv_t==inv_t);
-//  assert(False);
-  let ae_inv = coerce ae_inv_t inv_t (AE.message_log_inv im) in
-  assert(FStar.FunctionalExtensionality.feq 
-    #(MM.map' (message_log_key im) (message_log_range im )) #Type 
+  let ae_inv:map_t -> Type0 = ae_inv in
+  assert(FStar.FunctionalExtensionality.feq
+    #map_t #Type
     inv ae_inv);
   assert(message_log im rgn == AE.message_log im rgn);
   ()
 
 
-let get_message_log pkm =
-  let im = pkm.im in
-  let rgn = (AE.AM?.message_log_region pkm.aux.am) in
-  let log = AE.get_message_logGT #pkm.im pkm.aux.am in
-  message_log_lemma im rgn; 
-  let (log:message_log im rgn) = coerce (AE.message_log im rgn) (message_log im rgn) log in
+let get_message_log_region pkm = AE.get_message_log_region pkm.aux.am
+
+let get_message_logGT pkm =
+  let (ae_log:AE.message_log pkm.im (get_message_log_region pkm)) = AE.get_message_logGT #pkm.im pkm.aux.am in
+  let (ae_rgn:log_region pkm.im) = AE.get_message_log_region pkm.aux.am in
+  message_log_lemma pkm.im ae_rgn;
+  let log:message_log pkm.im ae_rgn = coerce (AE.message_log pkm.im ae_rgn) (message_log pkm.im ae_rgn) ae_log in
+  //admit()
   log
 
 
-(* "Box.PKAE.message_log 
-    (PKAE?.im pkm) 
+(* "Box.PKAE.message_log
+    (PKAE?.im pkm)
     (Box.AE.get_message_log_region (AUX?.am (PKAE?.aux pkm)))"
-    
-"(ml:Box.AE.message_log 
-    (PKAE?.im pkm) 
+
+"(ml:Box.AE.message_log
+    (PKAE?.im pkm)
     (AM?.message_log_region (AUX?.am (PKAE?.aux pkm)))
     { ml == AM?.message_log (AUX?.am (PKAE?.aux pkm)) })"
 *)
-// "(ml:Box.AE.message_log (PKAE?.im pkm) 
+// "(ml:Box.AE.message_log (PKAE?.im pkm)
 //  (AM?.message_log_region (AUX?.am (PKAE?.aux pkm)))
-//  { ml == AM?.message_log (AUX?.am (PKAE?.aux pkm)) })" 
-//  effect "GTot" 
-
-//     "Box.PKAE.message_log (PKAE?.im pkm) 
-//  (PKAE?.rgn pkm)" 
+//  { ml == AM?.message_log (AUX?.am (PKAE?.aux pkm)) })"
 //  effect "GTot"
 
-val create_aux: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region im -> ml:message_log im rgn -> St (aux_t im pm rgn ml)
-let create_aux im pm rgn ml =
+//     "Box.PKAE.message_log (PKAE?.im pkm)
+//  (PKAE?.rgn pkm)"
+//  effect "GTot"
+
+val create_aux: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region im -> St (aux_t im pm rgn)
+let create_aux im pm rgn =
   let am = AE.create im pm rgn in
   let km = AE.instantiate_km am in
   let om = ODH.create im km rgn in
   AUX am km om
 
-val smaller: i1:subId_t -> i2:subId_t -> t:Type0{t ==> i1 <> i2}
-let smaller i1 i2 =
-  let i1' = LE.little_endian i1 in
-  let i2' = LE.little_endian i2 in
-  ()
+val compose_ids: im:index_module{ID.get_subId im == subId_t} -> i1:subId_t -> i2:subId_t -> (i:id im)
+let compose_ids im i1 i2 =
+  if ODH.smaller i1 i2 then
+    (i1,i2)
+  else
+    (i2,i1)
 
+val symmetric_id_generation: im:index_module -> i1:subId_t -> i2:subId_t -> Lemma
+  (requires (i1<>i2))
+  (ensures (forall id1 id2. compose_ids id1 id2 = compose_ids id2 id1))
+  [SMTPat (compose_ids im i1 i2)]
+let symmetric_id_generation im i1 i2 =
+  LE.little_endian_inj i1 i2
 
-val total_order_lemma: (i1:subId_t -> i2:subId_t -> Lemma
-  (requires smaller i1 i2)
-  (ensures forall i. i <> i1 /\ i <> i2 /\ smaller i i1 ==> smaller i i2)
-  [SMTPat (smaller i1 i2)])
-let total_order_lemma i1 i2 = ()
 
 
 let create rgn =

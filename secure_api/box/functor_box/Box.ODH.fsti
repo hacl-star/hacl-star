@@ -12,6 +12,14 @@ module ID = Box.Indexing
 val dh_share: eqtype
 val dh_exponent: eqtype
 
+val smaller: i1:dh_share -> i2:dh_share -> b:bool{b ==> i1 <> i2}
+
+val total_order_lemma: (i1:dh_share -> i2:dh_share -> Lemma
+  (requires True)
+  (ensures
+    (b2t (smaller i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller i i1) ==> b2t (smaller i i2)))
+    /\ (~ (b2t (smaller i1 i2)) <==> (i1 = i2 \/ b2t (smaller i2 i1)))))
+
 val share_from_exponent: dh_exponent -> Tot dh_share
 
 type index_module = im:ID.index_module{ID.get_subId im == dh_share}
