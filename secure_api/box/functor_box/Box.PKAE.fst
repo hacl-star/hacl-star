@@ -121,22 +121,6 @@ let create_aux im pm rgn =
   let om = ODH.create im km rgn in
   AUX am km om
 
-val compose_ids: im:index_module{ID.get_subId im == subId_t} -> i1:subId_t -> i2:subId_t -> (i:id im)
-let compose_ids im i1 i2 =
-  if ODH.smaller i1 i2 then
-    (i1,i2)
-  else
-    (i2,i1)
-
-val symmetric_id_generation: im:index_module -> i1:subId_t -> i2:subId_t -> Lemma
-  (requires (i1<>i2))
-  (ensures (forall id1 id2. compose_ids id1 id2 = compose_ids id2 id1))
-  [SMTPat (compose_ids im i1 i2)]
-let symmetric_id_generation im i1 i2 =
-  LE.little_endian_inj i1 i2
-
-
-
 let create rgn =
   let im = ID.create rgn subId_t  in
   ()
