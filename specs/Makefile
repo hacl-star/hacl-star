@@ -103,26 +103,26 @@ sha2.exe: Spec.SHA2.Test.fst
 
 sha2_256.exe: Spec.SHA2_256.fst
 	$(MAKE) lib
-	mkdir -p sha2-spec
-	$(FSTAR_EXTRACT) --odir sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_256.ml
-	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) sha2-spec/FStar_Endianness.ml sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_256.ml -o sha2_256.exe
+	mkdir -p sha2_256-spec
+	$(FSTAR_EXTRACT) --odir sha2_256-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2_256-spec/Spec_SHA2_256.ml
+	$(OCAMLOPT) -I sha2_256-spec $(OCAML_INCLUDES) sha2_256-spec/FStar_Endianness.ml sha2_256-spec/Spec_Loops.ml sha2_256-spec/Spec_Lib.ml sha2_256-spec/Seq_Create.ml sha2_256-spec/Spec_SHA2_256.ml -o sha2_256.exe
 	./sha2_256.exe
 
 sha2_384.exe: Spec.SHA2_384.fst
 	$(MAKE) lib
-	mkdir -p sha2-spec
-	$(FSTAR_EXTRACT) --odir sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_384.ml
-	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) sha2-spec/FStar_Endianness.ml sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_384.ml -o sha2_384.exe
+	mkdir -p sha2_384-spec
+	$(FSTAR_EXTRACT) --odir sha2_384-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2_384-spec/Spec_SHA2_384.ml
+	$(OCAMLOPT) -I sha2_384-spec $(OCAML_INCLUDES) sha2_384-spec/FStar_Endianness.ml sha2_384-spec/Spec_Loops.ml sha2_384-spec/Spec_Lib.ml sha2_384-spec/Seq_Create.ml sha2_384-spec/Spec_SHA2_384.ml -o sha2_384.exe
 	./sha2_384.exe
 
 sha2_512.exe: Spec.SHA2_512.fst
 	$(MAKE) lib
-	mkdir -p sha2-spec
-	$(FSTAR_EXTRACT) --odir sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_512.ml
-	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) sha2-spec/FStar_Endianness.ml sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_512.ml -o sha2_512.exe
+	mkdir -p sha2_512-spec
+	$(FSTAR_EXTRACT) --odir sha2_512-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2_512-spec/Spec_SHA2_512.ml
+	$(OCAMLOPT) -I sha2_512-spec $(OCAML_INCLUDES) sha2_512-spec/FStar_Endianness.ml sha2_512-spec/Spec_Loops.ml sha2_512-spec/Spec_Lib.ml sha2_512-spec/Seq_Create.ml sha2_512-spec/Spec_SHA2_512.ml -o sha2_512.exe
 	./sha2_512.exe
 
 hmac_sha2.exe: Spec.HMAC.Test.fst
@@ -135,26 +135,26 @@ hmac_sha2.exe: Spec.HMAC.Test.fst
 
 hmac_sha2_256.exe: Spec.HMAC.SHA2_256.fst
 	$(MAKE) lib
-	mkdir -p hmac-sha2-spec
-	$(FSTAR_EXTRACT) --odir hmac-sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_SHA2_256.ml
-	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) hmac-sha2-spec/FStar_Endianness.ml hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_256.ml hmac-sha2-spec/Spec_HMAC_SHA2_256.ml -o hmac_sha2_256.exe
+	mkdir -p hmac-sha2_256-spec
+	$(FSTAR_EXTRACT) --odir hmac-sha2_256-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2_256-spec/Spec_HMAC_SHA2_256.ml
+	$(OCAMLOPT) -I hmac-sha2_256-spec $(OCAML_INCLUDES) hmac-sha2_256-spec/FStar_Endianness.ml hmac-sha2_256-spec/Spec_Loops.ml hmac-sha2_256-spec/Spec_Lib.ml hmac-sha2_256-spec/Seq_Create.ml hmac-sha2_256-spec/Spec_SHA2_256.ml hmac-sha2_256-spec/Spec_HMAC_SHA2_256.ml -o hmac_sha2_256.exe
 	./hmac_sha2_256.exe
 
 hmac_sha2_384.exe: Spec.HMAC.SHA2_384.fst
 	$(MAKE) lib
-	mkdir -p hmac-sha2-spec
-	$(FSTAR_EXTRACT) --odir hmac-sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_SHA2_384.ml
-	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) hmac-sha2-spec/FStar_Endianness.ml hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_384.ml hmac-sha2-spec/Spec_HMAC_SHA2_384.ml -o hmac_sha2_384.exe
+	mkdir -p hmac-sha2_384-spec
+	$(FSTAR_EXTRACT) --odir hmac-sha2_384-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2_384-spec/Spec_HMAC_SHA2_384.ml
+	$(OCAMLOPT) -I hmac-sha2_384-spec $(OCAML_INCLUDES) hmac-sha2_384-spec/FStar_Endianness.ml hmac-sha2_384-spec/Spec_Loops.ml hmac-sha2_384-spec/Spec_Lib.ml hmac-sha2_384-spec/Seq_Create.ml hmac-sha2_384-spec/Spec_SHA2_384.ml hmac-sha2_384-spec/Spec_HMAC_SHA2_384.ml -o hmac_sha2_384.exe
 	./hmac_sha2_384.exe
 
 hmac_sha2_512.exe: Spec.HMAC.SHA2_512.fst
 	$(MAKE) lib
-	mkdir -p hmac-sha2-spec
-	$(FSTAR_EXTRACT) --odir hmac-sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_SHA2_512.ml
-	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) hmac-sha2-spec/FStar_Endianness.ml hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2_512.ml hmac-sha2-spec/Spec_HMAC_SHA2_512.ml -o hmac_sha2_512.exe
+	mkdir -p hmac-sha2_512-spec
+	$(FSTAR_EXTRACT) --odir hmac-sha2_512-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2_512-spec/Spec_HMAC_SHA2_512.ml
+	$(OCAMLOPT) -I hmac-sha2_512-spec $(OCAML_INCLUDES) hmac-sha2_512-spec/FStar_Endianness.ml hmac-sha2_512-spec/Spec_Loops.ml hmac-sha2_512-spec/Spec_Lib.ml hmac-sha2_512-spec/Seq_Create.ml hmac-sha2_512-spec/Spec_SHA2_512.ml hmac-sha2_512-spec/Spec_HMAC_SHA2_512.ml -o hmac_sha2_512.exe
 	./hmac_sha2_512.exe
 
 ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
@@ -167,4 +167,4 @@ ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec hmac-sha2-spec ed25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec sha2_256-spec sha2_384-spec sha2_512-spec hmac-sha2-spec hmac-sha2_256-spec hmac-sha2_384-spec hmac-sha2_512-spec ed25519-spec
