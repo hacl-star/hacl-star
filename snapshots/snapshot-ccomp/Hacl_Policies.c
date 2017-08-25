@@ -15,7 +15,7 @@ uint64_t Hacl_Policies_declassify_u64(uint64_t x)
   return x;
 }
 
-void Hacl_Policies_declassify_u128(FStar_UInt128_t *x, FStar_UInt128_t *ret)
+void Hacl_Policies_declassify_u128(FStar_UInt128_uint128 *x, FStar_UInt128_uint128 *ret)
 {
   ret[0] = x[0];
 }

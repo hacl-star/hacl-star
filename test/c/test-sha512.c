@@ -79,6 +79,7 @@ int32_t perf_sha512() {
 
   cycles a,b;
   clock_t t1,t2;
+  uint64_t res = 0;
 
   t1 = clock();
   a = TestLib_cpucycles_begin();

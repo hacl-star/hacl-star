@@ -39,9 +39,15 @@ SNAPSHOT_FILES= snapshots/c/* \
 	$(addprefix code/hmac/hmac-c/, HMAC_SHA2_256.*) \
 	$(addprefix code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
 
+SNAPSHOT_CCOMP_FILES=$(KREMLIN_HOME)/kremlib/kremlib/kremlib.{c,h} \
+	code/lib/kremlin/ccomp-c/FStar.{c,h}
+
 snapshot-collect:
 	mkdir -p $(SNAPSHOT_DIR)
 	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
+ifeq ($(SNAPSHOT_DIR),snapshot-ccomp)
+	$(CP) $(SNAPSHOT_CCOMP_FILES) $(SNAPSHOT_DIR)/
+endif
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
 snapshots/snapshot-ccomp:
