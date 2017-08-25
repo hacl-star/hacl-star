@@ -4,7 +4,13 @@
 # Compilation flags
 #
 
-LIBFLAGS=$(CFLAGS) -fPIC -Wno-discarded-qualifiers
+ifeq ($(SNAPSHOT_DIR),snapshots/snapshot-ccomp)
+  LIBFLAGS=$(CCOPTS) $(CFLAGS) -Wl,-fPIC
+  OTHER=FStar.c -Wl,-shared
+else
+  LIBFLAGS=$(CFLAGS) -fPIC -Wno-discarded-qualifiers
+  OTHER=-shared
+endif
 LIBFLAGS32=$(LIBFLAGS) -DKRML_NOUINT128 -Wno-unused-function
 
 #
@@ -34,7 +40,7 @@ libnacl.so: $(FILES)
 	  Curve25519.c -c -o Curve25519.o
 	$(CC) $(LIBFLAGS) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
-	$(CC) -shared  $(LIBFLAGS) -I ../../test/c -I . -Wall \
+	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/c -I . -Wall \
 	  ../../test/c/hacl_test_utils.c \
 	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c/randombytes.c ../../test/c/haclnacl.c \
 	  -o libnacl.so

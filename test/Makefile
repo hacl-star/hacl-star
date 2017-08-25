@@ -95,15 +95,15 @@ test-pneutube:
 
 # 64-bit unit tests
 unit-tests:
-	$(MAKE) -C .. build/libhacl.so
+	$(MAKE) -C $(HACL_HOME)/$(SNAPSHOT_DIR) libnacl.so
 ifeq ($(SNAPSHOT_DIR),snapshots/snapshot-ccomp)
 	$(CCOMP) $(CCOMP_OPTS) $(FSTARH_CCOMP) -I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/c -I c/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c c/hacl_test_utils.c c/unit_tests.c $(HACL_HOME)/build/libnacl.so -o unit_tests.exe
+		$(TWEETNACL_HOME)/tweetnacl.c c/hacl_test_utils.c c/unit_tests.c $(HACL_HOME)/$(SNAPSHOT_DIR)/libnacl.so -o unit_tests.exe
 else
 	$(CC) $(CCOPTS) -I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/c -I c/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c c/hacl_test_utils.c c/unit_tests.c $(HACL_HOME)/build/libnacl.so -o unit_tests.exe
+		$(TWEETNACL_HOME)/tweetnacl.c c/hacl_test_utils.c c/unit_tests.c $(HACL_HOME)/$(SNAPSHOT_DIR)/libnacl.so -o unit_tests.exe
 endif
-	LD_LIBRARY_PATH=$(HACL_HOME)/build DYLD_LIBRARY_PATH=$(HACL_HOME)/build ./unit_tests.exe
+	LD_LIBRARY_PATH=$(HACL_HOME)/$(SNAPSHOT_DIR) DYLD_LIBRARY_PATH=$(HACL_HOME)/$(SNAPSHOT_DIR) ./unit_tests.exe
 
 # 32-bit unit tests
 unit-tests-32:
@@ -137,7 +137,8 @@ all-unit-tests:
 	$(MAKE) unit-tests-hacl-c
 	$(MAKE) unit-tests-gcc
 	$(MAKE) unit-tests-gcc-unrolled
-	$(MAKE) unit-tests-ccomp
+	# JK: FIXME, run unit-tests from CompCert
+	# $(MAKE) unit-tests-ccomp
 	# $(MAKE) unit-tests-msvc
 
 

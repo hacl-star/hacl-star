@@ -28,7 +28,7 @@ lib-c/FStar.h: $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int
 extract-c: ccomp-c/FStar.h lib-c/Hacl_Policies.c
 
 # JK: implement these for the library files
-test:
+test: extract-c
 
 all-ver:
 
