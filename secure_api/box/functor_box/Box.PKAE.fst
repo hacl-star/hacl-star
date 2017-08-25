@@ -62,7 +62,11 @@ type feq2 (#a:Type) (#b:Type) (#c:Type) (f:efun2 a b c) (g:efun2 a b c) =
 assume Extensionality2 : forall (a:Type) (b:Type) (c:Type) (f: efun2 a b c) (g: efun2 a b c).
 {:pattern feq2 #a #b #c f g} feq2 #a #b #c f g <==> f==g
 
-#set-options "--z3rlimit 1000 --max_ifuel 1 --max_fuel 0 --print_universes"
+
+val coerce: t1:Type -> t2:Type{t1 == t2} -> x:t1 -> t2
+let coerce t1 t2 x = x
+
+#set-options "--z3rlimit 200 --max_ifuel 1 --max_fuel 0 --print_universes "
 val message_log_lemma: im:index_module -> rgn:log_region im -> Lemma
   (requires True)
   (ensures message_log im rgn === AE.message_log im rgn)
@@ -72,15 +76,23 @@ let message_log_lemma im rgn =
   assert(message_log_value im == AE.message_log_value im);
   assert(FStar.FunctionalExtensionality.feq (message_log_range im) (AE.message_log_range im));
   assert(message_log_range im == AE.message_log_range im);
-  assume(FStar.FunctionalExtensionality.feq 
-    #(MM.map' (AE.message_log_key im) (AE.message_log_range im )) #Type 
-    (message_log_inv im) (AE.message_log_inv im));
-//  assert(message_log im rgn == AE.message_log im rgn);
-  admit();
+  let inv = message_log_inv im in
+  let ae_inv = AE.message_log_inv im in
+  let map_t =MonotoneMap.map' (message_log_key im) (message_log_range im) in
+  let ae_map_t =MonotoneMap.map' (AE.message_log_key im) (AE.message_log_range im) in
+  assert (ae_map_t==map_t);
+  let inv_t = (f:map_t) -> Type0 in
+  let ae_inv_t = (f:ae_map_t) -> Type0 in
+//  assert(FStar.FunctionalExtensionality.feq (inv_t) (ae_inv_t));
+  assume(ae_inv_t==inv_t);
+//  assert(False);
+  let ae_inv = coerce ae_inv_t inv_t (AE.message_log_inv im) in
+  assert(FStar.FunctionalExtensionality.feq 
+    #(MM.map' (message_log_key im) (message_log_range im )) #Type 
+    inv ae_inv);
+  assert(message_log im rgn == AE.message_log im rgn);
   ()
 
-val coerce: t1:Type -> t2:Type{t1 == t2} -> x:t1 -> t2
-let coerce t1 t2 x = x
 
 let get_message_log pkm =
   let im = pkm.im in
