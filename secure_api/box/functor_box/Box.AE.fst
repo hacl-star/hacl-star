@@ -42,7 +42,7 @@ type log_region (im:index_module) =
 (**
    The unprotected plaintext type.
 *)
-let plain_max_length = Spec.Salsa20.blocklen `op_Multiply` pow2 32
+let plain_max_length = Spec.Salsa20.blocklen `op_Multiply` pow2 32 - Spec.Salsa20.blocklen
 type ae_plain = b:bytes{Seq.length b < plain_max_length} // / Spec.Salsa20.blocklen < pow2 32} //one off error?
 
 val create_zero_bytes: n:nat{n < plain_max_length}-> Tot (b:ae_plain{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)})
@@ -98,7 +98,7 @@ type message_log (im:index_module) (rgn:log_region im) =
 
 abstract noeq type ae_module (im:index_module) =
   | AM :
-    (pm:plain_module{get_plain pm == ae_plain}) ->
+    (pm:plain_module{get_plain pm == ae_plain /\ Plain.plain_max_length #pm = plain_max_length}) ->
     key_log_region: log_region im ->
     message_log_region: (rgn:log_region im{disjoint rgn key_log_region}) ->
     key_log: (key_log_t im key_log_region) ->
@@ -117,7 +117,7 @@ let recall_logs #im am =
   MR.m_recall am.key_log;
   MR.m_recall am.message_log
 
-val get_message_log_region: #im:index_module  -> am:ae_module im -> (lr:log_region im{lr == am.message_log_region})
+val get_message_log_region: #im:index_module  -> am:ae_module im -> Tot (lr:log_region im{lr == am.message_log_region})
 let get_message_log_region #im am =
   am.message_log_region
 
@@ -277,14 +277,13 @@ let encrypt #im am #i n k m =
   MM.extend am.message_log (n,i) (c,m);
   c
 
-
 (**
    Decrypt a ciphertext c using a key k. If the key is honest and ae_int_ctxt is idealized,
    try to obtain the ciphertext from the log. Else decrypt via concrete implementation.
 *)
 val decrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:key im{get_index k=i} -> c:cipher -> ST (option (ae_protected_plain im am.pm i))
   (requires (fun h0 ->
-    registered im (ID i) // No in-between states of keys (i.e.) where one of the shares is fresh and one is registerd
+    registered im (ID i) // No in-between states of keys (i.e.) where one of the shares is fresh and one is registered
   ))
   (ensures  (fun h0 p h1 ->
     let modified_regions_honest = Set.singleton am.message_log_region in
@@ -305,7 +304,6 @@ val decrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:k
     ==> (MM.fresh am.message_log (n,i) h0 \/ c =!= fst (MM.value am.message_log (n,i) h0)))
    )
   ))
-
 
 #set-options "--z3rlimit 1900 --max_ifuel 1 --max_fuel 0"
 let decrypt #im am #i n k c =

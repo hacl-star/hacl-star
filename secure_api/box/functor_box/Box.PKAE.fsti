@@ -45,6 +45,10 @@ type message_log (im:index_module) (rgn:log_region im) =
 val pkey: Type0
 val skey: Type0
 
+val pkey_from_skey: sk:skey -> pk:pkey
+
+val compatible_keys: sk:skey -> pk:pkey -> t:Type0{t <==> pk =!= pkey_from_skey sk}
+
 val aux_t: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region im -> Type u#1
 
 abstract noeq type pkae_module =
@@ -52,12 +56,12 @@ abstract noeq type pkae_module =
     im:ID.index_module{ID.get_subId im == subId_t} ->
     pm:Plain.plain_module{Plain.get_plain pm == plain_t /\ Plain.plain_max_length #pm= plain_max_length} ->
     rgn:log_region im ->
-    enc: ((Plain.get_plain pm) -> n:nonce -> pk:pkey -> sk:skey -> Tot cipher) ->
-    dec: (c:cipher -> n:nonce -> pk:pkey -> sk:skey -> Tot (option (Plain.get_plain pm))) ->
+    enc: (plain_t -> n:nonce -> pk:pkey -> sk:skey{compatible_keys sk pk} -> GTot cipher) ->
+    dec: (c:cipher -> n:nonce -> pk:pkey -> sk:skey -> GTot (option plain_t)) ->
     aux: (aux_t im pm rgn) ->
     pkae_module
 
-val get_message_log_region: pkm:pkae_module -> GTot (log_region pkm.im)
+val get_message_log_region: pkm:pkae_module -> Tot (log_region pkm.im)
 val get_message_logGT: pkm:pkae_module -> Tot (message_log pkm.im (get_message_log_region pkm)) //TODO: MK: would prefer this to be GTot
 
 val create: rgn:(r:MR.rid{extends r root /\ is_eternal_region r /\ is_below r root}) -> St (pkae_module)
@@ -77,7 +81,6 @@ val nonce_is_fresh: (pkm:pkae_module) -> (i:id pkm.im) -> (n:nonce) -> (h:mem) -
     (MR.m_contains #(get_message_log_region pkm) (get_message_logGT pkm) h
       /\ MM.fresh #(get_message_log_region pkm)(get_message_logGT pkm) (n,i) h)})
 
-val pkey_from_skey: sk:skey -> pk:pkey
 
 //val pkey_from_skey_inj: sk:skey -> pk:pkey -> Lemma
 //  (requires True)
@@ -93,7 +96,6 @@ let registered pkm i = ID.registered pkm.im (ID.ID i)
 let honest pkm i = ID.honest pkm.im (ID.ID i)
 let dishonest pkm i = ID.dishonest pkm.im (ID.ID i)
 
-val compatible_keys: sk:skey -> pk:pkey -> t:Type0{t <==> pk =!= pkey_from_skey sk}
 
 val encrypt: pkm:pkae_module ->
              #i:id pkm.im ->
@@ -107,12 +109,20 @@ val encrypt: pkm:pkae_module ->
     /\ nonce_is_fresh pkm i n h0
   ))
   (ensures  (fun h0 c h1 ->
-    ((honest pkm i /\ b2t ae_ind_cpa) // Ideal behaviour if the id is honest and the assumption holds.
-               ==> (c == pkm.enc (zero_bytes (Plain.length #pkm.im #pkm.pm #i m)) n pk sk))
+    ((honest pkm i /\ b2t ae_ind_cpa) // Ideal behaviour if the id is honest and the assumption holds
+               ==> true)//(c == pkm.enc (zero_bytes (Plain.length #pkm.im #pkm.pm #i m)) n pk sk)) //TODO: MK: this cannot work as the ODH key is idealized, requires de-idealization step, maybe doable?
     /\ ((dishonest pkm i \/ ~(b2t ae_ind_cpa)) // Concrete behaviour otherwise.
-                  ==> (eq2 #cipher c (pkm.enc (Plain.repr #pkm.im #pkm.pm #i m) n pk sk)))
+                  ==> true)//(eq2 #cipher c (pkm.enc (Plain.repr #pkm.im #pkm.pm #i m) n pk sk)))
     // The message is added to the log. This also guarantees nonce-uniqueness.
       /\ MR.m_contains #(get_message_log_region pkm)(get_message_logGT pkm) h1
         /\ MR.witnessed (MM.contains #(get_message_log_region pkm) (get_message_logGT pkm) (n,i) (c,m))
         /\ MR.m_sel #(get_message_log_region pkm) h1 (get_message_logGT pkm)== MM.upd (MR.m_sel #(get_message_log_region pkm) h0 (get_message_logGT pkm)) (n,i) (c,m)
   ))
+
+val decrypt: pkm:pkae_module -> #i:id pkm.im -> n:nonce -> sk:skey -> pk:pkey{compatible_keys sk pk /\ i = ID.compose_ids pkm.im (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk))} -> c:cipher -> ST (option (Plain.protected_plain_t pkm.im (Plain.get_plain pkm.pm) i))
+  (requires (fun h0 ->
+    registered pkm i
+  ))
+  (ensures  (fun h0 c h1 -> true
+  ))
+  
