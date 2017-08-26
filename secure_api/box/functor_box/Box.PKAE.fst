@@ -123,7 +123,7 @@ let compatible_keys sk pk = ODH.compatible_keys sk pk
 
 
 
-#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
+#set-options "--z3rlimit 500 --max_ifuel 0 --max_fuel 0"
 let encrypt pkm #i n sk pk m =
   let k = ODH.prf_odh pkm.im pkm.aux.km pkm.aux.om sk pk in
   let c = AE.encrypt pkm.aux.am #i n k m in

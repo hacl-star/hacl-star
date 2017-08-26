@@ -151,7 +151,7 @@ let nonce_freshness_lemma #im am i n h0 h1 =
  ()
 
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 0"
-val create: im:index_module -> pm:plain_module{Plain.get_plain pm == ae_plain /\ Plain.plain_max_length pm = plain_max_length} -> rgn:log_region im -> ST (am:ae_module im)
+val create: im:index_module -> pm:plain_module{Plain.get_plain pm == ae_plain /\ Plain.plain_max_length #pm = plain_max_length} -> rgn:log_region im -> ST (am:ae_module im)
   (requires (fun h0 ->
     True
   ))
