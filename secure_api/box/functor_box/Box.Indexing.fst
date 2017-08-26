@@ -21,7 +21,7 @@ module MR = FStar.Monotonic.RRef
 module MM = MonotoneMap
 
 
-type id_log_region = (r:MR.rid{extends r root /\ is_eternal_region r /\ is_below r root})
+type id_log_region = (r:MR.rid{is_eternal_region r /\ is_below r root})
 
 type id_log_value = bool
 let id_log_range = fun id_log_key -> id_log_value
@@ -40,16 +40,24 @@ abstract noeq type index_module =
         (b2t (smaller i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller i i1) ==> b2t (smaller i i2)))
         /\ (~ (b2t (smaller i1 i2)) <==> (i1 = i2 \/ b2t (smaller i2 i1))))
       [SMTPat (smaller i1 i2)]) ->
-    compose_ids: (i1:subId -> i2:subId -> i:(subId*subId){b2t (smaller (fst i) (snd i)) /\ (i = (i1,i2) \/ i = (i2,i1))}) ->
-    symmetric_id_generation: (i1:subId -> i2:subId -> Lemma
-    (requires (i1<>i2))
-    (ensures (forall id1 id2. compose_ids id1 id2 = compose_ids id2 id1))
-    [SMTPat (compose_ids i1 i2)]) ->
     id_log: (id_log_t rgn subId) ->
     index_module
 
-let create rgn subId smaller total_order_lemma compose_ids symmetric_id_generation id_log =
-  IM rgn subId smaller total_order_lemma compose_ids symmetric_id_generation id_log
+val create: rgn:id_log_region -> subId:Type0{hasEq subId} -> 
+    smaller: (i1:subId -> i2:subId -> b:bool{b ==> i1 <> i2}) ->
+    total_order_lemma: (i1:subId -> i2:subId -> Lemma
+      (requires True)
+      (ensures
+        (b2t (smaller i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller i i1) ==> b2t (smaller i i2)))
+        /\ (~ (b2t (smaller i1 i2)) <==> (i1 = i2 \/ b2t (smaller i2 i1))))
+      [SMTPat (smaller i1 i2)]) ->
+    ST (index_module)
+    (requires fun _ -> true)
+    (ensures fun h0 im h1 -> im.subId == subId /\ im.rgn = rgn /\ modifies (Set.singleton im.rgn) h0 h1)
+
+let create rgn (subId:t:Type0{hasEq t}) smaller total_order_lemma  =
+  let id_log:id_log_t rgn subId = MM.alloc #rgn #subId #id_log_range #(id_log_inv subId) in
+  IM rgn subId smaller total_order_lemma id_log
 
 val get_rgn: im:index_module -> GTot id_log_region
 let get_rgn im =
@@ -84,14 +92,17 @@ let compose_ids im i1 i2 =
     let i:id im = (i2,i1) in
     i)
 
-#set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
+#set-options "--z3rlimit 200 --max_ifuel 1 --max_fuel 1"
 val symmetric_id_generation: (im:index_module) -> (i1:im.subId) -> (i2:im.subId{i2 <> i1}) -> Lemma
   (requires True)
   (ensures (compose_ids im i1 i2 = compose_ids im i2 i1))
   [SMTPat (compose_ids im i1 i2)]
 let symmetric_id_generation im i1 i2 =
-  im.total_order_lemma i1 i2;
-  ()
+  if im.smaller i1 i2 then (
+    admit()
+  ) else (
+    admit()
+  )
 
 noeq type meta_id (im:index_module) =
   | ID of id im
@@ -146,8 +157,8 @@ let lemma_both_ids_honest im i = ()
 val lemma_single_id_honest: im:index_module -> i1:im.subId -> Lemma
   (requires (honest im (SUBID i1)))
   (ensures (
-    (forall (i2:im.subId) .
-      (honest im (SUBID i2)) ==> (let ID i = ID (im.compose_ids i1 i2) in honest im (ID i)))
+    (forall (i2:im.subId{i2 <> i1}) .
+      (honest im (SUBID i2)) ==> (let ID i = ID (compose_ids im i1 i2) in honest im (ID i)))
   ))
   [SMTPat (honest im (SUBID i1))]
 let lemma_single_id_honest im i1 = ()

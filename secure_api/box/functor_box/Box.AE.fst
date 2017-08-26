@@ -35,9 +35,6 @@ type bytes = SPEC.bytes
 type cipher = b:bytes{Seq.length b >= 16 /\ (Seq.length b - 16) / Spec.Salsa20.blocklen < pow2 32}
 type nonce = SPEC.nonce
 
-val create_zero_bytes: n:nat -> Tot (b:bytes{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)})
-let create_zero_bytes n =
-  Seq.create n (UInt8.uint_to_t 0)
 
 type log_region (im:index_module) =
   r:MR.rid{disjoint r (ID.get_rgn im)}
@@ -45,14 +42,20 @@ type log_region (im:index_module) =
 (**
    The unprotected plaintext type.
 *)
-type ae_plain = b:bytes{Seq.length b / Spec.Salsa20.blocklen < pow2 32}
+let plain_max_length = Spec.Salsa20.blocklen `op_Multiply` pow2 32
+type ae_plain = b:bytes{Seq.length b < plain_max_length} // / Spec.Salsa20.blocklen < pow2 32} //one off error?
+
+val create_zero_bytes: n:nat{n < plain_max_length}-> Tot (b:ae_plain{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)})
+let create_zero_bytes n =
+  Seq.create n (UInt8.uint_to_t 0)
 
 type ae_protected_plain (im:index_module) (pm:plain_module) (i:id im) = m:Plain.protected_plain_t im (get_plain pm) i
 
 (**
   A helper function to obtain the length of a protected plaintext.
 *)
-let length (b:bytes) = Seq.length b
+val length: b:ae_plain -> n:nat{n<plain_max_length}
+let length (b:ae_plain) = Seq.length b
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The following functions belong to the formal KEY module in the model.
@@ -118,7 +121,7 @@ val get_message_log_region: #im:index_module  -> am:ae_module im -> (lr:log_regi
 let get_message_log_region #im am =
   am.message_log_region
 
-val get_message_logGT: #im:index_module  -> am:ae_module im -> GTot (ml:message_log im am.message_log_region{ml == am.message_log})
+val get_message_logGT: #im:index_module  -> am:ae_module im -> Tot (ml:message_log im am.message_log_region{ml == am.message_log}) //TODO: MK would prefer this to be GTot
 let get_message_logGT #im am =
   am.message_log
 
@@ -148,7 +151,7 @@ let nonce_freshness_lemma #im am i n h0 h1 =
  ()
 
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 0"
-val create: im:index_module -> pm:plain_module{Plain.get_plain pm == ae_plain} -> rgn:log_region im -> ST (am:ae_module im)
+val create: im:index_module -> pm:plain_module{Plain.get_plain pm == ae_plain /\ Plain.plain_max_length pm = plain_max_length} -> rgn:log_region im -> ST (am:ae_module im)
   (requires (fun h0 ->
     True
   ))

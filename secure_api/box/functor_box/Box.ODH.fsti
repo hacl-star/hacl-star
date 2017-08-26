@@ -81,7 +81,7 @@ val coerce_keypair: im:index_module -> dh_exp:dh_exponent{ID.dishonest im (ID.SU
 (**
   GTot specification of the prf_odh function for use in type refinements.
 *)
-val prf_odhGT: im:index_module -> skey -> pkey -> GTot aes_key
+val prf_odhGT: im:index_module -> sk:skey -> pk:pkey{compatible_keys sk pk} -> GTot aes_key
 
 val lemma_shares: sk:skey -> Lemma
   (requires True)

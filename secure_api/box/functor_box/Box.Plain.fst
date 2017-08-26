@@ -19,11 +19,16 @@ open Box.Indexing
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 abstract noeq type plain_module =
   | PM:
-    plain: (Type0) ->
+    plain: Type0 ->
     //repr: ((#i:id im) -> (protected_plain_t i) -> (p:plain_type{dishonest im (ID i) \/ not ae_ind_cpa})) ->
     //coerce: (#i:id im -> plain_type -> (p:protected_plain_t i{dishonest im (ID i) \/ not ae_int_ctxt})) ->
-    length: (plain -> nat) ->
+    plain_max_length: nat ->
+    length: (plain -> n:nat{n<plain_max_length}) ->
     plain_module
+
+val create: plain:Type0 -> plain_max_length:nat -> length:(plain -> n:nat{n<plain_max_length}) -> p:plain_module{p.plain==plain /\ p.plain_max_length = plain_max_length /\ p.length==length}
+let create plain plain_max_length length =
+  PM plain plain_max_length length
 
 abstract type protected_plain_t (im:index_module) (pt:Type0) (id:id im) = pt
 
@@ -41,6 +46,11 @@ val get_plain: pm:plain_module -> (t:Type0{t == pm.plain})
 let get_plain pm =
   pm.plain
 
+val reprGT: #im:index_module -> #pm:plain_module -> #i:id im -> protected_plain_t im pm.plain i -> (p:pm.plain)
+let reprGT #im #pm #i p =
+  p
+
+
 val repr: #im:index_module -> #pm:plain_module -> #i:id im{dishonest im (ID i) \/ not ae_ind_cpa} -> protected_plain_t im pm.plain i -> (p:pm.plain)
 let repr #im #pm #i p =
   p
@@ -49,11 +59,14 @@ val coerce: #im:index_module -> #pm:plain_module -> #i:id im{dishonest im (ID i)
 let coerce #im #pm #i p =
   p
 
-val length: #im:index_module -> #pm:plain_module -> #i:id im -> (p:protected_plain_t im pm.plain i) -> nat
+val plain_max_length: #pm:plain_module -> n:nat{n=pm.plain_max_length}
+let plain_max_length #pm = pm.plain_max_length
+
+val length: #im:index_module -> #pm:plain_module -> #i:id im -> (p:protected_plain_t im pm.plain i) -> n:nat{n=pm.length p /\ n < pm.plain_max_length}
 let length #im #pm #i p =
   pm.length p
 
-val rec_repr: #im:index_module ->
+ val rec_repr: #im:index_module ->
               #inner_pm:plain_module ->
               #pm:plain_module ->
               #i:id im{dishonest im (ID i) \/ not ae_ind_cpa} ->
