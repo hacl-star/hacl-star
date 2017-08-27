@@ -200,9 +200,6 @@ import-kremlin:
 %.dir-hints: %
 	$(MAKE) -C $^ hints
 
-%.dir-clean: %
-	$(MAKE) -C $^ clean
-
 # Colors
 NORMAL="\\033[0;39m"
 CYAN="\\033[1;36m"

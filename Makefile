@@ -111,7 +111,12 @@ clean-package: clean-base clean-build
 
 clean-snapshots: snapshots-remove
 
-clean: .clean-banner clean-base clean-build specs.dir-clean code.dir-clean secure_api.dir-clean apps.dir-clean tests.dir-clean
+clean: .clean-banner clean-base clean-build
+	$(MAKE) -C specs clean
+	$(MAKE) -C code clean
+	$(MAKE) -C secure_api clean
+	$(MAKE) -C apps clean
+	$(MAKE) -C test clean
 
 #
 # Installation helper
