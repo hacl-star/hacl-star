@@ -31,9 +31,9 @@ type log_region (im:index_module) =
   r:MR.rid{disjoint r (ID.get_rgn im)}
 
 val subId_t: Type0
-val plain_max_length: nat
+val valid_length: nat -> bool
 val plain_t: Type0
-val length: p:plain_t -> n:nat{n<plain_max_length}
+val length: p:plain_t -> n:nat{valid_length n}
 
 type message_log_key (im:index_module) = (nonce*(i:id im))
 type message_log_value (im:index_module) (i:id im) = (cipher*Plain.protected_plain_t im plain_t i)
@@ -54,7 +54,7 @@ val aux_t: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Pla
 abstract noeq type pkae_module =
   | PKAE:
     im:ID.index_module{ID.get_subId im == subId_t} ->
-    pm:Plain.plain_module{Plain.get_plain pm == plain_t /\ Plain.plain_max_length #pm= plain_max_length} ->
+    pm:Plain.plain_module{Plain.get_plain pm == plain_t /\ Plain.valid_length #pm == valid_length} ->
     rgn:log_region im ->
     enc: (plain_t -> n:nonce -> pk:pkey -> sk:skey{compatible_keys sk pk} -> GTot cipher) ->
     dec: (c:cipher -> n:nonce -> pk:pkey -> sk:skey -> GTot (option plain_t)) ->
@@ -66,7 +66,7 @@ val get_message_logGT: pkm:pkae_module -> Tot (message_log pkm.im (get_message_l
 
 val create: rgn:(r:MR.rid{extends r root /\ is_eternal_region r /\ is_below r root}) -> St (pkae_module)
 
-val zero_bytes: (n:nat{n<plain_max_length}) -> plain_t //b:bytes{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)}
+val zero_bytes: (n:nat{valid_length n}) -> plain_t //b:bytes{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)}
 //TODO: MK this can be modelled better
 
 val pkey_to_subId: #pkm:pkae_module -> pk:pkey -> ID.get_subId pkm.im
@@ -112,7 +112,7 @@ val encrypt: pkm:pkae_module ->
     ((honest pkm i /\ b2t ae_ind_cpa) // Ideal behaviour if the id is honest and the assumption holds
                ==> true)//(c == pkm.enc (zero_bytes (Plain.length #pkm.im #pkm.pm #i m)) n pk sk)) //TODO: MK: this cannot work as the ODH key is idealized, requires de-idealization step, maybe doable?
     /\ ((dishonest pkm i \/ ~(b2t ae_ind_cpa)) // Concrete behaviour otherwise.
-                  ==> true)//(eq2 #cipher c (pkm.enc (Plain.repr #pkm.im #pkm.pm #i m) n pk sk)))
+                  ==> true)//)eq2 #cipher c (pkm.enc (Plain.repr #pkm.im #pkm.pm #i m) n pk sk)))
     // The message is added to the log. This also guarantees nonce-uniqueness.
       /\ MR.m_contains #(get_message_log_region pkm)(get_message_logGT pkm) h1
         /\ MR.witnessed (MM.contains #(get_message_log_region pkm) (get_message_logGT pkm) (n,i) (c,m))

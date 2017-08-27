@@ -34,7 +34,7 @@ module LE = FStar.Endianness
 let nonce = AE.nonce
 let cipher = AE.cipher
 let subId_t = ODH.dh_share
-let plain_max_length = AE.plain_max_length
+let valid_length = AE.valid_length
 let plain_t = AE.ae_plain
 let length = AE.length
 
@@ -88,8 +88,9 @@ let get_message_logGT pkm =
   let log:message_log pkm.im ae_rgn = coerce (AE.message_log pkm.im ae_rgn) (message_log pkm.im ae_rgn) ae_log in
   log
 
-val create_aux: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t /\ Plain.plain_max_length #pm == plain_max_length}) -> rgn:log_region im -> St (aux_t im pm rgn)
+val create_aux: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t /\ Plain.valid_length #pm == valid_length}) -> rgn:log_region im -> St (aux_t im pm rgn)
 let create_aux im pm rgn =
+  assert(FStar.FunctionalExtensionality.feq (valid_length) (AE.valid_length));
   let am = AE.create im pm rgn in
   let km = AE.instantiate_km am in
   let om = ODH.create im km rgn in
@@ -97,7 +98,7 @@ let create_aux im pm rgn =
 
   
 assume val lemma_compatible_length: n:nat -> Lemma
-  (requires n < plain_max_length)
+  (requires valid_length n)
   (ensures n / Spec.Salsa20.blocklen < pow2 32)
 
 val enc (im:ODH.index_module): plain_t -> n:nonce -> pk:pkey -> sk:skey{ODH.compatible_keys sk pk} -> GTot cipher
@@ -110,8 +111,9 @@ assume val dec: c:cipher -> n:nonce -> pk:pkey -> sk:skey -> Tot (option plain_t
 let create rgn =
   let id_log_rgn : ID.id_log_region = new_region rgn in
   let im = ID.create id_log_rgn subId_t ODH.smaller ODH.total_order_lemma in
-  let pm = Plain.create plain_t AE.plain_max_length AE.length in
+  let pm = Plain.create plain_t AE.valid_length AE.length in
   let log_rgn : log_region im = new_region rgn in
+  assert(FStar.FunctionalExtensionality.feq (valid_length) (AE.valid_length));
   let aux = create_aux im pm log_rgn in
   PKAE im pm log_rgn (enc im) (dec) aux
 
@@ -130,11 +132,20 @@ let nonce_is_fresh (pkm:pkae_module) (i:id pkm.im) (n:nonce) (h:mem) =
 let gen pkm =
   ODH.keygen()
 
-#set-options "--z3rlimit 500 --max_ifuel 0 --max_fuel 0"
+#set-options "--z3rlimit 700 --max_ifuel 1 --max_fuel 1"
 let encrypt pkm #i n sk pk m =
   let k = ODH.prf_odh pkm.im pkm.aux.km pkm.aux.om sk pk in
   let c = AE.encrypt pkm.aux.am #i n k m in
-    let h = get() in
+  ID.lemma_honest_or_dishonest pkm.im (ID.ID i);
+  let honest_i = ID.get_honesty pkm.im (ID.ID i) in
+  if not honest_i then ( 
+    assert(ID.dishonest pkm.im (ID.ID i));
+    assert(Key.leak pkm.im pkm.aux.km k = ODH.prf_odhGT pkm.im sk pk );
+    //assert(c = SPEC.secretbox_easy (Plain.repr #pkm.im #pkm.pm #i m) (Key.get_rawGT pkm.im pkm.aux.km k) n);
+    //assert( eq2 #cipher c (pkm.enc (Plain.repr #pkm.im #pkm.pm #i m) n pk sk));
+    ()
+  );
+  let h = get() in
   assert(FStar.FunctionalExtensionality.feq (message_log_range pkm.im) (AE.message_log_range pkm.im));
   MM.contains_eq_compat (get_message_logGT pkm) (AE.get_message_logGT pkm.aux.am) (n,i) (c,m) h;
   MM.contains_stable (get_message_logGT pkm) (n,i) (c,m);

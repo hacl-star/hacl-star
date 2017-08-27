@@ -92,6 +92,7 @@ val prf_odh: im:index_module -> km:key_module im -> om:odh_module im km  -> sk:s
   (requires (fun h0 ->
     let i = ID.compose_ids im (pk_get_share pk) (sk_get_share sk) in
     ID.registered im (ID.ID i)
+    /\ Key.invariant im km h0
   ))
   (ensures (fun h0 k h1 ->
     let i = ID.compose_ids im (pk_get_share pk) (sk_get_share sk) in

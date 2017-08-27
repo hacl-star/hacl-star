@@ -42,10 +42,11 @@ type log_region (im:index_module) =
 (**
    The unprotected plaintext type.
 *)
-let plain_max_length = Spec.Salsa20.blocklen `op_Multiply` pow2 32 - Spec.Salsa20.blocklen
-type ae_plain = b:bytes{Seq.length b < plain_max_length} // / Spec.Salsa20.blocklen < pow2 32} //one off error?
+//let plain_max_length = Spec.Salsa20.blocklen `op_Multiply` pow2 32 - Spec.Salsa20.blocklen
+let valid_length n = n / Spec.Salsa20.blocklen < pow2 32
+type ae_plain = b:bytes{valid_length (Seq.length b) } // / Spec.Salsa20.blocklen < pow2 32} //one off error?
 
-val create_zero_bytes: n:nat{n < plain_max_length}-> Tot (b:ae_plain{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)})
+val create_zero_bytes: n:nat{valid_length n}-> Tot (b:ae_plain{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)})
 let create_zero_bytes n =
   Seq.create n (UInt8.uint_to_t 0)
 
@@ -54,7 +55,7 @@ type ae_protected_plain (im:index_module) (pm:plain_module) (i:id im) = m:Plain.
 (**
   A helper function to obtain the length of a protected plaintext.
 *)
-val length: b:ae_plain -> n:nat{n<plain_max_length}
+val length: b:ae_plain -> n:nat{valid_length n}
 let length (b:ae_plain) = Seq.length b
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,16 +97,18 @@ type message_log_inv (im:index_module) (f:MM.map' (message_log_key im) (message_
 type message_log (im:index_module) (rgn:log_region im) =
   MM.t rgn (message_log_key im) (message_log_range im) (message_log_inv im)
 
+#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
 abstract noeq type ae_module (im:index_module) =
   | AM :
-    (pm:plain_module{get_plain pm == ae_plain /\ Plain.plain_max_length #pm = plain_max_length}) ->
+    (pm:plain_module{get_plain pm == ae_plain /\ Plain.valid_length #pm == valid_length}) ->
     key_log_region: log_region im ->
     message_log_region: (rgn:log_region im{disjoint rgn key_log_region}) ->
     key_log: (key_log_t im key_log_region) ->
     message_log: (message_log im message_log_region) ->
     ae_module im
 
-#set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 0"
+
+#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
 val recall_logs: #im:index_module -> am:ae_module im -> ST unit
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 ->
@@ -150,8 +153,8 @@ val nonce_freshness_lemma: #im:index_module  -> am:ae_module im -> i:id im -> n:
 let nonce_freshness_lemma #im am i n h0 h1 =
  ()
 
-#set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 0"
-val create: im:index_module -> pm:plain_module{Plain.get_plain pm == ae_plain /\ Plain.plain_max_length #pm = plain_max_length} -> rgn:log_region im -> ST (am:ae_module im)
+#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
+val create: im:index_module -> pm:plain_module{Plain.get_plain pm == ae_plain /\ Plain.valid_length #pm == valid_length} -> rgn:log_region im -> ST (am:ae_module im)
   (requires (fun h0 ->
     True
   ))
@@ -175,7 +178,7 @@ let create im pm rgn =
    This function generates a fresh random key. Honest, as well as dishonest ids can be created using keygen. However, note that the adversary can
    only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
 *)
-#set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 0"
+#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
 private val gen: #im:index_module  -> am:ae_module im -> i:id im -> ST (k:key im{get_index k=i})
   (requires (fun h0 ->
     (fresh im (ID i) h0 \/ honest im (ID i))
@@ -259,14 +262,14 @@ val encrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:k
   ///\ log_freshness_invariant #im #pm am h1
 ))
 
-#set-options "--z3rlimit 900 --max_ifuel 1 --max_fuel 0"
+#set-options "--z3rlimit 900 --max_ifuel 1 --max_fuel 1"
 let encrypt #im am #i n k m =
-  MR.m_recall am.message_log;
-  recall_log im;
+  MR.m_recall am.message_log; recall_log im;
   lemma_honest_or_dishonest im (ID i);
   let honest_i = get_honesty im (ID i) in
   let p =
     if honest_i && ae_ind_cpa then (
+      lemma_valid_length am.pm;
       Seq.create (Plain.length #im #am.pm #i m) (UInt8.uint_to_t 0)
     ) else (
       Plain.repr #im #am.pm #i m)

@@ -22,13 +22,13 @@ abstract noeq type plain_module =
     plain: Type0 ->
     //repr: ((#i:id im) -> (protected_plain_t i) -> (p:plain_type{dishonest im (ID i) \/ not ae_ind_cpa})) ->
     //coerce: (#i:id im -> plain_type -> (p:protected_plain_t i{dishonest im (ID i) \/ not ae_int_ctxt})) ->
-    plain_max_length: nat ->
-    length: (plain -> n:nat{n<plain_max_length}) ->
+    valid_length: (nat -> bool)->
+    length: (plain -> n:nat{valid_length n}) ->
     plain_module
 
-val create: plain:Type0 -> plain_max_length:nat -> length:(plain -> n:nat{n<plain_max_length}) -> p:plain_module{p.plain==plain /\ p.plain_max_length = plain_max_length /\ p.length==length}
-let create plain plain_max_length length =
-  PM plain plain_max_length length
+val create: plain:Type0 -> valid_length:(nat -> bool)-> length:(plain -> n:nat{valid_length n}) -> p:plain_module{p.plain==plain /\ p.valid_length == valid_length /\ p.length==length}
+let create plain valid_length length =
+  PM plain valid_length length
 
 abstract type protected_plain_t (im:index_module) (pt:Type0) (id:id im) = pt
 
@@ -59,10 +59,15 @@ val coerce: #im:index_module -> #pm:plain_module -> #i:id im{dishonest im (ID i)
 let coerce #im #pm #i p =
   p
 
-val plain_max_length: #pm:plain_module -> n:nat{n=pm.plain_max_length}
-let plain_max_length #pm = pm.plain_max_length
+val valid_length: #pm:plain_module -> n:nat -> b:bool//{b=pm.valid_length n}
+let valid_length #pm n = pm.valid_length n
 
-val length: #im:index_module -> #pm:plain_module -> #i:id im -> (p:protected_plain_t im pm.plain i) -> n:nat{n=pm.length p /\ n < pm.plain_max_length}
+val lemma_valid_length: pm:plain_module -> Lemma (requires True) (ensures pm.valid_length == valid_length #pm)
+let lemma_valid_length pm = 
+  assert (FStar.FunctionalExtensionality.feq (pm.valid_length) (valid_length #pm));
+  ()
+
+val length: #im:index_module -> #pm:plain_module -> #i:id im -> (p:protected_plain_t im pm.plain i) -> n:nat{n=pm.length p /\ pm.valid_length n}
 let length #im #pm #i p =
   pm.length p
 
