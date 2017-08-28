@@ -103,4 +103,5 @@ val prf_odh: im:index_module -> km:key_module im -> om:odh_module im km  -> sk:s
                         (Key.leak im km k = prf_odhGT im sk pk // Functional correctness. Spec should be external in Spec.Cryptobox.
                         /\ h0 == h1))
     /\ (modifies (Set.singleton (Key.get_log_region im km)) h0 h1 \/ h0 == h1)
+    /\ Key.invariant im km h1
   ))

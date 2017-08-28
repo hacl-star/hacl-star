@@ -86,6 +86,8 @@ val nonce_is_fresh: (pkm:pkae_module) -> (i:id pkm.im) -> (n:nonce) -> (h:mem) -
 //  (requires True)
 //  (ensures (forall sk1 sk2 . pkey_from_skey sk1 == pkey_from_skey sk2 <==> sk1 == sk2))
 
+val invariant: pkae_module -> mem -> Type0
+
 val gen: unit -> ST (keypair:(pkey*skey){fst keypair == pkey_from_skey (snd keypair)})
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 ->
@@ -107,6 +109,7 @@ val encrypt: pkm:pkae_module ->
   (requires (fun h0 ->
     registered pkm i
     /\ nonce_is_fresh pkm i n h0
+    /\ invariant pkm h0
   ))
   (ensures  (fun h0 c h1 ->
     ((honest pkm i /\ b2t ae_ind_cpa) // Ideal behaviour if the id is honest and the assumption holds
@@ -114,15 +117,18 @@ val encrypt: pkm:pkae_module ->
     /\ ((dishonest pkm i \/ ~(b2t ae_ind_cpa)) // Concrete behaviour otherwise.
                   ==> true)//)eq2 #cipher c (pkm.enc (Plain.repr #pkm.im #pkm.pm #i m) n pk sk)))
     // The message is added to the log. This also guarantees nonce-uniqueness.
-      /\ MR.m_contains #(get_message_log_region pkm)(get_message_logGT pkm) h1
-        /\ MR.witnessed (MM.contains #(get_message_log_region pkm) (get_message_logGT pkm) (n,i) (c,m))
-        /\ MR.m_sel #(get_message_log_region pkm) h1 (get_message_logGT pkm)== MM.upd (MR.m_sel #(get_message_log_region pkm) h0 (get_message_logGT pkm)) (n,i) (c,m)
+    /\ MR.m_contains #(get_message_log_region pkm)(get_message_logGT pkm) h1
+    /\ MR.witnessed (MM.contains #(get_message_log_region pkm) (get_message_logGT pkm) (n,i) (c,m))
+    /\ MR.m_sel #(get_message_log_region pkm) h1 (get_message_logGT pkm)== MM.upd (MR.m_sel #(get_message_log_region pkm) h0 (get_message_logGT pkm)) (n,i) (c,m)
+    /\ invariant pkm h1
   ))
 
 val decrypt: pkm:pkae_module -> #i:id pkm.im -> n:nonce -> sk:skey -> pk:pkey{compatible_keys sk pk /\ i = ID.compose_ids pkm.im (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk))} -> c:cipher -> ST (option (Plain.protected_plain_t pkm.im (Plain.get_plain pkm.pm) i))
   (requires (fun h0 ->
     registered pkm i
+    /\ invariant pkm h0
   ))
   (ensures  (fun h0 c h1 -> true
+    /\ invariant pkm h1
   ))
   

@@ -97,7 +97,7 @@ type message_log_inv (im:index_module) (f:MM.map' (message_log_key im) (message_
 type message_log (im:index_module) (rgn:log_region im) =
   MM.t rgn (message_log_key im) (message_log_range im) (message_log_inv im)
 
-#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
+//#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
 abstract noeq type ae_module (im:index_module) =
   | AM :
     (pm:plain_module{get_plain pm == ae_plain /\ Plain.valid_length #pm == valid_length}) ->
@@ -108,7 +108,6 @@ abstract noeq type ae_module (im:index_module) =
     ae_module im
 
 
-#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
 val recall_logs: #im:index_module -> am:ae_module im -> ST unit
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 ->
@@ -147,13 +146,20 @@ abstract let log_freshness_invariant (#im:index_module) (am:ae_module im) (h:mem
   /\ MR.m_contains am.message_log h
   /\ (forall i n . ID.fresh im (ID i) h ==> MM.fresh am.message_log (n,i) h)
 
+#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
 val nonce_freshness_lemma: #im:index_module  -> am:ae_module im -> i:id im -> n:nonce -> h0:mem -> h1:mem -> Lemma
   (requires nonce_is_fresh am i n h0)
   (ensures ((modifies (Set.singleton am.key_log_region) h0 h1 \/ h0 == h1) ==> nonce_is_fresh am i n h1))
 let nonce_freshness_lemma #im am i n h0 h1 =
  ()
 
-#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
+
+ #set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 0"
+val invariant_lemma: #im:index_module -> am:ae_module im -> h0:mem -> h1:mem -> i:id im -> n:nonce -> y:message_log_range im (n,i) -> Lemma
+  (requires log_freshness_invariant #im am h0 /\ ~(MM.fresh am.message_log(n,i) h0))
+  (ensures (forall i' n'. (n',i')<>(n,i) /\ ~(MM.fresh am.message_log (n,i) h1) /\ (ID.fresh im (ID i') h1 ==> MM.fresh am.message_log (n',i') h1)) ==> (forall i n . ID.fresh im (ID i) h1 ==> MM.fresh am.message_log (n,i) h1))
+let invariant_lemma #im am h0 h1 i n y = ()
+
 val create: im:index_module -> pm:plain_module{Plain.get_plain pm == ae_plain /\ Plain.valid_length #pm == valid_length} -> rgn:log_region im -> ST (am:ae_module im)
   (requires (fun h0 ->
     True
@@ -178,7 +184,6 @@ let create im pm rgn =
    This function generates a fresh random key. Honest, as well as dishonest ids can be created using keygen. However, note that the adversary can
    only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
 *)
-#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
 private val gen: #im:index_module  -> am:ae_module im -> i:id im -> ST (k:key im{get_index k=i})
   (requires (fun h0 ->
     (fresh im (ID i) h0 \/ honest im (ID i))
@@ -206,7 +211,6 @@ let gen #im am i =
    The coerce function transforms a raw aes_key into an abstract key. Only dishonest ids can be used
    with this function.
 *)
-#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
 private val coerce: #im:index_module -> i:id im{dishonest im (ID i)} -> raw_k:aes_key -> (k:key im{get_index k=i /\ get_rawGT k = raw_k})
 let coerce #im i raw_k =
   Key i raw_k
@@ -219,7 +223,7 @@ private val leak: #im:index_module -> k:key im{dishonest im (ID (get_index k))} 
 let leak #im k =
   k.raw
 
-#set-options "--z3rlimit 1000 --max_ifuel 0 --max_fuel 0"
+#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
 val instantiate_km: #im:index_module -> am:ae_module im -> km:key_module im{
     Key.get_keytype im km == key im
     /\ Key.get_index im km == get_index #im
@@ -237,7 +241,6 @@ let instantiate_km #im am =
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #reset-options
-#set-options "--z3rlimit 400 --max_ifuel 0 --max_fuel 0"
 (**
    Encrypt a a message under a key. Idealize if the key is honest and ae_ind_cca true.
 *)
@@ -245,24 +248,24 @@ val encrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:k
 (requires (fun h0 ->
   registered im (ID i)
   /\ nonce_is_fresh #im am i n h0 // Nonce freshness
-  ///\ log_freshness_invariant #im #pm am h0
+  /\ log_freshness_invariant #im am h0
 ))
 (ensures  (fun h0 c h1 ->
   let modified_regions_fresh = Set.union (Set.singleton am.message_log_region) (Set.singleton (ID.get_rgn im)) in
   let modified_regions_honest = Set.singleton am.message_log_region in
   registered im (ID i)
-  /\ (dishonest im (ID i) ==> modifies (Set.singleton am.message_log_region) h0 h1) // No stateful changes if the id is dishonest.
+  /\ modifies (Set.singleton am.message_log_region) h0 h1 // stateful changes even if the id is dishonest.
   /\ ((honest im (ID i) /\ b2t ae_ind_cpa) // Ideal behaviour if the id is honest and the assumption holds.
       ==> (c = SPEC.secretbox_easy (create_zero_bytes (Plain.length #im #am.pm #i m)) (get_rawGT k) n))
   /\ ((dishonest im (ID i) \/ ~(b2t ae_ind_cpa)) // Concrete behaviour otherwise.
       ==> (eq2 #cipher c (SPEC.secretbox_easy (Plain.repr #im #am.pm #i m) (get_rawGT k) n)))
-  /\ MR.m_contains am.message_log h1  // A message is added to the log if the id is honest. This also guarantees nonce-uniqueness.
+  /\ MR.m_contains am.message_log h1  // A message is added to the log even if the id is dishonest. This also guarantees nonce-uniqueness.
   /\ MR.witnessed (MM.contains am.message_log (n,i) (c,m))
   /\ MR.m_sel h1 am.message_log == MM.upd (MR.m_sel h0 am.message_log) (n,i) (c,m)
-  ///\ log_freshness_invariant #im #pm am h1
+  /\ log_freshness_invariant #im am h1
 ))
 
-#set-options "--z3rlimit 900 --max_ifuel 1 --max_fuel 1"
+#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
 let encrypt #im am #i n k m =
   MR.m_recall am.message_log; recall_log im;
   lemma_honest_or_dishonest im (ID i);
@@ -308,7 +311,7 @@ val decrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:k
    )
   ))
 
-#set-options "--z3rlimit 1900 --max_ifuel 1 --max_fuel 0"
+//#set-options "--z3rlimit 1000 --max_ifuel 1 --max_fuel 0"
 let decrypt #im am #i n k c =
   MR.m_recall am.message_log;
   recall_log im;

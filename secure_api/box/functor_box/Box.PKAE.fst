@@ -47,7 +47,7 @@ let skey = ODH.skey
 let pkey_from_skey sk = ODH.get_pkey sk
 let compatible_keys sk pk = ODH.compatible_keys sk pk
 
-#set-options "--z3rlimit 900 --max_ifuel 2 --max_fuel 1"
+
 private noeq type aux_t' (im:index_module{ID.get_subId im == subId_t}) (pm:plain_module) (rgn:log_region im) =
   | AUX:
     am:AE.ae_module im ->
@@ -57,6 +57,7 @@ private noeq type aux_t' (im:index_module{ID.get_subId im == subId_t}) (pm:plain
 
 let aux_t im pm = aux_t' im pm
 
+#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
 val message_log_lemma: im:index_module -> rgn:log_region im -> Lemma
   (requires True)
   (ensures message_log im rgn === AE.message_log im rgn)
@@ -96,7 +97,6 @@ let create_aux im pm rgn =
   let om = ODH.create im km rgn in
   AUX am km om
 
-  
 assume val lemma_compatible_length: n:nat -> Lemma
   (requires valid_length n)
   (ensures n / Spec.Salsa20.blocklen < pow2 32)
@@ -117,7 +117,6 @@ let create rgn =
   let aux = create_aux im pm log_rgn in
   PKAE im pm log_rgn (enc im) (dec) aux
 
-
 type key (pkm:pkae_module) = AE.key pkm.im
 
 let zero_bytes = AE.create_zero_bytes
@@ -128,14 +127,17 @@ let pkey_to_subId_inj #pkm pk = ODH.lemma_pk_get_share_inj pk
 let nonce_is_fresh (pkm:pkae_module) (i:id pkm.im) (n:nonce) (h:mem) =
   AE.nonce_is_fresh pkm.aux.am i n h
 
+let invariant pkm =
+  Key.invariant pkm.im pkm.aux.km
 
 let gen pkm =
   ODH.keygen()
 
-#set-options "--z3rlimit 700 --max_ifuel 1 --max_fuel 1"
+#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
 let encrypt pkm #i n sk pk m =
   let k = ODH.prf_odh pkm.im pkm.aux.km pkm.aux.om sk pk in
   let c = AE.encrypt pkm.aux.am #i n k m in
+  let h = get() in assert(Key.invariant pkm.im pkm.aux.km h);
   ID.lemma_honest_or_dishonest pkm.im (ID.ID i);
   let honest_i = ID.get_honesty pkm.im (ID.ID i) in
   if not honest_i then ( 
