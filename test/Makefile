@@ -159,7 +159,8 @@ all-unit-tests-32:
 	$(MAKE) unit-tests-32-hacl-c
 	$(MAKE) unit-tests-32-gcc
 	$(MAKE) unit-tests-32-gcc-unrolled
-	$(MAKE) unit-tests-32-ccomp
+	# JK: FIXME, run unit-tests from CompCert
+	# $(MAKE) unit-tests-32-ccomp
 	# $(MAKE) unit-tests-32-msvc
 
 #
