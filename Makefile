@@ -91,14 +91,21 @@ test:
 # World
 #
 
-world: verify extract-specs extract-all build test package clean
+world: .clean-banner .clean-git .clean-snapshots
+	$(MAKE) verify
+	$(MAKE) extract-specs
+	$(MAKE) extract-all
+	$(MAKE) build
+	$(MAKE) test
+	$(MAKE) package
 
 #
 # CI
 #
 
 ci: .clean-banner .clean-git .clean-snapshots
-	$(MAKE) extract-specs
+	$(MAKE) extract-all
+	$(MAKE) build
 
 #
 # Clean
