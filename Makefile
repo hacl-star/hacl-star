@@ -94,6 +94,12 @@ test:
 world: verify extract-specs extract-all build test package clean
 
 #
+# CI
+#
+
+ci: world
+
+#
 # Clean
 #
 
