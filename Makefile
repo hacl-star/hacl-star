@@ -74,7 +74,9 @@ extract-all: snapshots-all
 .build-banner:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
 
-build: .build-banner build/libhacl.so build/libhacl32.so
+build: .build-banner
+	$(MAKE) build/libhacl.so
+	$(MAKE) build/libhacl32.so
 	mkdir -p build && cd build; \
 	cmake $(CMAKE_COMPILER_OPTION) .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
@@ -105,6 +107,7 @@ world: .clean-banner .clean-git .clean-snapshots
 
 ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) extract-all
+	$(MAKE) build
 
 #
 # Clean
