@@ -97,7 +97,8 @@ world: verify extract-specs extract-all build test package clean
 # CI
 #
 
-ci: .clean-banner .clean-git .clean-snapshots extract-specs
+ci: .clean-banner .clean-git .clean-snapshots
+	$(MAKE) -C extract-specs
 
 #
 # Clean
