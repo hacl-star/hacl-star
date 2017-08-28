@@ -79,7 +79,7 @@ build-make:
 	$(MAKE) build/libhacl32.so
 
 build-cmake:
-	mkdir -p build && cd build && cmake $(CMAKE_COMPILER_OPTION) .. && make
+	mkdir -p build && cd build && CC=gcc cmake $(CMAKE_COMPILER_OPTION) .. && make
 
 build:
 	$(MAKE) build-make
