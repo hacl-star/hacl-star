@@ -94,7 +94,7 @@ chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 	./chacha20poly1305.exe
 
 sha2.exe: Spec.SHA2.Test.fst
-	$(MAKE) lib
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p sha2-spec
 	$(FSTAR_EXTRACT) --odir sha2-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_Test.ml
@@ -102,7 +102,7 @@ sha2.exe: Spec.SHA2.Test.fst
 	./sha2.exe
 
 sha2_256.exe: Spec.SHA2_256.fst
-	$(MAKE) lib
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p sha2_256-spec
 	$(FSTAR_EXTRACT) --odir sha2_256-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2_256-spec/Spec_SHA2_256.ml
@@ -110,7 +110,7 @@ sha2_256.exe: Spec.SHA2_256.fst
 	./sha2_256.exe
 
 sha2_384.exe: Spec.SHA2_384.fst
-	$(MAKE) lib
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p sha2_384-spec
 	$(FSTAR_EXTRACT) --odir sha2_384-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2_384-spec/Spec_SHA2_384.ml
@@ -118,7 +118,7 @@ sha2_384.exe: Spec.SHA2_384.fst
 	./sha2_384.exe
 
 sha2_512.exe: Spec.SHA2_512.fst
-	$(MAKE) lib
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p sha2_512-spec
 	$(FSTAR_EXTRACT) --odir sha2_512-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2_512-spec/Spec_SHA2_512.ml
@@ -126,7 +126,7 @@ sha2_512.exe: Spec.SHA2_512.fst
 	./sha2_512.exe
 
 hmac_sha2.exe: Spec.HMAC.Test.fst
-	$(MAKE) lib
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p hmac-sha2-spec
 	$(FSTAR_EXTRACT) --odir hmac-sha2-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_Test.ml
@@ -134,7 +134,7 @@ hmac_sha2.exe: Spec.HMAC.Test.fst
 	./hmac_sha2.exe
 
 hmac_sha2_256.exe: Spec.HMAC.SHA2_256.fst
-	$(MAKE) lib
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p hmac-sha2_256-spec
 	$(FSTAR_EXTRACT) --odir hmac-sha2_256-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2_256-spec/Spec_HMAC_SHA2_256.ml
@@ -142,7 +142,7 @@ hmac_sha2_256.exe: Spec.HMAC.SHA2_256.fst
 	./hmac_sha2_256.exe
 
 hmac_sha2_384.exe: Spec.HMAC.SHA2_384.fst
-	$(MAKE) lib
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p hmac-sha2_384-spec
 	$(FSTAR_EXTRACT) --odir hmac-sha2_384-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2_384-spec/Spec_HMAC_SHA2_384.ml
@@ -150,7 +150,7 @@ hmac_sha2_384.exe: Spec.HMAC.SHA2_384.fst
 	./hmac_sha2_384.exe
 
 hmac_sha2_512.exe: Spec.HMAC.SHA2_512.fst
-	$(MAKE) lib
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p hmac-sha2_512-spec
 	$(FSTAR_EXTRACT) --odir hmac-sha2_512-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2_512-spec/Spec_HMAC_SHA2_512.ml
@@ -158,7 +158,7 @@ hmac_sha2_512.exe: Spec.HMAC.SHA2_512.fst
 	./hmac_sha2_512.exe
 
 ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
-	$(MAKE) lib
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p ed25519-spec
 	$(FSTAR_EXTRACT) --odir ed25519-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> ed25519-spec/Spec_Ed25519.ml
