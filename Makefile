@@ -97,14 +97,20 @@ world: verify extract-specs extract-all build test package clean
 # CI
 #
 
-ci: world
+ci: .clean-banner .clean-git .clean-snapshots world
 
 #
 # Clean
 #
 
+.clean-git:
+	git reset HEAD --hard
+	git clean -xffd
+
 .clean-banner:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
+
+.clean-snapshots: snapshots-remove
 
 clean-base:
 	rm -rf *~ *.tar.gz
@@ -114,8 +120,6 @@ clean-build:
 	rm -rf build-experimental
 
 clean-package: clean-base clean-build
-
-clean-snapshots: snapshots-remove
 
 clean: .clean-banner clean-base clean-build
 	$(MAKE) -C specs clean
