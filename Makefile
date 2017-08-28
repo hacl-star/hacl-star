@@ -105,7 +105,7 @@ ci: .clean-banner .clean-git .clean-snapshots extract-specs
 
 .clean-git:
 	git reset HEAD --hard
-	git clean -xffd
+	git clean -xfd
 
 .clean-banner:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
