@@ -89,14 +89,13 @@ snapshots-all:
 	$(MAKE) snapshots/snapshot-msvc
 	$(MAKE) snapshots/hacl-c
 
-# BB: I think it is time to remove that target ?
-# I liked 'update-snapshot' but it is inconsistant with current names
-# Maybe we can handle that directly in the top-level makefile ?
-snapshots-update: snapshots/hacl-c
-
 snapshots-remove:
 	rm -rf snapshots/hacl-c
 	rm -rf snapshots/snapshot*
+
+snapshots-update:
+	$(MAKE) snapshots-remove
+	$(MAKE) snapshots-all
 
 #
 # Building the shared library
