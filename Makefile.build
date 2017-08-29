@@ -24,7 +24,7 @@ extract-c-code-experimental:
 
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
-SNAPSHOT_FILES= snapshots/c/* \
+SNAPSHOT_FILES= $(addprefix snapshots/c/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile) \
 	$(addprefix code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
 	./code/curve25519/x25519-c/Curve25519.* \
 	./code/salsa-family/chacha-c/Chacha20.* \
