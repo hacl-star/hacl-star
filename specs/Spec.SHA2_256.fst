@@ -236,6 +236,61 @@ let lemma_update_multi_extend h0 block blocks =
   Seq.lemma_eq_intro (update_multi (update h0 block) blocks) (update_multi h0 (block @| blocks))
 
 
+#reset-options "--max_fuel 1 --z3rlimit 100 --using_facts_from FStar --using_facts_from Prims --using_facts_from Spec.SHA2_256"
+
+let lemma_update_multi_empty (h:hash_w) (empty:bytes{Seq.length empty = 0}) : Lemma
+  (ensures (update_multi h empty == h)) = ()
+
+let update_multi_one (h:hash_w) (b:bytes{Seq.length b = size_block}) : Lemma
+  (ensures (update_multi h b == update h b)) =
+  let block, rem = Seq.split b size_block in
+  assert (Seq.length rem == 0);
+  lemma_update_multi_empty (update h b) rem
+
+val update_multi_append:
+  hash:hash_w ->
+  blocks1:bytes{length blocks1 % size_block = 0} ->
+  blocks2:bytes{length blocks2 % size_block = 0} ->
+  Lemma
+    (requires True)
+    (ensures (update_multi (update_multi hash blocks1) blocks2 ==
+              update_multi hash (blocks1 @| blocks2)))
+    (decreases (length blocks1))
+let rec update_multi_append hash blocks1 blocks2 =
+  if Seq.length blocks1 = 0 then
+    begin
+    lemma_update_multi_empty hash blocks1;
+    Seq.append_empty_l blocks1;
+    Seq.lemma_eq_intro (blocks1 @| blocks2) blocks2
+    end
+  else
+    begin
+    (*
+      update_multi (update_multi hash blocks1) blocks2
+      == update_multi_def hash blocks1
+      update_multi (update_multi (update hash b) blocks1') blocks2
+      == update_multi_append (update hash b) blocks1' blocks2
+      update_multi (update hash b) (blocks1' @| blocks2)
+      == update_multi_def hash (blocks1 @| blocks2)
+      update_multi hash (blocks1 @| blocks2)
+    *)
+    let b , blocks1' = Seq.split_eq blocks1 size_block in
+    let b', blocks12 = Seq.split_eq (blocks1 @| blocks2) size_block in
+    Seq.append_assoc b blocks1' blocks2;
+    Seq.lemma_append_inj b (blocks1' @| blocks2) b' blocks12;
+    update_multi_append (update hash b) blocks1' blocks2
+    end
+
+val update_update_multi_append:
+  hash:hash_w ->
+  blocks:bytes{length blocks % size_block = 0} ->
+  b:bytes{length b = size_block} ->
+  Lemma
+    (update (update_multi hash blocks) b == update_multi hash (blocks @| b))
+let update_update_multi_append hash blocks b =
+  update_multi_append hash blocks b;
+  update_multi_one (update_multi hash blocks) b
+
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 val lemma_hash_all_prepend_block: (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length block + Seq.length msg < max_input_len_8}) -> Lemma
@@ -263,12 +318,6 @@ let lemma_hash_all_prepend_block block msg =
   assert(n' == n + 1);
   Seq.lemma_eq_intro (msg_last') (msg_last);
   Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
-
-
-#reset-options "--max_fuel 1 --z3rlimit 100"
-
-let lemma_update_multi_empty (h:hash_w) (empty:bytes{Seq.length empty = 0}) : Lemma
-  (ensures (update_multi h empty == h)) = ()
 
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
