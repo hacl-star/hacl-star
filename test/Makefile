@@ -30,7 +30,9 @@ CCOMP_OPTS=-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOUR
 # Unit tests
 #
 
-all: test-specs test-code test-vale test-vale-asm all-unit-tests all-unit-tests-32
+all: test-specs test-code test-vale test-vale-asm
+	$(MAKE) all-unit-tests
+	$(MAKE) all-unit-tests-32
 	$(MAKE) test-perf-all
 	#$(MAKE) test-pneutube
 	#$(MAKE) -C openssl-engine
