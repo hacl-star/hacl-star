@@ -69,6 +69,8 @@ hints:
 refresh-hints:
 	$(MAKE) -B hints
 
+ci:
+	$(MAKE) -C test
 
 
 # Check if GCC-7 is installed, uses GCC otherwise
