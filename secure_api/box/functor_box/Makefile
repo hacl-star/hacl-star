@@ -5,7 +5,8 @@ VERIFY= \
   Box.Plain \
 	Box.AE \
   Box.ODH \
-	Box.PKAE
+	Box.PKAE \
+  Box.Index
 LAX=
 
 FSTAR_INCLUDES+= \

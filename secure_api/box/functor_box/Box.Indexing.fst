@@ -259,12 +259,23 @@ let lemma_fresh im i h =
   ()
 
 val lemma_fresh2: im:index_module -> i:id im -> h:mem -> Lemma
-    (requires (let i1,i2 = i in
-    fresh im (SUBID i2) h
-    /\ fresh im (SUBID i1) h))
-    (ensures fresh im (ID i) h)
-    [SMTPat (fresh im (ID i) h)]
-let lemma_fresh2 im i h =
+  (requires (let i1,i2 = i in
+  fresh im (SUBID i2) h
+  /\ fresh im (SUBID i1) h))
+  (ensures fresh im (ID i) h)
+  [SMTPat (fresh im (ID i) h)]
+let lemma_fresh2 im i h = ()
+
+
+val lemma_registered_not_fresh: im:index_module -> i:id im -> ST unit
+  (requires fun h0 -> registered im (ID i))
+  (ensures fun h0 _ h1 -> h0 == h1 /\ ~(fresh im (ID i) h1))
+let lemma_registered_not_fresh im i = 
+  let i1,i2 = i in
+  assert(registered im (SUBID i1)); 
+  let h = get() in
+  MR.testify (MM.defined im.id_log i1);
+  assert(~(MM.fresh im.id_log i1 h));
   ()
 
 #set-options "--z3rlimit 900 --max_ifuel 1 --max_fuel 2"

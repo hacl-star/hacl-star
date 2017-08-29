@@ -97,7 +97,6 @@ type message_log_inv (im:index_module) (f:MM.map' (message_log_key im) (message_
 type message_log (im:index_module) (rgn:log_region im) =
   MM.t rgn (message_log_key im) (message_log_range im) (message_log_inv im)
 
-//#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
 abstract noeq type ae_module (im:index_module) =
   | AM :
     (pm:plain_module{get_plain pm == ae_plain /\ Plain.valid_length #pm == valid_length}) ->
@@ -146,19 +145,20 @@ abstract let log_freshness_invariant (#im:index_module) (am:ae_module im) (h:mem
   /\ MR.m_contains am.message_log h
   /\ (forall i n . ID.fresh im (ID i) h ==> MM.fresh am.message_log (n,i) h)
 
-#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
-val nonce_freshness_lemma: #im:index_module  -> am:ae_module im -> i:id im -> n:nonce -> h0:mem -> h1:mem -> Lemma
+#set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
+val lemma_nonce_freshness: #im:index_module  -> am:ae_module im -> i:id im -> n:nonce -> h0:mem -> h1:mem -> Lemma
   (requires nonce_is_fresh am i n h0)
   (ensures ((modifies (Set.singleton am.key_log_region) h0 h1 \/ h0 == h1) ==> nonce_is_fresh am i n h1))
-let nonce_freshness_lemma #im am i n h0 h1 =
+let lemma_nonce_freshness #im am i n h0 h1 =
  ()
 
 
- #set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 0"
-val invariant_lemma: #im:index_module -> am:ae_module im -> h0:mem -> h1:mem -> i:id im -> n:nonce -> y:message_log_range im (n,i) -> Lemma
-  (requires log_freshness_invariant #im am h0 /\ ~(MM.fresh am.message_log(n,i) h0))
-  (ensures (forall i' n'. (n',i')<>(n,i) /\ ~(MM.fresh am.message_log (n,i) h1) /\ (ID.fresh im (ID i') h1 ==> MM.fresh am.message_log (n',i') h1)) ==> (forall i n . ID.fresh im (ID i) h1 ==> MM.fresh am.message_log (n,i) h1))
-let invariant_lemma #im am h0 h1 i n y = ()
+#set-options "--z3refresh"
+val lemma_invariant_framing: #im:index_module -> am:ae_module im -> h0:mem -> h1:mem -> i:id im -> n:nonce -> y:message_log_range im (n,i) -> Lemma
+  (requires log_freshness_invariant #im am h0 /\ ~(ID.fresh im (ID i) h0))
+    (ensures (forall i' n'. (i'=i /\ ~(ID.fresh im (ID i) h1)) \/ // ~(MM.fresh am.message_log (n,i) h1) /\
+   (ID.fresh im (ID i') h1 ==> MM.fresh am.message_log (n',i') h1)) ==> (forall i n . ID.fresh im (ID i) h1 ==> MM.fresh am.message_log (n,i) h1))
+let lemma_invariant_framing #im am h0 h1 i n y = ()
 
 val create: im:index_module -> pm:plain_module{Plain.get_plain pm == ae_plain /\ Plain.valid_length #pm == valid_length} -> rgn:log_region im -> ST (am:ae_module im)
   (requires (fun h0 ->
@@ -265,10 +265,14 @@ val encrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:k
   /\ log_freshness_invariant #im am h1
 ))
 
-#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
+ #set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
 let encrypt #im am #i n k m =
+  let h0 =get() in
   MR.m_recall am.message_log; recall_log im;
   lemma_honest_or_dishonest im (ID i);
+  assert(log_freshness_invariant #im am h0);
+  lemma_registered_not_fresh im i;
+  assert(~(ID.fresh im (ID i) h0));
   let honest_i = get_honesty im (ID i) in
   let p =
     if honest_i && ae_ind_cpa then (
@@ -281,6 +285,11 @@ let encrypt #im am #i n k m =
   MR.m_recall am.message_log;
   recall_log im;
   MM.extend am.message_log (n,i) (c,m);
+  lemma_registered_not_fresh im i;
+  let h1=get() in 
+  assert(~(ID.fresh im (ID i) h1)); 
+  lemma_invariant_framing #im am h0 h1 i n (c,m);
+  admit();
   c
 
 (**
