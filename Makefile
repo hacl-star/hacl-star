@@ -98,6 +98,8 @@ test:
 # World
 #
 
+.base: verify extract-specs extract-all
+
 world: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) verify
 	$(MAKE) extract-specs
@@ -111,9 +113,7 @@ world: .clean-banner .clean-git .clean-snapshots
 #
 
 ci: .clean-banner .clean-git .clean-snapshots
-	$(MAKE) verify
-	$(MAKE) extract-specs
-	$(MAKE) extract-all
+	$(MAKE) .base
 	$(MAKE) build-make
 	$(MAKE) test
 	$(MAKE) package
