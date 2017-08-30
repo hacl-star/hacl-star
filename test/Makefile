@@ -30,16 +30,23 @@ CCOMP_OPTS=-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOUR
 # Unit tests
 #
 
-all: test-specs test-code test-vale test-vale-asm
-	$(MAKE) all-unit-tests
-	$(MAKE) all-unit-tests-32
-	$(MAKE) test-perf-all
-	#$(MAKE) test-pneutube
-	#$(MAKE) -C openssl-engine
-	#$(MAKE) test-snapshot
-	#$(MAKE) test-ccomp
-	#$(MAKE) test-gcc
-	#$(MAKE) test-gcc-unrolled
+all:
+	$(MAKE) test-specs        # Previously extract-specs
+	$(MAKE) test-code         # Previously 'make -C ../code test'
+	$(MAKE) test-vale         # Previously not tested
+	$(MAKE) test-vale-asm     # Previously 'make compile-vale'
+	$(MAKE) -C openssl-engine
+	$(MAKE) unit-tests-hacl-c  # Previously 'make unit-tests' for 'hacl-c'
+	$(MAKE) unit-tests-32-hacl-c  # Previously 'make unit-tests' for 'hacl-c'
+
+# Improvements
+# $(MAKE) all-unit-tests
+# $(MAKE) all-unit-tests-32
+# $(MAKE) test-perf-all
+# $(MAKE) test-pneutube     # Previously 'make extract-c-apps'
+
+# Note
+# 'extract-all-c' 'ct' 'verify-all' are now invoked at top-level
 
 #
 # Tests for specifications
