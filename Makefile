@@ -111,7 +111,12 @@ world: .clean-banner .clean-git .clean-snapshots
 #
 
 ci: .clean-banner .clean-git .clean-snapshots
+	$(MAKE) verify
+	$(MAKE) extract-specs
+	$(MAKE) extract-all
+	$(MAKE) build-make
 	$(MAKE) test
+	$(MAKE) package
 
 #
 # Clean
