@@ -31,7 +31,6 @@ CCOMP_OPTS=-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOUR
 #
 
 all:
-	$(MAKE) test-specs        # Previously extract-specs
 	$(MAKE) test-code         # Previously 'make -C ../code test'
 	$(MAKE) test-vale         # Previously not tested
 	$(MAKE) test-vale-asm     # Previously 'make compile-vale'
@@ -46,7 +45,7 @@ all:
 # $(MAKE) test-pneutube     # Previously 'make extract-c-apps'
 
 # Note
-# 'extract-all-c' 'ct' 'verify-all' are now invoked at top-level
+# 'extract-all-c' 'ct' 'verify-all' 'extract-specs' are now invoked at top-level
 
 #
 # Tests for specifications
