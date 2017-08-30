@@ -2,82 +2,193 @@
 # Main HACL* Makefile
 #
 
-.PHONY: display verify clean
+.PHONY: display verify test clean
 
 all: display
 
 display:
 	@echo "HaCl* Makefile:"
-	@echo "- 0 - 'make verify' will run F* verification on all specs, code and secure-api directories"
-	@echo "- 1 - 'make verify-specs' will run F* verification on the specifications"
-	@echo "- 2 - 'make verify-code' will run F* verification on the code against the specification"
-	@echo "- 3 - 'make extract' will generate all the C code and test it (no verification)"
-	@echo "- 4 - 'make build' will generate both static and shared libraries (no verification)"
-	@echo "- 5 - 'make prepare' will install F* and Kremlin (Requirements are still needed)"
-
+	@echo "- 'verify' will run F* verification on all specs, code and secure-api directories"
+	@echo "- 'extract' will generate all the C code into a snapshot and test it (no verification)"
+	@echo "- 'build' will generate both static and shared libraries (no verification)"
+	@echo "- 'test' will generate and test everything (no verification)"
+	@echo "- 'world' will run everything (except make prepare)"
+	@echo "- 'clean' will remove all artifacts of other targets"
+	@echo ""
+	@echo "Specialized targets for Experts:"
+	@echo "- 'verify-ct' will run F* verification of the code for the side-channel resistance"
+	@echo "- 'verify-specs' will run F* verification on the specifications"
+	@echo "- 'verify-code' will run F* verification on the code against the specification"
+	@echo "- 'verify-secure_api' will run F* verification of the secure_api directory"
+	@echo "- 'extract-specs' will generate OCaml code for the specifications"
+	@echo "- 'extract-c-code' will generate C code for all the stable primitives"
+	@echo "- 'extract-c-code-experimental' will generate C code for experimental primitives"
+	@echo "- 'extract-all' will generate all versions of the C snapshots available"
+	@echo "- 'prepare' will install F* and Kremlin (Requirements are still needed)"
+	@echo "- 'clean-snapshots' will remove all snapshots"
 
 #
-# Verification targets
+# Includes
 #
 
-extract:
-	$(MAKE) -C test snapshot
+include Makefile.include
+include Makefile.build
 
-%.verify-dir: %
-	$(MAKE) -C $^ verify
+#
+# Verification
+#
 
-verify-specs: specs.verify-dir
-verify-code: code.verify-dir
-verify: code.verify-dir secure_api.verify-dir specs.verify-dir
+.verify-banner:
+	@echo $(CYAN)"# Verification of the HaCl*"$(NORMAL)
 
-clean:
+verify-ct:
+	$(MAKE) -C code ct
+
+verify-specs: specs.dir-verify
+verify-code: code.dir-verify
+verify-secure_api: secure_api.dir-verify
+
+verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
+	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
+
+#
+# Code generation
+#
+
+.extract-banner:
+	@echo $(CYAN)"# Generation of the HaCl* verified C code"$(NORMAL)
+	@echo $(CYAN)" (This is not running formal verification)"$(NORMAL)
+
+extract: .extract-banner snapshots/hacl-c
+	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/hacl-c'."$(NORMAL)
+
+extract-specs:
+	$(MAKE) -C specs
+
+extract-all: snapshots-all
+
+#
+# Compilation of the library
+#
+
+.build-banner:
+	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
+
+build-make:
+	$(MAKE) build/libhacl.so
+	$(MAKE) build/libhacl32.so
+
+build-cmake:
+	mkdir -p build && cd build && CC=gcc cmake $(CMAKE_COMPILER_OPTION) .. && make
+
+build:
+	$(MAKE) build-make
+	$(MAKE) build-cmake
+	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
+
+#
+# Test specification and code
+#
+
+test:
+	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
+	$(MAKE) -C test
+
+#
+# World
+#
+
+.base: verify extract-specs extract-all
+
+world: .clean-banner .clean-git .clean-snapshots
+	$(MAKE) verify
+	$(MAKE) extract-specs
+	$(MAKE) extract-all
+	$(MAKE) build
+	$(MAKE) test
+	$(MAKE) package
+
+#
+# CI
+#
+
+ci: .clean-banner .clean-git .clean-snapshots
+	$(MAKE) .base
+	$(MAKE) build-make
+	$(MAKE) test
+	$(MAKE) package
+
+#
+# Clean
+#
+
+.clean-banner:
 	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
-	rm -rf *~
+
+.clean-git:
+	git reset HEAD --hard
+	git clean -xfd
+
+.clean-snapshots: snapshots-remove
+
+clean-base:
+	rm -rf *~ *.tar.gz
+
+clean-build:
 	rm -rf build
 	rm -rf build-experimental
+
+clean-package: clean-base clean-build
+
+clean: .clean-banner clean-base clean-build
 	$(MAKE) -C specs clean
 	$(MAKE) -C code clean
 	$(MAKE) -C secure_api clean
 	$(MAKE) -C apps clean
 	$(MAKE) -C test clean
 
+#
+# Installation helper
+#
+
+prepare:
+	@echo "# Installing OCaml packages required by F*"
+	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
+	@echo "# Installing OCaml packages required by KreMLin"
+	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
+	@echo "# Installing submodules for F* and KreMLin"
+	git submodule update --init
+	@echo "# Compiling and Installing F*"
+	$(MAKE) -C dependencies/FStar/src/ocaml-output
+	$(MAKE) -C dependencies/FStar/ulib/ml
+	@echo "# Compiling and Installing KreMLin"
+	$(MAKE) -C dependencies/kremlin
 
 #
-# Undocumented targets (voluntarily)
+# Packaging helper
 #
 
-include Makefile.build
+.package-banner:
+	@echo $(CYAN)"# Packaging the HaCl* generated code"$(NORMAL)
+	@echo $(CYAN)"  Make sure you have run verification before !"$(NORMAL)
 
-build:
-	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
-	mkdir -p build && cd build; \
-	cmake $(CMAKE_COMPILER_OPTION) .. && make
-	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
+package: .package-banner snapshots/hacl-c build
+	mkdir -p hacl
+	cp build/lib* hacl
+	cp -r snapshots/hacl-c/* hacl
+	tar -zcvf hacl-star.tar.gz hacl
+	rm -rf hacl
+	@echo $(CYAN)"\nDone ! Generated archive is 'hacl-star.tar.gz'. !"$(NORMAL)
+
+#
+# Undocumented targets
+#
 
 experimental:
 	@echo $(CYAN)"# Compiling the HaCl* library (with experimental features)"$(NORMAL)
 	mkdir -p build-experimental && cd build-experimental; \
-	c$(MAKE) $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
+	cmake $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build-experimental'."$(NORMAL)
 
-hints:
-	$(MAKE) -C code hints
-	$(MAKE) -C secure_api hints
-	$(MAKE) -C specs hints
-	$(MAKE) -C test hints
+hints: code.dir-hints secure_api.dir-hints specs.dir-hints
 
-refresh-hints:
-	$(MAKE) -B hints
-
-ci:
-	$(MAKE) -C test
-
-
-# Check if GCC-7 is installed, uses GCC otherwise
-GCC_EXEC := $(shell gcc-7 --version 2>/dev/null | cut -c -5 | head -n 1)
-ifdef GCC_EXEC
-   CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=gcc-7
-endif
-
-NORMAL="\\033[0;39m"
-CYAN="\\033[1;36m"

@@ -1,4 +1,4 @@
-include ../Makefile.include
+include ../../Makefile.include
 
 BIGNUM_FILES= \
 	Hacl.Bignum.Limb.fst \
@@ -16,7 +16,7 @@ BIGNUM_FILES= \
 	Hacl.Bignum.Fscalar.fst \
 	Hacl.Bignum.Fproduct.fst \
 	Hacl.Bignum.Fmul.fst \
-	Hacl.Bignum.fst 
+	Hacl.Bignum.fst
 #	Hacl.Bignum.Constants.fsti \
 	Hacl.Bignum.Parameters.fsti \
 	Hacl.Bignum.Modulo.fsti \

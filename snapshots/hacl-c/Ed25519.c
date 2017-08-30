@@ -1864,7 +1864,7 @@ Hacl_Impl_Ed25519_RecoverX_recover_x_(uint64_t *x, uint64_t *y, uint64_t sign1, 
   uint64_t *x20 = tmp;
   uint64_t x0 = y[0];
   uint64_t x1 = y[1];
-  uint64_t x21 = y[2];
+  uint64_t x2 = y[2];
   uint64_t x30 = y[3];
   uint64_t x4 = y[4];
   bool
@@ -1872,12 +1872,11 @@ Hacl_Impl_Ed25519_RecoverX_recover_x_(uint64_t *x, uint64_t *y, uint64_t sign1, 
     x0
     >= (uint64_t )0x7ffffffffffed
     && x1 == (uint64_t )0x7ffffffffffff
-    && x21 == (uint64_t )0x7ffffffffffff
+    && x2 == (uint64_t )0x7ffffffffffff
     && x30 == (uint64_t )0x7ffffffffffff
     && x4 == (uint64_t )0x7ffffffffffff;
-  bool res;
   if (b)
-    res = false;
+    return false;
   else
   {
     uint64_t tmp0[25] = { 0 };
@@ -1913,68 +1912,58 @@ Hacl_Impl_Ed25519_RecoverX_recover_x_(uint64_t *x, uint64_t *y, uint64_t sign1, 
     }
     else
       z = (uint8_t )2;
-    bool ite0;
     if (z == (uint8_t )0)
-      ite0 = false;
+      return false;
+    else if (z == (uint8_t )1)
+      return true;
     else
     {
-      bool ite1;
-      if (z == (uint8_t )1)
-        ite1 = true;
+      uint64_t *x2 = tmp;
+      uint64_t *x30 = tmp + (uint32_t )5;
+      uint64_t *t00 = tmp + (uint32_t )10;
+      uint64_t *t10 = tmp + (uint32_t )15;
+      Hacl_Impl_Ed25519_Pow2_252m2_pow2_252m2(x30, x2);
+      Hacl_Bignum25519_fsquare(t00, x30);
+      memcpy(t10, x2, (uint32_t )5 * sizeof x2[0]);
+      Hacl_Bignum25519_fdifference(t10, t00);
+      Hacl_Bignum25519_reduce_513(t10);
+      Hacl_Bignum25519_reduce(t10);
+      bool t1_is_0 = Hacl_Impl_Ed25519_RecoverX_is_0(t10);
+      if (t1_is_0)
+      {
+        
+      }
       else
       {
-        uint64_t *x2 = tmp;
-        uint64_t *x30 = tmp + (uint32_t )5;
-        uint64_t *t00 = tmp + (uint32_t )10;
-        uint64_t *t10 = tmp + (uint32_t )15;
-        Hacl_Impl_Ed25519_Pow2_252m2_pow2_252m2(x30, x2);
-        Hacl_Bignum25519_fsquare(t00, x30);
-        memcpy(t10, x2, (uint32_t )5 * sizeof x2[0]);
-        Hacl_Bignum25519_fdifference(t10, t00);
-        Hacl_Bignum25519_reduce_513(t10);
-        Hacl_Bignum25519_reduce(t10);
-        bool t1_is_0 = Hacl_Impl_Ed25519_RecoverX_is_0(t10);
-        if (t1_is_0)
-        {
-          
-        }
-        else
-        {
-          uint64_t sqrt_m1[5] = { 0 };
-          Hacl_Lib_Create64_make_h64_5(sqrt_m1,
-            (uint64_t )0x00061b274a0ea0b0,
-            (uint64_t )0x0000d5a5fc8f189d,
-            (uint64_t )0x0007ef5e9cbd0c60,
-            (uint64_t )0x00078595a6804c9e,
-            (uint64_t )0x0002b8324804fc1d);
-          Hacl_Bignum25519_fmul(x30, x30, sqrt_m1);
-        }
-        Hacl_Bignum25519_reduce(x30);
-        uint64_t *x20 = tmp;
-        uint64_t *x3 = tmp + (uint32_t )5;
-        uint64_t *t0 = tmp + (uint32_t )10;
-        uint64_t *t1 = tmp + (uint32_t )15;
-        Hacl_Bignum25519_fsquare(t0, x3);
-        memcpy(t1, x20, (uint32_t )5 * sizeof x20[0]);
-        Hacl_Bignum25519_fdifference(t1, t0);
-        Hacl_Bignum25519_reduce_513(t1);
-        Hacl_Bignum25519_reduce(t1);
-        bool z1 = Hacl_Impl_Ed25519_RecoverX_is_0(t1);
-        bool ite;
-        if (z1 == false)
-          ite = false;
-        else
-        {
-          Hacl_Impl_Ed25519_RecoverX_recover_x_step_5(x, sign1, tmp);
-          ite = true;
-        }
-        ite1 = ite;
+        uint64_t sqrt_m1[5] = { 0 };
+        Hacl_Lib_Create64_make_h64_5(sqrt_m1,
+          (uint64_t )0x00061b274a0ea0b0,
+          (uint64_t )0x0000d5a5fc8f189d,
+          (uint64_t )0x0007ef5e9cbd0c60,
+          (uint64_t )0x00078595a6804c9e,
+          (uint64_t )0x0002b8324804fc1d);
+        Hacl_Bignum25519_fmul(x30, x30, sqrt_m1);
       }
-      ite0 = ite1;
+      Hacl_Bignum25519_reduce(x30);
+      uint64_t *x20 = tmp;
+      uint64_t *x3 = tmp + (uint32_t )5;
+      uint64_t *t0 = tmp + (uint32_t )10;
+      uint64_t *t1 = tmp + (uint32_t )15;
+      Hacl_Bignum25519_fsquare(t0, x3);
+      memcpy(t1, x20, (uint32_t )5 * sizeof x20[0]);
+      Hacl_Bignum25519_fdifference(t1, t0);
+      Hacl_Bignum25519_reduce_513(t1);
+      Hacl_Bignum25519_reduce(t1);
+      bool z1 = Hacl_Impl_Ed25519_RecoverX_is_0(t1);
+      if (z1 == false)
+        return false;
+      else
+      {
+        Hacl_Impl_Ed25519_RecoverX_recover_x_step_5(x, sign1, tmp);
+        return true;
+      }
     }
-    res = ite0;
   }
-  return res;
 }
 
 static bool Hacl_Impl_Ed25519_RecoverX_recover_x(uint64_t *x, uint64_t *y, uint64_t sign1)

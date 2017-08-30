@@ -1,28 +1,6 @@
 #include "SHA2_512.h"
 
-void
-Hacl_Hash_Lib_LoadStore_uint32s_from_be_bytes(uint32_t *output, uint8_t *input, uint32_t len)
-{
-  for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
-  {
-    uint8_t *x0 = input + (uint32_t )4 * i;
-    uint32_t inputi = load32_be(x0);
-    output[i] = inputi;
-  }
-}
-
-void
-Hacl_Hash_Lib_LoadStore_uint32s_to_be_bytes(uint8_t *output, uint32_t *input, uint32_t len)
-{
-  for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
-  {
-    uint32_t hd1 = input[i];
-    uint8_t *x0 = output + (uint32_t )4 * i;
-    store32_be(x0, hd1);
-  }
-}
-
-void
+static void
 Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(uint64_t *output, uint8_t *input, uint32_t len)
 {
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
@@ -33,7 +11,7 @@ Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(uint64_t *output, uint8_t *input, 
   }
 }
 
-void
+static void
 Hacl_Hash_Lib_LoadStore_uint64s_to_be_bytes(uint8_t *output, uint64_t *input, uint32_t len)
 {
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
@@ -189,8 +167,8 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
   uint64_t *counter_w = state + (uint32_t )168;
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint64_t uu____212 = data_w[i];
-    ws_w[i] = uu____212;
+    uint64_t uu____242 = data_w[i];
+    ws_w[i] = uu____242;
   }
   for (uint32_t i = (uint32_t )16; i < (uint32_t )80; i = i + (uint32_t )1)
   {
@@ -254,52 +232,52 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
     p2[3] = g;
   }
   {
-    uint64_t uu____795 = hash_w[0];
-    uint64_t uu____798 = hash_0[0];
-    uint64_t uu____794 = uu____795 + uu____798;
-    hash_w[0] = uu____794;
+    uint64_t uu____871 = hash_w[0];
+    uint64_t uu____874 = hash_0[0];
+    uint64_t uu____870 = uu____871 + uu____874;
+    hash_w[0] = uu____870;
   }
   {
-    uint64_t uu____795 = hash_w[1];
-    uint64_t uu____798 = hash_0[1];
-    uint64_t uu____794 = uu____795 + uu____798;
-    hash_w[1] = uu____794;
+    uint64_t uu____871 = hash_w[1];
+    uint64_t uu____874 = hash_0[1];
+    uint64_t uu____870 = uu____871 + uu____874;
+    hash_w[1] = uu____870;
   }
   {
-    uint64_t uu____795 = hash_w[2];
-    uint64_t uu____798 = hash_0[2];
-    uint64_t uu____794 = uu____795 + uu____798;
-    hash_w[2] = uu____794;
+    uint64_t uu____871 = hash_w[2];
+    uint64_t uu____874 = hash_0[2];
+    uint64_t uu____870 = uu____871 + uu____874;
+    hash_w[2] = uu____870;
   }
   {
-    uint64_t uu____795 = hash_w[3];
-    uint64_t uu____798 = hash_0[3];
-    uint64_t uu____794 = uu____795 + uu____798;
-    hash_w[3] = uu____794;
+    uint64_t uu____871 = hash_w[3];
+    uint64_t uu____874 = hash_0[3];
+    uint64_t uu____870 = uu____871 + uu____874;
+    hash_w[3] = uu____870;
   }
   {
-    uint64_t uu____795 = hash_w[4];
-    uint64_t uu____798 = hash_0[4];
-    uint64_t uu____794 = uu____795 + uu____798;
-    hash_w[4] = uu____794;
+    uint64_t uu____871 = hash_w[4];
+    uint64_t uu____874 = hash_0[4];
+    uint64_t uu____870 = uu____871 + uu____874;
+    hash_w[4] = uu____870;
   }
   {
-    uint64_t uu____795 = hash_w[5];
-    uint64_t uu____798 = hash_0[5];
-    uint64_t uu____794 = uu____795 + uu____798;
-    hash_w[5] = uu____794;
+    uint64_t uu____871 = hash_w[5];
+    uint64_t uu____874 = hash_0[5];
+    uint64_t uu____870 = uu____871 + uu____874;
+    hash_w[5] = uu____870;
   }
   {
-    uint64_t uu____795 = hash_w[6];
-    uint64_t uu____798 = hash_0[6];
-    uint64_t uu____794 = uu____795 + uu____798;
-    hash_w[6] = uu____794;
+    uint64_t uu____871 = hash_w[6];
+    uint64_t uu____874 = hash_0[6];
+    uint64_t uu____870 = uu____871 + uu____874;
+    hash_w[6] = uu____870;
   }
   {
-    uint64_t uu____795 = hash_w[7];
-    uint64_t uu____798 = hash_0[7];
-    uint64_t uu____794 = uu____795 + uu____798;
-    hash_w[7] = uu____794;
+    uint64_t uu____871 = hash_w[7];
+    uint64_t uu____874 = hash_0[7];
+    uint64_t uu____870 = uu____871 + uu____874;
+    hash_w[7] = uu____870;
   }
   uint64_t c0 = counter_w[0];
   uint64_t one1 = (uint64_t )(uint32_t )1;
@@ -309,49 +287,50 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
 static void Hacl_Hash_SHA2_512_update_multi(uint64_t *state, uint8_t *data, uint32_t n1)
 {
   if (n1 == (uint32_t )0)
-    return;
+  {
+    
+  }
   else
   {
     uint8_t *b = data;
-    uint8_t *data1 = data + (uint32_t )128;
+    uint8_t *data_ = data + (uint32_t )128;
     Hacl_Hash_SHA2_512_update(state, b);
-    Hacl_Hash_SHA2_512_update_multi(state, data1, n1 - (uint32_t )1);
-    return;
+    Hacl_Hash_SHA2_512_update_multi(state, data_, n1 - (uint32_t )1);
   }
 }
 
 static void Hacl_Hash_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint64_t len)
 {
   uint8_t blocks[256] = { 0 };
-  K___uint32_t_uint8_t_ uu____2014;
+  uint32_t nb;
   if (len < (uint64_t )112)
-    uu____2014 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )128 });
+    nb = (uint32_t )1;
   else
-    uu____2014 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
-  K___uint32_t_uint8_t_ scrut = uu____2014;
-  uint32_t nb = scrut.fst;
-  uint8_t *final_blocks = scrut.snd;
+    nb = (uint32_t )2;
+  uint8_t *final_blocks;
+  if (len < (uint64_t )112)
+    final_blocks = blocks + (uint32_t )128;
+  else
+    final_blocks = blocks;
   memcpy(final_blocks, data, (uint32_t )len * sizeof data[0]);
   uint64_t n1 = state[168];
   uint8_t *padding = final_blocks + (uint32_t )len;
+  FStar_UInt128_uint128 encodedlen;
+  FStar_UInt128_uint128 ret0;
+  FStar_UInt128_uint128 ret1;
+  FStar_Int_Cast_Full_uint64_to_uint128(len, &ret1);
+  FStar_UInt128_uint128 s1 = ret1;
+  FStar_UInt128_uint128 ret;
+  FStar_UInt128_mul_wide(n1, (uint64_t )(uint32_t )128, &ret);
+  FStar_UInt128_uint128 s0 = ret;
+  FStar_UInt128_add(&s0, &s1, &ret0);
+  FStar_UInt128_uint128 s00 = ret0;
+  FStar_UInt128_shift_left(&s00, (uint32_t )3, &encodedlen);
   uint32_t
-  pad0len =
-    ((uint32_t )128 - ((uint32_t )len + (uint32_t )16 + (uint32_t )1) % (uint32_t )128)
-    % (uint32_t )128;
+  pad0len = ((uint32_t )256 - ((uint32_t )len + (uint32_t )16 + (uint32_t )1)) % (uint32_t )128;
   uint8_t *buf1 = padding;
   (void )(padding + (uint32_t )1);
   uint8_t *buf2 = padding + (uint32_t )1 + pad0len;
-  FStar_UInt128_t encodedlen;
-  FStar_UInt128_t ret0;
-  FStar_UInt128_t ret1;
-  FStar_Int_Cast_uint64_to_uint128(len, &ret1);
-  FStar_UInt128_t s1 = ret1;
-  FStar_UInt128_t ret;
-  FStar_UInt128_mul_wide(n1, (uint64_t )(uint32_t )128, &ret);
-  FStar_UInt128_t s0 = ret;
-  FStar_UInt128_add(&s0, &s1, &ret0);
-  FStar_UInt128_t s00 = ret0;
-  FStar_UInt128_shift_left(&s00, (uint32_t )3, &encodedlen);
   buf1[0] = (uint8_t )0x80;
   store128_be(buf2, &encodedlen);
   Hacl_Hash_SHA2_512_update_multi(state, final_blocks, nb);
@@ -361,7 +340,6 @@ static void Hacl_Hash_SHA2_512_finish(uint64_t *state, uint8_t *hash1)
 {
   uint64_t *hash_w = state + (uint32_t )160;
   Hacl_Hash_Lib_LoadStore_uint64s_to_be_bytes(hash1, hash_w, (uint32_t )8);
-  return;
 }
 
 static void Hacl_Hash_SHA2_512_hash(uint8_t *hash1, uint8_t *input, uint32_t len)
@@ -413,36 +391,30 @@ uint32_t SHA2_512_pos_count_w = (uint32_t )168;
 void SHA2_512_init(uint64_t *state)
 {
   Hacl_Hash_SHA2_512_init(state);
-  return;
 }
 
 void SHA2_512_update(uint64_t *state, uint8_t *data)
 {
   Hacl_Hash_SHA2_512_update(state, data);
-  return;
 }
 
 void SHA2_512_update_multi(uint64_t *state, uint8_t *data, uint32_t n1)
 {
   Hacl_Hash_SHA2_512_update_multi(state, data, n1);
-  return;
 }
 
 void SHA2_512_update_last(uint64_t *state, uint8_t *data, uint64_t len)
 {
   Hacl_Hash_SHA2_512_update_last(state, data, len);
-  return;
 }
 
 void SHA2_512_finish(uint64_t *state, uint8_t *hash1)
 {
   Hacl_Hash_SHA2_512_finish(state, hash1);
-  return;
 }
 
 void SHA2_512_hash(uint8_t *hash1, uint8_t *input, uint32_t len)
 {
   Hacl_Hash_SHA2_512_hash(hash1, input, len);
-  return;
 }
 

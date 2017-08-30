@@ -17,21 +17,30 @@ test/hash/sha256
 test/hmac/ml/*
 test/hmac/*.exe
 test/hmac/hmac_sha256
+test/bench.txt
 
 pneutube/tube-star.exe
 pneutube/tube-star.exe.dSYM/
 pneutube/tube/
 
-chacha-poly-spec/
-chacha-spec/
-curve25519-spec/
-ed25519-spec/
-gf128-spec/
-poly-spec/
-salsa-spec/
-sha2-spec/
-hmac-sha2-spec/
+specs/chacha-poly-spec/
+specs/chacha-spec/
+specs/curve25519-spec/
+specs/ed25519-spec/
+specs/gf128-spec/
+specs/poly-spec/
+specs/salsa-spec/
+specs/sha2-spec/
+specs/hmac-sha2-spec/
+specs/sha2_256-spec/
+specs/sha2_384-spec/
+specs/sha2_512-spec/
+specs/hmac-sha2_256-spec/
+specs/hmac-sha2_384-spec/
+specs/hmac-sha2_512-spec/
 
+code/lib/kremlin/ccomp-c/
+code/lib/kremlin/lib-c/
 code/lib/ml/hacllib.a
 code/lib/ml/hacllib.cmxa
 code/lib/ml/*.cmi
@@ -57,6 +66,8 @@ code/salsa-family/salsa-c/
 code/salsa-family/xsalsa-c/
 
 secure_api/LowCProvider/.depend
+secure_api/tmp-hacl/
+secure_api/tmp-vale/
 
 snapshots/hacl-c/bench.txt
 

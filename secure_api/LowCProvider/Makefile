@@ -1,4 +1,4 @@
-include ../../code/Makefile.include
+include ../../Makefile.include
 
 CONTRIB=ucontrib
 PLATFORM = $(FSTAR_HOME)/$(CONTRIB)/Platform/ml
