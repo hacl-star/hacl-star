@@ -52,14 +52,17 @@ noeq type index_module =
     id_log: (id_log_t rgn id) ->
     index_module
 
-val recall_log: im:index_module -> ST unit
-  (requires (fun h0 -> True))
-  (ensures (fun h0 _ h1 ->
-    h0 == h1
-    /\ MR.m_contains im.id_log h1
-  ))
-let recall_log im =
-  MR.m_recall im.id_log
+// val recall_log: im:index_module -> ST unit
+//   (requires (fun h0 -> True))
+//   (ensures (fun h0 _ h1 ->
+//     h0 == h1
+//     /\ (let id_log: (id_log_t im.rgn im.id) = im.id_log in MR.m_contains id_log h1)
+//   ))
+// let recall_log im =
+//   let id_log:FStar.Monotonic.RRef.m_rref (im.rgn)
+//     (MM.map (im.id) id_log_range (id_log_inv (im.id)))
+//     MM.grows = im.id_log in
+//   MR.m_recall im.id_log
 
 val registered: (#rgn:id_log_region) -> #id:eqtype -> id_log:(id_log_t rgn id) -> (i:id) -> Tot Type0
 let registered #rgn #id id_log i =
@@ -128,7 +131,7 @@ let rec lemma_honest_or_dishonest im i =
     else
       MR.testify (MM.contains im.id_log i false)
 
-val fresh: #rgn:id_log_region -> #id:eqtype -> id_log:(id_log_t rgn id) ->
+private val fresh: #rgn:id_log_region -> #id:eqtype -> id_log:(id_log_t rgn id) ->
            i:id ->
            h:mem ->
            (t:Type0{
