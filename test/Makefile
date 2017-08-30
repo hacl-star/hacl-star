@@ -52,6 +52,7 @@ all:
 #
 
 test-specs:
+	$(MAKE) -C ../specs clean
 	$(MAKE) -C ../specs
 
 #
@@ -59,6 +60,7 @@ test-specs:
 #
 
 test-code:
+	$(MAKE) -C ../code clean
 	$(MAKE) -C ../code test
 
 #
