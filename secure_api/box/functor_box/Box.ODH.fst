@@ -15,7 +15,7 @@ open Crypto.Symmetric.Bytes
 
 open Box.Flags
 open Box.Key
-open Box.Indexing
+open Box.Index
 open Box.Plain
 
 module MR = FStar.Monotonic.RRef
@@ -26,7 +26,7 @@ module HSalsa = Spec.HSalsa20
 module Curve = Spec.Curve25519
 module Plain = Box.Plain
 module Key = Box.Key
-module ID = Box.Indexing
+module ID = Box.Index
 module LE = FStar.Endianness
 
 let dh_element_size = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
@@ -61,14 +61,14 @@ private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
 
 let share_from_exponent dh_exp = Curve.scalarmult dh_exp (createL dh_basepoint)
 
-abstract noeq type odh_module' (im:index_module) (km:key_module im) = // require subId type to be dh_share?
+abstract noeq type odh_module' (im:index_module) (imk:key_index_module) (km:key_module imk) = // require subId type to be dh_share?
   | ODH:
     rgn:(r:HH.rid) ->
-    odh_module' im km
+    odh_module' im imk km
 
 let odh_module = odh_module'
 
-let create im km rgn =
+let create im imk km rgn =
   ODH rgn
 
 noeq abstract type pkey' =
@@ -115,8 +115,17 @@ let coerce_keypair im dh_ex =
   let sk = SKEY dh_ex pk in
   pk,sk
 
-let prf_odhGT im sk pk =
-  let i = compose_ids im pk.pk_share sk.pk.pk_share in
+let compose_ids s1 s2 =
+  if smaller s1 s2 then
+     let i = (s1,s2) in
+     i
+  else
+    (total_order_lemma s1 s2;
+    let i = (s2,s1) in
+    i)
+
+let prf_odhGT sk pk =
+  let i = compose_ids pk.pk_share sk.pk.pk_share in
   let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
   let k = HSalsa.hsalsa20 raw_k zero_nonce in
   k
@@ -125,19 +134,20 @@ let lemma_shares sk = ()
 
 
 #reset-options
-#set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 0"
-let prf_odh im km om sk pk =
+#set-options "--z3refresh --z3rlimit 500 --max_ifuel 1 --max_fuel 0"
+let prf_odh im imk km om sk pk = 
   let i1 = pk.pk_share in
   let i2 = sk.pk.pk_share in
-  let i = ID.compose_ids im i1 i2 in
+  let i = compose_ids i1 i2 in
   recall_log im;
-  lemma_honest_or_dishonest im (ID i);
-  match get_honesty im (ID i) with
+  lemma_honest_or_dishonest im i;
+  match get_honest imk i with
   | true ->
-    let k = Key.gen im km i in
+    let k = Key.gen imk km i in
     k
   | false ->
     let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
-    let k=Key.coerce im km i hashed_raw_k in
+    let k=Key.coerce imk km i hashed_raw_k in
     k
+    

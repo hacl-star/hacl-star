@@ -10,7 +10,7 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open Crypto.Symmetric.Bytes
 
-open Box.Indexing
+open Box.Index
 open Box.Plain
 open Box.Flags
 
@@ -42,14 +42,14 @@ abstract noeq type key_module (im:index_module) =
     key_log_region: (log_region im) ->
     gen: (i:id im -> ST (k:key_type im{get_index k = i}) // The spec should indicate that the result is random and that gen is idempotent
       (requires (fun h0 ->
-        (fresh im (ID i) h0 \/ honest im (ID i))
+        (fresh im i h0 \/ honest im i)
         /\ invariant h0))
       (ensures  (fun h0 k h1 ->
         invariant h1
         /\ modifies (Set.singleton key_log_region) h0 h1
         ))) ->
-    coerce: (i:id im{dishonest im (ID i)} -> raw:aes_key -> (k:key_type im{get_index k = i /\ raw=get_rawGT k})) ->
-    leak: (k:key_type im{dishonest im (ID (get_index k))} -> (raw:aes_key{raw = get_rawGT k})) ->
+    coerce: (i:id im{dishonest im i} -> raw:aes_key -> (k:key_type im{get_index k = i /\ raw=get_rawGT k})) ->
+    leak: (k:key_type im{dishonest im (get_index k)} -> (raw:aes_key{raw = get_rawGT k})) ->
     key_module im
 
 val get_keytype: im:index_module -> km:key_module im -> Type0
@@ -70,7 +70,7 @@ let get_log_region im km =
 
 val gen: (im:index_module) -> (km:key_module im) -> (i:id im) -> ST (k:km.key_type im{km.get_index k = i})
   (requires (fun h0 ->
-    (fresh im (ID i) h0 \/ honest im (ID i))
+    (fresh im i h0 \/ honest im i)
     /\ km.invariant h0))
   (ensures  (fun h0 k h1 ->
     km.invariant h1
@@ -79,11 +79,11 @@ val gen: (im:index_module) -> (km:key_module im) -> (i:id im) -> ST (k:km.key_ty
 let gen im km i =
   km.gen i
 
-val coerce: (im:index_module) -> (km:key_module im) -> (i:id im{dishonest im (ID i)}) -> (b:aes_key) -> (k:km.key_type im{km.get_index k = i /\ b = km.get_rawGT k})
+val coerce: (im:index_module) -> (km:key_module im) -> (i:id im{dishonest im i}) -> (b:aes_key) -> (k:km.key_type im{km.get_index k = i /\ b = km.get_rawGT k})
 let coerce im km i b =
   km.coerce i b
 
-val leak: im:index_module -> (km:key_module im) -> (k:km.key_type im{dishonest im (ID (km.get_index k))}) -> (b:aes_key{b=km.get_rawGT k})
+val leak: im:index_module -> (km:key_module im) -> (k:km.key_type im{dishonest im (km.get_index k)}) -> (b:aes_key{b=km.get_rawGT k})
 let leak im km k =
   km.leak k
 
@@ -100,14 +100,14 @@ val create: (im:index_module) ->
             (km_key_log_region: (log_region im)) ->
             (km_gen: (i:id im -> ST (k:km_key_type im{km_get_index k = i}) // The spec should indicate that the result is random and that gen is idempotent
               (requires (fun h0 ->
-                (fresh im (ID i) h0 \/ honest im (ID i))
+                (fresh im i h0 \/ honest im i)
                 /\ km_invariant h0))
               (ensures  (fun h0 k h1 ->
                 km_invariant h1
                 /\ modifies (Set.singleton km_key_log_region) h0 h1
               )))) ->
-            (km_coerce: (i:id im{dishonest im (ID i)} -> raw:aes_key -> (k:km_key_type im{km_get_index k = i /\ raw=km_get_rawGT k}))) ->
-            (km_leak: (k:km_key_type im{dishonest im (ID (km_get_index k))} -> (raw:aes_key{raw = km_get_rawGT k}))) ->
+            (km_coerce: (i:id im{dishonest im i} -> raw:aes_key -> (k:km_key_type im{km_get_index k = i /\ raw=km_get_rawGT k}))) ->
+            (km_leak: (k:km_key_type im{dishonest im (km_get_index k)} -> (raw:aes_key{raw = km_get_rawGT k}))) ->
             (km:key_module im{
               get_keytype im km == km_key_type im
               /\ get_index im km == km_get_index

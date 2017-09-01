@@ -9,7 +9,7 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 
 open Box.Flags
-open Box.Indexing
+open Box.Index
 
 (**
   The protected plaintext type of AE. It is associated with an id and acts as a wrapper around a protected pkae plaintext.
@@ -32,7 +32,7 @@ let create plain valid_length length =
 
 abstract type protected_plain_t (im:index_module) (pt:Type0) (id:id im) = pt
 
-val lemma_index_module: im:index_module -> i:meta_id im -> ST unit
+val lemma_index_module: im:index_module -> i:id im -> ST unit
   (requires (fun h0 -> registered im i))
   (ensures (fun h0 _ h1 ->
     (honest im i ==> (~(dishonest im i)))
@@ -51,11 +51,11 @@ let reprGT #im #pm #i p =
   p
 
 
-val repr: #im:index_module -> #pm:plain_module -> #i:id im{dishonest im (ID i) \/ not ae_ind_cpa} -> protected_plain_t im pm.plain i -> (p:pm.plain)
+val repr: #im:index_module -> #pm:plain_module -> #i:id im{dishonest im i \/ not ae_ind_cpa} -> protected_plain_t im pm.plain i -> (p:pm.plain)
 let repr #im #pm #i p =
   p
 
-val coerce: #im:index_module -> #pm:plain_module -> #i:id im{dishonest im (ID i) \/ not ae_int_ctxt} -> pm.plain -> (p:protected_plain_t im pm.plain i)
+val coerce: #im:index_module -> #pm:plain_module -> #i:id im{dishonest im i \/ not ae_int_ctxt} -> pm.plain -> (p:protected_plain_t im pm.plain i)
 let coerce #im #pm #i p =
   p
 
@@ -74,7 +74,7 @@ let length #im #pm #i p =
  val rec_repr: #im:index_module ->
               #inner_pm:plain_module ->
               #pm:plain_module ->
-              #i:id im{dishonest im (ID i) \/ not ae_ind_cpa} ->
+              #i:id im{dishonest im i \/ not ae_ind_cpa} ->
               p:protected_plain_t im pm.plain i{protected_plain_t im pm.plain i === protected_plain_t im inner_pm.plain i}
               -> Tot (inner_pm.plain)
 let rec_repr #im #inner_pm #pm #i p =
