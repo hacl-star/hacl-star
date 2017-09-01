@@ -161,9 +161,9 @@ clean-build:
 
 clean-package: clean-base clean-build
 
-clean: .clean-banner clean-base clean-build
+#clean: .clean-banner clean-base clean-build
 
-clean-all: .clean-banner clean-base clean-build
+clean: .clean-banner clean-base clean-build
 	$(MAKE) -C specs clean
 	$(MAKE) -C code clean
 	$(MAKE) -C secure_api clean
