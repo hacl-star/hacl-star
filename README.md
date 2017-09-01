@@ -73,6 +73,7 @@ HaCl* Makefile:
 
 All targets require to install F* and Kremlin except `make build` that uses
 the 'hacl-c' snapshot from `snapshots/hacl-c` to generate a shared library.
+Additionnally a CMake build is available and can be run with `make build-cmake`.
 
 
 # Performance
