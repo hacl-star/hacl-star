@@ -49,14 +49,10 @@ include Makefile.build
 verify-ct:
 	$(MAKE) -C code ct
 
-verify-specs:
-	$(MAKE) -C specs
+verify-specs: specs.dir-verify
+verify-code: code.dir-verify
+verify-secure_api: secure_api.dir-verify
 
-verify-code:
-	$(MAKE) -C code
-
-verify-secure_api:
-	$(MAKE) -C secure_api
 
 verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
