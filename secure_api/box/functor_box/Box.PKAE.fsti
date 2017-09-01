@@ -19,27 +19,35 @@ module MM = MonotoneMap
 module HS = FStar.HyperStack
 module HH = FStar.HyperHeap
 module Plain = Box.Plain
-module ID = Box.Indexing
+module ID = Box.Index
 
 
-type index_module = ID.index_module
-type plain_module = Plain.plain_module
-let id (im:index_module) = ID.id im
 val nonce: t:Type0{hasEq t}
 val cipher: Type0
-type log_region (im:index_module) =
-  r:MR.rid{disjoint r (ID.get_rgn im)}
+val sub_id: t:Type0{hasEq t}
+val key_id: Type0
 
-val subId_t: Type0
+val compose_ids: s1:sub_id -> s2:sub_id{s2 <> s1} -> key_id
+
 val valid_length: nat -> bool
 val plain_t: Type0
 val length: p:plain_t -> n:nat{valid_length n}
 
-type message_log_key (im:index_module) = (nonce*(i:id im))
-type message_log_value (im:index_module) (i:id im) = (cipher*Plain.protected_plain_t im plain_t i)
-type message_log_range (im:index_module) (k:message_log_key im) = (v:message_log_value im (snd k))
-type message_log_inv (im:index_module) (f:MM.map' (message_log_key im) (message_log_range im)) = True //t:Type0{t = True}
-type message_log (im:index_module) (rgn:log_region im) =
+
+type index_module = im:ID.index_module{ID.id im == sub_id}
+type key_index_module = im:ID.index_module{ID.id im == key_id}
+type plain_module = Plain.plain_module
+//let id (im:index_module) = ID.id im
+//let kid (im:key_index_module) = ID.id im
+
+type log_region (im:key_index_module) =
+  r:MR.rid{disjoint r (ID.get_rgn im)}
+
+type message_log_key (im:key_index_module) = (nonce*(i:ID.id im))
+type message_log_value (im:key_index_module) (i:ID.id im) = (cipher*Plain.protected_plain_t im plain_t i)
+type message_log_range (im:key_index_module) (k:message_log_key im) = (v:message_log_value im (snd k))
+type message_log_inv (im:key_index_module) (f:MM.map' (message_log_key im) (message_log_range im)) = True //t:Type0{t = True}
+type message_log (im:key_index_module) (rgn:log_region im) =
   MM.t rgn (message_log_key im) (message_log_range im) (message_log_inv im)
 
 val pkey: Type0
@@ -49,34 +57,35 @@ val pkey_from_skey: sk:skey -> pk:pkey
 
 val compatible_keys: sk:skey -> pk:pkey -> t:Type0{t <==> pk =!= pkey_from_skey sk}
 
-val aux_t: (im:index_module{ID.get_subId im == subId_t}) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region im -> Type u#1
+val aux_t: (im:index_module) -> (kim:key_index_module) -> (pm:plain_module{Plain.get_plain pm == plain_t}) -> rgn:log_region kim -> Type u#1
 
 abstract noeq type pkae_module =
   | PKAE:
-    im:ID.index_module{ID.get_subId im == subId_t} ->
+    im:index_module{ID.id im == sub_id} ->
+    kim:key_index_module ->
     pm:Plain.plain_module{Plain.get_plain pm == plain_t /\ Plain.valid_length #pm == valid_length} ->
-    rgn:log_region im ->
+    rgn:log_region kim ->
     enc: (plain_t -> n:nonce -> pk:pkey -> sk:skey{compatible_keys sk pk} -> GTot cipher) ->
     dec: (c:cipher -> n:nonce -> pk:pkey -> sk:skey -> GTot (option plain_t)) ->
-    aux: (aux_t im pm rgn) ->
+    aux: (aux_t im kim pm rgn) ->
     pkae_module
 
-val get_message_log_region: pkm:pkae_module -> Tot (log_region pkm.im)
-val get_message_logGT: pkm:pkae_module -> Tot (message_log pkm.im (get_message_log_region pkm)) //TODO: MK: would prefer this to be GTot
+val get_message_log_region: pkm:pkae_module -> Tot (log_region pkm.kim)
+val get_message_logGT: pkm:pkae_module -> Tot (message_log pkm.kim (get_message_log_region pkm)) //TODO: MK: would prefer this to be GTot
 
 val create: rgn:(r:MR.rid{extends r root /\ is_eternal_region r /\ is_below r root}) -> St (pkae_module)
 
 val zero_bytes: (n:nat{valid_length n}) -> plain_t //b:bytes{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)}
 //TODO: MK this can be modelled better
 
-val pkey_to_subId: #pkm:pkae_module -> pk:pkey -> ID.get_subId pkm.im
+val pkey_to_subId: #pkm:pkae_module -> pk:pkey -> ID.id pkm.im
 val pkey_to_subId_inj: #pkm:pkae_module -> pk:pkey -> Lemma
   (requires True)
   (ensures (forall pk' . pkey_to_subId #pkm pk == pkey_to_subId #pkm pk' <==> pk == pk'))
   [SMTPat (pkey_to_subId #pkm pk)]
 
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 0"
-val nonce_is_fresh: (pkm:pkae_module) -> (i:id pkm.im) -> (n:nonce) -> (h:mem) ->
+val nonce_is_fresh: (pkm:pkae_module) -> (i:ID.id pkm.kim) -> (n:nonce) -> (h:mem) ->
   (t:Type0{t <==>
     (MR.m_contains #(get_message_log_region pkm) (get_message_logGT pkm) h
       /\ MM.fresh #(get_message_log_region pkm)(get_message_logGT pkm) (n,i) h)})
@@ -94,17 +103,17 @@ val gen: unit -> ST (keypair:(pkey*skey){fst keypair == pkey_from_skey (snd keyp
     modifies_none h0 h1
   ))
 
-let registered pkm i = ID.registered pkm.im (ID.ID i)
-let honest pkm i = ID.honest pkm.im (ID.ID i)
-let dishonest pkm i = ID.dishonest pkm.im (ID.ID i)
+let registered pkm i = ID.registered pkm.kim i
+let honest pkm i = ID.honest pkm.kim i
+let dishonest pkm i = ID.dishonest pkm.kim i
 
 
 val encrypt: pkm:pkae_module ->
-             #i:id pkm.im ->
+             #i:ID.id pkm.kim ->
              n:nonce ->
              sk:skey ->
-             pk:pkey{compatible_keys sk pk /\ i = ID.compose_ids pkm.im (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk))} ->
-             m:(Plain.protected_plain_t pkm.im (Plain.get_plain pkm.pm) i) ->
+             pk:pkey{compatible_keys sk pk /\ i = compose_ids (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk))} ->
+             m:(Plain.protected_plain_t pkm.kim (Plain.get_plain pkm.pm) i) ->
              ST cipher
   (requires (fun h0 ->
     registered pkm i
@@ -123,7 +132,7 @@ val encrypt: pkm:pkae_module ->
     /\ invariant pkm h1
   ))
 
-val decrypt: pkm:pkae_module -> #i:id pkm.im -> n:nonce -> sk:skey -> pk:pkey{compatible_keys sk pk /\ i = ID.compose_ids pkm.im (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk))} -> c:cipher -> ST (option (Plain.protected_plain_t pkm.im (Plain.get_plain pkm.pm) i))
+val decrypt: pkm:pkae_module -> #i:ID.id pkm.kim -> n:nonce -> sk:skey -> pk:pkey{compatible_keys sk pk /\ i = compose_ids (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk))} -> c:cipher -> ST (option (Plain.protected_plain_t pkm.kim (Plain.get_plain pkm.pm) i))
   (requires (fun h0 ->
     registered pkm i
     /\ invariant pkm h0

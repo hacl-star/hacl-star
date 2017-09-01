@@ -1,12 +1,12 @@
 include ../../../code/Makefile.include
 
 VERIFY= \
-  Box.Indexing \
+  Box.Index \
   Box.Plain \
 	Box.AE \
   Box.ODH \
 	Box.PKAE \
-  Box.Index
+  Box.Indexing
 LAX=
 
 FSTAR_INCLUDES+= \
@@ -23,7 +23,7 @@ all: all-ver $(addsuffix .fst-lax, $(LAX))
 
 verify: $(addsuffix .fst-verify, $(filter-out $(LAX), $(VERIFY)))
 hints: $(addsuffix .fst.hints, $(VERIFY))
-lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))
+lax: $(addsuffix .fst-lax, $(LAX)) $(addsuffix .fst-lax, $(VERIFY))R
 
 all-ver: verify
 all-hints: hints
