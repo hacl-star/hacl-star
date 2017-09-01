@@ -1,5 +1,5 @@
 [
-  "\u0001#≥ƒ\u0017f´1Åƒ\u0000IÀNîú",
+  "l°Ûa\f9F\u0006‘?∫Am\u000e3\u001d",
   [
     [
       "Hacl.Bignum.Wide.v",
@@ -539,6 +539,67 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0
-    ]
+    ],
+    [
+      "Hacl.Bignum.Wide.op_Greater_Greater_Hat",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Bignum.Wide.op_Greater_Greater_Hat",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "data_elim_FStar.UInt32.Mk", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.n",
+        "equation_FStar.UInt32.t", "equation_FStar.UInt32.v",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Wide.n",
+        "fuel_guarded_inversion_FStar.UInt32.t_", "int_inversion",
+        "int_typing", "lemma_FStar.Buffer.lemma_size",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87"
+      ],
+      0
+    ],
+    [ "Hacl.Bignum.Wide.op_Greater_Greater_Hat", 3, 2, 1, [ "@query" ], 0 ],
+    [
+      "Hacl.Bignum.Wide.op_Less_Less_Hat",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Bignum.Wide.op_Less_Less_Hat",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "data_elim_FStar.UInt32.Mk",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.n",
+        "equation_FStar.UInt32.t", "equation_FStar.UInt32.v",
+        "equation_Hacl.Bignum.Constants.word_size",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Parameters.word_size",
+        "equation_Hacl.Bignum.Wide.n",
+        "fuel_guarded_inversion_FStar.UInt32.t_", "int_inversion",
+        "int_typing", "lemma_FStar.Buffer.lemma_size",
+        "primitive_Prims.op_Multiply", "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87"
+      ],
+      0
+    ],
+    [ "Hacl.Bignum.Wide.op_Less_Less_Hat", 3, 2, 1, [ "@query" ], 0 ]
   ]
 ]
