@@ -10,7 +10,7 @@ display:
 	@echo "HACL* Makefile:"
 	@echo "- 'make build' will generate a shared library from the hacl-c snapshot (no verification)"
 	#@echo "- 'make test' will run unit-tests on the shared library (no verification)"
-	@echo "- 'make clean' will clean 'build' and 'test' artifacts"
+	@echo "- 'make clean-build' will clean 'build' artifacts"
 	@echo ""
 	@echo "(Please install F* and Kremlin as a prerequisite...)"
 	@echo "- 'make verify' will run F* verification on all specs, code and secure-api directories"
@@ -160,8 +160,6 @@ clean-build:
 	rm -rf build-experimental
 
 clean-package: clean-base clean-build
-
-#clean: .clean-banner clean-base clean-build
 
 clean: .clean-banner clean-base clean-build
 	$(MAKE) -C specs clean
