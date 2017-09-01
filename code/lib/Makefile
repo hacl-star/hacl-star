@@ -26,4 +26,8 @@ all-hints: hints
 
 all: $(addsuffix -verify, $(ALL))
 
+extract-c:
+
+test:
+
 clean:
