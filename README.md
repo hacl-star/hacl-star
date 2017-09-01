@@ -46,6 +46,12 @@ This library is at the pre-production stage.
 Please consult the authors before using it in production systems.
 
 
+# Licenses
+
+All F* code is released under Apache 2.0
+All C  code is released under MIT
+
+
 # Installation
 
 See [INSTALL.md](INSTALL.md) for prerequisites.
