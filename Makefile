@@ -27,7 +27,7 @@ display:
 	@echo "- 'make extract-new' will remove and regenerate all versions of the C snapshots available"
 	@echo "- 'make extract-experimental' will generate C code for experimental primitives"
 	@echo "- 'make test-all' will generate and test everything (no verification)"
-	@echo "- 'make clean-all' will remove all artifacts of other targets"
+	@echo "- 'make clean' will remove all artifacts of other targets"
 	@echo "- 'make prepare' will install F* and Kremlin (Requirements are still needed)"
 
 #
