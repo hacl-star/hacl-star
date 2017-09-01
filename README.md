@@ -1,7 +1,7 @@
-HaCl-star
-=========
+HACL*
+=====
 
-HaCl* is a formally verified cryptographic library in [F\*],
+HACL* is a formally verified cryptographic library in [F\*],
 developed as part of [Project Everest].
 
 HACL stands for High-Assurance Cryptographic Library and its design is
@@ -48,7 +48,6 @@ Please consult the authors before using it in production systems.
 
 # Verification and Extraction
 
-
 To verify the F\* code, you need to install the [F\*] typechecker.
 
 To extract F\* code to C, you need to install the [KreMLin] compiler.
@@ -59,28 +58,37 @@ For convenience, C code for our verified primitives has already been extracted
 and is available in [snapshots/hacl-c](snapshots/hacl-c).
 To build the library, you need a modern C compiler (preferably GCC-7) and CMake.
 
-The following command will give you more informations on how to run verification and extraction.
-```
-make
-```
-
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
 [KreMLin]: https://github.com/FStarLang/kremlin
+
+
+# Makefile
+
+By default, you have to select what you want to `make`:
+```
+HaCl* Makefile:
+- 'make verify' will run F* verification on all specs, code and secure-api directories
+- 'make extract' will generate all the C code into a 'hacl-c' snapshot (no verification)
+- 'make build' will build libraries (no verification)
+- 'make test' will test everything (no verification)
+- 'make world' will run all our targets (except make prepare)
+- 'make clean' will remove all artifacts of other targets
+```
 
 
 # Performance
 
 HACL* primitives, when compiled to C, are as fast as state-of-the-art
 C implementations. You can see the numbers for your platform and C compiler
-by running `make test` in the snapshot folder.
+by running targets from `test/Makefile` if you have dependencies installed. (experimental)
 
 To compare its performance with the C reference code in libsodium and openssl,
 download and compile [libsodium] with the `--disable-asm` flag
 and [openssl] with the `-no-asm` flag.
 
-While the raw performance is quite good, HaCl is not as fast as hand-written
-assembly code.  Linking HACL* to verified assembly language components
-is a long-term goal.
+While the raw performance is quite good, though HaCl is not as fast as hand-written
+assembly code, it is usually good as handwritten C code.
+Linking HACL* to verified assembly language components is a long-term goal.
 
 [openssl]: https://github.com/openssl/openssl
 [libsodium]: https://github.com/jedisct1/libsodium
@@ -89,7 +97,6 @@ is a long-term goal.
 # Experimental features
 
 The [code/experimental](code/experimental) directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
-* Elliptic Curves: NIST P-256, Curve448
 * Encryption: AES-128, AES-256
 * MACs: GCM
 * Key Derivation: HKDF
