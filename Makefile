@@ -9,13 +9,13 @@ all: display
 display:
 	@echo "HaCl* Makefile:"
 	@echo "- 'make build' will generate a shared library from the hacl-c snapshot (no verification)"
+	@echo "- 'make test' will run unit-tests on the shared library (no verification)"
+	@echo "- 'make clean' will clean 'build' and 'test' artifacts"
 	@echo ""
 	@echo "(Please install F* and Kremlin as a prerequisite...)"
 	@echo "- 'make verify' will run F* verification on all specs, code and secure-api directories"
 	@echo "- 'make extract' will generate all the C code into a snapshot and test it (no verification)"
-	@echo "- 'make test' will generate and test everything (no verification)"
 	@echo "- 'make world' will run everything (except make prepare)"
-	@echo "- 'make clean' will remove all artifacts of other targets"
 	@echo ""
 	@echo "Specialized targets for Experts:"
 	@echo "- 'make verify-ct' will run F* verification of the code for the side-channel resistance"
@@ -26,6 +26,8 @@ display:
 	@echo "- 'make extract-all' will give you all versions of the C snapshots available"
 	@echo "- 'make extract-new' will remove and regenerate all versions of the C snapshots available"
 	@echo "- 'make extract-experimental' will generate C code for experimental primitives"
+	@echo "- 'make test-all' will generate and test everything (no verification)"
+	@echo "- 'make clean-all' will remove all artifacts of other targets"
 	@echo "- 'make prepare' will install F* and Kremlin (Requirements are still needed)"
 
 #
@@ -84,7 +86,6 @@ extract-experimental: extract-c-code-experimental
 
 .build-banner:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
-	@echo $(CYAN)"  Please make sure to have a valid snapshot/hacl-c (make extract)"$(NORMAL)
 
 build-make:
 	$(MAKE) build/libhacl.so
@@ -102,6 +103,10 @@ build: clean-build
 #
 
 test:
+	@echo $(CYAN)"# Testing the HaCl* shared library"$(NORMAL)
+	$(MAKE) -C snapshots/hacl-c test
+
+test-all:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
 	$(MAKE) -C test
 
@@ -152,6 +157,8 @@ clean-build:
 clean-package: clean-base clean-build
 
 clean: .clean-banner clean-base clean-build
+
+clean-all: .clean-banner clean-base clean-build
 	$(MAKE) -C specs clean
 	$(MAKE) -C code clean
 	$(MAKE) -C secure_api clean
