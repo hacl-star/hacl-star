@@ -148,13 +148,9 @@ inline_for_extraction val wide_logor: a:wide -> b:wide -> Tot (c:wide{w c = UInt
 inline_for_extraction val wide_lognot: a:wide -> Tot (b:wide{w b = UInt.lognot (w a)})
 
 (* Shift operators *)
-inline_for_extraction val wide_shift_right: a:wide -> s:FStar.UInt32.t -> Pure wide
-  (requires (FStar.UInt32.v s < wide_n))
-  (ensures (fun c -> w c = (w a / (pow2 (FStar.UInt32.v s)))))
+inline_for_extraction val wide_shift_right: a:wide -> s:FStar.UInt32.t{FStar.UInt32.v s < wide_n} -> Tot (c:wide{w c = (w a / (pow2 (FStar.UInt32.v s)))})
 
-inline_for_extraction val wide_shift_left: a:wide -> s:FStar.UInt32.t -> Pure wide
-  (requires (FStar.UInt32.v s < wide_n))
-  (ensures (fun c -> w c = ((w a * pow2 (FStar.UInt32.v s)) % pow2 wide_n)))
+inline_for_extraction val wide_shift_left: a:wide -> s:FStar.UInt32.t{FStar.UInt32.v s < wide_n} -> Tot (c:wide{w c = ((w a * pow2 (FStar.UInt32.v s)) % pow2 wide_n)})
 
 inline_for_extraction val wide_eq_mask: a:wide -> b:wide -> Tot (c:wide{(w a = w b ==> w c = pow2 wide_n - 1) /\ (w a <> w b ==> w c = 0)})
 inline_for_extraction val wide_gte_mask: a:wide -> b:wide -> Tot (c:wide{(w a >= w b ==> w c = pow2 wide_n - 1) /\ (w a < w b ==> w c = 0)})

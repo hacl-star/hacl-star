@@ -42,14 +42,12 @@ inline_for_extraction val lognot: t -> Tot t
 inline_for_extraction let lognot a = lognot a
 
 (* Shift operators *)
-inline_for_extraction val shift_right: a:t -> s:FStar.UInt32.t -> Pure t
-  (requires (FStar.UInt32.v s < n))
-  (ensures (fun c -> v c = (v a / (pow2 (FStar.UInt32.v s)))))
+inline_for_extraction val shift_right: a:t -> s:FStar.UInt32.t{FStar.UInt32.v s < n} ->
+  Tot (c:t{v c = (v a / (pow2 (FStar.UInt32.v s)))})
 inline_for_extraction let shift_right a s = shift_right a s
 
-inline_for_extraction val shift_left: a:t -> s:FStar.UInt32.t -> Pure t
-  (requires (FStar.UInt32.v s < n))
-  (ensures (fun c -> v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 n)))
+inline_for_extraction val shift_left: a:t -> s:FStar.UInt32.t{FStar.UInt32.v s < n} ->
+  Tot (c:t{v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 n)})
 inline_for_extraction let shift_left a s = shift_left a s
 
 inline_for_extraction val eq_mask: a:t -> b:t -> Tot (c:t{(v a = v b ==> v c = pow2 n - 1) /\ (v a <> v b ==> v c = 0)})
@@ -97,14 +95,12 @@ inline_for_extraction val op_Bar_Hat: t -> t -> Tot t
 inline_for_extraction let op_Bar_Hat a b = logor a b
 
 (* Shift operators *)
-inline_for_extraction val op_Greater_Greater_Hat: a:t -> s:FStar.UInt32.t -> Pure t
-  (requires (FStar.UInt32.v s < n))
-  (ensures (fun c -> v c = (v a / (pow2 (FStar.UInt32.v s)))))
+inline_for_extraction val op_Greater_Greater_Hat: a:t -> s:FStar.UInt32.t{FStar.UInt32.v s < n} ->
+  Tot (c:t{v c = (v a / (pow2 (FStar.UInt32.v s)))})
 inline_for_extraction let op_Greater_Greater_Hat a s = shift_right a s
 
-inline_for_extraction val op_Less_Less_Hat: a:t -> s:FStar.UInt32.t -> Pure t
-  (requires (FStar.UInt32.v s < n))
-  (ensures (fun c -> v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 n)))
+inline_for_extraction val op_Less_Less_Hat: a:t -> s:FStar.UInt32.t{FStar.UInt32.v s < n} ->
+  Tot (c:t{v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 n)})
 inline_for_extraction let op_Less_Less_Hat a s = shift_left a s
 
 inline_for_extraction val mul_wide: a:Hacl.UInt64.t -> b:Hacl.UInt64.t -> Tot (c:t{v c = Hacl.UInt64.v a * Hacl.UInt64.v b})
