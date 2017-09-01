@@ -8,24 +8,23 @@ all: display
 
 display:
 	@echo "HaCl* Makefile:"
-	@echo "- 'verify' will run F* verification on all specs, code and secure-api directories"
-	@echo "- 'extract' will generate all the C code into a snapshot and test it (no verification)"
-	@echo "- 'build' will generate both static and shared libraries (no verification)"
-	@echo "- 'test' will generate and test everything (no verification)"
-	@echo "- 'world' will run everything (except make prepare)"
-	@echo "- 'clean' will remove all artifacts of other targets"
+	@echo "- 'make verify' will run F* verification on all specs, code and secure-api directories"
+	@echo "- 'make extract' will generate all the C code into a snapshot and test it (no verification)"
+	@echo "- 'make build' will generate both static and shared libraries (no verification)"
+	@echo "- 'make test' will generate and test everything (no verification)"
+	@echo "- 'make world' will run everything (except make prepare)"
+	@echo "- 'make clean' will remove all artifacts of other targets"
 	@echo ""
 	@echo "Specialized targets for Experts:"
-	@echo "- 'verify-ct' will run F* verification of the code for the side-channel resistance"
-	@echo "- 'verify-specs' will run F* verification on the specifications"
-	@echo "- 'verify-code' will run F* verification on the code against the specification"
-	@echo "- 'verify-secure_api' will run F* verification of the secure_api directory"
-	@echo "- 'extract-specs' will generate OCaml code for the specifications"
-	@echo "- 'extract-c-code' will generate C code for all the stable primitives"
-	@echo "- 'extract-c-code-experimental' will generate C code for experimental primitives"
-	@echo "- 'extract-all' will generate all versions of the C snapshots available"
-	@echo "- 'prepare' will install F* and Kremlin (Requirements are still needed)"
-	@echo "- 'clean-snapshots' will remove all snapshots"
+	@echo "- 'make verify-ct' will run F* verification of the code for the side-channel resistance"
+	@echo "- 'make verify-specs' will run F* verification on the specifications"
+	@echo "- 'make verify-code' will run F* verification on the code against the specification"
+	@echo "- 'make verify-secure_api' will run F* verification of the secure_api directory"
+	@echo "- 'make extract-specs' will generate OCaml code for the specifications"
+	@echo "- 'make extract-all' will give you all versions of the C snapshots available"
+	@echo "- 'make extract-new' will remove and regenerate all versions of the C snapshots available"
+	@echo "- 'make extract-experimental' will generate C code for experimental primitives"
+	@echo "- 'make prepare' will install F* and Kremlin (Requirements are still needed)"
 
 #
 # Includes
@@ -59,7 +58,9 @@ verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"# Generation of the HaCl* verified C code"$(NORMAL)
 	@echo $(CYAN)" (This is not running formal verification)"$(NORMAL)
 
-extract: .extract-banner snapshots/hacl-c
+extract: .extract-banner
+	rm -rf snapshots/hacl-c snapshots/snapshot-gcc snapshots/snapshot-gcc-unrolled
+	$(MAKE) snapshots/hacl-c
 	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/hacl-c'."$(NORMAL)
 
 extract-specs:
@@ -67,12 +68,17 @@ extract-specs:
 
 extract-all: snapshots-all
 
+extract-new: snapshots-update
+
+extract-experimental: extract-c-code-experimental
+
 #
 # Compilation of the library
 #
 
 .build-banner:
 	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
+	@echo $(CYAN)"  Please make sure to have a valid snapshot/hacl-c (make extract)"$(NORMAL)
 
 build-make:
 	$(MAKE) build/libhacl.so
@@ -81,9 +87,8 @@ build-make:
 build-cmake:
 	mkdir -p build && cd build && CC=gcc cmake $(CMAKE_COMPILER_OPTION) .. && make
 
-build:
+build: clean-build
 	$(MAKE) build-make
-	$(MAKE) build-cmake
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
 
 #
@@ -104,7 +109,7 @@ world: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) verify
 	$(MAKE) extract-specs
 	$(MAKE) extract-all
-	$(MAKE) build
+	$(MAKE) build-make
 	$(MAKE) test
 	$(MAKE) package
 
