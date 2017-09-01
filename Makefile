@@ -124,7 +124,7 @@ world: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) extract-specs
 	$(MAKE) extract-all
 	$(MAKE) build-make
-	$(MAKE) test
+	$(MAKE) test-all
 	$(MAKE) package
 
 #
@@ -134,7 +134,7 @@ world: .clean-banner .clean-git .clean-snapshots
 ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) .base
 	$(MAKE) build-make
-	$(MAKE) test
+	$(MAKE) test-all
 	$(MAKE) package
 
 #
