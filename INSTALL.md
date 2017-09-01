@@ -1,38 +1,37 @@
 # INSTALLATION
 
-Hacl* relies on [F*](https://github.com/FStarLang/FStar) and [KreMLin](https://github.com/FStarLang/kremlin) for verification.
-The submodules are automatically installed when running the makefile targets.
+Hacl* relies on [F*](https://github.com/FStarLang/FStar) and
+[KreMLin](https://github.com/FStarLang/kremlin) for verification,
+extraction to OCaml (specs/) and extraction to C (code/).
 
-### Environment
+A first requirement is to install the OPAM package manager as it
+will provide you with the OCaml compiler, used to build F*.
 
-Please set FSTAR_HOME and KREMLIN_HOME in your environnement variables:
+Everest allows a reasonably easy setup with most up-to-date stable
+combination of F*, KreMLin, Z3
 ```
-export FSTAR_HOME= <path-to hacl-star/dependencies/FStar>
-export KREMLIN_HOME= <path-to hacl-star/dependencies/kremlin>
-```
-
-### Installing FStar and KreMLin
-
-The only prerequisite to install F* and KreMLin is OCaml.
-Please install the OCaml compiler and the OPAM package manager.
-
-Then, from the Hacl* root repository:
-```
-make prepare
+git clone -b stable https://github.com/project-everest/everest.git
+cd everest
+./everest check
+./everest FStar pull make
+./everest kremlin pull make
 ```
 
-This will install required OPAM packages and build F* and Kremlin.
+### Installing HACL*
 
-To generate the library, run:
+To start using HACL* you can simply download the stable or master
+branch of the repository and setting the following environnement variable.
+
 ```
-make
+export HACL_HOME= <path-to hacl-star>
 ```
 
-### Verifying / extracting the code
+Calling `make` from the root directory will give you more information.
 
-To verify and extract the code *Makefiles* are present in the [code](code) directory, and its sub directories.
-Run `make verify` to run the verification targets, or `make extract-c` to compile to F* code to c.
 
-### C code
+### HACL* master
 
-Already extracted C code can be found in the [snapshots/hacl-c](snapshots/hacl-c) directory.
+The HACL* repository has multiple branches: stable, master and
+feature branches. Feel free to install the cutting edge master.
+As it is under continuous integration, it should be working at
+all times.
