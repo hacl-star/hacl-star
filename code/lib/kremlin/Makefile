@@ -1,8 +1,30 @@
 include ../../../Makefile.include
 
-ALL=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst
+ALL= \
+	FStar.Endianness.fst \
+	Hacl.Cast.fst \
+	Hacl.Endianness.fst \
+	Hacl.Policies.fst \
+	Hacl.Spec.Endianness.fst \
+	Hacl.Types.fst \
+	Hacl.UInt128.fst \
+	Hacl.UInt16.fst \
+	Hacl.UInt32.fst \
+	Hacl.UInt64.fst \
+	Hacl.UInt8.fst
 
-all: $(addsuffix -ver, $(ALL))
+SLOW=
+BROKEN=
+
+ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(ALL)))
+verify: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(ALL)))
+hints: $(addsuffix .hints, $(ALL))
+all-ver: verify
+all-ct:
+all-ci: ci
+all-hints: hints
+
+all: $(addsuffix -verify, $(ALL))
 
 KREMLIN_ARGS=-drop Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.Types
 
@@ -29,14 +51,6 @@ extract-c: ccomp-c/FStar.h lib-c/Hacl_Policies.c
 
 # JK: implement these for the library files
 test: extract-c
-
-all-ver:
-
-all-ct:
-
-all-ci:
-
-hints:
 
 clean:
 	rm -rf *~ *.exe lib-c ccomp-c
