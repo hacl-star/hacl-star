@@ -4,7 +4,9 @@ API_FILES= \
 	Hacl.Constants.fst \
 	Chacha20Poly1305.fst \
 	Hacl.SecretBox.ZeroPad.fst \
-	Hacl.Box.ZeroPad.fst
+	Hacl.Box.ZeroPad.fst \
+	Hacl.Box.fst \
+	NaCl.fst
 
 INCLUDE_DIRS=../salsa-family $(HACL_HOME)/code/bignum ../curve25519 ../poly1305 ../hash
 FSTAR_INCLUDES+=$(addprefix --include ,$(INCLUDE_DIRS))
@@ -38,9 +40,9 @@ KREMLIN_ARGS+=$(addprefix -I ,$(INCLUDE_DIRS)) \
 policies-c/Hacl_Policies.c: $(HACL_HOME)/code/lib/kremlin/Hacl.Policies.fst
 	$(KREMLIN) $(KREMLIN_ARGS) $^ -tmpdir policies-c -skip-compilation
 
-box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst Hacl.Hash.fst NaCl.fst
+box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst  NaCl.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir box-c NaCl.fst -skip-compilation \
-		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad,Hacl.Hash" \
+		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad" \
 		-bundle "Hacl.Policies=Hacl.Policies"
 
 aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Chacha20.fsti Chacha20Poly1305.fst
