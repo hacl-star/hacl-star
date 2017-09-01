@@ -62,7 +62,7 @@ To build the library, you need a modern C compiler (preferably GCC-7).
 
 By default, you have to select what you want to `make`:
 ```
-HaCl* Makefile:
+HACL* Makefile:
 - 'make build' will build a shared library (no verification)
 - 'make verify' will run F* verification on all specs, code and secure-api directories
 - 'make extract' will generate all the C code into a 'hacl-c' snapshot (no verification)
@@ -86,7 +86,7 @@ To compare its performance with the C reference code in libsodium and openssl,
 download and compile [libsodium] with the `--disable-asm` flag
 and [openssl] with the `-no-asm` flag.
 
-While the raw performance is quite good, though HaCl is not as fast as hand-written
+While the raw performance is quite good, HACL* is not as fast as hand-written
 assembly code, it is usually good as handwritten C code.
 Linking HACL* to verified assembly language components is a long-term goal.
 
