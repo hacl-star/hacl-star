@@ -106,6 +106,6 @@ We are also working on a JavaScript backend to F* that would enable us to extrac
 
 # Maintainers
 
-* Jean-Karim Zinzindohoué
-* Karthikeyan Bhargavan
 * Benjamin Beurdouche
+* Karthikeyan Bhargavan
+* Jean-Karim Zinzindohoué
