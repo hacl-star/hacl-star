@@ -36,8 +36,6 @@ display:
 
 include Makefile.build
 
-MAKE_F = $(MAKE) -include Makefile.include
-
 #
 # Verification
 #
@@ -46,16 +44,16 @@ MAKE_F = $(MAKE) -include Makefile.include
 	@echo $(CYAN)"# Verification of the HaCl*"$(NORMAL)
 
 verify-ct:
-	$(MAKE_F) -C code ct
+	$(MAKE) -C code ct
 
 verify-specs:
-	$(MAKE_F) -C specs
+	$(MAKE) -C specs
 
 verify-code:
-	$(MAKE_F) -C code
+	$(MAKE) -C code
 
 verify-secure_api:
-	$(MAKE_F) -C secure_api
+	$(MAKE) -C secure_api
 
 verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
@@ -70,20 +68,17 @@ verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 
 extract: .extract-banner
 	rm -rf snapshots/hacl-c snapshots/snapshot-gcc snapshots/snapshot-gcc-unrolled
-	$(MAKE_F) snapshots/hacl-c
+	$(MAKE) snapshots/hacl-c
 	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/hacl-c'."$(NORMAL)
 
 extract-specs:
-	$(MAKE_F) -C specs
+	$(MAKE) -C specs
 
-extract-all:
-	$(MAKE_F) snapshots-all
+extract-all: snapshots-all
 
-extract-new:
-	$(MAKE_F) snapshots-update
+extract-new: snapshots-update
 
-extract-experimental:
-	$(MAKE_F) extract-c-code-experimental
+extract-experimental: extract-c-code-experimental
 
 #
 # Compilation of the library
@@ -113,7 +108,7 @@ test:
 
 test-all:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
-	$(MAKE_F) -C test
+	$(MAKE) -C test
 
 #
 # World
@@ -126,7 +121,7 @@ world: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) extract-specs
 	$(MAKE) extract-all
 	$(MAKE) build-make
-	$(MAKE) test-all
+	$(MAKE) test
 	$(MAKE) package
 
 #
@@ -136,7 +131,7 @@ world: .clean-banner .clean-git .clean-snapshots
 ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) .base
 	$(MAKE) build-make
-	$(MAKE) test-all
+	$(MAKE) test
 	$(MAKE) package
 
 #
