@@ -260,28 +260,22 @@ static void Hacl_Hash_SHA2_256_update(uint32_t *state, uint8_t *data)
 
 static void Hacl_Hash_SHA2_256_update_multi(uint32_t *state, uint8_t *data, uint32_t n1)
 {
-  if (n1 == (uint32_t )0)
+  for (uint32_t i = (uint32_t )0; i < n1; i = i + (uint32_t )1)
   {
-    
-  }
-  else
-  {
-    uint8_t *b = data;
-    uint8_t *data_ = data + (uint32_t )64;
+    uint8_t *b = data + i * (uint32_t )64;
     Hacl_Hash_SHA2_256_update(state, b);
-    Hacl_Hash_SHA2_256_update_multi(state, data_, n1 - (uint32_t )1);
   }
 }
 
 static void Hacl_Hash_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint32_t len)
 {
   uint8_t blocks[128] = { 0 };
-  K___uint32_t_uint8_t_ uu____1843;
+  K___uint32_t_uint8_t_ uu____1925;
   if (len < (uint32_t )56)
-    uu____1843 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )64 });
+    uu____1925 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )64 });
   else
-    uu____1843 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
-  K___uint32_t_uint8_t_ scrut = uu____1843;
+    uu____1925 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
+  K___uint32_t_uint8_t_ scrut = uu____1925;
   uint32_t nb = scrut.fst;
   uint8_t *final_blocks = scrut.snd;
   memcpy(final_blocks, data, len * sizeof data[0]);

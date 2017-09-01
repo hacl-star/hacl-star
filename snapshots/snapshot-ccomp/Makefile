@@ -5,8 +5,8 @@
 #
 
 ifeq ($(SNAPSHOT_DIR),snapshots/snapshot-ccomp)
-  LIBFLAGS=$(CCOPTS) $(CFLAGS) -Wl,-fPIC
-  OTHER=FStar.c -Wl,-shared
+  LIBFLAGS=$(CCOPTS) $(CFLAGS)
+  OTHER=FStar.c -shared
 else
   LIBFLAGS=$(CFLAGS) -fPIC -Wno-discarded-qualifiers
   OTHER=-shared
