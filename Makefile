@@ -8,10 +8,11 @@ all: display
 
 display:
 	@echo "HaCl* Makefile:"
+	@echo "- 'make build' will generate a shared library from the hacl-c snapshot (no verification)"
+	@echo ""
 	@echo "(Please install F* and Kremlin as a prerequisite...)"
 	@echo "- 'make verify' will run F* verification on all specs, code and secure-api directories"
 	@echo "- 'make extract' will generate all the C code into a snapshot and test it (no verification)"
-	@echo "- 'make build' will generate both static and shared libraries (no verification)"
 	@echo "- 'make test' will generate and test everything (no verification)"
 	@echo "- 'make world' will run everything (except make prepare)"
 	@echo "- 'make clean' will remove all artifacts of other targets"

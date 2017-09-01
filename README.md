@@ -46,17 +46,13 @@ This library is at the pre-production stage.
 Please consult the authors before using it in production systems.
 
 
-# Verification and Extraction
-
-To verify the F\* code, you need to install the [F\*] typechecker.
-
-To extract F\* code to C, you need to install the [KreMLin] compiler.
+# Installation
 
 See [INSTALL.md](INSTALL.md) for prerequisites.
 
 For convenience, C code for our verified primitives has already been extracted
 and is available in [snapshots/hacl-c](snapshots/hacl-c).
-To build the library, you need a modern C compiler (preferably GCC-7) and CMake.
+To build the library, you need a modern C compiler (preferably GCC-7).
 
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
 [KreMLin]: https://github.com/FStarLang/kremlin
@@ -67,13 +63,16 @@ To build the library, you need a modern C compiler (preferably GCC-7) and CMake.
 By default, you have to select what you want to `make`:
 ```
 HaCl* Makefile:
+- 'make build' will build a shared library (no verification)
 - 'make verify' will run F* verification on all specs, code and secure-api directories
 - 'make extract' will generate all the C code into a 'hacl-c' snapshot (no verification)
-- 'make build' will build libraries (no verification)
 - 'make test' will test everything (no verification)
 - 'make world' will run all our targets (except make prepare)
 - 'make clean' will remove all artifacts of other targets
 ```
+
+All targets require to install F* and Kremlin except `make build` that uses
+the 'hacl-c' snapshot from `snapshots/hacl-c` to generate a shared library.
 
 
 # Performance
