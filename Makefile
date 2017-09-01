@@ -33,6 +33,9 @@ display:
 #
 # Includes
 #
+ifneq ($(FSTAR_HOME),)
+include Makefile.include
+endif
 
 include Makefile.build
 
