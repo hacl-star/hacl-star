@@ -4,11 +4,8 @@ Hacl* relies on [F*](https://github.com/FStarLang/FStar) and
 [KreMLin](https://github.com/FStarLang/kremlin) for verification,
 extraction to OCaml (specs/) and extraction to C (code/).
 
-A first requirement is to install the OPAM package manager as it
-will provide you with the OCaml compiler, used to build F*.
-
 Everest allows a reasonably easy setup with most up-to-date stable
-combination of F*, KreMLin, Z3
+combination of OPAM, F*, KreMLin, Z3
 ```
 git clone -b stable https://github.com/project-everest/everest.git
 cd everest

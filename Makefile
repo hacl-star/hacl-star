@@ -179,13 +179,6 @@ prepare:
 	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
 	@echo "# Installing OCaml packages required by KreMLin"
 	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
-	@echo "# Installing submodules for F* and KreMLin"
-	git submodule update --init
-	@echo "# Compiling and Installing F*"
-	$(MAKE) -C dependencies/FStar/src/ocaml-output
-	$(MAKE) -C dependencies/FStar/ulib/ml
-	@echo "# Compiling and Installing KreMLin"
-	$(MAKE) -C dependencies/kremlin
 
 #
 # Packaging helper
