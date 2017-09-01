@@ -8,6 +8,7 @@ all: display
 
 display:
 	@echo "HaCl* Makefile:"
+	@echo "(Please install F* and Kremlin as a prerequisite...)"
 	@echo "- 'make verify' will run F* verification on all specs, code and secure-api directories"
 	@echo "- 'make extract' will generate all the C code into a snapshot and test it (no verification)"
 	@echo "- 'make build' will generate both static and shared libraries (no verification)"
@@ -30,7 +31,6 @@ display:
 # Includes
 #
 
-include Makefile.include
 include Makefile.build
 
 #
@@ -43,9 +43,14 @@ include Makefile.build
 verify-ct:
 	$(MAKE) -C code ct
 
-verify-specs: specs.dir-verify
-verify-code: code.dir-verify
-verify-secure_api: secure_api.dir-verify
+verify-specs:
+	$(MAKE) -C specs
+
+verify-code:
+	$(MAKE) -C code
+
+verify-secure_api:
+	$(MAKE) -C secure_api
 
 verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
@@ -197,3 +202,7 @@ experimental:
 
 hints: code.dir-hints secure_api.dir-hints specs.dir-hints
 
+
+# Colors
+NORMAL="\\033[0;39m"
+CYAN="\\033[1;36m"
