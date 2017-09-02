@@ -1687,16 +1687,10 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
 
 static void Hacl_Hash_SHA2_512_update_multi(uint64_t *state, uint8_t *data, uint32_t n1)
 {
-  if (n1 == (uint32_t )0)
+  for (uint32_t i = (uint32_t )0; i < n1; i = i + (uint32_t )1)
   {
-    
-  }
-  else
-  {
-    uint8_t *b = data;
-    uint8_t *data_ = data + (uint32_t )128;
+    uint8_t *b = data + i * (uint32_t )128;
     Hacl_Hash_SHA2_512_update(state, b);
-    Hacl_Hash_SHA2_512_update_multi(state, data_, n1 - (uint32_t )1);
   }
 }
 

@@ -17,7 +17,7 @@ void Hacl_Policies_declassify_u128(FStar_UInt128_uint128 *x, FStar_UInt128_uint1
 
 uint8_t Hacl_Policies_leak_byte(uint8_t *b, uint32_t n1);
 
-uint8_t Hacl_Policies_cmp_bytes_(uint8_t *b, uint8_t *b_, uint32_t len, uint8_t tmp);
+uint8_t Hacl_Policies_cmp_bytes_(uint8_t *b1, uint8_t *b2, uint32_t len, uint8_t tmp);
 
-uint8_t Hacl_Policies_cmp_bytes(uint8_t *b, uint8_t *b_, uint32_t len);
+uint8_t Hacl_Policies_cmp_bytes(uint8_t *b1, uint8_t *b2, uint32_t len);
 #endif

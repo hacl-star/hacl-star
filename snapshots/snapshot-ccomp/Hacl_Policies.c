@@ -25,22 +25,23 @@ uint8_t Hacl_Policies_leak_byte(uint8_t *b, uint32_t n1)
   return b[n1];
 }
 
-uint8_t Hacl_Policies_cmp_bytes_(uint8_t *b, uint8_t *b_, uint32_t len, uint8_t tmp)
+uint8_t Hacl_Policies_cmp_bytes_(uint8_t *b1, uint8_t *b2, uint32_t len, uint8_t tmp)
 {
   if (len == (uint32_t )0)
-    return ~tmp;
+    return tmp;
   else
   {
     uint32_t i = len - (uint32_t )1;
-    uint8_t bi = Hacl_Policies_leak_byte(b, i);
-    uint8_t bi_ = Hacl_Policies_leak_byte(b_, i);
-    uint8_t tmp1 = FStar_UInt8_eq_mask(bi, bi_) & tmp;
-    return Hacl_Policies_cmp_bytes_(b, b_, i, tmp1);
+    uint8_t bi1 = Hacl_Policies_leak_byte(b1, i);
+    uint8_t bi2 = Hacl_Policies_leak_byte(b2, i);
+    uint8_t z = Hacl_Policies_cmp_bytes_(b1, b2, i, FStar_UInt8_eq_mask(bi1, bi2) & tmp);
+    return z;
   }
 }
 
-uint8_t Hacl_Policies_cmp_bytes(uint8_t *b, uint8_t *b_, uint32_t len)
+uint8_t Hacl_Policies_cmp_bytes(uint8_t *b1, uint8_t *b2, uint32_t len)
 {
-  return Hacl_Policies_cmp_bytes_(b, b_, len, (uint8_t )255);
+  uint8_t z = Hacl_Policies_cmp_bytes_(b1, b2, len, (uint8_t )255);
+  return ~z;
 }
 

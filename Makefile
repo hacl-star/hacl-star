@@ -7,31 +7,36 @@
 all: display
 
 display:
-	@echo "HaCl* Makefile:"
-	@echo "- 'verify' will run F* verification on all specs, code and secure-api directories"
-	@echo "- 'extract' will generate all the C code into a snapshot and test it (no verification)"
-	@echo "- 'build' will generate both static and shared libraries (no verification)"
-	@echo "- 'test' will generate and test everything (no verification)"
-	@echo "- 'world' will run everything (except make prepare)"
-	@echo "- 'clean' will remove all artifacts of other targets"
+	@echo "HACL* Makefile:"
+	@echo "- 'make build' will generate a shared library from the hacl-c snapshot (no verification)"
+	#@echo "- 'make test' will run unit-tests on the shared library (no verification)"
+	@echo "- 'make clean-build' will clean 'build' artifacts"
+	@echo ""
+	@echo "(Please install F* and Kremlin as a prerequisite...)"
+	@echo "- 'make verify' will run F* verification on all specs, code and secure-api directories"
+	@echo "- 'make extract' will generate all the C code into a snapshot and test it (no verification)"
+	@echo "- 'make world' will run everything (except make prepare)"
 	@echo ""
 	@echo "Specialized targets for Experts:"
-	@echo "- 'verify-ct' will run F* verification of the code for the side-channel resistance"
-	@echo "- 'verify-specs' will run F* verification on the specifications"
-	@echo "- 'verify-code' will run F* verification on the code against the specification"
-	@echo "- 'verify-secure_api' will run F* verification of the secure_api directory"
-	@echo "- 'extract-specs' will generate OCaml code for the specifications"
-	@echo "- 'extract-c-code' will generate C code for all the stable primitives"
-	@echo "- 'extract-c-code-experimental' will generate C code for experimental primitives"
-	@echo "- 'extract-all' will generate all versions of the C snapshots available"
-	@echo "- 'prepare' will install F* and Kremlin (Requirements are still needed)"
-	@echo "- 'clean-snapshots' will remove all snapshots"
+	@echo "- 'make verify-ct' will run F* verification of the code for the side-channel resistance"
+	@echo "- 'make verify-specs' will run F* verification on the specifications"
+	@echo "- 'make verify-code' will run F* verification on the code against the specification"
+	@echo "- 'make verify-secure_api' will run F* verification of the secure_api directory"
+	@echo "- 'make extract-specs' will generate OCaml code for the specifications"
+	@echo "- 'make extract-all' will give you all versions of the C snapshots available"
+	@echo "- 'make extract-new' will remove and regenerate all versions of the C snapshots available"
+	@echo "- 'make extract-experimental' will generate C code for experimental primitives"
+	@echo "- 'make test-all' will generate and test everything (no verification)"
+	@echo "- 'make clean' will remove all artifacts of other targets"
+	@echo "- 'make prepare' will install F* and Kremlin (Requirements are still needed)"
 
 #
 # Includes
 #
-
+ifneq ($(FSTAR_HOME),)
 include Makefile.include
+endif
+
 include Makefile.build
 
 #
@@ -48,6 +53,7 @@ verify-specs: specs.dir-verify
 verify-code: code.dir-verify
 verify-secure_api: secure_api.dir-verify
 
+
 verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
 
@@ -59,13 +65,19 @@ verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"# Generation of the HaCl* verified C code"$(NORMAL)
 	@echo $(CYAN)" (This is not running formal verification)"$(NORMAL)
 
-extract: .extract-banner snapshots/hacl-c
+extract: .extract-banner
+	rm -rf snapshots/hacl-c snapshots/snapshot-gcc snapshots/snapshot-gcc-unrolled
+	$(MAKE) snapshots/hacl-c
 	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/hacl-c'."$(NORMAL)
 
 extract-specs:
 	$(MAKE) -C specs
 
 extract-all: snapshots-all
+
+extract-new: snapshots-update
+
+extract-experimental: extract-c-code-experimental
 
 #
 # Compilation of the library
@@ -81,9 +93,8 @@ build-make:
 build-cmake:
 	mkdir -p build && cd build && CC=gcc cmake $(CMAKE_COMPILER_OPTION) .. && make
 
-build:
+build: clean-build
 	$(MAKE) build-make
-	$(MAKE) build-cmake
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
 
 #
@@ -91,6 +102,10 @@ build:
 #
 
 test:
+	@echo $(CYAN)"# Testing the HaCl* shared library"$(NORMAL)
+	$(MAKE) -C snapshots/hacl-c test
+
+test-all:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
 	$(MAKE) -C test
 
@@ -104,8 +119,8 @@ world: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) verify
 	$(MAKE) extract-specs
 	$(MAKE) extract-all
-	$(MAKE) build
-	$(MAKE) test
+	$(MAKE) build-make
+	$(MAKE) test-all
 	$(MAKE) package
 
 #
@@ -115,7 +130,7 @@ world: .clean-banner .clean-git .clean-snapshots
 ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) .base
 	$(MAKE) build-make
-	$(MAKE) test
+	$(MAKE) test-all
 	$(MAKE) package
 
 #
@@ -133,6 +148,8 @@ ci: .clean-banner .clean-git .clean-snapshots
 
 clean-base:
 	rm -rf *~ *.tar.gz
+	rm -rf snapshots/hacl-c/*.o
+	rm -rf snapshots/hacl-c/libnacl*
 
 clean-build:
 	rm -rf build
@@ -156,13 +173,6 @@ prepare:
 	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
 	@echo "# Installing OCaml packages required by KreMLin"
 	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
-	@echo "# Installing submodules for F* and KreMLin"
-	git submodule update --init
-	@echo "# Compiling and Installing F*"
-	$(MAKE) -C dependencies/FStar/src/ocaml-output
-	$(MAKE) -C dependencies/FStar/ulib/ml
-	@echo "# Compiling and Installing KreMLin"
-	$(MAKE) -C dependencies/kremlin
 
 #
 # Packaging helper
@@ -192,3 +202,7 @@ experimental:
 
 hints: code.dir-hints secure_api.dir-hints specs.dir-hints
 
+
+# Colors
+NORMAL="\\033[0;39m"
+CYAN="\\033[1;36m"
