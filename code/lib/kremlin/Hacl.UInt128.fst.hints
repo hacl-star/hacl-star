@@ -1,5 +1,5 @@
 [
-  "ˇÜ‰s–ºrï\u0005Ç»ú\u001bïh¶",
+  "£û\u0015çaü∫\u0017/Ÿ Dœæ\u0001\u0012",
   [
     [
       "Hacl.UInt128.v",
@@ -168,8 +168,10 @@
       2,
       1,
       [
-        "@query", "equation_FStar.UInt128.n", "equation_Hacl.UInt128.n",
-        "equation_Hacl.UInt128.t", "equation_Hacl.UInt128.v"
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt128.n",
+        "equation_FStar.UInt32.t", "equation_Hacl.UInt128.n",
+        "equation_Hacl.UInt128.v",
+        "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2"
       ],
       0
     ],
@@ -206,8 +208,10 @@
       2,
       1,
       [
-        "@query", "equation_FStar.UInt128.n", "equation_Hacl.UInt128.n",
-        "equation_Hacl.UInt128.t", "equation_Hacl.UInt128.v"
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt128.n",
+        "equation_FStar.UInt32.t", "equation_Hacl.UInt128.n",
+        "equation_Hacl.UInt128.v",
+        "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2"
       ],
       0
     ],
@@ -581,7 +585,6 @@
       ],
       0
     ],
-    [ "Hacl.UInt128.op_Greater_Greater_Hat", 3, 2, 1, [ "@query" ], 0 ],
     [
       "Hacl.UInt128.op_Less_Less_Hat",
       1,
@@ -609,7 +612,6 @@
       ],
       0
     ],
-    [ "Hacl.UInt128.op_Less_Less_Hat", 3, 2, 1, [ "@query" ], 0 ],
     [
       "Hacl.UInt128.mul_wide",
       1,
