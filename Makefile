@@ -9,7 +9,6 @@ all: display
 display:
 	@echo "HACL* Makefile:"
 	@echo "- 'make build' will generate a shared library from the hacl-c snapshot (no verification)"
-	#@echo "- 'make test' will run unit-tests on the shared library (no verification)"
 	@echo "- 'make clean-build' will clean 'build' artifacts"
 	@echo ""
 	@echo "(Please install F* and Kremlin as a prerequisite...)"
