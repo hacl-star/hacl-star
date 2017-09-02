@@ -37,6 +37,7 @@ Currently verified primitives:
 
 ## Extraction to C and execution
 
-Run `make extract-c` to compile the F* code into C code for those primitives and run it on a single test vector.
-If you do not have F* or KreMLin installed, you can see the extracted code checked into the `extracted/c`
+Run `make extract-c` to compile the F* code into C code for those primitives
+and run it on a single test vector. If you do not have F* or KreMLin installed,
+you can see the extracted code checked into the `hacl-star/snapshots/hacl-c`
 directory.
