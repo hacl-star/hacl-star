@@ -139,7 +139,7 @@ let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
 let chacha20_encrypt_bytes key nonce counter m =
     Spec.CTR.counter_mode chacha20_ctx chacha20_cipher key nonce counter m
 
-#set-options "--lax"
+//#set-options "--lax"
 
 unfold let test_plaintext = [
     0x4cuy; 0x61uy; 0x64uy; 0x69uy; 0x65uy; 0x73uy; 0x20uy; 0x61uy;

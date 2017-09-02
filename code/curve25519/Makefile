@@ -29,6 +29,7 @@ X25519_SPECIFIC= \
 	Hacl.Spec.EC.Point.fst \
 	Hacl.EC.Point.fst \
 	Hacl.Spec.EC.AddAndDouble2.fst \
+	Hacl.Spec.EC.AddAndDouble3.fst \
 	Hacl.Spec.EC.Format.Lemmas.fst \
 	Hacl.Spec.EC.Format.fst \
 	Hacl.EC.Format.fst \
