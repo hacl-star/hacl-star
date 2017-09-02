@@ -6,14 +6,18 @@ developed as part of [Project Everest].
 
 HACL stands for High-Assurance Cryptographic Library and its design is
 inspired by discussions at the [HACS series of workshops](https://github.com/HACS-workshop).
-The goal of this library is to develop *reference* implementations
+The goal of this library is to develop verified C reference implementations
 for popular cryptographic primitives and to verify them for memory safety,
-side-channel resistance, and (where applicable) functional correctness.
+functional correctness, and secret independence.
 
-Research Paper (CCS 2017): https://eprint.iacr.org/2017/536
+More details about the library and its design can be found in our
+ACM CCS 2017 research paper: https://eprint.iacr.org/2017/536
 
-All code is written and verified in F\* and then compiled to C or to
-OCaml for execution.
+All our code is written and verified in [F\*] and then compiled to C via
+the [KreMLin tool](https://github.com/FStarLang/kremlin/). Details on the verification and compilation
+toolchain and their formal guarantees can be found in the ICFP 2017 paper: https://arxiv.org/abs/1703.00053
+
+# Supported Cryptographic Algorithms
 
 The primitives and constructions supported currently are:
 
@@ -22,16 +26,21 @@ The primitives and constructions supported currently are:
 * Elliptic Curves: Curve25519
 * Elliptic Curves Signatures: Ed25519
 * Hash functions: SHA2 (256,384,512)
-* NaCl API: secret_box, box
+* NaCl API: secret_box, box, sign
+* TLS API: IETF Chacha20Poly1305 AEAD
 
-HACL* can be used in two ways. The verified primitives can be directly
-used in larger verification projects.  For example, HACL* code is used
-as the basis for cryptographic proofs of the TLS record layer in
-[miTLS].  Alternatively, developers can use HACL* through the [NaCl API].
+Developers can use HACL* through the [NaCl API].
 In particular, we implement the same C API as [libsodium] for the
-Box and SecretBox primitives, so any application that runs on
-libsodium can be immediately ported to use the verified code in HACL*
-instead.
+NaCl constructions, so any application that relies on
+libsodium only for these constructions can be immediately ported to use the verified code in HACL*
+instead. (Warning: libsodium also implements other algorithms not in NaCl
+that are not implemented by HACL*)
+
+The verified primitives can also be used to support larger F* verification projects.  
+For example, HACL* code is used through the agile cryptographic model developed in
+[secure_api/] as the basis for cryptographic proofs of the TLS record layer in [miTLS]. 
+A detailed description of the code in [secure_api/] and its formal security guarantees 
+appears in the IEEE S&P 2017 paper: https://eprint.iacr.org/2016/1178.pdf
 
 [F\*]: https://github.com/FStarLang/FStar
 [miTLS]: https://github.com/mitls/mitls-fstar
@@ -62,7 +71,6 @@ and is available in [snapshots/hacl-c](snapshots/hacl-c).
 To build the library, you need a modern C compiler (preferably GCC-7).
 
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
-[KreMLin]: https://github.com/FStarLang/kremlin
 
 
 # Makefile
@@ -86,17 +94,14 @@ Additionnally a CMake build is available and can be run with `make build-cmake`.
 
 # Performance
 
-HACL* primitives, when compiled to C, are as fast as state-of-the-art
-C implementations. You can see the numbers for your platform and C compiler
-by running targets from `test/Makefile` if you have dependencies installed. (experimental)
+To measure see the performance of HACL* primitives on your platform and C compiler,
+run the targets from `test/Makefile` if you have dependencies installed. (experimental)
+To compare its performance with the C reference code (not the assembly versions) in libsodium and openssl,
+download and compile [libsodium] with the `--disable-asm` flag and [openssl] with the `-no-asm` flag.
 
-To compare its performance with the C reference code in libsodium and openssl,
-download and compile [libsodium] with the `--disable-asm` flag
-and [openssl] with the `-no-asm` flag.
-
-While the raw performance is quite good, HACL* is not as fast as hand-written
-assembly code, it is usually good as handwritten C code.
-Linking HACL* to verified assembly language components is a long-term goal.
+While HACL* is typically as fast as hand-written C code, it is typically 1.1-5.7x slower than
+assembly code in our experiments. This gap can be closed by using verified assembly implementations 
+like [Vale](https://github.com/project-everest/vale) for some primtives.
 
 [openssl]: https://github.com/openssl/openssl
 [libsodium]: https://github.com/jedisct1/libsodium
@@ -112,8 +117,13 @@ The [code/experimental](code/experimental) directory includes other (partially v
 We are also working on a JavaScript backend to F* that would enable us to extract HACL* as a JavaScript library.
 
 
-# Maintainers
+# Authors and Maintainers
 
-* Benjamin Beurdouche
-* Karthikeyan Bhargavan
-* Jean-Karim Zinzindohoué
+HACL* was originially developed as part of the Ph.D. thesis of Jean Karim Zinzindohoué.
+It contains contributions from many researchers at INRIA and Microsoft Research, and is
+being actively developed and maintained within [Project Everest]. 
+
+Its current maintainers are:
+* Benjamin Beurdouche (benjamin.beurdouche@inria.fr)
+* Karthikeyan Bhargavan (karthikeyan.bhargavan@inria.fr)
+
