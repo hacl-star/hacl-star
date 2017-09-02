@@ -70,12 +70,13 @@ To build the library, you need a modern C compiler (preferably GCC-7).
 By default, you have to select what you want to `make`:
 ```
 HACL* Makefile:
-- 'make build' will build a shared library (no verification)
+- 'make build' will generate a shared library from the hacl-c snapshot (no verification)
+- 'make clean-build' will clean 'build' artifacts
+
+(Please install F* and Kremlin as a prerequisite...)
 - 'make verify' will run F* verification on all specs, code and secure-api directories
-- 'make extract' will generate all the C code into a 'hacl-c' snapshot (no verification)
-- 'make test' will test everything (no verification)
-- 'make world' will run all our targets (except make prepare)
-- 'make clean' will remove all artifacts of other targets
+- 'make extract' will generate all the C code into a snapshot and test it (no verification)
+- 'make world' will run everything (except make prepare)
 ```
 
 All targets require to install F* and Kremlin except `make build` that uses
