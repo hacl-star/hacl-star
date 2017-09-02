@@ -229,6 +229,16 @@ val hload128_be:
     (requires (fun h -> live h b))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ live h0 b /\ hbig_endian (as_seq h0 b) = H128.v z))
 
+#set-options "--lax"
+
+(**
+ * REMARK
+ * These functions are implemented in C in Kremlin's library and trusted.
+ * Their assumed specifications in Kremlin's C.fst only specify their memory
+ * footprint and not their functional behaviour, so we can't prove the richer
+ * specifications given here.
+**)
+
 [@"substitute" ]
 let store32_le b z  = store32_le b z
 [@"substitute" ]
@@ -255,6 +265,8 @@ let load64_be b  = load64_be b
 let load128_le b = load128_le b
 [@"substitute" ]
 let load128_be b = load128_be b
+
+#reset-options
 
 [@"substitute" ]
 let hstore32_le b z  = store32_le b z

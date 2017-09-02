@@ -1,8 +1,9 @@
 include ../../Makefile.include
 
 # Files for verification
-HMAC_SHA2_FILES = Hacl.HMAC.SHA2_256.fst
-#	               HMAC_SHA2_256.fst
+HMAC_SHA2_FILES= \
+	Hacl.HMAC.SHA2_256.fst \
+	HMAC_SHA2_256.fst
 
 FSTAR_INCLUDES+=--include ../hash
 

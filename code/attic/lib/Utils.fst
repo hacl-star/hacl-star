@@ -106,7 +106,7 @@ let uint32_of_bytes b =
   lemma_uint32_of_bytes b0' b1' b2' b3';
   b0' +^ b1'' +^ b2'' +^ b3''
 
-#reset-options "--initial_fuel 0 -max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 val bytes_of_uint32s: output:u8s -> m:B.buffer H32.t{disjoint output m} -> len:u32{U32.v len <=length output /\ U32.v len<=op_Multiply 4 (length m)} -> STL unit
   (requires (fun h -> B.live h output /\ B.live h m))

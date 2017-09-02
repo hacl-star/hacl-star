@@ -13,7 +13,6 @@ open FStar.Buffer
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
-#set-options "--lax"
 
 let s8  = Hacl.UInt8.t
 let s32 = Hacl.UInt32.t
@@ -42,7 +41,7 @@ let length = length
 let idx  = idx
 let content = content
 let as_ref = as_ref
-let as_aref = as_aref
+//let as_aref = as_aref
 let frameOf = frameOf
 
 (* Liveness condition, necessary for any computation on the buffer *)
