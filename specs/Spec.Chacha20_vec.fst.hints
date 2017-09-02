@@ -1,5 +1,5 @@
 [
-  "\u0002óBÖÉd)ò\u0017{\u0015!°^Ça",
+  "\u0007¢:­¼\u0012ûÎÕ2?j\u0010ö$\u0010",
   [
     [
       "Spec.Chacha20_vec.key",
@@ -343,6 +343,95 @@
         "proj_equation_Spec.CTR.Mkblock_cipher_ctx_blocklen",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_blocklen"
+      ],
+      0
+    ],
+    [
+      "Spec.Chacha20_vec.test",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "data_elim_FStar.UInt32.Mk",
+        "data_elim_Spec.CTR.Mkblock_cipher_ctx", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.n", "equation_FStar.UInt32.t",
+        "equation_FStar.UInt32.uint_to_t", "equation_FStar.UInt8.t",
+        "equation_Prims.pos", "equation_Spec.Chacha20_vec.blocklen",
+        "equation_Spec.Chacha20_vec.c2",
+        "equation_Spec.Chacha20_vec.chacha20_ctx",
+        "equation_Spec.Chacha20_vec.keylen",
+        "equation_Spec.Chacha20_vec.noncelen",
+        "equation_Spec.Chacha20_vec.test_key",
+        "function_token_typing_Spec.Chacha20_vec.c2",
+        "function_token_typing_Spec.Chacha20_vec.chacha20_ctx",
+        "function_token_typing_Spec.Chacha20_vec.test_key",
+        "kinding_FStar.UInt8.t_@tok", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_blocklen",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_counterbits",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_incr",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_keylen",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_noncelen",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_blocklen",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_counterbits",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_incr",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_keylen",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_noncelen",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_FStar.List.Tot.Base.length"
+      ],
+      0
+    ],
+    [
+      "Spec.Chacha20_vec.test",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Chacha20_vec.test",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Chacha20_vec.test",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Chacha20_vec.test",
+      5,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Spec.Chacha20_vec.test",
+      6,
+      0,
+      1,
+      [
+        "@query", "assumption_FStar.Seq.Base.seq_haseq",
+        "assumption_FStar.UInt8.t__haseq", "equation_FStar.UInt8.t",
+        "kinding_FStar.UInt8.t_@tok"
       ],
       0
     ]
