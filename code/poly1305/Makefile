@@ -1,5 +1,6 @@
 include ../../Makefile.include
 
+# Verify everything but Bignum.Fscalar, Bignum.Fdifference, Bignum
 BIGNUM= \
 	../bignum/Hacl.Spec.Bignum.Field.fst \
 	../bignum/Hacl.Bignum.Limb.fst \
@@ -29,15 +30,14 @@ POLY1305_SPECIFIC= \
 	Hacl.Spec.Poly1305_64.Lemmas1.fst \
 	AEAD.Poly1305_64.fst
 
+# Files that are too slow and for which verification speed must improve
 SLOW=
-
-TODO=
 
 POLY1305_FILES=$(BIGNUM) $(POLY1305_SPECIFIC)
 
 FSTAR_INCLUDES+=--include ../bignum
 
-# Parameter for interactive mode
+# Parameters for interactive mode
 %.fst-in:
 	@echo $(OPTIONS) --hint_info \
 	$(FSTAR_INCLUDES)
@@ -59,8 +59,8 @@ hints: bignum-hints specific-hints
 all-hints: hints
 
 # For CI, all modules restricted from incomplete or slow ones
-bignum-ci: $(addsuffix -reloc-verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
-specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(POLY1305_SPECIFIC)))
+bignum-ci: $(addsuffix -reloc-verify, $(filter-out $(SLOW), $(BIGNUM)))
+specific-ci: $(addsuffix -verify, $(filter-out $(SLOW), $(POLY1305_SPECIFIC)))
 all-ci: bignum-ci specific-ci
 
 # By default, KreMLin drops a bunch of spec-related module that are not meant to
