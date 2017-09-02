@@ -2,9 +2,8 @@
 
 This directory contains several code snapshots of C code extracted from HACL*.
 
-These snapshots can be removed and regenerated from the top-level makefile
-if you have a correct installation of F*, Kremlin and Z3 using
-`make extract-new` from within the root directory.
+These snapshots can be removed and regenerated from the top-level makefile using
+`make extract-new` (assuming you have correctly installed F* and KreMLin).
 
 
 ## Directory structure
@@ -14,14 +13,15 @@ This directory contains:
 - `hacl-c`
 
   Reference snapshot code for HACL*. Includes the following primitives:
-  - Symetric ciphers: ChaCha20, Salsa20
+  - Symmetric ciphers: ChaCha20, Salsa20
   - MAC: Poly1305
-  - Hash: SHA256, SHA512
+  - Hash: SHA-256, SHA-384, SHA-512
   - Signature: Ed25519
   - ECDH: Curve25519
-  - Authenticated Encyption: SecretBox, Box, AEAD ChaCha20Poly1305 (IETF compliant)
+  - NaCl API: SecretBox, Box, Sign
+  - TLS API: IETF ChaCha20Poly1305 AEAD
 
-  NB: the primitives have been selectively picked from either `snapshot-gcc`
+  The code in hacl-c has been selectively picked from either `snapshot-gcc`
   or `snapshot-gcc-unrolled` to provide best performance, see below.
 
 - `snapshot-gcc`
@@ -40,9 +40,8 @@ This directory contains:
 
 - `hacl-c-experimental`
 
-  Experimental (unverified) HACL* code, useful to third party application,
-  to be verified and ported to the main `hacl-c` snapshot.
+  Experimental (unverified) HACL* code, to be verified and ported to the main `hacl-c` snapshot.
 
 - `ecc-star`
 
-  Legacy code snapshot for [A Verified Extensible Library of Elliptic Curves](http://ieeexplore.ieee.org/document/7536383/).
+  Legacy OCaml code for [A Verified Extensible Library of Elliptic Curves](http://ieeexplore.ieee.org/document/7536383/).
