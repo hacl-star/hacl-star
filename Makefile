@@ -17,7 +17,7 @@ display:
 	@echo "- 'make world' will run everything (except make prepare)"
 	@echo ""
 	@echo "Specialized targets for Experts:"
-	@echo "- 'make verify-ct' will run F* verification of the code for the side-channel resistance"
+	@echo "- 'make verify-ct' will run F* verification of the code for the secret independance"
 	@echo "- 'make verify-specs' will run F* verification on the specifications"
 	@echo "- 'make verify-code' will run F* verification on the code against the specification"
 	@echo "- 'make verify-secure_api' will run F* verification of the secure_api directory"
