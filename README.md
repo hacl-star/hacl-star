@@ -67,7 +67,7 @@ To build the library, you need a modern C compiler (preferably GCC-7).
 
 # Makefile
 
-By default, you have to select what you want to `make`:
+By default, you have to select what you want: type `make` to get more information:
 ```
 HACL* Makefile:
 - 'make build' will generate a shared library from the hacl-c snapshot (no verification)
