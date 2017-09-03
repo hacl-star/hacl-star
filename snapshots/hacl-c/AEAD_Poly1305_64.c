@@ -111,16 +111,15 @@ inline static void Hacl_Bignum_Fmul_shift_reduce(uint64_t *output)
 static void
 Hacl_Bignum_Fmul_mul_shift_reduce_(FStar_UInt128_t *output, uint64_t *input, uint64_t *input2)
 {
-  for (uint32_t i = (uint32_t )0; i < (uint32_t )3; i = i + (uint32_t )1)
+  for (uint32_t i = (uint32_t )0; i < (uint32_t )2; i = i + (uint32_t )1)
   {
-    uint32_t ctr = (uint32_t )3 - i - (uint32_t )1;
-    uint32_t i1 = ctr;
-    uint32_t j = (uint32_t )2 - i1;
-    uint64_t input2i = input2[j];
+    uint64_t input2i = input2[i];
     Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i);
-    if (ctr > (uint32_t )0)
-      Hacl_Bignum_Fmul_shift_reduce(input);
+    Hacl_Bignum_Fmul_shift_reduce(input);
   }
+  uint32_t i = (uint32_t )2;
+  uint64_t input2i = input2[i];
+  Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i);
 }
 
 inline static void Hacl_Bignum_Fmul_fmul_(uint64_t *output, uint64_t *input, uint64_t *input2)

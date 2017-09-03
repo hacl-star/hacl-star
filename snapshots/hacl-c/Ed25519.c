@@ -218,50 +218,28 @@ static void
 Hacl_Bignum_Fmul_mul_shift_reduce_(FStar_UInt128_t *output, uint64_t *input, uint64_t *input21)
 {
   {
-    uint32_t ctr = (uint32_t )5 - (uint32_t )0 - (uint32_t )1;
-    uint32_t i1 = ctr;
-    uint32_t j = (uint32_t )4 - i1;
-    uint64_t input2i = input21[j];
+    uint64_t input2i = input21[0];
     Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i);
-    if (ctr > (uint32_t )0)
-      Hacl_Bignum_Fmul_shift_reduce(input);
+    Hacl_Bignum_Fmul_shift_reduce(input);
   }
   {
-    uint32_t ctr = (uint32_t )5 - (uint32_t )1 - (uint32_t )1;
-    uint32_t i1 = ctr;
-    uint32_t j = (uint32_t )4 - i1;
-    uint64_t input2i = input21[j];
+    uint64_t input2i = input21[1];
     Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i);
-    if (ctr > (uint32_t )0)
-      Hacl_Bignum_Fmul_shift_reduce(input);
+    Hacl_Bignum_Fmul_shift_reduce(input);
   }
   {
-    uint32_t ctr = (uint32_t )5 - (uint32_t )2 - (uint32_t )1;
-    uint32_t i1 = ctr;
-    uint32_t j = (uint32_t )4 - i1;
-    uint64_t input2i = input21[j];
+    uint64_t input2i = input21[2];
     Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i);
-    if (ctr > (uint32_t )0)
-      Hacl_Bignum_Fmul_shift_reduce(input);
+    Hacl_Bignum_Fmul_shift_reduce(input);
   }
   {
-    uint32_t ctr = (uint32_t )5 - (uint32_t )3 - (uint32_t )1;
-    uint32_t i1 = ctr;
-    uint32_t j = (uint32_t )4 - i1;
-    uint64_t input2i = input21[j];
+    uint64_t input2i = input21[3];
     Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i);
-    if (ctr > (uint32_t )0)
-      Hacl_Bignum_Fmul_shift_reduce(input);
+    Hacl_Bignum_Fmul_shift_reduce(input);
   }
-  {
-    uint32_t ctr = (uint32_t )5 - (uint32_t )4 - (uint32_t )1;
-    uint32_t i1 = ctr;
-    uint32_t j = (uint32_t )4 - i1;
-    uint64_t input2i = input21[j];
-    Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i);
-    if (ctr > (uint32_t )0)
-      Hacl_Bignum_Fmul_shift_reduce(input);
-  }
+  uint32_t i = (uint32_t )4;
+  uint64_t input2i = input21[i];
+  Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i);
 }
 
 inline static void Hacl_Bignum_Fmul_fmul_(uint64_t *output, uint64_t *input, uint64_t *input21)
