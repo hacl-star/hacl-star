@@ -21,19 +21,10 @@ This directory contains:
   - NaCl API: SecretBox, Box, Sign
   - TLS API: IETF ChaCha20Poly1305 AEAD
 
-  The code in hacl-c has been selectively picked from either `snapshot-gcc`
-  or `snapshot-gcc-unrolled` to provide best performance, see below.
+  The code in hacl-c has been selectively picked from the make targets `snapshot-gcc`
+  or `snapshot-gcc-unrolled` to provide best performance.
 
-- `snapshot-gcc`
-
-  HACL* snapshot extracted for mainstream C compilers. Same primitives as listed above.
-
-- `snapshot-gcc-unrolled`
-
-  HACL* snapshot extracted for mainstream C compilers. Same primitives as listed above.
-  Loops have been unrolled up to 5 iterations.
-
-- `snapshot-ccomp`
+- `hacl-c-compcert`
 
   HACL* snapshot extracted for the [CompCert C compiler](www.http://compcert.inria.fr/).
   Same primitives as listed above. Loops have been unrolled up to 10 iterations.
@@ -41,6 +32,11 @@ This directory contains:
 - `hacl-c-experimental`
 
   Experimental (unverified) HACL* code, to be verified and ported to the main `hacl-c` snapshot.
+
+- `kremlib`
+
+  A cached version of the KreMLin C libraries, including platform-specific endianness libraries, 
+  and a compiled C version of the F* verified UInt128 library.
 
 - `ecc-star`
 

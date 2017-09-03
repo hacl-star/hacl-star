@@ -24,7 +24,7 @@ extract-c-code-experimental:
 
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
-SNAPSHOT_FILES= $(addprefix snapshots/c/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile) \
+SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile) \
 	$(addprefix code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
 	./code/curve25519/x25519-c/Curve25519.* \
 	./code/salsa-family/chacha-c/Chacha20.* \
@@ -45,16 +45,16 @@ SNAPSHOT_CCOMP_FILES=$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/k
 snapshot-collect:
 	mkdir -p $(SNAPSHOT_DIR)
 	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
-ifeq ($(SNAPSHOT_DIR),snapshots/snapshot-ccomp)
+ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	cp $(SNAPSHOT_CCOMP_FILES) $(SNAPSHOT_DIR)/
 else
 endif
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
-snapshots/snapshot-ccomp:
+snapshots/hacl-c-compcert:
 	$(MAKE) -C code clean
 	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
-	if $(HAS_CCOMP); then $(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-ccomp; fi
+	if $(HAS_CCOMP); then $(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/hacl-c-compcert; fi
 
 snapshots/snapshot-msvc:
 	$(MAKE) -C code clean
@@ -79,14 +79,14 @@ snapshots/hacl-c:
 	mkdir -p snapshots/hacl-c
 	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* Hacl_Policies.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* HMAC_SHA2_* vec128.h) \
 	   $(addprefix snapshots/snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
-	   $(addprefix snapshots/c/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile)  \
+	   $(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile)  \
 		./snapshots/hacl-c
 
 snapshots-all:
 	$(MAKE) snapshots/snapshot-gcc
 	$(MAKE) snapshots/snapshot-gcc-unrolled
-	$(MAKE) snapshots/snapshot-ccomp
 	$(MAKE) snapshots/snapshot-msvc
+	$(MAKE) snapshots/hacl-c-compcert
 	$(MAKE) snapshots/hacl-c
 
 snapshots-remove:
@@ -102,45 +102,45 @@ snapshots-update:
 #
 
 snapshots/hacl-c/libhacl.so: snapshots/hacl-c
-	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libnacl.so
+	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl.so
 
 snapshots/hacl-c/libhacl32.so: snapshots/hacl-c
-	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libnacl32.so
+	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl32.so
 
 snapshots/snapshot-gcc/libhacl.so: snapshots/snapshot-gcc
-	$(MAKE) -C snapshots/snapshot-gcc CC="$(GCC) $(GCC_OPTS) -fPIC" libnacl.so
+	$(MAKE) -C snapshots/snapshot-gcc CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl.so
 
 snapshots/snapshot-gcc/libhacl32.so: snapshots/snapshot-gcc
-	$(MAKE) -C snapshots/snapshot-gcc CC="$(GCC) $(GCC_OPTS) -fPIC" libnacl32.so
+	$(MAKE) -C snapshots/snapshot-gcc CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl32.so
 
 snapshots/snapshot-gcc-unrolled/libhacl.so: snapshots/snapshot-gcc-unrolled
-	$(MAKE) -C snapshots/snapshot-gcc-unrolled CC="$(GCC) $(GCC_OPTS) -fPIC" libnacl.so
+	$(MAKE) -C snapshots/snapshot-gcc-unrolled CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl.so
 
 snapshots/snapshot-gcc-unrolled/libhacl32.so: snapshots/snapshot-gcc-unrolled
-	$(MAKE) -C snapshots/snapshot-gcc-unrolled CC="$(GCC) $(GCC_OPTS) -fPIC" libnacl32.so
+	$(MAKE) -C snapshots/snapshot-gcc-unrolled CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl32.so
 
 # BB: The options for Compcert and MSVC must be adjusted here
-snapshots/snapshot-ccomp/libhacl.so: snapshots/snapshot-ccomp
-	$(MAKE) -C snapshots/snapshot-ccomp CC="$(CCOMP) $(CCOMP_OPTS) -fPIC" libnacl.so
+snapshots/hacl-c-compcert/libhacl.so: snapshots/hacl-c-compcert
+	$(MAKE) -C snapshots/hacl-c-compcert CC="$(CCOMP) $(CCOMP_OPTS) -fPIC" libhacl.so
 
-snapshots/snapshot-ccomp/libhacl32.so: snapshots/snapshot-ccomp
-	$(MAKE) -C snapshots/snapshot-ccomp CC="$(CCOMP) $(CCOMP_OPTS) -fPIC" libnacl32.so
+snapshots/hacl-c-compcert/libhacl32.so: snapshots/hacl-c-compcert
+	$(MAKE) -C snapshots/hacl-c-compcert CC="$(CCOMP) $(CCOMP_OPTS) -fPIC" libhacl32.so
 
 snapshots/snapshot-msvc/libhacl.so: snapshots/snapshot-msvc
-	$(MAKE) -C snapshots/snapshot-msvc CC="$(MSVC) $(MSVC_OPTS) -fPIC" libnacl.so
+	$(MAKE) -C snapshots/snapshot-msvc CC="$(MSVC) $(MSVC_OPTS) -fPIC" libhacl.so
 
 snapshots/snapshot-msvc/libhacl32.so: snapshots/snapshot-msvc
-	$(MAKE) -C snapshots/snapshot-msvc CC="$(MSVC) $(MSVC_OPTS) -fPIC" libnacl32.so
+	$(MAKE) -C snapshots/snapshot-msvc CC="$(MSVC) $(MSVC_OPTS) -fPIC" libhacl32.so
 
 build/libhacl.so:
 	mkdir -p build
 	$(MAKE) snapshots/hacl-c/libhacl.so
-	cp snapshots/hacl-c/libnacl.so build
+	cp snapshots/hacl-c/libhacl.so build
 
 build/libhacl32.so:
 	mkdir -p build
 	$(MAKE) snapshots/hacl-c/libhacl32.so
-	cp snapshots/hacl-c/libnacl32.so build
+	cp snapshots/hacl-c/libhacl32.so build
 
 
 #

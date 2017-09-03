@@ -23,7 +23,7 @@ FILES = Salsa20.c Salsa20.h Chacha20.c Chacha20.h Poly1305_64.c Poly1305_64.h AE
 # Library (64 bits)
 #
 
-libnacl.so: $(FILES)
+libhacl.so: $(FILES)
 	$(CC) $(LIBFLAGS) \
 	  Salsa20.c -c -o Salsa20.o
 	$(CC) $(LIBFLAGS) \
@@ -40,16 +40,16 @@ libnacl.so: $(FILES)
 	  Curve25519.c -c -o Curve25519.o
 	$(CC) $(LIBFLAGS) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
-	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/c -I . -Wall \
-	  ../../test/c/hacl_test_utils.c \
-	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c/randombytes.c ../../test/c/haclnacl.c \
-	  -o libnacl.so
+	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/test-files -I . -Wall \
+	  ../../test/test-files/hacl_test_utils.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  -o libhacl.so
 
 #
 # Library (32 bits)
 #
 
-libnacl32.so: $(FILES)
+libhacl32.so: $(FILES)
 	$(CC) $(LIBFLAGS32) \
 	  Salsa20.c -c -o Salsa20.o
 	$(CC) $(LIBFLAGS32) \
@@ -66,10 +66,10 @@ libnacl32.so: $(FILES)
 	  Curve25519.c -c -o Curve25519.o
 	$(CC) $(LIBFLAGS32) \
 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
-	$(CC) -shared  $(LIBFLAGS32) -I ../../test/c -I . -Wall \
-	  ../../test/c/hacl_test_utils.c \
-	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/c/randombytes.c ../../test/c/haclnacl.c \
-	  -o libnacl32.so
+	$(CC) -shared  $(LIBFLAGS32) -I ../../test/test-files -I . -Wall \
+	  ../../test/test-files/hacl_test_utils.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  -o libhacl32.so
 
 clean:
 	rm -rf *~ *.exe *.out *.o *.txt *.so

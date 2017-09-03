@@ -125,7 +125,7 @@ int main(int argc, char *argv[]){
   if (argc - optind == 3 && strcmp(argv[optind], "send") == 0) {
       strcpy(file, argv[optind+1]);
       sscanf(argv[optind+2],"%512[^:]:%u",host,&port);
-      Hacl_Tube_Send_file_send(strlen(file),file,roundup,host,port,sk,pk);
+      Hacl_Tube_Send_file_send(strlen(file),(unsigned char*)file,roundup,(unsigned char*)host,port,sk,pk);
   } else if (argc - optind == 2 && strcmp(argv[optind], "receive") == 0) {
       sscanf(argv[optind+1],"%u",&port);
       Hacl_Tube_Receive_file_recv(port,pk,sk);

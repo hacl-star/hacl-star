@@ -148,7 +148,7 @@ ci: .clean-banner .clean-git .clean-snapshots
 clean-base:
 	rm -rf *~ *.tar.gz
 	rm -rf snapshots/hacl-c/*.o
-	rm -rf snapshots/hacl-c/libnacl*
+	rm -rf snapshots/hacl-c/libhacl*
 
 clean-build:
 	rm -rf build

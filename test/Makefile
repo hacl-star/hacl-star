@@ -17,13 +17,13 @@ CFLAGS = $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HO
 	-I $(LIBSODIUM_HOME)/include -L$(LIBSODIUM_HOME)/lib \
 	-I $(TWEETNACL_HOME) -I .
 
-CC_BASE = $(CC) $(CFLAGS) -I $(HACL_HOME)/$(SNAPSHOT_DIR) -I ./c $(ADDITIONAL_FILES) \
-	c/hacl_test_utils.c $(TWEETNACL_HOME)/tweetnacl.c $(HACL_HOME)/$(SNAPSHOT_DIR)/kremlib.c $(HACL_HOME)/$(SNAPSHOT_DIR)/testlib.c
+CC_BASE = $(CC) $(CFLAGS) -I $(HACL_HOME)/$(SNAPSHOT_DIR) -I ./test-files $(ADDITIONAL_FILES) \
+	test-files/hacl_test_utils.c $(TWEETNACL_HOME)/tweetnacl.c $(HACL_HOME)/$(SNAPSHOT_DIR)/kremlib.c $(HACL_HOME)/$(SNAPSHOT_DIR)/testlib.c
 
 PERF_LIBS=$(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread -ldl
 
 CCOMP?=ccomp
-FSTARH_CCOMP=$(HACL_HOME)/snapshots/snapshot-ccomp/FStar.c
+FSTARH_CCOMP=$(HACL_HOME)/snapshots/hacl-c-compcert/FStar.c
 CCOMP_OPTS=-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE
 
 #
@@ -94,39 +94,39 @@ test-pneutube:
 
 # 64-bit unit tests
 unit-tests:
-	$(MAKE) -C $(HACL_HOME)/$(SNAPSHOT_DIR) libnacl.so
-	cp $(HACL_HOME)/$(SNAPSHOT_DIR)/libnacl.so .
-ifeq ($(SNAPSHOT_DIR),snapshots/snapshot-ccomp)
+	$(MAKE) -C $(HACL_HOME)/$(SNAPSHOT_DIR) libhacl.so
+	cp $(HACL_HOME)/$(SNAPSHOT_DIR)/libhacl.so .
+ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	$(CCOMP) $(CCOMP_OPTS) $(FSTARH_CCOMP) \
-		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/c -I c/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c c/hacl_test_utils.c c/unit_tests.c \
-		libnacl.so -o unit_tests.exe
+		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
+		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
+		libhacl.so -o unit_tests.exe
 else
 	$(CC) $(CCOPTS) \
-		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/c -I c/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c c/hacl_test_utils.c c/unit_tests.c \
-		libnacl.so -o unit_tests.exe
+		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
+		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
+		libhacl.so -o unit_tests.exe
 endif
 	./unit_tests.exe
-	rm libnacl.so
+	rm libhacl.so
 
 # 32-bit unit tests
 unit-tests-32:
-	$(MAKE) -C $(HACL_HOME)/$(SNAPSHOT_DIR) libnacl32.so
-	cp $(HACL_HOME)/$(SNAPSHOT_DIR)/libnacl32.so .
-ifeq ($(SNAPSHOT_DIR),snapshots/snapshot-ccomp)
+	$(MAKE) -C $(HACL_HOME)/$(SNAPSHOT_DIR) libhacl32.so
+	cp $(HACL_HOME)/$(SNAPSHOT_DIR)/libhacl32.so .
+ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	$(CCOMP) $(CCOMP_OPTS) $(FSTARH_CCOMP) \
-		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I ../snapshots/c -I c/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c c/hacl_test_utils.c c/unit_tests.c \
-		libnacl32.so -o unit_tests32.exe
+		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I ../snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
+		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
+		libhacl32.so -o unit_tests32.exe
 else
 	$(CC) $(CFLAGS) -DKRML_NOUINT128  \
-		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I ../snapshots/c -I c/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c c/hacl_test_utils.c c/unit_tests.c \
-		libnacl32.so -o unit_tests32.exe
+		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I ../snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
+		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
+		libhacl32.so -o unit_tests32.exe
 endif
 	./unit_tests32.exe
-	rm libnacl32.so
+	rm libhacl32.so
 
 unit-tests-hacl-c:
 	$(MAKE) unit-tests SNAPSHOT_DIR=snapshots/hacl-c
@@ -138,7 +138,7 @@ unit-tests-gcc-unrolled:
 	$(MAKE) unit-tests SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
 unit-tests-ccomp:
-	$(MAKE) unit-tests CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/snapshot-ccomp
+	$(MAKE) unit-tests CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/hacl-c-compcert
 
 # # FIXME: setup tests for MSVC
 # unit-tests-msvc:
@@ -163,7 +163,7 @@ unit-tests-32-gcc-unrolled:
 	$(MAKE) unit-tests-32 SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
 unit-tests-32-ccomp:
-	$(MAKE) unit-tests-32 CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/snapshot-ccomp
+	$(MAKE) unit-tests-32 CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/hacl-c-compcert
 
 # # FIXME: setup tests for MSVC
 # unit-tests-32-msvc:
@@ -192,7 +192,7 @@ test-all-%: .snapshot-all
 	@rm test-$*.exe
 	$(MAKE) CC="$(GCC) $(GCC_OPTS)" SNAPSHOT_DIR="snapshots/snapshot-gcc-unrolled" test-$*.exe && ./test-$*.exe
 	@rm test-$*.exe
-	$(MAKE) CC="ccomp" CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR="snapshots/snapshot-ccomp" test-$*.exe && ./test-$*.exe
+	$(MAKE) CC="ccomp" CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR="snapshots/hacl-c-compcert" test-$*.exe && ./test-$*.exe
 	@rm test-$*.exe
 #	$(MAKE) CC="$(MSVC) $(MSVC_OPTS)" SNAPSHOT_DIR="snapshots/snapshot-msvc" test-poly.exe; ./test-$*.exe
 
@@ -203,7 +203,7 @@ test-all-perf: $(addprefix test-all-, poly1305 chacha20 chacha20-vec128 salsa20 
 #
 
 test-poly1305.exe:
-	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c c/test-poly.c -o test-poly1305.exe \
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c test-files/test-poly.c -o test-poly1305.exe \
 		$(PERF_LIBS)
 
 test-unit-poly1305: test-poly1305.exe
@@ -217,7 +217,7 @@ test-perf-poly1305: test-poly1305.exe
 #
 
 test-salsa20.exe:
-	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c c/test-salsa.c -o test-salsa20.exe $(PERF_LIBS)
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c test-files/test-salsa.c -o test-salsa20.exe $(PERF_LIBS)
 
 test-unit-salsa20: test-salsa20.exe
 	./test-salsa20.exe unit-test
@@ -230,7 +230,7 @@ test-perf-salsa20: test-salsa20.exe
 #
 
 test-chacha20.exe:
-	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20.c c/test-chacha.c -o test-chacha20.exe $(PERF_LIBS)
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20.c test-files/test-chacha.c -o test-chacha20.exe $(PERF_LIBS)
 
 test-unit-chacha20: test-chacha20.exe
 	./test-chacha20.exe unit-test
@@ -255,7 +255,7 @@ ifeq ($(CC),ccomp)
 	@chmod +x test-chacha20-vec128.exe
 else
 	$(CC_BASE) -lpthread $(LIBDL) $(LIBWINSOCK) \
-	$(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20_Vec128.c c/test-chacha-vec128.c -o test-chacha20-vec128.exe $(PERF_LIBS)
+	$(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20_Vec128.c test-files/test-chacha-vec128.c -o test-chacha20-vec128.exe $(PERF_LIBS)
 endif
 
 test-unit-chacha20-vec128: test-chacha20-vec128.exe
@@ -277,7 +277,7 @@ endif
 #
 
 test-curve25519.exe:
-	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/Curve25519.c c/test-curve.c -o test-curve25519.exe $(PERF_LIBS)
+	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/Curve25519.c test-files/test-curve.c -o test-curve25519.exe $(PERF_LIBS)
 
 test-unit-curve25519: test-curve25519.exe
 	./test-curve25519.exe unit-test
@@ -290,7 +290,7 @@ test-perf-curve25519: test-curve25519.exe
 #
 
 test-sha512.exe:
-	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/SHA2_512.c c/test-sha512.c -o test-sha512.exe $(PERF_LIBS)
+	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/SHA2_512.c test-files/test-sha512.c -o test-sha512.exe $(PERF_LIBS)
 
 test-unit-sha512: test-sha512.exe
 	./test-sha512.exe unit-test
@@ -303,7 +303,7 @@ test-perf-sha512: test-sha512.exe
 #
 
 test-ed25519.exe:
-	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/SHA2_512.c $(HACL_HOME)/$(SNAPSHOT_DIR)/Ed25519.c c/test-ed25519.c -o test-ed25519.exe $(PERF_LIBS)
+	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/SHA2_512.c $(HACL_HOME)/$(SNAPSHOT_DIR)/Ed25519.c test-files/test-ed25519.c -o test-ed25519.exe $(PERF_LIBS)
 
 test-unit-ed25519: test-ed25519.exe
 	./test-ed25519.exe unit-test
@@ -320,7 +320,7 @@ test-secretbox.exe:
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c -o Poly1305_64.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Curve25519.c  -o Curve25519.o
 	$(CC_BASE) Salsa20.o Poly1305_64.o Curve25519.o \
-		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c c/test-secretbox.c -o test-secretbox.exe $(PERF_LIBS)
+		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c test-files/test-secretbox.c -o test-secretbox.exe $(PERF_LIBS)
 
 test-unit-secretbox: test-secretbox.exe
 	./test-secretbox.exe unit-test
@@ -337,7 +337,7 @@ test-box.exe:
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c -o Poly1305_64.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Curve25519.c  -o Curve25519.o
 	$(CC_BASE) Salsa20.o Poly1305_64.o Curve25519.o \
-		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c c/test-box.c -o test-box.exe $(PERF_LIBS)
+		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c test-files/test-box.c -o test-box.exe $(PERF_LIBS)
 
 test-unit-box: test-box.exe
 	./test-box.exe unit-test
@@ -353,7 +353,7 @@ test-aead.exe:
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20.c         -o Chacha20.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/AEAD_Poly1305_64.c -o AEAD_Poly1305_64.o
 	$(CC_BASE) -lpthread $(LIBDL) $(LIBWINSOCK) Chacha20.o AEAD_Poly1305_64.o \
-		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20Poly1305.c c/test-aead.c -o test-aead.exe $(PERF_LIBS)
+		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20Poly1305.c test-files/test-aead.c -o test-aead.exe $(PERF_LIBS)
 
 test-unit-aead: test-aead.exe
 	./test-aead.exe unit-test
@@ -439,8 +439,8 @@ clean:
 # 	$(MAKE) -C ../snapshots/snapshot-hacl CC="$(GCC) $(GCC_OPTS)" test
 
 # test-snapshot-ccomp:
-# 	$(MAKE) -C .. snapshots/snapshot-ccomp
-# 	$(MAKE) -C ../snapshots/snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" test
+# 	$(MAKE) -C .. snapshots/hacl-c-compcert
+# 	$(MAKE) -C ../snapshots/hacl-c-compcert CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" test
 
 # test-snapshot-gcc:
 # 	$(MAKE) -C .. snapshots/snapshot-gcc
@@ -458,7 +458,7 @@ clean:
 # 	$(shell (echo -e "Benchmarking results with ccomp -O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat $(HACL_HOME)/snapshot-ccomp/bench.txt) > benchmark-compcert.txt)
 
 # perf-ccomp:
-# 	-$(MAKE) -B -C $(HACL_HOME)/snapshots/snapshot-ccomp CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" perf
+# 	-$(MAKE) -B -C $(HACL_HOME)/snapshots/hacl-c-compcert CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" perf
 # 	$(MAKE) -B echo-perf-ccomp
 
 # echo-perf-gcc:
