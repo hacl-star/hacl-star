@@ -4,8 +4,15 @@ HACL_HOME?=../..
 include ../../Makefile.include
 
 RSA_FILES= \
+	Convert.fst \
+	Multiplication.fst \
+	Shift.fst \
+	Comparison.fst \
+	Addition.fst \
+	Division.fst \
+	Exponentiation.fst \
 	RSA.fst \
-	Test.RSA.fst  
+	Test.RSA.fst
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include ../../../code/lib/kremlin \
 	--include $(KREMLIN_HOME)/kremlib --include ../../../specs --include ../../hash --lax
@@ -30,7 +37,7 @@ extract-c: rsa-c/RSA.c
 
 test: test-rsa.exe
 	
-rsa-c/out.krml: RSA.fst Test.RSA.fst
+rsa-c/out.krml: $(RSA_FILES)
 	$(KRML) -tmpdir rsa-c -skip-translation $^
 
 EXTRACTED = \
@@ -38,12 +45,20 @@ EXTRACTED = \
 	Hacl_Hash_Lib_Create \
 	Hacl_Hash_SHA2_256 \
 	SHA2_256 \
+	Convert \
+	Multiplication \
+	Shift \
+	Comparison \
+	Addition \
+	Division \
+	Exponentiation \
 	RSA \
-	Test_RSA 
+	Test_RSA
 	
 $(addprefix rsa-c/,$(addsuffix .c, $(EXTRACTED))): rsa-c/out.krml
 	$(KRML) -tmpdir rsa-c $^ -skip-compilation -no-prefix Test.RSA
   
+CC = x86_64-w64-mingw32-gcc
 CC := $(CC) $(INCLUDES)
 
 %.o: %.c

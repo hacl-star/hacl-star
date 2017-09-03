@@ -7,45 +7,70 @@ open FStar.Int.Cast
 open FStar.All
 open FStar.Mul
 
+open Convert
+open Exponentiation
+
 module U32 = FStar.UInt32
 module U8 = FStar.UInt8
 
 type uint8_p = buffer FStar.UInt8.t
 type bignum = buffer FStar.UInt64.t
 
-type rsa_pubkey = 
-	| Mk_rsa_pubkey: n:bignum -> e:bignum -> rsa_pubkey
-
-type rsa_privkey =
-	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:bignum -> rsa_privkey
-
 let zero_8 = 0uy
 let hLen = 32ul
 let sLen = 20ul
 
-assume val nat_to_text: n:bignum -> len:U32.t -> res:uint8_p{length res = U32.v len} -> ST unit
-(requires (fun h -> live h n /\ live h res))
-(ensures (fun h0 _ h1 -> live h0 n /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
+type rsa_pubkey = 
+	| Mk_rsa_pubkey: n:bignum -> e:bignum -> rsa_pubkey
 
-assume val text_to_nat: text:uint8_p -> res:bignum -> ST unit 
-(requires (fun h -> live h text /\ live h res))
-(ensures (fun h0 _ h1 -> live h0 text /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
+val get_n: x:rsa_pubkey -> ST bignum
+	(requires (fun h -> True))  (* live h x *)
+	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 n *)
+let get_n x = 
+	match x with 
+	| Mk_rsa_pubkey n e -> n
+	
+val get_e: x:rsa_pubkey -> ST bignum
+	(requires (fun h -> True))  (* live h x *)
+	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 e *)
+let get_e x =
+	match x with
+	| Mk_rsa_pubkey n e -> e
 
+type rsa_privkey =
+	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:bignum -> rsa_privkey
+	
+val get_pkey: x:rsa_privkey -> ST rsa_pubkey
+	(requires (fun h -> True))  (* live h x *)
+	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 rsa_pubkey *)
+let get_pkey x =
+	match x with
+	| Mk_rsa_privkey pkey d -> pkey
+
+val get_d: x:rsa_privkey -> ST bignum
+	(requires (fun h -> True))  (* live h x *)
+	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 d *)
+let get_d x =
+	match x with
+	| Mk_rsa_privkey pkey d -> d
+	
 val get_octets: modBits:U32.t -> Tot U32.t
 let get_octets modBits = U32.((modBits +^ 7ul) /^ 8ul)
 
 val get_length_em: modBits:U32.t -> Tot U32.t
 let get_length_em modBits =
 	let k = get_octets modBits in
-	if U32.((modBits -^ 1ul) %^ 8ul =^ 0ul) 
+	if U32.((modBits -^ 1ul) %^ 8ul =^ 0ul)
 	then U32.(k -^ 1ul) else k
 
-val hash_sha256: mHash:uint8_p{length mHash = 32} -> m:uint8_p -> len:U32.t{U32.v len = length m} -> ST unit 
-(requires (fun h -> live h m /\ live h mHash))
-(ensures (fun h0 _ h1 -> live h0 m /\ live h0 mHash /\ live h1 mHash /\ modifies_1 mHash h0 h1))
+val hash_sha256: 
+	mHash:uint8_p{length mHash = U32.v hLen} -> m:uint8_p -> len:U32.t{U32.v len = length m} -> ST unit
+	(requires (fun h -> live h m /\ live h mHash))
+	(ensures (fun h0 _ h1 -> live h0 m /\ live h0 mHash /\ live h1 mHash /\ modifies_1 mHash h0 h1))
 let hash_sha256 mHash m len = SHA2_256.hash mHash m len
 
-val mgf: mgfseed_len:U32.t -> mgfseed:uint8_p{length mgfseed = U32.v mgfseed_len} ->  
+val mgf: 
+	mgfseed_len:U32.t -> mgfseed:uint8_p{length mgfseed = U32.v mgfseed_len} ->  
 	len:U32.t -> counter:U32.t -> acc:uint8_p{length acc = U32.(v (hLen *^ counter))} -> 
 	res:uint8_p{length res = U32.v len} -> ST unit
 	(requires (fun h -> live h res /\ live h mgfseed /\ live h acc))
@@ -95,7 +120,7 @@ val pss_encode:
 	salt:uint8_p{length salt = U32.v sLen} ->
 	em:uint8_p{length em = U32.v (get_length_em modBits)} -> ST unit
 	(requires (fun h -> live h msg /\ live h em /\ live h salt))
-	(ensures (fun h0 _ h1 -> live h0 msg /\ live h0 em /\  live h0 salt /\ live h1 salt /\ live h1 em /\ modifies_1 em h0 h1))
+	(ensures (fun h0 _ h1 -> live h0 msg /\ live h0 em /\  live h0 salt /\ live h1 em /\ modifies_1 em h0 h1))
 let pss_encode modBits msg len salt em =
 	push_frame();
 	let mHash = create zero_8 hLen in
@@ -168,24 +193,67 @@ let pss_verify modBits em msg len =
 	blit salt 0ul m1 U32.(8ul +^ hLen) sLen;
 	let m1Hash' = create zero_8 hLen in
 	hash_sha256 m1Hash' m1 m1_size;
-	eqb m1Hash m1Hash' hLen
-	))) in
+	eqb m1Hash m1Hash' hLen))) in
 	pop_frame();
 	res
 
-assume val rsa_sign:
+val rsa_sign:
 	modBits:U32.t{U32.v (get_length_em modBits) >= U32.(v (sLen +^ hLen +^ 2ul))} ->
-	msg:uint8_p ->
-	skey:rsa_privkey -> 
+	skeyBits:U32.t -> msgLen:U32.t ->
+	msg:uint8_p{length msg = U32.v msgLen} ->
+	skey:rsa_privkey ->
 	salt:uint8_p{length salt = U32.v sLen} ->
 	sgnt:uint8_p{length sgnt = U32.v (get_octets modBits)} -> ST unit
-	(requires (fun h -> live h msg /\ live h salt))
-	(ensures (fun h0 _ h1 -> live h0 msg /\ live h0 salt /\ live h1 msg /\ live h1 salt))
+	(requires (fun h -> live h msg /\ live h salt /\ live h sgnt))
+	(ensures (fun h0 _ h1 -> live h0 msg /\ live h0 salt /\ live h0 sgnt /\ live h1 sgnt /\ modifies_1 sgnt h0 h1))
+let rsa_sign modBits skeyBits msgLen msg skey salt sgnt =
+	push_frame();
+	let k = get_octets modBits in
+	let d = get_d skey in
+	let n = get_n (get_pkey skey) in
+	
+	let emLen = get_length_em modBits in
+	let em = create zero_8 emLen in
+	pss_encode modBits msg msgLen salt em;
+	let mLen = get_size_nat emLen in
+	let m = create 0uL mLen in
+	text_to_nat em emLen m;
+	
+	(* todo: m % n *)
+	let sLen = get_size_nat k in
+	let s = create 0uL sLen in
+    mod_exp modBits mLen skeyBits sLen n m d s;
 
-assume val rsa_verify:
+	nat_to_text s k sgnt;
+	pop_frame()
+	
+val rsa_verify:
 	modBits:U32.t{U32.v (get_length_em modBits) >= U32.(v (sLen +^ hLen +^ 2ul))} ->
+	msgLen:U32.t -> pkeyBits:U32.t ->
 	sgnt:uint8_p{length sgnt = U32.v (get_octets modBits)} ->
-	pkey:rsa_pubkey -> 
-	msg:uint8_p -> ST bool
+	pkey:rsa_pubkey ->
+	msg:uint8_p{length msg = U32.v msgLen} -> ST bool
 	(requires (fun h -> live h msg /\ live h sgnt))
 	(ensures (fun h0 _ h1 -> live h0 msg /\ live h0 sgnt /\ live h1 msg /\ live h1 sgnt))
+let rsa_verify modBits msgLen pkeyBits sgnt pkey msg =
+	push_frame();
+	let e = get_e pkey in
+	let n = get_n pkey in
+	
+	(* the length of the signature in octets *)
+	let k = get_octets modBits in
+	let sLen = get_size_nat k in
+	let s = create 0uL sLen in
+	text_to_nat sgnt k s;
+	
+	(* todo: s % n *)
+	let emLen = get_length_em modBits in
+	let mLen = get_size_nat emLen in
+	let m = create 0uL mLen in
+	mod_exp modBits sLen pkeyBits mLen n s e m;
+	
+	let em = create zero_8 emLen in
+	nat_to_text m emLen em;
+	let res = pss_verify modBits em msg msgLen in
+	pop_frame();
+	res
