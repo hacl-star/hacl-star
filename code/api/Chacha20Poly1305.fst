@@ -287,12 +287,12 @@ let aead_encrypt c mac m mlen aad aadlen k n =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
 private val lemma_aead_decrypt:
-  h0:mem -> h1:mem -> h2:mem ->
-  tmp:uint8_p -> m:uint8_p ->
-  Lemma (requires (live h0 m /\ modifies_0 h0 h1 /\ (modifies_1 m h1 h2 \/ h1 == h2)))
+  h0:mem -> h1:mem -> h2:mem -> m:uint8_p ->
+  Lemma (requires (live h0 m /\ modifies_0 h0 h1 /\ modifies_2_1 m h1 h2))
         (ensures (modifies_2_1 m h0 h2))
-let lemma_aead_decrypt h0 h1 h2 tmp m =
-  lemma_modifies_0_1 m h0 h1 h2
+let lemma_aead_decrypt h0 h1 h2 m =
+  lemma_modifies_sub_2_1 h0 h1 m;
+  lemma_modifies_2_1_trans m h0 h1 h2
 
 private val lemma_aead_decrypt_len:
   c:uint8_p ->
@@ -343,9 +343,9 @@ let aead_decrypt m c mlen mac aad aadlen k n =
   lemma_modifies_1_trans tmp h1 h1' h2;
   lemma_modifies_1_trans tmp h1 h2 h3;
   lemma_modifies_0_1' tmp h0 h1 h3;
-  (* Declassication assumption on mac *)
-  assume (Hacl.Policies.declassifiable mac /\ Hacl.Policies.declassifiable rmac);
-  let verify = cmp_bytes mac rmac 16ul in
+  let result = cmp_bytes mac rmac 16ul in
+  let h3' = ST.get() in
+  let verify = declassify_u8 result in
   lemma_aead_decrypt_len c mlen;
   let res : u32 =
     if U8.(verify =^ 0uy) then (
@@ -353,7 +353,8 @@ let aead_decrypt m c mlen mac aad aadlen k n =
 	 0ul
   	 ) else 1ul in
   let h4 = ST.get() in
-  lemma_aead_decrypt h0 h3 h4 tmp m;
+  lemma_modifies_0_1 m h3 h3' h4;
+  lemma_aead_decrypt h0 h3 h4 m;
   pop_frame();
   let h5 = ST.get() in
   modifies_popped_1 m h h0 h4 h5;

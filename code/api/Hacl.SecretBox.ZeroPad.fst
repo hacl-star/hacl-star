@@ -134,7 +134,7 @@ let crypto_secretbox_open_detached_decrypt m c clen n subkey verify =
 val crypto_secretbox_open_detached:
   m:uint8_p ->
   c:uint8_p{disjoint m c} ->
-  mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ declassifiable mac} ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
   clen:u64{let len = U64.v clen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
@@ -158,8 +158,8 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let clen_ = Int.Cast.uint64_to_uint32 clen in
   Poly1305_64.crypto_onetimeauth cmac (sub c 32ul clen_) clen mackey;
   let h4 = ST.get() in
-  assume (Hacl.Policies.declassifiable cmac);
-  let verify = cmp_bytes mac cmac 16ul in
+  let result = cmp_bytes mac cmac 16ul in
+  let verify = declassify_u8 result in
   let z = crypto_secretbox_open_detached_decrypt m c clen n subkey verify in
   pop_frame();
   lemma_modifies_1_trans tmp h1 h2 h3;
@@ -201,6 +201,4 @@ val crypto_secretbox_open_easy:
     (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
 let crypto_secretbox_open_easy m c clen n k =
   let mac = sub c 0ul 16ul in
-  (* Declassification assumption (non constant-time operations may happen on the 'mac' buffer *)
-  assume (declassifiable mac);
   crypto_secretbox_open_detached m c mac U64.(clen) n k
