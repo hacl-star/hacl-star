@@ -8,13 +8,18 @@ all: display
 
 display:
 	@echo "HACL* Makefile:"
+	@echo "If you want to run and test the C library:"
 	@echo "- 'make build' will generate a shared library from the hacl-c snapshot (no verification)"
+	@echo "- 'make unit-tests' will run tests on the library built rom the hacl-c snapshot (no verification)"
 	@echo "- 'make clean-build' will clean 'build' artifacts"
 	@echo ""
-	@echo "(Please install F* and Kremlin as a prerequisite...)"
+	@echo "If you want to verify the F* code and regenerate the C library:"
+	@echo "- 'make prepare' will try to install F* and Kremlin (still has some prerequisites)"
 	@echo "- 'make verify' will run F* verification on all specs, code and secure-api directories"
 	@echo "- 'make extract' will generate all the C code into a snapshot and test it (no verification)"
+	@echo "- 'make test-all' will generate and test everything (no verification)"
 	@echo "- 'make world' will run everything (except make prepare)"
+	@echo "- 'make clean' will remove all artifacts created by other targets"
 	@echo ""
 	@echo "Specialized targets for Experts:"
 	@echo "- 'make verify-ct' will run F* verification of the code for the secret independance"
@@ -25,9 +30,7 @@ display:
 	@echo "- 'make extract-all' will give you all versions of the C snapshots available"
 	@echo "- 'make extract-new' will remove and regenerate all versions of the C snapshots available"
 	@echo "- 'make extract-experimental' will generate C code for experimental primitives"
-	@echo "- 'make test-all' will generate and test everything (no verification)"
-	@echo "- 'make clean' will remove all artifacts of other targets"
-	@echo "- 'make prepare' will install F* and Kremlin (Requirements are still needed)"
+
 
 #
 # Includes

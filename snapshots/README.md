@@ -23,6 +23,10 @@ This directory contains:
 
   The code in hacl-c has been selectively picked from the make targets `snapshot-gcc`
   or `snapshot-gcc-unrolled` to provide best performance.
+  
+  To build the library, execute `make libhacl.co` or `make libhacl32.so` (on 32-bit systems).
+  To test the library, execute `make unit-tests` or `make unit-tests32`, which
+  runs the tests in `../test/test-files/unit-tests.c`.
 
 - `hacl-c-compcert`
 
