@@ -90,7 +90,7 @@ extract-experimental: extract-c-code-experimental
 
 build-make:
 	$(MAKE) build/libhacl.so
-	$(MAKE) build/libhacl32.so
+#	$(MAKE) build/libhacl32.so
 
 build-cmake:
 	mkdir -p build && cd build && CC=gcc cmake $(CMAKE_COMPILER_OPTION) .. && make
