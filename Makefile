@@ -103,9 +103,10 @@ build: clean-build
 # Test specification and code
 #
 
-test:
+unit-tests:
 	@echo $(CYAN)"# Testing the HaCl* shared library"$(NORMAL)
-	$(MAKE) -C snapshots/hacl-c test
+	$(MAKE) -C snapshots/hacl-c unit-tests
+	$(MAKE) -C snapshots/hacl-c unit-tests32
 
 test-all:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
