@@ -3,8 +3,10 @@
 #
 # Compilation flags
 #
-CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
-CCOPTS32 = -Ofast -mtune=generic -m32 -fwrapv -fomit-frame-pointer -funroll-loops
+SNAPSHOT_DIR=snapshots/hacl-c-compcert
+CC = ccomp
+CCOPTS = -O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE
+CCOPTS32 = -O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE
 
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
   LIBFLAGS=$(CCOPTS) $(CFLAGS)

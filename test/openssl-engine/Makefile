@@ -1,4 +1,4 @@
-OPENSSL_HOME?=../../../openssl
+OPENSSL_HOME?=../../other_providers/openssl
 KREMLIN_HOME?=../../../kremlin
 # CURVE_HOME=../../code/curve25519/x25519-c
 # CHACHA_HOME=../../code/salsa-family/chacha-c
