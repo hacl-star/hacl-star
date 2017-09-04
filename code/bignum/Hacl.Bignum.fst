@@ -78,7 +78,9 @@ val fdifference:
 let fdifference a b =
   let hinit = ST.get() in
   push_frame();
+  let h0 = ST.get() in
   let tmp = create limb_zero clen in
+  let h0' = ST.get() in
   blit b 0ul tmp 0ul clen;
   let h = ST.get() in
   Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h b);
@@ -92,7 +94,10 @@ let fdifference a b =
   Hacl.Spec.Bignum.Fdifference.lemma_fdifference_eval (as_seq hinit a) (as_seq h' tmp);
   lemma_diff (eval h' tmp) (eval hinit a) prime;
   lemma_diff (eval hinit b) (eval hinit a) prime;
-  pop_frame()
+  pop_frame();
+  lemma_modifies_1_trans tmp h0' h h';
+  lemma_modifies_0_1' tmp h0 h0' h';
+  lemma_modifies_0_1 a h0 h' h1
 
 
 open Hacl.Spec.Bignum.Fscalar
@@ -121,7 +126,9 @@ val fscalar:
 let fscalar output b s =
   let hinit = ST.get() in
   push_frame();
+  let h0 = ST.get() in
   let tmp = create wide_zero clen in
+  let h0' = ST.get() in
   fscalar tmp b s;
   lemma_fscalar_eval (as_seq hinit b) s;
   carry_wide_ tmp ;
@@ -132,8 +139,12 @@ let fscalar output b s =
   lemma_carry_top_wide_spec (as_seq h' tmp);
   assert(forall (i:nat). i < len ==> w (Seq.index (as_seq h'' tmp) i) < pow2 n);
   copy_from_wide_ output tmp;
+  let h1 = ST.get() in
   lemma_copy_from_wide (as_seq h'' tmp);
-  pop_frame()
+  pop_frame();
+  lemma_modifies_1_trans tmp h0' h' h'';
+  lemma_modifies_0_1' tmp h0 h0' h'';
+  lemma_modifies_0_1 output h0 h'' h1
 
 
 [@"c_inline"]
