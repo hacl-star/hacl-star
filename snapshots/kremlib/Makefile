@@ -3,21 +3,25 @@
 #
 # Compilation flags
 #
+CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
+CCOPTS32 = -Ofast -mtune=generic -m32 -fwrapv -fomit-frame-pointer -funroll-loops
 
-ifeq ($(SNAPSHOT_DIR),snapshots/snapshot-ccomp)
+ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
   LIBFLAGS=$(CCOPTS) $(CFLAGS)
+  LIBFLAGS32=$(CCOPTS32) $(CFLAGS)
   OTHER=FStar.c -shared
 else
-  LIBFLAGS=$(CFLAGS) -fPIC -Wno-discarded-qualifiers
+  LIBFLAGS=$(CCOPTS) -fPIC -Wno-discarded-qualifiers
+  LIBFLAGS32=$(CCOPTS32) -fPIC -Wno-discarded-qualifiers -DKRML_NOUINT128 -Wno-unused-function
   OTHER=-shared
 endif
-LIBFLAGS32=$(LIBFLAGS) -DKRML_NOUINT128 -Wno-unused-function
 
 #
 # Files
 #
 
 FILES = Salsa20.c Salsa20.h Chacha20.c Chacha20.h Poly1305_64.c Poly1305_64.h AEAD_Poly1305_64.c AEAD_Poly1305_64.h SHA2_512.c SHA2_512.h Ed25519.c Ed25519.h Curve25519.c Curve25519.h Chacha20Poly1305.c Chacha20Poly1305.h Hacl_Policies.c Hacl_Policies.h NaCl.c NaCl.h
+TWEETNACL_HOME ?= $(HACL_HOME)/other_providers/tweetnacl
 
 #
 # Library (64 bits)
@@ -70,6 +74,20 @@ libhacl32.so: $(FILES)
 	  ../../test/test-files/hacl_test_utils.c \
 	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
 	  -o libhacl32.so
+
+unit-tests: libhacl.so
+	$(CC) $(CCOPTS) \
+	-I . -I ../snapshots/kremlib -I ../../test/test-files/ -I $(TWEETNACL_HOME) \
+	$(TWEETNACL_HOME)/tweetnacl.c ../../test/test-files/hacl_test_utils.c \
+	../../test/test-files/unit_tests.c libhacl.so -o unit_tests.exe
+	./unit_tests.exe
+
+unit-tests32: libhacl32.so 
+	$(CC) $(CCOPTS32) \
+	-I . -I ../snapshots/kremlib -I ../../test/test-files/ -I $(TWEETNACL_HOME) \
+	$(TWEETNACL_HOME)/tweetnacl.c ../../test/test-files/hacl_test_utils.c \
+	../../test/test-files/unit_tests.c libhacl32.so -o unit_tests32.exe
+	./unit_tests32.exe
 
 clean:
 	rm -rf *~ *.exe *.out *.o *.txt *.so

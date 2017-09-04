@@ -71,7 +71,7 @@ aead_chacha20_poly1305_encrypt(
 }
 
 uint32_t
-aead_chacha20_poly1305__decrypt(
+aead_chacha20_poly1305_decrypt(
   uint8_t *msg,
   uint8_t *cipher,
   uint32_t msg_len,
@@ -339,3 +339,5 @@ int crypto_stream_xor(uint8_t *cipher, uint8_t *msg, uint64_t cipher_len, uint8_
   Salsa20_salsa20(cipher, msg, cipher_len, subkey, nonce + 16, 0);
   return 0;
 }
+
+
