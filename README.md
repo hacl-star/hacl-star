@@ -2,9 +2,9 @@ HACL*
 =====
 
 HACL* is a formally verified cryptographic library in [F\*],
-developed at the [Prosecco](http://prosecco.inria.fr) team in 
-[INRIA Paris](https://www.inria.fr/en/centre/paris) 
-as part of [Project Everest].
+developed by the [Prosecco](http://prosecco.inria.fr) team in 
+[INRIA Paris](https://www.inria.fr/en/centre/paris) in collaboration
+with Microsoft Research, as part of [Project Everest].
 
 HACL stands for High-Assurance Cryptographic Library and its design is
 inspired by discussions at the [HACS series of workshops](https://github.com/HACS-workshop).
