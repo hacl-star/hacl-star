@@ -2,7 +2,9 @@ HACL*
 =====
 
 HACL* is a formally verified cryptographic library in [F\*],
-developed as part of [Project Everest].
+developed by the [Prosecco](http://prosecco.inria.fr) team in 
+[INRIA Paris](https://www.inria.fr/en/centre/paris) in collaboration
+with Microsoft Research, as part of [Project Everest].
 
 HACL stands for High-Assurance Cryptographic Library and its design is
 inspired by discussions at the [HACS series of workshops](https://github.com/HACS-workshop).
@@ -73,23 +75,28 @@ To build the library, you need a modern C compiler (preferably GCC-7).
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
 
 
-# Makefile
+# Verifying and Building HACL*
 
-By default, you have to select what you want: type `make` to get more information:
+Type `make` to get more information:
 ```
 HACL* Makefile:
+If you want to run and test the C library:
 - 'make build' will generate a shared library from the hacl-c snapshot (no verification)
+- 'make unit-tests' will run tests on the library built rom the hacl-c snapshot (no verification)
 - 'make clean-build' will clean 'build' artifacts
 
-(Please install F* and Kremlin as a prerequisite...)
+If you want to verify the F* code and regenerate the C library:
+- 'make prepare' will try to install F* and Kremlin (still has some prerequisites)
 - 'make verify' will run F* verification on all specs, code and secure-api directories
 - 'make extract' will generate all the C code into a snapshot and test it (no verification)
+- 'make test-all' will generate and test everything (no verification)
 - 'make world' will run everything (except make prepare)
+- 'make clean' will remove all artifacts created by other targets
 ```
 
-All targets require to install F* and Kremlin except `make build` that uses
-the 'hacl-c' snapshot from `snapshots/hacl-c` to generate a shared library.
-Additionnally a CMake build is available and can be run with `make build-cmake`.
+Verification and C code generation requires F* and KreMLin.
+Benchmarking performance in `test-all` requires OpenSSL and Libsodium.
+An additional CMake build is available and can be run with `make build-cmake`.
 
 
 # Performance
@@ -100,7 +107,7 @@ To compare its performance with the C reference code (not the assembly versions)
 download and compile [libsodium] with the `--disable-asm` flag and [openssl] with the `-no-asm` flag.
 
 While HACL* is typically as fast as hand-written C code, it is typically 1.1-5.7x slower than
-assembly code in our experiments. This gap can be closed by using verified assembly implementations 
+assembly code in our experiments. In future, we hope to close this gap by using verified assembly implementations 
 like [Vale](https://github.com/project-everest/vale) for some primtives.
 
 [openssl]: https://github.com/openssl/openssl
@@ -119,11 +126,12 @@ We are also working on a JavaScript backend to F* that would enable us to extrac
 
 # Authors and Maintainers
 
-HACL* was originially developed as part of the Ph.D. thesis of Jean Karim Zinzindohoué.
+HACL* was originially developed as part of the Ph.D. thesis of Jean Karim Zinzindohoué
+at the [Prosecco](http://prosecco.inria.fr) team at [INRIA Paris](https://www.inria.fr/en/centre/paris).
 It contains contributions from many researchers at INRIA and Microsoft Research, and is
 being actively developed and maintained within [Project Everest]. 
 
-Its current maintainers are:
+For questions and comments, please contact the current maintainers at:
 * Benjamin Beurdouche (benjamin.beurdouche@inria.fr)
 * Karthikeyan Bhargavan (karthikeyan.bhargavan@inria.fr)
 
