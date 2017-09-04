@@ -90,7 +90,6 @@ extract-experimental: extract-c-code-experimental
 
 build-make:
 	$(MAKE) build/libhacl.so
-#	$(MAKE) build/libhacl32.so
 
 build-cmake:
 	mkdir -p build && cd build && CC=gcc cmake $(CMAKE_COMPILER_OPTION) .. && make
@@ -106,7 +105,6 @@ build: clean-build
 unit-tests:
 	@echo $(CYAN)"# Testing the HaCl* shared library"$(NORMAL)
 	$(MAKE) -C snapshots/hacl-c unit-tests
-	$(MAKE) -C snapshots/hacl-c unit-tests32
 
 test-all:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
