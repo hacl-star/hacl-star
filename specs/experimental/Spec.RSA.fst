@@ -51,42 +51,20 @@ let nat_to_uint8 x = U8.uint_to_t (to_uint_t 8 x)
 val nat_to_uint32: x:nat -> Tot UInt32.t
 let nat_to_uint32 x = U32.uint_to_t (to_uint_t 32 x)
 
-(* a*x + b*y = gcd(a,b) *)
-val extended_eucl: a:nat -> b:nat -> Tot (tuple2 int int) (decreases b)
-let rec extended_eucl a b =
-	if b = 0 then (1, 0)
-	else
-		match (extended_eucl b (a % b)) with
-		| (x, y) -> (y, x - (op_Multiply (a/b) y))
-
-val mod_mult_mont: n:pos -> r:pos -> n':int -> a_r: elem n -> b_r: elem n -> Tot (res:elem n)
-let mod_mult_mont n r n' a_r b_r =
-	let t = op_Multiply a_r b_r in
-	let m = (op_Multiply t n') % r in
-	let u = (t + op_Multiply m n) / r in
-	(* if u >= n then u - n else u *)
-	u % n
-
-val pow_mont: modBits:nat -> n:pos -> r:pos -> n':int -> a_r: elem n -> b: elem n -> acc_r: elem n -> Tot (res:elem n)
-let rec pow_mont modBits n r n' a_r b acc_r =
-	if modBits > 0 then 
-		let counter = modBits - 1 in 
-		let b_i = (b / pow2 counter) % 2 in
-		let acc_r = mod_mult_mont n r n' acc_r acc_r in
-		let acc_r = if b_i = 1 then mod_mult_mont n r n' a_r acc_r else acc_r in
-		pow_mont counter n r n' a_r b acc_r
-	else  acc_r
-
-val mod_exp_mont: modBits:pos -> n:pos -> a:elem n -> b:elem n -> Tot (res:elem n)
-let mod_exp_mont modBits n a b =
-	let r = pow2 modBits in
-	let (r', n') = extended_eucl r n in
-	let a_r = (op_Multiply a r) % n in
-	let acc_r = r % n in
-	let n' = op_Multiply n' (-1) in
-	let acc_r = pow_mont modBits n r n' a_r b acc_r in
-	(* let elem_n_1 = 1 % n *)
-	mod_mult_mont n r n' acc_r 1
+val mod_exp_loop: n:pos -> a:nat -> b:nat -> acc:elem n -> Tot (res:elem n)
+let rec mod_exp_loop n a b acc = 
+	match b with
+	| 0 -> acc
+	| 1 -> (op_Multiply a acc) % n
+	| e -> 
+		let a2 = (op_Multiply a a) % n in
+		if (e % 2 = 0) then mod_exp_loop n a2 (b/2) acc
+		else 
+			let acc = (op_Multiply a acc) % n in 
+			mod_exp_loop n a2 ((b - 1)/2) acc
+		 
+val mod_exp: n:pos -> a:elem n -> b:elem n -> Tot (res:elem n)
+let mod_exp n a b = mod_exp_loop n a b 1
 
 val text_to_nat: b:bytes -> Tot nat (decreases (Seq.length b))
 let rec text_to_nat b =
@@ -117,8 +95,6 @@ let get_length_em modBits =
 
 val hash_sha256: msg:bytes{length msg < max_input_len_sha256} -> Tot (msgHash:bytes{length msgHash = hLen})
 let hash_sha256 msg = SHA256.hash msg
-
-(* assume val random_bytes: len: pos -> Tot (res:bytes{length res = len}) *)
 
 val mgf: mgfseed:bytes -> len:nat -> counter:nat -> 
 acc: bytes {length acc = op_Multiply counter hLen} -> 
@@ -209,7 +185,7 @@ let rsa_sign modBits msg skey salt =
 	let em = pss_encode modBits msg salt in
 	let m = text_to_nat em in
 	let m = m % n in
-	let s = mod_exp_mont modBits n m d in
+	let s = mod_exp n m d in
 	nat_to_text s k
 
 val rsa_verify:
@@ -223,13 +199,13 @@ let rsa_verify modBits sgnt pkey msg =
 	
 	let s = text_to_nat sgnt in
 	let s = s % n in
-	let m = mod_exp_mont modBits n s e in
+	let m = mod_exp n s e in
 	let emLen = get_length_em modBits in
 	let em = nat_to_text m emLen in
 	pss_verify modBits em msg
 
 (* RSASSA-PSS Signature Example 1.2 *)
-(* http://www.das-labor.org/svn/microcontroller-2/arm-crypto-lib/testvectors/rsa-pkcs-1v2-1-vec/pss-vect.txt *)
+(* https://github.com/pyca/cryptography/blob/master/vectors/cryptography_vectors/asymmetric/RSA/pkcs-1v2-1d2-vec/pss-vect.txt *)
 
 let test() =
 	let msg = createL [
