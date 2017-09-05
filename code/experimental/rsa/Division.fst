@@ -21,19 +21,7 @@ let bits_to_bn bits =
     let to_octets = U32.((bits -^ 1ul) /^ 8ul +^ 1ul) in 
     U32.((to_octets -^ 1ul) /^ 8ul +^ 1ul)
 
-val correct_top: rLen:U32.t -> r:bignum -> ST U32.t
-    (requires (fun h -> live h r))
-	(ensures (fun h0 _ h1 -> live h0 r /\ live h1 r)) 
-let rec correct_top rLen r = 
-    if U32.(rLen >^ 0ul) then
-    let len = U32.(rLen -^ 1ul) in
-    let tmp = r.(len) in
-    (if U64.(tmp =^ 0uL) then
-        correct_top len r
-    else rLen)
-    else rLen
-
-val remainder_loop: 
+val remainder_loop:
     rLen:U32.t -> modLen:U32.t -> resLen:U32.t ->
     r_i:bignum{length r_i = U32.v rLen} -> mod:bignum{length mod = U32.v modLen} -> 
     count:U32.t -> res:bignum{length res = U32.v resLen} -> ST unit
@@ -50,11 +38,9 @@ let rec remainder_loop rLen modLen resLen r_i mod count res =
 	
     (if not (isMore modLen rLen mod r_i) then
 		(let tmp = create 0uL rLen in
-        sub rLen modLen r_i mod tmp; (* TODO: fix the top of tmp and rLen *)
-        let tmpLen = correct_top rLen tmp in
-		let r_i = create 0uL tmpLen in
-        blit tmp 0ul r_i 0ul tmpLen;
-		remainder_loop tmpLen mod1Len resLen r_i mod1 U32.(count -^ 1ul) res)
+        sub rLen modLen r_i mod tmp;
+        blit tmp 0ul r_i 0ul rLen;
+		remainder_loop rLen mod1Len resLen r_i mod1 U32.(count -^ 1ul) res)
 	else
 		remainder_loop rLen mod1Len resLen r_i mod1 U32.(count -^ 1ul) res)
     else
@@ -62,7 +48,6 @@ let rec remainder_loop rLen modLen resLen r_i mod count res =
         blit r_i 0ul res 0ul len);
     pop_frame()
 
-(* TODO: modBits >= aBits *)
 (* res = a % mod *)
 val remainder: 
     aBits:U32.t -> modBits:U32.t{U32.(modBits <^ aBits)} -> resLen:U32.t -> 
@@ -76,7 +61,7 @@ let remainder aBits modBits resLen a mod res =
     let aLen = bits_to_bn aBits in
     let modLen = bits_to_bn modBits in
     let k = U32.(aBits -^ modBits) in
-    let modk = U32.((k -^ 1ul) /^ bn_bits2 +^ 1ul) in
+    let modk = U32.(k /^ bn_bits2) in
     let mod1Len = U32.(modLen +^ modk) in
     let mod1 = create 0uL mod1Len in
     lshift modLen mod k mod1;

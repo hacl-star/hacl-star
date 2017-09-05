@@ -40,7 +40,7 @@ val lshift:
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let lshift aLen a nCount res = 
     push_frame();
-    let nw = U32.((nCount -^ 1ul) /^ bn_bits2 +^ 1ul) in
+    let nw = U32.(nCount/^ bn_bits2) in
     let resLen = U32.(aLen +^ nw) in
     let lb = U32.(nCount %^ bn_bits2) in
     (if U32.(lb =^ 0ul) 

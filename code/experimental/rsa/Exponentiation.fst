@@ -31,25 +31,26 @@ let bn_bit_is_set input ind =
     res
 
 val mod_exp_loop:
-    modBits:U32.t -> aLen:U32.t -> resLen:U32.t -> 
-    n:bignum -> a:bignum{U32.v aLen = length a} -> b:bignum -> 
+    modBits:U32.t -> aLen:U32.t -> bBits:U32.t -> resLen:U32.t -> 
+    n:bignum -> tmpV:bignum{U32.v aLen = length tmpV} -> b:bignum ->
     res:bignum{U32.v resLen = length res} -> count:U32.t{U32.v count < length b} -> ST unit
-    (requires (fun h -> live h n /\ live h a /\ live h b /\ live h res))
-    (ensures  (fun h0 r h1 -> live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
-let rec mod_exp_loop modBits aLen resLen n a b res count =
+    (requires (fun h -> live h n /\ live h tmpV /\ live h b /\ live h res))
+    (ensures  (fun h0 r h1 -> live h1 n /\ live h1 tmpV /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1 /\ modifies_1 tmpV h0 h1))
+let rec mod_exp_loop modBits aLen bBits resLen n tmpV b res count =
     push_frame();
-    (if U32.(count >^ 0ul) then
-    let count = U32.(count -^ 1ul) in
-    let tmpLen = U32.(2ul *^ resLen) in
-    let tmp = create 0uL tmpLen in
-    let tmpBits = U32.(tmpLen *^ 64ul) in
-    sqr resLen res tmp; remainder tmpBits modBits resLen tmp n res;
-    (if (bn_bit_is_set b count) then
-    let tmpLen = U32.(resLen +^ aLen) in
-    let tmp = create 0uL tmpLen in
-    let tmpBits = U32.(tmpLen *^ 64ul) in
-    mult resLen aLen res a tmp; remainder tmpBits modBits resLen tmp n res);
-    mod_exp_loop modBits aLen resLen n a b res count);
+    (if U32.(count <^ bBits) then
+        let tmpLen = U32.(2ul *^ aLen) in
+        let tmp = create 0uL tmpLen in
+        let tmpBits = U32.(tmpLen *^ 64ul) in
+        sqr aLen tmpV tmp;
+        remainder tmpBits modBits aLen tmp n tmpV;
+        (if (bn_bit_is_set b count) then
+        let tmpLen = U32.(aLen +^ resLen) in
+        let tmp = create 0uL tmpLen in
+        let tmpBits = U32.(tmpLen *^ 64ul) in
+        mult resLen aLen res tmpV tmp; 
+        remainder tmpBits modBits resLen tmp n res);
+        mod_exp_loop modBits aLen bBits resLen n tmpV b res U32.(count +^ 1ul));
     pop_frame()
 
 (* res = a ^^ b mod n *)
@@ -61,9 +62,12 @@ val mod_exp:
     (ensures  (fun h0 r h1 -> live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
 let mod_exp modBits aLen bBits resLen n a b res =
     push_frame();
-    let ind = U32.(bBits -^ 1ul) in
-    if (bn_bit_is_set b ind) then
+    let tmpV = create 0uL aLen in
+    blit a 0ul tmpV 0ul aLen;
+
+    if (bn_bit_is_set b 0ul) then
     blit a 0ul res 0ul aLen
     else res.(0ul) <- 1uL;
-    mod_exp_loop modBits aLen resLen n a b res ind;
+
+    mod_exp_loop modBits aLen bBits resLen n b res tmpV 1ul;
     pop_frame()
