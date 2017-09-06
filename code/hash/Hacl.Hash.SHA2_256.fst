@@ -995,7 +995,16 @@ let update_last state data len =
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length are considered public here ! *)
   let nb = if U32.(len <^ 56ul) then 1ul else 2ul in
-  let final_blocks = if U32.(nb =^ 1ul) then Buffer.offset blocks size_block else blocks in
+
+  let final_blocks =
+    (**) let h1 = ST.get () in
+    if U32.(len <^ 56ul) then begin
+      (**) assert(v size_block <= length blocks);
+      (**) assert(live h1 blocks);
+      Buffer.offset blocks size_block end
+    else begin
+      (**) assert(live h1 blocks);
+      blocks end in
 
   (**) assert(blocks `includes` final_blocks);
 
