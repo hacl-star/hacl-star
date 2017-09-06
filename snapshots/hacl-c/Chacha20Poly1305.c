@@ -94,7 +94,8 @@ Chacha20Poly1305_aead_decrypt(
   uint8_t *mk = b;
   (void )(mk + (uint32_t )16);
   Chacha20Poly1305_aead_encrypt_poly(c, mlen, rmac, aad1, aadlen, tmp);
-  uint8_t verify = Hacl_Policies_cmp_bytes(mac, rmac, (uint32_t )16);
+  uint8_t result = Hacl_Policies_cmp_bytes(mac, rmac, (uint32_t )16);
+  uint8_t verify = result;
   uint32_t res;
   if (verify == (uint8_t )0)
   {

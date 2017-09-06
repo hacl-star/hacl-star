@@ -322,17 +322,12 @@ inline static void Hacl_Bignum_Fsquare_fsquare_(FStar_UInt128_t *tmp, uint64_t *
   output[1] = i1_;
 }
 
-inline static void
-Hacl_Bignum_Fsquare_fsquare_times_(uint64_t *output, FStar_UInt128_t *tmp, uint32_t count1)
+static void
+Hacl_Bignum_Fsquare_fsquare_times_(uint64_t *input, FStar_UInt128_t *tmp, uint32_t count1)
 {
-  if (count1 == (uint32_t )1)
-    Hacl_Bignum_Fsquare_fsquare_(tmp, output);
-  else
-  {
-    uint32_t i = count1 - (uint32_t )1;
-    Hacl_Bignum_Fsquare_fsquare_(tmp, output);
-    Hacl_Bignum_Fsquare_fsquare_times_(output, tmp, i);
-  }
+  Hacl_Bignum_Fsquare_fsquare_(tmp, input);
+  for (uint32_t i = (uint32_t )1; i < count1; i = i + (uint32_t )1)
+    Hacl_Bignum_Fsquare_fsquare_(tmp, input);
 }
 
 inline static void
