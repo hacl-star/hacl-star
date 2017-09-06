@@ -1,4 +1,4 @@
-include ../Makefile.include
+include ../../Makefile.include
 
 BIGNUM_FILES= \
 	Hacl.Bignum.Limb.fst \
@@ -16,40 +16,23 @@ BIGNUM_FILES= \
 	Hacl.Bignum.Fscalar.fst \
 	Hacl.Bignum.Fproduct.fst \
 	Hacl.Bignum.Fmul.fst \
-	Hacl.Bignum.fst 
+	Hacl.Bignum.fst
 #	Hacl.Bignum.Constants.fsti \
 	Hacl.Bignum.Parameters.fsti \
 	Hacl.Bignum.Modulo.fsti \
 	Hacl.Bignum.Crecip.fsti \
 
-BIGNUM_MODULES=$(basename $(BIGNUM_FILES))
+FSTAR_INCLUDES+=--include interfaces --include ../lib
 
-%.fst-ct: %.fst
-	$(FSTAR_BASE) --include interfaces --include ../lib --lax --include $(KREMLIN_HOME)/kremlib $^
-
-all-ct:
-	$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include interfaces \
-		--include ../lib $^ --lax --include $(KREMLIN_HOME)/kremlib $(BIGNUM_FILES)
-
-%.fst-verify: %.fst
-	$(FSTAR_BASE) --include interfaces --include ../lib --include $(KREMLIN_HOME)/kremlib $^
-
+ct: $(addsuffix -lax, $(BIGNUM_FILES))
 verify: $(addsuffix -verify, $(BIGNUM_FILES))
+hints: $(addsuffix .hints, $(BIGNUM_FILES))
+test:
 
 all-ci: verify
-
 all-ver: verify
-
-%-hints: %.fst
-	-$(FSTAR_BASE) --include interfaces --include ../lib --include $(KREMLIN_HOME)/kremlib --record_hints $^
-
-ALL_HINTS=$(addsuffix -hints, $(BIGNUM_MODULES))
-
-all-hints2: $(ALL_HINTS)
-all-hints:
-	cp ./bignum_hints/* .
-	$(MAKE) all-hints2
-	mv *.hints ./bignum_hints
+all-hints: hints
+all-ct: ct
 
 count-line:
 	cloc --force-lang=ocaml $(BIGNUM_FILES)

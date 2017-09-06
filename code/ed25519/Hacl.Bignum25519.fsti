@@ -1,5 +1,9 @@
 module Hacl.Bignum25519
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 open FStar.Buffer

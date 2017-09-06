@@ -1,10 +1,10 @@
 [
-  "ç∫CôZe\u0016Ø(–SâM5W°",
+  "K\u0001†\u000ex\u0013°ÿòKwN\u007f¥Gæ",
   [
     [
       "Ed25519.sign",
       1,
-      2,
+      0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
@@ -12,7 +12,7 @@
     [
       "Ed25519.sign",
       2,
-      2,
+      0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
@@ -20,7 +20,7 @@
     [
       "Ed25519.sign",
       3,
-      2,
+      0,
       1,
       [
         "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
@@ -32,18 +32,17 @@
     [
       "Ed25519.sign",
       4,
-      2,
+      0,
       1,
       [
         "@MaxIFuel_assumption", "@query", "equation_Ed25519.hint8_p",
         "equation_Ed25519.op_String_Access", "equation_FStar.Buffer.buffer",
-        "equation_FStar.UInt8.t", "equation_Hacl.UInt8.t",
+        "equation_FStar.UInt8.t",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "kinding_FStar.UInt8.t_@tok", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Ed25519_Tm_refine_44ee1646555df76f870907c2a2aa0828",
         "refinement_interpretation_Ed25519_Tm_refine_94403ae1db118a2daa8d61fa9d371d82",
-        "refinement_interpretation_FStar.Buffer_Tm_refine_347cdcabc7e8becd6dd649804986fa75",
         "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
         "typing_FStar.Buffer.as_seq"
       ],
@@ -52,7 +51,7 @@
     [
       "Ed25519.sign",
       5,
-      2,
+      0,
       1,
       [
         "@query", "equation_Ed25519.op_String_Access",
@@ -63,7 +62,7 @@
     [
       "Ed25519.verify",
       1,
-      2,
+      0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
@@ -71,11 +70,11 @@
     [
       "Ed25519.verify",
       2,
-      2,
+      0,
       1,
       [
         "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "haseqFStar.Buffer_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
         "projection_inverse_BoxInt_proj_0"
       ],
       0
@@ -83,7 +82,7 @@
     [
       "Ed25519.verify",
       3,
-      2,
+      0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
@@ -91,14 +90,13 @@
     [
       "Ed25519.verify",
       4,
-      2,
+      0,
       1,
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Ed25519.op_String_Access", "equation_Ed25519.uint8_p",
         "equation_FStar.Buffer.buffer", "equation_FStar.Buffer.equal",
         "equation_FStar.UInt32.t", "equation_FStar.UInt8.t",
-        "equation_Hacl.UInt8.t",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "kinding_FStar.UInt8.t_@tok", "lemma_FStar.Buffer.no_upd_lemma_0",
@@ -106,7 +104,6 @@
         "refinement_interpretation_Ed25519_Tm_refine_19ac6f41cf659862d4009e4e13fd7e43",
         "refinement_interpretation_Ed25519_Tm_refine_7b8277f4aac7937ca94306760a67d045",
         "refinement_interpretation_Ed25519_Tm_refine_94403ae1db118a2daa8d61fa9d371d82",
-        "refinement_interpretation_FStar.Buffer_Tm_refine_347cdcabc7e8becd6dd649804986fa75",
         "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
         "typing_FStar.Buffer.as_seq"
       ],
@@ -115,13 +112,13 @@
     [
       "Ed25519.verify",
       5,
-      2,
+      0,
       1,
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Ed25519.op_String_Access", "equation_Ed25519.uint8_p",
         "equation_FStar.Buffer.buffer", "equation_FStar.UInt32.t",
-        "equation_FStar.UInt8.t", "equation_Hacl.UInt8.t",
+        "equation_FStar.UInt8.t",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "refinement_interpretation_Ed25519_Tm_refine_19ac6f41cf659862d4009e4e13fd7e43",
@@ -165,11 +162,8 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Ed25519.hint8_p",
         "equation_Ed25519.op_String_Access", "equation_FStar.UInt8.t",
-        "equation_Hacl.UInt8.t",
-        "fuel_guarded_inversion_FStar.HyperStack.mem",
         "kinding_FStar.UInt8.t_@tok",
         "refinement_interpretation_Ed25519_Tm_refine_a8d9d65facbe58ecae7d831161c49ec1",
-        "refinement_interpretation_FStar.Buffer_Tm_refine_347cdcabc7e8becd6dd649804986fa75",
         "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
         "typing_FStar.Buffer.as_seq"
       ],
@@ -184,7 +178,6 @@
         "@MaxIFuel_assumption", "@query", "equation_Ed25519.hint8_p",
         "equation_Ed25519.op_String_Access", "equation_FStar.UInt8.t",
         "equation_Hacl.Impl.Ed25519.SecretToPublic.op_String_Access",
-        "equation_Hacl.UInt8.t",
         "fuel_guarded_inversion_FStar.HyperStack.mem",
         "refinement_interpretation_Ed25519_Tm_refine_a8d9d65facbe58ecae7d831161c49ec1"
       ],

@@ -1,5 +1,9 @@
 module Spec.Chacha20_vec1.Lemmas
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
@@ -114,7 +118,7 @@ let lined (a:t) (b:t) (c:t) (d:t) (a1:t) (b1:t) (c1:t) (d1:t) : GTot Type0 =
   a1 == a'' /\ b1 == b'' /\ c1 == c'' /\ d1 == d''
 
 
-val line_: a:S.idx -> b:S.idx -> d:S.idx -> ss:UInt32.t {v ss < 32} -> s:state -> Tot (s':state{s' == S.line a b d ss s})
+val line_: a:S.idx -> b:S.idx -> d:S.idx -> ss:UInt32.t {v ss > 0 /\ v ss < 32} -> s:state -> Tot (s':state{s' == S.line a b d ss s})
 let line_ a b d s m =
   let open FStar.UInt32 in
   let m = upd m a (index m a +%^ index m b) in
@@ -124,7 +128,7 @@ let line_ a b d s m =
 
 #reset-options "--max_fuel 0 --z3rlimit 500"
 
-let new_line (s:state) (a:S.idx) (b:S.idx) (d:S.idx{a <> b /\ a <> d /\ b <> d}) (ss:UInt32.t{UInt32.v ss < 32}) : Tot (s':state{
+let new_line (s:state) (a:S.idx) (b:S.idx) (d:S.idx{a <> b /\ a <> d /\ b <> d}) (ss:UInt32.t{v ss > 0 /\ v ss < 32}) : Tot (s':state{
   let sa = index s a in let sb = index s b in let sd = index s d in
   let sa' = index s' a in let sb' = index s' b in let sd' = index s' d in
   let open FStar.UInt32 in

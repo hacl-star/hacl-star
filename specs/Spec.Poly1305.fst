@@ -1,5 +1,7 @@
 module Spec.Poly1305
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Math.Lib
 open FStar.Mul
 open FStar.Seq

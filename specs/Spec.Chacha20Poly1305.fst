@@ -1,5 +1,7 @@
 module Spec.Chacha20Poly1305
 
+module ST = FStar.HyperStack.ST
+
 (* RFC7539: https://tools.ietf.org/html/rfc7539#section-2.8 *)
 
 open FStar.Seq

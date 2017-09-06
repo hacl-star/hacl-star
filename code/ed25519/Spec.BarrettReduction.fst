@@ -1,5 +1,9 @@
 module Spec.BarrettReduction
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 
 (*
@@ -36,7 +40,7 @@ let barrett_reduce (a:nat{a < l * l}) : Tot (b:nat{b < l}) =
   let a = a - q * l in
   if l <= a then a - l else a
 
-#set-options "--max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 250"
 
 
 let p (x:nat{x < l * l}) = (x - ((x * m) / pow2k) * l) % l
@@ -46,6 +50,10 @@ let test () =
   assert_norm (0x3456781970987134091834079183409813049813740931409870198370987409879999999902938473920 < l * l);
   assert_norm (p (0x3456781970987134091834079183409813049813740931409870198370987409879999999902938473920)
               == q (0x3456781970987134091834079183409813049813740931409870198370987409879999999902938473920))
+
+#reset-options "--max_fuel 0 --z3rlimit 300"
+
+let lemma_mul_comm a b : Lemma (a * b == b * a) = ()
 
 val lemma_barrett_reduce:
   a:nat{a < l * l} ->
@@ -57,6 +65,7 @@ let lemma_barrett_reduce a =
   let a' = a - q * l in
   cut (a' = a - ((a * (pow2k / l)) / pow2k) * l);
   cut (0 <= a');
+  Math.Lemmas.lemma_mod_plus a' ((a * (pow2k / l)) / pow2k) l;
   cut (a' % l = a % l);
   Math.Lemmas.distributivity_sub_right pow2k a (((a * (pow2k / l)) / pow2k) * l);
   cut (pow2k * a' = pow2k * a - (pow2k * ((a * (pow2k / l)) / pow2k)) * l);
@@ -65,6 +74,9 @@ let lemma_barrett_reduce a =
   Math.Lemmas.distributivity_sub_left (a * (pow2k / l)) ((a * (pow2k / l)) % pow2k) l;
   cut (pow2k * a' = pow2k * a - (a * (pow2k / l)) * l + ((a * (pow2k / l)) % pow2k) * l);
   cut (pow2k * a' <= pow2k * a - (a * (pow2k / l)) * l + (pow2k - 1) * l);
+  lemma_mul_comm a pow2k;
+  Math.Lemmas.paren_mul_right a (pow2k / l) l;
+  Math.Lemmas.paren_mul_left a (pow2k / l) l;
   cut (pow2k * a - (a * (pow2k / l)) * l + (pow2k - 1) * l = a * pow2k - a * ((pow2k / l) * l) + (pow2k - 1) * l);
   Math.Lemmas.distributivity_sub_right a pow2k ((pow2k / l) * l);
   Math.Lemmas.lemma_div_mod pow2k l;

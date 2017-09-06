@@ -1,5 +1,9 @@
 module Crypto.AEAD.Enxor.Invariant
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
@@ -165,6 +169,18 @@ let intro_fresh_nonces_are_unused_except_enxor
  * main lemma that propagates the invariant across enxor
  * basically, if h0 and h1 are related by enxor_h0_h1, then h1 satisfies the enxor_and_maybe_mac
  *)
+
+private val aux: #i:id{prf i} -> #rw:rw -> #aadlen:aadlen_32
+  -> #plainlen:nz_ok_len_32 i
+  -> aead_st:aead_state i rw
+  -> nonce:Cipher.iv (alg i)
+  -> aad:lbuffer (v aadlen) -> plain:plainBuffer i (v plainlen)
+  -> ct:ctagbuf plainlen -> h0:mem -> h1:mem -> x:domain_mac i -> Lemma
+  (requires (enxor_h0_h1 aead_st nonce aad plain ct h0 h1))
+  (ensures  (let table_0 = HS.sel h0 (itable i aead_st.prf) in
+             PRF.prf_mac_inv table_0 x h0))
+let aux #i #rw #aadlen #plainlen aead_st nonce aad plain ct h0 h1 x = ()
+
 val lemma_propagate_inv_enxor
   (#i:id)
   (#rw:rw)
@@ -179,22 +195,23 @@ val lemma_propagate_inv_enxor
   (requires (enxor_h0_h1 aead_st nonce aad plain ct h0 h1))
   (ensures  (enxor_and_maybe_mac false aead_st nonce aad plain ct h1))
 let lemma_propagate_inv_enxor #i #rw #aadlen #plainlen aead_st nonce aad plain ct h0 h1 =
-  let open FStar.Classical in
   let cipher = cbuf ct in
-  if prf i then begin
+  if prf i then
+  begin
     let table_0     = HS.sel h0 (itable i aead_st.prf) in
     let table_1     = HS.sel h1 (itable i aead_st.prf) in
     let suffix = Seq.slice table_1 (Seq.length table_0) (Seq.length table_1) in
     assert (Seq.equal table_1 (Seq.append table_0 suffix));
     let dom_0 = {iv=nonce; ctr=PRF.ctr_0 i} in
     let h1:(h1:mem{prf i}) = h1 in
-    let aux (x:domain_mac i) :Lemma (PRF.prf_mac_inv table_1 x h1)
+    let aux (x:domain_mac i) : Lemma (PRF.prf_mac_inv table_1 x h1)
       = let _ = if x.iv = nonce then find_mac_all_above_1 suffix x.iv else find_other_iv_all_above suffix dom_0 x in
+        aux #i #rw #aadlen #plainlen aead_st nonce aad plain ct h0 h1 x;
 	frame_prf_mac_inv_append_blocks table_0 suffix x h0;
 	frame_mac_region_enxor aead_st nonce aad plain ct h0 h1;
 	frame_prf_prf_mac_inv table_1 h0 h1 x
     in
-    forall_intro aux
+    FStar.Classical.forall_intro aux
   end;
   if safeMac i then begin
     let dom_0 = {iv=nonce; ctr=PRF.ctr_0 i} in

@@ -1,5 +1,9 @@
 module Hacl.Impl.Ed25519.Ladder.Step
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
 
 open Hacl.Bignum25519

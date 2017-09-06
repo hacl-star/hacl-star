@@ -1,4 +1,8 @@
 module Crypto.AEAD.Decrypt
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
@@ -50,7 +54,7 @@ let post_pop (#i:id) (n:Cipher.iv (alg i)) (st:aead_state i Reader)
 		       inv st h /\
 		       (verified ==> Dexor.decrypt_ok n st aad plain cipher_tagged h)))
     = if safeMac i
-      then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h (HS.pop h)
+      then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h (st_ilog st)) h (HS.pop h)
 
 val chain_mods (#i:id) (#n:Cipher.iv (alg i)) 
 	       (st:aead_state i Reader) 

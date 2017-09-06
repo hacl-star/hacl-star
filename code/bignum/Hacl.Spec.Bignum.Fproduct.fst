@@ -1,5 +1,9 @@
 module Hacl.Spec.Bignum.Fproduct
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Hacl.Bignum.Constants
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint
@@ -128,10 +132,16 @@ val carry_wide_step: s:seqelem_wide ->
     /\ w (Seq.index s' i) = w (Seq.index s i) % pow2 limb_size
     /\ w (Seq.index s' (i+1)) = w (Seq.index s (i+1)) + (w (Seq.index s i) / pow2 limb_size)
     })
+
+#reset-options "--z3rlimit 100 --max_fuel 0"
+
+let lemma_carry_wide_step_aux_1 (x:nat) (y:pos) : Lemma (x % y < y) = ()
+
 let carry_wide_step s i =
+    Math.Lemmas.pow2_le_compat (wide_n - 1) (wide_n - limb_size);
     let si = Seq.index s i in
     let sip1 = Seq.index s (i+1) in
-    cut (w sip1 < pow2 (wide_n - 1));
+    assert (w sip1 < pow2 (wide_n - 1));
     assert_norm(pow2 0 = 1);
     Math.Lemmas.pow2_lt_compat limb_size 0;
     Math.Lemmas.pow2_lt_compat limb_n limb_size;
@@ -142,6 +152,7 @@ let carry_wide_step s i =
     Math.Lemmas.pow2_plus (limb_n - limb_size) (limb_size);
     Math.Lemmas.modulo_modulo_lemma (w si) (pow2 limb_size) (pow2 (limb_n - limb_size));
     assert(v r0 = w si % pow2 limb_size);
+    lemma_carry_wide_step_aux_1 (w si) (pow2 limb_size);
     assert(v r0 < pow2 limb_size);
     let open Hacl.Bignum.Wide in
     let c = si >>^ climb_size in
@@ -149,7 +160,7 @@ let carry_wide_step s i =
     Math.Lemmas.pow2_double_sum (wide_n - 1);
     Math.Lemmas.lemma_div_lt (w si) (wide_n) (limb_size);
     Math.Lemmas.pow2_le_compat (wide_n - 1) (wide_n - limb_size);
-    cut (w c < pow2 (wide_n - 1));
+    assert (w c < pow2 (wide_n - 1));
     let s' = Seq.upd s i (limb_to_wide r0) in
     assert(forall (j:nat). {:pattern (Seq.index s' j)} j < i + 1 ==> w (Seq.index s' j) < pow2 limb_size);
     assert(forall (j:nat). {:pattern (Seq.index s' j)} (j > i /\ j < len) ==> w (Seq.index s' j) < pow2 (wide_n - 1));

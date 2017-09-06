@@ -1,9 +1,13 @@
 module Hacl.Hash.SHA2_512.Lemmas
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 
 open C.Loops
@@ -147,7 +151,7 @@ let lemma_spec_ws_def2 b i = ()
 
 let lemma_modifies_0_is_modifies_1 (#a:Type) (h:HyperStack.mem) (b:buffer a{live h b}) : Lemma
   (modifies_1 b h h) =
-  lemma_intro_modifies_1 b h h
+  lemma_modifies_sub_1 h h b
 
 
 let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:buffer t{live h1 a}) (b:buffer t{live h0 b}) (len:nat{len = length a /\ len = length b}): Lemma
@@ -243,7 +247,7 @@ Seq.lemma_eq_intro (as_seq h g) (Seq.append (Seq.append seq_a seq_b) seq_c)
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
 
-let lemma_pad_aux_seq (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) < (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
+let lemma_pad_aux_seq (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) <= (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
   (requires (a == Seq.create 1 0x80uy
             /\ (b == Seq.create (Spec.pad0_length (U64.v len)) 0uy)
             /\ (c == Endianness.big_bytes size_len_8 ((H64.v n * v size_block + U64.v len) * 8))))
@@ -253,7 +257,7 @@ Seq.lemma_eq_intro (Seq.append (Seq.append a b) c) (Seq.append a (Seq.append b c
 
 #reset-options "--max_fuel 0  --z3rlimit 200"
 
-let lemma_pad_aux (h:HyperStack.mem) (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) < (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
+let lemma_pad_aux (h:HyperStack.mem) (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) <= (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
   (requires (live h a /\ live h b /\ live h c
             /\ (let seq_a = reveal_sbytes (as_seq h a) in
             let seq_b = reveal_sbytes (as_seq h b) in

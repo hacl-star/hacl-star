@@ -1,4 +1,8 @@
 module Hacl.UInt32
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 (* This module generated automatically using [mk_int.sh] *)
 
 open FStar.UInt32
@@ -52,10 +56,12 @@ val lognot: t -> Tot t
 let lognot a = Mk (lognot (a.v))
 
 (* Shift operators *)
-val shift_right: a:t -> s:FStar.UInt32.t -> Tot (c:t{FStar.UInt32.v s < n ==> v c = (v a / (pow2 (FStar.UInt32.v s)))})
+val shift_right: a:t -> s:FStar.UInt32.t{FStar.UInt32.v s < n}
+  -> Tot (c:t{v c = (v a / (pow2 (FStar.UInt32.v s)))})
 let shift_right a s = Mk (shift_right (a.v) s)
 
-val shift_left: a:t -> s:FStar.UInt32.t -> Tot (c:t{FStar.UInt32.v s < n ==> v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 n)})
+val shift_left: a:t -> s:FStar.UInt32.t{FStar.UInt32.v s < n}
+  -> Tot (c:t{v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 n)})
 let shift_left a s = Mk (shift_left (a.v) s)
 
 assume val eq_mask: a:t -> b:t -> Tot (c:t{(v a = v b ==> v c = pow2 n - 1) /\ (v a <> v b ==> v c = 0)})

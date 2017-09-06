@@ -1,9 +1,13 @@
 module Chacha20Poly1305
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Seq
 open FStar.HyperStack
 open FStar.Buffer
-open FStar.ST
+open FStar.HyperStack.ST
 open Hacl.Constants
 open Hacl.Policies
 open Hacl.Cast
@@ -159,12 +163,8 @@ private val lemma_aead_encrypt:
     /\ modifies_0 h0 h1 /\ modifies_1 c h1 h2 /\ modifies_1 b h2 h3 /\ modifies_1 mac h3 h4))
         (ensures (modifies_3_2 c mac h0 h4))
 private let lemma_aead_encrypt h0 h1 h2 h3 h4 c b mac =
-  lemma_reveal_modifies_0 h0 h1;
-  lemma_reveal_modifies_1 c h1 h2;
-  lemma_reveal_modifies_1 b h2 h3;
-  lemma_reveal_modifies_1 mac h3 h4;
-  lemma_intro_modifies_3_2 c mac h0 h4
-
+  lemma_modifies_0_2 c b h0 h1 h3;
+  lemma_modifies_2_1'' c mac h0 h3 h4
 
 val encode_length:
   lb:uint8_p{length lb = 16} ->
@@ -215,14 +215,16 @@ val aead_encrypt_:
       ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 500"
 let aead_encrypt_ c mac m mlen aad aadlen k n =
+  let h = ST.get() in
   push_frame();
   let h0 = ST.get() in
   let tmp = create (uint8_to_sint8 0uy) 80ul in
   let b = Buffer.sub tmp 0ul 64ul in
   let lb = Buffer.sub tmp 64ul 16ul in
+  let h0' = ST.get() in
   encode_length lb aadlen mlen;
   let h1 = ST.get() in
-  cut (modifies_0 h0 h1);
+  lemma_modifies_0_1' tmp h0 h0' h1;
   Chacha20.chacha20 c m mlen k n 1ul;
   let h2 = ST.get() in
   let _ =
@@ -248,6 +250,8 @@ let aead_encrypt_ c mac m mlen aad aadlen k n =
   let h4 = ST.get() in
   lemma_aead_encrypt h0 h1 h2 h3 h4 c tmp mac;
   pop_frame();
+  let h5 = ST.get() in
+  modifies_popped_3_2 c mac h h0 h4 h5;
   0ul
 
 
@@ -282,22 +286,19 @@ let aead_encrypt c mac m mlen aad aadlen k n =
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200"
 
-private let lemma_aead_decrypt_ (h:mem) (h':mem) (m:uint8_p) : Lemma 
-  (h == h' ==> modifies_1 m h h')
-  = lemma_intro_modifies_1 m h h
-
-
 private val lemma_aead_decrypt:
-  h0:mem -> h1:mem -> h2:mem ->
-  tmp:uint8_p -> m:uint8_p ->
-  Lemma (requires ((tmp `unused_in` h0) /\ live h0 m /\ live h1 tmp /\ live h1 m /\ live h2 tmp /\ live h2 m
-    /\ modifies_0 h0 h1 /\ (modifies_1 m h1 h2 \/ h1 == h2)))
+  h0:mem -> h1:mem -> h2:mem -> m:uint8_p ->
+  Lemma (requires (live h0 m /\ modifies_0 h0 h1 /\ modifies_2_1 m h1 h2))
         (ensures (modifies_2_1 m h0 h2))
-let lemma_aead_decrypt h0 h1 h2 tmp m =
-  lemma_reveal_modifies_0 h0 h1;
-  lemma_aead_decrypt_ h1 h2 m;
-  lemma_reveal_modifies_1 m h1 h2;
-  lemma_intro_modifies_2_1 m h0 h2
+let lemma_aead_decrypt h0 h1 h2 m =
+  lemma_modifies_sub_2_1 h0 h1 m;
+  lemma_modifies_2_1_trans m h0 h1 h2
+
+private val lemma_aead_decrypt_len:
+  c:uint8_p ->
+  mlen:u32{U32.v mlen = length c} ->
+  Lemma (1 + (length c / 64) < pow2 32)
+let lemma_aead_decrypt_len c mlen = ()
 
 val aead_decrypt:
   m:uint8_p ->
@@ -323,29 +324,38 @@ val aead_decrypt:
          /\ (z == 1ul ==> (None? plain))))))
 #reset-options "--initial_fuel 0 --max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 let aead_decrypt m c mlen mac aad aadlen k n =
+  let h = ST.get() in
   push_frame();
   let h0 = ST.get() in
   let tmp  = create (uint8_to_sint8 0uy) 96ul in
   let b    = Buffer.sub tmp 0ul 64ul in
   let lb   = Buffer.sub tmp 64ul 16ul in
+  let h1 = ST.get() in
   encode_length lb aadlen mlen;
   let rmac = Buffer.sub tmp 80ul 16ul in
+  let h1' = ST.get() in
   Chacha20.chacha20_key_block b k n 0ul;
   let mk = Buffer.sub b 0ul 32ul in
   let key_s = Buffer.sub mk 16ul 16ul in
-  aead_encrypt_poly  c mlen rmac aad aadlen (Buffer.sub tmp 0ul 80ul);
-  let h1 = ST.get() in
-  cut (modifies_0 h0 h1);
-  (* Declassication assumption on mac *)
-  assume (Hacl.Policies.declassifiable mac /\ Hacl.Policies.declassifiable rmac);
-  let verify = cmp_bytes mac rmac 16ul in
-  assume (1 + (length c / 64) < pow2 32); //NS:05.17. Without this assume, this proof takes 15mins; TODO, revise
+  let h2 = ST.get() in
+  aead_encrypt_poly c mlen rmac aad aadlen (Buffer.sub tmp 0ul 80ul);
+  let h3 = ST.get() in
+  lemma_modifies_1_trans tmp h1 h1' h2;
+  lemma_modifies_1_trans tmp h1 h2 h3;
+  lemma_modifies_0_1' tmp h0 h1 h3;
+  let result = cmp_bytes mac rmac 16ul in
+  let h3' = ST.get() in
+  let verify = declassify_u8 result in
+  lemma_aead_decrypt_len c mlen;
   let res : u32 =
     if U8.(verify =^ 0uy) then (
       	 Chacha20.chacha20 m c mlen k n 1ul;
 	 0ul
   	 ) else 1ul in
-  let h2 = ST.get() in
-  lemma_aead_decrypt h0 h1 h2 tmp m;
+  let h4 = ST.get() in
+  lemma_modifies_0_1 m h3 h3' h4;
+  lemma_aead_decrypt h0 h3 h4 m;
   pop_frame();
+  let h5 = ST.get() in
+  modifies_popped_1 m h h0 h4 h5;
   res

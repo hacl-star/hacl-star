@@ -1,3 +1,5 @@
+include ../../../Makefile.include
+
 all:
 	@echo
 	@echo "############## LAX TYPECHEKING #############"
@@ -8,20 +10,24 @@ all:
 	@echo
 	$(MAKE) ver
 
-FSTAR_HOME ?= ../../../FStar
-FSTAR ?= $(FSTAR_HOME)/bin/fstar.exe 
-KREMLIN_HOME = $(FSTAR_HOME)/../kremlin
-HACL_HOME ?= ../..
+SLOW=
+BROKEN=
 
-MODULES= Hacl.Symmetric.GCM.fst Hacl.Symmetric.AES.fst Hacl.AEAD.AES256GCM.fst
+AESGCM_FILES=Hacl.Symmetric.GCM.fst ../aesgcm/Hacl.Symmetric.AES.fst Hacl.AEAD.AES256GCM.fst
 
-FSTAR_INCLUDES:=--include $(FSTAR_HOME)/ulib/hyperstack --include $(HACL_HOME)/code/lib
+INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/experimental/aesgcm .
 
-lax:
-	$(FSTAR) $(FSTAR_INCLUDES) --lax $(MODULES)
+FSTAR_INCLUDES+=$(addprefix --include , $(INCLUDE_DIRS))
 
-ver:
-	$(FSTAR) $(FSTAR_INCLUDES) $(MODULES)
+ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(AESGCM_FILES)))
+ct: $(addsuffix -lax, $(AESGCM_FILES))
+verify: $(addsuffix -verify, $(AESGCM_FILES))
+hints: $(addsuffix .hints, $(filter-out $(BROKEN), $(AESGCM_FILES)))
+
+all-ci: ci
+all-ct: ct
+all-ver: verify
+all-hints: hints
 
 clean:
 	rm -f *~

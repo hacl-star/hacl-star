@@ -1,9 +1,13 @@
 module Hacl.Hash.Lib.Create
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 
 open Hacl.Spec.Endianness

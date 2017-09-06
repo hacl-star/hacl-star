@@ -1,5 +1,9 @@
 module Hacl.Spe.Poly1305_64
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.Seq
@@ -40,8 +44,10 @@ private val lemma_mod_distr: acc0:nat -> block:nat -> r0:nat -> Lemma
 private let lemma_mod_distr acc block r0 =
   let open FStar.Math.Lemmas in
   lemma_mod_mul_distr_l (acc + block) r0 prime;
+  swap_mul ((acc + block) % prime) r0;
   lemma_mod_mul_distr_l r0 ((acc + block) % prime) prime;
   lemma_mod_plus_distr_l acc block prime;
+  assert ((acc % prime) + block = block + (acc % prime));
   lemma_mod_plus_distr_l block (acc % prime) prime
 
 
@@ -418,7 +424,9 @@ val poly1305_partial:
 let poly1305_partial input len kr =
   let init_st = poly1305_init_spec kr in
   assert_norm(pow2 128 < pow2 130 - 5);
-  poly_def_0 (MkState?.log init_st) (seval (MkState?.r init_st));
+  let r = seval (MkState?.r init_st) in
+  assert (r < pow2 128);
+  poly_def_0 (MkState?.log init_st) r;
   cut (invariant init_st);
   let partial_st = poly1305_blocks_spec init_st input len in
   cut (invariant partial_st);

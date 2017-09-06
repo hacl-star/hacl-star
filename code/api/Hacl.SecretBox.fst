@@ -1,7 +1,11 @@
 module Hacl.SecretBox
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Buffer
-open FStar.ST
+open FStar.HyperStack.ST
 open Hacl.Constants
 open Hacl.Policies
 open Hacl.Cast
@@ -87,7 +91,7 @@ let crypto_secretbox_detached c mac m mlen n k =
 val crypto_secretbox_open_detached:
   m:uint8_p ->
   c:uint8_p ->
-  mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ declassifiable mac} ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
   clen:u64{let len = U64.v clen in len = length m /\ len = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
@@ -109,9 +113,8 @@ let crypto_secretbox_open_detached m c mac clen n k =
   Poly1305_64.crypto_onetimeauth tmp_mac c clen (sub block0 0ul 32ul);
   let h2 = ST.get() in
   cut(modifies_0 h0 h2);
-  (* Declassication assumption *)
-  assume (Hacl.Policies.declassifiable tmp_mac);
-  let verify = cmp_bytes mac tmp_mac 16ul in
+  let result = cmp_bytes mac tmp_mac 16ul in
+  let verify = declassify_u8 result in
   let zerobytes = 32ul in
   let zerobytes_64 = 32uL in
   let clen0 =
@@ -172,6 +175,4 @@ let crypto_secretbox_open_easy m c clen n k =
   Math.Lemmas.modulo_lemma (U64.(v clen - 16)) (pow2 32);
   let c'  = sub c 16ul clen_ in
   let mac = sub c 0ul 16ul in
-  (* Declassification assumption (non constant-time operations may happen on the 'mac' buffer *)
-  assume (declassifiable mac);
   crypto_secretbox_open_detached m c' mac (U64.(clen -^ 16uL)) n k

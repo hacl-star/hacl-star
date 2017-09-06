@@ -1,7 +1,4 @@
-HACL_HOME?=../..
-KREMLIN_HOME?=$(HACL_HOME)/kremlin
-FSTAR_HOME?=$(HACL_HOME)/kremlin
-
+include ../../Makefile.include
 
 DIRECTORIES=
 

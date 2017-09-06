@@ -1,6 +1,8 @@
 *.o
+*.so
 *.exe
 *.exe.dSYM
+out.krml
 
 build/
 build-experimental/
@@ -12,14 +14,38 @@ lib/hst/ml/*.o
 test/hash/ml/*
 test/hash/*.exe
 test/hash/sha256
-
 test/hmac/ml/*
 test/hmac/*.exe
 test/hmac/hmac_sha256
+test/bench.txt
 
 pneutube/tube-star.exe
 pneutube/tube-star.exe.dSYM/
 pneutube/tube/
+
+specs/chacha-poly-spec/
+specs/chacha-spec/
+specs/curve25519-spec/
+specs/ed25519-spec/
+specs/gf128-spec/
+specs/poly-spec/
+specs/salsa-spec/
+specs/sha2-spec/
+specs/hmac-sha2-spec/
+specs/sha2_256-spec/
+specs/sha2_384-spec/
+specs/sha2_512-spec/
+specs/hmac-sha2_256-spec/
+specs/hmac-sha2_384-spec/
+specs/hmac-sha2_512-spec/
+
+code/lib/kremlin/ccomp-c/
+code/lib/kremlin/lib-c/
+code/lib/ml/hacllib.a
+code/lib/ml/hacllib.cmxa
+code/lib/ml/*.cmi
+code/lib/ml/*.cmx
+code/lib/ml/*.o
 
 code/hash/sha2-c/
 code/hash/sha2-256-c/
@@ -28,14 +54,24 @@ code/hash/sha2-512-c/
 code/hmac/hmac-c/
 code/api/aead-c/
 code/api/box-c/
+code/api/policies-c/
 code/curve25519/x25519-c/
 code/ed25519/ed25519-c/
 code/poly1305/poly-c/
 code/salsa-family/chacha-c/
 code/salsa-family/chacha-vec128/
+code/salsa-family/chacha-vec128-c/
 code/salsa-family/hsalsa-c/
 code/salsa-family/salsa-c/
 code/salsa-family/xsalsa-c/
+
+secure_api/LowCProvider/.depend
+secure_api/tmp-hacl/
+secure_api/tmp-vale/
+
+snapshots/hacl-c/bench.txt
+snapshots/snapshot-gcc
+snapshots/snapshot-gcc-unrolled
 
 doc/tutorial/0-coding-field-arithmetic-in-fstar/extracted_c/
 doc/tutorial/1-recursion-vs-loops/extracted_c/

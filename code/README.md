@@ -26,17 +26,12 @@ They will be moved out of this directory to a subdirectory of `code` once their 
 ## Verification
 
 Run `make verify` to run start the library verification.
-
-Currently verified primitives:
-+ Salsa20, HSalsa20, XSalsa20, Chacha20 (memory safety, side channel resistance)
-+ Poly1305 (memory safety, overflow safety, functional correctness, side channel resistance)
-+ Curve25519 (memory safety, overflow safety, functional correctness, side channel resistance)
-+ Ed25519 (memory safety, overflow safety, functional correctness, side channel resistance)
-+ SHA2-{256,384,512} (memory safety, functional correctness, side channel resistance)
-+ HMAC-SHA2-{256,384,512} (memory safety, functional correctness, side channel resistance)
+All primitives are verified for memory safety, secret independence (a side-channel mitigation),
+and functional correctness against the high-level specifications in `hacl-star/specs`.
 
 ## Extraction to C and execution
 
-Run `make extract-c` to compile the F* code into C code for those primitives and run it on a single test vector.
-If you do not have F* or KreMLin installed, you can see the extracted code checked into the `extracted/c`
-directory.
+Run `make extract-c` to compile the F* code into C code for those primitives
+and run it on a single test vector. If you do not have F* or KreMLin installed,
+and you want to see the currently generated C code, look at the snapshot
+checked into the `hacl-star/snapshots/hacl-c` directory.

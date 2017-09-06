@@ -1,5 +1,7 @@
 module Spec.SHA2_384
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt64
@@ -67,7 +69,7 @@ let word_add_mod = Word.add_mod
 
 
 
-let rotate_right (a:word) (s:UInt32.t{UInt32.v s < 64}) : Tot word =
+let rotate_right (a:word) (s:UInt32.t{0 < UInt32.v s /\ UInt32.v s < 64}) : Tot word =
   Word.((a >>^ s) |^ (a <<^ (UInt32.sub 64ul s)))
 
 val _Ch: x:word -> y:word -> z:word -> Tot word
@@ -166,6 +168,66 @@ let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}
     let (block,rem) = Seq.split blocks size_block in
     let hash = update hash block in
     update_multi hash rem
+
+
+(* BEGIN TODO: move to Hacl.Hash.SHA2_384.Lemmas *)
+#reset-options "--max_fuel 1 --z3rlimit 100 --using_facts_from FStar --using_facts_from Prims --using_facts_from Spec.SHA2_384"
+
+let update_multi_empty (h:hash_w) (empty:bytes{Seq.length empty = 0}) : Lemma
+  (ensures (update_multi h empty == h)) = ()
+
+let update_multi_one (h:hash_w) (b:bytes{Seq.length b = size_block}) : Lemma
+  (ensures (update_multi h b == update h b)) =
+  let block, rem = Seq.split b size_block in
+  assert (Seq.length rem == 0);
+  update_multi_empty (update h b) rem
+
+val update_multi_append:
+  hash:hash_w ->
+  blocks1:bytes{length blocks1 % size_block = 0} ->
+  blocks2:bytes{length blocks2 % size_block = 0} ->
+  Lemma
+    (requires True)
+    (ensures (update_multi (update_multi hash blocks1) blocks2 ==
+              update_multi hash (blocks1 @| blocks2)))
+    (decreases (length blocks1))
+let rec update_multi_append hash blocks1 blocks2 =
+  if Seq.length blocks1 = 0 then
+    begin
+    update_multi_empty hash blocks1;
+    Seq.append_empty_l blocks1;
+    Seq.lemma_eq_intro (blocks1 @| blocks2) blocks2
+    end
+  else
+    begin
+    (*
+      update_multi (update_multi hash blocks1) blocks2
+      == update_multi_def hash blocks1
+      update_multi (update_multi (update hash b) blocks1') blocks2
+      == update_multi_append (update hash b) blocks1' blocks2
+      update_multi (update hash b) (blocks1' @| blocks2)
+      == update_multi_def hash (blocks1 @| blocks2)
+      update_multi hash (blocks1 @| blocks2)
+    *)
+    let b , blocks1' = Seq.split_eq blocks1 size_block in
+    let b', blocks12 = Seq.split_eq (blocks1 @| blocks2) size_block in
+    Seq.append_assoc b blocks1' blocks2;
+    Seq.lemma_append_inj b (blocks1' @| blocks2) b' blocks12;
+    update_multi_append (update hash b) blocks1' blocks2
+    end
+
+val update_update_multi_append:
+  hash:hash_w ->
+  blocks:bytes{length blocks % size_block = 0} ->
+  b:bytes{length b = size_block} ->
+  Lemma
+    (update (update_multi hash blocks) b == update_multi hash (blocks @| b))
+let update_update_multi_append hash blocks b =
+  update_multi_append hash blocks b;
+  update_multi_one (update_multi hash blocks) b
+
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 25"
+(* END TODO: move to Hacl.Hash.SHA2_384.Lemmas *)
 
 
 let pad0_length (len:nat) : Tot (n:nat{(len + 1 + n + size_len_8) % size_block = 0}) =

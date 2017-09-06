@@ -1,5 +1,7 @@
 module Spec.Lib
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
@@ -7,14 +9,14 @@ open FStar.Endianness
 
 #set-options "--initial_fuel 0 --initial_ifuel 0 --max_fuel 0 --max_ifuel 0"
 
-let rotate_left (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
+let rotate_left (a:UInt32.t) (s:UInt32.t {0 < v s /\ v s<32}) : Tot UInt32.t =
   ((a <<^ s) |^ (a >>^ (32ul -^ s)))
 
-let rotate_right (a:UInt32.t) (s:UInt32.t {v s<32}) : Tot UInt32.t =
+let rotate_right (a:UInt32.t) (s:UInt32.t {0 < v s /\ v s<32}) : Tot UInt32.t =
   ((a >>^ s) |^ (a <<^ (32ul -^ s)))
 
-let op_Less_Less_Less (a:UInt32.t) (s:UInt32.t {v s<32}) = rotate_left a s
-let op_Greater_Greater_Greater (a:UInt32.t) (s:UInt32.t {v s<32}) = rotate_right a s
+let op_Less_Less_Less (a:UInt32.t) (s:UInt32.t {0 < v s /\ v s<32}) = rotate_left a s
+let op_Greater_Greater_Greater (a:UInt32.t) (s:UInt32.t {0 < v s /\ v s<32}) = rotate_right a s
 
 let byte = UInt8.t
 let bytes = seq UInt8.t
@@ -93,7 +95,7 @@ let lemma_uint32_to_from_bij (b:UInt32.t) : Lemma
 let lemma_uint32_from_to_bij (b:lbytes 4) : Lemma
   (requires (True))
   (ensures (uint32_to_le (uint32_from_le b) = b))
-  = lemma_uint32_to_from_bij (uint32_from_le b);    
+  = lemma_uint32_to_from_bij (uint32_from_le b);
     let lemma (s:lbytes 4) (s':lbytes 4):
       Lemma (requires (s <> s'))
             (ensures (uint32_from_le s <> uint32_from_le s'))
@@ -368,9 +370,9 @@ let rec lemma_uint32s_from_le_slice len b n =
     lemma_append_assoc (uint32s_from_le n (slice tl 0 (4 * n)))
                        (uint32s_from_le (len - 1 - n) (slice tl (4*n) (4*(len - 1))))
                        (create 1 (uint32_from_le hd));
-    lemma_eq_intro (slice b (4*len-4) (4*len)) (slice (slice b (4*n) (4*len)) (4*(len - 1 - n)) (4*(len-n)));    
+    lemma_eq_intro (slice b (4*len-4) (4*len)) (slice (slice b (4*n) (4*len)) (4*(len - 1 - n)) (4*(len-n)));
     lemma_eq_intro (slice b (4*n) (4*(len-1))) (slice (slice b (4*n) (length b)) 0 (4 * (len - n - 1)));
-    
+
     lemma_eq_intro (uint32s_from_le (len-n) (slice b (4 * n) (4*len))) (snoc (uint32s_from_le (len-n-1) (slice b (4*n) (4*(len-1)))) (uint32_from_le hd)))
 
 

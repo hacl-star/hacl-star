@@ -1,11 +1,15 @@
 module Hacl.Spec.Poly1305_64
 
+open FStar.HyperStack.All
+
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Ghost
 open FStar.Seq
 open FStar.Seq
 open FStar.Endianness
-open FStar.Int.Cast
+open FStar.Int.Cast.Full
 
 open Hacl.Cast
 open Hacl.Bignum.Parameters

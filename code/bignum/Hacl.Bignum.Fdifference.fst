@@ -1,5 +1,9 @@
 module Hacl.Bignum.Fdifference
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.HyperStack
 open FStar.Buffer
 
@@ -7,8 +11,6 @@ open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint
 open Hacl.Bignum.Limb
 open Hacl.Spec.Bignum.Fdifference
-
-module U32 = FStar.UInt32
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 

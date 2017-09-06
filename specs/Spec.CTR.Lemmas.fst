@@ -1,5 +1,7 @@
 module Spec.CTR.Lemmas
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 
 #set-options "--max_fuel 0 --initial_fuel 0"

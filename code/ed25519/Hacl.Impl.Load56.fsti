@@ -1,5 +1,9 @@
 module Hacl.Impl.Load56
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.Buffer
 open FStar.Endianness

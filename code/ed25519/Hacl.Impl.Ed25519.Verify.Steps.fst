@@ -1,5 +1,9 @@
 module Hacl.Impl.Ed25519.Verify.Steps
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.Buffer
 open FStar.UInt32
@@ -60,25 +64,15 @@ let verify_step_2 r msg len rs public =
   let h0 = ST.get() in
   let r' = create 0uL 5ul in
   let h1 = ST.get() in
-  no_upd_lemma_0 h0 h1 rs;
-  no_upd_lemma_0 h0 h1 public;
-  no_upd_lemma_0 h0 h1 msg;
-  Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2 r' rs public msg len;  
+  Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2 r' rs public msg len;
   let h2 = ST.get() in
-  no_upd_lemma_1 h1 h2 r' rs;
-  no_upd_lemma_1 h1 h2 r' public;
-  no_upd_lemma_1 h1 h2 r' msg;
   Hacl.Impl.Store56.store_56 r r';
   let h3 = ST.get() in
-  no_upd_lemma_1 h2 h3 r rs;
-  no_upd_lemma_1 h2 h3 r public;
-  no_upd_lemma_1 h2 h3 r msg;
+  lemma_modifies_0_2 r r' h0 h1 h3;
   Endianness.lemma_little_endian_inj (as_seq h3 r)
                                      (Endianness.little_bytes 32ul (Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 rs @| as_seq h0 public @| as_seq h0 msg)));
   pop_frame()
 
-
-#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val point_mul_g:
   result:point ->
@@ -91,32 +85,17 @@ val point_mul_g:
      let n  = as_seq h0 scalar in
      r == Spec.Ed25519.point_mul n Spec.Ed25519.g) ))
 
-
-#reset-options "--max_fuel 0 --z3rlimit 20"
-
 let point_mul_g result scalar =
   push_frame();
   let h0 = ST.get() in
   let g = create 0uL 20ul in
+  let h0' = ST.get() in
   Hacl.Impl.Ed25519.G.make_g g;
   let h1 = ST.get() in
-  no_upd_lemma_0 h0 h1 scalar;
+  lemma_modifies_0_1' g h0 h0' h1;
   Hacl.Impl.Ed25519.Ladder.point_mul result scalar g;
-  let h2 = ST.get() in
-  no_upd_lemma_1 h1 h2 result scalar;
   pop_frame()
 
-
-#reset-options "--max_fuel 0 --z3rlimit 20"
-
-val lemma_modifies_none:
-  h:HyperStack.mem -> h':HyperStack.mem -> h'':HyperStack.mem -> h''':HyperStack.mem ->
-  Lemma (requires (HyperStack.fresh_frame h h' /\ modifies_0 h' h'' /\ HyperStack.popped h'' h'''))
-        (ensures (modifies_none h h'''))
-let lemma_modifies_none h h' h'' h''' =
-  lemma_reveal_modifies_0 h' h''
-
-#reset-options "--max_fuel 0 --z3rlimit 20"
 
 val verify_step_4:
   s:buffer UInt8.t{length s = 32} ->
@@ -133,7 +112,6 @@ val verify_step_4:
         point_equal sB (point_add (as_point h0 r') hA))))
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
-
 let verify_step_4 s h' a' r' =
   let h00 = ST.get() in
   push_frame();
@@ -143,10 +121,6 @@ let verify_step_4 s h' a' r' =
   let rhA  = Buffer.sub tmp 20ul  20ul in
   let sB   = Buffer.sub tmp 40ul  20ul in
   let h1 = ST.get() in
-  no_upd_lemma_0 h0 h1 h';
-  no_upd_lemma_0 h0 h1 a';
-  no_upd_lemma_0 h0 h1 r';
-  no_upd_lemma_0 h0 h1 s;
   point_mul_g sB s;
   let h2 = ST.get() in
   no_upd_lemma_1 h1 h2 sB h';
@@ -163,5 +137,8 @@ let verify_step_4 s h' a' r' =
   let h5 = ST.get() in
   pop_frame();
   let h01 = ST.get() in
-  lemma_modifies_none h00 h0 h5 h01;
+  lemma_modifies_1_trans tmp h1 h2 h3;
+  lemma_modifies_1_trans tmp h1 h3 h4;
+  lemma_modifies_0_1' tmp h0 h1 h4;
+  lemma_modifies_0_push_pop h00 h0 h5 h01;
   b

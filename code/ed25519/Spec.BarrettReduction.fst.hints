@@ -1,11 +1,11 @@
 [
-  "VU\u001ex»æARÂ\f\u0002]√w¨}",
+  "∑˜ÜÙt\u001f98ªíª©Û\u001f0ù",
   [
     [
       "Spec.BarrettReduction.l",
       1,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -13,7 +13,7 @@
       "Spec.BarrettReduction.l",
       2,
       0,
-      0,
+      1,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0
     ],
@@ -21,7 +21,7 @@
       "Spec.BarrettReduction.pow2k",
       1,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -29,7 +29,7 @@
       "Spec.BarrettReduction.pow2k",
       2,
       0,
-      0,
+      1,
       [
         "@query", "assumption_Prims.HasEq_int",
         "haseqSpec.BarrettReduction_Tm_refine_bef40ecb27fe134e9028551108703423"
@@ -40,21 +40,15 @@
       "Spec.BarrettReduction.pow2k",
       3,
       0,
-      0,
-      [
-        "@query", "equation_Prims.pos", "equation_Spec.BarrettReduction.l",
-        "function_token_typing_Spec.BarrettReduction.l",
-        "pretyping_ae567c2fb75be05905677af440075565",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
-      ],
+      1,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0
     ],
     [
       "Spec.BarrettReduction.m",
       1,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -62,7 +56,7 @@
       "Spec.BarrettReduction.m",
       2,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -70,14 +64,11 @@
       "Spec.BarrettReduction.m",
       3,
       0,
-      0,
+      1,
       [
-        "@query", "equation_Prims.nat", "equation_Spec.BarrettReduction.k",
+        "@query", "equation_Spec.BarrettReduction.k",
         "equation_Spec.BarrettReduction.l",
-        "equation_Spec.BarrettReduction.pow2k",
-        "function_token_typing_Spec.BarrettReduction.pow2k",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_b629a045c1dadde8fb276da4067399d6"
+        "projection_inverse_BoxInt_proj_0"
       ],
       0
     ],
@@ -85,21 +76,18 @@
       "Spec.BarrettReduction.barrett_reduce",
       1,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_Spec.BarrettReduction.l",
         "equation_Spec.BarrettReduction.m",
-        "equation_Spec.BarrettReduction.pow2k",
-        "function_token_typing_Spec.BarrettReduction.l", "int_inversion",
+        "equation_Spec.BarrettReduction.pow2k", "int_inversion",
         "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_9818bc90ff7fe80fb2fe9570d5fa49a9"
+        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_ff503377633b67ce518ce4e68f6545b6"
       ],
       0
     ],
@@ -107,18 +95,15 @@
       "Spec.BarrettReduction.p",
       1,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_Spec.BarrettReduction.l",
         "equation_Spec.BarrettReduction.m",
-        "equation_Spec.BarrettReduction.pow2k",
-        "function_token_typing_Spec.BarrettReduction.l", "int_inversion",
+        "equation_Spec.BarrettReduction.pow2k", "int_inversion",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_9818bc90ff7fe80fb2fe9570d5fa49a9"
+        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_ff503377633b67ce518ce4e68f6545b6"
       ],
       0
     ],
@@ -126,19 +111,19 @@
       "Spec.BarrettReduction.q",
       1,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.BarrettReduction.l",
-        "equation_Spec.BarrettReduction.m",
-        "function_token_typing_Spec.BarrettReduction.l", "int_inversion",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.BarrettReduction.l",
+        "equation_Spec.BarrettReduction.m", "int_inversion",
         "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
-        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_9818bc90ff7fe80fb2fe9570d5fa49a9"
+        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_ff503377633b67ce518ce4e68f6545b6"
       ],
       0
     ],
@@ -146,15 +131,28 @@
       "Spec.BarrettReduction.test",
       1,
       0,
-      0,
+      1,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0
+    ],
+    [
+      "Spec.BarrettReduction.lemma_mul_comm",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.HyperHeap.test0",
+        "equation_Prims._assert",
+        "function_token_typing_FStar.HyperHeap.test0", "int_inversion",
+        "primitive_Prims.op_Multiply"
+      ],
       0
     ],
     [
       "Spec.BarrettReduction.lemma_barrett_reduce",
       1,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -162,7 +160,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce",
       2,
       0,
-      0,
+      1,
       [
         "@query", "equation_Spec.BarrettReduction.l",
         "projection_inverse_BoxInt_proj_0"
@@ -173,18 +171,15 @@
       "Spec.BarrettReduction.lemma_barrett_reduce",
       3,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_Prims.pos",
         "equation_Spec.BarrettReduction.barrett_reduce",
         "equation_Spec.BarrettReduction.k",
         "equation_Spec.BarrettReduction.l",
         "equation_Spec.BarrettReduction.m",
         "equation_Spec.BarrettReduction.pow2k",
-        "function_token_typing_Spec.BarrettReduction.l",
         "function_token_typing_Spec.BarrettReduction.m",
         "function_token_typing_Spec.BarrettReduction.pow2k", "int_inversion",
         "int_typing", "primitive_Prims.op_Addition",
@@ -193,10 +188,10 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.BarrettReduction_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_9818bc90ff7fe80fb2fe9570d5fa49a9",
         "refinement_interpretation_Spec.BarrettReduction_Tm_refine_b629a045c1dadde8fb276da4067399d6",
         "refinement_interpretation_Spec.BarrettReduction_Tm_refine_d015193b893c43fb62575556ae0133dc",
-        "typing_FStar.Mul.op_Star"
+        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_ff503377633b67ce518ce4e68f6545b6",
+        "typing_Spec.BarrettReduction.barrett_reduce"
       ],
       0
     ],
@@ -204,7 +199,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce",
       4,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -212,7 +207,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce",
       5,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -220,7 +215,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce",
       6,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -228,7 +223,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce",
       7,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -236,7 +231,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce",
       8,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -244,7 +239,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce",
       9,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -252,7 +247,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce",
       10,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -260,17 +255,13 @@
       "Spec.BarrettReduction.lemma_mul_div",
       1,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.BarrettReduction.l",
-        "function_token_typing_Spec.BarrettReduction.l", "int_inversion",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
@@ -282,7 +273,7 @@
       "Spec.BarrettReduction.lemma_mul_div",
       2,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -290,7 +281,7 @@
       "Spec.BarrettReduction.lemma_mul_div",
       3,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -298,7 +289,7 @@
       "Spec.BarrettReduction.lemma_mul_div",
       4,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -306,19 +297,18 @@
       "Spec.BarrettReduction.lemma_optimized_barrett_reduce",
       1,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "equation_FStar.Mul.op_Star", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.BarrettReduction.l",
-        "equation_Spec.BarrettReduction.m",
-        "function_token_typing_Spec.BarrettReduction.l", "int_inversion",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
+        "equation_Prims.pos", "equation_Spec.BarrettReduction.m",
+        "int_inversion", "int_typing", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
-        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_c61c46e6b0c0b7a81f41dcd215a9a40e"
+        "refinement_interpretation_Spec.BarrettReduction_Tm_refine_c61c46e6b0c0b7a81f41dcd215a9a40e",
+        "typing_Prims.pow2"
       ],
       0
     ],
@@ -326,15 +316,12 @@
       "Spec.BarrettReduction.lemma_optimized_barrett_reduce",
       2,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
-        "equation_Spec.BarrettReduction.l",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Mul.op_Star",
+        "equation_Prims.nat", "equation_Spec.BarrettReduction.l",
         "equation_Spec.BarrettReduction.m",
         "equation_Spec.BarrettReduction.pow2k",
-        "function_token_typing_Spec.BarrettReduction.l",
         "function_token_typing_Spec.BarrettReduction.pow2k", "int_inversion",
         "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
@@ -348,7 +335,7 @@
       "Spec.BarrettReduction.lemma_optimized_barrett_reduce",
       3,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -356,7 +343,7 @@
       "Spec.BarrettReduction.lemma_optimized_barrett_reduce",
       4,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -364,13 +351,10 @@
       "Spec.BarrettReduction.lemma_mod_sub_",
       1,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.BarrettReduction.l",
-        "function_token_typing_Spec.BarrettReduction.l", "int_inversion",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Mul.op_Star",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
@@ -384,7 +368,7 @@
       "Spec.BarrettReduction.lemma_mod_sub_",
       2,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -392,7 +376,7 @@
       "Spec.BarrettReduction.lemma_mod_sub_",
       3,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -400,16 +384,18 @@
       "Spec.BarrettReduction.lemma_0",
       1,
       0,
-      0,
+      1,
       [
-        "@query", "equation_FStar.Mul.op_Star", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_GreaterThan", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
-        "unit_inversion", "unit_typing"
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Monotonic.HyperHeap.test0", "equation_Prims._assert",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_FStar.Monotonic.HyperHeap.test0",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0
     ],
@@ -419,11 +405,8 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.BarrettReduction.l",
-        "function_token_typing_Spec.BarrettReduction.l", "int_inversion",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Mul.op_Star",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
         "int_typing", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_Modulus",
@@ -439,7 +422,7 @@
       "Spec.BarrettReduction.lemma_1",
       2,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -447,7 +430,7 @@
       "Spec.BarrettReduction.lemma_1",
       3,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -455,7 +438,7 @@
       "Spec.BarrettReduction.lemma_1",
       4,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -463,7 +446,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce'",
       1,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -471,18 +454,14 @@
       "Spec.BarrettReduction.lemma_barrett_reduce'",
       2,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
-        "equation_Prims.nonzero", "equation_Prims.pos",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Mul.op_Star",
+        "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.BarrettReduction.l",
-        "equation_Spec.BarrettReduction.m",
-        "function_token_typing_Spec.BarrettReduction.l", "int_inversion",
+        "equation_Spec.BarrettReduction.m", "int_inversion",
         "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_7075614a0e8c0bdbec6de0d0ef7f1280",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "refinement_interpretation_Spec.BarrettReduction_Tm_refine_c61c46e6b0c0b7a81f41dcd215a9a40e"
@@ -493,23 +472,22 @@
       "Spec.BarrettReduction.lemma_barrett_reduce'",
       3,
       0,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.Mul.op_Star", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.BarrettReduction.l",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Mul.op_Star",
+        "equation_Prims.nat", "equation_Prims.nonzero", "equation_Prims.pos",
+        "equation_Spec.BarrettReduction.l",
         "equation_Spec.BarrettReduction.m",
         "equation_Spec.BarrettReduction.pow2k",
-        "function_token_typing_Spec.BarrettReduction.l",
         "function_token_typing_Spec.BarrettReduction.pow2k", "int_inversion",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
         "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_7075614a0e8c0bdbec6de0d0ef7f1280",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "refinement_interpretation_Spec.BarrettReduction_Tm_refine_b629a045c1dadde8fb276da4067399d6",
@@ -521,7 +499,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce'",
       4,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
@@ -529,7 +507,7 @@
       "Spec.BarrettReduction.lemma_barrett_reduce'",
       5,
       0,
-      0,
+      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ]

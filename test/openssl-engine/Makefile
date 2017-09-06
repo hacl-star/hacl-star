@@ -1,15 +1,15 @@
-OPENSSL_HOME?=../../../openssl
+OPENSSL_HOME?=../../other_providers/openssl
 KREMLIN_HOME?=../../../kremlin
 # CURVE_HOME=../../code/curve25519/x25519-c
 # CHACHA_HOME=../../code/salsa-family/chacha-c
 # POLY_HOME=../../code/poly1305/poly-c
 # AEAD_HOME=../../code/api/aead-c
-SNAPSHOT_HOME=../ccs-benchmarks/snapshot
-CURVE_HOME=../ccs-benchmarks/snapshot
-CHACHA_HOME=../ccs-benchmarks/snapshot
-POLY_HOME=../ccs-benchmarks/snapshot
-AEAD_HOME=../ccs-benchmarks/snapshot
-SHA_HOME=../ccs-benchmarks/snapshot
+SNAPSHOT_HOME=../benchmarks/snapshot
+CURVE_HOME=../benchmarks/snapshot
+CHACHA_HOME=../benchmarks/snapshot
+POLY_HOME=../benchmarks/snapshot
+AEAD_HOME=../benchmarks/snapshot
+SHA_HOME=../benchmarks/snapshot
 ifeq ($(shell uname),Linux)
   PIC=-fPIC
 else

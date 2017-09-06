@@ -1,4 +1,8 @@
 module Crypto.AEAD.Invariant
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 // We implement ideal AEAD on top of ideal Chacha20 and ideal Poly1305. 
 // We precisely relate AEAD's log to their underlying state.
 
@@ -156,7 +160,7 @@ let fresh_nonce (#i:id) (n:Cipher.iv (alg i)) (entries:aead_entries i) =
 
 let fresh_nonce_st (#i:id) (#rw:rw) (n:Cipher.iv (alg i)) (aead_st:aead_state i rw) (h:mem) = 
   safeMac i ==> 
-  fresh_nonce n (HS.sel h aead_st.log)
+  fresh_nonce n (HS.sel h (st_ilog aead_st))
 
 let num_blocks_for_entry (#i:id) (e:aead_entry i) : Tot nat =
   let AEADEntry nonce ad l plain cipher_tagged = e in
@@ -412,7 +416,7 @@ let inv (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) : Type0 =
   aead_liveness st h /\
   (safeMac i ==>
      (let prf_table = HS.sel h (itable i st.prf) in
-      let aead_entries = HS.sel h st.log in
+      let aead_entries = HS.sel h (st_ilog st) in
       refines prf_table aead_entries h)) /\
   (prf i ==> prf_mac_inv (HS.sel h (itable i st.prf)) h)
 
@@ -536,7 +540,7 @@ let frame_inv_modifies_0 (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
 	   (ensures  (inv st h1))
    = Buffer.lemma_reveal_modifies_0 h h1;
      if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1;
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h (st_ilog st)) h h1;
      if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_modifies_1 (#i:id) (#rw:rw) (#a:Type) (b:FStar.Buffer.buffer a) 
@@ -547,7 +551,7 @@ let frame_inv_modifies_1 (#i:id) (#rw:rw) (#a:Type) (b:FStar.Buffer.buffer a)
 	   (ensures  (inv st h1))
    = Buffer.lemma_reveal_modifies_1 b h h1;
      if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1;
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h (st_ilog st)) h h1;
      if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_modifies_tip (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
@@ -557,7 +561,7 @@ let frame_inv_modifies_tip (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem
 		      modifies_one h.tip h h1))
 	   (ensures  (inv st h1))
    = if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1;
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h (st_ilog st)) h h1;
      if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_push (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
@@ -565,14 +569,14 @@ let frame_inv_push (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
 		      HS.fresh_frame h h1))
 	   (ensures  (inv st h1))
    = if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h h1;
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h (st_ilog st)) h h1;
      if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h h1
 
 let frame_inv_pop (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem{HS.poppable h})
    : Lemma (requires (inv st h))
 	   (ensures  (inv st (HS.pop h)))
    = if safeMac i
-     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h st.log) h (HS.pop h);
+     then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h (st_ilog st)) h (HS.pop h);
      if prf i then frame_prf_mac_inv #i #st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) h (HS.pop h)
 
 let weaken_all_above (#rgn:region) (#i:id) (s:Seq.seq (PRF.entry rgn i)) 
@@ -1149,7 +1153,8 @@ val lemma_mac_log_framing
   (ensures  (m_sel h0 (CMA.(ilog mac_st_2.log)) = m_sel h1 (CMA.(ilog mac_st_2.log))))
 #set-options "--initial_ifuel 1 --max_ifuel 1"
 let lemma_mac_log_framing #i #nonce_1 #nonce_2 mac_st_1 h0 h1 mac_st_2 = //AR: 04/22/2017: this relies on ref injectivity ...
-  assume (m_contains (CMA.(ilog mac_st_1.log)) h0)
+  admit()
+  //assume (m_contains (CMA.(ilog mac_st_1.log)) h0)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let lemma_fresh_nonce_implies_all_entries_nonces_are_different

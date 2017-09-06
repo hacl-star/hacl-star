@@ -1,0 +1,181 @@
+[
+  "Åd\u0013Ky4\u001aú¸ˆ\u001eÒª\u001e§ ",
+  [
+    [
+      "Hacl.UInt32.gt_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt32.gt_mask",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt32.gt_mask",
+      3,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt32.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt32.gt_mask",
+      4,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.ones", "equation_FStar.UInt.zero",
+        "equation_FStar.UInt32.lognot", "equation_FStar.UInt32.n",
+        "equation_FStar.UInt32.t", "equation_FStar.UInt32.v",
+        "fuel_guarded_inversion_FStar.UInt32.t_",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt32.Mk_v",
+        "refinement_interpretation_FStar.UInt32_Tm_refine_06ddb0d6cc54219aa2cc1f7ee617fa51",
+        "typing_FStar.UInt32.gte_mask"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt32.gt_mask",
+      5,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt32.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lt_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lt_mask",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lt_mask",
+      3,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt32.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lt_mask",
+      4,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.ones", "equation_FStar.UInt.zero",
+        "equation_FStar.UInt32.lognot", "equation_FStar.UInt32.n",
+        "equation_FStar.UInt32.t", "equation_FStar.UInt32.v",
+        "fuel_guarded_inversion_FStar.UInt32.t_",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt32.Mk_v",
+        "refinement_interpretation_FStar.UInt32_Tm_refine_06ddb0d6cc54219aa2cc1f7ee617fa51",
+        "typing_FStar.UInt32.gte_mask"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lt_mask",
+      5,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt32.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lte_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lte_mask",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lte_mask",
+      3,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt32.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lte_mask",
+      4,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.BitVector.lognot_vec.fuel_instrumented",
+        "@fuel_correspondence_FStar.UInt.from_vec.fuel_instrumented",
+        "@query", "equation_FStar.UInt.lognot",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero", "equation_FStar.UInt32.lognot",
+        "equation_FStar.UInt32.n", "equation_FStar.UInt32.t",
+        "equation_FStar.UInt32.v", "equation_Hacl.UInt32.gt_mask",
+        "equation_with_fuel_FStar.UInt.from_vec.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.UInt32.t_",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt32.Mk_v",
+        "refinement_interpretation_Hacl.UInt32_Tm_refine_ad684818c67c93be9b8d2ebea4613d7b",
+        "typing_Hacl.UInt32.gt_mask"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt32.lte_mask",
+      5,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt32.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ]
+  ]
+]

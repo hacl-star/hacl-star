@@ -1,31 +1,33 @@
-include ../Makefile.include
+include ../../Makefile.include
 
-FSTAR=$(FSTAR_BASE)
+ALL= \
+	FStar.Endianness.fst \
+	Hacl.Cast.fst \
+	Hacl.Endianness.fst \
+	Hacl.Policies.fst \
+	Hacl.Spec.Endianness.fst \
+	Hacl.Types.fst \
+	Hacl.UInt128.fst \
+	Hacl.UInt16.fst \
+	Hacl.UInt32.fst \
+	Hacl.UInt64.fst \
+	Hacl.UInt8.fst
 
-OPTIONS_VER=
+SLOW=
+BROKEN=
 
-ALL=Hacl.SBuffer.fst Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst
+ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(ALL)))
+verify: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(ALL)))
+hints: $(addsuffix .hints, $(ALL))
+all-ver: verify
+all-ct:
+all-ci: ci
+all-hints: hints
 
-all: $(addsuffix -ver, $(ALL))
+all: $(addsuffix -verify, $(ALL))
 
-%-ver: %
-	$(FSTAR) $^
+extract-c:
 
-
-FILES=$(addprefix ml/,Hacl_UInt8.mli Hacl_UInt8.ml Hacl_UInt16.mli Hacl_UInt16.ml Hacl_UInt32.ml Hacl_UInt64.ml Hacl_UInt128.ml Hacl_Cast.ml Hacl_Utils.ml Hacl_SBuffer.ml)
-
-OBJS=$(FILES:.ml=.o)
-CMX=$(FILES:.ml=.cmx)
-OCAMLOPT=ocamlfind opt -thread -package batteries,zarith,stdint -linkpkg -g $(INCLUDES)
-OCAMLDEP=ocamlfind dep
-OCAMLMKLIB=ocamlfind mklib
-.SUFFIXES: .ml .mli .cmo .cmi .cmx
-
-%.o: %.ml
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) -c -I ml -I $(FSTAR_HOME)/ulib/ml -linkpkg $<
-
-
-ml: $(CMX) $(OBJS)
+test:
 
 clean:
-	rm -f *~ $(addprefix ml/, *.cmo *.cmi *.o *~ *.cmx)

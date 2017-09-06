@@ -1,5 +1,7 @@
 module Spec.Chacha20
 
+module ST = FStar.HyperStack.ST
+
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
@@ -24,41 +26,41 @@ type counter = UInt.uint_t 32
 // internally, blocks are represented as 16 x 4-byte integers
 type state = m:seq UInt32.t {length m = 16}
 type idx = n:nat{n < 16}
-type shuffle = state -> Tot state 
+type shuffle = state -> Tot state
 
-let line (a:idx) (b:idx) (d:idx) (s:t{v s < 32}) (m:state) : Tot state = 
+let line (a:idx) (b:idx) (d:idx) (s:t{0 < v s /\ v s < 32}) (m:state) : Tot state =
   let m = m.[a] <- (m.[a] +%^ m.[b]) in
   let m = m.[d] <- ((m.[d] ^^ m.[a]) <<< s) in m
 
-let quarter_round a b c d : shuffle = 
-  line a b d 16ul @ 
+let quarter_round a b c d : shuffle =
+  line a b d 16ul @
   line c d b 12ul @
-  line a b d 8ul  @ 
-  line c d b 7ul 
+  line a b d 8ul  @
+  line c d b 7ul
 
-let column_round : shuffle = 
+let column_round : shuffle =
   quarter_round 0 4 8  12 @
   quarter_round 1 5 9  13 @
   quarter_round 2 6 10 14 @
   quarter_round 3 7 11 15
 
-let diagonal_round : shuffle = 
+let diagonal_round : shuffle =
   quarter_round 0 5 10 15 @
   quarter_round 1 6 11 12 @
   quarter_round 2 7 8  13 @
   quarter_round 3 4 9  14
 
-let double_round: shuffle = 
+let double_round: shuffle =
     column_round @ diagonal_round (* 2 rounds *)
 
-let rounds : shuffle = 
+let rounds : shuffle =
     iter 10 double_round (* 20 rounds *)
 
-let chacha20_core (s:state) : Tot state = 
+let chacha20_core (s:state) : Tot state =
     let s' = rounds s in
     Spec.Loops.seq_map2 (fun x y -> x +%^ y) s' s
 
-(* state initialization *) 
+(* state initialization *)
 let c0 = 0x61707865ul
 let c1 = 0x3320646eul
 let c2 = 0x79622d32ul
@@ -75,7 +77,7 @@ let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     let st' = chacha20_core st in
     uint32s_to_le 16 st'
 
-let chacha20_ctx: Spec.CTR.block_cipher_ctx = 
+let chacha20_ctx: Spec.CTR.block_cipher_ctx =
     let open Spec.CTR in
     {
     keylen = keylen;
@@ -87,7 +89,7 @@ let chacha20_ctx: Spec.CTR.block_cipher_ctx =
 
 let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
 
-let chacha20_encrypt_bytes key nonce counter m = 
+let chacha20_encrypt_bytes key nonce counter m =
     Spec.CTR.counter_mode chacha20_ctx chacha20_cipher key nonce counter m
 
 

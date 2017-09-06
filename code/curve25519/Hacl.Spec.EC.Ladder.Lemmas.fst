@@ -1,5 +1,9 @@
 module Hacl.Spec.EC.Ladder.Lemmas
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open Spec.Curve25519
 open FStar.UInt8
 

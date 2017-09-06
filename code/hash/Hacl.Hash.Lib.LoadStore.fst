@@ -1,8 +1,12 @@
 module Hacl.Hash.Lib.LoadStore
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 open Hacl.UInt32
 open Hacl.Spec.Endianness
@@ -27,7 +31,7 @@ val uint32s_from_be_bytes:
       (let o = reveal_h32s (as_seq h1 output) in
        let i = reveal_sbytes (as_seq h0 input) in
        o == Spec.Lib.uint32s_from_be (U32.v len) i)))
-let rec uint32s_from_be_bytes output input len =
+let uint32s_from_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ modifies_1 output h0 h1 /\ 0 <= i /\ i <= UInt32.v len
@@ -76,7 +80,7 @@ val uint32s_to_be_bytes:
       (let o = reveal_sbytes (as_seq h1 output) in
        let i = reveal_h32s (as_seq h0 input) in
        o == Spec.Lib.uint32s_to_be (U32.v len) i)))
-let rec uint32s_to_be_bytes output input len =
+let uint32s_to_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ modifies_1 output h0 h1 /\ 0 <= i /\ i <= UInt32.v len
@@ -133,7 +137,7 @@ val uint64s_from_be_bytes:
       (let o = reveal_h64s (as_seq h1 output) in
        let i = reveal_sbytes (as_seq h0 input) in
        o == Spec.Lib.uint64s_from_be (U32.v len) i)))
-let rec uint64s_from_be_bytes output input len =
+let uint64s_from_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ modifies_1 output h0 h1 /\ 0 <= i /\ i <= UInt32.v len
@@ -181,7 +185,7 @@ val uint64s_to_be_bytes:
       (let o = reveal_sbytes (as_seq h1 output) in
        let i = reveal_h64s (as_seq h0 input) in
        o == Spec.Lib.uint64s_to_be (U32.v len) i)))
-let rec uint64s_to_be_bytes output input len =
+let uint64s_to_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ modifies_1 output h0 h1 /\ 0 <= i /\ i <= UInt32.v len

@@ -1,8 +1,12 @@
 module Hacl.Impl.Salsa20
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.ST
 open FStar.Buffer
 open Hacl.Cast
 open Hacl.UInt32
@@ -27,7 +31,7 @@ let uint8_p = buffer H8.t
 
 type state = b:Buffer.buffer h32{length b = 16}
 
-private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
+private inline_for_extraction let op_Less_Less_Less (a:h32) (s:u32{0 < U32.v s && U32.v s < 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
 
@@ -49,11 +53,19 @@ val setup:
 let setup st k n c =
   let h0 = ST.get() in
   push_frame();
+  (**) let h1 = ST.get() in
   let tmp = Buffer.create (uint32_to_sint32 0ul) 10ul in
+  (**) let h2 = ST.get() in
   let k'  = Buffer.sub tmp 0ul 8ul in
   let n'  = Buffer.sub tmp 8ul 2ul in
   uint32s_from_le_bytes k' k 8ul;
+  (**) let h3 = ST.get() in
+  (**) modifies_subbuffer_1 h2 h3 k' tmp;
   uint32s_from_le_bytes n' n 2ul;
+  (**) let h4 = ST.get() in
+  (**) modifies_subbuffer_1 h3 h4 n' tmp;
+  (**) lemma_modifies_1_trans tmp h2 h3 h4;
+  (**) lemma_modifies_0_1' tmp h1 h2 h4;
   let c0 = uint32_to_sint32 (FStar.Int.Cast.uint64_to_uint32 c) in
   let c1 = uint32_to_sint32 (FStar.Int.Cast.uint64_to_uint32 FStar.UInt64.(c >>^ 32ul)) in
   let k0 = k'.(0ul) in
@@ -66,10 +78,13 @@ let setup st k n c =
   let k7 = k'.(7ul) in
   let n0 = n'.(0ul) in
   let n1 = n'.(1ul) in
-  let h0 = ST.get() in
   make_h32_16 st (uint32_to_sint32 constant0) k0 k1 k2 k3 (uint32_to_sint32 constant1) n0 n1 c0 c1
                (uint32_to_sint32 constant2) k4 k5 k6 k7 (uint32_to_sint32 constant3);
-  pop_frame()
+  (**) let h5 = ST.get() in
+  (**) lemma_modifies_0_1 st h1 h4 h5;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 st h0 h1 h5 hfin
 
 
 let idx = a:U32.t{U32.v a < 16}
@@ -78,7 +93,7 @@ let idx = a:U32.t{U32.v a < 16}
 private
 val line:
   st:state ->
-  a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s < 32} ->
+  a:idx -> b:idx -> d:idx -> s:U32.t{0 < U32.v s && U32.v s < 32} ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st
@@ -393,20 +408,27 @@ val salsa20_block:
 [@ "c_inline"]
 let salsa20_block log stream_block st ctr =
   let h0 = ST.get() in
+  (**) let hinit = ST.get() in
   push_frame();
-  let h_0 = ST.get() in
+  (**) let h_0 = ST.get() in
   let st' = Buffer.create (uint32_to_sint32 0ul) 16ul in
-  let h_1 = ST.get() in
-  no_upd_lemma_0 h_0 h_1 st;
-  cut (as_seq h0 st == as_seq h_1 st);
+  (**) let h1 = ST.get() in
+  (**) let h_1 = ST.get() in
+  (**) no_upd_lemma_0 h_0 h_1 st;
+  (**) assert (as_seq h0 st == as_seq h_1 st);
   let log = salsa20_core log st' st ctr in
-  let h_3 = ST.get() in
+  (**) let h2 = ST.get() in
+  (**) lemma_modifies_0_2' st st' h_0 h1 h2;
+  (**) let h_3 = ST.get() in
   uint32s_to_le_bytes stream_block st' 16ul;
-  let h_4 = ST.get() in
-  let h = ST.get() in
-  cut (reveal_sbytes (as_seq h stream_block) == salsa20_block (Ghost.reveal log).k (Ghost.reveal log).n (UInt64.v ctr));
-  cut (modifies_3_2 stream_block st h_0 h);
+  (**) let h_4 = ST.get() in
+  (**) let h = ST.get() in
+  (**) lemma_modifies_2_1'' st stream_block h_0 h2 h;
+  (**) assert (reveal_sbytes (as_seq h stream_block) == salsa20_block (Ghost.reveal log).k (Ghost.reveal log).n (UInt64.v ctr));
+  (**) assert (modifies_3_2 stream_block st h_0 h);
   pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_3_2 stream_block st h0 h_0 h hfin;
   log
 
 
@@ -550,15 +572,22 @@ val update_last:
                let mask = Seq.slice mask 0 (UInt32.v len) in
                Spec.CTR.xor #(UInt32.v len) plain mask))))
 let update_last output plain len log st ctr =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   push_frame();
+  (**) let h = ST.get() in
   let block = create (uint8_to_sint8 0uy) 64ul in
+  (**) let h' = ST.get() in
   let l = salsa20_block log block st ctr in
+  (**) let h'' = ST.get() in
+  (**) lemma_modifies_0_2' st block h h' h'';
   let mask = Buffer.sub block 0ul len in
   map2 output plain mask len (fun x y -> H8.(x ^^ y));
-  let h1 = ST.get() in
-  lemma_salsa20_counter_mode_1 h1 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr;
+  (**) let h1 = ST.get() in
+  (**) lemma_modifies_2_1'' st output h h'' h1;
+  (**) lemma_salsa20_counter_mode_1 h1 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr;
   pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_3_2 st output h0 h h1 hfin;
   l
 
 
@@ -578,20 +607,34 @@ val update:
          match Ghost.reveal log with | MkLog k n ->
          o == seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) plain (salsa20_cipher k n (UInt64.v ctr)))))
 let update output plain log st ctr =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   push_frame();
+  (**) let h1 = ST.get() in
   let b  = create (uint32_to_sint32 0ul) 48ul in
+  (**) let h2 = ST.get() in
   let k  = Buffer.sub b 0ul  16ul in
   let ib = Buffer.sub b 16ul 16ul in
   let ob = Buffer.sub b 32ul 16ul in
   let l  = salsa20_core log k st ctr in
+  (**) let h3 = ST.get() in
+  (**) modifies_subbuffer_2 h2 h3 k st b;
   uint32s_from_le_bytes ib plain 16ul;
-  let h  = ST.get() in
+  (**) let h = ST.get() in
+  (**) modifies_subbuffer_1 h3 h ib b;
   map2 ob ib k 16ul (fun x y -> H32.(x ^^ y));
+  (**) let h4  = ST.get() in
+  (**) modifies_subbuffer_1 h h4 ob b;
+  (**) lemma_modifies_1_trans b h3 h h4;
+  (**) lemma_modifies_2_1' b st h2 h3 h4;
+  (**) lemma_modifies_0_2 st b h1 h2 h4;
   uint32s_to_le_bytes output ob 16ul;
-  Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes (reveal_sbytes (as_seq h0 plain))
+  (**) let h5  = ST.get() in
+  (**) lemma_modifies_2_1'' st output h1 h4 h5;
+  (**) Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes (reveal_sbytes (as_seq h0 plain))
                                                        (reveal_h32s (as_seq h k));
   pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_3_2 st output h0 h1 h5 hfin;
   l
 
 
@@ -657,6 +700,8 @@ let rec salsa20_counter_mode_blocks output plain len log st ctr =
     let o' = Buffer.sub output 0ul (64ul *^ i)  in
     let log' = update o b log st FStar.UInt64.(ctr+^ Int.Cast.uint32_to_uint64 i) in
     let h' = ST.get() in
+    (**) modifies_subbuffer_2 h h' o st output;
+    (**) lemma_modifies_2_trans output st h0 h h';
     no_upd_lemma_2 h h' o st b;
     no_upd_lemma_2 h h' o st b';
     no_upd_lemma_2 h h' o st o';
@@ -716,17 +761,22 @@ let salsa20_counter_mode output plain len log st ctr =
   let part_len   = len &^ 0x3ful in
   UInt.logand_mask (UInt32.v len) 6;
   Math.Lemmas.lemma_div_mod (UInt32.v len) 64;
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   let output' = Buffer.sub output 0ul (64ul *^ blocks_len) in
   let plain'  = Buffer.sub plain  0ul (64ul *^ blocks_len) in
   let output'' = Buffer.sub output (64ul *^ blocks_len) part_len in
   let plain''  = Buffer.sub plain  (64ul *^ blocks_len) part_len in
   salsa20_counter_mode_blocks output' plain' blocks_len log st ctr;
+  (**) let h1 = ST.get() in
+  (**) modifies_subbuffer_2 h0 h1 output' st output;
   if FStar.UInt32.(part_len >^ 0ul) then (
     let _ = update_last output'' plain'' part_len log st FStar.UInt64.(ctr +^ Int.Cast.uint32_to_uint64 blocks_len) in
-    ())
-  else ();
+    (**) let h' = ST.get() in
+    (**) modifies_subbuffer_2 h1 h' output'' st output)
+  else
+    (**) lemma_modifies_sub_2 h1 h1 output st;
   let h = ST.get() in
+  (**) lemma_modifies_2_trans output st h0 h1 h;
   Seq.lemma_eq_intro (Seq.append (as_seq h output') Seq.createEmpty) (as_seq h output');
   Seq.lemma_eq_intro (as_seq h output) (Seq.append (as_seq h output') (as_seq h output''));
   Seq.lemma_eq_intro (as_seq h0 plain) (Seq.append (as_seq h0 plain') (as_seq h0 plain''));
@@ -752,8 +802,19 @@ val salsa20:
          let ctr = UInt64.v ctr in
          o == Spec.CTR.counter_mode salsa20_ctx salsa20_cipher k n ctr plain)))
 let salsa20 output plain len k n ctr =
+  (**) let hinit = ST.get() in
   push_frame();
+  (**) let h0 = ST.get() in
   let st = alloc () in
+  (**) let h1 = ST.get() in
   let l  = init st k n in
+  (**) let h2 = ST.get() in
+  (**) lemma_modifies_0_1' st h0 h1 h2;
+  (**) no_upd_lemma_0 h0 h2 plain;
+  (**) no_upd_lemma_0 h0 h2 output;
   let l' = salsa20_counter_mode output plain len l st ctr in
-  pop_frame()
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_2 output st h0 h2 h3;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 output hinit h0 h3 hfin

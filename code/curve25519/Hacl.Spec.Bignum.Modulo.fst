@@ -1,5 +1,9 @@
 module Hacl.Spec.Bignum.Modulo
 
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
+
 open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer
@@ -131,6 +135,8 @@ let lemma_carry_top_spec_ s =
   assert(v (Seq.index s' 4) = v (Seq.index s 4) % pow2 limb_size)
 
 
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+
 private let lemma_carry_top_spec_1 (a:nat) (b:nat) : Lemma
   ((pow2 204 * a + b) % prime = (19 * (a / pow2 limb_size) + pow2 204 * (a % pow2 limb_size) + b) % prime)
   = assert_norm(pow2 255 % (pow2 255 - 19) = 19);
@@ -189,10 +195,7 @@ private let lemma_reduce_spec_ s = ()
 private let lemma_reduce_spec_1_1 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemma
   ((pow2 limb_size * (a + pow2 51 * b + pow2 102 * c + pow2 153 * d + pow2 204 * e))
     = (pow2 51 * a + pow2 102 * b + pow2 153 * c + pow2 204 * d + pow2 255 * e))
-  = admit(); //NS: 05/17 This proof is flaky with Z3-4.5.0 due to it not respecting an rlimit
-             //    The problem is fixed in Z3-4.5.1
-             //    TODO: remove this admit once we upgrade everest to Z3-4.5.1
-    let p51  = pow2 51 in
+  = let p51  = pow2 51 in
     let p102 = pow2 102 in
     let p153 = pow2 153 in
     let p204 = pow2 204 in

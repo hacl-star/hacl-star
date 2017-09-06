@@ -1,6 +1,3 @@
-(*--build-config
-options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rlimit 20 --use_hints --include ../../code/bignum --include ../../code/experimental/aesgcm --include ../../code/lib/kremlin --include ../../code/poly1305 --include ../../code/salsa-family --include ../../secure_api/aead --include ../../secure_api/prf --include ../vale --include ../uf1cma --include ../utils --include ../../specs --include ../../../kremlin/kremlib --include ../../../FStar/ulib/hyperstack
---*)
 (**
   This module multiplexes between different real implementations of polynomial
   MACs. It is oblivious to the static vs one-time allocation of the r part of
@@ -11,6 +8,10 @@ options: --__temp_no_proj Crypto.Symmetric.MAC --max_fuel 4 --initial_fuel 0 --m
   their ghost polynomial specification.
 *)
 module Crypto.Symmetric.MAC
+
+module ST = FStar.HyperStack.ST
+
+open FStar.HyperStack.All
 
 open Crypto.Symmetric.Bytes
 open Crypto.Indexing
@@ -30,11 +31,10 @@ module PL = Hacl.Impl.Poly1305_64
 module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
-type id = id * UInt128.t //NS: why not this definition : i:id & iv (alg i)
-inline_for_extraction let alg ((i,_):id) : macAlg =
- macAlg_of_id i
+#set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
-#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
+type id = id * UInt128.t //NS: why not this definition : i:id & iv (alg i)
+inline_for_extraction let alg ((i,_):id) : macAlg = macAlg_of_id i
 
 type text = Seq.seq (lbytes 16) // Used to be seq elem, then seq (lbytes 16)
 
@@ -81,12 +81,9 @@ let limb_length = function
   | POLY1305 ->  3
   | GHASH    -> 1
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
-
 inline_for_extraction unfold
 type buffer_of a = b:Buffer.buffer (limb a){Buffer.length b == limb_length a}
 
-#reset-options "--z3rlimit 100 --initial_ifuel 1 --max_ifuel 1"
 inline_for_extraction type pub_elemB (i:id) =
   buffer_of (alg i)
 
@@ -107,7 +104,6 @@ abstract type elemB (i:id) = pub_elemB i
 noextract val reveal_elemB : #i:id -> elemB i -> GTot (pub_elemB i)
 let reveal_elemB #i e = e
 
-#reset-options "--z3rlimit 100 --initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 val as_buffer: #i:id -> elemB i -> GTot (buffer_of (alg i))
 let as_buffer #i e =
   reveal_elemB e
@@ -158,8 +154,6 @@ let sel_elem h #i b =
   | POLY1305 -> PS_.selem (as_seq h b)
   | GHASH -> GF.sel_elem h b
 
-#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
-
 val frame_norm: h0:mem -> h1:mem -> #i:id -> b:elemB i{live h1 b} -> Lemma
   (requires (norm h0 b /\
     Buffer.as_seq h0 (as_buffer b) == Buffer.as_seq h1 (as_buffer b)))
@@ -208,10 +202,11 @@ let rcreate rgn i =
     assert (~ (HS.is_mm (Buffer.content (as_buffer r))));
     r
   | GHASH ->
-    let b : Buffer.buffer UInt128.t = FStar.Buffer.rcreate rgn (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in
+    let b : Buffer.buffer UInt128.t = FStar.Buffer.rcreate rgn (FStar.UInt128.uint64_to_uint128 0UL) 1ul in
     let r : elemB i = b in
     assert (~ (HS.is_mm (Buffer.content (as_buffer r))));
     r
+
 
 val create: i:id -> StackInline (elemB i)
   (requires (fun h0 -> True))
@@ -219,15 +214,19 @@ val create: i:id -> StackInline (elemB i)
      let b = as_buffer r in
      b `unused_in` h0 /\
      norm h1 r /\
-     sel_elem h1 r = zero i /\
+     sel_elem h1 r == zero i /\
      Buffer.frameOf b = HS.(h0.tip) /\ // /\ Map.domain h1.h == Map.domain h0.h
      Buffer.modifies_0 h0 h1 ))
 
 let create i =
   match alg i with
   | POLY1305 ->
+      let h0 = ST.get() in
       let b : Buffer.buffer UInt64.t = FStar.Buffer.create 0uL 3ul in
+      let h1 = ST.get() in
       PL.poly1305_start b;
+      let h2 = ST.get() in
+      lemma_modifies_0_1' b h0 h1 h2;
       b
       (* hide in Poly1305.fst? *)
       (* let b = FStar.Buffer.create 0uL 5ul in *)
@@ -237,10 +236,11 @@ let create i =
       (* B_POLY1305 b *)
   | GHASH ->
       let b : Buffer.buffer UInt128.t =
-        FStar.Buffer.create (FStar.Int.Cast.uint64_to_uint128 0UL) 1ul in
+        FStar.Buffer.create (FStar.UInt128.uint64_to_uint128 0UL) 1ul in
       let h1 = ST.get() in
       GF.fzero_lemma (Seq.index (as_seq h1 b) 0);
       b
+
 
 // TODO: generalize length, add functional spec
 (** Encode raw bytes of static key as a field element *)
@@ -382,15 +382,30 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
-#reset-options "--z3rlimit 300 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1 --split_cases 1"
 let update #i r a w =
-  push_frame();
-  let h0 = ST.get () in
-  (match alg i with
+  begin
+  match alg i with
+  | GHASH ->
+    push_frame();
+    let a' : Buffer.buffer UInt128.t = a in
+    let r' : Buffer.buffer UInt128.t = r in
+    let h0 = ST.get () in
+    let e = Buffer.create GF.zero_128 1ul in
+    let h1 = ST.get() in
+    e.(0ul) <- GF.load128_be w;
+    GF.add_and_multiply a' e r';
+    let h2 = ST.get() in
+    lemma_modifies_0_2 a e h0 h1 h2;
+    pop_frame()
+
+
   | POLY1305 ->
+    let h0 = ST.get() in
     let a' : Buffer.buffer UInt64.t = a in
     let r' : Buffer.buffer UInt64.t = r in
-    let _ = PL.poly1305_update (Ghost.hide Seq.createEmpty) (PL.mk_state r' a') w in
+    let st = PL.mk_state r' a' in
+    let log = PL.poly1305_update (Ghost.hide Seq.createEmpty) st w in
     ()
     (* begin *)
     (*   push_frame(); *)
@@ -409,13 +424,10 @@ let update #i r a w =
     (*   let h3 = ST.get () in *)
     (*   Crypto.Symmetric.Poly1305.Bigint.eval_eq_lemma h2 h3 a a 5 *)
     (* end *)
-  | GHASH ->
-    let a' : Buffer.buffer UInt128.t = a in
-    let r' : Buffer.buffer UInt128.t = r in
-    let e = Buffer.create GF.zero_128 1ul in
-    e.(0ul) <- GF.load128_be w;
-    GF.add_and_multiply a' e r'
-  ); pop_frame()
+  end
+
+
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 let taglen = 16ul
 type tag = lbytes (UInt32.v taglen)
@@ -447,9 +459,7 @@ val finish: #i:id -> s:tagB -> a:elemB i -> t:tagB -> Stack unit
     | POLY1305 -> Seq.equal tv (Spec.Poly1305.finish av sv)
     | GHASH    -> Seq.equal tv (GS.finish av sv) )))
 
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
-#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 private val lemma_modifies_3_2_finish: #a:Type -> #a':Type -> h:mem -> h':mem -> h'':mem -> b:buffer a -> b':buffer a' -> Lemma
   (requires (Buffer.live h b /\ Buffer.live h b' /\ Buffer.modifies_0 h h' /\ Buffer.modifies_2 b b' h' h''))
   (ensures (Buffer.modifies_3_2 b b' h h''))

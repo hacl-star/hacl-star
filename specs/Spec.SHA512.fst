@@ -1,5 +1,7 @@
 module Spec.SHA512
 
+module ST = FStar.HyperStack.ST
+
 open Spec.SHA2_512
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
