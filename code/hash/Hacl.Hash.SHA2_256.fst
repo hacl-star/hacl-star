@@ -978,6 +978,7 @@ val update_last:
 #reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 300"
 
 let update_last state data len =
+  (**) assert_norm(pow2 32 = 0x100000000);
 
   (**) let hinit = ST.get() in
   
@@ -1013,7 +1014,7 @@ let update_last state data len =
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 final_blocks))
                           (if U32.(len <^ 56ul) then
                               Seq.create (v size_block) 0uy
-                           else Seq.create (2 * v size_block) 0uy);
+                           else Seq.create (v size_block + v size_block) 0uy);
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 final_blocks)) (Seq.create (v nb * v size_block) 0uy);
   (**) assert(reveal_sbytes (as_seq h1 final_blocks) == Seq.create (v nb * v size_block) 0uy);
 
