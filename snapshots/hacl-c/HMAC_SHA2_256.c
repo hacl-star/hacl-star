@@ -233,7 +233,7 @@ static void Hacl_Hash_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint3
   else
     nb = (uint32_t )2;
   uint8_t *final_blocks;
-  if (nb == (uint32_t )1)
+  if (len < (uint32_t )56)
     final_blocks = blocks + (uint32_t )64;
   else
     final_blocks = blocks;
