@@ -200,7 +200,8 @@ val ws_part_1_core:
 let ws_part_1_core ws_w block_w t =
   (**) let h0 = ST.get() in
   (**) let h = ST.get() in
-  ws_w.(t) <- block_w.(t);
+  let b = block_w.(t) in
+  ws_w.(t) <- b;
   (**) let h1 = ST.get() in
   (**) let h' = ST.get() in
   (**) no_upd_lemma_1 h0 h1 ws_w block_w;
@@ -993,10 +994,9 @@ let update_last state data len =
 
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length are considered public here ! *)
-  let (nb, final_blocks) =
-    if U32.(len <^ 56ul) then (1ul, Buffer.offset blocks size_block)
-    else (2ul, blocks)
-  in
+  let nb = if U32.(len <^ 56ul) then 1ul else 2ul in
+  let final_blocks = if U32.(nb =^ 1ul) then Buffer.offset blocks size_block else blocks in
+
   (**) assert(blocks `includes` final_blocks);
 
   (**) let h1 = ST.get () in

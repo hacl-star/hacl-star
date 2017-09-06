@@ -36,9 +36,8 @@ Hacl_Bignum_Fproduct_copy_from_wide_(uint64_t *output, FStar_UInt128_t *input)
 {
   for (uint32_t i = (uint32_t )0; i < (uint32_t )3; i = i + (uint32_t )1)
   {
-    FStar_UInt128_t uu____429 = input[i];
-    uint64_t uu____428 = FStar_Int_Cast_Full_uint128_to_uint64(uu____429);
-    output[i] = uu____428;
+    FStar_UInt128_t xi = input[i];
+    output[i] = FStar_Int_Cast_Full_uint128_to_uint64(xi);
   }
 }
 
@@ -63,11 +62,9 @@ Hacl_Bignum_Fproduct_sum_scalar_multiplication_(
 {
   for (uint32_t i = (uint32_t )0; i < (uint32_t )3; i = i + (uint32_t )1)
   {
-    FStar_UInt128_t uu____871 = output[i];
-    uint64_t uu____874 = input[i];
-    FStar_UInt128_t
-    uu____870 = FStar_UInt128_add_mod(uu____871, FStar_UInt128_mul_wide(uu____874, s));
-    output[i] = uu____870;
+    FStar_UInt128_t xi = output[i];
+    uint64_t yi = input[i];
+    output[i] = FStar_UInt128_add_mod(xi, FStar_UInt128_mul_wide(yi, s));
   }
 }
 
@@ -152,10 +149,9 @@ Hacl_Bignum_AddAndMultiply_add_and_multiply(uint64_t *acc, uint64_t *block, uint
 {
   for (uint32_t i = (uint32_t )0; i < (uint32_t )3; i = i + (uint32_t )1)
   {
-    uint64_t uu____871 = acc[i];
-    uint64_t uu____874 = block[i];
-    uint64_t uu____870 = uu____871 + uu____874;
-    acc[i] = uu____870;
+    uint64_t xi = acc[i];
+    uint64_t yi = block[i];
+    acc[i] = xi + yi;
   }
   Hacl_Bignum_Fmul_fmul(acc, acc, r);
 }
@@ -404,11 +400,6 @@ Hacl_Standalone_Poly1305_64_crypto_onetimeauth(
 )
 {
   Hacl_Standalone_Poly1305_64_crypto_onetimeauth_(output, input, len1, k1);
-}
-
-void *Poly1305_64_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *b)
-{
-  return (void *)(uint8_t )0;
 }
 
 Hacl_Impl_Poly1305_64_State_poly1305_state Poly1305_64_mk_state(uint64_t *r, uint64_t *acc)

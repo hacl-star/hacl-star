@@ -92,10 +92,9 @@ inline static void Hacl_Impl_Chacha20_sum_states(uint32_t *st, uint32_t *st_)
 {
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint32_t uu____871 = st[i];
-    uint32_t uu____874 = st_[i];
-    uint32_t uu____870 = uu____871 + uu____874;
-    st[i] = uu____870;
+    uint32_t xi = st[i];
+    uint32_t yi = st_[i];
+    st[i] = xi + yi;
   }
 }
 
@@ -139,10 +138,9 @@ Hacl_Impl_Chacha20_update_last(
   uint8_t *mask = block;
   for (uint32_t i = (uint32_t )0; i < len; i = i + (uint32_t )1)
   {
-    uint8_t uu____602 = plain[i];
-    uint8_t uu____605 = mask[i];
-    uint8_t uu____601 = uu____602 ^ uu____605;
-    output[i] = uu____601;
+    uint8_t xi = plain[i];
+    uint8_t yi = mask[i];
+    output[i] = xi ^ yi;
   }
 }
 
@@ -157,10 +155,9 @@ Hacl_Impl_Chacha20_update(uint8_t *output, uint8_t *plain, uint32_t *st, uint32_
   Hacl_Lib_LoadStore32_uint32s_from_le_bytes(ib, plain, (uint32_t )16);
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint32_t uu____602 = ib[i];
-    uint32_t uu____605 = k[i];
-    uint32_t uu____601 = uu____602 ^ uu____605;
-    ob[i] = uu____601;
+    uint32_t xi = ib[i];
+    uint32_t yi = k[i];
+    ob[i] = xi ^ yi;
   }
   Hacl_Lib_LoadStore32_uint32s_to_le_bytes(output, ob, (uint32_t )16);
 }
@@ -216,11 +213,6 @@ Hacl_Impl_Chacha20_chacha20(
   uint32_t *st = buf;
   Hacl_Impl_Chacha20_init(st, k, n1);
   Hacl_Impl_Chacha20_chacha20_counter_mode(output, plain, len, st, ctr);
-}
-
-void *Chacha20_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *m)
-{
-  return (void *)(uint8_t )0;
 }
 
 void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32_t ctr)
