@@ -869,7 +869,6 @@ static void Hacl_Impl_Ed25519_PointDouble_point_double_step_1(uint64_t *p, uint6
   uint64_t *x1 = Hacl_Impl_Ed25519_ExtPoint_getx(p);
   uint64_t *y1 = Hacl_Impl_Ed25519_ExtPoint_gety(p);
   uint64_t *z1 = Hacl_Impl_Ed25519_ExtPoint_getz(p);
-  (void )Hacl_Impl_Ed25519_ExtPoint_gett(p);
   Hacl_Bignum25519_fsquare(tmp1, x1);
   Hacl_Bignum25519_fsquare(tmp2, y1);
   Hacl_Bignum25519_fsquare(tmp3, z1);
@@ -889,8 +888,6 @@ static void Hacl_Impl_Ed25519_PointDouble_point_double_step_2(uint64_t *p, uint6
   uint64_t *tmp6 = tmp + (uint32_t )25;
   uint64_t *x1 = Hacl_Impl_Ed25519_ExtPoint_getx(p);
   uint64_t *y1 = Hacl_Impl_Ed25519_ExtPoint_gety(p);
-  (void )Hacl_Impl_Ed25519_ExtPoint_getz(p);
-  (void )Hacl_Impl_Ed25519_ExtPoint_gett(p);
   memcpy(tmp5, x1, (uint32_t )5 * sizeof x1[0]);
   Hacl_Bignum25519_fsum(tmp5, y1);
   Hacl_Bignum25519_fsquare(tmp6, tmp5);
@@ -968,14 +965,6 @@ static void Hacl_Impl_Ed25519_Ladder_Step_loop_step_2(uint64_t *b, uint8_t *k1, 
   uint64_t *nq2 = b + (uint32_t )40;
   uint64_t *nqpq2 = b + (uint32_t )60;
   Hacl_Impl_Ed25519_PointDouble_point_double(nq2, nq);
-  (void )Hacl_Impl_Ed25519_ExtPoint_getx(nq);
-  (void )Hacl_Impl_Ed25519_ExtPoint_gety(nq);
-  (void )Hacl_Impl_Ed25519_ExtPoint_getz(nq);
-  (void )Hacl_Impl_Ed25519_ExtPoint_gett(nq);
-  (void )Hacl_Impl_Ed25519_ExtPoint_getx(nqpq);
-  (void )Hacl_Impl_Ed25519_ExtPoint_gety(nqpq);
-  (void )Hacl_Impl_Ed25519_ExtPoint_getz(nqpq);
-  (void )Hacl_Impl_Ed25519_ExtPoint_gett(nqpq);
   Hacl_Impl_Ed25519_PointAdd_point_add(nqpq2, nq, nqpq);
 }
 

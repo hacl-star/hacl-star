@@ -125,6 +125,24 @@ inline static void Hacl_Impl_Chacha20_init(uint32_t *st, uint8_t *k, uint8_t *n1
 }
 
 static void
+Hacl_Impl_Chacha20_update(uint8_t *output, uint8_t *plain, uint32_t *st, uint32_t ctr)
+{
+  uint32_t b[48] = { 0 };
+  uint32_t *k = b;
+  uint32_t *ib = b + (uint32_t )16;
+  uint32_t *ob = b + (uint32_t )32;
+  Hacl_Impl_Chacha20_chacha20_core(k, st, ctr);
+  Hacl_Lib_LoadStore32_uint32s_from_le_bytes(ib, plain, (uint32_t )16);
+  for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
+  {
+    uint32_t xi = ib[i];
+    uint32_t yi = k[i];
+    ob[i] = xi ^ yi;
+  }
+  Hacl_Lib_LoadStore32_uint32s_to_le_bytes(output, ob, (uint32_t )16);
+}
+
+static void
 Hacl_Impl_Chacha20_update_last(
   uint8_t *output,
   uint8_t *plain,
@@ -142,24 +160,6 @@ Hacl_Impl_Chacha20_update_last(
     uint8_t yi = mask[i];
     output[i] = xi ^ yi;
   }
-}
-
-static void
-Hacl_Impl_Chacha20_update(uint8_t *output, uint8_t *plain, uint32_t *st, uint32_t ctr)
-{
-  uint32_t b[48] = { 0 };
-  uint32_t *k = b;
-  uint32_t *ib = b + (uint32_t )16;
-  uint32_t *ob = b + (uint32_t )32;
-  Hacl_Impl_Chacha20_chacha20_core(k, st, ctr);
-  Hacl_Lib_LoadStore32_uint32s_from_le_bytes(ib, plain, (uint32_t )16);
-  for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
-  {
-    uint32_t xi = ib[i];
-    uint32_t yi = k[i];
-    ob[i] = xi ^ yi;
-  }
-  Hacl_Lib_LoadStore32_uint32s_to_le_bytes(output, ob, (uint32_t )16);
 }
 
 static void
