@@ -1111,7 +1111,7 @@ let update_last state data len =
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 final_blocks))
                           (if U64.(len <^ 112uL) then
                               Seq.create (v size_block) 0uy
-                           else Seq.create (2 * v size_block) 0uy);
+                           else Seq.create (v size_block + v size_block) 0uy);
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 final_blocks)) (Seq.create (v nb * v size_block) 0uy);
   (**) assert(reveal_sbytes (as_seq h2 final_blocks) == Seq.create (v nb * v size_block) 0uy);
 

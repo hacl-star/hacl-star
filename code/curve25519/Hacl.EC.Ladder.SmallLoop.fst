@@ -35,6 +35,7 @@ private inline_for_extraction let last_bit byt =
   bit
 
 
+[@"substitute"]
 private val cmult_small_loop_step_1:
   nq:point ->
   nqpq:point ->
@@ -54,6 +55,7 @@ private val cmult_small_loop_step_1:
           swap_conditional_spec (as_seq h0 (getx nq), as_seq h0 (getz nq)) (as_seq h0 (getx nqpq), as_seq h0 (getz nqpq)) (last_bit byte))
     ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+[@"substitute"]
 private let cmult_small_loop_step_1 nq nqpq nq2 nqpq2 q byt (* i *) =
   let bit = last_bit byt in
   let h0 = ST.get() in
@@ -62,6 +64,7 @@ private let cmult_small_loop_step_1 nq nqpq nq2 nqpq2 q byt (* i *) =
   lemma_reveal_modifies_2 nq nqpq h0 h1
 
 
+[@"substitute"]
 private val cmult_small_loop_step_2:
   nq:point ->
   nqpq:point ->
@@ -78,6 +81,7 @@ private val cmult_small_loop_step_2:
       /\ (as_seq h1 (getx nq2), as_seq h1 (getz nq2), as_seq h1 (getx nqpq2), as_seq h1 (getz nqpq2)) ==
           Hacl.Spec.EC.AddAndDouble2.fmonty_tot (as_seq h0 (getx nq)) (as_seq h0 (getz nq)) (as_seq h0 (getx nqpq)) (as_seq h0 (getz nqpq)) (as_seq h0 (getx q))))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
+[@"substitute"]
 private let cmult_small_loop_step_2 nq nqpq nq2 nqpq2 q byt (* i *) =
   fmonty nq2 nqpq2 nq nqpq q
 

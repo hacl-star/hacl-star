@@ -21,10 +21,6 @@ inline_for_extraction let two54m152 : x:limb{v x = 0x3fffffffffff68} =
 inline_for_extraction let two54m8 : x:limb{v x = 0x3ffffffffffff8} =
   assert_norm (pow2 64 > 0x3ffffffffffff8); uint64_to_limb 0x3ffffffffffff8uL
 inline_for_extraction let nineteen : x:limb{v x = 19} = assert_norm(19 < pow2 64); uint64_to_limb 19uL
-inline_for_extraction let mask_51 : x:limb{v x = pow2 51 - 1} =
-  assert_norm (0x7ffffffffffff < pow2 64);
-  assert_norm (0x7ffffffffffff = pow2 51 - 1);
-  uint64_to_limb 0x7ffffffffffffuL
 
 #set-options "--z3rlimit 20"
 
@@ -78,8 +74,7 @@ let carry_top b =
   let b0 = b.(0ul) in
   assert_norm((1 * pow2 limb_size) % pow2 word_size = pow2 limb_size);
   assert_norm(pow2 limb_size > 1);
-  let mask = (limb_one <<^ climb_size) -^ limb_one in
-  let b4' = b4 &^ mask in
+  let b4' = b4 &^ mask_51 in
   let b0' = b0 +^ (nineteen *^ (b4 >>^ climb_size)) in
   b.(4ul) <- b4';
   b.(0ul) <- b0'
@@ -112,8 +107,7 @@ let carry_top_wide b =
   let open Hacl.Bignum.Wide in
   assert_norm((1 * pow2 limb_size) % pow2 (2 * word_size) = pow2 (limb_size));
   assert_norm(pow2 limb_size > 1);
-  let mask = (wide_one <<^ climb_size) -^ wide_one in
-  let b4' = b4 &^ mask in
+  let b4' = b4 &^ mask_51_wide in
   Math.Lemmas.modulo_lemma (w b4 / pow2 limb_size) (pow2 word_size);
   let b0' = b0 +^ (nineteen *^ (wide_to_limb (b4 >>^ climb_size))) in
   b.(4ul) <- b4';

@@ -19,14 +19,14 @@ open Hacl.Spec.Bignum.Fsquare
 
 #set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
-[@"c_inline"]
+[@"substitute"]
 private val upd_5:
   tmp:felem_wide -> s0:wide -> s1:wide -> s2:wide -> s3:wide -> s4:wide ->
   Stack unit
     (requires (fun h -> live h tmp))
     (ensures (fun h0 _ h1 -> live h1 tmp /\ as_seq h1 tmp == seq_upd_5 s0 s1 s2 s3 s4
       /\ modifies_1 tmp h0 h1))
-[@"c_inline"]
+[@"substitute"]
 private let upd_5 tmp s0 s1 s2 s3 s4 =
   tmp.(0ul) <- s0;
   tmp.(1ul) <- s1;

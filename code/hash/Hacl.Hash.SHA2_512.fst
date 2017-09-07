@@ -1073,7 +1073,7 @@ let update_last state data len =
   let blocks = Buffer.create (uint8_to_sint8 0uy) (size_block +^ size_block) in
 
   (**) let h0 = ST.get () in
-  // (**) assert(reveal_sbytes (as_seq h0 blocks) == Seq.create (2 * v size_block) 0uy);
+ // (**) assert(reveal_sbytes (as_seq h0 blocks) == Seq.create (2 * v size_block) 0uy);
 
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length is public ! *)
