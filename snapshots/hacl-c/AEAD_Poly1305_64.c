@@ -67,7 +67,7 @@ inline static void Hacl_Bignum_Fproduct_carry_wide_(FStar_UInt128_t *tmp)
     uint32_t ctr = i;
     FStar_UInt128_t tctr = tmp[ctr];
     FStar_UInt128_t tctrp1 = tmp[ctr + (uint32_t )1];
-    uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(tctr) & Hacl_Bignum_Parameters_mask_44;
+    uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(tctr) & (uint64_t )0xfffffffffff;
     FStar_UInt128_t c = FStar_UInt128_shift_right(tctr, (uint32_t )44);
     tmp[ctr] = FStar_Int_Cast_Full_uint64_to_uint128(r0);
     tmp[ctr + (uint32_t )1] = FStar_UInt128_add(tctrp1, c);
@@ -81,7 +81,7 @@ inline static void Hacl_Bignum_Fproduct_carry_limb_(uint64_t *tmp)
     uint32_t ctr = i;
     uint64_t tctr = tmp[ctr];
     uint64_t tctrp1 = tmp[ctr + (uint32_t )1];
-    uint64_t r0 = tctr & Hacl_Bignum_Parameters_mask_44;
+    uint64_t r0 = tctr & (uint64_t )0xfffffffffff;
     uint64_t c = tctr >> (uint32_t )44;
     tmp[ctr] = r0;
     tmp[ctr + (uint32_t )1] = tctrp1 + c;
@@ -129,7 +129,7 @@ inline static void Hacl_Bignum_Fmul_fmul(uint64_t *output, uint64_t *input, uint
   Hacl_Bignum_Fproduct_copy_from_wide_(output, t);
   uint64_t i0 = output[0];
   uint64_t i1 = output[1];
-  uint64_t i0_ = i0 & Hacl_Bignum_Parameters_mask_44;
+  uint64_t i0_ = i0 & (uint64_t )0xfffffffffff;
   uint64_t i1_ = i1 + (i0 >> (uint32_t )44);
   output[0] = i0_;
   output[1] = i1_;
@@ -241,7 +241,7 @@ static void Hacl_Impl_Poly1305_64_poly1305_last_pass(uint64_t *acc)
   Hacl_Bignum_Modulo_carry_top(acc);
   uint64_t i0 = acc[0];
   uint64_t i1 = acc[1];
-  uint64_t i0_ = i0 & Hacl_Bignum_Parameters_mask_44;
+  uint64_t i0_ = i0 & (uint64_t )0xfffffffffff;
   uint64_t i1_ = i1 + (i0 >> (uint32_t )44);
   acc[0] = i0_;
   acc[1] = i1_;

@@ -196,7 +196,7 @@ inline_for_extraction let wide_to_limb x = sint128_to_sint64 x
 
 inline_for_extraction let uint64_to_limb x = Hacl.Cast.uint64_to_sint64 x
 
-let mask_44 : x:limb{v x = pow2 44 - 1} =
+inline_for_extraction let mask_44 : x:limb{v x = pow2 44 - 1} =
   assert_norm (0xfffffffffff < pow2 64);
   assert_norm (0xfffffffffff = pow2 44 - 1);
   uint64_to_limb 0xfffffffffffuL
