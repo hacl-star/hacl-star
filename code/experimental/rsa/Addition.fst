@@ -1,7 +1,6 @@
 module Addition
 
-open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.All
 open FStar.Buffer
 open FStar.Int.Cast
 
@@ -13,7 +12,7 @@ type bignum = buffer FStar.UInt64.t
 val sub_loop_min: 
     bLen:U32.t -> a:bignum -> b:bignum{length b = U32.v bLen} -> carry:bool ->
     count:U32.t{(U32.v count <= U32.v bLen) /\ (U32.v count <= length a)} ->
-    res:bignum{U32.v count <= length res} -> ST bool
+    res:bignum{U32.v count <= length res} -> Stack bool
     (requires (fun h -> live h a /\ live h b /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\  live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let rec sub_loop_min bLen a b carry count res =
@@ -34,7 +33,7 @@ let rec sub_loop_min bLen a b carry count res =
 val sub_loop_dif: 
     aLen:U32.t -> a:bignum{length a = U32.v aLen} -> 
     ind:U32.t -> dif:U32.t{U32.(v (ind +^ dif)) <= length a} -> 
-    res:bignum{length res = length a} -> ST U32.t
+    res:bignum{length res = length a} -> Stack U32.t
     (requires (fun h -> live h a /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 a /\  live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let rec sub_loop_dif aLen a ind dif res = 
@@ -56,7 +55,7 @@ let rec sub_loop_dif aLen a ind dif res =
 val sub: 
     aLen:U32.t -> bLen:U32.t{U32.(bLen <=^ aLen)} -> 
     a:bignum{length a = U32.v aLen} -> b:bignum{length b = U32.v bLen} ->
-    res:bignum{length res = U32.v aLen} -> ST unit
+    res:bignum{length res = U32.v aLen} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 b /\  live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let sub aLen bLen a b res =

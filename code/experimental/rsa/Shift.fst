@@ -1,7 +1,6 @@
 module Shift
 
-open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.All
 open FStar.Buffer
 open FStar.Int.Cast
 
@@ -16,7 +15,7 @@ let bn_mask2 = 0xffffffffffffffffuL
 
 val lshift_loop: 
     a:bignum -> count:U32.t{U32.v count <= length a} -> nw:U32.t ->
-    lb:U32.t -> res:bignum{U32.(v (count +^ nw)) < length res} -> ST unit
+    lb:U32.t -> res:bignum{U32.(v (count +^ nw)) < length res} -> Stack unit
 	(requires (fun h -> live h a /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let rec lshift_loop a count nw lb res =
@@ -35,7 +34,7 @@ let rec lshift_loop a count nw lb res =
 (* res = a << n *)
 val lshift:
     aLen:U32.t -> a:bignum{length a = U32.v aLen} -> nCount:U32.t ->
-    res:bignum{length res = U32.(v (aLen +^ (nCount /^ bn_bits2) +^ 1ul))} -> ST unit
+    res:bignum{length res = U32.(v (aLen +^ (nCount /^ bn_bits2) +^ 1ul))} -> Stack unit
 	(requires (fun h -> live h a /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let lshift aLen a nCount res = 
@@ -50,7 +49,7 @@ let lshift aLen a nCount res =
 
 val rshift1_loop: 
     a:bignum -> carry:U64.t -> ind:U32.t{U32.v ind <= length a} -> 
-    res:bignum{U32.v ind <= length res} -> ST unit
+    res:bignum{U32.v ind <= length res} -> Stack unit
     (requires (fun h -> live h a /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let rec rshift1_loop a carry ind res =
@@ -66,7 +65,7 @@ let rec rshift1_loop a carry ind res =
 (* res = a >> 1 *)
 val rshift1:
     aLen:U32.t -> a:bignum{length a = U32.v aLen} -> 
-    res:bignum{length res = U32.v aLen /\ length res = U32.(v (aLen -^ 1ul))} -> ST unit
+    res:bignum{length res = U32.v aLen /\ length res = U32.(v (aLen -^ 1ul))} -> Stack unit
 	(requires (fun h -> live h a /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let rshift1 aLen a res =

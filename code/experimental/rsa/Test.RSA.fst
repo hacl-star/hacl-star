@@ -1,10 +1,11 @@
 module Test.RSA
 
+open FStar.HyperStack.All
 open RSA
 open FStar.Buffer
 open Convert
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> Stack FStar.Int32.t
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =

@@ -1,7 +1,6 @@
 module Convert
 
-open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.All
 open FStar.Buffer
 open FStar.Int.Cast
 
@@ -22,7 +21,7 @@ let get_size_nat lenText =
 val text_to_nat_loop: 
     input:uint8_p -> len:U32.t -> res:bignum ->
     num_words:U32.t{U32.v num_words <= length res} -> m:U32.t -> word:U64.t ->
-    i:U32.t{U32.v i <= length input} -> ST unit
+    i:U32.t{U32.v i <= length input} -> Stack unit
     (requires (fun h -> live h input /\ live h res))
     (ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\ live h1 input /\ live h1 res /\ modifies_1 res h0 h1))
 let rec text_to_nat_loop input len res num_words m word i =
@@ -42,7 +41,7 @@ let rec text_to_nat_loop input len res num_words m word i =
 	else ()
 
 val text_to_nat:
-    input:uint8_p -> len:U32.t{U32.v len = length input} -> res:bignum -> ST unit
+    input:uint8_p -> len:U32.t{U32.v len = length input} -> res:bignum -> Stack unit
 	(requires (fun h -> live h input /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let text_to_nat input len res =
@@ -52,7 +51,7 @@ let text_to_nat input len res =
 
 val nat_to_text_loop:
     input:bignum -> res:uint8_p -> i:U32.t -> 
-    j:U32.t{U32.v j <= length res} -> ST unit
+    j:U32.t{U32.v j <= length res} -> Stack unit
 	(requires (fun h -> live h input /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let rec nat_to_text_loop input res i j =
@@ -66,7 +65,7 @@ let rec nat_to_text_loop input res i j =
     else () 
 
 val nat_to_text:
-    input:bignum -> len:U32.t -> res:uint8_p{length res = U32.v len} -> ST unit
+    input:bignum -> len:U32.t -> res:uint8_p{length res = U32.v len} -> Stack unit
 	(requires (fun h -> live h input /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let nat_to_text input len res = 

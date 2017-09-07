@@ -5,7 +5,7 @@ open FStar.UInt8
 open FStar.UInt32
 open FStar.Mul
 open FStar.UInt
-open Spec.SHA256
+open Spec.SHA2_256
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
@@ -94,7 +94,7 @@ let get_length_em modBits =
 	 then k - 1 else k
 
 val hash_sha256: msg:bytes{length msg < max_input_len_sha256} -> Tot (msgHash:bytes{length msgHash = hLen})
-let hash_sha256 msg = SHA256.hash msg
+let hash_sha256 msg = SHA2_256.hash msg
 
 val mgf: mgfseed:bytes -> len:nat -> counter:nat -> 
 acc: bytes {length acc = op_Multiply counter hLen} -> 

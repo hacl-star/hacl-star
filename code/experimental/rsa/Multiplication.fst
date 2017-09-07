@@ -1,7 +1,6 @@
 module Multiplication
 
-open FStar.HyperStack
-open FStar.ST
+open FStar.HyperStack.All
 open FStar.Buffer
 open FStar.Int.Cast
 
@@ -37,7 +36,7 @@ let add64 x y =
 val mult_inner_loop: 
     aLen:U32.t -> a:bignum{U32.v aLen = length a} -> b:bignum -> 
     i:U32.t{U32.v i < length b} -> j:U32.t{U32.v j <= length a} ->
-    carry:U64.t -> res:bignum -> ST unit
+    carry:U64.t -> res:bignum -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
     (ensures  (fun h0 r h1 -> live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
 let rec mult_inner_loop aLen a b i j carry res =
@@ -55,7 +54,7 @@ let rec mult_inner_loop aLen a b i j carry res =
 val mult_outer_loop:
     aLen:U32.t -> bLen:U32.t -> 
     a:bignum{U32.v aLen = length a} -> b:bignum{U32.v bLen = length b} ->
-    i:U32.t{U32.(i <=^ bLen)} -> res:bignum{U32.(v (aLen +^ bLen)) = length res} -> ST unit
+    i:U32.t{U32.(i <=^ bLen)} -> res:bignum{U32.(v (aLen +^ bLen)) = length res} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
     (ensures  (fun h0 r h1 -> live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
 let rec mult_outer_loop aLen bLen a b i res =
@@ -69,7 +68,7 @@ let rec mult_outer_loop aLen bLen a b i res =
 val mult: 
     aLen:U32.t -> bLen:U32.t -> 
     a:bignum{U32.v aLen = length a} -> b:bignum{U32.v bLen = length b} ->
-    res:bignum{U32.(v (aLen +^ bLen)) = length res} -> ST unit
+    res:bignum{U32.(v (aLen +^ bLen)) = length res} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
     (ensures  (fun h0 r h1 -> live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
 let mult aLen bLen a b res =
@@ -78,7 +77,7 @@ let mult aLen bLen a b res =
 (* TODO: res = a * a *) 
 val sqr: 
     aLen:U32.t -> a:bignum{U32.v aLen = length a} -> 
-    res:bignum{length res = U32.(v (2ul *^ aLen))} -> ST unit
+    res:bignum{length res = U32.(v (2ul *^ aLen))} -> Stack unit
     (requires (fun h -> live h a /\ live h res))
     (ensures  (fun h0 r h1 -> live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
 let sqr aLen a res = 

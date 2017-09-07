@@ -1,7 +1,4 @@
-FSTAR_HOME?=../../dependencies/FStar
-KREMLIN_HOME?=$(FSTAR_HOME)/../kremlin
-HACL_HOME?=../..
-include ../../Makefile.include
+include ../../../Makefile.include 
 
 RSA_FILES= \
 	Convert.fst \
@@ -9,36 +6,28 @@ RSA_FILES= \
 	Shift.fst \
 	Comparison.fst \
 	Addition.fst \
-	Division.fst \
+ 	Division.fst \
 	Exponentiation.fst \
 	RSA.fst \
 	Test.RSA.fst
+	
+FSTAR_INCLUDES+=--include ../../hash
 
-FSTARB=$(FSTAR_HOME)/bin/fstar.exe --include $(FSTAR_HOME)/ulib/hyperstack --include ../../../code/lib/kremlin \
-	--include $(KREMLIN_HOME)/kremlib --include ../../../specs --include ../../hash --lax
+verify: $(addsuffix -lax, $(RSA_FILES))
 
-%.fst-verify: %.fst
-	$(FSTARB) $^
-
-verify: $(addsuffix -verify, $(RSA_FILES))
-
-KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
-INCLUDES= -I ../../../code/lib/kremlin -I $ ../../../specs \
-  -I $(KREMLIN_HOME)/kremlib -I ../../../code/hash
-KRML=$(KRML_BIN) $(KREMLIN_ARGS) -verbose $(INCLUDES) \
-  -drop Prims,FStar,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
-  -drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
-  $(KREMLIN_HOME)/kremlib/testlib.c \
-  -add-include '"testlib.h"' -ccopt -march=native
-
-# Extraction
+KREMLIN_ARGS+=-verbose \
+	-tmpdir rsa-c \
+	-I ../../../code/hash \
+	-drop Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
+	-drop Hacl.Hash.SHA2_256.Lemmas \
+	$(KREMLIN_TESTLIB) -ccopt -march=native
 
 extract-c: rsa-c/RSA.c
-
 test: test-rsa.exe
-	
+
 rsa-c/out.krml: $(RSA_FILES)
-	$(KRML) -tmpdir rsa-c -skip-translation $^
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^
 
 EXTRACTED = \
 	Hacl_Hash_Lib_LoadStore \
@@ -52,14 +41,22 @@ EXTRACTED = \
 	Addition \
 	Division \
 	Exponentiation \
-	RSA \
-	Test_RSA
-	
+ 	RSA \
+ 	Test_RSA
+
 $(addprefix rsa-c/,$(addsuffix .c, $(EXTRACTED))): rsa-c/out.krml
-	$(KRML) -tmpdir rsa-c $^ -skip-compilation -no-prefix Test.RSA
-  
+	$(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation -no-prefix Test.RSA
+
+test-rsa-kremlin.exe: rsa-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) $^ \
+	-bundle RSA=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256,Convert,Multiplication,Shift,Comparison,Addition,Division,Exponentiation,RSA \
+	-no-prefix 'Test.RSA' -add-include '"RSA.h"' -o test-rsa-kremlin.exe
+	./test-rsa-kremlin.exe
+
+CFLAGS=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash
+
 CC = x86_64-w64-mingw32-gcc
-CC := $(CC) $(INCLUDES)
+CC := $(CC) $(CFLAGS)
 
 %.o: %.c
 	$(CC) -c $< -o $@
