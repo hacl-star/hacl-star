@@ -3,7 +3,8 @@ module Division
 open FStar.HyperStack.All
 open FStar.Buffer
 open FStar.Int.Cast
-
+open Convert
+ 
 open Shift 
 open Comparison
 open Addition
@@ -14,11 +15,6 @@ module U64 = FStar.UInt64
 type bignum = buffer FStar.UInt64.t
 
 let bn_bits2 = 64ul
-
-val bits_to_bn: bits:U32.t -> Tot U32.t 
-let bits_to_bn bits =
-    let to_octets = U32.((bits -^ 1ul) /^ 8ul +^ 1ul) in 
-    U32.((to_octets -^ 1ul) /^ 8ul +^ 1ul)
 
 val remainder_loop:
     rLen:U32.t -> modLen:U32.t -> resLen:U32.t ->

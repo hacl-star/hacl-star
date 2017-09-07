@@ -18,6 +18,15 @@ val get_size_nat: lenText:U32.t -> Tot U32.t
 let get_size_nat lenText =
      U32.((lenText -^ 1ul) /^ bn_bytes +^ 1ul)
 
+val bits_to_bn: bits:U32.t -> Tot U32.t 
+let bits_to_bn bits =
+    let to_octets = U32.((bits -^ 1ul) /^ 8ul +^ 1ul) in 
+    U32.((to_octets -^ 1ul) /^ 8ul +^ 1ul)
+
+val bits_to_text: bits:U32.t -> Tot U32.t
+let bits_to_text bits =
+    U32.((bits -^ 1ul)/^ 8ul +^ 1ul)
+    
 val text_to_nat_loop: 
     input:uint8_p -> len:U32.t -> res:bignum ->
     num_words:U32.t{U32.v num_words <= length res} -> m:U32.t -> word:U64.t ->
