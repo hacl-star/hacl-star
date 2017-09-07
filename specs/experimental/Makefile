@@ -63,12 +63,12 @@ sha2_256.exe: Spec.SHA256.fst
 	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA256.ml -o sha2_256.exe
 	./sha2_256.exe
 
-rsa.exe: Spec.RSA.fst
+rsa.exe: Spec.RSA.Test.fst
 	$(MAKE) lib
 	mkdir -p rsa-spec
 	$(FSTAR) $(ARGS) --odir rsa-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> rsa-spec/Spec_RSA.ml
-	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES) rsa-spec/FStar_Endianness.ml rsa-spec/Spec_Loops.ml rsa-spec/Spec_Lib.ml rsa-spec/Seq_Create.ml rsa-spec/Spec_SHA2_256.ml rsa-spec/Spec_RSA.ml -o rsa.exe
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> rsa-spec/Spec_RSA_Test.ml
+	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES) rsa-spec/FStar_Endianness.ml rsa-spec/Spec_Loops.ml rsa-spec/Spec_Lib.ml rsa-spec/Seq_Create.ml rsa-spec/Spec_SHA2_256.ml rsa-spec/Spec_RSA.ml rsa-spec/Spec_RSA_Test.ml -o rsa.exe
 	./rsa.exe
 	
 clean:
