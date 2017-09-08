@@ -11,7 +11,8 @@ SNAPSHOT_DIR = snapshots/hacl-c
 # Compiler and settings
 #
 
-CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
+CC=gcc-7
+CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops -flto --param max-unroll-times=20
 CFLAGS = $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
 	-I $(LIBSODIUM_HOME)/include -L$(LIBSODIUM_HOME)/lib \

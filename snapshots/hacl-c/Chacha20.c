@@ -22,6 +22,11 @@ Hacl_Lib_LoadStore32_uint32s_to_le_bytes(uint8_t *output, uint32_t *input, uint3
   }
 }
 
+inline static uint32_t Hacl_Impl_Chacha20_rotate_left(uint32_t a, uint32_t s)
+{
+  return a << s | a >> (uint32_t )32 - s;
+}
+
 inline static void Hacl_Impl_Chacha20_setup(uint32_t *st, uint8_t *k, uint8_t *n1, uint32_t c)
 {
   uint32_t *stcst = st;
@@ -46,28 +51,28 @@ Hacl_Impl_Chacha20_quarter_round(uint32_t *st, uint32_t a, uint32_t b, uint32_t 
   uint32_t sd = st[d];
   uint32_t sa10 = st[a];
   uint32_t sda = sd ^ sa10;
-  st[d] = sda << (uint32_t )16 | sda >> (uint32_t )32 - (uint32_t )16;
+  st[d] = Hacl_Impl_Chacha20_rotate_left(sda, (uint32_t )16);
   uint32_t sa0 = st[c];
   uint32_t sb1 = st[d];
   st[c] = sa0 + sb1;
   uint32_t sd0 = st[b];
   uint32_t sa11 = st[c];
   uint32_t sda0 = sd0 ^ sa11;
-  st[b] = sda0 << (uint32_t )12 | sda0 >> (uint32_t )32 - (uint32_t )12;
+  st[b] = Hacl_Impl_Chacha20_rotate_left(sda0, (uint32_t )12);
   uint32_t sa2 = st[a];
   uint32_t sb2 = st[b];
   st[a] = sa2 + sb2;
   uint32_t sd1 = st[d];
   uint32_t sa12 = st[a];
   uint32_t sda1 = sd1 ^ sa12;
-  st[d] = sda1 << (uint32_t )8 | sda1 >> (uint32_t )32 - (uint32_t )8;
+  st[d] = Hacl_Impl_Chacha20_rotate_left(sda1, (uint32_t )8);
   uint32_t sa3 = st[c];
   uint32_t sb = st[d];
   st[c] = sa3 + sb;
   uint32_t sd2 = st[b];
   uint32_t sa1 = st[c];
   uint32_t sda2 = sd2 ^ sa1;
-  st[b] = sda2 << (uint32_t )7 | sda2 >> (uint32_t )32 - (uint32_t )7;
+  st[b] = Hacl_Impl_Chacha20_rotate_left(sda2, (uint32_t )7);
 }
 
 inline static void Hacl_Impl_Chacha20_double_round(uint32_t *st)
