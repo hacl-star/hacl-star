@@ -18,16 +18,16 @@ val get_size_nat: lenText:U32.t -> Tot U32.t
 let get_size_nat lenText =
      U32.((lenText -^ 1ul) /^ bn_bytes +^ 1ul)
 
-val bits_to_bn: bits:U32.t -> Tot U32.t 
+val bits_to_bn: bits:U32.t -> Tot U32.t
 let bits_to_bn bits =
-    let to_octets = U32.((bits -^ 1ul) /^ 8ul +^ 1ul) in 
+    let to_octets = U32.((bits -^ 1ul) /^ 8ul +^ 1ul) in
     U32.((to_octets -^ 1ul) /^ 8ul +^ 1ul)
 
 val bits_to_text: bits:U32.t -> Tot U32.t
 let bits_to_text bits =
     U32.((bits -^ 1ul)/^ 8ul +^ 1ul)
-    
-val text_to_nat_loop: 
+
+val text_to_nat_loop:
     input:uint8_p -> len:U32.t -> res:bignum ->
     num_words:U32.t{U32.v num_words <= length res} -> m:U32.t -> word:U64.t ->
     i:U32.t{U32.v i <= length input} -> Stack unit
@@ -59,7 +59,7 @@ let text_to_nat input len res =
     text_to_nat_loop input len res num_words m 0uL 0ul
 
 val nat_to_text_loop:
-    input:bignum -> res:uint8_p -> i:U32.t -> 
+    input:bignum -> res:uint8_p -> i:U32.t ->
     j:U32.t{U32.v j <= length res} -> Stack unit
 	(requires (fun h -> live h input /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
@@ -71,11 +71,11 @@ let rec nat_to_text_loop input res i j =
     let tmp = U32.(i %^ bn_bytes) in (* a bug in F* ? *)
     res.(j) <- U8.(uint64_to_uint8 (U64.(l >>^ U32.(8ul *^ tmp))) &^ 0xffuy);
     nat_to_text_loop input res i U32.(j +^ 1ul)
-    else () 
+    else ()
 
 val nat_to_text:
     input:bignum -> len:U32.t -> res:uint8_p{length res = U32.v len} -> Stack unit
 	(requires (fun h -> live h input /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
-let nat_to_text input len res = 
+let nat_to_text input len res =
     nat_to_text_loop input res len 0ul

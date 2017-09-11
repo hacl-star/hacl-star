@@ -19,16 +19,16 @@ let zero_8 = 0uy
 let hLen = 32ul
 let sLen = 20ul
 
-type rsa_pubkey = 
+type rsa_pubkey =
 	| Mk_rsa_pubkey: n:bignum -> e:bignum -> rsa_pubkey
 
 val get_n: x:rsa_pubkey -> Stack bignum
 	(requires (fun h -> True))  (* live h x *)
 	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 n *)
-let get_n x = 
-	match x with 
+let get_n x =
+	match x with
 	| Mk_rsa_pubkey n e -> n
-	
+
 val get_e: x:rsa_pubkey -> Stack bignum
 	(requires (fun h -> True))  (* live h x *)
 	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 e *)
@@ -38,7 +38,7 @@ let get_e x =
 
 type rsa_privkey =
 	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:bignum -> rsa_privkey
-	
+
 val get_pkey: x:rsa_privkey -> Stack rsa_pubkey
 	(requires (fun h -> True))  (* live h x *)
 	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 rsa_pubkey *)
@@ -52,7 +52,7 @@ val get_d: x:rsa_privkey -> Stack bignum
 let get_d x =
 	match x with
 	| Mk_rsa_privkey pkey d -> d
-	
+
 val get_octets: modBits:U32.t -> Tot U32.t
 let get_octets modBits = U32.((modBits +^ 7ul) /^ 8ul)
 
@@ -62,18 +62,18 @@ let get_length_em modBits =
 	if U32.((modBits -^ 1ul) %^ 8ul =^ 0ul)
 	then U32.(k -^ 1ul) else k
 
-val hash_sha256: 
+val hash_sha256:
 	mHash:uint8_p{length mHash = U32.v hLen} -> m:uint8_p -> len:U32.t{U32.v len = length m} -> Stack unit
 	(requires (fun h -> live h m /\ live h mHash))
 	(ensures (fun h0 _ h1 -> live h0 m /\ live h0 mHash /\ live h1 mHash /\ modifies_1 mHash h0 h1))
 let hash_sha256 mHash m len = SHA2_256.hash mHash m len
 
-val mgf: 
-	mgfseed_len:U32.t -> mgfseed:uint8_p{length mgfseed = U32.v mgfseed_len} ->  
-	len:U32.t -> counter:U32.t -> acc:uint8_p{length acc = U32.(v (hLen *^ counter))} -> 
+val mgf:
+	mgfseed_len:U32.t -> mgfseed:uint8_p{length mgfseed = U32.v mgfseed_len} ->
+	len:U32.t -> counter:U32.t -> acc:uint8_p{length acc = U32.(v (hLen *^ counter))} ->
 	res:uint8_p{length res = U32.v len} -> Stack unit
 	(requires (fun h -> live h res /\ live h mgfseed /\ live h acc))
-	(ensures (fun h0 _ h1 -> live h0 res /\ live h0 mgfseed /\ live h0 acc /\ live h1 res /\ modifies_1 res h0 h1)) 
+	(ensures (fun h0 _ h1 -> live h0 res /\ live h0 mgfseed /\ live h0 acc /\ live h1 res /\ modifies_1 res h0 h1))
 let rec mgf mgfseed_len mgfseed len counter acc res =
 	(* if len > op_Multiply (pow2 32) hLen then failwith "mask too long" *)
 	push_frame();
@@ -99,7 +99,7 @@ let rec mgf mgfseed_len mgfseed len counter acc res =
 
 val xordb:
 	b1:uint8_p ->
-	b2:uint8_p{length b2 = length b1} -> 
+	b2:uint8_p{length b2 = length b1} ->
 	len:U32.t{U32.v len <= length b1} -> Stack unit
 	(requires (fun h -> live h b1 /\ live h b2))
 	(ensures (fun h0 _ h1 -> live h0 b1 /\ live h0 b2 /\ live h1 b1 /\ modifies_1 b1 h0 h1))
@@ -113,7 +113,7 @@ let rec xordb b1 b2 len =
 	else ();
 	pop_frame()
 
-val pss_encode: 
+val pss_encode:
 	modBits:U32.t{U32.v (get_length_em modBits) >= U32.(v (sLen +^ hLen +^ 2ul))} ->
 	msg:uint8_p -> len:U32.t{U32.v len = length msg} ->
 	salt:uint8_p{length salt = U32.v sLen} ->
@@ -133,13 +133,13 @@ let pss_encode modBits msg len salt em =
 	blit salt 0ul m1 U32.(8ul +^ hLen) sLen;
 	let m1Hash = create zero_8 hLen in
 	hash_sha256 m1Hash m1 m1_size;
-	
+
 	let db_size = U32.(emLen -^ hLen -^ 1ul) in
 	let db = create zero_8 db_size in
 	let ind_1 = U32.(emLen -^ sLen -^ hLen -^ 2ul) in
 	db.(ind_1) <- 1uy;
 	blit salt 0ul db U32.(ind_1 +^ 1ul) sLen;
-	
+
 	let dbMask = create zero_8 db_size in
 	let acc = create zero_8 0ul in
 	mgf hLen m1Hash db_size 0ul acc dbMask;
@@ -173,7 +173,7 @@ let pss_verify modBits em msg len =
 	let dbMask = create zero_8 db_size in
 
 	hash_sha256 mHash msg len;
-	let res = 
+	let res =
 	if not (U8.(em.(U32.(emLen -^ 1ul)) =^ 0xbcuy)) then false else (
 	let maskedDB = sub em 0ul db_size in
 	let m1Hash = sub em db_size hLen in
@@ -211,14 +211,14 @@ let rsa_sign modBits skeyBits msgLen msg skey salt sgnt =
 	let k = get_octets modBits in
 	let d = get_d skey in
 	let n = get_n (get_pkey skey) in
-	
+
 	let emLen = get_length_em modBits in
 	let em = create zero_8 emLen in
 	pss_encode modBits msg msgLen salt em;
 	let mLen = get_size_nat emLen in
 	let m = create 0uL mLen in
 	text_to_nat em emLen m;
-	
+
 	(* todo: m % n *)
 	let sLen = get_size_nat k in
 	let s = create 0uL sLen in
@@ -226,7 +226,7 @@ let rsa_sign modBits skeyBits msgLen msg skey salt sgnt =
 
 	nat_to_text s k sgnt;
 	pop_frame()
-	
+
 val rsa_verify:
 	modBits:U32.t{U32.v (get_length_em modBits) >= U32.(v (sLen +^ hLen +^ 2ul))} ->
 	msgLen:U32.t -> pkeyBits:U32.t ->
@@ -239,19 +239,19 @@ let rsa_verify modBits msgLen pkeyBits sgnt pkey msg =
 	push_frame();
 	let e = get_e pkey in
 	let n = get_n pkey in
-	
+
 	(* the length of the signature in octets *)
 	let k = get_octets modBits in
 	let sLen = get_size_nat k in
 	let s = create 0uL sLen in
 	text_to_nat sgnt k s;
-	
+
 	(* todo: s % n *)
 	let emLen = get_length_em modBits in
 	let mLen = get_size_nat emLen in
 	let m = create 0uL mLen in
 	mod_exp modBits sLen pkeyBits mLen n s e m;
-	
+
 	let em = create zero_8 emLen in
 	nat_to_text m emLen em;
 	let res = pss_verify modBits em msg msgLen in

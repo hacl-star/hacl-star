@@ -4,8 +4,8 @@ open FStar.HyperStack.All
 open FStar.Buffer
 open FStar.Int.Cast
 open Convert
- 
-open Shift 
+
+open Shift
 open Comparison
 open Addition
 
@@ -18,10 +18,10 @@ let bn_bits2 = 64ul
 
 val remainder_loop:
     rLen:U32.t -> modLen:U32.t -> resLen:U32.t ->
-    r_i:bignum{length r_i = U32.v rLen} -> mod:bignum{length mod = U32.v modLen} -> 
+    r_i:bignum{length r_i = U32.v rLen} -> mod:bignum{length mod = U32.v modLen} ->
     count:U32.t -> res:bignum{length res = U32.v resLen} -> Stack unit
     (requires (fun h -> live h r_i /\ live h mod /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 r_i /\ live h0 mod /\  live h0 res /\ live h1 res /\ modifies_1 res h0 h1)) 
+	(ensures (fun h0 _ h1 -> live h0 r_i /\ live h0 mod /\  live h0 res /\ live h1 res /\ modifies_1 res h0 h1))
 let rec remainder_loop rLen modLen resLen r_i mod count res =
     push_frame();
     let isSet = if U64.(mod.(U32.(modLen -^ 1ul)) =^ 1uL) then 1ul else 0ul in
@@ -41,10 +41,10 @@ let rec remainder_loop rLen modLen resLen r_i mod count res =
     pop_frame()
 
 (* res = a % mod *)
-val remainder: 
-    aBits:U32.t -> modBits:U32.t{U32.(modBits <^ aBits)} -> resLen:U32.t -> 
-    a:bignum{length a = U32.v (bits_to_bn aBits)} -> 
-    mod:bignum{length mod = U32.v (bits_to_bn modBits)} -> 
+val remainder:
+    aBits:U32.t -> modBits:U32.t{U32.(modBits <^ aBits)} -> resLen:U32.t ->
+    a:bignum{length a = U32.v (bits_to_bn aBits)} ->
+    mod:bignum{length mod = U32.v (bits_to_bn modBits)} ->
     res:bignum{length res = U32.v resLen} -> Stack unit
 	(requires (fun h -> live h a /\ live h mod /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 mod /\  live h0 res /\ live h1 res /\ modifies_1 res h0 h1))

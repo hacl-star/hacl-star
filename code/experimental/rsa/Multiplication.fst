@@ -9,7 +9,7 @@ module U64 = FStar.UInt64
 
 type bignum = buffer FStar.UInt64.t
 
-val mult64: x:U64.t -> y:U64.t -> Tot (U64.t * U64.t) 
+val mult64: x:U64.t -> y:U64.t -> Tot (U64.t * U64.t)
 let mult64 x y =
     let a = U64.(x >>^ 32ul) in
     let b = U64.(x &^ 0xffffffffuL) in
@@ -33,8 +33,8 @@ let add64 x y =
     let carry = if U64.(res <^ x) then 1uL else 0uL in
     (carry, res)
 
-val mult_inner_loop: 
-    aLen:U32.t -> a:bignum{U32.v aLen = length a} -> b:bignum -> 
+val mult_inner_loop:
+    aLen:U32.t -> a:bignum{U32.v aLen = length a} -> b:bignum ->
     i:U32.t{U32.v i < length b} -> j:U32.t{U32.v j <= length a} ->
     carry:U64.t -> res:bignum -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
@@ -52,7 +52,7 @@ let rec mult_inner_loop aLen a b i j carry res =
     pop_frame()
 
 val mult_outer_loop:
-    aLen:U32.t -> bLen:U32.t -> 
+    aLen:U32.t -> bLen:U32.t ->
     a:bignum{U32.v aLen = length a} -> b:bignum{U32.v bLen = length b} ->
     i:U32.t{U32.(i <=^ bLen)} -> res:bignum{U32.(v (aLen +^ bLen)) = length res} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
@@ -60,13 +60,13 @@ val mult_outer_loop:
 let rec mult_outer_loop aLen bLen a b i res =
     push_frame();
     (if U32.(i <^ bLen) then
-    (mult_inner_loop aLen a b i 0ul 0uL res; 
+    (mult_inner_loop aLen a b i 0ul 0uL res;
     mult_outer_loop aLen bLen a b U32.(i +^ 1ul) res));
     pop_frame()
 
 (* res = a * b *)
-val mult: 
-    aLen:U32.t -> bLen:U32.t -> 
+val mult:
+    aLen:U32.t -> bLen:U32.t ->
     a:bignum{U32.v aLen = length a} -> b:bignum{U32.v bLen = length b} ->
     res:bignum{U32.(v (aLen +^ bLen)) = length res} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
@@ -74,11 +74,11 @@ val mult:
 let mult aLen bLen a b res =
     mult_outer_loop aLen bLen a b 0ul res
 
-(* TODO: res = a * a *) 
-val sqr: 
-    aLen:U32.t -> a:bignum{U32.v aLen = length a} -> 
+(* TODO: res = a * a *)
+val sqr:
+    aLen:U32.t -> a:bignum{U32.v aLen = length a} ->
     res:bignum{length res = U32.(v (2ul *^ aLen))} -> Stack unit
     (requires (fun h -> live h a /\ live h res))
     (ensures  (fun h0 r h1 -> live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
-let sqr aLen a res = 
+let sqr aLen a res =
     mult aLen aLen a a res

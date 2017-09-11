@@ -1,4 +1,4 @@
-module Comparison 
+module Comparison
 
 open FStar.HyperStack.All
 open FStar.Buffer
@@ -16,7 +16,7 @@ val isMore_loop:
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 b))
 let rec isMore_loop a b count =
     push_frame();
-    let res = 
+    let res =
     if U32.(count >^ 0ul) then
     let count = U32.(count -^ 1ul) in
     let t1 = a.(count) in
@@ -37,7 +37,7 @@ val isMore:
 let isMore aLen bLen a b =
     push_frame();
     let res =
-    if U32.(aLen >^ bLen) then true 
+    if U32.(aLen >^ bLen) then true
     else if U32.(aLen <^ bLen) then false
          else isMore_loop a b aLen in
     pop_frame();
