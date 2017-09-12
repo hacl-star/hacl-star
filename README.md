@@ -108,7 +108,7 @@ download and compile [libsodium] with the `--disable-asm` flag and [openssl] wit
 
 While HACL* is typically as fast as hand-written C code, it is typically 1.1-5.7x slower than
 assembly code in our experiments. In future, we hope to close this gap by using verified assembly implementations 
-like [Vale](https://github.com/project-everest/vale) for some primtives.
+like [Vale](https://github.com/project-everest/vale) for some primitives.
 
 [openssl]: https://github.com/openssl/openssl
 [libsodium]: https://github.com/jedisct1/libsodium
