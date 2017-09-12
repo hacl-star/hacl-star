@@ -140,4 +140,3 @@ val decrypt: pkm:pkae_module -> #i:ID.id pkm.kim -> n:nonce -> sk:skey -> pk:pke
   (ensures  (fun h0 c h1 -> true
     /\ invariant pkm h1
   ))
-  

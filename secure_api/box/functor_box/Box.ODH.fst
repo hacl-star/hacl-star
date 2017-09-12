@@ -134,7 +134,7 @@ let lemma_shares sk = ()
 
 
 #reset-options
-#set-options "--z3refresh --z3rlimit 500 --max_ifuel 1 --max_fuel 0"
+#set-options "--z3refresh --z3rlimit 1000 --max_ifuel 2 --max_fuel 2"
 let prf_odh im imk km om sk pk = 
   let i1 = pk.pk_share in
   let i2 = sk.pk.pk_share in
@@ -150,4 +150,3 @@ let prf_odh im imk km om sk pk =
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
     let k=Key.coerce imk km i hashed_raw_k in
     k
-    
