@@ -121,9 +121,9 @@ val encrypt: pkm:pkae_module ->
     /\ invariant pkm h0
   ))
   (ensures  (fun h0 c h1 ->
-    ((honest pkm i /\ b2t ae_ind_cpa) // Ideal behaviour if the id is honest and the assumption holds
-               ==> true)//(c == pkm.enc (zero_bytes (Plain.length #pkm.im #pkm.pm #i m)) n pk sk)) //TODO: MK: this cannot work as the ODH key is idealized, requires de-idealization step, maybe doable?
-    /\ ((dishonest pkm i \/ ~(b2t ae_ind_cpa)) // Concrete behaviour otherwise.
+    ((honest pkm i /\ b2t pkae) // Ideal behaviour if the id is honest and the assumption holds
+               ==> c == pkm.enc (zero_bytes (Plain.length #pkm.kim #pkm.pm #i m)) n pk sk) //TODO: MK: this cannot work as the ODH key is idealized, requires de-idealization step, maybe doable?
+    /\ ((dishonest pkm i \/ ~(b2t pkae)) // Concrete behaviour otherwise.
                   ==> true)//)eq2 #cipher c (pkm.enc (Plain.repr #pkm.im #pkm.pm #i m) n pk sk)))
     // The message is added to the log. This also guarantees nonce-uniqueness.
     /\ MR.m_contains #(get_message_log_region pkm)(get_message_logGT pkm) h1
@@ -140,4 +140,3 @@ val decrypt: pkm:pkae_module -> #i:ID.id pkm.kim -> n:nonce -> sk:skey -> pk:pke
   (ensures  (fun h0 c h1 -> true
     /\ invariant pkm h1
   ))
-  
