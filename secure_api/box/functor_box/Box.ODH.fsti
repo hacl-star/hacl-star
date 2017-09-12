@@ -6,6 +6,7 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 
 open Box.Key
+open Crypto.Symmetric.Bytes
 
 module ID = Box.Index
 
@@ -86,7 +87,7 @@ val compose_ids: s1:dh_share -> s2:dh_share{s2 <> s1} -> (i:(dh_share * dh_share
 (**
   GTot specification of the prf_odh function for use in type refinements.
 *)
-val prf_odhGT: sk:skey -> pk:pkey{compatible_keys sk pk} -> GTot aes_key
+val prf_odhGT: sk:skey -> pk:pkey{compatible_keys sk pk} -> GTot (lbytes 32)
 
 val lemma_shares: sk:skey -> Lemma
   (requires True)

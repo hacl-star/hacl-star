@@ -118,6 +118,7 @@ let create rgn =
   let im = ID.create id_log_rgn sub_id in
   let kim = ID.compose id_log_rgn im ODH.smaller in 
   let pm = Plain.create plain_t AE.valid_length AE.length in
+    let kim: im:ID.index_module{ID.id im == i:(ODH.dh_share * ODH.dh_share){b2t (ODH.smaller (fst i) (snd i))}} = kim in
   let log_rgn : log_region kim = new_region rgn in
   assert(FStar.FunctionalExtensionality.feq (valid_length) (AE.valid_length));
   let aux = create_aux im kim pm log_rgn in

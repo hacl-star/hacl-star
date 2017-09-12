@@ -6,6 +6,7 @@ VERIFY= \
 	Box.AE \
   Box.ODH \
 	Box.PKAE \
+  Box.KDF \
   Box.Indexing
 LAX=
 

@@ -236,7 +236,7 @@ val instantiate_km: #im:index_module -> am:ae_module im -> km:key_module im{
     /\ disjoint (Key.get_log_region im km) am.message_log_region
   }
 let instantiate_km #im am =
-  let km = Key.create im key get_index get_rawGT (log_freshness_invariant am) (am.key_log_region) (gen am) coerce leak in
+  let km = Key.create im keysize key get_index get_rawGT (log_freshness_invariant am) (am.key_log_region) (gen am) coerce leak in
   km
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
