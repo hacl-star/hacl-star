@@ -34,11 +34,13 @@ module LE = FStar.Endianness
 let nonce = AE.nonce
 let cipher = AE.cipher
 let sub_id = ODH.dh_share
-let key_id = ODH.key_id 
+let key_id = ODH.key_id
 
 #set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
 let compose_ids i1 i2 = ODH.compose_ids i1 i2
 let valid_length = AE.valid_length
+let valid_cipher_length = AE.valid_cipher_length
+let key_length = ODH.dh_share_length
 let plain_t = AE.ae_plain
 let length = AE.length
 
@@ -52,10 +54,10 @@ let pkey_from_skey sk = ODH.get_pkey sk
 let compatible_keys sk pk = ODH.compatible_keys sk pk
 
 
-private noeq type aux_t' (im:index_module) (kim:key_index_module) (pm:plain_module) (rgn:log_region kim) =
+private noeq type aux_t' (im:index_module{ID.id im == sub_id}) (kim:key_index_module{ID.id kim == key_id}) (pm:plain_module) (rgn:log_region kim) =
   | AUX:
     am:AE.ae_module kim ->
-    km:Key.key_module kim{km == AE.instantiate_km am} ->
+    km:Key.key_module kim{km == AE.instantiate_km am /\ Key.get_keylen kim km == key_length} ->
     om:ODH.odh_module im kim km ->
     aux_t' im kim pm rgn
 
@@ -101,28 +103,39 @@ let create_aux im kim pm rgn =
   let om = ODH.create im kim km rgn in
   AUX am km om
 
-assume val lemma_compatible_length: n:nat -> Lemma
+val lemma_compatible_length: n:nat -> Lemma
   (requires valid_length n)
   (ensures n / Spec.Salsa20.blocklen < pow2 32)
+let lemma_compatible_length n = ()
+
+
+val length_lemma: n:nat{n >= 16} -> Lemma
+  (requires (n / Spec.Salsa20.blocklen < pow2 32))
+  (ensures ((n-16) / Spec.Salsa20.blocklen < pow2 32))
+let length_lemma n = ()
 
 val enc (im:ODH.index_module): plain_t -> n:nonce -> pk:pkey -> sk:skey{ODH.compatible_keys sk pk} -> GTot cipher
-let enc im p n pk sk = 
-  lemma_compatible_length (length p);
+let enc im p n pk sk =
   SPEC.secretbox_easy p (ODH.prf_odhGT sk pk) n
 
-assume val dec: c:cipher -> n:nonce -> pk:pkey -> sk:skey -> Tot (option plain_t) 
+//type plain_t = b:bytes{Seq.length b / Spec.Salsa20.blocklen < pow2 32} // / Spec.Salsa20.blocklen < pow2 32} //one off error?
+
+#set-options "--z3rlimit 1000 --max_ifuel 2 --max_fuel 0"
+val dec (im:ODH.index_module): c:cipher -> n:nonce -> pk:pkey -> sk:skey{ODH.compatible_keys sk pk} -> GTot (option (b:plain_t{Seq.length b = Seq.length c - 16}))
+let dec im c n pk sk =
+  SPEC.secretbox_open_easy c (ODH.prf_odhGT sk pk) n
 
 let create rgn =
   let id_log_rgn : ID.id_log_region = new_region rgn in
-//  let key_id_log_rgn : ID.id_log_region = new_region rgn in
   let im = ID.create id_log_rgn sub_id in
-  let kim = ID.compose id_log_rgn im ODH.smaller in 
+  let kim = ID.compose id_log_rgn im ODH.smaller in
   let pm = Plain.create plain_t AE.valid_length AE.length in
-    let kim: im:ID.index_module{ID.id im == i:(ODH.dh_share * ODH.dh_share){b2t (ODH.smaller (fst i) (snd i))}} = kim in
+  admit();
+  let kim: im:ID.index_module{ID.id im == i:(ODH.dh_share * ODH.dh_share){b2t (ODH.smaller (fst i) (snd i))}} = kim in
   let log_rgn : log_region kim = new_region rgn in
   assert(FStar.FunctionalExtensionality.feq (valid_length) (AE.valid_length));
   let aux = create_aux im kim pm log_rgn in
-  PKAE im kim pm log_rgn (enc im) (dec) aux
+  PKAE im kim pm log_rgn (enc im) (dec im) aux
 
 type key (pkm:pkae_module) = AE.key pkm.kim
 
@@ -140,14 +153,20 @@ let invariant pkm =
 let gen pkm =
   ODH.keygen()
 
-#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
-let encrypt pkm #i n sk pk m =
+#set-options "--z3rlimit 10000 --max_ifuel 0 --max_fuel 0"
+let encrypt pkm n sk pk m =
+  let i = compose_ids (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk)) in
   let k = ODH.prf_odh pkm.im pkm.kim pkm.aux.km pkm.aux.om sk pk in
   let c = AE.encrypt pkm.aux.am #i n k m in
+  assert(Game3? current_game <==> (b2t pkae /\ ~prf_odh));
+  admit();
+  assert((honest pkm i /\ b2t pkae) // Ideal behaviour if the id is honest and the assumption holds
+    ==> c == pkm.enc (zero_bytes (Plain.length #pkm.kim #pkm.pm #i m)) n pk sk);
+  admit();
   let h = get() in assert(Key.invariant pkm.kim pkm.aux.km h);
   ID.lemma_honest_or_dishonest pkm.kim i;
   let honest_i = ID.get_honest pkm.kim i in
-  if not honest_i then ( 
+  if not honest_i then (
     assert(ID.dishonest pkm.kim i);
     assert(Key.leak pkm.kim pkm.aux.km k = ODH.prf_odhGT sk pk );
     //assert(c = SPEC.secretbox_easy (Plain.repr #pkm.kim #pkm.pm #i m) (Key.get_rawGT pkm.kim pkm.aux.km k) n);
@@ -161,7 +180,7 @@ let encrypt pkm #i n sk pk m =
   MR.witness (get_message_logGT pkm) (MM.contains (get_message_logGT pkm) (n,i) (c,m));
   c
 
-let decrypt pkm #i n sk pk c =
+let decrypt pkm n sk pk c =
   let k = ODH.prf_odh pkm.im pkm.kim pkm.aux.km pkm.aux.om sk pk in
   let m = AE.decrypt pkm.aux.am #i n k c in
   m

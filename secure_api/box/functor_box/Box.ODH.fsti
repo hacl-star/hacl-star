@@ -10,8 +10,10 @@ open Crypto.Symmetric.Bytes
 
 module ID = Box.Index
 
-val dh_share: eqtype
-val dh_exponent: eqtype
+val dh_share_length: nat
+val dh_exponent_length: nat
+let dh_share = lbytes dh_share_length
+let dh_exponent = lbytes dh_exponent_length
 
 val smaller: i1:dh_share -> i2:dh_share -> b:bool{b ==> i1 <> i2}
 
@@ -27,7 +29,9 @@ val share_from_exponent: dh_exponent -> Tot dh_share
 
 type index_module = im:ID.index_module{ID.id im == dh_share}
 type key_index_module = im:ID.index_module{ID.id im == key_id}
+//type key_module (im:ID.index_module) = km:key_module im{Key.get_keylen im km = dh_share_length}
 
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 val odh_module: im:index_module -> kim:key_index_module -> key_module kim -> Type0
 
 val create: im:index_module -> kim:key_index_module -> km:key_module kim -> rgn:log_region im -> odh_module im kim km
@@ -95,23 +99,23 @@ val lemma_shares: sk:skey -> Lemma
   [ SMTPat (sk_get_share sk)]
 
 
-
-val prf_odh: im:index_module -> kim:key_index_module -> km:key_module kim{get_keylen kim km=32} -> om:odh_module im kim km  -> sk:skey -> pk:pkey{compatible_keys sk pk} -> ST (Key.get_keytype kim km )
+val prf_odh: im:index_module -> kim:key_index_module -> km:key_module kim{get_keylen kim km=32} ->
+om:odh_module im kim km  -> sk:skey -> pk:pkey{compatible_keys sk pk} -> ST (k:Key.get_keytype kim km)
   (requires (fun h0 ->
     let i = compose_ids (pk_get_share pk) (sk_get_share sk) in
     ID.registered kim i
     /\ Key.invariant kim km h0
   ))
-  (ensures (fun h0 k h1 -> True
-    // /\ Key.get_index kim km k = (compose_ids (pk_get_share pk) (sk_get_share sk))
-    // /\ let i = compose_ids (pk_get_share pk) (sk_get_share sk) in
-    // (ID.honest kim i ==> modifies (Set.singleton (Key.get_log_region kim km)) h0 h1)
-    // // We should guarantee, that the key is randomly generated. Generally, calls to prf_odh should be idempotent. How to specify that?
-    // // Should we have a genPost condition that we guarantee here?
-    // /\ (ID.dishonest kim i ==>
-    //                     (Key.leak kim km k = prf_odhGT sk pk // Functional correctness. Spec should be external in Spec.Cryptobox.
-    //                     /\ h0 == h1))
-    // /\ (modifies (Set.singleton (Key.get_log_region kim km)) h0 h1 \/ h0 == h1)
-    // /\ Key.invariant kim km h1
+  (ensures (fun h0 k h1 -> 
+    let i = compose_ids (pk_get_share pk) (sk_get_share sk) in
+    Key.get_index kim km k = i
+    /\ ((ID.honest kim i /\ Flags.prf_odh) ==> modifies (Set.singleton (Key.get_log_region kim km)) h0 h1)
+    // We should guarantee, that the key is randomly generated. Generally, calls to prf_odh should be idempotent. How to specify that?
+    // Should we have a genPost condition that we guarantee here?
+    /\ ((ID.dishonest kim i \/ ~Flags.prf_odh) ==>
+                        (Key.leak kim km k = prf_odhGT sk pk // Functional correctness. Spec should be external in Spec.Cryptobox.
+                        /\ h0 == h1))
+    /\ (modifies (Set.singleton (Key.get_log_region kim km)) h0 h1 \/ h0 == h1)
+    /\ Key.invariant kim km h1
   ))
  

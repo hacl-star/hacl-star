@@ -29,9 +29,9 @@ module Key = Box.Key
 module ID = Box.Index
 module LE = FStar.Endianness
 
-let dh_element_size = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
-let dh_exponent_size = 32 // Size of scalar in Curve25519. Replace with constant in spec?
-let dh_share = Curve.serialized_point //
+let dh_share_length = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
+let dh_exponent_length = 32 // Size of scalar in Curve25519. Replace with constant in spec?
+//let dh_share = Curve.serialized_point //
 let dh_basepoint = [
     0x09uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
     0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
@@ -39,7 +39,7 @@ let dh_basepoint = [
     0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
     ]
 
-let dh_exponent = Curve.scalar // is equal to Curve.serialized_point
+//let dh_exponent = Curve.scalar // is equal to Curve.serialized_point
 
 let smaller i1 i2 =
   let i1' = LE.little_endian i1 in
@@ -54,6 +54,8 @@ let total_order_lemma i1 i2 = admit()
 //  (ensures
 //    (b2t (smaller i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller i i1) ==> b2t (smaller i i2)))
 //    /\ (~ (b2t (smaller i1 i2)) <==> (i1 = i2 \/ b2t (smaller i2 i1)))))
+
+
 (**
 Nonce to use with HSalsa.hsalsa20.
 *)
@@ -132,16 +134,17 @@ let prf_odhGT sk pk =
 
 let lemma_shares sk = ()
 
-
 #reset-options
-#set-options "--z3refresh --z3rlimit 2500 --max_ifuel 0 --max_fuel 0"
-let prf_odh im kim km om sk pk = 
+#set-options "--z3rlimit 10000 --max_ifuel 0 --max_fuel 0"
+let prf_odh im kim km om sk pk =
   let i1 = pk.pk_share in
   let i2 = sk.pk.pk_share in
   let i = compose_ids i1 i2 in
   recall_log im;
+  recall_log kim;
   lemma_honest_or_dishonest kim i;
-  match get_honest im i with
+  let honest_i = get_honest kim i in
+  match honest_i && Flags.prf_odh with
   | true ->
     let k = Key.gen kim km i in
     admit();

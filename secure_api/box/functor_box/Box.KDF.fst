@@ -171,32 +171,32 @@ val derive: im:index_module -> km:key_module im -> out_im:out_index_module im ->
   (requires (fun h0 ->
     ( let i = Key.get_index im km k in
       let out_i : id out_im = Derived i in
-    registered im i 
-    /\
-    registered out_im out_i )
+      registered im i 
+    /\ registered out_im out_i
+    /\ Key.invariant out_im out_km h0
+    )
   ))
   (ensures (fun h0 k' h1 ->
     let i = Key.get_index im km k in
-    (honest im i ==> modifies (Set.singleton (Key.get_log_region im km)) h0 h1)
+    let out_i : id out_im = Derived i in
+    (honest out_im out_i ==> modifies (Set.singleton (Key.get_log_region out_im out_km)) h0 h1)
     // We should guarantee, that the key is randomly generated. Generally, calls to derive should be idempotent. How to specify that?
     // Should we have a genPost condition that we guarantee here?
-    /\ (dishonest im i ==> True
+    /\ (dishonest out_im out_i ==> True
           //              (Key.leak im km k =  deriveGT k // Functional correctness. Spec should be external in Spec.Cryptobox.
                         /\ h0 == h1)
-    /\ (modifies (Set.singleton (Key.get_log_region im km)) h0 h1 \/ h0 == h1)
-    /\ Key.invariant im km h1
+//    /\ (modifies (Set.singleton (Key.get_log_region out_im out_km)) h0 h1 \/ h0 == h1)
+    /\ Key.invariant out_im out_km h1
   )
 )
   
 let derive im km out_im out_km dm k =
   let i = Key.get_index im km k in
   let out_i : id out_im = Derived i in
-  //Key.gen out_im out_km i_out
-//  set_honest out_im out_i (get_honest im i);
+  lemma_honest_or_dishonest out_im out_i;
   match get_honest out_im out_i with
   | true ->
     let k = Key.gen out_im out_km out_i in
     k
   | false ->
     admit()
-    
