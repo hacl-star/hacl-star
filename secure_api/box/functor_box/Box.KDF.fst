@@ -24,9 +24,9 @@ module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 module MM = MonotoneMap
 
-module Hash = Spec.SHA2
-let keylen = Hash.size_block Hash.SHA2_512
-let rawkey = lbytes keylen
+module HSalsa = Spec.HSalsa20
+let keylen = HSalsa.keylen 
+let rawkey = HSalsa.key
 module SPEC = Spec.SecretBox
 module Plain = Box.Plain
 module Key = Box.Key
@@ -167,9 +167,9 @@ let instantiate_km #im dm =
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
 
-val derive: im:index_module -> km:key_module im -> out_im:out_index_module im ->out_km:key_module out_im -> dm:kdf_module im -> k:Key.get_keytype im km -> ST (k':Key.get_keytype out_im out_km{Key.get_index out_im out_km k' = Derived (Key.get_index im km k) } )
+val derive: im:index_module -> out_im:out_index_module im ->out_km:key_module out_im{get_keylen out_im out_km = keylen} -> dm:kdf_module im -> k:key im -> ST (k':Key.get_keytype out_im out_km{Key.get_index out_im out_km k' = Derived (get_index k) } )
   (requires (fun h0 ->
-    ( let i = Key.get_index im km k in
+    ( let i = get_index k in
       let out_i : id out_im = Derived i in
       registered im i 
     /\ registered out_im out_i
@@ -177,7 +177,7 @@ val derive: im:index_module -> km:key_module im -> out_im:out_index_module im ->
     )
   ))
   (ensures (fun h0 k' h1 ->
-    let i = Key.get_index im km k in
+    let i = get_index k in
     let out_i : id out_im = Derived i in
     (honest out_im out_i ==> modifies (Set.singleton (Key.get_log_region out_im out_km)) h0 h1)
     // We should guarantee, that the key is randomly generated. Generally, calls to derive should be idempotent. How to specify that?
@@ -189,14 +189,23 @@ val derive: im:index_module -> km:key_module im -> out_im:out_index_module im ->
     /\ Key.invariant out_im out_km h1
   )
 )
-  
-let derive im km out_im out_km dm k =
-  let i = Key.get_index im km k in
+
+(**
+Nonce to use with HSalsa.hsalsa20.
+  *)
+private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
+
+let derive im out_im out_km dm k =
+  let i = get_index k in
   let out_i : id out_im = Derived i in
   lemma_honest_or_dishonest out_im out_i;
   match get_honest out_im out_i with
   | true ->
-    let k = Key.gen out_im out_km out_i in
-    k
+    let k' = Key.gen out_im out_km out_i in
+    k'
   | false ->
-    admit()
+    let raw_k = k.raw in
+    let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
+    let k' = Key.coerce out_im out_km out_i hashed_raw_k in
+    k' 
+    

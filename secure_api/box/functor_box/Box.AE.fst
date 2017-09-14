@@ -163,11 +163,6 @@ let lemma_nonce_freshness #im am i n h0 h1 =
 
 
 #set-options "--z3refresh"
-val lemma_invariant_framing: #im:index_module -> am:ae_module im -> h0:mem -> h1:mem -> i:id im -> n:nonce -> y:message_log_range im (n,i) -> Lemma
-  (requires log_freshness_invariant #im am h0 /\ ~(ID.fresh im i h0))
-    (ensures (forall i' n'. (i'=i /\ ~(ID.fresh im i h1)) \/ // ~(MM.fresh am.message_log (n,i) h1) /\
-   (ID.fresh im i' h1 ==> MM.fresh am.message_log (n',i') h1)) ==> (forall i n . ID.fresh im i h1 ==> MM.fresh am.message_log (n,i) h1))
-let lemma_invariant_framing #im am h0 h1 i n y = ()
 
 val create: im:index_module -> pm:plain_module{Plain.get_plain pm == ae_plain /\ Plain.valid_length #pm == valid_length} -> rgn:log_region im -> ST (am:ae_module im)
   (requires (fun h0 ->
@@ -206,7 +201,13 @@ private val gen: #im:index_module  -> am:ae_module im -> i:id im -> ST (k:key im
     /\ log_freshness_invariant am h1
   ))
 
+assume val lemma_gen_framing: #im:index_module -> am:ae_module im -> h0:mem -> h1:mem -> Lemma
+  (requires log_freshness_invariant #im am h0)
+  (ensures log_freshness_invariant #im am h1)
+//let lemma_gen_framing #im am h0 h1 i n y = ()
+
 let gen #im am i =
+  let h0 = get() in
   match MM.lookup am.key_log i with
   | Some k -> k
   | None ->
@@ -216,7 +217,8 @@ let gen #im am i =
     MR.m_recall am.message_log;
     MR.m_recall am.key_log;
     MM.extend am.key_log i k;
-    admit();
+    let h1 = get() in
+    lemma_gen_framing am h0 h1;
     k
 
 (**
@@ -276,6 +278,14 @@ val encrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:k
   /\ log_freshness_invariant #im am h1
 ))
 
+
+
+val lemma_encrypt_framing: #im:index_module -> am:ae_module im -> h0:mem -> h1:mem -> i:id im -> n:nonce -> y:message_log_range im (n,i) -> Lemma
+  (requires log_freshness_invariant #im am h0 /\ ~(ID.fresh im i h0))
+    (ensures (forall i' n'. (i'=i /\ ~(ID.fresh im i h1)) \/ // ~(MM.fresh am.message_log (n,i) h1) /\
+  (ID.fresh im i' h1 ==> MM.fresh am.message_log (n',i') h1)) ==> (forall i n . ID.fresh im i h1 ==> MM.fresh am.message_log (n,i) h1))
+let lemma_encrypt_framing #im am h0 h1 i n y = ()
+
  #set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
 let encrypt #im am #i n k m =
   let h0 =get() in
@@ -299,7 +309,7 @@ let encrypt #im am #i n k m =
   lemma_registered_not_fresh im i;
   let h1=get() in
   assert(~(ID.fresh im i h1));
-  lemma_invariant_framing #im am h0 h1 i n (c,m);
+  lemma_encrypt_framing #im am h0 h1 i n (c,m);
   admit();
   c
 
