@@ -1,8 +1,5 @@
 (**
-   Box.AE provides cryptographically verified authenticated encryption for use by Box.PKAE. Plaintext types and functions
-   to create new plaintext or break the plaintext down to bytes are provided in PlainAE. Some functions and variables are
-   only present for purposes of modelling the cryptographic AE game. Of interest for other modules that are not concerned
-   with cryptographic verification are coerce_key, leak_key, keygen, encrypt and decrpyt.
+  A key derivation function
 *)
 module Box.KDF
 
@@ -30,12 +27,9 @@ let rawkey = HSalsa.key
 module SPEC = Spec.SecretBox
 module Plain = Box.Plain
 module Key = Box.Key
-//module ID = Box.Index
 
-//assume val secret_id: eqtype
 type key_id (im:index_module) = | Derived : id im -> key_id im
 
-//type index_module = im:ID.index_module{ID.id im == secret_id}
 type out_index_module (im:index_module) = kim:index_module{id kim == key_id im}
 
 type log_region (im:index_module) =
@@ -48,7 +42,7 @@ type log_region (im:index_module) =
 
 (**
    The key type is abstract and can only be accessed via the leak and coerce_key functions. This means that the adversary has no means
-   of accessing the raw representation of any honest AE key if AE is idealized.
+   of accessing the raw representation of any honest key.
 *)
 abstract noeq type key (im:index_module) =
   | Key: i:id im -> raw:rawkey -> key im
@@ -58,7 +52,7 @@ let get_index #im k =
   k.i
 
 (**
-  Similar to the leak_key function, get_keyGT provides access to the raw representation of an AE key.
+  Similar to the leak_key function, get_keyGT provides access to the raw representation of a key.
   However, note that the GTot effect only allows use in type refinements and is erased upon extraction.
 *)
 private val get_rawGT: #im:index_module -> k:key im -> GTot (b:rawkey{k.raw=b})
@@ -109,7 +103,7 @@ let create im rgn =
   
 (**
    This function generates a fresh random key. Honest, as well as dishonest ids can be created using keygen. However, note that the adversary can
-   only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
+   only access the raw representation of dishonest keys. 
 *)
 private val gen: #im:index_module  -> dm:kdf_module im -> i:id im -> ST (k:key im{get_index k=i})
   (requires (fun h0 ->
@@ -201,11 +195,7 @@ let derive im out_im out_km dm k =
   lemma_honest_or_dishonest out_im out_i;
   match get_honest out_im out_i with
   | true ->
-    let k' = Key.gen out_im out_km out_i in
-    k'
+    Key.gen out_im out_km out_i 
   | false ->
-    let raw_k = k.raw in
-    let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
-    let k' = Key.coerce out_im out_km out_i hashed_raw_k in
-    k' 
-    
+    let hashed_raw_k = HSalsa.hsalsa20 k.raw zero_nonce in
+    Key.coerce out_im out_km out_i hashed_raw_k 
