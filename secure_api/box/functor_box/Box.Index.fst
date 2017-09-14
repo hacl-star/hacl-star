@@ -59,7 +59,9 @@ abstract noeq type index_module =
       (requires (fun h0 -> fresh i h0 /\ (b ==> parent_honest i)))
       (ensures (fun h0 _ h1 ->
           (b ==> honest i)
-        /\ (~b ==> dishonest i)))) ->
+        /\ (~b ==> dishonest i)  
+        /\ modifies (Set.singleton rgn) h0 h1)
+      ))->
     // lemma_index_module: (i:id -> ST unit
     // (requires (fun h0 -> registered i ))
     // (ensures (fun h0 _ h1 ->
@@ -216,7 +218,7 @@ let lemma_registered_not_fresh im i =
 #set-options "--z3rlimit 900 --max_ifuel 1 --max_fuel 2"
 val get_honest_log: #rgn:id_log_region -> #id:eqtype -> id_log: id_log_t rgn id -> i:id -> ST(b:bool)
   (requires (fun h0 ->
-    registered_log id_log i
+    registered_log id_log i 
   ))
   (ensures (fun h0 b h1 ->
     modifies_none h0 h1
@@ -256,7 +258,7 @@ let get_honest im i = im.get_honest i
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 1"
 private val set_honest_log: #rgn:id_log_region -> #id:eqtype -> id_log: id_log_t rgn id -> i:id -> b:bool -> ST unit
   (requires (fun h0 ->
-    fresh_log id_log i h0
+    fresh_log id_log i h0   
   ))
   (ensures (fun h0 _ h1 ->
       (b ==> honest_log id_log i)
@@ -270,6 +272,21 @@ let set_honest_log #rgn #id id_log i b =
     | Some b -> ()
     | None ->
         MM.extend id_log i b)
+
+
+val set_honest: im:index_module -> i:id im -> b:bool -> ST unit
+(requires (fun h0 ->
+  fresh im i h0
+))
+(ensures (fun h0 _ h1 ->
+         (b ==> honest im i)
+         /\ (~b ==> dishonest im i)
+         /\ (forall (i':id im). ( i' =!= i /\ fresh im i' h0 ) ==> fresh im i' h1)
+         /\ MR.m_sel h1 im.id_log == MM.upd (MR.m_sel h0 im.id_log) i b
+           /\ modifies (Set.singleton (get_rgn im)) h0 h1
+))
+let set_honest im i b =
+  im.set_honest i b
 
 val lemma_index_module: im:index_module -> i:im.id -> ST unit
   (requires (fun h0 -> registered im i ))

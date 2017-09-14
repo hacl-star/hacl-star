@@ -30,13 +30,13 @@ let rawkey = lbytes keylen
 module SPEC = Spec.SecretBox
 module Plain = Box.Plain
 module Key = Box.Key
-module ID = Box.Index
+//module ID = Box.Index
 
-assume val secret_id: eqtype
-type key_id = | Derived : secret_id -> key_id
+//assume val secret_id: eqtype
+type key_id (im:index_module) = | Derived : id im -> key_id im
 
-type index_module = im:ID.index_module{ID.id im == secret_id}
-type out_index_module = im:ID.index_module{ID.id im == key_id}
+//type index_module = im:ID.index_module{ID.id im == secret_id}
+type out_index_module (im:index_module) = kim:index_module{id kim == key_id im}
 
 type log_region (im:index_module) =
   r:MR.rid{disjoint r (get_rgn im)}
@@ -106,7 +106,7 @@ let create im rgn =
   let kl = MM.alloc #klr #(key_log_key im) #(key_log_range im) #(key_log_inv im) in
   recall_log im;
   DM klr kl 
- 
+  
 (**
    This function generates a fresh random key. Honest, as well as dishonest ids can be created using keygen. However, note that the adversary can
    only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
@@ -157,6 +157,8 @@ val instantiate_km: #im:index_module -> dm:kdf_module im -> km:key_module im{
     /\ Key.get_rawGT im km == get_rawGT #im
     /\ Key.get_log_region im km == dm.key_log_region
   }
+
+
 let instantiate_km #im dm =
   let km = Key.create im keylen key get_index get_rawGT (fun (m:mem) -> True ) (dm.key_log_region) (gen dm) coerce leak in
   km
@@ -165,20 +167,36 @@ let instantiate_km #im dm =
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
 
-val derive: im:index_module -> out_im:out_index_module -> km:key_module out_im -> dm:kdf_module im -> k:Key.get_keytype im km -> ST (k':Key.get_keytype out_im km{Key.get_index out_im km k' = Derived (Key.get_index im km k) } )
+val derive: im:index_module -> km:key_module im -> out_im:out_index_module im ->out_km:key_module out_im -> dm:kdf_module im -> k:Key.get_keytype im km -> ST (k':Key.get_keytype out_im out_km{Key.get_index out_im out_km k' = Derived (Key.get_index im km k) } )
   (requires (fun h0 ->
-    let i = Key.get_index im km k in
-    ID.registered im i
+    ( let i = Key.get_index im km k in
+      let out_i : id out_im = Derived i in
+      registered im i 
+    /\ registered out_im out_i
+    /\ Key.invariant out_im out_km h0
+    )
   ))
-  (ensures (fun h0 k h1 ->
+  (ensures (fun h0 k' h1 ->
     let i = Key.get_index im km k in
-    (ID.honest im i ==> modifies (Set.singleton (Key.get_log_region im km)) h0 h1)
+    let out_i : id out_im = Derived i in
+    (honest out_im out_i ==> modifies (Set.singleton (Key.get_log_region out_im out_km)) h0 h1)
     // We should guarantee, that the key is randomly generated. Generally, calls to derive should be idempotent. How to specify that?
     // Should we have a genPost condition that we guarantee here?
-    /\ (ID.dishonest im i ==> True
+    /\ (dishonest out_im out_i ==> True
           //              (Key.leak im km k =  deriveGT k // Functional correctness. Spec should be external in Spec.Cryptobox.
                         /\ h0 == h1)
-    /\ (modifies (Set.singleton (Key.get_log_region im km)) h0 h1 \/ h0 == h1)
-    /\ Key.invariant im km h1
+//    /\ (modifies (Set.singleton (Key.get_log_region out_im out_km)) h0 h1 \/ h0 == h1)
+    /\ Key.invariant out_im out_km h1
   )
 )
+  
+let derive im km out_im out_km dm k =
+  let i = Key.get_index im km k in
+  let out_i : id out_im = Derived i in
+  lemma_honest_or_dishonest out_im out_i;
+  match get_honest out_im out_i with
+  | true ->
+    let k = Key.gen out_im out_km out_i in
+    k
+  | false ->
+    admit()

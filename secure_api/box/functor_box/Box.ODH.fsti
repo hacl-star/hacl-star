@@ -29,7 +29,7 @@ val share_from_exponent: dh_exponent -> Tot dh_share
 
 type index_module = im:ID.index_module{ID.id im == dh_share}
 type key_index_module = im:ID.index_module{ID.id im == key_id}
-type key_module (im:ID.index_module) = km:key_module im{Key.get_keylen im km = dh_share_length /\ Key.get_flag im km = Flags.prf_odh}
+//type key_module (im:ID.index_module) = km:key_module im{Key.get_keylen im km = dh_share_length}
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 val odh_module: im:index_module -> kim:key_index_module -> key_module kim -> Type0
@@ -98,15 +98,18 @@ val lemma_shares: sk:skey -> Lemma
   (ensures (pk_get_share (get_pkey sk)) == sk_get_share sk)
   [ SMTPat (sk_get_share sk)]
 
-val prf_odh: im:index_module -> kim:key_index_module -> km:key_module kim -> om:odh_module im kim km  -> sk:skey -> pk:pkey{compatible_keys sk pk} -> ST (k:Key.get_keytype kim km{Key.get_index kim km k = (compose_ids (pk_get_share pk) (sk_get_share sk))} )
+
+val prf_odh: im:index_module -> kim:key_index_module -> km:key_module kim{get_keylen kim km=32} ->
+om:odh_module im kim km  -> sk:skey -> pk:pkey{compatible_keys sk pk} -> ST (k:Key.get_keytype kim km)
   (requires (fun h0 ->
     let i = compose_ids (pk_get_share pk) (sk_get_share sk) in
     ID.registered kim i
     /\ Key.invariant kim km h0
   ))
-  (ensures (fun h0 k h1 ->
+  (ensures (fun h0 k h1 -> 
     let i = compose_ids (pk_get_share pk) (sk_get_share sk) in
-    ((ID.honest kim i /\ Flags.prf_odh) ==> modifies (Set.singleton (Key.get_log_region kim km)) h0 h1)
+    Key.get_index kim km k = i
+    /\ ((ID.honest kim i /\ Flags.prf_odh) ==> modifies (Set.singleton (Key.get_log_region kim km)) h0 h1)
     // We should guarantee, that the key is randomly generated. Generally, calls to prf_odh should be idempotent. How to specify that?
     // Should we have a genPost condition that we guarantee here?
     /\ ((ID.dishonest kim i \/ ~Flags.prf_odh) ==>
@@ -115,3 +118,4 @@ val prf_odh: im:index_module -> kim:key_index_module -> km:key_module kim -> om:
     /\ (modifies (Set.singleton (Key.get_log_region kim km)) h0 h1 \/ h0 == h1)
     /\ Key.invariant kim km h1
   ))
+ 

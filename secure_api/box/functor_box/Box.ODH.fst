@@ -54,6 +54,8 @@ let total_order_lemma i1 i2 = admit()
 //  (ensures
 //    (b2t (smaller i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller i i1) ==> b2t (smaller i i2)))
 //    /\ (~ (b2t (smaller i1 i2)) <==> (i1 = i2 \/ b2t (smaller i2 i1)))))
+
+
 (**
 Nonce to use with HSalsa.hsalsa20.
 *)
@@ -134,20 +136,21 @@ let lemma_shares sk = ()
 
 #reset-options
 #set-options "--z3rlimit 10000 --max_ifuel 0 --max_fuel 0"
-let prf_odh im imk km om sk pk =
+let prf_odh im kim km om sk pk =
   let i1 = pk.pk_share in
   let i2 = sk.pk.pk_share in
   let i = compose_ids i1 i2 in
   recall_log im;
-  recall_log imk;
-  lemma_honest_or_dishonest imk i;
-  let honest_i = get_honest imk i in
+  recall_log kim;
+  lemma_honest_or_dishonest kim i;
+  let honest_i = get_honest kim i in
   match honest_i && Flags.prf_odh with
   | true ->
-    let k = Key.gen imk km i in
+    let k = Key.gen kim km i in
+    admit();
     k
   | false ->
     let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
-    let k=Key.coerce imk km i hashed_raw_k in
+    let k=Key.coerce kim km i hashed_raw_k in
     k
