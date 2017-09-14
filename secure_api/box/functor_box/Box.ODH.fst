@@ -29,9 +29,9 @@ module Key = Box.Key
 module ID = Box.Index
 module LE = FStar.Endianness
 
-let dh_element_size = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
-let dh_exponent_size = 32 // Size of scalar in Curve25519. Replace with constant in spec?
-let dh_share = Curve.serialized_point //
+let dh_share_length = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
+let dh_exponent_length = 32 // Size of scalar in Curve25519. Replace with constant in spec?
+//let dh_share = Curve.serialized_point //
 let dh_basepoint = [
     0x09uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
     0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
@@ -39,7 +39,7 @@ let dh_basepoint = [
     0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
     ]
 
-let dh_exponent = Curve.scalar // is equal to Curve.serialized_point
+//let dh_exponent = Curve.scalar // is equal to Curve.serialized_point
 
 let smaller i1 i2 =
   let i1' = LE.little_endian i1 in
@@ -132,16 +132,17 @@ let prf_odhGT sk pk =
 
 let lemma_shares sk = ()
 
-
 #reset-options
-#set-options "--z3refresh --z3rlimit 1000 --max_ifuel 2 --max_fuel 2"
-let prf_odh im imk km om sk pk = 
+#set-options "--z3rlimit 10000 --max_ifuel 0 --max_fuel 0"
+let prf_odh im imk km om sk pk =
   let i1 = pk.pk_share in
   let i2 = sk.pk.pk_share in
   let i = compose_ids i1 i2 in
   recall_log im;
-  lemma_honest_or_dishonest im i;
-  match get_honest imk i with
+  recall_log imk;
+  lemma_honest_or_dishonest imk i;
+  let honest_i = get_honest imk i in
+  match honest_i && Flags.prf_odh with
   | true ->
     let k = Key.gen imk km i in
     k
