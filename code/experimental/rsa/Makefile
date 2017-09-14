@@ -15,6 +15,12 @@ FSTAR_INCLUDES+=--include ../../hash
 
 verify: $(addsuffix -lax, $(RSA_FILES))
 
+RSA_VERIFY= \
+	Addition.fst
+
+verify-1: $(RSA_VERIFY)
+	$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) $(FSTAR_INCLUDES) $^
+
 KREMLIN_ARGS+=-verbose \
 	-tmpdir rsa-c \
 	-I ../../../code/hash \
@@ -53,10 +59,9 @@ test-rsa-kremlin.exe: rsa-c/out.krml
 	-no-prefix 'Test.RSA' -add-include '"RSA.h"' -o test-rsa-kremlin.exe
 	./test-rsa-kremlin.exe
 
-CFLAGS=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash
+INCLUDE_C=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash
 
-CC = x86_64-w64-mingw32-gcc
-CC := $(CC) $(CFLAGS)
+CC := $(CC) $(INCLUDE_C)
 
 %.o: %.c
 	$(CC) -c $< -o $@

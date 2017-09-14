@@ -235,7 +235,7 @@ val main: unit -> Stack FStar.Int32.t
 	(ensures  (fun h0 r h1 -> True))
 let main () =
     push_frame();
-	let test = test1() && test2() in
+	let test = test1() && test2() && test3() && test4() in
     if test then C.print_string (C.string_of_literal "SUCCESS") else C.print_string (C.string_of_literal "Test failed");
     pop_frame();
     C.exit_success
