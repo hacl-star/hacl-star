@@ -98,14 +98,9 @@ let registered_log #rgn #id id_log i =
 val registered: im:index_module -> i:im.id -> Tot Type0
 let registered im i = im.registered i
 
-// Put the correct flag here, as soon as we have flags for proof steps
-val honest_log: (#rgn:id_log_region) -> #id:eqtype -> id_log:(id_log_t rgn id) -> (i:id) -> Tot (t:Type0 {t /\ ~(Game3? current_game) ==> registered_log id_log i})
+val honest_log: (#rgn:id_log_region) -> #id:eqtype -> id_log:(id_log_t rgn id) -> (i:id) -> Tot (t:Type0 {t ==> registered_log id_log i})
 let honest_log #rgn #id id_log i =
-  let _=() in
-  match current_game with
-  | Game3 -> True
-  | _ -> MR.witnessed (MM.contains id_log i true) /\ MR.witnessed (MM.defined
-  id_log i)
+  let _=() in MR.witnessed (MM.contains id_log i true) /\ MR.witnessed (MM.defined id_log i)
 
 val honest: im:index_module -> i:id im -> Tot (t:Type0 {t ==> registered im i})
 let honest im i = im.honest i
