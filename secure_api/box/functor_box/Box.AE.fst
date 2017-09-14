@@ -32,7 +32,6 @@ let noncesize = SPEC.noncelen
 let keysize = SPEC.keylen
 type aes_key = SPEC.key
 type bytes = SPEC.bytes
-type cipher = b:bytes{Seq.length b >= 16 /\ (Seq.length b - 16) / Spec.Salsa20.blocklen < pow2 32}
 type nonce = SPEC.nonce
 
 
@@ -44,7 +43,17 @@ type log_region (im:index_module) =
 *)
 //let plain_max_length = Spec.Salsa20.blocklen `op_Multiply` pow2 32 - Spec.Salsa20.blocklen
 let valid_length n = n / Spec.Salsa20.blocklen < pow2 32
-type ae_plain = b:bytes{valid_length (Seq.length b) } // / Spec.Salsa20.blocklen < pow2 32} //one off error?
+let valid_cipher_length (n:nat) = (n >= 16 && (n - 16) / Spec.Salsa20.blocklen < pow2 32)
+
+val length_lemma: n:nat -> Lemma
+  (requires (valid_cipher_length n))
+  (ensures (n >= 16 ==> valid_length (n-16)))
+  [SMTPat (valid_length n)]
+let length_lemma n = ()
+
+type cipher = SPEC.cipher
+type ae_plain = SPEC.plain
+//type ae_plain = b:bytes{valid_length (Seq.length b) } // / Spec.Salsa20.blocklen < pow2 32} //one off error?
 
 val create_zero_bytes: n:nat{valid_length n}-> Tot (b:ae_plain{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)})
 let create_zero_bytes n =
@@ -151,7 +160,7 @@ val lemma_nonce_freshness: #im:index_module  -> am:ae_module im -> i:id im -> n:
   (ensures ((modifies (Set.singleton am.key_log_region) h0 h1 \/ h0 == h1) ==> nonce_is_fresh am i n h1))
 let lemma_nonce_freshness #im am i n h0 h1 =
  ()
- 
+
 
 #set-options "--z3refresh"
 val lemma_invariant_framing: #im:index_module -> am:ae_module im -> h0:mem -> h1:mem -> i:id im -> n:nonce -> y:message_log_range im (n,i) -> Lemma
@@ -179,7 +188,7 @@ let create im pm rgn =
   let ml = MM.alloc #mlr #(message_log_key im) #(message_log_range im) #(message_log_inv im) in
   recall_log im;
   AM pm klr mlr kl ml
- 
+
 (**
    This function generates a fresh random key. Honest, as well as dishonest ids can be created using keygen. However, note that the adversary can
    only access the raw representation of dishonest keys. The log is created in a fresh region below the ae_key_region.
@@ -227,14 +236,15 @@ let leak #im k =
   k.raw
 
 #set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0 --print_full_names --print_effect_args --print_implicits --print_universes"
-val instantiate_km: #im:index_module -> am:ae_module im -> km:key_module im{
-    Key.get_keytype im km == key im
+val valid_km: #im:index_module -> am:ae_module im -> km:key_module im -> t:Type0{
+    t ==>
+    (Key.get_keytype im km == key im
     /\ Key.get_index im km == get_index #im
     /\ Key.get_rawGT im km == get_rawGT #im
     /\ Key.invariant im km == log_freshness_invariant am
     /\ Key.get_log_region im km == am.key_log_region
-    /\ disjoint (Key.get_log_region im km) am.message_log_region
-  }
+    /\ disjoint (Key.get_log_region im km) am.message_log_region)
+    }
 let instantiate_km #im am =
   let km = Key.create im keysize key get_index get_rawGT (log_freshness_invariant am) (am.key_log_region) (gen am) coerce leak in
   km
@@ -254,8 +264,6 @@ val encrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:k
   /\ log_freshness_invariant #im am h0
 ))
 (ensures  (fun h0 c h1 ->
-  let modified_regions_fresh = Set.union (Set.singleton am.message_log_region) (Set.singleton (ID.get_rgn im)) in
-  let modified_regions_honest = Set.singleton am.message_log_region in
   registered im i
   /\ modifies (Set.singleton am.message_log_region) h0 h1 // stateful changes even if the id is dishonest.
   /\ ((honest im i /\ b2t ae_ind_cpa) // Ideal behaviour if the id is honest and the assumption holds.
@@ -289,8 +297,8 @@ let encrypt #im am #i n k m =
   recall_log im;
   MM.extend am.message_log (n,i) (c,m);
   lemma_registered_not_fresh im i;
-  let h1=get() in 
-  assert(~(ID.fresh im i h1)); 
+  let h1=get() in
+  assert(~(ID.fresh im i h1));
   lemma_invariant_framing #im am h0 h1 i n (c,m);
   admit();
   c
