@@ -45,22 +45,12 @@ type game =
   | Game1
   | Game2
   | Game3
-// This flag expresses our claim of functional equality between our construction and PKAE in unidealized state.
-val game0 : b:bool{b <==> not ae_ind_cpa /\ ~ae_int_ctxt /\ ~prf_odh /\ not pkae}
-
-val game1 : b:bool{b <==> not ae_ind_cpa /\ ~ae_int_ctxt /\ prf_odh /\ not pkae}
-
-val game2 : b:bool{b <==> not ae_ind_cca /\ prf_odh /\ not pkae}
-
-// This flag expresses our claim of functional equality between our construction and PKAE in idealized state.
-// We have to leafe prf_odh unidealized, so we can prove that zeroes are encrypted.
-val game3 : b:bool{b <==> b2t ae_ind_cca /\ ~prf_odh /\ b2t pkae} // This should imply that forall ids, honest i = True
 
 // This should ensure that we're always in a well-defined game and that the code only verifies for all games.
 val current_game : g:game{
   match g with
-  | Game0 -> b2t game0
-  | Game1 -> b2t game1
-  | Game2 -> b2t game2
-  | Game3 -> b2t game3
+  | Game0 -> not ae_ind_cpa /\ ~ae_int_ctxt /\ ~prf_odh /\ not pkae
+  | Game1 -> not ae_ind_cpa /\ ~ae_int_ctxt /\ prf_odh /\ not pkae
+  | Game2 -> not ae_ind_cca /\ prf_odh /\ not pkae
+  | Game3 -> b2t ae_ind_cca /\ ~prf_odh /\ b2t pkae
   }
