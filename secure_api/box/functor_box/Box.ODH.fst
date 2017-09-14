@@ -134,19 +134,20 @@ let lemma_shares sk = ()
 
 
 #reset-options
-#set-options "--z3refresh --z3rlimit 1000 --max_ifuel 2 --max_fuel 2"
-let prf_odh im imk km om sk pk = 
+#set-options "--z3refresh --z3rlimit 2500 --max_ifuel 0 --max_fuel 0"
+let prf_odh im kim km om sk pk = 
   let i1 = pk.pk_share in
   let i2 = sk.pk.pk_share in
   let i = compose_ids i1 i2 in
   recall_log im;
-  lemma_honest_or_dishonest im i;
-  match get_honest imk i with
+  lemma_honest_or_dishonest kim i;
+  match get_honest im i with
   | true ->
-    let k = Key.gen imk km i in
+    let k = Key.gen kim km i in
+    admit();
     k
   | false ->
     let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
-    let k=Key.coerce imk km i hashed_raw_k in
+    let k=Key.coerce kim km i hashed_raw_k in
     k

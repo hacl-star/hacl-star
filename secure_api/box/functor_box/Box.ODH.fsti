@@ -96,21 +96,22 @@ val lemma_shares: sk:skey -> Lemma
 
 
 
-val prf_odh: im:index_module -> kim:key_index_module -> km:key_module kim -> om:odh_module im kim km  -> sk:skey -> pk:pkey{compatible_keys sk pk} -> ST (k:Key.get_keytype kim km{Key.get_index kim km k = (compose_ids (pk_get_share pk) (sk_get_share sk))} )
+val prf_odh: im:index_module -> kim:key_index_module -> km:key_module kim{get_keylen kim km=32} -> om:odh_module im kim km  -> sk:skey -> pk:pkey{compatible_keys sk pk} -> ST (Key.get_keytype kim km )
   (requires (fun h0 ->
     let i = compose_ids (pk_get_share pk) (sk_get_share sk) in
     ID.registered kim i
     /\ Key.invariant kim km h0
   ))
-  (ensures (fun h0 k h1 ->
-    let i = compose_ids (pk_get_share pk) (sk_get_share sk) in
-    (ID.honest kim i ==> modifies (Set.singleton (Key.get_log_region kim km)) h0 h1)
-    // We should guarantee, that the key is randomly generated. Generally, calls to prf_odh should be idempotent. How to specify that?
-    // Should we have a genPost condition that we guarantee here?
-    /\ (ID.dishonest kim i ==>
-                        (Key.leak kim km k = prf_odhGT sk pk // Functional correctness. Spec should be external in Spec.Cryptobox.
-                        /\ h0 == h1))
-    /\ (modifies (Set.singleton (Key.get_log_region kim km)) h0 h1 \/ h0 == h1)
-    /\ Key.invariant kim km h1
+  (ensures (fun h0 k h1 -> True
+    // /\ Key.get_index kim km k = (compose_ids (pk_get_share pk) (sk_get_share sk))
+    // /\ let i = compose_ids (pk_get_share pk) (sk_get_share sk) in
+    // (ID.honest kim i ==> modifies (Set.singleton (Key.get_log_region kim km)) h0 h1)
+    // // We should guarantee, that the key is randomly generated. Generally, calls to prf_odh should be idempotent. How to specify that?
+    // // Should we have a genPost condition that we guarantee here?
+    // /\ (ID.dishonest kim i ==>
+    //                     (Key.leak kim km k = prf_odhGT sk pk // Functional correctness. Spec should be external in Spec.Cryptobox.
+    //                     /\ h0 == h1))
+    // /\ (modifies (Set.singleton (Key.get_log_region kim km)) h0 h1 \/ h0 == h1)
+    // /\ Key.invariant kim km h1
   ))
  
