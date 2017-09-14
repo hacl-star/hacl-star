@@ -131,7 +131,7 @@ at the [Prosecco](http://prosecco.inria.fr) team at [INRIA Paris](https://www.in
 It contains contributions from many researchers at INRIA and Microsoft Research, and is
 being actively developed and maintained within [Project Everest]. 
 
-For questions and comments, please contact the current maintainers at:
+For questions and comments, or if you want to contribute to the project, do contact the current maintainers at:
 * Benjamin Beurdouche (benjamin.beurdouche@inria.fr)
 * Karthikeyan Bhargavan (karthikeyan.bhargavan@inria.fr)
 
