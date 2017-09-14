@@ -243,11 +243,12 @@ inline static uint16_t load16(uint8_t *b) {
   return x;
 }
 
-inline static uint32_t load32(uint8_t *b) {
+force_inline static uint32_t load32(uint8_t *b) {
   uint32_t x;
   memcpy(&x, b, 4);
   return x;
 }
+
 
 inline static uint64_t load64(uint8_t *b) {
   uint64_t x;
@@ -257,7 +258,7 @@ inline static uint64_t load64(uint8_t *b) {
 
 inline static void store16(uint8_t *b, uint16_t i) { memcpy(b, &i, 2); }
 
-inline static void store32(uint8_t *b, uint32_t i) { memcpy(b, &i, 4); }
+force_inline static void store32(uint8_t *b, uint32_t i) { memcpy(b, &i, 4); }
 
 inline static void store64(uint8_t *b, uint64_t i) { memcpy(b, &i, 8); }
 
