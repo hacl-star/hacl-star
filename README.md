@@ -12,12 +12,13 @@ The goal of this library is to develop verified C reference implementations
 for popular cryptographic primitives and to verify them for memory safety,
 functional correctness, and secret independence.
 
-More details about the library and its design can be found in our
-ACM CCS 2017 research paper: https://eprint.iacr.org/2017/536
+More details about the library and its design can be found in our ACM CCS 2017 research paper: 
+https://eprint.iacr.org/2017/536
 
 All our code is written and verified in [F\*] and then compiled to C via
 the [KreMLin tool](https://github.com/FStarLang/kremlin/). Details on the verification and compilation
-toolchain and their formal guarantees can be found in the ICFP 2017 paper: https://arxiv.org/abs/1703.00053
+toolchain and their formal guarantees can be found in the ICFP 2017 paper:    
+https://arxiv.org/abs/1703.00053
 
 # Supported Cryptographic Algorithms
 
