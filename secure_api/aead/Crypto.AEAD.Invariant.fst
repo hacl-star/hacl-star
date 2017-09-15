@@ -176,6 +176,7 @@ noextract let encode_ad_cipher (i:id) (ad:adata) (l:ok_len i) (cipher:lbytes l) 
 	 corresponding to the fragmentation of the 
 	 plain and cipher into encrypted blocks, 
 	 starting from position x, until to_pos **)
+noextract
 val counterblocks:
   i:id{safeId i} ->
   mac_rgn:eternal_region ->
@@ -187,6 +188,7 @@ val counterblocks:
   cipher:lbytes l ->
   Tot (prf_table mac_rgn i) // each entry e {PRF(e.x.id = x.iv /\ e.x.ctr >= ctr x)}
   (decreases (to_pos - from_pos))
+noextract
 let rec counterblocks i mac_rgn x l from_pos to_pos plain cipher =
   let blockl = v (Cipher.(blocklen (cipherAlg_of_id i))) in
   let remaining = to_pos - from_pos in
