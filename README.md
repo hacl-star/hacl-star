@@ -122,6 +122,7 @@ The [code/experimental](code/experimental) directory includes other (partially v
 * Encryption: AES-128, AES-256
 * MACs: GCM
 * Key Derivation: HKDF
+* Signatures: RSA-PSS
 
 We are also working on a JavaScript backend for F* that would enable us to extract HACL* as a JavaScript library.
 
