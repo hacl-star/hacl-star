@@ -16,6 +16,9 @@ open Hacl.Bignum.Modulo
 open Hacl.Bignum.Fproduct
 open Hacl.Spec.Bignum.Fsquare
 
+module U32 = FStar.UInt32
+module AD  = Hacl.Spec.EC.AddAndDouble
+
 
 #set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
@@ -36,8 +39,6 @@ private let upd_5 tmp s0 s1 s2 s3 s4 =
   let h1 = ST.get() in
   Seq.lemma_eq_intro (as_seq h1 tmp) (seq_upd_5 s0 s1 s2 s3 s4)
 
-
-#set-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0"
 
 [@"c_inline"]
 private val fsquare__:
@@ -95,75 +96,134 @@ let fsquare_ tmp output =
   carry_0_to_1 output
 
 
-#set-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
+#set-options "--initial_ifuel 0 --max_ifuel 0 --initial_fuel 1 --max_fuel 1"
+
+private val relax: s:seqelem -> Lemma
+  (requires (AD.red_513 s))
+  (ensures  (AD.red_5413 s))
+let relax s = ()
+
+private val fsquare_times_one: s:seqelem{AD.red_5413 s} -> Lemma
+  (fsquare_pre s /\ fsquare_times_tot s 1 == fsquare_spec s)
+let fsquare_times_one s =
+  fsquare_5413_is_fine s
+
+private val fsquare_times_many: s:seqelem{AD.red_5413 s} -> i:pos{i > 1} -> Lemma
+  (fsquare_pre s /\
+   AD.red_5413 (fsquare_spec s) /\
+   fsquare_times_tot s i == fsquare_times_tot (fsquare_spec s) (i - 1))
+let fsquare_times_many s i =
+  fsquare_5413_is_fine s
+
+#set-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0"
+
+private val fsquare_fsquare_times: s:seqelem{AD.red_5413 s} -> i:pos -> j:pos -> Lemma
+  (ensures (AD.red_5413 (fsquare_times_tot s i) /\
+            fsquare_times_tot (fsquare_times_tot s i) j == fsquare_times_tot s (i + j)))
+  (decreases i)
+let rec fsquare_fsquare_times s i j =
+  relax (fsquare_times_tot s i);
+  if i = 1 then
+    begin
+    fsquare_times_one s;
+    fsquare_times_many s (i + j)
+    end
+  else
+    begin
+    fsquare_5413_is_fine s;
+    relax (fsquare_times_tot s i);
+    relax (fsquare_spec s);
+    fsquare_times_many s i;
+    assert (fsquare_times_tot (fsquare_times_tot s i) j ==
+            fsquare_times_tot (fsquare_times_tot (fsquare_spec s) (i - 1)) j);
+    fsquare_fsquare_times (fsquare_spec s) (i - 1) j;
+    assert (fsquare_times_tot (fsquare_times_tot (fsquare_spec s) (i - 1)) j ==
+            fsquare_times_tot (fsquare_spec s) (i + j - 1));
+    fsquare_times_many s (i + j);
+    assert (fsquare_times_tot (fsquare_spec s) (i + j - 1) ==
+            fsquare_times_tot s (i + j))
+    end
+
+#set-options "--z3rlimit 50"
 
 [@"c_inline"]
 private val fsquare_times_:
   input:felem ->
   tmp:felem_wide{disjoint input tmp} ->
-  count:FStar.UInt32.t{FStar.UInt32.v count > 0} ->
+  count:U32.t{U32.v count > 0} ->
   Stack unit
-    (requires (fun h -> live h input /\ live h tmp /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h input)))
-    (ensures (fun h0 _ h1 -> live h0 input /\ live h1 input /\ live h1 tmp /\ modifies_2 input tmp h0 h1
-      /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h0 input)
-      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 input)
-      /\ as_seq h1 input == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
-[@"c_inline"]
-private let rec fsquare_times_ output tmp count =
-  if FStar.UInt32.(count =^ 1ul) then (
-    let h0 = ST.get() in
-    fsquare_5413_is_fine (as_seq h0 output);
-    fsquare_  tmp output
-  )
-  else (
-    let i = FStar.UInt32.(count -^ 1ul) in
-    cut (FStar.UInt32.v i > 0);
-    let h0 = ST.get() in
-    fsquare_5413_is_fine (as_seq h0 output);
-    fsquare_  tmp output;
+    (requires (fun h -> live h input /\ live h tmp /\ AD.red_5413 (as_seq h input)))
+    (ensures  (fun h0 _ h1 ->
+        live h1 input /\ live h1 tmp
+      /\ modifies_2 input tmp h0 h1
+      /\ AD.red_5413 (as_seq h0 input)
+      /\ AD.red_513 (as_seq h1 input)
+      /\ as_seq h1 input == fsquare_times_tot (as_seq h0 input) (U32.v count)))
+let fsquare_times_ input tmp count =
+  let h0 = ST.get() in
+  let inv h i =
+    1 <= i /\ i <= U32.v count /\
+    live h input /\ live h tmp /\
+    modifies_2 input tmp h0 h /\
+    AD.red_513 (as_seq h input) /\
+    as_seq h input == fsquare_times_tot (as_seq h0 input) i
+  in
+  fsquare_times_one (as_seq h0 input);
+  fsquare_5413_is_fine (as_seq h0 input);
+  fsquare_ tmp input;
+  C.Loops.for 1ul count inv (fun i ->
     let h1 = ST.get() in
-    cut (Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h1 output));
-    cut (modifies_2 tmp output h0 h1);
-    fsquare_times_ output tmp i
+    relax (as_seq h1 input);
+    fsquare_5413_is_fine (as_seq h1 input);
+    fsquare_ tmp input;
+    let h2 = ST.get() in
+    fsquare_times_one (as_seq h1 input);
+    fsquare_fsquare_times (as_seq h0 input) (U32.v i) 1;
+    lemma_modifies_2_trans input tmp h0 h1 h2
   )
 
 
-#set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0"
+#set-options "--z3rlimit 10"
 
 [@"c_inline"]
 val fsquare_times:
   output:felem ->
   input:felem{disjoint output input} ->
-  count:FStar.UInt32.t{FStar.UInt32.v count > 0} ->
+  count:U32.t{U32.v count > 0} ->
   Stack unit
-    (requires (fun h -> live h output /\ live h input /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h input)))
-    (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ live h0 input /\ modifies_1 output h0 h1
-      /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h0 input)
-      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
-      /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count)))
+    (requires (fun h -> live h output /\ live h input /\ AD.red_5413 (as_seq h input)))
+    (ensures (fun h0 _ h1 ->
+        live h0 output /\ live h1 output /\ live h0 input /\ modifies_1 output h0 h1
+      /\ AD.red_5413 (as_seq h0 input)
+      /\ AD.red_513 (as_seq h1 output)
+      /\ as_seq h1 output == fsquare_times_tot (as_seq h0 input) (U32.v count)))
 [@"c_inline"]
 let fsquare_times output input count =
   push_frame();
-  let t   = create wide_zero clen in
   let h0 = ST.get() in
-  blit input 0ul output 0ul clen;
+  let t = create wide_zero clen in
   let h1 = ST.get() in
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h0 input);
-  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h1 output);
+  blit input 0ul output 0ul clen;
+  let h2 = ST.get() in
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h1 input);
+  Hacl.Spec.Bignum.Fmul.lemma_whole_slice (as_seq h2 output);
   fsquare_times_ output t count;
+  let h3 = ST.get() in
+  lemma_modifies_1_2'' output t h1 h2 h3;
+  lemma_modifies_0_2 output t h0 h1 h3;
   pop_frame()
 
 
 [@"c_inline"]
 val fsquare_times_inplace:
   output:felem ->
-  count:FStar.UInt32.t{FStar.UInt32.v count > 0} ->
+  count:U32.t{U32.v count > 0} ->
   Stack unit
-    (requires (fun h -> live h output /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h output)))
+    (requires (fun h -> live h output /\ AD.red_5413 (as_seq h output)))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
-      /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
-      /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h0 output)
-      /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 output) (FStar.UInt32.v count)))
+      /\ AD.red_513 (as_seq h1 output)
+      /\ AD.red_5413 (as_seq h0 output)
+      /\ (as_seq h1 output) == fsquare_times_tot (as_seq h0 output) (U32.v count)))
 [@"c_inline"]
 let fsquare_times_inplace output count =
   push_frame();
