@@ -46,6 +46,7 @@ A detailed description of the code in [secure_api/] and its formal security guar
 appears in the IEEE S&P 2017 paper: https://eprint.iacr.org/2016/1178.pdf
 
 [F\*]: https://github.com/FStarLang/FStar
+[KreMLin]: https://github.com/FStarLang/kremlin
 [miTLS]: https://github.com/mitls/mitls-fstar
 [NaCl API]: https://nacl.cr.yp.to
 [libsodium]: https://github.com/jedisct1/libsodium
