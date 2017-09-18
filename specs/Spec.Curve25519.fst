@@ -29,9 +29,13 @@ let rec ( ** ) (e:elem) (n:pos) : Tot elem (decreases n) =
     if n % 2 = 0 then op_Star_Star (e `fmul` e) (n / 2)
     else e `fmul` (op_Star_Star (e `fmul` e) ((n-1)/2))
 
+(* Magic Numbers *)
+let scalar_length = 32 (* in bytes *)
+let serialized_point_length = 32 (* in bytes *)
+
 (* Type aliases *)
-type scalar = lbytes 32
-type serialized_point = lbytes 32
+type scalar = lbytes scalar_length
+type serialized_point = lbytes serialized_point_length
 type proj_point = | Proj: x:elem -> z:elem -> proj_point
 
 let decodeScalar25519 (k:scalar) =
