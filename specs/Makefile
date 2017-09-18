@@ -13,7 +13,7 @@ lib:
 	$(MAKE) -C ../code/lib/ml
 
 
-EXTRACTED=FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml  
+EXTRACTED=FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.ml FStar_BitVector.ml FStar_UInt.ml
 
 NOEXTRACT=$(FSTAR_DEFAULT_ARGS) $(addprefix --no_extract Hacl., UInt64 UInt32 UInt8)
 
@@ -36,7 +36,8 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.SHA2_256.fst \
 		Spec.SHA2_384.fst \
 		Spec.SHA2_512.fst \
-		Spec.Ed25519.fst
+		Spec.Ed25519.fst \
+		Spec.CryptoBox.fst
 
 hints: $(addsuffix .hints, $(SPEC_FILES))
 verify: $(addsuffix -verify, $(SPEC_FILES))
@@ -130,14 +131,6 @@ ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> ed25519-spec/Spec_Ed25519.ml
 	$(OCAMLOPT) -I ed25519-spec  $(OCAML_INCLUDES) $(addprefix ed25519-spec/, FStar_Endianness.ml Spec_Loops.ml Spec_Lib.ml Spec_Curve25519.ml Seq_Create.ml Spec_SHA2_512.ml Spec_SHA512.ml Spec_Ed25519.ml) -o ed25519.exe
 	./ed25519.exe
-
-cryptobox.exe: Spec.HSalsa20.fst Spec.SecretBox.fst Spec.Curve25519.fst Spec.CryptoBox.fst
-	$(MAKE) -C ../code/lib/ml MEM=HST
-	mkdir -p cryptobox-spec
-	$(FSTAR) $(ARGS) --odir cryptobox-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> cryptobox-spec/Spec_CryptoBox.ml
-	$(OCAMLOPT) -I cryptobox-spec $(OCAML_INCLUDES) $(addprefix cryptobox-spec/, $(EXTRACTED)) cryptobox-spec/Combinators.ml cryptobox-spec/Spec_Lib.ml cryptobox-spec/Spec_CTR.ml cryptobox-spec/Spec_Salsa20.ml cryptobox-spec/Spec_HSalsa20.ml cryptobox-spec/Spec_Poly1305.ml cryptobox-spec/Spec_SecretBox.ml cryptobox-spec/Spec_Curve25519.ml cryptobox-spec/Spec_CryptoBox.ml -o cryptobox.exe
-	./cryptobox.exe
 
 cryptobox.exe: Spec.HSalsa20.fst Spec.SecretBox.fst Spec.Curve25519.fst Spec.CryptoBox.fst
 	$(MAKE) -C ../code/lib/ml MEM=HST
