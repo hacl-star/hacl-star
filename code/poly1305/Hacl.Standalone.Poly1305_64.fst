@@ -177,7 +177,7 @@ let poly1305_partial st input len kr =
   (* lemma_append_empty' (encode_bytes (reveal_sbytes input)) (MkState?.log init_st); *)
   partial_log
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from Prims --using_facts_from FStar"
+#set-options "--max_fuel 0 --max_ifuel 0 --using_facts_from Prims --using_facts_from FStar"
 let sum_modifications (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem)
   : Lemma (requires (live h0 b1 /\
                      live h0 b2 /\

@@ -1,6 +1,8 @@
 all: extract-c ct verify
 
-DIRECTORIES=salsa-family bignum poly1305 curve25519 api hmac ed25519 hash
+# The bignum directory is not included because it is independently
+# checked by curve25519 and poly1305 with specific parameters
+DIRECTORIES=salsa-family poly1305 curve25519 api hmac ed25519 hash
 TOOSLOW=experimental
 
 %-c: %

@@ -2,18 +2,6 @@
   "K\u0001 \u000ex\u0013¡Ø˜KwN\u007f´G¾",
   [
     [
-      "Ed25519.op_String_Access",
-      1,
-      0,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Ed25519.uint8_p",
-        "equation_FStar.UInt8.t",
-        "refinement_interpretation_Hacl.Impl.Ed25519.SecretToPublic_Tm_refine_04d3395c881847f65dd2a6cf9d8a71b5"
-      ],
-      0
-    ],
-    [
       "Ed25519.sign",
       1,
       0,
@@ -86,7 +74,7 @@
       1,
       [
         "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "haseqFStar.Buffer_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
         "projection_inverse_BoxInt_proj_0"
       ],
       0

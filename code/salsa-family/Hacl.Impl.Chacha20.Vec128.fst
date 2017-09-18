@@ -44,7 +44,7 @@ let as_state h st =
 [@ CInline]
 val line:
   st:state ->
-  a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s < 32} ->
+  a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s > 0 /\ U32.v s < 32} ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st /\
@@ -727,20 +727,24 @@ val chacha20_block:
 
 [@ CInline]
 let chacha20_block log stream_block st =
+  (**) let hinit = ST.get() in
   push_frame();
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   let k = Buffer.create zero 4ul in
-  let h1 = ST.get() in
-  no_upd_lemma_0 h0 h1 stream_block;
-  no_upd_lemma_0 h0 h1 st;
+  (**) let h1 = ST.get() in
+  (**) no_upd_lemma_0 h0 h1 stream_block;
+  (**) no_upd_lemma_0 h0 h1 st;
   chacha20_core log k st;
-  let h2 = ST.get() in
-  no_upd_lemma_1 h1 h2 k stream_block;
-  no_upd_lemma_1 h1 h2 k st;
+  (**) let h2 = ST.get() in
+  (**) lemma_modifies_0_1' k h0 h1 h2;
+  (**) no_upd_lemma_1 h1 h2 k stream_block;
+  (**) no_upd_lemma_1 h1 h2 k st;
   state_to_key_block stream_block k;
-  let h3 = ST.get() in
-  assert(modifies_2_1 stream_block h0 h3);
-  pop_frame()
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1 stream_block h0 h2 h3;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 stream_block hinit h0 h3 hfin
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
@@ -781,21 +785,23 @@ val update_last:
                let mask = Seq.slice mask 0 (UInt32.v len) in
                Spec.CTR.xor #(UInt32.v len) plain mask)) ))
 let update_last log output plain len st =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   push_frame();
-  let h1 = ST.get() in
+  (**) let h1 = ST.get() in
   let block = create (uint8_to_sint8 0uy) vecsizebytes4 in
-  let h2 = ST.get() in
+  (**) let h2 = ST.get() in
   no_upd_lemma_0 h1 h2 plain;
   no_upd_lemma_0 h1 h2 st;
-  chacha20_block log block st;
-  let h3 = ST.get() in
+  (**) chacha20_block log block st;
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1' block h1 h2 h3;
   let mask = Buffer.sub block 0ul len in
   map2 output plain mask len (Hacl.UInt8.logxor);
-  let h4 = ST.get() in
+  (**) let h4 = ST.get() in
+  (**) lemma_modifies_0_1 output h1 h3 h4;
   pop_frame();
-  let h5 = ST.get() in
-  ()
+  (**) let h5 = ST.get() in
+  (**) modifies_popped_1 output h0 h1 h4 h5
 
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
@@ -1062,34 +1068,36 @@ val update:
        o == seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) plain (Spec.chacha20_cipher k n (U32.v ctr)) )
        ))
 let update log output plain st =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   push_frame();
-  let h1 = ST.get() in
+  (**) let h1 = ST.get() in
   let k = Buffer.create zero 4ul in
-  let h2 = ST.get() in
-  no_upd_lemma_0 h1 h2 plain;
-  no_upd_lemma_0 h1 h2 st;
+  (**) let h2 = ST.get() in
+  (**) no_upd_lemma_0 h1 h2 plain;
+  (**) no_upd_lemma_0 h1 h2 st;
   chacha20_core log k st;
-  let h3 = ST.get() in
-  lemma_uint32s_fragments3 (as_seq h3 k);
-  Seq.lemma_eq_intro (match Ghost.reveal log with | MkLog k n ctr ->
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1' k h1 h2 h3;
+  (**) lemma_uint32s_fragments3 (as_seq h3 k);
+  (**) Seq.lemma_eq_intro (match Ghost.reveal log with | MkLog k n ctr ->
                       Spec.chacha20_cipher k n (UInt32.v ctr))
                      (let st = as_seq h3 k in
                       FStar.Seq.(Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 0)) @|
                                  Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 1)) @|
                                  Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 2)) @|
                                  Spec.Lib.uint32s_to_le 4 (vec_as_seq (Seq.index st 3))));
-  no_upd_lemma_1 h2 h3 k plain;
-  no_upd_lemma_1 h2 h3 k st;
+  (**) no_upd_lemma_1 h2 h3 k plain;
+  (**) no_upd_lemma_1 h2 h3 k st;
   xor_block output plain k;
-  let h4 = ST.get() in
-  Seq.lemma_eq_intro (reveal_sbytes (as_seq h4 output))
+  (**) let h4 = ST.get() in
+  (**) lemma_modifies_0_1 output h1 h3 h4;
+  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h4 output))
                      (let plain = reveal_sbytes (as_seq h0 plain) in
                       match Ghost.reveal log with | MkLog k n ctr ->
                       seq_map2 (fun x y -> FStar.UInt8.(x ^^ y)) plain (Spec.chacha20_cipher k n (U32.v ctr)));
   pop_frame();
-  let h5 = ST.get() in
-  ()
+  (**) let h5 = ST.get() in
+  (**) modifies_popped_1 output h0 h1 h4 h5
 
 
 val lemma_live_update3:
@@ -1319,6 +1327,7 @@ let update3' log output plain len st i =
   Spec.CTR3.lemma_counter_mode_blocks3_def1 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr ) (Seq.slice (reveal_sbytes (as_seq h0 plain)) 0 (192 * U32.v i + 192)) (U32.v i + 1);
   update3 log' out_block plain_block st;
   let h'  = ST.get() in
+  (**) modifies_subbuffer_2 h h' out_block st output;
   Seq.lemma_eq_intro (Seq.slice (as_seq h' out_sub) (192 * U32.v i) (192 * U32.v i + 192))
                      (as_seq h' out_block);
   Seq.lemma_eq_intro (Seq.slice (as_seq h' out_sub) (0) (192 * U32.v i))
@@ -1334,7 +1343,8 @@ let update3' log output plain len st i =
   no_upd_lemma_2 h h' out_block st plain;
   let log'' = log_incrn log' 2ul in
   state_incr log'' st;
-  let h'' = ST.get() in
+  (**) let h'' = ST.get() in
+  (**) lemma_modifies_2_1' st output h h' h'';
   no_upd_lemma_1 h' h'' st output;
   no_upd_lemma_1 h' h'' st plain;
   no_upd_lemma_1 h' h'' st out_block;
@@ -1403,6 +1413,7 @@ let chacha20_counter_mode_blocks3 log output plain len st =
     let h   = ST.get() in
     update3' log output plain len st i;
     let h'  = ST.get() in
+    (**) lemma_modifies_2_trans output st h0 h h';
     ()
     in
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) (Seq.createEmpty);
@@ -1567,22 +1578,28 @@ val chacha20:
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 let chacha20 output plain len k n ctr =
-  let h = ST.get() in
+  (**) let h = ST.get() in
   push_frame();
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   let st = state_alloc () in
+  (**) let h0' = ST.get() in
   let log = init st k n ctr in
-  let h1 = ST.get() in
+  (**) let h1 = ST.get() in
+  (**) lemma_modifies_0_1' st h0 h0' h1;
   no_upd_lemma_0 h0 h1 plain;
   no_upd_lemma_0 h0 h1 k;
   no_upd_lemma_0 h0 h1 n;
+  no_upd_lemma_0 h0 h1 output;
   assert(as_seq h1 plain == as_seq h plain);
   assert(invariant log h1 st);
   assert(Ghost.reveal log == MkLog (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) ctr);
   chacha20_counter_mode log output plain len st;
   let h2 = ST.get() in
+  (**) lemma_modifies_0_2 output st h0 h1 h2;
   assert(
     let k = reveal_sbytes (as_seq h0 k) in let n = reveal_sbytes (as_seq h0 n) in let plain = reveal_sbytes (as_seq h1 plain) in
     reveal_sbytes (as_seq h2 output) == Spec.CTR3.counter_mode k n (UInt32.v ctr) plain);
   Spec.CTR3.lemma_counter_mode3_eq (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) (UInt32.v ctr) (reveal_sbytes (as_seq h0 plain));
-  pop_frame()
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 output h h0 h2 hfin

@@ -64,7 +64,7 @@ static struct custom_operations st_ops = {
 
 CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
         CAMLparam2(alg, key);
-        Crypto_Indexing_cipherAlg calg;
+        Crypto_Indexing_aeadAlg calg;
 	Crypto_Indexing_aesImpl aesimpl;
 
         switch(Int_val(alg)){
@@ -96,7 +96,7 @@ CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
 	id.aesi = aesimpl;
 
         AEAD_ST* st = malloc(sizeof(AEAD_ST));
-       	*st = Crypto_AEAD_gen(id, FStar_HyperHeap_root);
+       	*st = Crypto_AEAD_coerce(id, FStar_HyperHeap_root, (uint8_t*)String_val(key));
 
         ST *s = malloc(sizeof(ST));
         s->st = st;

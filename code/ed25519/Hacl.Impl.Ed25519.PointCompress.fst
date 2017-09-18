@@ -160,39 +160,24 @@ let point_compress_ tmp p =
   let px   = Hacl.Impl.Ed25519.ExtPoint.getx p in
   let py   = Hacl.Impl.Ed25519.ExtPoint.gety p in
   let pz   = Hacl.Impl.Ed25519.ExtPoint.getz p in
-  Hacl.Bignum25519.inverse  zinv pz;
-  let h = ST.get() in
-  no_upd_lemma_1 h0 h zinv x;
-  no_upd_lemma_1 h0 h zinv out;
-  no_upd_lemma_1 h0 h zinv px;
-  no_upd_lemma_1 h0 h zinv py;
-  no_upd_lemma_1 h0 h zinv pz;
-  Hacl.Bignum25519.lemma_red_513_is_red_53 (as_seq h px);
-  Hacl.Bignum25519.lemma_red_513_is_red_5413 (as_seq h zinv);
-  Hacl.Bignum25519.fmul x   px zinv;
-  let hh = ST.get() in
-  Hacl.Bignum25519.lemma_reveal_seval (as_seq hh x);
-  assert(Hacl.Bignum25519.seval (as_seq hh x) < Spec.Curve25519.prime);
-  Hacl.Bignum25519.reduce x;
-  let h' = ST.get() in
-  no_upd_lemma_1 h h' x zinv;
-  no_upd_lemma_1 h h' x out;
-  no_upd_lemma_1 h h' x px;
-  no_upd_lemma_1 h h' x py;
-  no_upd_lemma_1 h h' x pz;
-  Hacl.Bignum25519.lemma_red_513_is_red_53 (as_seq h' py);
-  Hacl.Bignum25519.fmul out py zinv;
-  let h'' = ST.get() in
-  Hacl.Bignum25519.reduce out;
+  Hacl.Bignum25519.inverse zinv pz;
   let h1 = ST.get() in
-  assert(Hacl.Bignum25519.seval (as_seq h1 out) < Spec.Curve25519.prime);
-  no_upd_lemma_1 h' h1 out x;
-  no_upd_lemma_1 h' h1 out zinv;
-  no_upd_lemma_1 h' h1 out px;
-  no_upd_lemma_1 h' h1 out py;
-  no_upd_lemma_1 h' h1 out pz;
-  assert(modifies_1 tmp h0 h1)
-
+  Hacl.Bignum25519.lemma_red_513_is_red_53 (as_seq h1 px);
+  Hacl.Bignum25519.lemma_red_513_is_red_5413 (as_seq h1 zinv);
+  Hacl.Bignum25519.fmul x px zinv;
+  let h2 = ST.get() in
+  Hacl.Bignum25519.lemma_reveal_seval (as_seq h2 x);
+  Hacl.Bignum25519.reduce x;
+  let h3 = ST.get() in
+  Hacl.Bignum25519.lemma_red_513_is_red_53 (as_seq h3 py);
+  Hacl.Bignum25519.fmul out py zinv;
+  let h4 = ST.get() in
+  Hacl.Bignum25519.reduce out;
+  let h5 = ST.get() in
+  lemma_modifies_1_trans tmp h0 h1 h2;
+  lemma_modifies_1_trans tmp h0 h2 h3;
+  lemma_modifies_1_trans tmp h0 h3 h4;
+  lemma_modifies_1_trans tmp h0 h4 h5
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
@@ -211,16 +196,31 @@ val point_compress:
       h1.[out] == Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p)
     ))
 let point_compress z p =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   push_frame();
+  (**) let h1 = ST.get() in
   let tmp  = create (Hacl.Cast.uint64_to_sint64 0uL) 15ul in
   let zinv = Buffer.sub tmp 0ul  5ul in
   let x    = Buffer.sub tmp 5ul  5ul in
   let out  = Buffer.sub tmp 10ul 5ul in
+  (**) let h2 = ST.get() in
+  (**) no_upd_fresh h0 h1 (Hacl.Impl.Ed25519.ExtPoint.getz p);
+  (**) no_upd_lemma_0 h1 h2 (Hacl.Impl.Ed25519.ExtPoint.getz p);
+  (**) Seq.lemma_eq_intro (as_seq h0 (Hacl.Impl.Ed25519.ExtPoint.getz p))
+                          (as_seq h2 (Hacl.Impl.Ed25519.ExtPoint.getz p));
   point_compress_ tmp p;
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1' tmp h1 h2 h3;
   let b = x_mod_2 x in
   Hacl.Impl.Store51.store_51 z out;
+  (**) let h4 = ST.get() in
   add_sign z b;
-  let h = ST.get() in
-  Endianness.lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h z)) (Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p));
-  pop_frame()
+  let h5 = ST.get() in
+  (**) lemma_modifies_1_trans z h3 h4 h5;
+  (**) lemma_modifies_0_1 z h1 h3 h5;
+  (**) Endianness.lemma_little_endian_inj
+    (Hacl.Spec.Endianness.reveal_sbytes (as_seq h5 z))
+    (Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p));
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 z h0 h1 h5 hfin

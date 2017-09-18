@@ -176,6 +176,7 @@ noextract let encode_ad_cipher (i:id) (ad:adata) (l:ok_len i) (cipher:lbytes l) 
 	 corresponding to the fragmentation of the 
 	 plain and cipher into encrypted blocks, 
 	 starting from position x, until to_pos **)
+noextract
 val counterblocks:
   i:id{safeId i} ->
   mac_rgn:eternal_region ->
@@ -187,6 +188,7 @@ val counterblocks:
   cipher:lbytes l ->
   Tot (prf_table mac_rgn i) // each entry e {PRF(e.x.id = x.iv /\ e.x.ctr >= ctr x)}
   (decreases (to_pos - from_pos))
+noextract
 let rec counterblocks i mac_rgn x l from_pos to_pos plain cipher =
   let blockl = v (Cipher.(blocklen (cipherAlg_of_id i))) in
   let remaining = to_pos - from_pos in
@@ -1153,7 +1155,8 @@ val lemma_mac_log_framing
   (ensures  (m_sel h0 (CMA.(ilog mac_st_2.log)) = m_sel h1 (CMA.(ilog mac_st_2.log))))
 #set-options "--initial_ifuel 1 --max_ifuel 1"
 let lemma_mac_log_framing #i #nonce_1 #nonce_2 mac_st_1 h0 h1 mac_st_2 = //AR: 04/22/2017: this relies on ref injectivity ...
-  assume (m_contains (CMA.(ilog mac_st_1.log)) h0)
+  admit()
+  //assume (m_contains (CMA.(ilog mac_st_1.log)) h0)
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let lemma_fresh_nonce_implies_all_entries_nonces_are_different

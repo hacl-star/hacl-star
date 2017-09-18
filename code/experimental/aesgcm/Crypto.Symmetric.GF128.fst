@@ -67,7 +67,7 @@ inline_for_extraction let zero_128 : H128.t = uint64_to_sint128 0uL
 inline_for_extraction let one_128  : H128.t = uint64_to_sint128 1uL
 inline_for_extraction let ones_128 : H128.t =
   H128.(((uint64_to_sint128 0xffffffffffffffffuL) <<^ 64ul) +^ (uint64_to_sint128 0xffffffffffffffffuL))
-private let r_mul : H128.t = H128.(uint64_to_sint128(225uL) <<^ 120ul)
+inline_for_extraction private let r_mul : H128.t = H128.(uint64_to_sint128(225uL) <<^ 120ul)
 
 val fzero_lemma: v:H128.t -> Lemma
   (requires v == zero_128)

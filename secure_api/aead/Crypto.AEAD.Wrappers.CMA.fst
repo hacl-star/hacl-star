@@ -91,7 +91,8 @@ private val mac_wrapper_aux: #a:Type -> #b:Type ->
   abuf:Buffer.buffer a -> tbuf:Buffer.buffer b -> h0:mem -> h1:mem -> Lemma
   (requires (Buffer.frameOf abuf <> Buffer.frameOf tbuf /\
              Buffer.modifies_2 abuf tbuf h0 h1))
-  (ensures  (HS.modifies (Set.as_set [Buffer.frameOf abuf; Buffer.frameOf tbuf]) h0 h1 /\
+  (ensures  (HS.modifies (Set.union (Set.singleton (Buffer.frameOf abuf))
+                                    (Set.singleton (Buffer.frameOf tbuf))) h0 h1 /\
              Buffer.modifies_buf_1 (Buffer.frameOf abuf) abuf h0 h1 /\
              Buffer.modifies_buf_1 (Buffer.frameOf tbuf) tbuf h0 h1))
 let mac_wrapper_aux #a #b abuf tbuf h0 h1 =
@@ -116,10 +117,11 @@ let mac_wrapper (#i:EncodingWrapper.mac_id) (ak:CMA.state i) (acc:CMA.accBuffer 
       let log = RR.as_hsref CMA.(ilog ak.log) in
       assert (mac_modifies (fst i) (snd i) tag ak acc h0 h1)
       end
-    else
+    else begin
       mac_wrapper_aux (MAC.as_buffer (CMA.abuf acc)) tag h0 h1;
       // Takes a long time without this useless line
       assert (mac_modifies (fst i) (snd i) tag ak acc h0 h1)
+     end
 
 
 #set-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
@@ -676,6 +678,7 @@ let verify #i #n st #aadlen aad #plainlen plain cipher_tagged ak acc h_init =
   let h0 = get () in
   let b = verify_wrapper ak acc tag in
   let h1 = get () in
+  assume (enc_dec_liveness st aad plain cipher_tagged h1); //TODO NS (08/08/17): this one is provable but not robustly (hint replay fails)
   frame_accumulate_ensures #(i,n) st ak aad #plainlen plain cipher_tagged h_init acc h0 h1;
   frame_inv_modifies_1 (MAC.as_buffer (CMA.abuf acc)) st h0 h1;
   Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h1;

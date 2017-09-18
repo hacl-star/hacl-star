@@ -31,7 +31,20 @@
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
-    [ "Hacl.Spec.EC.Ladder.Lemmas.double_step", 1, 0, 1, [ "@query" ], 0 ],
+    [
+      "Hacl.Spec.EC.Ladder.Lemmas.double_step",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_FStar.UInt32.uint_to_t",
+        "equation_FStar.UInt32.v", "equation_FStar.UInt8.n",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt32.Mk_v"
+      ],
+      0
+    ],
     [
       "Hacl.Spec.EC.Ladder.Lemmas.small_loop",
       1,
@@ -40,9 +53,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "binder_x_51c83020f22c4be1582f5457b30f6a54_4",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
-        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equality_tok_Prims.LexTop@tok", "equation_FStar.UInt32.uint_to_t",
+        "equation_FStar.UInt32.v", "equation_FStar.UInt8.n",
+        "equation_Prims.nat", "int_inversion", "int_typing",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt32.Mk_v",
         "refinement_interpretation_Hacl.Spec.EC.Ladder.Lemmas_Tm_refine_a18b256a5ff66e5662b8b8ef9005d754",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "well-founded-ordering-on-nat"
@@ -90,8 +107,12 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt32.uint_to_t",
+        "equation_FStar.UInt32.v", "equation_FStar.UInt8.n",
+        "equation_Prims.nat", "primitive_Prims.op_Subtraction",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt32.Mk_v",
         "refinement_interpretation_Hacl.Spec.EC.Ladder.Lemmas_Tm_refine_b6f678b7156503498ec363a76b075caf"
       ],
       0
@@ -125,7 +146,13 @@
       1,
       0,
       1,
-      [ "@query" ],
+      [
+        "@query", "equation_FStar.UInt32.uint_to_t",
+        "equation_FStar.UInt32.v", "equation_FStar.UInt8.n",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt32.Mk_v"
+      ],
       0
     ],
     [
@@ -144,16 +171,26 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Spec.Curve25519_pretyping_a7ada2192580537a17fc6e7524125877",
-        "equation_FStar.HyperHeap.test0", "equation_FStar.UInt8.t",
+        "b2t_def", "data_elim_FStar.UInt8.Mk",
+        "equation_FStar.Monotonic.HyperHeap.test0",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.uint_to_t",
+        "equation_FStar.UInt32.v", "equation_FStar.UInt8.n",
+        "equation_FStar.UInt8.t",
         "equation_Hacl.Spec.EC.Ladder.Lemmas.small_loop_unrolled",
         "equation_Prims._assert", "equation_Spec.Curve25519.elem",
         "equation_Spec.Curve25519.prime",
         "fuel_guarded_inversion_FStar.UInt8.t_",
         "fuel_guarded_inversion_Spec.Curve25519.proj_point",
-        "function_token_typing_FStar.HyperHeap.test0", "int_inversion",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "function_token_typing_FStar.Monotonic.HyperHeap.test0",
+        "int_inversion", "primitive_Prims.op_AmpAmp",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_FStar.UInt32.Mk_v",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
         "refinement_interpretation_Spec.Curve25519_Tm_refine_64fde586cd61a9af199b0a72fdba45d1",
         "unit_inversion"
       ],
@@ -260,7 +297,13 @@
       1,
       0,
       1,
-      [ "@query" ],
+      [
+        "@query", "equation_FStar.UInt32.uint_to_t",
+        "equation_FStar.UInt32.v", "equation_FStar.UInt8.n",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt32.Mk_v"
+      ],
       0
     ],
     [
@@ -291,7 +334,13 @@
       1,
       0,
       1,
-      [ "@query" ],
+      [
+        "@query", "equation_FStar.UInt32.uint_to_t",
+        "equation_FStar.UInt32.v", "equation_FStar.UInt8.n",
+        "proj_equation_FStar.UInt32.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt32.Mk_v"
+      ],
       0
     ],
     [

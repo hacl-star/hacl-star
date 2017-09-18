@@ -1,4 +1,5 @@
 *.o
+*.so
 *.exe
 *.exe.dSYM
 out.krml
@@ -13,7 +14,6 @@ lib/hst/ml/*.o
 test/hash/ml/*
 test/hash/*.exe
 test/hash/sha256
-
 test/hmac/ml/*
 test/hmac/*.exe
 test/hmac/hmac_sha256
@@ -22,6 +22,22 @@ pneutube/tube-star.exe
 pneutube/tube-star.exe.dSYM/
 pneutube/tube/
 
+chacha-poly-spec/
+chacha-spec/
+curve25519-spec/
+ed25519-spec/
+gf128-spec/
+poly-spec/
+salsa-spec/
+sha2-spec/
+hmac-sha2-spec/
+
+code/lib/ml/hacllib.a
+code/lib/ml/hacllib.cmxa
+code/lib/ml/*.cmi
+code/lib/ml/*.cmx
+code/lib/ml/*.o
+
 code/hash/sha2-c/
 code/hash/sha2-256-c/
 code/hash/sha2-384-c/
@@ -29,14 +45,20 @@ code/hash/sha2-512-c/
 code/hmac/hmac-c/
 code/api/aead-c/
 code/api/box-c/
+code/api/policies-c/
 code/curve25519/x25519-c/
 code/ed25519/ed25519-c/
 code/poly1305/poly-c/
 code/salsa-family/chacha-c/
 code/salsa-family/chacha-vec128/
+code/salsa-family/chacha-vec128-c/
 code/salsa-family/hsalsa-c/
 code/salsa-family/salsa-c/
 code/salsa-family/xsalsa-c/
+
+secure_api/LowCProvider/.depend
+
+snapshots/hacl-c/bench.txt
 
 doc/tutorial/0-coding-field-arithmetic-in-fstar/extracted_c/
 doc/tutorial/1-recursion-vs-loops/extracted_c/

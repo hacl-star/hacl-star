@@ -5,6 +5,7 @@
 #include "tweetnacl.h"
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
+#include "hacl_test_utils.h"
 
 void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
@@ -75,19 +76,12 @@ int32_t perf_hmac_sha256() {
   uint32_t key_len = 64 * sizeof(char);
   uint8_t* plain = malloc(len);
   uint8_t* key = malloc(key_len);
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plain, len);
-  uint64_t res2 = read(fd, key, key_len);
+  if (! (read_random_bytes(len, plain)))
+    return 1;
+  if (! (read_random_bytes(key_len, key))
+    return 1;
   uint8_t* macs = malloc(ROUNDS * SIGSIZE * sizeof(char));
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return 1;
-  }
-  if (res2 != key_len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res2);
-    return 1;
-  }
-  
+
   cycles a,b;
   clock_t t1,t2;
 
@@ -156,7 +150,7 @@ int32_t perf_hmac_sha256() {
 
   return exit_success;
 }
-  
+
 int32_t main(int argc, char *argv[])
 {
   if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
@@ -167,7 +161,7 @@ int32_t main(int argc, char *argv[])
     return res;
   } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
     return test_hmac_sha256();
-  } else {    
+  } else {
     printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
     return exit_failure;
   }

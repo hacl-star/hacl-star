@@ -5,7 +5,7 @@
 #include "internal/poly1305.h"
 #include "poly1305_local.h"
 #include "tweetnacl.h"
-
+#include "hacl_test_utils.h"
 
 #define PLAINLEN (1024*1024)
 #define ROUNDS 1000
@@ -185,13 +185,10 @@ int32_t perf_poly() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = PLAINLEN * sizeof(char);
   uint8_t* plain = malloc(len);
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plain, len);
-  uint8_t* macs = malloc(ROUNDS * MACSIZE * sizeof(char));
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  uint64_t res = 0;
+  if (! (read_random_bytes(len, plain)))
     return 1;
-  }
+  uint8_t* macs = malloc(ROUNDS * MACSIZE * sizeof(char));
 
   cycles a,b;
   clock_t t1,t2;
@@ -261,7 +258,7 @@ int32_t perf_poly() {
 
   return exit_success;
 }
-  
+
 int32_t main(int argc, char *argv[])
 {
   if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
@@ -272,7 +269,7 @@ int32_t main(int argc, char *argv[])
     return res;
   } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
     return test_poly();
-  } else {    
+  } else {
     printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
     return exit_failure;
   }

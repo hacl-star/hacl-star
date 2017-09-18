@@ -3,6 +3,7 @@
 #include "Salsa20.h"
 #include "sodium.h"
 #include "tweetnacl.h"
+#include "hacl_test_utils.h"
 
 void print_results(char *txt, double t1, uint64_t d1, int rounds, int plainlen){
   printf("Testing: %s\n", txt);
@@ -343,14 +344,34 @@ __attribute__ ((aligned (16)))  uint8_t
 
 int32_t test_salsa()
 {
-  __attribute__ ((aligned (16)))uint8_t ciphertext[TEST_LEN];
+  /* TR: we now allocate in the free store rather than on the stack,
+     because of stack overflow on Windows. */
+  uint8_t * ciphertext = hacl_aligned_malloc(16, TEST_LEN);
+  if (ciphertext == NULL) {
+    return exit_failure;
+  }
   memset(ciphertext, 0, TEST_LEN * sizeof ciphertext[0]);
-  __attribute__ ((aligned (16)))uint8_t plaintext[TEST_LEN];
+  uint8_t * plaintext = hacl_aligned_malloc(16, TEST_LEN);
+  if (plaintext == NULL) {
+    hacl_aligned_free(ciphertext);
+    return exit_failure;
+  }
   memset(plaintext, 0, TEST_LEN * sizeof plaintext[0]);
-  __attribute__ ((aligned (16)))uint8_t key[TEST_KEYSIZE];
+  uint8_t * key = hacl_aligned_malloc(16, TEST_KEYSIZE);
+  if (key == NULL) {
+    hacl_aligned_free(plaintext);
+    hacl_aligned_free(ciphertext);
+    return exit_failure;
+  }
   memset(key, 0, TEST_KEYSIZE * sizeof key[0]);
   key[(uint32_t )0] = (uint8_t )0x80;
-  __attribute__ ((aligned (16)))uint8_t nonce[TEST_NONCESIZE];
+  uint8_t * nonce = hacl_aligned_malloc(16, TEST_NONCESIZE);
+  if (nonce == NULL) {
+    hacl_aligned_free(key);
+    hacl_aligned_free(plaintext);
+    hacl_aligned_free(ciphertext);
+    return exit_failure;
+  }
   memset(nonce, 0, TEST_NONCESIZE * sizeof nonce[0]);
 
 
@@ -371,6 +392,10 @@ int32_t test_salsa()
   TestLib_compare_and_print("Sodium Salsa20", expected3, ciphertext + (uint32_t )256, (uint32_t )64);
   TestLib_compare_and_print("Sodium Salsa20", expected4, ciphertext + (uint32_t )448, (uint32_t )64);
 
+  hacl_aligned_free(nonce);
+  hacl_aligned_free(key);
+  hacl_aligned_free(plaintext);
+  hacl_aligned_free(ciphertext);
 
   return exit_success;
 }
@@ -378,31 +403,95 @@ int32_t test_salsa()
 #define LEN (PLAINLEN * sizeof(char))
 
 int32_t perf_salsa() {
+  /* TR: we now allocate in the free store rather than on the stack,
+     because of stack overflow on Windows. */
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
-  __attribute__ ((aligned (16)))uint8_t plain[LEN];
-  __attribute__ ((aligned (16)))uint8_t cipher[LEN];
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plain, LEN);
-  if (res != LEN) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
-    return 1;
+  uint64_t res = 0;
+  uint8_t * plain = malloc(LEN);
+  if (plain == NULL) {
+    return exit_failure;
+  }
+  uint8_t * cipher = hacl_aligned_malloc(16, LEN);
+  if (cipher == NULL) {
+    free(plain);
+    return exit_failure;
+  }
+  if (! (read_random_bytes(LEN, plain))) {
+    hacl_aligned_free(cipher);
+    free(plain);
+    return exit_failure;
   }
 
-  __attribute__ ((aligned (16)))uint8_t key[TEST_KEYSIZE];
+  uint8_t * key = hacl_aligned_malloc(16, TEST_KEYSIZE);
+  if (key == NULL) {
+    hacl_aligned_free(cipher);
+    free(plain);
+    return exit_failure;
+  }
   memset(key, 0, TEST_KEYSIZE * sizeof key[0]);
-  __attribute__ ((aligned (16)))uint8_t subkey[TEST_KEYSIZE];
+  uint8_t * subkey = hacl_aligned_malloc(16, TEST_KEYSIZE);
+  if (subkey == NULL) {
+    hacl_aligned_free(key);
+    hacl_aligned_free(cipher);
+    free(plain);
+    return exit_failure;
+  }
   memset(subkey, 0, TEST_KEYSIZE * sizeof subkey[0]);
   key[(uint32_t )0] = (uint8_t )0x80;
-  __attribute__ ((aligned (16)))uint8_t nonce[TEST_NONCESIZE];
+  uint8_t * nonce = hacl_aligned_malloc(16, TEST_NONCESIZE);
+  if (nonce == NULL) {
+    hacl_aligned_free(subkey);
+    hacl_aligned_free(key);
+    hacl_aligned_free(cipher);
+    free(plain);
+    return exit_failure;
+  }
   memset(nonce, 0, TEST_NONCESIZE * sizeof nonce[0]);
-  __attribute__ ((aligned (16)))uint8_t block[64];
+  uint8_t * block = hacl_aligned_malloc(16, 64);
+  if (block == NULL) {
+    hacl_aligned_free(nonce);
+    hacl_aligned_free(subkey);
+    hacl_aligned_free(key);
+    hacl_aligned_free(cipher);
+    free(plain);
+    return exit_failure;
+  }
   memset(block, 0, 64 * sizeof block[0]);
-  __attribute__ ((aligned (16)))uint8_t block_[64];
+  uint8_t * block_ = hacl_aligned_malloc(16, 64);
+  if (block_ == NULL) {
+    hacl_aligned_free(block);
+    hacl_aligned_free(nonce);
+    hacl_aligned_free(subkey);
+    hacl_aligned_free(key);
+    hacl_aligned_free(cipher);
+    free(plain);
+    return exit_failure;
+  }
   memset(block_, 0, 64 * sizeof block_[0]);
-
-  __attribute__ ((aligned (16)))uint8_t nonce_[TEST_NONCESIZE];
+  uint8_t * nonce_ = hacl_aligned_malloc(16, TEST_NONCESIZE);
+  if (nonce_ == NULL) {
+    hacl_aligned_free(block_);
+    hacl_aligned_free(block);
+    hacl_aligned_free(nonce);
+    hacl_aligned_free(subkey);
+    hacl_aligned_free(key);
+    hacl_aligned_free(cipher);
+    free(plain);
+    return exit_failure;
+  }
   memset(nonce_, 0, TEST_NONCESIZE * sizeof nonce_[0]);
-  __attribute__ ((aligned (16)))uint8_t subkey_[TEST_KEYSIZE];
+  uint8_t * subkey_ = hacl_aligned_malloc(16, TEST_KEYSIZE);
+  if (subkey_ == NULL) {
+    hacl_aligned_free(nonce_);
+    hacl_aligned_free(block_);
+    hacl_aligned_free(block);
+    hacl_aligned_free(nonce);
+    hacl_aligned_free(subkey);
+    hacl_aligned_free(key);
+    hacl_aligned_free(cipher);
+    free(plain);
+    return exit_failure;
+  }
   memset(subkey_, 0, TEST_KEYSIZE * sizeof subkey_[0]);
 
   cycles a,b;
@@ -424,7 +513,7 @@ int32_t perf_salsa() {
   hacl_utime = (double)t2 - t1;
   print_results("HACL Salsa20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < PLAINLEN; i++) 
+  for (int i = 0; i < PLAINLEN; i++)
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -439,10 +528,10 @@ int32_t perf_salsa() {
   sodium_utime = (double)t2 - t1;
   print_results("Sodium Salsa20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < PLAINLEN; i++) 
+  for (int i = 0; i < PLAINLEN; i++)
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
-  
+
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
@@ -454,11 +543,21 @@ int32_t perf_salsa() {
   tweet_utime = (double)t2 - t1;
   print_results("TweetNacl Salsa20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < PLAINLEN; i++) 
+  for (int i = 0; i < PLAINLEN; i++)
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
-  
+
   flush_results("SALSA20", hacl_cy, sodium_cy, 0, tweet_cy, hacl_utime, sodium_utime, 0, tweet_utime, ROUNDS, PLAINLEN);
+
+  hacl_aligned_free(subkey_);
+  hacl_aligned_free(nonce_);
+  hacl_aligned_free(block_);
+  hacl_aligned_free(block);
+  hacl_aligned_free(nonce);
+  hacl_aligned_free(subkey);
+  hacl_aligned_free(key);
+  hacl_aligned_free(cipher);
+  free(plain);
 
   return exit_success;
 }
@@ -468,12 +567,13 @@ int32_t main(int argc, char *argv[])
   if (argc < 2 || strcmp(argv[1], "perf") == 0 ) {
     int32_t res = test_salsa();
     if (res == exit_success) {
+      printf("Before perf\n");
       res = perf_salsa();
     }
     return res;
   } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
     return test_salsa();
-  } else {    
+  } else {
     printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
     return exit_failure;
   }

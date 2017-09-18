@@ -3,6 +3,7 @@
 #include "Chacha20.h"
 #include "sodium.h"
 #include "openssl/evp.h"
+#include "hacl_test_utils.h"
 
 void ossl_chacha20(uint8_t* cipher, uint8_t* plain, int len, uint8_t* nonce, uint8_t* key){
   EVP_CIPHER_CTX *ctx;
@@ -369,7 +370,7 @@ nonce[12] =
 int32_t test_chacha()
 {
   uint8_t ciphertext[114];
-  memset(ciphertext, 0, 114 * sizeof ciphertext[0]); 
+  memset(ciphertext, 0, 114 * sizeof ciphertext[0]);
   uint32_t counter = (uint32_t )1;
   uint32_t ctx[32] = { 0 };
   Chacha20_chacha20(ciphertext,plaintext,114, key, nonce, counter);
@@ -384,14 +385,11 @@ int32_t test_chacha()
 int32_t perf_chacha() {
   double hacl_cy, sodium_cy, ossl_cy, hacl_utime, sodium_utime, ossl_utime;
   uint32_t len = PLAINLEN * sizeof(char);
+  uint64_t res = 0;
   uint8_t* plain = malloc(len);
   uint8_t* cipher = malloc(len);
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plain, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  if (! (read_random_bytes(len, plain)))
     return 1;
-  }
 
   uint32_t counter = (uint32_t )1;
   uint32_t ctx[32] = { 0 };
@@ -411,7 +409,7 @@ int32_t perf_chacha() {
   hacl_utime = (double) t2 - t1;
   print_results("HACL ChaCha20 speed", (double) t2 - t1,
 	        (double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < PLAINLEN; i++) 
+  for (int i = 0; i < PLAINLEN; i++)
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -426,7 +424,7 @@ int32_t perf_chacha() {
   sodium_utime = (double) t2 - t1;
   print_results("Sodium ChaCha20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < PLAINLEN; i++) 
+  for (int i = 0; i < PLAINLEN; i++)
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -441,13 +439,13 @@ int32_t perf_chacha() {
   ossl_utime = (double) t2 - t1;
   print_results("OpenSSL ChaCha20 speed", (double)t2-t1,
 		(double) b - a, ROUNDS, PLAINLEN);
-  for (int i = 0; i < PLAINLEN; i++) 
+  for (int i = 0; i < PLAINLEN; i++)
     res += (uint64_t) plain[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
-  
+
   flush_results("CHACHA20", hacl_cy, sodium_cy, ossl_cy, 0, hacl_utime, sodium_utime, ossl_utime, 0, ROUNDS, PLAINLEN);
-  
+
   return exit_success;
 }
 

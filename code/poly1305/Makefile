@@ -37,6 +37,11 @@ POLY1305_FILES=$(BIGNUM) $(POLY1305_SPECIFIC)
 
 FSTAR_INCLUDES+=--include ../bignum
 
+# Parameter for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDES)
+
 ct: $(addsuffix -lax, $(POLY1305_FILES))
 	# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
 	$(FSTAR) --lax --verify_all Poly1305_64.fst

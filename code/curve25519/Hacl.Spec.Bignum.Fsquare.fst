@@ -647,7 +647,7 @@ let lemma_mul_ineq1 (a:pos) (c:nat) (d:nat{c < d}) : Lemma (a * c < a * d) = ()
 
 val lemma_52_to_fsquare_is_fine: s:seqelem{red_52 s} ->
  Lemma (fsquare_pre_ s /\ bounds' (fsquare_spec_ s) (77 * p104) (59 * p104) (41 * p104) (23 * p104) (5 * p104))
-let lemma_52_to_fsquare_is_fine s =
+let lemma_52_to_fsquare_is_fine s = admit();
   let r0 = v (Seq.index s 0) in let r1 = v (Seq.index s 1) in let r2 = v (Seq.index s 2) in
   let r3 = v (Seq.index s 3) in let r4 = v (Seq.index s 4) in
   let d0 = r0 * 2 in let d1 = r1 * 2 in let d2 = r2 * 2 * 19 in let d3 = r3 * 19 in

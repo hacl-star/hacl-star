@@ -99,6 +99,10 @@ let word_n: hash_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> 32
   | SHA2_384 | SHA2_512 -> 64
 
+let v' #a (x:word a) = match a with
+  | SHA2_224 | SHA2_256 -> UInt32.v x
+  | SHA2_384 | SHA2_512 -> UInt64.v x
+
 let hash_w   a = m:Seq.seq (word a) {length m = size_hash_w}
 let k_w      a = m:Seq.seq (word a) {length m = size_k_w a}
 let ws_w     a = m:Seq.seq (word a) {length m = size_ws_w a}
@@ -135,7 +139,9 @@ let word_lognot: a:hash_alg -> Tot ((word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> UInt32.lognot
   | SHA2_384 | SHA2_512 -> UInt64.lognot
 
-let word_shift_right: a:hash_alg -> Tot (word a -> s:UInt32.t -> Tot (word a)) = function
+let word_shift_right: t:hash_alg -> Tot (a:word t -> s:UInt32.t -> Pure (word t)
+  (requires (v s < 8 * size_word t))
+  (ensures (fun c -> v' c = (v' a / (pow2 (v s)))))) = function
   | SHA2_224 | SHA2_256 -> UInt32.shift_right
   | SHA2_384 | SHA2_512 -> UInt64.shift_right
 

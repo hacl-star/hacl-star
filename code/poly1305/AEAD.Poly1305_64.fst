@@ -37,18 +37,20 @@ val pad_16_bytes:
   StackInline (uint8_p)
     (requires (fun h -> live h input))
     (ensures (fun h0 output h1 -> live h0 input /\ live h1 output /\ frameOf output = h1.tip
-      /\ modifies_0 h0 h1 /\ length output = 16
+      /\ modifies_0 h0 h1 /\ length output = 16 /\ output `unused_in` h0
       /\ (let o = reveal_sbytes (as_seq h1 output) in let i = reveal_sbytes (as_seq h0 input) in
          o == Spec.Chacha20Poly1305.pad_16 i)))
 let pad_16_bytes input len =
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   let b = Buffer.create (uint8_to_sint8 0uy) 16ul in
+  (**) let h1 = ST.get() in
   Buffer.blit input 0ul b 0ul len;
-  let h = ST.get() in
-  no_upd_lemma_0 h0 h input;
-  Seq.lemma_eq_intro (as_seq h input) (Seq.slice (as_seq h input) 0 (U32.v len));
-  Seq.lemma_eq_intro (Seq.slice (as_seq h b) (U32.v len) 16) (Seq.create (16 - U32.v len) (uint8_to_sint8 0uy));
-  Seq.lemma_eq_intro (reveal_sbytes (as_seq h b)) (Spec.Chacha20Poly1305.pad_16 (reveal_sbytes (as_seq h0 input)));
+  (**) let h = ST.get() in
+  (**) lemma_modifies_0_1' b h0 h1 h;
+  (**) no_upd_lemma_0 h0 h input;
+  (**) Seq.lemma_eq_intro (as_seq h input) (Seq.slice (as_seq h input) 0 (U32.v len));
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h b) (U32.v len) 16) (Seq.create (16 - U32.v len) (uint8_to_sint8 0uy));
+  (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h b)) (Spec.Chacha20Poly1305.pad_16 (reveal_sbytes (as_seq h0 input)));
   b
 
 
@@ -127,12 +129,16 @@ val pad_last:
     ))
 #reset-options "--max_fuel 0 --z3rlimit 400"
 let pad_last log st input len =
+  (**) let hinit = ST.get() in
   push_frame();
-  cut (U32.v len >= 0 /\ U32.v len < 16);
+  (**) assert (U32.v len >= 0 /\ U32.v len < 16);
+  (**) let h0 = ST.get() in
   let l =
   if U32.(len =^ 0ul) then (
     let h0 = ST.get() in
-    lemma_pad_last_modifies h0 I.(st.h);
+    // lemma_pad_last_modifies h0 I.(st.h);
+    (**) lemma_modifies_sub_0 h0 h0;
+    (**) lemma_modifies_sub_2_1 h0 h0 I.(st.h);
     log
   ) else (
     cut (U32.v len <> 0);
@@ -145,9 +151,13 @@ let pad_last log st input len =
     Hacl.Standalone.Poly1305_64.lemma_poly1305_blocks_spec_1 (S.MkState (as_seq h0 I.(st.r)) (as_seq h0 I.(st.h)) (reveal log)) (as_seq h b) 1uL;
     let l = I.poly1305_update log st b in
     let h1 = ST.get() in
+    (**) lemma_modifies_0_1 I.(st.h) h0 h h1;
     l
   ) in
+  (**) let h1 = ST.get() in
   pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 I.(st.h) hinit h0 h1 hfin;
   l
 
 
@@ -185,21 +195,28 @@ let lemma_pad_16 h b len_16 rem_16 =
 let poly1305_blocks_init st input len k =
   let len_16 = U32.(len >>^ 4ul) in
   let rem_16 = U32.(len &^ 15ul)  in
-  assert_norm(pow2 4 = 16);
-  UInt.logand_mask (U32.v len) 4;
-  Math.Lemmas.lemma_div_mod (U32.v len) 16;
-  lemma_div (U32.v len);
+  (**) assert_norm(pow2 4 = 16);
+  (**) UInt.logand_mask (U32.v len) 4;
+  (**) Math.Lemmas.lemma_div_mod (U32.v len) 16;
+  (**) lemma_div (U32.v len);
   let kr = Buffer.sub k 0ul 16ul in
   let len' = mul_div_16 len in
   let part_input = Buffer.sub input 0ul len' in
   let last_block = Buffer.offset input len' in
-  cut (length last_block = U32.v rem_16);
-  let h0 = ST.get() in
+  (**) assert (length last_block = U32.v rem_16);
+  (**) let h0 = ST.get() in
+  (**) lemma_disjoint_sub input part_input I.(st.h);
+  (**) lemma_disjoint_sub input part_input I.(st.r);
+  (**) lemma_disjoint_sub input last_block I.(st.h);
+  (**) lemma_disjoint_sub input last_block I.(st.r);
   let l = Poly.poly1305_partial st part_input (Int.Cast.uint32_to_uint64 len_16) kr in
-  let h1 = ST.get() in
+  (**) let h1 = ST.get() in
+  (**) lemma_modifies_2_comm I.(st.h) I.(st.r) h0 h1;
   let l' = pad_last l st last_block rem_16 in
-  let h2 = ST.get() in
-  lemma_pad_16 h0 input len' rem_16;
+  (**) let h2 = ST.get() in
+  (**) lemma_modifies_2_1' I.(st.h) I.(st.r) h0 h1 h2;
+  (**) lemma_modifies_2_comm I.(st.h) I.(st.r) h0 h2;
+  (**) lemma_pad_16 h0 input len' rem_16;
   l'
 
 
@@ -215,6 +232,10 @@ let poly1305_blocks_continue log st input len =
   let len' = mul_div_16 len in
   let part_input = Buffer.sub input 0ul len' in
   let last_block = Buffer.offset input len' in
+  (**) lemma_disjoint_sub input part_input I.(st.h);
+  (**) lemma_disjoint_sub input part_input I.(st.r);
+  (**) lemma_disjoint_sub input last_block I.(st.h);
+  (**) lemma_disjoint_sub input last_block I.(st.r);
   let h0 = ST.get() in
   let l = Hacl.Standalone.Poly1305_64.poly1305_blocks log st part_input (Int.Cast.uint32_to_uint64 len_16) in
   let h1 = ST.get() in

@@ -4,13 +4,13 @@ HaCl-star
 HaCl* is a formally verified cryptographic library in [F\*],
 developed as part of [Project Everest].
 
-[![Build Status](https://travis-ci.org/mitls/hacl-star.svg?branch=master)](https://travis-ci.org/mitls/hacl-star)
-
 HACL stands for High-Assurance Cryptographic Library and its design is
-inspired by discussions at the HACS series of workshops.
+inspired by discussions at the [HACS series of workshops](https://github.com/HACS-workshop).
 The goal of this library is to develop *reference* implementations
 for popular cryptographic primitives and to verify them for memory safety,
 side-channel resistance, and (where applicable) functional correctness.
+
+Research Paper (CCS 2017): https://eprint.iacr.org/2017/536
 
 All code is written and verified in F\* and then compiled to C or to
 OCaml for execution.
@@ -18,11 +18,10 @@ OCaml for execution.
 The primitives and constructions supported currently are:
 
 * Stream ciphers: Chacha20, Salsa20, XSalsa20
-* MACs: Poly1305
+* MACs: Poly1305, HMAC
 * Elliptic Curves: Curve25519
 * Elliptic Curves Signatures: Ed25519
 * Hash functions: SHA2 (256,384,512)
-* MAC: HMAC
 * NaCl API: secret_box, box
 
 HACL* can be used in two ways. The verified primitives can be directly
@@ -43,34 +42,27 @@ instead.
 
 # Warning
 
-This library is experimental and only at the pre-production stage.
-
-Do not use it in production systems without consulting the authors.
-
-
-# Build and Installation
-
-See [INSTALL.md](INSTALL.md).
-
-For convenience, C code for our verified primitives has already been extracted
-and is available in [snapshots/hacl-c](snapshots/hacl-c).
-To build the library, you need a modern C compiler (preferably GCC-6) and CMake.
-
-To build a static and shared versions of this library:
-```
-make build
-```
-
-
-[INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
+This library is at the pre-production stage.
+Please consult the authors before using it in production systems.
 
 
 # Verification and Extraction
 
-See [INSTALL.md](INSTALL.md).
 
 To verify the F\* code, you need to install the [F\*] typechecker.
+
 To extract F\* code to C, you need to install the [KreMLin] compiler.
+
+See [INSTALL.md](INSTALL.md) for prerequisites.
+
+For convenience, C code for our verified primitives has already been extracted
+and is available in [snapshots/hacl-c](snapshots/hacl-c).
+To build the library, you need a modern C compiler (preferably GCC-7) and CMake.
+
+The following command will give you more informations on how to run verification and extraction.
+```
+make
+```
 
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
 [KreMLin]: https://github.com/FStarLang/kremlin
@@ -90,7 +82,6 @@ While the raw performance is quite good, HaCl is not as fast as hand-written
 assembly code.  Linking HACL* to verified assembly language components
 is a long-term goal.
 
-
 [openssl]: https://github.com/openssl/openssl
 [libsodium]: https://github.com/jedisct1/libsodium
 
@@ -102,11 +93,6 @@ The [code/experimental](code/experimental) directory includes other (partially v
 * Encryption: AES-128, AES-256
 * MACs: GCM
 * Key Derivation: HKDF
-
-To build a static and shared versions of the experimental library:
-```
-make build-experimental
-```
 
 We are also working on a JavaScript backend to F* that would enable us to extract HACL* as a JavaScript library.
 

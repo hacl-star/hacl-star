@@ -3,7 +3,7 @@
 #include "NaCl.h"
 #include "sodium.h"
 #include "tweetnacl.h"
-
+#include "hacl_test_utils.h"
 
 #define MESSAGE_LEN 72
 #define secretbox_MACBYTES   16
@@ -147,29 +147,29 @@ int32_t test_api()
   NaCl_crypto_box_beforenm(test1, pk1, sk2);
   res = crypto_box_beforenm(test2, pk2, sk1);
   TestLib_compare_and_print("HACL beforenm", test1, test2, 32);
-  
+
   /* Testing the box primitives */
-  i = NaCl_crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk1, sk2); 
-  res = crypto_box_open_detached(decrypted, ciphertext+32, mac, MESSAGE_LEN, nonce, pk2, sk1); 
+  i = NaCl_crypto_box_detached(ciphertext, mac, msg, MESSAGE_LEN, nonce, pk1, sk2);
+  res = crypto_box_open_detached(decrypted, ciphertext+32, mac, MESSAGE_LEN, nonce, pk2, sk1);
   printf("Libsodium decryption of HACL box was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
 
-  i = crypto_box_detached(ciphertext+32, mac, msg+32, MESSAGE_LEN, nonce, pk1, sk2); 
-  res = NaCl_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, sk1); 
+  i = crypto_box_detached(ciphertext+32, mac, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
+  res = NaCl_crypto_box_open_detached(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, pk2, sk1);
   printf("HACL decryption of Libsodium box was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("Box", msg+32, decrypted+32, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
 
-  i = NaCl_crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk1, sk2); 
-  res = crypto_box_open_easy(decrypted, ciphertext+16, MESSAGE_LEN+16, nonce, pk2, sk1); 
+  i = NaCl_crypto_box_easy(ciphertext, msg, MESSAGE_LEN, nonce, pk1, sk2);
+  res = crypto_box_open_easy(decrypted, ciphertext+16, MESSAGE_LEN+16, nonce, pk2, sk1);
   printf("Libsodium decryption of HACL box_easy was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("Box", msg+32, decrypted, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
 
   i = crypto_box_easy(ciphertext+16, msg+32, MESSAGE_LEN, nonce, pk1, sk2);
   res = NaCl_crypto_box_open_easy(decrypted, ciphertext, MESSAGE_LEN, nonce, pk2, sk1);
-  printf("Box decryption of libsodium box easy was a %s.\n", res == 0 ? "success" : "failure");  
+  printf("Box decryption of libsodium box easy was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("Box", msg+32, decrypted+32, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
 
@@ -179,14 +179,11 @@ int32_t test_api()
 int32_t perf_api() {
   double hacl_cy, sodium_cy, ossl_cy, tweet_cy, hacl_utime, sodium_utime, ossl_utime, tweet_utime;
   uint32_t len = 1024*1024 * sizeof(char);
+  uint64_t res = 0;
   uint8_t* plaintext = malloc(len+16*sizeof(char));
   uint8_t* ciphertext = malloc(len+16*sizeof(char));
-  int fd = open("/dev/urandom", O_RDONLY);
-  uint64_t res = read(fd, plaintext, len);
-  if (res != len) {
-    printf("Error on reading, got %" PRIu64 " bytes\n", res);
+  if (! (read_random_bytes(len, plaintext)))
     return 1;
-  }
 
   uint8_t mac[16],mac2[16], pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES];
 
@@ -204,7 +201,7 @@ int32_t perf_api() {
   hacl_utime = (double)t2 - t1;
   print_results("Hacl Box speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < CIPHERTEXT_LEN; i++) 
+  for (int i = 0; i < CIPHERTEXT_LEN; i++)
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -219,7 +216,7 @@ int32_t perf_api() {
   sodium_utime = (double)t2 - t1;
   print_results("Sodium Box speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < len + 16 * sizeof(char); i++) 
+  for (int i = 0; i < len + 16 * sizeof(char); i++)
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -234,7 +231,7 @@ int32_t perf_api() {
   tweet_utime = (double)t2 - t1;
   print_results("TweetNacl Box speed", (double)t2-t1,
 		(double) b - a, ROUNDS, 1024 * 1024);
-  for (int i = 0; i < len + 16 * sizeof(char); i++) 
+  for (int i = 0; i < len + 16 * sizeof(char); i++)
     res += (uint64_t) ciphertext[i];
   printf("Composite result (ignore): %" PRIx64 "\n", res);
 
@@ -257,7 +254,7 @@ int32_t main(int argc, char *argv[])
     return res;
   } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
     return test_api();
-  } else {    
+  } else {
     printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
     return exit_failure;
   }
