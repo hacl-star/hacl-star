@@ -83,29 +83,57 @@ val recover_x_step_1:
 #reset-options "--max_fuel 0 --z3rlimit 200"
 [@ "substitute"]
 let recover_x_step_1 x2 y =
+  (**) let hinit = ST.get() in
   push_frame();
+  (**) let h = ST.get() in
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) 25ul in
+  (**) let h' = ST.get() in
   let one = Buffer.sub tmp 0ul 5ul in
   let y2  = Buffer.sub tmp 5ul 5ul in
   let dyyi = Buffer.sub tmp 10ul 5ul in
   let dyy = Buffer.sub tmp 15ul 5ul in
   let h0 = ST.get() in
   make_one one;
-  let h1 = ST.get() in
-  lemma_red_51_is_red_5413 (as_seq h1 y);
+  (**) let h1 = ST.get() in
+  (**) modifies_subbuffer_1 h0 h1 one tmp;
+  (**) lemma_red_51_is_red_5413 (as_seq h1 y);
   Hacl.Bignum25519.fsquare y2 y; // y2 = y `fmul` y
+  (**) let h1' = ST.get() in
+  (**) modifies_subbuffer_1 h1 h1' y2 tmp;
+  (**) lemma_modifies_1_trans tmp h0 h1 h1';
   Hacl.Bignum25519.times_d dyy y2; // dyy = d `fmul` (y `fmul` y)
+  (**) let h1'' = ST.get() in
+  (**) modifies_subbuffer_1 h1' h1'' dyy tmp;
+  (**) lemma_modifies_1_trans tmp h0 h1' h1'';
+  
   Hacl.Bignum25519.fsum dyy one;   // dyy = (d `fmul` (y `fmul` y)) `fadd` one
   let h4 = ST.get() in
-  lemma_red_53_is_red_5413 (as_seq h4 dyy);
+  (**) modifies_subbuffer_1 h1'' h4 dyy tmp;
+  (**) lemma_modifies_1_trans tmp h0 h1'' h4;
+  (**) lemma_red_53_is_red_5413 (as_seq h4 dyy);
   Hacl.Bignum25519.reduce_513 dyy;
+  (**) let h5 = ST.get() in
+  (**) modifies_subbuffer_1 h4 h5 dyy tmp;
+  (**) lemma_modifies_1_trans tmp h0 h4 h5;
   Hacl.Bignum25519.inverse dyyi dyy; // dyyi = modp_inv ((d `fmul` (y `fmul` y)) `fadd` one)
+  (**) let h6 = ST.get() in
+  (**) modifies_subbuffer_1 h5 h6 dyyi tmp;
+  (**) lemma_modifies_1_trans tmp h0 h5 h6;
   Hacl.Bignum25519.fdifference one y2; // one = (y `fmul` y) `fsub` 1
-  let h7 = ST.get() in
-  lemma_red_513_is_red_53 (as_seq h7 dyyi);
+  (**) let h7 = ST.get() in
+  (**) modifies_subbuffer_1 h6 h7 one tmp;
+  (**) lemma_modifies_1_trans tmp h0 h6 h7;
+  (**) lemma_modifies_0_1' tmp h h0 h7;
+  (**) lemma_red_513_is_red_53 (as_seq h7 dyyi);
   Hacl.Bignum25519.fmul x2 dyyi one; //
+  (**) let h8 = ST.get() in
   Hacl.Bignum25519.reduce x2;
-  pop_frame()
+  (**) let h9 = ST.get() in
+  (**) lemma_modifies_1_trans x2 h7 h8 h9;
+  (**) lemma_modifies_0_1 x2 h h7 h9;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 x2 hinit h h9 hfin
 
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
@@ -156,10 +184,16 @@ let mul_modp_sqrt_m1 x =
   let open FStar.Mul in
   assert_norm(pow2 51 = 0x8000000000000);
   assert_norm((0x00061b274a0ea0b0 + pow2 51 * 0x0000d5a5fc8f189d + pow2 102 *  0x0007ef5e9cbd0c60 + pow2 153 *  0x00078595a6804c9e + pow2 204 * 0x0002b8324804fc1d) % (pow2 255 - 19) = Spec.Ed25519.modp_sqrt_m1);
+  let h0 = ST.get() in
   push_frame();
+  let h0' = ST.get() in
   let sqrt_m1 = create 0uL 5ul in
+  let h0'' = ST.get() in
   Hacl.Lib.Create64.make_h64_5 sqrt_m1 0x00061b274a0ea0b0uL 0x0000d5a5fc8f189duL 0x0007ef5e9cbd0c60uL 0x00078595a6804c9euL 0x0002b8324804fc1duL;
   let h = ST.get() in
+  lemma_modifies_0_1' sqrt_m1 h0' h0'' h;
+  no_upd_fresh h0 h0' x;
+  no_upd_lemma_0 h0' h x;
   lemma_intro_red_51 (as_seq h sqrt_m1);
   lemma_reveal_seval (as_seq h sqrt_m1);
   assert(seval (as_seq h sqrt_m1) = Spec.Ed25519.modp_sqrt_m1);
@@ -301,13 +335,13 @@ let x_mod_2 x =
 
 
 private
-let lemma_modifies_2 #a #a' h (b:buffer a{live h b}) (b':buffer a'{live h b'}) :
+let lemma_modifies_2 #a #a' h (b:buffer a) (b':buffer a') :
   Lemma (modifies_2 b b' h h)
   = lemma_intro_modifies_2 b b' h h
 
 
 private
-let lemma_modifies_1 #a h (b:buffer a{live h b}) :
+let lemma_modifies_1 #a h (b:buffer a) :
   Lemma (modifies_1 b h h)
   = lemma_intro_modifies_1 b h h
 
@@ -501,50 +535,52 @@ let recover_x_ x y sign tmp =
   let h0 = ST.get() in
   let res =
   if b then (
-    let hf = ST.get() in
-    lemma_modifies_2 hf x tmp;
-    assert(modifies_2 x tmp h0 hf);
+    lemma_modifies_2 h0 x tmp;
     false
   ) else (
-    let h = ST.get() in
-    lemma_reveal_seval (as_seq h y);
-    lemma_mul_5 (v (get h y 0)) (v (get h y 1)) (v (get h y 2)) (v (get h y 3)) (v (get h y 4));
-    Math.Lemmas.modulo_lemma (let op_String_Access = Seq.index in let y = as_seq h y in
+    lemma_reveal_seval (as_seq h0 y);
+    lemma_mul_5 (v (get h0 y 0)) (v (get h0 y 1)) (v (get h0 y 2)) (v (get h0 y 3)) (v (get h0 y 4));
+    Math.Lemmas.modulo_lemma (let op_String_Access = Seq.index in let y = as_seq h0 y in
       v y.[0] + pow2 51 * v y.[1] + pow2 102 * v y.[2] + pow2 153 * v y.[3] + pow2 204 * v y.[4]) Spec.Curve25519.prime;
+    lemma_disjoint_sub tmp x2 y;
     recover_x_step_1 x2 y;
     let h1 = ST.get() in
-    assert(modifies_1 tmp h0 h1);
+    lemma_disjoint_sub tmp x2 x;
     let z = recover_x_step_2 x sign x2 in
     if z = 0uy then (
-      let h = ST.get() in
-      lemma_modifies_1 h x;
-      assert(modifies_2 x tmp h0 h);
+      lemma_modifies_1 h0 x;
       false
     ) else if z = 1uy then (
-      let h = ST.get() in
-      assert(modifies_2 x tmp h0 h);
       true
     ) else (
-      let h = ST.get() in
-      lemma_red_51_is_red_513 (as_seq h x2);
+      let h2 = ST.get() in
+      lemma_red_51_is_red_513 (as_seq h2 x2);
       recover_x_step_3 tmp;
+      let h3 = ST.get() in
       let z = recover_x_step_4 tmp in
       if z = false then (
-        let h = ST.get() in
-        assert(modifies_1 tmp h0 h);
-        lemma_modifies_1 h x;
-        assert(modifies_2 x tmp h0 h);
+        let h3 = ST.get() in
+        lemma_modifies_1 h3 x;
+        //assert(modifies_2 x tmp h0 h3);
         false)
       else (
+        let h4 = ST.get() in
         recover_x_step_5 x sign tmp;
-        let h = ST.get() in
-        assert(modifies_2 x tmp h0 h);
+        let h5 = ST.get() in
+        //assert (modifies_1 tmp h0 h1);
+        //assert (h1 == h2);
+        //assert (modifies_1 tmp h2 h3);
+        //assert (modifies_1 tmp h3 h4);
+        lemma_modifies_1_trans tmp h2 h3 h4;
+        //assert (modifies_1 tmp h2 h4);
+        lemma_modifies_1_trans tmp h0 h1 h4;
+        //assert (modifies_1 tmp h0 h4);
+        //assert (modifies_2 x tmp h4 h5);
+        lemma_modifies_1_2''' tmp x h0 h4 h5;
         true
-          )
-        )
-        ) in
-   let h1 = ST.get() in
-   assert(modifies_2 x tmp h0 h1);
+      )
+    )
+   ) in
    res
 
 

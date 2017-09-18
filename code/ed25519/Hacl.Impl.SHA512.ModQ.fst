@@ -44,28 +44,31 @@ val sha512_modq_pre_:
            v (out.[4]) < 0x100000000000000) ))
 #reset-options "--max_fuel 0 --z3rlimit 200"
 let sha512_modq_pre_ out prefix input len tmp =
-  assert_norm(pow2 32 = 0x100000000);
-  let h0 = ST.get() in
+  (**) assert_norm(pow2 32 = 0x100000000);
+  (**) let h0 = ST.get() in
   push_frame();
-  let h1 = ST.get() in
+  (**) let h1 = ST.get() in
   let hash = create (Hacl.Cast.uint8_to_sint8 0uy) 64ul in
-  let h2 = ST.get() in
-  no_upd_lemma_0 h1 h2 prefix;
-  no_upd_lemma_0 h1 h2 input;
+  (**) let h2 = ST.get() in
+  (**) no_upd_lemma_0 h1 h2 prefix;
+  (**) no_upd_lemma_0 h1 h2 input;
   Hacl.Impl.Sha512.sha512_pre_msg hash prefix input len;
-  let h3 = ST.get() in
-  assert(modifies_0 h1 h3);
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1' hash h1 h2 h3;
   Hacl.Impl.Load56.load_64_bytes tmp hash;
-  let h4 = ST.get() in
-  assert(modifies_2_1 tmp h1 h4);
+  (**) let h4 = ST.get() in
+  (**) lemma_modifies_0_1 tmp h1 h3 h4;
   pop_frame();
   let h5 = ST.get() in
-  assert(modifies_1 tmp h0 h5);
-  assert(let t = as_seq h5 tmp in Hacl.Impl.BignumQ.Mul.all_10_bellow_56 t);
-  assert(let t = reveal_h64s (as_seq h5 tmp) in let op_String_Access = Seq.index in
+  (**) modifies_popped_1 tmp h0 h1 h4 h5;
+  (**) assert(modifies_1 tmp h0 h5);
+  (**) assert(let t = as_seq h5 tmp in Hacl.Impl.BignumQ.Mul.all_10_bellow_56 t);
+  (**) assert(let t = reveal_h64s (as_seq h5 tmp) in let op_String_Access = Seq.index in
     Hacl.Spec.BignumQ.Eval.eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9] < pow2 512);
   Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;
-  assert_norm(pow2 252 + 27742317777372353535851937790883648493 =
+  (**) let h6 = ST.get() in
+  (**) lemma_modifies_1_1 tmp out h0 h5 h6;
+  (**) assert_norm(pow2 252 + 27742317777372353535851937790883648493 =
     0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)
 
 
@@ -111,11 +114,15 @@ let sha512_modq_pre_pre2_ out prefix prefix2 input len tmp =
   let h1 = ST.get() in
   let hash = create (Hacl.Cast.uint8_to_sint8 0uy) 64ul in
   let h2 = ST.get() in
-  Hacl.Impl.Sha512.sha512_pre_pre2_msg hash prefix prefix2 input len;
+  Hacl.Impl.Sha512.sha512_pre_pre2_msg hash prefix prefix2 input len;  
   let h3 = ST.get() in
+  (**) lemma_modifies_0_1' hash h1 h2 h3;
   Hacl.Impl.Load56.load_64_bytes tmp hash;
   let h4 = ST.get() in
+  (**) lemma_modifies_0_1 tmp h1 h3 h4;
   pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 tmp h0 h1 h4 hfin;
   let h1 = ST.get() in
   assert(modifies_1 tmp h0 h1);
   assert(let t = as_seq h1 tmp in Hacl.Impl.BignumQ.Mul.all_10_bellow_56 t);

@@ -178,7 +178,9 @@ let subm_conditional z x =
   assert_norm(pow2 56 = 0x100000000000000);
   assert_norm(pow2 32 = 0x100000000);
   push_frame();
+  let h0 = ST.get() in
   let tmp = create (uint64_to_sint64 0uL) 5ul in
+  let h1 = ST.get() in
   let x0 = x.(0ul) in
   let x1 = x.(1ul) in
   let x2 = x.(2ul) in
@@ -204,6 +206,9 @@ let subm_conditional z x =
   let y4 = y4 +^ b in
   let b  = lt x4 (y4) in
   let t4 = (shiftl_56 b +^ x4) -^ (y4) in
+  let h2 = ST.get() in
+  lemma_modifies_0_1' tmp h0 h1 h2;
+  lemma_live_disjoint h0 z tmp;
   Hacl.Lib.Create64.make_h64_5 z t0 t1 t2 t3 t4;
   choose z tmp z b;
   pop_frame()
@@ -677,27 +682,36 @@ val barrett_reduction__1:
       /\ modifies_2 qmu tmp h0 h1
     ))
 
-#reset-options "--max_fuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let barrett_reduction__1 qmu t mu tmp =
   let q   = Buffer.sub tmp 0ul 5ul in
   let qmu'  = Buffer.sub tmp 10ul 10ul in
   let qmu_264 = Buffer.sub tmp 20ul 5ul in
-  let h0' = ST.get() in
+  let h0 = ST.get() in
   div_248 q t;
   let h1 = ST.get() in
-  no_upd_lemma_1 h0' h1 q qmu;
-  no_upd_lemma_1 h0' h1 q mu;
-  Math.Lemmas.lemma_div_lt (let t = reveal_h64s (as_seq h0' t) in eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
-  let h2 = ST.get() in
+  no_upd_lemma_1 h0 h1 q qmu;
+  no_upd_lemma_1 h0 h1 q mu;
+  Math.Lemmas.lemma_div_lt
+    (let t = reveal_h64s (as_seq h0 t) in
+      eval_q_10 t.[0] t.[1] t.[2] t.[3] t.[4] t.[5] t.[6] t.[7] t.[8] t.[9]) 512 248;
   assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
-  Spec.lemma_mul_ineq__ (eval_q (reveal_h64s (as_seq h2 q))) (eval_q (reveal_h64s (as_seq h2 mu))) 264 264;
+  Spec.lemma_mul_ineq__
+    (eval_q (reveal_h64s (as_seq h1 q))) (eval_q (reveal_h64s (as_seq h1 mu))) 264 264;
   mul_5 qmu q mu;
-  let h3 = ST.get() in
+  let h2 = ST.get() in
   carry qmu' qmu;
+  let h3 = ST.get() in
+  div_264 qmu_264 qmu';
   let h4 = ST.get() in
-  div_264 qmu_264 qmu'
-
+//  assert (modifies_1 tmp h0 h1);
+//  assert (modifies_1 qmu h1 h2);
+//  assert (modifies_1 tmp h2 h3);
+//  assert (modifies_1 tmp h3 h4);
+  lemma_modifies_1_1 tmp qmu h0 h1 h2;
+  lemma_modifies_2_1' tmp qmu h0 h2 h3;
+  lemma_modifies_2_1' tmp qmu h0 h3 h4
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
@@ -890,9 +904,10 @@ let barrett_reduction z t =
 (*        eval_q x < pow2 256 /\ eval_q y < pow2 256) /\ *)
 (*        eval_q (as_seq h1 z) == (eval_q (as_seq h0 x) * eval_q (as_seq h0 y)) % 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed)) *)
 
-#reset-options "--max_fuel 0 --z3rlimit 400"
+#reset-options "--max_fuel 0 --z3rlimit 40"
 
 let mul_modq out x y =
+  assert_norm(pow2 32 = 0x100000000);
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in
@@ -914,17 +929,20 @@ let mul_modq out x y =
   assert(as_seq h4 y == as_seq h0 y);
   mul_5 z x y;
   let h5 = ST.get() in
+  lemma_modifies_0_1' z h3 h4 h5;
   no_upd_lemma_1 h4 h5 z out;
   no_upd_lemma_1 h4 h5 z z';
   assert(modifies_0 h3 h5);
   Math.Lemmas.pow2_lt_compat 528 512;
   carry z' z;
   let h6 = ST.get() in
+  lemma_modifies_0_1 z' h3 h5 h6;
   no_upd_lemma_1 h5 h6 z' out;
   assert(modifies_2_1 z' h3 h6);
   pop_frame();
   let h7 = ST.get() in
   modifies_popped_1 z' h2 h3 h6 h7;
+  lemma_modifies_0_1' z' h1 h2 h7;
   assert(modifies_0 h1 h7);
   barrett_reduction_ out z';
   let h8 = ST.get() in

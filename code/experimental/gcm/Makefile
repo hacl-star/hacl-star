@@ -1,4 +1,4 @@
-include ../code/Makefile.include
+include ../../../Makefile.include
 
 all:
 	@echo
@@ -10,18 +10,24 @@ all:
 	@echo
 	$(MAKE) ver
 
-MODULES=Hacl.Symmetric.GCM.fst Hacl.Symmetric.AES.fst Hacl.AEAD.AES256GCM.fst
+SLOW=
+BROKEN=
 
-FSTAR_INCLUDES+=--include $(HACL_HOME)/code/lib
+AESGCM_FILES=Hacl.Symmetric.GCM.fst ../aesgcm/Hacl.Symmetric.AES.fst Hacl.AEAD.AES256GCM.fst
 
-ct:
-	$(FSTAR) --lax $(MODULES)
+INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/experimental/aesgcm .
 
-ver:
-	$(FSTAR) $(MODULES)
+FSTAR_INCLUDES+=$(addprefix --include , $(INCLUDE_DIRS))
 
+ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(AESGCM_FILES)))
+ct: $(addsuffix -lax, $(AESGCM_FILES))
+verify: $(addsuffix -verify, $(AESGCM_FILES))
+hints: $(addsuffix .hints, $(filter-out $(BROKEN), $(AESGCM_FILES)))
+
+all-ci: ci
 all-ct: ct
-all-ver: ver
+all-ver: verify
+all-hints: hints
 
 clean:
 	rm -f *~

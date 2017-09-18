@@ -1,4 +1,4 @@
-include ../../Makefile.include
+include ../../../Makefile.include
 
 FSTAR_LIB_ML=$(FSTAR_LIB)/ml
 
@@ -18,5 +18,5 @@ hacllib.cmxa:
 	$(OCAMLOPT) -thread -w -58 -c $(FILES)
 	$(OCAMLOPT_BARE) -package fstarlib -a $(CMX) -o hacllib.cmxa
 
-clean:	
+clean:
 	rm -f *.cmi *.cmo *.cmx *.cmxa *.o *.a *~

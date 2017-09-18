@@ -108,7 +108,7 @@ let crypto_box_detached c mac m mlen n pk sk =
 val crypto_box_open_detached:
   m:uint8_p ->
   c:uint8_p{disjoint m c} ->
-  mac:uint8_p{length mac = crypto_box_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
+  mac:uint8_p{length mac = crypto_box_MACBYTES} ->
   mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
@@ -188,14 +188,13 @@ let crypto_box_open_easy m c mlen n pk sk =
   let mlen' = Int.Cast.uint64_to_uint32 mlen in
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   let mac = sub c 16ul 16ul in
-  assume (Hacl.Policies.declassifiable mac);
   crypto_box_open_detached m c mac mlen n pk sk
 
 
 val crypto_box_open_detached_afternm:
   m:uint8_p ->
   c:uint8_p{disjoint m c} ->
-  mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
   mlen:u64{let len = U64.v mlen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
@@ -219,7 +218,6 @@ let crypto_box_open_easy_afternm m c mlen n k =
   let mlen' = Int.Cast.uint64_to_uint32 mlen in
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
   let mac = sub c 0ul 16ul in
-  assume (Hacl.Policies.declassifiable mac);
   let h0 = ST.get () in
   let t = crypto_box_open_detached_afternm m c mac mlen n k in
   let h1 = ST.get () in

@@ -77,14 +77,14 @@ let shift_ output =
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-[@"c_inline"]
+[@"substitute"]
 val shift:
   output:felem ->
   Stack unit
     (requires (fun h -> live h output))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
       /\ as_seq h1 output == shift_spec (as_seq h0 output)))
-[@"c_inline"]
+[@"substitute"]
 let rec shift output =
   let h0 = ST.get() in
   let open FStar.UInt32 in
@@ -152,7 +152,7 @@ let carry_wide_ tmp =
     Math.Lemmas.pow2_lt_compat limb_size 0;
     Math.Lemmas.pow2_lt_compat limb_n limb_size;
     Math.Lemmas.modulo_lemma (pow2 limb_size) (pow2 limb_n);
-    let r0 = wide_to_limb (tctr) &^ ((limb_one <<^ climb_size) -^ limb_one) in
+    let r0 = wide_to_limb (tctr) &^ climb_mask in
     UInt.logand_mask #limb_n (v (wide_to_limb tctr)) limb_size;
     Math.Lemmas.pow2_plus (limb_n - limb_size) (limb_size);
     Math.Lemmas.modulo_modulo_lemma (w tctr) (pow2 limb_size) (pow2 (limb_n - limb_size));
@@ -205,7 +205,7 @@ let rec carry_limb_ tmp =
     Math.Lemmas.pow2_lt_compat limb_size 0;
     Math.Lemmas.pow2_lt_compat limb_n limb_size;
     Math.Lemmas.modulo_lemma (pow2 limb_size) (pow2 limb_n);
-    let r0 = (tctr) &^ ((limb_one <<^ climb_size) -^ limb_one) in
+    let r0 = (tctr) &^ climb_mask in
     UInt.logand_mask #limb_n (v ( tctr)) limb_size;
     Math.Lemmas.pow2_plus (limb_n - limb_size) (limb_size);
     Math.Lemmas.modulo_modulo_lemma (v tctr) (pow2 limb_size) (pow2 (limb_n - limb_size));
@@ -249,7 +249,7 @@ let carry_0_to_1 output =
   Math.Lemmas.pow2_le_compat (limb_n - 1) limb_size;
   Math.Lemmas.lemma_div_lt (v i0) (limb_n) (limb_size);
   Math.Lemmas.pow2_le_compat (limb_n - 1) (limb_n - limb_size);
-  let i0' = i0 &^ ((limb_one <<^ climb_size) -^ limb_one) in
+  let i0' = i0 &^ climb_mask in
   cut (v i1 < pow2 (limb_size));
   let i1'   = i1 +^ (i0 >>^ climb_size) in
   output.(0ul) <- i0';

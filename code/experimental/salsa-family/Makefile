@@ -1,4 +1,4 @@
-include ../../Makefile.include
+include ../../../Makefile.include
 
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe \
 		--include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib \

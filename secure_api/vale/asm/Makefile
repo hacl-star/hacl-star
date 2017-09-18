@@ -1,4 +1,4 @@
-include ../../../code/Makefile.include
+include ../../../Makefile.include
 
 # Override to get cross-compilation
 MARCH?=$(shell uname -m)

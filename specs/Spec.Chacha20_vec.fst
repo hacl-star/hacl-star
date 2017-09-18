@@ -27,16 +27,16 @@ type counter = UInt.uint_t 32
 type vec   = v:seq UInt32.t {length v = 4}
 type state = m:seq vec      {length m = 4}
 type idx = n:nat{n < 4}
-type shuffle = state -> Tot state 
+type shuffle = state -> Tot state
 
-(* unfold  *)let op_Plus_Percent_Hat (x:vec) (y:vec) : Tot vec = 
+(* unfold  *)let op_Plus_Percent_Hat (x:vec) (y:vec) : Tot vec =
        Spec.Loops.seq_map2 U32.op_Plus_Percent_Hat x y
 
-(* unfold *) let op_Hat_Hat (x:vec) (y:vec) : Tot vec = 
+(* unfold *) let op_Hat_Hat (x:vec) (y:vec) : Tot vec =
        Spec.Loops.seq_map2 U32.op_Hat_Hat x y
 
-(* unfold *) let op_Less_Less_Less (x:vec) (n:UInt32.t{v n < 32}) : Tot vec = 
-       Spec.Loops.seq_map (fun x -> x <<< n) x 
+(* unfold *) let op_Less_Less_Less (x:vec) (n:UInt32.t{0 < v n /\ v n < 32}) : Tot vec =
+       Spec.Loops.seq_map (fun x -> x <<< n) x
 
 let shuffle_right (x:vec) (n:idx) : Tot vec =
         let z:nat = n in
@@ -50,10 +50,10 @@ let shuffle_right (x:vec) (n:idx) : Tot vec =
 	let x = upd x 3 x3 in
 	x
 
-let shuffle_row (i:idx) (n:idx) (s:state) : Tot state = 
+let shuffle_row (i:idx) (n:idx) (s:state) : Tot state =
        upd s i (shuffle_right (index s i) n)
 
-val line: idx -> idx -> idx -> s:UInt32.t {v s < 32} -> st:state -> Tot state
+val line: idx -> idx -> idx -> s:UInt32.t {0 < v s /\ v s < 32} -> st:state -> Tot state
 let line a b d s m =
   let ma = index m a in let mb = index m b in let md = index m d in
   let ma = ma +%^ mb in
@@ -94,14 +94,14 @@ let double_round (st:state) : Tot state =
   let st = diagonal_round st in
   st
 
-let rounds (st:state) : Tot state = 
+let rounds (st:state) : Tot state =
     iter 10 double_round st (* 20 rounds *)
 
-let chacha20_core (s:state) : Tot state = 
+let chacha20_core (s:state) : Tot state =
     let s' = rounds s in
     Spec.Loops.seq_map2 op_Plus_Percent_Hat s' s
 
-(* state initialization *) 
+(* state initialization *)
 unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]
 let c0 = 0x61707865ul
 let c1 = 0x3320646eul
@@ -122,9 +122,9 @@ let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     uint32s_to_le 4 (index st' 0) @|
     uint32s_to_le 4 (index st' 1) @|
     uint32s_to_le 4 (index st' 2) @|
-    uint32s_to_le 4 (index st' 3) 
+    uint32s_to_le 4 (index st' 3)
 
-let chacha20_ctx: Spec.CTR.block_cipher_ctx = 
+let chacha20_ctx: Spec.CTR.block_cipher_ctx =
     let open Spec.CTR in
     {
     keylen = keylen;
@@ -136,10 +136,10 @@ let chacha20_ctx: Spec.CTR.block_cipher_ctx =
 
 let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
 
-let chacha20_encrypt_bytes key nonce counter m = 
+let chacha20_encrypt_bytes key nonce counter m =
     Spec.CTR.counter_mode chacha20_ctx chacha20_cipher key nonce counter m
 
-#set-options "--lax"
+//#set-options "--lax"
 
 unfold let test_plaintext = [
     0x4cuy; 0x61uy; 0x64uy; 0x69uy; 0x65uy; 0x73uy; 0x20uy; 0x61uy;

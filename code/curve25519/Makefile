@@ -1,20 +1,23 @@
-include ../Makefile.include
+include ../../Makefile.include
 
+# Verify everything with the used parameters
 BIGNUM= \
-	../bignum/Hacl.Bignum.Limb.fst \
-	../bignum/Hacl.Spec.Bignum.Field.fst \
-	../bignum/Hacl.Bignum.Wide.fst \
-	../bignum/Hacl.Spec.Bignum.Bigint.fst \
-	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
-	../bignum/Hacl.Spec.Bignum.Fsum.fst \
-	../bignum/Hacl.Spec.Bignum.Fdifference.fst \
-	../bignum/Hacl.Spec.Bignum.Fmul.fst \
-	../bignum/Hacl.Spec.Bignum.Fscalar.fst \
-	../bignum/Hacl.Spec.Bignum.fst \
-	../bignum/Hacl.Bignum.Fscalar.fst \
-	../bignum/Hacl.Bignum.Fproduct.fst \
+	../bignum/Hacl.Bignum.Fdifference.fst \
 	../bignum/Hacl.Bignum.Fmul.fst \
-	../bignum/Hacl.Bignum.fst
+	../bignum/Hacl.Bignum.Fproduct.fst \
+	../bignum/Hacl.Bignum.Fscalar.fst \
+	../bignum/Hacl.Bignum.Fsum.fst \
+	../bignum/Hacl.Bignum.Limb.fst \
+	../bignum/Hacl.Bignum.Wide.fst \
+	../bignum/Hacl.Bignum.fst \
+	../bignum/Hacl.Spec.Bignum.Bigint.fst \
+	../bignum/Hacl.Spec.Bignum.Fdifference.fst \
+	../bignum/Hacl.Spec.Bignum.Field.fst \
+	../bignum/Hacl.Spec.Bignum.Fmul.fst \
+	../bignum/Hacl.Spec.Bignum.Fproduct.fst \
+	../bignum/Hacl.Spec.Bignum.Fscalar.fst \
+	../bignum/Hacl.Spec.Bignum.Fsum.fst \
+	../bignum/Hacl.Spec.Bignum.fst
 
 X25519_SPECIFIC= \
 	Hacl.Spec.Curve25519.Lemmas.fst \
@@ -29,6 +32,7 @@ X25519_SPECIFIC= \
 	Hacl.Spec.EC.Point.fst \
 	Hacl.EC.Point.fst \
 	Hacl.Spec.EC.AddAndDouble2.fst \
+	Hacl.Spec.EC.AddAndDouble3.fst \
 	Hacl.Spec.EC.Format.Lemmas.fst \
 	Hacl.Spec.EC.Format.fst \
 	Hacl.EC.Format.fst \
@@ -43,14 +47,16 @@ X25519_SPECIFIC= \
 	Curve25519.fst
 
 # Files that are too slow and for which verification speed must improve
-SLOW=Hacl.Spec.Bignum.Fsquare.fst
-
-# Files that still have errors
-TODO=
+SLOW=
 
 X25519_FILES=$(BIGNUM) $(X25519_SPECIFIC)
 
 FSTAR_INCLUDES+=--include ../bignum
+
+# Parameters for interactive mode
+%.fst-in:
+	@echo $(OPTIONS) --hint_info \
+	$(FSTAR_INCLUDES)
 
 ct: $(addsuffix -lax, $(X25519_FILES))
 	# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
@@ -69,8 +75,8 @@ hints: bignum-hints specific-hints
 all-hints: hints
 
 # For CI, all modules restricted from incomplete or slow ones
-bignum-ci: $(addsuffix -reloc-verify, $(filter-out $(SLOW) $(TODO), $(BIGNUM)))
-specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(X25519_SPECIFIC)))
+bignum-ci: $(addsuffix -reloc-verify, $(filter-out $(SLOW), $(BIGNUM)))
+specific-ci: $(addsuffix -verify, $(filter-out $(SLOW), $(X25519_SPECIFIC)))
 all-ci: bignum-ci specific-ci
 
 

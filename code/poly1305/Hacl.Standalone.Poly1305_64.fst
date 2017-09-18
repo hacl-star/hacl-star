@@ -177,7 +177,7 @@ let poly1305_partial st input len kr =
   (* lemma_append_empty' (encode_bytes (reveal_sbytes input)) (MkState?.log init_st); *)
   partial_log
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from Prims --using_facts_from FStar"
+#set-options "--max_fuel 0 --max_ifuel 0 --using_facts_from Prims --using_facts_from FStar"
 let sum_modifications (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem)
   : Lemma (requires (live h0 b1 /\
                      live h0 b2 /\
@@ -204,7 +204,8 @@ val poly1305_complete:
       /\ (let acc' = as_seq h1 st.h in
          let m = as_seq h0 m in
          let k = as_seq h0 k in
-         acc' == poly1305_complete m len k))
+         acc' == poly1305_complete m len k)
+  )
          (* bounds acc' p44 p44 p42 *)
          (* /\ acc == invariant (Spec.MkState r' acc' log') *)
          (* /\ Spec.MkState r' acc' log' == Hacl.Spe.Poly1305_64.poly1305_partial m len k)) *)
@@ -224,6 +225,8 @@ let poly1305_complete st m len k =
   let part_input = Buffer.sub m 0ul (Int.Cast.uint64_to_uint32 (U64.(16uL *^ len16))) in
   let last_block = Buffer.sub m (Int.Cast.uint64_to_uint32 (U64.(16uL *^ len16))) (Int.Cast.uint64_to_uint32 rem16) in
   let h0 = ST.get () in
+  lemma_disjoint_sub m part_input P.(st.r);
+  lemma_disjoint_sub m part_input P.(st.h);
   let l = poly1305_partial st part_input len16 kr in
   let h1 = ST.get () in
   P.poly1305_update_last l st last_block rem16;

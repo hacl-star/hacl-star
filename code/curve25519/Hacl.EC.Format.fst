@@ -65,6 +65,7 @@ open Hacl.Endianness
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
+[@"substitute"]
 private val upd_5: output:felem ->
   o0:limb{v o0 < pow2 51} ->
   o1:limb{v o1 < pow2 51} ->
@@ -77,6 +78,7 @@ private val upd_5: output:felem ->
       /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h1 output)
       /\ as_seq h1 output == Hacl.Spec.EC.Format.seq_upd_5 o0 o1 o2 o3 o4
     ))
+[@"substitute"]
 private let upd_5 output output0 output1 output2 output3 output4 =
   output.(0ul) <- output0;
   output.(1ul) <- output1;
@@ -92,6 +94,7 @@ private let upd_5 output output0 output1 output2 output3 output4 =
   Seq.lemma_eq_intro (as_seq h1 output) (Hacl.Spec.EC.Format.seq_upd_5 output0 output1 output2 output3 output4)
 
 
+[@"substitute"]
 private val upd_5': output:felem ->
   o0:limb -> o1:limb -> o2:limb -> o3:limb -> o4:limb ->
   Stack unit
@@ -99,6 +102,7 @@ private val upd_5': output:felem ->
     (ensures (fun h0 _ h1 -> Buffer.live h1 output /\ modifies_1 output h0 h1
       /\ as_seq h1 output == Hacl.Spec.EC.Format.seq_upd_5 o0 o1 o2 o3 o4
     ))
+[@"substitute"]
 private let upd_5' output output0 output1 output2 output3 output4 =
   output.(0ul) <- output0;
   output.(1ul) <- output1;
@@ -130,7 +134,6 @@ let fexpand output input =
   Seq.lemma_eq_intro (Seq.slice (as_seq h input) 12 20) (as_seq h (Buffer.sub input 12ul 8ul));
   Seq.lemma_eq_intro (Seq.slice (as_seq h input) 19 27) (as_seq h (Buffer.sub input 19ul 8ul));
   Seq.lemma_eq_intro (Seq.slice (as_seq h input) 24 32) (as_seq h (Buffer.sub input 24ul 8ul));
-  let mask_51 = uint64_to_limb 0x7ffffffffffffuL in
   let i0 = hload64_le (Buffer.sub input 0ul 8ul) in
   let i1 = hload64_le (Buffer.sub input 6ul 8ul) in
   let i2 = hload64_le (Buffer.sub input 12ul 8ul) in
@@ -152,6 +155,7 @@ let fexpand output input =
 open Hacl.Spec.Endianness
 open FStar.Endianness
 
+[@"substitute"]
 private val store_4:
   output:uint8_p{length output = 32} ->
   v1:limb -> v2:limb -> v3:limb -> v4:limb ->
@@ -161,6 +165,7 @@ private val store_4:
       /\ (let s = as_seq h1 output in
          s == FStar.Seq.(hlittle_bytes 8ul (v v1) @| hlittle_bytes 8ul (v v2)
                          @| hlittle_bytes 8ul (v v3) @| hlittle_bytes 8ul (v v4)))))
+[@"substitute"]
 private let store_4 output v0 v1 v2 v3 =
   let b0 = Buffer.sub output 0ul  8ul in
   let b1 = Buffer.sub output 8ul  8ul in

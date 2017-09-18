@@ -25,10 +25,11 @@ let uint32s = buffer u32
 let bytes = buffer u8
 
 (** Rotate operators on UInt32.t *)
-let op_Greater_Greater_Greater (a:u32) (s:u32{v s <= 32}) =
+let op_Greater_Greater_Greater (a:u32) (s:u32{0 < v s && v s < 32}) =
   let (m:u32{v m = 32}) = 32ul in
   (op_Greater_Greater_Hat a s) |^ (a <<^ (m -^ s))
-let op_Less_Less_Less (a:u32) (s:u32{v s <= 32}) =
+
+let op_Less_Less_Less (a:u32) (s:u32{0 < v s && v s < 32}) =
   let (m:u32{v m = 32}) = 32ul in
   (op_Less_Less_Hat a s) |^ (op_Greater_Greater_Hat a (m -^ s))
 

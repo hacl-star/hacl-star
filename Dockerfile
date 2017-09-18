@@ -5,11 +5,13 @@ MAINTAINER Benjamin Beurdouche <benjamin.beurdouche@inria.fr>
 
 # Define versions of dependencies
 ENV opamv 4.04.2
-ENV z3v z3-4.5.0
+ENV z3v 4.5.1.1f29cebd4df6-x64-ubuntu-14.04
+ENV fstarv 787a4fb921ea2ceee65396bb8c6276d3de99a94e
+ENV kremlinv 32c177d6622badce550aa08c1158f8b824480531
 
 # Install required packages and set versions
 RUN apt-get -qq update
-RUN apt-get install --yes sudo libssl-dev libsqlite3-dev g++-5 gcc-5 m4 make opam pkg-config python libgmp3-dev cmake
+RUN apt-get install --yes sudo wget libssl-dev libsqlite3-dev g++-5 gcc-5 m4 make opam pkg-config python libgmp3-dev unzip
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 200
 RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 200
 
@@ -27,28 +29,25 @@ RUN opam switch ${opamv}
 RUN opam install ocamlfind batteries sqlite3 fileutils yojson ppx_deriving_yojson zarith pprint menhir ulex process fix wasm stdint
 
 # Prepare and build Z3
-RUN git clone -b ${z3v} https://github.com/Z3Prover/z3.git
-WORKDIR z3
-RUN python scripts/mk_make.py
-WORKDIR build
-RUN make
-RUN sudo make install
+RUN wget https://github.com/FStarLang/binaries/raw/master/z3-tested/z3-${z3v}.zip
+RUN unzip z3-${z3v}.zip
+RUN mv z3-${z3v} z3
+ENV PATH "/home/Work/z3/bin:$PATH"
 WORKDIR /home/Work
 
 # Prepare and build F*
 RUN git clone https://github.com/FStarLang/FStar.git
 WORKDIR /home/Work/FStar
-# RUN git checkout 187bcc284ad075a2dcff0ac76f5479f75e1914f2
+RUN git checkout ${fstarv}
 ENV PATH "~/FStar/bin:$PATH"
 RUN opam config exec -- make -C src/ocaml-output
-RUN make ocaml -C src
-RUN opam config exec -- make -C src/ocaml-output
+RUN opam config exec -- make -C ulib/ml
 WORKDIR /home/Work
 
 # Prepare and build KreMLin
 RUN git clone https://github.com/FStarLang/kremlin.git
 WORKDIR /home/Work/kremlin
-# RUN git checkout a47b5a31b959a57c166a5de5db718c2d11980b1b
+RUN git checkout ${kremlinv}
 ENV PATH "~/kremlin:$PATH"
 RUN opam config exec -- make
 WORKDIR /home/Work
@@ -57,9 +56,8 @@ WORKDIR /home/Work
 ARG CACHEBUST=1
 RUN git clone https://github.com/mitls/hacl-star.git
 WORKDIR /home/Work/hacl-star
-RUN git checkout beurdouche_no_dependencies
-# RUN git checkout 1b415d2af711b82ccd466c6ffb232794b6b8c51b
+RUN git checkout stable
 ENV FSTAR_HOME /home/Work/FStar
 ENV KREMLIN_HOME /home/Work/kremlin
-RUN opam config exec -- make -C test snapshot
+RUN opam config exec -- make extract
 WORKDIR /home/Work

@@ -23,18 +23,16 @@ Chacha20Poly1305_aead_encrypt_poly(
   uint64_t tmp1[6] = { 0 };
   Hacl_Impl_Poly1305_64_State_poly1305_state
   st = AEAD_Poly1305_64_mk_state(tmp1, tmp1 + (uint32_t )3);
-  AEAD_Poly1305_64_poly1305_blocks_init(st, aad1, aadlen, mk);
-  AEAD_Poly1305_64_poly1305_blocks_continue(st, c, mlen);
+  (void )AEAD_Poly1305_64_poly1305_blocks_init(st, aad1, aadlen, mk);
+  (void )AEAD_Poly1305_64_poly1305_blocks_continue(st, c, mlen);
   AEAD_Poly1305_64_poly1305_blocks_finish(st, lb, mac, key_s);
 }
 
 void Chacha20Poly1305_encode_length(uint8_t *lb, uint32_t aad_len, uint32_t mlen)
 {
-  uint8_t *x0 = lb;
-  store64_le(x0, (uint64_t )aad_len);
-  uint8_t *x00 = lb + (uint32_t )8;
-  store64_le(x00, (uint64_t )mlen);
-  return;
+  store64_le(lb, (uint64_t )aad_len);
+  uint8_t *x0 = lb + (uint32_t )8;
+  store64_le(x0, (uint64_t )mlen);
 }
 
 uint32_t
@@ -94,9 +92,9 @@ Chacha20Poly1305_aead_decrypt(
   uint8_t *rmac = tmp + (uint32_t )80;
   Chacha20_chacha20_key_block(b, k1, n1, (uint32_t )0);
   uint8_t *mk = b;
-  (void )(mk + (uint32_t )16);
   Chacha20Poly1305_aead_encrypt_poly(c, mlen, rmac, aad1, aadlen, tmp);
-  uint8_t verify = Hacl_Policies_cmp_bytes(mac, rmac, (uint32_t )16);
+  uint8_t result = Hacl_Policies_cmp_bytes(mac, rmac, (uint32_t )16);
+  uint8_t verify = result;
   uint32_t res;
   if (verify == (uint8_t )0)
   {

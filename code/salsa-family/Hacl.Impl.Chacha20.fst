@@ -28,10 +28,11 @@ let uint8_p = buffer H8.t
 
 type state = b:Buffer.buffer h32{length b = 16}
 
-private
-inline_for_extraction let ( <<< ) (a:h32) (s:u32{U32.v s <= 32}) : Tot h32 =
+[@ "c_inline"]
+private let rotate_left (a:h32) (s:u32{0 < U32.v s && U32.v s < 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
+private inline_for_extraction let ( <<< ) = rotate_left
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
@@ -182,7 +183,7 @@ let idx = a:U32.t{U32.v a < 16}
 private
 val line:
   st:state ->
-  a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s < 32} ->
+  a:idx -> b:idx -> d:idx -> s:U32.t{0 < U32.v s && U32.v s < 32} ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st
@@ -441,16 +442,24 @@ val chacha20_block:
              block == chacha20_block k n (U32.v ctr) /\ k == k' /\ n == n')))
 [@ "c_inline"]
 let chacha20_block log stream_block st ctr =
+  (**) let hinit = ST.get() in
   push_frame();
-  let h_0 = ST.get() in
+  (**) let h0 = ST.get() in
+  (**) let h_0 = ST.get() in
   let st' = Buffer.create (uint32_to_sint32 0ul) 16ul in
+  (**) let h1 = ST.get() in
   let log' = chacha20_core log st' st ctr in
+  (**) let h2 = ST.get() in
+  (**) lemma_modifies_0_2' st st' h0 h1 h2;
   uint32s_to_le_bytes stream_block st' 16ul;
-  let h = ST.get() in
-  cut (reveal_sbytes (as_seq h stream_block) == chacha20_block (Ghost.reveal log').k (Ghost.reveal log').n (U32.v ctr));
-  cut (modifies_3_2 stream_block st h_0 h);
+  (**) let h = ST.get() in
+  (**) lemma_modifies_2_1'' st stream_block h0 h2 h;
+  (**) assert (reveal_sbytes (as_seq h stream_block) == chacha20_block (Ghost.reveal log').k (Ghost.reveal log').n (U32.v ctr));
+  (**) assert (modifies_3_2 stream_block st h_0 h);
   pop_frame();
-  Ghost.elift1 (fun l -> match l with | MkLog k n -> MkLog k n) log'
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_3_2 stream_block st hinit h0 h hfin;
+  (**) Ghost.elift1 (fun l -> match l with | MkLog k n -> MkLog k n) log'
 
 
 [@ "c_inline"]
@@ -557,35 +566,6 @@ let lemma_chacha20_counter_mode_0 ho output hi input len k n ctr =
 
 #reset-options " --max_fuel 0 --z3rlimit 400"
 
-val update_last:
-  output:uint8_p ->
-  plain:uint8_p{disjoint output plain} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len < 64 /\ UInt32.v len > 0} ->
-  log:log_t ->
-  st:state{disjoint st output /\ disjoint st plain} ->
-  ctr:UInt32.t{UInt32.v ctr + (length plain / 64) < pow2 32} ->
-  Stack log_t
-    (requires (fun h -> live h output /\ live h plain /\ invariant log h st))
-    (ensures (fun h0 updated_log h1 -> live h1 output /\ live h0 plain /\ invariant updated_log h1 st
-      /\ modifies_2 output st h0 h1
-      /\ (let o = reveal_sbytes (as_seq h1 output) in
-         let plain = reveal_sbytes (as_seq h0 plain) in
-         match Ghost.reveal log with | MkLog k n ->
-         o == (let mask = chacha20_cipher k n (UInt32.v ctr+(UInt32.v len / 64)) in
-               let mask = Seq.slice mask 0 (UInt32.v len) in
-               Spec.CTR.xor #(UInt32.v len) plain mask))))
-let update_last output plain len log st ctr =
-  let h0 = ST.get() in
-  push_frame();
-  let block = create (uint8_to_sint8 0uy) 64ul in
-  let l = chacha20_block log block st ctr in
-  let mask = Buffer.sub block 0ul len in
-  map2 output plain mask len (fun x y -> H8.(x ^^ y));
-  let h1 = ST.get() in
-  lemma_chacha20_counter_mode_1 h1 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr;
-  pop_frame();
-  l
-
 
 val update:
   output:uint8_p{length output = 64} ->
@@ -605,18 +585,68 @@ val update:
 let update output plain log st ctr =
   let h0 = ST.get() in
   push_frame();
+  (**) let h1 = ST.get() in
   let b  = create (uint32_to_sint32 0ul) 48ul in
+  (**) let h2 = ST.get() in
   let k  = Buffer.sub b 0ul  16ul in
   let ib = Buffer.sub b 16ul 16ul in
   let ob = Buffer.sub b 32ul 16ul in
   let l  = chacha20_core log k st ctr in
+  (**) let h3 = ST.get() in
+  (**) modifies_subbuffer_2 h2 h3 k st b;
   uint32s_from_le_bytes ib plain 16ul;
-  let h  = ST.get() in
+  (**) let h  = ST.get() in
+  (**) modifies_subbuffer_1 h3 h ib b;
   map2 ob ib k 16ul (fun x y -> H32.(x ^^ y));
+  (**) let h4  = ST.get() in
+  (**) modifies_subbuffer_1 h h4 ob b;
+  (**) lemma_modifies_1_trans b h3 h h4;
+  (**) lemma_modifies_2_1' b st h2 h3 h4;
+  (**) lemma_modifies_0_2 st b h1 h2 h4;
   uint32s_to_le_bytes output ob 16ul;
+  (**) let h5  = ST.get() in
+  (**) lemma_modifies_2_1'' st output h1 h4 h5;
   Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes (reveal_sbytes (as_seq h0 plain))
                                                        (reveal_h32s (as_seq h k));
   pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_3_2 st output h0 h1 h5 hfin;
+  l
+
+val update_last:
+  output:uint8_p ->
+  plain:uint8_p{disjoint output plain} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len < 64 /\ UInt32.v len > 0} ->
+  log:log_t ->
+  st:state{disjoint st output /\ disjoint st plain} ->
+  ctr:UInt32.t{UInt32.v ctr + (length plain / 64) < pow2 32} ->
+  Stack log_t
+    (requires (fun h -> live h output /\ live h plain /\ invariant log h st))
+    (ensures (fun h0 updated_log h1 -> live h1 output /\ live h0 plain /\ invariant updated_log h1 st
+      /\ modifies_2 output st h0 h1
+      /\ (let o = reveal_sbytes (as_seq h1 output) in
+         let plain = reveal_sbytes (as_seq h0 plain) in
+         match Ghost.reveal log with | MkLog k n ->
+         o == (let mask = chacha20_cipher k n (UInt32.v ctr+(UInt32.v len / 64)) in
+               let mask = Seq.slice mask 0 (UInt32.v len) in
+               Spec.CTR.xor #(UInt32.v len) plain mask))))
+let update_last output plain len log st ctr =
+  (**) let h0 = ST.get() in
+  push_frame();
+  (**) let h = ST.get() in
+  let block = create (uint8_to_sint8 0uy) 64ul in
+  (**) let h' = ST.get() in
+  let l = chacha20_block log block st ctr in
+  (**) let h'' = ST.get() in
+  (**) lemma_modifies_0_2' st block h h' h'';
+  let mask = Buffer.sub block 0ul len in
+  map2 output plain mask len (fun x y -> H8.(x ^^ y));
+  (**) let h1 = ST.get() in
+  (**) lemma_modifies_2_1'' st output h h'' h1;
+  (**) lemma_chacha20_counter_mode_1 h1 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_3_2 st output h0 h h1 hfin;
   l
 
 
@@ -681,6 +711,8 @@ let chacha20_counter_mode_blocks output plain len log st ctr =
     let o' = Buffer.sub output 0ul (64ul *^ i)  in
     let log' = update o b log st FStar.UInt32.(ctr+^ i) in
     let h' = ST.get() in
+    (**) modifies_subbuffer_2 h h' o st output;
+    (**) lemma_modifies_2_trans output st h0 h h';
     no_upd_lemma_2 h h' o st b;
     no_upd_lemma_2 h h' o st b';
     no_upd_lemma_2 h h' o st o';
@@ -739,17 +771,22 @@ let chacha20_counter_mode output plain len log st ctr =
   let part_len   = len &^ 0x3ful in
   UInt.logand_mask (UInt32.v len) 6;
   Math.Lemmas.lemma_div_mod (UInt32.v len) 64;
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   let output' = Buffer.sub output 0ul (64ul *^ blocks_len) in
   let plain'  = Buffer.sub plain  0ul (64ul *^ blocks_len) in
   let output'' = Buffer.sub output (64ul *^ blocks_len) part_len in
   let plain''  = Buffer.sub plain  (64ul *^ blocks_len) part_len in
   chacha20_counter_mode_blocks output' plain' blocks_len log st ctr;
+  (**) let h1 = ST.get() in
+  (**) modifies_subbuffer_2 h0 h1 output' st output;
   if FStar.UInt32.(part_len >^ 0ul) then (
     let _ = update_last output'' plain'' part_len log st FStar.UInt32.(ctr +^ blocks_len) in
-    ())
-  else ();
+    (**) let h' = ST.get() in
+    (**) modifies_subbuffer_2 h1 h' output'' st output)
+  else 
+    (**) lemma_modifies_sub_2 h1 h1 output st;
   let h = ST.get() in
+  (**) lemma_modifies_2_trans output st h0 h1 h;
   Seq.lemma_eq_intro (Seq.append (as_seq h output') Seq.createEmpty) (as_seq h output');
   Seq.lemma_eq_intro (as_seq h output) (Seq.append (as_seq h output') (as_seq h output''));
   Seq.lemma_eq_intro (as_seq h0 plain) (Seq.append (as_seq h0 plain') (as_seq h0 plain''));
@@ -777,8 +814,17 @@ val chacha20:
          let ctr = U32.v ctr in
          o == Spec.CTR.counter_mode chacha20_ctx chacha20_cipher k n ctr plain)))
 let chacha20 output plain len k n ctr =
+  (**) let hinit = ST.get() in
   push_frame();
+  (**) let h0 = ST.get() in
   let st = alloc () in
+  (**) let h1 = ST.get() in
   let l  = init st k n in
+  (**) let h2 = ST.get() in
+  (**) lemma_modifies_0_1' st h0 h1 h2;
   let l' = chacha20_counter_mode output plain len l st ctr in
-  pop_frame()
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_2 output st h0 h2 h3;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 output hinit h0 h3 hfin

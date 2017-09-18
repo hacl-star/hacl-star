@@ -132,13 +132,13 @@ let lemma_find_snoc #rgn #i s e =
   Seq.find_snoc s e (is_entry_domain e.x)
 *)
 
+let table_ideal_t rgn mac_rgn i = r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r == rgn}
 
 // The table exists only for idealization
 // What's in the table stays there. And the table does not have two entries with the same x.
 // TODO consider using a monotonic map to enforce those
 let table_t rgn mac_rgn (i:id) = 
-  if prf i then r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r == rgn}
-  else unit
+  if prf i then table_ideal_t rgn mac_rgn i else unit
 
 // the PRF instance, 
 // including its key and memoization table (in rgn) 
@@ -195,10 +195,12 @@ let gen rgn i =
     (* begin *)
     push_frame();
     let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
-    let keystate = Buffer.rcreate rgn 0uy (statelen i) in
     let key = Buffer.create 0uy (keylen i) in
-    let alg = cipherAlg_of_id i in
     Bytes.random (v (keylen i)) key;
+    let h = ST.get() in
+    let keystate = Buffer.rcreate rgn 0uy (statelen i) in
+    Buffer.lemma_live_disjoint h key keystate;
+    let alg = cipherAlg_of_id i in
     Block.init #i key keystate;
     let table: table_t rgn mac_rgn i =
       if prf i then 
@@ -226,7 +228,9 @@ let coerce rgn i key =
   (* | _ -> *)
     (* begin *)
     let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
+    let h = ST.get() in
     let keystate = Buffer.rcreate rgn 0uy (statelen i) in
+    Buffer.lemma_live_disjoint h key keystate;
     let alg = cipherAlg_of_id i in
     Cipher.init #i key keystate;
     State #i #rgn #mac_rgn keystate (no_table i rgn mac_rgn)
@@ -564,9 +568,9 @@ val prf_enxor:
      Buffer.frameOf (as_buffer plain) <> t.rgn /\ 
      Buffer.frameOf cipher <> t.rgn } -> ST unit
   (requires (fun h0 ->
-     Crypto.Plain.live h0 plain /\ 
+     Crypto.Plain.live h0 plain /\
      Buffer.live h0 cipher /\
-     (safeId i ==> find_otp #t.mac_rgn #i (HS.sel h0 t.table) x == None)))
+     (safeId i ==> find_otp #t.mac_rgn #i (HS.sel h0 (itable i t)) x == None)))
   (ensures (fun h0 _ h1 ->
      Crypto.Plain.live h1 plain /\ Buffer.live h1 cipher /\
      modifies_x_buffer_1 t x cipher h0 h1 /\

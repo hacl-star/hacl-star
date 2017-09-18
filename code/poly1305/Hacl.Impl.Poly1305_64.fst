@@ -43,6 +43,7 @@ let elemB : Type0  = b:felem
 let wordB : Type0  = b:uint8_p{length b <= 16}
 let wordB_16 : Type0 = b:uint8_p{length b = 16}
 
+let mask_44 = Hacl.Bignum.Parameters.mask_44
 
 #reset-options "--max_fuel 0 --z3rlimit 5"
 
@@ -126,7 +127,7 @@ let toField b block =
   let r2 = Limb.(sint128_to_sint64 (Wide.(m >>^ 88ul))) in
   upd_3 b r0 r1 r2;
   let h1 = ST.get() in
-  cut (as_seq h1 b == Hacl.Spec.Poly1305_64.toField_spec (as_seq h0 block));
+  (**) Seq.lemma_eq_intro (as_seq h1 b) (Hacl.Spec.Poly1305_64.toField_spec (as_seq h0 block));
   ()
 
 
@@ -233,22 +234,25 @@ val poly1305_update:
 let poly1305_update log st m =
   let acc = st.h in
   let r   = st.r in
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   push_frame();
-  let h1 = ST.get() in
+  (**) let h1 = ST.get() in
   let tmp = create limb_zero clen in
-  let h2 = ST.get() in
-  no_upd_lemma_0 h1 h2 r;
-  no_upd_lemma_0 h1 h2 acc;
+  (**) let h2 = ST.get() in
+  (**) no_upd_lemma_0 h1 h2 r;
+  (**) no_upd_lemma_0 h1 h2 acc;
   toField_plus_2_128 tmp m;
-  let h3 = ST.get() in
-  no_upd_lemma_1 h2 h3 tmp r;
-  no_upd_lemma_1 h2 h3 tmp acc;
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_0_1' tmp h1 h2 h3;
+  (**) no_upd_lemma_1 h2 h3 tmp r;
+  (**) no_upd_lemma_1 h2 h3 tmp acc;
   add_and_multiply acc tmp r;
   let h4 = ST.get() in
   no_upd_lemma_1 h3 h4 acc r;
+  (**) lemma_modifies_0_1 acc h1 h3 h4;
   pop_frame();
   let h5 = ST.get() in
+  (**) modifies_popped_1 st.h h0 h1 h4 h5;
   hide_log h0 m log
 
   (* let (m':erased Spec.Poly1305.word) = elift2_p #wordB_16 #HyperStack.mem #(fun m h -> live h m) #Spec.word' *)
@@ -310,18 +314,24 @@ val poly1305_process_last_block_:
 
 [@"c_inline"]
 let poly1305_process_last_block_ log block st m rem' =
-  let h0 = ST.get() in
+  (**) let hinit = ST.get() in
   push_frame();
+  (**) let h = ST.get() in
   let tmp = create limb_zero clen in
+  (**) let h' = ST.get() in
   assert_norm(pow2 32 = 0x100000000);
   Math.Lemmas.modulo_lemma (U64.v rem') (pow2 32);
   let i = FStar.Int.Cast.uint64_to_uint32 rem' in
   let h0 = ST.get() in
   toField tmp block;
   let h1 = ST.get() in
+  (**) lemma_modifies_0_1' tmp h h' h1;
   add_and_multiply st.h tmp st.r;
   let h2 = ST.get() in
+  (**) lemma_modifies_0_1 st.h h h1 h2;
   pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 st.h hinit h h2 hfin;
   hide_log h0 m log
   
 
@@ -343,15 +353,25 @@ val poly1305_process_last_block:
     ))
 [@"c_inline"]
 let poly1305_process_last_block log st m rem' =
+  (**) let hinit = ST.get() in
   push_frame();
-  let h0 = ST.get() in
+  (**) let h0 = ST.get() in
   let zero = uint8_to_sint8 0uy in
   let block = create zero 16ul in
+  (**) let h1 = ST.get() in
   let i = FStar.Int.Cast.uint64_to_uint32 rem' in
   poly1305_concat block m rem';
+  (**) let h2 = ST.get() in
   block.(i) <- uint8_to_sint8 1uy;
+  (**) let h3 = ST.get() in
+  (**) lemma_modifies_1_trans block h1 h2 h3;
+  (**) lemma_modifies_0_1' block h0 h1 h3;
   let log' = poly1305_process_last_block_ log block st m rem' in
+  (**) let h4 = ST.get() in
+  (**) lemma_modifies_0_1 st.h h0 h3 h4;
   pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_1 st.h hinit h0 h4 hfin;
   log'
 
 
@@ -618,7 +638,7 @@ let poly1305_finish st mac key_s =
   lemma_little_endian_inj (Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 mac)) (Hacl.Spec.Endianness.reveal_sbytes (Hacl.Spec.Poly1305_64.poly1305_finish_spec' (as_seq h0 acc) (as_seq h0 key_s)))
 
 
-let mk_state r h : Tot poly1305_state = MkState r h
+let mk_state r h = MkState r h
 
 val alloc:
   unit -> StackInline poly1305_state

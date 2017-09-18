@@ -97,7 +97,8 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached(
   Salsa20_hsalsa20(subkey, k1, n1);
   Salsa20_salsa20(mackey, mackey_, (uint32_t )32, subkey, n1 + (uint32_t )16, (uint64_t )0);
   Poly1305_64_crypto_onetimeauth(cmac, c + (uint32_t )32, clen, mackey);
-  uint8_t verify = Hacl_Policies_cmp_bytes(mac, cmac, (uint32_t )16);
+  uint8_t result = Hacl_Policies_cmp_bytes(mac, cmac, (uint32_t )16);
+  uint8_t verify = result;
   uint32_t
   z =
     Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached_decrypt(m,

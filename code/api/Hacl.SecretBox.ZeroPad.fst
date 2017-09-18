@@ -93,6 +93,7 @@ let crypto_secretbox_detached c mac m mlen n k =
   let h5 = ST.get() in
   set_zero_bytes(subkey);
   let h6 = ST.get() in
+  lemma_modifies_0_1' subkey h0 h1 h2;
   lemma_crypto_secretbox_detached h0 h2 h3 h4 h5 h6 subkey mac c;
   pop_frame();
   0ul
@@ -133,7 +134,7 @@ let crypto_secretbox_open_detached_decrypt m c clen n subkey verify =
 val crypto_secretbox_open_detached:
   m:uint8_p ->
   c:uint8_p{disjoint m c} ->
-  mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ declassifiable mac} ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
   clen:u64{let len = U64.v clen in len + 32 = length m /\ len + 32 = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->
@@ -149,17 +150,21 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let mackey = Buffer.sub tmp 32ul 32ul in
   let mackey' = Buffer.sub tmp 64ul 32ul in
   let cmac   = Buffer.sub tmp 96ul 16ul in
-  let h0' = ST.get() in
+  let h1 = ST.get() in
   Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
+  let h2 = ST.get() in
   Salsa20.salsa20 mackey mackey' 32ul subkey (sub n 16ul 8ul) 0uL;
+  let h3 = ST.get() in
   let clen_ = Int.Cast.uint64_to_uint32 clen in
   Poly1305_64.crypto_onetimeauth cmac (sub c 32ul clen_) clen mackey;
-  let h1 = ST.get() in
-  cut (modifies_0 h0 h1);
-  assume (Hacl.Policies.declassifiable cmac);
-  let verify = cmp_bytes mac cmac 16ul in
+  let h4 = ST.get() in
+  let result = cmp_bytes mac cmac 16ul in
+  let verify = declassify_u8 result in
   let z = crypto_secretbox_open_detached_decrypt m c clen n subkey verify in
   pop_frame();
+  lemma_modifies_1_trans tmp h1 h2 h3;
+  lemma_modifies_1_trans tmp h1 h3 h4;
+  lemma_modifies_0_1' tmp h0 h1 h4;
   z
 
 
@@ -196,6 +201,4 @@ val crypto_secretbox_open_easy:
     (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
 let crypto_secretbox_open_easy m c clen n k =
   let mac = sub c 0ul 16ul in
-  (* Declassification assumption (non constant-time operations may happen on the 'mac' buffer *)
-  assume (declassifiable mac);
   crypto_secretbox_open_detached m c mac U64.(clen) n k
