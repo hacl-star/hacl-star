@@ -108,7 +108,11 @@ else
 		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
 		libhacl.so -o unit_tests.exe
 endif
+ifeq ($(UNAME), Linux)
+	LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ./unit_tests.exe
+else
 	./unit_tests.exe
+endif
 	rm libhacl.so
 
 # 32-bit unit tests
@@ -126,7 +130,11 @@ else
 		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
 		libhacl32.so -o unit_tests32.exe
 endif
+ifeq ($(UNAME), Linux)
+	LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ./unit_tests32.exe
+else
 	./unit_tests32.exe
+endif
 	rm libhacl32.so
 
 unit-tests-hacl-c:
