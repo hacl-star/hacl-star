@@ -1,5 +1,5 @@
 [
-  "×1 ¯XÁœjoÅYvš:½|",
+  "\u0012Î~ë¶¦˜õ\u001d¤mˆG]\u0012÷",
   [
     [
       "Hacl.Bignum.Parameters.clen",
@@ -2067,6 +2067,64 @@
       2,
       1,
       [ "@query", "equation_Hacl.Bignum.Parameters.v" ],
+      0
+    ],
+    [
+      "Hacl.Bignum.Parameters.mask_51",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Bignum.Parameters.mask_51",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Bignum.Parameters.mask_51",
+      3,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt64.uint_to_t", "equation_FStar.UInt64.v",
+        "equation_Hacl.Bignum.Constants.word_size",
+        "equation_Hacl.Bignum.Parameters.word_size",
+        "primitive_Prims.op_LessThanOrEqual",
+        "proj_equation_FStar.UInt64.Mk_v",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_FStar.UInt64.Mk_v"
+      ],
+      0
+    ],
+    [
+      "Hacl.Bignum.Parameters.mask_51_wide",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Bignum.Parameters.mask_51_wide",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt64.t", "equation_Hacl.Bignum.Constants.limb",
+        "equation_Hacl.Bignum.Parameters.limb",
+        "equation_Hacl.Bignum.Parameters.mask_51",
+        "function_token_typing_Hacl.Bignum.Parameters.mask_51",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_9db6d087b0800d12209f5f8381070747"
+      ],
       0
     ]
   ]
