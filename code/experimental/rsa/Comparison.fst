@@ -11,34 +11,30 @@ module I32 = FStar.Int32
 type bignum = buffer FStar.UInt64.t
 
 val isMore_loop:
-    a:bignum -> b:bignum{length b = length a} -> count:U32.t{U32.v count <= length a} -> Stack bool
+    a:bignum -> b:bignum{length b = length a} -> 
+    count:U32.t{U32.v count <= length a} -> Stack bool
     (requires (fun h -> live h a /\ live h b))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 b))
+	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 b
+         /\ live h1 a /\ live h1 b))
 let rec isMore_loop a b count =
-    push_frame();
-    let res =
     if U32.(count >^ 0ul) then
-    let count = U32.(count -^ 1ul) in
-    let t1 = a.(count) in
-    let t2 = b.(count) in
-    (if not (U64.(t1 =^ t2)) then
-        if U64.(t1 >^ t2) then true else false
-    else isMore_loop a b count)
-    else false in
-    pop_frame();
-    res
+        let count = U32.(count -^ 1ul) in
+        let t1 = a.(count) in
+        let t2 = b.(count) in
+        (if not (U64.(t1 =^ t2)) then
+            if U64.(t1 >^ t2) then true else false
+        else isMore_loop a b count)
+    else false
 
 (* if a > b then true else false *)
 val isMore:
     aLen:U32.t -> bLen:U32.t ->
-    a:bignum{length a = U32.v aLen} -> b:bignum{length b = U32.v bLen} -> Stack bool
+    a:bignum{length a = U32.v aLen} -> 
+    b:bignum{length b = U32.v bLen} -> Stack bool
     (requires (fun h -> live h a /\ live h b))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 b))
+	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 b 
+        /\ live h1 a /\ live h1 b))
 let isMore aLen bLen a b =
-    push_frame();
-    let res =
     if U32.(aLen >^ bLen) then true
     else if U32.(aLen <^ bLen) then false
-         else isMore_loop a b aLen in
-    pop_frame();
-    res
+         else isMore_loop a b aLen

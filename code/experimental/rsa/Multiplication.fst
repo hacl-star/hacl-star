@@ -38,31 +38,30 @@ val mult_inner_loop:
     i:U32.t{U32.v i < length b} -> j:U32.t{U32.v j <= length a} ->
     carry:U64.t -> res:bignum -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
-    (ensures  (fun h0 r h1 -> live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
+    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h0 res /\ 
+        live h1 res /\ modifies_1 res h0 h1))
 let rec mult_inner_loop aLen a b i j carry res =
-    push_frame();
-    (if U32.(j <^ aLen) then
-    (let (carry1, s1) = mult64 a.(j) b.(i) in
-    let (carry2, s2) = add64 res.(U32.(i +^ j)) s1 in
-    let (carry3, s3) = add64 s2 carry in
-    let carry = U64.(carry1 +^ carry2 +^ carry3) in
-    res.(U32.(i +^ j)) <- s3;
-    mult_inner_loop aLen a b i U32.(j +^ 1ul) carry res)
-    else res.(U32.(i +^ aLen)) <- carry);
-    pop_frame()
+    if U32.(j <^ aLen) then
+       (let (carry1, s1) = mult64 a.(j) b.(i) in
+        let (carry2, s2) = add64 res.(U32.(i +^ j)) s1 in
+        let (carry3, s3) = add64 s2 carry in
+        let carry = U64.(carry1 +^ carry2 +^ carry3) in
+        res.(U32.(i +^ j)) <- s3;
+        mult_inner_loop aLen a b i U32.(j +^ 1ul) carry res)
+    else res.(U32.(i +^ aLen)) <- carry
 
 val mult_outer_loop:
     aLen:U32.t -> bLen:U32.t ->
     a:bignum{U32.v aLen = length a} -> b:bignum{U32.v bLen = length b} ->
     i:U32.t{U32.(i <=^ bLen)} -> res:bignum{U32.(v (aLen +^ bLen)) = length res} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
-    (ensures  (fun h0 r h1 -> live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
+    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h0 res /\
+        live h1 res /\ modifies_1 res h0 h1))
 let rec mult_outer_loop aLen bLen a b i res =
-    push_frame();
-    (if U32.(i <^ bLen) then
-    (mult_inner_loop aLen a b i 0ul 0uL res;
-    mult_outer_loop aLen bLen a b U32.(i +^ 1ul) res));
-    pop_frame()
+    if U32.(i <^ bLen) then
+       (mult_inner_loop aLen a b i 0ul 0uL res;
+        mult_outer_loop aLen bLen a b U32.(i +^ 1ul) res)
+    else ()
 
 (* res = a * b *)
 val mult:
@@ -70,7 +69,8 @@ val mult:
     a:bignum{U32.v aLen = length a} -> b:bignum{U32.v bLen = length b} ->
     res:bignum{U32.(v (aLen +^ bLen)) = length res} -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
-    (ensures  (fun h0 r h1 -> live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
+    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h0 res /\
+        live h1 res /\ modifies_1 res h0 h1))
 let mult aLen bLen a b res =
     mult_outer_loop aLen bLen a b 0ul res
 
@@ -79,6 +79,7 @@ val sqr:
     aLen:U32.t -> a:bignum{U32.v aLen = length a} ->
     res:bignum{length res = U32.(v (2ul *^ aLen))} -> Stack unit
     (requires (fun h -> live h a /\ live h res))
-    (ensures  (fun h0 r h1 -> live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
+    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 res /\ 
+        live h1 res /\ modifies_1 res h0 h1))
 let sqr aLen a res =
     mult aLen aLen a a res
