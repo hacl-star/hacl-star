@@ -35,7 +35,7 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.SHA2_256.fst \
 		Spec.SHA2_384.fst \
 		Spec.SHA2_512.fst \
-		Spec.CryptoBox.fst
+		Spec.CryptoBox.fst \
 		Spec.HMAC.fst \
 		Spec.Ed25519.fst
 
