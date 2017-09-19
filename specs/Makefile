@@ -177,9 +177,10 @@ ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 cryptobox.exe: Spec.HSalsa20.fst experimental/Spec.SecretBox.fst Spec.Curve25519.fst Spec.CryptoBox.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p cryptobox-spec
-	$(FSTAR) $(ARGS) --odir cryptobox-spec $^
+	$(FSTAR_EXTRACT) --odir cryptobox-spec $^
+#	$(FSTAR) $(ARGS) --odir cryptobox-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> cryptobox-spec/Spec_CryptoBox.ml
-	$(OCAMLOPT) -I cryptobox-spec $(OCAML_INCLUDES) cryptobox-spec/Spec_HSalsa20.ml cryptobox-spec/Spec_SecretBox.ml cryptobox-spec/Spec_Curve25519.ml cryptobox-spec/Spec_CryptoBox.ml -o cryptobox.exe
+	$(OCAMLOPT) -I cryptobox-spec $(OCAML_INCLUDES) $(addprefix cryptobox-spec/, FStar_Endianness.ml Seq_Create.ml Spec_Loops.ml Spec_CTR.ml Spec_Lib.ml Spec_Salsa20.ml Spec_HSalsa20.ml Spec_Poly1305_Lemmas.ml Spec_Poly1305.ml Spec_SecretBox.ml Spec_Curve25519.ml Spec_CryptoBox.ml) -o cryptobox.exe
 	./cryptobox.exe
 
 clean:
