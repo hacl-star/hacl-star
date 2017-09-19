@@ -30,11 +30,12 @@ let bits_to_text bits =
 val text_to_nat_loop:
 	input:uint8_p ->
     res:bignum{disjoint input res} ->
-    len:U32.t{length res = U32.v len /\ length input = U32.(v (8ul *^ len))} ->
+    len:U32.t{length res = U32.v len /\ FStar.Mul.(8 * U32.v len) < pow2 32 /\ length input = U32.(v (8ul *^ len))} ->
     i:U32.t{U32.v i <= U32.v len} -> Stack unit
     (requires (fun h -> live h input /\ live h res))
     (ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\
-        live h1 input /\ live h1 res (*/\ modifies_1 res h0 h1 *))) 
+        live h1 input /\ live h1 res /\ modifies_1 res h0 h1))
+
 let rec text_to_nat_loop input res len i =
     if U32.(i <^ len) then
         begin
@@ -42,7 +43,7 @@ let rec text_to_nat_loop input res len i =
         let ind = U32.(len -^ i -^ 1ul) in
         res.(ind) <- inputi;
         text_to_nat_loop input res len U32.(i +^ 1ul)
-        end 
+        end
     else ()
 
 val text_to_nat:
@@ -51,19 +52,32 @@ val text_to_nat:
     res:bignum{length res = U32.v (get_size_nat len) /\ length res > 0 /\ disjoint input res} -> Stack unit
 	(requires (fun h -> live h input /\ live h res))
 	(ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\
-        live h1 input /\ live h1 res (*/\ modifies_1 res h0 h1 *)))
+        live h1 input /\ live h1 res /\ modifies_1 res h0 h1))
+
+#set-options "--z3rlimit 15 --max_fuel 2"
+
 let text_to_nat input len res =
     push_frame();
     let num_words = get_size_nat len in
+    assert(0 < U32.v num_words);
     let m = U32.(len %^ 8ul) in
-    let tmpLen = U32.(8ul *^ num_words) in 
+    assert(0 <= U32.v m /\ U32.v m < 8);
+    assume(FStar.Mul.(8 * U32.v num_words) < pow2 32);
+    let tmpLen = U32.(8ul *^ num_words) in
+    assert(FStar.Mul.(U32.(8 <= 8 * U32.v num_words)));
+    assert(FStar.Mul.(U32.v tmpLen = 8 * U32.v num_words));
+    assert(8 <= U32.v tmpLen);
+    assert(U32.(8 - (U32.v m) <= 8));
+    assert(U32.(8 - (U32.v m) <= U32.v tmpLen));
     let tmp = create 0uy tmpLen in
-    (if U32.(m =^ 0ul) then 
+    (if U32.(m =^ 0ul) then
         text_to_nat_loop input res num_words 0ul
     else
-        (blit input 0ul tmp U32.(8ul -^ m) len;
+        (
+        blit input 0ul tmp U32.(8ul -^ m) len;
         text_to_nat_loop tmp res num_words 0ul));
     pop_frame()
+
 
 val nat_to_text_loop:
 	input:bignum ->
@@ -72,7 +86,7 @@ val nat_to_text_loop:
     i:U32.t{U32.v i <= U32.v len} -> Stack unit
     (requires (fun h -> live h input /\ live h res))
     (ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\
-        live h1 input /\ live h1 res (*/\ modifies_1 res h0 h1 *))) 
+        live h1 input /\ live h1 res (*/\ modifies_1 res h0 h1 *)))
 let rec nat_to_text_loop input res len i =
     if U32.(i <^ len) then
         begin
@@ -84,11 +98,11 @@ let rec nat_to_text_loop input res len i =
     else ()
 
 val nat_to_text:
-    input:bignum -> 
-    len:U32.t -> 
+    input:bignum ->
+    len:U32.t ->
     res:uint8_p{length res = U32.v len} -> Stack unit
 	(requires (fun h -> live h input /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\ 
+	(ensures (fun h0 _ h1 -> live h0 input /\ live h0 res /\
         live h1 input  /\ live h1 res /\ modifies_1 res h0 h1))
 let nat_to_text input len res =
     push_frame();
