@@ -146,7 +146,7 @@ import-kremlin:
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_INCLUDES) $<
 
 %.fst-verify: %.fst
-	$(FSTAR) $<
+	$(FSTAR) --log_queries $< 
 %.fsti-verify: %.fsti
 	$(FSTAR) $<
 
