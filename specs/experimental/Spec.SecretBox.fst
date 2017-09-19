@@ -1,6 +1,5 @@
 module Spec.SecretBox
 
-module ST = FStar.HyperStack.ST
 (* NaCl secretbox: https://cr.yp.to/highspeed/naclcrypto-20090310.pdf *)
 
 open FStar.Seq
@@ -13,8 +12,8 @@ let noncelen = Spec.HSalsa20.noncelen + Spec.Salsa20.noncelen
 type key = lbytes keylen
 type nonce = lbytes noncelen
 type bytes = seq UInt8.t
-type plain = b:bytes{Seq.length b / Spec.Salsa20.blocklen < pow2 32}
-type cipher = b:bytes{Seq.length b >= 16 /\ (Seq.length b - 16) / Spec.Salsa20.blocklen < pow2 32}
+type plain = p:bytes{Seq.length p / Spec.Salsa20.blocklen < pow2 32}
+type cipher = c:bytes{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32}
 type cipher_detached = plain
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30"
@@ -28,11 +27,11 @@ let secretbox_init  k n =
     let mackey = slice keyblock 0 32 in
     (mackey,subkey,n2)
 
-val secretbox_process: input:bytes{length input / Spec.Salsa20.blocklen < pow2 32} ->
+val secretbox_process: input:bytes{Seq.length input / Spec.Salsa20.blocklen < pow2 32} ->
                k:Spec.Salsa20.key -> n:Spec.Salsa20.nonce ->
-               Tot (lbytes (length input))
+               Tot (lbytes (Seq.length input))
 let secretbox_process input k n =
-    let ilen = length input in
+    let ilen = Seq.length input in
     let ilen0 = if ilen < 32 then ilen else 32 in
     let (i0,irest) = split input ilen0 in
     let iblock0 = create 32 0uy @| i0 in
@@ -43,17 +42,17 @@ let secretbox_process input k n =
     output
 
 
-val secretbox_detached: m:plain ->
-    k:key -> n:nonce -> Tot (Spec.Poly1305.tag * cipher_detached)
-let secretbox_detached m k n =
+val secretbox_detached: p:plain ->
+    k:key -> n:nonce -> Tot (Spec.Poly1305.tag * c:cipher_detached{Seq.length c = Seq.length p})
+let secretbox_detached p k n =
     let (mk,ek,n) = secretbox_init k n in
-    let cipher = secretbox_process m ek n in
+    let cipher = secretbox_process p ek n in
     let mac = Spec.Poly1305.poly1305 cipher mk in
     (mac,cipher)
 
 
 val secretbox_open_detached: c:cipher_detached ->
-    mac:Spec.Poly1305.tag -> k:key -> n:nonce -> Tot (option (b:plain{Seq.length b = Seq.length c}))
+    mac:Spec.Poly1305.tag -> k:key -> n:nonce -> Tot (option (p:plain{Seq.length p = Seq.length c}))
 let secretbox_open_detached c mac k n =
     let (mk,ek,n) = secretbox_init k n in
     let xmac = Spec.Poly1305.poly1305 c mk in
@@ -63,15 +62,15 @@ let secretbox_open_detached c mac k n =
     else None
 
 
-val secretbox_easy: m:plain ->
-    k:key -> n:nonce -> Tot (b:cipher{Seq.length b = Seq.length m + 16})
-let secretbox_easy m k n =
-    let (mac,cipher) = secretbox_detached m k n in
+val secretbox_easy: p:plain ->
+    k:key -> n:nonce -> Tot (b:cipher{Seq.length b = Seq.length p + 16})
+let secretbox_easy p k n =
+    let (mac,cipher) = secretbox_detached p k n in
     mac @| cipher
 
 
 val secretbox_open_easy: c:cipher ->
-    k:key -> n:nonce -> Tot (option (b:plain{Seq.length b = Seq.length c - 16}))
+    k:key -> n:nonce -> Tot (option (p:plain{Seq.length p = Seq.length c - 16}))
 let secretbox_open_easy c k n =
     let (mac,cipher) = split c 16 in
     secretbox_open_detached cipher mac k n
@@ -118,10 +117,10 @@ let test() =
     let n:nonce = createL n in
     let p:plain = createL p in
     let (mac,cipher) = secretbox_detached p k n in
-    let p:(b:plain{length b = length cipher}) = p in
+    let p:(b:plain{Seq.length b = Seq.length cipher}) = p in
     let out_easy = secretbox_easy p k n in
     let (mac_easy,cipher_easy) = split out_easy 16 in
-    let plain:(option (b:plain{length b = length cipher})) = secretbox_open_detached cipher mac k n in
+    let plain:(option (b:plain{Seq.length b = Seq.length cipher})) = secretbox_open_detached cipher mac k n in
     let plain_easy = secretbox_open_easy (mac @| cipher) k n in
     match plain, plain_easy with
     | None, _ | _, None -> false

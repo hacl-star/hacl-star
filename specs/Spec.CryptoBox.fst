@@ -15,7 +15,7 @@ type key = lbytes keylen (* = Spec.SecretBox.key *)
 type dh_pkey = lbytes keylen (* = Spec.Curve25519.serialized_point *)
 type dh_skey = lbytes keylen (* = Spec.Curve25519.scalar *)
 type nonce = lbytes noncelen (* = Spec.SecretBox.nonce *)
-type message = Spec.SecretBox.plain
+type plain = Spec.SecretBox.plain
 type cipher = Spec.SecretBox.cipher
 
 (* Nonce for use in HSalsa20. Not the same as Spec.SecretBox.nonce *)
@@ -44,18 +44,18 @@ let cryptobox_beforenm pk sk =
   let s = Spec.Curve25519.scalarmult sk pk in
   Spec.HSalsa20.hsalsa20 s h_zero_nonce
 
-val cryptobox_afternm: m:message
+val cryptobox_afternm: p:plain
          -> n:nonce
          -> k:key
-         -> Tot cipher
+         -> Tot (c:cipher{Seq.length c = Seq.length p + 16})
 let cryptobox_afternm m n k =
   Spec.SecretBox.secretbox_easy m k n
 
-val cryptobox: m:message
+val cryptobox: p:plain
        -> n:nonce
        -> pk:dh_pkey
        -> sk:dh_skey
-       -> Tot cipher
+       -> Tot (c:cipher{Seq.length c = Seq.length p + 16})
 let cryptobox m n pk sk =
   let k = cryptobox_beforenm pk sk in
   cryptobox_afternm m n k
@@ -64,7 +64,7 @@ let cryptobox m n pk sk =
 val cryptobox_open_afternm: c:cipher
         -> n:nonce
         -> k:key
-        -> Tot (option (b:message{Seq.length b = Seq.length c - 16}))
+        -> Tot (option (p:plain{Seq.length p = Seq.length c - 16}))
 let cryptobox_open_afternm c n k =
   Spec.SecretBox.secretbox_open_easy c k n
 
@@ -72,7 +72,7 @@ val cryptobox_open: c:cipher
       -> n:nonce
       -> pk:dh_pkey
       -> (sk:dh_skey)
-      -> Tot (option (b:message{Seq.length b = Seq.length c - 16}))
+      -> Tot (option (p:plain{Seq.length p = Seq.length c - 16}))
 let cryptobox_open c n pk sk =
   let k = cryptobox_beforenm pk sk in
   cryptobox_open_afternm c n k
