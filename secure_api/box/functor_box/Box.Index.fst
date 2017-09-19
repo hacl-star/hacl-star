@@ -32,6 +32,7 @@ abstract noeq type index_module =
   | IM:
     rgn: id_log_region ->
     id: eqtype ->
+    id_log: (id_log_t rgn id) ->
     registered: (id -> Tot Type0) ->
     parent_honest: (id -> Tot Type0) ->
     honest:    (i:id -> Tot (t:Type0{t ==> registered i})) ->
@@ -43,7 +44,11 @@ abstract noeq type index_module =
         /\ h0==h1
         /\ (b <==> honest i)
         /\ (~b <==> dishonest i)))) ->
-    fresh: (i:id -> h:mem -> Tot Type0) ->
+    fresh: (i:id -> h:mem -> Tot (t:Type0{(t <==>
+                               MM.fresh id_log i h
+                               /\ ~(MM.contains id_log i true h)
+                               /\ ~(MM.contains id_log i false h))
+                               /\ (~t ==> (MM.defined id_log i h))})) ->
     lemma_registered_not_fresh: (i:id -> ST unit
       (requires fun h0 -> registered i)
       (ensures fun h0 _ h1 -> h0 == h1 /\ ~(fresh i h1))) ->
@@ -56,10 +61,13 @@ abstract noeq type index_module =
         /\ h0==h1
       ))) ->
     set_honest: (i:id -> b:bool -> ST unit
-      (requires (fun h0 -> fresh i h0 /\ (b ==> parent_honest i)))
+      (requires (fun h0 ->
+        fresh i h0
+        /\ (b ==> parent_honest i)
+      ))
       (ensures (fun h0 _ h1 ->
           (b ==> honest i)
-        /\ (~b ==> dishonest i)  
+        /\ (~b ==> dishonest i)
         /\ modifies (Set.singleton rgn) h0 h1)
       ))->
     // lemma_index_module: (i:id -> ST unit
@@ -68,7 +76,6 @@ abstract noeq type index_module =
     //   (honest i ==> (~(dishonest i)))
     //   /\ (dishonest i ==> (~(honest i)))
     // ))) ->
-    id_log: (id_log_t rgn id) ->
     index_module
 
 let get_rgn im =
@@ -189,14 +196,11 @@ private val fresh_log: #rgn:id_log_region -> #id:eqtype -> id_log:(id_log_t rgn 
 let fresh_log #rgn #id id_log i h =
     MM.fresh id_log i h
 
-val fresh: im:index_module -> i:id im -> h:mem ->
-                           t:Type0
-                           // {
-                           // (t <==>
-                           // MM.fresh im.id_log i h
-                           // /\ ~(MM.contains im.id_log i true h))
-                           // /\ (~t ==> (MM.defined im.id_log i h))
-                           // }
+val fresh: im:index_module -> i:id im -> h:mem -> (t:Type0{(t <==>
+           MM.fresh im.id_log i h
+           /\ ~(MM.contains im.id_log i true h)
+           /\ ~(MM.contains im.id_log i false h))
+           /\ (~t ==> (MM.defined im.id_log i h))})
 let fresh im i h = im.fresh i h
 
 val lemma_registered_not_fresh_log: #rgn:id_log_region -> #id:eqtype -> id_log:(id_log_t rgn id) -> i:id -> ST unit
@@ -218,7 +222,7 @@ let lemma_registered_not_fresh im i =
 #set-options "--z3rlimit 900 --max_ifuel 1 --max_fuel 2"
 val get_honest_log: #rgn:id_log_region -> #id:eqtype -> id_log: id_log_t rgn id -> i:id -> ST(b:bool)
   (requires (fun h0 ->
-    registered_log id_log i 
+    registered_log id_log i
   ))
   (ensures (fun h0 b h1 ->
     modifies_none h0 h1
@@ -258,7 +262,7 @@ let get_honest im i = im.get_honest i
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 1"
 private val set_honest_log: #rgn:id_log_region -> #id:eqtype -> id_log: id_log_t rgn id -> i:id -> b:bool -> ST unit
   (requires (fun h0 ->
-    fresh_log id_log i h0   
+    fresh_log id_log i h0
   ))
   (ensures (fun h0 _ h1 ->
       (b ==> honest_log id_log i)
@@ -276,7 +280,7 @@ let set_honest_log #rgn #id id_log i b =
 
 val set_honest: im:index_module -> i:id im -> b:bool -> ST unit
 (requires (fun h0 ->
-  fresh im i h0
+  fresh im i h0 /\ (b ==> honest im i)
 ))
 (ensures (fun h0 _ h1 ->
          (b ==> honest im i)
@@ -286,6 +290,7 @@ val set_honest: im:index_module -> i:id im -> b:bool -> ST unit
            /\ modifies (Set.singleton (get_rgn im)) h0 h1
 ))
 let set_honest im i b =
+  admit();
   im.set_honest i b
 
 val lemma_index_module: im:index_module -> i:im.id -> ST unit
@@ -325,6 +330,7 @@ let create_int rgn =
   let id_log:id_log_t rgn int = MM.alloc #rgn #int #id_log_range #(id_log_inv int) in
   // assert(False);
   IM rgn int
+       id_log
       (fun i -> registered_log id_log i)
       (fun i -> True)
       (fun i -> let b = honest_log id_log i in b)
@@ -334,13 +340,13 @@ let create_int rgn =
       (fun i -> lemma_registered_not_fresh_log id_log i)
       (fun i -> lemma_honest_or_dishonest_log id_log i)
       (fun i b -> set_honest_log id_log i b)
-      id_log
 
 val create: rgn:id_log_region -> id_t:eqtype -> St (im:index_module{get_rgn im=rgn /\ id im ==id_t })
 let create rgn id =
   let id_log:id_log_t rgn id = MM.alloc #rgn #id #id_log_range #(id_log_inv id) in
   // assert(False);
   IM rgn id
+     id_log
      (fun i -> registered_log id_log i)
      (fun i -> True)
      (fun i -> let b = honest_log id_log i in b)
@@ -350,7 +356,6 @@ let create rgn id =
      (fun i -> lemma_registered_not_fresh_log id_log i)
      (fun i -> lemma_honest_or_dishonest_log id_log i)
      (fun i b -> set_honest_log id_log i b)
-     id_log
 
 
 #set-options "--print_effect_args  --print_full_names --print_implicits --print_universes"
@@ -365,6 +370,7 @@ let compose rgn (im:index_module{im.rgn=rgn}) smaller =
   let id_log:id_log_t rgn id_t = MM.alloc #rgn #id_t #id_log_range #(id_log_inv id_t) in
     let im':(im':index_module{id im' == i:(id im * id im){b2t (smaller (fst i) (snd i))}}) = IM rgn
       id_t
+      id_log
       (fun i -> registered_log id_log i)
       (fun i -> im.honest (fst_imp i) /\ im.honest (snd_imp i))
       (fun i -> honest_log id_log i)
@@ -374,5 +380,5 @@ let compose rgn (im:index_module{im.rgn=rgn}) smaller =
       (fun i -> lemma_registered_not_fresh_log id_log i)
       (fun i -> lemma_honest_or_dishonest_log id_log i)
       (fun i b -> set_honest_log id_log i b)
-      id_log in
+      in
   im'
