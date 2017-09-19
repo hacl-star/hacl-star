@@ -183,6 +183,7 @@ update-snapshot:
 	   $(addprefix snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
 	   $(addprefix c/, kremlib.h kremlib.c FStar.h Makefile)  \
 		../snapshots/hacl-c
+	touch ../snapshots/hacl-c/Prims.h
 	$(MAKE) -C ../snapshots/hacl-c unit-tests
 	$(MAKE) -C ../snapshots/hacl-c unit-tests-32
 	$(MAKE) -C ../snapshots/hacl-c perf
