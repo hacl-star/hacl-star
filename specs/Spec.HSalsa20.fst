@@ -9,7 +9,6 @@ open FStar.Endianness
 open Seq.Create
 open Spec.Lib
 open Spec.Salsa20
-//module Salsa20 = Spec.Salsa20
 
 let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
@@ -39,7 +38,7 @@ let hsalsa20 (k:key) (n:nonce) : Tot key =
   let hs = create_8 st'.[0] st'.[5] st'.[10] st'.[15] st'.[6] st'.[7] st'.[8] st'.[9] in
   uint32s_to_le 8 hs
 
-
+(* Tests: https://cr.yp.to/highspeed/naclcrypto-20090310.pdf (Section 8)*)
 unfold let k = [
        0x4auy;0x5duy;0x9duy;0x5buy;0xa4uy;0xceuy;0x2duy;0xe1uy;
        0x72uy;0x8euy;0x3buy;0xf4uy;0x80uy;0x35uy;0x0fuy;0x25uy;

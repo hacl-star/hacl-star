@@ -76,7 +76,7 @@ let secretbox_open_easy c k n =
     secretbox_open_detached cipher mac k n
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30"
-//(* Tests: https://cr.yp.to/highspeed/naclcrypto-20090310.pdf *)
+(* Tests: https://cr.yp.to/highspeed/naclcrypto-20090310.pdf *)
 
 unfold let k = [
       0x1buy;0x27uy;0x55uy;0x64uy;0x73uy;0xe9uy;0x85uy;0xd4uy;

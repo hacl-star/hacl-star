@@ -77,6 +77,7 @@ let cryptobox_open c n pk sk =
   let k = cryptobox_beforenm pk sk in
   cryptobox_open_afternm c n k
 
+(* Tests: https://cr.yp.to/highspeed/naclcrypto-20090310.pdf *)
 unfold let k = [
         0x1buy;0x27uy;0x55uy;0x64uy;0x73uy;0xe9uy;0x85uy;0xd4uy;
         0x62uy;0xcduy;0x51uy;0x19uy;0x7auy;0x9auy;0x46uy;0xc7uy;
