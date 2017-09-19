@@ -74,7 +74,7 @@ let mpfr_GET_EXP x = mpfr_EXP x
 let mpfr_SET_EXP x e = 
     x.(0ul) <- e
 
-let gmp_NUMB_BITS = 512ul
+let gmp_NUMB_BITS = 64ul
 
 let mpfr_LIMB_ONE = 1uL
 
@@ -87,10 +87,10 @@ assume val gmpfr_flags: i32
 
 let mpfr_FLAGS_INEXACT = 8ul
 
-assume val mpfr_RET: i32 -> i32
+assume val mpfr_RET: i32 -> Tot i32
 
-assume val mpfr_IS_RNDUTEST_OR_RNDDNOTTEST: mpfr_rnd_t -> i32 -> bool
+assume val mpfr_IS_RNDUTEST_OR_RNDDNOTTEST: mpfr_rnd_t -> i32 -> Tot bool
 
-assume val mpfr_IS_LIKE_RNDZ: mpfr_rnd_t -> i32 -> bool
+assume val mpfr_IS_LIKE_RNDZ: mpfr_rnd_t -> i32 -> Tot bool
 
 let mpfr_IS_NEG x = FStar.Int32.(mpfr_SIGN x <^ 0l)

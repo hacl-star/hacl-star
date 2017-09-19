@@ -33,19 +33,22 @@ let mk_state s ax am rb sb = {
 private let mpfr_overflow (rnd:mpfr_rnd_t) (sign:i32) = mk_state sign 0l 0uL 0uL 0uL
 
 
+
 val mpfr_add1sp1_gt: bx:i32 -> bm:u64 -> 
-	              cx:i32{I32.(bx >^ cx)} -> cm:u64 -> 
+	              cx:i32{I32.v bx < pow2 31 - 1 /\ I32.v bx > I32.v cx /\ (I32.v bx - I32.v cx) < pow2 31} -> cm:u64 -> 
 		      rnd_mode:mpfr_rnd_t -> 
-		      p:mpfr_prec_t{U32.(gmp_NUMB_BITS -^ p >^ 1ul /\ 
-					 gmp_NUMB_BITS -^ p <^ 32ul)} -> 
+		      p:mpfr_prec_t{U32.v gmp_NUMB_BITS - U32.v p > 1 /\ 
+				    U32.v gmp_NUMB_BITS - U32.v p < 32} -> 
 		      Tot state
+#set-options "--z3refresh --z3rlimit 20"	      
 let mpfr_add1sp1_gt bx bm cx cm rnd_mode p =
   let sh = U32.(gmp_NUMB_BITS -^ p) in
   let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
   let mask = mpfr_LIMB_MASK sh in
-  let d = int32_to_uint32 (I32.(bx -^ cx)) in
+  let di = I32.(bx -^ cx) in
+  let d = int32_to_uint32 di in
           if U32.(d <^ sh) then 
-             let am = bm +^ (cm >>^ d) in
+             let am = bm +%^ (cm >>^ d) in
 	     let (am,bx) =  if (am <^ bm)  then 
    		            let bx = I32.(bx +^ 1l) in
 			    let am = mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul)  in
@@ -56,8 +59,9 @@ let mpfr_add1sp1_gt bx bm cx cm rnd_mode p =
 	     let am = am &^ (lognot mask) in
 	      mk_state 0l bx am rb sb
 	  else if U32.(d <^ gmp_NUMB_BITS) then
-	     let sb = cm <<^ U32.(gmp_NUMB_BITS -^ d) in
-	     let am = bm +^ (cm >>^ d) in
+	     let sh = U32.(gmp_NUMB_BITS -^ d) in
+	     let sb = cm <<^ sh in
+	     let am = bm +%^ (cm >>^ d) in
 	     let st = if (am <^ bm) then 
                             let sb = sb |^ (am &^ 1uL) in
                             let am = mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul) in
@@ -75,11 +79,13 @@ let mpfr_add1sp1_gt bx bm cx cm rnd_mode p =
              mk_state 0l bx bm 0uL 1uL
 
 
-val mpfr_add1sp1_any: bx:i32 -> bm:u64 -> 
-	              cx:i32 -> cm:u64 -> 
+val mpfr_add1sp1_any: bx:i32{I32.v bx < pow2 31 - 1} -> bm:u64 -> 
+	              cx:i32{I32.v cx < pow2 31 - 1 /\ 
+			     I32.v bx - I32.v cx < pow2 31 /\
+			     I32.v cx - I32.v bx < pow2 31} -> cm:u64 -> 
 		      rnd_mode:mpfr_rnd_t -> 
-		      p:mpfr_prec_t{U32.(gmp_NUMB_BITS -^ p >^ 1ul /\ 
-					 gmp_NUMB_BITS -^ p <^ 32ul)} -> 
+		      p:mpfr_prec_t{U32.v gmp_NUMB_BITS - U32.v p > 1 /\ 
+				    U32.v gmp_NUMB_BITS - U32.v p < 32} -> 
 		      Tot state
 let mpfr_add1sp1_any bx bm cx cm rnd_mode p = 
   let sh = U32.(gmp_NUMB_BITS -^ p) in
@@ -94,9 +100,10 @@ let mpfr_add1sp1_any bx bm cx cm rnd_mode p =
 	mpfr_add1sp1_gt bx bm cx cm rnd_mode p
     else mpfr_add1sp1_gt cx cm bx bm rnd_mode p
 
-
+val add_one_ulp: sign:i32 -> ax:i32{I32.v ax < pow2 31 - 1} -> am:u64 -> rnd_mode:mpfr_rnd_t -> sh:u32{U32.v sh < 32} ->
+		 Tot state
 let add_one_ulp sign ax am rnd_mode sh = 
-	 let am = am +^ (mpfr_LIMB_ONE <<^ sh) in
+	 let am = am +%^ (mpfr_LIMB_ONE <<^ sh) in
          if (am =^ 0uL) then
             let am = mpfr_LIMB_HIGHBIT in
             if I32.(ax +^ 1l >^ gmpfr_emax) then
@@ -105,14 +112,18 @@ let add_one_ulp sign ax am rnd_mode sh =
                 mk_state sign I32.(ax +^ 1l) am 0uL 0uL
          else mk_state sign ax am 0uL 0uL
 
+assume val neg: i32 -> Tot i32
 
-val mpfr_add1sp1_ : bx:i32 -> bm:u64 -> 
-                    cx:i32 -> cm:u64 -> 
+val mpfr_add1sp1_ : bx:i32{I32.v bx < pow2 31 - 1} -> bm:u64 -> 
+	            cx:i32{I32.v cx < pow2 31 - 1 /\ 
+			     I32.v bx - I32.v cx < pow2 31 /\
+			     I32.v cx - I32.v bx < pow2 31} -> cm:u64 -> 
 		    rnd_mode:mpfr_rnd_t -> 
-		    p:mpfr_prec_t{U32.(gmp_NUMB_BITS -^ p >^ 1ul /\ 
-		  		       gmp_NUMB_BITS -^ p <^ 32ul)} -> 
+  		    p:mpfr_prec_t{U32.v gmp_NUMB_BITS - U32.v p > 1 /\ 
+				    U32.v gmp_NUMB_BITS - U32.v p < 32} -> 
    	            s: mpfr_sign_t ->
 		    Tot state 
+#set-options "--z3refresh --z3rlimit 100"	      
 let mpfr_add1sp1_ bx bm cx cm rnd_mode p sign =
   let sh = U32.(gmp_NUMB_BITS -^ p) in
   let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
@@ -126,13 +137,15 @@ let mpfr_add1sp1_ bx bm cx cm rnd_mode p sign =
   else if ((rb =^ 0uL && sb =^ 0uL) || (MPFR_RNDF? rnd_mode)) then
         mk_state sign ax am 0uL 0uL
   else if (MPFR_RNDN? rnd_mode) then
-          if ((rb =^ 0uL || (sb =^ 0uL && (am &^ (mpfr_LIMB_ONE <<^ sh)) =^ 0uL))) then
-             mk_state I32.(0l -^ sign) ax am 0uL 0uL
-          else add_one_ulp sign ax am rnd_mode sh
-  else if (mpfr_IS_LIKE_RNDZ rnd_mode sign) then
-             mk_state I32.(0l -^ sign) ax am 0uL 0uL
-  else add_one_ulp sign ax am rnd_mode sh
-
+	 if ((rb =^ 0uL || (sb =^ 0uL && (am &^ (mpfr_LIMB_ONE <<^ sh)) =^ 0uL))) then (
+	     let ns = neg sign in
+             mk_state ns ax am 0uL 0uL)
+          else (admit(); add_one_ulp sign ax am rnd_mode sh)
+  else if (mpfr_IS_LIKE_RNDZ rnd_mode sign) then (
+             let ns = neg sign in
+             mk_state ns ax am 0uL 0uL)
+  else (admit();add_one_ulp sign ax am rnd_mode sh)
+  
 
 val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr -> 
     		  rnd_mode:mpfr_rnd_t -> p:mpfr_prec_t -> Stack i32 
