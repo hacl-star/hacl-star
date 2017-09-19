@@ -46,8 +46,8 @@ val get_plain: pm:plain_module -> (t:Type0{t == pm.plain})
 let get_plain pm =
   pm.plain
 
-val reprGT: #im:index_module -> #pm:plain_module -> #i:id im -> protected_plain_t im pm.plain i -> (p:pm.plain)
-let reprGT #im #pm #i p =
+val get_plainGT: #im:index_module -> #pm:plain_module -> #i:id im -> protected_plain_t im pm.plain i -> GTot (p:pm.plain)
+let get_plainGT #im #pm #i p =
   p
 
 
@@ -63,7 +63,7 @@ val valid_length: #pm:plain_module -> n:nat -> b:bool//{b=pm.valid_length n}
 let valid_length #pm n = pm.valid_length n
 
 val lemma_valid_length: pm:plain_module -> Lemma (requires True) (ensures pm.valid_length == valid_length #pm)
-let lemma_valid_length pm = 
+let lemma_valid_length pm =
   assert (FStar.FunctionalExtensionality.feq (pm.valid_length) (valid_length #pm));
   ()
 
@@ -71,7 +71,7 @@ val length: #im:index_module -> #pm:plain_module -> #i:id im -> (p:protected_pla
 let length #im #pm #i p =
   pm.length p
 
- val rec_repr: #im:index_module ->
+val rec_repr: #im:index_module ->
               #inner_pm:plain_module ->
               #pm:plain_module ->
               #i:id im{dishonest im i \/ not ae_ind_cpa} ->
