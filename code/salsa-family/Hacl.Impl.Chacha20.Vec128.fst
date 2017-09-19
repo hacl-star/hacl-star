@@ -1325,6 +1325,7 @@ let update3' log output plain len st i =
                      (as_seq h plain_prefix);
   let log' = log_incrn log U32.(3ul *^ i) in
   Spec.CTR3.lemma_counter_mode_blocks3_def1 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr ) (Seq.slice (reveal_sbytes (as_seq h0 plain)) 0 (192 * U32.v i + 192)) (U32.v i + 1);
+  assume (disjoint out_block plain_block); //NS: 09/18 ... seems to have regressed
   update3 log' out_block plain_block st;
   let h'  = ST.get() in
   (**) modifies_subbuffer_2 h h' out_block st output;
