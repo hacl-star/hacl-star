@@ -8,8 +8,8 @@ open FStar.UInt32
 open FStar.Endianness
 open Spec.Lib
 
-let keylen =   32 (* in bytes *)
-let noncelen = 24 (* in bytes *)
+let keylen = Spec.Salsa20.keylen
+let noncelen = Spec.HSalsa20.noncelen + Spec.Salsa20.noncelen
 type key = lbytes keylen
 type nonce = lbytes noncelen
 type bytes = seq UInt8.t
@@ -109,19 +109,19 @@ unfold let p = [
   0xe0uy;0x82uy;0xf9uy;0x37uy;0x76uy;0x38uy;0x48uy;0x64uy;
   0x5euy;0x07uy;0x05uy]
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
-
+#reset-options "--initial_fuel 0 --max_fuel 0 --max_ifuel 1 --z3rlimit 100"
 let test() =
   assert_norm(List.Tot.length k = 32);
   assert_norm(List.Tot.length n = 24);
   assert_norm(List.Tot.length p = 131);
     let k:key = createL k in
     let n:nonce = createL n in
-    let p:bytes = createL p in
+    let p:plain = createL p in
     let (mac,cipher) = secretbox_detached p k n in
+    let p:(b:plain{length b = length cipher}) = p in
     let out_easy = secretbox_easy p k n in
     let (mac_easy,cipher_easy) = split out_easy 16 in
-    let plain = secretbox_open_detached cipher mac k n in
+    let plain:(option (b:plain{length b = length cipher})) = secretbox_open_detached cipher mac k n in
     let plain_easy = secretbox_open_easy (mac @| cipher) k n in
     match plain, plain_easy with
     | None, _ | _, None -> false

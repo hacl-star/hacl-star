@@ -2,40 +2,54 @@ module Spec.CryptoBox
 
 open FStar.Seq
 open FStar.Endianness
-
-module SB = Spec.SecretBox
-module C = Spec.Curve25519
-module H = Spec.HSalsa20
+open FStar.HyperStack (* Only for the RNG *)
+open FStar.HyperStack.ST (* Only for the RNG *)
 
 type bytes = seq UInt8.t
 
-let dh_keylen = 32 (* in bytes *)
-let keylen =   32 (* in bytes *)
-let noncelen = 24 (* in bytes *)
+let dh_keylen = Spec.Curve25519.scalar_length (* in bytes *)
+let keylen =   Spec.SecretBox.keylen (* in bytes *)
+let noncelen = Spec.SecretBox.noncelen (* in bytes *)
 
-type key = lbytes keylen (* = SB.key *)
-type dh_pkey = lbytes keylen (* = C.serialized_point *)
-type dh_skey = lbytes keylen (* = C.scalar *)
-type nonce = lbytes noncelen (* = SB.nonce *)
-type message = SB.plain
-type cipher = SB.cipher
+type key = lbytes keylen (* = Spec.SecretBox.key *)
+type dh_pkey = lbytes keylen (* = Spec.Curve25519.serialized_point *)
+type dh_skey = lbytes keylen (* = Spec.Curve25519.scalar *)
+type nonce = lbytes noncelen (* = Spec.SecretBox.nonce *)
+type message = Spec.SecretBox.plain
+type cipher = Spec.SecretBox.cipher
 
-(* Nonce for use in HSalsa20. Not the same as SB.nonce *)
-private let h_zero_nonce = Seq.create H.noncelen (UInt8.uint_to_t 0)
+(* Nonce for use in HSalsa20. Not the same as Spec.SecretBox.nonce *)
+private let h_zero_nonce = Seq.create Spec.HSalsa20.noncelen (UInt8.uint_to_t 0)
+
+#set-options "--z3rlimit 1000"
+//val keygen: unit -> Stack (dh_pkey*dh_skey)
+//  (requires (fun h0 -> True))
+//  (ensures (fun h0 _ h1 ->
+//    modifies Set.empty h0 h1
+//  ))
+//let keygen() =
+//  let dh_exponent = Crypto.Symmetric.Bytes.random_bytes (UInt32.uint_to_t Spec.Curve25519.scalar_length) in
+//  let dh_share = Spec.Curve25519.scalarmult dh_exponent Spec.Curve25519.base_point in
+//  dh_share,dh_exponent
+
+
+val public_from_secret: dh_skey -> dh_pkey
+let public_from_secret sk =
+  Spec.Curve25519.scalarmult sk Spec.Curve25519.base_point
 
 val cryptobox_beforenm: pk:dh_pkey
           -> sk:dh_skey
           -> Tot (k:key)
 let cryptobox_beforenm pk sk =
-  let s = C.scalarmult sk pk in
-  H.hsalsa20 s h_zero_nonce
+  let s = Spec.Curve25519.scalarmult sk pk in
+  Spec.HSalsa20.hsalsa20 s h_zero_nonce
 
 val cryptobox_afternm: m:message
          -> n:nonce
          -> k:key
          -> Tot cipher
 let cryptobox_afternm m n k =
-  SB.secretbox_easy m k n
+  Spec.SecretBox.secretbox_easy m k n
 
 val cryptobox: m:message
        -> n:nonce
@@ -52,7 +66,7 @@ val cryptobox_open_afternm: c:cipher
         -> k:key
         -> Tot (option (b:message{Seq.length b = Seq.length c - 16}))
 let cryptobox_open_afternm c n k =
-  SB.secretbox_open_easy c k n
+  Spec.SecretBox.secretbox_open_easy c k n
 
 val cryptobox_open: c:cipher
       -> n:nonce

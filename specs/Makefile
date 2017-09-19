@@ -7,7 +7,7 @@ OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 OCAML_INCLUDES=-I ../code/lib/ml ../code/lib/ml/hacllib.cmxa
 
 all: lib
-	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe chacha20poly1305.exe gf128.exe ed25519.exe curve25519.exe sha2_256.exe sha2_384.exe sha2_512.exe hmac_sha2_256.exe hmac_sha2_384.exe hmac_sha2_512.exe sha2.exe hmac_sha2.exe
+	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe chacha20poly1305.exe gf128.exe ed25519.exe curve25519.exe sha2_256.exe sha2_384.exe sha2_512.exe hmac_sha2_256.exe hmac_sha2_384.exe hmac_sha2_512.exe sha2.exe hmac_sha2.exe hsalsa20.exe cryptobox.exe
 
 lib:
 	$(MAKE) -C ../code/lib/ml
@@ -26,11 +26,11 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Curve25519.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
+		Spec.Salsa20.fst \
 		Spec.HSalsa20.fst \
 		Spec.Lib.fst \
 		Spec.Poly1305.fst \
 		Spec.Poly1305.Lemmas.fst \
-		Spec.Salsa20.fst \
 		Spec.SHA2.fst \
 		Spec.SHA2_256.fst \
 		Spec.SHA2_384.fst \
@@ -85,6 +85,14 @@ salsa20.exe: Spec.Salsa20.fst
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> salsa-spec/Spec_Salsa20.ml
 	$(OCAMLOPT) -I salsa-spec $(OCAML_INCLUDES) salsa-spec/FStar_Endianness.ml salsa-spec/Spec_Loops.ml salsa-spec/Seq_Create.ml salsa-spec/Spec_Lib.ml salsa-spec/Spec_CTR.ml salsa-spec/Spec_Salsa20.ml -o salsa20.exe
 	./salsa20.exe
+
+hsalsa20.exe: Spec.Salsa20.fst Spec.HSalsa20.fst
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p hsalsa-spec
+	$(FSTAR_EXTRACT) --odir hsalsa-spec $^
+	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> hsalsa-spec/Spec_HSalsa20.ml
+	$(OCAMLOPT) -I hsalsa-spec $(OCAML_INCLUDES) hsalsa-spec/FStar_Endianness.ml hsalsa-spec/Spec_Loops.ml hsalsa-spec/Seq_Create.ml hsalsa-spec/Spec_Lib.ml hsalsa-spec/Spec_CTR.ml hsalsa-spec/Spec_Salsa20.ml hsalsa-spec/Spec_HSalsa20.ml -o hsalsa20.exe
+	./hsalsa20.exe
 
 chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 	$(MAKE) -C ../code/lib/ml
@@ -166,14 +174,14 @@ ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	$(OCAMLOPT) -I ed25519-spec  $(OCAML_INCLUDES) $(addprefix ed25519-spec/, FStar_Endianness.ml Spec_Loops.ml Spec_Lib.ml Spec_Curve25519.ml Seq_Create.ml Spec_SHA2_512.ml Spec_SHA512.ml Spec_Ed25519.ml) -o ed25519.exe
 	./ed25519.exe
 
-cryptobox.exe: Spec.HSalsa20.fst Spec.SecretBox.fst Spec.Curve25519.fst Spec.CryptoBox.fst
-	$(MAKE) -C ../code/lib/ml MEM=HST
+cryptobox.exe: Spec.HSalsa20.fst experimental/Spec.SecretBox.fst Spec.Curve25519.fst Spec.CryptoBox.fst
+	$(MAKE) -C ../code/lib/ml
 	mkdir -p cryptobox-spec
 	$(FSTAR) $(ARGS) --odir cryptobox-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> cryptobox-spec/Spec_CryptoBox.ml
-	$(OCAMLOPT) -I cryptobox-spec $(OCAML_INCLUDES) $(addprefix cryptobox-spec/, $(EXTRACTED)) cryptobox-spec/Combinators.ml cryptobox-spec/Spec_Lib.ml cryptobox-spec/Spec_CTR.ml cryptobox-spec/Spec_Salsa20.ml cryptobox-spec/Spec_HSalsa20.ml cryptobox-spec/Spec_Poly1305.ml cryptobox-spec/Spec_SecretBox.ml cryptobox-spec/Spec_Curve25519.ml cryptobox-spec/Spec_CryptoBox.ml -o cryptobox.exe
+	$(OCAMLOPT) -I cryptobox-spec $(OCAML_INCLUDES) cryptobox-spec/Spec_HSalsa20.ml cryptobox-spec/Spec_SecretBox.ml cryptobox-spec/Spec_Curve25519.ml cryptobox-spec/Spec_CryptoBox.ml -o cryptobox.exe
 	./cryptobox.exe
 
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec sha2_256-spec sha2_384-spec sha2_512-spec hmac-sha2-spec hmac-sha2_256-spec hmac-sha2_384-spec hmac-sha2_512-spec ed25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec sha2_256-spec sha2_384-spec sha2_512-spec hmac-sha2-spec hmac-sha2_256-spec hmac-sha2_384-spec hmac-sha2_512-spec ed25519-spec cryptobox-spec
