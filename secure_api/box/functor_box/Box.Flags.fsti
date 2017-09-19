@@ -39,7 +39,6 @@ val pkae : b:bool{(b <==> b2t pkae_int_ctxt /\ b2t pkae_ind_cpa)} // This should
 val state : b:bool{b2t ae_ind_cca \/ prf_odh ==> b}
 
 // Flags representing steps/games in the proof.
-
 type game =
   | Game0
   | Game1
