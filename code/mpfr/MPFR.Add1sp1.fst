@@ -140,11 +140,11 @@ let mpfr_add1sp1_ bx bm cx cm rnd_mode p sign =
 	 if ((rb =^ 0uL || (sb =^ 0uL && (am &^ (mpfr_LIMB_ONE <<^ sh)) =^ 0uL))) then (
 	     let ns = neg sign in
              mk_state ns ax am 0uL 0uL)
-          else (admit(); add_one_ulp sign ax am rnd_mode sh)
+          else (add_one_ulp sign ax am rnd_mode sh)
   else if (mpfr_IS_LIKE_RNDZ rnd_mode sign) then (
              let ns = neg sign in
              mk_state ns ax am 0uL 0uL)
-  else (admit();add_one_ulp sign ax am rnd_mode sh)
+  else (add_one_ulp sign ax am rnd_mode sh)
   
 
 val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr -> 
