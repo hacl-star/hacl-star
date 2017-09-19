@@ -70,6 +70,8 @@ void *Prims_magic(void *_);
 void *Prims_admit(void *x);
 void *Prims____Cons___tl(void *_);
 
+typedef int krml_checked_int_t;
+
 // In statement position, exiting is easy.
 #define KRML_EXIT                                                              \
   do {                                                                         \

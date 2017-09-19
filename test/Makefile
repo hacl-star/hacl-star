@@ -90,6 +90,7 @@ SNAPSHOT_FILES= ./c/* \
 build-snapshot: 
 	mkdir -p $(SNAPSHOT_DIR)
 	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
+	touch $(SNAPSHOT_DIR)/Prims.h
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
 ifeq ($(OS),Windows_NT)
