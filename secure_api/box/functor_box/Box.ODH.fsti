@@ -9,15 +9,35 @@ open Box.Key
 open Crypto.Symmetric.Bytes
 
 module ID = Box.Index
+module HH = FStar.HyperHeap
+
+
 
 val dh_share_length: nat
 val dh_exponent_length: nat
+val hash_length:nat
 let dh_share = lbytes dh_share_length
 let dh_exponent = lbytes dh_exponent_length
-
+let hash_output = lbytes hash_length
 val smaller: i1:dh_share -> i2:dh_share -> b:bool{b ==> i1 <> i2}
-
 let key_id = i:(dh_share * dh_share){b2t (smaller (fst i) (snd i))}
+
+type index_module = im:ID.index_module{ID.id im == dh_share}
+type key_index_module = im:ID.index_module{ID.id im == key_id}
+
+abstract noeq type odh_module (im:index_module) (kim:key_index_module) = // require subId type to be dh_share?
+  | ODH:
+    rgn:(r:HH.rid) ->
+    om_hash_length:(n:nat{n = hash_length}) ->
+    om_dh_share_length:(n:nat{n = dh_share_length}) ->
+    km:key_module kim{Key.get_keylen kim km = hash_length} ->
+    odh_module im kim
+
+val get_hash_length: im:index_module -> kim:key_index_module -> om:odh_module im kim -> n:nat{n = om.om_hash_length}
+val get_dh_share_length: im:index_module -> kim:key_index_module -> om:odh_module im kim -> n:nat{n = om.om_dh_share_length}
+
+
+val hash: dh_share -> Tot (hash_output)
 
 val total_order_lemma: (i1:dh_share -> i2:dh_share -> Lemma
   (requires True)
@@ -26,15 +46,12 @@ val total_order_lemma: (i1:dh_share -> i2:dh_share -> Lemma
     /\ (~ (b2t (smaller i1 i2)) <==> (i1 = i2 \/ b2t (smaller i2 i1)))))
 
 val share_from_exponent: dh_exponent -> Tot dh_share
+val dh_exponentiate: dh_exponent -> dh_share -> Tot dh_share
 
-type index_module = im:ID.index_module{ID.id im == dh_share}
-type key_index_module = im:ID.index_module{ID.id im == key_id}
-//type key_module (im:ID.index_module) = km:key_module im{Key.get_keylen im km = dh_share_length}
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
-val odh_module: im:index_module -> kim:key_index_module -> key_module kim -> Type0
 
-val create: im:index_module -> kim:key_index_module -> km:key_module kim -> rgn:log_region im -> odh_module im kim km
+val create: im:index_module -> kim:key_index_module -> km:key_module kim{Key.get_keylen kim km = hash_length} -> rgn:log_region im -> odh_module im kim
 
 (**
   A DH public key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
@@ -91,11 +108,30 @@ val compose_ids: s1:dh_share -> s2:dh_share{s2 <> s1} -> (i:(dh_share * dh_share
 (**
   GTot specification of the prf_odh function for use in type refinements.
 *)
-val prf_odhGT: sk:skey -> pk:pkey{compatible_keys sk pk} -> GTot (lbytes 32)
+val prf_odhGT: sk:skey -> pk:pkey{compatible_keys sk pk} -> GTot (ho:hash_output{ho = hash (dh_exponentiate (get_skeyGT sk) (pk_get_share pk))})
 
 val lemma_shares: sk:skey -> Lemma
   (requires True)
   (ensures (pk_get_share (get_pkey sk)) == sk_get_share sk)
   [ SMTPat (sk_get_share sk)]
- 
 
+#set-options "--z3rlimit 1000 --max_ifuel 1 --max_fuel 0"
+val prf_odh: im:index_module -> kim:key_index_module -> km:key_module kim{get_keylen kim km=hash_length} ->
+om:odh_module im kim -> sk:skey -> pk:pkey{compatible_keys sk pk} -> ST (k:Key.get_keytype kim km)
+  (requires (fun h0 ->
+    let i = compose_ids (pk_get_share pk) (sk_get_share sk) in
+    ID.registered kim i
+    /\ Key.invariant kim km h0
+  ))
+  (ensures (fun h0 k h1 ->
+    let i = compose_ids (pk_get_share pk) (sk_get_share sk) in True
+    /\ Key.get_index kim km k = i
+    /\ ((ID.honest kim i /\ Flags.prf_odh) ==>
+        modifies (Set.singleton (Key.get_log_region kim km)) h0 h1)
+    // We should guarantee, that the key is randomly generated. Generally, calls to prf_odh should be idempotent. How to specify that?
+    // Should we have a genPost condition that we guarantee here?
+    /\ ((ID.dishonest kim i \/ ~Flags.prf_odh) ==>
+        (Key.get_rawGT kim km k = prf_odhGT sk pk // Functional correctness.
+        /\ h0 == h1))
+    /\ Key.invariant kim km h1
+  ))
