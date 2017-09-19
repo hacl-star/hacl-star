@@ -49,13 +49,14 @@ abstract noeq type key_module (im:index_module) =
         invariant h1
         /\ modifies (Set.singleton key_log_region) h0 h1
         ))) ->
+    set: ((i:id im {Game3? current_game \/ Game0? current_game}) -> (b:lbytes keylen) -> (k:key_type im{get_index k = i /\ b = get_rawGT k})) ->
     coerce: (i:id im{dishonest im i} -> raw:lbytes keylen -> (k:key_type im{get_index k = i /\ raw=get_rawGT k})) ->
     leak: (k:key_type im{dishonest im (get_index k)} -> (raw:lbytes keylen{raw = get_rawGT k})) ->
     key_module im
 
-val get_keylen: im:index_module -> km:key_module im -> nat 
+val get_keylen: im:index_module -> km:key_module im -> nat
 let get_keylen im km =
-  km.keylen 
+  km.keylen
 
 val get_keytype: im:index_module -> km:key_module im -> Type0
 let get_keytype im km =
@@ -83,6 +84,10 @@ val gen: (im:index_module) -> (km:key_module im) -> (i:id im) -> ST (k:km.key_ty
   ))
 let gen im km i =
   km.gen i
+
+val set: (im:index_module) -> (km:key_module im) -> (i:id im {Game3? current_game \/ Game0? current_game}) -> (b:lbytes km.keylen) -> (k:km.key_type im{km.get_index k = i /\ b = km.get_rawGT k})
+let set im km i b =
+  km.set i b
 
 val coerce: (im:index_module) -> (km:key_module im) -> (i:id im{dishonest im i}) -> (b:lbytes km.keylen) -> (k:km.key_type im{km.get_index k = i /\ b = km.get_rawGT k})
 let coerce im km i b =
@@ -112,6 +117,7 @@ val create: (im:index_module) ->
                 km_invariant h1
                 /\ modifies (Set.singleton km_key_log_region) h0 h1
               )))) ->
+            (km_set: (i:id im {Game3? current_game \/ Game0? current_game} -> b:lbytes keylen -> (k:km_key_type im{km_get_index k = i /\ b = km_get_rawGT k}))) ->
             (km_coerce: (i:id im{dishonest im i} -> raw:lbytes keylen -> (k:km_key_type im{km_get_index k = i /\ raw=km_get_rawGT k}))) ->
             (km_leak: (k:km_key_type im{dishonest im (km_get_index k)} -> (raw:lbytes keylen{raw = km_get_rawGT k}))) ->
             (km:key_module im{
@@ -121,6 +127,6 @@ val create: (im:index_module) ->
               /\ invariant im km == km_invariant
               /\ get_log_region im km == km_key_log_region
     })
-let create im keylen km_key_type km_get_index km_get_rawGT km_invariant km_key_log_region km_gen km_coerce km_leak =
-  let km = KM keylen km_key_type km_get_index km_get_rawGT km_invariant km_key_log_region km_gen km_coerce km_leak in
+let create im keylen km_key_type km_get_index km_get_rawGT km_invariant km_key_log_region km_gen km_set km_coerce km_leak =
+  let km = KM keylen km_key_type km_get_index km_get_rawGT km_invariant km_key_log_region km_gen km_set km_coerce km_leak in
   km
