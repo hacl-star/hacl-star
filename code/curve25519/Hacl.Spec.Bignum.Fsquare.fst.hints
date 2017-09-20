@@ -707,14 +707,6 @@
       0
     ],
     [
-      "Hacl.Spec.Bignum.Fsquare.lemma_mul_5",
-      3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Hacl.Spec.Bignum.Fsquare.lemma_fsquare_spec_2_1",
       1,
       0,
@@ -778,14 +770,6 @@
       0
     ],
     [
-      "Hacl.Spec.Bignum.Fsquare.lemma_aux_1",
-      3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Hacl.Spec.Bignum.Fsquare.lemma_aux_2",
       1,
       0,
@@ -801,14 +785,6 @@
     [
       "Hacl.Spec.Bignum.Fsquare.lemma_aux_2",
       2,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spec.Bignum.Fsquare.lemma_aux_2",
-      3,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -831,14 +807,6 @@
     [
       "Hacl.Spec.Bignum.Fsquare.lemma_aux_3",
       2,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spec.Bignum.Fsquare.lemma_aux_3",
-      3,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -1106,14 +1074,6 @@
       0
     ],
     [
-      "Hacl.Spec.Bignum.Fsquare.lemma_distr_2",
-      3,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Hacl.Spec.Bignum.Fsquare.lemma_distr_3",
       1,
       2,
@@ -1134,14 +1094,6 @@
     [
       "Hacl.Spec.Bignum.Fsquare.lemma_distr_3",
       2,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spec.Bignum.Fsquare.lemma_distr_3",
-      3,
       2,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -1174,14 +1126,6 @@
       0
     ],
     [
-      "Hacl.Spec.Bignum.Fsquare.lemma_distr_4",
-      3,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Hacl.Spec.Bignum.Fsquare.lemma_distr_5",
       1,
       2,
@@ -1202,14 +1146,6 @@
     [
       "Hacl.Spec.Bignum.Fsquare.lemma_distr_5",
       2,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spec.Bignum.Fsquare.lemma_distr_5",
-      3,
       2,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -1231,14 +1167,6 @@
     [
       "Hacl.Spec.Bignum.Fsquare.lemma_mul_paren",
       2,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spec.Bignum.Fsquare.lemma_mul_paren",
-      3,
       2,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -1349,14 +1277,6 @@
       0
     ],
     [
-      "Hacl.Spec.Bignum.Fsquare.lemma_mul_symm",
-      3,
-      0,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Hacl.Spec.Bignum.Fsquare.lemma_fsquare_spec_4",
       1,
       0,
@@ -1378,36 +1298,6 @@
         "equation_Hacl.Bignum.Parameters.seqelem",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
-      ],
-      0
-    ],
-    [
-      "Hacl.Spec.Bignum.Fsquare.lemma_fsquare_spec_4",
-      3,
-      0,
-      1,
-      [
-        "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_FStar.Mul.op_Star", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt64.t", "equation_Hacl.Bignum.Constants.len",
-        "equation_Hacl.Bignum.Constants.limb", "equation_Hacl.Bignum.Limb.v",
-        "equation_Hacl.Bignum.Parameters.len",
-        "equation_Hacl.Bignum.Parameters.limb",
-        "equation_Hacl.Bignum.Parameters.seqelem",
-        "equation_Hacl.Spec.Bignum.Fsquare.p64",
-        "equation_Hacl.Spec.EC.AddAndDouble.p51",
-        "equation_Hacl.Spec.EC.AddAndDouble.p52", "equation_Prims.pos",
-        "function_token_typing_Hacl.Spec.Bignum.Fsquare.p64",
-        "function_token_typing_Hacl.Spec.EC.AddAndDouble.p51",
-        "function_token_typing_Hacl.Spec.EC.AddAndDouble.p52",
-        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Hacl.Spec.Bignum.Fsquare_Tm_refine_da98c95d2af35788da839c6c05bdbc1c",
-        "refinement_interpretation_Hacl.Spec.EC.AddAndDouble_Tm_refine_0687947f194c800b72626856850fce93",
-        "refinement_interpretation_Hacl.Spec.EC.AddAndDouble_Tm_refine_51400a2963b1a03190be41ae7973a8a2"
       ],
       0
     ],
@@ -1608,14 +1498,6 @@
       0
     ],
     [
-      "Hacl.Spec.Bignum.Fsquare.lemma_mul_paren2",
-      3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Hacl.Spec.Bignum.Fsquare.lemma_mul_paren3",
       1,
       0,
@@ -1638,14 +1520,6 @@
       0
     ],
     [
-      "Hacl.Spec.Bignum.Fsquare.lemma_mul_paren3",
-      3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Hacl.Spec.Bignum.Fsquare.lemma_mul_paren4",
       1,
       0,
@@ -1661,14 +1535,6 @@
     [
       "Hacl.Spec.Bignum.Fsquare.lemma_mul_paren4",
       2,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spec.Bignum.Fsquare.lemma_mul_paren4",
-      3,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],

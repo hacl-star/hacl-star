@@ -2398,39 +2398,6 @@
       0
     ],
     [
-      "Hacl.Hash.SHA2_384.pad0_length",
-      3,
-      0,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "data_elim_FStar.UInt32.Mk", "equation_FStar.Mul.op_Star",
-        "equation_FStar.UInt.mul", "equation_FStar.UInt.uint_t",
-        "equation_FStar.UInt32.mul", "equation_FStar.UInt32.n",
-        "equation_FStar.UInt32.t", "equation_FStar.UInt32.uint_to_t",
-        "equation_FStar.UInt32.v",
-        "equation_Hacl.Hash.SHA2_384.Lemmas.size_len_8",
-        "equation_Hacl.Hash.SHA2_384.Lemmas.size_word",
-        "equation_Hacl.Hash.SHA2_384.size_len_8",
-        "equation_Hacl.Hash.SHA2_384.size_word",
-        "equation_Hacl.Hash.SHA2_384.uint32_t",
-        "equation_Spec.SHA2_384.size_block",
-        "equation_Spec.SHA2_384.size_block_w",
-        "equation_Spec.SHA2_384.size_len_8",
-        "equation_Spec.SHA2_384.size_word",
-        "fuel_guarded_inversion_FStar.UInt32.t_",
-        "function_token_typing_Hacl.Hash.SHA2_384.Lemmas.size_len_8",
-        "haseqHacl.Hash.SHA2_384_Tm_refine_bc32861c0c79d3b18b42c8e52aace3aa",
-        "int_inversion", "primitive_Prims.op_Multiply",
-        "proj_equation_FStar.UInt32.Mk_v",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.UInt32.Mk_v",
-        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
-        "refinement_interpretation_Hacl.Hash.SHA2_384_Tm_refine_ddd94017d9d79a659f33b59556887bc2"
-      ],
-      0
-    ],
-    [
       "Hacl.Hash.SHA2_384.encode_length",
       1,
       0,
@@ -2499,14 +2466,6 @@
     [
       "Hacl.Hash.SHA2_384.encode_length",
       3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Hash.SHA2_384.encode_length",
-      4,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],

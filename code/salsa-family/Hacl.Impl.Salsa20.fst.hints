@@ -603,14 +603,6 @@
       0
     ],
     [
-      "Hacl.Impl.Salsa20.u64_of_u32s",
-      3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Hacl.Impl.Salsa20.low32_of_u64",
       1,
       0,
@@ -629,14 +621,6 @@
     [
       "Hacl.Impl.Salsa20.low32_of_u64",
       2,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Impl.Salsa20.low32_of_u64",
-      3,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -674,14 +658,6 @@
     [
       "Hacl.Impl.Salsa20.high32_of_u64",
       2,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Impl.Salsa20.high32_of_u64",
-      3,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -971,34 +947,12 @@
       4,
       0,
       1,
-      [
-        "@query", "assumption_FStar.UInt32.t__haseq",
-        "equation_FStar.UInt32.t"
-      ],
-      0
-    ],
-    [
-      "Hacl.Impl.Salsa20.lemma_u64_of_u32s",
-      5,
-      0,
-      1,
-      [
-        "@query", "assumption_FStar.UInt32.t__haseq",
-        "equation_FStar.UInt32.t"
-      ],
-      0
-    ],
-    [
-      "Hacl.Impl.Salsa20.lemma_u64_of_u32s",
-      6,
-      0,
-      1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
     [
       "Hacl.Impl.Salsa20.lemma_u64_of_u32s",
-      7,
+      5,
       0,
       1,
       [

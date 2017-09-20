@@ -1,5 +1,5 @@
 [
-  "xô˜¬A»‹™¥∂ÿbâ_^ ",
+  "äÈñ\u0017†\u0002Wi‚ö∫ÈÃ¬ê\u000f",
   [
     [
       "Hacl.Spec.Poly1305_64.lemma_bignum_to_128_",
@@ -187,7 +187,7 @@
       "Hacl.Spec.Poly1305_64.lemma_bignum_to_128",
       3,
       0,
-      1,
+      2,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
@@ -1098,14 +1098,6 @@
       3,
       0,
       1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spec.Poly1305_64.lemma_encode_r0",
-      4,
-      0,
-      1,
       [
         "@query", "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.limb_n",
@@ -1179,14 +1171,6 @@
     [
       "Hacl.Spec.Poly1305_64.lemma_encode_r1",
       3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spec.Poly1305_64.lemma_encode_r1",
-      4,
       0,
       1,
       [
@@ -1282,14 +1266,6 @@
       0
     ],
     [
-      "Hacl.Spec.Poly1305_64.lemma_encode_r2",
-      3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Hacl.Spec.Poly1305_64.lemma_encode_r",
       1,
       0,
@@ -1328,14 +1304,6 @@
     [
       "Hacl.Spec.Poly1305_64.lemma_encode_r",
       2,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spec.Poly1305_64.lemma_encode_r",
-      3,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],

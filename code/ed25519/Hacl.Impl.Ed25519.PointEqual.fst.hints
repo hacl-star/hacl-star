@@ -851,7 +851,8 @@
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
         "bool_typing", "data_elim_FStar.Buffer.MkBuffer",
-        "data_elim_FStar.Monotonic.HyperStack.HS", "eq2-interp",
+        "data_elim_FStar.Monotonic.HyperStack.HS",
+        "data_typing_intro_FStar.UInt32.Mk@tok", "eq2-interp",
         "equation_FStar.Buffer.as_seq", "equation_FStar.Buffer.buffer",
         "equation_FStar.Buffer.equal", "equation_FStar.Buffer.idx",
         "equation_FStar.Buffer.length", "equation_FStar.Buffer.live",
@@ -905,9 +906,7 @@
         "lemma_FStar.Buffer.lemma_fresh_poppable",
         "lemma_FStar.Buffer.lemma_live_disjoint",
         "lemma_FStar.Buffer.lemma_modifies_0_1_",
-        "lemma_FStar.Buffer.lemma_sub_spec",
-        "lemma_FStar.Buffer.lemma_sub_spec_",
-        "lemma_FStar.Buffer.live_fresh",
+        "lemma_FStar.Buffer.lemma_sub_spec", "lemma_FStar.Buffer.live_fresh",
         "lemma_FStar.Buffer.modifies_poppable_1",
         "lemma_FStar.Buffer.modifies_popped_0",
         "lemma_FStar.Buffer.no_upd_fresh",
@@ -945,8 +944,8 @@
         "typing_FStar.Monotonic.HyperStack.poppable",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.v",
-        "typing_Hacl.Impl.Ed25519.ExtPoint.getx",
-        "typing_Hacl.Impl.Ed25519.ExtPoint.gety"
+        "typing_Hacl.Impl.Ed25519.ExtPoint.gett",
+        "typing_Hacl.Impl.Ed25519.ExtPoint.getz"
       ],
       0
     ]
