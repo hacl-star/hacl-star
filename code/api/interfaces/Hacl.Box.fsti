@@ -56,7 +56,7 @@ val crypto_box_detached:
 val crypto_box_open_detached:
   m:uint8_p ->
   c:uint8_p ->
-  mac:uint8_p{length mac = crypto_box_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
+  mac:uint8_p{length mac = crypto_box_MACBYTES} ->
   mlen:u64{let len = U64.v mlen in length m = len /\ len = length c}  ->
   n:uint8_p{length n = crypto_box_NONCEBYTES} ->
   pk:uint8_p{length pk = crypto_box_PUBLICKEYBYTES} ->
@@ -104,7 +104,7 @@ val crypto_box_open_easy:
 val crypto_box_open_detached_afternm:
   m:uint8_p ->
   c:uint8_p ->
-  mac:uint8_p{length mac = crypto_secretbox_MACBYTES /\ Hacl.Policies.declassifiable mac} ->
+  mac:uint8_p{length mac = crypto_secretbox_MACBYTES} ->
   mlen:u64{let len = U64.v mlen in len = length m /\ len = length c}  ->
   n:uint8_p{length n = crypto_secretbox_NONCEBYTES} ->
   k:uint8_p{length k = crypto_secretbox_KEYBYTES} ->

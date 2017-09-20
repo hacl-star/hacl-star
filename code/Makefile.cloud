@@ -1,6 +1,6 @@
 export CLOUD_VERIFY:=true
 HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
-include $(HACL_HOME)/code/Makefile.include
+include $(HACL_HOME)/Makefile.include
 
 Z3?=$(shell which z3)
 ifeq ($(strip $(Z3)),)

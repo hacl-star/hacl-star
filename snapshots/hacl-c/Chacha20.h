@@ -38,8 +38,6 @@ typedef uint8_t *Chacha20_uint8_p;
 
 typedef uint32_t Chacha20_uint32_t;
 
-void *Chacha20_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *m);
-
 void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32_t ctr);
 
 void

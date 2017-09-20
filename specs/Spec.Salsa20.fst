@@ -106,7 +106,7 @@ let salsa20_encrypt_bytes key nonce counter m =
 
 (* TESTS: https://cr.yp.to/snuffle/spec.pdf *)
 
-#set-options "--lax"
+//#set-options "--lax"
 
 let test_quarter_round () =
     let st = create 16 0ul in

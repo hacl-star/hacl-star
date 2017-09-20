@@ -18,7 +18,7 @@ open Hacl.Spec.Bignum.Fproduct
 open Hacl.Spec.EC.AddAndDouble
 
 
-#set-options "--initial_fuel 0 --max_fuel 0"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3refresh"
 
 inline_for_extraction let p64 : p:pos{p = 0x10000000000000000} = assert_norm(pow2 64 = 0x10000000000000000); pow2 64
 inline_for_extraction let p128 : p:pos{p = 0x100000000000000000000000000000000} = assert_norm(pow2 128 = 0x100000000000000000000000000000000); pow2 128

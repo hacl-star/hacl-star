@@ -1,4 +1,4 @@
-include ../../Makefile.include
+include ../../../Makefile.include
 
 FSTAR_LIB_FILES= \
 	FStar.Mul.fst \

@@ -1,0 +1,187 @@
+[
+  "b\u001bŠßÉa¸ëwˆê ¬ð\u0001\u0017",
+  [
+    [
+      "Hacl.UInt16.gt_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt16.gt_mask",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt16.gt_mask",
+      3,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt16.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt16.gt_mask",
+      4,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.BitVector.lognot_vec.fuel_instrumented",
+        "@fuel_correspondence_FStar.UInt.from_vec.fuel_instrumented",
+        "@query", "equation_FStar.UInt.lognot",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero", "equation_FStar.UInt16.lognot",
+        "equation_FStar.UInt16.n", "equation_FStar.UInt16.t",
+        "equation_FStar.UInt16.v",
+        "equation_with_fuel_FStar.UInt.from_vec.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.UInt16.t_",
+        "proj_equation_FStar.UInt16.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt16.Mk_v",
+        "refinement_interpretation_FStar.UInt16_Tm_refine_5f8a5bc84521a1db0e4e813282a73295",
+        "typing_FStar.UInt16.gte_mask"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt16.gt_mask",
+      5,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt16.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lt_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lt_mask",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lt_mask",
+      3,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt16.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lt_mask",
+      4,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.BitVector.lognot_vec.fuel_instrumented",
+        "@fuel_correspondence_FStar.UInt.from_vec.fuel_instrumented",
+        "@query", "equation_FStar.UInt.lognot",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero", "equation_FStar.UInt16.lognot",
+        "equation_FStar.UInt16.n", "equation_FStar.UInt16.t",
+        "equation_FStar.UInt16.v",
+        "equation_with_fuel_FStar.UInt.from_vec.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.UInt16.t_",
+        "proj_equation_FStar.UInt16.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt16.Mk_v",
+        "refinement_interpretation_FStar.UInt16_Tm_refine_5f8a5bc84521a1db0e4e813282a73295",
+        "typing_FStar.UInt16.gte_mask"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lt_mask",
+      5,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt16.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lte_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lte_mask",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lte_mask",
+      3,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt16.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lte_mask",
+      4,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.ones", "equation_FStar.UInt.zero",
+        "equation_FStar.UInt16.lognot", "equation_FStar.UInt16.n",
+        "equation_FStar.UInt16.t", "equation_FStar.UInt16.v",
+        "equation_Hacl.UInt16.gt_mask",
+        "fuel_guarded_inversion_FStar.UInt16.t_",
+        "proj_equation_FStar.UInt16.Mk_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.UInt16.Mk_v",
+        "refinement_interpretation_Hacl.UInt16_Tm_refine_e723030c74fc4023096bbc16a80b0f26",
+        "typing_Hacl.UInt16.gt_mask"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt16.lte_mask",
+      5,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt16.n",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ]
+  ]
+]

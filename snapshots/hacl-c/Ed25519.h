@@ -251,8 +251,6 @@ typedef uint8_t *Ed25519_uint8_p;
 
 typedef uint8_t *Ed25519_hint8_p;
 
-void *Ed25519_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *b);
-
 void Ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32_t len1);
 
 bool Ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t len1, uint8_t *signature);

@@ -24,6 +24,7 @@ module H8 = Hacl.UInt8
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
+[@"substitute"]
 val crypto_scalarmult__:
   mypublic:uint8_p{length mypublic = 32} ->
   secret:uint8_p{length secret = 32} ->
@@ -48,6 +49,7 @@ val crypto_scalarmult__:
          mypublic == Spec.Curve25519.(encodePoint (montgomery_ladder q secret)))
       ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
+[@"substitute"]
 let crypto_scalarmult__ mypublic scalar basepoint q =
   let h0 = ST.get() in
   push_frame();
@@ -85,6 +87,7 @@ let crypto_scalarmult__ mypublic scalar basepoint q =
   (**) modifies_popped_1 mypublic h0 h1 h6 h7
 
 
+[@"substitute"]
 val crypto_scalarmult_:
   mypublic:uint8_p{length mypublic = 32} ->
   secret:uint8_p{length secret = 32} ->
@@ -108,6 +111,7 @@ val crypto_scalarmult_:
          let q        = Hacl.Spec.Bignum.selem (as_seq h0 (getx q)) in
         mypublic == Spec.Curve25519.(encodePoint (montgomery_ladder q (decodeScalar25519 secret))))
     ))
+[@"substitute"]
 let crypto_scalarmult_ mypublic secret basepoint q =
   let h0 = ST.get() in
   push_frame();
