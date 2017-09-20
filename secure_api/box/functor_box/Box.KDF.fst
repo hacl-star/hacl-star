@@ -28,6 +28,7 @@ module SPEC = Spec.SecretBox
 module Plain = Box.Plain
 module Key = Box.Key
 
+#set-options "--z3rlimit 1300 --max_ifuel 1 --max_fuel 2"
 type key_id (im:index_module) = | Derived : id im -> key_id im
 
 type out_index_module (im:index_module) = kim:index_module{id kim == key_id im}
@@ -71,6 +72,8 @@ abstract noeq type kdf_module (im:index_module) =
   | DM :
     key_log_region: log_region im ->
     key_log: (key_log_t im key_log_region) ->
+    out_im:out_index_module im ->
+    out_km:key_module out_im{get_keylen out_im out_km = keylen} ->
     kdf_module im
 
 
@@ -83,23 +86,23 @@ val recall_logs: #im:index_module -> dm:kdf_module im -> ST unit
 let recall_logs #im dm =
   MR.m_recall dm.key_log
 
-val create: im:index_module -> rgn:log_region im -> ST (dm:kdf_module im)
-  (requires (fun h0 ->
-    True
-  ))
-  (ensures (fun h0 dm h1 ->
-    modifies_none h0 h1
-    /\ MR.m_contains dm.key_log h1
-    /\ MR.m_sel #dm.key_log_region h1 dm.key_log == MM.empty_map (key_log_key im) (key_log_range im)
-  ))
+val create: im:index_module -> rgn:log_region im -> out_im:out_index_module im ->out_km:key_module out_im{get_keylen out_im out_km = keylen} -> ST (dm:kdf_module im)
+(requires (fun h0 ->
+  True
+))
+(ensures (fun h0 dm h1 ->
+  modifies_none h0 h1
+  /\ MR.m_contains dm.key_log h1
+  /\ MR.m_sel #dm.key_log_region h1 dm.key_log == MM.empty_map (key_log_key im) (key_log_range im)
+))
  
 
 #set-options "--z3rlimit 1000 --max_ifuel 1 --max_fuel 0"
-let create im rgn =
+let create im rgn out_im out_km =
   let klr = new_region rgn in
   let kl = MM.alloc #klr #(key_log_key im) #(key_log_range im) #(key_log_inv im) in
   recall_log im;
-  DM klr kl 
+  DM klr kl out_im out_km
   
 (**
    This function generates a fresh random key. Honest, as well as dishonest ids can be created using keygen. However, note that the adversary can
@@ -161,26 +164,26 @@ let instantiate_km #im dm =
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
 
-val derive: im:index_module -> out_im:out_index_module im ->out_km:key_module out_im{get_keylen out_im out_km = keylen} -> dm:kdf_module im -> k:key im -> ST (k':Key.get_keytype out_im out_km{Key.get_index out_im out_km k' = Derived (get_index k) } )
+  val derive: im:index_module -> dm:kdf_module im -> k:key im -> ST (k':Key.get_keytype dm.out_im dm.out_km{Key.get_index dm.out_im dm.out_km k' = Derived (get_index k) } )
   (requires (fun h0 ->
     ( let i = get_index k in
-      let out_i : id out_im = Derived i in
+      let out_i : id dm.out_im = Derived i in
       registered im i 
-    /\ registered out_im out_i
-    /\ Key.invariant out_im out_km h0
+    /\ registered dm.out_im out_i
+    /\ Key.invariant dm.out_im dm.out_km h0
     )
   ))
   (ensures (fun h0 k' h1 ->
     let i = get_index k in
-    let out_i : id out_im = Derived i in
-    (honest out_im out_i ==> modifies (Set.singleton (Key.get_log_region out_im out_km)) h0 h1)
+    let out_i : id dm.out_im = Derived i in
+    (honest dm.out_im out_i ==> modifies (Set.singleton (Key.get_log_region dm.out_im dm.out_km)) h0 h1)
     // We should guarantee, that the key is randomly generated. Generally, calls to derive should be idempotent. How to specify that?
     // Should we have a genPost condition that we guarantee here?
-    /\ (dishonest out_im out_i ==> True
+    /\ (dishonest dm.out_im out_i ==> True
           //              (Key.leak im km k =  deriveGT k // Functional correctness. Spec should be external in Spec.Cryptobox.
                         /\ h0 == h1)
 //    /\ (modifies (Set.singleton (Key.get_log_region out_im out_km)) h0 h1 \/ h0 == h1)
-    /\ Key.invariant out_im out_km h1
+    /\ Key.invariant dm.out_im dm.out_km h1
   )
 )
 
@@ -189,13 +192,13 @@ Nonce to use with HSalsa.hsalsa20.
   *)
 private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
 
-let derive im out_im out_km dm k =
+let derive im dm k =
   let i = get_index k in
-  let out_i : id out_im = Derived i in
-  lemma_honest_or_dishonest out_im out_i;
-  match get_honest out_im out_i with
+  let out_i : id dm.out_im = Derived i in
+  lemma_honest_or_dishonest dm.out_im out_i;
+  match get_honest dm.out_im out_i with
   | true ->
-    Key.gen out_im out_km out_i 
+    Key.gen dm.out_im dm.out_km out_i 
   | false ->
     let hashed_raw_k = HSalsa.hsalsa20 k.raw zero_nonce in
-    Key.coerce out_im out_km out_i hashed_raw_k 
+    Key.coerce dm.out_im dm.out_km out_i hashed_raw_k 
