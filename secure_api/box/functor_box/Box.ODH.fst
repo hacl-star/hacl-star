@@ -29,25 +29,29 @@ module Key = Box.Key
 module ID = Box.Index
 module LE = FStar.Endianness
 
-let dh_share_length = Curve.serialized_point_length // is equal to scalar lenght in Spec.Curve25519
-let dh_exponent_length = Curve.scalar_length // Size of scalar in Curve25519. Replace with constant in spec?
-//let dh_share = Curve.serialized_point //
-let hash_length = HSalsa.keylen
+let hash_length' = HSalsa.keylen
+let dh_share_length' = Curve.serialized_point_length // is equal to scalar lenght in Spec.Curve25519
+let dh_exponent_length' = Curve.scalar_length // Size of scalar in Curve25519. Replace with constant in spec?
 
 //let dh_exponent = Curve.scalar // is equal to Curve.serialized_point
 
-let smaller i1 i2 =
+let smaller' n i1 i2 =
   let i1' = LE.little_endian i1 in
   let i2' = LE.little_endian i2 in
   i1' < i2'
 
-let get_hash_length im kim om = om.om_hash_length
-let get_dh_share_length im kim om = om.om_dh_share_length
+let get_hash_length om = om.hash_length
+let get_dh_share_length om = om.dh_share_length
+let get_dh_exponent_length om = om.dh_share_length
+
+let get_index_module om = om.im
+let get_key_index_module om = om.kim
+let get_key_module om = om.km
 
 private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
-let hash input = HSalsa.hsalsa20 input zero_nonce
+let hash om input = HSalsa.hsalsa20 input zero_nonce
 #set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
-let total_order_lemma i1 i2 = admit()
+let total_order_lemma om i1 i2 = admit()
 
 //val total_order_lemma': (i1:dh_share -> i2:dh_share -> Lemma
 //  (requires True)
@@ -60,89 +64,89 @@ let total_order_lemma i1 i2 = admit()
 Nonce to use with HSalsa.hsalsa20.
 *)
 
-let share_from_exponent dh_exp = Curve.scalarmult dh_exp Curve.base_point
-let dh_exponentiate dh_exp dh_sh = Curve.scalarmult dh_exp dh_sh
+let share_from_exponent om dh_exp = Curve.scalarmult dh_exp Curve.base_point
+let dh_exponentiate om dh_exp dh_sh = Curve.scalarmult dh_exp dh_sh
 
-let create im imk km rgn =
-  ODH rgn hash_length km
+let create hash_len dh_share_len dh_exp_len im kim km rgn =
+  ODH rgn hash_len dh_share_len dh_exp_len im kim km
 
-noeq abstract type pkey' =
-  | PKEY: pk_share:dh_share -> pkey'
+noeq abstract type pkey' (om:odh_module) =
+  | PKEY: pk_share:dh_share om -> pkey' om
 
-let pkey = pkey'
+let pkey om = pkey' om
 
-noeq abstract type skey' =
-  | SKEY: sk_exp:dh_exponent -> pk:pkey{pk.pk_share = share_from_exponent sk_exp} -> skey'
+noeq abstract type skey' (om:odh_module) =
+  | SKEY: sk_exp:dh_exponent om -> pk:pkey om{pk.pk_share = share_from_exponent  om sk_exp} -> skey' om
 
-let skey = skey'
+let skey om = skey' om
 
-let get_pkey sk = sk.pk
+let get_pkey om sk = sk.pk
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
-let compatible_keys sk pk =
+let compatible_keys om sk pk =
   sk.pk =!= pk
 
-let pk_get_share k = k.pk_share
+let pk_get_share om k = k.pk_share
 
-let lemma_pk_get_share_inj pk = ()
+let lemma_pk_get_share_inj om pk = ()
 
-let get_skeyGT sk =
+let get_skeyGT om sk =
   sk.sk_exp
 
-let sk_get_share sk = sk.pk.pk_share
+let sk_get_share om sk = sk.pk.pk_share
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
-let leak_skey im sk =
+let leak_skey om sk =
   sk.sk_exp
 
-let keygen () =
+let keygen om =
   let dh_exponent = random_bytes (UInt32.uint_to_t 32) in
-  let dh_pk = PKEY (share_from_exponent dh_exponent) in
+  let dh_pk = PKEY (share_from_exponent om dh_exponent) in
   let dh_sk = SKEY dh_exponent dh_pk in
   dh_pk,dh_sk
 
-let coerce_pkey im dh_sh =
+let coerce_pkey om dh_sh =
   PKEY dh_sh
 
-let coerce_keypair im dh_ex =
-  let dh_sh = share_from_exponent dh_ex in
+let coerce_keypair om dh_ex =
+  let dh_sh = share_from_exponent om dh_ex in
   let pk = PKEY dh_sh in
   let sk = SKEY dh_ex pk in
   pk,sk
 
-let compose_ids s1 s2 =
-  if smaller s1 s2 then
+let compose_ids om s1 s2 =
+  if smaller om s1 s2 then
      let i = (s1,s2) in
      i
   else
-    (total_order_lemma s1 s2;
+    (total_order_lemma om s1 s2;
     let i = (s2,s1) in
     i)
 
-let prf_odhGT sk pk =
+let prf_odhGT om sk pk =
   let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
   let k = HSalsa.hsalsa20 raw_k zero_nonce in
   k
 
-let lemma_shares sk = ()
+let lemma_shares om sk = ()
 
 
-let prf_odh im kim km om sk pk =
+let prf_odh om sk pk =
   let i1 = pk.pk_share in
   let i2 = sk.pk.pk_share in
-  let i = compose_ids i1 i2 in
-  recall_log im;
-  recall_log kim;
-  lemma_honest_or_dishonest kim i;
-  let honest_i = get_honest kim i in
+  let i = compose_ids om i1 i2 in
+  recall_log om.im;
+  recall_log om.kim;
+  lemma_honest_or_dishonest om.kim i;
+  let honest_i = get_honest om.kim i in
   match honest_i && Flags.prf_odh with
   | true ->
-    let k = Key.gen kim km i in
+    let k = Key.gen om.kim om.km i in
     k
   | false ->
     let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
     let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
     if not honest_i then
-      Key.coerce kim km i hashed_raw_k
+      Key.coerce om.kim om.km i hashed_raw_k
     else
-      Key.set kim km i hashed_raw_k
+      Key.set om.kim om.km i hashed_raw_k
