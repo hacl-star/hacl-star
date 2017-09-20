@@ -23,7 +23,7 @@ module HS = FStar.HyperStack
 module HH = FStar.HyperHeap
 module HSalsa = Spec.HSalsa20
 module Curve = Spec.Curve25519
-module SPEC = Spec.SecretBox
+module SPEC = Spec.CryptoBox
 module Plain = Box.Plain
 module Key = Box.Key
 module ID = Box.Index
@@ -38,9 +38,9 @@ let key_id = ODH.key_id
 
 #set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
 let compose_ids i1 i2 = ODH.compose_ids i1 i2
-let valid_length = AE.valid_length
+let valid_plain_length = AE.valid_plain_length
 let valid_cipher_length = AE.valid_cipher_length
-let key_length = ODH.dh_share_length
+let key_length = ODH.hash_length
 let plain_t = AE.ae_plain
 let length = AE.length
 
@@ -53,12 +53,13 @@ let skey = ODH.skey
 let pkey_from_skey sk = ODH.get_pkey sk
 let compatible_keys sk pk = ODH.compatible_keys sk pk
 
+type key_index_module = plain_index_module
 
 private noeq type aux_t' (im:index_module{ID.id im == sub_id}) (kim:key_index_module{ID.id kim == key_id}) (pm:plain_module) (rgn:log_region kim) =
   | AUX:
     am:AE.ae_module kim ->
     km:Key.key_module kim{km == AE.instantiate_km am /\ Key.get_keylen kim km == key_length} ->
-    om:ODH.odh_module im kim km ->
+    om:ODH.odh_module im kim{ODH.get_hash_length im kim om = key_length /\ ODH.get_dh_share_length im kim om = Curve.serialized_point_length} ->
     aux_t' im kim pm rgn
 
 let aux_t im kim pm = aux_t' im kim pm
@@ -89,66 +90,69 @@ val coerce: t1:Type -> t2:Type{t1 == t2} -> x:t1 -> t2
 let coerce t1 t2 x = x
 
 let get_message_logGT pkm =
-  let (ae_log:AE.message_log pkm.kim (get_message_log_region pkm)) = AE.get_message_logGT #pkm.kim pkm.aux.am in
-  let (ae_rgn:log_region pkm.kim) = AE.get_message_log_region pkm.aux.am in
-  message_log_lemma pkm.kim ae_rgn;
-  let log:message_log pkm.kim ae_rgn = coerce (AE.message_log pkm.kim ae_rgn) (message_log pkm.kim ae_rgn) ae_log in
+  let (ae_log:AE.message_log pkm.pim (get_message_log_region pkm)) = AE.get_message_logGT #pkm.pim pkm.aux.am in
+  let (ae_rgn:log_region pkm.pim) = AE.get_message_log_region pkm.aux.am in
+  message_log_lemma pkm.pim ae_rgn;
+  let log:message_log pkm.pim ae_rgn = coerce (AE.message_log pkm.pim ae_rgn) (message_log pkm.pim ae_rgn) ae_log in
   log
 
-val create_aux: (im:index_module) -> (kim:key_index_module) -> (pm:plain_module{Plain.get_plain pm == plain_t /\ Plain.valid_length #pm == valid_length}) -> rgn:log_region kim -> St (aux_t im kim pm rgn)
+val create_aux: (im:index_module) -> (kim:key_index_module) -> (pm:plain_module{Plain.get_plain pm == plain_t /\ Plain.valid_length #pm == valid_plain_length}) -> rgn:log_region kim -> St (aux_t im kim pm rgn)
 let create_aux im kim pm rgn =
-  assert(FStar.FunctionalExtensionality.feq (valid_length) (AE.valid_length));
+  assert(FStar.FunctionalExtensionality.feq (valid_plain_length) (AE.valid_plain_length));
   let am = AE.create kim pm rgn in
   let km = AE.instantiate_km am in
   let om = ODH.create im kim km rgn in
   AUX am km om
 
-val lemma_compatible_length: n:nat -> Lemma
-  (requires valid_length n)
-  (ensures n / Spec.Salsa20.blocklen < pow2 32)
-let lemma_compatible_length n = ()
+//val lemma_compatible_length: n:nat -> Lemma
+//  (requires valid_plain_length n)
+//  (ensures n / Spec.Salsa20.blocklen < pow2 32)
+//let lemma_compatible_length n = ()
+//
+//
+//val length_lemma: n:nat{n >= 16} -> Lemma
+//  (requires (n / Spec.Salsa20.blocklen < pow2 32))
+//  (ensures ((n-16) / Spec.Salsa20.blocklen < pow2 32))
+//let length_lemma n = ()
 
+val enc (pkm:pkae_module): plain_t -> n:nonce -> pk:pkey -> sk:skey{ODH.compatible_keys sk pk} -> GTot cipher
+let enc pkm p n pk sk =
 
-val length_lemma: n:nat{n >= 16} -> Lemma
-  (requires (n / Spec.Salsa20.blocklen < pow2 32))
-  (ensures ((n-16) / Spec.Salsa20.blocklen < pow2 32))
-let length_lemma n = ()
-
-val enc (im:ODH.index_module): plain_t -> n:nonce -> pk:pkey -> sk:skey{ODH.compatible_keys sk pk} -> GTot cipher
-let enc im p n pk sk =
-  SPEC.secretbox_easy p (ODH.prf_odhGT sk pk) n
+  SPEC.cryptobox p n (ODH.pk_get_share pk) (ODH.get_skeyGT sk)
+  //SPEC.secretbox_easy p (ODH.prf_odhGT sk pk) n
 
 //type plain_t = b:bytes{Seq.length b / Spec.Salsa20.blocklen < pow2 32} // / Spec.Salsa20.blocklen < pow2 32} //one off error?
 
 #set-options "--z3rlimit 1000 --max_ifuel 2 --max_fuel 0"
 val dec (im:ODH.index_module): c:cipher -> n:nonce -> pk:pkey -> sk:skey{ODH.compatible_keys sk pk} -> GTot (option (b:plain_t{Seq.length b = Seq.length c - 16}))
 let dec im c n pk sk =
-  SPEC.secretbox_open_easy c (ODH.prf_odhGT sk pk) n
+  SPEC.cryptobox_open c n (ODH.pk_get_share pk) (ODH.get_skeyGT sk) n
+  //SPEC.secretbox_open_easy c (ODH.prf_odhGT sk pk) n
 
 let create rgn =
   let id_log_rgn : ID.id_log_region = new_region rgn in
   let im = ID.create id_log_rgn sub_id in
   let kim = ID.compose id_log_rgn im ODH.smaller in
-  let pm = Plain.create plain_t AE.valid_length AE.length in
+  let pm = Plain.create plain_t AE.valid_plain_length AE.length in
   admit();
   let kim: im:ID.index_module{ID.id im == i:(ODH.dh_share * ODH.dh_share){b2t (ODH.smaller (fst i) (snd i))}} = kim in
   let log_rgn : log_region kim = new_region rgn in
-  assert(FStar.FunctionalExtensionality.feq (valid_length) (AE.valid_length));
+  assert(FStar.FunctionalExtensionality.feq (valid_plain_length) (AE.valid_plain_length));
   let aux = create_aux im kim pm log_rgn in
   PKAE im kim pm log_rgn (enc im) (dec im) aux
 
-type key (pkm:pkae_module) = AE.key pkm.kim
+type key (pkm:pkae_module) = AE.key pkm.pim
 
 let zero_bytes = AE.create_zero_bytes
 
 let pkey_to_subId #pkm pk = ODH.pk_get_share pk
 let pkey_to_subId_inj #pkm pk = ODH.lemma_pk_get_share_inj pk
 
-let nonce_is_fresh (pkm:pkae_module) (i:ID.id pkm.kim) (n:nonce) (h:mem) =
+let nonce_is_fresh (pkm:pkae_module) (i:ID.id pkm.pim) (n:nonce) (h:mem) =
   AE.nonce_is_fresh pkm.aux.am i n h
 
 let invariant pkm =
-  Key.invariant pkm.kim pkm.aux.km
+  Key.invariant pkm.pim pkm.aux.km
 
 let gen pkm =
   ODH.keygen()
