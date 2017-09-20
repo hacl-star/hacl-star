@@ -14,6 +14,12 @@
   type u64 = FStar.UInt64.t
   type i64 = FStar.Int64.t
 
+(*
+#set-options "--z3refresh --z3rlimit 20 --log_queries --using_facts_from Prims --using_facts_from FStar.Int,FStar.UInt --using_facts_from FStar.Int32 --using_facts_from FStar.UInt32 --using_facts_from FStar.UInt64 --using_facts_from FStar.Int64 --using_facts_from MPFR.Lib --using_facts_from MPFR.Add1sp1 --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native"
+*)
+
+#set-options "--z3refresh --z3rlimit 20 --log_queries"
+
 type state = {
   sign: i32;
   ax: i32;
@@ -40,7 +46,6 @@ val mpfr_add1sp1_gt: bx:i32 -> bm:u64 ->
 		      p:mpfr_prec_t{U32.v gmp_NUMB_BITS - U32.v p > 1 /\ 
 				    U32.v gmp_NUMB_BITS - U32.v p < 32} -> 
 		      Tot state
-#set-options "--z3refresh --z3rlimit 20"	      
 let mpfr_add1sp1_gt bx bm cx cm rnd_mode p =
   let sh = U32.(gmp_NUMB_BITS -^ p) in
   let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
@@ -112,8 +117,6 @@ let add_one_ulp sign ax am rnd_mode sh =
                 mk_state sign I32.(ax +^ 1l) am 0uL 0uL
          else mk_state sign ax am 0uL 0uL
 
-assume val neg: i32 -> Tot i32
-
 val mpfr_add1sp1_ : bx:i32{I32.v bx < pow2 31 - 1} -> bm:u64 -> 
 	            cx:i32{I32.v cx < pow2 31 - 1 /\ 
 			     I32.v bx - I32.v cx < pow2 31 /\
@@ -123,6 +126,8 @@ val mpfr_add1sp1_ : bx:i32{I32.v bx < pow2 31 - 1} -> bm:u64 ->
 				    U32.v gmp_NUMB_BITS - U32.v p < 32} -> 
    	            s: mpfr_sign_t ->
 		    Tot state 
+
+
 #set-options "--z3refresh --z3rlimit 100"	      
 let mpfr_add1sp1_ bx bm cx cm rnd_mode p sign =
   let sh = U32.(gmp_NUMB_BITS -^ p) in
@@ -150,14 +155,41 @@ let mpfr_add1sp1_ bx bm cx cm rnd_mode p sign =
 val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr -> 
     		  rnd_mode:mpfr_rnd_t -> p:mpfr_prec_t -> Stack i32 
 		  (requires (fun h -> live h a /\ live h b /\ live h c /\ 
-			     U32.(p <^ gmp_NUMB_BITS)))
-		  (ensures  (fun h0 r h1 -> live h1 a /\ live h1 b /\ live h1 c /\ modifies_1 a h1 h1))
+		             length a = 1 /\ length b = 1 /\ length c = 1 /\
+			     (let am = Seq.index (as_seq h a) 0 in
+			     let bm = Seq.index (as_seq h b) 0 in
+			     let cm = Seq.index (as_seq h c) 0 in
+			     let a0 = am.mpfr_d in
+			     let b0 = bm.mpfr_d in
+			     let c0 = cm.mpfr_d in
+			     live h a0 /\ live h b0 /\ live h c0 /\
+			     disjoint a a0 /\
+			     disjoint b b0 /\
+			     disjoint c c0 /\
+			     length a0 = 1 /\
+			     length b0 = 1 /\
+			     length c0 = 1 /\
+			     U32.v gmp_NUMB_BITS - U32.v p > 1 /\ 
+   			     U32.v gmp_NUMB_BITS - U32.v p < 32)))
+		  (ensures  (fun h0 r h1 -> live h1 a /\ live h1 b /\ live h1 c /\ 
+			     (let am = Seq.index (as_seq h1 a) 0 in
+			     let bm = Seq.index (as_seq h1 b) 0 in
+			     let cm = Seq.index (as_seq h1 c) 0 in
+			     let a0 = am.mpfr_d in
+			     let b0 = bm.mpfr_d in
+			     let c0 = cm.mpfr_d in
+			     live h1 a0 /\ live h1 b0 /\ live h1 c0 /\
+		             modifies_2 a a0 h0 h1)))
+#set-options "--z3refresh --z3rlimit 10 --log_queries"
 let mpfr_add1sp1 a b c rnd_mode p = 
     let sign = mpfr_SIGN a in
     let bx = mpfr_GET_EXP b in
     let bm = mpfr_MANT b in
     let cx = mpfr_GET_EXP c in
     let cm = mpfr_MANT c in
+    let h = ST.get() in
+    assert (live h bm);
+    assert (length bm = 1);
     let b0 = bm.(0ul) in
     let c0 = cm.(0ul) in
     let st = mpfr_add1sp1_ bx b0 cx c0 rnd_mode p sign in
@@ -166,8 +198,15 @@ let mpfr_add1sp1 a b c rnd_mode p =
     let ax = st.ax in
     let am = mpfr_MANT a in
     am.(0ul) <- a0;
-    let ap = mk_mpfr_struct p as ax am in
-    a.(0ul) <- ap;
+    let h1 = ST.get() in
+    assert (live h1 a);
+    assert (live h1 am);
+    assert (modifies_1 am h h1);
+    mpfr_SET_EXP a ax;
+    let h2 = ST.get() in
+    assert (live h2 a);
+    assert (live h2 am);
+    assert (modifies_1 a h1 h2);
     as
-    
+
 

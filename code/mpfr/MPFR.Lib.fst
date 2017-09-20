@@ -7,17 +7,20 @@ open FStar.UInt64
 
 // GENERIC LIBRARY DEFINITIONS
 
+
 type i32 = FStar.Int32.t
 type u32 = FStar.UInt32.t
 type u64 = FStar.UInt64.t
 
 type mpfr_prec_t = u32
-type mpfr_sign_t = i32
-type mpfr_exp_t = i32
+type mpfr_sign_t = i:i32{i = 1l \/ i = -1l}
+type mpfr_exp_t = i:i32{FStar.Int32.v i < pow2 30 /\ FStar.Int32.v i > 1 - pow2 30}
 type mpfr_uexp_t = u32
 type mp_limb_t = u64
 
-type mpfr_struct = {
+let neg (x:mpfr_sign_t) = if x = 1l then -1l else 1l
+
+noeq type mpfr_struct = {
     mpfr_prec: mpfr_prec_t;
     mpfr_sign: mpfr_sign_t;
     mpfr_exp : mpfr_exp_t;
@@ -36,22 +39,39 @@ let mk_mpfr_struct p s e d = {
 
 val mpfr_SIGN: x:mpfr_ptr -> Stack mpfr_sign_t 
 		(requires (fun h -> live h x))
-		(ensures (fun h0 _ h1 -> live h1 x /\ modifies_0 h0 h1))
+		(ensures (fun h0 r h1 -> live h1 x /\ modifies_0 h0 h1 /\
+		            (let xm = Seq.index (as_seq h0 x) 0 in
+			     r == xm.mpfr_sign)))
 let mpfr_SIGN x = 
     let f = x.(0ul) in
     f.mpfr_sign
 
 val mpfr_EXP: x:mpfr_ptr -> Stack mpfr_exp_t 
 		(requires (fun h -> live h x))
-		(ensures (fun h0 _ h1 -> live h1 x /\ modifies_0 h0 h1))
+		(ensures (fun h0 r h1 -> live h1 x /\ modifies_0 h0 h1 /\
+			    (let xm = Seq.index (as_seq h0 x) 0 in
+			     r == xm.mpfr_exp)))
 let mpfr_EXP x = 
     let f = x.(0ul) in
     f.mpfr_exp
 
+let mpfr_GET_EXP x = mpfr_EXP x
+
+val mpfr_SET_EXP: x:mpfr_ptr -> e:mpfr_exp_t -> Stack unit
+		(requires (fun h -> live h x))
+		(ensures (fun h0 _ h1 -> live h1 x /\ modifies_1 x h0 h1 /\
+			    (let xm = Seq.index (as_seq h1 x) 0 in
+			     e == xm.mpfr_exp)))
+let mpfr_SET_EXP x e = 
+    let f = x.(0ul) in
+    x.(0ul) <- {f with mpfr_exp = e}
+
 
 val mpfr_MANT: x:mpfr_ptr -> Stack (buffer mp_limb_t)
 		(requires (fun h -> live h x))
-		(ensures (fun h0 _ h1 -> live h1 x /\ modifies_0 h0 h1))
+		(ensures (fun h0 r h1 -> live h1 x /\ modifies_0 h0 h1 /\
+			    (let xm = Seq.index (as_seq h0 x) 0 in
+			     r == xm.mpfr_d)))
 let mpfr_MANT x = 
     let f = x.(0ul) in
     f.mpfr_d
@@ -69,17 +89,19 @@ type mpfr_rnd_t =
    | MPFR_RNDNA
 
 
-let mpfr_GET_EXP x = mpfr_EXP x
-
-let mpfr_SET_EXP x e = 
-    x.(0ul) <- e
-
 let gmp_NUMB_BITS = 64ul
 
 let mpfr_LIMB_ONE = 1uL
 
-let mpfr_LIMB_MASK s = (1uL <<^ s) -^ 1uL
+val mpfr_LIMB_MASK: s:u32{FStar.UInt32.v s < 64} -> Tot u64
+#set-options "--z3refresh --z3rlimit 100 --log_queries"
+let mpfr_LIMB_MASK s =
+    let lsh = 1uL <<^ s in
+    assume (lsh >^ 0uL);
+    lsh -^ 1uL
+
 let mpfr_LIMB_HIGHBIT = 0x8000000000000000uL
+
 
 
 assume val gmpfr_emax: mpfr_exp_t
