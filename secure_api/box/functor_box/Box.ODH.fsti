@@ -19,6 +19,10 @@ let dh_exponent' (dh_exponent_length:nat) = lbytes dh_exponent_length
 let hash_output' (hash_length:nat) = lbytes hash_length
 val smaller' (dh_share_length:nat): i1:dh_share' dh_share_length -> i2:dh_share' dh_share_length -> b:bool{b ==> i1 <> i2}
 let key_id' (dh_share_length:nat) = i:(dh_share' dh_share_length * dh_share' dh_share_length){b2t (smaller' dh_share_length (fst i) (snd i))}
+val share_from_exponent': dh_exponent' dh_exponent_length' -> Tot (dh_share' dh_share_length')
+val skey: Type0
+val pkey: Type0
+
 
 abstract noeq type odh_module = // require subId type to be dh_share?
   | ODH:
@@ -64,50 +68,52 @@ val create: hash_len:nat{hash_len = hash_length'} -> dh_share_len:nat{dh_share_l
   A DH public key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
   or dishonest).
 *)
-val pkey: om:odh_module -> Type0
+
+//val pkey: om:odh_module -> pkey'
 
 
 (**
   A DH secret key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
   or dishonest).
 *)
-val skey: om:odh_module -> Type0
 
-val get_pkey: om:odh_module -> skey om -> pkey om
+//val skey: om:odh_module -> skey'
 
-val compatible_keys: om:odh_module -> sk:skey om -> pk:pkey om -> t:Type0{t <==> pk =!= get_pkey om sk}
+val get_pkey: om:odh_module -> skey -> pkey
+
+val compatible_keys: om:odh_module -> sk:skey -> pk:pkey -> t:Type0{t <==> pk =!= get_pkey om sk}
 
 (**
   A helper function to obtain the raw bytes of a DH public key.
 *)
-val pk_get_share: om:odh_module -> pk:pkey om -> Tot (dh_sh:dh_share om) //{dh_sh = pk.pk_sharite numbersre})
+val pk_get_share: om:odh_module -> pk:pkey -> Tot (dh_sh:dh_share om) //{dh_sh = pk.pk_sharite numbersre})
 
-val lemma_pk_get_share_inj: om:odh_module -> pk:pkey om -> Lemma
+val lemma_pk_get_share_inj: om:odh_module -> pk:pkey -> Lemma
   (requires True)
   (ensures (forall pk' . pk_get_share om pk' == pk_get_share om pk <==> pk' == pk))
   [SMTPat (pk_get_share om pk)]
 
-val get_skeyGT: om:odh_module -> sk:skey om -> GTot (raw:dh_exponent om) //{raw=sk.sk_exp})
+val get_skeyGT: om:odh_module -> sk:skey -> GTot (raw:dh_exponent om) //{raw=sk.sk_exp})
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 (**
 A helper function to obtain the share that corresponds to a DH secret key.
 *)
-val sk_get_share: om:odh_module -> sk:skey om -> Tot (dh_sh:dh_share om{dh_sh = share_from_exponent om (get_skeyGT om sk)})
+val sk_get_share: om:odh_module -> sk:skey -> Tot (dh_sh:dh_share om{dh_sh = share_from_exponent om (get_skeyGT om sk)})
 
-val leak_skey: om:odh_module -> sk:skey om{ID.dishonest om.im (sk_get_share om sk)} -> Tot (raw:dh_exponent om{raw=get_skeyGT om sk})
+val leak_skey: om:odh_module -> sk:skey{ID.dishonest om.im (sk_get_share om sk)} -> Tot (raw:dh_exponent om{raw=get_skeyGT om sk})
 
-val keygen: om:odh_module -> ST (dh_pair:(pkey om * skey om){fst dh_pair == get_pkey om (snd dh_pair)})
+val keygen: om:odh_module -> ST (dh_pair:(pkey * skey){fst dh_pair == get_pkey om (snd dh_pair)})
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 -> modifies_none h0 h1))
 
-val coerce_pkey: om:odh_module -> dh_sh:dh_share om{ID.dishonest om.im dh_sh} -> Tot (pk:pkey om{pk_get_share om pk=dh_sh})
+val coerce_pkey: om:odh_module -> dh_sh:dh_share om{ID.dishonest om.im dh_sh} -> Tot (pk:pkey{pk_get_share om pk=dh_sh})
 
 (**
   coerce_keypair allows the adversary to coerce a DH exponent into a DH private key. The corresponding DH public key
   is generated along with it. Both keys are considered dishonest and the id is considered unfresh after coercion.
 *)
-val coerce_keypair: om:odh_module -> dh_exp:dh_exponent om{ID.dishonest om.im (share_from_exponent om dh_exp)} -> Tot (dh_pair:(k:pkey om{pk_get_share om k = share_from_exponent om dh_exp}) * (k:skey om{get_skeyGT om k=dh_exp}))
+val coerce_keypair: om:odh_module -> dh_exp:dh_exponent om{ID.dishonest om.im (share_from_exponent om dh_exp)} -> Tot (dh_pair:(k:pkey{pk_get_share om k = share_from_exponent om dh_exp}) * (k:skey{get_skeyGT om k=dh_exp}))
 
 
 val compose_ids: om:odh_module -> s1:dh_share om -> s2:dh_share om{s2 <> s1} -> (i:(dh_share om * dh_share om){b2t (smaller om (fst i) (snd i))})
@@ -115,15 +121,15 @@ val compose_ids: om:odh_module -> s1:dh_share om -> s2:dh_share om{s2 <> s1} -> 
 (**
   GTot specification of the prf_odh function for use in type refinements.
 *)
-val prf_odhGT: om:odh_module -> sk:skey om -> pk:pkey om{compatible_keys om sk pk} -> GTot (ho:hash_output om{ho = hash om (dh_exponentiate om (get_skeyGT om sk) (pk_get_share om pk))})
+val prf_odhGT: om:odh_module -> sk:skey -> pk:pkey{compatible_keys om sk pk} -> GTot (ho:hash_output om{ho = hash om (dh_exponentiate om (get_skeyGT om sk) (pk_get_share om pk))})
 
-val lemma_shares: om:odh_module -> sk:skey om -> Lemma
+val lemma_shares: om:odh_module -> sk:skey -> Lemma
   (requires True)
   (ensures (pk_get_share om (get_pkey om sk)) == sk_get_share om sk)
   [ SMTPat (sk_get_share om sk)]
 
 #set-options "--z3rlimit 1000 --max_ifuel 1 --max_fuel 0"
-val prf_odh: om:odh_module -> sk:skey om -> pk:pkey om{compatible_keys om sk pk} -> ST (k:Key.get_keytype om.kim om.km)
+val prf_odh: om:odh_module -> sk:skey -> pk:pkey{compatible_keys om sk pk} -> ST (k:Key.get_keytype om.kim om.km)
   (requires (fun h0 ->
     let i = compose_ids om (pk_get_share om pk) (sk_get_share om sk) in
     ID.registered om.kim i

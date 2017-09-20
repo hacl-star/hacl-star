@@ -31,38 +31,43 @@ module ODH = Box.ODH
 module AE = Box.AE
 module LE = FStar.Endianness
 
-let nonce = AE.nonce
-let cipher = AE.cipher
-let sub_id = ODH.dh_share
-let key_id = ODH.key_id
+let nonce' = AE.nonce
+let cipher' = AE.cipher
+let sub_id' = ODH.dh_share' Curve.serialized_point_length
+let key_id' = ODH.key_id' Curve.serialized_point_length
+let plain' = AE.ae_plain
 
-#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
-let compose_ids i1 i2 = ODH.compose_ids i1 i2
 let valid_plain_length = AE.valid_plain_length
 let valid_cipher_length = AE.valid_cipher_length
-let key_length = ODH.hash_length
-let plain_t = AE.ae_plain
-let length = AE.length
 
-//let message_log_range (im:index_module) = AE.message_log_range im
-//let message_log_inv (im:index_module) (pm:plain_module) (f:MM.map' (message_log_key im) (message_log_range im pm)) = AE.message_log_inv im pm f
+#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 0"
+private noeq type aux_t' (skey:Type0) (pkey:Type0) (im:index_module) (kim:plain_index_module) (pm:plain_module) (rgn:log_region kim) =
+  | AUX:
+    am:AE.ae_module kim ->
+    om:ODH.odh_module{ODH.get_hash_length om = HSalsa.keylen
+                      /\ ODH.get_dh_share_length om = Curve.serialized_point_length
+                      /\ ODH.get_dh_exponent_length om = Curve.scalar_length
+                      /\ ODH.get_index_module om == im
+                      /\ ODH.get_key_index_module om == kim
+                      /\ ODH.skey == skey
+                      /\ ODH.pkey == pkey
+                      } ->
+    km:Key.key_module kim{km == AE.instantiate_km am
+                          /\ km == ODH.get_key_module om
+                          /\ Key.get_keylen kim km == ODH.get_hash_length om} ->
+    aux_t' skey pkey im kim pm rgn
 
-let pkey = ODH.pkey
-let skey = ODH.skey
+let aux_t skey pkey im kim pm = aux_t' skey pkey im kim pm
+
+#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
+let compose_ids pkm i1 i2 = ODH.compose_ids pkm.aux.om i1 i2
+let length pkm = AE.length
 
 let pkey_from_skey sk = ODH.get_pkey sk
 let compatible_keys sk pk = ODH.compatible_keys sk pk
 
 type key_index_module = plain_index_module
-
-private noeq type aux_t' (im:index_module{ID.id im == sub_id}) (kim:key_index_module{ID.id kim == key_id}) (pm:plain_module) (rgn:log_region kim) =
-  | AUX:
-    am:AE.ae_module kim ->
-    km:Key.key_module kim{km == AE.instantiate_km am /\ Key.get_keylen kim km == key_length} ->
-    om:ODH.odh_module im kim{ODH.get_hash_length im kim om = key_length /\ ODH.get_dh_share_length im kim om = Curve.serialized_point_length} ->
-    aux_t' im kim pm rgn
-
-let aux_t im kim pm = aux_t' im kim pm
+type plain_module = pm:plain_module{Plain.get_plain pm == plain' /\ Plain.valid_length #pm == valid_plain_length}
 
 #set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
 val message_log_lemma: im:key_index_module -> rgn:log_region im -> Lemma
@@ -96,50 +101,60 @@ let get_message_logGT pkm =
   let log:message_log pkm.pim ae_rgn = coerce (AE.message_log pkm.pim ae_rgn) (message_log pkm.pim ae_rgn) ae_log in
   log
 
-val create_aux: (im:index_module) -> (kim:key_index_module) -> (pm:plain_module{Plain.get_plain pm == plain_t /\ Plain.valid_length #pm == valid_plain_length}) -> rgn:log_region kim -> St (aux_t im kim pm rgn)
-let create_aux im kim pm rgn =
+val create_aux: (skey:Type0) ->
+                (pkey:Type0) ->
+                (im:index_module) ->
+                (kim:key_index_module) ->
+                (pm:plain_module) ->
+                rgn:log_region kim ->
+                St (aux_t skey pkey im kim pm rgn)
+let create_aux skey pkey im kim pm rgn =
   assert(FStar.FunctionalExtensionality.feq (valid_plain_length) (AE.valid_plain_length));
   let am = AE.create kim pm rgn in
   let km = AE.instantiate_km am in
-  let om = ODH.create im kim km rgn in
-  AUX am km om
+  let om = ODH.create HSalsa.keylen Curve.serialized_point_length Curve.scalar_length im kim km rgn in
+  AUX am om km
 
-//val lemma_compatible_length: n:nat -> Lemma
-//  (requires valid_plain_length n)
-//  (ensures n / Spec.Salsa20.blocklen < pow2 32)
-//let lemma_compatible_length n = ()
-//
-//
-//val length_lemma: n:nat{n >= 16} -> Lemma
-//  (requires (n / Spec.Salsa20.blocklen < pow2 32))
-//  (ensures ((n-16) / Spec.Salsa20.blocklen < pow2 32))
-//let length_lemma n = ()
+val enc (im:index_module) (kim:key_index_module) (pm:plain_module) (rgn:log_region kim) (aux:aux_t ODH.skey ODH.pkey im kim pm rgn): plain' -> n:nonce' -> pk:ODH.pkey -> sk:ODH.skey{ODH.compatible_keys aux.om sk pk} -> GTot cipher'
+let enc im kim pm rgn aux p n pk sk =
+  SPEC.cryptobox p n (ODH.pk_get_share aux.om pk) (ODH.get_skeyGT aux.om sk)
 
-val enc (pkm:pkae_module): plain_t -> n:nonce -> pk:pkey -> sk:skey{ODH.compatible_keys sk pk} -> GTot cipher
-let enc pkm p n pk sk =
+val dec (im:index_module) (kim:key_index_module) (pm:plain_module) (rgn:log_region kim) (aux:aux_t ODH.skey ODH.pkey im kim pm rgn): c:cipher' -> n:nonce' -> pk:ODH.pkey -> sk:ODH.skey{ODH.compatible_keys aux.om sk pk} -> GTot (option (b:plain'))
+let dec im kim pm rgn aux c n pk sk =
+  SPEC.cryptobox_open c n (ODH.pk_get_share aux.om pk) (ODH.get_skeyGT aux.om sk)
 
-  SPEC.cryptobox p n (ODH.pk_get_share pk) (ODH.get_skeyGT sk)
-  //SPEC.secretbox_easy p (ODH.prf_odhGT sk pk) n
+//type plain_index_module = im:ID.index_module{ID.id im == key_id'}
+//let key_id' = ODH.key_id' Curve.serialized_point_length
+// ODH.key_id' sh = i:(dh_share' dh_share_length * dh_share' dh_share_length){b2t (smaller' dh_share_length (fst i) (snd i))}
 
-//type plain_t = b:bytes{Seq.length b / Spec.Salsa20.blocklen < pow2 32} // / Spec.Salsa20.blocklen < pow2 32} //one off error?
+//Subtyping check failed; expected type Box.PKAE.plain_index_module; got type (im':Box.Index.index_module{ Box.Index.id im' ==
+//          (i:(Box.Index.id im * Box.Index.id im){ Prims.b2t (Box.ODH.smaller' Spec.Curve25519.serialized_point_length
+//                           (FStar.Pervasives.Native.fst i)
+//                           (FStar.Pervasives.Native.snd i)) }) })
 
-#set-options "--z3rlimit 1000 --max_ifuel 2 --max_fuel 0"
-val dec (im:ODH.index_module): c:cipher -> n:nonce -> pk:pkey -> sk:skey{ODH.compatible_keys sk pk} -> GTot (option (b:plain_t{Seq.length b = Seq.length c - 16}))
-let dec im c n pk sk =
-  SPEC.cryptobox_open c n (ODH.pk_get_share pk) (ODH.get_skeyGT sk) n
-  //SPEC.secretbox_open_easy c (ODH.prf_odhGT sk pk) n
-
+#set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 0"
 let create rgn =
   let id_log_rgn : ID.id_log_region = new_region rgn in
-  let im = ID.create id_log_rgn sub_id in
-  let kim = ID.compose id_log_rgn im ODH.smaller in
-  let pm = Plain.create plain_t AE.valid_plain_length AE.length in
+  let im = ID.create id_log_rgn sub_id' in
+  let kim = ID.compose id_log_rgn im (ODH.smaller' Curve.serialized_point_length) in
+  assert(ID.id im == ODH.dh_share' Curve.serialized_point_length);
+  assert(ID.id im * ID.id im == ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length);
+  assert(ID.id kim == i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
+  assert()
+  //assert(i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i ) (snd i))} == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
+  //assert(ID.id kim == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
+  let kid = ODH.key_id' Curve.serialized_point_length in
+  let kid' = kid in
+  //assert(key_id' == i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
+  assert(key_id' == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   admit();
-  let kim: im:ID.index_module{ID.id im == i:(ODH.dh_share * ODH.dh_share){b2t (ODH.smaller (fst i) (snd i))}} = kim in
+  let pm = Plain.create plain' AE.valid_plain_length AE.length in
+  //admit();
+  //let kim: im:ID.index_module{ID.id im == i:(ODH.dh_share * ODH.dh_share){b2t (ODH.smaller (fst i) (snd i))}} = kim in
   let log_rgn : log_region kim = new_region rgn in
   assert(FStar.FunctionalExtensionality.feq (valid_plain_length) (AE.valid_plain_length));
-  let aux = create_aux im kim pm log_rgn in
-  PKAE im kim pm log_rgn (enc im) (dec im) aux
+  let aux = create_aux ODH.skey ODH.pkey im kim pm log_rgn in
+  PKAE nonce' cipher' sub_id' key_id' plain' ODH.skey ODH.pkey (ODH.get_pkey aux.om) (ODH.compatible_keys aux.om) im kim pm log_rgn (enc im kim pm rgn aux) (dec im kim pm rgn aux) aux
 
 type key (pkm:pkae_module) = AE.key pkm.pim
 

@@ -40,6 +40,18 @@ let smaller' n i1 i2 =
   let i2' = LE.little_endian i2 in
   i1' < i2'
 
+let share_from_exponent' dh_exp = Curve.scalarmult dh_exp Curve.base_point
+
+noeq abstract type pkey' =
+  | PKEY: pk_share:dh_share' dh_share_length' -> pkey'
+
+noeq abstract type skey' =
+  | SKEY: sk_exp:dh_exponent' dh_exponent_length' -> pk:pkey'{pk.pk_share = share_from_exponent'  sk_exp} -> skey'
+
+let skey = skey'
+let pkey = pkey'
+
+
 let get_hash_length om = om.hash_length
 let get_dh_share_length om = om.dh_share_length
 let get_dh_exponent_length om = om.dh_share_length
@@ -69,16 +81,6 @@ let dh_exponentiate om dh_exp dh_sh = Curve.scalarmult dh_exp dh_sh
 
 let create hash_len dh_share_len dh_exp_len im kim km rgn =
   ODH rgn hash_len dh_share_len dh_exp_len im kim km
-
-noeq abstract type pkey' (om:odh_module) =
-  | PKEY: pk_share:dh_share om -> pkey' om
-
-let pkey om = pkey' om
-
-noeq abstract type skey' (om:odh_module) =
-  | SKEY: sk_exp:dh_exponent om -> pk:pkey om{pk.pk_share = share_from_exponent  om sk_exp} -> skey' om
-
-let skey om = skey' om
 
 let get_pkey om sk = sk.pk
 
