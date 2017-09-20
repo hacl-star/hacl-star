@@ -218,12 +218,8 @@ Hacl_Impl_Chacha20_chacha20(
   Hacl_Impl_Chacha20_chacha20_counter_mode(output, plain, len, st, ctr);
 }
 
-void *Chacha20_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *m)
-{
-  return (void *)(uint8_t )0;
-}
 
-void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32_t ctr)
+static void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32_t ctr)
 {
   uint32_t buf[16] = { 0 };
   uint32_t *st = buf;
