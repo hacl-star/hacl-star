@@ -16,7 +16,7 @@ FSTAR_INCLUDES+=--include ../../hash
 verify: $(addsuffix -lax, $(RSA_FILES))
 
 RSA_VERIFY= \
-	Convert.fst
+	Division.fst
 
 verify-1: $(RSA_VERIFY)
 	$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) $(FSTAR_INCLUDES) $^

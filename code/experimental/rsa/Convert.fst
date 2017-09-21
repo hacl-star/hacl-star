@@ -12,8 +12,6 @@ module U64 = FStar.UInt64
 type uint8_p = buffer FStar.UInt8.t
 type bignum = buffer FStar.UInt64.t
 
-let bn_bytes = 8ul
-
 (* text_to_bn *)
 val get_size_nat: lenText:U32.t{U32.v lenText > 0} -> Tot (res:U32.t{U32.v res > 0})
 let get_size_nat lenText =
