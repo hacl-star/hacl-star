@@ -36,12 +36,14 @@ let cipher' = AE.cipher
 let sub_id' = ODH.dh_share' Curve.serialized_point_length
 let key_id' = ODH.key_id' Curve.serialized_point_length
 let plain' = AE.ae_plain
+let skey' = ODH.skey
+let pkey' = ODH.pkey
 
 let valid_plain_length = AE.valid_plain_length
 let valid_cipher_length = AE.valid_cipher_length
 
 #set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 0"
-private noeq type aux_t' (skey:Type0) (pkey:Type0) (im:index_module) (kim:plain_index_module) (pm:plain_module) (rgn:log_region kim) =
+private noeq type aux_t' (skey:Type0) (pkey:Type0) (im:index_module) (kim:plain_index_module) (pm:Plain.plain_module) (rgn:log_region kim) =
   | AUX:
     am:AE.ae_module kim ->
     om:ODH.odh_module{ODH.get_hash_length om = HSalsa.keylen
@@ -66,8 +68,8 @@ let length pkm = AE.length
 let pkey_from_skey sk = ODH.get_pkey sk
 let compatible_keys sk pk = ODH.compatible_keys sk pk
 
-type key_index_module = plain_index_module
-type plain_module = pm:plain_module{Plain.get_plain pm == plain' /\ Plain.valid_length #pm == valid_plain_length}
+let key_index_module = plain_index_module
+let plain_module = pm:Plain.plain_module{Plain.get_plain pm == plain' /\ Plain.valid_length #pm == valid_plain_length}
 
 #set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
 val message_log_lemma: im:key_index_module -> rgn:log_region im -> Lemma
@@ -137,16 +139,16 @@ let create rgn =
   let id_log_rgn : ID.id_log_region = new_region rgn in
   let im = ID.create id_log_rgn sub_id' in
   let kim = ID.compose id_log_rgn im (ODH.smaller' Curve.serialized_point_length) in
+  //assert(FStar.FunctionalExtensionality.feq ())
+  assert(ID.id kim == i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   assert(ID.id im == ODH.dh_share' Curve.serialized_point_length);
   assert(ID.id im * ID.id im == ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length);
-  assert(ID.id kim == i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
-  assert()
+  assert(key_id' == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   //assert(i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i ) (snd i))} == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   //assert(ID.id kim == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   let kid = ODH.key_id' Curve.serialized_point_length in
   let kid' = kid in
   //assert(key_id' == i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
-  assert(key_id' == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   admit();
   let pm = Plain.create plain' AE.valid_plain_length AE.length in
   //admit();
@@ -156,50 +158,84 @@ let create rgn =
   let aux = create_aux ODH.skey ODH.pkey im kim pm log_rgn in
   PKAE nonce' cipher' sub_id' key_id' plain' ODH.skey ODH.pkey (ODH.get_pkey aux.om) (ODH.compatible_keys aux.om) im kim pm log_rgn (enc im kim pm rgn aux) (dec im kim pm rgn aux) aux
 
-type key (pkm:pkae_module) = AE.key pkm.pim
+let key (pkm:pkae_module) = AE.key pkm.pim
 
 let zero_bytes = AE.create_zero_bytes
 
-let pkey_to_subId #pkm pk = ODH.pk_get_share pk
-let pkey_to_subId_inj #pkm pk = ODH.lemma_pk_get_share_inj pk
+let pkey_to_subId #pkm pk = ODH.pk_get_share pkm.aux.om pk
+let pkey_to_subId_inj #pkm pk = ODH.lemma_pk_get_share_inj pkm.aux.om pk
 
-let nonce_is_fresh (pkm:pkae_module) (i:ID.id pkm.pim) (n:nonce) (h:mem) =
+let nonce_is_fresh (pkm:pkae_module) (i:ID.id pkm.pim) (n:pkm.nonce) (h:mem) =
   AE.nonce_is_fresh pkm.aux.am i n h
+
 
 let invariant pkm =
   Key.invariant pkm.pim pkm.aux.km
 
+//  Subtyping check failed; expected type (keypair:(PKAE?.pkey pkm * PKAE?.skey pkm){ FStar.Pervasives.Native.fst keypair ==
+//            PKAE?.pkey_from_skey pkm (FStar.Pervasives.Native.snd keypair) }); got type (dh_pair:(Box.ODH.pkey * Box.ODH.skey){ FStar.Pervasives.Native.fst dh_pair ==
+//            Box.ODH.get_pkey (AUX?.om (PKAE?.aux pkm)) (FStar.Pervasives.Native.snd dh_pair) })
 let gen pkm =
-  ODH.keygen()
+  assert(FStar.FunctionalExtensionality.feq (ODH.get_pkey) (pkey_from_skey));
+  ODH.keygen pkm.aux.om
+
+val encrypt: pkm:pkae_module ->
+             n:pkm.nonce ->
+             sk:pkm.skey ->
+             pk:pkm.pkey -> //{pkm.compatible_keys sk pk} ->
+             m:(Plain.protected_plain_t pkm.pim (Plain.get_plain pkm.pm) (compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)))) ->
+             ST pkm.cipher
+  (requires (fun h0 -> True
+    //let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)) in
+    //registered pkm i
+    ///\ nonce_is_fresh pkm i n h0
+    ///\ invariant pkm h0
+  ))
+  (ensures  (fun h0 c h1 ->
+    let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)) in
+    modifies (Set.singleton pkm.rgn) h0 h1 // stateful changes even if the id is dishonest.
+    /\ ((honest pkm i /\ b2t pkae) // Ideal behaviour if the id is honest and the assumption holds
+               ==> eq2 #pkm.cipher c (pkm.enc (zero_bytes (Plain.length #pkm.pim #pkm.pm #i m)) n pk sk))
+    /\ ((dishonest pkm i \/ ~(b2t pkae)) // Concrete behaviour otherwise.
+                  ==> eq2 #pkm.cipher c (pkm.enc (Plain.repr #pkm.pim #pkm.pm #i m) n pk sk))
+    // The message is added to the log. This also guarantees nonce-uniqueness.
+    /\ MR.m_contains #(get_message_log_region pkm)(get_message_logGT pkm) h1
+    /\ MR.witnessed (MM.contains #(get_message_log_region pkm) (get_message_logGT pkm) (n,i) (c,m))
+    /\ MR.m_sel #(get_message_log_region pkm) h1 (get_message_logGT pkm)== MM.upd (MR.m_sel #(get_message_log_region pkm) h0 (get_message_logGT pkm)) (n,i) (c,m)
+    /\ invariant pkm h1
+  ))
 
 #set-options "--z3rlimit 10000 --max_ifuel 0 --max_fuel 0"
 let encrypt pkm n sk pk m =
+  assert(False);
+  admit();
   let i = compose_ids (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk)) in
-  let k = ODH.prf_odh pkm.im pkm.kim pkm.aux.km pkm.aux.om sk pk in
+  let k = ODH.prf_odh pkm.aux.om sk pk in
   let c = AE.encrypt pkm.aux.am #i n k m in
   assert(Game3? current_game <==> (b2t pkae /\ ~prf_odh));
-  admit();
-  assert((honest pkm i /\ b2t pkae) // Ideal behaviour if the id is honest and the assumption holds
-    ==> c == pkm.enc (zero_bytes (Plain.length #pkm.kim #pkm.pm #i m)) n pk sk);
-  admit();
-  let h = get() in assert(Key.invariant pkm.kim pkm.aux.km h);
-  ID.lemma_honest_or_dishonest pkm.kim i;
-  let honest_i = ID.get_honest pkm.kim i in
+  //assert((honest pkm i /\ b2t pkae) // Ideal behaviour if the id is honest and the assumption holds
+  //  ==> c == pkm.enc (zero_bytes (Plain.length #pkm.pim #pkm.pm #i m)) n pk sk);
+  let h = get() in
+  assert(Key.invariant pkm.pim pkm.aux.km h);
+  ID.lemma_honest_or_dishonest pkm.pim i;
+  let honest_i = ID.get_honest pkm.pim i in
   if not honest_i then (
-    assert(ID.dishonest pkm.kim i);
-    assert(Key.leak pkm.kim pkm.aux.km k = ODH.prf_odhGT sk pk );
+    assert(ID.dishonest pkm.pim i);
+    //assert(Key.leak pkm.pim pkm.aux.km k = ODH.prf_odhGT sk pk );
     //assert(c = SPEC.secretbox_easy (Plain.repr #pkm.kim #pkm.pm #i m) (Key.get_rawGT pkm.kim pkm.aux.km k) n);
     //assert( eq2 #cipher c (pkm.enc (Plain.repr #pkm.kim #pkm.pm #i m) n pk sk));
     ()
   );
   let h = get() in
-  assert(FStar.FunctionalExtensionality.feq (message_log_range pkm.kim) (AE.message_log_range pkm.kim));
+  assert(FStar.FunctionalExtensionality.feq (message_log_range pkm.pim) (AE.message_log_range pkm.pim));
   MM.contains_eq_compat (get_message_logGT pkm) (AE.get_message_logGT pkm.aux.am) (n,i) (c,m) h;
   MM.contains_stable (get_message_logGT pkm) (n,i) (c,m);
   MR.witness (get_message_logGT pkm) (MM.contains (get_message_logGT pkm) (n,i) (c,m));
   c
 
 let decrypt pkm n sk pk c =
-  let k = ODH.prf_odh pkm.im pkm.kim pkm.aux.km pkm.aux.om sk pk in
+  assert(False);
+  let i = compose_ids (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk)) in
+  let k = ODH.prf_odh pkm.aux.om sk pk in
   let m = AE.decrypt pkm.aux.am #i n k c in
   m
