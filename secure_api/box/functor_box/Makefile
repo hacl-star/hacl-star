@@ -1,4 +1,4 @@
-include ../../../code/Makefile.include
+include ../../../Makefile.include
 
 VERIFY= \
   Box.Index \
@@ -32,7 +32,7 @@ all-lax: lax
 
 # Verifying one file at a time
 %.fst-ver:
-	$(FSTAR) $(INCLUDE) \
+	$(FSTAR) --log_queries $(INCLUDE) \
 	$(basename $@).fst
 
 all-assumes: $(addsuffix .fst, $(VERIFY) $(LAX))

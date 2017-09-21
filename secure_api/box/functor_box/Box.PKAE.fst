@@ -31,13 +31,13 @@ module ODH = Box.ODH
 module AE = Box.AE
 module LE = FStar.Endianness
 
-let nonce' = AE.nonce
-let cipher' = AE.cipher
-let sub_id' = ODH.dh_share' Curve.serialized_point_length
-let key_id' = ODH.key_id' Curve.serialized_point_length
-let plain' = AE.ae_plain
-let skey' = ODH.skey
-let pkey' = ODH.pkey
+let nonce = AE.nonce
+let cipher = AE.cipher
+let sub_id = ODH.dh_share' Curve.serialized_point_length
+let key_id = ODH.key_id' Curve.serialized_point_length
+let plain = AE.ae_plain
+let skey = ODH.skey
+let pkey = ODH.pkey
 
 let valid_plain_length = AE.valid_plain_length
 let valid_cipher_length = AE.valid_cipher_length
@@ -69,7 +69,7 @@ let pkey_from_skey sk = ODH.get_pkey sk
 let compatible_keys sk pk = ODH.compatible_keys sk pk
 
 let key_index_module = plain_index_module
-let plain_module = pm:Plain.plain_module{Plain.get_plain pm == plain' /\ Plain.valid_length #pm == valid_plain_length}
+let plain_module = pm:Plain.plain_module{Plain.get_plain pm == plain /\ Plain.valid_length #pm == valid_plain_length}
 
 #set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
 val message_log_lemma: im:key_index_module -> rgn:log_region im -> Lemma
@@ -117,11 +117,11 @@ let create_aux skey pkey im kim pm rgn =
   let om = ODH.create HSalsa.keylen Curve.serialized_point_length Curve.scalar_length im kim km rgn in
   AUX am om km
 
-val enc (im:index_module) (kim:key_index_module) (pm:plain_module) (rgn:log_region kim) (aux:aux_t ODH.skey ODH.pkey im kim pm rgn): plain' -> n:nonce' -> pk:ODH.pkey -> sk:ODH.skey{ODH.compatible_keys aux.om sk pk} -> GTot cipher'
+val enc (im:index_module) (kim:key_index_module) (pm:plain_module) (rgn:log_region kim) (aux:aux_t ODH.skey ODH.pkey im kim pm rgn): plain -> n:nonce -> pk:ODH.pkey -> sk:ODH.skey{ODH.compatible_keys aux.om sk pk} -> GTot cipher
 let enc im kim pm rgn aux p n pk sk =
   SPEC.cryptobox p n (ODH.pk_get_share aux.om pk) (ODH.get_skeyGT aux.om sk)
 
-val dec (im:index_module) (kim:key_index_module) (pm:plain_module) (rgn:log_region kim) (aux:aux_t ODH.skey ODH.pkey im kim pm rgn): c:cipher' -> n:nonce' -> pk:ODH.pkey -> sk:ODH.skey{ODH.compatible_keys aux.om sk pk} -> GTot (option (b:plain'))
+val dec (im:index_module) (kim:key_index_module) (pm:plain_module) (rgn:log_region kim) (aux:aux_t ODH.skey ODH.pkey im kim pm rgn): c:cipher -> n:nonce -> pk:ODH.pkey -> sk:ODH.skey{ODH.compatible_keys aux.om sk pk} -> GTot (option (b:plain))
 let dec im kim pm rgn aux c n pk sk =
   SPEC.cryptobox_open c n (ODH.pk_get_share aux.om pk) (ODH.get_skeyGT aux.om sk)
 
@@ -137,26 +137,26 @@ let dec im kim pm rgn aux c n pk sk =
 #set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 0"
 let create rgn =
   let id_log_rgn : ID.id_log_region = new_region rgn in
-  let im = ID.create id_log_rgn sub_id' in
+  let im = ID.create id_log_rgn sub_id in
   let kim = ID.compose id_log_rgn im (ODH.smaller' Curve.serialized_point_length) in
   //assert(FStar.FunctionalExtensionality.feq ())
   assert(ID.id kim == i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   assert(ID.id im == ODH.dh_share' Curve.serialized_point_length);
   assert(ID.id im * ID.id im == ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length);
-  assert(key_id' == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
+  assert(key_id == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   //assert(i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i ) (snd i))} == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   //assert(ID.id kim == i:(ODH.dh_share' Curve.serialized_point_length * ODH.dh_share' Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   let kid = ODH.key_id' Curve.serialized_point_length in
   let kid' = kid in
   //assert(key_id' == i:(ID.id im * ID.id im){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))});
   admit();
-  let pm = Plain.create plain' AE.valid_plain_length AE.length in
+  let pm = Plain.create plain AE.valid_plain_length AE.length in
   //admit();
   //let kim: im:ID.index_module{ID.id im == i:(ODH.dh_share * ODH.dh_share){b2t (ODH.smaller (fst i) (snd i))}} = kim in
   let log_rgn : log_region kim = new_region rgn in
   assert(FStar.FunctionalExtensionality.feq (valid_plain_length) (AE.valid_plain_length));
   let aux = create_aux ODH.skey ODH.pkey im kim pm log_rgn in
-  PKAE nonce' cipher' sub_id' key_id' plain' ODH.skey ODH.pkey (ODH.get_pkey aux.om) (ODH.compatible_keys aux.om) im kim pm log_rgn (enc im kim pm rgn aux) (dec im kim pm rgn aux) aux
+  PKAE (ODH.get_pkey aux.om) (ODH.compatible_keys aux.om) im kim pm log_rgn (enc im kim pm rgn aux) (dec im kim pm rgn aux) aux
 
 let key (pkm:pkae_module) = AE.key pkm.pim
 
@@ -165,7 +165,7 @@ let zero_bytes = AE.create_zero_bytes
 let pkey_to_subId #pkm pk = ODH.pk_get_share pkm.aux.om pk
 let pkey_to_subId_inj #pkm pk = ODH.lemma_pk_get_share_inj pkm.aux.om pk
 
-let nonce_is_fresh (pkm:pkae_module) (i:ID.id pkm.pim) (n:pkm.nonce) (h:mem) =
+let nonce_is_fresh (pkm:pkae_module) (i:ID.id pkm.pim) (n:nonce) (h:mem) =
   AE.nonce_is_fresh pkm.aux.am i n h
 
 
@@ -180,11 +180,11 @@ let gen pkm =
   ODH.keygen pkm.aux.om
 
 val encrypt: pkm:pkae_module ->
-             n:pkm.nonce ->
-             sk:pkm.skey ->
-             pk:pkm.pkey -> //{pkm.compatible_keys sk pk} ->
+             n:nonce ->
+             sk:skey ->
+             pk:pkey -> //{pkm.compatible_keys sk pk} ->
              m:(Plain.protected_plain_t pkm.pim (Plain.get_plain pkm.pm) (compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)))) ->
-             ST pkm.cipher
+             ST cipher
   (requires (fun h0 -> True
     //let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)) in
     //registered pkm i
@@ -195,9 +195,9 @@ val encrypt: pkm:pkae_module ->
     let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)) in
     modifies (Set.singleton pkm.rgn) h0 h1 // stateful changes even if the id is dishonest.
     /\ ((honest pkm i /\ b2t pkae) // Ideal behaviour if the id is honest and the assumption holds
-               ==> eq2 #pkm.cipher c (pkm.enc (zero_bytes (Plain.length #pkm.pim #pkm.pm #i m)) n pk sk))
+               ==> eq2 #cipher c (pkm.enc (zero_bytes (Plain.length #pkm.pim #pkm.pm #i m)) n pk sk))
     /\ ((dishonest pkm i \/ ~(b2t pkae)) // Concrete behaviour otherwise.
-                  ==> eq2 #pkm.cipher c (pkm.enc (Plain.repr #pkm.pim #pkm.pm #i m) n pk sk))
+                  ==> eq2 #cipher c (pkm.enc (Plain.repr #pkm.pim #pkm.pm #i m) n pk sk))
     // The message is added to the log. This also guarantees nonce-uniqueness.
     /\ MR.m_contains #(get_message_log_region pkm)(get_message_logGT pkm) h1
     /\ MR.witnessed (MM.contains #(get_message_log_region pkm) (get_message_logGT pkm) (n,i) (c,m))
@@ -209,7 +209,7 @@ val encrypt: pkm:pkae_module ->
 let encrypt pkm n sk pk m =
   assert(False);
   admit();
-  let i = compose_ids (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk)) in
+  let i = compose_ids (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)) in
   let k = ODH.prf_odh pkm.aux.om sk pk in
   let c = AE.encrypt pkm.aux.am #i n k m in
   assert(Game3? current_game <==> (b2t pkae /\ ~prf_odh));
@@ -235,7 +235,49 @@ let encrypt pkm n sk pk m =
 
 let decrypt pkm n sk pk c =
   assert(False);
-  let i = compose_ids (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey sk)) in
+  let i = compose_ids (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)) in
   let k = ODH.prf_odh pkm.aux.om sk pk in
   let m = AE.decrypt pkm.aux.am #i n k c in
   m
+
+(* low-level wrapper *)
+
+open FStar.Buffer
+module U64 = FStar.UInt64
+type u64   = FStar.UInt64.t
+
+let uint8_p = buffer Hacl.UInt8.t
+
+val encrypt_low:
+  c:uint8_p ->
+  m:uint8_p ->
+  mlen:u64{let len = U64.v mlen in length c = len /\ len = length m}  ->
+  n:uint8_p ->
+  pk:uint8_p ->
+  sk:uint8_p{disjoint sk pk} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
+    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
+let encrypt_low c m mlen n pk sk = 
+  admit()
+  // let mlen' = Int.Cast.uint64_to_uint32 mlen in
+  // Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
+  // crypto_box_detached (sub c 16ul mlen') (sub c 0ul 16ul) (sub m 0ul mlen') mlen n pk sk
+
+
+val decrypt_low:
+  m:uint8_p ->
+  c:uint8_p ->
+  mlen:u64  ->
+  n:uint8_p ->
+  pk:uint8_p->
+  sk:uint8_p{disjoint sk pk} ->
+  Stack u32
+    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
+    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
+let decrypt_low m c mlen n pk sk =
+  admit()
+  // let mlen' = Int.Cast.uint64_to_uint32 mlen in
+  // Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
+  // let mac = sub c 0ul 16ul in
+  // crypto_box_open_detached m (sub c 16ul (U32.(mlen' -^ 16ul))) mac (U64.(mlen -^ 16uL)) n pk sk

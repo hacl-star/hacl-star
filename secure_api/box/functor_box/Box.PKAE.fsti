@@ -22,19 +22,19 @@ module Plain = Box.Plain
 module ID = Box.Index
 
 
-val nonce': t:Type0{hasEq t}
-val cipher': Type0
-val sub_id': t:Type0{hasEq t}
-val key_id': Type0
-val plain': Type0
-val skey': Type0
-val pkey': Type0
+val nonce: t:Type0{hasEq t}
+val cipher: Type0
+val sub_id: t:Type0{hasEq t}
+val key_id: Type0
+val plain: Type0
+val skey: Type0
+val pkey: Type0
 
 val valid_plain_length: nat -> bool
 val valid_cipher_length: nat -> bool
 
-let index_module = im:ID.index_module{ID.id im == sub_id'}
-let plain_index_module = im:ID.index_module{ID.id im == key_id'}
+let index_module = im:ID.index_module{ID.id im == sub_id}
+let plain_index_module = im:ID.index_module{ID.id im == key_id}
 
 let log_region (pim:plain_index_module) =
   r:MR.rid{disjoint r (ID.get_rgn pim)}
@@ -43,13 +43,6 @@ val aux_t: skey:Type0 -> pkey:Type0 -> (im:index_module) -> (pim:plain_index_mod
 
 abstract noeq type pkae_module =
   | PKAE:
-    nonce: (t:Type0{t == nonce'}) ->
-    cipher: (t:Type0{t == cipher'}) ->
-    sub_id: (t:Type0{t == sub_id'}) ->
-    key_id: (t:Type0{t == key_id'}) ->
-    plain: (t:Type0{t == plain'}) ->
-    skey: (t:Type0{t == skey'}) ->
-    pkey: (t:Type0{t == pkey'}) ->
     pkey_from_skey: (sk:skey -> pk:pkey) ->
     compatible_keys: (sk:skey -> pk:pkey -> t:Type0{t <==> pk =!= pkey_from_skey sk}) ->
     im:ID.index_module{ID.id im == sub_id} ->
@@ -63,14 +56,14 @@ abstract noeq type pkae_module =
 
 
 
-val compose_ids: pkae:pkae_module ->  s1:pkae.sub_id -> s2:pkae.sub_id{s2 <> s1} -> pkae.key_id
+val compose_ids: pkae:pkae_module ->  s1:sub_id -> s2:sub_id{s2 <> s1} -> key_id
 
-val length: pkae:pkae_module -> p:pkae.plain -> n:nat{valid_plain_length n}
+val length: pkae:pkae_module -> p:plain -> n:nat{valid_plain_length n}
 
 
 
-type message_log_key (im:plain_index_module) = (nonce'*(i:ID.id im))
-type message_log_value (im:plain_index_module) (i:ID.id im) = (cipher'*Plain.protected_plain_t im plain' i)
+type message_log_key (im:plain_index_module) = (nonce*(i:ID.id im))
+type message_log_value (im:plain_index_module) (i:ID.id im) = (cipher*Plain.protected_plain_t im plain i)
 type message_log_range (im:plain_index_module) (k:message_log_key im) = (v:message_log_value im (snd k))
 type message_log_inv (im:plain_index_module) (f:MM.map' (message_log_key im) (message_log_range im)) = True //t:Type0{t = True}
 type message_log (im:plain_index_module) (rgn:log_region im) =
@@ -82,17 +75,17 @@ val get_message_logGT: pkm:pkae_module -> Tot (message_log pkm.pim (get_message_
 
 val create: rgn:(r:MR.rid{extends r root /\ is_eternal_region r /\ is_below r root}) -> St (pkae_module)
 
-val zero_bytes: (n:nat{valid_plain_length n}) -> plain' //b:bytes{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)}
+val zero_bytes: (n:nat{valid_plain_length n}) -> plain //b:bytes{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)}
 //TODO: MK this can be modelled better
 
-val pkey_to_subId: #pkm:pkae_module -> pk:pkm.pkey -> ID.id pkm.im
-val pkey_to_subId_inj: #pkm:pkae_module -> pk:pkm.pkey -> Lemma
+val pkey_to_subId: #pkm:pkae_module -> pk:pkey -> ID.id pkm.im
+val pkey_to_subId_inj: #pkm:pkae_module -> pk:pkey -> Lemma
   (requires True)
   (ensures (forall pk' . pkey_to_subId #pkm pk == pkey_to_subId #pkm pk' <==> pk == pk'))
   [SMTPat (pkey_to_subId #pkm pk)]
 
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 0"
-val nonce_is_fresh: (pkm:pkae_module) -> (i:ID.id pkm.pim) -> (n:nonce') -> (h:mem) ->
+val nonce_is_fresh: (pkm:pkae_module) -> (i:ID.id pkm.pim) -> (n:nonce) -> (h:mem) ->
   (t:Type0{t <==>
     (MR.m_contains #(get_message_log_region pkm) (get_message_logGT pkm) h
       /\ MM.fresh #(get_message_log_region pkm)(get_message_logGT pkm) (n,i) h)})
@@ -104,7 +97,7 @@ val nonce_is_fresh: (pkm:pkae_module) -> (i:ID.id pkm.pim) -> (n:nonce') -> (h:m
 
 val invariant: pkae_module -> mem -> Type0
 
-val gen: pkm:pkae_module -> ST (keypair:(pkm.pkey*pkm.skey){fst keypair == pkm.pkey_from_skey (snd keypair)})
+val gen: pkm:pkae_module -> ST (keypair:(pkey*skey){fst keypair == pkm.pkey_from_skey (snd keypair)})
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 ->
     modifies_none h0 h1
@@ -116,10 +109,10 @@ let dishonest pkm i = ID.dishonest pkm.pim i
 
 
 val decrypt: pkm:pkae_module ->
-             n:pkm.nonce ->
-             sk:pkm.skey ->
-             pk:pkm.pkey{pkm.compatible_keys sk pk} ->
-             c:pkm.cipher ->
+             n:nonce ->
+             sk:skey ->
+             pk:pkey{pkm.compatible_keys sk pk} ->
+             c:cipher ->
              ST (option (Plain.protected_plain_t pkm.pim (Plain.get_plain pkm.pm) (compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)))))
   (requires (fun h0 ->
     let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)) in
