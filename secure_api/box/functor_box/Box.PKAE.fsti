@@ -27,18 +27,19 @@ val cipher': Type0
 val sub_id': t:Type0{hasEq t}
 val key_id': Type0
 val plain': Type0
+val skey': Type0
+val pkey': Type0
 
 val valid_plain_length: nat -> bool
 val valid_cipher_length: nat -> bool
 
-type index_module = im:ID.index_module{ID.id im == sub_id'}
-type plain_index_module = im:ID.index_module{ID.id im == key_id'}
-type plain_module = Plain.plain_module
+let index_module = im:ID.index_module{ID.id im == sub_id'}
+let plain_index_module = im:ID.index_module{ID.id im == key_id'}
 
-type log_region (pim:plain_index_module) =
+let log_region (pim:plain_index_module) =
   r:MR.rid{disjoint r (ID.get_rgn pim)}
 
-val aux_t: skey:Type0 -> pkey:Type0 -> (im:index_module) -> (pim:plain_index_module) -> (pm:plain_module) -> rgn:log_region pim -> Type u#1
+val aux_t: skey:Type0 -> pkey:Type0 -> (im:index_module) -> (pim:plain_index_module) -> (pm:Plain.plain_module) -> rgn:log_region pim -> Type u#1
 
 abstract noeq type pkae_module =
   | PKAE:
@@ -47,8 +48,8 @@ abstract noeq type pkae_module =
     sub_id: (t:Type0{t == sub_id'}) ->
     key_id: (t:Type0{t == key_id'}) ->
     plain: (t:Type0{t == plain'}) ->
-    skey: (t:Type0) ->
-    pkey: (t:Type0) ->
+    skey: (t:Type0{t == skey'}) ->
+    pkey: (t:Type0{t == pkey'}) ->
     pkey_from_skey: (sk:skey -> pk:pkey) ->
     compatible_keys: (sk:skey -> pk:pkey -> t:Type0{t <==> pk =!= pkey_from_skey sk}) ->
     im:ID.index_module{ID.id im == sub_id} ->
@@ -113,31 +114,6 @@ let registered pkm i = ID.registered pkm.pim i
 let honest pkm i = ID.honest pkm.pim i
 let dishonest pkm i = ID.dishonest pkm.pim i
 
-val encrypt: pkm:pkae_module ->
-             n:pkm.nonce ->
-             sk:pkm.skey ->
-             pk:pkm.pkey{pkm.compatible_keys sk pk} ->
-             m:(Plain.protected_plain_t pkm.pim (Plain.get_plain pkm.pm) (compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)))) ->
-             ST pkm.cipher
-  (requires (fun h0 ->
-    let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)) in
-    registered pkm i
-    /\ nonce_is_fresh pkm i n h0
-    /\ invariant pkm h0
-  ))
-  (ensures  (fun h0 c h1 ->
-    let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkm.pkey_from_skey sk)) in
-    modifies (Set.singleton pkm.rgn) h0 h1 // stateful changes even if the id is dishonest.
-    /\ ((honest pkm i /\ b2t pkae) // Ideal behaviour if the id is honest and the assumption holds
-               ==> eq2 #pkm.cipher c (pkm.enc (zero_bytes (Plain.length #pkm.pim #pkm.pm #i m)) n pk sk))
-    /\ ((dishonest pkm i \/ ~(b2t pkae)) // Concrete behaviour otherwise.
-                  ==> eq2 #pkm.cipher c (pkm.enc (Plain.repr #pkm.pim #pkm.pm #i m) n pk sk))
-    // The message is added to the log. This also guarantees nonce-uniqueness.
-    /\ MR.m_contains #(get_message_log_region pkm)(get_message_logGT pkm) h1
-    /\ MR.witnessed (MM.contains #(get_message_log_region pkm) (get_message_logGT pkm) (n,i) (c,m))
-    /\ MR.m_sel #(get_message_log_region pkm) h1 (get_message_logGT pkm)== MM.upd (MR.m_sel #(get_message_log_region pkm) h0 (get_message_logGT pkm)) (n,i) (c,m)
-    /\ invariant pkm h1
-  ))
 
 val decrypt: pkm:pkae_module ->
              n:pkm.nonce ->
