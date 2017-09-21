@@ -12,8 +12,6 @@ open Hacl.Spec.Bignum.Bigint
 open Hacl.Bignum.Limb
 open Hacl.Spec.Bignum.Fdifference
 
-module U32 = FStar.UInt32
-
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 let gte_limbs_c h (a:felem) h' (b:felem) (l:nat{l <= len}) : GTot Type0 =

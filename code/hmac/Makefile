@@ -1,8 +1,9 @@
-include ../Makefile.include
+include ../../Makefile.include
 
 # Files for verification
-HMAC_SHA2_FILES = Hacl.HMAC.SHA2_256.fst
-#	               HMAC_SHA2_256.fst
+HMAC_SHA2_FILES= \
+	Hacl.HMAC.SHA2_256.fst \
+	HMAC_SHA2_256.fst
 
 FSTAR_INCLUDES+=--include ../hash
 
@@ -15,7 +16,7 @@ ct: $(addsuffix -lax, $(HMAC_SHA2_FILES))
 hints: $(addsuffix .hints, $(HMAC_SHA2_FILES))
 verify: $(addsuffix -verify, $(HMAC_SHA2_FILES))
 all-ct: ct
-all-ver: verify 
+all-ver: verify
 all-ci: verify
 all-hints: hints
 

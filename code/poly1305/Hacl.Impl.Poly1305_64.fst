@@ -43,6 +43,7 @@ let elemB : Type0  = b:felem
 let wordB : Type0  = b:uint8_p{length b <= 16}
 let wordB_16 : Type0 = b:uint8_p{length b = 16}
 
+let mask_44 = Hacl.Bignum.Parameters.mask_44
 
 #reset-options "--max_fuel 0 --z3rlimit 5"
 

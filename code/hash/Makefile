@@ -1,4 +1,4 @@
-include ../Makefile.include
+include ../../Makefile.include
 
 # Files for verification
 SHA2_FILES = \

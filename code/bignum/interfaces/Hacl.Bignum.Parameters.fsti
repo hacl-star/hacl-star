@@ -119,3 +119,6 @@ inline_for_extraction val wide_to_limb: x:wide -> Tot (y:limb{v y = w x % pow2 l
 
 inline_for_extraction val uint64_to_limb: x:FStar.UInt64.t{FStar.UInt64.v x < pow2 word_size} ->
   Tot (y:limb{v y = FStar.UInt64.v x})
+
+val climb_mask: x:limb{v x = pow2 (FStar.UInt32.v climb_size) - 1} 
+val climb_mask_wide: x:wide{w x = pow2 (FStar.UInt32.v climb_size) - 1} 

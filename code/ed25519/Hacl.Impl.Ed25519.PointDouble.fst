@@ -89,7 +89,7 @@ let point_double_step_1 p tmp =
   let x1 = getx p in
   let y1 = gety p in
   let z1 = getz p in
-  let t1 = gett p in
+//  let t1 = gett p in
   let h0 = ST.get() in
   lemma_red_513_is_red_5413 (as_seq h0 x1);
   fsquare tmp1 x1; // tmp1 = a
@@ -97,14 +97,14 @@ let point_double_step_1 p tmp =
   no_upd_lemma_1 h0 h1 tmp1 x1;
   no_upd_lemma_1 h0 h1 tmp1 y1;
   no_upd_lemma_1 h0 h1 tmp1 z1;
-  no_upd_lemma_1 h0 h1 tmp1 t1;
+//  no_upd_lemma_1 h0 h1 tmp1 t1;
   lemma_red_513_is_red_5413 (as_seq h1 y1);
   fsquare tmp2 y1; // tmp2 = b
   let h2 = ST.get() in
   no_upd_lemma_1 h1 h2 tmp2 x1;
   no_upd_lemma_1 h1 h2 tmp2 y1;
   no_upd_lemma_1 h1 h2 tmp2 z1;
-  no_upd_lemma_1 h1 h2 tmp2 t1;
+//  no_upd_lemma_1 h1 h2 tmp2 t1;
   no_upd_lemma_1 h1 h2 tmp2 tmp1;
   lemma_red_513_is_red_5413 (as_seq h2 z1);
   fsquare tmp3 z1;
@@ -112,7 +112,7 @@ let point_double_step_1 p tmp =
   no_upd_lemma_1 h2 h3 tmp3 x1;
   no_upd_lemma_1 h2 h3 tmp3 y1;
   no_upd_lemma_1 h2 h3 tmp3 z1;
-  no_upd_lemma_1 h2 h3 tmp3 t1;
+//  no_upd_lemma_1 h2 h3 tmp3 t1;
   no_upd_lemma_1 h2 h3 tmp3 tmp1;
   no_upd_lemma_1 h2 h3 tmp3 tmp2;
   times_2 tmp4 tmp3; // tmp4 = c
@@ -120,7 +120,7 @@ let point_double_step_1 p tmp =
   no_upd_lemma_1 h3 h4 tmp4 x1;
   no_upd_lemma_1 h3 h4 tmp4 y1;
   no_upd_lemma_1 h3 h4 tmp4 z1;
-  no_upd_lemma_1 h3 h4 tmp4 t1;
+//  no_upd_lemma_1 h3 h4 tmp4 t1;
   no_upd_lemma_1 h3 h4 tmp4 tmp1;
   no_upd_lemma_1 h3 h4 tmp4 tmp2;
   no_upd_lemma_1 h3 h4 tmp4 tmp3;
@@ -129,7 +129,7 @@ let point_double_step_1 p tmp =
   no_upd_lemma_1 h4 h5 tmp3 x1;
   no_upd_lemma_1 h4 h5 tmp3 y1;
   no_upd_lemma_1 h4 h5 tmp3 z1;
-  no_upd_lemma_1 h4 h5 tmp3 t1;
+//  no_upd_lemma_1 h4 h5 tmp3 t1;
   no_upd_lemma_1 h4 h5 tmp3 tmp1;
   no_upd_lemma_1 h4 h5 tmp3 tmp2;
   no_upd_lemma_1 h4 h5 tmp3 tmp4;
@@ -141,7 +141,7 @@ let point_double_step_1 p tmp =
   no_upd_lemma_1 h5 h6 tmp3 x1;
   no_upd_lemma_1 h5 h6 tmp3 y1;
   no_upd_lemma_1 h5 h6 tmp3 z1;
-  no_upd_lemma_1 h5 h6 tmp3 t1;
+//  no_upd_lemma_1 h5 h6 tmp3 t1;
   no_upd_lemma_1 h5 h6 tmp3 tmp1;
   no_upd_lemma_1 h5 h6 tmp3 tmp2;
   no_upd_lemma_1 h5 h6 tmp3 tmp4;
@@ -201,8 +201,8 @@ let point_double_step_2 p tmp =
   let tmp6 = sub tmp 25ul 5ul in
   let x1 = getx p in
   let y1 = gety p in
-  let z1 = getz p in
-  let t1 = gett p in
+//  let z1 = getz p in
+//  let t1 = gett p in
   let h0 = ST.get() in
   copy x1 tmp5; // tmp5 = x1
   let h1 = ST.get() in

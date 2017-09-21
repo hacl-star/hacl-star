@@ -52,8 +52,6 @@ typedef uint8_t *Poly1305_64_uint8_p;
 
 typedef uint64_t Poly1305_64_uint64_t;
 
-void *Poly1305_64_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *b);
-
 typedef uint8_t *Poly1305_64_key;
 
 typedef Hacl_Impl_Poly1305_64_State_poly1305_state Poly1305_64_state;

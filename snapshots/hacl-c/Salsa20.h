@@ -46,8 +46,6 @@ typedef uint8_t *Salsa20_uint8_p;
 
 typedef uint32_t Salsa20_uint32_t;
 
-void *Salsa20_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *b);
-
 typedef uint32_t *Salsa20_state;
 
 void

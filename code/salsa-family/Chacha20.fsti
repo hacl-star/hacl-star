@@ -16,7 +16,7 @@ open Spec.Chacha20
 
 let uint8_p = buffer Hacl.UInt8.t
 let uint32_t = t
-let op_String_Access (h:HyperStack.mem) (m:uint8_p{live h m}) = reveal_sbytes (as_seq h m)
+private let op_String_Access (h:HyperStack.mem) (m:uint8_p{live h m}) = reveal_sbytes (as_seq h m)
 
 val chacha20_key_block:
   block:uint8_p{length block = 64} ->

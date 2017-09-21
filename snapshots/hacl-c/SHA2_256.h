@@ -43,13 +43,6 @@ typedef uint32_t *Hacl_Hash_SHA2_256_uint32_p;
 
 typedef uint8_t *Hacl_Hash_SHA2_256_uint8_p;
 
-typedef struct 
-{
-  uint32_t fst;
-  uint8_t *snd;
-}
-K___uint32_t_uint8_t_;
-
 typedef uint8_t SHA2_256_uint8_t;
 
 typedef uint32_t SHA2_256_uint32_t;

@@ -236,6 +236,7 @@ let loop_step_2 b k ctr =
   let h1    = ST.get() in
   Hacl.Impl.Ed25519.PointDouble.point_double nq2 nq;
   let h     = ST.get() in
+(*
   let x = getx nq in
   let y = gety nq in
   let z = getz nq in
@@ -252,8 +253,10 @@ let loop_step_2 b k ctr =
   no_upd_lemma_1 h1 h nq2 y';
   no_upd_lemma_1 h1 h nq2 z';
   no_upd_lemma_1 h1 h nq2 t';
+*)
   Hacl.Impl.Ed25519.PointAdd.point_add nqpq2 nq nqpq;
-  let h2    = ST.get() in
+  ()
+(*  let h2    = ST.get() in
   let x'' = getx nq2 in
   let y'' = gety nq2 in
   let z'' = getz nq2 in
@@ -269,7 +272,7 @@ let loop_step_2 b k ctr =
   no_upd_lemma_1 h h2 nqpq2 x'';
   no_upd_lemma_1 h h2 nqpq2 y'';
   no_upd_lemma_1 h h2 nqpq2 z'';
-  no_upd_lemma_1 h h2 nqpq2 t''
+  no_upd_lemma_1 h h2 nqpq2 t''*)
 
 
 [@ Substitute]

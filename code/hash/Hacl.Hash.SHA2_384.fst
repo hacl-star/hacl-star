@@ -234,7 +234,8 @@ val ws_part_1_core:
 let ws_part_1_core ws_w block_w t =
   (**) let h0 = ST.get() in
   (**) let h = ST.get() in
-  ws_w.(t) <- block_w.(t);
+  let b = block_w.(t) in
+  ws_w.(t) <- b;
   (**) let h1 = ST.get() in
   (**) let h' = ST.get() in
   (**) no_upd_lemma_1 h0 h1 ws_w block_w;
@@ -1110,7 +1111,7 @@ let update_last state data len =
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 final_blocks))
                           (if U64.(len <^ 112uL) then
                               Seq.create (v size_block) 0uy
-                           else Seq.create (2 * v size_block) 0uy);
+                           else Seq.create (v size_block + v size_block) 0uy);
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h2 final_blocks)) (Seq.create (v nb * v size_block) 0uy);
   (**) assert(reveal_sbytes (as_seq h2 final_blocks) == Seq.create (v nb * v size_block) 0uy);
 

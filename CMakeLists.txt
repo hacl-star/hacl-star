@@ -22,6 +22,7 @@ set(SOURCE_FILES_VERIFIED
    snapshots/hacl-c/SHA2_256.c
    snapshots/hacl-c/SHA2_384.c
    snapshots/hacl-c/SHA2_512.c
+   snapshots/hacl-c/HMAC_SHA2_256.c
    snapshots/hacl-c/Salsa20.c
    snapshots/hacl-c/NaCl.c)
 

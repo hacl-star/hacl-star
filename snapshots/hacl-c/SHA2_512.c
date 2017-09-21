@@ -24,7 +24,6 @@ Hacl_Hash_Lib_LoadStore_uint64s_to_be_bytes(uint8_t *output, uint64_t *input, ui
 
 static void Hacl_Hash_SHA2_512_init(uint64_t *state)
 {
-  (void )(state + (uint32_t )168);
   uint64_t *k1 = state;
   uint64_t *h_01 = state + (uint32_t )160;
   uint64_t *p10 = k1;
@@ -167,8 +166,8 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
   uint64_t *counter_w = state + (uint32_t )168;
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint64_t uu____242 = data_w[i];
-    ws_w[i] = uu____242;
+    uint64_t b = data_w[i];
+    ws_w[i] = b;
   }
   for (uint32_t i = (uint32_t )16; i < (uint32_t )80; i = i + (uint32_t )1)
   {
@@ -233,10 +232,9 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
   }
   for (uint32_t i = (uint32_t )0; i < (uint32_t )8; i = i + (uint32_t )1)
   {
-    uint64_t uu____871 = hash_w[i];
-    uint64_t uu____874 = hash_0[i];
-    uint64_t uu____870 = uu____871 + uu____874;
-    hash_w[i] = uu____870;
+    uint64_t xi = hash_w[i];
+    uint64_t yi = hash_0[i];
+    hash_w[i] = xi + yi;
   }
   uint64_t c0 = counter_w[0];
   uint64_t one1 = (uint64_t )(uint32_t )1;
@@ -245,16 +243,10 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
 
 static void Hacl_Hash_SHA2_512_update_multi(uint64_t *state, uint8_t *data, uint32_t n1)
 {
-  if (n1 == (uint32_t )0)
+  for (uint32_t i = (uint32_t )0; i < n1; i = i + (uint32_t )1)
   {
-    
-  }
-  else
-  {
-    uint8_t *b = data;
-    uint8_t *data_ = data + (uint32_t )128;
+    uint8_t *b = data + i * (uint32_t )128;
     Hacl_Hash_SHA2_512_update(state, b);
-    Hacl_Hash_SHA2_512_update_multi(state, data_, n1 - (uint32_t )1);
   }
 }
 
@@ -283,7 +275,6 @@ static void Hacl_Hash_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint6
   uint32_t
   pad0len = ((uint32_t )256 - ((uint32_t )len + (uint32_t )16 + (uint32_t )1)) % (uint32_t )128;
   uint8_t *buf1 = padding;
-  (void )(padding + (uint32_t )1);
   uint8_t *buf2 = padding + (uint32_t )1 + pad0len;
   buf1[0] = (uint8_t )0x80;
   store128_be(buf2, encodedlen);

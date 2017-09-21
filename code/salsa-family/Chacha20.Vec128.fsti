@@ -12,7 +12,7 @@ let uint8_p = buffer Hacl.UInt8.t
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-let op_String_Access h (b:uint8_p{live h b}) = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
+private let op_String_Access h (b:uint8_p{live h b}) = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 val chacha20:
   output:uint8_p ->
