@@ -897,12 +897,28 @@ val dexor:
             inv st h1 /\
             decrypt_ok iv st aad plain cipher_tagged h1))
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --using_facts_from FStar --using_facts_from Prims --using_facts_from Crypto.AEAD.Invariant --using_facts_from Crypto.Plain --using_facts_from Crypto.Symmetric --using_facts_from Crypto.AEAD.EnxorDexor --using_facts_from Crypto.AEAD.Encoding --using_facts_from Flag --using_facts_from Crypto.Indexing"
+
+//NS 09/21: This proof of separation leads to unreplayable hints in the large proof of dexor below; so factoring it out
+let intro_separation
+    (#i:id)
+    (st:aead_state i Reader)
+    (#aadlen:aadlen) (aad:lbuffer (v aadlen))
+    (#len:Encoding.txtlen_32)
+    (plain:plainBuffer i (v len))
+    (cipher_tagged:lbuffer (v len + v MAC.taglen))
+  : Lemma (requires (enc_dec_separation st aad plain cipher_tagged))
+          (ensures (let t = st.prf in
+                    let cipher : lbuffer (v len) = Buffer.sub cipher_tagged 0ul len in
+                    separation t plain cipher))
+  = ()
+
 open Crypto.AEAD.Encoding
 let dexor #i st iv #aadlen aad #len plain cipher_tagged p =
   let x_1 = {iv=iv; ctr=otp_offset i} in
   let t = st.prf in
   let cipher : lbuffer (v len) = Buffer.sub cipher_tagged 0ul len in
   let h0 = get () in
+  intro_separation st aad plain cipher_tagged;
   counter_dexor i t x_1 len len plain cipher p;
   let h1 = get () in
   decrypted_up_to_end plain p h1;
