@@ -11,13 +11,13 @@ VERIFY= \
 LAX=
 
 FSTAR_INCLUDES+= \
-  --include /home/markulf/everest/FStar/ucontrib/Platform/fst/ \
-  --include /home/markulf/everest/FStar/ucontrib/CoreCrypto/fst/ \
-  --include /home/markulf/everest/hacl-star/specs/ \
-  --include /home/markulf/everest/hacl-star/specs/experimental/ \
-  --include /home/markulf/everest/hacl-star/secure_api/utils/ \
-  --include /home/markulf/everest/hacl-star/code/lib/ \
-  --include /home/markulf/everest/kremlin/kremlib/
+  --include $(FSTAR_HOME)/ucontrib/Platform/fst/ \
+  --include $(FSTAR_HOME)/ucontrib/CoreCrypto/fst/ \
+  --include $(HACL_HOME)/specs/ \
+  --include $(HACL_HOME)/specs/experimental/ \
+  --include $(HACL_HOME)/secure_api/utils/ \
+  --include $(HACL_HOME)/code/lib/ \
+  --include $(KREMLIN_HOME)/kremlib/
 
 
 all: all-ver $(addsuffix .fst-lax, $(LAX))
