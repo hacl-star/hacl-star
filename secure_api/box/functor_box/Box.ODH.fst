@@ -38,7 +38,15 @@ let dh_exponent_length' = Curve.scalar_length // Size of scalar in Curve25519. R
 let smaller' n i1 i2 =
   let i1' = LE.little_endian i1 in
   let i2' = LE.little_endian i2 in
-  i1' < i2'
+  if i1' < i2' then
+    (true)
+  else
+    if i1' = i2' then
+      (FStar.Endianness.lemma_little_endian_inj i1 i2;
+      false)
+    else
+    (assert(i2' < i1');
+    false)
 
 let share_from_exponent' dh_exp = Curve.scalarmult dh_exp Curve.base_point
 
@@ -62,15 +70,35 @@ let get_key_module om = om.km
 
 private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
 let hash om input = HSalsa.hsalsa20 input zero_nonce
-#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
-let total_order_lemma om i1 i2 = admit()
 
-//val total_order_lemma': (i1:dh_share -> i2:dh_share -> Lemma
+#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
+val lemma_little_endian_bij': b:bytes -> b':bytes{Seq.length b = Seq.length b'} -> Lemma
+  (requires True)
+  (ensures little_endian b = little_endian b' <==> b = b' )
+let lemma_little_endian_bij' b b' =
+  if little_endian b = little_endian b' then
+    (LE.lemma_little_endian_inj b b';
+    LE.lemma_little_endian_sur b b')
+  else
+    ()
+//val lemma_little_endian_bij: b:bytes -> b':bytes{Seq.length b = Seq.length b'} -> Lemma
+//  (requires b =!= b')
+//  (ensures little_endian b <> little_endian b')
+//let lemma_little_endian_bij b b' =
+//  lemma_little_endian_bij' b b'
+
+let total_order_lemma om i1 i2 =
+  let i1:dh_share' om.dh_share_length = i1 in
+  let i2:dh_share' om.dh_share_length = i2 in
+  lemma_little_endian_bij' i1 i2
+
+
+//val total_order_lemma': (om:odh_module -> i1:dh_share om -> i2:dh_share om -> Lemma
 //  (requires True)
 //  (ensures
-//    (b2t (smaller i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller i i1) ==> b2t (smaller i i2)))
-//    /\ (~ (b2t (smaller i1 i2)) <==> (i1 = i2 \/ b2t (smaller i2 i1)))))
-
+//    (b2t (smaller om i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller om i i1) ==> b2t (smaller om i i2)))
+//    /\ (~ (b2t (smaller om i1 i2)) <==> (i1 = i2 \/ b2t (smaller om i2 i1)))))
+//let total_order_lemma' om i1 i2 = ()
 
 (**
 Nonce to use with HSalsa.hsalsa20.
