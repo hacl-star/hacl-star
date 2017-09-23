@@ -243,27 +243,39 @@ let decrypt pkm n sk pk c =
 (* low-level wrapper *)
 
 open FStar.Buffer
+open Hacl.Policies
 module U64 = FStar.UInt64
 type u64   = FStar.UInt64.t
 
 let uint8_p = buffer Hacl.UInt8.t
 
+let buf_to_seq (b:uint8_p): Stack (seq FStar.UInt8.t) (requires (fun h -> live h b)) (ensures (fun h0 s h1 -> live h1 b)) =
+  let ss = to_seq_full b in
+  let sl = seq_to_list ss in 
+  let fl = FStar.List.Tot.map declassify_u8 sl in
+  seq_of_list fl
+
+let seq_to_buf (b:uint8_p) (s:seq FStar.UInt8.t): unit =
+  admit()
+
 val encrypt_low:
   c:uint8_p ->
-  m:uint8_p ->
+  m:uint8_p -> //we might want this to be abstract
   mlen:u64{let len = U64.v mlen in length c = len /\ len = length m}  ->
   n:uint8_p ->
-  pk:uint8_p ->
-  sk:uint8_p{disjoint sk pk} ->
+  sk:skey -> //I use the abstract high level keys here
+  pk:pkey -> 
   Stack u32
-    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
+    (requires (fun h -> live h c /\ live h m /\ live h n))  //we have to add the security specification here
     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
-let encrypt_low c m mlen n pk sk = 
-  admit()
-  // let mlen' = Int.Cast.uint64_to_uint32 mlen in
-  // Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
-  // crypto_box_detached (sub c 16ul mlen') (sub c 0ul 16ul) (sub m 0ul mlen') mlen n pk sk
-
+let encrypt_low c m mlen n sk pk = 
+  let m = buf_to_seq m in
+  let n = buf_to_seq n in
+  let pkm = admit() in //this encapsulates the idealization state, should we pass it in as 'idealized' input
+  let m = admit() in //conversion from m to abstract plaintext?
+  let c' = encrypt pkm n sk pk m in
+  seq_to_buf c c'; 
+  0ul
 
 val decrypt_low:
   m:uint8_p ->
@@ -277,7 +289,3 @@ val decrypt_low:
     (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
 let decrypt_low m c mlen n pk sk =
   admit()
-  // let mlen' = Int.Cast.uint64_to_uint32 mlen in
-  // Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
-  // let mac = sub c 0ul 16ul in
-  // crypto_box_open_detached m (sub c 16ul (U32.(mlen' -^ 16ul))) mac (U64.(mlen -^ 16uL)) n pk sk
