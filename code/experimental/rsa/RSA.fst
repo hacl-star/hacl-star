@@ -25,24 +25,35 @@ noeq type rsa_pubkey =
 noeq type rsa_privkey =
 	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:bignum -> rsa_privkey
 
-val get_length_em: modBits:U32.t -> Tot U32.t
+val get_length_em: 
+	modBits:U32.t{U32.v modBits > 0} -> Tot U32.t
+
+#set-options "--z3rlimit 50"
+
 let get_length_em modBits =
 	let k = bits_to_text modBits in
 	if U32.((modBits -^ 1ul) %^ 8ul =^ 0ul)
 	then U32.(k -^ 1ul) else k
 
 val hash_sha256:
-	mHash:uint8_p{length mHash = U32.v hLen} -> m:uint8_p -> len:U32.t{U32.v len = length m} -> Stack unit
+	mHash:uint8_p{length mHash = U32.v hLen} -> 
+	m:uint8_p{length m < pow2 61 /\ disjoint mHash m} -> 
+	len:U32.t{U32.v len = length m} -> Stack unit
 	(requires (fun h -> live h m /\ live h mHash))
-	(ensures (fun h0 _ h1 -> live h0 m /\ live h0 mHash /\ live h1 mHash /\ modifies_1 mHash h0 h1))
+	(ensures (fun h0 _ h1 -> live h0 m /\ live h0 mHash /\ 
+	 	live h1 m /\ live h1 mHash /\ modifies_1 mHash h0 h1))
 let hash_sha256 mHash m len = SHA2_256.hash mHash m len
 
 val mgf:
-	mgfseed_len:U32.t -> mgfseed:uint8_p{length mgfseed = U32.v mgfseed_len} ->
-	len:U32.t -> counter:U32.t -> acc:uint8_p{length acc = U32.(v (hLen *^ counter))} ->
+	mgfseed_len:U32.t -> 
+	mgfseed:uint8_p{length mgfseed = U32.v mgfseed_len} ->
+	len:U32.t -> 
+	counter:U32.t -> 
+	acc:uint8_p{length acc = U32.(v (hLen *^ counter))} ->
 	res:uint8_p{length res = U32.v len} -> Stack unit
 	(requires (fun h -> live h res /\ live h mgfseed /\ live h acc))
-	(ensures (fun h0 _ h1 -> live h0 res /\ live h0 mgfseed /\ live h0 acc /\ live h1 res /\ modifies_1 res h0 h1))
+	(ensures (fun h0 _ h1 -> live h0 res /\ live h0 mgfseed /\ live h0 acc /\ 
+		live h1 res /\ live h1 mgfseed /\ live h1 acc /\ modifies_2 res acc h0 h1))
 let rec mgf mgfseed_len mgfseed len counter acc res =
 	(* if len > op_Multiply (pow2 32) hLen then failwith "mask too long" *)
 	push_frame();
