@@ -15,50 +15,19 @@ module U8 = FStar.UInt8
 type uint8_p = buffer FStar.UInt8.t
 type bignum = buffer FStar.UInt64.t
 
-let zero_8 = 0uy
-let hLen = 32ul
-let sLen = 20ul
+inline_for_extraction let zero_8 = 0uy
+inline_for_extraction let hLen = 32ul
+inline_for_extraction let sLen = 20ul
 
-type rsa_pubkey =
+noeq type rsa_pubkey =
 	| Mk_rsa_pubkey: n:bignum -> e:bignum -> rsa_pubkey
 
-val get_n: x:rsa_pubkey -> Stack bignum
-	(requires (fun h -> True))  (* live h x *)
-	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 n *)
-let get_n x =
-	match x with
-	| Mk_rsa_pubkey n e -> n
-
-val get_e: x:rsa_pubkey -> Stack bignum
-	(requires (fun h -> True))  (* live h x *)
-	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 e *)
-let get_e x =
-	match x with
-	| Mk_rsa_pubkey n e -> e
-
-type rsa_privkey =
+noeq type rsa_privkey =
 	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:bignum -> rsa_privkey
-
-val get_pkey: x:rsa_privkey -> Stack rsa_pubkey
-	(requires (fun h -> True))  (* live h x *)
-	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 rsa_pubkey *)
-let get_pkey x =
-	match x with
-	| Mk_rsa_privkey pkey d -> pkey
-
-val get_d: x:rsa_privkey -> Stack bignum
-	(requires (fun h -> True))  (* live h x *)
-	(ensures (fun h0 _ h1 -> True))  (* live h0 x /\ live h1 d *)
-let get_d x =
-	match x with
-	| Mk_rsa_privkey pkey d -> d
-
-val get_octets: modBits:U32.t -> Tot U32.t
-let get_octets modBits = U32.((modBits +^ 7ul) /^ 8ul)
 
 val get_length_em: modBits:U32.t -> Tot U32.t
 let get_length_em modBits =
-	let k = get_octets modBits in
+	let k = bits_to_text modBits in
 	if U32.((modBits -^ 1ul) %^ 8ul =^ 0ul)
 	then U32.(k -^ 1ul) else k
 
@@ -203,14 +172,15 @@ val rsa_sign:
 	msg:uint8_p{length msg = U32.v msgLen} ->
 	skey:rsa_privkey ->
 	salt:uint8_p{length salt = U32.v sLen} ->
-	sgnt:uint8_p{length sgnt = U32.v (get_octets modBits)} -> Stack unit
+	sgnt:uint8_p{length sgnt = U32.v (bits_to_text modBits)} -> Stack unit
 	(requires (fun h -> live h msg /\ live h salt /\ live h sgnt))
 	(ensures (fun h0 _ h1 -> live h0 msg /\ live h0 salt /\ live h0 sgnt /\ live h1 sgnt /\ modifies_1 sgnt h0 h1))
 let rsa_sign modBits skeyBits msgLen msg skey salt sgnt =
 	push_frame();
-	let k = get_octets modBits in
-	let d = get_d skey in
-	let n = get_n (get_pkey skey) in
+	let k = bits_to_text modBits in
+	let d = Mk_rsa_privkey?.d skey in
+	let pkey = Mk_rsa_privkey?.pkey skey in
+	let n = Mk_rsa_pubkey?.n pkey in
 
 	let emLen = get_length_em modBits in
 	let em = create zero_8 emLen in
@@ -230,18 +200,18 @@ let rsa_sign modBits skeyBits msgLen msg skey salt sgnt =
 val rsa_verify:
 	modBits:U32.t{U32.v (get_length_em modBits) >= U32.(v (sLen +^ hLen +^ 2ul))} ->
 	msgLen:U32.t -> pkeyBits:U32.t ->
-	sgnt:uint8_p{length sgnt = U32.v (get_octets modBits)} ->
+	sgnt:uint8_p{length sgnt = U32.v (bits_to_text modBits)} ->
 	pkey:rsa_pubkey ->
 	msg:uint8_p{length msg = U32.v msgLen} -> Stack bool
 	(requires (fun h -> live h msg /\ live h sgnt))
 	(ensures (fun h0 _ h1 -> live h0 msg /\ live h0 sgnt /\ live h1 msg /\ live h1 sgnt))
 let rsa_verify modBits msgLen pkeyBits sgnt pkey msg =
 	push_frame();
-	let e = get_e pkey in
-	let n = get_n pkey in
+	let e = Mk_rsa_pubkey?.e pkey in
+	let n = Mk_rsa_pubkey?.n pkey in
 
 	(* the length of the signature in octets *)
-	let k = get_octets modBits in
+	let k = bits_to_text modBits in
 	let sLen = get_size_nat k in
 	let s = create 0uL sLen in
 	text_to_nat sgnt k s;

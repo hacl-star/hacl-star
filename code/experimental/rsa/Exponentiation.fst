@@ -14,33 +14,34 @@ module U64 = FStar.UInt64
 
 type bignum = buffer FStar.UInt64.t
 
-let bn_bits2 = 64ul
-
 (* check if input[ind] is equal to 1 *)
 val bn_bit_is_set:
-    input:bignum -> ind:U32.t{U32.(v (ind /^ bn_bits2)) < length input} -> Stack bool
+    input:bignum -> 
+    ind:U32.t{U32.v ind / 64 < length input} -> 
+    Stack bool
     (requires (fun h -> live h input))
     (ensures  (fun h0 r h1 -> live h0 input /\ live h1 input))
 let bn_bit_is_set input ind =
-    push_frame();
-    let i = U32.(ind /^ bn_bits2) in
-    let j = U32.(ind %^ bn_bits2) in
+    let i = U32.(ind /^ 64ul) in
+    let j = U32.(ind %^ 64ul) in
     let tmp = input.(i) in
     let res = U64.(((tmp >>^ j) &^ 1uL) =^ 1uL) in
-    pop_frame();
     res
 
 val mod_exp_loop:
-    modBits:U32.t -> aLen:U32.t -> bBits:U32.t -> resLen:U32.t ->
+    modBits:U32.t{U32.v modBits > 0} ->
+    aLen:U32.t{U32.v aLen > 0} -> 
+    bBits:U32.t{U32.v bBits > 0} -> 
+    resLen:U32.t{U32.v resLen > 0} ->
     n:bignum{length n = U32.v (bits_to_bn modBits)} -> 
-    tmpV:bignum{U32.v aLen = length tmpV} -> 
+    tmpV:bignum{length tmpV = U32.v aLen} -> 
     b:bignum{length b = U32.v (bits_to_bn bBits)} ->
-    res:bignum{U32.v resLen = length res} -> 
+    res:bignum{length res = U32.v resLen} ->
     count:U32.t{U32.v count <= length b} -> Stack unit
     (requires (fun h -> live h n /\ live h tmpV /\ live h b /\ live h res))
-    (ensures  (fun h0 r h1 -> live h0 n /\ live h0 tmpV /\ live h0 b /\ live h0 res /\
+    (ensures  (fun h0 _ h1 -> live h0 n /\ live h0 tmpV /\ live h0 b /\ live h0 res /\
         live h1 n /\ live h1 tmpV /\ live h1 b /\ live h1 res /\ 
-        modifies_1 res h0 h1 /\ modifies_1 tmpV h0 h1))
+        modifies_2 tmpV res h0 h1))
 let rec mod_exp_loop modBits aLen bBits resLen n tmpV b res count =
     push_frame();
     let tmpLen = U32.(2ul *^ aLen) in
@@ -63,14 +64,18 @@ let rec mod_exp_loop modBits aLen bBits resLen n tmpV b res count =
 
 (* res = a ^^ b mod n *)
 val mod_exp:
-    modBits:U32.t -> aLen:U32.t -> bBits:U32.t -> resLen:U32.t ->
+    modBits:U32.t{U32.v modBits > 0} ->
+    aLen:U32.t{U32.v aLen > 0} -> 
+    bBits:U32.t{U32.v bBits > 0} -> 
+    resLen:U32.t{U32.v resLen > 0} ->
     n:bignum{length n = U32.v (bits_to_bn modBits)} ->
-    a:bignum{U32.v aLen = length a} ->
+    a:bignum{length a = U32.v aLen} ->
     b:bignum{length b = U32.v (bits_to_bn bBits)} ->
-    res:bignum{U32.v resLen = length res} -> Stack unit
+    res:bignum{length res = U32.v resLen} -> Stack unit
     (requires (fun h -> live h n /\ live h a /\ live h b /\ live h res))
-    (ensures  (fun h0 r h1 -> live h0 n /\ live h0 a /\ live h0 b /\ live h0 res /\
-        live h1 res /\ modifies_1 res h0 h1))
+    (ensures  (fun h0 _ h1 -> live h0 n /\ live h0 a /\ live h0 b /\ live h0 res /\
+        live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
+        modifies_1 res h0 h1))
 let mod_exp modBits aLen bBits resLen n a b res =
     push_frame();
     let tmpV = create 0uL aLen in

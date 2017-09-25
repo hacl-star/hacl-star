@@ -21,7 +21,7 @@ let ctest modBits pkeyBits skeyBits msgLen n e d msg salt =
 	let dNat = create 0uL (bits_to_bn skeyBits) in text_to_nat d (bits_to_text skeyBits) dNat;
 	let pkey = Mk_rsa_pubkey nNat eNat in
 	let skey = Mk_rsa_privkey pkey dNat in
-	let sgnt = create 0uy (get_octets modBits) in
+	let sgnt = create 0uy (bits_to_text modBits) in
 	rsa_sign modBits skeyBits msgLen msg skey salt sgnt;
 	let test = rsa_verify modBits msgLen pkeyBits sgnt pkey msg in
 	pop_frame();
