@@ -83,6 +83,14 @@ snapshots/hacl-c:
 	$(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile)  \
 		./snapshots/hacl-c
 
+snapshots/nss:
+	$(MAKE) snapshots/snapshot-gcc
+	$(MAKE) snapshots/snapshot-gcc-unrolled
+	mkdir -p snapshots/nss
+	cp $(addprefix snapshots/snapshot-gcc-unrolled/, Curve25519*) \
+	$(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile)  \
+		./snapshots/nss
+
 snapshots-all:
 	$(MAKE) snapshots/snapshot-gcc
 	$(MAKE) snapshots/snapshot-gcc-unrolled
@@ -93,6 +101,7 @@ snapshots-all:
 snapshots-remove:
 	rm -rf snapshots/hacl-c
 	rm -rf snapshots/snapshot*
+	rm -rf snapshots/nss
 
 snapshots-update:
 	$(MAKE) snapshots-remove

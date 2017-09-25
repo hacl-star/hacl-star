@@ -59,6 +59,14 @@ verify-secure_api: secure_api.dir-verify
 verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
 
+verify-nss:
+	@echo $(CYAN)"# Verification of the HaCl* algorithms used by NSS"$(NORMAL)
+	# Verify spec, code and ct
+	$(MAKE) ct -C code/curve25519
+	$(MAKE) verify -C code/curve25519
+	$(MAKE) Spec.Curve25519.fst-verify -C specs
+
+
 #
 # Code generation
 #
