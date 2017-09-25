@@ -23,7 +23,7 @@ val remainder_r_i:
     mod:bignum{length mod = U32.v modLen /\ disjoint r_i mod} ->
     tmp_b:bool -> Stack unit
     (requires (fun h -> live h r_i /\ live h mod))
-	(ensures (fun h0 _ h1 -> live h0 r_i /\ live h0 mod /\ 
+	(ensures (fun h0 _ h1 -> live h0 r_i /\ live h0 mod /\
         live h1 r_i /\ live h1 mod /\ modifies_1 r_i h0 h1))
 
 let remainder_r_i rLen modLen r_i mod tmp_b =
@@ -35,7 +35,7 @@ let remainder_r_i rLen modLen r_i mod tmp_b =
         blit tmp 0ul r_i 0ul rLen));
     lemma_modifies_sub_1 h0 h0 r_i;
     pop_frame()
-  
+
 val remainder_loop:
     rLen:U32.t{U32.v rLen > 0} ->
     modLen:U32.t{U32.v modLen > 0 /\ U32.v modLen = U32.v rLen} ->
@@ -66,7 +66,7 @@ val remainder_:
     mod:bignum{length mod = U32.v modLen /\ disjoint r_i mod} ->
     count:U32.t -> Stack unit
     (requires (fun h -> live h r_i /\ live h mod))
-	(ensures (fun h0 _ h1 -> live h0 r_i /\ live h0 mod /\ 
+	(ensures (fun h0 _ h1 -> live h0 r_i /\ live h0 mod /\
         live h1 r_i /\ live h1 mod /\ modifies_2 r_i mod h0 h1))
 
 let remainder_ rLen modLen r_i mod count =
