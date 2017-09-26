@@ -2,7 +2,7 @@
 # Main HACL* Makefile
 #
 
-.PHONY: display verify test clean
+.PHONY: display verify test clean dependencies
 
 all: display
 
