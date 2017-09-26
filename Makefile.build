@@ -88,7 +88,10 @@ snapshots/nss: snapshots/snapshot-gcc-unrolled
 	mkdir -p snapshots/nss
 	cp snapshots/snapshot-gcc-unrolled/Curve25519.c snapshots/nss/hacl_curve25519_64.c
 	cp snapshots/snapshot-gcc-unrolled/Curve25519.h snapshots/nss/hacl_curve25519_64.h
-	cp $(addprefix snapshots/kremlib/, kremlib.h kremlib.c FStar.h) snapshots/nss
+	cp snapshots/kremlib/FStar.h snapshots/nss/fstar_uint128.h
+	cp $(addprefix snapshots/kremlib/, kremlib.h kremlib.c) snapshots/nss
+	# Patch files adding license headers.
+	code/nss-patches/patch.sh
 
 snapshots-all:
 	$(MAKE) snapshots/snapshot-gcc
