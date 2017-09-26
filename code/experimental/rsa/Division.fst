@@ -36,28 +36,54 @@ let remainder_r_i rLen modLen r_i mod tmp_b =
     lemma_modifies_sub_1 h0 h0 r_i;
     pop_frame()
 
+// BB. TODO
+let lemma_modifies_1_0_1_1_is_modifies_3 #t h0 h1 h1' h1'' h2 h3 (b0:buffer t) (b1:buffer t{disjoint b1 b0}) (b2:buffer t{disjoint b2 b0 /\ disjoint b2 b1}) : Lemma
+  (requires (modifies_1 b0 h0 h1 /\ h1 == h1' /\ modifies_0 h1' h1'' /\ modifies_1 b1 h1'' h2 /\ modifies_1 b2 h2 h3))
+  (ensures  (modifies_3 b0 b1 b2 h0 h3))
+  = admit()
+
+// BB. TODO
+let lemma_modifies_1_is_modifies_3 #t h0 h1 h2 (b0:buffer t) (b1:buffer t{disjoint b1 b0}) (b2:buffer t{disjoint b2 b0 /\ disjoint b2 b1}) : Lemma
+  (requires (modifies_1 b0 h0 h1 /\ modifies_0 h1 h2))
+  (ensures  (modifies_3 b0 b1 b2 h0 h2))
+  = admit()
+
+
 val remainder_loop:
     rLen:U32.t{U32.v rLen > 0} ->
     modLen:U32.t{U32.v modLen > 0 /\ U32.v modLen = U32.v rLen} ->
     r_i:bignum{length r_i = U32.v rLen} ->
     mod:bignum{length mod = U32.v modLen /\ disjoint r_i mod} ->
-    mod1:bignum{length mod1 = U32.v modLen /\ disjoint mod mod1} ->
+    mod1:bignum{length mod1 = U32.v modLen /\ disjoint mod mod1 /\ disjoint r_i mod1} ->
     count:U32.t -> Stack unit
     (requires (fun h -> live h r_i /\ live h mod /\ live h mod1))
 	(ensures (fun h0 _ h1 -> live h0 r_i /\ live h0 mod /\ live h0 mod1 /\
-        live h1 r_i /\ live h1 mod /\ live h1 mod1 /\ modifies_3 r_i mod mod1 h0 h1))
+        live h1 r_i /\ live h1 mod /\ live h1 mod1 /\ modifies_3 mod1 r_i mod h0 h1))
 
-#set-options "--z3rlimit 50 --max_fuel 2"
+#set-options "--z3rlimit 150 --max_fuel 1"
 
 let rec remainder_loop rLen modLen r_i mod mod1 count =
-    rshift1 modLen mod mod1;
-    if U32.(count >^ 0ul) then
-        begin
-        let tmp_b = isMore modLen rLen mod r_i in
-        remainder_r_i rLen modLen r_i mod tmp_b;
-        blit mod1 0ul mod 0ul modLen;
-        remainder_loop rLen modLen r_i mod mod1 U32.(count -^ 1ul)
-        end
+  (**) let h0 = ST.get () in
+  rshift1 modLen mod mod1;
+  (**) let h1 = ST.get () in
+  if U32.(count >^ 0ul) then begin
+    (**) assert(modifies_1 mod1 h0 h1);
+    (**) let h1' = ST.get () in
+    let tmp_b = isMore modLen rLen mod r_i in
+    (**) let h1'' = ST.get () in
+    remainder_r_i rLen modLen r_i mod tmp_b;
+    (**) let h2 = ST.get () in
+    blit mod1 0ul mod 0ul modLen;
+    (**) let h3 = ST.get () in
+    (**) lemma_modifies_1_0_1_1_is_modifies_3 h0 h1 h1' h1'' h2 h3 mod1 r_i mod;
+    (**) assert(modifies_3 mod1 r_i mod h0 h3);
+    remainder_loop rLen modLen r_i mod mod1 U32.(count -^ 1ul)
+    end else begin
+    (**) let h3' = ST.get () in
+    (**) lemma_modifies_1_is_modifies_3 h0 h1 h3' mod1 r_i mod;
+    (**) assert(modifies_3 mod1 r_i mod h0 h3')
+    end
+
 
 val remainder_:
     rLen:U32.t{U32.v rLen > 0} ->
