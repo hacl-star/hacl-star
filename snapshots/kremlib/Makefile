@@ -1,5 +1,7 @@
 .PHONY: nacllib clean
 
+HACL_HOME ?= ../..
+
 #
 # Compilation flags
 #
@@ -80,7 +82,7 @@ unit-tests: libhacl.so
 	-I . -I ../snapshots/kremlib -I ../../test/test-files/ -I $(TWEETNACL_HOME) \
 	$(TWEETNACL_HOME)/tweetnacl.c ../../test/test-files/hacl_test_utils.c \
 	../../test/test-files/unit_tests.c libhacl.so -o unit_tests.exe
-	./unit_tests.exe
+	LD_LIBRARY_PATH=. PATH=. DYLD_LIBRARY_PATH=. ./unit_tests.exe
 
 unit-tests32: libhacl32.so 
 	$(CC) $(CCOPTS32) \

@@ -114,6 +114,10 @@ unit-tests:
 	@echo $(CYAN)"# Testing the HaCl* shared library"$(NORMAL)
 	$(MAKE) -C snapshots/hacl-c unit-tests
 
+unit-tests-unrolled:
+	@echo $(CYAN)"# Testing the HaCl* shared library"$(NORMAL)
+	$(MAKE) -C snapshots/snapshot-gcc-unrolled unit-tests
+
 test-all:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
 	$(MAKE) -C test
@@ -182,6 +186,15 @@ prepare:
 	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
 	@echo "# Installing OCaml packages required by KreMLin"
 	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
+
+dependencies:
+	@echo "# Get and build F* and KreMLin"
+	opam switch 4.04.2
+	eval `opam config env`
+	git submodule update --init
+	opam config exec -- make -C dependencies/FStar/src/ocaml-output
+	opam config exec -- make -C dependencies/FStar/ulib/ml
+	opam config exec -- make -C dependencies/kremlin
 
 #
 # Packaging helper
