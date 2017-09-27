@@ -17,31 +17,11 @@ type bytes = seq byte
 
 type elem (n:pos) = e:int{e >= 0 /\ e < n}
 
-type rsa_pubkey = 
+type rsa_pubkey =
 	| Mk_rsa_pubkey: n:pos -> e:elem n -> rsa_pubkey
-
-val get_n: x:rsa_pubkey -> Tot pos
-let get_n x = 
-	match x with 
-	| Mk_rsa_pubkey n e -> n
-	
-val get_e: x:rsa_pubkey -> Tot (e:elem (get_n x))
-let get_e x =
-	match x with
-	| Mk_rsa_pubkey n e -> e
 	
 type rsa_privkey =
-	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:elem (get_n pkey) -> rsa_privkey
-	
-val get_pkey: x:rsa_privkey -> Tot rsa_pubkey
-let get_pkey x =
-	match x with
-	| Mk_rsa_privkey pkey d -> pkey
-
-val get_d: x:rsa_privkey -> Tot (e:elem (get_n (get_pkey x))) 	
-let get_d x =
-	match x with
-	| Mk_rsa_privkey pkey d -> d
+	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:elem (Mk_rsa_pubkey?.n pkey) -> rsa_privkey
 
 val nat_to_uint8: x:nat -> Tot UInt8.t
 let nat_to_uint8 x = U8.uint_to_t (to_uint_t 8 x)
@@ -177,8 +157,9 @@ skey:rsa_privkey ->
 salt:bytes{length salt = sLen} -> Tot (sgnt:bytes{length sgnt = get_octets modBits})
 let rsa_sign modBits msg skey salt =
 	let k = get_octets modBits in 
-	let d = get_d skey in
-	let n = get_n (get_pkey skey) in
+	let d = Mk_rsa_privkey?.d skey in
+	let pkey = Mk_rsa_privkey?.pkey skey in
+	let n = Mk_rsa_pubkey?.n pkey in
 
 	let em = pss_encode modBits msg salt in
 	let m = text_to_nat em in
@@ -192,8 +173,8 @@ sgnt:bytes{length sgnt = get_octets modBits} ->
 pkey:rsa_pubkey ->
 msg:bytes{length msg < max_input_len_sha256} -> Tot bool
 let rsa_verify modBits sgnt pkey msg =
-	let e = get_e pkey in
-	let n = get_n pkey in
+	let e = Mk_rsa_pubkey?.e pkey in
+	let n = Mk_rsa_pubkey?.n pkey in
 	
 	let s = text_to_nat sgnt in
 	let s = s % n in
