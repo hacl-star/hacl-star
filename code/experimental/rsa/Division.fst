@@ -84,24 +84,6 @@ let rec remainder_loop rLen modLen r_i mod mod1 count =
     (**) assert(modifies_3 mod1 r_i mod h0 h3')
     end
 
-
-val remainder_:
-    rLen:U32.t{U32.v rLen > 0} ->
-    modLen:U32.t{U32.v modLen > 0 /\ U32.v modLen = U32.v rLen} ->
-    r_i:bignum{length r_i = U32.v rLen} ->
-    mod:bignum{length mod = U32.v modLen /\ disjoint r_i mod} ->
-    count:U32.t -> Stack unit
-    (requires (fun h -> live h r_i /\ live h mod))
-	(ensures (fun h0 _ h1 -> live h0 r_i /\ live h0 mod /\
-        live h1 r_i /\ live h1 mod /\ modifies_2 r_i mod h0 h1))
-
-let remainder_ rLen modLen r_i mod count =
-    push_frame();
-    let mod1 = create 0uL modLen in
-    remainder_loop rLen modLen r_i mod mod1 count;
-    pop_frame()
-
-(*
 (* res = a % mod *)
 val remainder:
     aBits:U32.t{U32.v aBits > 0} ->
@@ -137,7 +119,7 @@ let remainder aBits modBits resLen a mod res =
     let r_0 = create 0uL a1Len in
     blit a 0ul r_0 1ul aLen;
 
-    remainder_ a1Len mod1Len r_0 mod1 k;
+    let mod1_tmp = create 0uL modLen in
+    remainder_loop a1Len mod1Len r_0 mod1 mod1_tmp k;
     blit r_0 0ul res 0ul resLen;
     pop_frame()
-    *)
