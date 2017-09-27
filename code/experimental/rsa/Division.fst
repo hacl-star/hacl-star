@@ -53,7 +53,9 @@ val remainder_r_i:
     tmp_b:bool -> st:rem_state rLen modLen -> Stack unit 
     	       (requires (fun h -> rem_state_st_inv rLen modLen st h))
 	       (ensures (fun h r h' -> rem_state_st_inv rLen modLen st h' /\
-				     modifies_1 st h h'))
+			        (let tmp = get_tmp st in 
+				 let r_i = get_r_i st in
+				     modifies_2 tmp r_i h h')))
 let remainder_r_i rLen modLen tmp_b st =
     if not tmp_b then
 	let r_i = get_r_i st in
@@ -61,11 +63,6 @@ let remainder_r_i rLen modLen tmp_b st =
 	let mod = get_mod st in
         sub rLen modLen r_i mod tmp;
         blit tmp 0ul r_i 0ul rLen
-
-let lemma_modifies_0_is_modifies_1 (#a:Type) (h:HyperStack.mem) (b:buffer a{live h b}) : Lemma
-  (modifies_1 b h h) =
-  lemma_modifies_sub_1 h h b
-
 
 
 val remainder_loop:
@@ -82,17 +79,12 @@ let rec remainder_loop rLen modLen count st =
     let mod_1 = get_mod_1 st in
     let r_i = get_r_i st in
     let mod = get_mod st in
-    let h1 = ST.get() in
-    let tmp_b = isMore modLen rLen mod r_i in
-    let h2 = ST.get() in
-    no_upd_lemma_0 h1 h2 st;
-    lemma_modifies_0_is_modifies_1 h2 st; (* IDIOTIC LEMMA NEEDED *)
     rshift1 modLen mod mod_1;
+    let tmp_b = isMore modLen rLen mod r_i in
     remainder_r_i rLen modLen tmp_b st;
     blit mod_1 0ul mod 0ul modLen;
     remainder_loop rLen modLen U32.(count -^ 1ul) st 
     end 
-    
 
 
 val remainder_:
@@ -105,8 +97,6 @@ val remainder_:
 let remainder_ rLen modLen count st =
     remainder_loop rLen modLen count st
 
-
-(*
 (* res = a % mod *)
 val remainder:
     aBits:U32.t{U32.v aBits > 0} ->
@@ -124,25 +114,18 @@ val remainder:
 let remainder aBits modBits resLen a mod res =
     push_frame();
     let aLen = bits_to_bn aBits in
-    assert(length a = U32.v (bits_to_bn aBits));
     let modLen = bits_to_bn modBits in
-    assert(length mod = U32.v (bits_to_bn modBits));
-
     let k = U32.(aBits -^ modBits) in
     let modk = U32.(k /^ 64ul) in
-    assume(U32.v modLen + U32.v modk + 1 < pow2 32);
     let mod1Len = U32.(modLen +^ modk +^ 1ul) in
-
     let a1Len = U32.(aLen +^ 1ul) in
-    assert(U32.v mod1Len = U32.v a1Len);
-
-    let mod1 = create 0uL mod1Len in
+    let mod1Len: bnlen = mod1Len in
+    let a1Len: bnlen = a1Len in
+    let st : rem_state a1Len mod1Len = create 0uL U32.(a1Len +^ a1Len +^ mod1Len +^ mod1Len) in
+    let mod1 = get_mod_1 st in 
+    let r_0 = get_r_i st in
     lshift modLen mod k mod1;
-
-    let r_0 = create 0uL a1Len in
     blit a 0ul r_0 1ul aLen;
-
-    remainder_ a1Len mod1Len r_0 mod1 k;
+    remainder_ a1Len mod1Len k st;
     blit r_0 0ul res 0ul resLen;
     pop_frame()
-    *)

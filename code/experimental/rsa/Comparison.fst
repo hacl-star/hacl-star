@@ -16,7 +16,7 @@ val isMore_loop:
     count:U32.t{U32.v count <= length a} -> Stack bool
     (requires (fun h -> live h a /\ live h b))
 	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 b
-         /\ live h1 a /\ live h1 b /\ modifies_0 h0 h1))
+         /\ live h1 a /\ live h1 b /\ h0 == h1))
 
 let rec isMore_loop a b count =
     if U32.(count >^ 0ul) then
@@ -35,8 +35,8 @@ val isMore:
     a:bignum{length a = U32.v aLen} ->
     b:bignum{length b = U32.v bLen /\ disjoint a b} -> Stack bool
     (requires (fun h -> live h a /\ live h b))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 b
-        /\ live h1 a /\ live h1 b /\ modifies_0 h0 h1))
+    (ensures (fun h0 _ h1 -> live h0 a /\ live h0 b
+        /\ live h1 a /\ live h1 b /\ h0 == h1))
 
 let isMore aLen bLen a b =
     if U32.(aLen >^ bLen) then true
