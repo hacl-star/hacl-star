@@ -4,7 +4,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 
-open Platform.Bytes
+open FStar.Bytes
 open CoreCrypto
 
 assume type aead_state: Type0
