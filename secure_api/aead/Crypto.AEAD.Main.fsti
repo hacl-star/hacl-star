@@ -89,6 +89,7 @@ type refs_in_region =
 type fp = FStar.TSet.set (HH.rid * refs_in_region)
 val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> fp
 
+noextract 
 let regions_of_fp (fp:fp) = FStar.TSet.map fst fp
 let refs_of_region (rgn:HH.rid) (footprint:fp) : FStar.TSet.set refs_in_region =
   FStar.TSet.map snd (FStar.TSet.filter (fun r -> fst r == rgn) footprint)
