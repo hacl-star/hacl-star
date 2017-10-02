@@ -40,17 +40,9 @@ val xor_bytes_inplace: output:bytes -> in1:bytes{disjoint in1 output} ->
   (requires (fun h -> live h output /\ live h in1))
   (ensures  (fun h0 _ h1 -> live h0 output /\ live h0 in1 /\ live h1 output /\ live h1 in1
     /\ modifies_1 output h0 h1 ))
-let rec xor_bytes_inplace output in1 len =
-  if len =^ 0ul then ()
-  else
-    begin
-      let i    = len -^ 1ul in
-      let in1i = index in1 i in
-      let oi   = index output i in
-      let oi   = UInt8.logxor in1i oi in
-      output.(i) <- oi;
-      xor_bytes_inplace output in1 i
-    end
+let xor_bytes_inplace output in1 len =
+  C.Loops.in_place_map2 in1 output len
+    (fun ibyte obyte -> UInt8.logxor ibyte obyte)
 
 val lemma_euclidean_division: r:nat -> b:nat -> q:pos -> Lemma
   (requires (r < q))
