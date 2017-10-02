@@ -96,11 +96,17 @@ let remainder aLen modLen resLen diffBits a mod res =
     let st : rem_state a1Len mod1Len = create 0uL U32.(a1Len +^ a1Len +^ mod1Len +^ mod1Len) in
     let r_0 = get_r_i st in
     let mod1 = get_mod st in
-
     lshift modLen mod diffBits mod1;
     blit a 0ul r_0 0ul aLen;
-
-    remainder_loop a1Len mod1Len diffBits st;
-
+    remainder_loop a1Len mod1Len U32.(diffBits +^ 1ul) st;
     blit r_0 0ul res 0ul resLen;
     pop_frame()
+
+    (*(if U32.(isMore aLen modLen a mod) then begin
+        lshift modLen mod diffBits mod1;
+        blit a 0ul r_0 0ul aLen;
+        remainder_loop a1Len mod1Len U32.(diffBits +^ 1ul) st;
+        blit r_0 0ul res 0ul resLen end
+    else
+        assume(U32.v aLen <= U32.v resLen); 
+        blit a 0ul res 0ul aLen); *)

@@ -32,8 +32,9 @@ val get_length_em:
 
 let get_length_em modBits =
 	let k = bits_to_text modBits in
-	if U32.((modBits -^ 1ul) %^ 8ul =^ 0ul)
-	then U32.(k -^ 1ul) else k
+	(*if U32.((modBits -^ 1ul) %^ 8ul =^ 0ul)
+	then U32.(k -^ 1ul) else k*)
+	k
 
 val hash_sha256:
 	mHash:uint8_p{length mHash = U32.v hLen} -> 
