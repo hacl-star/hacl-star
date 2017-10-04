@@ -8,12 +8,22 @@ open FStar.Mul
 
 open Convert
 open Exponentiation
+open MGF
 
 module U32 = FStar.UInt32
 module U8 = FStar.UInt8
 
 type uint8_p = buffer FStar.UInt8.t
+type lbytes (len:U32.t) = 
+     b:uint8_p{length b = U32.v len} 
+
+type blen = (l:U32.t{U32.v l > 0 /\ U32.v l < pow2 61})
+
 type bignum = buffer FStar.UInt64.t
+type lbignum (len:U32.t) = 
+     b:bignum{length b = U32.v len}
+
+type bnlen = (l:U32.t{U32.v l > 0 /\ U32.v l <= 8192})
 
 inline_for_extraction let zero_8 = 0uy
 inline_for_extraction let hLen = 32ul
@@ -25,58 +35,9 @@ noeq type rsa_pubkey =
 noeq type rsa_privkey =
 	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:bignum -> rsa_privkey
 
-val get_length_em: 
-	modBits:U32.t{U32.v modBits > 0} -> Tot U32.t
-
-#set-options "--z3rlimit 50"
-
-let get_length_em modBits =
-	let k = bits_to_text modBits in
-	(*if U32.((modBits -^ 1ul) %^ 8ul =^ 0ul)
-	then U32.(k -^ 1ul) else k*)
-	k
-
-val hash_sha256:
-	mHash:uint8_p{length mHash = U32.v hLen} -> 
-	m:uint8_p{length m < pow2 61 /\ disjoint mHash m} -> 
-	len:U32.t{U32.v len = length m} -> Stack unit
-	(requires (fun h -> live h m /\ live h mHash))
-	(ensures (fun h0 _ h1 -> live h0 m /\ live h0 mHash /\ 
-	 	live h1 m /\ live h1 mHash /\ modifies_1 mHash h0 h1))
-let hash_sha256 mHash m len = SHA2_256.hash mHash m len
-
-val mgf:
-	mgfseed_len:U32.t -> 
-	mgfseed:uint8_p{length mgfseed = U32.v mgfseed_len} ->
-	len:U32.t -> 
-	counter:U32.t -> 
-	acc:uint8_p{length acc = U32.(v (hLen *^ counter))} ->
-	res:uint8_p{length res = U32.v len} -> Stack unit
-	(requires (fun h -> live h res /\ live h mgfseed /\ live h acc))
-	(ensures (fun h0 _ h1 -> live h0 res /\ live h0 mgfseed /\ live h0 acc /\ 
-		live h1 res /\ live h1 mgfseed /\ live h1 acc /\ modifies_2 res acc h0 h1))
-let rec mgf mgfseed_len mgfseed len counter acc res =
-	(* if len > op_Multiply (pow2 32) hLen then failwith "mask too long" *)
-	push_frame();
-	let c = create zero_8 4ul in
-	c.(0ul) <- uint32_to_uint8 (U32.(counter >>^ 24ul));
-	c.(1ul) <- uint32_to_uint8 (U32.(counter >>^ 16ul));
-	c.(2ul) <- uint32_to_uint8 (U32.(counter >>^ 8ul));
-	c.(3ul) <- uint32_to_uint8 counter;
-	let tmp = create zero_8 U32.(mgfseed_len +^ 4ul) in
-	blit mgfseed 0ul tmp 0ul mgfseed_len;
-	blit c 0ul tmp mgfseed_len 4ul;
-	let hash_tmp = create zero_8 hLen in
-	hash_sha256 hash_tmp tmp U32.(mgfseed_len +^ 4ul);
-	let counter = U32.(counter +^ 1ul) in
-	let acc_size = U32.(counter *^ hLen) in
-	let acc_tmp = create zero_8 acc_size in
-	blit acc 0ul acc_tmp 0ul U32.(acc_size -^ hLen);
-	blit hash_tmp 0ul acc_tmp U32.(acc_size -^ hLen) hLen;
-	if U32.(acc_size <^ len)
-	then mgf mgfseed_len mgfseed len counter acc_tmp res
-	else blit acc_tmp 0ul res 0ul len;
-	pop_frame()
+val get_length_em: (* consider the case when modBits - 1 is divisible by 8 *)
+	modBits:U32.t{U32.v modBits > 0} -> Tot (res:U32.t{U32.v res > 0})
+let get_length_em modBits = bits_to_text modBits
 
 val xordb:
 	b1:uint8_p ->
@@ -104,7 +65,7 @@ val pss_encode:
 let pss_encode modBits msg len salt em =
 	push_frame();
 	let mHash = create zero_8 hLen in
-	hash_sha256 mHash msg len;
+	hash_sha256 mHash len msg;
 	let emBits = U32.(modBits -^ 1ul) in
 	let emLen = get_length_em modBits in
 	let m1_size = U32.(8ul +^ hLen +^ sLen) in
@@ -113,7 +74,7 @@ let pss_encode modBits msg len salt em =
 	blit mHash 0ul m1 8ul hLen;
 	blit salt 0ul m1 U32.(8ul +^ hLen) sLen;
 	let m1Hash = create zero_8 hLen in
-	hash_sha256 m1Hash m1 m1_size;
+	hash_sha256 m1Hash m1_size m1;
 
 	let db_size = U32.(emLen -^ hLen -^ 1ul) in
 	let db = create zero_8 db_size in
@@ -122,8 +83,7 @@ let pss_encode modBits msg len salt em =
 	blit salt 0ul db U32.(ind_1 +^ 1ul) sLen;
 
 	let dbMask = create zero_8 db_size in
-	let acc = create zero_8 0ul in
-	mgf hLen m1Hash db_size 0ul acc dbMask;
+	mgf hLen m1Hash db_size dbMask;
 
 	xordb db dbMask db_size;
 	let zeroL = U32.(8ul *^ emLen -^ emBits) in
@@ -153,7 +113,7 @@ let pss_verify modBits em msg len =
 	let pad2 = create zero_8 pad_size in
 	let dbMask = create zero_8 db_size in
 
-	hash_sha256 mHash msg len;
+	hash_sha256 mHash len msg;
 	let res =
 	if not (U8.(em.(U32.(emLen -^ 1ul)) =^ 0xbcuy)) then false else (
 	let maskedDB = sub em 0ul db_size in
@@ -161,8 +121,7 @@ let pss_verify modBits em msg len =
 	let zeroL = U32.(8ul *^ emLen -^ (modBits -^ 1ul)) in
 	let tmp = U8.(maskedDB.(0ul) &^ (0xffuy <<^ U32.(8ul -^ zeroL))) in
 	if not (U8.(tmp =^ 0x00uy)) then false else (
-	let acc = create zero_8 0ul in
-	mgf hLen m1Hash db_size 0ul acc dbMask;
+	mgf hLen m1Hash db_size dbMask;
 	xordb maskedDB dbMask db_size;
 	maskedDB.(0ul) <- U8.(maskedDB.(0ul) &^ (0xffuy >>^ zeroL));
 	upd pad2 U32.(pad_size -^ 1ul) 0x01uy;
@@ -173,7 +132,7 @@ let pss_verify modBits em msg len =
 	(* first 8 elements should be 0x00 *)
 	blit mHash 0ul m1 8ul hLen;
 	blit salt 0ul m1 U32.(8ul +^ hLen) sLen;
-	hash_sha256 m1Hash' m1 m1_size;
+	hash_sha256 m1Hash' m1_size m1;
 	eqb m1Hash m1Hash' hLen))) in
 	pop_frame();
 	res
