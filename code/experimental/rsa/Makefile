@@ -1,6 +1,7 @@
 include ../../../Makefile.include 
 
 RSA_FILES= \
+	Lib.fst \
 	Convert.fst \
 	Multiplication.fst \
 	Shift.fst \
@@ -37,6 +38,7 @@ rsa-c/out.krml: $(RSA_FILES)
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^
 
 EXTRACTED = \
+	Lib \
 	Hacl_Hash_Lib_LoadStore \
 	Hacl_Hash_Lib_Create \
 	Hacl_Hash_SHA2_256 \

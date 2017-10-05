@@ -3,16 +3,10 @@ module Multiplication
 open FStar.HyperStack.All
 open FStar.Buffer
 open FStar.Int.Cast
+open Lib
 
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-
-type bignum = buffer FStar.UInt64.t
-
-type lbignum (len:U32.t) = 
-     b:bignum{length b = U32.v len} 
-
-type bnlen = (l:U32.t{U32.v l > 0 /\ U32.v l <= 8192})
 
 val mult64: x:U64.t -> y:U64.t -> Tot (U64.t * U64.t)
 #set-options "--z3rlimit 300"

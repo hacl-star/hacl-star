@@ -7,15 +7,10 @@ open FStar.Int.Cast
 open Shift 
 open Comparison
 open Addition
+open Lib
 
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-
-type bignum = buffer FStar.UInt64.t
-type lbignum (len:U32.t) = 
-     b:bignum{length b = U32.v len} 
-
-type bnlen = (l:U32.t{U32.v l > 0 /\ U32.v l <= 8192})
 
 type rem_state (rLen:bnlen) (modLen:bnlen) = lbignum U32.(rLen +^ modLen +^ modLen +^ rLen)
 
@@ -87,12 +82,12 @@ let remainder aLen modLen resLen diffBits a mod res =
     push_frame();
     let modk = U32.(diffBits /^ 64ul) in
     let mod1Len = U32.(modLen +^ modk +^ 1ul) in
-    assume(U32.v mod1Len > 0 /\ U32.v mod1Len <= 8192);
+    (**) assume(U32.v mod1Len > 0 /\ U32.v mod1Len <= 8192);
     let a1Len = U32.(aLen +^ 1ul) in
-    assume(U32.v a1Len > 0 /\ U32.v a1Len <= 8192);
+    (**) assume(U32.v a1Len > 0 /\ U32.v a1Len <= 8192);
     let mod1Len: bnlen = mod1Len in
     let a1Len: bnlen = a1Len in
-    assert(U32.v a1Len = U32.v mod1Len);
+    (**) assert(U32.v a1Len = U32.v mod1Len);
     let st : rem_state a1Len mod1Len = create 0uL U32.(a1Len +^ a1Len +^ mod1Len +^ mod1Len) in
     let r_0 = get_r_i st in
     let mod1 = get_mod st in

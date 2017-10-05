@@ -7,16 +7,11 @@ open FStar.All
 
 open Multiplication
 open Convert
+open Lib
 
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module Div = Division
-
-type bignum = buffer FStar.UInt64.t
-type lbignum (len:U32.t) = 
-     b:bignum{length b = U32.v len} 
-
-type bnlen = (l:U32.t{U32.v l > 0 /\ U32.v l <= 8192})
 
 type exp_state (rLen:bnlen) (aLen:bnlen) = lbignum U32.(rLen +^ aLen +^ (aLen +^ aLen) +^ (rLen +^ aLen))
 
@@ -60,6 +55,34 @@ let bn_bit_is_set input ind =
     let res = U64.(((tmp >>^ j) &^ 1uL) =^ 1uL) in
     res
 
+val mod_exp_loop_:
+    modBits:U32.t{U32.v modBits > 0} -> aLen:bnlen ->
+    bBits:U32.t{U32.v bBits > 0} -> resLen:bnlen ->
+    n:lbignum (bits_to_bn modBits) ->
+    b:lbignum (bits_to_bn bBits) ->
+    st:exp_state resLen aLen{disjoint st n /\ disjoint st b} ->
+    count:U32.t{U32.v count <= U32.v bBits} -> Stack unit
+    (requires (fun h -> live h n /\ live h b /\ exp_state_st_inv resLen aLen st h))
+    (ensures  (fun h0 _ h1 -> live h1 n /\ live h1 b /\ exp_state_st_inv resLen aLen st h1 /\
+                modifies_1 st h0 h1))
+
+#set-options "--z3rlimit 150"
+
+let mod_exp_loop_ modBits aLen bBits resLen n b st count =
+    let acc = get_acc st in
+    let a = get_a_1 st in
+    let acc2 = get_acc2 st in
+    let acc2Len = U32.(resLen +^ aLen) in
+    fill acc2 0uL acc2Len;
+
+    let diffBits2 = U32.(64ul *^ acc2Len -%^ modBits) in
+    let modLen = bits_to_bn modBits in
+
+    (if (bn_bit_is_set b count) then begin
+        mult resLen aLen acc a acc2;
+        Div.remainder acc2Len modLen resLen diffBits2 acc2 n acc
+    end)
+
 (* mod_exp_loop modBits aLen bBits resLen n a1 b acc count *)
 val mod_exp_loop:
     modBits:U32.t{U32.v modBits > 0} -> aLen:bnlen ->
@@ -75,25 +98,17 @@ val mod_exp_loop:
 #set-options "--z3rlimit 150 --max_fuel 2"
 
 let rec mod_exp_loop modBits aLen bBits resLen n b st count =
-    let acc = get_acc st in
     let a = get_a_1 st in
     let a2 = get_a2 st in
-    let acc2 = get_acc2 st in
     let a2Len = U32.(aLen +^ aLen) in
-    let acc2Len = U32.(resLen +^ aLen) in
     fill a2 0uL a2Len;
-    fill acc2 0uL acc2Len;
 
     let diffBits1 = U32.(64ul *^ a2Len -%^ modBits) in
-    let diffBits2 = U32.(64ul *^ acc2Len -%^ modBits) in
     let modLen = bits_to_bn modBits in
     (if U32.(count <^ bBits) then begin
         sqr aLen a a2;
         Div.remainder a2Len modLen aLen diffBits1 a2 n a;
-        (if (bn_bit_is_set b count) then begin
-            mult resLen aLen acc a acc2;
-            Div.remainder acc2Len modLen resLen diffBits2 acc2 n acc
-        end);
+        mod_exp_loop_ modBits aLen bBits resLen n b st count;
         mod_exp_loop modBits aLen bBits resLen n b st U32.(count +^ 1ul)
     end)
 

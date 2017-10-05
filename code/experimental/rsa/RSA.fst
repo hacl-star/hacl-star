@@ -6,24 +6,13 @@ open FStar.Int.Cast
 open FStar.All
 open FStar.Mul
 
+open Lib
 open Convert
 open Exponentiation
 open MGF
 
 module U32 = FStar.UInt32
 module U8 = FStar.UInt8
-
-type uint8_p = buffer FStar.UInt8.t
-type lbytes (len:U32.t) = 
-     b:uint8_p{length b = U32.v len} 
-
-type blen = (l:U32.t{U32.v l > 0 /\ U32.v l < pow2 61})
-
-type bignum = buffer FStar.UInt64.t
-type lbignum (len:U32.t) = 
-     b:bignum{length b = U32.v len}
-
-type bnlen = (l:U32.t{U32.v l > 0 /\ U32.v l <= 8192})
 
 inline_for_extraction let zero_8 = 0uy
 inline_for_extraction let hLen = 32ul
@@ -83,7 +72,7 @@ let pss_encode modBits msg len salt em =
 	blit salt 0ul db U32.(ind_1 +^ 1ul) sLen;
 
 	let dbMask = create zero_8 db_size in
-	mgf hLen m1Hash db_size dbMask;
+	mgf_sha256 m1Hash db_size dbMask;
 
 	xordb db dbMask db_size;
 	let zeroL = U32.(8ul *^ emLen -^ emBits) in
@@ -121,7 +110,7 @@ let pss_verify modBits em msg len =
 	let zeroL = U32.(8ul *^ emLen -^ (modBits -^ 1ul)) in
 	let tmp = U8.(maskedDB.(0ul) &^ (0xffuy <<^ U32.(8ul -^ zeroL))) in
 	if not (U8.(tmp =^ 0x00uy)) then false else (
-	mgf hLen m1Hash db_size dbMask;
+	mgf_sha256 m1Hash db_size dbMask;
 	xordb maskedDB dbMask db_size;
 	maskedDB.(0ul) <- U8.(maskedDB.(0ul) &^ (0xffuy >>^ zeroL));
 	upd pad2 U32.(pad_size -^ 1ul) 0x01uy;
@@ -158,14 +147,14 @@ let rsa_sign modBits skeyBits msgLen msg skey salt sgnt =
 	pss_encode modBits msg msgLen salt em;
 	let mLen = get_size_nat emLen in
 	let m = create 0uL mLen in
-	text_to_nat em emLen m;
+	text_to_nat emLen em m;
 
 	(* todo: m % n *)
 	let sLen = get_size_nat k in
 	let s = create 0uL sLen in
     mod_exp modBits mLen skeyBits sLen n m d s;
 
-	nat_to_text s k sgnt;
+	nat_to_text k s sgnt;
 	pop_frame()
 
 val rsa_verify:
@@ -185,7 +174,7 @@ let rsa_verify modBits msgLen pkeyBits sgnt pkey msg =
 	let k = bits_to_text modBits in
 	let sLen = get_size_nat k in
 	let s = create 0uL sLen in
-	text_to_nat sgnt k s;
+	text_to_nat k sgnt s;
 
 	(* todo: s % n *)
 	let emLen = get_length_em modBits in
@@ -194,7 +183,7 @@ let rsa_verify modBits msgLen pkeyBits sgnt pkey msg =
 	mod_exp modBits sLen pkeyBits mLen n s e m;
 
 	let em = create zero_8 emLen in
-	nat_to_text m emLen em;
+	nat_to_text emLen m em;
 	let res = pss_verify modBits em msg msgLen in
 	pop_frame();
 	res
