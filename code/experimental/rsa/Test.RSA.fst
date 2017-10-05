@@ -11,11 +11,11 @@ type uint8_p = buffer FStar.UInt8.t
 type bignum = buffer FStar.UInt64.t
 
 val ctest:
-    modBits:U32.t -> pkeyBits:U32.t -> skeyBits:U32.t -> msgLen:U32.t ->
+    modBits:U32.t -> pkeyBits:U32.t -> skeyBits:U32.t -> msgLen:U32.t -> saltLen:U32.t ->
 	n:uint8_p -> e:uint8_p -> d:uint8_p -> msg:uint8_p -> salt:uint8_p -> Stack bool
 	(requires (fun h -> True))
 	(ensures  (fun h0 r h1 -> True))
-let ctest modBits pkeyBits skeyBits msgLen n e d msg salt =
+let ctest modBits pkeyBits skeyBits msgLen saltLen n e d msg salt =
 	push_frame();
 	let nNat = create 0uL (bits_to_bn modBits)  in text_to_nat (bits_to_text modBits)  n nNat;
 	let eNat = create 0uL (bits_to_bn pkeyBits) in text_to_nat (bits_to_text pkeyBits) e eNat;
@@ -23,8 +23,8 @@ let ctest modBits pkeyBits skeyBits msgLen n e d msg salt =
 	let pkey = Mk_rsa_pubkey nNat eNat in
 	let skey = Mk_rsa_privkey pkey dNat in
 	let sgnt = create 0uy (bits_to_text modBits) in
-	rsa_sign modBits skeyBits msgLen msg skey salt sgnt;
-	let test = rsa_verify modBits msgLen pkeyBits sgnt pkey msg in
+	rsa_sign saltLen modBits skeyBits msgLen msg skey salt sgnt;
+	let test = rsa_verify saltLen modBits msgLen pkeyBits sgnt pkey msg in
 	pop_frame();
 	test
 
@@ -64,7 +64,7 @@ let test1() =
 	let pkeyBits = 24ul in
 	let skeyBits = 1024ul in
 	let msgLen = 51ul in
-	let res = ctest modBits pkeyBits skeyBits msgLen n e d msg salt in
+	let res = ctest modBits pkeyBits skeyBits msgLen 20ul n e d msg salt in
 	pop_frame();
 	res
 
@@ -116,7 +116,7 @@ let test2() =
 	let pkeyBits = 24ul in
 	let skeyBits = 1024ul  in
 	let msgLen = 234ul in
-	let res = ctest modBits pkeyBits skeyBits msgLen n e d msg salt in
+	let res = ctest modBits pkeyBits skeyBits msgLen 20ul n e d msg salt in
 	pop_frame();
 	res
 
@@ -167,7 +167,7 @@ let test3() =
 	let pkeyBits = 24ul in
 	let skeyBits = 1536ul in
 	let msgLen = 107ul in
-	let res = ctest modBits pkeyBits skeyBits msgLen n e d msg salt in
+	let res = ctest modBits pkeyBits skeyBits msgLen 20ul n e d msg salt in
 	pop_frame();
 	res
 
@@ -227,7 +227,7 @@ let test4() =
 	let pkeyBits = 24ul in
 	let skeyBits = 2048ul in
 	let msgLen = 128ul in
-	let res = ctest modBits pkeyBits skeyBits msgLen n e d msg salt in
+	let res = ctest modBits pkeyBits skeyBits msgLen 20ul n e d msg salt in
 	pop_frame();
 	res
 
