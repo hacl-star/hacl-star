@@ -30,12 +30,12 @@ module ID = Box.Index
 
 let nonce_length = SPEC.noncelen
 let key_length = SPEC.keylen
-type aes_key = SPEC.key
-type bytes = SPEC.bytes
-type nonce = SPEC.nonce
+let aes_key = SPEC.key
+let bytes = SPEC.bytes
+let nonce = SPEC.nonce
 
 
-type log_region (im:index_module) =
+let log_region (im:index_module) =
   r:MR.rid{disjoint r (get_rgn im)}
 
 (**
@@ -51,17 +51,17 @@ let valid_cipher_length (n:nat) = (n >= 16 && (n - 16) / Spec.Salsa20.blocklen <
 //  [SMTPat (valid_length n)]
 //let length_lemma n = ()
 
-type cipher = SPEC.cipher
-type ae_plain = SPEC.plain
+let cipher = SPEC.cipher
+let ae_plain = SPEC.plain
 //type ae_plain = b:bytes{valid_length (Seq.length b) } // / Spec.Salsa20.blocklen < pow2 32} //one off error?
 
-type plain_module = pm:Plain.plain_module{Plain.get_plain pm == ae_plain /\ Plain.valid_length #pm == valid_plain_length}
+let plain_module = pm:Plain.plain_module{Plain.get_plain pm == ae_plain /\ Plain.valid_length #pm == valid_plain_length}
 
 val create_zero_bytes: n:nat{valid_plain_length n}-> Tot (b:ae_plain{Seq.length b = n /\ b=Seq.create n (UInt8.uint_to_t 0)})
 let create_zero_bytes n =
   Seq.create n (UInt8.uint_to_t 0)
 
-type ae_protected_plain (im:index_module) (pm:plain_module) (i:id im) = m:Plain.protected_plain_t im (get_plain pm) i
+let ae_protected_plain (im:index_module) (pm:plain_module) (i:id im) = m:Plain.protected_plain_t im (get_plain pm) i
 
 (**
   A helper function to obtain the length of a protected plaintext.
@@ -92,25 +92,25 @@ private val get_rawGT: #im:index_module -> k:key im -> GTot (b:aes_key{k.raw=b})
 let get_rawGT #im k =
   k.raw
 
-type key_log_key (im:index_module) = i:id im
-type key_log_value (im:index_module) = (key im)
+let key_log_key (im:index_module) = i:id im
+let key_log_value (im:index_module) = (key im)
 let key_log_range (im:index_module) = fun (k:key_log_key im) -> (v:key_log_value im{v.i = k})
 let key_log_inv (im:index_module) (f:MM.map' (key_log_key im) (key_log_range im)) = True
 
-type key_log_t (im:index_module) (rgn:log_region im) = MM.t rgn (key_log_key im) (key_log_range im) (key_log_inv im)
+let key_log_t (im:index_module) (rgn:log_region im) = MM.t rgn (key_log_key im) (key_log_range im) (key_log_inv im)
 
 
-type message_log_key (im:index_module) = (nonce*(i:id im))
-type message_log_value (im:index_module) (i:id im) = (cipher*protected_plain_t im ae_plain i)
-type message_log_range (im:index_module) (k:message_log_key im) = (message_log_value im (snd k))
-type message_log_inv (im:index_module) (f:MM.map' (message_log_key im) (message_log_range im)) = True
+let message_log_key (im:index_module) = (nonce*(i:id im))
+let message_log_value (im:index_module) (i:id im) = (cipher*protected_plain_t im ae_plain i)
+let message_log_range (im:index_module) (k:message_log_key im) = (message_log_value im (snd k))
+let message_log_inv (im:index_module) (f:MM.map' (message_log_key im) (message_log_range im)) = True
 
-type message_log (im:index_module) (rgn:log_region im) =
+let message_log (im:index_module) (rgn:log_region im) =
   MM.t rgn (message_log_key im) (message_log_range im) (message_log_inv im)
 
 abstract noeq type ae_module (im:index_module) =
   | AM :
-    (pm:plain_module) ->
+    pm:plain_module ->
     key_log_region: log_region im ->
     message_log_region: (rgn:log_region im{disjoint rgn key_log_region}) ->
     key_log: (key_log_t im key_log_region) ->
@@ -158,7 +158,7 @@ let log_freshness_invariant (#im:index_module) (am:ae_module im) (h:mem) =
 
 #set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
 val lemma_nonce_freshness: #im:index_module  -> am:ae_module im -> i:id im -> n:nonce -> h0:mem -> h1:mem -> Lemma
-  (requires nonce_is_fresh am i n h0)
+  (requires nonce_is_fresh am i n h0 /\ (modifies (Set.singleton am.key_log_region) h0 h1 \/ h0 == h1))
   (ensures ((modifies (Set.singleton am.key_log_region) h0 h1 \/ h0 == h1) ==> nonce_is_fresh am i n h1))
 let lemma_nonce_freshness #im am i n h0 h1 =
  ()
@@ -170,11 +170,15 @@ val create: im:index_module -> pm:plain_module -> rgn:log_region im -> ST (am:ae
   ))
   (ensures (fun h0 am h1 ->
     modifies_none h0 h1
+    /\ HH.extends am.message_log_region rgn
+    /\ HH.extends am.key_log_region rgn
+    /\ disjoint am.message_log_region am.key_log_region
     /\ MR.m_contains am.key_log h1
     /\ MR.m_contains am.message_log h1
     /\ MR.m_sel #am.key_log_region h1 am.key_log == MM.empty_map (key_log_key im) (key_log_range im)
     /\ MR.m_sel #am.message_log_region h1 am.message_log == MM.empty_map (message_log_key im) (message_log_range im)
     /\ log_freshness_invariant #im am h1
+    /\ pm == am.pm
   ))
 let create im pm rgn =
   let klr = new_region rgn in
@@ -235,7 +239,7 @@ let gen #im am i =
     let h1 = get() in
     k
 
-val set: #im:index_module -> i:id im {honest im i /\ (Game0? current_game \/ Game3? current_game)} -> b:lbytes key_length -> (k:key im{get_index k = i /\ b = get_rawGT k})
+private val set: #im:index_module -> i:id im {Game0? current_game \/ Game3? current_game} -> b:lbytes key_length -> (k:key im{get_index k = i /\ b = get_rawGT k})
 let set #im i b =
   Key i b
 (**
@@ -255,17 +259,17 @@ let leak #im k =
   k.raw
 
 #set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0 --print_full_names --print_effect_args --print_implicits --print_universes"
-val valid_km: #im:index_module -> am:ae_module im -> km:key_module im -> t:Type0{
-    t ==>
-    (Key.get_keytype im km == key im
+val instantiate_km: #im:index_module -> am:ae_module im -> km:key_module im{
+    Key.get_keytype im km == key im
     /\ Key.get_index im km == get_index #im
     /\ Key.get_rawGT im km == get_rawGT #im
+    /\ Key.get_keylen im km == key_length
     /\ Key.invariant im km == log_freshness_invariant am
     /\ Key.get_log_region im km == am.key_log_region
-    /\ disjoint (Key.get_log_region im km) am.message_log_region)
+    /\ disjoint (Key.get_log_region im km) am.message_log_region
     }
 let instantiate_km #im am =
-  let km = Key.create im key_length key get_index get_rawGT (log_freshness_invariant am) (am.key_log_region) (gen am) set coerce leak in
+  let km = Key.create im key_length key get_index get_rawGT (log_freshness_invariant am) (am.key_log_region) (gen am) (set #im) coerce leak in
   km
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +288,7 @@ val encrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:k
 ))
 (ensures  (fun h0 c h1 ->
   registered im i
-  /\ modifies (Set.singleton am.message_log_region) h0 h1 // stateful changes even if the id is dishonest.
+  /\ modifies (Set.singleton (get_message_log_region #im am)) h0 h1 // stateful changes even if the id is dishonest.
   /\ ((honest im i /\ b2t ae_ind_cpa) // Ideal behaviour if the id is honest and the assumption holds.
       ==> (c = SPEC.secretbox_easy (create_zero_bytes (Plain.length #im #am.pm #i m)) (get_rawGT k) n))
   /\ ((dishonest im i \/ ~(b2t ae_ind_cpa)) // Concrete behaviour otherwise.
@@ -294,14 +298,6 @@ val encrypt: #im:index_module -> am:ae_module im -> #(i:id im) -> n:nonce -> k:k
   /\ MR.m_sel h1 am.message_log == MM.upd (MR.m_sel h0 am.message_log) (n,i) (c,m)
   /\ log_freshness_invariant #im am h1
 ))
-
-
-
-//val lemma_encrypt_framing: #im:index_module -> am:ae_module im -> h0:mem -> h1:mem -> i:id im -> n:nonce -> y:message_log_range im (n,i) -> Lemma
-//  (requires log_freshness_invariant #im am h0 /\ ~(ID.fresh im i h0))
-//    (ensures (forall i' n'. (i'=i /\ ~(ID.fresh im i h1)) \/ // ~(MM.fresh am.message_log (n,i) h1) /\
-//  (ID.fresh im i' h1 ==> MM.fresh am.message_log (n',i') h1)) ==> (forall i n . ID.fresh im i h1 ==> MM.fresh am.message_log (n,i) h1))
-//let lemma_encrypt_framing #im am h0 h1 i n y = ()
 
  #set-options "--z3rlimit 500 --max_ifuel 1 --max_fuel 1"
 let encrypt #im am #i n k m =
