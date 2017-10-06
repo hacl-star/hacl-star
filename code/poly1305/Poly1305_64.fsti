@@ -16,7 +16,7 @@ open Hacl.Spec.Endianness
 (* Type Aliases *)
 let uint8_p = Buffer.buffer Hacl.UInt8.t
 let uint64_t = FStar.UInt64.t
-let op_String_Access h (b:uint8_p{live h b}) = reveal_sbytes (as_seq h b)
+private let op_String_Access h (b:uint8_p{live h b}) = reveal_sbytes (as_seq h b)
 
 
 val crypto_onetimeauth:

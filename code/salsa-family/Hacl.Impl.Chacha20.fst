@@ -28,10 +28,11 @@ let uint8_p = buffer H8.t
 
 type state = b:Buffer.buffer h32{length b = 16}
 
-private
-inline_for_extraction let ( <<< ) (a:h32) (s:u32{0 < U32.v s && U32.v s < 32}) : Tot h32 =
+[@ "c_inline"]
+private let rotate_left (a:h32) (s:u32{0 < U32.v s && U32.v s < 32}) : Tot h32 =
   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
 
+private inline_for_extraction let ( <<< ) = rotate_left
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
@@ -565,42 +566,6 @@ let lemma_chacha20_counter_mode_0 ho output hi input len k n ctr =
 
 #reset-options " --max_fuel 0 --z3rlimit 400"
 
-val update_last:
-  output:uint8_p ->
-  plain:uint8_p{disjoint output plain} ->
-  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len < 64 /\ UInt32.v len > 0} ->
-  log:log_t ->
-  st:state{disjoint st output /\ disjoint st plain} ->
-  ctr:UInt32.t{UInt32.v ctr + (length plain / 64) < pow2 32} ->
-  Stack log_t
-    (requires (fun h -> live h output /\ live h plain /\ invariant log h st))
-    (ensures (fun h0 updated_log h1 -> live h1 output /\ live h0 plain /\ invariant updated_log h1 st
-      /\ modifies_2 output st h0 h1
-      /\ (let o = reveal_sbytes (as_seq h1 output) in
-         let plain = reveal_sbytes (as_seq h0 plain) in
-         match Ghost.reveal log with | MkLog k n ->
-         o == (let mask = chacha20_cipher k n (UInt32.v ctr+(UInt32.v len / 64)) in
-               let mask = Seq.slice mask 0 (UInt32.v len) in
-               Spec.CTR.xor #(UInt32.v len) plain mask))))
-let update_last output plain len log st ctr =
-  (**) let h0 = ST.get() in
-  push_frame();
-  (**) let h = ST.get() in
-  let block = create (uint8_to_sint8 0uy) 64ul in
-  (**) let h' = ST.get() in
-  let l = chacha20_block log block st ctr in
-  (**) let h'' = ST.get() in
-  (**) lemma_modifies_0_2' st block h h' h'';
-  let mask = Buffer.sub block 0ul len in
-  map2 output plain mask len (fun x y -> H8.(x ^^ y));
-  (**) let h1 = ST.get() in
-  (**) lemma_modifies_2_1'' st output h h'' h1;
-  (**) lemma_chacha20_counter_mode_1 h1 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr;
-  pop_frame();
-  (**) let hfin = ST.get() in
-  (**) modifies_popped_3_2 st output h0 h h1 hfin;
-  l
-
 
 val update:
   output:uint8_p{length output = 64} ->
@@ -646,6 +611,42 @@ let update output plain log st ctr =
   pop_frame();
   (**) let hfin = ST.get() in
   (**) modifies_popped_3_2 st output h0 h1 h5 hfin;
+  l
+
+val update_last:
+  output:uint8_p ->
+  plain:uint8_p{disjoint output plain} ->
+  len:U32.t{U32.v len = length output /\ U32.v len = length plain /\ U32.v len < 64 /\ UInt32.v len > 0} ->
+  log:log_t ->
+  st:state{disjoint st output /\ disjoint st plain} ->
+  ctr:UInt32.t{UInt32.v ctr + (length plain / 64) < pow2 32} ->
+  Stack log_t
+    (requires (fun h -> live h output /\ live h plain /\ invariant log h st))
+    (ensures (fun h0 updated_log h1 -> live h1 output /\ live h0 plain /\ invariant updated_log h1 st
+      /\ modifies_2 output st h0 h1
+      /\ (let o = reveal_sbytes (as_seq h1 output) in
+         let plain = reveal_sbytes (as_seq h0 plain) in
+         match Ghost.reveal log with | MkLog k n ->
+         o == (let mask = chacha20_cipher k n (UInt32.v ctr+(UInt32.v len / 64)) in
+               let mask = Seq.slice mask 0 (UInt32.v len) in
+               Spec.CTR.xor #(UInt32.v len) plain mask))))
+let update_last output plain len log st ctr =
+  (**) let h0 = ST.get() in
+  push_frame();
+  (**) let h = ST.get() in
+  let block = create (uint8_to_sint8 0uy) 64ul in
+  (**) let h' = ST.get() in
+  let l = chacha20_block log block st ctr in
+  (**) let h'' = ST.get() in
+  (**) lemma_modifies_0_2' st block h h' h'';
+  let mask = Buffer.sub block 0ul len in
+  map2 output plain mask len (fun x y -> H8.(x ^^ y));
+  (**) let h1 = ST.get() in
+  (**) lemma_modifies_2_1'' st output h h'' h1;
+  (**) lemma_chacha20_counter_mode_1 h1 output h0 plain len (Ghost.reveal log).k (Ghost.reveal log).n ctr;
+  pop_frame();
+  (**) let hfin = ST.get() in
+  (**) modifies_popped_3_2 st output h0 h h1 hfin;
   l
 
 

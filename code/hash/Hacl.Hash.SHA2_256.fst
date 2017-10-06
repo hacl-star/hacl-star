@@ -200,7 +200,8 @@ val ws_part_1_core:
 let ws_part_1_core ws_w block_w t =
   (**) let h0 = ST.get() in
   (**) let h = ST.get() in
-  ws_w.(t) <- block_w.(t);
+  let b = block_w.(t) in
+  ws_w.(t) <- b;
   (**) let h1 = ST.get() in
   (**) let h' = ST.get() in
   (**) no_upd_lemma_1 h0 h1 ws_w block_w;
@@ -974,9 +975,10 @@ val update_last:
                   let prevlen = U32.(H32.v (Seq.index count 0) * (v size_block)) in
                   (reveal_h32s seq_hash_1) == Spec.update_last (reveal_h32s seq_hash_0) prevlen seq_data)))
 
-#reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 200"
+#reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 300"
 
 let update_last state data len =
+  (**) assert_norm(pow2 32 = 0x100000000);
 
   (**) let hinit = ST.get() in
   
@@ -993,10 +995,18 @@ let update_last state data len =
 
   (* Verification of how many blocks are necessary *)
   (* Threat model. The length are considered public here ! *)
-  let (nb, final_blocks) =
-    if U32.(len <^ 56ul) then (1ul, Buffer.offset blocks size_block)
-    else (2ul, blocks)
-  in
+  let nb = if U32.(len <^ 56ul) then 1ul else 2ul in
+
+  let final_blocks =
+    (**) let h1 = ST.get () in
+    if U32.(len <^ 56ul) then begin
+      (**) assert(v size_block <= length blocks);
+      (**) assert(live h1 blocks);
+      Buffer.offset blocks size_block end
+    else begin
+      (**) assert(live h1 blocks);
+      blocks end in
+
   (**) assert(blocks `includes` final_blocks);
 
   (**) let h1 = ST.get () in
@@ -1004,7 +1014,7 @@ let update_last state data len =
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 final_blocks))
                           (if U32.(len <^ 56ul) then
                               Seq.create (v size_block) 0uy
-                           else Seq.create (2 * v size_block) 0uy);
+                           else Seq.create (v size_block + v size_block) 0uy);
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 final_blocks)) (Seq.create (v nb * v size_block) 0uy);
   (**) assert(reveal_sbytes (as_seq h1 final_blocks) == Seq.create (v nb * v size_block) 0uy);
 

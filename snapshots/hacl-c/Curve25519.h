@@ -43,7 +43,5 @@ void Hacl_EC_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *base
 
 typedef uint8_t *Curve25519_uint8_p;
 
-void *Curve25519_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *b);
-
 void Curve25519_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint);
 #endif

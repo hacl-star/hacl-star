@@ -141,7 +141,6 @@
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
-    [ "NaCl.crypto_secretbox_easy", 5, 2, 1, [ "@query" ], 0 ],
     [
       "NaCl.crypto_secretbox_open_easy",
       1,
@@ -174,7 +173,6 @@
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
-    [ "NaCl.crypto_secretbox_open_easy", 5, 2, 1, [ "@query" ], 0 ],
     [
       "NaCl.crypto_box_beforenm",
       1,
@@ -199,7 +197,6 @@
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
-    [ "NaCl.crypto_box_beforenm", 4, 2, 1, [ "@query" ], 0 ],
     [
       "NaCl.crypto_box_detached_afternm",
       1,
@@ -519,7 +516,6 @@
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
     ],
-    [ "NaCl.crypto_box_open_easy", 6, 2, 1, [ "@query" ], 0 ],
     [
       "NaCl.crypto_box_open_detached_afternm",
       1,
@@ -605,7 +601,6 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0
-    ],
-    [ "NaCl.crypto_box_open_easy_afternm", 5, 2, 1, [ "@query" ], 0 ]
+    ]
   ]
 ]

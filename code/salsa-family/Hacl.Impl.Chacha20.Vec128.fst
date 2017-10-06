@@ -405,10 +405,14 @@ val copy_state:
 [@ "c_inline"]
 let copy_state st' st =
   let h0 = ST.get() in
-  st'.(0ul) <- st.(0ul);
-  st'.(1ul) <- st.(1ul);
-  st'.(2ul) <- st.(2ul);
-  st'.(3ul) <- st.(3ul);
+  let st0 = st.(0ul) in
+  let st1 = st.(1ul) in
+  let st2 = st.(2ul) in
+  let st3 = st.(3ul) in
+  st'.(0ul) <- st0;
+  st'.(1ul) <- st1;
+  st'.(2ul) <- st2;
+  st'.(3ul) <- st3;
   let h1 = ST.get() in
   Seq.lemma_eq_intro (as_state h1 st') (as_state h0 st)
 
@@ -1310,6 +1314,7 @@ let update3' log output plain len st i =
   let plain_sub    = Buffer.sub plain 0ul U32.(192ul *^ i +^ 192ul)  in
   let out_block    = Buffer.sub output U32.(192ul *^ i) 192ul        in
   let plain_block  = Buffer.sub plain U32.(192ul *^ i) 192ul         in
+  assert (disjoint out_block plain_block);
   let out_prefix   = Buffer.sub output 0ul U32.(192ul *^ i)          in
   let plain_prefix = Buffer.sub plain 0ul U32.(192ul *^ i)           in
   Seq.lemma_eq_intro (as_seq h out_sub) (Seq.slice (as_seq h output) 0 (192 * U32.v i + 192));
