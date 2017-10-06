@@ -1,23 +1,22 @@
 include ../../../Makefile.include
 
 VERIFY= \
-  Box.Index \
-  Box.Plain \
+	Box.Index \
+	Box.Plain \
 	Box.AE \
-  Box.ODH \
+	Box.ODH \
 	Box.PKAE \
-  Box.KDF \
-  Box.Indexing
+	Box.KDF
 LAX=
 
 FSTAR_INCLUDES+= \
-  --include $(FSTAR_HOME)/ucontrib/Platform/fst/ \
-  --include $(FSTAR_HOME)/ucontrib/CoreCrypto/fst/ \
-  --include $(HACL_HOME)/specs/ \
-  --include $(HACL_HOME)/specs/experimental/ \
-  --include $(HACL_HOME)/secure_api/utils/ \
-  --include $(HACL_HOME)/code/lib/ \
-  --include $(KREMLIN_HOME)/kremlib/
+	--include $(FSTAR_HOME)/ucontrib/Platform/fst/ \
+	--include $(FSTAR_HOME)/ucontrib/CoreCrypto/fst/ \
+	--include $(HACL_HOME)/specs/ \
+	--include $(HACL_HOME)/specs/experimental/ \
+	--include $(HACL_HOME)/secure_api/utils/ \
+	--include $(HACL_HOME)/code/lib/ \
+	--include $(KREMLIN_HOME)/kremlib/
 
 
 all: all-ver $(addsuffix .fst-lax, $(LAX))
