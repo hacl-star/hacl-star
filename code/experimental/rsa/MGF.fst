@@ -14,11 +14,12 @@ module U8 = FStar.UInt8
 
 val hash_sha256:
 	mHash:lbytes 32ul ->
-	len:blen ->
-	m:lbytes len{disjoint mHash m} -> Stack unit
+	len:U32.t ->
+	m:uint8_p{length m = U32.v len /\ disjoint mHash m} -> Stack unit
 	(requires (fun h -> live h m /\ live h mHash))
 	(ensures (fun h0 _ h1 -> live h0 m /\ live h0 mHash /\
 	 	live h1 m /\ live h1 mHash /\ modifies_1 mHash h0 h1))
+		 
 let hash_sha256 mHash len m = SHA2_256.hash mHash m len
 
 type mgf_state (accLen:blen) = lbytes U32.(32ul +^ 4ul +^ 4ul +^ 32ul +^ accLen)
@@ -90,7 +91,7 @@ val mgf_sha256:
 	(ensures (fun h0 _ h1 ->
 		live h0 res /\ live h0 mgfseed /\
 		live h1 res /\ live h1 mgfseed /\ modifies_1 res h0 h1))
-	
+
 #set-options "--z3rlimit 50"
 
 let mgf_sha256 mgfseed len res =
