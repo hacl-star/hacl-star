@@ -20,7 +20,7 @@ module MR = FStar.Monotonic.RRef
 module MM = MonotoneMap
 
 
-type id_log_region = (r:MR.rid{is_eternal_region r /\ is_below r root})
+type id_log_region = (r:MR.rid{is_eternal_region r})
 
 type id_log_value = bool
 let id_log_range = fun id_log_key -> id_log_value
@@ -30,9 +30,9 @@ type id_log_t (rgn:id_log_region) (id_log_kt:Type0) = MM.t rgn id_log_kt id_log_
 
 abstract noeq type index_module =
   | IM:
-    rgn: id_log_region ->
+    id_rgn: id_log_region ->
     id: eqtype ->
-    id_log: (id_log_t rgn id) ->
+    id_log: (id_log_t id_rgn id) ->
     registered: (id -> Tot Type0) ->
     parent_honest: (id -> Tot Type0) ->
     honest:    (i:id -> Tot (t:Type0{t ==> registered i})) ->
@@ -68,7 +68,7 @@ abstract noeq type index_module =
       (ensures (fun h0 _ h1 ->
           (b ==> honest i)
         /\ (~b ==> dishonest i)
-        /\ modifies (Set.singleton rgn) h0 h1)
+        /\ modifies (Set.singleton id_rgn) h0 h1)
       ))->
     // lemma_index_module: (i:id -> ST unit
     // (requires (fun h0 -> registered i ))
@@ -78,29 +78,30 @@ abstract noeq type index_module =
     // ))) ->
     index_module
 
+val get_rgn: im:index_module -> rgn:id_log_region{rgn = im.id_rgn}
 let get_rgn im =
-  im.rgn
+  im.id_rgn
 
 val id: im:index_module -> t:eqtype{t==im.id}
 let id im =
   im.id
 
-val get_log: im:index_module -> id_log_t im.rgn (id im)
+val get_log: im:index_module -> id_log_t im.id_rgn (id im)
 let get_log im = im.id_log
 
 val recall_log: im:index_module -> ST unit
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 ->
     h0 == h1
-    /\ (let id_log: (id_log_t im.rgn im.id) = im.id_log in MR.m_contains id_log h1)
+    /\ (let id_log: (id_log_t im.id_rgn im.id) = im.id_log in MR.m_contains id_log h1)
   ))
 let recall_log im =
-  let id_log:FStar.Monotonic.RRef.m_rref (im.rgn)
+  let id_log:FStar.Monotonic.RRef.m_rref (im.id_rgn)
     (MM.map (im.id) id_log_range (id_log_inv (im.id)))
     MM.grows = im.id_log in
   MR.m_recall im.id_log
 
-private val registered_log: (#rgn:id_log_region) -> #id:eqtype -> id_log:(id_log_t rgn id) -> (i:id) -> Tot Type0
+val registered_log: (#rgn:id_log_region) -> #id:eqtype -> id_log:(id_log_t rgn id) -> (i:id) -> Tot Type0
 let registered_log #rgn #id id_log i =
   MR.witnessed (MM.defined id_log i)
 
@@ -183,7 +184,7 @@ val lemma_honest_or_dishonest: im:index_module -> (i:im.id) -> ST unit
 let lemma_honest_or_dishonest im i =
   im.lemma_honest_or_dishonest i
 
-private val fresh_log: #rgn:id_log_region -> #id:eqtype -> id_log:(id_log_t rgn id) ->
+val fresh_log: #rgn:id_log_region -> #id:eqtype -> id_log:(id_log_t rgn id) ->
            i:id ->
            h:mem ->
            (t:Type0{
@@ -260,7 +261,7 @@ let get_honest im i = im.get_honest i
 
 
 #set-options "--z3rlimit 2000 --max_ifuel 1 --max_fuel 1"
-private val set_honest_log: #rgn:id_log_region -> #id:eqtype -> id_log: id_log_t rgn id -> i:id -> b:bool -> ST unit
+val set_honest_log: #rgn:id_log_region -> #id:eqtype -> id_log: id_log_t rgn id -> i:id -> b:bool -> ST unit
   (requires (fun h0 ->
     fresh_log id_log i h0
   ))
@@ -269,7 +270,7 @@ private val set_honest_log: #rgn:id_log_region -> #id:eqtype -> id_log: id_log_t
     /\ (~b ==> dishonest_log id_log i)
     /\ (forall (i':id). ( i' =!= i /\ fresh_log id_log i' h0 ) ==> fresh_log id_log i' h1)
     /\ MR.m_sel h1 id_log == MM.upd (MR.m_sel h0 id_log) i b
-              /\ modifies (Set.singleton rgn) h0 h1
+    /\ modifies (Set.singleton rgn) h0 h1
   ))
 let set_honest_log #rgn #id id_log i b =
     (match MM.lookup id_log i with
@@ -290,13 +291,14 @@ val set_honest: im:index_module -> i:id im -> b:bool -> ST unit
            /\ modifies (Set.singleton (get_rgn im)) h0 h1
 ))
 let set_honest im i b =
-  admit();
+  admit(); // TODO: Fix!
   im.set_honest i b
 
 val lemma_index_module: im:index_module -> i:im.id -> ST unit
   (requires (fun h0 -> registered im i ))
   (ensures (fun h0 _ h1 ->
-    (honest im i ==> (~(dishonest im i)))
+    h0 == h1
+    /\ (honest im i ==> (~(dishonest im i)))
     /\ (dishonest im i ==> (~(honest im i)))
   ))
 let lemma_index_module im i =
@@ -341,7 +343,15 @@ let create_int rgn =
       (fun i -> lemma_honest_or_dishonest_log id_log i)
       (fun i b -> set_honest_log id_log i b)
 
-val create: rgn:id_log_region -> id_t:eqtype -> St (im:index_module{get_rgn im=rgn /\ id im ==id_t })
+val create: rgn:id_log_region -> id_t:eqtype -> ST (im:index_module)
+  (requires (fun h0 -> True))
+  (ensures (fun h0 im h1 ->
+    modifies (Set.singleton rgn) h0 h1
+    /\ get_rgn im=rgn
+    /\ id im == id_t
+    /\ get_rgn im=im.id_rgn
+    /\ id im == im.id
+  ))
 let create rgn id =
   let id_log:id_log_t rgn id = MM.alloc #rgn #id #id_log_range #(id_log_inv id) in
   // assert(False);
@@ -357,13 +367,21 @@ let create rgn id =
      (fun i -> lemma_honest_or_dishonest_log id_log i)
      (fun i b -> set_honest_log id_log i b)
 
-
-#set-options "--print_effect_args  --print_full_names --print_implicits --print_universes"
+//#set-options "--print_effect_args  --print_full_names --print_implicits --print_universes"
 val compose: rgn:id_log_region ->
-             im:index_module{im.rgn=rgn} ->
+             im:index_module{disjoint rgn im.id_rgn} ->
              smaller: (i1:im.id -> i2:im.id -> b:bool{b ==> i1 <> i2}) ->
-             St (im':index_module{id im' == i:(id im * id im){b2t (smaller (fst i) (snd i))}})
-let compose rgn (im:index_module{im.rgn=rgn}) smaller =
+             ST (im':index_module{id im' == i:(id im * id im){b2t (smaller (fst i) (snd i))}})
+             (requires (fun h0 -> True))
+             (ensures (fun h0 im' h1 ->
+               modifies (Set.singleton rgn) h0 h1
+               /\ id im' == i:(id im * id im){b2t (smaller (fst i) (snd i))}
+               /\ disjoint im.id_rgn im'.id_rgn
+               /\ get_rgn im' = rgn
+               /\ get_rgn im' = im'.id_rgn
+               /\ id im' == im'.id
+             ))
+let compose rgn (im) smaller =
   let fst_imp = fst #im.id #im.id in
   let snd_imp = snd #im.id #im.id in
   let id_t:eqtype = i:(id im * id im){b2t (smaller (fst i) (snd i))} in
