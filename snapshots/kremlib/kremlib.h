@@ -252,6 +252,8 @@ FStar_Seq_Base_seq FStar_Seq_Base_slice(FStar_Seq_Base_seq x,
 #define KRML_CHECK_SIZE(elt, size)
 
 #if BYTE_ORDER == BIG_ENDIAN
+// Byte swapping code inspired by:
+// https://github.com/rweather/arduinolibs/blob/master/libraries/Crypto/utility/EndianUtil.h
 
 #define htobe32(x)  (x)
 #define be32toh(x)  (x)
