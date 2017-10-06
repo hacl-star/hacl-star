@@ -28,7 +28,7 @@ KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_a
 # - Warning 9 (uninitialized globals)
 # because global constants in `Crypto.Symmetric.GF128` that are uninitialized but
 # marked as `inline_for_extraction`, so always inlined.
-KRML_ARGS=$(FPIC) -ccopt -maes -warn-error -4-9 \
+KRML_ARGS=$(FPIC) -ccopt -maes -warn-error +4+9 \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
   vale/asm/vale.a test/test_hacks.c \
   -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \

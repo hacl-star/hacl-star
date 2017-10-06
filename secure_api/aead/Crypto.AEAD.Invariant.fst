@@ -407,8 +407,12 @@ let enc_dec_liveness_and_separation (#i:id) (#rw:rw) (aead_st:aead_state i rw)
     enc_dec_separation aead_st aad plain cipher /\
     aead_liveness aead_st h
 
+//NS 09/21: Added the disjunctive pattern, below. Otherwise this is a very brittle pattern.
+//          It will cause seemingly trivial proofs like
+//               prf_mac_inv .. h ==> prf_mac_inv ... h
+//          to fail in case prf_mac_inv is unfolded
 let prf_mac_inv (#i:id) (#mac_rgn:region) (blocks:prf_table mac_rgn i) (h:mem{prf i}) :Type0 =
-  (forall (x:domain_mac i).{:pattern (find_mac blocks x)}
+  (forall (x:domain_mac i).{:pattern (find_mac blocks x) \/ (PRF.prf_mac_inv blocks x h)}
                       PRF.prf_mac_inv blocks x h)
 
 (*** inv st h:
