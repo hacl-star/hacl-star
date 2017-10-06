@@ -7,7 +7,7 @@
 #include "tweetnacl.h"
 #include "hacl_test_utils.h"
 
-#define PLAINLEN (1024*1024)
+#define PLAINLEN (16*1024)
 #define ROUNDS 1000
 #define MACSIZE 16
 

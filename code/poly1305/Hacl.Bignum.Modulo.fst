@@ -17,13 +17,13 @@ open Hacl.Spec.Bignum.Modulo
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
-inline_for_extraction let mask_2_42 : p:Hacl.Bignum.Wide.t{w p = pow2 42 - 1} =
-  assert_norm (pow2 64 = 0x10000000000000000); assert_norm(pow2 42 - 1 = 0x3ffffffffff);
-  limb_to_wide (uint64_to_limb 0x3ffffffffffuL)
-
-inline_for_extraction let mask_2_42' : p:t{v p = pow2 42 - 1} =
+let mask_2_42_limb : p:limb{v p = pow2 42 - 1} =
   assert_norm (pow2 64 = 0x10000000000000000); assert_norm(pow2 42 - 1 = 0x3ffffffffff);
   uint64_to_limb 0x3ffffffffffuL
+
+inline_for_extraction let mask_2_42_wide : p:Hacl.Bignum.Wide.t{w p = pow2 42 - 1} =
+  limb_to_wide mask_2_42_limb
+
 
 [@"c_inline"]
 val reduce:
@@ -61,7 +61,7 @@ let carry_top b =
   let b2_42 = b2 >>^ 42ul in
   cut (v b2_42 = v b2 / pow2 42);
   assert_norm(pow2 2 = 4); Math.Lemmas.modulo_lemma (v b2_42 * 4) (pow2 64);
-  b.(2ul) <- b2 &^ mask_2_42';
+  b.(2ul) <- b2 &^ mask_2_42_limb;
   b.(0ul) <- ((b2_42 <<^ 2ul) +^ b2_42) +^ b0
 
 
@@ -79,7 +79,7 @@ let carry_top_wide b =
   let open Hacl.Bignum.Wide in
   assert_norm((1 * pow2 limb_size) % pow2 (2 * word_size) = pow2 (limb_size));
   assert_norm(pow2 limb_size > 1);
-  let b2' = b2 &^ mask_2_42 in
+  let b2' = b2 &^ mask_2_42_wide in
   Math.Lemmas.modulo_lemma (v b2 / pow2 42) (pow2 word_size);
   let b2_42 = wide_to_limb (b2 >>^ 42ul) in
   assert_norm(pow2 2 = 4); Math.Lemmas.modulo_lemma (Hacl.Bignum.Limb.v b2_42 * 4) (pow2 64);

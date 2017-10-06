@@ -24,7 +24,6 @@ Hacl_Hash_Lib_LoadStore_uint32s_to_be_bytes(uint8_t *output, uint32_t *input, ui
 
 static void Hacl_Hash_SHA2_256_init(uint32_t *state)
 {
-  (void )(state + (uint32_t )136);
   uint32_t *k1 = state;
   uint32_t *h_01 = state + (uint32_t )128;
   uint32_t *p10 = k1;
@@ -141,8 +140,8 @@ static void Hacl_Hash_SHA2_256_update(uint32_t *state, uint8_t *data)
   uint32_t *counter_w = state + (uint32_t )136;
   for (uint32_t i = (uint32_t )0; i < (uint32_t )16; i = i + (uint32_t )1)
   {
-    uint32_t uu____206 = data_w[i];
-    ws_w[i] = uu____206;
+    uint32_t b = data_w[i];
+    ws_w[i] = b;
   }
   for (uint32_t i = (uint32_t )16; i < (uint32_t )64; i = i + (uint32_t )1)
   {
@@ -207,10 +206,9 @@ static void Hacl_Hash_SHA2_256_update(uint32_t *state, uint8_t *data)
   }
   for (uint32_t i = (uint32_t )0; i < (uint32_t )8; i = i + (uint32_t )1)
   {
-    uint32_t uu____871 = hash_w[i];
-    uint32_t uu____874 = hash_0[i];
-    uint32_t uu____870 = uu____871 + uu____874;
-    hash_w[i] = uu____870;
+    uint32_t xi = hash_w[i];
+    uint32_t yi = hash_0[i];
+    hash_w[i] = xi + yi;
   }
   uint32_t c0 = counter_w[0];
   uint32_t one1 = (uint32_t )1;
@@ -229,21 +227,22 @@ static void Hacl_Hash_SHA2_256_update_multi(uint32_t *state, uint8_t *data, uint
 static void Hacl_Hash_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint32_t len)
 {
   uint8_t blocks[128] = { 0 };
-  K___uint32_t_uint8_t_ uu____1925;
+  uint32_t nb;
   if (len < (uint32_t )56)
-    uu____1925 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )1, .snd = blocks + (uint32_t )64 });
+    nb = (uint32_t )1;
   else
-    uu____1925 = ((K___uint32_t_uint8_t_ ){ .fst = (uint32_t )2, .snd = blocks });
-  K___uint32_t_uint8_t_ scrut = uu____1925;
-  uint32_t nb = scrut.fst;
-  uint8_t *final_blocks = scrut.snd;
+    nb = (uint32_t )2;
+  uint8_t *final_blocks;
+  if (len < (uint32_t )56)
+    final_blocks = blocks + (uint32_t )64;
+  else
+    final_blocks = blocks;
   memcpy(final_blocks, data, len * sizeof data[0]);
   uint32_t n1 = state[136];
   uint8_t *padding = final_blocks + len;
   uint32_t
   pad0len = ((uint32_t )64 - (len + (uint32_t )8 + (uint32_t )1) % (uint32_t )64) % (uint32_t )64;
   uint8_t *buf1 = padding;
-  (void )(padding + (uint32_t )1);
   uint8_t *buf2 = padding + (uint32_t )1 + pad0len;
   uint64_t
   encodedlen =

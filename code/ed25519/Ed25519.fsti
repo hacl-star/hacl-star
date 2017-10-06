@@ -12,7 +12,7 @@ open FStar.Buffer
 let uint8_p = buffer UInt8.t
 let hint8_p = buffer Hacl.UInt8.t
 
-let op_String_Access (h:HyperStack.mem) (b:uint8_p{live h b}) =
+private let op_String_Access (h:HyperStack.mem) (b:uint8_p{live h b}) =
   Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 

@@ -40,8 +40,6 @@ typedef void *Hacl_Impl_Chacha20_Vec128_log_t;
 
 typedef uint8_t *Chacha20_Vec128_uint8_p;
 
-void *Chacha20_Vec128_op_String_Access(FStar_Monotonic_HyperStack_mem h, uint8_t *b);
-
 void
 Chacha20_Vec128_chacha20(
   uint8_t *output,

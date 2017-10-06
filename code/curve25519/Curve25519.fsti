@@ -10,7 +10,7 @@ open FStar.Buffer
 
 type uint8_p = Buffer.buffer Hacl.UInt8.t
 
-let op_String_Access h (b:uint8_p{live h b}) = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
+private let op_String_Access h (b:uint8_p{live h b}) = Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
 val crypto_scalarmult:
   mypublic:uint8_p{length mypublic = 32} ->

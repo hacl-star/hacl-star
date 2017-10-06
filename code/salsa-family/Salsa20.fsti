@@ -13,7 +13,7 @@ open Hacl.Spec.Endianness
 
 let uint8_p = buffer Hacl.UInt8.t
 let uint32_t = FStar.UInt32.t
-let op_String_Access h (b:uint8_p{live h b}) = reveal_sbytes (as_seq h b)
+private let op_String_Access h (b:uint8_p{live h b}) = reveal_sbytes (as_seq h b)
 
 
 type state = b:Buffer.buffer Hacl.UInt32.t{length b = 16}

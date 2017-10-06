@@ -11,7 +11,8 @@ SNAPSHOT_DIR = snapshots/hacl-c
 # Compiler and settings
 #
 
-CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
+CC=gcc
+CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops --param max-unroll-times=20
 CFLAGS = $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
 	-I $(LIBSODIUM_HOME)/include -L$(LIBSODIUM_HOME)/lib \
@@ -107,7 +108,11 @@ else
 		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
 		libhacl.so -o unit_tests.exe
 endif
+ifeq ($(UNAME), Linux)
+	LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ./unit_tests.exe
+else
 	./unit_tests.exe
+endif
 	rm libhacl.so
 
 # 32-bit unit tests
@@ -125,7 +130,11 @@ else
 		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
 		libhacl32.so -o unit_tests32.exe
 endif
+ifeq ($(UNAME), Linux)
+	LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ./unit_tests32.exe
+else
 	./unit_tests32.exe
+endif
 	rm libhacl32.so
 
 unit-tests-hacl-c:
@@ -368,114 +377,3 @@ test-perf-aead: test-aead.exe
 clean:
 	rm -rf *~ *.o *.exe
 
-
-# lib:
-# 	$(CC) $(CFLAGS) \
-# 	  Salsa20.c -c -o Salsa20.o
-# 	$(CC) $(CFLAGS) \
-# 	  Chacha20.c -c -o Chacha20.o
-# 	$(CC) $(CFLAGS) \
-# 	  Poly1305_64.c -c -o Poly1305_64.o
-# 	$(CC) $(CFLAGS) \
-# 	  AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
-# 	$(CC) $(CFLAGS) \
-# 	  SHA2_512.c -c -o SHA2_512.o
-# 	$(CC) $(CFLAGS) \
-# 	  Ed25519.c -c -o Ed25519.o
-# 	$(CC) $(CFLAGS) \
-# 	  Curve25519.c -c -o Curve25519.o
-# 	$(CC) $(CFLAGS) \
-# 	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
-# 	$(CC) -shared  $(CFLAGS) \
-# 	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Curve25519.o kremlib.c Hacl_Policies.c NaCl.c \
-# 	  -o libhacl.so
-
-# lib-test: lib
-# 	$(CC)  $(CFLAGS) \
-# 	  -I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
-# 	  hacl_test_utils.c \
-# 	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
-# 	  testlib.c test-poly.c -o test-poly.exe \
-# 	  -lsodium $(OPENSSL_HOME)/libcrypto.a libhacl.so
-# 	$(CC)  $(CFLAGS) \
-# 	  hacl_test_utils.c \
-# 	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
-# 	  testlib.c test-salsa.c -o test-salsa.exe \
-# 	  -lsodium $(OPENSSL_HOME)/libcrypto.a libhacl.so
-# 	$(CC)  $(CFLAGS) \
-# 	  -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/poly1305 -I ../../other_providers/tweetnacl \
-# 	  hacl_test_utils.c \
-# 	  ../../other_providers/tweetnacl/tweetnacl.c testlib.c test-chacha.c -o test-chacha.exe \
-# 	   $(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread $(LIBDL) libhacl.so
-# 	$(CC)  $(CFLAGS) \
-# 	  hacl_test_utils.c \
-# 	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
-# 	  testlib.c test-secretbox.c -o test-secretbox.exe \
-# 	  -lsodium $(OPENSSL_HOME)/libcrypto.a libhacl.so
-# 	$(CC)  $(CFLAGS) \
-# 	  testlib.c hacl_test_utils.c test-aead.c -o test-aead.exe \
-# 	  -lsodium  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lpthread $(LIBDL) libhacl.so
-# 	$(CC)  $(CFLAGS) \
-# 	  -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
-# 	  hacl_test_utils.c \
-# 	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
-# 	  testlib.c test-curve.c -o test-curve.exe \
-# 	  $(OPENSSL_HOME)/libcrypto.a $(OPENSSL_HOME)/libssl.a -lsodium -lpthread $(LIBDL) libhacl.so
-# 	$(CC)  $(CFLAGS) \
-# 	  hacl_test_utils.c \
-# 	  -I $(TWEETNACL_HOME) $(TWEETNACL_HOME)/tweetnacl.c \
-# 	  testlib.c test-box.c -o test-box.exe -lsodium  libhacl.so
-# 	./test-chacha.exe
-# 	./test-salsa.exe
-# 	./test-poly.exe
-# 	./test-secretbox.exe
-# 	./test-aead.exe
-# 	./test-curve.exe
-# 	./test-box.exe
-
-
-# test-snapshot-hacl-c:
-# 	$(MAKE) -C .. snapshots/snapshot-hacl
-# 	$(MAKE) -C ../snapshots/snapshot-hacl CC="$(GCC) $(GCC_OPTS)" test
-
-# test-snapshot-ccomp:
-# 	$(MAKE) -C .. snapshots/hacl-c-compcert
-# 	$(MAKE) -C ../snapshots/hacl-c-compcert CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" test
-
-# test-snapshot-gcc:
-# 	$(MAKE) -C .. snapshots/snapshot-gcc
-# 	$(MAKE) -C ../snapshots/snapshot-gcc CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
-
-# test-snapshot-gcc-unrolled:
-# 	$(MAKE) -C .. snapshots/snapshot-gcc-unrolled
-# 	$(MAKE) -C ../snapshots/snapshot-gcc-unrolled CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " test
-
-#
-# Performance tests
-#
-
-# echo-perf-ccomp:
-# 	$(shell (echo -e "Benchmarking results with ccomp -O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat $(HACL_HOME)/snapshot-ccomp/bench.txt) > benchmark-compcert.txt)
-
-# perf-ccomp:
-# 	-$(MAKE) -B -C $(HACL_HOME)/snapshots/hacl-c-compcert CC=ccomp CCOPTS="-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOURCE -D_DEFAULT_SOURCE" perf
-# 	$(MAKE) -B echo-perf-ccomp
-
-# echo-perf-gcc:
-# 	$(shell (echo -e "Benchmarking results with $(GCC) -fno-tree-vectorize $(ENABLE_LTO) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc/bench.txt) > benchmark-gcc.txt)
-
-# perf-gcc:
-# 	$(MAKE) -B -C snapshot-gcc CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
-# 	$(MAKE) -B echo-perf-gcc
-
-# echo-gcc-unrolled:
-# 	$(shell (echo -e "Benchmarking results with $(GCC) -fno-tree-vectorize $(ENABLE_LTO) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops with KreMLin loop unrolling\n\nAlgorithm       HACL(cy/b)      LibSodium(cy/b) OpenSSL(cy/b)   TweetNaCl(cy/b) HACL(us/b)      LibSodium(us/b) OpenSSL(us/b)   TweetNaCl(us/b) \n"; cat snapshot-gcc-unrolled/bench.txt) > benchmark-gcc-unrolled.txt)
-
-# perf-gcc-unrolled:
-# 	$(MAKE) -B -C snapshot-gcc-unrolled CC="$(GCC) -fno-tree-vectorize $(ENABLE_LTO)" CCOPTS="-Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops " perf
-# 	$(MAKE) -B echo-gcc-unrolled
-
-# all-perf:
-# 	$(MAKE) perf-gcc
-# 	$(MAKE) perf-gcc-unrolled
-# 	$(MAKE) perf-ccomp
