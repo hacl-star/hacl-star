@@ -80,9 +80,6 @@ let get_skeyGT om sk =
   sk.sk_exp
 
 let sk_get_share om sk =
-  let pk_sh = sk.pk.pk_share in
-  assert(pk_sh = (dh_exponentiate om) (sk.sk_exp) om.base_point);
-  admit();
   sk.pk.pk_share
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
@@ -136,9 +133,7 @@ let prf_odh om sk pk =
     let k = Key.gen om.kim om.km i in
     k
   | false ->
-    //let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
     let raw_k = om.exponentiate sk.sk_exp pk.pk_share in
-    //let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
     let hashed_raw_k = om.hash raw_k in
     if not honest_i then
       Key.coerce om.kim om.km i hashed_raw_k
