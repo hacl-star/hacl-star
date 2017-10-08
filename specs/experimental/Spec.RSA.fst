@@ -28,6 +28,14 @@ let nat_to_uint8 x = U8.uint_to_t (to_uint_t 8 x)
 val nat_to_uint32: x:nat -> Tot UInt32.t
 let nat_to_uint32 x = U32.uint_to_t (to_uint_t 32 x)
 
+(* a*x + b*y = gcd(a,b) *)
+val extended_eucl: a:nat -> b:nat -> Tot (tuple2 int int) (decreases b)
+let rec extended_eucl a b =
+	if b = 0 then (1, 0)
+	else
+		match (extended_eucl b (a % b)) with
+		| (x, y) -> (y, x - (op_Multiply (a/b) y))
+
 #set-options "--z3rlimit 50 --max_fuel 2"
 
 val mod_exp_loop: n:pos -> a:nat -> b:nat -> acc:elem n -> Tot (res:elem n) (decreases b)
@@ -228,18 +236,26 @@ val rsa_sign:
 	modBits:pos{get_length_em modBits >= sLen + hLen + 2} ->
 	msg:bytes{length msg < max_input_len_sha256} ->
 	skey:rsa_privkey ->
-	salt:bytes{length salt = sLen} -> Tot (sgnt:bytes{length sgnt = get_octets modBits})
+	salt:bytes{length salt = sLen} ->
+	rBlind:elem (Mk_rsa_pubkey?.n (Mk_rsa_privkey?.pkey skey)) ->
+	Tot (sgnt:bytes{length sgnt = get_octets modBits})
 
-let rsa_sign sLen modBits msg skey salt =
+let rsa_sign sLen modBits msg skey salt rBlind =
 	let k = get_octets modBits in
 	let d = Mk_rsa_privkey?.d skey in
 	let pkey = Mk_rsa_privkey?.pkey skey in
 	let n = Mk_rsa_pubkey?.n pkey in
+	let e = Mk_rsa_pubkey?.e pkey in
 
 	let em = pss_encode sLen modBits msg salt in
 	let m = os2ip em in
-	let m = m % n in
-	let s = mod_exp n m d in
+	(* BLINDING *)
+	(* let m1 = (op_Multiply m (pow r e)) % n in *)
+	let rBlind_inv, _ = extended_eucl rBlind n in
+	let rBlind_e = mod_exp n rBlind e in
+	let m1 = (op_Multiply m rBlind_e) % n in
+	let s1 = mod_exp n m1 d in
+	let s = (op_Multiply s1 rBlind_inv) % n in
 	(**) assume(s < pow2 (op_Multiply 8 k));
 	i2osp s k
 
