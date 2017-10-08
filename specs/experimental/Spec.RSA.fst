@@ -55,6 +55,17 @@ let mod_exp n a b =
 	let one_n = 1 % n in
 	mod_exp_loop n a b one_n
 
+val pow: a:nat -> n:nat -> Tot nat
+let rec pow a n =
+	match n with
+	| 0 -> 1
+	| _ -> 
+		let b = pow a (n/2) in
+		op_Multiply b (op_Multiply b (if n % 2 = 0 then 1 else a))
+
+val fexp: n:pos -> a:elem n -> b:elem n -> Tot (res:elem n) 
+let fexp n a b = (pow a b) % n
+
 val os2ip: b:bytes -> Tot nat (decreases (Seq.length b))
 let rec os2ip b =
 	let bLen = Seq.length b in
@@ -252,9 +263,9 @@ let rsa_sign sLen modBits msg skey salt rBlind =
 	(* BLINDING *)
 	(* let m1 = (op_Multiply m (pow r e)) % n in *)
 	let rBlind_inv, _ = extended_eucl rBlind n in
-	let rBlind_e = mod_exp n rBlind e in
+	let rBlind_e = fexp n rBlind e in
 	let m1 = (op_Multiply m rBlind_e) % n in
-	let s1 = mod_exp n m1 d in
+	let s1 = fexp n m1 d in
 	let s = (op_Multiply s1 rBlind_inv) % n in
 	(**) assume(s < pow2 (op_Multiply 8 k));
 	i2osp s k
@@ -273,7 +284,7 @@ let rsa_verify sLen modBits sgnt pkey msg =
 	
 	let s = os2ip sgnt in
 	let s = s % n in
-	let m = mod_exp n s e in
+	let m = fexp n s e in
 	(**) assume(m < pow2 (op_Multiply 8 emLen));
 	let em = i2osp m emLen in
 	pss_verify sLen modBits em msg
