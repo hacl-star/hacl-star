@@ -9,14 +9,14 @@ module U32 = FStar.UInt32
 (* RSASSA-PSS vector tests *)
 (* https://github.com/pyca/cryptography/blob/master/vectors/cryptography_vectors/asymmetric/RSA/pkcs-1v2-1d2-vec/pss-vect.txt *)
 
-let ctest modBits n e d msg salt =
-    let n = text_to_nat n in
-	let e = text_to_nat e in
-	let d = text_to_nat d in
+let ctest sLen modBits n e d msg salt =
+    let n = os2ip n in
+	let e = os2ip e in
+	let d = os2ip d in
 	let pkey = Mk_rsa_pubkey n e in
 	let skey = Mk_rsa_privkey pkey d in
-	let sgnt = rsa_sign modBits msg skey salt in
-	rsa_verify modBits sgnt pkey msg
+	let sgnt = rsa_sign sLen modBits msg skey salt in
+	rsa_verify sLen modBits sgnt pkey msg
 
 let test1() =
 	let msg = createL [
@@ -46,7 +46,7 @@ let test1() =
 		0xa3uy; 0x95uy; 0x74uy; 0x50uy; 0x1auy; 0x53uy; 0x26uy; 0x83uy; 0x10uy; 0x9cuy; 0x2auy; 0xbauy; 0xcauy; 0xbauy; 0x28uy; 0x3cuy; 
 		0x31uy; 0xb4uy; 0xbduy; 0x2fuy; 0x53uy; 0xc3uy; 0xeeuy; 0x37uy; 0xe3uy; 0x52uy; 0xceuy; 0xe3uy; 0x4fuy; 0x9euy; 0x50uy; 0x3buy; 
 		0xd8uy; 0x0cuy; 0x06uy; 0x22uy; 0xaduy; 0x79uy; 0xc6uy; 0xdcuy; 0xeeuy; 0x88uy; 0x35uy; 0x47uy; 0xc6uy; 0xa3uy; 0xb3uy; 0x25uy ] in	
-	ctest 1024 n e d msg salt
+	ctest 20 1024 n e d msg salt
 
 let test2() = 
     let n = createL [
@@ -88,7 +88,7 @@ let test2() =
     let salt = createL [
         0x7fuy; 0x6duy; 0xd3uy; 0x59uy; 0xe6uy; 0x04uy; 0xe6uy; 0x08uy; 0x70uy; 0xe8uy; 0x98uy; 0xe4uy; 0x7buy; 0x19uy; 0xbfuy; 0x2euy;
         0x5auy; 0x7buy; 0x2auy; 0x90uy ] in
-    ctest 1025 n e d msg salt
+    ctest 20 1025 n e d msg salt
 
 let test3() = 
     let n = createL [
@@ -129,7 +129,7 @@ let test3() =
     let salt = createL [
         0xb3uy; 0x07uy; 0xc4uy; 0x3buy; 0x48uy; 0x50uy; 0xa8uy; 0xdauy; 0xc2uy; 0xf1uy; 0x5fuy; 0x32uy; 0xe3uy; 0x78uy; 0x39uy; 0xefuy;
         0x8cuy; 0x5cuy; 0x0euy; 0x91uy] in
-    ctest 1536 n e d msg salt
+    ctest 20 1536 n e d msg salt
 
 let test4() = 
     let n = createL [
@@ -179,7 +179,16 @@ let test4() =
     let salt = createL [
         0x8buy; 0x2buy; 0xdduy; 0x4buy; 0x40uy; 0xfauy; 0xf5uy; 0x45uy; 0xc7uy; 0x78uy; 0xdduy; 0xf9uy; 0xbcuy; 0x1auy; 0x49uy; 0xcbuy;
         0x57uy; 0xf9uy; 0xb7uy; 0x1buy] in
-    ctest 2048 n e d msg salt    
+    ctest 20 2048 n e d msg salt    
+
+let test_exp() =
+    let n = 92086691 in
+    let e = 21954739 in
+    let d = 40692523 in
+    let m = 4567389 in
+    let s = mod_exp n m d in
+    let m1 = mod_exp n s e in
+    m = m1
 
 let test() =
-    test1() && test2() && test3() && test4()
+    test_exp() && test1() && test2() && test3() && test4()
