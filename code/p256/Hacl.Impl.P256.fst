@@ -19,6 +19,7 @@ open C.Loops
 
 (* Constants *)
 let nlimbs = 4
+let nlimbs' = 4ul
 
 (* Type aliases *)
 type u64 = UInt64.t
@@ -26,6 +27,28 @@ type limb = UInt128.t
 type felem = b:buffer limb{length b = nlimbs}
 type longfelem = b:buffer limb{length b = 2 * nlimbs}
 type smallfelem = b:buffer u64{length b = nlimbs}
+
+val create_felem:
+  unit -> StackInline felem
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let create_felem () =
+  create (UInt128.uint64_to_uint128 0uL) 4ul
+
+
+val create_longfelem:
+  unit -> StackInline longfelem
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let create_longfelem () =
+  create (UInt128.uint64_to_uint128 0uL) 8ul
+
+val create_smallfelem:
+  unit -> StackInline smallfelem
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let create_smallfelem () =
+  create 0uL 4ul
 
 val kPrime: unit -> 
   StackInline smallfelem
@@ -175,7 +198,7 @@ val felem_scalar: out:felem -> scalar:u64 ->
   Stack unit
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
-let felem_sum out scalar =
+let felem_scalar out scalar =
   let open FStar.UInt128 in
   let o0 = out.(0ul) in
   let o1 = out.(1ul) in
@@ -198,7 +221,7 @@ val longfelem_scalar: out:longfelem -> scalar:u64 ->
   Stack unit
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
-let longfelem_sum out scalar =
+let longfelem_scalar out scalar =
   let open FStar.UInt128 in
   let o0 = out.(0ul) in
   let o1 = out.(1ul) in
@@ -413,8 +436,9 @@ val felem_shrink:
     (ensures (fun h0 _ h1 -> True))
 let felem_shrink out input =
   push_frame();
-  let tmp = create 4ul 0uL in
+  let tmp = create (FStar.UInt128.uint64_to_uint128 0uL) 4ul in
   let zero110 = zero110 () in
+  let kPrime  = kPrime () in
   let kPrime3Test = 0x7fffffff00000001uL in
   let input0 = input.(0ul) in
   let input1 = input.(1ul) in
@@ -424,6 +448,10 @@ let felem_shrink out input =
   let zero1  = zero110.(1ul) in
   let zero2  = zero110.(2ul) in
   let zero3  = zero110.(3ul) in
+  let kPrime0 = kPrime.(0ul) in
+  let kPrime1 = kPrime.(1ul) in
+  let kPrime2 = kPrime.(2ul) in
+  let kPrime3 = kPrime.(3ul) in
   let open FStar.UInt128 in
   // TODO: replace with a primitive to call the high word only
   tmp.(3ul) <- zero3 +^ input3 +^ (input2 >>^ 64ul);
@@ -431,6 +459,7 @@ let felem_shrink out input =
   tmp.(0ul) <- zero0 +^ input0;
   tmp.(1ul) <- zero1 +^ input1;
 
+  let tmp2 = tmp.(2ul) in
   let tmp3 = tmp.(3ul) in
   let a = tmp3 >>^ 64ul in
   let tmp3 = uint64_to_uint128 (uint128_to_uint64 tmp3) in
@@ -455,10 +484,884 @@ let felem_shrink out input =
 
   // TODO: better implementation
   let low = uint128_to_uint64 tmp3 in
-  let low = UInt64.gte_mask low 0x8000000000000000uL in
+  let mask = UInt64.gte_mask low 0x8000000000000000uL in
 
   let low = UInt64.gte_mask kPrime3Test low in
   let low = UInt64.lognot low in
 
   let mask = FStar.UInt64.((mask &^ low) |^ high) in
-  ()
+
+  let tmp0 = tmp0 -^ uint64_to_uint128 FStar.UInt64.(mask &^ kPrime0) in
+  let tmp1 = tmp1 -^ uint64_to_uint128 FStar.UInt64.(mask &^ kPrime1) in
+  let tmp3 = tmp3 -^ uint64_to_uint128 FStar.UInt64.(mask &^ kPrime3) in
+
+  let tmp1 = tmp1 +^ (tmp0 >>^ 64ul) in
+  let tmp0 = uint128_to_uint64 tmp0 in
+  let tmp2 = tmp2 +^ (tmp1 >>^ 64ul) in
+  let tmp1 = uint128_to_uint64 tmp1 in
+  let tmp3 = tmp3 +^ (tmp2 >>^ 64ul) in
+  let tmp2 = uint128_to_uint64 tmp2 in
+
+  out.(0ul) <- tmp0;
+  out.(1ul) <- tmp1;
+  out.(2ul) <- tmp2;
+  out.(3ul) <- uint128_to_uint64 tmp3;
+  pop_frame ()
+
+
+val smallfelem_expand:
+  out:felem -> input:smallfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let smallfelem_expand out input =
+  let input0 = input.(0ul) in
+  let input1 = input.(1ul) in
+  let input2 = input.(2ul) in
+  let input3 = input.(3ul) in
+  let open FStar.UInt128 in
+  out.(0ul) <- uint64_to_uint128 input0;
+  out.(1ul) <- uint64_to_uint128 input1;
+  out.(2ul) <- uint64_to_uint128 input2;
+  out.(3ul) <- uint64_to_uint128 input3
+
+val smallfelem_square:
+  out:longfelem -> small:smallfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let smallfelem_square out small =
+  let open FStar.UInt128 in
+  let small0 = small.(0ul) in
+  let small1 = small.(1ul) in
+  let small2 = small.(2ul) in
+  let small3 = small.(3ul) in
+  let a = mul_wide small0 small0 in
+  let low = a in
+  let high = a >>^ 64ul in
+
+  let out0 = low in
+  let out1 = high in
+
+  let a = mul_wide small0 small1 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out1 = out1 +^ low in
+  let out1 = out1 +^ low in
+  let out2 = high in
+
+  let a = mul_wide small0 small2 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out2 = out2 +^ low in
+  let out2 = out2 <<^ 1ul in
+  let out3 = high in
+
+  let a = mul_wide small0 small3 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out3 = out3 +^ low in
+  let out4 = high in
+
+  let a = mul_wide small1 small2 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out3 = out3 +^ low in
+  let out3 = out3 <<^ 1ul in
+  let out4 = out4 +^ high in
+
+  let a = mul_wide small1 small1 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out2 = out2 +^ low in
+  let out3 = out3 +^ high in
+
+  let a = mul_wide small1 small3 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out4 = out4 +^ low in
+  let out4 = out4 <<^ 1ul in
+  let out5 = high in
+
+  let a = mul_wide small2 small3 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out5 = out5 +^ low in
+  let out5 = out5 <<^ 1ul in
+  let out6 = high in
+  let out6 = out6 +^ high in
+
+  let a = mul_wide small2 small2 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out4 = out4 +^ low in
+  let out5 = out5 +^ high in
+
+  let a = mul_wide small3 small3 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out6 = out6 +^ low in
+  let out7 = high in
+
+  out.(0ul) <- out0;
+  out.(1ul) <- out1;
+  out.(2ul) <- out2;
+  out.(3ul) <- out3;
+  out.(4ul) <- out4;
+  out.(5ul) <- out5;
+  out.(6ul) <- out6;
+  out.(7ul) <- out7
+
+
+val felem_square:
+  out:longfelem -> input:felem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let felem_square out input =
+  push_frame();
+  let small = create 0uL 4ul in
+  felem_shrink small input;
+  smallfelem_square out small;
+  pop_frame()
+
+
+val smallfelem_mul:
+  out:longfelem -> small1:smallfelem -> small2:smallfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let smallfelem_mul out small1 small2 =
+  let small10 = small1.(0ul) in
+  let small11 = small1.(1ul) in
+  let small12 = small1.(2ul) in
+  let small13 = small1.(3ul) in
+  let small20 = small2.(0ul) in
+  let small21 = small2.(1ul) in
+  let small22 = small2.(2ul) in
+  let small23 = small2.(3ul) in
+
+  let open FStar.UInt128 in
+  let a = mul_wide small10 small20 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out0 = low in
+  let out1 = high in
+
+  let a = mul_wide small10 small21 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out1 = out1 +^ low in
+  let out2 = high in
+
+  let a = mul_wide small11 small20 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out1 = out1 +^ low in
+  let out2 = out2 +^ high in
+
+  let a = mul_wide small10 small22 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out2 = out2 +^ low in
+  let out3 = high in
+
+  let a = mul_wide small11 small21 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out2 = out2 +^ low in
+  let out3 = out3 +^ high in
+
+  let a = mul_wide small12 small20 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out2 = out2 +^ low in
+  let out3 = out3 +^ high in
+
+  let a = mul_wide small10 small23 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out3 = out3 +^ low in
+  let out4 = high in
+
+  let a = mul_wide small11 small22 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out3 = out3 +^ low in
+  let out4 = out4 +^ high in
+
+  let a = mul_wide small12 small21 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out3 = out3 +^ low in
+  let out4 = out4 +^ high in
+
+  let a = mul_wide small13 small20 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out3 = out3 +^ low in
+  let out4 = out4 +^ high in
+
+  let a = mul_wide small11 small23 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out4 = out4 +^ low in
+  let out5 = high in
+
+  let a = mul_wide small12 small22 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out4 = out4 +^ low in
+  let out5 = out5 +^ high in
+
+  let a = mul_wide small13 small21 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out4 = out4 +^ low in
+  let out5 = out5 +^ high in
+
+  let a = mul_wide small12 small23 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out5 = out5 +^ low in
+  let out6 = high in
+
+  let a = mul_wide small13 small22 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out5 = out5 +^ low in
+  let out6 = out6 +^ high in
+
+  let a = mul_wide small13 small23 in
+  let low = a in
+  let high = a >>^ 64ul in
+  let out6 = out6 +^ low in
+  let out7 = high in
+
+  out.(0ul) <- out0;
+  out.(1ul) <- out1;
+  out.(2ul) <- out2;
+  out.(3ul) <- out3;
+  out.(4ul) <- out4;
+  out.(5ul) <- out5;
+  out.(6ul) <- out6;
+  out.(7ul) <- out7
+
+val felem_mul:
+  out:longfelem -> in1:felem -> in2:felem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let felem_mul out in1 in2 =
+  push_frame();
+  let small1 = create 0uL 4ul in
+  let small2 = create 0uL 4ul in
+  felem_shrink small1 in1;
+  felem_shrink small2 in2;
+  smallfelem_mul out small1 small2;
+  pop_frame()
+
+val felem_small_mul:
+  out:longfelem -> small1:smallfelem -> in2:felem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let felem_small_mul out small1 in2 =
+  push_frame();
+  let small2 = create 0uL 4ul in
+  felem_shrink small2 in2;
+  smallfelem_mul out small1 small2;
+  pop_frame()
+
+val felem_reduce_:
+  out:felem -> input:longfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let felem_reduce_ out input =
+  let out0 = out.(0ul) in
+  let out1 = out.(1ul) in
+  let out2 = out.(2ul) in
+  let out3 = out.(3ul) in
+  let input0 = input.(0ul) in
+  let input1 = input.(1ul) in
+  let input2 = input.(2ul) in
+  let input3 = input.(3ul) in
+  let input4 = input.(4ul) in
+  let input5 = input.(5ul) in
+  let input6 = input.(6ul) in
+  let input7 = input.(7ul) in
+  let open FStar.UInt128 in
+  let c = input4 +^ (input5 <<^ 32ul) in
+  let out0 = out0 +^ c in
+  let out3 = out3 -^ c in
+  let c = input5 -^ input7 in
+  let out1 = out1 +^ c in
+  let out2 = out2 -^ c in
+  let out1 = out1 -^ (input4 <<^ 32ul) in
+  let out3 = out1 +^ (input4 <<^ 32ul) in
+  let out2 = out2 -^ (input5 <<^ 32ul) in
+  let out0 = out0 -^ input6 in
+  let out0 = out0 -^ (input6 <<^ 32ul) in
+  let out1 = out1 +^ (input6 <<^ 33ul) in
+  let out2 = out2 +^ (input6 <<^ 1ul)  in
+  let out3 = out3 -^ (input6 <<^ 32ul) in
+  let out0 = out0 -^ input7 in
+  let out0 = out0 -^ (input7 <<^ 32ul) in
+  let out2 = out2 +^ (input7 <<^ 33ul) in
+  let out3 = out3 +^ ((input7 <<^ 1ul) +^ input7) in
+  out.(0ul) <- out0;
+  out.(1ul) <- out1;
+  out.(2ul) <- out2;
+  out.(3ul) <- out3
+  
+val felem_reduce:
+  out:felem -> input:longfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let felem_reduce out input =
+  let open FStar.UInt128 in
+  push_frame();
+  let zero100 = zero100() in
+  let zero0 = zero100.(0ul) in
+  let zero1 = zero100.(1ul) in
+  let zero2 = zero100.(2ul) in
+  let zero3 = zero100.(3ul) in
+  let input0 = input.(0ul) in
+  let input1 = input.(1ul) in
+  let input2 = input.(2ul) in
+  let input3 = input.(3ul) in
+  out.(0ul) <- input0 +^ zero0;
+  out.(1ul) <- input0 +^ zero1;
+  out.(2ul) <- input0 +^ zero2;
+  out.(3ul) <- input0 +^ zero3;
+  felem_reduce_ out input;
+  pop_frame()
+
+val felem_reduce_zero105:
+  out:felem -> input:longfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let felem_reduce_zero105 out input =
+  let open FStar.UInt128 in
+  push_frame();
+  let zero105 = zero105() in
+  let zero0 = zero105.(0ul) in
+  let zero1 = zero105.(1ul) in
+  let zero2 = zero105.(2ul) in
+  let zero3 = zero105.(3ul) in
+  let input0 = input.(0ul) in
+  let input1 = input.(1ul) in
+  let input2 = input.(2ul) in
+  let input3 = input.(3ul) in
+  out.(0ul) <- input0 +^ zero0;
+  out.(1ul) <- input0 +^ zero1;
+  out.(2ul) <- input0 +^ zero2;
+  out.(3ul) <- input0 +^ zero3;
+  felem_reduce_ out input;
+  pop_frame()
+
+val subtract_u64:
+  result:u64 -> v:u64 -> Tot (tuple2 u64 u64)
+let subtract_u64 result v' =
+  let r = UInt128.uint64_to_uint128 result in
+  let r = FStar.UInt128.(r -%^ uint64_to_uint128 v') in  
+  let open FStar.UInt64 in
+  let carry = FStar.UInt128.(uint128_to_uint64 (r >>^ 64ul)) &^ 1uL in
+  let result = UInt128.uint128_to_uint64 r in
+  result, carry
+
+val felem_contract:
+  out:smallfelem -> input:felem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let felem_contract out input =
+  push_frame();
+  let all_equal_so_far = 0uL in
+  let result = 0uL in
+  felem_shrink out input;
+  let all_equal_so_far = FStar.UInt64.(all_equal_so_far -%^ 1uL) in
+
+  let open FStar.UInt128 in
+  let kPrime = kPrime() in
+  let kPrime0 = kPrime.(0ul) in
+  let kPrime1 = kPrime.(1ul) in
+  let kPrime2 = kPrime.(2ul) in
+  let kPrime3 = kPrime.(3ul) in
+  let out0 = out.(0ul) in
+  let out1 = out.(1ul) in
+  let out2 = out.(2ul) in
+  let out3 = out.(3ul) in
+  let a = uint64_to_uint128 kPrime0 -^ uint64_to_uint128 out0 in
+  let result = FStar.UInt64.(result |^ (all_equal_so_far &^ FStar.UInt128.(uint128_to_uint64 (a >>^ 64ul)))) in
+
+  let open FStar.UInt64 in
+  let equal = kPrime3 ^^ out3 in
+  let equal = equal -^ 1uL in
+  let equal = equal &^ (equal <<^ 32ul) in
+  let equal = equal &^ (equal <<^ 16ul) in
+  let equal = equal &^ (equal <<^ 8ul) in
+  let equal = equal &^ (equal <<^ 4ul) in
+  let equal = equal &^ (equal <<^ 2ul) in
+  let equal = equal &^ (equal <<^ 1ul) in
+  let equal = gte_mask equal 0x1000000000000000uL in
+  let all_equal_so_far = all_equal_so_far &^ equal in
+
+
+  let equal = kPrime2 ^^ out2 in
+  let equal = equal -^ 1uL in
+  let equal = equal &^ (equal <<^ 32ul) in
+  let equal = equal &^ (equal <<^ 16ul) in
+  let equal = equal &^ (equal <<^ 8ul) in
+  let equal = equal &^ (equal <<^ 4ul) in
+  let equal = equal &^ (equal <<^ 2ul) in
+  let equal = equal &^ (equal <<^ 1ul) in
+  let equal = gte_mask equal 0x1000000000000000uL in
+  let all_equal_so_far = all_equal_so_far &^ equal in
+
+  let equal = kPrime1 ^^ out1 in
+  let equal = equal -^ 1uL in
+  let equal = equal &^ (equal <<^ 32ul) in
+  let equal = equal &^ (equal <<^ 16ul) in
+  let equal = equal &^ (equal <<^ 8ul) in
+  let equal = equal &^ (equal <<^ 4ul) in
+  let equal = equal &^ (equal <<^ 2ul) in
+  let equal = equal &^ (equal <<^ 1ul) in
+  let equal = gte_mask equal 0x1000000000000000uL in
+  let all_equal_so_far = all_equal_so_far &^ equal in
+
+  let equal = kPrime0 ^^ out0 in
+  let equal = equal -^ 1uL in
+  let equal = equal &^ (equal <<^ 32ul) in
+  let equal = equal &^ (equal <<^ 16ul) in
+  let equal = equal &^ (equal <<^ 8ul) in
+  let equal = equal &^ (equal <<^ 4ul) in
+  let equal = equal &^ (equal <<^ 2ul) in
+  let equal = equal &^ (equal <<^ 1ul) in
+  let equal = gte_mask equal 0x1000000000000000uL in
+  let all_equal_so_far = all_equal_so_far &^ equal in
+
+  let result = result |^ all_equal_so_far in
+
+  let out0, carry = subtract_u64 out0 (result &^ kPrime0) in
+  let out1, carry = subtract_u64 out1 carry in
+  let out2, carry = subtract_u64 out2 carry in
+  let out3, carry = subtract_u64 out3 carry in
+
+  let out1, carry = subtract_u64 out1 (result &^ kPrime1) in
+  let out2, carry = subtract_u64 out2 carry in
+  let out3, carry = subtract_u64 out3 carry in
+
+  let out2, carry = subtract_u64 out2 (result &^ kPrime2) in
+  let out3, carry = subtract_u64 out3 carry in
+
+  let out3, carry = subtract_u64 out3 (result &^ kPrime3) in
+  pop_frame()
+
+val smallfelem_mul_contract:
+  out:smallfelem -> in1:smallfelem -> in2:smallfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let smallfelem_mul_contract out in1 in2 =
+  push_frame();
+  let longtmp = create (UInt128.uint64_to_uint128 0uL) 8ul in
+  let tmp     = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  smallfelem_mul longtmp in1 in2;
+  felem_reduce tmp longtmp;
+  felem_contract out tmp;
+  pop_frame()
+
+val smallfelem_is_zero:
+  small:smallfelem -> Stack limb
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let smallfelem_is_zero small =
+  push_frame();
+  let kPrime = kPrime() in
+  let kPrime0 = kPrime.(0ul) in
+  let kPrime1 = kPrime.(1ul) in
+  let kPrime2 = kPrime.(2ul) in
+  let kPrime3 = kPrime.(3ul) in
+  let small0 = small.(0ul) in
+  let small1 = small.(1ul) in
+  let small2 = small.(2ul) in
+  let small3 = small.(3ul) in
+  let open FStar.UInt64 in
+  let is_zero = FStar.UInt64.(small0 |^ small1 |^ small2 |^ small3) in
+  let is_zero = eq_mask is_zero 0uL in
+  let is_p = (small0 ^^ kPrime0) |^ (small1 ^^ kPrime1) |^ (small2 ^^ kPrime2) |^ (small3 ^^ kPrime3) in
+  let is_p = eq_mask is_p 0uL in
+  let is_zero = is_zero |^ is_p in
+  let result = FStar.UInt128.(uint64_to_uint128 is_zero |^ (uint64_to_uint128 is_zero <<^ 64ul)) in
+  pop_frame();
+  result
+
+val smallfelem_is_zero_int:
+  small:smallfelem -> Stack FStar.UInt32.t
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let smallfelem_is_zero_int small =
+  let w = smallfelem_is_zero small in
+  FStar.UInt128.(uint64_to_uint32 (uint128_to_uint64 (w &^ uint64_to_uint128 1uL)))
+
+val felem_inv:
+  out:felem -> input:felem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let felem_inv out input =
+  push_frame();
+  let z = FStar.UInt128.uint64_to_uint128 0uL in
+  let ftmp = create z 4ul in
+  let ftmp2 = create z 4ul in
+  let e2 = create z 4ul in
+  let e4 = create z 4ul in
+  let e8 = create z 4ul in
+  let e16 = create z 4ul in
+  let e32 = create z 4ul in
+  let e64 = create z 4ul in
+  let tmp = create z 8ul in
+  felem_square tmp input;
+  felem_reduce ftmp tmp;
+  felem_mul tmp input ftmp;
+  felem_reduce ftmp tmp;
+  felem_assign e2 ftmp;
+  felem_square tmp ftmp;
+  felem_reduce ftmp tmp;
+  felem_square tmp ftmp;
+  felem_reduce ftmp tmp;
+  felem_mul tmp ftmp e2;
+  felem_reduce ftmp tmp;
+  felem_assign e4 ftmp;
+  felem_square tmp ftmp;
+  felem_reduce ftmp tmp;
+  felem_square tmp ftmp;
+  felem_reduce ftmp tmp;
+  felem_square tmp ftmp;
+  felem_reduce ftmp tmp;
+  felem_square tmp ftmp;
+  felem_reduce ftmp tmp;
+  felem_mul tmp ftmp e4;
+  felem_reduce ftmp tmp;
+  felem_assign e8 ftmp;
+  let inv (h1:mem) (i:nat) = True in
+  let f (i:UInt32.t) : Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+    = felem_square tmp ftmp;
+      felem_reduce ftmp tmp in
+  let f' (i:UInt32.t) : Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+    = felem_square tmp ftmp2;
+      felem_reduce ftmp2 tmp in
+  for 0ul 8ul inv f;
+  felem_mul tmp ftmp e8;
+  felem_reduce ftmp tmp;
+  felem_assign e16 ftmp;
+  for 0ul 16ul inv f;
+  felem_mul tmp ftmp e16;
+  felem_reduce ftmp tmp;
+  felem_assign e32 ftmp;
+  for 0ul 32ul inv f;
+  felem_assign e64 ftmp;
+  felem_mul tmp ftmp input;
+  felem_reduce ftmp tmp;
+  for 0ul 192ul inv f;
+  felem_mul tmp e64 e32;
+  felem_reduce ftmp2 tmp;
+  for 0ul 16ul inv f';
+  felem_mul tmp ftmp2 e16;
+  felem_reduce ftmp2 tmp;
+  for 0ul 8ul inv f';
+  felem_mul tmp ftmp2 e8;
+  felem_reduce ftmp2 tmp;
+  for 0ul 4ul inv f';
+  felem_mul tmp ftmp2 e4;
+  felem_reduce ftmp2 tmp;
+  felem_square tmp ftmp2;
+  felem_reduce ftmp2 tmp;
+  felem_square tmp ftmp2;
+  felem_reduce ftmp2 tmp;
+  felem_mul tmp ftmp2 e2;
+  felem_reduce ftmp2 tmp;
+  felem_square tmp ftmp2;
+  felem_reduce ftmp2 tmp;
+  felem_square tmp ftmp2;
+  felem_reduce ftmp2 tmp;
+  felem_mul tmp ftmp2 input;
+  felem_reduce ftmp2 tmp;
+
+  felem_mul tmp ftmp2 ftmp;
+  felem_reduce out tmp
+
+val smallfelem_inv_contract:
+  out:smallfelem -> input:smallfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let smallfelem_inv_contract out input =
+  push_frame();
+  let tmp = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  smallfelem_expand tmp input;
+  felem_inv tmp tmp;
+  felem_contract out tmp;
+  pop_frame()
+
+val point_double:
+  x_out:felem -> y_out:felem -> z_out:felem ->
+  x_in:felem -> y_in:felem -> z_in:felem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let point_double x_out y_out z_out x_in y_in z_in =
+  let tmp = create (UInt128.uint64_to_uint128 0uL) 8ul in
+  let tmp2 = create (UInt128.uint64_to_uint128 0uL) 8ul in
+  let delta = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let gamma = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let beta = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let alpha = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let ftmp = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let ftmp2 = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let small1 = create 0uL 4ul in
+  let small2 = create 0uL 4ul in
+
+  felem_assign ftmp x_in;
+  felem_assign ftmp2 x_in;
+
+  felem_square tmp z_in;
+  felem_reduce delta tmp;
+
+  felem_square tmp y_in;
+  felem_reduce gamma tmp;
+  felem_shrink small1 gamma;
+
+  felem_small_mul tmp small1 x_in;
+  felem_reduce beta tmp;
+
+  felem_diff ftmp delta;
+  felem_sum ftmp2 delta;
+  felem_scalar ftmp2 3uL;
+  felem_mul tmp ftmp ftmp2;
+  felem_reduce alpha tmp;
+  felem_shrink small2 alpha;
+
+  smallfelem_square tmp small2;
+  felem_reduce x_out tmp;
+  felem_assign ftmp beta;
+  felem_scalar ftmp 8uL;
+  felem_diff x_out ftmp;
+
+  felem_sum delta gamma;
+  felem_assign ftmp y_in;
+  felem_sum ftmp z_in;
+  felem_square tmp ftmp;
+  felem_reduce z_out tmp;
+  felem_diff z_out delta;
+
+  felem_scalar beta 4uL;
+  felem_diff_zero107 beta x_out;
+  felem_small_mul tmp small2 beta;
+  smallfelem_square tmp2 small1;
+  longfelem_scalar tmp2 8uL;
+  longfelem_diff tmp tmp2;
+  felem_reduce_zero105 y_out tmp
+
+val point_double_small:
+  x_out:smallfelem -> y_out:smallfelem -> z_out:smallfelem ->
+  x_in:smallfelem -> y_in:smallfelem -> z_in:smallfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let point_double_small x_out y_out z_out x_in y_in z_in =
+  push_frame();
+  let felem_x_out = create_felem () in
+  let felem_y_out = create_felem () in
+  let felem_z_out = create_felem () in
+  let felem_x_in = create_felem () in
+  let felem_y_in = create_felem () in
+  let felem_z_in = create_felem () in
+  point_double felem_x_out felem_y_out felem_z_out felem_x_in felem_y_in felem_z_in;
+  felem_shrink x_out felem_x_out;
+  felem_shrink y_out felem_y_out;
+  felem_shrink z_out felem_z_out;
+  pop_frame()
+
+
+val copy_conditional:
+  out:felem -> input:felem -> mask:limb -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let copy_conditional out input mask =
+  let open FStar.UInt128 in
+  let inv (h1:mem) (i:nat) = True in
+  let f (i:UInt32.t) : Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+    = let inputi = input.(i) in
+      let outi = out.(i) in
+      let tmp = mask &^ input.(FStar.UInt32.(nlimbs' -^ 1ul -^ i)) in
+      out.(i) <- tmp in
+  for 0ul nlimbs' inv f
+
+val copy_small_conditional:
+  out:felem -> input:smallfelem -> mask:limb -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let copy_small_conditional out input mask =
+  let open FStar.UInt128 in
+  let mask64 = uint128_to_uint64 mask in
+  let inv (h1:mem) (i:nat) = True in
+  let f (i:UInt32.t) : Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+    = let inputi = input.(i) in
+      let outi = out.(i) in
+      let tmp = (uint64_to_uint128 FStar.UInt64.(inputi &^ mask64) |^ (outi &^ lognot mask)) in
+      out.(i) <- tmp in
+  for 0ul nlimbs' inv f
+
+
+val point_add:
+  x3:felem -> y3:felem -> z3:felem ->
+  x1:felem -> y1:felem -> z1:felem ->
+  mixed:FStar.UInt32.t -> x2:smallfelem -> y2:smallfelem -> z2:smallfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let point_add x3 y3 z3 x1 y1 z1 mixed x2 y2 z2 =
+  push_frame();
+  let ftmp = create_felem() in
+  let ftmp2 = create_felem() in
+  let ftmp3 = create_felem() in
+  let ftmp4 = create_felem() in
+  let ftmp5 = create_felem() in
+  let ftmp6 = create_felem() in
+  let x_out = create_felem() in
+  let y_out = create_felem() in
+  let z_out = create_felem() in
+  let tmp   = create_longfelem() in
+  let tmp2   = create_longfelem() in
+  let small1 = create_smallfelem() in
+  let small2 = create_smallfelem() in
+  let small3 = create_smallfelem() in
+  let small4 = create_smallfelem() in
+  let small5 = create_smallfelem() in
+
+  felem_shrink small3 z1;
+
+  let z1_is_zero = smallfelem_is_zero small3 in
+  let z2_is_zero = smallfelem_is_zero z2 in
+
+  smallfelem_square tmp small3;
+  felem_reduce ftmp tmp;
+  felem_shrink small1 ftmp;
+
+  if (mixed <> 0ul) then
+    begin
+      smallfelem_square tmp z2;
+      felem_reduce ftmp2 tmp;
+      felem_shrink small2 ftmp2;
+
+      felem_shrink small5 x1;
+
+      smallfelem_mul tmp small5 small2;
+      felem_reduce ftmp3 tmp;
+
+      felem_assign ftmp5 z1;
+      felem_small_sum ftmp5 z2;
+
+      felem_square tmp ftmp5;
+      felem_reduce ftmp5 tmp;
+      felem_sum ftmp2 ftmp;
+      felem_diff ftmp5 ftmp2;
+
+      smallfelem_mul tmp small2 z2;
+      felem_reduce ftmp2 tmp;
+
+      felem_mul tmp y1 ftmp2;
+      felem_reduce ftmp6 tmp
+    end
+  else
+    begin
+      felem_assign ftmp3 x1;
+
+      felem_assign ftmp5 z1;
+      felem_scalar ftmp5 2uL;
+
+      felem_assign ftmp6 y1
+    end;
+
+  smallfelem_mul tmp x2 small1;
+  felem_reduce ftmp4 tmp;
+
+  felem_diff_zero107 ftmp4 ftmp3;
+  felem_shrink small4 ftmp4;
+
+  let x_equal = smallfelem_is_zero small4 in
+
+  felem_small_mul tmp small4 ftmp5;
+  felem_reduce z_out tmp;
+
+  smallfelem_mul tmp small1 small3;
+  felem_reduce ftmp tmp;
+
+  felem_small_mul tmp y2 ftmp;
+  felem_reduce ftmp5 tmp;
+
+  felem_diff_zero107 ftmp5 ftmp6;
+  felem_scalar ftmp5 2uL;
+  felem_shrink small1 ftmp5;
+  let y_equal = smallfelem_is_zero small1 in
+
+  let zero = UInt128.uint64_to_uint128 0uL in
+  if  ((x_equal <> zero) && (y_equal <> zero) && not(z1_is_zero <> zero) && not(z2_is_zero <> zero)) then
+      begin
+        point_double x3 y3 z3 x1 y1 z1
+      end
+  else
+      begin
+        felem_assign ftmp ftmp4;
+        felem_scalar ftmp 2uL;
+        felem_square tmp ftmp;
+        felem_reduce ftmp tmp;
+        felem_mul tmp ftmp4 ftmp;
+        felem_reduce ftmp2 tmp;
+        felem_mul tmp ftmp3 ftmp;
+        felem_reduce ftmp4 tmp;
+        smallfelem_square tmp small1;
+        felem_reduce x_out tmp;
+        felem_assign ftmp3 ftmp4;
+        felem_scalar ftmp4 2uL;
+        felem_sum ftmp4 ftmp2;
+        felem_diff x_out ftmp4;
+
+        felem_diff_zero107 ftmp3 x_out;
+        felem_small_mul tmp small1 ftmp3;
+        felem_mul tmp2 ftmp6 ftmp2;
+        longfelem_scalar tmp2 2uL;
+        longfelem_diff tmp tmp2;
+        felem_reduce_zero105 y_out tmp;
+
+        copy_small_conditional x_out x2 z1_is_zero;
+        copy_conditional x_out x1 z2_is_zero;
+        copy_small_conditional y_out y2 z1_is_zero;
+        copy_conditional y_out y1 z2_is_zero;
+        copy_small_conditional z_out z2 z1_is_zero;
+        copy_conditional z_out z1 z2_is_zero;
+        felem_assign x3 x_out;
+        felem_assign y3 y_out;
+        felem_assign z3 z_out
+      end;
+  pop_frame()
+
+val point_add_small:
+  x3:smallfelem -> y3:smallfelem -> z3:smallfelem ->
+  x1:smallfelem -> y1:smallfelem -> z1:smallfelem ->
+  x2:smallfelem -> y2:smallfelem -> z2:smallfelem -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let point_add_small x3 y3 z3 x1 y1 z1 x2 y2 z2 =
+  push_frame();
+  let felem_x3 = create_felem () in
+  let felem_y3 = create_felem () in
+  let felem_z3 = create_felem () in
+  let felem_x1 = create_felem () in
+  let felem_y1 = create_felem () in
+  let felem_z1 = create_felem () in
+  smallfelem_expand felem_x1 x1;
+  smallfelem_expand felem_y1 y1;
+  smallfelem_expand felem_z1 z1;
+  point_add felem_x3 felem_y3 felem_z3 felem_x1 felem_y1 felem_z1 0ul x2 y2 z2;
+  felem_shrink x3 felem_x3;
+  felem_shrink y3 felem_y3;
+  felem_shrink z3 felem_z3;
+  pop_frame()
