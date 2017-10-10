@@ -47,7 +47,7 @@ KREMLIN_ARGS+= \
 chacha-c/out.krml: Hacl.Lib.LoadStore32.fst Hacl.Lib.Create.fst Hacl.Impl.Xor.Lemmas.fst Hacl.Impl.Chacha20.fst Chacha20.fst Hacl.Test.Chacha20.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c \
 		-bundle 'Chacha20=Hacl.Impl.*,Chacha20,Hacl.Lib.*' \
-		-skip-compilation $^ -o $@
+		-skip-translation $^ -o $@
 
 chacha-c/Chacha20.c: chacha-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c \
@@ -63,7 +63,7 @@ chacha20.exe: chacha-c/out.krml
 
 
 salsa-c/out.krml: Hacl.Impl.Salsa20.fst Salsa20.fst Hacl.Test.Salsa20.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c -skip-compilation \
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c -skip-translation \
 		-bundle 'Salsa20=Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
 		$^ -o $@
 
@@ -83,7 +83,7 @@ chacha-vec128-c/out.krml: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
 		-bundle "Chacha20.Vec128=Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
 		-add-include '"vec128.h"' \
-		-skip-compilation $^ -o $@
+		-skip-translation $^ -o $@
 
 chacha-vec128-c/Chacha20_Vec128.c: chacha-vec128-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
