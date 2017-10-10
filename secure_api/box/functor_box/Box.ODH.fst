@@ -14,9 +14,6 @@ open FStar.List.Tot
 open Crypto.Symmetric.Bytes
 
 open Box.Flags
-open Box.Key
-open Box.Index
-open Box.Plain
 
 module MR = FStar.Monotonic.RRef
 module MM = MonotoneMap
@@ -29,92 +26,51 @@ module Key = Box.Key
 module ID = Box.Index
 module LE = FStar.Endianness
 
-let hash_length' = HSalsa.keylen
-let dh_share_length' = Curve.serialized_point_length // is equal to scalar lenght in Spec.Curve25519
-let dh_exponent_length' = Curve.scalar_length // Size of scalar in Curve25519. Replace with constant in spec?
-
-//let dh_exponent = Curve.scalar // is equal to Curve.serialized_point
-
 let smaller' n i1 i2 =
   let i1' = LE.little_endian i1 in
   let i2' = LE.little_endian i2 in
-  if i1' < i2' then
-    (true)
-  else
-    if i1' = i2' then
-      (FStar.Endianness.lemma_little_endian_inj i1 i2;
-      false)
-    else
-    (assert(i2' < i1');
-    false)
+  i1' < i2'
 
-let share_from_exponent' dh_exp = Curve.scalarmult dh_exp Curve.base_point
+let smaller om i1 i2 = smaller' om.dh_share_length i1 i2
 
-noeq abstract type pkey' =
-  | PKEY: pk_share:dh_share' dh_share_length' -> pkey'
+//let share_from_exponent' dh_exp = Curve.scalarmult dh_exp Curve.base_point
 
-noeq abstract type skey' =
-  | SKEY: sk_exp:dh_exponent' dh_exponent_length' -> pk:pkey'{pk.pk_share = share_from_exponent'  sk_exp} -> skey'
+let hash_fun om = om.hash
+let dh_exponentiate om = om.exponentiate
+let share_from_exponent om exp = om.exponentiate exp om.base_point
+
+noeq abstract type pkey' (om:odh_module) =
+  | PKEY: pk_share:dh_share om-> pkey' om
+
+noeq abstract type skey' (om:odh_module) =
+  | SKEY: sk_exp:dh_exponent om -> pk:pkey' om{pk.pk_share = om.exponentiate sk_exp om.base_point} -> skey' om
 
 let skey = skey'
 let pkey = pkey'
-
-
-let get_hash_length om = om.hash_length
-let get_dh_share_length om = om.dh_share_length
-let get_dh_exponent_length om = om.dh_share_length
-
-let get_index_module om = om.im
-let get_key_index_module om = om.kim
-let get_key_module om = om.km
-
-private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
-let hash om input = HSalsa.hsalsa20 input zero_nonce
-
-#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
-val lemma_little_endian_bij': b:bytes -> b':bytes{Seq.length b = Seq.length b'} -> Lemma
-  (requires True)
-  (ensures little_endian b = little_endian b' <==> b = b' )
-let lemma_little_endian_bij' b b' =
-  if little_endian b = little_endian b' then
-    (LE.lemma_little_endian_inj b b';
-    LE.lemma_little_endian_sur b b')
-  else
-    ()
-//val lemma_little_endian_bij: b:bytes -> b':bytes{Seq.length b = Seq.length b'} -> Lemma
-//  (requires b =!= b')
-//  (ensures little_endian b <> little_endian b')
-//let lemma_little_endian_bij b b' =
-//  lemma_little_endian_bij' b b'
-
-let total_order_lemma om i1 i2 =
-  let i1:dh_share' om.dh_share_length = i1 in
-  let i2:dh_share' om.dh_share_length = i2 in
-  lemma_little_endian_bij' i1 i2
-
-
-//val total_order_lemma': (om:odh_module -> i1:dh_share om -> i2:dh_share om -> Lemma
-//  (requires True)
-//  (ensures
-//    (b2t (smaller om i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller om i i1) ==> b2t (smaller om i i2)))
-//    /\ (~ (b2t (smaller om i1 i2)) <==> (i1 = i2 \/ b2t (smaller om i2 i1)))))
-//let total_order_lemma' om i1 i2 = ()
-
-(**
-Nonce to use with HSalsa.hsalsa20.
-*)
-
-let share_from_exponent om dh_exp = Curve.scalarmult dh_exp Curve.base_point
-let dh_exponentiate om dh_exp dh_sh = Curve.scalarmult dh_exp dh_sh
-
-let create hash_len dh_share_len dh_exp_len im kim km rgn =
-  ODH rgn hash_len dh_share_len dh_exp_len im kim km
 
 let get_pkey om sk = sk.pk
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 let compatible_keys om sk pk =
   sk.pk =!= pk
+
+let get_hash_length om = om.hash_length
+let get_dh_share_length om = om.dh_share_length
+let get_dh_exponent_length om = om.dh_exponent_length
+let get_base_point om = om.base_point
+let get_index_module om = om.im
+let get_key_index_module om = om.kim
+let get_key_module om kim = om.km
+
+#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
+let total_order_lemma om i1 i2 =
+  let i1:dh_share om = i1 in
+  let i2:dh_share om = i2 in
+  LE.lemma_little_endian_bij i1 i2
+
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
+let create hash_len dh_share_len dh_exp_len hash_fun exponentiate base_point im kim km rgn =
+  ODH rgn hash_len dh_share_len dh_exp_len hash_fun exponentiate base_point im kim km
 
 let pk_get_share om k = k.pk_share
 
@@ -123,14 +79,17 @@ let lemma_pk_get_share_inj om pk = ()
 let get_skeyGT om sk =
   sk.sk_exp
 
-let sk_get_share om sk = sk.pk.pk_share
+let sk_get_share om sk =
+  sk.pk.pk_share
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 let leak_skey om sk =
   sk.sk_exp
 
+assume val boundless_random_bytes: n:nat -> lbytes n
+
 let keygen om =
-  let dh_exponent = random_bytes (UInt32.uint_to_t 32) in
+  let dh_exponent = boundless_random_bytes om.dh_exponent_length in
   let dh_pk = PKEY (share_from_exponent om dh_exponent) in
   let dh_sk = SKEY dh_exponent dh_pk in
   dh_pk,dh_sk
@@ -154,8 +113,8 @@ let compose_ids om s1 s2 =
     i)
 
 let prf_odhGT om sk pk =
-  let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
-  let k = HSalsa.hsalsa20 raw_k zero_nonce in
+  let raw_k = (dh_exponentiate om) sk.sk_exp pk.pk_share in
+  let k = (hash_fun om) raw_k in
   k
 
 let lemma_shares om sk = ()
@@ -165,17 +124,17 @@ let prf_odh om sk pk =
   let i1 = pk.pk_share in
   let i2 = sk.pk.pk_share in
   let i = compose_ids om i1 i2 in
-  recall_log om.im;
-  recall_log om.kim;
-  lemma_honest_or_dishonest om.kim i;
-  let honest_i = get_honest om.kim i in
+  ID.recall_log om.im;
+  ID.recall_log om.kim;
+  ID.lemma_honest_or_dishonest om.kim i;
+  let honest_i = ID.get_honest om.kim i in
   match honest_i && Flags.prf_odh with
   | true ->
     let k = Key.gen om.kim om.km i in
     k
   | false ->
-    let raw_k = Curve.scalarmult sk.sk_exp pk.pk_share in
-    let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
+    let raw_k = om.exponentiate sk.sk_exp pk.pk_share in
+    let hashed_raw_k = om.hash raw_k in
     if not honest_i then
       Key.coerce om.kim om.km i hashed_raw_k
     else

@@ -26,10 +26,6 @@ abstract noeq type plain_module =
     length: (plain -> n:nat{valid_length n}) ->
     plain_module
 
-val create: plain:Type0 -> valid_length:(nat -> bool)-> length:(plain -> n:nat{valid_length n}) -> p:plain_module{p.plain==plain /\ p.valid_length == valid_length /\ p.length==length}
-let create plain valid_length length =
-  PM plain valid_length length
-
 abstract type protected_plain_t (im:index_module) (pt:Type0) (id:id im) = pt
 
 val lemma_index_module: im:index_module -> i:id im -> ST unit
@@ -46,13 +42,17 @@ val get_plain: pm:plain_module -> (t:Type0{t == pm.plain})
 let get_plain pm =
   pm.plain
 
-val get_plainGT: #im:index_module -> #pm:plain_module -> #i:id im -> protected_plain_t im pm.plain i -> GTot (p:pm.plain)
-let get_plainGT #im #pm #i p =
-  p
 
+val make_plainGT: #im:index_module -> #pm:plain_module -> #i:id im -> protected_plain_t im pm.plain i -> GTot (p:pm.plain)
+let make_plainGT #im #pm #i p =
+  p
 
 val repr: #im:index_module -> #pm:plain_module -> #i:id im{dishonest im i \/ not ae_ind_cpa} -> protected_plain_t im pm.plain i -> (p:pm.plain)
 let repr #im #pm #i p =
+  p
+
+val make_prot_plainGT: #im:index_module -> #pm:plain_module -> #i:id im -> p:pm.plain -> GTot (protected_plain_t im pm.plain i)
+let make_prot_plainGT #im #pm #i p =
   p
 
 val coerce: #im:index_module -> #pm:plain_module -> #i:id im{dishonest im i \/ not ae_int_ctxt} -> pm.plain -> (p:protected_plain_t im pm.plain i)
@@ -62,10 +62,23 @@ let coerce #im #pm #i p =
 val valid_length: #pm:plain_module -> n:nat -> b:bool//{b=pm.valid_length n}
 let valid_length #pm n = pm.valid_length n
 
-val lemma_valid_length: pm:plain_module -> Lemma (requires True) (ensures pm.valid_length == valid_length #pm)
+val lemma_valid_length: pm:plain_module -> Lemma (requires True) (ensures pm.valid_length == valid_length #pm) [SMTPat (valid_length #pm)]
 let lemma_valid_length pm =
   assert (FStar.FunctionalExtensionality.feq (pm.valid_length) (valid_length #pm));
   ()
+
+val create: plain:Type0 ->
+            pm_valid_length:(nat -> bool) ->
+            length:(plain ->
+            n:nat{pm_valid_length n}) ->
+            pm:plain_module{
+              pm.plain==plain
+              /\ get_plain pm == plain
+              /\ valid_length #pm == pm_valid_length
+              /\ pm.valid_length == pm_valid_length
+              /\ pm.length==length}
+let create plain valid_length length =
+  PM plain valid_length length
 
 val length: #im:index_module -> #pm:plain_module -> #i:id im -> (p:protected_plain_t im pm.plain i) -> n:nat{n=pm.length p /\ pm.valid_length n}
 let length #im #pm #i p =
