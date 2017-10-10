@@ -35,6 +35,7 @@ all:
 	$(MAKE) test-code         # Previously 'make -C ../code test'
 	$(MAKE) test-vale         # Previously not tested
 	$(MAKE) test-vale-asm     # Previously 'make compile-vale'
+	$(MAKE) test-provider-lowc
 	$(MAKE) -C openssl-engine
 	$(MAKE) unit-tests-hacl-c  # Previously 'make unit-tests' for 'hacl-c'
 #	$(MAKE) unit-tests-32-hacl-c  # Previously 'make unit-tests' for 'hacl-c'
@@ -74,6 +75,13 @@ test-vale:
 
 test-vale-asm:
 	$(MAKE) -C ../secure_api/vale/asm/
+
+#
+# Tests for LowCProvider
+#
+
+test-provider-lowc:
+	$(MAKE) -C ../secure_api/LowCProvider
 
 #
 # Tests for applications
