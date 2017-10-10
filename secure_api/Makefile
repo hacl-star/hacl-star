@@ -173,6 +173,7 @@ LAX=
 #16-10-09  Not sure how to verify Flag.fsti and Flag.fst
 
 all: all-ver $(addsuffix .fst-lax, $(LAX))
+	$(MAKE) -C LowCProvider
 
 extra: all-ver $(addsuffix .fst-ver, $(EXTRA))
 
