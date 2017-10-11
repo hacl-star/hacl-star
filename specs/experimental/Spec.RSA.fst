@@ -86,6 +86,7 @@ val fexp: n:pos -> a:elem n -> b:elem n -> Tot (res:elem n)
 let fexp n a b = (pow a b) % n
 *)
 
+(* BIGNUM LIB *)
 val os2ip: b:bytes -> Tot nat (decreases (Seq.length b))
 let rec os2ip b =
 	let bLen = Seq.length b in
@@ -160,7 +161,7 @@ let rec blit #a s1 ind_s1 s2 ind_s2 len =
 	else s2
 
 #reset-options "--z3rlimit 150"
-
+//no update, no create
 val pss_encode:
 	sLen:bignum ->
 	modBits:pos{sLen + hLen + 2 <= get_length_em modBits} ->
@@ -168,18 +169,22 @@ val pss_encode:
 	salt:bytes{length salt = sLen} -> Tot (em:bytes{length em = get_length_em modBits})
 
 let pss_encode sLen modBits msg salt =
+	let msBits = (modBits - 1) % 8 in
 	let emLen = get_length_em modBits in
+	let em = create emLen 0x00uy in
+
+	let emLen = if (msBits = 0) then emLen - 1 else emLen in
+
 	let m1_size = 8 + hLen + sLen in
 	let db_size = emLen - hLen - 1 in
 
 	let m1 = create m1_size 0x00uy in
 	let db = create db_size 0x00uy in
-	let em = create emLen 0x00uy in
 
 	let mHash = hash_sha256 msg in
 	let m1 = blit mHash 0 m1 8 hLen in
 	let m1 = blit salt 0 m1 (8 + hLen) sLen in
-	let m1Hash = hash_sha256 m1 in admit();
+	let m1Hash = hash_sha256 m1 in
 
 	let ind_1 = emLen - sLen - hLen - 2 in
 	let db = upd db ind_1 0x01uy in
@@ -188,14 +193,16 @@ let pss_encode sLen modBits msg salt =
 	let dbMask = mgf_sha256 m1Hash db_size in
 
 	let maskedDB = xorDB db dbMask in
-	let zeroL = op_Multiply 8 emLen - (modBits - 1) in
-	assume(zeroL < 8);
-	let maskedDB_0 = U8.((index maskedDB 0) &^ (0xffuy >>^ (bignum_to_uint32 zeroL))) in
-	let maskedDB = upd maskedDB 0 maskedDB_0 in
-
-	let em = blit maskedDB 0 em 0 db_size in
-	let em = blit m1Hash 0 em db_size hLen in
-	upd em (emLen - 1) 0xbcuy
+	let maskedDB =
+		if (msBits > 0) then begin
+			let maskedDB_0 = U8.((index maskedDB 0) &^ (0xffuy >>^ (bignum_to_uint32 (8 - msBits)))) in
+			upd maskedDB 0 maskedDB_0 end
+		else maskedDB in
+	let ind_db = if (msBits = 0) then 1 else 0 in
+	let em = blit maskedDB 0 em ind_db db_size in
+	let em = blit m1Hash 0 em (ind_db + db_size) hLen in
+	let last_el = if (msBits = 0) then 0 else 1 in
+	upd em (emLen - last_el) 0xbcuy
 
 #reset-options "--lax"
 
@@ -206,7 +213,13 @@ val pss_verify:
 	msg:bytes{length msg < max_input_len_sha256} -> Tot bool
 
 let pss_verify sLen modBits em msg =
+	let msBits = (modBits - 1) % 8 in
 	let emLen = get_length_em modBits in
+
+	let tmp = U8.((index em 0) &^ (0xffuy <<^ (bignum_to_uint32 msBits))) in
+
+	let emLen = if (msBits = 0) then emLen - 1 else emLen in
+
 	let m1_size = 8 + hLen + sLen in
 	let pad_size = emLen - sLen - hLen - 1 in
 	let db_size = emLen - hLen - 1 in
@@ -215,21 +228,23 @@ let pss_verify sLen modBits em msg =
 	let pad2 = create pad_size 0x00uy in
 
 	let mHash = hash_sha256 msg in
-	if not (U8.(index em (emLen - 1) =^ 0xbcuy)) then false
+	let last_el = if (msBits = 0) then 0 else 1 in
+	if not (U8.(index em (emLen - last_el) =^ 0xbcuy)) then false
 	else begin
+		let em = if (msBits = 0) then slice em 1 emLen else em in
 		let maskedDB, m1Hash_bc = split em db_size in
 		let m1Hash, bc = split m1Hash_bc hLen in
-		let zeroL = op_Multiply 8 emLen - (modBits - 1) in
-		assume(zeroL < 8);
-		let tmp = U8.((index maskedDB 0) &^ (0xffuy <<^ (bignum_to_uint32 (8 - zeroL)))) in
 		if not (U8.(tmp =^ 0x00uy)) then false
 		else begin
 			assume(0 < db_size /\ db_size <= op_Multiply (pow2 32) hLen);
 			let dbMask = mgf_sha256 m1Hash db_size in
 			let db = xorDB maskedDB dbMask in
-			let db_0 = U8.((index db 0) &^ (0xffuy >>^ (bignum_to_uint32 zeroL))) in
-			let db = upd db 0 db_0 in
-			let pad2 = upd pad2 (pad_size -1) 0x01uy in
+			let db =
+				if (msBits > 0) then begin
+					let db_0 = U8.((index db 0) &^ (0xffuy >>^ (bignum_to_uint32 (8 - msBits)))) in
+					upd db 0 db_0 end
+				else db in
+			let pad2 = upd pad2 (pad_size - 1) 0x01uy in
 			let pad, salt = split db pad_size in
 			if not (pad = pad2) then false
 			else begin
