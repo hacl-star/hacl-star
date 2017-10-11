@@ -3,7 +3,7 @@ include ../../../Makefile.include
 # Override to get cross-compilation
 MARCH?=$(shell uname -m)
 UNAME?=$(shell uname | cut -c 1-6)
-SED?=$(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
+SED?=$(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
 
 ifeq ($(UNAME),CYGWIN)
   CC=$(MARCH)-w64-mingw32-gcc
@@ -57,7 +57,7 @@ vale.a: $(ALL_OBJ)
 # our wrappers to be standalone; note that HACL*'s CI does NOT bring Vale into
 # the picture, so this directory should compile WITHOUT
 # -I$(VALE_HOME)/obj/crypto/hashing
-VALE_OBJ_FILES=sha256_main_i.{c,h} Prims.h
+VALE_OBJ_FILES=sha256_main_i.c sha256_main_i.h
 VALE_UTIL_FILES=DafnyLib.h
 
 .PHONY: import
