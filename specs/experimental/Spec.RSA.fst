@@ -121,41 +121,6 @@ let get_length_em modBits =
 	 if ((modBits - 1) % 8 = 0)
 	 then k - 1 else k
 
-val mgf_sha256_loop:
-	mgfseed:bytes{length mgfseed = hLen} ->
-	counter_max:bignum{counter_max <= pow2 32} -> counter:bignum{counter <= counter_max} ->
-	acc:bytes{length acc = op_Multiply counter hLen} ->
-	Tot (res:bytes{length res = op_Multiply counter_max hLen}) (decreases (counter_max - counter))
-
-let rec mgf_sha256_loop mgfseed counter_max counter acc =
-	if (counter < counter_max) then begin
-		(**) assert(counter < pow2 (op_Multiply 8 4));
-		let c = i2osp counter 4 in
-		let mgfseed_c = append mgfseed c in
-		(**) assert(length mgfseed_c = hLen + 4);
-		(**) assert(length mgfseed_c < max_input_len_sha256);
-		(**) assert(length acc = op_Multiply counter hLen);
-		let acc = append acc (hash_sha256 mgfseed_c) in
-		(**) assert(length acc = op_Multiply counter hLen + hLen);
-		mgf_sha256_loop mgfseed counter_max (counter + 1) acc end
-	else acc
-
-val mgf_sha256:
-	mgfseed:bytes{length mgfseed = hLen} ->
-	maskLen:bignum{0 < maskLen /\ maskLen <= op_Multiply (pow2 32) hLen} ->
-	Tot (mask:bytes{length mask = maskLen})
-
-let mgf_sha256 mgfseed maskLen =
-	(**) assert(maskLen - 1 < op_Multiply (pow2 32) hLen);
-	(**) assert((maskLen - 1) / hLen < pow2 32);
-	let counter_max = (maskLen - 1) / hLen + 1 in
-	(**) assert(counter_max <= pow2 32);
-	let acc = mgf_sha256_loop mgfseed counter_max 0 (createEmpty #UInt8.t) in
-	slice acc 0 maskLen
-
-val xorDB: b1:bytes -> b2:bytes{length b2 = length b1} -> Tot (res:bytes{length res = length b1})
-let xorDB b1 b2 = Spec.Lib.map2 (fun x y -> U8.(x ^^ y)) b1 b2
-
 //#reset-options "--z3rlimit 50 --max_fuel 2"
 
 val blit: #a:Type ->
@@ -170,6 +135,46 @@ let rec blit #a s1 ind_s1 s2 ind_s2 len =
 		let s2 = upd s2 (ind_s2 + len) s1_i in
 		blit #a s1 ind_s1 s2 ind_s2 len end
 	else s2
+	
+#reset-options "--z3rlimit 50 --max_fuel 2"
+
+val mgf_sha256_loop:
+	mgfseed:bytes{length mgfseed = hLen} ->
+	counter_max:bignum{counter_max <= pow2 32} -> counter:bignum{counter <= counter_max} ->
+	acc:bytes{length acc = op_Multiply counter_max hLen} ->
+	Tot (res:bytes{length res = op_Multiply counter_max hLen}) (decreases (counter_max - counter))
+
+let rec mgf_sha256_loop mgfseed counter_max counter acc =
+	if (counter < counter_max) then begin
+		(**) assert(counter < pow2 (op_Multiply 8 4));
+		let c = i2osp counter 4 in
+		let mgfseed_c = append mgfseed c in
+		(**) assert(length mgfseed_c = hLen + 4);
+		(**) assert(length mgfseed_c < max_input_len_sha256);
+		let mHash = hash_sha256 mgfseed_c in
+		let acc = blit mHash 0 acc (op_Multiply hLen counter) hLen in
+		mgf_sha256_loop mgfseed counter_max (counter + 1) acc end
+	else acc
+
+val mgf_sha256:
+	mgfseed:bytes{length mgfseed = hLen} ->
+	maskLen:bignum{0 < maskLen /\ maskLen <= op_Multiply (pow2 32) hLen} ->
+	Tot (mask:bytes{length mask = maskLen})
+
+let mgf_sha256 mgfseed maskLen =
+	(**) assert(maskLen - 1 < op_Multiply (pow2 32) hLen);
+	(**) assert((maskLen - 1) / hLen < pow2 32);
+	let counter_max = (maskLen - 1) / hLen + 1 in
+	let accLen = op_Multiply counter_max hLen in
+	let acc = create accLen 0x00uy in
+	(**) assert(counter_max <= pow2 32);
+	let acc = mgf_sha256_loop mgfseed counter_max 0 acc in
+	slice acc 0 maskLen
+
+#reset-options "--lax"
+
+val xorDB: b1:bytes -> b2:bytes{length b2 = length b1} -> Tot (res:bytes{length res = length b1})
+let xorDB b1 b2 = Spec.Lib.map2 (fun x y -> U8.(x ^^ y)) b1 b2
 
 //#reset-options "--z3rlimit 50"
 
@@ -223,7 +228,7 @@ let pss_encode sLen modBits msg salt =
 	(**) assume(ind_db + db_size + hLen < length em);
 	blit m1Hash 0 em (ind_db + db_size) hLen
 
-#reset-options "--z3rlimit 150"
+//#reset-options "--z3rlimit 150"
 
 val pss_verify:
 	sLen:bignum ->
@@ -250,7 +255,7 @@ let pss_verify sLen modBits em msg =
 	let m1 = create m1_size 0x00uy in
 	let pad2 = create pad_size 0x00uy in
 
-	let mHash = hash_sha256 msg in
+	let mHash = hash_sha256 msg in admit();
 	if not (U8.(em_0 =^ 0x00uy) && U8.(em_last =^ 0xbcuy)) then false
 	else begin
 		let maskedDB, m1Hash_bc = split em db_size in
@@ -261,7 +266,7 @@ let pss_verify sLen modBits em msg =
 		(**) assume(0 < 8 - msBits /\ 8 - msBits < 8);
 		(**) assert(U8.v 0xffuy < pow2 8);
 		let db_0 = U8.((index db 0) &^ (0xffuy >>^ (bignum_to_uint32 (8 - msBits)))) in
-		let db = if (msBits > 0) then upd db 0 db_0 else db in admit();
+		let db = if (msBits > 0) then upd db 0 db_0 else db in
 		let pad, salt = split db pad_size in
 		let pad2 = upd pad2 (pad_size - 1) 0x01uy in
 		if not (pad = pad2) then false
@@ -277,7 +282,7 @@ let pss_verify sLen modBits em msg =
 		end
 	end
 
-#reset-options "--lax"
+//#reset-options "--lax"
 
 val rsa_sign:
 	sLen:bignum ->
