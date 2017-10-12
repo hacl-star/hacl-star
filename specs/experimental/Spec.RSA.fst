@@ -7,22 +7,74 @@ open Spec.SHA2_256
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
-
-#set-options "--lax"
+open U32
 
 (* PREREQUISITES *)
 
 (* SEQUENCES *)
+
+type seq 'a = s:Seq.seq 'a{length s < pow2 32}
 type byte = UInt8.t
 type bytes = seq byte
+type lseq 'a n = s:seq 'a{length s = U32.v n}
+type lbytes n = s:bytes{length s = U32.v n}
+
+
+val create: #a:Type -> sz:U32.t -> v:a -> s:seq a{length s = U32.v sz}
+let create #a s v = Seq.create #a (U32.v s) v
+
+val upd: #a:Type -> s:seq a -> i:U32.t{U32.v i < length s} -> 
+	 v:a -> s':seq a{length s = length s}
+let upd #a s i v = Seq.upd #a s (U32.v i) v
+
+val index: #a:Type -> s:seq a -> i:U32.t{U32.v i < length s} -> a
+let index #a s i = Seq.index #a s (U32.v i)
+
+let op_String_Access = index
+let op_String_Assignment = upd
+
+val slice: #a:Type -> s:seq a -> i:U32.t -> j:U32.t{U32.v i <= U32.v j /\ U32.v j <= length s} -> t:seq a {length t = U32.v j - U32.v i}
+let slice #a s i j = Seq.slice #a s (U32.v i) (U32.v j)
+
+val seq_length: #a:Type -> s:seq a -> r:U32.t{U32.v r = length s}
+let seq_length (#a:Type) (s:seq a) = U32.uint_to_t (length s)
+
+val blit: #a:Type ->
+	s1:seq a -> ind_s1:U32.t{U32.v ind_s1 <= length s1} ->
+	s2:seq a -> ind_s2:U32.t{U32.v ind_s2 <= length s2} ->
+	len:U32.t{U32.v ind_s1 + U32.v len <= length s1 /\ 
+		  U32.v ind_s2 + U32.v len <= length s2} ->
+	Tot (res:seq a{length res = length s2}) 
+#reset-options "--z3rlimit 30"
+
+let blit #a s1 ind_s1 s2 ind_s2 len =
+    let t1 = slice s2 0ul ind_s2 in
+    let t3 = slice s2 (ind_s2 +^ len) (seq_length s2)  in
+    let f2 = slice s1 ind_s1 (ind_s1 +^ len)  in
+    t1 @| f2 @| t3
+
+val update_slice: #a:Type -> s:seq a -> i:U32.t -> l:U32.t{U32.v i + U32.v l <= length s} -> 
+		  f: (s:lseq a l -> s:lseq a l) -> Tot (r:seq a{length r = length s})
+let update_slice #a s i l f = 
+    let s1 = slice s 0ul i in
+    let s2 = slice s i (i +^ l) in
+    let s3 = slice s (i +^ l) (seq_length s) in
+    s1 @| (f s2) @| s3
+
+
+val for_loop: min:U32.t -> max:U32.t{U32.v min <= U32.v max} -> f:('a -> i:U32.t{U32.v i < U32.v max} -> Tot 'a) -> x:'a -> Tot 'a
+let for_loop min max f a = 
+    Spec.Loops.repeat_range_spec (U32.v min) (U32.v max) (fun x i -> f x (U32.uint_to_t i)) a
+
 
 (* SHA256 *)
 let max_input_len_sha256 = pow2 61
-let hLen = 32ul
+unfold let hLen = 32ul
 val hash_sha256:
-	msg:bytes{length msg < max_input_len_sha256} ->
-	Tot (msgHash:bytes{length msgHash = U32.v hLen})
-let hash_sha256 msg = SHA2_256.hash msg
+	msg:bytes{length msg < max_input_len_sha256} -> 
+	hash:lbytes hLen ->
+	Tot (msgHash:lbytes hLen)
+let hash_sha256 msg h = SHA2_256.hash msg
 
 (* BIGNUM *)
 type bignum = nat
@@ -38,8 +90,8 @@ let bignum_mul_mod x y m = (x * y) % m
 let bignum_is_even x = (x % 2) = 0
 let bignum_div2 x = x / 2
 
-let bignum_to_uint32 x = U32.uint_to_t (to_uint_t 32 x)
-let uint32_to_bignum x = U32.v x
+//let bignum_to_uint32 x = U32.uint_to_t (to_uint_t 32 x)
+//let uint32_to_bignum x = U32.v x
 
 (* RSA *)
 type rsa_pubkey =
@@ -48,7 +100,6 @@ type rsa_pubkey =
 type rsa_privkey =
 	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:elem (Mk_rsa_pubkey?.n pkey) -> rsa_privkey
 
-//#reset-options "--z3rlimit 50 --max_fuel 2"
 
 (* a*x + b*y = gcd(a,b) *)
 val extended_eucl: a:bignum -> b:bignum -> Tot (tuple2 int int) (decreases b)
@@ -58,7 +109,6 @@ let rec extended_eucl a b =
 		match (extended_eucl b (bignum_mod a b)) with
 		| (x, y) -> (y, bignum_sub x (bignum_mul (bignum_div a b) y))
 
-//#reset-options "--z3rlimit 50 --max_fuel 2"
 
 val mod_exp_loop: n:pos -> a:bignum -> b:bignum -> acc:elem n -> Tot (res:elem n) (decreases b)
 let rec mod_exp_loop n a b acc =
@@ -90,147 +140,141 @@ val fexp: n:pos -> a:elem n -> b:elem n -> Tot (res:elem n)
 let fexp n a b = (pow a b) % n
 *)
 
-//#reset-options "--z3rlimit 50 --max_fuel 2"
+
 
 (* BIGNUM LIB *)
-val os2ip: b:bytes -> Tot bignum (decreases (Seq.length b))
-let rec os2ip b =
-	let bLen = Seq.length b in
-	if bLen = 0 then 0
-	else op_Multiply (U8.v (head b)) (pow2 (op_Multiply 8 (bLen - 1))) + (os2ip (tail b))
+val os2ip: b:bytes -> Tot bignum 
+let os2ip b =
+  let bLen = seq_length b in
+  if (bLen = 0ul) 
+  then 0 
+  else
+    let next (a:bignum) (i:U32.t{U32.v i < U32.v bLen - 1}): bignum = 
+	       bignum_mul (bignum_add a (uint8_to_bignum b.[i])) 256 in
+    let acc = for_loop 0ul (bLen -^ 1ul) next 0 in
+    acc + U8.v (b.[bLen -^ 1ul])
+    
 
 val i2osp:
-	n:bignum -> bLen:nat{n < pow2 (op_Multiply 8 bLen)} -> 
-	Tot (b:bytes{length b = bLen}) (decreases bLen)
-let rec i2osp n bLen =
-	if bLen = 0 then createEmpty #UInt8.t
-	else
-		let len = bLen - 1 in
-		let t = pow2 (op_Multiply 8 len) in
-		let x = bignum_to_uint8 (n / t) in
-		let n = n % t in
-		append (create 1 x) (i2osp n len)
+	n:bignum -> b:bytes{n < pow2 (8 * length b)} ->
+	Tot (b':bytes{length b' = length b})
+let i2osp n b =
+	let bLen = seq_length b in
+	if (bLen = 0ul)
+	then b
+	else 
+	let next (c:tuple2 bignum (lbytes bLen)) (i:U32.t{U32.v i < U32.v bLen - 1}) : tuple2 bignum (lbytes bLen) = 
+	    let (n,b) = c in
+	    let b' = b.[bLen -^ i -^ 1ul] <- bignum_to_uint8 (bignum_mod n 256) in
+	    let n' = bignum_div n 256 in
+	    (n',b') in
+  
+        let (n',b') = for_loop 0ul (bLen -^ 1ul) next (n,b) in
+	b'
 
-//#reset-options
 
-val get_octets: modBits:U32.t{U32.v modBits > 0} -> Tot (res:U32.t{U32.v res > 0})
-let get_octets modBits = U32.((modBits -^ 1ul) /^ 8ul +^ 1ul)
 
-val get_length_em: modBits:U32.t{U32.v modBits > 0} -> Tot U32.t
-let get_length_em modBits =
-	 let k = get_octets modBits in
-	 if U8.((modBits -^ 1ul) %^ 8ul =^ 0ul)
-	 then U32.(k -^ 1ul) else k
+let get_octets (modBits:U32.t{U32.v modBits > 0}) = U32.((modBits -^ 1ul) /^ 8ul +^ 1ul)
 
-//#reset-options "--z3rlimit 50 --max_fuel 2"
 
-val blit: #a:Type ->
-	s1:seq a -> ind_s1:nat{ind_s1 <= length s1} ->
-	s2:seq a -> ind_s2:nat{ind_s2 <= length s2} ->
-	len:nat{ind_s1 + len <= length s1 /\ ind_s2 + len <= length s2} ->
-	Tot (res:seq a{length res = length s2}) (decreases len)
-let rec blit #a s1 ind_s1 s2 ind_s2 len =
-	if (len > 0) then begin
-		let len = len - 1 in
-		let s1_i = index s1 (ind_s1 + len) in
-		let s2 = upd s2 (ind_s2 + len) s1_i in
-		blit #a s1 ind_s1 s2 ind_s2 len end
-	else s2
-
-//#reset-options "--z3rlimit 50 --max_fuel 2"
 
 val mgf_sha256_loop:
-	mgfseed:bytes{length mgfseed = U32.v hLen} ->
-	counter_max:bignum{counter_max <= pow2 32} -> counter:bignum{counter <= counter_max} ->
-	acc:bytes{length acc = op_Multiply counter_max (U32.v hLen)} ->
-	Tot (res:bytes{length res = op_Multiply counter_max (U32.v hLen)}) (decreases (counter_max - counter))
+	mgfseed:bytes{length mgfseed = (U32.v hLen) + 4} ->
+        counter_max:UInt32.t ->
+	acc:bytes{length acc = U32.v counter_max * U32.v hLen /\ length acc < pow2 32} ->
+	Tot (res:bytes{length res = length acc})
 
-let rec mgf_sha256_loop mgfseed counter_max counter acc =
-	if (counter < counter_max) then begin
-		let hLen = uint32_to_bignum hLen in
-		(**) assert(counter < pow2 (op_Multiply 8 4));
-		let c = i2osp counter 4 in
-		let mgfseed_c = append mgfseed c in
-		(**) assert(length mgfseed_c = hLen + 4);
-		(**) assert(length mgfseed_c < max_input_len_sha256);
-		let mHash = hash_sha256 mgfseed_c in
-		let acc = blit mHash 0 acc (op_Multiply hLen counter) hLen in
-		mgf_sha256_loop mgfseed counter_max (counter + 1) acc end
-	else acc
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 
+val store32_be: U32.t -> lbytes 4ul -> lbytes 4ul
+let store32_be (i:U32.t) (b:lbytes 4ul) : lbytes 4ul = FStar.Endianness.uint32_be 4ul i
+
+let mgf_sha256_loop mgfseed counter_max acc =
+    let mHash = create 32ul 0uy in
+    let accLen = seq_length acc in
+    let acc: lbytes accLen = acc in
+    let next (acc:lbytes accLen) (i:U32.t{U32.v i < U32.v counter_max}) : lbytes accLen = 
+     		let mgfseed = update_slice mgfseed hLen 4ul (store32_be i) in
+		let mHash = hash_sha256 mgfseed mHash in
+		blit mHash 0ul acc (hLen *^ i) hLen in
+    for_loop #(lbytes accLen) 0ul counter_max next acc
+
+
+val blocks: x:U32.t{U32.v x > 0} -> m:U32.t{U32.v m > 0} -> r:U32.t{U32.v r > 0}
+let blocks (x:U32.t{U32.v x > 0}) (m:U32.t{U32.v m > 0}) = (x -^ 1ul) /^ m +^ 1ul
+
+(* We only allow U32.t masklen, this means that we always have the property
+   that maskLen <= op_Multiply (pow2 32) (U32.v hLen) as required by the spec *)
 val mgf_sha256:
-	mgfseed:bytes{length mgfseed = U32.v hLen} ->
-	maskLen:nat{0 < maskLen /\ maskLen <= op_Multiply (pow2 32) (U32.v hLen)} ->
-	Tot (mask:bytes{length mask = maskLen})
+	mgfseed:bytes{length mgfseed = U32.v hLen + 4} ->
+	maskLen:U32.t{U32.v maskLen > 0 /\ U32.v (blocks maskLen hLen) * U32.v hLen < pow2 32} ->
+	mask:bytes{length mask = U32.v maskLen} ->
+	Tot (mask':bytes{length mask = U32.v maskLen})
 
-let mgf_sha256 mgfseed maskLen =
-	let hLen = uint32_to_bignum hLen in
-	(**) assert(maskLen - 1 < op_Multiply (pow2 32) hLen);
-	(**) assert((maskLen - 1) / hLen < pow2 32);
-	let counter_max = (maskLen - 1) / hLen + 1 in
-	let accLen = op_Multiply counter_max hLen in
+let mgf_sha256 mgfseed maskLen mask =
+	let counter_max = blocks maskLen hLen in
+	let accLen =  counter_max *^ hLen in
 	let acc = create accLen 0x00uy in
-	(**) assert(counter_max <= pow2 32);
-	let acc = mgf_sha256_loop mgfseed counter_max 0 acc in
-	slice acc 0 maskLen
+	let acc = mgf_sha256_loop mgfseed counter_max acc in
+	slice acc 0ul maskLen
 
-val xorDB: b1:bytes -> b2:bytes{length b2 = length b1} -> Tot (res:bytes{length res = length b1})
-let xorDB b1 b2 = Spec.Lib.map2 (fun x y -> U8.(x ^^ y)) b1 b2
+val xor_bytes: b1:bytes -> b2:bytes{length b2 = length b1} -> Tot (res:bytes{length res = length b1})
+let xor_bytes b1 b2 = Spec.Lib.map2 (fun x y -> U8.(x ^^ y)) b1 b2
 
-//#reset-options "--z3rlimit 50"
+
+val pss_encode_:
+	msBits:U32.t{U32.v msBits < 8} ->
+	salt:bytes{length salt + U32.v hLen + 8 < pow2 32} -> 
+	msg:bytes{length msg < max_input_len_sha256} ->
+	em:bytes{length em - length salt - U32.v hLen - 2 >= 0} ->
+	Tot (em':bytes{length em = length em'})
+
+let pss_encode_ msBits salt msg em = 
+	let mHash = create 32ul 0uy in
+	let mHash = hash_sha256 msg mHash in
+
+	let sLen = seq_length salt in
+	let emLen = seq_length em in
+
+	let m1_size = 8ul +^ hLen +^ sLen in
+	let m1 = create m1_size 0x00uy in
+	let m1 = blit mHash 0ul m1 8ul hLen in
+	let m1 = blit salt 0ul m1 (8ul +^ hLen) sLen in
+	let m1Hash = create 36ul 0uy in
+	let m1Hash = update_slice m1Hash 0ul 32ul (hash_sha256 m1) in
+	
+	let db_size = emLen -^ hLen -^ 1ul in
+	let db = create db_size 0x00uy in
+	let last_before_salt = db_size -^ sLen -^ 1ul in
+	let db = db.[last_before_salt] <- 0x01uy in
+	let db = blit salt 0ul db (last_before_salt +^ 1ul) sLen in
+
+        let dbMask = create db_size 0uy in
+	let dbMask = mgf_sha256 m1Hash db_size dbMask in
+	let maskedDB = xor_bytes db dbMask in
+
+	let em = blit maskedDB 0ul em 0ul db_size in
+	let em = blit m1Hash 0ul em db_size hLen in
+        upd em (emLen -^ 1ul) 0xbcuy 
+
 
 val pss_encode:
-	sLen:U32.t ->
-	emLen:U32.t{U32.t emLen > 0} ->
-	msBits:U32.t{U32.t msBits < 8} ->
+	msBits:U32.t{U32.v msBits < 8} ->
+	salt:bytes{length salt + U32.v hLen + 8 < pow2 32} -> 
 	msg:bytes{length msg < max_input_len_sha256} ->
-	salt:bytes{length salt = sLen} -> Tot (em:bytes{length em = U32.v emLen})
+	em:bytes{length em - length salt - U32.v hLen - 2 >= 0} ->
+	Tot (em':bytes{length em = length em' \/ length em' = length em - 1})
 
-let pss_encode sLen emLen msBits msg salt =
-	let emLen = uint32_to_bignum emLen in
-	let hLen = uint32_to_bignum hLen in
-	let em = create emLen 0x00uy in
-	let em = upd em (emLen - 1) 0xbcuy in
+//#reset-options "--z3rlimit 50"
+let pss_encode msBits salt msg em = 
+     let em' = pss_encode_ msBits salt msg em in
+     let emLen = seq_length em' in
+     if U32.(msBits =^ 0ul) 
+     then slice em' 1ul emLen 
+     else em'.[0ul] <-  U8.(0xffuy >>^ U32.(8ul -^ msBits))
 
-	let emLen = if U32.(msBits =^ 0ul) then emLen - 1 else emLen in
-	let ind_db = if U32.(msBits =^ 0ul) then 1 else 0 in
 
-	let m1_size = 8 + hLen + sLen in
-	let db_size = emLen - hLen - 1 in
-
-	let m1 = create m1_size 0x00uy in
-	let db = create db_size 0x00uy in
-
-	let mHash = hash_sha256 msg in
-	let m1 = blit mHash 0 m1 8 hLen in
-	let m1 = blit salt 0 m1 (8 + hLen) sLen in
-	(**) assume(length m1 < max_input_len_sha256);
-	let m1Hash = hash_sha256 m1 in
-
-	let ind_1 = emLen - sLen - hLen - 2 in
-	(**) assert(0 <= emLen - sLen - hLen - 2);
-	let db = upd db ind_1 0x01uy in
-	(**) assume(ind_1 + 1 < length db);
-	(**) assume(ind_1 + 1 + sLen < length db);
-	let db = blit salt 0 db (ind_1 + 1) sLen in
-	(**) assume(0 < db_size /\ db_size <= op_Multiply (pow2 32) hLen);
-	let dbMask = mgf_sha256 m1Hash db_size in
-
-	let maskedDB = xorDB db dbMask in
-	let maskedDB =
-		if (msBits > 0) then begin
-			(**) assume(0 < 8 - msBits /\ 8 - msBits < 8);
-			(**) assert(U8.v 0xffuy < pow2 8);
-			let maskedDB_0 = U8.((index maskedDB 0) &^ (0xffuy >>^ (bignum_to_uint32 (8 - msBits)))) in
-			upd maskedDB 0 maskedDB_0 end
-		else maskedDB in
-	(**) assume(ind_db < length em);
-	(**) assume(ind_db + db_size < length em);
-	let em = blit maskedDB 0 em ind_db db_size in
-	(**) assume(ind_db + db_size + hLen < length em);
-	blit m1Hash 0 em (ind_db + db_size) hLen
-
-#reset-options "--z3rlimit 150"
+(*
 
 (* length em > sLen *)
 (* get rid of msBits; % *)
@@ -289,7 +333,6 @@ let pss_verify sLen emLen msBits em msg =
 		end
 	end
 
-#reset-options "--lax"
 
 val rsa_sign:
 	sLen:U32.t ->
@@ -337,3 +380,14 @@ let rsa_verify sLen modBits sgnt pkey msg =
 	let em = i2osp m emLen in
 	let msBits = U32.(8ul *^ emLen -^ (modBits -^ 1ul)) in
 	pss_verify sLen emLen msBits em msg
+
+
+(*
+val get_length_em: modBits:U32.t{U32.v modBits > 0} -> Tot U32.t
+let get_length_em modBits =
+	 let k = get_octets modBits in
+	 if (k = 1ul)
+	 U8.((modBits -^ 1ul) %^ 8ul =^ 0ul)
+	 then U32.(k -^ 1ul) else k
+*)
+*)
