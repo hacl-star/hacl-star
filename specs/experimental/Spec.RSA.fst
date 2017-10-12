@@ -36,8 +36,7 @@ let bignum_add x y = x + y
 let bignum_sub x y = x - y
 let bignum_mul_mod x y m = (x * y) % m
 let bignum_is_even x = (x % 2) = 0
-let bignum_div2 x = x / 2 
-let bignum_one = 1
+let bignum_div2 x = x / 2
 
 let bignum_to_uint32 x = U32.uint_to_t (to_uint_t 32 x)
 
@@ -48,13 +47,17 @@ type rsa_pubkey =
 type rsa_privkey =
 	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:elem (Mk_rsa_pubkey?.n pkey) -> rsa_privkey
 
+//#reset-options "--z3rlimit 50 --max_fuel 2"
+
 (* a*x + b*y = gcd(a,b) *)
-val extended_eucl: a:bignum -> b:bignum -> Tot (tuple2 bignum bignum) (decreases b)
+val extended_eucl: a:bignum -> b:bignum -> Tot (tuple2 int int) (decreases b)
 let rec extended_eucl a b =
 	if b = 0 then (1, 0)
 	else
 		match (extended_eucl b (bignum_mod a b)) with
 		| (x, y) -> (y, bignum_sub x (bignum_mul (bignum_div a b) y))
+
+//#reset-options "--z3rlimit 50 --max_fuel 2"
 
 val mod_exp_loop: n:pos -> a:bignum -> b:bignum -> acc:elem n -> Tot (res:elem n) (decreases b)
 let rec mod_exp_loop n a b acc =
@@ -70,7 +73,7 @@ let rec mod_exp_loop n a b acc =
 
 val mod_exp: n:pos -> a:elem n -> b:elem n -> Tot (res:elem n)
 let mod_exp n a b =
-	let one_n : elem n = 1 in
+	let one_n = 1 % n in
 	mod_exp_loop n a b one_n
 
 (*
@@ -85,6 +88,8 @@ let rec pow a n =
 val fexp: n:pos -> a:elem n -> b:elem n -> Tot (res:elem n) 
 let fexp n a b = (pow a b) % n
 *)
+
+//#reset-options "--z3rlimit 50 --max_fuel 2"
 
 (* BIGNUM LIB *)
 val os2ip: b:bytes -> Tot bignum (decreases (Seq.length b))
@@ -104,6 +109,8 @@ let rec i2osp n bLen =
 		let x = bignum_to_uint8 (n / t) in
 		let n = n % t in
 		append (create 1 x) (i2osp n len)
+
+//#reset-options
 
 val get_octets: modBits:pos -> Tot bignum
 let get_octets modBits = (modBits - 1)/8 + 1
@@ -149,11 +156,13 @@ let mgf_sha256 mgfseed maskLen =
 val xorDB: b1:bytes -> b2:bytes{length b2 = length b1} -> Tot (res:bytes{length res = length b1})
 let xorDB b1 b2 = Spec.Lib.map2 (fun x y -> U8.(x ^^ y)) b1 b2
 
+//#reset-options "--z3rlimit 50 --max_fuel 2"
+
 val blit: #a:Type ->
 	s1:seq a -> ind_s1:nat{ind_s1 <= length s1} ->
 	s2:seq a -> ind_s2:nat{ind_s2 <= length s2} ->
 	len:nat{ind_s1 + len <= length s1 /\ ind_s2 + len <= length s2} ->
-	Tot (res:seq a{length res = length s2})
+	Tot (res:seq a{length res = length s2}) (decreases len)
 let rec blit #a s1 ind_s1 s2 ind_s2 len =
 	if (len > 0) then begin
 		let len = len - 1 in
@@ -161,6 +170,8 @@ let rec blit #a s1 ind_s1 s2 ind_s2 len =
 		let s2 = upd s2 (ind_s2 + len) s1_i in
 		blit #a s1 ind_s1 s2 ind_s2 len end
 	else s2
+
+//#reset-options "--z3rlimit 50"
 
 val pss_encode:
 	sLen:bignum ->
@@ -186,22 +197,33 @@ let pss_encode sLen modBits msg salt =
 	let mHash = hash_sha256 msg in
 	let m1 = blit mHash 0 m1 8 hLen in
 	let m1 = blit salt 0 m1 (8 + hLen) sLen in
+	(**) assume(length m1 < max_input_len_sha256);
 	let m1Hash = hash_sha256 m1 in
 
 	let ind_1 = emLen - sLen - hLen - 2 in
+	(**) assert(0 <= emLen - sLen - hLen - 2);
 	let db = upd db ind_1 0x01uy in
+	(**) assume(ind_1 + 1 < length db);
+	(**) assume(ind_1 + 1 + sLen < length db);
 	let db = blit salt 0 db (ind_1 + 1) sLen in
-	assume(0 < db_size /\ db_size <= op_Multiply (pow2 32) hLen);
+	(**) assume(0 < db_size /\ db_size <= op_Multiply (pow2 32) hLen);
 	let dbMask = mgf_sha256 m1Hash db_size in
 
 	let maskedDB = xorDB db dbMask in
 	let maskedDB =
 		if (msBits > 0) then begin
+			(**) assume(0 < 8 - msBits /\ 8 - msBits < 8);
+			(**) assert(U8.v 0xffuy < pow2 8);
 			let maskedDB_0 = U8.((index maskedDB 0) &^ (0xffuy >>^ (bignum_to_uint32 (8 - msBits)))) in
 			upd maskedDB 0 maskedDB_0 end
 		else maskedDB in
+	(**) assume(ind_db < length em);
+	(**) assume(ind_db + db_size < length em);
 	let em = blit maskedDB 0 em ind_db db_size in
+	(**) assume(ind_db + db_size + hLen < length em);
 	blit m1Hash 0 em (ind_db + db_size) hLen
+
+#reset-options "--z3rlimit 150"
 
 val pss_verify:
 	sLen:bignum ->
@@ -213,6 +235,8 @@ let pss_verify sLen modBits em msg =
 	let msBits = (modBits - 1) % 8 in
 	let emLen = get_octets modBits in
 
+	(**) assume(msBits < 8);
+	(**) assert(U8.v 0xffuy < pow2 8);
 	let em_0 = U8.((index em 0) &^ (0xffuy <<^ (bignum_to_uint32 msBits))) in
 	let em_last = index em (emLen - 1) in
 
@@ -231,25 +255,29 @@ let pss_verify sLen modBits em msg =
 	else begin
 		let maskedDB, m1Hash_bc = split em db_size in
 		let m1Hash, bc = split m1Hash_bc hLen in
-		assume(0 < db_size /\ db_size <= op_Multiply (pow2 32) hLen);
+		(**) assume(0 < db_size /\ db_size <= op_Multiply (pow2 32) hLen);
 		let dbMask = mgf_sha256 m1Hash db_size in
 		let db = xorDB maskedDB dbMask in
-		let db =
-			if (msBits > 0) then begin
-				let db_0 = U8.((index db 0) &^ (0xffuy >>^ (bignum_to_uint32 (8 - msBits)))) in
-				upd db 0 db_0 end
-			else db in
+		(**) assume(0 < 8 - msBits /\ 8 - msBits < 8);
+		(**) assert(U8.v 0xffuy < pow2 8);
+		let db_0 = U8.((index db 0) &^ (0xffuy >>^ (bignum_to_uint32 (8 - msBits)))) in
+		let db = if (msBits > 0) then upd db 0 db_0 else db in admit();
 		let pad, salt = split db pad_size in
 		let pad2 = upd pad2 (pad_size - 1) 0x01uy in
 		if not (pad = pad2) then false
 		else begin
 			(* first 8 elements should be 0x00 *)
+			(**) assert(8 + hLen + sLen = length m1);
+			(**) assert(8 + hLen < length m1);
 			let m1 = blit mHash 0 m1 8 hLen in
 			let m1 = blit salt 0 m1 (8 + hLen) sLen in
+			(**) assume(length m1 < max_input_len_sha256);
 			let m1Hash' = hash_sha256 m1 in
 			m1Hash = m1Hash'
 		end
 	end
+
+#reset-options "--lax"
 
 val rsa_sign:
 	sLen:bignum ->
