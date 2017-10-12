@@ -263,13 +263,13 @@ val pss_encode:
 	salt:bytes{length salt + U32.v hLen + 8 < pow2 32} -> 
 	msg:bytes{length msg < max_input_len_sha256} ->
 	em:bytes{length em - length salt - U32.v hLen - 2 >= 0} ->
-	Tot (em':bytes{length em = length em' \/ length em' = length em - 1})
+	Tot bytes
 
 //#reset-options "--z3rlimit 50"
 let pss_encode msBits salt msg em = 
      let em' = pss_encode_ msBits salt msg em in
      let emLen = seq_length em' in
-     if U32.(msBits =^ 0ul) 
+     if msBits = 0ul 
      then slice em' 1ul emLen 
      else em'.[0ul] <-  U8.(0xffuy >>^ U32.(8ul -^ msBits))
 
