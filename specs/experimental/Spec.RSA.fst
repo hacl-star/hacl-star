@@ -8,7 +8,6 @@ open Spec.SHA2_256
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 
-#set-options "--lax"
 
 (* PREREQUISITES *)
 
@@ -228,19 +227,23 @@ let pss_encode sLen modBits msg salt =
 val pss_verify:
 	sLen:bignum ->
 	modBits:pos{sLen + hLen + 2 <= get_length_em modBits} ->
-	em:bytes{length em = get_octets modBits} ->
+	em:bytes{length em >= 1 /\ length em = get_octets modBits} ->
 	msg:bytes{length msg < max_input_len_sha256} -> Tot bool
-
+ 
 let pss_verify sLen modBits em msg =
 	let msBits = (modBits - 1) % 8 in
 	let emLen = get_octets modBits in
-
 	(**) assume(msBits < 8);
-	(**) assert(U8.v 0xffuy < pow2 8);
-	let em_0 = U8.((index em 0) &^ (0xffuy <<^ (bignum_to_uint32 msBits))) in
+//	(**) assert(U8.v 0xffuy <pow2 8);
+	let e0 = index em 0 in
+	let em_0 = U8.(e0 &^ (0xffuy <<^ (bignum_to_uint32 msBits))) in
+	admit()
+
+
 	let em_last = index em (emLen - 1) in
 
 	let emLen = if (msBits = 0) then emLen - 1 else emLen in
+
 	let em = if (msBits = 0) then slice em 1 emLen else em in
 
 	let m1_size = 8 + hLen + sLen in
@@ -251,6 +254,8 @@ let pss_verify sLen modBits em msg =
 	let pad2 = create pad_size 0x00uy in
 
 	let mHash = hash_sha256 msg in
+
+	
 	if not (U8.(em_0 =^ 0x00uy) && U8.(em_last =^ 0xbcuy)) then false
 	else begin
 		let maskedDB, m1Hash_bc = split em db_size in
