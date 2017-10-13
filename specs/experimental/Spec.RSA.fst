@@ -45,6 +45,7 @@ val blit: #a:Type ->
 	len:U32.t{U32.v ind_s1 + U32.v len <= length s1 /\ 
 		  U32.v ind_s2 + U32.v len <= length s2} ->
 	Tot (res:seq a{length res = length s2}) 
+
 #reset-options "--z3rlimit 30"
 
 let blit #a s1 ind_s1 s2 ind_s2 len =
@@ -76,31 +77,31 @@ val hash_sha256:
 	Tot (msgHash:lbytes hLen)
 let hash_sha256 msg h = SHA2_256.hash msg
 
-(* BIGNUM *)
+(* BIGNUM; make abstract type *)
 type bignum = nat
 type elem (n:pos) = e:bignum{e < n}
-let bignum_to_uint8 x = U8.uint_to_t (to_uint_t 8 x)
+let bignum_to_uint8 x = U8.uint_to_t (to_uint_t 8 x)  (* bignum_to_bytes *)
 let uint8_to_bignum x = U8.v x
-let bignum_mul x y = (op_Multiply x y)
-let bignum_mod x y = x % y
-let bignum_div x y = x / y
-let bignum_add x y = x + y
-let bignum_sub x y = x - y
+let bignum_mul x y = (op_Multiply x y) (* use for extended_eucl & for mult by 256 *)
+let bignum_mod x y = x % y (* use for extended_eucl & mod 256 *)
+let bignum_div x y = x / y (* use for extended_eucl & div 256 *)
+(* NEED TO IMPLEMENT: *)
+let bignum_add x y = x + y (* bytes_to_bignum *)
+let bignum_sub x y = x - y (* use for extended_eucl *)
 let bignum_mul_mod x y m = (x * y) % m
 let bignum_is_even x = (x % 2) = 0
 let bignum_div2 x = x / 2
 
-//let bignum_to_uint32 x = U32.uint_to_t (to_uint_t 32 x)
-//let uint32_to_bignum x = U32.v x
-
 (* RSA *)
-type rsa_pubkey =
-	| Mk_rsa_pubkey: n:pos -> e:elem n -> rsa_pubkey
+type modBits = modBits:U32.t{U32.v modBits > 0}
+
+type rsa_pubkey (modBits:modBits) =
+	| Mk_rsa_pubkey: n:pos{n < pow2 (U32.v modBits)} -> e:elem n -> rsa_pubkey modBits
 	
-type rsa_privkey =
-	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:elem (Mk_rsa_pubkey?.n pkey) -> rsa_privkey
+type rsa_privkey (modBits:modBits) =
+	| Mk_rsa_privkey: pkey:rsa_pubkey modBits -> d:elem (Mk_rsa_pubkey?.n pkey) -> rsa_privkey modBits
 
-
+(* USE MONTGOMERY INVERSE METHOD *)
 (* a*x + b*y = gcd(a,b) *)
 val extended_eucl: a:bignum -> b:bignum -> Tot (tuple2 int int) (decreases b)
 let rec extended_eucl a b =
@@ -192,7 +193,7 @@ let mgf_sha256_loop mgfseed counter_max acc =
 		blit mHash 0ul acc (hLen *^ i) hLen in
     for_loop #(lbytes accLen) 0ul counter_max next acc
 
-
+(* NEED TO PROVE: x <= m * r *)
 val blocks: x:U32.t{U32.v x > 0} -> m:U32.t{U32.v m > 0} -> r:U32.t{U32.v r > 0}
 let blocks (x:U32.t{U32.v x > 0}) (m:U32.t{U32.v m > 0}) = (x -^ 1ul) /^ m +^ 1ul
 
@@ -214,15 +215,14 @@ let mgf_sha256 mgfseed maskLen mask =
 val xor_bytes: b1:bytes -> b2:bytes{length b2 = length b1} -> Tot (res:bytes{length res = length b1})
 let xor_bytes b1 b2 = Spec.Lib.map2 (fun x y -> U8.(x ^^ y)) b1 b2
 
-
 val pss_encode_:
-	msBits:U32.t{U32.v msBits < 8} ->
 	salt:bytes{length salt + U32.v hLen + 8 < pow2 32} ->
 	msg:bytes{length msg < max_input_len_sha256} ->
-	em:bytes{length em - length salt - U32.v hLen - 2 >= 0} ->
-	Tot (em':bytes{length em = length em'})
+	emLen:U32.t{U32.v emLen - length salt - U32.v hLen - 2 >= 0} ->
+	em:lbytes emLen ->
+	Tot (em':lbytes emLen)
 
-let pss_encode_ msBits salt msg em =
+let pss_encode_ salt msg emLen em =
 	let mHash = create 32ul 0uy in
 	let mHash = hash_sha256 msg mHash in
 
@@ -245,10 +245,6 @@ let pss_encode_ msBits salt msg em =
     let dbMask = create db_size 0uy in
 	let dbMask = mgf_sha256 m1Hash db_size dbMask in
 	let maskedDB = xor_bytes db dbMask in
-	let maskedDB = 
-		if msBits >^ 0ul
-		then maskedDB.[0ul] <- U8.(maskedDB.[0ul] &^ (0xffuy >>^ U32.(8ul -^ msBits)))
-		else maskedDB in
 
 	let em = blit maskedDB 0ul em 0ul db_size in
 	let em = blit m1Hash 0ul em db_size hLen in
@@ -258,14 +254,18 @@ val pss_encode:
 	msBits:U32.t{U32.v msBits < 8} ->
 	salt:bytes{length salt + U32.v hLen + 8 < pow2 32} -> 
 	msg:bytes{length msg < max_input_len_sha256} ->
-	em:bytes{length em > 0} ->
+	em:bytes{length em - length salt - U32.v hLen - 3 >= 0} ->
 	Tot (res:bytes{length res = length em})
+
+#reset-options "--z3rlimit 50 --max_fuel 0"
 
 let pss_encode msBits salt msg em =
 	let emLen = seq_length em in
 	if msBits =^ 0ul
-	then update_slice em 1ul (emLen -^ 1ul) (pss_encode_ msBits salt msg)
-	else pss_encode_ msBits salt msg em
+	then update_slice em 1ul (emLen -^ 1ul) (pss_encode_ salt msg (emLen -^ 1ul))
+	else 
+		let em = pss_encode_ salt msg emLen em in
+		em.[0ul] <- U8.(em.[0ul] &^ (0xffuy >>^ U32.(8ul -^ msBits)))
 
 val pss_verify_:
 	sLen:U32.t{U32.v sLen + U32.v hLen + 8 < pow2 32} ->
@@ -300,14 +300,14 @@ let pss_verify_ sLen msBits em msg =
 
 	let m1_size = 8ul +^ hLen +^ sLen in
 	let m1 = create m1_size 0x00uy in
-	if not (pad = pad2) then false
+	if not (Seq.eq pad pad2) then false
 	else begin
 		(* first 8 elements should be 0x00 *)
 		let m1 = blit mHash 0ul m1 8ul hLen in
 		let m1 = blit salt 0ul m1 (8ul +^ hLen) sLen in
 		let m1Hash' = create 32ul 0uy in
 		let m1Hash' = hash_sha256 m1 m1Hash' in
-		m1Hash0 = m1Hash'
+		Seq.eq m1Hash0 m1Hash'
 	end
 
 val pss_verify:
@@ -330,11 +330,12 @@ let pss_verify sLen msBits em msg =
 		else pss_verify_ sLen msBits em' msg
 		end
 
+
 val rsa_sign:
-	modBits:U32.t{U32.v modBits > 0} ->
-	skey:rsa_privkey ->
+	modBits:modBits ->
+	skey:rsa_privkey modBits ->
 	rBlind:elem (Mk_rsa_pubkey?.n (Mk_rsa_privkey?.pkey skey)) ->
-	salt:bytes{length salt + U32.v hLen + 8 < pow2 32} ->
+	salt:bytes{length salt + U32.v hLen + 8 < pow2 32 /\ U32.v (blocks modBits 8ul) - length salt - U32.v hLen - 3 >= 0} ->
 	msg:bytes{length msg < max_input_len_sha256} ->
 	Tot (sgnt:bytes{length sgnt = U32.v (blocks modBits 8ul)})
 
@@ -361,8 +362,8 @@ let rsa_sign modBits skey rBlind salt msg =
 	i2osp s sgnt
 
 val rsa_verify:
-	modBits:U32.t{U32.v modBits > 0} ->
-	pkey:rsa_pubkey ->
+	modBits:modBits ->
+	pkey:rsa_pubkey modBits ->
 	sLen:U32.t{U32.v sLen + U32.v hLen + 8 < pow2 32} ->
 	sgnt:bytes{length sgnt = U32.v (blocks modBits 8ul)} ->
 	msg:bytes{length msg < max_input_len_sha256} -> Tot bool
@@ -371,10 +372,14 @@ let rsa_verify modBits pkey sLen sgnt msg =
 	let k = blocks modBits 8ul in
 	let e = Mk_rsa_pubkey?.e pkey in
 	let n = Mk_rsa_pubkey?.n pkey in
-	
+	(* PROVE: n < pow2 (8 * k) /\ e < n => e < pow2 (8 * k) *)
+	(* modBits <= 8 * k *)
+	(* n < pow2 modBits => n < pow2 (8 * ((modBits - 1)/8 + 1)) *)
+
 	let s = os2ip sgnt in
-	let s = bignum_mod s n in (* need to prove: s < n *)
+	let s = bignum_mod s n in (* compare: s < n *)
 	let m = mod_exp n s e in
+	(* PROVE: m < n => m < pow2 (8 * k) *)
 	(**) assume(m < pow2 (8 * U32.v k));
 	let em = create k 0x00uy in
 	let em = i2osp m em in
