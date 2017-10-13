@@ -2,6 +2,8 @@ include ../Makefile.include
 
 .PHONY=lib all
 
+FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lemmas
+
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 OCAML_INCLUDES=-I ../code/lib/ml ../code/lib/ml/hacllib.cmxa
@@ -17,19 +19,16 @@ EXTRACTED=FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib.
 
 NOEXTRACT=$(FSTAR_DEFAULT_ARGS) $(addprefix --no_extract Hacl., UInt64 UInt32 UInt8)
 
-SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
-		Spec.Chacha20.fst \
+SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Chacha20_vec.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.CTR.fst \
-		Spec.Curve25519.Lemmas.fst \
 		Spec.Curve25519.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
 		Spec.HSalsa20.fst \
 		Spec.Lib.fst \
 		Spec.Poly1305.fst \
-		Spec.Poly1305.Lemmas.fst \
 		Spec.Salsa20.fst \
 		Spec.SHA2.fst \
 		Spec.SHA2_256.fst \

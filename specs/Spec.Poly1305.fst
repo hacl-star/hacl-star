@@ -8,12 +8,11 @@ open FStar.Seq
 open FStar.UInt8
 open FStar.Endianness
 open Spec.Poly1305.Lemmas
-
 #set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 (* Field types and parameters *)
-let prime = pow2 130 - 5
-type elem = e:int{e >= 0 /\ e < prime}
+let prime =  pow2 130 - 5
+type elem = e:nat{e >= 0 /\ e < prime}
 let fadd (e1:elem) (e2:elem) = (e1 + e2) % prime
 let fmul (e1:elem) (e2:elem) = (e1 * e2) % prime
 let zero : elem = 0
@@ -45,6 +44,8 @@ let encode_r (rb:word_16) =
 let finish (a:elem) (s:word_16) : Tot tag =
   let n = (a + little_endian s) % pow2 128 in
   little_bytes 16ul n
+
+let append_last = snoc
 
 let rec encode_bytes (txt:bytes) : Tot text (decreases (length txt)) =
   if length txt = 0 then createEmpty

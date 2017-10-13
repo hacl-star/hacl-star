@@ -7,7 +7,6 @@ open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness
 open Spec.Lib
-open Spec.Chacha20.Lemmas
 open Seq.Create
 
 #set-options "--max_fuel 0 --z3rlimit 100"

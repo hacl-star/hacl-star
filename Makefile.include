@@ -77,7 +77,7 @@ endif
 
 FSTAR_LIB=$(FSTAR_HOME)/ulib
 HINTS_ENABLED?=--use_hints
-FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs
+FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs --query_stats
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
 
