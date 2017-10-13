@@ -43,7 +43,7 @@ typedef struct quic_key quic_key;
 // (5) erase all secrets used for derivation.
 
 // con_id must be 8 bytes, salt must be the version-specific 16 bytes initial salt
-int quic_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt);
+int quic_crypto_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt);
 int quic_crypto_tls_derive_secret(/*out*/ quic_secret *derived, const quic_secret *secret, const char *label);
 int quic_crypto_derive_key(/*out*/quic_key **key, const quic_secret *secret);
 

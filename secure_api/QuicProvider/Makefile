@@ -6,6 +6,18 @@ MARCH?=x86_64
 
 COPTS = -fPIC -std=c11 -Ofast -funroll-loops -g -I tmp -I $(MITLS_HOME)/libs/ffi -I $(KREMLIN_HOME)/kremlib
 
+ifneq ($(VS140COMNTOOLS),)
+	VS_BIN_DOSPATH=$(VS140COMNTOOLS)/../../VC/bin
+else ifneq ($(VS120COMNTOOLS),)
+	VS_BIN_DOSPATH=$(VS120COMNTOOLS)/../../VC/bin
+else ifneq ($(VS120COMNTOOLS),)
+	VS_BIN_DOSPATH=$(VS120COMNTOOLS)/../../VC/bin
+else ifneq ($(VS110COMNTOOLS),)
+	VS_BIN_DOSPATH=$(VS110COMNTOOLS)/../../VC/bin
+else
+	VS_BIN_DOSPATH=
+endif
+
 ifeq ($(OS),Windows_NT)
     LIBQUICCRYPTO=libquiccrypto.dll
     # On cygwin + cygwinports, DLLs are searched in the PATH, which is not
@@ -34,9 +46,30 @@ else
     endif
 endif
 
+ifeq ($(OS),Windows_NT)
+VS_BIN = $(shell cygpath -u "$(VS_BIN_DOSPATH)")
+else
+VS_BIN =
+endif
+
+ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+LIB_MACHINE=x64
+else
+LIB_MACHINE=x86
+endif
+
+ifeq ($(VS_BIN),)
+LIBFILE=
+else
+LIBFILE=libquiccrypto.lib
+$(LIBFILE): $(LIBQUICCRYPTO)
+	"$(VS_BIN)/dumpbin.exe" /nologo /exports $(LIBQUICCRYPTO) |  awk -F " " 'BEGIN {print "LIBRARY libquiccrypto"; print "EXPORTS";} $$4 ~/quic_crypto/{print $$4}' > libquiccrypto.def
+	"$(VS_BIN)/lib.exe" /nologo /def:libquiccrypto.def /out:$(LIBFILE) /machine:$(LIB_MACHINE)
+endif
+
 .PHONY: test dep
 
-all: $(LIBQUICCRYPTO)
+all: $(LIBQUICCRYPTO) $(LIBFILE)
 
 tmp:
 	$(MAKE) -C .. QuicProvider-tmp
