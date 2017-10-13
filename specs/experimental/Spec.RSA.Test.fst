@@ -2,6 +2,7 @@ module Spec.RSA.Test
 
 open Spec.RSA
 open FStar.Seq
+open Spec.Bignum.Lib
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32

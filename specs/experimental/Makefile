@@ -68,7 +68,7 @@ rsa.exe: Spec.RSA.Test.fst
 	mkdir -p rsa-spec
 	$(FSTAR) $(ARGS) --odir rsa-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> rsa-spec/Spec_RSA_Test.ml
-	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES) rsa-spec/FStar_Endianness.ml rsa-spec/Spec_Loops.ml rsa-spec/Spec_Lib.ml rsa-spec/Seq_Create.ml rsa-spec/Spec_SHA2_256.ml rsa-spec/Spec_RSA.ml rsa-spec/Spec_RSA_Test.ml -o rsa.exe
+	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES) rsa-spec/FStar_Endianness.ml rsa-spec/Spec_Loops.ml rsa-spec/Spec_Lib.ml rsa-spec/Seq_Create.ml rsa-spec/Spec_SHA2_256.ml rsa-spec/Spec_Seq_Lib.ml rsa-spec/Spec_Bignum.ml rsa-spec/Spec_Bignum_Lib.ml rsa-spec/Spec_RSA.ml rsa-spec/Spec_RSA_Test.ml -o rsa.exe
 	./rsa.exe
 	
 clean:

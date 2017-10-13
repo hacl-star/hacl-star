@@ -4,69 +4,15 @@ open FStar.Seq
 open FStar.Mul
 open FStar.UInt
 open Spec.SHA2_256
+open Spec.Seq.Lib
+open Spec.Bignum
+open Spec.Bignum.Lib
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 open U32
 
 (* PREREQUISITES *)
-
-(* SEQUENCES *)
-
-type seq 'a = s:Seq.seq 'a{length s < pow2 32}
-type byte = UInt8.t
-type bytes = seq byte
-type lseq 'a n = s:seq 'a{length s = U32.v n}
-type lbytes n = s:bytes{length s = U32.v n}
-
-
-val create: #a:Type -> sz:U32.t -> v:a -> s:seq a{length s = U32.v sz}
-let create #a s v = Seq.create #a (U32.v s) v
-
-val upd: #a:Type -> s:seq a -> i:U32.t{U32.v i < length s} -> 
-	 v:a -> s':seq a{length s' = length s}
-let upd #a s i v = Seq.upd #a s (U32.v i) v
-
-val index: #a:Type -> s:seq a -> i:U32.t{U32.v i < length s} -> a
-let index #a s i = Seq.index #a s (U32.v i)
-
-let op_String_Access = index
-let op_String_Assignment = upd
-
-val slice: #a:Type -> s:seq a -> i:U32.t -> j:U32.t{U32.v i <= U32.v j /\ U32.v j <= length s} -> t:seq a {length t = U32.v j - U32.v i}
-let slice #a s i j = Seq.slice #a s (U32.v i) (U32.v j)
-
-val seq_length: #a:Type -> s:seq a -> r:U32.t{U32.v r = length s}
-let seq_length (#a:Type) (s:seq a) = U32.uint_to_t (length s)
-
-val blit: #a:Type ->
-	s1:seq a -> ind_s1:U32.t{U32.v ind_s1 <= length s1} ->
-	s2:seq a -> ind_s2:U32.t{U32.v ind_s2 <= length s2} ->
-	len:U32.t{U32.v ind_s1 + U32.v len <= length s1 /\ 
-		  U32.v ind_s2 + U32.v len <= length s2} ->
-	Tot (res:seq a{length res = length s2}) 
-
-#reset-options "--z3rlimit 30"
-
-let blit #a s1 ind_s1 s2 ind_s2 len =
-    let t1 = slice s2 0ul ind_s2 in
-    let t3 = slice s2 (ind_s2 +^ len) (seq_length s2)  in
-    let f2 = slice s1 ind_s1 (ind_s1 +^ len)  in
-    t1 @| f2 @| t3
-
-val update_slice: #a:Type -> s:seq a -> i:U32.t -> l:U32.t{U32.v i + U32.v l <= length s} -> 
-		  f: (s:lseq a l -> s:lseq a l) -> Tot (r:seq a{length r = length s})
-let update_slice #a s i l f = 
-    let s1 = slice s 0ul i in
-    let s2 = slice s i (i +^ l) in
-    let s3 = slice s (i +^ l) (seq_length s) in
-    s1 @| (f s2) @| s3
-
-
-val for_loop: min:U32.t -> max:U32.t{U32.v min <= U32.v max} -> f:('a -> i:U32.t{U32.v i < U32.v max} -> Tot 'a) -> x:'a -> Tot 'a
-let for_loop min max f a = 
-    Spec.Loops.repeat_range_spec (U32.v min) (U32.v max) (fun x i -> f x (U32.uint_to_t i)) a
-
 
 (* SHA256 *)
 let max_input_len_sha256 = pow2 61
@@ -76,21 +22,6 @@ val hash_sha256:
 	hash:lbytes hLen ->
 	Tot (msgHash:lbytes hLen)
 let hash_sha256 msg h = SHA2_256.hash msg
-
-(* BIGNUM; make abstract type *)
-type bignum = nat
-type elem (n:pos) = e:bignum{e < n}
-let bignum_to_uint8 x = U8.uint_to_t (to_uint_t 8 x)  (* bignum_to_bytes *)
-let uint8_to_bignum x = U8.v x
-let bignum_mul x y = (op_Multiply x y) (* use for extended_eucl & for mult by 256 *)
-let bignum_mod x y = x % y (* use for extended_eucl & mod 256 *)
-let bignum_div x y = x / y (* use for extended_eucl & div 256 *)
-(* NEED TO IMPLEMENT: *)
-let bignum_add x y = x + y (* bytes_to_bignum *)
-let bignum_sub x y = x - y (* use for extended_eucl *)
-let bignum_mul_mod x y m = (x * y) % m
-let bignum_is_even x = (x % 2) = 0
-let bignum_div2 x = x / 2
 
 (* RSA *)
 type modBits = modBits:U32.t{U32.v modBits > 0}
@@ -110,6 +41,7 @@ let rec extended_eucl a b =
 		match (extended_eucl b (bignum_mod a b)) with
 		| (x, y) -> (y, bignum_sub x (bignum_mul (bignum_div a b) y))
 
+#reset-options "--z3rlimit 30"
 
 val mod_exp_loop: n:pos -> a:bignum -> b:bignum -> acc:elem n -> Tot (res:elem n) (decreases b)
 let rec mod_exp_loop n a b acc =
@@ -141,37 +73,6 @@ val fexp: n:pos -> a:elem n -> b:elem n -> Tot (res:elem n)
 let fexp n a b = (pow a b) % n
 *)
 
-
-
-(* BIGNUM LIB *)
-val os2ip: b:bytes -> Tot bignum 
-let os2ip b =
-  let bLen = seq_length b in
-  if (bLen = 0ul) 
-  then 0 
-  else
-    let next (a:bignum) (i:U32.t{U32.v i < U32.v bLen - 1}): bignum = 
-	       bignum_mul (bignum_add a (uint8_to_bignum b.[i])) 256 in
-    let acc = for_loop 0ul (bLen -^ 1ul) next 0 in
-    acc + U8.v (b.[bLen -^ 1ul])
-    
-val i2osp:
-	n:bignum -> b:bytes{n < pow2 (8 * length b)} ->
-	Tot (b':bytes{length b' = length b})
-let i2osp n b =
-	let bLen = seq_length b in
-	if (bLen = 0ul)
-	then b
-	else
-	let next (c:tuple2 bignum (lbytes bLen)) (i:U32.t{U32.v i < U32.v bLen}) : tuple2 bignum (lbytes bLen) =
-	    let (n,b) = c in
-	    let b' = b.[bLen -^ i -^ 1ul] <- bignum_to_uint8 (bignum_mod n 256) in
-	    let n' = bignum_div n 256 in
-	    (n',b') in
-  
-        let (n',b') = for_loop 0ul bLen next (n,b) in
-	b'
-
 val mgf_sha256_loop:
 	mgfseed:bytes{length mgfseed = (U32.v hLen) + 4} ->
         counter_max:UInt32.t ->
@@ -179,9 +80,6 @@ val mgf_sha256_loop:
 	Tot (res:bytes{length res = length acc})
 
 #reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
-
-val store32_be: U32.t -> lbytes 4ul -> lbytes 4ul
-let store32_be (i:U32.t) (b:lbytes 4ul) : lbytes 4ul = FStar.Endianness.uint32_be 4ul i
 
 let mgf_sha256_loop mgfseed counter_max acc =
     let mHash = create 32ul 0uy in
@@ -192,10 +90,6 @@ let mgf_sha256_loop mgfseed counter_max acc =
 		let mHash = hash_sha256 mgfseed mHash in
 		blit mHash 0ul acc (hLen *^ i) hLen in
     for_loop #(lbytes accLen) 0ul counter_max next acc
-
-(* NEED TO PROVE: x <= m * r *)
-val blocks: x:U32.t{U32.v x > 0} -> m:U32.t{U32.v m > 0} -> r:U32.t{U32.v r > 0}
-let blocks (x:U32.t{U32.v x > 0}) (m:U32.t{U32.v m > 0}) = (x -^ 1ul) /^ m +^ 1ul
 
 (* We only allow U32.t masklen, this means that we always have the property
    that maskLen <= op_Multiply (pow2 32) (U32.v hLen) as required by the spec *)
@@ -211,9 +105,6 @@ let mgf_sha256 mgfseed maskLen mask =
 	let acc = create accLen 0x00uy in
 	let acc = mgf_sha256_loop mgfseed counter_max acc in
 	slice acc 0ul maskLen
-
-val xor_bytes: b1:bytes -> b2:bytes{length b2 = length b1} -> Tot (res:bytes{length res = length b1})
-let xor_bytes b1 b2 = Spec.Lib.map2 (fun x y -> U8.(x ^^ y)) b1 b2
 
 val pss_encode_:
 	salt:bytes{length salt + U32.v hLen + 8 < pow2 32} ->
