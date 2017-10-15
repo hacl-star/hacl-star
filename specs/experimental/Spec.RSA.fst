@@ -3,6 +3,7 @@ module Spec.RSA
 open FStar.Seq
 open FStar.Mul
 open FStar.UInt
+open FStar.Math.Lemmas
 open Spec.SHA2_256
 open Spec.Seq.Lib
 open Spec.Bignum
@@ -32,6 +33,8 @@ type rsa_pubkey (modBits:modBits) =
 type rsa_privkey (modBits:modBits) =
 	| Mk_rsa_privkey: pkey:rsa_pubkey modBits -> d:elem (Mk_rsa_pubkey?.n pkey) -> rsa_privkey modBits
 
+#reset-options "--z3rlimit 50"
+
 (* USE MONTGOMERY INVERSE METHOD *)
 (* a*x + b*y = gcd(a,b) *)
 val extended_eucl: a:bignum -> b:bignum -> Tot (tuple2 int int) (decreases b)
@@ -40,8 +43,6 @@ let rec extended_eucl a b =
 	else
 		match (extended_eucl b (bignum_mod a b)) with
 		| (x, y) -> (y, bignum_sub x (bignum_mul (bignum_div a b) y))
-
-#reset-options "--z3rlimit 30"
 
 val mod_exp_loop: n:pos -> a:bignum -> b:bignum -> acc:elem n -> Tot (res:elem n) (decreases b)
 let rec mod_exp_loop n a b acc =
@@ -148,7 +149,7 @@ val pss_encode:
 	em:bytes{length em - length salt - U32.v hLen - 3 >= 0} ->
 	Tot (res:bytes{length res = length em})
 
-#reset-options "--z3rlimit 50 --max_fuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 let pss_encode msBits salt msg em =
 	let emLen = seq_length em in
@@ -221,7 +222,6 @@ let pss_verify sLen msBits em msg =
 		else pss_verify_ sLen msBits em' msg
 		end
 
-
 val rsa_sign:
 	modBits:modBits ->
 	skey:rsa_privkey modBits ->
@@ -236,10 +236,13 @@ let rsa_sign modBits skey rBlind salt msg =
 	let pkey = Mk_rsa_privkey?.pkey skey in
 	let n = Mk_rsa_pubkey?.n pkey in
 	let e = Mk_rsa_pubkey?.e pkey in
+	assert(U32.v modBits <= 8 * U32.v k);
+	pow2_le_compat (8 * U32.v k) (U32.v modBits);
+	assert(pow2 (U32.v modBits) <= pow2 (8 * U32.v k));
+	assert(n < pow2 (8 * U32.v k));
 
 	let msBits = (modBits -^ 1ul) %^ 8ul in
 	let em = create k 0x00uy in
-	(**) assume(U32.v msBits < 8);
 	let em = pss_encode msBits salt msg em in
 	let m = os2ip em in
 	(* BLINDING *)
@@ -249,7 +252,7 @@ let rsa_sign modBits skey rBlind salt msg =
 	let s1 = mod_exp n m1 d in
 	let s = bignum_mul_mod s1 rBlind_inv n in
 	let sgnt = create k 0x00uy in
-	(**) assume(s < pow2 (8 * U32.v k));
+	assert(s < n);
 	i2osp s sgnt
 
 val rsa_verify:
@@ -263,17 +266,17 @@ let rsa_verify modBits pkey sLen sgnt msg =
 	let k = blocks modBits 8ul in
 	let e = Mk_rsa_pubkey?.e pkey in
 	let n = Mk_rsa_pubkey?.n pkey in
-	(* PROVE: n < pow2 (8 * k) /\ e < n => e < pow2 (8 * k) *)
-	(* modBits <= 8 * k *)
-	(* n < pow2 modBits => n < pow2 (8 * ((modBits - 1)/8 + 1)) *)
+	assert(U32.v modBits <= 8 * U32.v k);
+	pow2_le_compat (8 * U32.v k) (U32.v modBits);
+	assert(pow2 (U32.v modBits) <= pow2 (8 * U32.v k));
+	assert(n < pow2 (8 * U32.v k));
 
 	let s = os2ip sgnt in
-	let s = bignum_mod s n in (* compare: s < n *)
-	let m = mod_exp n s e in
-	(* PROVE: m < n => m < pow2 (8 * k) *)
-	(**) assume(m < pow2 (8 * U32.v k));
-	let em = create k 0x00uy in
-	let em = i2osp m em in
-	let msBits = (modBits -^ 1ul) %^ 8ul in
-	(**) assume(U32.v msBits < 8);
-	pss_verify sLen msBits em msg
+	if bignum_is_less s n then begin
+		let s = bignum_mod s n in
+		let m = mod_exp n s e in
+		let em = create k 0x00uy in
+		let em = i2osp m em in
+		let msBits = (modBits -^ 1ul) %^ 8ul in
+		pss_verify sLen msBits em msg end 
+	else false

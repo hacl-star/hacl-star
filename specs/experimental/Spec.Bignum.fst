@@ -23,3 +23,4 @@ let bignum_sub x y = x - y (* use for extended_eucl *)
 let bignum_mul_mod x y m = (x * y) % m
 let bignum_is_even x = (x % 2) = 0
 let bignum_div2 x = x / 2
+let bignum_is_less x y = x < y
