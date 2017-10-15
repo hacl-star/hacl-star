@@ -83,7 +83,7 @@ val mgf_sha256_loop:
 #reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 
 let mgf_sha256_loop mgfseed counter_max acc =
-    let mHash = create 32ul 0uy in
+    let mHash = create hLen 0uy in
     let accLen = seq_length acc in
     let acc: lbytes accLen = acc in
     let next (acc:lbytes accLen) (i:U32.t{U32.v i < U32.v counter_max}) : lbytes accLen =
@@ -115,7 +115,7 @@ val pss_encode_:
 	Tot (em':lbytes emLen)
 
 let pss_encode_ salt msg emLen em =
-	let mHash = create 32ul 0uy in
+	let mHash = create hLen 0uy in
 	let mHash = hash_sha256 msg mHash in
 
 	let sLen = seq_length salt in
@@ -126,7 +126,7 @@ let pss_encode_ salt msg emLen em =
 	let m1 = blit mHash 0ul m1 8ul hLen in
 	let m1 = blit salt 0ul m1 (8ul +^ hLen) sLen in
 	let m1Hash = create 36ul 0uy in
-	let m1Hash = update_slice m1Hash 0ul 32ul (hash_sha256 m1) in
+	let m1Hash = update_slice m1Hash 0ul hLen (hash_sha256 m1) in
 	
 	let db_size = emLen -^ hLen -^ 1ul in
 	let db = create db_size 0x00uy in
@@ -167,7 +167,7 @@ val pss_verify_:
 
 let pss_verify_ sLen msBits em msg =
 	let emLen = seq_length em in
-	let mHash = create 32ul 0uy in
+	let mHash = create hLen 0uy in
 	let mHash = hash_sha256 msg mHash in
 
 	let pad_size = emLen -^ sLen -^ hLen -^ 1ul in
@@ -197,7 +197,7 @@ let pss_verify_ sLen msBits em msg =
 		(* first 8 elements should be 0x00 *)
 		let m1 = blit mHash 0ul m1 8ul hLen in
 		let m1 = blit salt 0ul m1 (8ul +^ hLen) sLen in
-		let m1Hash' = create 32ul 0uy in
+		let m1Hash' = create hLen 0uy in
 		let m1Hash' = hash_sha256 m1 m1Hash' in
 		Seq.eq m1Hash0 m1Hash'
 	end
@@ -273,7 +273,6 @@ let rsa_verify modBits pkey sLen sgnt msg =
 
 	let s = os2ip sgnt in
 	if bignum_is_less s n then begin
-		let s = bignum_mod s n in
 		let m = mod_exp n s e in
 		let em = create k 0x00uy in
 		let em = i2osp m em in
