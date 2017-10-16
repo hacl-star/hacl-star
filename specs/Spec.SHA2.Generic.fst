@@ -6,11 +6,11 @@ open FStar.UInt32
 open Spec.Loops
 open Spec.Lib
 
-type lseq 'a n = s:seq 'a{length s = n}
+type lseq 'a n = s:seq 'a{Seq.length s = n}
 type byte = UInt8.t
 type u8 = UInt8.t
 type u32 = UInt32.t
-type u64 = UInt32.t
+type u64 = UInt64.t
 type rotval (size:nat) = r:u32{v r > 0 /\ v r < size}
 
 let rec big_bytes #max (start:nat) (len:nat{start+len <= max}) (n:nat{n < pow2 (8 * len)}) (s:lseq u8 max) : lseq u8 max =
@@ -230,7 +230,7 @@ let word32 : word u32 4 = {
   rotate_right = rotate_right32;
 }
 
-let word64 : word u32 8 = {
+let word64 : word u64 8 = {
   word0 = 0uL;
   to_be = Spec.Lib.uint64s_to_be;
   from_be = u64s_from_be;
