@@ -44,6 +44,37 @@ let rec extended_eucl a b =
 		match (extended_eucl b (bignum_mod a b)) with
 		| (x, y) -> (y, bignum_sub x (bignum_mul (bignum_div a b) y))
 
+val mod_mult_mont: n:bignum -> r:bignum -> n':int -> a_r: elem n -> b_r: elem n -> Tot (res:elem n)
+let mod_mult_mont n r n' a_r b_r =
+	let c = op_Multiply a_r b_r in
+	let m = (op_Multiply c n') % r in
+	let u = (c + op_Multiply m n) / r in
+	(* if u >= n then u - n else u *)
+	u % n
+
+val mod_exp_mont_loop: n:pos -> r:bignum -> n':int -> a:bignum -> b:bignum -> acc:elem n -> Tot (res:elem n) (decreases b)
+let rec mod_exp_mont_loop n r n' a b acc =
+	match b with
+	| 0 -> acc
+	| 1 -> mod_mult_mont n r n' a acc
+	| e ->
+		let a2 = mod_mult_mont n r n' a a in
+		let acc =
+			if (bignum_is_even e) then acc
+			else mod_mult_mont n r n' a acc in
+		mod_exp_mont_loop n r n' a2 (bignum_div2 b) acc
+
+val mod_exp_mont: k:U32.t -> n:pos -> a:elem n -> b:elem n -> Tot (res:elem n)
+let mod_exp_mont k n a b =
+	let r = pow2 (64 * (U32.v k)) in
+	let _, n' = extended_eucl r n in
+	let n' = op_Multiply n' (-1) in
+	let a_r = (op_Multiply a r) % n in
+	let one_r = (op_Multiply 1 r) % n in
+	let acc_r = mod_exp_mont_loop n r n' a_r b one_r in
+	mod_mult_mont n r n' acc_r 1
+
+
 val mod_exp_loop: n:pos -> a:bignum -> b:bignum -> acc:elem n -> Tot (res:elem n) (decreases b)
 let rec mod_exp_loop n a b acc =
 	match b with
@@ -247,9 +278,9 @@ let rsa_sign modBits skey rBlind salt msg =
 	let m = os2ip em in
 	(* BLINDING *)
 	let rBlind_inv, _ = extended_eucl rBlind n in
-	let rBlind_e = mod_exp n rBlind e in
+	let rBlind_e = mod_exp_mont k n rBlind e in
 	let m1 = bignum_mul_mod m rBlind_e n in
-	let s1 = mod_exp n m1 d in
+	let s1 = mod_exp_mont k n m1 d in
 	let s = bignum_mul_mod s1 rBlind_inv n in
 	let sgnt = create k 0x00uy in
 	assert(s < n);
@@ -273,7 +304,7 @@ let rsa_verify modBits pkey sLen sgnt msg =
 
 	let s = os2ip sgnt in
 	if bignum_is_less s n then begin
-		let m = mod_exp n s e in
+		let m = mod_exp_mont k n s e in
 		let em = create k 0x00uy in
 		let em = i2osp m em in
 		let msBits = (modBits -^ 1ul) %^ 8ul in
