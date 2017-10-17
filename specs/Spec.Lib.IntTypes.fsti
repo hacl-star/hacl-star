@@ -3,6 +3,8 @@ module Spec.Lib.IntTypes
 type inttype = 
  | U8 | U16 | U32 | U64 | U128 
 
+val maxint: inttype -> nat
+
 unfold 
 let bits (n:inttype) = 
   match n with
@@ -23,20 +25,27 @@ let size (n:inttype) =
   
 val uint: Type0
 val ty: uint -> GTot inttype
+type uint_t (t:inttype) = 
+     u:uint {ty u = t}
 val uint_v: u:uint -> GTot nat
 
-type uint8 = u:uint{ty u = U8}
-type uint16 = u:uint{ty u = U16}
-type uint32 = u:uint{ty u = U32}
-type uint64 = u:uint{ty u = U64}
-type uint128 = u:uint{ty u = U128}
-val u8: UInt8.t -> u:uint8
-val u16: UInt16.t -> u:uint16
-val u32: UInt32.t -> u:uint32
-val u64: UInt64.t -> u:uint64
-val u128: UInt128.t -> uint128
+type uint8 = uint_t U8
+type uint16 = uint_t U16
+type uint32 = uint_t U32
+type uint64 = uint_t U64
+type uint128 = uint_t U128
+val u8: (n:nat{n <= maxint U8}) -> u:uint8
+val u16: (n:nat{n <= maxint U16}) -> u:uint16
+val u32: (n:nat{n <= maxint U32}) -> u:uint32
+val u64: (n:nat{n <= maxint U64}) -> u:uint64
+val u128: (n:nat{n <= maxint U128}) -> uint128
 
-val add_mod: a:uint -> b:uint{ty b = ty a} -> u:uint{ty u = ty a}
+//val add_mod: a:uint -> b:uint{ty a = ty b} -> u:uint{ty u = ty a}
+
+val add_mod: a:uint -> b:uint -> Pure uint
+    (requires (ty b = ty a))
+    (ensures (fun u -> ty u = ty a))
+
 val add: a:uint -> b:uint{ty b = ty a /\ 
 			 uint_v a + uint_v b < pow2 (bits (ty a))} 
 			    -> u:uint{ty u = ty a}
@@ -52,10 +61,10 @@ val logand: a:uint -> b:uint{ty b = ty a} -> u:uint{ty u = ty a}
 val logor: a:uint -> b:uint{ty b = ty a} -> u:uint{ty u = ty a}
 val lognot: a:uint -> u:uint{ty u = ty a}
 
-val shift_right: a:uint -> b:UInt32.t{UInt32.v b < bits (ty a)} -> u:uint{ty u = ty a}
-val shift_left: a:uint -> b:UInt32.t{UInt32.v b < bits (ty a)} -> u:uint{ty u = ty a}
-val rotate_right: a:uint -> b:UInt32.t{UInt32.v b > 0 /\ UInt32.v b < bits (ty a)} -> u:uint{ty u = ty a}
-val rotate_left: a:uint -> b:UInt32.t{UInt32.v b > 0 /\ UInt32.v b < bits (ty a)} -> u:uint{ty u = ty a}
+val shift_right: a:uint -> b:uint32{uint_v b < bits (ty a)} -> u:uint{ty u = ty a}
+val shift_left: a:uint -> b:uint32{uint_v b < bits (ty a)} -> u:uint{ty u = ty a}
+val rotate_right: a:uint -> b:uint32{uint_v b > 0 /\ uint_v b < bits (ty a)} -> u:uint{ty u = ty a}
+val rotate_left: a:uint -> b:uint32{uint_v b > 0 /\ uint_v b < bits (ty a)} -> u:uint{ty u = ty a}
 
 val eq_mask: a:uint -> b:uint{ty b = ty a} -> c:uint{ty c = ty a }
 val neq_mask: a:uint -> b:uint{ty b = ty a} -> c:uint{ty c = ty a}

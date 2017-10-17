@@ -5,7 +5,15 @@ open FStar.Endianness
 
 (* Declared in .fsti : intsize, bits *)
 
-let uint_t (t:inttype) : Type0 = 
+let maxint (t:inttype) = 
+  match t with
+  | U8 -> 0xff
+  | U16 -> 0xffff
+  | U32 -> 0xffffffff
+  | U64 -> 0xffffffffffffffff
+  | U128 -> 0xffffffffffffffffffffffffffffffff
+
+let uint_n (t:inttype) : Type0 = 
   match t with
   | U8 -> UInt8.t
   | U16 -> UInt16.t
@@ -14,9 +22,10 @@ let uint_t (t:inttype) : Type0 =
   | U128 -> UInt128.t
     
 noeq type uint_ =
- | UInt: t:inttype -> v:uint_t t -> uint_
+ | UInt: t:inttype -> v:uint_n t -> uint_
 
 let uint = uint_
+
 let ty u = u.t
 
 let uint_v (u:uint) = 
@@ -30,15 +39,20 @@ let uint_v (u:uint) =
 
 (* Declared in .fsti: uint8, uint16, uint32, uint64, uint128 *)
 
-let u8 (x:UInt8.t) : uint8 = UInt U8 x
+let u8 x : uint8 = 
+  UInt U8 (UInt8.uint_to_t x)
 
-let u16 (x:UInt16.t) : uint16 = UInt U16 x
+let u16 x : uint16 = 
+  UInt U16 (UInt16.uint_to_t x)
 
-let u32 (x:UInt32.t) : uint32 = UInt U32 x
+let u32 x : uint32 = 
+  UInt U32 (UInt32.uint_to_t x)
 
-let u64 (x:UInt64.t) : uint64 = UInt U64 x
+let u64 x : uint64 = 
+  UInt U64 (UInt64.uint_to_t x)
 
-let u128 (x:UInt128.t) : uint128 = UInt U128 x
+let u128 x : uint128 = 
+  UInt U128 (UInt128.uint_to_t x)
 
 let add_mod a b =
   match a,b with
@@ -132,78 +146,76 @@ let lognot a =
 
 let shift_right a b = 
   match a with
-  | UInt U8 a -> UInt U8 (UInt8.shift_right a b)
-  | UInt U16 a -> UInt U16 (UInt16.shift_right a b)
-  | UInt U32 a -> UInt U32 (UInt32.shift_right a b)
-  | UInt U64 a -> UInt U64 (UInt64.shift_right a b)
-  | UInt U128 a -> UInt U128 (UInt128.shift_right a b)
+  | UInt U8 a -> UInt U8 (UInt8.shift_right a b.v)
+  | UInt U16 a -> UInt U16 (UInt16.shift_right a b.v)
+  | UInt U32 a -> UInt U32 (UInt32.shift_right a b.v)
+  | UInt U64 a -> UInt U64 (UInt64.shift_right a b.v)
+  | UInt U128 a -> UInt U128 (UInt128.shift_right a b.v)
 
 
 let shift_left a b = 
   match a with
-  | UInt U8 a -> UInt U8 (UInt8.shift_left a b)
-  | UInt U16 a -> UInt U16 (UInt16.shift_left a b)
-  | UInt U32 a -> UInt U32 (UInt32.shift_left a b)
-  | UInt U64 a -> UInt U64 (UInt64.shift_left a b)
-  | UInt U128 a -> UInt U128 (UInt128.shift_left a b)
+  | UInt U8 a -> UInt U8 (UInt8.shift_left a b.v)
+  | UInt U16 a -> UInt U16 (UInt16.shift_left a b.v)
+  | UInt U32 a -> UInt U32 (UInt32.shift_left a b.v)
+  | UInt U64 a -> UInt U64 (UInt64.shift_left a b.v)
+  | UInt U128 a -> UInt U128 (UInt128.shift_left a b.v)
 
 
 let rotate_right a b = 
-  (logor (shift_right a b)  (shift_left a (UInt32.uint_to_t (bits a.t - UInt32.v b))))
-
+  (logor (shift_right a b)  (shift_left a (sub (u32 (bits a.t)) b)))
 
 let rotate_left a b = 
-  (logor (shift_left a b)  (shift_right a (UInt32.uint_to_t (bits a.t - UInt32.v b))))
-
+  (logor (shift_left a b)  (shift_right a (sub (u32 (bits a.t)) b)))
 
 let eq_mask a b = 
   match a,b with
-  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a =^ b) then (u8 0xffuy) else (u8 0uy)
-  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a =^ b) then (u16 0xffffus) else (u16 0us)
-  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a =^ b) then (u32 0xfffffffful) else (u32 0ul) 
-  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a =^ b) then (u64 0xffffffffffffffffuL) else (u64 0uL) 
-  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a =^ b) then (u128 (FStar.UInt128.uint_to_t 0xffffffffffffffffffffffffffffffff)) else (u128 (FStar.UInt128.uint_to_t 0))
+  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a =^ b) then (u8 (maxint U8)) else (u8 0)
+  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a =^ b) then (u16 (maxint U16)) else (u16 0)
+  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0) 
+  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a =^ b) then (u64 (maxint U64)) else (u64 0) 
+  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
 
 let neq_mask a b = 
   match a,b with
-  | UInt U8 a, UInt U8 b -> if not FStar.UInt8.(a =^ b) then (u8 0xffuy) else (u8 0uy)
-  | UInt U16 a, UInt U16 b -> if not FStar.UInt16.(a =^ b) then (u16 0xffffus) else (u16 0us)
-  | UInt U32 a, UInt U32 b -> if not FStar.UInt32.(a =^ b) then (u32 0xfffffffful) else (u32 0ul) 
-  | UInt U64 a, UInt U64 b -> if not FStar.UInt64.(a =^ b) then (u64 0xffffffffffffffffuL) else (u64 0uL) 
-  | UInt U128 a, UInt U128 b -> if not FStar.UInt128.(a =^ b) then (u128 (FStar.UInt128.uint_to_t 0xffffffffffffffffffffffffffffffff)) else (u128 (FStar.UInt128.uint_to_t 0))
+  | UInt U8 a, UInt U8 b -> if not FStar.UInt8.(a =^ b) then (u8 (maxint U8)) else (u8 0)
+  | UInt U16 a, UInt U16 b -> if not FStar.UInt16.(a =^ b) then (u16 (maxint U16)) else (u16 0)
+  | UInt U32 a, UInt U32 b -> if not FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0) 
+  | UInt U64 a, UInt U64 b -> if not FStar.UInt64.(a =^ b) then (u64 (maxint U64)) else (u64 0) 
+  | UInt U128 a, UInt U128 b -> if not FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
 
 let gte_mask a b = 
   match a,b with
-  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a >=^ b) then (u8 0xffuy) else (u8 0uy)
-  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a >=^ b) then (u16 0xffffus) else (u16 0us)
-  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a >=^ b) then (u32 0xfffffffful) else (u32 0ul) 
-  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a >=^ b) then (u64 0xffffffffffffffffuL) else (u64 0uL) 
-  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a >=^ b) then (u128 (FStar.UInt128.uint_to_t 0xffffffffffffffffffffffffffffffff)) else (u128 (FStar.UInt128.uint_to_t 0))
+  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a >=^ b) then (u8 (maxint U8)) else (u8 0)
+  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a >=^ b) then (u16 (maxint U16)) else (u16 0)
+  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0) 
+  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a >=^ b) then (u64 (maxint U64)) else (u64 0) 
+  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a >=^ b) then (u128 (maxint U128)) else (u128 0)
 
 let gt_mask a b = 
   match a,b with
-  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a >^ b) then (u8 0xffuy) else (u8 0uy)
-  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a >^ b) then (u16 0xffffus) else (u16 0us)
-  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a >^ b) then (u32 0xfffffffful) else (u32 0ul) 
-  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a >^ b) then (u64 0xffffffffffffffffuL) else (u64 0uL) 
-  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a >^ b) then (u128 (FStar.UInt128.uint_to_t 0xffffffffffffffffffffffffffffffff)) else (u128 (FStar.UInt128.uint_to_t 0))
+  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a >^ b) then (u8 (maxint U8)) else (u8 0)
+  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a >^ b) then (u16 (maxint U16)) else (u16 0)
+  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a >^ b) then (u32 (maxint U32)) else (u32 0) 
+  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a >^ b) then (u64 (maxint U64)) else (u64 0) 
+  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a >^ b) then (u128 (maxint U128)) else (u128 0)
 
 
 let lt_mask a b = 
   match a,b with
-  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a <^ b) then (u8 0xffuy) else (u8 0uy)
-  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a <^ b) then (u16 0xffffus) else (u16 0us)
-  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a <^ b) then (u32 0xfffffffful) else (u32 0ul) 
-  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a <^ b) then (u64 0xffffffffffffffffuL) else (u64 0uL) 
-  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a <^ b) then (u128 (FStar.UInt128.uint_to_t 0xffffffffffffffffffffffffffffffff)) else (u128 (FStar.UInt128.uint_to_t 0))
+  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a <^ b) then (u8 (maxint U8)) else (u8 0)
+  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a <^ b) then (u16 (maxint U16)) else (u16 0)
+  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a <^ b) then (u32 (maxint U32)) else (u32 0) 
+  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a <^ b) then (u64 (maxint U64)) else (u64 0) 
+  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a <^ b) then (u128 (maxint U128)) else (u128 0)
 
 let lte_mask a b = 
   match a,b with
-  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a <=^ b) then (u8 0xffuy) else (u8 0uy)
-  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a <=^ b) then (u16 0xffffus) else (u16 0us)
-  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a <=^ b) then (u32 0xfffffffful) else (u32 0ul) 
-  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a <=^ b) then (u64 0xffffffffffffffffuL) else (u64 0uL) 
-  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a <=^ b) then (u128 (FStar.UInt128.uint_to_t 0xffffffffffffffffffffffffffffffff)) else (u128 (FStar.UInt128.uint_to_t 0))
+  | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a <=^ b) then (u8 (maxint U8)) else (u8 0)
+  | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a <=^ b) then (u16 (maxint U16)) else (u16 0)
+  | UInt U32 a, UInt U32 b -> if FStar.UInt32.(a <=^ b) then (u32 (maxint U32)) else (u32 0) 
+  | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a <=^ b) then (u64 (maxint U64)) else (u64 0) 
+  | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a <=^ b) then (u128 (maxint U128)) else (u128 0)
  
 (* defined in .fsti: notations +^, -^, ...*)
 
@@ -215,4 +227,5 @@ let bn_mul a b = a `op_Multiply` b
 let bn_sub a b = a - b
 let bn_mod a b = a % b
 let bn_div a b = a / b
+
 
