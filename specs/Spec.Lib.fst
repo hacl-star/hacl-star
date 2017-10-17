@@ -2,11 +2,128 @@ module Spec.Lib
 
 module ST = FStar.HyperStack.ST
 
-open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
 open FStar.Endianness
 
+(* Size of integer in bytes *)
+let intsize : Type0 = n:nat{n = 1 \/ n = 2 \/ n = 4 \/ n = 8 \/ n = 16}
+
+unfold 
+let bits (n:intsize) = 
+  match n with
+  | 1 -> 8
+  | 2 -> 16
+  | 4 -> 32
+  | 8 -> 64
+  | 16 -> 128
+
+unfold
+let uint (n:intsize) : Type0 = 
+  match n with
+  | 1 -> UInt8.t
+  | 2 -> UInt16.t
+  | 4 -> UInt32.t
+  | 8 -> UInt64.t
+  | 16 -> UInt128.t
+
+val u8: UInt8.t -> uint 1
+let u8 (x:UInt8.t) : uint 1 = x
+
+val u32: UInt32.t -> uint 4
+let u32 (x:UInt32.t) : uint 4 = x
+
+unfold
+let add_mod #n (a:uint n) (b:uint n) : uint n =
+  match n with
+  | 1 -> UInt8.add_mod a b 
+  | 2 -> UInt16.add_mod a b
+  | 4 -> UInt32.add_mod a b
+  | 8 -> UInt64.add_mod a b 
+  | 16 -> UInt128.add_mod a b
+
+unfold
+let logxor #n (a:uint n) (b:uint n) : uint n =
+  match n with
+  | 1 -> UInt8.logxor a b 
+  | 2 -> UInt16.logxor a b
+  | 4 -> UInt32.logxor a b
+  | 8 -> UInt64.logxor a b 
+  | 16 -> UInt128.logxor a b
+
+unfold
+let logand #n (a:uint n) (b:uint n) : uint n =
+  match n with
+  | 1 -> UInt8.logand a b 
+  | 2 -> UInt16.logand a b
+  | 4 -> UInt32.logand a b
+  | 8 -> UInt64.logand a b 
+  | 16 -> UInt128.logand a b
+
+unfold
+let logor #n (a:uint n) (b:uint n) : uint n =
+  match n with
+  | 1 -> UInt8.logor a b 
+  | 2 -> UInt16.logor a b
+  | 4 -> UInt32.logor a b
+  | 8 -> UInt64.logor a b 
+  | 16 -> UInt128.logor a b
+
+unfold
+let lognot #n (a:uint n) : uint n =
+  match n with
+  | 1 -> UInt8.lognot a  
+  | 2 -> UInt16.lognot a 
+  | 4 -> UInt32.lognot a 
+  | 8 -> UInt64.lognot a  
+  | 16 -> UInt128.lognot a 
+
+unfold
+let shift_right #n (a:uint n) (b:UInt32.t{v b < bits n}) : uint n =
+  match n with
+  | 1 -> UInt8.shift_right a b 
+  | 2 -> UInt16.shift_right a b
+  | 4 -> UInt32.shift_right a b
+  | 8 -> UInt64.shift_right a b 
+  | 16 -> UInt128.shift_right a b
+
+unfold
+let shift_left #n (a:uint n) (b:UInt32.t{v b < bits n}) : uint n =
+  match n with
+  | 1 -> UInt8.shift_left a b 
+  | 2 -> UInt16.shift_left a b
+  | 4 -> UInt32.shift_left a b
+  | 8 -> UInt64.shift_left a b 
+  | 16 -> UInt128.shift_left a b
+
+unfold
+let rotate_right #n (a:uint n) (b:UInt32.t{v b > 0 /\ v b < bits n}) : uint n = 
+  (logor #n (shift_right #n a b)  (shift_left #n a (uint_to_t (bits n - v b))))
+
+unfold
+let rotate_left #n (a:uint n) (b:UInt32.t{v b > 0 /\ v b < bits n}) : uint n = 
+  (logor #n (shift_left #n a b)  (shift_right #n a (uint_to_t (bits n - v b))))
+
+unfold
+let op_Plus_Hat #n = add_mod #n
+
+unfold
+let op_Greater_Greater_Hat #n = shift_right #n
+
+let f x : uint 1=
+  let y:uint 1 = u8 x in
+  add_mod #1 y 1uy
+
+let lseq 'a (l:nat) : Type0 = s:seq 'a{length s = l}
+
+let index #l (s:lseq 'a n) (i:nat{i < l}) : 'a = 
+  match l,i with
+  | 0,_ -> ()
+  | 1,0 -> s
+  | 2,0 -> fst #'a #'a s
+  | 2,1 -> snd #'a #'a s
+  | _,i -> Seq.index s i
+  
 #set-options "--initial_fuel 0 --initial_ifuel 0 --max_fuel 0 --max_ifuel 0"
 
 let rotate_left (a:UInt32.t) (s:UInt32.t {0 < v s /\ v s<32}) : Tot UInt32.t =
@@ -400,3 +517,4 @@ let rec lemma_uint32s_to_le_slice len b n =
     lemma_eq_intro (slice b n (len-1)) (slice (slice b n (len)) 0 (len-n-1));
     lemma_eq_intro (uint32s_to_le (len-n) (slice b n (len))) (uint32s_to_le (len-n-1) (slice b n (len-1)) @| uint32_to_le h)
   )
+
