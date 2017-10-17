@@ -3,15 +3,7 @@ module Spec.Lib.IntTypes
 open FStar.Seq
 open FStar.Endianness
 
-(* Declared in .fsti : intsize, bits *)
-
-let maxint (t:inttype) = 
-  match t with
-  | U8 -> 0xff
-  | U16 -> 0xffff
-  | U32 -> 0xffffffff
-  | U64 -> 0xffffffffffffffff
-  | U128 -> 0xffffffffffffffffffffffffffffffff
+(* Declared in .fsti : intsize, bits, maxint *)
 
 let uint_n (t:inttype) : Type0 = 
   match t with
@@ -21,7 +13,8 @@ let uint_n (t:inttype) : Type0 =
   | U64 -> UInt64.t
   | U128 -> UInt128.t
     
-noeq type uint_ =
+noeq 
+type uint_ =
  | UInt: t:inttype -> v:uint_n t -> uint_
 
 let uint = uint_
@@ -54,7 +47,7 @@ let u64 x : uint64 =
 let u128 x : uint128 = 
   UInt U128 (UInt128.uint_to_t x)
 
-let add_mod a b =
+let add_mod #t a b =
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.add_mod a b)
   | UInt U16 a, UInt U16 b -> UInt U16 (UInt16.add_mod a b)
@@ -63,7 +56,7 @@ let add_mod a b =
   | UInt U128 a, UInt U128 b -> UInt U128 (UInt128.add_mod a b)
   
 
-let add a b = 
+let add #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.add a b)
   | UInt U16 a, UInt U16 b -> UInt U16 (UInt16.add a b)
@@ -74,7 +67,7 @@ let add a b =
 
 //#reset-options "--z3rlimit 50"
 
-let mul_mod a b = 
+let mul_mod #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.mul_mod a b)
   | UInt U16 a, UInt U16 b -> UInt U16 (UInt16.mul_mod a b)
@@ -82,7 +75,7 @@ let mul_mod a b =
   | UInt U64 a, UInt U64 b -> UInt U64 (UInt64.mul_mod a b)
 
 
-let mul a b = 
+let mul #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.mul a b)
   | UInt U16 a, UInt U16 b -> UInt U16 (UInt16.mul a b)
@@ -90,7 +83,7 @@ let mul a b =
   | UInt U64 a, UInt U64 b -> UInt U64 (UInt64.mul a b)
 
 
-let sub_mod a b = 
+let sub_mod #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.sub_mod a b)
   | UInt U16 a, UInt U16 b -> UInt U16 (UInt16.sub_mod a b)
@@ -99,7 +92,7 @@ let sub_mod a b =
   | UInt U128 a, UInt U128 b -> UInt U128 (UInt128.sub_mod a b)
 
 
-let sub a b = 
+let sub #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.sub a b)
   | UInt U16 a, UInt U16 b -> UInt U16 (UInt16.sub a b)
@@ -108,7 +101,7 @@ let sub a b =
   | UInt U128 a, UInt U128 b -> UInt U128 (UInt128.sub a b)
 
 
-let logxor a b = 
+let logxor #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.logxor a b)
   | UInt U16 a, UInt U16 b -> UInt U16 (UInt16.logxor a b)
@@ -117,7 +110,7 @@ let logxor a b =
   | UInt U128 a, UInt U128 b -> UInt U128 (UInt128.logxor a b)
 
 
-let logand a b = 
+let logand #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.logand a b)
   | UInt U16 a, UInt U16 b -> UInt U16 (UInt16.logand a b)
@@ -126,7 +119,7 @@ let logand a b =
   | UInt U128 a, UInt U128 b -> UInt U128 (UInt128.logand a b)
 
 
-let logor a b = 
+let logor #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.logor a b)
   | UInt U16 a, UInt U16 b -> UInt U16 (UInt16.logor a b)
@@ -135,7 +128,7 @@ let logor a b =
   | UInt U128 a, UInt U128 b -> UInt U128 (UInt128.logor a b)
 
 
-let lognot a = 
+let lognot #t a = 
   match a with
   | UInt U8 a -> UInt U8 (UInt8.lognot a)
   | UInt U16 a -> UInt U16 (UInt16.lognot a)
@@ -144,7 +137,7 @@ let lognot a =
   | UInt U128 a -> UInt U128 (UInt128.lognot a)
 
 
-let shift_right a b = 
+let shift_right #t a b = 
   match a with
   | UInt U8 a -> UInt U8 (UInt8.shift_right a b.v)
   | UInt U16 a -> UInt U16 (UInt16.shift_right a b.v)
@@ -153,7 +146,7 @@ let shift_right a b =
   | UInt U128 a -> UInt U128 (UInt128.shift_right a b.v)
 
 
-let shift_left a b = 
+let shift_left #t a b = 
   match a with
   | UInt U8 a -> UInt U8 (UInt8.shift_left a b.v)
   | UInt U16 a -> UInt U16 (UInt16.shift_left a b.v)
@@ -162,13 +155,13 @@ let shift_left a b =
   | UInt U128 a -> UInt U128 (UInt128.shift_left a b.v)
 
 
-let rotate_right a b = 
+let rotate_right #t a b = 
   (logor (shift_right a b)  (shift_left a (sub (u32 (bits a.t)) b)))
 
-let rotate_left a b = 
+let rotate_left #t a b = 
   (logor (shift_left a b)  (shift_right a (sub (u32 (bits a.t)) b)))
 
-let eq_mask a b = 
+let eq_mask #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a =^ b) then (u8 (maxint U8)) else (u8 0)
   | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a =^ b) then (u16 (maxint U16)) else (u16 0)
@@ -176,7 +169,7 @@ let eq_mask a b =
   | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a =^ b) then (u64 (maxint U64)) else (u64 0) 
   | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
 
-let neq_mask a b = 
+let neq_mask #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> if not FStar.UInt8.(a =^ b) then (u8 (maxint U8)) else (u8 0)
   | UInt U16 a, UInt U16 b -> if not FStar.UInt16.(a =^ b) then (u16 (maxint U16)) else (u16 0)
@@ -184,7 +177,7 @@ let neq_mask a b =
   | UInt U64 a, UInt U64 b -> if not FStar.UInt64.(a =^ b) then (u64 (maxint U64)) else (u64 0) 
   | UInt U128 a, UInt U128 b -> if not FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
 
-let gte_mask a b = 
+let gte_mask #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a >=^ b) then (u8 (maxint U8)) else (u8 0)
   | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a >=^ b) then (u16 (maxint U16)) else (u16 0)
@@ -192,7 +185,7 @@ let gte_mask a b =
   | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a >=^ b) then (u64 (maxint U64)) else (u64 0) 
   | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a >=^ b) then (u128 (maxint U128)) else (u128 0)
 
-let gt_mask a b = 
+let gt_mask #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a >^ b) then (u8 (maxint U8)) else (u8 0)
   | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a >^ b) then (u16 (maxint U16)) else (u16 0)
@@ -201,7 +194,7 @@ let gt_mask a b =
   | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a >^ b) then (u128 (maxint U128)) else (u128 0)
 
 
-let lt_mask a b = 
+let lt_mask #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a <^ b) then (u8 (maxint U8)) else (u8 0)
   | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a <^ b) then (u16 (maxint U16)) else (u16 0)
@@ -209,7 +202,7 @@ let lt_mask a b =
   | UInt U64 a, UInt U64 b -> if FStar.UInt64.(a <^ b) then (u64 (maxint U64)) else (u64 0) 
   | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a <^ b) then (u128 (maxint U128)) else (u128 0)
 
-let lte_mask a b = 
+let lte_mask #t a b = 
   match a,b with
   | UInt U8 a, UInt U8 b -> if FStar.UInt8.(a <=^ b) then (u8 (maxint U8)) else (u8 0)
   | UInt U16 a, UInt U16 b -> if FStar.UInt16.(a <=^ b) then (u16 (maxint U16)) else (u16 0)

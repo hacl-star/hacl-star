@@ -3,7 +3,13 @@ module Spec.Lib.IntTypes
 type inttype = 
  | U8 | U16 | U32 | U64 | U128 
 
-val maxint: inttype -> nat
+let maxint (t:inttype) = 
+  match t with
+  | U8 -> 0xff
+  | U16 -> 0xffff
+  | U32 -> 0xffffffff
+  | U64 -> 0xffffffffffffffff
+  | U128 -> 0xffffffffffffffffffffffffffffffff
 
 unfold 
 let bits (n:inttype) = 
@@ -29,63 +35,83 @@ type uint_t (t:inttype) =
      u:uint {ty u = t}
 val uint_v: u:uint -> GTot nat
 
-type uint8 = uint_t U8
+type uint8 = u:uint_t U8
 type uint16 = uint_t U16
 type uint32 = uint_t U32
 type uint64 = uint_t U64
 type uint128 = uint_t U128
-val u8: (n:nat{n <= maxint U8}) -> u:uint8
-val u16: (n:nat{n <= maxint U16}) -> u:uint16
-val u32: (n:nat{n <= maxint U32}) -> u:uint32
-val u64: (n:nat{n <= maxint U64}) -> u:uint64
-val u128: (n:nat{n <= maxint U128}) -> uint128
+val u8: (n:nat{n <= maxint U8}) -> u:uint8{uint_v u = n}
+val u16: (n:nat{n <= maxint U16}) -> u:uint16{uint_v u = n}
+val u32: (n:nat{n <= maxint U32}) -> u:uint32{uint_v u = n}
+val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v u = n}
+val u128: (n:nat{n <= maxint U128}) -> u:uint128{uint_v u = n}
 
-//val add_mod: a:uint -> b:uint{ty a = ty b} -> u:uint{ty u = ty a}
+val add_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> uint_t t 
 
-val add_mod: a:uint -> b:uint -> Pure uint
-    (requires (ty b = ty a))
-    (ensures (fun u -> ty u = ty a))
+val add: #t:inttype -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
+  (requires (uint_v a + uint_v b < pow2 (bits t)))
+  (ensures (fun _ -> True))
 
-val add: a:uint -> b:uint{ty b = ty a /\ 
-			 uint_v a + uint_v b < pow2 (bits (ty a))} 
-			    -> u:uint{ty u = ty a}
-val mul_mod: a:uint -> b:uint{ty b = ty a /\ ty b <> U128} -> u:uint{ty u = ty a}
-val mul: a:uint -> b:uint{ty b = ty a /\ ty b <> U128 /\ 
-			      uint_v a `op_Multiply` uint_v b < pow2 (bits (ty a))} 
-			    -> u:uint{ty u = ty a}
-val sub_mod: a:uint -> b:uint{ty b = ty a} -> u:uint{ty u = ty a}
-val sub: a:uint -> b:uint{ty b = ty a /\ uint_v a - uint_v b >= 0} -> u:uint{ty u = ty a}
+val mul_mod: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> uint_t t
 
-val logxor: a:uint -> b:uint{ty b = ty a} -> u:uint{ty u = ty a}
-val logand: a:uint -> b:uint{ty b = ty a} -> u:uint{ty u = ty a}
-val logor: a:uint -> b:uint{ty b = ty a} -> u:uint{ty u = ty a}
-val lognot: a:uint -> u:uint{ty u = ty a}
+val mul: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
+  (requires (uint_v a `op_Multiply` uint_v b < pow2 (bits t)))
+  (ensures (fun _ -> True))
 
-val shift_right: a:uint -> b:uint32{uint_v b < bits (ty a)} -> u:uint{ty u = ty a}
-val shift_left: a:uint -> b:uint32{uint_v b < bits (ty a)} -> u:uint{ty u = ty a}
-val rotate_right: a:uint -> b:uint32{uint_v b > 0 /\ uint_v b < bits (ty a)} -> u:uint{ty u = ty a}
-val rotate_left: a:uint -> b:uint32{uint_v b > 0 /\ uint_v b < bits (ty a)} -> u:uint{ty u = ty a}
+val sub_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> uint_t t
+val sub: #t:inttype -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
+  (requires (uint_v a >= uint_v b ))
+  (ensures (fun _ -> True))
 
-val eq_mask: a:uint -> b:uint{ty b = ty a} -> c:uint{ty c = ty a }
-val neq_mask: a:uint -> b:uint{ty b = ty a} -> c:uint{ty c = ty a}
-val gte_mask: a:uint -> b:uint{ty b = ty a} -> c:uint{ty c = ty a}
-val gt_mask: a:uint -> b:uint{ty b = ty a} -> c:uint{ty c = ty a}
-val lt_mask: a:uint -> b:uint{ty b = ty a} -> c:uint{ty c = ty a}
-val lte_mask: a:uint -> b:uint{ty b = ty a} -> c:uint{ty c = ty a}
+val logxor: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t 
+val logand: #t:inttype -> a:uint_t t  -> 
+b:uint_t t -> uint_t t 
+val logor: #t:inttype -> a:uint_t t  -> 
+b:uint_t t -> uint_t t 
+val lognot: #t:inttype -> a:uint_t t -> uint_t t 
 
-let op_Plus_Hat = add
-let op_Plus_Percent_Hat = add_mod
-let op_Multiply_Hat = mul
-let op_Multiply_Percent_Hat = mul_mod
-let op_Minus_Hat = sub
-let op_Minus_Percent_Hat = sub_mod
-let op_Greater_Greater_Hat = shift_right
-let op_Less_Less_Hat = shift_left
-let op_Hat_Hat = logxor
-let op_Bar_Hat = logor
-let op_Amp_Hat = logand
-let op_Greater_Greater_Greater = rotate_right
-let op_Less_Less_Less = rotate_left
+val shift_right: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
+  (requires (uint_v b < bits t))
+  (ensures (fun _ -> True))
+
+val shift_left: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
+  (requires (uint_v b < bits t))
+  (ensures (fun _ -> True))
+
+val rotate_right: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
+  (requires (uint_v b > 0 /\ uint_v b < bits t))
+  (ensures (fun _ -> True))
+
+val rotate_left: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
+  (requires (uint_v b > 0 /\ uint_v b < bits t))
+  (ensures (fun _ -> True))
+
+val eq_mask: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+
+val neq_mask: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+
+val gte_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+
+val gt_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+
+val lt_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+
+val lte_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+
+let (+!) = add
+let (+.) = add_mod
+let ( *! ) = mul
+let ( *. ) = mul_mod
+let ( -! ) = sub
+let ( -. ) = sub_mod
+let ( >>. ) = shift_right
+let ( <<. ) = shift_left
+let ( >>>. ) = rotate_right
+let ( <<<. ) = rotate_left
+let ( ^. ) = logxor
+let ( |. ) = logor
+let ( &. ) = logand
+let ( ~. ) = lognot
 
 type index32 = UInt32.t
 
