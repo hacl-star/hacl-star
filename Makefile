@@ -40,6 +40,8 @@ include Makefile.include
 endif
 
 include Makefile.build
+include Makefile.prepare
+
 
 #
 # Verification
@@ -164,16 +166,6 @@ clean: .clean-banner clean-base clean-build
 	$(MAKE) -C secure_api clean
 	$(MAKE) -C apps clean
 	$(MAKE) -C test clean
-
-#
-# Installation helper
-#
-
-prepare:
-	@echo "# Installing OCaml packages required by F*"
-	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
-	@echo "# Installing OCaml packages required by KreMLin"
-	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
 
 #
 # Packaging helper
