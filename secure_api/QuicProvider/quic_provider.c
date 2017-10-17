@@ -161,6 +161,21 @@ int quic_crypto_tls_derive_secret(quic_secret *derived, const quic_secret *secre
   return 1;
 }
 
+int quic_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt)
+{
+  quic_secret s0;
+  s0.hash = TLS_hash_SHA256;
+  s0.ae = TLS_aead_AES_128_GCM;
+
+  if(!quic_crypto_hkdf_extract(s0.hash, s0.secret, salt, 20, con_id, 8))
+    return 0;
+
+  quic_crypto_tls_derive_secret(client_cleartext, &s0, "QUIC client cleartext Secret");
+  quic_crypto_tls_derive_secret(server_cleartext, &s0, "QUIC server cleartext Secret");
+
+  return 1;
+}
+
 int quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
 {
   quic_key *key = malloc(sizeof(quic_key));
