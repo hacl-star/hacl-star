@@ -4,6 +4,7 @@
 #define __Chacha20Poly1305_H
 
 
+#include "Prims.h"
 #include "Hacl_Policies.h"
 #include "Chacha20.h"
 #include "AEAD_Poly1305_64.h"

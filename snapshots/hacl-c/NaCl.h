@@ -4,6 +4,7 @@
 #define __NaCl_H
 
 
+#include "Prims.h"
 #include "Curve25519.h"
 #include "Salsa20.h"
 #include "Poly1305_64.h"
