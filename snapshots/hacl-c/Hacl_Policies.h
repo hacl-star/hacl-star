@@ -4,7 +4,7 @@
 #define __Hacl_Policies_H
 
 
-#include "Prims.h"
+
 
 
 uint8_t Hacl_Policies_declassify_u8(uint8_t x);
