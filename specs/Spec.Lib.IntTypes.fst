@@ -15,10 +15,10 @@ type uint_ =
  | UInt: t:inttype -> v:uint_n t -> uint_
 
 let uint = uint_
-
+type bignum = nat
 let ty u = u.t
 
-let uint_v (u:uint) = 
+let uint_to_nat_ (u:uint) = 
   match u with
   | UInt U8 x -> UInt8.v x
   | UInt U16 x -> UInt16.v x
@@ -26,6 +26,7 @@ let uint_v (u:uint) =
   | UInt U64 x -> UInt64.v x
   | UInt U128 x -> UInt128.v x
 
+let uint_v #t u = uint_to_nat_ u
 
 (* Declared in .fsti: uint8, uint16, uint32, uint64, uint128 *)
 
@@ -44,6 +45,20 @@ let u64 x : uint64 =
 let u128 x : uint128 = 
   UInt U128 (UInt128.uint_to_t x)
 
+let uint_to_nat #t u = uint_to_nat_ u
+let nat_to_uint #t x : uint_t t = 
+  match t with
+  | U8 -> u8 x
+  | U16 -> u16 x
+  | U32 -> u32 x
+  | U64 -> u64 x
+  | U128 -> u128 x
+
+let cast #t u t' = 
+  let n = uint_to_nat #t u in
+  let n' = n % (pow2 (bits t')) in
+  nat_to_uint #t' n'
+  
 let add_mod #t a b =
   match a,b with
   | UInt U8 a, UInt U8 b -> UInt U8 (UInt8.add_mod a b)
@@ -209,7 +224,6 @@ let lte_mask #t a b =
  
 (* defined in .fsti: notations +^, -^, ...*)
 
-type bignum = nat
 let bn_v n = n
 let bn n = n
 let bn_add a b = a + b
@@ -219,3 +233,4 @@ let bn_mod a b = a % b
 let bn_div a b = a / b
 
 
+  

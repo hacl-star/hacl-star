@@ -30,12 +30,13 @@ let size (n:inttype) =
   | U128 -> 16
   
 val uint: Type0
+val bignum: Type0 
 val ty: uint -> GTot inttype
 type uint_t (t:inttype) = 
      u:uint {ty u = t}
-val uint_v: u:uint -> GTot nat
-
-type uint8 = u:uint_t U8
+     
+val uint_v: #t:inttype -> u:uint_t t -> GTot (n:nat{n <= maxint t})
+type uint8 = uint_t U8
 type uint16 = uint_t U16
 type uint32 = uint_t U32
 type uint64 = uint_t U64
@@ -45,6 +46,19 @@ val u16: (n:nat{n <= maxint U16}) -> u:uint16{uint_v u = n}
 val u32: (n:nat{n <= maxint U32}) -> u:uint32{uint_v u = n}
 val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v u = n}
 val u128: (n:nat{n <= maxint U128}) -> u:uint128{uint_v u = n}
+
+// FOR TRUSTED LIBS ONLY: DONT USE IN CODE OR SPECS >>>>>
+val uint_to_nat: #t:inttype -> u:uint_t t -> n:nat{n = uint_v u}
+val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u = n}
+// <<<<< FOR TRUSTED LIBS ONLY: DONT USE IN CODE OR SPECS 
+
+val cast: #t:inttype -> uint_t t -> t':inttype -> uint_t t'
+
+let to_u8 #t u : uint8 = cast #t u U8
+let to_u16 #t u : uint16 = cast #t u U16
+let to_u32 #t u : uint32 = cast #t u U32
+let to_u64 #t u : uint64 = cast #t u U64
+let to_u128 #t u : uint128 = cast #t u U128
 
 val add_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> uint_t t 
 
@@ -116,12 +130,13 @@ let ( ~. ) = lognot
 type index32 = UInt32.t
 
 
-val bignum: Type0
 val bn_v: bignum -> GTot nat
 val bn: nat -> bignum
+
 val bn_add: bignum -> bignum -> bignum
 val bn_mul: bignum -> bignum -> bignum
 val bn_sub: a:bignum -> b:bignum{bn_v a >= bn_v b} -> bignum
 val bn_mod: bignum -> b:bignum{bn_v b <> 0} -> bignum
 val bn_div: bignum -> b:bignum{bn_v b <> 0} -> bignum
+
 

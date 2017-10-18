@@ -1,7 +1,7 @@
 module Spec.Lib.IntVec
 
-open FStar.Seq
 open FStar.Mul
+open Spec.Lib.IntSeq
 module Ints = Spec.Lib.IntTypes
 
 type vectype = 
@@ -10,7 +10,7 @@ let bits vt = Ints.bits vt.it
 let size vt = Ints.size vt.it * vt.len
 
 val intvec: vt:vectype -> Type0
-val intvec_v: #vt:vectype -> intvec vt -> GTot (s:seq nat{length s = vt.len})
+val intvec_v: #vt:vectype -> intvec vt -> GTot (lseq nat vt.len)
 
 val vec_add: #vt:vectype -> intvec vt -> intvec vt -> intvec vt
 val vec_sub: #vt:vectype -> intvec vt -> intvec vt -> intvec vt
