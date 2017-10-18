@@ -150,7 +150,7 @@ ci: .clean-banner .clean-git .clean-snapshots
 .clean-snapshots: snapshots-remove
 
 clean-base:
-	rm -rf *~ *.tar.gz
+	rm -rf *~ *.tar.gz *.zip
 	rm -rf snapshots/hacl-c/*.o
 	rm -rf snapshots/hacl-c/libhacl*
 
