@@ -10,7 +10,7 @@ val bits: vt:vectype -> n:nat{n = bits vt.t}
 val size: vt:vectype -> n:nat{n = size vt.t * vt.len}
 
 val intvec: vt:vectype -> Type0
-
+val intvec_v: #vt:vectype -> intvec vt -> GTot (s:seq nat{length s = vt.len})
 val vec_add: #vt:vectype -> intvec vt -> intvec vt -> intvec vt
 val vec_sub: #vt:vectype -> intvec vt -> intvec vt -> intvec vt
 val vec_mul: #vt:vectype{vt.t <> U128} -> intvec vt -> intvec vt -> intvec vt
