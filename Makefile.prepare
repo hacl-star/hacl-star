@@ -31,8 +31,12 @@ prepare: .prepare
 	$(MAKE) prepare-z3
 	$(MAKE) prepare-fstar
 	$(MAKE) prepare-kremlin
+	$(MAKE) .prepare-ocaml-display-done
+	$(MAKE) .prepare-z3-display-done
+	$(MAKE) .prepare-fstar-display-done
+	$(MAKE) .prepare-kremlin-display-done
 
-prepare-opam: .prepare
+prepare-ocaml: .prepare
 	@echo "# Installing OCaml packages required by F*"
 	opam switch $(VERSION_OCAML)
 	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir ulex
@@ -41,29 +45,47 @@ prepare-opam: .prepare
 
 prepare-z3: .prepare
 	@echo "# Installing Z3 required by F*"
-	cd $(HACL_HOME)/dependencies
-	wget https://github.com/FStarLang/binaries/raw/master/z3-tested/z3-$(VERSION_Z3).zip
-	unzip z3-$(VERSION_Z3).zip
+	cd $(HACL_HOME)/dependencies && \
+	rm -rf $(HACL_HOME)/dependencies/z3 && \
+	wget https://github.com/FStarLang/binaries/raw/master/z3-tested/z3-$(VERSION_Z3).zip && \
+	unzip z3-$(VERSION_Z3).zip && \
 	mv z3-$(VERSION_Z3) $(Z3_HOME)
-	@echo "Done ! Please add the Z3 executable to your PATH\n"
+	$(MAKE) .prepare-z3-display-done
 
 prepare-fstar: .prepare
 	@echo "# Installing F*"
-	cd $(HACL_HOME)/dependencies
+	cd $(HACL_HOME)/dependencies && \
+	rm -rf $(HACL_HOME)/dependencies/FStar && \
 	git clone https://github.com/FStarLang/FStar.git
-	git checkout stable
-	opam config exec -- make -C $(FSTAR_HOME)/src/ocaml-output
-	opam config exec -- make -C $(FSTAR_HOME)/ulib/ml
-	@echo "Done ! Please set an environnment variable FSTAR_HOME to\n'$(FSTAR_HOME)'\n"
+	cd $(HACL_HOME)/dependencies/FStar && \
+	git checkout stable && \
+	opam config exec -- make -C src/ocaml-output && \
+	opam config exec -- make -C ulib/ml
+	$(MAKE) .prepare-fstar-display-done
 
 prepare-kremlin: .prepare
 	@echo "# Installing Kremlin"
-	cd $(HACL_HOME)/dependencies
+	cd $(HACL_HOME)/dependencies && \
+	rm -rf $(HACL_HOME)/dependencies/kremlin && \
 	git clone https://github.com/FStarLang/kremlin.git
-	opam config exec -- make -C $(KREMLIN_HOME)
-	@echo "Done ! Please set an environnment variable KREMLIN_HOME to\n'$(KREMLIN_HOME)'\n"
+	cd $(HACL_HOME)/dependencies/kremlin && \
+	opam config exec -- make
+	$(MAKE) .prepare-kremlin-display-done
 
 prepare-clean:
 	@echo "# Removing all dependencies"
 	rm -rf dependencies
 	@echo "Done ! Do not forget to remove your environnement variables"
+
+
+.prepare-ocaml-display-done:
+	@echo "Done: Installing OCaml"
+
+.prepare-kremlin-display-done:
+	@echo "Done (Install KreMLin) !\nPlease set an environnment variable KREMLIN_HOME to\n'$(KREMLIN_HOME)'\n"
+
+.prepare-fstar-display-done:
+	@echo "Done (Install FStar) !\nPlease set an environnment variable FSTAR_HOME to\n'$(FSTAR_HOME)'\n"
+
+.prepare-z3-display-done:
+	@echo "Done (Install Z3) !\nPlease add the Z3 executable to your PATH\n"
