@@ -64,7 +64,7 @@ tmp-%/out.krml: $(wildcard */*.fst)
 
 krml-test-vale.exe: vale/asm/vale.a
 
-krml-test-%.exe: tmp-%/out.krml
+krml-test-%.exe: vale/asm/vale.a tmp-%/out.krml
 	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
 	./$@
 
