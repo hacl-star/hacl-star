@@ -1,13 +1,12 @@
 module Spec.Lib.IntVec
 
-open Spec.Lib.IntTypes
 open FStar.Seq
 open FStar.Mul
-let bits vt = bits vt.t
-let size vt = size vt.t * vt.len
+
+module Ints = Spec.Lib.IntTypes
 
 type intvec (vt:vectype) = 
-  s:seq (uint_t vt.t){length s = vt.len}
+  s:seq (Ints.uint_t vt.it){length s = vt.len}
 
 val seq_map_ghost:
   #a:Type -> #b:Type ->
@@ -52,40 +51,40 @@ let rec seq_map2 #a #b #c f s s' =
 
 
 let intvec_v #vt v =
-  seq_map_ghost uint_v v
+  seq_map_ghost Ints.uint_v v
 
 let vec_add #vt (v1:intvec vt) (v2:intvec vt) : intvec vt = 
-seq_map2 (add_mod #vt.t) v1 v2
+seq_map2 (Ints.add_mod #vt.it) v1 v2
 
 let vec_sub #vt (v1:intvec vt) (v2:intvec vt) : intvec vt = 
-seq_map2 (sub_mod #vt.t) v1 v2
+seq_map2 (Ints.sub_mod #vt.it) v1 v2
 
-let vec_mul (#vt:vectype{vt.t <> U128}) (v1:intvec vt) (v2:intvec vt): intvec vt = 
-seq_map2 (mul_mod #vt.t) v1 v2
+let vec_mul #vt (v1:intvec vt) (v2:intvec vt): intvec vt = 
+seq_map2 (Ints.mul_mod #vt.it) v1 v2
 
 let vec_xor #vt (v1:intvec vt) (v2:intvec vt) : intvec vt = 
-seq_map2 (logxor #vt.t) v1 v2
+seq_map2 (Ints.logxor #vt.it) v1 v2
 
 let vec_and #vt (v1:intvec vt) (v2:intvec vt) : intvec vt = 
-seq_map2 (logand #vt.t) v1 v2
+seq_map2 (Ints.logand #vt.it) v1 v2
 
 let vec_or #vt (v1:intvec vt) (v2:intvec vt) : intvec vt = 
-seq_map2 (logor #vt.t) v1 v2
+seq_map2 (Ints.logor #vt.it) v1 v2
 
 let vec_not #vt (v1:intvec vt) : intvec vt = 
-seq_map (lognot #vt.t) v1 
+seq_map (Ints.lognot #vt.it) v1 
 
 let vec_shift_right #vt v1 s = 
-seq_map (fun x -> shift_right x s) v1 
+seq_map (fun x -> Ints.shift_right x s) v1 
 
-let vec_shift_left #vt (v1:intvec vt) (s:uint32{uint_v s < bits vt}) : intvec vt = 
-seq_map (fun x -> shift_left #vt.t x s) v1 
+let vec_shift_left #vt v1 s =
+seq_map (fun x -> Ints.shift_left #vt.it x s) v1 
 
-let vec_rotate_right #vt (v1:intvec vt) (s:uint32{uint_v s > 0 /\ uint_v s < bits vt}) : intvec vt = 
-seq_map (fun x -> rotate_right  #vt.t x s) v1 
+let vec_rotate_right #vt v1 s = 
+seq_map (fun x -> Ints.rotate_right  #vt.it x s) v1 
 
-let vec_rotate_left #vt (v1:intvec vt) (s:uint32{uint_v s > 0 /\ uint_v s < bits vt}) : intvec vt = 
-seq_map (fun x -> rotate_left #vt.t x s) v1 
+let vec_rotate_left #vt v1 s = 
+seq_map (fun x -> Ints.rotate_left #vt.it x s) v1 
 
 let op_Plus_Bar = vec_add
 let op_Subtraction_Bar = vec_sub
@@ -98,4 +97,19 @@ let op_Greater_Greater_Bar = vec_shift_right
 let op_Less_Less_Bar = vec_shift_left
 let op_Greater_Greater_Greater_Bar = vec_rotate_right
 let op_Less_Less_Less_Bar = vec_rotate_left
+
+let vec_load vt i = 
+  Seq.create vt.len i
+
+let u32x4 i1 i2 i3 i4 = 
+  Seq.createL [i1;i2;i3;i4]
+
+let u32x8 i1 i2 i3 i4 i5 i6 i7 i8 = 
+  Seq.createL [i1;i2;i3;i4;i5;i6;i7;i8]
+
+let u64x4 i1 i2 i3 i4 =
+  Seq.createL [i1;i2;i3;i4]
+
+let u64x2 i1 i2 = 
+  Seq.createL [i1;i2]
 

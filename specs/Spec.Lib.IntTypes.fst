@@ -1,8 +1,5 @@
 module Spec.Lib.IntTypes
 
-open FStar.Seq
-open FStar.Endianness
-
 (* Declared in .fsti : intsize, bits, maxint *)
 
 let uint_n (t:inttype) : Type0 = 
