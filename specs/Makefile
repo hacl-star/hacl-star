@@ -52,12 +52,12 @@ gf128.exe: Spec.GF128.fst
 	$(OCAMLOPT) -I gf128-spec $(OCAML_INCLUDES) gf128-spec/FStar_Endianness.ml gf128-spec/Spec_GaloisField.ml gf128-spec/Spec_GF128.ml -o gf128.exe
 	./gf128.exe
 
-poly1305.exe: Spec.Poly1305.fst
+poly1305.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Poly1305.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p poly-spec
 	$(FSTAR_EXTRACT) --odir poly-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> poly-spec/Spec_Poly1305.ml
-	$(OCAMLOPT) -I poly-spec $(OCAML_INCLUDES) poly-spec/FStar_Endianness.ml poly-spec/Spec_Poly1305_Lemmas.ml poly-spec/Spec_Poly1305.ml -o poly1305.exe
+	$(OCAMLOPT) -I poly-spec $(OCAML_INCLUDES) poly-spec/Spec_Lib_IntTypes.ml poly-spec/Spec_Lib_IntSeq.ml poly-spec/Spec_Poly1305.ml -o poly1305.exe
 	./poly1305.exe
 
 curve25519.exe: Spec.Curve25519.fst
