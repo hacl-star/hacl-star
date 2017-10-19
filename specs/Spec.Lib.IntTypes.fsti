@@ -52,7 +52,7 @@ val uint_to_nat: #t:inttype -> u:uint_t t -> n:nat{n = uint_v u}
 val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u = n}
 // <<<<< FOR TRUSTED LIBS ONLY: DONT USE IN CODE OR SPECS 
 
-val cast: #t:inttype -> uint_t t -> t':inttype -> uint_t t'
+val cast: #t:inttype -> u1:uint_t t -> t':inttype -> u2:uint_t t'{uint_v u2 = uint_v u1 % pow2 (bits t')}
 
 let to_u8 #t u : uint8 = cast #t u U8
 let to_u16 #t u : uint16 = cast #t u U16
@@ -60,22 +60,31 @@ let to_u32 #t u : uint32 = cast #t u U32
 let to_u64 #t u : uint64 = cast #t u U64
 let to_u128 #t u : uint128 = cast #t u U128
 
-val add_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> uint_t t 
+val add_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> c:uint_t t {uint_v c = (uint_v a + uint_v b) % pow2 (bits t)}
 
 val add: #t:inttype -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
   (requires (uint_v a + uint_v b < pow2 (bits t)))
-  (ensures (fun _ -> True))
+  (ensures (fun c -> uint_v c = uint_v a + uint_v b))
 
-val mul_mod: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> uint_t t
+val incr: #t:inttype -> a:uint_t t -> Pure (uint_t t)
+  (requires (uint_v a < pow2 (bits t) - 1))
+  (ensures (fun c -> uint_v c = uint_v a + 1))
+  
+val mul_mod: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> c:uint_t t {uint_v c = (uint_v a `op_Multiply` uint_v b) % pow2 (bits t)}
 
 val mul: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
   (requires (uint_v a `op_Multiply` uint_v b < pow2 (bits t)))
-  (ensures (fun _ -> True))
+  (ensures (fun c -> uint_v c = uint_v a `op_Multiply` uint_v b))
 
-val sub_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> uint_t t
+(* I would prefer the post-condition to say: uint_v c = (pow2 (bits t) + uint_v a - uint_v b) % pow2 (bits t) *)
+val sub_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> c:uint_t t{uint_v c = (uint_v a - uint_v b) % pow2 (bits t)}
 val sub: #t:inttype -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
   (requires (uint_v a >= uint_v b ))
-  (ensures (fun _ -> True))
+  (ensures (fun c -> uint_v c = uint_v a - uint_v b))
+
+val decr: #t:inttype -> a:uint_t t -> Pure (uint_t t)
+  (requires (uint_v a > 0))
+  (ensures (fun c -> uint_v c = uint_v a - 1))
 
 val logxor: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t 
 val logand: #t:inttype -> a:uint_t t  -> 
@@ -86,11 +95,11 @@ val lognot: #t:inttype -> a:uint_t t -> uint_t t
 
 val shift_right: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
   (requires (uint_v b < bits t))
-  (ensures (fun _ -> True))
+  (ensures (fun c -> uint_v c =  uint_v a / pow2 (uint_v b)))
 
 val shift_left: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
   (requires (uint_v b < bits t))
-  (ensures (fun _ -> True))
+  (ensures (fun c -> uint_v c = (uint_v a `op_Multiply` pow2 (uint_v b)) % pow2 (bits t)))
 
 val rotate_right: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
   (requires (uint_v b > 0 /\ uint_v b < bits t))
@@ -127,9 +136,31 @@ let ( |. ) = logor
 let ( &. ) = logand
 let ( ~. ) = lognot
 
-type index32 = UInt32.t
+val size_t : t:Type0{hasEq t}
+val nat_to_size: n:nat{n <= maxint U32} -> s:size_t
+val size_to_nat: s:size_t -> n:nat{n <= maxint U32}
+val size_to_nat_lemma: n:nat{n <= maxint U32} -> Lemma
+    (size_to_nat (nat_to_size n) = n)
+    [SMTPat (size_to_nat (nat_to_size n))]
+val nat_to_size_lemma: s:size_t -> Lemma
+    (nat_to_size (size_to_nat s) = s)
+    [SMTPat (nat_to_size (size_to_nat s))]
+
+val size_incr: a:size_t -> Pure (size_t)
+  (requires (size_to_nat a < maxint U32))
+  (ensures (fun c -> c = nat_to_size (size_to_nat a + 1)))
+val size_decr: a:size_t -> Pure (size_t)
+  (requires (size_to_nat a > 0))
+  (ensures (fun c -> c = nat_to_size (size_to_nat a - 1)))
+val size_add: a:size_t -> b:size_t -> Pure (size_t)
+  (requires (size_to_nat a + size_to_nat b <= maxint U32))
+  (ensures (fun c -> c = nat_to_size (size_to_nat a + size_to_nat b)))
+val size_sub:  a:size_t -> b:size_t -> Pure (size_t)
+  (requires (size_to_nat a >= size_to_nat b ))
+  (ensures (fun c -> c = nat_to_size (size_to_nat a - size_to_nat b)))
 
 
+  
 val bn_v: bignum -> GTot nat
 val bn: nat -> bignum
 

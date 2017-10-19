@@ -5,9 +5,9 @@ open Spec.Lib.IntSeq
 module Ints = Spec.Lib.IntTypes
 
 type vectype = 
-  | V: it:Ints.inttype -> len:nat -> vectype
+  | V: it:Ints.inttype -> len:Ints.size_t -> vectype
 let bits vt = Ints.bits vt.it
-let size vt = Ints.size vt.it * vt.len
+let size vt = Ints.size vt.it * Ints.size_to_nat vt.len
 
 val intvec: vt:vectype -> Type0
 val intvec_v: #vt:vectype -> intvec vt -> GTot (lseq nat vt.len)
@@ -43,10 +43,10 @@ val ( <<<| ): #vt:vectype -> intvec vt -> (s:Ints.uint32{Ints.uint_v s > 0 /\ In
 
 val vec_load: vt:vectype -> Ints.uint_t vt.it -> intvec vt
 
-type uint32x4 = intvec (V Ints.U32 4)
-type uint32x8 = intvec (V Ints.U32 8)
-type uint64x4 = intvec (V Ints.U64 4)
-type uint64x2 = intvec (V Ints.U64 2)
+type uint32x4 = intvec (V Ints.U32 (Ints.nat_to_size 4))
+type uint32x8 = intvec (V Ints.U32 (Ints.nat_to_size 8))
+type uint64x4 = intvec (V Ints.U64 (Ints.nat_to_size 4))
+type uint64x2 = intvec (V Ints.U64 (Ints.nat_to_size 2))
 
 val u32x4: Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> uint32x4
 val u32x8: Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> uint32x8

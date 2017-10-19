@@ -1,6 +1,7 @@
 module Spec.Lib.IntTypes
 
 (* Declared in .fsti : intsize, bits, maxint *)
+#set-options "--z3rlimit 50"
 
 let uint_n (t:inttype) : Type0 = 
   match t with
@@ -10,7 +11,6 @@ let uint_n (t:inttype) : Type0 =
   | U64 -> UInt64.t
   | U128 -> UInt128.t
     
-noeq 
 type uint_ =
  | UInt: t:inttype -> v:uint_n t -> uint_
 
@@ -76,8 +76,15 @@ let add #t a b =
   | UInt U64 a, UInt U64 b -> UInt U64 (UInt64.add a b)
   | UInt U128 a, UInt U128 b -> UInt U128 (UInt128.add a b)
 
+let incr #t a = 
+  match a with
+  | UInt U8 a -> UInt U8 (UInt8.add a 0x1uy)
+  | UInt U16 a -> UInt U16 (UInt16.add a 0x1us)
+  | UInt U32 a -> UInt U32 (UInt32.add a 0x1ul)
+  | UInt U64 a -> UInt U64 (UInt64.add a 0x1uL)
+  | UInt U128 a -> UInt U128 (UInt128.add a (UInt128.uint_to_t 1))
 
-//#reset-options "--z3rlimit 50"
+
 
 let mul_mod #t a b = 
   match a,b with
@@ -112,6 +119,13 @@ let sub #t a b =
   | UInt U64 a, UInt U64 b -> UInt U64 (UInt64.sub a b)
   | UInt U128 a, UInt U128 b -> UInt U128 (UInt128.sub a b)
 
+let decr #t a = 
+  match a with
+  | UInt U8 a -> UInt U8 (UInt8.sub a 0x1uy)
+  | UInt U16 a -> UInt U16 (UInt16.sub a 0x1us)
+  | UInt U32 a -> UInt U32 (UInt32.sub a 0x1ul)
+  | UInt U64 a -> UInt U64 (UInt64.sub a 0x1uL)
+  | UInt U128 a -> UInt U128 (UInt128.sub a (UInt128.uint_to_t 1))
 
 let logxor #t a b = 
   match a,b with
@@ -223,6 +237,17 @@ let lte_mask #t a b =
   | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a <=^ b) then (u128 (maxint U128)) else (u128 0)
  
 (* defined in .fsti: notations +^, -^, ...*)
+type size_t = uint32
+let nat_to_size = nat_to_uint
+let size_to_nat = uint_to_nat
+let size_to_nat_lemma s = ()
+let nat_to_size_lemma s = ()
+
+let size_incr = incr
+let size_decr = decr
+let size_add = add
+let size_sub = sub
+
 
 let bn_v n = n
 let bn n = n
