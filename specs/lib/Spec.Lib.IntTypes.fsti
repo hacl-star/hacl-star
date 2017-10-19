@@ -37,13 +37,13 @@ type uint32 = uint_t U32
 type uint64 = uint_t U64
 type uint128 = uint_t U128
 
-val u8: (n:nat{n <= maxint U8}) -> u:uint8{uint_v u = n}
-val u8uy: (n:FStar.UInt8.t) -> u:uint8{uint_v u = UInt8.v n}
+val u8: (n:nat{n <= maxint U8}) -> u:uint8{uint_v #U8 u = n}
+val u8uy: (n:FStar.UInt8.t) -> u:uint8{uint_v #U8 u = UInt8.v n}
 
-val u16: (n:nat{n <= maxint U16}) -> u:uint16{uint_v u = n}
-val u32: (n:nat{n <= maxint U32}) -> u:uint32{uint_v u = n}
-val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v u = n}
-val u128: (n:nat{n <= maxint U128}) -> u:uint128{uint_v u = n}
+val u16: (n:nat{n <= maxint U16}) -> u:uint16{uint_v #U16 u = n}
+val u32: (n:nat{n <= maxint U32}) -> u:uint32{uint_v #U32 u = n}
+val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v #U64 u = n}
+val u128: (n:nat{n <= maxint U128}) -> u:uint128{uint_v #U128 u = n}
 
 // FOR TRUSTED LIBS ONLY: DONT USE IN CODE OR SPECS >>>>>
 val uint_to_nat: #t:inttype -> u:uint_t t -> n:nat{n = uint_v u}
@@ -92,19 +92,19 @@ b:uint_t t -> uint_t t
 val lognot: #t:inttype -> a:uint_t t -> uint_t t 
 
 val shift_right: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
-  (requires (uint_v b < bits t))
-  (ensures (fun c -> uint_v c =  uint_v a / pow2 (uint_v b)))
+  (requires (uint_v #U32 b < bits t))
+  (ensures (fun c -> uint_v #t c =  uint_v #t a / pow2 (uint_v #U32 b)))
 
 val shift_left: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
-  (requires (uint_v b < bits t))
-  (ensures (fun c -> uint_v c = (uint_v a `op_Multiply` pow2 (uint_v b)) % pow2 (bits t)))
+  (requires (uint_v #U32 b < bits t))
+  (ensures (fun c -> uint_v #t c = (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % pow2 (bits t)))
 
 val rotate_right: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
-  (requires (uint_v b > 0 /\ uint_v b < bits t))
+  (requires (uint_v #U32 b > 0 /\ uint_v #U32 b < bits t))
   (ensures (fun _ -> True))
 
 val rotate_left: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
-  (requires (uint_v b > 0 /\ uint_v b < bits t))
+  (requires (uint_v #U32 b > 0 /\ uint_v #U32 b < bits t))
   (ensures (fun _ -> True))
 
 val eq_mask: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
@@ -135,7 +135,7 @@ let ( &. ) = logand
 let ( ~. ) = lognot
 
 type size_t = n:nat{n <= maxint U32}
-val size_to_uint32: s:size_t -> u:uint32{uint_v u = s}
+val size_to_uint32: s:size_t -> u:uint32{uint_v #U32 u = s}
 val size_incr: a:size_t -> Pure (size_t)
   (requires (a < maxint U32))
   (ensures (fun c -> c = a + 1))

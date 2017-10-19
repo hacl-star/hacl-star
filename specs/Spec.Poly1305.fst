@@ -38,12 +38,18 @@ let encode_last (#l:size_t{l < blocksize}) (w:lbytes l) =
 val poly: #len:size_t -> txt:lbytes len -> r:elem -> acc:elem
 let poly #len txt r =
   let blocks = len / blocksize in
+  assert (rem < blocksize /\ len = (blocks * blocksize) + rem);
   let rem = len % blocksize in
-  repeati blocks
-    (fun i acc -> 
-      let b = sub txt (i * blocksize) blocksize in
-      let n = encode_block b in
-      (n `fadd` acc) `fmul` r) 0
+  let acc = 
+    repeati blocks
+      (fun i acc -> 
+	let b = sub txt (i * blocksize) blocksize in
+	let n = encode_block b in
+	(n `fadd` acc) `fmul` r) 0 in
+  let last = sub txt (blocks * blocksize) rem in
+  let n = encode_last last in
+  (n `fadd` acc) `fmul` r
+  
   
 let encode_r (rb:block) : elem =
     uint_to_nat ((uint_from_bytes_le #U128 rb) &. 
@@ -90,4 +96,4 @@ let test () : Tot bool =
   let k        : lseq uint8 keysize  = createL #uint8 k   in
   let expected : lseq uint8 blocksize = createL #uint8 expected in
   let mac      : lseq uint8 blocksize = poly1305 msg k in
-  for_all2 #uint8 #uint8 (fun a b -> uint_to_nat a = uint_to_nat b) mac expected
+  for_all2 #uint8 #uint8 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac expected
