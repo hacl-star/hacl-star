@@ -45,9 +45,9 @@ val u32: (n:nat{n <= maxint U32}) -> u:uint32{uint_v #U32 u = n}
 val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v #U64 u = n}
 val u128: (n:nat{n <= maxint U128}) -> u:uint128{uint_v #U128 u = n}
 
+val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u = n}
 // FOR TRUSTED LIBS ONLY: DONT USE IN CODE OR SPECS >>>>>
 val uint_to_nat: #t:inttype -> u:uint_t t -> n:nat{n = uint_v u}
-val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u = n}
 // <<<<< FOR TRUSTED LIBS ONLY: DONT USE IN CODE OR SPECS 
 
 val cast: #t:inttype -> t':inttype -> u1:uint_t t -> u2:uint_t t'{uint_v u2 = uint_v u1 % pow2 (bits t')}

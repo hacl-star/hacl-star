@@ -35,7 +35,6 @@ let u64 x : uint64 = UInt64.uint_to_t x
 
 let u128 x : uint128 = UInt128.uint_to_t x
 
-let uint_to_nat #t u = uint_to_nat_ u
 let nat_to_uint #t x : uint_t t = 
   match t with
   | U8 -> u8 x
@@ -43,6 +42,9 @@ let nat_to_uint #t x : uint_t t =
   | U32 -> u32 x
   | U64 -> u64 x
   | U128 -> u128 x
+  
+//DONT USE FOLLOWING FUNCTION EXCEPT IN TRUSTED LIBS
+let uint_to_nat #t u = uint_to_nat_ u
 
 let cast #t t' u  = 
   let n = uint_to_nat #t u in

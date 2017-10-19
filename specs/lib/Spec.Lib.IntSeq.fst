@@ -166,8 +166,16 @@ let rec nat_from_intseq_be_ #t #len b =
   else
     let l = uint_to_nat #t (last #(uint_t t) #len b) in
     let pre : intseq t (size_decr len) = prefix #len b (size_decr len) in
-    admit();
-    l + (pow2 (bits t)) * (nat_from_intseq_be_ #t #(size_decr len) pre)
+    let shift = pow2 (bits t) in
+    let n' : n:nat{n < pow2 ((len-1) * bits t)}  = nat_from_intseq_be_ #t #(size_decr len) pre in
+    assert (l <= shift - 1);
+    assert (l + shift * n' <= shift * (n' + 1) - 1);
+    assert (n' + 1 <= pow2 ((len -1) * bits t));
+    assert (shift * (n' + 1) <= shift * pow2 (len * bits t - bits t));
+    assert (shift * (n' + 1) <= pow2 (bits t) * pow2 (len * bits t - bits t));
+    Math.Lemmas.pow2_plus (bits t) ( len * bits t - bits t);
+    assert (shift * (n' + 1) <= pow2 (len  * bits t));
+    l + shift * n'
 
 let nat_from_intseq_be = nat_from_intseq_be_
 
@@ -177,8 +185,16 @@ let rec nat_from_intseq_le_ #t #len (b:intseq t len)  =
   match len,b with
   | 0, _ -> (0) 
   | _, h::tt -> 
-    admit();
-    uint_to_nat h + pow2 (bits t) * (nat_from_intseq_le_ #t #(size_decr len) tt)
+    let shift = pow2 (bits t) in
+    let n' : n:nat{n < pow2 ((len-1) * bits t)}  = nat_from_intseq_le_ #t #(size_decr len) tt in
+    let l = uint_to_nat #t h in
+    assert (l <= shift - 1);
+    assert (l + shift * n' <= shift * (n' + 1) - 1);
+    assert (n' + 1 <= pow2 ((len -1) * bits t));
+    assert (shift * (n' + 1) <= pow2 (bits t) * pow2 (len * bits t - bits t));
+    Math.Lemmas.pow2_plus (bits t) ( len * bits t - bits t);
+    assert (shift * (n' + 1) <= pow2 (len  * bits t));
+    l + shift * n'
 
 let nat_from_intseq_le = nat_from_intseq_le_
 
@@ -196,12 +212,11 @@ let rec nat_to_bytes_be len n =
     let byte = u8 (n % 256) in
     let n' =  n / 256 in 
     Math.Lemmas.pow2_plus 8 (8 * len');
-    assume( n' < pow2 (8 * len' ));
+    assert( n' < pow2 (8 * len' ));
     let b' : intseq U8 len' = nat_to_bytes_be len' n' in
     let b  : intseq U8 len = snoc #uint8 #len' b' byte in
     assert(b' == prefix b len');
     assert(byte == last #uint8 #len b);
-    admit();
     b)
 
 val nat_to_bytes_le_:
@@ -217,24 +232,36 @@ let rec nat_to_bytes_le_ len n =
     assert(n' < pow2 (8 * len ));
     let b' : intseq U8 len = nat_to_bytes_le_ len n' in
     let b = byte :: b' in
-    admit();
     b
 
 let nat_to_bytes_le = nat_to_bytes_le_
 
 let uint_to_bytes_le #t n = 
-  admit();
   nat_to_bytes_le (numbytes t) (uint_to_nat n)
+
 let uint_to_bytes_be #t n = 
-  admit();
   nat_to_bytes_be (numbytes t) (uint_to_nat n)
+
 let uint_from_bytes_le #t b = 
   let n = nat_from_intseq_le #U8 #(numbytes t) b in
-  admit();
   nat_to_uint #t n
   
 let uint_from_bytes_be #t b = 
   let n = nat_from_intseq_be #U8 #(numbytes t) b in
-  admit();
   nat_to_uint #t n
 
+let uints_to_bytes_le #t (#len:size_t{len * numbytes t < pow2 32}) (l:intseq t len) : lbytes (len * numbytes t) =
+  let b = create (len * numbytes t) (u8 0) in
+  repeati len (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_le l.[i])) b
+
+let uints_to_bytes_be #t (#len:size_t{len * numbytes t < pow2 32}) (l:intseq t len) : lbytes (len * numbytes t) =
+  let b = create (len * numbytes t) (u8 0) in
+  repeati len (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_be l.[i])) b
+
+let uints_from_bytes_le #t (#len:size_t{len * numbytes t < pow2 32}) (b:lbytes (len * numbytes t)) : intseq t len =
+  let l = create #(uint_t t) len (nat_to_uint 0) in
+  repeati len (fun i l -> l.[i] <- uint_from_bytes_le (sub b (i * numbytes t) (numbytes t))) l
+
+let uints_from_bytes_be #t (#len:size_t{len * numbytes t < pow2 32}) (b:lbytes (len * numbytes t)) : intseq t len =
+  let l = create #(uint_t t) len (nat_to_uint 0) in
+  repeati len (fun i l -> l.[i] <- uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))) l
