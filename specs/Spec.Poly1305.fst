@@ -38,7 +38,6 @@ let encode_last (#l:size_t{l < blocksize}) (w:lbytes l) =
 val poly: #len:size_t -> txt:lbytes len -> r:elem -> acc:elem
 let poly #len txt r =
   let blocks = len / blocksize in
-  assert (rem < blocksize /\ len = (blocks * blocksize) + rem);
   let rem = len % blocksize in
   let acc = 
     repeati blocks
@@ -47,7 +46,7 @@ let poly #len txt r =
 	let n = encode_block b in
 	(n `fadd` acc) `fmul` r) 0 in
   let last = sub txt (blocks * blocksize) rem in
-  let n = encode_last last in
+  let n = encode_last #rem last in
   (n `fadd` acc) `fmul` r
   
   
