@@ -2,7 +2,7 @@ include ../Makefile.include
 
 .PHONY=lib all
 
-FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lemmas
+FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lemmas
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
