@@ -15,9 +15,8 @@ type uint_ =
  | UInt: t:inttype -> v:uint_n t -> uint_
 
 let uint = uint_
-type bignum = nat
 let ty u = u.t
-
+type uint_t (t:inttype) = u:uint{ty u = t}
 let uint_to_nat_ (u:uint) = 
   match u with
   | UInt U8 x -> UInt8.v x
@@ -249,6 +248,7 @@ let size_add = add
 let size_sub = sub
 
 
+type bignum = nat
 let bn_v n = n
 let bn n = n
 let bn_add a b = a + b

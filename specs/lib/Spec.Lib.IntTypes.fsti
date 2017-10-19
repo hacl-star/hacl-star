@@ -29,12 +29,7 @@ let size (n:inttype) =
   | U64 -> 8
   | U128 -> 16
   
-val uint: Type0
-val bignum: Type0 
-val ty: uint -> GTot inttype
-type uint_t (t:inttype) = 
-     u:uint {ty u = t}
-     
+val uint_t: t:inttype -> Type0    
 val uint_v: #t:inttype -> u:uint_t t -> GTot (n:nat{n <= maxint t})
 type uint8 = uint_t U8
 type uint16 = uint_t U16
@@ -161,9 +156,9 @@ val size_sub:  a:size_t -> b:size_t -> Pure (size_t)
 
 
   
+val bignum: Type0 
 val bn_v: bignum -> GTot nat
 val bn: nat -> bignum
-
 val bn_add: bignum -> bignum -> bignum
 val bn_mul: bignum -> bignum -> bignum
 val bn_sub: a:bignum -> b:bignum{bn_v a >= bn_v b} -> bignum
