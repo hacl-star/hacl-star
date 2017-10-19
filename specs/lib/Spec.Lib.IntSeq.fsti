@@ -5,6 +5,12 @@ open Spec.Lib.IntTypes
 val lseq: a:Type0 -> len:size_t -> Type0
 val create: #a:Type -> len:size_t -> init:a -> lseq a len 
 val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (nat_to_size (List.Tot.length l))
+
+val repeat: #a:Type -> n:size_t -> (a -> Tot a) -> a -> Tot (a) 
+val repeati: #a:Type -> n:size_t -> (size_t -> a -> Tot a) -> a -> Tot (a) 
+val fold_left: #a:Type -> #b:Type -> #len:size_t -> (a -> b -> Tot b) -> lseq a len -> b -> Tot (b) 
+val fold_lefti: #a:Type -> #b:Type -> #len:size_t -> (size_t -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b) 
+
 val map: #a:Type -> #b:Type -> #len:size_t -> (a -> Tot b) -> lseq a len -> lseq b len
 
 val ghost_map: #a:Type -> #b:Type -> #len:size_t -> (a -> GTot b) -> lseq a len -> GTot (lseq b len)

@@ -5,9 +5,6 @@ open Spec.Lib.IntTypes
 
 #set-options "--z3rlimit 100"
 
-//unfold type lseq_ (a:Type0) (len:size_t) = s:list a {List.Tot.length s = size_to_nat len}
-
-//type lseq (a:Type0) (len:size_t) = lseq_ a len
 type lseq (a:Type0) (len:size_t) = s:list a {List.Tot.length s = size_to_nat len}
 
 val create_: #a:Type -> len:size_t -> init:a -> Tot (lseq a len) (decreases (size_to_nat len))
@@ -20,6 +17,35 @@ let create = create_
 
 let createL #a l = l
 
+
+val repeat_: #a:Type -> n:size_t -> (a -> Tot a) -> a -> Tot (a) (decreases (size_to_nat n))
+let rec repeat_ #a n f x = 
+  match size_to_nat n with
+  | 0 -> x
+  | _ -> repeat_ #a (size_decr n) f (f x)
+let repeat = repeat_
+
+val repeati_: #a:Type -> i:size_t -> n:size_t{size_to_nat i <= size_to_nat n} -> (size_t -> a -> Tot a) -> a -> Tot (a) (decreases (size_to_nat n - size_to_nat i))
+let rec repeati_ #a i n f x = 
+  if size_to_nat i = size_to_nat n then x
+  else repeati_ #a (size_incr i) n f (f i x)
+let repeati #a = repeati_ #a (nat_to_size 0)
+
+val fold_left_: #a:Type -> #b:Type -> #len:size_t -> (a -> b -> Tot b) -> lseq a len -> b -> Tot (b) (decreases (size_to_nat len))
+let rec fold_left_ #a #b #len f l init =
+  match l with
+  | [] -> init 
+  | h :: t -> fold_left_ #a #b #(size_decr len) f t (f h init)
+let fold_left = fold_left_
+
+val fold_lefti_: #a:Type -> #b:Type -> #fulllen:size_t -> #len:size_t{size_to_nat len <= size_to_nat fulllen} -> (size_t -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b) (decreases (size_to_nat len))
+let rec fold_lefti_ #a #b #fulllen #len f l init =
+  match l with
+  | [] -> init 
+  | h :: t -> let i = size_sub fulllen len in 
+	    fold_lefti_ #a #b #fulllen #(size_decr len) f t (f i h init)
+let fold_lefti #a #b #len = fold_lefti_ #a #b #len #len
+
 val map_: #a:Type -> #b:Type -> #len:size_t -> (a -> Tot b) -> lseq a len -> Tot (lseq b len) (decreases (size_to_nat len))
 let rec map_ #a #b #len f x =
   match x with
@@ -29,6 +55,7 @@ let rec map_ #a #b #len f x =
 	 f h :: map_ #a #b #(size_decr len) f t'
 
 let map = map_
+
 
 val ghost_map_: #a:Type -> #b:Type -> #len:size_t -> (a -> GTot b) -> lseq a len -> GTot (lseq b len) (decreases (size_to_nat len))
 let rec ghost_map_ #a #b #len f x = match x with
