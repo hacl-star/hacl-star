@@ -1,11 +1,9 @@
 module Spec.Poly1305.Lemmas
 
-module ST = FStar.HyperStack.ST
-
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt8
-open FStar.Endianness
+//open FStar.Endianness
 
 
 val lemma_prime_value: n:nat -> Lemma
@@ -14,6 +12,7 @@ val lemma_prime_value: n:nat -> Lemma
   [SMTPat (pow2 n - 5)]
 let lemma_prime_value n = assert_norm(pow2 130 - 5 = 0x3fffffffffffffffffffffffffffffffb)
 
+(*
 val lemma_encode_bound: w:seq t{length w < 16} -> Lemma
   (requires (True))
   (ensures (little_endian w < 0x3fffffffffffffffffffffffffffffffb
@@ -34,3 +33,4 @@ let lemma_encode_r r =
   assert_norm(pow2 128 = 0x100000000000000000000000000000000)
 
 let append_last = snoc
+*)

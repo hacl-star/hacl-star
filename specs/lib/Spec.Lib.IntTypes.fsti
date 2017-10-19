@@ -36,7 +36,10 @@ type uint16 = uint_t U16
 type uint32 = uint_t U32
 type uint64 = uint_t U64
 type uint128 = uint_t U128
+
 val u8: (n:nat{n <= maxint U8}) -> u:uint8{uint_v u = n}
+val u8uy: (n:FStar.UInt8.t) -> u:uint8{uint_v u = UInt8.v n}
+
 val u16: (n:nat{n <= maxint U16}) -> u:uint16{uint_v u = n}
 val u32: (n:nat{n <= maxint U32}) -> u:uint32{uint_v u = n}
 val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v u = n}
@@ -131,28 +134,14 @@ let ( |. ) = logor
 let ( &. ) = logand
 let ( ~. ) = lognot
 
-val size_t : t:Type0{hasEq t}
-val nat_to_size: n:nat{n <= maxint U32} -> s:size_t
-val size_to_nat: s:size_t -> n:nat{n <= maxint U32}
-val size_to_nat_lemma: n:nat{n <= maxint U32} -> Lemma
-    (size_to_nat (nat_to_size n) = n)
-    [SMTPat (size_to_nat (nat_to_size n))]
-val nat_to_size_lemma: s:size_t -> Lemma
-    (nat_to_size (size_to_nat s) = s)
-    [SMTPat (nat_to_size (size_to_nat s))]
-
+type size_t = n:nat{n <= maxint U32}
+val size_to_uint32: s:size_t -> u:uint32{uint_v u = s}
 val size_incr: a:size_t -> Pure (size_t)
-  (requires (size_to_nat a < maxint U32))
-  (ensures (fun c -> c = nat_to_size (size_to_nat a + 1)))
+  (requires (a < maxint U32))
+  (ensures (fun c -> c = a + 1))
 val size_decr: a:size_t -> Pure (size_t)
-  (requires (size_to_nat a > 0))
-  (ensures (fun c -> c = nat_to_size (size_to_nat a - 1)))
-val size_add: a:size_t -> b:size_t -> Pure (size_t)
-  (requires (size_to_nat a + size_to_nat b <= maxint U32))
-  (ensures (fun c -> c = nat_to_size (size_to_nat a + size_to_nat b)))
-val size_sub:  a:size_t -> b:size_t -> Pure (size_t)
-  (requires (size_to_nat a >= size_to_nat b ))
-  (ensures (fun c -> c = nat_to_size (size_to_nat a - size_to_nat b)))
+  (requires (a > 0))
+  (ensures (fun c -> c = a - 1))
 
 
   

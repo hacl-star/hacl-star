@@ -32,6 +32,11 @@ let uint_v #t u = uint_to_nat_ u
 let u8 x : uint8 = 
   UInt U8 (UInt8.uint_to_t x)
 
+let u8uy x = UInt U8 x
+  
+let u8_ x : uint8 = 
+  UInt U8 (UInt8.uint_to_t x)
+
 let u16 x : uint16 = 
   UInt U16 (UInt16.uint_to_t x)
 
@@ -236,16 +241,10 @@ let lte_mask #t a b =
   | UInt U128 a, UInt U128 b -> if FStar.UInt128.(a <=^ b) then (u128 (maxint U128)) else (u128 0)
  
 (* defined in .fsti: notations +^, -^, ...*)
-type size_t = uint32
-let nat_to_size = nat_to_uint
-let size_to_nat = uint_to_nat
-let size_to_nat_lemma s = ()
-let nat_to_size_lemma s = ()
 
-let size_incr = incr
-let size_decr = decr
-let size_add = add
-let size_sub = sub
+let size_to_uint32 x = u32 x
+let size_incr x = x + 1
+let size_decr y = y - 1
 
 
 type bignum = nat
