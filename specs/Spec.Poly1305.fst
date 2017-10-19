@@ -16,10 +16,6 @@ let one  : elem = 1
 let op_Plus_At = fadd
 let op_Star_At = fmul
 
-
-type lbytes (s:size_t) = intseq U8 s
-let nat_from_bytes_le = nat_from_intseq_le
-
 let blocksize : size_t = 16
 let keysize   : size_t = 32
 
@@ -28,35 +24,34 @@ type tag   = lbytes blocksize
 type key   = lbytes keysize
 
 (* Specification code *)
-let encode_block (w:block) =
-  pow2 128 `fadd` nat_from_bytes_le  w 
-
-let encode_last (#l:size_t{l < blocksize}) (w:lbytes l) =
-  assert (pow2 (8 * l) < pow2 128);
-  pow2 (8 * l) `fadd` nat_from_bytes_le w
-
-val poly: #len:size_t -> txt:lbytes len -> r:elem -> acc:elem
-let poly #len txt r =
-  let blocks = len / blocksize in
-  let rem = len % blocksize in
-  let acc = 
-    repeati blocks
-      (fun i acc -> 
-	let b = sub txt (i * blocksize) blocksize in
-	let n = encode_block b in
-	(n `fadd` acc) `fmul` r) 0 in
-  let last = sub txt (blocks * blocksize) rem in
-  let n = encode_last #rem last in
+let update_block (w:block) (r:elem) (acc:elem) : elem =
+  let n = pow2 128 `fadd` nat_from_bytes_le  w  in
   (n `fadd` acc) `fmul` r
-  
-  
-let encode_r (rb:block) : elem =
-    uint_to_nat ((uint_from_bytes_le #U128 rb) &. 
-		  u128 0x0ffffffc0ffffffc0ffffffc0fffffff)
 
+let update_last (#l:size_t{l < blocksize}) 
+		(w:lbytes l) (r:elem) (acc:elem) : elem =
+  assert (pow2 (8 * l) < pow2 128);
+  let n = pow2 (8 * l) `fadd` nat_from_bytes_le w in
+  (n `fadd` acc) `fmul` r
+
+let poly #len (txt:lbytes len) (r:elem) : elem =
+  let blocks = len / blocksize in
+  let acc : elem = 
+    repeati blocks
+      (fun i  -> let b = sub txt (i * blocksize) blocksize in
+	      update_block b r) 0 in
+  let rem = len % blocksize in
+  let last = sub txt (blocks * blocksize) rem in
+  update_last #rem last r acc
+  
 let finish (a:elem) (s:block) : Tot tag =
   let n = (a + nat_from_bytes_le s) % pow2 128 in
   nat_to_bytes_le 16 n
+
+
+let encode_r (rb:block) : elem =
+    uint_to_nat ((uint_from_bytes_le #U128 rb) &. 
+		  u128 0x0ffffffc0ffffffc0ffffffc0fffffff)
 
 let poly1305 (#len:size_t) (msg:lbytes len) (k:key) : Tot tag =
   let r = encode_r (sub k 0 16) in

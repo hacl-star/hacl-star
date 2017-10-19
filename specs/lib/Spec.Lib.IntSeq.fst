@@ -17,85 +17,6 @@ let create = create_
 
 let createL #a l = l
 
-
-val repeat_: #a:Type -> n:size_t -> (a -> Tot a) -> a -> Tot (a) (decreases (n))
-let rec repeat_ #a n f x = 
-  match n with
-  | 0 -> x
-  | _ -> repeat_ #a (size_decr n) f (f x)
-let repeat = repeat_
-
-val repeati_: #a:Type -> i:size_t -> n:size_t{i <= n} -> (s:size_t{s < n} -> a -> Tot a) -> a -> Tot (a) (decreases (n - i))
-let rec repeati_ #a i n f x = 
-  if i = n then x
-  else repeati_ #a (size_incr i) n f (f i x)
-let repeati #a = repeati_ #a ( 0)
-
-val fold_left_: #a:Type -> #b:Type -> #len:size_t -> (a -> b -> Tot b) -> lseq a len -> b -> Tot (b) (decreases (len))
-let rec fold_left_ #a #b #len f l init =
-  match l with
-  | [] -> init 
-  | h :: t -> fold_left_ #a #b #(size_decr len) f t (f h init)
-let fold_left = fold_left_
-
-val fold_lefti_: #a:Type -> #b:Type -> #fulllen:size_t -> #len:size_t{len <= fulllen} -> (size_t -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b) (decreases (len))
-let rec fold_lefti_ #a #b #fulllen #len f l init =
-  match l with
-  | [] -> init 
-  | h :: t -> let i = fulllen - len in 
-	    fold_lefti_ #a #b #fulllen #(size_decr len) f t (f i h init)
-let fold_lefti #a #b #len = fold_lefti_ #a #b #len #len
-
-val map_: #a:Type -> #b:Type -> #len:size_t -> (a -> Tot b) -> lseq a len -> Tot (lseq b len) (decreases (len))
-let rec map_ #a #b #len f x =
-  match x with
-  | [] -> []
-  | h :: t -> 
-	 let t' : lseq a (size_decr len) = t in
-	 f h :: map_ #a #b #(size_decr len) f t'
-
-let map = map_
-
-
-val for_all_: #a:Type -> #len:size_t -> (a -> Tot bool) -> lseq a len -> Tot bool (decreases (len))
-let rec for_all_ #a #len f x =
-  match x with
-  | [] -> true
-  | h :: t -> 
-	 let t' : lseq a (size_decr len) = t in
-	 f h && for_all_ #a #(size_decr len) f t'
-
-let for_all = for_all_
-
-val ghost_map_: #a:Type -> #b:Type -> #len:size_t -> (a -> GTot b) -> lseq a len -> GTot (lseq b len) (decreases (len))
-let rec ghost_map_ #a #b #len f x = match x with
-  | [] -> []
-  | h :: t -> 
-	 let t' : lseq a (size_decr len) = t in
-	 f h :: ghost_map_ #a #b #(size_decr len) f t'
-
-let ghost_map = ghost_map_
-
-val map2_: #a:Type -> #b:Type -> #c:Type -> #len:size_t -> (a -> b -> Tot c) -> lseq a len -> lseq b len -> Tot (lseq c len) (decreases (len))
-let rec map2_ #a #b #c #len f x y = match x,y with
-  | [],[] -> []
-  | h1 :: t1, h2 :: t2 -> 
-	 let t1' : lseq a (size_decr len) = t1 in
-	 let t2' : lseq b (size_decr len) = t2 in
-	 f h1 h2 :: map2_ #a #b #c #(size_decr len) f t1' t2'
-
-let map2 = map2_
-
-val for_all2_: #a:Type -> #b:Type -> #len:size_t -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> Tot (bool) (decreases (len))
-let rec for_all2_ #a #b #len f x y = match x,y with
-  | [],[] -> true
-  | h1 :: t1, h2 :: t2 -> 
-	 let t1' : lseq a (size_decr len) = t1 in
-	 let t2' : lseq b (size_decr len) = t2 in
-	 f h1 h2 && for_all2_ #a #b #(size_decr len) f t1' t2'
-
-let for_all2 = for_all2_
-
 val index_: #a:Type -> #len:size_t{len > 0} -> lseq a len -> n:size_t{n < len} -> Tot a (decreases (n))
 let rec index_ #a #len l i = 
   match i, l with
@@ -157,6 +78,88 @@ let update_sub = update_sub_
 
 let update_slice #a #len l s f sl = update_sub #a #len l s (f-s) sl
 
+val repeat_range_: #a:Type -> min:size_t -> max:size_t{min <= max} -> (s:size_t{s >= min /\ s < max} -> a -> Tot a) -> a -> Tot (a) (decreases (max - min))
+let rec repeat_range_ #a min max f x = 
+  if min = max then x
+  else repeat_range_ #a (size_incr min) max f (f min x)
+
+let repeat_range = repeat_range_
+let repeati #a = repeat_range #a 0
+let repeat #a n f x = repeat_range 0 n (fun i -> f) x
+
+
+val fold_left_range_: #a:Type -> #b:Type -> #len:size_t -> min:size_t ->
+  max:size_t{min <= max /\ len = max - min} -> 
+  (i:size_t{i >= min /\ i < max} -> a -> b -> Tot b) ->
+  lseq a len -> b -> Tot b (decreases (max - min))
+let rec fold_left_range_ #a #b #len min max f l x =
+  match l with 
+  | [] -> x 
+  | h::t -> fold_left_range_ #a #b #(len - 1) (min + 1) max f t (f min h x)
+
+let fold_left_range #a #b #len min max f l x = 
+  fold_left_range_ #a #b #(max - min) min max f (slice #a #len l min max) x
+  
+let fold_lefti #a #b #len = fold_left_range #a #b #len 0 len
+
+let fold_left #a #b #len f = fold_left_range #a #b #len 0 len (fun i -> f)
+
+(*
+let fold_left_slices #a #b #len #slice_len f l b =
+  let n = lin / slice_len in
+  repeati #a n (fun i -> let sl = sub #a #len 
+*)
+val map_: #a:Type -> #b:Type -> #len:size_t -> (a -> Tot b) -> lseq a len -> Tot (lseq b len) (decreases (len))
+let rec map_ #a #b #len f x =
+  match x with
+  | [] -> []
+  | h :: t -> 
+	 let t' : lseq a (size_decr len) = t in
+	 f h :: map_ #a #b #(size_decr len) f t'
+
+let map = map_
+
+
+val for_all_: #a:Type -> #len:size_t -> (a -> Tot bool) -> lseq a len -> Tot bool (decreases (len))
+let rec for_all_ #a #len f x =
+  match x with
+  | [] -> true
+  | h :: t -> 
+	 let t' : lseq a (size_decr len) = t in
+	 f h && for_all_ #a #(size_decr len) f t'
+
+let for_all = for_all_
+
+val ghost_map_: #a:Type -> #b:Type -> #len:size_t -> (a -> GTot b) -> lseq a len -> GTot (lseq b len) (decreases (len))
+let rec ghost_map_ #a #b #len f x = match x with
+  | [] -> []
+  | h :: t -> 
+	 let t' : lseq a (size_decr len) = t in
+	 f h :: ghost_map_ #a #b #(size_decr len) f t'
+
+let ghost_map = ghost_map_
+
+val map2_: #a:Type -> #b:Type -> #c:Type -> #len:size_t -> (a -> b -> Tot c) -> lseq a len -> lseq b len -> Tot (lseq c len) (decreases (len))
+let rec map2_ #a #b #c #len f x y = match x,y with
+  | [],[] -> []
+  | h1 :: t1, h2 :: t2 -> 
+	 let t1' : lseq a (size_decr len) = t1 in
+	 let t2' : lseq b (size_decr len) = t2 in
+	 f h1 h2 :: map2_ #a #b #c #(size_decr len) f t1' t2'
+
+let map2 = map2_
+
+val for_all2_: #a:Type -> #b:Type -> #len:size_t -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> Tot (bool) (decreases (len))
+let rec for_all2_ #a #b #len f x y = match x,y with
+  | [],[] -> true
+  | h1 :: t1, h2 :: t2 -> 
+	 let t1' : lseq a (size_decr len) = t1 in
+	 let t2' : lseq b (size_decr len) = t2 in
+	 f h1 h2 && for_all2_ #a #b #(size_decr len) f t1' t2'
+
+let for_all2 = for_all2_
+
+
 val nat_from_intseq_be_:#t:inttype -> #len:size_t -> b:intseq t len -> Tot (n:nat{n < pow2 (len * bits t)})  (decreases (len))
 let rec nat_from_intseq_be_ #t #len b = 
   if len = 0 then 0
@@ -178,6 +181,9 @@ let rec nat_from_intseq_le_ #t #len (b:intseq t len)  =
     uint_to_nat h + pow2 (bits t) * (nat_from_intseq_le_ #t #(size_decr len) tt)
 
 let nat_from_intseq_le = nat_from_intseq_le_
+
+let nat_from_bytes_be = nat_from_intseq_be
+let nat_from_bytes_le = nat_from_intseq_le
 
 val nat_to_bytes_be: 
   len:size_t -> n:nat{ n < pow2 (8 * len)} ->

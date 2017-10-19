@@ -50,13 +50,13 @@ val uint_to_nat: #t:inttype -> u:uint_t t -> n:nat{n = uint_v u}
 val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u = n}
 // <<<<< FOR TRUSTED LIBS ONLY: DONT USE IN CODE OR SPECS 
 
-val cast: #t:inttype -> u1:uint_t t -> t':inttype -> u2:uint_t t'{uint_v u2 = uint_v u1 % pow2 (bits t')}
+val cast: #t:inttype -> t':inttype -> u1:uint_t t -> u2:uint_t t'{uint_v u2 = uint_v u1 % pow2 (bits t')}
 
-let to_u8 #t u : uint8 = cast #t u U8
-let to_u16 #t u : uint16 = cast #t u U16
-let to_u32 #t u : uint32 = cast #t u U32
-let to_u64 #t u : uint64 = cast #t u U64
-let to_u128 #t u : uint128 = cast #t u U128
+let to_u8 #t u : uint8 = cast #t U8 u
+let to_u16 #t u : uint16 = cast #t U16 u
+let to_u32 #t u : uint32 = cast #t U32 u
+let to_u64 #t u : uint64 = cast #t U64 u
+let to_u128 #t u : uint128 = cast #t U128 u
 
 val add_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> c:uint_t t {uint_v c = (uint_v a + uint_v b) % pow2 (bits t)}
 

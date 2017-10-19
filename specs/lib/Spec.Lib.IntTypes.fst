@@ -44,7 +44,7 @@ let nat_to_uint #t x : uint_t t =
   | U64 -> u64 x
   | U128 -> u128 x
 
-let cast #t u t' = 
+let cast #t t' u  = 
   let n = uint_to_nat #t u in
   let n' = n % (pow2 (bits t')) in
   nat_to_uint #t' n'
