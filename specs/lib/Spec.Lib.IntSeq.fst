@@ -166,17 +166,17 @@ let rec nat_to_bytes_le len n =
 
 let uint_to_bytes_le #t n = 
   admit();
-  nat_to_bytes_le (nat_to_size (size t)) (uint_to_nat n)
+  nat_to_bytes_le (nat_to_size (numbytes t)) (uint_to_nat n)
 let uint_to_bytes_be #t n = 
   admit();
-  nat_to_bytes_be (nat_to_size (size t)) (uint_to_nat n)
+  nat_to_bytes_be (nat_to_size (numbytes t)) (uint_to_nat n)
 let uint_from_bytes_le #t b = 
-  let n = nat_from_intseq_le #U8 #(nat_to_size (size t)) b in
+  let n = nat_from_intseq_le #U8 #(nat_to_size (numbytes t)) b in
   admit();
   nat_to_uint #t n
   
 let uint_from_bytes_be #t b = 
-  let n = nat_from_intseq_be #U8 #(nat_to_size (size t)) b in
+  let n = nat_from_intseq_be #U8 #(nat_to_size (numbytes t)) b in
   admit();
   nat_to_uint #t n
 

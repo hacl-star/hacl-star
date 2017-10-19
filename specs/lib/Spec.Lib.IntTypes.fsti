@@ -21,7 +21,7 @@ let bits (n:inttype) =
   | U128 -> 128
 
 unfold 
-let size (n:inttype) = 
+let numbytes (n:inttype) = 
   match n with
   | U8 -> 1
   | U16 -> 2

@@ -21,9 +21,9 @@ val update_slice: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> n:size
 
 type intseq (t:inttype) (len:size_t) = lseq (uint_t t) len
 
-val uint_to_bytes_le: #t:inttype -> u:uint_t t -> intseq U8 (nat_to_size (size t))
+val uint_to_bytes_le: #t:inttype -> u:uint_t t -> intseq U8 (nat_to_size (numbytes t))
 
-val uint_to_bytes_be: #t:inttype -> u:uint_t t -> intseq U8 (nat_to_size (size t))
+val uint_to_bytes_be: #t:inttype -> u:uint_t t -> intseq U8 (nat_to_size (numbytes t))
 
-val uint_from_bytes_le: #t:inttype -> intseq U8 (nat_to_size (size t)) -> u:uint_t t 
-val uint_from_bytes_be: #t:inttype -> intseq U8 (nat_to_size (size t)) -> u:uint_t t 
+val uint_from_bytes_le: #t:inttype -> intseq U8 (nat_to_size (numbytes t)) -> u:uint_t t 
+val uint_from_bytes_be: #t:inttype -> intseq U8 (nat_to_size (numbytes t)) -> u:uint_t t 

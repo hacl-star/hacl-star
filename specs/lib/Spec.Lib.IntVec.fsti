@@ -7,7 +7,7 @@ module Ints = Spec.Lib.IntTypes
 type vectype = 
   | V: it:Ints.inttype -> len:Ints.size_t -> vectype
 let bits vt = Ints.bits vt.it
-let size vt = Ints.size vt.it * Ints.size_to_nat vt.len
+let size vt = Ints.numbytes vt.it * Ints.size_to_nat vt.len
 
 val intvec: vt:vectype -> Type0
 val intvec_v: #vt:vectype -> intvec vt -> GTot (lseq nat vt.len)
