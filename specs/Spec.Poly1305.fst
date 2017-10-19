@@ -1,10 +1,11 @@
 module Spec.Poly1305
 
+#set-options "--z3rlimit 30 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+
 open FStar.Mul
 open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 open Spec.Poly1305.Lemmas
-#set-options "--z3rlimit 30 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 (* Field types and parameters *)
 let prime =  pow2 130 - 5
@@ -13,8 +14,6 @@ let fadd (e1:elem) (e2:elem) = (e1 + e2) % prime
 let fmul (e1:elem) (e2:elem) = (e1 * e2) % prime
 let zero : elem = 0
 let one  : elem = 1
-let op_Plus_At = fadd
-let op_Star_At = fmul
 
 let blocksize : size_t = 16
 let keysize   : size_t = 32
@@ -24,27 +23,32 @@ type tag   = lbytes blocksize
 type key   = lbytes keysize
 
 (* Specification code *)
-let update_block (w:block) (r:elem) (acc:elem) : elem =
-  let n = pow2 128 `fadd` nat_from_bytes_le  w  in
+let update_block (b:block) (r:elem) (acc:elem) : elem =
+  let n = pow2 128 `fadd` nat_from_bytes_le b  in
   (n `fadd` acc) `fmul` r
 
-let update_last (#l:size_t{l < blocksize}) 
-		(w:lbytes l) (r:elem) (acc:elem) : elem =
-  assert (pow2 (8 * l) < pow2 128);
-  let n = pow2 (8 * l) `fadd` nat_from_bytes_le w in
+let update_last (len:size_t{len < blocksize}) (b:lbytes len) 
+		(r:elem) (acc:elem) : elem =
+  assert (pow2 (8 * len) < pow2 128);
+  let n = pow2 (8 * len) `fadd` nat_from_bytes_le b in
   (n `fadd` acc) `fmul` r
 
-let poly #len (txt:lbytes len) (r:elem) : elem =
+let poly (len:size_t) (text:lbytes len) (r:elem) : elem =
   let blocks = len / blocksize in
-  let acc : elem = 
-    repeati blocks
-      (fun i  -> let b = sub txt (i * blocksize) blocksize in
-	      update_block b r) 0 in
   let rem = len % blocksize in
-  let last = sub txt (blocks * blocksize) rem in
-  update_last #rem last r acc
+  let init  : elem = 0 in
+  let acc   : elem = 
+    repeati blocks
+      (fun i acc  -> let b = slice text (blocksize * i) (blocksize * (i+1)) in
+	          update_block b r acc) 
+      init in
+  if rem = 0 then
+     acc
+  else 
+     let last = slice text (blocks * blocksize) len in
+     update_last rem last r acc
   
-let finish (a:elem) (s:block) : Tot tag =
+let finish (a:elem) (s:block) : tag =
   let n = (a + nat_from_bytes_le s) % pow2 128 in
   nat_to_bytes_le 16 n
 
@@ -53,10 +57,10 @@ let encode_r (rb:block) : elem =
     uint_to_nat ((uint_from_bytes_le #U128 rb) &. 
 		  u128 0x0ffffffc0ffffffc0ffffffc0fffffff)
 
-let poly1305 (#len:size_t) (msg:lbytes len) (k:key) : Tot tag =
+let poly1305 (len:size_t) (msg:lbytes len) (k:key) : tag =
   let r = encode_r (sub k 0 16) in
   let s = sub k 16 16 in
-  finish (poly msg r) s
+  finish (poly len msg r) s
 
 
 (* ********************* *)
@@ -89,5 +93,5 @@ let test () : Tot bool =
   let msg      : lseq uint8 34  = createL #uint8 msg in
   let k        : lseq uint8 keysize  = createL #uint8 k   in
   let expected : lseq uint8 blocksize = createL #uint8 expected in
-  let mac      : lseq uint8 blocksize = poly1305 msg k in
-  for_all2 #uint8 #uint8 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac expected
+  let mac      : lseq uint8 blocksize = poly1305 34 msg k in
+  for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac expected
