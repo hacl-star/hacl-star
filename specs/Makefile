@@ -55,7 +55,7 @@ gf128.exe: Spec.GF128.fst
 poly1305.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Poly1305.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p poly-spec
-	$(FSTAR_EXTRACT) --odir poly-spec $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Poly1305 --odir poly-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> poly-spec/Spec_Poly1305.ml
 	$(OCAMLOPT) -I poly-spec $(OCAML_INCLUDES) poly-spec/Spec_Lib_IntTypes.ml poly-spec/Spec_Lib_IntSeq.ml poly-spec/Spec_Poly1305.ml -o poly1305.exe
 	./poly1305.exe

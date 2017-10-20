@@ -11,6 +11,7 @@ let uint_t (t:inttype) : Type0 =
   | U64 -> UInt64.t
   | U128 -> UInt128.t
 
+inline_for_extraction
 let uint_to_nat_ #t (x:uint_t t) = 
   match t with
   | U8 -> UInt8.v x

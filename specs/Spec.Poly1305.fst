@@ -67,8 +67,6 @@ let poly1305 (len:size_t) (msg:lbytes len) (k:key) : tag =
 (* RFC 7539 Test Vectors *)
 (* ********************* *)
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
-
 let msg = List.Tot.map u8uy [
   0x43uy; 0x72uy; 0x79uy; 0x70uy; 0x74uy; 0x6fuy; 0x67uy; 0x72uy;
   0x61uy; 0x70uy; 0x68uy; 0x69uy; 0x63uy; 0x20uy; 0x46uy; 0x6fuy;
