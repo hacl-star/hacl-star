@@ -68,12 +68,12 @@ curve25519.exe: Spec.Curve25519.fst
 	$(OCAMLOPT) -I curve25519-spec $(OCAML_INCLUDES) curve25519-spec/FStar_Endianness.ml curve25519-spec/Spec_Loops.ml curve25519-spec/Spec_Lib.ml curve25519-spec/Spec_Curve25519.ml -o curve25519.exe
 	./curve25519.exe
 
-chacha20.exe: Spec.Chacha20.fst
+chacha20.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Chacha20.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p chacha-spec
-	$(FSTAR_EXTRACT) --odir chacha-spec $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.CTR --extract_module Spec.Chacha20 --odir chacha-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> chacha-spec/Spec_Chacha20.ml
-	$(OCAMLOPT) -I chacha-spec $(OCAML_INCLUDES) chacha-spec/FStar_Endianness.ml chacha-spec/Spec_Loops.ml chacha-spec/Seq_Create.ml chacha-spec/Spec_Lib.ml chacha-spec/Spec_CTR.ml chacha-spec/Spec_Chacha20.ml -o chacha20.exe
+	$(OCAMLOPT) -I chacha-spec $(OCAML_INCLUDES) chacha-spec/Spec_Lib_IntTypes.ml chacha-spec/Spec_Lib_IntSeq.ml chacha-spec/Spec_CTR.ml chacha-spec/Spec_Chacha20.ml -o chacha20.exe
 	./chacha20.exe
 
 salsa20.exe: Spec.Salsa20.fst

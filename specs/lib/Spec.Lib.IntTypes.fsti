@@ -52,16 +52,27 @@ type uint128 = uint_t U128
 inline_for_extraction
 val u8: (n:nat{n <= maxint U8}) -> u:uint8{uint_v #U8 u = n}
 inline_for_extraction
-val u8uy: (n:FStar.UInt8.t) -> u:uint8{uint_v #U8 u = UInt8.v n}
+val u8_uy: (n:FStar.UInt8.t) -> u:uint8{uint_v #U8 u = UInt8.v n}
 
 inline_for_extraction
 val u16: (n:nat{n <= maxint U16}) -> u:uint16{uint_v #U16 u = n}
 inline_for_extraction
+val u16_us: (n:FStar.UInt16.t) -> u:uint16{uint_v #U16 u = UInt16.v n}
+
+inline_for_extraction
 val u32: (n:nat{n <= maxint U32}) -> u:uint32{uint_v #U32 u = n}
+inline_for_extraction
+val u32_ul: (n:FStar.UInt32.t) -> u:uint32{uint_v #U32 u = UInt32.v n}
+
 inline_for_extraction
 val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v #U64 u = n}
 inline_for_extraction
+val u64_uL: (n:FStar.UInt64.t) -> u:uint64{uint_v #U64 u = UInt64.v n}
+
+inline_for_extraction
 val u128: (n:nat{n <= maxint U128}) -> u:uint128{uint_v #U128 u = n}
+inline_for_extraction
+val u128_uLL: (n:FStar.UInt128.t) -> u:uint128{uint_v #U128 u = UInt128.v n}
 
 inline_for_extraction
 val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u = n}
@@ -130,25 +141,22 @@ b:uint_t t -> uint_t t
 inline_for_extraction
 val lognot: #t:inttype -> a:uint_t t -> uint_t t 
 
-inline_for_extraction
-val shift_right: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
-  (requires (uint_v #U32 b < bits t))
-  (ensures (fun c -> uint_v #t c =  uint_v #t a / pow2 (uint_v #U32 b)))
+type shiftval (t:inttype) = u:uint32{uint_v #U32 u < bits t}
+type rotval  (t:inttype) = u:uint32{uint_v #U32 u > 0 /\ uint_v #U32 u < bits t}
 
 inline_for_extraction
-val shift_left: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
-  (requires (uint_v #U32 b < bits t))
-  (ensures (fun c -> uint_v #t c = (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % pow2 (bits t)))
+val shift_right: #t:inttype -> a:uint_t t -> b:shiftval t -> 
+    c:uint_t t{uint_v #t c =  uint_v #t a / pow2 (uint_v #U32 b)}
 
 inline_for_extraction
-val rotate_right: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
-  (requires (uint_v #U32 b > 0 /\ uint_v #U32 b < bits t))
-  (ensures (fun _ -> True))
+val shift_left: #t:inttype -> a:uint_t t -> b:shiftval t ->
+    c:uint_t t{uint_v #t c = (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % pow2 (bits t)}
 
 inline_for_extraction
-val rotate_left: #t:inttype -> a:uint_t t -> b:uint32 -> Pure (uint_t t )
-  (requires (uint_v #U32 b > 0 /\ uint_v #U32 b < bits t))
-  (ensures (fun _ -> True))
+val rotate_right: #t:inttype -> a:uint_t t -> b:rotval t -> uint_t t 
+
+inline_for_extraction
+val rotate_left: #t:inttype -> a:uint_t t -> b:rotval t -> uint_t t 
 
 inline_for_extraction
 val eq_mask: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
@@ -231,3 +239,4 @@ inline_for_extraction
 val bn_div: bignum -> b:bignum{bn_v b <> 0} -> bignum
 
 
+  

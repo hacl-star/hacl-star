@@ -20,10 +20,10 @@ val vec_and: #vt:vectype -> intvec vt -> intvec vt -> intvec vt
 val vec_or: #vt:vectype -> intvec vt -> intvec vt -> intvec vt
 val vec_not: #vt:vectype -> intvec vt -> intvec vt
 
-val vec_shift_right: #vt:vectype -> intvec vt -> (s:Ints.uint32{Ints.uint_v #Ints.U32 s < bits vt}) -> intvec vt
-val vec_shift_left: #vt:vectype -> intvec vt -> (s:Ints.uint32{Ints.uint_v #Ints.U32 s < bits vt}) -> intvec vt
-val vec_rotate_right: #vt:vectype -> intvec vt -> (s:Ints.uint32{Ints.uint_v #Ints.U32 s > 0 /\ Ints.uint_v #Ints.U32 s < bits vt}) -> intvec vt
-val vec_rotate_left: #vt:vectype -> intvec vt -> (s:Ints.uint32{Ints.uint_v #Ints.U32 s > 0 /\ Ints.uint_v #Ints.U32 s < bits vt}) -> intvec vt
+val vec_shift_right: #vt:vectype -> intvec vt -> Ints.shiftval vt.it -> intvec vt
+val vec_shift_left: #vt:vectype -> intvec vt -> Ints.shiftval vt.it -> intvec vt
+val vec_rotate_right: #vt:vectype -> intvec vt -> Ints.rotval vt.it -> intvec vt
+val vec_rotate_left: #vt:vectype -> intvec vt -> Ints.rotval vt.it -> intvec vt
 
 
 
@@ -35,10 +35,10 @@ val ( &| ): #vt:vectype -> intvec vt -> intvec vt -> intvec vt
 val ( || ): #vt:vectype -> intvec vt -> intvec vt -> intvec vt
 val ( ~| ): #vt:vectype -> intvec vt -> intvec vt
 
-val ( >>| ): #vt:vectype -> intvec vt -> (s:Ints.uint32{Ints.uint_v #Ints.U32 s < bits vt}) -> intvec vt
-val ( <<| ): #vt:vectype -> intvec vt -> (s:Ints.uint32{Ints.uint_v #Ints.U32 s < bits vt}) -> intvec vt
-val ( >>>| ): #vt:vectype -> intvec vt -> (s:Ints.uint32{Ints.uint_v #Ints.U32 s > 0 /\ Ints.uint_v #Ints.U32 s < bits vt}) -> intvec vt
-val ( <<<| ): #vt:vectype -> intvec vt -> (s:Ints.uint32{Ints.uint_v #Ints.U32 s > 0 /\ Ints.uint_v #Ints.U32 s < bits vt}) -> intvec vt
+val ( >>| ): #vt:vectype -> intvec vt -> Ints.shiftval vt.it -> intvec vt
+val ( <<| ): #vt:vectype -> intvec vt -> Ints.shiftval vt.it -> intvec vt
+val ( >>>| ): #vt:vectype -> intvec vt -> Ints.rotval vt.it -> intvec vt
+val ( <<<| ): #vt:vectype -> intvec vt -> Ints.rotval vt.it -> intvec vt
 
 
 val vec_load: vt:vectype -> Ints.uint_t vt.it -> intvec vt

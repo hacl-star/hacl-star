@@ -1,98 +1,148 @@
 module Spec.Chacha20
-
-module ST = FStar.HyperStack.ST
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
 
 open FStar.Mul
-open FStar.Seq
-open FStar.UInt32
-open FStar.Endianness
-open Spec.Lib
-open Seq.Create
+open Spec.Lib.IntTypes
+open Spec.Lib.IntSeq
+open Spec.Lib.Stateful
 
-#set-options "--max_fuel 0 --z3rlimit 100"
+(* Chacha20 State *)
 
-(* Constants *)
+noeq type state = {
+  state_i:lseq uint32 16;
+  state  :lseq uint32 16;
+}
+
+(* The following types and functions could be 
+   automatically generated from the "state" definition above. *)
+
+type key =  | St_i | St
+
+unfold 
+let value (k:key) : Type0 = 
+  match k with
+  | St_i -> uint32
+  | St   -> uint32
+  
+unfold
+let length (k:key) : size_t = 
+  match k with
+  | St_i -> 16
+  | St   -> 16
+
+let create_state () = 
+  let s = create 16 (u32 0) in
+  let s' = create 16 (u32 0) in
+  {state_i = s; state = s'}
+  
+unfold
+let get (s:state) (k:key) : lseq (value k) (length k) =
+  match k with
+  | St_i  -> s.state_i
+  | St    -> s.state
+  
+unfold
+let put(s:state) (k:key) (v:lseq (value k) (length k)) : state =
+  match k with
+  | St_i -> {s with state_i = v}
+  | St   -> {s with state = v}
+
+  
+(* Stateful monad for Chacha20 *)
+let chacha_state_def = StateDef state key value length create_state get put
+type chacha_st (a:Type0)  = stateful chacha_state_def a
+type index (k:chacha_state_def.key) = st_index chacha_state_def k
+
+(* Chacha20 Spec *)
+
+let line (a:index St) (b:index St) (d:index St) (s:rotval U32) : chacha_st unit =
+  mb <-- read St b ;
+  ma <-- read St a ;
+  write St a ((+.) #U32 ma mb) ;;
+  ma <-- read St a ;
+  md <-- read St d ;
+  write St d ((md ^. ma) <<<. s)
+
+let quarter_round a b c d : chacha_st unit =
+  line a b d (u32 16) ;;
+  line c d b (u32 12) ;;
+  line a b d (u32 8)  ;;
+  line c d b (u32 7)
+
+let column_round : chacha_st unit = 
+  quarter_round 0 4 8  12 ;;
+  quarter_round 1 5 9  13 ;;
+  quarter_round 2 6 10 14 ;;
+  quarter_round 3 7 11 15
+
+let diagonal_round : chacha_st unit =
+  quarter_round 0 5 10 15 ;;
+  quarter_round 1 6 11 12 ;;
+  quarter_round 2 7 8  13 ;;
+  quarter_round 3 4 9  14
+
+let double_round: chacha_st unit =
+    column_round ;; 
+    diagonal_round (* 2 rounds *)
+
+let rounds : chacha_st unit =
+    repeat_st 10 double_round (* 20 rounds *)
+ 
+let chacha20_core: chacha_st unit = 
+    copy St_i St ;;
+    rounds ;;
+    in_place_map2 St_i St ((+.) #U32) 
+
+(* state initialization *)
+let c0 = u32 0x61707865
+let c1 = u32 0x3320646e
+let c2 = u32 0x79622d32
+let c3 = u32 0x6b206574
+
 let keylen = 32   (* in bytes *)
 let blocklen = 64 (* in bytes *)
 let noncelen = 12 (* in bytes *)
 
-type key = lbytes keylen
-type block = lbytes blocklen
-type nonce = lbytes noncelen
-type counter = UInt.uint_t 32
+type chacha_key   = lbytes keylen
+type chacha_block = lbytes blocklen
+type chacha_nonce = lbytes noncelen
+type counter = size_t
 
-// using @ as a functional substitute for ;
-// internally, blocks are represented as 16 x 4-byte integers
-type state = m:seq UInt32.t {length m = 16}
-type idx = n:nat{n < 16}
-type shuffle = state -> Tot state
 
-let line (a:idx) (b:idx) (d:idx) (s:t{0 < v s /\ v s < 32}) (m:state) : Tot state =
-  let m = m.[a] <- (m.[a] +%^ m.[b]) in
-  let m = m.[d] <- ((m.[d] ^^ m.[a]) <<< s) in m
+let setup (k:chacha_key) (n:chacha_nonce) (c:counter): chacha_st unit =
+  write St_i 0 c0 ;;
+  write St_i 1 c1 ;;
+  write St_i 2 c2 ;;
+  write St_i 3 c3 ;;
+  import_slice k (Slice St_i 4 12) (uints_from_bytes_le #U32 #8) ;;
+  write St_i 12 (u32 c) ;;
+  import_slice n (Slice St_i 13 16) (uints_from_bytes_le #U32 #3) 
 
-let quarter_round a b c d : shuffle =
-  line a b d 16ul @
-  line c d b 12ul @
-  line a b d 8ul  @
-  line c d b 7ul
 
-let column_round : shuffle =
-  quarter_round 0 4 8  12 @
-  quarter_round 1 5 9  13 @
-  quarter_round 2 6 10 14 @
-  quarter_round 3 7 11 15
-
-let diagonal_round : shuffle =
-  quarter_round 0 5 10 15 @
-  quarter_round 1 6 11 12 @
-  quarter_round 2 7 8  13 @
-  quarter_round 3 4 9  14
-
-let double_round: shuffle =
-    column_round @ diagonal_round (* 2 rounds *)
-
-let rounds : shuffle =
-    iter 10 double_round (* 20 rounds *)
-
-let chacha20_core (s:state) : Tot state =
-    let s' = rounds s in
-    Spec.Loops.seq_map2 (fun x y -> x +%^ y) s' s
-
-(* state initialization *)
-let c0 = 0x61707865ul
-let c1 = 0x3320646eul
-let c2 = 0x79622d32ul
-let c3 = 0x6b206574ul
-
-let setup (k:key) (n:nonce) (c:counter): Tot state =
-  create_4 c0 c1 c2 c3          @|
-  uint32s_from_le 8 k           @|
-  create_1 (UInt32.uint_to_t c) @|
-  uint32s_from_le 3 n
-
-let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
-    let st  = setup k n c in
-    let st' = chacha20_core st in
-    uint32s_to_le 16 st'
+let chacha20_block (k:chacha_key) (n:chacha_nonce) (c:counter): Tot chacha_block =
+    alloc (
+       setup k n c ;;
+       chacha20_core ;;
+       export St (uints_to_bytes_le #U32 #16)
+    )
 
 let chacha20_ctx: Spec.CTR.block_cipher_ctx =
     let open Spec.CTR in
     {
     keylen = keylen;
-    blocklen = blocklen;
     noncelen = noncelen;
-    counterbits = 32;
-    incr = 1
+    countermax = maxint U32;
+    blocklen = blocklen;
     }
 
-let chacha20_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
+let chacha20_block_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
 
-let chacha20_encrypt_bytes key nonce counter m =
-    Spec.CTR.counter_mode chacha20_ctx chacha20_cipher key nonce counter m
+let chacha20_encrypt_bytes key nonce counter len m =
+    let chacha20_ctr = Spec.CTR.counter_mode chacha20_ctx chacha20_block_cipher in
+    chacha20_ctr key nonce counter len m
 
 
-unfold let test_plaintext = [
+let test_plaintext = List.Tot.map u8_uy [
     0x4cuy; 0x61uy; 0x64uy; 0x69uy; 0x65uy; 0x73uy; 0x20uy; 0x61uy;
     0x6euy; 0x64uy; 0x20uy; 0x47uy; 0x65uy; 0x6euy; 0x74uy; 0x6cuy;
     0x65uy; 0x6duy; 0x65uy; 0x6euy; 0x20uy; 0x6fuy; 0x66uy; 0x20uy;
@@ -110,7 +160,7 @@ unfold let test_plaintext = [
     0x74uy; 0x2euy
 ]
 
-unfold let test_ciphertext = [
+let test_ciphertext = List.Tot.map u8_uy [
     0x6euy; 0x2euy; 0x35uy; 0x9auy; 0x25uy; 0x68uy; 0xf9uy; 0x80uy;
     0x41uy; 0xbauy; 0x07uy; 0x28uy; 0xdduy; 0x0duy; 0x69uy; 0x81uy;
     0xe9uy; 0x7euy; 0x7auy; 0xecuy; 0x1duy; 0x43uy; 0x60uy; 0xc2uy;
@@ -128,26 +178,30 @@ unfold let test_ciphertext = [
     0x87uy; 0x4duy
 ]
 
-unfold let test_key = [
+let test_key = List.Tot.map u8_uy [
     0uy;   1uy;  2uy;  3uy;  4uy;  5uy;  6uy;  7uy;
     8uy;   9uy; 10uy; 11uy; 12uy; 13uy; 14uy; 15uy;
     16uy; 17uy; 18uy; 19uy; 20uy; 21uy; 22uy; 23uy;
     24uy; 25uy; 26uy; 27uy; 28uy; 29uy; 30uy; 31uy
     ]
-unfold let test_nonce = [
+
+let test_nonce = List.Tot.map u8_uy [
     0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0x4auy; 0uy; 0uy; 0uy; 0uy
     ]
 
-unfold let test_counter = 1
+let test_counter = 1
 
 let test() =
   assert_norm(List.Tot.length test_plaintext = 114);
   assert_norm(List.Tot.length test_ciphertext = 114);
   assert_norm(List.Tot.length test_key = 32);
   assert_norm(List.Tot.length test_nonce = 12);
-  let test_plaintext = createL test_plaintext in
-  let test_ciphertext = createL test_ciphertext in
-  let test_key = createL test_key in
-  let test_nonce = createL test_nonce in
-  chacha20_encrypt_bytes test_key test_nonce test_counter test_plaintext
-  = test_ciphertext
+  let test_plaintext : lbytes 114 = createL test_plaintext in
+  let test_ciphertext : lbytes 114 = createL test_ciphertext in
+  let test_key : chacha_key = createL test_key in
+  let test_nonce :chacha_nonce = createL test_nonce in
+  let cipher : lbytes 114 = chacha20_encrypt_bytes test_key test_nonce test_counter 114 test_plaintext in
+  for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cipher test_ciphertext
+
+
+

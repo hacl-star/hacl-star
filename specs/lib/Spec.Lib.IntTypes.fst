@@ -26,15 +26,23 @@ let uint_v #t u = uint_to_nat_ u
 
 let u8 x : uint8  = UInt8.uint_to_t x 
 
-let u8uy x = x
+let u8_uy x = x
   
 let u16 x : uint16 = UInt16.uint_to_t x
 
+let u16_us x = x
+
 let u32 x : uint32 = UInt32.uint_to_t x
+
+let u32_ul x = x
 
 let u64 x : uint64 = UInt64.uint_to_t x
 
+let u64_uL x = x
+
 let u128 x : uint128 = UInt128.uint_to_t x
+
+let u128_uLL x = x
 
 let nat_to_uint #t x : uint_t t = 
   match t with
