@@ -1,5 +1,8 @@
 module Spec.Lib.IntTypes
 
+open FStar.Math.Lemmas
+
+
 type inttype = 
  | U8 | U16 | U32 | U64 | U128 
 

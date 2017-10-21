@@ -37,8 +37,8 @@ let test () =
   let mac      : lseq uint8 blocksize = poly1305 34 msg k in
   let result : bool = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac expected in
   IO.print_string   "Expected MAC:";
-  iter_ml (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) expected;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list expected);
   IO.print_string "\nComputed MAC:";
-  iter_ml (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) mac;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list mac);
   if result then   IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :("
+  else IO.print_string "\nFailure :(\n"

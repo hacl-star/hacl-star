@@ -1,6 +1,6 @@
 module Spec.Poly1305
 
-#set-options "--z3rlimit 30 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 60 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 open FStar.Mul
 open Spec.Lib.IntTypes
@@ -48,18 +48,23 @@ let poly (len:size_t) (text:lbytes len) (r:elem) : elem =
      let last = slice text (blocks * blocksize) len in
      update_last rem last r acc
   
-let finish (a:elem) (s:block) : tag =
-  let n = (a + nat_from_bytes_le s) % pow2 128 in
+let finish (a:elem) (s:elem) : tag =
+  let n = (a + s) % pow2 128 in
   nat_to_bytes_le 16 n
 
-
 let encode_r (rb:block) : elem =
-    UInt.logand #128 (nat_from_bytes_le rb) 
-		      0x0ffffffc0ffffffc0ffffffc0fffffff
+   let rb = rb.[3] <- rb.[3] &. u8 15 in
+   let rb = rb.[7] <- rb.[7] &. u8 15 in
+   let rb = rb.[11] <- rb.[11] &. u8 15 in
+   let rb = rb.[15] <- rb.[15] &. u8 15 in
+   let rb = rb.[4] <- rb.[4] &. u8 252 in
+   let rb = rb.[8] <- rb.[8] &. u8 252 in
+   let rb = rb.[12] <- rb.[12] &. u8 252 in
+   nat_from_bytes_le rb
 
 let poly1305 (len:size_t) (msg:lbytes len) (k:key) : tag =
-  let r = encode_r (sub k 0 16) in
-  let s = sub k 16 16 in
+  let r = encode_r (slice k 0 16) in
+  let s = nat_from_bytes_le (slice k 16 32) in
   finish (poly len msg r) s
 
 

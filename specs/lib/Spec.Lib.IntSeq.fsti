@@ -62,6 +62,7 @@ val uints_to_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < 
 val uints_from_bytes_le: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
 val uints_from_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
 
-open FStar.All
-val iter_ml: #a:Type -> #len:size_t -> (a -> ML unit) -> lseq a len -> ML unit 
+//The following function is primarily meant for testing, do not rely on it in code.
+val as_list: #a:Type -> #len:size_t -> lseq a len -> list a
+
 

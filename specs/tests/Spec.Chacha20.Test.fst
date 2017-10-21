@@ -69,9 +69,10 @@ let test () =
   let cipher : lbytes 114 = chacha20_encrypt_bytes test_key test_nonce test_counter 114 test_plaintext in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cipher test_ciphertext in
   IO.print_string   "Expected cipher:";
-  iter_ml (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) test_ciphertext;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test_ciphertext);
   IO.print_string "\nComputed cipher:";
-  iter_ml (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) cipher;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) 
+  (as_list cipher);
   if result then   IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :("
        

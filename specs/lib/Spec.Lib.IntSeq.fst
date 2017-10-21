@@ -266,8 +266,5 @@ let uints_from_bytes_be #t (#len:size_t{len * numbytes t < pow2 32}) (b:lbytes (
   let l = create #(uint_t t) len (nat_to_uint 0) in
   repeati len (fun i l -> l.[i] <- uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))) l
 
-let rec iter_ml #a #len f l =
-  match l with 
-  | [] -> () 
-  | h::t -> f h; iter_ml #a #(len - 1) f t 
+let as_list #a #len l = l
 
