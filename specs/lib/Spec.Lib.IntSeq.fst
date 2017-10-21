@@ -2,8 +2,9 @@ module Spec.Lib.IntSeq
 
 open FStar.Mul
 open Spec.Lib.IntTypes
+open Spec.Lib.RawIntTypes
 
-#set-options "--z3rlimit 100"
+#reset-options "--z3rlimit 300"
 
 let lseq (a:Type0) (len:size_t) =  s:list a {List.Tot.length s = len}
 
@@ -204,7 +205,6 @@ let nat_from_bytes_le = nat_from_intseq_le
 val nat_to_bytes_be: 
   len:size_t -> n:nat{ n < pow2 (8 * len)} ->
   Tot (b:intseq U8 len {n == nat_from_intseq_be #U8 #len b}) (decreases (len))
-#reset-options "--z3rlimit 200"
 let rec nat_to_bytes_be len n = 
   if len = 0 then [] 
   else (
@@ -265,3 +265,9 @@ let uints_from_bytes_le #t (#len:size_t{len * numbytes t < pow2 32}) (b:lbytes (
 let uints_from_bytes_be #t (#len:size_t{len * numbytes t < pow2 32}) (b:lbytes (len * numbytes t)) : intseq t len =
   let l = create #(uint_t t) len (nat_to_uint 0) in
   repeati len (fun i l -> l.[i] <- uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))) l
+
+let rec iter_ml #a #len f l =
+  match l with 
+  | [] -> () 
+  | h::t -> f h; iter_ml #a #(len - 1) f t 
+

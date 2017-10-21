@@ -4,16 +4,6 @@ type inttype =
  | U8 | U16 | U32 | U64 | U128 
 
 inline_for_extraction
-unfold
-let maxint (t:inttype) = 
-  match t with
-  | U8 -> 0xff
-  | U16 -> 0xffff
-  | U32 -> 0xffffffff
-  | U64 -> 0xffffffffffffffff
-  | U128 -> 0xffffffffffffffffffffffffffffffff
-
-inline_for_extraction
 unfold 
 let bits (n:inttype) = 
   match n with
@@ -33,6 +23,29 @@ let numbytes (n:inttype) =
   | U64 -> 8
   | U128 -> 16
   
+val pow2_values: n:nat ->  Lemma (
+    pow2 0 == 1 /\
+    pow2 8 == 0x100 /\
+    pow2 16 == 0x10000 /\
+    pow2 32 == 0x100000000 /\
+    pow2 64 == 0x10000000000000000 /\
+    pow2 128 == 0x100000000000000000000000000000000
+    )
+    [SMTPat (pow2 n)]
+
+inline_for_extraction
+unfold
+let maxint (t:inttype) = pow2 (bits t) - 1
+(*
+  match t with
+  | U8 -> 0xff
+  | U16 -> 0xffff
+  | U32 -> 0xffffffff
+  | U64 -> 0xffffffffffffffff
+  | U128 -> 0xffffffffffffffffffffffffffffffff
+*)
+
+
 inline_for_extraction
 val uint_t: t:inttype -> Type0    
 inline_for_extraction
@@ -52,34 +65,19 @@ type uint128 = uint_t U128
 inline_for_extraction
 val u8: (n:nat{n <= maxint U8}) -> u:uint8{uint_v #U8 u = n}
 inline_for_extraction
-val u8_uy: (n:FStar.UInt8.t) -> u:uint8{uint_v #U8 u = UInt8.v n}
-
-inline_for_extraction
 val u16: (n:nat{n <= maxint U16}) -> u:uint16{uint_v #U16 u = n}
-inline_for_extraction
-val u16_us: (n:FStar.UInt16.t) -> u:uint16{uint_v #U16 u = UInt16.v n}
 
 inline_for_extraction
 val u32: (n:nat{n <= maxint U32}) -> u:uint32{uint_v #U32 u = n}
-inline_for_extraction
-val u32_ul: (n:FStar.UInt32.t) -> u:uint32{uint_v #U32 u = UInt32.v n}
 
 inline_for_extraction
 val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v #U64 u = n}
-inline_for_extraction
-val u64_uL: (n:FStar.UInt64.t) -> u:uint64{uint_v #U64 u = UInt64.v n}
 
 inline_for_extraction
 val u128: (n:nat{n <= maxint U128}) -> u:uint128{uint_v #U128 u = n}
-inline_for_extraction
-val u128_uLL: (n:FStar.UInt128.t) -> u:uint128{uint_v #U128 u = UInt128.v n}
 
 inline_for_extraction
 val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u = n}
-// FOR TRUSTED LIBS ONLY: DONT USE IN CODE OR SPECS >>>>>
-inline_for_extraction
-val uint_to_nat: #t:inttype -> u:uint_t t -> n:nat{n = uint_v u}
-// <<<<< FOR TRUSTED LIBS ONLY: DONT USE IN CODE OR SPECS 
 
 inline_for_extraction
 val cast: #t:inttype -> t':inttype -> u1:uint_t t -> u2:uint_t t'{uint_v u2 = uint_v u1 % pow2 (bits t')}

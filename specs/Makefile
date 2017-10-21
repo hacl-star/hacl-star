@@ -52,12 +52,21 @@ gf128.exe: Spec.GF128.fst
 	$(OCAMLOPT) -I gf128-spec $(OCAML_INCLUDES) gf128-spec/FStar_Endianness.ml gf128-spec/Spec_GaloisField.ml gf128-spec/Spec_GF128.ml -o gf128.exe
 	./gf128.exe
 
-poly1305.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Poly1305.fst
+
+chacha20.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst lib/Spec.Lib.Stateful.fst Spec.CTR.fst Spec.Chacha20.fst tests/Spec.Chacha20.Test.fst
 	$(MAKE) -C ../code/lib/ml
-	mkdir -p poly-spec
-	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Poly1305 --odir poly-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> poly-spec/Spec_Poly1305.ml
-	$(OCAMLOPT) -I poly-spec $(OCAML_INCLUDES) poly-spec/Spec_Lib_IntTypes.ml poly-spec/Spec_Lib_IntSeq.ml poly-spec/Spec_Poly1305.ml -o poly1305.exe
+	mkdir -p chacha20-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.CTR --extract_module Spec.Chacha20 --extract_module Spec.Chacha20.Test --odir chacha20-ml $^
+	@echo 'let _ = test()' >> chacha20-ml/Spec_Chacha20_Test.ml
+	$(OCAMLOPT) -I chacha20-ml $(OCAML_INCLUDES) chacha20-ml/Spec_Lib_IntTypes.ml chacha20-ml/Spec_Lib_RawIntTypes.ml chacha20-ml/Spec_Lib_IntSeq.ml chacha20-ml/Spec_Lib_Stateful.ml chacha20-ml/Spec_CTR.ml chacha20-ml/Spec_Chacha20.ml chacha20-ml/Spec_Chacha20_Test.ml -o chacha20.exe
+	./chacha20.exe
+
+poly1305.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Poly1305.fst tests/Spec.Poly1305.Test.fst
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p poly1305-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Poly1305 --extract_module Spec.Poly1305.Test --odir poly1305-ml $^
+	@echo 'let _ = test()' >> poly1305-ml/Spec_Poly1305_Test.ml
+	$(OCAMLOPT) -I poly1305-ml $(OCAML_INCLUDES) poly1305-ml/Spec_Lib_IntTypes.ml poly1305-ml/Spec_Lib_IntSeq.ml poly1305-ml/Spec_Poly1305.ml poly1305-ml/Spec_Poly1305_Test.ml -o poly1305.exe
 	./poly1305.exe
 
 curve25519.exe: Spec.Curve25519.fst
@@ -67,14 +76,6 @@ curve25519.exe: Spec.Curve25519.fst
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> curve25519-spec/Spec_Curve25519.ml
 	$(OCAMLOPT) -I curve25519-spec $(OCAML_INCLUDES) curve25519-spec/FStar_Endianness.ml curve25519-spec/Spec_Loops.ml curve25519-spec/Spec_Lib.ml curve25519-spec/Spec_Curve25519.ml -o curve25519.exe
 	./curve25519.exe
-
-chacha20.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Chacha20.fst
-	$(MAKE) -C ../code/lib/ml
-	mkdir -p chacha-spec
-	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.CTR --extract_module Spec.Chacha20 --odir chacha-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> chacha-spec/Spec_Chacha20.ml
-	$(OCAMLOPT) -I chacha-spec $(OCAML_INCLUDES) chacha-spec/Spec_Lib_IntTypes.ml chacha-spec/Spec_Lib_IntSeq.ml chacha-spec/Spec_CTR.ml chacha-spec/Spec_Chacha20.ml -o chacha20.exe
-	./chacha20.exe
 
 salsa20.exe: Spec.Salsa20.fst
 	$(MAKE) -C ../code/lib/ml
@@ -86,7 +87,7 @@ salsa20.exe: Spec.Salsa20.fst
 
 chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 	$(MAKE) -C ../code/lib/ml
-	mkdir -p chacha-poly-spec
+	mkdir -p chacha-poly1305-ml
 	$(FSTAR_EXTRACT) --odir chacha-poly-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> chacha-poly-spec/Spec_Chacha20Poly1305.ml
 	$(OCAMLOPT) -I chacha-poly-spec $(OCAML_INCLUDES) chacha-poly-spec/FStar_Endianness.ml chacha-poly-spec/Spec_Loops.ml chacha-poly-spec/Seq_Create.ml chacha-poly-spec/Spec_Lib.ml chacha-poly-spec/Spec_CTR.ml chacha-poly-spec/Spec_Chacha20.ml chacha-poly-spec/Spec_Poly1305_Lemmas.ml chacha-poly-spec/Spec_Poly1305.ml chacha-poly-spec/Spec_Chacha20Poly1305.ml -o chacha20poly1305.exe
@@ -173,4 +174,4 @@ ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	./ed25519.exe
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly-spec chacha-spec chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec sha2_256-spec sha2_384-spec sha2_512-spec hmac-sha2-spec hmac-sha2_256-spec hmac-sha2_384-spec hmac-sha2_512-spec ed25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly1305-ml chacha20-ml chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec sha2_256-spec sha2_384-spec sha2_512-spec hmac-sha2-spec hmac-sha2_256-spec hmac-sha2_384-spec hmac-sha2_512-spec ed25519-spec

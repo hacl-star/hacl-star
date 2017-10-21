@@ -3,6 +3,14 @@ module Spec.Lib.IntTypes
 (* Declared in .fsti : intsize, bits, maxint *)
 #set-options "--z3rlimit 10 --max_fuel 0"
 
+let pow2_values n =
+    assert_norm (pow2 0 = 1);
+    assert_norm (pow2 8 = 0x100);
+    assert_norm (pow2 16 = 0x10000);
+    assert_norm (pow2 32 = 0x100000000);
+    assert_norm (pow2 64 = 0x10000000000000000);
+    assert_norm (pow2 128 = 0x100000000000000000000000000000000)
+
 let uint_t (t:inttype) : Type0 = 
   match t with
   | U8 -> UInt8.t
@@ -26,8 +34,6 @@ let uint_v #t u = uint_to_nat_ u
 
 let u8 x : uint8  = UInt8.uint_to_t x 
 
-let u8_uy x = x
-  
 let u16 x : uint16 = UInt16.uint_to_t x
 
 let u16_us x = x
@@ -52,11 +58,8 @@ let nat_to_uint #t x : uint_t t =
   | U64 -> u64 x
   | U128 -> u128 x
   
-//DONT USE FOLLOWING FUNCTION EXCEPT IN TRUSTED LIBS
-let uint_to_nat #t u = uint_to_nat_ u
-
 let cast #t t' u  = 
-  let n = uint_to_nat #t u in
+  let n = uint_to_nat_ #t u in
   let n' = n % (pow2 (bits t')) in
   nat_to_uint #t' n'
   

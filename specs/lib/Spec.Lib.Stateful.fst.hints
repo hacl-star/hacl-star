@@ -1,0 +1,218 @@
+[
+  "r\u000fq)ÊzùDîº\\\u001a®—$O",
+  [
+    [
+      "Spec.Lib.Stateful.__proj__StateDef__item__state",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "03c1c4fcf354687cab7d249c4848fdbf"
+    ],
+    [
+      "Spec.Lib.Stateful.__proj__StateDef__item__key",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "a4e44de66f4b36b27352e95062e40d24"
+    ],
+    [
+      "Spec.Lib.Stateful.__proj__StateDef__item__value",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Spec.Lib.Stateful.StateDef_key",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_key"
+      ],
+      0,
+      "2f1e5d3c88b8abe039cf364990b6cea2"
+    ],
+    [
+      "Spec.Lib.Stateful.__proj__StateDef__item__length",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Spec.Lib.Stateful.StateDef_key",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_key"
+      ],
+      0,
+      "d3eeb688b7204db0421c5212fdb39105"
+    ],
+    [
+      "Spec.Lib.Stateful.__proj__StateDef__item__create",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Spec.Lib.Stateful.StateDef_state",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_state"
+      ],
+      0,
+      "f7e4d61d0d6a0618bf587d731765d6a8"
+    ],
+    [
+      "Spec.Lib.Stateful.__proj__StateDef__item__get",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Spec.Lib.Stateful.StateDef_key",
+        "proj_equation_Spec.Lib.Stateful.StateDef_length",
+        "proj_equation_Spec.Lib.Stateful.StateDef_state",
+        "proj_equation_Spec.Lib.Stateful.StateDef_value",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_key",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_length",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_state",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_value",
+        "token_correspondence_Spec.Lib.Stateful.__proj__StateDef__item__length",
+        "token_correspondence_Spec.Lib.Stateful.__proj__StateDef__item__value"
+      ],
+      0,
+      "073a61c14293a775b840e84892839dc8"
+    ],
+    [
+      "Spec.Lib.Stateful.__proj__StateDef__item__put",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Spec.Lib.Stateful.StateDef_key",
+        "proj_equation_Spec.Lib.Stateful.StateDef_length",
+        "proj_equation_Spec.Lib.Stateful.StateDef_state",
+        "proj_equation_Spec.Lib.Stateful.StateDef_value",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_key",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_length",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_state",
+        "projection_inverse_Spec.Lib.Stateful.StateDef_value",
+        "token_correspondence_Spec.Lib.Stateful.__proj__StateDef__item__length",
+        "token_correspondence_Spec.Lib.Stateful.__proj__StateDef__item__value"
+      ],
+      0,
+      "6ae12cde8dc4409037ab1b4ce2b65e93"
+    ],
+    [
+      "Spec.Lib.Stateful.state_slice",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.UInt32.n", "equation_Prims.nat",
+        "equation_Spec.Lib.IntTypes.size_t",
+        "function_token_typing_FStar.UInt32.n", "int_inversion",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.Lib.IntSeq_Tm_refine_5d68b4aedab07e9543c96792e76744c9",
+        "refinement_interpretation_Spec.Lib.IntTypes_Tm_refine_28308cea6ae7a112cb49408f7e9eac2d"
+      ],
+      0,
+      "70f7d946404d808ea8201d295cd68dbd"
+    ],
+    [
+      "Spec.Lib.Stateful.alloc",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "1e777af6e8c97c664c3c8f895d09706d"
+    ],
+    [
+      "Spec.Lib.Stateful.read",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.Lib.IntTypes.size_t",
+        "refinement_interpretation_Spec.Lib.Stateful_Tm_refine_f248d41453445474a795b64132433dec"
+      ],
+      0,
+      "8e4895f3fd5af95803e907a3b4cd5bb0"
+    ],
+    [
+      "Spec.Lib.Stateful.read",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.UInt32.n", "equation_Prims.nat",
+        "equation_Spec.Lib.IntTypes.size_t",
+        "function_token_typing_FStar.UInt32.n",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.Lib.IntTypes_Tm_refine_28308cea6ae7a112cb49408f7e9eac2d",
+        "refinement_interpretation_Spec.Lib.Stateful_Tm_refine_f248d41453445474a795b64132433dec"
+      ],
+      0,
+      "71c932d56b74ccde3f3398cb276e12a7"
+    ],
+    [
+      "Spec.Lib.Stateful.write",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.UInt32.n", "equation_Prims.nat",
+        "equation_Spec.Lib.IntTypes.size_t",
+        "function_token_typing_FStar.UInt32.n",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.Lib.IntTypes_Tm_refine_28308cea6ae7a112cb49408f7e9eac2d",
+        "refinement_interpretation_Spec.Lib.Stateful_Tm_refine_f248d41453445474a795b64132433dec"
+      ],
+      0,
+      "07609c202d0b3886b53558afd8e0d28c"
+    ],
+    [
+      "Spec.Lib.Stateful.bind",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "4a6eca432461cc0af595aa60cc83bcb1"
+    ],
+    [
+      "Spec.Lib.Stateful.copy",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Spec.Lib.Stateful_Tm_refine_5c31e7c0e8b63ec1fe034a4b0dcf4324"
+      ],
+      0,
+      "e452f0f4cd3b34d43c9e633905ce8e73"
+    ],
+    [
+      "Spec.Lib.Stateful.in_place_map2",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Spec.Lib.Stateful_Tm_refine_5c31e7c0e8b63ec1fe034a4b0dcf4324"
+      ],
+      0,
+      "2b34fae1427be0f1685190a078eafc6e"
+    ],
+    [
+      "Spec.Lib.Stateful.import_slice",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "125a9f8d608406be13225a1ef86b3f9c"
+    ]
+  ]
+]

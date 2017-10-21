@@ -26,8 +26,6 @@ val fold_left_range: #a:Type -> #b:Type -> #len:size_t -> min:size_t -> max:size
 val fold_lefti: #a:Type -> #b:Type -> #len:size_t -> (i:size_t{i < len} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b) 
 val fold_left: #a:Type -> #b:Type -> #len:size_t -> (a -> b -> Tot b) -> lseq a len -> b -> Tot (b) 
 
-//val fold_left_slices: #a:Type -> #b:Type -> #len:size_t -> #slice_len:size_t{len % slice_len = 0} -> (lseq a slice_len -> b -> Tot b) -> lseq a len -> b -> Tot b
-
 
 val map: #a:Type -> #b:Type -> #len:size_t -> (a -> Tot b) -> lseq a len -> lseq b len
 val for_all: #a:Type -> #len:size_t -> (a -> Tot bool) -> lseq a len -> bool
@@ -40,8 +38,8 @@ val map2: #a:Type -> #b:Type -> #c:Type -> #len:size_t -> (a -> b -> Tot c) -> l
 val for_all2: #a:Type -> #b:Type -> #len:size_t -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> bool
 
 
-type intseq (t:inttype) (len:size_t) = lseq (uint_t t) len
-type lbytes (len:size_t) = intseq U8 len
+unfold type intseq (t:inttype) (len:size_t) = lseq (uint_t t) len
+unfold type lbytes (len:size_t) = intseq U8 len
 
 val nat_from_intseq_be:#t:inttype -> #len:size_t -> b:intseq t len -> Tot (n:nat{n < pow2 (len `op_Multiply` bits t)})
 val nat_from_intseq_le:#t:inttype -> #len:size_t -> b:intseq t len -> Tot (n:nat{n < pow2 (len `op_Multiply` bits t)})
@@ -62,4 +60,8 @@ val uint_from_bytes_be: #t:inttype -> intseq U8 (numbytes t) -> u:uint_t t
 val uints_to_bytes_le: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
 val uints_to_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
 val uints_from_bytes_le: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
-  val uints_from_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
+val uints_from_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
+
+open FStar.All
+val iter_ml: #a:Type -> #len:size_t -> (a -> ML unit) -> lseq a len -> ML unit 
+
