@@ -211,7 +211,7 @@ let uint8_p = buffer Hacl.UInt8.t
 
 let buf_to_seq (b:uint8_p): Stack (seq FStar.UInt8.t) (requires (fun h -> live h b)) (ensures (fun h0 s h1 -> live h1 b)) =
   let ss = to_seq_full b in
-  let sl = seq_to_list ss in 
+  let sl = seq_to_list ss in
   let fl = FStar.List.Tot.map declassify_u8 sl in
   seq_of_list fl
 
@@ -219,22 +219,23 @@ let seq_to_buf (b:uint8_p) (s:seq FStar.UInt8.t): unit =
   admit()
 
 val encrypt_low:
+  pkm:pkae_module ->
   c:uint8_p ->
   m:uint8_p -> //we might want this to be abstract
   mlen:u64{let len = U64.v mlen in length c = len /\ len = length m}  ->
   n:uint8_p ->
-  sk:skey -> //I use the abstract high level keys here
-  pk:pkey -> 
+  sk:skey pkm -> //I use the abstract high level keys here
+  pk:pkey pkm ->
   Stack u32
     (requires (fun h -> live h c /\ live h m /\ live h n))  //we have to add the security specification here
     (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
-let encrypt_low c m mlen n sk pk = 
+let encrypt_low c m mlen n sk pk =
   let m = buf_to_seq m in
   let n = buf_to_seq n in
   let pkm = admit() in //this encapsulates the idealization state, should we pass it in as 'idealized' input
   let m = admit() in //conversion from m to abstract plaintext?
   let c' = encrypt pkm n sk pk m in
-  seq_to_buf c c'; 
+  seq_to_buf c c';
   0ul
 
 val decrypt_low:
