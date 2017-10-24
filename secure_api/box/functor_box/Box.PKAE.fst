@@ -202,6 +202,8 @@ let decrypt pkm n sk pk c =
 
 (* low-level wrapper *)
 
+let my_create = create
+
 open FStar.Buffer
 open Hacl.Policies
 module U64 = FStar.UInt64
@@ -215,8 +217,13 @@ let buf_to_seq (b:uint8_p): Stack (seq FStar.UInt8.t) (requires (fun h -> live h
   let fl = FStar.List.Tot.map declassify_u8 sl in
   seq_of_list fl
 
+let as_seq h (b:uint8_p) = 
+  seq_of_list (FStar.List.Tot.map declassify_u8 (seq_to_list (Buffer.as_seq h b)))
+  
 let seq_to_buf (b:uint8_p) (s:seq FStar.UInt8.t): unit =
   admit()
+
+let pkm = my_create root 
 
 val encrypt_low:
   pkm:pkae_module ->
@@ -228,11 +235,13 @@ val encrypt_low:
   pk:pkey pkm ->
   Stack u32
     (requires (fun h -> live h c /\ live h m /\ live h n))  //we have to add the security specification here
-    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c))
-let encrypt_low c m mlen n sk pk =
+    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c /\ 
+      ( let r = as_seq h1 c in 
+        let m = as_seq h1 m in 
+        r = SPEC.cryptobox m (as_seq h1 n) (ODH.pk_get_share pkm.aux.om pk) (ODH.get_skeyGT pkm.aux.om sk) )))
+let encrypt_low c m mlen n sk pk = 
   let m = buf_to_seq m in
   let n = buf_to_seq n in
-  let pkm = admit() in //this encapsulates the idealization state, should we pass it in as 'idealized' input
   let m = admit() in //conversion from m to abstract plaintext?
   let c' = encrypt pkm n sk pk m in
   seq_to_buf c c';

@@ -109,7 +109,7 @@ val create: om_hash_len:nat ->
 (**
   A helper function to obtain the raw bytes of a DH public key.
 *)
-val pk_get_share: om:odh_module -> pk:pkey om -> Tot (dh_sh:dh_share om) //{dh_sh = pk.pk_sharite numbersre})
+val pk_get_share: om:odh_module -> pk:pkey om -> Tot (dh_sh:dh_share om) //{dh_sh = pk.pk_share})
 
 val lemma_pk_get_share_inj: om:odh_module -> pk:pkey om -> Lemma
   (requires True)
