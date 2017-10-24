@@ -5,53 +5,42 @@ open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 
 
+let op_String_Access = index
+let op_String_Assignment = upd
+
 type lbytes (s:size_t) = intseq U8 s
 type rotval (t:inttype) = r:uint32{uint_v r > 0 /\ uint_v r < bits t}
 
 #set-options "--z3rlimit  25"
 
-// let rec big_bytes #max (start:nat) (len:nat{start+len <= max}) (n:nat{n < pow2 (8 * len)}) (s:lseq u8 max) : lseq u8 max =
-//   if len = 0 then
-//     s
-//   else
-//     let len = len - 1 in
-//     let byte = UInt8.uint_to_t (n % 256) in
-//     let n' = n / 256 in
-//     let s = s.[start+len] <- byte in
-//     big_bytes #max start len n' s
+let max_size_t = maxint U32
 
-// let write #n (s:lseq 'a n) (i:nat{i < n}) (v:'a) : (t:lseq 'a n) =
-//     upd s i v
+noeq type parameters =
+  | MkParameters:
+    wt:inttype{wt = U32 \/ wt = U64} ->
+	 opTable: lseq (rotval wt) 12 ->
+	 kSize: size_t{kSize > 16} ->
+	 kTable: intseq wt kSize ->
+	 h0: intseq wt 8 ->
+	 hashSize: nat {hashSize <= 8 * numbytes wt} ->
+	 parameters
 
-noeq type sha2_params =
-  | MkParams: wt:inttype ->
-	      opTable: lseq (rotval wt) 12 ->
-	      lenSize: size_t{lenSize > 0 /\ lenSize <= 16} ->
-	      kSize: size_t{kSize > 16} ->
-	      kTable: intseq wt kSize ->
-	      h0: intseq wt 8 ->
-	      hashSize: nat {hashSize <= 8 * numbytes wt} ->
-	      sha2_params
+let lenType p = match p.wt with
+| U32 -> U64
+| U64 -> U128
+
+let lenSize p = numbytes (lenType p)
+
+let maxInput p = (maxint (lenType p) + 1) / 8
+
 
 let _Ch p x y z = ((x &. y) ^. ((~. x) &. z))
 let _Maj p x y z = (x &. y) ^. ((x &. z) ^. (y &. z))
-
-let op_String_Access = index
-let op_String_Assignment = upd
-
 let _Sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[0]) ^. ((x >>>. p.opTable.[1]) ^. (x >>>. p.opTable.[2]))
+let _Sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[3]) ^. ((x >>>. p.opTable.[4]) ^. (x >>>. p.opTable.[5]))
+let _sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[6]) ^. ((x >>>. p.opTable.[7]) ^. (x >>. p.opTable.[8]))
+let _sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[9]) ^. ((x >>>. p.opTable.[10]) ^. (x >>. p.opTable.[11]))
 
-let _Sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[3]) ^.
-                                ((x >>>. p.opTable.[4]) ^.
-                                               (x >>>. p.opTable.[5]))
-
-let _sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[6]) ^.
-                                ((x >>>. p.opTable.[7]) ^.
-                                               (x >>. p.opTable.[8]))
-
-let _sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[9])
-                                ^. ((x >>>. p.opTable.[10]) ^.
-                                               (x >>. p.opTable.[11]))
 
 let size_block_w = 16
 let size_hash_w = 8
@@ -62,16 +51,16 @@ type block_w p = b:intseq p.wt size_block_w
 type hash_w p = b:intseq p.wt size_hash_w
 
 let step_ws0 p (b:block_w p) (i:size_t{i >= 0 /\ i < 16}) (s:intseq p.wt p.kSize) : (t:intseq p.wt p.kSize) =
-    s.[i] <- b.[i]
+  s.[i] <- b.[i]
 
 let step_ws1 p (i:size_t{i >= 16 /\ i < p.kSize}) (s:intseq p.wt p.kSize) : (t:intseq p.wt p.kSize) =
-      let t16 = s.[i - 16] in
-      let t15 = s.[i - 15] in
-      let t7  = s.[i - 7] in
-      let t2  = s.[i - 2] in
-      let s1 = _sigma1 p t2 in
-      let s0 = _sigma0 p t15 in
-      s.[i] <- s1 +. (t7 +. (s0 +. t16))
+  let t16 = s.[i - 16] in
+  let t15 = s.[i - 15] in
+  let t7  = s.[i - 7] in
+  let t2  = s.[i - 2] in
+  let s1 = _sigma1 p t2 in
+  let s0 = _sigma0 p t15 in
+  s.[i] <- s1 +. (t7 +. (s0 +. t16))
 
 let ws p (b:block_w p) =
   let s = create p.kSize (nat_to_uint #p.wt 0) in
@@ -105,264 +94,239 @@ let shuffle_core p (wsTable:intseq p.wt p.kSize) (t:size_t{t < p.kSize}) (hash:h
 
 
 (* Full shuffling function *)
-let shuffle (p:sha2_params) (wsTable:intseq p.wt p.kSize) (hash:hash_w p) : Tot (hash_w p) =
+let shuffle (p:parameters) (wsTable:intseq p.wt p.kSize) (hash:hash_w p) : Tot (hash_w p) =
   repeati p.kSize (shuffle_core p wsTable) hash
 
-assume val uints_from_bytes_be: wt:inttype -> n:size_t{n * numbytes wt < pow2 32} -> intseq U8 (n * numbytes wt) -> intseq wt n
-
 (* Compression function *)
-let update_block (p:sha2_params) (block:lbytes (size_block p)) (hash:hash_w p) : Tot (hash_w p) =
-  let block_ = uints_from_bytes_be p.wt size_block_w block in
-  let wsTable = ws p block_ in
+let update_block (p:parameters) (block:lbytes (size_block p)) (hash:hash_w p) : Tot (hash_w p) =
+  let wsTable = ws p (uints_from_bytes_be block) in
   let hash1 = shuffle p wsTable hash in
   map2 (fun x y -> x +. y) hash hash1
 
-let update_multi (p:sha2_params) (n:size_t{n * size_block p < pow2 32}) (blocks:lbytes (n * size_block p)) (hash:hash_w p) : Tot (hash_w p) =
+let update_multi (p:parameters) (n:size_t{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (hash:hash_w p) : Tot (hash_w p) =
   let bl = size_block p in
-  repeati n
-    (fun i -> update_block p (sub blocks (bl * i) bl))
-    hash
+  repeati n (fun i -> update_block p (sub blocks (bl * i) bl)) hash
 
-let padding_blocks p (len:size_t) : size_t =
-  if (len < size_block p - p.lenSize) then 1 else 2
+let padding_blocks_single p (len:size_t{len < size_block p}) : size_t =
+  if len < size_block p - numbytes (lenType p) then 1 else 2
 
-let padding_size p (len:size_t) = size_block p * padding_blocks p len
+let padding_blocks p (len:size_t{len < maxInput p}) : size_t =
+  let n = len / size_block p in
+  let r = len % size_block p in
+  let nr = padding_blocks_single p r in
+  n + nr
 
-let pad p (n:size_t)
-          (len:size_t{len < size_block p /\ 8 * (n * size_block p + len) < pow2 (8 * p.lenSize)})
+
+let pad_single p (n:size_t)
+//          (len:size_t{len < size_block p /\ 8 * (len + n * size_block p) <= maxint (lenType p)})
+          (len:size_t{len < size_block p /\ len + n * size_block p <= maxInput p})
           (last:lbytes len)
-: Tot lbytes (padding_size p len) =
-  let lastlen = length last in
-  let blocks = padding_blocks p lastlen in
-  let plen = blocks * size_block p in
-  let padding : lbytes plen = create plen 0uy in
-  let tlen = n * size_block p + lastlen in
-  let padding = repeati lastlen
-			(fun s i -> write #byte #plen s i last.[i]) padding in
-  let padding = repeati ((plen - p.lenSize) - (lastlen + 1))
-			(fun s i -> write #byte #plen s i 0uy) padding in
+: Tot (block:lbytes (size_block p * padding_blocks_single p len)) =
+  // Number of blocks to pad last
+  let nr : size_t = padding_blocks_single p len in
+  // Size in bytes for the final blocks
+  let plen : size_t = nr * size_block p in
+  // Creating the padding
+  let padding : lbytes plen = create plen (u8 0) in
+  // Write the last data in the padding
+  let padding : lbytes plen = repeati len (fun i s -> s.[i] <- last.[i]) padding in
+  // Write the 0x80 byte in the padding
+  let padding : lbytes plen = padding.[len] <- u8 0x80 in
+  // Write the zeros of the padding
+  let set_zero (i:size_t{i < plen}) (s:lbytes plen) : lbytes plen  = s.[i] <- u8 0 in
+  let padding : lbytes plen = repeati (plen - numbytes (lenType p) - len - 1) set_zero padding in
+  // Size of the total input in bytes
+  let tlen = n * size_block p + len in
+  // Size of the total input in bits
   let tlenbits = tlen * 8 in
-  let padding = big_bytes #plen (plen - p.lenSize) p.lenSize tlenbits padding in
+  //
+  let x = nat_to_uint #(lenType p) tlenbits in
+  // Encode the total length in bits
+  let encodedlen = uint_to_bytes_be x in
+  // Write the encoded length in the padding
+  let padding : lbytes plen = update_slice padding (plen - numbytes (lenType p)) plen encodedlen in
   padding
 
+let pad p (n:size_t)
+//          (len:size_t{len < p.maxInput /\ (size_block p * padding_blocks p len) <= max_size_t  /\ 8 * (len + n * size_block p) <= maxint (lenType p) /\ n + (len / size_block p) <= max_size_t})
+          (len:size_t{len < maxInput p /\ (size_block p * padding_blocks p len) <= max_size_t /\ n + (len / size_block p) <= max_size_t})
+          (last:lbytes len) : Tot
+          (block:lbytes (size_block p * padding_blocks p len)) =
+  let nb = len / size_block p in
+  let nr = len % size_block p in
+
+  let plen : size_t = size_block p * padding_blocks p len in
+
+  let nblocks8 = nb * size_block p in
+//  let nlblocks = padding_blocks_single nr
+  let l1 = slice last nblocks8 len in
+  let last_blocks = pad_single p (n + nb) nr l1 in
+    // Creating the padding
+
+  let padding : lbytes plen = create plen  (u8 0) in
+  // Write the last data in the padding
+  let padding = update_slice padding 0 nblocks8 (slice last 0 nblocks8) in
+  let padding = update_slice padding nblocks8 plen last_blocks in
+  padding
+
+
 let update_last p (n:size_t)
-                  (last:seq u8{length last < size_block p /\ 8 * (n * size_block p + length last) < pow2 (8 * p.lenSize)})
+                  (len:size_t{len < size_block p /\ len + n * size_block p <= maxInput p})
+                  (last:lbytes len)
 		            (hash:hash_w p)
 : Tot (hash_w p) =
-  let blocks = pad p n last in
-  update_multi p (padding_blocks p (length last)) blocks hash
+  let blocks = pad_single p n len last in
+  update_multi p (padding_blocks_single p len) blocks hash
 
-let finish p (hash:hash_w p) : lseq byte p.hashSize =
-  let hash_final = p.w.to_be 8 hash in
-  let h,_ = Seq.split hash_final p.hashSize in
+
+let finish p (hash:hash_w p) : lbytes p.hashSize =
+  let hash_final = uints_to_bytes_be hash in
+  let h = slice hash_final 0 p.hashSize in
   h
 
-#reset-options "--z3rlimit 10"
 
-let hash p (input:bytes{8 * length input < pow2 (8 * p.lenSize)}) : lseq byte p.hashSize =
-  let n = Seq.length input / (size_block p) in
-  let prevlen = n * (size_block p) in
-  let (bs,l) = Seq.split input prevlen in
-  let hash = update_multi p n bs p.h0 in
-  let hash = update_last p n l hash in
+let hash p (len:size_t{len < maxInput p}) (input:lbytes len) : lbytes p.hashSize =
+  let nb = len / size_block p in
+  let nr = len % size_block p in
+  let nblocks8 = nb * size_block p in
+  let l0 = slice input 0 nblocks8 in
+  let l1 = slice input nblocks8 len in
+  let hash = update_multi p nb l0 p.h0 in
+  let hash = update_last p nb nr l1 hash in
   finish p hash
 
-let hash' p (input:bytes{8 * length input < pow2 (8 * p.lenSize)}) : lseq byte p.hashSize =
-  let n = Seq.length input / (size_block p) in
-  let prevlen = n * (size_block p) in
-  let (blocks,last) = Seq.split input prevlen in
-  let padding = pad p n last in
-  let lastlen = length last in
-  let padn = padding_blocks p lastlen in
-  finish p (update_multi p (n + padn) (blocks @| padding) p.h0)
+let hash' p (len:size_t{len < maxInput p /\ (size_block p * padding_blocks p len) <= max_size_t}) (input:lbytes len) : lbytes p.hashSize =
+  let n = padding_blocks p len in
+  let blocks = pad p 0 len input in
+  finish p (update_multi p n blocks p.h0)
 
 
-let rotate_right32 (x:UInt32.t) (s:UInt32.t{0 < v s /\ v s < 32}) : Tot UInt32.t =
-  ((x >>^ s) |^ (x <<^ (32ul -^ s)))
 
-let rotate_right64 (a:UInt64.t) (s:UInt32.t{0 < v s /\ v s < 64}) : Tot UInt64.t =
-  FStar.UInt64.((a >>^ s) |^ (a <<^ (UInt32.sub 64ul s)))
-
-val u32s_from_be: len:nat -> lseq byte (4 * len) -> lseq u32 len
-let u32s_from_be l s = Spec.Lib.uint32s_from_be l s
-
-val shift_right32: n:u32 -> s:u32{v s < 32} -> u32
-let shift_right32 n s = UInt32.shift_right n s
-
-val u64s_from_be: len:nat -> lseq byte (8 * len) -> lseq u64 len
-let u64s_from_be l s = Spec.Lib.uint64s_from_be l s
-
-val shift_right64: n:u64 -> s:u32{v s < 64} -> u64
-let shift_right64 n s = UInt64.shift_right n s
-
-let word32 : word u32 4 = {
-  word0 = 0ul;
-  to_be = Spec.Lib.uint32s_to_be;
-  from_be = u32s_from_be;
-  add_mod = UInt32.add_mod;
-  logxor = UInt32.logxor;
-  logand = UInt32.logand;
-  logor = UInt32.logor;
-  lognot = UInt32.lognot;
-  shift_right = shift_right32;
-  rotate_right = rotate_right32;
-}
-
-let word64 : word u64 8 = {
-  word0 = 0uL;
-  to_be = Spec.Lib.uint64s_to_be;
-  from_be = u64s_from_be;
-  add_mod = UInt64.add_mod;
-  logxor = UInt64.logxor;
-  logand = UInt64.logand;
-  logor = UInt64.logor;
-  lognot = UInt64.lognot;
-  shift_right = shift_right64;
-  rotate_right = rotate_right64;
-}
+    // wt:inttype{wt = U32 \/ wt = U64} ->
+	 // opTable: lseq (rotval wt) 12 ->
+	 // kSize: size_t{kSize > 16} ->
+	 // kTable: intseq wt kSize ->
+	 // h0: intseq wt 8 ->
+	 // hashSize: nat {hashSize <= 8 * numbytes wt} ->
 
 
-let params_sha2_224 : sha2_params =
-  MkParams
-    u32
-    4
-    word32
-    (Seq.Create.create_12
-    2ul  13ul 22ul
-    6ul  11ul 25ul
-    7ul  18ul  3ul
-    17ul 19ul 10ul)
-    8
+let rotval32 (n:nat{n > 0 /\ n < 32}) : rotval U32 = u32 n
+
+let const_224_256_ops = List.Tot.map rotval32 [
+    2; 13; 22;
+    6; 11; 25;
+    7; 18; 3;
+    17; 19; 10]
+
+let const_224_256_k = List.Tot.map u32 [
+    0x428a2f98; 0x71374491; 0xb5c0fbcf; 0xe9b5dba5;
+    0x3956c25b; 0x59f111f1; 0x923f82a4; 0xab1c5ed5;
+    0xd807aa98; 0x12835b01; 0x243185be; 0x550c7dc3;
+    0x72be5d74; 0x80deb1fe; 0x9bdc06a7; 0xc19bf174;
+    0xe49b69c1; 0xefbe4786; 0x0fc19dc6; 0x240ca1cc;
+    0x2de92c6f; 0x4a7484aa; 0x5cb0a9dc; 0x76f988da;
+    0x983e5152; 0xa831c66d; 0xb00327c8; 0xbf597fc7;
+    0xc6e00bf3; 0xd5a79147; 0x06ca6351; 0x14292967;
+    0x27b70a85; 0x2e1b2138; 0x4d2c6dfc; 0x53380d13;
+    0x650a7354; 0x766a0abb; 0x81c2c92e; 0x92722c85;
+    0xa2bfe8a1; 0xa81a664b; 0xc24b8b70; 0xc76c51a3;
+    0xd192e819; 0xd6990624; 0xf40e3585; 0x106aa070;
+    0x19a4c116; 0x1e376c08; 0x2748774c; 0x34b0bcb5;
+    0x391c0cb3; 0x4ed8aa4a; 0x5b9cca4f; 0x682e6ff3;
+    0x748f82ee; 0x78a5636f; 0x84c87814; 0x8cc70208;
+    0x90befffa; 0xa4506ceb; 0xbef9a3f7; 0xc67178f2]
+
+let const_224_h0 = List.Tot.map u32 [
+    0xc1059ed8; 0x367cd507; 0x3070dd17; 0xf70e5939;
+    0xffc00b31; 0x68581511; 0x64f98fa7; 0xbefa4fa4]
+
+let const_256_h0 = List.Tot.map u32 [
+    0x6a09e667; 0xbb67ae85; 0x3c6ef372; 0xa54ff53a;
+    0x510e527f; 0x9b05688c; 0x1f83d9ab; 0x5be0cd19]
+
+let rotval64 (n:nat{n > 0 /\ n < 64}) : rotval U64 = u32 n
+
+let const_384_512_ops = List.Tot.map rotval64 [
+    28; 34; 39;
+    14; 18; 41;
+    1;   8;  7;
+    19; 61;  6]
+
+let const_384_512_k = List.Tot.map u64 [
+    0x428a2f98d728ae22; 0x7137449123ef65cd; 0xb5c0fbcfec4d3b2f; 0xe9b5dba58189dbbc;
+    0x3956c25bf348b538; 0x59f111f1b605d019; 0x923f82a4af194f9b; 0xab1c5ed5da6d8118;
+    0xd807aa98a3030242; 0x12835b0145706fbe; 0x243185be4ee4b28c; 0x550c7dc3d5ffb4e2;
+    0x72be5d74f27b896f; 0x80deb1fe3b1696b1; 0x9bdc06a725c71235; 0xc19bf174cf692694;
+    0xe49b69c19ef14ad2; 0xefbe4786384f25e3; 0x0fc19dc68b8cd5b5; 0x240ca1cc77ac9c65;
+    0x2de92c6f592b0275; 0x4a7484aa6ea6e483; 0x5cb0a9dcbd41fbd4; 0x76f988da831153b5;
+    0x983e5152ee66dfab; 0xa831c66d2db43210; 0xb00327c898fb213f; 0xbf597fc7beef0ee4;
+    0xc6e00bf33da88fc2; 0xd5a79147930aa725; 0x06ca6351e003826f; 0x142929670a0e6e70;
+    0x27b70a8546d22ffc; 0x2e1b21385c26c926; 0x4d2c6dfc5ac42aed; 0x53380d139d95b3df;
+    0x650a73548baf63de; 0x766a0abb3c77b2a8; 0x81c2c92e47edaee6; 0x92722c851482353b;
+    0xa2bfe8a14cf10364; 0xa81a664bbc423001; 0xc24b8b70d0f89791; 0xc76c51a30654be30;
+    0xd192e819d6ef5218; 0xd69906245565a910; 0xf40e35855771202a; 0x106aa07032bbd1b8;
+    0x19a4c116b8d2d0c8; 0x1e376c085141ab53; 0x2748774cdf8eeb99; 0x34b0bcb5e19b48a8;
+    0x391c0cb3c5c95a63; 0x4ed8aa4ae3418acb; 0x5b9cca4f7763e373; 0x682e6ff3d6b2b8a3;
+    0x748f82ee5defb2fc; 0x78a5636f43172f60; 0x84c87814a1f0ab72; 0x8cc702081a6439ec;
+    0x90befffa23631e28; 0xa4506cebde82bde9; 0xbef9a3f7b2c67915; 0xc67178f2e372532b;
+    0xca273eceea26619c; 0xd186b8c721c0c207; 0xeada7dd6cde0eb1e; 0xf57d4f7fee6ed178;
+    0x06f067aa72176fba; 0x0a637dc5a2c898a6; 0x113f9804bef90dae; 0x1b710b35131c471b;
+    0x28db77f523047d84; 0x32caab7b40c72493; 0x3c9ebe0a15c9bebc; 0x431d67c49c100d4c;
+    0x4cc5d4becb3e42b6; 0x597f299cfc657e2a; 0x5fcb6fab3ad6faec; 0x6c44198c4a475817]
+
+let const_384_h0 = List.Tot.map u64 [
+    0xcbbb9d5dc1059ed8; 0x629a292a367cd507; 0x9159015a3070dd17; 0x152fecd8f70e5939;
+    0x67332667ffc00b31; 0x8eb44a8768581511; 0xdb0c2e0d64f98fa7; 0x47b5481dbefa4fa4]
+
+let const_512_h0 = List.Tot.map u64 [
+    0x6a09e667f3bcc908; 0xbb67ae8584caa73b; 0x3c6ef372fe94f82b; 0xa54ff53a5f1d36f1;
+    0x510e527fade682d1; 0x9b05688c2b3e6c1f; 0x1f83d9abfb41bd6b; 0x5be0cd19137e2179]
+
+
+let parameters_sha2_224 : parameters =
+  assert_norm(List.Tot.length const_224_h0 = 8);
+  assert_norm(List.Tot.length const_224_256_ops = 12);
+  assert_norm(List.Tot.length const_224_256_k = 64);
+  MkParameters
+    U32
+    (createL const_224_256_ops)
     64
-    (Seq.Create.create_64
-    0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul
-    0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul
-    0xd807aa98ul 0x12835b01ul 0x243185beul 0x550c7dc3ul
-    0x72be5d74ul 0x80deb1feul 0x9bdc06a7ul 0xc19bf174ul
-    0xe49b69c1ul 0xefbe4786ul 0x0fc19dc6ul 0x240ca1ccul
-    0x2de92c6ful 0x4a7484aaul 0x5cb0a9dcul 0x76f988daul
-    0x983e5152ul 0xa831c66dul 0xb00327c8ul 0xbf597fc7ul
-    0xc6e00bf3ul 0xd5a79147ul 0x06ca6351ul 0x14292967ul
-    0x27b70a85ul 0x2e1b2138ul 0x4d2c6dfcul 0x53380d13ul
-    0x650a7354ul 0x766a0abbul 0x81c2c92eul 0x92722c85ul
-    0xa2bfe8a1ul 0xa81a664bul 0xc24b8b70ul 0xc76c51a3ul
-    0xd192e819ul 0xd6990624ul 0xf40e3585ul 0x106aa070ul
-    0x19a4c116ul 0x1e376c08ul 0x2748774cul 0x34b0bcb5ul
-    0x391c0cb3ul 0x4ed8aa4aul 0x5b9cca4ful 0x682e6ff3ul
-    0x748f82eeul 0x78a5636ful 0x84c87814ul 0x8cc70208ul
-    0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul)
-    (Seq.Create.create_8
-    0xc1059ed8ul 0x367cd507ul 0x3070dd17ul 0xf70e5939ul
-    0xffc00b31ul 0x68581511ul 0x64f98fa7ul 0xbefa4fa4ul)
+    (createL const_224_256_k)
+    (createL const_224_h0)
     28
 
-let params_sha2_256 =
-  MkParams
-    u32
-    4
-    word32
-    (Seq.Create.create_12
-    2ul  13ul 22ul
-    6ul  11ul 25ul
-    7ul  18ul  3ul
-    17ul 19ul 10ul)
-    8
+let parameters_sha2_256 : parameters =
+  assert_norm(List.Tot.length const_256_h0 = 8);
+  assert_norm(List.Tot.length const_224_256_ops = 12);
+  assert_norm(List.Tot.length const_224_256_k = 64);
+  MkParameters
+    U32
+    (createL const_224_256_ops)
     64
-    (Seq.Create.create_64
-    0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul
-    0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul
-    0xd807aa98ul 0x12835b01ul 0x243185beul 0x550c7dc3ul
-    0x72be5d74ul 0x80deb1feul 0x9bdc06a7ul 0xc19bf174ul
-    0xe49b69c1ul 0xefbe4786ul 0x0fc19dc6ul 0x240ca1ccul
-    0x2de92c6ful 0x4a7484aaul 0x5cb0a9dcul 0x76f988daul
-    0x983e5152ul 0xa831c66dul 0xb00327c8ul 0xbf597fc7ul
-    0xc6e00bf3ul 0xd5a79147ul 0x06ca6351ul 0x14292967ul
-    0x27b70a85ul 0x2e1b2138ul 0x4d2c6dfcul 0x53380d13ul
-    0x650a7354ul 0x766a0abbul 0x81c2c92eul 0x92722c85ul
-    0xa2bfe8a1ul 0xa81a664bul 0xc24b8b70ul 0xc76c51a3ul
-    0xd192e819ul 0xd6990624ul 0xf40e3585ul 0x106aa070ul
-    0x19a4c116ul 0x1e376c08ul 0x2748774cul 0x34b0bcb5ul
-    0x391c0cb3ul 0x4ed8aa4aul 0x5b9cca4ful 0x682e6ff3ul
-    0x748f82eeul 0x78a5636ful 0x84c87814ul 0x8cc70208ul
-    0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul)
-    (Seq.Create.create_8
-    0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul
-    0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul)
+    (createL const_224_256_k)
+    (createL const_256_h0)
     32
 
-
-let params_sha2_384 =
-  MkParams
-    u64
-    8
-    word64
-    (Seq.Create.create_12
-    28ul 34ul 39ul
-    14ul 18ul 41ul
-    1ul   8ul  7ul
-    19ul 61ul  6ul)
-    16
+let parameters_sha2_384 : parameters =
+  assert_norm(List.Tot.length const_384_h0 = 8);
+  assert_norm(List.Tot.length const_384_512_ops = 12);
+  assert_norm(List.Tot.length const_384_512_k = 80);
+  MkParameters
+    U64
+    (createL const_384_512_ops)
     80
-    (Seq.Create.create_80
-    0x428a2f98d728ae22uL 0x7137449123ef65cduL 0xb5c0fbcfec4d3b2fuL 0xe9b5dba58189dbbcuL
-    0x3956c25bf348b538uL 0x59f111f1b605d019uL 0x923f82a4af194f9buL 0xab1c5ed5da6d8118uL
-    0xd807aa98a3030242uL 0x12835b0145706fbeuL 0x243185be4ee4b28cuL 0x550c7dc3d5ffb4e2uL
-    0x72be5d74f27b896fuL 0x80deb1fe3b1696b1uL 0x9bdc06a725c71235uL 0xc19bf174cf692694uL
-    0xe49b69c19ef14ad2uL 0xefbe4786384f25e3uL 0x0fc19dc68b8cd5b5uL 0x240ca1cc77ac9c65uL
-    0x2de92c6f592b0275uL 0x4a7484aa6ea6e483uL 0x5cb0a9dcbd41fbd4uL 0x76f988da831153b5uL
-    0x983e5152ee66dfabuL 0xa831c66d2db43210uL 0xb00327c898fb213fuL 0xbf597fc7beef0ee4uL
-    0xc6e00bf33da88fc2uL 0xd5a79147930aa725uL 0x06ca6351e003826fuL 0x142929670a0e6e70uL
-    0x27b70a8546d22ffcuL 0x2e1b21385c26c926uL 0x4d2c6dfc5ac42aeduL 0x53380d139d95b3dfuL
-    0x650a73548baf63deuL 0x766a0abb3c77b2a8uL 0x81c2c92e47edaee6uL 0x92722c851482353buL
-    0xa2bfe8a14cf10364uL 0xa81a664bbc423001uL 0xc24b8b70d0f89791uL 0xc76c51a30654be30uL
-    0xd192e819d6ef5218uL 0xd69906245565a910uL 0xf40e35855771202auL 0x106aa07032bbd1b8uL
-    0x19a4c116b8d2d0c8uL 0x1e376c085141ab53uL 0x2748774cdf8eeb99uL 0x34b0bcb5e19b48a8uL
-    0x391c0cb3c5c95a63uL 0x4ed8aa4ae3418acbuL 0x5b9cca4f7763e373uL 0x682e6ff3d6b2b8a3uL
-    0x748f82ee5defb2fcuL 0x78a5636f43172f60uL 0x84c87814a1f0ab72uL 0x8cc702081a6439ecuL
-    0x90befffa23631e28uL 0xa4506cebde82bde9uL 0xbef9a3f7b2c67915uL 0xc67178f2e372532buL
-    0xca273eceea26619cuL 0xd186b8c721c0c207uL 0xeada7dd6cde0eb1euL 0xf57d4f7fee6ed178uL
-    0x06f067aa72176fbauL 0x0a637dc5a2c898a6uL 0x113f9804bef90daeuL 0x1b710b35131c471buL
-    0x28db77f523047d84uL 0x32caab7b40c72493uL 0x3c9ebe0a15c9bebcuL 0x431d67c49c100d4cuL
-    0x4cc5d4becb3e42b6uL 0x597f299cfc657e2auL 0x5fcb6fab3ad6faecuL 0x6c44198c4a475817uL)
-    (Seq.Create.create_8
-    0xcbbb9d5dc1059ed8uL 0x629a292a367cd507uL 0x9159015a3070dd17uL 0x152fecd8f70e5939uL
-    0x67332667ffc00b31uL 0x8eb44a8768581511uL 0xdb0c2e0d64f98fa7uL 0x47b5481dbefa4fa4uL)
+    (createL const_384_512_k)
+    (createL const_384_h0)
     48
 
-let params_sha2_512 =
-  MkParams
-    u64
-    8
-    word64
-    (Seq.Create.create_12
-    28ul 34ul 39ul
-    14ul 18ul 41ul
-    1ul   8ul  7ul
-    19ul 61ul  6ul)
-    16
+let parameters_sha2_512 : parameters =
+  assert_norm(List.Tot.length const_512_h0 = 8);
+  assert_norm(List.Tot.length const_384_512_ops = 12);
+  assert_norm(List.Tot.length const_384_512_k = 80);
+  MkParameters
+    U64
+    (createL const_384_512_ops)
     80
-    (Seq.Create.create_80
-    0x428a2f98d728ae22uL 0x7137449123ef65cduL 0xb5c0fbcfec4d3b2fuL 0xe9b5dba58189dbbcuL
-    0x3956c25bf348b538uL 0x59f111f1b605d019uL 0x923f82a4af194f9buL 0xab1c5ed5da6d8118uL
-    0xd807aa98a3030242uL 0x12835b0145706fbeuL 0x243185be4ee4b28cuL 0x550c7dc3d5ffb4e2uL
-    0x72be5d74f27b896fuL 0x80deb1fe3b1696b1uL 0x9bdc06a725c71235uL 0xc19bf174cf692694uL
-    0xe49b69c19ef14ad2uL 0xefbe4786384f25e3uL 0x0fc19dc68b8cd5b5uL 0x240ca1cc77ac9c65uL
-    0x2de92c6f592b0275uL 0x4a7484aa6ea6e483uL 0x5cb0a9dcbd41fbd4uL 0x76f988da831153b5uL
-    0x983e5152ee66dfabuL 0xa831c66d2db43210uL 0xb00327c898fb213fuL 0xbf597fc7beef0ee4uL
-    0xc6e00bf33da88fc2uL 0xd5a79147930aa725uL 0x06ca6351e003826fuL 0x142929670a0e6e70uL
-    0x27b70a8546d22ffcuL 0x2e1b21385c26c926uL 0x4d2c6dfc5ac42aeduL 0x53380d139d95b3dfuL
-    0x650a73548baf63deuL 0x766a0abb3c77b2a8uL 0x81c2c92e47edaee6uL 0x92722c851482353buL
-    0xa2bfe8a14cf10364uL 0xa81a664bbc423001uL 0xc24b8b70d0f89791uL 0xc76c51a30654be30uL
-    0xd192e819d6ef5218uL 0xd69906245565a910uL 0xf40e35855771202auL 0x106aa07032bbd1b8uL
-    0x19a4c116b8d2d0c8uL 0x1e376c085141ab53uL 0x2748774cdf8eeb99uL 0x34b0bcb5e19b48a8uL
-    0x391c0cb3c5c95a63uL 0x4ed8aa4ae3418acbuL 0x5b9cca4f7763e373uL 0x682e6ff3d6b2b8a3uL
-    0x748f82ee5defb2fcuL 0x78a5636f43172f60uL 0x84c87814a1f0ab72uL 0x8cc702081a6439ecuL
-    0x90befffa23631e28uL 0xa4506cebde82bde9uL 0xbef9a3f7b2c67915uL 0xc67178f2e372532buL
-    0xca273eceea26619cuL 0xd186b8c721c0c207uL 0xeada7dd6cde0eb1euL 0xf57d4f7fee6ed178uL
-    0x06f067aa72176fbauL 0x0a637dc5a2c898a6uL 0x113f9804bef90daeuL 0x1b710b35131c471buL
-    0x28db77f523047d84uL 0x32caab7b40c72493uL 0x3c9ebe0a15c9bebcuL 0x431d67c49c100d4cuL
-    0x4cc5d4becb3e42b6uL 0x597f299cfc657e2auL 0x5fcb6fab3ad6faecuL 0x6c44198c4a475817uL)
-    (Seq.Create.create_8
-    0x6a09e667f3bcc908uL 0xbb67ae8584caa73buL 0x3c6ef372fe94f82buL 0xa54ff53a5f1d36f1uL
-    0x510e527fade682d1uL 0x9b05688c2b3e6c1fuL 0x1f83d9abfb41bd6buL 0x5be0cd19137e2179uL)
+    (createL const_384_512_k)
+    (createL const_512_h0)
     64
