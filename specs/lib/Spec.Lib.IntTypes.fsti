@@ -206,8 +206,10 @@ let ( &. ) = logand
 inline_for_extraction
 let ( ~. ) = lognot
 
+unfold inline_for_extraction
+let max_size_t = maxint U32
 inline_for_extraction
-type size_t = n:nat{n <= maxint U32}
+type size_t = n:nat{n <= max_size_t}
 
 inline_for_extraction
 val size_to_uint32: s:size_t -> u:uint32{uint_v #U32 u = s}

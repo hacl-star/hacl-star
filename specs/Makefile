@@ -69,12 +69,12 @@ poly1305.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Li
 	$(OCAMLOPT) -I poly1305-ml $(OCAML_INCLUDES) poly1305-ml/Spec_Lib_IntTypes.ml poly1305-ml/Spec_Lib_IntSeq.ml poly1305-ml/Spec_Poly1305.ml poly1305-ml/Spec_Poly1305_Test.ml -o poly1305.exe
 	./poly1305.exe
 
-curve25519.exe: Spec.Curve25519.fst
+curve25519.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Curve25519.fst tests/Spec.Curve25519.Test.fst
 	$(MAKE) -C ../code/lib/ml
-	mkdir -p curve25519-spec
-	$(FSTAR_EXTRACT) --odir curve25519-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> curve25519-spec/Spec_Curve25519.ml
-	$(OCAMLOPT) -I curve25519-spec $(OCAML_INCLUDES) curve25519-spec/FStar_Endianness.ml curve25519-spec/Spec_Loops.ml curve25519-spec/Spec_Lib.ml curve25519-spec/Spec_Curve25519.ml -o curve25519.exe
+	mkdir -p curve25519-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Curve25519 --extract_module Spec.Curve25519.Test --odir curve25519-ml $^
+	@echo 'let _ = test()' >> curve25519-ml/Spec_Curve25519_Test.ml
+	$(OCAMLOPT) -I curve25519-ml $(OCAML_INCLUDES) curve25519-ml/Spec_Lib_IntTypes.ml curve25519-ml/Spec_Lib_IntSeq.ml curve25519-ml/Spec_Curve25519.ml curve25519-ml/Spec_Curve25519_Test.ml -o curve25519.exe
 	./curve25519.exe
 
 salsa20.exe: Spec.Salsa20.fst

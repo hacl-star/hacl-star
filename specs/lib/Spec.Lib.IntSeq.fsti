@@ -57,10 +57,10 @@ val uint_to_bytes_be: #t:inttype -> u:uint_t t -> intseq U8 (numbytes t)
 val uint_from_bytes_le: #t:inttype -> intseq U8 (numbytes t) -> u:uint_t t 
 val uint_from_bytes_be: #t:inttype -> intseq U8 (numbytes t) -> u:uint_t t 
 
-val uints_to_bytes_le: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
-val uints_to_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
-val uints_from_bytes_le: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
-val uints_from_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t < pow2 32} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
+val uints_to_bytes_le: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t <= max_size_t} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
+val uints_to_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t <= max_size_t} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
+val uints_from_bytes_le: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t <= max_size_t} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
+val uints_from_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t <= max_size_t} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
 
 //The following function is primarily meant for testing, do not rely on it in code.
 val as_list: #a:Type -> #len:size_t -> lseq a len -> list a
