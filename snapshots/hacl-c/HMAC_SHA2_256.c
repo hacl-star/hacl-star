@@ -286,10 +286,10 @@ static void
 Hacl_HMAC_SHA2_256_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len)
 {
   uint8_t ipad[64];
-  for (uintmax_t _i = 0; _i < (uint32_t )64; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )64; ++_i)
     ipad[_i] = (uint8_t )0x36;
   uint8_t opad[64];
-  for (uintmax_t _i = 0; _i < (uint32_t )64; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )64; ++_i)
     opad[_i] = (uint8_t )0x5c;
   Hacl_HMAC_SHA2_256_xor_bytes_inplace(ipad, key, (uint32_t )64);
   uint32_t state0[137] = { 0 };
@@ -322,7 +322,7 @@ Hacl_HMAC_SHA2_256_hmac(
 )
 {
   uint8_t nkey[64];
-  for (uintmax_t _i = 0; _i < (uint32_t )64; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )64; ++_i)
     nkey[_i] = (uint8_t )0x00;
   if (keylen <= (uint32_t )64)
     memcpy(nkey, key, keylen * sizeof key[0]);

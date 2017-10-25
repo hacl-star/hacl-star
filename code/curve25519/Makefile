@@ -68,7 +68,7 @@ verify: bignum-ver specific-ver
 all-ver: verify
 all-ct: ct
 
-# Hints regeneration                                                          
+# Hints regeneration
 bignum-hints: $(addsuffix .reloc.hints, $(BIGNUM))
 specific-hints: $(addsuffix .hints, $(X25519_SPECIFIC))
 hints: bignum-hints specific-hints
@@ -143,4 +143,4 @@ count-line:
 	cloc --force-lang=ocaml $(X25519_ONLY)
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ x25519-c 
+	rm -rf *.exe *.exe.* *.out *~ x25519-c

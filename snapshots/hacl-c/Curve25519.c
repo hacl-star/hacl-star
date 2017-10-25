@@ -173,7 +173,7 @@ inline static void Hacl_Bignum_Fmul_fmul(uint64_t *output, uint64_t *input, uint
   memcpy(tmp, input, (uint32_t )5 * sizeof input[0]);
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )5);
   FStar_UInt128_t t[5];
-  for (uintmax_t _i = 0; _i < (uint32_t )5; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )5; ++_i)
     t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   Hacl_Bignum_Fmul_mul_shift_reduce_(t, tmp, input21);
   Hacl_Bignum_Fproduct_carry_wide_(t);
@@ -282,7 +282,7 @@ Hacl_Bignum_Fsquare_fsquare_times(uint64_t *output, uint64_t *input, uint32_t co
 {
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )5);
   FStar_UInt128_t t[5];
-  for (uintmax_t _i = 0; _i < (uint32_t )5; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )5; ++_i)
     t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   memcpy(output, input, (uint32_t )5 * sizeof input[0]);
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count1);
@@ -292,7 +292,7 @@ inline static void Hacl_Bignum_Fsquare_fsquare_times_inplace(uint64_t *output, u
 {
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )5);
   FStar_UInt128_t t[5];
-  for (uintmax_t _i = 0; _i < (uint32_t )5; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )5; ++_i)
     t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count1);
 }
@@ -408,7 +408,7 @@ inline static void Hacl_Bignum_fscalar(uint64_t *output, uint64_t *b, uint64_t s
 {
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )5);
   FStar_UInt128_t tmp[5];
-  for (uintmax_t _i = 0; _i < (uint32_t )5; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )5; ++_i)
     tmp[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   {
     uint64_t xi = b[0];

@@ -40,6 +40,8 @@ include Makefile.include
 endif
 
 include Makefile.build
+include Makefile.prepare
+
 
 #
 # Verification
@@ -160,7 +162,7 @@ ci: .clean-banner .clean-git .clean-snapshots
 .clean-snapshots: snapshots-remove
 
 clean-base:
-	rm -rf *~ *.tar.gz
+	rm -rf *~ *.tar.gz *.zip
 	rm -rf snapshots/hacl-c/*.o
 	rm -rf snapshots/hacl-c/libhacl*
 
@@ -180,12 +182,6 @@ clean: .clean-banner clean-base clean-build
 #
 # Installation helper
 #
-
-prepare:
-	@echo "# Installing OCaml packages required by F*"
-	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
-	@echo "# Installing OCaml packages required by KreMLin"
-	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
 
 dependencies:
 	@echo "# Get and build F* and KreMLin"
