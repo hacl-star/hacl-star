@@ -116,10 +116,6 @@ unit-tests:
 	@echo $(CYAN)"# Testing the HaCl* shared library"$(NORMAL)
 	$(MAKE) -C snapshots/hacl-c unit-tests
 
-unit-tests-unrolled:
-	@echo $(CYAN)"# Testing the HaCl* shared library"$(NORMAL)
-	$(MAKE) -C snapshots/snapshot-gcc-unrolled unit-tests
-
 test-all:
 	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
 	$(MAKE) -C test
