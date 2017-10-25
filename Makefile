@@ -176,19 +176,6 @@ clean: .clean-banner clean-base clean-build
 	$(MAKE) -C test clean
 
 #
-# Installation helper
-#
-
-dependencies:
-	@echo "# Get and build F* and KreMLin"
-	opam switch 4.04.2
-	eval `opam config env`
-	git submodule update --init
-	opam config exec -- make -C dependencies/FStar/src/ocaml-output
-	opam config exec -- make -C dependencies/FStar/ulib/ml
-	opam config exec -- make -C dependencies/kremlin
-
-#
 # Packaging helper
 #
 
