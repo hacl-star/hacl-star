@@ -46,18 +46,19 @@ prepare-ocaml: .prepare
 prepare-z3: .prepare
 	@echo "# Installing Z3 required by F*"
 	cd $(HACL_HOME)/dependencies && \
-	rm -rf $(HACL_HOME)/dependencies/z3 && \
+	rm -rf z3 && \
+	rm -rf z3-$(VERSION_Z3) && \
 	wget https://github.com/FStarLang/binaries/raw/master/z3-tested/z3-$(VERSION_Z3).zip && \
 	unzip z3-$(VERSION_Z3).zip && \
-	mv z3-$(VERSION_Z3) $(Z3_HOME)
+	mv z3-$(VERSION_Z3) z3
 	$(MAKE) .prepare-z3-display-done
 
 prepare-fstar: .prepare
 	@echo "# Installing F*"
 	cd $(HACL_HOME)/dependencies && \
-	rm -rf $(HACL_HOME)/dependencies/FStar && \
+	rm -rf FStar && \
 	git clone https://github.com/FStarLang/FStar.git
-	cd $(HACL_HOME)/dependencies/FStar && \
+	cd FStar && \
 	git checkout stable && \
 	opam config exec -- make -C src/ocaml-output && \
 	opam config exec -- make -C ulib/ml
@@ -66,9 +67,9 @@ prepare-fstar: .prepare
 prepare-kremlin: .prepare
 	@echo "# Installing Kremlin"
 	cd $(HACL_HOME)/dependencies && \
-	rm -rf $(HACL_HOME)/dependencies/kremlin && \
+	rm -rf kremlin && \
 	git clone https://github.com/FStarLang/kremlin.git
-	cd $(HACL_HOME)/dependencies/kremlin && \
+	cd kremlin && \
 	opam config exec -- make
 	$(MAKE) .prepare-kremlin-display-done
 
