@@ -55,9 +55,9 @@ let rec remainder_loop rLen modLen count st =
     let tmp = get_tmp st in
     if U32.(count >^ 0ul) then begin
         rshift1 modLen mod mod1;
-        let tmp_b = isMore modLen rLen mod r_i in
+        let tmp_b = isMore modLen mod rLen r_i in
         (if not tmp_b then begin
-		    sub rLen modLen r_i mod tmp;
+		    sub rLen r_i modLen mod tmp;
             blit tmp 0ul r_i 0ul rLen end);
         blit mod1 0ul mod 0ul modLen;
         remainder_loop rLen modLen U32.(count -^ 1ul) st
@@ -91,13 +91,15 @@ let remainder aLen modLen resLen diffBits a mod res =
     let st : rem_state a1Len mod1Len = create 0uL U32.(a1Len +^ a1Len +^ mod1Len +^ mod1Len) in
     let r_0 = get_r_i st in
     let mod1 = get_mod st in
-    lshift modLen mod diffBits mod1;
+    let mod' = create 0uL mod1Len in
+    blit mod 0ul mod' 0ul modLen;
+    lshift mod1Len mod' diffBits mod1;
     blit a 0ul r_0 0ul aLen;
     remainder_loop a1Len mod1Len U32.(diffBits +^ 1ul) st;
     blit r_0 0ul res 0ul resLen;
     pop_frame()
 
-    (*(if U32.(isMore aLen modLen a mod) then begin
+    (*(if U32.(isMore aLen a modLen mod) then begin
         lshift modLen mod diffBits mod1;
         blit a 0ul r_0 0ul aLen;
         remainder_loop a1Len mod1Len U32.(diffBits +^ 1ul) st;

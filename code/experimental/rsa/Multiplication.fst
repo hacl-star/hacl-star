@@ -7,9 +7,9 @@ open Lib
 
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
+open U32
 
 val mult64: x:U64.t -> y:U64.t -> Tot (U64.t * U64.t)
-#set-options "--z3rlimit 300"
 let mult64 x y =
     let a = U64.(x >>^ 32ul) in
     let b = uint64_to_uint32 x in let b = uint32_to_uint64 b in
@@ -41,58 +41,56 @@ let add64 x y =
     let carry = if U64.(res <^ x) then 1uL else 0uL in
     (carry, res)
 
-val mult_inner_loop:
-    aLen:bnlen -> bLen:bnlen ->
-    a:lbignum aLen ->
-    b:lbignum bLen ->
-    i:U32.t{U32.v i < U32.v bLen} ->
-    j:U32.t{U32.v j <= U32.v aLen} ->
-    carry:U64.t ->
-    res:lbignum U32.(aLen +^ bLen) -> Stack unit
-    (requires (fun h -> live h a /\ live h b /\ live h res))
-    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h0 res /\ 
-        live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
+val mult_by_limb_addj:
+    aLen:bnlen -> a:lbignum aLen ->
+    l:U64.t -> i:U32.t{v i <= v aLen} -> j:U32.t ->
+    resLen:U32.t{v aLen + v j < v resLen} ->
+    carry:U64.t -> res:lbignum resLen -> Stack unit
+    (requires (fun h -> live h a /\ live h res))
+    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 res /\
+        live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
 
-let rec mult_inner_loop aLen bLen a b i j carry res =
-    if U32.(j <^ aLen) then begin
-        let (carry1, s1) = mult64 a.(j) b.(i) in
-        let (carry2, s2) = add64 res.(U32.(i +^ j)) s1 in
-        let (carry3, s3) = add64 s2 carry in
-        let carry = U64.(carry1 +%^ carry2 +%^ carry3) in
-        res.(U32.(i +^ j)) <- s3;
-        mult_inner_loop aLen bLen a b i U32.(j +^ 1ul) carry res
-        end
-    else 
-        res.(U32.(i +^ aLen)) <- carry
+#reset-options "--z3rlimit 150 --max_fuel 2"
 
-val mult_outer_loop:
-    aLen:bnlen -> bLen:bnlen ->
-    a:lbignum aLen ->
-    b:lbignum bLen ->
-    i:U32.t{U32.v i <= U32.v bLen} ->
-    res:lbignum U32.(aLen +^ bLen) -> Stack unit
+let rec mult_by_limb_addj aLen a l i j resLen carry res =
+    if U32.(i <^ aLen) then begin
+        let (carry1, res_ij) = mult64 a.(i) l in
+        let (carry2, res_ij) = add64 res_ij carry in
+        let (carry3, res_ij) = add64 res_ij res.(i +^ j) in
+        let carry' = U64.(carry1 +%^ carry2 +%^ carry3) in
+        res.(i +^ j) <- res_ij;
+        mult_by_limb_addj aLen a l (i +^ 1ul) j resLen carry' res end
+    else
+        res.(i +^ j) <- carry
+
+val mult_loop:
+    aLen:bnlen -> a:lbignum aLen ->
+    bLen:bnlen -> b:lbignum bLen ->
+    j:U32.t{U32.v j <= U32.v bLen} ->
+    resLen:U32.t{v resLen = v aLen + v bLen} -> res:lbignum resLen -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
     (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h0 res /\
         live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
 
-let rec mult_outer_loop aLen bLen a b i res =
-    if U32.(i <^ bLen) then begin
-        mult_inner_loop aLen bLen a b i 0ul 0uL res;
-        mult_outer_loop aLen bLen a b U32.(i +^ 1ul) res
+#reset-options
+
+let rec mult_loop aLen a bLen b j resLen res =
+    if U32.(j <^ bLen) then begin
+        mult_by_limb_addj aLen a b.(j) 0ul j resLen 0uL res;
+        mult_loop aLen a bLen b (j +^ 1ul) resLen res
         end
 
 (* res = a * b *)
 val mult:
-    aLen:bnlen -> bLen:bnlen ->
-    a:lbignum aLen ->
-    b:lbignum bLen ->
+    aLen:bnlen -> a:lbignum aLen ->
+    bLen:bnlen -> b:lbignum bLen ->
     res:lbignum U32.(aLen +^ bLen) -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
     (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h0 res /\
         live h1 a /\ live h1 b /\ live h1 res /\ modifies_1 res h0 h1))
         
-let mult aLen bLen a b res =
-    mult_outer_loop aLen bLen a b 0ul res
+let mult aLen a bLen b res =
+    mult_loop aLen a bLen b 0ul (aLen +^ bLen) res
 
 (* TODO: res = a * a *)
 val sqr:
@@ -103,4 +101,4 @@ val sqr:
         live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
         
 let sqr aLen a res =
-    mult aLen aLen a a res
+    mult aLen a aLen a res

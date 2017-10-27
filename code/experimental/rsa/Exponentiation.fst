@@ -79,7 +79,7 @@ let mod_exp_loop_ modBits aLen bBits resLen n b st count =
     let modLen = bits_to_bn modBits in
 
     (if (bn_bit_is_set b count) then begin
-        mult resLen aLen acc a acc2;
+        mult resLen acc aLen a acc2;
         Div.remainder acc2Len modLen resLen diffBits2 acc2 n acc
     end)
 
