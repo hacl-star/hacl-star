@@ -30,15 +30,15 @@ type Equal: felem -> felem -> Type
 assume val lemma_equal_intro: x:felem -> y:felem -> Lemma
   (requires (x == y))
   (ensures (Equal x y))
-  [SMTPatT (Equal x y)]
+  [SMTPat (Equal x y)]
 assume val lemma_equal_elim: x:felem -> y:felem -> Lemma
   (requires (Equal x y))
   (ensures (x = y))
-  [SMTPatT (Equal x y)]
+  [SMTPat (Equal x y)]
 assume val lemma_equal_refl: x:felem -> y:felem -> Lemma
   (requires (x = y))
   (ensures (Equal x y))
-  [SMTPatT (Equal x y)]
+  [SMTPat (Equal x y)]
 
 (* Subtraction and division definitions *)
 val sub: x:felem -> y:felem -> Tot felem
