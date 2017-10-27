@@ -44,21 +44,12 @@ all-ver: verify
 
 FSTAR_EXTRACT=$(FSTAR) --codegen OCaml --lax $(NOEXTRACT)
 
-gf128.exe: Spec.GF128.fst
-	$(MAKE) -C ../code/lib/ml
-	mkdir -p gf128-spec
-	$(FSTAR_EXTRACT) --odir gf128-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> gf128-spec/Spec_GF128.ml
-	$(OCAMLOPT) -I gf128-spec $(OCAML_INCLUDES) gf128-spec/FStar_Endianness.ml gf128-spec/Spec_GaloisField.ml gf128-spec/Spec_GF128.ml -o gf128.exe
-	./gf128.exe
-
-
-chacha20.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst lib/Spec.Lib.Stateful.fst Spec.CTR.fst Spec.Chacha20.fst tests/Spec.Chacha20.Test.fst
+chacha20.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst lib/Spec.Lib.Stateful2.fst Spec.CTR.fst Spec.Chacha20.fst tests/Spec.Chacha20.Test.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p chacha20-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.CTR --extract_module Spec.Chacha20 --extract_module Spec.Chacha20.Test --odir chacha20-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful2 --extract_module Spec.CTR --extract_module Spec.Chacha20 --extract_module Spec.Chacha20.Test --odir chacha20-ml $^
 	@echo 'let _ = test()' >> chacha20-ml/Spec_Chacha20_Test.ml
-	$(OCAMLOPT) -I chacha20-ml $(OCAML_INCLUDES) chacha20-ml/Spec_Lib_IntTypes.ml chacha20-ml/Spec_Lib_RawIntTypes.ml chacha20-ml/Spec_Lib_IntSeq.ml chacha20-ml/Spec_Lib_Stateful.ml chacha20-ml/Spec_CTR.ml chacha20-ml/Spec_Chacha20.ml chacha20-ml/Spec_Chacha20_Test.ml -o chacha20.exe
+	$(OCAMLOPT) -I chacha20-ml $(OCAML_INCLUDES) chacha20-ml/Spec_Lib_IntTypes.ml chacha20-ml/Spec_Lib_RawIntTypes.ml chacha20-ml/Spec_Lib_IntSeq.ml chacha20-ml/Spec_Lib_Stateful2.ml chacha20-ml/Spec_CTR.ml chacha20-ml/Spec_Chacha20.ml chacha20-ml/Spec_Chacha20_Test.ml -o chacha20.exe
 	./chacha20.exe
 
 poly1305.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Poly1305.fst tests/Spec.Poly1305.Test.fst
@@ -68,6 +59,36 @@ poly1305.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Li
 	@echo 'let _ = test()' >> poly1305-ml/Spec_Poly1305_Test.ml
 	$(OCAMLOPT) -I poly1305-ml $(OCAML_INCLUDES) poly1305-ml/Spec_Lib_IntTypes.ml poly1305-ml/Spec_Lib_IntSeq.ml poly1305-ml/Spec_Poly1305.ml poly1305-ml/Spec_Poly1305_Test.ml -o poly1305.exe
 	./poly1305.exe
+
+
+gf128.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.GF128.fst tests/Spec.GF128.Test.fst
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p gf128-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.GF128 --extract_module Spec.GF128.Test --odir gf128-ml $^
+	@echo 'let _ = test()' >> gf128-ml/Spec_GF128_Test.ml
+	$(OCAMLOPT) -I gf128-ml $(OCAML_INCLUDES) gf128-ml/Spec_Lib_IntTypes.ml gf128-ml/Spec_Lib_IntSeq.ml gf128-ml/Spec_GaloisField.ml gf128-ml/Spec_GF128.ml gf128-ml/Spec_GF128_Test.ml -o gf128.exe
+	./gf128.exe
+
+
+sbox.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.Sbox.fst 
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p sbox-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module FStar.BitVector --extract_module Spec.GaloisField --extract_module Spec.Sbox --odir sbox-ml $^
+	@echo 'let _ = test()' >> sbox-ml/Spec_Sbox.ml
+	$(OCAMLOPT) -I sbox-ml $(OCAML_INCLUDES) sbox-ml/Spec_Lib_IntTypes.ml sbox-ml/Spec_Lib_IntSeq.ml sbox-ml/Spec_GaloisField.ml sbox-ml/Spec_Sbox.ml -o sbox.exe
+	./sbox.exe
+
+
+aes.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.AES.fst 
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p aes-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.AES --odir aes-ml $^
+	@echo 'let _ = test()' >> aes-ml/Spec_AES.ml
+	$(OCAMLOPT) -I aes-ml $(OCAML_INCLUDES) aes-ml/Spec_Lib_IntTypes.ml aes-ml/Spec_Lib_IntSeq.ml aes-ml/Spec_GaloisField.ml aes-ml/Spec_AES.ml -o aes.exe
+	./aes.exe
+
+
+
 
 curve25519.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Curve25519.fst tests/Spec.Curve25519.Test.fst
 	$(MAKE) -C ../code/lib/ml
@@ -174,4 +195,4 @@ ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	./ed25519.exe
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly1305-ml chacha20-ml chacha-poly-spec salsa-spec gf128-spec curve25519-spec sha2-spec sha2_256-spec sha2_384-spec sha2_512-spec hmac-sha2-spec hmac-sha2_256-spec hmac-sha2_384-spec hmac-sha2_512-spec ed25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly1305-ml chacha20-ml chacha-poly-spec salsa-spec gf128-spec aes-spec curve25519-spec sha2-spec sha2_256-spec sha2_384-spec sha2_512-spec hmac-sha2-spec hmac-sha2_256-spec hmac-sha2_384-spec hmac-sha2_512-spec ed25519-spec

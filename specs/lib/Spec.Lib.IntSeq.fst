@@ -202,10 +202,10 @@ let nat_from_intseq_le = nat_from_intseq_le_
 let nat_from_bytes_be = nat_from_intseq_be
 let nat_from_bytes_le = nat_from_intseq_le
 
-val nat_to_bytes_be: 
+val nat_to_bytes_be_: 
   len:size_t -> n:nat{ n < pow2 (8 * len)} ->
   Tot (b:intseq U8 len {n == nat_from_intseq_be #U8 #len b}) (decreases (len))
-let rec nat_to_bytes_be len n = 
+let rec nat_to_bytes_be_ len n = 
   if len = 0 then [] 
   else (
     let len' = size_decr len in 
@@ -213,11 +213,12 @@ let rec nat_to_bytes_be len n =
     let n' =  n / 256 in 
     Math.Lemmas.pow2_plus 8 (8 * len');
     assert( n' < pow2 (8 * len' ));
-    let b' : intseq U8 len' = nat_to_bytes_be len' n' in
+    let b' : intseq U8 len' = nat_to_bytes_be_ len' n' in
     let b  : intseq U8 len = snoc #uint8 #len' b' byte in
     assert(b' == prefix b len');
     assert(byte == last #uint8 #len b);
     b)
+let nat_to_bytes_be = nat_to_bytes_be_
 
 val nat_to_bytes_le_:
   len:size_t -> n:nat{n < pow2 (8 * len)} ->
