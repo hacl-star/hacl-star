@@ -9,7 +9,7 @@ val index: #a:Type -> #len:size_t{len > 0} -> lseq a len -> n:size_t{n < len} ->
 val upd: #a:Type -> #len:size_t -> lseq a len -> n:size_t{n < len /\ len > 0} -> x:a -> lseq a len
 val sub: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> n:size_t{start + n <= len} -> lseq a n
 val slice: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> fin:size_t{start <= fin /\ fin <= len} -> lseq a (fin - start)
-val update_sub: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> n:size_t{start + n <= len} -> lseq a n -> lseq a len
+val update_sub: #a:Type -> #len:size_t -> i:lseq a len -> start:size_t -> n:size_t{start + n <= len} -> v:lseq a n -> o:lseq a len{sub o start n == v}
 val update_slice: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> fin:size_t{start <= fin /\ fin <= len} -> lseq a (fin - start) -> lseq a len
 
 let op_String_Access = index
@@ -67,6 +67,6 @@ val uints_from_bytes_le: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t 
 val uints_from_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t <= max_size_t} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
 
 //The following function is primarily meant for testing, do not rely on it in code.
-val as_list: #a:Type -> #len:size_t -> lseq a len -> list a
+val as_list: #a:Type -> #len:size_t -> lseq a len -> l:list a{List.Tot.length l = len}
 
 

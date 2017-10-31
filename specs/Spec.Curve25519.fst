@@ -33,6 +33,7 @@ let decodeScalar25519 (k:scalar) =
   let k   = k.[0] <- (k.[0] &. u8 248)          in
   let k   = k.[31] <- ((k.[31] &. u8 127) |. u8 64) in k
 
+
 let decodePoint (u:serialized_point) =
   (nat_from_bytes_le u % pow2 255) % prime
 

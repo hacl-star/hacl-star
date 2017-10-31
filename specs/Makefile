@@ -98,6 +98,13 @@ curve25519.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.
 	$(OCAMLOPT) -I curve25519-ml $(OCAML_INCLUDES) curve25519-ml/Spec_Lib_IntTypes.ml curve25519-ml/Spec_Lib_IntSeq.ml curve25519-ml/Spec_Curve25519.ml curve25519-ml/Spec_Curve25519_Test.ml -o curve25519.exe
 	./curve25519.exe
 
+qdsa.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Curve25519.fst Spec.SHA2.Generic.fst Spec.Qdsa.fst
+	mkdir -p qdsa-ml
+	$(FSTAR) --lax --codegen OCaml --odir qdsa-ml --include lib --include lemmas --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Qdsa --extract_module Spec.Curve25519 --extract_module Spec.SHA2.Generic --extract_module Spec.Lib.RawIntTypes lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Curve25519.fst Spec.SHA2.Generic.fst Spec.Qdsa.fst
+	@echo 'let _ = test()' >> qdsa-ml/Spec_Qdsa.ml
+	$(OCAMLOPT) -I qdsa-ml -I ../code/lib/ml ../code/lib/ml/hacllib.cmxa qdsa-ml/Spec_Lib_IntTypes.ml qdsa-ml/Spec_Lib_RawIntTypes.ml qdsa-ml/Spec_Lib_IntSeq.ml qdsa-ml/Spec_Curve25519.ml qdsa-ml/Spec_SHA2_Generic.ml qdsa-ml/Spec_Qdsa.ml -o qdsa.exe
+	./qdsa.exe
+
 salsa20.exe: Spec.Salsa20.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p salsa-spec

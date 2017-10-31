@@ -18,20 +18,16 @@ let create_state : allocator chacha_state = fun () ->
   let s' = create 16 (u32 0) in
   {state_i = s; state = s'} 
   
-let state_i: array_accessor chacha_state uint32 16 = 
-{
+let state_i: array_accessor chacha_state uint32 16 = {
   get = (fun s -> s.state_i);
   put = (fun s v -> {s with state_i = v})
 }
 
-let state: array_accessor chacha_state uint32 16 = 
-{
+let state: array_accessor chacha_state uint32 16 = {
   get = (fun s -> s.state);
   put = (fun s v -> {s with state = v})
 }
 
-  
-(* Stateful monad for Chacha20 *)
 type chacha_st (a:Type0)  = stateful chacha_state a 
 type index (#a:Type0) (#len:array_size_t) (k:array_accessor chacha_state a len) = 
      i:size_t{i < len}
@@ -102,13 +98,14 @@ let setup (k:chacha_key) (n:chacha_nonce) (c:counter): chacha_st unit =
   import_slice n state_i 13 16 (uints_from_bytes_le #U32 #3) 
 
 
-let chacha20_block (k:chacha_key) (n:chacha_nonce) (c:counter): Tot chacha_block =
+let chacha20_block (k:chacha_key) (n:chacha_nonce) (c:counter) (f:chacha_block -> stateful 't 'a) : stateful 't 'a =
+  let b = 
     run create_state (
        setup k n c ;;
        chacha20_core ;;
        export state (uints_to_bytes_le #U32 #16)
     )
-
+  in f b
 let chacha20_ctx: Spec.CTR.block_cipher_ctx =
     let open Spec.CTR in
     {
