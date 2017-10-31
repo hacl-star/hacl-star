@@ -12,7 +12,7 @@ let op_String_Assignment = upd
 
 (* Definition: Base types *)
 type lbytes (s:size_t) = intseq U8 s
-type rotval (t:inttype) = r:uint32{uint_v r > 0 /\ uint_v r < bits t}
+type rotval (t:inttype) = r:uint32{uint_v #U32 r > 0 /\ uint_v #U32 r < bits t}
 
 (* Definition: Maximum for size_t *)
 let max_size_t = maxint U32
