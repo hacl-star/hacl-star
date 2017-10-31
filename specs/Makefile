@@ -93,12 +93,12 @@ chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 	$(OCAMLOPT) -I chacha-poly-spec $(OCAML_INCLUDES) chacha-poly-spec/FStar_Endianness.ml chacha-poly-spec/Spec_Loops.ml chacha-poly-spec/Seq_Create.ml chacha-poly-spec/Spec_Lib.ml chacha-poly-spec/Spec_CTR.ml chacha-poly-spec/Spec_Chacha20.ml chacha-poly-spec/Spec_Poly1305_Lemmas.ml chacha-poly-spec/Spec_Poly1305.ml chacha-poly-spec/Spec_Chacha20Poly1305.ml -o chacha20poly1305.exe
 	./chacha20poly1305.exe
 
-sha2generic.exe: Spec.SHA2.Test.fst
+sha2generic.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst lib/Spec.Lib.Stateful.fst Spec.SHA2.Generic.fst tests/Spec.SHA2.Generic.Test.fst
 	$(MAKE) -C ../code/lib/ml
-	mkdir -p sha2-spec
-	$(FSTAR_EXTRACT) --odir sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> sha2-spec/Spec_SHA2_Test.ml
-	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) sha2-spec/FStar_Endianness.ml sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA2_Generic.ml sha2-spec/Spec_SHA2_Test.ml -o sha2generic.exe
+	mkdir -p sha2generic-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2.Generic --extract_module Spec.SHA2.Generic.Test --odir sha2generic-ml $^
+	@echo 'let _ = test()' >> sha2generic-ml/Spec_SHA2_Generic_Test.ml
+	$(OCAMLOPT) -I sha2generic-ml $(OCAML_INCLUDES) sha2generic-ml/Spec_Lib_IntTypes.ml sha2generic-ml/Spec_Lib_RawIntTypes.ml sha2generic-ml/Spec_Lib_IntSeq.ml sha2generic-ml/Spec_Lib_Stateful.ml sha2generic-ml/Spec_SHA2_Generic.ml sha2generic-ml/Spec_SHA2_Generic_Test.ml -o sha2generic.exe
 	./sha2generic.exe
 
 sha2.exe: Spec.SHA2.Test.fst
