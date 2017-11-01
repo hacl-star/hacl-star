@@ -240,16 +240,24 @@ let test5_expected224 = List.Tot.map u8_from_UInt8 [
 let test () =
   assert_norm(List.Tot.length test1_plaintext = 3);
   assert_norm(List.Tot.length test1_expected512 = 64);
-  let test1_plaintext_len = 3 in
+  let test1_plaintext_len : size_t = 3 in
   let test1_plaintext : lbytes test1_plaintext_len = createL test1_plaintext in
   let test1_expected512 : lbytes 64 = createL test1_expected512 in
   let test1_result512 : lbytes 64 = Hash.hash Hash.parameters_sha2_512 test1_plaintext_len test1_plaintext in
   // (Hash.hash Hash.params_sha2_224 (createL test1_plaintext) = createL test1_expected224) &&
 
+  let test1_last : lbytes 64 = Hash.pad_single Hash.parameters_sha2_512 0 3 test1_plaintext in
+  // let test_finish_h0 : lbytes 64 = Hash.finish Hash.parameters_sha2_512 test in
+
+  IO.print_string "\nInput   : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_plaintext);
+  IO.print_string "\nPadding : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_last);
+
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected512 test1_result512 in
-  IO.print_string   "Expected cipher:";
+  IO.print_string "\nExpected: ";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected512);
-  IO.print_string "\nComputed cipher:";
+  IO.print_string "\nComputed: ";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result512);
   if result then   IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :("
+  else IO.print_string "\nFailure :(\n"
