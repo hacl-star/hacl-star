@@ -9,7 +9,7 @@ OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 OCAML_INCLUDES=-I ../code/lib/ml ../code/lib/ml/hacllib.cmxa
 
 all: lib
-	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe chacha20poly1305.exe gf128.exe ed25519.exe curve25519.exe sha2.exe hmac_sha2.exe
+	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe chacha20poly1305.exe gf128.exe ed25519.exe curve25519.exe curve448.exe sha2.exe hmac.exe
 
 lib:
 	$(MAKE) -C ../code/lib/ml
@@ -24,6 +24,7 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.CTR.fst \
 		Spec.Curve25519.fst \
+		Spec.Curve448.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
 		Spec.HSalsa20.fst \
@@ -92,6 +93,14 @@ curve25519.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.
 	@echo 'let _ = test()' >> curve25519-ml/Spec_Curve25519_Test.ml
 	$(OCAMLOPT) -I curve25519-ml $(OCAML_INCLUDES) curve25519-ml/Spec_Lib_IntTypes.ml curve25519-ml/Spec_Lib_IntSeq.ml curve25519-ml/Spec_Curve25519.ml curve25519-ml/Spec_Curve25519_Test.ml -o curve25519.exe
 	./curve25519.exe
+
+curve448.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Curve448.fst tests/Spec.Curve448.Test.fst
+	$(MAKE) -C ../code/lib/ml
+	mkdir -p curve448-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Curve448 --extract_module Spec.Curve448.Test --odir curve448-ml $^
+	@echo 'let _ = test()' >> curve448-ml/Spec_Curve448_Test.ml
+	$(OCAMLOPT) -I curve448-ml $(OCAML_INCLUDES) curve448-ml/Spec_Lib_IntTypes.ml curve448-ml/Spec_Lib_IntSeq.ml curve448-ml/Spec_Curve448.ml curve448-ml/Spec_Curve448_Test.ml -o curve448.exe
+	./curve448.exe
 
 qdsa.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.Curve25519.fst Spec.SHA2.Generic.fst Spec.Qdsa.fst
 	mkdir -p qdsa-ml
