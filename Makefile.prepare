@@ -1,4 +1,4 @@
-HACL_HOME    ?= .
+HACL_HOME    ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 Z3_HOME      ?= $(HACL_HOME)/dependencies/z3
 FSTAR_HOME   ?= $(HACL_HOME)/dependencies/FStar
 KREMLIN_HOME ?= $(HACL_HOME)/dependencies/kremlin
@@ -47,8 +47,10 @@ prepare-z3: .prepare
 	@echo "# Installing Z3 required by F*"
 	cd $(HACL_HOME)/dependencies && \
 	rm -rf $(HACL_HOME)/dependencies/z3 && \
+	rm -rf $(HACL_HOME)/dependencies/z3-$(VERSION_Z3) && \
 	wget https://github.com/FStarLang/binaries/raw/master/z3-tested/z3-$(VERSION_Z3).zip && \
 	unzip z3-$(VERSION_Z3).zip && \
+	rm -rf z3-$(VERSION_Z3).zip && \
 	mv z3-$(VERSION_Z3) $(Z3_HOME)
 	$(MAKE) .prepare-z3-display-done
 
