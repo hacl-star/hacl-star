@@ -10,13 +10,6 @@ open Spec.Lib.IntSeq
 let op_String_Access = index
 let op_String_Assignment = upd
 
-(* Definition: Base types *)
-type lbytes (s:size_t) = intseq U8 s
-type rotval (t:inttype) = r:uint32{uint_v #U32 r > 0 /\ uint_v #U32 r < bits t}
-
-(* Definition: Maximum for size_t *)
-let max_size_t = maxint U32
-
 (* Definition: Hash algorithm parameters *)
 noeq type parameters =
   | MkParameters:
@@ -25,8 +18,12 @@ noeq type parameters =
 	 kSize:    size_t{kSize > 16} ->
 	 kTable:   intseq wt kSize ->
 	 h0:       intseq wt 8 ->
-	 hashSize: nat {hashSize <= 8 * numbytes wt} ->
+	 size_hash: nat {size_hash <= 8 * numbytes wt} ->
 	 parameters
+
+(* Definition: Base types *)
+type lbytes (s:size_t) = intseq U8 s
+type rotval (t:inttype) = r:uint32{uint_v #U32 r > 0 /\ uint_v #U32 r < bits t}
 
 (* Definition: Type for the total length encoded in the padding *)
 let lenType p = match p.wt with
@@ -47,15 +44,13 @@ let _Sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[3]) ^. ((x >>>. p.opTable.[4]
 let _sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[6]) ^. ((x >>>. p.opTable.[7]) ^. (x >>. p.opTable.[8]))
 let _sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[9]) ^. ((x >>>. p.opTable.[10]) ^. (x >>. p.opTable.[11]))
 
-
 (* Definition: Algorithm constants *)
 let size_block_w = 16
 let size_hash_w = 8
 let size_block p :size_t = size_block_w * numbytes p.wt
-let size_hash p :size_t = size_hash_w * numbytes p.wt
 
 (* Definition: Types for block and hash as sequences of words *)
-type block_w p = b:intseq p.wt size_block_w
+type block_w p = b:intseq p.wt 16
 type hash_w p = b:intseq p.wt size_hash_w
 
 (* Definition of the scheduling function (part 1) *)
@@ -89,8 +84,10 @@ let shuffle_core p (wsTable:intseq p.wt p.kSize) (t:size_t{t < p.kSize}) (hash:h
   let f0 = hash.[5] in
   let g0 = hash.[6] in
   let h0 = hash.[7] in
+
   let t1 = h0 +. (_Sigma1 p e0) +. ((_Ch p e0 f0 g0) +. (p.kTable.[t] +. wsTable.[t])) in
   let t2 = (_Sigma0 p a0) +. (_Maj p a0 b0 c0) in
+
   let hash = hash.[0] <- (t1 +. t2) in
   let hash = hash.[1] <- a0 in
   let hash = hash.[2] <- b0 in
@@ -169,13 +166,13 @@ let update_last p (n:size_t) (len:size_t{len < size_block p /\ len + n * size_bl
   update_multi p (number_blocks_padding_single p len) blocks hash
 
 (* Definition of the finalization function *)
-let finish p (hash:hash_w p) : lbytes p.hashSize =
+let finish p (hash:hash_w p) : lbytes p.size_hash =
   let hash_final = uints_to_bytes_be hash in
-  let h = slice hash_final 0 p.hashSize in
+  let h = slice hash_final 0 p.size_hash in
   h
 
 (* Definition of the SHA2 ontime function based on incremental calls *)
-let hash p (len:size_t{len < maxInput p}) (input:lbytes len) : lbytes p.hashSize =
+let hash p (len:size_t{len < maxInput p}) (input:lbytes len) : lbytes p.size_hash =
   let nb = len / size_block p in
   let nr = len % size_block p in
   let nblocks8 = nb * size_block p in
@@ -186,7 +183,7 @@ let hash p (len:size_t{len < maxInput p}) (input:lbytes len) : lbytes p.hashSize
   finish p hash
 
 (* Definition of the original SHA2 onetime function *)
-let hash' p (len:size_t{len < maxInput p /\ (size_block p * number_blocks_padding p len) <= max_size_t}) (input:lbytes len) : lbytes p.hashSize =
+let hash' p (len:size_t{len < maxInput p /\ (size_block p * number_blocks_padding p len) <= max_size_t}) (input:lbytes len) : lbytes p.size_hash =
   let n = number_blocks_padding p len in
   let blocks = pad p 0 len input in
   finish p (update_multi p n blocks p.h0)
