@@ -1,5 +1,7 @@
 .PHONY: nacllib clean
 
+HACL_HOME ?= ../..
+
 #
 # Compilation flags
 #

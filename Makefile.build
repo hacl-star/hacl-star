@@ -83,6 +83,16 @@ snapshots/hacl-c:
 	$(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile)  \
 		./snapshots/hacl-c
 
+snapshots/nss: snapshots/snapshot-gcc-unrolled
+	# Compile everything but only copy out the things NSS is using.
+	mkdir -p snapshots/nss
+	cp snapshots/snapshot-gcc-unrolled/Curve25519.c snapshots/nss/hacl_curve25519_64.c
+	cp snapshots/snapshot-gcc-unrolled/Curve25519.h snapshots/nss/hacl_curve25519_64.h
+	cp snapshots/kremlib/FStar.h snapshots/nss/fstar_uint128.h
+	cp snapshots/kremlib/kremlib.h snapshots/nss
+	# Patch files adding license headers.
+	code/nss-patches/patch.sh
+
 snapshots-all:
 	$(MAKE) snapshots/snapshot-gcc
 	$(MAKE) snapshots/snapshot-gcc-unrolled
@@ -93,6 +103,7 @@ snapshots-all:
 snapshots-remove:
 	rm -rf snapshots/hacl-c
 	rm -rf snapshots/snapshot*
+	rm -rf snapshots/nss
 
 snapshots-update:
 	$(MAKE) snapshots-remove
