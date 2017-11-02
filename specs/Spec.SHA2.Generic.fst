@@ -137,8 +137,6 @@ let pad_single p (n:size_t) (len:size_t{len < size_block p /\ len + n * size_blo
   let padding = repeati len (fun i s -> s.[i] <- last.[i]) padding in
   // Write the 0x80 byte and the zeros in the padding
   let padding = padding.[len] <- u8 0x80 in
-  let set_zero (i:size_t{i < plen}) (s:lbytes plen) : lbytes plen  = s.[i] <- u8 0 in
-  let padding = repeati (plen - numbytes (lenType p) - len - 1) set_zero padding in
   // Encode and write the total length in bits at the end of the padding
   let tlen = n * size_block p + len in
   let tlenbits = tlen * 8 in
