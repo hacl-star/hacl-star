@@ -17,6 +17,7 @@ open Hacl.Spec.Bignum.Modulo
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
+inline_for_extraction
 let mask_2_42_limb : p:limb{v p = pow2 42 - 1} =
   assert_norm (pow2 64 = 0x10000000000000000); assert_norm(pow2 42 - 1 = 0x3ffffffffff);
   uint64_to_limb 0x3ffffffffffuL
