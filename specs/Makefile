@@ -150,4 +150,4 @@ ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	./ed25519.exe
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly1305-ml chacha20-ml sha2-ml hmac-ml chacha-poly-spec salsa-spec gf128-spec aes-spec curve25519-spec ed25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly1305-ml chacha20-ml sha2-ml hmac-ml chacha-poly-spec salsa-spec gf128-spec aes-spec curve25519-ml curve448-ml ed25519-spec
