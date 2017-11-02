@@ -124,13 +124,13 @@ sha2.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.In
 	$(OCAMLOPT) -I sha2-ml $(OCAML_INCLUDES) sha2-ml/Spec_Lib_IntTypes.ml sha2-ml/Spec_Lib_RawIntTypes.ml sha2-ml/Spec_Lib_IntSeq.ml sha2-ml/Spec_Lib_Stateful.ml sha2-ml/Spec_SHA2.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
 	./sha2.exe
 
-hmac_sha2.exe: Spec.HMAC.Test.fst
+hmac.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst lib/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
 	$(MAKE) -C ../code/lib/ml
-	mkdir -p hmac-sha2-spec
-	$(FSTAR_EXTRACT) --odir hmac-sha2-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> hmac-sha2-spec/Spec_HMAC_Test.ml
-	$(OCAMLOPT) -I hmac-sha2-spec $(OCAML_INCLUDES) hmac-sha2-spec/FStar_Endianness.ml hmac-sha2-spec/Spec_Loops.ml hmac-sha2-spec/Spec_Lib.ml hmac-sha2-spec/Seq_Create.ml hmac-sha2-spec/Spec_SHA2.ml hmac-sha2-spec/Spec_HMAC.ml hmac-sha2-spec/Spec_HMAC_Test.ml -o hmac_sha2.exe
-	./hmac_sha2.exe
+	mkdir -p hmac-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
+	@echo 'let _ = test()' >> hmac-ml/Spec_HMAC_Test.ml
+	$(OCAMLOPT) -I hmac-ml $(OCAML_INCLUDES) hmac-ml/Spec_Lib_IntTypes.ml hmac-ml/Spec_Lib_RawIntTypes.ml hmac-ml/Spec_Lib_IntSeq.ml hmac-ml/Spec_Lib_Stateful.ml hmac-ml/Spec_SHA2.ml hmac-ml/Spec_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
+	./hmac.exe
 
 ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	$(MAKE) -C ../code/lib/ml
@@ -141,4 +141,4 @@ ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	./ed25519.exe
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly1305-ml chacha20-ml sha2-ml hmac-sha2-ml chacha-poly-spec salsa-spec gf128-spec aes-spec curve25519-spec ed25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly1305-ml chacha20-ml sha2-ml hmac-ml chacha-poly-spec salsa-spec gf128-spec aes-spec curve25519-spec ed25519-spec
