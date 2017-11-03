@@ -4,7 +4,7 @@ cwd=$(cd $(dirname $0); pwd -P)
 
 # Add license headers to all files.
 for file in `find "$cwd/../../snapshots/nss/" -type f`; do
-    echo -e "$(cat $cwd/license.txt)\n\n$(cat $file)" > "$file"
+    cat "$cwd/license.txt" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
 # Patch files where file names changed.
