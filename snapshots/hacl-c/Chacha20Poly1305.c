@@ -1,10 +1,10 @@
 #include "Chacha20Poly1305.h"
 
-Prims_int Chacha20Poly1305_noncelen;
+Prims_int Chacha20Poly1305_noncelen = (krml_checked_int_t )12;
 
-Prims_int Chacha20Poly1305_keylen;
+Prims_int Chacha20Poly1305_keylen = (krml_checked_int_t )32;
 
-Prims_int Chacha20Poly1305_maclen;
+Prims_int Chacha20Poly1305_maclen = (krml_checked_int_t )16;
 
 static void
 Chacha20Poly1305_aead_encrypt_poly(

@@ -128,7 +128,7 @@ all-ci: ci
 
 KREMLIN_ARGS+=-tmpdir ed25519-c \
 		-I ../bignum -I ../curve25519 -I ../hash \
-		-drop Hacl.Spec,Hacl.Spec.*,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.*,Prims,Spec.* \
+		-drop C.Nullity,Hacl.Spec,Hacl.Spec.*,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.*,Prims,Spec.* \
 		-bundle Ed25519=Ed25519,Hacl.EC,Hacl.EC.*,Hacl.Impl.*,Hacl.Lib.*,Hacl.Bignum.*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Spec.*,SHA2_512,Hacl.Hash.*
 
 ed25519-c/out.krml: $(ED25519_FILES)

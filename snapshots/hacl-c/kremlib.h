@@ -43,16 +43,18 @@ void kremlinit_globals();
 #define FStar_Buffer_to_seq_full(x) 0
 void FStar_Buffer_recall(void *x);
 
+typedef int32_t Prims_pos, Prims_nat, Prims_nonzero, Prims_int,
+    krml_checked_int_t;
+
 // Some types that KreMLin has no special knowledge of; many of them appear in
 // signatures of ghost functions, meaning that it suffices to give them (any)
 // definition.
-typedef void *Prims_pos, *Prims_nat, *Prims_nonzero, *FStar_Seq_Base_seq,
-    *Prims_int, *Prims_prop, *FStar_HyperStack_mem, *FStar_Set_set,
-    *Prims_st_pre_h, *FStar_Heap_heap, *Prims_all_pre_h, *FStar_TSet_set,
-    *Prims_string, *Prims_list, *FStar_Map_t, *FStar_UInt63_t_, *FStar_Int63_t_,
-    *FStar_UInt63_t, *FStar_Int63_t, *FStar_UInt_uint_t, *FStar_Int_int_t,
-    *FStar_HyperStack_stackref, *FStar_Bytes_bytes, *FStar_HyperHeap_rid,
-    *FStar_Heap_aref, *FStar_Monotonic_Heap_heap,
+typedef void *FStar_Seq_Base_seq, *Prims_prop, *FStar_HyperStack_mem,
+    *FStar_Set_set, *Prims_st_pre_h, *FStar_Heap_heap, *Prims_all_pre_h,
+    *FStar_TSet_set, *Prims_string, *Prims_list, *FStar_Map_t, *FStar_UInt63_t_,
+    *FStar_Int63_t_, *FStar_UInt63_t, *FStar_Int63_t, *FStar_UInt_uint_t,
+    *FStar_Int_int_t, *FStar_HyperStack_stackref, *FStar_Bytes_bytes,
+    *FStar_HyperHeap_rid, *FStar_Heap_aref, *FStar_Monotonic_Heap_heap,
     *FStar_Monotonic_HyperHeap_rid, *FStar_Monotonic_HyperStack_mem;
 
 // Prims; all of the functions below abort;

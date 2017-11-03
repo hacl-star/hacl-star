@@ -157,7 +157,7 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
 {
   KRML_CHECK_SIZE((uint64_t )(uint32_t )0, (uint32_t )16);
   uint64_t data_w[16];
-  for (uintmax_t _i = 0; _i < (uint32_t )16; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )16; ++_i)
     data_w[_i] = (uint64_t )(uint32_t )0;
   Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(data_w, data, (uint32_t )16);
   uint64_t *hash_w = state + (uint32_t )160;
@@ -291,7 +291,7 @@ static void Hacl_Hash_SHA2_512_hash(uint8_t *hash1, uint8_t *input, uint32_t len
 {
   KRML_CHECK_SIZE((uint64_t )(uint32_t )0, (uint32_t )169);
   uint64_t state[169];
-  for (uintmax_t _i = 0; _i < (uint32_t )169; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )169; ++_i)
     state[_i] = (uint64_t )(uint32_t )0;
   uint32_t n1 = len / (uint32_t )128;
   uint32_t r = len % (uint32_t )128;

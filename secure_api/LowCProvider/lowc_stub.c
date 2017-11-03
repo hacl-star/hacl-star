@@ -97,7 +97,6 @@ CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
 
         AEAD_ST* st = malloc(sizeof(AEAD_ST));
        	*st = Crypto_AEAD_coerce(id, (uint8_t*)String_val(key));
-
         ST *s = malloc(sizeof(ST));
         s->st = st;
         s->id = id;

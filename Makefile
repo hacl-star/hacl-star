@@ -2,7 +2,7 @@
 # Main HACL* Makefile
 #
 
-.PHONY: display verify test clean
+.PHONY: display verify test clean dependencies
 
 all: display
 
@@ -40,6 +40,8 @@ include Makefile.include
 endif
 
 include Makefile.build
+include Makefile.prepare
+
 
 #
 # Verification
@@ -58,6 +60,14 @@ verify-secure_api: secure_api.dir-verify
 
 verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
+
+verify-nss:
+	@echo $(CYAN)"# Verification of the HaCl* algorithms used by NSS"$(NORMAL)
+	# Verify spec, code and ct
+	$(MAKE) ct -C code/curve25519
+	$(MAKE) verify -C code/curve25519
+	$(MAKE) Spec.Curve25519.fst-verify -C specs
+
 
 #
 # Code generation
@@ -148,7 +158,7 @@ ci: .clean-banner .clean-git .clean-snapshots
 .clean-snapshots: snapshots-remove
 
 clean-base:
-	rm -rf *~ *.tar.gz
+	rm -rf *~ *.tar.gz *.zip
 	rm -rf snapshots/hacl-c/*.o
 	rm -rf snapshots/hacl-c/libhacl*
 
@@ -164,16 +174,6 @@ clean: .clean-banner clean-base clean-build
 	$(MAKE) -C secure_api clean
 	$(MAKE) -C apps clean
 	$(MAKE) -C test clean
-
-#
-# Installation helper
-#
-
-prepare:
-	@echo "# Installing OCaml packages required by F*"
-	opam install ocamlfind batteries sqlite3 fileutils stdint zarith yojson pprint menhir
-	@echo "# Installing OCaml packages required by KreMLin"
-	opam install ppx_deriving_yojson zarith pprint menhir ulex process fix wasm
 
 #
 # Packaging helper

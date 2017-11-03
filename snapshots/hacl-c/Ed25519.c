@@ -217,7 +217,7 @@ inline static void Hacl_Bignum_Fmul_fmul(uint64_t *output, uint64_t *input, uint
   memcpy(tmp, input, (uint32_t )5 * sizeof input[0]);
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )5);
   FStar_UInt128_t t[5];
-  for (uintmax_t _i = 0; _i < (uint32_t )5; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )5; ++_i)
     t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   Hacl_Bignum_Fmul_mul_shift_reduce_(t, tmp, input21);
   Hacl_Bignum_Fproduct_carry_wide_(t);
@@ -326,7 +326,7 @@ Hacl_Bignum_Fsquare_fsquare_times(uint64_t *output, uint64_t *input, uint32_t co
 {
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )5);
   FStar_UInt128_t t[5];
-  for (uintmax_t _i = 0; _i < (uint32_t )5; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )5; ++_i)
     t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   memcpy(output, input, (uint32_t )5 * sizeof input[0]);
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count1);
@@ -336,7 +336,7 @@ inline static void Hacl_Bignum_Fsquare_fsquare_times_inplace(uint64_t *output, u
 {
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )5);
   FStar_UInt128_t t[5];
-  for (uintmax_t _i = 0; _i < (uint32_t )5; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )5; ++_i)
     t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count1);
 }
@@ -698,7 +698,7 @@ static void Hacl_Bignum25519_fsquare(uint64_t *out, uint64_t *a)
 {
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )5);
   FStar_UInt128_t tmp[5];
-  for (uintmax_t _i = 0; _i < (uint32_t )5; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )5; ++_i)
     tmp[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   memcpy(out, a, (uint32_t )5 * sizeof a[0]);
   Hacl_Bignum_Fsquare_fsquare_(tmp, out);
@@ -1300,7 +1300,7 @@ static void Hacl_Hash_SHA2_512_update(uint64_t *state, uint8_t *data)
 {
   KRML_CHECK_SIZE((uint64_t )(uint32_t )0, (uint32_t )16);
   uint64_t data_w[16];
-  for (uintmax_t _i = 0; _i < (uint32_t )16; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )16; ++_i)
     data_w[_i] = (uint64_t )(uint32_t )0;
   Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(data_w, data, (uint32_t )16);
   uint64_t *hash_w = state + (uint32_t )160;
@@ -1434,7 +1434,7 @@ static void Hacl_Hash_SHA2_512_hash(uint8_t *hash1, uint8_t *input, uint32_t len
 {
   KRML_CHECK_SIZE((uint64_t )(uint32_t )0, (uint32_t )169);
   uint64_t state[169];
-  for (uintmax_t _i = 0; _i < (uint32_t )169; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )169; ++_i)
     state[_i] = (uint64_t )(uint32_t )0;
   uint32_t n1 = len1 / (uint32_t )128;
   uint32_t r = len1 % (uint32_t )128;
@@ -2435,7 +2435,7 @@ Hacl_Impl_BignumQ_Mul_barrett_reduction__(
   uint64_t *s = tmp + (uint32_t )25;
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )9);
   FStar_UInt128_t qmu[9];
-  for (uintmax_t _i = 0; _i < (uint32_t )9; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )9; ++_i)
     qmu[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   Hacl_Impl_BignumQ_Mul_barrett_reduction__1(qmu, t, mu1, tmp);
   Hacl_Impl_BignumQ_Mul_barrett_reduction__2(t, m1, tmp);
@@ -2463,7 +2463,7 @@ static void Hacl_Impl_BignumQ_Mul_mul_modq(uint64_t *out, uint64_t *x, uint64_t 
   uint64_t z_[10] = { 0 };
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )9);
   FStar_UInt128_t z[9];
-  for (uintmax_t _i = 0; _i < (uint32_t )9; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )9; ++_i)
     z[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   Hacl_Impl_BignumQ_Mul_mul_5(z, x, y);
   Hacl_Impl_BignumQ_Mul_carry(z_, z);
@@ -2639,35 +2639,29 @@ Hacl_Impl_Ed25519_Verify_verify__(
   uint64_t *s = tmp + (uint32_t )40;
   uint8_t *h_ = tmp_;
   bool b = Hacl_Impl_Ed25519_PointDecompress_point_decompress(a_, public);
-  bool res;
   if (b)
   {
     uint8_t *rs = signature;
     bool b_ = Hacl_Impl_Ed25519_Verify_Steps_verify_step_1(r_, signature);
-    bool ite0;
     if (b_)
     {
       Hacl_Impl_Load56_load_32_bytes(s, signature + (uint32_t )32);
       bool b__ = Hacl_Impl_Ed25519_PointEqual_gte_q(s);
-      bool ite;
       if (b__)
-        ite = false;
+        return false;
       else
       {
         Hacl_Impl_Ed25519_Verify_Steps_verify_step_2(h_, msg, len1, rs, public);
         bool
         b1 = Hacl_Impl_Ed25519_Verify_Steps_verify_step_4(signature + (uint32_t )32, h_, a_, r_);
-        ite = b1;
+        return b1;
       }
-      ite0 = ite;
     }
     else
-      ite0 = false;
-    res = ite0;
+      return false;
   }
   else
-    res = false;
-  return res;
+    return false;
 }
 
 static bool
