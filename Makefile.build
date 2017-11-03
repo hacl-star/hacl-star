@@ -64,12 +64,12 @@ snapshots/snapshot-msvc:
 
 snapshots/snapshot-gcc:
 	$(MAKE) -C code clean
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar"
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar -fparentheses -header $(HACL_HOME)/snapshots/LICENSE" KREMLIN_TESTLIB=""
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc
 
 snapshots/snapshot-gcc-unrolled:
 	$(MAKE) -C code clean
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar"
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar -fparentheses -header $(HACL_HOME)/snapshots/LICENSE" KREMLIN_TESTLIB=""
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
 # BB: This requires to have up-to-date snapshot-gcc and snapshot-gcc-unrolled
