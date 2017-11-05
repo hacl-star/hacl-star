@@ -49,7 +49,7 @@ let init' (p:Hash.parameters) (key:lbytes (size_block p)) =
 
   (* Step 3a: feed s2 to the inner hash function *)
   let hash_w0 = Hash.update_block p s2 p.h0 in
-  hash,key
+  hash_w0,key
 
 
 let update_block (p:Hash.parameters) (data:lbytes (size_block p)) (hash:hash_w p) =
@@ -91,8 +91,8 @@ let hmac_core' (p:Hash.parameters) (key:lbytes (Hash.size_block p)) (len:size_t{
   let l0 = slice data 0 nblocks8 in
   let l1 = slice data nblocks8 len in
   let hash0,key = init' p key in
-  let hash1 = update_multi p nb l0 p.h0 in
-  let hash2 = update_last p nb nr l1 hash1 in
+  let hash1 = update_multi p nb l0 hash0 in
+  let hash2 = update_last p (nb + 1) nr l1 hash1 in
   let mac = finish p key hash2 in
   mac
 
