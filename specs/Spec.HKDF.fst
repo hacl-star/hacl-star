@@ -81,7 +81,7 @@ let hkdf_extract
 ///    ...
 
 
-let hkdf_expand (p:Hash.parameters) (len_prk:size_t) (prk:lbytes len_prk) (len_info:size_t) (info:lbytes len_info) (len:size_t) =
+let hkdf_expand (p:Hash.parameters) (len_prk:size_t) (prk:lbytes len_prk) (len_info:size_t) (info:lbytes len_info) (len:size_t{len <= 255 `op_Multiply` p.size_hash}) =
   // Compute the number of blocks required for the final output
   assume(p.size_hash <> 0);
   let n = len / p.size_hash + 1 in
