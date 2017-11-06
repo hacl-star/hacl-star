@@ -102,6 +102,9 @@ let shuffle_core p (wsTable:intseq p.wt p.kSize) (t:size_t{t < p.kSize}) (hash:h
 let shuffle (p:parameters) (wsTable:intseq p.wt p.kSize) (hash:hash_w p) : Tot (hash_w p) =
   repeati p.kSize (shuffle_core p wsTable) hash
 
+(* Definition of the initialization function for convenience *)
+let init (p:parameters) = p.h0
+
 (* Definition of the core compression function *)
 let update_block (p:parameters) (block:lbytes (size_block p)) (hash:hash_w p) : Tot (hash_w p) =
   let wsTable = ws p (uints_from_bytes_be block) in
