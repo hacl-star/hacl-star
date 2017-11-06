@@ -2,15 +2,15 @@ module Spec.SHA2_512
 
 #reset-options "--max_fuel 0 --z3rlimit 25"
 
-let parameters = Spec.SHA2.parameters_sha2_512
+let algorithm = Spec.Hashing.SHA2_512
 
-let hash_w = Spec.SHA2.hash_w parameters
-let size_hash = 64
-let size_block = 128
-let maxInput = pow2 32 - 1
+let hash_w = Spec.Hashing.hash_w algorithm
+let size_hash = Spec.Hashing.size_hash algorithm
+let size_block = Spec.Hashing.size_block algorithm
+let maxInput = Spec.Hashing.maxInput algorithm
 
-let update_block b h = Spec.SHA2.update_block parameters b h
-let update_multi n b h = Spec.SHA2.update_multi parameters n b h
-let update_last n l b h = Spec.SHA2.update_last parameters n l b h
-let finish h = Spec.SHA2.finish parameters h
-let hash s = Spec.SHA2.hash' parameters s
+let update_block b h = Spec.Hashing.update_block algorithm b h
+let update_multi n b h = Spec.Hashing.update_multi algorithm n b h
+let update_last n l b h = Spec.Hashing.update_last algorithm n l b h
+let finish h = Spec.Hashing.finish algorithm h
+let hash s = Spec.Hashing.hash algorithm s
