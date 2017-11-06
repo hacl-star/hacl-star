@@ -74,7 +74,7 @@ let above (#i:id) (x:domain i) (z:domain i) = x.iv == z.iv /\ x.ctr >=^ z.ctr
 // the range of our PRF, after idealization and "reverse inlining."
 // for one-time-pads, we keep both the plain and cipher blocks, instead of their XOR.
 
-type smac (rgn:region) (i:id) x = mac: CMA.state (i,x.iv) { CMA.State?.region mac = rgn }
+type smac (rgn:region) (i:id) (x:domain i) = mac: CMA.state (i,x.iv) { CMA.State?.region mac = rgn }
 noeq type otp (i:id) = | OTP: l:u32 {l <=^ blocklen i} -> plain i (v l) -> cipher:lbytes (v l) -> otp i
 
 let ctr_0 (i:id) = if CMA.skeyed i then 1ul else 0ul

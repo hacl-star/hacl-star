@@ -148,13 +148,13 @@ let aes_store_counter b x =
 private val fresh_frame_unused_in: #t:Type -> b:Buffer.buffer t -> h0:mem -> h1:mem -> Lemma
   (requires (fresh_frame h0 h1 /\ b `unused_in` h1))
   (ensures  (b `unused_in` h0))
-  [ SMTPatT (fresh_frame h0 h1); SMTPatT (b `unused_in` h1) ]
+  [ SMTPat (fresh_frame h0 h1); SMTPat (b `unused_in` h1) ]
 let fresh_frame_unused_in #t b h0 h1 = ()
 
 private val modifies_0_unused_in: #t:Type -> b:Buffer.buffer t -> h0:mem -> h1:mem -> Lemma
   (requires (modifies_0 h0 h1 /\ b `unused_in` h1))
   (ensures  (b `unused_in` h0))
-  [ SMTPatT (modifies_0 h0 h1); SMTPatT (b `unused_in` h1) ]
+  [ SMTPat (modifies_0 h0 h1); SMTPat (b `unused_in` h1) ]
 let modifies_0_unused_in #t b h0 h1 =
   lemma_reveal_modifies_0 h0 h1
 
@@ -162,7 +162,7 @@ private val modifies_1_unused_in: #t:Type -> #t':Type
   -> b:Buffer.buffer t -> b':Buffer.buffer t' -> h0:mem -> h1:mem -> Lemma
   (requires (modifies_1 b h0 h1 /\ b' `unused_in` h1 /\ disjoint b b'))
   (ensures  (b' `unused_in` h0))
-  [ SMTPatT (modifies_1 b h0 h1); SMTPatT (b' `unused_in` h1) ]
+  [ SMTPat (modifies_1 b h0 h1); SMTPat (b' `unused_in` h1) ]
 let modifies_1_unused_in #t #t' b b' h0 h1 =
   lemma_reveal_modifies_1 b h0 h1
 

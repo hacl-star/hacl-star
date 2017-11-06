@@ -121,7 +121,7 @@ inline static void Hacl_Bignum_Fmul_fmul(uint64_t *output, uint64_t *input, uint
   memcpy(tmp, input, (uint32_t )3 * sizeof input[0]);
   KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0), (uint32_t )3);
   FStar_UInt128_t t[3];
-  for (uintmax_t _i = 0; _i < (uint32_t )3; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )3; ++_i)
     t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t )0);
   Hacl_Bignum_Fmul_mul_shift_reduce_(t, tmp, input2);
   Hacl_Bignum_Fproduct_carry_wide_(t);
@@ -214,7 +214,7 @@ Hacl_Impl_Poly1305_64_poly1305_process_last_block(
   uint8_t zero1 = (uint8_t )0;
   KRML_CHECK_SIZE(zero1, (uint32_t )16);
   uint8_t block[16];
-  for (uintmax_t _i = 0; _i < (uint32_t )16; ++_i)
+  for (uint32_t _i = 0; _i < (uint32_t )16; ++_i)
     block[_i] = zero1;
   uint32_t i0 = (uint32_t )rem_;
   uint32_t i = (uint32_t )rem_;

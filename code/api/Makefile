@@ -34,7 +34,7 @@ extract-c: aead-c/Chacha20Poly1305.c box-c/NaCl.c policies-c/Hacl_Policies.c
 test:
 
 KREMLIN_ARGS+=$(addprefix -I ,$(INCLUDE_DIRS)) \
-	-drop Spec.*,Hacl.Spec.*,Hacl.Spe.*,Hacl.Impl.*,Seq.*,Hacl.Constants,Hacl.Endianness \
+	-drop Prims,Spec.*,Hacl.Spec.*,Hacl.Spe.*,Hacl.Impl.*,Seq.*,Hacl.Constants,Hacl.Endianness \
 	-drop Hacl.UInt8,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Cast,Hacl.UInt16,Hacl.Types
 
 policies-c/Hacl_Policies.c: $(HACL_HOME)/code/lib/kremlin/Hacl.Policies.fst

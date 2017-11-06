@@ -59,7 +59,7 @@ inline_for_extraction let h32_to_h64 = Cast.sint32_to_sint64
 inline_for_extraction let u64_to_h64 = Cast.uint64_to_sint64
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--using_facts_from '+Prims +FStar.UInt +FStar.UInt32 +Spec.SHA2_256 +Hacl.Hash.SHA2_256' --max_fuel 0 --z3rlimit 10"
 
 //
 // SHA-256

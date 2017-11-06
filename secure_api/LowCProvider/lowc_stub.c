@@ -69,13 +69,13 @@ CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
 
         switch(Int_val(alg)){
                 case 0:
-                        calg = Crypto_Indexing_aeadAlg_AES_128_GCM;
+                        calg = Crypto_Indexing_AES_128_GCM;
                         break;
                 case 1:
-                        calg = Crypto_Indexing_aeadAlg_AES_256_GCM;
+                        calg = Crypto_Indexing_AES_256_GCM;
                         break;
                 case 2:
-                        calg = Crypto_Indexing_aeadAlg_CHACHA20_POLY1305;
+                        calg = Crypto_Indexing_CHACHA20_POLY1305;
                         break;
                 default:
                         caml_failwith("LowCProvider: unsupported AEAD alg");
@@ -83,10 +83,10 @@ CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
 
 	switch(Int_val(impl)){
 		case 0:
-			aesimpl = Crypto_Indexing_aesImpl_HaclAES;
+			aesimpl = Crypto_Indexing_HaclAES;
 			break;
 		case 1:
-			aesimpl = Crypto_Indexing_aesImpl_ValeAES;
+			aesimpl = Crypto_Indexing_ValeAES;
 			break;
 		default:
 			caml_failwith("LowCProvider: invalid AES implementation");
@@ -96,8 +96,7 @@ CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
 	id.aesi = aesimpl;
 
         AEAD_ST* st = malloc(sizeof(AEAD_ST));
-       	*st = Crypto_AEAD_coerce(id, FStar_HyperHeap_root, (uint8_t*)String_val(key));
-
+       	*st = Crypto_AEAD_coerce(id, (uint8_t*)String_val(key));
         ST *s = malloc(sizeof(ST));
         s->st = st;
         s->id = id;

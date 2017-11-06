@@ -58,6 +58,10 @@ appears in the IEEE S&P 2017 paper: https://eprint.iacr.org/2016/1178.pdf
 This library is at the pre-production stage.
 Please consult the authors before using it in production systems.
 
+The first release is to be expected around the time of [ACM CCS].
+Any feedback is welcome in the meantime.
+
+[ACM CCS]: https://www.sigsac.org/ccs/CCS2017/
 
 # Licenses
 
