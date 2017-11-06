@@ -172,7 +172,7 @@ let finish p (hash:hash_w p) : lbytes p.size_hash =
   h
 
 (* Definition of the SHA2 ontime function based on incremental calls *)
-let hash p (len:size_t{len < maxInput p}) (input:lbytes len) : lbytes p.size_hash =
+let hash' p (len:size_t{len < maxInput p}) (input:lbytes len) : lbytes p.size_hash =
   let nb = len / size_block p in
   let nr = len % size_block p in
   let nblocks8 = nb * size_block p in
@@ -183,7 +183,7 @@ let hash p (len:size_t{len < maxInput p}) (input:lbytes len) : lbytes p.size_has
   finish p hash
 
 (* Definition of the original SHA2 onetime function *)
-let hash' p (len:size_t{len < maxInput p /\ (size_block p * number_blocks_padding p len) <= max_size_t}) (input:lbytes len) : lbytes p.size_hash =
+let hash p (len:size_t{len < maxInput p /\ (size_block p * number_blocks_padding p len) <= max_size_t}) (input:lbytes len) : lbytes p.size_hash =
   let n = number_blocks_padding p len in
   let blocks = pad p 0 len input in
   finish p (update_multi p n blocks p.h0)
