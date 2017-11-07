@@ -18,7 +18,7 @@ noeq type parameters =
 	 kSize:    size_t{kSize > 16} ->
 	 kTable:   intseq wt kSize ->
 	 h0:       intseq wt 8 ->
-	 size_hash: nat {size_hash <= 8 * numbytes wt} ->
+	 size_hash: nat {0 < size_hash /\ size_hash <= 8 * numbytes wt} ->
 	 parameters
 
 (* Definition: Base types *)
@@ -34,7 +34,7 @@ let lenType p = match p.wt with
 let lenSize p = numbytes (lenType p)
 
 (* Definition: Maximum input size in bytes *)
-let maxInput p = (maxint (lenType p) + 1) / 8
+let max_input p = (maxint (lenType p) + 1) / 8
 
 (* Definition of permutation functions *)
 let _Ch p x y z = ((x &. y) ^. ((~. x) &. z))
@@ -121,14 +121,14 @@ let number_blocks_padding_single p (len:size_t{len < size_block p}) : size_t =
   if len < size_block p - numbytes (lenType p) then 1 else 2
 
 (* Definition of the function returning the number of padding blocks *)
-let number_blocks_padding p (len:size_t{len < maxInput p}) : size_t =
+let number_blocks_padding p (len:size_t{len < max_input p}) : size_t =
   let n = len / size_block p in
   let r = len % size_block p in
   let nr = number_blocks_padding_single p r in
   n + nr
 
 (* Definition of the padding function for a single input block *)
-let pad_single p (n:size_t) (len:size_t{len < size_block p /\ len + n * size_block p <= maxInput p}) (last:lbytes len)
+let pad_single p (n:size_t) (len:size_t{len < size_block p /\ len + n * size_block p <= max_input p}) (last:lbytes len)
 : Tot (block:lbytes (size_block p * number_blocks_padding_single p len)) =
   let nr = number_blocks_padding_single p len in
   let plen : size_t = nr * size_block p in
@@ -146,7 +146,7 @@ let pad_single p (n:size_t) (len:size_t{len < size_block p /\ len + n * size_blo
   padding
 
 (* Definition of the padding function *)
-let pad p (n:size_t) (len:size_t{len < maxInput p /\ (size_block p * number_blocks_padding p len) <= max_size_t /\ n + (len / size_block p) <= max_size_t}) (last:lbytes len)
+let pad p (n:size_t) (len:size_t{len < max_input p /\ (size_block p * number_blocks_padding p len) <= max_size_t /\ n + (len / size_block p) <= max_size_t}) (last:lbytes len)
 : Tot (block:lbytes (size_block p * number_blocks_padding p len)) =
   let nb = len / size_block p in
   let nr = len % size_block p in
@@ -163,7 +163,7 @@ let pad p (n:size_t) (len:size_t{len < maxInput p /\ (size_block p * number_bloc
   padding
 
 (* Definition of the function for the partial block compression *)
-let update_last p (n:size_t) (len:size_t{len < size_block p /\ len + n * size_block p <= maxInput p}) (last:lbytes len) (hash:hash_w p)
+let update_last p (n:size_t) (len:size_t{len < size_block p /\ len + n * size_block p <= max_input p}) (last:lbytes len) (hash:hash_w p)
 : Tot (hash_w p) =
   let blocks = pad_single p n len last in
   update_multi p (number_blocks_padding_single p len) blocks hash
@@ -175,7 +175,7 @@ let finish p (hash:hash_w p) : lbytes p.size_hash =
   h
 
 (* Definition of the SHA2 ontime function based on incremental calls *)
-let hash' p (len:size_t{len < maxInput p}) (input:lbytes len) : lbytes p.size_hash =
+let hash' p (len:size_t{len < max_input p}) (input:lbytes len) : lbytes p.size_hash =
   let nb = len / size_block p in
   let nr = len % size_block p in
   let nblocks8 = nb * size_block p in
@@ -186,7 +186,7 @@ let hash' p (len:size_t{len < maxInput p}) (input:lbytes len) : lbytes p.size_ha
   finish p hash
 
 (* Definition of the original SHA2 onetime function *)
-let hash p (len:size_t{len < maxInput p /\ (size_block p * number_blocks_padding p len) <= max_size_t}) (input:lbytes len) : lbytes p.size_hash =
+let hash p (len:size_t{len < max_input p /\ (size_block p * number_blocks_padding p len) <= max_size_t}) (input:lbytes len) : lbytes p.size_hash =
   let n = number_blocks_padding p len in
   let blocks = pad p 0 len input in
   finish p (update_multi p n blocks p.h0)
@@ -272,7 +272,7 @@ let const_384_512_k = List.Tot.map u64 [
     0x4cc5d4becb3e42b6; 0x597f299cfc657e2a; 0x5fcb6fab3ad6faec; 0x6c44198c4a475817]
 
 
-let parameters_sha2_224 : parameters =
+let parameters224 : parameters =
   assert_norm(List.Tot.length const_224_h0 = 8);
   assert_norm(List.Tot.length const_224_256_ops = 12);
   assert_norm(List.Tot.length const_224_256_k = 64);
@@ -284,7 +284,7 @@ let parameters_sha2_224 : parameters =
     (createL const_224_h0)
     28
 
-let parameters_sha2_256 : parameters =
+let parameters256 : parameters =
   assert_norm(List.Tot.length const_256_h0 = 8);
   assert_norm(List.Tot.length const_224_256_ops = 12);
   assert_norm(List.Tot.length const_224_256_k = 64);
@@ -296,7 +296,7 @@ let parameters_sha2_256 : parameters =
     (createL const_256_h0)
     32
 
-let parameters_sha2_384 : parameters =
+let parameters384 : parameters =
   assert_norm(List.Tot.length const_384_h0 = 8);
   assert_norm(List.Tot.length const_384_512_ops = 12);
   assert_norm(List.Tot.length const_384_512_k = 80);
@@ -308,7 +308,7 @@ let parameters_sha2_384 : parameters =
     (createL const_384_h0)
     48
 
-let parameters_sha2_512 : parameters =
+let parameters512 : parameters =
   assert_norm(List.Tot.length const_512_h0 = 8);
   assert_norm(List.Tot.length const_384_512_ops = 12);
   assert_norm(List.Tot.length const_384_512_k = 80);
@@ -319,3 +319,57 @@ let parameters_sha2_512 : parameters =
     (createL const_384_512_k)
     (createL const_512_h0)
     64
+
+///
+/// Instances of SHA2
+///
+
+let hash_w224 = hash_w parameters224
+let hash_w256 = hash_w parameters256
+let hash_w384 = hash_w parameters384
+let hash_w512 = hash_w parameters512
+
+let size_block224 = size_block parameters224
+let size_block256 = size_block parameters256
+let size_block384 = size_block parameters384
+let size_block512 = size_block parameters512
+
+let size_hash224 = parameters224.size_hash
+let size_hash256 = parameters256.size_hash
+let size_hash384 = parameters384.size_hash
+let size_hash512 = parameters512.size_hash
+
+let max_input224 = max_input parameters224
+let max_input256 = max_input parameters256
+let max_input384 = max_input parameters384
+let max_input512 = max_input parameters512
+
+let init224 = init parameters224
+let init256 = init parameters256
+let init384 = init parameters384
+let init512 = init parameters512
+
+let update_block224 = update_block parameters224
+let update_block256 = update_block parameters256
+let update_block384 = update_block parameters384
+let update_block512 = update_block parameters512
+
+let update_multi224 = update_multi parameters224
+let update_multi256 = update_multi parameters256
+let update_multi384 = update_multi parameters384
+let update_multi512 = update_multi parameters512
+
+let update_last224 = update_last parameters224
+let update_last256 = update_last parameters256
+let update_last384 = update_last parameters384
+let update_last512 = update_last parameters512
+
+let finish224 = finish parameters224
+let finish256 = finish parameters256
+let finish384 = finish parameters384
+let finish512 = finish parameters512
+
+let hash224 = hash' parameters224
+let hash256 = hash' parameters256
+let hash384 = hash' parameters384
+let hash512 = hash' parameters512

@@ -1,4 +1,4 @@
-module Spec.Hashing
+module Spec.Hash
 
 open Spec.SHA2
 
@@ -6,10 +6,10 @@ open Spec.SHA2
 
 inline_for_extraction
 private let parameters a = match a with
-  | SHA2_224 -> Spec.SHA2.parameters_sha2_224
-  | SHA2_256 -> Spec.SHA2.parameters_sha2_256
-  | SHA2_384 -> Spec.SHA2.parameters_sha2_384
-  | SHA2_512 -> Spec.SHA2.parameters_sha2_512
+  | SHA2_224 -> Spec.SHA2.parameters224
+  | SHA2_256 -> Spec.SHA2.parameters256
+  | SHA2_384 -> Spec.SHA2.parameters384
+  | SHA2_512 -> Spec.SHA2.parameters512
 
 let hash_w a = match a with
   | SHA2_224 -> Spec.SHA2.hash_w (parameters a)
@@ -17,27 +17,33 @@ let hash_w a = match a with
   | SHA2_384 -> Spec.SHA2.hash_w (parameters a)
   | SHA2_512 -> Spec.SHA2.hash_w (parameters a)
 
-let size_hash a = match a with
-  | SHA2_224 -> (parameters a).size_hash
-  | SHA2_256 -> (parameters a).size_hash
-  | SHA2_384 -> (parameters a).size_hash
-  | SHA2_512 -> (parameters a).size_hash
-
 let size_block a = match a with
   | SHA2_224 -> Spec.SHA2.size_block (parameters a)
   | SHA2_256 -> Spec.SHA2.size_block (parameters a)
   | SHA2_384 -> Spec.SHA2.size_block (parameters a)
   | SHA2_512 -> Spec.SHA2.size_block (parameters a)
 
+let size_hash a = match a with
+  | SHA2_224 -> (parameters a).size_hash
+  | SHA2_256 -> (parameters a).size_hash
+  | SHA2_384 -> (parameters a).size_hash
+  | SHA2_512 -> (parameters a).size_hash
+
 #reset-options "--lax"
 
-let maxInput a = match a with
-  | SHA2_224 -> Spec.SHA2.maxInput (parameters a)
-  | SHA2_256 -> Spec.SHA2.maxInput (parameters a)
-  | SHA2_384 -> Spec.SHA2.maxInput (parameters a)
-  | SHA2_512 -> Spec.SHA2.maxInput (parameters a)
+let max_input a = match a with
+  | SHA2_224 -> Spec.SHA2.max_input (parameters a)
+  | SHA2_256 -> Spec.SHA2.max_input (parameters a)
+  | SHA2_384 -> Spec.SHA2.max_input (parameters a)
+  | SHA2_512 -> Spec.SHA2.max_input (parameters a)
 
 #reset-options "--max_fuel 0 --z3rlimit 25"
+
+let init a = match a with
+  | SHA2_224 -> Spec.SHA2.init (parameters a)
+  | SHA2_256 -> Spec.SHA2.init (parameters a)
+  | SHA2_384 -> Spec.SHA2.init (parameters a)
+  | SHA2_512 -> Spec.SHA2.init (parameters a)
 
 let update_block a b h = match a with
   | SHA2_224 -> Spec.SHA2.update_block (parameters a) b h
@@ -68,4 +74,3 @@ let hash a s = match a with
   | SHA2_256 -> Spec.SHA2.hash' (parameters a) s
   | SHA2_384 -> Spec.SHA2.hash' (parameters a) s
   | SHA2_512 -> Spec.SHA2.hash' (parameters a) s
-
