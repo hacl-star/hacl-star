@@ -1,4 +1,4 @@
-module Spec.Hashing
+module Spec.Hash
 
 open FStar.Mul
 open Spec.Types
@@ -13,10 +13,11 @@ type algorithm =
   | SHA2_512
 
 val hash_w: a:algorithm -> Type0
-val size_hash: a:algorithm -> size_t
 val size_block: a:algorithm -> size_t
+val size_hash: a:algorithm -> s:size_t{0 <= s /\ s <= size_block a}
 val maxInput: a:algorithm -> size_t
 
+val init: a:algorithm -> Tot (hash_w a)
 val update_block: a:algorithm -> block:lbytes (size_block a) -> hash:hash_w a -> Tot (hash_w a)
 val update_multi: a:algorithm -> n:size_t{n * (size_block a) <= max_size_t} -> blocks:lbytes (n * (size_block a)) -> hash:hash_w a -> Tot (hash_w a)
 val update_last: a:algorithm -> n:size_t -> len:size_t{len < size_block a /\ len + n * size_block a <= maxInput a} -> last:lbytes len -> hash:hash_w a -> Tot (hash_w a)

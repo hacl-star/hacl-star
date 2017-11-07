@@ -1,4 +1,4 @@
-module Spec.Hashing
+module Spec.Hash
 
 open Spec.SHA2
 
@@ -17,27 +17,33 @@ let hash_w a = match a with
   | SHA2_384 -> Spec.SHA2.hash_w (parameters a)
   | SHA2_512 -> Spec.SHA2.hash_w (parameters a)
 
-let size_hash a = match a with
-  | SHA2_224 -> (parameters a).size_hash
-  | SHA2_256 -> (parameters a).size_hash
-  | SHA2_384 -> (parameters a).size_hash
-  | SHA2_512 -> (parameters a).size_hash
-
-let size_block a = match a with
+unfold let size_block a = match a with
   | SHA2_224 -> Spec.SHA2.size_block (parameters a)
   | SHA2_256 -> Spec.SHA2.size_block (parameters a)
   | SHA2_384 -> Spec.SHA2.size_block (parameters a)
   | SHA2_512 -> Spec.SHA2.size_block (parameters a)
 
+unfold let size_hash a = match a with
+  | SHA2_224 -> (parameters a).size_hash
+  | SHA2_256 -> (parameters a).size_hash
+  | SHA2_384 -> (parameters a).size_hash
+  | SHA2_512 -> (parameters a).size_hash
+
 #reset-options "--lax"
 
-let maxInput a = match a with
+unfold let maxInput a = match a with
   | SHA2_224 -> Spec.SHA2.maxInput (parameters a)
   | SHA2_256 -> Spec.SHA2.maxInput (parameters a)
   | SHA2_384 -> Spec.SHA2.maxInput (parameters a)
   | SHA2_512 -> Spec.SHA2.maxInput (parameters a)
 
 #reset-options "--max_fuel 0 --z3rlimit 25"
+
+let init a = match a with
+  | SHA2_224 -> Spec.SHA2.init (parameters a)
+  | SHA2_256 -> Spec.SHA2.init (parameters a)
+  | SHA2_384 -> Spec.SHA2.init (parameters a)
+  | SHA2_512 -> Spec.SHA2.init (parameters a)
 
 let update_block a b h = match a with
   | SHA2_224 -> Spec.SHA2.update_block (parameters a) b h
