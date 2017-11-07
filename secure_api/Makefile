@@ -60,7 +60,7 @@ vale/asm/vale.a:
 	$(MAKE) -C vale/asm
 
 tmp-%/out.krml: $(wildcard */*.fst)
-	$(KRML) test/test_$*/Crypto.Indexing.fst \
+	$(KRML) -fsopt --expose_interfaces test/test_$*/Crypto.Indexing.fst \
 	  test/Flag.fst utils/Hacl.Spec.fst \
 	  test/Crypto.KrmlTest.fst \
 	  -tmpdir tmp-$* -skip-translation
