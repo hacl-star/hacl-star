@@ -369,7 +369,7 @@ let finish256 = finish parameters256
 let finish384 = finish parameters384
 let finish512 = finish parameters512
 
-let hash224 = hash parameters224
-let hash256 = hash parameters256
-let hash384 = hash parameters384
-let hash512 = hash parameters512
+let hash224 = hash' parameters224
+let hash256 = hash' parameters256
+let hash384 = hash' parameters384
+let hash512 = hash' parameters512
