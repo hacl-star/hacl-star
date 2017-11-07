@@ -59,6 +59,8 @@ QuicProvider-tmp: vale/asm/vale.a
 vale/asm/vale.a:
 	$(MAKE) -C vale/asm
 
+.PRECIOUS:tmp-%/out.krml
+
 tmp-%/out.krml: $(wildcard */*.fst)
 	$(KRML) -fsopt --expose_interfaces test/test_$*/Crypto.Indexing.fst \
 	  test/Flag.fst utils/Hacl.Spec.fst \
