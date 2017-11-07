@@ -86,4 +86,9 @@ let scalarmult (k:scalar) (u:serialized_point) : Tot serialized_point =
   let res = montgomery_ladder u k in
   encodePoint res
 
+let scalarmult' (k:scalar) (u:serialized_point) : Tot serialized_point =
+  let u = decodePoint u in
+  let res = montgomery_ladder u k in
+  encodePoint res
+
 
