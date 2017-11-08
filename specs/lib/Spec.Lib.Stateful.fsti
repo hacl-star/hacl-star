@@ -2,14 +2,14 @@ module Spec.Lib.Stateful
 open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 
-noeq type state_def = 
-  | StateDef: state: Type0 -> 
-	      key:Type0 -> 
-	      value:(key->Type0) -> 
-	      length:(key->size_t) -> 
+noeq type state_def =
+  | StateDef: state: Type0 ->
+	      key:Type0 ->
+	      value:(key->Type0) ->
+	      length:(key->size_t) ->
 	      create:(unit -> state) ->
 	      get:(state -> k:key -> lseq (value k) (length k)) ->
-	      put:(state -> k:key -> lseq (value k) (length k) -> state) -> 
+	      put:(state -> k:key -> lseq (value k) (length k) -> state) ->
 	      state_def
 
 unfold
@@ -19,7 +19,7 @@ let state_seq (d:state_def) (k:d.key) : Type0 = lseq (d.value k) (d.length k)
 unfold
 let state_slice (d:state_def) (k:d.key) (min:size_t) (max:size_t{min <= max}) : Type0 = lseq (d.value k) (max - min)
 
-	       
+
 val stateful (d:state_def) (a:Type0) : Type0
 
 val alloc: #a:Type0 -> #d:state_def -> f:stateful d a -> a
@@ -27,7 +27,7 @@ val alloc: #a:Type0 -> #d:state_def -> f:stateful d a -> a
 val read: #d:state_def -> k:d.key -> x:state_index d k -> stateful d (d.value k)
 val write: #d:state_def -> k:d.key -> x:state_index d k -> v:d.value k -> stateful d unit
 val return: #a:Type0 -> #d:state_def -> x:a -> stateful d a
-val bind: #a:Type0 -> #b:Type0 -> #d:state_def -> f:stateful d a -> g:(a -> stateful d b) -> stateful d b 
+val bind: #a:Type0 -> #b:Type0 -> #d:state_def -> f:stateful d a -> g:(a -> stateful d b) -> stateful d b
 
 (* Convenience functions, can be implemented using read/write and repeat_range *)
 
