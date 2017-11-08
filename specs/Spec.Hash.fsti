@@ -15,7 +15,7 @@ type algorithm =
 val hash_w: a:algorithm -> Type0
 val size_block: a:algorithm -> size_t
 val size_hash: a:algorithm -> s:size_t{0 <= s /\ s <= size_block a}
-val max_input: a:algorithm -> size_t
+val max_input: a:algorithm -> nat
 
 val init: a:algorithm -> Tot (hash_w a)
 val update_block: a:algorithm -> block:lbytes (size_block a) -> hash:hash_w a -> Tot (hash_w a)

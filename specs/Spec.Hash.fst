@@ -29,15 +29,11 @@ let size_hash a = match a with
   | SHA2_384 -> (parameters a).size_hash
   | SHA2_512 -> (parameters a).size_hash
 
-#reset-options "--lax"
-
 let max_input a = match a with
   | SHA2_224 -> Spec.SHA2.max_input (parameters a)
   | SHA2_256 -> Spec.SHA2.max_input (parameters a)
   | SHA2_384 -> Spec.SHA2.max_input (parameters a)
   | SHA2_512 -> Spec.SHA2.max_input (parameters a)
-
-#reset-options "--max_fuel 0 --z3rlimit 25"
 
 let init a = match a with
   | SHA2_224 -> Spec.SHA2.init (parameters a)
