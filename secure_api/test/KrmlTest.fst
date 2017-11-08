@@ -1,4 +1,4 @@
-module Crypto.KrmlTest
+module KrmlTest
 
 module ST = FStar.HyperStack.ST
 

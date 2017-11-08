@@ -68,6 +68,7 @@ let safeId  (i:I.id) = Flag.safeId i
 val aead_state     : I.id -> I.rw -> Type0
 val log_region: #i:_ -> #rw:_ -> aead_state i rw -> eternal_region
 val prf_region: #i:_ -> #rw:_ -> aead_state i rw -> eternal_region
+noextract
 val log       : #i:_ -> #rw:_ -> s:aead_state i rw{safeMac i} -> HS.mem -> GTot (Seq.seq (entry i))
 
 let address   = nat
@@ -227,6 +228,7 @@ let enc_dec_liveness (#i:_) (#rw:_) (st:aead_state i rw)
     log_region st `is_in` h.h /\
     prf_region st `is_in` h.h
 
+noextract
 let entry_of
           (#i: I.id)
            (n: iv (I.cipherAlg_of_id i))
@@ -241,6 +243,7 @@ let entry_of
   let c = Buffer.as_seq h cipher_tag in
   mk_entry n aad p c
 
+noextract
 let entry_for_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i})
   : GTot (option (entry i)) =
     Seq.find_l (fun e -> nonce_of_entry e = n) (log st h)

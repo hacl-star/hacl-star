@@ -64,19 +64,19 @@ vale/asm/vale.a:
 tmp-%/out.krml: $(wildcard */*.fst)
 	$(KRML) -fsopt --expose_interfaces test/test_$*/Crypto.Indexing.fst \
 	  test/Flag.fst utils/Hacl.Spec.fst \
-	  test/Crypto.KrmlTest.fst \
+	  test/KrmlTest.fst aead/Crypto.AEAD.Main.fst \
 	  -tmpdir tmp-$* -skip-translation
 
 krml-test-vale.exe: vale/asm/vale.a
 
 krml-test-%.exe: tmp-%/out.krml vale/asm/vale.a 
-	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
+	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD.Main=Crypto.*" -no-prefix KrmlTest
 	./$@
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
 	 -o test-perf-hacl.exe \
-	$(filter-out tmp-hacl/Crypto_KrmlTest.c, $(wildcard tmp-hacl/*.c)) \
+	$(filter-out tmp-hacl/KrmlTest.c, $(wildcard tmp-hacl/*.c)) \
 	$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c \
 	test/test_perf.c test/test_hacks.c \
 	-I tmp-hacl  \
