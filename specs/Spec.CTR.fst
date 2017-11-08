@@ -1,83 +1,64 @@
 module Spec.CTR
 
-module ST = FStar.HyperStack.ST
-
 open FStar.Mul
-open FStar.Seq
-open Spec.Lib
+open Spec.Lib.IntTypes
+open Spec.Lib.IntSeq
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 type block_cipher_ctx = {
-     keylen: nat ;
-     blocklen: (x:nat{x>0});
-     noncelen: nat;
-     counterbits: nat;
-     incr: pos}
+     keylen: size_t ;
+     blocklen: (x:size_t{x>0});
+     noncelen: size_t;
+     countermax: size_t
+     }
+
 
 type key (c:block_cipher_ctx) = lbytes c.keylen
 type nonce (c:block_cipher_ctx) = lbytes c.noncelen
-type block (c:block_cipher_ctx) = lbytes (c.blocklen*c.incr)
-type counter (c:block_cipher_ctx) = UInt.uint_t c.counterbits
+type block (c:block_cipher_ctx) = lbytes c.blocklen
+type counter (c:block_cipher_ctx) = s:size_t{s <= c.countermax}
+
 type block_cipher (c:block_cipher_ctx) =  key c -> nonce c -> counter c -> block c
 
-val xor: #len:nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
-let xor #len x y = map2 FStar.UInt8.(fun x y -> x ^^ y) x y
-
+val xor: #len:size_t -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
+let xor #len x y = map2 (fun x y -> x ^. y) x y
 
 val counter_mode_blocks:
   ctx: block_cipher_ctx ->
   bc: block_cipher ctx ->
   k:key ctx -> n:nonce ctx -> c:counter ctx ->
-  plain:seq UInt8.t{c + ctx.incr * (length plain / ctx.blocklen) < pow2 ctx.counterbits /\
-    length plain % (ctx.blocklen * ctx.incr) = 0} ->
-  Tot (lbytes (length plain))
-      (decreases (length plain))
-#reset-options "--z3rlimit 200 --max_fuel 0"
-let rec counter_mode_blocks ctx block_enc key nonce counter plain =
-  let len  = length plain in
-  let len' = len / (ctx.blocklen * ctx.incr) in
-  Math.Lemmas.lemma_div_mod len (ctx.blocklen * ctx.incr) ;
-  if len = 0 then Seq.createEmpty #UInt8.t
-  else (
-    let prefix, block = split plain (len - ctx.blocklen * ctx.incr) in    
-      (* TODO: move to a single lemma for clarify *)
-      Math.Lemmas.lemma_mod_plus (length prefix) 1 (ctx.blocklen * ctx.incr);
-      Math.Lemmas.lemma_div_le (length prefix) len ctx.blocklen;
-      Spec.CTR.Lemmas.lemma_div len (ctx.blocklen * ctx.incr);
-      (* End TODO *)
-    let cipher        = counter_mode_blocks ctx block_enc key nonce counter prefix in
-    let mask          = block_enc key nonce (counter + (len / ctx.blocklen - 1) * ctx.incr) in
-    let eb            = xor block mask in
-    cipher @| eb
-  )
+  n:size_t{n * ctx.blocklen < pow2 32 /\ c + n <= ctx.countermax} ->
+  plain:lbytes (n * ctx.blocklen) ->
+  Tot (lbytes (n * ctx.blocklen))
+let counter_mode_blocks ctx block_enc key nonce counter n plain =
+  let cipher = create (n * ctx.blocklen) (u8 0) in
+  repeati n
+    (fun i cipher -> 
+      let b = slice plain (ctx.blocklen * i) (ctx.blocklen * (i+1)) in
+      let k = block_enc key nonce (counter + i) in
+      let c = xor b k in
+      update_slice cipher (ctx.blocklen * i) (ctx.blocklen * (i+1)) c) cipher
 
 
 val counter_mode:
   ctx: block_cipher_ctx ->
   bc: block_cipher ctx ->
   k:key ctx -> n:nonce ctx -> c:counter ctx ->
-  plain:seq UInt8.t{c + ctx.incr * (length plain / ctx.blocklen) < pow2 ctx.counterbits} ->
-  Tot (lbytes (length plain))
-      (decreases (length plain))
-#reset-options "--z3rlimit 200 --max_fuel 0"
-let counter_mode ctx block_enc key nonce counter plain =
-  let len = length plain in
-  let blocks_len = (ctx.incr * ctx.blocklen) * (len / (ctx.blocklen * ctx.incr)) in
-  let part_len   = len % (ctx.blocklen * ctx.incr) in
-    (* TODO: move to a single lemma for clarify *)
-    Math.Lemmas.lemma_div_mod len (ctx.blocklen * ctx.incr);
-    Math.Lemmas.multiple_modulo_lemma (len / (ctx.blocklen * ctx.incr)) (ctx.blocklen * ctx.incr);
-    Math.Lemmas.lemma_div_le (blocks_len) len ctx.blocklen;
-    (* End TODO *)
-  let blocks, last_block = split plain blocks_len in
-  let cipher_blocks = counter_mode_blocks ctx block_enc key nonce counter blocks in
-  let cipher_last_block =
-    if part_len > 0
-    then (* encrypt final partial block(s) *)
-      let mask = block_enc key nonce (counter+ctx.incr*(length plain / ctx.blocklen)) in
-      let mask = slice mask 0 part_len in
-      assert(length last_block = part_len);
-      xor #part_len last_block mask
-    else createEmpty in
-  cipher_blocks @| cipher_last_block
+  len: size_t{c + (len / ctx.blocklen) <= ctx.countermax}  -> 
+  plain:lbytes len ->
+  Tot (lbytes len)
+let counter_mode ctx block_enc key nonce counter len plain =
+  let n      = len / ctx.blocklen in
+  let rem    = len % ctx.blocklen in
+  let blocks = slice plain 0 (n * ctx.blocklen) in
+  let cipher_blocks = counter_mode_blocks ctx block_enc key nonce counter n blocks in
+  if rem = 0 then cipher_blocks
+  else 
+      let k = block_enc key nonce (counter+n) in
+      let k' = slice k 0 rem in
+      let last : lbytes rem = slice plain (n * ctx.blocklen) len in
+      let cipher_last: lbytes rem = xor #rem last k' in
+      let cipher = create len (u8 0) in
+      let cipher = update_slice cipher 0 (n * ctx.blocklen) cipher_blocks in
+      update_slice cipher (n * ctx.blocklen) len cipher_last

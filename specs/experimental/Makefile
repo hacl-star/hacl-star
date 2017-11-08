@@ -4,6 +4,7 @@ FSTAR_ARGS=$(OTHERFLAGS)
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
+FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lemmas
 
 all:
 	$(MAKE) lib
@@ -63,14 +64,14 @@ sha2_256.exe: Spec.SHA256.fst
 	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA256.ml -o sha2_256.exe
 	./sha2_256.exe
 
-rsa.exe: Spec.RSA.Test.fst
-	$(MAKE) lib
+rsa.exe: ../lib/Spec.Lib.IntTypes.fst ../lib/Spec.Lib.RawIntTypes.fst ../lib/Spec.Lib.IntSeq.fst ../lib/Spec.Lib.Stateful.fst ../Spec.SHA2.fst Spec.RSA.fst Spec.RSA.Test.fst
+	$(MAKE) -C ../../code/lib/ml
 	mkdir -p rsa-spec
-	$(FSTAR) $(ARGS) --odir rsa-spec $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSA --extract_module Spec.RSA.Test --extract_module Spec.RSA.Test --odir rsa-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> rsa-spec/Spec_RSA_Test.ml
-	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES) rsa-spec/FStar_Endianness.ml rsa-spec/Spec_Loops.ml rsa-spec/Spec_Lib.ml rsa-spec/Seq_Create.ml rsa-spec/Spec_SHA2_256.ml rsa-spec/Spec_Seq_Lib.ml rsa-spec/Spec_Bignum.ml rsa-spec/Spec_Bignum_Lib.ml rsa-spec/Spec_RSA.ml rsa-spec/Spec_RSA_Test.ml -o rsa.exe
+	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES) rsa-spec/Spec_Lib_IntTypes.ml rsa-spec/Spec_Lib_RawIntTypes.ml rsa-spec/Spec_Lib_IntSeq.ml rsa-spec/Spec_Lib_Stateful.ml rsa-spec/Spec_SHA2.ml rsa-spec/Spec_RSA.ml rsa-spec/Spec_RSA_Test.ml -o rsa.exe
 	./rsa.exe
 	
 clean:
 	$(MAKE) -C $(HACL_HOME)/code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 chacha-spec-vec2 chacha-spec-vec sha2-spec ed25519-spec secretbox-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe chacha-spec-vec3 chacha-spec-vec256 chacha-spec-vec2 chacha-spec-vec sha2-spec ed25519-spec secretbox-spec rsa-spec

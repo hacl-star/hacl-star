@@ -1,13 +1,5 @@
 module Spec.Curve25519.Lemmas
 
-module ST = FStar.HyperStack.ST
-
-
-open FStar.Mul
-open FStar.Seq
-open FStar.UInt8
-open FStar.Endianness
-
 val lemma_prime_value: n:nat -> Lemma
   (requires (n = 255))
   (ensures (pow2 n - 19 = 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed))

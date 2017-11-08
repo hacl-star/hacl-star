@@ -1,21 +1,29 @@
-module Spec.Curve25519
+module Spec.Curve448
 
 open FStar.Mul
 open Spec.Lib.IntTypes
 open Spec.Lib.RawIntTypes
 open Spec.Lib.IntSeq
-open Spec.Curve25519.Lemmas
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
 (* Field types and parameters *)
-let prime = pow2 255 - 19
+let prime = pow2 448 - pow2 224 - 1
 type elem : Type0 = e:int{e >= 0 /\ e < prime}
-let fadd e1 e2 = (e1 + e2) % prime
-let fsub e1 e2 = (e1 - e2) % prime
-let fmul e1 e2 = (e1 * e2) % prime
-let zero : elem = 0
-let one  : elem = 1
+let fadd e1 e2 =
+  assert_norm(prime <> 0);
+  (e1 + e2) % prime
+let fsub e1 e2 =
+  assert_norm(prime <> 0);
+  (e1 - e2) % prime
+let fmul e1 e2 =
+  assert_norm(prime <> 0);
+  (e1 * e2) % prime
+let zero : elem =
+  assert_norm(0 >= 0 /\ 0 < prime); 0
+
+let one  : elem =
+  assert_norm(1 >= 0 /\ 1 < prime); 1
 
 (* Exponentiation *)
 let rec ( ** ) (e:elem) (n:pos) : Tot elem (decreases n) =
@@ -25,17 +33,16 @@ let rec ( ** ) (e:elem) (n:pos) : Tot elem (decreases n) =
     else e `fmul` ((e `fmul` e) ** ((n-1)/2))
 
 (* Type aliases *)
-type scalar = lbytes 32
-type serialized_point = lbytes 32
+type scalar = lbytes 56
+type serialized_point = lbytes 56
 type proj_point = | Proj: x:elem -> z:elem -> proj_point
 
-let decodeScalar25519 (k:scalar) =
-  let k   = k.[0] <- (k.[0] &. u8 248)          in
-  let k   = k.[31] <- ((k.[31] &. u8 127) |. u8 64) in k
-
+let decodeScalar448 (k:scalar) =
+  let k   = k.[0] <- (k.[0] &. u8 252) in
+  let k   = k.[55] <- (k.[55] |. u8 128) in k
 
 let decodePoint (u:serialized_point) =
-  (nat_from_bytes_le u % pow2 255) % prime
+  (nat_from_bytes_le u % pow2 448) % prime
 
 let add_and_double qx nq nqp1 =
   let x_1 = qx in
@@ -53,14 +60,14 @@ let add_and_double qx nq nqp1 =
   let x_3 = (da `fadd` cb)**2 in
   let z_3 = x_1 `fmul` ((da `fsub` cb)**2) in
   let x_2 = aa `fmul` bb in
-  let z_2 = e `fmul` (aa `fadd` (121665 `fmul` e)) in
+  let z_2 = e `fmul` (aa `fadd` (39081 `fmul` e)) in
   Proj x_2 z_2, Proj x_3 z_3
 
-let ith_bit (k:scalar) (i:nat{i < 256}) =
+let ith_bit (k:scalar) (i:nat{i < 448}) =
   let q = i / 8 in let r = u32 (i % 8) in
   (k.[q] >>. r) &. u8 1
 
-let rec montgomery_ladder_ (init:elem) x xp1 (k:scalar) (ctr:nat{ctr<=256})
+let rec montgomery_ladder_ (init:elem) x xp1 (k:scalar) (ctr:nat{ctr<=448})
   : Tot proj_point (decreases ctr) =
   if ctr = 0 then x
   else (
@@ -74,19 +81,15 @@ let rec montgomery_ladder_ (init:elem) x xp1 (k:scalar) (ctr:nat{ctr<=256})
   )
 
 let montgomery_ladder (init:elem) (k:scalar) : Tot proj_point =
-  montgomery_ladder_ init (Proj one zero) (Proj init one) k 256
+  montgomery_ladder_ init (Proj one zero) (Proj init one) k 448
 
 let encodePoint (p:proj_point) : Tot serialized_point =
+  assert_norm (prime - 2 > 0);
   let p = p.x `fmul` (p.z ** (prime - 2)) in
-  nat_to_bytes_le 32 p
+  nat_to_bytes_le 56 p
 
 let scalarmult (k:scalar) (u:serialized_point) : Tot serialized_point =
-  let k = decodeScalar25519 k in
-  let u = decodePoint u in
-  let res = montgomery_ladder u k in
-  encodePoint res
-
-let scalarmult' (k:scalar) (u:serialized_point) : Tot serialized_point =
+  let k = decodeScalar448 k in
   let u = decodePoint u in
   let res = montgomery_ladder u k in
   encodePoint res

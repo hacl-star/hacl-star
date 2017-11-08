@@ -1,92 +1,68 @@
 module Spec.Poly1305
 
-module ST = FStar.HyperStack.ST
+#reset-options "--z3rlimit 60 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
-open FStar.Math.Lib
 open FStar.Mul
-open FStar.Seq
-open FStar.UInt8
-open FStar.Endianness
+open Spec.Lib.IntTypes
+open Spec.Lib.IntSeq
 open Spec.Poly1305.Lemmas
 
-#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
-
 (* Field types and parameters *)
-let prime = pow2 130 - 5
-type elem = e:int{e >= 0 /\ e < prime}
+let prime =  pow2 130 - 5
+type elem = e:nat{e >= 0 /\ e < prime}
 let fadd (e1:elem) (e2:elem) = (e1 + e2) % prime
 let fmul (e1:elem) (e2:elem) = (e1 * e2) % prime
 let zero : elem = 0
 let one  : elem = 1
-let op_Plus_At = fadd
-let op_Star_At = fmul
-(* Type aliases *)
-let op_Amp_Bar = UInt.logand #128
-type word = w:bytes{length w <= 16}
-type word_16 = w:bytes{length w = 16}
-type tag = word_16
-type key = lbytes 32
-type text = seq word
 
-(* Specification code *)
-let encode (w:word) =
-  (pow2 (8 * length w)) `fadd` (little_endian w)
+(* Poly1305 parameters *)
+let blocksize : size_t = 16
+let keysize   : size_t = 32
+type block = lbytes blocksize
+type tag   = lbytes blocksize
+type key   = lbytes keysize
 
-let rec poly (txt:text) (r:e:elem) : Tot elem (decreases (length txt)) =
-  if length txt = 0 then zero
-  else
-    let a = poly (Seq.tail txt) r in
-    let n = encode (Seq.head txt) in
-    (n `fadd` a) `fmul` r
+(* Poly1305 specification *)
+let update (len:size_t{len <= blocksize}) (b:lbytes len) 
+	   (r:elem) (acc:elem) : elem =
+  Math.Lemmas.pow2_le_compat 128 (8 * len);		
+  assert (pow2 (8 * len) <= pow2 128);
+  let n = pow2 (8 * len) `fadd` nat_from_bytes_le b in
+  (n `fadd` acc) `fmul` r
 
-let encode_r (rb:word_16) =
-  (little_endian rb) &| 0x0ffffffc0ffffffc0ffffffc0fffffff
+let poly (len:size_t) (text:lbytes len) (r:elem) : elem =
+  let blocks = len / blocksize in
+  let rem = len % blocksize in
+  let init  : elem = 0 in
+  let acc   : elem = 
+    repeati blocks
+      (fun i acc  -> let b = slice text (blocksize * i) (blocksize * (i+1)) in
+	          update 16 b r acc) 
+      init in
+  if rem = 0 then
+     acc
+  else 
+     let last = slice text (blocks * blocksize) len in
+     update rem last r acc
+  
+let finish (a:elem) (s:elem) : tag =
+  let n = (a + s) % pow2 128 in
+  nat_to_bytes_le 16 n
 
-let finish (a:elem) (s:word_16) : Tot tag =
-  let n = (a + little_endian s) % pow2 128 in
-  little_bytes 16ul n
+let encode_r (rb:block) : elem =
+   let rb = rb.[3] <- rb.[3] &. u8 15 in
+   let rb = rb.[7] <- rb.[7] &. u8 15 in
+   let rb = rb.[11] <- rb.[11] &. u8 15 in
+   let rb = rb.[15] <- rb.[15] &. u8 15 in
+   let rb = rb.[4] <- rb.[4] &. u8 252 in
+   let rb = rb.[8] <- rb.[8] &. u8 252 in
+   let rb = rb.[12] <- rb.[12] &. u8 252 in
+   nat_from_bytes_le rb
 
-let rec encode_bytes (txt:bytes) : Tot text (decreases (length txt)) =
-  if length txt = 0 then createEmpty
-  else
-    let w, txt = split txt (min (length txt) 16) in
-    append_last (encode_bytes txt) w
-
-let poly1305 (msg:bytes) (k:key) : Tot tag =
-  let text = encode_bytes msg in
+let poly1305 (len:size_t) (msg:lbytes len) (k:key) : tag =
   let r = encode_r (slice k 0 16) in
-  let s = slice k 16 32 in
-  finish (poly text r) s
+  let s = nat_from_bytes_le (slice k 16 32) in
+  let acc = poly len msg r in
+  finish acc s
 
 
-(* ********************* *)
-(* RFC 7539 Test Vectors *)
-(* ********************* *)
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
-
-unfold let msg = [
-  0x43uy; 0x72uy; 0x79uy; 0x70uy; 0x74uy; 0x6fuy; 0x67uy; 0x72uy;
-  0x61uy; 0x70uy; 0x68uy; 0x69uy; 0x63uy; 0x20uy; 0x46uy; 0x6fuy;
-  0x72uy; 0x75uy; 0x6duy; 0x20uy; 0x52uy; 0x65uy; 0x73uy; 0x65uy;
-  0x61uy; 0x72uy; 0x63uy; 0x68uy; 0x20uy; 0x47uy; 0x72uy; 0x6fuy;
-  0x75uy; 0x70uy ]
-
-unfold let k = [
-  0x85uy; 0xd6uy; 0xbeuy; 0x78uy; 0x57uy; 0x55uy; 0x6duy; 0x33uy;
-  0x7fuy; 0x44uy; 0x52uy; 0xfeuy; 0x42uy; 0xd5uy; 0x06uy; 0xa8uy;
-  0x01uy; 0x03uy; 0x80uy; 0x8auy; 0xfbuy; 0x0duy; 0xb2uy; 0xfduy;
-  0x4auy; 0xbfuy; 0xf6uy; 0xafuy; 0x41uy; 0x49uy; 0xf5uy; 0x1buy ]
-
-unfold let expected = [
-  0xa8uy; 0x06uy; 0x1duy; 0xc1uy; 0x30uy; 0x51uy; 0x36uy; 0xc6uy;
-  0xc2uy; 0x2buy; 0x8buy; 0xafuy; 0x0cuy; 0x01uy; 0x27uy; 0xa9uy ]
-
-let test () : Tot bool =
-  assert_norm(List.Tot.length msg      = 34);
-  assert_norm(List.Tot.length k        = 32);
-  assert_norm(List.Tot.length expected = 16);
-  let msg      = createL msg in
-  let k        = createL k   in
-  let expected = createL expected in
-  poly1305 msg k = expected
