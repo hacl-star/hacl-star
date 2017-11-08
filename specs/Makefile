@@ -149,13 +149,14 @@ hkdf.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.In
 	$(OCAMLOPT) -I hkdf-ml $(OCAML_INCLUDES) hkdf-ml/Spec_Lib_IntTypes.ml hkdf-ml/Spec_Lib_RawIntTypes.ml hkdf-ml/Spec_Lib_IntSeq.ml hkdf-ml/Spec_Lib_Stateful.ml hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
 	./hkdf.exe
 
-ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
+ed25519.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst lib/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Curve25519.fst Spec.Ed25519.fst tests/Spec.Ed25519.Test.fst
 	$(MAKE) -C ../code/lib/ml
-	mkdir -p ed25519-spec
-	$(FSTAR_EXTRACT) --odir ed25519-spec $^
-	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> ed25519-spec/Spec_Ed25519.ml
-	$(OCAMLOPT) -I ed25519-spec  $(OCAML_INCLUDES) $(addprefix ed25519-spec/, FStar_Endianness.ml Spec_Loops.ml Spec_Lib.ml Spec_Curve25519.ml Seq_Create.ml Spec_SHA2_512.ml Spec_SHA512.ml Spec_Ed25519.ml) -o ed25519.exe
+	mkdir -p ed25519-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Curve25519 --extract_module Spec.Ed25519 --extract_module Spec.Ed25519.Test --odir ed25519-ml $^
+	@echo 'let _ = test()' >> ed25519-ml/Spec_Ed25519_Test.ml
+	$(OCAMLOPT) -I ed25519-ml $(OCAML_INCLUDES) ed25519-ml/Spec_Lib_IntTypes.ml ed25519-ml/Spec_Lib_RawIntTypes.ml ed25519-ml/Spec_Lib_IntSeq.ml ed25519-ml/Spec_Lib_Stateful.ml ed25519-ml/Spec_SHA2.ml ed25519-ml/Spec_Curve25519.ml ed25519-ml/Spec_Ed25519.ml ed25519-ml/Spec_Ed25519_Test.ml -o ed25519.exe
 	./ed25519.exe
+
 clean:
 	$(MAKE) -C ../code/lib/ml clean
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly1305-ml chacha20-ml sha2-ml hmac-ml hkdf-ml chacha-poly-spec salsa-spec gf128-spec aes-spec curve25519-ml curve448-ml ed25519-spec
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe poly1305-ml chacha20-ml sha2-ml hmac-ml hkdf-ml chacha-poly-spec salsa-spec gf128-spec aes-spec curve25519-ml curve448-ml ed25519-ml
