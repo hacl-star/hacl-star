@@ -71,18 +71,9 @@ let setup (k:key) (n:nonce) (c:counter): Tot state =
   let state = state.[1] <- u32_from_UInt32 c1 in
   let state = state.[2] <- u32_from_UInt32 c2 in
   let state = state.[3] <- u32_from_UInt32 c3 in
-  let state = state.[4] <- uint_from_bytes_le (sub k 0 4) in
-  let state = state.[5] <- uint_from_bytes_le (sub k 4 4) in
-  let state = state.[6] <- uint_from_bytes_le (sub k 8 4) in
-  let state = state.[7] <- uint_from_bytes_le (sub k 12 4) in
-  let state = state.[8] <- uint_from_bytes_le (sub k 16 4) in
-  let state = state.[9] <- uint_from_bytes_le (sub k 20 4) in
-  let state = state.[10] <- uint_from_bytes_le (sub k 24 4)in
-  let state = state.[11] <- uint_from_bytes_le (sub k 28 4) in
+  let state = update_slice state 4 12 (uints_from_bytes_le k) in
   let state = state.[12] <- (u32 c) in
-  let state = state.[13] <- uint_from_bytes_le (sub n 0 4) in
-  let state = state.[14] <- uint_from_bytes_le (sub n 4 4) in
-  let state = state.[15] <- uint_from_bytes_le (sub n 8 4) in
+  let state = update_slice state 13 16 (uints_from_bytes_le n) in
   state
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
