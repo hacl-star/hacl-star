@@ -34,8 +34,7 @@ KRML_ARGS=$(FPIC) -warn-error -4-9 -ccopt -Wno-unused-value \
   -ccopt -maes -ccopt -Ofast -ccopt -funroll-loops -ccopt -fomit-frame-pointer \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
   vale/asm/vale.a test/test_hacks.c \
-  -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
-  -add-include '"testlib.h"' -bundle Hacl.* $(KOPTS)
+  -add-include '"testlib.h"' -bundle Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* $(KOPTS)
 
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 

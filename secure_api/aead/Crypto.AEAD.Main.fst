@@ -30,7 +30,11 @@ let aead_state i rw = Invariant.aead_state i rw
 let log_region #i #rw st = Invariant.AEADState?.log_region st
 let prf_region #i #rw st = Invariant.AEADState?.log_region st //TODO: FIXME!!
 noextract
-let log #i #rw s h = HS.sel h (Invariant.st_ilog s)
+let log #i #rw s h =
+  if safeMac i then
+    HS.sel h (Invariant.st_ilog s)
+  else
+    Seq.createEmpty
 
 let footprint #i #rw s = TSet.empty //TODO: FIXME!
 let hh_modifies_t (_:FStar.TSet.set HH.rid) (h0:HS.mem) (h1:HS.mem) = True //TODO: FIXME!
