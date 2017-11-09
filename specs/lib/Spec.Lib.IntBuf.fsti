@@ -35,7 +35,8 @@ val disjoint_self_lemma: #a:Type0 -> #len:size_t -> b:lbuffer a len -> Lemma
 val disjoint_sub_lemma1: #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> start1:size_t -> n1:size_t{start1 + n1 <= len1} -> Lemma
 			 (requires (disjoint b1 b2))
 			 (ensures (disjoint (sub b1 start1 n1) b2 /\ disjoint b2 (sub b1 start1 n1)))
-			 [SMTPat (disjoint (sub b1 start1 n1) b2 \/ disjoint b2 (sub b1 start1 n1))]
+			 [SMTPat (disjoint (sub b1 start1 n1) b2);
+			  SMTPat (disjoint b2 (sub b1 start1 n1))]
 
 val disjoint_sub_lemma2: #a:Type0 -> #len:size_t -> b:lbuffer a len -> start1:size_t -> n1:size_t{start1 + n1 <= len} -> start2:size_t -> n2:size_t{start2 + n2 <= len} -> Lemma
 			 (requires (start1 + n1 <= start2 \/ start2 + n2 <= start1))
@@ -51,7 +52,8 @@ val as_lseq_sub_lemma: #a:Type0 -> #len:size_t -> h:mem -> b:lbuffer a len -> st
 val preserves_live_lemma: #a:Type0 -> #len:size_t -> b:lbuffer a len -> h0:mem -> h1:mem -> Lemma
 			 (requires (preserves_live h0 h1 /\ live h0 b))
 			 (ensures  (live h1 b))
-			 [SMTPat (preserves_live h0 h1 /\ live h0 b)]
+			 [SMTPat (preserves_live h0 h1);
+			  SMTPat (live h0 b)]
 
 
 //val creates1: #a:Type0 -> #len:size_t -> b:lbuffer a len -> h0:mem -> h1:mem -> GTot Type 
@@ -62,7 +64,8 @@ let creates1 (#a:Type0) (#len:size_t) (b:lbuffer a len) (h0:mem) (h1:mem) : GTot
 val creates1_lemma:  #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> h0:mem -> h1:mem -> Lemma
 			 (requires (live h0 b1 /\ creates1 b2 h0 h1))
 			 (ensures  (live h1 b1 /\ disjoint b1 b2 /\ disjoint b2 b1))
-			 [SMTPat (creates1 b2 h0 h1 /\ live h0 b1)]
+			 [SMTPat (creates1 b2 h0 h1);
+			  SMTPat (live h0 b1)]
 
 
 let creates2 #a1 #a2 #len1 #len2 (b1:lbuffer a1 len1) (b2:lbuffer a2 len2) h0 h1 = 
@@ -79,24 +82,30 @@ let rec creates (l:list bufitem) (h0:mem) (h1:mem) : GTot Type =
   | [] -> True
   | b::t -> creates1 b.buf h0 h1 /\ creates t h0 h1
   
-//val modifies1: #a:Type0 -> #len:size_t ->  lbuffer a len -> mem -> mem -> GTot Type
+val modifies1: #a:Type0 -> #len:size_t ->  lbuffer a len -> mem -> mem -> GTot Type
+(*
 let modifies1 (#a:Type0) (#len:size_t) (b:lbuffer a len) (h0:mem) (h1:mem) : GTot Type =
   (live h1 b /\
   (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b' /\ disjoint b' b)} 
 		(live h0 b' /\ disjoint b' b) ==> (live h1 b'  /\ as_lseq b' h1 == as_lseq b' h0)))
-
-//val modifies2: #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> lbuffer a1 len1 -> lbuffer a2 len2 -> mem -> mem -> GTot Type
+*)
+val modifies2: #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> lbuffer a1 len1 -> lbuffer a2 len2 -> mem -> mem -> GTot Type
+(*
 let modifies2 (#a1:Type0) (#a2:Type0) (#len1:size_t) (#len2:size_t) (b1:lbuffer a1 len1) (b2:lbuffer a2 len2) (h0:mem) (h1:mem) : GTot Type =
   (live h1 b1 /\ live h1 b2 /\
   (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b' /\ disjoint b' b1 /\ disjoint b' b2)} 
 		(live h0 b' /\ disjoint b' b1 /\ disjoint b' b2) ==> (live h1 b'  /\ as_lseq b' h1 == as_lseq b' h0)))
+*)
 
-//val modifies3: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_t -> #len2:size_t -> #len3:size_t -> lbuffer a1 len1 -> lbuffer a2 len2 -> lbuffer a3 len3 -> mem -> mem -> GTot Type
+val modifies3: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_t -> #len2:size_t -> #len3:size_t -> lbuffer a1 len1 -> lbuffer a2 len2 -> lbuffer a3 len3 -> mem -> mem -> GTot Type
+(*
 let modifies3 (#a1:Type0) (#a2:Type0) (#a3:Type0) (#len1:size_t) (#len2:size_t)  (#len3:size_t) (b1:lbuffer a1 len1) (b2:lbuffer a2 len2) (b3:lbuffer a3 len3) (h0:mem) (h1:mem) : GTot Type =
   (live h1 b1 /\ live h1 b2 /\ live h1 b3 /\ 
   (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b' /\ disjoint b' b1 /\ disjoint b' b2 /\ disjoint b' b3)} 
 		(live h0 b' /\ disjoint b' b1 /\ disjoint b' b2 /\ disjoint b' b3) ==> (live h1 b'  /\ as_lseq b' h1 == as_lseq b' h0)))
+*)
 
+(*
 let rec live_list (l:list bufitem) (h1:mem) : GTot Type = 
   match l with
   | [] -> True
@@ -106,8 +115,11 @@ let rec disjoint_list #a #len (b:lbuffer a len) (l:list bufitem) : GTot Type =
   match l with
   | [] -> True
   | h::t -> (disjoint b h.buf /\ disjoint_list b t)
+*)
 
-//val modifies: list bufitem -> mem -> mem -> GTot Type
+val modifies: list bufitem -> mem -> mem -> GTot Type
+
+(*
 let modifies (l:list bufitem) (h0:mem) (h1:mem) : GTot Type = 
     match l with
     | [] -> h0 == h1
@@ -118,24 +130,96 @@ let modifies (l:list bufitem) (h0:mem) (h1:mem) : GTot Type =
 	  (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b' /\ disjoint_list b' l)} 
 	     (live h0 b' /\ disjoint_list b' l) ==> (live h1 b' /\ as_lseq b' h1 == as_lseq b' h0))
 
-    
+*)
+
+val preserves_live_refl: h0:mem -> Lemma
+		         (requires (True))
+			 (ensures (preserves_live h0 h0))
+			 [SMTPat (preserves_live h0 h0)]
+
+val preserves_live_trans: h0:mem -> h1:mem -> h2:mem -> Lemma
+		         (requires (preserves_live h0 h1 /\ preserves_live h1 h2))
+			 (ensures (preserves_live h0 h2))
+			 [SMTPat (preserves_live h0 h1);
+			  SMTPat (preserves_live h1 h2)]
+
+val modifies_1_refl: #a:Type0 -> #len:size_t -> b:lbuffer a len -> h0:mem -> Lemma
+			 (requires (live h0 b))
+			 (ensures (modifies1 b h0 h0))
+			 [SMTPat (modifies1 b h0 h0)]
+
+val modifies_1_modifies_2: #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> h0:mem -> h1:mem -> Lemma
+			 (requires (live h0 b1 /\ live h0 b2 /\ modifies1 b1 h0 h1))
+			 (ensures (modifies2 b1 b2 h0 h1 /\ modifies2 b2 b1 h0 h1))
+			 [SMTPat (modifies1 b1 h0 h1);
+			  SMTPat (live h0 b1);
+			  SMTPat (live h0 b2)]
+
+
+val modifies_2_modifies_3: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_t -> #len2:size_t -> #len3:size_t -> 
+		           b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> h0:mem -> h1:mem -> Lemma
+			 (requires (live h0 b1 /\ live h0 b2 /\ live h0 b3 /\ modifies2 b1 b2 h0 h1))
+			 (ensures (modifies3 b1 b2 b3 h0 h1 /\ modifies3 b1 b3 b2 h0 h1 /\ modifies3 b2 b1 b3 h0 h1 /\ 
+				   modifies3 b2 b3 b1 h0 h1 /\ modifies3 b3 b1 b2 h0 h1 /\ modifies3 b3 b2 b1 h0 h1))
+			 [SMTPat (modifies2 b1 b2 h0 h1);
+			  SMTPat (live h0 b1);
+			  SMTPat (live h0 b2);
+			  SMTPat (live h0 b3)]
+
+
+val modifies_1_trans: #a:Type0 -> #len:size_t -> b:lbuffer a len -> h0:mem -> h1:mem -> h2:mem -> Lemma
+			 (requires (live h0 b /\ modifies1 b h0 h1 /\ modifies1 b h1 h2))
+			 (ensures (modifies1 b h0 h2))
+			 [SMTPat (modifies1 b h0 h1);
+			  SMTPat (modifies1 b h1 h2);
+			  SMTPat (live h0 b)]
+
+
+val modifies_2_trans: #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> h0:mem -> h1:mem -> h2:mem -> Lemma
+			 (requires (live h0 b1 /\ live h0 b2 /\ modifies2 b1 b2 h0 h1 /\ modifies2 b1 b2 h1 h2))
+			 (ensures (modifies2 b1 b2 h0 h2))
+			 [SMTPat (modifies2 b1 b2 h0 h1);
+			  SMTPat (modifies2 b1 b2 h1 h2);
+			  SMTPat (live h0 b1);
+			  SMTPat (live h0 b2)]
+
+val modifies_3_trans: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_t -> #len2:size_t -> #len3:size_t -> 
+		           b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> h0:mem -> h1:mem -> h2:mem -> Lemma
+			 (requires (live h0 b1 /\ live h0 b2 /\ live h0 b3 /\ modifies3 b1 b2 b3 h0 h1 /\ modifies3 b1 b2 b3 h1 h2))
+			 (ensures (modifies3 b1 b2 b3 h0 h2))
+			 [SMTPat (modifies3 b1 b2 b3 h0 h1);
+			  SMTPat (modifies3 b1 b2 b3 h1 h2);
+			  SMTPat (live h0 b1);
+			  SMTPat (live h0 b2);
+			  SMTPat (live h0 b3)]
+
+
 val modifies1_lemma:  #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> h0:mem -> h1:mem -> Lemma
 			 (requires (disjoint b1 b2 /\ live h0 b1 /\ modifies1 b2 h0 h1))
 			 (ensures  (live h1 b1 /\ as_lseq b1 h1 == as_lseq b1 h0))
-			 [SMTPat (disjoint b1 b2 /\ modifies1 b2 h0 h1)]
+			 [SMTPat (disjoint b1 b2);
+			  SMTPat (live h0 b1);
+			  SMTPat (modifies1 b2 h0 h1)]
 
 
 val modifies2_lemma:  #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_t -> #len2:size_t -> #len3:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> h0:mem -> h1:mem -> Lemma
 			 (requires (disjoint b1 b2 /\ disjoint b1 b3 /\ live h0 b1 /\ modifies2 b2 b3 h0 h1))
 			 (ensures  (live h1 b1 /\ as_lseq b1 h1 == as_lseq b1 h0))
-			 [SMTPat (disjoint b1 b2 /\ modifies2 b2 b3 h0 h1)]
+			 [SMTPat (disjoint b1 b2);
+			  SMTPat (disjoint b1 b3);
+			  SMTPat (live h0 b1);
+			  SMTPat (modifies2 b2 b3 h0 h1)]
 
 
 val modifies3_lemma:  #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #a4:Type0-> #len1:size_t -> #len2:size_t -> #len3:size_t -> #len4:size_t -> 
 		      b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> b4:lbuffer a4 len4 -> h0:mem -> h1:mem -> Lemma
 			 (requires (disjoint b1 b2 /\ disjoint b1 b3 /\ disjoint b1 b4 /\ live h0 b1 /\ modifies3 b2 b3 b4 h0 h1))
 			 (ensures  (live h1 b1 /\ as_lseq b1 h1 == as_lseq b1 h0))
-			 [SMTPat (disjoint b1 b2 /\ modifies3 b2 b3 b4 h0 h1)]
+			 [SMTPat (disjoint b1 b2);
+			  SMTPat (disjoint b1 b3);
+			  SMTPat (disjoint b1 b4);
+			  SMTPat (live h0 b1);
+			  SMTPat (modifies3 b2 b3 b4 h0 h1)]
 
 
 
@@ -233,5 +317,4 @@ val iter_range: #a:Type -> #len:size_t -> start:size_t -> fin:size_t{start <= fi
 	    (requires (fun h0 -> live h0 input))
 	    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 input h1 h1 /\
 				  as_lseq #a #len input h1 ==  LSeq.repeat_range start fin spec (as_lseq #a #len input h0)))
-
 
