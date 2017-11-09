@@ -1,124 +1,95 @@
 module Hacl.Impl.Chacha20
 
-module ST = FStar.HyperStack.ST
-
-open FStar.HyperStack.All
-
 open FStar.Mul
 open FStar.HyperStack
+open FStar.HyperStack.All
 open FStar.HyperStack.ST
-open FStar.Buffer
-open Hacl.Cast
-open Hacl.UInt32
-open Hacl.Spec.Endianness
-open Hacl.Endianness
-open Spec.Chacha20
-open C.Loops
-open Hacl.Lib.LoadStore32
 
+open Spec.Lib.IntSeq
+open Spec.Lib.IntTypes
+open Spec.Lib.IntBuf
+open Spec.Chacha20
+
+module ST = FStar.HyperStack.ST
+module LSeq = Spec.Lib.IntSeq
 module Spec = Spec.Chacha20
 
-module U32 = FStar.UInt32
-module H8  = Hacl.UInt8
-module H32 = Hacl.UInt32
 
-let u32 = U32.t
-let h32 = H32.t
-let uint8_p = buffer H8.t
-
-type state = b:Buffer.buffer h32{length b = 16}
-
-private
-inline_for_extraction let ( <<< ) (a:h32) (s:u32{0 < U32.v s && U32.v s < 32}) : Tot h32 =
-  (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
+(* Definition of the state *)
+type state = lbuffer uint32 16
 
 
-#reset-options "--max_fuel 0 --z3rlimit 100"
+// private
+// inline_for_extraction let ( <<< ) (a:h32) (s:u32{0 < U32.v s && U32.v s < 32}) : Tot h32 =
+//   (a <<^ s) |^ (a >>^ (FStar.UInt32.(32ul -^ s)))
+
+
+#reset-options "--max_fuel 0 --z3rlimit 10"
 
 [@ "substitute"]
 private
-val constant_setup_:
-  c:Buffer.buffer H32.t{length c = 4} ->
-  Stack unit
-    (requires (fun h -> live h c))
-    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1
-      /\ (let s = as_seq h1 c in
-         v (Seq.index s 0) = 0x61707865 /\
-         v (Seq.index s 1) = 0x3320646e /\
-         v (Seq.index s 2) = 0x79622d32 /\
-         v (Seq.index s 3) = 0x6b206574)))
-[@ "substitute"]
-let constant_setup_ st =
-  st.(0ul)  <- (uint32_to_sint32 0x61707865ul);
-  st.(1ul)  <- (uint32_to_sint32 0x3320646eul);
-  st.(2ul)  <- (uint32_to_sint32 0x79622d32ul);
-  st.(3ul)  <- (uint32_to_sint32 0x6b206574ul)
-
-
-[@ "substitute"]
-private
-val constant_setup:
-  c:Buffer.buffer H32.t{length c = 4} ->
-  Stack unit
-    (requires (fun h -> live h c))
-    (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1
-      /\ reveal_h32s (as_seq h1 c) == Seq.Create.create_4 c0 c1 c2 c3))
-[@ "substitute"]
-let constant_setup st =
-  constant_setup_ st;
-  let h = ST.get() in
-  Seq.lemma_eq_intro (reveal_h32s (as_seq h st)) (Seq.Create.create_4 c0 c1 c2 c3)
-
-
-[@ "substitute"]
-private
-val keysetup:
-  st:Buffer.buffer H32.t{length st = 8} ->
-  k:uint8_p{length k = 32 /\ disjoint st k} ->
-  Stack unit
-    (requires (fun h -> live h st /\ live h k))
-    (ensures  (fun h0 _ h1 -> live h0 st /\ live h0 k /\ live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = reveal_h32s (as_seq h1 st) in
-         let k = reveal_sbytes (as_seq h0 k) in
-         s == Spec.Lib.uint32s_from_le 8 k)))
-[@ "substitute"]
-let keysetup st k =
-  uint32s_from_le_bytes st k 8ul
-
-
-[@ "substitute"]
-private
-val ivsetup:
-  st:buffer H32.t{length st = 3} ->
-  iv:uint8_p{length iv = 12 /\ disjoint st iv} ->
-  Stack unit
-    (requires (fun h -> live h st /\ live h iv))
-    (ensures  (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 iv
-      /\ (let s = reveal_h32s (as_seq h1 st) in
-         let iv = reveal_sbytes (as_seq h0 iv) in
-         s == Spec.Lib.uint32s_from_le 3 iv) ))
-[@ "substitute"]
-let ivsetup st iv =
-  uint32s_from_le_bytes st iv 3ul
-
-
-[@ "substitute"]
-private
-val ctrsetup:
-  st:buffer H32.t{length st = 1} ->
-  ctr:U32.t ->
+val setup_constant:
+  st:lbuffer uint32 4 ->
   Stack unit
     (requires (fun h -> live h st))
-    (ensures  (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = as_seq h1 st in
-         s == Spec.Lib.singleton (uint32_to_sint32 ctr)) ))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
+      /\ (let st' = as_lseq st h1 in
+         uint_v st'.[0] == Spec.c0 /\
+         uint_v st'.[1] == Spec.c1 /\
+         uint_v st'.[2] == Spec.c2 /\
+         uint_v st'.[3] == Spec.c3)))
+
 [@ "substitute"]
-let ctrsetup st ctr =
-  st.(0ul) <- uint32_to_sint32 ctr;
-  let h = ST.get() in
-  Seq.lemma_eq_intro (Spec.Lib.singleton (uint32_to_sint32 ctr)) (as_seq h st)
+let setup_constant st =
+  st.(0) <- u32 Spec.c0;
+  st.(1) <- u32 Spec.c1;
+  st.(2) <- u32 Spec.c2;
+  st.(3) <- u32 Spec.c3
 
 
+[@ "substitute"]
+private
+val setup_key:
+  st:lbuffer uint32 8 ->
+  k:lbuffer uint8 32 ->
+  Stack unit
+    (requires (fun h -> live h st /\ live h k /\ disjoint st k))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
+                         /\ as_lseq st h1 == LSeq.uints_from_bytes_le (as_lseq k h0)))
+
+[@ "substitute"]
+let setup_key st k = uint32s_from_bytes_le 8 st k
+
+
+[@ "substitute"]
+private
+val setup_iv:
+  st:lbuffer uint32 3 ->
+  iv:lbuffer uint8 12 ->
+  Stack unit
+    (requires (fun h -> live h st /\ live h iv /\ disjoint st iv))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
+                         /\ as_lseq st h1 == LSeq.uints_from_bytes_le (as_lseq iv h0)))
+
+[@ "substitute"]
+let setup_iv st iv = uint32s_from_bytes_le 3 st iv
+
+
+[@ "substitute"]
+private
+val setup_ctr:
+  st:lbuffer uint32 1 ->
+  ctr:size_t ->
+  Stack unit
+    (requires (fun h -> live h st))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
+                         /\ LSeq.index (as_lseq st h1) 0 == u32 ctr ))
+
+[@ "substitute"]
+let setup_ctr st ctr =
+  st.(0) <- u32 ctr
+
+(*
 private val lemma_setup: h:mem -> st:state{live h st} -> Lemma
   (as_seq h st == FStar.Seq.(as_seq h (Buffer.sub st 0ul 4ul) @| as_seq h (Buffer.sub st 4ul 8ul)
                            @| as_seq h (Buffer.sub st 12ul 1ul) @| as_seq h (Buffer.sub st 13ul 3ul)))
@@ -131,6 +102,53 @@ private let lemma_setup h st =
   Seq.lemma_eq_intro s (FStar.Seq.(slice s 0 4 @| slice s 4 12 @| slice s 12 13 @| slice s 13 16))
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
+*)
+
+
+[@ "c_inline"]
+val setup:
+  st:state ->
+  k:lbuffer uint8 32 ->
+  n:lbuffer uint8 12 ->
+  c:size_t ->
+  Stack unit
+    (requires (fun h -> live h st /\ live h k /\ live h n
+                   /\ disjoint st k /\ disjoint st n /\ disjoint k n))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
+                        /\ as_lseq st h1 == Spec.setup (as_lseq k h0) (as_lseq n h0) c))
+
+[@ "c_inline"]
+let setup st k n c =
+  let h0 = ST.get () in
+  setup_constant (sub st 0 4);
+  let h1 = ST.get () in
+  assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 0) == Spec.c0);
+  assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 1) == Spec.c1);
+  assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 2) == Spec.c2);
+  assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 3) == Spec.c3);
+  // setup_key (sub st 4 8) k;
+  // let h2 = ST.get () in
+  // assert(as_lseq (sub st 4 8) h2 == LSeq.uints_from_bytes_le (as_lseq k h1));
+  // setup_ctr (sub st 12 1) c;
+  // let h3 = ST.get () in
+  // assert(uint_v (LSeq.index (as_lseq (sub st 12 1) h3) 0) == c);
+  // setup_iv (sub st 13 3) n;
+  // let h4 = ST.get () in
+  // assert(as_lseq (sub st 13 3) h4 == LSeq.uints_from_bytes_le (as_lseq n h3));
+  assert(
+//    let st_h4 = as_lseq st h4 in
+    let st_h0 = as_lseq st h0 in
+    let st_h0' = st_h0.[0] <- u32 c0 in
+    let st_h0' = st_h0'.[1] <- u32 c1 in
+    let st_h0' = st_h0'.[2] <- u32 c2 in
+    let st_h1' = st_h0'.[3] <- u32 c3 in
+    as_lseq st h1 == st_h1')
+    // let st_h2 = update_sub st_h1 4 8 (uints_from_bytes_le (as_lseq k h1)) in
+    // let st_h3 = st_h2.[12] <- (u32 c) in
+    // st_h4 == update_sub st_h3 13 3 (uints_from_bytes_le (as_lseq n h3))); admit()
+
+
+(*
 
 [@ "c_inline"]
 val setup:
