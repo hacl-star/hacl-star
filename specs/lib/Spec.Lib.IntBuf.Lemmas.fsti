@@ -56,16 +56,26 @@ val preserves_live_lemma: #a:Type0 -> #len:size_t -> b:lbuffer a len -> h0:mem -
 			  SMTPat (live h0 b)]
 
 
-//val creates1: #a:Type0 -> #len:size_t -> b:lbuffer a len -> h0:mem -> h1:mem -> GTot Type 
-let creates1 (#a:Type0) (#len:size_t) (b:lbuffer a len) (h0:mem) (h1:mem) : GTot Type = 
- (live h1 b /\
-  (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b')} live h0 b' ==> (live h1 b' /\ disjoint b b'  /\ disjoint b' b)))
+val creates1: #a:Type0 -> #len:size_t -> b:lbuffer a len -> h0:mem -> h1:mem -> GTot Type 
   
 val creates1_lemma:  #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> h0:mem -> h1:mem -> Lemma
 			 (requires (live h0 b1 /\ creates1 b2 h0 h1))
 			 (ensures  (live h1 b1 /\ disjoint b1 b2 /\ disjoint b2 b1))
 			 [SMTPat (creates1 b2 h0 h1);
 			  SMTPat (live h0 b1)]
+
+
+val creates1_preserves:  #a1:Type0 -> #len1:size_t -> b:lbuffer a1 len1 -> h0:mem -> h1:mem -> h2:mem -> Lemma
+			 (requires (preserves_live h0 h1 /\ creates1 b h1 h2))
+			 (ensures  (creates1 b h0 h1))
+			 [SMTPat (creates1 b h1 h2);
+			  SMTPat (preserves_live h0 h1)]
+
+val creates1_preserves':  #a1:Type0 -> #len1:size_t -> b:lbuffer a1 len1 -> h0:mem -> h1:mem -> h2:mem -> Lemma
+			 (requires (creates1 b h0 h1 /\ preserves_live h1 h2))
+			 (ensures  (creates1 b h0 h2))
+			 [SMTPat (creates1 b h0 h1);
+			  SMTPat (preserves_live h1 h2)]
 
 
 let creates2 #a1 #a2 #len1 #len2 (b1:lbuffer a1 len1) (b2:lbuffer a2 len2) h0 h1 = 
@@ -83,29 +93,9 @@ let rec creates (l:list bufitem) (h0:mem) (h1:mem) : GTot Type =
   | b::t -> creates1 b.buf h0 h1 /\ creates t h0 h1
   
 val modifies1: #a:Type0 -> #len:size_t ->  lbuffer a len -> mem -> mem -> GTot Type
-(*
-let modifies1 (#a:Type0) (#len:size_t) (b:lbuffer a len) (h0:mem) (h1:mem) : GTot Type =
-  (live h1 b /\
-  (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b' /\ disjoint b' b)} 
-		(live h0 b' /\ disjoint b' b) ==> (live h1 b'  /\ as_lseq b' h1 == as_lseq b' h0)))
-*)
 val modifies2: #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> lbuffer a1 len1 -> lbuffer a2 len2 -> mem -> mem -> GTot Type
-(*
-let modifies2 (#a1:Type0) (#a2:Type0) (#len1:size_t) (#len2:size_t) (b1:lbuffer a1 len1) (b2:lbuffer a2 len2) (h0:mem) (h1:mem) : GTot Type =
-  (live h1 b1 /\ live h1 b2 /\
-  (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b' /\ disjoint b' b1 /\ disjoint b' b2)} 
-		(live h0 b' /\ disjoint b' b1 /\ disjoint b' b2) ==> (live h1 b'  /\ as_lseq b' h1 == as_lseq b' h0)))
-*)
-
 val modifies3: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_t -> #len2:size_t -> #len3:size_t -> lbuffer a1 len1 -> lbuffer a2 len2 -> lbuffer a3 len3 -> mem -> mem -> GTot Type
-(*
-let modifies3 (#a1:Type0) (#a2:Type0) (#a3:Type0) (#len1:size_t) (#len2:size_t)  (#len3:size_t) (b1:lbuffer a1 len1) (b2:lbuffer a2 len2) (b3:lbuffer a3 len3) (h0:mem) (h1:mem) : GTot Type =
-  (live h1 b1 /\ live h1 b2 /\ live h1 b3 /\ 
-  (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b' /\ disjoint b' b1 /\ disjoint b' b2 /\ disjoint b' b3)} 
-		(live h0 b' /\ disjoint b' b1 /\ disjoint b' b2 /\ disjoint b' b3) ==> (live h1 b'  /\ as_lseq b' h1 == as_lseq b' h0)))
-*)
 
-(*
 let rec live_list (l:list bufitem) (h1:mem) : GTot Type = 
   match l with
   | [] -> True
@@ -115,11 +105,8 @@ let rec disjoint_list #a #len (b:lbuffer a len) (l:list bufitem) : GTot Type =
   match l with
   | [] -> True
   | h::t -> (disjoint b h.buf /\ disjoint_list b t)
-*)
+//val modifies: list bufitem -> mem -> mem -> GTot Type
 
-val modifies: list bufitem -> mem -> mem -> GTot Type
-
-(*
 let modifies (l:list bufitem) (h0:mem) (h1:mem) : GTot Type = 
     match l with
     | [] -> h0 == h1
@@ -130,7 +117,6 @@ let modifies (l:list bufitem) (h0:mem) (h1:mem) : GTot Type =
 	  (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b' /\ disjoint_list b' l)} 
 	     (live h0 b' /\ disjoint_list b' l) ==> (live h1 b' /\ as_lseq b' h1 == as_lseq b' h0))
 
-*)
 
 val preserves_live_refl: h0:mem -> Lemma
 		         (requires (True))
