@@ -6,7 +6,7 @@ open Spec.Lib.IntTypes
    Typechecking it requires full access to IntTypes.fst (not just IntTypes.fsti)
    Use only if you need to, because using this module will load more F* dependencies.
    More importantly, using the u*_to_UInt* functions BREAKS secret independence.  *)
-   
+
 inline_for_extraction
 val u8_from_UInt8: (n:FStar.UInt8.t) -> u:uint8{uint_v #U8 u = UInt8.v n}
 inline_for_extraction
@@ -31,4 +31,3 @@ val u128_to_UInt128: (u:uint128) -> n:UInt128.t{uint_v #U128 u = UInt128.v n}
 
 inline_for_extraction
 val uint_to_nat: #t:inttype -> u:uint_t t -> n:nat{n = uint_v #t u}
-

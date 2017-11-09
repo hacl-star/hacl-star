@@ -133,7 +133,7 @@ val hash_sha256:
 	msg:lbytes msgLen ->
 	hash:lbytes hLen ->
 	Tot (msgHash:lbytes hLen)
-let hash_sha256 msgLen msg hash = Hash.hash Hash.parameters_sha2_256 msgLen msg
+let hash_sha256 msgLen msg hash = Hash.hash256 msgLen msg
 
 (* RSA *)
 type modBits = modBits:size_t{modBits > 0}
@@ -201,7 +201,7 @@ let pss_encode_ sLen salt msgLen msg emLen em =
 	let m1 = update_sub m1 8 hLen mHash in
 	let m1 = update_sub m1 (8 + hLen) sLen salt in
 	let m1Hash = create 36 (u8 0) in
-	let m1Hash' = create hLen (u8 0) in (* ??? *)
+	let m1Hash' = sub m1Hash 0 hLen in
 	let m1Hash' = hash_sha256 m1_size m1 m1Hash' in
 	let m1Hash = update_sub m1Hash 0 hLen m1Hash' in
 	

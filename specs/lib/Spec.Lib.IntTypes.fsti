@@ -3,12 +3,12 @@ module Spec.Lib.IntTypes
 open FStar.Math.Lemmas
 
 
-type inttype = 
- | U8 | U16 | U32 | U64 | U128 
+type inttype =
+ | U8 | U16 | U32 | U64 | U128
 
 inline_for_extraction
-unfold 
-let bits (n:inttype) = 
+unfold
+let bits (n:inttype) =
   match n with
   | U8 -> 8
   | U16 -> 16
@@ -17,15 +17,15 @@ let bits (n:inttype) =
   | U128 -> 128
 
 inline_for_extraction
-unfold 
-let numbytes (n:inttype) = 
+unfold
+let numbytes (n:inttype) =
   match n with
   | U8 -> 1
   | U16 -> 2
   | U32 -> 4
   | U64 -> 8
   | U128 -> 16
-  
+
 val pow2_values: n:nat ->  Lemma (
     pow2 0 == 1 /\
     pow2 8 == 0x100 /\
@@ -50,7 +50,7 @@ let maxint (t:inttype) = pow2 (bits t) - 1
 
 
 inline_for_extraction
-val uint_t: t:inttype -> Type0    
+val uint_t: t:inttype -> Type0
 inline_for_extraction
 val uint_v: #t:inttype -> u:uint_t t -> GTot (n:nat{n <= maxint t})
 
@@ -109,7 +109,7 @@ inline_for_extraction
 val incr: #t:inttype -> a:uint_t t -> Pure (uint_t t)
   (requires (uint_v a < pow2 (bits t) - 1))
   (ensures (fun c -> uint_v c = uint_v a + 1))
-  
+
 inline_for_extraction
 val mul_mod: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> c:uint_t t {uint_v c = (uint_v a `op_Multiply` uint_v b) % pow2 (bits t)}
 
@@ -132,21 +132,21 @@ val decr: #t:inttype -> a:uint_t t -> Pure (uint_t t)
   (ensures (fun c -> uint_v c = uint_v a - 1))
 
 inline_for_extraction
-val logxor: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t 
+val logxor: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
 inline_for_extraction
-val logand: #t:inttype -> a:uint_t t  -> 
-b:uint_t t -> uint_t t 
+val logand: #t:inttype -> a:uint_t t  ->
+b:uint_t t -> uint_t t
 inline_for_extraction
-val logor: #t:inttype -> a:uint_t t  -> 
-b:uint_t t -> uint_t t 
+val logor: #t:inttype -> a:uint_t t  ->
+b:uint_t t -> uint_t t
 inline_for_extraction
-val lognot: #t:inttype -> a:uint_t t -> uint_t t 
+val lognot: #t:inttype -> a:uint_t t -> uint_t t
 
 type shiftval (t:inttype) = u:uint32{uint_v #U32 u < bits t}
 type rotval  (t:inttype) = u:uint32{uint_v #U32 u > 0 /\ uint_v #U32 u < bits t}
 
 inline_for_extraction
-val shift_right: #t:inttype -> a:uint_t t -> b:shiftval t -> 
+val shift_right: #t:inttype -> a:uint_t t -> b:shiftval t ->
     c:uint_t t{uint_v #t c =  uint_v #t a / pow2 (uint_v #U32 b)}
 
 inline_for_extraction
@@ -154,10 +154,10 @@ val shift_left: #t:inttype -> a:uint_t t -> b:shiftval t ->
     c:uint_t t{uint_v #t c = (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % pow2 (bits t)}
 
 inline_for_extraction
-val rotate_right: #t:inttype -> a:uint_t t -> b:rotval t -> uint_t t 
+val rotate_right: #t:inttype -> a:uint_t t -> b:rotval t -> uint_t t
 
 inline_for_extraction
-val rotate_left: #t:inttype -> a:uint_t t -> b:rotval t -> uint_t t 
+val rotate_left: #t:inttype -> a:uint_t t -> b:rotval t -> uint_t t
 
 inline_for_extraction
 val eq_mask: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
@@ -223,9 +223,9 @@ val size_decr: a:size_t -> Pure (size_t)
   (ensures (fun c -> c = a - 1))
 
 
-  
+
 inline_for_extraction
-val bignum: Type0 
+val bignum: Type0
 inline_for_extraction
 val bn_v: bignum -> GTot nat
 inline_for_extraction
@@ -240,6 +240,3 @@ inline_for_extraction
 val bn_mod: bignum -> b:bignum{bn_v b <> 0} -> bignum
 inline_for_extraction
 val bn_div: bignum -> b:bignum{bn_v b <> 0} -> bignum
-
-
-  
