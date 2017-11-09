@@ -60,20 +60,20 @@ let chacha20_core (s:state) : Tot state =
   map2 (fun x y -> x +. y) s' s
 
 (* state initialization *)
-let c0 = 0x61707865ul
-let c1 = 0x3320646eul
-let c2 = 0x79622d32ul
-let c3 = 0x6b206574ul
+let c0 = 0x61707865
+let c1 = 0x3320646e
+let c2 = 0x79622d32
+let c3 = 0x6b206574
 
 let setup (k:key) (n:nonce) (c:counter): Tot state =
   let state = create 16 (u32 0) in
-  let state = state.[0] <- u32_from_UInt32 c0 in
-  let state = state.[1] <- u32_from_UInt32 c1 in
-  let state = state.[2] <- u32_from_UInt32 c2 in
-  let state = state.[3] <- u32_from_UInt32 c3 in
-  let state = update_slice state 4 12 (uints_from_bytes_le k) in
-  let state = state.[12] <- (u32 c) in
-  let state = update_slice state 13 16 (uints_from_bytes_le n) in
+  let state = state.[0] <- u32 c0 in
+  let state = state.[1] <- u32 c1 in
+  let state = state.[2] <- u32 c2 in
+  let state = state.[3] <- u32 c3 in
+  let state = update_sub state 4 8 (uints_from_bytes_le k) in
+  let state = state.[12] <- u32 c in
+  let state = update_sub state 13 3 (uints_from_bytes_le n) in
   state
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
