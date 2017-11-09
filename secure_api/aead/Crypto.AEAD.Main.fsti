@@ -68,7 +68,6 @@ let safeId  (i:I.id) = Flag.safeId i
 val aead_state     : I.id -> I.rw -> Type0
 val log_region: #i:_ -> #rw:_ -> aead_state i rw -> eternal_region
 val prf_region: #i:_ -> #rw:_ -> aead_state i rw -> eternal_region
-noextract
 val log       : #i:_ -> #rw:_ -> s:aead_state i rw{safeMac i} -> HS.mem -> GTot (Seq.seq (entry i))
 
 let address   = nat

@@ -29,7 +29,6 @@ let nonce_of_entry (#i:_) (e:entry i) = Crypto.AEAD.Invariant.AEADEntry?.nonce e
 let aead_state i rw = Invariant.aead_state i rw
 let log_region #i #rw st = Invariant.AEADState?.log_region st
 let prf_region #i #rw st = Invariant.AEADState?.log_region st //TODO: FIXME!!
-noextract
 let log #i #rw s h =
   if safeMac i then
     HS.sel h (Invariant.st_ilog s)
