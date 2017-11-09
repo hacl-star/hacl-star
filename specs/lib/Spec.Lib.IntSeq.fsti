@@ -6,10 +6,10 @@ val lseq: a:Type0 -> len:size_t -> t:Type0
 val create: #a:Type -> len:size_t -> init:a -> lseq a len
 val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (List.Tot.length l)
 val index: #a:Type -> #len:size_t{len > 0} -> lseq a len -> n:size_t{n < len} -> a
-val upd: #a:Type -> #len:size_t -> lseq a len -> n:size_t{n < len /\ len > 0} -> x:a -> lseq a len
+val upd: #a:Type -> #len:size_t -> lseq a len -> n:size_t{n < len /\ len > 0} -> x:a -> o:lseq a len{index o n == x}
 val sub: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> n:size_t{start + n <= len} -> lseq a n
 val slice: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> fin:size_t{start <= fin /\ fin <= len} -> lseq a (fin - start)
-val update_sub: #a:Type -> #len:size_t -> i:lseq a len -> start:size_t -> n:size_t{start + n <= len} -> v:lseq a n -> o:lseq a len{sub o start n == v}
+val update_sub: #a:Type -> #len:size_t -> i:lseq a len -> start:size_t -> n:size_t{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}
 val update_slice: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> fin:size_t{start <= fin /\ fin <= len} -> lseq a (fin - start) -> lseq a len
 
 let op_String_Access = index

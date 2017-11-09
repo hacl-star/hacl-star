@@ -26,7 +26,7 @@ let rec index_ #a #len l i =
 
 let index = index_
 
-val upd_: #a:Type -> #len:size_t -> lseq a len -> n:size_t{n < len /\ len > 0} -> x:a -> Tot (lseq a len) (decreases (n))
+val upd_: #a:Type -> #len:size_t -> lseq a len -> n:size_t{n < len /\ len > 0} -> x:a -> Tot (o:lseq a len{index o n == x}) (decreases (n))
 let rec upd_ #a #len l i x =
   match i,l with
   | 0, h::t -> x::t
@@ -63,13 +63,13 @@ let rec snoc #a #len i x =
   | [] -> [x]
   | h::t -> h::snoc #a #(size_decr len) t x
 
-val update_prefix: #a:Type -> #len:size_t -> lseq a len -> n:size_t{n <= len} -> lseq a n -> Tot (lseq a len) (decreases (len))
+val update_prefix: #a:Type -> #len:size_t -> lseq a len -> n:size_t{n <= len} -> x:lseq a n -> Tot (o:lseq a len{sub o 0 n == x}) (decreases (len))
 let rec update_prefix #a #len l n l' =
   match n,l,l' with
   | 0, _, _ -> l
   | _, h::t, h'::t' -> h':: update_prefix #a #(size_decr len) t (size_decr n) t'
 
-val update_sub_: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> n:size_t{start + n <= len} -> lseq a n -> Tot (lseq a len) (decreases (len))
+val update_sub_: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> n:size_t{start + n <= len} -> x:lseq a n -> Tot (o:lseq a len{sub o start n == x}) (decreases (len))
 let rec update_sub_ #a #len l s n l' =
   match s,l with
   | 0, l -> update_prefix #a #len l n l'
