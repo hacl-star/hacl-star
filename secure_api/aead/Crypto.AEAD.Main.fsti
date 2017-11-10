@@ -42,6 +42,7 @@ let lbytes  (l:nat) = b:bytes  {Seq.length b == l}
 type adata = b:bytes {Seq.length b <= v aadmax}
 type cipher (i:I.id) (l:nat) = lbytes (l + v taglen)
 
+inline_for_extraction
 val entry : i:I.id -> Type0
 let nonce (i:I.id) = iv (I.cipherAlg_of_id i)
 val mk_entry (#i:I.id) :
@@ -89,7 +90,10 @@ type refs_in_region =
 type fp = FStar.TSet.set (HH.rid * refs_in_region)
 val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> fp
 
+noextract
 let regions_of_fp (fp:fp) = FStar.TSet.map fst fp
+
+noextract
 let refs_of_region (rgn:HH.rid) (footprint:fp) : FStar.TSet.set refs_in_region =
   FStar.TSet.map snd (FStar.TSet.filter (fun r -> fst r == rgn) footprint)
 
@@ -156,6 +160,7 @@ val gen (i:I.id)
 (** Building a reader from a writer **)
 
 (* A reader never writes to the log_region, but may write to the prf_region *)
+noextract
 let read_footprint (#i:_) (wr:aead_state i I.Writer) : fp =
   FStar.TSet.filter (fun (rs:(HH.rid * refs_in_region)) -> fst rs == prf_region wr)
                     (footprint wr)
