@@ -1,1 +1,0 @@
-#define FStar_TSet_empty__FStar_Monotonic_HyperHeap_rid___Crypto_AEAD_Main_refs_in_region ((void*)0)
