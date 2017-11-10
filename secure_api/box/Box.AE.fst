@@ -28,11 +28,6 @@ module Plain = Box.Plain
 module Key = Box.Key
 module ID = Box.Index
 
-assume val ae_ind_cca:(b:bool{Game0? current_game ==> ~b
-                              /\ Game1? current_game ==> ~b
-                              /\ Game2? current_game ==> b
-                              })
-
 let nonce_length = SPEC.noncelen
 let key_length = SPEC.keylen
 let aes_key = SPEC.key
