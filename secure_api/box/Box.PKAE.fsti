@@ -120,6 +120,7 @@ val encrypt: pkm:pkae_module ->
   (requires (fun h0 ->
     let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey pkm sk)) in
     registered pkm i
+    ///\ (Flags.Game0? Flags.current_game \/ Flags.Game5? Flags.current_game)
     /\ nonce_is_fresh pkm i n h0
     /\ invariant pkm h0
   ))

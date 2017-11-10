@@ -161,11 +161,11 @@ val prf_odh: om:odh_module -> sk:skey om -> pk:pkey om{compatible_keys om sk pk}
   (ensures (fun h0 k h1 ->
     let i = compose_ids om (pk_get_share om pk) (sk_get_share om sk) in True
     /\ Key.get_index om.kim om.km k = i
-    /\ ((ID.honest om.kim i /\ Flags.prf_odh) ==>
+    /\ ((ID.honest om.kim i /\ b2t Flags.prf_odh) ==>
         modifies (Set.singleton (Key.get_log_region om.kim om.km)) h0 h1)
     // We should guarantee, that the key is randomly generated. Generally, calls to prf_odh should be idempotent. How to specify that?
     // Should we have a genPost condition that we guarantee here?
-    /\ ((ID.dishonest om.kim i \/ ~Flags.prf_odh) ==>
+    /\ ((ID.dishonest om.kim i \/ ~(b2t Flags.prf_odh)) ==>
         (Key.get_rawGT om.kim om.km k = prf_odhGT om sk pk // Functional correctness.
         /\ h0 == h1))
     /\ (modifies (Set.singleton (Key.get_log_region om.kim om.km))h0 h1 \/ h0 == h1)

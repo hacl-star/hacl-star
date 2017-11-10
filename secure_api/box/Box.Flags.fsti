@@ -67,10 +67,6 @@ val ae_ind_cca : b:bool{(Game0? current_game ==> ~b)
                         /\ (Game5? current_game ==> b)
                         }
 
-val pkae : b:bool{(Game0? current_game ==> ~b)
-                  /\ (Game1? current_game ==> ~b)
-                  /\ (Game2? current_game ==> ~b)
-                  /\ (Game3? current_game ==> ~b)
-                  /\ (Game4? current_game ==> ~b)
-                  /\ (Game5? current_game ==> b)
+val pkae : b:bool{(Game0? current_game <==> ~b)
+                  /\ (Game5? current_game <==> b)
                   }
