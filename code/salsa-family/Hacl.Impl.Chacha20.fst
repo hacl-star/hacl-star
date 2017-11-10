@@ -7,7 +7,7 @@ open FStar.HyperStack.ST
 
 open Spec.Lib.IntSeq
 open Spec.Lib.IntTypes
-open Spec.Lib.IntBuf
+open Spec.Lib.IntBuf.B
 open Spec.Chacha20
 
 module ST = FStar.HyperStack.ST
@@ -89,22 +89,6 @@ val setup_ctr:
 let setup_ctr st ctr =
   st.(0) <- u32 ctr
 
-(*
-private val lemma_setup: h:mem -> st:state{live h st} -> Lemma
-  (as_seq h st == FStar.Seq.(as_seq h (Buffer.sub st 0ul 4ul) @| as_seq h (Buffer.sub st 4ul 8ul)
-                           @| as_seq h (Buffer.sub st 12ul 1ul) @| as_seq h (Buffer.sub st 13ul 3ul)))
-private let lemma_setup h st =
-  let s = as_seq h st in
-  Seq.lemma_eq_intro (Seq.slice s 0 4) (as_seq h (Buffer.sub st 0ul 4ul));
-  Seq.lemma_eq_intro (Seq.slice s 4 12) (as_seq h (Buffer.sub st 4ul 8ul));
-  Seq.lemma_eq_intro (Seq.slice s 12 13) (as_seq h (Buffer.sub st 12ul 1ul));
-  Seq.lemma_eq_intro (Seq.slice s 13 16) (as_seq h (Buffer.sub st 13ul 3ul));
-  Seq.lemma_eq_intro s (FStar.Seq.(slice s 0 4 @| slice s 4 12 @| slice s 12 13 @| slice s 13 16))
-
-#reset-options "--max_fuel 0 --z3rlimit 100"
-*)
-
-
 [@ "c_inline"]
 val setup:
   st:state ->
@@ -114,124 +98,77 @@ val setup:
   Stack unit
     (requires (fun h -> live h st /\ live h k /\ live h n
                    /\ disjoint st k /\ disjoint st n /\ disjoint k n))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
-                        /\ as_lseq st h1 == Spec.setup (as_lseq k h0) (as_lseq n h0) c))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+//                        /\ as_lseq st h1 == Spec.setup (as_lseq k h0) (as_lseq n h0) c))
 
 [@ "c_inline"]
 let setup st k n c =
-  let h0 = ST.get () in
+  // let h0 = ST.get () in
   setup_constant (sub st 0 4);
-  let h1 = ST.get () in
-  assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 0) == Spec.c0);
-  assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 1) == Spec.c1);
-  assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 2) == Spec.c2);
-  assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 3) == Spec.c3);
-  // setup_key (sub st 4 8) k;
+  // let h1 = ST.get () in
+  // assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 0) == Spec.c0);
+  // assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 1) == Spec.c1);
+  // assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 2) == Spec.c2);
+  // assert(uint_v (LSeq.index (as_lseq (sub st 0 4) h1) 3) == Spec.c3);
+  // assert(uint_v (LSeq.index (as_lseq st h1) 0) == Spec.c0);
+  // assert(uint_v (LSeq.index (as_lseq st h1) 1) == Spec.c1);
+  // assert(uint_v (LSeq.index (as_lseq st h1) 2) == Spec.c2);
+  // assert(uint_v (LSeq.index (as_lseq st h1) 3) == Spec.c3);
+  setup_key (sub st 4 8) k;
   // let h2 = ST.get () in
   // assert(as_lseq (sub st 4 8) h2 == LSeq.uints_from_bytes_le (as_lseq k h1));
-  // setup_ctr (sub st 12 1) c;
+  setup_ctr (sub st 12 1) c;
   // let h3 = ST.get () in
   // assert(uint_v (LSeq.index (as_lseq (sub st 12 1) h3) 0) == c);
-  // setup_iv (sub st 13 3) n;
+  setup_iv (sub st 13 3) n
   // let h4 = ST.get () in
-  // assert(as_lseq (sub st 13 3) h4 == LSeq.uints_from_bytes_le (as_lseq n h3));
-  assert(
-//    let st_h4 = as_lseq st h4 in
-    let st_h0 = as_lseq st h0 in
-    let st_h0' = st_h0.[0] <- u32 c0 in
-    let st_h0' = st_h0'.[1] <- u32 c1 in
-    let st_h0' = st_h0'.[2] <- u32 c2 in
-    let st_h1' = st_h0'.[3] <- u32 c3 in
-    as_lseq st h1 == st_h1')
-    // let st_h2 = update_sub st_h1 4 8 (uints_from_bytes_le (as_lseq k h1)) in
-    // let st_h3 = st_h2.[12] <- (u32 c) in
-    // st_h4 == update_sub st_h3 13 3 (uints_from_bytes_le (as_lseq n h3))); admit()
+  // assert(as_lseq (sub st 13 3) h4 == LSeq.uints_from_bytes_le (as_lseq n h3))
+  // assert(
+  //   let st_h4 = as_lseq st h4 in
+  //   let st_h0 = as_lseq st h0 in
+  //   let st_h0' = st_h0.[0] <- u32 c0 in
+  //   let st_h0' = st_h0'.[1] <- u32 c1 in
+  //   let st_h0' = st_h0'.[2] <- u32 c2 in
+  //   let st_h1' = st_h0'.[3] <- u32 c3 in
+  //   as_lseq st h1 == st_h1'); admit()
+  //   let st_h2 = update_sub st_h1 4 8 (uints_from_bytes_le (as_lseq k h1)) in
+  //   let st_h3 = st_h2.[12] <- (u32 c) in
+  //   st_h4 == update_sub st_h3 13 3 (uints_from_bytes_le (as_lseq n h3))); admit()
 
-
-(*
-
-[@ "c_inline"]
-val setup:
-  st:state ->
-  k:uint8_p{length k = 32 /\ disjoint st k} ->
-  n:uint8_p{length n = 12 /\ disjoint st n} ->
-  c:U32.t ->
-  Stack unit
-    (requires (fun h -> live h st /\ live h k /\ live h n))
-    (ensures (fun h0 _ h1 -> live h0 k /\ live h0 n /\ live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = reveal_h32s (as_seq h1 st) in
-         let k = reveal_sbytes (as_seq h0 k) in
-         let n = reveal_sbytes (as_seq h0 n) in
-         s == setup k n (U32.v c))))
-[@ "c_inline"]
-let setup st k n c =
-  let h0 = ST.get() in
-  let stcst = Buffer.sub st 0ul 4ul in
-  let stk   = Buffer.sub st 4ul 8ul in
-  let stc   = Buffer.sub st 12ul 1ul in
-  let stn   = Buffer.sub st 13ul 3ul in
-  constant_setup stcst;
-  let h1 = ST.get() in
-  keysetup stk k;
-  let h2 = ST.get() in
-  ctrsetup stc c;
-  let h3 = ST.get() in
-  ivsetup stn n;
-  let h4 = ST.get() in
-  no_upd_lemma_1 h0 h1 stcst stk;
-  no_upd_lemma_1 h0 h1 stcst stn;
-  no_upd_lemma_1 h0 h1 stcst stc;
-  no_upd_lemma_1 h1 h2 stk stcst;
-  no_upd_lemma_1 h1 h2 stk stn;
-  no_upd_lemma_1 h1 h2 stk stc;
-  no_upd_lemma_1 h2 h3 stc stcst;
-  no_upd_lemma_1 h2 h3 stc stk;
-  no_upd_lemma_1 h2 h3 stc stn;
-  no_upd_lemma_1 h3 h4 stn stcst;
-  no_upd_lemma_1 h3 h4 stn stk;
-  no_upd_lemma_1 h3 h4 stn stc;
-  lemma_setup h4 st;
-  Seq.lemma_eq_intro (reveal_h32s (as_seq h4 st)) (Spec.setup (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) (U32.v c))
-
-
-let idx = a:U32.t{U32.v a < 16}
 
 [@ "substitute"]
 private
-val line:
-  st:state ->
-  a:idx -> b:idx -> d:idx -> s:U32.t{0 < U32.v s && U32.v s < 32} ->
+val line: st:state -> a:idx -> b:idx -> d:idx -> s:rotval U32 ->
   Stack unit
     (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st
-      /\ (let st1 = reveal_h32s (as_seq h1 st) in
-         let st0 = reveal_h32s (as_seq h0 st) in
-         st1 == line (U32.v a) (U32.v b) (U32.v d) s st0)))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+      // /\ (let st1 = reveal_h32s (as_seq h1 st) in
+      //    let st0 = reveal_h32s (as_seq h0 st) in
+      //    st1 == line (U32.v a) (U32.v b) (U32.v d) s st0)))
+
 [@ "substitute"]
 let line st a b d s =
   let sa = st.(a) in let sb = st.(b) in
-  st.(a) <- sa +%^ sb;
+  st.(a) <- sa +. sb;
   let sd = st.(d) in let sa = st.(a) in
-  let sda = sd ^^ sa in
-  st.(d) <- sda <<< s
+  let sda = sd ^. sa in
+  st.(d) <- sda <<<. s
 
 
 [@ "c_inline"]
 private
-val quarter_round:
-  st:state ->
-  a:idx -> b:idx -> c:idx -> d:idx ->
+val quarter_round: st:state -> a:idx -> b:idx -> c:idx -> d:idx ->
   Stack unit
     (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
-         s' == quarter_round (U32.v a) (U32.v b) (U32.v c) (U32.v d) s)))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+      // /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
+      //    s' == quarter_round (U32.v a) (U32.v b) (U32.v c) (U32.v d) s)))
 [@ "c_inline"]
 let quarter_round st a b c d =
-  line st a b d 16ul;
-  line st c d b 12ul;
-  line st a b d 8ul ;
-  line st c d b 7ul
+  line st a b d (u32 16);
+  line st c d b (u32 12);
+  line st a b d (u32 8) ;
+  line st c d b (u32 7)
 
 
 [@ "substitute"]
@@ -240,109 +177,112 @@ val column_round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
-         s' == column_round s)))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+      // /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
+      //    s' == column_round s)))
+
 [@ "substitute"]
 let column_round st =
-  quarter_round st 0ul 4ul 8ul  12ul;
-  quarter_round st 1ul 5ul 9ul  13ul;
-  quarter_round st 2ul 6ul 10ul 14ul;
-  quarter_round st 3ul 7ul 11ul 15ul
+  quarter_round st 0 4 8  12;
+  quarter_round st 1 5 9  13;
+  quarter_round st 2 6 10 14;
+  quarter_round st 3 7 11 15
+
 
 
 [@ "substitute"]
 private
-val diagonal_round:
-  st:state ->
+val diagonal_round: st:state ->
   Stack unit
     (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
-         s' == diagonal_round s)))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+      // /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
+      //    s' == diagonal_round s)))
+
 [@ "substitute"]
 let diagonal_round st =
-  quarter_round st 0ul 5ul 10ul 15ul;
-  quarter_round st 1ul 6ul 11ul 12ul;
-  quarter_round st 2ul 7ul 8ul  13ul;
-  quarter_round st 3ul 4ul 9ul  14ul
+  quarter_round st 0 5 10 15;
+  quarter_round st 1 6 11 12;
+  quarter_round st 2 7 8  13;
+  quarter_round st 3 4 9  14
 
 
 [@ "c_inline"]
 private
-val double_round:
-  st:buffer H32.t{length st = 16} ->
+val double_round: st:state ->
   Stack unit
     (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
-         s' == double_round s)))
+    (ensures  (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies1 st h0 h1))
+      // /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
+      //    s' == double_round s)))
+
 [@ "c_inline"]
 let double_round st =
-    column_round st;
-    diagonal_round st
+  column_round st;
+  diagonal_round st
 
-
-#reset-options " --max_fuel 0 --z3rlimit 500"
 
 [@ "c_inline"]
-val rounds:
-  st:state ->
+val rounds: st:state ->
   Stack unit
     (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
-      /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
-         s' == Spec.Chacha20.rounds s)))
-[@ "c_inline"]
-let rounds st =
-  let h0 = ST.get() in
-  let inv (h1: mem) (i: nat): Type0 =
-    live h1 st /\ modifies_1 st h0 h1 /\ i <= 10
-    /\ (let s' = reveal_h32s (as_seq h1 st) in
-       let s  = reveal_h32s (as_seq h0 st) in
-       s' == repeat_spec i Spec.Chacha20.double_round s)
-  in
-  let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < 10 ) }): Stack unit
-    (requires (fun h -> inv h (UInt32.v i)))
-    (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
-  = double_round st;
-    Spec.Loops.lemma_repeat (UInt32.v i + 1) Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st))
-  in
-  lemma_repeat_0 0 Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st));
-  for 0ul 10ul inv f'
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+      // /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
+      //    s' == Spec.Chacha20.rounds s)))
 
+// [@ "c_inline"]
+// let rounds st =
+//   let h0 = ST.get() in
+//   let inv (h1: mem) (i:size_t): Type0 =
+//     preserves_live h0 h1 /\ modifies1 st h0 h1 /\ i <= 10
+//     // /\ (let s' = reveal_h32s (as_seq h1 st) in
+//     //    let s  = reveal_h32s (as_seq h0 st) in
+//     //    s' == repeat_spec i Spec.Chacha20.double_round s)
+//   in
+//   let spec_f' = Spec.Chacha20.double_round (as_lseq st h0) in
+//   let f' (i:size_t{0 <= i /\ i < 10}): Stack unit
+//     (requires (fun h -> inv h i))
+//     (ensures  (fun h1 _ h2 -> inv h2 (i + 1)))
+//   = double_round st
+//     // Spec.Loops.lemma_repeat (UInt32.v i + 1) Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st))
+//   in
+// //  lemma_repeat_0 0 Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st));
+//   repeati 10 spec_f' f'
 
-#reset-options " --max_fuel 0 --z3rlimit 100"
 
 [@ "c_inline"]
 val sum_states:
   st:state ->
-  st':state{disjoint st st'} ->
+  st':state ->
   Stack unit
-    (requires (fun h -> live h st /\ live h st'))
-    (ensures  (fun h0 _ h1 -> live h0 st /\ live h1 st /\ live h0 st' /\ modifies_1 st h0 h1
-      /\ (let s1 = as_seq h1 st in let s = as_seq h0 st in let s' = as_seq h0 st' in
-         s1 == seq_map2 (fun x y -> H32.(x +%^ y)) s s')))
+    (requires (fun h -> live h st /\ live h st' /\ disjoint st st'))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+      // /\ (let s1 = as_seq h1 st in let s = as_seq h0 st in let s' = as_seq h0 st' in
+      //    s1 == seq_map2 (fun x y -> H32.(x +%^ y)) s s')))
+
 [@ "c_inline"]
-let sum_states st st' =
-  in_place_map2 st st' 16ul (fun x y -> H32.(x +%^ y))
+let sum_states st st' = map2 (fun x y -> x +. y) st st'
 
 
 [@ "c_inline"]
 val copy_state:
   st:state ->
-  st':state{disjoint st st'} ->
+  st':state ->
   Stack unit
-    (requires (fun h -> live h st /\ live h st'))
-    (ensures (fun h0 _ h1 -> live h1 st /\ live h0 st' /\ modifies_1 st h0 h1
-      /\ (let s = as_seq h0 st' in let s' = as_seq h1 st in s' == s)))
+    (requires (fun h -> live h st /\ live h st' /\ disjoint st st'))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+      // /\ (let s = as_seq h0 st' in let s' = as_seq h1 st in s' == s)))
+
+(*
 [@ "c_inline"]
 let copy_state st st' =
-  Buffer.blit st' 0ul st 0ul 16ul;
-  let h = ST.get() in
-  Seq.lemma_eq_intro (as_seq h st) (Seq.slice (as_seq h st) 0 16);
-  Seq.lemma_eq_intro (as_seq h st') (Seq.slice (as_seq h st') 0 16);
-  Seq.lemma_eq_intro (as_seq h st) (as_seq h st')
+let spec_f = Spec.iteri n ()
+  iteri n (fun i -> st.(i) <- st'.(i)) 
+  // Buffer.blit st' 0ul st 0ul 16ul;
+  // let h = ST.get() in
+  // Seq.lemma_eq_intro (as_seq h st) (Seq.slice (as_seq h st) 0 16);
+  // Seq.lemma_eq_intro (as_seq h st') (Seq.slice (as_seq h st') 0 16);
+  // Seq.lemma_eq_intro (as_seq h st) (as_seq h st')
 
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
