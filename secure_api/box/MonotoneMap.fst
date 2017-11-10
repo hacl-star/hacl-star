@@ -68,6 +68,33 @@ let contains #r #a #b #inv (m:t r a b inv) (x:a) (y:b x) (h:HS.mem)
   : GTot (t:Type0{t ==> defined m x h})
   = Some? (sel (m_sel h m) x) /\ Some?.v (sel (m_sel h m) x) == y
 
+val contains_eq_compat:
+  #r1:_ -> #a1:Type -> #b1:_ -> #inv1:_ ->
+  #r2:_ -> #a2:Type -> #b2:_ -> #inv2:_ ->
+  m1:t r1 a1 b1 inv1 ->
+  m2:t r2 a2 b2 inv2 ->
+  x:a1 ->
+  y:b1 x ->
+  h:HS.mem ->
+  Lemma
+    (requires (m1 === m2))
+    (ensures ((a1 == a2 /\ b1 == b2 /\ contains m1 x y h) ==> contains m2 x y h))
+let contains_eq_compat #r #a #b #inv #r' #a' #b' #inv' m m' x y h = ()
+
+val witnessed_contains_eq_compat:
+  #r1:_ -> #a1:Type -> #b1:_ -> #inv1:_ ->
+  #r2:_ -> #a2:Type -> #b2:_ -> #inv2:_ ->
+  m1:t r1 a1 b1 inv1 ->
+  m2:t r2 a2 b2 inv2 ->
+  x:a1 ->
+  y:b1 x ->
+  Lemma
+    (requires (a1 === a2 /\ b1 x === b2 x /\ m1 === m2))
+    (ensures  ((a1 === a2 /\ b1 x === b2 x /\ MR.witnessed (contains m1 x y))) ==>
+              MR.witnessed (contains m2 x y))
+    [SMTPat (MR.witnessed (contains m1 x y)); SMTPat ( m1 === m2 )]
+let witnessed_contains_eq_compat #r1 #a1 #b1 #inv1 #r2 #a2 #b2 #inv2 m1 m2 x y =
+  weaken_witness (contains m1 x y) (contains m2 x y)
 
 let value #r #a #b #inv (m:t r a b inv) (x:a) (h:HS.mem{defined m x h})
   : GTot (r:b x{contains m x r h})

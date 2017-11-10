@@ -4,8 +4,8 @@
 module Box.ODH
 open FStar.Set
 open FStar.HyperHeap
-open FStar.HyperHeap.ST
 open FStar.HyperStack
+open FStar.HyperStack.ST
 open FStar.Monotonic.RRef
 open FStar.Seq
 open FStar.Monotonic.Seq
@@ -13,7 +13,6 @@ open FStar.List.Tot
 
 open Crypto.Symmetric.Bytes
 
-open Box.Indexing
 open Box.Flags
 
 module MR = FStar.Monotonic.RRef
@@ -22,198 +21,121 @@ module HS = FStar.HyperStack
 module HH = FStar.HyperHeap
 module HSalsa = Spec.HSalsa20
 module Curve = Spec.Curve25519
-module Key = Box.AE.Key
+module Plain = Box.Plain
+module Key = Box.Key
+module ID = Box.Index
+module LE = FStar.Endianness
 
-let dh_element_size = HSalsa.keylen // is equal to scalar lenght in Spec.Curve25519
-let dh_exponent_size = 32 // Size of scalar in Curve25519. Replace with constant in spec?
-type dh_share = Curve.serialized_point //
-let dh_basepoint = [
-     0x09uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
-     0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
-     0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
-     0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
-     ]
+let smaller' n i1 i2 =
+  let i1' = LE.little_endian i1 in
+  let i2' = LE.little_endian i2 in
+  i1' < i2'
 
-type dh_exponent = Curve.scalar // is equal to Curve.serialized_point
+let smaller om i1 i2 = smaller' om.dh_share_length i1 i2
 
-val share_from_exponent: dh_exponent -> Tot dh_share
-let share_from_exponent dh_exp = Curve.scalarmult dh_exp (createL dh_basepoint)
+//let share_from_exponent' dh_exp = Curve.scalarmult dh_exp Curve.base_point
 
-(**
-   Nonce to use with HSalsa.hsalsa20.
-*)
-private let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
+let hash_fun om = om.hash
+let dh_exponentiate om = om.exponentiate
+let share_from_exponent om exp = om.exponentiate exp om.base_point
 
-type aes_key = Key.aes_key
+noeq abstract type pkey' (om:odh_module) =
+  | PKEY: pk_share:dh_share om-> pkey' om
 
-val dh_key_log_region: (r:HH.rid{ extends r root
-           /\ is_eternal_region r
-           /\ is_below r root
-           /\ disjoint r Key.ae_log_region
-           /\ disjoint r id_log_region
-           /\ disjoint r id_honesty_log_region
-           })
-let dh_key_log_region =
-  recall_region Key.ae_log_region;
-  recall_region id_log_region;
-  recall_region id_honesty_log_region;
-  new_region root
+noeq abstract type skey' (om:odh_module) =
+  | SKEY: sk_exp:dh_exponent om -> pk:pkey' om{pk.pk_share = om.exponentiate sk_exp om.base_point} -> skey' om
 
-type dh_key_log_key = i:id{AE_id? i /\ honest i}
-type dh_key_log_value = (AE.key)
-type dh_key_log_range = fun (i:dh_key_log_key) -> (k:dh_key_log_value{AE.get_index k = i})
-type dh_key_log_inv (f:MM.map' dh_key_log_key dh_key_log_range) = True
+let skey = skey'
+let pkey = pkey'
 
-(**
-   The dh_key_log is a monotone map that maps ids to AE keys. Keys that are generated/computed by prf_odh are random if both DH keys
-   that serve as its input are honest. Such honest keys are stored in the dh_key_log to ensure that only one AE key is generated for each
-   pair of DH keys. This is ensured by the monotone nature of the log and the composition of AE ids through DH ids.
-*)
-val dh_key_log: MM.t dh_key_log_region dh_key_log_key dh_key_log_range dh_key_log_inv
-let dh_key_log = MM.alloc #dh_key_log_region #dh_key_log_key #dh_key_log_range #dh_key_log_inv
+let get_pkey om sk = sk.pk
 
-(**
-   A DH public key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
-   or dishonest).
-   TODO: Does the public key have to be abstract?
-*)
-noeq abstract type dh_pkey =
-  | DH_pkey: pk_share:dh_share -> dh_pkey
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
+let compatible_keys om sk pk =
+  sk.pk =!= pk
 
-(**
-   A DH secret key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
-   or dishonest).
-*)
-noeq abstract type dh_skey =
-  | DH_skey: sk_exp:dh_exponent -> pk:dh_pkey{pk.pk_share = share_from_exponent sk_exp} -> dh_skey
+let get_hash_length om = om.hash_length
+let get_dh_share_length om = om.dh_share_length
+let get_dh_exponent_length om = om.dh_exponent_length
+let get_base_point om = om.base_point
+let get_index_module om = om.im
+let get_key_index_module om = om.kim
+let get_key_module om kim = om.km
 
-(**
-   A helper function to obtain the raw bytes of a DH public key.
-*)
-val pk_get_share: pk:dh_pkey -> Tot (dh_sh:dh_share{dh_sh = pk.pk_share})
-let pk_get_share k = k.pk_share
+#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
+let total_order_lemma om i1 i2 =
+  let i1:dh_share om = i1 in
+  let i2:dh_share om = i2 in
+  LE.lemma_little_endian_bij i1 i2
 
-(**
-   A helper function to obtain the share that corresponds to a DH secret key.
-*)
-val sk_get_share: sk:dh_skey -> Tot (dh_sh:dh_share{dh_sh = share_from_exponent sk.sk_exp})
-let sk_get_share sk = sk.pk.pk_share
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
+let create hash_len dh_share_len dh_exp_len hash_fun exponentiate base_point im kim km rgn =
+  ODH rgn hash_len dh_share_len dh_exp_len hash_fun exponentiate base_point im kim km
 
-val get_skey: sk:dh_skey -> GTot (raw:dh_exponent{raw=sk.sk_exp})
-let get_skey sk =
+let pk_get_share om k = k.pk_share
+
+let lemma_pk_get_share_inj om pk = ()
+
+let get_skeyGT om sk =
   sk.sk_exp
 
+let sk_get_share om sk =
+  sk.pk.pk_share
 
-val leak_skey: sk:dh_skey{dishonest (DH_id sk.pk.pk_share)} -> Tot (raw:dh_exponent{raw=sk.sk_exp})
-let leak_skey sk =
+#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
+let leak_skey om sk =
   sk.sk_exp
 
-val get_skeyGT: sk:dh_skey -> Tot (raw:dh_exponent{raw=sk.sk_exp})
-let get_skeyGT sk =
-  sk.sk_exp
+assume val boundless_random_bytes: n:nat -> lbytes n
 
-
-val keygen: unit -> HyperStack.ST.ST (dh_pair:(dh_pkey * dh_skey){fst dh_pair == (snd dh_pair).pk})
-  (requires (fun h0 -> True))
-  (ensures (fun h0 _ h1 -> HS.modifies Set.empty h0 h1))
-let keygen () =
-  let dh_exponent = random_bytes (UInt32.uint_to_t 32) in
-  let dh_pk = DH_pkey (share_from_exponent dh_exponent) in
-  let dh_sk = DH_skey dh_exponent dh_pk in
+let keygen om =
+  let dh_exponent = boundless_random_bytes om.dh_exponent_length in
+  let dh_pk = PKEY (share_from_exponent om dh_exponent) in
+  let dh_sk = SKEY dh_exponent dh_pk in
   dh_pk,dh_sk
 
+let coerce_pkey om dh_sh =
+  PKEY dh_sh
 
-val coerce_pkey: dh_sh:dh_share{dishonest (DH_id dh_sh)} -> Tot (pk:dh_pkey{pk.pk_share=dh_sh})
-let coerce_pkey dh_sh =
-  DH_pkey dh_sh
-
-(**
-   coerce_keypair allows the adversary to coerce a DH exponent into a DH private key. The corresponding DH public key
-   is generated along with it. Both keys are considered dishonest and the id is considered unfresh after coercion.
-*)
-val coerce_keypair: dh_exp:dh_exponent{dishonest (DH_id (share_from_exponent dh_exp))} -> Tot (dh_pair:(k:dh_pkey{k.pk_share = share_from_exponent dh_exp}) * (k:dh_skey{k.sk_exp=dh_exp}))
-let coerce_keypair dh_ex =
-  let dh_sh = share_from_exponent dh_ex in
-  let pk = DH_pkey dh_sh in
-  let sk = DH_skey dh_ex pk in
+let coerce_keypair om dh_ex =
+  let dh_sh = share_from_exponent om dh_ex in
+  let pk = PKEY dh_sh in
+  let sk = SKEY dh_ex pk in
   pk,sk
 
-(**
-   GTot specification of the prf_odh function for use in type refinements.
-*)
-val prf_odhGT: dh_skey -> dh_pkey -> GTot aes_key
-let prf_odhGT dh_sk dh_pk =
-  let i = generate_ae_id (DH_id dh_pk.pk_share) (DH_id dh_sk.pk.pk_share) in
-  let raw_k = Curve.scalarmult dh_sk.sk_exp dh_pk.pk_share in
-  let k = HSalsa.hsalsa20 raw_k zero_nonce in
+let compose_ids om s1 s2 =
+  if smaller om s1 s2 then
+     let i = (s1,s2) in
+     i
+  else
+    (total_order_lemma om s1 s2;
+    let i = (s2,s1) in
+    i)
+
+let prf_odhGT om sk pk =
+  let raw_k = (dh_exponentiate om) sk.sk_exp pk.pk_share in
+  let k = (hash_fun om) raw_k in
   k
 
+let lemma_shares om sk = ()
 
-#reset-options
-#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
-val prf_odh: sk:dh_skey -> pk:dh_pkey -> HyperStack.ST.ST (Key.key)
-  ( requires (fun h0 ->
-    let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
-    ((AE_id? i /\ honest i /\ MM.fresh dh_key_log i h0) ==>  fresh i h0)
-    /\ MR.m_contains id_log h0
-    /\ MR.m_contains dh_key_log h0
-    /\ registered i
-  ))
-  ( ensures (fun h0 k h1 ->
-    let i = generate_ae_id (DH_id pk.pk_share) (DH_id sk.pk.pk_share) in
-    let regions_modified_dishonest:Set.set (r:HH.rid) = (Set.singleton id_log_region) in
-    let regions_modified_honest = Set.union regions_modified_dishonest (Set.singleton dh_key_log_region) in
-    (i = Key.ae_key_get_index k)
-    /\ (honest i \/ dishonest i)
-    /\ (honest i ==> (let current_log = MR.m_sel h0 dh_key_log in
-           MR.witnessed (MM.contains dh_key_log i k)
-           /\ MM.contains dh_key_log i k h1
-           /\ MM.defined dh_key_log i h1
-           /\ (MM.fresh dh_key_log i h0 ==> (MR.m_sel h1 dh_key_log == MM.upd current_log i k // if the key is not yet in the dh_key_log, it will be afterwards
-                  /\ makes_unfresh_just i h0 h1
-                  /\ modifies regions_modified_honest h0 h1))
-           /\ (MM.defined dh_key_log i h0 ==> (MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log // if the key is in the dh_key_log, the dh_key_log will not be modified
-                    /\ h0==h1))       // and the log of the key will be the same as before.
-      ))
-    /\ (dishonest i
-      ==> (modifies regions_modified_dishonest h0 h1
-         /\ Key.leak_key k = prf_odhGT sk pk
-         /\ makes_unfresh_just i h0 h1
-         /\ MR.m_sel h0 dh_key_log == MR.m_sel h1 dh_key_log))
-    /\ (modifies regions_modified_honest h0 h1
-      \/ h0 == h1
-      \/ modifies regions_modified_dishonest h0 h1)
-    /\ ~(fresh i h1)
-    /\ MR.m_contains dh_key_log h1
-  ))
-let prf_odh dh_sk dh_pk =
-  let i = generate_ae_id (DH_id dh_pk.pk_share) (DH_id dh_sk.pk.pk_share) in
-  let honest_i = is_honest i in
-  MR.m_recall dh_key_log;
-  MR.m_recall id_log;
-  MR.m_recall id_honesty_log;
-  if honest_i then (
-    lemma_honest_not_dishonest i;
-    match MM.lookup dh_key_log i with
-    | Some  k ->
-      MR.m_recall id_log;
-      fresh_unfresh_contradiction i;
-      k
-    | None ->
-      let k = Key.keygen i in
-      MR.m_recall dh_key_log;
-      MR.m_recall id_log;
-      MM.extend dh_key_log i k;
-      fresh_unfresh_contradiction i;
-      k
-  ) else (
-    lemma_dishonest_not_honest i;
-    MR.m_recall id_log;
-    MR.m_recall id_honesty_log;
-    MR.m_recall dh_key_log;
-    let raw_k = Curve.scalarmult dh_sk.sk_exp dh_pk.pk_share in
-    let hashed_raw_k = HSalsa.hsalsa20 raw_k zero_nonce in
-    let k=Key.coerce_key i hashed_raw_k in
-    fresh_unfresh_contradiction i;
+
+let prf_odh om sk pk =
+  let i1 = pk.pk_share in
+  let i2 = sk.pk.pk_share in
+  let i = compose_ids om i1 i2 in
+  ID.recall_log om.im;
+  ID.recall_log om.kim;
+  ID.lemma_honest_or_dishonest om.kim i;
+  let honest_i = ID.get_honest om.kim i in
+  match honest_i && Flags.prf_odh with
+  | true ->
+    let k = Key.gen om.kim om.km i in
     k
-  )
+  | false ->
+    let raw_k = om.exponentiate sk.sk_exp pk.pk_share in
+    let hashed_raw_k = om.hash raw_k in
+    if not honest_i then
+      Key.coerce om.kim om.km i hashed_raw_k
+    else
+      Key.set om.kim om.km i hashed_raw_k

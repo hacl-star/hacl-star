@@ -1,4 +1,4 @@
-include ../../../Makefile.include
+include ../../Makefile.include
 
 VERIFY= \
 	Box.Index \

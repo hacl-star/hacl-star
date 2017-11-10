@@ -88,7 +88,7 @@ val gen: (im:index_module) -> (km:key_module im) -> (i:id im) -> ST (k:km.key_ty
 let gen im km i =
   km.gen i
 
-val set: (im:index_module) -> (km:key_module im) -> (i:id im {Game3? current_game \/ Game0? current_game}) -> (b:lbytes km.keylen) -> (k:km.key_type im{km.get_index k = i /\ b = km.get_rawGT k})
+val set: (im:index_module) -> (km:key_module im) -> (i:id im {~(Game2? current_game)}) -> (b:lbytes km.keylen) -> (k:km.key_type im{km.get_index k = i /\ b = km.get_rawGT k})
 let set im km i b =
   km.set i b
 
