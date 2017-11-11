@@ -37,6 +37,7 @@ type eternal_region = rgn:HH.rid {HS.is_eternal_region rgn}
 let prf_table (r:rgn) (i:id) = Seq.seq (PRF.entry r i)
 
 (* An idealization flag controlling per-id authentication alone *)
+inline_for_extraction
 let safeMac (i:id) = safeHS i && mac1 i
 
 (*+ maybe_plain:

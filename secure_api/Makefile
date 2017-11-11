@@ -30,12 +30,11 @@ KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_a
 # - Warning 9 (uninitialized globals)
 # because global constants in `Crypto.Symmetric.GF128` that are uninitialized but
 # marked as `inline_for_extraction`, so always inlined.
-KRML_ARGS=$(FPIC) -warn-error -4-9 -ccopt -Wno-unused-value \
+KRML_ARGS=$(FPIC) -warn-error +4+9 -ccopt -Wno-unused-value \
   -ccopt -maes -ccopt -Ofast -ccopt -funroll-loops -ccopt -fomit-frame-pointer \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
-  vale/asm/vale.a test/test_hacks.c \
-  -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
-  -add-include '"testlib.h"' -bundle Hacl.* $(KOPTS)
+  vale/asm/vale.a \
+  -add-include '"testlib.h"' -bundle Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* $(KOPTS)
 
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)
 
@@ -59,22 +58,24 @@ QuicProvider-tmp: vale/asm/vale.a
 vale/asm/vale.a:
 	$(MAKE) -C vale/asm
 
+.PRECIOUS:tmp-%/out.krml
+
 tmp-%/out.krml: $(wildcard */*.fst)
-	$(KRML) test/test_$*/Crypto.Indexing.fst \
+	$(KRML) -fsopt --expose_interfaces test/test_$*/Crypto.Indexing.fst \
 	  test/Flag.fst utils/Hacl.Spec.fst \
-	  test/Crypto.KrmlTest.fst \
+	  test/KrmlTest.fst aead/Crypto.AEAD.Main.fst \
 	  -tmpdir tmp-$* -skip-translation
 
 krml-test-vale.exe: vale/asm/vale.a
 
 krml-test-%.exe: tmp-%/out.krml vale/asm/vale.a 
-	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD=Crypto.AEAD.*" -no-prefix Crypto.KrmlTest
+	$(KRML) $< -tmpdir tmp-$* -o $@ -bundle "Crypto.AEAD.Main=Crypto.*" -no-prefix KrmlTest
 	./$@
 
 test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
 	 -o test-perf-hacl.exe \
-	$(filter-out tmp-hacl/Crypto_KrmlTest.c, $(wildcard tmp-hacl/*.c)) \
+	$(filter-out tmp-hacl/KrmlTest.c, $(wildcard tmp-hacl/*.c)) \
 	$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c \
 	test/test_perf.c test/test_hacks.c \
 	-I tmp-hacl  \

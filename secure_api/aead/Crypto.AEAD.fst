@@ -50,6 +50,7 @@ val gen:
      (ensures  (fun h0 st h1 -> True))
 
 (** ref_as_aead_log: A coercion from a conditional log to the ideal case *)
+private
 let ref_as_aead_log (#r:rgn) (#i:id) (x:rref r (aead_entries i){safeMac i})
   : aead_log r i
   = x

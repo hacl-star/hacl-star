@@ -42,6 +42,7 @@ let lbytes  (l:nat) = b:bytes  {Seq.length b == l}
 type adata = b:bytes {Seq.length b <= v aadmax}
 type cipher (i:I.id) (l:nat) = lbytes (l + v taglen)
 
+inline_for_extraction
 val entry : i:I.id -> Type0
 let nonce (i:I.id) = iv (I.cipherAlg_of_id i)
 val mk_entry (#i:I.id) :
@@ -87,11 +88,11 @@ type refs_in_region =
   | SomeRefs : FStar.TSet.set address -> refs_in_region
 
 type fp = FStar.TSet.set (HH.rid * refs_in_region)
-val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> fp
+val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> GTot fp
 
-noextract 
-let regions_of_fp (fp:fp) = FStar.TSet.map fst fp
-let refs_of_region (rgn:HH.rid) (footprint:fp) : FStar.TSet.set refs_in_region =
+let regions_of_fp (fp:fp): GTot (FStar.TSet.set HH.rid) = FStar.TSet.map fst fp
+
+let refs_of_region (rgn:HH.rid) (footprint:fp) : GTot (FStar.TSet.set refs_in_region) =
   FStar.TSet.map snd (FStar.TSet.filter (fun r -> fst r == rgn) footprint)
 
 //HH only provides modifies on sets, not tsets
@@ -157,7 +158,7 @@ val gen (i:I.id)
 (** Building a reader from a writer **)
 
 (* A reader never writes to the log_region, but may write to the prf_region *)
-let read_footprint (#i:_) (wr:aead_state i I.Writer) : fp =
+let read_footprint (#i:_) (wr:aead_state i I.Writer) : GTot fp =
   FStar.TSet.filter (fun (rs:(HH.rid * refs_in_region)) -> fst rs == prf_region wr)
                     (footprint wr)
 
@@ -246,7 +247,7 @@ let entry_for_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{sa
   : GTot (option (entry i)) =
     Seq.find_l (fun e -> nonce_of_entry e = n) (log st h)
 
-let fresh_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i}) =
+let fresh_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i}): GTot bool =
   None? (entry_for_nonce n st h)
 
 let just_one_buffer (#a:Type) (b:Buffer.buffer a) : GTot fp =
