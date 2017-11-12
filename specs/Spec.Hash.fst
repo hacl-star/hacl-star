@@ -29,7 +29,7 @@ let size_hash a = match a with
   | SHA2_384 -> (parameters a).size_hash
   | SHA2_512 -> (parameters a).size_hash
 
-let max_input a = match a with
+let max_input a : nat = match a with
   | SHA2_224 -> Spec.SHA2.max_input (parameters a)
   | SHA2_256 -> Spec.SHA2.max_input (parameters a)
   | SHA2_384 -> Spec.SHA2.max_input (parameters a)
