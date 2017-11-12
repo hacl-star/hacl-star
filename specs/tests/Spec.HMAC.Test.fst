@@ -8,7 +8,7 @@ open Spec.Lib.RawIntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.Stateful
 
-module Hash = Spec.SHA2
+module Hash = Spec.Hash
 module HMAC = Spec.HMAC
 
 
@@ -414,18 +414,18 @@ let test () =
   let test1_key : lbytes test1_key_len = createL test1_key in
   let test1_data_len : size_t = 8 in
   let test1_data : lbytes test1_data_len = createL test1_data in
-  let test1_expected224 : lbytes 28 = createL test1_expected224 in
-  let test1_expected256 : lbytes 32 = createL test1_expected256 in
-  let test1_expected384 : lbytes 48 = createL test1_expected384 in
-  let test1_expected512 : lbytes 64 = createL test1_expected512 in
-  let test1_result224 : lbytes 28 = HMAC.hmac Hash.parameters_sha2_224 test1_key_len test1_key test1_data_len test1_data in
-  let test1_result256 : lbytes 32 = HMAC.hmac Hash.parameters_sha2_256 test1_key_len test1_key test1_data_len test1_data in
-  let test1_result384 : lbytes 48 = HMAC.hmac Hash.parameters_sha2_384 test1_key_len test1_key test1_data_len test1_data in
-  let test1_result512 : lbytes 64 = HMAC.hmac Hash.parameters_sha2_512 test1_key_len test1_key test1_data_len test1_data in
-  let test1_result224' : lbytes 28 = HMAC.hmac' Hash.parameters_sha2_224 test1_key_len test1_key test1_data_len test1_data in
-  let test1_result256' : lbytes 32 = HMAC.hmac' Hash.parameters_sha2_256 test1_key_len test1_key test1_data_len test1_data in
-  let test1_result384' : lbytes 48 = HMAC.hmac' Hash.parameters_sha2_384 test1_key_len test1_key test1_data_len test1_data in
-  let test1_result512' : lbytes 64 = HMAC.hmac' Hash.parameters_sha2_512 test1_key_len test1_key test1_data_len test1_data in
+  let test1_expected224 = createL test1_expected224 in
+  let test1_expected256 = createL test1_expected256 in
+  let test1_expected384 = createL test1_expected384 in
+  let test1_expected512 = createL test1_expected512 in
+  let test1_result224 = HMAC.hmac Hash.SHA2_224 test1_key_len test1_key test1_data_len test1_data in
+  let test1_result256 = HMAC.hmac Hash.SHA2_256 test1_key_len test1_key test1_data_len test1_data in
+  let test1_result384 = HMAC.hmac Hash.SHA2_384 test1_key_len test1_key test1_data_len test1_data in
+  let test1_result512 = HMAC.hmac Hash.SHA2_512 test1_key_len test1_key test1_data_len test1_data in
+  let test1_result224' = HMAC.hmac' Hash.SHA2_224 test1_key_len test1_key test1_data_len test1_data in
+  let test1_result256' = HMAC.hmac' Hash.SHA2_256 test1_key_len test1_key test1_data_len test1_data in
+  let test1_result384' = HMAC.hmac' Hash.SHA2_384 test1_key_len test1_key test1_data_len test1_data in
+  let test1_result512' = HMAC.hmac' Hash.SHA2_512 test1_key_len test1_key test1_data_len test1_data in
   let result1_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected224 test1_result224 in
   let result1_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected256 test1_result256 in
   let result1_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected384 test1_result384 in
@@ -482,18 +482,18 @@ let test () =
   let test2_key : lbytes test2_key_len = createL test2_key in
   let test2_data_len : size_t = List.Tot.length test2_data in
   let test2_data : lbytes test2_data_len = createL test2_data in
-  let test2_expected224 : lbytes 28 = createL test2_expected224 in
-  let test2_expected256 : lbytes 32 = createL test2_expected256 in
-  let test2_expected384 : lbytes 48 = createL test2_expected384 in
-  let test2_expected512 : lbytes 64 = createL test2_expected512 in
-  let test2_result224 : lbytes 28 = HMAC.hmac Hash.parameters_sha2_224 test2_key_len test2_key test2_data_len test2_data in
-  let test2_result256 : lbytes 32 = HMAC.hmac Hash.parameters_sha2_256 test2_key_len test2_key test2_data_len test2_data in
-  let test2_result384 : lbytes 48 = HMAC.hmac Hash.parameters_sha2_384 test2_key_len test2_key test2_data_len test2_data in
-  let test2_result512 : lbytes 64 = HMAC.hmac Hash.parameters_sha2_512 test2_key_len test2_key test2_data_len test2_data in
-  let test2_result224' : lbytes 28 = HMAC.hmac' Hash.parameters_sha2_224 test2_key_len test2_key test2_data_len test2_data in
-  let test2_result256' : lbytes 32 = HMAC.hmac' Hash.parameters_sha2_256 test2_key_len test2_key test2_data_len test2_data in
-  let test2_result384' : lbytes 48 = HMAC.hmac' Hash.parameters_sha2_384 test2_key_len test2_key test2_data_len test2_data in
-  let test2_result512' : lbytes 64 = HMAC.hmac' Hash.parameters_sha2_512 test2_key_len test2_key test2_data_len test2_data in
+  let test2_expected224 = createL test2_expected224 in
+  let test2_expected256 = createL test2_expected256 in
+  let test2_expected384 = createL test2_expected384 in
+  let test2_expected512 = createL test2_expected512 in
+  let test2_result224 = HMAC.hmac Hash.SHA2_224 test2_key_len test2_key test2_data_len test2_data in
+  let test2_result256 = HMAC.hmac Hash.SHA2_256 test2_key_len test2_key test2_data_len test2_data in
+  let test2_result384 = HMAC.hmac Hash.SHA2_384 test2_key_len test2_key test2_data_len test2_data in
+  let test2_result512 = HMAC.hmac Hash.SHA2_512 test2_key_len test2_key test2_data_len test2_data in
+  let test2_result224' = HMAC.hmac' Hash.SHA2_224 test2_key_len test2_key test2_data_len test2_data in
+  let test2_result256' = HMAC.hmac' Hash.SHA2_256 test2_key_len test2_key test2_data_len test2_data in
+  let test2_result384' = HMAC.hmac' Hash.SHA2_384 test2_key_len test2_key test2_data_len test2_data in
+  let test2_result512' = HMAC.hmac' Hash.SHA2_512 test2_key_len test2_key test2_data_len test2_data in
   let result2_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected224 test2_result224 in
   let result2_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected256 test2_result256 in
   let result2_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected384 test2_result384 in
@@ -551,18 +551,18 @@ let test () =
   let test3_key : lbytes test3_key_len = createL test3_key in
   let test3_data_len : size_t = List.Tot.length test3_data in
   let test3_data : lbytes test3_data_len = createL test3_data in
-  let test3_expected224 : lbytes 28 = createL test3_expected224 in
-  let test3_expected256 : lbytes 32 = createL test3_expected256 in
-  let test3_expected384 : lbytes 48 = createL test3_expected384 in
-  let test3_expected512 : lbytes 64 = createL test3_expected512 in
-  let test3_result224 : lbytes 28 = HMAC.hmac Hash.parameters_sha2_224 test3_key_len test3_key test3_data_len test3_data in
-  let test3_result256 : lbytes 32 = HMAC.hmac Hash.parameters_sha2_256 test3_key_len test3_key test3_data_len test3_data in
-  let test3_result384 : lbytes 48 = HMAC.hmac Hash.parameters_sha2_384 test3_key_len test3_key test3_data_len test3_data in
-  let test3_result512 : lbytes 64 = HMAC.hmac Hash.parameters_sha2_512 test3_key_len test3_key test3_data_len test3_data in
-  let test3_result224' : lbytes 28 = HMAC.hmac' Hash.parameters_sha2_224 test3_key_len test3_key test3_data_len test3_data in
-  let test3_result256' : lbytes 32 = HMAC.hmac' Hash.parameters_sha2_256 test3_key_len test3_key test3_data_len test3_data in
-  let test3_result384' : lbytes 48 = HMAC.hmac' Hash.parameters_sha2_384 test3_key_len test3_key test3_data_len test3_data in
-  let test3_result512' : lbytes 64 = HMAC.hmac' Hash.parameters_sha2_512 test3_key_len test3_key test3_data_len test3_data in
+  let test3_expected224 = createL test3_expected224 in
+  let test3_expected256 = createL test3_expected256 in
+  let test3_expected384 = createL test3_expected384 in
+  let test3_expected512 = createL test3_expected512 in
+  let test3_result224 = HMAC.hmac Hash.SHA2_224 test3_key_len test3_key test3_data_len test3_data in
+  let test3_result256 = HMAC.hmac Hash.SHA2_256 test3_key_len test3_key test3_data_len test3_data in
+  let test3_result384 = HMAC.hmac Hash.SHA2_384 test3_key_len test3_key test3_data_len test3_data in
+  let test3_result512 = HMAC.hmac Hash.SHA2_512 test3_key_len test3_key test3_data_len test3_data in
+  let test3_result224' = HMAC.hmac' Hash.SHA2_224 test3_key_len test3_key test3_data_len test3_data in
+  let test3_result256' = HMAC.hmac' Hash.SHA2_256 test3_key_len test3_key test3_data_len test3_data in
+  let test3_result384' = HMAC.hmac' Hash.SHA2_384 test3_key_len test3_key test3_data_len test3_data in
+  let test3_result512' = HMAC.hmac' Hash.SHA2_512 test3_key_len test3_key test3_data_len test3_data in
   let result3_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected224 test3_result224 in
   let result3_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected256 test3_result256 in
   let result3_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected384 test3_result384 in
@@ -620,18 +620,18 @@ let test () =
   let test4_key : lbytes test4_key_len = createL test4_key in
   let test4_data_len : size_t = List.Tot.length test4_data in
   let test4_data : lbytes test4_data_len = createL test4_data in
-  let test4_expected224 : lbytes 28 = createL test4_expected224 in
-  let test4_expected256 : lbytes 32 = createL test4_expected256 in
-  let test4_expected384 : lbytes 48 = createL test4_expected384 in
-  let test4_expected512 : lbytes 64 = createL test4_expected512 in
-  let test4_result224 : lbytes 28 = HMAC.hmac Hash.parameters_sha2_224 test4_key_len test4_key test4_data_len test4_data in
-  let test4_result256 : lbytes 32 = HMAC.hmac Hash.parameters_sha2_256 test4_key_len test4_key test4_data_len test4_data in
-  let test4_result384 : lbytes 48 = HMAC.hmac Hash.parameters_sha2_384 test4_key_len test4_key test4_data_len test4_data in
-  let test4_result512 : lbytes 64 = HMAC.hmac Hash.parameters_sha2_512 test4_key_len test4_key test4_data_len test4_data in
-  let test4_result224' : lbytes 28 = HMAC.hmac' Hash.parameters_sha2_224 test4_key_len test4_key test4_data_len test4_data in
-  let test4_result256' : lbytes 32 = HMAC.hmac' Hash.parameters_sha2_256 test4_key_len test4_key test4_data_len test4_data in
-  let test4_result384' : lbytes 48 = HMAC.hmac' Hash.parameters_sha2_384 test4_key_len test4_key test4_data_len test4_data in
-  let test4_result512' : lbytes 64 = HMAC.hmac' Hash.parameters_sha2_512 test4_key_len test4_key test4_data_len test4_data in
+  let test4_expected224 = createL test4_expected224 in
+  let test4_expected256 = createL test4_expected256 in
+  let test4_expected384 = createL test4_expected384 in
+  let test4_expected512 = createL test4_expected512 in
+  let test4_result224 = HMAC.hmac Hash.SHA2_224 test4_key_len test4_key test4_data_len test4_data in
+  let test4_result256 = HMAC.hmac Hash.SHA2_256 test4_key_len test4_key test4_data_len test4_data in
+  let test4_result384 = HMAC.hmac Hash.SHA2_384 test4_key_len test4_key test4_data_len test4_data in
+  let test4_result512 = HMAC.hmac Hash.SHA2_512 test4_key_len test4_key test4_data_len test4_data in
+  let test4_result224' = HMAC.hmac' Hash.SHA2_224 test4_key_len test4_key test4_data_len test4_data in
+  let test4_result256' = HMAC.hmac' Hash.SHA2_256 test4_key_len test4_key test4_data_len test4_data in
+  let test4_result384' = HMAC.hmac' Hash.SHA2_384 test4_key_len test4_key test4_data_len test4_data in
+  let test4_result512' = HMAC.hmac' Hash.SHA2_512 test4_key_len test4_key test4_data_len test4_data in
   let result4_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected224 test4_result224 in
   let result4_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected256 test4_result256 in
   let result4_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected384 test4_result384 in
@@ -693,14 +693,14 @@ let test () =
   let test5_expected256 : lbytes 16 = createL test5_expected256 in
   let test5_expected384 : lbytes 16 = createL test5_expected384 in
   let test5_expected512 : lbytes 16 = createL test5_expected512 in
-  let test5_result224b : lbytes 28 = HMAC.hmac Hash.parameters_sha2_224 test5_key_len test5_key test5_data_len test5_data in
-  let test5_result256b : lbytes 32 = HMAC.hmac Hash.parameters_sha2_256 test5_key_len test5_key test5_data_len test5_data in
-  let test5_result384b : lbytes 48 = HMAC.hmac Hash.parameters_sha2_384 test5_key_len test5_key test5_data_len test5_data in
-  let test5_result512b : lbytes 64 = HMAC.hmac Hash.parameters_sha2_512 test5_key_len test5_key test5_data_len test5_data in
-  let test5_result224b' : lbytes 28 = HMAC.hmac' Hash.parameters_sha2_224 test5_key_len test5_key test5_data_len test5_data in
-  let test5_result256b' : lbytes 32 = HMAC.hmac' Hash.parameters_sha2_256 test5_key_len test5_key test5_data_len test5_data in
-  let test5_result384b' : lbytes 48 = HMAC.hmac' Hash.parameters_sha2_384 test5_key_len test5_key test5_data_len test5_data in
-  let test5_result512b' : lbytes 64 = HMAC.hmac' Hash.parameters_sha2_512 test5_key_len test5_key test5_data_len test5_data in
+  let test5_result224b = HMAC.hmac Hash.SHA2_224 test5_key_len test5_key test5_data_len test5_data in
+  let test5_result256b = HMAC.hmac Hash.SHA2_256 test5_key_len test5_key test5_data_len test5_data in
+  let test5_result384b = HMAC.hmac Hash.SHA2_384 test5_key_len test5_key test5_data_len test5_data in
+  let test5_result512b = HMAC.hmac Hash.SHA2_512 test5_key_len test5_key test5_data_len test5_data in
+  let test5_result224b' = HMAC.hmac' Hash.SHA2_224 test5_key_len test5_key test5_data_len test5_data in
+  let test5_result256b' = HMAC.hmac' Hash.SHA2_256 test5_key_len test5_key test5_data_len test5_data in
+  let test5_result384b' = HMAC.hmac' Hash.SHA2_384 test5_key_len test5_key test5_data_len test5_data in
+  let test5_result512b' = HMAC.hmac' Hash.SHA2_512 test5_key_len test5_key test5_data_len test5_data in
   let test5_result224 = slice test5_result224b 0 16 in
   let test5_result256 = slice test5_result256b 0 16 in
   let test5_result384 = slice test5_result384b 0 16 in
@@ -766,18 +766,18 @@ let test () =
   let test6_key : lbytes test6_key_len = createL test6_key in
   let test6_data_len : size_t = List.Tot.length test6_data in
   let test6_data : lbytes test6_data_len = createL test6_data in
-  let test6_expected224 : lbytes 28 = createL test6_expected224 in
-  let test6_expected256 : lbytes 32 = createL test6_expected256 in
-  let test6_expected384 : lbytes 48 = createL test6_expected384 in
-  let test6_expected512 : lbytes 64 = createL test6_expected512 in
-  let test6_result224 : lbytes 28 = HMAC.hmac Hash.parameters_sha2_224 test6_key_len test6_key test6_data_len test6_data in
-  let test6_result256 : lbytes 32 = HMAC.hmac Hash.parameters_sha2_256 test6_key_len test6_key test6_data_len test6_data in
-  let test6_result384 : lbytes 48 = HMAC.hmac Hash.parameters_sha2_384 test6_key_len test6_key test6_data_len test6_data in
-  let test6_result512 : lbytes 64 = HMAC.hmac Hash.parameters_sha2_512 test6_key_len test6_key test6_data_len test6_data in
-  let test6_result224' : lbytes 28 = HMAC.hmac' Hash.parameters_sha2_224 test6_key_len test6_key test6_data_len test6_data in
-  let test6_result256' : lbytes 32 = HMAC.hmac' Hash.parameters_sha2_256 test6_key_len test6_key test6_data_len test6_data in
-  let test6_result384' : lbytes 48 = HMAC.hmac' Hash.parameters_sha2_384 test6_key_len test6_key test6_data_len test6_data in
-  let test6_result512' : lbytes 64 = HMAC.hmac' Hash.parameters_sha2_512 test6_key_len test6_key test6_data_len test6_data in
+  let test6_expected224 = createL test6_expected224 in
+  let test6_expected256 = createL test6_expected256 in
+  let test6_expected384 = createL test6_expected384 in
+  let test6_expected512 = createL test6_expected512 in
+  let test6_result224 = HMAC.hmac Hash.SHA2_224 test6_key_len test6_key test6_data_len test6_data in
+  let test6_result256 = HMAC.hmac Hash.SHA2_256 test6_key_len test6_key test6_data_len test6_data in
+  let test6_result384 = HMAC.hmac Hash.SHA2_384 test6_key_len test6_key test6_data_len test6_data in
+  let test6_result512 = HMAC.hmac Hash.SHA2_512 test6_key_len test6_key test6_data_len test6_data in
+  let test6_result224' = HMAC.hmac' Hash.SHA2_224 test6_key_len test6_key test6_data_len test6_data in
+  let test6_result256' = HMAC.hmac' Hash.SHA2_256 test6_key_len test6_key test6_data_len test6_data in
+  let test6_result384' = HMAC.hmac' Hash.SHA2_384 test6_key_len test6_key test6_data_len test6_data in
+  let test6_result512' = HMAC.hmac' Hash.SHA2_512 test6_key_len test6_key test6_data_len test6_data in
   let result6_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test6_expected224 test6_result224 in
   let result6_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test6_expected256 test6_result256 in
   let result6_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test6_expected384 test6_result384 in
@@ -835,18 +835,18 @@ let test () =
   let test7_key : lbytes test7_key_len = createL test7_key in
   let test7_data_len : size_t = List.Tot.length test7_data in
   let test7_data : lbytes test7_data_len = createL test7_data in
-  let test7_expected224 : lbytes 28 = createL test7_expected224 in
-  let test7_expected256 : lbytes 32 = createL test7_expected256 in
-  let test7_expected384 : lbytes 48 = createL test7_expected384 in
-  let test7_expected512 : lbytes 64 = createL test7_expected512 in
-  let test7_result224 : lbytes 28 = HMAC.hmac Hash.parameters_sha2_224 test7_key_len test7_key test7_data_len test7_data in
-  let test7_result256 : lbytes 32 = HMAC.hmac Hash.parameters_sha2_256 test7_key_len test7_key test7_data_len test7_data in
-  let test7_result384 : lbytes 48 = HMAC.hmac Hash.parameters_sha2_384 test7_key_len test7_key test7_data_len test7_data in
-  let test7_result512 : lbytes 64 = HMAC.hmac Hash.parameters_sha2_512 test7_key_len test7_key test7_data_len test7_data in
-  let test7_result224' : lbytes 28 = HMAC.hmac' Hash.parameters_sha2_224 test7_key_len test7_key test7_data_len test7_data in
-  let test7_result256' : lbytes 32 = HMAC.hmac' Hash.parameters_sha2_256 test7_key_len test7_key test7_data_len test7_data in
-  let test7_result384' : lbytes 48 = HMAC.hmac' Hash.parameters_sha2_384 test7_key_len test7_key test7_data_len test7_data in
-  let test7_result512' : lbytes 64 = HMAC.hmac' Hash.parameters_sha2_512 test7_key_len test7_key test7_data_len test7_data in
+  let test7_expected224 = createL test7_expected224 in
+  let test7_expected256 = createL test7_expected256 in
+  let test7_expected384 = createL test7_expected384 in
+  let test7_expected512 = createL test7_expected512 in
+  let test7_result224 = HMAC.hmac Hash.SHA2_224 test7_key_len test7_key test7_data_len test7_data in
+  let test7_result256 = HMAC.hmac Hash.SHA2_256 test7_key_len test7_key test7_data_len test7_data in
+  let test7_result384 = HMAC.hmac Hash.SHA2_384 test7_key_len test7_key test7_data_len test7_data in
+  let test7_result512  = HMAC.hmac Hash.SHA2_512 test7_key_len test7_key test7_data_len test7_data in
+  let test7_result224' = HMAC.hmac' Hash.SHA2_224 test7_key_len test7_key test7_data_len test7_data in
+  let test7_result256' = HMAC.hmac' Hash.SHA2_256 test7_key_len test7_key test7_data_len test7_data in
+  let test7_result384' = HMAC.hmac' Hash.SHA2_384 test7_key_len test7_key test7_data_len test7_data in
+  let test7_result512' = HMAC.hmac' Hash.SHA2_512 test7_key_len test7_key test7_data_len test7_data in
   let result7_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test7_expected224 test7_result224 in
   let result7_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test7_expected256 test7_result256 in
   let result7_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test7_expected384 test7_result384 in
