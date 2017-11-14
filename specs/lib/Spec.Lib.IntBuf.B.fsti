@@ -29,6 +29,11 @@ let creates1 (#a:Type0) (#len:size_t) (b:lbuffer a len) (h0:mem) (h1:mem) : GTot
   (live h1 b
   /\ (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b')} live h0 b' ==> (live h1 b' /\ disjoint b b'  /\ disjoint b' b)))
 
+val creates1_lemma:  #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> h0:mem -> h1:mem -> Lemma
+  (requires (live h0 b1 /\ creates1 b2 h0 h1))
+  (ensures  (live h1 b1 /\ disjoint b1 b2 /\ disjoint b2 b1))
+  [SMTPat (creates1 b2 h0 h1); SMTPat (live h0 b1)]
+
 let creates2 #a1 #a2 #len1 #len2 (b1:lbuffer a1 len1) (b2:lbuffer a2 len2) h0 h1 =
   creates1 #a1 #len1 b1 h0 h1 /\
   creates1 #a2 #len2 b2 h0 h1
@@ -42,6 +47,11 @@ let rec creates (l:list bufitem) (h0:mem) (h1:mem) : GTot Type =
   match l with
   | [] -> True
   | b::t -> creates1 b.buf h0 h1 /\ creates t h0 h1
+
+//val modifies1: #a:Type0 -> #len:size_t ->  lbuffer a len -> mem -> mem -> GTot Type
+let modifies0 (h0:mem) (h1:mem) : GTot Type =
+  (forall (a:Type0) (len:size_t) (b:lbuffer a len). {:pattern (live h0 b)}
+		(live h0 b ==> live h1 b /\ as_lseq b h1 == as_lseq b h0))
 
 //val modifies1: #a:Type0 -> #len:size_t ->  lbuffer a len -> mem -> mem -> GTot Type
 let modifies1 (#a:Type0) (#len:size_t) (b:lbuffer a len) (h0:mem) (h1:mem) : GTot Type =
@@ -87,7 +97,7 @@ let modifies (l:list bufitem) (h0:mem) (h1:mem) : GTot Type =
 	 /\ (forall (a':Type0) (len':size_t) (b':lbuffer a' len'). {:pattern (live h0 b' /\ disjoint_list b' l)}
 	     (live h0 b' /\ disjoint_list b' l) ==> (live h1 b' /\ as_lseq b' h1 == as_lseq b' h0))
 
-val create: #a:Type0 -> len:size_t -> init:a -> Stack (lbuffer a len)
+val create: #a:Type0 -> len:size_t -> init:a -> Stack (b:lbuffer a len)
   (requires (fun h0 -> True))
   (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ creates1 r h0 h1 /\ modifies1 r h0 h1 /\ as_lseq #a #len r h1 == LSeq.create #a len init))
 
@@ -189,13 +199,22 @@ val iter_range: #a:Type -> #len:size_t -> start:size_t -> fin:size_t{start <= fi
 				                       as_lseq #a #len input h1 ==  LSeq.repeat_range start fin spec (as_lseq #a #len input h0)))
 
 val uint32s_from_bytes_le:
-  len:size_t{len * numbytes U32 < max_size_t} ->
+  len:size_t{len * numbytes U32 <= max_size_t} ->
   output:lbuffer uint32 len ->
   input:lbuffer uint8 (len * numbytes U32) ->
   Stack unit
     (requires (fun h -> live h output /\ live h input /\ disjoint output input))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1
                          /\ as_lseq output h1 == LSeq.uints_from_bytes_le #U32 #len (as_lseq input h0)))
+
+val uint32s_to_bytes_le:
+  len:size_t{len * numbytes U32 <= max_size_t} ->
+  output:lbuffer uint8 (len * numbytes U32) ->
+  input:lbuffer uint32 len ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h input /\ disjoint output input))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1
+                         /\ as_lseq output h1 == LSeq.uints_to_bytes_le #U32 #len (as_lseq input h0)))
 
 
 //
