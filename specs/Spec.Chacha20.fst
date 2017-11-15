@@ -65,19 +65,19 @@ let c1 = 0x3320646e
 let c2 = 0x79622d32
 let c3 = 0x6b206574
 
-let setup (k:key) (n:nonce) (c:counter): Tot state =
-  let state = create 16 (u32 0) in
-  let state = state.[0] <- u32 c0 in
-  let state = state.[1] <- u32 c1 in
-  let state = state.[2] <- u32 c2 in
-  let state = state.[3] <- u32 c3 in
-  let state = update_sub state 4 8 (uints_from_bytes_le k) in
-  let state = state.[12] <- u32 c in
-  let state = update_sub state 13 3 (uints_from_bytes_le n) in
-  state
+let setup (k:key) (n:nonce) (c:counter) (st:state) : Tot state =
+  let st = st.[0] <- u32 c0 in
+  let st = st.[1] <- u32 c1 in
+  let st = st.[2] <- u32 c2 in
+  let st = st.[3] <- u32 c3 in
+  let st = update_sub st 4 8 (uints_from_bytes_le k) in
+  let st = st.[12] <- u32 c in
+  let st = update_sub st 13 3 (uints_from_bytes_le n) in
+  st
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
-  let st  = setup k n c in
+  let st = create 16 (u32 0) in
+  let st  = setup k n c st in
   let st' = chacha20_core st in
   uints_to_bytes_le st'
 
