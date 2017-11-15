@@ -65,6 +65,6 @@ let main () =
   let counter = 1ul in
   let ctx = create 0ul 32ul in
   Chacha20.chacha20 ciphertext plaintext len key nonce counter;
-  TestLib.compare_and_print (C.string_of_literal "chacha20") expected ciphertext len;
+  TestLib.compare_and_print (C.String.of_literal "chacha20") expected ciphertext len;
   pop_frame();
   C.exit_success

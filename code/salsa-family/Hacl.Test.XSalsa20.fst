@@ -70,6 +70,6 @@ let main () =
     ] in
   (* Hacl.Symmetric.XSalsa20.xsalsa20_encrypt ciphertext key nonce plaintext len; *)
   Hacl.Symmetric.XSalsa20.crypto_stream_xsalsa20_xor ciphertext plaintext 163uL nonce key;
-  TestLib.compare_and_print (C.string_of_literal "xsalsa20") expected (offset ciphertext 32ul) (FStar.UInt32.(len -^ 32ul));
+  TestLib.compare_and_print (C.String.of_literal "xsalsa20") expected (offset ciphertext 32ul) (FStar.UInt32.(len -^ 32ul));
   pop_frame();
   C.exit_success

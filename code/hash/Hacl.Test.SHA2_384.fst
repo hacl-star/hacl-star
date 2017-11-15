@@ -44,7 +44,7 @@ let test_1a () =
   Hash.finish state output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 1a") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 1a") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -79,7 +79,7 @@ let test_1b () =
   Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 1b") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 1b") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -118,7 +118,7 @@ let test_2a () =
   Hash.finish state output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 2a") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 2a") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -151,7 +151,7 @@ let test_2b () =
   Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 2b") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 2b") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -198,7 +198,7 @@ let test_3a () =
   Hash.finish state output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 3a") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 3a") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -239,7 +239,7 @@ let test_3b () =
   Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 3b") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 3b") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -293,7 +293,7 @@ let test_4a () =
   Hash.finish state output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 4a") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 4a") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -341,7 +341,7 @@ let test_4b () =
   Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 4b") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 4b") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -375,7 +375,7 @@ let test_5 () =
   Hash.hash output plaintext plaintext_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 5") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 5") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -455,7 +455,7 @@ let test_6 () =
   Hash.finish state output;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 6") expected output 48ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 6") expected output 48ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()

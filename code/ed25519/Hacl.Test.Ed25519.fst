@@ -228,9 +228,9 @@ let main () =
   Ed25519.secret_to_public pk1' sk1;
   Ed25519.secret_to_public pk2' sk2;
   Ed25519.secret_to_public pk3' sk3;
-  TestLib.compare_and_print (C.string_of_literal "Public key 1 generation") pk1 pk1' 32ul;
-  TestLib.compare_and_print (C.string_of_literal "Public key 2 generation") pk2 pk2' 32ul;
-  TestLib.compare_and_print (C.string_of_literal "Public key 3 generation") pk3 pk3' 32ul;
+  TestLib.compare_and_print (C.String.of_literal "Public key 1 generation") pk1 pk1' 32ul;
+  TestLib.compare_and_print (C.String.of_literal "Public key 2 generation") pk2 pk2' 32ul;
+  TestLib.compare_and_print (C.String.of_literal "Public key 3 generation") pk3 pk3' 32ul;
 
   let sig1' = create 0uy 64ul in
   let sig2' = create 0uy 64ul in
@@ -242,7 +242,7 @@ let main () =
   let ret =
     if res then (
       Ed25519.sign sig1' sk1 msg1 0ul;
-      TestLib.compare_and_print (C.string_of_literal "Ed25519 sig1") sig1 sig1' 64ul;
+      TestLib.compare_and_print (C.String.of_literal "Ed25519 sig1") sig1 sig1' 64ul;
       C.exit_success
     ) else C.exit_failure in
 
@@ -250,7 +250,7 @@ let main () =
   let ret =
     if res && (ret = C.exit_success) then (
       Ed25519.sign sig2' sk2 msg2 1ul;
-      TestLib.compare_and_print (C.string_of_literal "Ed25519 sig2") sig2 sig2' 64ul;
+      TestLib.compare_and_print (C.String.of_literal "Ed25519 sig2") sig2 sig2' 64ul;
       C.exit_success
     ) else C.exit_failure in
 
@@ -258,7 +258,7 @@ let main () =
   let ret =
     if res && (ret = C.exit_success) then (
       Ed25519.sign sig3' sk3 msg3 2ul;
-      TestLib.compare_and_print (C.string_of_literal "Ed25519 sig3") sig3 sig3' 64ul;
+      TestLib.compare_and_print (C.String.of_literal "Ed25519 sig3") sig3 sig3' 64ul;
       C.exit_success
     ) else C.exit_failure in
 
@@ -266,7 +266,7 @@ let main () =
   (* let ret = *)
   (*   if res then ( *)
   (*     Ed25519.sign sig4' sk4 msg4 1023ul; *)
-  (*     TestLib.compare_and_print (C.string_of_literal "Ed25519 sig4") sig4 sig4' 64ul; *)
+  (*     TestLib.compare_and_print (C.String.of_literal "Ed25519 sig4") sig4 sig4' 64ul; *)
   (*     C.exit_success *)
   (*   ) else C.exit_failure in *)
 
