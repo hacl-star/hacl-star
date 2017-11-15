@@ -167,34 +167,19 @@ val chacha20_block:
 #reset-options "--z3rlimit 100"
 [@ "c_inline"]
 let chacha20_block stream_block st ctr =
-  let mods = [BufItem st; BufItem stream_block] in
-  let f st' : Stack unit
-    (requires (fun h -> live h st' /\ live h st /\ disjoint st st' /\ 
-		     live h stream_block))
+  let bufs = [BufItem st; BufItem stream_block] in
+  let spec h0 r h1 = True in
+  let impl st' : Stack unit
+    (requires (fun h -> live h st' /\ live_list h bufs /\ disjoint_list st' bufs))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies3 st' st stream_block h0 h1))
   = 
     chacha20_core st' st ctr;
     uint32s_to_bytes_le #16 stream_block st' in
-  alloc 16 (u32 0) mods
-  (fun h0 r h1 -> True)
-  f
-  
-
+  alloc 16 (u32 0) bufs spec impl
+    
 
 
 (*
-[@ "c_inline"]
-val alloc:
-  unit ->
-  StackInline state
-    (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> True))
-                           // (st `unused_in` h0) /\ live h1 st /\ modifies0 h0 h1 /\ 
-                           // frameOf st == h1.tip /\ Map.domain h1.h == Map.domain h0.h))
-[@ "c_inline"]
-let alloc () = create 16 (u32 0)
-
-
 [@ "c_inline"]
 val init:
   st:state ->
