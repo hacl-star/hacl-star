@@ -36,6 +36,6 @@ let main () =
     0x4auy; 0xbfuy; 0xf6uy; 0xafuy; 0x41uy; 0x49uy; 0xf5uy; 0x1buy
     ] in
   crypto_onetimeauth mac plaintext len' key;
-  TestLib.compare_and_print (C.string_of_literal "Poly1305-32bits") expected mac macsize;
+  TestLib.compare_and_print (C.String.of_literal "Poly1305-32bits") expected mac macsize;
   pop_frame();
   C.exit_success

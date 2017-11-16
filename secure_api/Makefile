@@ -33,7 +33,7 @@ KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_a
 KRML_ARGS=$(FPIC) -warn-error +4+9 -ccopt -Wno-unused-value \
   -ccopt -maes -ccopt -Ofast -ccopt -funroll-loops -ccopt -fomit-frame-pointer \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
-  vale/asm/vale.a \
+  vale/asm/vale.a -add-include '"kremstr.h"' \
   -add-include '"testlib.h"' -bundle Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* $(KOPTS)
 
 KRML=$(KREMLIN_HOME)/krml $(KRML_ARGS) $(KRML_INCLUDES)

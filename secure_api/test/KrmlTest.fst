@@ -143,7 +143,7 @@ let test() =
   );
   AEAD.Main.encrypt i st iv aadlen aad plainlen plain cipher;
 
-  TestLib.compare_and_print (C.string_of_literal "cipher") expected_cipher cipher cipherlen;
+  TestLib.compare_and_print (C.String.of_literal "cipher") expected_cipher cipher cipherlen;
 
   (* let ok_0 = diff "cipher" cipherlen expected_cipher cipher in *)
 
@@ -152,7 +152,7 @@ let test() =
   let st = AE.genReader st in
   let ok_1 = AEAD.Main.decrypt i st iv aadlen aad plainlen decrypted cipher in
 
-  TestLib.compare_and_print (C.string_of_literal "decryption") (bufferRepr #i plain) (bufferRepr #i decrypted) plainlen;
+  TestLib.compare_and_print (C.String.of_literal "decryption") (bufferRepr #i plain) (bufferRepr #i decrypted) plainlen;
   (* let ok_2 = diff "decryption" plainlen (bufferRepr #i decrypted) (bufferRepr #i plain) in *)
 
   // testing that decryption fails when truncating aad or tweaking the ciphertext.
@@ -198,14 +198,14 @@ let test_aes_gcm i (tn: UInt32.t) key ivBuffer aadlen aad plainlen plainrepr exp
   AEAD.Main.encrypt i st iv aadlen aad plainlen plain cipher;
 
   (* let ok_0 = diff "cipher" cipherlen expected_cipher cipher in  *)
-  TestLib.compare_and_print (C.string_of_literal "cipher")  expected_cipher cipher cipherlen;
+  TestLib.compare_and_print (C.String.of_literal "cipher")  expected_cipher cipher cipherlen;
 
   let st = AE.genReader st in
   let decrypted = Plain.create i 3uy plainlen in
   let ok_1 = AEAD.Main.decrypt i st iv aadlen aad plainlen decrypted cipher in
   (* let ok_2 = diff "decryption" plainlen (bufferRepr #i plain) (bufferRepr #i decrypted) in *)
 
-  TestLib.compare_and_print (C.string_of_literal "decryption") (bufferRepr #i decrypted) (bufferRepr #i plain) plainlen;
+  TestLib.compare_and_print (C.String.of_literal "decryption") (bufferRepr #i decrypted) (bufferRepr #i plain) plainlen;
   (* let ok_2 = diff "decryption" plainlen (bufferRepr #i decrypted) (bufferRepr #i plain) in *)
 
   pop_frame();
@@ -349,16 +349,16 @@ val main: unit -> ST FStar.Int32.t
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
-  C.print_string (C.string_of_literal "test()\n");
+  C.String.print (C.String.of_literal "test()\n");
   let _ = test() in
-  C.print_string (C.string_of_literal "test_aes_gcm_0()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_0()\n");
   let _ = test_aes_gcm_0 () in
-  C.print_string (C.string_of_literal "test_aes_gcm_1()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_1()\n");
   let _ = test_aes_gcm_1 () in
-  C.print_string (C.string_of_literal "test_aes_gcm_2()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_2()\n");
   let _ = test_aes_gcm_2 () in
-  C.print_string (C.string_of_literal "test_aes_gcm_3()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_3()\n");
   let _ = test_aes_gcm_3 () in
-  C.print_string (C.string_of_literal "test_aes_gcm_4()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_4()\n");
   let _ = test_aes_gcm_4 () in
   C.exit_success

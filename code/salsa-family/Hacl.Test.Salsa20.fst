@@ -45,9 +45,9 @@ let main () =
   key.(0ul) <- 0x80uy;
   let nonce = create 0uy 8ul in
   Salsa20.salsa20 ciphertext plaintext 512ul key nonce 0uL;
-  TestLib.compare_and_print (C.string_of_literal "salsa20") expected1 (offset ciphertext 0ul) 64ul;
-  TestLib.compare_and_print (C.string_of_literal "salsa20") expected2 (offset ciphertext 192ul) 64ul;
-  TestLib.compare_and_print (C.string_of_literal "salsa20") expected3 (offset ciphertext 256ul) 64ul;
-  TestLib.compare_and_print (C.string_of_literal "salsa20") expected4 (offset ciphertext 448ul) 64ul;
+  TestLib.compare_and_print (C.String.of_literal "salsa20") expected1 (offset ciphertext 0ul) 64ul;
+  TestLib.compare_and_print (C.String.of_literal "salsa20") expected2 (offset ciphertext 192ul) 64ul;
+  TestLib.compare_and_print (C.String.of_literal "salsa20") expected3 (offset ciphertext 256ul) 64ul;
+  TestLib.compare_and_print (C.String.of_literal "salsa20") expected4 (offset ciphertext 448ul) 64ul;
   pop_frame();
   C.exit_success

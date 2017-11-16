@@ -38,6 +38,6 @@ let main () =
     ] in
   (* Hacl.MAC.Poly1305_64.crypto_onetimeauth mac plaintext len' key; *)
   Poly.crypto_onetimeauth mac plaintext len' key;
-  TestLib.compare_and_print (C.string_of_literal "poly1305") expected mac macsize;
+  TestLib.compare_and_print (C.String.of_literal "poly1305") expected mac macsize;
   pop_frame();
   C.exit_success
