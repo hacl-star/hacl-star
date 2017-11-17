@@ -28,7 +28,7 @@ display:
 	@echo "- 'make verify-secure_api' will run F* verification of the secure_api directory"
 	@echo "- 'make extract-specs' will generate OCaml code for the specifications"
 	@echo "- 'make extract-all' will give you all versions of the C snapshots available"
-	@echo "- 'make extract-new' will remove and regenerate all versions of the C snapshots available"
+	@echo "- 'make extract-production' will remove and regenerate all C production snapshots available"
 	@echo "- 'make extract-experimental' will generate C code for experimental primitives"
 
 
@@ -48,7 +48,7 @@ include Makefile.prepare
 #
 
 .verify-banner:
-	@echo $(CYAN)"# Verification of the HaCl*"$(NORMAL)
+	@echo $(CYAN)"# Verification of the HACL*"$(NORMAL)
 
 verify-ct:
 	$(MAKE) -C code ct
@@ -62,7 +62,7 @@ verify: .verify-banner verify-ct verify-specs verify-code verify-secure_api
 	@echo $(CYAN)"\nDone ! Please check the verification output"$(NORMAL)
 
 verify-nss:
-	@echo $(CYAN)"# Verification of the HaCl* algorithms used by NSS"$(NORMAL)
+	@echo $(CYAN)"# Verification of the HACL* algorithms used by NSS"$(NORMAL)
 	# Verify spec, code and ct
 	$(MAKE) ct -C code/curve25519
 	$(MAKE) verify -C code/curve25519
@@ -74,20 +74,24 @@ verify-nss:
 #
 
 .extract-banner:
-	@echo $(CYAN)"# Generation of the HaCl* verified C code"$(NORMAL)
+	@echo $(CYAN)"# Generation of the HACL* verified C code"$(NORMAL)
 	@echo $(CYAN)" (This is not running formal verification)"$(NORMAL)
 
 extract: .extract-banner
-	rm -rf snapshots/hacl-c snapshots/snapshot-gcc snapshots/snapshot-gcc-unrolled
-	$(MAKE) snapshots/hacl-c
-	@echo $(CYAN)"\nDone ! Generated code can be found in 'snapshots/hacl-c'."$(NORMAL)
+	$(MAKE) extract-production
+	@echo $(CYAN)"\nDone ! Generated code for HACL* can be found in 'snapshots/hacl-c'."$(NORMAL)
+	@echo $(CYAN)"Done ! Generated code for NSS can be found in 'snapshots/nss'."$(NORMAL)
 
 extract-specs:
 	$(MAKE) -C specs
 
-extract-all: snapshots-all
+extract-all:
+	$(MAKE) snapshots-intermediates
+	$(MAKE) snapshots-production
 
-extract-new: snapshots-update
+extract-production:
+	$(MAKE) snapshots-remove-production
+	$(MAKE) snapshots-production
 
 extract-experimental: extract-c-code-experimental
 
@@ -113,11 +117,11 @@ build: clean-build
 #
 
 unit-tests:
-	@echo $(CYAN)"# Testing the HaCl* shared library"$(NORMAL)
+	@echo $(CYAN)"# Testing the HACL* shared library"$(NORMAL)
 	$(MAKE) -C snapshots/hacl-c unit-tests
 
 test-all:
-	@echo $(CYAN)"# Testing the HaCl* code and specifications"$(NORMAL)
+	@echo $(CYAN)"# Testing the HACL* code and specifications"$(NORMAL)
 	$(MAKE) -C test
 
 #
@@ -180,7 +184,7 @@ clean: .clean-banner clean-base clean-build
 #
 
 .package-banner:
-	@echo $(CYAN)"# Packaging the HaCl* generated code"$(NORMAL)
+	@echo $(CYAN)"# Packaging the HACL* generated code"$(NORMAL)
 	@echo $(CYAN)"  Make sure you have run verification before !"$(NORMAL)
 
 package: .package-banner snapshots/hacl-c build
@@ -196,7 +200,7 @@ package: .package-banner snapshots/hacl-c build
 #
 
 experimental:
-	@echo $(CYAN)"# Compiling the HaCl* library (with experimental features)"$(NORMAL)
+	@echo $(CYAN)"# Compiling the HACL* library (with experimental features)"$(NORMAL)
 	mkdir -p build-experimental && cd build-experimental; \
 	cmake $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build-experimental'."$(NORMAL)

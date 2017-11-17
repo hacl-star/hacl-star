@@ -18,6 +18,10 @@ extract-c-code:
 extract-c-code-experimental:
 	$(MAKE) -C code/experimental extract-c
 
+# Clean the code directories
+clean-c-code:
+	$(MAKE) -C code clean
+
 #
 # Snapshot targets
 #
@@ -52,62 +56,71 @@ else
 endif
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
-snapshots/hacl-c-compcert:
-	$(MAKE) -C code clean
-	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
-	if $(HAS_CCOMP); then $(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/hacl-c-compcert; fi
+snapshots/snapshot-compcert: clean-c-code
+	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 5 -fnouint128 -fnostruct-passing" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
+	if $(HAS_CCOMP); then $(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-compcert; fi
 
-snapshots/snapshot-msvc:
-	$(MAKE) -C code clean
-	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar"; fi
+snapshots/snapshot-msvc: clean-c-code
+	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
 	if $(HAS_CL); then $(MAKE) snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-msvc; fi
 
-snapshots/snapshot-gcc:
-	$(MAKE) -C code clean
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar -fparentheses -header $(HACL_HOME)/snapshots/LICENSE" KREMLIN_TESTLIB=""
+snapshots/snapshot-gcc: clean-c-code
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc
 
-snapshots/snapshot-gcc-unrolled:
-	$(MAKE) -C code clean
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar -fparentheses -header $(HACL_HOME)/snapshots/LICENSE" KREMLIN_TESTLIB=""
+snapshots/snapshot-gcc-unrolled: clean-c-code
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
-# BB: This requires to have up-to-date snapshot-gcc and snapshot-gcc-unrolled
-# Maybe we should call 'snapshot-remove' before to enforce it (at the cost of two more extractions) ?
-snapshots/hacl-c:
-	$(MAKE) snapshots/snapshot-gcc
-	$(MAKE) snapshots/snapshot-gcc-unrolled
+#
+# Production targets
+#
+
+HACL_RELEASE=1
+HACL_LICENSE?=$(HACL_HOME)/snapshots/licenses/MIT
+HACL_LICENSE_NSS?=$(HACL_HOME)/snapshots/licenses/APACHE2
+
+snapshots/hacl-c: snapshots-remove-intermediates
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc-unrolled
+	rm -rf snapshots/hacl-c
 	mkdir -p snapshots/hacl-c
 	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* Hacl_Policies.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* HMAC_SHA2_* vec128.h) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
 	$(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile)  \
 		./snapshots/hacl-c
 
-snapshots/nss: snapshots/snapshot-gcc-unrolled
-	# Compile everything but only copy out the things NSS is using.
+snapshots/nss: snapshots-remove-intermediates
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc-unrolled
+	rm -rf snapshots/nss
 	mkdir -p snapshots/nss
 	cp snapshots/snapshot-gcc-unrolled/Curve25519.c snapshots/nss/hacl_curve25519_64.c
 	cp snapshots/snapshot-gcc-unrolled/Curve25519.h snapshots/nss/hacl_curve25519_64.h
 	cp snapshots/kremlib/FStar.h snapshots/nss/fstar_uint128.h
 	cp snapshots/kremlib/kremlib.h snapshots/nss
 	# Patch files adding license headers.
-	code/nss-patches/patch.sh
+	# code/nss-patches/patch.sh
 
-snapshots-all:
+#
+# Build, refresh and clean targets for all snapshots
+#
+
+snapshots-intermediates:
 	$(MAKE) snapshots/snapshot-gcc
 	$(MAKE) snapshots/snapshot-gcc-unrolled
 	$(MAKE) snapshots/snapshot-msvc
-	$(MAKE) snapshots/hacl-c-compcert
+	$(MAKE) snapshots/snapshot-compcert
+
+snapshots-production:
 	$(MAKE) snapshots/hacl-c
+	$(MAKE) snapshots/nss
 
-snapshots-remove:
-	rm -rf snapshots/hacl-c
+snapshots-remove-intermediates:
 	rm -rf snapshots/snapshot*
-	rm -rf snapshots/nss
 
-snapshots-update:
-	$(MAKE) snapshots-remove
-	$(MAKE) snapshots-all
+snapshots-remove-production:
+	rm -rf snapshots/hacl-c
+	rm -rf snapshots/nss
 
 #
 # Building the shared library
