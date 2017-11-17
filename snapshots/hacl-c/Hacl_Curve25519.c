@@ -22,7 +22,7 @@
  */
 
 
-#include "Curve25519.h"
+#include "Hacl_Curve25519.h"
 
 static void Hacl_Bignum_Modulo_carry_top(uint64_t *b)
 {
@@ -836,7 +836,7 @@ void Hacl_EC_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *base
   Hacl_EC_Format_scalar_of_point(mypublic, nq);
 }
 
-void Curve25519_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint)
+void Hacl_Curve25519_crypto_scalarmult(uint8_t *mypublic, uint8_t *secret, uint8_t *basepoint)
 {
   Hacl_EC_crypto_scalarmult(mypublic, secret, basepoint);
 }
