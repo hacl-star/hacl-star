@@ -99,7 +99,7 @@ snapshots/nss: snapshots-remove-intermediates
 	cp snapshots/kremlib/FStar.h snapshots/nss/fstar_uint128.h
 	cp snapshots/kremlib/kremlib.h snapshots/nss
 	# Patch files adding license headers.
-	# code/nss-patches/patch.sh
+	# snapshots/patches/nss/patch.sh
 
 #
 # Build, refresh and clean targets for all snapshots
