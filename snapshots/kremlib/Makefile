@@ -23,9 +23,9 @@ endif
 #
 
 # Removing some files because of a mis-extraction
-# AEAD_Poly1305_64.c AEAD_Poly1305_64.h
+# AEAD_Poly1305_64.c AEAD_Poly1305_64.h  Chacha20Poly1305.c Chacha20Poly1305.h
 
-FILES = Salsa20.c Salsa20.h Chacha20.c Chacha20.h Poly1305_64.c Poly1305_64.h SHA2_512.c SHA2_512.h Ed25519.c Ed25519.h Hacl_Curve25519.c Hacl_Curve25519.h Chacha20Poly1305.c Chacha20Poly1305.h Hacl_Policies.c Hacl_Policies.h NaCl.c NaCl.h
+FILES = Salsa20.c Salsa20.h Chacha20.c Chacha20.h Poly1305_64.c Poly1305_64.h SHA2_512.c SHA2_512.h Ed25519.c Ed25519.h Hacl_Curve25519.c Hacl_Curve25519.h Hacl_Policies.c Hacl_Policies.h NaCl.c NaCl.h
 TWEETNACL_HOME ?= $(HACL_HOME)/other_providers/tweetnacl
 
 #
@@ -45,11 +45,9 @@ libhacl.so: $(FILES)
 	  Ed25519.c -c -o Ed25519.o
 	$(CC) $(LIBFLAGS) \
 	  Hacl_Curve25519.c -c -o Hacl_Curve25519.o
-	$(CC) $(LIBFLAGS) \
-	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
 	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/test-files -I . -Wall \
 	  ../../test/test-files/hacl_test_utils.c \
-	  Salsa20.o Poly1305_64.o Chacha20.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o SHA2_512.o Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
 	  -o libhacl.so
 
 
@@ -70,11 +68,9 @@ libhacl.a: $(FILES)
 	  Ed25519.c -c -o Ed25519.o
 	$(CC) $(LIBFLAGS) \
 	  Hacl_Curve25519.c -c -o Hacl_Curve25519.o
-	$(CC) $(LIBFLAGS) \
-	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
 	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/test-files -I . -Wall \
 	  ../../test/test-files/hacl_test_utils.c \
-	  Salsa20.o Poly1305_64.o Chacha20.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o SHA2_512.o Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
 	  -o libhacl.a
 
 #
@@ -94,11 +90,9 @@ libhacl32.so: $(FILES)
 	  Ed25519.c -c -o Ed25519.o
 	$(CC) $(LIBFLAGS32) \
 	  Hacl_Curve25519.c -c -o Hacl_Curve25519.o
-	$(CC) $(LIBFLAGS32) \
-	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
 	$(CC) -shared  $(LIBFLAGS32) -I ../../test/test-files -I . -Wall \
 	  ../../test/test-files/hacl_test_utils.c \
-	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o AEAD_Poly1305_64.o SHA2_512.o Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
 	  -o libhacl32.so
 
 #
@@ -118,11 +112,9 @@ libhacl32.a: $(FILES)
 	  Ed25519.c -c -o Ed25519.o
 	$(CC) $(LIBFLAGS32) \
 	  Hacl_Curve25519.c -c -o Hacl_Curve25519.o
-	$(CC) $(LIBFLAGS32) \
-	  Chacha20Poly1305.c -c -o Chacha20Poly1305.o
 	$(CC) -shared  $(LIBFLAGS32) -I ../../test/test-files -I . -Wall \
 	  ../../test/test-files/hacl_test_utils.c \
-	  Salsa20.o Poly1305_64.o Chacha20.o Chacha20Poly1305.o SHA2_512.o Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  Salsa20.o Poly1305_64.o Chacha20.o SHA2_512.o Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
 	  -o libhacl32.a
 
 unit-tests: libhacl.so
