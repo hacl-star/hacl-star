@@ -16,7 +16,7 @@ set(SOURCE_FILES_VERIFIED
    snapshots/hacl-c/AEAD_Poly1305_64.c
    snapshots/hacl-c/Chacha20.c
    snapshots/hacl-c/Chacha20Poly1305.c
-   snapshots/hacl-c/Curve25519.c
+   snapshots/hacl-c/Hacl_Curve25519.c
    snapshots/hacl-c/Ed25519.c
    snapshots/hacl-c/Poly1305_64.c
    snapshots/hacl-c/SHA2_256.c
