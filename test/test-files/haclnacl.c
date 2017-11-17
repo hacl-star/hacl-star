@@ -1,6 +1,6 @@
 #include "haclnacl.h"
 #include "kremlib.h"
-#include "Curve25519.h"
+#include "Hacl_Curve25519.h"
 #include "Chacha20.h"
 #include "Salsa20.h"
 #define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_poly
@@ -24,7 +24,7 @@
 extern void randombytes(uint8_t *bytes, uint64_t bytes_len);
 
 void curve25519_scalarmult(uint8_t *out, uint8_t *secret, uint8_t *point){
-  Curve25519_crypto_scalarmult(out, secret, point);
+  Hacl_Curve25519_crypto_scalarmult(out, secret, point);
 }
 
 void
@@ -159,13 +159,13 @@ int crypto_box_open_easy_afternm(unsigned char *m, const unsigned char *c,
 int crypto_scalarmult_base(unsigned char *q, const unsigned char *n){
   /* This leaves room for improvements with precomputations */
   uint8_t basepoint[32] = {9};
-  Curve25519_crypto_scalarmult(q, n, basepoint);
+  Hacl_Curve25519_crypto_scalarmult(q, n, basepoint);
   return 0;
 }
 
 int crypto_scalarmult(unsigned char *q, const unsigned char *n,
                       const unsigned char *p){
-  Curve25519_crypto_scalarmult(q, n, p);
+  Hacl_Curve25519_crypto_scalarmult(q, n, p);
   return 0;
 }
 

@@ -141,8 +141,8 @@ int32_t test_api()
   int i;
 
   // Creating public/private key couples
-  Curve25519_crypto_scalarmult(pk1, sk1, basepoint);
-  Curve25519_crypto_scalarmult(pk2, sk2, basepoint);
+  Hacl_Curve25519_crypto_scalarmult(pk1, sk1, basepoint);
+  Hacl_Curve25519_crypto_scalarmult(pk2, sk2, basepoint);
 
   NaCl_crypto_box_beforenm(test1, pk1, sk2);
   res = crypto_box_beforenm(test2, pk2, sk1);
