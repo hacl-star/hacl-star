@@ -1,4 +1,4 @@
-module Curve25519
+module Hacl.Curve25519
 
 module ST = FStar.HyperStack.ST
 

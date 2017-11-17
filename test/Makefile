@@ -294,7 +294,7 @@ endif
 #
 
 test-curve25519.exe:
-	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/Curve25519.c test-files/test-curve.c -o test-curve25519.exe $(PERF_LIBS)
+	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Curve25519.c test-files/test-curve.c -o test-curve25519.exe $(PERF_LIBS)
 
 test-unit-curve25519: test-curve25519.exe
 	./test-curve25519.exe unit-test
@@ -335,8 +335,8 @@ test-perf-ed25519: test-ed25519.exe
 test-secretbox.exe:
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c     -o Salsa20.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c -o Poly1305_64.o
-	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Curve25519.c  -o Curve25519.o
-	$(CC_BASE) Salsa20.o Poly1305_64.o Curve25519.o \
+	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Curve25519.c  -o Hacl_Curve25519.o
+	$(CC_BASE) Salsa20.o Poly1305_64.o Hacl_Curve25519.o \
 		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c test-files/test-secretbox.c -o test-secretbox.exe $(PERF_LIBS)
 
 test-unit-secretbox: test-secretbox.exe
@@ -352,8 +352,8 @@ test-perf-secretbox: test-secretbox.exe
 test-box.exe:
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c     -o Salsa20.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c -o Poly1305_64.o
-	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Curve25519.c  -o Curve25519.o
-	$(CC_BASE) Salsa20.o Poly1305_64.o Curve25519.o \
+	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Curve25519.c  -o Hacl_Curve25519.o
+	$(CC_BASE) Salsa20.o Poly1305_64.o Hacl_Curve25519.o \
 		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c test-files/test-box.c -o test-box.exe $(PERF_LIBS)
 
 test-unit-box: test-box.exe
