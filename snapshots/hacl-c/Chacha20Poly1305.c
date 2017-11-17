@@ -48,8 +48,8 @@ Chacha20Poly1305_aead_encrypt_poly(
   Hacl_Impl_Poly1305_64_State_poly1305_state
   st = AEAD_Poly1305_64_mk_state(tmp1, tmp1 + (uint32_t)3U);
   (void)AEAD_Poly1305_64_poly1305_blocks_init(st, aad1, aadlen, mk);
-  (void)AEAD_Poly1305_64_poly1305_blocks_continue((void *)(uint8_t)0U, st, c, mlen);
-  AEAD_Poly1305_64_poly1305_blocks_finish((void *)(uint8_t)0U, st, lb, mac, key_s);
+  (void)AEAD_Poly1305_64_poly1305_blocks_continue(st, c, mlen);
+  AEAD_Poly1305_64_poly1305_blocks_finish(st, lb, mac, key_s);
 }
 
 void Chacha20Poly1305_encode_length(uint8_t *lb, uint32_t aad_len, uint32_t mlen)

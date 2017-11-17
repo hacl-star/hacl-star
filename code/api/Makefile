@@ -50,7 +50,7 @@ aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HA
 	-add-include '"Chacha20.h"' -add-include '"AEAD_Poly1305_64.h"' \
 	-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide,Hacl.UInt16,Hacl.Types,Hacl.Bignum.*,AEAD_Poly1305_64,Chacha20 \
 	# TODO: FIX FOR KREMLIN EXTRACTION ISSUE, CHECK WITH JP
-	$(SED) -i 's/(void \*)(uint8_t )0, //g' aead-c/Chacha20Poly1305.c
+	$(SED) -i 's/(void \*)(uint8_t)0U, //g' aead-c/Chacha20Poly1305.c
 
 count-line:
 	@echo "LOC for AEAD CHACHAPOLY"
