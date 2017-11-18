@@ -45,10 +45,10 @@ box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Poly1305_64.fsti $(HACL_HOME)/code/sals
 		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad" \
 		-bundle "Hacl.Policies=Hacl.Policies"
 
-aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Chacha20.fsti Chacha20Poly1305.fst
+aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Hacl.Chacha20.fsti Chacha20Poly1305.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir aead-c Chacha20Poly1305.fst -skip-compilation \
-	-add-include '"Chacha20.h"' -add-include '"AEAD_Poly1305_64.h"' \
-	-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide,Hacl.UInt16,Hacl.Types,Hacl.Bignum.*,AEAD_Poly1305_64,Chacha20 \
+	-add-include '"Hacl_Chacha20.h"' -add-include '"AEAD_Poly1305_64.h"' \
+	-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide,Hacl.UInt16,Hacl.Types,Hacl.Bignum.*,AEAD_Poly1305_64,Hacl.Chacha20 \
 	# TODO: FIX FOR KREMLIN EXTRACTION ISSUE, CHECK WITH JP
 	$(SED) -i 's/(void \*)(uint8_t)0U, //g' aead-c/Chacha20Poly1305.c
 

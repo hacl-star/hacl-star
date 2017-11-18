@@ -1,7 +1,7 @@
 #include "haclnacl.h"
 #include "kremlib.h"
 #include "Hacl_Curve25519.h"
-#include "Chacha20.h"
+#include "Hacl_Chacha20.h"
 #include "Salsa20.h"
 #define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_poly
 #include "Poly1305_64.h"
@@ -36,7 +36,7 @@ chacha20(
          uint8_t *nonce,
          uint32_t ctr
          ){
-  Chacha20_chacha20(output, plain, plain_len, key, nonce, ctr);
+  Hacl_Chacha20_chacha20(output, plain, plain_len, key, nonce, ctr);
 }
 
 void

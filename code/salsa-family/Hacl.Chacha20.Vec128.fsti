@@ -1,4 +1,4 @@
-module Chacha20.Vec128
+module Hacl.Chacha20.Vec128
 
 module ST = FStar.HyperStack.ST
 

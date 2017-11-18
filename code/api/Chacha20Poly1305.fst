@@ -225,7 +225,7 @@ let aead_encrypt_ c mac m mlen aad aadlen k n =
   encode_length lb aadlen mlen;
   let h1 = ST.get() in
   lemma_modifies_0_1' tmp h0 h0' h1;
-  Chacha20.chacha20 c m mlen k n 1ul;
+  Hacl.Chacha20.chacha20 c m mlen k n 1ul;
   let h2 = ST.get() in
   let _ =
     let m = reveal_sbytes (as_seq h0 m) in
@@ -234,7 +234,7 @@ let aead_encrypt_ c mac m mlen aad aadlen k n =
     let n = reveal_sbytes (as_seq h0 n) in
     assert (c == Spec.Chacha20.chacha20_encrypt_bytes k n 1 m)
   in
-  Chacha20.chacha20_key_block b k n 0ul;
+  Hacl.Chacha20.chacha20_key_block b k n 0ul;
   let h3 = ST.get() in
   no_upd_lemma_1 h2 h3 b c;
   cut (let b = reveal_sbytes (as_seq h3 b) in let k = reveal_sbytes (as_seq h0 k) in
@@ -334,7 +334,7 @@ let aead_decrypt m c mlen mac aad aadlen k n =
   encode_length lb aadlen mlen;
   let rmac = Buffer.sub tmp 80ul 16ul in
   let h1' = ST.get() in
-  Chacha20.chacha20_key_block b k n 0ul;
+  Hacl.Chacha20.chacha20_key_block b k n 0ul;
   let mk = Buffer.sub b 0ul 32ul in
   let key_s = Buffer.sub mk 16ul 16ul in
   let h2 = ST.get() in
@@ -349,7 +349,7 @@ let aead_decrypt m c mlen mac aad aadlen k n =
   lemma_aead_decrypt_len c mlen;
   let res : u32 =
     if U8.(verify =^ 0uy) then (
-      	 Chacha20.chacha20 m c mlen k n 1ul;
+      	 Hacl.Chacha20.chacha20 m c mlen k n 1ul;
 	 0ul
   	 ) else 1ul in
   let h4 = ST.get() in

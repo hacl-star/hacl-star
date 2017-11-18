@@ -247,7 +247,7 @@ test-perf-salsa20: test-salsa20.exe
 #
 
 test-chacha20.exe:
-	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20.c test-files/test-chacha.c -o test-chacha20.exe $(PERF_LIBS)
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Chacha20.c test-files/test-chacha.c -o test-chacha20.exe $(PERF_LIBS)
 
 test-unit-chacha20: test-chacha20.exe
 	./test-chacha20.exe unit-test
@@ -272,7 +272,7 @@ ifeq ($(CC),ccomp)
 	@chmod +x test-chacha20-vec128.exe
 else
 	$(CC_BASE) -lpthread $(LIBDL) $(LIBWINSOCK) \
-	$(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20_Vec128.c test-files/test-chacha-vec128.c -o test-chacha20-vec128.exe $(PERF_LIBS)
+	$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Chacha20_Vec128.c test-files/test-chacha-vec128.c -o test-chacha20-vec128.exe $(PERF_LIBS)
 endif
 
 test-unit-chacha20-vec128: test-chacha20-vec128.exe
@@ -367,9 +367,9 @@ test-perf-box: test-box.exe
 #
 
 test-aead.exe:
-	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20.c         -o Chacha20.o
+	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Chacha20.c         -o Hacl_Chacha20.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/AEAD_Poly1305_64.c -o AEAD_Poly1305_64.o
-	$(CC_BASE) -lpthread $(LIBDL) $(LIBWINSOCK) Chacha20.o AEAD_Poly1305_64.o \
+	$(CC_BASE) -lpthread $(LIBDL) $(LIBWINSOCK) Hacl_Chacha20.o AEAD_Poly1305_64.o \
 		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/Chacha20Poly1305.c test-files/test-aead.c -o test-aead.exe $(PERF_LIBS)
 
 test-unit-aead: test-aead.exe
