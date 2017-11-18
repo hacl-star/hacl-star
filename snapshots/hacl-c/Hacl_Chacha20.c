@@ -22,7 +22,7 @@
  */
 
 
-#include "Chacha20.h"
+#include "Hacl_Chacha20.h"
 
 static void
 Hacl_Lib_LoadStore32_uint32s_from_le_bytes(uint32_t *output, uint8_t *input, uint32_t len)
@@ -244,7 +244,7 @@ Hacl_Impl_Chacha20_chacha20(
   Hacl_Impl_Chacha20_chacha20_counter_mode(output, plain, len, st, ctr);
 }
 
-void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32_t ctr)
+void Hacl_Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32_t ctr)
 {
   uint32_t buf[16U] = { 0U };
   uint32_t *st = buf;
@@ -253,7 +253,7 @@ void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32
 }
 
 void
-Chacha20_chacha20(
+Hacl_Chacha20_chacha20(
   uint8_t *output,
   uint8_t *plain,
   uint32_t len,

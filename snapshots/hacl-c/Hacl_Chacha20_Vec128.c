@@ -22,7 +22,7 @@
  */
 
 
-#include "Chacha20_Vec128.h"
+#include "Hacl_Chacha20_Vec128.h"
 
 inline static void Hacl_Impl_Chacha20_Vec128_State_state_incr(vec *k)
 {
@@ -375,7 +375,7 @@ Hacl_Impl_Chacha20_Vec128_chacha20(
 }
 
 void
-Chacha20_Vec128_chacha20(
+Hacl_Chacha20_Vec128_chacha20(
   uint8_t *output,
   uint8_t *plain,
   uint32_t len,

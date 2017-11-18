@@ -22,8 +22,8 @@
  */
 
 #include "kremlib.h"
-#ifndef __Chacha20_H
-#define __Chacha20_H
+#ifndef __Hacl_Chacha20_H
+#define __Hacl_Chacha20_H
 
 
 
@@ -56,14 +56,14 @@ typedef void *Hacl_Impl_Chacha20_log_t;
 
 typedef uint32_t Hacl_Lib_Create_h32;
 
-typedef uint8_t *Chacha20_uint8_p;
+typedef uint8_t *Hacl_Chacha20_uint8_p;
 
-typedef uint32_t Chacha20_uint32_t;
+typedef uint32_t Hacl_Chacha20_uint32_t;
 
-void Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32_t ctr);
+void Hacl_Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, uint32_t ctr);
 
 void
-Chacha20_chacha20(
+Hacl_Chacha20_chacha20(
   uint8_t *output,
   uint8_t *plain,
   uint32_t len,

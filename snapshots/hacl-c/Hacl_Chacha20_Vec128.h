@@ -22,8 +22,8 @@
  */
 
 #include "kremlib.h"
-#ifndef __Chacha20_Vec128_H
-#define __Chacha20_Vec128_H
+#ifndef __Hacl_Chacha20_Vec128_H
+#define __Hacl_Chacha20_Vec128_H
 
 
 
@@ -59,10 +59,10 @@ Hacl_Impl_Chacha20_Vec128_log_t_;
 
 typedef void *Hacl_Impl_Chacha20_Vec128_log_t;
 
-typedef uint8_t *Chacha20_Vec128_uint8_p;
+typedef uint8_t *Hacl_Chacha20_Vec128_uint8_p;
 
 void
-Chacha20_Vec128_chacha20(
+Hacl_Chacha20_Vec128_chacha20(
   uint8_t *output,
   uint8_t *plain,
   uint32_t len,

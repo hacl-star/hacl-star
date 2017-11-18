@@ -27,7 +27,7 @@
 
 
 #include "Hacl_Policies.h"
-#include "Chacha20.h"
+#include "Hacl_Chacha20.h"
 #include "AEAD_Poly1305_64.h"
 
 extern Prims_int Chacha20Poly1305_noncelen;
