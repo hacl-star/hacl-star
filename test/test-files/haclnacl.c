@@ -14,10 +14,10 @@
 #include "Ed25519.h"
 #undef K___uint32_t_uint8_t_
 #define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_sha256
-#include "SHA2_256.h"
+#include "Hacl_SHA2_256.h"
 #undef K___uint32_t_uint8_t_
 #define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_sha512
-#include "SHA2_512.h"
+#include "Hacl_SHA2_512.h"
 #undef K___uint32_t_uint8_t_
 #include "NaCl.h"
 
@@ -98,7 +98,7 @@ bool ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t msg_len, uint8_t *si
 }
 
 void sha2_512_hash(uint8_t *hash, uint8_t *input, uint32_t len){
-  SHA2_512_hash(hash, input, len);
+  Hacl_SHA2_512_hash(hash, input, len);
 }
 
 
