@@ -29,7 +29,7 @@ module H32 = Hacl.UInt32
 module H64 = Hacl.UInt64
 
 module Spec_Hash = Spec.SHA2_256
-module Hash = Hacl.Hash.SHA2_256
+module Hash = Hacl.Impl.SHA2_256
 module Spec = Spec.HMAC.SHA2_256
 
 

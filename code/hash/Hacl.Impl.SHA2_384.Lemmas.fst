@@ -1,12 +1,9 @@
-module Hacl.Hash.SHA2_384.Lemmas
-
-open FStar.HyperStack.All
-
-module ST = FStar.HyperStack.ST
+module Hacl.Impl.SHA2_384.Lemmas
 
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
+open FStar.HyperStack.All
 open FStar.HyperStack.ST
 open FStar.Buffer
 
@@ -31,6 +28,7 @@ module H32 = Hacl.UInt32
 module H64 = Hacl.UInt64
 module H128 = Hacl.UInt128
 
+module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module Buffer = FStar.Buffer
 module Cast = Hacl.Cast

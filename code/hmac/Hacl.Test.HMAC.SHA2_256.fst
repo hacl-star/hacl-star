@@ -6,7 +6,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.Buffer
 
-module Hash = Hacl.Hash.SHA2_256
+module Hash = Hacl.Impl.SHA2_256
 module MAC = HMAC_SHA2_256
 
 

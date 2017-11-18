@@ -1,4 +1,4 @@
-module Hacl.Hash.SHA2_256
+module Hacl.Impl.SHA2_256
 
 open FStar.HyperStack.All
 
@@ -34,7 +34,7 @@ module HS = FStar.HyperStack
 module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2_256
-module Lemmas = Hacl.Hash.SHA2_256.Lemmas
+module Lemmas = Hacl.Impl.SHA2_256.Lemmas
 
 
 (* Definition of base types *)

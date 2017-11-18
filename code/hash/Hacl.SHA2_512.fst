@@ -1,12 +1,9 @@
-module SHA2_512
-
-open FStar.HyperStack.All
-
-module ST = FStar.HyperStack.ST
+module Hacl.SHA2_512
 
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
+open FStar.HyperStack.All
 open FStar.HyperStack.ST
 open FStar.Buffer
 
@@ -15,7 +12,7 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
-open Hacl.Hash.SHA2_512
+open Hacl.Impl.SHA2_512
 
 
 (* Definition of aliases for modules *)
@@ -27,11 +24,12 @@ module H32 = Hacl.UInt32
 module H64 = Hacl.UInt64
 module H128 = Hacl.UInt128
 
+module ST = FStar.HyperStack.ST
 module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2_512
-module Hash = Hacl.Hash.SHA2_512
+module Hash = Hacl.Impl.SHA2_512
 
 
 (* Definitions of aliases for functions *)

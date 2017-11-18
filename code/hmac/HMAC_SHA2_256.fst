@@ -1,17 +1,15 @@
 module HMAC_SHA2_256
 
-open FStar.HyperStack.All
-
-module ST = FStar.HyperStack.ST
-
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
+open FStar.HyperStack.All
 open FStar.HyperStack.ST
 open FStar.Buffer
 open FStar.UInt32
 
-module Hash = Hacl.Hash.SHA2_256
+module ST = FStar.HyperStack.ST
+module Hash = Hacl.Impl.SHA2_256
 module Spec = Spec.HMAC.SHA2_256
 module MAC = Hacl.HMAC.SHA2_256
 
