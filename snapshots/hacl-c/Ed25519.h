@@ -108,59 +108,59 @@ typedef uint32_t *Hacl_Hash_Lib_Create_uint32_p;
 
 typedef uint64_t *Hacl_Hash_Lib_Create_uint64_p;
 
-typedef uint8_t Hacl_Hash_SHA2_512_Lemmas_uint8_t;
+typedef uint8_t Hacl_Impl_SHA2_512_Lemmas_uint8_t;
 
-typedef uint32_t Hacl_Hash_SHA2_512_Lemmas_uint32_t;
+typedef uint32_t Hacl_Impl_SHA2_512_Lemmas_uint32_t;
 
-typedef uint64_t Hacl_Hash_SHA2_512_Lemmas_uint64_t;
+typedef uint64_t Hacl_Impl_SHA2_512_Lemmas_uint64_t;
 
-typedef uint8_t Hacl_Hash_SHA2_512_Lemmas_uint8_ht;
+typedef uint8_t Hacl_Impl_SHA2_512_Lemmas_uint8_ht;
 
-typedef uint32_t Hacl_Hash_SHA2_512_Lemmas_uint32_ht;
+typedef uint32_t Hacl_Impl_SHA2_512_Lemmas_uint32_ht;
 
-typedef uint64_t Hacl_Hash_SHA2_512_Lemmas_uint64_ht;
+typedef uint64_t Hacl_Impl_SHA2_512_Lemmas_uint64_ht;
 
-typedef FStar_UInt128_t Hacl_Hash_SHA2_512_Lemmas_uint128_ht;
+typedef FStar_UInt128_t Hacl_Impl_SHA2_512_Lemmas_uint128_ht;
 
-typedef uint64_t *Hacl_Hash_SHA2_512_Lemmas_uint64_p;
+typedef uint64_t *Hacl_Impl_SHA2_512_Lemmas_uint64_p;
 
-typedef uint8_t *Hacl_Hash_SHA2_512_Lemmas_uint8_p;
+typedef uint8_t *Hacl_Impl_SHA2_512_Lemmas_uint8_p;
 
-typedef uint8_t Hacl_Hash_SHA2_512_uint8_t;
+typedef uint8_t Hacl_Impl_SHA2_512_uint8_t;
 
-typedef uint32_t Hacl_Hash_SHA2_512_uint32_t;
+typedef uint32_t Hacl_Impl_SHA2_512_uint32_t;
 
-typedef uint64_t Hacl_Hash_SHA2_512_uint64_t;
+typedef uint64_t Hacl_Impl_SHA2_512_uint64_t;
 
-typedef uint8_t Hacl_Hash_SHA2_512_uint8_ht;
+typedef uint8_t Hacl_Impl_SHA2_512_uint8_ht;
 
-typedef uint32_t Hacl_Hash_SHA2_512_uint32_ht;
+typedef uint32_t Hacl_Impl_SHA2_512_uint32_ht;
 
-typedef uint64_t Hacl_Hash_SHA2_512_uint64_ht;
+typedef uint64_t Hacl_Impl_SHA2_512_uint64_ht;
 
-typedef FStar_UInt128_t Hacl_Hash_SHA2_512_uint128_ht;
+typedef FStar_UInt128_t Hacl_Impl_SHA2_512_uint128_ht;
 
-typedef uint64_t *Hacl_Hash_SHA2_512_uint64_p;
+typedef uint64_t *Hacl_Impl_SHA2_512_uint64_p;
 
-typedef uint8_t *Hacl_Hash_SHA2_512_uint8_p;
+typedef uint8_t *Hacl_Impl_SHA2_512_uint8_p;
 
-typedef uint8_t SHA2_512_uint8_t;
+typedef uint8_t Hacl_SHA2_512_uint8_t;
 
-typedef uint32_t SHA2_512_uint32_t;
+typedef uint32_t Hacl_SHA2_512_uint32_t;
 
-typedef uint64_t SHA2_512_uint64_t;
+typedef uint64_t Hacl_SHA2_512_uint64_t;
 
-typedef uint8_t SHA2_512_uint8_ht;
+typedef uint8_t Hacl_SHA2_512_uint8_ht;
 
-typedef uint32_t SHA2_512_uint32_ht;
+typedef uint32_t Hacl_SHA2_512_uint32_ht;
 
-typedef uint64_t SHA2_512_uint64_ht;
+typedef uint64_t Hacl_SHA2_512_uint64_ht;
 
-typedef FStar_UInt128_t SHA2_512_uint128_ht;
+typedef FStar_UInt128_t Hacl_SHA2_512_uint128_ht;
 
-typedef uint64_t *SHA2_512_uint64_p;
+typedef uint64_t *Hacl_SHA2_512_uint64_p;
 
-typedef uint8_t *SHA2_512_uint8_p;
+typedef uint8_t *Hacl_SHA2_512_uint8_p;
 
 typedef uint8_t *Hacl_Impl_Ed25519_SecretExpand_hint8_p;
 

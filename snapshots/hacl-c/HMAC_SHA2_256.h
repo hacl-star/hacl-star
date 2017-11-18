@@ -49,21 +49,21 @@ typedef uint64_t *Hacl_Hash_Lib_Create_uint64_p;
 
 typedef uint8_t *Hacl_Hash_Lib_LoadStore_uint8_p;
 
-typedef uint8_t Hacl_Hash_SHA2_256_uint8_t;
+typedef uint8_t Hacl_Impl_SHA2_256_uint8_t;
 
-typedef uint32_t Hacl_Hash_SHA2_256_uint32_t;
+typedef uint32_t Hacl_Impl_SHA2_256_uint32_t;
 
-typedef uint64_t Hacl_Hash_SHA2_256_uint64_t;
+typedef uint64_t Hacl_Impl_SHA2_256_uint64_t;
 
-typedef uint8_t Hacl_Hash_SHA2_256_uint8_ht;
+typedef uint8_t Hacl_Impl_SHA2_256_uint8_ht;
 
-typedef uint32_t Hacl_Hash_SHA2_256_uint32_ht;
+typedef uint32_t Hacl_Impl_SHA2_256_uint32_ht;
 
-typedef uint64_t Hacl_Hash_SHA2_256_uint64_ht;
+typedef uint64_t Hacl_Impl_SHA2_256_uint64_ht;
 
-typedef uint32_t *Hacl_Hash_SHA2_256_uint32_p;
+typedef uint32_t *Hacl_Impl_SHA2_256_uint32_p;
 
-typedef uint8_t *Hacl_Hash_SHA2_256_uint8_p;
+typedef uint8_t *Hacl_Impl_SHA2_256_uint8_p;
 
 typedef uint8_t Hacl_HMAC_SHA2_256_uint8_t;
 
