@@ -172,9 +172,9 @@ import-kremlin:
 	$(FSTAR_INCLUDES)
 
 %.fst.hints: %.fst
-	$(FSTAR) --record_hints $<
+	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
 %.fsti.hints: %.fsti
-	$(FSTAR) --record_hints $<
+	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
 
 # Custom verification targets for re-located hint files
 %.fst-reloc-verify: %.fst
