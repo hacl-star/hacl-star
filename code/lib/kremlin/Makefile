@@ -47,8 +47,8 @@ lib-c/FStar.h: $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int
 	@echo "#endif" >> lib-c/FStar.h
 	@rm lib-c/Hacl_UInt128.*
 
-lib-c/Hacl_UInt128.h: Hacl.UInt128.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -drop Prims,FStar -skip-compilation $^ -fnouint128 -fnoanonymous-unions -tmpdir lib-c -static-header Hacl.UInt128 -bundle "Hacl.UInt128=FStar.UInt128" #-fnostruct-passing
+lib-c/Hacl_UInt128.h lib-c/Hacl_UInt128.c: Hacl.UInt128.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -drop Prims,FStar -skip-compilation $^ -fnouint128 -fnoanonymous-unions -tmpdir lib-c -bundle "Hacl.UInt128=Hacl.UInt128,FStar.UInt128" # -fnostruct-passing
 
 extract-c: ccomp-c/FStar.h lib-c/Hacl_Policies.c
 
