@@ -2,6 +2,12 @@
 # General extraction
 #
 
+ifndef HACL_HOME
+  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+else
+  HACL_HOME:=$(abspath $(HACL_HOME))
+endif
+
 .PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove
 
 #

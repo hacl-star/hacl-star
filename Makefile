@@ -2,13 +2,6 @@
 # Main HACL* Makefile
 #
 
-ifndef HACL_HOME
-  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-else
-  HACL_HOME:=$(abspath $(HACL_HOME))
-endif
-
-
 .PHONY: display verify test clean dependencies
 
 all: display
