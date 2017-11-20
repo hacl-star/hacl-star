@@ -22,8 +22,8 @@
  */
 
 #include "kremlib.h"
-#ifndef __Poly1305_64_H
-#define __Poly1305_64_H
+#ifndef __Hacl_Poly1305_64_H
+#define __Hacl_Poly1305_64_H
 
 
 
@@ -70,35 +70,49 @@ typedef uint8_t *Hacl_Impl_Poly1305_64_wordB;
 
 typedef uint8_t *Hacl_Impl_Poly1305_64_wordB_16;
 
-typedef uint8_t *Poly1305_64_uint8_p;
+typedef uint8_t *Hacl_Poly1305_64_uint8_p;
 
-typedef uint64_t Poly1305_64_uint64_t;
+typedef uint64_t Hacl_Poly1305_64_uint64_t;
 
-typedef uint8_t *Poly1305_64_key;
+typedef uint8_t *Hacl_Poly1305_64_key;
 
-typedef Hacl_Impl_Poly1305_64_State_poly1305_state Poly1305_64_state;
+typedef Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Poly1305_64_state;
 
-Hacl_Impl_Poly1305_64_State_poly1305_state Poly1305_64_mk_state(uint64_t *r, uint64_t *acc);
+Hacl_Impl_Poly1305_64_State_poly1305_state
+Hacl_Poly1305_64_mk_state(uint64_t *r, uint64_t *acc);
 
-void Poly1305_64_init(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *k1);
+void Hacl_Poly1305_64_init(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *k1);
 
-extern void *Poly1305_64_empty_log;
+extern void *Hacl_Poly1305_64_empty_log;
 
-void Poly1305_64_update_block(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m);
-
-void
-Poly1305_64_update(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m, uint32_t len1);
+void Hacl_Poly1305_64_update_block(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m);
 
 void
-Poly1305_64_update_last(
+Hacl_Poly1305_64_update(
   Hacl_Impl_Poly1305_64_State_poly1305_state st,
   uint8_t *m,
   uint32_t len1
 );
 
 void
-Poly1305_64_finish(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *mac, uint8_t *k1);
+Hacl_Poly1305_64_update_last(
+  Hacl_Impl_Poly1305_64_State_poly1305_state st,
+  uint8_t *m,
+  uint32_t len1
+);
 
 void
-Poly1305_64_crypto_onetimeauth(uint8_t *output, uint8_t *input, uint64_t len1, uint8_t *k1);
+Hacl_Poly1305_64_finish(
+  Hacl_Impl_Poly1305_64_State_poly1305_state st,
+  uint8_t *mac,
+  uint8_t *k1
+);
+
+void
+Hacl_Poly1305_64_crypto_onetimeauth(
+  uint8_t *output,
+  uint8_t *input,
+  uint64_t len1,
+  uint8_t *k1
+);
 #endif

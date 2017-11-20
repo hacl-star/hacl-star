@@ -22,7 +22,7 @@
  */
 
 
-#include "Poly1305_64.h"
+#include "Hacl_Poly1305_64.h"
 
 inline static void Hacl_Bignum_Modulo_reduce(uint64_t *b)
 {
@@ -405,12 +405,13 @@ Hacl_Standalone_Poly1305_64_crypto_onetimeauth(
   Hacl_Standalone_Poly1305_64_crypto_onetimeauth_(output, input, len1, k1);
 }
 
-Hacl_Impl_Poly1305_64_State_poly1305_state Poly1305_64_mk_state(uint64_t *r, uint64_t *acc)
+Hacl_Impl_Poly1305_64_State_poly1305_state
+Hacl_Poly1305_64_mk_state(uint64_t *r, uint64_t *acc)
 {
   return Hacl_Impl_Poly1305_64_mk_state(r, acc);
 }
 
-void Poly1305_64_init(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *k1)
+void Hacl_Poly1305_64_init(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *k1)
 {
   Hacl_Impl_Poly1305_64_State_poly1305_state scrut = st;
   uint64_t *r = scrut.r;
@@ -440,28 +441,32 @@ void Poly1305_64_init(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *k1
   x00[2U] = (uint64_t)0U;
 }
 
-void *Poly1305_64_empty_log = (void *)(uint8_t)0U;
+void *Hacl_Poly1305_64_empty_log = (void *)(uint8_t)0U;
 
-void Poly1305_64_update_block(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m)
+void Hacl_Poly1305_64_update_block(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m)
 {
   Hacl_Impl_Poly1305_64_poly1305_update(st, m);
 }
 
 void
-Poly1305_64_update(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m, uint32_t len1)
+Hacl_Poly1305_64_update(
+  Hacl_Impl_Poly1305_64_State_poly1305_state st,
+  uint8_t *m,
+  uint32_t len1
+)
 {
   if (!(len1 == (uint32_t)0U))
   {
     uint8_t *block = m;
     uint8_t *m_ = m + (uint32_t)16U;
     uint32_t len2 = len1 - (uint32_t)1U;
-    Poly1305_64_update_block(st, block);
-    Poly1305_64_update(st, m_, len2);
+    Hacl_Poly1305_64_update_block(st, block);
+    Hacl_Poly1305_64_update(st, m_, len2);
   }
 }
 
 void
-Poly1305_64_update_last(
+Hacl_Poly1305_64_update_last(
   Hacl_Impl_Poly1305_64_State_poly1305_state st,
   uint8_t *m,
   uint32_t len1
@@ -476,7 +481,11 @@ Poly1305_64_update_last(
 }
 
 void
-Poly1305_64_finish(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *mac, uint8_t *k1)
+Hacl_Poly1305_64_finish(
+  Hacl_Impl_Poly1305_64_State_poly1305_state st,
+  uint8_t *mac,
+  uint8_t *k1
+)
 {
   Hacl_Impl_Poly1305_64_State_poly1305_state scrut = st;
   uint64_t *h = scrut.h;
@@ -497,7 +506,12 @@ Poly1305_64_finish(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *mac, 
 }
 
 void
-Poly1305_64_crypto_onetimeauth(uint8_t *output, uint8_t *input, uint64_t len1, uint8_t *k1)
+Hacl_Poly1305_64_crypto_onetimeauth(
+  uint8_t *output,
+  uint8_t *input,
+  uint64_t len1,
+  uint8_t *k1
+)
 {
   Hacl_Standalone_Poly1305_64_crypto_onetimeauth(output, input, len1, k1);
 }
