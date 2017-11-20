@@ -30,9 +30,9 @@ module H64 = Hacl.UInt64
 
 
 (* The following values should point to Spec.Chacha20Poly1305 *)
-let noncelen = 12
-let keylen = 32
-let maclen = 16
+noextract let noncelen = 12
+noextract let keylen = 32
+noextract let maclen = 16
 
 
 let state = Hacl.Impl.Poly1305_64.State.poly1305_state
