@@ -28,7 +28,7 @@ clean-c-code:
 
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
-SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile) \
+SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h testlib.* FStar.* Makefile) \
 	$(addprefix code/poly1305/poly-c/, Hacl_Poly1305_64.* AEAD_Poly1305_64.*) \
 	./code/curve25519/x25519-c/Hacl_Curve25519.* \
 	./code/salsa-family/chacha-c/Hacl_Chacha20.* \
@@ -87,19 +87,17 @@ snapshots/hacl-c: snapshots-remove-intermediates
 	mkdir -p snapshots/hacl-c
 	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Salsa20.* Hacl_SHA2_* HMAC_SHA2_* vec128.h) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Ed25519*) \
-	$(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile)  \
+	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* Makefile)  \
 		./snapshots/hacl-c
 
 snapshots/nss: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc-unrolled
 	rm -rf snapshots/nss
 	mkdir -p snapshots/nss
-	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.c snapshots/nss/hacl_curve25519_64.c
-	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.h snapshots/nss/hacl_curve25519_64.h
-	cp snapshots/kremlib/FStar.h snapshots/nss/fstar_uint128.h
+	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/nss
+	cp snapshots/kremlib/FStar.* snapshots/nss
 	cp snapshots/kremlib/kremlib.h snapshots/nss
-	# Patch files adding license headers.
-	# snapshots/patches/nss/patch.sh
+	cp snapshots/kremlib/kremlib_base.h snapshots/nss
 
 #
 # Build, refresh and clean targets for all snapshots
