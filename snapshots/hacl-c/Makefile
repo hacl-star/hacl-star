@@ -145,4 +145,4 @@ unit-tests32: libhacl32.so
 	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. ./unit_tests32.exe
 
 clean:
-	rm -rf *~ *.exe *.out *.o *.txt *.so *.a
+	rm -rf *~ *.exe *.out *.o *.txt *.so

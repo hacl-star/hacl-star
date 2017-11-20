@@ -83,23 +83,23 @@ Hacl_Bignum_Fproduct_copy_from_wide_(uint64_t *output, FStar_UInt128_t *input)
 {
   {
     FStar_UInt128_t xi = input[0U];
-    output[0U] = FStar_Int_Cast_Full_uint128_to_uint64(xi);
+    output[0U] = FStar_UInt128_uint128_to_uint64(xi);
   }
   {
     FStar_UInt128_t xi = input[1U];
-    output[1U] = FStar_Int_Cast_Full_uint128_to_uint64(xi);
+    output[1U] = FStar_UInt128_uint128_to_uint64(xi);
   }
   {
     FStar_UInt128_t xi = input[2U];
-    output[2U] = FStar_Int_Cast_Full_uint128_to_uint64(xi);
+    output[2U] = FStar_UInt128_uint128_to_uint64(xi);
   }
   {
     FStar_UInt128_t xi = input[3U];
-    output[3U] = FStar_Int_Cast_Full_uint128_to_uint64(xi);
+    output[3U] = FStar_UInt128_uint128_to_uint64(xi);
   }
   {
     FStar_UInt128_t xi = input[4U];
-    output[4U] = FStar_Int_Cast_Full_uint128_to_uint64(xi);
+    output[4U] = FStar_UInt128_uint128_to_uint64(xi);
   }
 }
 
@@ -143,36 +143,36 @@ inline static void Hacl_Bignum_Fproduct_carry_wide_(FStar_UInt128_t *tmp)
     uint32_t ctr = (uint32_t)0U;
     FStar_UInt128_t tctr = tmp[ctr];
     FStar_UInt128_t tctrp1 = tmp[ctr + (uint32_t)1U];
-    uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(tctr) & (uint64_t)0x7ffffffffffffU;
+    uint64_t r0 = FStar_UInt128_uint128_to_uint64(tctr) & (uint64_t)0x7ffffffffffffU;
     FStar_UInt128_t c = FStar_UInt128_shift_right(tctr, (uint32_t)51U);
-    tmp[ctr] = FStar_Int_Cast_Full_uint64_to_uint128(r0);
+    tmp[ctr] = FStar_UInt128_uint64_to_uint128(r0);
     tmp[ctr + (uint32_t)1U] = FStar_UInt128_add(tctrp1, c);
   }
   {
     uint32_t ctr = (uint32_t)1U;
     FStar_UInt128_t tctr = tmp[ctr];
     FStar_UInt128_t tctrp1 = tmp[ctr + (uint32_t)1U];
-    uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(tctr) & (uint64_t)0x7ffffffffffffU;
+    uint64_t r0 = FStar_UInt128_uint128_to_uint64(tctr) & (uint64_t)0x7ffffffffffffU;
     FStar_UInt128_t c = FStar_UInt128_shift_right(tctr, (uint32_t)51U);
-    tmp[ctr] = FStar_Int_Cast_Full_uint64_to_uint128(r0);
+    tmp[ctr] = FStar_UInt128_uint64_to_uint128(r0);
     tmp[ctr + (uint32_t)1U] = FStar_UInt128_add(tctrp1, c);
   }
   {
     uint32_t ctr = (uint32_t)2U;
     FStar_UInt128_t tctr = tmp[ctr];
     FStar_UInt128_t tctrp1 = tmp[ctr + (uint32_t)1U];
-    uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(tctr) & (uint64_t)0x7ffffffffffffU;
+    uint64_t r0 = FStar_UInt128_uint128_to_uint64(tctr) & (uint64_t)0x7ffffffffffffU;
     FStar_UInt128_t c = FStar_UInt128_shift_right(tctr, (uint32_t)51U);
-    tmp[ctr] = FStar_Int_Cast_Full_uint64_to_uint128(r0);
+    tmp[ctr] = FStar_UInt128_uint64_to_uint128(r0);
     tmp[ctr + (uint32_t)1U] = FStar_UInt128_add(tctrp1, c);
   }
   {
     uint32_t ctr = (uint32_t)3U;
     FStar_UInt128_t tctr = tmp[ctr];
     FStar_UInt128_t tctrp1 = tmp[ctr + (uint32_t)1U];
-    uint64_t r0 = FStar_Int_Cast_Full_uint128_to_uint64(tctr) & (uint64_t)0x7ffffffffffffU;
+    uint64_t r0 = FStar_UInt128_uint128_to_uint64(tctr) & (uint64_t)0x7ffffffffffffU;
     FStar_UInt128_t c = FStar_UInt128_shift_right(tctr, (uint32_t)51U);
-    tmp[ctr] = FStar_Int_Cast_Full_uint64_to_uint128(r0);
+    tmp[ctr] = FStar_UInt128_uint64_to_uint128(r0);
     tmp[ctr + (uint32_t)1U] = FStar_UInt128_add(tctrp1, c);
   }
 }
@@ -237,23 +237,21 @@ inline static void Hacl_Bignum_Fmul_fmul(uint64_t *output, uint64_t *input, uint
 {
   uint64_t tmp[5U] = { 0U };
   memcpy(tmp, input, (uint32_t)5U * sizeof input[0U]);
-  KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
+  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
   FStar_UInt128_t t[5U];
   for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U);
+    t[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   Hacl_Bignum_Fmul_mul_shift_reduce_(t, tmp, input21);
   Hacl_Bignum_Fproduct_carry_wide_(t);
   FStar_UInt128_t b4 = t[4U];
   FStar_UInt128_t b0 = t[0U];
   FStar_UInt128_t
-  b4_ =
-    FStar_UInt128_logand(b4,
-      FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0x7ffffffffffffU));
+  b4_ = FStar_UInt128_logand(b4, FStar_UInt128_uint64_to_uint128((uint64_t)0x7ffffffffffffU));
   FStar_UInt128_t
   b0_ =
     FStar_UInt128_add(b0,
       FStar_UInt128_mul_wide((uint64_t)19U,
-        FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(b4, (uint32_t)51U))));
+        FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(b4, (uint32_t)51U))));
   t[4U] = b4_;
   t[0U] = b0_;
   Hacl_Bignum_Fproduct_copy_from_wide_(output, t);
@@ -316,14 +314,12 @@ inline static void Hacl_Bignum_Fsquare_fsquare_(FStar_UInt128_t *tmp, uint64_t *
   FStar_UInt128_t b4 = tmp[4U];
   FStar_UInt128_t b0 = tmp[0U];
   FStar_UInt128_t
-  b4_ =
-    FStar_UInt128_logand(b4,
-      FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0x7ffffffffffffU));
+  b4_ = FStar_UInt128_logand(b4, FStar_UInt128_uint64_to_uint128((uint64_t)0x7ffffffffffffU));
   FStar_UInt128_t
   b0_ =
     FStar_UInt128_add(b0,
       FStar_UInt128_mul_wide((uint64_t)19U,
-        FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_shift_right(b4, (uint32_t)51U))));
+        FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(b4, (uint32_t)51U))));
   tmp[4U] = b4_;
   tmp[0U] = b0_;
   Hacl_Bignum_Fproduct_copy_from_wide_(output, tmp);
@@ -346,20 +342,20 @@ Hacl_Bignum_Fsquare_fsquare_times_(uint64_t *input, FStar_UInt128_t *tmp, uint32
 inline static void
 Hacl_Bignum_Fsquare_fsquare_times(uint64_t *output, uint64_t *input, uint32_t count1)
 {
-  KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
+  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
   FStar_UInt128_t t[5U];
   for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U);
+    t[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   memcpy(output, input, (uint32_t)5U * sizeof input[0U]);
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count1);
 }
 
 inline static void Hacl_Bignum_Fsquare_fsquare_times_inplace(uint64_t *output, uint32_t count1)
 {
-  KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
+  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
   FStar_UInt128_t t[5U];
   for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    t[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U);
+    t[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count1);
 }
 
@@ -718,10 +714,10 @@ static void Hacl_Bignum25519_times_2d(uint64_t *out, uint64_t *a)
 
 static void Hacl_Bignum25519_fsquare(uint64_t *out, uint64_t *a)
 {
-  KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
+  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
   FStar_UInt128_t tmp[5U];
   for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    tmp[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U);
+    tmp[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   memcpy(out, a, (uint32_t)5U * sizeof a[0U]);
   Hacl_Bignum_Fsquare_fsquare_(tmp, out);
 }
@@ -1434,7 +1430,7 @@ static void Hacl_Impl_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint6
   FStar_UInt128_t
   encodedlen =
     FStar_UInt128_shift_left(FStar_UInt128_add(FStar_UInt128_mul_wide(n1, (uint64_t)(uint32_t)128U),
-        FStar_Int_Cast_Full_uint64_to_uint128(len1)),
+        FStar_UInt128_uint64_to_uint128(len1)),
       (uint32_t)3U);
   uint32_t
   pad0len = ((uint32_t)256U - ((uint32_t)len1 + (uint32_t)16U + (uint32_t)1U)) % (uint32_t)128U;
@@ -2217,16 +2213,16 @@ static void Hacl_Impl_BignumQ_Mul_low_mul_5(uint64_t *z, uint64_t *x, uint64_t *
   FStar_UInt128_t xy40 = FStar_UInt128_mul_wide(x4, y0);
   FStar_UInt128_t x5 = xy00;
   FStar_UInt128_t carry1 = FStar_UInt128_shift_right(x5, (uint32_t)56U);
-  uint64_t t = FStar_Int_Cast_Full_uint128_to_uint64(x5) & (uint64_t)0xffffffffffffffU;
+  uint64_t t = FStar_UInt128_uint128_to_uint64(x5) & (uint64_t)0xffffffffffffffU;
   uint64_t t0 = t;
   FStar_UInt128_t x6 = FStar_UInt128_add(FStar_UInt128_add(xy01, xy10), carry1);
   FStar_UInt128_t carry2 = FStar_UInt128_shift_right(x6, (uint32_t)56U);
-  uint64_t t1 = FStar_Int_Cast_Full_uint128_to_uint64(x6) & (uint64_t)0xffffffffffffffU;
+  uint64_t t1 = FStar_UInt128_uint128_to_uint64(x6) & (uint64_t)0xffffffffffffffU;
   uint64_t t11 = t1;
   FStar_UInt128_t
   x7 = FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_add(xy02, xy11), xy20), carry2);
   FStar_UInt128_t carry3 = FStar_UInt128_shift_right(x7, (uint32_t)56U);
-  uint64_t t2 = FStar_Int_Cast_Full_uint128_to_uint64(x7) & (uint64_t)0xffffffffffffffU;
+  uint64_t t2 = FStar_UInt128_uint128_to_uint64(x7) & (uint64_t)0xffffffffffffffU;
   uint64_t t21 = t2;
   FStar_UInt128_t
   x8 =
@@ -2234,11 +2230,11 @@ static void Hacl_Impl_BignumQ_Mul_low_mul_5(uint64_t *z, uint64_t *x, uint64_t *
         xy30),
       carry3);
   FStar_UInt128_t carry4 = FStar_UInt128_shift_right(x8, (uint32_t)56U);
-  uint64_t t3 = FStar_Int_Cast_Full_uint128_to_uint64(x8) & (uint64_t)0xffffffffffffffU;
+  uint64_t t3 = FStar_UInt128_uint128_to_uint64(x8) & (uint64_t)0xffffffffffffffU;
   uint64_t t31 = t3;
   uint64_t
   t4 =
-    FStar_Int_Cast_Full_uint128_to_uint64(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_add(xy04,
+    FStar_UInt128_uint128_to_uint64(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_add(xy04,
                 xy13),
               xy22),
             xy31),
@@ -2317,58 +2313,58 @@ static void Hacl_Impl_BignumQ_Mul_carry(uint64_t *out, FStar_UInt128_t *z)
   FStar_UInt128_t x = z0;
   FStar_UInt128_t y = z1;
   FStar_UInt128_t carry1 = FStar_UInt128_shift_right(x, (uint32_t)56U);
-  uint64_t t = FStar_Int_Cast_Full_uint128_to_uint64(x) & (uint64_t)0xffffffffffffffU;
+  uint64_t t = FStar_UInt128_uint128_to_uint64(x) & (uint64_t)0xffffffffffffffU;
   uint64_t x0 = t;
   FStar_UInt128_t z1_ = FStar_UInt128_add(y, carry1);
   FStar_UInt128_t x1 = z1_;
   FStar_UInt128_t y1 = z2;
   FStar_UInt128_t carry2 = FStar_UInt128_shift_right(x1, (uint32_t)56U);
-  uint64_t t1 = FStar_Int_Cast_Full_uint128_to_uint64(x1) & (uint64_t)0xffffffffffffffU;
+  uint64_t t1 = FStar_UInt128_uint128_to_uint64(x1) & (uint64_t)0xffffffffffffffU;
   uint64_t x11 = t1;
   FStar_UInt128_t z2_ = FStar_UInt128_add(y1, carry2);
   FStar_UInt128_t x2 = z2_;
   FStar_UInt128_t y2 = z3;
   FStar_UInt128_t carry3 = FStar_UInt128_shift_right(x2, (uint32_t)56U);
-  uint64_t t2 = FStar_Int_Cast_Full_uint128_to_uint64(x2) & (uint64_t)0xffffffffffffffU;
+  uint64_t t2 = FStar_UInt128_uint128_to_uint64(x2) & (uint64_t)0xffffffffffffffU;
   uint64_t x21 = t2;
   FStar_UInt128_t z3_ = FStar_UInt128_add(y2, carry3);
   FStar_UInt128_t x3 = z3_;
   FStar_UInt128_t y3 = z4;
   FStar_UInt128_t carry4 = FStar_UInt128_shift_right(x3, (uint32_t)56U);
-  uint64_t t3 = FStar_Int_Cast_Full_uint128_to_uint64(x3) & (uint64_t)0xffffffffffffffU;
+  uint64_t t3 = FStar_UInt128_uint128_to_uint64(x3) & (uint64_t)0xffffffffffffffU;
   uint64_t x31 = t3;
   FStar_UInt128_t z4_ = FStar_UInt128_add(y3, carry4);
   FStar_UInt128_t x4 = z4_;
   FStar_UInt128_t y4 = z5;
   FStar_UInt128_t carry5 = FStar_UInt128_shift_right(x4, (uint32_t)56U);
-  uint64_t t4 = FStar_Int_Cast_Full_uint128_to_uint64(x4) & (uint64_t)0xffffffffffffffU;
+  uint64_t t4 = FStar_UInt128_uint128_to_uint64(x4) & (uint64_t)0xffffffffffffffU;
   uint64_t x41 = t4;
   FStar_UInt128_t z5_ = FStar_UInt128_add(y4, carry5);
   FStar_UInt128_t x5 = z5_;
   FStar_UInt128_t y5 = z6;
   FStar_UInt128_t carry6 = FStar_UInt128_shift_right(x5, (uint32_t)56U);
-  uint64_t t5 = FStar_Int_Cast_Full_uint128_to_uint64(x5) & (uint64_t)0xffffffffffffffU;
+  uint64_t t5 = FStar_UInt128_uint128_to_uint64(x5) & (uint64_t)0xffffffffffffffU;
   uint64_t x51 = t5;
   FStar_UInt128_t z6_ = FStar_UInt128_add(y5, carry6);
   FStar_UInt128_t x6 = z6_;
   FStar_UInt128_t y6 = z7;
   FStar_UInt128_t carry7 = FStar_UInt128_shift_right(x6, (uint32_t)56U);
-  uint64_t t6 = FStar_Int_Cast_Full_uint128_to_uint64(x6) & (uint64_t)0xffffffffffffffU;
+  uint64_t t6 = FStar_UInt128_uint128_to_uint64(x6) & (uint64_t)0xffffffffffffffU;
   uint64_t x61 = t6;
   FStar_UInt128_t z7_ = FStar_UInt128_add(y6, carry7);
   FStar_UInt128_t x7 = z7_;
   FStar_UInt128_t y7 = z8;
   FStar_UInt128_t carry8 = FStar_UInt128_shift_right(x7, (uint32_t)56U);
-  uint64_t t7 = FStar_Int_Cast_Full_uint128_to_uint64(x7) & (uint64_t)0xffffffffffffffU;
+  uint64_t t7 = FStar_UInt128_uint128_to_uint64(x7) & (uint64_t)0xffffffffffffffU;
   uint64_t x71 = t7;
   FStar_UInt128_t z8_ = FStar_UInt128_add(y7, carry8);
   FStar_UInt128_t x8 = z8_;
-  FStar_UInt128_t y8 = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U);
+  FStar_UInt128_t y8 = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   FStar_UInt128_t carry9 = FStar_UInt128_shift_right(x8, (uint32_t)56U);
-  uint64_t t8 = FStar_Int_Cast_Full_uint128_to_uint64(x8) & (uint64_t)0xffffffffffffffU;
+  uint64_t t8 = FStar_UInt128_uint128_to_uint64(x8) & (uint64_t)0xffffffffffffffU;
   uint64_t x81 = t8;
   FStar_UInt128_t z9_ = FStar_UInt128_add(y8, carry9);
-  uint64_t x9 = FStar_Int_Cast_Full_uint128_to_uint64(z9_);
+  uint64_t x9 = FStar_UInt128_uint128_to_uint64(z9_);
   Hacl_Lib_Create64_make_h64_10(out, x0, x11, x21, x31, x41, x51, x61, x71, x81, x9);
 }
 
@@ -2454,10 +2450,10 @@ Hacl_Impl_BignumQ_Mul_barrett_reduction__(
 )
 {
   uint64_t *s = tmp + (uint32_t)25U;
-  KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U), (uint32_t)9U);
+  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)9U);
   FStar_UInt128_t qmu[9U];
   for (uint32_t _i = 0U; _i < (uint32_t)9U; ++_i)
-    qmu[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U);
+    qmu[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   Hacl_Impl_BignumQ_Mul_barrett_reduction__1(qmu, t, mu1, tmp);
   Hacl_Impl_BignumQ_Mul_barrett_reduction__2(t, m1, tmp);
   Hacl_Impl_BignumQ_Mul_subm_conditional(z, s);
@@ -2482,10 +2478,10 @@ static void Hacl_Impl_BignumQ_Mul_barrett_reduction(uint64_t *z, uint64_t *t)
 static void Hacl_Impl_BignumQ_Mul_mul_modq(uint64_t *out, uint64_t *x, uint64_t *y)
 {
   uint64_t z_[10U] = { 0U };
-  KRML_CHECK_SIZE(FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U), (uint32_t)9U);
+  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)9U);
   FStar_UInt128_t z[9U];
   for (uint32_t _i = 0U; _i < (uint32_t)9U; ++_i)
-    z[_i] = FStar_Int_Cast_Full_uint64_to_uint128((uint64_t)0U);
+    z[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   Hacl_Impl_BignumQ_Mul_mul_5(z, x, y);
   Hacl_Impl_BignumQ_Mul_carry(z_, z);
   Hacl_Impl_BignumQ_Mul_barrett_reduction_(out, z_);

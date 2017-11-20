@@ -293,7 +293,7 @@ static void Hacl_Impl_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint6
   FStar_UInt128_t
   encodedlen =
     FStar_UInt128_shift_left(FStar_UInt128_add(FStar_UInt128_mul_wide(n1, (uint64_t)(uint32_t)128U),
-        FStar_Int_Cast_Full_uint64_to_uint128(len)),
+        FStar_UInt128_uint64_to_uint128(len)),
       (uint32_t)3U);
   uint32_t
   pad0len = ((uint32_t)256U - ((uint32_t)len + (uint32_t)16U + (uint32_t)1U)) % (uint32_t)128U;
