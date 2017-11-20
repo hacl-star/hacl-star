@@ -5,6 +5,8 @@ open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
 
+open  FStar.Math.Lemmas
+
 module Hash = Spec.SHA2
 
 (* BIGNUM *)
@@ -173,7 +175,7 @@ val karatsuba:
 	(ensures (fun res -> res == a * b))
 	(decreases x0)
 let rec karatsuba x0 a b =
-	if x0 < 9 then a * b
+	if x0 < 11 then a * b
 	else begin
 		let x = x0 - 1 in
 		let pow_x = pow2 (pow2 x) in
@@ -208,30 +210,164 @@ let rec karatsuba x0 a b =
 		c
 	end
 
-val karatsuba_mod: 
-	x:size_t -> a:bignum{bn_v a < pow2 (pow2 x)} -> b:bignum{bn_v b < pow2 (pow2 x)} ->
-	n:bignum{1 < bn_v n /\ bn_v n < pow2 (pow2 x)} -> Tot (res:bignum{bn_v res < pow2 (pow2 x)})
-let karatsuba_mod x a b n = bn_mod (karatsuba x a b) n
+#reset-options "--max_fuel 0"
+
+val lemma_distributivity_div:
+	a:bignum -> b:bignum -> c:bignum{c > 0} -> Lemma
+	((a + b) / c == a / c + b / c)
+let lemma_distributivity_div a b c = admit()
+
+val lemma_mult_div_mod:
+	a:bignum -> b:bignum{b > 0} -> n:bignum{n > 0} -> Lemma
+	(((a * n) / b) % n == 0)
+let lemma_mult_div_mod a b n = admit()
+
+val lemma_mult_div_mod1:
+	a:bignum -> b:bignum{b > 0} -> n:bignum{n > 0} -> Lemma
+	((n - (a * n) / b) % n == 0)
+let lemma_mult_div_mod1 a b n = admit()
+
+val lemma_sub_minus:
+	a:bignum -> b:bignum -> Lemma
+	(a - b == -(b - a))
+let lemma_sub_minus a b = admit()
+
+val lemma_mod_minus_distr_l: a:nat -> b:nat -> p:pos -> Lemma
+  ((a - b) % p = ((a - b % p) % p))
+let lemma_mod_minus_distr_l a b p = admit()
+
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
+val lemma_mont_reduction1:
+	r:bignum -> c:bignum -> n:bignum{0 < n /\ n < r} -> m:bignum{m < r} -> Lemma
+	(requires (0 <= (c + m * n) / r - n /\ (c + m * n) / r - n < n))
+	(ensures ((c + m * n) / r - n == (c / r) % n))
+let lemma_mont_reduction1 r c n m =
+	small_modulo_lemma_1 ((c + m * n) / r - n) n;
+	//assert ((c + m * n) / r - n == ((c + m * n) / r - n) % n);
+	lemma_distributivity_div c (m * n) r;
+	//assert ((c + m * n) / r - n == c / r + (m * n) / r - n);
+	lemma_sub_minus ((m * n) / r) n;
+	//assert ((c + m * n) / r - n == c / r - (n - (m * n) / r));
+	assume (n - (m * n) / r >= 0);
+	lemma_mod_minus_distr_l (c / r) (n - (m * n) / r) n;
+	lemma_mult_div_mod1 m r n;
+	//assert (c / r + (m * n) / r - n == (c / r) % n);
+	assert ((c + m * n) / r - n == (c / r) % n)
+
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
+val lemma_mont_reduction2:
+	r:bignum -> c:bignum -> n:bignum{0 < n /\ n < r} -> m:bignum -> Lemma
+	(requires ((c + m * n) / r < n))
+	(ensures ((c + m * n) / r == (c / r) % n ))
+let lemma_mont_reduction2 r c n m =
+	small_modulo_lemma_1 ((c + m * n) / r) n;
+	//assert ((c + m * n) / r == ((c + m * n) / r) % n);
+	lemma_distributivity_div c (m * n) r;
+	//assert ((c + m * n) / r == c / r + (m * n) / r);
+	lemma_mod_plus_distr_l ((m * n) / r) (c / r) n;
+	lemma_mult_div_mod m r n;
+	assert ((c + m * n) / r == (c / r) % n)
+
+#reset-options "--z3rlimit 150 --max_fuel 0"
+
+(* res = c / r mod n *)
+val mont_reduction:
+	r:bignum -> n:bignum{0 < n /\ n < r} -> n':int -> c:bignum -> Pure (elem n)
+	(requires (c < n * n))
+	(ensures (fun res -> res == (c / r) % n))
+let mont_reduction r n n' c =
+	assert (c < r * n);
+	let m = (c * n') % r in
+	assert (m < r);
+	let u = (c + m * n) / r in
+	assert (c + m * n < r * n + r * n);
+	distributivity_add_right r n n;
+	multiple_division_lemma (n + n) r;
+	assert (u < n + n);
+	let res =
+		if u >= n then begin
+			let res = u - n in
+			assert (res < n);
+			assert (res == (c + m * n) / r - n);
+			assert ((c + m * n) / r - n < n);
+			lemma_mont_reduction1 r c n m;
+	 		res end
+		else begin
+			let res = u in
+			assert (res < n);
+			assert (res == (c + m * n) / r);
+			assert ((c + m * n) / r < n);
+			lemma_mont_reduction2 r c n m;
+			res
+		end in
+	res
+	
+val karatsuba_mont_mod:
+	x:size_t -> r:bignum{r = pow2 (pow2 x)} -> n:bignum{1 < n /\ n < r} -> n':int ->
+	a:elem n -> b:elem n -> Pure (elem n)
+	(requires (True))
+	(ensures (fun res -> res == (a * b / r) % n))
+let karatsuba_mont_mod x r n n' a b =
+	let c = karatsuba x a b in
+	assert (c == a * b);
+	assert (c < n * n);
+	let res = mont_reduction r n n' c in
+	assert (res == (a * b / r) % n);
+	res
+
+#reset-options "--z3rlimit 30 --max_fuel 0"
+
+val to_mont:
+	r:bignum -> n:bignum{1 < n /\ n < r} -> n':int -> a:elem n -> Pure (elem n)
+	(requires (True))
+	(ensures (fun res -> res == (a * r) % n))
+let to_mont r n n' a =
+	let r2 = (r * r) % n in
+	assert (r2 < n);
+	let c = a * r2 in
+	assert (c < n * n);
+	let res = mont_reduction r n n' c in
+	assert (res == (c / r) % n);
+	//assert (((a * ((r * r) % n))/ r) % n == ((a * r * r) / r) % n);
+	assume ((c / r) % n == (a * r) % n);
+	res
+
+#reset-options "--z3rlimit 30 --max_fuel 0"
+
+val from_mont:
+	r:bignum -> n:bignum{1 < n /\ n < r} -> n':int -> a_r:elem n -> Pure (elem n)
+	(requires (True))
+	(ensures (fun res -> res == (a_r / r) % n))
+let from_mont r n n' a_r = mont_reduction r n n' a_r
 
 #reset-options "--z3rlimit 50"
 
 val mod_exp_loop:
-	x:size_t -> n:bignum{1 < bn_v n /\ bn_v n < pow2 (pow2 x)} -> a:bignum{bn_v a < pow2 (pow2 x)} ->
-	b:bignum{bn_v b < pow2 (pow2 x)} -> acc:elem n -> Tot (res:elem n) (decreases b)
-let rec mod_exp_loop x n a b acc =
+	x:size_t -> r:bignum{r = pow2 (pow2 x)} -> n:bignum{1 < n /\ n < r} -> n':int ->
+	a:elem n -> b:elem n -> acc:elem n -> Tot (res:elem n) (decreases b)
+let rec mod_exp_loop x r n n' a b acc =
 	match b with
 	| 0 -> acc
-	| 1 -> karatsuba_mod x a acc n
+	| 1 -> karatsuba_mont_mod x r n n' a acc
 	| e ->
-		let a2 = karatsuba_mod x a a n in
+		let a2 = karatsuba_mont_mod x r n n' a a in
 		let acc =
 			if (bn_is_even e) then acc
-			else karatsuba_mod x a acc n in
-		mod_exp_loop x n a2 (bn_div2 b) acc
+			else karatsuba_mont_mod x r n n' a acc in
+		mod_exp_loop x r n n' a2 (bn_div2 b) acc
 
-val mod_exp: x:size_t -> n:bignum{1 < bn_v n /\ bn_v n < pow2 (pow2 x)} -> a:elem n -> b:elem n -> Tot (res:elem n)
+val mod_exp:
+	x:size_t -> n:bignum{1 < n /\ n < pow2 (pow2 x)} -> a:elem n -> b:elem n -> Tot (res:elem n)
 let mod_exp x n a b =
-	mod_exp_loop x n a b (bn 1)
+	let r = pow2 (pow2 x) in
+	let n', _ = extended_eucl n r in
+	let n' = -1 * n' in
+	let a_r = to_mont r n n' a in
+	let acc_r = to_mont r n n' 1 in
+	let res_r = mod_exp_loop x r n n' a_r b acc_r in
+	from_mont r n n' res_r
 
 (*
 val pow: a:bignum -> n:bignum -> Tot bignum (decreases n)
