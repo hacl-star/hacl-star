@@ -607,7 +607,7 @@ static void Hacl_EC_Format_fcontract_trim(uint64_t *input)
   uint64_t mask2 = FStar_UInt64_eq_mask(a2, (uint64_t)0x7ffffffffffffU);
   uint64_t mask3 = FStar_UInt64_eq_mask(a3, (uint64_t)0x7ffffffffffffU);
   uint64_t mask4 = FStar_UInt64_eq_mask(a4, (uint64_t)0x7ffffffffffffU);
-  uint64_t mask = mask0 & mask1 & mask2 & mask3 & mask4;
+  uint64_t mask = (((mask0 & mask1) & mask2) & mask3) & mask4;
   uint64_t a0_ = a0 - ((uint64_t)0x7ffffffffffedU & mask);
   uint64_t a1_ = a1 - ((uint64_t)0x7ffffffffffffU & mask);
   uint64_t a2_ = a2 - ((uint64_t)0x7ffffffffffffU & mask);
@@ -1368,7 +1368,7 @@ static void Hacl_Impl_SHA2_512_update(uint64_t *state, uint8_t *data)
         ^
           ((e >> (uint32_t)18U | e << ((uint32_t)64U - (uint32_t)18U))
           ^ (e >> (uint32_t)41U | e << ((uint32_t)64U - (uint32_t)41U))))
-      + (e & f1 ^ ~e & g1)
+      + ((e & f1) ^ (~e & g1))
       + k_t
       + ws_t;
     uint64_t
@@ -1377,7 +1377,7 @@ static void Hacl_Impl_SHA2_512_update(uint64_t *state, uint8_t *data)
       ^
         ((a >> (uint32_t)34U | a << ((uint32_t)64U - (uint32_t)34U))
         ^ (a >> (uint32_t)39U | a << ((uint32_t)64U - (uint32_t)39U))))
-      + (a & b ^ (a & c ^ b & c));
+      + ((a & b) ^ ((a & c) ^ (b & c)));
     uint64_t x1 = t1 + t2;
     uint64_t x5 = d1 + t1;
     uint64_t *p1 = hash_0;
@@ -1475,7 +1475,7 @@ static void Hacl_Impl_Ed25519_SecretExpand_secret_expand(uint8_t *expanded, uint
   uint8_t h_low0 = h_low[0U];
   uint8_t h_low31 = h_low[31U];
   h_low[0U] = h_low0 & (uint8_t)0xf8U;
-  h_low[31U] = h_low31 & (uint8_t)127U | (uint8_t)64U;
+  h_low[31U] = (h_low31 & (uint8_t)127U) | (uint8_t)64U;
 }
 
 static void Hacl_Impl_Ed25519_SecretToPublic_point_mul_g(uint64_t *result, uint8_t *scalar)
@@ -2105,11 +2105,11 @@ static void Hacl_Impl_BignumQ_Mul_choose(uint64_t *z, uint64_t *x, uint64_t *y, 
   uint64_t y2 = y[2U];
   uint64_t y3 = y[3U];
   uint64_t y4 = y[4U];
-  uint64_t z0 = (y0 ^ x0) & mask ^ x0;
-  uint64_t z1 = (y1 ^ x1) & mask ^ x1;
-  uint64_t z2 = (y2 ^ x2) & mask ^ x2;
-  uint64_t z3 = (y3 ^ x3) & mask ^ x3;
-  uint64_t z4 = (y4 ^ x4) & mask ^ x4;
+  uint64_t z0 = ((y0 ^ x0) & mask) ^ x0;
+  uint64_t z1 = ((y1 ^ x1) & mask) ^ x1;
+  uint64_t z2 = ((y2 ^ x2) & mask) ^ x2;
+  uint64_t z3 = ((y3 ^ x3) & mask) ^ x3;
+  uint64_t z4 = ((y4 ^ x4) & mask) ^ x4;
   Hacl_Lib_Create64_make_h64_5(z, z0, z1, z2, z3, z4);
 }
 

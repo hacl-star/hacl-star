@@ -231,7 +231,7 @@ static void Hacl_Impl_SHA2_512_update(uint64_t *state, uint8_t *data)
         ^
           ((e >> (uint32_t)18U | e << ((uint32_t)64U - (uint32_t)18U))
           ^ (e >> (uint32_t)41U | e << ((uint32_t)64U - (uint32_t)41U))))
-      + (e & f1 ^ ~e & g)
+      + ((e & f1) ^ (~e & g))
       + k_t
       + ws_t;
     uint64_t
@@ -240,7 +240,7 @@ static void Hacl_Impl_SHA2_512_update(uint64_t *state, uint8_t *data)
       ^
         ((a >> (uint32_t)34U | a << ((uint32_t)64U - (uint32_t)34U))
         ^ (a >> (uint32_t)39U | a << ((uint32_t)64U - (uint32_t)39U))))
-      + (a & b ^ (a & c ^ b & c));
+      + ((a & b) ^ ((a & c) ^ (b & c)));
     uint64_t x1 = t1 + t2;
     uint64_t x5 = d + t1;
     uint64_t *p1 = hash_0;

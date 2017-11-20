@@ -750,7 +750,7 @@ static void Hacl_EC_Format_fcontract_trim(uint64_t *input)
   uint64_t mask2 = FStar_UInt64_eq_mask(a2, (uint64_t)0x7ffffffffffffU);
   uint64_t mask3 = FStar_UInt64_eq_mask(a3, (uint64_t)0x7ffffffffffffU);
   uint64_t mask4 = FStar_UInt64_eq_mask(a4, (uint64_t)0x7ffffffffffffU);
-  uint64_t mask = mask0 & mask1 & mask2 & mask3 & mask4;
+  uint64_t mask = (((mask0 & mask1) & mask2) & mask3) & mask4;
   uint64_t a0_ = a0 - ((uint64_t)0x7ffffffffffedU & mask);
   uint64_t a1_ = a1 - ((uint64_t)0x7ffffffffffffU & mask);
   uint64_t a2_ = a2 - ((uint64_t)0x7ffffffffffffU & mask);

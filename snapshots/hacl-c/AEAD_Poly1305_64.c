@@ -266,7 +266,7 @@ static void Hacl_Impl_Poly1305_64_poly1305_last_pass(uint64_t *acc)
   uint64_t mask0 = FStar_UInt64_gte_mask(a00, (uint64_t)0xffffffffffbU);
   uint64_t mask1 = FStar_UInt64_eq_mask(a1, (uint64_t)0xfffffffffffU);
   uint64_t mask2 = FStar_UInt64_eq_mask(a2, (uint64_t)0x3ffffffffffU);
-  uint64_t mask = mask0 & mask1 & mask2;
+  uint64_t mask = (mask0 & mask1) & mask2;
   uint64_t a0_0 = a00 - ((uint64_t)0xffffffffffbU & mask);
   uint64_t a1_0 = a1 - ((uint64_t)0xfffffffffffU & mask);
   uint64_t a2_0 = a2 - ((uint64_t)0x3ffffffffffU & mask);
