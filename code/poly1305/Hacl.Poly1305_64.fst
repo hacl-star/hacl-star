@@ -1,10 +1,7 @@
-module Poly1305_64
-
-open FStar.HyperStack.All
-
-module ST = FStar.HyperStack.ST
+module Hacl.Poly1305_64
 
 open FStar.Mul
+open FStar.HyperStack.All
 open FStar.HyperStack.ST
 open FStar.Ghost
 open FStar.Seq
@@ -13,7 +10,7 @@ open FStar.Endianness
 open FStar.Buffer
 open Hacl.Cast
 
-
+module ST = FStar.HyperStack.ST
 module H8   = Hacl.UInt8
 module Limb = Hacl.Bignum.Limb
 module Wide = Hacl.Bignum.Wide
@@ -23,7 +20,7 @@ module U64  = FStar.UInt64
 module I = Hacl.Impl.Poly1305_64
 module S = Hacl.Spec.Poly1305_64
 module Poly = Hacl.Standalone.Poly1305_64
-       	      
+
 
 (* Type Aliases *)
 type key = k:uint8_p{length k = 32}
@@ -95,7 +92,7 @@ let rec update st m len =
     Buffer.lemma_reveal_modifies_1 (get_accumulator st) h0 h1;
     update st m' len
 
-  
+
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
 module A = Hacl.Spec.Bignum.AddAndMultiply

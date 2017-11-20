@@ -78,7 +78,7 @@ let crypto_secretbox_detached c mac m mlen n k =
     Salsa20.salsa20 (offset c mlen0_32) (offset m mlen0_32) (U32.(mlen_32 -^ mlen0_32)) subkey (sub n 16ul 8ul)  1uL;
   let h2 = ST.get() in
   cut (modifies_2_1 c h0 h2);
-  Poly1305_64.crypto_onetimeauth mac c mlen (sub block0 0ul 32ul);
+  Hacl.Poly1305_64.crypto_onetimeauth mac c mlen (sub block0 0ul 32ul);
   let h3 = ST.get() in
   cut (modifies_3_2 c mac h0 h3);
   pop_frame();
@@ -110,7 +110,7 @@ let crypto_secretbox_open_detached m c mac clen n k =
   Salsa20.salsa20 block0 block0 32ul subkey (sub n 16ul 8ul) 0uL;
   let h1 = ST.get() in
   cut(modifies_0 h0 h1);
-  Poly1305_64.crypto_onetimeauth tmp_mac c clen (sub block0 0ul 32ul);
+  Hacl.Poly1305_64.crypto_onetimeauth tmp_mac c clen (sub block0 0ul 32ul);
   let h2 = ST.get() in
   cut(modifies_0 h0 h2);
   let result = cmp_bytes mac tmp_mac 16ul in

@@ -4,7 +4,7 @@
 #include "Hacl_Chacha20.h"
 #include "Salsa20.h"
 #define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_poly
-#include "Poly1305_64.h"
+#include "Hacl_Poly1305_64.h"
 #undef Hacl_Impl_Poly1305_64_State_poly1305_state
 #define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_aead
 #include "Chacha20Poly1305.h"
@@ -53,7 +53,7 @@ salsa20(
 
 void
 poly1305_onetimeauth(uint8_t *output, uint8_t *input, uint64_t input_len, uint8_t *key){
-  Poly1305_64_crypto_onetimeauth(output, input, input_len, key);
+  Hacl_Poly1305_64_crypto_onetimeauth(output, input, input_len, key);
 }
 
 uint32_t

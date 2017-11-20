@@ -220,7 +220,7 @@ test-all-perf: $(addprefix test-all-, poly1305 chacha20 chacha20-vec128 salsa20 
 #
 
 test-poly1305.exe:
-	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c test-files/test-poly.c -o test-poly1305.exe \
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Poly1305_64.c test-files/test-poly.c -o test-poly1305.exe \
 		$(PERF_LIBS)
 
 test-unit-poly1305: test-poly1305.exe
@@ -334,9 +334,9 @@ test-perf-ed25519: test-ed25519.exe
 
 test-secretbox.exe:
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c     -o Salsa20.o
-	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c -o Poly1305_64.o
+	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Poly1305_64.c -o Hacl_Poly1305_64.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Curve25519.c  -o Hacl_Curve25519.o
-	$(CC_BASE) Salsa20.o Poly1305_64.o Hacl_Curve25519.o \
+	$(CC_BASE) Salsa20.o Hacl_Poly1305_64.o Hacl_Curve25519.o \
 		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c test-files/test-secretbox.c -o test-secretbox.exe $(PERF_LIBS)
 
 test-unit-secretbox: test-secretbox.exe
@@ -351,9 +351,9 @@ test-perf-secretbox: test-secretbox.exe
 
 test-box.exe:
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c     -o Salsa20.o
-	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Poly1305_64.c -o Poly1305_64.o
+	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Poly1305_64.c -o Hacl_Poly1305_64.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Curve25519.c  -o Hacl_Curve25519.o
-	$(CC_BASE) Salsa20.o Poly1305_64.o Hacl_Curve25519.o \
+	$(CC_BASE) Salsa20.o Hacl_Poly1305_64.o Hacl_Curve25519.o \
 		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c test-files/test-box.c -o test-box.exe $(PERF_LIBS)
 
 test-unit-box: test-box.exe

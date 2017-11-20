@@ -29,7 +29,7 @@ clean-c-code:
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
 SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile) \
-	$(addprefix code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
+	$(addprefix code/poly1305/poly-c/, Hacl_Poly1305_64.* AEAD_Poly1305_64.*) \
 	./code/curve25519/x25519-c/Hacl_Curve25519.* \
 	./code/salsa-family/chacha-c/Hacl_Chacha20.* \
 	./code/salsa-family/salsa-c/Salsa20.* \
@@ -85,7 +85,7 @@ snapshots/hacl-c: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc-unrolled
 	rm -rf snapshots/hacl-c
 	mkdir -p snapshots/hacl-c
-	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Poly1305_64.* Salsa20.* Hacl_SHA2_* HMAC_SHA2_* vec128.h) \
+	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Salsa20.* Hacl_SHA2_* HMAC_SHA2_* vec128.h) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Ed25519*) \
 	$(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile)  \
 		./snapshots/hacl-c
