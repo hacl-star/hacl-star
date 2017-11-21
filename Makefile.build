@@ -93,7 +93,7 @@ snapshots/hacl-c/kremlib:
 
 snapshots/nss/kremlib:
 	for f in kremlib.h kremlib_base.h FStar.h FStar.c; do \
-		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/nss/$$f ; \
+		(cat $(HACL_LICENSE_NSS) snapshots/kremlib/$$f ) > snapshots/nss/$$f ; \
 	done
 
 
