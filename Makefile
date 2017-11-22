@@ -67,6 +67,9 @@ verify-nss:
 	$(MAKE) ct -C code/curve25519
 	$(MAKE) verify -C code/curve25519
 	$(MAKE) Spec.Curve25519.fst-verify -C specs
+	$(MAKE) ct -C code/salsa-family
+	$(MAKE) verify -C code/salsa-family
+	$(MAKE) Spec.Chacha20.fst-verify -C specs
 
 
 #
