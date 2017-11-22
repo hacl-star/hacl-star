@@ -58,7 +58,7 @@ val f:
 let f prf p_len pwd s_len salt counter i =
   let input = create (s_len + numbytes_size_t) (u8 0) in
   let s_i = update_sub input 0 s_len salt in
-  let i_bytes = uint_to_bytes_le #U32 (u32 i) in
+  let i_bytes = uint_to_bytes_be #U32 (u32 i) in
   let s_i = update_sub s_i s_len numbytes_size_t i_bytes in
   let u1 = Spec.HMAC.hmac prf p_len pwd (s_len + numbytes_size_t) s_i in
   repeat_range 1 counter (fun i u ->
@@ -114,8 +114,6 @@ let pbkdf2 prf p_len pwd s_len salt counter dkLen =
   let dk_t = repeat_range 0 l (fun i dk_x ->
       let dk_i = f prf p_len pwd s_len salt counter (i + 1) in
       update_sub #uint8 #foo dk_x (i * hLen) hLen dk_i
-      (*let tmp = create hLen (u8 1) in
-      update_sub #uint8 #foo dk_x 0 hLen tmp*)
     ) dk_0 in
 
 ///  4. Concatenate the blocks and extract the first dkLen octets to
@@ -125,4 +123,3 @@ let pbkdf2 prf p_len pwd s_len salt counter dkLen =
 ///
 ///  5. Output the derived key DK.
   sub dk_t 0 dkLen
-  (*create hLen (u8 1)*)

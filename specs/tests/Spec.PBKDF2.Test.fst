@@ -56,4 +56,4 @@ let test () =
   IO.print_string "\nComputed key:";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list output);
   if result then   IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :("
+  else IO.print_string "\nFailure :(\n"
