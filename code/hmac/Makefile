@@ -20,7 +20,7 @@ all-ver: verify
 all-ci: verify
 all-hints: hints
 
-extract-c: hmac-c/Hacl.HMAC.SHA2_256.c
+extract-c: hmac-c/Hacl_HMAC_SHA2_256.c
 
 test: test-hmac_sha2_256.exe
 
