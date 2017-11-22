@@ -24,11 +24,6 @@ open Spec.Lib.IntSeq
 type lbytes (s:size_t) = intseq U8 s
 let numbytes_size_t = 4
 
-(*let prf (a:Hash.algorithm) = Spec.HMAC.hmac a
-type prf =
-  | HMAC_SHA2_256
-  | HMAC_SHA2_512*)
-
 ///  F is defined as the exclusive-or sum of the
 ///  first c iterates of the underlying pseudorandom function PRF
 ///  applied to the password P and the concatenation of the salt S
@@ -60,12 +55,15 @@ let f prf p_len pwd s_len salt counter i =
   let s_i = update_sub input 0 s_len salt in
   let i_bytes = uint_to_bytes_be #U32 (u32 i) in
   let s_i = update_sub s_i s_len numbytes_size_t i_bytes in
-  let u1 = Spec.HMAC.hmac prf p_len pwd (s_len + numbytes_size_t) s_i in
+  let u_o = Spec.HMAC.hmac prf p_len pwd (s_len + numbytes_size_t) s_i in
   repeat_range 1 counter (fun i u ->
-      let u_i = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u in
+      let u_i = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u_o in
       map2 (fun x y -> x ^. y) u u_i
-    ) u1
-
+    ) u_o
+  (*let u2 = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u_o in
+  let u_o = map2 (fun x y -> x ^. y) u_o u2 in
+  let u3 = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u2 in
+  map2 (fun x y -> x ^. y) u_o u3*)
 
 val pbkdf2:
   prf:Hash.algorithm ->
