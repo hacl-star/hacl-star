@@ -22,7 +22,7 @@
  */
 
 
-#include "HMAC_SHA2_256.h"
+#include "Hacl_HMAC_SHA2_256.h"
 
 static void
 Hacl_Hash_Lib_LoadStore_uint32s_from_be_bytes(uint32_t *output, uint8_t *input, uint32_t len)
@@ -294,7 +294,7 @@ static void Hacl_Impl_SHA2_256_hash(uint8_t *hash1, uint8_t *input, uint32_t len
   Hacl_Impl_SHA2_256_finish(state, hash1);
 }
 
-static void Hacl_HMAC_SHA2_256_xor_bytes_inplace(uint8_t *a, uint8_t *b, uint32_t len)
+static void Hacl_Impl_HMAC_SHA2_256_xor_bytes_inplace(uint8_t *a, uint8_t *b, uint32_t len)
 {
   for (uint32_t i = (uint32_t)0U; i < len; i = i + (uint32_t)1U)
   {
@@ -305,7 +305,7 @@ static void Hacl_HMAC_SHA2_256_xor_bytes_inplace(uint8_t *a, uint8_t *b, uint32_
 }
 
 static void
-Hacl_HMAC_SHA2_256_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len)
+Hacl_Impl_HMAC_SHA2_256_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len)
 {
   uint8_t ipad[64U];
   for (uint32_t _i = 0U; _i < (uint32_t)64U; ++_i)
@@ -313,7 +313,7 @@ Hacl_HMAC_SHA2_256_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t
   uint8_t opad[64U];
   for (uint32_t _i = 0U; _i < (uint32_t)64U; ++_i)
     opad[_i] = (uint8_t)0x5cU;
-  Hacl_HMAC_SHA2_256_xor_bytes_inplace(ipad, key, (uint32_t)64U);
+  Hacl_Impl_HMAC_SHA2_256_xor_bytes_inplace(ipad, key, (uint32_t)64U);
   uint32_t state0[137U] = { 0U };
   uint32_t n0 = len / (uint32_t)64U;
   uint32_t r0 = len % (uint32_t)64U;
@@ -326,7 +326,7 @@ Hacl_HMAC_SHA2_256_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t
   uint8_t *hash0 = ipad;
   Hacl_Impl_SHA2_256_finish(state0, hash0);
   uint8_t *s4 = ipad;
-  Hacl_HMAC_SHA2_256_xor_bytes_inplace(opad, key, (uint32_t)64U);
+  Hacl_Impl_HMAC_SHA2_256_xor_bytes_inplace(opad, key, (uint32_t)64U);
   uint32_t state1[137U] = { 0U };
   Hacl_Impl_SHA2_256_init(state1);
   Hacl_Impl_SHA2_256_update(state1, opad);
@@ -335,7 +335,7 @@ Hacl_HMAC_SHA2_256_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t
 }
 
 static void
-Hacl_HMAC_SHA2_256_hmac(
+Hacl_Impl_HMAC_SHA2_256_hmac(
   uint8_t *mac,
   uint8_t *key,
   uint32_t keylen,
@@ -353,16 +353,16 @@ Hacl_HMAC_SHA2_256_hmac(
     uint8_t *nkey0 = nkey;
     Hacl_Impl_SHA2_256_hash(nkey0, key, keylen);
   }
-  Hacl_HMAC_SHA2_256_hmac_core(mac, nkey, data, datalen);
+  Hacl_Impl_HMAC_SHA2_256_hmac_core(mac, nkey, data, datalen);
 }
 
 void hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len)
 {
-  Hacl_HMAC_SHA2_256_hmac_core(mac, key, data, len);
+  Hacl_Impl_HMAC_SHA2_256_hmac_core(mac, key, data, len);
 }
 
 void hmac(uint8_t *mac, uint8_t *key, uint32_t keylen, uint8_t *data, uint32_t datalen)
 {
-  Hacl_HMAC_SHA2_256_hmac(mac, key, keylen, data, datalen);
+  Hacl_Impl_HMAC_SHA2_256_hmac(mac, key, keylen, data, datalen);
 }
 
