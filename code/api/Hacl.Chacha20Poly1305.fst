@@ -1,11 +1,8 @@
-module Chacha20Poly1305
-
-module ST = FStar.HyperStack.ST
-
-open FStar.HyperStack.All
+module Hacl.Chacha20Poly1305
 
 open FStar.Seq
 open FStar.HyperStack
+open FStar.HyperStack.All
 open FStar.Buffer
 open FStar.HyperStack.ST
 open Hacl.Constants
@@ -18,7 +15,7 @@ open Hacl.Endianness
 open Spec.Chacha20Poly1305
 
 (* Module abbreviations *)
-
+module ST = FStar.HyperStack.ST
 module HS  = FStar.HyperStack
 module B   = FStar.Buffer
 module U8  = FStar.UInt8

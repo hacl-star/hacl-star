@@ -7,7 +7,7 @@
 #include "Hacl_Poly1305_64.h"
 #undef Hacl_Impl_Poly1305_64_State_poly1305_state
 #define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_aead
-#include "Chacha20Poly1305.h"
+#include "Hacl_Chacha20Poly1305.h"
 #undef Hacl_Impl_Poly1305_64_State_poly1305_state
 
 #define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_ed
@@ -67,7 +67,7 @@ aead_chacha20_poly1305_encrypt(
                                uint8_t *key,
                                uint8_t *nonce
                                ){
-  return Chacha20Poly1305_aead_encrypt(cipher, mac, msg, msg_len, aad, aad_len, key, nonce);
+  return Hacl_Chacha20Poly1305_aead_encrypt(cipher, mac, msg, msg_len, aad, aad_len, key, nonce);
 }
 
 uint32_t
@@ -82,7 +82,7 @@ aead_chacha20_poly1305_decrypt(
   uint8_t *nonce
 )
 {
-  return Chacha20Poly1305_aead_decrypt(msg, cipher, msg_len, mac, aad, aad_len, key, nonce);
+  return Hacl_Chacha20Poly1305_aead_decrypt(msg, cipher, msg_len, mac, aad, aad_len, key, nonce);
 }
 
 void ed25519_secret_to_public(uint8_t *public_key, uint8_t *secret_key){

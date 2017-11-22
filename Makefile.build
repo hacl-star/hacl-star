@@ -39,7 +39,7 @@ SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base
 	./code/curve25519/x25519-c/Hacl_Curve25519.* \
 	./code/salsa-family/chacha-c/Hacl_Chacha20.* \
 	./code/salsa-family/salsa-c/Hacl_Salsa20.* \
-	$(addprefix code/api/aead-c/, Chacha20Poly1305.*) \
+	$(addprefix code/api/aead-c/, Hacl_Chacha20Poly1305.*) \
 	$(addprefix code/api/box-c/, NaCl.*) \
 	$(addprefix code/api/policies-c/, Hacl_Policies.* ) \
 	$(addprefix code/ed25519/ed25519-c/, Hacl_Ed25519.*) \
@@ -97,7 +97,7 @@ snapshots/nss/kremlib:
 	done
 
 
-SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_* vec128.h) \
+SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_* vec128.h) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) \
 	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* Makefile)
 
