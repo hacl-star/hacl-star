@@ -22,14 +22,12 @@
  */
 
 #include "kremlib.h"
-#ifndef __Ed25519_H
-#define __Ed25519_H
+#ifndef __Hacl_Ed25519_H
+#define __Hacl_Ed25519_H
 
 
 
 
-
-typedef uint64_t Hacl_Lib_Create64_h64;
 
 typedef uint64_t Hacl_Bignum_Constants_limb;
 
@@ -65,6 +63,8 @@ K___FStar_Seq_Base_seq_uint64_t_FStar_Seq_Base_seq_uint64_t;
 typedef uint64_t *Hacl_EC_Point_point;
 
 typedef uint8_t *Hacl_EC_Format_uint8_p;
+
+typedef uint64_t Hacl_Lib_Create64_h64;
 
 typedef uint64_t Hacl_Bignum25519_limb;
 
@@ -218,13 +218,13 @@ typedef uint8_t *Hacl_Impl_Ed25519_Sign_Steps_hint8_p;
 
 typedef uint8_t *Hacl_Impl_Ed25519_Sign_hint8_p;
 
-typedef uint8_t *Ed25519_uint8_p;
+typedef uint8_t *Hacl_Ed25519_uint8_p;
 
-typedef uint8_t *Ed25519_hint8_p;
+typedef uint8_t *Hacl_Ed25519_hint8_p;
 
-void Ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32_t len1);
+void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32_t len1);
 
-bool Ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t len1, uint8_t *signature);
+bool Hacl_Ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t len1, uint8_t *signature);
 
-void Ed25519_secret_to_public(uint8_t *out, uint8_t *secret);
+void Hacl_Ed25519_secret_to_public(uint8_t *out, uint8_t *secret);
 #endif
