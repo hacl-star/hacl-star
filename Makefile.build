@@ -114,6 +114,7 @@ snapshots/nss: snapshots-remove-intermediates
 	rm -rf snapshots/nss
 	mkdir -p snapshots/nss
 	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/nss
+	cp snapshots/snapshot-gcc-unrolled/Hacl_Chacha20.* snapshots/nss
 	$(MAKE) snapshots/nss/kremlib
 
 #
