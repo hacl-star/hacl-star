@@ -1,5 +1,9 @@
 module Hacl.Chacha20
 
+(** This module implements Chacha20 
+    @summary Chacha20 reference code
+    **)
+  
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
