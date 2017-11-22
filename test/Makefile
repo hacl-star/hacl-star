@@ -320,7 +320,7 @@ test-perf-sha512: test-sha512.exe
 #
 
 test-ed25519.exe:
-	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_SHA2_512.c $(HACL_HOME)/$(SNAPSHOT_DIR)/Ed25519.c test-files/test-ed25519.c -o test-ed25519.exe $(PERF_LIBS)
+	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_SHA2_512.c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Ed25519.c test-files/test-ed25519.c -o test-ed25519.exe $(PERF_LIBS)
 
 test-unit-ed25519: test-ed25519.exe
 	./test-ed25519.exe unit-test
