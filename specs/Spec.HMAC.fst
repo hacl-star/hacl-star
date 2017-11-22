@@ -82,7 +82,7 @@ let finish (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (hash:Hash.hash_w
 
 
 (* Core HMAC function for a key of length size_block *)
-let hmac_core' (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_t{Hash.size_block a + len < max_size_t /\ Hash.size_block a + len < Hash.max_input a}) (data:lbytes len) =
+let hmac_core' (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) (data:lbytes len) =
   let nb = len / Hash.size_block a in
   let nr = len % Hash.size_block a in
   let nblocks8 = nb * Hash.size_block a in
@@ -96,7 +96,7 @@ let hmac_core' (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_t{H
 
 
 (* Core HMAC function for a key of length size_block *)
-let hmac_core (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_t{Hash.size_block a + len < max_size_t /\ Hash.size_block a + len < Hash.max_input a}) (data:lbytes len) =
+let hmac_core (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) (data:lbytes len) =
 
   (* Create the scratch space *)
   let s3  = create (Hash.size_block a + len) (u8 0x00) in
@@ -132,7 +132,7 @@ let hmac'
   (a:Hash.algorithm)
   (klen:size_t{klen < Hash.max_input a})
   (key:lbytes klen)
-  (len:size_t{Hash.size_block a + len < max_size_t /\ Hash.size_block a + len < Hash.max_input a})
+  (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a})
   (data:lbytes len) =
 
   (* Step 1: make sure the key has the proper length *)
@@ -146,7 +146,7 @@ let hmac
   (a:Hash.algorithm)
   (klen:size_t{klen < Hash.max_input a})
   (key:lbytes klen)
-  (len:size_t{Hash.size_block a + len < max_size_t /\ Hash.size_block a + len < Hash.max_input a})
+  (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a})
   (data:lbytes len) =
 
   (* Step 1: make sure the key has the proper length *)

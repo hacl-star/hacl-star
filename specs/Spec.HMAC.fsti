@@ -20,20 +20,20 @@ val update_last: (a:Hash.algorithm) -> (n:size_t) -> (len:size_t{len < Hash.size
 
 val finish: (a:Hash.algorithm) -> (key:lbytes (Hash.size_block a)) -> (hash:Hash.hash_w a) -> Tot (h:lbytes (Hash.size_hash a))
 
-val hmac_core': (a:Hash.algorithm) -> (key:lbytes (Hash.size_block a)) -> (len:size_t{Hash.size_block a + len < max_size_t /\ Hash.size_block a + len < Hash.max_input a}) -> (data:lbytes len) -> Tot (h:lbytes (Hash.size_hash a))
+val hmac_core': (a:Hash.algorithm) -> (key:lbytes (Hash.size_block a)) -> (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) -> (data:lbytes len) -> Tot (h:lbytes (Hash.size_hash a))
 
-val hmac_core: (a:Hash.algorithm) -> (key:lbytes (Hash.size_block a)) -> (len:size_t{Hash.size_block a + len < max_size_t /\ Hash.size_block a + len < Hash.max_input a}) -> (data:lbytes len) -> Tot (h:lbytes (Hash.size_hash a))
+val hmac_core: (a:Hash.algorithm) -> (key:lbytes (Hash.size_block a)) -> (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) -> (data:lbytes len) -> Tot (h:lbytes (Hash.size_hash a))
 
 val hmac':
   (a:Hash.algorithm) ->
   (klen:size_t{klen < Hash.max_input a}) ->
   (key:lbytes klen) ->
-  (len:size_t{Hash.size_block a + len < max_size_t /\ Hash.size_block a + len < Hash.max_input a}) ->
+  (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) ->
   (data:lbytes len) -> Tot (h:lbytes (Hash.size_hash a))
 
 val hmac:
   (a:Hash.algorithm) ->
   (klen:size_t{klen < Hash.max_input a}) ->
   (key:lbytes klen) ->
-  (len:size_t{Hash.size_block a + len < max_size_t /\ Hash.size_block a + len < Hash.max_input a}) ->
+  (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) ->
   (data:lbytes len) -> Tot (h:lbytes (Hash.size_hash a))
