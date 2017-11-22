@@ -2,7 +2,7 @@
 #include "kremlib.h"
 #include "Hacl_Curve25519.h"
 #include "Hacl_Chacha20.h"
-#include "Salsa20.h"
+#include "Hacl_Salsa20.h"
 #define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_poly
 #include "Hacl_Poly1305_64.h"
 #undef Hacl_Impl_Poly1305_64_State_poly1305_state
@@ -48,7 +48,7 @@ salsa20(
         uint8_t *nonce,
         uint64_t ctr
         ){
-  Salsa20_salsa20(output, plain, len, key, nonce, ctr);
+  Hacl_Salsa20_salsa20(output, plain, len, key, nonce, ctr);
 }
 
 void
@@ -327,16 +327,16 @@ int crypto_secretbox_open(uint8_t *msg, uint8_t *cipher, uint64_t cipher_len, ui
 int crypto_stream(uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *key){
   uint8_t subkey[32];
   memset(cipher, 0, cipher_len * sizeof(uint8_t));
-  Salsa20_hsalsa20(subkey, key, nonce);
-  Salsa20_salsa20(cipher, cipher, cipher_len, subkey, nonce + 16, 0);
+  Hacl_Salsa20_hsalsa20(subkey, key, nonce);
+  Hacl_Salsa20_salsa20(cipher, cipher, cipher_len, subkey, nonce + 16, 0);
   return 0;
 }
 
 int crypto_stream_xor(uint8_t *cipher, uint8_t *msg, uint64_t cipher_len, uint8_t *nonce, uint8_t *key){
   uint8_t subkey[32];
   memset(cipher, 0, cipher_len * sizeof(uint8_t));
-  Salsa20_hsalsa20(subkey, key, nonce);
-  Salsa20_salsa20(cipher, msg, cipher_len, subkey, nonce + 16, 0);
+  Hacl_Salsa20_hsalsa20(subkey, key, nonce);
+  Hacl_Salsa20_salsa20(cipher, msg, cipher_len, subkey, nonce + 16, 0);
   return 0;
 }
 

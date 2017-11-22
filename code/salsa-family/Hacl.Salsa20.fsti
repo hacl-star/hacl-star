@@ -1,4 +1,4 @@
-module Salsa20
+module Hacl.Salsa20
 
 module ST = FStar.HyperStack.ST
 

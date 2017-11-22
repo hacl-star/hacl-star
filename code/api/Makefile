@@ -40,7 +40,7 @@ KREMLIN_ARGS+=$(addprefix -I ,$(INCLUDE_DIRS)) \
 policies-c/Hacl_Policies.c: $(HACL_HOME)/code/lib/kremlin/Hacl.Policies.fst
 	$(KREMLIN) $(KREMLIN_ARGS) $^ -tmpdir policies-c -skip-compilation
 
-box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Hacl.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Hacl.Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst  NaCl.fst
+box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Hacl.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Hacl.Salsa20.fsti $(HACL_HOME)/code/curve25519/Hacl.Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst  NaCl.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir box-c NaCl.fst -skip-compilation \
 		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad" \
 		-bundle "Hacl.Policies=Hacl.Policies"
