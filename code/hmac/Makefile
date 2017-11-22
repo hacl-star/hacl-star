@@ -2,8 +2,8 @@ include ../../Makefile.include
 
 # Files for verification
 HMAC_SHA2_FILES= \
-	Hacl.HMAC.SHA2_256.fst \
-	HMAC_SHA2_256.fst
+	Hacl.Impl.HMAC.SHA2_256.fst \
+	Hacl.HMAC.SHA2_256.fst
 
 FSTAR_INCLUDES+=--include ../hash
 
@@ -20,7 +20,7 @@ all-ver: verify
 all-ci: verify
 all-hints: hints
 
-extract-c: hmac-c/HMAC_SHA2_256.c
+extract-c: hmac-c/Hacl.HMAC.SHA2_256.c
 
 test: test-hmac_sha2_256.exe
 
@@ -35,16 +35,16 @@ KREMLIN_ARGS+= \
 		-drop Prims \
 		-drop Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 		-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.*,Hacl.Impl.SHA2_256.Lemmas \
-		-bundle "HMAC_SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Impl.SHA2_256,Hacl.HMAC.SHA2_256,HMAC_SHA2_256" \
+		-bundle "Hacl.HMAC.SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Impl.SHA2_256,Hacl.Impl.HMAC.SHA2_256,Hacl.HMAC.SHA2_256" \
 		-ccopt -Wno-error=strict-aliasing -ccopt -march=native -ccopt -std=gnu99 \
 		$(KREMLIN_TESTLIB)
 
-hmac-c/out.krml: HMAC_SHA2_256.fst Hacl.Test.HMAC.SHA2_256.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation -no-prefix HMAC_SHA2_256 \
+hmac-c/out.krml: Hacl.HMAC.SHA2_256.fst Hacl.Test.HMAC.SHA2_256.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation -no-prefix Hacl.HMAC.SHA2_256 \
 	$^ -o $@
 
-hmac-c/HMAC_SHA2_256.c: hmac-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix HMAC_SHA2_256 \
+hmac-c/Hacl_HMAC_SHA2_256.c: hmac-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix Hacl.HMAC.SHA2_256 \
 		$^ -o $@
 
 test-hmac_sha2_256.exe: hmac-c/out.krml
