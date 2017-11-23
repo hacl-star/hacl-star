@@ -91,7 +91,7 @@ void
 Hacl_Poly1305_64_update(
   Hacl_Impl_Poly1305_64_State_poly1305_state st,
   uint8_t *m,
-  uint32_t len1
+  uint32_t num_blocks
 );
 
 void
