@@ -12,14 +12,16 @@ SNAPSHOT_DIR = snapshots/hacl-c
 #
 
 CC=gcc
+KREMLIB= $(HACL_HOME)/snapshots/kremlib
+
 CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops --param max-unroll-times=20
 CFLAGS = $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
 	-I $(LIBSODIUM_HOME)/include -L$(LIBSODIUM_HOME)/lib \
-	-I $(TWEETNACL_HOME) -I .
+	-I $(TWEETNACL_HOME) -I . -I $(KREMLIB)
 
 CC_BASE = $(CC) $(CFLAGS) -I $(HACL_HOME)/$(SNAPSHOT_DIR) -I ./test-files $(ADDITIONAL_FILES) \
-	test-files/hacl_test_utils.c $(TWEETNACL_HOME)/tweetnacl.c $(HACL_HOME)/$(SNAPSHOT_DIR)/kremlib.c $(HACL_HOME)/$(SNAPSHOT_DIR)/testlib.c
+	test-files/hacl_test_utils.c $(TWEETNACL_HOME)/tweetnacl.c $(KREMLIB)/kremlib.c $(KREMLIB)/testlib.c
 
 PERF_LIBS=$(OPENSSL_HOME)/libcrypto.a -lsodium -lpthread -ldl
 

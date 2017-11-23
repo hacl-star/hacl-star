@@ -8,7 +8,7 @@ else
   HACL_HOME:=$(abspath $(HACL_HOME))
 endif
 
-.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove snapshots/hacl-c/kremlib.h snapshots/hacl-c/kremlib.c snapshots/hacl-c/kremlib_base.h snapshots/nss/kremlib.h snapshots/nss/kremlib.c snapshots/nss/kremlib_base.h
+.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove snapshots/hacl-c/kremlib.h snapshots/hacl-c/vec128.h snapshots/hacl-c/kremlib.c snapshots/hacl-c/kremlib_base.h snapshots/nss/kremlib.h snapshots/nss/kremlib.c snapshots/nss/kremlib_base.h snapshots/nss/vec128.h
 
 #
 # Extraction target for the stateful code
@@ -34,7 +34,7 @@ clean-c-code:
 
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
-SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h testlib.* FStar.* Makefile) \
+SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h testlib.* FStar.* vec128.h Makefile) \
 	$(addprefix code/poly1305/poly-c/, Hacl_Poly1305_64.* AEAD_Poly1305_64.*) \
 	./code/curve25519/x25519-c/Hacl_Curve25519.* \
 	./code/salsa-family/chacha-c/Hacl_Chacha20.* \
@@ -47,10 +47,10 @@ SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base
 	$(addprefix code/hash/sha2-c/, Hacl_SHA2_384.*) \
 	$(addprefix code/hash/sha2-c/, Hacl_SHA2_512.*) \
 	$(addprefix code/hmac/hmac-c/, Hacl_HMAC_SHA2_256.*) \
-	$(addprefix code/salsa-family/chacha-vec128-c/, Hacl_Chacha20_Vec128.* ../vec128.h)
+	$(addprefix code/salsa-family/chacha-vec128-c/, Hacl_Chacha20_Vec128.*)
 
 SNAPSHOT_CCOMP_FILES=$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/kremlib.h \
-	code/lib/kremlin/ccomp-c/FStar.c code/lib/kremlin/ccomp-c/FStar.h
+	code/lib/kremlin/ccomp-c/FStar.c code/lib/kremlin/ccomp-c/FStar.h 
 
 snapshot-collect:
 	mkdir -p $(SNAPSHOT_DIR)
@@ -87,19 +87,19 @@ HACL_LICENSE?=$(HACL_HOME)/snapshots/licenses/MIT
 HACL_LICENSE_NSS?=$(HACL_HOME)/snapshots/licenses/APACHE2
 
 snapshots/hacl-c/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
+	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c vec128.h; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
 	done
 
 snapshots/nss/kremlib:
-	for f in kremlib.h kremlib_base.h FStar.h FStar.c; do \
+	for f in kremlib.h kremlib_base.h FStar.h FStar.c vec128.h; do \
 		(cat $(HACL_LICENSE_NSS) snapshots/kremlib/$$f ) > snapshots/nss/$$f ; \
 	done
 
 
-SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_* vec128.h) \
+SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) \
-	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* Makefile)
+	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* vec128.h Makefile)
 
 snapshots/hacl-c: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc

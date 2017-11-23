@@ -17,7 +17,7 @@ int32_t perf_chacha() {
 
 #else
 
-#include "Chacha20_Vec128.h"
+#include "Hacl_Chacha20_Vec128.h"
 #include "sodium.h"
 #include "openssl/evp.h"
 
@@ -388,7 +388,7 @@ int32_t test_chacha()
   memset(ciphertext, 0, len * sizeof ciphertext[0]);
   uint32_t counter = (uint32_t )1;
   uint32_t ctx[32] = { 0 };
-  Chacha20_Vec128_chacha20(ciphertext,plaintext,len, key, nonce, counter);
+  Hacl_Chacha20_Vec128_chacha20(ciphertext,plaintext,len, key, nonce, counter);
   TestLib_compare_and_print("HACL Chacha20", expected, ciphertext, len);
 
   crypto_stream_chacha20_ietf_xor_ic(ciphertext,plaintext, len, nonce, 1, key);
@@ -415,7 +415,7 @@ int32_t perf_chacha() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Chacha20_Vec128_chacha20(plain,plain,len, key, nonce, counter);
+    Hacl_Chacha20_Vec128_chacha20(plain,plain,len, key, nonce, counter);
     plain[0] = cipher[0];
   }
   b = TestLib_cpucycles_end();
