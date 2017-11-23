@@ -5,7 +5,8 @@ open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
 
-open  FStar.Math.Lemmas
+open FStar.Math.Lemmas
+open FStar.Math.Lib
 
 module Hash = Spec.SHA2
 
@@ -244,6 +245,10 @@ val lemma_mod_div_simplify: a:nat -> r:nat{r > 0} -> n:nat{n > 0} -> Lemma
   (((a * ((r * r) % n))/ r) % n == (a * r) % n)
 let lemma_mod_div_simplify a r n = admit()
 
+val lemma_mod_mul_distr: a:nat -> b:nat -> n:nat{n > 0} -> Lemma
+	((a * b) % n = ((a % n) * (b % n)) % n)
+let lemma_mod_mul_distr a b n = admit()
+
 #reset-options "--z3rlimit 50 --max_fuel 0"
 
 val lemma_mont_reduction1:
@@ -351,51 +356,82 @@ let from_mont r n n' a_r = mont_reduction r n n' a_r
 
 #reset-options "--z3rlimit 50"
 
-val pow:
-	a:bignum -> b:bignum -> acc:bignum -> Tot bignum (decreases b)
-let rec pow a b acc =
-	match b with
-	| 0 -> acc
-	| 1 -> a * acc
-	| e ->
-		let a2 = a * a in
-		let acc =
-			if (bn_is_even e) then acc
-			else a * acc in
-		pow a2 (bn_div2 b) acc
-
-val fexp:
-	x:size_t -> n:bignum{1 < n /\ n < pow2 (pow2 x)} -> a:elem n -> b:elem n -> Tot (res:elem n)
-let fexp x n a b = (pow a b 1) % n
-
-val mod_exp_loop:
-	x:size_t -> r:bignum{r = pow2 (pow2 x)} -> n:bignum{1 < n /\ n < r} -> n':int ->
-	a:elem n -> b:elem n -> acc:elem n -> Tot (res:elem n) (decreases b)
-let rec mod_exp_loop x r n n' a b acc =
-	match b with
-	| 0 -> acc
-	| 1 -> karatsuba_mont_mod x r n n' a acc
-	| e ->
-		let a2 = karatsuba_mont_mod x r n n' a a in
-		let acc =
-			if (bn_is_even e) then acc
-			else karatsuba_mont_mod x r n n' a acc in
-		mod_exp_loop x r n n' a2 (bn_div2 b) acc
+val mod_exp_:
+	x:size_t -> n:bignum{1 < n /\ n < pow2 (pow2 x)} -> a:elem n -> b:elem n -> Pure (res:elem n)
+	(ensures (True))
+	(requires (fun res -> res == (powx a b) % n))
+	(decreases b)
+let rec mod_exp_ x n a b =
+	if b = 0 then 1
+	else begin
+		let b2 = bn_div2 b in
+		let res' = mod_exp_ x n a b2 in
+		assert (res' == (powx a b2) % n); //from ind hypo
+		lemma_div_mod b 2;
+		assert (b = 2 * b2 + b % 2);
+		powx_lemma2 a b2 b2;
+		assert (powx a (2 * b2) == powx a b2 * powx a b2); //property of exp
+		//lemma_mod_mul_distr (powx a b2) (powx a b2) n;
+		assume ((powx a b2 * powx a b2) % n == (((powx a b2) % n) * ((powx a b2) % n)) % n); //property of modular arithmetic
+		let res = (res' * res') % n in
+		assert (res == (powx a (2 * b2)) % n);
+		let res =
+			if (bn_is_even b) then begin
+				assert (b % 2 = 0);
+				assert (b = 2 * b2);
+				assert (res == (powx a b) % n);
+				res end
+			else begin
+				assert (b % 2 = 1);
+				assert (b = 2 * b2 + 1);
+				let res = (res * a) % n in
+				powx_lemma2 a (2 * b2) 1;
+				assert (powx a b == powx a (2 * b2) * powx a 1); //property of exp
+				powx_lemma1 a; //assert (powx a 1 = a)
+				//lemma_mod_mul_distr_l (powx a (2 * b2)) a n;
+				assume ((powx a b) % n == (((powx a (2 * b2)) % n) * a) % n); //property of modular arithmetic
+				assert (res == (powx a b) % n);
+				res end in
+		res
+	end
 
 val mod_exp:
 	x:size_t -> n:bignum{1 < n /\ n < pow2 (pow2 x)} -> a:elem n -> b:elem n -> Pure (res:elem n)
 	(ensures (True))
-	(requires (fun res -> res == fexp x n a b))
+	(requires (fun res -> res == (powx a b) % n))
+let mod_exp x n a b = mod_exp_ x n a b
+
+(*
+val mod_exp_:
+	x:size_t -> r:bignum{r = pow2 (pow2 x)} -> n:bignum{1 < n /\ n < r} -> n':int ->
+	a:elem n -> b:elem n -> Pure (res:elem n)
+	(ensures (True))
+	(requires (fun res -> res == ((powx a b) / powx r (b - 1)) % n))
+	(decreases b)
+let rec mod_exp_ x r n n' a b =
+	if b = 0 then to_mont r n n' 1
+	else begin
+		let res' = mod_exp_ x r n n' a (bn_div2 b) in
+		let res = karatsuba_mont_mod x r n n' res' res' in
+		let res = if (bn_is_even b) then res else karatsuba_mont_mod x r n n' res a in
+		res
+	end
+
+val mod_exp:
+	x:size_t -> n:bignum{1 < n /\ n < pow2 (pow2 x)} -> 
+	a:elem n -> b:elem n -> Pure (res:elem n)
+	(ensures (True))
+	(requires (fun res -> res == (powx a b) % n))
 let mod_exp x n a b =
 	let r = pow2 (pow2 x) in
 	let n', _ = extended_eucl n r in
 	let n' = -1 * n' in
 	let a_r = to_mont r n n' a in
-	let acc_r = to_mont r n n' 1 in
-	let res_r = mod_exp_loop x r n n' a_r b acc_r in
+	let res_r = mod_exp_ x r n n' a_r b in
 	let res = from_mont r n n' res_r in
-	assume (res == fexp x n a b);
+	assume (res == (powx a b) % n);
 	res
+*)
 
 (* BIGNUM CONVERT FUNCTIONS *)
 #reset-options "--z3rlimit 50 --max_fuel 0"
