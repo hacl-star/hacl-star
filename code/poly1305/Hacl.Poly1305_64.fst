@@ -76,21 +76,21 @@ let update_block st m =
 val update:
   st:state ->
   m:uint8_p ->
-  len:FStar.UInt32.t{length m >= 16 * UInt32.v len} ->
+  num_blocks:FStar.UInt32.t{length m >= 16 * UInt32.v num_blocks} ->
   Stack unit
     (requires (fun h -> stable h st /\ live h m))
     (ensures  (fun h0 updated_log h1 -> modifies_1 (get_accumulator st) h0 h1 /\ stable h1 st))
-let rec update st m len =
-  if FStar.UInt32.(len =^ 0ul) then ()
+let rec update st m num_blocks =
+  if FStar.UInt32.(num_blocks =^ 0ul) then ()
   else
     let block = Buffer.sub m 0ul 16ul in
     let m'    = Buffer.offset m 16ul  in
-    let len   = FStar.UInt32.(len -^ 1ul) in
+    let n     = FStar.UInt32.(num_blocks -^ 1ul) in
     let h0    = ST.get () in
     let _ = update_block st block in
     let h1    = ST.get () in
     Buffer.lemma_reveal_modifies_1 (get_accumulator st) h0 h1;
-    update st m' len
+    update st m' n
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
