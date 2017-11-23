@@ -22,51 +22,7 @@
  */
 
 
-#include "Ed25519.h"
-
-static void
-Hacl_Lib_Create64_make_h64_5(
-  uint64_t *b,
-  uint64_t s0,
-  uint64_t s1,
-  uint64_t s2,
-  uint64_t s3,
-  uint64_t s4
-)
-{
-  b[0U] = s0;
-  b[1U] = s1;
-  b[2U] = s2;
-  b[3U] = s3;
-  b[4U] = s4;
-}
-
-static void
-Hacl_Lib_Create64_make_h64_10(
-  uint64_t *b,
-  uint64_t s0,
-  uint64_t s1,
-  uint64_t s2,
-  uint64_t s3,
-  uint64_t s4,
-  uint64_t s5,
-  uint64_t s6,
-  uint64_t s7,
-  uint64_t s8,
-  uint64_t s9
-)
-{
-  b[0U] = s0;
-  b[1U] = s1;
-  b[2U] = s2;
-  b[3U] = s3;
-  b[4U] = s4;
-  b[5U] = s5;
-  b[6U] = s6;
-  b[7U] = s7;
-  b[8U] = s8;
-  b[9U] = s9;
-}
+#include "Hacl_Ed25519.h"
 
 static void Hacl_Bignum_Modulo_carry_top(uint64_t *b)
 {
@@ -625,6 +581,50 @@ static void Hacl_EC_Format_reduce(uint64_t *out)
   Hacl_EC_Format_fcontract_first_carry_full(out);
   Hacl_EC_Format_fcontract_second_carry_full(out);
   Hacl_EC_Format_fcontract_trim(out);
+}
+
+static void
+Hacl_Lib_Create64_make_h64_5(
+  uint64_t *b,
+  uint64_t s0,
+  uint64_t s1,
+  uint64_t s2,
+  uint64_t s3,
+  uint64_t s4
+)
+{
+  b[0U] = s0;
+  b[1U] = s1;
+  b[2U] = s2;
+  b[3U] = s3;
+  b[4U] = s4;
+}
+
+static void
+Hacl_Lib_Create64_make_h64_10(
+  uint64_t *b,
+  uint64_t s0,
+  uint64_t s1,
+  uint64_t s2,
+  uint64_t s3,
+  uint64_t s4,
+  uint64_t s5,
+  uint64_t s6,
+  uint64_t s7,
+  uint64_t s8,
+  uint64_t s9
+)
+{
+  b[0U] = s0;
+  b[1U] = s1;
+  b[2U] = s2;
+  b[3U] = s3;
+  b[4U] = s4;
+  b[5U] = s5;
+  b[6U] = s6;
+  b[7U] = s7;
+  b[8U] = s8;
+  b[9U] = s9;
 }
 
 static void Hacl_Bignum25519_fsum(uint64_t *a, uint64_t *b)
@@ -2816,17 +2816,17 @@ Hacl_Impl_Ed25519_Sign_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, u
   Hacl_Impl_Ed25519_Sign_sign_(signature, secret, msg, len1);
 }
 
-void Ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32_t len1)
+void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32_t len1)
 {
   Hacl_Impl_Ed25519_Sign_sign(signature, secret, msg, len1);
 }
 
-bool Ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t len1, uint8_t *signature)
+bool Hacl_Ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t len1, uint8_t *signature)
 {
   return Hacl_Impl_Ed25519_Verify_verify(public, msg, len1, signature);
 }
 
-void Ed25519_secret_to_public(uint8_t *out, uint8_t *secret)
+void Hacl_Ed25519_secret_to_public(uint8_t *out, uint8_t *secret)
 {
   Hacl_Impl_Ed25519_SecretToPublic_secret_to_public(out, secret);
 }

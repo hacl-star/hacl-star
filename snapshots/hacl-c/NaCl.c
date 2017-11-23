@@ -73,8 +73,8 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_detached(
 {
   uint32_t mlen_ = (uint32_t)mlen;
   uint8_t subkey[32U] = { 0U };
-  Salsa20_hsalsa20(subkey, k1, n1);
-  Salsa20_salsa20(c, m, mlen_ + (uint32_t)32U, subkey, n1 + (uint32_t)16U, (uint64_t)0U);
+  Hacl_Salsa20_hsalsa20(subkey, k1, n1);
+  Hacl_Salsa20_salsa20(c, m, mlen_ + (uint32_t)32U, subkey, n1 + (uint32_t)16U, (uint64_t)0U);
   Hacl_Poly1305_64_crypto_onetimeauth(mac, c + (uint32_t)32U, mlen, c);
   Hacl_SecretBox_ZeroPad_set_zero_bytes(c);
   Hacl_SecretBox_ZeroPad_set_zero_bytes(subkey);
@@ -94,7 +94,7 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached_decrypt(
   uint32_t clen_ = (uint32_t)clen;
   if (verify == (uint8_t)0U)
   {
-    Salsa20_salsa20(m, c, clen_ + (uint32_t)32U, subkey, n1 + (uint32_t)16U, (uint64_t)0U);
+    Hacl_Salsa20_salsa20(m, c, clen_ + (uint32_t)32U, subkey, n1 + (uint32_t)16U, (uint64_t)0U);
     Hacl_SecretBox_ZeroPad_set_zero_bytes(subkey);
     Hacl_SecretBox_ZeroPad_set_zero_bytes(m);
     return (uint32_t)0U;
@@ -118,8 +118,8 @@ Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached(
   uint8_t *mackey = tmp + (uint32_t)32U;
   uint8_t *mackey_ = tmp + (uint32_t)64U;
   uint8_t *cmac = tmp + (uint32_t)96U;
-  Salsa20_hsalsa20(subkey, k1, n1);
-  Salsa20_salsa20(mackey, mackey_, (uint32_t)32U, subkey, n1 + (uint32_t)16U, (uint64_t)0U);
+  Hacl_Salsa20_hsalsa20(subkey, k1, n1);
+  Hacl_Salsa20_salsa20(mackey, mackey_, (uint32_t)32U, subkey, n1 + (uint32_t)16U, (uint64_t)0U);
   Hacl_Poly1305_64_crypto_onetimeauth(cmac, c + (uint32_t)32U, clen, mackey);
   uint8_t result = Hacl_Policies_cmp_bytes(mac, cmac, (uint32_t)16U);
   uint8_t verify = result;
@@ -168,7 +168,7 @@ static uint32_t Hacl_Box_ZeroPad_crypto_box_beforenm(uint8_t *k1, uint8_t *pk, u
   uint8_t *hsalsa_k = tmp;
   uint8_t *hsalsa_n = tmp + (uint32_t)32U;
   Hacl_Curve25519_crypto_scalarmult(hsalsa_k, sk, pk);
-  Salsa20_hsalsa20(k1, hsalsa_k, hsalsa_n);
+  Hacl_Salsa20_hsalsa20(k1, hsalsa_k, hsalsa_n);
   return (uint32_t)0U;
 }
 
@@ -201,7 +201,7 @@ Hacl_Box_ZeroPad_crypto_box_detached(
   uint8_t *subkey = key + (uint32_t)32U;
   uint8_t *hsalsa_n = key + (uint32_t)64U;
   Hacl_Curve25519_crypto_scalarmult(k1, sk, pk);
-  Salsa20_hsalsa20(subkey, k1, hsalsa_n);
+  Hacl_Salsa20_hsalsa20(subkey, k1, hsalsa_n);
   uint32_t z = Hacl_SecretBox_ZeroPad_crypto_secretbox_detached(c, mac, m, mlen, n1, subkey);
   return z;
 }
@@ -222,7 +222,7 @@ Hacl_Box_ZeroPad_crypto_box_open_detached(
   uint8_t *subkey = key + (uint32_t)32U;
   uint8_t *hsalsa_n = key + (uint32_t)64U;
   Hacl_Curve25519_crypto_scalarmult(k1, sk, pk);
-  Salsa20_hsalsa20(subkey, k1, hsalsa_n);
+  Hacl_Salsa20_hsalsa20(subkey, k1, hsalsa_n);
   uint32_t
   z = Hacl_SecretBox_ZeroPad_crypto_secretbox_open_detached(m, c, mac, mlen, n1, subkey);
   return z;

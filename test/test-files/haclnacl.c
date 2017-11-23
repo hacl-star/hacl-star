@@ -2,16 +2,16 @@
 #include "kremlib.h"
 #include "Hacl_Curve25519.h"
 #include "Hacl_Chacha20.h"
-#include "Salsa20.h"
+#include "Hacl_Salsa20.h"
 #define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_poly
 #include "Hacl_Poly1305_64.h"
 #undef Hacl_Impl_Poly1305_64_State_poly1305_state
 #define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_aead
-#include "Chacha20Poly1305.h"
+#include "Hacl_Chacha20Poly1305.h"
 #undef Hacl_Impl_Poly1305_64_State_poly1305_state
 
 #define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_ed
-#include "Ed25519.h"
+#include "Hacl_Ed25519.h"
 #undef K___uint32_t_uint8_t_
 #define K___uint32_t_uint8_t_ K___uint32_t_uint8_t_sha256
 #include "Hacl_SHA2_256.h"
@@ -48,7 +48,7 @@ salsa20(
         uint8_t *nonce,
         uint64_t ctr
         ){
-  Salsa20_salsa20(output, plain, len, key, nonce, ctr);
+  Hacl_Salsa20_salsa20(output, plain, len, key, nonce, ctr);
 }
 
 void
@@ -67,7 +67,7 @@ aead_chacha20_poly1305_encrypt(
                                uint8_t *key,
                                uint8_t *nonce
                                ){
-  return Chacha20Poly1305_aead_encrypt(cipher, mac, msg, msg_len, aad, aad_len, key, nonce);
+  return Hacl_Chacha20Poly1305_aead_encrypt(cipher, mac, msg, msg_len, aad, aad_len, key, nonce);
 }
 
 uint32_t
@@ -82,19 +82,19 @@ aead_chacha20_poly1305_decrypt(
   uint8_t *nonce
 )
 {
-  return Chacha20Poly1305_aead_decrypt(msg, cipher, msg_len, mac, aad, aad_len, key, nonce);
+  return Hacl_Chacha20Poly1305_aead_decrypt(msg, cipher, msg_len, mac, aad, aad_len, key, nonce);
 }
 
 void ed25519_secret_to_public(uint8_t *public_key, uint8_t *secret_key){
-  Ed25519_secret_to_public(public_key, secret_key);
+  Hacl_Ed25519_secret_to_public(public_key, secret_key);
 }
 
 void ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32_t msg_len){
-  Ed25519_sign(signature, secret, msg, msg_len);
+  Hacl_Ed25519_sign(signature, secret, msg, msg_len);
 }
 
 bool ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t msg_len, uint8_t *signature){
-  return Ed25519_verify(public, msg, msg_len, signature);
+  return Hacl_Ed25519_verify(public, msg, msg_len, signature);
 }
 
 void sha2_512_hash(uint8_t *hash, uint8_t *input, uint32_t len){
@@ -261,7 +261,7 @@ crypto_sign(
             uint64_t msg_len,
             uint8_t *sk
             ){
-  Ed25519_sign(signed_msg, sk, msg, msg_len);
+  Hacl_Ed25519_sign(signed_msg, sk, msg, msg_len);
   memmove(signed_msg+64, msg, msg_len * sizeof(uint8_t));
   *signed_len = msg_len + 64;
   return 0;
@@ -275,7 +275,7 @@ int crypto_sign_open(
                      uint8_t *pk
                      ){
   uint32_t res;
-  res = Ed25519_verify(pk, msg+64, msg_len - 64, msg);
+  res = Hacl_Ed25519_verify(pk, msg+64, msg_len - 64, msg);
   if (res == true){
     memmove(unsigned_msg, msg+64, sizeof(uint8_t) * (msg_len-64));
     *unsigned_msg_len = msg_len - 64;
@@ -290,13 +290,13 @@ int crypto_sign_keypair(
                         uint8_t sk[64]
                         ){
   randombytes(sk, 32 * sizeof(uint8_t));
-  Ed25519_secret_to_public(pk, sk);
+  Hacl_Ed25519_secret_to_public(pk, sk);
   for (int i = 0; i < 32; i++) sk[32+i] = pk[i];
   return 0;
 }
 
 int crypto_sign_secret_to_public(uint8_t *public_key, uint8_t *secret_key){
-  Ed25519_secret_to_public(public_key, secret_key);
+  Hacl_Ed25519_secret_to_public(public_key, secret_key);
   return 0;
 }
 
@@ -327,16 +327,16 @@ int crypto_secretbox_open(uint8_t *msg, uint8_t *cipher, uint64_t cipher_len, ui
 int crypto_stream(uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *key){
   uint8_t subkey[32];
   memset(cipher, 0, cipher_len * sizeof(uint8_t));
-  Salsa20_hsalsa20(subkey, key, nonce);
-  Salsa20_salsa20(cipher, cipher, cipher_len, subkey, nonce + 16, 0);
+  Hacl_Salsa20_hsalsa20(subkey, key, nonce);
+  Hacl_Salsa20_salsa20(cipher, cipher, cipher_len, subkey, nonce + 16, 0);
   return 0;
 }
 
 int crypto_stream_xor(uint8_t *cipher, uint8_t *msg, uint64_t cipher_len, uint8_t *nonce, uint8_t *key){
   uint8_t subkey[32];
   memset(cipher, 0, cipher_len * sizeof(uint8_t));
-  Salsa20_hsalsa20(subkey, key, nonce);
-  Salsa20_salsa20(cipher, msg, cipher_len, subkey, nonce + 16, 0);
+  Hacl_Salsa20_hsalsa20(subkey, key, nonce);
+  Hacl_Salsa20_salsa20(cipher, msg, cipher_len, subkey, nonce + 16, 0);
   return 0;
 }
 

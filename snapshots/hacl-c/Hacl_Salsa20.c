@@ -22,7 +22,7 @@
  */
 
 
-#include "Salsa20.h"
+#include "Hacl_Salsa20.h"
 
 static void
 Hacl_Lib_Create_make_h32_4(uint32_t *b, uint32_t s0, uint32_t s1, uint32_t s2, uint32_t s3)
@@ -366,7 +366,7 @@ Hacl_Impl_HSalsa20_crypto_core_hsalsa20(uint8_t *output, uint8_t *nonce, uint8_t
 }
 
 void
-Salsa20_salsa20(
+Hacl_Salsa20_salsa20(
   uint8_t *output,
   uint8_t *plain,
   uint32_t len,
@@ -378,7 +378,7 @@ Salsa20_salsa20(
   Hacl_Impl_Salsa20_salsa20(output, plain, len, k, n1, ctr);
 }
 
-void Salsa20_hsalsa20(uint8_t *output, uint8_t *key, uint8_t *nonce)
+void Hacl_Salsa20_hsalsa20(uint8_t *output, uint8_t *key, uint8_t *nonce)
 {
   Hacl_Impl_HSalsa20_crypto_core_hsalsa20(output, nonce, key);
 }

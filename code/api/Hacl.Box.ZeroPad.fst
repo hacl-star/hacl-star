@@ -37,7 +37,7 @@ let crypto_box_beforenm k pk sk =
   let hsalsa_n = sub tmp 32ul 16ul in
   (* Compute shared key *)
   Hacl.Curve25519.crypto_scalarmult hsalsa_k sk pk;
-  Salsa20.hsalsa20 k hsalsa_k hsalsa_n;
+  Hacl.Salsa20.hsalsa20 k hsalsa_k hsalsa_n;
   pop_frame();
   0ul
 
@@ -92,7 +92,7 @@ let crypto_box_detached c mac m mlen n pk sk =
   Hacl.Curve25519.crypto_scalarmult k sk pk;
   let h1 = ST.get() in
   cut (modifies_0 h0 h1);
-  Salsa20.hsalsa20 subkey k hsalsa_n;
+  Hacl.Salsa20.hsalsa20 subkey k hsalsa_n;
   let h2 = ST.get() in
   cut (modifies_0 h0 h2);
   let z = crypto_secretbox_detached c mac m mlen n subkey in
@@ -124,7 +124,7 @@ let crypto_box_open_detached m c mac mlen n pk sk =
   let hsalsa_n = sub key 64ul 16ul in
   (* Compute shared key *)
   Hacl.Curve25519.crypto_scalarmult k sk pk;
-  Salsa20.hsalsa20 subkey k hsalsa_n;
+  Hacl.Salsa20.hsalsa20 subkey k hsalsa_n;
   let z = crypto_secretbox_open_detached m c mac mlen n subkey in
   pop_frame();
   z

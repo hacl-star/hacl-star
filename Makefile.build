@@ -38,15 +38,15 @@ SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base
 	$(addprefix code/poly1305/poly-c/, Hacl_Poly1305_64.* AEAD_Poly1305_64.*) \
 	./code/curve25519/x25519-c/Hacl_Curve25519.* \
 	./code/salsa-family/chacha-c/Hacl_Chacha20.* \
-	./code/salsa-family/salsa-c/Salsa20.* \
-	$(addprefix code/api/aead-c/, Chacha20Poly1305.*) \
+	./code/salsa-family/salsa-c/Hacl_Salsa20.* \
+	$(addprefix code/api/aead-c/, Hacl_Chacha20Poly1305.*) \
 	$(addprefix code/api/box-c/, NaCl.*) \
 	$(addprefix code/api/policies-c/, Hacl_Policies.* ) \
-	$(addprefix code/ed25519/ed25519-c/, Ed25519.*) \
+	$(addprefix code/ed25519/ed25519-c/, Hacl_Ed25519.*) \
 	$(addprefix code/hash/sha2-c/, Hacl_SHA2_256.*) \
 	$(addprefix code/hash/sha2-c/, Hacl_SHA2_384.*) \
 	$(addprefix code/hash/sha2-c/, Hacl_SHA2_512.*) \
-	$(addprefix code/hmac/hmac-c/, HMAC_SHA2_256.*) \
+	$(addprefix code/hmac/hmac-c/, Hacl_HMAC_SHA2_256.*) \
 	$(addprefix code/salsa-family/chacha-vec128-c/, Hacl_Chacha20_Vec128.* ../vec128.h)
 
 SNAPSHOT_CCOMP_FILES=$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/kremlib.h \
@@ -97,8 +97,8 @@ snapshots/nss/kremlib:
 	done
 
 
-SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Salsa20.* Hacl_SHA2_* HMAC_SHA2_* vec128.h) \
-	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Ed25519*) \
+SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_* vec128.h) \
+	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) \
 	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* Makefile)
 
 snapshots/hacl-c: snapshots-remove-intermediates

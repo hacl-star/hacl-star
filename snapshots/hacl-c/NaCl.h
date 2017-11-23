@@ -26,7 +26,7 @@
 #define __NaCl_H
 
 
-#include "Salsa20.h"
+#include "Hacl_Salsa20.h"
 #include "Hacl_Curve25519.h"
 #include "Hacl_Poly1305_64.h"
 #include "Hacl_Policies.h"

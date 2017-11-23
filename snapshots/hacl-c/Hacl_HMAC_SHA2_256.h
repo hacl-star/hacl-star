@@ -22,8 +22,8 @@
  */
 
 #include "kremlib.h"
-#ifndef __HMAC_SHA2_256_H
-#define __HMAC_SHA2_256_H
+#ifndef __Hacl_HMAC_SHA2_256_H
+#define __Hacl_HMAC_SHA2_256_H
 
 
 
@@ -65,21 +65,21 @@ typedef uint32_t *Hacl_Impl_SHA2_256_uint32_p;
 
 typedef uint8_t *Hacl_Impl_SHA2_256_uint8_p;
 
-typedef uint8_t Hacl_HMAC_SHA2_256_uint8_t;
+typedef uint8_t Hacl_Impl_HMAC_SHA2_256_uint8_t;
 
-typedef uint32_t Hacl_HMAC_SHA2_256_uint32_t;
+typedef uint32_t Hacl_Impl_HMAC_SHA2_256_uint32_t;
 
-typedef uint64_t Hacl_HMAC_SHA2_256_uint64_t;
+typedef uint64_t Hacl_Impl_HMAC_SHA2_256_uint64_t;
 
-typedef uint8_t Hacl_HMAC_SHA2_256_uint8_ht;
+typedef uint8_t Hacl_Impl_HMAC_SHA2_256_uint8_ht;
 
-typedef uint32_t Hacl_HMAC_SHA2_256_uint32_ht;
+typedef uint32_t Hacl_Impl_HMAC_SHA2_256_uint32_ht;
 
-typedef uint64_t Hacl_HMAC_SHA2_256_uint64_ht;
+typedef uint64_t Hacl_Impl_HMAC_SHA2_256_uint64_ht;
 
-typedef uint32_t *Hacl_HMAC_SHA2_256_uint32_p;
+typedef uint32_t *Hacl_Impl_HMAC_SHA2_256_uint32_p;
 
-typedef uint8_t *Hacl_HMAC_SHA2_256_uint8_p;
+typedef uint8_t *Hacl_Impl_HMAC_SHA2_256_uint8_p;
 
 typedef uint8_t uint8_ht;
 
