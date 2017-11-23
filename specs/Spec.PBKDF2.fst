@@ -55,11 +55,11 @@ let f prf p_len pwd s_len salt counter i =
   let s_i = update_sub input 0 s_len salt in
   let i_bytes = uint_to_bytes_be #U32 (u32 i) in
   let s_i = update_sub s_i s_len numbytes_size_t i_bytes in
-  let u_o = Spec.HMAC.hmac prf p_len pwd (s_len + numbytes_size_t) s_i in
-  repeat_range 1 counter (fun i u ->
-      let u_i = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u_o in
-      map2 (fun x y -> x ^. y) u u_i
-    ) u_o
+  let u_1 = Spec.HMAC.hmac prf p_len pwd (s_len + numbytes_size_t) s_i in
+  let u, _ = repeat_range 1 counter (fun i (u, u_p) ->
+      let u_i = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u_p in
+      map2 (fun x y -> x ^. y) u u_i, u_i
+    ) (u_1, u_1) in u
   (*let u2 = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u_o in
   let u_o = map2 (fun x y -> x ^. y) u_o u2 in
   let u3 = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u2 in
