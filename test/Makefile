@@ -234,7 +234,7 @@ test-perf-poly1305: test-poly1305.exe
 #
 
 test-salsa20.exe:
-	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c test-files/test-salsa.c -o test-salsa20.exe $(PERF_LIBS)
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Salsa20.c test-files/test-salsa.c -o test-salsa20.exe $(PERF_LIBS)
 
 test-unit-salsa20: test-salsa20.exe
 	./test-salsa20.exe unit-test
@@ -320,7 +320,7 @@ test-perf-sha512: test-sha512.exe
 #
 
 test-ed25519.exe:
-	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_SHA2_512.c $(HACL_HOME)/$(SNAPSHOT_DIR)/Ed25519.c test-files/test-ed25519.c -o test-ed25519.exe $(PERF_LIBS)
+	$(CC_BASE) -lpthread $(LIBDL) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_SHA2_512.c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Ed25519.c test-files/test-ed25519.c -o test-ed25519.exe $(PERF_LIBS)
 
 test-unit-ed25519: test-ed25519.exe
 	./test-ed25519.exe unit-test
@@ -333,10 +333,10 @@ test-perf-ed25519: test-ed25519.exe
 #
 
 test-secretbox.exe:
-	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c     -o Salsa20.o
+	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Salsa20.c     -o Hacl_Salsa20.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Poly1305_64.c -o Hacl_Poly1305_64.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Curve25519.c  -o Hacl_Curve25519.o
-	$(CC_BASE) Salsa20.o Hacl_Poly1305_64.o Hacl_Curve25519.o \
+	$(CC_BASE) Hacl_Salsa20.o Hacl_Poly1305_64.o Hacl_Curve25519.o \
 		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c test-files/test-secretbox.c -o test-secretbox.exe $(PERF_LIBS)
 
 test-unit-secretbox: test-secretbox.exe
@@ -350,10 +350,10 @@ test-perf-secretbox: test-secretbox.exe
 #
 
 test-box.exe:
-	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Salsa20.c     -o Salsa20.o
+	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Salsa20.c     -o Hacl_Salsa20.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Poly1305_64.c -o Hacl_Poly1305_64.o
 	$(CC) $(CFLAGS) -c $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Curve25519.c  -o Hacl_Curve25519.o
-	$(CC_BASE) Salsa20.o Hacl_Poly1305_64.o Hacl_Curve25519.o \
+	$(CC_BASE) Hacl_Salsa20.o Hacl_Poly1305_64.o Hacl_Curve25519.o \
 		$(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Policies.c $(HACL_HOME)/$(SNAPSHOT_DIR)/NaCl.c test-files/test-box.c -o test-box.exe $(PERF_LIBS)
 
 test-unit-box: test-box.exe

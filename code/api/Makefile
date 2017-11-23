@@ -2,7 +2,7 @@ include ../../Makefile.include
 
 API_FILES= \
 	Hacl.Constants.fst \
-	Chacha20Poly1305.fst \
+	Hacl.Chacha20Poly1305.fst \
 	Hacl.SecretBox.ZeroPad.fst \
 	Hacl.Box.ZeroPad.fst \
 	Hacl.Box.fst \
@@ -29,7 +29,7 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(API_FILES)))
 
 api: verify
 
-extract-c: aead-c/Chacha20Poly1305.c box-c/NaCl.c policies-c/Hacl_Policies.c
+extract-c: aead-c/Hacl_Chacha20Poly1305.c box-c/NaCl.c policies-c/Hacl_Policies.c
 
 test:
 
@@ -40,21 +40,21 @@ KREMLIN_ARGS+=$(addprefix -I ,$(INCLUDE_DIRS)) \
 policies-c/Hacl_Policies.c: $(HACL_HOME)/code/lib/kremlin/Hacl.Policies.fst
 	$(KREMLIN) $(KREMLIN_ARGS) $^ -tmpdir policies-c -skip-compilation
 
-box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Hacl.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Salsa20.fsti $(HACL_HOME)/code/curve25519/Hacl.Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst  NaCl.fst
+box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Hacl.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Hacl.Salsa20.fsti $(HACL_HOME)/code/curve25519/Hacl.Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst  NaCl.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir box-c NaCl.fst -skip-compilation \
 		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad" \
 		-bundle "Hacl.Policies=Hacl.Policies"
 
-aead-c/Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Hacl.Chacha20.fsti Chacha20Poly1305.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir aead-c Chacha20Poly1305.fst -skip-compilation \
+aead-c/Hacl_Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Hacl.Chacha20.fsti Hacl.Chacha20Poly1305.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir aead-c Hacl.Chacha20Poly1305.fst -skip-compilation \
 	-add-include '"Hacl_Chacha20.h"' -add-include '"AEAD_Poly1305_64.h"' \
 	-drop Hacl.Bignum.Constants,Hacl.Bignum.Parameters,Hacl.Bignum.Limb,Hacl.Bignum.Wide,Hacl.UInt16,Hacl.Types,Hacl.Bignum.*,AEAD_Poly1305_64,Hacl.Chacha20 \
 	# TODO: FIX FOR KREMLIN EXTRACTION ISSUE, CHECK WITH JP
-	$(SED) -i 's/(void \*)(uint8_t)0U, //g' aead-c/Chacha20Poly1305.c
+	$(SED) -i 's/(void \*)(uint8_t)0U, //g' aead-c/Hacl_Chacha20Poly1305.c
 
 count-line:
 	@echo "LOC for AEAD CHACHAPOLY"
-	cloc --force-lang=ocaml Chacha20Poly1305.fst
+	cloc --force-lang=ocaml Hacl.Chacha20Poly1305.fst
 	@echo "LOC for SECRETBOX"
 	cloc --force-lang=ocaml Hacl.SecretBox.ZeroPad.fst
 	@echo "LOC for BOX"

@@ -1,4 +1,4 @@
-module Ed25519
+module Hacl.Ed25519
 
 module ST = FStar.HyperStack.ST
 
@@ -36,7 +36,7 @@ val verify:
   Stack bool
     (requires (fun h -> live h public /\ live h msg /\ live h signature))
     (ensures (fun h0 b h1 -> live h0 public /\ live h0 msg /\ live h0 signature /\
-      modifies_0 h0 h1 /\ 
+      modifies_0 h0 h1 /\
       b == Spec.Ed25519.verify h0.[public] h0.[msg] h0.[signature]))
 
 

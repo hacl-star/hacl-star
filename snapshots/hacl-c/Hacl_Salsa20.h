@@ -22,8 +22,8 @@
  */
 
 #include "kremlib.h"
-#ifndef __Salsa20_H
-#define __Salsa20_H
+#ifndef __Hacl_Salsa20_H
+#define __Hacl_Salsa20_H
 
 
 
@@ -64,14 +64,14 @@ typedef uint8_t *Hacl_Impl_HSalsa20_uint8_p;
 
 typedef uint32_t *Hacl_Impl_HSalsa20_state;
 
-typedef uint8_t *Salsa20_uint8_p;
+typedef uint8_t *Hacl_Salsa20_uint8_p;
 
-typedef uint32_t Salsa20_uint32_t;
+typedef uint32_t Hacl_Salsa20_uint32_t;
 
-typedef uint32_t *Salsa20_state;
+typedef uint32_t *Hacl_Salsa20_state;
 
 void
-Salsa20_salsa20(
+Hacl_Salsa20_salsa20(
   uint8_t *output,
   uint8_t *plain,
   uint32_t len,
@@ -80,5 +80,5 @@ Salsa20_salsa20(
   uint64_t ctr
 );
 
-void Salsa20_hsalsa20(uint8_t *output, uint8_t *key, uint8_t *nonce);
+void Hacl_Salsa20_hsalsa20(uint8_t *output, uint8_t *key, uint8_t *nonce);
 #endif

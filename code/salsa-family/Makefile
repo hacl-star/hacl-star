@@ -9,7 +9,7 @@ SALSA_FAMILY_FILES= \
 	Hacl.Impl.HSalsa20.fst \
 	Hacl.SecureAPI.Chacha20.fst \
 	Hacl.Chacha20.fst \
-	Salsa20.fst \
+	Hacl.Salsa20.fst \
 	Spec.Chacha20_vec1.Lemmas.fst \
 	Spec.CTR3.fst \
 	Hacl.Impl.Chacha20.Vec128.State.fst \
@@ -30,7 +30,7 @@ BROKEN=
 ci: $(addsuffix -verify, $(filter-out $(SLOW) $(BROKEN), $(SALSA_FAMILY_FILES)))
 ct: $(addsuffix -lax, $(SALSA_FAMILY_FILES))
 	# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
-	$(FSTAR) --lax --verify_all Hacl.Chacha20.fst Salsa20.fst Hacl.Chacha20.Vec128.fst
+	$(FSTAR) --lax --verify_all Hacl.Chacha20.fst Hacl.Salsa20.fst Hacl.Chacha20.Vec128.fst
 verify: $(addsuffix -verify, $(SALSA_FAMILY_FILES))
 hints: $(addsuffix .hints, $(filter-out $(BROKEN), $(SALSA_FAMILY_FILES)))
 
@@ -62,19 +62,19 @@ chacha20.exe: chacha-c/out.krml
 	./$@
 
 
-salsa-c/out.krml: Hacl.Impl.Salsa20.fst Salsa20.fst Hacl.Test.Salsa20.fst
+salsa-c/out.krml: Hacl.Impl.Salsa20.fst Hacl.Salsa20.fst Hacl.Test.Salsa20.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c -skip-translation \
-		-bundle 'Salsa20=Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
+		-bundle 'Hacl.Salsa20=Hacl.Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
 		$^ -o $@
 
-salsa-c/Salsa20.c: salsa-c/out.krml
+salsa-c/Hacl_Salsa20.c: salsa-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c -skip-compilation \
-		-bundle 'Salsa20=Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
+		-bundle 'Hacl.Salsa20=Hacl.Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
 		$^ -o $@
 
 salsa20.exe: salsa-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c  -no-prefix Hacl.Test.Salsa20 \
-		-bundle 'Salsa20=Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
+		-bundle 'Hacl.Salsa20=Hacl.Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
 		$^ -o $@
 	./$@
 
@@ -99,7 +99,7 @@ chacha20-vec128.exe: chacha-vec128-c/out.krml
 		$^ -o $@
 	./$@
 
-extract-c: chacha-c/Hacl_Chacha20.c salsa-c/Salsa20.c chacha-vec128-c/Hacl_Chacha20_Vec128.c
+extract-c: chacha-c/Hacl_Chacha20.c salsa-c/Hacl_Salsa20.c chacha-vec128-c/Hacl_Chacha20_Vec128.c
 
 test: chacha20.exe salsa20.exe chacha20-vec128.exe
 

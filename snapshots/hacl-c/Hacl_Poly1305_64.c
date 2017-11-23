@@ -447,16 +447,16 @@ void
 Hacl_Poly1305_64_update(
   Hacl_Impl_Poly1305_64_State_poly1305_state st,
   uint8_t *m,
-  uint32_t len1
+  uint32_t num_blocks
 )
 {
-  if (!(len1 == (uint32_t)0U))
+  if (!(num_blocks == (uint32_t)0U))
   {
     uint8_t *block = m;
     uint8_t *m_ = m + (uint32_t)16U;
-    uint32_t len2 = len1 - (uint32_t)1U;
+    uint32_t n1 = num_blocks - (uint32_t)1U;
     Hacl_Poly1305_64_update_block(st, block);
-    Hacl_Poly1305_64_update(st, m_, len2);
+    Hacl_Poly1305_64_update(st, m_, n1);
   }
 }
 

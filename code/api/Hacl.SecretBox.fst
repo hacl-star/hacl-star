@@ -68,14 +68,14 @@ let crypto_secretbox_detached c mac m mlen n k =
   let mlen0_32 = Int.Cast.uint64_to_uint32 mlen0 in
   Math.Lemmas.modulo_lemma (U32.v mlen0_32) (pow2 32);
   blit m 0ul block0 zerobytes mlen0_32;
-  Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
-  Salsa20.salsa20 block0 block0 (U32.(mlen0_32 +^ zerobytes)) subkey (sub n 16ul 8ul) 0uL;
+  Hacl.Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
+  Hacl.Salsa20.salsa20 block0 block0 (U32.(mlen0_32 +^ zerobytes)) subkey (sub n 16ul 8ul) 0uL;
   let h1 = ST.get() in
   cut (modifies_1 hsalsa_state h0' h1);
   cut (modifies_0 h0 h1);
   blit block0 zerobytes c 0ul mlen0_32;
   if (U64.(mlen >^ mlen0)) then
-    Salsa20.salsa20 (offset c mlen0_32) (offset m mlen0_32) (U32.(mlen_32 -^ mlen0_32)) subkey (sub n 16ul 8ul)  1uL;
+    Hacl.Salsa20.salsa20 (offset c mlen0_32) (offset m mlen0_32) (U32.(mlen_32 -^ mlen0_32)) subkey (sub n 16ul 8ul)  1uL;
   let h2 = ST.get() in
   cut (modifies_2_1 c h0 h2);
   Hacl.Poly1305_64.crypto_onetimeauth mac c mlen (sub block0 0ul 32ul);
@@ -106,8 +106,8 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let block0 = sub hsalsa_state 32ul 64ul in
   let tmp_mac = sub hsalsa_state 96ul 16ul in
   let h0' = ST.get() in
-  Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
-  Salsa20.salsa20 block0 block0 32ul subkey (sub n 16ul 8ul) 0uL;
+  Hacl.Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
+  Hacl.Salsa20.salsa20 block0 block0 32ul subkey (sub n 16ul 8ul) 0uL;
   let h1 = ST.get() in
   cut(modifies_0 h0 h1);
   Hacl.Poly1305_64.crypto_onetimeauth tmp_mac c clen (sub block0 0ul 32ul);
@@ -123,13 +123,13 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let z =
     if U8.(verify =^ 0uy) then (
       blit c 0ul block0 zerobytes clen0_32;
-      Salsa20.salsa20 block0 block0 (U32.(clen0_32 +^ zerobytes)) subkey (sub n 16ul 8ul) 0uL;
+      Hacl.Salsa20.salsa20 block0 block0 (U32.(clen0_32 +^ zerobytes)) subkey (sub n 16ul 8ul) 0uL;
       blit block0 zerobytes m 0ul clen0_32;
       let clen_32 = Int.Cast.uint64_to_uint32 clen in
       let h3 = ST.get() in
       cut(modifies_2_1 m h0 h3);
       if (U64.(clen >^ clen0))
-        then Salsa20.salsa20 (offset m clen0_32) (offset c clen0_32) (U32.(clen_32 +^ clen0_32)) subkey (sub n 16ul 8ul) 1uL;
+        then Hacl.Salsa20.salsa20 (offset m clen0_32) (offset c clen0_32) (U32.(clen_32 +^ clen0_32)) subkey (sub n 16ul 8ul) 1uL;
       let h4 = ST.get() in
       cut(modifies_2_1 m h0 h4);
       0x0ul
