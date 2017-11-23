@@ -77,11 +77,7 @@ sbox.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.In
 	./sbox.exe
 
 
-<<<<<<< HEAD
-aes.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.AES.fst
-=======
 aes.exe: lib/Spec.Lib.IntTypes.fst lib/Spec.Lib.RawIntTypes.fst lib/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst 
->>>>>>> upstream/dev_specs
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p aes-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --odir aes-ml $^
