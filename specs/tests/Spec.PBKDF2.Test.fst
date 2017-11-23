@@ -90,8 +90,8 @@ let test8_expected = List.Tot.map u8_from_UInt8 [
 // TODO: get correct size
 let numbytes_size_t = 4
 
-(*val test_c: expected:lbytes 20 -> counter:size_t -> Tot int*)
-let test_c (expected:lbytes 20) (counter:size_t) =
+val test_c: expected:lbytes 20 -> counter:size_t -> FStar.All.ML unit
+let test_c expected counter =
   let p_len: size_t = 8 in
   let s_len: size_t = 4 in
   let test_pwd : lbytes 8 = createL test1_pwd in
@@ -106,8 +106,8 @@ let test_c (expected:lbytes 20) (counter:size_t) =
   if result then   IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n"
 
-
-let test_c2 (expected:lbytes 50) (counter:size_t) =
+val test_c2: expected:lbytes 50 -> counter:size_t -> FStar.All.ML unit
+let test_c2 expected counter =
   let p_len: size_t = 8 in
   let s_len: size_t = 4 in
   let test_pwd : lbytes 8 = createL test1_pwd in
