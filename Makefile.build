@@ -8,7 +8,7 @@ else
   HACL_HOME:=$(abspath $(HACL_HOME))
 endif
 
-.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove snapshots/hacl-c/kremlib.h snapshots/hacl-c/vec128.h snapshots/hacl-c/kremlib.c snapshots/hacl-c/kremlib_base.h snapshots/nss/kremlib.h snapshots/nss/kremlib.c snapshots/nss/kremlib_base.h snapshots/nss/vec128.h
+.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove snapshots/hacl-c/kremlib snapshots/nss/kremlib
 
 #
 # Extraction target for the stateful code
