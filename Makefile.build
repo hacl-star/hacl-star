@@ -119,6 +119,7 @@ snapshots/nss: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc-unrolled
 	rm -rf snapshots/nss
 	mkdir -p snapshots/nss
+	mkdir -p snapshots/nss/specs
 	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/nss
 	cp snapshots/snapshot-gcc-unrolled/Hacl_Chacha20.* snapshots/nss
 	cp snapshots/snapshot-gcc/Hacl_Poly1305_64.* snapshots/nss
