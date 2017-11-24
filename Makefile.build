@@ -8,7 +8,7 @@ else
   HACL_HOME:=$(abspath $(HACL_HOME))
 endif
 
-.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove snapshots/hacl-c/kremlib snapshots/nss/kremlib
+.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove snapshots/hacl-c/kremlib snapshots/nss/kremlib snapshots/nss/specs
 
 #
 # Extraction target for the stateful code
@@ -96,6 +96,11 @@ snapshots/nss/kremlib:
 		(cat $(HACL_LICENSE_NSS) snapshots/kremlib/$$f ) > snapshots/nss/$$f ; \
 	done
 
+snapshots/nss/specs:
+	for f in Spec.Poly1305.fst; do \
+		(cat $(HACL_LICENSE_NSS) specs/$$f ) > snapshots/nss/specs/$$f ; \
+	done
+
 
 SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) \
@@ -117,6 +122,7 @@ snapshots/nss: snapshots-remove-intermediates
 	cp snapshots/snapshot-gcc-unrolled/Hacl_Chacha20.* snapshots/nss
 	cp snapshots/snapshot-gcc/Hacl_Poly1305_64.* snapshots/nss
 	$(MAKE) snapshots/nss/kremlib
+	$(MAKE) snapshots/nss/specs
 
 #
 # Build, refresh and clean targets for all snapshots
