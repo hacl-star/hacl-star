@@ -97,7 +97,7 @@ snapshots/nss/kremlib:
 	done
 
 snapshots/nss/specs:
-	for f in Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst; do \
+	for f in Spec.Curve25519.fst Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst; do \
 		(cat $(HACL_LICENSE_NSS) specs/$$f ) > snapshots/nss/specs/$$f ; \
 	done
 
