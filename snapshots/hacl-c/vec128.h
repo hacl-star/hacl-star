@@ -1,25 +1,3 @@
-/* MIT License
- *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 #ifndef __Vec_H
 #define __Vec_H
 
@@ -161,22 +139,32 @@ static inline vec mk_vec(vec128 v) {
   return r;
 }
 
-
+#if 1
+#define vec_rotate_left(v,n) \
+  mk_vec((vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)v.v,n),(uint32x4_t)v.v,32-n))
+#else
 static inline vec vec_rotate_left(vec v, unsigned int n) {
   vec r;
   r.v = (vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)v.v,n),(uint32x4_t)v.v,32-n);
   return r;
 }
+#endif
 
 static inline vec vec_rotate_right(vec v, unsigned int n) {
   return (vec_rotate_left(v,32-n));
 }
 
+#if 1
+#define vec_shuffle_right(x,n) \
+  mk_vec((vec128)vextq_u32((uint32x4_t)x.v,(uint32x4_t)x.v,n))
+#else 
 static inline vec vec_shuffle_right(vec x, unsigned int n) {
   vec r;
   r.v = (vec128)vextq_u32((uint32x4_t)x.v,(uint32x4_t)x.v,n);
   return r;
 }
+#endif
+
 static inline vec vec_shuffle_left(vec x, unsigned int n) {
   return (vec_shuffle_right(x,4-n));
 }

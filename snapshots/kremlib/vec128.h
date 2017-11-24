@@ -139,22 +139,32 @@ static inline vec mk_vec(vec128 v) {
   return r;
 }
 
-
+#if 1
+#define vec_rotate_left(v,n) \
+  mk_vec((vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)v.v,n),(uint32x4_t)v.v,32-n))
+#else
 static inline vec vec_rotate_left(vec v, unsigned int n) {
   vec r;
   r.v = (vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)v.v,n),(uint32x4_t)v.v,32-n);
   return r;
 }
+#endif
 
 static inline vec vec_rotate_right(vec v, unsigned int n) {
   return (vec_rotate_left(v,32-n));
 }
 
+#if 1
+#define vec_shuffle_right(x,n) \
+  mk_vec((vec128)vextq_u32((uint32x4_t)x.v,(uint32x4_t)x.v,n))
+#else 
 static inline vec vec_shuffle_right(vec x, unsigned int n) {
   vec r;
   r.v = (vec128)vextq_u32((uint32x4_t)x.v,(uint32x4_t)x.v,n);
   return r;
 }
+#endif
+
 static inline vec vec_shuffle_left(vec x, unsigned int n) {
   return (vec_shuffle_right(x,4-n));
 }
