@@ -13,8 +13,8 @@ ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
   LIBFLAGS32=$(CCOPTS32) $(CFLAGS)
   OTHER=FStar.c -shared
 else
-  LIBFLAGS=$(CCOPTS) -fPIC -Wno-discarded-qualifiers
-  LIBFLAGS32=$(CCOPTS32) -fPIC -Wno-discarded-qualifiers -DKRML_NOUINT128 -Wno-unused-function
+  LIBFLAGS=$(CCOPTS) -fPIC
+  LIBFLAGS32=$(CCOPTS32) -fPIC -DKRML_NOUINT128 -Wno-unused-function
   OTHER=-shared
 endif
 
