@@ -121,7 +121,7 @@ static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned in
 }
 #endif
 
-#elif defined(__ARM_NEON__)
+#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
 #include <arm_neon.h>
 
 #define VEC128
