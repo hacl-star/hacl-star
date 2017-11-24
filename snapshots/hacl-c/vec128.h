@@ -139,6 +139,13 @@ static inline vec mk_vec(vec128 v) {
   return r;
 }
 
+static inline vec vec_xor(vec v1, vec v2) {
+  vec r;
+  r.v = (vec128) veorq_u32(v1.v,v2.v);
+  return r;
+}
+
+
 #if 1
 #define vec_rotate_left(v,n) \
   mk_vec((vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)v.v,n),(uint32x4_t)v.v,32-n))
@@ -207,12 +214,6 @@ static inline void vec_store_le(unsigned char* out, vec v) {
 static inline vec vec_add(vec v1, vec v2) {
   vec r;
   r.v = (vec128) vaddq_u32(v1.v,v2.v);
-  return r;
-}
-
-static inline vec vec_xor(vec v1, vec v2) {
-  vec r;
-  r.v = (vec128) veorq_u32(v1.v,v2.v);
   return r;
 }
 
