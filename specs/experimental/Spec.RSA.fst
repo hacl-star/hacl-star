@@ -34,57 +34,29 @@ let rec extended_eucl a b =
 		match (extended_eucl b (bn_mod a b)) with
 		| (x, y) -> (y, x - (bn_mul (bn_div a b) y))
 
-(* LEMMAS from FStar.Math.Lemmas *)
+(* LEMMAS for pow from FStar.Math.Lib *)
+#reset-options "--z3rlimit 30 --max_fuel 2"
+val pow : x:nat -> n:nat -> Tot nat
+let rec pow x n =
+  match n with
+  | 0 -> 1
+  | n -> x * pow x (n - 1)
+
 #reset-options "--z3rlimit 30 --initial_fuel 0 --max_fuel 0"
+val pow_lemma1: a:nat -> Lemma (pow a 1 = a)
+let pow_lemma1 a = admit()
 
-val lemma_div_mod: a:nat -> p:pos -> Lemma (a = p * (a / p) + a % p)
-let lemma_div_mod a p = ()
-
-#reset-options "--z3rlimit 30 --initial_fuel 1 --max_fuel 1"
-
-val pow2_double_sum: n:nat -> Lemma (pow2 n + pow2 n = pow2 (n + 1))
-let pow2_double_sum n = ()
-
-val pow2_lt_compat: n:nat -> m:nat -> Lemma
-  (requires (m < n))
-  (ensures  (pow2 m < pow2 n))
-  (decreases (n - m))
-let rec pow2_lt_compat n m =
-  match n-m with
-  | 1 -> ()
-  | _ -> pow2_lt_compat (n-1) m; pow2_lt_compat n (n-1)
-
-val pow2_le_compat: n:nat -> m:nat -> Lemma
-  (requires (m <= n))
-  (ensures  (pow2 m <= pow2 n))
-  (decreases (n - m))
-let pow2_le_compat n m =
-  match n-m with
-  | 0 -> ()
-  | _ -> pow2_lt_compat n m
-
-#reset-options "--z3rlimit 30 --max_fuel 1"
-
-val pow2_plus: n:nat -> m:nat -> Lemma
-  (ensures (pow2 n * pow2 m = pow2 (n + m)))
-  (decreases n)
-let rec pow2_plus n m =
+#reset-options "--z3rlimit 30 --max_fuel 2"
+val pow_lemma2: x:nat -> n:nat -> m:nat -> Lemma
+  (pow x n * pow x m = pow x (n + m))
+let rec pow_lemma2 x n m =
+  let ass (x y z : nat) : Lemma ((x*y)*z == x*(y*z)) = () in
   match n with
   | 0 -> ()
-  | _ -> pow2_plus (n - 1) m
+  | _ -> pow_lemma2 x (n-1) m; ass x (pow x (n-1)) (pow x m)
 
-#reset-options "--z3rlimit 30 --initial_fuel 0 --max_fuel 0"
-
-val lemma_div_lt: a:nat -> n:nat -> m:nat{m <= n} -> Lemma
-	(requires (a < pow2 n))
-	(ensures  (a / pow2 m < pow2 (n-m)))
-let lemma_div_lt a n m =
-  lemma_div_mod a (pow2 m);
-  assert(a = pow2 m * (a / pow2 m) + a % pow2 m);
-  pow2_plus m (n-m);
-  assert(pow2 n = pow2 m * pow2 (n - m))
-
-(* LEMMAS *)
+(* LEMMAS for Karatsuba's multiplication *)
+#reset-options "--z3rlimit 30 --max_fuel 0"
 
 val lemma_distributivity_mult: a:int -> b:int -> c:int -> d:int -> Lemma
   ((a + b) * (c + d) = a * c + a * d + b * c + b * d)
@@ -211,6 +183,7 @@ let rec karatsuba x0 a b =
 		c
 	end
 
+(* LEMMAS for Montgomery's arithmetic *)
 #reset-options "--max_fuel 0"
 
 val lemma_distributivity_div:
@@ -359,38 +332,38 @@ let from_mont r n n' a_r = mont_reduction r n n' a_r
 val mod_exp_:
 	x:size_t -> n:bignum{1 < n /\ n < pow2 (pow2 x)} -> a:elem n -> b:elem n -> Pure (res:elem n)
 	(ensures (True))
-	(requires (fun res -> res == (powx a b) % n))
+	(requires (fun res -> res == (pow a b) % n))
 	(decreases b)
 let rec mod_exp_ x n a b =
 	if b = 0 then 1
 	else begin
 		let b2 = bn_div2 b in
 		let res' = mod_exp_ x n a b2 in
-		assert (res' == (powx a b2) % n); //from ind hypo
+		assert (res' == (pow a b2) % n); //from ind hypo
 		lemma_div_mod b 2;
 		assert (b = 2 * b2 + b % 2);
-		powx_lemma2 a b2 b2;
-		assert (powx a (2 * b2) == powx a b2 * powx a b2); //property of exp
-		//lemma_mod_mul_distr (powx a b2) (powx a b2) n;
-		assume ((powx a b2 * powx a b2) % n == (((powx a b2) % n) * ((powx a b2) % n)) % n); //property of modular arithmetic
+		pow_lemma2 a b2 b2;
+		assert (pow a (2 * b2) == pow a b2 * pow a b2); //property of exp
+		lemma_mod_mul_distr (pow a b2) (pow a b2) n;
+		//assert ((pow a b2 * pow a b2) % n == (((pow a b2) % n) * ((pow a b2) % n)) % n); //property of modular arithmetic
 		let res = (res' * res') % n in
-		assert (res == (powx a (2 * b2)) % n);
+		assert (res == (pow a (2 * b2)) % n);
 		let res =
 			if (bn_is_even b) then begin
 				assert (b % 2 = 0);
 				assert (b = 2 * b2);
-				assert (res == (powx a b) % n);
+				assert (res == (pow a b) % n);
 				res end
 			else begin
 				assert (b % 2 = 1);
 				assert (b = 2 * b2 + 1);
 				let res = (res * a) % n in
-				powx_lemma2 a (2 * b2) 1;
-				assert (powx a b == powx a (2 * b2) * powx a 1); //property of exp
-				powx_lemma1 a; //assert (powx a 1 = a)
-				//lemma_mod_mul_distr_l (powx a (2 * b2)) a n;
-				assume ((powx a b) % n == (((powx a (2 * b2)) % n) * a) % n); //property of modular arithmetic
-				assert (res == (powx a b) % n);
+				pow_lemma2 a (2 * b2) 1;
+				assert (pow a b == pow a (2 * b2) * pow a 1); //property of exp
+				pow_lemma1 a; //assert (pow a 1 = a)
+				lemma_mod_mul_distr_l (pow a (2 * b2)) a n;
+				//assert ((pow a b) % n == (((pow a (2 * b2)) % n) * a) % n); //property of modular arithmetic
+				assert (res == (pow a b) % n);
 				res end in
 		res
 	end
@@ -398,7 +371,7 @@ let rec mod_exp_ x n a b =
 val mod_exp:
 	x:size_t -> n:bignum{1 < n /\ n < pow2 (pow2 x)} -> a:elem n -> b:elem n -> Pure (res:elem n)
 	(ensures (True))
-	(requires (fun res -> res == (powx a b) % n))
+	(requires (fun res -> res == (pow a b) % n))
 let mod_exp x n a b = mod_exp_ x n a b
 
 (*
@@ -406,7 +379,7 @@ val mod_exp_:
 	x:size_t -> r:bignum{r = pow2 (pow2 x)} -> n:bignum{1 < n /\ n < r} -> n':int ->
 	a:elem n -> b:elem n -> Pure (res:elem n)
 	(ensures (True))
-	(requires (fun res -> res == ((powx a b) / powx r (b - 1)) % n))
+	(requires (fun res -> res == ((pow a b) / pow r (b - 1)) % n))
 	(decreases b)
 let rec mod_exp_ x r n n' a b =
 	if b = 0 then to_mont r n n' 1
@@ -421,7 +394,7 @@ val mod_exp:
 	x:size_t -> n:bignum{1 < n /\ n < pow2 (pow2 x)} -> 
 	a:elem n -> b:elem n -> Pure (res:elem n)
 	(ensures (True))
-	(requires (fun res -> res == (powx a b) % n))
+	(requires (fun res -> res == (pow a b) % n))
 let mod_exp x n a b =
 	let r = pow2 (pow2 x) in
 	let n', _ = extended_eucl n r in
