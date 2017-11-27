@@ -115,7 +115,6 @@ Hacl_Chacha20Poly1305_aead_decrypt(
   Hacl_Chacha20Poly1305_encode_length(lb, aadlen, mlen);
   uint8_t *rmac = tmp + (uint32_t)80U;
   Hacl_Chacha20_chacha20_key_block(b, k1, n1, (uint32_t)0U);
-  uint8_t *mk = b;
   Hacl_Chacha20Poly1305_aead_encrypt_poly(c, mlen, rmac, aad1, aadlen, tmp);
   uint8_t result = Hacl_Policies_cmp_bytes(mac, rmac, (uint32_t)16U);
   uint8_t verify = result;
