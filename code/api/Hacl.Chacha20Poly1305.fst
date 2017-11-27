@@ -297,6 +297,8 @@ private val lemma_aead_decrypt_len:
   Lemma (1 + (length c / 64) < pow2 32)
 let lemma_aead_decrypt_len c mlen = ()
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+
 val aead_decrypt:
   m:uint8_p ->
   c:uint8_p{disjoint m c} ->
@@ -319,7 +321,7 @@ val aead_decrypt:
          let plain = aead_chacha20_poly1305_decrypt k n c mac aad in
          (z == 0ul ==> (Some? plain /\ m == Some?.v plain)
          /\ (z == 1ul ==> (None? plain))))))
-#reset-options "--initial_fuel 0 --max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 let aead_decrypt m c mlen mac aad aadlen k n =
   let h = ST.get() in
   push_frame();
