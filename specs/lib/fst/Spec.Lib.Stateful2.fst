@@ -45,8 +45,6 @@ let import (ext:'a) (k:accessor 's 'b) (f:'a -> 'b) : stateful 's unit =
 let export (k:accessor 's 'a) (f:'a -> 'b) : stateful 's 'b =
   fun s -> (f (k.get s)), s
 
-let pipe (k1:accessor 's 'a) (f:'a -> 'b) (k2:accessor 't 'b) : stateful s 'a * stateful 't
-
 let read #len (k:array_accessor 's 'a len) (i:size_t{i < len}) : stateful 's 'a =
   fun s -> (k.get s).[i],s
 
