@@ -2726,12 +2726,7 @@ Hacl_Impl_Ed25519_Sign_Steps_copy_bytes(uint8_t *output, uint8_t *input, uint32_
   memcpy(output, input, len1 * sizeof input[0U]);
 }
 
-static void
-Hacl_Impl_Ed25519_Sign_Steps_sign_step_1(
-  uint8_t *secret,
-  uint8_t *tmp_bytes,
-  uint64_t *tmp_ints
-)
+static void Hacl_Impl_Ed25519_Sign_Steps_sign_step_1(uint8_t *secret, uint8_t *tmp_bytes)
 {
   uint8_t *a__ = tmp_bytes + (uint32_t)96U;
   uint8_t *apre = tmp_bytes + (uint32_t)224U;
@@ -2777,8 +2772,7 @@ static void Hacl_Impl_Ed25519_Sign_Steps_sign_step_5(uint8_t *tmp_bytes, uint64_
   uint64_t *s = tmp_ints + (uint32_t)55U;
   uint64_t *h = tmp_ints + (uint32_t)60U;
   uint8_t *s_ = tmp_bytes + (uint32_t)192U;
-  uint8_t *apre = tmp_bytes + (uint32_t)224U;
-  uint8_t *a = apre;
+  uint8_t *a = tmp_bytes + (uint32_t)224U;
   Hacl_Impl_Load56_load_32_bytes(aq, a);
   Hacl_Impl_BignumQ_Mul_mul_modq(ha, h, aq);
   Hacl_Impl_BignumQ_Mul_add_modq(s, r, ha);
@@ -2798,7 +2792,7 @@ Hacl_Impl_Ed25519_Sign_sign_(uint8_t *signature, uint8_t *secret, uint8_t *msg, 
   uint64_t tmp_ints[65U] = { 0U };
   uint8_t *rs_ = tmp_bytes + (uint32_t)160U;
   uint8_t *s_ = tmp_bytes + (uint32_t)192U;
-  Hacl_Impl_Ed25519_Sign_Steps_sign_step_1(secret, tmp_bytes, tmp_ints);
+  Hacl_Impl_Ed25519_Sign_Steps_sign_step_1(secret, tmp_bytes);
   Hacl_Impl_Ed25519_Sign_Steps_sign_step_2(msg, len1, tmp_bytes, tmp_ints);
   uint8_t rb[32U] = { 0U };
   uint64_t *r = tmp_ints + (uint32_t)20U;
