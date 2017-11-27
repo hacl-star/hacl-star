@@ -83,8 +83,6 @@ Hacl_Poly1305_64_mk_state(uint64_t *r, uint64_t *acc);
 
 void Hacl_Poly1305_64_init(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *k1);
 
-extern void *Hacl_Poly1305_64_empty_log;
-
 void Hacl_Poly1305_64_update_block(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m);
 
 void

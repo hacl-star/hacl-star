@@ -436,8 +436,6 @@ void Hacl_Poly1305_64_init(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_
   x00[2U] = (uint64_t)0U;
 }
 
-void *Hacl_Poly1305_64_empty_log = (void *)(uint8_t)0U;
-
 void Hacl_Poly1305_64_update_block(Hacl_Impl_Poly1305_64_State_poly1305_state st, uint8_t *m)
 {
   Hacl_Impl_Poly1305_64_poly1305_update(st, m);
