@@ -152,7 +152,7 @@ ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) .base
 	$(MAKE) build-make
 	$(MAKE) test-all
-#	$(MAKE) package
+	$(MAKE) package
 
 #
 # Clean
