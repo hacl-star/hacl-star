@@ -9,8 +9,8 @@ all: display
 display:
 	@echo "HACL* Makefile:"
 	@echo "If you want to run and test the C library:"
-	@echo "- 'make build' will generate a shared library from the hacl-c snapshot (no verification)"
-	@echo "- 'make unit-tests' will run tests on the library built rom the hacl-c snapshot (no verification)"
+	@echo "- 'make build' will generate static and shared libraries for snapshots/hacl-c (no verification)"
+	@echo "- 'make unit-tests' will run tests on the library built from the hacl-c snapshot (no verification)"
 	@echo "- 'make clean-build' will clean 'build' artifacts"
 	@echo ""
 	@echo "If you want to verify the F* code and regenerate the C library:"
