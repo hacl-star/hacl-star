@@ -193,9 +193,8 @@ clean: .clean-banner clean-base clean-build
 	@echo $(CYAN)"# Packaging the HACL* generated code"$(NORMAL)
 	@echo $(CYAN)"  Make sure you have run verification before !"$(NORMAL)
 
-package: .package-banner snapshots/hacl-c build
+package: .package-banner
 	mkdir -p hacl
-	cp build/lib* hacl
 	cp -r snapshots/hacl-c/* hacl
 	tar -zcvf hacl-star.tar.gz hacl
 	rm -rf hacl
