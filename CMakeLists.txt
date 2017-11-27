@@ -44,7 +44,7 @@ else ()
 endif ()
 
 # Compilation options
-set(GCC_COVERAGE_COMPILE_FLAGS "-march=nativ -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= ")
+# set(CMAKE_C_FLAGS "-Wall -Wextra")
 
 # Generate both a static and a shared library
 add_library(hacl_static STATIC ${SOURCE_FILES})
