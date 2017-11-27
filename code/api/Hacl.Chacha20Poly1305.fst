@@ -332,8 +332,6 @@ let aead_decrypt m c mlen mac aad aadlen k n =
   let rmac = Buffer.sub tmp 80ul 16ul in
   let h1' = ST.get() in
   Hacl.Chacha20.chacha20_key_block b k n 0ul;
-  let mk = Buffer.sub b 0ul 32ul in
-  let key_s = Buffer.sub mk 16ul 16ul in
   let h2 = ST.get() in
   aead_encrypt_poly c mlen rmac aad aadlen (Buffer.sub tmp 0ul 80ul);
   let h3 = ST.get() in
