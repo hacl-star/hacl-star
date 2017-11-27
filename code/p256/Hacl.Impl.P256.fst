@@ -431,6 +431,8 @@ let longfelem_diff out input =
   out.(7ul) <- out7 -^ input7;
   pop_frame()
 
+
+// TODO: This function (at least) is bugged, FIXME
 val felem_shrink:
   out:smallfelem -> input:felem -> Stack unit
     (requires (fun h -> True))
@@ -480,8 +482,8 @@ let felem_shrink out input =
   let tmp1 = tmp1 -^ (b <<^ 32ul) in
 
   // TODO: better implementation
-  let high = tmp3 >>^ 64ul in
-  let high = uint128_to_uint64 (eq_mask tmp3 (load128 0x0uL 0x1uL)) in
+  // let high = tmp3 >>^ 64ul in
+  let high = uint128_to_uint64 (gte_mask tmp3 (load128 0x1uL 0x0uL)) in
 
   // TODO: better implementation
   let low = uint128_to_uint64 tmp3 in
@@ -1472,8 +1474,8 @@ let swap_cond_inplace p q iswap =
       let pi = p.(i) in
       let qi = q.(i) in
       let x  = mask &^ (pi ^^ qi) in
-      let pi' = pi &^ x in
-      let qi' = qi &^ x in
+      let pi' = pi ^^ x in
+      let qi' = qi ^^ x in
       p.(i) <- pi';
       q.(i) <- qi'
       in
@@ -1514,7 +1516,6 @@ let loop_step pp ppq p pq k i =
 
 
 val point_mul_:
-  // b:buffer UInt64.t{length b = 80} ->
   pp:point ->
   ppq:point ->
   p:point ->
@@ -1522,11 +1523,7 @@ val point_mul_:
   k:buffer UInt8.t ->
   Stack unit
     (requires (fun h -> Buffer.live h k /\ True))
-      // (let nq   = Buffer.sub b 0ul 20ul in
-      //  let nqpq = Buffer.sub b 20ul 20ul in
-      //  point_inv h nq /\ point_inv h nqpq) ))
-    (ensures (fun h0 _ h1 -> Buffer.live h0 k // /\ live h0 b /\ live h1 b /\ modifies_1 b h0 h1
-  ))
+    (ensures (fun h0 _ h1 -> Buffer.live h0 k))
 let point_mul_ pp ppq p pq k =
   let h0 = ST.get() in
   let inv (h1: HyperStack.mem) (i: nat): Type0 = True
@@ -1535,17 +1532,10 @@ let point_mul_ pp ppq p pq k =
     (requires (fun h -> inv h (UInt32.v i)))
     (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
   =
-    // let nq   = Buffer.sub b  0ul 20ul in
-    // let nqpq = Buffer.sub b 20ul 20ul in
-    // let h  = ST.get() in
-    loop_step pp ppq p pq k FStar.UInt32.(256ul -^ i -^ 1ul)
-    // let h' = ST.get() in
-    // lemma_montgomery_ladder_def_1 (as_point h0 nq) (as_point h0 nqpq) (reveal_sbytes (as_seq h0 k)) (UInt32.v i + 1)
+    loop_step pp ppq p pq k FStar.UInt32.(256ul -^ (2ul *^ i) -^ 1ul);
+    loop_step p pq pp ppq k FStar.UInt32.(256ul -^ (2ul *^ i) -^ 2ul)
   in
-  // let nq   = Buffer.sub b  0ul 20ul in
-  // let nqpq = Buffer.sub b 20ul 20ul in
-  // lemma_montgomery_ladder_def_0 (as_point h0 nq) (as_point h0 nqpq) (reveal_sbytes (as_seq h0 k));
-  C.Loops.for 0ul 256ul inv f'
+  C.Loops.for 0ul 128ul inv f'
 
 
 val p256:
@@ -1596,8 +1586,8 @@ let p256 outx outy inx iny key =
   point_mul_ pp ppq p pq key;
   let x = create 0uL 4ul in
   let y = create 0uL 4ul in
-  felem_contract x (get_x pp);
-  felem_contract y (get_y pp);
+  felem_contract x (get_x p);
+  felem_contract y (get_y p);
   let x0 = x.(0ul) in
   let x1 = x.(1ul) in
   let x2 = x.(2ul) in

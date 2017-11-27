@@ -62,6 +62,10 @@ p256.exe: p256-c/out.krml
 test: p256.exe
 	./$^
 
+c:
+	gcc-6 -I $(HACL_HOME)/code/lib/kremlin -I /home/jkz/dev/kremlin/kremlib -I $(HACL_HOME)/specs -I . -I $(KREMLIN_HOME)/kremlib -I p256-c -march=native -D_GNU_SOURCE -Wall -Werror -Wno-unused-variable -Wno-unknown-warning-option -Wno-unused-but-set-variable -g -O3 -fwrapv -fstack-check -D_BSD_SOURCE -D_DEFAULT_SOURCE -Wno-parentheses -std=c11 p256-c/FStar.o p256-c/Hacl_Impl_P256.c p256-c/Hacl_Test_P256.o p256-c/kremlinit.o p256-c/kremlib.o p256-c/testlib.o -o p256.exe -flto
+	./p256.exe
+
 count-line:
 	cloc --force-lang=ocaml $(P256_FILES)
 
