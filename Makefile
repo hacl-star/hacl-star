@@ -112,10 +112,10 @@ build-make:
 	$(MAKE) build/libhacl.so
 
 build-cmake:
-	mkdir -p build && cd build && CC=gcc cmake $(CMAKE_COMPILER_OPTION) .. && make
+	mkdir -p build && cd build && cmake $(CMAKE_COMPILER_OPTION) .. && make
 
 build: clean-build
-	$(MAKE) build-make
+	$(MAKE) build-cmake
 	@echo $(CYAN)"\nDone ! Generated libraries can be found in 'build'."$(NORMAL)
 
 #
