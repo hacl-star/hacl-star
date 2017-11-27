@@ -810,7 +810,7 @@ let felem_reduce_ out input =
   out.(1ul) <- out1;
   out.(2ul) <- out2;
   out.(3ul) <- out3
-  
+
 val felem_reduce:
   out:felem -> input:longfelem -> Stack unit
     (requires (fun h -> True))
@@ -1102,6 +1102,12 @@ let smallfelem_inv_contract out input =
   felem_inv tmp tmp;
   felem_contract out tmp;
   pop_frame()
+
+
+(* ******************************************************* *)
+(*      END OF BIGNUM CODE / BEGINNING OF CURVE CODE       *)
+(* ******************************************************* *)
+
 
 val point_double:
   x_out:felem -> y_out:felem -> z_out:felem ->
@@ -1454,10 +1460,6 @@ val swap_cond_inplace:
         let x2' = as_seq h1 (get_x q) in
         let y2' = as_seq h1 (get_y q) in
         let z2' = as_seq h1 (get_z q) in
-        // red_513 x1 /\ red_513 y1 /\ red_513 z1 /\
-        // red_513 x2 /\ red_513 y2 /\ red_513 z2 /\
-        // red_513 x1' /\ red_513 y1' /\ red_513 z1' /\
-        // red_513 x2' /\ red_513 y2' /\ red_513 z2' /\
         True /\
       (if UInt128.v i = 1 then (x1' == x2 /\ y1' == y2 /\ z1' == z2 /\
                                     x2' == x1 /\ y2' == y1 /\ z2' == z1)
@@ -1480,8 +1482,6 @@ let swap_cond_inplace p q iswap =
       q.(i) <- qi'
       in
   for 0ul 12ul inv f
-
-  // Hacl.Impl.Ed25519.SwapConditional.swap_conditional_inplace p q iswap
 
 val loop_step:
   pp:point ->
@@ -1577,13 +1577,9 @@ let p256 outx outy inx iny key =
   let py = get_y p in
   px.(0ul) <- UInt128.uint64_to_uint128 1uL;
   py.(0ul) <- UInt128.uint64_to_uint128 1uL;
-  // Copy initial point into pq (P == point at infinity + Q == initial_point)
-  let pq = create (UInt128.uint64_to_uint128 0uL) 12ul in
-  Buffer.blit q 0ul pq 0ul 12ul;
-  // Storage buffers
   let pp = create (UInt128.uint64_to_uint128 0uL) 12ul in
   let ppq = create (UInt128.uint64_to_uint128 0uL) 12ul in
-  point_mul_ pp ppq p pq key;
+  point_mul_ pp ppq p q key;
   let x = create 0uL 4ul in
   let y = create 0uL 4ul in
   felem_contract x (get_x p);
