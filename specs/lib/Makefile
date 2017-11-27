@@ -4,6 +4,7 @@ hints:
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntTypes.fst --record_hints 
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntTypes.fst Spec.Lib.RawIntTypes.fst --record_hints
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntSeq.fst --record_hints
+	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntSeq.Lemma.fst --record_hints
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntVec.fst --record_hints 
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.Stateful.fst --record_hints
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.Stateful2.fst --record_hints
@@ -13,6 +14,7 @@ verify:
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntTypes.fst --use_hints 
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntTypes.fst Spec.Lib.RawIntTypes.fst --use_hints
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntSeq.fst --use_hints
+	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntSeq.Lemma.fst --use_hints
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.IntVec.fst --use_hints 
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.Stateful.fst --use_hints
 	$(FSTAR_HOME)/bin/fstar.exe Spec.Lib.Stateful2.fst --record_hints
