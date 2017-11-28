@@ -7,7 +7,7 @@ project (hacl)
 set(CMAKE_BUILD_TYPE Release)
 
 # Include directories
-include_directories($ENV{KREMLIN_HOME}/kremlib ./snapshots/hacl-c ./snapshots/hacl-c-experimental)
+include_directories(./snapshots/hacl-c ./snapshots/hacl-c-experimental)
 
 # Verified Files
 set(SOURCE_FILES_VERIFIED
