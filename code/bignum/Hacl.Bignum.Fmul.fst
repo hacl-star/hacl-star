@@ -110,7 +110,7 @@ let mul_shift_reduce_ output input input2 =
 let as_seq' (h:mem) (b:felem{live h b}) : GTot seqelem = as_seq h b
   
 
-[@"c_inline"]
+[@"substitute"]
 private val fmul_:
   output:felem ->
   input:felem{disjoint output input} ->
@@ -124,7 +124,7 @@ private val fmul_:
       /\ as_seq h1 output == fmul_spec (as_seq h0 input) (as_seq h0 input2)
       ))
 #reset-options "--z3rlimit 100 --max_fuel 0"
-[@"c_inline"]
+[@"substitute"]
 private let fmul_ output input input2 =
   let h0 = ST.get() in
   push_frame();

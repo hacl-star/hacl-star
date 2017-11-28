@@ -2,7 +2,13 @@
 # General extraction
 #
 
-.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove
+ifndef HACL_HOME
+  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+else
+  HACL_HOME:=$(abspath $(HACL_HOME))
+endif
+
+.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove snapshots/hacl-c/kremlib snapshots/nss/kremlib snapshots/nss/specs
 
 #
 # Extraction target for the stateful code
@@ -18,26 +24,30 @@ extract-c-code:
 extract-c-code-experimental:
 	$(MAKE) -C code/experimental extract-c
 
+# Clean the code directories
+clean-c-code:
+	$(MAKE) -C code clean
+
 #
 # Snapshot targets
 #
 
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
-SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile) \
-	$(addprefix code/poly1305/poly-c/, Poly1305_64.* AEAD_Poly1305_64.*) \
-	./code/curve25519/x25519-c/Curve25519.* \
-	./code/salsa-family/chacha-c/Chacha20.* \
-	./code/salsa-family/salsa-c/Salsa20.* \
-	$(addprefix code/api/aead-c/, Chacha20Poly1305.*) \
+SNAPSHOT_FILES= $(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h testlib.* FStar.* vec128.h Makefile CMakeLists.txt) \
+	$(addprefix code/poly1305/poly-c/, Hacl_Poly1305_64.* AEAD_Poly1305_64.*) \
+	./code/curve25519/x25519-c/Hacl_Curve25519.* \
+	./code/salsa-family/chacha-c/Hacl_Chacha20.* \
+	./code/salsa-family/salsa-c/Hacl_Salsa20.* \
+	$(addprefix code/api/aead-c/, Hacl_Chacha20Poly1305.*) \
 	$(addprefix code/api/box-c/, NaCl.*) \
 	$(addprefix code/api/policies-c/, Hacl_Policies.* ) \
-	$(addprefix code/ed25519/ed25519-c/, Ed25519.*) \
-	$(addprefix code/hash/sha2-c/, SHA2_256.*) \
-	$(addprefix code/hash/sha2-c/, SHA2_384.*) \
-	$(addprefix code/hash/sha2-c/, SHA2_512.*) \
-	$(addprefix code/hmac/hmac-c/, HMAC_SHA2_256.*) \
-	$(addprefix code/salsa-family/chacha-vec128-c/, Chacha20_Vec128.* ../vec128.h)
+	$(addprefix code/ed25519/ed25519-c/, Hacl_Ed25519.*) \
+	$(addprefix code/hash/sha2-c/, Hacl_SHA2_256.*) \
+	$(addprefix code/hash/sha2-c/, Hacl_SHA2_384.*) \
+	$(addprefix code/hash/sha2-c/, Hacl_SHA2_512.*) \
+	$(addprefix code/hmac/hmac-c/, Hacl_HMAC_SHA2_256.*) \
+	$(addprefix code/salsa-family/chacha-vec128-c/, Hacl_Chacha20_Vec128.*)
 
 SNAPSHOT_CCOMP_FILES=$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/kremlib.h \
 	code/lib/kremlin/ccomp-c/FStar.c code/lib/kremlin/ccomp-c/FStar.h
@@ -45,103 +55,134 @@ SNAPSHOT_CCOMP_FILES=$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/k
 snapshot-collect:
 	mkdir -p $(SNAPSHOT_DIR)
 	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
+	touch $(SNAPSHOT_DIR)/Prims.h
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	cp $(SNAPSHOT_CCOMP_FILES) $(SNAPSHOT_DIR)/
 else
 endif
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
-snapshots/hacl-c-compcert:
-	$(MAKE) -C code clean
-	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 10 -fnouint128 -fnostruct-passing"; fi
-	if $(HAS_CCOMP); then $(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/hacl-c-compcert; fi
+snapshots/snapshot-compcert: clean-c-code
+	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 5 -fnouint128 -fnostruct-passing" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
+	if $(HAS_CCOMP); then $(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-compcert; fi
 
-snapshots/snapshot-msvc:
-	$(MAKE) -C code clean
-	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar"; fi
+snapshots/snapshot-msvc: clean-c-code
+	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
 	if $(HAS_CL); then $(MAKE) snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-msvc; fi
 
-snapshots/snapshot-gcc:
-	$(MAKE) -C code clean
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar"
+snapshots/snapshot-gcc: clean-c-code
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc
 
-snapshots/snapshot-gcc-unrolled:
-	$(MAKE) -C code clean
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar"
+snapshots/snapshot-gcc-unrolled: clean-c-code
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
-# BB: This requires to have up-to-date snapshot-gcc and snapshot-gcc-unrolled
-# Maybe we should call 'snapshot-remove' before to enforce it (at the cost of two more extractions) ?
-snapshots/hacl-c:
-	$(MAKE) snapshots/snapshot-gcc
-	$(MAKE) snapshots/snapshot-gcc-unrolled
-	mkdir -p snapshots/hacl-c
-	cp $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Chacha20.* Chacha20Poly1305.* Chacha20_Vec128.* Hacl_Policies.* NaCl.* Poly1305_64.* Salsa20.* SHA2_* HMAC_SHA2_* vec128.h) \
-	   $(addprefix snapshots/snapshot-gcc-unrolled/, Curve25519* Ed25519*) \
-	   $(addprefix snapshots/kremlib/, kremlib.* testlib.* gcc_compat.h FStar.h Makefile)  \
-		./snapshots/hacl-c
+#
+# Production targets
+#
 
-snapshots-all:
+HACL_RELEASE=1
+HACL_LICENSE?=$(HACL_HOME)/snapshots/licenses/MIT
+HACL_LICENSE_NSS?=$(HACL_HOME)/snapshots/licenses/APACHE2
+
+snapshots/hacl-c/kremlib:
+	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c vec128.h; do \
+		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
+	done
+
+snapshots/nss/kremlib:
+	for f in kremlib.h kremlib_base.h FStar.h FStar.c vec128.h; do \
+		(cat $(HACL_LICENSE_NSS) snapshots/kremlib/$$f ) > snapshots/nss/$$f ; \
+	done
+
+snapshots/nss/specs:
+	for f in Spec.Curve25519.fst Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst; do \
+		(cat $(HACL_LICENSE_NSS) specs/$$f ) > snapshots/nss/specs/$$f ; \
+	done
+
+
+SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
+	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) \
+	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* vec128.h Makefile CMakeLists.txt)
+
+snapshots/hacl-c: snapshots-remove-intermediates
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc-unrolled
+	rm -rf snapshots/hacl-c
+	mkdir -p snapshots/hacl-c
+	cp $(SNAPSHOT_HACL_C_FILES) ./snapshots/hacl-c
+	$(MAKE) snapshots/hacl-c/kremlib
+
+snapshots/nss: snapshots-remove-intermediates
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc-unrolled
+	rm -rf snapshots/nss
+	mkdir -p snapshots/nss
+	mkdir -p snapshots/nss/specs
+	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/nss
+	cp snapshots/snapshot-gcc/Hacl_Chacha20.* snapshots/nss
+	cp snapshots/snapshot-gcc/Hacl_Poly1305_64.* snapshots/nss
+	$(MAKE) snapshots/nss/kremlib
+	$(MAKE) snapshots/nss/specs
+
+#
+# Build, refresh and clean targets for all snapshots
+#
+
+snapshots-intermediates:
 	$(MAKE) snapshots/snapshot-gcc
 	$(MAKE) snapshots/snapshot-gcc-unrolled
 	$(MAKE) snapshots/snapshot-msvc
-	$(MAKE) snapshots/hacl-c-compcert
-	$(MAKE) snapshots/hacl-c
+	$(MAKE) snapshots/snapshot-compcert
 
-snapshots-remove:
-	rm -rf snapshots/hacl-c
+snapshots-production:
+	$(MAKE) snapshots/hacl-c
+	$(MAKE) snapshots/nss
+
+snapshots-remove-intermediates:
 	rm -rf snapshots/snapshot*
 
-snapshots-update:
-	$(MAKE) snapshots-remove
-	$(MAKE) snapshots-all
+snapshots-remove-production:
+	rm -rf snapshots/hacl-c
+	rm -rf snapshots/nss
 
 #
 # Building the shared library
 #
 
-snapshots/hacl-c/libhacl.so: snapshots/hacl-c
-	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl.so
 
-snapshots/hacl-c/libhacl32.so: snapshots/hacl-c
-	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl32.so
+snapshots/hacl-c/libhacl.so:
+	$(MAKE) -C snapshots/hacl-c libhacl.so
 
-snapshots/snapshot-gcc/libhacl.so: snapshots/snapshot-gcc
-	$(MAKE) -C snapshots/snapshot-gcc CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl.so
+snapshots/hacl-c/libhacl.a:
+	$(MAKE) -C snapshots/hacl-c libhacl.a
 
-snapshots/snapshot-gcc/libhacl32.so: snapshots/snapshot-gcc
-	$(MAKE) -C snapshots/snapshot-gcc CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl32.so
+snapshots/hacl-c/libhacl32.so:
+	$(MAKE) -C snapshots/hacl-c libhacl32.so
 
-snapshots/snapshot-gcc-unrolled/libhacl.so: snapshots/snapshot-gcc-unrolled
-	$(MAKE) -C snapshots/snapshot-gcc-unrolled CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl.so
-
-snapshots/snapshot-gcc-unrolled/libhacl32.so: snapshots/snapshot-gcc-unrolled
-	$(MAKE) -C snapshots/snapshot-gcc-unrolled CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl32.so
-
-# BB: The options for Compcert and MSVC must be adjusted here
-snapshots/hacl-c-compcert/libhacl.so: snapshots/hacl-c-compcert
-	$(MAKE) -C snapshots/hacl-c-compcert CC="$(CCOMP) $(CCOMP_OPTS) -fPIC" libhacl.so
-
-snapshots/hacl-c-compcert/libhacl32.so: snapshots/hacl-c-compcert
-	$(MAKE) -C snapshots/hacl-c-compcert CC="$(CCOMP) $(CCOMP_OPTS) -fPIC" libhacl32.so
-
-snapshots/snapshot-msvc/libhacl.so: snapshots/snapshot-msvc
-	$(MAKE) -C snapshots/snapshot-msvc CC="$(MSVC) $(MSVC_OPTS) -fPIC" libhacl.so
-
-snapshots/snapshot-msvc/libhacl32.so: snapshots/snapshot-msvc
-	$(MAKE) -C snapshots/snapshot-msvc CC="$(MSVC) $(MSVC_OPTS) -fPIC" libhacl32.so
+snapshots/hacl-c/libhacl32.a:
+	$(MAKE) -C snapshots/hacl-c libhacl32.a
 
 build/libhacl.so:
 	mkdir -p build
 	$(MAKE) snapshots/hacl-c/libhacl.so
 	cp snapshots/hacl-c/libhacl.so build
 
+build/libhacl.a:
+	mkdir -p build
+	$(MAKE) snapshots/hacl-c/libhacl.a
+	cp snapshots/hacl-c/libhacl.a build
+
 build/libhacl32.so:
 	mkdir -p build
 	$(MAKE) snapshots/hacl-c/libhacl32.so
 	cp snapshots/hacl-c/libhacl32.so build
 
+build/libhacl32.a:
+	mkdir -p build
+	$(MAKE) snapshots/hacl-c/libhacl32.a
+	cp snapshots/hacl-c/libhacl32.a build
 
 #
 # Compilers and tools

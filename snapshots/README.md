@@ -40,7 +40,8 @@ This directory contains:
 - `kremlib`
 
   A cached version of the KreMLin C libraries, including platform-specific endianness libraries, 
-  and a compiled C version of the F* verified UInt128 library.
+  and a compiled C version of the F* verified UInt128 library. Note that except for FStar.h other files
+  are unverified hence are trusted code.
 
 - `ecc-star`
 

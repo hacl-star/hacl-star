@@ -33,22 +33,22 @@ let crypto_box_detached_afternm c mac m mlen n k =
   Hacl.Box.ZeroPad.crypto_box_detached_afternm c mac m mlen n k
 
 let crypto_box_detached c mac m mlen n pk sk =
-  Hacl.Box.ZeroPad.crypto_box_detached c mac m mlen n pk sk 
+  Hacl.Box.ZeroPad.crypto_box_detached c mac m mlen n pk sk
 
 let crypto_box_open_detached m c mac mlen n pk sk =
-  Hacl.Box.ZeroPad.crypto_box_open_detached m c mac mlen n pk sk 
+  Hacl.Box.ZeroPad.crypto_box_open_detached m c mac mlen n pk sk
 
 let crypto_box_easy_afternm c m mlen n k =
   Hacl.Box.ZeroPad.crypto_box_easy_afternm c m mlen n k
 
 let crypto_box_easy c m mlen n pk sk =
-  Hacl.Box.ZeroPad.crypto_box_easy c m mlen n pk sk 
+  Hacl.Box.ZeroPad.crypto_box_easy c m mlen n pk sk
 
 let crypto_box_open_easy m c mlen n pk sk =
-  Hacl.Box.ZeroPad.crypto_box_open_easy m c mlen n pk sk 
+  Hacl.Box.ZeroPad.crypto_box_open_easy m c mlen n pk sk
 
 let crypto_box_open_detached_afternm m c mac mlen n k =
   Hacl.Box.ZeroPad.crypto_box_open_detached_afternm m c mac mlen n k
 
 let crypto_box_open_easy_afternm m c mlen n k =
-  Hacl.Box.ZeroPad.crypto_box_open_easy_afternm m c mlen n k 
+  Hacl.Box.ZeroPad.crypto_box_open_easy_afternm m c mlen n k

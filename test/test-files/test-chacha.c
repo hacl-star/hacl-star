@@ -1,6 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
-#include "Chacha20.h"
+#include "Hacl_Chacha20.h"
 #include "sodium.h"
 #include "openssl/evp.h"
 #include "hacl_test_utils.h"
@@ -73,7 +73,7 @@ void flush_results(char *txt, uint64_t hacl_cy, uint64_t sodium_cy, uint64_t oss
 }
 
 
-#define PLAINLEN (1024*1024)
+#define PLAINLEN (16*1024)
 #define ROUNDS 1000
 #define MACSIZE 32
 
@@ -373,7 +373,7 @@ int32_t test_chacha()
   memset(ciphertext, 0, 114 * sizeof ciphertext[0]);
   uint32_t counter = (uint32_t )1;
   uint32_t ctx[32] = { 0 };
-  Chacha20_chacha20(ciphertext,plaintext,114, key, nonce, counter);
+  Hacl_Chacha20_chacha20(ciphertext,plaintext,114, key, nonce, counter);
   TestLib_compare_and_print("HACL Chacha20", expected, ciphertext, 114);
 
   crypto_stream_chacha20_ietf_xor_ic(ciphertext,plaintext, 114, nonce, 1, key);
@@ -400,7 +400,7 @@ int32_t perf_chacha() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Chacha20_chacha20(plain,plain,len, key, nonce, counter);
+    Hacl_Chacha20_chacha20(plain,plain,len, key, nonce, counter);
     plain[0] = cipher[0];
   }
   b = TestLib_cpucycles_end();

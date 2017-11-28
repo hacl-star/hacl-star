@@ -188,11 +188,9 @@ let lemma_append2 h buf len1 len2 =
 val sign_step_1:
   secret:hint8_p{length secret = 32} ->
   tmp_bytes:hint8_p{length tmp_bytes = 352 /\ disjoint tmp_bytes secret} ->
-  tmp_ints:buffer Hacl.UInt64.t{length tmp_ints = 65 /\ disjoint tmp_bytes tmp_ints /\ disjoint tmp_ints secret} ->
   Stack unit
-    (requires (fun h -> live h secret /\  live h tmp_bytes /\ live h tmp_ints))
-    (ensures (fun h0 _ h1 -> live h0 secret /\ live h0 tmp_bytes /\
-      live h0 tmp_ints /\ live h1 tmp_bytes /\ live h1 tmp_ints /\
+    (requires (fun h -> live h secret /\  live h tmp_bytes))
+    (ensures (fun h0 _ h1 -> live h0 secret /\ live h0 tmp_bytes /\ live h1 tmp_bytes /\
       modifies_1 tmp_bytes h0 h1 /\ (
         let a''  = Buffer.sub tmp_bytes 96ul  32ul in
         let apre = Buffer.sub tmp_bytes 224ul 64ul in
@@ -205,7 +203,7 @@ val sign_step_1:
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-let sign_step_1 secret tmp_bytes tmp_ints =
+let sign_step_1 secret tmp_bytes =
   let a''  = Buffer.sub tmp_bytes 96ul  32ul in
   let apre = Buffer.sub tmp_bytes 224ul 64ul in
   let a      = Buffer.sub apre 0ul 32ul in
@@ -476,9 +474,8 @@ let sign_step_5 tmp_bytes tmp_ints =
   let s    = Buffer.sub tmp_ints 55ul 5ul  in
   let h    = Buffer.sub tmp_ints 60ul 5ul  in
   let s'   = Buffer.sub tmp_bytes 192ul 32ul in
-  let apre = Buffer.sub tmp_bytes 224ul 64ul in
   let rs'  = Buffer.sub tmp_bytes 160ul 32ul in
-  let a      = Buffer.sub apre 0ul 32ul in
+  let a = Buffer.sub tmp_bytes 224ul 32ul in
   let h0 = ST.get() in
   Endianness.lemma_little_endian_is_bounded (reveal_sbytes (as_seq h0 a));
   Hacl.Impl.Load56.load_32_bytes aq a;

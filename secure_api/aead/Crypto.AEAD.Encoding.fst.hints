@@ -655,22 +655,6 @@
       0
     ],
     [
-      "Crypto.AEAD.Encoding.lemma_encode_loop",
-      4,
-      2,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.lemma_encode_loop",
-      5,
-      2,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
-      0
-    ],
-    [
       "Crypto.AEAD.Encoding.lemma_encode_final",
       1,
       2,
@@ -1391,30 +1375,6 @@
       0
     ],
     [
-      "Crypto.AEAD.Encoding.encode_lengths_poly1305",
-      4,
-      0,
-      0,
-      [
-        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "haseqCrypto.Symmetric.Bytes_Tm_refine_530be526726c3b66223dd819f9d65058",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.encode_lengths_poly1305",
-      5,
-      0,
-      0,
-      [
-        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "haseqCrypto.Symmetric.Bytes_Tm_refine_530be526726c3b66223dd819f9d65058",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0
-    ],
-    [
       "Crypto.AEAD.Encoding.store_lengths_poly1305",
       1,
       0,
@@ -1650,22 +1610,6 @@
     [
       "Crypto.AEAD.Encoding.encode_lengths_ghash",
       3,
-      0,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.encode_lengths_ghash",
-      4,
-      0,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.encode_lengths_ghash",
-      5,
       0,
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -1945,30 +1889,6 @@
         "haseqCrypto.Symmetric.UF1CMA_Tm_refine_8dee15140b795a6514dd1f921ebe30a2",
         "kinding_FStar.UInt8.t_@tok", "projection_inverse_BoxBool_proj_0"
       ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.encode_both",
-      7,
-      0,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.encode_both",
-      8,
-      0,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.encode_both",
-      9,
-      0,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
       0
     ],
     [
@@ -2269,46 +2189,6 @@
       0
     ],
     [
-      "Crypto.AEAD.Encoding.lemma_encode_both_inj",
-      13,
-      0,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.lemma_encode_both_inj",
-      14,
-      0,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.lemma_encode_both_inj",
-      15,
-      0,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.lemma_encode_both_inj",
-      16,
-      0,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
-      0
-    ],
-    [
-      "Crypto.AEAD.Encoding.lemma_encode_both_inj",
-      17,
-      0,
-      0,
-      [ "@query", "projection_inverse_BoxBool_proj_0" ],
-      0
-    ],
-    [
       "Crypto.AEAD.Encoding.store_lengths",
       1,
       0,
@@ -2534,7 +2414,6 @@
         "assumption_Prims.HasEq_int", "b2t_def", "bool_inversion",
         "bool_typing",
         "constructor_distinct_FStar.Monotonic.HyperStack.mreference",
-        "constructor_distinct_FStar.UInt64.t_",
         "constructor_distinct_Prims.unit", "constructor_distinct_Tm_unit",
         "eq2-interp", "equation_Crypto.Symmetric.AES.keylen",
         "equation_Crypto.Symmetric.AES.nk",
@@ -2645,9 +2524,9 @@
         "typing_FStar.Buffer.frameOf", "typing_FStar.Buffer.length",
         "typing_FStar.Map.concat", "typing_FStar.Map.contains",
         "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
-        "typing_FStar.Map.sel", "typing_FStar.Monotonic.Heap.contains",
+        "typing_FStar.Map.sel", "typing_FStar.Monotonic.Heap.addr_of",
+        "typing_FStar.Monotonic.Heap.contains",
         "typing_FStar.Monotonic.HyperHeap.as_ref",
-        "typing_FStar.Monotonic.HyperHeap.contains_ref",
         "typing_FStar.Monotonic.HyperStack.__proj__HS__item__h",
         "typing_FStar.Monotonic.HyperStack.__proj__HS__item__tip",
         "typing_FStar.Monotonic.HyperStack.__proj__MkRef__item__id",
