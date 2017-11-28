@@ -26,7 +26,7 @@ all-hints: hints
 all-ver: verify
 
 all: test
-test: chacha20.exe poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe hmac.exe hkdf.exe ed25519.exe
+test: chacha20.exe salsa20.exe poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe hmac.exe hkdf.exe ed25519.exe
 
 
 chacha20.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.CTR.fst Spec.Chacha20.fst tests/Spec.Chacha20.Test.fst
@@ -35,6 +35,13 @@ chacha20.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib
 	@echo 'let _ = test()' >> chacha20-ml/Spec_Chacha20_Test.ml
 	$(OCAMLOPT) -I chacha20-ml chacha20-ml/Spec_Lib_IntTypes.ml chacha20-ml/Spec_Lib_RawIntTypes.ml chacha20-ml/Spec_Lib_IntSeq.ml chacha20-ml/Spec_CTR.ml chacha20-ml/Spec_Chacha20.ml chacha20-ml/Spec_Chacha20_Test.ml -o chacha20.exe
 	./chacha20.exe
+
+salsa20.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.CTR.fst Spec.Salsa20.fst tests/Spec.Salsa20.Test.fst
+	mkdir -p salsa20-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq  --extract_module Spec.CTR --extract_module Spec.Salsa20 --extract_module Spec.Salsa20.Test --odir salsa20-ml $^
+	@echo 'let _ = test()' >> salsa20-ml/Spec_Salsa20_Test.ml
+	$(OCAMLOPT) -I salsa20-ml salsa20-ml/Spec_Lib_IntTypes.ml salsa20-ml/Spec_Lib_RawIntTypes.ml salsa20-ml/Spec_Lib_IntSeq.ml salsa20-ml/Spec_CTR.ml salsa20-ml/Spec_Salsa20.ml salsa20-ml/Spec_Salsa20_Test.ml -o salsa20.exe
+	./salsa20.exe
 
 poly1305.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Poly1305.fst tests/Spec.Poly1305.Test.fst
 	mkdir -p poly1305-ml
@@ -94,13 +101,6 @@ ed25519.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/
 clean:
 	$(MAKE) -C ../code/lib/ml clean
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
-
-# salsa20.exe: Spec.Salsa20.fst
-# 	mkdir -p salsa-spec
-# 	$(FSTAR_EXTRACT) --odir salsa-spec $^
-# 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> salsa-spec/Spec_Salsa20.ml
-# 	$(OCAMLOPT) -I salsa-spec $(OCAML_INCLUDES) salsa-spec/FStar_Endianness.ml salsa-spec/Spec_Loops.ml salsa-spec/Seq_Create.ml salsa-spec/Spec_Lib.ml salsa-spec/Spec_CTR.ml salsa-spec/Spec_Salsa20.ml -o salsa20.exe
-# 	./salsa20.exe
 
 # chacha20poly1305.exe: Spec.Chacha20Poly1305.fst
 # 	$(MAKE) -C ../code/lib/ml
