@@ -151,22 +151,38 @@ snapshots-remove-production:
 # Building the shared library
 #
 
+
 snapshots/hacl-c/libhacl.so:
 	$(MAKE) -C snapshots/hacl-c libhacl.so
 
+snapshots/hacl-c/libhacl.a:
+	$(MAKE) -C snapshots/hacl-c libhacl.a
+
 snapshots/hacl-c/libhacl32.so:
 	$(MAKE) -C snapshots/hacl-c libhacl32.so
+
+snapshots/hacl-c/libhacl32.a:
+	$(MAKE) -C snapshots/hacl-c libhacl32.a
 
 build/libhacl.so:
 	mkdir -p build
 	$(MAKE) snapshots/hacl-c/libhacl.so
 	cp snapshots/hacl-c/libhacl.so build
 
+build/libhacl.a:
+	mkdir -p build
+	$(MAKE) snapshots/hacl-c/libhacl.a
+	cp snapshots/hacl-c/libhacl.a build
+
 build/libhacl32.so:
 	mkdir -p build
 	$(MAKE) snapshots/hacl-c/libhacl32.so
 	cp snapshots/hacl-c/libhacl32.so build
 
+build/libhacl32.a:
+	mkdir -p build
+	$(MAKE) snapshots/hacl-c/libhacl32.a
+	cp snapshots/hacl-c/libhacl32.a build
 
 #
 # Compilers and tools
