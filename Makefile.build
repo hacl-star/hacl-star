@@ -151,36 +151,11 @@ snapshots-remove-production:
 # Building the shared library
 #
 
-snapshots/hacl-c/libhacl.so: snapshots/hacl-c
-	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl.so
+snapshots/hacl-c/libhacl.so:
+	$(MAKE) -C snapshots/hacl-c libhacl.so
 
-snapshots/hacl-c/libhacl32.so: snapshots/hacl-c
-	$(MAKE) -C snapshots/hacl-c CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl32.so
-
-snapshots/snapshot-gcc/libhacl.so: snapshots/snapshot-gcc
-	$(MAKE) -C snapshots/snapshot-gcc CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl.so
-
-snapshots/snapshot-gcc/libhacl32.so: snapshots/snapshot-gcc
-	$(MAKE) -C snapshots/snapshot-gcc CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl32.so
-
-snapshots/snapshot-gcc-unrolled/libhacl.so: snapshots/snapshot-gcc-unrolled
-	$(MAKE) -C snapshots/snapshot-gcc-unrolled CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl.so
-
-snapshots/snapshot-gcc-unrolled/libhacl32.so: snapshots/snapshot-gcc-unrolled
-	$(MAKE) -C snapshots/snapshot-gcc-unrolled CC="$(GCC) $(GCC_OPTS) -fPIC" libhacl32.so
-
-# BB: The options for Compcert and MSVC must be adjusted here
-snapshots/hacl-c-compcert/libhacl.so: snapshots/hacl-c-compcert
-	$(MAKE) -C snapshots/hacl-c-compcert CC="$(CCOMP) $(CCOMP_OPTS) -fPIC" libhacl.so
-
-snapshots/hacl-c-compcert/libhacl32.so: snapshots/hacl-c-compcert
-	$(MAKE) -C snapshots/hacl-c-compcert CC="$(CCOMP) $(CCOMP_OPTS) -fPIC" libhacl32.so
-
-snapshots/snapshot-msvc/libhacl.so: snapshots/snapshot-msvc
-	$(MAKE) -C snapshots/snapshot-msvc CC="$(MSVC) $(MSVC_OPTS) -fPIC" libhacl.so
-
-snapshots/snapshot-msvc/libhacl32.so: snapshots/snapshot-msvc
-	$(MAKE) -C snapshots/snapshot-msvc CC="$(MSVC) $(MSVC_OPTS) -fPIC" libhacl32.so
+snapshots/hacl-c/libhacl32.so:
+	$(MAKE) -C snapshots/hacl-c libhacl32.so
 
 build/libhacl.so:
 	mkdir -p build
