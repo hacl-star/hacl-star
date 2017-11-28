@@ -46,6 +46,17 @@ endif ()
 # Compilation options
 # set(CMAKE_C_FLAGS "-Wall -Wextra")
 
+# Compilation options depending on the architecture
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+   # 64 bits
+   if (MSVC)
+      set(CMAKE_C_FLAGS "-DKRML_NOUINT128")
+   endif()
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+   # 32 bits
+   set(CMAKE_C_FLAGS "-DKRML_NOUINT128")
+endif()
+
 # Generate both a static and a shared library
 add_library(hacl_static STATIC ${SOURCE_FILES})
 set_target_properties(hacl_static PROPERTIES OUTPUT_NAME hacl)
