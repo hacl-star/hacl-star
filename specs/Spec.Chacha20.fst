@@ -89,5 +89,5 @@ let chacha20_key_block (st:state) : Tot block =
 let chacha20_cipher =
   Spec.CTR.Cipher state keylen noncelen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
 
-let chacha20_encrypt_bytes key nonce counter m =
-    Spec.CTR.counter_mode chacha20_cipher key nonce counter m
+let chacha20_encrypt_bytes key nonce counter len m =
+  Spec.CTR.counter_mode chacha20_cipher key nonce counter len m
