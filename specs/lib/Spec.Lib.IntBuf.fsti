@@ -308,7 +308,13 @@ val blit: #a:Type -> #len:size_t -> i:lbuffer a len -> start1:size_t ->
 					   LSeq.update_sub (as_lseq o h0) 
 						start1 num
 						(LSeq.sub (as_lseq i h0) start2 num)))
-						 
+
+val copy: #a:Type -> #len:size_t -> i:lbuffer a len -> o:lbuffer a len -> Stack unit 
+ 		  (requires (fun h0 -> live h0 i /\ live h0 o ))
+  		  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ 
+		  			modifies1 o h0 h1 /\ 
+					as_lseq o h1 == as_lseq i h0))
+
 
 val repeat: #a:Type -> #b:Type -> #lift:(mem -> b -> GTot (option a)) -> 
 	    n:size_t -> spec:(a -> Tot a) -> 
