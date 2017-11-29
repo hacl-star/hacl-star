@@ -130,42 +130,42 @@ int crypto_box_keypair(unsigned char *pk, unsigned char *sk){
 int crypto_box_easy(unsigned char *c, const unsigned char *m,
                     unsigned long long mlen, const unsigned char *n,
                     const unsigned char *pk, const unsigned char *sk){
-  return NaCl_crypto_box_easy(c, m, mlen, n, pk, sk);
+  return NaCl_crypto_box_easy(c, (uint8_t*)m, mlen, (uint8_t*)n, (uint8_t*)pk, (uint8_t*)sk);
 }
 
 int crypto_box_open_easy(unsigned char *m, const unsigned char *c,
                          unsigned long long clen, const unsigned char *n,
                          const unsigned char *pk, const unsigned char *sk){
-  return NaCl_crypto_box_open_easy(m, c, clen, n, pk, sk);
+  return NaCl_crypto_box_open_easy(m, (uint8_t*)c, clen, (uint8_t*)n, (uint8_t*)pk, (uint8_t*)sk);
 }
 
 int crypto_box_beforenm(unsigned char *k, const unsigned char *pk,
                         const unsigned char *sk){
-  return NaCl_crypto_box_beforenm(k, pk, sk);
+  return NaCl_crypto_box_beforenm(k, (uint8_t*)pk, (uint8_t*)sk);
 }
 
 int crypto_box_easy_afternm(unsigned char *c, const unsigned char *m,
                             unsigned long long mlen, const unsigned char *n,
                             const unsigned char *k){
-  return NaCl_crypto_box_easy_afternm(c, m, mlen, n, k);
+  return NaCl_crypto_box_easy_afternm(c, (uint8_t*)m, mlen, (uint8_t*)n, (uint8_t*)k);
 }
 
 int crypto_box_open_easy_afternm(unsigned char *m, const unsigned char *c,
                                  unsigned long long clen, const unsigned char *n,
                                  const unsigned char *k){
-  return NaCl_crypto_box_open_easy_afternm(m, c, clen, n, k);
+  return NaCl_crypto_box_open_easy_afternm(m, (uint8_t*)c, clen, (uint8_t*)n, (uint8_t*)k);
 }
 
 int crypto_scalarmult_base(unsigned char *q, const unsigned char *n){
   /* This leaves room for improvements with precomputations */
   uint8_t basepoint[32] = {9};
-  Hacl_Curve25519_crypto_scalarmult(q, n, basepoint);
+  Hacl_Curve25519_crypto_scalarmult(q, (uint8_t*)n, basepoint);
   return 0;
 }
 
 int crypto_scalarmult(unsigned char *q, const unsigned char *n,
                       const unsigned char *p){
-  Hacl_Curve25519_crypto_scalarmult(q, n, p);
+  Hacl_Curve25519_crypto_scalarmult(q, (uint8_t*)n, (uint8_t*)p);
   return 0;
 }
 
@@ -215,7 +215,7 @@ crypto_box_detached_afternm(
                             uint64_t mlen,
                             uint8_t *n,
                             uint8_t *k){
-  return crypto_box_detached_afternm(c, mac, m, mlen, n, k);
+  return NaCl_crypto_box_detached_afternm(c, mac, m, mlen, n, k);
 }
 
 uint32_t
