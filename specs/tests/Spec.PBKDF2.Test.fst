@@ -97,10 +97,10 @@ let test_c expected counter =
   let test_pwd : lbytes 8 = createL test1_pwd in
   let test_salt : lbytes 4 = createL test1_salt in
   let test_expected : lbytes 20 = createL expected in
-  let output : lbytes 20 = PBKDF2.pbkdf2 Hash.SHA2_256 p_len test1_pwd s_len test1_salt counter dkLen in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test_expected in
+  let output : lbytes 20 = PBKDF2.pbkdf2 Hash.SHA2_256 p_len test_pwd s_len test_salt counter dkLen in
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
   IO.print_string   "Expected key:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test_expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list expected);
   IO.print_string "\nComputed key:";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list output);
   if result then   IO.print_string "\nSuccess!\n"
@@ -113,7 +113,7 @@ let test_c2 expected counter =
   let test_pwd : lbytes 8 = createL test1_pwd in
   let test_salt : lbytes 4 = createL test1_salt in
   let test_expected : lbytes 50 = createL expected in
-  let output : lbytes 50 = PBKDF2.pbkdf2 Hash.SHA2_256 p_len test1_pwd s_len test1_salt counter dkLen2 in
+  let output : lbytes 50 = PBKDF2.pbkdf2 Hash.SHA2_256 p_len test_pwd s_len test_salt counter dkLen2 in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test_expected in
   IO.print_string   "Expected key:";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test_expected);
@@ -137,9 +137,10 @@ let test () =
 
   test_c test1_expected test1_counter;
   test_c test2_expected test2_counter;
-  (*test_c test3_expected test3_counter;
-  test_c test4_expected test4_counter;*)
   test_c test5_expected test5_counter;
   test_c test6_expected test6_counter;
   test_c2 test7_expected test7_counter;
   test_c2 test8_expected test8_counter
+  // These two tests take pretty long
+  (*test_c test3_expected test3_counter;
+  test_c test4_expected test4_counter*)

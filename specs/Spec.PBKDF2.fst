@@ -22,6 +22,7 @@ open Spec.Lib.IntSeq
 
 (* Definition: Base types *)
 type lbytes (s:size_t) = intseq U8 s
+// TODO: get the correct size of size_t
 let numbytes_size_t = 4
 
 ///  F is defined as the exclusive-or sum of the
@@ -60,10 +61,6 @@ let f prf p_len pwd s_len salt counter i =
       let u_i = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u_p in
       map2 (fun x y -> x ^. y) u u_i, u_i
     ) (u_1, u_1) in u
-  (*let u2 = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u_o in
-  let u_o = map2 (fun x y -> x ^. y) u_o u2 in
-  let u3 = Spec.HMAC.hmac prf p_len pwd (Hash.size_hash prf) u2 in
-  map2 (fun x y -> x ^. y) u_o u3*)
 
 val pbkdf2:
   prf:Hash.algorithm ->
@@ -106,12 +103,12 @@ let pbkdf2 prf p_len pwd s_len salt counter dkLen =
 ///            ...
 ///            T_l = F (P, S, c, l) ,
 ///
-///  where the function
-  let foo: size_t = l * hLen in
+///  where the function F is defined above.
+  let dk_x_size: size_t = l * hLen in
   let dk_0 = create (l * hLen) (u8 0) in
   let dk_t = repeat_range 0 l (fun i dk_x ->
       let dk_i = f prf p_len pwd s_len salt counter (i + 1) in
-      update_sub #uint8 #foo dk_x (i * hLen) hLen dk_i
+      update_sub #uint8 #dk_x_size dk_x (i * hLen) hLen dk_i
     ) dk_0 in
 
 ///  4. Concatenate the blocks and extract the first dkLen octets to
