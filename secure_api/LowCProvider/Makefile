@@ -1,3 +1,5 @@
+HACL_HOME ?= ../..
+KREMLIN_HOME ?= ../../../kremlin
 include ../../Makefile.include
 
 CONTRIB=ucontrib

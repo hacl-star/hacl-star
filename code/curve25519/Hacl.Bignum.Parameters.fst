@@ -198,3 +198,15 @@ inline_for_extraction let limb_to_wide x = sint64_to_sint128 x
 inline_for_extraction let wide_to_limb x = sint128_to_sint64 x
 
 inline_for_extraction let uint64_to_limb x = Hacl.Cast.uint64_to_sint64 x
+
+inline_for_extraction
+let mask_51 : x:limb{v x = pow2 51 - 1} =
+  assert_norm (0x7ffffffffffff < pow2 64);
+  assert_norm (0x7ffffffffffff = pow2 51 - 1);
+  uint64_to_limb 0x7ffffffffffffuL
+
+inline_for_extraction let mask_51_wide : x:wide{w x = pow2 51 - 1} =
+  limb_to_wide mask_51
+
+inline_for_extraction let climb_mask = mask_51
+inline_for_extraction let climb_mask_wide = mask_51_wide

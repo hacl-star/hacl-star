@@ -502,14 +502,6 @@
       0
     ],
     [
-      "Spec.SHA2_512.pad0_length",
-      3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Spec.SHA2_512.pad",
       1,
       0,
@@ -576,14 +568,6 @@
       0
     ],
     [
-      "Spec.SHA2_512.pad",
-      4,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Spec.SHA2_512.update_last",
       1,
       0,
@@ -643,14 +627,6 @@
       0
     ],
     [
-      "Spec.SHA2_512.finish",
-      3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Spec.SHA2_512.hash",
       1,
       0,
@@ -697,14 +673,6 @@
       0
     ],
     [
-      "Spec.SHA2_512.hash",
-      3,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Spec.SHA2_512.hash'",
       1,
       0,
@@ -728,14 +696,6 @@
     [
       "Spec.SHA2_512.hash'",
       2,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Spec.SHA2_512.hash'",
-      3,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -806,17 +766,6 @@
       0
     ],
     [
-      "Spec.SHA2_512.lemma_update_multi_partial",
-      4,
-      0,
-      1,
-      [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
-      ],
-      0
-    ],
-    [
       "Spec.SHA2_512.lemma_modulo",
       1,
       0,
@@ -853,14 +802,6 @@
     [
       "Spec.SHA2_512.lemma_modulo",
       4,
-      0,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Spec.SHA2_512.lemma_modulo",
-      5,
       0,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],

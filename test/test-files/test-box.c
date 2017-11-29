@@ -128,7 +128,7 @@ void flush_results(char *txt, uint64_t hacl_cy, uint64_t sodium_cy, uint64_t oss
   fclose(fp);
 }
 
-#define PLAINLEN (1024*1024)
+#define PLAINLEN (16*1024)
 #define ROUNDS 1000
 
 int32_t test_api()
@@ -141,8 +141,8 @@ int32_t test_api()
   int i;
 
   // Creating public/private key couples
-  Curve25519_crypto_scalarmult(pk1, sk1, basepoint);
-  Curve25519_crypto_scalarmult(pk2, sk2, basepoint);
+  Hacl_Curve25519_crypto_scalarmult(pk1, sk1, basepoint);
+  Hacl_Curve25519_crypto_scalarmult(pk2, sk2, basepoint);
 
   NaCl_crypto_box_beforenm(test1, pk1, sk2);
   res = crypto_box_beforenm(test2, pk2, sk1);

@@ -23,9 +23,9 @@ type tag   = lbytes blocksize
 type key   = lbytes keysize
 
 (* Poly1305 specification *)
-let update (len:size_t{len <= blocksize}) (b:lbytes len) 
+let update (len:size_t{len <= blocksize}) (b:lbytes len)
 	   (r:elem) (acc:elem) : elem =
-  Math.Lemmas.pow2_le_compat 128 (8 * len);		
+  Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
   let n = pow2 (8 * len) `fadd` nat_from_bytes_le b in
   (n `fadd` acc) `fmul` r
@@ -34,17 +34,17 @@ let poly (len:size_t) (text:lbytes len) (r:elem) : elem =
   let blocks = len / blocksize in
   let rem = len % blocksize in
   let init  : elem = 0 in
-  let acc   : elem = 
+  let acc   : elem =
     repeati blocks
       (fun i acc  -> let b = slice text (blocksize * i) (blocksize * (i+1)) in
-	          update 16 b r acc) 
+	          update 16 b r acc)
       init in
   if rem = 0 then
      acc
-  else 
+  else
      let last = slice text (blocks * blocksize) len in
      update rem last r acc
-  
+
 let finish (a:elem) (s:elem) : tag =
   let n = (a + s) % pow2 128 in
   nat_to_bytes_le 16 n
@@ -64,5 +64,3 @@ let poly1305 (len:size_t) (msg:lbytes len) (k:key) : tag =
   let s = nat_from_bytes_le (slice k 16 32) in
   let acc = poly len msg r in
   finish acc s
-
-

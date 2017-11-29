@@ -1,0 +1,138 @@
+[
+  "ctçÃ9eã\u0014Ωì-Aœ\u0014˜",
+  [
+    [
+      "Hacl.Chacha20.chacha20_key_block",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Chacha20.chacha20_key_block",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Chacha20.chacha20_key_block",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Chacha20.chacha20_key_block",
+      4,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "eq2-interp",
+        "equation_FStar.Buffer.as_seq", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Buffer.equal", "equation_FStar.UInt8.t",
+        "equation_Hacl.Chacha20.op_String_Access",
+        "equation_Hacl.Chacha20.uint8_p", "equation_Spec.Chacha20.keylen",
+        "equation_Spec.Chacha20.noncelen",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
+        "kinding_FStar.UInt8.t_@tok", "lemma_FStar.Buffer.no_upd_lemma_1",
+        "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
+        "refinement_interpretation_Hacl.Chacha20_Tm_refine_7b8277f4aac7937ca94306760a67d045",
+        "refinement_interpretation_Hacl.Chacha20_Tm_refine_a8d9d65facbe58ecae7d831161c49ec1",
+        "refinement_interpretation_Hacl.Chacha20_Tm_refine_bae8aa75f60deecac89c8024dc0d620e",
+        "typing_FStar.Buffer.as_seq"
+      ],
+      0
+    ],
+    [
+      "Hacl.Chacha20.chacha20",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "haseqHacl.Chacha20_Tm_refine_530be526726c3b66223dd819f9d65058",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.Chacha20.chacha20",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "haseqHacl.Chacha20_Tm_refine_530be526726c3b66223dd819f9d65058",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.Chacha20.chacha20",
+      3,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Chacha20.chacha20",
+      4,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.Chacha20.chacha20",
+      5,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "data_elim_FStar.UInt32.Mk", "eq2-interp",
+        "equation_FStar.Buffer.as_seq", "equation_FStar.Buffer.buffer",
+        "equation_FStar.Buffer.equal", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.n", "equation_FStar.UInt32.t",
+        "equation_FStar.UInt32.uint_to_t", "equation_FStar.UInt32.v",
+        "equation_FStar.UInt8.t", "equation_Hacl.Chacha20.op_String_Access",
+        "equation_Hacl.Chacha20.uint32_t", "equation_Hacl.Chacha20.uint8_p",
+        "equation_Spec.Chacha20.blocklen", "equation_Spec.Chacha20.c0",
+        "equation_Spec.Chacha20.chacha20_ctx",
+        "equation_Spec.Chacha20.keylen", "equation_Spec.Chacha20.noncelen",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
+        "function_token_typing_Spec.Chacha20.c0",
+        "kinding_FStar.UInt8.t_@tok", "lemma_FStar.Buffer.no_upd_lemma_1",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Multiply",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_blocklen",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_counterbits",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_incr",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_keylen",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_noncelen",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_blocklen",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_counterbits",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_incr",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_keylen",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_noncelen",
+        "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Hacl.Chacha20_Tm_refine_655f435aca33aabc4a1ca1fab5c827b9",
+        "refinement_interpretation_Hacl.Chacha20_Tm_refine_89cfbffaea7abb55d8cc65915541f2c9",
+        "refinement_interpretation_Hacl.Chacha20_Tm_refine_94403ae1db118a2daa8d61fa9d371d82",
+        "refinement_interpretation_Hacl.Chacha20_Tm_refine_ea0cdb077ae78da455b9677f874da9dd",
+        "typing_FStar.Buffer.as_seq"
+      ],
+      0
+    ]
+  ]
+]
