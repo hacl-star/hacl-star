@@ -68,13 +68,22 @@ type skey (rgn:rid) (i:id) =
 
 //16-10-16 can't make it abstract?
 (** Conditionally-allocated abstract key (accessed only in this module) *)
-let akey (rgn:rid) (i:id) = 
-  o:option (skey rgn i) {Some? o <==> skeyed i}
-  // using a sum type for KreMLin. Was: if skeyed i then skey rgn i else unit
+abstract 
+type akey' (rgn:rid) (i:id) =
+  | Nothing
+  | Just    of skey rgn i
+let akey (rgn:rid) (i:id) = a:akey' rgn i{Just? a <==> skeyed i}
+// using an option type for KreMLin. Was: if skeyed i then skey rgn i else unit
+// using a hand-rolled maybe-type for KreMLin to avoid an auto-gen'd monorphic instance from appearing in the top-level interface in C
 
 val get_skey: #r:rid -> #i:id{skeyed i} -> akey r i -> Tot (skey r i)
-let get_skey #rgn #i (Some k) = k
+let get_skey #rgn #i (Just k) = k
 
+val mk_akey: #r:rid -> #i:id -> _:skey r i{skeyed i} -> Tot (akey r i)
+let mk_akey #r #i sk = Just sk
+
+val mk_akey_null: #r:rid -> #i:id -> _:unit{~(skeyed i)} -> Tot (akey r i)
+let mk_akey_null #r #i _ = Nothing
 
 val akey_gen: r:erid -> i:id -> ST (akey r i)
   (requires (fun _ -> True))
@@ -88,8 +97,8 @@ val akey_gen: r:erid -> i:id -> ST (akey r i)
 let akey_gen r i =
   if skeyed i then
     let k:skey r i = Buffer.rcreate r 0uy (skeylen i) in
-    Some k
-  else None
+    Just k
+  else Nothing
 
 #reset-options "--max_fuel 0 --z3rlimit 40"
 
@@ -109,8 +118,8 @@ let akey_coerce r i kb =
     Buffer.blit kb 0ul sk 0ul (skeylen i);
     let h2 = ST.get () in
     lemma_reveal_modifies_1 sk h1 h2;
-    Some sk
-  else None
+    Just sk
+  else Nothing
 
 #reset-options
 

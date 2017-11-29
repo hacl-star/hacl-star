@@ -63,7 +63,7 @@ let gen i rgn =
     if safeMac i 
     then ref_as_aead_log (ralloc rgn Seq.createEmpty)
     else () in
-  let ak = if CMA.skeyed i then Some (PRF.prf_sk0 #i prf) else None in 
+  let ak = if CMA.skeyed i then CMA.mk_akey (PRF.prf_sk0 #i prf) else CMA.mk_akey_null () in 
   AEADState #i #Writer #rgn log prf ak
 #reset-options
 
@@ -78,7 +78,7 @@ let coerce i rgn key =
   let prf = PRF.coerce rgn i key in
   if Flag.prf i then recall (PRF.itable i prf);
   let log : aead_log rgn i = () in
-  let ak = if CMA.skeyed i then Some (PRF.prf_sk0 #i prf) else None in 
+  let ak = if CMA.skeyed i then CMA.mk_akey (PRF.prf_sk0 #i prf) else CMA.mk_akey_null () in 
   AEADState #i #Writer #rgn log prf ak
 
 val genReader: #i:id -> st:aead_state i Writer -> ST (aead_state i Reader)
