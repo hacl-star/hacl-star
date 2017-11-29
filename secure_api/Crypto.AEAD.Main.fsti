@@ -37,9 +37,9 @@ type aadlen_32 =
 val keylen      : I.id -> UInt32.t
 val statelen    : I.id -> UInt32.t
 
-let bytes = FStar.Seq.seq FStar.UInt8.t
-let lbytes  (l:nat) = b:bytes  {Seq.length b == l}
-type adata = b:bytes {Seq.length b <= v aadmax}
+let bytes = FStar.Bytes.bytes
+let lbytes  (l:nat) = b:bytes  {Seq.length (Bytes.reveal b) == l}
+type adata = b:bytes {Seq.length (Bytes.reveal b) <= v aadmax}
 type cipher (i:I.id) (l:nat) = lbytes (l + v taglen)
 
 inline_for_extraction
@@ -51,7 +51,7 @@ val mk_entry (#i:I.id) :
     #l:Plain.plainLen ->
     p:Plain.plain i l ->
     c:cipher i (Seq.length (Plain.as_bytes p)) ->
-    entry i
+    GTot (entry i)
 val entry_injective (#i:I.id)
                     (n:nonce i) (n':nonce i)
                     (ad:adata) (ad':adata)
@@ -61,7 +61,7 @@ val entry_injective (#i:I.id)
   : Lemma (let e  = mk_entry n ad p c in
            let e' = mk_entry n' ad' p' c' in
            (e == e' <==> (n == n' /\ ad == ad' /\ l == l' /\ p == p' /\ c == c')))
-val nonce_of_entry (#i:_) (e:entry i) : nonce i
+val nonce_of_entry (#i:_) (e:entry i) : GTot (nonce i)
 
 let safeMac (i:I.id) = Flag.safeHS i && Flag.mac1 i
 let safeId  (i:I.id) = Flag.safeId i
@@ -245,7 +245,7 @@ let entry_of
 
 let entry_for_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i})
   : GTot (option (entry i)) =
-    Seq.find_l (fun e -> nonce_of_entry e = n) (log st h)
+    Seq.ghost_find_l (fun e -> nonce_of_entry e = n) (log st h)
 
 let fresh_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i}): GTot bool =
   None? (entry_for_nonce n st h)

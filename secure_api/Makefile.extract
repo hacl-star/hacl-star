@@ -36,10 +36,8 @@ FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) --lax --cache_checked_modules $(
 
 FSTAR_FILES=aead/Crypto.AEAD.Main.fst
 
-all: out.krml
-
 Crypto_AEAD_Main.c: out.krml
-	$(KREMLIN_HOME)/krml -bundle Crypto.AEAD.Main=* -add-include "kremstr.h" -add-include "testlib.h" -minimal -add-include "kremlib.h" $^
+	$(KREMLIN_HOME)/krml $(KOPTS) -bundle Crypto.AEAD.Main=* -add-include '"kremstr.h"' -add-include '"testlib.h"' -add-include '"kremlib.h"' -skip-compilation -minimal $^
 
 clean:
 	rm -f .depend.extract *.checked.lax out.krml
@@ -47,6 +45,12 @@ clean:
 %.checked.lax: %
 	$(FSTAR) $*
 	touch $@
+
+%.fsti-in:
+	@echo --hint_info \
+	$(INCLUDE_PATHS) \
+	$(OTHERFLAGS) \
+	--lax --cache_checked_modules
 
 .depend.extract:
 	$(FSTAR) --dep full $(FSTAR_FILES) $(NO_EXTRACT) > .depend.extract

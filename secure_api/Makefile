@@ -192,16 +192,10 @@ all-lax: lax
 
 # Parameter for interactive mode
 %.fst-in:
-	@echo --hint_info \
-	$(HINTS_ENABLED) \
-	$(OTHERFLAGS) \
-	$(FSTAR_INCLUDES)
+	$(MAKE) -f Makefile.extract $@
 
 %.fsti-in:
-	@echo --hint_info \
-	$(HINTS_ENABLED) \
-	$(OTHERFLAGS) \
-	$(FSTAR_INCLUDES)
+	$(MAKE) -f Makefile.extract $@
 
 # Verifying one file at a time
 %.fst-ver:

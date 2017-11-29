@@ -14,7 +14,7 @@ let keylen i = PRF.keylen i
 let statelen i = PRF.statelen i
 inline_for_extraction
 let entry i = Invariant.aead_entry i
-let mk_entry #i n ad #l p c = Invariant.AEADEntry n ad l p c
+let mk_entry #i n ad #l p c = Invariant.AEADEntry n (FStar.Bytes.reveal ad) l p (FStar.Bytes.reveal c)
 let entry_injective (#i:I.id)
                     (n:nonce i) (n':nonce i)
                     (ad:adata) (ad':adata)
