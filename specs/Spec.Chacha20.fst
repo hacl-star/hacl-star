@@ -86,6 +86,11 @@ let chacha20_key_block (st:state) : Tot block =
   let st' = chacha20_core st in
   uints_to_bytes_le st'
 
+let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
+  let st = chacha20_init k n in
+  let st' = chacha20_core st in
+  uints_to_bytes_le st'
+
 let chacha20_cipher =
   Spec.CTR.Cipher state keylen noncelen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
 
