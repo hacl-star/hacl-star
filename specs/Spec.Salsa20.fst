@@ -65,36 +65,33 @@ let constant2 = 0x79622d32
 let constant3 = 0x6b206574
 
 
-let setup (k:key) (n:nonce) (c:counter) (st:state) : Tot state =
+let setup (k:key) (n:nonce) (st:state) : Tot state =
   let ks = uints_from_bytes_le #U32 #8 k in
   let ns = uints_from_bytes_le #U32 #2 n in
   let st = st.[0] <- u32 constant0 in
   let st = update_sub st 1 4 (slice ks 0 4) in
   let st = st.[5] <- u32 constant1 in
   let st = update_sub st 6 2 (slice ns 0 2) in
-  let st = st.[8] <- u32 constant2 in
-  let st = update_sub st 8 4 (slice ks 4 8) in
-  let st = st.[12] <- u32 constant3 in
+  let st = st.[10] <- u32 constant2 in
+  let st = update_sub st 11 4 (slice ks 4 8) in
+  let st = st.[15] <- u32 constant3 in
   st
 
-
-let salsa20_block (k:key) (n:nonce) (c:counter): block =
+let salsa20_init (k:key) (n:nonce) : Tot state =
   let st = create 16 (u32 0) in
-  let st = setup k n c st in
+  let st  = setup k n st in
+  st
+
+let salsa20_set_counter (st:state) (c:counter) : Tot state =
+  let st = st.[8] <- (u32 c) in
+  st.[9] <- (u32 0)
+
+let salsa20_key_block (st:state) : Tot block =
   let st' = salsa20_core st in
   uints_to_bytes_le st'
 
-
-let salsa20_ctx: Spec.CTR.block_cipher_ctx =
-  let open Spec.CTR in
-  {
-    keylen = keylen;
-    blocklen = blocklen;
-    noncelen = noncelen;
-    countermax = 1
-  }
-
-let salsa20_cipher: Spec.CTR.block_cipher salsa20_ctx = salsa20_block
+let salsa20_cipher =
+  Spec.CTR.Cipher state keylen noncelen max_size_t blocklen salsa20_init salsa20_set_counter salsa20_key_block
 
 let salsa20_encrypt_bytes key nonce counter m =
-    Spec.CTR.counter_mode salsa20_ctx salsa20_cipher key nonce counter m
+  Spec.CTR.counter_mode salsa20_cipher key nonce counter m
