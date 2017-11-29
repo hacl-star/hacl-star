@@ -45,7 +45,7 @@ let rec mod_exp_loop n a b acc =
 			else bn_mul_mod a acc n in
 		mod_exp_loop n a2 (bn_div2 b) acc
 
-val mod_exp: n:bignum{bn_v n > 1} -> a:elem n -> b:elem n -> Tot (res:elem n)
+val mod_exp: n:bignum{bn_v n > 1} -> a:elem n -> b:bignum -> Tot (res:elem n)
 let mod_exp n a b =
 	mod_exp_loop n a b (bn 1)
 
@@ -142,7 +142,7 @@ noeq type rsa_pubkey (modBits:modBits) =
 	| Mk_rsa_pubkey: n:bignum{1 < bn_v n /\ bn_v n < pow2 modBits} -> e:elem n -> rsa_pubkey modBits
 	
 noeq type rsa_privkey (modBits:modBits) =
-	| Mk_rsa_privkey: pkey:rsa_pubkey modBits -> d:elem (Mk_rsa_pubkey?.n pkey) -> rsa_privkey modBits
+	| Mk_rsa_privkey: pkey:rsa_pubkey modBits -> d:elem (Mk_rsa_pubkey?.n pkey) -> p:elem (Mk_rsa_pubkey?.n pkey) -> q:elem (Mk_rsa_pubkey?.n pkey) -> rsa_privkey modBits
 
 val mgf_sha256_loop:
 	mgfseedLen:size_t{mgfseedLen = hLen + 4 /\ mgfseedLen < max_input_len_sha256} ->
@@ -330,6 +330,8 @@ let rsa_sign modBits skey rBlind sLen salt msgLen msg =
 	let pkey = Mk_rsa_privkey?.pkey skey in
 	let n = Mk_rsa_pubkey?.n pkey in
 	let e = Mk_rsa_pubkey?.e pkey in
+	let p = Mk_rsa_privkey?.p skey in
+	let q = Mk_rsa_privkey?.q skey in
 	assert (modBits <= 8 * k);
 	pow2_le_compat (8 * k) modBits;
 	assert (pow2 modBits <= pow2 (8 * k));
@@ -340,12 +342,10 @@ let rsa_sign modBits skey rBlind sLen salt msgLen msg =
 	let em = pss_encode msBits sLen salt msgLen msg k em in
 	let m = os2ip k em in
 	(* BLINDING *)
-	let rBlind_inv, _ = extended_eucl rBlind n in
-	let rBlind_e = mod_exp n rBlind e in
-	let m1 = bn_mul_mod m rBlind_e n in
-	assert (bn_v m1 < bn_v n);
-	let s1 = mod_exp n m1 d in
-	let s = bn_mul_mod s1 rBlind_inv n in
+	let phi_n = (p - 1) * (q - 1) in
+	let d' = d + rBlind * phi_n in
+	let s = mod_exp n m d' in
+
 	let sgnt = create k (u8 0) in
 	assert (bn_v s < bn_v n);
 	i2osp s k sgnt
