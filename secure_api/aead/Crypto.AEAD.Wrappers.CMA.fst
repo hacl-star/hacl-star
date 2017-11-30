@@ -40,7 +40,7 @@ let mac_requires (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) (tag:MAC.tag
   Buffer.live h tag /\
   Buffer.live h ak.s /\
   EncodingWrapper.ak_acc_tag_separate ak acc tag /\
-  (mac_log ==> Buffer.frameOf tag <> (alog acc).id \/
+  (mac_log ==> Buffer.frameOf tag <> HS.frameOf (alog acc) \/
                Buffer.disjoint_ref_1 tag (alog acc)) /\
   (authId i ==> CMA.mac_is_unset i ak.region ak h) // implies MAC.norm m st.r; already in acc_inv
 
@@ -56,7 +56,7 @@ let mac_modifies
   if safeMac i 
   then
     let log = RR.as_hsref CMA.(ilog ak.log) in
-    CMA.pairwise_distinct (frameOf abuf) (frameOf tbuf) HS.(log.id) /\
+    CMA.pairwise_distinct (frameOf abuf) (frameOf tbuf) (HS.frameOf log) /\
     CMA.modifies_bufs_and_ref abuf tbuf log h0 h1
   else
     frameOf abuf <> frameOf tbuf /\
