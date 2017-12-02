@@ -5,6 +5,8 @@ open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
 
+open FStar.Math.Lemmas
+
 module Hash = Spec.SHA2
 
 (* BIGNUM *)
@@ -21,57 +23,22 @@ let bn_is_less x y = x < y
 
 type elem (n:bignum) = e:bignum{bn_v e < bn_v n}
 
-#reset-options "--z3rlimit 50"
-
-val mod_exp_loop: 
-	n:bignum{bn_v n > 1} -> a:bignum -> b:bignum -> acc:elem n -> Tot (res:elem n) (decreases b)
-let rec mod_exp_loop n a b acc =
-	match b with
-	| 0 -> acc
-	| 1 -> bn_mul_mod a acc n
-	| e ->
-		let a2 = bn_mul_mod a a n in
-		let acc =
-			if (bn_is_even e) then acc
-			else bn_mul_mod a acc n in
-		mod_exp_loop n a2 (bn_div2 b) acc
-
-val mod_exp:
-	n:bignum{bn_v n > 1} -> a:elem n -> b:bignum -> Tot (res:elem n)
-let mod_exp n a b =
-	mod_exp_loop n a b (bn 1)
-
-(* BIGNUM CONVERT FUNCTIONS *)
-val os2ip:
-	bLen:size_t{bLen > 0} -> b:lbytes bLen -> Tot (res:bignum{bn_v res < pow2 (8 * bLen)})
-let os2ip bLen b = nat_from_intseq_be #U8 #bLen b
-
-val i2osp:
-	n:bignum -> bLen:size_t{bn_v n < pow2 (8 * bLen)} -> b:lbytes bLen -> Tot (lbytes bLen)
-let i2osp n bLen b = nat_to_bytes_be bLen n
-
-(* LEMMAS from FStar.Math.Lemmas *)
-#reset-options "--z3rlimit 30 --initial_fuel 1 --max_fuel 1"
-
-val pow2_lt_compat: n:nat -> m:nat -> Lemma
-  (requires (m < n))
-  (ensures  (pow2 m < pow2 n))
-  (decreases (n - m))
-let rec pow2_lt_compat n m =
-  match n-m with
-  | 1 -> ()
-  | _ -> pow2_lt_compat (n-1) m; pow2_lt_compat n (n-1)
-
-val pow2_le_compat: n:nat -> m:nat -> Lemma
-  (requires (m <= n))
-  (ensures  (pow2 m <= pow2 n))
-  (decreases (n - m))
-let pow2_le_compat n m =
-  match n-m with
-  | 0 -> ()
-  | _ -> pow2_lt_compat n m
+(* LEMMAS *)
+#reset-options "--z3rlimit 30 --max_fuel 2"
+val pow : x:nat -> n:nat -> Tot nat
+let rec pow x n =
+  match n with
+  | 0 -> 1
+  | n -> x * pow x (n - 1)
 
 #reset-options "--z3rlimit 30 --max_fuel 2"
+val lemma_pow: x:nat -> n:nat -> m:nat -> Lemma
+  (pow x n * pow x m = pow x (n + m))
+let rec lemma_pow x n m =
+  let ass (x y z : nat) : Lemma ((x*y)*z == x*(y*z)) = () in
+  match n with
+  | 0 -> ()
+  | _ -> lemma_pow x (n-1) m; ass x (pow x (n-1)) (pow x m)
 
 val lemma_pow2_greater_1: x:size_t{x > 1} -> Lemma
 	(requires True)
@@ -81,6 +48,89 @@ let rec lemma_pow2_greater_1 x =
 	match x with
 	| 2 -> ()
 	| _ -> lemma_pow2_greater_1 (x - 1)
+
+#reset-options "--z3rlimit 30 --max_fuel 0"
+
+val lemma_div_mod:
+	a:nat -> p:pos -> Lemma (a = p * (a / p) + a % p)
+let lemma_div_mod a p = ()
+
+val lemma_mult_3:
+	a:nat -> b:nat -> c:nat -> Lemma (a * b * c = c * a * b)
+let lemma_mult_3 a b c = ()
+
+val lemma_pow_a2_b:
+	a:nat -> b:nat -> Lemma (pow (a * a) b = pow a (2 * b))
+let lemma_pow_a2_b a b = admit()
+
+val lemma_pow_mod:
+	a:nat -> b:nat -> n:pos -> Lemma ((pow a b) % n == (pow (a % n) b) % n)
+let lemma_pow_mod a b n = admit()
+
+val lemma_mod_exp:
+	n:bignum{n > 1} -> a:bignum -> a2:bignum ->
+	b:bignum -> b2:bignum -> acc:elem n -> res:bignum -> Lemma
+	(requires (a2 == (a * a) % n /\ b2 == bn_div2 b /\ res == (pow a2 b2 * acc) % n))
+	(ensures (res == (pow a (2 * b2) * acc) % n))
+let lemma_mod_exp n a a2 b b2 acc res =
+	let res = (pow a2 b2 * acc) % n in
+	lemma_mod_mul_distr_l (pow a2 b2) acc n;
+	assert (((pow a2 b2) * acc) % n == ((pow a2 b2) % n * acc) % n);
+	lemma_pow_mod (a * a) b2 n;
+	assert ((pow a2 b2) % n == (pow (a * a) b2) % n);
+	lemma_pow_a2_b a b2;
+	assert ((pow (a * a) b2) % n == (pow a (2 * b2)) % n);
+	assert (res == ((pow a (2 * b2)) % n * acc) % n);
+	lemma_mod_mul_distr_l (pow a (2 * b2)) acc n
+
+#reset-options "--z3rlimit 150"
+
+val mod_exp_:
+	n:bignum{bn_v n > 1} -> a:bignum -> b:bignum -> acc:elem n -> Tot (res:elem n{res == (pow a b * acc) % n})
+	(decreases b)
+let rec mod_exp_ n a b acc =
+	if b = 0
+	then acc
+	else begin
+		let a2 = (a * a) % n in
+		let b2 = bn_div2 b in
+		let acc' = (a * acc) % n in
+		lemma_div_mod b 2;
+		if (bn_is_even b) then begin
+			assert (b % 2 = 0);
+			assert (b = 2 * b2);
+			let res = mod_exp_ n a2 b2 acc in
+			assert (res == (pow a2 b2 * acc) % n); //from ind hypo
+			lemma_mod_exp n a a2 b b2 acc res;
+			res end
+		else begin
+			assert (b % 2 = 1);
+			assert (b = 2 * b2 + 1);
+			let res = mod_exp_ n a2 b2 acc' in
+			assert (res == (pow a2 b2 * acc') % n); //from ind hypo
+			lemma_mod_exp n a a2 b b2 acc' res;
+			assert (res == (((a * acc) % n) * pow a (2 * b2)) % n);
+			lemma_mod_mul_distr_l (a * acc) (pow a (2 * b2)) n;
+			assert (res == (a * acc * pow a (2 * b2)) % n);
+			assert (pow a 1 == a);
+			lemma_mult_3 (pow a 1) acc (pow a (2 * b2));
+			assert (res == (pow a (2 * b2) * pow a 1 * acc) % n);
+			lemma_pow a (2 * b2) 1;
+			res end
+		end
+
+val mod_exp:
+	n:bignum{bn_v n > 1} -> a:elem n -> b:bignum -> Tot (res:elem n{res == (pow a b) % n})
+let mod_exp n a b = mod_exp_ n a b (bn 1)
+
+(* BIGNUM CONVERT FUNCTIONS *)
+val os2ip:
+	bLen:size_t{bLen > 0} -> b:lbytes bLen -> Tot (res:bignum{bn_v res < pow2 (8 * bLen)})
+let os2ip bLen b = nat_from_intseq_be #U8 #bLen b
+
+val i2osp:
+	n:bignum -> bLen:size_t{bn_v n < pow2 (8 * bLen)} -> b:lbytes bLen -> Tot (lbytes bLen)
+let i2osp n bLen b = nat_to_bytes_be bLen n
 
 #reset-options "--z3rlimit 50"
 
