@@ -38,8 +38,8 @@ type serialized_point = lbytes 56
 type proj_point = | Proj: x:elem -> z:elem -> proj_point
 
 let decodeScalar448 (k:scalar) =
-  let k   = k.[0] <- (k.[0] &. u8 252) in
-  let k   = k.[55] <- (k.[55] |. u8 128) in k
+  let k : scalar = k.[0] <- (k.[0] &. u8 252) in
+  let k : scalar = k.[55] <- (k.[55] |. u8 128) in k
 
 let decodePoint (u:serialized_point) =
   (nat_from_bytes_le u % pow2 448) % prime
@@ -93,5 +93,3 @@ let scalarmult (k:scalar) (u:serialized_point) : Tot serialized_point =
   let u = decodePoint u in
   let res = montgomery_ladder u k in
   encodePoint res
-
-

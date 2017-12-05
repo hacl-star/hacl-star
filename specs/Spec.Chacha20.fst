@@ -1,127 +1,98 @@
 module Spec.Chacha20
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
-
 open FStar.Mul
 open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
-open Spec.Lib.Stateful2
+open Spec.Lib.RawIntTypes
 
-(* Chacha20 State *)
+open Spec.Chacha20.Lemmas
 
-noeq type chacha_state = {
-  state_i:lseq uint32 16;
-  state  :lseq uint32 16;
-}
 
-let create_state : allocator chacha_state = fun () ->
-  let s = create 16 (u32 0) in
-  let s' = create 16 (u32 0) in
-  {state_i = s; state = s'} 
-  
-let state_i: array_accessor chacha_state uint32 16 = {
-  get = (fun s -> s.state_i);
-  put = (fun s v -> {s with state_i = v})
-}
+#set-options "--max_fuel 0 --z3rlimit 100"
 
-let state: array_accessor chacha_state uint32 16 = {
-  get = (fun s -> s.state);
-  put = (fun s v -> {s with state = v})
-}
-
-type chacha_st (a:Type0)  = stateful chacha_state a 
-type index (#a:Type0) (#len:array_size_t) (k:array_accessor chacha_state a len) = 
-     i:size_t{i < len}
-
-(* Chacha20 Spec *)
-
-let line (a:index state) (b:index state) (d:index state) (s:rotval U32) : chacha_st unit =
-  mb <-- read state b ;
-  ma <-- read state a ;
-  write state a ((+.) #U32 ma mb) ;;
-  ma <-- read state a ;
-  md <-- read state d ;
-  write state d ((md ^. ma) <<<. s)
-
-let quarter_round a b c d : chacha_st unit =
-  line a b d (u32 16) ;;
-  line c d b (u32 12) ;;
-  line a b d (u32 8)  ;;
-  line c d b (u32 7)
-
-let column_round : chacha_st unit = 
-  quarter_round 0 4 8  12 ;;
-  quarter_round 1 5 9  13 ;;
-  quarter_round 2 6 10 14 ;;
-  quarter_round 3 7 11 15
-
-let diagonal_round : chacha_st unit =
-  quarter_round 0 5 10 15 ;;
-  quarter_round 1 6 11 12 ;;
-  quarter_round 2 7 8  13 ;;
-  quarter_round 3 4 9  14
-
-let double_round: chacha_st unit =
-    column_round ;; 
-    diagonal_round (* 2 rounds *)
-
-let rounds : chacha_st unit =
-    repeat 10 double_round (* 20 rounds *)
- 
-let chacha20_core: chacha_st unit = 
-    copy state_i state ;;
-    rounds ;;
-    in_place_map2 state_i state ((+.) #U32) 
-
-(* stateate initialization *)
-let c0 = u32 0x61707865
-let c1 = u32 0x3320646e
-let c2 = u32 0x79622d32
-let c3 = u32 0x6b206574
-
+(* Constants *)
 let keylen = 32   (* in bytes *)
 let blocklen = 64 (* in bytes *)
 let noncelen = 12 (* in bytes *)
 
-type chacha_key   = lbytes keylen
-type chacha_block = lbytes blocklen
-type chacha_nonce = lbytes noncelen
+type key = lbytes keylen
+type block = lbytes blocklen
+type nonce = lbytes noncelen
 type counter = size_t
 
+// Internally, blocks are represented as 16 x 4-byte integers
+type state = m:intseq U32 16
+type idx = n:size_t{n < 16}
+type shuffle = state -> Tot state
 
-let setup (k:chacha_key) (n:chacha_nonce) (c:counter): chacha_st unit =
-  write state_i 0 c0 ;;
-  write state_i 1 c1 ;;
-  write state_i 2 c2 ;;
-  write state_i 3 c3 ;;
-  import_slice k state_i 4 12 (uints_from_bytes_le #U32 #8) ;;
-  write state_i 12 (u32 c) ;;
-  import_slice n state_i 13 16 (uints_from_bytes_le #U32 #3) 
+// Using @ as a functional substitute for ;
+let op_At f g = fun x -> g (f x)
 
+let line (a:idx) (b:idx) (d:idx) (s:rotval U32) (m:state) : Tot state =
+  let m = m.[a] <- (m.[a] +. m.[b]) in
+  let m = m.[d] <- ((m.[d] ^. m.[a]) <<<. s) in m
 
-let chacha20_block (k:chacha_key) (n:chacha_nonce) (c:counter) (f:chacha_block -> stateful 't 'a) : stateful 't 'a =
-  let b = 
-    run create_state (
-       setup k n c ;;
-       chacha20_core ;;
-       export state (uints_to_bytes_le #U32 #16)
-    )
-  in f b
-let chacha20_ctx: Spec.CTR.block_cipher_ctx =
-    let open Spec.CTR in
-    {
-    keylen = keylen;
-    noncelen = noncelen;
-    countermax = maxint U32;
-    blocklen = blocklen;
-    }
+let quarter_round a b c d : shuffle =
+  line a b d (u32 16) @
+  line c d b (u32 12) @
+  line a b d (u32 8)  @
+  line c d b (u32 7)
 
-let chacha20_block_cipher: Spec.CTR.block_cipher chacha20_ctx = chacha20_block
+let column_round : shuffle =
+  quarter_round 0 4 8  12 @
+  quarter_round 1 5 9  13 @
+  quarter_round 2 6 10 14 @
+  quarter_round 3 7 11 15
+
+let diagonal_round : shuffle =
+  quarter_round 0 5 10 15 @
+  quarter_round 1 6 11 12 @
+  quarter_round 2 7 8  13 @
+  quarter_round 3 4 9  14
+
+let double_round : shuffle =
+  column_round @ diagonal_round (* 2 rounds *)
+
+let rounds : shuffle =
+  repeat 10 double_round (* 20 rounds *)
+
+let chacha20_core (s:state) : Tot state =
+  let s' = rounds s in
+  map2 (fun x y -> x +. y) s' s
+
+(* state initialization *)
+let c0 = 0x61707865
+let c1 = 0x3320646e
+let c2 = 0x79622d32
+let c3 = 0x6b206574
+
+let setup (k:key) (n:nonce) (st:state) : Tot state =
+  let st = st.[0] <- u32 c0 in
+  let st = st.[1] <- u32 c1 in
+  let st = st.[2] <- u32 c2 in
+  let st = st.[3] <- u32 c3 in
+  let st = update_sub st 4 8 (uints_from_bytes_le k) in
+  let st = update_sub st 13 3 (uints_from_bytes_le n) in
+  st
+
+let chacha20_init (k:key) (n:nonce) : Tot state =
+  let st = create 16 (u32 0) in
+  let st  = setup k n st in
+  st
+
+let chacha20_set_counter (st:state) (c:counter) : Tot state =
+  st.[12] <- (u32 c)
+
+let chacha20_key_block (st:state) : Tot block =
+  let st' = chacha20_core st in
+  uints_to_bytes_le st'
+
+let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
+  let st = chacha20_init k n in
+  let st' = chacha20_core st in
+  uints_to_bytes_le st'
+
+let chacha20_cipher =
+  Spec.CTR.Cipher state keylen noncelen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
 
 let chacha20_encrypt_bytes key nonce counter len m =
-    let chacha20_ctr = Spec.CTR.counter_mode chacha20_ctx chacha20_block_cipher in
-    chacha20_ctr key nonce counter len m
-
-
-
-
-
+  Spec.CTR.counter_mode chacha20_cipher key nonce counter len m

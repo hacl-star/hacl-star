@@ -33,9 +33,6 @@ let lenType p = match p.wt with
 (* Definition: Number of bytes required to store the total length *)
 let lenSize p = numbytes (lenType p)
 
-(* Definition: Maximum input size in bytes *)
-let max_input p = (maxint (lenType p) + 1) / 8
-
 (* Definition of permutation functions *)
 let _Ch p x y z = ((x &. y) ^. ((~. x) &. z))
 let _Maj p x y z = (x &. y) ^. ((x &. z) ^. (y &. z))
@@ -48,6 +45,9 @@ let _sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[9]) ^. ((x >>>. p.opTable.[10
 let size_block_w = 16
 let size_hash_w = 8
 let size_block p :size_t = size_block_w * numbytes p.wt
+
+(* Definition: Maximum input size in bytes *)
+let max_input p : n:nat = (maxint (lenType p) + 1) / 8
 
 (* Definition: Types for block and hash as sequences of words *)
 type block_w p = b:intseq p.wt 16

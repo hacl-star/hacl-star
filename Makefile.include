@@ -2,7 +2,7 @@ UNAME := $(shell uname)
 .DEFAULT_GOAL=all
 
 ifndef HACL_HOME
-  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
+  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 else
   HACL_HOME:=$(abspath $(HACL_HOME))
 endif
@@ -45,10 +45,17 @@ endif
 # Kremlin
 #
 
+KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMLIN=$(KREMLIN_HOME)/krml
-KREMLIN_ARGS?=
+KREMTEST=$(KREMLIN_HOME)/test
 
+
+# Default Kremlin arguments
+KREMLIN_ARGS?=
 KREMLIN_ARGS+=$(KOPTS)
+KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
+
+# Compiler options
 ifdef USE_CCOMP
   KREMLIN_ARGS+=-cc compcert $(VERBOSE)
 else ifdef USE_CL
@@ -57,18 +64,21 @@ else
   KREMLIN_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
 endif
 
-# Linux specific compilation instruction for PneuTube
-ifeq ($(UNAME), Linux)
-  KREMLIN_ARGS+=-ccopt -D_GNU_SOURCE
-endif
-
-KREMLIB=$(KREMLIN_HOME)/kremlib
-KREMTEST=$(KREMLIN_HOME)/test
-KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
-ifdef HACL_NO_TESTLIB
+# Release mode (includes testlib if not release)
+ifdef HACL_RELEASE
   KREMLIN_TESTLIB=
 else
   KREMLIN_TESTLIB=-add-include '"testlib.h"' $(KREMLIB)/testlib.c
+endif
+
+# License header
+ifdef HACL_LICENSE
+  KREMLIN_ARGS+=-header $(HACL_LICENSE)
+endif
+
+# Linux specific compilation instruction for PneuTube
+ifeq ($(UNAME), Linux)
+  KREMLIN_ARGS+=-ccopt -D_GNU_SOURCE
 endif
 
 #
@@ -163,9 +173,9 @@ import-kremlin:
 	$(FSTAR_INCLUDES)
 
 %.fst.hints: %.fst
-	$(FSTAR) --record_hints $<
+	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
 %.fsti.hints: %.fsti
-	$(FSTAR) --record_hints $<
+	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
 
 # Custom verification targets for re-located hint files
 %.fst-reloc-verify: %.fst

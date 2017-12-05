@@ -1,6 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
-#include "Curve25519.h"
+#include "Hacl_Curve25519.h"
 #include "sodium.h"
 #include "tweetnacl.h"
 #include "ec_lcl.h"
@@ -309,16 +309,16 @@ int32_t test_curve()
   uint8_t result[KEYSIZE];
   memset(result, 0, KEYSIZE * sizeof result[0]);
 
-  Curve25519_crypto_scalarmult(result, scalar1, input1);
+  Hacl_Curve25519_crypto_scalarmult(result, scalar1, input1);
   TestLib_compare_and_print("HACL Curve25519", expected1, result, KEYSIZE);
-  Curve25519_crypto_scalarmult(result, scalar2, input2);
+  Hacl_Curve25519_crypto_scalarmult(result, scalar2, input2);
   TestLib_compare_and_print("HACL Curve25519", expected2, result, KEYSIZE);
 
   int res = crypto_scalarmult_curve25519(result, scalar1, input1);
   TestLib_compare_and_print("Sodium Curve25519", expected1, result, KEYSIZE);
   res = crypto_scalarmult_curve25519(result, scalar2, input2);
   TestLib_compare_and_print("Sodium Curve25519", expected2, result, KEYSIZE);
-  
+
   return exit_success;
 }
 
@@ -343,7 +343,7 @@ int32_t perf_curve() {
   t1 = clock();
   for (int i = 0; i < ROUNDS; i++){
     a = TestLib_cpucycles();
-    Curve25519_crypto_scalarmult(mul + KEYSIZE * i, sk + KEYSIZE * i, pk + KEYSIZE * i);
+    Hacl_Curve25519_crypto_scalarmult(mul + KEYSIZE * i, sk + KEYSIZE * i, pk + KEYSIZE * i);
     b = TestLib_cpucycles();
     d[i] = b - a;
   }
@@ -417,9 +417,8 @@ int32_t main(int argc, char *argv[])
     return res;
   } else if (argc == 2 && strcmp (argv[1], "unit-test") == 0 ) {
     return test_curve();
-  } else {    
+  } else {
     printf("Error: expected arguments 'perf' (default) or 'unit-test'.\n");
     return exit_failure;
   }
 }
-  

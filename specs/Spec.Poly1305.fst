@@ -22,47 +22,59 @@ type block = lbytes blocksize
 type tag   = lbytes blocksize
 type key   = lbytes keysize
 
+
+type state = {
+  r:elem;
+  s:elem;
+  acc:elem
+}
+
+let set_acc (st:state) (acc:elem) =
+  {st with acc = acc}
+
 (* Poly1305 specification *)
-let update (len:size_t{len <= blocksize}) (b:lbytes len) 
-	   (r:elem) (acc:elem) : elem =
-  Math.Lemmas.pow2_le_compat 128 (8 * len);		
+let update1 (len:size_t{len <= blocksize}) (b:lbytes len) (st:state) : state =
+  Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
   let n = pow2 (8 * len) `fadd` nat_from_bytes_le b in
-  (n `fadd` acc) `fmul` r
+  set_acc st ((n `fadd` st.acc) `fmul` st.r)
 
-let poly (len:size_t) (text:lbytes len) (r:elem) : elem =
-  let blocks = len / blocksize in
+
+let update_blocks (n:size_t{n * blocksize <= max_size_t}) (text:lbytes (n * blocksize)) (st:state) : state =
+  repeati n (fun i st ->
+    let b = slice text (blocksize * i) (blocksize * (i+1)) in
+    update1 16 b st) st
+
+let poly (len:size_t) (text:lbytes len) (st:state) : state =
+  let n = len / blocksize in
   let rem = len % blocksize in
-  let init  : elem = 0 in
-  let acc   : elem = 
-    repeati blocks
-      (fun i acc  -> let b = slice text (blocksize * i) (blocksize * (i+1)) in
-	          update 16 b r acc) 
-      init in
-  if rem = 0 then
-     acc
-  else 
-     let last = slice text (blocks * blocksize) len in
-     update rem last r acc
-  
-let finish (a:elem) (s:elem) : tag =
-  let n = (a + s) % pow2 128 in
+  let blocks = slice text 0 (n * blocksize) in
+  let st = update_blocks n blocks st in
+  if rem = 0 then st
+  else
+    let last = slice text (n * blocksize) len in
+    update1 rem last st
+
+let finish (st:state) : tag =
+  let n = (st.acc + st.s) % pow2 128 in
   nat_to_bytes_le 16 n
 
 let encode_r (rb:block) : elem =
-   let rb = rb.[3] <- rb.[3] &. u8 15 in
-   let rb = rb.[7] <- rb.[7] &. u8 15 in
-   let rb = rb.[11] <- rb.[11] &. u8 15 in
-   let rb = rb.[15] <- rb.[15] &. u8 15 in
-   let rb = rb.[4] <- rb.[4] &. u8 252 in
-   let rb = rb.[8] <- rb.[8] &. u8 252 in
-   let rb = rb.[12] <- rb.[12] &. u8 252 in
-   nat_from_bytes_le rb
+  let rb = rb.[3] <- rb.[3] &. u8 15 in
+  let rb = rb.[7] <- rb.[7] &. u8 15 in
+  let rb = rb.[11] <- rb.[11] &. u8 15 in
+  let rb = rb.[15] <- rb.[15] &. u8 15 in
+  let rb = rb.[4] <- rb.[4] &. u8 252 in
+  let rb = rb.[8] <- rb.[8] &. u8 252 in
+  let rb = rb.[12] <- rb.[12] &. u8 252 in
+  nat_from_bytes_le rb
 
-let poly1305 (len:size_t) (msg:lbytes len) (k:key) : tag =
+let poly1305_init (k:key) : state =
   let r = encode_r (slice k 0 16) in
   let s = nat_from_bytes_le (slice k 16 32) in
-  let acc = poly len msg r in
-  finish acc s
+  {r = r; s = s; acc = 0}
 
-
+let poly1305 (len:size_t) (msg:lbytes len) (k:key) : tag =
+  let st = poly1305_init k in
+  let st = poly len msg st in
+  finish st

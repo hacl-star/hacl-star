@@ -8,7 +8,7 @@ open Spec.Lib.RawIntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.Stateful
 
-module Hash = Spec.SHA2
+module Hash = Spec.Hash
 module HMAC = Spec.HMAC
 module HKDF = Spec.HKDF
 
@@ -17,7 +17,7 @@ module HKDF = Spec.HKDF
 // Test 1
 //
 
-let test1_hash = Hash.parameters_sha2_256
+let test1_hash = Hash.SHA2_256
 
 let test1_ikm = List.Tot.map u8_from_UInt8 [
   0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy;
@@ -57,7 +57,7 @@ let test1_expected_okm = List.Tot.map u8_from_UInt8 [
 // Test 2
 //
 
-let test2_hash = Hash.parameters_sha2_256
+let test2_hash = Hash.SHA2_256
 
 let test2_ikm = List.Tot.map u8_from_UInt8 [
   0x00uy; 0x01uy; 0x02uy; 0x03uy; 0x04uy; 0x05uy; 0x06uy; 0x07uy;
@@ -126,7 +126,7 @@ let test2_expected_okm = List.Tot.map u8_from_UInt8 [
 // Test 3
 //
 
-let test3_hash = Hash.parameters_sha2_256
+let test3_hash = Hash.SHA2_256
 
 let test3_ikm = List.Tot.map u8_from_UInt8 [
   0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy;

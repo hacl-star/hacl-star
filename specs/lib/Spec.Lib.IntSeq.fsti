@@ -3,28 +3,28 @@ module Spec.Lib.IntSeq
 open Spec.Lib.IntTypes
 
 val lseq: a:Type0 -> len:size_t -> t:Type0
-val create: #a:Type -> len:size_t -> init:a -> lseq a len 
+val create: #a:Type -> len:size_t -> init:a -> lseq a len
 val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (List.Tot.length l)
 val index: #a:Type -> #len:size_t{len > 0} -> lseq a len -> n:size_t{n < len} -> a
-val upd: #a:Type -> #len:size_t -> lseq a len -> n:size_t{n < len /\ len > 0} -> x:a -> lseq a len
+val upd: #a:Type -> #len:size_t -> lseq a len -> n:size_t{n < len /\ len > 0} -> x:a -> o:lseq a len{index o n == x}
 val sub: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> n:size_t{start + n <= len} -> lseq a n
 val slice: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> fin:size_t{start <= fin /\ fin <= len} -> lseq a (fin - start)
-val update_sub: #a:Type -> #len:size_t -> i:lseq a len -> start:size_t -> n:size_t{start + n <= len} -> v:lseq a n -> o:lseq a len{sub o start n == v}
+val update_sub: #a:Type -> #len:size_t -> i:lseq a len -> start:size_t -> n:size_t{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}
 val update_slice: #a:Type -> #len:size_t -> lseq a len -> start:size_t -> fin:size_t{start <= fin /\ fin <= len} -> lseq a (fin - start) -> lseq a len
 
 let op_String_Access = index
 let op_String_Assignment = upd
 
 
-val repeat_range: #a:Type -> min:size_t -> max:size_t{min <= max} -> (i:size_t{i >= min /\ i < max}  -> a -> Tot a) -> a -> Tot (a) 
-val repeati: #a:Type -> n:size_t -> (i:size_t{i < n}  -> a -> Tot a) -> a -> Tot (a) 
-val repeat: #a:Type -> n:size_t -> (a -> Tot a) -> a -> Tot (a) 
+val repeat_range: #a:Type -> min:size_t -> max:size_t{min <= max} -> (i:size_t{i >= min /\ i < max}  -> a -> Tot a) -> a -> Tot (a)
+val repeati: #a:Type -> n:size_t -> (i:size_t{i < n}  -> a -> Tot a) -> a -> Tot (a)
+val repeat: #a:Type -> n:size_t -> (a -> Tot a) -> a -> Tot (a)
 
 
 
-val fold_left_range: #a:Type -> #b:Type -> #len:size_t -> min:size_t -> max:size_t{min <= max /\ max <= len} -> (i:size_t{i >= min /\ i < max} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b) 
-val fold_lefti: #a:Type -> #b:Type -> #len:size_t -> (i:size_t{i < len} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b) 
-val fold_left: #a:Type -> #b:Type -> #len:size_t -> (a -> b -> Tot b) -> lseq a len -> b -> Tot (b) 
+val fold_left_range: #a:Type -> #b:Type -> #len:size_t -> min:size_t -> max:size_t{min <= max /\ max <= len} -> (i:size_t{i >= min /\ i < max} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b)
+val fold_lefti: #a:Type -> #b:Type -> #len:size_t -> (i:size_t{i < len} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b)
+val fold_left: #a:Type -> #b:Type -> #len:size_t -> (a -> b -> Tot b) -> lseq a len -> b -> Tot (b)
 
 
 val map: #a:Type -> #b:Type -> #len:size_t -> (a -> Tot b) -> lseq a len -> lseq b len
@@ -58,8 +58,8 @@ val uint_to_bytes_le: #t:inttype -> u:uint_t t -> intseq U8 (numbytes t)
 
 val uint_to_bytes_be: #t:inttype -> u:uint_t t -> intseq U8 (numbytes t)
 
-val uint_from_bytes_le: #t:inttype -> intseq U8 (numbytes t) -> u:uint_t t 
-val uint_from_bytes_be: #t:inttype -> intseq U8 (numbytes t) -> u:uint_t t 
+val uint_from_bytes_le: #t:inttype -> intseq U8 (numbytes t) -> u:uint_t t
+val uint_from_bytes_be: #t:inttype -> intseq U8 (numbytes t) -> u:uint_t t
 
 val uints_to_bytes_le: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t <= max_size_t} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
 val uints_to_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t <= max_size_t} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
@@ -68,5 +68,4 @@ val uints_from_bytes_be: #t:inttype -> #len:size_t{len `op_Multiply` numbytes t 
 
 //The following function is primarily meant for testing, do not rely on it in code.
 val as_list: #a:Type -> #len:size_t -> lseq a len -> l:list a{List.Tot.length l = len}
-
 

@@ -4,61 +4,64 @@ open FStar.Mul
 open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 
-#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
-type block_cipher_ctx = {
-     keylen: size_t ;
-     blocklen: (x:size_t{x>0});
-     noncelen: size_t;
-     countermax: size_t
-     }
+noeq
+type cipher =
+  | Cipher: state:Type ->
+	    key_len:size_t ->
+	    nonce_len:size_t ->
+	    counter_max:size_t ->
+	    block_len:(x:size_t{x>0}) ->
+	    init:(lbytes key_len -> lbytes nonce_len -> state) ->
+	    set_counter:(state -> c:size_t{c <= counter_max} -> state) ->
+	    key_block: (state -> lbytes block_len) ->
+	    cipher
 
-
-type key (c:block_cipher_ctx) = lbytes c.keylen
-type nonce (c:block_cipher_ctx) = lbytes c.noncelen
-type block (c:block_cipher_ctx) = lbytes c.blocklen
-type counter (c:block_cipher_ctx) = s:size_t{s <= c.countermax}
-
-type block_cipher (c:block_cipher_ctx) =  key c -> nonce c -> counter c -> block c
 
 val xor: #len:size_t -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
 let xor #len x y = map2 (fun x y -> x ^. y) x y
 
 val counter_mode_blocks:
-  ctx: block_cipher_ctx ->
-  bc: block_cipher ctx ->
-  k:key ctx -> n:nonce ctx -> c:counter ctx ->
-  n:size_t{n * ctx.blocklen < pow2 32 /\ c + n <= ctx.countermax} ->
-  plain:lbytes (n * ctx.blocklen) ->
-  Tot (lbytes (n * ctx.blocklen))
-let counter_mode_blocks ctx block_enc key nonce counter n plain =
-  let cipher = create (n * ctx.blocklen) (u8 0) in
+  enc: cipher ->
+  st0:enc.state ->
+  c:size_t ->
+  n:size_t{n * enc.block_len < pow2 32 /\ c + n <= enc.counter_max} ->
+  plain:lbytes (n * enc.block_len) ->
+  Tot (lbytes (n * enc.block_len))
+#set-options "--z3rlimit 100"
+let counter_mode_blocks enc st0 counter n plain =
+  let ciphertext = create (n * enc.block_len) (u8 0) in
   repeati n
-    (fun i cipher -> 
-      let b = slice plain (ctx.blocklen * i) (ctx.blocklen * (i+1)) in
-      let k = block_enc key nonce (counter + i) in
+    (fun i cipher ->
+      let st = enc.set_counter st0 (counter + i) in
+      let b = slice plain (enc.block_len * i) (enc.block_len * (i+1)) in
+      let k = enc.key_block st in
       let c = xor b k in
-      update_slice cipher (ctx.blocklen * i) (ctx.blocklen * (i+1)) c) cipher
-
+      update_slice cipher (enc.block_len * i) (enc.block_len * (i+1)) c)
+      ciphertext
 
 val counter_mode:
-  ctx: block_cipher_ctx ->
-  bc: block_cipher ctx ->
-  k:key ctx -> n:nonce ctx -> c:counter ctx ->
-  len: size_t{c + (len / ctx.blocklen) <= ctx.countermax}  -> 
-  plain:lbytes len ->
+  enc: cipher ->
+  k:lbytes enc.key_len ->
+  n:lbytes enc.nonce_len ->
+  c:size_t{c <= enc.counter_max} ->
+  len: size_t{c + (len / enc.block_len) <= enc.counter_max}  ->
+  plain:lbytes len  ->
   Tot (lbytes len)
-let counter_mode ctx block_enc key nonce counter len plain =
-  let n      = len / ctx.blocklen in
-  let rem    = len % ctx.blocklen in
-  let blocks = slice plain 0 (n * ctx.blocklen) in
-  let cipher_blocks = counter_mode_blocks ctx block_enc key nonce counter n blocks in
+let counter_mode enc key nonce counter len plain =
+  let n      = len / enc.block_len in
+  let rem    = len % enc.block_len in
+  let st0 = enc.init key nonce in
+  let blocks = slice plain 0 (n * enc.block_len) in
+  let cipher_blocks = counter_mode_blocks enc st0 counter n blocks in
   if rem = 0 then cipher_blocks
-  else 
-      let k = block_enc key nonce (counter+n) in
+  else
+      let st = enc.set_counter st0 (counter + n) in
+      let k = enc.key_block st in
       let k' = slice k 0 rem in
-      let last : lbytes rem = slice plain (n * ctx.blocklen) len in
+      let last : lbytes rem = slice plain (n * enc.block_len) len in
       let cipher_last: lbytes rem = xor #rem last k' in
       let cipher = create len (u8 0) in
-      let cipher = update_slice cipher 0 (n * ctx.blocklen) cipher_blocks in
-      update_slice cipher (n * ctx.blocklen) len cipher_last
+      let cipher = update_slice cipher 0 (n * enc.block_len) cipher_blocks in
+      update_slice cipher (n * enc.block_len) len cipher_last

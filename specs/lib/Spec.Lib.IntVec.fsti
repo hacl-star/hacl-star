@@ -4,7 +4,7 @@ open FStar.Mul
 open Spec.Lib.IntSeq
 module Ints = Spec.Lib.IntTypes
 
-type vectype = 
+type vectype =
   | V: it:Ints.inttype -> len:Ints.size_t -> vectype
 let bits vt = Ints.bits vt.it
 let size vt = Ints.numbytes vt.it * vt.len
@@ -52,5 +52,3 @@ val u32x4: Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> uint32x4
 val u32x8: Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> Ints.uint32 -> uint32x8
 val u64x4: Ints.uint64 -> Ints.uint64 -> Ints.uint64 -> Ints.uint64 -> uint64x4
 val u64x2: Ints.uint64 -> Ints.uint64 -> uint64x2
-
-

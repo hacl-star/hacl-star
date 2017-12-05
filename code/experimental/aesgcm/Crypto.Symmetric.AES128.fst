@@ -239,7 +239,7 @@ private val subBytes_sbox: state:block -> sbox:sbox{disjoint state sbox} -> STL 
   (ensures  (fun h0 _ h1 -> modifies_1 state h0 h1 /\ live h1 state))
 let subBytes_sbox state sbox =
   subBytes_aux_sbox state sbox 0ul
-
+o
 private val shiftRows: state:block -> STL unit
   (requires (fun h -> live h state))
   (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))

@@ -18,7 +18,7 @@ open Hacl.Spec.Bignum.Fproduct
 open Hacl.Spec.EC.AddAndDouble
 
 
-#set-options "--initial_fuel 0 --max_fuel 0"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3refresh"
 
 inline_for_extraction let p64 : p:pos{p = 0x10000000000000000} = assert_norm(pow2 64 = 0x10000000000000000); pow2 64
 inline_for_extraction let p128 : p:pos{p = 0x100000000000000000000000000000000} = assert_norm(pow2 128 = 0x100000000000000000000000000000000); pow2 128
@@ -398,7 +398,7 @@ let lemma_fsquare_spec_3 s =
 let lemma_mul_symm a b : Lemma (a * b + b * a = 2 * a * b) = ()
 
 
-#reset-options "--z3rlimit 689 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 689 --initial_fuel 0 --max_fuel 0 --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
 
 val lemma_fsquare_spec_4: s:seqelem -> Lemma
   (let r0 = v (Seq.index s 0) in
@@ -406,18 +406,25 @@ val lemma_fsquare_spec_4: s:seqelem -> Lemma
   let r2 = v (Seq.index s 2) in
   let r3 = v (Seq.index s 3) in
   let r4 = v (Seq.index s 4) in
-  (r0 * r0 + pow2 51 * (r0 * r1 + r1 * r0) + pow2 102 * (r0 * r2 + r1 * r1 + r2 * r0) + pow2 153 * (r0 * r3 + r1 * r2 + r2 * r1 + r3 * r0) + pow2 204 * (r0 * r4 + r1 * r3 + r2 * r2 + r3 * r1 + r4 * r0)+ pow2 255 * (r1 * r4 + r2 * r3 + r3 * r2 + r4 * r1) + pow2 306 * (r2 * r4 + r3 * r3 + r4 * r2) + pow2 357 * (r3 * r4 + r4 * r3) + pow2 408 * r4 * r4
-  = r0 * r0 + pow2 51 * 2 * r0 * r1 + pow2 102 * (2 * r0 * r2 + r1 * r1) + pow2 153 * (2 * r0 * r3 + 2 * r1 * r2) + pow2 204 * (2 * r0 * r4 + 2 * r1 * r3 + r2 * r2)+ pow2 255 * (2 * r1 * r4 + 2 * r2 * r3) + pow2 306 * (2 * r2 * r4 + r3 * r3) + pow2 357 * 2 * r3 * r4 + pow2 408 * r4 * r4))
-let lemma_fsquare_spec_4 s =
-  let r0 = v (Seq.index s 0) in
-  let r1 = v (Seq.index s 1) in
-  let r2 = v (Seq.index s 2) in
-  let r3 = v (Seq.index s 3) in
-  let r4 = v (Seq.index s 4) in
-  lemma_mul_symm r0 r1; lemma_mul_symm r0 r2; lemma_mul_symm r0 r3; lemma_mul_symm r0 r4;
-  lemma_mul_symm r1 r2; lemma_mul_symm r1 r3; lemma_mul_symm r1 r4;
-  lemma_mul_symm r2 r3; lemma_mul_symm r2 r4;
-  lemma_mul_symm r3 r4
+  (r0 * r0 
+   + pow2 51 * (r0 * r1 + r1 * r0) 
+   + pow2 102 * (r0 * r2 + r1 * r1 + r2 * r0) 
+   + pow2 153 * (r0 * r3 + r1 * r2 + r2 * r1 + r3 * r0) 
+   + pow2 204 * (r0 * r4 + r1 * r3 + r2 * r2 + r3 * r1 + r4 * r0) 
+   + pow2 255 * (r1 * r4 + r2 * r3 + r3 * r2 + r4 * r1) 
+   + pow2 306 * (r2 * r4 + r3 * r3 + r4 * r2) 
+   + pow2 357 * (r3 * r4 + r4 * r3) 
+   + pow2 408 * r4 * r4
+  = r0 * r0 
+    + pow2 51 * 2 * r0 * r1 
+    + pow2 102 * (2 * r0 * r2 + r1 * r1) 
+    + pow2 153 * (2 * r0 * r3 + 2 * r1 * r2) 
+    + pow2 204 * (2 * r0 * r4 + 2 * r1 * r3 + r2 * r2)
+    + pow2 255 * (2 * r1 * r4 + 2 * r2 * r3) 
+    + pow2 306 * (2 * r2 * r4 + r3 * r3) 
+    + pow2 357 * 2 * r3 * r4 
+    + pow2 408 * r4 * r4))
+let lemma_fsquare_spec_4 s = ()
 
 #reset-options "--z3rlimit 10"
 
@@ -643,7 +650,7 @@ let lemma_mul_ineq (a:nat) (b:nat) (c:nat{a < c}) (d:nat{b < d}) : Lemma (a * b 
 let lemma_mul_ineq1 (a:pos) (c:nat) (d:nat{c < d}) : Lemma (a * c < a * d) = ()
 
 
-#reset-options "--z3rlimit 1000 --max_fuel 0"
+#reset-options "--z3rlimit 1000 --max_fuel 0 --initial_ifuel 2 --max_ifuel 2"
 
 val lemma_52_to_fsquare_is_fine: s:seqelem{red_52 s} ->
  Lemma (fsquare_pre_ s /\ bounds' (fsquare_spec_ s) (77 * p104) (59 * p104) (41 * p104) (23 * p104) (5 * p104))
@@ -669,8 +676,7 @@ let lemma_52_to_fsquare_is_fine s =
   lemma_mul_ineq d1 r2 (2*p52) (p52);
   lemma_mul_ineq r4 d419 (p52) (19*p52);
   lemma_mul_ineq d1 r3 (2*p52) (p52);
-  lemma_mul_ineq r2 r2 (p52) (p52);
-  ()
+  lemma_mul_ineq r2 r2 (p52) (p52)
 
 
 #set-options "--z3rlimit 5 --initial_fuel 0 --max_fuel 0"

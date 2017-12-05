@@ -178,22 +178,22 @@ fn chacha_encrypt_bytes_core(ctx: &chacha_ctx, m:&[h8], c:&mut[h8]){
   quarter_round(&mut x,2,7,8,13); 
   quarter_round(&mut x,3,4,9,14); 
 
-  x[0] = x[0] + j0;
-  x[1] = x[1] + j1;
-  x[2] = x[2] + j2;
-  x[3] = x[3] + j3;
-  x[4] = x[4] + j4;
-  x[5] = x[5] + j5;
-  x[6] = x[6] + j6;
-  x[7] = x[7] + j7;
-  x[8] = x[8] + j8;
-  x[9] = x[9] + j9;
-  x[10] = x[10] + j10;
-  x[11] = x[11] + j11;
-  x[12] = x[12] + j12;
-  x[13] = x[13] + j13;
-  x[14] = x[14] + j14;
-  x[15] = x[15] + j15;
+  x[0] = x[0].wrapping_add(j0);
+  x[1] = x[1].wrapping_add(j1);
+  x[2] = x[2].wrapping_add(j2);
+  x[3] = x[3].wrapping_add(j3);
+  x[4] = x[4].wrapping_add(j4);
+  x[5] = x[5].wrapping_add(j5);
+  x[6] = x[6].wrapping_add(j6);
+  x[7] = x[7].wrapping_add(j7);
+  x[8] = x[8].wrapping_add(j8);
+  x[9] = x[9].wrapping_add(j9);
+  x[10] = x[10].wrapping_add(j10);
+  x[11] = x[11].wrapping_add(j11);
+  x[12] = x[12].wrapping_add(j12);
+  x[13] = x[13].wrapping_add(j13);
+  x[14] = x[14].wrapping_add(j14);
+  x[15] = x[15].wrapping_add(j15);
 
 
   let m0 = load32_le(&m[0..4]);
@@ -249,17 +249,13 @@ fn chacha_encrypt_bytes_core(ctx: &chacha_ctx, m:&[h8], c:&mut[h8]){
 }
 
 fn chacha_encrypt_bytes_loop(mut ctx:&mut chacha_ctx,m:&[h8],mut c:&mut[h8],len:usize) {
-   if len >= 64 { {
+   let mut curr = 0;
+   while len - curr >= 64 {
      let m1 = &m[0..64];
      let mut c1 = &mut c[0..64];
      chacha_encrypt_bytes_core(&ctx,&m1,&mut c1);
-     }
-     {
-     let m2 = &m[64..len];
-     let mut c2 = &mut c[64..len];
+     curr = curr + 64;     
      ctx[12] = ctx[12] + 1;
-     chacha_encrypt_bytes_loop(&mut ctx,&m2,&mut c2,len-64);
-     }
    }
 }
 
@@ -267,13 +263,80 @@ fn chacha_encrypt_bytes(mut ctx:&mut chacha_ctx, m:&[h8], mut c:&mut[h8], len:us
    chacha_encrypt_bytes_loop(&mut ctx,&m,&mut c,len);
    let rem = len & 63;
    if rem > 0 {
-     let mut tmp : [h8;64] = [0;64];
-     tmp[0..rem].clone_from_slice(&m[len-rem..len]);
-     let mut crem = &mut c[len-rem..len];
-     chacha_encrypt_bytes_core(&ctx,&tmp,&mut crem);
+     let mut tmp_m : [h8;64] = [0;64];
+     tmp_m[0..rem].clone_from_slice(&m[len-rem..len]);
+     let mut tmp_c : [h8;64] = [0;64];
+     chacha_encrypt_bytes_core(&ctx,&tmp_m,&mut tmp_c);
+     for i in 0..rem {  
+        c[len-rem+i] = tmp_c[i];
+     }
    }
 }
 
-fn main() {
-    println!("Hello, world!");
+fn chacha20(mut c:&mut[h8],m:&[h8], len:usize, k:&[h8;32], n:&[h8;12], ctr:u32) {
+  let mut ctx: chacha_ctx = [0, 0, 0, 0, 0, 0, 0, 0, 
+      	   	         0, 0, 0, 0, 0, 0, 0, 0];
+   chacha_keysetup(&mut ctx,k);
+   chacha_ietf_ivsetup(&mut ctx,n,ctr);
+   chacha_encrypt_bytes(&mut ctx,m,&mut c,len);
+}
+
+
+fn main() { 
+  let plain: [h8;114] = [
+    0x4cu8, 0x61u8, 0x64u8, 0x69u8, 0x65u8, 0x73u8, 0x20u8, 0x61u8,
+    0x6eu8, 0x64u8, 0x20u8, 0x47u8, 0x65u8, 0x6eu8, 0x74u8, 0x6cu8,
+    0x65u8, 0x6du8, 0x65u8, 0x6eu8, 0x20u8, 0x6fu8, 0x66u8, 0x20u8,
+    0x74u8, 0x68u8, 0x65u8, 0x20u8, 0x63u8, 0x6cu8, 0x61u8, 0x73u8,
+    0x73u8, 0x20u8, 0x6fu8, 0x66u8, 0x20u8, 0x27u8, 0x39u8, 0x39u8,
+    0x3au8, 0x20u8, 0x49u8, 0x66u8, 0x20u8, 0x49u8, 0x20u8, 0x63u8,
+    0x6fu8, 0x75u8, 0x6cu8, 0x64u8, 0x20u8, 0x6fu8, 0x66u8, 0x66u8,
+    0x65u8, 0x72u8, 0x20u8, 0x79u8, 0x6fu8, 0x75u8, 0x20u8, 0x6fu8,
+    0x6eu8, 0x6cu8, 0x79u8, 0x20u8, 0x6fu8, 0x6eu8, 0x65u8, 0x20u8,
+    0x74u8, 0x69u8, 0x70u8, 0x20u8, 0x66u8, 0x6fu8, 0x72u8, 0x20u8,
+    0x74u8, 0x68u8, 0x65u8, 0x20u8, 0x66u8, 0x75u8, 0x74u8, 0x75u8,
+    0x72u8, 0x65u8, 0x2cu8, 0x20u8, 0x73u8, 0x75u8, 0x6eu8, 0x73u8,
+    0x63u8, 0x72u8, 0x65u8, 0x65u8, 0x6eu8, 0x20u8, 0x77u8, 0x6fu8,
+    0x75u8, 0x6cu8, 0x64u8, 0x20u8, 0x62u8, 0x65u8, 0x20u8, 0x69u8,
+    0x74u8, 0x2eu8];
+
+  let cipher: [h8;114] = [
+    0x6eu8, 0x2eu8, 0x35u8, 0x9au8, 0x25u8, 0x68u8, 0xf9u8, 0x80u8,
+    0x41u8, 0xbau8, 0x07u8, 0x28u8, 0xddu8, 0x0du8, 0x69u8, 0x81u8,
+    0xe9u8, 0x7eu8, 0x7au8, 0xecu8, 0x1du8, 0x43u8, 0x60u8, 0xc2u8,
+    0x0au8, 0x27u8, 0xafu8, 0xccu8, 0xfdu8, 0x9fu8, 0xaeu8, 0x0bu8,
+    0xf9u8, 0x1bu8, 0x65u8, 0xc5u8, 0x52u8, 0x47u8, 0x33u8, 0xabu8,
+    0x8fu8, 0x59u8, 0x3du8, 0xabu8, 0xcdu8, 0x62u8, 0xb3u8, 0x57u8,
+    0x16u8, 0x39u8, 0xd6u8, 0x24u8, 0xe6u8, 0x51u8, 0x52u8, 0xabu8,
+    0x8fu8, 0x53u8, 0x0cu8, 0x35u8, 0x9fu8, 0x08u8, 0x61u8, 0xd8u8,
+    0x07u8, 0xcau8, 0x0du8, 0xbfu8, 0x50u8, 0x0du8, 0x6au8, 0x61u8,
+    0x56u8, 0xa3u8, 0x8eu8, 0x08u8, 0x8au8, 0x22u8, 0xb6u8, 0x5eu8,
+    0x52u8, 0xbcu8, 0x51u8, 0x4du8, 0x16u8, 0xccu8, 0xf8u8, 0x06u8,
+    0x81u8, 0x8cu8, 0xe9u8, 0x1au8, 0xb7u8, 0x79u8, 0x37u8, 0x36u8,
+    0x5au8, 0xf9u8, 0x0bu8, 0xbfu8, 0x74u8, 0xa3u8, 0x5bu8, 0xe6u8,
+    0xb4u8, 0x0bu8, 0x8eu8, 0xedu8, 0xf2u8, 0x78u8, 0x5eu8, 0x42u8,
+    0x87u8, 0x4du8];
+
+  let key: [h8;32] = [
+    0u8,   1u8,  2u8,  3u8,  4u8,  5u8,  6u8,  7u8,
+    8u8,   9u8, 10u8, 11u8, 12u8, 13u8, 14u8, 15u8,
+    16u8, 17u8, 18u8, 19u8, 20u8, 21u8, 22u8, 23u8,
+    24u8, 25u8, 26u8, 27u8, 28u8, 29u8, 30u8, 31u8
+    ];
+
+  let nonce:[h8;12] = [
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0x4au8, 0u8, 0u8, 0u8, 0u8
+    ];
+
+  let counter: u32 = 1;
+
+  let mut test_cipher: [h8;114] = [0; 114];
+  chacha20(&mut test_cipher,&plain,114,&key,&nonce,counter);
+
+  for i in 0..114 {
+     if test_cipher[i] != cipher[i]  {
+         println!("chacha20 failure!");
+     }
+  }
+  println!("chacha20 success!");
 }

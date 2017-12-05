@@ -124,9 +124,7 @@ type id = MAC.id
  * - this should not affect the code behavior
  * - this may cause the code not to compile to KreMLin/C
  *)
-unfold let authId (i:id) = // inline_for_extraction?
-  let i = fst i in
-  safeHS i && mac1 i
+unfold let authId ((i,_):id) = safeHS i && mac1 i
 
 // Do we need authId i ==> ideal?
 
@@ -596,7 +594,8 @@ val verify:
   (ensures (fun h0 b h1 -> verify_ensures st acc tag h0 b h1))
 #reset-options "--z3rlimit 400"
 let verify #i st acc tag =
-  if authId i then RR.m_recall #st.region #(log i) #(log_cmp #i) (ilog st.log);
+  // FIXME(adl) workaround for normalization bug
+  if (*authId i*) safeHS (fst i) && mac1 (fst i) then RR.m_recall #st.region #(log i) #(log_cmp #i) (ilog st.log);
   let h0 = ST.get () in
   push_frame ();
   let h1 = ST.get () in

@@ -64,7 +64,7 @@ sha2_256.exe: Spec.SHA256.fst
 	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA256.ml -o sha2_256.exe
 	./sha2_256.exe
 
-rsa.exe: ../lib/Spec.Lib.IntTypes.fst ../lib/Spec.Lib.RawIntTypes.fst ../lib/Spec.Lib.IntSeq.fst ../lib/Spec.Lib.Stateful.fst ../Spec.SHA2.fst Spec.RSA.fst Spec.RSA.Test.fst
+rsa.exe: ../lib/fst/Spec.Lib.IntTypes.fst ../lib/fst/Spec.Lib.RawIntTypes.fst ../lib/fst/Spec.Lib.IntSeq.fst ../lib/fst/Spec.Lib.Stateful.fst ../Spec.SHA2.fst Spec.RSA.fst Spec.RSA.Test.fst
 	$(MAKE) -C ../../code/lib/ml
 	mkdir -p rsa-spec
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSA --extract_module Spec.RSA.Test --extract_module Spec.RSA.Test --odir rsa-spec $^
