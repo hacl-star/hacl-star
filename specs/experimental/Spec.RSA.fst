@@ -31,7 +31,6 @@ let rec pow x n =
   | 0 -> 1
   | n -> x * pow x (n - 1)
 
-#reset-options "--z3rlimit 30 --max_fuel 2"
 val lemma_pow: x:nat -> n:nat -> m:nat -> Lemma
   (pow x n * pow x m = pow x (n + m))
 let rec lemma_pow x n m =
@@ -49,7 +48,31 @@ let rec lemma_pow2_greater_1 x =
 	| 2 -> ()
 	| _ -> lemma_pow2_greater_1 (x - 1)
 
+val lemma_pow_0: b:nat{b > 0} -> Lemma (pow 0 b = 0)
+let rec lemma_pow_0 b =
+	match b with
+	| 1 -> ()
+	| _ -> lemma_pow_0 (b - 1)
+
+val lemma_pow_1: b:nat -> Lemma (pow 1 b = 1)
+let rec lemma_pow_1 b =
+	match b with
+	|  0 -> ()
+	| _ -> lemma_pow_1 (b - 1)
+
 #reset-options "--z3rlimit 30 --max_fuel 0"
+
+val lemma_pow_pow:
+	a:nat -> b:nat -> c:nat -> Lemma (pow a (b * c) = pow (pow a b) c)
+let lemma_pow_pow a b c = admit()
+
+val lemma_pow_a2_b:
+	a:nat -> b:nat -> Lemma (pow (a * a) b = pow a (2 * b))
+let lemma_pow_a2_b a b = admit()
+
+val lemma_pow_mod:
+	a:nat -> b:nat -> n:pos -> Lemma ((pow a b) % n == (pow (a % n) b) % n)
+let lemma_pow_mod a b n = admit()
 
 val lemma_div_mod:
 	a:nat -> p:pos -> Lemma (a = p * (a / p) + a % p)
@@ -59,13 +82,58 @@ val lemma_mult_3:
 	a:nat -> b:nat -> c:nat -> Lemma (a * b * c = c * a * b)
 let lemma_mult_3 a b c = ()
 
-val lemma_pow_a2_b:
-	a:nat -> b:nat -> Lemma (pow (a * a) b = pow a (2 * b))
-let lemma_pow_a2_b a b = admit()
+val lemma_mod_pq:
+	a:bignum -> b:bignum -> p:bignum{p > 1} -> q:bignum{q > 1} -> Lemma
+	(requires (a % p = b /\ a % q = b))
+	(ensures (a % (p * q) = b))
+let lemma_mod_pq a b p q = admit()
 
-val lemma_pow_mod:
-	a:nat -> b:nat -> n:pos -> Lemma ((pow a b) % n == (pow (a % n) b) % n)
-let lemma_pow_mod a b n = admit()
+// m ^ (p - 1) = 1 (mod p) where m is any integer and p is a prime number
+val fermat_little_theorem:
+	p:bignum{p > 1} -> m:bignum -> Lemma ((pow m (p - 1)) % p = 1)
+let fermat_little_theorem p m = admit()
+
+#reset-options "--z3rlimit 300 --max_fuel 0"
+
+val lemma_exp_blinding_1:
+	n:bignum{n > 1} -> phi_n:bignum -> p:elem n{p > 1} ->
+	q:elem n{q > 1} -> m:elem n -> Lemma
+	(requires (phi_n == (p - 1) * (q - 1) /\ n = p * q))
+	(ensures ((pow m phi_n) % q == 1))
+let lemma_exp_blinding_1 n phi_n p q m =
+	lemma_pow_pow m (q - 1) (p - 1);
+	lemma_pow_mod (pow m (q - 1)) (p - 1) q;
+	fermat_little_theorem q m;
+	lemma_pow_1 (p - 1);
+	assert ((pow m phi_n) % q == 1)
+
+val lemma_exp_blinding:
+	n:bignum{n > 1} -> phi_n:bignum -> p:elem n{p > 1} -> q:elem n{q > 1} ->
+	d:elem n{d > 0} -> m:elem n -> r:bignum -> Lemma
+	(requires (phi_n == (p - 1) * (q - 1) /\ n = p * q))
+	(ensures ((pow m (d + r * phi_n)) % n  == (pow m d) % n))
+let lemma_exp_blinding n phi_n p q d m r =
+	let res = (pow m (d + r * phi_n)) % n in
+	lemma_pow m d (r * phi_n);
+	assert (pow m (d + r * phi_n) == pow m d * pow m (r * phi_n));
+	lemma_pow_pow m phi_n r;
+	assert (pow m (phi_n * r) == pow (pow m phi_n) r);
+	lemma_pow_mod (pow m phi_n) r n;
+	assert ((pow (pow m phi_n) r) % n == (pow ((pow m phi_n) % n) r) % n);
+
+	lemma_exp_blinding_1 n phi_n p q m;
+	assert ((pow m phi_n) % q == 1);
+	lemma_exp_blinding_1 n phi_n q p m;
+	assert ((pow m phi_n) % p == 1);
+	lemma_mod_pq (pow m phi_n) 1 p q;
+	assert ((pow m phi_n) % n = 1);
+
+	lemma_pow_1 r;
+	modulo_lemma 1 n;
+	assert ((pow 1 r) % n = 1);
+	assert ((pow m (r * phi_n)) % n = 1);
+	lemma_mod_mul_distr_l (pow m (r * phi_n)) (pow m d) n;
+	assert (res == (((pow m (r * phi_n)) % n) * pow m d) % n)
 
 val lemma_mod_exp:
 	n:bignum{n > 1} -> a:bignum -> a2:bignum ->
@@ -132,7 +200,7 @@ val i2osp:
 	n:bignum -> bLen:size_t{bn_v n < pow2 (8 * bLen)} -> b:lbytes bLen -> Tot (lbytes bLen)
 let i2osp n bLen b = nat_to_bytes_be bLen n
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 50 --max_fuel 0"
 
 val blocks: x:size_t{x > 0} -> m:size_t{m > 0} -> r:size_t{r > 0 /\ x <= m * r}
 let blocks x m = (x - 1) / m + 1
@@ -195,10 +263,14 @@ let mgf_sha256 mgfseedLen mgfseed maskLen mask =
 type modBits = modBits:size_t{modBits > 1}
 
 noeq type rsa_pubkey (modBits:modBits) =
-	| Mk_rsa_pubkey: n:bignum{pow2 (modBits - 1) <= bn_v n /\ bn_v n < pow2 modBits} -> e:elem n -> rsa_pubkey modBits
+	| Mk_rsa_pubkey: n:bignum{pow2 (modBits - 1) <= bn_v n /\ bn_v n < pow2 modBits} -> 
+					 e:elem n{bn_v e > 1} -> rsa_pubkey modBits
 	
 noeq type rsa_privkey (modBits:modBits) =
-	| Mk_rsa_privkey: pkey:rsa_pubkey modBits -> d:elem (Mk_rsa_pubkey?.n pkey) -> p:elem (Mk_rsa_pubkey?.n pkey){bn_v p > 1} -> q:elem (Mk_rsa_pubkey?.n pkey){bn_v q > 1} -> rsa_privkey modBits
+	| Mk_rsa_privkey: pkey:rsa_pubkey modBits ->
+					  d:elem (Mk_rsa_pubkey?.n pkey){bn_v d > 1} ->
+					  p:elem (Mk_rsa_pubkey?.n pkey){bn_v p > 1} ->
+					  q:elem (Mk_rsa_pubkey?.n pkey){bn_v q > 1 /\ bn_v (Mk_rsa_pubkey?.n pkey) = bn_v p * bn_v q} -> rsa_privkey modBits
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
 
@@ -362,9 +434,12 @@ let rsa_sign modBits skey rBlind sLen salt msgLen msg =
 	let m = os2ip k em in
 	assume (bn_v m < bn_v n);
 	(* BLINDING *)
-	let phi_n = bn_mul (bn_sub p (bn 1)) (bn_sub q (bn 1)) in
-	let d' = bn_add d (bn_mul rBlind phi_n) in
+	let phi_n = (p - 1) * (q - 1) in
+	let d' = d + rBlind * phi_n in
 	let s = mod_exp n m d' in
+	assert (s == (pow m d') % n);
+	lemma_exp_blinding n phi_n p q d m rBlind;
+	assert (s == (pow m d) % n);
 
 	let sgnt = create k (u8 0) in
 	assert (bn_v s < bn_v n);
