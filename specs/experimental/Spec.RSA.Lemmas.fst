@@ -64,6 +64,7 @@ val lemma_mult_3:
 	a:nat -> b:nat -> c:nat -> Lemma (a * b * c = c * a * b)
 let lemma_mult_3 a b c = ()
 
+(* LEMMAS for exponent blinding *)
 val lemma_mod_pq:
 	a:nat -> b:nat -> p:nat{p > 1} -> q:nat{q > 1} -> Lemma
 	(requires (a % p = b /\ a % q = b))
@@ -120,11 +121,13 @@ let lemma_exp_blinding n phi_n p q d m r =
 	assert (res == (((pow m (r * phi_n)) % n) * pow m d) % n);
     assert ((pow m (d + r * phi_n)) % n  == (pow m d) % n)
 
+(* LEMMAS for modular exponentiation *)
 val lemma_mod_exp:
 	n:nat{n > 1} -> a:nat -> a2:nat ->
 	b:nat -> b2:nat -> acc:elem n -> res:nat -> Lemma
 	(requires (a2 == (a * a) % n /\ b2 == b / 2 /\ res == (pow a2 b2 * acc) % n))
 	(ensures (res == (pow a (2 * b2) * acc) % n))
+
 let lemma_mod_exp n a a2 b b2 acc res =
 	let res = (pow a2 b2 * acc) % n in
 	lemma_mod_mul_distr_l (pow a2 b2) acc n;
@@ -135,3 +138,121 @@ let lemma_mod_exp n a a2 b b2 acc res =
 	assert ((pow (a * a) b2) % n == (pow a (2 * b2)) % n);
 	assert (res == ((pow a (2 * b2)) % n * acc) % n);
 	lemma_mod_mul_distr_l (pow a (2 * b2)) acc n
+
+(* LEMMAS for Karatsuba's multiplication *)
+val lemma_distributivity_mult: a:int -> b:int -> c:int -> d:int -> Lemma
+  ((a + b) * (c + d) = a * c + a * d + b * c + b * d)
+let lemma_distributivity_mult a b c d = ()
+
+#reset-options "--z3rlimit 300 --initial_fuel 0 --max_fuel 0"
+
+val lemma_karatsuba_mult:
+	x:nat -> a:nat -> a0:nat -> a1:nat ->
+	b:nat -> b0:nat -> b1:nat -> Lemma
+	(requires (let pow_x = pow2 (pow2 x) in
+		      a == a1 * pow_x + a0 /\ b == b1 * pow_x + b0))
+	(ensures (let pow_x = pow2 (pow2 x) in
+		      let pow_x1 = pow2 (pow2 (x + 1)) in
+		      a * b == a1 * b1 * pow_x1 + (a0 * b1 + a1 * b0) * pow_x + a0 * b0))
+
+let lemma_karatsuba_mult x a a0 a1 b b0 b1 =
+	let pow_x = pow2 (pow2 x) in
+	let pow_x1 = pow2 (pow2 (x + 1)) in
+	assert (a * b == (a1 * pow_x + a0) * (b1 * pow_x + b0));
+	lemma_distributivity_mult (a1 * pow_x) a0 (b1 * pow_x) b0;
+	assert (a * b == a1 * b1 * pow_x * pow_x + (a0 * b1 + a1 * b0) * pow_x + a0 * b0);
+	pow2_plus (pow2 x) (pow2 x);
+	assert (pow2 (pow2 x) * pow2 (pow2 x) == pow2 (pow2 x + pow2 x));
+	pow2_double_sum x;
+	assert (pow2 x + pow2 x == pow2 (x + 1))
+
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
+
+val lemma_pow_div_karatsuba:
+	x0:nat{x0 > 0} -> b:nat{b < pow2 (pow2 x0)} -> Lemma
+	(requires (True))
+	(ensures (let pow_x = pow2 (pow2 (x0 - 1)) in
+		      let b1 = b / pow_x in
+	 	      0 <= b1 /\ b1 < pow_x))
+
+let lemma_pow_div_karatsuba x0 b =
+	let x = x0 - 1 in
+	let pow_x = pow2 (pow2 x) in
+	pow2_lt_compat x0 x;
+	lemma_div_lt b (pow2 x0) (pow2 x);
+	assert (b / pow_x < pow2 (pow2 x0 - pow2 x));
+	pow2_plus (x0 - 1) 1;
+	assert_norm (pow2 1 = 2);
+	assert (pow2 x0 - pow2 (x0 - 1) == (pow2 (x0 - 1)) * (2 - 1))
+
+val abs: x:int -> Tot (y:int{ (x >= 0 ==> y = x) /\ (x < 0 ==> y = -x) })
+let abs x = if x >= 0 then x else -x
+
+(* LEMMAS for Montgomery's arithmetic *)
+#reset-options "--max_fuel 0"
+
+val lemma_distributivity_div:
+	a:nat -> b:nat -> c:nat{c > 0} -> Lemma
+	((a + b) / c == a / c + b / c)
+let lemma_distributivity_div a b c = admit()
+
+val lemma_mult_div_mod:
+	a:nat -> b:nat{b > 0} -> n:nat{n > 0} -> Lemma
+	(((a * n) / b) % n == 0)
+let lemma_mult_div_mod a b n = admit()
+
+val lemma_mult_div_mod1:
+	a:nat -> b:nat{b > 0} -> n:nat{n > 0} -> Lemma
+	((n - (a * n) / b) % n == 0)
+let lemma_mult_div_mod1 a b n = admit()
+
+val lemma_sub_minus:
+	a:nat -> b:nat -> Lemma
+	(a - b == -(b - a))
+let lemma_sub_minus a b = admit()
+
+val lemma_mod_minus_distr_l: a:nat -> b:nat -> p:pos -> Lemma
+  ((a - b) % p = ((a - b % p) % p))
+let lemma_mod_minus_distr_l a b p = admit()
+
+val lemma_mont_reduction1_rm: n:nat{n > 0} -> r:nat -> m:nat{m < r} -> Lemma
+  (n - (m * n) / r > 0)
+let lemma_mont_reduction1_rm n r m = admit()
+
+val lemma_mod_div_simplify: a:nat -> r:nat{r > 0} -> n:nat{n > 0} -> Lemma
+  (((a * ((r * r) % n)) / r) % n == (a * r) % n)
+let lemma_mod_div_simplify a r n = admit()
+
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
+val lemma_mont_reduction1:
+	r:nat -> c:nat -> n:nat{0 < n /\ n < r} -> m:nat{m < r} -> Lemma
+	(requires (0 <= (c + m * n) / r - n /\ (c + m * n) / r - n < n))
+	(ensures ((c + m * n) / r - n == (c / r) % n))
+let lemma_mont_reduction1 r c n m =
+	small_modulo_lemma_1 ((c + m * n) / r - n) n;
+	//assert ((c + m * n) / r - n == ((c + m * n) / r - n) % n);
+	lemma_distributivity_div c (m * n) r;
+	//assert ((c + m * n) / r - n == c / r + (m * n) / r - n);
+	lemma_sub_minus ((m * n) / r) n;
+	//assert ((c + m * n) / r - n == c / r - (n - (m * n) / r));
+	lemma_mont_reduction1_rm n r m;
+	lemma_mod_minus_distr_l (c / r) (n - (m * n) / r) n;
+	lemma_mult_div_mod1 m r n;
+	//assert (c / r + (m * n) / r - n == (c / r) % n);
+	assert ((c + m * n) / r - n == (c / r) % n)
+
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
+val lemma_mont_reduction2:
+	r:nat -> c:nat -> n:nat{0 < n /\ n < r} -> m:nat -> Lemma
+	(requires ((c + m * n) / r < n))
+	(ensures ((c + m * n) / r == (c / r) % n ))
+let lemma_mont_reduction2 r c n m =
+	small_modulo_lemma_1 ((c + m * n) / r) n;
+	//assert ((c + m * n) / r == ((c + m * n) / r) % n);
+	lemma_distributivity_div c (m * n) r;
+	//assert ((c + m * n) / r == c / r + (m * n) / r);
+	lemma_mod_plus_distr_l ((m * n) / r) (c / r) n;
+	lemma_mult_div_mod m r n;
+	assert ((c + m * n) / r == (c / r) % n)
