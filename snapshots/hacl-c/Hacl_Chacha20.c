@@ -248,7 +248,7 @@ void Hacl_Chacha20_chacha20_key_block(uint8_t *block, uint8_t *k, uint8_t *n1, u
 }
 
 /*
-  This function implements Chacha20  
+  This function implements Chacha20
 
   val chacha20 :
   output:uint8_p ->
