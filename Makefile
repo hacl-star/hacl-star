@@ -72,8 +72,8 @@ verify-nss:
 	$(MAKE) verify -C code/salsa-family
 	$(MAKE) Spec.Chacha20.fst-verify -C specs
 	$(MAKE) ct -C code/poly1305
-	# Verification of poly1305 is disabled for now because of CI issues.
-	# Verification is performed on every push in the NSS CI instead.
+	# Verification of poly1305 is disabled for now on Mozilla's CI.
+	# Verification is performed separately on every push in the Mozilla CI instead.
 	# $(MAKE) verify -C code/poly1305
 	$(MAKE) Spec.Poly1305.fst-verify -C specs
 
