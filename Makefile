@@ -72,7 +72,7 @@ verify-nss:
 	$(MAKE) verify -C code/salsa-family
 	$(MAKE) Spec.Chacha20.fst-verify -C specs
 	$(MAKE) ct -C code/poly1305
-	$(MAKE) verify -C code/poly1305
+	# $(MAKE) verify -C code/poly1305
 	$(MAKE) Spec.Poly1305.fst-verify -C specs
 
 
