@@ -4,8 +4,6 @@ open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
 
-open Spec.Chacha20.Lemmas
-
 
 #set-options "--max_fuel 0 --z3rlimit 100"
 

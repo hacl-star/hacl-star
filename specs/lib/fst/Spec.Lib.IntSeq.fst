@@ -84,6 +84,7 @@ let rec repeat_range_ #a min max f x =
   if min = max then x
   else repeat_range_ #a (size_incr min) max f (f min x)
 
+
 let repeat_range = repeat_range_
 let repeati #a = repeat_range #a 0
 let repeat #a n f x = repeat_range 0 n (fun i -> f) x
@@ -117,7 +118,6 @@ let rec map_ #a #b #len f x =
   | h :: t ->
 	 let t' : lseq a (size_decr len) = t in
 	 f h :: map_ #a #b #(size_decr len) f t'
-
 let map = map_
 
 
@@ -268,3 +268,21 @@ let uints_from_bytes_be #t (#len:size_t{len * numbytes t < pow2 32}) (b:lbytes (
   repeati len (fun i l -> l.[i] <- uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))) l
 
 let as_list #a #len l = l
+
+val map_block_: #a:Type -> #b:Type -> min:size_t -> max:size_t{min <= max} ->
+		blocksize:size_t{max * blocksize <= max_size_t} -> 
+		(i:size_t{i >= min /\ i < max} -> lseq a blocksize -> lseq b blocksize) -> 
+		lseq a ((max - min) * blocksize) -> 
+		Tot (lseq b ((max - min) * blocksize)) (decreases (max - min))
+let rec map_block_ #a #b min max sz f x =
+  if min = max then []
+  else 
+    let h = slice x 0 sz in 
+    let t = slice x sz ((max - min) * sz) in
+    let h' = f min h in
+    let t' = map_block_ #a #b (min+1) max sz f t in
+    let r = h' @ t' in
+    List.Tot.append_length h' t';
+    r
+
+let map_block #a #b n sz f x = map_block_ #a #b 0 n sz f x

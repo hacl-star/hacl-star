@@ -14,6 +14,10 @@ module Spec = Spec.Chacha20
 
 (* Definition of the state *)
 type state = lbuffer uint32 16
+type idx = n:size_t{n < 16}
+
+let x = 0ul 
+let y = 17ul
 
 [@ "substitute"]
 private
@@ -25,7 +29,7 @@ val line: st:state -> a:idx -> b:idx -> d:idx -> s:rotval U32 ->
 [@ "substitute"]
 let line st a b d s =
   let sa = st.(a) in let sb = st.(b) in
-  st.(a) <- sa +. sb;
+  st.(a) <- add_mod #U32 sa sb;
   let sd = st.(d) in let sa = st.(a) in
   let sda = sd ^. sa in
   st.(d) <- sda <<<. s
@@ -116,7 +120,7 @@ let chacha20_core k st ctr =
   st.(12) <- u32 ctr;
   copy st k;
   rounds k;
-  map2 (fun x y -> x +. y) k st
+  map2 (fun x y -> add_mod #U32 x y) k st
 
 [@ "c_inline"]
 val setup:

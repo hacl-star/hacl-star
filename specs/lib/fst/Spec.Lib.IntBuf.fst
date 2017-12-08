@@ -7,73 +7,58 @@ open Spec.Lib.IntSeq
 
 module LSeq = Spec.Lib.IntSeq
 
-unfold type lblock' (a:Type0) (len:size_t) = reference (lseq a len)
-let lblock a len = lblock' a len
+module Buf = FStar.Buffer
+module U32 = FStar.UInt32 
+type lbuffer (a:Type0) (len:size_t) = b:Buf.buffer a {Buf.length b == len}
+let sub #a #len b start n = Buf.sub b (U32.uint_to_t start) (U32.uint_to_t n)
 
-let same_block #a #b #l #l' x y = 
-  let _ = () in
-  (a == b /\ l == l' /\ x.id == y.id)
-  
-let lblock_as_lseq #a #l m b = sel m b
+let disjoint #a1 #a2 #len1 #len2 b1 b2 : GTot Type0 = Buf.disjoint #a1 #a2 b1 b2
+let live #a #len h b : GTot Type0 = Buf.live h b
 
-let live_lblock #a #l h b = contains h b
+let preserves_live h0 h1 = True
+let as_lseq #a #len b m = admit()
+let modifies1 #a #len b h0 h1 = admit()
+let modifies2 = admit()
+let modifies3 = admit()
+let modifies = admit()
+let live_list = admit()
+let disjoint_list = admit()
 
-let disjoint_lblock #a #b #l #l' x y = 
-  x.id =!= y.id
+let create #a len init = Buf.create init (U32.uint_to_t len)
+let createL #a init = Buf.createL init
 
-let creates_lblock1 #a #l b h0 h1 =
-    let _ = () in
-    ~ (contains h0 b) /\
-    contains h1 b /\
-    modifies (Set.singleton b.id) h0 h1 
+let alloc #a #b len init read writes spec impl = 
+  push_frame();
+  let buf = create len init in
+  let r = impl buf in
+  pop_frame();
+  r
 
-let modifies_lblock1 #a #l b h0 h1 = 
-    let _ = () in
-    live_lblock h0 b /\
-    live_lblock h1 b /\
-    modifies (Set.singleton b.id) h0 h1 
+let index #a #len b i = Buf.index b (U32.uint_to_t i)
+let upd #a #len b i v = Buf.upd b (U32.uint_to_t i) v
 
-let modifies_lblock2 #a #b #l #l' x y h0 h1 = 
-    let _ = () in
-    live_lblock h0 x /\
-    live_lblock h1 x /\
-    live_lblock h0 y /\
-    live_lblock h1 y /\
-    modifies (Set.union (Set.singleton x.id) (Set.singleton y.id)) h0 h1 
+//let op_Array_Assignment = upd
+//let op_Array_Access = index
 
-noeq type buffer' (a:Type) = 
-| MkBuffer: #max_length:size_t -> content:lblock a max_length -> start:size_t -> length:size_t{start+length <= max_length} -> buffer' a
+let map #a #len f b = admit()
+let map2 #a1 #a2 #len f b1 b2 = admit()
+let blit #a #len i start1 o start2 num = admit()
+let copy #a #len i o = admit()
+let repeat #a #b #lift n spec impl input = admit()
+let repeat_range #a #b #lift start fin spec impl input = admit()
+let repeati #a #b #lift fin spec impl input = admit()
+let iter #a #len n spec impl input = admit()
+let iteri #a #len n spec impl input = admit()
+let iter_range #a #len start fin spec impl input = admit()
+let uints_from_bytes_le #t #len o i = admit()
+let uint32s_from_bytes_le #len o i = admit()
+let uint32s_to_bytes_le #len o i = admit()
 
-let buffer = buffer'
+//let index #a #len b i = Buf.index b (U32.uint_to_t i)
 
-let max_length #a b = b.max_length
 
-let start #a b = b.start
+(*
 
-let length #a b = b.length
-
-let content #a b = b.content
-
-val modifies_2: #a:Type -> #b:Type -> b1:buffer a -> b2:buffer b{disjoint b1 b2} -> h0:mem -> h1:mem -> GTot Type0
-let modifies_2 #a #b x y h0 h1 = 
-    let _ = () in
-    live h0 x /\
-    live h1 x /\
-    live h0 y /\
-    live h1 y /\
-    (
-    let x0 = sel h0 x.content in
-    let x1 = sel h1 x.content in
-    let y0 = sel h0 y.content in
-    let y1 = sel h1 y.content in
-    (x.content.id =!= y.content.id /\
-     modifies (Set.union (Set.singleton x.content.id) (Set.singleton y.content.id)) h0 h1 /\
-     x1 == update_sub x0 x.start x.length (as_lseq h1 x) /\
-     y1 == update_sub y0 y.start y.length (as_lseq h1 y)) \/
-    (x.content.id == y.content.id /\
-     x.max_length == y.max_length /\
-     a == b /\
-     modifies (Set.singleton x.content.id) h0 h1 /\
      x1 == update_sub (update_sub x0 x.start x.length (as_lseq h1 x)) y.start y.length (as_lseq h1 y)))
 
 
@@ -126,3 +111,4 @@ let slice #a #len b s f =
   MkBuffer b.content (b.start + s) (f - s)
 
 
+*)
