@@ -191,68 +191,17 @@ let abs x = if x >= 0 then x else -x
 (* LEMMAS for Montgomery's arithmetic *)
 #reset-options "--max_fuel 0"
 
-val lemma_distributivity_div:
-	a:nat -> b:nat -> c:nat{c > 0} -> Lemma
-	((a + b) / c == a / c + b / c)
-let lemma_distributivity_div a b c = admit()
-
-val lemma_mult_div_mod:
-	a:nat -> b:nat{b > 0} -> n:nat{n > 0} -> Lemma
-	(((a * n) / b) % n == 0)
-let lemma_mult_div_mod a b n = admit()
-
-val lemma_mult_div_mod1:
-	a:nat -> b:nat{b > 0} -> n:nat{n > 0} -> Lemma
-	((n - (a * n) / b) % n == 0)
-let lemma_mult_div_mod1 a b n = admit()
-
-val lemma_sub_minus:
-	a:nat -> b:nat -> Lemma
-	(a - b == -(b - a))
-let lemma_sub_minus a b = admit()
-
-val lemma_mod_minus_distr_l: a:nat -> b:nat -> p:pos -> Lemma
-  ((a - b) % p = ((a - b % p) % p))
-let lemma_mod_minus_distr_l a b p = admit()
-
-val lemma_mont_reduction1_rm: n:nat{n > 0} -> r:nat -> m:nat{m < r} -> Lemma
-  (n - (m * n) / r > 0)
-let lemma_mont_reduction1_rm n r m = admit()
+val lemma_div_lt_ab: a:nat -> b:nat -> d:pos -> Lemma
+    (requires (a < b))
+    (ensures (a / d < b / d))
+let lemma_div_lt_ab a b d = admit()
 
 val lemma_mod_div_simplify: a:nat -> r:nat{r > 0} -> n:nat{n > 0} -> Lemma
   (((a * ((r * r) % n)) / r) % n == (a * r) % n)
 let lemma_mod_div_simplify a r n = admit()
 
-#reset-options "--z3rlimit 50 --max_fuel 0"
-
-val lemma_mont_reduction1:
-	r:nat -> c:nat -> n:nat{0 < n /\ n < r} -> m:nat{m < r} -> Lemma
-	(requires (0 <= (c + m * n) / r - n /\ (c + m * n) / r - n < n))
-	(ensures ((c + m * n) / r - n == (c / r) % n))
-let lemma_mont_reduction1 r c n m =
-	small_modulo_lemma_1 ((c + m * n) / r - n) n;
-	//assert ((c + m * n) / r - n == ((c + m * n) / r - n) % n);
-	lemma_distributivity_div c (m * n) r;
-	//assert ((c + m * n) / r - n == c / r + (m * n) / r - n);
-	lemma_sub_minus ((m * n) / r) n;
-	//assert ((c + m * n) / r - n == c / r - (n - (m * n) / r));
-	lemma_mont_reduction1_rm n r m;
-	lemma_mod_minus_distr_l (c / r) (n - (m * n) / r) n;
-	lemma_mult_div_mod1 m r n;
-	//assert (c / r + (m * n) / r - n == (c / r) % n);
-	assert ((c + m * n) / r - n == (c / r) % n)
-
-#reset-options "--z3rlimit 50 --max_fuel 0"
-
-val lemma_mont_reduction2:
-	r:nat -> c:nat -> n:nat{0 < n /\ n < r} -> m:nat -> Lemma
-	(requires ((c + m * n) / r < n))
-	(ensures ((c + m * n) / r == (c / r) % n ))
-let lemma_mont_reduction2 r c n m =
-	small_modulo_lemma_1 ((c + m * n) / r) n;
-	//assert ((c + m * n) / r == ((c + m * n) / r) % n);
-	lemma_distributivity_div c (m * n) r;
-	//assert ((c + m * n) / r == c / r + (m * n) / r);
-	lemma_mod_plus_distr_l ((m * n) / r) (c / r) n;
-	lemma_mult_div_mod m r n;
-	assert ((c + m * n) / r == (c / r) % n)
+val lemma_mont_reduction:
+	res:nat -> r:nat{r > 0} -> c:nat -> n:nat{n > 0} -> m:nat -> Lemma
+	(requires (res = (c + m * n) / r))
+	(ensures (res % n == (c / r) % n))
+let lemma_mont_reduction res r c n m = admit()

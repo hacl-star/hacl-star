@@ -13,7 +13,7 @@ open Spec.RSA
 (* RSASSA-PSS vector tests *)
 (* https://github.com/pyca/cryptography/blob/master/vectors/cryptography_vectors/asymmetric/RSA/pkcs-1v2-1d2-vec/pss-vect.txt *)
 
-let ctest x modBits nLen n eLen e dLen d pLen p qLen q msgLen msg sLen salt rBlindLen rBlind sgnt_expected =
+let ctest modBits nLen n eLen e dLen d pLen p qLen q msgLen msg sLen salt rBlindLen rBlind sgnt_expected =
     let n = os2ip nLen n in
 	let e = os2ip eLen e in
 	let d = os2ip dLen d in
@@ -22,11 +22,12 @@ let ctest x modBits nLen n eLen e dLen d pLen p qLen q msgLen msg sLen salt rBli
     let rBlind = os2ip rBlindLen rBlind in
 	let pkey = Mk_rsa_pubkey n e in
 	let skey = Mk_rsa_privkey pkey d p q in
-	let sgnt = rsa_sign x modBits skey rBlind sLen salt msgLen msg in
+	let sgnt = rsa_sign modBits skey rBlind sLen salt msgLen msg in
     let check_sgnt = eq_bytes nLen sgnt sgnt_expected in
-	let verify_sgnt = rsa_verify x modBits pkey sLen sgnt msgLen msg in
+	let verify_sgnt = rsa_verify modBits pkey sLen sgnt msgLen msg in
     check_sgnt && verify_sgnt
 
+val test1: unit -> bool
 let test1() =
 	let msg = List.Tot.map u8_from_UInt8 [
 	 	0x85uy; 0x13uy; 0x84uy; 0xcduy; 0xfeuy; 0x81uy; 0x9cuy; 0x22uy; 0xeduy; 0x6cuy; 0x4cuy; 0xcbuy; 0x30uy; 0xdauy; 0xebuy; 0x5cuy; 
@@ -87,8 +88,9 @@ let test1() =
         0x64uy; 0x4fuy; 0x37uy; 0xf6uy; 0x80uy; 0x7buy; 0x86uy; 0x71uy; 0x6fuy; 0xc9uy; 0x07uy; 0xe1uy; 0xd0uy; 0xfcuy; 0x75uy; 0xbduy;
         0xa7uy; 0x7euy; 0x41uy; 0x1buy; 0xfcuy; 0x60uy; 0xfduy; 0x2euy; 0xd9uy; 0x27uy; 0x8euy; 0x92uy; 0x1auy; 0x33uy; 0x02uy; 0x1fuy] in
 	let sgnt_expected : lbytes 128 = createL sgnt_expected in
-    ctest 10 1024 128 n 3 e 128 d 64 p 64 q 51 msg 20 salt 45 rBlind sgnt_expected
+    ctest 1024 128 n 3 e 128 d 64 p 64 q 51 msg 20 salt 45 rBlind sgnt_expected
 
+val test2: unit -> bool
 let test2() =
     let n = List.Tot.map u8_from_UInt8 [
         0x01uy; 0xd4uy; 0x0cuy; 0x1buy; 0xcfuy; 0x97uy; 0xa6uy; 0x8auy; 0xe7uy; 0xcduy; 0xbduy; 0x8auy; 0x7buy; 0xf3uy; 0xe3uy; 0x4fuy;
@@ -164,8 +166,9 @@ let test2() =
         0x73uy; 0x24uy; 0x54uy; 0x3euy; 0xcduy; 0xafuy; 0x56uy; 0xf7uy; 0x44uy; 0x6euy; 0x20uy; 0x79uy; 0xb8uy; 0x9cuy; 0xc4uy; 0x8fuy;
         0x2duy ] in
     let sgnt_expected : lbytes 129 = createL sgnt_expected in
-    ctest 11 1025 129 n 3 e 128 d 65 p 65 q 234 msg 20 salt 38 rBlind sgnt_expected
+    ctest 1025 129 n 3 e 128 d 65 p 65 q 234 msg 20 salt 38 rBlind sgnt_expected
 
+val test3: unit -> bool
 let test3() = 
     let n = List.Tot.map u8_from_UInt8 [
         0xe6uy; 0xbduy; 0x69uy; 0x2auy; 0xc9uy; 0x66uy; 0x45uy; 0x79uy; 0x04uy; 0x03uy; 0xfduy; 0xd0uy; 0xf5uy; 0xbeuy; 0xb8uy; 0xb9uy;
@@ -245,8 +248,9 @@ let test3() =
         0x89uy; 0x2auy; 0x74uy; 0x0euy; 0x1buy; 0x8auy; 0x88uy; 0x76uy; 0x6auy; 0x30uy; 0xfcuy; 0xe9uy; 0xb6uy; 0x0euy; 0x03uy; 0x32uy;
         0xd7uy; 0xa0uy; 0x1buy; 0xa5uy; 0xfauy; 0x13uy; 0x5fuy; 0xe7uy; 0xc4uy; 0x92uy; 0x72uy; 0xacuy; 0xbbuy; 0x1duy; 0x30uy; 0xf1uy] in
     let sgnt_expected : lbytes 192 = createL sgnt_expected in
-    ctest 11 1536 192 n 3 e 192 d 96 p 96 q 107 msg 20 salt 48 rBlind sgnt_expected
+    ctest 1536 192 n 3 e 192 d 96 p 96 q 107 msg 20 salt 48 rBlind sgnt_expected
 
+val test4: unit -> bool
 let test4() = 
     let n = List.Tot.map u8_from_UInt8 [
         0xa5uy; 0xdduy; 0x86uy; 0x7auy; 0xc4uy; 0xcbuy; 0x02uy; 0xf9uy; 0x0buy; 0x94uy; 0x57uy; 0xd4uy; 0x8cuy; 0x14uy; 0xa7uy; 0x70uy;
@@ -343,16 +347,7 @@ let test4() =
         0x98uy; 0xbeuy; 0xbbuy; 0x0duy; 0x5duy; 0x01uy; 0x0euy; 0x32uy; 0xe0uy; 0xb8uy; 0x00uy; 0xe9uy; 0x65uy; 0x6fuy; 0x64uy; 0x08uy; 
         0x2buy; 0xb1uy; 0xacuy; 0x95uy; 0xa2uy; 0x23uy; 0xf4uy; 0x31uy; 0xecuy; 0x40uy; 0x6auy; 0x42uy; 0x95uy; 0x4buy; 0x2duy; 0x57uy] in
     let sgnt_expected : lbytes 256 = createL sgnt_expected in
-    ctest 11 2048 256 n 3 e 256 d 128 p 128 q 128 msg 20 salt 35 rBlind sgnt_expected
+    ctest 2048 256 n 3 e 256 d 128 p 128 q 128 msg 20 salt 35 rBlind sgnt_expected
 
-let test_exp() =
-    let n = 92086691 in
-    let e = 21954739 in
-    let d = 40692523 in
-    let m = 4567389 in
-    let s = mod_exp 5 n m d in
-    let m1 = mod_exp 5 n s e in
-    m = m1
-
-let test() =
-    test_exp() && test1() && test2() && test3() && test4()
+val test: unit -> bool
+let test() = test1() && test2() && test3() && test4()
