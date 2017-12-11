@@ -116,48 +116,83 @@ let from_mont modBits r n n' a_r =
 	let res = (a_r + m * n) / r in
 	assert (a_r + m * n < n + n + r * n);
 	lemma_div_lt_ab (a_r + m * n) (n + n + r * n) r;
-	//assert ((a_r + m * n) / r < (n + n + r * n) / r);
+	assert ((a_r + m * n) / r < (n + n + r * n) / r);
 	division_addition_lemma (n + n) r n;
-	//assert ((n + n + r * n) / r = (n + n) / r + n);
 	assert (res < (n + n) / r + n); // !! assert (res < 1 + n)
 	assert (n + n < 4 * n);
 	assert (n + n < r);
 	small_division_lemma_1 (n + n) r;
+	assert ((n + n) / r = 0);
 	assert (res < n);
-	lemma_mont_reduction res r a_r n m;
-	small_modulo_lemma_1 res n;
+	lemma_mont_reduction_1 res r a_r n m;
 	res
 
-#reset-options "--z3rlimit 150"
+#reset-options "--z3rlimit 300 --max_fuel 2"
 
 val mod_exp_:
 	modBits:size_t{modBits > 1} ->
 	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
 	n:nat{1 < n /\ 4 * n < r} -> n':int ->
-	a:elem (n + n) -> b:nat -> acc:elem (n + n) -> Tot (elem (n + n))
+	a:elem (n + n) -> b:nat -> acc:elem (n + n) -> Pure (elem (n + n))
+	(requires True)
+	(ensures (fun res -> res % n == ((pow a b) * acc / pow r b) % n))
 	(decreases b)
 let rec mod_exp_ modBits r n n' a b acc =
 	if b = 0
 	then acc
 	else begin
 		let a2 = karatsuba_mont_mod modBits r n n' a a in
+		assert (a2 % n == (a * a / r) % n);
 		let b2 = bn_div2 b in
-		let acc = if (bn_is_even b) then acc else karatsuba_mont_mod modBits r n n' a acc in
-		mod_exp_ modBits r n n' a2 b2 acc
+		lemma_div_mod b 2;
+		if (bn_is_even b) then begin
+			assert (b = 2 * b2);
+			let res = mod_exp_ modBits r n n' a2 b2 acc in
+			assert (res % n == ((pow a2 b2) * acc / pow r b2) % n); //from ind hypo
+			lemma_mod_exp n a a2 b b2 acc r res;
+			res end
+		else begin
+			assert (b = 2 * b2 + 1);
+			let acc' = karatsuba_mont_mod modBits r n n' a acc in
+			assert (acc' % n == (a * acc / r) % n);
+		    let res = mod_exp_ modBits r n n' a2 b2 acc' in
+			assert (res % n == ((pow a2 b2) * acc' / pow r b2) % n); //from ind hypo
+			lemma_mod_exp_1 n a a2 b b2 acc acc' r res;
+			res end
 		end
+
+#reset-options "--z3rlimit 150 --max_fuel 0"
 
 val mod_exp:
 	modBits:size_t{modBits > 1} ->
 	n:bignum{1 < n /\ n < pow2 modBits} ->
-	a:elem n -> b:bignum -> Tot (elem n)
+	a:elem n -> b:bignum -> Pure (elem n)
+	(requires True)
+	(ensures (fun res -> res == (pow a b) % n))
 let mod_exp modBits n a b =
 	let r = pow2 (2 + modBits) in
+	lemma_r_n modBits r n;
+	assert (4 * n < r);
 	let n'= mont_inverse n (2 + modBits) in
 	let n' = -1 * n' in
 	let a_r = to_mont modBits r n n' a in
+	assert (a_r % n == (a * r) % n);
 	let acc_r = to_mont modBits r n n' 1 in
+	assert (acc_r % n == r % n);
 	let res_r = mod_exp_ modBits r n n' a_r b acc_r in
-	from_mont modBits r n n' res_r
+	assert (res_r % n == ((pow a_r b) * acc_r / pow r b) % n);
+	lemma_mod_exp_2 n a a_r b acc_r r res_r;
+	assert (res_r % n == ((pow a b) * r) % n);
+	let res = from_mont modBits r n n' res_r in
+	assert (res == (res_r / r) % n);
+	lemma_mod_mult_div_1 res_r r n;
+	assert (res == ((res_r % n) / r) % n);
+	assert (res == ((((pow a b) * r) % n) / r) % n);
+	lemma_mod_mult_div_1 ((pow a b) * r) r n;
+	assert (res == ((pow a b) * r / r) % n);
+	multiple_division_lemma (pow a b) r;
+	assert (res == (pow a b) % n);
+	res
 
 (* BIGNUM CONVERT FUNCTIONS *)
 val os2ip:
@@ -406,6 +441,9 @@ let rsa_sign modBits skey rBlind sLen salt msgLen msg =
 	let d' = d + rBlind * phi_n in
 	assert (d' > 0);
 	let s = mod_exp modBits n m d' in
+	assert (s == (pow m d') % n);
+	lemma_exp_blinding n phi_n p q d m rBlind;
+	assert (s == (pow m d) % n);
 
 	let sgnt = create k (u8 0) in
 	assert (bn_v s < bn_v n);
