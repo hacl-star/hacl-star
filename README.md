@@ -87,8 +87,9 @@ Type `make` to get more information:
 ```
 HACL* Makefile:
 If you want to run and test the C library:
-- 'make build' will generate a shared library from the hacl-c snapshot (no verification)
-- 'make unit-tests' will run tests on the library built rom the hacl-c snapshot (no verification)
+- 'make build' will use CMake to generate static and shared libraries for snapshots/hacl-c (no verification)
+- 'make build-make' will use Makefiles to do the same thing (no verification)
+- 'make unit-tests' will run tests on the library built from the hacl-c snapshot (no verification)
 - 'make clean-build' will clean 'build' artifacts
 
 If you want to verify the F* code and regenerate the C library:
