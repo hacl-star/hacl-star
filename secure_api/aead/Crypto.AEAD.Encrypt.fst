@@ -34,7 +34,7 @@ module Encoding    = Crypto.AEAD.Encoding
 module EncodingWrapper = Crypto.AEAD.Wrappers.Encoding
 module CMAWrapper = Crypto.AEAD.Wrappers.CMA
 
-#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let ideal_ensures
 	 (#i: id)
  	 (st: aead_state i Writer)

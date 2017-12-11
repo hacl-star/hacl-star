@@ -34,7 +34,7 @@ open Crypto.AEAD.Invariant
 //AEAD.Encoding.accumulate wrapper
 ////////////////////////////////////////////////////////////////////////////////
 (** Fresh stack reference *)
-let fresh_sref (#a:Type0) h0 h1 (r:HS.reference a) =
+let fresh_sref (#a:Type0) h0 h1 (r:ST.reference a) =
   (r `HS.unused_in` h0) /\
   HS.frameOf r == HS.(h1.tip) /\
   h1 `HS.contains` r

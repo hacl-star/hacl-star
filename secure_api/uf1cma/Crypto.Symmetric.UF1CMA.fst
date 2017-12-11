@@ -1,4 +1,5 @@
 (**
+
    This file states our probabilistic security assumption on
    polynomial MACs, and provides an idealized implementation,
    while being abstract on the underlying field.
@@ -11,6 +12,7 @@ open FStar.HyperStack.All
 
 open FStar.HyperHeap
 open FStar.HyperStack
+open FStar.HyperStack.ST
 open FStar.Ghost
 open FStar.UInt64
 open FStar.Buffer
@@ -285,14 +287,14 @@ let coerce region i ak k =
 *)
 
 (** Should be abstract, but causes code duplication *)
-let irtext (r:rid) = if mac_log then (x:HS.reference text{x.id == r}) else unit
+let irtext (r:rid) = if mac_log then (x:ST.reference text{x.id == r}) else unit
 
 noeq abstract type accBuffer (i:id) =
   | Acc: a:MAC.elemB i ->
          l:irtext (Buffer.frameOf (MAC.as_buffer a)) ->
          accBuffer i
 
-let alog (#i:id) (acc:accBuffer i{mac_log}) : HS.reference text =
+let alog (#i:id) (acc:accBuffer i{mac_log}) : ST.reference text =
   acc.l
 
 noextract val abuf: #i:id -> acc:accBuffer i -> GTot (MAC.elemB i)
@@ -347,7 +349,7 @@ let start #i st =
   let h1 = ST.get () in
   lemma_reveal_modifies_0 h0 h1;
   if mac_log then
-    let log = salloc #text Seq.createEmpty in
+    let log = salloc #text #(Heap.trivial_preorder text) Seq.createEmpty in
     let h2 = ST.get () in
     // Needed to prove disjointness of st.r and log
     assert (HS.sel h2 (Buffer.content (MAC.as_buffer st.r)) =!= Seq.createEmpty);
@@ -436,7 +438,7 @@ let update #i st acc w =
     begin
     let v = read_word 16ul w in
     let vs = !(alog acc) in
-    acc.l := Seq.cons v vs;
+    (alog acc) := Seq.cons v vs;
     let h1 = ST.get () in
     MAC.frame_sel_elem h0 h1 st.r;
     MAC.frame_sel_elem h0 h1 acc.a;

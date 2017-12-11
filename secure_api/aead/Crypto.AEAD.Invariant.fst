@@ -116,7 +116,7 @@ noeq type aead_entry (i:id) =
 let aead_entries i = Seq.seq (aead_entry i)
 
 //TODO: move this to HyperStack
-let rref (r:rid) (a:Type) = x:HS.ref a {HS.frameOf x == r}
+let rref (r:rid) (a:Type) = x:ST.ref a {HS.frameOf x == r}
 
 (*+ aead_log: The type of the conditional, ideal aead_log **)
 let aead_log (r:rgn) (i:id) =
