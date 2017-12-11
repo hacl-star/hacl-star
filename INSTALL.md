@@ -1,7 +1,7 @@
 # INSTALLATION
 
-Hacl* relies on [F*](https://github.com/FStarLang/FStar) and
-[KreMLin](https://github.com/FStarLang/kremlin) for verification,
+Hacl* relies on [F*](https://github.com/FStarLang/FStar) (`stable` branch) and
+[KreMLin](https://github.com/FStarLang/kremlin) (`master` branch) for verification,
 extraction to OCaml (specs/) and extraction to C (code/).
 
 Everest allows a reasonably easy setup with most up-to-date stable
