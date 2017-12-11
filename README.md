@@ -58,10 +58,10 @@ appears in the IEEE S&P 2017 paper: https://eprint.iacr.org/2016/1178.pdf
 This library is at the pre-production stage.
 Please consult the authors before using it in production systems.
 
-The first release is to be expected around the time of [ACM CCS].
+The first release is to be expected around the time of [Real World Crypto 2018].
 Any feedback is welcome in the meantime.
 
-[ACM CCS]: https://www.sigsac.org/ccs/CCS2017/
+[Real World Crypto 2018]: https://rwc.iacr.org/
 
 # Licenses
 
@@ -76,7 +76,7 @@ See [INSTALL.md](INSTALL.md) for prerequisites.
 
 For convenience, C code for our verified primitives has already been extracted
 and is available in [snapshots/hacl-c](snapshots/hacl-c).
-To build the library, you need a modern C compiler (preferably GCC-7).
+To build the library, you need a modern C compiler.
 
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
 
