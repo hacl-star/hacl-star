@@ -230,6 +230,17 @@ let finish p (hash:hash_w p) : lbytes p.size_hash =
   let h = slice hash_final 0 p.size_hash in
   h
 
+(* Definition of the finalization function *)
+let finish' (p:parameters) (st:state p{st.n + number_blocks_padding_single p st.len_block <= max_size_t}) : lbytes p.size_hash =
+  let block = uints_to_bytes_be st.block in
+  let pblock = slice block 0 st.len_block in
+  let blocks = pad_single p st.n st.len_block pblock in
+  assert(st.n + number_blocks_padding_single p st.len_block <= max_size_t);
+  let st = update_multi p (number_blocks_padding_single p st.len_block) blocks st in
+  let hash_final = uints_to_bytes_be st.hash in
+  let h = slice hash_final 0 p.size_hash in
+  h
+
 (* Definition of the SHA2 ontime function based on incremental calls *)
 let hash' p (len:size_t{len < max_input p}) (input:lbytes len) : lbytes p.size_hash =
   let nb = len / size_block p in
