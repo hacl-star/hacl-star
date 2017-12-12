@@ -181,6 +181,18 @@ let update_multi (p:parameters) (n:size_t{n * size_block p <= max_size_t}) (bloc
   let st = repeati n (fun i -> update_block p (sub blocks (bl * i) bl)) st in
   {st with len_block = old_len_block; n = old_n + n}
 
+(* Definition of the function for the partial block compression *)
+let update_last (p:parameters) (len:size_t) (last:lbytes len) (st:state p{len < size_block p /\ (st.n * size_block p) + len <= max_size_t})
+: Tot (state p) =
+  let blocks = pad_single p st.n len last in
+  update_multi p (number_blocks_padding_single p len) blocks st
+
+(* Definition of the finalization function *)
+let finish p (hash:hash_w p) : lbytes p.size_hash =
+  let hash_final = uints_to_bytes_be hash in
+  let h = slice hash_final 0 p.size_hash in
+  h
+
 (* Definition of the core compression function *)
 let update' (p:parameters) (len:size_t) (input:lbytes len) (st:state p{let n = len / size_block p in st.n + n + 1 <= max_size_t}) : Tot (state p) =
   if st.len_block = 0 then begin
@@ -219,18 +231,6 @@ let update' (p:parameters) (len:size_t) (input:lbytes len) (st:state p{let n = l
     let pblock_w = uints_from_bytes_be pblock in
     {st with block = pblock_w; len_block = r}
   end
-
-(* Definition of the function for the partial block compression *)
-let update_last (p:parameters) (len:size_t) (last:lbytes len) (st:state p{len < size_block p /\ (st.n * size_block p) + len <= max_size_t})
-: Tot (state p) =
-  let blocks = pad_single p st.n len last in
-  update_multi p (number_blocks_padding_single p len) blocks st
-
-(* Definition of the finalization function *)
-let finish p (hash:hash_w p) : lbytes p.size_hash =
-  let hash_final = uints_to_bytes_be hash in
-  let h = slice hash_final 0 p.size_hash in
-  h
 
 (* Definition of the finalization function *)
 let finish' (p:parameters) (st:state p{st.n + number_blocks_padding_single p st.len_block <= max_size_t}) : lbytes p.size_hash =
@@ -415,35 +415,15 @@ let init256 = init parameters256
 let init384 = init parameters384
 let init512 = init parameters512
 
-let update_block224 = update_block parameters224
-let update_block256 = update_block parameters256
-let update_block384 = update_block parameters384
-let update_block512 = update_block parameters512
+let update224 = update' parameters224
+let update256 = update' parameters256
+let update384 = update' parameters384
+let update512 = update' parameters512
 
-let update_multi224 = update_multi parameters224
-let update_multi256 = update_multi parameters256
-let update_multi384 = update_multi parameters384
-let update_multi512 = update_multi parameters512
-
-let update_last224 = update_last parameters224
-let update_last256 = update_last parameters256
-let update_last384 = update_last parameters384
-let update_last512 = update_last parameters512
-
-let finish224 = finish parameters224
-let finish256 = finish parameters256
-let finish384 = finish parameters384
-let finish512 = finish parameters512
-
-// let update224 = update' parameters224
-// let update256 = update' parameters256
-// let update384 = update' parameters384
-// let update512 = update' parameters512
-
-// let finish224 = finish' parameters224
-// let finish256 = finish' parameters256
-// let finish384 = finish' parameters384
-// let finish512 = finish' parameters512
+let finish224 = finish' parameters224
+let finish256 = finish' parameters256
+let finish384 = finish' parameters384
+let finish512 = finish' parameters512
 
 let hash224 = hash' parameters224
 let hash256 = hash' parameters256
