@@ -10,13 +10,13 @@ module Poly = Spec.Poly1305
 (* RFC7539: https://tools.ietf.org/html/rfc7539#section-2.8 *)
 #set-options "--max_fuel 0 --z3rlimit 30"
 
-let keylen : size_t =   32 (* in bytes *)
-let noncelen : size_t = 12 (* in bytes *)
+let keylen : size_nat =   32 (* in bytes *)
+let noncelen : size_nat = 12 (* in bytes *)
 
 type key = lbytes keylen
 type nonce = lbytes noncelen
 
-let poly1305_padded (len:size_t) (text:lbytes len) (tmp:lbytes Poly.blocksize) (st:Poly1305.state) : Poly1305.state =
+let poly1305_padded (len:size_nat) (text:lbytes len) (tmp:lbytes Poly.blocksize) (st:Poly1305.state) : Poly1305.state =
   let n = len / Poly.blocksize in
   let r = len % Poly.blocksize in
   let blocks = sub text 0 (n * Poly.blocksize) in
@@ -26,8 +26,8 @@ let poly1305_padded (len:size_t) (text:lbytes len) (tmp:lbytes Poly.blocksize) (
   let st = Poly1305.update1 Poly1305.blocksize tmp st in
   st
 
-let poly1305_do (k:Poly.key) (len:size_t{len + Poly.blocksize <= max_size_t}) (m:lbytes len)
-        (aad_len:size_t{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t}) (aad:lbytes aad_len)
+let poly1305_do (k:Poly.key) (len:size_nat{len + Poly.blocksize <= max_size_t}) (m:lbytes len)
+        (aad_len:size_nat{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t}) (aad:lbytes aad_len)
 : Tot Poly.tag =
   let st = Poly.poly1305_init k in
   let block = create Poly.blocksize (u8 0) in
@@ -41,7 +41,7 @@ let poly1305_do (k:Poly.key) (len:size_t{len + Poly.blocksize <= max_size_t}) (m
   Poly.finish st
 
 
-val aead_encrypt: k:key -> n:nonce -> len:size_t{len + Poly.blocksize <= max_size_t} -> m:lbytes len -> aad_len:size_t{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t} -> aad:lbytes aad_len -> Tot (lbytes (len + Poly.blocksize))
+val aead_encrypt: k:key -> n:nonce -> len:size_nat{len + Poly.blocksize <= max_size_t} -> m:lbytes len -> aad_len:size_nat{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t} -> aad:lbytes aad_len -> Tot (lbytes (len + Poly.blocksize))
 
 let aead_encrypt k n len m len_aad aad =
   let key0 = Spec.Chacha20.chacha20_key_block0 k n in
@@ -54,7 +54,7 @@ let aead_encrypt k n len m len_aad aad =
   res
 
 
-val aead_decrypt: k:key -> n:nonce -> len:size_t{len + Poly.blocksize <= max_size_t} -> c:lbytes len -> tag:lbytes Poly.blocksize -> aad_len:size_t{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t} -> aad:lbytes aad_len -> Tot (option (lbytes len))
+val aead_decrypt: k:key -> n:nonce -> len:size_nat{len + Poly.blocksize <= max_size_t} -> c:lbytes len -> tag:lbytes Poly.blocksize -> aad_len:size_nat{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t} -> aad:lbytes aad_len -> Tot (option (lbytes len))
 let aead_decrypt k n len c tag len_aad aad =
   let key0 = Spec.Chacha20.chacha20_key_block0 k n in
   let poly_k = sub key0 0 32 in

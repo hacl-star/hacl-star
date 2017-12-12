@@ -34,3 +34,4 @@ let uint_to_nat #t (x:uint_t t) =
   | U32 -> UInt32.v x
   | U64 -> UInt64.v x
   | U128 -> UInt128.v x
+  | SIZE -> UInt32.v x

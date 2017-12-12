@@ -9,44 +9,44 @@ open Spec.Lib.IntSeq
 noeq
 type cipher =
   | Cipher: state:Type ->
-	    key_len:size_t ->
-	    nonce_len:size_t ->
-	    counter_max:size_t ->
-	    block_len:(x:size_t{x>0}) ->
+	    key_len:size_nat ->
+	    nonce_len:size_nat ->
+	    counter_max:size_nat ->
+	    block_len:(x:size_nat{x>0}) ->
 	    init:(lbytes key_len -> lbytes nonce_len -> state) ->
-	    set_counter:(state -> c:size_t{c <= counter_max} -> state) ->
+	    set_counter:(state -> c:size_nat{c <= counter_max} -> state) ->
 	    key_block: (state -> lbytes block_len) ->
 	    cipher
 
 
-val xor: #len:size_t -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
+val xor: #len:size_nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
 let xor #len x y = map2 (fun x y -> x ^. y) x y
 
 val counter_mode_blocks:
   enc: cipher ->
   st0:enc.state ->
-  c:size_t ->
-  n:size_t{n * enc.block_len < pow2 32 /\ c + n <= enc.counter_max} ->
+  c:size_nat ->
+  n:size_nat{n * enc.block_len < pow2 32 /\ c + n <= enc.counter_max} ->
   plain:lbytes (n * enc.block_len) ->
   Tot (lbytes (n * enc.block_len))
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 1000"
 let counter_mode_blocks enc st0 counter n plain =
   let ciphertext = create (n * enc.block_len) (u8 0) in
   repeati n
     (fun i cipher ->
       let st = enc.set_counter st0 (counter + i) in
-      let b = slice plain (enc.block_len * i) (enc.block_len * (i+1)) in
+      let b = slice plain (i * enc.block_len) ((i+1) * enc.block_len) in
       let k = enc.key_block st in
       let c = xor b k in
-      update_slice cipher (enc.block_len * i) (enc.block_len * (i+1)) c)
+      update_slice cipher (i * enc.block_len) ((i+1) * enc.block_len) c)
       ciphertext
 
 val counter_mode:
   enc: cipher ->
   k:lbytes enc.key_len ->
   n:lbytes enc.nonce_len ->
-  c:size_t{c <= enc.counter_max} ->
-  len: size_t{c + (len / enc.block_len) <= enc.counter_max}  ->
+  c:size_nat{c <= enc.counter_max} ->
+  len: size_nat{c + (len / enc.block_len) <= enc.counter_max}  ->
   plain:lbytes len  ->
   Tot (lbytes len)
 let counter_mode enc key nonce counter len plain =

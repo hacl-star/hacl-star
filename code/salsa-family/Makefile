@@ -54,10 +54,10 @@ chacha-c/Hacl_Chacha20.c: chacha-c/out.krml
 		-bundle 'Hacl.Chacha20=Hacl.Impl.*,Hacl.Chacha20,Hacl.Lib.*' \
 		-skip-compilation $^ -o $@
 
-chacha20-ml.exe: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst Hacl.Impl.Chacha20.fst
+chacha20-ml.exe: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst Hacl.Impl.Chacha20.fst
 	mkdir -p chacha20-ml
 	$(FSTAR) --include ../../specs --include ../../specs/lib --include ../../specs/lib/fst --codegen OCaml --lax --odir chacha20-ml $^
-	$(OCAMLOPT) -I chacha20-ml chacha20-ml/Spec_Lib_IntBuf.ml chacha20-ml/Hacl_Impl_Chacha20.ml
+	$(OCAMLOPT) -I chacha20-ml chacha20-ml/Spec_Lib_Loops.ml chacha20-ml/Hacl_Impl_Chacha20.ml
 
 
 chacha20.exe: chacha-c/out.krml

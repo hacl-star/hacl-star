@@ -30,10 +30,10 @@ let apply2_st (k1:accessor 's 'a) (k2:accessor 's 'b) (k3:accessor 's 'c) (f:'a 
   fun s -> (), k3.put s (f (k1.get s) (k2.get s))
 
 (* Useful functions *)
-let loop (min:size_t) (max:size_t{min <= max}) (f:i:size_t{i>=min /\ i < max} -> stateful 's unit) : stateful 's unit =
+let loop (min:size_nat) (max:size_nat{min <= max}) (f:i:size_nat{i>=min /\ i < max} -> stateful 's unit) : stateful 's unit =
   fun s -> (),repeat_range min max (fun i s -> snd (f i s)) s
 
-let repeat (n:size_t) (f:stateful 's unit) : stateful 's unit =
+let repeat (n:size_nat) (f:stateful 's unit) : stateful 's unit =
   fun s -> (),repeat n (fun s -> snd (f s)) s
 
 let copy (k1:accessor 's 'a) (k2:accessor 's 'a) : stateful 's unit =
@@ -45,18 +45,18 @@ let import (ext:'a) (k:accessor 's 'b) (f:'a -> 'b) : stateful 's unit =
 let export (k:accessor 's 'a) (f:'a -> 'b) : stateful 's 'b =
   fun s -> (f (k.get s)), s
 
-let read #len (k:array_accessor 's 'a len) (i:size_t{i < len}) : stateful 's 'a =
+let read #len (k:array_accessor 's 'a len) (i:size_nat{i < len}) : stateful 's 'a =
   fun s -> (k.get s).[i],s
 
-let write #len (k:array_accessor 's 'a len) (i:size_t{i < len}) (v:'a) =
+let write #len (k:array_accessor 's 'a len) (i:size_nat{i < len}) (v:'a) =
   fun s -> (),(k.put s ((k.get s).[i] <- v))
 
-let foreach #len (k:array_accessor 's 'a len) (f:i:size_t{i < len} -> 'a -> stateful 's unit) : stateful 's unit =
+let foreach #len (k:array_accessor 's 'a len) (f:i:size_nat{i < len} -> 'a -> stateful 's unit) : stateful 's unit =
   fun s -> (),fold_lefti (fun i a s -> snd (f i a s)) (k.get s) s
 
 #reset-options "--z3rlimit 50"
 
-let foreach_slice #len (k:array_accessor 's 'a len) slen (f:i:size_t{i < len/slen} -> lseq 'a slen -> stateful 's unit) : stateful 's unit =
+let foreach_slice #len (k:array_accessor 's 'a len) slen (f:i:size_nat{i < len/slen} -> lseq 'a slen -> stateful 's unit) : stateful 's unit =
   fun s -> let arr = k.get s in
 	loop 0 (len/slen) (fun i ->
 		    let sl = slice arr (i*slen) ((i+1)*slen) in
@@ -73,5 +73,5 @@ let alloc_ref (init:'a) : allocator 'a = fun () -> init
 let ref_read #a : stateful a a  = fun s -> (s,s)
 let ref_write (v:'a) : stateful 'a unit = fun s -> (),v
 
-let alloc_array (len:size_t) (init:'a): allocator (lseq 'a len) =
+let alloc_array (len:size_nat) (init:'a): allocator (lseq 'a len) =
   fun () -> create len init
