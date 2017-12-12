@@ -102,38 +102,6 @@ let shuffle_core p (wsTable:intseq p.wt p.kSize) (t:size_t{t < p.kSize}) (hash:h
 let shuffle (p:parameters) (wsTable:intseq p.wt p.kSize) (hash:hash_w p) : Tot (hash_w p) =
   repeati p.kSize (shuffle_core p wsTable) hash
 
-(* Definition of the SHA2 state *)
-let len_block_t (p:parameters) = l:size_t{l < size_block p}
-noeq type state (p:parameters) =
-  {
-    hash:intseq p.wt size_hash_w;
-    block:intseq p.wt size_block_w;
-    len_block:len_block_t p;
-    n:size_t;
-  }
-
-(* Definition of the initialization function for convenience *)
-let init (p:parameters) : Tot (state p) =
-  let st =
-    match p.wt with
-    | U32 -> ({hash = p.h0; block = create size_block_w (u32 0); len_block = 0; n = 0})
-    | U64 -> ({hash = p.h0; block = create size_block_w (u64 0); len_block = 0; n = 0}) in
-  st
-
-(* Definition of the core compression function *)
-let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p) : Tot (state p) =
-  let wsTable = ws p (uints_from_bytes_be block) in
-  let hash1 = shuffle p wsTable st.hash in
-  let hash2 = map2 (fun x y -> x +. y) st.hash hash1 in
-  {st with hash = hash2}
-
-(* Definition of the compression function iterated over multiple blocks *)
-let update_multi (p:parameters) (n:size_t{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p{st.n + n + 2 <= max_size_t}) : Tot (st1:state p{st1.n = st.n + n}) =
-  let bl = size_block p in
-  let old_n = st.n in
-  let st = repeati n (fun i -> update_block p (sub blocks (bl * i) bl)) st in
-  {st with n = old_n + n}
-
 (* Definition of the function returning the number of padding blocks for a single input block *)
 let number_blocks_padding_single p (len:size_t{len < size_block p}) : size_t =
   if len < size_block p - numbytes (lenType p) then 1 else 2
@@ -179,6 +147,76 @@ let pad p (n:size_t) (len:size_t{len < max_input p /\ (size_block p * number_blo
   let padding = update_slice padding 0 pos_fb (slice last 0 pos_fb) in
   let padding = update_slice padding pos_fb plen rem_blocks in
   padding
+
+(* Definition of the SHA2 state *)
+let len_block_t (p:parameters) = l:size_t{l < size_block p}
+noeq type state (p:parameters) =
+  {
+    hash:intseq p.wt size_hash_w;
+    block:intseq p.wt size_block_w;
+    len_block:len_block_t p;
+    n:size_t;
+  }
+
+(* Definition of the initialization function for convenience *)
+let init (p:parameters) : Tot (state p) =
+  let st =
+    match p.wt with
+    | U32 -> ({hash = p.h0; block = create size_block_w (u32 0); len_block = 0; n = 0})
+    | U64 -> ({hash = p.h0; block = create size_block_w (u64 0); len_block = 0; n = 0}) in
+  st
+
+(* Definition of the core compression function *)
+let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p) : Tot (state p) =
+  let wsTable = ws p (uints_from_bytes_be block) in
+  let hash1 = shuffle p wsTable st.hash in
+  let hash2 = map2 (fun x y -> x +. y) st.hash hash1 in
+  {st with hash = hash2}
+
+(* Definition of the compression function iterated over multiple blocks *)
+let update_multi (p:parameters) (n:size_t{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p{st.n + n <= max_size_t}) : Tot (st1:state p{st1.n = st.n + n /\ st1.len_block = st.len_block}) =
+  let bl = size_block p in
+  let old_n = st.n in
+  let old_len_block = st.len_block in
+  let st = repeati n (fun i -> update_block p (sub blocks (bl * i) bl)) st in
+  {st with len_block = old_len_block; n = old_n + n}
+
+(* Definition of the core compression function *)
+let update (p:parameters) (len:size_t) (input:lbytes len) (st:state p{let n = len / size_block p in st.n + n <= max_size_t}) : Tot (state p) =
+  if st.len_block = 0 then begin
+    let n = len / size_block p in
+    let r = len % size_block p in
+    let blocks = sub input 0 (n * size_block p) in
+    let rem = slice input (n * size_block p) len in
+    let st = update_multi p n blocks st in
+    let pblock = uints_to_bytes_be st.block in
+    let pblock = update_sub pblock st.len_block r rem in
+    let pblock_w = uints_from_bytes_be pblock in
+    {st with block = pblock_w} end
+  else if st.len_block + len < size_block p then begin
+    let pblock = uints_to_bytes_be st.block in
+    let pblock = update_sub pblock st.len_block len input in
+    let pblock_w = uints_from_bytes_be pblock in
+    {st with block = pblock_w} end
+  else begin
+    let pblock = uints_to_bytes_be st.block in
+    let l1 = size_block p - st.len_block in
+    let rem1 = sub input 0 l1 in
+    // Fill the partial block and run update
+    let block = update_sub pblock st.len_block l1 rem1 in
+    let st = update_block p block st in
+    let l2 : size_t = len - l1 in
+    let rem2 = slice input l1 len in
+    let n : size_t = l2 / size_block p in
+    let r : size_t = l2 % size_block p in
+    let blocks = sub #uint8 #l2 rem2 0 (n * (size_block p)) in
+    let rem3 = sub #uint8 #l2 rem2 (n * (size_block p)) r in
+    let st = update_multi p n blocks st in
+    // Save a new partial block
+    let pblock = update_sub pblock 0 r rem3 in
+    let pblock_w = uints_from_bytes_be pblock in
+    {st with block = pblock_w}
+  end
 
 (* Definition of the function for the partial block compression *)
 let update_last (p:parameters) (len:size_t) (last:lbytes len) (st:state p{len < size_block p /\ (st.n * size_block p) + len <= max_size_t})
