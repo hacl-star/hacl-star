@@ -17,6 +17,7 @@ let u64_from_UInt64 x = x
 
 let u128_from_UInt128 x = x
 
+let size_from_UInt32 x =  x
 let u8_to_UInt8 x = x
 
 let u16_to_UInt16 x = x
@@ -26,6 +27,8 @@ let u32_to_UInt32 x = x
 let u64_to_UInt64 x = x
 
 let u128_to_UInt128 x = x
+
+let size_to_UInt32 x =  x
 
 let uint_to_nat #t (x:uint_t t) =
   match t with
