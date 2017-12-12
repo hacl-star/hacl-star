@@ -125,7 +125,7 @@ let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p) : Tot
   let wsTable = ws p (uints_from_bytes_be block) in
   let hash1 = shuffle p wsTable st.hash in
   let hash2 = map2 (fun x y -> x +. y) st.hash hash1 in
-  {st with hash = hash2}
+  {st with hash = hash2; n = st.n + 1}
 
 (* Definition of the compression function iterated over multiple blocks *)
 let update_multi (p:parameters) (n:size_t{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p) : Tot (state p) =
@@ -179,9 +179,9 @@ let pad p (n:size_t) (len:size_t{len < max_input p /\ (size_block p * number_blo
   padding
 
 (* Definition of the function for the partial block compression *)
-let update_last p (n:size_t) (len:size_t{len < size_block p /\ len + n * size_block p <= max_input p}) (last:lbytes len) (st:state p)
+let update_last (p:parameters) (len:size_t) (last:lbytes len) (st:state p{len < size_block p /\ len + st.n * size_block p <= max_input p})
 : Tot (state p) =
-  let blocks = pad_single p n len last in
+  let blocks = pad_single p st.n len last in
   update_multi p (number_blocks_padding_single p len) blocks st
 
 (* Definition of the finalization function *)
@@ -199,7 +199,7 @@ let hash' p (len:size_t{len < max_input p}) (input:lbytes len) : lbytes p.size_h
   let l1 = slice input nblocks8 len in
   let st = init p in
   let st = update_multi p nb l0 st in
-  let st = update_last p nb nr l1 st in
+  let st = update_last p nr l1 st in
   finish p st.hash
 
 (* Definition of the original SHA2 onetime function *)
