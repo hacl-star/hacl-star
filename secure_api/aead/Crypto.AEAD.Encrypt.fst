@@ -71,13 +71,15 @@ noextract val do_ideal:
 	    enc_dec_liveness st aad plain cipher_tag h))
  (ensures  (fun h0 _ h1 ->
 	    ideal_ensures st n aad plain cipher_tag h0 h1))
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let do_ideal #i st n #aadlen aad #plainlen plain cipher_tag =
     let ad = Buffer.to_seq_full aad in
     let p = Plain.load plainlen plain in 
     let c_tagged = Buffer.to_seq_full cipher_tag in
     let entry = AEADEntry n ad (v plainlen) p c_tagged in
     ST.recall (st_ilog st);
-    st_ilog st := Seq.snoc !(st_ilog st) entry
+    let log = st_ilog st in
+    log := Seq.snoc !(log) entry
 
 #reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let encrypt_ensures  (#i:id) (st:aead_state i Writer)
