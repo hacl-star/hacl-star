@@ -125,12 +125,14 @@ let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p) : Tot
   let wsTable = ws p (uints_from_bytes_be block) in
   let hash1 = shuffle p wsTable st.hash in
   let hash2 = map2 (fun x y -> x +. y) st.hash hash1 in
-  {st with hash = hash2; n = st.n + 1}
+  {st with hash = hash2}
 
 (* Definition of the compression function iterated over multiple blocks *)
-let update_multi (p:parameters) (n:size_t{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p) : Tot (state p) =
+let update_multi (p:parameters) (n:size_t{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p{st.n + n + 2 <= max_size_t}) : Tot (st1:state p{st1.n = st.n + n}) =
   let bl = size_block p in
-  repeati n (fun i -> update_block p (sub blocks (bl * i) bl)) st
+  let old_n = st.n in
+  let st = repeati n (fun i -> update_block p (sub blocks (bl * i) bl)) st in
+  {st with n = old_n + n}
 
 (* Definition of the function returning the number of padding blocks for a single input block *)
 let number_blocks_padding_single p (len:size_t{len < size_block p}) : size_t =
@@ -179,7 +181,7 @@ let pad p (n:size_t) (len:size_t{len < max_input p /\ (size_block p * number_blo
   padding
 
 (* Definition of the function for the partial block compression *)
-let update_last (p:parameters) (len:size_t) (last:lbytes len) (st:state p{len < size_block p /\ len + st.n * size_block p <= max_input p})
+let update_last (p:parameters) (len:size_t) (last:lbytes len) (st:state p{len < size_block p /\ (st.n * size_block p) + len <= max_size_t})
 : Tot (state p) =
   let blocks = pad_single p st.n len last in
   update_multi p (number_blocks_padding_single p len) blocks st
