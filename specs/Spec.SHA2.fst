@@ -182,7 +182,7 @@ let update_multi (p:parameters) (n:size_t{n * size_block p <= max_size_t}) (bloc
   {st with len_block = old_len_block; n = old_n + n}
 
 (* Definition of the core compression function *)
-let update (p:parameters) (len:size_t) (input:lbytes len) (st:state p{let n = len / size_block p in st.n + n <= max_size_t}) : Tot (state p) =
+let update' (p:parameters) (len:size_t) (input:lbytes len) (st:state p{let n = len / size_block p in st.n + n + 1 <= max_size_t}) : Tot (state p) =
   if st.len_block = 0 then begin
     let n = len / size_block p in
     let r = len % size_block p in
@@ -192,19 +192,21 @@ let update (p:parameters) (len:size_t) (input:lbytes len) (st:state p{let n = le
     let pblock = uints_to_bytes_be st.block in
     let pblock = update_sub pblock st.len_block r rem in
     let pblock_w = uints_from_bytes_be pblock in
-    {st with block = pblock_w} end
+    {st with block = pblock_w; len_block = st.len_block + r} end
   else if st.len_block + len < size_block p then begin
     let pblock = uints_to_bytes_be st.block in
     let pblock = update_sub pblock st.len_block len input in
     let pblock_w = uints_from_bytes_be pblock in
-    {st with block = pblock_w} end
+    {st with block = pblock_w; len_block = st.len_block + len} end
   else begin
     let pblock = uints_to_bytes_be st.block in
     let l1 = size_block p - st.len_block in
     let rem1 = sub input 0 l1 in
     // Fill the partial block and run update
     let block = update_sub pblock st.len_block l1 rem1 in
+    let old_n = st.n in
     let st = update_block p block st in
+    let st = {st with n = old_n + 1} in
     let l2 : size_t = len - l1 in
     let rem2 = slice input l1 len in
     let n : size_t = l2 / size_block p in
@@ -215,7 +217,7 @@ let update (p:parameters) (len:size_t) (input:lbytes len) (st:state p{let n = le
     // Save a new partial block
     let pblock = update_sub pblock 0 r rem3 in
     let pblock_w = uints_from_bytes_be pblock in
-    {st with block = pblock_w}
+    {st with block = pblock_w; len_block = r}
   end
 
 (* Definition of the function for the partial block compression *)
@@ -243,15 +245,9 @@ let finish' (p:parameters) (st:state p{st.n + number_blocks_padding_single p st.
 
 (* Definition of the SHA2 ontime function based on incremental calls *)
 let hash' p (len:size_t{len < max_input p}) (input:lbytes len) : lbytes p.size_hash =
-  let nb = len / size_block p in
-  let nr = len % size_block p in
-  let nblocks8 = nb * size_block p in
-  let l0 = slice input 0 nblocks8 in
-  let l1 = slice input nblocks8 len in
   let st = init p in
-  let st = update_multi p nb l0 st in
-  let st = update_last p nr l1 st in
-  finish p st.hash
+  let st = update' p len input st in
+  finish' p st
 
 (* Definition of the original SHA2 onetime function *)
 let hash p (len:size_t{len < max_input p /\ (size_block p * number_blocks_padding p len) <= max_size_t}) (input:lbytes len) : lbytes p.size_hash =
@@ -438,6 +434,16 @@ let finish224 = finish parameters224
 let finish256 = finish parameters256
 let finish384 = finish parameters384
 let finish512 = finish parameters512
+
+// let update224 = update' parameters224
+// let update256 = update' parameters256
+// let update384 = update' parameters384
+// let update512 = update' parameters512
+
+// let finish224 = finish' parameters224
+// let finish256 = finish' parameters256
+// let finish384 = finish' parameters384
+// let finish512 = finish' parameters512
 
 let hash224 = hash' parameters224
 let hash256 = hash' parameters256
