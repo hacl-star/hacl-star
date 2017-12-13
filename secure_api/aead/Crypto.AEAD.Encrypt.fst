@@ -245,6 +245,7 @@ let reestablish_inv i st n #aadlen aad #plainlen plain cipher_tag ak acc h0 h1 h
   lemma_propagate_inv_enxor st n aad plain cipher_tag h0 h1;
   FStar.Buffer.lemma_intro_modifies_0 h1 h2;
   lemma_propagate_inv_accumulate false st n aad plain cipher_tag h1 h2;
+  assume (safeMac i ==> HS.modifies_ref st.prf.mac_rgn (Set.singleton (HS.as_addr (as_hsref (CMA.(ilog ak.log))))) h2 h3);
   lemma_propagate_inv_mac_wrapper st n aad plain cipher_tag ak acc h2 h3;
   reestablish_inv st n aad plain cipher_tag h3 h4 //needs some optimization
 #reset-options
