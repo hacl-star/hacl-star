@@ -5,6 +5,7 @@ open FStar.HyperStack.ST
 open Spec.Lib.IntTypes
 
 open Spec.Lib.IntBuf
+open Spec.Lib.IntBuf.Lemmas
 open Spec.Chacha20
 
 module ST = FStar.HyperStack.ST
@@ -14,10 +15,13 @@ module Spec = Spec.Chacha20
 
 (* Definition of the state *)
 type state = lbuffer uint32 16
-type idx = n:size_t{n < 16}
+type idx = n:size_t{v n < 16}
 
-let x = 0ul 
-let y = 17ul
+
+inline_for_extraction
+let v = size_v
+inline_for_extraction
+let index (x:size_nat) = size x
 
 [@ "substitute"]
 private
@@ -25,7 +29,7 @@ val line: st:state -> a:idx -> b:idx -> d:idx -> s:rotval U32 ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
-			   as_lseq st h1 == Spec.line a b d s (as_lseq st h0)))
+			   as_lseq st h1 == Spec.line (v a) (v b) (v d) s (as_lseq st h0)))
 [@ "substitute"]
 let line st a b d s =
   let sa = st.(a) in let sb = st.(b) in
@@ -41,7 +45,7 @@ val quarter_round: st:state -> a:idx -> b:idx -> c:idx -> d:idx ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
-			  as_lseq st h1 == Spec.quarter_round a b c d (as_lseq  st h0 )))
+			  as_lseq st h1 == Spec.quarter_round (v a) (v b) (v c) (v d) (as_lseq  st h0 )))
 		  
 [@ "c_inline"]
 let quarter_round st a b c d =
@@ -60,10 +64,10 @@ val column_round:
 	     as_lseq st h1 == Spec.column_round (as_lseq st h0)))
 [@ "substitute"]
 let column_round st =
-  quarter_round st 0 4 8  12;
-  quarter_round st 1 5 9  13;
-  quarter_round st 2 6 10 14;
-  quarter_round st 3 7 11 15
+  quarter_round st (index 0) (index 4) (index 8)  (index 12);
+  quarter_round st (index 1) (index 5) (index 9)  (index 13);
+  quarter_round st (index 2) (index 6) (index 10) (index 14);
+  quarter_round st (index 3) (index 7) (index 11) (index 15)
 
 [@ "substitute"]
 private
@@ -74,10 +78,10 @@ val diagonal_round: st:state ->
        as_lseq st h1 == Spec.diagonal_round (as_lseq st h0)))
 [@ "substitute"]
 let diagonal_round st =
-  quarter_round st 0 5 10 15;
-  quarter_round st 1 6 11 12;
-  quarter_round st 2 7 8  13;
-  quarter_round st 3 4 9  14
+  quarter_round st (index 0) (index 5) (index 10) (index 15);
+  quarter_round st (index 1) (index 6) (index 11) (index 12);
+  quarter_round st (index 2) (index 7) (index 8)  (index 13);
+  quarter_round st (index 3) (index 4) (index 9)  (index 14)
 
 
 [@ "c_inline"]
@@ -100,7 +104,7 @@ val rounds: st:state ->
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
 		 as_lseq st h1 == Spec.rounds (as_lseq st h0)))
 let rounds st =
-  iter 10 Spec.double_round double_round st
+  iter (size 10) Spec.double_round double_round st
 
 
 [@ "c_inline"]
@@ -108,19 +112,17 @@ private
 val chacha20_core:
   k:state ->
   st:state ->
-  ctr:size_t ->
   Stack unit
     (requires (fun h -> live h k /\ live h st /\ disjoint st k))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 st k h0 h1 /\
-			  (let s = as_lseq st h0 in
-			   let s = Spec.Lib.IntSeq.(s.[12] <- (u32 ctr)) in
-			   as_lseq k h1 == Spec.chacha20_core s)))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 k h0 h1 /\
+		as_lseq k h1 == Spec.chacha20_core (as_lseq st h0)))
+#reset-options "--z3rlimit 50"
 [@ "c_inline"]
-let chacha20_core k st ctr =
-  st.(12) <- u32 ctr;
-  copy st k;
+let chacha20_core k st =
+  copy (size 16) st k;
   rounds k;
-  map2 (fun x y -> add_mod #U32 x y) k st
+  map2 (size 16) (add_mod #U32) k st;
+  ()
 
 [@ "c_inline"]
 val setup:
@@ -137,14 +139,14 @@ val setup:
 #reset-options "--z3rlimit 50 --max_fuel 0"
 [@ "c_inline"]
 let setup st k n =
-  st.(0) <- u32 Spec.c0;
-  st.(1) <- u32 Spec.c1;
-  st.(2) <- u32 Spec.c2;
-  st.(3) <- u32 Spec.c3;
-  let st_k = sub st 4 8 in
-  uint32s_from_bytes_le #8 st_k k;
-  let st_n = sub st 13 3 in
-  uint32s_from_bytes_le #3 st_n n 
+  st.(index 0) <- u32 Spec.c0;
+  st.(index 1) <- u32 Spec.c1;
+  st.(index 2) <- u32 Spec.c2;
+  st.(index 3) <- u32 Spec.c3;
+  let st_k = sub st (index 4) (index 8) in
+  uint32s_from_bytes_le #8 (size 8) st_k k;
+  let st_n = sub st (index 13) (index 3) in
+  uint32s_from_bytes_le #3 (size 3) st_n n 
 
 (*
 [@ "c_inline"]

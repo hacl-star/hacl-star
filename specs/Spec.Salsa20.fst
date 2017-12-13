@@ -16,10 +16,10 @@ let noncelen = 8   (* in bytes *)
 type key = lbytes keylen
 type block = lbytes blocklen
 type nonce = lbytes noncelen
-type counter = size_t
+type counter = size_nat
 
 type state = m:intseq U32 16
-type idx = n:size_t{n < 16}
+type idx = n:size_nat{n < 16}
 type shuffle = state -> Tot state
 
 // Using @ as a functional substitute for ;
