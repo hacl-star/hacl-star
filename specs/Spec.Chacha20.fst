@@ -54,13 +54,17 @@ let rounds : shuffle =
   repeat 10 double_round (* 20 rounds *)
 
 let chacha20_core (s:state) : Tot state =
-  let s' = rounds s in
-  map2 (fun x y -> x +. y) s' s
+  let k = rounds s in
+  map2 (add_mod #U32) k s
 
 (* state initialization *)
+inline_for_extraction
 let c0 = 0x61707865
+inline_for_extraction
 let c1 = 0x3320646e
+inline_for_extraction
 let c2 = 0x79622d32
+inline_for_extraction
 let c3 = 0x6b206574
 
 let setup (k:key) (n:nonce) (st:state) : Tot state =

@@ -12,7 +12,7 @@ module LSeq = Spec.Lib.IntSeq
 module Buf = FStar.Buffer
 module U32 = FStar.UInt32 
 type lbuffer (a:Type0) (len:size_nat) = b:Buf.buffer a {Buf.length b == len}
-let sub #a #len b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
+let sub #a #len #olen b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
 let disjoint #a1 #a2 #len1 #len2 b1 b2 : GTot Type0 = Buf.disjoint #a1 #a2 b1 b2
 let live #a #len h b : GTot Type0 = Buf.live h b
@@ -74,7 +74,28 @@ let iter #a #len n spec impl input = admit()
 let iteri #a #len n spec impl input = admit()
 let iter_range #a #len start fin spec impl input = admit()
 let uints_from_bytes_le #t #len o i = admit()
-let uint32s_from_bytes_le #len o i = admit()
+
+inline_for_extraction
+let uint32_from_bytes_le (i:lbuffer uint8 4) : Stack uint32 
+			 (requires (fun h -> True))
+			 (ensures (fun h0 _ h1 -> True)) =  
+  let x0:uint32 = to_u32 #U8 i.(size 0) in
+  let x1:uint32 = to_u32 #U8 i.(size 1) in
+  let x2:uint32 = to_u32 #U8 i.(size 2) in
+  let x3:uint32 = to_u32 #U8 i.(size 3) in
+  (shift_left #U32 x0 (u32 24)) |. (x1 <<. u32 16) |. (x2 <<. u32 8) |. x3
+
+inline_for_extraction
+let uint32s_from_bytes_le #len clen o i = 
+  let h0 = ST.get() in
+  let inv (h1:mem) (j:nat) =  True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) = 
+      let xi = sub #uint8 #(len `op_Multiply` 4) #len i (mul_mod #SIZE j (size 4)) (size 4) in
+      o.(j) <- uint32_from_bytes_le xi in
+  Spec.Lib.Loops.for (size 0) clen inv f'
+
 let uint32s_to_bytes_le #len o i = admit()
 
 //let index #a #len b i = Buf.index b (U32.uint_to_t i)

@@ -6,11 +6,11 @@ open Spec.Lib.IntTypes
 
 module LSeq = Spec.Lib.IntSeq
 
-inline_for_extraction
+unfold
 let v = size_v 
 inline_for_extraction val lbuffer: a:Type0 -> len:size_nat -> Type0
-inline_for_extraction val sub: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len} -> Tot (lbuffer a (v n))
- let slice #a #len (b:lbuffer a (len)) (start:size_t) (fin:size_t{v fin <= len /\ v start <= v fin}) = sub #a #len b start (sub_mod #SIZE fin start)
+inline_for_extraction val sub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> Tot (lbuffer a olen)
+ let slice #a #len #olen (b:lbuffer a (len)) (start:size_t) (fin:size_t{v fin <= len /\ v start <= v fin /\ v fin - v start == olen}) = sub #a #len #olen b start (sub_mod #SIZE fin start)
 noeq type bufitem = | BufItem: #a:Type0 -> #len:size_nat -> buf:lbuffer a (len) -> bufitem
 
 
@@ -196,9 +196,10 @@ val uints_from_bytes_le:
 			      as_lseq o h1 == 
 			      (LSeq.uints_from_bytes_le #t #(len) (as_lseq i h0) )))
 
-
+inline_for_extraction
 val uint32s_from_bytes_le: 
   #len:size_nat{len `op_Multiply` 4 <= max_size_t} -> 
+  clen:size_t{size_v clen == len} ->
   o:lbuffer uint32 len ->
   i:lbuffer uint8 (len `op_Multiply` 4) ->
   Stack unit 
@@ -210,6 +211,7 @@ val uint32s_from_bytes_le:
 
 val uint32s_to_bytes_le: 
   #len:size_nat{len `op_Multiply` 4 <= max_size_t} -> 
+  clen:size_t{size_v clen == len} ->
   o:lbuffer uint8 (len `op_Multiply` 4) -> 
   i:lbuffer uint32 len ->
   Stack unit 
@@ -218,6 +220,7 @@ val uint32s_to_bytes_le:
 			      modifies1 o h0 h1 /\
 			      as_lseq o h1 == 
 			      (LSeq.uints_to_bytes_le #U32 #len (as_lseq i h0) )))
+
 
 
 
