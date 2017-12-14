@@ -291,11 +291,12 @@ let encrypt i st n aadlen aad plainlen plain cipher_tagged =
   let h_enxor = get () in
   
   //call accumulate: encode the ciphertext and additional data for mac'ing
-  assume (Crypto.AEAD.Wrappers.Encoding.ak_aad_cipher_separate ak aad cipher_tagged);
+  assume (Crypto.AEAD.Wrappers.Encoding.ak_aad_cipher_separate ak aad cipher_tagged); //NS:12/13 seems to have regressed
   let acc = EncodingWrapper.accumulate_enc #(i, n) st ak aad plain cipher_tagged in
   let h_acc = get () in
 
   //call mac: filling in the tag component of the out buffer
+  assume (Crypto.Symmetric.UF1CMA.verify_liveness ak tag h_acc); //NS:12/13 hint does not replay
   CMAWrapper.mac #(i,n) st aad plain cipher_tagged ak acc h_enxor;
   let h_mac = get () in
 
