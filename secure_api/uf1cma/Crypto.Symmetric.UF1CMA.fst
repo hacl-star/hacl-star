@@ -285,7 +285,7 @@ let coerce region i ak k =
 *)
 
 (** Should be abstract, but causes code duplication *)
-let irtext (r:rid) = if mac_log then (x:HS.reference text{x.id == r}) else unit
+let irtext (r:rid) = if mac_log then (x:HS.reference text{HS.frameOf x == r}) else unit
 
 noeq abstract type accBuffer (i:id) =
   | Acc: a:MAC.elemB i ->
@@ -361,12 +361,12 @@ let start #i st =
 
 let modifies_buf_and_ref (#a:Type) (#b:Type)
   (buf:Buffer.buffer a)
-  (ref:reference b{frameOf buf == ref.id}) h0 h1 : GTot Type0 =
-  HS.modifies_one ref.id h0 h1 /\
-  HS.modifies_ref ref.id (Set.union (Set.singleton (HS.as_addr ref))
-                                    (Set.singleton (Buffer.as_addr buf))) h0 h1 /\
+  (ref:reference b{frameOf buf == HS.frameOf ref}) h0 h1 : GTot Type0 =
+  HS.modifies_one (HS.frameOf ref) h0 h1 /\
+  HS.modifies_ref (HS.frameOf ref) (Set.union (Set.singleton (HS.as_addr ref))
+                                              (Set.singleton (Buffer.as_addr buf))) h0 h1 /\
   (forall (#t:Type) (buf':Buffer.buffer t).
-    (frameOf buf' == ref.id /\ Buffer.live h0 buf' /\
+    (frameOf buf' == HS.frameOf ref /\ Buffer.live h0 buf' /\
     Buffer.disjoint buf buf' /\ Buffer.disjoint_ref_1 buf' ref) ==>
     equal h0 buf' h1 buf')
 
@@ -455,11 +455,11 @@ let pairwise_distinct (r1:HH.rid) (r2:HH.rid) (r3:HH.rid) =
 
 let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type)
   (buf1:Buffer.buffer a) (buf2:Buffer.buffer b)
-  (ref:reference c{pairwise_distinct (frameOf buf1) (frameOf buf2) ref.id}) h0 h1 : GTot Type0 =
+  (ref:reference c{pairwise_distinct (frameOf buf1) (frameOf buf2) (HS.frameOf ref)}) h0 h1 : GTot Type0 =
   HS.modifies (Set.union (Set.singleton (frameOf buf1))
                          (Set.union (Set.singleton (frameOf buf2))
-			            (Set.singleton ref.id))) h0 h1 /\
-  HS.modifies_ref ref.id (Set.singleton (HS.as_addr ref)) h0 h1 /\
+			            (Set.singleton (HS.frameOf ref)))) h0 h1 /\
+  HS.modifies_ref (HS.frameOf ref) (Set.singleton (HS.as_addr ref)) h0 h1 /\
   Buffer.modifies_buf_1 (frameOf buf1) buf1 h0 h1 /\
   Buffer.modifies_buf_1 (frameOf buf2) buf2 h0 h1
 
@@ -501,7 +501,7 @@ val mac:
     Buffer.disjoint_2 (MAC.as_buffer (abuf acc)) st.s tag /\
     Buffer.disjoint_2 (MAC.as_buffer st.r) st.s tag /\
     Buffer.disjoint st.s tag /\
-    (mac_log ==> frameOf tag <> (alog acc).id \/
+    (mac_log ==> frameOf tag <> HS.frameOf (alog acc) \/
                  Buffer.disjoint_ref_1 tag (alog acc)) /\
     (authId i ==> snd (RR.m_sel h0 (ilog st.log)) == None)))
   (ensures (fun h0 _ h1 -> mac_ensures i st acc tag h0 h1))
