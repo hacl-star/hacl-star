@@ -5,13 +5,13 @@ open FStar.HyperStack.ST
 open Spec.Lib.IntTypes
 
 open Spec.Lib.IntBuf
+open Spec.Lib.IntBuf.LoadStore
 open Spec.Lib.IntBuf.Lemmas
 open Spec.Chacha20
 
 module ST = FStar.HyperStack.ST
 module LSeq = Spec.Lib.IntSeq
 module Spec = Spec.Chacha20
-
 
 (* Definition of the state *)
 type state = lbuffer uint32 16
@@ -103,9 +103,8 @@ val rounds: st:state ->
     (requires (fun h -> live h st))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
 		 as_lseq st h1 == Spec.rounds (as_lseq st h0)))
-let rounds st =
+let rounds st = 
   iter (size 10) Spec.double_round double_round st
-
 
 [@ "c_inline"]
 private

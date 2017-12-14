@@ -90,10 +90,10 @@ val live_list_lemma3: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_nat -> #
 			[SMTPat (live_list h [BufItem b1; BufItem b2; BufItem b3])]
 
 
-val disjoint_list_lemma1: #a:Type0 -> #a1:Type0 -> #len:size_nat -> #len1:size_nat -> b0:lbuffer a len -> b:lbuffer a len -> Lemma
+val disjoint_list_lemma1: #a:Type0 -> #a1:Type0 -> #len:size_nat -> #len1:size_nat -> b0:lbuffer a len -> b:lbuffer a len1 -> Lemma
 			(requires (True))
 			(ensures (disjoint_list b0 [BufItem b] == (disjoint b0 b /\ disjoint b b0) ))
-			[SMTPat (disjoint_list b0 [BufItem b])]
+			[SMTPat (disjoint_list #a b0 [BufItem #a1 #len1 b])]
 
 val disjoint_list_lemma2: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 ->  Lemma
 			(requires (True))
