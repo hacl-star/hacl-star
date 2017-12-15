@@ -1,11 +1,28 @@
-HACL_HOME ?=..
-KREMLIN_HOME ?=../../kremlin
-FSTAR_HOME ?=../../FStar
-AES_SPECIALIZATION ?= vale_aes
+# This Makefile is capable of separately lax-checking files in parallel using a
+# .depend file; it then generates, in the out/ directory:
+# - QuicProvider, an OCaml library that calls a C-compiled HACL*
+# - LowCProvider, an OCaml library like the one above, with a smaller API
+# - Crypto_AEAD_Main.c, a standalone version of secure_api that is suitable for
+#   the miTLS build in pure C.
+#
+# An extraction configuration is made up of $(CONCRETE_DIR)/Flag.fst, which
+# eliminates all the ideal code. Furthermore, a particular compile-time choice of
+# algorithms can be achieved by re-defining the Crypto.Indexing.fst file.
+#
+# In this Makefile, the implementation choice is IMPL_CHOICE, which can be
+# overriden with any of the directory names in concrete_specializations/.
+#
+# A caller of this Makefile need not run "make clean" before using a different
+# IMPL_CHOICE.
+HACL_HOME 	?= ..
+KREMLIN_HOME 	?= ../../kremlin
+FSTAR_HOME 	?= ../../FStar
+CONCRETE_DIR	= $(HACL_HOME)/secure_api/concrete_specializations
+IMPL_CHOICE	?= vale_aes
+DIST_DIR	= out/$(IMPL_CHOICE)
+OUTPUT_DIR	= $(DIST_DIR)/extracted
 
-# directories not used:
-# $(HACL_HOME)/code/hash \
-
+# The include paths, including the implementation choice.
 INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/specs \
 	$(HACL_HOME)/code/bignum \
@@ -20,48 +37,64 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/secure_api/vale \
 	$(HACL_HOME)/secure_api/uf1cma \
 	$(HACL_HOME)/secure_api/utils \
-	$(HACL_HOME)/secure_api/concrete_specializations \
-	$(HACL_HOME)/secure_api/concrete_specializations/$(AES_SPECIALIZATION))
+	$(CONCRETE_DIR) $(CONCRETE_DIR)/$(IMPL_CHOICE))
 
 # Committing here to a build using the target compiler's native uint128 type.
+# Note: because this Makefile chooses to call F* "by hand", one should make sure
+# this list is kept in sync with kremlin/src/Driver.ml:220.
 NO_EXTRACT=$(addprefix --no_extract , C.String				\
 		FStar.Monotonic.HyperStack FStar.Buffer			\
-		FStar.Monotonic.HyperHeap FStar.Map FStar.Math.Lib	\
-		FStar.HyperHeap FStar.HyperStack FStar.HyperStack.ST	\
+		FStar.Monotonic.HyperHeap FStar.Monotonic.Heap 		\
+		FStar.HyperStack.ST					\
 		FStar.Int128 FStar.UInt64 FStar.Int64 FStar.UInt63	\
 		FStar.Int63 FStar.UInt32 FStar.Int32 FStar.UInt31	\
 		FStar.Int31 FStar.UInt16 FStar.Int16 FStar.UInt8	\
 		FStar.Int8 FStar.UInt128)
 
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) --lax --cache_checked_modules $(INCLUDE_PATHS)
+# The F* compiler and the entry points.
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) --lax --cache_checked_modules \
+	$(INCLUDE_PATHS) --odir $(OUTPUT_DIR)
+FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst
 
-FSTAR_FILES=aead/Crypto.AEAD.Main.fst
+# Horrible Makefile trick.
+.hack.$(IMPL_CHOICE):
+	@rm -rf .hack.*
+	touch $@
 
-Crypto_AEAD_Main.c: out.krml
-	$(KREMLIN_HOME)/krml $(KOPTS) -bundle Crypto.AEAD.Main=* -add-include \
-	  '"kremstr.h"' -add-include '"testlib.h"' -add-include '"kremlib.h"' \
-	  -add-include '"Crypto_Indexing.h"' -skip-compilation -minimal -drop \
-	  Crypto.Indexing $<
+# Automatic dependency analysis; the hack forces this target to be rebuilt
+# whenever the value of $(IMPL_CHOICE) changes.
+.depend.extract: .hack.$(IMPL_CHOICE)
+	$(FSTAR) --dep full $(FSTAR_FILES) $(NO_EXTRACT) > .depend.extract
 
-clean:
-	rm -f .depend.extract *.checked.lax out.krml
+include .depend.extract
 
+# Now we get parallel lax-checking, which is nice.
 %.checked.lax: %
 	$(FSTAR) $*
 	touch $@
 
+# Another generic rule that leverages .depend.extract, for interactive
+# verification.
 %.fsti-in:
-	@echo --hint_info \
-	$(INCLUDE_PATHS) \
-	$(OTHERFLAGS) \
-	--lax --cache_checked_modules
+	@echo --hint_info $(INCLUDE_PATHS) $(OTHERFLAGS) --lax \
+	  --cache_checked_modules
 
-.depend.extract:
-	$(FSTAR) --dep full $(FSTAR_FILES) $(NO_EXTRACT) > .depend.extract
+# Filling out the right invocations to generate a .krml
+$(OUTPUT_DIR)/%.krml:
+	$(FSTAR) $(subst .checked.lax,,$<) --codegen Kremlin --extract_module $(basename $(notdir $(subst .checked.lax,,$<)))
 
-depend.extract: .depend.extract
+# ... and a .ml file. Note: it's hard to put these in two separate
+# sub-directories because they share the --odir option of F*.
+$(OUTPUT_DIR)/%.ml:
+	$(FSTAR) $(subst .checked.lax,,$<) --codegen OCaml --extract_module $(basename $(notdir $(subst .checked.lax,,$<)))
 
-include .depend.extract
+# First target: a clean, single-file version of the library suitable for the
+# build of miTLS in pure C. No subtlety in the list of dependencies...
+$(DIST_DIR)/Crypto_AEAD_Main.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
+	$(KREMLIN_HOME)/krml $(KOPTS) -bundle Crypto.AEAD.Main=* -add-include \
+	  '"kremstr.h"' -add-include '"testlib.h"' -add-include '"kremlib.h"' \
+	  -add-include '"Crypto_Indexing.h"' -skip-compilation -minimal -drop \
+	  Crypto.Indexing -drop KrmlTest -tmpdir $(DIST_DIR) $^
 
-out.krml: $(addsuffix .checked.lax, $(FSTAR_FILES))
-	$(FSTAR) --codegen Kremlin $(FSTAR_FILES) $(NO_EXTRACT)
+clean:
+	rm -rf .depend.extract *.checked.lax out.krml out/*

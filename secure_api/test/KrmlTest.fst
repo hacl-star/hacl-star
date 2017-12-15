@@ -35,7 +35,6 @@ module MAC = Crypto.Symmetric.MAC
 module Cipher = Crypto.Symmetric.Cipher
 module PRF = Crypto.Symmetric.PRF
 module AE = Crypto.AEAD.Main
-module AETypes = Crypto.AEAD.Invariant
 
 module L = FStar.List.Tot
 
@@ -133,14 +132,14 @@ let test() =
   // To prove the assertion below for the concrete constants in PRF, AEAD:
   assert_norm (114 <= pow2 14);
   assert_norm (FStar.Mul.(114 <= 1999 * 64));
-  assert(AETypes.safelen i (v plainlen) 1ul);
+  (* assert(AETypes.safelen i (v plainlen) 1ul); *)
   //NS: These 3 separation properties are explicitly violated by allocating st in HH.root
   //    Assuming them for the moment
-  assume (
-    HH.disjoint (Buffer.frameOf (Plain.as_buffer plain)) (AETypes.AEADState?.log_region st) /\
-    HH.disjoint (Buffer.frameOf cipher) (AETypes.AEADState?.log_region st) /\
-    HH.disjoint (Buffer.frameOf aad) (AETypes.AEADState?.log_region st)
-  );
+  (* assume ( *)
+  (*   HH.disjoint (Buffer.frameOf (Plain.as_buffer plain)) (AETypes.AEADState?.log_region st) /\ *)
+  (*   HH.disjoint (Buffer.frameOf cipher) (AETypes.AEADState?.log_region st) /\ *)
+  (*   HH.disjoint (Buffer.frameOf aad) (AETypes.AEADState?.log_region st) *)
+  (* ); *)
   AEAD.Main.encrypt i st iv aadlen aad plainlen plain cipher;
 
   TestLib.compare_and_print (C.String.of_literal "cipher") expected_cipher cipher cipherlen;
