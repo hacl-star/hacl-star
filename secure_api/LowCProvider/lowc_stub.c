@@ -1,3 +1,10 @@
+/* This file implements the OCaml/C interface for the functions exposed in
+ * LowCProvider.ml. It relies on insider knowledge and leverages the OCaml
+ * representation of FStar.Byte.{bytes,lbytes} specified in
+ * ulib/ml/FStar_Bytes.ml. Furthermore, this file makes assumptions about the
+ * way [secure_api] was extracted; specifically, it assumes run-time dynamic
+ * switching between AES implementations and a specific definition of the id
+ * type. */
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -14,12 +21,11 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
-#include "tmp/Crypto_AEAD.h"
-#include "tmp/Crypto_Indexing.h"
-#include "tmp/Crypto_Symmetric_Bytes.h"
-#include "tmp/Crypto_Symmetric_MAC.h"
+#include "Crypto_AEAD_Main.h"
+#include "Crypto_Indexing.h"
+#include "Crypto_Symmetric_Bytes.h"
 
-typedef Crypto_AEAD_Invariant_aead_state_______ AEAD_ST;
+typedef Crypto_AEAD_Invariant_aead_state AEAD_ST;
 typedef Crypto_Indexing_id ID;
 
 typedef struct {
@@ -93,10 +99,10 @@ CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
   }
 
   Crypto_Indexing_id id = Crypto_Indexing_testId(calg);
-  id.aesi = aesimpl;
+  id.aesImpl = aesimpl;
 
   AEAD_ST *st = malloc(sizeof(AEAD_ST));
-  *st = Crypto_AEAD_coerce(id, (uint8_t *)String_val(key));
+  *st = Crypto_AEAD_Main_coerce(id, (uint8_t *)String_val(key));
   ST *s = malloc(sizeof(ST));
   s->st = st;
   s->id = id;
@@ -123,9 +129,9 @@ CAMLprim value ocaml_AEAD_encrypt(value state, value iv, value ad,
   uint32_t plainlen = caml_string_length(plain);
 
   CAMLlocal1(cipher);
-  cipher = caml_alloc_string(plainlen + Crypto_Symmetric_MAC_taglen);
+  cipher = caml_alloc_string(plainlen + Crypto_AEAD_Main_taglen);
   uint8_t *ccipher = (uint8_t *)String_val(cipher);
-  Crypto_AEAD_Encrypt_encrypt(id, *ast, n, adlen, cad, plainlen, cplain,
+  Crypto_AEAD_Main_encrypt(id, *ast, n, adlen, cad, plainlen, cplain,
                               ccipher);
   CAMLreturn(cipher);
 }
@@ -144,15 +150,15 @@ CAMLprim value ocaml_AEAD_decrypt(value state, value iv, value ad,
   uint32_t adlen = caml_string_length(ad);
   uint8_t *ccipher = (uint8_t *)String_val(cipher);
   uint32_t cipherlen = caml_string_length(cipher);
-  if (cipherlen < Crypto_Symmetric_MAC_taglen)
+  if (cipherlen < Crypto_AEAD_Main_taglen)
     CAMLreturn(Val_none);
 
   CAMLlocal1(plain);
-  uint32_t plainlen = cipherlen - Crypto_Symmetric_MAC_taglen;
+  uint32_t plainlen = cipherlen - Crypto_AEAD_Main_taglen;
   plain = caml_alloc_string(plainlen);
   uint8_t *cplain = (uint8_t *)String_val(plain);
 
-  if (Crypto_AEAD_Decrypt_decrypt(id, *ast, n, adlen, cad, plainlen, cplain,
+  if (Crypto_AEAD_Main_decrypt(id, *ast, n, adlen, cad, plainlen, cplain,
                                   ccipher)) {
     CAMLreturn(Val_some(plain));
   }
