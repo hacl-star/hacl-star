@@ -22,8 +22,10 @@ IMPL_CHOICE	?= vale_aes
 DIST_DIR	= out/$(IMPL_CHOICE)
 OUTPUT_DIR	= $(DIST_DIR)/extracted
 
-# Main target
-all: $(DIST_DIR)/Crypto_AEAD_Main.c
+all: $(DIST_DIR)/Crypto_AEAD_Main.c $(DIST_DIR)/krml-test.exe
+
+test: all
+	./$(DIST_DIR)/krml-test.exe
 
 # The include paths, including the implementation choice.
 INCLUDE_PATHS=$(addprefix --include , \
@@ -82,8 +84,8 @@ include .depend.extract
 	@echo --hint_info $(INCLUDE_PATHS) $(OTHERFLAGS) --lax \
 	  --cache_checked_modules
 
+# F* doesn't recursively create directories for --odir
 $(OUTPUT_DIR):
-	# F* doesn't recursively create directories for --odir
 	mkdir -p $@
 
 # Filling out the right invocations to generate a .krml
@@ -104,6 +106,13 @@ $(DIST_DIR)/Crypto_AEAD_Main.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML
 	  '"kremstr.h"' -add-include '"testlib.h"' -add-include '"kremlib.h"' \
 	  -add-include '"Crypto_Indexing.h"' -skip-compilation -minimal -drop \
 	  Crypto.Indexing -drop KrmlTest -tmpdir $(DIST_DIR) $^
+
+# Second target: the functional test
+$(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
+	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
+	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
+	    Crypto.AEAD.Main=Crypto.* -add-include '"kremstr.h"' -add-include \
+	  '"testlib.h"' -add-include '"kremlib.h"' -tmpdir $(OUTPUT_DIR) $^ -o $@
 
 clean:
 	rm -rf .depend.extract *.checked.lax out.krml out/*
