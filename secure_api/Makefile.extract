@@ -22,6 +22,9 @@ IMPL_CHOICE	?= vale_aes
 DIST_DIR	= out/$(IMPL_CHOICE)
 OUTPUT_DIR	= $(DIST_DIR)/extracted
 
+# Main target
+all: $(DIST_DIR)/Crypto_AEAD_Main.c
+
 # The include paths, including the implementation choice.
 INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/specs \
@@ -63,7 +66,7 @@ FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst
 
 # Automatic dependency analysis; the hack forces this target to be rebuilt
 # whenever the value of $(IMPL_CHOICE) changes.
-.depend.extract: .hack.$(IMPL_CHOICE)
+.depend.extract: .hack.$(IMPL_CHOICE) $(OUTPUT_DIR)
 	$(FSTAR) --dep full $(FSTAR_FILES) $(NO_EXTRACT) > .depend.extract
 
 include .depend.extract
@@ -79,14 +82,20 @@ include .depend.extract
 	@echo --hint_info $(INCLUDE_PATHS) $(OTHERFLAGS) --lax \
 	  --cache_checked_modules
 
+$(OUTPUT_DIR):
+	# F* doesn't recursively create directories for --odir
+	mkdir -p $@
+
 # Filling out the right invocations to generate a .krml
 $(OUTPUT_DIR)/%.krml:
-	$(FSTAR) $(subst .checked.lax,,$<) --codegen Kremlin --extract_module $(basename $(notdir $(subst .checked.lax,,$<)))
+	$(FSTAR) $(subst .checked.lax,,$<) --codegen Kremlin --extract_module \
+	  $(basename $(notdir $(subst .checked.lax,,$<)))
 
 # ... and a .ml file. Note: it's hard to put these in two separate
 # sub-directories because they share the --odir option of F*.
 $(OUTPUT_DIR)/%.ml:
-	$(FSTAR) $(subst .checked.lax,,$<) --codegen OCaml --extract_module $(basename $(notdir $(subst .checked.lax,,$<)))
+	$(FSTAR) $(subst .checked.lax,,$<) --codegen OCaml --extract_module \
+	  $(basename $(notdir $(subst .checked.lax,,$<)))
 
 # First target: a clean, single-file version of the library suitable for the
 # build of miTLS in pure C. No subtlety in the list of dependencies...
