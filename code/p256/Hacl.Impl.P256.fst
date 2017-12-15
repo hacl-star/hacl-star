@@ -217,7 +217,7 @@ let felem_scalar out scalar =
 
 // TODO: check that the downcast to u64 is indeed correct, otherwise this
 // requires a special implementation of the multiplication
-val longfelem_scalar: out:longfelem -> scalar:u64 ->
+val longfelem_scalar: out:longfelem -> scalar:u32 ->
   Stack unit
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
@@ -231,23 +231,23 @@ let longfelem_scalar out scalar =
   let o5 = out.(5ul) in
   let o6 = out.(6ul) in
   let o7 = out.(7ul) in
-  let o0 = uint128_to_uint64 o0 in
-  let o1 = uint128_to_uint64 o1 in
-  let o2 = uint128_to_uint64 o2 in
-  let o3 = uint128_to_uint64 o3 in
-  let o4 = uint128_to_uint64 o4 in
-  let o5 = uint128_to_uint64 o5 in
-  let o6 = uint128_to_uint64 o6 in
-  let o7 = uint128_to_uint64 o7 in
   let scalar = scalar in
-  out.(0ul) <- mul_wide o0 scalar;
-  out.(1ul) <- mul_wide o1 scalar;
-  out.(2ul) <- mul_wide o2 scalar;
-  out.(3ul) <- mul_wide o3 scalar;
-  out.(4ul) <- mul_wide o4 scalar;
-  out.(5ul) <- mul_wide o5 scalar;
-  out.(6ul) <- mul_wide o6 scalar;
-  out.(7ul) <- mul_wide o7 scalar
+  out.(0ul) <- shift_left o0 scalar;
+  out.(1ul) <- shift_left o1 scalar;
+  out.(2ul) <- shift_left o2 scalar;
+  out.(3ul) <- shift_left o3 scalar;
+  out.(4ul) <- shift_left o4 scalar;
+  out.(5ul) <- shift_left o5 scalar;
+  out.(6ul) <- shift_left o6 scalar;
+  out.(7ul) <- shift_left o7 scalar
+  // out.(0ul) <- mul_wide o0 scalar;
+  // out.(1ul) <- mul_wide o1 scalar;
+  // out.(2ul) <- mul_wide o2 scalar;
+  // out.(3ul) <- mul_wide o3 scalar;
+  // out.(4ul) <- mul_wide o4 scalar;
+  // out.(5ul) <- mul_wide o5 scalar;
+  // out.(6ul) <- mul_wide o6 scalar;
+  // out.(7ul) <- mul_wide o7 scalar
 
 inline_for_extraction
 val load128: high:UInt64.t -> low:UInt64.t -> Tot (z:UInt128.t{UInt128.v z = pow2 64 * UInt64.v high
@@ -263,7 +263,7 @@ let load128 h l =
 
 (* Put in uint128 form*)
 let two105m41m9 = load128 0x1ffffffffffuL 0xfffffdfffffffe00uL
-let two105      = load128 0x30000000000uL 0x0uL
+let two105      = load128 0x20000000000uL 0x0uL
 let two105m41p9 = load128 0x1ffffffffffuL 0xfffffe0000000200uL
 
 let two107m43m11 = load128 0x7ffffffffffuL 0xfffff7fffffff800uL
@@ -457,13 +457,17 @@ let felem_shrink out input =
   let kPrime3 = kPrime.(3ul) in
   let open FStar.UInt128 in
   // TODO: replace with a primitive to call the high word only
-  tmp.(3ul) <- zero3 +^ input3 +^ (input2 >>^ 64ul);
-  tmp.(2ul) <- zero2 +^ (uint64_to_uint128 (uint128_to_uint64 input2));
-  tmp.(0ul) <- zero0 +^ input0;
-  tmp.(1ul) <- zero1 +^ input1;
+  let tmp3 = zero3 +^ input3 +^ (input2 >>^ 64ul) in
+  // tmp.(3ul) <- zero3 +^ input3 +^ (input2 >>^ 64ul);
+  let tmp2 = zero2 +^ (uint64_to_uint128 (uint128_to_uint64 input2)) in
+  // tmp.(2ul) <- zero2 +^ (uint64_to_uint128 (uint128_to_uint64 input2));
+  let tmp0 = zero0 +^ input0 in
+  // tmp.(0ul) <- zero0 +^ input0;
+  let tmp1 = zero1 +^ input1 in
+  // tmp.(1ul) <- zero1 +^ input1;
 
-  let tmp2 = tmp.(2ul) in
-  let tmp3 = tmp.(3ul) in
+  // let tmp2 = tmp.(2ul) in
+  // let tmp3 = tmp.(3ul) in
   let a = tmp3 >>^ 64ul in
   let tmp3 = uint64_to_uint128 (uint128_to_uint64 tmp3) in
   let tmp3 = tmp3 -^ a in
@@ -476,9 +480,9 @@ let felem_shrink out input =
   let tmp3 = tmp3 -^ a in
   let tmp3 = tmp3 +^ (a <<^ 32ul) in
 
-  let tmp0 = tmp.(0ul) in
+  // let tmp0 = tmp.(0ul) in
   let tmp0 = tmp0 +^ b in
-  let tmp1 = tmp.(1ul) in
+  // let tmp1 = tmp.(1ul) in
   let tmp1 = tmp1 -^ (b <<^ 32ul) in
 
   // TODO: better implementation
@@ -489,6 +493,7 @@ let felem_shrink out input =
   let low = uint128_to_uint64 tmp3 in
   let mask = UInt64.gte_mask low 0x8000000000000000uL in
 
+  let low = FStar.UInt64.(low &^ 0x7fffffffffffffffuL) in
   let low = UInt64.gte_mask kPrime3Test low in
   let low = UInt64.lognot low in
 
@@ -1167,7 +1172,7 @@ let point_double x_out y_out z_out x_in y_in z_in =
   felem_diff_zero107 beta x_out;
   felem_small_mul tmp small2 beta;
   smallfelem_square tmp2 small1;
-  longfelem_scalar tmp2 8uL;
+  longfelem_scalar tmp2 3ul;
   longfelem_diff tmp tmp2;
   felem_reduce_zero105 y_out tmp
 
@@ -1259,7 +1264,7 @@ let point_add x3 y3 z3 x1 y1 z1 mixed x2 y2 z2 =
   felem_reduce ftmp tmp;
   felem_shrink small1 ftmp;
 
-  if (mixed <> 0ul) then
+  if (mixed = 0ul) then
     begin
       smallfelem_square tmp z2;
       felem_reduce ftmp2 tmp;
@@ -1341,7 +1346,7 @@ let point_add x3 y3 z3 x1 y1 z1 mixed x2 y2 z2 =
         felem_diff_zero107 ftmp3 x_out;
         felem_small_mul tmp small1 ftmp3;
         felem_mul tmp2 ftmp6 ftmp2;
-        longfelem_scalar tmp2 2uL;
+        longfelem_scalar tmp2 1ul;
         longfelem_diff tmp tmp2;
         felem_reduce_zero105 y_out tmp;
 
@@ -1499,18 +1504,26 @@ let loop_step pp ppq p pq k i =
   let y = create 0uL 4ul in
   let z = create 0uL 4ul in
   // TODO: change the algorithm, this is an ugly workaround due to OpenSSL's 'point_add' function
-  felem_shrink x (get_x pq);
-  felem_shrink y (get_y pq);
-  felem_shrink z (get_z pq);
   let ith_bit = ith_bit k i in
   let ith_bit = uint8_to_uint128 ith_bit in
   swap_cond_inplace p pq ith_bit;
+  felem_shrink x (get_x pq);
+  felem_shrink y (get_y pq);
+  felem_shrink z (get_z pq);
   point_double (get_x pp) (get_y pp) (get_z pp) (get_x p) (get_y p) (get_z p);
-  point_add (get_x pp) (get_y pp) (get_z pp)
+  point_add (get_x ppq) (get_y ppq) (get_z ppq)
             (get_x p) (get_y p) (get_z p)
             0ul
             x y z;
-            // (get_x pq) (get_y pq) (get_z pq);
+           // (get_x pq) (get_y pq) (get_z pq);
+  // let x0 = x.(0ul) in
+  // let x1 = x.(1ul) in
+  // let x2 = x.(2ul) in
+  // let x3 = x.(3ul) in
+  // ppq.(0ul) <- UInt128.uint64_to_uint128 x0;
+  // ppq.(1ul) <- UInt128.uint64_to_uint128 x1;
+  // ppq.(2ul) <- UInt128.uint64_to_uint128 x2;
+  // ppq.(3ul) <- UInt128.uint64_to_uint128 x3;
   swap_cond_inplace pp ppq ith_bit;
   pop_frame()
 
@@ -1580,10 +1593,31 @@ let p256 outx outy inx iny key =
   let pp = create (UInt128.uint64_to_uint128 0uL) 12ul in
   let ppq = create (UInt128.uint64_to_uint128 0uL) 12ul in
   point_mul_ pp ppq p q key;
+  
   let x = create 0uL 4ul in
   let y = create 0uL 4ul in
-  felem_contract x (get_x p);
-  felem_contract y (get_y p);
+  let tmp = create (UInt128.uint64_to_uint128 0uL) 8ul in
+  let z2 = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let z3 = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let z2_inv = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let z3_inv = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let big_x = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  let big_y = create (UInt128.uint64_to_uint128 0uL) 4ul in
+  
+  felem_square tmp (get_z p);
+  felem_reduce z2 tmp;
+  felem_inv z2_inv z2;
+  felem_mul tmp (get_x p) z2_inv;
+  felem_reduce big_x tmp;
+  felem_contract x big_x;
+  
+  felem_mul tmp z2 (get_z p);
+  felem_reduce z3 tmp;
+  felem_inv z3_inv z3;
+  felem_mul tmp (get_y p) z3_inv;
+  felem_reduce big_y tmp;
+  felem_contract y big_y;
+  
   let x0 = x.(0ul) in
   let x1 = x.(1ul) in
   let x2 = x.(2ul) in
