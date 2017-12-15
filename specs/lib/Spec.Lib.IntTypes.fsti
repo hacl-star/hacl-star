@@ -85,7 +85,7 @@ inline_for_extraction
 val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u == n}
 
 inline_for_extraction
-val cast: #t:inttype -> t':inttype -> u1:uint_t t -> u2:uint_t t'{uint_v u2 == uint_v u1 % pow2 (bits t')}
+val cast: #t:inttype{t <> SIZE} -> t':inttype{t' <> SIZE} -> u1:uint_t t -> u2:uint_t t'{uint_v u2 == uint_v u1 % pow2 (bits t')}
 
 inline_for_extraction
 let to_u8 #t u : uint8 = cast #t U8 u
