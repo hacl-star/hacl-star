@@ -211,7 +211,7 @@ let entry_of
   let aad = Buffer.as_seq h aad in
   let p = Plain.sel_plain h plainlen plain in
   let c = Buffer.as_seq h cipher_tag in
-  mk_entry n aad p c
+  mk_entry n (FStar.Bytes.hide aad) p (FStar.Bytes.hide c)
 
 let entry_for_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i})
   : GTot (option (entry i)) =
