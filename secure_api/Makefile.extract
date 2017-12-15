@@ -111,7 +111,8 @@ vale_aes_concrete_id_EXTRA 	= $(VALE_A)
 vale_aes_abstract_id_EXTRA 	= $(VALE_A)
 runtime_switch_EXTRA 		= $(VALE_A)
 
-# Second target: the functional test
+# Second target: the functional test. Note: this does not yet use the
+# standalone C file because the test still bypasses Crypto.AEAD.Main
 $(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES)) $($(IMPL_CHOICE)_EXTRA)
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
@@ -121,10 +122,10 @@ $(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILE
 
 # Third target: the LowC interface. There are several sub-parts.
 
-# Extracting a standalone header from a single fst file.
-$(DIST_DIR)/%.h: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
+# Extracting a standalone header & C file from a single fst file.
+$(DIST_DIR)/%.h $(DIST_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
 	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$*=*' -minimal -skip-compilation \
-	  -tmpdir $(DIST_DIR) $^ -add-include '"kremlib.h"'
+	  -tmpdir $(DIST_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"'
 
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
@@ -148,7 +149,8 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 $(DIST_DIR)/LowCProvider.cmxa: \
 	  $(OUTPUT_DIR)/CryptoTypes.ml LowCProvider/LowCProvider.ml \
 	  LowCProvider/lowc_stub.o \
-	  $(DIST_DIR)/Crypto_AEAD_Main.o $(DIST_DIR)/Crypto_Indexing.o $($(IMPL_CHOICE)_EXTRA)
+	  $(DIST_DIR)/Crypto_AEAD_Main.o $(DIST_DIR)/Crypto_Indexing.o \
+	  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $($(IMPL_CHOICE)_EXTRA)
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^
 
