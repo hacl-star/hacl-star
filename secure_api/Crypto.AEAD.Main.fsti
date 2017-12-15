@@ -82,7 +82,7 @@ let fresh_addresses (rid:HH.rid) (addrs:FStar.TSet.set address) (m0:HS.mem) (m1:
        addr_unused_in rid a m0 /\
        contains_addr  rid a m1
 
-let fp = FStar.Pointer.Base.loc
+let fp = FStar.Ghost.erased FStar.Pointer.Base.loc
 val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> GTot fp
 val modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0
 val preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0
