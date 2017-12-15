@@ -12,7 +12,7 @@ module HMAC = Spec.HMAC
 let hkdf_extract_core
   (a:Hash.algorithm)
   (salt:lbytes (Hash.size_block a))
-  (len_ikm:size_t{Hash.size_block a + len_ikm < max_size_t /\ Hash.size_block a + len_ikm < Hash.max_input a})
+  (len_ikm:size_nat{Hash.size_block a + len_ikm < max_size_t /\ Hash.size_block a + len_ikm < Hash.max_input a})
   (ikm:lbytes len_ikm) =
 
   HMAC.hmac_core a salt len_ikm ikm
@@ -20,9 +20,9 @@ let hkdf_extract_core
 
 let hkdf_extract
   (a:Hash.algorithm)
-  (len_salt:size_t{len_salt < Hash.max_input a})
+  (len_salt:size_nat{len_salt < Hash.max_input a})
   (salt:lbytes len_salt)
-  (len_ikm:size_t{Hash.size_block a + len_ikm < max_size_t /\ Hash.size_block a + len_ikm < Hash.max_input a})
+  (len_ikm:size_nat{Hash.size_block a + len_ikm < max_size_t /\ Hash.size_block a + len_ikm < Hash.max_input a})
   (ikm:lbytes len_ikm) =
 
   if len_salt = 0 then
@@ -34,16 +34,16 @@ let hkdf_extract
 
 let hkdf_expand
   (a:Hash.algorithm)
-  (len_prk:size_t{len_prk < Hash.max_input a})
+  (len_prk:size_nat{len_prk < Hash.max_input a})
   (prk:lbytes len_prk)
-  (len_info:size_t{Hash.size_block a + Hash.size_hash a + len_info + 1 < max_size_t
+  (len_info:size_nat{Hash.size_block a + Hash.size_hash a + len_info + 1 < max_size_t
                   /\ Hash.size_block a + Hash.size_hash a + len_info + 1 < Hash.max_input a})
   (info:lbytes len_info)
-  (len:size_t{len < 255 * Hash.size_hash a}) =
+  (len:size_nat{len < 255 * Hash.size_hash a}) =
 
-  let n : size_t = len / (Hash.size_hash a) + 1 in
+  let n : size_nat = len / (Hash.size_hash a) + 1 in
   assert(1 <= n /\ n < 256);
-  let tlen :size_t = n * (Hash.size_hash a) in
+  let tlen :size_nat = n * (Hash.size_hash a) in
   let _T : lbytes tlen = create (n * (Hash.size_hash a)) (u8 0) in
   let tic = create ((Hash.size_hash a) + len_info + 1) (u8 0) in
   let tic = update_slice tic (Hash.size_hash a) ((Hash.size_hash a) + len_info) info in
