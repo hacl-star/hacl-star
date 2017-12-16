@@ -6,6 +6,7 @@ open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
 
 open FStar.Math.Lemmas
+open Spec.RSA.Lemmas
 
 module Hash = Spec.SHA2
 
@@ -23,105 +24,171 @@ let bn_is_less x y = x < y
 
 type elem (n:bignum) = e:bignum{bn_v e < bn_v n}
 
-(* LEMMAS *)
-#reset-options "--z3rlimit 30 --max_fuel 2"
-val pow : x:nat -> n:nat -> Tot nat
-let rec pow x n =
-  match n with
-  | 0 -> 1
-  | n -> x * pow x (n - 1)
+#reset-options "--z3rlimit 50 --max_fuel 2"
 
-#reset-options "--z3rlimit 30 --max_fuel 2"
-val lemma_pow: x:nat -> n:nat -> m:nat -> Lemma
-  (pow x n * pow x m = pow x (n + m))
-let rec lemma_pow x n m =
-  let ass (x y z : nat) : Lemma ((x*y)*z == x*(y*z)) = () in
-  match n with
-  | 0 -> ()
-  | _ -> lemma_pow x (n-1) m; ass x (pow x (n-1)) (pow x m)
+val mont_inverse_:
+	a:bignum -> exp_2:size_nat -> y:bignum -> i:size_nat{1 < i /\ i <= exp_2} -> Tot bignum
+	(decreases (exp_2 - i))
+let rec mont_inverse_ a exp_2 y i =
+	if i < exp_2 then begin
+		let pow2_i1 = pow2 (i - 1) in
+		let pow2_i = pow2_i1 * 2 in
+		let y = if (pow2_i1 < (a * y) % pow2_i) then y + pow2_i1 else y in
+		mont_inverse_ a exp_2 y (i + 1) end
+	else y
 
-val lemma_pow2_greater_1: x:size_nat{x > 1} -> Lemma
-	(requires True)
-	(ensures (pow2 (x - 1) > 1))
-	[SMTPat (pow2 (x - 1))]
-let rec lemma_pow2_greater_1 x =
-	match x with
-	| 2 -> ()
-	| _ -> lemma_pow2_greater_1 (x - 1)
+#reset-options "--z3rlimit 50 --max_fuel 0"
 
-#reset-options "--z3rlimit 30 --max_fuel 0"
+//res = a^(-1) % 2^(exp_2)
+val mont_inverse:
+	a:bignum -> exp_2:size_nat{1 < exp_2 /\ exp_2 + 1 <= max_size_t} -> Tot bignum
+let mont_inverse a exp_2 = mont_inverse_ a (exp_2 + 1) 1 2
 
-val lemma_div_mod:
-	a:nat -> p:pos -> Lemma (a = p * (a / p) + a % p)
-let lemma_div_mod a p = ()
+#reset-options "--z3rlimit 150 --max_fuel 0"
 
-val lemma_mult_3:
-	a:nat -> b:nat -> c:nat -> Lemma (a * b * c = c * a * b)
-let lemma_mult_3 a b c = ()
+val mont_reduction:
+	modBits:size_nat{modBits > 1} ->
+	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
+	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
+	c:nat{c < 4 * n * n} -> Pure (elem (n + n))
+	(requires (True))
+	(ensures (fun res -> res % n == (c / r) % n))
+let mont_reduction modBits r n n' c =
+	let m:nat = (c * n') % r in
+	assert (0 <= m /\ m < r);
+	let m:nat = r - m in
+	assert (0 < m /\ m <= r);
+	let res:nat = (c + n * m) / r in
+	assert (c + m * n < 4 * n * n + r * n);
+	assert (c + m * n < r * n + r * n);
+	lemma_div_lt_ab (c + m * n) (r * n + r * n) r;
+	distributivity_add_right r n n;
+	multiple_division_lemma (n + n) r;
+	assert (res < n + n);
+	lemma_mont_reduction res r c n m;
+	res
 
-val lemma_pow_a2_b:
-	a:nat -> b:nat -> Lemma (pow (a * a) b = pow a (2 * b))
-let lemma_pow_a2_b a b = admit()
+val karatsuba_mont_mod:
+	modBits:size_nat{modBits > 1} ->
+	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
+	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
+	a:elem (n + n) -> b:elem (n + n) -> Pure (elem (n + n))
+	(requires (True))
+	(ensures (fun res -> res % n == (a * b / r) % n))
+let karatsuba_mont_mod modBits r n n' a b =
+	//let c = karatsuba x a b in
+	let c = a * b in
+	//assert (c < 4 * n * n);
+ 	mont_reduction modBits r n n' c
 
-val lemma_pow_mod:
-	a:nat -> b:nat -> n:pos -> Lemma ((pow a b) % n == (pow (a % n) b) % n)
-let lemma_pow_mod a b n = admit()
+//#reset-options "--z3rlimit 150 --max_fuel 0"
 
-val lemma_mod_exp:
-	n:bignum{n > 1} -> a:bignum -> a2:bignum ->
-	b:bignum -> b2:bignum -> acc:elem n -> res:bignum -> Lemma
-	(requires (a2 == (a * a) % n /\ b2 == bn_div2 b /\ res == (pow a2 b2 * acc) % n))
-	(ensures (res == (pow a (2 * b2) * acc) % n))
-let lemma_mod_exp n a a2 b b2 acc res =
-	let res = (pow a2 b2 * acc) % n in
-	lemma_mod_mul_distr_l (pow a2 b2) acc n;
-	assert (((pow a2 b2) * acc) % n == ((pow a2 b2) % n * acc) % n);
-	lemma_pow_mod (a * a) b2 n;
-	assert ((pow a2 b2) % n == (pow (a * a) b2) % n);
-	lemma_pow_a2_b a b2;
-	assert ((pow (a * a) b2) % n == (pow a (2 * b2)) % n);
-	assert (res == ((pow a (2 * b2)) % n * acc) % n);
-	lemma_mod_mul_distr_l (pow a (2 * b2)) acc n
+val to_mont:
+	modBits:size_nat{modBits > 1} ->
+	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
+	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
+	a:elem n -> Pure (elem (n + n))
+	(requires (True))
+	(ensures (fun res -> res % n == (a * r) % n))
+let to_mont modBits r n n' a =
+	let r2:nat = (r * r) % n in
+	assert (r2 < n);
+	let c = a * r2 in
+	//assert (c < n * n);
+	let res = mont_reduction modBits r n n' c in
+	//assert (res % n == (c / r) % n);
+	lemma_mod_div_simplify a r n;
+	res
 
-#reset-options "--z3rlimit 150"
+//#reset-options "--z3rlimit 150 --max_fuel 0"
+
+val from_mont:
+	modBits:size_nat{modBits > 1} ->
+	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
+	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
+	a_r:elem (n + n) -> Pure (elem n)
+	(requires (True))
+	(ensures (fun res -> res == (a_r / r) % n))
+let from_mont modBits r n n' a_r =
+	let m:nat = (a_r * n') % r in
+	assert (0 <= m /\ m < r);
+	let m:nat = r - m in
+	assert (0 < m /\ m <= r);
+	let res:nat = (a_r + n * m) / r in
+	assert (a_r + m * n < n + n + r * n);
+	lemma_div_lt_ab (a_r + m * n) (n + n + r * n) r;
+	division_addition_lemma (n + n) r n;
+	assert (n + n < 4 * n);
+	assert (n + n < r);
+	small_division_lemma_1 (n + n) r;
+	lemma_mont_reduction_1 res r a_r n m;
+	res
+
+#reset-options "--z3rlimit 150 --max_fuel 2"
 
 val mod_exp_:
-	n:bignum{bn_v n > 1} -> a:bignum -> b:bignum -> acc:elem n -> Tot (res:elem n{res == (pow a b * acc) % n})
+	modBits:size_nat{modBits > 1} ->
+	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
+	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
+	a:elem (n + n) -> b:nat -> acc:elem (n + n) -> Pure (elem (n + n))
+	(requires True)
+	(ensures (fun res -> res % n == ((pow a b) * acc / pow r b) % n))
 	(decreases b)
-let rec mod_exp_ n a b acc =
+let rec mod_exp_ modBits r n n' a b acc =
 	if b = 0
 	then acc
 	else begin
-		let a2 = (a * a) % n in
+		let a2 = karatsuba_mont_mod modBits r n n' a a in
+		assert (a2 % n == (a * a / r) % n);
 		let b2 = bn_div2 b in
-		let acc' = (a * acc) % n in
 		lemma_div_mod b 2;
 		if (bn_is_even b) then begin
-			assert (b % 2 = 0);
 			assert (b = 2 * b2);
-			let res = mod_exp_ n a2 b2 acc in
-			assert (res == (pow a2 b2 * acc) % n); //from ind hypo
-			lemma_mod_exp n a a2 b b2 acc res;
+			let res = mod_exp_ modBits r n n' a2 b2 acc in
+			assert (res % n == ((pow a2 b2) * acc / pow r b2) % n); //from ind hypo
+			lemma_mod_exp n a a2 b b2 acc r res;
 			res end
 		else begin
-			assert (b % 2 = 1);
 			assert (b = 2 * b2 + 1);
-			let res = mod_exp_ n a2 b2 acc' in
-			assert (res == (pow a2 b2 * acc') % n); //from ind hypo
-			lemma_mod_exp n a a2 b b2 acc' res;
-			assert (res == (((a * acc) % n) * pow a (2 * b2)) % n);
-			lemma_mod_mul_distr_l (a * acc) (pow a (2 * b2)) n;
-			assert (res == (a * acc * pow a (2 * b2)) % n);
-			assert (pow a 1 == a);
-			lemma_mult_3 (pow a 1) acc (pow a (2 * b2));
-			assert (res == (pow a (2 * b2) * pow a 1 * acc) % n);
-			lemma_pow a (2 * b2) 1;
+			let acc' = karatsuba_mont_mod modBits r n n' a acc in
+			assert (acc' % n == (a * acc / r) % n);
+		    let res = mod_exp_ modBits r n n' a2 b2 acc' in
+			assert (res % n == ((pow a2 b2) * acc' / pow r b2) % n); //from ind hypo
+			lemma_mod_exp_1 n a a2 b b2 acc acc' r res;
 			res end
 		end
 
+#reset-options "--z3rlimit 150 --max_fuel 0"
+
 val mod_exp:
-	n:bignum{bn_v n > 1} -> a:elem n -> b:bignum -> Tot (res:elem n{res == (pow a b) % n})
-let mod_exp n a b = mod_exp_ n a b (bn 1)
+	modBits:size_nat{1 < modBits /\ modBits + 3 <= max_size_t} ->
+	n:bignum{1 < n /\ n < pow2 modBits} ->
+	a:elem n -> b:bignum -> Pure (elem n)
+	(requires True)
+	(ensures (fun res -> res == (pow a b) % n))
+let mod_exp modBits n a b =
+	let r = pow2 (2 + modBits) in
+	lemma_r_n modBits r n;
+	assert (4 * n < r);
+	let n'= mont_inverse n (2 + modBits) in
+	let a_r = to_mont modBits r n n' a in
+	assert (a_r % n == (a * r) % n);
+	let acc_r = to_mont modBits r n n' 1 in
+	assert (acc_r % n == r % n);
+	let res_r = mod_exp_ modBits r n n' a_r b acc_r in
+	assert (res_r % n == ((pow a_r b) * acc_r / pow r b) % n);
+	lemma_mod_exp_2 n a a_r b acc_r r res_r;
+	assert (res_r % n == ((pow a b) * r) % n);
+	let res = from_mont modBits r n n' res_r in
+	assert (res == (res_r / r) % n);
+	lemma_mod_mult_div_1 res_r r n;
+	assert (res == ((res_r % n) / r) % n);
+	assert (res == ((((pow a b) * r) % n) / r) % n);
+	lemma_mod_mult_div_1 ((pow a b) * r) r n;
+	assert (res == ((pow a b) * r / r) % n);
+	multiple_division_lemma (pow a b) r;
+	assert (res == (pow a b) % n);
+	res
 
 (* BIGNUM CONVERT FUNCTIONS *)
 val os2ip:
@@ -132,7 +199,7 @@ val i2osp:
 	n:bignum -> bLen:size_nat{bn_v n < pow2 (8 * bLen)} -> b:lbytes bLen -> Tot (lbytes bLen)
 let i2osp n bLen b = nat_to_bytes_be bLen n
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 50 --max_fuel 0"
 
 val blocks: x:size_nat{x > 0} -> m:size_nat{m > 0} -> r:size_nat{r > 0 /\ x <= m * r}
 let blocks x m = (x - 1) / m + 1
@@ -192,13 +259,17 @@ let mgf_sha256 mgfseedLen mgfseed maskLen mask =
 	slice acc 0 maskLen
 
 (* RSA *)
-type modBits = modBits:size_nat{modBits > 1}
+type modBits = modBits:size_nat{1 < modBits /\ modBits + 3 <= max_size_t}
 
 noeq type rsa_pubkey (modBits:modBits) =
-	| Mk_rsa_pubkey: n:bignum{pow2 (modBits - 1) <= bn_v n /\ bn_v n < pow2 modBits} -> e:elem n -> rsa_pubkey modBits
+	| Mk_rsa_pubkey: n:bignum{1 < n /\ pow2 (modBits - 1) <= bn_v n /\ bn_v n < pow2 modBits} ->
+					 e:elem n{bn_v e > 1} -> rsa_pubkey modBits
 	
 noeq type rsa_privkey (modBits:modBits) =
-	| Mk_rsa_privkey: pkey:rsa_pubkey modBits -> d:elem (Mk_rsa_pubkey?.n pkey) -> p:elem (Mk_rsa_pubkey?.n pkey){bn_v p > 1} -> q:elem (Mk_rsa_pubkey?.n pkey){bn_v q > 1} -> rsa_privkey modBits
+	| Mk_rsa_privkey: pkey:rsa_pubkey modBits ->
+					  d:elem (Mk_rsa_pubkey?.n pkey){bn_v d > 1} ->
+					  p:elem (Mk_rsa_pubkey?.n pkey){bn_v p > 1} ->
+					  q:elem (Mk_rsa_pubkey?.n pkey){bn_v q > 1 /\ bn_v (Mk_rsa_pubkey?.n pkey) = bn_v p * bn_v q} -> rsa_privkey modBits
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
 
@@ -335,8 +406,8 @@ let pss_verify sLen msBits emLen em msgLen msg =
 val rsa_sign:
 	modBits:modBits ->
 	skey:rsa_privkey modBits ->
-	rBlind:bignum ->
-	sLen:size_nat{sLen + hLen + 8 < pow2 32 /\ (blocks modBits 8) - sLen - hLen - 3 >= 0 /\ 
+	rBlind:bignum{rBlind > 0} ->
+	sLen:size_nat{sLen + hLen + 8 < pow2 32 /\ (blocks modBits 8) - sLen - hLen - 3 >= 0 /\
 				sLen + hLen + 8 < max_input_len_sha256} ->
 	salt:lbytes sLen ->
 	msgLen:size_nat{msgLen < max_input_len_sha256} ->
@@ -360,11 +431,14 @@ let rsa_sign modBits skey rBlind sLen salt msgLen msg =
 	let em = create k (u8 0) in
 	let em = pss_encode msBits sLen salt msgLen msg k em in
 	let m = os2ip k em in
-	assume (bn_v m < bn_v n);
+	assume (0 < bn_v m /\ bn_v m < bn_v n);
 	(* BLINDING *)
-	let phi_n = bn_mul (bn_sub p (bn 1)) (bn_sub q (bn 1)) in
-	let d' = bn_add d (bn_mul rBlind phi_n) in
-	let s = mod_exp n m d' in
+	let phi_n:nat = (p - 1) * (q - 1) in
+	let d':nat = d + rBlind * phi_n in
+	let s = mod_exp modBits n m d' in
+	assert (s == (pow m d') % n);
+	lemma_exp_blinding n phi_n p q d m rBlind;
+	assert (s == (pow m d) % n);
 
 	let sgnt = create k (u8 0) in
 	assert (bn_v s < bn_v n);
@@ -390,7 +464,7 @@ let rsa_verify modBits pkey sLen sgnt msgLen msg =
 	let s = os2ip k sgnt in
 	if bn_is_less s n then begin
 		assert (bn_v s < bn_v n);
-		let m = mod_exp n s e in
+		let m = mod_exp modBits n s e in
 		let em = create k (u8 0) in
 		let em = i2osp m k em in
 		let msBits = (modBits - 1) % 8 in
