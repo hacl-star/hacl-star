@@ -6,6 +6,7 @@ open Spec.Lib.RawIntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.Stateful
 
+open Spec.RSA.Bignum
 open Spec.RSA
 
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
