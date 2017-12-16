@@ -833,9 +833,9 @@ let felem_reduce out input =
   let input2 = input.(2ul) in
   let input3 = input.(3ul) in
   out.(0ul) <- input0 +^ zero0;
-  out.(1ul) <- input0 +^ zero1;
-  out.(2ul) <- input0 +^ zero2;
-  out.(3ul) <- input0 +^ zero3;
+  out.(1ul) <- input1 +^ zero1;
+  out.(2ul) <- input2 +^ zero2;
+  out.(3ul) <- input3 +^ zero3;
   felem_reduce_ out input;
   pop_frame()
 
@@ -1120,6 +1120,7 @@ val point_double:
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
 let point_double x_out y_out z_out x_in y_in z_in =
+  push_frame();
   let tmp = create (UInt128.uint64_to_uint128 0uL) 8ul in
   let tmp2 = create (UInt128.uint64_to_uint128 0uL) 8ul in
   let delta = create (UInt128.uint64_to_uint128 0uL) 4ul in
@@ -1174,7 +1175,9 @@ let point_double x_out y_out z_out x_in y_in z_in =
   smallfelem_square tmp2 small1;
   longfelem_scalar tmp2 3ul;
   longfelem_diff tmp tmp2;
-  felem_reduce_zero105 y_out tmp
+  felem_reduce_zero105 y_out tmp;
+  pop_frame()
+  
 
 val point_double_small:
   x_out:smallfelem -> y_out:smallfelem -> z_out:smallfelem ->
@@ -1567,14 +1570,14 @@ let p256 outx outy inx iny key =
   let qx = get_x q in
   let qy = get_y q in
   let qz = get_z q in
-  let qx0 = load64_le (Buffer.sub inx 0ul 8ul) in
-  let qx1 = load64_le (Buffer.sub inx 8ul 8ul) in
-  let qx2 = load64_le (Buffer.sub inx 16ul 8ul) in
-  let qx3 = load64_le (Buffer.sub inx 24ul 8ul) in
-  let qy0 = load64_le (Buffer.sub iny 0ul 8ul) in
-  let qy1 = load64_le (Buffer.sub iny 8ul 8ul) in
-  let qy2 = load64_le (Buffer.sub iny 16ul 8ul) in
-  let qy3 = load64_le (Buffer.sub iny 24ul 8ul) in
+  let qx3 = load64_be (Buffer.sub inx 0ul 8ul) in
+  let qx2 = load64_be (Buffer.sub inx 8ul 8ul) in
+  let qx1 = load64_be (Buffer.sub inx 16ul 8ul) in
+  let qx0 = load64_be (Buffer.sub inx 24ul 8ul) in
+  let qy3 = load64_be (Buffer.sub iny 0ul 8ul) in
+  let qy2 = load64_be (Buffer.sub iny 8ul 8ul) in
+  let qy1 = load64_be (Buffer.sub iny 16ul 8ul) in
+  let qy0 = load64_be (Buffer.sub iny 24ul 8ul) in
   qx.(0ul) <- UInt128.uint64_to_uint128 qx0;
   qx.(1ul) <- UInt128.uint64_to_uint128 qx1;
   qx.(2ul) <- UInt128.uint64_to_uint128 qx2;
@@ -1626,12 +1629,12 @@ let p256 outx outy inx iny key =
   let y1 = y.(1ul) in
   let y2 = y.(2ul) in
   let y3 = y.(3ul) in
-  store64_le (Buffer.sub outx 0ul 8ul) x0;
-  store64_le (Buffer.sub outx 8ul 8ul) x1;
-  store64_le (Buffer.sub outx 16ul 8ul) x2;
-  store64_le (Buffer.sub outx 24ul 8ul) x3;
-  store64_le (Buffer.sub outy 0ul 8ul) y0;
-  store64_le (Buffer.sub outy 8ul 8ul) y1;
-  store64_le (Buffer.sub outy 16ul 8ul) y2;
-  store64_le (Buffer.sub outy 24ul 8ul) y3;
+  store64_be (Buffer.sub outx 0ul 8ul) x3;
+  store64_be (Buffer.sub outx 8ul 8ul) x2;
+  store64_be (Buffer.sub outx 16ul 8ul) x1;
+  store64_be (Buffer.sub outx 24ul 8ul) x0;
+  store64_be (Buffer.sub outy 0ul 8ul) y3;
+  store64_be (Buffer.sub outy 8ul 8ul) y2;
+  store64_be (Buffer.sub outy 16ul 8ul) y1;
+  store64_be (Buffer.sub outy 24ul 8ul) y0;
   pop_frame()
