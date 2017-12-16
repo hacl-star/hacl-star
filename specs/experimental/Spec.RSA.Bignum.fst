@@ -45,7 +45,7 @@ let mont_inverse a exp_2 = mont_inverse_ a (exp_2 + 1) 1 2
 #reset-options "--z3rlimit 150 --max_fuel 0"
 
 val mont_reduction:
-	modBits:size_nat{modBits > 1} ->
+	modBits:size_nat{1 < modBits /\ modBits < pow2 32} ->
 	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
 	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
 	c:nat{c < 4 * n * n} -> Pure (elem (n + n))
@@ -66,7 +66,7 @@ let mont_reduction modBits r n n' c =
 	res
 
 val karatsuba_mont_mod:
-	modBits:size_nat{modBits > 1} ->
+	modBits:size_nat{1 < modBits /\ modBits < pow2 32} ->
 	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
 	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
 	a:elem (n + n) -> b:elem (n + n) -> Pure (elem (n + n))
@@ -78,7 +78,7 @@ let karatsuba_mont_mod modBits r n n' a b =
  	mont_reduction modBits r n n' c
 
 val to_mont:
-	modBits:size_nat{modBits > 1} ->
+	modBits:size_nat{1 < modBits /\ modBits < pow2 32} ->
 	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
 	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
 	a:elem n -> Pure (elem (n + n))
@@ -93,7 +93,7 @@ let to_mont modBits r n n' a =
 	res
 
 val from_mont:
-	modBits:size_nat{modBits > 1} ->
+	modBits:size_nat{1 < modBits /\ modBits < pow2 32} ->
 	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
 	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
 	a_r:elem (n + n) -> Pure (elem n)
@@ -117,7 +117,7 @@ let from_mont modBits r n n' a_r =
 #reset-options "--z3rlimit 150 --max_fuel 2"
 
 val mod_exp_:
-	modBits:size_nat{modBits > 1} ->
+	modBits:size_nat{1 < modBits /\ modBits < pow2 32} ->
 	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
 	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
 	a:elem (n + n) -> b:nat -> acc:elem (n + n) -> Pure (elem (n + n))
@@ -151,7 +151,7 @@ let rec mod_exp_ modBits r n n' a b acc =
 #reset-options "--z3rlimit 150 --max_fuel 0"
 
 val mod_exp:
-	modBits:size_nat{1 < modBits /\ modBits + 3 <= max_size_t} ->
+	modBits:size_nat{1 < modBits /\ modBits + 3 < pow2 32} ->
 	n:bignum{1 < n /\ n < pow2 modBits} ->
 	a:elem n -> b:bignum -> Pure (elem n)
 	(requires True)

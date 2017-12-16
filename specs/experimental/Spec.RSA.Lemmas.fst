@@ -126,15 +126,15 @@ let lemma_exp_blinding_2 n phi_n p q m =
 	lemma_exp_blinding_1 n phi_n q p m;
 	lemma_mod_pq (pow m phi_n) 1 p q
 
-#reset-options "--z3rlimit 50 --max_fuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 0"
 
 val lemma_exp_blinding:
 	n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
-	d:elem n{d > 0} -> m:elem n{m > 0} -> r:nat -> Lemma
-	(requires (phi_n == (p - 1) * (q - 1) /\ n = p * q))
-	(ensures ((pow m (d + r * phi_n)) % n  == (pow m d) % n))
-let lemma_exp_blinding n phi_n p q d m r =
-	let res : nat = (pow m (d + r * phi_n)) % n in
+	d:elem n{d > 0} -> d':nat -> m:elem n{m > 0} -> r:nat -> Lemma
+	(requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ d' = d + r * phi_n))
+	(ensures ((pow m d') % n  == (pow m d) % n))
+let lemma_exp_blinding n phi_n p q d d' m r =
+    let res:nat = (pow m d') % n in
 	lemma_pow m d (r * phi_n);
 	lemma_pow_pow m phi_n r;
 	lemma_pow_mod (pow m phi_n) r n;
