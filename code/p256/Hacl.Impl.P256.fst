@@ -277,7 +277,7 @@ let two64m32    = UInt128.uint64_to_uint128 0xffffffff00000000uL
 
 let two70m8p6     = load128 0x3fuL 0xffffffffffffff40uL
 let two70p40      = load128 0x40uL 0x0000010000000000uL
-let two70         = load128  0x40uL 0x0000010000000000uL
+let two70         = load128 0x40uL 0x0000000000000000uL
 let two70m40m38p6 = load128 0x3fuL 0xfffffec000000040uL
 let two70m6       = load128 0x3fuL 0xffffffffffffffc0uL
 
@@ -542,55 +542,55 @@ let smallfelem_square out small =
   let small1 = small.(1ul) in
   let small2 = small.(2ul) in
   let small3 = small.(3ul) in
-  let a = mul_wide small0 small0 in
-  let low = a in
-  let high = a >>^ 64ul in
 
+  let a = mul_wide small0 small0 in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
+  let high = a >>^ 64ul in
   let out0 = low in
   let out1 = high in
 
   let a = mul_wide small0 small1 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out1 = out1 +^ low in
   let out1 = out1 +^ low in
   let out2 = high in
 
   let a = mul_wide small0 small2 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out2 = out2 +^ low in
   let out2 = out2 <<^ 1ul in
   let out3 = high in
 
   let a = mul_wide small0 small3 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out3 = out3 +^ low in
   let out4 = high in
 
   let a = mul_wide small1 small2 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out3 = out3 +^ low in
   let out3 = out3 <<^ 1ul in
   let out4 = out4 +^ high in
 
   let a = mul_wide small1 small1 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out2 = out2 +^ low in
   let out3 = out3 +^ high in
 
   let a = mul_wide small1 small3 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out4 = out4 +^ low in
   let out4 = out4 <<^ 1ul in
   let out5 = high in
 
   let a = mul_wide small2 small3 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out5 = out5 +^ low in
   let out5 = out5 <<^ 1ul in
@@ -598,13 +598,13 @@ let smallfelem_square out small =
   let out6 = out6 +^ high in
 
   let a = mul_wide small2 small2 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out4 = out4 +^ low in
   let out5 = out5 +^ high in
 
   let a = mul_wide small3 small3 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out6 = out6 +^ low in
   let out7 = high in
@@ -647,97 +647,97 @@ let smallfelem_mul out small1 small2 =
 
   let open FStar.UInt128 in
   let a = mul_wide small10 small20 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out0 = low in
   let out1 = high in
 
   let a = mul_wide small10 small21 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out1 = out1 +^ low in
   let out2 = high in
 
   let a = mul_wide small11 small20 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out1 = out1 +^ low in
   let out2 = out2 +^ high in
 
   let a = mul_wide small10 small22 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out2 = out2 +^ low in
   let out3 = high in
 
   let a = mul_wide small11 small21 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out2 = out2 +^ low in
   let out3 = out3 +^ high in
 
   let a = mul_wide small12 small20 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out2 = out2 +^ low in
   let out3 = out3 +^ high in
 
   let a = mul_wide small10 small23 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out3 = out3 +^ low in
   let out4 = high in
 
   let a = mul_wide small11 small22 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out3 = out3 +^ low in
   let out4 = out4 +^ high in
 
   let a = mul_wide small12 small21 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out3 = out3 +^ low in
   let out4 = out4 +^ high in
 
   let a = mul_wide small13 small20 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out3 = out3 +^ low in
   let out4 = out4 +^ high in
 
   let a = mul_wide small11 small23 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out4 = out4 +^ low in
   let out5 = high in
 
   let a = mul_wide small12 small22 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out4 = out4 +^ low in
   let out5 = out5 +^ high in
 
   let a = mul_wide small13 small21 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out4 = out4 +^ low in
   let out5 = out5 +^ high in
 
   let a = mul_wide small12 small23 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out5 = out5 +^ low in
   let out6 = high in
 
   let a = mul_wide small13 small22 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out5 = out5 +^ low in
   let out6 = out6 +^ high in
 
   let a = mul_wide small13 small23 in
-  let low = a in
+  let low = uint64_to_uint128 (uint128_to_uint64 a) in
   let high = a >>^ 64ul in
   let out6 = out6 +^ low in
   let out7 = high in
@@ -796,11 +796,13 @@ let felem_reduce_ out input =
   let c = input4 +^ (input5 <<^ 32ul) in
   let out0 = out0 +^ c in
   let out3 = out3 -^ c in
-  let c = input5 -^ input7 in
-  let out1 = out1 +^ c in
-  let out2 = out2 -^ c in
+  // let c = input5 -^ input7 in
+  let out1 = out1 +^ input5 -^ input7 in
+  let out2 = out2 +^ input7 -^ input5 in
+  // let out1 = out1 +^ c in
+  // let out2 = out2 -^ c in
   let out1 = out1 -^ (input4 <<^ 32ul) in
-  let out3 = out1 +^ (input4 <<^ 32ul) in
+  let out3 = out3 +^ (input4 <<^ 32ul) in
   let out2 = out2 -^ (input5 <<^ 32ul) in
   let out0 = out0 -^ input6 in
   let out0 = out0 -^ (input6 <<^ 32ul) in
@@ -856,9 +858,9 @@ let felem_reduce_zero105 out input =
   let input2 = input.(2ul) in
   let input3 = input.(3ul) in
   out.(0ul) <- input0 +^ zero0;
-  out.(1ul) <- input0 +^ zero1;
-  out.(2ul) <- input0 +^ zero2;
-  out.(3ul) <- input0 +^ zero3;
+  out.(1ul) <- input1 +^ zero1;
+  out.(2ul) <- input2 +^ zero2;
+  out.(3ul) <- input3 +^ zero3;
   felem_reduce_ out input;
   pop_frame()
 
@@ -1211,8 +1213,9 @@ let copy_conditional out input mask =
     (ensures (fun h0 _ h1 -> True))
     = let inputi = input.(i) in
       let outi = out.(i) in
-      let tmp = mask &^ input.(FStar.UInt32.(nlimbs' -^ 1ul -^ i)) in
-      out.(i) <- tmp in
+      let tmp = mask &^ (inputi ^^ outi) in
+      // let tmp = mask &^ input.(FStar.UInt32.(nlimbs' -^ 1ul -^ i)) in
+      out.(i) <- outi ^^ tmp in
   for 0ul nlimbs' inv f
 
 val copy_small_conditional:
