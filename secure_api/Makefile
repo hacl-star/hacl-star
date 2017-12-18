@@ -6,3 +6,6 @@ all:
 	IMPL_CHOICE=hacl_aes_concrete_id $(MAKE) -f Makefile.extract test
 	IMPL_CHOICE=vale_aes_abstract_id $(MAKE) -f Makefile.extract standalone
 	IMPL_CHOICE=hacl_aes_abstract_id $(MAKE) -f Makefile.extract standalone
+
+clean:
+	$(MAKE) -f Makefile.extract clean
