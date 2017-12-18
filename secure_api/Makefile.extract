@@ -94,6 +94,7 @@ $(OUTPUT_DIR)/%.ml:
 
 # First target: a clean, single-file version of the library suitable for the
 # build of miTLS in pure C. No subtlety in the list of dependencies...
+$(DIST_DIR)/Crypto_AEAD_Main.h \
 $(DIST_DIR)/Crypto_AEAD_Main.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
 	$(KREMLIN_HOME)/krml $(KOPTS) -bundle Crypto.AEAD.Main=* -add-include \
 	  '"kremstr.h"' -add-include '"testlib.h"' -add-include '"kremlib.h"' \
@@ -130,7 +131,8 @@ $(DIST_DIR)/%.h $(DIST_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRM
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
-HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(DIST_DIR)/Crypto_Indexing.h
+HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(DIST_DIR)/Crypto_Indexing.h \
+  $(DIST_DIR)/Crypto_AEAD_Main.h
 
 $(DIST_DIR)/Crypto_AEAD_Main.o: $(HEADERS)
 LowCProvider/lowc_stub.o: $(HEADERS)
