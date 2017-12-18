@@ -178,7 +178,7 @@ private val add_bytes:
     Buffer.disjoint (MAC.as_buffer (CMA.abuf acc)) txt /\
     Buffer.disjoint CMA.(MAC.as_buffer st.r) txt /\
     (mac_log ==>
-      Buffer.frameOf txt <> (CMA.alog acc).HS.id \/
+      Buffer.frameOf txt <> HS.frameOf (CMA.alog acc) \/
       Buffer.disjoint_ref_1 txt CMA.(alog acc))))
   (ensures (fun h0 () h1 ->
     let b = CMA.(MAC.as_buffer (CMA.abuf acc)) in
@@ -417,7 +417,7 @@ let fresh_sref (#a:Type0) h0 h1 (r:ST.reference a) =
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 private val frame_modifies_buf_and_ref: #a:Type -> #b:Type -> #c:Type -> h0:mem -> h1:mem ->
   buf:Buffer.buffer a ->
-  ref:ST.reference b{Buffer.frameOf buf == ref.HS.id} ->
+  ref:ST.reference b{Buffer.frameOf buf == HS.frameOf ref} ->
   buf':Buffer.buffer c -> Lemma
   (requires (CMA.modifies_buf_and_ref #a #b buf ref h0 h1 /\
              (Buffer.frameOf buf' <> Buffer.frameOf buf \/

@@ -191,7 +191,7 @@ val encrypt_write_effect :
 	      let h_final = HS.pop h_ideal in
 	      encrypt_ensures st n aad plain cipher_tag h_init h_final /\
 	      encrypt_modifies st cipher_tag h_init h_final)))
-#reset-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0 --query_stats --z3cliopt 'smt.case_split=3' --using_facts_from '* -Spec -Hacl +Hacl.Bignum.Constants +Hacl.Bignum.Parameters'"
 let encrypt_write_effect i st n #aadlen aad #plainlen plain cipher_tag k_0 ak acc
 			 h_init h_push h_prf h_enx h_acc h_mac h_ideal =
   let open HS in			 
@@ -294,10 +294,12 @@ let encrypt i st n aadlen aad plainlen plain cipher_tagged =
   let h_enxor = get () in
   
   //call accumulate: encode the ciphertext and additional data for mac'ing
+  assume (Crypto.AEAD.Wrappers.Encoding.ak_aad_cipher_separate ak aad cipher_tagged); //NS:12/13 seems to have regressed
   let acc = EncodingWrapper.accumulate_enc #(i, n) st ak aad plain cipher_tagged in
   let h_acc = get () in
 
   //call mac: filling in the tag component of the out buffer
+  assume (Crypto.Symmetric.UF1CMA.verify_liveness ak tag h_acc); //NS:12/13 hint does not replay
   CMAWrapper.mac #(i,n) st aad plain cipher_tagged ak acc h_enxor;
   let h_mac = get () in
 
