@@ -177,6 +177,9 @@ $(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILE
 HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(DIST_DIR)/Crypto_Indexing.h \
   $(DIST_DIR)/Crypto_AEAD_Main.h
 
+# Note: we don't use gcc -MM because this would need to happen after KreMLin
+# extraction, and then every run of this Makefile would start by extracting the
+# entire world just to get the dependencies between C files.
 $(DIST_DIR)/Crypto_AEAD_Main.o: $(HEADERS)
 LowCProvider/lowc_stub.o: $(HEADERS)
 
@@ -194,6 +197,9 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -I LowCProvider -I $(DIST_DIR) -I $(OUTPUT_DIR) -I $(CORECRYPTO_DIR) -o $@
 
+# Note: we don't use ocamldep because this would need to happen after
+# extraction... meaning that the Makefile, no matter what, would always
+# re-extract to get the dependencies. Make it a separate target?
 LowCProvider/LowCProvider.cmx: $(OUTPUT_DIR)/CryptoTypes.cmx
 LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
 
