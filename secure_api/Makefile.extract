@@ -23,6 +23,7 @@ CONCRETE_DIR	= $(HACL_HOME)/secure_api/concrete_specializations
 IMPL_CHOICE	?= runtime_switch
 DIST_DIR	= out/$(IMPL_CHOICE)
 OUTPUT_DIR	= $(DIST_DIR)/extracted
+CORECRYPTO_DIR	= $(FSTAR_HOME)/contrib/CoreCrypto/fst
 
 # Pseudo autoconfiguration
 UNAME		= $(shell uname)
@@ -45,8 +46,10 @@ all: standalone $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowCProvider.cmxa
 
 standalone: $(DIST_DIR)/Crypto_AEAD_Main.h
 
-test: $(DIST_DIR)/krml-test.exe
+%.test: %
 	./$<
+
+test: $(DIST_DIR)/krml-test.exe.test $(DIST_DIR)/LowCTests.exe.test
 
 ################################################################################
 # Building upon the generated .depend file				       #
@@ -68,7 +71,7 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/secure_api/uf1cma \
 	$(HACL_HOME)/secure_api/utils \
 	$(HACL_HOME)/secure_api/LowCProvider/fst \
-	$(FSTAR_HOME)/contrib/CoreCrypto/fst \
+	$(CORECRYPTO_DIR) \
 	$(CONCRETE_DIR) $(CONCRETE_DIR)/$(IMPL_CHOICE))
 
 # The F* compiler and the entry points.
@@ -189,7 +192,10 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 
 # Standard rule.
 %.cmx: %.ml
-	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(OUTPUT_DIR) -o $@
+	$(OCAMLOPT) -c $< -I LowCProvider -I $(DIST_DIR) -I $(OUTPUT_DIR) -I $(CORECRYPTO_DIR) -o $@
+
+LowCProvider/LowCProvider.cmx: $(OUTPUT_DIR)/CryptoTypes.cmx
+LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
 
 # Finally, ocamlmklib is smart enough to take all of these at once.
 $(DIST_DIR)/LowC.cmxa: \
