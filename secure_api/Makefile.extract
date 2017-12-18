@@ -25,6 +25,7 @@ DIST_DIR	= out/$(IMPL_CHOICE)
 OUTPUT_DIR	= $(DIST_DIR)/extracted
 
 # Pseudo autoconfiguration
+UNAME		= $(shell uname)
 SED		= $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
 MARCH		= x86_64
 ifeq ($(UNAME),Darwin)
@@ -117,13 +118,14 @@ $(OUTPUT_DIR)/%.ml:
 # 1. A clean single-file version of AEAD for the C build of miTLS    	       #
 ################################################################################
 
-# Generic rule
+# Generic rule for single-file KreMLin packaging -- use with caution, this may
+# repeat most of your program in every single compilation unit.
 $(DIST_DIR)/%.h $(DIST_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
 	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$*=*' -minimal -skip-compilation \
 	  -tmpdir $(DIST_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
 	  $(EXTRA)
 
-# Specialized for our file
+# A couple extra arguments needed for just Crypto_AEAD_Main.
 $(DIST_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
 
 
@@ -131,11 +133,7 @@ $(DIST_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-include 
 # 2. Compiling Vale on all platforms                             	       #
 ################################################################################
 
-# Building vale.a via a recursive invocation.
 VALE_DIR = vale/asm
-
-%.o: %.S
-	$(CC) $(CCOPTS) -c $< -o $@
 
 VALE_OBJ = $(addprefix $(VALE_DIR)/,sha256_main_i.o \
   sha256-$(MARCH)$(VARIANT).o Vale_Hash_SHA2_256.o \
@@ -147,6 +145,9 @@ vale_aes_concrete_id_EXTRA 	= $(VALE_OBJ)
 vale_aes_abstract_id_EXTRA 	= $(VALE_OBJ)
 runtime_switch_EXTRA 		= $(VALE_OBJ)
 
+# Easy!
+%.o: %.S
+	$(CC) $(CCOPTS) -c $< -o $@
 
 ################################################################################
 # 3. The functional test, krml-test.exe                          	       #
@@ -185,6 +186,7 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -ccopt -o \
 	  -ccopt $@ -ccopt -fPIC -ccopt -Wno-unused-variable -ccopt -Wno-parentheses
 
+# Standard rule.
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(OUTPUT_DIR) -o $@
 
@@ -210,4 +212,4 @@ $(DIST_DIR)/LowCTests.exe: $(KREMLIN_HOME)/kremlib/kremstr.o \
 	  -ccopt -L$(DIST_DIR) -linkpkg $^ -o $@
 
 clean:
-	rm -rf .depend.extract out/*
+	rm -rf .depend.extract out/* vale/asm/*.o LowCProvider/*.{cm*,o,a}
