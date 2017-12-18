@@ -68,6 +68,7 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/secure_api/uf1cma \
 	$(HACL_HOME)/secure_api/utils \
 	$(HACL_HOME)/secure_api/LowCProvider/fst \
+	$(FSTAR_HOME)/contrib/CoreCrypto/fst \
 	$(CONCRETE_DIR) $(CONCRETE_DIR)/$(IMPL_CHOICE))
 
 # The F* compiler and the entry points.
