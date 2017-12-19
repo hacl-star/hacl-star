@@ -213,7 +213,7 @@ val rsa_blinding:
 	p:elem n{1 < p} ->
 	q:elem n{1 < q /\ n = p * q} ->
 	d:elem n{1 < d} ->
-	m:elem n{0 < m} ->
+	m:elem n ->
 	rBlind:bignum -> Tot (s:bignum{s == (pow m d) % n})
 
 let rsa_blinding modBits n p q d m rBlind =
@@ -221,7 +221,7 @@ let rsa_blinding modBits n p q d m rBlind =
 	let d':nat = d + rBlind * phi_n in
 	let s = mod_exp modBits n m d' in
 	assert (s == (pow m d') % n);
-	lemma_exp_blinding n phi_n p q d d' m rBlind;
+	lemma_exp_blinding n phi_n p q d m rBlind;
 	assert (s == (pow m d) % n);
 	s
 
@@ -254,7 +254,7 @@ let rsa_sign modBits skey rBlind sLen salt msgLen msg =
 	let em = pss_encode msBits sLen salt msgLen msg k em in
 	let m = os2ip k em in
 	
-	assume (0 < bn_v m /\ bn_v m < bn_v n);
+	assume (bn_v m < bn_v n);
 	let s = rsa_blinding modBits n p q d m rBlind in
 
 	let sgnt = create k (u8 0) in
