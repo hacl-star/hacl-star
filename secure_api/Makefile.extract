@@ -49,7 +49,9 @@ standalone: $(DIST_DIR)/Crypto_AEAD_Main.h
 %.test: %
 	./$<
 
-test: $(DIST_DIR)/krml-test.exe.test $(DIST_DIR)/LowCTests.exe.test
+test: krml-test lowc-test
+krml-test: $(DIST_DIR)/krml-test.exe.test
+lowc-test: $(DIST_DIR)/LowCTests.exe.test
 
 ################################################################################
 # Building upon the generated .depend file				       #
