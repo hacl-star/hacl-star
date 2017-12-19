@@ -50,15 +50,15 @@ let size_block p :size_nat = size_block_w * numbytes p.wt
 let max_input p : n:nat = (maxint (lenType p) + 1) / 8
 
 (* Definition: Types for block and hash as sequences of words *)
-type block_w p = b:intseq p.wt 16
+unfold type block_w p = b:intseq p.wt 16
 type hash_w p = b:intseq p.wt size_hash_w
 
 (* Definition of the scheduling function (part 1) *)
-let step_ws0 p (b:block_w p) (i:size_nat{i >= 0 /\ i < 16}) (s:intseq p.wt p.kSize) : (t:intseq p.wt p.kSize) =
+let step_ws0 p (b:block_w p) (i:size_nat{i < 16}) (s:intseq p.wt p.kSize) : Tot (t:intseq p.wt p.kSize) =
   s.[i] <- b.[i]
 
 (* Definition of the scheduling function (part 2) *)
-let step_ws1 p (i:size_nat{i >= 16 /\ i < p.kSize}) (s:intseq p.wt p.kSize) : (t:intseq p.wt p.kSize) =
+let step_ws1 p (i:size_nat{i >= 16 /\ i < p.kSize}) (s:intseq p.wt p.kSize) : Tot (t:intseq p.wt p.kSize) =
   let t16 = s.[i - 16] in
   let t15 = s.[i - 15] in
   let t7  = s.[i - 7] in
@@ -149,22 +149,18 @@ let pad p (n:size_nat) (len:size_nat{len < max_input p /\ (size_block p * number
   padding
 
 (* Definition of the SHA2 state *)
-let len_block_t (p:parameters) = l:size_nat{l < size_block p}
+let len_block_nat (p:parameters) = l:size_nat{l < size_block p}
 noeq type state (p:parameters) =
   {
     hash:intseq p.wt size_hash_w;
     block:intseq p.wt size_block_w;
-    len_block:len_block_t p;
+    len_block:len_block_nat p;
     n:size_nat;
   }
 
 (* Definition of the initialization function for convenience *)
 let init (p:parameters) : Tot (state p) =
-  let st =
-    match p.wt with
-    | U32 -> ({hash = p.h0; block = create size_block_w (u32 0); len_block = 0; n = 0})
-    | U64 -> ({hash = p.h0; block = create size_block_w (u64 0); len_block = 0; n = 0}) in
-  st
+  {hash = p.h0; block = create size_block_w (nat_to_uint 0); len_block = 0; n = 0}
 
 (* Definition of the core compression function *)
 let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p) : Tot (state p) =
