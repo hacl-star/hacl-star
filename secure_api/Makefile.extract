@@ -42,7 +42,7 @@ CCOPTS=-Wall -Wextra -Werror -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
 
 # Warning: these are not always buildable, depending on IMPL_CHOICE...! Consult
 # the main Makefile for valid combinations.
-all: standalone $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowCProvider.cmxa
+all: standalone $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 
 standalone: $(DIST_DIR)/Crypto_AEAD_Main.h
 
