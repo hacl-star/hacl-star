@@ -140,7 +140,8 @@ type text = Seq.seq (lbytes 16)
 (** One-time MAC log, None or Some (m, MAC(m)), stores nonce for framing purposes *)
 type log (i:id) = n:UInt128.t{n == snd i} * option (text * (lbytes 16))
 
-let log_cmp (#i:id) (a:log i) (b:log i) =
+let log_cmp (#i:id) :RR.reln (log i) =
+  fun (a b: log i) ->
   match snd a, snd b with
   | Some (l,t) , Some (l',t') -> l == l' /\ t == t' // avoid inversion
   | None, _                   -> True
@@ -455,9 +456,9 @@ let update #i st acc w =
 let pairwise_distinct (r1:HH.rid) (r2:HH.rid) (r3:HH.rid) =
   r1 <> r2 /\ r2 <> r3 /\ r3 <> r1
 
-let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type)
+let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type) (#rel:Preorder.preorder c)
   (buf1:Buffer.buffer a) (buf2:Buffer.buffer b)
-  (ref:reference c{pairwise_distinct (frameOf buf1) (frameOf buf2) (HS.frameOf ref)}) h0 h1 : GTot Type0 =
+  (ref:mreference c rel{pairwise_distinct (frameOf buf1) (frameOf buf2) (HS.frameOf ref)}) h0 h1 : GTot Type0 =
   HS.modifies (Set.union (Set.singleton (frameOf buf1))
                          (Set.union (Set.singleton (frameOf buf2))
 			            (Set.singleton (HS.frameOf ref)))) h0 h1 /\
