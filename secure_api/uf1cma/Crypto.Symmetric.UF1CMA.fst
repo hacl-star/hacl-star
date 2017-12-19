@@ -356,7 +356,7 @@ let start #i st =
   let h1 = ST.get () in
   lemma_reveal_modifies_0 h0 h1;
   if mac_log then
-    let log = salloc #text Seq.createEmpty in
+    let log : HS.reference text = salloc Seq.createEmpty in
     let h2 = ST.get () in
     // Needed to prove disjointness of st.r and log
     assert (HS.sel h2 (Buffer.content (MAC.as_buffer st.r)) =!= Seq.createEmpty);
@@ -445,7 +445,7 @@ let update #i st acc w =
     begin
     let v = read_word 16ul w in
     let vs = !(alog acc) in
-    acc.l := Seq.cons v vs;
+    alog acc := Seq.cons v vs;
     let h1 = ST.get () in
     MAC.frame_sel_elem h0 h1 st.r;
     MAC.frame_sel_elem h0 h1 acc.a;
