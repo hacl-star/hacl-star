@@ -285,18 +285,15 @@ let encrypt i st n aadlen aad plainlen plain cipher_tagged =
 
   //call prf_mac: get a mac key, ak
   let ak = PRF_MAC.prf_mac_enc st aad plain cipher_tagged st.ak x_0 in  // used for keying the one-time MAC
+  assert (Crypto.AEAD.Wrappers.Encoding.ak_aad_cipher_separate ak aad cipher_tagged); //NS:12/13 seems to have regressed AR:12/19 can verify it now
   let h_prf = get () in
-  let open CMA in 
-
+  let open CMA in
   //call enxor: fragment the plaintext, call the prf, and fill in the cipher text
   Enxor.enxor n st aad plain cipher_tagged ak;
   let h_enxor = get () in
-  
   //call accumulate: encode the ciphertext and additional data for mac'ing
-  assume (Crypto.AEAD.Wrappers.Encoding.ak_aad_cipher_separate ak aad cipher_tagged); //NS:12/13 seems to have regressed
   let acc = EncodingWrapper.accumulate_enc #(i, n) st ak aad plain cipher_tagged in
   let h_acc = get () in
-
   //call mac: filling in the tag component of the out buffer
   assume (Crypto.Symmetric.UF1CMA.verify_liveness ak tag h_acc); //NS:12/13 hint does not replay
   CMAWrapper.mac #(i,n) st aad plain cipher_tagged ak acc h_enxor;
