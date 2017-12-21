@@ -7,7 +7,7 @@ RSA_FILES= \
 	Shift.fst \
 	Comparison.fst \
 	Addition.fst \
- 	Division.fst \
+	Montgomery.fst \
 	Exponentiation.fst \
 	MGF.fst \
 	RSA.fst \
@@ -18,10 +18,10 @@ FSTAR_INCLUDES+=--include ../../hash
 verify: $(addsuffix -lax, $(RSA_FILES))
 
 RSA_VERIFY= \
-	RSA.fst
+	Comparison.fst
 
 verify-1: $(RSA_VERIFY)
-	$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) $(FSTAR_INCLUDES) $^
+	$(FSTAR_HOME)/bin/fstar.exe --query_stats $(OTHERFLAGS) $(FSTAR_INCLUDES) $^
 
 KREMLIN_ARGS+=-verbose \
 	-tmpdir rsa-c \
@@ -48,7 +48,7 @@ EXTRACTED = \
 	Shift \
 	Comparison \
 	Addition \
-	Division \
+	Montgomery \
 	Exponentiation \
 	MGF \
  	RSA \
@@ -59,7 +59,7 @@ $(addprefix rsa-c/,$(addsuffix .c, $(EXTRACTED))): rsa-c/out.krml
 
 test-rsa-kremlin.exe: rsa-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $^ \
-	-bundle RSA=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256,Convert,Multiplication,Shift,Comparison,Addition,Division,Exponentiation,MGF,RSA \
+	-bundle RSA=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Hash.SHA2_256,SHA2_256,Convert,Multiplication,Shift,Comparison,Addition,Montgomery,Exponentiation,MGF,RSA \
 	-no-prefix 'Test.RSA' -add-include '"RSA.h"' -o test-rsa-kremlin.exe
 	./test-rsa-kremlin.exe
 

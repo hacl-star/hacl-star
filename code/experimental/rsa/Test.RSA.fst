@@ -4,6 +4,7 @@ open FStar.HyperStack.All
 open RSA
 open FStar.Buffer
 open Convert
+open Lib
 
 module U32 = FStar.UInt32
 
