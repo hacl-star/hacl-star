@@ -4,8 +4,6 @@ open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
 
-open Spec.Chacha20.Lemmas
-
 
 #set-options "--max_fuel 0 --z3rlimit 100"
 
@@ -17,11 +15,11 @@ let noncelen = 12 (* in bytes *)
 type key = lbytes keylen
 type block = lbytes blocklen
 type nonce = lbytes noncelen
-type counter = size_t
+type counter = size_nat
 
 // Internally, blocks are represented as 16 x 4-byte integers
 type state = m:intseq U32 16
-type idx = n:size_t{n < 16}
+type idx = n:size_nat{n < 16}
 type shuffle = state -> Tot state
 
 // Using @ as a functional substitute for ;
@@ -56,13 +54,17 @@ let rounds : shuffle =
   repeat 10 double_round (* 20 rounds *)
 
 let chacha20_core (s:state) : Tot state =
-  let s' = rounds s in
-  map2 (fun x y -> x +. y) s' s
+  let k = rounds s in
+  map2 (add_mod #U32) k s
 
 (* state initialization *)
+inline_for_extraction
 let c0 = 0x61707865
+inline_for_extraction
 let c1 = 0x3320646e
+inline_for_extraction
 let c2 = 0x79622d32
+inline_for_extraction
 let c3 = 0x6b206574
 
 let setup (k:key) (n:nonce) (st:state) : Tot state =

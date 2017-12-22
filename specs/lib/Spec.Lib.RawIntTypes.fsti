@@ -17,6 +17,8 @@ inline_for_extraction
 val u64_from_UInt64: (n:FStar.UInt64.t) -> u:uint64{uint_v #U64 u = UInt64.v n}
 inline_for_extraction
 val u128_from_UInt128: (n:FStar.UInt128.t) -> u:uint128{uint_v #U128 u = UInt128.v n}
+inline_for_extraction
+val size_from_UInt32: (n:FStar.UInt32.t) -> u:size_t{uint_v #SIZE u = UInt32.v n}
 
 inline_for_extraction
 val u8_to_UInt8: (u:uint8) -> n:UInt8.t{uint_v #U8 u = UInt8.v n}
@@ -28,6 +30,8 @@ inline_for_extraction
 val u64_to_UInt64: (u:uint64) -> n:UInt64.t{uint_v #U64 u = UInt64.v n}
 inline_for_extraction
 val u128_to_UInt128: (u:uint128) -> n:UInt128.t{uint_v #U128 u = UInt128.v n}
+inline_for_extraction
+val size_to_UInt32: (u:size_t) -> n:UInt32.t{uint_v #SIZE u = UInt32.v n}
 
 inline_for_extraction
 val uint_to_nat: #t:inttype -> u:uint_t t -> n:nat{n = uint_v #t u}

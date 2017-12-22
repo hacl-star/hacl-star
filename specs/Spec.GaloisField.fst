@@ -67,13 +67,13 @@ let op_Star_At e1 e2 = fmul e1 e2
 
 val degree_: #f:field -> a:felem f -> i:nat{i < f.bits} -> Tot nat (decreases i)
 let rec degree_ (#f:field) (a:felem f) (i:nat{i < f.bits}) = 
-  if i < 0 then 0
+  if i = 0 then 0
   else if index a (f.bits - i - 1) then i
   else degree_ #f a (i-1)
 
 let degree #f a = degree_ #f a (f.bits - 1)
 
-val finv_: #f:field -> s:felem f -> r:felem f -> v:felem f -> u:felem f -> Tot (felem f)
+val finv_: #f:field -> s:felem f -> r:felem f -> v:felem f -> u:felem f -> Tot (felem f) (decreases (degree r + degree s))
 let rec finv_ (#f:field) (s:felem f) (r:felem f) (v:felem f) (u:felem f) =
   let dr = degree r in
   let ds = degree s in

@@ -20,7 +20,7 @@ let noncelen = 12 (* in bytes *)
 type key = lbytes keylen
 type block = lbytes blocklen
 type nonce = lbytes noncelen
-type counter = UInt.uint_t 32
+type counter = size_nat
 
 // using @ as a functional substitute for ;
 // internally, blocks are represented as 16 x 4-byte integers
@@ -109,12 +109,18 @@ let c2 = 0x79622d32ul
 let c3 = 0x6b206574ul
 
 // JK: I have to add those assertions to typechecks, would be nice to get rid of it
-let setup (k:key) (n:nonce) (c:counter): Tot state =
+let setup (k:key) (n:nonce) : Tot state =
   let constants : vec = Seq.Create.create_4 c0 c1 c2 c3 in
   let key_part_1:vec = uint32s_from_le 4 (Seq.slice k 0 16)  in
   let key_part_2:vec = uint32s_from_le 4 (Seq.slice k 16 32) in
-  let nonce    :vec = Seq.cons (UInt32.uint_to_t c) (uint32s_from_le 3 n) in
+  let nonce    :vec = Seq.cons (u32 0) (uint32s_from_le 3 n) in
   Seq.Create.create_4 constants key_part_1 key_part_2 nonce
+
+
+let chacha20_set_counter (st:state) (c:counter) : Tot state =
+  let st3 = st.[3] in
+  let st3 = st3.[0] <- u32 c in
+  st.[3] <- st3
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     let st = setup k n c in
