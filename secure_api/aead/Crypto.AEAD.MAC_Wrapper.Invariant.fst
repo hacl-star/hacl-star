@@ -17,7 +17,6 @@ open Flag
 open Crypto.AEAD.Encoding 
 open Crypto.Symmetric.PRF
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 module MAC    = Crypto.Symmetric.MAC
@@ -199,11 +198,11 @@ let frame_prf_table_mac_modifies #i #aadlen #plainlen st n aad plain ct ak acc h
   let abuf = MAC.as_buffer (CMA.abuf acc) in
   let tag = Buffer.sub ct plainlen MAC.taglen in	
   assert (HS.contains h0 table);
-  assert (HH.disjoint (HS.frameOf table) (Buffer.frameOf abuf));
-  assert (HH.disjoint (HS.frameOf table) (Buffer.frameOf tag));  
+  assert (HS.disjoint (HS.frameOf table) (Buffer.frameOf abuf));
+  assert (HS.disjoint (HS.frameOf table) (Buffer.frameOf tag));  
   if safeMac i
   then let log = FStar.Monotonic.RRef.as_hsref CMA.(ilog ak.log) in
-       let _ = assert (HH.extends (HS.frameOf log) (HS.frameOf table)) in
+       let _ = assert (HS.extends (HS.frameOf log) (HS.frameOf table)) in
        assert (HS.modifies (Set.as_set [Buffer.frameOf abuf; Buffer.frameOf tag; HS.frameOf log]) h0 h1)
   else assert (HS.modifies (Set.as_set [Buffer.frameOf abuf; Buffer.frameOf tag]) h0 h1)
 

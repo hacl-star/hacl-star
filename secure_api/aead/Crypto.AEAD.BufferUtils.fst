@@ -4,10 +4,8 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 open FStar.Set
-open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.Buffer
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 type buffer = Buffer.buffer UInt8.t
@@ -87,9 +85,9 @@ val chain_mods_enc: #a:Type ->
 	      mac_region `is_in` h_init.h /\
 	      is_eternal_region prf_region /\
 	      is_eternal_region (frameOf cipher) /\
-	      prf_region `HH.includes` mac_region /\
+	      prf_region `HS.includes` mac_region /\
 	      prf_region <> mac_region /\
-	      HH.disjoint (frameOf cipher) prf_region /\
+	      HS.disjoint (frameOf cipher) prf_region /\
 	      HS.fresh_frame h_init h_push /\
 	      prf_mac_modifies prf_region mac_region h_push h_prf /\
 	      enxor_modifies prf_region cipher h_prf h_enx /\
@@ -127,9 +125,9 @@ val chain_modification: #a:Type ->
 	      mac_region `is_in` h_init.h /\
 	      is_eternal_region prf_region /\
 	      is_eternal_region (frameOf plain) /\
-	      prf_region `HH.includes` mac_region /\
+	      prf_region `HS.includes` mac_region /\
 	      prf_region <> mac_region /\
-	      HH.disjoint (frameOf plain) prf_region /\
+	      HS.disjoint (frameOf plain) prf_region /\
 	      HS.fresh_frame h_init h0 /\                        //push
 	      prf_mac_modifies prf_region mac_region h0 h1 /\    //prf_mac
 	      accumulate_modifies_nothing h1 h2 /\               //accumulate
