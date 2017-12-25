@@ -28,7 +28,6 @@ module PS_ = Hacl.Spec.Poly1305_64
 module PS = Hacl.Spe.Poly1305_64
 module PL = Hacl.Impl.Poly1305_64
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 #set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
@@ -186,7 +185,7 @@ let frame_sel_elem h1 h2 #i b =
 
 #reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
 (** Create and initialize an element (used for r) *)
-val rcreate: rgn:HH.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
+val rcreate: rgn:HS.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
   (requires (fun h0 -> True))
   (ensures  (fun h0 r h1 ->
     HS.modifies (Set.singleton rgn) h0 h1 /\
