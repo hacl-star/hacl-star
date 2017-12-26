@@ -52,17 +52,24 @@ let mac_modifies
 = 
   let open FStar.Buffer in	  
   let abuf = MAC.as_buffer (CMA.abuf acc) in
-  if safeMac i 
-  then
-    let log = RR.as_hsref CMA.(ilog ak.log) in
-    CMA.pairwise_distinct (frameOf abuf) (frameOf tbuf) (HS.frameOf log) /\
-    CMA.modifies_bufs_and_ref abuf tbuf log h0 h1
-  else
-    frameOf abuf <> frameOf tbuf /\
-    HS.modifies (Set.union (Set.singleton (frameOf abuf))
-                           (Set.singleton (frameOf tbuf))) h0 h1 /\
-    modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
-    modifies_buf_1 (frameOf tbuf) tbuf h0 h1
+  (*
+   * AR: 12/26: HyperStack modifies clauses used to give h0.tip == h1.tip, but that's no longer the case
+   *            So this needs to be added explicitly
+   *            But note that it should be easy to prove since ST effect gives it to us directly
+   *            For record, this came up in AEAD.Encrypt.reestablish_inv when calling lemma_propagate_inv_mac_wrapper
+   *)
+  h0.HS.tip == h1.HS.tip /\
+  (if safeMac i
+   then
+     let log = RR.as_hsref CMA.(ilog ak.log) in
+     CMA.pairwise_distinct (frameOf abuf) (frameOf tbuf) (HS.frameOf log) /\
+     CMA.modifies_bufs_and_ref abuf tbuf log h0 h1
+   else
+     frameOf abuf <> frameOf tbuf /\
+     HS.modifies (Set.union (Set.singleton (frameOf abuf))
+                            (Set.singleton (frameOf tbuf))) h0 h1 /\
+     modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
+     modifies_buf_1 (frameOf tbuf) tbuf h0 h1)
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 val weaken_mac_modifies: i:id -> 
