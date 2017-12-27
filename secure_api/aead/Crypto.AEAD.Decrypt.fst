@@ -17,7 +17,6 @@ open Crypto.Symmetric.PRF
 open Crypto.AEAD.Encoding 
 open Crypto.AEAD.Invariant
 
-module HH       = FStar.HyperHeap
 module HS       = FStar.HyperStack
 module MAC      = Crypto.Symmetric.MAC
 module CMA      = Crypto.Symmetric.UF1CMA
