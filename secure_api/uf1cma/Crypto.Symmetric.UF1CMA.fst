@@ -10,7 +10,6 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 
-open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Ghost
@@ -28,7 +27,6 @@ open Crypto.Symmetric.Bytes
 open Crypto.Indexing
 open Flag
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 module RR = FStar.Monotonic.RRef
 module MAC = Crypto.Symmetric.MAC
@@ -453,7 +451,7 @@ let update #i st acc w =
 #reset-options
 
 
-let pairwise_distinct (r1:HH.rid) (r2:HH.rid) (r3:HH.rid) =
+let pairwise_distinct (r1:HS.rid) (r2:HS.rid) (r3:HS.rid) =
   r1 <> r2 /\ r2 <> r3 /\ r3 <> r1
 
 let modifies_bufs_and_ref (#a:Type) (#b:Type) (#c:Type) (#rel:Preorder.preorder c)

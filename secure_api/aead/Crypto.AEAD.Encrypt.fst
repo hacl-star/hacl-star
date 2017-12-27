@@ -21,7 +21,6 @@ open Crypto.AEAD.Enxor.Invariant
 open Crypto.AEAD.MAC_Wrapper.Invariant
 open Crypto.AEAD.Encrypt.Ideal.Invariant
 
-module HH       = FStar.HyperHeap
 module HS       = FStar.HyperStack
 module MAC      = Crypto.Symmetric.MAC
 module CMA      = Crypto.Symmetric.UF1CMA

@@ -17,7 +17,6 @@ open Flag
 open Crypto.AEAD.Encoding 
 open Crypto.Symmetric.PRF
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 module MAC    = Crypto.Symmetric.MAC

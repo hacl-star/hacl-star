@@ -19,7 +19,6 @@ open Crypto.Symmetric.Bytes
 open Crypto.Plain
 open Flag
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 module MAC = Crypto.Symmetric.MAC

@@ -10,7 +10,6 @@ open FStar.HyperStack.All
 open FStar.HyperStack
 open FStar.Buffer
 open Buffer.Utils
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 open FStar.UInt32

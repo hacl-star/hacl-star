@@ -21,7 +21,6 @@ module Cipher        = Crypto.Symmetric.Cipher
 module PRF           = Crypto.Symmetric.PRF
 module Plain         = Crypto.Plain
 module Invariant     = Crypto.AEAD.Invariant
-module HH            = FStar.HyperHeap
 module HS            = FStar.HyperStack
 module CMA           = Crypto.Symmetric.UF1CMA
 module MAC           = Crypto.Symmetric.MAC
@@ -79,7 +78,7 @@ let modifies_table_above_x_and_buffer (#i:id) (#l:nat) (t:PRF.state i)
   (if prf i then
     let r = PRF.itable i t in
     let rb = Buffer.frameOf b in
-    let rgns = Set.union (Set.singleton #HH.rid t.rgn) (Set.singleton #HH.rid rb) in
+    let rgns = Set.union (Set.singleton #HS.rid t.rgn) (Set.singleton #HS.rid rb) in
     let contents0 = HS.sel h0 r in
     let contents1 = HS.sel h1 r in
     HS.modifies rgns h0 h1 /\
