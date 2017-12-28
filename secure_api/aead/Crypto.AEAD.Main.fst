@@ -5,7 +5,6 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 open FStar.UInt32
 open Crypto.AEAD
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 module I = Crypto.Indexing
 module PRF = Crypto.Symmetric.PRF
@@ -35,7 +34,7 @@ let log #i #rw s h =
   HS.sel h (Invariant.st_ilog s)
 
 let footprint #i #rw s = TSet.empty //TODO: FIXME!
-let hh_modifies_t (_:FStar.TSet.set HH.rid) (h0:HS.mem) (h1:HS.mem) = True //TODO: FIXME!
+let hh_modifies_t (_:FStar.TSet.set HS.rid) (h0:HS.mem) (h1:HS.mem) = True //TODO: FIXME!
 
 let safelen (i:I.id) (n:nat) = Invariant.safelen i n (Invariant.otp_offset i)
 let invariant #i #rw s h = Invariant.inv s h
