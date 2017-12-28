@@ -224,8 +224,8 @@ let mac_is_set (#rgn:region) (#i:id)
      | None -> False
      | Some mac_range ->
        let mac_st = CMA.ilog (CMA.State?.log mac_range) in
-       m_contains mac_st h /\ (
-       match snd (m_sel h mac_st) with
+       HS.contains h mac_st /\ (
+       match snd (HS.sel h mac_st) with
        | None           -> False
        | Some (msg,tag') ->
 	 safelen i l (PRF.ctr_0 i +^ 1ul) /\
@@ -718,7 +718,7 @@ let mac_is_used (#rgn:region) (#i:id)
      | None -> False
      | Some mac_range ->
        let mac_st = CMA.ilog (CMA.State?.log mac_range) in
-       Some? (snd (m_sel h mac_st))))
+       Some? (snd (HS.sel h mac_st))))
 
 (* JP: not extracting because the use of false_elim means that the None branch
  * is not eliminated from the match, which means that KreMLin would have to
@@ -1153,10 +1153,10 @@ val lemma_mac_log_framing
   (h0 h1:mem)
   (mac_st_2:CMA.state (i, nonce_2){CMA.(mac_st_2.region) = CMA.(mac_st_1.region)}) : Lemma
   (requires (nonce_1 <> nonce_2                                        /\
-             m_contains (CMA.(ilog mac_st_2.log)) h0                 /\
+             HS.contains h0 (CMA.(ilog mac_st_2.log))                 /\
 	     HS.(h1.h `Map.contains` CMA.(mac_st_2.region))          /\
-             HS.modifies_ref (CMA.(mac_st_1.region)) (Set.singleton (HS.as_addr (as_hsref (CMA.(ilog mac_st_1.log))))) h0 h1))
-  (ensures  (m_sel h0 (CMA.(ilog mac_st_2.log)) = m_sel h1 (CMA.(ilog mac_st_2.log))))
+             HS.modifies_ref (CMA.(mac_st_1.region)) (Set.singleton (HS.as_addr (CMA.(ilog mac_st_1.log)))) h0 h1))
+  (ensures  (HS.sel h0 (CMA.(ilog mac_st_2.log)) = HS.sel h1 (CMA.(ilog mac_st_2.log))))
 #set-options "--initial_ifuel 1 --max_ifuel 1"
 let lemma_mac_log_framing #i #nonce_1 #nonce_2 mac_st_1 h0 h1 mac_st_2 = //AR: 04/22/2017: this relies on ref injectivity ...
   admit()

@@ -213,6 +213,6 @@ let mac_wrapper_h0_h1
     HS.modifies (Set.union (Set.singleton h0.tip)
                            (Set.union (Set.singleton aead_st.prf.mac_rgn)
 			              (Set.singleton (Buffer.frameOf ct)))) h0 h1 /\               //mac_wrapper modifies the tip of the stack, prf.mac_rgn (it sets the tag in the mac log), and the cipher text region (adds tag to the cipher text buffer)
-    HS.modifies_ref aead_st.prf.mac_rgn (Set.singleton (HS.as_addr (as_hsref (CMA.(ilog mac_st.log))))) h0 h1  /\    //in the mac region, it only modifies the mac log associated with mac_st
+    HS.modifies_ref aead_st.prf.mac_rgn (Set.singleton (HS.as_addr (CMA.(ilog mac_st.log)))) h0 h1  /\    //in the mac region, it only modifies the mac log associated with mac_st
     Buffer.modifies_buf_1 (Buffer.frameOf ct) tag h0 h1 /\    //mac_wrapper modifies the tag component of the ciphertext buffer
     mac_is_set prf_table_1 nonce (Buffer.as_seq h1 aad) (v plainlen) (Buffer.as_seq h1 cipher) (Buffer.as_seq h1 tag) h1))    //mac_is_set for nonce

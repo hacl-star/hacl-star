@@ -138,17 +138,14 @@ type text = Seq.seq (lbytes 16)
 (** One-time MAC log, None or Some (m, MAC(m)), stores nonce for framing purposes *)
 type log (i:id) = n:UInt128.t{n == snd i} * option (text * (lbytes 16))
 
-let log_cmp (#i:id) :RR.reln (log i) =
+let log_cmp (#i:id) :Preorder.preorder (log i) =
   fun (a b: log i) ->
   match snd a, snd b with
   | Some (l,t) , Some (l',t') -> l == l' /\ t == t' // avoid inversion
   | None, _                   -> True
   | _                         -> False
 
-val log_cmp_monotonic: i:id -> Lemma (RR.monotonic (log i) log_cmp)
-let log_cmp_monotonic _ = ()
-
-let ideal_log (i:id) (r:erid) = RR.m_rref r (log i) log_cmp
+let ideal_log (i:id) (r:erid) = m_rref r (log i) log_cmp
 
 let log_ref (i:id) (r:erid) = if mac_log then (ideal_log i r) else unit
 
@@ -169,15 +166,15 @@ let live_ak #r (#i:id) m (ak:akey r (fst i)) =
 let mac_is_fresh (i:id) (region:erid) m0 (st:state i) m1 =
    ((MAC.as_buffer st.r) `unused_in` m0) /\
    (st.s `unused_in` m0) /\
-   (mac_log ==> RR.m_unused_in (ilog st.log) m0)
+   (mac_log ==> HS.unused_in (ilog st.log) m0)
 
 let mac_is_unset (i:id) (region:erid) (st:state i) m =
    st.region == region /\
    MAC.norm_r m st.r /\
    Buffer.live m st.s /\
    (mac_log ==>
-      RR.m_contains (ilog st.log) m /\
-      snd (RR.m_sel m (ilog st.log)) == None)
+      HS.contains m (ilog st.log) /\
+      snd (HS.sel m (ilog st.log)) == None)
 
 let genPost (i:id) (region:erid) m0 (st:state i) m1 =
   mac_is_fresh i region m0 st m1 /\
@@ -228,8 +225,7 @@ let alloc region i ak k =
     end;
   if mac_log then
     begin
-    log_cmp_monotonic i;
-    let log = RR.m_alloc #(log i) #log_cmp region (snd i, None) in
+    let log = ST.ralloc #(log i) #log_cmp region (snd i, None) in
     let h4 = ST.get() in
     lemma_intro_modifies_1 k h0 h4;
     State #i #region r s log
@@ -481,9 +477,9 @@ let mac_ensures
     let buf = MAC.as_buffer (abuf acc) in
     Buffer.as_seq h1 tag == t /\ (
     if authId i then
-      RR.m_contains log h1 /\
-      RR.m_sel h1 log == (snd i, Some (vs, t)) /\
-      modifies_bufs_and_ref buf tag (RR.as_hsref log) h0 h1
+      HS.contains h1 log /\
+      HS.sel h1 log == (snd i, Some (vs, t)) /\
+      modifies_bufs_and_ref buf tag log h0 h1
     else
       Buffer.modifies_2 (MAC.as_buffer (abuf acc)) tag h0 h1)
   else
@@ -504,7 +500,7 @@ val mac:
     Buffer.disjoint st.s tag /\
     (mac_log ==> frameOf tag <> HS.frameOf (alog acc) \/
                  Buffer.disjoint_ref_1 tag (alog acc)) /\
-    (authId i ==> snd (RR.m_sel h0 (ilog st.log)) == None)))
+    (authId i ==> snd (HS.sel h0 (ilog st.log)) == None)))
   (ensures (fun h0 _ h1 -> mac_ensures i st acc tag h0 h1))
 
 
@@ -519,9 +515,9 @@ let mac #i st acc tag =
     lemma_reveal_modifies_2 (MAC.as_buffer acc.a) tag h0 h1;
     let vs = !(alog acc) in
     assert (log_cmp #i (snd i, None) (snd i, Some (vs, t)));
-    RR.m_recall #st.region #(log i) #log_cmp (ilog st.log);
+    ST.recall #(log i) #log_cmp (ilog st.log);
     if authId i then
-      RR.m_write #st.region #(log i) #log_cmp (ilog st.log) (snd i, Some (vs, t));
+      ST.op_Colon_Equals #(log i) #log_cmp (ilog st.log) (snd i, Some (vs, t));
     let h2 = ST.get () in
     MAC.frame_sel_elem h0 h1 st.r;
     MAC.frame_sel_elem h1 h2 st.r;
@@ -550,7 +546,7 @@ let verify_ok (#i:id) (st:state i) (acc:accBuffer i) (tag:MAC.tagB)
     let t = MAC.mac vs r s in
     let verified = Seq.eq t (MAC.sel_word h0 tag) in
     if authId i then
-      match snd (RR.m_sel h0 (ilog st.log)) with
+      match snd (HS.sel h0 (ilog st.log)) with
       | Some (vs',t') ->
         let correct = t = t' && Seq.eq vs vs' in
         b == (verified && correct)
@@ -566,16 +562,16 @@ let verify_ensures (#i:id) (st:state i) (acc:accBuffer i) (tag:MAC.tagB)
 
 (** Auxiliary lemma to propagate `ilog st.log` and `alog acc` in `verify` *)
 private val modifies_verify_aux: #a:Type -> #b:Type -> #c:Type -> #d:Type ->
-  #r:RR.rid -> #rel:RR.reln c -> mref:RR.m_rref r c rel -> ref:HS.reference d ->
+  #r:RR.rid -> #rel:Preorder.preorder c -> mref:ST.m_rref r c rel -> ref:HS.reference d ->
   buf1:Buffer.buffer a -> buf2:Buffer.buffer b ->
   h0:mem -> h1:mem -> h2:mem -> h3:mem -> Lemma
   (requires (
-    disjoint_ref_2 buf1 (RR.as_hsref mref) ref /\
-    disjoint_ref_1 buf2 (RR.as_hsref mref) /\
+    disjoint_ref_2 buf1 mref ref /\
+    disjoint_ref_1 buf2 mref /\
     frameOf buf2 == h1.tip /\
     fresh_frame h0 h1 /\ modifies_0 h1 h2 /\ modifies_2 buf1 buf2 h2 h3))
   (ensures (
-    (RR.m_contains mref h0 ==> (RR.m_contains mref h3 /\ RR.m_sel h0 mref == RR.m_sel h3 mref)) /\
+    (HS.contains h0 mref ==> (HS.contains h3 mref /\ HS.sel h0 mref == HS.sel h3 mref)) /\
     (HS.contains h0 ref    ==> (HS.contains h3 ref    /\ HS.sel h0 ref == HS.sel h3 ref))))
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 let modifies_verify_aux #a #b #c #d #r #rel mref ref buf1 buf2 h0 h1 h2 h3 =
@@ -596,7 +592,7 @@ val verify:
 #reset-options "--z3rlimit 400"
 let verify #i st acc tag =
   // FIXME(adl) workaround for normalization bug
-  if (*authId i*) safeHS (fst i) && mac1 (fst i) then RR.m_recall #st.region #(log i) #(log_cmp #i) (ilog st.log);
+  if (*authId i*) safeHS (fst i) && mac1 (fst i) then ST.recall #(log i) #log_cmp (ilog st.log);
   let h0 = ST.get () in
   push_frame ();
   let h1 = ST.get () in
@@ -612,7 +608,7 @@ let verify #i st acc tag =
       MAC.frame_sel_elem h0 h2 st.r;
       MAC.frame_sel_elem h2 h3 st.r;
       MAC.frame_sel_elem h0 h2 acc.a;
-      RR.m_recall #st.region #(log i) #(log_cmp #i) (ilog st.log);
+      ST.recall #(log i) #log_cmp (ilog st.log);
       modifies_verify_aux (ilog st.log) (alog acc) (MAC.as_buffer acc.a) computed 
         h0 h1 h2 h3;
       let t = read_word 16ul computed in
@@ -620,7 +616,7 @@ let verify #i st acc tag =
       MAC.lemma_poly_finish_to_mac i h3 computed (MAC.sel_elem h0 acc.a) h0 st.s vs (MAC.sel_elem h0 st.r);
       if authId i then
         begin
-        let log = RR.m_read (ilog st.log) in // Don't inline it below; doesn't work
+        let log = !(ilog st.log) in // Don't inline it below; doesn't work
         match snd log with
         | Some (vs',t') ->
           let correct = t = t' && Seq.eq vs vs' in

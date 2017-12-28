@@ -290,7 +290,7 @@ val prf_mac:
            mc == mc' /\ 
            CMA.(MAC.norm_r h1 mc.r) /\ 
            CMA.(Buffer.live h1 mc.s) /\ 
-           CMA.(mac_log ==> m_contains (ilog mc.log) h1) 
+           CMA.(mac_log ==> HS.contains h1 (ilog mc.log)) 
        | None ->  // when encrypting, we get the stateful post of MAC.create             
          (match find_mac (HS.sel h1 r) x with 
           | Some mc' -> 
@@ -326,7 +326,7 @@ let prf_mac i t k_0 x =
     | Some mc ->  (* beware: mac shadowed by CMA.mac *)
         assert (CMA.(MAC.norm_r h0 mc.r));
         Buffer.recall (CMA.(mc.s));
-        if mac_log then FStar.Monotonic.RRef.m_recall (CMA.(ilog mc.log));
+        if mac_log then recall (CMA.(ilog mc.log));
         mc
     | None ->
         let mc = CMA.gen t.mac_rgn macId k_0 in

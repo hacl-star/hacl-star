@@ -69,7 +69,7 @@ let frame_aead_entries_are_refined_mac_wrapper #i #rw #aadlen #plainlen aead_st 
     assert (entries_0 == entries_1);
     assert (table_0 == table_1);
     assert (aead_entries_are_refined table_0 entries_0 h0);
-    assert (HS.modifies_ref aead_st.prf.mac_rgn (Set.singleton (HS.as_addr (as_hsref (CMA.(ilog mac_st.log))))) h0 h1);
+    assert (HS.modifies_ref aead_st.prf.mac_rgn (Set.singleton (HS.as_addr (CMA.(ilog mac_st.log)))) h0 h1);
     let h1: (h:HS.mem{safeId i}) = h1 in
     let aux (e:aead_entry i) : Lemma
     	(requires (entries_1 `contains` e))
@@ -201,7 +201,7 @@ let frame_prf_table_mac_modifies #i #aadlen #plainlen st n aad plain ct ak acc h
   assert (HS.disjoint (HS.frameOf table) (Buffer.frameOf abuf));
   assert (HS.disjoint (HS.frameOf table) (Buffer.frameOf tag));  
   if safeMac i
-  then let log = FStar.Monotonic.RRef.as_hsref CMA.(ilog ak.log) in
+  then let log = CMA.(ilog ak.log) in
        let _ = assert (HS.extends (HS.frameOf log) (HS.frameOf table)) in
        assert (HS.modifies (Set.as_set [Buffer.frameOf abuf; Buffer.frameOf tag; HS.frameOf log]) h0 h1)
   else assert (HS.modifies (Set.as_set [Buffer.frameOf abuf; Buffer.frameOf tag]) h0 h1)
@@ -266,7 +266,7 @@ let mac_modifies_preserves_norm_keys #i #j #aadlen #plainlen st n aad plain ct a
   assert (Buffer.disjoint b tag);
   assert (Buffer.disjoint b abuf);
   let _ =
-    if safeMac i then assume (Buffer.disjoint_ref_1 b (FStar.Monotonic.RRef.as_hsref (CMA.(ilog ak.log)))) else ()
+    if safeMac i then assume (Buffer.disjoint_ref_1 b (CMA.(ilog ak.log))) else ()
   in
   match macAlg_of_id i with
   | POLY1305 -> 

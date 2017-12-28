@@ -45,7 +45,7 @@ let prf_mac_existed (i:id) (t:PRF.state i) (k_0: CMA.akey t.mac_rgn i) (x:PRF.do
     returned_mac == existing_mac        /\                    //we returned the mac we found
     CMA.(MAC.norm_r h1 returned_mac.r)    /\                    //it's repr is in canonical form
     CMA.(Buffer.live h1 returned_mac.s) /\                    //it's live
-    CMA.(mac_log ==> m_contains (ilog returned_mac.log) h1)  //and its underlying log is live too
+    CMA.(mac_log ==> HS.contains h1 (ilog returned_mac.log))  //and its underlying log is live too
 
 let prf_mac_added (i:id{prf i}) (t:PRF.state i) (k_0: CMA.akey t.mac_rgn i) (x:PRF.domain_mac i)
 		  (h0:mem) (returned_mac:CMA.state (i,x.iv)) (h1:mem)

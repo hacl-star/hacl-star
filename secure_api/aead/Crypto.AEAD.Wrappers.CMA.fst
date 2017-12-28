@@ -61,7 +61,7 @@ let mac_modifies
   h0.HS.tip == h1.HS.tip /\
   (if safeMac i
    then
-     let log = RR.as_hsref CMA.(ilog ak.log) in
+     let log = CMA.(ilog ak.log) in
      CMA.pairwise_distinct (frameOf abuf) (frameOf tbuf) (HS.frameOf log) /\
      CMA.modifies_bufs_and_ref abuf tbuf log h0 h1
    else
@@ -120,7 +120,7 @@ let mac_wrapper (#i:EncodingWrapper.mac_id) (ak:CMA.state i) (acc:CMA.accBuffer 
     if safeMac (fst i) then
       begin
       // Takes a long time without this useless line
-      let log = RR.as_hsref CMA.(ilog ak.log) in
+      let log = CMA.(ilog ak.log) in
       assert (mac_modifies (fst i) (snd i) tag ak acc h0 h1)
       end
     else begin
@@ -352,7 +352,7 @@ let verify_ok (#i:CMA.id) (st:CMA.state i) (acc:CMA.accBuffer i) (tag:lbuffer 16
       let m = MAC.mac log r s in
       let verified = Seq.eq m (MAC.sel_word h tag) in
       if authId i then
-      	match m_sel h (ilog st.log) with
+      	match HS.sel h (ilog st.log) with
       	| _, Some(l',m') ->
       	  let correct = m = m' && Seq.eq log l' in
       	  b == (verified && correct)
@@ -518,7 +518,7 @@ let entry_exists_if_verify_ok #i #n st #aadlen aad #plainlen plain cipher_tagged
     let AEADEntry nonce aad' plainlen' p' cipher_tagged' = aead_entry in
     let cipher', _ = Seq.split cipher_tagged' plainlen' in
     let mac_log = CMA.ilog (CMA.State?.log ak) in
-    match m_sel h mac_log with
+    match HS.sel h mac_log with
     | _, None           -> ()
     | _, Some (msg,tag') -> 
       lemma_encode_both_inj i aadlen plainlen (u (Seq.length aad')) (u plainlen')
@@ -589,7 +589,7 @@ let verify_requires (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) (tag:lbuf
     EncodingWrapper.ak_acc_tag_separate ak acc tag /\
     verify_liveness CMA.(ak.region) ak tag h0 /\
     CMA.acc_inv ak acc h0 /\
-    (mac_log ==> m_contains CMA.(ilog ak.log) h0)
+    (mac_log ==> HS.contains h0 CMA.(ilog ak.log))
 
 let verify_modifies (#i:CMA.id) (acc:CMA.accBuffer i) (h0:mem) (h1:mem) = 
     Buffer.modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h1
@@ -612,7 +612,7 @@ let verify_wrapper #i ak acc tag =
   let b = CMA.verify #i ak acc tag in
   let h1 = get() in
   Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h1;
-  assert (mac_log ==> m_sel h0 (CMA.(ilog ak.log)) == m_sel h1 (CMA.(ilog ak.log)));
+  assert (mac_log ==> HS.sel h0 (CMA.(ilog ak.log)) == HS.sel h1 (CMA.(ilog ak.log)));
   assert (Buffer.modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h1);
   assert (verify_liveness CMA.(ak.region) ak tag h1);
   frame_verify_ok ak acc tag h0 h1 b;
@@ -680,7 +680,7 @@ let verify #i #n st #aadlen aad #plainlen plain cipher_tagged ak acc h_init =
   let cipher = Buffer.sub cipher_tagged 0ul plainlen in
   let tag = Buffer.sub cipher_tagged plainlen MAC.taglen in 
   if mac_log 
-  then m_recall CMA.(ilog ak.log);
+  then recall CMA.(ilog ak.log);
   let h0 = get () in
   let b = verify_wrapper ak acc tag in
   let h1 = get () in
