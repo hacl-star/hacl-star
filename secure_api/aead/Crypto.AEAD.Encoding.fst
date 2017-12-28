@@ -9,7 +9,6 @@ open FStar.HyperStack.All
 
 open FStar.UInt32
 open FStar.Ghost
-open FStar.Monotonic.RRef
 
 open FStar.Math.Lib
 open FStar.Math.Lemmas

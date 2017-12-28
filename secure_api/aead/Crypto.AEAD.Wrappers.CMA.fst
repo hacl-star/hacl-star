@@ -6,7 +6,6 @@ open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
-open FStar.Monotonic.RRef
 
 open Crypto.Indexing
 open Crypto.Symmetric.Bytes
@@ -26,7 +25,6 @@ module CMA = Crypto.Symmetric.UF1CMA
 module Seq = FStar.Seq
 module MAC = Crypto.Symmetric.MAC
 module EncodingWrapper = Crypto.AEAD.Wrappers.Encoding
-module RR = FStar.Monotonic.RRef
 module BufferUtils = Crypto.AEAD.BufferUtils
 
 (*** UF1CMA.mac ***)
@@ -330,7 +328,10 @@ let found_entry (#i:id) (n:Cipher.iv (Cipher.algi i)) (st:aead_state i Reader)
 (*+ verify_liveness: 
 	 liveness pre-condition for UF1CMA.verify
   **)	
-  
+
+(*
+ * AR: 12/29: TODO: is this rid eternal? if so, use erid from HST
+ *)
 let verify_liveness (#i:CMA.id) (r:rid) (ak:CMA.state i) (tag:lbuffer (v MAC.taglen)) (h:mem) = 
   ak_live CMA.(ak.region) ak h /\
   Buffer.live h tag

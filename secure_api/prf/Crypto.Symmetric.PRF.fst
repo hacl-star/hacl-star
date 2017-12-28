@@ -22,7 +22,6 @@ open FStar.HyperStack.All
 open FStar.Ghost
 open FStar.UInt8
 open FStar.UInt32
-open FStar.Monotonic.RRef
 
 open Crypto.Indexing
 open Crypto.Symmetric.Bytes
@@ -35,6 +34,8 @@ module MAC   = Crypto.Symmetric.MAC
 module CMA   = Crypto.Symmetric.UF1CMA
 module Block = Crypto.Symmetric.Cipher
 
+
+type rid = ST.erid
 
 // PRF TABLE
 

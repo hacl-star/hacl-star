@@ -28,7 +28,6 @@ open Crypto.Indexing
 open Flag
 
 module HS = FStar.HyperStack
-module RR = FStar.Monotonic.RRef
 module MAC = Crypto.Symmetric.MAC
 
 
@@ -562,7 +561,7 @@ let verify_ensures (#i:id) (st:state i) (acc:accBuffer i) (tag:MAC.tagB)
 
 (** Auxiliary lemma to propagate `ilog st.log` and `alog acc` in `verify` *)
 private val modifies_verify_aux: #a:Type -> #b:Type -> #c:Type -> #d:Type ->
-  #r:RR.rid -> #rel:Preorder.preorder c -> mref:ST.m_rref r c rel -> ref:HS.reference d ->
+  #r:erid -> #rel:Preorder.preorder c -> mref:ST.m_rref r c rel -> ref:HS.reference d ->
   buf1:Buffer.buffer a -> buf2:Buffer.buffer b ->
   h0:mem -> h1:mem -> h2:mem -> h3:mem -> Lemma
   (requires (
