@@ -95,53 +95,6 @@ val lemma_div_lt_ab: a:nat -> b:nat -> d:pos -> Lemma
     (ensures (a / d < b / d))
 let lemma_div_lt_ab a b d = admit()
 
-(* LEMMAS for Karatsuba's multiplication *)
-val lemma_distributivity_mult: a:int -> b:int -> c:int -> d:int -> Lemma
-  ((a + b) * (c + d) = a * c + a * d + b * c + b * d)
-let lemma_distributivity_mult a b c d = ()
-
-#reset-options "--z3rlimit 150 --initial_fuel 0 --max_fuel 0"
-
-val lemma_karatsuba_mult:
-	x:nat -> a:nat -> a0:nat -> a1:nat ->
-	b:nat -> b0:nat -> b1:nat -> Lemma
-	(requires (let pow_x = pow2 (pow2 x) in
-		      a == a1 * pow_x + a0 /\ b == b1 * pow_x + b0))
-	(ensures (let pow_x = pow2 (pow2 x) in
-		      let pow_x1 = pow2 (pow2 (x + 1)) in
-		      a * b == a1 * b1 * pow_x1 + (a0 * b1 + a1 * b0) * pow_x + a0 * b0))
-
-let lemma_karatsuba_mult x a a0 a1 b b0 b1 =
-	let pow_x = pow2 (pow2 x) in
-	let pow_x1 = pow2 (pow2 (x + 1)) in
-	assert (a * b == (a1 * pow_x + a0) * (b1 * pow_x + b0));
-	lemma_distributivity_mult (a1 * pow_x) a0 (b1 * pow_x) b0;
-	pow2_plus (pow2 x) (pow2 x);
-	pow2_double_sum x;
-    distributivity_add_left (a0 * b1) (a1 * b0) pow_x
-
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
-
-val lemma_pow_div_karatsuba:
-	x0:nat{x0 > 0} -> b:nat{b < pow2 (pow2 x0)} -> Lemma
-	(requires (True))
-	(ensures (let pow_x = pow2 (pow2 (x0 - 1)) in
-		      let b1 = b / pow_x in
-	 	      0 <= b1 /\ b1 < pow_x))
-
-let lemma_pow_div_karatsuba x0 b =
-	let x = x0 - 1 in
-	let pow_x = pow2 (pow2 x) in
-	pow2_lt_compat x0 x;
-	lemma_div_lt b (pow2 x0) (pow2 x);
-	assert (b / pow_x < pow2 (pow2 x0 - pow2 x));
-	pow2_plus (x0 - 1) 1;
-	assert_norm (pow2 1 = 2);
-	assert (pow2 x0 - pow2 (x0 - 1) == (pow2 (x0 - 1)) * (2 - 1))
-
-val abs: x:int -> Tot (y:int{ (x >= 0 ==> y = x) /\ (x < 0 ==> y = -x) })
-let abs x = if x >= 0 then x else -x
-
 (* LEMMAS for Montgomery's arithmetic *)
 #reset-options "--z3rlimit 50 --max_fuel 0"
 val lemma_mod_div_simplify: a:nat -> r:nat{r > 0} -> n:nat{n > 0} -> Lemma

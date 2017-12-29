@@ -45,15 +45,14 @@ let mont_reduction modBits r n n' c =
 	lemma_mont_reduction res r c n m;
 	res
 
-val karatsuba_mont_mod:
+val mul_mod_mont:
 	modBits:size_nat{1 < modBits /\ modBits < pow2 32} ->
 	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
 	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
 	a:elem (n + n) -> b:elem (n + n) -> Pure (elem (n + n))
 	(requires (True))
 	(ensures (fun res -> res % n == (a * b / r) % n))
-let karatsuba_mont_mod modBits r n n' a b =
-	//let c = karatsuba x a b in
+let mul_mod_mont modBits r n n' a b =
 	let c = a * b in
  	mont_reduction modBits r n n' c
 
@@ -128,7 +127,7 @@ let rec mod_exp_ modBits r n n' a b acc =
 	if b = 0
 	then acc
 	else begin
-		let a2 = karatsuba_mont_mod modBits r n n' a a in
+		let a2 = mul_mod_mont modBits r n n' a a in
 		assert (a2 % n == (a * a / r) % n);
 		let b2 = bn_div2 b in
 		lemma_div_mod b 2;
@@ -140,7 +139,7 @@ let rec mod_exp_ modBits r n n' a b acc =
 			res end
 		else begin
 			assert (b = 2 * b2 + 1);
-			let acc' = karatsuba_mont_mod modBits r n n' a acc in
+			let acc' = mul_mod_mont modBits r n n' a acc in
 			assert (acc' % n == (a * acc / r) % n);
 		    let res = mod_exp_ modBits r n n' a2 b2 acc' in
 			assert (res % n == ((pow a2 b2) * acc' / pow r b2) % n); //from ind hypo

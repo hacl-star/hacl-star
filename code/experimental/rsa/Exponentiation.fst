@@ -12,7 +12,7 @@ module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 open U32
 
-val karatsuba_mont_mod:
+val mul_mod_mont:
     exp_r:U32.t ->
     rLen:U32.t -> r:lbignum rLen ->
     n:lbignum rLen -> nInv:lbignum rLen ->
@@ -21,7 +21,7 @@ val karatsuba_mont_mod:
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
 
-let karatsuba_mont_mod exp_r rLen r n nInv aM bM resM =
+let mul_mod_mont exp_r rLen r n nInv aM bM resM =
     push_frame();
     let c = create 0uL (rLen +^ rLen) in
     bn_mul rLen aM rLen bM c; // c = a * b
@@ -40,8 +40,8 @@ val mod_exp_:
 let rec mod_exp_ exp_r rLen r n nInv aM bBits bLen b accM count =
     if (count <^ bBits) then begin
         (if (bn_is_bit_set bLen b count) then
-            karatsuba_mont_mod exp_r rLen r n nInv aM accM accM); //acc = (acc * a) % n
-        karatsuba_mont_mod exp_r rLen r n nInv aM aM aM; //a = (a * a) % n
+            mul_mod_mont exp_r rLen r n nInv aM accM accM); //acc = (acc * a) % n
+        mul_mod_mont exp_r rLen r n nInv aM aM aM; //a = (a * a) % n
         mod_exp_ exp_r rLen r n nInv aM bBits bLen b accM U32.(count +^ 1ul)
     end
 
