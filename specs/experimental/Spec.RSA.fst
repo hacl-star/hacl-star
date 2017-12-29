@@ -214,7 +214,7 @@ val rsa_blinding:
 	q:elem n{1 < q /\ n = p * q} ->
 	d:elem n{1 < d} ->
 	m:elem n ->
-	rBlind:bignum -> Tot (s:bignum{s == (pow m d) % n})
+	rBlind:bignum{rBlind < pow2 64} -> Tot (s:bignum{s == (pow m d) % n})
 
 let rsa_blinding modBits n p q d m rBlind =
 	let phi_n:nat = (p - 1) * (q - 1) in
@@ -228,9 +228,9 @@ let rsa_blinding modBits n p q d m rBlind =
 val rsa_sign:
 	modBits:modBits ->
 	skey:rsa_privkey modBits ->
-	rBlind:bignum{rBlind > 0} ->
+	rBlind:bignum{rBlind < pow2 64} ->
 	sLen:size_nat{sLen + hLen + 8 < pow2 32 /\ 0 <= (blocks modBits 8) - sLen - hLen - 3 /\
-				sLen + hLen + 8 < max_input_len_sha256} ->
+				  sLen + hLen + 8 < max_input_len_sha256} ->
 	salt:lbytes sLen ->
 	msgLen:size_nat{msgLen < max_input_len_sha256} ->
 	msg:lbytes msgLen ->
