@@ -22,26 +22,6 @@ let bn_is_less x y = x < y
 
 type elem (n:bignum) = e:bignum{bn_v e < bn_v n}
 
-#reset-options "--z3rlimit 50 --max_fuel 2"
-
-val mont_inverse_:
-	a:bignum -> exp_2:size_nat -> y:bignum -> i:size_nat{1 < i /\ i <= exp_2} -> Tot bignum
-	(decreases (exp_2 - i))
-let rec mont_inverse_ a exp_2 y i =
-	if i < exp_2 then begin
-		let pow2_i1 = pow2 (i - 1) in
-		let pow2_i = pow2_i1 * 2 in
-		let y = if (pow2_i1 < (a * y) % pow2_i) then y + pow2_i1 else y in
-		mont_inverse_ a exp_2 y (i + 1) end
-	else y
-
-#reset-options "--z3rlimit 50 --max_fuel 0"
-
-//res = a^(-1) % 2^(exp_2)
-val mont_inverse:
-	a:bignum -> exp_2:size_nat{1 < exp_2 /\ exp_2 + 1 <= max_size_t} -> Tot bignum
-let mont_inverse a exp_2 = mont_inverse_ a (exp_2 + 1) 1 2
-
 #reset-options "--z3rlimit 150 --max_fuel 0"
 
 val mont_reduction:
@@ -52,9 +32,9 @@ val mont_reduction:
 	(requires (True))
 	(ensures (fun res -> res % n == (c / r) % n))
 let mont_reduction modBits r n n' c =
-	let m:nat = (c * n') % r in
+	let m = (c * n') % r in
 	assert (0 <= m /\ m < r);
-	let m:nat = r - m in
+	let m = r - m in
 	assert (0 < m /\ m <= r);
 	let res:nat = (c + n * m) / r in
 	assert (c + m * n < 4 * n * n + r * n);
@@ -81,12 +61,10 @@ val to_mont:
 	modBits:size_nat{1 < modBits /\ modBits < pow2 32} ->
 	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
 	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
-	a:elem n -> Pure (elem (n + n))
-	(requires (True))
+	r2:elem n -> a:elem n -> Pure (elem (n + n))
+	(requires (r2 == (r * r) % n))
 	(ensures (fun res -> res % n == (a * r) % n))
-let to_mont modBits r n n' a =
-	let r2:nat = (r * r) % n in
-	assert (r2 < n);
+let to_mont modBits r n n' r2 a =
 	let c = a * r2 in
 	let res = mont_reduction modBits r n n' c in
 	lemma_mod_div_simplify a r n;
@@ -100,9 +78,9 @@ val from_mont:
 	(requires (True))
 	(ensures (fun res -> res == (a_r / r) % n))
 let from_mont modBits r n n' a_r =
-	let m:nat = (a_r * n') % r in
+	let m = (a_r * n') % r in
 	assert (0 <= m /\ m < r);
-	let m:nat = r - m in
+	let m = r - m in
 	assert (0 < m /\ m <= r);
 	let res:nat = (a_r + n * m) / r in
 	assert (a_r + m * n < n + n + r * n);
@@ -113,6 +91,28 @@ let from_mont modBits r n n' a_r =
 	small_division_lemma_1 (n + n) r;
 	lemma_mont_reduction_1 res r a_r n m;
 	res
+
+#reset-options "--z3rlimit 50 --max_fuel 2"
+
+val mont_inverse_:
+	n:bignum -> exp_2:size_nat -> nInv:bignum -> i:size_nat{1 < i /\ i <= exp_2} ->
+	pow2_i1:bignum{0 < pow2_i1} -> pow2_i:bignum -> Tot bignum
+	(decreases (exp_2 - i))
+let rec mont_inverse_ n exp_2 nInv i pow2_i1 pow2_i =
+	if i < exp_2 then begin
+		let pow2_i1 = pow2_i1 * 2 in
+		let pow2_i = pow2_i1 * 2 in
+		let nnInv = (n * nInv) % pow2_i in
+		let nInv = if (pow2_i1 < nnInv) then nInv + pow2_i1 else nInv in
+		mont_inverse_ n exp_2 nInv (i + 1) pow2_i1 pow2_i end
+	else nInv
+
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
+//res = n^(-1) % 2^(exp_2)
+val mont_inverse:
+	n:bignum -> exp_2:size_nat{1 < exp_2 /\ exp_2 + 1 <= max_size_t} -> Tot bignum
+let mont_inverse n exp_2 = mont_inverse_ n (exp_2 + 1) 1 2 1 0
 
 #reset-options "--z3rlimit 150 --max_fuel 2"
 
@@ -161,9 +161,10 @@ let mod_exp modBits n a b =
 	lemma_r_n modBits r n;
 	assert (4 * n < r);
 	let n'= mont_inverse n (2 + modBits) in
-	let a_r = to_mont modBits r n n' a in
+	let r2 = (r * r) % n in
+	let a_r = to_mont modBits r n n' r2 a in
 	assert (a_r % n == (a * r) % n);
-	let acc_r = to_mont modBits r n n' 1 in
+	let acc_r = to_mont modBits r n n' r2 1 in
 	assert (acc_r % n == r % n);
 	let res_r = mod_exp_ modBits r n n' a_r b acc_r in
 	assert (res_r % n == ((pow a_r b) * acc_r / pow r b) % n);
