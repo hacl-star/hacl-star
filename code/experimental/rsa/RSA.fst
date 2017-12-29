@@ -18,39 +18,34 @@ open U32
 inline_for_extraction let hLen = 32ul
 
 (* RSA *)
-noeq type rsa_pubkey =
-	| Mk_rsa_pubkey: n:bignum -> e:bignum -> rsa_pubkey
+noeq type rsa_pubkey modBits pkeyBits =
+	| Mk_rsa_pubkey: n:lbignum (bits_to_bn modBits) -> e:lbignum (bits_to_bn pkeyBits) -> rsa_pubkey modBits pkeyBits
 
-noeq type rsa_privkey =
-	| Mk_rsa_privkey: pkey:rsa_pubkey -> d:bignum -> rsa_privkey
+noeq type rsa_privkey modBits pkeyBits skeyBits =
+	| Mk_rsa_privkey: pkey:rsa_pubkey modBits pkeyBits -> d:lbignum (bits_to_bn skeyBits) -> rsa_privkey modBits pkeyBits skeyBits
 
-val blocks: 
-	x:U32.t{U32.v x > 0} -> m:U32.t{U32.v m > 0} -> r:U32.t{U32.v r > 0 /\ U32.v x <= (U32.v m) * (U32.v r)}
+val blocks: x:U32.t{v x > 0} -> m:U32.t{v m > 0} -> r:U32.t{v r > 0 /\ v x <= v m * v r}
 let blocks x m = (x -^ 1ul) /^ m +^ 1ul
 
 val xor_bytes:
 	len:U32.t ->
 	b1:lbytes len ->
-	b2:lbytes len{disjoint b1 b2} -> Stack unit
-	(requires (fun h -> live h b1 /\ live h b2))
-	(ensures (fun h0 _ h1 -> live h0 b1 /\ live h0 b2 /\ 
-							 live h1 b1 /\ live h1 b2 /\ 
-							 modifies_1 b1 h0 h1))
+	b2:lbytes len -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 
 let xor_bytes len b1 b2 =
 	C.Loops.in_place_map2 b1 b2 len (fun x y -> U8.(x ^^ y))
 
 val pss_encode_:
-	sLen:U32.t{U32.v sLen + U32.v hLen + 8 < pow2 32} ->
+	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
 	salt:lbytes sLen ->
 	msgLen:U32.t ->
-	msg:uint8_p{length msg = U32.v msgLen /\ disjoint msg salt} ->
-	emLen:U32.t{U32.v emLen - U32.v sLen - U32.v hLen - 2 >= 0} ->
-	em:lbytes emLen{disjoint em salt /\ disjoint em msg} -> Stack unit
-	(requires (fun h -> live h salt /\ live h msg /\ live h em))
-	(ensures (fun h0 _ h1 -> live h0 salt /\ live h0 msg /\ live h0 em /\
-							 live h1 salt /\ live h1 msg /\ live h1 em /\
-							 modifies_1 em h0 h1))
+	msg:lbytes msgLen ->
+	emLen:U32.t{v emLen - v sLen - v hLen - 2 >= 0} ->
+	em:lbytes emLen -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 
 let pss_encode_ sLen salt msgLen msg emLen em =
 	push_frame();
@@ -80,17 +75,15 @@ let pss_encode_ sLen salt msgLen msg emLen em =
 	pop_frame()
 	
 val pss_encode:
-	msBits:U32.t{U32.v msBits < 8} ->
-	sLen:U32.t{U32.v sLen + U32.v hLen + 8 < pow2 32} ->
+	msBits:U32.t{v msBits < 8} ->
+	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
 	salt:lbytes sLen ->
-	msgLen:U32.t{U32.v msgLen < pow2 61} ->
-	msg:uint8_p{length msg = U32.v msgLen /\ disjoint msg salt} ->
-	emLen:U32.t{U32.v emLen - U32.v sLen - U32.v hLen - 3 >= 0} ->
-	em:lbytes emLen{disjoint em salt /\ disjoint em msg} -> Stack unit
-	(requires (fun h -> live h salt /\ live h msg /\ live h em))
-	(ensures (fun h0 _ h1 -> live h0 salt /\ live h0 msg /\ live h0 em /\
-							 live h1 salt /\ live h1 msg /\ live h1 em /\
-							 modifies_1 em h0 h1))
+	msgLen:U32.t{v msgLen < pow2 61} ->
+	msg:lbytes msgLen ->
+	emLen:U32.t{v emLen - v sLen - v hLen - 3 >= 0} ->
+	em:lbytes emLen -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 
 let pss_encode msBits sLen salt msgLen msg emLen em =
 	if (msBits =^ 0ul)
@@ -103,16 +96,14 @@ let pss_encode msBits sLen salt msgLen msg emLen em =
 		em.(0ul) <- U8.(em.(0ul) &^ (0xffuy >>^ U32.(8ul -^ msBits)))
 
 val pss_verify_:
-	sLen:U32.t{U32.v sLen + U32.v hLen + 8 < pow2 32} ->
-	msBits:U32.t{U32.v msBits < 8} ->
-	emLen:U32.t{U32.v emLen - U32.v sLen - U32.v hLen - 2 >= 0} ->
+	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
+	msBits:U32.t{v msBits < 8} ->
+	emLen:U32.t{v emLen - v sLen - v hLen - 2 >= 0} ->
 	em:lbytes emLen ->
 	msgLen:U32.t ->
-	msg:uint8_p{length msg = U32.v msgLen /\ disjoint msg em} -> Stack bool
-	(requires (fun h -> live h em /\ live h msg))
-	(ensures (fun h0 _ h1 -> live h0 em /\ live h0 msg /\ 
-						     live h1 em /\ live h1 msg /\
-							 modifies_0 h0 h1))
+	msg:lbytes msgLen -> Stack bool
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 	
 let pss_verify_ sLen msBits emLen em msgLen msg =
 	push_frame();
@@ -151,16 +142,14 @@ let pss_verify_ sLen msBits emLen em msgLen msg =
 	res
 	
 val pss_verify:
-	sLen:U32.t{U32.v sLen + U32.v hLen + 8 < pow2 32} ->
-	msBits:U32.t{U32.v msBits < 8} ->
-	emLen:U32.t{U32.v emLen - U32.v sLen - U32.v hLen - 2 >= 0} ->
+	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
+	msBits:U32.t{v msBits < 8} ->
+	emLen:U32.t{v emLen - v sLen - v hLen - 2 >= 0} ->
 	em:lbytes emLen ->
 	msgLen:U32.t ->
-	msg:uint8_p{length msg = U32.v msgLen /\ disjoint msg em} -> Stack bool
-	(requires (fun h -> live h em /\ live h msg))
-	(ensures (fun h0 _ h1 -> live h0 em /\ live h0 msg /\ 
-							 live h1 em /\ live h1 msg /\
-							 modifies_0 h0 h1))
+	msg:lbytes msgLen -> Stack bool
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 
 let pss_verify sLen msBits emLen em msgLen msg =
 	let em_0 = U8.(em.(0ul) &^ (0xffuy <<^ msBits)) in
@@ -178,27 +167,19 @@ let pss_verify sLen msBits emLen em msgLen msg =
 		else pss_verify_ sLen msBits emLen em msgLen msg
 		end
 
-(* ADD disjointness for skey ? *)
 val rsa_sign:
-	modBits:U32.t{U32.v modBits > 0} ->
-	skeyBits:U32.t{U32.v skeyBits <= U32.v modBits} ->
-	skey:rsa_privkey ->
-	sLen:U32.t{U32.v sLen + U32.v hLen + 8 < pow2 32 /\ U32.v (blocks modBits 8ul) - U32.v sLen - U32.v hLen - 3 >= 0 } ->
+	modBits:U32.t{v modBits > 0} ->
+	pkeyBits:U32.t{v pkeyBits <= v modBits} ->
+	skeyBits:U32.t{v skeyBits <= v modBits} ->
+	skey:rsa_privkey modBits pkeyBits skeyBits ->
+	sLen:U32.t{v sLen + v hLen + 8 < pow2 32 /\ v (blocks modBits 8ul) - v sLen - v hLen - 3 >= 0 } ->
 	salt:lbytes sLen ->
-	msgLen:U32.t ->
-	msg:uint8_p{length msg = U32.v msgLen /\ disjoint salt msg} ->
-	sgnt:lbytes (blocks modBits 8ul){disjoint sgnt msg /\ disjoint sgnt salt} -> Stack unit
-	(requires (fun h -> let pkey = Mk_rsa_privkey?.pkey skey in
-			live h msg /\ live h salt /\ live h sgnt /\ 
-			live h (Mk_rsa_privkey?.d skey) /\ live h (Mk_rsa_pubkey?.n pkey) /\ live h (Mk_rsa_pubkey?.e pkey)))
-	(ensures (fun h0 _ h1 ->
-			let pkey = Mk_rsa_privkey?.pkey skey in
-			live h0 msg /\ live h0 salt /\ live h0 sgnt /\ live h1 msg /\ live h1 salt /\ live h1 sgnt /\
-			live h0 (Mk_rsa_privkey?.d skey) /\ live h0 (Mk_rsa_pubkey?.n pkey) /\ live h0 (Mk_rsa_pubkey?.e pkey) /\
-			live h1 (Mk_rsa_privkey?.d skey) /\ live h1 (Mk_rsa_pubkey?.n pkey) /\ live h1 (Mk_rsa_pubkey?.e pkey) /\
-			modifies_1 sgnt h0 h1))
+	msgLen:U32.t -> msg:lbytes msgLen ->
+	sgnt:lbytes (blocks modBits 8ul) -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 
-let rsa_sign modBits skeyBits skey sLen salt msgLen msg sgnt =
+let rsa_sign modBits pkeyBits skeyBits skey sLen salt msgLen msg sgnt =
 	push_frame();
 	let pkey = Mk_rsa_privkey?.pkey skey in
 	let n = Mk_rsa_pubkey?.n pkey in
@@ -221,18 +202,14 @@ let rsa_sign modBits skeyBits skey sLen salt msgLen msg sgnt =
 
 
 val rsa_verify:
-	modBits:U32.t{U32.v modBits > 0} ->
-	pkeyBits:U32.t{U32.v pkeyBits <= U32.v modBits} ->
-	pkey:rsa_pubkey ->
-	sLen:U32.t{U32.v sLen + U32.v hLen + 8 < pow2 32} ->
+	modBits:U32.t{v modBits > 0} ->
+	pkeyBits:U32.t{v pkeyBits <= v modBits} ->
+	pkey:rsa_pubkey modBits pkeyBits ->
+	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
 	sgnt:lbytes (blocks modBits 8ul) ->
-	msgLen:U32.t ->
-	msg:uint8_p{length msg = U32.v msgLen /\ disjoint msg sgnt} -> Stack bool
-	(requires (fun h -> live h msg /\ live h sgnt /\ live h (Mk_rsa_pubkey?.e pkey) /\ live h (Mk_rsa_pubkey?.n pkey)))
-	(ensures (fun h0 _ h1 -> live h0 msg /\ live h0 sgnt /\ live h1 msg /\ live h1 sgnt /\
-			live h0 (Mk_rsa_pubkey?.e pkey) /\ live h0 (Mk_rsa_pubkey?.n pkey) /\
-			live h1 (Mk_rsa_pubkey?.e pkey) /\ live h1 (Mk_rsa_pubkey?.n pkey) /\ 
-			modifies_0 h0 h1))
+	msgLen:U32.t -> msg:lbytes msgLen -> Stack bool
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 
 let rsa_verify modBits pkeyBits pkey sLen sgnt msgLen msg =
 	push_frame();

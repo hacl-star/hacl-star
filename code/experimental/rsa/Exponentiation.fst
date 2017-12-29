@@ -3,10 +3,10 @@ module Exponentiation
 open FStar.HyperStack.All
 open FStar.Buffer
 
+open Lib
+open Convert
 open Montgomery
 open Multiplication
-open Convert
-open Lib
 
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
@@ -14,7 +14,7 @@ open U32
 
 val karatsuba_mont_mod:
     exp_r:U32.t ->
-    rLen:bnlen -> r:lbignum rLen ->
+    rLen:U32.t -> r:lbignum rLen ->
     n:lbignum rLen -> nInv:lbignum rLen ->
     aM:lbignum rLen -> bM:lbignum rLen ->
     resM:lbignum rLen -> Stack unit
@@ -30,19 +30,19 @@ let karatsuba_mont_mod exp_r rLen r n nInv aM bM resM =
 
 val mod_exp_:
     exp_r:U32.t ->
-    rLen:bnlen -> r:lbignum rLen ->
+    rLen:U32.t -> r:lbignum rLen ->
     n:lbignum rLen -> nInv:lbignum rLen -> aM:lbignum rLen ->
-    bBits:U32.t{U32.v bBits > 0} -> b:lbignum (bits_to_bn bBits) ->
-    accM:lbignum rLen -> count:U32.t{U32.v count <= U32.v bBits} -> Stack unit
+    bBits:U32.t{U32.v bBits > 0} -> bLen:U32.t{v bLen = v (bits_to_bn bBits)} -> b:lbignum bLen ->
+    accM:lbignum rLen -> count:U32.t{v count <= v bBits} -> Stack unit
     (requires (fun h -> True))
     (ensures  (fun h0 _ h1 -> True))
 
-let rec mod_exp_ exp_r rLen r n nInv aM bBits b accM count =
-    if U32.(count <^ bBits) then begin
-        (if (bn_is_bit_set b count) then
+let rec mod_exp_ exp_r rLen r n nInv aM bBits bLen b accM count =
+    if (count <^ bBits) then begin
+        (if (bn_is_bit_set bLen b count) then
             karatsuba_mont_mod exp_r rLen r n nInv aM accM accM); //acc = (acc * a) % n
         karatsuba_mont_mod exp_r rLen r n nInv aM aM aM; //a = (a * a) % n
-        mod_exp_ exp_r rLen r n nInv aM bBits b accM U32.(count +^ 1ul)
+        mod_exp_ exp_r rLen r n nInv aM bBits bLen b accM U32.(count +^ 1ul)
     end
 
 // res = a ^^ b mod n
@@ -56,6 +56,7 @@ val mod_exp:
 
 let mod_exp modBits nLen n a bBits b res =
     push_frame();
+    let bLen = bits_to_bn bBits in
     let rLen = bits_to_bn (3ul +^ modBits) in
     let exp_r = modBits +^ 2ul in
 
@@ -78,7 +79,7 @@ let mod_exp modBits nLen n a bBits b res =
     to_mont exp_r rLen r n1 nInv r2 a1 aM;
     to_mont exp_r rLen r n1 nInv r2 acc accM;
 
-    mod_exp_ exp_r rLen r n1 nInv aM bBits b accM 0ul;
+    mod_exp_ exp_r rLen r n1 nInv aM bBits bLen b accM 0ul;
 
     from_mont exp_r rLen r n1 nInv accM res1;
     blit res1 0ul res 0ul nLen;

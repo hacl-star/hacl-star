@@ -19,15 +19,12 @@ let bn_mul_by_limb_addj_f a_i l c r_ij =
     (c', r)
 
 val bn_mul_by_limb_addj_:
-    aLen:bnlen -> a:lbignum aLen ->
+    aLen:U32.t -> a:lbignum aLen ->
     l:U64.t -> i:U32.t{v i <= v aLen} -> j:U32.t ->
     resLen:U32.t{v aLen + v j < v resLen} ->
     res:lbignum resLen -> Stack U64.t
-    (requires (fun h -> live h a /\ live h res))
-    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 res /\
-     			      live h1 a /\ live h1 res /\
-			      modifies_1 res h0 h1))
-
+    (requires (fun h -> True))
+    (ensures  (fun h0 _ h1 -> True))
 let rec bn_mul_by_limb_addj_ aLen a l i j resLen res =
     if i =^ 0ul then 0uL
     else begin
@@ -39,27 +36,23 @@ let rec bn_mul_by_limb_addj_ aLen a l i j resLen res =
     end
 
 val bn_mul_by_limb_addj:
-    aLen:bnlen -> a:lbignum aLen -> l:U64.t -> j:U32.t ->
+    aLen:U32.t -> a:lbignum aLen -> l:U64.t -> j:U32.t ->
     resLen:U32.t{v aLen + v j < v resLen} ->
     res:lbignum resLen -> Stack U64.t
-    (requires (fun h -> live h a /\ live h res))
-    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 res /\
-        		      live h1 a /\ live h1 res /\ 
-			      modifies_1 res h0 h1))
+    (requires (fun h -> True))
+    (ensures  (fun h0 _ h1 -> True))
 
 let bn_mul_by_limb_addj aLen a l j resLen res =
     bn_mul_by_limb_addj_ aLen a l aLen j resLen res
 
 val bn_mul_:
-    aLen:bnlen -> a:lbignum aLen ->
-    bLen:bnlen -> b:lbignum bLen ->
-    j:U32.t{U32.v j <= U32.v bLen} ->
-    resLen:U32.t{v resLen = v aLen + v bLen} -> 
+    aLen:U32.t -> a:lbignum aLen ->
+    bLen:U32.t -> b:lbignum bLen ->
+    j:U32.t{v j <= v bLen} ->
+    resLen:U32.t{v resLen = v aLen + v bLen} ->
     res:lbignum resLen -> Stack unit
-    (requires (fun h -> live h a /\ live h b /\ live h res))
-    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h0 res /\
-        		      live h1 a /\ live h1 b /\ live h1 res /\ 
-			      modifies_1 res h0 h1))
+    (requires (fun h -> True))
+    (ensures  (fun h0 _ h1 -> True))
 
 let rec bn_mul_ aLen a bLen b j resLen res =
     if j =^ 0ul then ()
@@ -72,13 +65,11 @@ let rec bn_mul_ aLen a bLen b j resLen res =
 
 // res = a * b
 val bn_mul:
-    aLen:bnlen -> a:lbignum aLen ->
-    bLen:bnlen -> b:lbignum bLen ->
-    res:lbignum U32.(aLen +^ bLen) -> Stack unit
-    (requires (fun h -> live h a /\ live h b /\ live h res))
-    (ensures  (fun h0 _ h1 -> live h0 a /\ live h0 b /\ live h0 res /\
-        		      live h1 a /\ live h1 b /\ live h1 res /\ 
-			      modifies_1 res h0 h1))
+    aLen:U32.t -> a:lbignum aLen ->
+    bLen:U32.t -> b:lbignum bLen ->
+    res:lbignum (aLen +^ bLen) -> Stack unit
+    (requires (fun h -> True))
+    (ensures  (fun h0 _ h1 -> True))
         
 let bn_mul aLen a bLen b res = 
     bn_mul_ aLen a bLen b bLen (aLen +^ bLen) res

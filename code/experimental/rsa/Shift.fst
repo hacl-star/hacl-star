@@ -3,6 +3,7 @@ module Shift
 open FStar.HyperStack.All
 open FStar.Buffer
 open FStar.Int.Cast
+
 open Lib
 open Addition
 
@@ -13,13 +14,12 @@ open U32
 let bn_tbit = 0x8000000000000000uL
 
 val bn_lshift_:
-    aLen:bnlen -> a:lbignum aLen ->
+    aLen:U32.t -> a:lbignum aLen ->
     count:U32.t -> nw:U32.t ->
     lb:U32.t{0 < v lb /\ v lb < 64} ->
-    res:lbignum aLen{v count + v nw < v aLen /\ disjoint a res} -> Stack unit
-	(requires (fun h -> live h a /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\
-        live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
+    res:lbignum aLen{v count + v nw < v aLen} -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 let rec bn_lshift_ aLen a count nw lb res =
     if count >^ 0ul then begin
         let i = nw +^ count in
@@ -34,13 +34,11 @@ let rec bn_lshift_ aLen a count nw lb res =
 
 (* res = a << n *)
 val bn_lshift:
-    aLen:bnlen -> a:lbignum aLen ->
+    aLen:U32.t -> a:lbignum aLen ->
     nCount:U32.t{v nCount > 0 /\ v aLen - (v nCount) / 64 - 1 > 0} ->
-    res:lbignum aLen{disjoint a res} ->
-    Stack unit
-	(requires (fun h -> live h a /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\
-        live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
+    res:lbignum aLen -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 let bn_lshift aLen a nCount res =
     let nw = nCount /^ 64ul in
     let lb = nCount %^ 64ul in
@@ -50,12 +48,11 @@ let bn_lshift aLen a nCount res =
 
 
 val bn_lshift1_:
-    aLen:bnlen -> a:lbignum aLen ->
+    aLen:U32.t -> a:lbignum aLen ->
     carry:U64.t -> i:U32.t{v i < v aLen} ->
-    res:lbignum aLen{disjoint a res} -> Stack unit
-    (requires (fun h -> live h a /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\ 
-        live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
+    res:lbignum aLen -> Stack unit
+    (requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 let rec bn_lshift1_ aLen a carry i res =
     if i <^ aLen then begin
         let tmp = a.(i) in
@@ -65,24 +62,21 @@ let rec bn_lshift1_ aLen a carry i res =
 
 (* res = a << 1 *)
 val bn_lshift1:
-    aLen:bnlen -> a:lbignum aLen ->
-    res:lbignum aLen{disjoint a res} ->
-    Stack unit
-	(requires (fun h -> live h a /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\
-        live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
+    aLen:U32.t -> a:lbignum aLen ->
+    res:lbignum aLen -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 
 let bn_lshift1 aLen a res = bn_lshift1_ aLen a 0uL 0ul res
 
 
 val bn_rshift_:
-    aLen:bnlen -> a:lbignum aLen ->
+    aLen:U32.t -> a:lbignum aLen ->
     i:U32.t{v i > 0} -> nw:U32.t ->
     rb:U32.t{0 < v rb /\ v rb < 64} -> l:U64.t ->
-    res:lbignum aLen{v i + v nw < v aLen /\ disjoint a res} -> Stack unit
-	(requires (fun h -> live h a /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\
-        live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
+    res:lbignum aLen{v i + v nw < v aLen} -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 let rec bn_rshift_ aLen a i nw rb l res =
     if (i <^ aLen -^ nw) then begin
         let tmp = U64.(l >>^ rb) in
@@ -95,12 +89,11 @@ let rec bn_rshift_ aLen a i nw rb l res =
 
 (* res = a >> n *)
 val bn_rshift:
-    aLen:bnlen -> a:lbignum aLen ->
+    aLen:U32.t -> a:lbignum aLen ->
     nCount:U32.t{v nCount > 0 /\ v aLen - (v nCount) / 64 - 1 > 0} ->
-    res:lbignum aLen{disjoint a res} -> Stack unit
-	(requires (fun h -> live h a /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\
-        live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
+    res:lbignum aLen -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 let bn_rshift aLen a nCount res =
     let nw = nCount /^ 64ul in
     let rb = nCount %^ 64ul in
@@ -112,12 +105,11 @@ let bn_rshift aLen a nCount res =
 
 
 val bn_rshift1_:
-    aLen:bnlen -> a:lbignum aLen ->
+    aLen:U32.t -> a:lbignum aLen ->
     carry:U64.t -> i:U32.t{v i < v aLen} ->
-    res:lbignum aLen{disjoint a res} -> Stack unit
-    (requires (fun h -> live h a /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\ 
-        live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
+    res:lbignum aLen -> Stack unit
+    (requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 let rec bn_rshift1_ aLen a carry i res =
     if i >^ 0ul then begin
         let i = i -^ 1ul in
@@ -128,11 +120,10 @@ let rec bn_rshift1_ aLen a carry i res =
 
 (* res = a >> 1 *)
 val bn_rshift1:
-    aLen:bnlen -> a:lbignum aLen ->
-    res:lbignum aLen{disjoint a res} -> Stack unit
-	(requires (fun h -> live h a /\ live h res))
-	(ensures (fun h0 _ h1 -> live h0 a /\ live h0 res /\
-        live h1 a /\ live h1 res /\ modifies_1 res h0 h1))
+    aLen:U32.t -> a:lbignum aLen ->
+    res:lbignum aLen -> Stack unit
+	(requires (fun h -> True))
+	(ensures (fun h0 _ h1 -> True))
 let bn_rshift1 aLen a res =
     //if a is 0 then return 0
     let i = aLen -^ 1ul in
@@ -145,9 +136,9 @@ let bn_rshift1 aLen a res =
 
 // res = a % (pow2 nCount)
 val bn_mod_pow2_n:
-    aLen:bnlen -> a:lbignum aLen ->
+    aLen:U32.t -> a:lbignum aLen ->
     nCount:U32.t ->
-    resLen:bnlen -> res:lbignum resLen -> Stack unit
+    resLen:U32.t -> res:lbignum resLen -> Stack unit
 	(requires (fun h -> True))
 	(ensures (fun h0 _ h1 -> True))
 

@@ -3,24 +3,23 @@ module Montgomery
 open FStar.HyperStack.All
 open FStar.Buffer
 
-open Multiplication
-open Addition
-open Shift
-open Comparison
-open Convert
 open Lib
+open Convert
+open Addition
+open Comparison
+open Multiplication
+open Shift
 
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 open U32
 
 val bn_pow2_mod_n_:
-    rLen:bnlen -> a:lbignum rLen ->
+    rLen:U32.t -> a:lbignum rLen ->
     i:U32.t -> p:U32.t ->
     r:lbignum rLen -> Stack unit
 	(requires (fun h -> True))
 	(ensures (fun h0 _ h1 -> True))
-
 let rec bn_pow2_mod_n_ len a i p r =
     if (i <^ p) then begin
         bn_lshift1 len r r;
@@ -44,7 +43,7 @@ let bn_pow2_mod_n aBits rLen a p r =
     bn_pow2_mod_n_ rLen a aBits p r
 
 
-type mont_inverse_state (rLen:bnlen) = lbignum U32.(rLen +^ rLen +^ (rLen +^ rLen) +^ rLen)
+type mont_inverse_state (rLen:U32.t) = lbignum (rLen +^ rLen +^ (rLen +^ rLen) +^ rLen)
 
 let get_ri1 #r (st:mont_inverse_state r) : lbignum r = Buffer.sub st 0ul r
 let get_ri  #r (st:mont_inverse_state r) : lbignum r = Buffer.sub st r r
@@ -53,7 +52,7 @@ let get_nni_mod #r (st:mont_inverse_state r) : lbignum r = Buffer.sub st (r +^ r
 let get_ninv #r (st:mont_inverse_state r) : lbignum r = Buffer.sub st (r +^ r +^ r +^ r +^ r) r
 
 val mont_inverse_:
-    rLen:bnlen -> n:lbignum rLen ->
+    rLen:U32.t -> n:lbignum rLen ->
     exp_2:U32.t -> i:U32.t ->
     st:mont_inverse_state rLen -> Stack unit
     (requires (fun h -> True))
@@ -80,7 +79,7 @@ let rec mont_inverse_ rLen n exp_2 i st =
     end
 
 val mont_inverse:
-    rLen:bnlen -> n:lbignum rLen ->
+    rLen:U32.t -> n:lbignum rLen ->
     exp_2:U32.t ->
     nInv:lbignum rLen -> Stack unit
     (requires (fun h -> True))
@@ -97,7 +96,7 @@ let mont_inverse rLen n exp_2 nInv =
 
 val mont_reduction:
     exp_r:U32.t ->
-    rLen:bnlen -> r:lbignum rLen ->
+    rLen:U32.t -> r:lbignum rLen ->
     n:lbignum rLen -> nInv:lbignum rLen ->
     c:lbignum (rLen +^ rLen) ->
     res:lbignum rLen -> Stack unit
@@ -127,7 +126,7 @@ let mont_reduction exp_r rLen r n nInv c res =
 
 val to_mont:
     exp_r:U32.t ->
-    rLen:bnlen -> r:lbignum rLen ->
+    rLen:U32.t -> r:lbignum rLen ->
     n:lbignum rLen -> nInv:lbignum rLen ->
     r2:lbignum rLen -> a:lbignum rLen ->
     aM:lbignum rLen -> Stack unit
@@ -143,7 +142,7 @@ let to_mont exp_r rLen r n nInv r2 a aM =
 
 val from_mont:
     exp_r:U32.t ->
-    rLen:bnlen -> r:lbignum rLen ->
+    rLen:U32.t -> r:lbignum rLen ->
     n:lbignum rLen -> nInv:lbignum rLen ->
     aM:lbignum rLen -> a:lbignum rLen -> Stack unit
     (requires (fun h -> True))
