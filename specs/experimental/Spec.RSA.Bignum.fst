@@ -28,7 +28,7 @@ val mont_reduction:
 	modBits:size_nat{1 < modBits /\ modBits < pow2 32} ->
 	r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
 	n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
-	c:nat{c < 4 * n * n} -> Pure (elem (n + n))
+	c:nat{c < r * n} -> Pure (elem (n + n))
 	(requires (True))
 	(ensures (fun res -> res % n == (c / r) % n))
 let mont_reduction modBits r n n' c =
@@ -36,12 +36,15 @@ let mont_reduction modBits r n n' c =
 	assert (0 <= m /\ m < r);
 	let m = r - m in
 	assert (0 < m /\ m <= r);
-	let res:nat = (c + n * m) / r in
-	assert (c + m * n < 4 * n * n + r * n);
-	assert (c + m * n < r * n + r * n);
-    distributivity_add_right r n n;
-	lemma_div_lt_ab (c + m * n) (r * (n + n)) r;
-	multiple_division_lemma (n + n) r;
+	let res = (c + n * m) / r in
+	assert (res >= 0);
+	assert (c + n * m <= c + n * r);
+	lemma_div_le (c + n * m) (c + n * r) r;
+	assert (res <= (c + n * r) / r);
+	division_addition_lemma c r n;
+	assert (res <= c / r + n);
+	assert (c / r < n);
+	assert (res < n + n);
 	lemma_mont_reduction res r c n m;
 	res
 
@@ -54,6 +57,8 @@ val mul_mod_mont:
 	(ensures (fun res -> res % n == (a * b / r) % n))
 let mul_mod_mont modBits r n n' a b =
 	let c = a * b in
+	assert (c < 4 * n * n);
+	assert (c < r * n);
  	mont_reduction modBits r n n' c
 
 val to_mont:
@@ -65,8 +70,12 @@ val to_mont:
 	(ensures (fun res -> res % n == (a * r) % n))
 let to_mont modBits r n n' r2 a =
 	let c = a * r2 in
+	assert (c == a * ((r * r) % n));
+	assert (c < n * n);
+	assert (c < r * n);
 	let res = mont_reduction modBits r n n' c in
-	lemma_mod_div_simplify a r n;
+	assert (res % n == ((a * ((r * r) % n)) / r) % n);
+	lemma_mod_div_simplify res a r n;
 	res
 
 val from_mont:
@@ -82,12 +91,13 @@ let from_mont modBits r n n' a_r =
 	let m = r - m in
 	assert (0 < m /\ m <= r);
 	let res:nat = (a_r + n * m) / r in
-	assert (a_r + m * n < n + n + r * n);
-	lemma_div_lt_ab (a_r + m * n) (n + n + r * n) r;
-	division_addition_lemma (n + n) r n;
-	assert (n + n < 4 * n);
-	assert (n + n < r);
-	small_division_lemma_1 (n + n) r;
+	assert (a_r + n * m <= a_r + n * r);
+	lemma_div_le (a_r + n * m) (a_r + n * r) r;
+	assert (res <= (a_r + n * r) / r);
+	division_addition_lemma a_r r n;
+	assert (res <= a_r / r + n);
+	small_division_lemma_1 a_r r;
+	assert (res <= n);
 	lemma_mont_reduction_1 res r a_r n m;
 	res
 
@@ -128,7 +138,6 @@ let rec mod_exp_ modBits r n n' a b acc =
 	then acc
 	else begin
 		let a2 = mul_mod_mont modBits r n n' a a in
-		assert (a2 % n == (a * a / r) % n);
 		let b2 = bn_div2 b in
 		lemma_div_mod b 2;
 		if (bn_is_even b) then begin
@@ -140,8 +149,7 @@ let rec mod_exp_ modBits r n n' a b acc =
 		else begin
 			assert (b = 2 * b2 + 1);
 			let acc' = mul_mod_mont modBits r n n' a acc in
-			assert (acc' % n == (a * acc / r) % n);
-		    let res = mod_exp_ modBits r n n' a2 b2 acc' in
+			let res = mod_exp_ modBits r n n' a2 b2 acc' in
 			assert (res % n == ((pow a2 b2) * acc' / pow r b2) % n); //from ind hypo
 			lemma_mod_exp_1 n a a2 b b2 acc acc' r res;
 			res end
@@ -158,26 +166,16 @@ val mod_exp:
 let mod_exp modBits n a b =
 	let r = pow2 (2 + modBits) in
 	lemma_r_n modBits r n;
-	assert (4 * n < r);
 	let n'= mont_inverse n (2 + modBits) in
 	let r2 = (r * r) % n in
 	let a_r = to_mont modBits r n n' r2 a in
-	assert (a_r % n == (a * r) % n);
 	let acc_r = to_mont modBits r n n' r2 1 in
-	assert (acc_r % n == r % n);
 	let res_r = mod_exp_ modBits r n n' a_r b acc_r in
-	assert (res_r % n == ((pow a_r b) * acc_r / pow r b) % n);
 	lemma_mod_exp_2 n a a_r b acc_r r res_r;
-	assert (res_r % n == ((pow a b) * r) % n);
 	let res = from_mont modBits r n n' res_r in
-	assert (res == (res_r / r) % n);
 	lemma_mod_mult_div_1 res_r r n;
-	assert (res == ((res_r % n) / r) % n);
-	assert (res == ((((pow a b) * r) % n) / r) % n);
 	lemma_mod_mult_div_1 ((pow a b) * r) r n;
-	assert (res == ((pow a b) * r / r) % n);
 	multiple_division_lemma (pow a b) r;
-	assert (res == (pow a b) % n);
 	res
 
 (* BIGNUM CONVERT FUNCTIONS *)
