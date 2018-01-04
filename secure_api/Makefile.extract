@@ -88,7 +88,8 @@ FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst LowCProvider/fst/LowCPro
 
 # Automatic dependency analysis; the hack forces this target to be rebuilt
 # whenever the value of $(IMPL_CHOICE) changes.
-.depend.extract: .hack.$(IMPL_CHOICE) $(OUTPUT_DIR)
+.depend.extract: .hack.$(IMPL_CHOICE)
+	mkdir -p $(OUTPUT_DIR)
 	$(FSTAR) --dep full $(FSTAR_FILES) > .depend.extract
 
 include .depend.extract
