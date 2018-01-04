@@ -7,7 +7,6 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 
-open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.UInt32
 open FStar.Ghost

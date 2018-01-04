@@ -5,14 +5,13 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.HyperStack.ST
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 module I = Crypto.Indexing
 module Plain = Crypto.Plain
 
 (* Several constants that the interface relies on *)
 type eternal_region =
-     rgn:HH.rid {HS.is_eternal_region rgn}
+     rgn:HS.rid {HS.is_eternal_region rgn}
 
 type lbuffer (l:nat) =
      b:Buffer.buffer UInt8.t {Buffer.length b == l}
@@ -72,12 +71,12 @@ val prf_region: #i:_ -> #rw:_ -> aead_state i rw -> eternal_region
 val log       : #i:_ -> #rw:_ -> s:aead_state i rw{safeMac i} -> HS.mem -> GTot (Seq.seq (entry i))
 
 let address   = nat
-let addr_unused_in (rid:HH.rid) (a:address) (m0:HS.mem) =
+let addr_unused_in (r:HS.rid) (a:address) (m0:HS.mem) =
   let open FStar.HyperStack in
-  FStar.Monotonic.Heap.addr_unused_in a (Map.sel m0.h rid)
-let contains_addr (rid:HH.rid) (a:address) (m:HS.mem) =
+  FStar.Monotonic.Heap.addr_unused_in a (Map.sel m0.h r)
+let contains_addr (rid:HS.rid) (a:address) (m:HS.mem) =
   ~ (addr_unused_in rid a m)
-let fresh_addresses (rid:HH.rid) (addrs:FStar.TSet.set address) (m0:HS.mem) (m1:HS.mem) =
+let fresh_addresses (rid:HS.rid) (addrs:FStar.TSet.set address) (m0:HS.mem) (m1:HS.mem) =
   forall a. a `FStar.TSet.mem` addrs ==>
        addr_unused_in rid a m0 /\
        contains_addr  rid a m1
@@ -109,7 +108,7 @@ let rec as_set (#a:Type) (l:list a) : TSet.set a =
 (** Allocating a writer **)
 val gen (i:I.id)
         (prf_rgn:eternal_region)
-        (log_rgn:eternal_region{HH.disjoint prf_rgn log_rgn})
+        (log_rgn:eternal_region{HS.disjoint prf_rgn log_rgn})
   : ST (aead_state i I.Writer)
     (requires (fun h -> True))
     (ensures (fun h0 s h1 ->
@@ -128,7 +127,7 @@ val gen (i:I.id)
 
 // (* A reader never writes to the log_region, but may write to the prf_region *)
 // let read_footprint (#i:_) (wr:aead_state i I.Writer) : GTot fp =
-//   FStar.TSet.filter (fun (rs:(HH.rid * refs_in_region)) -> fst rs == prf_region wr)
+//   FStar.TSet.filter (fun (rs:(HS.rid * refs_in_region)) -> fst rs == prf_region wr)
 //                     (footprint wr)
 
 val genReader
@@ -176,14 +175,14 @@ let enc_dec_separation (#i:_) (#rw:_) (st:aead_state i rw)
     Buffer.disjoint aad cipher /\
     Buffer.disjoint (Plain.as_buffer plain) aad /\
     Buffer.disjoint (Plain.as_buffer plain) cipher /\
-    HH.disjoint_regions (Set.as_set [Buffer.frameOf (Plain.as_buffer plain);
+    HS.disjoint_regions (Set.as_set [Buffer.frameOf (Plain.as_buffer plain);
                                      Buffer.frameOf cipher;
                                      Buffer.frameOf aad])
                         (Set.as_set [log_region st;
                                      prf_region st]) /\
-    Buffer.frameOf cipher <> HH.root /\
-    Buffer.frameOf aad <> HH.root /\
-    Buffer.frameOf (Plain.as_buffer plain) <> HH.root
+    Buffer.frameOf cipher <> HS.root /\
+    Buffer.frameOf aad <> HS.root /\
+    Buffer.frameOf (Plain.as_buffer plain) <> HS.root
     (* HS.is_eternal_region (Buffer.frameOf cipher) /\ // why? *)
     (* HS.is_eternal_region (Buffer.frameOf (Plain.as_buffer plain)) /\ //why? *)
     (* HS.is_eternal_region (Buffer.frameOf aad) /\ //why? *)
