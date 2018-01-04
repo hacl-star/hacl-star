@@ -1,0 +1,230 @@
+# This Makefile is capable of separately lax-checking files in parallel using a
+# .depend file; it then generates, in the out/ directory:
+# - QuicProvider, an OCaml library that calls a C-compiled HACL*
+# - LowCProvider, an OCaml library like the one above, with a smaller API
+# - Crypto_AEAD_Main.c, a standalone version of secure_api that is suitable for
+#   the miTLS build in pure C.
+# - krml-test.exe, a test driver for AEAD
+# - LowCTests.exe, a test driver for LowCProvider
+#
+# An extraction configuration is made up of $(CONCRETE_DIR)/Flag.fst, which
+# eliminates all the ideal code. Furthermore, a particular compile-time choice of
+# algorithms can be achieved by re-defining the Crypto.Indexing.fst file.
+#
+# In this Makefile, the implementation choice is IMPL_CHOICE, which can be
+# overriden with any of the directory names in concrete_specializations/.
+#
+# A caller of this Makefile need not run "make clean" before using a different
+# IMPL_CHOICE.
+HACL_HOME 	?= ..
+KREMLIN_HOME 	?= ../../kremlin
+FSTAR_HOME 	?= ../../FStar
+CONCRETE_DIR	= $(HACL_HOME)/secure_api/concrete_specializations
+IMPL_CHOICE	?= runtime_switch
+DIST_DIR	= out/$(IMPL_CHOICE)
+OUTPUT_DIR	= $(DIST_DIR)/extracted
+CORECRYPTO_DIR	= $(FSTAR_HOME)/contrib/CoreCrypto/fst
+
+# Pseudo autoconfiguration
+UNAME		= $(shell uname)
+SED		= $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
+MARCH		= x86_64
+ifeq ($(UNAME),Darwin)
+  VARIANT=-Darwin
+else ifeq ($(UNAME),Linux)
+  CCOPTS_EXTRA=-fPIC
+  VARIANT=-Linux
+else ifeq ($(OS),Windows_NT)
+  CC=$(MARCH)-w64-mingw32-gcc
+  AR=$(MARCH)-w64-mingw32-ar
+endif
+CCOPTS=-Wall -Wextra -Werror -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
+
+# Warning: these are not always buildable, depending on IMPL_CHOICE...! Consult
+# the main Makefile for valid combinations.
+all: standalone $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
+
+standalone: $(DIST_DIR)/Crypto_AEAD_Main.h
+
+%.test: %
+	./$<
+
+test: krml-test lowc-test
+krml-test: $(DIST_DIR)/krml-test.exe.test
+lowc-test: $(DIST_DIR)/LowCTests.exe.test
+
+################################################################################
+# Building upon the generated .depend file				       #
+################################################################################
+
+# The include paths, including the implementation choice.
+INCLUDE_PATHS=$(addprefix --include , \
+	$(HACL_HOME)/specs \
+	$(HACL_HOME)/code/bignum \
+	$(HACL_HOME)/code/experimental/aesgcm \
+	$(HACL_HOME)/code/lib/kremlin \
+	$(HACL_HOME)/code/poly1305 \
+	$(HACL_HOME)/code/salsa-family \
+	$(KREMLIN_HOME)/kremlib	\
+	$(HACL_HOME)/secure_api \
+	$(HACL_HOME)/secure_api/aead \
+	$(HACL_HOME)/secure_api/prf \
+	$(HACL_HOME)/secure_api/vale \
+	$(HACL_HOME)/secure_api/uf1cma \
+	$(HACL_HOME)/secure_api/utils \
+	$(HACL_HOME)/secure_api/LowCProvider/fst \
+	$(CORECRYPTO_DIR) \
+	$(CONCRETE_DIR) $(CONCRETE_DIR)/$(IMPL_CHOICE))
+
+# The F* compiler and the entry points.
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) --lax --cache_checked_modules \
+	$(INCLUDE_PATHS) --odir $(OUTPUT_DIR)
+FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst LowCProvider/fst/LowCProvider.fst
+
+# Horrible Makefile trick.
+.hack.$(IMPL_CHOICE):
+	@rm -rf .hack.*
+	touch $@
+
+# Automatic dependency analysis; the hack forces this target to be rebuilt
+# whenever the value of $(IMPL_CHOICE) changes.
+.depend.extract: .hack.$(IMPL_CHOICE) $(OUTPUT_DIR)
+	$(FSTAR) --dep full $(FSTAR_FILES) > .depend.extract
+
+include .depend.extract
+
+# Now we get parallel lax-checking, which is nice.
+%.checked.lax: %
+	$(FSTAR) $*
+	touch $@
+
+# Another generic rule that leverages .depend.extract, for interactive
+# verification.
+%.fsti-in:
+	@echo --hint_info $(INCLUDE_PATHS) $(OTHERFLAGS) --lax \
+	  --cache_checked_modules
+
+# F* doesn't recursively create directories for --odir
+$(OUTPUT_DIR):
+	mkdir -p $@
+
+# Filling out the right invocations to generate a .krml
+$(OUTPUT_DIR)/%.krml:
+	$(FSTAR) $(subst .checked.lax,,$<) --codegen Kremlin --extract_module \
+	  $(basename $(notdir $(subst .checked.lax,,$<)))
+
+# ... and a .ml file. Note: it's hard to put these in two separate
+# sub-directories because they share the --odir option of F*.
+$(OUTPUT_DIR)/%.ml:
+	$(FSTAR) $(subst .checked.lax,,$<) --codegen OCaml --extract_module \
+	  $(basename $(notdir $(subst .checked.lax,,$<)))
+
+
+################################################################################
+# 1. A clean single-file version of AEAD for the C build of miTLS    	       #
+################################################################################
+
+# Generic rule for single-file KreMLin packaging -- use with caution, this may
+# repeat most of your program in every single compilation unit.
+$(DIST_DIR)/%.h $(DIST_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
+	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$*=*' -minimal -skip-compilation \
+	  -tmpdir $(DIST_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
+	  $(EXTRA)
+
+# A couple extra arguments needed for just Crypto_AEAD_Main.
+$(DIST_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
+
+
+################################################################################
+# 2. Compiling Vale on all platforms                             	       #
+################################################################################
+
+VALE_DIR = vale/asm
+
+VALE_OBJ = $(addprefix $(VALE_DIR)/,sha256_main_i.o \
+  sha256-$(MARCH)$(VARIANT).o Vale_Hash_SHA2_256.o \
+  vale_aes_glue.o aes-$(MARCH)$(VARIANT).o)
+
+# These three concrete specializations want you to bring in the vale object
+# files into your cmxa / .exe
+vale_aes_concrete_id_EXTRA 	= $(VALE_OBJ)
+vale_aes_abstract_id_EXTRA 	= $(VALE_OBJ)
+runtime_switch_EXTRA 		= $(VALE_OBJ)
+
+# Easy!
+%.o: %.S
+	$(CC) $(CCOPTS) -c $< -o $@
+
+################################################################################
+# 3. The functional test, krml-test.exe                          	       #
+################################################################################
+
+# Note: this does not yet use the standalone C file because the test still
+# bypasses Crypto.AEAD.Main
+$(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES)) $($(IMPL_CHOICE)_EXTRA)
+	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
+	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
+	    Crypto.AEAD.Main=Crypto.* -add-include '"kremstr.h"' -add-include \
+	  '"testlib.h"' -add-include '"kremlib.h"' -tmpdir $(OUTPUT_DIR) $^ -o $@ \
+	  -drop LowCProvider,CryptoTypes $(KREMLIN_HOME)/kremlib/testlib.c
+
+
+################################################################################
+# 4. The LowC provider library                                   	       #
+################################################################################
+
+# Since we're building an actual C file, we need the standalone AEAD file, along
+# with the actual extraction of the index. We also need a helper from
+# Crypto.Symmetric.Bytes.
+HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(DIST_DIR)/Crypto_Indexing.h \
+  $(DIST_DIR)/Crypto_AEAD_Main.h
+
+# Note: we don't use gcc -MM because this would need to happen after KreMLin
+# extraction, and then every run of this Makefile would start by extracting the
+# entire world just to get the dependencies between C files.
+$(DIST_DIR)/Crypto_AEAD_Main.o: $(HEADERS)
+LowCProvider/lowc_stub.o: $(HEADERS)
+
+OCAMLOPTS=-package fstarlib,zarith -g -I $(FSTAR_HOME)/ulib/ml
+OCAMLOPT=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind opt $(OCAMLOPTS)
+OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
+
+# Then, we need to generate some .o ourselves, using ocamlopt to get all the
+# right include paths...
+%.o: %.c
+	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -ccopt -o \
+	  -ccopt $@ -ccopt -fPIC -ccopt -Wno-unused-variable -ccopt -Wno-parentheses
+
+# Standard rule.
+%.cmx: %.ml
+	$(OCAMLOPT) -c $< -I LowCProvider -I $(DIST_DIR) -I $(OUTPUT_DIR) -I $(CORECRYPTO_DIR) -o $@
+
+# Note: we don't use ocamldep because this would need to happen after
+# extraction... meaning that the Makefile, no matter what, would always
+# re-extract to get the dependencies. Make it a separate target?
+LowCProvider/LowCProvider.cmx: $(OUTPUT_DIR)/CryptoTypes.cmx
+LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
+
+# Finally, ocamlmklib is smart enough to take all of these at once.
+$(DIST_DIR)/LowC.cmxa: \
+	  $(OUTPUT_DIR)/CryptoTypes.cmx LowCProvider/LowCProvider.cmx \
+	  LowCProvider/lowc_stub.o \
+	  $(DIST_DIR)/Crypto_AEAD_Main.o $(DIST_DIR)/Crypto_Indexing.o \
+	  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $($(IMPL_CHOICE)_EXTRA)
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
+	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cmxa,%,$@)
+
+
+################################################################################
+# 5. The LowC provider tests                                     	       #
+################################################################################
+
+# Everything is built into the cmxa, but ocamlopt still needs to see the cmx's
+# for LowCProvider and CryptoTypes, hence the two include paths.
+$(DIST_DIR)/LowCTests.exe: $(KREMLIN_HOME)/kremlib/kremstr.o \
+	  $(DIST_DIR)/LowC.cmxa LowCProvider/Tests.cmx
+	$(OCAMLOPT) -I $(OUTPUT_DIR) -I LowCProvider  \
+	  -ccopt -L$(DIST_DIR) -linkpkg $^ -o $@
+
+clean:
+	rm -rf .depend.extract out/* vale/asm/*.o LowCProvider/*.{cm*,o,a}

@@ -36,9 +36,9 @@ type aadlen_32 =
 val keylen      : I.id -> UInt32.t
 val statelen    : I.id -> UInt32.t
 
-let bytes = FStar.Seq.seq FStar.UInt8.t
-let lbytes  (l:nat) = b:bytes  {Seq.length b == l}
-type adata = b:bytes {Seq.length b <= v aadmax}
+let bytes = FStar.Bytes.bytes
+let lbytes  (l:nat) = b:bytes  {Seq.length (Bytes.reveal b) == l}
+type adata = b:bytes {Seq.length (Bytes.reveal b) <= v aadmax}
 type cipher (i:I.id) (l:nat) = lbytes (l + v taglen)
 
 inline_for_extraction
@@ -50,7 +50,7 @@ val mk_entry (#i:I.id) :
     #l:Plain.plainLen ->
     p:Plain.plain i l ->
     c:cipher i (Seq.length (Plain.as_bytes p)) ->
-    entry i
+    GTot (entry i)
 val entry_injective (#i:I.id)
                     (n:nonce i) (n':nonce i)
                     (ad:adata) (ad':adata)
@@ -60,7 +60,7 @@ val entry_injective (#i:I.id)
   : Lemma (let e  = mk_entry n ad p c in
            let e' = mk_entry n' ad' p' c' in
            (e == e' <==> (n == n' /\ ad == ad' /\ l == l' /\ p == p' /\ c == c')))
-val nonce_of_entry (#i:_) (e:entry i) : nonce i
+val nonce_of_entry (#i:_) (e:entry i) : GTot (nonce i)
 
 let safeMac (i:I.id) = Flag.safeHS i && Flag.mac1 i
 let safeId  (i:I.id) = Flag.safeId i
@@ -81,42 +81,50 @@ let fresh_addresses (rid:HS.rid) (addrs:FStar.TSet.set address) (m0:HS.mem) (m1:
        addr_unused_in rid a m0 /\
        contains_addr  rid a m1
 
-noeq
-type refs_in_region =
-  | AllRefs  : refs_in_region
-  | SomeRefs : FStar.TSet.set address -> refs_in_region
+// JP: commenting out this (tentative, I take it?) model of the AEAD footprint
+// in favor of something more abstract and temporary, to better support miTLS and C
+// extraction
+(* noeq *)
+(* type refs_in_region = *)
+(*   | AllRefs  : refs_in_region *)
+(*   | SomeRefs : FStar.TSet.set address -> refs_in_region *)
 
-type fp = FStar.TSet.set (HS.rid * refs_in_region)
+(* type fp = FStar.TSet.set (HS.rid * refs_in_region) *)
+(* val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> GTot fp *)
+
+(* let regions_of_fp (fp:fp): GTot (FStar.TSet.set HS.rid) = FStar.TSet.map fst fp *)
+
+(* let refs_of_region (rgn:HS.rid) (footprint:fp) : GTot (FStar.TSet.set refs_in_region) = *)
+(*   FStar.TSet.map snd (FStar.TSet.filter (fun r -> fst r == rgn) footprint) *)
+
+(* //HS only provides modifies on sets, not tsets *)
+(* val hh_modifies_t (_:FStar.TSet.set HS.rid) (h0:HS.mem) (h1:HS.mem) : Type0 *)
+
+(* let modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0 = *)
+(*   let open FStar.HyperStack in *)
+(*   hh_modifies_t (regions_of_fp fp) h0 h1 /\ *)
+(*   (forall r. r `TSet.mem` (regions_of_fp fp) ==> ( *)
+(*         let refs = refs_of_region r fp in *)
+(*         (forall a. a `TSet.mem` refs ==> *)
+(*               (match a with *)
+(*               | AllRefs -> True *)
+(*               | SomeRefs addrs -> FStar.Heap.modifies_t addrs (Map.sel h0.h r) (Map.sel h1.h r))))) *)
+
+(* let preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0 = *)
+(*   let open FStar.HyperStack in *)
+(*   (forall r. r `TSet.mem` regions_of_fp fp ==> ( *)
+(*         let refs = refs_of_region r fp in *)
+(*         (forall a. a `TSet.mem` refs ==> ( *)
+(*               let mod_refs = *)
+(*                 match a with *)
+(*                 | AllRefs -> TSet.empty *)
+(*                 | SomeRefs addrs -> TSet.complement addrs in *)
+(*               FStar.Heap.modifies_t mod_refs (Map.sel h0.h r) (Map.sel h1.h r))))) *)
+
+let fp = FStar.Ghost.erased FStar.Pointer.Base.loc
 val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> GTot fp
-
-let regions_of_fp (fp:fp): GTot (FStar.TSet.set HS.rid) = FStar.TSet.map fst fp
-
-let refs_of_region (rgn:HS.rid) (footprint:fp) : GTot (FStar.TSet.set refs_in_region) =
-  FStar.TSet.map snd (FStar.TSet.filter (fun r -> fst r == rgn) footprint)
-
-//HS only provides modifies on sets, not tsets
-val hh_modifies_t (_:FStar.TSet.set HS.rid) (h0:HS.mem) (h1:HS.mem) : Type0
-
-let modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0 =
-  let open FStar.HyperStack in
-  hh_modifies_t (regions_of_fp fp) h0 h1 /\
-  (forall r. r `TSet.mem` (regions_of_fp fp) ==> (
-        let refs = refs_of_region r fp in
-        (forall a. a `TSet.mem` refs ==>
-              (match a with
-              | AllRefs -> True
-              | SomeRefs addrs -> FStar.Heap.modifies_t addrs (Map.sel h0.h r) (Map.sel h1.h r)))))
-
-let preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0 =
-  let open FStar.HyperStack in
-  (forall r. r `TSet.mem` regions_of_fp fp ==> (
-        let refs = refs_of_region r fp in
-        (forall a. a `TSet.mem` refs ==> (
-              let mod_refs =
-                match a with
-                | AllRefs -> TSet.empty
-                | SomeRefs addrs -> TSet.complement addrs in
-              FStar.Heap.modifies_t mod_refs (Map.sel h0.h r) (Map.sel h1.h r)))))
+val modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0
+val preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0
 
 //Leaving this abstract for now; but it should imply Crypto.AEAD.Invariant.safelen i len (otp_offset i)
 val safelen     : I.id -> nat -> bool
@@ -147,8 +155,9 @@ val gen (i:I.id)
              log_region s == log_rgn /\
              prf_region s == prf_rgn /\
              (exists fresh.
-                fresh_addresses prf_rgn fresh h0 h1 /\
-                footprint s == as_set [(log_rgn, AllRefs); (prf_rgn, SomeRefs fresh)]) /\
+                fresh_addresses prf_rgn fresh h0 h1 // /\
+                // footprint s == as_set [(log_rgn, AllRefs); (prf_rgn, SomeRefs fresh)]
+             ) /\
              (safeMac i ==> log s h1 == Seq.createEmpty) /\
              invariant s h1
     ))
@@ -156,10 +165,11 @@ val gen (i:I.id)
 
 (** Building a reader from a writer **)
 
-(* A reader never writes to the log_region, but may write to the prf_region *)
-let read_footprint (#i:_) (wr:aead_state i I.Writer) : GTot fp =
-  FStar.TSet.filter (fun (rs:(HS.rid * refs_in_region)) -> fst rs == prf_region wr)
-                    (footprint wr)
+// JP: commented out for the same reasons as above
+// (* A reader never writes to the log_region, but may write to the prf_region *)
+// let read_footprint (#i:_) (wr:aead_state i I.Writer) : GTot fp =
+//   FStar.TSet.filter (fun (rs:(HH.rid * refs_in_region)) -> fst rs == prf_region wr)
+//                     (footprint wr)
 
 val genReader
            (#i: I.id)
@@ -170,8 +180,9 @@ val genReader
                HS.modifies Set.empty h0 h1 /\
                invariant rd h1 /\
                log_region rd == log_region wr /\
-               prf_region rd == prf_region wr /\
-               footprint  rd == read_footprint wr))
+               prf_region rd == prf_region wr//  /\
+               // footprint  rd == read_footprint wr
+ ))
 
 
 (** [coerce]: Only needed for modeling the adversary *)
@@ -240,17 +251,14 @@ let entry_of
   let aad = Buffer.as_seq h aad in
   let p = Plain.sel_plain h plainlen plain in
   let c = Buffer.as_seq h cipher_tag in
-  mk_entry n aad p c
+  mk_entry n (FStar.Bytes.hide aad) p (FStar.Bytes.hide c)
 
 let entry_for_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i})
   : GTot (option (entry i)) =
-    Seq.find_l (fun e -> nonce_of_entry e = n) (log st h)
+    Seq.ghost_find_l (fun e -> nonce_of_entry e = n) (log st h)
 
 let fresh_nonce (#i:_) (#rw:_) (n:nonce i) (st:aead_state i rw) (h:HS.mem{safeMac i}): GTot bool =
   None? (entry_for_nonce n st h)
-
-let just_one_buffer (#a:Type) (b:Buffer.buffer a) : GTot fp =
-   as_set [(Buffer.frameOf b, SomeRefs (as_set [Buffer.as_addr b]))]
 
 val encrypt
           (i: I.id)
@@ -268,7 +276,7 @@ val encrypt
                invariant st h /\
                (safeMac i ==> fresh_nonce n st h)))
   (ensures (fun h0 _ h1 ->
-               modifies_fp (footprint st `TSet.union` just_one_buffer cipher_tag) h0 h1 /\
+               // modifies_fp FStar.Pointer.Base.(loc_union (footprint st) (loc_buffer cipher_tag)) h0 h1 /\
                enc_dec_liveness st aad plain cipher_tag h1 /\
                invariant st h1 /\
                (safeMac i ==>
@@ -292,5 +300,5 @@ val decrypt
   (ensures (fun h0 verified h1 ->
                invariant st h1 /\
                enc_dec_liveness st aad plain cipher_tag h1 /\
-               modifies_fp (footprint st `TSet.union` just_one_buffer (Plain.as_buffer plain)) h0 h1 /\
+               // modifies_fp FStar.Pointer.Base.(loc_union (footprint st) (loc_buffer (Plain.as_buffer plain))) h0 h1 /\
                (safeId i ==> entry_for_nonce n st h1 == Some (entry_of n aad plain cipher_tag h1))))

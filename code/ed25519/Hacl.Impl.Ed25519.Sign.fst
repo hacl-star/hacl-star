@@ -50,7 +50,7 @@ let lemma_modifies_3 h0 h1 h2 h3 h4 h5 h6 a b c =
 private
 val append_to_sig:
   signature:hint8_p{length signature = 64} ->
-  a:hint8_p{length a = 32 /\ disjoint a signature} -> 
+  a:hint8_p{length a = 32 /\ disjoint a signature} ->
   b:hint8_p{length b = 32 /\ disjoint b signature} ->
   Stack unit
     (requires (fun h -> live h signature /\ live h a /\ live h b))
@@ -68,11 +68,11 @@ let append_to_sig signature a b =
   let h2 = ST.get() in
   no_upd_lemma_1 h1 h2 (Buffer.sub signature 32ul 32ul) (Buffer.sub signature 0ul 32ul);
   Seq.lemma_eq_intro (as_seq h2 signature) FStar.Seq.(as_seq h0 a @| as_seq h0 b)
-  
+
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val sign__:
   signature:hint8_p{length signature = 64} ->

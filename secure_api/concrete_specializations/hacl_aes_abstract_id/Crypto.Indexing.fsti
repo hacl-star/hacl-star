@@ -29,15 +29,15 @@ type aesImpl =
   | ValeAES
   | HaclAES
 
+(* The id type is to be instantiated by a client *)
 val id:Type0
 
 val aeadAlg_of_id: i:id -> Tot aeadAlg
-
 val macAlg_of_id: i:id -> Tot macAlg
-
 val cipherAlg_of_id: i:id -> Tot cipherAlg
 
-val aesImpl_of_id: i:id -> Tot aesImpl
+inline_for_extraction
+let aesImpl_of_id (_:id) = HaclAES
 
 val aeadAlg_cipherAlg: i:id -> Lemma
   (requires True)

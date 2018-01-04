@@ -29,21 +29,37 @@ type aesImpl =
   | ValeAES
   | HaclAES
 
-val id:Type0
+(* A concrete choice for [id], for testing purposes. *)
+let id: Type0 = aeadAlg
 
-val aeadAlg_of_id: i:id -> Tot aeadAlg
+inline_for_extraction
+let aeadAlg_of_id i = i
 
-val macAlg_of_id: i:id -> Tot macAlg
+inline_for_extraction
+let macAlg_of_id i =
+  match i with
+  | AES_128_GCM       -> GHASH
+  | AES_256_GCM       -> GHASH
+  | CHACHA20_POLY1305 -> POLY1305
 
-val cipherAlg_of_id: i:id -> Tot cipherAlg
+inline_for_extraction
+let cipherAlg_of_id i =
+  match i with
+  | AES_128_GCM       -> AES128
+  | AES_256_GCM       -> AES256
+  | CHACHA20_POLY1305 -> CHACHA20
 
-val aesImpl_of_id: i:id -> Tot aesImpl
+inline_for_extraction
+let aesImpl_of_id (i:id) =
+  HaclAES
 
-val aeadAlg_cipherAlg: i:id -> Lemma
+let aeadAlg_cipherAlg: i:id -> Lemma
   (requires True)
   (ensures
     ((aeadAlg_of_id i == AES_128_GCM ==> cipherAlg_of_id i == AES128) /\
      (aeadAlg_of_id i == AES_256_GCM ==> cipherAlg_of_id i == AES256) /\
      (aeadAlg_of_id i == CHACHA20_POLY1305 ==> cipherAlg_of_id i == CHACHA20)))
+  =
+    fun (i: id) -> ()
 
-val testId: a:aeadAlg -> Tot (i:id{aeadAlg_of_id i = a})
+let testId (a:aeadAlg): Tot (i:id{aeadAlg_of_id i = a}) = a
