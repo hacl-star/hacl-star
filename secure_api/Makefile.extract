@@ -174,6 +174,11 @@ $(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILE
 # 4. The LowC provider library                                   	       #
 ################################################################################
 
+# How to get a working fstarlib.
+.PHONY: $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa
+$(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa:
+	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
+
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
@@ -196,8 +201,9 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -ccopt -o \
 	  -ccopt $@ -ccopt -fPIC -ccopt -Wno-unused-variable -ccopt -Wno-parentheses
 
-# Standard rule.
-%.cmx: %.ml
+# Gross approximation: the cmx's we build are most likely extracted F* code and,
+# as such, require a working fstarlib.
+%.cmx: %.ml $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa
 	$(OCAMLOPT) -c $< -I LowCProvider -I $(DIST_DIR) -I $(OUTPUT_DIR) -I $(CORECRYPTO_DIR) -o $@
 
 # Note: we don't use ocamldep because this would need to happen after
@@ -212,7 +218,6 @@ $(DIST_DIR)/LowC.cmxa: \
 	  LowCProvider/lowc_stub.o \
 	  $(DIST_DIR)/Crypto_AEAD_Main.o $(DIST_DIR)/Crypto_Indexing.o \
 	  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $($(IMPL_CHOICE)_EXTRA)
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cmxa,%,$@)
 
 
