@@ -118,8 +118,8 @@ noeq type state (p:Spec.parameters) =
     hash:lbuffer (uint_t p.wt) Spec.size_hash_w;
     k:lbuffer (uint_t p.wt) p.kSize;
     ws:lbuffer (uint_t p.wt) p.kSize;
-    block:lbuffer (uint_t p.wt) Spec.size_block_w;
-    len_block:len_block_t p;
+    blocks:lbuffer (uint_t p.wt) (2 * Spec.size_block_w);
+    len_block:lbuffer (uint_t p.wt) 1;
     n:lbuffer (uint_t p.wt) 1;
     tmp_block:lbuffer (uint_t p.wt) Spec.size_block_w;
   }
@@ -157,7 +157,10 @@ assume val init: p:parameters -> StackInline (state p)
 //   {hash = h0; ws = ws0; block = block0; len_block = size 0; n = size 0; tmp_block = tmp_block0}
 
 (* Definition of the core compression function *)
-let update_block (p:parameters) (block:lbuffer uint8 (Spec.size_block p)) (st:state p) =
+let update_block (p:parameters) (block:lbuffer uint8 (Spec.size_block p)) (st:state p)
+: Stack unit
+        (requires (fun h -> live h block))
+        (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st.hash h0 h1)) =
   Spec.Lib.IntBuf.LoadStore.uints_from_bytes_be st.tmp_block block;
   ws p st.ws st.tmp_block;
   let hash1 = st.hash in
@@ -167,20 +170,72 @@ let update_block (p:parameters) (block:lbuffer uint8 (Spec.size_block p)) (st:st
   st.n.(size 0) <- n0 +. (size 1)
 
 (* Definition of the compression function iterated over multiple blocks *)
-let update_multi (p:parameters) (n:size_t{uint_v n * Spec.size_block p <= max_size_t}) (blocks:lbytes (uint_v n * Spec.size_block p)) (st:state p{(as_lseq st.n h1).[0] + uint_v n <= max_size_t}) : Tot (st1:state p) =
+let update_multi (p:parameters) (n:size_t{uint_v n * Spec.size_block p <= max_size_t}) (blocks:lbuffer uint8 (uint_v n * Spec.size_block p)) (st:state p)
+: Stack unit
+        (requires (fun h -> v (as_lseq st.n h).[0] + v n <= max_size_t))
+        (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st.hash h0 h1)) =
   let bl = size_block p in
   let old_n = st.n in
   let old_len_block = st.len_block in
-  iteri n (fun i -> update_block p (sub blocks (bl * i) bl)) st
+  // iteri n (fun i -> update_block p (sub blocks FStar.Mul.((Spec.size_block p) * i) bl)) st
+  ()
 
-(* Definition of the function for the partial block compression *)
-let update_last (p:parameters) (len:size_nat) (last:lbytes len) (st:state p{len < size_block p /\ (st.n * size_block p) + len <= max_size_t})
-: Tot (state p) =
-  let blocks = pad_single p st.n len last in
-  update_multi p (number_blocks_padding_single p len) blocks st
+(* Definition of the core compression function *)
+let update' (p:parameters) (len:size_t) (input:lbuffer uint8 (uint_v len)) (st:state p)
+: Stack unit
+        (requires (fun h -> True))
+        (ensures  (fun h0 _ h1 -> True)) =
+  let len_block = st.len_block.(size 0) in
+  if len_block +. len <. size_block p then begin
+    let block = sub #uint8 #(FStar.Mul.(2 * uint_v (size_block p))) #(uint_v len) st.blocks len_block len in
+    // copy #uint8 #(uint_v len) len input st.blocks;
+    let nv = len_block +. len in
+    // st.len_block.(size 0) <- nv;
+    () end
+  else begin
+    let prev_n = st.n in
+    // Fill the first part of the partial block and run update
+    let l1 = size_block p -. len_block in
+    let rem1 = sub input (size 0) l1 in
+    let block = sub st.blocks (size 0) (size_block p) in
+//    let block = update_sub block st.len_block l1 rem1 in
+//    let st = update_block p block st in
+//    let st = {st with n = prev_n + 1} in
+    () end
+  // else begin
+  //   let prev_n = st.n in
+  //   // Fill the first part of the partial block and run update
+  //   let l1 = size_block p - st.len_block in
+  //   let rem1 = sub input 0 l1 in
+  //   let block = sub st.blocks 0 (size_block p) in
+  //   let block = update_sub block st.len_block l1 rem1 in
+  //   let st = update_block p block st in
+  //   let st = {st with n = prev_n + 1} in
+  //   // Handle full blocks in the rest of the input data
+  //   let l2 : size_nat = len - l1 in
+  //   let rem2 = sub input l1 l2 in
+  //   let n : size_nat = l2 / size_block p in
+  //   let r : size_nat = l2 % size_block p in
+  //   let blocks = sub #uint8 #l2 rem2 0 (n * (size_block p)) in
+  //   let st = update_multi p n blocks st in
+  //   // Handle the remainder of the input
+  //   let rem3 = sub #uint8 #l2 rem2 (n * (size_block p)) r in
+  //   let pblock = update_sub st.blocks 0 r rem3 in
+  //   {st with blocks = pblock; len_block = r}
+  // end
 
 (* Definition of the finalization function *)
-let finish p (hash:hash_w p) : lbytes p.size_hash =
-  let hash_final = uints_to_bytes_be hash in
+let finish' (p:parameters) (st:state p{st.n + number_blocks_padding_single p st.len_block <= max_size_t}) : lbytes p.size_hash =
+  let pblock = sub st.blocks 0 st.len_block in
+  let blocks = pad p st.n st.len_block pblock in
+  assert(st.n + number_blocks_padding_single p st.len_block <= max_size_t);
+  let st = update_multi p (number_blocks_padding_single p st.len_block) blocks st in
+  let hash_final = uints_to_bytes_be st.hash in
   let h = slice hash_final 0 p.size_hash in
   h
+
+(* Definition of the SHA2 ontime function based on incremental calls *)
+let hash' (p:parameters) (len:size_nat{len < max_input p}) (input:lbytes len) : lbytes p.size_hash =
+  let st = init p in
+  let st = update' p len input st in
+  finish' p st
