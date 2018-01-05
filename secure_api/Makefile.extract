@@ -19,6 +19,7 @@
 HACL_HOME 	?= ..
 KREMLIN_HOME 	?= ../../kremlin
 FSTAR_HOME 	?= ../../FStar
+MLCRYPTO_HOME   ?= ../../../MLCrypto
 CONCRETE_DIR	= $(HACL_HOME)/secure_api/concrete_specializations
 IMPL_CHOICE	?= runtime_switch
 DIST_DIR	= out/$(IMPL_CHOICE)
@@ -86,11 +87,12 @@ FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst LowCProvider/fst/LowCPro
 	@rm -rf .hack.*
 	touch $@
 
+EXTRACT='* -FStar -CryptoTypes'
 # Automatic dependency analysis; the hack forces this target to be rebuilt
 # whenever the value of $(IMPL_CHOICE) changes.
 .depend.extract: .hack.$(IMPL_CHOICE)
 	mkdir -p $(OUTPUT_DIR)
-	$(FSTAR) --dep full $(FSTAR_FILES) > .depend.extract
+	$(FSTAR) --extract $(EXTRACT) --dep full $(FSTAR_FILES) > .depend.extract
 
 include .depend.extract
 
@@ -198,23 +200,23 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 # Then, we need to generate some .o ourselves, using ocamlopt to get all the
 # right include paths...
 %.o: %.c
-	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -ccopt -o \
+	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -I $(MLCRYPTO_HOME) -ccopt -o \
 	  -ccopt $@ -ccopt -fPIC -ccopt -Wno-unused-variable -ccopt -Wno-parentheses
 
 # Gross approximation: the cmx's we build are most likely extracted F* code and,
 # as such, require a working fstarlib.
 %.cmx: %.ml $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa
-	$(OCAMLOPT) -c $< -I LowCProvider -I $(DIST_DIR) -I $(OUTPUT_DIR) -I $(CORECRYPTO_DIR) -o $@
+	$(OCAMLOPT) -c $< -I LowCProvider -I $(DIST_DIR) -I $(OUTPUT_DIR) -I $(MLCRYPTO_HOME) -o $@
 
 # Note: we don't use ocamldep because this would need to happen after
 # extraction... meaning that the Makefile, no matter what, would always
 # re-extract to get the dependencies. Make it a separate target?
-LowCProvider/LowCProvider.cmx: $(OUTPUT_DIR)/CryptoTypes.cmx
+LowCProvider/LowCProvider.cmx: $(MLCRYPTO_HOME)/CryptoTypes.cmx
 LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
 
 # Finally, ocamlmklib is smart enough to take all of these at once.
 $(DIST_DIR)/LowC.cmxa: \
-	  $(OUTPUT_DIR)/CryptoTypes.cmx LowCProvider/LowCProvider.cmx \
+	  $(MLCRYPTO_HOME)/CryptoTypes.cmx LowCProvider/LowCProvider.cmx \
 	  LowCProvider/lowc_stub.o \
 	  $(DIST_DIR)/Crypto_AEAD_Main.o $(DIST_DIR)/Crypto_Indexing.o \
 	  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $($(IMPL_CHOICE)_EXTRA)
