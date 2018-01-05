@@ -9,7 +9,6 @@ open FStar.HyperStack.All
 
 open FStar.UInt32
 open FStar.Ghost
-open FStar.Monotonic.RRef
 
 open FStar.Math.Lib
 open FStar.Math.Lemmas
@@ -18,7 +17,6 @@ open Crypto.Symmetric.Bytes
 open Crypto.Plain
 open Flag
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 module MAC = Crypto.Symmetric.MAC
@@ -26,11 +24,11 @@ module CMA = Crypto.Symmetric.UF1CMA
 module Cipher = Crypto.Symmetric.Cipher
 module PRF = Crypto.Symmetric.PRF
 
-type region = rgn:HH.rid {HS.is_eternal_region rgn}
+type region = rgn:HS.rid {HS.is_eternal_region rgn}
 
 let alg (i:id) = cipherAlg_of_id i
 
-type rgn = rgn:HH.rid {HS.is_eternal_region rgn}
+type rgn = rgn:HS.rid {HS.is_eternal_region rgn}
 
 // Concrete, somewhat arbitrary bounds on input lengths;
 // these should go to some configuration flle
@@ -409,7 +407,7 @@ let store_lengths i aadlen txtlen w =
   | POLY1305 -> store_lengths_poly1305 aadlen txtlen w
   | GHASH    -> store_lengths_ghash    aadlen txtlen w
 
-let fresh_sref (#a:Type0) h0 h1 (r:HS.reference a) =
+let fresh_sref (#a:Type0) h0 h1 (r:ST.reference a) =
   (r `HS.unused_in` h0) /\
   HS.frameOf r == HS.(h1.tip) /\
   h1 `HS.contains` r

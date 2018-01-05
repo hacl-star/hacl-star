@@ -81,6 +81,46 @@ let fresh_addresses (rid:HS.rid) (addrs:FStar.TSet.set address) (m0:HS.mem) (m1:
        addr_unused_in rid a m0 /\
        contains_addr  rid a m1
 
+// JP: commenting out this (tentative, I take it?) model of the AEAD footprint
+// in favor of something more abstract and temporary, to better support miTLS and C
+// extraction
+(* noeq *)
+(* type refs_in_region = *)
+(*   | AllRefs  : refs_in_region *)
+(*   | SomeRefs : FStar.TSet.set address -> refs_in_region *)
+
+(* type fp = FStar.TSet.set (HS.rid * refs_in_region) *)
+(* val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> GTot fp *)
+
+(* let regions_of_fp (fp:fp): GTot (FStar.TSet.set HS.rid) = FStar.TSet.map fst fp *)
+
+(* let refs_of_region (rgn:HS.rid) (footprint:fp) : GTot (FStar.TSet.set refs_in_region) = *)
+(*   FStar.TSet.map snd (FStar.TSet.filter (fun r -> fst r == rgn) footprint) *)
+
+(* //HS only provides modifies on sets, not tsets *)
+(* val hh_modifies_t (_:FStar.TSet.set HS.rid) (h0:HS.mem) (h1:HS.mem) : Type0 *)
+
+(* let modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0 = *)
+(*   let open FStar.HyperStack in *)
+(*   hh_modifies_t (regions_of_fp fp) h0 h1 /\ *)
+(*   (forall r. r `TSet.mem` (regions_of_fp fp) ==> ( *)
+(*         let refs = refs_of_region r fp in *)
+(*         (forall a. a `TSet.mem` refs ==> *)
+(*               (match a with *)
+(*               | AllRefs -> True *)
+(*               | SomeRefs addrs -> FStar.Heap.modifies_t addrs (Map.sel h0.h r) (Map.sel h1.h r))))) *)
+
+(* let preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0 = *)
+(*   let open FStar.HyperStack in *)
+(*   (forall r. r `TSet.mem` regions_of_fp fp ==> ( *)
+(*         let refs = refs_of_region r fp in *)
+(*         (forall a. a `TSet.mem` refs ==> ( *)
+(*               let mod_refs = *)
+(*                 match a with *)
+(*                 | AllRefs -> TSet.empty *)
+(*                 | SomeRefs addrs -> TSet.complement addrs in *)
+(*               FStar.Heap.modifies_t mod_refs (Map.sel h0.h r) (Map.sel h1.h r))))) *)
+
 let fp = FStar.Ghost.erased FStar.Pointer.Base.loc
 val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> GTot fp
 val modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0
@@ -125,6 +165,7 @@ val gen (i:I.id)
 
 (** Building a reader from a writer **)
 
+// JP: commented out for the same reasons as above
 // (* A reader never writes to the log_region, but may write to the prf_region *)
 // let read_footprint (#i:_) (wr:aead_state i I.Writer) : GTot fp =
 //   FStar.TSet.filter (fun (rs:(HS.rid * refs_in_region)) -> fst rs == prf_region wr)

@@ -5,7 +5,7 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.HyperStack
-open FStar.Monotonic.RRef
+open FStar.HyperStack.ST
 
 open Crypto.Indexing
 open Flag

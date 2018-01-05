@@ -9,7 +9,6 @@ open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
-open FStar.Monotonic.RRef
 
 open Crypto.Indexing
 open Crypto.Symmetric.Bytes
@@ -19,7 +18,6 @@ open Flag
 open Crypto.AEAD.Encoding 
 open Crypto.Symmetric.PRF
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 module MAC    = Crypto.Symmetric.MAC
@@ -32,7 +30,7 @@ module Plain  = Crypto.Plain
 let min (a:u32) (b:u32) = if a <=^ b then a else b
 let minNat (a:nat) (b:nat) : nat = if a <= b then a else b
 
-type eternal_region = rgn:HH.rid {HS.is_eternal_region rgn}
+type eternal_region = rgn:HS.rid {HS.is_eternal_region rgn}
 
 let prf_table (r:rgn) (i:id) = Seq.seq (PRF.entry r i)
 
@@ -116,7 +114,7 @@ noeq type aead_entry (i:id) =
 let aead_entries i = Seq.seq (aead_entry i)
 
 //TODO: move this to HyperStack
-let rref (r:rid) (a:Type) = x:HS.ref a {HS.frameOf x == r}
+let rref (r:rid) (a:Type) = x:ST.ref a {HS.frameOf x == r}
 
 (*+ aead_log: The type of the conditional, ideal aead_log **)
 let aead_log (r:rgn) (i:id) =
@@ -225,8 +223,8 @@ let mac_is_set (#rgn:region) (#i:id)
      | None -> False
      | Some mac_range ->
        let mac_st = CMA.ilog (CMA.State?.log mac_range) in
-       m_contains mac_st h /\ (
-       match snd (m_sel h mac_st) with
+       HS.contains h mac_st /\ (
+       match snd (HS.sel h mac_st) with
        | None           -> False
        | Some (msg,tag') ->
 	 safelen i l (PRF.ctr_0 i +^ 1ul) /\
@@ -372,13 +370,13 @@ let enc_dec_separation (#i:id) (#rw:rw) (st:aead_state i rw)
     HS.is_eternal_region (Buffer.frameOf cipher) /\ // why?
     HS.is_eternal_region (Buffer.frameOf (Plain.as_buffer plain)) /\ //why?
     HS.is_eternal_region (Buffer.frameOf aad) /\ //why?
-    HH.disjoint (Buffer.frameOf (Plain.as_buffer plain)) st.log_region /\
-    HH.disjoint (Buffer.frameOf cipher) st.log_region /\
-    HH.disjoint (Buffer.frameOf aad) st.log_region /\
-    st.log_region <> HH.root /\
-    Buffer.frameOf cipher <> HH.root /\
-    Buffer.frameOf aad <> HH.root /\
-    Buffer.frameOf (Plain.as_buffer plain) <> HH.root
+    HS.disjoint (Buffer.frameOf (Plain.as_buffer plain)) st.log_region /\
+    HS.disjoint (Buffer.frameOf cipher) st.log_region /\
+    HS.disjoint (Buffer.frameOf aad) st.log_region /\
+    st.log_region <> HS.root /\
+    Buffer.frameOf cipher <> HS.root /\
+    Buffer.frameOf aad <> HS.root /\
+    Buffer.frameOf (Plain.as_buffer plain) <> HS.root
 
 (*+ enc_dec_liveness:
 	Calling AEAD.encrypt/decrypt requires and ensures this liveness **)
@@ -494,7 +492,7 @@ let frame_refines_one_entry (#i:id) (#mac_rgn:region)
 			    (e:aead_entry i{safeId i}) //NB: moving the refinement earlier causes typing problems in frame_refines below
    : Lemma (requires (let open HS in
 		      refines_one_entry blocks e h /\			    
-		      HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
+		      HS.modifies_ref mac_rgn Set.empty h h' /\
 		      live_region h' mac_rgn))
 	   (ensures  refines_one_entry blocks e h')
    = ()
@@ -503,8 +501,8 @@ let frame_unused_aead_iv_for_prf_h (#mac_rgn:region) (#i:id) (h0:mem{safeMac i})
 				 (prf_table:prf_table mac_rgn i)
 				 (iv:Cipher.iv (alg i))
   : Lemma (requires (let open HS in
-		     unused_aead_iv_for_prf prf_table iv h0        /\
-                     HH.modifies_rref mac_rgn Set.empty h0.h h1.h /\
+		     unused_aead_iv_for_prf prf_table iv h0  /\
+                     HS.modifies_ref mac_rgn Set.empty h0 h1 /\
 		     live_region h1 mac_rgn))
 	  (ensures  unused_aead_iv_for_prf prf_table iv h1)
   = ()
@@ -514,8 +512,8 @@ let frame_refines (i:id{safeMac i}) (mac_rgn:region)
 		  (entries:aead_entries i)
 		  (h:mem) (h':mem)
    : Lemma (requires (let open HS in 
-		      refines blocks entries h                     /\
-   		      HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
+		      refines blocks entries h               /\
+   		      HS.modifies_ref mac_rgn Set.empty h h' /\
 		      HS.live_region h' mac_rgn))
 	   (ensures  refines blocks entries h')
    = let open FStar.Classical in
@@ -525,8 +523,8 @@ let frame_refines (i:id{safeMac i}) (mac_rgn:region)
 let frame_prf_prf_mac_inv
   (#i:id) (#mac_rgn:region) (blocks:prf_table mac_rgn i) (h:mem) (h':mem{prf i}) (x:domain_mac i) 
   :Lemma (requires (let open HS in
-                    PRF.prf_mac_inv blocks x h                   /\
-                    HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
+                    PRF.prf_mac_inv blocks x h             /\
+                    HS.modifies_ref mac_rgn Set.empty h h' /\
 		    HS.live_region h' mac_rgn))
 	 (ensures  (PRF.prf_mac_inv blocks x h'))
   = ()
@@ -534,8 +532,8 @@ let frame_prf_prf_mac_inv
 let frame_prf_mac_inv
   (#i:id) (#mac_rgn:region) (blocks:prf_table mac_rgn i) (h:mem) (h':mem{prf i})
   :Lemma (requires (let open HS in
-                    prf_mac_inv blocks h                         /\
-		    HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
+                    prf_mac_inv blocks h                   /\
+		    HS.modifies_ref mac_rgn Set.empty h h' /\
 		    HS.live_region h' mac_rgn))
          (ensures  (prf_mac_inv blocks h'))
   = let open FStar.Classical in
@@ -554,7 +552,7 @@ let frame_inv_modifies_1 (#i:id) (#rw:rw) (#a:Type) (b:FStar.Buffer.buffer a)
 			(st:aead_state i rw) (h:mem) (h1:mem)
    : Lemma (requires (inv st h /\ 
 		      Buffer.modifies_1 b h h1 /\
-		      HH.disjoint st.log_region (Buffer.frameOf b)))
+		      HS.disjoint st.log_region (Buffer.frameOf b)))
 	   (ensures  (inv st h1))
    = Buffer.lemma_reveal_modifies_1 b h h1;
      if safeMac i
@@ -692,8 +690,8 @@ let frame_refines_entries_h (i:id{safeMac i}) (mac_rgn:region)
 		                 (entries:aead_entries i)
 		                 (h:mem) (h':mem)
    : Lemma (requires (let open HS in 
-		      aead_entries_are_refined blocks entries h    /\
-   		      HH.modifies_rref mac_rgn Set.empty h.h h'.h /\
+		      aead_entries_are_refined blocks entries h /\
+   		      HS.modifies_ref mac_rgn Set.empty h h'    /\
 		      HS.live_region h' mac_rgn))
 	   (ensures  aead_entries_are_refined blocks entries h')
    = let open FStar.Classical in
@@ -719,7 +717,7 @@ let mac_is_used (#rgn:region) (#i:id)
      | None -> False
      | Some mac_range ->
        let mac_st = CMA.ilog (CMA.State?.log mac_range) in
-       Some? (snd (m_sel h mac_st))))
+       Some? (snd (HS.sel h mac_st))))
 
 (* JP: not extracting because the use of false_elim means that the None branch
  * is not eliminated from the match, which means that KreMLin would have to
@@ -1070,8 +1068,8 @@ let frame_unused_mac_exists_h
   (x:PRF.domain_mac i)
   (h0 h1:mem) : Lemma
   (requires (let open HS in
-             unused_mac_exists table x h0                  /\
-	     HH.modifies_rref mac_rgn Set.empty h0.h h1.h /\
+             unused_mac_exists table x h0            /\
+	     HS.modifies_ref mac_rgn Set.empty h0 h1 /\
 	     live_region h1 mac_rgn))
   (ensures  (unused_mac_exists table x h1))
  = ()
@@ -1154,10 +1152,10 @@ val lemma_mac_log_framing
   (h0 h1:mem)
   (mac_st_2:CMA.state (i, nonce_2){CMA.(mac_st_2.region) = CMA.(mac_st_1.region)}) : Lemma
   (requires (nonce_1 <> nonce_2                                        /\
-             m_contains (CMA.(ilog mac_st_2.log)) h0                 /\
+             HS.contains h0 (CMA.(ilog mac_st_2.log))                 /\
 	     HS.(h1.h `Map.contains` CMA.(mac_st_2.region))          /\
-             HS.modifies_ref (CMA.(mac_st_1.region)) (Set.singleton (HS.as_addr (as_hsref (CMA.(ilog mac_st_1.log))))) h0 h1))
-  (ensures  (m_sel h0 (CMA.(ilog mac_st_2.log)) = m_sel h1 (CMA.(ilog mac_st_2.log))))
+             HS.modifies_ref (CMA.(mac_st_1.region)) (Set.singleton (HS.as_addr (CMA.(ilog mac_st_1.log)))) h0 h1))
+  (ensures  (HS.sel h0 (CMA.(ilog mac_st_2.log)) = HS.sel h1 (CMA.(ilog mac_st_2.log))))
 #set-options "--initial_ifuel 1 --max_ifuel 1"
 let lemma_mac_log_framing #i #nonce_1 #nonce_2 mac_st_1 h0 h1 mac_st_2 = //AR: 04/22/2017: this relies on ref injectivity ...
   admit()

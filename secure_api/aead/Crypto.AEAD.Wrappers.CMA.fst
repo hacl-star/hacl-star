@@ -6,7 +6,6 @@ open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
-open FStar.Monotonic.RRef
 
 open Crypto.Indexing
 open Crypto.Symmetric.Bytes
@@ -21,13 +20,11 @@ module Cipher = Crypto.Symmetric.Cipher
 module PRF = Crypto.Symmetric.PRF
 module Plain = Crypto.Plain
 module Invariant = Crypto.AEAD.Invariant
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 module CMA = Crypto.Symmetric.UF1CMA
 module Seq = FStar.Seq
 module MAC = Crypto.Symmetric.MAC
 module EncodingWrapper = Crypto.AEAD.Wrappers.Encoding
-module RR = FStar.Monotonic.RRef
 module BufferUtils = Crypto.AEAD.BufferUtils
 
 (*** UF1CMA.mac ***)
@@ -53,17 +50,24 @@ let mac_modifies
 = 
   let open FStar.Buffer in	  
   let abuf = MAC.as_buffer (CMA.abuf acc) in
-  if safeMac i 
-  then
-    let log = RR.as_hsref CMA.(ilog ak.log) in
-    CMA.pairwise_distinct (frameOf abuf) (frameOf tbuf) (HS.frameOf log) /\
-    CMA.modifies_bufs_and_ref abuf tbuf log h0 h1
-  else
-    frameOf abuf <> frameOf tbuf /\
-    HS.modifies (Set.union (Set.singleton (frameOf abuf))
-                           (Set.singleton (frameOf tbuf))) h0 h1 /\
-    modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
-    modifies_buf_1 (frameOf tbuf) tbuf h0 h1
+  (*
+   * AR: 12/26: HyperStack modifies clauses used to give h0.tip == h1.tip, but that's no longer the case
+   *            So this needs to be added explicitly
+   *            But note that it should be easy to prove since ST effect gives it to us directly
+   *            For record, this came up in AEAD.Encrypt.reestablish_inv when calling lemma_propagate_inv_mac_wrapper
+   *)
+  h0.HS.tip == h1.HS.tip /\
+  (if safeMac i
+   then
+     let log = CMA.(ilog ak.log) in
+     CMA.pairwise_distinct (frameOf abuf) (frameOf tbuf) (HS.frameOf log) /\
+     CMA.modifies_bufs_and_ref abuf tbuf log h0 h1
+   else
+     frameOf abuf <> frameOf tbuf /\
+     HS.modifies (Set.union (Set.singleton (frameOf abuf))
+                            (Set.singleton (frameOf tbuf))) h0 h1 /\
+     modifies_buf_1 (frameOf abuf) abuf h0 h1 /\
+     modifies_buf_1 (frameOf tbuf) tbuf h0 h1)
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 val weaken_mac_modifies: i:id -> 
@@ -114,7 +118,7 @@ let mac_wrapper (#i:EncodingWrapper.mac_id) (ak:CMA.state i) (acc:CMA.accBuffer 
     if safeMac (fst i) then
       begin
       // Takes a long time without this useless line
-      let log = RR.as_hsref CMA.(ilog ak.log) in
+      let log = CMA.(ilog ak.log) in
       assert (mac_modifies (fst i) (snd i) tag ak acc h0 h1)
       end
     else begin
@@ -324,7 +328,10 @@ let found_entry (#i:id) (n:Cipher.iv (Cipher.algi i)) (st:aead_state i Reader)
 (*+ verify_liveness: 
 	 liveness pre-condition for UF1CMA.verify
   **)	
-  
+
+(*
+ * AR: 12/29: TODO: is this rid eternal? if so, use erid from HST
+ *)
 let verify_liveness (#i:CMA.id) (r:rid) (ak:CMA.state i) (tag:lbuffer (v MAC.taglen)) (h:mem) = 
   ak_live CMA.(ak.region) ak h /\
   Buffer.live h tag
@@ -346,7 +353,7 @@ let verify_ok (#i:CMA.id) (st:CMA.state i) (acc:CMA.accBuffer i) (tag:lbuffer 16
       let m = MAC.mac log r s in
       let verified = Seq.eq m (MAC.sel_word h tag) in
       if authId i then
-      	match m_sel h (ilog st.log) with
+      	match HS.sel h (ilog st.log) with
       	| _, Some(l',m') ->
       	  let correct = m = m' && Seq.eq log l' in
       	  b == (verified && correct)
@@ -512,7 +519,7 @@ let entry_exists_if_verify_ok #i #n st #aadlen aad #plainlen plain cipher_tagged
     let AEADEntry nonce aad' plainlen' p' cipher_tagged' = aead_entry in
     let cipher', _ = Seq.split cipher_tagged' plainlen' in
     let mac_log = CMA.ilog (CMA.State?.log ak) in
-    match m_sel h mac_log with
+    match HS.sel h mac_log with
     | _, None           -> ()
     | _, Some (msg,tag') -> 
       lemma_encode_both_inj i aadlen plainlen (u (Seq.length aad')) (u plainlen')
@@ -583,7 +590,7 @@ let verify_requires (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) (tag:lbuf
     EncodingWrapper.ak_acc_tag_separate ak acc tag /\
     verify_liveness CMA.(ak.region) ak tag h0 /\
     CMA.acc_inv ak acc h0 /\
-    (mac_log ==> m_contains CMA.(ilog ak.log) h0)
+    (mac_log ==> HS.contains h0 CMA.(ilog ak.log))
 
 let verify_modifies (#i:CMA.id) (acc:CMA.accBuffer i) (h0:mem) (h1:mem) = 
     Buffer.modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h1
@@ -606,7 +613,7 @@ let verify_wrapper #i ak acc tag =
   let b = CMA.verify #i ak acc tag in
   let h1 = get() in
   Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h1;
-  assert (mac_log ==> m_sel h0 (CMA.(ilog ak.log)) == m_sel h1 (CMA.(ilog ak.log)));
+  assert (mac_log ==> HS.sel h0 (CMA.(ilog ak.log)) == HS.sel h1 (CMA.(ilog ak.log)));
   assert (Buffer.modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h1);
   assert (verify_liveness CMA.(ak.region) ak tag h1);
   frame_verify_ok ak acc tag h0 h1 b;
@@ -674,7 +681,7 @@ let verify #i #n st #aadlen aad #plainlen plain cipher_tagged ak acc h_init =
   let cipher = Buffer.sub cipher_tagged 0ul plainlen in
   let tag = Buffer.sub cipher_tagged plainlen MAC.taglen in 
   if mac_log 
-  then m_recall CMA.(ilog ak.log);
+  then recall CMA.(ilog ak.log);
   let h0 = get () in
   let b = verify_wrapper ak acc tag in
   let h1 = get () in

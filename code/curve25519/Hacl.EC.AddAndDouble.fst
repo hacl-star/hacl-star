@@ -1,6 +1,7 @@
 module Hacl.EC.AddAndDouble
 
 module ST = FStar.HyperStack.ST
+module HS = FStar.HyperStack
 
 open FStar.HyperStack.All
 
@@ -46,13 +47,13 @@ inline_for_extraction let red_53 s = Hacl.Spec.EC.AddAndDouble.red_53 s
 inline_for_extraction let red_5413 s = Hacl.Spec.EC.AddAndDouble.red_5413 s
 
 
-private val lemma_modifies_composition: s1:Set.set HyperHeap.rid -> r2:HyperHeap.rid -> h0:mem -> h1:mem -> h2:mem -> Lemma
+private val lemma_modifies_composition: s1:Set.set HS.rid -> r2:HS.rid -> h0:mem -> h1:mem -> h2:mem -> Lemma
   (requires (modifies s1 h0 h1 /\ modifies (Set.singleton r2) h1 h2))
   (ensures (modifies (Set.union s1 (Set.singleton r2)) h0 h2))
 private let lemma_modifies_composition s1 r2 h0 h1 h2 = ()
 
 
-private val lemma_set_union: s:Set.set HyperHeap.rid -> r:HyperHeap.rid{Set.mem r s} -> Lemma
+private val lemma_set_union: s:Set.set HS.rid -> r:HS.rid{Set.mem r s} -> Lemma
   (Set.union s (Set.singleton r) == s)
 private let lemma_set_union s r = Set.lemma_equal_intro s (Set.union s (Set.singleton r))
 
@@ -564,7 +565,7 @@ let fmonty_pre h (pp:point) (ppq:point) (p:point) (pq:point) (q:point) : GTot Ty
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
-private val lemma_fmonty_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> r:HyperHeap.rid -> Lemma
+private val lemma_fmonty_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:mem -> r:HS.rid -> Lemma
     (requires (
       fresh_frame h0 h1
       /\ modifies_0 h1 h2

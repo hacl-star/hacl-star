@@ -22,20 +22,20 @@ open FStar.HyperStack.All
 open FStar.Ghost
 open FStar.UInt8
 open FStar.UInt32
-open FStar.Monotonic.RRef
 
 open Crypto.Indexing
 open Crypto.Symmetric.Bytes
 open Flag
 open Crypto.Plain
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
   
 module MAC   = Crypto.Symmetric.MAC
 module CMA   = Crypto.Symmetric.UF1CMA
 module Block = Crypto.Symmetric.Cipher
 
+
+type rid = ST.erid
 
 // PRF TABLE
 
@@ -56,7 +56,7 @@ private let sanity_check i = assert(safeId i ==> prf i)
 
 // LIBRARY STUFF
 
-type region = rgn:HH.rid {HS.is_eternal_region rgn}
+type region = rgn:HS.rid {HS.is_eternal_region rgn}
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 // to be adjusted, controlling concrete bound.
@@ -146,7 +146,7 @@ let table_t rgn mac_rgn (i:id) =
 // NOTE both regions are meant to be allocated at the writer. A bit dubious for the real key state.
 noeq type state (i:id) =
   | State: #rgn: region ->
-	   #mac_rgn: region{mac_rgn `HH.extends` rgn} ->
+	   #mac_rgn: region{mac_rgn `HS.extends` rgn} ->
            // key is immutable once generated, we should make it private
            key: lbuffer (v (statelen i)) 
              {Buffer.frameOf key = rgn /\ ~(HS.is_mm (Buffer.content key))} ->
@@ -158,11 +158,11 @@ val itable: i:id {prf i} -> s:state i
   -> Tot (r:HS.ref (Seq.seq (entry s.mac_rgn i)) {HS.frameOf r == s.rgn})
 let itable i s = s.table
 
-val mktable: i:id {prf i} -> rgn:region -> mac_rgn:region{mac_rgn `HH.extends` rgn}
+val mktable: i:id {prf i} -> rgn:region -> mac_rgn:region{mac_rgn `HS.extends` rgn}
   -> r:HS.ref (Seq.seq (entry mac_rgn i)) {HS.frameOf r == rgn} -> Tot (table_t rgn mac_rgn i)
 let mktable i rgn mac_rgn r = r 
 
-val no_table: i:id {~(prf i)} -> rgn:region -> mac_rgn:region{mac_rgn `HH.extends` rgn} -> Tot (table_t rgn mac_rgn i)
+val no_table: i:id {~(prf i)} -> rgn:region -> mac_rgn:region{mac_rgn `HS.extends` rgn} -> Tot (table_t rgn mac_rgn i)
 let no_table i rgn mac_rgn = ()
 
 val gen: rgn:region -> i:id -> ST (state i)
@@ -176,7 +176,7 @@ let gen rgn i =
   (* match cipherAlg_of_id i with *)
   (* | CHACHA20 -> *)
   (*   begin *)
-  (*   let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in *)
+  (*   let mac_rgn : (r:region{r `HS.extends` rgn}) = new_region rgn in *)
   (*   let keystate = Buffer.rcreate rgn 0ul (stlen i) in *)
   (*   let key = Buffer.create 0uy (keylen i) in *)
   (*   let alg = cipherAlg_of_id i in *)
@@ -194,7 +194,7 @@ let gen rgn i =
   (* | _ ->  *)
     (* begin *)
     push_frame();
-    let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
+    let mac_rgn : (r:region{r `HS.extends` rgn}) = new_region rgn in
     let key = Buffer.create 0uy (keylen i) in
     Bytes.random (v (keylen i)) key;
     let h = ST.get() in
@@ -219,7 +219,7 @@ let coerce rgn i key =
   (* match cipherAlg_of_id i with *)
   (* | CHACHA20 -> *)
   (*   begin *)
-  (*   let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in *)
+  (*   let mac_rgn : (r:region{r `HS.extends` rgn}) = new_region rgn in *)
   (*   let keystate = Buffer.rcreate rgn 0uy (stlen i) in *)
   (*   let alg = cipherAlg_of_id i in *)
   (*   Cipher.init #i key keystate; *)
@@ -227,7 +227,7 @@ let coerce rgn i key =
   (*   end *)
   (* | _ -> *)
     (* begin *)
-    let mac_rgn : (r:region{r `HH.extends` rgn}) = new_region rgn in
+    let mac_rgn : (r:region{r `HS.extends` rgn}) = new_region rgn in
     let h = ST.get() in
     let keystate = Buffer.rcreate rgn 0uy (statelen i) in
     Buffer.lemma_live_disjoint h key keystate;
@@ -291,7 +291,7 @@ val prf_mac:
            mc == mc' /\ 
            CMA.(MAC.norm_r h1 mc.r) /\ 
            CMA.(Buffer.live h1 mc.s) /\ 
-           CMA.(mac_log ==> m_contains (ilog mc.log) h1) 
+           CMA.(mac_log ==> HS.contains h1 (ilog mc.log)) 
        | None ->  // when encrypting, we get the stateful post of MAC.create             
          (match find_mac (HS.sel h1 r) x with 
           | Some mc' -> 
@@ -327,7 +327,7 @@ let prf_mac i t k_0 x =
     | Some mc ->  (* beware: mac shadowed by CMA.mac *)
         assert (CMA.(MAC.norm_r h0 mc.r));
         Buffer.recall (CMA.(mc.s));
-        if mac_log then FStar.Monotonic.RRef.m_recall (CMA.(ilog mc.log));
+        if mac_log then recall (CMA.(ilog mc.log));
         mc
     | None ->
         let mc = CMA.gen t.mac_rgn macId k_0 in
@@ -433,7 +433,7 @@ let modifies_x_buffer_1 #i (t:state i) x b h0 h1 =
     let r = itable i t in 
     let rb = Buffer.frameOf b in
     // can't use !{ t.rgn, rb}, why?
-    let rgns = Set.union (Set.singleton #HH.rid t.rgn) (Set.singleton #HH.rid rb) in
+    let rgns = Set.union (Set.singleton #HS.rid t.rgn) (Set.singleton #HS.rid rb) in
     HS.modifies rgns h0 h1 /\
     HS.modifies_ref t.rgn (Set.singleton (HS.as_addr r)) h0 h1 /\
     extends (HS.sel h0 r) (HS.sel h1 r) x /\

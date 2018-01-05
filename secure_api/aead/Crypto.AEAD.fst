@@ -15,7 +15,6 @@ open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
-open FStar.Monotonic.RRef
 
 open Crypto.Indexing
 open Crypto.Symmetric.Bytes
@@ -28,7 +27,6 @@ open Crypto.AEAD.Invariant
 (* open Crypto.AEAD.Wrappers *)
 open FStar.HyperStack.ST
 
-module HH       = FStar.HyperHeap
 module HS       = FStar.HyperStack
 module MAC      = Crypto.Symmetric.MAC
 module CMA      = Crypto.Symmetric.UF1CMA

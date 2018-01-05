@@ -6,7 +6,6 @@ open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
-open FStar.Monotonic.RRef
 
 open Crypto.Indexing
 open Crypto.Symmetric.Bytes
@@ -21,7 +20,6 @@ open Crypto.AEAD.Enxor.Invariant
 open Crypto.AEAD.MAC_Wrapper.Invariant
 open Crypto.AEAD.Encrypt.Ideal.Invariant
 
-module HH       = FStar.HyperHeap
 module HS       = FStar.HyperStack
 module MAC      = Crypto.Symmetric.MAC
 module CMA      = Crypto.Symmetric.UF1CMA
@@ -34,7 +32,7 @@ module Encoding    = Crypto.AEAD.Encoding
 module EncodingWrapper = Crypto.AEAD.Wrappers.Encoding
 module CMAWrapper = Crypto.AEAD.Wrappers.CMA
 
-#reset-options "--z3rlimit 40 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let ideal_ensures
 	 (#i: id)
  	 (st: aead_state i Writer)
@@ -71,13 +69,15 @@ noextract val do_ideal:
 	    enc_dec_liveness st aad plain cipher_tag h))
  (ensures  (fun h0 _ h1 ->
 	    ideal_ensures st n aad plain cipher_tag h0 h1))
+#reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let do_ideal #i st n #aadlen aad #plainlen plain cipher_tag =
     let ad = Buffer.to_seq_full aad in
     let p = Plain.load plainlen plain in 
     let c_tagged = Buffer.to_seq_full cipher_tag in
     let entry = AEADEntry n ad (v plainlen) p c_tagged in
     ST.recall (st_ilog st);
-    st_ilog st := Seq.snoc !(st_ilog st) entry
+    let log = st_ilog st in
+    log := Seq.snoc !(log) entry
 
 #reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 let encrypt_ensures  (#i:id) (st:aead_state i Writer)
@@ -189,7 +189,7 @@ val encrypt_write_effect :
 	      let h_final = HS.pop h_ideal in
 	      encrypt_ensures st n aad plain cipher_tag h_init h_final /\
 	      encrypt_modifies st cipher_tag h_init h_final)))
-#reset-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0 --query_stats --z3cliopt 'smt.case_split=3' --using_facts_from '* -Spec -Hacl +Hacl.Bignum.Constants +Hacl.Bignum.Parameters'"
 let encrypt_write_effect i st n #aadlen aad #plainlen plain cipher_tag k_0 ak acc
 			 h_init h_push h_prf h_enx h_acc h_mac h_ideal =
   let open HS in			 
@@ -283,18 +283,17 @@ let encrypt i st n aadlen aad plainlen plain cipher_tagged =
 
   //call prf_mac: get a mac key, ak
   let ak = PRF_MAC.prf_mac_enc st aad plain cipher_tagged st.ak x_0 in  // used for keying the one-time MAC
+  assert (Crypto.AEAD.Wrappers.Encoding.ak_aad_cipher_separate ak aad cipher_tagged); //NS:12/13 seems to have regressed AR:12/19 can verify it now
   let h_prf = get () in
-  let open CMA in 
-
+  let open CMA in
   //call enxor: fragment the plaintext, call the prf, and fill in the cipher text
   Enxor.enxor n st aad plain cipher_tagged ak;
   let h_enxor = get () in
-  
   //call accumulate: encode the ciphertext and additional data for mac'ing
   let acc = EncodingWrapper.accumulate_enc #(i, n) st ak aad plain cipher_tagged in
   let h_acc = get () in
-
   //call mac: filling in the tag component of the out buffer
+  //assume (Crypto.Symmetric.UF1CMA.verify_liveness ak tag h_acc); //NS:12/13 hint does not replay
   CMAWrapper.mac #(i,n) st aad plain cipher_tagged ak acc h_enxor;
   let h_mac = get () in
 

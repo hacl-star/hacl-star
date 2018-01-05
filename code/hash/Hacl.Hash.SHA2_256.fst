@@ -409,7 +409,7 @@ private val shuffle:
                   let seq_block = reveal_h32s (as_seq h0 block_w) in
                   seq_hash_1 == Spec.shuffle seq_hash_0 seq_block)))
 
-#reset-options "--max_fuel 0  --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 150"
 
 [@"substitute"]
 let shuffle hash block ws k =

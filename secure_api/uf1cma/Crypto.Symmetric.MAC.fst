@@ -28,7 +28,6 @@ module PS_ = Hacl.Spec.Poly1305_64
 module PS = Hacl.Spe.Poly1305_64
 module PL = Hacl.Impl.Poly1305_64
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 #set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
@@ -186,7 +185,7 @@ let frame_sel_elem h1 h2 #i b =
 
 #reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
 (** Create and initialize an element (used for r) *)
-val rcreate: rgn:HH.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
+val rcreate: rgn:HS.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
   (requires (fun h0 -> True))
   (ensures  (fun h0 r h1 ->
     HS.modifies (Set.singleton rgn) h0 h1 /\
@@ -382,7 +381,7 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1 --split_cases 1"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1"
 let update #i r a w =
   begin
   match alg i with

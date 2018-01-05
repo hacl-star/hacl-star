@@ -27,7 +27,6 @@ open Crypto
 open Buffer
 open Flag
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 module Plain = Crypto.Plain
@@ -127,7 +126,7 @@ let test() =
   let cipherlen = plainlen +^ 16ul in
   assert(Buffer.length expected_cipher = v cipherlen);
   let cipher = Buffer.create 0uy cipherlen in
-  let st = AE.coerce i HH.root key in
+  let st = AE.coerce i HS.root key in
 
   // To prove the assertion below for the concrete constants in PRF, AEAD:
   assert_norm (114 <= pow2 14);
@@ -188,7 +187,7 @@ let test_aes_gcm i (tn: UInt32.t) key ivBuffer aadlen aad plainlen plainrepr exp
   // Plain.store plainlen plain plainbytes; // trying hard to forget we know the plaintext
   let plain = Plain.unsafe_hide_buffer i plainrepr in
 
-  let st = AE.coerce i HH.root key in
+  let st = AE.coerce i HS.root key in
   let iv : Crypto.Symmetric.Cipher.iv (cipherAlg_of_id i) =
     lemma_little_endian_is_bounded (load_bytes 12ul ivBuffer);
     load_uint128 12ul ivBuffer in
