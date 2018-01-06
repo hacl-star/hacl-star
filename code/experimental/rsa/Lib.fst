@@ -1,49 +1,115 @@
 module Lib
 
 open FStar.HyperStack.All
-open FStar.Buffer
+open Spec.Lib.IntBuf.Lemmas
+open Spec.Lib.IntBuf
+open Spec.Lib.IntTypes
+open Spec.Lib.RawIntTypes
 open FStar.Mul
 
-module U8 = FStar.UInt8
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
-open U32
+//inline_for_extraction
+let v = size_v
 
-type lbytes  (len:U32.t) = b:buffer U8.t{length b = U32.v len}
-type lbignum (len:U32.t) = b:buffer U64.t{length b = U32.v len}
+type lbytes (len:size_nat) = lbuffer uint8 len
+type lbignum (len:size_nat) = lbuffer uint64 len
+
+val blocks: x:size_t{v x > 0} -> m:size_t{v m > 0} -> r:size_t{v r > 0 /\ v x <= v m * v r}
+[@ "substitute"]
+let blocks x m = add_mod #SIZE ((sub_mod #SIZE x (size 1)) /. m) (size 1)
 
 (* text_to_bn *)
-val get_size_nat: lenText:U32.t{v lenText > 0} -> Tot (res:U32.t{v res > 0})
-let get_size_nat lenText = ((lenText -^ 1ul) >>^ 3ul) +^ 1ul
+val get_size_nat: lenText:size_t{v lenText > 0} -> Tot (res:size_t{v res > 0})
+[@ "substitute"]
+let get_size_nat lenText = blocks lenText (size 8)
 
-val bits_to_bn: bits:U32.t{v bits > 0} -> Tot (res:U32.t{v res > 0})
-let bits_to_bn bits = ((bits -^ 1ul) >>^ 6ul) +^ 1ul
+val bits_to_bn: bits:size_t{v bits > 0} -> Tot (res:size_t{v res > 0})
+[@ "substitute"]
+let bits_to_bn bits = blocks bits (size 64)
 
-val bits_to_text: bits:U32.t{v bits > 0} -> Tot (res:U32.t{v res > 0})
-let bits_to_text bits = ((bits -^ 1ul) >>^ 3ul) +^ 1ul
+val bits_to_text: bits:size_t{v bits > 0} -> Tot (res:size_t{v res > 0})
+[@ "substitute"]
+let bits_to_text bits = blocks bits (size 8)
+
+val eq_u64: a:uint64 -> b:uint64 -> Tot bool
+[@ "substitute"]
+let eq_u64 a b = FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
+
+val lt_u64: a:uint64 -> b:uint64 -> Tot bool
+[@ "substitute"]
+let lt_u64 a b = FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
+
+val le_u64: a:uint64 -> b:uint64 -> Tot bool
+[@ "substitute"]
+let le_u64 a b = FStar.UInt64.(u64_to_UInt64 a <=^ u64_to_UInt64 b)
+
+val eq_u8: a:uint8 -> b:uint8 -> Tot bool
+[@ "substitute"]
+let eq_u8 a b = FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
 
 (* check if input[ind] is equal to 1 *)
 val bn_is_bit_set:
-    len:U32.t ->
+    #len:size_nat -> clen:size_t{v clen == len} ->
     input:lbignum len ->
-    ind:U32.t{v ind / 64 < v len} -> Stack bool
-    (requires (fun h -> True))
-    (ensures  (fun h0 r h1 -> True))
-let bn_is_bit_set len input ind =
-    let i = ind /^ 64ul in
-    let j = ind %^ 64ul in
+    ind:size_t{v ind / 64 < len} -> Stack bool
+    (requires (fun h -> live h input))
+    (ensures  (fun h0 r h1 -> preserves_live h0 h1 /\ h0 == h1))
+    
+let bn_is_bit_set #len clen input ind =
+    let i = ind /. size 64 in
+    let j = ind %. size 64 in
     let tmp = input.(i) in
-    let res = U64.(((tmp >>^ j) &^ 1uL) =^ 1uL) in
-    res
+    let tmp = (shift_right #U64 tmp (size_to_uint32 j)) &. u64 1 in
+    eq_u64 tmp (u64 1)
 
 val bn_set_bit:
-    len:U32.t ->
+    #len:size_nat -> clen:size_t{v clen == len} ->
     input:lbignum len ->
-    ind:U32.t{v ind / 64 < v len} -> Stack unit
-    (requires (fun h -> True))
-    (ensures  (fun h0 r h1 -> True))
-let bn_set_bit len input ind =
-    let i = ind /^ 64ul in
-    let j = ind %^ 64ul in
+    ind:size_t{v ind / 64 < len} -> Stack unit
+    (requires (fun h -> live h input))
+    (ensures  (fun h0 r h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1))
+    
+let bn_set_bit #len clen input ind =
+    let i = ind /. size 64 in
+    let j = ind %. size 64 in
     let tmp = input.(i) in
-    input.(i) <- U64.(tmp |^ (1uL <<^ j))
+    input.(i) <- (tmp |. (shift_left #U64 (u64 1) (size_to_uint32 j)))
+    
+(* temporal functions *)
+val fill:
+  #len:size_nat -> clen:size_t{v clen == len} ->
+  b:lbignum len -> z:uint64 -> Stack unit
+  (requires (fun h -> live h b))
+  (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1))
+  
+let fill #len clen b z =
+  let h = FStar.HyperStack.ST.get() in
+  assume (live_list h []);
+  alloc #uint64 #unit #len clen z [] [BufItem b]
+  (fun h0 _ h1 -> True)
+  (fun tmp ->
+      copy clen tmp b
+  )
+
+val mul_wide: a:uint64 -> b:uint64 -> Tot uint128
+let mul_wide a b = u128_from_UInt128 (FStar.UInt128.mul_wide (u64_to_UInt64 a) (u64_to_UInt64 b))
+
+val eq_b_:
+    #len:size_nat -> clen:size_t{v clen == len} ->
+    b1:lbytes len -> b2:lbytes len ->
+    i:size_t{v i <= len} -> Stack bool
+    (requires (fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
+    
+let rec eq_b_ #len clen b1 b2 i =
+    if (i <. clen) then begin
+       if (eq_u8 b1.(i) b2.(i))
+       then eq_b_ #len clen b1 b2 (size_incr i)
+       else false end 
+    else true
+
+val eq_b:
+    #len:size_nat -> clen:size_t{v clen == len} ->
+    b1:lbytes len -> b2:lbytes len -> Stack bool
+    (requires (fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
+let eq_b #len clen b1 b2 = eq_b_ #len clen b1 b2 (size 0)

@@ -1,9 +1,11 @@
 module RSA
 
 open FStar.HyperStack.All
-open FStar.Buffer
 open FStar.Mul
-open C.Loops
+open Spec.Lib.Loops
+open Spec.Lib.IntBuf.Lemmas
+open Spec.Lib.IntBuf
+open Spec.Lib.IntTypes
 
 open Lib
 open MGF
@@ -11,224 +13,329 @@ open Comparison
 open Convert
 open Exponentiation
 
-module U8 = FStar.UInt8
-module U32 = FStar.UInt32
-open U32
+module Buffer = Spec.Lib.IntBuf
 
-inline_for_extraction let hLen = 32ul
-
-(* RSA *)
-noeq type rsa_pubkey modBits pkeyBits =
-	| Mk_rsa_pubkey: n:lbignum (bits_to_bn modBits) -> e:lbignum (bits_to_bn pkeyBits) -> rsa_pubkey modBits pkeyBits
-
-noeq type rsa_privkey modBits pkeyBits skeyBits =
-	| Mk_rsa_privkey: pkey:rsa_pubkey modBits pkeyBits -> d:lbignum (bits_to_bn skeyBits) -> rsa_privkey modBits pkeyBits skeyBits
-
-val blocks: x:U32.t{v x > 0} -> m:U32.t{v m > 0} -> r:U32.t{v r > 0 /\ v x <= v m * v r}
-let blocks x m = (x -^ 1ul) /^ m +^ 1ul
+inline_for_extraction let hLen:size_t = size 32
 
 val xor_bytes:
-	len:U32.t ->
-	b1:lbytes len ->
-	b2:lbytes len -> Stack unit
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
+    #len:size_nat ->
+    clen:size_t{v clen == len} ->
+    b1:lbytes len ->
+    b2:lbytes len -> Stack unit
+    (requires (fun h -> live h b1 /\ live h b2))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b1 h0 h1))
+let xor_bytes #len clen b1 b2 = map2 #uint8 #uint8 #len clen (fun x y -> logxor #U8 x y) b1 b2
 
-let xor_bytes len b1 b2 =
-	C.Loops.in_place_map2 b1 b2 len (fun x y -> U8.(x ^^ y))
+val pss_encode_in:
+    #sLen:size_nat -> #msgLen:size_nat -> #emLen:size_nat -> #stLen:size_nat ->
+    ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t} -> salt:lbytes sLen ->
+    mmsgLen:size_t{v mmsgLen == msgLen} -> msg:lbytes msgLen ->
+    eemLen:size_t{v eemLen == emLen /\ emLen - sLen - v hLen - 2 >= 0} ->
+    m1_size:size_t{v m1_size = 8 + v hLen + sLen} -> 
+    db_size:size_t{v db_size = emLen - v hLen - 1} ->
+    sstLen:size_t{v sstLen == stLen /\ stLen = v hLen + v m1_size + v hLen + v db_size + v db_size} -> st:lbytes stLen -> Stack unit
+    (requires (fun h -> live h salt /\ live h msg /\ live h st /\ disjoint st msg /\ disjoint st salt /\ disjoint msg salt))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+[@ "substitute"]
+let pss_encode_in #sLen #msgLen #emLen #stLen ssLen salt mmsgLen msg eemLen m1_size db_size sstLen st =
+    let mHash = Buffer.sub #uint8 #stLen #(v hLen) st (size 0) hLen in
+    disjoint_sub_lemma1 st msg (size 0) hLen;
+    hash_sha256 mHash mmsgLen msg;
+    
+    let m1 = Buffer.sub #uint8 #stLen #(v m1_size) st hLen m1_size in
+    let m1_ = Buffer.sub #uint8 #(v m1_size) #(v hLen) m1 (size 8) hLen in
+    copy hLen mHash m1_;
+    let m1_ = Buffer.sub #uint8 #(v m1_size) #sLen m1 (add #SIZE (size 8) hLen) ssLen in
+    copy ssLen salt m1_;
+    
+    let m1Hash = Buffer.sub #uint8 #stLen #(v hLen) st (add #SIZE hLen m1_size) hLen in
+    hash_sha256 m1Hash m1_size m1;
+    
+    let db = Buffer.sub #uint8 #stLen #(v db_size) st (add #SIZE (add #SIZE hLen m1_size) hLen) db_size in
+    let last_before_salt = sub #SIZE (sub #SIZE db_size ssLen) (size 1) in
+    db.(last_before_salt) <- u8 1;
+    let db_ = Buffer.sub #uint8 #(v db_size) #sLen db (size_incr last_before_salt) ssLen in
+    copy ssLen salt db_;
+    
+    let dbMask = Buffer.sub #uint8 #stLen #(v db_size) st (add #SIZE (add #SIZE (add #SIZE hLen m1_size) hLen) db_size) db_size in
+    mgf_sha256 m1Hash db_size dbMask;
+    xor_bytes db_size db dbMask
+
+  
 val pss_encode_:
-	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
-	salt:lbytes sLen ->
-	msgLen:U32.t ->
-	msg:lbytes msgLen ->
-	emLen:U32.t{v emLen - v sLen - v hLen - 2 >= 0} ->
-	em:lbytes emLen -> Stack unit
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
+    #sLen:size_nat -> #msgLen:size_nat -> #emLen:size_nat ->
+    ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t} ->
+    salt:lbytes sLen ->
+    mmsgLen:size_t{v mmsgLen == msgLen} -> msg:lbytes msgLen ->
+    eemLen:size_t{v eemLen == emLen /\  emLen - sLen - v hLen - 2 >= 0} ->
+    em:lbytes emLen -> Stack unit
+    (requires (fun h -> live h salt /\ live h msg /\ live h em /\ disjoint msg salt /\ disjoint em msg /\ disjoint em salt))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 em h0 h1))
 
-let pss_encode_ sLen salt msgLen msg emLen em =
-	push_frame();
-	let mHash = create 0uy hLen in
-	hash_sha256 mHash msgLen msg;
-	
-	let m1_size = 8ul +^ hLen +^ sLen in
-	let m1 = create 0uy m1_size in
-	blit mHash 0ul m1 8ul hLen;
-	blit salt 0ul m1 (8ul +^ hLen) sLen;
-	let m1Hash = create 0uy hLen in
-	hash_sha256 m1Hash m1_size m1;
-	
-	let db_size = emLen -^ hLen -^ 1ul in
-	let db = create 0uy db_size in
-	let last_before_salt = db_size -^ sLen -^ 1ul in
-	db.(last_before_salt) <- 1uy;
-	blit salt 0ul db (last_before_salt +^ 1ul) sLen;
-	
-	let dbMask = create 0uy db_size in
-	mgf_sha256 m1Hash db_size dbMask;
-	xor_bytes db_size db dbMask;
-	
-	blit db 0ul em 0ul db_size;
-	blit m1Hash 0ul em db_size hLen;
-	em.(emLen -^ 1ul) <- 0xbcuy;
-	pop_frame()
-	
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+let pss_encode_ #sLen #msgLen #emLen ssLen salt mmsgLen msg eemLen em =
+    let m1_size:size_t = add #SIZE (add #SIZE (size 8) hLen) ssLen in
+    let db_size:size_t = sub #SIZE (sub #SIZE eemLen hLen) (size 1) in
+    assume (v hLen + v m1_size + v hLen + v db_size + v db_size < max_size_t);
+    let stLen:size_t = add #SIZE (add #SIZE (add #SIZE (add #SIZE hLen m1_size) hLen) db_size) db_size in
+
+    alloc #uint8 #unit #(v stLen) stLen (u8 0) [BufItem salt; BufItem msg] [BufItem em]
+    (fun h0 _ h1 -> True)
+    (fun st ->
+       pss_encode_in #sLen #msgLen #emLen #(v stLen) ssLen salt mmsgLen msg eemLen m1_size db_size stLen st;
+       let db = Buffer.sub #uint8 #(v stLen) #(v db_size) st (add #SIZE (add #SIZE hLen m1_size) hLen) db_size in
+       let em_ = Buffer.sub #uint8 #emLen #(v db_size) em (size 0) db_size in
+       copy db_size db em_;
+       let em_ = Buffer.sub #uint8 #emLen #(v hLen) em db_size hLen in
+       let m1Hash = Buffer.sub #uint8 #(v stLen) #(v hLen) st (add #SIZE hLen m1_size) hLen in
+       copy hLen m1Hash em_;
+       em.(size_decr eemLen) <- u8 0xbc
+    )
+		
 val pss_encode:
-	msBits:U32.t{v msBits < 8} ->
-	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
-	salt:lbytes sLen ->
-	msgLen:U32.t{v msgLen < pow2 61} ->
-	msg:lbytes msgLen ->
-	emLen:U32.t{v emLen - v sLen - v hLen - 3 >= 0} ->
-	em:lbytes emLen -> Stack unit
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
+    #sLen:size_nat -> #msgLen:size_nat -> #emLen:size_nat ->
+    msBits:size_t{v msBits < 8} ->
+    ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t} -> salt:lbytes sLen ->
+    mmsgLen:size_t{v mmsgLen == msgLen /\ msgLen < pow2 61} -> msg:lbytes msgLen ->
+    eemLen:size_t{v eemLen == emLen /\ emLen - sLen - v hLen - 3 >= 0} ->
+    em:lbytes emLen -> Stack unit
+    (requires (fun h -> live h salt /\ live h msg /\ live h em /\ disjoint msg salt /\ disjoint em msg /\ disjoint em salt))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 em h0 h1))
 
-let pss_encode msBits sLen salt msgLen msg emLen em =
-	if (msBits =^ 0ul)
-	then begin
-		let em' = Buffer.sub em 1ul (emLen -^ 1ul) in
-		pss_encode_ sLen salt msgLen msg (emLen -^ 1ul) em';
-		blit em' 0ul em 1ul (emLen -^ 1ul) end
-	else 
-		pss_encode_ sLen salt msgLen msg emLen em;
-		em.(0ul) <- U8.(em.(0ul) &^ (0xffuy >>^ U32.(8ul -^ msBits)))
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
+let pss_encode #sLen #msgLen #emLen msBits ssLen salt mmsgLen msg eemLen em =
+    if (msBits =. size 0)
+    then begin
+	let em' = Buffer.sub #uint8 #emLen #(emLen - 1) em (size 1) (size_decr eemLen) in
+	disjoint_sub_lemma1 em msg (size 1) (size_decr eemLen);
+	disjoint_sub_lemma1 em salt (size 1) (size_decr eemLen);
+	pss_encode_ ssLen salt mmsgLen msg (size_decr eemLen) em' end
+    else begin
+	pss_encode_ ssLen salt mmsgLen msg eemLen em;
+	let shift_ = sub #SIZE (size 8) msBits in
+	em.(size 0) <- em.(size 0) &. (shift_right #U8 (u8 0xff) (size_to_uint32 shift_))
+    end
+
+
+val pss_verify_in:
+    #sLen:size_nat -> #msgLen:size_nat -> #emLen:size_nat -> #stLen:size_nat ->
+    ssLen:size_t{v ssLen == sLen /\  sLen + v hLen + 8 < max_size_t} ->
+    msBits:size_t{v msBits < 8} ->
+    eemLen:size_t{v eemLen == emLen /\ emLen - sLen - v hLen - 2 >= 0} -> em:lbytes emLen ->
+    mmsgLen:size_t{v mmsgLen == msgLen} -> msg:lbytes msgLen ->
+    pad_size:size_t{v pad_size = emLen - sLen - v hLen - 1} ->
+    db_size:size_t{v db_size = emLen - v hLen - 1} ->
+    m1_size:size_t{v m1_size = 8 + v hLen + sLen} ->
+    sstLen:size_t{v sstLen == stLen /\ stLen = v hLen + v pad_size + v db_size + v m1_size + v hLen} ->
+    st:lbytes stLen -> Stack bool
+    (requires (fun h -> live h em /\ live h msg /\ live h st /\ disjoint st em /\ disjoint st msg /\ disjoint em msg))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+[@ "substitute"]
+let pss_verify_in #sLen #msgLen #emLen #stLen ssLen msBits eemLen em mmsgLen msg pad_size db_size m1_size sstLen st =
+    let mHash = Buffer.sub #uint8 #stLen #(v hLen) st (size 0) hLen in
+    disjoint_sub_lemma1 st msg (size 0) hLen;
+    hash_sha256 mHash mmsgLen msg;
+    let pad2 = Buffer.sub #uint8 #stLen #(v pad_size) st hLen pad_size in
+    pad2.(size_decr pad_size) <- u8 0x01;
+
+    let maskedDB = Buffer.sub #uint8 #emLen #(v db_size) em (size 0) db_size in
+    let m1Hash = Buffer.sub #uint8 #emLen #(v hLen) em db_size hLen in
+    let dbMask = Buffer.sub #uint8 #stLen #(v db_size) st (add #SIZE hLen pad_size) db_size in
+    assume (disjoint dbMask m1Hash);
+    mgf_sha256 m1Hash db_size dbMask;
+    xor_bytes db_size dbMask maskedDB;
+    (if (msBits >. size 0) then begin
+      let shift_ = sub #SIZE (size 8) msBits in
+      dbMask.(size 0) <- dbMask.(size 0) &. (shift_right #U8 (u8 0xff) (size_to_uint32 shift_)) end);
+
+    let pad = Buffer.sub #uint8 #(v db_size) #(v pad_size) dbMask (size 0) pad_size in
+    let salt = Buffer.sub #uint8 #(v db_size) #sLen dbMask pad_size ssLen in
+
+    let m1 = Buffer.sub #uint8 #stLen #(v m1_size) st (add #SIZE (add #SIZE hLen pad_size) db_size) m1_size in
+    let m1Hash' = Buffer.sub #uint8 #stLen #(v hLen) st (add #SIZE (add #SIZE (add #SIZE hLen pad_size) db_size) m1_size) hLen in
+    assume (disjoint pad pad2);
+    let res = 
+	if not (eq_b pad_size pad pad2) then false 
+	else begin
+	     let m1_ = Buffer.sub #uint8 #(v m1_size) #(v hLen) m1 (size 8) hLen in
+	     copy hLen mHash m1_;
+	     let m1_ = Buffer.sub #uint8 #(v m1_size) #sLen m1 (add #SIZE (size 8) hLen) ssLen in
+	     copy ssLen salt m1_;
+	     hash_sha256 m1Hash' m1_size m1;
+	     assume (disjoint m1Hash m1Hash');
+	     eq_b hLen m1Hash m1Hash'
+	end in
+    res
+
 
 val pss_verify_:
-	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
-	msBits:U32.t{v msBits < 8} ->
-	emLen:U32.t{v emLen - v sLen - v hLen - 2 >= 0} ->
-	em:lbytes emLen ->
-	msgLen:U32.t ->
-	msg:lbytes msgLen -> Stack bool
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
-	
-let pss_verify_ sLen msBits emLen em msgLen msg =
-	push_frame();
-	let mHash = create 0uy hLen in
-	hash_sha256 mHash msgLen msg;
-	
-	let pad_size = emLen -^ sLen -^ hLen -^ 1ul in
-	let pad2 = create 0uy pad_size in
-	pad2.(pad_size -^ 1ul) <- 0x01uy;
-	
-	let db_size = emLen -^ hLen -^ 1ul in
-	let maskedDB = Buffer.sub em 0ul db_size in
-	let m1Hash = Buffer.sub em db_size hLen in
-	let dbMask = create 0uy db_size in
-	mgf_sha256 m1Hash db_size dbMask;
-	xor_bytes db_size maskedDB dbMask;
-	(if (msBits >^ 0ul) then 
-		maskedDB.(0ul) <- U8.(maskedDB.(0ul) &^ (0xffuy >>^ U32.(8ul -^ msBits))));
-	
-	let pad = Buffer.sub maskedDB 0ul pad_size in
-	let salt = Buffer.sub maskedDB pad_size sLen in
-	
-	let m1_size = 8ul +^ hLen +^ sLen in
-	let m1 = create 0uy m1_size in
-	let m1Hash' = create 0uy 32ul in
-	let res =
-		if not (eqb pad pad2 pad_size) then false
-		else begin
-			(* first 8 elements should be 0x00 *)
-			blit mHash 0ul m1 8ul hLen;
-			blit salt 0ul m1 (8ul +^ hLen) sLen;
-			hash_sha256 m1Hash' m1_size m1;
-			eqb m1Hash m1Hash' hLen
-		end in
-	pop_frame();
-	res
-	
+    #sLen:size_nat -> #msgLen:size_nat -> #emLen:size_nat ->
+    ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t} ->
+    msBits:size_t{v msBits < 8} ->
+    eemLen:size_t{v eemLen == emLen /\ emLen - sLen - v hLen - 2 >= 0} ->
+    em:lbytes emLen ->
+    mmsgLen:size_t{v mmsgLen == msgLen} ->
+    msg:lbytes msgLen -> Stack bool
+    (requires (fun h -> live h em /\ live h msg /\ disjoint em msg))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1))
+
+let pss_verify_ #sLen #msgLen #emLen ssLen msBits eemLen em mmsgLen msg =
+    let pad_size = sub #SIZE (sub #SIZE (sub #SIZE eemLen ssLen) hLen) (size 1) in
+    let db_size = sub #SIZE (sub #SIZE eemLen hLen) (size 1) in
+    let m1_size = add #SIZE (add #SIZE (size 8) hLen) ssLen in
+    assume (v hLen + v pad_size + v db_size + v m1_size + v hLen < max_size_t);
+    let stLen = add #SIZE (add #SIZE (add #SIZE (add #SIZE hLen pad_size) db_size) m1_size) hLen in
+    let h = FStar.HyperStack.ST.get () in
+    assume (live_list h []);
+    alloc #uint8 #bool #(v stLen) stLen (u8 0) [BufItem em; BufItem msg] []
+    (fun h0 _ h1 -> True)
+    (fun st ->
+	  pss_verify_in #sLen #msgLen #emLen #(v stLen) ssLen msBits eemLen em mmsgLen msg pad_size db_size m1_size stLen st
+    )
+
+
 val pss_verify:
-	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
-	msBits:U32.t{v msBits < 8} ->
-	emLen:U32.t{v emLen - v sLen - v hLen - 2 >= 0} ->
-	em:lbytes emLen ->
-	msgLen:U32.t ->
-	msg:lbytes msgLen -> Stack bool
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
+    #sLen:size_nat -> #msgLen:size_nat -> #emLen:size_nat ->
+    ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t} ->
+    msBits:size_t{v msBits < 8} ->
+    eemLen:size_t{v eemLen == emLen /\ emLen - sLen - v hLen - 2 >= 0} ->
+    em:lbytes emLen ->
+    mmsgLen:size_t{v mmsgLen == msgLen} -> msg:lbytes msgLen -> Stack bool
+    (requires (fun h -> live h em /\ live h msg /\ disjoint em msg))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1))
 
-let pss_verify sLen msBits emLen em msgLen msg =
-	let em_0 = U8.(em.(0ul) &^ (0xffuy <<^ msBits)) in
-	let em_last = em.(emLen -^ 1ul) in
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-	if not (U8.(em_0 =^ 0x00uy) && U8.(em_last =^ 0xbcuy))
-	then false
-	else begin
-		let em = if msBits =^ 0ul then Buffer.sub em 1ul (emLen -^ 1ul) else em in
-		let emLen = if msBits =^ 0ul then (emLen -^ 1ul) else emLen in
-		assert(length em = U32.v emLen);
-		let em : lbytes emLen = em in
-		if (emLen <^ sLen +^ hLen +^ 2ul)
-		then false
-		else pss_verify_ sLen msBits emLen em msgLen msg
-		end
+let pss_verify #sLen #msgLen #emLen ssLen msBits eemLen em mmsgLen msg =
+    let em_0 = em.(size 0) &. (shift_left #U8 (u8 0xff) (size_to_uint32 msBits)) in
+    let em_last = em.(size_decr eemLen) in
+
+    if not ((eq_u8 em_0 (u8 0)) && (eq_u8 em_last (u8 0xbc)))
+    then false
+    else begin
+	 //TODO: add the length for EM
+	 let eemLen1:size_t = if msBits =. size 0 then size_decr eemLen else eemLen in
+	 let em1:lbytes (v eemLen1) =
+	     if msBits =. size 0 then begin
+	       let em' = Buffer.sub em (size 1) eemLen1 in
+	       disjoint_sub_lemma1 em msg (size 1) eemLen1;
+	       em' end
+	     else em in
+	 if (v eemLen1 < sLen + v hLen + 2) then false
+	 else pss_verify_ #sLen #msgLen #(v eemLen1) ssLen msBits eemLen1 em1 mmsgLen msg
+    end
 
 val rsa_sign:
-	modBits:U32.t{v modBits > 0} ->
-	pkeyBits:U32.t{v pkeyBits <= v modBits} ->
-	skeyBits:U32.t{v skeyBits <= v modBits} ->
-	skey:rsa_privkey modBits pkeyBits skeyBits ->
-	sLen:U32.t{v sLen + v hLen + 8 < pow2 32 /\ v (blocks modBits 8ul) - v sLen - v hLen - 3 >= 0 } ->
-	salt:lbytes sLen ->
-	msgLen:U32.t -> msg:lbytes msgLen ->
-	sgnt:lbytes (blocks modBits 8ul) -> Stack unit
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
+    #sLen:size_nat -> #msgLen:size_nat ->
+    modBits:size_t{0 < v modBits /\ v modBits + 3 < max_size_t} ->
+    eBits:size_t{0 < v eBits /\ v eBits <= v modBits} ->
+    dBits:size_t{0 < v dBits /\ v dBits <= v modBits /\
+		 v (bits_to_bn modBits) + v (bits_to_bn eBits) + v (bits_to_bn dBits) < max_size_t} ->
+    skey:lbignum (v (bits_to_bn modBits) + v (bits_to_bn eBits) + v (bits_to_bn dBits)) ->
+    ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t /\ v (blocks modBits (size 8)) - sLen - v hLen - 3 >= 0 } ->
+    salt:lbytes sLen ->
+    mmsgLen:size_t{v mmsgLen == msgLen /\ msgLen < pow2 61} -> msg:lbytes msgLen ->
+    sgnt:lbytes (v (blocks modBits (size 8))) -> Stack unit
+    (requires (fun h -> live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
+	              disjoint msg salt /\ disjoint msg sgnt /\ disjoint sgnt salt))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 sgnt h0 h1))
 
-let rsa_sign modBits pkeyBits skeyBits skey sLen salt msgLen msg sgnt =
-	push_frame();
-	let pkey = Mk_rsa_privkey?.pkey skey in
-	let n = Mk_rsa_pubkey?.n pkey in
-	let e = Mk_rsa_pubkey?.e pkey in
-	let d = Mk_rsa_privkey?.d skey in
-	let k = blocks modBits 8ul in
-	let nLen = blocks k 8ul in
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
-	let em = create 0uy k in
-	let m = create 0uL nLen in
-	let s = create 0uL nLen in
+let rsa_sign #sLen #msgLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt =
+    let nLen:size_t = bits_to_bn modBits in
+    let eLen:size_t = bits_to_bn eBits in
+    let dLen:size_t = bits_to_bn dBits in
+    let skeyLen:size_t = add #SIZE (add #SIZE nLen eLen) dLen in
+    let k = blocks modBits (size 8) in
+    let msBits = (size_decr modBits) %. size 8 in
+    assume (v nLen + v nLen < max_size_t);
+    assume (8 * v (get_size_nat k) < max_size_t);
+    assume (v nLen == v k);
+    let n2Len:size_t = add #SIZE nLen nLen in
+    
+    alloc #uint8 #unit #(v k) k (u8 0) [BufItem skey; BufItem msg; BufItem salt] [BufItem sgnt]
+    (fun h0 _ h1 -> True)
+    (fun em -> 
+       pss_encode msBits ssLen salt mmsgLen msg k em;
+      	
+       alloc #uint64 #unit #(v n2Len) n2Len (u64 0) [BufItem skey; BufItem em] [BufItem sgnt]
+	(fun h0 _ h1 -> True)
+	(fun tmp ->
+	   let n = Buffer.sub #uint64 #(v skeyLen) #(v nLen) skey (size 0) nLen in
+	   let e = Buffer.sub #uint64 #(v skeyLen) #(v eLen) skey nLen eLen in
+	   let d = Buffer.sub #uint64 #(v skeyLen) #(v dLen) skey (add #SIZE nLen eLen) dLen in
 
-	let msBits = (modBits -^ 1ul) %^ 8ul in
-	pss_encode msBits sLen salt msgLen msg k em;
-	text_to_nat k em m;
-	
-	mod_exp modBits nLen n m skeyBits d s;
-	nat_to_text k s sgnt;
-	pop_frame()
-
+	   let m = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp (size 0) nLen in
+	   let s = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp nLen nLen in
+	   
+	   (**) disjoint_sub_lemma1 tmp em (size 0) nLen;
+	   text_to_nat k em m;
+	   mod_exp modBits nLen n m dBits d s;
+	   (**) disjoint_sub_lemma1 tmp sgnt nLen nLen; 
+	   nat_to_text k s sgnt
+	)
+    )
 
 val rsa_verify:
-	modBits:U32.t{v modBits > 0} ->
-	pkeyBits:U32.t{v pkeyBits <= v modBits} ->
-	pkey:rsa_pubkey modBits pkeyBits ->
-	sLen:U32.t{v sLen + v hLen + 8 < pow2 32} ->
-	sgnt:lbytes (blocks modBits 8ul) ->
-	msgLen:U32.t -> msg:lbytes msgLen -> Stack bool
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
+    #sLen:size_nat -> #msgLen:size_nat ->
+    modBits:size_t{0 < v modBits /\ v modBits + 3 < max_size_t} ->
+    eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\
+		 v (bits_to_bn modBits) + v (bits_to_bn eBits) < max_size_t} ->
+    pkey:lbignum (v (bits_to_bn modBits) + v (bits_to_bn eBits)) ->
+    ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t} ->
+    sgnt:lbytes (v (blocks modBits (size 8))) ->
+    mmsgLen:size_t{v mmsgLen == msgLen /\ msgLen < pow2 61} -> msg:lbytes msgLen -> Stack bool
+    (requires (fun h -> live h msg /\ live h sgnt /\ live h pkey /\ disjoint msg sgnt))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1))
 
-let rsa_verify modBits pkeyBits pkey sLen sgnt msgLen msg =
-	push_frame();
-	let n = Mk_rsa_pubkey?.n pkey in
-	let e = Mk_rsa_pubkey?.e pkey in
-	let k = blocks modBits 8ul in
-	let nLen = blocks k 8ul in
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-	let em = create 0uy k in
-	let m = create 0uL nLen in	
-	let s = create 0uL nLen in
+let rsa_verify #sLen #msgLen modBits eBits pkey ssLen sgnt mmsgLen msg =
+    let nLen:size_t = bits_to_bn modBits in
+    let eLen:size_t = bits_to_bn eBits in
+    let pkeyLen:size_t = add #SIZE nLen eLen in
+    let k = blocks modBits (size 8) in
+    let msBits = (size_decr modBits) %. size 8 in
+    assume (8 * v (get_size_nat k) < max_size_t);
+    assume (v nLen + v nLen < max_size_t);
+    assume (v k - sLen - v hLen - 2 >= 0);
+    assume (v nLen = v k);
+    let n2Len:size_t = add #SIZE nLen nLen in
 
+    let h = FStar.HyperStack.ST.get () in
+    assume (live_list h []);
+    alloc #uint64 #bool #(v n2Len) n2Len (u64 0) [BufItem pkey; BufItem msg; BufItem sgnt] []
+    (fun h0 _ h1 -> True)
+    (fun tmp ->
+	let s = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp nLen nLen in
+	(**) disjoint_sub_lemma1 tmp sgnt nLen nLen;
 	text_to_nat k sgnt s;
-	let res =
-		if (bn_is_less nLen s n) then begin
-			mod_exp modBits nLen n s pkeyBits e m;
-			nat_to_text k m em;
-			let msBits = (modBits -^ 1ul) %^ 8ul in
-			pss_verify sLen msBits k em msgLen msg end
-		else false in
-	pop_frame();
-	res
+
+	alloc #uint8 #bool #(v k) k (u8 0) [BufItem pkey; BufItem msg] [BufItem tmp]
+	(fun h0 _ h1 -> True)
+	(fun em ->
+            let m = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp (size 0) nLen in
+	    let s = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp nLen nLen in
+	
+	    let n = Buffer.sub #uint64 #(v pkeyLen) #(v nLen) pkey (size 0) nLen in
+	    let e = Buffer.sub #uint64 #(v pkeyLen) #(v eLen) pkey nLen eLen in
+
+	    assume (disjoint s n);
+	    let res = 
+	      if (bn_is_less nLen s n) then begin
+	         mod_exp modBits nLen n s eBits e m;
+		 disjoint_sub_lemma1 tmp em (size 0) nLen;
+		 nat_to_text k m em;
+		 pss_verify #sLen #msgLen #(v k) ssLen msBits k em mmsgLen msg end
+	      else false in
+	    admit();
+	    res 
+       )
+    )

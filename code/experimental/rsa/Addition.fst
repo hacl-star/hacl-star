@@ -1,71 +1,78 @@
 module Addition
 
 open FStar.HyperStack.All
-open FStar.Buffer
+open Spec.Lib.IntBuf.Lemmas
+open Spec.Lib.IntBuf
+open Spec.Lib.IntTypes
+
 open Lib
 
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
-open U32
-
 val bn_sub_:
-    aLen:U32.t -> a:lbignum aLen ->
-    bLen:U32.t -> b:lbignum bLen ->
-    i:U32.t{v i <= v aLen} ->
-    res:lbignum aLen -> Stack U64.t
-    (requires (fun h -> True))
-    (ensures (fun h0 _ h1 -> True))
-let rec bn_sub_ aLen a bLen b i res =
-    if (i =^ 0ul) then 0uL
+    #aLen:size_nat -> #bLen:size_nat ->
+    caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
+    cbLen:size_t{v cbLen == bLen} -> b:lbignum bLen ->
+    i:size_t{v i <= aLen} ->
+    res:lbignum aLen -> Stack uint64
+    (requires (fun h -> live h a /\ live h b /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    
+let rec bn_sub_ #aLen #bLen caLen a cbLen b i res =
+    if (i =. size 0) then u64 0
     else begin
-        let i1 = i -^ 1ul in
-        let carry' = bn_sub_ aLen a bLen b i1 res in
+        let i1 = size_decr i in
+        let carry' = bn_sub_ #aLen #bLen caLen a cbLen b i1 res in
         let t1 = a.(i1) in 
-        let t2 = if (i1 <^ bLen) then b.(i1) else 0uL in
-        let res_i = U64.(t1 -%^ t2 -%^ carry') in
+        let t2 = if (i1 <. cbLen) then b.(i1) else u64 0 in
+        let res_i = sub_mod #U64 (sub_mod #U64 t1 t2) carry' in
         res.(i1) <- res_i;
-        (if U64.(carry' =^ 1uL) then
-            (if U64.(t1 <=^ t2) then 1uL else 0uL)
+        (if (eq_u64 carry' (u64 1)) then
+            (if (le_u64 t1 t2) then u64 1 else u64 0)
         else
-            (if U64.(t1 <^ t2) then 1uL else 0uL))
+            (if (lt_u64 t1 t2) then u64 1 else u64 0))
     end
 
 (* a must be greater than b *)
 (* ADD: isMore aLen bLen a b *)
 (* res = a - b *)
 val bn_sub:
-    aLen:U32.t -> a:lbignum aLen ->
-    bLen:U32.t{v bLen <= v aLen} -> b:lbignum bLen ->
+    #aLen:size_nat -> #bLen:size_nat ->
+    caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
+    cbLen:size_t{v cbLen == bLen /\ bLen <= aLen} -> b:lbignum bLen ->
     res:lbignum aLen -> Stack unit
-    (requires (fun h -> True))
-    (ensures (fun h0 _ h1 -> True))
-let bn_sub aLen a bLen b res =
-    let _ = bn_sub_ aLen a bLen b aLen res in ()
+    (requires (fun h -> live h a /\ live h b /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    
+let bn_sub #aLen #bLen caLen a cbLen b res =
+    let _ = bn_sub_ #aLen #bLen caLen a cbLen b caLen res in ()
+
 
 val bn_add_:
-    aLen:U32.t -> a:lbignum aLen ->
-    bLen:U32.t -> b:lbignum bLen ->
-    i:U32.t{v i <= v aLen} ->
-    res:lbignum aLen -> Stack U64.t
-    (requires (fun h -> True))
-    (ensures (fun h0 _ h1 -> True))
-let rec bn_add_ aLen a bLen b i res =
-    if (i =^ 0ul) then 0uL
+    #aLen:size_nat -> #bLen:size_nat ->
+    caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
+    cbLen:size_t{v cbLen == bLen} -> b:lbignum bLen ->
+    i:size_t{v i <= aLen} ->
+    res:lbignum aLen -> Stack uint64
+    (requires (fun h -> live h a /\ live h b /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    
+let rec bn_add_ #aLen #bLen caLen a cbLen b i res =
+    if (i =. size 0) then u64 0
     else begin
-        let i1 = i -^ 1ul in
-        let carry' = bn_add_ aLen a bLen b i1 res in
+        let i1 = size_decr i in
+        let carry' = bn_add_ #aLen #bLen caLen a cbLen b i1 res in
         let t1 = a.(i1) in 
-        let t2 = if i1 <^ bLen then b.(i1) else 0uL in
-        let res_i = U64.(t1 +%^ t2 +%^ carry') in
+        let t2 = if (i1 <. cbLen) then b.(i1) else u64 0 in
+        let res_i = add_mod #U64 (add_mod #U64 t1 t2) carry' in
         res.(i1) <- res_i;
-        (if U64.(res_i <^ t1) then 1uL else 0uL) 
+        (if (lt_u64 res_i t1) then u64 1 else u64 0)
     end
 
 val bn_add:
-    aLen:U32.t -> a:lbignum aLen ->
-    bLen:U32.t{v bLen <= v aLen} -> b:lbignum bLen ->
+    #aLen:size_nat -> #bLen:size_nat ->
+    caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
+    cbLen:size_t{v cbLen == bLen /\ bLen <= aLen} -> b:lbignum bLen ->
     res:lbignum aLen -> Stack unit
-    (requires (fun h -> True))
-    (ensures (fun h0 _ h1 -> True))
-let bn_add aLen a bLen b res =
-    let _ = bn_add_ aLen a bLen b aLen res in ()
+    (requires (fun h -> live h a /\ live h b /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+let bn_add #aLen #bLen caLen a cbLen b res =
+    let _ = bn_add_ #aLen #bLen caLen a cbLen b caLen res in ()

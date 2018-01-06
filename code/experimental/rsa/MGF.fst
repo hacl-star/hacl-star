@@ -1,83 +1,81 @@
 module MGF
 
 open FStar.HyperStack.All
-open FStar.Buffer
-open FStar.Int.Cast
+open Spec.Lib.IntBuf.Lemmas
+open Spec.Lib.IntBuf
+open Spec.Lib.IntTypes
 open FStar.Mul
 
 open Lib
 open Convert
 
-module U8 = FStar.UInt8
-module U32 = FStar.UInt32
-open U32
+module Buffer = Spec.Lib.IntBuf
 
 (* SHA 256 *)
-let hLen = 32ul
+let hLen:size_t = size 32 
 assume val hash_sha256:
-	mHash:lbytes hLen ->
-	len:U32.t ->
-	m:lbytes len -> Stack unit
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
+    #len:size_nat ->
+    mHash:lbytes (v hLen) ->
+    clen:size_t{v clen == len} ->
+    m:lbytes len -> Stack unit
+    (requires (fun h -> live h mHash /\ live h m /\ disjoint m mHash))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 mHash h0 h1))
 //let hash_sha256 mHash len m = SHA2_256.hash mHash m len
 
 (* Mask Generation Function *)
-type mgf_state (accLen:U32.t) = lbytes (hLen +^ 4ul +^ 4ul +^ hLen +^ accLen)
-
-let get_mgfseed_counter #a (st:mgf_state a) : lbytes (hLen +^ 4ul) = Buffer.sub st 0ul (hLen +^ 4ul)
-let get_counter #a (st:mgf_state a) : lbytes 4ul = Buffer.sub st (hLen +^ 4ul) 4ul 
-let get_mHash #a (st:mgf_state a) : lbytes hLen = Buffer.sub st (hLen +^ 4ul +^ 4ul) hLen
-let get_acc #a (st:mgf_state a) : lbytes a = Buffer.sub st (hLen +^ 4ul +^ 4ul +^ hLen) a
-
 val mgf_:
-	count_max:U32.t ->
-	mgfseed:lbytes hLen ->
-	accLen:U32.t{v accLen = v hLen * v count_max} ->
-	st:mgf_state accLen ->
-	counter:U32.t{v counter <= v count_max} -> Stack unit
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
+    #accLen:size_nat -> #stLen:size_nat ->
+    count_max:size_t ->
+    mgfseed:lbytes (v hLen) ->
+    aaccLen:size_t{v aaccLen == accLen /\  accLen = v hLen * v count_max} ->
+    sstLen:size_t{v sstLen == stLen /\ stLen = v hLen + 4 + 4 + v hLen + accLen} -> st:lbytes stLen ->
+    counter:size_t{v counter <= v count_max} -> Stack unit
+    (requires (fun h -> live h mgfseed /\ live h st /\ disjoint st mgfseed))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
 
-let rec mgf_ count_max mgfseed accLen st counter =
-	if (counter <^ count_max) then begin
-		let mgfseed_counter = get_mgfseed_counter st in
-		let c = get_counter st in
-		let mHash = get_mHash st in
-		let acc = get_acc st in
-		
-		(**) assert(length c = 4);
-		c.(0ul) <- uint32_to_uint8 (counter >>^ 24ul);
-		c.(1ul) <- uint32_to_uint8 (counter >>^ 16ul);
-		c.(2ul) <- uint32_to_uint8 (counter >>^ 8ul);
-		c.(3ul) <- uint32_to_uint8 counter;
-		
-		(* blit mgfseed 0ul tmp 0ul 32ul; *)
-		(**) assert(length mgfseed_counter = U32.v hLen + 4);
-		blit c 0ul mgfseed_counter hLen 4ul;
-		(**) assert(length mHash = U32.v hLen);
-		hash_sha256 mHash (hLen +^ 4ul) mgfseed_counter;
-		(**) assert(v hLen * v counter < length acc);
-		(**) assert(v hLen * v counter + v hLen <= length acc);
-		blit mHash 0ul acc (hLen *^ counter) hLen;
-		mgf_ count_max mgfseed accLen st (counter +^ 1ul)
-	end
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+let rec mgf_ #accLen #stLen count_max mgfseed aaccLen sstLen st counter =
+  if (counter <. count_max) then begin
+     let mgfseed_counter = Buffer.sub #uint8 #stLen #(v hLen + 4) st (size 0) (add #SIZE hLen (size 4)) in
+     let c = Buffer.sub #uint8 #stLen #4 st (add #SIZE hLen (size 4)) (size 4) in
+     let mHash = Buffer.sub #uint8 #stLen #(v hLen) st (add #SIZE hLen (size 8)) hLen in
+     let acc = Buffer.sub #uint8 #stLen #accLen st (add #SIZE (add #SIZE hLen (size 8)) hLen) aaccLen in
+     c.(size 0) <- to_u8 #U32 (size_to_uint32 counter >>. u32 24);
+     c.(size 1) <- to_u8 #U32 (size_to_uint32 counter >>. u32 16);
+     c.(size 2) <- to_u8 #U32 (size_to_uint32 counter >>. u32 8);
+     c.(size 3) <- to_u8 #U32 (size_to_uint32 counter);
+
+     let mgfseed_counter_ = Buffer.sub #uint8 #(v hLen + 4) #4 mgfseed_counter hLen (size 4) in
+     copy (size 4) c mgfseed_counter_;
+     hash_sha256 mHash (add #SIZE hLen (size 4)) mgfseed_counter;
+     let acc_ = Buffer.sub #uint8 #accLen #(v hLen) acc (mul #SIZE hLen counter) hLen in
+     copy hLen mHash acc_;
+     mgf_ #accLen #stLen count_max mgfseed aaccLen sstLen st (size_incr counter)
+  end
 
 val mgf_sha256:
-	mgfseed:lbytes hLen ->
-	len:U32.t ->
-	res:lbytes len -> Stack unit
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
-let mgf_sha256 mgfseed len res =
-	push_frame();
-	let count_max = (len -^ 1ul) /^ hLen +^ 1ul in
-	let accLen = hLen *^ count_max in
-	let stLen = hLen +^ 4ul +^ 4ul +^ hLen +^ accLen in
-	let st:mgf_state accLen = create 0uy stLen in
-	let mgfseed_counter = get_mgfseed_counter st in
-	blit mgfseed 0ul mgfseed_counter 0ul hLen;
-	mgf_ count_max mgfseed accLen st 0ul;
-	let acc = get_acc st in
-	blit acc 0ul res 0ul len;
-	pop_frame()
+    #len:size_nat ->
+    mgfseed:lbytes (v hLen) ->
+    clen:size_t{v clen == len /\ len > 0} ->
+    res:lbytes len -> Stack unit
+    (requires (fun h -> live h mgfseed /\ live h res /\ disjoint res mgfseed))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+	
+let mgf_sha256 #len mgfseed clen res =
+    let count_max:size_t = add_mod #SIZE (size_div (sub #SIZE clen (size 1)) hLen) (size 1) in
+    assume (v hLen * v count_max < max_size_t);
+    let accLen:size_t = mul #SIZE hLen count_max in
+    assume (v hLen + 4 + 4 + v hLen + v accLen < max_size_t);
+    let stLen:size_t = add #SIZE (add #SIZE (add #SIZE hLen (size 8)) hLen) accLen in
+    alloc #uint8 #unit #(v stLen) stLen (u8 0) [BufItem mgfseed] [BufItem res]
+    (fun h0 _ h1 -> True)
+    (fun st ->
+       let mgfseed_counter = Buffer.sub #uint8 #(v stLen) #(v hLen + 4) st (size 0) (add #SIZE hLen (size 4)) in
+       let acc = Buffer.sub #uint8 #(v stLen) #(v accLen) st (add #SIZE (add #SIZE hLen (size 8)) hLen) accLen in
+       let mgfseed_counter_ = Buffer.sub #uint8 #(v hLen + 4) #(v hLen) mgfseed_counter (size 0) hLen in
+       copy hLen mgfseed mgfseed_counter_;
+       mgf_ #(v accLen) #(v stLen) count_max mgfseed accLen stLen st (size 0);
+       let acc_ = Buffer.sub #uint8 #(v accLen) #len acc (size 0) clen in
+       copy clen acc_ res
+    ) 

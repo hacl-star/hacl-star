@@ -1,92 +1,99 @@
 module Convert
 
 open FStar.HyperStack.All
-open FStar.Buffer
-open Hacl.Endianness
+open Spec.Lib.IntBuf.Lemmas
+open Spec.Lib.IntBuf
+open Spec.Lib.IntTypes
+open Spec.Lib.Endian
+open FStar.Mul
+
 open Lib
 
-module U8 = FStar.UInt8
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
-open U32
+module Buffer = Spec.Lib.IntBuf
 
 val text_to_nat_:
-    len:U32.t ->
-    input:lbytes (8ul *^ len) ->
-    res:lbignum len ->
-    i:U32.t{v i <= v len} -> Stack unit
-    (requires (fun h -> True))
-    (ensures (fun h0 _ h1 -> True))
-let rec text_to_nat_ len input res i =
-    if (i <^ len) then begin
-        let inputi = hload64_be (Buffer.sub input (8ul *^ i) 8ul) in
-        let ind = len -^ i -^ 1ul in
+    #len:size_nat ->
+    clen:size_t{v clen == len} ->
+    input:lbytes len ->
+    resLen:size_t{len = 8 * v resLen} ->
+    res:lbignum (v resLen) ->
+    i:size_t{v i <= v resLen} -> Stack unit
+    (requires (fun h -> live h input /\ live h res /\ disjoint res input))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+
+let rec text_to_nat_ #len clen input resLen res i =
+    if (i <. resLen) then begin
+        let inputi = uint64_from_bytes_be (Buffer.sub input (mul_mod #SIZE (size 8) i) (size 8)) in
+	let ind:size_t = sub_mod #SIZE (sub_mod #SIZE resLen i) (size 1) in
         res.(ind) <- inputi;
-        text_to_nat_ len input res (i +^ 1ul)
+        text_to_nat_ #len clen input resLen res (size_incr i)
     end
 
 val text_to_nat:
-    len:U32.t ->
+    #len:size_nat{len > 0} -> clen:size_t{v clen == len} ->
     input:lbytes len ->
-    res:lbignum (get_size_nat len) -> Stack unit
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
-let text_to_nat len input res =
-    push_frame();
-    let num_words = get_size_nat len in
-    (**) assert(0 < U32.v num_words);
-    let m = len %^ 8ul in
-    (**) assert(0 <= U32.v m /\ U32.v m < 8);
-    (**) assume(FStar.Mul.(8 * U32.v num_words) <= 65536);
-    let tmpLen = 8ul *^ num_words in
-    (**) assert(FStar.Mul.(U32.(8 <= 8 * U32.v num_words)));
-    (**) assert(FStar.Mul.(U32.v tmpLen = 8 * U32.v num_words));
-    (**) assert(8 <= U32.v tmpLen);
-    (**) assert(U32.(8 - (U32.v m) <= 8));
-    (**) assert(U32.(8 - (U32.v m) <= U32.v tmpLen));
-    let tmp = create 0uy tmpLen in
-    let ind = if (m =^ 0ul) then 0ul else 8ul -^ m in
-    blit input 0ul tmp ind len;
-    text_to_nat_ num_words tmp res 0ul;
-    pop_frame()
+    res:lbignum (v (get_size_nat clen)){8 * v (get_size_nat clen) < max_size_t} -> Stack unit
+    (requires (fun h -> live h input /\ live h res /\ disjoint res input))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
+let text_to_nat #len clen input res =
+    let num_words = get_size_nat clen in
+    let tmpLen:size_t = mul_mod #SIZE (size 8) num_words in
+    let m = clen %. size 8 in
+    let ind:size_t = if (m =. size 0) then size 0 else sub_mod #SIZE (size 8) m in
+
+    alloc #uint8 #unit #(v tmpLen) tmpLen (u8 0) [BufItem input] [BufItem res]
+    (fun h0 _ h1 -> True)
+    (fun tmp ->
+      let tmp_Len:size_t = sub_mod #SIZE tmpLen ind in
+      assume (v tmp_Len = v clen);
+      let tmp_:lbuffer uint8 len = Buffer.sub #uint8 #(v tmpLen) #(v tmp_Len) tmp ind tmp_Len in
+      copy #uint8 #len clen input tmp_;
+      text_to_nat_ tmpLen tmp num_words res (size 0)
+    )
+  
 
 val nat_to_text_:
-    len:U32.t ->
-	input:lbignum len ->
-    res:lbytes (8ul *^ len) ->
-    i:U32.t{v i <= v len} -> Stack unit
-    (requires (fun h -> True))
-    (ensures (fun h0 _ h1 -> True))
-let rec nat_to_text_ len input res i =
-    if (i <^ len) then begin
-        let ind = len -^ i -^ 1ul in
+    #len:size_nat -> clen:size_t{v clen == len} ->
+    input:lbignum len ->
+    resLen:size_t{v resLen = 8 * len} ->
+    res:lbytes (v resLen) ->
+    i:size_t{v i <= len} -> Stack unit
+    (requires (fun h -> live h input /\ live h res /\ disjoint res input))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    
+let rec nat_to_text_ #len clen input resLen res i =
+    if (i <. clen) then begin
+        let ind = sub_mod #SIZE (sub_mod #SIZE clen i) (size 1) in
         let tmp = input.(ind) in
-        hstore64_be (Buffer.sub res (8ul *^ i) 8ul) tmp;
-        nat_to_text_ len input res (i +^ 1ul)
+	uint64_to_bytes_be (Buffer.sub res (mul_mod #SIZE (size 8) i) (size 8)) tmp;
+        nat_to_text_ #len clen input resLen res (size_incr i)
     end
 
 val nat_to_text:
-    len:U32.t ->
-    input:lbignum (get_size_nat len) ->
+    #len:size_nat{len > 0} -> clen:size_t{v clen == len} ->
+    input:lbignum (v (get_size_nat clen)){8 * v (get_size_nat clen) < max_size_t} ->
     res:lbytes len -> Stack unit
-	(requires (fun h -> True))
-	(ensures (fun h0 _ h1 -> True))
-let nat_to_text len input res =
-    push_frame();
-    let num_words = get_size_nat len in
-    (**) assert(0 < U32.v num_words);
-    let m = len %^ 8ul in
-    (**) assert(0 <= U32.v m /\ U32.v m < 8);
-    (**) assume(FStar.Mul.(8 * U32.v num_words) <= 65536);
-    let tmpLen = 8ul *^ num_words in
-    (**) assert(FStar.Mul.(U32.(8 <= 8 * U32.v num_words)));
-    (**) assert(FStar.Mul.(U32.v tmpLen = 8 * U32.v num_words));
-    (**) assert(8 <= U32.v tmpLen);
-    (**) assert(U32.(8 - (U32.v m) <= 8));
-    (**) assert(U32.(8 - (U32.v m) <= U32.v tmpLen));
-    let tmp = create 0uy tmpLen in
-    nat_to_text_ num_words input tmp 0ul;
-    let ind = if (m =^ 0ul) then 0ul else 8ul -^ m in
-    blit tmp ind res 0ul len;
-    pop_frame()
+    (requires (fun h -> live h input /\ live h res /\ disjoint res input))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
+let nat_to_text #len clen input res =
+    let num_words = get_size_nat clen in
+    let tmpLen:size_t = mul_mod #SIZE (size 8) num_words in
+    let m = clen %. size 8 in
+    let ind:size_t = if (m =. size 0) then size 0 else sub_mod #SIZE (size 8) m in
+
+    alloc #uint8 #unit #(v tmpLen) tmpLen (u8 0) [BufItem input] [BufItem res]
+    (fun h0 _ h1 -> True)
+    (fun tmp ->
+      nat_to_text_ num_words input tmpLen tmp (size 0);
+      let tmp_Len:size_t = sub_mod #SIZE tmpLen ind in
+      assume (v tmp_Len = v clen);
+      let tmp_:lbuffer uint8 (v tmp_Len) = Buffer.sub tmp ind tmp_Len in
+      copy #uint8 #len clen tmp_ res
+    )
+
