@@ -31,6 +31,7 @@ display:
 	@echo "- 'make extract-all' will give you all versions of the C snapshots available"
 	@echo "- 'make extract-production' will remove and regenerate all C production snapshots available"
 	@echo "- 'make extract-experimental' will generate C code for experimental primitives"
+	@echo "- 'make build-experimental' will use CMake to generate experimental libraries with experimental features (no verification)"
 
 
 #
@@ -207,7 +208,7 @@ package: .package-banner
 # Undocumented targets
 #
 
-experimental:
+build-experimental:
 	@echo $(CYAN)"# Compiling the HACL* library (with experimental features)"$(NORMAL)
 	mkdir -p build-experimental && cd build-experimental; \
 	cmake $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
