@@ -12,7 +12,8 @@ open Convert
 module Buffer = Spec.Lib.IntBuf
 
 (* SHA 256 *)
-let hLen:size_t = size 32 
+let hLen:size_t = size 32
+
 assume val hash_sha256:
     #len:size_nat ->
     mHash:lbytes (v hLen) ->
@@ -20,7 +21,7 @@ assume val hash_sha256:
     m:lbytes len -> Stack unit
     (requires (fun h -> live h mHash /\ live h m /\ disjoint m mHash))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 mHash h0 h1))
-//let hash_sha256 mHash len m = SHA2_256.hash mHash m len
+//let hash_sha256 #len mHash clen m = SHA2_256.hash mHash m clen
 
 (* Mask Generation Function *)
 val mgf_:
@@ -57,17 +58,16 @@ let rec mgf_ #accLen #stLen count_max mgfseed aaccLen sstLen st counter =
 val mgf_sha256:
     #len:size_nat ->
     mgfseed:lbytes (v hLen) ->
-    clen:size_t{v clen == len /\ len > 0} ->
+    clen:size_t{v clen == len /\ 0 < len /\ 8 + 2 * v hLen + v hLen * v (blocks clen hLen) < max_size_t} ->
     res:lbytes len -> Stack unit
     (requires (fun h -> live h mgfseed /\ live h res /\ disjoint res mgfseed))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 	
 let mgf_sha256 #len mgfseed clen res =
-    let count_max:size_t = add_mod #SIZE (size_div (sub #SIZE clen (size 1)) hLen) (size 1) in
-    assume (v hLen * v count_max < max_size_t);
-    let accLen:size_t = mul #SIZE hLen count_max in
-    assume (v hLen + 4 + 4 + v hLen + v accLen < max_size_t);
-    let stLen:size_t = add #SIZE (add #SIZE (add #SIZE hLen (size 8)) hLen) accLen in
+    let count_max = blocks clen hLen in
+    let accLen = mul #SIZE hLen count_max in
+    let stLen = add #SIZE (add #SIZE (add #SIZE hLen (size 8)) hLen) accLen in
+    
     alloc #uint8 #unit #(v stLen) stLen (u8 0) [BufItem mgfseed] [BufItem res]
     (fun h0 _ h1 -> True)
     (fun st ->
@@ -78,4 +78,4 @@ let mgf_sha256 #len mgfseed clen res =
        mgf_ #(v accLen) #(v stLen) count_max mgfseed accLen stLen st (size 0);
        let acc_ = Buffer.sub #uint8 #(v accLen) #len acc (size 0) clen in
        copy clen acc_ res
-    ) 
+    )

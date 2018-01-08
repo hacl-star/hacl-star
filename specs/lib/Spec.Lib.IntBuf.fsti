@@ -27,7 +27,9 @@ inline_for_extraction val as_lseq: #a:Type0 -> #len:size_nat -> lbuffer a len ->
   match l with
   | [] -> True
   | b::t -> creates1 b.buf h0 h1 /\ creates t h0 h1
-  
+
+inline_for_extraction val modifies0: mem -> mem -> GTot Type0
+
 inline_for_extraction val modifies1: #a:Type0 -> #len:size_nat ->  lbuffer a (len) -> mem -> mem -> GTot Type0
 
 inline_for_extraction val modifies2: #a1:Type0 -> #a2:Type0 -> #len1:size_nat -> #len2:size_nat -> lbuffer a1 (len1) -> lbuffer a2 (len2) -> mem -> mem -> GTot Type0

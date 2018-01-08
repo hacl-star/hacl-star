@@ -19,6 +19,7 @@ let live #a #len h b : GTot Type0 = Buf.live h b
 
 let preserves_live h0 h1 = True
 let as_lseq #a #len b m = admit()
+let modifies0 = admit()
 let modifies1 #a #len b h0 h1 = admit()
 let modifies2 = admit()
 let modifies3 = admit()

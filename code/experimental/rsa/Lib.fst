@@ -7,7 +7,7 @@ open Spec.Lib.IntTypes
 open Spec.Lib.RawIntTypes
 open FStar.Mul
 
-//inline_for_extraction
+inline_for_extraction
 let v = size_v
 
 type lbytes (len:size_nat) = lbuffer uint8 len
@@ -82,8 +82,6 @@ val fill:
   (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1))
   
 let fill #len clen b z =
-  let h = FStar.HyperStack.ST.get() in
-  assume (live_list h []);
   alloc #uint64 #unit #len clen z [] [BufItem b]
   (fun h0 _ h1 -> True)
   (fun tmp ->

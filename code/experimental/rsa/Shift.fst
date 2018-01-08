@@ -49,9 +49,9 @@ val bn_rshift_:
 #reset-options "--z3rlimit 50 --max_fuel 0"
 
 let rec bn_rshift_ #aLen caLen a i nw rb l res =
-    if (i <. sub_mod #SIZE caLen nw) then begin
+    if (i <. sub #SIZE caLen nw) then begin
         let tmp = l >>. rb in
-        let l = a.(add_mod #SIZE nw i) in
+        let l = a.(add #SIZE nw i) in
         let lb = u32 64 -. rb in
         assert(0 < uint_v #U32 lb /\ uint_v #U32 lb < 64);
         res.(size_decr i) <- tmp |. (shift_left #U64 l lb);
@@ -71,7 +71,7 @@ let bn_rshift #aLen caLen a nCount res =
     let nw = nCount /. size 64 in
     let rb = nCount %. size 64 in
     (if rb =. size 0 then begin
-	let a_Len:size_t =sub_mod #SIZE caLen nw in
+	let a_Len = sub #SIZE caLen nw in
 	let a_ = Buffer.sub #uint64 #aLen #(v a_Len) a nw a_Len in
 	let res_ = Buffer.sub #uint64 #aLen #(v a_Len) res (size 0) a_Len in
 	copy a_Len a_ res_ end
@@ -84,7 +84,7 @@ val bn_mod_pow2_n:
     #aLen:size_nat -> #resLen:size_nat ->
     caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
     nCount:size_t ->
-    cresLen:size_t{v cresLen == resLen /\ resLen <= aLen /\ resLen - v nCount / 64 - 1 > 0} ->
+    cresLen:size_t{v cresLen == resLen /\ resLen <= aLen /\ resLen - v nCount / 64 - 1 >= 0} ->
     res:lbignum resLen -> Stack unit
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
@@ -97,12 +97,11 @@ let bn_mod_pow2_n #aLen #resLen caLen a nCount cresLen res =
 
     let start_i:size_t =
         if (nb >. size 0) then begin
-	    let lb = sub_mod #U32 (u32 64) (size_to_uint32 nb) in
+	    let lb = sub #U32 (u32 64) (size_to_uint32 nb) in
             res.(nw) <- res.(nw) &. (shift_right #U64 (u64 0xffffffffffffffff) lb);
             size_incr nw end
         else nw in
 
-    let res_Len:size_t = sub_mod #SIZE cresLen start_i in
-    assume (v start_i + v res_Len <= resLen);
+    let res_Len = sub #SIZE cresLen start_i in
     let res_ = Buffer.sub #uint64 #resLen #(v res_Len) res start_i res_Len in
     fill res_Len res_ (u64 0)

@@ -4,6 +4,7 @@ open FStar.HyperStack.All
 open Spec.Lib.IntBuf.Lemmas
 open Spec.Lib.IntBuf
 open Spec.Lib.IntTypes
+open FStar.Mul
 
 open Lib
 
@@ -13,12 +14,10 @@ val bn_mul_by_limb_addj_f:
     a_i:uint64 -> l:uint64 -> c:uint64 -> r_ij:uint64 -> Tot (tuple2 uint64 uint64)
 [@ "substitute"]    
 let bn_mul_by_limb_addj_f a_i l c r_ij =
-    //let res = (mul_wide a_i l) +. to_u128 c +. to_u128 r_ij in
-    let res = add_mod #U128 (to_u128 #U64 c) (to_u128 #U64 r_ij) in
-    let res = add_mod #U128 (mul_wide a_i l) res in
+    assume (uint_v #U64 a_i * uint_v #U64 l + uint_v #U64 c + uint_v #U64 r_ij < pow2 128);
+    let res = add #U128 (add #U128 (mul_wide a_i l) (to_u128 #U64 c)) (to_u128 #U64 r_ij) in
     let r = to_u64 res in
-    let c' =  res >>. u32 64 in
-    let c' = to_u64 c' in
+    let c' = to_u64 (res >>. u32 64) in
     (c', r)
 
 val bn_mul_by_limb_addj_:
@@ -35,8 +34,8 @@ let rec bn_mul_by_limb_addj_ #aLen #resLen caLen a l i j cresLen res =
     else begin
         let i1 = size_decr i in
         let c1 = bn_mul_by_limb_addj_ #aLen #resLen caLen a l i1 j cresLen res in
-        let (carry', res_ij) = bn_mul_by_limb_addj_f a.(i1) l c1 res.(add_mod #SIZE i1 j) in
-        res.(add_mod #SIZE i1 j) <- res_ij;
+        let (carry', res_ij) = bn_mul_by_limb_addj_f a.(i1) l c1 res.(add #SIZE i1 j) in
+        res.(add #SIZE i1 j) <- res_ij;
         carry'
     end
 
@@ -68,7 +67,7 @@ let rec bn_mul_ #aLen #bLen #resLen caLen a cbLen b j cresLen res =
         let j1 = size_decr j in
         bn_mul_ #aLen #bLen #resLen caLen a cbLen b j1 cresLen res;
         let c' = bn_mul_by_limb_addj #aLen #resLen caLen a b.(j1) j1 cresLen res in
-        res.(add_mod #SIZE caLen j1) <- c'
+        res.(add #SIZE caLen j1) <- c'
     end
 
 // res = a * b
@@ -81,4 +80,4 @@ val bn_mul:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
         
 let bn_mul #aLen #bLen caLen a cbLen b res = 
-    bn_mul_ #aLen #bLen #(aLen + bLen) caLen a cbLen b cbLen (add_mod #SIZE caLen cbLen) res
+    bn_mul_ #aLen #bLen #(aLen + bLen) caLen a cbLen b cbLen (add #SIZE caLen cbLen) res

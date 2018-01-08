@@ -33,6 +33,12 @@ val disjoint_sub_lemma2: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> start1:
 			 (ensures (disjoint (sub #a #len #(v n1) b start1 n1) (sub #a #len #(v n2) b start2 n2)))
 			 [SMTPat (disjoint (sub #a #len #(v n1) b start1 n1) (sub #a #len #(v n2) b  start2 n2))]
 
+val disjoint_sub_lemma3: #a1:Type0 -> #a2:Type0 -> #len1:size_nat -> #len2:size_nat -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 ->
+			 start1:size_t -> n1:size_t{v start1 + v n1 <= len1} -> start2:size_t -> n2:size_t{v start2 + v n2 <= len2} -> Lemma
+			 (requires (disjoint b1 b2))
+			 (ensures (disjoint (sub #a1 #len1 #(v n1) b1 start1 n1) (sub #a2 #len2 #(v n2) b2 start2 n2)))
+			 [SMTPat (disjoint (sub #a1 #len1 #(v n1) b1 start1 n1) (sub #a2 #len2 #(v n2) b2 start2 n2))]
+
 val as_lseq_sub_lemma: #a:Type0 -> #len:size_nat -> h:mem -> b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len} -> Lemma
 			 (requires (live h b))
 			 (ensures (as_lseq (sub #a #len #(v n) b start n) h == LSeq.sub (as_lseq b h) (v start) (v n)))
@@ -73,6 +79,11 @@ let creates3 #a1 #a2 #a3  #len1 #len2  #len3 (b1:lbuffer a1 len1) (b2:lbuffer a2
   creates1 #a2 #len2 b2 h0 h1 /\
   creates1 #a3 #len3 b3 h0 h1 
 
+val live_list_lemma0: h:mem -> Lemma
+			(requires (True))
+			(ensures (live_list h []))
+			[SMTPat (live_list h [])]
+
 val live_list_lemma1: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> h:mem -> Lemma
 			(requires (True))
 			(ensures (live_list h [BufItem b] == live h b))
@@ -89,6 +100,11 @@ val live_list_lemma3: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_nat -> #
 			(ensures (live_list h [BufItem b1; BufItem b2; BufItem b3] == (live h b1 /\ live h b2 /\ live h b3)))
 			[SMTPat (live_list h [BufItem b1; BufItem b2; BufItem b3])]
 
+val disjoint_list_lemma0: #a:Type0 -> #len:size_nat -> b0:lbuffer a len -> Lemma
+			(requires (True))
+			(ensures (disjoint_list b0 []))
+			[SMTPat (disjoint_list #a b0 [])]
+
 val disjoint_list_lemma1: #a:Type0 -> #a1:Type0 -> #len:size_nat -> #len1:size_nat -> b0:lbuffer a len -> b:lbuffer a1 len1 -> Lemma
 			(requires (True))
 			(ensures (disjoint_list b0 [BufItem b] == (disjoint b0 b /\ disjoint b b0) ))
@@ -104,6 +120,11 @@ val disjoint_list_lemma3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #l
 			(requires (True))
 			(ensures (disjoint_list b0 [BufItem b1; BufItem b2; BufItem b3] == (disjoint b0 b1 /\ disjoint b0 b2 /\ disjoint b0 b3 /\ disjoint b1 b0 /\ disjoint b2 b0 /\ disjoint b3 b0)))
 			[SMTPat (disjoint_list b0 [BufItem b1; BufItem b2; BufItem b3])]
+
+val modifies_modifies_0: h0:mem -> h1:mem -> Lemma
+			(requires (True))
+			(ensures (modifies [] h0 h1 == modifies0 h0 h1))
+			[SMTPat (modifies [] h0 h1)]
 
 val modifies_modifies_1: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> h0:mem -> h1:mem -> Lemma
 			(requires (True))
