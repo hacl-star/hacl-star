@@ -1,4 +1,4 @@
-module RSA
+module Hacl.Impl.RSA
 
 open FStar.HyperStack.All
 open FStar.Mul
@@ -7,11 +7,11 @@ open Spec.Lib.IntBuf.Lemmas
 open Spec.Lib.IntBuf
 open Spec.Lib.IntTypes
 
-open Lib
-open MGF
-open Comparison
-open Convert
-open Exponentiation
+open Hacl.Impl.Lib
+open Hacl.Impl.MGF
+open Hacl.Impl.Comparison
+open Hacl.Impl.Convert
+open Hacl.Impl.Exponentiation
 
 module Buffer = Spec.Lib.IntBuf
 

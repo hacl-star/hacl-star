@@ -1,4 +1,4 @@
-module Lib
+module Hacl.Impl.Lib
 
 open FStar.HyperStack.All
 open Spec.Lib.IntBuf.Lemmas

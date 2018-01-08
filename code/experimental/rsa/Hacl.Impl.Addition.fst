@@ -1,11 +1,11 @@
-module Addition
+module Hacl.Impl.Addition
 
 open FStar.HyperStack.All
 open Spec.Lib.IntBuf.Lemmas
 open Spec.Lib.IntBuf
 open Spec.Lib.IntTypes
 
-open Lib
+open Hacl.Impl.Lib
 
 val bn_sub_:
     #aLen:size_nat -> #bLen:size_nat ->

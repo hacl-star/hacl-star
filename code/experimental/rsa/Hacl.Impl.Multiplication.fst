@@ -1,4 +1,4 @@
-module Multiplication
+module Hacl.Impl.Multiplication
 
 open FStar.HyperStack.All
 open Spec.Lib.IntBuf.Lemmas
@@ -6,7 +6,7 @@ open Spec.Lib.IntBuf
 open Spec.Lib.IntTypes
 open FStar.Mul
 
-open Lib
+open Hacl.Impl.Lib
 
 module Buffer = Spec.Lib.IntBuf
 

@@ -1,4 +1,4 @@
-module Exponentiation
+module Hacl.Impl.Exponentiation
 
 open FStar.HyperStack.All
 open Spec.Lib.IntBuf.Lemmas
@@ -6,10 +6,10 @@ open Spec.Lib.IntBuf
 open Spec.Lib.IntTypes
 open FStar.Mul
 
-open Lib
-open Convert
-open Montgomery
-open Multiplication
+open Hacl.Impl.Lib
+open Hacl.Impl.Convert
+open Hacl.Impl.Montgomery
+open Hacl.Impl.Multiplication
 
 module Buffer = Spec.Lib.IntBuf
 
@@ -107,7 +107,7 @@ val mod_exp:
     (requires (fun h -> live h n /\ live h a /\ live h b /\ live h res))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
     
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+#reset-options "--lax"
 
 let mod_exp #nLen modBits nnLen n a bBits b res =
     let exp_r = add #SIZE modBits (size 2) in

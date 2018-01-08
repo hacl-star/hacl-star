@@ -1,11 +1,11 @@
-module Shift
+module Hacl.Impl.Shift
 
 open FStar.HyperStack.All
 open Spec.Lib.IntBuf.Lemmas
 open Spec.Lib.IntBuf
 open Spec.Lib.IntTypes
 
-open Lib
+open Hacl.Impl.Lib
 
 module Buffer = Spec.Lib.IntBuf
 

@@ -1,11 +1,11 @@
-module Comparison
+module Hacl.Impl.Comparison
 
 open FStar.HyperStack.All
 open Spec.Lib.IntBuf.Lemmas
 open Spec.Lib.IntBuf
 open Spec.Lib.IntTypes
 
-open Lib
+open Hacl.Impl.Lib
 
 val bn_is_less_:
     #len:size_nat -> clen:size_t{v clen == len} ->

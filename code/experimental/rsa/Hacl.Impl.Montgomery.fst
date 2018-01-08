@@ -1,4 +1,4 @@
-module Montgomery
+module Hacl.Impl.Montgomery
 
 open FStar.HyperStack.All
 open Spec.Lib.IntBuf.Lemmas
@@ -6,12 +6,12 @@ open Spec.Lib.IntBuf
 open Spec.Lib.IntTypes
 open FStar.Mul
 
-open Lib
-open Convert
-open Addition
-open Comparison
-open Multiplication
-open Shift
+open Hacl.Impl.Lib
+open Hacl.Impl.Convert
+open Hacl.Impl.Addition
+open Hacl.Impl.Comparison
+open Hacl.Impl.Multiplication
+open Hacl.Impl.Shift
 
 module Buffer = Spec.Lib.IntBuf
 

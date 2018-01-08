@@ -1,4 +1,4 @@
-module Test.RSA
+module Hacl.Test.RSA
 
 open FStar.HyperStack.All
 open Spec.Lib.IntBuf
@@ -6,9 +6,9 @@ open Spec.Lib.IntTypes
 open Spec.Lib.RawIntTypes
 open FStar.Mul
 
-open Lib
-open Convert
-open RSA
+open Hacl.Impl.Lib
+open Hacl.Impl.Convert
+open Hacl.RSAPSS
 
 module Buffer = Spec.Lib.IntBuf
 
@@ -42,9 +42,9 @@ let ctest modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected 
     
     let nTLen = bits_to_text modBits in
     let sgnt:lbytes (v nTLen) = Buffer.create nTLen (u8 0) in
-    rsa_sign modBits pkeyBits skeyBits skey saltLen salt msgLen msg sgnt;
+    rsa_pss_sign modBits pkeyBits skeyBits skey saltLen salt msgLen msg sgnt;
     let check_sgnt = eq_b nTLen sgnt sgnt_expected in
-    let verify_sgnt = rsa_verify #(v saltLen) #(v msgLen) modBits pkeyBits pkey saltLen sgnt msgLen msg in
+    let verify_sgnt = rsa_pss_verify #(v saltLen) #(v msgLen) modBits pkeyBits pkey saltLen sgnt msgLen msg in
     check_sgnt && verify_sgnt
 
 val test1: unit -> Stack bool

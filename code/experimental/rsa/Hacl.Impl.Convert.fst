@@ -1,4 +1,4 @@
-module Convert
+module Hacl.Impl.Convert
 
 open FStar.HyperStack.All
 open Spec.Lib.IntBuf.Lemmas
@@ -7,7 +7,7 @@ open Spec.Lib.IntTypes
 open Spec.Lib.Endian
 open FStar.Mul
 
-open Lib
+open Hacl.Impl.Lib
 
 module Buffer = Spec.Lib.IntBuf
 

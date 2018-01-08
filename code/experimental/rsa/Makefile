@@ -1,60 +1,59 @@
 include ../../../Makefile.include 
 
 RSA_FILES= \
-	Lib.fst \
-	Convert.fst \
-	Comparison.fst \
-	Addition.fst \
-	Multiplication.fst \
-	Shift.fst \
-	Montgomery.fst \
-	Exponentiation.fst \
-	MGF.fst \
-	RSA.fst \
-	Test.RSA.fst
+	Hacl.Impl.Lib.fst \
+	Hacl.Impl.Convert.fst \
+	Hacl.Impl.Comparison.fst \
+	Hacl.Impl.Addition.fst \
+	Hacl.Impl.Multiplication.fst \
+	Hacl.Impl.Shift.fst \
+	Hacl.Impl.Montgomery.fst \
+	Hacl.Impl.Exponentiation.fst \
+	Hacl.Impl.MGF.fst \
+	Hacl.Impl.RSA.fst \
+	Hacl.RSAPSS.fst
 
 verify: $(addsuffix -lax, $(RSA_FILES))
-
-RSA_VERIFY= \
-	Comparison.fst
-
-verify-1: $(RSA_VERIFY)
-	$(FSTAR_HOME)/bin/fstar.exe --query_stats $(OTHERFLAGS) $(FSTAR_INCLUDES) $^
 
 KREMLIN_ARGS+= \
         -drop Prims,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Endianness,Hacl.Cast,Hacl.Spec.*,Spec.*,Seq.* \
         $(KREMLIN_TESTLIB)
 
-extract-c: rsa-c/RSA.c
-test: test-rsa.exe
-
-EXTRACTED = \
-	Lib \
-	Convert \
-	Multiplication \
-	Shift \
-	Comparison \
-	Addition \
-	Montgomery \
-	Exponentiation \
-	MGF \
-	RSA \
-	Test_RSA
-
-rsa-c/out.krml: ../../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../../specs/lib/c/Spec.Lib.Loops.fst ../../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../../specs/lib/c/Spec.Lib.Endian.fst ../../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst $(RSA_FILES) 
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir rsa-c \
+rsa-c/out.krml: ../../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../../specs/lib/c/Spec.Lib.Loops.fst ../../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../../specs/lib/c/Spec.Lib.Endian.fst ../../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.RSAPSS.fst Hacl.Test.RSA.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir rsa-c -no-prefix 'Hacl.Test.RSA' \
         -I ../../../specs -I ../../../specs/lib -I ../../../specs/lib/fst  -I ../../../specs/lib/c \
+	-bundle 'Hacl.RSAPSS=Hacl.Impl.*,Hacl.RSAPSS' \
         -skip-translation $^ -o $@
 
-$(addprefix rsa-c/,$(addsuffix .c, $(EXTRACTED))): rsa-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir rsa-c $^ -skip-compilation -no-prefix 'Test.RSA'
+rsa-c/Hacl_RSAPSS.c: rsa-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir rsa-c -no-prefix 'Hacl.Test.RSA' \
+	-bundle 'Hacl.RSAPSS=HAcl.Impl.*,Hacl.RSAPSS' \
+	-skip-compilation $^ -o $@
 
 test-rsa-kremlin.exe: rsa-c/out.krml
 	mkdir -p rsa-c
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir rsa-c  -no-prefix Test.RSA \
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir rsa-c  -no-prefix 'Hacl.Test.RSA' \
 	-I ../../../specs -I ../../../specs/lib -I ../../../specs/lib/fst -I ../../../specs/lib/c \
+	-bundle 'Hacl.RSAPSS=HAcl.Impl.*,Hacl.RSAPSS' \
 	$^ -o $@
 	./$@
+
+EXTRACTED= \
+	Hacl_Impl_Lib \
+	Hacl_Impl_Convert \
+	Hacl_Impl_Comparison \
+	Hacl_Impl_Addition \
+	Hacl_Impl_Multiplication \
+	Hacl_Impl_Shift \
+	Hacl_Impl_Montgomery \
+	Hacl_Impl_Exponentiation \
+	Hacl_Impl_MGF \
+	Hacl_Impl_RSA \
+	Hacl_RSAPSS \
+	Hacl_Test_RSA
+
+$(addprefix rsa-c/,$(addsuffix .c, $(EXTRACTED))): rsa-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir rsa-c $^ -skip-compilation -no-prefix 'Hacl.Test.RSA'
 
 INCLUDE_C=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib
 
