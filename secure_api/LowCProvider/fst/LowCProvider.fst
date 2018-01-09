@@ -37,3 +37,9 @@ assume val aead_decrypt:
   ad:bytes ->
   cipher:bytes{length cipher >= aeadTagSize (alg st)} ->
   EXT (o:option bytes)
+
+
+assume val crypto_scalarmult:
+  secret:lbytes 32 ->
+  point:lbytes 32 ->
+  EXT (lbytes 32)

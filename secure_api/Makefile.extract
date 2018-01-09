@@ -181,11 +181,17 @@ $(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILE
 $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa:
 	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
 
+CURVE_DIR=$(HACL_HOME)/code/curve25519/x25519-c/
+
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
 HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(DIST_DIR)/Crypto_Indexing.h \
-  $(DIST_DIR)/Crypto_AEAD_Main.h
+  $(DIST_DIR)/Crypto_AEAD_Main.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h
+
+.PHONY: $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h
+$(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h:
+	$(MAKE) -C $(CURVE_DIR)/.. extract-c
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
@@ -201,7 +207,8 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 # right include paths...
 %.o: %.c
 	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -I $(MLCRYPTO_HOME) -ccopt -o \
-	  -ccopt $@ -ccopt -fPIC -ccopt -Wno-unused-variable -ccopt -Wno-parentheses
+	  -ccopt $@ -ccopt -fPIC -ccopt -Wno-unused-variable -ccopt -Wno-parentheses \
+	  -I $(CURVE_DIR)
 
 # Gross approximation: the cmx's we build are most likely extracted F* code and,
 # as such, require a working fstarlib.
@@ -223,7 +230,8 @@ $(DIST_DIR)/LowC.cmxa: \
 	  LowCProvider/LowCProvider.cmx \
 	  LowCProvider/lowc_stub.o \
 	  $(DIST_DIR)/Crypto_AEAD_Main.o $(DIST_DIR)/Crypto_Indexing.o \
-	  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $($(IMPL_CHOICE)_EXTRA)
+	  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Curve25519.o \
+	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cmxa,%,$@)
 
 
