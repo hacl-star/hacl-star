@@ -140,6 +140,7 @@ let mul #t a b =
   | U64 -> (UInt64.mul a b)
   | SIZE -> (UInt32.mul a b)
 
+let mul_wide a b = UInt128.mul_wide a b
 
 let sub_mod #t a b =
   match t with

@@ -147,6 +147,65 @@ let setup st k n =
   let st_n = sub st (index 13) (index 3) in
   uint32s_from_bytes_le #3 (size 3) st_n n 
 
+[@ "c_inline"]
+val chacha20_init:
+  k:lbuffer uint8 32 ->
+  n:lbuffer uint8 12 ->
+  StackInline state
+    (requires (fun h -> live h k /\ live h n))
+    (ensures (fun h0 st h1 -> preserves_live h0 h1 /\ creates1 st h0 h1
+                       /\ as_lseq st h1 == 
+			 Spec.chacha20_init (as_lseq k h0) (as_lseq n h0)))
+
+let chacha20_init k n = 
+  let st : state = create #uint32 #16 (size 16) (u32 0) in
+  setup st k n;
+  st
+  
+
+[@ "c_inline"]
+val chacha20_set_counter: st:state -> c:counter -> Stack unit
+    (requires (fun h -> live h st))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
+                       /\ as_lseq st h1 == 
+			 Spec.chacha20_set_counter (as_lseq st h0) c))
+
+let chacha20_set_counter st c = 
+  st.(size 12) <- u32 c
+
+[@ "c_inline"]
+val chacha20_key_block: b:lbuffer uint8 64 -> st:state -> Stack unit
+    (requires (fun h -> live h st /\ live h b /\ disjoint st b))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
+                       /\ as_lseq b h1 == 
+			 Spec.chacha20_key_block (as_lseq st h0)))
+let chacha20_key_block b st = 
+  alloc (size 16) (u32 0) [BufItem st] [BufItem b]
+  (fun h0 _ h1 -> as_lseq b h1 == Spec.chacha20_key_block (as_lseq st h0))
+  (fun st' -> chacha20_core st' st; 
+	   uint32s_to_bytes_le (size 16) b st')
+
+
+[@ "c_inline"]
+val chacha20_key_block0: b:lbuffer uint8 64 -> 
+  k:lbuffer uint8 32 -> 
+  n:lbuffer uint8 12 -> Stack unit
+    (requires (fun h -> live h k /\ live h n /\ live h b /\ disjoint b k /\ disjoint b n))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
+                       /\ as_lseq b h1 == 
+			 Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0)))
+let chacha20_key_block0 b k n = 
+  alloc #_ #_ #32 (size 32) (u32 0) [BufItem k; BufItem n] [BufItem b]
+  (fun h0 _ h1 -> as_lseq b h1 == Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0))
+  (fun buf -> let st = sub buf (size 0) (size 16) in
+	   let st' = sub buf (size 16) (size 16) in
+	   assert (disjoint buf k);
+	   assert (disjoint k st);
+	   setup st k n;
+	   chacha20_core st' st; 
+	   uint32s_to_bytes_le (size 16) b st')
+
+
 (*
 [@ "c_inline"]
 val chacha20_block:

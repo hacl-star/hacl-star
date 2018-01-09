@@ -25,8 +25,8 @@ val disjoint_self_lemma: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> Lemma
 val disjoint_sub_lemma1: #a1:Type0 -> #a2:Type0 -> #len1:size_nat -> #len2:size_nat -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> start1:size_t -> n1:size_t{v start1 + v n1 <= len1} -> Lemma
 			 (requires (disjoint b1 b2))
 			 (ensures (disjoint (sub #a1 #len1 #(v n1) b1 start1 n1) b2 /\ disjoint b2 (sub #a1 #len1 #(v n1) b1 start1 n1)))
-			 [SMTPat (disjoint (sub #a1 #len1 #(v n1) b1 start1 n1) b2);
-			  SMTPat (disjoint b2 (sub #a1 #len1 #(v n1) b1 start1 n1))]
+			 [SMTPatOr[[SMTPat (disjoint (sub #a1 #len1 #(v n1) b1 start1 n1) b2)];
+				   [SMTPat (disjoint b2 (sub #a1 #len1 #(v n1) b1 start1 n1))]]]
 
 val disjoint_sub_lemma2: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> start1:size_t -> n1:size_t{v start1 + v n1 <= len} -> start2:size_t -> n2:size_t{v start2 + v n2 <= len} -> Lemma
 			 (requires (v start1 + v n1 <= v start2 \/ v start2 + v n2 <= v start1))
