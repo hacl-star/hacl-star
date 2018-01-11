@@ -1,4 +1,6 @@
 HACL_HOME ?= ..
+KREMLIN_HOME ?= ../../kremlin
+
 include $(HACL_HOME)/Makefile.include
 
 OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
@@ -28,7 +30,8 @@ KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_a
 # - Warning 9 (uninitialized globals)
 # because global constants in `Crypto.Symmetric.GF128` that are uninitialized but
 # marked as `inline_for_extraction`, so always inlined.
-KRML_ARGS=$(FPIC) -ccopt -maes -warn-error -4-9 \
+KRML_ARGS=$(FPIC) -warn-error -4-9 -ccopt -Wno-unused-value \
+  -ccopt -maes -ccopt -Ofast -ccopt -funroll-loops -ccopt -fomit-frame-pointer \
   $(KREMLIN_HOME)/test/../kremlib/testlib.c \
   vale/asm/vale.a test/test_hacks.c \
   -drop Hacl.Spe.*,Spec,Hacl.Spec,Spec.*,Hacl.Spec.* \
@@ -173,6 +176,7 @@ LAX=
 #16-10-09  Not sure how to verify Flag.fsti and Flag.fst
 
 all: all-ver $(addsuffix .fst-lax, $(LAX))
+	$(MAKE) -C LowCProvider
 
 extra: all-ver $(addsuffix .fst-ver, $(EXTRA))
 

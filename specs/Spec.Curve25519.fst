@@ -6,7 +6,7 @@ open Spec.Lib.RawIntTypes
 open Spec.Lib.IntSeq
 open Spec.Curve25519.Lemmas
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 20"
 
 (* Field types and parameters *)
 let prime = pow2 255 - 19
@@ -30,9 +30,8 @@ type serialized_point = lbytes 32
 type proj_point = | Proj: x:elem -> z:elem -> proj_point
 
 let decodeScalar25519 (k:scalar) =
-  let k   = k.[0] <- (k.[0] &. u8 248)          in
-  let k   = k.[31] <- ((k.[31] &. u8 127) |. u8 64) in k
-
+  let k :scalar = k.[0] <- (k.[0] &. u8 248)          in
+  let k :scalar = k.[31] <- ((k.[31] &. u8 127) |. u8 64) in k
 
 let decodePoint (u:serialized_point) =
   (nat_from_bytes_le u % pow2 255) % prime
@@ -90,5 +89,3 @@ let scalarmult' (k:scalar) (u:serialized_point) : Tot serialized_point =
   let u = decodePoint u in
   let res = montgomery_ladder u k in
   encodePoint res
-
-

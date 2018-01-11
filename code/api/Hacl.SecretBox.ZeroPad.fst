@@ -83,11 +83,11 @@ let crypto_secretbox_detached c mac m mlen n k =
   let h0 = ST.get() in
   let subkey = create (uint8_to_sint8 0uy) 32ul in
   let h1 = ST.get() in
-  Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
+  Hacl.Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
   let h2 = ST.get() in
-  Salsa20.salsa20 c m U32.(mlen_ +^ 32ul) subkey (sub n 16ul 8ul) 0uL;
+  Hacl.Salsa20.salsa20 c m U32.(mlen_ +^ 32ul) subkey (sub n 16ul 8ul) 0uL;
   let h3 = ST.get() in
-  Poly1305_64.crypto_onetimeauth mac (sub c 32ul mlen_) mlen (sub c 0ul 32ul);
+  Hacl.Poly1305_64.crypto_onetimeauth mac (sub c 32ul mlen_) mlen (sub c 0ul 32ul);
   let h4 = ST.get() in
   set_zero_bytes(c);
   let h5 = ST.get() in
@@ -120,7 +120,7 @@ let crypto_secretbox_open_detached_decrypt m c clen n subkey verify =
     let h = ST.get() in
     let clen_ = Int.Cast.uint64_to_uint32 clen in
     if U8.(verify =^ 0uy) then (
-      Salsa20.salsa20 m c U32.(clen_ +^ 32ul) subkey (sub n 16ul 8ul) 0uL;
+      Hacl.Salsa20.salsa20 m c U32.(clen_ +^ 32ul) subkey (sub n 16ul 8ul) 0uL;
       set_zero_bytes subkey;
       set_zero_bytes m;
       0ul)
@@ -151,12 +151,12 @@ let crypto_secretbox_open_detached m c mac clen n k =
   let mackey' = Buffer.sub tmp 64ul 32ul in
   let cmac   = Buffer.sub tmp 96ul 16ul in
   let h1 = ST.get() in
-  Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
+  Hacl.Salsa20.hsalsa20 subkey k (sub n 0ul 16ul);
   let h2 = ST.get() in
-  Salsa20.salsa20 mackey mackey' 32ul subkey (sub n 16ul 8ul) 0uL;
+  Hacl.Salsa20.salsa20 mackey mackey' 32ul subkey (sub n 16ul 8ul) 0uL;
   let h3 = ST.get() in
   let clen_ = Int.Cast.uint64_to_uint32 clen in
-  Poly1305_64.crypto_onetimeauth cmac (sub c 32ul clen_) clen mackey;
+  Hacl.Poly1305_64.crypto_onetimeauth cmac (sub c 32ul clen_) clen mackey;
   let h4 = ST.get() in
   let result = cmp_bytes mac cmac 16ul in
   let verify = declassify_u8 result in

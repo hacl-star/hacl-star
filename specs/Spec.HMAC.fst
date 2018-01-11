@@ -10,7 +10,7 @@ module Hash = Spec.Hash
 
 
 (* Key wrapping function *)
-let wrap_key (a:Hash.algorithm) (len:size_t{len < Hash.max_input a}) (key:lbytes len) =
+let wrap_key (a:Hash.algorithm) (len:size_nat{len < Hash.max_input a}) (key:lbytes len) =
   let block = create (Hash.size_block a) (u8 0) in
   if len <= Hash.size_block a then
     update_slice block 0 len key
@@ -20,7 +20,7 @@ let wrap_key (a:Hash.algorithm) (len:size_t{len < Hash.max_input a}) (key:lbytes
   end
 
 
-let init (a:Hash.algorithm) (len:size_t{len < Hash.max_input a}) (key:lbytes len) =
+let init (a:Hash.algorithm) (len:size_nat{len < Hash.max_input a}) (key:lbytes len) =
 
   (* Define ipad and opad *)
   let ipad = create (Hash.size_block a) (u8 0x36) in
@@ -54,11 +54,11 @@ let update_block (a:Hash.algorithm) (data:lbytes (Hash.size_block a)) (hash:Hash
   Hash.update_block a data hash
 
 
-let update_multi (a:Hash.algorithm) (n:size_t{n * Hash.size_block a <= max_size_t}) (data:lbytes (n * Hash.size_block a)) (hash:Hash.hash_w a) =
+let update_multi (a:Hash.algorithm) (n:size_nat{n * Hash.size_block a <= max_size_t}) (data:lbytes (n * Hash.size_block a)) (hash:Hash.hash_w a) =
   Hash.update_multi a n data hash
 
 
-let update_last (a:Hash.algorithm) (n:size_t) (len:size_t{len < Hash.size_block a /\ len + n * Hash.size_block a <= Hash.max_input a}) (last:lbytes len) (hash:Hash.hash_w a) =
+let update_last (a:Hash.algorithm) (n:size_nat) (len:size_nat{len < Hash.size_block a /\ len + n * Hash.size_block a <= Hash.max_input a}) (last:lbytes len) (hash:Hash.hash_w a) =
   Hash.update_last a n len last hash
 
 
@@ -82,7 +82,7 @@ let finish (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (hash:Hash.hash_w
 
 
 (* Core HMAC function for a key of length size_block *)
-let hmac_core' (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) (data:lbytes len) =
+let hmac_core' (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_nat{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) (data:lbytes len) =
   let nb = len / Hash.size_block a in
   let nr = len % Hash.size_block a in
   let nblocks8 = nb * Hash.size_block a in
@@ -96,7 +96,7 @@ let hmac_core' (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_t{H
 
 
 (* Core HMAC function for a key of length size_block *)
-let hmac_core (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) (data:lbytes len) =
+let hmac_core (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_nat{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a}) (data:lbytes len) =
 
   (* Create the scratch space *)
   let s3  = create (Hash.size_block a + len) (u8 0x00) in
@@ -130,9 +130,9 @@ let hmac_core (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (len:size_t{Ha
 
 let hmac'
   (a:Hash.algorithm)
-  (klen:size_t{klen < Hash.max_input a})
+  (klen:size_nat{klen < Hash.max_input a})
   (key:lbytes klen)
-  (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a})
+  (len:size_nat{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a})
   (data:lbytes len) =
 
   (* Step 1: make sure the key has the proper length *)
@@ -144,9 +144,9 @@ let hmac'
 
 let hmac
   (a:Hash.algorithm)
-  (klen:size_t{klen < Hash.max_input a})
+  (klen:size_nat{klen < Hash.max_input a})
   (key:lbytes klen)
-  (len:size_t{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a})
+  (len:size_nat{Hash.size_block a + len <= max_size_t /\ Hash.size_block a + len < Hash.max_input a})
   (data:lbytes len) =
 
   (* Step 1: make sure the key has the proper length *)

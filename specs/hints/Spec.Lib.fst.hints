@@ -85,17 +85,6 @@
       0
     ],
     [
-      "Spec.Lib.set",
-      3,
-      0,
-      0,
-      [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
-      ],
-      0
-    ],
-    [
       "Spec.Lib.map2",
       1,
       0,
@@ -392,36 +381,6 @@
       0
     ],
     [
-      "Spec.Lib.lemma_uint32_from_le_inj",
-      4,
-      0,
-      0,
-      [
-        "@query", "assumption_FStar.UInt32.t__haseq",
-        "equation_FStar.UInt32.t"
-      ],
-      0
-    ],
-    [
-      "Spec.Lib.lemma_uint32_from_le_inj",
-      5,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "equation_FStar.UInt8.t", "equation_Prims.nat",
-        "equation_Spec.Lib.lbytes", "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "kinding_FStar.UInt8.t_@tok",
-        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_FStar.Seq.Base.length"
-      ],
-      0
-    ],
-    [
       "Spec.Lib.lemma_uint32_to_le_inj",
       1,
       0,
@@ -485,32 +444,6 @@
       0
     ],
     [
-      "Spec.Lib.lemma_uint32_to_le_inj",
-      4,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0
-    ],
-    [
-      "Spec.Lib.lemma_uint32_to_le_inj",
-      5,
-      0,
-      0,
-      [
-        "@query", "assumption_FStar.UInt32.t__haseq",
-        "equation_FStar.UInt32.t"
-      ],
-      0
-    ],
-    [
       "Spec.Lib.lemma_uint32_to_from_bij",
       1,
       0,
@@ -553,17 +486,6 @@
     [
       "Spec.Lib.lemma_uint32_to_from_bij",
       2,
-      0,
-      0,
-      [
-        "@query", "assumption_FStar.UInt32.t__haseq",
-        "equation_FStar.UInt32.t"
-      ],
-      0
-    ],
-    [
-      "Spec.Lib.lemma_uint32_to_from_bij",
-      3,
       0,
       0,
       [
@@ -646,19 +568,8 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_FStar.Seq.Base.seq_haseq",
-        "assumption_FStar.UInt8.t__haseq", "assumption_Prims.HasEq_int",
-        "equation_FStar.UInt32.n", "equation_FStar.UInt8.t",
-        "equation_Prims.nat", "equation_Spec.Lib.lbytes",
-        "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "haseqSpec.Lib_Tm_refine_19d50c0cb031e629c1456efa5f6acfd9",
-        "kinding_FStar.UInt8.t_@tok",
-        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_FStar.Seq.Base.length"
+        "@query", "assumption_FStar.UInt32.t__haseq",
+        "equation_FStar.UInt32.t"
       ],
       0
     ],
@@ -676,50 +587,6 @@
     [
       "Spec.Lib.lemma_uint32_from_to_bij",
       6,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_FStar.Seq.Base.seq_haseq",
-        "assumption_FStar.UInt8.t__haseq", "assumption_Prims.HasEq_int",
-        "equation_FStar.UInt32.n", "equation_FStar.UInt8.t",
-        "equation_Prims.nat", "equation_Spec.Lib.lbytes",
-        "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "haseqSpec.Lib_Tm_refine_19d50c0cb031e629c1456efa5f6acfd9",
-        "kinding_FStar.UInt8.t_@tok",
-        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_FStar.Seq.Base.length"
-      ],
-      0
-    ],
-    [
-      "Spec.Lib.lemma_uint32_from_to_bij",
-      7,
-      0,
-      0,
-      [
-        "@query", "assumption_FStar.UInt32.t__haseq",
-        "equation_FStar.UInt32.t"
-      ],
-      0
-    ],
-    [
-      "Spec.Lib.lemma_uint32_from_to_bij",
-      8,
-      0,
-      0,
-      [
-        "@query", "assumption_FStar.UInt32.t__haseq",
-        "equation_FStar.UInt32.t"
-      ],
-      0
-    ],
-    [
-      "Spec.Lib.lemma_uint32_from_to_bij",
-      9,
       0,
       0,
       [
@@ -1324,17 +1191,6 @@
       0
     ],
     [
-      "Spec.Lib.lemma_uint32s_from_le_def_0",
-      4,
-      1,
-      1,
-      [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
-      ],
-      0
-    ],
-    [
       "Spec.Lib.lemma_uint32s_from_le_def_1",
       1,
       1,
@@ -1406,23 +1262,6 @@
     [
       "Spec.Lib.lemma_uint32s_to_le_def_0",
       4,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_FStar.Mul.op_Star",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Spec.Lib_Tm_refine_13822e8d415cca32657fdd044ba9fbfb"
-      ],
-      0
-    ],
-    [
-      "Spec.Lib.lemma_uint32s_to_le_def_0",
-      5,
       1,
       1,
       [
@@ -1520,17 +1359,6 @@
       0
     ],
     [
-      "Spec.Lib.lemma_uint32s_from_be_def_0",
-      4,
-      1,
-      1,
-      [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
-      ],
-      0
-    ],
-    [
       "Spec.Lib.lemma_uint32s_from_be_def_1",
       1,
       1,
@@ -1601,23 +1429,6 @@
     [
       "Spec.Lib.lemma_uint32s_to_be_def_0",
       4,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_FStar.Mul.op_Star",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Spec.Lib_Tm_refine_13822e8d415cca32657fdd044ba9fbfb"
-      ],
-      0
-    ],
-    [
-      "Spec.Lib.lemma_uint32s_to_be_def_0",
-      5,
       1,
       1,
       [
@@ -1712,17 +1523,6 @@
       0
     ],
     [
-      "Spec.Lib.lemma_uint64s_from_be_def_0",
-      4,
-      1,
-      1,
-      [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
-      ],
-      0
-    ],
-    [
       "Spec.Lib.lemma_uint64s_from_be_def_1",
       1,
       1,
@@ -1793,23 +1593,6 @@
     [
       "Spec.Lib.lemma_uint64s_to_be_def_0",
       4,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_FStar.Mul.op_Star",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Spec.Lib_Tm_refine_13822e8d415cca32657fdd044ba9fbfb"
-      ],
-      0
-    ],
-    [
-      "Spec.Lib.lemma_uint64s_to_be_def_0",
-      5,
       1,
       1,
       [

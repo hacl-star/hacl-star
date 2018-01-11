@@ -1,121 +1,67 @@
 module Spec.Chacha20Poly1305
 
-module ST = FStar.HyperStack.ST
+open FStar.Mul
+open Spec.Lib.IntTypes
+open Spec.Lib.IntSeq
+open Spec.Lib.RawIntTypes
+
+module Poly = Spec.Poly1305
 
 (* RFC7539: https://tools.ietf.org/html/rfc7539#section-2.8 *)
+#set-options "--max_fuel 0 --z3rlimit 30"
 
-open FStar.Seq
-open FStar.UInt32
-open FStar.Endianness
-open Spec.Lib
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
-
-let keylen =   32 (* in bytes *)
-let noncelen = 12 (* in bytes *)
+let keylen : size_nat =   32 (* in bytes *)
+let noncelen : size_nat = 12 (* in bytes *)
 
 type key = lbytes keylen
 type nonce = lbytes noncelen
-type bytes = s:seq UInt8.t{length s < pow2 32}
 
-let pad_16 (x:bytes) =
-    let l = length x in
-    let m = l % 16 in
-    if m = 0 then x 
-    else x @| create (16-m) 0uy
+let poly1305_padded (len:size_nat) (text:lbytes len) (tmp:lbytes Poly.blocksize) (st:Poly1305.state) : Poly1305.state =
+  let n = len / Poly.blocksize in
+  let r = len % Poly.blocksize in
+  let blocks = sub text 0 (n * Poly.blocksize) in
+  let rem = sub text (n * Poly.blocksize) r in
+  let st = Poly.update_blocks n blocks st in
+  let tmp = update_sub tmp 0 r rem in
+  let st = Poly1305.update1 Poly1305.blocksize tmp st in
+  st
 
-let poly1305_aad (k:key) (n:nonce) (m:bytes) (aad:bytes) =
-    let b0 = Spec.Chacha20.chacha20_block k n 0 in
-    let mackey = slice b0 0 32 in
-    let laad = little_bytes 8ul (length aad) in
-    let lm = little_bytes 8ul (length m) in
-    let to_mac = pad_16 aad @| pad_16 m @| laad @| lm in
-    let mac = Spec.Poly1305.poly1305 to_mac mackey in
-    mac
-
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30"
-val aead_chacha20_poly1305_encrypt: k:key -> n:nonce ->
-    m:bytes -> aad:bytes{(length m + length aad) / Spec.Chacha20.blocklen < pow2 32} ->
-Tot (lbytes (length m) * Spec.Poly1305.tag)
-let aead_chacha20_poly1305_encrypt k n m aad =
-    let cipher = Spec.Chacha20.chacha20_encrypt_bytes k n 1 m in
-    let mac = poly1305_aad k n cipher aad in
-    (cipher, mac)
-
-val aead_chacha20_poly1305_decrypt: k:key -> n:nonce ->
-    c:bytes -> tag:lbytes 16 ->  aad:bytes{(length c + length aad) / Spec.Chacha20.blocklen < pow2 32} ->
-    Tot (option (lbytes (length c)))
-let aead_chacha20_poly1305_decrypt k n c mac aad =
-    let xmac = poly1305_aad k n c aad in
-    if xmac = mac then
-       let plain = Spec.Chacha20.chacha20_encrypt_bytes k n 1 c in
-       Some plain
-    else None
+let poly1305_do (k:Poly.key) (len:size_nat{len + Poly.blocksize <= max_size_t}) (m:lbytes len)
+        (aad_len:size_nat{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t}) (aad:lbytes aad_len)
+: Tot Poly.tag =
+  let st = Poly.poly1305_init k in
+  let block = create Poly.blocksize (u8 0) in
+  let st = poly1305_padded aad_len aad block st in
+  let st = poly1305_padded len m block st in
+  let aad_len8 = uint_to_bytes_le #U64 (u64 aad_len) in
+  let ciphertext_len8 = uint_to_bytes_le #U64 (u64 len) in
+  let block = update_sub block 0 8 aad_len8 in
+  let block = update_sub block 8 8 ciphertext_len8 in
+  let st = Poly.update1 16 block st in
+  Poly.finish st
 
 
-(* Tests: RFC7539 *)
+val aead_encrypt: k:key -> n:nonce -> len:size_nat{len + Poly.blocksize <= max_size_t} -> m:lbytes len -> aad_len:size_nat{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t} -> aad:lbytes aad_len -> Tot (lbytes (len + Poly.blocksize))
 
-let k = [0x80uy;0x81uy;0x82uy;0x83uy;0x84uy;0x85uy;0x86uy;0x87uy;
-         0x88uy;0x89uy;0x8auy;0x8buy;0x8cuy;0x8duy;0x8euy;0x8fuy;
-	 0x90uy;0x91uy;0x92uy;0x93uy;0x94uy;0x95uy;0x96uy;0x97uy;
-         0x98uy;0x99uy;0x9auy;0x9buy;0x9cuy;0x9duy;0x9euy;0x9fuy]
+let aead_encrypt k n len m len_aad aad =
+  let key0 = Spec.Chacha20.chacha20_key_block0 k n in
+  let poly_k = sub key0 0 32 in
+  let res = create (len + Poly.blocksize) (u8 0) in
+  let cipher = Spec.Chacha20.chacha20_encrypt_bytes k n 1 len m in
+  let mac = poly1305_do poly_k len cipher len_aad aad in
+  let res = update_sub res 0 len cipher in
+  let res = update_sub res len Poly.blocksize mac in
+  res
 
-let n = [0x07uy;0x00uy;0x00uy;0x00uy;0x40uy;0x41uy;0x42uy;0x43uy;
-         0x44uy;0x45uy;0x46uy;0x47uy]
 
-let p = [0x4cuy; 0x61uy; 0x64uy; 0x69uy; 0x65uy; 0x73uy; 0x20uy; 0x61uy;
-    	 0x6euy; 0x64uy; 0x20uy; 0x47uy; 0x65uy; 0x6euy; 0x74uy; 0x6cuy;
-    	 0x65uy; 0x6duy; 0x65uy; 0x6euy; 0x20uy; 0x6fuy; 0x66uy; 0x20uy;
-    	 0x74uy; 0x68uy; 0x65uy; 0x20uy; 0x63uy; 0x6cuy; 0x61uy; 0x73uy;
-    	 0x73uy; 0x20uy; 0x6fuy; 0x66uy; 0x20uy; 0x27uy; 0x39uy; 0x39uy;
-    	 0x3auy; 0x20uy; 0x49uy; 0x66uy; 0x20uy; 0x49uy; 0x20uy; 0x63uy;
-   	 0x6fuy; 0x75uy; 0x6cuy; 0x64uy; 0x20uy; 0x6fuy; 0x66uy; 0x66uy;
-    	 0x65uy; 0x72uy; 0x20uy; 0x79uy; 0x6fuy; 0x75uy; 0x20uy; 0x6fuy;
-    	 0x6euy; 0x6cuy; 0x79uy; 0x20uy; 0x6fuy; 0x6euy; 0x65uy; 0x20uy;
-    	 0x74uy; 0x69uy; 0x70uy; 0x20uy; 0x66uy; 0x6fuy; 0x72uy; 0x20uy;
-    	 0x74uy; 0x68uy; 0x65uy; 0x20uy; 0x66uy; 0x75uy; 0x74uy; 0x75uy;
-    	 0x72uy; 0x65uy; 0x2cuy; 0x20uy; 0x73uy; 0x75uy; 0x6euy; 0x73uy;
-    	 0x63uy; 0x72uy; 0x65uy; 0x65uy; 0x6euy; 0x20uy; 0x77uy; 0x6fuy;
-    	 0x75uy; 0x6cuy; 0x64uy; 0x20uy; 0x62uy; 0x65uy; 0x20uy; 0x69uy;
-    	 0x74uy; 0x2euy]
+val aead_decrypt: k:key -> n:nonce -> len:size_nat{len + Poly.blocksize <= max_size_t} -> c:lbytes len -> tag:lbytes Poly.blocksize -> aad_len:size_nat{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t} -> aad:lbytes aad_len -> Tot (option (lbytes len))
+let aead_decrypt k n len c tag len_aad aad =
+  let key0 = Spec.Chacha20.chacha20_key_block0 k n in
+  let poly_k = sub key0 0 32 in
+  let xmac = poly1305_do poly_k len c len_aad aad in
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) xmac tag in
+  if result then
+    let plain = Spec.Chacha20.chacha20_encrypt_bytes k n 1 len c in
+    Some plain
+  else None
 
-let aad = [0x50uy;0x51uy;0x52uy;0x53uy;0xc0uy;0xc1uy;0xc2uy;0xc3uy;
-           0xc4uy;0xc5uy;0xc6uy;0xc7uy]
-
-let xcipher = [0xd3uy;0x1auy;0x8duy;0x34uy;0x64uy;0x8euy;0x60uy;0xdbuy;
-               0x7buy;0x86uy;0xafuy;0xbcuy;0x53uy;0xefuy;0x7euy;0xc2uy;
-	       0xa4uy;0xaduy;0xeduy;0x51uy;0x29uy;0x6euy;0x08uy;0xfeuy;
-               0xa9uy;0xe2uy;0xb5uy;0xa7uy;0x36uy;0xeeuy;0x62uy;0xd6uy;
-	       0x3duy;0xbeuy;0xa4uy;0x5euy;0x8cuy;0xa9uy;0x67uy;0x12uy;
-               0x82uy;0xfauy;0xfbuy;0x69uy;0xdauy;0x92uy;0x72uy;0x8buy;
-	       0x1auy;0x71uy;0xdeuy;0x0auy;0x9euy;0x06uy;0x0buy;0x29uy;
-               0x05uy;0xd6uy;0xa5uy;0xb6uy;0x7euy;0xcduy;0x3buy;0x36uy;
-	       0x92uy;0xdduy;0xbduy;0x7fuy;0x2duy;0x77uy;0x8buy;0x8cuy;
-               0x98uy;0x03uy;0xaeuy;0xe3uy;0x28uy;0x09uy;0x1buy;0x58uy;
-	       0xfauy;0xb3uy;0x24uy;0xe4uy;0xfauy;0xd6uy;0x75uy;0x94uy;
-               0x55uy;0x85uy;0x80uy;0x8buy;0x48uy;0x31uy;0xd7uy;0xbcuy;
-	       0x3fuy;0xf4uy;0xdeuy;0xf0uy;0x8euy;0x4buy;0x7auy;0x9duy;
-               0xe5uy;0x76uy;0xd2uy;0x65uy;0x86uy;0xceuy;0xc6uy;0x4buy;
-	       0x61uy;0x16uy;]
-
-let xmac = [0x1auy;0xe1uy;0x0buy;0x59uy;0x4fuy;0x09uy;0xe2uy;0x6auy;
-            0x7euy;0x90uy;0x2euy;0xcbuy;0xd0uy;0x60uy;0x06uy;0x91uy]
-
-let test() =
-  assert_norm(List.Tot.length k = 32);
-  assert_norm(List.Tot.length n = 12);
-  assert_norm(List.Tot.length p = 114);
-  assert_norm(List.Tot.length aad = 12);
-  assert_norm(List.Tot.length xcipher = 114);
-  assert_norm(List.Tot.length xmac = 16);
-  let k:key = createL k in
-  let n:nonce = createL n in
-  let p:bytes = createL p in
-  let aad = createL aad in
-  let xcipher = createL xcipher in
-  let xmac = createL xmac in
-  let (cipher,mac)=  aead_chacha20_poly1305_encrypt k n p aad in
-  let dec =  aead_chacha20_poly1305_decrypt k n cipher mac aad in
-  cipher = xcipher &&
-  mac = xmac &&
-  dec = Some p

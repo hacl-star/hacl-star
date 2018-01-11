@@ -2655,32 +2655,6 @@
       0
     ],
     [
-      "Crypto.Symmetric.Bytes.endian_is_injective",
-      5,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Crypto.Symmetric.Bytes.endian_is_injective",
-      6,
-      1,
-      0,
-      [
-        "@query", "assumption_FStar.UInt8.t__haseq", "equation_FStar.UInt8.t"
-      ],
-      0
-    ],
-    [
-      "Crypto.Symmetric.Bytes.endian_is_injective",
-      7,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
       "Crypto.Symmetric.Bytes.big_endian_step",
       1,
       1,
@@ -2707,14 +2681,6 @@
     [
       "Crypto.Symmetric.Bytes.big_endian_step",
       2,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Crypto.Symmetric.Bytes.big_endian_step",
-      3,
       1,
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
@@ -2987,14 +2953,6 @@
     [
       "Crypto.Symmetric.Bytes.little_endian_step",
       2,
-      0,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Crypto.Symmetric.Bytes.little_endian_step",
-      3,
       0,
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],

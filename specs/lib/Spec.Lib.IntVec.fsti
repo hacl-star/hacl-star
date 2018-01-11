@@ -5,7 +5,7 @@ open Spec.Lib.IntSeq
 module Ints = Spec.Lib.IntTypes
 
 type vectype =
-  | V: it:Ints.inttype -> len:Ints.size_t -> vectype
+  | V: it:Ints.inttype -> len:Ints.size_nat -> vectype
 let bits vt = Ints.bits vt.it
 let size vt = Ints.numbytes vt.it * vt.len
 
