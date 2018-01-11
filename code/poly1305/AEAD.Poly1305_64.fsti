@@ -55,7 +55,7 @@ val poly1305_blocks_init:
       /\ modifies_2 I.(st.r) I.(st.h) h0 h1
       /\ (let r   = as_seq h1 I.(st.r) in
          let acc = as_seq h1 I.(st.h) in
-         let log = reveal log in
+         let log = Ghost.reveal log in
          let m   = reveal_sbytes (as_seq h0 input) in
          let kr  = reveal_sbytes (as_seq h0 (Buffer.sub k 0ul 16ul)) in
          Hacl.Spec.Poly1305_64.State.invariant (Hacl.Spec.Poly1305_64.State.MkState r acc log)
@@ -73,16 +73,16 @@ val poly1305_blocks_continue:
     (requires (fun h -> I.live_st h st /\ live h input
       /\ (let r = as_seq h I.(st.r) in
          let acc = as_seq h I.(st.h) in
-         let log = reveal log in
+         let log = Ghost.reveal log in
          Hacl.Spec.Poly1305_64.State.invariant (Hacl.Spec.Poly1305_64.State.MkState r acc log))
     ))
     (ensures (fun h0 log' h1 -> I.live_st h0 st /\ I.live_st h1 st /\ live h0 input
       /\ modifies_1 I.(st.h) h0 h1
       /\ (let r = as_seq h0 I.(st.r) in
          let acc = as_seq h0 I.(st.h) in
-         let log = reveal log in
+         let log = Ghost.reveal log in
          let acc' = as_seq h1 I.(st.h) in
-         let log' = reveal log' in
+         let log' = Ghost.reveal log' in
          let m    = reveal_sbytes (as_seq h0 input) in
          Hacl.Spec.Poly1305_64.State.invariant (Hacl.Spec.Poly1305_64.State.MkState r acc log)
          /\ Hacl.Spec.Poly1305_64.State.invariant (Hacl.Spec.Poly1305_64.State.MkState r acc' log')
@@ -100,7 +100,7 @@ val poly1305_blocks_finish:
     (requires (fun h -> I.live_st h st /\ live h input /\ live h mac /\ live h key_s
       /\ (let r = as_seq h I.(st.r) in
          let acc = as_seq h I.(st.h) in
-         let log = reveal log in
+         let log = Ghost.reveal log in
          Hacl.Spec.Poly1305_64.State.invariant (Hacl.Spec.Poly1305_64.State.MkState r acc log))
     ))
     (ensures (fun h0 _ h1 -> I.live_st h0 st /\ live h0 key_s /\ live h0 input
@@ -108,7 +108,7 @@ val poly1305_blocks_finish:
       /\ (let mac = as_seq h1 mac in
          let r   = (as_seq h0 I.(st.r)) in
          let acc = as_seq h0 I.(st.h) in
-         let log = reveal log in
+         let log = Ghost.reveal log in
          let m   = reveal_sbytes (as_seq h0 input) in
          let k   = Hacl.Spec.Endianness.hlittle_endian (as_seq h0 key_s) in
          Hacl.Spec.Poly1305_64.State.invariant (Hacl.Spec.Poly1305_64.State.MkState r acc log)
