@@ -253,15 +253,6 @@ let neq_mask #t a b =
   | U128 -> if not FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
   | SIZE -> if not FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0)
 
-let gte_mask #t a b =
-  match t with
-  | U8 -> if FStar.UInt8.(a >=^ b) then (u8 (maxint U8)) else (u8 0)
-  | U16 -> if FStar.UInt16.(a >=^ b) then (u16 (maxint U16)) else (u16 0)
-  | U32 -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
-  | U64 -> if FStar.UInt64.(a >=^ b) then (u64 (maxint U64)) else (u64 0)
-  | U128 -> if FStar.UInt128.(a >=^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
-
 let gt_mask #t a b =
   match t with
   | U8 -> if FStar.UInt8.(a >^ b) then (u8 (maxint U8)) else (u8 0)
@@ -270,6 +261,15 @@ let gt_mask #t a b =
   | U64 -> if FStar.UInt64.(a >^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a >^ b) then (u128 (maxint U128)) else (u128 0)
   | SIZE -> if FStar.UInt32.(a >^ b) then (u32 (maxint U32)) else (u32 0)
+
+let gte_mask #t a b =
+  match t with
+  | U8 -> if FStar.UInt8.(a >=^ b) then (u8 (maxint U8)) else (u8 0)
+  | U16 -> if FStar.UInt16.(a >=^ b) then (u16 (maxint U16)) else (u16 0)
+  | U32 -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
+  | U64 -> if FStar.UInt64.(a >=^ b) then (u64 (maxint U64)) else (u64 0)
+  | U128 -> if FStar.UInt128.(a >=^ b) then (u128 (maxint U128)) else (u128 0)
+  | SIZE -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
 
 
 let lt_mask #t a b =
@@ -289,6 +289,13 @@ let lte_mask #t a b =
   | U64 -> if FStar.UInt64.(a <=^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a <=^ b) then (u128 (maxint U128)) else (u128 0)
   | SIZE -> if FStar.UInt32.(a <=^ b) then (u32 (maxint U32)) else (u32 0)
+
+let eq_mask_lemma #t a b d = admit ()
+let neq_mask_lemma #t a b d = admit ()
+let gt_mask_lemma #t a b d = admit ()
+let gte_mask_lemma #t a b d = admit ()
+let lt_mask_lemma #t a b d = admit ()
+let lte_mask_lemma #t a b d = admit ()
 
 (* defined in .fsti: notations +^, -^, ...*)
 
