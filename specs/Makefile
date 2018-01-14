@@ -87,6 +87,14 @@ curve25519.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst l
 	$(OCAMLOPT) -I curve25519-ml curve25519-ml/Spec_Lib_IntTypes.ml curve25519-ml/Spec_Lib_IntSeq.ml curve25519-ml/Spec_Curve25519.ml curve25519-ml/Spec_Curve25519_Test.ml -o curve25519.exe
 	./curve25519.exe
 
+
+kyber.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Kyber.fst 
+	mkdir -p kyber-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Kyber --odir kyber-ml $^
+	@echo 'let _ = test()' >> kyber-ml/Spec_Kyber.ml
+	$(OCAMLOPT) -I kyber-ml kyber-ml/Spec_Lib_IntTypes.ml kyber-ml/Spec_Lib_IntSeq.ml kyber-ml/Spec_Kyber.ml -o kyber.exe
+	./kyber.exe
+
 curve448.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Curve448.fst tests/Spec.Curve448.Test.fst
 	mkdir -p curve448-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Curve448 --extract_module Spec.Curve448.Test --odir curve448-ml $^

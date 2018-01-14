@@ -28,6 +28,9 @@ val fold_left: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot b) -> lseq 
 
 
 val map: #a:Type -> #b:Type -> #len:size_nat -> (a -> Tot b) -> lseq a len -> lseq b len
+
+//val mapi: #a:Type -> #b:Type -> #len:size_nat -> (i:size_nat{i < len} -> a -> Tot b) -> lseq a len -> lseq b len
+
 val for_all: #a:Type -> #len:size_nat -> (a -> Tot bool) -> lseq a len -> bool
 
 
