@@ -101,6 +101,10 @@ snapshots/nss/specs:
 		(cat $(HACL_LICENSE_NSS) specs/$$f ) > snapshots/nss/specs/$$f ; \
 	done
 
+snapshots/wireguard/kremlib:
+	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
+		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/wireguard/$$f ; \
+	done
 
 SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) \
@@ -125,6 +129,13 @@ snapshots/nss: snapshots-remove-intermediates
 	cp snapshots/snapshot-gcc/Hacl_Poly1305_64.* snapshots/nss
 	$(MAKE) snapshots/nss/kremlib
 	$(MAKE) snapshots/nss/specs
+
+snapshots/wireguard: snapshots-remove-intermediates
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" KOPTS="$(KOPTS) -fc89" snapshots/snapshot-gcc-unrolled
+	rm -rf snapshots/wireguard
+	mkdir -p snapshots/wireguard
+	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/wireguard
+	$(MAKE) snapshots/wireguard/kremlib
 
 #
 # Build, refresh and clean targets for all snapshots
