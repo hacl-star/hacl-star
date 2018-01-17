@@ -374,7 +374,10 @@ let salsa20_core log k st ctr =
   cut (as_seq h2 st == Seq.upd (as_seq h' st) 9 (c1));
   cut (get h2 st 8 == c0 /\ get h2 st 9 == c1);
   cut (let s = as_seq h0 st in let s' = as_seq h2 st in s' == Seq.upd (Seq.upd s 8 c0) 9 c1);
-  lemma_invariant (reveal_h32s (as_seq h0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (uint64_to_sint64 (u64_of_u32s (h32_to_u32 (get h0 st 8)) (h32_to_u32 (get h0 st 9)))) (uint64_to_sint64 ctr);
+  // GM: Need these explicit bindings as a workaround to FStarLang/FStar#1368
+  (let hh8 = h32_to_u32 (get h0 st 8) in
+   let hh9 = h32_to_u32 (get h0 st 9) in
+   lemma_invariant (reveal_h32s (as_seq h0 st)) (Ghost.reveal log).k (Ghost.reveal log).n (uint64_to_sint64 (u64_of_u32s hh8 hh9)) (uint64_to_sint64 ctr));
   lemma_u64_of_u32s (h32_to_u32 c0) (h32_to_u32 c1);
   cut (invariant log h2 st);
   copy_state k st;
