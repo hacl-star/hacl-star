@@ -1,6 +1,7 @@
 module Hacl.Impl.Chacha20.Vec128
 
 module ST = FStar.HyperStack.ST
+module HyperHeap = FStar.Monotonic.HyperHeap
 
 open FStar.HyperStack.All
 
@@ -186,8 +187,8 @@ val lemma_modifies_double_round3:
   st:state ->
   st':state{disjoint st st'} ->
   st'':state{disjoint st st' /\ disjoint st' st''} ->
-  Lemma (requires (live h0 st /\ live h0 st' /\ live h0 st'' /\ HyperStack.equal_domains h0 h1 /\ 
-    HyperStack.equal_domains h1 h2 /\ HyperStack.equal_domains h2 h3 /\
+  Lemma (requires (live h0 st /\ live h0 st' /\ live h0 st'' /\ ST.equal_domains h0 h1 /\
+    ST.equal_domains h1 h2 /\ ST.equal_domains h2 h3 /\
     modifies_1 st h0 h1 /\ modifies_1 st' h1 h2 /\ modifies_1 st'' h2 h3))
         (ensures (modifies_3 st st' st'' h0 h3))
 
@@ -523,7 +524,7 @@ val lemma_chacha_incr3_modifies:
   h2:HyperStack.mem ->
   h3:HyperStack.mem ->
   st0:state -> st1:state{disjoint st0 st1} -> st2:state{disjoint st2 st1 /\ disjoint st2 st0} ->
-  Lemma (requires (live h0 st0 /\ live h0 st1 /\ live h0 st2 /\ modifies_1 st0 h0 h1 /\ modifies_1 st1 h1 h2 /\ modifies_1 st2 h2 h3 /\ HyperStack.equal_domains h0 h1 /\ HyperStack.equal_domains h1 h2 /\ HyperStack.equal_domains h2 h3))
+  Lemma (requires (live h0 st0 /\ live h0 st1 /\ live h0 st2 /\ modifies_1 st0 h0 h1 /\ modifies_1 st1 h1 h2 /\ modifies_1 st2 h2 h3 /\ ST.equal_domains h0 h1 /\ ST.equal_domains h1 h2 /\ ST.equal_domains h2 h3))
         (ensures (modifies_3 st0 st1 st2 h0 h3))
 let lemma_chacha_incr3_modifies h0 h1 h2 h3 st0 st1 st2 =
   lemma_reveal_modifies_1 st0 h0 h1;
@@ -622,8 +623,8 @@ val lemma_modifies_sum3:
   k1:state{disjoint st k1 /\ disjoint k0 k1 /\ frameOf k1 == frameOf k0} ->
   k2:state{disjoint st k2 /\ disjoint k0 k2 /\ disjoint k1 k2 /\ frameOf k2 == frameOf k1} ->
   Lemma (requires (live h0 st /\ live h0 k0 /\ live h0 k1 /\ live h0 k2 /\
-    HyperStack.equal_domains h0 h1 /\ HyperStack.equal_domains h1 h2 /\
-    HyperStack.equal_domains h2 h3 /\ HyperStack.equal_domains h3 h4 /\ HyperStack.equal_domains h4 h5 /\
+    ST.equal_domains h0 h1 /\ ST.equal_domains h1 h2 /\
+    ST.equal_domains h2 h3 /\ ST.equal_domains h3 h4 /\ ST.equal_domains h4 h5 /\
     modifies_1 k0 h0 h1 /\ modifies_1 st h1 h2 /\ modifies_1 k1 h2 h3 /\ modifies_1 st h3 h4 /\
     modifies_1 k2 h4 h5))
         (ensures (modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h5 /\
@@ -1161,10 +1162,10 @@ val lemma_modifies_update3:
   h0:HyperStack.mem ->
   h1:HyperStack.mem{HyperStack.fresh_frame h0 h1} ->
   h2:HyperStack.mem{modifies_0 h1 h2} ->
-  h3:HyperStack.mem{HyperStack.equal_domains h2 h3} ->
-  h4:HyperStack.mem{HyperStack.equal_domains h3 h4} ->
-  h5:HyperStack.mem{HyperStack.equal_domains h4 h5} ->
-  h6:HyperStack.mem{HyperStack.equal_domains h5 h6} ->
+  h3:HyperStack.mem{ST.equal_domains h2 h3} ->
+  h4:HyperStack.mem{ST.equal_domains h3 h4} ->
+  h5:HyperStack.mem{ST.equal_domains h4 h5} ->
+  h6:HyperStack.mem{ST.equal_domains h5 h6} ->
   h7:HyperStack.mem{HyperStack.popped h6 h7} ->
   output:uint8_p{length output = 192 /\ live h0 output /\ live h1 output /\ live h2 output /\ live h3 output /\ live h4 output /\ live h5 output /\ live h6 output /\ live h7 output} ->
   st:state{live h0 st /\ live h1 st /\ live h2 st /\ live h3 st /\ live h4 st /\ live h5 st /\ live h6 st /\ live h7 st} ->
