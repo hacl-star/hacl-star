@@ -146,6 +146,18 @@ let aes128_block (k:block) (n:lseq uint8 12) (c:size_t) : block =
   let output = block_cipher key_ex input in
   output
 
+type aes_state = {
+  key_ex: lseq uint8 (11 × 16);
+  block:  lseq uint8 16;
+}
+
+let aes_init (k:block) (n:lseq uint8 12) : block = 
+  let input = create 16 (u8 0) in
+  let input = repeati 12 (fun i b -> b.[i] <- n.[i]) input in 
+  let key_ex = key_expansion k in
+  {key_ex = key_ex;
+   block  =input}
+
 let aes128_ctx: Spec.CTR.block_cipher_ctx =
   let open Spec.CTR in
   {

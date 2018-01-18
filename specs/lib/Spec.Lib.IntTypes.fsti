@@ -123,7 +123,7 @@ val mul: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
 inline_for_extraction
 val mul_wide: a:uint64 -> b:uint64 -> Pure (uint128)
   (requires (True))
-  (ensures (fun c -> uint_v c == uint_v a `op_Multiply` uint_v b))
+  (ensures (fun c -> uint_v #U128 c == uint_v #U64 a `op_Multiply` uint_v #U64 b))
 
 (* I would prefer the post-condition to say: uint_v c = (pow2 (bits t) + uint_v a - uint_v b) % pow2 (bits t) *)
 inline_for_extraction
