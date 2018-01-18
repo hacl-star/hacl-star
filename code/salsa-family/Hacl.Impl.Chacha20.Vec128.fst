@@ -41,7 +41,7 @@ let as_state h st =
   let st = as_seq h st in let op_String_Access = Seq.index in
   Seq.Create.create_4 (vec_as_seq (st.[0])) (vec_as_seq (st.[1])) (vec_as_seq (st.[2])) (vec_as_seq (st.[3]))
 
-[@ "c_inline"]
+[@ "substitute"]
 val line:
   st:state ->
   a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s > 0 /\ U32.v s < 32} ->
@@ -50,7 +50,7 @@ val line:
     (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st /\
       as_state h1 st == Spec.line (U32.v a) (U32.v b) (U32.v d) s (as_state h0 st)
       ))
-[@ "c_inline"]
+[@ "substitute"]
 let line st a b d s =
   let h0 = ST.get() in
   let sa = st.(a) in

@@ -22,18 +22,17 @@ static inline vec mk_vec(vec128 v) {
   return r;
 }
 
-
 static inline vec vec_rotate_left_8(vec v) {
   vec r;
   __m128i x = _mm_set_epi8(14, 13, 12, 15, 10, 9, 8, 11, 6, 5, 4, 7, 2, 1, 0, 3);
-  r.v = (vec128)_mm_shuffle_epi8((__m128i)v.v,x);				    
+  r.v = (vec128)_mm_shuffle_epi8((__m128i)v.v,x);
   return r;
 }
 
 static inline vec vec_rotate_left_16(vec v) {
   vec r;
   __m128i x = _mm_set_epi8(13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2);
-  r.v = (vec128)_mm_shuffle_epi8((__m128i)v.v,x);				    
+  r.v = (vec128)_mm_shuffle_epi8((__m128i)v.v,x);
   return r;
 }
 
@@ -72,7 +71,6 @@ static inline vec vec_load_32x4(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t 
   return v;
 }
 
-
 static inline vec vec_load_32x8(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4, uint32_t x5, uint32_t x6, uint32_t x7, uint32_t x8){
   vec v;
   v.v = (vec128) _mm_set_epi32(x4,x3,x2,x1);
@@ -92,7 +90,6 @@ static inline vec vec_load128_le(const unsigned char* in) {
 static inline void vec_store_le(unsigned char* out, vec v) {
   _mm_storeu_si128((__m128i*)(out), (__m128i) (v.v));
 }
-
 
 static inline vec vec_add(vec v1, vec v2) {
   vec r;
@@ -114,7 +111,7 @@ static const vec zero = {.v = {0,0,0,0}};
 #define vec_choose_128(v1,v2,first,second) v1
 #else
 static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned int second) {
-  return v1; 
+  return v1;
 }
 #endif
 
@@ -142,26 +139,17 @@ static inline vec vec_xor(vec v1, vec v2) {
   return r;
 }
 
-
-#if 1
-#define vec_rotate_left(v,n) \
-  mk_vec((vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)(v).v,(n)),(uint32x4_t)(v).v,32-(n)))
-#else
-static inline vec vec_rotate_left(vec v, unsigned int n) {
-  vec r;
-  r.v = (vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)v.v,n),(uint32x4_t)v.v,32-n);
-  return r;
-}
-#endif
+#define vec_rotate_left(_vec,n) \
+  mk_vec((vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)(_vec).v,(n)),(uint32x4_t)(_vec).v,32-(n)))
 
 static inline vec vec_rotate_right(vec v, unsigned int n) {
-  return (vec_rotate_left(v,32-n));
+  return vec_rotate_left(v,32-n);
 }
 
 #if 1
 #define vec_shuffle_right(x,n) \
   mk_vec((vec128)vextq_u32((uint32x4_t)(x).v,(uint32x4_t)(x).v,(n)))
-#else 
+#else
 static inline vec vec_shuffle_right(vec x, unsigned int n) {
   vec r;
   r.v = (vec128)vextq_u32((uint32x4_t)x.v,(uint32x4_t)x.v,n);
@@ -186,7 +174,6 @@ static inline vec vec_load_32(uint32_t x1) {
   return v;
 }
 
-
 static inline vec vec_load_32x8(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4, uint32_t x5, uint32_t x6, uint32_t x7, uint32_t x8){
   vec v;
   v.v = (vec128) {x4,x3,x2,x1};
@@ -207,7 +194,6 @@ static inline void vec_store_le(unsigned char* out, vec v) {
   vst1q_u32((uint32_t*)out,v.v);
 }
 
-
 static inline vec vec_add(vec v1, vec v2) {
   vec r;
   r.v = (vec128) vaddq_u32(v1.v,v2.v);
@@ -219,7 +205,7 @@ static const vec one_le = {.v = {1,0,0,0}};
 static const vec zero = {.v = {0,0,0,0}};
 
 static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned int second) {
-  return v1; 
+  return v1;
 }
 
 static inline vec vec_interleave32_high(vec v1, vec v2) {
@@ -254,7 +240,8 @@ static inline vec vec_interleave64_low(vec v1, vec v2) {
 }
 
 #else
-#error "SSSE3 or ARM_NEON needed"
+/* Dummy definition. This will fail at runtime if it's actually used. */
+typedef uint32_t vec;
 #endif
 
 #endif
