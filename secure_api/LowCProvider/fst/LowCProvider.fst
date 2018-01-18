@@ -10,6 +10,10 @@ open FStar.HyperStack.All
 open FStar.Bytes
 open CryptoTypes
 
+// JP: for the C build, we currently do not ignore the client's id and DO pass it down to AEAD, so
+// we need the id to be in scope when we hit this module
+let dummy_dependency = Crypto.Indexing.id
+
 assume type aead_state: Type0
 
 assume val alg: aead_state -> GTot aead_cipher
@@ -37,9 +41,3 @@ assume val aead_decrypt:
   ad:bytes ->
   cipher:bytes{length cipher >= aeadTagSize (alg st)} ->
   EXT (o:option bytes)
-
-
-assume val crypto_scalarmult:
-  secret:lbytes 32 ->
-  point:lbytes 32 ->
-  EXT (lbytes 32)

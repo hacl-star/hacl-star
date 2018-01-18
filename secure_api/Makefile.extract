@@ -80,7 +80,8 @@ INCLUDE_PATHS=$(addprefix --include , \
 # The F* compiler and the entry points.
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) --lax --cache_checked_modules \
 	$(INCLUDE_PATHS) --odir $(OUTPUT_DIR)
-FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst LowCProvider/fst/LowCProvider.fst
+FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst \
+  LowCProvider/fst/LowCProvider.fst LowCProvider/fst/HaclProvider.fst
 
 # Horrible Makefile trick.
 .hack.$(IMPL_CHOICE):
@@ -169,7 +170,7 @@ $(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILE
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
 	    Crypto.AEAD.Main=Crypto.* -add-include '"kremstr.h"' -add-include \
 	  '"testlib.h"' -add-include '"kremlib.h"' -tmpdir $(OUTPUT_DIR) $^ -o $@ \
-	  -drop LowCProvider,CryptoTypes $(KREMLIN_HOME)/kremlib/testlib.c
+	  -drop HaclProvider,LowCProvider,CryptoTypes $(KREMLIN_HOME)/kremlib/testlib.c
 
 
 ################################################################################
@@ -190,7 +191,7 @@ HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(DIST_DIR)/Crypto_Indexing.h \
   $(DIST_DIR)/Crypto_AEAD_Main.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h
 
 .PHONY: $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h
-$(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h:
+$(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/Curve25519.c $(CURVE_DIR)/FStar.h:
 	$(MAKE) -C $(CURVE_DIR)/.. extract-c
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
@@ -228,6 +229,7 @@ LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
 # Finally, ocamlmklib is smart enough to take all of these at once.
 $(DIST_DIR)/LowC.cmxa: \
 	  LowCProvider/LowCProvider.cmx \
+	  LowCProvider/HaclProvider.cmx \
 	  LowCProvider/lowc_stub.o \
 	  $(DIST_DIR)/Crypto_AEAD_Main.o $(DIST_DIR)/Crypto_Indexing.o \
 	  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Curve25519.o \
