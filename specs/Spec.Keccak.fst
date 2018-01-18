@@ -15,7 +15,7 @@ let lfsr86540 (lfsr:uint8) : tuple2 uint8 bool =
     lfsr', result
 
 type state = lseq uint64 25
-type index = n:size_t{n < 5}
+type index = n:size_nat{n < 5}
 
 let readLane (s:state) (x:index) (y:index) : uint64 = 
   s.[x * 5 + y]
