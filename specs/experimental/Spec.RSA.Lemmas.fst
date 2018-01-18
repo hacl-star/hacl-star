@@ -2,6 +2,7 @@ module Spec.RSA.Lemmas
 
 open FStar.Mul
 open FStar.Math.Lemmas
+open Spec.Lib.IntTypes
 
 type elem (n:nat) = e:nat{e < n}
 
@@ -22,35 +23,35 @@ let rec lemma_pow x n m =
     | _ -> lemma_pow x (n-1) m; ass x (pow x (n-1)) (pow x m)
 
 val lemma_pow_greater_0: a:nat{a > 0} -> b:nat -> Lemma
-	(requires True)
-	(ensures (pow a b > 0))
-	[SMTPat (pow a b)]
+    (requires True)
+    (ensures (pow a b > 0))
+    [SMTPat (pow a b)]
 let rec lemma_pow_greater_0 a b =
-	match b with
-	| 0 -> ()
-	| _ -> lemma_pow_greater_0 a (b - 1)
+    match b with
+    | 0 -> ()
+    | _ -> lemma_pow_greater_0 a (b - 1)
 
 val lemma_pow_0: b:nat{b > 0} -> Lemma (pow 0 b = 0)
 let rec lemma_pow_0 b =
-	match b with
-	| 1 -> ()
-	| _ -> lemma_pow_0 (b - 1)
+    match b with
+    | 1 -> ()
+    | _ -> lemma_pow_0 (b - 1)
 
 val lemma_pow_1: b:nat -> Lemma (pow 1 b = 1)
 let rec lemma_pow_1 b =
-	match b with
-	|  0 -> ()
-	| _ -> lemma_pow_1 (b - 1)
+    match b with
+    |  0 -> ()
+    | _ -> lemma_pow_1 (b - 1)
 
 #reset-options "--z3rlimit 30 --max_fuel 0"
 
 val lemma_pow_pow:
-	a:nat -> b:nat -> c:nat -> Lemma
+    a:nat -> b:nat -> c:nat -> Lemma
     (pow a (b * c) = pow (pow a b) c)
 let lemma_pow_pow a b c = admit()
 
 val lemma_pow_mul:
-	a:nat -> b:nat -> c:nat -> Lemma
+    a:nat -> b:nat -> c:nat -> Lemma
     (pow (a * b) c = (pow a c) * (pow b c))
 let lemma_pow_mul a b c = admit()
 
@@ -60,14 +61,14 @@ val lemma_pow_div:
 let lemma_pow_div a b d = admit()
 
 val lemma_pow_a2_b:
-	a:nat -> b:nat -> Lemma
+    a:nat -> b:nat -> Lemma
     (pow (a * a) b = pow a (2 * b))
 let lemma_pow_a2_b a b =
     lemma_pow_mul a a b;
     lemma_pow a b b
 
 val lemma_pow_mod:
-	a:nat -> b:nat -> n:pos -> Lemma 
+    a:nat -> b:nat -> n:pos -> Lemma 
     ((pow a b) % n == (pow (a % n) b) % n)
 let lemma_pow_mod a b n = admit()
 
@@ -92,11 +93,14 @@ let lemma_mult_div_mod a b d n = admit()
  
 
 (* LEMMAS for Montgomery's arithmetic *)
-#reset-options "--z3rlimit 50 --max_fuel 0"
+
 val lemma_mod_div_simplify: 
     res:nat -> a:nat -> r:nat{r > 0} -> n:nat{n > 0} -> Lemma
     (requires (res % n == (a * ((r * r) % n) / r) % n))
     (ensures (res % n == (a * r) % n))
+
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
 let lemma_mod_div_simplify res a r n =
     assert (res % n == (a * ((r * r) % n) / r) % n);
     lemma_mod_mult_div (r * r) a r n;
@@ -108,6 +112,7 @@ val lemma_mont_reduction:
     res:nat -> r:nat{r > 0} -> c:nat -> n:nat{n > 0} -> m:nat -> Lemma
     (requires (res == (c + n * m) / r /\ res < n + n))
     (ensures (res % n == (c / r) % n))
+    
 let lemma_mont_reduction res r c n m =
     let res : nat = (c + n * m) / r in
     assert (res % n == ((c + m * n) / r) % n);
@@ -119,6 +124,7 @@ val lemma_mont_reduction_1:
     res:nat -> r:nat{r > 0} -> c:nat -> n:nat{n > 0} -> m:nat -> Lemma
     (requires (res == (c + m * n) / r /\ res <= n))
     (ensures (res == (c / r) % n))
+    
 let lemma_mont_reduction_1 res r c n m =
     if res < n then begin
         lemma_mont_reduction res r c n m;
@@ -126,6 +132,7 @@ let lemma_mont_reduction_1 res r c n m =
     else admit() //res = n ==> c = 0
 
 (* LEMMAS for modular exponentiation *)
+
 val lemma_mult_abc:
     a:nat -> b:nat -> c:nat -> Lemma
     (a * b * c == a * c * b)
@@ -135,19 +142,21 @@ val lemma_r_n:
     modBits:nat{modBits > 0} -> r:nat{r > 0} -> n:nat{n > 0} -> Lemma
     (requires (r == pow2 (modBits + 2) /\ n < pow2 modBits))
     (ensures (4 * n < r))
+    
 let lemma_r_n modBits r n =
     pow2_plus 2 modBits;
-	assert_norm (pow2 2 = 4);
-	pow2_lt_compat (2 + modBits) modBits;
-	assert (pow2 modBits < 4 * pow2 modBits);
-	assert (4 * n < r)
+    assert_norm (pow2 2 = 4);
+    pow2_lt_compat (2 + modBits) modBits;
+    assert (pow2 modBits < 4 * pow2 modBits);
+    assert (4 * n < r)
 
 val lemma_mod_exp:
-	n:nat{n > 1} -> a:nat -> a2:nat ->
-	b:nat -> b2:nat -> acc:nat -> r:nat{r > 0} -> res:nat -> Lemma
-	(requires (a2 % n == (a * a / r) % n /\ b2 == b / 2 /\ 
+    n:nat{n > 1} -> a:nat -> a2:nat ->
+    b:nat -> b2:nat -> acc:nat -> r:nat{r > 0} -> res:nat -> Lemma
+    (requires (a2 % n == (a * a / r) % n /\ b2 == b / 2 /\ 
               res % n == ((pow a2 b2) * acc / pow r b2) % n))
-	(ensures (res % n == ((pow a (2 * b2)) * acc / pow r (2 * b2)) % n))
+    (ensures (res % n == ((pow a (2 * b2)) * acc / pow r (2 * b2)) % n))
+    
 let lemma_mod_exp n a a2 b b2 acc r res =
     lemma_mod_mult_div (pow a2 b2) acc (pow r b2) n;
     lemma_pow_mod a2 b2 n;
@@ -161,15 +170,16 @@ let lemma_mod_exp n a a2 b b2 acc r res =
     division_multiplication_lemma (acc * pow a (2 * b2)) (pow r b2) (pow r b2);
     lemma_pow r b2 b2
 
-#reset-options "--z3rlimit 150 --max_fuel 0"
-
 val lemma_mod_exp_1:
-	n:nat{n > 1} -> a:nat -> a2:nat ->
-	b:nat -> b2:nat -> acc:nat -> acc':nat -> r:nat{r > 0} -> res:nat -> Lemma
-	(requires (a2 % n == (a * a / r) % n /\ b2 == b / 2 /\ 
+    n:nat{n > 1} -> a:nat -> a2:nat ->
+    b:nat -> b2:nat -> acc:nat -> acc':nat -> r:nat{r > 0} -> res:nat -> Lemma
+    (requires (a2 % n == (a * a / r) % n /\ b2 == b / 2 /\ 
                res % n == ((pow a2 b2) * acc' / pow r b2) % n /\
                acc' % n == (a * acc / r) % n))
-	(ensures (res % n == ((pow a (2 * b2 + 1)) * acc / pow r (2 * b2 + 1)) % n))
+    (ensures (res % n == ((pow a (2 * b2 + 1)) * acc / pow r (2 * b2 + 1)) % n))
+
+#reset-options "--z3rlimit 150 --max_fuel 0"
+
 let lemma_mod_exp_1 n a a2 b b2 acc acc' r res =
     assert (res % n == ((pow a2 b2) * acc' / pow r b2) % n);
     lemma_mod_exp n a a2 b b2 acc' r res;
@@ -186,14 +196,15 @@ let lemma_mod_exp_1 n a a2 b b2 acc acc' r res =
     assert_norm (pow r 1 = r);
     lemma_pow r 1 (2 * b2)
 
-#reset-options "--z3rlimit 300 --max_fuel 0"
-
 val lemma_mod_exp_2:
-	n:nat{n > 1} -> a:nat -> a_r:nat ->
-	b:nat -> acc_r:nat -> r:nat{r > 0} -> res_r:nat -> Lemma
-	(requires (a_r % n == (a * r) % n /\ acc_r % n == r % n /\
+    n:nat{n > 1} -> a:nat -> a_r:nat ->
+    b:nat -> acc_r:nat -> r:nat{r > 0} -> res_r:nat -> Lemma
+    (requires (a_r % n == (a * r) % n /\ acc_r % n == r % n /\
                res_r % n == ((pow a_r b) * acc_r / pow r b) % n))
-	(ensures (res_r % n == ((pow a b) * r) % n))
+    (ensures (res_r % n == ((pow a b) * r) % n))
+
+#reset-options "--z3rlimit 150 --max_fuel 0"
+
 let lemma_mod_exp_2 n a a_r b acc_r r res_r =
     assert (res_r % n == ((pow a_r b) * acc_r / pow r b) % n);
     lemma_mod_mult_div (pow a_r b) acc_r (pow r b) n;
@@ -210,6 +221,7 @@ let lemma_mod_exp_2 n a a_r b acc_r r res_r =
     lemma_mod_mul_distr_l r (pow a b) n
 
 (* LEMMAS for exponent blinding *)
+
 val lemma_mod_pq:
     a:nat -> b:nat -> p:nat{p > 1} -> q:nat{q > 1} -> Lemma
     (requires (a % p == b % p /\ a % q == b % q))
@@ -228,6 +240,7 @@ val lemma_exp_blinding_q:
     q:elem n{q > 1} -> m:elem n{m > 0} -> Lemma
     (requires (phi_n == (p - 1) * (q - 1) /\ n = p * q /\ m % q <> 0))
     (ensures ((pow m phi_n) % q == 1))
+    
 let lemma_exp_blinding_q n phi_n p q m =
     let res = (pow m phi_n) % q in
     lemma_pow_pow m (q - 1) (p - 1);
@@ -240,6 +253,7 @@ val lemma_exp_blinding_pq:
     q:elem n{q > 1} -> m:elem n{m > 0} -> Lemma
     (requires (phi_n == (p - 1) * (q - 1) /\ n = p * q /\ m % p <> 0 /\ m % q <> 0))
     (ensures ((pow m phi_n) % (p * q) == 1))
+    
 let lemma_exp_blinding_pq n phi_n p q m =
     lemma_exp_blinding_q n phi_n p q m;
     small_modulo_lemma_1 1 q;
@@ -248,13 +262,14 @@ let lemma_exp_blinding_pq n phi_n p q m =
     lemma_mod_pq (pow m phi_n) 1 p q;
     small_modulo_lemma_1 1 n
 
-#reset-options "--z3rlimit 150 --max_fuel 0"
-
 val lemma_exp_blinding_1:
     n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
     d:elem n{d > 0} -> m:elem n{m > 0} -> r:nat -> Lemma
     (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % p <> 0 /\ m % q <> 0))
     (ensures ((pow m (d + r * phi_n)) % n  == (pow m d) % n))
+
+#reset-options "--z3rlimit 150 --max_fuel 0"
+
 let lemma_exp_blinding_1 n phi_n p q d m r =
     lemma_exp_blinding_pq n phi_n p q m;
     assert ((pow m phi_n) % (p * q) == 1);
@@ -273,6 +288,7 @@ val lemma_exp_blinding_0_q0:
     d:elem n{d > 0} -> m:elem n{m > 0} -> r:nat -> Lemma
     (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % q = 0))
     (ensures ((pow m (d + r * phi_n)) % q == (pow m d) % q))
+    
 let lemma_exp_blinding_0_q0 n phi_n p q d m r =
     let res:nat = pow m (d + r * phi_n) in
     assert (res % q == (pow m (d + r * phi_n)) % q);
@@ -281,13 +297,14 @@ let lemma_exp_blinding_0_q0 n phi_n p q d m r =
     lemma_pow_mod m d q;
     lemma_pow_0 d
 
-#reset-options "--z3rlimit 150 --max_fuel 0"
-
 val lemma_exp_blinding_0_q1:
     n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
     d:elem n{d > 0} -> m:elem n{m > 0} -> r:nat -> Lemma
     (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % p <> 0))
     (ensures ((pow m (d + r * phi_n)) % p == (pow m d) % p))
+
+#reset-options "--z3rlimit 300 --max_fuel 0"
+
 let lemma_exp_blinding_0_q1 n phi_n p q d m r =
     lemma_exp_blinding_q n phi_n q p m;
     assert ((pow m phi_n) % p == 1);
@@ -308,6 +325,7 @@ val lemma_exp_blinding_0_q:
     d:elem n{d > 0} -> m:elem n{m > 0} -> r:nat -> Lemma
     (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % q = 0 /\ m % p <> 0))
     (ensures ((pow m (d + r * phi_n)) % n == (pow m d) % n))
+    
 let lemma_exp_blinding_0_q n phi_n p q d m r =
     let res:nat = pow m (d + r * phi_n) in
     lemma_exp_blinding_0_q0 n phi_n p q d m r;
@@ -320,6 +338,7 @@ val lemma_exp_blinding_0_pq:
     d:elem n{d > 0} -> m:elem n -> r:nat -> Lemma
     (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % q = 0 /\ m % p = 0))
     (ensures ((pow m (d + r * phi_n)) % n == (pow m d) % n))
+    
 let lemma_exp_blinding_0_pq n phi_n p q d m r =
     small_modulo_lemma_1 0 p;
     small_modulo_lemma_1 0 q;
@@ -337,6 +356,7 @@ val lemma_exp_blinding_0:
     (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ 
                 (m = 0 \/ m % p = 0 \/ m % q = 0)))
     (ensures ((pow m (d + r * phi_n)) % n  == (pow m d) % n))
+    
 let lemma_exp_blinding_0 n phi_n p q d m r =
     if (m = 0) then begin
         lemma_pow_0 (d + r * phi_n);
@@ -358,7 +378,54 @@ val lemma_exp_blinding:
     d:elem n{d > 0} -> m:elem n -> r:nat -> Lemma
     (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q))
     (ensures ((pow m (d + r * phi_n)) % n  == (pow m d) % n))
+    
 let lemma_exp_blinding n phi_n p q d m r =
     if (m = 0 || m % p = 0 || m % q = 0) then 
         lemma_exp_blinding_0 n phi_n p q d m r
     else lemma_exp_blinding_1 n phi_n p q d m r
+
+(* LEMMAS for Karatsuba's multiplication *)
+
+val lemma_distributivity_mult: 
+    a:nat -> b:nat -> c:nat -> d:nat -> Lemma
+    ((a + b) * (c + d) = a * c + a * d + b * c + b * d)
+let lemma_distributivity_mult a b c d = ()
+
+val lemma_karatsuba_mult:
+    x:size_nat -> a:nat -> a0:nat -> a1:nat -> b:nat -> b0:nat -> b1:nat -> Lemma
+    (requires (let pow_x = pow2 (pow2 x) in
+	      a == a1 * pow_x + a0 /\ b == b1 * pow_x + b0))
+    (ensures (let pow_x = pow2 (pow2 x) in
+	      let pow_x1 = pow2 (pow2 (x + 1)) in
+	      a * b == a1 * b1 * pow_x1 + (a0 * b1 + a1 * b0) * pow_x + a0 * b0))
+
+#reset-options "--z3rlimit 150 --initial_fuel 0 --max_fuel 0"
+
+let lemma_karatsuba_mult x a a0 a1 b b0 b1 =
+    let pow_x = pow2 (pow2 x) in
+    let pow_x1 = pow2 (pow2 (x + 1)) in
+    assert (a * b == (a1 * pow_x + a0) * (b1 * pow_x + b0));
+    lemma_distributivity_mult (a1 * pow_x) a0 (b1 * pow_x) b0;
+    pow2_plus (pow2 x) (pow2 x);
+    pow2_double_sum x
+
+val lemma_pow_div_karatsuba:
+    x0:size_nat{x0 > 0} -> b:nat{b < pow2 (pow2 x0)} -> Lemma
+    (requires (True))
+    (ensures (let pow_x = pow2 (pow2 (x0 - 1)) in
+	      let b1 = b / pow_x in
+	      0 <= b1 /\ b1 < pow_x))
+
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0"
+
+let lemma_pow_div_karatsuba x0 b =
+    let x = x0 - 1 in
+    let pow_x = pow2 (pow2 x) in
+    pow2_lt_compat x0 x;
+    lemma_div_lt b (pow2 x0) (pow2 x);
+    assert (b / pow_x < pow2 (pow2 x0 - pow2 x));
+    pow2_plus (x0 - 1) 1;
+    assert_norm (pow2 1 = 2)
+
+val abs: x:int -> Tot (y:nat{(x >= 0 ==> y = x) /\ (x < 0 ==> y = -x)})
+let abs x = if x >= 0 then x else -x
