@@ -35,10 +35,10 @@ type seqelem_wide = s:Seq.seq wide{Seq.length s = len}
 
 (** Associates a weight in bits to each limb of the bigint *)
 inline_for_extraction val climb_size: l:FStar.UInt32.t{limb_size = FStar.UInt32.v l}
-inline_for_extraction let climb_size = assert_norm(pow2 32 > 44); 26ul
+inline_for_extraction let climb_size = assert_norm(pow2 32 > 26); 26ul
 
 val lemma_prime_limb_size: unit -> Lemma (pow2 (len * limb_size) > prime)
-let lemma_prime_limb_size () = assert_norm (pow2 (3 * 44) > pow2 130 - 5)
+let lemma_prime_limb_size () = assert_norm (pow2 (5 * 26) > pow2 130 - 5)
 
 open Hacl.UInt32
 
@@ -200,3 +200,14 @@ inline_for_extraction let mul_wide x y =
 inline_for_extraction let uint64_to_limb x = Math.Lemmas.modulo_lemma (FStar.UInt64.v x) (pow2 32);
   uint64_to_sint32 x
 inline_for_extraction let uint32_to_limb x = uint32_to_sint32 x
+
+inline_for_extraction let mask_26 : x:limb{v x = pow2 26 - 1} =
+  assert_norm (0x3ffffff < pow2 64);
+  assert_norm (0x3ffffff = pow2 26 - 1);
+  uint32_to_limb 0x3fffffful
+
+inline_for_extraction let mask_26_wide : x:wide{w x = pow2 26 - 1} =
+  limb_to_wide mask_26
+
+inline_for_extraction let climb_mask = mask_26
+inline_for_extraction let climb_mask_wide = mask_26_wide
