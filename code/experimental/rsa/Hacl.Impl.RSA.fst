@@ -243,6 +243,7 @@ let pss_verify #sLen #msgLen #emLen ssLen msBits eemLen em mmsgLen msg =
 
 val rsa_sign:
     #sLen:size_nat -> #msgLen:size_nat ->
+    iLen:size_t{8 * v iLen < max_size_t} ->    
     modBits:size_t{0 < v modBits /\ v modBits + 3 < max_size_t} ->
     eBits:size_t{0 < v eBits /\ v eBits <= v modBits} ->
     dBits:size_t{0 < v dBits /\ v dBits <= v modBits /\
@@ -258,7 +259,7 @@ val rsa_sign:
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
-let rsa_sign #sLen #msgLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt =
+let rsa_sign #sLen #msgLen iLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt =
     let nLen = bits_to_bn modBits in
     let eLen = bits_to_bn eBits in
     let dLen = bits_to_bn dBits in
@@ -289,7 +290,7 @@ let rsa_sign #sLen #msgLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt 
 	   
 	   (**) disjoint_sub_lemma1 tmp em (size 0) nLen;
 	   text_to_nat k em m;
-	   mod_exp modBits nLen n m dBits d s;
+	   mod_exp iLen modBits nLen n m dBits d s;
 	   (**) disjoint_sub_lemma1 tmp sgnt nLen nLen; 
 	   nat_to_text k s sgnt
 	)
@@ -297,6 +298,7 @@ let rsa_sign #sLen #msgLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt 
 
 val rsa_verify:
     #sLen:size_nat -> #msgLen:size_nat ->
+    iLen:size_t{8 * v iLen < max_size_t} ->    
     modBits:size_t{0 < v modBits /\ v modBits + 3 < max_size_t} ->
     eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\
 		 v (bits_to_bn modBits) + v (bits_to_bn eBits) < max_size_t} ->
@@ -309,7 +311,7 @@ val rsa_verify:
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let rsa_verify #sLen #msgLen modBits eBits pkey ssLen sgnt mmsgLen msg =
+let rsa_verify #sLen #msgLen iLen modBits eBits pkey ssLen sgnt mmsgLen msg =
     let nLen = bits_to_bn modBits in
     let eLen = bits_to_bn eBits in
     let pkeyLen = add #SIZE nLen eLen in
@@ -341,7 +343,7 @@ let rsa_verify #sLen #msgLen modBits eBits pkey ssLen sgnt mmsgLen msg =
 	    assume (disjoint s n);
 	    let res = 
 	      if (bn_is_less nLen s n) then begin
-	         mod_exp modBits nLen n s eBits e m;
+	         mod_exp iLen modBits nLen n s eBits e m;
 		 disjoint_sub_lemma1 tmp em (size 0) nLen;
 		 nat_to_text k m em;
 		 pss_verify #sLen #msgLen #(v k) ssLen msBits k em mmsgLen msg end

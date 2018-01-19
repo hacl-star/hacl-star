@@ -122,7 +122,7 @@ let mont_reduction #rLen #cLen exp_r rrLen st_mont ccLen c res =
     alloc #uint64 #unit #(v stLen) stLen (u64 0) [BufItem st_mont; BufItem c] [BufItem res]
     (fun h0 _ h1 -> True)
     (fun st ->
-      let tmp = Buffer.sub #uint64 #(v stLen) #(v crLen) st (size 0) crLen in
+      //let tmp = Buffer.sub #uint64 #(v stLen) #(v crLen) st (size 0) crLen in
       let tmp1 = Buffer.sub #uint64 #(v stLen) #(v r2Len) st crLen r2Len in
       let m = Buffer.sub #uint64 #(v stLen) #rLen st (add #SIZE crLen r2Len) rrLen in
 
@@ -131,13 +131,15 @@ let mont_reduction #rLen #cLen exp_r rrLen st_mont ccLen c res =
       let n = Buffer.sub #uint64 #(v stMLen) #rLen st_mont rrLen rrLen in
       let nInv = Buffer.sub #uint64 #(v stMLen) #rLen st_mont r2Len rrLen in
 
-      disjoint_sub_lemma1 st c (size 0) crLen;
-      bn_mul ccLen c rrLen nInv tmp; // tmp = c * nInv
+      let c1 = Buffer.sub #uint64 #cLen #rLen c (size 0) rrLen in
+      //disjoint_sub_lemma1 st c (size 0) crLen;
+      bn_mul rrLen c1 rrLen nInv tmp1; // tmp1 = c1 * nInv
       disjoint_sub_lemma2 st (add #SIZE crLen r2Len) rrLen (size 0) crLen;
-      bn_mod_pow2_n crLen tmp exp_r rrLen m; // m = tmp % r
+      bn_mod_pow2_n r2Len tmp1 exp_r rrLen m; // m = tmp1 % r
       bn_sub rrLen r rrLen m m; // m = r - m
       disjoint_sub_lemma2 st crLen r2Len (add #SIZE crLen r2Len) rrLen;
       disjoint_sub_lemma3 st st_mont crLen r2Len rrLen rrLen;
+      fill r2Len tmp1 (u64 0);
       bn_mul rrLen m rrLen n tmp1; // tmp1 = m * n
       bn_add r2Len tmp1 ccLen c tmp1; // tmp1 = c + tmp1
       bn_rshift r2Len tmp1 exp_r tmp1; // tmp1 = tmp1 / r

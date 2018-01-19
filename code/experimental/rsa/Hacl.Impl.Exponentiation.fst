@@ -15,6 +15,7 @@ module Buffer = Spec.Lib.IntBuf
 
 val mul_mod_mont:
     #rLen:size_nat ->
+    iLen:size_t{8 * v iLen < max_size_t /\ rLen <= v iLen} ->
     exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
     rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
     st_mont:lbignum (3 * rLen) ->
@@ -23,18 +24,20 @@ val mul_mod_mont:
     (requires (fun h -> live h st_mont /\ live h aM /\ live h bM /\ live h resM))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 resM h0 h1))
 
-let mul_mod_mont #rLen exp_r rrLen st_mont aM bM resM =
+let mul_mod_mont #rLen iLen exp_r rrLen st_mont aM bM resM =
     let cLen = add #SIZE rrLen rrLen in
     
     alloc #uint64 #unit #(v cLen) cLen (u64 0) [BufItem st_mont; BufItem aM; BufItem bM] [BufItem resM]
     (fun h0 _ h1 -> True)
     (fun c ->
-       bn_mul rrLen aM rrLen bM c; // c = a * b
+       karatsuba iLen rrLen aM bM c; // c = a * b
+       //bn_mul rrLen aM rrLen bM c; // c = a * b
        mont_reduction exp_r rrLen st_mont cLen c resM // resM = c % n
     )
    
 val mod_exp_:
     #rLen:size_nat -> #bLen:size_nat ->
+    iLen:size_t{8 * v iLen < max_size_t /\ rLen <= v iLen} ->    
     exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
     rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
     st_mont:lbignum (3 * rLen) ->
@@ -48,19 +51,20 @@ val mod_exp_:
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 "
 
-let rec mod_exp_ #rLen #bLen exp_r rrLen st_mont st_exp bBits bbLen b count =
+let rec mod_exp_ #rLen #bLen iLen exp_r rrLen st_mont st_exp bBits bbLen b count =
     let aM = Buffer.sub #uint64 #(rLen + rLen) #rLen st_exp (size 0) rrLen in
     let accM = Buffer.sub #uint64 #(rLen + rLen) #rLen st_exp rrLen rrLen in
     
     if (count <. bBits) then begin
         (if (bn_is_bit_set bbLen b count) then begin
-            mul_mod_mont exp_r rrLen st_mont aM accM accM end); //acc = (acc * a) % n
-        mul_mod_mont exp_r rrLen st_mont aM aM aM; //a = (a * a) % n
-	mod_exp_ exp_r rrLen st_mont st_exp bBits bbLen b (size_incr count)
+            mul_mod_mont iLen exp_r rrLen st_mont aM accM accM end); //acc = (acc * a) % n
+        mul_mod_mont iLen exp_r rrLen st_mont aM aM aM; //a = (a * a) % n
+	mod_exp_ iLen exp_r rrLen st_mont st_exp bBits bbLen b (size_incr count)
     end
 
 val mod_exp_mont:
     #rLen:size_nat -> #stLen:size_nat ->
+    iLen:size_t{8 * v iLen < max_size_t /\ rLen <= v iLen} ->
     bBits:size_t{0 < v bBits} -> b:lbignum (v (bits_to_bn bBits)) ->
     exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
     rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 9 * rLen < max_size_t} ->
@@ -70,7 +74,7 @@ val mod_exp_mont:
 
 #reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
-let mod_exp_mont #rLen #stLen bBits b exp_r rrLen sstLen st =
+let mod_exp_mont #rLen #stLen iLen bBits b exp_r rrLen sstLen st =
     let bLen = bits_to_bn bBits in
     assert (v bBits / 64 <= v bLen);
     
@@ -91,16 +95,18 @@ let mod_exp_mont #rLen #stLen bBits b exp_r rrLen sstLen st =
     to_mont exp_r rrLen st_mont r2 a1 aM;
     to_mont exp_r rrLen st_mont r2 acc accM;
 
-    mod_exp_ exp_r rrLen st_mont st_exp bBits bLen b (size 0);
+    mod_exp_ iLen exp_r rrLen st_mont st_exp bBits bLen b (size 0);
 
     from_mont exp_r rrLen st_mont accM res1
     
 // res = a ^^ b mod n
 val mod_exp:
     #nLen:size_nat ->
+    iLen:size_t{8 * v iLen < max_size_t} ->
     modBits:size_t{0 < v modBits /\ 2 * v modBits + 4 < max_size_t} ->
     nnLen:size_t{v nnLen == nLen /\ 0 < nLen /\ nLen = v (bits_to_bn modBits) /\ 
-		 9 * v (bits_to_bn (add #SIZE modBits (size 2))) < max_size_t} ->
+		 9 * v (bits_to_bn (add #SIZE modBits (size 2))) < max_size_t /\
+		 v (bits_to_bn (add #SIZE modBits (size 2))) <= v iLen} ->
     n:lbignum nLen -> a:lbignum nLen ->
     bBits:size_t{0 < v bBits} -> b:lbignum (v (bits_to_bn bBits)) ->
     res:lbignum nLen -> Stack unit
@@ -109,7 +115,7 @@ val mod_exp:
     
 #reset-options "--lax"
 
-let mod_exp #nLen modBits nnLen n a bBits b res =
+let mod_exp #nLen iLen modBits nnLen n a bBits b res =
     let exp_r = add #SIZE modBits (size 2) in
     let rBits = add #SIZE modBits (size 3) in
     let rLen = bits_to_bn rBits in
@@ -149,7 +155,7 @@ let mod_exp #nLen modBits nnLen n a bBits b res =
       bn_set_bit rLen r exp_r; // r = pow2 (2 + modBits)
       bn_pow2_mod_n modBits rLen n1 exp2 r2; // r2 = r * r % n
       mont_inverse rLen n1 exp_r nInv; // n * nInv = 1 (mod r)
-      mod_exp_mont #(v rLen) #(v stLen) bBits b exp_r rLen stLen st;
+      mod_exp_mont #(v rLen) #(v stLen) iLen bBits b exp_r rLen stLen st;
       
       copy nnLen res1_ res
     )

@@ -13,6 +13,7 @@ open Hacl.RSAPSS
 module Buffer = Spec.Lib.IntBuf
 
 val ctest:
+    x0:size_nat{x0 >= 6} ->
     modBits:size_t -> n:lbytes (v (bits_to_text modBits)) ->
     pkeyBits:size_t -> e:lbytes (v (bits_to_text pkeyBits)) ->
     skeyBits:size_t -> d:lbytes (v (bits_to_text skeyBits)) ->
@@ -21,30 +22,31 @@ val ctest:
     sgnt_expected:lbytes (v (bits_to_text modBits)) -> Stack bool
     (requires (fun h -> True))
     (ensures  (fun h0 r h1 -> True))
-let ctest modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected =
+let ctest x0 modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected =
+    let iLen = size (pow2 (x0 - 6)) in
     let nLen = bits_to_bn modBits in
     let eLen = bits_to_bn pkeyBits in
     let dLen = bits_to_bn skeyBits in
 
-    let pkeyLen:size_t = add_mod #SIZE nLen eLen in
-    let skeyLen:size_t = add_mod #SIZE pkeyLen dLen in
+    let pkeyLen:size_t = add #SIZE nLen eLen in
+    let skeyLen:size_t = add #SIZE pkeyLen dLen in
 
     let skey:lbignum (v skeyLen) = Buffer.create skeyLen (u64 0) in
     
     let nNat = Buffer.sub skey (size 0) nLen in
     let eNat = Buffer.sub skey nLen eLen in
-    let dNat = Buffer.sub skey (add_mod #SIZE nLen eLen) dLen in
+    let dNat = Buffer.sub skey (add #SIZE nLen eLen) dLen in
 
     text_to_nat (bits_to_text modBits) n nNat;
     text_to_nat (bits_to_text pkeyBits) e eNat;
     text_to_nat (bits_to_text skeyBits) d dNat;
-    let pkey = Buffer.sub skey (size 0) (add_mod #SIZE nLen eLen) in
+    let pkey = Buffer.sub skey (size 0) (add #SIZE nLen eLen) in
     
     let nTLen = bits_to_text modBits in
     let sgnt:lbytes (v nTLen) = Buffer.create nTLen (u8 0) in
-    rsa_pss_sign modBits pkeyBits skeyBits skey saltLen salt msgLen msg sgnt;
+    rsa_pss_sign iLen modBits pkeyBits skeyBits skey saltLen salt msgLen msg sgnt;
     let check_sgnt = eq_b nTLen sgnt sgnt_expected in
-    let verify_sgnt = rsa_pss_verify #(v saltLen) #(v msgLen) modBits pkeyBits pkey saltLen sgnt msgLen msg in
+    let verify_sgnt = rsa_pss_verify #(v saltLen) #(v msgLen) iLen modBits pkeyBits pkey saltLen sgnt msgLen msg in
     check_sgnt && verify_sgnt
 
 val test1: unit -> Stack bool
@@ -95,12 +97,12 @@ let test1() =
         u8 0x1c; u8 0x8c; u8 0x9e; u8 0x3e; u8 0x99; u8 0x41; u8 0x54; u8 0xa9; u8 0x33; u8 0x95; u8 0xa5; u8 0x11; u8 0xb4; u8 0xa1; u8 0x72; u8 0xf6;
         u8 0x64; u8 0x4f; u8 0x37; u8 0xf6; u8 0x80; u8 0x7b; u8 0x86; u8 0x71; u8 0x6f; u8 0xc9; u8 0x07; u8 0xe1; u8 0xd0; u8 0xfc; u8 0x75; u8 0xbd;
         u8 0xa7; u8 0x7e; u8 0x41; u8 0x1b; u8 0xfc; u8 0x60; u8 0xfd; u8 0x2e; u8 0xd9; u8 0x27; u8 0x8e; u8 0x92; u8 0x1a; u8 0x33; u8 0x02; u8 0x1f] in
-    let res = ctest modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected in
+    let res = ctest 11 modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected in
     res
 
 val test2: unit -> Stack bool
-	(requires (fun h -> True))
-	(ensures  (fun h0 r h1 -> True))
+    (requires (fun h -> True))
+    (ensures  (fun h0 r h1 -> True))
 let test2() =
     let modBits = size 1025 in
     let nLen = bits_to_text modBits in
@@ -159,12 +161,12 @@ let test2() =
         u8 0x92; u8 0x72; u8 0xc5; u8 0xd7; u8 0x73; u8 0x36; u8 0x8a; u8 0xbc; u8 0x06; u8 0x84; u8 0xd6; u8 0xbc; u8 0xc1; u8 0x9d; u8 0x30; u8 0x27;
         u8 0x73; u8 0x24; u8 0x54; u8 0x3e; u8 0xcd; u8 0xaf; u8 0x56; u8 0xf7; u8 0x44; u8 0x6e; u8 0x20; u8 0x79; u8 0xb8; u8 0x9c; u8 0xc4; u8 0x8f;
         u8 0x2d ] in
-    let res = ctest modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected in
+    let res = ctest 11 modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected in
     res
 
 val test3: unit -> Stack bool
-	(requires (fun h -> True))
-	(ensures  (fun h0 r h1 -> True))
+    (requires (fun h -> True))
+    (ensures  (fun h0 r h1 -> True))
 let test3() =
     let modBits = size 1536 in
     let nLen = bits_to_text modBits in
@@ -225,12 +227,12 @@ let test3() =
         u8 0xfe; u8 0x74; u8 0xe4; u8 0x12; u8 0x26; u8 0x84; u8 0x71; u8 0xc9; u8 0x51; u8 0x81; u8 0x62; u8 0x51; u8 0x6c; u8 0xd6; u8 0xf9; u8 0x66;
         u8 0x89; u8 0x2a; u8 0x74; u8 0x0e; u8 0x1b; u8 0x8a; u8 0x88; u8 0x76; u8 0x6a; u8 0x30; u8 0xfc; u8 0xe9; u8 0xb6; u8 0x0e; u8 0x03; u8 0x32;
         u8 0xd7; u8 0xa0; u8 0x1b; u8 0xa5; u8 0xfa; u8 0x13; u8 0x5f; u8 0xe7; u8 0xc4; u8 0x92; u8 0x72; u8 0xac; u8 0xbb; u8 0x1d; u8 0x30; u8 0xf1] in
-    let res = ctest modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected in
+    let res = ctest 11 modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected in
     res
 
 val test4: unit -> Stack bool
-	(requires (fun h -> True))
-	(ensures  (fun h0 r h1 -> True))
+    (requires (fun h -> True))
+    (ensures  (fun h0 r h1 -> True))
 let test4() =
     let modBits = size 2048 in
     let nLen = bits_to_text modBits in
@@ -304,12 +306,12 @@ let test4() =
         u8 0x95; u8 0x25; u8 0x65; u8 0xb8; u8 0xa1; u8 0x9a; u8 0x8f; u8 0xc3; u8 0xf0; u8 0xee; u8 0x7d; u8 0x39; u8 0x1d; u8 0x9b; u8 0x8b; u8 0x3f;
         u8 0x98; u8 0xbe; u8 0xbb; u8 0x0d; u8 0x5d; u8 0x01; u8 0x0e; u8 0x32; u8 0xe0; u8 0xb8; u8 0x00; u8 0xe9; u8 0x65; u8 0x6f; u8 0x64; u8 0x08;
         u8 0x2b; u8 0xb1; u8 0xac; u8 0x95; u8 0xa2; u8 0x23; u8 0xf4; u8 0x31; u8 0xec; u8 0x40; u8 0x6a; u8 0x42; u8 0x95; u8 0x4b; u8 0x2d; u8 0x57] in
-    let res = ctest modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected in
+    let res = ctest 12 modBits n pkeyBits e skeyBits d msgLen msg saltLen salt sgnt_expected in
     res
 
 val main: unit -> Stack FStar.Int32.t
-	(requires (fun h -> True))
-	(ensures  (fun h0 r h1 -> True))
+    (requires (fun h -> True))
+    (ensures  (fun h0 r h1 -> True))
 let main () =
     let test = test1() && test2() && test3() && test4() in
     if test then C.print_string (C.string_of_literal "SUCCESS") else C.print_string (C.string_of_literal "Test failed");

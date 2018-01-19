@@ -7,6 +7,8 @@ open Spec.Lib.IntTypes
 
 open Hacl.Impl.Lib
 
+module Buffer = Spec.Lib.IntBuf
+
 val bn_sub_:
     #aLen:size_nat -> #bLen:size_nat ->
     caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
@@ -76,3 +78,16 @@ val bn_add:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 let bn_add #aLen #bLen caLen a cbLen b res =
     let _ = bn_add_ #aLen #bLen caLen a cbLen b caLen res in ()
+
+val bn_add_carry:
+    #aLen:size_nat -> #bLen:size_nat ->
+    caLen:size_t{v caLen == aLen /\ aLen + 1 < max_size_t} -> a:lbignum aLen ->
+    cbLen:size_t{v cbLen == bLen /\ bLen <= aLen} -> b:lbignum bLen ->
+    res:lbignum (aLen + 1) -> Stack unit
+    (requires (fun h -> live h a /\ live h b /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    
+let bn_add_carry #aLen #bLen caLen a cbLen b res =
+    let res' = Buffer.sub #uint64 #(aLen + 1) #aLen res (size 0) caLen in
+    let carry = bn_add_ #aLen #bLen caLen a cbLen b caLen res' in
+    res.(caLen) <- carry

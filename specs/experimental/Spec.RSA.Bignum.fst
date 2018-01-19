@@ -35,7 +35,7 @@ val abs_sub:
 let abs_sub x a b =
     if (bn_is_less a b)
     then begin
-        assert (b >= a);
+        assert (b > a);
         (Negative, b - a) end
     else begin
         assert (a >= b);
