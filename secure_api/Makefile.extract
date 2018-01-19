@@ -159,6 +159,10 @@ runtime_switch_EXTRA 		= $(VALE_OBJ)
 %.o: %.S
 	$(CC) $(CCOPTS) -c $< -o $@
 
+# For convenient linking from miTLS
+out/vale.a: $(VALE_OBJ)
+	ar cr $@ $^
+
 ################################################################################
 # 3. The functional test, krml-test.exe                          	       #
 ################################################################################
