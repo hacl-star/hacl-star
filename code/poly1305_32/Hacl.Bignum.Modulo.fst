@@ -26,13 +26,14 @@ inline_for_extraction let mask_2_26' : p:Hacl.Bignum.Limb.t{v p = pow2 26 - 1} =
   assert_norm (pow2 32 = 0x100000000); assert_norm(pow2 26 - 1 = 0x3ffffff);
   uint32_to_limb 0x3fffffful
 
-
+[@"c_inline"]
 val reduce:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ reduce_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ reduce_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == reduce_spec (as_seq h0 b)))
+[@"c_inline"]
 let reduce b =
   assert_norm(pow2 4 = 16);
   assert_norm(pow2 2 = 4);
@@ -44,12 +45,14 @@ let reduce b =
 
 #set-options "--z3rlimit 20"
 
+[@"c_inline"]
 val carry_top:
   b:felem ->
   Stack unit
   (requires (fun h -> live h b /\ carry_top_pre (as_seq h b)))
   (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
     /\ as_seq h1 b == carry_top_spec (as_seq h0 b)))
+[@"c_inline"]
 let carry_top b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in
@@ -63,6 +66,7 @@ let carry_top b =
   b.(0ul) <- ((b4_26 <<^ 2ul) +^ b4_26) +^ b0
 
 
+[@"c_inline"]
 val carry_top_wide:
   b:felem_wide ->
   Stack unit
@@ -70,6 +74,7 @@ val carry_top_wide:
     (ensures (fun h0 _ h1 -> live h0 b /\ carry_top_wide_pre (as_seq h0 b) /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h1 b == carry_top_wide_spec (as_seq h0 b)
     ))
+[@"c_inline"]
 let carry_top_wide b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in

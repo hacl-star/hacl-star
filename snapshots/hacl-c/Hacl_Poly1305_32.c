@@ -2,13 +2,13 @@
 
 #include "Hacl_Poly1305_32.h"
 
-static void Hacl_Bignum_Modulo_reduce(uint32_t *b)
+inline static void Hacl_Bignum_Modulo_reduce(uint32_t *b)
 {
   uint32_t b0 = b[0U];
   b[0U] = (b0 << (uint32_t)2U) + b0;
 }
 
-static void Hacl_Bignum_Modulo_carry_top(uint32_t *b)
+inline static void Hacl_Bignum_Modulo_carry_top(uint32_t *b)
 {
   uint32_t b4 = b[4U];
   uint32_t b0 = b[0U];
@@ -17,7 +17,7 @@ static void Hacl_Bignum_Modulo_carry_top(uint32_t *b)
   b[0U] = (b4_26 << (uint32_t)2U) + b4_26 + b0;
 }
 
-static void Hacl_Bignum_Modulo_carry_top_wide(uint64_t *b)
+inline static void Hacl_Bignum_Modulo_carry_top_wide(uint64_t *b)
 {
   uint64_t b4 = b[4U];
   uint64_t b0 = b[0U];
@@ -120,7 +120,7 @@ inline static void Hacl_Bignum_Fmul_fmul(uint32_t *output, uint32_t *input, uint
   output[1U] = i1_;
 }
 
-static void
+inline static void
 Hacl_Bignum_AddAndMultiply_add_and_multiply(uint32_t *acc, uint32_t *block, uint32_t *r)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)1U)

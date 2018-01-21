@@ -29,6 +29,7 @@ module U64  = FStar.UInt64
 
 #set-options "--max_fuel 0 --z3rlimit 50"
 
+[@"c_inline"]
 val add_and_multiply:
   acc:felem ->
   block:felem{disjoint acc block} ->
@@ -43,6 +44,7 @@ val add_and_multiply:
       /\ red_y (as_seq h1 acc)
       /\ as_seq h1 acc == add_and_multiply_tot (as_seq h0 acc) (as_seq h0 block) (as_seq h0 r)
     ))
+[@"c_inline"]
 let add_and_multiply acc block r =
   assert_norm(pow2 31 = 0x80000000);
   let h0 = ST.get() in
