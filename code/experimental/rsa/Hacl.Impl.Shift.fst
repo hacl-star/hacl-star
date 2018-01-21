@@ -102,6 +102,7 @@ let bn_mod_pow2_n #aLen #resLen caLen a nCount cresLen res =
             size_incr nw end
         else nw in
 
-    let res_Len = sub #SIZE cresLen start_i in
-    let res_ = Buffer.sub #uint64 #resLen #(v res_Len) res start_i res_Len in
-    fill res_Len res_ (u64 0)
+    if (start_i <. cresLen) then begin
+       let res_Len = sub #SIZE cresLen start_i in
+       let res_ = Buffer.sub #uint64 #resLen #(v res_Len) res start_i res_Len in
+       fill res_Len res_ (u64 0) end

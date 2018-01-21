@@ -22,68 +22,51 @@ let bn_mul_by_limb_addj_f a_i l c r_ij =
     let c' = to_u64 (res >>. u32 64) in
     (c', r)
 
-val bn_mul_by_limb_addj_:
-    #aLen:size_nat -> #resLen:size_nat ->
-    caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
+val bn_mult_by_limb_addj:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen} -> a:lbignum aLen ->
     l:uint64 -> i:size_t{v i <= aLen} -> j:size_t ->
-    cresLen:size_t{aLen + v j < resLen} ->
-    res:lbignum resLen -> Stack uint64
+    resLen:size_t{aLen + v j < v resLen} ->
+    carry:uint64 -> res:lbignum (v resLen) -> Stack unit
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-    
-let rec bn_mul_by_limb_addj_ #aLen #resLen caLen a l i j cresLen res =
-    if i =. size 0 then u64 0
-    else begin
-        let i1 = size_decr i in
-        let c1 = bn_mul_by_limb_addj_ #aLen #resLen caLen a l i1 j cresLen res in
-        let (carry', res_ij) = bn_mul_by_limb_addj_f a.(i1) l c1 res.(add #SIZE i1 j) in
-        res.(add #SIZE i1 j) <- res_ij;
-        carry'
-    end
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 
-val bn_mul_by_limb_addj:
-    #aLen:size_nat -> #resLen:size_nat ->
-    caLen:size_t{v caLen == aLen} -> a:lbignum aLen -> l:uint64 -> j:size_t ->
-    cresLen:size_t{aLen + v j < resLen} ->
-    res:lbignum resLen -> Stack uint64
-    (requires (fun h -> live h a /\ live h res /\ disjoint res a))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+let rec bn_mult_by_limb_addj #aLen aaLen a l i j resLen carry res =
+    let ij = add #SIZE i j in
+    if (i <. aaLen) then begin
+        let res_ij = res.(ij) in
+	let (carry', res_ij) = bn_mul_by_limb_addj_f a.(i) l carry res_ij in
+        res.(ij) <- res_ij;
+        bn_mult_by_limb_addj aaLen a l (size_incr i) j resLen carry' res end
+    else
+        res.(ij) <- carry
 
-[@ "substitute"]
-let bn_mul_by_limb_addj #aLen #resLen caLen a l j cresLen res =
-    bn_mul_by_limb_addj_ #aLen #resLen caLen a l caLen j cresLen res
-
-val bn_mul_:
-    #aLen:size_nat -> #bLen:size_nat -> #resLen:size_nat ->
-    caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
-    cbLen:size_t{v cbLen == bLen} -> b:lbignum bLen ->
+val bn_mult_:
+    #aLen:size_nat -> #bLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen} -> a:lbignum aLen ->
+    bbLen:size_t{v bbLen == bLen /\ aLen + bLen < max_size_t} -> b:lbignum bLen ->
     j:size_t{v j <= bLen} ->
-    cresLen:size_t{v cresLen == resLen /\  resLen = aLen + bLen} ->
-    res:lbignum resLen -> Stack unit
+    resLen:size_t{v resLen = aLen + bLen} -> res:lbignum (aLen + bLen) -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 
-let rec bn_mul_ #aLen #bLen #resLen caLen a cbLen b j cresLen res =
-    if j =. size 0 then ()
-    else begin
-        let j1 = size_decr j in
-        bn_mul_ #aLen #bLen #resLen caLen a cbLen b j1 cresLen res;
-        let c' = bn_mul_by_limb_addj #aLen #resLen caLen a b.(j1) j1 cresLen res in
-        res.(add #SIZE caLen j1) <- c'
+let rec bn_mult_ #aLen #bLen aaLen a bbLen b j resLen res =
+    if (j <. bbLen) then begin
+        bn_mult_by_limb_addj aaLen a b.(j) (size 0) j resLen (u64 0) res;
+        bn_mult_ aaLen a bbLen b (size_incr j) resLen res
     end
 
 // res = a * b
 val bn_mul:
     #aLen:size_nat -> #bLen:size_nat ->
-    caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
-    cbLen:size_t{v cbLen == bLen /\ aLen + bLen < max_size_t} -> b:lbignum bLen ->
+    aaLen:size_t{v aaLen == aLen} -> a:lbignum aLen ->
+    bbLen:size_t{v bbLen == bLen /\ aLen + bLen < max_size_t} -> b:lbignum bLen ->
     res:lbignum (aLen + bLen) -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))    
         
-let bn_mul #aLen #bLen caLen a cbLen b res = 
-    bn_mul_ #aLen #bLen #(aLen + bLen) caLen a cbLen b cbLen (add #SIZE caLen cbLen) res
-
+let bn_mul #aLen #bLen aaLen a bbLen b res = 
+    bn_mult_ #aLen #bLen aaLen a bbLen b (size 0) (add #SIZE aaLen bbLen) res
 
 val abs:
     #aLen:size_nat ->
@@ -106,12 +89,12 @@ type sign =
 val add_sign:
     #aLen:size_nat -> #cLen:size_nat -> #resLen:size_nat ->
     aaLen:size_t{v aaLen == aLen} ->
-    ccLen:size_t{v ccLen == cLen /\ cLen = aLen + aLen} ->
+    ccLen:size_t{v ccLen == cLen /\ cLen = aLen + aLen /\ cLen + 1 < max_size_t} ->
     rresLen:size_t{v rresLen == resLen /\ resLen = cLen + 1} ->
     c0:lbignum cLen -> c1:lbignum cLen -> c2:lbignum cLen ->
     a0:lbignum aLen -> a1:lbignum aLen -> a2:lbignum aLen ->
     b0:lbignum aLen -> b1:lbignum aLen -> b2:lbignum aLen ->
-    res:lbignum cLen -> Stack unit
+    res:lbignum (v rresLen) -> Stack unit
     (requires (fun h -> live h c0 /\ live h c1 /\ live h c2 /\ 
                       live h a0 /\ live h a1 /\ live h a2 /\
                       live h b0 /\ live h b1 /\ live h b2 /\
