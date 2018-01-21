@@ -74,17 +74,14 @@ static inline vec vec_rotate_right(vec v, unsigned int n) {
 
 #if __clang__
 #define vec_shuffle_right(x,n) \
-  mk_vec((vec128)_mm_shuffle_epi32((__m128i)x.v,_MM_SHUFFLE((3+n)%4,(2+n)%4,(1+n)%4,n%4)))
+  mk_vec((vec128)_mm_shuffle_epi32((__m128i)(x).v,_MM_SHUFFLE((3+(n))%4,(2+(n))%4,(1+(n))%4,(n)%4)))
 #else
-static inline vec vec_shuffle_right(vec x, unsigned int n) {
-  vec r;
-  r.v = ((vec128)_mm_shuffle_epi32((__m128i)x.v,_MM_SHUFFLE((3+n)%4,(2+n)%4,(1+n)%4,n%4)));
-  return r;
-}
+#define vec_shuffle_right(x,n) \
+  mk_vec((vec128)_mm_shuffle_epi32((__m128i)(x).v,_MM_SHUFFLE((3+(n))%4,(2+(n))%4,(1+(n))%4,(n)%4)))
 #endif
 
 #if __clang__
-#define vec_shuffle_left(x,n) vec_shuffle_right(x,4-n)
+#define vec_shuffle_left(x,n) vec_shuffle_right((x),4-(n))
 #else
 static inline vec vec_shuffle_left(vec x, unsigned int n) {
   return (vec_shuffle_right(x,4-n));
@@ -143,7 +140,7 @@ static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned in
 }
 #endif
 
-#elif defined(__ARM_NEON__)
+#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
 #include <arm_neon.h>
 
 #define VEC128
@@ -170,7 +167,7 @@ static inline vec vec_xor(vec v1, vec v2) {
 
 #if 1
 #define vec_rotate_left(v,n) \
-  mk_vec((vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)v.v,n),(uint32x4_t)v.v,32-n))
+  mk_vec((vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)(v).v,(n)),(uint32x4_t)(v).v,32-(n)))
 #else
 static inline vec vec_rotate_left(vec v, unsigned int n) {
   vec r;
@@ -185,7 +182,7 @@ static inline vec vec_rotate_right(vec v, unsigned int n) {
 
 #if 1
 #define vec_shuffle_right(x,n) \
-  mk_vec((vec128)vextq_u32((uint32x4_t)x.v,(uint32x4_t)x.v,n))
+  mk_vec((vec128)vextq_u32((uint32x4_t)(x).v,(uint32x4_t)(x).v,(n)))
 #else 
 static inline vec vec_shuffle_right(vec x, unsigned int n) {
   vec r;

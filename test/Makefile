@@ -225,11 +225,21 @@ test-poly1305.exe:
 	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Poly1305_64.c test-files/test-poly.c -o test-poly1305.exe \
 		$(PERF_LIBS)
 
+test-poly1305-32.exe:
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Poly1305_32.c test-files/test-poly32.c -o test-poly1305-32.exe \
+		$(PERF_LIBS)
+
 test-unit-poly1305: test-poly1305.exe
 	./test-poly1305.exe unit-test
 
 test-perf-poly1305: test-poly1305.exe
 	./test-poly1305.exe perf
+
+test-unit-poly1305-32: test-poly1305-32.exe
+	./test-poly1305-32.exe unit-test
+
+test-perf-poly1305-32: test-poly1305-32.exe
+	./test-poly1305-32.exe perf
 
 #
 # Tests for Salsa20

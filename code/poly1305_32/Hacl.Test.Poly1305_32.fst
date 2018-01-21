@@ -6,7 +6,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.Buffer
 open Hacl.Cast
-open Poly1305_32
+open Hacl.Poly1305_32
 
 val main: unit -> ST FStar.Int32.t
   (requires (fun h -> True))

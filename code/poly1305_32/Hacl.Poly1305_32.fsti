@@ -1,4 +1,4 @@
-module Poly1305_32
+module Hacl.Poly1305_32
 
 open FStar.HyperStack.All
 

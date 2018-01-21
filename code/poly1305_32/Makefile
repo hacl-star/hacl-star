@@ -26,7 +26,7 @@ POLY1305_SPECIFIC= \
 	Hacl.Impl.Poly1305_32.State.fst \
 	Hacl.Impl.Poly1305_32.fst \
 	Hacl.Standalone.Poly1305_32.fst \
-	Poly1305_32.fst
+	Hacl.Poly1305_32.fst
 
 SLOW=
 
@@ -44,7 +44,7 @@ FSTAR_INCLUDES+=--include $(HACL_HOME)/code/bignum
 
 ct: $(addsuffix -lax, $(POLY1305_FILES))
 	# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
-	$(FSTAR) --lax --verify_all Poly1305_32.fst
+	$(FSTAR) --lax --verify_all Hacl.Poly1305_32.fst
 
 bignum-ver: $(addsuffix -reloc-verify, $(BIGNUM))
 specific-ver: $(addsuffix -verify, $(POLY1305_SPECIFIC))
@@ -66,31 +66,32 @@ all-ci: bignum-ci specific-ci
 # By default, KreMLin drops a bunch of spec-related module that are not meant to
 # extract.
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
-KREMLIN_ARGS+=-I $(HACL_HOME)/code/bignum -tmpdir poly-c \
-	-fnouint128 -fparentheses -ccopt -Wno-parentheses \
-	-fnostruct-passing -fnoanonymous-unions -funroll-loops 10 \
-	-bundle 'Hacl.Spec.*,Hacl.Spe.*'\
+KREMLIN_ARGS+=-I ../bignum -tmpdir poly-c \
+	-bundle 'Hacl.Spec.*,Hacl.Spe.*' -fparentheses \
 	-drop Combinators,Hacl.Endianness,Spec.*,Hacl.Bignum.Parameters,Hacl.Endianness,Hacl.Spec,Hacl.Spec.*,Hacl.Spe,Hacl.Spe.*,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims,Seq.* \
 	$(KREMLIN_TESTLIB)
 
 poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_32.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
-poly-c/Poly1305_32.c: poly-c/out.krml
+poly-c/Hacl_Poly1305_32.c: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $^ \
-		-bundle 'Poly1305_32=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Poly1305_32' \
+		-bundle 'Hacl.Poly1305_32=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Hacl.Poly1305_32' \
 		-skip-compilation
 
 poly1305.exe: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) \
 		-no-prefix Hacl.Test.Poly1305_32 \
-		-bundle 'Poly1305_32=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Poly1305_32' \
+		-bundle 'Hacl.Poly1305_32=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Hacl.Poly1305_32' \
 		$^ -o $@
 	./$@
 
-extract-c: poly-c/Poly1305_32.c
+extract-c: poly-c/Hacl_Poly1305_32.c
 
 test: poly1305.exe
+
+perf:
+	$(GCC) $(GCC_OPTS) -I $(KREMLIN_HOME)/kremlib -I poly-c -I $(HACL_HOME)/other_providers/openssl/crypto/poly1305 -I $(HACL_HOME)/other_providers/tweetnacl -I $(HACL_HOME)/test -I $(HACL_HOME)/other_providers/openssl/crypto/include poly-c/Hacl_Poly1305_32.c test-poly32.c
 
 clean:
 	rm -rf *.exe *.exe.* *.out *~ poly-c *.krml
