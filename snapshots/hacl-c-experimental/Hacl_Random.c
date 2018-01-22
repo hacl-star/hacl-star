@@ -1,4 +1,4 @@
-#include "Random.h"
+#include "Hacl_Random.h"
 
 uint32_t random_uint32()
 {

@@ -32,7 +32,7 @@ set(SOURCE_FILES_VERIFIED
 set(SOURCE_FILES_EXPERIMENTAL
    snapshots/hacl-c-experimental/cpuid.c
    snapshots/hacl-c-experimental/drng.c
-   snapshots/hacl-c-experimental/Random.c)
+   snapshots/hacl-c-experimental/Hacl_Random.c)
 
 # Define a user variable to determinate if experimental files are build
 option(Experimental "Include experimental code in HaCl build" OFF)
