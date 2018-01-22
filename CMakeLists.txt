@@ -19,6 +19,7 @@ set(SOURCE_FILES_VERIFIED
    snapshots/hacl-c/Hacl_Chacha20Poly1305.c
    snapshots/hacl-c/Hacl_Curve25519.c
    snapshots/hacl-c/Hacl_Ed25519.c
+   snapshots/hacl-c/Hacl_Poly1305_32.c
    snapshots/hacl-c/Hacl_Poly1305_64.c
    snapshots/hacl-c/Hacl_SHA2_256.c
    snapshots/hacl-c/Hacl_SHA2_384.c
