@@ -1,9 +1,9 @@
 KREMLIN  ?= $(KREMLIN_HOME)/krml
 
 # Check if GCC-6 is installed, uses GCC otherwise
-COMPILER := $(shell gcc-6 --version 2>/dev/null | cut -c -5 | head -n 1)
+COMPILER := $(shell gcc-7 --version 2>/dev/null | cut -c -5 | head -n 1)
 ifdef GCC_EXEC
-   CMAKE_COMPILER_OPTION := gcc-6
+   CMAKE_COMPILER_OPTION := gcc-7
 else
 	CMAKE_COMPILER_OPTION := gcc
 endif
@@ -19,11 +19,11 @@ EXTERNAL_CODE   = c
 BUILD_DIR		 = build
 
 MODULES_ASSUMED = Hacl.Hardware.Intel.DRNG.Assumed
-MODULE          = Hacl.Hardware.Intel.DRNG
-MAIN            = Test.Hacl.Hardware.Intel.DRNG
+MODULE          = Hacl.Random.DRNG
+MAIN            = Hacl.Test.Random.DRNG
 
 INCLUDES        = $(KREMLIN_HOME)/kremlib
-EXTRACTED_FILES =  Prims.c FStar.c cpuid.c drng.c Hacl_Hardware_Intel_DRNG.c Test_Hacl_Hardware_Intel_DRNG.c
+EXTRACTED_FILES =  Prims.c FStar.c cpuid.c drng.c Hacl_Random_DRNG.c Hacl_Test_Random_DRNG.c
 
 
 # Targets

@@ -1,27 +1,26 @@
-module Test.Hacl.Hardware.Intel.DRNG
-
-module ST = FStar.HyperStack.ST
+module Hacl.Test.Random.DRNG
 
 open FStar.HyperStack.All
-
 open FStar.Buffer
 open FStar.UInt32
-open Hacl.Hardware.Intel.DRNG
 
-module R = Hacl.Hardware.Intel.DRNG
+module ST = FStar.HyperStack.ST
+module R = Hacl.Random.DRNG
 
+(* Base types *)
+let uint32_t = FStar.Int32.t
 
 (* Entry point *)
-val main: unit -> ST FStar.Int32.t
+val main: unit -> Stack uint32_t
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
   push_frame();
-  
+
   (* Allocate space to get randomness from the CPU *)
   let size = 64ul in
   let result = create 0uy size in
-  
+
   (* Call the Random Number Generator *)
   R.random_bytes result size;
 
