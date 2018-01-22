@@ -32,4 +32,5 @@ val bn_is_less:
     b:lbignum len -> Stack bool
     (requires (fun h -> live h a /\ live h b /\ disjoint a b))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
+[@ "substitute"]    
 let bn_is_less #len clen a b = bn_is_less_ #len clen a b clen

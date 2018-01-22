@@ -89,6 +89,7 @@ let fill #len clen b z =
   )
 
 val mul_wide: a:uint64 -> b:uint64 -> Tot uint128
+[@ "substitute"]
 let mul_wide a b = u128_from_UInt128 (FStar.UInt128.mul_wide (u64_to_UInt64 a) (u64_to_UInt64 b))
 
 val eq_b_:
@@ -110,4 +111,5 @@ val eq_b:
     b1:lbytes len -> b2:lbytes len -> Stack bool
     (requires (fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
+[@ "substitute"]    
 let eq_b #len clen b1 b2 = eq_b_ #len clen b1 b2 (size 0)
