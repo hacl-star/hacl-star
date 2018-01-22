@@ -24,6 +24,7 @@ CONCRETE_DIR	= $(HACL_HOME)/secure_api/concrete_specializations
 IMPL_CHOICE	?= runtime_switch
 DIST_DIR	= out/$(IMPL_CHOICE)
 OUTPUT_DIR	= $(DIST_DIR)/extracted
+CACHE_DIR       = $(DIST_DIR)/cache
 CORECRYPTO_DIR	= $(FSTAR_HOME)/contrib/CoreCrypto/fst
 
 # Pseudo autoconfiguration
@@ -75,31 +76,29 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/secure_api/utils \
 	$(HACL_HOME)/secure_api/LowCProvider/fst \
 	$(CORECRYPTO_DIR) \
-	$(CONCRETE_DIR) $(CONCRETE_DIR)/$(IMPL_CHOICE))
+	$(CONCRETE_DIR) \
+	$(CONCRETE_DIR)/$(IMPL_CHOICE) \
+	$(HACL_HOME)/secure_api/test)
 
 # The F* compiler and the entry points.
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) --lax --cache_checked_modules \
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) --lax \
+	--cache_dir $(CACHE_DIR) --cache_checked_modules \
 	$(INCLUDE_PATHS) --odir $(OUTPUT_DIR)
 FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst \
   LowCProvider/fst/LowCProvider.fst LowCProvider/fst/HaclProvider.fst
 
-# Horrible Makefile trick.
-.hack.$(IMPL_CHOICE):
-	@rm -rf .hack.*
-	touch $@
-
 EXTRACT='* -FStar -CryptoTypes'
 # Automatic dependency analysis; the hack forces this target to be rebuilt
 # whenever the value of $(IMPL_CHOICE) changes.
-.depend.extract: .hack.$(IMPL_CHOICE)
+.depend.$(IMPL_CHOICE):
 	mkdir -p $(OUTPUT_DIR)
-	$(FSTAR) --extract $(EXTRACT) --dep full $(FSTAR_FILES) > .depend.extract
+	$(FSTAR) --extract $(EXTRACT) --dep full $(FSTAR_FILES) > .depend.$(IMPL_CHOICE)
 
-include .depend.extract
+include .depend.$(IMPL_CHOICE)
 
 # Now we get parallel lax-checking, which is nice.
-%.checked.lax: %
-	$(FSTAR) $*
+%.checked.lax:
+	$(FSTAR) $<
 	touch $@
 
 # Another generic rule that leverages .depend.extract, for interactive
@@ -114,14 +113,18 @@ $(OUTPUT_DIR):
 
 # Filling out the right invocations to generate a .krml
 $(OUTPUT_DIR)/%.krml:
-	$(FSTAR) $(subst .checked.lax,,$<) --codegen Kremlin --extract_module \
-	  $(basename $(notdir $(subst .checked.lax,,$<)))
+	$(FSTAR) \
+          $(subst $(CACHE_DIR)/,,$(subst .checked.lax,,$<)) \
+	  --codegen Kremlin \
+	  --extract_module $(basename $(notdir $(subst .checked.lax,,$<)))
 
 # ... and a .ml file. Note: it's hard to put these in two separate
 # sub-directories because they share the --odir option of F*.
 $(OUTPUT_DIR)/%.ml:
-	$(FSTAR) $(subst .checked.lax,,$<) --codegen OCaml --extract_module \
-	  $(basename $(notdir $(subst .checked.lax,,$<)))
+	$(FSTAR) \
+	  $(subst $(CACHE_DIR)/,,$(subst .checked.lax,,$<)) \
+	  --codegen OCaml \
+	  --extract_module $(basename $(notdir $(subst .checked.lax,,$<)))
 
 
 ################################################################################
