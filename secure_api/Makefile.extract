@@ -181,22 +181,21 @@ $(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILE
 # 4. The LowC provider library                                   	       #
 ################################################################################
 
-# How to get a working fstarlib.
-.PHONY: $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa
-$(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa:
-	$(MAKE) -C $(FSTAR_HOME)/ulib/ml
-
 CURVE_DIR=$(HACL_HOME)/code/curve25519/x25519-c/
+
+ifeq (,$(wildcard $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa))
+  $(error FSTAR_HOME is $(FSTAR_HOME) and I cannot find $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa -- please run make in $(FSTAR_HOME)/ulib/ml)
+endif
+
+ifeq (,$(wildcard $(CURVE_DIR)/Curve25519.c))
+  $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find $(CURVE_DIR)/Curve25519.c -- please run make extract-c in $(CURVE_DIR)/..)
+endif
 
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
 HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(DIST_DIR)/Crypto_Indexing.h \
   $(DIST_DIR)/Crypto_AEAD_Main.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h
-
-.PHONY: $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h
-$(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/Curve25519.c $(CURVE_DIR)/FStar.h:
-	$(MAKE) -C $(CURVE_DIR)/.. extract-c
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
