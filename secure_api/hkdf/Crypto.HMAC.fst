@@ -8,7 +8,6 @@ open FStar.HyperStack
 open FStar.Buffer
 open Buffer.Utils
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 open FStar.UInt32
@@ -37,9 +36,6 @@ private let uint32_p = Buffer.buffer uint32_t
 private let uint8_p  = Buffer.buffer uint8_t
 private let uint64_t = FStar.UInt64.t
 private let uint64_p = Buffer.buffer uint64_t
-
-type bytes = Seq.seq uint8_t
-type lbytes (n:nat) = b:bytes{Seq.length b = n}
 
 //
 // HMAC-SHA2-256

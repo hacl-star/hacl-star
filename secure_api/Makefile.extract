@@ -46,7 +46,8 @@ CCOPTS=-Wall -Wextra -Werror -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
 # the main Makefile for valid combinations.
 all: standalone $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 
-standalone: $(DIST_DIR)/Crypto_AEAD_Main.h
+# Makefile bug here: the second file is never generated (because of the +).
+standalone: $(DIST_DIR)/Crypto_AEAD_Main.h $(DIST_DIR)/Crypto_HKDF+Crypto_HMAC.h
 
 %.test: %
 	./$<
@@ -66,11 +67,13 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/code/experimental/aesgcm \
 	$(HACL_HOME)/code/lib/kremlin \
 	$(HACL_HOME)/code/poly1305 \
+	$(HACL_HOME)/code/hash \
 	$(HACL_HOME)/code/salsa-family \
 	$(KREMLIN_HOME)/kremlib	\
 	$(HACL_HOME)/secure_api \
 	$(HACL_HOME)/secure_api/aead \
 	$(HACL_HOME)/secure_api/prf \
+	$(HACL_HOME)/secure_api/hkdf \
 	$(HACL_HOME)/secure_api/vale \
 	$(HACL_HOME)/secure_api/uf1cma \
 	$(HACL_HOME)/secure_api/utils \
@@ -85,7 +88,8 @@ FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) --lax \
 	--cache_dir $(CACHE_DIR) --cache_checked_modules \
 	$(INCLUDE_PATHS) --odir $(OUTPUT_DIR)
 FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst \
-  LowCProvider/fst/LowCProvider.fst LowCProvider/fst/HaclProvider.fst
+  LowCProvider/fst/LowCProvider.fst LowCProvider/fst/HaclProvider.fst \
+  hkdf/Crypto.HKDF.fst
 
 EXTRACT='* -FStar -CryptoTypes'
 # Automatic dependency analysis; the hack forces this target to be rebuilt
