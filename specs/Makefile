@@ -18,7 +18,7 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Ed25519.fst \
 		Spec.HSalsa20.fst \
 		Spec.GaloisField.fst \
-		Spec.Chacha20_vec.fst 
+		Spec.Chacha20_vec.fst
 
 hints: $(addsuffix .hints, $(SPEC_FILES))
 verify: $(addsuffix -verify, $(SPEC_FILES))
@@ -87,6 +87,14 @@ curve25519.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst l
 	$(OCAMLOPT) -I curve25519-ml curve25519-ml/Spec_Lib_IntTypes.ml curve25519-ml/Spec_Lib_IntSeq.ml curve25519-ml/Spec_Curve25519.ml curve25519-ml/Spec_Curve25519_Test.ml -o curve25519.exe
 	./curve25519.exe
 
+
+kyber.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Kyber.fst 
+	mkdir -p kyber-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Kyber --odir kyber-ml $^
+	@echo 'let _ = test()' >> kyber-ml/Spec_Kyber.ml
+	$(OCAMLOPT) -I kyber-ml kyber-ml/Spec_Lib_IntTypes.ml kyber-ml/Spec_Lib_IntSeq.ml kyber-ml/Spec_Kyber.ml -o kyber.exe
+	./kyber.exe
+
 curve448.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Curve448.fst tests/Spec.Curve448.Test.fst
 	mkdir -p curve448-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Curve448 --extract_module Spec.Curve448.Test --odir curve448-ml $^
@@ -120,6 +128,13 @@ hkdf.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst
 	@echo 'let _ = test()' >> hkdf-ml/Spec_HKDF_Test.ml
 	$(OCAMLOPT) -I hkdf-ml hkdf-ml/Spec_Lib_IntTypes.ml hkdf-ml/Spec_Lib_RawIntTypes.ml hkdf-ml/Spec_Lib_IntSeq.ml hkdf-ml/Spec_Lib_Stateful.ml hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Hash.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
 	./hkdf.exe
+
+pbkdf2.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.PBKDF2.fst tests/Spec.PBKDF2.Test.fst
+	mkdir -p pbkdf2-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.PBKDF2 --extract_module Spec.PBKDF2.Test --odir pbkdf2-ml $^
+	@echo 'let _ = test()' >> pbkdf2-ml/Spec_PBKDF2_Test.ml
+	$(OCAMLOPT) -I pbkdf2-ml $(OCAML_INCLUDES) pbkdf2-ml/Spec_Lib_IntTypes.ml pbkdf2-ml/Spec_Lib_RawIntTypes.ml pbkdf2-ml/Spec_Lib_IntSeq.ml pbkdf2-ml/Spec_Lib_Stateful.ml pbkdf2-ml/Spec_SHA2.ml pbkdf2-ml/Spec_Hash.ml pbkdf2-ml/Spec_HMAC.ml pbkdf2-ml/Spec_PBKDF2.ml pbkdf2-ml/Spec_PBKDF2_Test.ml -o pbkdf2.exe
+	./pbkdf2.exe
 
 ed25519.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Curve25519.fst Spec.Ed25519.fst tests/Spec.Ed25519.Test.fst
 	mkdir -p ed25519-ml

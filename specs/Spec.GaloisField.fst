@@ -30,11 +30,11 @@ let op_Plus_At e1 e2 = fadd e1 e2
 
 (* Properties *)
 
-let add_comm #f a b = lemma_eq_intro (a +@ b) (b +@ a)
+let add_comm (#f:field) (a:felem f) (b:felem f) = lemma_eq_intro (a +@ b) (b +@ a)
 
-let add_asso #f a b c = lemma_eq_intro (a +@ b +@ c) (a +@ (b +@ c))
+let add_asso (#f:field) (a:felem f) (b:felem f) (c:felem f) = lemma_eq_intro (a +@ b +@ c) (a +@ (b +@ c))
 
-let add_zero #f a b = lemma_eq_intro (a +@ b) a
+let add_zero (#f:field) (a:felem f) = lemma_eq_intro (a +@ zero) a
 
 let shift_reduce (#f:field) (a:felem f) = 
     if (index a (f.bits-1) = true) then
@@ -46,12 +46,13 @@ let cond_fadd (#f:field) (a:felem f) (b:felem f) (c:felem f) (n:nat{n < f.bits})
 
 val cond_fadd_lemma: #f:field -> a:felem f -> b:felem f -> c:felem f -> d:felem f -> n:nat{n < f.bits} -> Lemma
   (requires True)
-  (ensures cond_fadd a b c n +@ d = c +@ cond_fadd a b d n)
-let cond_fadd_lemma #f a b c d n =
+  (ensures cond_fadd a b c n `fadd` d = c `fadd` cond_fadd a b d n)
+let cond_fadd_lemma #f a b c d n = 
     if (index b n = true) then begin
-       add_comm d a;
-       add_asso c a d
+       add_comm #f d a;
+       add_asso #f c a d
     end else ()
+    
 
 let rec fmul_loop (#f:field) (a:felem f) (b:felem f) (n:nat{n<=f.bits}) 
     : Tot (felem f) (decreases (f.bits - n)) = 

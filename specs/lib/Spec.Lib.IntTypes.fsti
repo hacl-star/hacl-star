@@ -120,6 +120,11 @@ val mul: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
   (requires (uint_v a `op_Multiply` uint_v b < pow2 (bits t)))
   (ensures (fun c -> uint_v c == uint_v a `op_Multiply` uint_v b))
 
+inline_for_extraction
+val mul_wide: a:uint64 -> b:uint64 -> Pure (uint128)
+  (requires (True))
+  (ensures (fun c -> uint_v #U128 c == uint_v #U64 a `op_Multiply` uint_v #U64 b))
+
 (* I would prefer the post-condition to say: uint_v c = (pow2 (bits t) + uint_v a - uint_v b) % pow2 (bits t) *)
 inline_for_extraction
 val sub_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> c:uint_t t{uint_v c == (uint_v a - uint_v b) % pow2 (bits t)}
@@ -170,16 +175,47 @@ inline_for_extraction
 val neq_mask: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
 
 inline_for_extraction
-val gte_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
-
-inline_for_extraction
 val gt_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
 
 inline_for_extraction
-val lt_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+val gte_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+
+inline_for_extraction
+val lt_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> c:uint_t t
 
 inline_for_extraction
 val lte_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+
+val eq_mask_lemma: #t:inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma 
+    (requires (True))
+    (ensures  ((eq_mask #t a b) `logand` d == (if uint_v a = uint_v b then d else nat_to_uint 0)))
+    [SMTPat (eq_mask #t a b `logand` d)]
+
+val neq_mask_lemma: #t:inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma 
+    (requires (True))
+    (ensures  ((neq_mask #t a b) `logand` d == (if uint_v a <> uint_v b then d else nat_to_uint 0)))
+    [SMTPat (neq_mask #t a b `logand` d)]
+
+val gt_mask_lemma: #t:inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma 
+    (requires (True))
+    (ensures  ((gt_mask #t a b) `logand` d == (if uint_v a > uint_v b then d else nat_to_uint 0)))
+    [SMTPat (gt_mask #t a b `logand` d)]
+
+val gte_mask_lemma: #t:inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma 
+    (requires (True))
+    (ensures  ((gte_mask #t a b) `logand` d == (if uint_v a >= uint_v b then d else nat_to_uint 0)))
+    [SMTPat (gte_mask #t a b `logand` d)]
+
+val lt_mask_lemma: #t:inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma 
+    (requires (True))
+    (ensures  ((lt_mask #t a b) `logand` d == (if uint_v a  < uint_v b then d else nat_to_uint 0)))
+    [SMTPat (lt_mask #t a b `logand` d)]
+
+val lte_mask_lemma: #t:inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma 
+    (requires (True))
+    (ensures  ((lte_mask #t a b) `logand` d == (if uint_v a  <= uint_v b then d else nat_to_uint 0)))
+    [SMTPat (lte_mask #t a b `logand` d)]
+
 
 inline_for_extraction
 let (+!) = add

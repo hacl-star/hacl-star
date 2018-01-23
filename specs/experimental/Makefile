@@ -64,12 +64,12 @@ sha2_256.exe: Spec.SHA256.fst
 	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA256.ml -o sha2_256.exe
 	./sha2_256.exe
 
-rsa.exe: ../lib/fst/Spec.Lib.IntTypes.fst ../lib/fst/Spec.Lib.RawIntTypes.fst ../lib/fst/Spec.Lib.IntSeq.fst ../lib/fst/Spec.Lib.Stateful.fst ../Spec.SHA2.fst Spec.RSA.fst Spec.RSA.Test.fst
+rsa.exe: ../lib/fst/Spec.Lib.IntTypes.fst ../lib/fst/Spec.Lib.RawIntTypes.fst ../lib/fst/Spec.Lib.IntSeq.fst ../lib/fst/Spec.Lib.Stateful.fst ../Spec.SHA2.fst Spec.RSA.Bignum.fst Spec.RSA.fst Spec.RSA.Test.fst
 	$(MAKE) -C ../../code/lib/ml
 	mkdir -p rsa-spec
-	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSA --extract_module Spec.RSA.Test --extract_module Spec.RSA.Test --odir rsa-spec $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSA.Bignum --extract_module Spec.RSA --extract_module Spec.RSA.Test --odir rsa-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else failwith "Test failed\n")' >> rsa-spec/Spec_RSA_Test.ml
-	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES) rsa-spec/Spec_Lib_IntTypes.ml rsa-spec/Spec_Lib_RawIntTypes.ml rsa-spec/Spec_Lib_IntSeq.ml rsa-spec/Spec_Lib_Stateful.ml rsa-spec/Spec_SHA2.ml rsa-spec/Spec_RSA.ml rsa-spec/Spec_RSA_Test.ml -o rsa.exe
+	$(OCAMLOPT) -I rsa-spec $(OCAML_INCLUDES) rsa-spec/Spec_Lib_IntTypes.ml rsa-spec/Spec_Lib_RawIntTypes.ml rsa-spec/Spec_Lib_IntSeq.ml rsa-spec/Spec_Lib_Stateful.ml rsa-spec/Spec_SHA2.ml rsa-spec/Spec_RSA_Bignum.ml rsa-spec/Spec_RSA.ml rsa-spec/Spec_RSA_Test.ml -o rsa.exe
 	./rsa.exe
 	
 clean:

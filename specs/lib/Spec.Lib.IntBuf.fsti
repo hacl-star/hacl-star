@@ -41,12 +41,12 @@ inline_for_extraction val live_list: mem -> list bufitem -> GTot Type0
 inline_for_extraction val disjoint_list: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> list bufitem  -> GTot Type0
 
 
-inline_for_extraction val create: #a:Type0 -> len:size_t -> init:a -> StackInline (lbuffer a (v len))
+inline_for_extraction val create: #a:Type0 -> #len:size_nat -> clen:size_t{v clen == len} -> init:a -> StackInline (lbuffer a len)
 		      (requires (fun h0 -> True))
 		      (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ 
 					    creates1 r h0 h1 /\ 
 					    modifies1 r h0 h1 /\ 
-					    as_lseq #a #(v len) r h1 == LSeq.create #a (v len) init))
+					    as_lseq #a #len r h1 == LSeq.create #a len init))
 		      
 inline_for_extraction val createL: #a:Type0 -> init:list a{List.Tot.length init <= max_size_t} -> StackInline (lbuffer a (List.Tot.length init))
 		      (requires (fun h0 -> True))

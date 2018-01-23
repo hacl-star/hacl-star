@@ -18,8 +18,8 @@ let uint_t (t:inttype) : Type0 =
   | U32 -> UInt32.t
   | U64 -> UInt64.t
   | U128 -> UInt128.t
-  | SIZE -> UInt32.t 
-  
+  | SIZE -> UInt32.t
+
 inline_for_extraction
 let uint_to_nat_ #t (x:uint_t t) =
   match t with
@@ -29,7 +29,7 @@ let uint_to_nat_ #t (x:uint_t t) =
   | U64 -> UInt64.v x
   | U128 -> UInt128.v x
   | SIZE -> UInt32.v x
-  
+
 let uint_v #t u = uint_to_nat_ u
 
 (* Declared in .fsti: uint8, uint16, uint32, uint64, uint128 *)
@@ -92,7 +92,7 @@ let cast #t t' u  =
   | U128, U16 -> FStar.Int.Cast.uint64_to_uint16 (FStar.UInt128.uint128_to_uint64 u)
   | U128, U32 -> FStar.Int.Cast.uint64_to_uint32 (FStar.UInt128.uint128_to_uint64 u)
   | U128, U128 -> u
- 
+
 let add_mod #t a b =
   match t with
   | U8  -> (UInt8.add_mod a b)
@@ -140,6 +140,7 @@ let mul #t a b =
   | U64 -> (UInt64.mul a b)
   | SIZE -> (UInt32.mul a b)
 
+let mul_wide a b = UInt128.mul_wide a b
 
 let sub_mod #t a b =
   match t with
@@ -252,15 +253,6 @@ let neq_mask #t a b =
   | U128 -> if not FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
   | SIZE -> if not FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0)
 
-let gte_mask #t a b =
-  match t with
-  | U8 -> if FStar.UInt8.(a >=^ b) then (u8 (maxint U8)) else (u8 0)
-  | U16 -> if FStar.UInt16.(a >=^ b) then (u16 (maxint U16)) else (u16 0)
-  | U32 -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
-  | U64 -> if FStar.UInt64.(a >=^ b) then (u64 (maxint U64)) else (u64 0)
-  | U128 -> if FStar.UInt128.(a >=^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
-
 let gt_mask #t a b =
   match t with
   | U8 -> if FStar.UInt8.(a >^ b) then (u8 (maxint U8)) else (u8 0)
@@ -269,6 +261,15 @@ let gt_mask #t a b =
   | U64 -> if FStar.UInt64.(a >^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a >^ b) then (u128 (maxint U128)) else (u128 0)
   | SIZE -> if FStar.UInt32.(a >^ b) then (u32 (maxint U32)) else (u32 0)
+
+let gte_mask #t a b =
+  match t with
+  | U8 -> if FStar.UInt8.(a >=^ b) then (u8 (maxint U8)) else (u8 0)
+  | U16 -> if FStar.UInt16.(a >=^ b) then (u16 (maxint U16)) else (u16 0)
+  | U32 -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
+  | U64 -> if FStar.UInt64.(a >=^ b) then (u64 (maxint U64)) else (u64 0)
+  | U128 -> if FStar.UInt128.(a >=^ b) then (u128 (maxint U128)) else (u128 0)
+  | SIZE -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
 
 
 let lt_mask #t a b =
@@ -288,6 +289,13 @@ let lte_mask #t a b =
   | U64 -> if FStar.UInt64.(a <=^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a <=^ b) then (u128 (maxint U128)) else (u128 0)
   | SIZE -> if FStar.UInt32.(a <=^ b) then (u32 (maxint U32)) else (u32 0)
+
+let eq_mask_lemma #t a b d = admit ()
+let neq_mask_lemma #t a b d = admit ()
+let gt_mask_lemma #t a b d = admit ()
+let gte_mask_lemma #t a b d = admit ()
+let lt_mask_lemma #t a b d = admit ()
+let lte_mask_lemma #t a b d = admit ()
 
 (* defined in .fsti: notations +^, -^, ...*)
 
@@ -313,4 +321,3 @@ let bn_mul a b = a `op_Multiply` b
 let bn_sub a b = a - b
 let bn_mod a b = a % b
 let bn_div a b = a / b
-
