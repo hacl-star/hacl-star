@@ -63,7 +63,7 @@ let ws (p:Spec.parameters) (s:wsTable p) (b:block_w p) :
         (requires (fun h -> live h s /\ live h b))
         (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1)) =
   (**) let h0 = ST.get () in
-  //let lseq_b = as_lseq b h0 in
+  // FIXME let lseq_b = as_lseq b h0 in
   let lseq_b = LSeq.create 16 (nat_to_uint #p.wt 0) in
   let spec0 (i:size_nat{i < 16}) (s:Spec.Lib.IntSeq.intseq p.wt p.kSize) : Tot (Spec.Lib.IntSeq.intseq p.wt p.kSize) = Spec.step_ws0 p lseq_b i s in
   let spec1 (i:size_nat{i + 16 < p.kSize}) (s:Spec.Lib.IntSeq.intseq p.wt p.kSize) : Tot (Spec.Lib.IntSeq.intseq p.wt p.kSize) = Spec.step_ws1 p (i + 16) s in
@@ -71,7 +71,7 @@ let ws (p:Spec.parameters) (s:wsTable p) (b:block_w p) :
   iteri (size p.kSize -. size 16) spec1 (fun i -> step_ws1 p (i +. size 16)) s
 
 (* Definition of the core shuffling function *)
-let shuffle_core (p:Spec.parameters) (kt:kTable p) (wst:wsTable p) (t:size_nat{t < p.kSize}) (hash:hash_w p)
+let shuffle_core (p:Spec.parameters) (kt:kTable p) (wst:wsTable p) (t:size_t{size_v t < p.kSize}) (hash:hash_w p)
 : Stack unit
         (requires (fun h -> live h kt /\ live h wst /\ live h hash))
         (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1)) =
@@ -84,8 +84,8 @@ let shuffle_core (p:Spec.parameters) (kt:kTable p) (wst:wsTable p) (t:size_nat{t
   let g0 = hash.(size 6) in
   let h0 = hash.(size 7) in
 
-  let wst_t = wst.(size t) in
-  let kt_t = kt.(size t) in
+  let wst_t = wst.(t) in
+  let kt_t = kt.(t) in
   let t1 = h0 +. (_Sigma1 p e0) +. ((_Ch p e0 f0 g0) +. (kt_t +. wst_t)) in
   let t2 = (_Sigma0 p a0) +. (_Maj p a0 b0 c0) in
 
@@ -99,16 +99,19 @@ let shuffle_core (p:Spec.parameters) (kt:kTable p) (wst:wsTable p) (t:size_nat{t
   hash.(size 7) <- g0
 
 // Definition of the full shuffling function
-assume val shuffle: (p:Spec.parameters) -> (kt:kTable p) -> (wst:wsTable p) -> (hash:hash_w p) ->
+val shuffle: (p:Spec.parameters) -> (kt:kTable p) -> (wst:wsTable p) -> (hash:hash_w p) ->
   Stack unit
         (requires (fun h -> live h kt /\ live h wst))
         (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1))
-// let shuffle (p:parameters) (kt:kTable p) (wst:wsTable p) (hash:hash_w p)
-// : Stack unit
-//         (requires (fun h -> live h kt /\ live h wst))
-//         (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1)) =
-//   let lseq_wst = LSeq.create (p.kSize) (nat_to_uint #p.wt 0) in
-//   iter (size p.kSize) (Spec.shuffle_core p lseq_wst) (shuffle_core p kt wst) hash
+let shuffle (p:parameters) (kt:kTable p) (wst:wsTable p) (hash:hash_w p)
+: Stack unit
+        (requires (fun h -> live h kt /\ live h wst))
+        (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1)) =
+  let h0 = ST.get () in
+  // FIXME let lseq_wst : LSeq.intseq p.wt p.kSize = as_lseq wst h0 in
+  let lseq_wst = LSeq.create p.kSize (nat_to_uint #p.wt 0) in
+  iteri (size p.kSize) (Spec.shuffle_core p lseq_wst) (shuffle_core p kt wst) hash
+
 
 (* Definition of the SHA2 state *)
 let len_block_t (p:Spec.parameters) = l:size_t{uint_v l < Spec.size_block p}
@@ -118,7 +121,7 @@ noeq type state (p:Spec.parameters) =
     hash:lbuffer (uint_t p.wt) Spec.size_hash_w;
     k:lbuffer (uint_t p.wt) p.kSize;
     ws:lbuffer (uint_t p.wt) p.kSize;
-    blocks:lbuffer (uint_t p.wt) (2 * Spec.size_block_w);
+    blocks:lbuffer uint8 (2 * Spec.size_block_w);
     len_block:lbuffer (uint_t p.wt) 1;
     n:lbuffer (uint_t p.wt) 1;
     tmp_block:lbuffer (uint_t p.wt) Spec.size_block_w;
@@ -141,10 +144,10 @@ let set_h0 (p:parameters) (hw:hash_w p) :
   admit()
 
 (* Definition of the initialization function for convenience *)
-assume val init: p:parameters -> StackInline (state p)
-                                            (requires (fun h -> True))
-                                            (ensures  (fun h0 _ h1 -> True))
-
+assume val init: p:parameters ->
+  StackInline (state p)
+              (requires (fun h -> True))
+              (ensures  (fun h0 _ h1 -> True))
 // let init (p:parameters) :
 //   StackInline (state p)
 //               (requires (fun h -> True))
@@ -174,11 +177,19 @@ let update_multi (p:parameters) (n:size_t{uint_v n * Spec.size_block p <= max_si
 : Stack unit
         (requires (fun h -> v (as_lseq st.n h).[0] + v n <= max_size_t))
         (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st.hash h0 h1)) =
-  let bl = size_block p in
   let old_n = st.n in
   let old_len_block = st.len_block in
-  // iteri n (fun i -> update_block p (sub blocks FStar.Mul.((Spec.size_block p) * i) bl)) st
-  ()
+  iteri n
+    (fun i bl ->
+      // let h0 = ST.get () in
+      let sz_block = Spec.size_block p in
+      // FIXME let lseq_blocks = as_lseq blocks h0 in
+      // let lseq_block = LSeq.sub lseq_blocks FStar.Mul.(size_v sz_block * i) (size_v sz_block) in
+      let lseq_block = LSeq.create (Spec.size_block p) (nat_to_uint #p.wt 0) in
+      Spec.update_block p lseq_block)
+    (fun i bl ->
+      update_block p (sub blocks)) st
+
 
 (* Definition of the core compression function *)
 let update' (p:parameters) (len:size_t) (input:lbuffer uint8 (uint_v len)) (st:state p)
