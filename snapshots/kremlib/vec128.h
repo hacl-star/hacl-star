@@ -144,8 +144,8 @@ static inline vec vec_xor(vec v1, vec v2) {
 
 
 #if 1
-#define vec_rotate_left(v,n) \
-  mk_vec((vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)(v).v,(n)),(uint32x4_t)(v).v,32-(n)))
+#define vec_rotate_left(x,n) \
+  mk_vec((vec128)vsriq_n_u32(vshlq_n_u32((uint32x4_t)(x).v,(n)),(uint32x4_t)(x).v,32-(n)))
 #else
 static inline vec vec_rotate_left(vec v, unsigned int n) {
   vec r;
@@ -175,7 +175,7 @@ static inline vec vec_shuffle_left(vec x, unsigned int n) {
 
 static inline vec vec_load_32x4(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4){
   vec v;
-  v.v = (vec128) {x4,x3,x2,x1};
+  v.v = (vec128) {x1,x2,x3,x4};
   return v;
 }
 
@@ -189,7 +189,7 @@ static inline vec vec_load_32(uint32_t x1) {
 
 static inline vec vec_load_32x8(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4, uint32_t x5, uint32_t x6, uint32_t x7, uint32_t x8){
   vec v;
-  v.v = (vec128) {x4,x3,x2,x1};
+  v.v = (vec128) {x1,x2,x3,x4};
   return v;
 }
 
