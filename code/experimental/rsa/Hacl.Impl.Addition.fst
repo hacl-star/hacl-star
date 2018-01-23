@@ -42,7 +42,7 @@ val bn_sub:
     res:lbignum aLen -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-[@ "substitute"]
+
 let bn_sub #aLen #bLen caLen a cbLen b res =
     bn_sub_ #aLen #bLen caLen a cbLen b (size 0) (u64 0) res
 
@@ -72,7 +72,7 @@ val bn_add:
     res:lbignum aLen -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-[@ "substitute"]
+
 let bn_add #aLen #bLen caLen a cbLen b res =
     let _ = bn_add_ #aLen #bLen caLen a cbLen b (size 0) (u64 0) res in ()
 

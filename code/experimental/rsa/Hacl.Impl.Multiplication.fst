@@ -64,132 +64,127 @@ val bn_mul:
     res:lbignum (aLen + bLen) -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))    
-[@ "substitute"]        
+  
 let bn_mul #aLen #bLen aaLen a bbLen b res = 
     bn_mult_ #aLen #bLen aaLen a bbLen b (size 0) (add #SIZE aaLen bbLen) res
 
 val abs:
-    #aLen:size_nat ->
-    aaLen:size_t{v aaLen == aLen} ->
-    a:lbignum aLen -> b:lbignum aLen -> 
+    #aLen:size_nat -> #bLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen} -> a:lbignum aLen ->
+    bbLen:size_t{v bbLen == bLen} -> b:lbignum aLen ->
     res:lbignum aLen -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res /\ disjoint a b))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-[@ "substitute"]
-let abs #aLen aaLen a b res =
-    if (bn_is_less aaLen a b) then
+
+let abs #aLen #bLen aaLen a bbLen b res =
+    if (bn_is_less_ds aaLen a bbLen b) then
        //a < b ==> res = b - a
-       bn_sub aaLen b aaLen a res
-    else bn_sub aaLen a aaLen b res
+       bn_sub bbLen b aaLen a res
+    else bn_sub aaLen a bbLen b res
 
 type sign =
      | Positive : sign
      | Negative : sign
 
 val add_sign:
-    #aLen:size_nat -> #cLen:size_nat -> #resLen:size_nat ->
-    aaLen:size_t{v aaLen == aLen} ->
-    ccLen:size_t{v ccLen == cLen /\ cLen = aLen + aLen /\ cLen + 1 < max_size_t} ->
-    rresLen:size_t{v rresLen == resLen /\ resLen = cLen + 1} ->
-    c0:lbignum cLen -> c1:lbignum cLen -> c2:lbignum cLen ->
-    a0:lbignum aLen -> a1:lbignum aLen -> a2:lbignum aLen ->
-    b0:lbignum aLen -> b1:lbignum aLen -> b2:lbignum aLen ->
+    #a0Len:size_nat -> #a1Len:size_nat -> #resLen:size_nat ->
+    aa0Len:size_t{v aa0Len == a0Len} ->
+    aa1Len:size_t{v aa1Len == a1Len} ->
+    rresLen:size_t{v rresLen == resLen /\ resLen = a0Len + a0Len + 1 /\ resLen < max_size_t} ->
+    c0:lbignum (a0Len + a0Len) -> c1:lbignum (a1Len + a1Len) -> c2:lbignum (a0Len + a0Len) ->
+    a0:lbignum a0Len -> a1:lbignum a1Len -> a2:lbignum a0Len ->
+    b0:lbignum a0Len -> b1:lbignum a1Len -> b2:lbignum a0Len ->
     res:lbignum (v rresLen) -> Stack unit
     (requires (fun h -> live h c0 /\ live h c1 /\ live h c2 /\ 
                       live h a0 /\ live h a1 /\ live h a2 /\
                       live h b0 /\ live h b1 /\ live h b2 /\
 		      live h res /\ disjoint a0 a1 /\ disjoint b0 b1))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-[@ "substitute"]
-let add_sign #aLen #cLen #resLen aaLen ccLen rresLen c0 c1 c2 a0 a1 a2 b0 b1 b2 res =
-    let sa2 = if (bn_is_less aaLen a0 a1) then Negative else Positive in
-    let sb2 = if (bn_is_less aaLen b0 b1) then Negative else Positive in
-    bn_add_carry ccLen c0 ccLen c1 res;
+
+let add_sign #a0Len #a1Len #resLen aa0Len aa1Len rresLen c0 c1 c2 a0 a1 a2 b0 b1 b2 res =
+    let c0Len = add #SIZE aa0Len aa0Len in
+    let c1Len = add #SIZE aa1Len aa1Len in
+    let sa2 = if (bn_is_less_ds aa0Len a0 aa1Len a1) then Negative else Positive in
+    let sb2 = if (bn_is_less_ds aa0Len b0 aa1Len b1) then Negative else Positive in
+    bn_add_carry c0Len c0 c1Len c1 res;
     if ((sa2 = Positive && sb2 = Positive) || (sa2 = Negative && sb2 = Negative))
-    then bn_sub rresLen res ccLen c2 res
-    else bn_add rresLen res ccLen c2 res
+    then bn_sub rresLen res c0Len c2 res
+    else bn_add rresLen res c0Len c2 res
     
-// iLen is the upper bound for a and b
-// iLen must be a power of 2
 val karatsuba_:
     #aLen:size_nat ->
-    aaLen:size_t{v aaLen == aLen /\ 4 * aLen < max_size_t} ->
+    pow2_i:size_t -> iLen:size_t ->
+    aaLen:size_t{v aaLen == aLen /\ 4 * v pow2_i < max_size_t /\ aLen + aLen < max_size_t} ->
     a:lbignum aLen -> b:lbignum aLen ->
-    tmp:lbignum (4 * aLen) ->
-    res:lbignum (2 * aLen) -> Stack unit
-    (requires (fun h -> live h a /\ live h b /\ live h res /\ live h tmp /\
-		      disjoint res a /\ disjoint res b /\ disjoint res tmp))
+    tmp:lbignum (4 * v pow2_i) ->
+    res:lbignum (aLen + aLen) -> Stack unit
+    (requires (fun h -> live h a /\ live h b /\ live h tmp /\ live h res))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
-
-let rec karatsuba_ #aLen aaLen a b tmp res =
-    let tmpLen = mul #SIZE (size 4) aaLen in
-    let aaLen2 = add #SIZE aaLen aaLen in
-    let aaLen0 = aaLen /. (size 2) in
-    assume (v aaLen = v aaLen0 + v aaLen0);
     
+let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
+    assume (v pow2_i = aLen + v iLen);
+    let tmpLen = mul #SIZE (size 4) pow2_i in
+    let aaLen2 = add #SIZE aaLen aaLen in
+    let pow2_i0 = pow2_i /. (size 2) in
+    assume (v pow2_i = v pow2_i0 + v pow2_i0);
+    let pow2_i1 = sub #SIZE pow2_i0 iLen in
+    
+    fill tmpLen tmp (u64 0);
     fill aaLen2 res (u64 0);
+    
     if (aaLen <. size 9) then
        bn_mul #aLen #aLen aaLen a aaLen b res
     else begin
-       let a0 = Buffer.sub #uint64 #aLen #(v aaLen0) a (size 0) aaLen0 in
-       let a1 = Buffer.sub #uint64 #aLen #(v aaLen0) a aaLen0 aaLen0 in
-       let b0 = Buffer.sub #uint64 #aLen #(v aaLen0) b (size 0) aaLen0 in
-       let b1 = Buffer.sub #uint64 #aLen #(v aaLen0) b aaLen0 aaLen0 in
+       let a0 = Buffer.sub #uint64 #aLen #(v pow2_i0) a (size 0) pow2_i0 in
+       let a1 = Buffer.sub #uint64 #aLen #(v pow2_i1) a pow2_i0 pow2_i1 in
+       let b0 = Buffer.sub #uint64 #aLen #(v pow2_i0) b (size 0) pow2_i0 in
+       let b1 = Buffer.sub #uint64 #aLen #(v pow2_i1) b pow2_i0 pow2_i1 in
 
-       let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(v aaLen2) tmp (size 0) aaLen2 in
-       let c0 = Buffer.sub #uint64 #(v aaLen2) #(v aaLen) res (size 0) aaLen in
-       let c1 = Buffer.sub #uint64 #(v aaLen2) #(v aaLen) res aaLen aaLen in
-       karatsuba_ #(v aaLen0) aaLen0 a0 b0 tmp0 c0; // c0 = a0 * b0
-       karatsuba_ #(v aaLen0) aaLen0 a1 b1 tmp0 c1; // c1 = a1 * b1
-         
-       let a2 = Buffer.sub #uint64 #(v tmpLen) #(v aaLen0) tmp (size 0) aaLen0 in
-       let b2 = Buffer.sub #uint64 #(v tmpLen) #(v aaLen0) tmp aaLen0 aaLen0 in
-       let c2 = Buffer.sub #uint64 #(v tmpLen) #(v aaLen) tmp aaLen aaLen in
-       let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(v aaLen2) tmp aaLen2 aaLen2 in
-	 
-       abs #(v aaLen0) aaLen0 a0 a1 a2; // a2 = |a0 - a1|
-       abs #(v aaLen0) aaLen0 b0 b1 b2; // b2 = |b0 - b1|
-       karatsuba_ #(v aaLen0) aaLen0 a2 b2 tmp0 c2; // c2 = a2 * b2
+       let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(4 * v pow2_i0) tmp (size 0) (mul #SIZE (size 4) pow2_i0) in
+       let c0 = Buffer.sub #uint64 #(v aaLen2) #(2 * v pow2_i0) res (size 0) (mul #SIZE (size 2) pow2_i0) in
+       karatsuba_ #(v pow2_i0) pow2_i0 (size 0) pow2_i0 a0 b0 tmp0 c0; // c0 = a0 * b0
 
-       let tmp1Len = add #SIZE aaLen (size 1) in
-       let tmp1 = Buffer.sub #uint64 #(v tmpLen) #(v tmp1Len) tmp aaLen2 tmp1Len in
-       add_sign #(v aaLen0) #(v aaLen) #(v tmp1Len) aaLen0 aaLen tmp1Len c0 c1 c2 a0 a1 a2 b0 b1 b2 tmp1; //tmp1 = (c0 + c1) +/- c2
+       let ind = if (pow2_i0 /. (size 2) <=. iLen) then sub #SIZE iLen (pow2_i0 /. (size 2)) else iLen in
+       let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(4 * v pow2_i1) tmp (size 0) (mul #SIZE (size 4) pow2_i1) in
+       let c1 = Buffer.sub #uint64 #(v aaLen2) #(2 * v pow2_i1) res (mul #SIZE (size 2) pow2_i0) (mul #SIZE (size 2) pow2_i1) in
+       karatsuba_ #(v pow2_i1) pow2_i0 iLen pow2_i1 a1 b1 tmp0 c1; // c1 = a1 * b1
+	    
+       let a2 = Buffer.sub #uint64 #(v tmpLen) #(v pow2_i0) tmp (size 0) pow2_i0 in
+       let b2 = Buffer.sub #uint64 #(v tmpLen) #(v pow2_i0) tmp pow2_i0 pow2_i0 in
+       abs #(v pow2_i0) #(v pow2_i1) pow2_i0 a0 pow2_i1 a1 a2; // a2 = |a0 - a1|
+       abs #(v pow2_i0) #(v pow2_i1) pow2_i0 b0 pow2_i1 b1 b2; // b2 = |b0 - b1|
+
+       let c2 = Buffer.sub #uint64 #(v aaLen2) #(2 * v pow2_i0) tmp (mul #SIZE (size 2) pow2_i0) (mul #SIZE (size 2) pow2_i0) in
+       let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(4 * v pow2_i0) tmp (mul #SIZE (size 4) pow2_i0) (mul #SIZE (size 4) pow2_i0) in
+       karatsuba_ #(v pow2_i0) pow2_i0 (size 0) pow2_i0 a2 b2 tmp0 c2; // c2 = a2 * b2
+
+       let tmp1Len = add #SIZE pow2_i (size 1) in
+       let tmp1 = Buffer.sub #uint64 #(v tmpLen) #(v tmp1Len) tmp (mul #SIZE (size 4) pow2_i0) tmp1Len in
+       add_sign #(v pow2_i0) #(v pow2_i1) #(v tmp1Len) pow2_i0 pow2_i1 tmp1Len c0 c1 c2 a0 a1 a2 b0 b1 b2 tmp1; //tmp1 = (c0 + c1) +/- c2
 
        //res = [c0; c1]
        //tmp = [a2; b2; c2; tmp1; _]
-       let res1Len = add #SIZE aaLen0 aaLen in
-       let res1 = Buffer.sub #uint64 #(v aaLen2) #(v res1Len) res aaLen0 res1Len in
-       bn_add res1Len res1 tmp1Len tmp1 res1
-     end
-      
-    
+       let res1Len = add #SIZE pow2_i0 (add #SIZE pow2_i1 pow2_i1) in
+       let res1 = Buffer.sub #uint64 #(v aaLen2) #(v res1Len) res pow2_i0 res1Len in
+       bn_add res1Len res1 tmp1Len tmp1 res1 //FIXME!!!
+    end
+
+// aLen + iLen == pow2_i
+// iLen is the number of leading zeroes
 val karatsuba:
     #aLen:size_nat ->
-    iLen:size_t{8 * v iLen < max_size_t} ->
-    aaLen:size_t{v aaLen == aLen /\ aLen + aLen < max_size_t /\ aLen <= v iLen} ->
+    pow2_i:size_t -> iLen:size_t ->
+    aaLen:size_t{v aaLen == aLen /\ 4 * v pow2_i < max_size_t /\ 2 * aLen < max_size_t} ->
     a:lbignum aLen -> b:lbignum aLen ->
-    st_mult:lbignum (8 * v iLen) ->  Stack unit
-    (requires (fun h -> live h a /\ live h b /\ live h st_mult))
+    st_mult:lbignum (4 * v pow2_i) ->
+    res:lbignum (aLen + aLen) -> Stack unit
+    (requires (fun h -> live h a /\ live h b /\ live h st_mult /\ live h res))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
     
-let karatsuba #aLen iLen aaLen a b st_mult =
+let karatsuba #aLen pow2_i iLen aaLen a b st_mult res =
     let aaLen2 = add #SIZE aaLen aaLen in
-    let tmpLen = mul #SIZE (size 4) iLen in
-    let stLen = mul #SIZE (size 8) iLen in
-    fill stLen st_mult (u64 0);
+    fill aaLen2 res (u64 0);
     
-    if (aaLen <. size 9) then begin
-       let res = Buffer.sub #uint64 #(v stLen) #(aLen + aLen) st_mult (size 0) aaLen2 in
-       bn_mul #aLen #aLen aaLen a aaLen b res end
-    else begin
-       let res_ = Buffer.sub #uint64 #(v stLen) #(v iLen + v iLen) st_mult (size 0) (add #SIZE iLen iLen) in
-       let a_ = Buffer.sub #uint64 #(v stLen) #(v iLen) st_mult (add #SIZE iLen iLen) iLen in
-       let b_ = Buffer.sub #uint64 #(v stLen) #(v iLen) st_mult (mul #SIZE (size 3) iLen) iLen in
-       let tmp = Buffer.sub #uint64 #(v stLen) #(v tmpLen) st_mult (mul #SIZE (size 4) iLen) tmpLen in
-       
-       let a_' = Buffer.sub #uint64 #(v iLen) #(aLen) a_ (size 0) aaLen in
-       let b_' = Buffer.sub #uint64 #(v iLen) #(aLen) b_ (size 0) aaLen in       
-       copy aaLen a a_';
-       copy aaLen b b_';
-       
-       karatsuba_ #(v iLen) iLen a_ b_ tmp res_ end
+    if (aaLen <. size 9)
+    then bn_mul #aLen #aLen aaLen a aaLen b res
+    else karatsuba_ pow2_i iLen aaLen a b st_mult res

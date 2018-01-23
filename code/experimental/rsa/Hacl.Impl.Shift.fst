@@ -34,7 +34,7 @@ val bn_lshift1:
     res:lbignum aLen -> Stack unit
     (requires (fun h -> live h a /\ live h res))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-[@ "substitute"]
+
 let bn_lshift1 #aLen caLen a res = bn_lshift1_ #aLen caLen a (u64 0) (size 0) res
 
 val bn_rshift_:

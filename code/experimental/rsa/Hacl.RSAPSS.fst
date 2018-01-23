@@ -13,7 +13,7 @@ module Buffer = Spec.Lib.IntBuf
 
 val rsa_pss_sign:
     #sLen:size_nat -> #msgLen:size_nat ->
-    iLen:size_t{8 * v iLen < max_size_t} ->
+    pow2_i:size_t -> iLen:size_t ->
     modBits:size_t{0 < v modBits /\ v modBits + 3 < max_size_t} ->
     eBits:size_t{0 < v eBits /\ v eBits <= v modBits} ->
     dBits:size_t{0 < v dBits /\ v dBits <= v modBits /\
@@ -27,11 +27,12 @@ val rsa_pss_sign:
 	              disjoint msg salt /\ disjoint msg sgnt /\ disjoint sgnt salt))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 sgnt h0 h1))
 
-let rsa_pss_sign #sLen #msgLen iLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt = Hacl.Impl.RSA.rsa_sign #sLen #msgLen iLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt
+let rsa_pss_sign #sLen #msgLen pow2_i iLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt = 
+    Hacl.Impl.RSA.rsa_sign #sLen #msgLen pow2_i iLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt
 
 val rsa_pss_verify:
     #sLen:size_nat -> #msgLen:size_nat ->
-    iLen:size_t{8 * v iLen < max_size_t} ->    
+    pow2_i:size_t -> iLen:size_t ->
     modBits:size_t{0 < v modBits /\ v modBits + 3 < max_size_t} ->
     eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\
 		 v (bits_to_bn modBits) + v (bits_to_bn eBits) < max_size_t} ->
@@ -42,4 +43,5 @@ val rsa_pss_verify:
     (requires (fun h -> live h msg /\ live h sgnt /\ live h pkey /\ disjoint msg sgnt))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies0 h0 h1))
 
-let rsa_pss_verify #sLen #msgLen iLen modBits eBits pkey ssLen sgnt mmsgLen msg = Hacl.Impl.RSA.rsa_verify #sLen #msgLen iLen modBits eBits pkey ssLen sgnt mmsgLen msg
+let rsa_pss_verify #sLen #msgLen pow2_i iLen modBits eBits pkey ssLen sgnt mmsgLen msg = 
+    Hacl.Impl.RSA.rsa_verify #sLen #msgLen pow2_i iLen modBits eBits pkey ssLen sgnt mmsgLen msg

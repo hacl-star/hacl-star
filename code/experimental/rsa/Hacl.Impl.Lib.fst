@@ -111,5 +111,5 @@ val eq_b:
     b1:lbytes len -> b2:lbytes len -> Stack bool
     (requires (fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
-[@ "substitute"]    
+  
 let eq_b #len clen b1 b2 = eq_b_ #len clen b1 b2 (size 0)
