@@ -120,10 +120,9 @@ let test () =
   assert_norm(List.Tot.length p1 = 256);
   let test0 = create 256 zero in
   let test0 = test0.[1] <- 1 in
-(*  IO.print_string   "NTT(test0):";
-  let result1 = ntt test0 `poly_pointwise_mul` ntt test0  in
+  IO.print_string   "NTT(test0):";
+  let result1 = ntt test0 in
   List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (as_list result1);
-  *)
   IO.print_string   "\nMul with NTT:";
   let result1 = poly_mul test0 test0 in
   List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (as_list result1);
