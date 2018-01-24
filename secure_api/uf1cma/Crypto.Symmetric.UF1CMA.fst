@@ -67,7 +67,6 @@ type skey (rgn:rid) (i:id) =
 
 //16-10-16 can't make it abstract?
 (** Conditionally-allocated abstract key (accessed only in this module) *)
-abstract 
 type akey' (rgn:rid) (i:id) =
   | Nothing
   | Just    of skey rgn i

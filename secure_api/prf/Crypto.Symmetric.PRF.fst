@@ -194,8 +194,9 @@ let gen rgn i =
   (* | _ ->  *)
     (* begin *)
     push_frame();
+    assume (witnessed (region_contains_pred rgn));
     let mac_rgn : (r:region{r `HS.extends` rgn}) = new_region rgn in
-    let key = Buffer.create 0uy (keylen i) in
+    let key = Buffer.rcreate_mm mac_rgn 0uy (keylen i) in
     Bytes.random (v (keylen i)) key;
     let h = ST.get() in
     let keystate = Buffer.rcreate rgn 0uy (statelen i) in
@@ -207,6 +208,7 @@ let gen rgn i =
         mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i)))
       else ()
       in
+    Buffer.rfree key;
     pop_frame();
     State #i #rgn #mac_rgn keystate table
     // no need to demand prf i so far.
