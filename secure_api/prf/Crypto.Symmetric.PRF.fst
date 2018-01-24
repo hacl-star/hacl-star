@@ -208,7 +208,7 @@ let gen rgn i =
         mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i)))
       else ()
       in
-    Buffer.rfree key;
+    //Buffer.rfree key;
     pop_frame();
     State #i #rgn #mac_rgn keystate table
     // no need to demand prf i so far.
