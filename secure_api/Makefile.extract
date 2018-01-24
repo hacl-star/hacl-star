@@ -16,6 +16,8 @@
 #
 # A caller of this Makefile need not run "make clean" before using a different
 # IMPL_CHOICE.
+HACL_HOME=..
+
 include Makefile.common
 
 # Warning: these are not always buildable, depending on IMPL_CHOICE...! Consult
