@@ -1,25 +1,3 @@
-/* MIT License
- *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 #ifndef __Vec_H
 #define __Vec_H
 
@@ -30,7 +8,7 @@
 
 #define VEC128
 #define vec_size 4
-/* static const int vec_size = 4; */
+
 
 typedef unsigned int vec128 __attribute__ ((vector_size (16)));
 
@@ -274,9 +252,118 @@ static inline vec vec_interleave64_low(vec v1, vec v2) {
   r.v = (vec128) vcombine_u64(h0,h1);
   return r;
 }
-
 #else
-#error "SSSE3 or ARM_NEON needed"
+
+#define VEC128
+#define vec_size 4
+
+typedef struct {
+  uint32_t v[4];
+} vec;
+
+static inline vec mk_vec(uint32_t* v) {
+  vec r;
+  r.v[0] = v[0];
+  r.v[1] = v[1];
+  r.v[2] = v[2];
+  r.v[3] = v[3];
+  return r;
+}
+
+static inline vec vec_xor(vec v1, vec v2) {
+  vec r;
+  r.v[0] = v1.v[0] ^ v2.v[0];
+  r.v[1] = v1.v[1] ^ v2.v[1];
+  r.v[2] = v1.v[2] ^ v2.v[2];
+  r.v[3] = v1.v[3] ^ v2.v[3];
+  return r;
+}
+
+static inline vec vec_rotate_left(vec v, unsigned int n) {
+  vec r;
+  r.v[0] = (v.v[0] << n) ^ (v.v[0] >> (32-n));
+  r.v[1] = (v.v[1] << n) ^ (v.v[1] >> (32-n));
+  r.v[2] = (v.v[2] << n) ^ (v.v[2] >> (32-n));
+  r.v[3] = (v.v[3] << n) ^ (v.v[3] >> (32-n));
+  return r;
+}
+
+static inline vec vec_rotate_right(vec v, unsigned int n) {
+  return (vec_rotate_left(v,32-n));
+}
+
+static inline vec vec_shuffle_right(vec v, unsigned int n) {
+  vec r;
+  r.v[0] = v.v[n%4];
+  r.v[1] = v.v[(n+1)%4];
+  r.v[2] = v.v[(n+2)%4];
+  r.v[3] = v.v[(n+3)%4];
+  return r;
+}
+
+
+static inline vec vec_shuffle_left(vec x, unsigned int n) {
+  return vec_shuffle_right(x,4-n);
+}
+
+
+static inline vec vec_load_32x4(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3){
+  vec v;
+  v.v[0] = x0;
+  v.v[1] = x1;
+  v.v[2] = x2;
+  v.v[3] = x3;
+  return v;
+}
+
+
+static inline vec vec_load_32(uint32_t x0){
+  vec v;
+  v.v[0] = x0;
+  v.v[1] = x0;
+  v.v[2] = x0;
+  v.v[3] = x0;
+  return v;
+}
+
+static inline vec vec_load_le(const uint8_t* in) {
+  vec r;
+  r.v[0] = load32_le((uint8_t*)in);
+  r.v[1] = load32_le((uint8_t*)in+4);
+  r.v[2] = load32_le((uint8_t*)in+8);
+  r.v[3] = load32_le((uint8_t*)in+12);
+  return r;
+}
+
+static inline void vec_store_le(unsigned char* out, vec r) {
+  store32_le(out,r.v[0]);
+  store32_le(out+4,r.v[1]);
+  store32_le(out+8,r.v[2]);
+  store32_le(out+12,r.v[3]);
+}
+
+static inline vec vec_load128_le(const unsigned char* in) {
+  return vec_load_le(in);
+}
+
+
+static inline vec vec_add(vec v1, vec v2) {
+  vec r;
+  r.v[0] = v1.v[0] + v2.v[0];
+  r.v[1] = v1.v[1] + v2.v[1];
+  r.v[2] = v1.v[2] + v2.v[2];
+  r.v[3] = v1.v[3] + v2.v[3];
+  return r;
+}
+
+static const vec two_le = {.v = {2,0,0,0}};
+static const vec one_le = {.v = {1,0,0,0}};
+static const vec zero = {.v = {0,0,0,0}};
+
+static inline vec vec_choose_128(vec v1, vec v2, unsigned int first, unsigned int second) {
+  return v1;
+}
+
 #endif
 
 #endif
