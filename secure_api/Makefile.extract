@@ -16,31 +16,7 @@
 #
 # A caller of this Makefile need not run "make clean" before using a different
 # IMPL_CHOICE.
-HACL_HOME 	?= ..
-KREMLIN_HOME 	?= ../../kremlin
-FSTAR_HOME 	?= ../../FStar
-MLCRYPTO_HOME   ?= ../../MLCrypto
-CONCRETE_DIR	= $(HACL_HOME)/secure_api/concrete_specializations
-IMPL_CHOICE	?= runtime_switch
-DIST_DIR	= out/$(IMPL_CHOICE)
-OUTPUT_DIR	= $(DIST_DIR)/extracted
-CACHE_DIR       = $(DIST_DIR)/cache
-CORECRYPTO_DIR	= $(FSTAR_HOME)/contrib/CoreCrypto/fst
-
-# Pseudo autoconfiguration
-UNAME		= $(shell uname)
-SED		= $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
-MARCH		= x86_64
-ifeq ($(UNAME),Darwin)
-  VARIANT=-Darwin
-else ifeq ($(UNAME),Linux)
-  CCOPTS_EXTRA=-fPIC
-  VARIANT=-Linux
-else ifeq ($(OS),Windows_NT)
-  CC=$(MARCH)-w64-mingw32-gcc
-  AR=$(MARCH)-w64-mingw32-ar
-endif
-CCOPTS=-Wall -Wextra -Werror -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
+include Makefile.common
 
 # Warning: these are not always buildable, depending on IMPL_CHOICE...! Consult
 # the main Makefile for valid combinations.
@@ -60,33 +36,10 @@ lowc-test: $(DIST_DIR)/LowCTests.exe.test
 # Building upon the generated .depend file				       #
 ################################################################################
 
-# The include paths, including the implementation choice.
-INCLUDE_PATHS=$(addprefix --include , \
-	$(HACL_HOME)/specs \
-	$(HACL_HOME)/code/bignum \
-	$(HACL_HOME)/code/experimental/aesgcm \
-	$(HACL_HOME)/code/lib/kremlin \
-	$(HACL_HOME)/code/poly1305 \
-	$(HACL_HOME)/code/hash \
-	$(HACL_HOME)/code/salsa-family \
-	$(KREMLIN_HOME)/kremlib	\
-	$(HACL_HOME)/secure_api \
-	$(HACL_HOME)/secure_api/aead \
-	$(HACL_HOME)/secure_api/prf \
-	$(HACL_HOME)/secure_api/hkdf \
-	$(HACL_HOME)/secure_api/vale \
-	$(HACL_HOME)/secure_api/uf1cma \
-	$(HACL_HOME)/secure_api/utils \
-	$(HACL_HOME)/secure_api/LowCProvider/fst \
-	$(CORECRYPTO_DIR) \
-	$(CONCRETE_DIR) \
-	$(CONCRETE_DIR)/$(IMPL_CHOICE) \
-	$(HACL_HOME)/secure_api/test)
+# Extraction runs F* in --lax mode
+FSTAR += --lax
 
-# The F* compiler and the entry points.
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) --lax \
-	--cache_dir $(CACHE_DIR) --cache_checked_modules \
-	$(INCLUDE_PATHS) --odir $(OUTPUT_DIR)
+# The entry points
 FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst \
   LowCProvider/fst/LowCProvider.fst LowCProvider/fst/HaclProvider.fst \
   hkdf/Crypto.HKDF.fst
@@ -104,12 +57,6 @@ include .depend.$(IMPL_CHOICE)
 %.checked.lax:
 	$(FSTAR) $<
 	touch $@
-
-# Another generic rule that leverages .depend.extract, for interactive
-# verification.
-%.fsti-in:
-	@echo --hint_info $(INCLUDE_PATHS) $(OTHERFLAGS) --lax \
-	  --cache_checked_modules
 
 # F* doesn't recursively create directories for --odir
 $(OUTPUT_DIR):
