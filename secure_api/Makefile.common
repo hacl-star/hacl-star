@@ -54,3 +54,20 @@ FSTAR=$(FSTAR_HOME)/bin/fstar.exe \
         --cache_checked_modules \
         $(INCLUDE_PATHS) \
         --odir $(OUTPUT_DIR)
+
+
+%.fst-ver: %.fst
+	$(FSTAR) --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
+	  $^
+
+%.fst-lax: %.fst
+	$(FSTAR) --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
+	  --cache_checked_modules $^ --lax
+
+%.fsti-in:
+	@echo --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
+	  --cache_checked_modules
+
+%.fst-in:
+	@echo --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
+	  --cache_checked_modules
