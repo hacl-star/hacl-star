@@ -105,8 +105,10 @@ let mont_inverse #rLen crLen n exp_2 nInv =
 val mont_reduction:
     #rLen:size_nat -> #cLen:size_nat ->
     exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
+    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->    
     rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
     st_mont:lbignum (3 * rLen) -> st:lbignum (3 * rLen) ->
+    st_kara:lbignum (4 * v pow2_i) ->
     ccLen:size_t{v ccLen == cLen /\ cLen = rLen + rLen} -> c:lbignum cLen ->
     res:lbignum rLen -> Stack unit
     (requires (fun h -> live h st_mont /\ live h c /\ live h res))
@@ -114,7 +116,7 @@ val mont_reduction:
     
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let mont_reduction #rLen #cLen exp_r rrLen st_mont st ccLen c res =
+let mont_reduction #rLen #cLen pow2_i iLen exp_r rrLen st_mont st st_kara ccLen c res =
     let r2Len = add #SIZE rrLen rrLen in
     let stLen = mul #SIZE (size 3) rrLen in
     fill stLen st (u64 0);
@@ -126,11 +128,13 @@ let mont_reduction #rLen #cLen exp_r rrLen st_mont st ccLen c res =
     let nInv = Buffer.sub #uint64 #(v stLen) #rLen st_mont r2Len rrLen in
 
     let c1 = Buffer.sub #uint64 #cLen #rLen c (size 0) rrLen in
-    bn_mul rrLen c1 rrLen nInv tmp1; // tmp1 = c1 * nInv
+    //bn_mul rrLen c1 rrLen nInv tmp1; // tmp1 = c1 * nInv
+    karatsuba #rLen pow2_i iLen rrLen c1 nInv st_kara tmp1; // tmp1 = c1 * nInv
     bn_mod_pow2_n r2Len tmp1 exp_r rrLen m; // m = tmp1 % r
     bn_sub rrLen r rrLen m m; // m = r - m
     fill r2Len tmp1 (u64 0);
-    bn_mul rrLen m rrLen n tmp1; // tmp1 = m * n
+    //bn_mul rrLen m rrLen n tmp1; // tmp1 = m * n
+    karatsuba #rLen pow2_i iLen rrLen m n st_kara tmp1; // tmp1 = m * n
     bn_add r2Len tmp1 ccLen c tmp1; // tmp1 = c + tmp1
     bn_rshift r2Len tmp1 exp_r tmp1; // tmp1 = tmp1 / r
 
@@ -139,9 +143,11 @@ let mont_reduction #rLen #cLen exp_r rrLen st_mont st ccLen c res =
 
 val to_mont:
     #rLen:size_nat ->
+    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->
     exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
     rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
     st_mont:lbignum (3 * rLen) -> st:lbignum (5 * rLen) ->
+    st_kara:lbignum (4 * v pow2_i) ->
     r2:lbignum rLen -> a:lbignum rLen ->
     aM:lbignum rLen -> Stack unit
     (requires (fun h -> live h st_mont /\ live h r2 /\ live h a /\ live h aM))
@@ -149,28 +155,31 @@ val to_mont:
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let to_mont #rLen exp_r rrLen st_mont st r2 a aM =
+let to_mont #rLen pow2_i iLen exp_r rrLen st_mont st st_kara r2 a aM =
     let cLen = add #SIZE rrLen rrLen in
     let stLen = mul #SIZE (size 3) rrLen in
     let c = Buffer.sub #uint64 #(5 * rLen) #(v cLen) st (size 0) cLen in
     let st = Buffer.sub #uint64 #(5 * rLen) #(3 * rLen) st cLen stLen in
     fill cLen c (u64 0);
-    bn_mul rrLen a rrLen r2 c; // c = a * r2
-    mont_reduction exp_r rrLen st_mont st cLen c aM //aM = c % n
+    //bn_mul rrLen a rrLen r2 c; // c = a * r2
+    karatsuba #rLen pow2_i iLen rrLen a r2 st_kara c; // c = a * r2 
+    mont_reduction pow2_i iLen exp_r rrLen st_mont st st_kara cLen c aM //aM = c % n
     
     
 val from_mont:
     #rLen:size_nat ->
+    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->
     exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
     rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
     st_mont:lbignum (3 * rLen) -> st:lbignum (3 * rLen) ->
+    st_kara:lbignum (4 * v pow2_i) ->
     aM:lbignum rLen -> a:lbignum rLen -> Stack unit
     (requires (fun h ->  live h st_mont /\ live h aM /\ live h a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 a h0 h1))
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let from_mont #rLen exp_r rrLen st_mont st aM a =
+let from_mont #rLen pow2_i iLen exp_r rrLen st_mont st st_kara aM a =
     let r2Len = add #SIZE rrLen rrLen in
     let stLen = mul #SIZE (size 3) rrLen in
     fill stLen st (u64 0);
@@ -183,11 +192,13 @@ let from_mont #rLen exp_r rrLen st_mont st aM a =
     let nInv = Buffer.sub #uint64 #(v stLen) #rLen st_mont r2Len rrLen in
       
     disjoint_sub_lemma1 st aM (size 0) r2Len;
-    bn_mul rrLen aM rrLen nInv tmp; // tmp = aM * nInv
+    //bn_mul rrLen aM rrLen nInv tmp; // tmp = aM * nInv
+    karatsuba #rLen pow2_i iLen rrLen aM nInv st_kara tmp; // tmp = aM * nInv 
     bn_mod_pow2_n r2Len tmp exp_r rrLen m; // m = tmp % r
     bn_sub rrLen r rrLen m m; // m = r - m
     fill r2Len tmp (u64 0);
-    bn_mul rrLen m rrLen n tmp; //tmp = m * n
+    //bn_mul rrLen m rrLen n tmp; //tmp = m * n
+    karatsuba #rLen pow2_i iLen rrLen m n st_kara tmp; // tmp = m * n    
     bn_add r2Len tmp rrLen aM tmp; //tmp = aM + tmp
     bn_rshift r2Len tmp exp_r tmp; //tmp = tmp / r
       
