@@ -36,21 +36,26 @@ type block = lseq uint8 16
 let subBytes (state:block) : block = 
   map sbox state
 
-let shiftRow (i:size_t{i < 4}) (state:block) : block = 
-  let tmp = state.[i] in
-  let state = state.[i] <- state.[i + 4] in
-  let state = state.[i + 4] <- state.[i + 8] in
-  let state = state.[i + 8] <- state.[i + 12] in
-  let state = state.[i + 12] <- tmp in
+let shiftRow (i:size_nat{i < 4}) (shift:size_nat{i < 4}) (state:block) : block = 
+  let tmp0 = state.[i + (4 * (shift % 4))] in
+  let tmp1 = state.[i + (4 * ((shift + 1) % 4))] in
+  let tmp2 = state.[i + (4 * ((shift + 2) % 4))] in
+  let tmp3 = state.[i + (4 * ((shift + 3) % 4))] in
+  let state = state.[i] <- tmp0 in
+  let state = state.[i+4] <- tmp1 in
+  let state = state.[i+8] <- tmp2 in
+  let state = state.[i+12] <- tmp3 in
   state
   
 let shiftRows (state:block) = 
-  let state = shiftRow 1 state in
-  let state = shiftRow 2 state in
-  let state = shiftRow 3 state in
+  let state = shiftRow 1 1 state in
+  let state = shiftRow 2 2 state in
+  let state = shiftRow 3 3 state in
   state
 
-let mixColumn (c:size_t{c < 4}) (state:block) : block = 
+(*
+SPEC for mixColumn: broken, to fix, to prove.
+let mixColumn (c:size_nat{c < 4}) (state:block) : block = 
   let i0 = 4 * c in
   let s0 = to_elem state.[i0] in 
   let s1 = to_elem state.[i0 + 1] in
@@ -73,6 +78,28 @@ let mixColumn (c:size_t{c < 4}) (state:block) : block =
 			    (s0 `fmul` three) `fadd`
 			     s1 `fadd` s2) in
   state
+*)
+
+let xtime (x:uint8) : uint8 = 
+  let x1 : uint8 = shift_left #U8 x (u32 1) in
+  let x7 : uint8 = shift_right #U8 x (u32 7) in
+  let x71 : uint8 = logand #U8 x7 (u8 1) in
+  let x711b : uint8 = mul_mod #U8 x71 (u8 0x1b) in
+  logxor #U8 x1 x711b
+
+let mixColumn (c:size_nat{c < 4}) (state:block) : block = 
+  let i0 = 4 * c in
+  let s0 : uint8 = state.[i0] in 
+  let s1 : uint8 = state.[i0 + 1] in
+  let s2 : uint8 = state.[i0 + 2] in
+  let s3 : uint8 = state.[i0 + 3] in
+  let tmp : uint8 = logxor #U8 s0 (s1 ^. s2 ^. s3) in
+  let state = state.[i0] <- logxor #U8 s0 (tmp ^. (xtime (logxor #U8 s0 s1))) in
+  let state = state.[i0+1] <- logxor #U8 s1 (tmp ^. (xtime (logxor #U8 s1 s2))) in
+  let state = state.[i0+2] <- logxor #U8 s2 (tmp ^. (xtime (logxor #U8 s2 s3))) in
+  let state = state.[i0+3] <- logxor #U8 s3 (tmp ^. (xtime (logxor #U8 s3 s0))) in
+  state
+
 
 let mixColumns (state:block) : block = 
   let state = mixColumn 0 state in
@@ -91,18 +118,19 @@ let round (key:block) (state:block) =
   let state = addRoundKey key state in
   state
 
-let rounds (key:lseq uint8 (10 * 16)) (state:block) =
-  repeati 10 (fun i -> round (slice key (16*i) (16*i + 16))) state
+let rounds (key:lseq uint8 (9 * 16)) (state:block) =
+  repeati 9 (fun i -> round (sub key (16*i) 16)) state
 
 let block_cipher (key:lseq uint8 (11 * 16)) (input:block) =
   let state = input in
   let k0 = slice key 0 16 in
-  let k = slice key 16 (11 * 16) in 
+  let k = sub key 16 (9 * 16) in 
+  let kn = sub key (10 * 16) 16 in 
   let state = addRoundKey k0 state in
   let state = rounds k state in
   let state = subBytes state in
   let state = shiftRows state in
-  let state = addRoundKey k0 state in
+  let state = addRoundKey kn state in
   state
 
 type word = lseq uint8 4 
@@ -112,32 +140,47 @@ let rotate_word (w:word) : word =
 let sub_word (w:word) : word =
   map sbox w
 
-val rcon: i:size_t{i >= 1} -> elem
-let rec rcon i = 
-  if i = 1 then to_elem (u8 1)
-  else two `fmul` rcon (i - 1)
+let rcon_l = [u8 0x8d; u8 0x01; u8 0x02; u8 0x04; u8 0x08; u8 0x10; u8 0x20; u8 0x40; u8 0x80; u8 0x1b; u8 0x36]
 
-let key_expansion_word (w0:word) (w1:word) (i:size_t{i > 0}) : word = 
+let rcon : lseq uint8 11 = 
+  assert_norm (List.Tot.length rcon_l = 11);
+  createL #uint8 rcon_l
+
+(*
+SPEC for rcon: broken? to fix, to prove.
+val rcon_spec: i:size_nat{i >= 1} -> elem
+let rec rcon_spec i = 
+  if i = 1 then to_elem (u8 1)
+  else two `fmul` rcon_spec (i - 1)
+*)
+
+let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 48}) : word = 
   let k = w1 in
-  let k = rotate_word k in
-  let k = sub_word k in
-  let rcon_i = from_elem (rcon i) in
-  let k = k.[0] <- logxor #U8 rcon_i k.[0] in
+  let k = 
+    if (i % 4 = 0) then 
+       let k = rotate_word k in
+       let k = sub_word k in
+       let rcon_i = rcon.[i / 4] in
+       let k = k.[0] <- logxor #U8 rcon_i k.[0] in
+       k
+    else k in
   let k = map2 (logxor #U8) w0 k in
   k
 
 let key_expansion (key:block) : (lseq uint8 (11 * 16)) = 
   let key_ex = create (11 * 16) (u8 0) in
   let key_ex = repeati 16 (fun i s -> s.[i] <- key.[i]) key_ex in
-  let key_ex = repeat_range 4 (4 + 10 * 4) 
-		       (fun i k -> update_slice k (i*4) (i*4 + 4) 
+  let key_ex = repeat_range 4 44
+		       (fun i k -> update_slice k (i*4) ((i*4) + 4) 
 			(key_expansion_word 
-			  (slice k (i*4 - 16) (i*4 - 12))
-			  (slice k (i*4 - 4)  (i*4)) (i - 4 + 1))) key_ex in
+			  (sub k ((i-4) * 4) 4)
+			  (sub k ((i-1) * 4) 4)
+			  i))
+		       key_ex in
   key_ex
 
 
-let aes128_block (k:block) (n:lseq uint8 12) (c:size_t) : block = 
+let aes128_block (k:block) (n:lseq uint8 12) (c:size_nat) : block = 
   let ctrby = nat_to_bytes_be 4 c in
   let input = create 16 (u8 0) in
   let input = repeati 12 (fun i b -> b.[i] <- n.[i]) input in 
@@ -146,72 +189,36 @@ let aes128_block (k:block) (n:lseq uint8 12) (c:size_t) : block =
   let output = block_cipher key_ex input in
   output
 
-type aes_state = {
-  key_ex: lseq uint8 (11 × 16);
+noeq type aes_state = {
+  key_ex: lseq uint8 (11 `op_Multiply` 16);
   block:  lseq uint8 16;
 }
 
-let aes_init (k:block) (n:lseq uint8 12) : block = 
+let aes_init (k:block) (n:lseq uint8 12) : aes_state = 
   let input = create 16 (u8 0) in
   let input = repeati 12 (fun i b -> b.[i] <- n.[i]) input in 
   let key_ex = key_expansion k in
   {key_ex = key_ex;
-   block  =input}
+   block  = input}
 
-let aes128_ctx: Spec.CTR.block_cipher_ctx =
-  let open Spec.CTR in
-  {
-  keylen = 16;
-  blocklen = 16;
-  noncelen = 12;
-  countermax = max_size_t;
-  }
+let aes_set_counter (st:aes_state) (c:size_nat) : Tot aes_state = 
+  let ctrby = nat_to_bytes_be 4 c in
+  let input = repeati 4 (fun i b -> b.[12+i] <- ctrby.[i]) st.block in 
+  {st with block = input}
 
+let aes_key_block (st:aes_state) : Tot block = 
+  block_cipher st.key_ex st.block
+
+let aes_key_block0 (k:block) (n:lseq uint8 12) : Tot block = 
+  let st = aes_init k n in
+  aes_key_block st
+
+let aes128_cipher =
+  Spec.CTR.Cipher aes_state 16 12 max_size_t 16 aes_init aes_set_counter aes_key_block
 
 let aes128_encrypt_bytes key nonce counter n m = 
-  Spec.CTR.counter_mode aes128_ctx aes128_block key nonce counter n m
+  Spec.CTR.counter_mode aes128_cipher key nonce counter n m
 
-let test_key = List.map u8 [
-  0x2b; 0x7e; 0x15; 0x16; 0x28; 0xae; 0xd2; 0xa6; 
-  0xab; 0xf7; 0x15; 0x88; 0x09; 0xcf; 0x4f; 0x3c
-]
-
-let test_nonce = List.map u8 [
-  0xf0; 0xf1; 0xf2 ; 0xf3; 0xf4; 0xf5; 0xf6; 0xf7; 0xf8; 0xf9; 0xfa; 0xfb
-]
-
-let test_counter = 0xfcfdfeff
-
-let test_plaintext = List.map u8 [
-  0x6b; 0xc1; 0xbe; 0xe2; 0x2e; 0x40; 0x9f; 0x96; 0xe9; 0x3d; 0x7e; 0x11; 0x73; 0x93; 0x17; 0x2a
-]
-
-let test_ciphertext = List.map u8 [
-  0x87; 0x4d; 0x61; 0x91; 0xb6; 0x20; 0xe3; 0x26; 0x1b; 0xef; 0x68; 0x64; 0x99; 0x0d; 0xb6; 0xce
-
-]
-
-let test() : FStar.All.ML unit = 
-  let seq = create 256 (u8 0) in
-  let seqi = repeati #(lseq uint8 256) 256 (fun i s -> s.[i] <- u8 i) seq in
-  let seqinv = map (fun s -> from_elem (finv (to_elem s))) seqi in
-  IO.print_string "inv i:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string "\n") (as_list #uint8 #256 seqinv);
-  let seqsbox = map (fun s -> sbox s) seqi in
-  IO.print_string "sbox i:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string "\n") (as_list #uint8 #256 seqsbox);
-  let key = createL test_key in
-  let nonce = createL test_nonce in
-  let counter = test_counter in
-  let plain = createL test_plaintext in
-  let expected = createL test_ciphertext in
-  let cip = aes128_encrypt_bytes key nonce counter 16 plain in
-  IO.print_string "aes_cip computed:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string "\n") (as_list #uint8 #16 cip);
-  IO.print_string "\n";
-  IO.print_string "aes_cip expected:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string "\n") (as_list #uint8 #16 expected);
-  ()
   
      
 (* 

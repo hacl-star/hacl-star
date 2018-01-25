@@ -72,11 +72,11 @@ sbox.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst
 	./sbox.exe
 
 
-aes.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst
+aes.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst tests/Spec.AES.Test.fst
 	mkdir -p aes-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --odir aes-ml $^
-	@echo 'let _ = test()' >> aes-ml/Spec_AES.ml
-	$(OCAMLOPT) -I aes-ml $(OCAML_INCLUDES) aes-ml/Spec_Lib_IntTypes.ml aes-ml/Spec_Lib_IntSeq.ml aes-ml/Spec_GaloisField.ml aes-ml/Spec_CTR.ml aes-ml/Spec_AES.ml -o aes.exe
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --extract_module Spec.AES.Test --odir aes-ml $^
+	@echo 'let _ = test()' >> aes-ml/Spec_AES_Test.ml
+	$(OCAMLOPT) -I aes-ml $(OCAML_INCLUDES) aes-ml/Spec_Lib_IntTypes.ml aes-ml/Spec_Lib_IntSeq.ml aes-ml/Spec_GaloisField.ml aes-ml/Spec_CTR.ml aes-ml/Spec_AES.ml aes-ml/Spec_AES_Test.ml -o aes.exe
 	./aes.exe
 
 
