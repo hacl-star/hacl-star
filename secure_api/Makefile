@@ -7,10 +7,10 @@ runtime_switch:
 	IMPL_CHOICE=runtime_switch $(MAKE) -f Makefile.extract all test out/vale.a
 
 vale_aes_concrete_id:
-	IMPL_CHOICE=vale_aes_concrete_id $(MAKE) -f Makefile.extract krml-test
+	IMPL_CHOICE=vale_aes_concrete_id $(MAKE) -f Makefile.extract krml-test standalone
 
 hacl_aes_concrete_id:
-	IMPL_CHOICE=hacl_aes_concrete_id $(MAKE) -f Makefile.extract krml-test
+	IMPL_CHOICE=hacl_aes_concrete_id $(MAKE) -f Makefile.extract krml-test standalone
 
 vale_aes_abstract_id:
 	IMPL_CHOICE=vale_aes_abstract_id $(MAKE) -f Makefile.extract standalone
