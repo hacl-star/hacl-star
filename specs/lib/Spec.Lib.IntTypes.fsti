@@ -218,33 +218,33 @@ val lte_mask_lemma: #t:inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemm
 
 
 inline_for_extraction
-let (+!) = add
+let (+!) #t = add #t
 inline_for_extraction
-let (+.) = add_mod
+let (+.) #t = add_mod #t
 inline_for_extraction
-let ( *! ) = mul
+let ( *! ) #t = mul #t
 inline_for_extraction
-let ( *. ) = mul_mod
+let ( *. ) #t = mul_mod #t
 inline_for_extraction
-let ( -! ) = sub
+let ( -! ) #t = sub #t
 inline_for_extraction
-let ( -. ) = sub_mod
+let ( -. ) #t = sub_mod #t
 inline_for_extraction
-let ( >>. ) = shift_right
+let ( >>. ) #t = shift_right #t
 inline_for_extraction
-let ( <<. ) = shift_left
+let ( <<. ) #t = shift_left #t
 inline_for_extraction
-let ( >>>. ) = rotate_right
+let ( >>>. ) #t = rotate_right #t
 inline_for_extraction
-let ( <<<. ) = rotate_left
+let ( <<<. ) #t = rotate_left #t
 inline_for_extraction
-let ( ^. ) = logxor
+let ( ^. ) #t = logxor #t
 inline_for_extraction
-let ( |. ) = logor
+let ( |. ) #t = logor #t
 inline_for_extraction
-let ( &. ) = logand
+let ( &. ) #t = logand #t
 inline_for_extraction
-let ( ~. ) = lognot
+let ( ~. ) #t = lognot #t
 
 unfold inline_for_extraction
 let max_size_t = maxint SIZE

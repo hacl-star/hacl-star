@@ -12,8 +12,8 @@ val slice: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> fin:size_
 val update_sub: #a:Type -> #len:size_nat -> i:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}
 val update_slice: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> fin:size_nat{start <= fin /\ fin <= len} -> lseq a (fin - start) -> lseq a len
 
-let op_String_Access = index
-let op_String_Assignment = upd
+let op_String_Access #a #len = index #a #len
+let op_String_Assignment #a #len = upd #a #len
 
 
 val repeat_range: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> Tot a) -> a -> Tot (a)

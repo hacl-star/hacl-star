@@ -62,6 +62,24 @@ let test_ciphertext2 = List.map u8 [
 
 
 let test() : FStar.All.ML unit = 
+  let seq = create 256 (u8 0) in
+  let seqi = repeati #(lseq uint8 256) 256 (fun i s -> s.[i] <- u8 i) seq in
+  (*
+  let inv = map (fun s -> from_elem (finv (to_elem s))) seqi in
+  IO.print_string "inv i:     \n";
+  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #256 inv);
+  IO.print_string "\n";
+  *)
+  let seqsbox = map (fun s -> sbox s) seqi in
+  IO.print_string "sbox i:     \n";
+  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #256 seqsbox);
+  IO.print_string "\n";
+(*
+  let seqsbox_16 = map (fun s -> sbox_bp_16 s) seqi in
+  IO.print_string "sbox bp_i i:\n";
+  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #256 seqsbox_16);
+  IO.print_string "\n";
+  *)
   let key = createL test_key in
   let nonce = createL test_nonce in
   let counter = test_counter in
