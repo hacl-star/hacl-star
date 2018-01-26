@@ -19,7 +19,7 @@ static inline __m128i
 vec_rotate_left_16(__m128i v)
 {
     __m128i x = _mm_set_epi8(13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2);
-    return _mm_shuffle_epi8((__m128i)v, x);
+    return _mm_shuffle_epi8(v, x);
 }
 
 static inline __m128i
