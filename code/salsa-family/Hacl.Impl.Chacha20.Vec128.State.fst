@@ -69,7 +69,7 @@ val state_incr:
 let state_incr k =
   let h0 = ST.get() in
   let k3 = k.(3ul) in
-  k.(3ul) <- vec_add k3 one_le;
+  k.(3ul) <- vec_increment k3;
   let h1 = ST.get() in
   assert(let vec  = vec_as_seq (Seq.index (as_seq h0 k) 3) in
          let vec' = vec_as_seq (Seq.index (as_seq h1 k) 3) in
@@ -136,7 +136,7 @@ let lemma_state_to_key_block a b =
   Spec.Lib.lemma_uint32s_from_le_bij 4 a;
   Spec.Lib.lemma_uint32s_from_le_inj 4 a (Spec.Lib.uint32s_to_le 4 b);
   Seq.lemma_eq_intro a (Spec.Lib.uint32s_to_le 4 b)
-  
+
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
 [@ "c_inline"]
@@ -261,7 +261,7 @@ let lemma_ctr_ivsetup iv =
   Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 4) 0 4) (Seq.slice iv 0 4);
   Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 4) 0 0) Seq.createEmpty;
   Spec.Lib.lemma_uint32s_from_le_def_0 0 (Seq.slice iv 0 0)
-  
+
 
 [@ "substitute"]
 let ctr_ivsetup st ctr iv =
@@ -276,7 +276,7 @@ let ctr_ivsetup st ctr iv =
   Seq.lemma_eq_intro (vec_as_seq v) (Seq.cons ctr (Spec.Lib.uint32s_from_le 3 (reveal_sbytes (as_seq h iv))));
   st.(3ul) <- v
 
-  
+
 [@ "c_inline"]
 val state_setup:
   st:state ->
