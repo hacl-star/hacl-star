@@ -7,12 +7,8 @@
 #include <assert.h>
 #include <time.h>
 
-#include "tmp/Crypto_Indexing.h"
-#include "tmp/Crypto_Symmetric_Bytes.h"
-#include "tmp/Crypto_Symmetric_MAC.h"
-#include "tmp/Crypto_AEAD.h"
-#include "tmp/Crypto_HMAC.h"
-#include "tmp/Crypto_HKDF.h"
+#include "../out/runtime_switch/Crypto_HKDF_Crypto_HMAC.h"
+#include "../out/vale_aes_concrete_id/Crypto_AEAD_Main.h"
 #include "mitlsffi.h"
 #include "quic_provider.h"
 
