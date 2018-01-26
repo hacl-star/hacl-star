@@ -186,26 +186,56 @@ let from_mont modBits r n n' a_r =
     lemma_mont_reduction_1 res r a_r n m;
     res
 
-val mont_inverse_:
-    n:bignum -> exp_2:size_nat -> nInv:bignum -> i:size_nat{1 < i /\ i <= exp_2} ->
-    pow2_i1:bignum{0 < pow2_i1} -> pow2_i:bignum -> Tot bignum
-    (decreases (exp_2 - i))
+val is_bit_set: a:bignum -> ind:size_nat -> Tot bool
+let is_bit_set a ind = if (a / pow2 ind > 0) then true else false
 
-#reset-options "--z3rlimit 50 --max_fuel 2"
+val degree_: a:bignum -> i:size_nat -> Tot size_nat (decreases i)
+let rec degree_ a i =
+  if i = 0 then 0
+  else
+    if is_bit_set a i then i
+    else degree_ a (i-1)
 
-let rec mont_inverse_ n exp_2 nInv i pow2_i1 pow2_i =
-    if i < exp_2 then begin
-        let pow2_i1 = pow2_i1 * 2 in
-        let pow2_i = pow2_i1 * 2 in
-        let nnInv = (n * nInv) % pow2_i in
-        let nInv = if (pow2_i1 < nnInv) then nInv + pow2_i1 else nInv in
-        mont_inverse_ n exp_2 nInv (i + 1) pow2_i1 pow2_i end
-    else nInv
+let degree a aBits = degree_ a aBits
 
-//res = n^(-1) % 2^(exp_2)
-val mont_inverse: n:bignum -> exp_2:size_nat{1 < exp_2 /\ exp_2 + 1 <= max_size_t} -> Tot bignum
-let mont_inverse n exp_2 = mont_inverse_ n (exp_2 + 1) 1 2 1 0
+val bn_shift_left: a:bignum -> b:size_nat -> Tot bignum
+let bn_shift_left a b = a * pow2 b
 
+val shift_euclidean_mod_inv_f: m:bignum -> tmp:bignum -> f:size_nat -> i:size_nat -> Tot bignum
+let rec shift_euclidean_mod_inv_f m tmp f i =
+    if (i < f) then begin
+      let tmp = tmp + tmp in
+      let tmp = if (tmp > m) then tmp - m else tmp in
+      shift_euclidean_mod_inv_f m tmp f (i + 1) end 
+    else tmp
+
+// u >= v
+val shift_euclidean_mod_inv_: 
+    uBits:size_nat ->u:bignum -> vBits:size_nat{uBits > vBits} -> v:bignum -> r:bignum -> s:bignum -> m:bignum -> Tot bignum
+let rec shift_euclidean_mod_inv_ uBits u vBits v r s m =
+    if v > 1 then begin
+      let du = degree u uBits in
+      let dv = degree v vBits in
+      let f = du - dv in //u >= v
+      let v_lshift_f = bn_shift_left v f in
+      let f = if (u < v_lshift_f) then f - 1 else f in
+      let u = u - (bn_shift_left v f) in
+      let tmp = shift_euclidean_mod_inv_f m s f 0 in
+      let r = if (r >= tmp) then r - tmp else r + m - tmp in
+      let du = degree u uBits in
+      if (u < v) then
+        //swap (u, v); swap (r, s)
+        shift_euclidean_mod_inv_ dv v du u s r m
+      else shift_euclidean_mod_inv_ du u dv v r s m end 
+    else s  
+      
+//res = a^(-1) % m
+val shift_euclidean_mod_inv: aBits:size_nat ->a:bignum -> mBits:size_nat -> m:bignum -> Tot bignum
+let shift_euclidean_mod_inv aBits a mBits m =
+    //a < m
+    let r = 0 in 
+    let s = 1 in
+    shift_euclidean_mod_inv_ mBits m aBits a r s m
 
 val mod_exp_:
     x0:size_nat ->
@@ -254,7 +284,7 @@ val mod_exp:
 let mod_exp x0 modBits n a b =
     let r = pow2 (2 + modBits) in
     lemma_r_n modBits r n;
-    let n'= mont_inverse n (2 + modBits) in
+    let n' = shift_euclidean_mod_inv modBits n (3 + modBits) r in
     let r2 = (r * r) % n in
     let a_r = to_mont modBits r n n' r2 a in
     let acc_r = to_mont modBits r n n' r2 1 in
