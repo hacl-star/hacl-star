@@ -11,7 +11,7 @@ module Plain = Crypto.Plain
 
 (* Several constants that the interface relies on *)
 type eternal_region =
-     rgn:HS.rid {HS.is_eternal_region rgn}
+     rgn:HS.rid {is_eternal_region rgn}
 
 type lbuffer (l:nat) =
      b:Buffer.buffer UInt8.t {Buffer.length b == l}
@@ -213,9 +213,9 @@ let enc_dec_separation (#i:_) (#rw:_) (st:aead_state i rw)
     Buffer.frameOf cipher <> HS.root /\
     Buffer.frameOf aad <> HS.root /\
     Buffer.frameOf (Plain.as_buffer plain) <> HS.root
-    (* HS.is_eternal_region (Buffer.frameOf cipher) /\ // why? *)
-    (* HS.is_eternal_region (Buffer.frameOf (Plain.as_buffer plain)) /\ //why? *)
-    (* HS.is_eternal_region (Buffer.frameOf aad) /\ //why? *)
+    (* is_eternal_region (Buffer.frameOf cipher) /\ // why? *)
+    (* is_eternal_region (Buffer.frameOf (Plain.as_buffer plain)) /\ //why? *)
+    (* is_eternal_region (Buffer.frameOf aad) /\ //why? *)
 
 let enc_dec_liveness (#i:_) (#rw:_) (st:aead_state i rw)
                      (#aadlen:nat) (aad: lbuffer aadlen)
