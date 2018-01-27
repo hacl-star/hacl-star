@@ -30,7 +30,7 @@ module Plain  = Crypto.Plain
 let min (a:u32) (b:u32) = if a <=^ b then a else b
 let minNat (a:nat) (b:nat) : nat = if a <= b then a else b
 
-type eternal_region = rgn:HS.rid {HS.is_eternal_region rgn}
+type eternal_region = rgn:HS.rid {is_eternal_region rgn}
 
 let prf_table (r:rgn) (i:id) = Seq.seq (PRF.entry r i)
 
@@ -366,10 +366,10 @@ let enc_dec_separation (#i:id) (#rw:rw) (st:aead_state i rw)
     Buffer.disjoint aad cipher /\
     Buffer.disjoint (Plain.as_buffer plain) aad /\
     Buffer.disjoint (Plain.as_buffer plain) cipher /\
-    HS.is_eternal_region st.log_region /\
-    HS.is_eternal_region (Buffer.frameOf cipher) /\ // why?
-    HS.is_eternal_region (Buffer.frameOf (Plain.as_buffer plain)) /\ //why?
-    HS.is_eternal_region (Buffer.frameOf aad) /\ //why?
+    is_eternal_region st.log_region /\
+    is_eternal_region (Buffer.frameOf cipher) /\ // why?
+    is_eternal_region (Buffer.frameOf (Plain.as_buffer plain)) /\ //why?
+    is_eternal_region (Buffer.frameOf aad) /\ //why?
     HS.disjoint (Buffer.frameOf (Plain.as_buffer plain)) st.log_region /\
     HS.disjoint (Buffer.frameOf cipher) st.log_region /\
     HS.disjoint (Buffer.frameOf aad) st.log_region /\
@@ -1134,7 +1134,7 @@ let frame_mac_is_set_h
 
 val frame_cma_mac_is_unset_h
   (i:CMA.id)
-  (r:rid{HS.is_eternal_region r})
+  (r:rid{is_eternal_region r})
   (r':rid{r' `HS.is_above` r})
   (mac_st:CMA.state i)
   (h0 h1:mem) : Lemma

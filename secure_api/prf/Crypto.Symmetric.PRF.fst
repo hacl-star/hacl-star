@@ -56,7 +56,7 @@ private let sanity_check i = assert(safeId i ==> prf i)
 
 // LIBRARY STUFF
 
-type region = rgn:HS.rid {HS.is_eternal_region rgn}
+type region = rgn:HS.rid {is_eternal_region rgn}
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 // to be adjusted, controlling concrete bound.

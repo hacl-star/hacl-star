@@ -368,7 +368,7 @@ let frame_verify_ok (#i:CMA.id) (ak:CMA.state i) (acc:CMA.accBuffer i) (tag:lbuf
  		    (b:bool)
    : Lemma (requires (let open CMA in 
 		      verify_ok ak acc tag h0 b /\
-		      HS.is_eternal_region ak.region /\
+		      is_eternal_region ak.region /\
 		      HS.is_stack_region (Buffer.frameOf (MAC.as_buffer (abuf acc))) /\
 		      CMA.acc_inv ak acc h0 /\
     		      EncodingWrapper.ak_acc_tag_separate ak acc tag /\

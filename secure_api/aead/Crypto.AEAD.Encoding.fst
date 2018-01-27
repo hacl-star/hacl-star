@@ -24,11 +24,11 @@ module CMA = Crypto.Symmetric.UF1CMA
 module Cipher = Crypto.Symmetric.Cipher
 module PRF = Crypto.Symmetric.PRF
 
-type region = rgn:HS.rid {HS.is_eternal_region rgn}
+type region = rgn:HS.rid {is_eternal_region rgn}
 
 let alg (i:id) = cipherAlg_of_id i
 
-type rgn = rgn:HS.rid {HS.is_eternal_region rgn}
+type rgn = rgn:HS.rid {is_eternal_region rgn}
 
 // Concrete, somewhat arbitrary bounds on input lengths;
 // these should go to some configuration flle
