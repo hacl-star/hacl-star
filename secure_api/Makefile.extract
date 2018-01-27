@@ -22,10 +22,15 @@ include Makefile.common
 
 # Warning: these are not always buildable, depending on IMPL_CHOICE...! Consult
 # the main Makefile for valid combinations.
-all: standalone $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
+all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 
 # Makefile bug here: the second file is never generated (because of the +).
-standalone: $(DIST_DIR)/Crypto_AEAD_Main.h $(DIST_DIR)/Crypto_HKDF+Crypto_HMAC.h
+abstract: $(DIST_DIR)/Crypto_AEAD_Main.h base
+
+# Ibid.
+concrete: $(DIST_DIR)/Crypto_AEAD_Main+Crypto_Indexing.h base
+
+base: $(DIST_DIR)/Crypto_HKDF+Crypto_HMAC.h $(DIST_DIR)/Crypto_Symmetric_Bytes.h
 
 %.test: %
 	./$<
@@ -89,9 +94,10 @@ $(OUTPUT_DIR)/%.ml:
 $(DIST_DIR)/%.h $(DIST_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
 	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$*=*' -minimal -skip-compilation \
 	  -tmpdir $(DIST_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
+	  -add-include '"testlib.h"'
 	  $(EXTRA)
 
-# A couple extra arguments needed for just Crypto_AEAD_Main.
+# This is without the indexing id.
 $(DIST_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
 
 

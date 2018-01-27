@@ -7,15 +7,18 @@
 #include <assert.h>
 #include <time.h>
 
-#include "../out/runtime_switch/Crypto_HKDF_Crypto_HMAC.h"
-#include "../out/vale_aes_concrete_id/Crypto_AEAD_Main.h"
+#include "../out/vale_aes_concrete_id/Crypto_HKDF_Crypto_HMAC.h"
+#include "../out/vale_aes_concrete_id/Crypto_AEAD_Main_Crypto_Indexing.h"
 #include "mitlsffi.h"
 #include "quic_provider.h"
 
 #define DEBUG 0
 
+// FIXME!!
+#define Crypto_Symmetric_MAC_taglen 16
+
 typedef struct quic_key {
-  Crypto_AEAD_Invariant_aead_state_______ st;
+  Crypto_AEAD_Invariant_aead_state st;
   Crypto_Indexing_id id;
   char static_iv[12];
 } quic_key;
@@ -205,7 +208,7 @@ int quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
    printf("IV: "); dump(key->static_iv, 12);
 #endif
 
-  key->st = Crypto_AEAD_coerce(key->id, (uint8_t*)dkey);
+  key->st = Crypto_AEAD_Main_coerce(key->id, (uint8_t*)dkey);
   return 1;
 }
 

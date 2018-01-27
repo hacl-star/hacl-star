@@ -4,19 +4,19 @@ HACL_HOME=..
 all: runtime_switch vale_aes_concrete_id hacl_aes_concrete_id vale_aes_abstract_id hacl_aes_abstract_id
 
 runtime_switch:
-	IMPL_CHOICE=runtime_switch $(MAKE) -f Makefile.extract all test out/vale.a
+	IMPL_CHOICE=runtime_switch $(MAKE) -f Makefile.extract all concrete test out/vale.a
 
 vale_aes_concrete_id:
-	IMPL_CHOICE=vale_aes_concrete_id $(MAKE) -f Makefile.extract krml-test standalone
+	IMPL_CHOICE=vale_aes_concrete_id $(MAKE) -f Makefile.extract krml-test concrete
 
 hacl_aes_concrete_id:
-	IMPL_CHOICE=hacl_aes_concrete_id $(MAKE) -f Makefile.extract krml-test standalone
+	IMPL_CHOICE=hacl_aes_concrete_id $(MAKE) -f Makefile.extract krml-test concrete
 
 vale_aes_abstract_id:
-	IMPL_CHOICE=vale_aes_abstract_id $(MAKE) -f Makefile.extract standalone
+	IMPL_CHOICE=vale_aes_abstract_id $(MAKE) -f Makefile.extract abstract
 
 hacl_aes_abstract_id:
-	IMPL_CHOICE=hacl_aes_abstract_id $(MAKE) -f Makefile.extract standalone
+	IMPL_CHOICE=hacl_aes_abstract_id $(MAKE) -f Makefile.extract abstract
 
 clean:
 	$(MAKE) -f Makefile.extract clean
