@@ -73,22 +73,16 @@ val shift_euclidean_mod_inv_f:
     #rLen:size_nat ->
     rrLen:size_t{v rrLen == rLen} ->
     m:lbignum rLen -> tmp:lbignum rLen ->
-    f:size_t -> i:size_t -> tmp1:lbignum (rLen + 1)-> Stack unit
+    f:size_t -> i:size_t -> Stack unit
     (requires (fun h -> live h m /\ live h tmp))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 tmp h0 h1))
     
-let rec shift_euclidean_mod_inv_f #rLen rrLen m tmp f i tmp1 =
+let rec shift_euclidean_mod_inv_f #rLen rrLen m tmp f i =
     if (i <. f) then begin
-       //bn_add rrLen tmp rrLen tmp tmp; // tmp = tmp + tmp
-       //FIXME: bn_add 
-       fill (add #SIZE rrLen (size 1)) tmp1 (u64 0);
-       bn_mul_u64 rrLen tmp (u64 2) tmp1;
-       let tmp1_ = Buffer.sub #uint64 #(rLen + 1) #rLen tmp1 (size 0) rrLen in
-       copy rrLen tmp1_ tmp;
-       
-       (if (bn_is_less rrLen m tmp) then // m < tmp 
+       bn_add rrLen tmp rrLen tmp tmp; // tmp = tmp + tmp
+       (if (bn_is_less rrLen m tmp) then // m < tmp
            bn_sub rrLen tmp rrLen m tmp); //tmp = tmp - m
-       shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size_incr i) tmp1
+       shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size_incr i)
     end
     
 val shift_euclidean_mod_inv_:
@@ -97,16 +91,15 @@ val shift_euclidean_mod_inv_:
     uBits:size_t{v uBits / 64 < rLen} -> ub:lbignum rLen ->
     vBits:size_t{v vBits / 64 < rLen} -> vb:lbignum rLen ->
     r:lbignum rLen -> s:lbignum rLen ->
-    m:lbignum rLen -> st_inv:lbignum (3 * rLen + 1) -> res:lbignum rLen -> Stack unit
-    (requires (fun h -> live h ub /\ live h vb /\ live h s /\ live h r /\ live h m /\ live h st_inv /\ live h res))
+    m:lbignum rLen -> st_inv:lbignum (rLen + rLen) -> res:lbignum rLen -> Stack unit
+    (requires (fun h -> live h ub /\ live h vb /\ live h s /\ live h r /\ live h m /\ live h st_inv))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1))
     
 let rec shift_euclidean_mod_inv_ #rLen rrLen uBits ub vBits vb r s m st_inv res =
-    let stLen = add (mul #SIZE rrLen (size 3)) (size 1) in
+    let stLen = add  #SIZE rrLen rrLen in
     fill stLen st_inv (u64 0);
     let v_shift_f = Buffer.sub #uint64 #(v stLen) #rLen st_inv (size 0) rrLen in
     let tmp = Buffer.sub #uint64 #(v stLen) #rLen st_inv rrLen rrLen in
-    let tmp1 = Buffer.sub #uint64 #(v stLen) #(rLen + 1) st_inv (add #SIZE rrLen rrLen) (add #SIZE rrLen (size 1)) in
 
     let du = degree rrLen ub uBits in
     let dv = degree rrLen vb vBits in
@@ -122,7 +115,7 @@ let rec shift_euclidean_mod_inv_ #rLen rrLen uBits ub vBits vb r s m st_inv res 
 	  else f in
        bn_sub rrLen ub rrLen v_shift_f ub; // u = u - v_shift_f
        copy rrLen s tmp;
-       shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size 0) tmp1;
+       shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size 0);
        (if (bn_is_less rrLen r tmp) then begin // r < tmp
             bn_add rrLen r rrLen m r; //r = r + m
             bn_sub rrLen r rrLen tmp r end
@@ -145,7 +138,7 @@ val shift_euclidean_mod_inv:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1))
     
 let shift_euclidean_mod_inv #rLen rrLen aBits a mBits m res =
-    let stLen = add #SIZE (mul #SIZE (size 7) rrLen) (size 1) in
+    let stLen = mul #SIZE (size 6) rrLen in
     alloc #uint64 #unit #(v stLen) stLen (u64 0) [BufItem a; BufItem m] [BufItem res]
     (fun h0 _ h1 -> True)
     (fun st ->
@@ -153,13 +146,12 @@ let shift_euclidean_mod_inv #rLen rrLen aBits a mBits m res =
       let vb = Buffer.sub #uint64 #(v stLen) #rLen st rrLen rrLen in
       let r = Buffer.sub #uint64 #(v stLen) #rLen st (add #SIZE rrLen rrLen) rrLen in
       let s = Buffer.sub #uint64 #(v stLen) #rLen st (mul #SIZE (size 3) rrLen) rrLen in
-      let st_inv = Buffer.sub #uint64 #(v stLen) #(3 * rLen + 1) st (mul #SIZE (size 4) rrLen) (add #SIZE (mul #SIZE rrLen (size 3)) (size 1)) in
+      let st_inv = Buffer.sub #uint64 #(v stLen) #(rLen + rLen) st (mul #SIZE (size 4) rrLen) (add #SIZE rrLen rrLen) in
 
       copy rrLen m ub;
       copy rrLen a vb;
       s.(size 0) <- u64 1;
       shift_euclidean_mod_inv_ #rLen rrLen mBits ub aBits vb r s m st_inv res
-      //copy rrLen s res
     )
 
 val mont_reduction:
