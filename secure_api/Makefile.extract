@@ -94,7 +94,6 @@ $(OUTPUT_DIR)/%.ml:
 $(DIST_DIR)/%.h $(DIST_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
 	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$*=*' -minimal -skip-compilation \
 	  -tmpdir $(DIST_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
-	  -add-include '"testlib.h"'
 	  $(EXTRA)
 
 # This is without the indexing id.

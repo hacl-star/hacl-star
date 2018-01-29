@@ -225,7 +225,7 @@ int quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, const char *ad
   sn_to_iv(iv, sn);
 
   FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, iv);
-  Crypto_AEAD_Encrypt_encrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, cipher);
+  Crypto_AEAD_Main_encrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, cipher);
 
 #if DEBUG
   printf("ENCRYPT\nIV="); dump(iv, 12);
@@ -249,7 +249,7 @@ int quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, const char *ad,
 
   FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, iv);
   uint32_t plain_len = cipher_len - Crypto_Symmetric_MAC_taglen;
-  int r = Crypto_AEAD_Decrypt_decrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, plain, (uint8_t*)cipher);
+  int r = Crypto_AEAD_Main_decrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, plain, (uint8_t*)cipher);
 
 #if DEBUG
   printf("DECRYPT %s\nIV=", r?"OK":"BAD"); dump(iv, 12);
