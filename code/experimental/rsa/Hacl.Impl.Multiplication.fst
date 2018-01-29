@@ -154,6 +154,7 @@ let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
        karatsuba_ #(v pow2_i0) pow2_i0 (size 0) pow2_i0 a0 b0 tmp0 c0; // c0 = a0 * b0
 
        if (pow2_i1 =. size 1) then begin
+          fill tmpLen tmp (u64 0);
           let a1_0 = a1.(size 0) in
           let b1_0 = b1.(size 0) in
           let c1 = mul_wide a1_0 b1_0 in
