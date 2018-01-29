@@ -165,7 +165,7 @@ HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Curve25519.h $(CURVE_D
 # extraction, and then every run of this Makefile would start by extracting the
 # entire world just to get the dependencies between C files.
 $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(HEADERS)
-LowCProvider/lowc_stub.o: $(HEADERS) $(HEADERS)
+LowCProvider/lowc_stub.o: $(HEADERS)
 
 OCAMLOPTS=-package fstarlib,zarith -g -I $(FSTAR_HOME)/ulib/ml
 OCAMLOPT=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind opt $(OCAMLOPTS)
