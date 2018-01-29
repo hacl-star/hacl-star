@@ -158,14 +158,14 @@ endif
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
-HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(DIST_DIR)/Crypto_Indexing.h \
-  $(DIST_DIR)/Crypto_AEAD_Main.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h
+HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h \
+	  $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
 # entire world just to get the dependencies between C files.
-$(DIST_DIR)/Crypto_AEAD_Main.o: $(HEADERS)
-LowCProvider/lowc_stub.o: $(HEADERS)
+$(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(HEADERS)
+LowCProvider/lowc_stub.o: $(HEADERS) $(HEADERS)
 
 OCAMLOPTS=-package fstarlib,zarith -g -I $(FSTAR_HOME)/ulib/ml
 OCAMLOPT=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind opt $(OCAMLOPTS)
@@ -198,7 +198,7 @@ $(DIST_DIR)/LowC.cmxa: \
 	  LowCProvider/LowCProvider.cmx \
 	  LowCProvider/HaclProvider.cmx \
 	  LowCProvider/lowc_stub.o \
-	  $(DIST_DIR)/Crypto_AEAD_Main.o $(DIST_DIR)/Crypto_Indexing.o \
+	  $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
 	  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Curve25519.o \
 	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cmxa,%,$@)

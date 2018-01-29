@@ -21,8 +21,7 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
-#include "Crypto_AEAD_Main.h"
-#include "Crypto_Indexing.h"
+#include "Crypto_AEAD_Main_Crypto_Indexing.h"
 #include "Crypto_Symmetric_Bytes.h"
 #include "Curve25519.h"
 
