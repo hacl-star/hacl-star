@@ -24,10 +24,8 @@ include Makefile.common
 # the main Makefile for valid combinations.
 all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 
-# Makefile bug here: the second file is never generated (because of the +).
 abstract: $(DIST_DIR)/Crypto_AEAD_Main.h base
 
-# Ibid.
 concrete: $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h base
 
 base: $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.h $(DIST_DIR)/Crypto_Symmetric_Bytes.h
