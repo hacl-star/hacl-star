@@ -59,9 +59,11 @@ let rec bn_add_ #aLen #bLen caLen a cbLen b i carry res =
     if (i <. caLen) then begin
        let t1 = a.(i) in
        let t2 = if (i <. cbLen) then b.(i) else u64 0 in
-       let res_i = add_mod #U64 (add_mod #U64 t1 t2) carry in
+       let t1 = add_mod #U64 t1 carry in
+       let carry = if (lt_u64 t1 carry) then u64 1 else u64 0 in
+       let res_i = add_mod #U64 t1 t2 in
        res.(i) <- res_i;
-       let carry = if (lt_u64 res_i t1) then u64 1 else u64 0 in
+       let carry = if (lt_u64 res_i t1) then add #U64 carry (u64 1) else carry in
        bn_add_ #aLen #bLen caLen a cbLen b (size_incr i) carry res end
     else carry
 
