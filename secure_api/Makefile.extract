@@ -28,9 +28,9 @@ all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 abstract: $(DIST_DIR)/Crypto_AEAD_Main.h base
 
 # Ibid.
-concrete: $(DIST_DIR)/Crypto_AEAD_Main+Crypto_Indexing.h base
+concrete: $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h base
 
-base: $(DIST_DIR)/Crypto_HKDF+Crypto_HMAC.h $(DIST_DIR)/Crypto_Symmetric_Bytes.h
+base: $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.h $(DIST_DIR)/Crypto_Symmetric_Bytes.h
 
 %.test: %
 	./$<
@@ -92,9 +92,16 @@ $(OUTPUT_DIR)/%.ml:
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
 $(DIST_DIR)/%.h $(DIST_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
-	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$*=*' -minimal -skip-compilation \
+	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
 	  -tmpdir $(DIST_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
 	  $(EXTRA)
+
+# Manually override the default argument for bundles, so as to provide a +
+$(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.c \
+  $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h: BUNDLE=Crypto_AEAD_Main+Crypto_Indexing
+
+$(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.c \
+  $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.h: BUNDLE=Crypto_HKDF+Crypto_HMAC
 
 # This is without the indexing id.
 $(DIST_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
@@ -213,7 +220,7 @@ $(DIST_DIR)/LowC.cmxa: \
 # pass CryptoTypes.cmx
 $(DIST_DIR)/LowCTests.exe: copied/kremstr.o \
 	  $(MLCRYPTO_HOME)/CryptoTypes.cmx $(DIST_DIR)/LowC.cmxa LowCProvider/Tests.cmx
-	$(OCAMLOPT) -I $(OUTPUT_DIR) -I LowCProvider  \
+	$(OCAMLOPT) -I $(OUTPUT_DIR) -I LowCProvider \
 	  -ccopt -L$(DIST_DIR) -linkpkg $^ -o $@
 
 clean:
