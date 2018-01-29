@@ -205,30 +205,33 @@ val shift_euclidean_mod_inv_f: m:bignum -> tmp:bignum -> f:size_nat -> i:size_na
 let rec shift_euclidean_mod_inv_f m tmp f i =
     if (i < f) then begin
       let tmp = tmp + tmp in
-      let tmp = if (tmp > m) then tmp - m else tmp in
-      shift_euclidean_mod_inv_f m tmp f (i + 1) end 
+      let tmp = if (m < tmp) then tmp - m else tmp in
+      shift_euclidean_mod_inv_f m tmp f (i + 1) end
     else tmp
 
 // u >= v
 val shift_euclidean_mod_inv_: 
-    uBits:size_nat ->u:bignum -> vBits:size_nat{uBits > vBits} -> v:bignum -> r:bignum -> s:bignum -> m:bignum -> Tot bignum
+    uBits:size_nat -> u:bignum -> vBits:size_nat{uBits > vBits} -> v:bignum -> r:bignum -> s:bignum -> m:bignum -> Tot bignum
 let rec shift_euclidean_mod_inv_ uBits u vBits v r s m =
-    if v > 1 then begin
-      let du = degree u uBits in
-      let dv = degree v vBits in
+    let du = degree u uBits in
+    let dv = degree v vBits in
+   
+    if dv > 0 then begin
       let f = du - dv in //u >= v
       let v_lshift_f = bn_shift_left v f in
       let f = if (u < v_lshift_f) then f - 1 else f in
-      let u = u - (bn_shift_left v f) in
+      let v_lshift_f = bn_shift_left v f in
+      let u = u - v_lshift_f in
+    
       let tmp = shift_euclidean_mod_inv_f m s f 0 in
-      let r = if (r >= tmp) then r - tmp else r + m - tmp in
+      let r = if (r < tmp) then r + m - tmp else r - tmp in
       let du = degree u uBits in
       if (u < v) then
         //swap (u, v); swap (r, s)
         shift_euclidean_mod_inv_ dv v du u s r m
-      else shift_euclidean_mod_inv_ du u dv v r s m end 
-    else s  
-      
+      else shift_euclidean_mod_inv_ du u dv v r s m end
+    else s
+          
 //res = a^(-1) % m
 val shift_euclidean_mod_inv: aBits:size_nat ->a:bignum -> mBits:size_nat -> m:bignum -> Tot bignum
 let shift_euclidean_mod_inv aBits a mBits m =
