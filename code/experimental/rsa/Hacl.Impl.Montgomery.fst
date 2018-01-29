@@ -46,61 +46,121 @@ let bn_pow2_mod_n #rLen aBits rLen a p r =
     bn_sub rLen r rLen a r; // r = r - a
     bn_pow2_mod_n_ rLen a aBits p r
 
-val mont_inverse_:
-    #rLen:size_nat -> #stLen:size_nat ->
-    crLen:size_t{v crLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
-    n:lbignum rLen ->
-    exp_2:size_t{1 < v exp_2 /\ rLen == v exp_2 / 64 + 1} ->
-    i:size_t{v i <= v exp_2 + 1 /\ v exp_2 + 1 < max_size_t} ->
-    cstLen:size_t{v cstLen == stLen /\ stLen = 6 * rLen} -> st:lbignum stLen -> Stack unit
-    (requires (fun h -> live h n /\ live h st /\ disjoint st n))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
-
-#reset-options "--z3rlimit 50 --max_fuel 2"
-
-let rec mont_inverse_ #rLen #stLen crLen n exp_2 i cstLen st =
-    let cr2Len = add #SIZE crLen crLen in
-    let pow2_i1 = Buffer.sub #uint64 #stLen #rLen st (size 0) crLen in
-    let pow2_i = Buffer.sub #uint64 #stLen #rLen st crLen crLen in
-    let nnInv = Buffer.sub #uint64 #stLen #(v cr2Len) st cr2Len cr2Len in
-    let nnInv_mod = Buffer.sub #uint64 #stLen #rLen st (mul #SIZE (size 4) crLen) crLen in
-    let nInv = Buffer.sub #uint64 #stLen #rLen st (mul #SIZE (size 5) crLen) crLen in
-    disjoint_sub_lemma1 st n cr2Len cr2Len;
-    
-    if (i <=. exp_2) then begin
-       bn_lshift1 crLen pow2_i1 pow2_i1;
-       bn_lshift1 crLen pow2_i1 pow2_i;
-       fill cr2Len nnInv (u64 0);
-       bn_mul crLen n crLen nInv nnInv; //nnInv = n * nInv
-
-       assert (rLen - v i / 64 - 1 >= 0);
-       bn_mod_pow2_n cr2Len nnInv i crLen nnInv_mod; // nnInv_mod = nnInv % pow2_i
-       (if (bn_is_less crLen pow2_i1 nnInv_mod) then
-	   bn_add crLen nInv crLen pow2_i1 nInv);
-       mont_inverse_ crLen n exp_2 (size_incr i) cstLen st
+val degree_:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen} ->
+    a:lbignum aLen ->
+    i:size_t{v i / 64 < aLen} -> Stack size_t
+    (requires (fun h -> live h a))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
+let rec degree_ #aLen aaLen a i =
+    if i =. size 0 then size 0
+    else begin
+       if (bn_is_bit_set aaLen a i) then i
+       else degree_ #aLen aaLen a (size_decr i)
     end
-	  
-val mont_inverse:
-    #rLen:size_nat ->
-    crLen:size_t{v crLen == rLen /\ 0 < rLen /\ rLen * 6 < max_size_t} ->
-    n:lbignum rLen ->
-    exp_2:size_t{1 < v exp_2 /\ v exp_2 + 1 < max_size_t /\ rLen == v exp_2 / 64 + 1} ->
-    nInv:lbignum rLen -> Stack unit
-    (requires (fun h -> live h n /\ live h nInv /\ disjoint n nInv))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 nInv h0 h1))
 
-let mont_inverse #rLen crLen n exp_2 nInv =
-  let stLen = mul #SIZE crLen (size 6) in
-  alloc #uint64 #unit #(v stLen) stLen (u64 0) [BufItem n] [BufItem nInv]
-  (fun h0 _ h1 -> True)
-  (fun st ->
-    let pow2_i1 = Buffer.sub #uint64 #(v stLen) #rLen st (size 0) crLen in
-    let nInv_t = Buffer.sub #uint64 #(v stLen) #rLen st (mul #SIZE (size 5) crLen) crLen in
-    pow2_i1.(size 0) <- u64 1;
-    nInv_t.(size 0) <- u64 1;
-    mont_inverse_ crLen n exp_2 (size 2) stLen st;
-    copy crLen nInv_t nInv
-  )
+val degree:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen} ->
+    a:lbignum aLen ->
+    aBits:size_t{v aBits / 64 < aLen} -> Stack size_t
+    (requires (fun h -> live h a))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
+let degree #aLen aaLen a aBits = degree_ #aLen aaLen a aBits
+    
+val shift_euclidean_mod_inv_f:
+    #rLen:size_nat ->
+    rrLen:size_t{v rrLen == rLen} ->
+    m:lbignum rLen -> tmp:lbignum rLen ->
+    f:size_t -> i:size_t -> tmp1:lbignum (rLen + 1)-> Stack unit
+    (requires (fun h -> live h m /\ live h tmp))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 tmp h0 h1))
+    
+let rec shift_euclidean_mod_inv_f #rLen rrLen m tmp f i tmp1 =
+    if (i <. f) then begin
+       //bn_add rrLen tmp rrLen tmp tmp; // tmp = tmp + tmp
+       //FIXME: bn_add 
+       fill (add #SIZE rrLen (size 1)) tmp1 (u64 0);
+       bn_mul_u64 rrLen tmp (u64 2) tmp1;
+       let tmp1_ = Buffer.sub #uint64 #(rLen + 1) #rLen tmp1 (size 0) rrLen in
+       copy rrLen tmp1_ tmp;
+       
+       (if (bn_is_less rrLen m tmp) then // m < tmp 
+           bn_sub rrLen tmp rrLen m tmp); //tmp = tmp - m
+       shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size_incr i) tmp1
+    end
+    
+val shift_euclidean_mod_inv_:
+    #rLen:size_nat ->
+    rrLen:size_t{v rrLen == rLen} ->
+    uBits:size_t{v uBits / 64 < rLen} -> ub:lbignum rLen ->
+    vBits:size_t{v vBits / 64 < rLen} -> vb:lbignum rLen ->
+    r:lbignum rLen -> s:lbignum rLen ->
+    m:lbignum rLen -> st_inv:lbignum (3 * rLen + 1) -> res:lbignum rLen -> Stack unit
+    (requires (fun h -> live h ub /\ live h vb /\ live h s /\ live h r /\ live h m /\ live h st_inv /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1))
+    
+let rec shift_euclidean_mod_inv_ #rLen rrLen uBits ub vBits vb r s m st_inv res =
+    let stLen = add (mul #SIZE rrLen (size 3)) (size 1) in
+    fill stLen st_inv (u64 0);
+    let v_shift_f = Buffer.sub #uint64 #(v stLen) #rLen st_inv (size 0) rrLen in
+    let tmp = Buffer.sub #uint64 #(v stLen) #rLen st_inv rrLen rrLen in
+    let tmp1 = Buffer.sub #uint64 #(v stLen) #(rLen + 1) st_inv (add #SIZE rrLen rrLen) (add #SIZE rrLen (size 1)) in
+
+    let du = degree rrLen ub uBits in
+    let dv = degree rrLen vb vBits in
+    
+    if (dv >. size 0) then begin
+       let f = sub #SIZE du dv in
+       bn_lshift rrLen vb f v_shift_f; //v_shift_f = v << f
+       let f = 
+	  if (bn_is_less rrLen ub v_shift_f) then begin // u < v_shift_f
+             let f = sub #SIZE f (size 1) in
+             fill rrLen v_shift_f (u64 0);
+             bn_lshift rrLen vb f v_shift_f; f end
+	  else f in
+       bn_sub rrLen ub rrLen v_shift_f ub; // u = u - v_shift_f
+       copy rrLen s tmp;
+       shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size 0) tmp1;
+       (if (bn_is_less rrLen r tmp) then begin // r < tmp
+            bn_add rrLen r rrLen m r; //r = r + m
+            bn_sub rrLen r rrLen tmp r end
+        else bn_sub rrLen r rrLen tmp r);
+	 
+       let du = degree rrLen ub uBits in
+       if (bn_is_less rrLen ub vb) then begin
+          //swap(u,v); swap(r,s)
+          shift_euclidean_mod_inv_ #rLen rrLen dv vb du ub s r m st_inv res end
+       else shift_euclidean_mod_inv_ #rLen rrLen du ub dv vb r s m st_inv res end
+    else copy rrLen s res
+      
+val shift_euclidean_mod_inv:
+    #rLen:size_nat ->
+    rrLen:size_t{v rrLen == rLen} ->
+    aBits:size_t{v aBits / 64 < rLen} -> a:lbignum rLen ->
+    mBits:size_t{v mBits / 64 < rLen} -> m:lbignum rLen -> 
+    res:lbignum rLen -> Stack unit
+    (requires (fun h -> live h a /\ live h m))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1))
+    
+let shift_euclidean_mod_inv #rLen rrLen aBits a mBits m res =
+    let stLen = add #SIZE (mul #SIZE (size 7) rrLen) (size 1) in
+    alloc #uint64 #unit #(v stLen) stLen (u64 0) [BufItem a; BufItem m] [BufItem res]
+    (fun h0 _ h1 -> True)
+    (fun st ->
+      let ub = Buffer.sub #uint64 #(v stLen) #rLen st (size 0) rrLen in
+      let vb = Buffer.sub #uint64 #(v stLen) #rLen st rrLen rrLen in
+      let r = Buffer.sub #uint64 #(v stLen) #rLen st (add #SIZE rrLen rrLen) rrLen in
+      let s = Buffer.sub #uint64 #(v stLen) #rLen st (mul #SIZE (size 3) rrLen) rrLen in
+      let st_inv = Buffer.sub #uint64 #(v stLen) #(3 * rLen + 1) st (mul #SIZE (size 4) rrLen) (add #SIZE (mul #SIZE rrLen (size 3)) (size 1)) in
+
+      copy rrLen m ub;
+      copy rrLen a vb;
+      s.(size 0) <- u64 1;
+      shift_euclidean_mod_inv_ #rLen rrLen mBits ub aBits vb r s m st_inv res
+      //copy rrLen s res
+    )
 
 val mont_reduction:
     #rLen:size_nat -> #cLen:size_nat ->

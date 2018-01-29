@@ -167,7 +167,7 @@ let mod_exp #nLen pow2_i iLen modBits nnLen n a bBits b res =
       acc.(size 0) <- u64 1;
       bn_set_bit rLen r exp_r; // r = pow2 (2 + modBits)
       bn_pow2_mod_n modBits rLen n1 exp2 r2; // r2 = r * r % n
-      mont_inverse rLen n1 exp_r nInv; // n * nInv = 1 (mod r)
+      shift_euclidean_mod_inv rLen modBits n1 rBits r nInv; // n * nInv = 1 (mod r)
       mod_exp_mont #(v rLen) #(v stLen) pow2_i iLen bBits b exp_r rLen stLen st;
       
       copy nnLen res1_ res

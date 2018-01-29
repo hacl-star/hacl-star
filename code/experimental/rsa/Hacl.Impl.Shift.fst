@@ -11,6 +11,50 @@ module Buffer = Spec.Lib.IntBuf
 
 let bn_tbit = u64 0x8000000000000000
 
+val bn_lshift_:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen} ->
+    a:lbignum aLen ->
+    count:size_t -> nw:size_t ->
+    lb:uint32{0 < uint_v #U32 lb /\ uint_v #U32 lb < 64} ->
+    res:lbignum aLen{v count + v nw < aLen} -> Stack unit
+    (requires (fun h -> live h a /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    
+let rec bn_lshift_ #aLen aaLen a count nw lb res =
+    if (count >. size 0) then begin
+       let i = add #SIZE nw count in
+       let tmp = res.(i) in
+       let count = sub #SIZE i (size 1) in
+       let t1 = a.(count) in
+       let rb = u32 64 -. lb in
+       assert (0 < uint_v #U32 rb /\ uint_v #U32 rb < 64);
+       res.(i) <- tmp |. (shift_right #U64 t1 rb);
+       res.(size_decr i) <- shift_left #U64 t1 lb;
+       bn_lshift_ #aLen aaLen a count nw lb res end
+
+// res = a << n
+val bn_lshift:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen} ->
+    a:lbignum aLen ->
+    nCount:size_t{0 < v nCount /\ aLen - (v nCount) / 64 - 1 > 0} ->
+    res:lbignum aLen -> Stack unit
+    (requires (fun h -> live h a /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    
+let bn_lshift #aLen aaLen a nCount res =
+    let nw = nCount /. size 64 in
+    let lb = nCount %. size 64 in
+    if (lb =. size 0) then begin
+       let aLen' = sub #SIZE aaLen nw in
+       let a' = Buffer.sub #uint64 #aLen #(v aLen') a (size 0) aLen' in
+       let res' = Buffer.sub #uint64 #aLen #(v aLen') res nw aLen' in
+       copy aLen' a' res' end
+    else begin
+       let count = sub #SIZE aaLen (sub #SIZE nw (size 1)) in
+       bn_lshift_ #aLen aaLen a count nw (size_to_uint32 lb) res end
+  
 val bn_lshift1_:
     #aLen:size_nat ->
     caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
