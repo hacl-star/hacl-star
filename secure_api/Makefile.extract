@@ -137,13 +137,13 @@ vale: $(DIST_DIR)/vale.a
 # 3. The functional test, krml-test.exe                          	       #
 ################################################################################
 
-$(OUT_DIR)/copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
+$(DIST_DIR)/copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
 	mkdir -p $(dir $@)
 	cp $< $@
 
 # Note: this does not yet use the standalone C file because the test still
 # bypasses Crypto.AEAD.Main
-$(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES)) $($(IMPL_CHOICE)_EXTRA) $(OUT_DIR)/copied/testlib.c
+$(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES)) $($(IMPL_CHOICE)_EXTRA) $(DIST_DIR)/copied/testlib.c
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
 	    Crypto.AEAD.Main=Crypto.* -add-include '"kremstr.h"' -add-include \
@@ -220,7 +220,7 @@ $(DIST_DIR)/LowC.cmxa: \
 # Note: clients of MLCrypto are generally assumed to use CoreCrypto.cmxa but
 # here since we just need the type definitions we optimize the linking and just
 # pass CryptoTypes.cmx
-$(DIST_DIR)/LowCTests.exe: $(OUT_DIR)/copied/kremstr.o \
+$(DIST_DIR)/LowCTests.exe: $(DIST_DIR)/copied/kremstr.o \
 	  $(MLCRYPTO_HOME)/CryptoTypes.cmx $(DIST_DIR)/LowC.cmxa LowCProvider/Tests.cmx
 	$(OCAMLOPT) -I $(OUTPUT_DIR) -I LowCProvider \
 	  -ccopt -L$(DIST_DIR) -linkpkg $^ -o $@
@@ -235,7 +235,7 @@ QuicProvider/test.o: $(HEADERS)
 $(DIST_DIR)/quicprovider-test.exe: $(VALE_OBJ) QuicProvider/quic_provider.o \
   QuicProvider/test.o $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
   $(DIST_DIR)/Crypto_Symmetric_Bytes.o $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.o \
-  $(OUT_DIR)/copied/kremstr.o
+  $(DIST_DIR)/copied/kremstr.o
 	$(CC) $^ -o $@
 
 clean:
