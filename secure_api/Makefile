@@ -1,7 +1,9 @@
 HACL_HOME=..
 
 # The main Makefile that knows which combinations of targets are possible/valid.
-all: runtime_switch vale_aes_concrete_id hacl_aes_concrete_id vale_aes_abstract_id hacl_aes_abstract_id
+all:
+	rm -f .depend.*
+	$(MAKE) runtime_switch vale_aes_concrete_id hacl_aes_concrete_id vale_aes_abstract_id hacl_aes_abstract_id
 
 runtime_switch:
 	IMPL_CHOICE=runtime_switch $(MAKE) -f Makefile.extract all concrete test vale
