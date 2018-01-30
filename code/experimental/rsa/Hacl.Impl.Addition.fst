@@ -90,3 +90,33 @@ let bn_add_carry #aLen #bLen caLen a cbLen b res =
     let res' = Buffer.sub #uint64 #(aLen + 1) #aLen res (size 0) caLen in
     let carry = bn_add_ #aLen #bLen caLen a cbLen b (size 0) (u64 0) res' in
     res.(caLen) <- carry
+
+
+val bn_sub_u64_:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen} ->
+    a:lbignum aLen ->
+    carry:uint64 -> i:size_t ->
+    res:lbignum aLen -> Stack unit
+    (requires (fun h -> live h a /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    
+let rec bn_sub_u64_ #aLen aaLen a carry i res =
+    if (i <. aaLen) then begin
+       let t1 = a.(i) in
+       let res_i = sub_mod #U64 t1 carry in
+       res.(i) <- res_i;
+       let carry = if (lt_u64 t1 carry) then u64 1 else u64 0 in
+       bn_sub_u64_ #aLen aaLen a carry (size_incr i) res
+    end
+    
+val bn_sub_u64:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen} ->
+    a:lbignum aLen ->
+    b:uint64 ->
+    res:lbignum aLen -> Stack unit
+    (requires (fun h -> live h a /\ live h res))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+    
+let bn_sub_u64 #aLen aaLen a b res = bn_sub_u64_ #aLen aaLen a b (size 0) res

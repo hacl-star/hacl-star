@@ -12,6 +12,8 @@ open Hacl.Impl.MGF
 open Hacl.Impl.Comparison
 open Hacl.Impl.Convert
 open Hacl.Impl.Exponentiation
+open Hacl.Impl.Addition
+open Hacl.Impl.Multiplication
 
 module Buffer = Spec.Lib.IntBuf
 
@@ -246,9 +248,10 @@ val rsa_sign:
     pow2_i:size_t -> iLen:size_t ->
     modBits:size_t{0 < v modBits /\ v modBits + 3 < max_size_t} ->
     eBits:size_t{0 < v eBits /\ v eBits <= v modBits} ->
-    dBits:size_t{0 < v dBits /\ v dBits <= v modBits /\
-		 v (bits_to_bn modBits) + v (bits_to_bn eBits) + v (bits_to_bn dBits) < max_size_t} ->
-    skey:lbignum (v (bits_to_bn modBits) + v (bits_to_bn eBits) + v (bits_to_bn dBits)) ->
+    dBits:size_t{0 < v dBits /\ v dBits <= v modBits} ->
+    pLen:size_t -> qLen:size_t{v (bits_to_bn modBits) + v (bits_to_bn eBits) + v (bits_to_bn dBits) + v pLen + v qLen < max_size_t } ->
+    skey:lbignum (v (bits_to_bn modBits) + v (bits_to_bn eBits) + v (bits_to_bn dBits) + v pLen + v qLen) ->
+    rBlind:uint64 ->
     ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t /\ v (blocks modBits (size 8)) - sLen - v hLen - 3 >= 0 } ->
     salt:lbytes sLen ->
     mmsgLen:size_t{v mmsgLen == msgLen /\ msgLen < pow2 61} -> msg:lbytes msgLen ->
@@ -259,11 +262,11 @@ val rsa_sign:
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
-let rsa_sign #sLen #msgLen pow2_i iLen modBits eBits dBits skey ssLen salt mmsgLen msg sgnt =
+let rsa_sign #sLen #msgLen pow2_i iLen modBits eBits dBits pLen qLen skey rBlind ssLen salt mmsgLen msg sgnt =
     let nLen = bits_to_bn modBits in
     let eLen = bits_to_bn eBits in
     let dLen = bits_to_bn dBits in
-    let skeyLen = add #SIZE (add #SIZE nLen eLen) dLen in
+    let skeyLen = add #SIZE (add #SIZE (add #SIZE (add #SIZE nLen eLen) dLen) pLen) qLen in
     let k = blocks modBits (size 8) in
     let msBits = (size_decr modBits) %. size 8 in
     
@@ -271,27 +274,38 @@ let rsa_sign #sLen #msgLen pow2_i iLen modBits eBits dBits skey ssLen salt mmsgL
     assume (8 * v (get_size_nat k) < max_size_t);
     assume (v nLen == v k);
  
-    let n2Len:size_t = add #SIZE nLen nLen in
-    
+    let n2Len = add #SIZE nLen nLen in
+    let pqLen = add #SIZE pLen qLen in
+    let stLen = add #SIZE n2Len (add #SIZE (add #SIZE pqLen pqLen) (size 1)) in
     alloc #uint8 #unit #(v k) k (u8 0) [BufItem skey; BufItem msg; BufItem salt] [BufItem sgnt]
     (fun h0 _ h1 -> True)
     (fun em -> 
        pss_encode msBits ssLen salt mmsgLen msg k em;
       	
-       alloc #uint64 #unit #(v n2Len) n2Len (u64 0) [BufItem skey; BufItem em] [BufItem sgnt]
+       alloc #uint64 #unit #(v stLen) stLen (u64 0) [BufItem skey; BufItem em] [BufItem sgnt]
 	(fun h0 _ h1 -> True)
 	(fun tmp ->
 	   let n = Buffer.sub #uint64 #(v skeyLen) #(v nLen) skey (size 0) nLen in
 	   let e = Buffer.sub #uint64 #(v skeyLen) #(v eLen) skey nLen eLen in
 	   let d = Buffer.sub #uint64 #(v skeyLen) #(v dLen) skey (add #SIZE nLen eLen) dLen in
+	   let p = Buffer.sub #uint64 #(v skeyLen) #(v pLen) skey (add #SIZE (add #SIZE nLen eLen) dLen) pLen in
+	   let q = Buffer.sub #uint64 #(v skeyLen) #(v qLen) skey (add #SIZE ((add #SIZE (add #SIZE nLen eLen) dLen)) pLen) qLen in
 
-	   let m = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp (size 0) nLen in
-	   let s = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp nLen nLen in
+	   let m = Buffer.sub #uint64 #(v stLen) #(v nLen) tmp (size 0) nLen in
+	   let s = Buffer.sub #uint64 #(v stLen) #(v nLen) tmp nLen nLen in
+           let phi_n = Buffer.sub #uint64 #(v stLen) #(v pqLen) tmp n2Len pqLen in
+	   let p1 = Buffer.sub #uint64 #(v stLen) #(v pLen) tmp (add #SIZE n2Len pqLen) pLen in
+	   let q1 = Buffer.sub #uint64 #(v stLen) #(v qLen) tmp (add #SIZE (add #SIZE n2Len pqLen) pLen) qLen in
+	   let dLen' = add #SIZE (add #SIZE pLen qLen) (size 1) in
+	   let d' = Buffer.sub #uint64 #(v stLen) #(v dLen') tmp (add #SIZE n2Len pqLen) dLen' in
 	   
-	   (**) disjoint_sub_lemma1 tmp em (size 0) nLen;
 	   text_to_nat k em m;
-	   mod_exp pow2_i iLen modBits nLen n m dBits d s;
-	   (**) disjoint_sub_lemma1 tmp sgnt nLen nLen; 
+	   bn_sub_u64 pLen p (u64 1) p1; // p1 = p - 1
+	   bn_sub_u64 qLen q (u64 1) q1; // q1 = q - 1
+	   bn_mul pLen p1 qLen q1 phi_n; // phi_n = p1 * q1
+	   bn_mul_u64 pqLen phi_n rBlind d'; //d' = phi_n * rBlind
+	   bn_add dLen' d' dLen d d';  //d' = d' + d
+	   mod_exp pow2_i iLen modBits nLen n m (mul #SIZE dLen' (size 64)) d' s;
 	   nat_to_text k s sgnt
 	)
     )
