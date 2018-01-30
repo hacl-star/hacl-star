@@ -1,3 +1,5 @@
+### This Makefile is no longer used! Makefile.extract builds quicprovider-test.exe
+
 FSTAR_HOME ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 MITLS_HOME ?= ../../../mitls-fstar

@@ -33,7 +33,7 @@ base: $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.h $(DIST_DIR)/Crypto_Symmetric_Bytes.h
 %.test: %
 	./$<
 
-test: krml-test lowc-test
+test: krml-test lowc-test quicprovider-test
 krml-test: $(DIST_DIR)/krml-test.exe.test
 lowc-test: $(DIST_DIR)/LowCTests.exe.test
 quicprovider-test: $(DIST_DIR)/quicprovider-test.exe.test
