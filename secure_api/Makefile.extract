@@ -137,13 +137,13 @@ vale: $(DIST_DIR)/vale.a
 # 3. The functional test, krml-test.exe                          	       #
 ################################################################################
 
-copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
+copied_$(IMPL_CHOICE)/%.c: $(KREMLIN_HOME)/kremlib/%.c
 	mkdir -p $(dir $@)
 	cp $< $@
 
 # Note: this does not yet use the standalone C file because the test still
 # bypasses Crypto.AEAD.Main
-$(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES)) $($(IMPL_CHOICE)_EXTRA) copied/testlib.c
+$(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES)) $($(IMPL_CHOICE)_EXTRA) copied_$(IMPL_CHOICE)/testlib.c
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
 	    Crypto.AEAD.Main=Crypto.* -add-include '"kremstr.h"' -add-include \
