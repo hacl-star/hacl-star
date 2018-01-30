@@ -7,9 +7,9 @@
 #include <assert.h>
 #include <time.h>
 
-#include "../out/vale_aes_concrete_id/Crypto_HKDF_Crypto_HMAC.h"
-#include "../out/vale_aes_concrete_id/Crypto_AEAD_Main_Crypto_Indexing.h"
-#include "mitlsffi.h"
+#include "Crypto_HKDF_Crypto_HMAC.h"
+#include "Crypto_AEAD_Main_Crypto_Indexing.h"
+#include "Crypto_Symmetric_Bytes.h"
 #include "quic_provider.h"
 
 #define DEBUG 0

@@ -7,7 +7,6 @@
 #include <assert.h>
 #include <time.h>
 
-#include "mitlsffi.h"
 #include "quic_provider.h"
 
 void dump(unsigned char buffer[], size_t len)

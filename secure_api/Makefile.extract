@@ -36,6 +36,7 @@ base: $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.h $(DIST_DIR)/Crypto_Symmetric_Bytes.h
 test: krml-test lowc-test
 krml-test: $(DIST_DIR)/krml-test.exe.test
 lowc-test: $(DIST_DIR)/LowCTests.exe.test
+quicprovider-test: $(DIST_DIR)/quicprovider-test.exe.test
 
 ################################################################################
 # Building upon the generated .depend file				       #
@@ -126,8 +127,10 @@ runtime_switch_EXTRA 		= $(VALE_OBJ)
 	$(CC) $(CCOPTS) -c $< -o $@
 
 # For convenient linking from miTLS
-out/vale.a: $(VALE_OBJ)
+$(DIST_DIR)/vale.a: $(VALE_OBJ)
 	ar cr $@ $^
+
+vale: $(DIST_DIR)/vale.a
 
 ################################################################################
 # 3. The functional test, krml-test.exe                          	       #
@@ -220,6 +223,18 @@ $(DIST_DIR)/LowCTests.exe: copied/kremstr.o \
 	  $(MLCRYPTO_HOME)/CryptoTypes.cmx $(DIST_DIR)/LowC.cmxa LowCProvider/Tests.cmx
 	$(OCAMLOPT) -I $(OUTPUT_DIR) -I LowCProvider \
 	  -ccopt -L$(DIST_DIR) -linkpkg $^ -o $@
+
+################################################################################
+# 6. The QuicProvider tests                                      	       #
+################################################################################
+
+QuicProvider/quic_provider.o: $(HEADERS)
+
+$(DIST_DIR)/quicprovider-test.exe: $(VALE_OBJ) QuicProvider/quic_provider.o \
+  QuicProvider/test.o $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
+  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.o \
+  copied/kremstr.o
+	$(CC) $^ -o $@
 
 clean:
 	rm -rf .depend.extract out/* vale/asm/*.o LowCProvider/*.{cm*,o,a}
