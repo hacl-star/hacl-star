@@ -36,7 +36,7 @@ val bn_pow2_mod_n:
     #rLen:size_nat ->
     aBits:size_t ->
     crLen:size_t{v crLen == rLen /\ v aBits / 64 < rLen} -> a:lbignum rLen ->
-    p:size_t{v p > v aBits} ->
+    p:size_t{v aBits < v p} ->
     r:lbignum rLen -> Stack unit
     (requires (fun h -> live h a /\ live h r /\ disjoint r a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 r h0 h1))
@@ -53,6 +53,7 @@ val degree_:
     i:size_t{v i / 64 < aLen} -> Stack size_t
     (requires (fun h -> live h a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
+    
 let rec degree_ #aLen aaLen a i =
     if i =. size 0 then size 0
     else begin
@@ -74,7 +75,7 @@ val shift_euclidean_mod_inv_f:
     rrLen:size_t{v rrLen == rLen} ->
     m:lbignum rLen -> tmp:lbignum rLen ->
     f:size_t -> i:size_t -> Stack unit
-    (requires (fun h -> live h m /\ live h tmp))
+    (requires (fun h -> live h m /\ live h tmp /\ disjoint m tmp))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 tmp h0 h1))
     
 let rec shift_euclidean_mod_inv_f #rLen rrLen m tmp f i =
@@ -96,8 +97,7 @@ val shift_euclidean_mod_inv_:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1))
     
 let rec shift_euclidean_mod_inv_ #rLen rrLen uBits ub vBits vb r s m st_inv res =
-    let stLen = add  #SIZE rrLen rrLen in
-    fill stLen st_inv (u64 0);
+    let stLen = add #SIZE rrLen rrLen in    
     let v_shift_f = Buffer.sub #uint64 #(v stLen) #rLen st_inv (size 0) rrLen in
     let tmp = Buffer.sub #uint64 #(v stLen) #rLen st_inv rrLen rrLen in
 
@@ -107,15 +107,15 @@ let rec shift_euclidean_mod_inv_ #rLen rrLen uBits ub vBits vb r s m st_inv res 
     if (dv >. size 0) then begin
        let f = sub #SIZE du dv in
        bn_lshift rrLen vb f v_shift_f; //v_shift_f = v << f
-       let f = 
+       let f =
 	  if (bn_is_less rrLen ub v_shift_f) then begin // u < v_shift_f
              let f = sub #SIZE f (size 1) in
-             fill rrLen v_shift_f (u64 0);
              bn_lshift rrLen vb f v_shift_f; f end
 	  else f in
        bn_sub rrLen ub rrLen v_shift_f ub; // u = u - v_shift_f
+       
        copy rrLen s tmp;
-       shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size 0);
+       if (f >. size 0) then shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size 0);
        (if (bn_is_less rrLen r tmp) then begin // r < tmp
             bn_add rrLen r rrLen m r; //r = r + m
             bn_sub rrLen r rrLen tmp r end
@@ -132,7 +132,7 @@ val shift_euclidean_mod_inv:
     #rLen:size_nat ->
     rrLen:size_t{v rrLen == rLen} ->
     aBits:size_t{v aBits / 64 < rLen} -> a:lbignum rLen ->
-    mBits:size_t{v mBits / 64 < rLen} -> m:lbignum rLen -> 
+    mBits:size_t{v mBits / 64 < rLen} -> m:lbignum rLen ->
     res:lbignum rLen -> Stack unit
     (requires (fun h -> live h a /\ live h m))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1))
@@ -157,7 +157,7 @@ let shift_euclidean_mod_inv #rLen rrLen aBits a mBits m res =
 val mont_reduction:
     #rLen:size_nat -> #cLen:size_nat ->
     exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
-    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->    
+    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->
     rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
     st_mont:lbignum (3 * rLen) -> st:lbignum (3 * rLen) ->
     st_kara:lbignum (4 * v pow2_i) ->
@@ -171,7 +171,7 @@ val mont_reduction:
 let mont_reduction #rLen #cLen pow2_i iLen exp_r rrLen st_mont st st_kara ccLen c res =
     let r2Len = add #SIZE rrLen rrLen in
     let stLen = mul #SIZE (size 3) rrLen in
-    fill stLen st (u64 0);
+    
     let tmp1 = Buffer.sub #uint64 #(v stLen) #(v r2Len) st (size 0) r2Len in
     let m = Buffer.sub #uint64 #(v stLen) #rLen st r2Len rrLen in
       
@@ -180,12 +180,9 @@ let mont_reduction #rLen #cLen pow2_i iLen exp_r rrLen st_mont st st_kara ccLen 
     let nInv = Buffer.sub #uint64 #(v stLen) #rLen st_mont r2Len rrLen in
 
     let c1 = Buffer.sub #uint64 #cLen #rLen c (size 0) rrLen in
-    //bn_mul rrLen c1 rrLen nInv tmp1; // tmp1 = c1 * nInv
     karatsuba #rLen pow2_i iLen rrLen c1 nInv st_kara tmp1; // tmp1 = c1 * nInv
     bn_mod_pow2_n r2Len tmp1 exp_r rrLen m; // m = tmp1 % r
     bn_sub rrLen r rrLen m m; // m = r - m
-    fill r2Len tmp1 (u64 0);
-    //bn_mul rrLen m rrLen n tmp1; // tmp1 = m * n
     karatsuba #rLen pow2_i iLen rrLen m n st_kara tmp1; // tmp1 = m * n
     bn_add r2Len tmp1 ccLen c tmp1; // tmp1 = c + tmp1
     bn_rshift r2Len tmp1 exp_r tmp1; // tmp1 = tmp1 / r
@@ -210,10 +207,10 @@ val to_mont:
 let to_mont #rLen pow2_i iLen exp_r rrLen st_mont st st_kara r2 a aM =
     let cLen = add #SIZE rrLen rrLen in
     let stLen = mul #SIZE (size 3) rrLen in
+    
     let c = Buffer.sub #uint64 #(5 * rLen) #(v cLen) st (size 0) cLen in
     let st = Buffer.sub #uint64 #(5 * rLen) #(3 * rLen) st cLen stLen in
-    fill cLen c (u64 0);
-    //bn_mul rrLen a rrLen r2 c; // c = a * r2
+    
     karatsuba #rLen pow2_i iLen rrLen a r2 st_kara c; // c = a * r2 
     mont_reduction pow2_i iLen exp_r rrLen st_mont st st_kara cLen c aM //aM = c % n
     
@@ -234,7 +231,6 @@ val from_mont:
 let from_mont #rLen pow2_i iLen exp_r rrLen st_mont st st_kara aM a =
     let r2Len = add #SIZE rrLen rrLen in
     let stLen = mul #SIZE (size 3) rrLen in
-    fill stLen st (u64 0);
     
     let tmp = Buffer.sub #uint64 #(v stLen) #(v r2Len) st (size 0) r2Len in
     let m = Buffer.sub #uint64 #(v stLen) #rLen st r2Len rrLen in
@@ -243,14 +239,10 @@ let from_mont #rLen pow2_i iLen exp_r rrLen st_mont st st_kara aM a =
     let n = Buffer.sub #uint64 #(v stLen) #rLen st_mont rrLen rrLen in
     let nInv = Buffer.sub #uint64 #(v stLen) #rLen st_mont r2Len rrLen in
       
-    disjoint_sub_lemma1 st aM (size 0) r2Len;
-    //bn_mul rrLen aM rrLen nInv tmp; // tmp = aM * nInv
-    karatsuba #rLen pow2_i iLen rrLen aM nInv st_kara tmp; // tmp = aM * nInv 
+    karatsuba #rLen pow2_i iLen rrLen aM nInv st_kara tmp; // tmp = aM * nInv
     bn_mod_pow2_n r2Len tmp exp_r rrLen m; // m = tmp % r
     bn_sub rrLen r rrLen m m; // m = r - m
-    fill r2Len tmp (u64 0);
-    //bn_mul rrLen m rrLen n tmp; //tmp = m * n
-    karatsuba #rLen pow2_i iLen rrLen m n st_kara tmp; // tmp = m * n    
+    karatsuba #rLen pow2_i iLen rrLen m n st_kara tmp; // tmp = m * n
     bn_add r2Len tmp rrLen aM tmp; //tmp = aM + tmp
     bn_rshift r2Len tmp exp_r tmp; //tmp = tmp / r
       

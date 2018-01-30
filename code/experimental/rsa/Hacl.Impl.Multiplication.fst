@@ -65,8 +65,10 @@ val bn_mul:
     (requires (fun h -> live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))    
   
-let bn_mul #aLen #bLen aaLen a bbLen b res = 
-    bn_mult_ #aLen #bLen aaLen a bbLen b (size 0) (add #SIZE aaLen bbLen) res
+let bn_mul #aLen #bLen aaLen a bbLen b res =
+    let resLen = add #SIZE aaLen bbLen in
+    fill resLen res (u64 0);
+    bn_mult_ #aLen #bLen aaLen a bbLen b (size 0) resLen res
 
 val bn_mul_u64:
     #aLen:size_nat ->
@@ -75,7 +77,9 @@ val bn_mul_u64:
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 let bn_mul_u64 #aLen aaLen a b res = 
-    bn_mult_by_limb_addj #aLen aaLen a b (size 0) (size 0) (add #SIZE aaLen (size 1)) (u64 0) res
+    let resLen = add #SIZE aaLen (size 1) in
+    fill resLen res (u64 0);
+    bn_mult_by_limb_addj #aLen aaLen a b (size 0) (size 0) resLen (u64 0) res
 
 val abs:
     #aLen:size_nat -> #bLen:size_nat ->
@@ -138,10 +142,7 @@ let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
     assume (v pow2_i = v pow2_i0 + v pow2_i0);
     let pow2_i1 = sub #SIZE pow2_i0 iLen in
     
-    fill tmpLen tmp (u64 0);
-    fill aaLen2 res (u64 0);
-    
-    if (aaLen <. size 9) then
+    if (aaLen <. size 32) then
        bn_mul #aLen #aLen aaLen a aaLen b res
     else begin
        let a0 = Buffer.sub #uint64 #aLen #(v pow2_i0) a (size 0) pow2_i0 in
@@ -154,7 +155,6 @@ let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
        karatsuba_ #(v pow2_i0) pow2_i0 (size 0) pow2_i0 a0 b0 tmp0 c0; // c0 = a0 * b0
 
        if (pow2_i1 =. size 1) then begin
-          fill tmpLen tmp (u64 0);
           let a1_0 = a1.(size 0) in
           let b1_0 = b1.(size 0) in
           let c1 = mul_wide a1_0 b1_0 in
@@ -163,7 +163,7 @@ let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
           let c0Len = mul #SIZE (size 2) pow2_i0 in
           res.(c0Len) <- c1_0;
           res.(add #SIZE c0Len (size 1)) <- c1_1;
-	  
+
           let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(v pow2_i0 + 1) tmp (size 0) (add #SIZE pow2_i0 (size 1)) in //tmp0 = a0 * b1_0
           bn_mul_u64 #(v pow2_i0) pow2_i0 a0 b1_0 tmp0;
           let tmp1 = Buffer.sub #uint64 #(v tmpLen) #(v pow2_i0 + 1) tmp (add #SIZE pow2_i0 (size 1)) (add #SIZE pow2_i0 (size 1)) in //tmp1 = b0 * a1_0
@@ -176,8 +176,8 @@ let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
 	  
           let res1Len = add #SIZE pow2_i0 (size 2) in
           let res1 = Buffer.sub #uint64 #(v aaLen2) #(v res1Len) res pow2_i0 res1Len in
-          bn_add res1Len res1 tmp2Len tmp2 res1 //FIXME!!!
-          end 
+          bn_add res1Len res1 tmp2Len tmp2 res1
+          end
        else begin
           let ind = if (pow2_i0 /. (size 2) <=. iLen) then sub #SIZE iLen (pow2_i0 /. (size 2)) else iLen in
           let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(4 * v pow2_i1) tmp (size 0) (mul #SIZE (size 4) pow2_i1) in
@@ -218,9 +218,6 @@ val karatsuba:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
     
 let karatsuba #aLen pow2_i iLen aaLen a b st_mult res =
-    let aaLen2 = add #SIZE aaLen aaLen in
-    fill aaLen2 res (u64 0);
-    
-    if (aaLen <. size 9)
+    if (aaLen <. size 32)
     then bn_mul #aLen #aLen aaLen a aaLen b res
     else karatsuba_ pow2_i iLen aaLen a b st_mult res

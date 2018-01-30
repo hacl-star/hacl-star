@@ -32,8 +32,6 @@ let mul_mod_mont #rLen pow2_i iLen exp_r rrLen st_mont st_m st_kara aM bM resM =
     
     let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
     let st_k = Buffer.sub #uint64 #(v stLen) #(v stKLen) st_kara cLen stKLen in
-    //fill cLen c (u64 0);
-    //bn_mul rrLen aM rrLen bM c;
     karatsuba pow2_i iLen rrLen aM bM st_k c; // c = a * b
     mont_reduction pow2_i iLen exp_r rrLen st_mont st_m st_k cLen c resM // resM = c % n
    
