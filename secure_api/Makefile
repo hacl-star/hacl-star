@@ -11,14 +11,22 @@ ifeq (,$(findstring shortest-stem,$(.FEATURES)))
 	@exit 1
 endif
 
+# The following targets are not parallel and must occur at most once in
+# parallel:
+# - quicprovider-test (a dependency of test)
+# - vale
+# The reason is that they generate object files in the current directory, as
+# opposed to copying the source files into their out/$(IMPL_CHOICE) private
+# directory, and building there.
+
 runtime_switch:
 	IMPL_CHOICE=runtime_switch $(MAKE) -f Makefile.extract all concrete test vale
 
 vale_aes_concrete_id:
-	IMPL_CHOICE=vale_aes_concrete_id $(MAKE) -f Makefile.extract krml-test quicprovider-test concrete
+	IMPL_CHOICE=vale_aes_concrete_id $(MAKE) -f Makefile.extract krml-test
 
 hacl_aes_concrete_id:
-	IMPL_CHOICE=hacl_aes_concrete_id $(MAKE) -f Makefile.extract krml-test quicprovider-test concrete
+	IMPL_CHOICE=hacl_aes_concrete_id $(MAKE) -f Makefile.extract krml-test
 
 vale_aes_abstract_id:
 	IMPL_CHOICE=vale_aes_abstract_id $(MAKE) -f Makefile.extract abstract
