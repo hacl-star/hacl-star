@@ -1,9 +1,15 @@
 HACL_HOME=..
 
 # The main Makefile that knows which combinations of targets are possible/valid.
-all:
+all: check
 	rm -f .depend.*
 	$(MAKE) runtime_switch vale_aes_concrete_id hacl_aes_concrete_id vale_aes_abstract_id hacl_aes_abstract_id
+
+check:
+ifeq (,$(findstring shortest-stem,$(.FEATURES)))
+	@echo "ERROR: This Makefile requires GNU Make >= 3.81"
+	@exit 1
+endif
 
 runtime_switch:
 	IMPL_CHOICE=runtime_switch $(MAKE) -f Makefile.extract all concrete test vale
