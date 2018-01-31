@@ -7,7 +7,7 @@ all: check
 
 check:
 ifeq (,$(findstring shortest-stem,$(.FEATURES)))
-	@echo "ERROR: This Makefile requires GNU Make >= 3.81"
+	@echo "ERROR: This Makefile requires GNU Make >= 3.82"
 	@exit 1
 endif
 
