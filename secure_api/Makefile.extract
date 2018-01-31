@@ -24,11 +24,17 @@ include Makefile.common
 # the main Makefile for valid combinations.
 all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 
-abstract: $(DIST_DIR)/Crypto_AEAD_Main.h base
+################################################################################
+# Main configurations                                    		       #
+################################################################################
 
-concrete: $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h base
+CRYPTO_DIR = $(DIST_DIR)/crypto
 
-base: $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.h $(DIST_DIR)/Crypto_Symmetric_Bytes.h
+abstract: $(CRYPTO_DIR)/Crypto_AEAD_Main.h base
+
+concrete: $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h base
+
+base: $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h
 
 %.test: %
 	./$<
@@ -91,27 +97,31 @@ $(OUTPUT_DIR)/%.ml:
 
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
-$(DIST_DIR)/%.h $(DIST_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
+$(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
 	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
-	  -tmpdir $(DIST_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
+	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
 	  $(EXTRA)
 
 # Manually override the default argument for bundles, so as to provide a +
-$(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.c \
-  $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h: BUNDLE=Crypto_AEAD_Main+Crypto_Indexing
+$(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.c \
+  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h: BUNDLE=Crypto_AEAD_Main+Crypto_Indexing
 
-$(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.c \
-  $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.h: BUNDLE=Crypto_HKDF+Crypto_HMAC
+$(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.c \
+  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h: BUNDLE=Crypto_HKDF+Crypto_HMAC
 
 # This is without the indexing id.
-$(DIST_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
+$(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
 
 
 ################################################################################
 # 2. Compiling Vale on all platforms                             	       #
 ################################################################################
 
-VALE_DIR = vale/asm
+VALE_DIR = $(DIST_DIR)/vale
+
+$(DIST_DIR)/vale/%: vale/asm/%
+	mkdir -p $(dir $@)
+	cp $< $@
 
 VALE_OBJ = $(addprefix $(VALE_DIR)/,sha256_main_i.o \
   sha256-$(MARCH)$(VARIANT).o Vale_Hash_SHA2_256.o \
@@ -167,13 +177,13 @@ endif
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
-HEADERS=$(DIST_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h \
-	  $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h
+HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h \
+	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
 # entire world just to get the dependencies between C files.
-$(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(HEADERS)
+$(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(HEADERS)
 LowCProvider/lowc_stub.o: $(HEADERS)
 
 OCAMLOPTS=-package fstarlib,zarith -g -I $(FSTAR_HOME)/ulib/ml
@@ -185,7 +195,7 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 %.o: %.c
 	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -I $(MLCRYPTO_HOME) -ccopt -o \
 	  -ccopt $@ -ccopt -fPIC -ccopt -Wno-unused-variable -ccopt -Wno-parentheses \
-	  -I $(CURVE_DIR)
+	  -I $(CURVE_DIR) -I $(CRYPTO_DIR)
 
 # Gross approximation: the cmx's we build are most likely extracted F* code and,
 # as such, require a working fstarlib.
@@ -207,8 +217,8 @@ $(DIST_DIR)/LowC.cmxa: \
 	  LowCProvider/LowCProvider.cmx \
 	  LowCProvider/HaclProvider.cmx \
 	  LowCProvider/lowc_stub.o \
-	  $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
-	  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Curve25519.o \
+	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
+	  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Curve25519.o \
 	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cmxa,%,$@)
 
@@ -229,14 +239,23 @@ $(DIST_DIR)/LowCTests.exe: $(DIST_DIR)/copied/kremstr.o \
 # 6. The QuicProvider tests                                      	       #
 ################################################################################
 
-QuicProvider/quic_provider.o: $(HEADERS)
-QuicProvider/test.o: $(HEADERS)
+QUICPROVIDER_DIR = $(DIST_DIR)/quicprovider
 
-$(DIST_DIR)/quicprovider-test.exe: $(VALE_OBJ) QuicProvider/quic_provider.o \
-  QuicProvider/test.o $(DIST_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
-  $(DIST_DIR)/Crypto_Symmetric_Bytes.o $(DIST_DIR)/Crypto_HKDF_Crypto_HMAC.o \
+$(QUICPROVIDER_DIR)/%: QuicProvider/%
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(QUICPROVIDER_DIR)/quic_provider.o: $(QUICPROVIDER_DIR)/quic_provider.h $(HEADERS)
+$(QUICPROVIDER_DIR)/test.o: $(QUICPROVIDER_DIR)/quic_provider.h $(HEADERS)
+
+$(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) $(QUICPROVIDER_DIR)/quic_provider.o \
+  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
+  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
   $(DIST_DIR)/copied/kremstr.o
-	$(CC) $^ -o $@
+	$(CC) $^ -o $@ -shared
+
+$(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)
+	$(CC) $< -o $@ -L$(DIST_DIR) -lquicprovider
 
 clean:
 	rm -rf .depend.extract out/* vale/asm/*.o LowCProvider/*.{cm*,o,a}

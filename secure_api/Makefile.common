@@ -15,12 +15,21 @@ SED		= $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
 MARCH		= x86_64
 ifeq ($(UNAME),Darwin)
   VARIANT=-Darwin
+  DYLD_LIBRARY_PATH := $(DIST_DIR):$(DYLD_LIBRARY_PATH)
+  SO = so
+  export DYLD_LIBRARY_PATH
 else ifeq ($(UNAME),Linux)
   CCOPTS_EXTRA=-fPIC
   VARIANT=-Linux
+  LD_LIBRARY_PATH := $(DIST_DIR):$(LD_LIBRARY_PATH)
+  SO = so
+  export LD_LIBRARY_PATH
 else ifeq ($(OS),Windows_NT)
   CC=$(MARCH)-w64-mingw32-gcc
   AR=$(MARCH)-w64-mingw32-ar
+  PATH := $(DIST_DIR):$(PATH)
+  SO = dll
+  export PATH
 endif
 CCOPTS=-Wall -Wextra -Werror -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
 
