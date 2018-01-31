@@ -117,11 +117,7 @@ $(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-includ
 # 2. Compiling Vale on all platforms                             	       #
 ################################################################################
 
-VALE_DIR = $(DIST_DIR)/vale
-
-$(DIST_DIR)/vale/%: vale/asm/%
-	mkdir -p $(dir $@)
-	cp $< $@
+VALE_DIR = vale/asm
 
 VALE_OBJ = $(addprefix $(VALE_DIR)/,sha256_main_i.o \
   sha256-$(MARCH)$(VARIANT).o Vale_Hash_SHA2_256.o \
@@ -239,14 +235,10 @@ $(DIST_DIR)/LowCTests.exe: $(DIST_DIR)/copied/kremstr.o \
 # 6. The QuicProvider tests                                      	       #
 ################################################################################
 
-QUICPROVIDER_DIR = $(DIST_DIR)/quicprovider
+QUICPROVIDER_DIR = QuicProvider
 
-$(QUICPROVIDER_DIR)/%: QuicProvider/%
-	mkdir -p $(dir $@)
-	cp $< $@
-
-$(QUICPROVIDER_DIR)/quic_provider.o: $(QUICPROVIDER_DIR)/quic_provider.h $(HEADERS)
-$(QUICPROVIDER_DIR)/test.o: $(QUICPROVIDER_DIR)/quic_provider.h $(HEADERS)
+$(QUICPROVIDER_DIR)/quic_provider.o: $(HEADERS)
+$(QUICPROVIDER_DIR)/test.o: $(HEADERS)
 
 $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) $(QUICPROVIDER_DIR)/quic_provider.o \
   $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
