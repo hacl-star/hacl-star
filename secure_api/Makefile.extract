@@ -224,6 +224,9 @@ HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Curve25519.h $(CURVE
 	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h \
 	  $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 
+# Technically this dependency edge is only real for the KRML_NOUINT128 case.
+$(CURVE_DIR)/Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
+
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
 # entire world just to get the dependencies between C files.
@@ -259,6 +262,7 @@ LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
 
 # Finally, ocamlmklib is smart enough to take all of these at once.
 $(DIST_DIR)/LowC.cmxa: \
+	  $(DIST_DIR)/uint128/uint128_wrapper.o \
 	  LowCProvider/LowCProvider.cmx \
 	  LowCProvider/HaclProvider.cmx \
 	  LowCProvider/lowc_stub.o \
@@ -292,7 +296,7 @@ $(QUICPROVIDER_DIR)/test.o: $(HEADERS)
 $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) $(QUICPROVIDER_DIR)/quic_provider.o \
   $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
   $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
-  $(DIST_DIR)/copied/kremstr.o
+  $(DIST_DIR)/copied/kremstr.o $(DIST_DIR)/uint128/uint128_wrapper.o
 	$(CC) $^ -o $@ -shared
 
 $(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)
