@@ -98,7 +98,7 @@ $(OUTPUT_DIR)/%.ml:
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
 $(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
-	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
+	$(KREMLIN_HOME)/krml $(KOPTS) -drop FStar.UInt128 -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
 	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
 	  $(EXTRA)
 
