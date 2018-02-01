@@ -90,7 +90,7 @@ $(LIBQUICCRYPTO): libhacl.a quic_provider.o
 	$(CC) $(COPTS) -shared -L. quic_provider.o -lhacl -o $@
 
 clean:
-	rm -fr tmp *.[oa] *.so *.cm[ixoa] *.cmxa *.exe *.dll *.so *.annot *~
+	rm -fr tmp *.[oa] *.so *.cm[ixoa] *.cmxa *.exe *.dll *.so *.annot *.lib *.def *.exp *~
 
 test.exe: $(LIBQUICCRYPTO) test.o
 	$(CC) $(COPTS) -L. test.o -lquiccrypto -o test.exe

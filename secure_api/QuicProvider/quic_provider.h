@@ -10,32 +10,7 @@
 #include <assert.h>
 #include <time.h>
 
-// JP: copy-pasted from mitlsffi.h
-typedef enum {
-  TLS_hash_MD5 = 0,
-  TLS_hash_SHA1 = 1,
-  TLS_hash_SHA224 = 2,
-  TLS_hash_SHA256 = 3,
-  TLS_hash_SHA384 = 4,
-  TLS_hash_SHA512 = 5
-} quic_hash;
-
-typedef enum {
-  TLS_aead_AES_128_GCM = 0,
-  TLS_aead_AES_256_GCM = 1,
-  TLS_aead_CHACHA20_POLY1305 = 2
-} quic_aead;
-
-typedef uint16_t quic_signature_scheme;
-
-// Agile secret with static allocation
-typedef struct {
-  quic_hash hash;
-  quic_aead ae;
-  char secret[64]; // Max possible size, flat allocation
-} quic_secret;
-
-// JP: end copy-pasting
+#include "mitlsffi.h"
 
 // mitlsffi defines quic_secret: the type of exported secrets
 
