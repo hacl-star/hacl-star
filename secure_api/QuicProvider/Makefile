@@ -60,6 +60,10 @@ else
 LIB_MACHINE=x86
 endif
 
+.PHONY: all test
+
+all: test
+
 ifeq ($(VS_BIN),)
 LIBFILE=
 else
@@ -69,28 +73,14 @@ $(LIBFILE): $(LIBQUICCRYPTO)
 	"$(VS_BIN)/lib.exe" /nologo /def:libquiccrypto.def /out:$(LIBFILE) /machine:$(LIB_MACHINE)
 endif
 
-.PHONY: test dep
+test:
+	IMPL_CHOICE=runtime_switch make -C .. -f Makefile.extract quicprovider-test
 
-all: $(LIBQUICCRYPTO) $(LIBFILE)
-
-tmp:
-	$(MAKE) -C .. QuicProvider-tmp
-
-../vale/asm/vale.a:
-	$(MAKE) -C ../vale/asm
-
-libhacl.a: tmp ../vale/asm/vale.a
-	cp ../vale/asm/vale.a libhacl.a
-	$(AR) -cr libhacl.a tmp/*.o
+# $(LIBQUICCRYPTO) $(LIBFILE)
 
 %.o: %.c
 	$(CC) $(COPTS) -c $< -o $@
 
-$(LIBQUICCRYPTO): libhacl.a quic_provider.o
-	$(CC) $(COPTS) -shared -L. quic_provider.o -lhacl -o $@
-
 clean:
 	rm -fr tmp *.[oa] *.so *.cm[ixoa] *.cmxa *.exe *.dll *.so *.annot *.lib *.def *.exp *~
 
-test.exe: $(LIBQUICCRYPTO) test.o
-	$(CC) $(COPTS) -L. test.o -lquiccrypto -o test.exe
