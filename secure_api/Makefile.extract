@@ -51,6 +51,7 @@ endif
 ################################################################################
 
 CRYPTO_DIR = $(DIST_DIR)/crypto
+TLS_FFI_DIR = $(MITLS_HOME)/libs/ffi
 
 abstract: $(CRYPTO_DIR)/Crypto_AEAD_Main.h base
 
@@ -117,7 +118,8 @@ $(OUTPUT_DIR)/%.ml:
 # 1. A clean single-file version of AEAD for the C build of miTLS    	       #
 ################################################################################
 
-CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
+CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable \
+  -Wno-parentheses
 
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
@@ -220,8 +222,8 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 # Then, we need to generate some .o ourselves, using ocamlopt to get all the
 # right include paths...
 %.o: %.c
-	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -I $(MLCRYPTO_HOME) -ccopt -o \
-	  -ccopt $@ -ccopt -Wno-unused-variable -ccopt -Wno-parentheses \
+	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -I $(MLCRYPTO_HOME) \
+	  -I $(TLS_FFI_DIR) -ccopt "-o $@" \
 	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) $(addprefix -ccopt ,$(CCOPTS)) \
 	  -I $(DIST_DIR)/uint128
 
