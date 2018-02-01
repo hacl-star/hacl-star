@@ -30,6 +30,7 @@ all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 
 ifneq (,$(KRML_NOUINT128))
 $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h: $(DIST_DIR)/uint128/kremlib0.h
+	mkdir -p $(dir $@)
 	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int.Cast.Full.fst \
 	  -tmpdir $(dir $@) -skip-compilation \
