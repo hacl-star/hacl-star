@@ -33,7 +33,7 @@ $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h: $(DIST_DIR)/uint128/kre
 	mkdir -p $(dir $@)
 	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int.Cast.Full.fst \
-	  -tmpdir $(dir $@) -skip-compilation \
+	  -tmpdir $(DIST_DIR)/uint128 -skip-compilation \
 	  -add-include '"kremlib0.h"' \
 	  -bundle FStar.UInt128+FStar.Int.Cast.Full=FStar.*,Prims
 	touch $(subst .c,.h,$(@))
