@@ -49,6 +49,8 @@ $(DIST_DIR)/uint128/uint128_wrapper.c: \
   cstubs/uint128_wrapper.c $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 	mkdir -p $(dir $@)
 	cp $< $@
+
+$(DIST_DIR)/copied/kremstr.o.: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 else
 $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h:
 	mkdir -p $(dir $@)
