@@ -35,6 +35,7 @@ $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h: $(DIST_DIR)/uint128/kre
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -add-include '"kremlib0.h"' \
 	  -bundle FStar.UInt128+FStar.Int.Cast.Full=FStar.*,Prims
+	touch $(subst .c,.h,$(@))
 
 $(DIST_DIR)/uint128/kremlib0.h: cstubs/kremlib0.h
 	mkdir -p $(dir $@)
@@ -45,7 +46,9 @@ KOPTS+=-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full
 CFLAGS+=-DKRML_NOUINT128
 else
 $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h:
+	mkdir -p $(dir $@)
 	touch $@
+	touch $(subst .c,.h,$(@))
 endif
 
 ################################################################################
