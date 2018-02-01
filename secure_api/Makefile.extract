@@ -227,9 +227,13 @@ HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Curve25519.h $(CURVE
 	  $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 
 # Technically these dependency edges are only real for the KRML_NOUINT128 case.
+$(CURVE_DIR)/FStar.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 $(CURVE_DIR)/Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 $(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 $(VALE_DIR)/Vale_Hash_SHA2_256.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
+$(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
+$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
+$(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
