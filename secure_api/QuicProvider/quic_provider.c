@@ -268,5 +268,8 @@ int quic_crypto_free_key(quic_key *key)
   // TODO switch to caller allocated style in Crypto.AEAD
   if(key && key->st.prf.key)
     free(key->st.prf.key);
-  if(key) free(key);
+
+  free(key);
+  return 1;
 }
+
