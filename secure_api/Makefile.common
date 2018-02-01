@@ -2,6 +2,7 @@ HACL_HOME 	?= ..
 KREMLIN_HOME 	?= ../../kremlin
 FSTAR_HOME 	?= ../../FStar
 MLCRYPTO_HOME   ?= ../../MLCrypto
+MITLS_HOME      ?= ../../mitls-fstar
 CONCRETE_DIR	= $(HACL_HOME)/secure_api/concrete_specializations
 IMPL_CHOICE	?= runtime_switch
 DIST_DIR	= $(HACL_HOME)/secure_api/out/$(IMPL_CHOICE)

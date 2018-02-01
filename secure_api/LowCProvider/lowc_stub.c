@@ -9,10 +9,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#include <inttypes.h>
 
 #include <caml/alloc.h>
 #include <caml/callback.h>
@@ -21,6 +23,7 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
+#include "FStar_UInt128_FStar_Int_Cast_Full.h"
 #include "Crypto_AEAD_Main_Crypto_Indexing.h"
 #include "Crypto_Symmetric_Bytes.h"
 #include "Curve25519.h"
