@@ -108,7 +108,7 @@ int quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, const char 
   }
 
   // Empty hash
-  char hash[hlen];
+  char *hash = alloca(hlen);
   if(!quic_crypto_hash(a, hash, label, 0)) return 0;
 
   info[9+label_len] = (char)hlen;
@@ -121,7 +121,7 @@ int quic_crypto_tls_derive_secret(quic_secret *derived, const quic_secret *secre
 {
   uint32_t hlen = (secret->hash == TLS_hash_SHA256 ? 32 :
     (secret->hash == TLS_hash_SHA384 ? 48 : 64));
-  char tmp[hlen];
+  char *tmp = alloca(hlen);
   char info[323] = {0};
   size_t info_len;
 
