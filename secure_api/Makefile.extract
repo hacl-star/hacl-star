@@ -41,6 +41,8 @@ $(DIST_DIR)/uint128/kremlib0.h: cstubs/kremlib0.h
 	cp $< $@
 
 KOPTS+=-add-early-include '"FStar_UInt128_FStar_Int_Cast_Full.h"'
+KOPTS+=-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full
+CFLAGS+=-DKRML_NOUINT128
 else
 $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h:
 	touch $@
