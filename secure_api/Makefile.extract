@@ -25,6 +25,21 @@ include Makefile.common
 all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 
 ################################################################################
+# This Makefile ought to work with and without compiler support for UInt128    #
+################################################################################
+
+ifeq (,$(KRML_NOUINT128))
+$(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h:
+	$(KREMLIN_HOME)/krml -minimal -add-include '"kremlib.h"' -fnouint128 \
+	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int.Cast.Full.fst \
+	  -tmpdir $(dir $@) -skip-compilation \
+	  -bundle FStar.UInt128+FStar.Int.Cast.Full=FStar.*,Prims
+else
+$(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h:
+	touch $@
+endif
+
+################################################################################
 # Main configurations                                    		       #
 ################################################################################
 
