@@ -190,7 +190,7 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 # right include paths...
 %.o: %.c
 	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -I $(MLCRYPTO_HOME) -ccopt -o \
-	  -ccopt $@ -ccopt -fPIC -ccopt -Wno-unused-variable -ccopt -Wno-parentheses \
+	  -ccopt $@ -ccopt -Wno-unused-variable -ccopt -Wno-parentheses \
 	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) $(addprefix -ccopt ,$(CCOPTS))
 
 # Gross approximation: the cmx's we build are most likely extracted F* code and,
