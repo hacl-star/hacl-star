@@ -24,7 +24,6 @@
 #include "Crypto_AEAD_Main_Crypto_Indexing.h"
 #include "Crypto_Symmetric_Bytes.h"
 #include "Curve25519.h"
-#include "FStar.h"
 
 typedef Crypto_AEAD_Invariant_aead_state AEAD_ST;
 typedef Crypto_Indexing_id ID;
@@ -122,7 +121,7 @@ CAMLprim value ocaml_AEAD_encrypt(value state, value iv, value ad,
   AEAD_ST *ast = st->st;
   ID id = st->id;
   uint8_t *civ = (uint8_t *)String_val(iv);
-  FStar_UInt128_uint128 n = Crypto_Symmetric_Bytes_load_uint128(
+  FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(
       (uint32_t)caml_string_length(iv), civ);
   uint8_t *cad = (uint8_t *)String_val(ad);
   uint32_t adlen = caml_string_length(ad);
@@ -145,7 +144,7 @@ CAMLprim value ocaml_AEAD_decrypt(value state, value iv, value ad,
   AEAD_ST *ast = st->st;
   ID id = st->id;
   uint8_t *civ = (uint8_t *)String_val(iv);
-  FStar_UInt128_uint128 n = Crypto_Symmetric_Bytes_load_uint128(
+  FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(
       (uint32_t)caml_string_length(iv), civ);
   uint8_t *cad = (uint8_t *)String_val(ad);
   uint32_t adlen = caml_string_length(ad);
