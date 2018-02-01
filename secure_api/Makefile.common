@@ -31,8 +31,9 @@ else ifeq ($(OS),Windows_NT)
   SO = dll
   export PATH
 endif
-CCOPTS=-Wall -Wextra -Werror $(CFLAGS) -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
+CCOPTS=-Wall -Wextra $(CFLAGS) -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
 
+# -Werror --not yet feasible because of FStar_Char_char_of_int in kremstr.h
 # The include paths, including the implementation choice.
 INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/specs \
