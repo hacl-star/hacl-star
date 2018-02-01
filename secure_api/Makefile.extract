@@ -28,7 +28,7 @@ all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 # This Makefile ought to work with and without compiler support for UInt128    #
 ################################################################################
 
-ifeq (,$(KRML_NOUINT128))
+ifneq (,$(KRML_NOUINT128))
 $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h: $(DIST_DIR)/uint128/kremlib0.h
 	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int.Cast.Full.fst \
@@ -184,14 +184,20 @@ $(DIST_DIR)/krml-test.exe: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILE
 # 4. The LowC provider library                                   	       #
 ################################################################################
 
-CURVE_DIR=$(HACL_HOME)/code/curve25519/x25519-c/
+CURVE_DIR=$(HACL_HOME)/code/curve25519/x25519-c
 
 ifeq (,$(wildcard $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa))
   $(error FSTAR_HOME is $(FSTAR_HOME) and I cannot find $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa -- please run `make -C $(FSTAR_HOME)/ulib/ml`)
 endif
 
 ifeq (,$(wildcard $(CURVE_DIR)/Curve25519.c))
-  $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find $(CURVE_DIR)/Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
+  ifneq (,$(KRML_NOUINT128))
+    $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
+      $(CURVE_DIR)/Curve25519.c -- please run `KOPTS="-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full -add-early-include '\"FStar_UInt128_FStar_Int_Cast_Full.h\"'" make -C $(CURVE_DIR)/.. extract-c`)
+  else
+    $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
+      $(CURVE_DIR)/Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
+  endif
 endif
 
 # Since we're building an actual C file, we need the standalone AEAD file, along
