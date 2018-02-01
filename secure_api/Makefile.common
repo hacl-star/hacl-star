@@ -31,7 +31,7 @@ else ifeq ($(OS),Windows_NT)
   SO = dll
   export PATH
 endif
-CCOPTS=-Wall -Wextra -Werror -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
+CCOPTS=-Wall -Wextra -Werror $(CFLAGS) -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
 
 # The include paths, including the implementation choice.
 INCLUDE_PATHS=$(addprefix --include , \
