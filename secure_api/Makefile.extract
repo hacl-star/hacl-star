@@ -29,11 +29,18 @@ all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 ################################################################################
 
 ifeq (,$(KRML_NOUINT128))
-$(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h:
-	$(KREMLIN_HOME)/krml -minimal -add-include '"kremlib.h"' -fnouint128 \
+$(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h: $(DIST_DIR)/uint128/kremlib0.h
+	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int.Cast.Full.fst \
 	  -tmpdir $(dir $@) -skip-compilation \
+	  -add-include '"kremlib0.h"' \
 	  -bundle FStar.UInt128+FStar.Int.Cast.Full=FStar.*,Prims
+
+$(DIST_DIR)/uint128/kremlib0.h: cstubs/kremlib0.h
+	mkdir -p $(dir $@)
+	cp $< $@
+
+KOPTS+=-add-early-include '"FStar_UInt128_FStar_Int_Cast_Full.h"'
 else
 $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h:
 	touch $@
@@ -109,6 +116,8 @@ $(OUTPUT_DIR)/%.ml:
 ################################################################################
 # 1. A clean single-file version of AEAD for the C build of miTLS    	       #
 ################################################################################
+
+CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
 
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
@@ -189,7 +198,8 @@ endif
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
 HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h \
-	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h
+	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h \
+	  $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
@@ -206,7 +216,8 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 %.o: %.c
 	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -I $(MLCRYPTO_HOME) -ccopt -o \
 	  -ccopt $@ -ccopt -Wno-unused-variable -ccopt -Wno-parentheses \
-	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) $(addprefix -ccopt ,$(CCOPTS))
+	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) $(addprefix -ccopt ,$(CCOPTS)) \
+	  -I $(DIST_DIR)/uint128
 
 # Gross approximation: the cmx's we build are most likely extracted F* code and,
 # as such, require a working fstarlib.
