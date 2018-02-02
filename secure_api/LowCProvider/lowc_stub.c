@@ -23,7 +23,7 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
-#include "FStar_UInt128_FStar_Int_Cast_Full.h"
+#include "FStar_UInt128.h"
 #include "Crypto_AEAD_Main_Crypto_Indexing.h"
 #include "Crypto_Symmetric_Bytes.h"
 #include "Curve25519.h"

@@ -29,31 +29,32 @@ all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
 ################################################################################
 
 ifneq (,$(KRML_NOUINT128))
-$(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h: $(DIST_DIR)/uint128/kremlib0.h
+$(DIST_DIR)/uint128/FStar_UInt128.h: $(DIST_DIR)/uint128/kremlib0.h
 	mkdir -p $(dir $@)
 	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
-	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int.Cast.Full.fst \
+	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst
 	  -tmpdir $(DIST_DIR)/uint128 -skip-compilation \
 	  -add-include '"kremlib0.h"' \
-	  -bundle FStar.UInt128+FStar.Int.Cast.Full=FStar.*,Prims
+	  -drop FStar.Int.Cast.Full \
+	  -bundle FStar.UInt128=FStar.*,Prims
 	touch $(subst .c,.h,$(@))
 
 $(DIST_DIR)/uint128/kremlib0.h: cstubs/kremlib0.h
 	mkdir -p $(dir $@)
 	cp $< $@
 
-KOPTS+=-add-early-include '"FStar_UInt128_FStar_Int_Cast_Full.h"'
-KOPTS+=-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full
+KOPTS+=-add-early-include '"FStar_UInt128.h"'
+KOPTS+=-fnouint128 -drop FStar.UInt128
 CFLAGS+=-DKRML_NOUINT128
 
 $(DIST_DIR)/uint128/uint128_wrapper.c: \
-  cstubs/uint128_wrapper.c $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
+  cstubs/uint128_wrapper.c $(DIST_DIR)/uint128/FStar_UInt128.h
 	mkdir -p $(dir $@)
 	cp $< $@
 
-$(DIST_DIR)/copied/kremstr.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
+$(DIST_DIR)/copied/kremstr.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 else
-$(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h:
+$(DIST_DIR)/uint128/FStar_UInt128.h:
 	mkdir -p $(dir $@)
 	touch $@
 	touch $(subst .h,.c,$(@))
@@ -213,7 +214,7 @@ endif
 ifeq (,$(wildcard $(CURVE_DIR)/Curve25519.c))
   ifneq (,$(KRML_NOUINT128))
     $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
-      $(CURVE_DIR)/Curve25519.c -- please run `KOPTS="-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full -add-early-include '\"FStar_UInt128_FStar_Int_Cast_Full.h\"'" make -C $(CURVE_DIR)/.. extract-c`)
+      $(CURVE_DIR)/Curve25519.c -- please run `KOPTS="-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full -add-early-include '\"FStar_UInt128.h\"'" make -C $(CURVE_DIR)/.. extract-c`)
   else
     $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
       $(CURVE_DIR)/Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
@@ -225,16 +226,16 @@ endif
 # Crypto.Symmetric.Bytes.
 HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h \
 	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h \
-	  $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
+	  $(DIST_DIR)/uint128/FStar_UInt128.h
 
 # Technically these dependency edges are only real for the KRML_NOUINT128 case.
-$(CURVE_DIR)/FStar.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
-$(CURVE_DIR)/Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
-$(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
-$(VALE_DIR)/Vale_Hash_SHA2_256.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
-$(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
-$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
-$(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
+$(CURVE_DIR)/FStar.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(CURVE_DIR)/Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(VALE_DIR)/Vale_Hash_SHA2_256.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
