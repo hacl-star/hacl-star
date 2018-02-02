@@ -24,9 +24,9 @@ typedef struct quic_key {
 } quic_key;
 
 #if DEBUG
-void dump(unsigned char buffer[], size_t len)
+void dump(char buffer[], size_t len)
 {
-  int i;
+  size_t i;
   for(i=0; i<len; i++) {
     printf("%02x",buffer[i]);
     if (i % 32 == 31 || i == len-1) printf("\n");
@@ -56,7 +56,7 @@ void dump_secret(quic_secret *s)
 
 int quic_crypto_hash(quic_hash a, /*out*/ char *hash, const char *data, size_t len){
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HMAC_agile_hash(CONVERT_ALG(a), hash, (char*)data, len);
+  Crypto_HMAC_agile_hash(CONVERT_ALG(a), (uint8_t*) hash, (uint8_t*)data, len);
   return 1;
 }
 
@@ -64,7 +64,7 @@ int quic_crypto_hmac(quic_hash a, char *mac,
                      const char *key, uint32_t key_len,
                      const char *data, uint32_t data_len) {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HMAC_hmac(CONVERT_ALG(a), mac, (uint8_t*)key, key_len, (uint8_t*)data, data_len);
+  Crypto_HMAC_hmac(CONVERT_ALG(a), (uint8_t*) mac, (uint8_t*)key, key_len, (uint8_t*)data, data_len);
   return 1;
 }
 
@@ -73,14 +73,14 @@ int quic_crypto_hkdf_extract(quic_hash a, char *prk,
                              const char *ikm, uint32_t ikm_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HKDF_hkdf_extract(CONVERT_ALG(a), prk, (uint8_t*)salt, salt_len, (uint8_t*)ikm, ikm_len);
+  Crypto_HKDF_hkdf_extract(CONVERT_ALG(a), (uint8_t*) prk, (uint8_t*)salt, salt_len, (uint8_t*)ikm, ikm_len);
   return 1;
 }
 
 int quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, const char *prk, uint32_t prk_len, const char *info, uint32_t info_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HKDF_hkdf_expand(CONVERT_ALG(a), okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
+  Crypto_HKDF_hkdf_expand(CONVERT_ALG(a), (uint8_t*) okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
   return 1;
 }
 
@@ -224,8 +224,8 @@ int quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, const char *ad
   memcpy(iv, key->static_iv, 12);
   sn_to_iv(iv, sn);
 
-  FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, iv);
-  Crypto_AEAD_Main_encrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, cipher);
+  FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, (uint8_t*)iv);
+  Crypto_AEAD_Main_encrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, (uint8_t*)cipher);
 
 #if DEBUG
   printf("ENCRYPT\nIV="); dump(iv, 12);
@@ -247,9 +247,9 @@ int quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, const char *ad,
   if(cipher_len < Crypto_Symmetric_MAC_taglen)
     return 0;
 
-  FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, iv);
+  FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, (uint8_t*)iv);
   uint32_t plain_len = cipher_len - Crypto_Symmetric_MAC_taglen;
-  int r = Crypto_AEAD_Main_decrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, plain, (uint8_t*)cipher);
+  int r = Crypto_AEAD_Main_decrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, (uint8_t*)cipher);
 
 #if DEBUG
   printf("DECRYPT %s\nIV=", r?"OK":"BAD"); dump(iv, 12);

@@ -9,9 +9,9 @@
 
 #include "quic_provider.h"
 
-void dump(unsigned char buffer[], size_t len)
+void dump(char buffer[], size_t len)
 {
-  int i;
+  size_t i;
   for(i=0; i<len; i++) {
     printf("%02x",buffer[i]);
     if (i % 32 == 31 || i == len-1) printf("\n");
