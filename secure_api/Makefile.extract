@@ -51,7 +51,7 @@ $(DIST_DIR)/uint128/uint128_wrapper.c: \
 	mkdir -p $(dir $@)
 	cp $< $@
 
-$(DIST_DIR)/copied/kremstr.o.: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
+$(DIST_DIR)/copied/kremstr.o: $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h
 else
 $(DIST_DIR)/uint128/FStar_UInt128_FStar_Int_Cast_Full.h:
 	mkdir -p $(dir $@)
@@ -141,7 +141,7 @@ CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable 
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
 $(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
-	$(KREMLIN_HOME)/krml $(KOPTS) -drop FStar.UInt128 -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
+	$(KREMLIN_HOME)/krml $(KOPTS) -drop FStar.UInt128,FStar.Int.Cast.Full -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
 	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
 	  $(EXTRA)
 
