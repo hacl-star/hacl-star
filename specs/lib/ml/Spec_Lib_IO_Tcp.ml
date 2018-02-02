@@ -30,12 +30,15 @@ let connect s i =
 
 let connectTimeout t s i = connect s i
 
-let sock_send sock l b =
-  let str = FStar_String.string_of_list b in
-  let b = FStar_String.list_of_string str in
-  List.iter (Printf.printf "%02x ") b;
-  Printf.printf "\n";
-  send sock str 0 l []
+let uint8s_to_bytes s =
+  let b = Bytes.create (List.length s) in
+  List.iteri (fun i c -> Bytes.set b i (Char.chr c)) s;
+  b
+
+let sock_send sock s =
+  let l = List.length s in
+  let b = uint8s_to_bytes s in
+  send sock b 0 l []
 
 let sock_recv sock maxlen =
   let str = String.create maxlen in
@@ -66,9 +69,8 @@ let recv s i =
     Error (Printf.sprintf "%s: %s(%s)" (error_message e) s1 s2)
 
 let rec send s l b =
-  let l' = Z.to_int l in
   try (
-    let n = sock_send s l' b in
+    let n = sock_send s b in
     let m = List.length b in
     if n < m
     then
