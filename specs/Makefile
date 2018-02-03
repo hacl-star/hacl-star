@@ -29,6 +29,13 @@ all: test
 test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe hmac.exe hkdf.exe ed25519.exe
 
 
+noise.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Noise.fst
+	mkdir -p noise-ml
+	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Noise --odir noise-ml $^
+	@echo 'let _ = test()' >> noise-ml/Spec_Noise.ml
+	$(OCAMLOPT) -I noise-ml noise-ml/Spec_Lib_IntTypes.ml noise-ml/Spec_Lib_RawIntTypes.ml noise-ml/Spec_Lib_IntSeq.ml noise-ml/Spec_Noise.ml -o noise.exe
+	./noise.exe
+
 chacha20.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.CTR.fst Spec.Chacha20.fst tests/Spec.Chacha20.Test.fst
 	mkdir -p chacha20-ml
 	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq  --extract_module Spec.CTR --extract_module Spec.Chacha20 --extract_module Spec.Chacha20.Test --odir chacha20-ml $^
