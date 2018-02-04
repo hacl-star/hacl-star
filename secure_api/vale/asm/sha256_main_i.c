@@ -103,7 +103,6 @@ sha256_main_i_SHA256_BlockDataOrder(
   uint64_t pos = (uint64_t)0U;
   pos = (uint64_t)0U;
   uint32_t *W;
-  KRML_CHECK_SIZE((uint32_t)0U, (uint32_t)(uint64_t)64U);
   uint32_t buf[(uint32_t)(uint64_t)64U];
   memset(buf, 0U, (uint32_t)(uint64_t)64U * sizeof buf[0U]);
   W = buf;
@@ -249,11 +248,9 @@ sha256_main_i_SHA256_Complete(uint8_t *bytes, uint64_t offset, uint64_t len, uin
     };
   ctx = buf0;
   sha256_main_i_SHA256Context *_nw0 = ctx;
-  KRML_CHECK_SIZE((uint32_t)0U, (uint32_t)(uint64_t)8U);
   uint32_t buf[(uint32_t)(uint64_t)8U];
   memset(buf, 0U, (uint32_t)(uint64_t)8U * sizeof buf[0U]);
   _nw0->H = buf;
-  KRML_CHECK_SIZE((uint8_t)0U, (uint32_t)(uint64_t)64U);
   uint8_t buf1[(uint32_t)(uint64_t)64U];
   memset(buf1, 0U, (uint32_t)(uint64_t)64U * sizeof buf1[0U]);
   _nw0->unprocessed_bytes = buf1;
