@@ -181,7 +181,7 @@ int quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
   quic_key *key = KRML_HOST_MALLOC(sizeof(quic_key));
   if(!key) return 0;
 
-  key->id = Crypto_Indexing_testId(secret->ae);
+  key->id = Crypto_Indexing_testId((Crypto_Indexing_aeadAlg)secret->ae);
 
   uint32_t klen = (secret->ae == TLS_aead_AES_128_GCM ? 16 : 32);
   uint32_t slen = (secret->hash == TLS_hash_SHA256 ? 32 :
