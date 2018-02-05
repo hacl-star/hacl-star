@@ -48,7 +48,7 @@ val vec_store_le: b:uint8_p{Buffer.length b = 16} -> r:vec -> Stack unit
 			     s == vec_as_seq r)))
 
 
-val vec_load128_le: b:uint8_p{Buffer.length b = 16} -> Stack vec 
+val vec_load128_le: b:uint8_p{Buffer.length b = 16} -> Stack vec
               (requires (fun h -> live h b))
 	      (ensures  (fun h0 r h1 -> live h1 b /\ h0 == h1 /\ live h0 b /\
 	      		    (let s = Spec.Lib.uint32s_from_le 4 (reveal_sbytes (as_seq h0 b)) in
@@ -66,6 +66,8 @@ val vec_add: s0:vec -> s0':vec -> Tot (s1:vec{
   vec_as_seq s1 == Spec.Chacha20_vec.op_Plus_Percent_Hat (vec_as_seq s0) (vec_as_seq s0')})
 val vec_xor: s0:vec -> s0':vec -> Tot (s1:vec{
   vec_as_seq s1 == Spec.Chacha20_vec.op_Hat_Hat (vec_as_seq s0) (vec_as_seq s0')})
+val vec_increment: s0:vec -> Tot (s1:vec{
+  vec_as_seq s1 == Spec.Chacha20_vec.op_Plus_Percent_Hat (vec_as_seq s0) (Seq.Create.create_4 1ul 0ul 0ul 0ul)})
 
 inline_for_extraction let ( <<< ) (v:vec) (r:u32{U32.v r < 32}): Tot (vec) = vec_rotate_left v r
 inline_for_extraction let ( +%^ ) (v1:vec) (v2:vec): Tot (vec) = vec_add v1 v2
