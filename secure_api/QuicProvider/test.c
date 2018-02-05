@@ -13,7 +13,7 @@ void dump(char buffer[], size_t len)
 {
   size_t i;
   for(i=0; i<len; i++) {
-    printf("%02x",buffer[i]);
+    printf("%02x",buffer[i] & 0xFF);
     if (i % 32 == 31 || i == len-1) printf("\n");
   }
 }
@@ -71,9 +71,7 @@ int main(int argc, char **argv)
   }
   dump(okm, 42);
 
-  quic_secret s = {0};
-  s.hash = TLS_hash_SHA256;
-  s.ae = TLS_aead_AES_128_GCM;
+  quic_secret s = { .hash = TLS_hash_SHA256, .ae = TLS_aead_AES_128_GCM };
   memcpy(s.secret, hash, 32);
   quic_crypto_tls_derive_secret(&s, &s, "EXPORTER-QUIC server 1-RTT Secret");
 

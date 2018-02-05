@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <time.h>
 
+#include "kremlib.h"
 #include "Crypto_HKDF_Crypto_HMAC.h"
 #include "Crypto_AEAD_Main_Crypto_Indexing.h"
 #include "Crypto_Symmetric_Bytes.h"
@@ -177,10 +178,10 @@ int quic_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *se
 
 int quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
 {
-  quic_key *key = malloc(sizeof(quic_key));
-  if(!(*k = key)) return 0;
+  quic_key *key = KRML_HOST_MALLOC(sizeof(quic_key));
+  if(!key) return 0;
 
-  key->id = Crypto_Indexing_testId(secret->ae);
+  key->id = Crypto_Indexing_testId((Crypto_Indexing_aeadAlg)secret->ae);
 
   uint32_t klen = (secret->ae == TLS_aead_AES_128_GCM ? 16 : 32);
   uint32_t slen = (secret->hash == TLS_hash_SHA256 ? 32 :
@@ -209,6 +210,7 @@ int quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
 #endif
 
   key->st = Crypto_AEAD_Main_coerce(key->id, (uint8_t*)dkey);
+  *k = key;
   return 1;
 }
 
@@ -267,9 +269,9 @@ int quic_crypto_free_key(quic_key *key)
   // ADL: the PRF stats is allocated with Buffer.screate
   // TODO switch to caller allocated style in Crypto.AEAD
   if(key && key->st.prf.key)
-    free(key->st.prf.key);
+    KRML_HOST_FREE(key->st.prf.key);
 
-  free(key);
+  KRML_HOST_FREE(key);
   return 1;
 }
 
