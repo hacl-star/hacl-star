@@ -1,4 +1,4 @@
-module Spec.Connect.Test
+module Spec.Network.Test
 
 open FStar.Error
 open Spec.Lib.IntTypes
