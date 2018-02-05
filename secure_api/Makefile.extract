@@ -311,6 +311,3 @@ $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) $(QUICPROVIDER_DIR)/quic_provider
 
 $(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)
 	$(CC) $< -o $@ -L$(DIST_DIR) -lquicprovider
-
-clean:
-	rm -rf .depend.extract out/* vale/asm/*.o LowCProvider/*.{cm*,o,a}

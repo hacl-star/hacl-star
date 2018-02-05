@@ -35,6 +35,6 @@ hacl_aes_abstract_id:
 	IMPL_CHOICE=hacl_aes_abstract_id $(MAKE) -f Makefile.extract abstract
 
 clean:
-	$(MAKE) -f Makefile.extract clean
+	rm -rf .depend.extract out/* vale/asm/*.o LowCProvider/*.{cm*,o,a}
 
 include $(HACL_HOME)/secure_api/Makefile.common
