@@ -24,5 +24,9 @@ let test() =
     IO.print_string "Success to connect !\n";
     match TCP.send tcp (FStar.List.Tot.length test_client_hello) test_client_hello with
     | Error _ -> IO.print_string "Failed to send !\n"
-    | Correct _ -> IO.print_string "Success to send !\n"
+    | Correct _ ->
+      (IO.print_string "Success to send !\n";
+      match TCP.recv tcp 128 with
+      | Error _ -> IO.print_string "Failed to receive !\n"
+      | Correct _ -> IO.print_string "Success to receive !\n")
     end
