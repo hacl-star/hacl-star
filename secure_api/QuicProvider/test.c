@@ -13,7 +13,7 @@ void dump(char buffer[], size_t len)
 {
   size_t i;
   for(i=0; i<len; i++) {
-    printf("%02x",buffer[i]);
+    printf("%02x",buffer[i] & 0xFF);
     if (i % 32 == 31 || i == len-1) printf("\n");
   }
 }
