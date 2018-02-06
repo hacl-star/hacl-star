@@ -40,6 +40,18 @@ chacha20(
 }
 
 void
+chacha20_vec128(
+         uint8_t *output,
+         uint8_t *plain,
+         uint32_t plain_len,
+         uint8_t *key,
+         uint8_t *nonce,
+         uint32_t ctr
+         ){
+  Hacl_Chacha20_Vec128_chacha20(output, plain, plain_len, key, nonce, ctr);
+}
+
+void
 salsa20(
         uint8_t *output,
         uint8_t *plain,

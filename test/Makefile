@@ -11,7 +11,8 @@ SNAPSHOT_DIR = snapshots/hacl-c
 # Compiler and settings
 #
 
-CC=gcc
+#CC=clang
+CC=gcc-7
 KREMLIB= $(HACL_HOME)/snapshots/kremlib
 
 CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops --param max-unroll-times=20

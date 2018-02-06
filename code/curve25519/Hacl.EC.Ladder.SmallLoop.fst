@@ -193,16 +193,9 @@ val cmult_small_loop:
     ))
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10000"
 let rec cmult_small_loop nq nqpq nq2 nqpq2 q byt i =
-  if (U32.(i =^ 0ul)) then (
-    let h = ST.get() in
-    cmult_small_loop_def_0 (as_seq h (getx nq), (as_seq h (getz nq))) (as_seq h (getx nqpq), (as_seq h (getz nqpq))) (as_seq h (getx q), (as_seq h (getz q))) byt
-  )
-  else (
-    let i' = U32.(i -^ 1ul) in
-    cut (U32.v i >= 1);
-    let h = ST.get() in
-    cmult_small_loop_def_1 (as_seq h (getx nq), (as_seq h (getz nq))) (as_seq h (getx nqpq), (as_seq h (getz nqpq))) (as_seq h (getx q), (as_seq h (getz q))) byt i;
-    cmult_small_loop_double_step nq nqpq nq2 nqpq2 q byt;
-    let byt' = H8.(byt <<^ 2ul) in
-    cmult_small_loop nq nqpq nq2 nqpq2 q byt' i'
-  )
+  let inv h i = True in
+  C.Loops.for 0ul i inv (fun j -> 
+    let shl = U32.(j *^ 2ul) in
+    let byt' = H8.(byt <<^ shl) in
+    cmult_small_loop_double_step nq nqpq nq2 nqpq2 q byt'
+    )

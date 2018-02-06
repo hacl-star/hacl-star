@@ -101,15 +101,13 @@ private val swap_conditional_: a:felem -> b:felem -> swap:limb{v swap = pow2 64 
      /\ (as_seq h1 a, as_seq h1 b) == swap_conditional_spec_ (as_seq h0 a) (as_seq h0 b) swap ctr
     ))
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 50"
-private let rec swap_conditional_ a b swap ctr =
-  if not U32.(ctr =^ 0ul) then 
-  (
-    cut (U32.v ctr > 0);
-    swap_conditional_step a b swap ctr;
-    let i = U32.(ctr -^ 1ul) in
-    swap_conditional_ a b swap i
+private let swap_conditional_ a b swap ctr =
+  let inv h i = True in
+  let max = U32.(ctr -^ 1ul) in
+  C.Loops.for 0ul max inv (fun j -> 
+    let idx = U32.(ctr -^ j) in
+    swap_conditional_step a b swap idx
   )
-  else ()
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 

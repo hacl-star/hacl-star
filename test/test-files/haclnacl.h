@@ -45,6 +45,16 @@ int crypto_stream_xor(uint8_t *cipher, uint8_t *msg, uint64_t cipher_len, uint8_
 
 void chacha20(uint8_t *output, uint8_t *plain, uint32_t plain_len, uint8_t *key, uint8_t *nonce, uint32_t ctr);
 
+void
+chacha20_vec128(
+         uint8_t *output,
+         uint8_t *plain,
+         uint32_t plain_len,
+         uint8_t *key,
+         uint8_t *nonce,
+         uint32_t ctr
+		);
+
 uint32_t aead_chacha20_poly1305_encrypt(uint8_t *cipher,  uint8_t *mac,  uint8_t *msg, uint32_t msg_len,  uint8_t *aad,  uint32_t aad_len,  uint8_t *key,  uint8_t *nonce);
 
 uint32_t aead_chacha20_poly1305_decrypt(uint8_t *msg, uint8_t *cipher,  uint32_t msg_len,  uint8_t *mac,  uint8_t *aad,  uint32_t aad_len,  uint8_t *key,  uint8_t *nonce);
