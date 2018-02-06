@@ -2,6 +2,7 @@
 #include "kremlib.h"
 #include "Hacl_Curve25519.h"
 #include "Hacl_Chacha20.h"
+#include "Hacl_Chacha20_Vec128.h"
 #include "Hacl_Salsa20.h"
 #define Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Impl_Poly1305_64_State_poly1305_state_poly
 #include "Hacl_Poly1305_64.h"

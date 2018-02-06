@@ -3,7 +3,7 @@
 
 
 #ifdef __MSVC__
-#define forceinline __forceinline inline
+#define forceinline __forceinline inline 
 #elif (defined(__GNUC__) || defined(__clang__))
 #define forceinline __attribute__((always_inline)) inline
 #else
@@ -93,19 +93,19 @@ static forceinline vec vec_xor(vec v1, vec v2) {
 typedef uint32x4_t vec;
 
 static forceinline vec vec_xor(vec v1, vec v2) {
-  return veorq_u32(v1.v,v2.v);
+  return veorq_u32(v1,v2);
 }
 
 
 #define vec_rotate_left(x,n) \
-  vsriq_n_u32(vshlq_n_u32((x),(n)),(x),32-(n)))
+  vsriq_n_u32(vshlq_n_u32((x),(n)),(x),32-(n))
 
 static forceinline vec vec_rotate_right(vec v, unsigned int n) {
   return (vec_rotate_left(v,32-n));
 }
 
 #define vec_shuffle_right(x,n) \
-  vextq_u32((x),(x),(n)))
+  vextq_u32((x),(x),(n))
 
 static forceinline vec vec_shuffle_left(vec x, unsigned int n) {
   return (vec_shuffle_right(x,4-n));
