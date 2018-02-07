@@ -277,6 +277,7 @@ $(DIST_DIR)/LowC.cmxa: \
 	  LowCProvider/HaclProvider.cmx \
 	  LowCProvider/lowc_stub.o \
 	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
+	  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
 	  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Curve25519.o \
 	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cmxa,%,$@)
