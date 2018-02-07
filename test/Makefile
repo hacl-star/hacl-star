@@ -13,9 +13,9 @@ KREMLIB= $(HACL_HOME)/snapshots/kremlib
 #
 
 #CC=clang
-CC=gcc
-#CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops --param max-unroll-times=20
-CCOPTS = -Ofast -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon-fp-armv8 -fwrapv -fomit-frame-pointer -funroll-loops
+CC=gcc-7
+CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops --param max-unroll-times=20
+#CCOPTS = -Ofast -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon-fp-armv8 -fwrapv -fomit-frame-pointer -funroll-loops
 
 CFLAGS = $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \

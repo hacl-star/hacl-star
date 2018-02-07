@@ -47,10 +47,13 @@ val cmult_big_loop:
          (spointa1) == cmult_big_loop_spec (as_seq h0 n) (spointa0) (spointb0) pointq i)
     ))
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 1000"
-let rec cmult_big_loop n nq nqpq nq2 nqpq2 q i =
-  let inv h i = True in
-  C.Loops.for 0ul i inv (fun j -> 
-    let idx = U32.(i -^ j -^ 1ul) in
-    let byte = n.(idx) in
-    cmult_small_loop nq nqpq nq2 nqpq2 q byte 4ul
-  )
+
+ let rec cmult_big_loop n nq nqpq nq2 nqpq2 q i =
+ if (U32.(i =^ 0ul)) then ()
+ else (
+    cut (U32.v i > 0);
+    let i = U32.(i -^ 1ul) in
+    let byte = n.(i) in
+    cmult_small_loop nq nqpq nq2 nqpq2 q byte 4ul;
+    cmult_big_loop n nq nqpq nq2 nqpq2 q i
+    )
