@@ -241,7 +241,7 @@ $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 # extraction, and then every run of this Makefile would start by extracting the
 # entire world just to get the dependencies between C files.
 $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(HEADERS)
-LowCProvider/lowc_stub.o: $(HEADERS)
+LowCProvider/lowc_stub.o: $(HEADERS) $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h
 
 OCAMLOPTS=-package fstarlib,zarith -g -I $(FSTAR_HOME)/ulib/ml
 OCAMLOPT=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind opt $(OCAMLOPTS)
