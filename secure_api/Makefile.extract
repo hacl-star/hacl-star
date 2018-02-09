@@ -301,8 +301,8 @@ $(DIST_DIR)/LowCTests.exe: $(DIST_DIR)/copied/kremstr.o \
 
 QUICPROVIDER_DIR = QuicProvider
 
-$(QUICPROVIDER_DIR)/quic_provider.o: $(HEADERS)
-$(QUICPROVIDER_DIR)/test.o: $(HEADERS)
+$(QUICPROVIDER_DIR)/quic_provider.o: $(HEADERS) $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h
+$(QUICPROVIDER_DIR)/test.o: $(HEADERS) $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h
 
 $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) $(QUICPROVIDER_DIR)/quic_provider.o \
   $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
