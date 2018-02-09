@@ -308,7 +308,7 @@ $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) $(QUICPROVIDER_DIR)/quic_provider
   $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
   $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
   $(DIST_DIR)/copied/kremstr.o $(DIST_DIR)/uint128/uint128_wrapper.o
-	$(CC) $^ -o $@ -shared
+	$(CC) $^ -o $@ $(QUICPROVIDER_SO_LDOPTS) -shared
 
 $(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)
 	$(CC) $< -o $@ -L$(DIST_DIR) -lquicprovider
