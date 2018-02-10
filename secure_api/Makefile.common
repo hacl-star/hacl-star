@@ -25,7 +25,7 @@ else ifeq ($(UNAME),Linux)
   VARIANT=-Linux
   LD_LIBRARY_PATH := $(DIST_DIR):$(LD_LIBRARY_PATH)
   SO = so
-  QUICPROVIDER_SO_LDOPTS = -Xlinker --version-script -Xlinker $(HACL_HOME)/secure_api/libquicprovider_version_script
+  QUICPROVIDER_SO_LDOPTS = -Xlinker -z -Xlinker noexecstack -Xlinker --version-script -Xlinker $(HACL_HOME)/secure_api/libquicprovider_version_script
   export LD_LIBRARY_PATH
 else ifeq ($(OS),Windows_NT)
   CC=$(MARCH)-w64-mingw32-gcc
