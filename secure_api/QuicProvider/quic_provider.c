@@ -1,11 +1,8 @@
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
-#include <time.h>
 
 #include "kremlib.h"
 #include "Crypto_HKDF_Crypto_HMAC.h"
@@ -55,13 +52,13 @@ void dump_secret(quic_secret *s)
   (a == TLS_hash_SHA256 ? Crypto_HMAC_SHA256 : \
     (a == TLS_hash_SHA384 ? Crypto_HMAC_SHA384 : Crypto_HMAC_SHA512))
 
-int quic_crypto_hash(quic_hash a, /*out*/ char *hash, const char *data, size_t len){
+int MITLS_CALLCONV quic_crypto_hash(quic_hash a, /*out*/ char *hash, const char *data, size_t len){
   if(a < TLS_hash_SHA256) return 0;
   Crypto_HMAC_agile_hash(CONVERT_ALG(a), (uint8_t*) hash, (uint8_t*)data, len);
   return 1;
 }
 
-int quic_crypto_hmac(quic_hash a, char *mac,
+int MITLS_CALLCONV quic_crypto_hmac(quic_hash a, char *mac,
                      const char *key, uint32_t key_len,
                      const char *data, uint32_t data_len) {
   if(a < TLS_hash_SHA256) return 0;
@@ -69,7 +66,7 @@ int quic_crypto_hmac(quic_hash a, char *mac,
   return 1;
 }
 
-int quic_crypto_hkdf_extract(quic_hash a, char *prk,
+int MITLS_CALLCONV quic_crypto_hkdf_extract(quic_hash a, char *prk,
                              const char *salt, uint32_t salt_len,
                              const char *ikm, uint32_t ikm_len)
 {
@@ -78,7 +75,7 @@ int quic_crypto_hkdf_extract(quic_hash a, char *prk,
   return 1;
 }
 
-int quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, const char *prk, uint32_t prk_len, const char *info, uint32_t info_len)
+int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, const char *prk, uint32_t prk_len, const char *info, uint32_t info_len)
 {
   if(a < TLS_hash_SHA256) return 0;
   Crypto_HKDF_hkdf_expand(CONVERT_ALG(a), (uint8_t*) okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
@@ -87,7 +84,7 @@ int quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen, const char *p
 
 // Use key_len = 0 for HASH("") context and hlen output
 // Use key_len = k for no context and k length output
-int quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, const char *label, uint16_t key_len)
+int MITLS_CALLCONV quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, const char *label, uint16_t key_len)
 {
   if(a < TLS_hash_SHA256) return 0;
   uint32_t hlen = (a == TLS_hash_SHA256 ? 32 :
@@ -118,7 +115,7 @@ int quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, const char 
   return 1;
 }
 
-int quic_crypto_tls_derive_secret(quic_secret *derived, const quic_secret *secret, const char *label)
+int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const quic_secret *secret, const char *label)
 {
   uint32_t hlen = (secret->hash == TLS_hash_SHA256 ? 32 :
     (secret->hash == TLS_hash_SHA384 ? 48 : 64));
@@ -161,7 +158,7 @@ int quic_crypto_tls_derive_secret(quic_secret *derived, const quic_secret *secre
   return 1;
 }
 
-int quic_crypto_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt)
+int MITLS_CALLCONV quic_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt)
 {
   quic_secret s0;
   s0.hash = TLS_hash_SHA256;
@@ -176,13 +173,7 @@ int quic_crypto_derive_plaintext_secrets(quic_secret *client_cleartext, quic_sec
   return 1;
 }
 
-// Implement the old name as a call to the new name, to help host applications that still use the old name.
-int quic_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt)
-{
-    return quic_crypto_derive_plaintext_secrets(client_cleartext, server_cleartext, con_id, salt);
-}
-
-int quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
+int MITLS_CALLCONV quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
 {
   quic_key *key = KRML_HOST_MALLOC(sizeof(quic_key));
   if(!key) return 0;
@@ -220,13 +211,13 @@ int quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
   return 1;
 }
 
-void sn_to_iv(char *iv, uint64_t sn)
+static inline void sn_to_iv(char *iv, uint64_t sn)
 {
   for(int i = 4; i < 12; i++)
     iv[i] ^= (sn >> (88-(i<<3))) & 255;
 }
 
-int quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, const char *ad, uint32_t ad_len, const char *plain, uint32_t plain_len)
+int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, const char *ad, uint32_t ad_len, const char *plain, uint32_t plain_len)
 {
   char iv[12];
   memcpy(iv, key->static_iv, 12);
@@ -246,7 +237,7 @@ int quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, const char *ad
   return 1;
 }
 
-int quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, const char *ad, uint32_t ad_len, const char *cipher, uint32_t cipher_len)
+int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, const char *ad, uint32_t ad_len, const char *cipher, uint32_t cipher_len)
 {
   char iv[12];
   memcpy(iv, key->static_iv, 12);
@@ -270,7 +261,7 @@ int quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, const char *ad,
   return r;
 }
 
-int quic_crypto_free_key(quic_key *key)
+int MITLS_CALLCONV quic_crypto_free_key(quic_key *key)
 {
   // ADL: the PRF stats is allocated with Buffer.screate
   // TODO switch to caller allocated style in Crypto.AEAD
@@ -280,4 +271,3 @@ int quic_crypto_free_key(quic_key *key)
   KRML_HOST_FREE(key);
   return 1;
 }
-
