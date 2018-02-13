@@ -161,7 +161,7 @@ int quic_crypto_tls_derive_secret(quic_secret *derived, const quic_secret *secre
   return 1;
 }
 
-int quic_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt)
+int quic_crypto_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt)
 {
   quic_secret s0;
   s0.hash = TLS_hash_SHA256;
@@ -174,6 +174,12 @@ int quic_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *se
   quic_crypto_tls_derive_secret(server_cleartext, &s0, "QUIC server cleartext Secret");
 
   return 1;
+}
+
+// Implement the old name as a call to the new name, to help host applications that still use the old name.
+int quic_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt)
+{
+    return quic_crypto_derive_plaintext_secrets(client_cleartext, server_cleartext, con_id, salt);
 }
 
 int quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
