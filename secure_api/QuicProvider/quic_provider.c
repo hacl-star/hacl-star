@@ -22,7 +22,7 @@ typedef struct quic_key {
 } quic_key;
 
 #if DEBUG
-void dump(char buffer[], size_t len)
+static void dump(char buffer[], size_t len)
 {
   size_t i;
   for(i=0; i<len; i++) {
@@ -31,7 +31,7 @@ void dump(char buffer[], size_t len)
   }
 }
 
-void dump_secret(quic_secret *s)
+static void dump_secret(quic_secret *s)
 {
   const char *ha =
     s->hash == TLS_hash_SHA256 ? "SHA256" :
@@ -82,36 +82,44 @@ int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, char *okm, uint32_t olen
   return 1;
 }
 
-// Use key_len = 0 for HASH("") context and hlen output
-// Use key_len = k for no context and k length output
-int MITLS_CALLCONV quic_crypto_tls_label(quic_hash a, char *info, size_t *info_len, const char *label, uint16_t key_len)
+int MITLS_CALLCONV quic_crypto_hkdf_tls_label(quic_hash a, char *info, size_t *info_len, const char *label)
 {
-  if(a < TLS_hash_SHA256) return 0;
-  uint32_t hlen = (a == TLS_hash_SHA256 ? 32 :
-    (a == TLS_hash_SHA384 ? 48 : 64));
   size_t label_len = strlen(label);
-  if(label_len > 249) return 0;
+  uint32_t hlen = (a == TLS_hash_SHA256 ? 32 : (a == TLS_hash_SHA384 ? 48 : 64));
+  char *hash = alloca(hlen);
 
-  info[0] = key_len ? (key_len >> 8) : 0;
-  info[1] = key_len ? (key_len & 255) : (char)hlen;
+  if(a < TLS_hash_SHA256 || !info || !hash || label_len > 249)
+    return 0;
+
+  info[0] = 0;
+  info[1] = (char)hlen;
   info[2] = (char)(label_len + 6);
   memcpy(info+3, "tls13 ", 6);
   memcpy(info+9, label, label_len);
-
-  if(key_len)
-  {
-    info[9 + label_len] = 0;
-    *info_len = label_len + 10;
-    return 1;
-  }
-
-  // Empty hash
-  char *hash = alloca(hlen);
   if(!quic_crypto_hash(a, hash, label, 0)) return 0;
-
   info[9+label_len] = (char)hlen;
   memcpy(info + label_len + 10, hash, hlen);
+
   *info_len = label_len + 10 + hlen;
+  return 1;
+}
+
+int MITLS_CALLCONV quic_crypto_hkdf_quic_label(quic_hash a, char *info, size_t *info_len, const char *label, uint16_t key_len)
+{
+  uint32_t hlen = (a == TLS_hash_SHA256 ? 32 :
+    (a == TLS_hash_SHA384 ? 48 : 64));
+  size_t label_len = strlen(label);
+
+  if(a < TLS_hash_SHA256 || !info || label_len > 249)
+    return 0;
+
+  info[0] = key_len >> 8;
+  info[1] = key_len & 255;
+  info[2] = (char)(label_len + 5);
+  memcpy(info+3, "QUIC ", 5);
+  memcpy(info+8, label, label_len);
+  info[8 + label_len] = 0;
+  *info_len = label_len + 9;
   return 1;
 }
 
@@ -123,7 +131,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
   char info[323] = {0};
   size_t info_len;
 
-  if(!quic_crypto_tls_label(secret->hash, info, &info_len, label, 0))
+  if(!quic_crypto_hkdf_tls_label(secret->hash, info, &info_len, label))
     return 0;
 
   derived->hash = secret->hash;
@@ -143,7 +151,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
   dump(tmp, hlen);
 #endif
 
-  if(!quic_crypto_tls_label(secret->hash, info, &info_len, "exporter", 0))
+  if(!quic_crypto_hkdf_tls_label(secret->hash, info, &info_len, "exporter"))
     return 0;
 
   if(!quic_crypto_hkdf_expand(secret->hash, derived->secret, hlen,
@@ -158,17 +166,32 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
   return 1;
 }
 
-int MITLS_CALLCONV quic_derive_plaintext_secrets(quic_secret *client_cleartext, quic_secret *server_cleartext, const char *con_id, const char *salt)
+int MITLS_CALLCONV quic_derive_handshake_secrets(quic_secret *client_hs, quic_secret *server_hs, const char *con_id, size_t con_id_len, const char *salt, size_t salt_len)
 {
-  quic_secret s0;
-  s0.hash = TLS_hash_SHA256;
-  s0.ae = TLS_aead_AES_128_GCM;
+  quic_secret s0 = {
+    .hash = TLS_hash_SHA256,
+    .ae = TLS_aead_AES_128_GCM,
+    .secret = {0}
+  };
+  char info[259] = {0};
+  size_t info_len;
 
-  if(!quic_crypto_hkdf_extract(s0.hash, s0.secret, salt, 20, con_id, 8))
+  if(!quic_crypto_hkdf_extract(s0.hash, s0.secret, salt, salt_len, con_id, con_id_len))
     return 0;
 
-  quic_crypto_tls_derive_secret(client_cleartext, &s0, "QUIC client cleartext Secret");
-  quic_crypto_tls_derive_secret(server_cleartext, &s0, "QUIC server cleartext Secret");
+  client_hs->hash = s0.hash;
+  client_hs->ae = s0.ae;
+  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, "client hs", 32))
+    return 0;
+  if(!quic_crypto_hkdf_expand(s0.hash, client_hs->secret, 32, s0.secret, 32, info, info_len))
+    return 0;
+
+  server_hs->hash = s0.hash;
+  server_hs->ae = s0.ae;
+  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, "server hs", 32))
+    return 0;
+  if(!quic_crypto_hkdf_expand(s0.hash, server_hs->secret, 32, s0.secret, 32, info, info_len))
+    return 0;
 
   return 1;
 }
@@ -184,20 +207,17 @@ int MITLS_CALLCONV quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret
   uint32_t slen = (secret->hash == TLS_hash_SHA256 ? 32 :
     (secret->hash == TLS_hash_SHA384 ? 48 : 64));
 
-  char info[323] = {0};
+  char info[259] = {0};
   char dkey[32];
   size_t info_len;
 
-  if(!quic_crypto_tls_label(secret->hash, info, &info_len, "key", klen))
+  if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "key", klen))
     return 0;
-
-  // HKDF-Expand-Label(Secret, "key", "", key_length)
   if(!quic_crypto_hkdf_expand(secret->hash, dkey, klen, secret->secret, slen, info, info_len))
     return 0;
 
-  if(!quic_crypto_tls_label(secret->hash, info, &info_len, "iv", 12))
+  if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "iv", 12))
     return 0;
-
   if(!quic_crypto_hkdf_expand(secret->hash, key->static_iv, 12, secret->secret, slen, info, info_len))
     return 0;
 
@@ -215,6 +235,17 @@ static inline void sn_to_iv(char *iv, uint64_t sn)
 {
   for(int i = 4; i < 12; i++)
     iv[i] ^= (sn >> (88-(i<<3))) & 255;
+}
+
+int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const char *raw_key, const char *iv)
+{
+  quic_key *k = KRML_HOST_MALLOC(sizeof(quic_key));
+  if(!k) return 0;
+  k->id = Crypto_Indexing_testId((Crypto_Indexing_aeadAlg)alg);
+  k->st = Crypto_AEAD_Main_coerce(k->id, (uint8_t*)raw_key);
+  memcpy(k->static_iv, iv, 12);
+  *key = k;
+  return 1;
 }
 
 int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn, const char *ad, uint32_t ad_len, const char *plain, uint32_t plain_len)
@@ -265,9 +296,12 @@ int MITLS_CALLCONV quic_crypto_free_key(quic_key *key)
 {
   // ADL: the PRF stats is allocated with Buffer.screate
   // TODO switch to caller allocated style in Crypto.AEAD
-  if(key && key->st.prf.key)
+  if(key != NULL)
+  {
     KRML_HOST_FREE(key->st.prf.key);
-
-  KRML_HOST_FREE(key);
+    if(key->st.ak.tag) //  == FStar_Pervasives_Native_Some
+      KRML_HOST_FREE(key->st.ak._0);
+    KRML_HOST_FREE(key);
+  }
   return 1;
 }
