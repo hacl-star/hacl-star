@@ -35,6 +35,11 @@ let uint8s_to_bytes s =
   List.iteri (fun i c -> Bytes.set b i (Char.chr c)) s;
   b
 
+let uint8s_from_bytes s =
+  let rec exp i l =
+    if i < 0 then l else exp (i - 1) ((Char.code s.[i]) :: l) in
+  exp (Bytes.length s - 1) []
+
 let sock_send sock s =
   let l = List.length s in
   let b = uint8s_to_bytes s in
@@ -43,8 +48,7 @@ let sock_send sock s =
 let sock_recv sock maxlen =
   let str = String.create maxlen in
   let recvlen = recv sock str 0 maxlen [] in
-  let str = String.sub str 0 recvlen in
-  str
+  recvlen,str
 
 (* type 'a recv_result =
  *   | RecvWouldBlock
@@ -63,8 +67,10 @@ let clear_nonblock = clear_nonblock
 let recv s i =
   let i = Z.to_int i in
   try
-    let b = sock_recv s i in
-    Correct (String.length b, b)
+    let (l,output) = sock_recv s i in
+    let lr = Z.of_int l in
+    let outr = uint8s_from_bytes output in
+    Correct (lr,outr)
   with Unix_error (e,s1,s2) ->
     Error (Printf.sprintf "%s: %s(%s)" (error_message e) s1 s2)
 

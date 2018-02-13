@@ -34,7 +34,7 @@ val connect: string -> nat -> Tot (optResult ioerror_t networkStream)
 //   | Received of (lbytes len)
 
 //val recv_async: networkStream -> max:size_nat -> Tot (optResult ioerror_t (len:size_nat{len <= max} & b:recv_result len max))
-val recv: networkStream -> max:size_nat -> Tot (optResult ioerror_t (len:size_nat & b:(lbytes len){len <= max}))
+val recv: networkStream -> max:size_nat -> Tot (optResult ioerror_t (len:size_nat{len <= max} * b:(lbytes max)))
 val send: networkStream -> len:size_nat -> b:lbytes len -> Tot (optResult ioerror_t unit)
 val close: networkStream -> Tot unit
 

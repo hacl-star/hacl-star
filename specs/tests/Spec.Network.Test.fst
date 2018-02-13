@@ -17,16 +17,18 @@ let test_client_hello = List.Tot.map u8_from_UInt8 [
 
 (* Test *)
 let test() =
-  // let f tcp = ... in
   match TCP.connect "enabled.tls13.com" 443 with
   | Error _ -> IO.print_string "Failed to connect !\n"
   | Correct tcp -> begin
     IO.print_string "Success to connect !\n";
-    match TCP.send tcp (FStar.List.Tot.length test_client_hello) test_client_hello with
+    match TCP.send tcp (FStar.List.Tot.length test_client_hello) (createL test_client_hello) with
     | Error _ -> IO.print_string "Failed to send !\n"
     | Correct _ ->
       (IO.print_string "Success to send !\n";
       match TCP.recv tcp 128 with
       | Error _ -> IO.print_string "Failed to receive !\n"
-      | Correct _ -> IO.print_string "Success to receive !\n")
+      | Correct (l,out) ->
+        IO.print_string "Success to receive !\n";
+        IO.print_lbytes l (as_list out);
+        IO.print_newline ())
     end
