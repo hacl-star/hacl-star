@@ -74,7 +74,7 @@ $(LIBFILE): $(LIBQUICCRYPTO)
 endif
 
 test:
-	IMPL_CHOICE=runtime_switch make -C .. -f Makefile.extract quicprovider-test
+	IMPL_CHOICE=runtime_switch $(MAKE) -C .. -f Makefile.extract quicprovider-test
 
 # $(LIBQUICCRYPTO) $(LIBFILE)
 

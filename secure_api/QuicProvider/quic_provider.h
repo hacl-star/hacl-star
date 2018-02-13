@@ -20,6 +20,9 @@
 
 typedef struct quic_key quic_key;
 
+// Helper function to determine the buffer overhead for encryption.
+#define quic_crypto_tag_length(pKey) 16
+
 // Main functions for QUIC AEAD keying. Encryption keys for AEAD are
 // derived as follows (see quic-tls#4 section 5)
 //

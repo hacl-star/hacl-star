@@ -12,9 +12,6 @@
 
 #define DEBUG 0
 
-// FIXME!!
-#define Crypto_Symmetric_MAC_taglen 16
-
 typedef struct quic_key {
   Crypto_AEAD_Invariant_aead_state st;
   Crypto_Indexing_id id;
@@ -96,11 +93,14 @@ int MITLS_CALLCONV quic_crypto_hkdf_tls_label(quic_hash a, char *info, size_t *i
   info[2] = (char)(label_len + 6);
   memcpy(info+3, "tls13 ", 6);
   memcpy(info+9, label, label_len);
-  if(!quic_crypto_hash(a, hash, label, 0)) return 0;
+
+  if(!quic_crypto_hash(a, hash, label, 0))
+    return 0;
+
   info[9+label_len] = (char)hlen;
   memcpy(info + label_len + 10, hash, hlen);
-
   *info_len = label_len + 10 + hlen;
+
   return 1;
 }
 
@@ -120,6 +120,7 @@ int MITLS_CALLCONV quic_crypto_hkdf_quic_label(quic_hash a, char *info, size_t *
   memcpy(info+8, label, label_len);
   info[8 + label_len] = 0;
   *info_len = label_len + 9;
+
   return 1;
 }
 
@@ -196,7 +197,7 @@ int MITLS_CALLCONV quic_derive_handshake_secrets(quic_secret *client_hs, quic_se
   return 1;
 }
 
-int MITLS_CALLCONV quic_crypto_derive_key(/*out*/quic_key **k, const quic_secret *secret)
+int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secret)
 {
   quic_key *key = KRML_HOST_MALLOC(sizeof(quic_key));
   if(!key) return 0;
@@ -274,11 +275,11 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, 
   memcpy(iv, key->static_iv, 12);
   sn_to_iv(iv, sn);
 
-  if(cipher_len < Crypto_Symmetric_MAC_taglen)
+  if(cipher_len < quic_crypto_tag_length(key))
     return 0;
 
   FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, (uint8_t*)iv);
-  uint32_t plain_len = cipher_len - Crypto_Symmetric_MAC_taglen;
+  uint32_t plain_len = cipher_len - quic_crypto_tag_length(key);
   int r = Crypto_AEAD_Main_decrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, (uint8_t*)cipher);
 
 #if DEBUG
