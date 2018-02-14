@@ -150,6 +150,13 @@ ed25519.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/
 	$(OCAMLOPT) -I ed25519-ml ed25519-ml/Spec_Lib_IntTypes.ml ed25519-ml/Spec_Lib_RawIntTypes.ml ed25519-ml/Spec_Lib_IntSeq.ml ed25519-ml/Spec_Lib_Stateful.ml ed25519-ml/Spec_SHA2.ml ed25519-ml/Spec_Curve25519.ml ed25519-ml/Spec_Ed25519.ml ed25519-ml/Spec_Ed25519_Test.ml -o ed25519.exe
 	./ed25519.exe
 
+network.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst tests/Spec.Network.Test.fst
+	mkdir -p network-ml
+	$(FSTAR) --include lib --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Network.Test --odir network-ml $^
+	@echo 'let _ = test()' >> network-ml/Spec_Network_Test.ml
+	$(OCAMLOPT) -I network-ml -I lib/ml lib/ml/Spec_Lib_IO_Tcp.ml network-ml/Spec_Lib_IntTypes.ml network-ml/Spec_Lib_RawIntTypes.ml network-ml/Spec_Lib_IntSeq.ml network-ml/Spec_Network_Test.ml -o network.exe
+	./network.exe
+
 clean:
 	$(MAKE) -C ../code/lib/ml clean
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
