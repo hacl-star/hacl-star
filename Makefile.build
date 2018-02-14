@@ -156,12 +156,12 @@ endef
 snapshots/hacl-c-wasm: snapshots-remove-intermediates
 	$(MAKE) -C ./ snapshots/hacl-c
 	rm -rf snapshots/hacl-c-wasm
-	mkdir -p snapshots/hacl-c*wasm
+	mkdir -p snapshots/hacl-c-wasm
 	cp $(SNAPSHOT_HACL_C_FILES) snapshots/hacl-c-wasm
 	emcc -O3 -DKRML_NOUINT128 -Wno-implicit-function-declaration \
 			-Wno-bitwise-op-parentheses -Wno-shift-op-parentheses \
-			-s WASM=1 -s MODULARIZE=1 -s 'EXPORT_NAME="Hacl"'  \
-			-o snapshots/hacl-c-wasm/hacl.js \
+			-s WASM=1 -s MODULARIZE=1 -s 'EXPORT_NAME="HaclLoader"'  \
+			-o snapshots/hacl-c-wasm/HaclLoader.js \
 			-s EXPORTED_FUNCTIONS='[$(WASM_EXPORTED_FUNCTIONS)]' \
 			-s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap","ccall"]' \
 			-I snapshot/hacl-c-wasm snapshots/hacl-c-wasm/*.c
