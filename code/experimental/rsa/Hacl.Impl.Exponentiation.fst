@@ -34,7 +34,32 @@ let mul_mod_mont #rLen pow2_i iLen exp_r rrLen st_mont st_m st_kara aM bM resM =
     let st_k = Buffer.sub #uint64 #(v stLen) #(v stKLen) st_kara cLen stKLen in
     karatsuba pow2_i iLen rrLen aM bM st_k c; // c = a * b
     mont_reduction pow2_i iLen exp_r rrLen st_mont st_m st_k cLen c resM // resM = c % n
-   
+
+
+val sqr_mod_mont:
+    #rLen:size_nat ->
+    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->
+    exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
+    rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
+    st_mont:lbignum (3 * rLen) ->
+    st_m:lbignum (3 * rLen) ->
+    st_kara:lbignum (2 * rLen + 4 * v pow2_i) ->
+    aM:lbignum rLen -> resM:lbignum rLen -> Stack unit
+    (requires (fun h -> live h st_mont /\ live h aM /\ live h resM /\ live h st_kara))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1))
+
+let sqr_mod_mont #rLen pow2_i iLen exp_r rrLen st_mont st_m st_kara aM resM =
+    let cLen = add #SIZE rrLen rrLen in
+    let stKLen = mul #SIZE (size 4) pow2_i in
+    let stLen = add #SIZE cLen stKLen in
+    
+    let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
+    let tmp = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara cLen cLen in
+    let st_k = Buffer.sub #uint64 #(v stLen) #(v stKLen) st_kara cLen stKLen in
+    bn_sqr rrLen aM tmp c; // c = a * a
+    mont_reduction pow2_i iLen exp_r rrLen st_mont st_m st_k cLen c resM // resM = c % n
+
+
 val mod_exp_:
     #rLen:size_nat -> #bLen:size_nat ->
     pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->
@@ -60,7 +85,7 @@ let rec mod_exp_ #rLen #bLen pow2_i iLen exp_r rrLen st_mont st_exp st_m st_kara
     if (count <. bBits) then begin
         (if (bn_is_bit_set bbLen b count) then begin
             mul_mod_mont pow2_i iLen exp_r rrLen st_mont st_m st_kara aM accM accM end); //acc = (acc * a) % n
-        mul_mod_mont pow2_i iLen exp_r rrLen st_mont st_m st_kara aM aM aM; //a = (a * a) % n
+        sqr_mod_mont pow2_i iLen exp_r rrLen st_mont st_m st_kara aM aM; //a = (a * a) % n
 	mod_exp_ pow2_i iLen exp_r rrLen st_mont st_exp st_m st_kara bBits bbLen b (size_incr count)
     end
 

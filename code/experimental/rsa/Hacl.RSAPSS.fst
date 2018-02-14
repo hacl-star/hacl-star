@@ -29,7 +29,9 @@ val rsa_pss_sign:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 sgnt h0 h1))
 
 let rsa_pss_sign #sLen #msgLen pow2_i iLen modBits eBits dBits pLen qLen skey rBlind ssLen salt mmsgLen msg sgnt =
-    Hacl.Impl.RSA.rsa_sign #sLen #msgLen pow2_i iLen modBits eBits dBits pLen qLen skey rBlind ssLen salt mmsgLen msg sgnt
+    push_frame();
+    Hacl.Impl.RSA.rsa_sign #sLen #msgLen pow2_i iLen modBits eBits dBits pLen qLen skey rBlind ssLen salt mmsgLen msg sgnt;
+    pop_frame()
 
 val rsa_pss_verify:
     #sLen:size_nat -> #msgLen:size_nat ->
@@ -45,4 +47,7 @@ val rsa_pss_verify:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies0 h0 h1))
 
 let rsa_pss_verify #sLen #msgLen pow2_i iLen modBits eBits pkey ssLen sgnt mmsgLen msg =
-    Hacl.Impl.RSA.rsa_verify #sLen #msgLen pow2_i iLen modBits eBits pkey ssLen sgnt mmsgLen msg
+    push_frame();
+    let res = Hacl.Impl.RSA.rsa_verify #sLen #msgLen pow2_i iLen modBits eBits pkey ssLen sgnt mmsgLen msg in
+    pop_frame();
+    res

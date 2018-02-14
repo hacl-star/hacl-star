@@ -76,10 +76,58 @@ val bn_mul_u64:
     a:lbignum aLen -> b:uint64 -> res:lbignum (aLen + 1) -> Stack unit
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-let bn_mul_u64 #aLen aaLen a b res = 
+    
+let bn_mul_u64 #aLen aaLen a b res =
     let resLen = add #SIZE aaLen (size 1) in
     fill resLen res (u64 0);
     bn_mult_by_limb_addj #aLen aaLen a b (size 0) (size 0) resLen (u64 0) res
+
+val bn_sqr_sqr:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen /\ aLen + aLen < max_size_t} -> a:lbignum aLen ->
+    i:size_t{v i <= aLen} ->
+    res:lbignum (aLen + aLen) -> Stack unit
+    (requires (fun h -> live h a /\ live h res /\ disjoint res a))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+
+let rec bn_sqr_sqr #aLen aaLen a i res =
+    if (i <. aaLen) then begin
+       let a_i = a.(i) in
+       let a2 = mul_wide a_i a_i in
+       let ind = mul #SIZE i (size 2) in
+       res.(ind) <- to_u64 #U128 a2;
+       res.(size_incr ind) <- to_u64 (shift_right #U128 a2 (u32 64));
+       bn_sqr_sqr aaLen a (size_incr i) res
+    end
+
+val bn_sqr_:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen /\ aLen + aLen < max_size_t} -> a:lbignum aLen ->
+    i:size_t{v i <= aLen} ->
+    resLen:size_t{v resLen == aLen + aLen} -> res:lbignum (aLen + aLen) -> Stack unit
+    (requires (fun h -> live h a /\ live h res /\ disjoint res a))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+
+let rec bn_sqr_ #aLen aaLen a i resLen res =
+    if (i <. size_decr aaLen) then begin
+       bn_mult_by_limb_addj aaLen a a.(i) (size_incr i) i resLen (u64 0) res;
+       bn_sqr_ aaLen a (size_incr i) resLen res
+    end
+
+val bn_sqr:
+    #aLen:size_nat ->
+    aaLen:size_t{v aaLen == aLen /\ aLen + aLen < max_size_t} -> a:lbignum aLen ->
+    tmp:lbignum (aLen + aLen) -> res:lbignum (aLen + aLen) -> Stack unit
+    (requires (fun h -> live h a /\ live h res /\ disjoint res a))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
+
+let bn_sqr #aLen aaLen a tmp res =
+    let resLen = add #SIZE aaLen aaLen in
+    fill resLen res (u64 0);
+    bn_sqr_ aaLen a (size 0) resLen res;
+    bn_add resLen res resLen res res;
+    bn_sqr_sqr aaLen a (size 0) tmp;
+    bn_add resLen res resLen tmp res
 
 val abs:
     #aLen:size_nat -> #bLen:size_nat ->
