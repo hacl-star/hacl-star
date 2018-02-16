@@ -2,7 +2,7 @@ HACL*
 =====
 
 HACL* is a formally verified cryptographic library in [F\*],
-developed by the [Prosecco](http://prosecco.inria.fr) team at 
+developed by the [Prosecco](http://prosecco.inria.fr) team at
 [INRIA Paris](https://www.inria.fr/en/centre/paris) in collaboration
 with Microsoft Research, as part of [Project Everest].
 
@@ -12,12 +12,12 @@ The goal of this library is to develop verified C reference implementations
 for popular cryptographic primitives and to verify them for memory safety,
 functional correctness, and secret independence.
 
-More details about the HACL* library and its design can be found in our ACM CCS 2017 research paper:    
+More details about the HACL* library and its design can be found in our ACM CCS 2017 research paper:
 https://eprint.iacr.org/2017/536
 
 All our code is written and verified in [F\*] and then compiled to C via
 the [KreMLin tool](https://github.com/FStarLang/kremlin/). Details on the verification and compilation
-toolchain and their formal guarantees can be found in the ICFP 2017 paper:    
+toolchain and their formal guarantees can be found in the ICFP 2017 paper:
 https://arxiv.org/abs/1703.00053
 
 # Supported Cryptographic Algorithms
@@ -39,10 +39,10 @@ libsodium only for these constructions can be immediately ported to use the veri
 instead. (Warning: libsodium also implements other algorithms not in NaCl
 that are not implemented by HACL*)
 
-The verified primitives can also be used to support larger F* verification projects.  
+The verified primitives can also be used to support larger F* verification projects.
 For example, HACL* code is used through the agile cryptographic model developed in
-[secure_api/] as the basis for cryptographic proofs of the TLS record layer in [miTLS]. 
-A detailed description of the code in [secure_api/] and its formal security guarantees 
+[secure_api/] as the basis for cryptographic proofs of the TLS record layer in [miTLS].
+A detailed description of the code in [secure_api/] and its formal security guarantees
 appears in the IEEE S&P 2017 paper: https://eprint.iacr.org/2016/1178.pdf
 
 [F\*]: https://github.com/FStarLang/FStar
@@ -114,7 +114,7 @@ To compare its performance with the C reference code (not the assembly versions)
 download and compile [libsodium] with the `--disable-asm` flag and [openssl] with the `-no-asm` flag.
 
 While HACL* is typically as fast as hand-written C code, it is typically 1.1-5.7x slower than
-assembly code in our experiments. In the future, we hope to close this gap by using verified assembly implementations 
+assembly code in our experiments. In the future, we hope to close this gap by using verified assembly implementations
 like [Vale](https://github.com/project-everest/vale) for some primitives.
 
 [openssl]: https://github.com/openssl/openssl
@@ -142,4 +142,3 @@ being actively developed and maintained within [Project Everest].
 For questions and comments, or if you want to contribute to the project, do contact the current maintainers at:
 * Benjamin Beurdouche (benjamin.beurdouche@inria.fr)
 * Karthikeyan Bhargavan (karthikeyan.bhargavan@inria.fr)
-
