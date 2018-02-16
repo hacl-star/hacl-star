@@ -55,19 +55,14 @@ appears in the IEEE S&P 2017 paper: https://eprint.iacr.org/2016/1178.pdf
 
 # Warning
 
-This library is at the pre-production stage.
-Please consult the authors before using it in production systems.
-
-The first release is to be expected around the time of [Real World Crypto 2018].
-Any feedback is welcome in the meantime.
-
-[Real World Crypto 2018]: https://rwc.iacr.org/
+While HACL* is used in several products such as Mozilla Firefox or Wireguard,
+we highly recommand to consult the authors before using HACL* in production systems.
 
 # Licenses
 
-All F* source code is released under Apache 2.0
+All F* source code is released under Apache 2.0.
 
-All generated C code is released under MIT
+All generated C, OCaml, Javascript and Web Assembly code is released under MIT.
 
 
 # Installation
@@ -76,7 +71,7 @@ See [INSTALL.md](INSTALL.md) for prerequisites.
 
 For convenience, C code for our verified primitives has already been extracted
 and is available in [snapshots/hacl-c](snapshots/hacl-c).
-To build the library, you need a modern C compiler.
+To build the library, you need a modern C compiler and, preferably, CMake.
 
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
 
