@@ -147,9 +147,9 @@ define WASM_EXPORTED_FUNCTIONS
 "_Hacl_SHA2_512_update_multi", "_Hacl_SHA2_512_update_last", "_Hacl_SHA2_512_finish", \
 "_Hacl_SHA2_512_hash", "_NaCl_crypto_secretbox_detached", "_NaCl_crypto_secretbox_open_detached", \
 "_NaCl_crypto_secretbox_easy", "_NaCl_crypto_secretbox_open_easy", "_NaCl_crypto_box_beforenm", \
-"_NaCl_crypto_box_detached_afternm", "NaCl_crypto_box_detached", "NaCl_crypto_box_open_detached", \
-"_NaCl_crypto_box_easy_afternm", "_NaCl_crypto_box_easy", "NaCl_crypto_box_open_easy", \
-"_NaCl_crypto_box_open_detached_afternm", "-NaCl_crypto_box_open_easy_afternm", \
+"_NaCl_crypto_box_detached_afternm", "NaCl_crypto_box_detached", "_NaCl_crypto_box_open_detached", \
+"_NaCl_crypto_box_easy_afternm", "_NaCl_crypto_box_easy", "_NaCl_crypto_box_open_easy", \
+"_NaCl_crypto_box_open_detached_afternm", "_NaCl_crypto_box_open_easy_afternm", \
 "_malloc", "_free"
 endef
 
@@ -163,7 +163,6 @@ snapshots/hacl-c-wasm: snapshots-remove-intermediates
 			-s WASM=1 -s MODULARIZE=1 -s 'EXPORT_NAME="HaclLoader"'  \
 			-o snapshots/hacl-c-wasm/HaclLoader.js \
 			-s EXPORTED_FUNCTIONS='[$(WASM_EXPORTED_FUNCTIONS)]' \
-			-s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap","ccall"]' \
 			-I snapshot/hacl-c-wasm snapshots/hacl-c-wasm/*.c
 	rm -f snapshots/hacl-c-wasm/*.c snapshots/hacl-c-wasm/*.h \
 			snapshots/hacl-c-wasm/Makefile snapshots/hacl-c-wasm/CMakeLists.txt
