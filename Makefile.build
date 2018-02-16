@@ -155,7 +155,7 @@ define WASM_EXPORTED_FUNCTIONS
 "_Hacl_Chacha20Poly1305_aead_encrypt", "_Hacl_Chacha20Poly1305_aead_decrypt", \
 "_Hacl_Chacha20_Vec128_chacha20", "_Hacl_Curve25519_crypto_scalarmult", \
 "_Hacl_Ed25519_sign", "_Hacl_Ed25519_verify", "_Hacl_Ed25519_secret_to_public", \
-"_hmac_core", "_hmac", "_Hacl_Policies_declassify_u8", "_Hacl_Policies_declassify_u32", \
+"_Hacl_HMAC_SHA2_256_hmac_core", "_Hacl_HMAC_SHA2_256_hmac", "_Hacl_Policies_declassify_u8", "_Hacl_Policies_declassify_u32", \
 "_Hacl_Policies_declassify_u64", "_Hacl_Policies_declassify_u128", "_Hacl_Policies_cmp_bytes_", \
 "_Hacl_Policies_cmp_bytes", "_Hacl_Poly1305_32_mk_state", "_Hacl_Poly1305_32_init", \
 "_Hacl_Poly1305_32_update_block", "_Hacl_Poly1305_32_update", "_Hacl_Poly1305_32_update_last", \
