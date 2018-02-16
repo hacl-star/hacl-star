@@ -25,7 +25,7 @@ machine before being able to verify or extract HACL* using the toolchain:
 - CMake (if building libraries from C code)
 - Emscripten (if generating the Web Assembly library from C code)
 
-Please do not miss the `opam init` and `eval `opam config env`` steps.
+Please do not miss the `opam init` and ``` eval `opam config env` ``` steps.
 
 2. Installing the toolchain (FStar, OCaml, KreMLin and Z3) can be achieved
 easily by running `make prepare` from within the HACL* root directory.
