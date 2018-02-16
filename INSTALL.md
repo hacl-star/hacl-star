@@ -12,7 +12,7 @@ in [snapshots/hacl-c-wasm](snapshots/hacl-c-wasm).
 
 HACL* relies on [F*](https://github.com/FStarLang/FStar) (`stable` branch) and
 [KreMLin](https://github.com/FStarLang/kremlin) (`master` branch) for verification,
-extraction to OCaml (specs/) and extraction to C (code/).
+extraction to OCaml (`specs/`) and extraction to C (`code/`).
 
 ### Installing dependencies and the toolchain
 
