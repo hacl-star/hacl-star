@@ -78,10 +78,9 @@ in [snapshots/hacl-c-wasm](snapshots/hacl-c-wasm).
 
 HACL* relies on [F*](https://github.com/FStarLang/FStar) (`stable` branch) and
 [KreMLin](https://github.com/FStarLang/kremlin) (`master` branch) for verification,
-extraction to OCaml (specs/) and extraction to C (code/).
+extraction to OCaml (`specs/`) and extraction to C (`code/`).
 
-See [INSTALL.md](INSTALL.md) for more information on how to install the toolchain.
-[INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
+See [INSTALL.md](https://github.com/mitls/hacl-star/INSTALL.md) for more information on how to install the toolchain.
 
 # Verifying and Building HACL*
 
