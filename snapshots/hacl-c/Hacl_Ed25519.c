@@ -2760,7 +2760,6 @@ Hacl_Impl_Ed25519_Sign_Steps_sign_step_4(
   uint64_t *h = tmp_ints + (uint32_t)60U;
   uint8_t *a__ = tmp_bytes + (uint32_t)96U;
   uint8_t *rs_ = tmp_bytes + (uint32_t)160U;
-  uint8_t *apre = tmp_bytes + (uint32_t)224U;
   Hacl_Impl_SHA512_ModQ_sha512_modq_pre_pre2(h, rs_, a__, msg, len1);
 }
 
