@@ -356,12 +356,19 @@ Hacl_Impl_HMAC_SHA2_256_hmac(
   Hacl_Impl_HMAC_SHA2_256_hmac_core(mac, nkey, data, datalen);
 }
 
-void hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len)
+void Hacl_HMAC_SHA2_256_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len)
 {
   Hacl_Impl_HMAC_SHA2_256_hmac_core(mac, key, data, len);
 }
 
-void hmac(uint8_t *mac, uint8_t *key, uint32_t keylen, uint8_t *data, uint32_t datalen)
+void
+Hacl_HMAC_SHA2_256_hmac(
+  uint8_t *mac,
+  uint8_t *key,
+  uint32_t keylen,
+  uint8_t *data,
+  uint32_t datalen
+)
 {
   Hacl_Impl_HMAC_SHA2_256_hmac(mac, key, keylen, data, datalen);
 }
