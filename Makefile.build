@@ -82,7 +82,7 @@ snapshots/snapshot-gcc-unrolled: clean-c-code
 	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
 #
-# Production targets
+# Production targets for C code
 #
 
 HACL_RELEASE=1
@@ -121,8 +121,31 @@ snapshots/hacl-c: snapshots-remove-intermediates
 	cp $(SNAPSHOT_HACL_C_FILES) ./snapshots/hacl-c
 	$(MAKE) snapshots/hacl-c/kremlib
 
-# Emscripten exported functions
+snapshots/nss: snapshots-remove-intermediates
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc-unrolled
+	rm -rf snapshots/nss
+	mkdir -p snapshots/nss
+	mkdir -p snapshots/nss/specs
+	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/nss
+	cp snapshots/snapshot-gcc/Hacl_Chacha20.* snapshots/nss
+	cp snapshots/snapshot-gcc/Hacl_Chacha20_Vec128.* snapshots/nss
+	cp snapshots/snapshot-gcc/Hacl_Poly1305_64.* snapshots/nss
+	$(MAKE) snapshots/nss/kremlib
+	$(MAKE) snapshots/nss/specs
 
+snapshots/wireguard: snapshots-remove-intermediates
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" KOPTS="$(KOPTS) -fc89" snapshots/snapshot-gcc-unrolled
+	rm -rf snapshots/wireguard
+	mkdir -p snapshots/wireguard
+	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/wireguard
+	$(MAKE) snapshots/wireguard/kremlib
+
+#
+# Production target for Web Assembly
+#
+
+# Emscripten exported functions
 define WASM_EXPORTED_FUNCTIONS
 "_Hacl_Chacha20_chacha20", "_Hacl_Chacha20_chacha20_key_block", \
 "_AEAD_Poly1305_64_mk_state", "_AEAD_Poly1305_64_mul_div_16", "_AEAD_Poly1305_64_pad_last", \
@@ -154,38 +177,17 @@ define WASM_EXPORTED_FUNCTIONS
 endef
 
 snapshots/hacl-c-wasm: snapshots-remove-intermediates
-	$(MAKE) -C ./ snapshots/hacl-c
+	$(MAKE) snapshots/hacl-c
 	rm -rf snapshots/hacl-c-wasm
-	mkdir -p snapshots/hacl-c-wasm
-	cp $(SNAPSHOT_HACL_C_FILES) snapshots/hacl-c-wasm
+	mkdir -p snapshots/hacl-c-wasm/build
+	cp $(SNAPSHOT_HACL_C_FILES) snapshots/hacl-c-wasm/build
 	emcc -O3 -DKRML_NOUINT128 -Wno-implicit-function-declaration \
 			-Wno-bitwise-op-parentheses -Wno-shift-op-parentheses \
 			-s WASM=1 -s MODULARIZE=1 -s 'EXPORT_NAME="HaclLoader"'  \
 			-o snapshots/hacl-c-wasm/HaclLoader.js \
 			-s EXPORTED_FUNCTIONS='[$(WASM_EXPORTED_FUNCTIONS)]' \
-			-I snapshot/hacl-c-wasm snapshots/hacl-c-wasm/*.c
-	rm -f snapshots/hacl-c-wasm/*.c snapshots/hacl-c-wasm/*.h \
-			snapshots/hacl-c-wasm/Makefile snapshots/hacl-c-wasm/CMakeLists.txt
-
-snapshots/nss: snapshots-remove-intermediates
-	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc
-	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc-unrolled
-	rm -rf snapshots/nss
-	mkdir -p snapshots/nss
-	mkdir -p snapshots/nss/specs
-	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/nss
-	cp snapshots/snapshot-gcc/Hacl_Chacha20.* snapshots/nss
-	cp snapshots/snapshot-gcc/Hacl_Chacha20_Vec128.* snapshots/nss
-	cp snapshots/snapshot-gcc/Hacl_Poly1305_64.* snapshots/nss
-	$(MAKE) snapshots/nss/kremlib
-	$(MAKE) snapshots/nss/specs
-
-snapshots/wireguard: snapshots-remove-intermediates
-	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" KOPTS="$(KOPTS) -fc89" snapshots/snapshot-gcc-unrolled
-	rm -rf snapshots/wireguard
-	mkdir -p snapshots/wireguard
-	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/wireguard
-	$(MAKE) snapshots/wireguard/kremlib
+			-I snapshots/hacl-c-wasm/build snapshots/hacl-c-wasm/build/*.c
+	rm -rf snapshots/hacl-c-wasm/build
 
 #
 # Build, refresh and clean targets for all snapshots
@@ -211,7 +213,6 @@ snapshots-remove-production:
 #
 # Building the shared library
 #
-
 
 snapshots/hacl-c/libhacl.so:
 	$(MAKE) -C snapshots/hacl-c libhacl.so
