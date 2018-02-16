@@ -20,6 +20,11 @@ the [KreMLin tool](https://github.com/FStarLang/kremlin/). Details on the verifi
 toolchain and their formal guarantees can be found in the ICFP 2017 paper:
 https://arxiv.org/abs/1703.00053
 
+# Warning
+
+While HACL* is used in several products such as Mozilla Firefox or Wireguard,
+we highly recommand to consult the authors before using HACL* in production systems.
+
 # Supported Cryptographic Algorithms
 
 The primitives and constructions supported currently are:
@@ -53,28 +58,30 @@ appears in the IEEE S&P 2017 paper: https://eprint.iacr.org/2016/1178.pdf
 [Project Everest]: https://github.com/project-everest
 [secure_api/]: https://github.com/mitls/hacl-star/tree/master/secure_api
 
-# Warning
-
-While HACL* is used in several products such as Mozilla Firefox or Wireguard,
-we highly recommand to consult the authors before using HACL* in production systems.
-
 # Licenses
 
 All F* source code is released under Apache 2.0.
 
 All generated C, OCaml, Javascript and Web Assembly code is released under MIT.
 
-
 # Installation
 
-See [INSTALL.md](INSTALL.md) for prerequisites.
+If you only are interested in the latest version of the generated C code,
+or Web Assembly code, installing the toolchain is not required.
+In that scenario, only a recent C compiler and CMake are needed for building libraries.
 
-For convenience, C code for our verified primitives has already been extracted
-and is available in [snapshots/hacl-c](snapshots/hacl-c).
-To build the library, you need a modern C compiler and, preferably, CMake.
+The latest version of the verified C code can be found is available
+in [snapshots/hacl-c](snapshots/hacl-c).
 
+The latest version of the Web Assembly code can be found is available
+in [snapshots/hacl-c-wasm](snapshots/hacl-c-wasm).
+
+HACL* relies on [F*](https://github.com/FStarLang/FStar) (`stable` branch) and
+[KreMLin](https://github.com/FStarLang/kremlin) (`master` branch) for verification,
+extraction to OCaml (specs/) and extraction to C (code/).
+
+See [INSTALL.md](INSTALL.md) for more information on how to install the toolchain.
 [INSTALL.md]: https://github.com/mitls/hacl-star/INSTALL.md
-
 
 # Verifying and Building HACL*
 
@@ -100,7 +107,6 @@ Verification and C code generation requires [F\*] and [KreMLin].
 Benchmarking performance in `test-all` requires [openssl] and [libsodium].
 An additional CMake build is available and can be run with `make build-cmake`.
 
-
 # Performance
 
 To measure see the performance of HACL* primitives on your platform and C compiler,
@@ -115,7 +121,6 @@ like [Vale](https://github.com/project-everest/vale) for some primitives.
 [openssl]: https://github.com/openssl/openssl
 [libsodium]: https://github.com/jedisct1/libsodium
 
-
 # Experimental features
 
 The [code/experimental](code/experimental) directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
@@ -125,7 +130,6 @@ The [code/experimental](code/experimental) directory includes other (partially v
 * Signatures: RSA-PSS
 
 We are also working on a JavaScript backend for F* that would enable us to extract HACL* as a JavaScript library.
-
 
 # Authors and Maintainers
 
