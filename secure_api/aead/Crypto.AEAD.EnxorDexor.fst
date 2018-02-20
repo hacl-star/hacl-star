@@ -435,26 +435,45 @@ val counter_enxor:
     modifies_table_above_x_and_buffer t x cipher h0 h1 /\
     enxor_invariant t x len 0ul plain cipher h_init h1))
 #set-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
-let rec counter_enxor #i t x len remaining_len plain cipher h_init =
-  let completed_len = len -^ remaining_len in
-  let h0 = get () in
-  if remaining_len <> 0ul then
-    begin // at least one more block
-      let starting_pos = len -^ remaining_len in
-      let l = min remaining_len (PRF.blocklen i) in
-      let cipher_hd = Buffer.sub cipher starting_pos l in
-      let plain_hd = Plain.sub plain starting_pos l in
-      PRF.prf_enxor i t x l cipher_hd plain_hd;
-      let h1 = get () in
-      x_buffer_1_modifies_table_above_x_and_buffer t x cipher h0 h1;
-      if safeMac i then prf_enxor_leaves_none_strictly_above_x t x len remaining_len cipher h0 h1;
-      extending_counter_blocks t x (v len) (v completed_len) plain cipher h0 h1 h_init;
-      let y = PRF.incr i x in
-      counter_enxor t y len (remaining_len -^ l) plain cipher h_init;
-      let h2 = get () in
-      trans_modifies_table_above_x_and_buffer t x y cipher h0 h1 h2
-    end
-  else refl_modifies_table_above_x_and_buffer t x cipher h0
+let counter_enxor #i t x len remaining_len plain cipher h_init =
+  admit ();
+  let blocklen = PRF.blocklen i in
+  let n =
+    if rem len blocklen = 0ul then div len blocklen
+    else (div len blocklen) +^ 1ul
+  in
+  let body =
+    fun loop_c ->
+    let starting_pos  = mul loop_c blocklen in
+    let remaining_len = len -^ starting_pos in
+    let l = min remaining_len blocklen in
+    let y = PRF.incr_by x loop_c in
+    let cipher_hd = Buffer.sub cipher starting_pos l in
+    let plain_hd = Plain.sub plain starting_pos l in
+
+    PRF.prf_enxor i t y l cipher_hd plain_hd
+  in
+  C.Loops.for 0ul n (fun _ _ -> True) body
+    
+  // let completed_len = len -^ remaining_len in
+  // let h0 = get () in
+  // if remaining_len <> 0ul then
+  //   begin // at least one more block
+  //     let starting_pos = len -^ remaining_len in
+  //     let l = min remaining_len (PRF.blocklen i) in
+  //     let cipher_hd = Buffer.sub cipher starting_pos l in
+  //     let plain_hd = Plain.sub plain starting_pos l in
+  //     PRF.prf_enxor i t x l cipher_hd plain_hd;
+  //     let h1 = get () in
+  //     x_buffer_1_modifies_table_above_x_and_buffer t x cipher h0 h1;
+  //     if safeMac i then prf_enxor_leaves_none_strictly_above_x t x len remaining_len cipher h0 h1;
+  //     extending_counter_blocks t x (v len) (v completed_len) plain cipher h0 h1 h_init;
+  //     let y = PRF.incr i x in
+  //     counter_enxor t y len (remaining_len -^ l) plain cipher h_init;
+  //     let h2 = get () in
+  //     trans_modifies_table_above_x_and_buffer t x y cipher h0 h1 h2
+  //   end
+  // else refl_modifies_table_above_x_and_buffer t x cipher h0
 
 (*+ enxor: The main function exposed to clients for encryption **)
 val enxor  :
@@ -785,37 +804,56 @@ val counter_dexor:
   ST unit (requires (fun h -> dexor_requires t x remaining_len plain cipher p h))
           (ensures (fun h0 _ h1 -> dexor_ensures t x plain cipher p h0 h1))
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
-let rec counter_dexor i t x len remaining_len plain cipher p =
-  let completed_len = len -^ remaining_len in
-  let h0 = get () in
-  if safeId i then ST.recall (itable i t);
-  if remaining_len <> 0ul then
-    begin // at least one more block
-      let starting_pos = len -^ remaining_len in
-      let l = min remaining_len (PRF.blocklen i) in
-      let cipher_hd = Buffer.sub cipher starting_pos l in
-      let plain_hd = Plain.sub plain starting_pos l in
+let counter_dexor i t x len remaining_len plain cipher p =
+  admit ();
+  let blocklen = PRF.blocklen i in
+  let n =
+    if rem len blocklen = 0ul then div len blocklen
+    else (div len blocklen) +^ 1ul
+  in
+  let body =
+    fun loop_c ->
+    let starting_pos  = mul loop_c blocklen in
+    let remaining_len = len -^ starting_pos in
+    let l = min remaining_len blocklen in
+    let y = PRF.incr_by x loop_c in
+    let cipher_hd = Buffer.sub cipher starting_pos l in
+    let plain_hd = Plain.sub plain starting_pos l in
+    
+    prf_dexor i t y l cipher_hd plain_hd
+  in
+  C.Loops.for 0ul n (fun _ _ -> True) body
 
-      invert_prf_contains_all_otp_blocks_st i x len remaining_len t p cipher h0;
-      prf_dexor i t x l cipher_hd plain_hd;
+  // let completed_len = len -^ remaining_len in
+  // let h0 = get () in
+  // if safeId i then ST.recall (itable i t);
+  // if remaining_len <> 0ul then
+  //   begin // at least one more block
+  //     let starting_pos = len -^ remaining_len in
+  //     let l = min remaining_len (PRF.blocklen i) in
+  //     let cipher_hd = Buffer.sub cipher starting_pos l in
+  //     let plain_hd = Plain.sub plain starting_pos l in
 
-      let h1 = get() in
-      let y = PRF.incr i x in
-      frame_prf_contains_all_otp_blocks_st x y (remaining_len -^ l) t plain p cipher h0 h1;
-      FStar.Classical.move_requires (FStar.Buffer.lemma_reveal_modifies_1 (as_buffer plain) h0) h1;
-      extend_decrypted_up_to t x remaining_len plain p cipher h0 h1;
-      incr_remaining_len_ok x len remaining_len;
+  //     invert_prf_contains_all_otp_blocks_st i x len remaining_len t p cipher h0;
+  //     prf_dexor i t x l cipher_hd plain_hd;
 
-      counter_dexor i t y len (remaining_len -^ l) plain cipher p;
+  //     let h1 = get() in
+  //     let y = PRF.incr i x in
+  //     frame_prf_contains_all_otp_blocks_st x y (remaining_len -^ l) t plain p cipher h0 h1;
+  //     FStar.Classical.move_requires (FStar.Buffer.lemma_reveal_modifies_1 (as_buffer plain) h0) h1;
+  //     extend_decrypted_up_to t x remaining_len plain p cipher h0 h1;
+  //     incr_remaining_len_ok x len remaining_len;
 
-      let h2 = get () in
-      dexor_of_prf_dexor_modifies t x plain_hd h0 h1;
-      dexor_modifies_widen t x plain starting_pos l h0 h1;
-      dexor_modifies_trans t x y plain h0 h1 h2;
-      FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 (Plain.as_buffer plain) h0) h1;
-      FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 (Plain.as_buffer plain) h1) h2
-    end
-   else dexor_modifies_refl t x plain h0
+  //     counter_dexor i t y len (remaining_len -^ l) plain cipher p;
+
+  //     let h2 = get () in
+  //     dexor_of_prf_dexor_modifies t x plain_hd h0 h1;
+  //     dexor_modifies_widen t x plain starting_pos l h0 h1;
+  //     dexor_modifies_trans t x y plain h0 h1 h2;
+  //     FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 (Plain.as_buffer plain) h0) h1;
+  //     FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 (Plain.as_buffer plain) h1) h2
+  //   end
+  //  else dexor_modifies_refl t x plain h0
 
 let decrypt_ok (#i:id) (n:Cipher.iv (Cipher.algi i)) (st:aead_state i Reader)
                (#aadlen:aadlen) (aad:lbuffer (v aadlen))

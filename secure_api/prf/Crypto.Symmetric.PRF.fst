@@ -67,7 +67,10 @@ type ctrT i = x:u32 {x <=^ maxCtr i}
 // The PRF domain: an IV and a counter.
 
 type domain (i:id) = { iv:Block.iv (cipherAlg_of_id i); ctr:ctrT i }
-let incr (i:id) (x:domain i {x.ctr <^ maxCtr i}) = { iv = x.iv; ctr = x.ctr +^ 1ul }
+
+let incr_by (#i:id) (x:domain i) (n:u32{UInt.size (v x.ctr + v n) 32 /\ x.ctr +^ n <=^ maxCtr i}) =
+  { iv = x.iv; ctr = x.ctr +^ n }
+let incr (i:id) (x:domain i {x.ctr <^ maxCtr i}) = incr_by x 1ul
 
 let above (#i:id) (x:domain i) (z:domain i) = x.iv == z.iv /\ x.ctr >=^ z.ctr
 
