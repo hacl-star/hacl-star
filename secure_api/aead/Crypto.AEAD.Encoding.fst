@@ -149,6 +149,8 @@ let rec lemma_encode_bytes_injective t0 t1 =
 
 // If the length is not a multiple of 16, pad to 16
 // (we actually don't depend on the details of the padding)
+[@"c_inline"]
+inline_for_extraction
 val pad_16: b:lbuffer 16 -> len:UInt32.t {0 < v len /\ v len <= 16} -> STL unit
   (requires (fun h -> Buffer.live h b))
   (ensures  (fun h0 _ h1 ->
