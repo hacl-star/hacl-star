@@ -44,12 +44,12 @@ typedef __m128i vec;
 
 static forceinline vec vec_rotate_left_8(vec v) {
   __m128i x = _mm_set_epi8(14, 13, 12, 15, 10, 9, 8, 11, 6, 5, 4, 7, 2, 1, 0, 3);
-  return _mm_shuffle_epi8(v,x);				    
+  return _mm_shuffle_epi8(v,x);
 }
 
 static forceinline vec vec_rotate_left_16(vec v) {
   __m128i x = _mm_set_epi8(13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2);
-  return _mm_shuffle_epi8(v,x);				    
+  return _mm_shuffle_epi8(v,x);
 }
 
 static forceinline vec vec_rotate_left(vec v, unsigned int n) {
@@ -118,20 +118,17 @@ static forceinline vec vec_xor(vec v1, vec v2) {
   return veorq_u32(v1,v2);
 }
 
-
 #define vec_rotate_left(x,n) \
   vsriq_n_u32(vshlq_n_u32((x),(n)),(x),32-(n))
 
-static forceinline vec vec_rotate_right(vec v, unsigned int n) {
-  return (vec_rotate_left(v,32-n));
-}
+#define vec_rotate_right(a, b) \
+    vec_rotate_left((b), 32 - (b))
 
 #define vec_shuffle_right(x,n) \
   vextq_u32((x),(x),(n))
 
-static forceinline vec vec_shuffle_left(vec x, unsigned int n) {
-  return (vec_shuffle_right(x,4-n));
-}
+#define vec_shuffle_left(a, b) \
+    vec_shuffle_right((a), 4 - (b))
 
 static forceinline vec vec_load_32x4(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4){
   uint32_t a[4] = {x1,x2,x3,x4};
