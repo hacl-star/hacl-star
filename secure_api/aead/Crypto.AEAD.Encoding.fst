@@ -204,7 +204,49 @@ val lemma_encode_final: b:Seq.seq UInt8.t{0 <> Seq.length b /\ Seq.length b < 16
 let lemma_encode_final b = ()
 
 #reset-options "--z3rlimit 400 --max_fuel 0 --detail_hint_replay"
+// 2018.02.22 SZ: Disabled verification to loopify it; see the verified recursive
+// version in the comment below.
+#set-options "--lax"
 let rec add_bytes #i st acc len txt =
+  push_frame();
+  let bound = len /^ 16ul in
+  C.Loops.for 0ul bound (fun _ _ -> True)
+  (fun i ->
+    let w = Buffer.sub txt (16ul *^ i) 16ul in
+    CMA.update st acc w
+  );
+  let rem = len %^ 16ul in
+  if 0ul <^ rem then
+  begin
+    let w = Buffer.create 0uy 16ul in
+    Buffer.blit txt (len -^ rem) w 0ul rem;
+    CMA.update st acc w
+  end;
+  pop_frame()
+
+(*
+  // Recursive version with only computationally relevant parts retained
+  push_frame();
+  if len = 0ul then () else
+  if len <^ 16ul then
+  begin
+    let w = Buffer.create 0uy 16ul in
+    Buffer.blit txt 0ul w 0ul len;
+    //pad_16 w len; // Unnecessary, since `w` is zero-initialized
+    CMA.update st acc w
+  end
+  else
+  begin
+    let w = Buffer.sub txt 0ul 16ul in
+    CMA.update st acc w;
+    let txt' = Buffer.offset txt 16ul in
+    add_bytes st acc (len -^ 16ul) txt'
+  end;
+  pop_frame()
+*)
+
+(*
+  // Verified recursive version
   let h0 = ST.get() in
   assert(mac_log ==> h0 `HS.contains` (CMA.alog acc));
   push_frame();
@@ -271,7 +313,8 @@ let rec add_bytes #i st acc len txt =
   CMA.frame_acc_inv st acc h5 h6;
   MAC.frame_sel_elem h5 h6 (CMA.abuf acc);
   if not mac_log then
-    Buffer.lemma_intro_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h6
+Buffer.lemma_intro_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h6
+*)
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 private let encode_lengths_poly1305 (aadlen:UInt32.t) (plainlen:UInt32.t) : b:lbytes 16
