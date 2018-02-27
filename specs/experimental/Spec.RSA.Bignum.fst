@@ -49,7 +49,7 @@ val add_sign:
 	       sb2 = (if (b0 >= b1) then Positive else Negative)))
     (ensures (fun res -> res == a1 * b0 + a0 * b1))
 
-#reset-options "--z3rlimit 150 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 150 --max_ifuel 0 --max_fuel 0"
 
 let add_sign c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 =
     if ((sa2 = Positive && sb2 = Positive) || (sa2 = Negative && sb2 = Negative))
@@ -108,7 +108,7 @@ val mont_reduction:
     (requires (True))
     (ensures (fun res -> res % n == (c / r) % n))
 
-#reset-options "--z3rlimit 150 --max_fuel 0"
+#reset-options "--z3rlimit 300 --max_fuel 0"
 
 let mont_reduction modBits r n n' c =
     let m = (c * n') % r in
@@ -119,7 +119,7 @@ let mont_reduction modBits r n n' c =
     assert (res >= 0);
     assert (c + n * m <= c + n * r);
     lemma_div_le (c + n * m) (c + n * r) r;
-    assert (res <= (c + n * r) / r);
+    //assert (res <= (c + n * r) / r);
     division_addition_lemma c r n;
     assert (res <= c / r + n);
     assert (c < r * n);
@@ -183,7 +183,7 @@ let from_mont modBits r n n' a_r =
     let res = (a_r + n * m) / r in
     assert (a_r + n * m <= a_r + n * r);
     lemma_div_le (a_r + n * m) (a_r + n * r) r;
-    assert (res <= (a_r + n * r) / r);
+    //assert (res <= (a_r + n * r) / r);
     division_addition_lemma a_r r n;
     assert (res <= a_r / r + n);
     small_division_lemma_1 a_r r;
@@ -208,7 +208,7 @@ val bn_lshift: a:bignum -> b:size_nat -> Tot bignum
 let bn_lshift a b = a * pow2 b
 
 val shift_euclidean_mod_inv_f:
-    m:bignum -> tmp:bignum{tmp <= m} -> f:size_nat -> i:size_nat -> Tot (res:bignum{res <= m}) 
+    m:bignum -> tmp:bignum{tmp <= m} -> f:size_nat -> i:size_nat -> Tot (res:bignum{res <= m})
     (decreases (f - i))
 let rec shift_euclidean_mod_inv_f m tmp f i =
     if (i < f) then begin
