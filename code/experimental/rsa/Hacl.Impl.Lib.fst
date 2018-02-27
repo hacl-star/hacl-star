@@ -53,7 +53,7 @@ val bn_is_bit_set:
     ind:size_t{v ind / 64 < len} -> Stack bool
     (requires (fun h -> live h input))
     (ensures  (fun h0 r h1 -> preserves_live h0 h1 /\ h0 == h1))
-    
+    [@"c_inline"]
 let bn_is_bit_set #len clen input ind =
     let i = ind /. size 64 in
     let j = ind %. size 64 in
@@ -67,26 +67,35 @@ val bn_set_bit:
     ind:size_t{v ind / 64 < len} -> Stack unit
     (requires (fun h -> live h input))
     (ensures  (fun h0 r h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1))
-    
+    [@"c_inline"]
 let bn_set_bit #len clen input ind =
     let i = ind /. size 64 in
     let j = ind %. size 64 in
     let tmp = input.(i) in
     input.(i) <- (tmp |. (shift_left #U64 (u64 1) (size_to_uint32 j)))
-    
+
+val bval:
+    #bLen:size_nat -> cbLen:size_t{v cbLen == bLen} ->
+    b:lbignum bLen -> i:size_t -> Stack uint64
+    (requires (fun h -> live h b))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
+    [@"c_inline"]
+let bval #bLen cbLen b i =
+    if (i <. cbLen) then b.(i) else u64 0
+
 (* temporal functions *)
 val fill:
-  #len:size_nat -> clen:size_t{v clen == len} ->
-  b:lbignum len -> z:uint64 -> Stack unit
-  (requires (fun h -> live h b))
-  (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1))
-  
+    #len:size_nat -> clen:size_t{v clen == len} ->
+    b:lbignum len -> z:uint64 -> Stack unit
+    (requires (fun h -> live h b))
+    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1))
+    [@"c_inline"]
 let fill #len clen b z =
-  alloc #uint64 #unit #len clen z [] [BufItem b]
-  (fun h0 _ h1 -> True)
-  (fun tmp ->
-      copy clen tmp b
-  )
+    alloc #uint64 #unit #len clen z [] [BufItem b]
+    (fun h0 _ h1 -> True)
+    (fun tmp ->
+       copy clen tmp b
+    )
 
 val mul_wide: a:uint64 -> b:uint64 -> Tot uint128
 [@ "substitute"]
@@ -98,7 +107,7 @@ val eq_b_:
     i:size_t{v i <= len} -> Stack bool
     (requires (fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
-    
+    [@"c_inline"]
 let rec eq_b_ #len clen b1 b2 i =
     if (i <. clen) then begin
        if (eq_u8 b1.(i) b2.(i))
@@ -111,5 +120,5 @@ val eq_b:
     b1:lbytes len -> b2:lbytes len -> Stack bool
     (requires (fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
-  
+    [@"c_inline"]
 let eq_b #len clen b1 b2 = eq_b_ #len clen b1 b2 (size 0)

@@ -20,7 +20,7 @@ val text_to_nat_:
     i:size_t{v i <= v resLen} -> Stack unit
     (requires (fun h -> live h input /\ live h res /\ disjoint res input))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let rec text_to_nat_ #len clen input resLen res i =
     if (i <. resLen) then begin
         let inputi = uint64_from_bytes_be (Buffer.sub input (mul #SIZE (size 8) i) (size 8)) in
@@ -38,7 +38,7 @@ val text_to_nat:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
-
+    [@"c_inline"]
 let text_to_nat #len clen input res =
     let num_words = get_size_nat clen in
     let tmpLen = mul #SIZE (size 8) num_words in
@@ -65,7 +65,7 @@ val nat_to_text_:
     i:size_t{v i <= len} -> Stack unit
     (requires (fun h -> live h input /\ live h res /\ disjoint res input))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-    
+    [@"c_inline"]
 let rec nat_to_text_ #len clen input resLen res i =
     if (i <. clen) then begin
         let ind = sub #SIZE (sub #SIZE clen i) (size 1) in
@@ -83,7 +83,7 @@ val nat_to_text:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
-
+    [@"c_inline"]
 let nat_to_text #len clen input res =
     let num_words = get_size_nat clen in
     let tmpLen = mul #SIZE (size 8) num_words in

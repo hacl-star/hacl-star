@@ -356,7 +356,7 @@ let rsa_verify #sLen #msgLen pow2_i iLen modBits eBits pkey ssLen sgnt mmsgLen m
 
 	    assume (disjoint s n);
 	    let res = 
-	      if (bn_is_less nLen s n) then begin
+	      if (bn_is_less nLen s nLen n) then begin
 	         mod_exp pow2_i iLen modBits nLen n s eBits e m;
 		 disjoint_sub_lemma1 tmp em (size 0) nLen;
 		 nat_to_text k m em;

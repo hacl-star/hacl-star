@@ -9,7 +9,6 @@ open Hacl.Impl.Lib
 
 module Buffer = Spec.Lib.IntBuf
 
-
 val addcarry_u64: 
     carry:uint64 -> a:uint64 -> b:uint64 -> Tot (tuple2 uint64 uint64)
 [@"c_inline"]    
@@ -31,15 +30,6 @@ let subborrow_u64 carry a b =
         else
            (if (lt_u64 a b) then u64 1 else u64 0) in
     (carry, res)
-
-val bval:
-    #bLen:size_nat -> cbLen:size_t{v cbLen == bLen} ->
-    b:lbignum bLen -> i:size_t -> Stack uint64
-    (requires (fun h -> live h b))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
-    [@"c_inline"]
-let bval #bLen cbLen b i =
-    if (i <. cbLen) then b.(i) else u64 0
     
 val bn_sub_:
     #aLen:size_nat -> #bLen:size_nat ->

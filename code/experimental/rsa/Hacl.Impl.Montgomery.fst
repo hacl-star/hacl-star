@@ -22,11 +22,11 @@ val bn_pow2_mod_n_:
     r:lbignum rLen -> Stack unit
     (requires (fun h -> live h a /\ live h r /\ disjoint r a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 r h0 h1))
-	
+    [@"c_inline"]	
 let rec bn_pow2_mod_n_ #rLen clen a i p r =
     if (i <. p) then begin
         bn_lshift1 #rLen clen r r;
-        (if not (bn_is_less #rLen clen r a) then
+        (if not (bn_is_less clen r clen a) then
             bn_sub clen r clen a r);
         bn_pow2_mod_n_ clen a (size_incr i) p r
     end
@@ -40,7 +40,7 @@ val bn_pow2_mod_n:
     r:lbignum rLen -> Stack unit
     (requires (fun h -> live h a /\ live h r /\ disjoint r a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 r h0 h1))
-
+    [@"c_inline"]
 let bn_pow2_mod_n #rLen aBits rLen a p r =
     bn_set_bit rLen r aBits;
     bn_sub rLen r rLen a r; // r = r - a
@@ -53,7 +53,7 @@ val degree_:
     i:size_t{v i / 64 < aLen} -> Stack size_t
     (requires (fun h -> live h a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
-    
+    [@"c_inline"]
 let rec degree_ #aLen aaLen a i =
     if i =. size 0 then size 0
     else begin
@@ -68,8 +68,9 @@ val degree:
     aBits:size_t{v aBits / 64 < aLen} -> Stack size_t
     (requires (fun h -> live h a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ h0 == h1))
+    [@"c_inline"]
 let degree #aLen aaLen a aBits = degree_ #aLen aaLen a aBits
-    
+
 val shift_euclidean_mod_inv_f:
     #rLen:size_nat ->
     rrLen:size_t{v rrLen == rLen} ->
@@ -77,11 +78,11 @@ val shift_euclidean_mod_inv_f:
     f:size_t -> i:size_t -> Stack unit
     (requires (fun h -> live h m /\ live h tmp /\ disjoint m tmp))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 tmp h0 h1))
-    
+    [@"c_inline"]
 let rec shift_euclidean_mod_inv_f #rLen rrLen m tmp f i =
     if (i <. f) then begin
        bn_add rrLen tmp rrLen tmp tmp; // tmp = tmp + tmp
-       (if (bn_is_less rrLen m tmp) then // m < tmp
+       (if (bn_is_less rrLen m rrLen tmp) then // m < tmp
            bn_sub rrLen tmp rrLen m tmp); //tmp = tmp - m
        shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size_incr i)
     end
@@ -95,7 +96,7 @@ val shift_euclidean_mod_inv_:
     m:lbignum rLen -> st_inv:lbignum (rLen + rLen) -> res:lbignum rLen -> Stack unit
     (requires (fun h -> live h ub /\ live h vb /\ live h s /\ live h r /\ live h m /\ live h st_inv))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1))
-    
+    [@"c_inline"]
 let rec shift_euclidean_mod_inv_ #rLen rrLen uBits ub vBits vb r s m st_inv res =
     let stLen = add #SIZE rrLen rrLen in    
     let v_shift_f = Buffer.sub #uint64 #(v stLen) #rLen st_inv (size 0) rrLen in
@@ -108,7 +109,7 @@ let rec shift_euclidean_mod_inv_ #rLen rrLen uBits ub vBits vb r s m st_inv res 
        let f = sub #SIZE du dv in
        bn_lshift rrLen vb f v_shift_f; //v_shift_f = v << f
        let f =
-	  if (bn_is_less rrLen ub v_shift_f) then begin // u < v_shift_f
+	  if (bn_is_less rrLen ub rrLen v_shift_f) then begin // u < v_shift_f
              let f = sub #SIZE f (size 1) in
              bn_lshift rrLen vb f v_shift_f; f end
 	  else f in
@@ -116,13 +117,13 @@ let rec shift_euclidean_mod_inv_ #rLen rrLen uBits ub vBits vb r s m st_inv res 
        
        copy rrLen s tmp;
        if (f >. size 0) then shift_euclidean_mod_inv_f #rLen rrLen m tmp f (size 0);
-       (if (bn_is_less rrLen r tmp) then begin // r < tmp
+       (if (bn_is_less rrLen r rrLen tmp) then begin // r < tmp
             bn_add rrLen r rrLen m r; //r = r + m
             bn_sub rrLen r rrLen tmp r end
         else bn_sub rrLen r rrLen tmp r);
 	 
        let du = degree rrLen ub uBits in
-       if (bn_is_less rrLen ub vb) then begin
+       if (bn_is_less rrLen ub rrLen vb) then begin
           //swap(u,v); swap(r,s)
           shift_euclidean_mod_inv_ #rLen rrLen dv vb du ub s r m st_inv res end
        else shift_euclidean_mod_inv_ #rLen rrLen du ub dv vb r s m st_inv res end
@@ -136,7 +137,7 @@ val shift_euclidean_mod_inv:
     res:lbignum rLen -> Stack unit
     (requires (fun h -> live h a /\ live h m))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1))
-    
+    [@"c_inline"]
 let shift_euclidean_mod_inv #rLen rrLen aBits a mBits m res =
     let stLen = mul #SIZE (size 6) rrLen in
     alloc #uint64 #unit #(v stLen) stLen (u64 0) [BufItem a; BufItem m] [BufItem res]
@@ -167,7 +168,7 @@ val mont_reduction:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
     
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
+    [@"c_inline"]
 let mont_reduction #rLen #cLen pow2_i iLen exp_r rrLen st_mont st st_kara ccLen c res =
     let r2Len = add #SIZE rrLen rrLen in
     let stLen = mul #SIZE (size 3) rrLen in
@@ -203,7 +204,7 @@ val to_mont:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 aM h0 h1))
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
+    [@"c_inline"]
 let to_mont #rLen pow2_i iLen exp_r rrLen st_mont st st_kara r2 a aM =
     let cLen = add #SIZE rrLen rrLen in
     let stLen = mul #SIZE (size 3) rrLen in
@@ -227,7 +228,7 @@ val from_mont:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 a h0 h1))
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
+    [@"c_inline"]
 let from_mont #rLen pow2_i iLen exp_r rrLen st_mont st st_kara aM a =
     let r2Len = add #SIZE rrLen rrLen in
     let stLen = mul #SIZE (size 3) rrLen in

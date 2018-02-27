@@ -12,6 +12,7 @@ open Hacl.Impl.Convert
 module Buffer = Spec.Lib.IntBuf
 
 (* SHA 256 *)
+inline_for_extraction 
 let hLen:size_t = size 32
 
 assume val hash_sha256:
@@ -35,7 +36,7 @@ val mgf_:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
+    [@"c_inline"]
 let rec mgf_ #accLen #stLen count_max mgfseed aaccLen sstLen st counter =
   if (counter <. count_max) then begin
      let mgfseed_counter = Buffer.sub #uint8 #stLen #(v hLen + 4) st (size 0) (add #SIZE hLen (size 4)) in
@@ -62,7 +63,7 @@ val mgf_sha256:
     res:lbytes len -> Stack unit
     (requires (fun h -> live h mgfseed /\ live h res /\ disjoint res mgfseed))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-	
+    [@"c_inline"]	
 let mgf_sha256 #len mgfseed clen res =
     let count_max = blocks clen hLen in
     let accLen = mul #SIZE hLen count_max in

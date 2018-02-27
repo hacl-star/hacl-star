@@ -14,7 +14,7 @@ module Buffer = Spec.Lib.IntBuf
 
 val bn_mul_by_limb_addj_f:
     a_i:uint64 -> l:uint64 -> c:uint64 -> r_ij:uint64 -> Tot (tuple2 uint64 uint64)
-[@ "substitute"]    
+    [@ "substitute"]    
 let bn_mul_by_limb_addj_f a_i l c r_ij =
     assume (uint_v #U64 a_i * uint_v #U64 l + uint_v #U64 c + uint_v #U64 r_ij < pow2 128);
     let res = add #U128 (add #U128 (mul_wide a_i l) (to_u128 #U64 c)) (to_u128 #U64 r_ij) in
@@ -30,7 +30,7 @@ val bn_mult_by_limb_addj:
     carry:uint64 -> res:lbignum (v resLen) -> Stack unit
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let rec bn_mult_by_limb_addj #aLen aaLen a l i j resLen carry res =
     let ij = add #SIZE i j in
     if (i <. aaLen) then begin
@@ -49,7 +49,7 @@ val bn_mult_:
     resLen:size_t{v resLen = aLen + bLen} -> res:lbignum (aLen + bLen) -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let rec bn_mult_ #aLen #bLen aaLen a bbLen b j resLen res =
     if (j <. bbLen) then begin
         bn_mult_by_limb_addj aaLen a b.(j) (size 0) j resLen (u64 0) res;
@@ -64,7 +64,7 @@ val bn_mul:
     res:lbignum (aLen + bLen) -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))    
-  
+    [@"c_inline"]
 let bn_mul #aLen #bLen aaLen a bbLen b res =
     let resLen = add #SIZE aaLen bbLen in
     fill resLen res (u64 0);
@@ -76,7 +76,7 @@ val bn_mul_u64:
     a:lbignum aLen -> b:uint64 -> res:lbignum (aLen + 1) -> Stack unit
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-    
+    [@"c_inline"]
 let bn_mul_u64 #aLen aaLen a b res =
     let resLen = add #SIZE aaLen (size 1) in
     fill resLen res (u64 0);
@@ -89,7 +89,7 @@ val bn_sqr_sqr:
     res:lbignum (aLen + aLen) -> Stack unit
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let rec bn_sqr_sqr #aLen aaLen a i res =
     if (i <. aaLen) then begin
        let a_i = a.(i) in
@@ -107,7 +107,7 @@ val bn_sqr_:
     resLen:size_t{v resLen == aLen + aLen} -> res:lbignum (aLen + aLen) -> Stack unit
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let rec bn_sqr_ #aLen aaLen a i resLen res =
     if (i <. size_decr aaLen) then begin
        bn_mult_by_limb_addj aaLen a a.(i) (size_incr i) i resLen (u64 0) res;
@@ -120,7 +120,7 @@ val bn_sqr:
     tmp:lbignum (aLen + aLen) -> res:lbignum (aLen + aLen) -> Stack unit
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let bn_sqr #aLen aaLen a tmp res =
     let resLen = add #SIZE aaLen aaLen in
     fill resLen res (u64 0);
@@ -136,9 +136,9 @@ val abs:
     res:lbignum aLen -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h res /\ disjoint a b))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let abs #aLen #bLen aaLen a bbLen b res =
-    if (bn_is_less_ds aaLen a bbLen b) then
+    if (bn_is_less aaLen a bbLen b) then
        //a < b ==> res = b - a
        bn_sub bbLen b aaLen a res
     else bn_sub aaLen a bbLen b res
@@ -161,12 +161,12 @@ val add_sign:
                       live h b0 /\ live h b1 /\ live h b2 /\
 		      live h res /\ disjoint a0 a1 /\ disjoint b0 b1))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let add_sign #a0Len #a1Len #resLen aa0Len aa1Len rresLen c0 c1 c2 a0 a1 a2 b0 b1 b2 res =
     let c0Len = add #SIZE aa0Len aa0Len in
     let c1Len = add #SIZE aa1Len aa1Len in
-    let sa2 = if (bn_is_less_ds aa0Len a0 aa1Len a1) then Negative else Positive in
-    let sb2 = if (bn_is_less_ds aa0Len b0 aa1Len b1) then Negative else Positive in
+    let sa2 = if (bn_is_less aa0Len a0 aa1Len a1) then Negative else Positive in
+    let sb2 = if (bn_is_less aa0Len b0 aa1Len b1) then Negative else Positive in
     bn_add_carry c0Len c0 c1Len c1 res;
     if ((sa2 = Positive && sb2 = Positive) || (sa2 = Negative && sb2 = Negative))
     then bn_sub rresLen res c0Len c2 res
@@ -181,7 +181,7 @@ val karatsuba_:
     res:lbignum (aLen + aLen) -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h tmp /\ live h res))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
-    
+    [@"c_inline"]
 let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
     assume (v pow2_i = aLen + v iLen);
     let tmpLen = mul #SIZE (size 4) pow2_i in
@@ -264,7 +264,7 @@ val karatsuba:
     res:lbignum (aLen + aLen) -> Stack unit
     (requires (fun h -> live h a /\ live h b /\ live h st_mult /\ live h res))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
-    
+    [@"c_inline"]
 let karatsuba #aLen pow2_i iLen aaLen a b st_mult res =
     if (aaLen <. size 32)
     then bn_mul #aLen #aLen aaLen a aaLen b res

@@ -9,6 +9,7 @@ open Hacl.Impl.Lib
 
 module Buffer = Spec.Lib.IntBuf
 
+inline_for_extraction
 let bn_tbit = u64 0x8000000000000000
 
 val bn_lshift_:
@@ -20,7 +21,7 @@ val bn_lshift_:
     res:lbignum aLen{v count + v nw < aLen} -> Stack unit
     (requires (fun h -> live h a /\ live h res))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-    
+    [@"c_inline"]
 let rec bn_lshift_ #aLen aaLen a count nw lb res =
     if (count >. size 0) then begin
        let i = add #SIZE nw count in
@@ -42,7 +43,7 @@ val bn_lshift:
     res:lbignum aLen -> Stack unit
     (requires (fun h -> live h a /\ live h res))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-    
+    [@"c_inline"]
 let bn_lshift #aLen aaLen a nCount res =
     if (nCount =. size 0) then
        copy aaLen a res
@@ -67,7 +68,7 @@ val bn_lshift1_:
     res:lbignum aLen -> Stack unit
     (requires (fun h -> live h a /\ live h res))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let rec bn_lshift1_ #aLen caLen a carry i res =
     if (i <. caLen) then begin
         let tmp = a.(i) in
@@ -83,7 +84,7 @@ val bn_lshift1:
     res:lbignum aLen -> Stack unit
     (requires (fun h -> live h a /\ live h res))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let bn_lshift1 #aLen caLen a res = bn_lshift1_ #aLen caLen a (u64 0) (size 0) res
 
 val bn_rshift_:
@@ -96,7 +97,7 @@ val bn_rshift_:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
-
+    [@"c_inline"]
 let rec bn_rshift_ #aLen caLen a i nw rb l res =
     if (i <. sub #SIZE caLen nw) then begin
         let tmp = l >>. rb in
@@ -115,7 +116,7 @@ val bn_rshift:
     res:lbignum aLen -> Stack unit
     (requires (fun h -> live h a /\ live h res))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-	
+    [@"c_inline"]
 let bn_rshift #aLen caLen a nCount res =
     if (nCount =. size 0) then
       copy caLen a res
@@ -141,7 +142,7 @@ val bn_mod_pow2_n:
     res:lbignum resLen -> Stack unit
     (requires (fun h -> live h a /\ live h res /\ disjoint res a))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-
+    [@"c_inline"]
 let bn_mod_pow2_n #aLen #resLen caLen a nCount cresLen res =
     let nw = nCount /. size 64 in
     let nb = nCount %. size 64 in
