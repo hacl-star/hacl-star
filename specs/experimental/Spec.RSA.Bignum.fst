@@ -207,60 +207,67 @@ let degree a aBits = degree_ a aBits
 val bn_lshift: a:bignum -> b:size_nat -> Tot bignum
 let bn_lshift a b = a * pow2 b
 
-val shift_euclidean_mod_inv_f:
-    m:bignum -> tmp:bignum{tmp <= m} -> f:size_nat -> i:size_nat -> Tot (res:bignum{res <= m})
-    (decreases (f - i))
-let rec shift_euclidean_mod_inv_f m tmp f i =
-    if (i < f) then begin
-      let tmp = tmp + tmp in
-      let tmp = if (m < tmp) then tmp - m else tmp in
-      shift_euclidean_mod_inv_f m tmp f (i + 1) end
-    else tmp
+val lemma_degree_decr_lt:
+    a:bignum -> da:size_nat -> b:bignum -> db:size_nat -> Lemma
+    (requires (a < b))
+    (ensures (da < db))
+let lemma_degree_decr_lt a da b db = admit()
+
+val lemma_degree_decr_le:
+    a:bignum -> da:size_nat -> b:bignum -> db:size_nat -> Lemma
+    (requires (a <= b))
+    (ensures (da <= db))
+let lemma_degree_decr_le a da b db = admit()
 
 // u >= v
 val shift_euclidean_mod_inv_:
     du:size_nat -> u:bignum -> dv:size_nat{dv <= du} -> v:bignum{v <= u} ->
-    r:bignum -> s:bignum -> m:bignum{s < m /\ r < m} -> Tot bignum
+    r:bignum -> s:bignum -> a:bignum -> m:bignum{s < m /\ r < m} -> Pure bignum
+    (requires (v % m == (s * a) % m /\ u % m == (r * a) % m))
+    (ensures (fun res -> v % m == (s * a) % m))
     (decreases (du + dv))
     
-let rec shift_euclidean_mod_inv_ du u dv v r s m =
+#reset-options "--z3rlimit 50 --max_fuel 2"
+
+let rec shift_euclidean_mod_inv_ du u dv v r s a m =
     if dv > 1 then begin
       let f = du - dv in
-      let (u, f) =
-         if (f > 0) then begin
-            let v_lshift_f = bn_lshift v f in
-            let f = if (u < v_lshift_f) then f - 1 else f in
-            let v_lshift_f = bn_lshift v f in
-            assume (0 <= u - v_lshift_f);
-            let u = u - v_lshift_f in
-            (u, f) end
-          else (u - v, f) in
-	 
-      let tmp = if (f > 0) then shift_euclidean_mod_inv_f m s f 0 else s in
-      assert (tmp <= m);
-      let r = if (r < tmp) then r + m - tmp else r - tmp in
-      assume (r < m);
-
-      let du' = degree u du in
-      assume (du' < du);
-      if (u < v) then begin
-        //swap (u, v); swap (r, s)
-	assume (du' <= dv);
-        shift_euclidean_mod_inv_ dv v du' u s r m end
+      let v_lshift_f = bn_lshift v f in
+      let f = if (u < v_lshift_f) then f - 1 else f in
+      let v_lshift_f = bn_lshift v f in
+      assume (0 < v_lshift_f /\ v_lshift_f <= u);
+      let u' = u - v_lshift_f in
+      assert (u' == u - v * (pow2 f));
+      
+      let tmp = (bn_lshift s f) % m in
+      let r' = if (r < tmp) then r + m - tmp else r - tmp in
+      assume (r' % m == (r - s * (pow2 f)) % m);
+      
+      assert (u % m - (pow2 f) * (v % m) == (r * a) % m - (pow2 f) * ((s * a) % m));
+      assume ((u - v * (pow2 f)) % m == (((r - s * (pow2 f)) % m) * a) % m);
+      assert (u' % m == ((r' % m) * a) % m);
+      assume (u' % m == (r'* a) % m);
+      
+      let du' = degree u' du in
+      lemma_degree_decr_lt u' du' u du;
+      if (u' < v) then begin
+        lemma_degree_decr_lt u' du' v dv;
+        shift_euclidean_mod_inv_ dv v du' u' s r' a m end
       else begin
-        assume (dv <= du');
-        shift_euclidean_mod_inv_ du' u dv v r s m end
+        lemma_degree_decr_le v dv u' du';
+        shift_euclidean_mod_inv_ du' u' dv v r' s a m end
+      end
+    else begin
+      if dv = 0 then 0 // v = 0
+      else s // v = 1 ==> s = a^(-1) % m
     end
-    else s
-          
+    
 //res = a^(-1) % m
 val shift_euclidean_mod_inv:
     aBits:size_nat -> a:bignum -> 
     mBits:size_nat{aBits < mBits} -> m:bignum{1 < m /\ a < m} -> Tot bignum
 let shift_euclidean_mod_inv aBits a mBits m =
-    let r = 0 in
-    let s = 1 in
-    shift_euclidean_mod_inv_ mBits m aBits a r s m
+    shift_euclidean_mod_inv_ mBits m aBits a 0 1 a m
 
 val mod_exp_:
     x0:size_nat ->
