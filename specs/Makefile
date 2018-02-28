@@ -64,17 +64,9 @@ gf128.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fs
 	$(OCAMLOPT) -I gf128-ml $(OCAML_INCLUDES) gf128-ml/Spec_Lib_IntTypes.ml gf128-ml/Spec_Lib_IntSeq.ml gf128-ml/Spec_GaloisField.ml gf128-ml/Spec_GF128.ml gf128-ml/Spec_GF128_Test.ml -o gf128.exe
 	./gf128.exe
 
-sbox.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.Sbox.fst
-	mkdir -p sbox-ml
-	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module FStar.BitVector --extract_module Spec.GaloisField --extract_module Spec.Sbox --odir sbox-ml $^
-	@echo 'let _ = test()' >> sbox-ml/Spec_Sbox.ml
-	$(OCAMLOPT) -I sbox-ml $(OCAML_INCLUDES) sbox-ml/Spec_Lib_IntTypes.ml sbox-ml/Spec_Lib_IntSeq.ml sbox-ml/Spec_GaloisField.ml sbox-ml/Spec_Sbox.ml -o sbox.exe
-	./sbox.exe
-
-
 aes.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst tests/Spec.AES.Test.fst
 	mkdir -p aes-ml
-	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --extract_module Spec.AES.Test --odir aes-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --extract_module Spec.AES.Test --odir aes-ml $^
 	@echo 'let _ = test()' >> aes-ml/Spec_AES_Test.ml
 	$(OCAMLOPT) -I aes-ml $(OCAML_INCLUDES) aes-ml/Spec_Lib_IntTypes.ml aes-ml/Spec_Lib_IntSeq.ml aes-ml/Spec_GaloisField.ml aes-ml/Spec_CTR.ml aes-ml/Spec_AES.ml aes-ml/Spec_AES_Test.ml -o aes.exe
 	./aes.exe
@@ -88,7 +80,7 @@ curve25519.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst l
 	./curve25519.exe
 
 
-kyber.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Kyber.fst 
+kyber.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Kyber.fst
 	mkdir -p kyber-ml
 	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Kyber --odir kyber-ml $^
 	@echo 'let _ = test()' >> kyber-ml/Spec_Kyber.ml
@@ -131,7 +123,7 @@ hkdf.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst
 
 pbkdf2.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.PBKDF2.fst tests/Spec.PBKDF2.Test.fst
 	mkdir -p pbkdf2-ml
-	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.PBKDF2 --extract_module Spec.PBKDF2.Test --odir pbkdf2-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.PBKDF2 --extract_module Spec.PBKDF2.Test --odir pbkdf2-ml $^
 	@echo 'let _ = test()' >> pbkdf2-ml/Spec_PBKDF2_Test.ml
 	$(OCAMLOPT) -I pbkdf2-ml $(OCAML_INCLUDES) pbkdf2-ml/Spec_Lib_IntTypes.ml pbkdf2-ml/Spec_Lib_RawIntTypes.ml pbkdf2-ml/Spec_Lib_IntSeq.ml pbkdf2-ml/Spec_Lib_Stateful.ml pbkdf2-ml/Spec_SHA2.ml pbkdf2-ml/Spec_Hash.ml pbkdf2-ml/Spec_HMAC.ml pbkdf2-ml/Spec_PBKDF2.ml pbkdf2-ml/Spec_PBKDF2_Test.ml -o pbkdf2.exe
 	./pbkdf2.exe
