@@ -131,6 +131,7 @@ snapshots/nss: snapshots-remove-intermediates
 	cp snapshots/snapshot-gcc/Hacl_Chacha20.* snapshots/nss
 	cp snapshots/snapshot-gcc/Hacl_Chacha20_Vec128.* snapshots/nss
 	cp snapshots/snapshot-gcc/Hacl_Poly1305_64.* snapshots/nss
+	cp snapshots/snapshot-gcc/Hacl_Poly1305_32.* snapshots/nss
 	$(MAKE) snapshots/nss/kremlib
 	$(MAKE) snapshots/nss/specs
 
