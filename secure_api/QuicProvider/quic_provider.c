@@ -144,7 +144,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
 #endif
 
   if(!quic_crypto_hkdf_expand(secret->hash, tmp, hlen,
-        secret->secret, hlen, info, info_len))
+        (const char*)secret->secret, hlen, info, info_len))
     return 0;
 
 #if DEBUG
@@ -155,7 +155,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
   if(!quic_crypto_hkdf_tls_label(secret->hash, info, &info_len, "exporter"))
     return 0;
 
-  if(!quic_crypto_hkdf_expand(secret->hash, derived->secret, hlen,
+  if(!quic_crypto_hkdf_expand(secret->hash, (char*)derived->secret, hlen,
         tmp, hlen, info, info_len))
     return 0;
 
@@ -177,21 +177,21 @@ int MITLS_CALLCONV quic_derive_handshake_secrets(quic_secret *client_hs, quic_se
   char info[259] = {0};
   size_t info_len;
 
-  if(!quic_crypto_hkdf_extract(s0.hash, s0.secret, salt, salt_len, con_id, con_id_len))
+  if(!quic_crypto_hkdf_extract(s0.hash, (char*)s0.secret, salt, salt_len, con_id, con_id_len))
     return 0;
 
   client_hs->hash = s0.hash;
   client_hs->ae = s0.ae;
   if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, "client hs", 32))
     return 0;
-  if(!quic_crypto_hkdf_expand(s0.hash, client_hs->secret, 32, s0.secret, 32, info, info_len))
+  if(!quic_crypto_hkdf_expand(s0.hash, (char*)client_hs->secret, 32, (char*)s0.secret, 32, info, info_len))
     return 0;
 
   server_hs->hash = s0.hash;
   server_hs->ae = s0.ae;
   if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, "server hs", 32))
     return 0;
-  if(!quic_crypto_hkdf_expand(s0.hash, server_hs->secret, 32, s0.secret, 32, info, info_len))
+  if(!quic_crypto_hkdf_expand(s0.hash, (char*)server_hs->secret, 32, (char*)s0.secret, 32, info, info_len))
     return 0;
 
   return 1;
@@ -214,12 +214,12 @@ int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secre
 
   if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "key", klen))
     return 0;
-  if(!quic_crypto_hkdf_expand(secret->hash, dkey, klen, secret->secret, slen, info, info_len))
+  if(!quic_crypto_hkdf_expand(secret->hash, dkey, klen, (char*)secret->secret, slen, info, info_len))
     return 0;
 
   if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "iv", 12))
     return 0;
-  if(!quic_crypto_hkdf_expand(secret->hash, key->static_iv, 12, secret->secret, slen, info, info_len))
+  if(!quic_crypto_hkdf_expand(secret->hash, key->static_iv, 12, (char*)secret->secret, slen, info, info_len))
     return 0;
 
 #if DEBIG
