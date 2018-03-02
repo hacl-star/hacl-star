@@ -7,6 +7,7 @@ open Spec.Lib.IntTypes
 open Spec.Lib.RawIntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.Stateful
+open Spec.GaloisField
 
 module GF = Spec.GF128
 
@@ -55,7 +56,16 @@ let test2_c_length: size_nat = 16
 let test2_aad_length: size_nat = 0
 
 let test () =
-  let output = GF.gmac test1_c_length test1_ciphertext test1_hash_key in
+  let x : lbytes key_length = createL test2_hash_key in
+  let x_int = nat_from_bytes_be x in
+  let y : lbytes key_length = createL test2_ciphertext in
+  let y_int = nat_from_bytes_be y in
+  IO.print_string (Printf.sprintf "%d" x_int);
+  IO.print_string "\n";
+  IO.print_string (Printf.sprintf "%d" y_int);
+  IO.print_string "\n";
+
+  let output = GF.ghash test1_c_length test1_ciphertext test1_aad_length test1_aad test1_hash_key in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test1_expected in
   IO.print_string   "Expected hash: ";
   let test_expected : lbytes key_length = createL test1_expected in
@@ -65,7 +75,7 @@ let test () =
   if result then IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n";
 
-  let output = GF.gmac test2_c_length test2_ciphertext test2_hash_key in
+  let output = GF.ghash test2_c_length test2_ciphertext test1_aad_length test1_aad test2_hash_key in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test2_expected in
   IO.print_string   "Expected hash: ";
   let test_expected : lbytes key_length = createL test2_expected in
