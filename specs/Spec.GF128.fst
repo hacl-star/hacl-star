@@ -48,14 +48,3 @@ let gmac (len:size_nat) (text:lbytes len) (k:key) : Tot tag  =
   let s = create blocksize (u8 0) in
   let r = encode blocksize k in
   finish (poly len text r) s
-
-val ghash: input_len:size_nat -> input:lbytes input_len -> aad_len:size_nat -> aad:lbytes aad_len -> k:key -> Tot tag
-let ghash input_len input aad_len aad k =
-  (* TODO add aad *)
-  let s = create blocksize (u8 0) in
-  let r = encode blocksize k in
-  (* TODO Only a single block! *)
-  let acc0: elem = zero in
-  let encoded_input = encode input_len input in
-  let h = (encoded_input `fadd` acc0) `fmul` r in
-  finish h s
