@@ -108,10 +108,12 @@ val mont_reduction:
     (requires (True))
     (ensures (fun res -> res % n == (c / r) % n))
 
-#reset-options "--z3rlimit 300 --max_fuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
 let mont_reduction modBits r n n' c =
-    let m = (c * n') % r in
+    let c1 = c % r in
+    assert (0 <= c1 /\ c1 <= r);
+    let m = (c1 * n') % r in
     assert (0 <= m /\ m < r);
     let m = r - m in
     assert (0 < m /\ m <= r);
@@ -121,10 +123,10 @@ let mont_reduction modBits r n n' c =
     lemma_div_le (c + n * m) (c + n * r) r;
     //assert (res <= (c + n * r) / r);
     division_addition_lemma c r n;
-    assert (res <= c / r + n);
-    assert (c < r * n);
+    //assert (res <= c / r + n);
+    //assert (c < r * n);
     division_addition_lemma 0 r n;
-    assert (res < n + n);
+    //assert (res < n + n);
     lemma_mont_reduction res r c n m;
     res
 
@@ -173,7 +175,7 @@ val from_mont:
     (requires (True))
     (ensures (fun res -> res == (a_r / r) % n))
 
-#reset-options "--z3rlimit 150 --max_fuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
 let from_mont modBits r n n' a_r =
     let m = (a_r * n') % r in
@@ -185,9 +187,9 @@ let from_mont modBits r n n' a_r =
     lemma_div_le (a_r + n * m) (a_r + n * r) r;
     //assert (res <= (a_r + n * r) / r);
     division_addition_lemma a_r r n;
-    assert (res <= a_r / r + n);
+    //assert (res <= a_r / r + n);
     small_division_lemma_1 a_r r;
-    assert (res <= n);
+    //assert (res <= n);
     lemma_mont_reduction_1 res r a_r n m;
     res
 
