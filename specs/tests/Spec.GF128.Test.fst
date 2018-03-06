@@ -78,7 +78,7 @@ let test () =
   IO.print_string (Printf.sprintf "%d" y_int);
   IO.print_string "\n";
 
-  let output = GF.gmac test1_c_length test1_ciphertext test1_hash_key in
+  let output = GF.gmul test1_c_length test1_ciphertext test1_hash_key in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test1_expected in
   IO.print_string   "Expected hash: ";
   let test_expected : lbytes key_length = createL test1_expected in
@@ -88,7 +88,7 @@ let test () =
   if result then IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n";
 
-  let output = GF.gmac test2_c_length test2_ciphertext test2_hash_key in
+  let output = GF.gmul test2_c_length test2_ciphertext test2_hash_key in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test2_expected in
   IO.print_string   "Expected hash: ";
   let test_expected : lbytes key_length = createL test2_expected in
@@ -98,7 +98,7 @@ let test () =
   if result then IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n";
 
-  let output = GF.gmac test3_c_length test3_ciphertext test3_hash_key in
+  let output = GF.gmul test3_c_length test3_ciphertext test3_hash_key in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test3_expected in
   IO.print_string   "Expected hash: ";
   let test_expected : lbytes key_length = createL test3_expected in

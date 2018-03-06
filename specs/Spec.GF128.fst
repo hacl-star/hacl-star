@@ -44,7 +44,7 @@ let poly len text r =
   acc
 let finish (a:elem) (s:tag) : Tot tag = decode (a `fadd` (encode blocksize s))
 
-let gmac (len:size_nat) (text:lbytes len) (k:key) : Tot tag  =
+let gmul (len:size_nat) (text:lbytes len) (k:key) : Tot tag  =
   let s = create blocksize (u8 0) in
   let r = encode blocksize k in
   finish (poly len text r) s

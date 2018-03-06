@@ -64,6 +64,13 @@ gf128.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fs
 	$(OCAMLOPT) -I gf128-ml $(OCAML_INCLUDES) gf128-ml/Spec_Lib_IntTypes.ml gf128-ml/Spec_Lib_IntSeq.ml gf128-ml/Spec_GaloisField.ml gf128-ml/Spec_GF128.ml gf128-ml/Spec_GF128_Test.ml -o gf128.exe
 	./gf128.exe
 
+gcm.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.GF128.fst Spec.GCM.fst tests/Spec.GCM.Test.fst
+	mkdir -p gcm-ml
+	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.GF128 --extract_module Spec.GCM --extract_module Spec.GCM.Test --odir gcm-ml $^
+	@echo 'let _ = test()' >> gcm-ml/Spec_GCM_Test.ml
+	$(OCAMLOPT) -I gcm-ml $(OCAML_INCLUDES) gcm-ml/Spec_Lib_IntTypes.ml gcm-ml/Spec_Lib_IntSeq.ml gcm-ml/Spec_GaloisField.ml gcm-ml/Spec_GF128.ml gcm-ml/Spec_GCM.ml gcm-ml/Spec_GCM_Test.ml -o gcm.exe
+	./gcm.exe
+
 aes.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst tests/Spec.AES.Test.fst
 	mkdir -p aes-ml
 	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --extract_module Spec.AES.Test --odir aes-ml $^
