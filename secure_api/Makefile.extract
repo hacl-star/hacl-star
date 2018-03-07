@@ -36,7 +36,7 @@ $(DIST_DIR)/uint128/FStar_UInt128.h: $(DIST_DIR)/uint128/kremlib0.h
 	  -tmpdir $(DIST_DIR)/uint128 -skip-compilation \
 	  -add-include '"kremlib0.h"' \
 	  -drop FStar.Int.Cast.Full \
-	  -bundle FStar.UInt128=FStar.*,Prims
+	  -bundle FStar.UInt128=FStar.*,Prims # -fnostruct-passing
 	touch $(subst .c,.h,$(@))
 
 $(DIST_DIR)/uint128/kremlib0.h: cstubs/kremlib0.h
@@ -45,7 +45,7 @@ $(DIST_DIR)/uint128/kremlib0.h: cstubs/kremlib0.h
 
 KOPTS+=-add-early-include '"FStar_UInt128.h"'
 KOPTS+=-fnouint128 -drop FStar.UInt128
-CFLAGS+=-DKRML_NOUINT128
+CFLAGS+=-DKRML_NOUINT128 # -DKRML_NOSTRUCT_PASSING
 
 $(DIST_DIR)/uint128/uint128_wrapper.c: \
   cstubs/uint128_wrapper.c $(DIST_DIR)/uint128/FStar_UInt128.h

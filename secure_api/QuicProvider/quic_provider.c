@@ -202,7 +202,11 @@ int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secre
   quic_key *key = KRML_HOST_MALLOC(sizeof(quic_key));
   if(!key) return 0;
 
+#ifdef KRML_NOSTRUCT_PASSING
+  Crypto_Indexing_testId((Crypto_Indexing_aeadAlg)secret->ae, &key->id);
+#else
   key->id = Crypto_Indexing_testId((Crypto_Indexing_aeadAlg)secret->ae);
+#endif
 
   uint32_t klen = (secret->ae == TLS_aead_AES_128_GCM ? 16 : 32);
   uint32_t slen = (secret->hash == TLS_hash_SHA256 ? 32 :
@@ -227,7 +231,11 @@ int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secre
    printf("IV: "); dump(key->static_iv, 12);
 #endif
 
+#ifdef KRML_NOSTRUCT_PASSING
+  Crypto_AEAD_Main_coerce(&key->id, (uint8_t*)dkey, &key->st);
+#else
   key->st = Crypto_AEAD_Main_coerce(key->id, (uint8_t*)dkey);
+#endif
   *k = key;
   return 1;
 }
@@ -242,8 +250,13 @@ int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const char
 {
   quic_key *k = KRML_HOST_MALLOC(sizeof(quic_key));
   if(!k) return 0;
+#ifdef KRML_NOSTRUCT_PASSING
+  Crypto_Indexing_testId((Crypto_Indexing_aeadAlg)alg, &k->id);
+  Crypto_AEAD_Main_coerce(&k->id, (uint8_t*)raw_key, &k->st);
+#else
   k->id = Crypto_Indexing_testId((Crypto_Indexing_aeadAlg)alg);
   k->st = Crypto_AEAD_Main_coerce(k->id, (uint8_t*)raw_key);
+#endif
   memcpy(k->static_iv, iv, 12);
   *key = k;
   return 1;
@@ -255,8 +268,14 @@ int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, char *cipher, uint64_t sn,
   memcpy(iv, key->static_iv, 12);
   sn_to_iv(iv, sn);
 
+#ifdef KRML_NOSTRUCT_PASSING
+  FStar_UInt128_t n;
+  Crypto_Symmetric_Bytes_load_uint128(12, (uint8_t*)iv, &n);
+  Crypto_AEAD_Main_encrypt(&key->id, &key->st, &n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, (uint8_t*)cipher);
+#else
   FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, (uint8_t*)iv);
   Crypto_AEAD_Main_encrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, (uint8_t*)cipher);
+#endif
 
 #if DEBUG
   printf("ENCRYPT\nIV="); dump(iv, 12);
@@ -278,9 +297,16 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, char *plain, uint64_t sn, 
   if(cipher_len < quic_crypto_tag_length(key))
     return 0;
 
+#ifdef KRML_NOSTRUCT_PASSING
+  FStar_UInt128_t n;
+  Crypto_Symmetric_Bytes_load_uint128(12, (uint8_t*)iv, &n);
+  uint32_t plain_len = cipher_len - quic_crypto_tag_length(key);
+  int r = Crypto_AEAD_Main_decrypt(&key->id, &key->st, &n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, (uint8_t*)cipher);
+#else
   FStar_UInt128_t n = Crypto_Symmetric_Bytes_load_uint128(12, (uint8_t*)iv);
   uint32_t plain_len = cipher_len - quic_crypto_tag_length(key);
   int r = Crypto_AEAD_Main_decrypt(key->id, key->st, n, ad_len, (uint8_t*)ad, plain_len, (uint8_t*)plain, (uint8_t*)cipher);
+#endif
 
 #if DEBUG
   printf("DECRYPT %s\nIV=", r?"OK":"BAD"); dump(iv, 12);

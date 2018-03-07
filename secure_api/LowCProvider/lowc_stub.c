@@ -103,11 +103,20 @@ CAMLprim value ocaml_AEAD_create(value alg, value impl, value key) {
     caml_failwith("LowCProvider: invalid AES implementation");
   }
 
+#ifdef KRML_NOSTRUCT_PASSING
+  Crypto_Indexing_id id;
+  Crypto_Indexing_testId(calg, &id);
+#else
   Crypto_Indexing_id id = Crypto_Indexing_testId(calg);
+#endif
   id.aesImpl = aesimpl;
 
   AEAD_ST *st = malloc(sizeof(AEAD_ST));
+#ifdef KRML_NOSTRUCT_PASSING
+  Crypto_AEAD_Main_coerce(&id, (uint8_t *)String_val(key), st);
+#else
   *st = Crypto_AEAD_Main_coerce(id, (uint8_t *)String_val(key));
+#endif
   ST *s = malloc(sizeof(ST));
   s->st = st;
   s->id = id;
@@ -126,8 +135,14 @@ CAMLprim value ocaml_AEAD_encrypt(value state, value iv, value ad,
   AEAD_ST *ast = st->st;
   ID id = st->id;
   uint8_t *civ = (uint8_t *)String_val(iv);
+#ifdef KRML_NOSTRUCT_PASSING
+  FStar_UInt128_uint128 n;
+  Crypto_Symmetric_Bytes_load_uint128(
+      (uint32_t)caml_string_length(iv), civ, &n);
+#else
   FStar_UInt128_uint128 n = Crypto_Symmetric_Bytes_load_uint128(
       (uint32_t)caml_string_length(iv), civ);
+#endif
   uint8_t *cad = (uint8_t *)String_val(ad);
   uint32_t adlen = caml_string_length(ad);
   uint8_t *cplain = (uint8_t *)String_val(plain);
@@ -136,8 +151,13 @@ CAMLprim value ocaml_AEAD_encrypt(value state, value iv, value ad,
   CAMLlocal1(cipher);
   cipher = caml_alloc_string(plainlen + Crypto_AEAD_Main_taglen);
   uint8_t *ccipher = (uint8_t *)String_val(cipher);
+#ifdef KRML_NOSTRUCT_PASSING
+  Crypto_AEAD_Main_encrypt(&id, ast, &n, adlen, cad, plainlen, cplain,
+                              ccipher);
+#else
   Crypto_AEAD_Main_encrypt(id, *ast, n, adlen, cad, plainlen, cplain,
                               ccipher);
+#endif
   CAMLreturn(cipher);
 }
 
@@ -149,8 +169,12 @@ CAMLprim value ocaml_AEAD_decrypt(value state, value iv, value ad,
   AEAD_ST *ast = st->st;
   ID id = st->id;
   uint8_t *civ = (uint8_t *)String_val(iv);
-  FStar_UInt128_uint128 n = Crypto_Symmetric_Bytes_load_uint128(
-      (uint32_t)caml_string_length(iv), civ);
+  FStar_UInt128_uint128 n;
+#ifdef KRML_NOSTRUCT_PASSING
+  Crypto_Symmetric_Bytes_load_uint128((uint32_t)caml_string_length(iv), civ, &n);
+#else
+  n = Crypto_Symmetric_Bytes_load_uint128((uint32_t)caml_string_length(iv), civ);
+#endif
   uint8_t *cad = (uint8_t *)String_val(ad);
   uint32_t adlen = caml_string_length(ad);
   uint8_t *ccipher = (uint8_t *)String_val(cipher);
@@ -163,8 +187,15 @@ CAMLprim value ocaml_AEAD_decrypt(value state, value iv, value ad,
   plain = caml_alloc_string(plainlen);
   uint8_t *cplain = (uint8_t *)String_val(plain);
 
-  if (Crypto_AEAD_Main_decrypt(id, *ast, n, adlen, cad, plainlen, cplain,
-                                  ccipher)) {
+#ifdef KRML_NOSTRUCT_PASSING
+  int ret = Crypto_AEAD_Main_decrypt(&id, ast, &n, adlen, cad, plainlen, cplain,
+                                  ccipher);
+#else
+  int ret = Crypto_AEAD_Main_decrypt(id, *ast, n, adlen, cad, plainlen, cplain,
+                                  ccipher);
+#endif
+
+  if (ret) {
     CAMLreturn(Val_some(plain));
   }
 
