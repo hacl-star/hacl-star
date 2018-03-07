@@ -121,7 +121,6 @@ let squeeze (s:state)
    update_slice output (outputByteLen - remOut) outputByteLen outBlock
 
 let keccak (rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate < 1600})
-	   (capacity:size_nat{capacity + rate == 1600})
 	   (inputByteLen:size_nat)
 	   (input:lbytes inputByteLen) (delimitedSuffix:uint8)
 	   (outputByteLen:size_nat)
