@@ -23,6 +23,7 @@ let readLane (s:state) (x:index) (y:index) : uint64 =
 let writeLane (s:state ) (x:index) (y:index) (v:uint64) : state =
   s.[x * 5 + y] <- v
 
+#set-options "--max_fuel 0 --z3rlimit 100"
 
 let state_permute1 (s:state) (lfsr:uint8) : tuple2 state uint8 =
   let _C = create 5 (u64 0) in
@@ -65,21 +66,20 @@ let state_permute (s:state) : state =
   let (s,lfsr) = repeat 25 (fun (s,lfsr) -> state_permute1 s lfsr) (s,lfsr) in
   s
 
-
-let loadState (rate: size_t{rate <= 200}) (input: lbytes rate) (s:state) : state =
+let loadState (rate: size_nat{rate <= 200}) (input: lbytes rate) (s:state) : state =
   let block = create 200 (u8 0) in
   let block = update_slice block 0 rate input in
   repeati 25 (fun j s ->
     let nj = uint_from_bytes_le #U64 (slice block (j*8) ((j*8) + 8)) in
     s.[j] <- (s.[j] ^. nj) ) s
 
-let storeState (rate: size_t{rate <= 200}) (s:state) : lbytes rate =
+let storeState (rate: size_nat{rate <= 200}) (s:state) : lbytes rate =
   let block = create 200 (u8 0) in
   let block = repeati 25 (fun j block -> update_slice block (j * 8) (j*8 + 8) (uint_to_bytes_le #U64 s.[j])) block in
   slice block 0 rate
 
-let sponge (rate:size_t{rate > 0 /\ rate <= 200})
-	   (inputByteLen:size_t)
+let sponge (rate:size_nat{rate > 0 /\ rate <= 200})
+	   (inputByteLen:size_nat)
 	   (input:lbytes inputByteLen)
 	   (delimitedSuffix:uint8) : state =
    let s : state = create 25 (u64 0) in
@@ -102,9 +102,11 @@ let sponge (rate:size_t{rate > 0 /\ rate <= 200})
    let s = loadState rate nextBlock s in
    s
 
+#set-options "--max_fuel 0 --z3rlimit 2500"
+
 let squeeze (s:state)
-	    (rate:size_t{rate > 0 /\ rate < 200})
-	    (outputByteLen: size_t)
+	    (rate:size_nat{rate > 0 /\ rate < 200})
+	    (outputByteLen: size_nat)
 	    : lbytes outputByteLen =
    let output = create outputByteLen (u8 0) in
    let outBlocks = outputByteLen / rate in
@@ -118,13 +120,12 @@ let squeeze (s:state)
    let outBlock = storeState remOut s in
    update_slice output (outputByteLen - remOut) outputByteLen outBlock
 
-
-let keccak (rate:size_t{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600})
-	   (capacity:size_t{capacity + rate == 1600})
-	   (inputByteLen:size_t)
+let keccak (rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate < 1600})
+	   (capacity:size_nat{capacity + rate == 1600})
+	   (inputByteLen:size_nat)
 	   (input:lbytes inputByteLen) (delimitedSuffix:uint8)
-	   (outputByteLen:size_t)
+	   (outputByteLen:size_nat)
 	   : lbytes outputByteLen =
-   let rateInBytes : size_t = rate / 8 in
+   let rateInBytes : size_nat = rate / 8 in
    let s = sponge rateInBytes inputByteLen input delimitedSuffix in
    squeeze s rateInBytes outputByteLen
