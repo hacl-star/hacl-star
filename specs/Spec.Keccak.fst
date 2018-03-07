@@ -69,7 +69,7 @@ let state_permute (s:state) : state =
 let loadState (rate: size_nat{rate <= 200}) (input: lbytes rate) (s:state) : state =
   let block = create 200 (u8 0) in
   let block = update_slice block 0 rate input in
-  repeati 25 (fun j s ->
+  repeati (rate / 8 - 1) (fun j s ->
     let nj = uint_from_bytes_le #U64 (slice block (j*8) ((j*8) + 8)) in
     s.[j] <- (s.[j] ^. nj) ) s
 
@@ -84,41 +84,44 @@ let absorb (rate:size_nat{rate > 0 /\ rate <= 200})
 	   (inputByteLen:size_nat)
 	   (input:lbytes inputByteLen)
 	   (delimitedSuffix:uint8) : state =
-   let s : state = create 25 (u64 0) in
-   let blocks = inputByteLen / rate in
-   let s : state = repeati blocks
-       (fun i s ->
+  let s : state = create 25 (u64 0) in
+  let n = inputByteLen / rate in
+  let rem = inputByteLen % rate in
+  let last_input = slice input (n * rate) inputByteLen in
+  let s : state =
+    repeati n (fun i s ->
 	  let s = loadState rate (slice input (i*rate) (i*rate + rate)) s in
 	  state_permute s) s in
-   let rem = inputByteLen - (blocks * rate) in
-   let last = slice input (inputByteLen - rem) inputByteLen in
-   let lastBlock = create rate (u8 0) in
-   let lastBlock = update_slice lastBlock 0 rem last in
-   let lastBlock = lastBlock.[rem] <- delimitedSuffix in
-   let s = loadState rate lastBlock s in
-   let s = if ((u8_to_UInt8 (logand #U8 delimitedSuffix (u8 0x80)) = 0uy) && (rem = rate - 1))
-	   then state_permute s
-	   else s in
-   let nextBlock = create rate (u8 0) in
-   let nextBlock = nextBlock.[rate - 1] <- u8 0x80 in
-   let s = loadState rate nextBlock s in
-   s
+  let tt = create rate (u8 0) in
+  let tt = update_slice tt 0 rem last_input in
+  let tt = tt.[rem] <- delimitedSuffix in
+  let tt = tt.[rate - 1] <- logor #U8 tt.[rate - 1] (u8 128) in
+  let s : state = loadState rate (slice tt 0 rate) s in
+  s
+
+let squeeze_blocks (s:state)
+  (n:size_nat)
+  (rate:size_nat{rate > 0 /\ rate < 200 /\ n * rate <= max_size_t})
+  : (tuple2 state (lbytes (n * rate))) =
+  let output = create (n * rate) (u8 0) in
+  repeati n (fun i (s,o) ->
+	 let block = storeState rate s in
+    let o = update_slice o (i*rate) (i*rate + rate) block in
+    let s = state_permute s in
+    (s,o))
+  (s,output)
 
 let squeeze (s:state)
 	    (rate:size_nat{rate > 0 /\ rate < 200})
 	    (outputByteLen: size_nat)
 	    : lbytes outputByteLen =
-   let output = create outputByteLen (u8 0) in
-   let outBlocks = outputByteLen / rate in
-   let (s,output) = repeati outBlocks
-       (fun i (s,o) ->
-	  let block = storeState rate s in
-          let o = update_slice o (i*rate) (i*rate + rate) block in
-          let s = state_permute s in
-          (s,o)) (s,output) in
-   let remOut = outputByteLen - (outBlocks * rate) in
-   let outBlock = storeState remOut s in
-   update_slice output (outputByteLen - remOut) outputByteLen outBlock
+  let output = create outputByteLen (u8 0) in
+  let n = outputByteLen / rate in
+  let rem = outputByteLen % rate in
+  let s, output' = squeeze_blocks s n rate in
+  let output = update_slice output 0 (n * rate) output' in
+  let outBlock = storeState rem s in
+  update_slice output (n * rate) outputByteLen outBlock
 
 let keccak (rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate < 1600})
 	   (inputByteLen:size_nat)
