@@ -60,14 +60,14 @@ let blake2_mixing v a b c d x y =
   let v = g1 v b c r4 in
   v
 
-val blake2_compress : hash_state -> message_block -> counter -> last_block_flag -> Tot hash_state
+val blake2_compress : hash_state -> message_block -> uint64 -> last_block_flag -> Tot hash_state
 
 let blake2_compress h m offset f =
   let v = create 16 (u32 0) in
   let v = update_slice v 0 8 h in
   let v = update_slice v 8 16 init_vector in
-  let low_offset = cast U32 offset in
-  let high_offset = cast U32 (offset >>>. u32 word_size) in
+  let low_offset = to_u32 #U64 offset in
+  let high_offset = to_u32 #U64 (offset >>>. u32 word_size) in
   let v = v.[12] <- v.[12] ^. low_offset in
   let v = v.[13] <- v.[13] ^. high_offset in
   let v = if f then v.[14] <- v.[14] ^. (u32 0xFFFFFFFF) else v in
