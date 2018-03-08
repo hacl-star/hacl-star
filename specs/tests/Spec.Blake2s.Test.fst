@@ -12,10 +12,10 @@ open Spec.Lib.IntSeq
 //
 
 let test1_plaintext_list  = List.Tot.map u8_from_UInt8 [
-  0x00uy; 0x61uy; 0x62uy; 0x63uy
+  0x61uy; 0x62uy; 0x63uy
 ]
-let test1_plaintext : lbytes 4 =
-  assert_norm (List.Tot.length test1_plaintext_list = 4);createL test1_plaintext_list
+let test1_plaintext : lbytes 3 =
+  assert_norm (List.Tot.length test1_plaintext_list = 3);createL test1_plaintext_list
 
 let test1_expected_list = List.Tot.map u8_from_UInt8 [
   0x50uy; 0x8Cuy; 0x5Euy; 0x8Cuy; 0x32uy; 0x7Cuy; 0x14uy; 0xE2uy;
@@ -33,16 +33,16 @@ let test () =
 
   IO.print_string "\nTEST 1\n";
   let test1_plaintext_len : size_nat = 32 in
-  let test1_result : lbytes 32 = 
-    Spec.Blake2s.blake2s 4 test1_plaintext 0 (createL []) 32
+  let test1_result : lbytes 32 =
+    Spec.Blake2s.blake2s 3 test1_plaintext 0 (createL []) 32
   in
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
 
-  IO.print_string "\nResult   SHAKE 256: ";
+  IO.print_string "\nResult   BLAKE2S: ";
   List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list test1_result);
 
-  IO.print_string "\nExpected SHAKE 256: ";
+  IO.print_string "\nExpected BLAKE2S: ";
   List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list test1_expected);
 
-  if result1 then IO.print_string "\nSHAKE 256 Test1 : Success!\n"
-  else IO.print_string "\nSHAKE 256 Test1: Failure :(\n"
+  if result1 then IO.print_string "\nBLAKE2S Test1 : Success!\n"
+  else IO.print_string "\nBLAKE2S Test1: Failure :(\n"
