@@ -39,10 +39,10 @@ let test () =
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
 
   IO.print_string "\nResult   BLAKE2S: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list test1_result);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result);
 
   IO.print_string "\nExpected BLAKE2S: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list test1_expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected);
 
   if result1 then IO.print_string "\nBLAKE2S Test1 : Success!\n"
   else IO.print_string "\nBLAKE2S Test1: Failure :(\n"
