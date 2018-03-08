@@ -7,6 +7,9 @@ open Spec.Lib.IntSeq
 (* Constants *)
 
 let word_size = 32
+let words_block_size = 16
+let bytes_in_word = 4
+let bytes_in_block = words_block_size * bytes_in_word
 let rounds_in_f = 10
 let block_bytes = 64
 let r1 = u32 16
@@ -89,20 +92,25 @@ let blake2_compress h m offset f =
   in
   h
     
-val blake2 : dd:size_nat{dd <= max_size_t / 16}  -> d:lbytes (dd * 16) -> ll:size_nat{ll<= pow2 64} -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
+val blake2 : dd:size_nat{0 < dd /\ dd < max_size_t / bytes_in_block}  -> d:lbytes (dd * bytes_in_block) -> ll:size_nat{ll<= pow2 64} -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 
 let blake2 dd d ll kk nn =
   let h = init_vector in
-  let h = h.[0] <- h.[0] ^. (u32 0x01010000) ^. (kk <<. 8) ^. nn in
+  let h = h.[0] <- h.[0] ^. (u32 0x01010000) ^. ((u32 kk) <<. (u32 8)) ^. (u32 nn) in
   let h = if dd > 1 then
     repeati (dd -1) 
       (fun i h ->
-	blake2_compress h (sub d (i * 16) 16) ((i+1)*block_bytes) false
+	let to_compress : intseq U32 16 = 
+	  uints_from_bytes_le (sub d (i*bytes_in_block) bytes_in_block) 
+	in
+	blake2_compress h to_compress (u64 ((i+1)*block_bytes)) false
       ) h else h
   in
+  let offset : size_nat = (dd-1)*16*4 in
+  let last_block : intseq U32 16 = uints_from_bytes_le (sub d offset bytes_in_block) in
   let h = if kk = 0 then
-    blake2_compress h (sub d (dd - 1) 16) ll true
+    blake2_compress h last_block (u64 ll) true
     else
-    blake2_compress h (sub d (dd - 1) 16) ll + block_bytes true
+    blake2_compress h last_block (u64 (ll + block_bytes)) true
   in
-  sub 0 nn (uints_to_bytes_le h)
+  sub (uints_to_bytes_le h) 0 nn
