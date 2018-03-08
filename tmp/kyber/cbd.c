@@ -11,6 +11,7 @@
 *
 * Returns 64-bit unsigned integer loaded from x
 **************************************************/
+#if KYBER_ETA != 4
 static uint64_t load_littleendian(const unsigned char *x, int bytes)
 {
   int i;
@@ -19,6 +20,7 @@ static uint64_t load_littleendian(const unsigned char *x, int bytes)
     r |= (uint64_t)x[i] << (8*i);
   return r;
 }
+#endif
 
 /*************************************************
 * Name:        cbd
@@ -58,6 +60,23 @@ void cbd(poly *r, const unsigned char *buf)
     r->coeffs[4*i+3] = a[3] + KYBER_Q - b[3];
   }
 #elif KYBER_ETA == 4
+  int i;
+
+  unsigned char hw4(unsigned char x)
+  {
+    unsigned char r = 0;
+    int i;
+    for(i=0;i<4;i++)
+      r += (x >> i) & 1;
+    return r;
+  }
+  
+  for(i=0;i<KYBER_N;i++)
+  {
+    r->coeffs[i] = hw4(buf[i] & 0xf) + KYBER_Q - hw4(buf[i] >> 4);
+  }
+
+  /*
   uint32_t t,d, a[4], b[4];
   int i,j;
 
@@ -82,6 +101,7 @@ void cbd(poly *r, const unsigned char *buf)
     r->coeffs[4*i+2] = a[2] + KYBER_Q - b[2];
     r->coeffs[4*i+3] = a[3] + KYBER_Q - b[3];
   }
+  */
 #elif KYBER_ETA == 5
   uint64_t t,d, a[4], b[4];
   int i,j;
