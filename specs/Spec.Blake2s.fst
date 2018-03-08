@@ -9,7 +9,7 @@ open Spec.Lib.IntSeq
 let word_size = 32
 let words_block_size = 16
 let bytes_in_word = 4
-let bytes_in_block = words_block_size * bytes_in_word
+let bytes_in_block : nat = words_block_size * bytes_in_word
 let rounds_in_f = 10
 let block_bytes = 64
 let r1 = u32 16
@@ -32,7 +32,7 @@ let sigma_list : list (n:nat{n<16}) =
    6; 15; 14;  9; 11;  3;  0;  8; 12;  2; 13;  7;  1;  4; 10;  5;
    10;  2;  8;  4;  7;  6;  1;  5; 15; 11;  9; 14;  3; 12; 13;  0]
 let sigma:lseq (n:nat{n < 16}) 160 = assert_norm (List.Tot.length sigma_list = 160) ; createL sigma_list
-   
+
 type working_vector = intseq U32 16
 type message_block = intseq U32 16
 type hash_state = intseq U32 8
@@ -61,7 +61,7 @@ let blake2_mixing v a b c d x y =
   v
 
 val blake2_compress : hash_state -> message_block -> counter -> last_block_flag -> Tot hash_state
-  
+
 let blake2_compress h m offset f =
   let v = create 16 (u32 0) in
   let v = update_slice v 0 8 h in
@@ -91,17 +91,18 @@ let blake2_compress h m offset f =
     ) h
   in
   h
-    
-val blake2 : dd:size_nat{0 < dd /\ dd < max_size_t / bytes_in_block}  -> d:lbytes (dd * bytes_in_block) -> ll:size_nat{ll<= pow2 64} -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 
-let blake2 dd d ll kk nn =
+val blake2s_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t}  -> d:lbytes (dd * bytes_in_block) -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
+
+let blake2s_internal dd d kk nn =
+  let ll = dd * bytes_in_block in
   let h = init_vector in
   let h = h.[0] <- h.[0] ^. (u32 0x01010000) ^. ((u32 kk) <<. (u32 8)) ^. (u32 nn) in
   let h = if dd > 1 then
-    repeati (dd -1) 
+    repeati (dd -1)
       (fun i h ->
-	let to_compress : intseq U32 16 = 
-	  uints_from_bytes_le (sub d (i*bytes_in_block) bytes_in_block) 
+	let to_compress : intseq U32 16 =
+	  uints_from_bytes_le (sub d (i*bytes_in_block) bytes_in_block)
 	in
 	blake2_compress h to_compress (u64 ((i+1)*block_bytes)) false
       ) h else h
@@ -114,3 +115,24 @@ let blake2 dd d ll kk nn =
     blake2_compress h last_block (u64 (ll + block_bytes)) true
   in
   sub (uints_to_bytes_le h) 0 nn
+
+val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * bytes_in_block } ->  d:lbytes ll ->  kk:size_nat{kk<=32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
+
+let blake2s ll d kk k nn =
+  let data_blocks : size_nat = ((ll - 1) / bytes_in_block) + 1 in
+  assert (0<data_blocks /\ data_blocks * bytes_in_block <= max_size_t - bytes_in_block);
+  let padded_data_length : size_nat = data_blocks * bytes_in_block in
+  assert (padded_data_length <= max_size_t - bytes_in_block);
+  let padded_data = create padded_data_length (u8 0) in
+  let padded_data : lbytes (data_blocks * bytes_in_block) = update_slice padded_data 0 ll d in
+  if kk = 0 then
+     blake2s_internal data_blocks padded_data kk nn
+  else
+     let padded_key = create bytes_in_block (u8 0) in
+     let padded_key = update_slice padded_key 0 kk k in
+     assume (bytes_in_block + padded_data_length <= max_size_t);
+     let data_length : size_nat = bytes_in_block + padded_data_length in
+     let data = create data_length (u8 0) in
+     let data = update_slice data 0 bytes_in_block padded_key in
+     let data = update_slice data bytes_in_block data_length padded_data in
+     blake2s_internal (data_blocks+1) data kk nn
