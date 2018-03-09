@@ -54,9 +54,9 @@ let inner_loop (st:state) : state =
 
 let round (r:size_nat{r <= 24}) (st:state) : state =
   let st = inner_loop st in
-  let st = if (u32 r &. u32 3) = u32 0 then small_swap st else st in
-  let st = if (u32 r &. u32 3) = u32 2 then big_swap st else st in
-  let st = if (u32 r &. u32 3) = u32 0 then round_add r st else st in
+  let st = if (land r 3) = 0 then small_swap st else st in
+  let st = if (land r 3) = 2 then big_swap st else st in
+  let st = if (land r 3) = 0 then round_add r st else st in
   st
 
 let gimli (st:state) : state =
