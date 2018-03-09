@@ -23,7 +23,7 @@ let zero #f : felem f = zero_vec #f.bits
 let one #f : felem f = elem_vec #f.bits 0
 
 let fadd (#f:field) (a:felem f) (b:felem f) : felem f = logxor_vec #f.bits a b
-let op_Plus_At e1 e2 = fadd e1 e2
+let op_Plus_At #f e1 e2 = fadd #f e1 e2
 
 
 
@@ -64,7 +64,7 @@ let rec fmul_loop (#f:field) (a:felem f) (b:felem f) (n:nat{n<=f.bits})
        cond_fadd a b fmul_n_1 n
       
 let fmul (#f:field) (a:felem f) (b:felem f) = fmul_loop a b 0
-let op_Star_At e1 e2 = fmul e1 e2
+let op_Star_At #f e1 e2 = fmul #f e1 e2
 
 val degree_: #f:field -> a:felem f -> i:nat{i < f.bits} -> Tot nat (decreases i)
 let rec degree_ (#f:field) (a:felem f) (i:nat{i < f.bits}) = 

@@ -43,7 +43,7 @@ let rec prefix_ #a #len l n =
   | 0, _ -> []
   | n', h::t -> h::prefix_ #a #(decr len) t (decr n)
 
-let prefix = prefix_
+let prefix #a #len = prefix_ #a #len
 
 val suffix: #a:Type -> #len:size_nat -> lseq a len -> n:size_nat{n <= len} -> Tot (lseq a (len - n)) (decreases (n))
 let rec suffix #a #len l n =
@@ -53,14 +53,14 @@ let rec suffix #a #len l n =
 
 let sub #a #len l s n =
   let suf = suffix #a #len l s in
-  prefix #(len - s) suf n
+  prefix #a #(len - s) suf n
 
 let slice #a #len l s f = sub #a #len l s (f-s)
 
 val last: #a:Type -> #len:size_nat{len > 0} -> x:lseq a len -> a
 let last #a #len x = index #a #len x (decr len)
 
-val snoc: #a:Type -> #len:size_nat{len < maxint U32} -> i:lseq a len -> x:a -> Tot (o:lseq a (incr len){i == prefix #(incr len) o len /\ last o == x}) (decreases (len))
+val snoc: #a:Type -> #len:size_nat{len < maxint U32} -> i:lseq a len -> x:a -> Tot (o:lseq a (incr len){i == prefix #a #(incr len) o len /\ last o == x}) (decreases (len))
 let rec snoc #a #len i x =
   match i with
   | [] -> [x]
@@ -169,7 +169,7 @@ let rec nat_from_intseq_be_ #t #len b =
   if len = 0 then 0
   else
     let l = uint_to_nat #t (last #(uint_t t) #len b) in
-    let pre : intseq t (decr len) = prefix #len b (decr len) in
+    let pre : intseq t (decr len) = prefix #(uint_t t) #len b (decr len) in
     let shift = pow2 (bits t) in
     let n' : n:nat{n < pow2 ((len-1) * bits t)}  = nat_from_intseq_be_ #t #(decr len) pre in
     assert (l <= shift - 1);

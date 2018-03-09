@@ -7,8 +7,8 @@ open Spec.Lib.IntSeq
 #set-options "--z3rlimit  25"
 
 (* Aliasing for operators *)
-let op_String_Access = index
-let op_String_Assignment = upd
+let op_String_Access #a #len = index #a #len
+let op_String_Assignment #a #len = upd #a #len
 
 (* Definition: Hash algorithm parameters *)
 noeq type parameters =
@@ -34,8 +34,8 @@ let lenType p = match p.wt with
 let lenSize p = numbytes (lenType p)
 
 (* Definition of permutation functions *)
-let _Ch p x y z = ((x &. y) ^. ((~. x) &. z))
-let _Maj p x y z = (x &. y) ^. ((x &. z) ^. (y &. z))
+let _Ch p (x:uint_t p.wt) (y:uint_t p.wt) (z:uint_t p.wt) = ((x &. y) ^. ((~. x) &. z))
+let _Maj p (x:uint_t p.wt) (y:uint_t p.wt) (z:uint_t p.wt) = (x &. y) ^. ((x &. z) ^. (y &. z))
 let _Sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[0]) ^. ((x >>>. p.opTable.[1]) ^. (x >>>. p.opTable.[2]))
 let _Sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[3]) ^. ((x >>>. p.opTable.[4]) ^. (x >>>. p.opTable.[5]))
 let _sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[6]) ^. ((x >>>. p.opTable.[7]) ^. (x >>. p.opTable.[8]))
