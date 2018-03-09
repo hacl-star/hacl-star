@@ -4,10 +4,10 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open Spec.Lib.IntTypes
+open Spec.Lib.IntSeq
 
 open Spec.Lib.IntBuf
 open Spec.Lib.IntBuf.Lemmas
-open Spec.Blake2s
 
 module ST = FStar.HyperStack.ST
 module LSeq = Spec.Lib.IntSeq
@@ -19,20 +19,42 @@ inline_for_extraction
 let index (x:size_nat) = size x
 
 
-(* Define algorithm parameters *)
-// inline_for_extraction let word_size : size_t = size Spec.word_size
-// inline_for_extraction let words_block_size : size_t = size Spec.words_block_size
-// inline_for_extraction let bytes_in_word : size_t = size Spec.bytes_in_word
-// inline_for_extraction let bytes_in_block : size_t = size Spec.bytes_in_block
-// inline_for_extraction let rounds_in_f : size_t = size Spec.rounds_in_f
-// inline_for_extraction let block_bytes : size_t = size Spec.block_bytes
+#set-options "--max_fuel 0 --z3rlimit 25"
 
+(* Define algorithm parameters *)
+type init_vector = lbuffer uint32 8
 type working_vector = lbuffer uint32 16
 type message_block = lbuffer uint32 16
 type hash_state = lbuffer uint32 8
 type idx = n:size_t{size_v n < 16}
-// type counter = uint64
-// type last_block_flag = bool
+
+
+// val set_init_vector : vec:init_vector ->
+//   Stack unit
+//     (requires (fun h -> live h vec))
+//     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
+//                          /\ modifies1 vec h0 h1
+//                          /\ as_lseq vec h1 == Spec.init_vector))
+// let set_init_vector vec =
+//   vec.(size 0) <- Spec.init_vector.[0];
+//   vec.(size 1) <- Spec.init_vector.[1];
+//   vec.(size 2) <- Spec.init_vector.[2];
+//   vec.(size 3) <- Spec.init_vector.[3];
+//   vec.(size 4) <- Spec.init_vector.[4];
+//   vec.(size 5) <- Spec.init_vector.[5];
+//   vec.(size 6) <- Spec.init_vector.[6];
+//   vec.(size 7) <- Spec.init_vector.[7];
+//   admit()
+
+// val set_sigma : vec:lbuffer (n:uint32{v n < 16}) 160  ->
+//   Stack unit
+//     (requires (fun h -> live h vec))
+//     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
+//                          /\ modifies1 vec h0 h1
+//                          /\ as_lseq vec h1 == Spec.sigma))
+// let set_sigma vec =
+
+
 
 let g1 (wv:working_vector) (a:idx) (b:idx) (r:rotval U32) :
   Stack unit
@@ -63,36 +85,41 @@ val blake2_mixing : wv:working_vector -> a:idx -> b:idx -> c:idx -> d:idx -> x:u
 
 let blake2_mixing wv a b c d x y =
   g2 wv a b x;
-  g1 wv d a r1;
+  g1 wv d a Spec.r1;
   g2 wv c d (u32 0);
-  g1 wv b c r2;
+  g1 wv b c Spec.r2;
   g2 wv a b y;
-  g1 wv d a r3;
+  g1 wv d a Spec.r3;
   g2 wv c d (u32 0);
-  g1 wv b c r4
+  g1 wv b c Spec.r4
 
-val blake2_compress : s:hash_state -> b:message_block -> offset:uint64 -> f:last_block_flag ->
+val blake2_compress : s:hash_state -> b:message_block -> wv:working_vector -> offset:uint64 -> f:Spec.last_block_flag ->
   Stack unit
-    (requires (fun h -> live h s /\ live h b))
+    (requires (fun h -> live h s /\ live h b /\ live h wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 s h0 h1
                          /\ as_lseq s h1 == Spec.blake2_compress (as_lseq s h0) (as_lseq b h0) offset f))
 
-let blake2_compress h m offset f =
-  let v = create #uint32 #16 (size 16) (u32 0) in
-  // copy v 0 8 h;
-  // copy v 8 16 init_vector;
+let blake2_compress s (* = h *) m wv offset f =
+  let iv = createL Spec.init_list in
+  assert_norm (List.Tot.length Spec.sigma_list = 160);
+  let sigma : lbuffer (n:size_t{size_v n < 16}) 160 = createL (List.Tot.map size Spec.sigma_list) in
+  let wv_1 = sub wv (size 0) (size 8) in
+  let wv_2 = sub wv (size 8) (size 16) in
+  copy (size 8) s wv_1;
+  copy (size 8) iv wv_2;
   let low_offset = to_u32 #U64 offset in
-  let high_offset = to_u32 #U64 (offset >>. u32 word_size) in
-  let v_12 = v.(size 12) ^. low_offset in
-  let v_13 = v.(size 13) ^. high_offset in
-  let v_14 = v.(size 14) ^. (u32 0xFFFFFFFF) in
-  v.(size 12) <- v_12;
-  v.(size 13) <- v_13;
-  if f then v.(size 14) <- v_14 else
-  repeati rounds_in_f
+  let high_offset = to_u32 #U64 (offset >>. u32 Spec.word_size) in
+  let wv_12 = wv.(size 12) ^. low_offset in
+  let wv_13 = wv.(size 13) ^. high_offset in
+  let wv_14 = wv.(size 14) ^. (u32 0xFFFFFFFF) in
+  wv.(size 12) <- wv_12;
+  wv.(size 13) <- wv_13;
+  if f then wv.(size 14) <- wv_14 else
+  iteri (size Spec.rounds_in_f)
+    (fun i wv -> admit(); wv)
     (fun i wv ->
-      let s = sub sigma ((i % 10) * 16) 16 in
+      let s = sub #size_t #160 #16 sigma ((i %. size 10) *. size 16) (size 16) in
       blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
       blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(s.(size 2))) (m.(s.(size 3)));
       blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(s.(size 4))) (m.(s.(size 5)));
@@ -101,11 +128,13 @@ let blake2_compress h m offset f =
       blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(s.(size 10))) (m.(s.(size 11)));
       blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(s.(size 12))) (m.(s.(size 13)));
       blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(s.(size 14))) (m.(s.(size 15)))
-    ) v;
-  repeati 8
+    ) wv;
+    iteri (size 8)
+    (fun i h -> h)
     (fun i h ->
-      h.[i] <- h.[i] ^. v.[i] ^. v.[i+8]
-    ) h
+      let hi = h.(i) ^. wv.(i) ^. wv.(i +. size 8) in
+      s.(i) <- hi
+    ) s
 
 // val blake2s_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t}  -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 
