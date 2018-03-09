@@ -22,7 +22,7 @@ let init_list = List.Tot.map u32
   [0x6A09E667; 0xBB67AE85; 0x3C6EF372; 0xA54FF53A;
    0x510E527F; 0x9B05688C; 0x1F83D9AB; 0x5BE0CD19]
 let init_vector : intseq U32 8 = assert_norm (List.Tot.length init_list = 8) ; createL init_list
-let sigma_list : list (n:nat{n<16}) =
+let sigma_list : list (n:size_nat{n<16}) =
   [0;  1;  2;  3;  4;  5;  6;  7;  8;  9; 10; 11; 12; 13; 14; 15;
    14; 10;  4;  8;  9; 15; 13;  6;  1; 12;  0;  2; 11;  7;  5;  3;
    11;  8; 12;  0;  5;  2; 15; 13; 10; 14;  3;  6;  7;  1;  9;  4;
@@ -33,7 +33,9 @@ let sigma_list : list (n:nat{n<16}) =
    13; 11;  7; 14; 12;  1;  3;  9;  5;  0; 15;  4;  8;  6;  2; 10;
    6; 15; 14;  9; 11;  3;  0;  8; 12;  2; 13;  7;  1;  4; 10;  5;
    10;  2;  8;  4;  7;  6;  1;  5; 15; 11;  9; 14;  3; 12; 13;  0]
-let sigma:lseq (n:nat{n < 16}) 160 = assert_norm (List.Tot.length sigma_list = 160) ; createL sigma_list
+let sigma:lseq (n:size_nat{n < 16}) 160 =
+  assert_norm (List.Tot.length sigma_list = 160);
+  createL sigma_list
 
 type working_vector = intseq U32 16
 type message_block = intseq U32 16
