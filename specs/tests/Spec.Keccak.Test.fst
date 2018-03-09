@@ -7,12 +7,11 @@ open Spec.Lib.IntTypes
 open Spec.Lib.RawIntTypes
 open Spec.Lib.IntSeq
 
-
 //
 // Test 1
 //
 
-let test1_plaintext = create 32 (u8 0x00)
+let test1_plaintext = create 32 (u8 0xFF)
 
 let test1_expected = List.Tot.map u8_from_UInt8 [
   0xf5uy; 0x97uy; 0x7cuy; 0x82uy; 0x83uy; 0x54uy; 0x6auy; 0x63uy;
@@ -30,7 +29,7 @@ let test () =
   IO.print_string "\nTEST 1\n";
   let test1_plaintext_len : size_nat = 32 in
   let test1_expected : lbytes 32 = createL test1_expected in
-  let test1_result : lbytes 32 = Spec.Keccak.shake256 32 32 test1_plaintext in
+  let test1_result : lbytes 32 = Spec.Keccak.keccak Spec.Keccak.shake256_rate test1_plaintext_len test1_plaintext (u8 0x1F) 32 in
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
 
   IO.print_string "\nResult   SHAKE 256: ";

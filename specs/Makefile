@@ -129,6 +129,20 @@ keccak.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/f
 	$(OCAMLOPT) -I keccak-ml keccak-ml/Spec_Lib_IntTypes.ml keccak-ml/Spec_Lib_RawIntTypes.ml keccak-ml/Spec_Lib_IntSeq.ml keccak-ml/Spec_Lib_Stateful.ml keccak-ml/Spec_Keccak.ml keccak-ml/Spec_Keccak_Test.ml -o keccak.exe
 	./keccak.exe
 
+blake2s.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.Blake2s.fst tests/Spec.Blake2s.Test.fst
+	mkdir -p blake2s-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2s --extract_module Spec.Blake2s.Test --odir blake2s-ml $^
+	@echo 'let _ = test()' >> blake2s-ml/Spec_Blake2s_Test.ml
+	$(OCAMLOPT) -I blake2s-ml blake2s-ml/Spec_Lib_IntTypes.ml blake2s-ml/Spec_Lib_RawIntTypes.ml blake2s-ml/Spec_Lib_IntSeq.ml blake2s-ml/Spec_Lib_Stateful.ml blake2s-ml/Spec_Blake2s.ml blake2s-ml/Spec_Blake2s_Test.ml -o blake2s.exe
+	./blake2s.exe
+
+blake2b.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.Blake2b.fst tests/Spec.Blake2b.Test.fst
+	mkdir -p blake2b-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2b --extract_module Spec.Blake2b.Test --odir blake2b-ml $^
+	@echo 'let _ = test()' >> blake2b-ml/Spec_Blake2b_Test.ml
+	$(OCAMLOPT) -I blake2b-ml blake2b-ml/Spec_Lib_IntTypes.ml blake2b-ml/Spec_Lib_RawIntTypes.ml blake2b-ml/Spec_Lib_IntSeq.ml blake2b-ml/Spec_Lib_Stateful.ml blake2b-ml/Spec_Blake2b.ml blake2b-ml/Spec_Blake2b_Test.ml -o blake2b.exe
+	./blake2b.exe
+
 hmac.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
 	mkdir -p hmac-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
