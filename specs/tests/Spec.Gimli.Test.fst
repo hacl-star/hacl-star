@@ -154,7 +154,7 @@ let test () =
   let test1_input : lbytes test1_input_len = createL test1_input in
 
   let test1_expected : lbytes 32 = createL test1_expected in
-  let test1_result : intseq uint32 Spec.Gimli.size_state = Spec.Gimli.hash 32 test1_input_len test1_input in
+  let test1_result : lbytes 32 = Spec.Gimli.hash 32 test1_input_len test1_input in
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
 
   IO.print_string "\nExpected Gimli : ";
