@@ -87,19 +87,38 @@ test-native-sha2_512.exe: sha2-c/Hacl_SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o $(B
 	$(CC) $(CFLAGS) -o $@ $^
 
 
-blake2s-c/out.krml: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.Impl.Blake2s.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir blake2s-c -drop Spec.* \
-		-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst \
-		-bundle 'Hacl.Impl.Blake2s=Hacl.Impl.*,Spec.Lib.*' \
-		-skip-translation $^ -o $@
+# blake2s-c/out.krml: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.Impl.Blake2s.fst Hacl.Test.Blake2s.fst
+# 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir blake2s-c -drop Spec.* \
+# 		-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst \
+# 		-bundle 'Hacl.Impl.Blake2s=Hacl.Impl.*,Spec.Lib.*' \
+# 		-skip-translation $^ -o $@
 
-blake2s-c.exe: blake2s-c/out.krml
-	mkdir -p blake2s-c
-	$(KREMLIN) $(KREMLIN_ARGS) -drop Spec.* -tmpdir blake2s-c  -no-prefix Hacl.Test.Blake2s \
-		-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst -I ../../specs/lib/c \
-		-bundle 'Hacl.Impl.Blake2s=Hacl.Impl.*,Spec.Lib.*' \
-		$^ -o $@
-	./$@
+
+# blake2s-c.exe: blake2s-c/out.krml
+# 	mkdir -p blake2s-c
+# 	$(KREMLIN) $(KREMLIN_ARGS) -drop Spec.* -tmpdir blake2s-c  -no-prefix Hacl.Test.Blake2s \
+# 		-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst -I ../../specs/lib/c \
+# 		-bundle 'Hacl.Impl.Blake2s=Hacl.Impl.*,Spec.Lib.*' \
+# 		$^ -o $@
+# 	./$@
+
+
+blake2s-c/out.krml: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir blake2s-c \
+	-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst \
+	-skip-translation $^
+
+blake2s-c/Hacl_Blake2s.c: blake2s-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
+	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
+	$^ -o $@
+
+BASE_OBJ = $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o
+
+
+test-blake2s.exe: blake2s-c/Hacl_Blake2s.o $(BASE_OBJ)
+	$(CC) -I $(KREMLIN_HOME)/kremlib -o $@ blake2s-c/Hacl_Test_Blake2s.c $^
+	./test-blake2s.exe
 
 clean:
 	rm -rf *~ *.exe *.exe.dSYM

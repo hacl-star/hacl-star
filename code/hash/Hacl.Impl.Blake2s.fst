@@ -81,8 +81,8 @@ let blake2_compress s (* = h *) m wv offset f =
   assert_norm (List.Tot.length Spec.init_list = 8);
   let iv : lbuffer uint32 8 = createL Spec.init_list in
   assert_norm (List.Tot.length Spec.sigma_list = 160);
-  // let sigma : lbuffer (n:size_t{size_v n < 16}) 160 = createL (List.Tot.map size Spec.sigma_list) in
-  let sigma = create (size 160) (size 0) in
+  let sigma : lbuffer (n:size_t{size_v n < 16}) 160 = createL Spec.sigma_list_size in
+  // let sigma = create (size 160) (size 0) in
   let wv_1 = sub wv (size 0) (size 8) in
   let wv_2 = sub wv (size 8) (size 16) in
   copy (size 8) s wv_1;
@@ -96,7 +96,7 @@ let blake2_compress s (* = h *) m wv offset f =
   wv.(size 13) <- wv_13;
   if f then wv.(size 14) <- wv_14 else
   iteri (size Spec.rounds_in_f)
-    (fun i wv -> admit(); wv)
+    (fun i wv -> wv)
     (fun i wv ->
       let i_mod_10 = size_mod i (size 10) in
       let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
