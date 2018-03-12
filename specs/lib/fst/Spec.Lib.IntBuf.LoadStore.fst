@@ -28,7 +28,19 @@ let uint32s_from_bytes_le #len clen o i =
       o.(j) <- u32_i in
   Spec.Lib.Loops.for (size 0) clen inv f'
 
-let uint32s_to_bytes_le #len o i = admit()
+
+inline_for_extraction
+let uint32s_to_bytes_le #len clen o i =
+  let h0 = ST.get () in
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+    (requires (fun h -> inv h (v j)))
+    (ensures  (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      let u32_i = index i j in
+      let b4_i = sub o (mul_mod #SIZE j (size 4)) (size 4) in
+      Spec.Lib.Endian.uint32_to_bytes_le b4_i u32_i in
+  Spec.Lib.Loops.for (size 0) clen inv f'
+
 
 //let index #a #len b i = Buf.index b (U32.uint_to_t i)
 
