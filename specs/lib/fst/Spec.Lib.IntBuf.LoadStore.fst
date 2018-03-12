@@ -14,6 +14,7 @@ module Buf = FStar.Buffer
 module U32 = FStar.UInt32
 
 let uints_from_bytes_le #t #len o i = admit()
+let uints_from_bytes_be #t #len o i = admit()
 
 inline_for_extraction
 let uint32s_from_bytes_le #len clen o i =
