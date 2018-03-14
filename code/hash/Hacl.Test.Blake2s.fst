@@ -52,7 +52,6 @@ let main () =
   let empty : lbuffer uint8 (size_v test1_empty_len) = createL [] in
 
   C.print_string (C.string_of_literal "\nTEST 1\n");
-  let test1_plaintext_len : size_t = size 32 in
   let test1_result : lbuffer uint8 (size_v test1_expected_len) = create #uint8 (size 32) (u8 0) in
   Hacl.Impl.Blake2s.blake2s test1_plaintext_len test1_plaintext test1_empty_len empty test1_expected_len test1_result;
 

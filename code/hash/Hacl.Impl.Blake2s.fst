@@ -94,7 +94,7 @@ let blake2_compress s (* = h *) m wv offset f =
   let wv_14 = logxor #U32 wv.(size 14) (u32 0xFFFFFFFF) in
   wv.(size 12) <- wv_12;
   wv.(size 13) <- wv_13;
-  if f then wv.(size 14) <- wv_14 else
+  (if f then wv.(size 14) <- wv_14);
   iteri (size Spec.rounds_in_f)
     (fun i wv -> wv)
     (fun i wv ->
@@ -181,14 +181,14 @@ let blake2s ll d kk k nn res =
        let padded_key = sub #uint8 #(v len_st_u8) #(Spec.bytes_in_block) st_u8 (add #SIZE (size 32) padded_data_length) (size Spec.bytes_in_block) in
        let data = sub #uint8 #(v len_st_u8) #(v data_length) st_u8 (add #SIZE (size 32) (add #SIZE padded_data_length (size Spec.bytes_in_block))) data_length in
 
-       let padded_date' = sub padded_data (size 0) ll in
-       copy ll d padded_date';
+       let padded_data' = sub padded_data (size 0) ll in
+       copy ll d padded_data';
 
        let to_compress = sub st_u32 (size 0) (size 16) in
        let wv = sub st_u32 (size 16) (size 16) in
 
        if (kk =. size 0) then
-	 blake2s_internal data_blocks d ll kk nn to_compress wv tmp res
+	 blake2s_internal data_blocks padded_data' ll kk nn to_compress wv tmp res
        else begin
 	 let padded_key' = sub padded_key (size 0) kk in
 	 copy kk k padded_key';
@@ -198,7 +198,7 @@ let blake2s ll d kk k nn res =
 
 	 let data' = sub data (size Spec.bytes_in_block) padded_data_length in
 	 copy padded_data_length padded_data data';
-	 blake2s_internal (size_incr data_blocks) d ll kk nn to_compress wv tmp res
+	 blake2s_internal (size_incr data_blocks) data' ll kk nn to_compress wv tmp res
        end
     )
   )
