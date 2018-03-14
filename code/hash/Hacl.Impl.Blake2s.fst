@@ -21,6 +21,33 @@ let index (x:size_nat) = size x
 
 let op_String_Access m b = as_lseq b m
 
+
+
+val size_v: s:size_t -> n:size_nat{uint_v #SIZE s == n}
+
+let lemma_size_v_of_size_equal (s:size_nat) : Lemma (requires True)
+  (ensures (size_v (size s) == s)) = ()
+
+val update_sub: #a:Type -> #len:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len} -> x:lbuffer a (v n) ->
+  Stack unit
+    (requires (fun h -> live h i /\ live h x))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
+                         /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[x]))
+let update_sub #a #len i start n x =
+  let i' = sub i start n in
+  copy n x i'
+
+// [@"Substitute"]
+// val update_sub2: #a:Type -> #len:size_nat -> i:lbuffer a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lbuffer a n ->
+//   Stack unit
+//     (requires (fun h -> live h i /\ live h x))
+//     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
+//                          /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] start n h0.[x]))
+// let update_sub2 #a #len i start n x =
+//   let i' = sub i (size start) (size n) in
+//   copy (size n) x i'
+
+
 #set-options "--max_fuel 0 --z3rlimit 25"
 
 (* Define algorithm parameters *)
@@ -89,7 +116,6 @@ let blake2_round wv m i sigma =
   blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(s.(size 12))) (m.(s.(size 13)));
   blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(s.(size 14))) (m.(s.(size 15)))
 
-
 val blake2_compress1 : wv:working_vector ->
   s:hash_state -> m:message_block ->
   offset:uint64 -> flag:Spec.last_block_flag -> const_iv:lbuffer uint32 8 ->
@@ -100,10 +126,17 @@ val blake2_compress1 : wv:working_vector ->
                          /\ h1.[wv] == Spec.Blake2s.blake2_compress1 h0.[wv] h0.[s] h0.[m] offset flag))
 
 let blake2_compress1 wv s m offset flag const_iv =
-  let wv_1 = sub wv (size 0) (size 8) in
-  let wv_2 = sub wv (size 8) (size 16) in
-  copy (size 8) s wv_1;
-  copy (size 8) const_iv wv_2;
+  // lemma_size_v_of_size_equal 8;
+  let type_s = size_v (size 8) in
+  let type_iv = size_v (size 8) in
+  let s : lbuffer uint32 type_s = s in
+  let const_iv : lbuffer uint32 type_s = const_iv in
+  update_sub wv (size 0) (size 8) s;
+  update_sub wv (size 8) (size 8) const_iv;
+  // let wv_1 = sub wv (size 0) (size 8) in
+  // let wv_2 = sub wv (size 8) (size 16) in admit();
+  // copy (size 8) s wv_1;
+  // copy (size 8) const_iv wv_2;
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 Spec.word_size) in
   let wv_12 = logxor #U32 wv.(size 12) low_offset in
@@ -111,9 +144,8 @@ let blake2_compress1 wv s m offset flag const_iv =
   let wv_14 = logxor #U32 wv.(size 14) (u32 0xFFFFFFFF) in
   wv.(size 12) <- wv_12;
   wv.(size 13) <- wv_13;
-  (if flag then wv.(size 14) <- wv_14);
-  let h0 = ST.get () in
-  ()
+  (if flag then wv.(size 14) <- wv_14)
+
 
 val blake2_compress2 :
   wv:working_vector -> s:hash_state -> m:message_block -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
