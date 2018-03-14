@@ -99,23 +99,32 @@ let blake2_round v m i =
   let v = blake2_mixing v 3 4  9 14 (m.[s.[14]]) (m.[s.[15]]) in
   v
 
-
-val blake2_compress : hash_state -> message_block -> uint64 -> last_block_flag -> Tot hash_state
-let blake2_compress h m offset f =
-  let v = create 16 (u32 0) in
+val blake2_compress1 : working_vector -> hash_state -> message_block -> uint64 -> last_block_flag -> Tot working_vector
+let blake2_compress1 v h m offset flag =
   let v = update_slice v 0 8 h in
   let v = update_slice v 8 16 init_vector in
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 word_size) in
   let v = v.[12] <- v.[12] ^. low_offset in
   let v = v.[13] <- v.[13] ^. high_offset in
-  let v = if f then v.[14] <- v.[14] ^. (u32 0xFFFFFFFF) else v in
+  let v = if flag then v.[14] <- v.[14] ^. (u32 0xFFFFFFFF) else v in
+  v
+
+val blake2_compress2: working_vector -> hash_state -> message_block -> Tot hash_state
+let blake2_compress2 v h m =
   let v = repeati rounds_in_f (fun i v -> blake2_round v m i) v in
   let h = repeati 8
     (fun i h ->
       h.[i] <- h.[i] ^. v.[i] ^. v.[i+8]
     ) h
   in
+  h
+
+val blake2_compress : hash_state -> message_block -> uint64 -> last_block_flag -> Tot hash_state
+let blake2_compress h m offset flag =
+  let v = create 16 (u32 0) in
+  let v = blake2_compress1 v h m offset flag in
+  let h = blake2_compress2 v h m in
   h
 
 val blake2s_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t}  -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
