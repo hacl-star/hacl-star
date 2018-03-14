@@ -34,6 +34,28 @@ let mul_mod_mont #rLen rrLen pow2_i iLen n nInv_u64 st_kara aM bM resM =
   assume (disjoint c n);
   mont_reduction rrLen n nInv_u64 c c resM // resM = c % n
 
+val sqr_mod_mont:
+  #rLen:size_nat -> rrLen:size_t{v rrLen == rLen /\ rLen + rLen < max_size_t} ->
+  pow2_i:size_t{2 * rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> 
+  iLen:size_t{v iLen < v pow2_i / 2 /\ v iLen + rLen = v pow2_i} ->
+  n:lbignum rLen -> nInv_u64:uint64 -> st_kara:lbignum (2 * rLen + 4 * v pow2_i) ->
+  aM:lbignum rLen -> resM:lbignum rLen ->
+  Stack unit
+    (requires (fun h -> live h aM /\ live h resM /\ live h n /\ live h st_kara))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1))
+  [@"c_inline"]
+let sqr_mod_mont #rLen rrLen pow2_i iLen n nInv_u64 st_kara aM resM =
+  let cLen = add #SIZE rrLen rrLen in
+  let stLen = add #SIZE cLen (mul #SIZE (size 4) pow2_i) in
+  
+  let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
+  let st_kara' = Buffer.sub #uint64 #(v stLen) #(4 * v pow2_i) st_kara cLen (mul #SIZE (size 4) pow2_i) in
+  assume (disjoint c aM /\ disjoint st_kara' aM);
+  karatsuba_sqr pow2_i iLen rrLen aM st_kara' c; // c = aM * bM
+  assume (disjoint c n);
+  mont_reduction rrLen n nInv_u64 c c resM // resM = c % n
+
+
 val mod_exp_:
   #rLen:size_nat -> rrLen:size_t{v rrLen == rLen /\ rLen + rLen < max_size_t} ->
   pow2_i:size_t{2 * rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} ->
@@ -51,7 +73,8 @@ let rec mod_exp_ #rLen rrLen pow2_i iLen n nInv_u64 st_kara st_exp bBits bLen b 
   
   if (i <. bBits) then begin
     (if (bn_is_bit_set bLen b i) then mul_mod_mont rrLen pow2_i iLen n nInv_u64 st_kara aM accM accM); // acc = (acc * a) % n
-    mul_mod_mont rrLen pow2_i iLen n nInv_u64 st_kara aM aM aM; // a = (a * a) % n
+    //mul_mod_mont rrLen pow2_i iLen n nInv_u64 st_kara aM aM aM; // a = (a * a) % n
+    sqr_mod_mont rrLen pow2_i iLen n nInv_u64 st_kara aM aM; // a = (a * a) % n
     mod_exp_ rrLen pow2_i iLen n nInv_u64 st_kara st_exp bBits bLen b (size_incr i)
   end
 

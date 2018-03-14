@@ -282,3 +282,102 @@ let karatsuba #aLen pow2_i iLen aaLen a b st_mult res =
     then bn_mul #aLen #aLen aaLen a aaLen b res
     else karatsuba_ pow2_i iLen aaLen a b st_mult res);
     admit()
+
+//modifies2 res tmp h0 h1
+val karatsuba_sqr_:
+    #aLen:size_nat ->
+    pow2_i:size_t{4 * v pow2_i < max_size_t} -> iLen:size_t{v iLen < v pow2_i / 2} ->
+    aaLen:size_t{v aaLen == aLen /\ aLen + aLen < max_size_t /\ v iLen + aLen = v pow2_i} ->
+    a:lbignum aLen ->
+    tmp:lbignum (4 * v pow2_i) ->
+    res:lbignum (aLen + aLen) -> Stack unit
+    (requires (fun h -> live h a /\ live h tmp /\ live h res /\ disjoint res a /\ disjoint tmp a))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
+    #reset-options "--z3rlimit 150 --max_fuel 2"
+    [@"c_inline"]
+let rec karatsuba_sqr_ #aLen pow2_i iLen aaLen a tmp res =
+    let tmpLen = mul #SIZE (size 4) pow2_i in
+    let resLen = add #SIZE aaLen aaLen in
+    let pow2_i0 = pow2_i /. (size 2) in
+    assume (v pow2_i = v pow2_i0 + v pow2_i0);
+    
+    if (aaLen <. size 32) then begin
+       //bn_mul #aLen #aLen aaLen a aaLen a res 
+       let tmp' = Buffer.sub #uint64 #(4 * v pow2_i) #(aLen + aLen) tmp (size 0) (add #SIZE aaLen aaLen) in
+       bn_sqr aaLen a tmp' res end
+    else begin
+       let a0 = Buffer.sub #uint64 #aLen #(v pow2_i0) a (size 0) pow2_i0 in
+
+       let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(4 * v pow2_i0) tmp (size 0) (mul #SIZE (size 4) pow2_i0) in
+       let c0 = Buffer.sub #uint64 #(v resLen) #(v pow2_i) res (size 0) pow2_i in
+       karatsuba_sqr_ #(v pow2_i0) pow2_i0 (size 0) pow2_i0 a0 tmp0 c0; // c0 = a0 * a0
+
+       let pow2_i1 = sub #SIZE pow2_i0 iLen in
+       if (pow2_i1 =. size 1) then begin
+          let a1 = Buffer.sub #uint64 #aLen #1 a pow2_i0 (size 1) in
+          let a1_0 = a1.(size 0) in
+	  
+          let c1 = mul_wide a1_0 a1_0 in
+          res.(pow2_i) <- to_u64 #U128 c1;
+          res.(size_incr pow2_i) <- to_u64 #U128 (shift_right #U128 c1 (u32 64));
+
+          let tmp1Len = size_incr pow2_i0 in
+          let tmp1Len2 = add #SIZE tmp1Len tmp1Len in
+          let tmp2Len = add #SIZE pow2_i0 (size 2) in
+	  
+          let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(v tmp1Len) tmp (size 0) tmp1Len in
+          let tmp1 = Buffer.sub #uint64 #(v tmpLen) #(v tmp1Len) tmp tmp1Len tmp1Len in
+          let tmp2 = Buffer.sub #uint64 #(v tmpLen) #(v tmp2Len) tmp tmp1Len2 tmp2Len in
+          let res1 = Buffer.sub #uint64 #(v resLen) #(v tmp2Len) res pow2_i0 tmp2Len in
+	  
+          bn_mul_u64 #(v pow2_i0) pow2_i0 a0 a1_0 tmp0; // tmp0 = a0 * a1_0
+          bn_add_carry #(v tmp1Len) #(v tmp1Len) tmp1Len tmp0 tmp1Len tmp0 tmp2; // tmp2 = tmp0 + tmp0 = a0 * a1_0 + a0 * a1_0
+          bn_add tmp2Len res1 tmp2Len tmp2 res1
+          end
+       else begin
+	  let a1 = Buffer.sub #uint64 #aLen #(v pow2_i1) a pow2_i0 pow2_i1 in
+          let pow2_i02 = pow2_i0 /. size 2 in
+          assume (v pow2_i0 + v pow2_i0 = v pow2_i02);
+          let ind = if (pow2_i02 <. iLen) then sub #SIZE iLen pow2_i02 else iLen in
+          let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(4 * v pow2_i0) tmp (size 0) (mul #SIZE (size 4) pow2_i0) in
+          let c1 = Buffer.sub #uint64 #(v resLen) #(2 * v pow2_i1) res pow2_i (mul #SIZE (size 2) pow2_i1) in
+          karatsuba_sqr_ #(v pow2_i1) pow2_i0 ind pow2_i1 a1 tmp0 c1; // c1 = a1 * a1
+
+          let a2 = Buffer.sub #uint64 #(v tmpLen) #(v pow2_i0) tmp (size 0) pow2_i0 in
+          let sa2 =  abs #(v pow2_i0) #(v pow2_i1) pow2_i0 a0 pow2_i1 a1 a2 in // a2 = |a0 - a1|
+
+          let c2 = Buffer.sub #uint64 #(v tmpLen) #(v pow2_i) tmp pow2_i pow2_i in
+          let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(4 * v pow2_i0) tmp (mul #SIZE (size 4) pow2_i0) (mul #SIZE (size 4) pow2_i0) in
+          karatsuba_sqr_ #(v pow2_i0) pow2_i0 (size 0) pow2_i0 a2 tmp0 c2; // c2 = a2 * a2
+
+          let tmp1Len = size_incr pow2_i in
+          let tmp1 = Buffer.sub #uint64 #(v tmpLen) #(v tmp1Len) tmp (mul #SIZE (size 4) pow2_i0) tmp1Len in
+          add_sign #(v pow2_i0) #(v pow2_i1) #(v tmp1Len) pow2_i0 pow2_i1 tmp1Len c0 c1 c2 a0 a1 a2 a0 a1 a2 sa2 sa2 tmp1; //tmp1 = (c0 + c1) +/- c2
+
+          //res = [c0; c1]
+          //tmp = [a2; b2; c2; tmp1; _]
+          let res1Len = add #SIZE pow2_i0 (add #SIZE pow2_i1 pow2_i1) in
+          let res1 = Buffer.sub #uint64 #(v resLen) #(v res1Len) res pow2_i0 res1Len in
+          bn_add res1Len res1 tmp1Len tmp1 res1
+         end
+    end
+    
+// aLen + iLen == pow2_i
+// iLen is the number of leading zeroes
+val karatsuba_sqr:
+    #aLen:size_nat ->
+    pow2_i:size_t{4 * v pow2_i < max_size_t} -> iLen:size_t{v iLen < v pow2_i / 2} ->
+    aaLen:size_t{v aaLen == aLen /\ aLen + aLen < max_size_t /\ v iLen + aLen = v pow2_i} ->
+    a:lbignum aLen -> st_mult:lbignum (4 * v pow2_i) ->
+    res:lbignum (aLen + aLen) -> Stack unit
+    (requires (fun h -> live h a /\ live h st_mult /\ live h res /\
+                      disjoint res a /\ disjoint st_mult a))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 res st_mult h0 h1))
+    [@"c_inline"]
+let karatsuba_sqr #aLen pow2_i iLen aaLen a st_mult res =
+    (if (aaLen <. size 32)
+    then begin 
+      let tmp = Buffer.sub #uint64 #(4 * v pow2_i) #(aLen + aLen) st_mult (size 0) (add #SIZE aaLen aaLen) in 
+      bn_sqr aaLen a tmp res end
+    else karatsuba_sqr_ pow2_i iLen aaLen a st_mult res);
+    admit()
