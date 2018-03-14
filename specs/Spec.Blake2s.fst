@@ -1,13 +1,13 @@
 module Spec.Blake2s
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
 open FStar.All
+open Spec.Lib.IntTypes
 open Spec.Lib.RawIntTypes
+open Spec.Lib.IntSeq
+
 
 (* Constants *)
-
 inline_for_extraction let word_size : size_nat = 32
 inline_for_extraction let words_block_size : size_nat = 16
 inline_for_extraction let bytes_in_word : size_nat = 4
@@ -41,8 +41,6 @@ inline_for_extraction let sigma_list : list (n:size_nat{n<16}) =
    6; 15; 14;  9; 11;  3;  0;  8; 12;  2; 13;  7;  1;  4; 10;  5;
    10;  2;  8;  4;  7;  6;  1;  5; 15; 11;  9; 14;  3; 12; 13;  0]
 
-
-
 inline_for_extraction let sigma_list_size : list (n:size_t{size_v n<16}) =
   [size 0; size  1; size  2; size  3; size  4; size  5; size  6; size  7; size  8; size  9; size 10; size 11; size 12; size 13; size 14; size 15; size
    14; size 10; size  4; size  8; size  9; size 15; size 13; size  6; size  1; size 12; size  0; size  2; size 11; size  7; size  5; size  3; size
@@ -55,11 +53,11 @@ inline_for_extraction let sigma_list_size : list (n:size_t{size_v n<16}) =
    6; size 15; size 14; size  9; size 11; size  3; size  0; size  8; size 12; size  2; size 13; size  7; size  1; size  4; size 10; size  5; size
    10; size  2; size  8; size  4; size  7; size  6; size  1; size  5; size 15; size 11; size  9; size 14; size  3; size 12; size 13; size 0]
 
-
 let sigma:lseq (n:size_nat{n < 16}) 160 =
   assert_norm (List.Tot.length sigma_list = 160);
   createL sigma_list
 
+(* Definition of base types *)
 type working_vector = intseq U32 16
 type message_block = intseq U32 16
 type hash_state = intseq U32 8
@@ -67,14 +65,15 @@ type idx = n:size_nat{n < 16}
 type counter = uint64
 type last_block_flag = bool
 
+(* Functions *)
 let g1 (v: working_vector) (a:idx) (b:idx) (r:rotval U32) : Tot working_vector =
   v.[a] <- (v.[a] ^. v.[b]) >>>. r
 
 let g2 (v:working_vector) (a:idx) (b:idx) (x:uint32) : Tot working_vector =
   v.[a] <- (v.[a] +. v.[b] +. x)
 
-val blake2_mixing : working_vector -> idx -> idx -> idx -> idx -> uint32 -> uint32 -> Tot working_vector
 
+val blake2_mixing : working_vector -> idx -> idx -> idx -> idx -> uint32 -> uint32 -> Tot working_vector
 let blake2_mixing v a b c d x y =
   let v = g2 v a b x in
   let v = g1 v d a r1 in
@@ -87,7 +86,6 @@ let blake2_mixing v a b c d x y =
   v
 
 val blake2_compress : hash_state -> message_block -> uint64 -> last_block_flag -> Tot hash_state
-
 let blake2_compress h m offset f =
   let v = create 16 (u32 0) in
   let v = update_slice v 0 8 h in
@@ -123,21 +121,21 @@ val blake2s_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} 
 let blake2s_internal dd d ll kk nn =
   let h = init_vector in
   let h = h.[0] <- h.[0] ^. (u32 0x01010000) ^. ((u32 kk) <<. (u32 8)) ^. (u32 nn) in
-  let h = if dd > 1 then
-    repeati (dd -1)
-      (fun i h ->
-	let to_compress : intseq U32 16 =
-	  uints_from_bytes_le (sub d (i*bytes_in_block) bytes_in_block)
-	in
-	blake2_compress h to_compress (u64 ((i+1)*block_bytes)) false
-      ) h else h
+  let h =
+    if dd > 1 then
+    repeati (dd -1) (fun i h ->
+	   let to_compress : intseq U32 16 =
+	   uints_from_bytes_le (sub d (i*bytes_in_block) bytes_in_block) in
+	   blake2_compress h to_compress (u64 ((i+1)*block_bytes)) false
+    ) h else h
   in
   let offset : size_nat = (dd-1)*16*4 in
   let last_block : intseq U32 16 = uints_from_bytes_le (sub d offset bytes_in_block) in
-  let h = if kk = 0 then
-    blake2_compress h last_block (u64  ll) true
+  let h =
+    if kk = 0 then
+      blake2_compress h last_block (u64  ll) true
     else
-    blake2_compress h last_block (u64 (ll + block_bytes)) true
+      blake2_compress h last_block (u64 (ll + block_bytes)) true
   in
   sub (uints_to_bytes_le h) 0 nn
 
@@ -149,12 +147,12 @@ let blake2s ll d kk k nn =
   let padded_data = create padded_data_length (u8 0) in
   let padded_data : lbytes (data_blocks * bytes_in_block) = update_slice padded_data 0 ll d in
   if kk = 0 then
-     blake2s_internal data_blocks padded_data ll kk nn
+    blake2s_internal data_blocks padded_data ll kk nn
   else
-     let padded_key = create bytes_in_block (u8 0) in
-     let padded_key = update_slice padded_key 0 kk k in
-     let data_length : size_nat = bytes_in_block + padded_data_length in
-     let data = create data_length (u8 0) in
-     let data = update_slice data 0 bytes_in_block padded_key in
-     let data = update_slice data bytes_in_block data_length padded_data in
-     blake2s_internal (data_blocks+1) data ll kk nn
+    let padded_key = create bytes_in_block (u8 0) in
+    let padded_key = update_slice padded_key 0 kk k in
+    let data_length : size_nat = bytes_in_block + padded_data_length in
+    let data = create data_length (u8 0) in
+    let data = update_slice data 0 bytes_in_block padded_key in
+    let data = update_slice data bytes_in_block data_length padded_data in
+    blake2s_internal (data_blocks+1) data ll kk nn
