@@ -7,7 +7,6 @@ open Spec.Lib.IntTypes
 open FStar.Mul
 
 open Hacl.Impl.Lib
-open Hacl.Impl.Convert
 open Hacl.Impl.Montgomery
 open Hacl.Impl.Multiplication
 

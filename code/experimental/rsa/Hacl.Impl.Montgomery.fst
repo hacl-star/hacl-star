@@ -7,7 +7,6 @@ open Spec.Lib.IntTypes
 open FStar.Mul
 
 open Hacl.Impl.Lib
-open Hacl.Impl.Convert
 open Hacl.Impl.Addition
 open Hacl.Impl.Comparison
 open Hacl.Impl.Multiplication
@@ -47,16 +46,6 @@ let bn_pow2_mod_n #rLen aBits rrLen a p res =
   bn_sub rrLen res rrLen a res; // res = res - a
   bn_pow2_mod_n_ rrLen a aBits p res
 
-(*
-  for (size_t i = 0; i < 64; ++i) {
-    uint64_t u_is_odd = 0uL - (u & 1); /* Either 0xff..ff or 0. */
-    uint64_t beta_if_u_is_odd = beta & u_is_odd; /* Either |beta| or 0. */
-    u = ((u ^ beta_if_u_is_odd) >> 1) + (u & beta_if_u_is_odd);
-
-    uint64_t alpha_if_u_is_odd = alpha & u_is_odd; /* Either |alpha| or 0. */
-    v = (v >> 1) + alpha_if_u_is_odd;
-  }
-*)
 val mod_inv_u64_:
   alpha:uint64 -> beta:uint64 -> ub:uint64 -> vb:uint64 -> i:size_t{v i <= 64} -> Tot uint64
   (decreases (64 - v i))
