@@ -85,6 +85,21 @@ let blake2_mixing v a b c d x y =
   let v = g1 v b c r4 in
   v
 
+
+val blake2_round : working_vector -> message_block -> size_nat -> Tot working_vector
+let blake2_round v m i =
+  let s = sub sigma ((i % 10) * 16) 16 in
+  let v = blake2_mixing v 0 4  8 12 (m.[s.[ 0]]) (m.[s.[ 1]]) in
+  let v = blake2_mixing v 1 5  9 13 (m.[s.[ 2]]) (m.[s.[ 3]]) in
+  let v = blake2_mixing v 2 6 10 14 (m.[s.[ 4]]) (m.[s.[ 5]]) in
+  let v = blake2_mixing v 3 7 11 15 (m.[s.[ 6]]) (m.[s.[ 7]]) in
+  let v = blake2_mixing v 0 5 10 15 (m.[s.[ 8]]) (m.[s.[ 9]]) in
+  let v = blake2_mixing v 1 6 11 12 (m.[s.[10]]) (m.[s.[11]]) in
+  let v = blake2_mixing v 2 7  8 13 (m.[s.[12]]) (m.[s.[13]]) in
+  let v = blake2_mixing v 3 4  9 14 (m.[s.[14]]) (m.[s.[15]]) in
+  v
+
+
 val blake2_compress : hash_state -> message_block -> uint64 -> last_block_flag -> Tot hash_state
 let blake2_compress h m offset f =
   let v = create 16 (u32 0) in
@@ -95,20 +110,7 @@ let blake2_compress h m offset f =
   let v = v.[12] <- v.[12] ^. low_offset in
   let v = v.[13] <- v.[13] ^. high_offset in
   let v = if f then v.[14] <- v.[14] ^. (u32 0xFFFFFFFF) else v in
-  let v = repeati rounds_in_f
-    (fun i v ->
-      let s = sub sigma ((i % 10) * 16) 16 in
-      let v = blake2_mixing v 0 4  8 12 (m.[s.[ 0]]) (m.[s.[ 1]]) in
-      let v = blake2_mixing v 1 5  9 13 (m.[s.[ 2]]) (m.[s.[ 3]]) in
-      let v = blake2_mixing v 2 6 10 14 (m.[s.[ 4]]) (m.[s.[ 5]]) in
-      let v = blake2_mixing v 3 7 11 15 (m.[s.[ 6]]) (m.[s.[ 7]]) in
-      let v = blake2_mixing v 0 5 10 15 (m.[s.[ 8]]) (m.[s.[ 9]]) in
-      let v = blake2_mixing v 1 6 11 12 (m.[s.[10]]) (m.[s.[11]]) in
-      let v = blake2_mixing v 2 7  8 13 (m.[s.[12]]) (m.[s.[13]]) in
-      let v = blake2_mixing v 3 4  9 14 (m.[s.[14]]) (m.[s.[15]]) in
-      v
-    ) v
-  in
+  let v = repeati rounds_in_f (fun i v -> blake2_round v m i) v in
   let h = repeati 8
     (fun i h ->
       h.[i] <- h.[i] ^. v.[i] ^. v.[i+8]
