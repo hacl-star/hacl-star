@@ -14,185 +14,134 @@ open Hacl.Impl.Multiplication
 module Buffer = Spec.Lib.IntBuf
 
 val mul_mod_mont:
-    #rLen:size_nat ->
-    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->
-    exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
-    rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
-    st_mont:lbignum (3 * rLen) ->
-    st_m:lbignum (3 * rLen) ->
-    st_kara:lbignum (2 * rLen + 4 * v pow2_i) ->
-    aM:lbignum rLen -> bM:lbignum rLen -> resM:lbignum rLen -> Stack unit
-    (requires (fun h -> live h st_mont /\ live h aM /\ live h bM /\ live h resM /\ live h st_kara))
+  #rLen:size_nat -> rrLen:size_t{v rrLen == rLen /\ rLen + rLen < max_size_t} ->
+  pow2_i:size_t{2 * rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> 
+  iLen:size_t{v iLen < v pow2_i / 2 /\ v iLen + rLen = v pow2_i} ->
+  n:lbignum rLen -> nInv_u64:uint64 -> st_kara:lbignum (2 * rLen + 4 * v pow2_i) ->
+  aM:lbignum rLen -> bM:lbignum rLen -> resM:lbignum rLen ->
+  Stack unit
+    (requires (fun h -> live h aM /\ live h bM /\ live h resM /\ live h n /\ live h st_kara))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1))
-
-let mul_mod_mont #rLen pow2_i iLen exp_r rrLen st_mont st_m st_kara aM bM resM =
-    let cLen = add #SIZE rrLen rrLen in
-    let stKLen = mul #SIZE (size 4) pow2_i in
-    let stLen = add #SIZE cLen stKLen in
-    
-    let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
-    let st_k = Buffer.sub #uint64 #(v stLen) #(v stKLen) st_kara cLen stKLen in
-    karatsuba pow2_i iLen rrLen aM bM st_k c; // c = a * b
-    mont_reduction pow2_i iLen exp_r rrLen st_mont st_m st_k cLen c resM // resM = c % n
-
-
-val sqr_mod_mont:
-    #rLen:size_nat ->
-    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->
-    exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
-    rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
-    st_mont:lbignum (3 * rLen) ->
-    st_m:lbignum (3 * rLen) ->
-    st_kara:lbignum (2 * rLen + 4 * v pow2_i) ->
-    aM:lbignum rLen -> resM:lbignum rLen -> Stack unit
-    (requires (fun h -> live h st_mont /\ live h aM /\ live h resM /\ live h st_kara))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1))
-
-let sqr_mod_mont #rLen pow2_i iLen exp_r rrLen st_mont st_m st_kara aM resM =
-    let cLen = add #SIZE rrLen rrLen in
-    let stKLen = mul #SIZE (size 4) pow2_i in
-    let stLen = add #SIZE cLen stKLen in
-    
-    let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
-    let tmp = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara cLen cLen in
-    let st_k = Buffer.sub #uint64 #(v stLen) #(v stKLen) st_kara cLen stKLen in
-    bn_sqr rrLen aM tmp c; // c = a * a
-    mont_reduction pow2_i iLen exp_r rrLen st_mont st_m st_k cLen c resM // resM = c % n
-
+  [@"c_inline"]
+let mul_mod_mont #rLen rrLen pow2_i iLen n nInv_u64 st_kara aM bM resM =
+  let cLen = add #SIZE rrLen rrLen in
+  let stLen = add #SIZE cLen (mul #SIZE (size 4) pow2_i) in
+  
+  let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
+  let st_kara' = Buffer.sub #uint64 #(v stLen) #(4 * v pow2_i) st_kara cLen (mul #SIZE (size 4) pow2_i) in
+  assume (disjoint c aM /\ disjoint c bM /\ disjoint st_kara' aM /\ disjoint st_kara' bM);
+  karatsuba pow2_i iLen rrLen aM bM st_kara' c; // c = aM * bM
+  assume (disjoint c n);
+  mont_reduction rrLen n nInv_u64 c c resM // resM = c % n
 
 val mod_exp_:
-    #rLen:size_nat -> #bLen:size_nat ->
-    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->
-    exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
-    rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 6 * rLen < max_size_t} ->
-    st_mont:lbignum (3 * rLen) ->
-    st_exp:lbignum (2 * rLen) ->
-    st_m:lbignum (3 * rLen) ->
-    st_kara:lbignum (2 * rLen + 4 * v pow2_i) ->
-    bBits:size_t{0 < v bBits} ->
-    bbLen:size_t{v bbLen == bLen /\ bLen = v (bits_to_bn bBits) /\ v bBits / 64 <= bLen} ->
-    b:lbignum bLen ->
-    count:size_t{v count <= v bBits} -> Stack unit
-    (requires (fun h -> live h st_mont /\ live h st_exp /\ live h b /\ live h st_kara))
+  #rLen:size_nat -> rrLen:size_t{v rrLen == rLen /\ rLen + rLen < max_size_t} ->
+  pow2_i:size_t{2 * rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} ->
+  iLen:size_t{v iLen < v pow2_i / 2 /\ v iLen + rLen = v pow2_i} ->
+  n:lbignum rLen -> nInv_u64:uint64 -> st_kara:lbignum (2 * rLen + 4 * v pow2_i) -> st_exp:lbignum (2 * rLen) ->
+  bBits:size_t{0 < v bBits} -> bLen:size_t{v bLen = v (bits_to_bn bBits) /\ v bBits / 64 < v bLen} -> b:lbignum (v bLen) ->
+  i:size_t{v i <= v bBits} ->
+  Stack unit
+    (requires (fun h -> live h n /\ live h b /\ live h st_kara /\ live h st_exp))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
+  [@"c_inline"]
+let rec mod_exp_ #rLen rrLen pow2_i iLen n nInv_u64 st_kara st_exp bBits bLen b i =
+  let aM = Buffer.sub #uint64 #(rLen + rLen) #rLen st_exp (size 0) rrLen in
+  let accM = Buffer.sub #uint64 #(rLen + rLen) #rLen st_exp rrLen rrLen in
+  
+  if (i <. bBits) then begin
+    (if (bn_is_bit_set bLen b i) then mul_mod_mont rrLen pow2_i iLen n nInv_u64 st_kara aM accM accM); // acc = (acc * a) % n
+    mul_mod_mont rrLen pow2_i iLen n nInv_u64 st_kara aM aM aM; // a = (a * a) % n
+    mod_exp_ rrLen pow2_i iLen n nInv_u64 st_kara st_exp bBits bLen b (size_incr i)
+  end
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 "
-
-let rec mod_exp_ #rLen #bLen pow2_i iLen exp_r rrLen st_mont st_exp st_m st_kara bBits bbLen b count =
-    let aM = Buffer.sub #uint64 #(rLen + rLen) #rLen st_exp (size 0) rrLen in
-    let accM = Buffer.sub #uint64 #(rLen + rLen) #rLen st_exp rrLen rrLen in
-    
-    if (count <. bBits) then begin
-        (if (bn_is_bit_set bbLen b count) then begin
-            mul_mod_mont pow2_i iLen exp_r rrLen st_mont st_m st_kara aM accM accM end); //acc = (acc * a) % n
-        sqr_mod_mont pow2_i iLen exp_r rrLen st_mont st_m st_kara aM aM; //a = (a * a) % n
-	mod_exp_ pow2_i iLen exp_r rrLen st_mont st_exp st_m st_kara bBits bbLen b (size_incr count)
-    end
 
 val mod_exp_mont:
-    #rLen:size_nat -> #stLen:size_nat ->
-    pow2_i:size_t{rLen + rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} -> iLen:size_t ->
-    bBits:size_t{0 < v bBits} -> b:lbignum (v (bits_to_bn bBits)) ->
-    exp_r:size_t{0 < v exp_r /\ rLen = v exp_r / 64 + 1} ->
-    rrLen:size_t{v rrLen == rLen /\ 0 < rLen /\ 9 * rLen < max_size_t} ->
-    sstLen:size_t{v sstLen == stLen} -> st:lbignum stLen -> Stack unit
-    (requires (fun h -> live h b /\ live h st /\ disjoint st b))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+  #rLen:size_nat -> rrLen:size_t{v rrLen == rLen /\ rLen + rLen < max_size_t} ->
+  pow2_i:size_t{9 * rLen + 4 * v pow2_i < max_size_t /\ rLen < v pow2_i} ->
+  iLen:size_t{v iLen < v pow2_i / 2 /\ v iLen + rLen = v pow2_i} ->
+  bBits:size_t{0 < v bBits} -> b:lbignum (v (bits_to_bn bBits)) ->
+  nInv_u64:uint64 -> st:lbignum (9 * rLen + 4 * v pow2_i) ->
+  Stack unit
+    (requires (fun h -> live h b /\ live h st))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+  [@"c_inline"]
+let mod_exp_mont #rLen rrLen pow2_i iLen bBits b nInv_u64 st =
+  let bLen = bits_to_bn bBits in
+  //assert ((v bBits - 1) / 64 < v bLen);
+  assume (v bBits / 64 < v bLen);
+  let karaLen = add #SIZE (add #SIZE rrLen rrLen) (mul #SIZE (size 4) pow2_i) in
+  let stLen = add #SIZE (mul #SIZE (size 7) rrLen) karaLen in
+  
+  let n1 = Buffer.sub #uint64 #(v stLen) #rLen st (size 0) rrLen in
+  let r2 = Buffer.sub #uint64 #(v stLen) #rLen st rrLen rrLen in
+  let a1 = Buffer.sub #uint64 #(v stLen) #rLen st (mul #SIZE (size 2) rrLen) rrLen in
+  let acc = Buffer.sub #uint64 #(v stLen) #rLen st (mul #SIZE (size 3) rrLen) rrLen in
+  
+  let aM = Buffer.sub #uint64 #(v stLen) #rLen st (mul #SIZE (size 4) rrLen) rrLen in
+  let accM = Buffer.sub #uint64 #(v stLen) #rLen st (mul #SIZE (size 5) rrLen) rrLen in
+  let res1 = Buffer.sub #uint64 #(v stLen) #rLen st (mul #SIZE (size 6) rrLen) rrLen in
+  let st_exp = Buffer.sub #uint64 #(v stLen) #(2 * rLen) st (mul #SIZE (size 4) rrLen) (mul #SIZE (size 2) rrLen) in
+  let st_kara = Buffer.sub #uint64 #(v stLen) #(v karaLen) st (mul #SIZE (size 7) rrLen) karaLen in
+  let st' = Buffer.sub #uint64 #(v stLen) #(rLen + rLen) st (mul #SIZE (size 7) rrLen) (add #SIZE rrLen rrLen) in
+  
+  to_mont rrLen pow2_i iLen n1 nInv_u64 r2 a1 st_kara aM;
+  to_mont rrLen pow2_i iLen n1 nInv_u64 r2 acc st_kara accM;
+  mod_exp_ rrLen pow2_i iLen n1 nInv_u64 st_kara st_exp bBits bLen b (size 0);
+  from_mont rrLen pow2_i iLen n1 nInv_u64 accM st' res1
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
-
-let mod_exp_mont #rLen #stLen pow2_i iLen bBits b exp_r rrLen sstLen st =
-    let bLen = bits_to_bn bBits in
-    assert (v bBits / 64 <= v bLen);
-    
-    let r = Buffer.sub #uint64 #stLen #rLen st (size 0) rrLen in
-    let n1 = Buffer.sub #uint64 #stLen #rLen st rrLen rrLen in
-    let nInv = Buffer.sub #uint64 #stLen #rLen st (mul #SIZE (size 2) rrLen) rrLen in
-    let r2 = Buffer.sub #uint64 #stLen #rLen st (mul #SIZE (size 3) rrLen) rrLen in
-    
-    let a1 = Buffer.sub #uint64 #stLen #rLen st (mul #SIZE (size 4) rrLen) rrLen in
-    let acc = Buffer.sub #uint64 #stLen #rLen st (mul #SIZE (size 5) rrLen) rrLen in
-    let aM = Buffer.sub #uint64 #stLen #rLen st (mul #SIZE (size 6) rrLen) rrLen in
-    let accM = Buffer.sub #uint64 #stLen #rLen st (mul #SIZE (size 7) rrLen) rrLen in
-    let res1 = Buffer.sub #uint64 #stLen #rLen st (mul #SIZE (size 8) rrLen) rrLen in
-    
-    let st_mont = Buffer.sub #uint64 #stLen #(3 * rLen) st (size 0) (mul #SIZE (size 3) rrLen) in
-    let st_exp = Buffer.sub #uint64 #stLen #(2 * rLen) st (mul #SIZE (size 6) rrLen) (mul #SIZE (size 2) rrLen) in
-    
-    let stKLen = add #SIZE (mul #SIZE (size 2) rrLen) (mul #SIZE (size 4) pow2_i) in
-    let st_kara = Buffer.sub #uint64 #stLen #(v stKLen) st (mul #SIZE (size 9) rrLen) stKLen in
-
-    let stLLen = add #SIZE stKLen (mul #SIZE (size 9) rrLen) in
-    let st_t = Buffer.sub #uint64 #stLen #(5 * rLen) st stLLen (mul #SIZE (size 5) rrLen) in
-    let st_f = Buffer.sub #uint64 #stLen #(3 * rLen) st stLLen (mul #SIZE (size 3) rrLen) in
-    to_mont pow2_i iLen exp_r rrLen st_mont st_t st_kara r2 a1 aM;
-    to_mont pow2_i iLen exp_r rrLen st_mont st_t st_kara r2 acc accM;
-
-    mod_exp_ pow2_i iLen exp_r rrLen st_mont st_exp st_f st_kara bBits bLen b (size 0);
-    from_mont pow2_i iLen exp_r rrLen st_mont st_f st_kara accM res1
-    
 // res = a ^^ b mod n
 val mod_exp:
-    #nLen:size_nat ->
-    pow2_i:size_t -> iLen:size_t ->
-    modBits:size_t{0 < v modBits /\ 2 * v modBits + 4 < max_size_t} ->
-    nnLen:size_t{let rLen = v (bits_to_bn (add #SIZE modBits (size 2))) in
-                 v nnLen == nLen /\ 0 < nLen /\ nLen = v (bits_to_bn modBits) /\
-		 9 * rLen < max_size_t /\ 2 * rLen + 4 * v pow2_i < max_size_t /\
-		 rLen < v pow2_i} ->
-    n:lbignum nLen -> a:lbignum nLen ->
-    bBits:size_t{0 < v bBits} -> b:lbignum (v (bits_to_bn bBits)) ->
-    res:lbignum nLen -> Stack unit
+  #nLen:size_nat ->
+  pow2_i:size_t{9 * (1 + nLen) + 4 * v pow2_i < max_size_t /\ (1 + nLen) < v pow2_i} ->
+  iLen:size_t{v iLen < v pow2_i / 2 /\ v iLen + (1 + nLen) = v pow2_i} ->
+  modBits:size_t{0 < v modBits} -> nnLen:size_t{v nnLen == nLen /\ nLen = v (bits_to_bn modBits)} ->
+  n:lbignum nLen -> a:lbignum nLen ->
+  bBits:size_t{0 < v bBits} -> b:lbignum (v (bits_to_bn bBits)) -> res:lbignum nLen ->
+  Stack unit
     (requires (fun h -> live h n /\ live h a /\ live h b /\ live h res))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-    
-#reset-options "--lax"
-
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+  [@"c_inline"]    
 let mod_exp #nLen pow2_i iLen modBits nnLen n a bBits b res =
-    push_frame();
-    let exp_r = add #SIZE modBits (size 2) in
-    let rBits = add #SIZE modBits (size 3) in
-    let rLen = bits_to_bn rBits in
-    assert (v rLen = (v rBits - 1) / 64 + 1);
-    assert (nLen = (v modBits - 1) / 64 + 1);
-    assert (9 * v rLen < max_size_t);
-    assert (nLen <= v rLen);
-    assert (v exp_r / 64 < v rLen);
-    assert (v modBits / 64 < v rLen);
+  push_frame();
+  let rrLen = size_incr nnLen in
+  assume (128 * v rrLen < max_size_t);
+  let exp_r = mul #SIZE (size 64) rrLen in
+  let exp2 = add #SIZE exp_r exp_r in
+  
+  let karaLen = add #SIZE (add #SIZE rrLen rrLen) (mul #SIZE (size 4) pow2_i) in
+  let stLen = add #SIZE (mul #SIZE (size 7) rrLen) karaLen in
 
-    let stLenKara = add #SIZE (mul #SIZE (size 2) rLen) (mul #SIZE (size 4) pow2_i) in
-    let stLen' = mul #SIZE (size 14) rLen in
-    let stLen = add #SIZE stLenKara stLen' in
-    let stMLen = mul #SIZE (size 3) rLen in
-    let exp2 = add #SIZE exp_r exp_r in
+  alloc #uint64 #unit #(v stLen) stLen (u64 0) [BufItem n; BufItem a; BufItem b] [BufItem res]
+  (fun h0 _ h1 -> True)
+  (fun st ->
+    let n1 = Buffer.sub #uint64 #(v stLen) #(v rrLen) st (size 0) rrLen in
+    let r2 = Buffer.sub #uint64 #(v stLen) #(v rrLen) st rrLen rrLen in
+    let a1 = Buffer.sub #uint64 #(v stLen) #(v rrLen) st (mul #SIZE (size 2) rrLen) rrLen in
+    let acc = Buffer.sub #uint64 #(v stLen) #(v rrLen) st (mul #SIZE (size 3) rrLen) rrLen in
+  
+    //let aM = Buffer.sub #uint64 #(v stLen) #(v rrLen) st (mul #SIZE (size 4) rrLen) rrLen in
+    //let accM = Buffer.sub #uint64 #(v stLen) #(v rrLen) st (mul #SIZE (size 5) rrLen) rrLen in
+    let res1 = Buffer.sub #uint64 #(v stLen) #(v rrLen) st (mul #SIZE (size 6) rrLen) rrLen in
+    //let st_exp = Buffer.sub #uint64 #(v stLen) #(2 * v rrLen) st (mul #SIZE (size 4) rrLen) (mul #SIZE (size 2) rrLen) in
+    //let st_kara = Buffer.sub #uint64 #(v stLen) #(v karaLen) st (mul #SIZE (size 7) rrLen) karaLen in
+    //let st' = Buffer.sub #uint64 #(v stLen) #(2 * v rrLen) st (mul #SIZE (size 7) rrLen) (add #SIZE rrLen rrLen) in
     
-    alloc #uint64 #unit #(v stLen) stLen (u64 0) [BufItem n; BufItem a; BufItem b] [BufItem res]
-    (fun h0 _ h1 -> True)
-    (fun st ->
-      let r = Buffer.sub #uint64 #(v stLen) #(v rLen) st (size 0) rLen in
-      let n1 = Buffer.sub #uint64 #(v stLen) #(v rLen) st rLen rLen in
-      let nInv = Buffer.sub #uint64 #(v stLen) #(v rLen) st (mul #SIZE (size 2) rLen) rLen in
-      let r2 = Buffer.sub #uint64 #(v stLen) #(v rLen) st (mul #SIZE (size 3) rLen) rLen in
-      let a1 = Buffer.sub #uint64 #(v stLen) #(v rLen) st (mul #SIZE (size 4) rLen) rLen in
-      let acc = Buffer.sub #uint64 #(v stLen) #(v rLen) st (mul #SIZE (size 5) rLen) rLen in
-      //let aM = Buffer.sub #uint64 #(v stLen) #(v rLen) st (mul #SIZE (size 6) rLen) rLen in
-      //let accM = Buffer.sub #uint64 #(v stLen) #(v rLen) st (mul #SIZE (size 7) rLen) rLen in
-      let res1 = Buffer.sub #uint64 #(v stLen) #(v rLen) st (mul #SIZE (size 8) rLen) rLen in
-      //let st_mont = Buffer.sub #uint64 #(v stLen) #(3 * v rLen) st (size 0) (mul #SIZE (size 3) rLen) in
-      //let st_exp = Buffer.sub #uint64 #(v stLen) #(2 * v rLen) st (mul #SIZE (size 6) rLen) (mul #SIZE (size 2) rLen) in
+    let n1' = Buffer.sub #uint64 #(v rrLen) #nLen n1 (size 0) nnLen in
+    let a1' = Buffer.sub #uint64 #(v rrLen) #nLen a1 (size 0) nnLen in
+    let res1' = Buffer.sub #uint64 #(v rrLen) #nLen res1 (size 0) nnLen in
+    
+    copy nnLen n n1';
+    copy nnLen a a1';
+    acc.(size 0) <- u64 1;
+    bn_pow2_mod_n modBits rrLen n1 exp2 r2; // r2 = r * r % n
+    let n0 = n.(size 0) in
+    let nInv_u64 = mod_inv_u64 n0 in // n * nInv = 1 (mod (pow2 64))
+    mod_exp_mont #(v rrLen) rrLen pow2_i iLen bBits b nInv_u64 st;
       
-      let n1_ = Buffer.sub #uint64 #(v rLen) #nLen n1 (size 0) nnLen in
-      let a1_ = Buffer.sub #uint64 #(v rLen) #nLen a1 (size 0) nnLen in
-      let res1_ = Buffer.sub #uint64 #(v rLen) #nLen res1 (size 0) nnLen in
-      
-      copy nnLen n n1_;
-      copy nnLen a a1_;
-      acc.(size 0) <- u64 1;
-      bn_set_bit rLen r exp_r; // r = pow2 (2 + modBits)
-      bn_pow2_mod_n modBits rLen n1 exp2 r2; // r2 = r * r % n
-      shift_euclidean_mod_inv rLen modBits n1 rBits r nInv; // n * nInv = 1 (mod r)
-      mod_exp_mont #(v rLen) #(v stLen) pow2_i iLen bBits b exp_r rLen stLen st;
-      
-      copy nnLen res1_ res
+    copy nnLen res1' res;
+    admit()
     );
     pop_frame()

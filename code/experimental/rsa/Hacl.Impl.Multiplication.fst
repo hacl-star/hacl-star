@@ -38,7 +38,10 @@ let rec bn_mult_by_limb_addj #aLen aaLen a l i j resLen carry res =
         let (carry', res_ij) = bn_mul_by_limb_addj_f a.(i) l carry res_ij in
         res.(ij) <- res_ij;
         bn_mult_by_limb_addj aaLen a l (size_incr i) j resLen carry' res end
-    else res.(ij) <- carry
+    else begin //TODO:create another function
+      let res_ij = res.(ij) in
+      res.(ij) <- add #U64 res_ij carry
+      end
 
 val bn_mult_:
     #aLen:size_nat -> #bLen:size_nat ->
