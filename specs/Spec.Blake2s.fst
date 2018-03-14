@@ -101,8 +101,8 @@ let blake2_round v m i =
 
 val blake2_compress1 : working_vector -> hash_state -> message_block -> uint64 -> last_block_flag -> Tot working_vector
 let blake2_compress1 v h m offset flag =
-  let v = update_slice v 0 8 h in
-  let v = update_slice v 8 16 init_vector in
+  let v = update_sub v 0 8 h in
+  let v = update_sub v 8 8 init_vector in
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 word_size) in
   let v = v.[12] <- v.[12] ^. low_offset in
