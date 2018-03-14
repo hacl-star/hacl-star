@@ -90,26 +90,20 @@ let blake2_round wv m i sigma =
   blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(s.(size 14))) (m.(s.(size 15)))
 
 
-val blake2_compress :
-  s:hash_state -> m:message_block -> wv:working_vector ->
-  offset:uint64 -> f:Spec.last_block_flag ->
+val blake2_compress1 : wv:working_vector ->
+  s:hash_state -> m:message_block ->
+  offset:uint64 -> flag:Spec.last_block_flag -> const_iv:lbuffer uint32 8 ->
   Stack unit
     (requires (fun h -> live h s /\ live h m /\ live h wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
-                         /\ modifies2 s wv h0 h1
-                         /\ as_lseq s h1 == Spec.blake2_compress (as_lseq s h0) (as_lseq m h0) offset f))
+                         /\ modifies1 wv h0 h1
+                         /\ h1.[wv] == Spec.Blake2s.blake2_compress1 h0.[wv] h0.[s] h0.[m] offset flag))
 
-let blake2_compress s (* = h *) m wv offset f =
-  push_frame ();
-  assert_norm (List.Tot.length Spec.init_list = 8);
-  let iv : lbuffer uint32 8 = createL Spec.init_list in
-  assert_norm (List.Tot.length Spec.sigma_list = 160);
-  let sigma : lbuffer (n:size_t{size_v n < 16}) 160 = createL Spec.sigma_list_size in
-  // let sigma = create (size 160) (size 0) in
+let blake2_compress1 wv s m offset flag const_iv =
   let wv_1 = sub wv (size 0) (size 8) in
   let wv_2 = sub wv (size 8) (size 16) in
   copy (size 8) s wv_1;
-  copy (size 8) iv wv_2;
+  copy (size 8) const_iv wv_2;
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 Spec.word_size) in
   let wv_12 = logxor #U32 wv.(size 12) low_offset in
@@ -117,11 +111,22 @@ let blake2_compress s (* = h *) m wv offset f =
   let wv_14 = logxor #U32 wv.(size 14) (u32 0xFFFFFFFF) in
   wv.(size 12) <- wv_12;
   wv.(size 13) <- wv_13;
-  (if f then wv.(size 14) <- wv_14);
+  (if flag then wv.(size 14) <- wv_14);
   let h0 = ST.get () in
+  ()
+
+val blake2_compress2 :
+  wv:working_vector -> s:hash_state -> m:message_block -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  Stack unit
+    (requires (fun h -> live h s /\ live h m /\ live h wv))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1
+                         /\ modifies2 s wv h0 h1
+                         /\ h1.[s] == Spec.blake2_compress2 h0.[wv] h0.[s] h0.[m]))
+
+let blake2_compress2 wv s m const_sigma =
   iteri (size Spec.rounds_in_f)
     (fun i wv -> admit(); wv)
-    (fun i wv -> blake2_round wv m i sigma) wv;
+    (fun i wv -> blake2_round wv m i const_sigma) wv;
     iteri (size 8)
     (fun i h -> h)
     (fun i h ->
@@ -129,19 +134,35 @@ let blake2_compress s (* = h *) m wv offset f =
       let hi_xor_wvi = logxor #U32 h.(i) wv.(i) in
       let hi = logxor #U32 hi_xor_wvi wv.(i_plus_8) in
       s.(i) <- hi
-    ) s;
-    pop_frame ()
+    ) s
+
+val blake2_compress :
+  s:hash_state -> m:message_block ->
+  offset:uint64 -> f:Spec.last_block_flag -> const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  Stack unit
+    (requires (fun h -> live h s /\ live h m))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1
+                         /\ modifies1 s h0 h1
+                         /\ h1.[s] == Spec.blake2_compress h0.[s] h0.[m] offset f))
+
+let blake2_compress s m offset flag const_iv const_sigma =
+  alloc #uint32 #unit #16 (size 16) (u32 0) [BufItem m] [BufItem s]
+  (fun h0 _ h1 -> True)
+  (fun wv ->
+  blake2_compress1 wv s m offset flag const_iv;
+  blake2_compress2 wv s m const_sigma)
 
  val blake2s_internal:
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
    ll:size_t -> kk:size_t{size_v kk <= 32} -> nn:size_t{1 <= size_v nn /\ size_v nn <= 32} ->
    to_compress:lbuffer uint32 16 -> wv:working_vector -> tmp:lbuffer uint8 32 -> res:lbuffer uint8 (size_v nn) ->
+   const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
    Stack unit
      (requires (fun h -> live h d /\ live h to_compress /\ live h res /\ live h wv))
      (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
 
- let blake2s_internal dd d ll kk nn to_compress wv tmp res =
+ let blake2s_internal dd d ll kk nn to_compress wv tmp res const_iv const_sigma =
   push_frame ();
   assert_norm (List.Tot.length Spec.init_list = 8);
   let h : lbuffer uint32 8 = createL Spec.init_list in
@@ -154,14 +175,14 @@ let blake2_compress s (* = h *) m wv offset f =
     (fun i h -> h)
     (fun i h ->
       uint32s_from_bytes_le (size 16) to_compress (sub d (mul #SIZE i (size Spec.bytes_in_block)) (size Spec.bytes_in_block));
-      blake2_compress h to_compress wv (to_u64 #U32 (size_to_uint32 (mul #SIZE (size_incr i) (size Spec.block_bytes)))) false //FIXME: i should have the u64 type
+      blake2_compress h to_compress (to_u64 #U32 (size_to_uint32 (mul #SIZE (size_incr i) (size Spec.block_bytes)))) false const_iv const_sigma//FIXME: i should have the u64 type
     ) h);
    let offset:size_t = mul #SIZE (size_decr dd) (size 64) in
    uint32s_from_bytes_le (size 16) to_compress (sub d offset (size Spec.bytes_in_block));
    (if kk =. size 0 then
-      blake2_compress h to_compress wv (to_u64 #U32 (size_to_uint32 ll)) true
+      blake2_compress h to_compress (to_u64 #U32 (size_to_uint32 ll)) true const_iv const_sigma
    else
-      blake2_compress h to_compress wv (to_u64 #U32 (size_to_uint32 (add #SIZE ll (size Spec.block_bytes)))) true);
+      blake2_compress h to_compress (to_u64 #U32 (size_to_uint32 (add #SIZE ll (size Spec.block_bytes)))) true const_iv const_sigma);
   uint32s_to_bytes_le (size 8) tmp h;
   let tmp' = sub tmp (size 0) nn in
   copy nn tmp' res;
@@ -181,7 +202,8 @@ let blake2s ll d kk k nn res =
   let data_length : size_t = add #SIZE (size Spec.bytes_in_block) padded_data_length in
   let len_st_u8 = add #SIZE (size 32) (add #SIZE padded_data_length (add #SIZE (size Spec.bytes_in_block) data_length)) in
   let len_st_u32 = size 32 in
-
+  let const_iv : lbuffer uint32 8 = createL Spec.init_list in
+  let const_sigma : lbuffer (n:size_t{size_v n < 16}) 160 = createL Spec.sigma_list_size in
   alloc #uint8 #unit #(v len_st_u8) len_st_u8 (u8 0) [BufItem d; BufItem k] [BufItem res]
   (fun h0 _ h1 -> True)
   (fun st_u8 ->
@@ -200,7 +222,7 @@ let blake2s ll d kk k nn res =
        let wv = sub st_u32 (size 16) (size 16) in
 
        if (kk =. size 0) then
-	 blake2s_internal data_blocks padded_data' ll kk nn to_compress wv tmp res
+	 blake2s_internal data_blocks padded_data' ll kk nn to_compress wv tmp res const_iv const_sigma
        else begin
 	 let padded_key' = sub padded_key (size 0) kk in
 	 copy kk k padded_key';
@@ -210,7 +232,7 @@ let blake2s ll d kk k nn res =
 
 	 let data' = sub data (size Spec.bytes_in_block) padded_data_length in
 	 copy padded_data_length padded_data data';
-	 blake2s_internal (size_incr data_blocks) data' ll kk nn to_compress wv tmp res
+	 blake2s_internal (size_incr data_blocks) data' ll kk nn to_compress wv tmp res const_iv const_sigma
        end
     )
   )
