@@ -31,7 +31,7 @@ open Spec.Lib.IntBuf
 // Main
 //
 
-val main: unit -> ML Int32.t // (requires (fun h -> True)) (ensures (fun h0 _ h1 -> True))
+val main: unit -> Stack Int32.t (requires (fun h -> True)) (ensures (fun h0 _ h1 -> True))
 let main () =
 
   let test1_plaintext_len = size 3 in
@@ -50,15 +50,10 @@ let main () =
       u8 0x4D; u8 0x99; u8 0x9B; u8 0x4C; u8 0x86; u8 0x67; u8 0x59; u8 0x82
     ] in
   let empty : lbuffer uint8 (size_v test1_empty_len) = createL [] in
-
   C.print_string (C.string_of_literal "\nTEST 1\n");
   let test1_result : lbuffer uint8 (size_v test1_expected_len) = create #uint8 (size 32) (u8 0) in
   Hacl.Impl.Blake2s.blake2s test1_plaintext_len test1_plaintext test1_empty_len empty test1_expected_len test1_result;
 
-  // C.print_string (C.string_of_literal "\nResult   BLAKE2S: ");
-  // List.iter (fun a -> C.print_string (UInt8.to_string (u8_to_UInt8 a))) test1_result;
-
-  // C.print_string (C.string_of_literal "\nExpected BLAKE2S: ");
-  // List.iter (fun a -> C.print_string (UInt8.to_string (u8_to_UInt8 a))) test1_expected;
-
+  (* Display the result *)
+  Spec.Lib.Print.print_compare (size 32) test1_expected test1_result;
   C.exit_success

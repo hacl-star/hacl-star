@@ -117,7 +117,8 @@ BASE_OBJ = $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o
 
 
 test-blake2s.exe: blake2s-c/Hacl_Blake2s.o $(BASE_OBJ)
-	$(CC) -I $(KREMLIN_HOME)/kremlib -o $@ blake2s-c/Hacl_Test_Blake2s.c $^
+	$(CC) -I ../../specs/lib/c -c ../../specs/lib/c/Spec_Lib_Print.c -o blake2s-c/Spec_Lib_Print.o
+	$(CC) -I ../../specs/lib/c -I $(KREMLIN_HOME)/kremlib -o $@ blake2s-c/Hacl_Test_Blake2s.c blake2s-c/Spec_Lib_Print.o $^
 	./test-blake2s.exe
 
 clean:
