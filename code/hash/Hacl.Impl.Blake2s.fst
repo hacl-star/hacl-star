@@ -19,6 +19,7 @@ let v = size_v
 inline_for_extraction
 let index (x:size_nat) = size x
 
+let op_String_Access m b = as_lseq b m
 
 #set-options "--max_fuel 0 --z3rlimit 25"
 
@@ -35,7 +36,7 @@ let g1 (wv:working_vector) (a:idx) (b:idx) (r:rotval U32) :
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
-                         /\ as_lseq wv h1 == Spec.g1 (as_lseq wv h0) (size_v a) (size_v b) r)) =
+                         /\ h1.[wv] == Spec.g1 h0.[wv] (v a) (v b) r)) =
   let wv_a = wv.(a) in
   let wv_b = wv.(b) in
   wv.(a) <- (wv_a ^. wv_b) >>>. r
@@ -45,7 +46,7 @@ let g2 (wv:working_vector) (a:idx) (b:idx) (x:uint32) :
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
-                         /\ as_lseq wv h1 == Spec.g2 (as_lseq wv h0) (size_v a) (size_v b) x)) =
+                         /\ h1.[wv] == Spec.g2 h0.[wv] (v a) (v b) x)) =
   let wv_a = wv.(a) in
   let wv_b = wv.(b) in
   wv.(a) <- add_mod #U32 (add_mod #U32 wv_a wv_b) x
@@ -55,7 +56,7 @@ val blake2_mixing : wv:working_vector -> a:idx -> b:idx -> c:idx -> d:idx -> x:u
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
-                         /\ as_lseq wv h1 == Spec.blake2_mixing (as_lseq wv h0) (size_v a) (size_v b) (size_v c) (size_v d) x y))
+                         /\ h1.[wv] == Spec.blake2_mixing h0.[wv] (v a) (v b) (v c) (v d) x y))
 
 let blake2_mixing wv a b c d x y =
   g2 wv a b x;
@@ -66,6 +67,28 @@ let blake2_mixing wv a b c d x y =
   g1 wv d a Spec.r3;
   g2 wv c d (u32 0);
   g1 wv b c Spec.r4
+
+
+val blake2_round : wv:working_vector -> m:message_block -> i:size_t -> sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  Stack unit
+    (requires (fun h -> live h wv /\ live h m /\ live h sigma))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1
+                         /\ modifies1 wv h0 h1
+                         /\ h1.[wv] == Spec.blake2_round h0.[wv] h0.[m] (v i)))
+
+let blake2_round wv m i sigma =
+  let i_mod_10 = size_mod i (size 10) in
+  let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
+  let s = sub #(n:size_t{v n < 16}) #160 #16 sigma start_idx (size 16) in admit();
+  blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
+  blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(s.(size 2))) (m.(s.(size 3)));
+  blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(s.(size 4))) (m.(s.(size 5)));
+  blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(s.(size 6))) (m.(s.(size 7)));
+  blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(s.(size 8))) (m.(s.(size 9)));
+  blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(s.(size 10))) (m.(s.(size 11)));
+  blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(s.(size 12))) (m.(s.(size 13)));
+  blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(s.(size 14))) (m.(s.(size 15)))
+
 
 val blake2_compress :
   s:hash_state -> m:message_block -> wv:working_vector ->
@@ -95,21 +118,10 @@ let blake2_compress s (* = h *) m wv offset f =
   wv.(size 12) <- wv_12;
   wv.(size 13) <- wv_13;
   (if f then wv.(size 14) <- wv_14);
+  let h0 = ST.get () in
   iteri (size Spec.rounds_in_f)
-    (fun i wv -> wv)
-    (fun i wv ->
-      let i_mod_10 = size_mod i (size 10) in
-      let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
-      let s = sub #size_t #160 #16 sigma start_idx (size 16) in
-      blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
-      blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(s.(size 2))) (m.(s.(size 3)));
-      blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(s.(size 4))) (m.(s.(size 5)));
-      blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(s.(size 6))) (m.(s.(size 7)));
-      blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(s.(size 8))) (m.(s.(size 9)));
-      blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(s.(size 10))) (m.(s.(size 11)));
-      blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(s.(size 12))) (m.(s.(size 13)));
-      blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(s.(size 14))) (m.(s.(size 15)))
-    ) wv;
+    (fun i wv -> admit(); wv)
+    (fun i wv -> blake2_round wv m i sigma) wv;
     iteri (size 8)
     (fun i h -> h)
     (fun i h ->
