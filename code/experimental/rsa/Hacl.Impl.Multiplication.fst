@@ -38,10 +38,7 @@ let rec bn_mult_by_limb_addj #aLen aaLen a l i j resLen carry res =
         let (carry', res_ij) = bn_mul_by_limb_addj_f a.(i) l carry res_ij in
         res.(ij) <- res_ij;
         bn_mult_by_limb_addj aaLen a l (size_incr i) j resLen carry' res end
-    else begin //TODO:create another function
-      let res_ij = res.(ij) in
-      res.(ij) <- add #U64 res_ij carry
-      end
+    else res.(ij) <- carry
 
 val bn_mult_:
     #aLen:size_nat -> #bLen:size_nat ->
@@ -131,17 +128,15 @@ let add_sign #a0Len #a1Len #resLen aa0Len aa1Len rresLen c0 c1 c2 a0 a1 a2 b0 b1
     then bn_sub rresLen res c0Len c2 res
     else bn_add rresLen res c0Len c2 res
 
-//modifies2 res tmp h0 h1
 val karatsuba_:
     #aLen:size_nat ->
     pow2_i:size_t{4 * v pow2_i < max_size_t} -> iLen:size_t{v iLen < v pow2_i / 2} ->
     aaLen:size_t{v aaLen == aLen /\ aLen + aLen < max_size_t /\ v iLen + aLen = v pow2_i} ->
-    a:lbignum aLen -> b:lbignum aLen ->
-    tmp:lbignum (4 * v pow2_i) ->
+    a:lbignum aLen -> b:lbignum aLen -> tmp:lbignum (4 * v pow2_i) -> 
     res:lbignum (aLen + aLen) -> Stack unit
-    (requires (fun h -> live h a /\ live h b /\ live h tmp /\ live h res /\
-                      disjoint res a /\ disjoint res b /\ disjoint tmp a /\ disjoint tmp b))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
+    (requires (fun h -> live h a /\ live h b /\ live h tmp /\ live h res /\ disjoint res tmp
+                   /\ disjoint tmp a /\ disjoint tmp b /\ disjoint res a /\ disjoint res b))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 res tmp h0 h1))
     #reset-options "--z3rlimit 150 --max_fuel 2"
     [@"c_inline"]
 let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
@@ -150,7 +145,7 @@ let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
     let pow2_i0 = pow2_i /. (size 2) in
     assume (v pow2_i = v pow2_i0 + v pow2_i0);
     
-    if (aaLen <. size 32) then
+    (if (aaLen <. size 32) then
        bn_mul #aLen #aLen aaLen a aaLen b res
     else begin
        let a0 = Buffer.sub #uint64 #aLen #(v pow2_i0) a (size 0) pow2_i0 in
@@ -214,23 +209,34 @@ let rec karatsuba_ #aLen pow2_i iLen aaLen a b tmp res =
           let res1 = Buffer.sub #uint64 #(v resLen) #(v res1Len) res pow2_i0 res1Len in
           bn_add res1Len res1 tmp1Len tmp1 res1
          end
-    end
+    end); admit()
 
 // aLen + iLen == pow2_i
 // iLen is the number of leading zeroes
 val karatsuba:
     #aLen:size_nat ->
-    pow2_i:size_t{4 * v pow2_i < max_size_t} -> iLen:size_t{v iLen < v pow2_i / 2} ->
+    pow2_i:size_t{2 * aLen + 4 * v pow2_i < max_size_t} -> iLen:size_t{v iLen < v pow2_i / 2} ->
     aaLen:size_t{v aaLen == aLen /\ aLen + aLen < max_size_t /\ v iLen + aLen = v pow2_i} ->
     a:lbignum aLen -> b:lbignum aLen ->
-    st_mult:lbignum (4 * v pow2_i) ->
-    res:lbignum (aLen + aLen) -> Stack unit
-    (requires (fun h -> live h a /\ live h b /\ live h st_mult /\ live h res /\
-                      disjoint res a /\ disjoint res b /\ disjoint st_mult a /\ disjoint st_mult b))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 res st_mult h0 h1))
+    st_kara:lbignum (aLen + aLen + 4 * v pow2_i) ->
+    Stack unit
+    (requires (fun h -> live h a /\ live h b /\ live h st_kara /\
+                      disjoint st_kara a /\ disjoint st_kara b))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st_kara h0 h1))
     [@"c_inline"]
-let karatsuba #aLen pow2_i iLen aaLen a b st_mult res =
-    (if (aaLen <. size 32)
+let karatsuba #aLen pow2_i iLen aaLen a b st_kara =
+    let stLen = add #SIZE (add #SIZE aaLen aaLen) (mul (size 4) pow2_i) in
+    let res = Buffer.sub #uint64 #(v stLen) #(aLen + aLen) st_kara (size 0) (add #SIZE aaLen aaLen) in
+    let st_mult = Buffer.sub #uint64 #(v stLen) #(4 * v pow2_i) st_kara (add #SIZE aaLen aaLen) (mul #SIZE (size 4) pow2_i) in
+    disjoint_sub_lemma1 st_kara a (size 0) (add #SIZE aaLen aaLen); // disjoint res a
+    disjoint_sub_lemma1 st_kara a (add #SIZE aaLen aaLen) (mul #SIZE (size 4) pow2_i); // disjoint st_mult a
+    disjoint_sub_lemma1 st_kara b (size 0) (add #SIZE aaLen aaLen); // disjoint res b
+    disjoint_sub_lemma1 st_kara b (add #SIZE aaLen aaLen) (mul #SIZE (size 4) pow2_i); // disjoint st_mult b
+    let h0 = FStar.HyperStack.ST.get() in
+    karatsuba_ pow2_i iLen aaLen a b st_mult res;
+    let h1 = FStar.HyperStack.ST.get() in
+    assume (modifies1 st_kara h0 h1)
+
+    (*if (aaLen <. size 32)
     then bn_mul #aLen #aLen aaLen a aaLen b res
-    else karatsuba_ pow2_i iLen aaLen a b st_mult res);
-    admit()
+    else karatsuba_ pow2_i iLen aaLen a b st_mult res*)
