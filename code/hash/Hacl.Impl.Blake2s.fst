@@ -26,7 +26,8 @@ let op_String_Access m b = as_lseq b m
 val size_v: s:size_t -> n:size_nat{uint_v #SIZE s == n}
 
 let lemma_size_v_of_size_equal (s:size_nat) : Lemma (requires True)
-  (ensures (size_v (size s) == s)) = ()
+  (ensures (size_v (size s) == s))
+  [SMTPat (size s)] = ()
 
 val update_sub: #a:Type -> #len:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len} -> x:lbuffer a (v n) ->
   Stack unit
@@ -47,8 +48,6 @@ let update_sub #a #len i start n x =
 //   let i' = sub i (size start) (size n) in
 //   copy (size n) x i'
 
-
-#set-options "--max_fuel 0 --z3rlimit 25"
 
 (* Define algorithm parameters *)
 type init_vector = lbuffer uint32 8
@@ -96,6 +95,52 @@ let blake2_mixing wv a b c d x y =
   g1 wv b c Spec.r4
 
 
+#set-options "--max_fuel 0 --z3rlimit 50"
+
+val blake2_round1 : wv:working_vector -> m:message_block -> i:size_t -> sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  Stack unit
+    (requires (fun h -> live h wv /\ live h m /\ live h sigma))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1
+                         /\ modifies1 wv h0 h1
+                         /\ h1.[wv] == Spec.blake2_round1 h0.[wv] h0.[m] (v i)))
+
+let blake2_round1 wv m i sigma =
+  let h0 = ST.get () in
+  let i_mod_10 = size_mod i (size 10) in
+  let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
+  let s = sub #(n:size_t{v n < 16}) #160 #16 sigma start_idx (size 16) in
+  let h1 = ST.get () in
+  assert(
+    let s' : lseq (n:size_t{v n < 16}) 16 = Spec.Lib.IntSeq.sub Spec.Blake2s.sigma (v start_idx) 16 in
+    True
+  );
+  assume(live h1 s);
+  blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
+  blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(s.(size 2))) (m.(s.(size 3)));
+  blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(s.(size 4))) (m.(s.(size 5)));
+  blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(s.(size 6))) (m.(s.(size 7)));
+  admit()
+
+
+val blake2_round2 : wv:working_vector -> m:message_block -> i:size_t -> sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  Stack unit
+    (requires (fun h -> live h wv /\ live h m /\ live h sigma))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1
+                         /\ modifies1 wv h0 h1
+                         /\ h1.[wv] == Spec.blake2_round2 h0.[wv] h0.[m] (v i)))
+
+let blake2_round2 wv m i sigma =
+  let i_mod_10 = size_mod i (size 10) in
+  let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
+  let s = sub #(n:size_t{v n < 16}) #160 #16 sigma start_idx (size 16) in
+  let h = ST.get () in
+  assume(live h s);
+  blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(s.(size 8))) (m.(s.(size 9)));
+  blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(s.(size 10))) (m.(s.(size 11)));
+  blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(s.(size 12))) (m.(s.(size 13)));
+  blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(s.(size 14))) (m.(s.(size 15)))
+
+
 val blake2_round : wv:working_vector -> m:message_block -> i:size_t -> sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ live h sigma))
@@ -104,17 +149,9 @@ val blake2_round : wv:working_vector -> m:message_block -> i:size_t -> sigma:lbu
                          /\ h1.[wv] == Spec.blake2_round h0.[wv] h0.[m] (v i)))
 
 let blake2_round wv m i sigma =
-  let i_mod_10 = size_mod i (size 10) in
-  let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
-  let s = sub #(n:size_t{v n < 16}) #160 #16 sigma start_idx (size 16) in admit();
-  blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
-  blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(s.(size 2))) (m.(s.(size 3)));
-  blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(s.(size 4))) (m.(s.(size 5)));
-  blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(s.(size 6))) (m.(s.(size 7)));
-  blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(s.(size 8))) (m.(s.(size 9)));
-  blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(s.(size 10))) (m.(s.(size 11)));
-  blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(s.(size 12))) (m.(s.(size 13)));
-  blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(s.(size 14))) (m.(s.(size 15)))
+  blake2_round1 wv m i sigma;
+  blake2_round2 wv m i sigma
+
 
 val blake2_compress1 : wv:working_vector ->
   s:hash_state -> m:message_block ->
