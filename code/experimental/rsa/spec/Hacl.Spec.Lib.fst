@@ -22,6 +22,19 @@ let lt_u64 a b = FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
 val le_u64: a:uint64 -> b:uint64 -> Tot bool
 let le_u64 a b = FStar.UInt64.(u64_to_UInt64 a <=^ u64_to_UInt64 b)
 
+val blocks: x:size_nat{x > 0} -> m:size_nat{m > 0} -> r:size_nat{r > 0 /\ x <= m * r}
+let blocks x m = (x - 1) / m + 1
+
+(* text_to_bn *)
+val get_size_nat: lenText:size_nat{lenText > 0} -> Tot (res:size_nat{res > 0})
+let get_size_nat lenText = blocks lenText 8
+
+val bits_to_bn: bits:size_nat{bits > 0} -> Tot (res:size_nat{res > 0})
+let bits_to_bn bits = blocks bits 64
+
+val bits_to_text: bits:size_nat{bits > 0} -> Tot (res:size_nat{res > 0})
+let bits_to_text bits = blocks bits 8
+
 val bn_is_bit_set:
   len:size_nat ->
   input:lseqbn len ->

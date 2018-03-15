@@ -128,7 +128,7 @@ let rec karatsuba_ pow2_i iLen aLen a b tmp res =
     let c0 = sub res 0 pow2_i in
     let c0 = karatsuba_ pow2_i0 0 pow2_i0 a0 b0 tmp0 c0 in // c0 = a0 * b0
     let res = update_sub res 0 pow2_i c0 in
-       
+    
     let pow2_i1 = pow2_i0 - iLen in
     if (pow2_i1 = 1) then begin
       let a1 = sub a pow2_i0 1 in
@@ -161,7 +161,8 @@ let rec karatsuba_ pow2_i iLen aLen a b tmp res =
       let tmp0 = sub tmp 0 (4 * pow2_i0) in
       let c1 = sub res pow2_i (2 * pow2_i1) in
       let c1 = karatsuba_ pow2_i0 ind pow2_i1 a1 b1 tmp0 c1 in // c1 = a1 * b1
-
+      let res = update_sub res pow2_i (2 * pow2_i1) c1 in
+      
       let a2 = sub tmp 0 pow2_i0 in
       let b2 = sub tmp pow2_i0 pow2_i0 in
       let (sa2, a2) = abs pow2_i0 a0 pow2_i1 a1 a2 in // a2 = |a0 - a1|
@@ -186,13 +187,13 @@ let rec karatsuba_ pow2_i iLen aLen a b tmp res =
 // aLen + iLen == pow2_i
 // iLen is the number of leading zeroes
 val karatsuba:
-  pow2_i:size_nat{4 * pow2_i < max_size_t} -> iLen:size_nat{iLen < pow2_i / 2} ->
-  aLen:size_nat{0 < aLen /\ aLen + aLen < max_size_t /\ iLen + aLen = pow2_i} ->
-  a:lseqbn aLen -> b:lseqbn aLen ->
-  st_mult:lseqbn (4 * pow2_i) ->
-  res:lseqbn (aLen + aLen) -> Tot (lseqbn (aLen + aLen))
+  pow2_i:size_nat -> iLen:size_nat{iLen < pow2_i / 2} ->
+  aLen:size_nat{0 < aLen /\ 2 * aLen + 4 * pow2_i < max_size_t /\ iLen + aLen = pow2_i} ->
+  a:lseqbn aLen -> b:lseqbn aLen -> st_kara:lseqbn (2 * aLen + 4 * pow2_i) ->
+  Tot (lseqbn (aLen + aLen))
 
-let karatsuba pow2_i iLen aLen a b st_mult res =
-  if (aLen < 32)
-  then bn_mul aLen a aLen b res
-  else karatsuba_ pow2_i iLen aLen a b st_mult res
+let karatsuba pow2_i iLen aLen a b st_kara =
+  let stLen:size_nat = 2 * aLen + 4 * pow2_i in
+  let res = sub st_kara 0 (aLen + aLen) in
+  let st_mult = sub st_kara (aLen + aLen) (4 * pow2_i) in
+  karatsuba_ pow2_i iLen aLen a b st_mult res

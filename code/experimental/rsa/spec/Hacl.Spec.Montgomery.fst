@@ -40,181 +40,94 @@ let bn_pow2_mod_n aBits rLen a p res =
   let res = bn_sub rLen res rLen a res in // res = res - a
   bn_pow2_mod_n_ rLen a aBits p res
 
-val degree_:
-  aLen:size_nat -> a:lseqbn aLen ->
-  i:size_nat{i / 64 < aLen} -> Tot size_nat
-let rec degree_ aLen a i =
-  if i = 0 then 0
+val mod_inv_u64_:
+  alpha:uint64 -> beta:uint64 -> ub:uint64 -> vb:uint64 -> i:size_nat{i <= 64} -> Tot uint64
+  (decreases (64 - i))
+let rec mod_inv_u64_ alpha beta ub vb i =
+  if (i < 64) then begin
+    let u_is_odd = u64 0 -. (ub &. u64 1) in
+    let beta_if_u_is_odd = beta &. u_is_odd in
+    let ub = ((ub ^. beta_if_u_is_odd) >>. (u32 1)) +. (ub &. beta_if_u_is_odd) in
+
+    let alpha_if_u_is_odd = alpha &. u_is_odd in
+    let vb = (vb >>. (u32 1)) +. alpha_if_u_is_odd in
+    mod_inv_u64_ alpha beta ub vb (i + 1) end 
+  else vb
+
+val mod_inv_u64: n0:uint64 -> Tot uint64
+let mod_inv_u64 n0 =
+  let alpha = (u64 1) <<. (u32 63) in
+  let beta = n0 in
+
+  let ub = u64 1 in
+  let vb = u64 0 in
+  mod_inv_u64_ alpha beta ub vb 0
+
+val bn_mult_by_limb_addj_carry:
+  aLen:size_nat{aLen > 0} -> a:lseqbn aLen ->
+  l:uint64 -> carry:uint64 -> i:size_nat{i <= aLen} -> j:size_nat ->
+  resLen:size_nat{aLen + j < resLen} -> res:lseqbn resLen -> Tot (tuple2 uint64 (lseqbn resLen))
+  (decreases (aLen - i))
+let rec bn_mult_by_limb_addj_carry aLen a l carry i j resLen res =
+  let ij = i + j in
+  if (i < aLen) then begin
+    let res_ij = res.[ij] in
+    let (carry', res_ij) = bn_mul_by_limb_addj_f a.[i] l carry res_ij in
+    let res = res.[ij] <- res_ij in
+    bn_mult_by_limb_addj_carry aLen a l carry' (i + 1) j resLen res end
   else begin
-    if (bn_is_bit_set aLen a (i - 1)) then i
-    else degree_ aLen a (i - 1)
-  end
+    let res_ij = res.[ij] in
+    let (c', res_ij) = addcarry_u64 (u64 0) res_ij carry in
+    let res = res.[ij] <- res_ij in
+    (c', res) end
 
-val degree:
-  aLen:size_nat -> a:lseqbn aLen ->
-  aBits:size_nat{aBits / 64 < aLen} -> Tot size_nat
-let degree aLen a aBits = degree_ aLen a aBits
-
-val shift_euclidean_mod_inv_f:
-  rLen:size_nat{rLen > 0} ->
-  m:lseqbn rLen -> tmp:lseqbn rLen ->
-  f:size_nat -> i:size_nat -> Tot (lseqbn rLen)
-  (decreases (f - i))
-  
-let rec shift_euclidean_mod_inv_f rLen m tmp f i =
-  if (i < f) then begin
-    let tmp = bn_add rLen tmp rLen tmp tmp in // tmp = tmp + tmp
-    let tmp =
-      if (bn_is_less rLen m rLen tmp)
-      then bn_sub rLen tmp rLen m tmp // tmp = tmp - m
-      else tmp in
-    shift_euclidean_mod_inv_f rLen m tmp f (i + 1) end
-  else tmp
-
-val shift_euclidean_mod_inv_:
-  rLen:size_nat{rLen + rLen < max_size_t} ->
-  du:size_nat{du / 64 < rLen} -> ub:lseqbn rLen ->
-  dv:size_nat{dv / 64 < rLen /\ dv <= du} -> vb:lseqbn rLen ->
-  r:lseqbn rLen -> s:lseqbn rLen ->
-  a:lseqbn rLen -> m:lseqbn rLen ->
-  st_inv:lseqbn (rLen + rLen) -> res:lseqbn rLen -> Tot (lseqbn rLen)
-  (decreases (du + dv))
-
-#reset-options "--lax"
-let rec shift_euclidean_mod_inv_ rLen du ub dv vb r s a m st_inv res =
-  let stLen = rLen + rLen in
-  let v_shift_f = sub st_inv 0 rLen in
-  let tmp = sub st_inv rLen rLen in
-
-  if (dv > 1) then begin
-    let f = du - dv in
-    let v_shift_f = bn_lshift rLen vb f v_shift_f in // v_shift_f = v << f
-    let f =
-      if (bn_is_less rLen ub rLen v_shift_f)
-      then begin assume (f > 0); f - 1 end
-      else f in
-    let v_shift_f = bn_lshift rLen vb f v_shift_f in // v_shift_f = v << f
-    let ub = bn_sub rLen ub rLen v_shift_f ub in // u = u - v_shift_f
-       
-    let tmp = update_sub tmp 0 rLen s in
-    let tmp = shift_euclidean_mod_inv_f rLen m tmp f 0 in
-    let r =
-      if (bn_is_less rLen r rLen tmp)
-      then begin // r < tmp
-	let r = bn_add rLen r rLen m r in // r = r + m
-        bn_sub rLen r rLen tmp r end
-      else bn_sub rLen r rLen tmp r in
-
-    let du' = degree rLen ub du in
-    assume (du' < du);
-    if (bn_is_less rLen ub rLen vb) // ub < vb
-    then begin
-      assume (du' < dv);
-      shift_euclidean_mod_inv_ rLen dv vb du' ub s r a m st_inv res end
-    else begin
-      assume (dv <= du');
-      shift_euclidean_mod_inv_ rLen du' ub dv vb r s a m st_inv res end
-    end
-  else begin
-    if (dv = 0) then
-      let res' = create rLen (u64 0) in
-      update_sub res 0 rLen res'
-    else update_sub res 0 rLen s
-  end
-
-#reset-options "--z3rlimit 30"
-
-val shift_euclidean_mod_inv:
-  rLen:size_nat{rLen > 0 /\ 6 * rLen < max_size_t} ->
-  aBits:size_nat{aBits / 64 < rLen} -> a:lseqbn rLen ->
-  mBits:size_nat{mBits / 64 < rLen /\ aBits <= mBits} -> m:lseqbn rLen ->
-  res:lseqbn rLen -> Tot (lseqbn rLen)
-  
-let shift_euclidean_mod_inv rLen aBits a mBits m res =
-  let stLen:size_nat = 6 * rLen in
-  let st = create stLen (u64 0) in
-    
-  let ub = sub st 0 rLen in
-  let vb = sub st rLen rLen in
-  let r = sub st (2 * rLen) rLen in
-  let s = sub st (3 * rLen) rLen in
-  let st_inv = sub st (4 * rLen) (2 * rLen) in
-
-  let ub = update_sub ub 0 rLen m in
-  let vb = update_sub vb 0 rLen a in
-  let s = s.[0] <- u64 1 in
-  shift_euclidean_mod_inv_ rLen mBits ub aBits vb r s a m st_inv res
+val mont_reduction_:
+  rLen:size_nat{0 < rLen /\ rLen + rLen < max_size_t} ->
+  c:lseqbn (rLen + rLen) -> n:lseqbn rLen -> nInv_u64:uint64 ->
+  i:size_nat -> carry':uint64 -> Tot (lseqbn (rLen + rLen))
+  (decreases (rLen - i))
+let rec mont_reduction_ rLen c n nInv_u64 i carry' =
+  if (i < rLen) then begin
+    let ci = c.[i] in
+    let qi = nInv_u64 *. ci in
+    let (carry', c) = bn_mult_by_limb_addj_carry rLen n qi carry' 0 i (rLen + rLen) c in
+    mont_reduction_ rLen c n nInv_u64 (i + 1) carry'
+  end else c
 
 val mont_reduction:
-  pow2_i:size_nat{4 * pow2_i < max_size_t} -> iLen:size_nat{iLen < pow2_i / 2} -> exp_r:size_nat{0 < exp_r} ->
-  rLen:size_nat{0 < rLen /\ 6 * rLen < max_size_t /\ iLen + rLen = pow2_i /\ rLen = exp_r / 64 + 1} ->
-  st_mont:lseqbn (3 * rLen) -> st:lseqbn (3 * rLen) -> st_kara:lseqbn (4 * pow2_i) ->
-  cLen:size_nat{cLen = rLen + rLen} -> c:lseqbn cLen ->
-  res:lseqbn rLen -> Tot (lseqbn rLen)
-//merge st and st_kara
-let mont_reduction pow2_i iLen exp_r rLen st_mont st st_kara cLen c res =
-  let r2Len:size_nat = rLen + rLen in
-  let stLen:size_nat = 3 * rLen in
-  
-  let r = sub st_mont 0 rLen in
-  let n = sub st_mont rLen rLen in
-  let nInv = sub st_mont r2Len rLen in
-    
-  let tmp1 = sub st 0 r2Len in
-  let m = sub st r2Len rLen in
-      
-  let c1 = sub c 0 rLen in // c1 = c % r
-  let tmp1 = karatsuba pow2_i iLen rLen c1 nInv st_kara tmp1 in // tmp1 = c1 * nInv
-  
-  let m = bn_mod_pow2_n r2Len tmp1 exp_r rLen m in // m = tmp1 % r
-  let m = bn_sub rLen r rLen m m in // m = r - m
-  let tmp1 = karatsuba pow2_i iLen rLen m n st_kara tmp1 in // tmp1 = m * n
-  let tmp1 = bn_add r2Len tmp1 cLen c tmp1 in // tmp1 = c + tmp1
-  let tmp1 = bn_rshift r2Len tmp1 exp_r tmp1 in // tmp1 = tmp1 / r
-
-  let tmp1' = sub tmp1 0 rLen in
-  update_sub res 0 rLen tmp1'
+  rLen:size_nat{0 < rLen /\ rLen + rLen < max_size_t} ->
+  n:lseqbn rLen -> nInv_u64:uint64 ->
+  c:lseqbn (rLen + rLen) -> tmp:lseqbn (rLen + rLen) -> res:lseqbn rLen -> Tot (lseqbn rLen)
+let mont_reduction rLen n nInv_u64 c tmp res =
+  let rLen2:size_nat = rLen + rLen in
+  let tmp = update_sub tmp 0 rLen2 c in
+  let tmp = mont_reduction_ rLen tmp n nInv_u64 0 (u64 0) in
+  //bn_rshift rLen2 tmp (mul #SIZE (size 64) rrLen) tmp; // tmp = tmp / r
+  let tmp' = sub tmp rLen rLen in
+  update_sub res 0 rLen tmp'
 
 val to_mont:
-  pow2_i:size_nat{4 * pow2_i < max_size_t} -> iLen:size_nat{iLen < pow2_i / 2} -> exp_r:size_nat{0 < exp_r} ->
-  rLen:size_nat{0 < rLen /\ 6 * rLen < max_size_t /\ iLen + rLen = pow2_i /\ rLen = exp_r / 64 + 1} ->
-  st_mont:lseqbn (3 * rLen) -> st:lseqbn (5 * rLen) -> st_kara:lseqbn (4 * pow2_i) ->
-  r2:lseqbn rLen -> a:lseqbn rLen -> aM:lseqbn rLen -> Tot (lseqbn rLen)
-//merge st and st_kara
-let to_mont pow2_i iLen exp_r rLen st_mont st st_kara r2 a aM =
-  let cLen:size_nat = rLen + rLen in
-  let stLen:size_nat = 3 * rLen in
-    
-  let c = sub st 0 cLen in
-  let st = sub st cLen stLen in
-    
-  let c = karatsuba pow2_i iLen rLen a r2 st_kara c in // c = a * r2 
-  mont_reduction pow2_i iLen exp_r rLen st_mont st st_kara cLen c aM // aM = c % n
-    
-    
+  rLen:size_nat{0 < rLen} ->
+  pow2_i:size_nat{2 * rLen + 4 * pow2_i < max_size_t /\ rLen < pow2_i} ->
+  iLen:size_nat{iLen < pow2_i / 2 /\ iLen + rLen = pow2_i} ->
+  n:lseqbn rLen -> nInv_u64:uint64 ->
+  r2:lseqbn rLen -> a:lseqbn rLen ->
+  st_kara:lseqbn (2 * rLen + 4 * pow2_i) -> aM:lseqbn rLen -> Tot (lseqbn rLen)
+let to_mont rLen pow2_i iLen n nInv_u64 r2 a st_kara aM =
+  let cLen = rLen + rLen in
+  let stLen = cLen + 4 * pow2_i in
+  let c = sub st_kara 0 cLen in 
+  let c = karatsuba pow2_i iLen rLen a r2 st_kara in // c = a * r2
+  mont_reduction rLen n nInv_u64 c c aM // aM = c % n
+
 val from_mont:
-  pow2_i:size_nat{4 * pow2_i < max_size_t} -> iLen:size_nat{iLen < pow2_i / 2} -> exp_r:size_nat{0 < exp_r} ->
-  rLen:size_nat{0 < rLen /\ 6 * rLen < max_size_t /\ iLen + rLen = pow2_i /\ rLen = exp_r / 64 + 1} ->
-  st_mont:lseqbn (3 * rLen) -> st:lseqbn (3 * rLen) -> st_kara:lseqbn (4 * pow2_i) ->
-  aM:lseqbn rLen -> a:lseqbn rLen -> Tot (lseqbn rLen)
-//merge st and st_kara
-let from_mont pow2_i iLen exp_r rLen st_mont st st_kara aM a =
-  let r2Len:size_nat = rLen + rLen in
-  let stLen:size_nat = 3 * rLen in
-
-  let r = sub st_mont 0 rLen in
-  let n = sub st_mont rLen rLen in
-  let nInv = sub st_mont r2Len rLen in
-
-  let tmp = sub st 0 r2Len in
-  let m = sub st r2Len rLen in
-  
-  let tmp = karatsuba pow2_i iLen rLen aM nInv st_kara tmp in // tmp = aM * nInv
-  let m = bn_mod_pow2_n r2Len tmp exp_r rLen m in // m = tmp % r
-  let m = bn_sub rLen r rLen m m in // m = r - m
-  let tmp = karatsuba pow2_i iLen rLen m n st_kara tmp in // tmp = m * n
-  let tmp = bn_add r2Len tmp rLen aM tmp in //tmp = aM + tmp
-  let tmp = bn_rshift r2Len tmp exp_r tmp in //tmp = tmp / r
-      
-  let tmp' = sub tmp 0 rLen in
-  update_sub a 0 rLen tmp'
+  rLen:size_nat{0 < rLen} ->
+  pow2_i:size_nat{2 * rLen + 4 * pow2_i < max_size_t /\ rLen < pow2_i} -> 
+  iLen:size_nat{iLen < pow2_i / 2 /\ iLen + rLen = pow2_i} ->
+  n:lseqbn rLen -> nInv_u64:uint64 ->
+  aM:lseqbn rLen -> st:lseqbn (rLen + rLen) -> a:lseqbn rLen -> Tot (lseqbn rLen)
+let from_mont rLen pow2_i iLen n nInv_u64 aM st a =
+  let rLen2:size_nat = rLen + rLen in
+  let st = create rLen2 (u64 0) in
+  let st = update_sub st 0 rLen aM in
+  mont_reduction rLen n nInv_u64 st st a // a = aM % n
