@@ -21,13 +21,20 @@ let index (x:size_nat) = size x
 
 let op_String_Access m b = as_lseq b m
 
+(* Constants *)
 
+// inline_for_extraction
+// let normalized_sigma : list size_t =
+//   normalize_term (List.Tot.map Spec.Blake2s.size_sigma_list Spec.sigma_list)
 
-val size_v: s:size_t -> n:size_nat{uint_v #SIZE s == n}
-
+(* Lemmas *)
 let lemma_size_v_of_size_equal (s:size_nat) : Lemma (requires True)
   (ensures (size_v (size s) == s))
   [SMTPat (size s)] = ()
+
+let lemma_sigma_equal (s0:list size_t) (s1:list size_nat) : Lemma (requires True)
+  (ensures (List.Tot.map size_v s0 == s1)) = admit()
+
 
 val update_sub: #a:Type -> #len:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len} -> x:lbuffer a (v n) ->
   Stack unit
@@ -37,16 +44,6 @@ val update_sub: #a:Type -> #len:size_nat -> i:lbuffer a len -> start:size_t -> n
 let update_sub #a #len i start n x =
   let i' = sub i start n in
   copy n x i'
-
-// [@"Substitute"]
-// val update_sub2: #a:Type -> #len:size_nat -> i:lbuffer a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lbuffer a n ->
-//   Stack unit
-//     (requires (fun h -> live h i /\ live h x))
-//     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
-//                          /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] start n h0.[x]))
-// let update_sub2 #a #len i start n x =
-//   let i' = sub i (size start) (size n) in
-//   copy (size n) x i'
 
 
 (* Define algorithm parameters *)
@@ -111,8 +108,8 @@ let blake2_round1 wv m i sigma =
   let s = sub #(n:size_t{v n < 16}) #160 #16 sigma start_idx (size 16) in
   let h1 = ST.get () in
   assert(
-    let s' : lseq (n:size_t{v n < 16}) 16 = Spec.Lib.IntSeq.sub Spec.Blake2s.sigma (v start_idx) 16 in
-    True
+    let s' : lseq (n:size_nat{n < 16}) 16 = Spec.Lib.IntSeq.sub Spec.Blake2s.sigma_list (v start_idx) 16 in
+    h1.[s] == s'
   );
   assume(live h1 s);
   blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
