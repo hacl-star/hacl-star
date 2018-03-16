@@ -38,6 +38,8 @@ type serialized_point = lbytes 56
 type proj_point = | Proj: x:elem -> z:elem -> proj_point
 
 let decodeScalar448 (k:scalar) =
+  let ( &. ) = logand #U8 in
+  let ( |. ) = logor #U8 in
   let k : scalar = k.[0] <- (k.[0] &. u8 252) in
   let k : scalar = k.[55] <- (k.[55] |. u8 128) in k
 
@@ -63,7 +65,8 @@ let add_and_double qx nq nqp1 =
   let z_2 = e `fmul` (aa `fadd` (39081 `fmul` e)) in
   Proj x_2 z_2, Proj x_3 z_3
 
-let ith_bit (k:scalar) (i:nat{i < 448}) =
+let ith_bit (k:scalar) (i:nat{i < 448}) : uint8 =
+  let (&.) = logand #U8 in
   let q = i / 8 in let r = u32 (i % 8) in
   (k.[q] >>. r) &. u8 1
 
@@ -73,7 +76,7 @@ let rec montgomery_ladder_ (init:elem) x xp1 (k:scalar) (ctr:nat{ctr<=448})
   else (
     let ctr' = ctr - 1 in
     let (x', xp1') =
-      if uint_to_nat (ith_bit k ctr') = 1 then (
+      if uint_to_nat #U8 (ith_bit k ctr') = 1 then (
         let nqp2, nqp1 = add_and_double init xp1 x in
         nqp1, nqp2
       ) else add_and_double init x xp1 in

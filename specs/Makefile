@@ -2,23 +2,22 @@ include ../Makefile.include
 
 .PHONY=all test
 
-FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lib/fst --include $(HACL_HOME)/specs/lemmas
+FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lib/fst --include $(HACL_HOME)/specs/lemmas --expose_interfaces
 
 SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.CTR.fst \
 		Spec.Curve25519.fst \
 		Spec.Curve448.fst \
+		Spec.GaloisField.fst \
 		Spec.GF128.fst \
-		Spec.Lib.fst \
 		Spec.Poly1305.fst \
 		Spec.Salsa20.fst \
 		Spec.SHA2.fst \
 		Spec.HMAC.fst \
 		Spec.Ed25519.fst \
-		Spec.HSalsa20.fst \
-		Spec.GaloisField.fst \
-		Spec.Chacha20_vec.fst
+		Spec.Chacha20_vec.fst \
+		Spec.HSalsa20.fst 
 
 hints: $(addsuffix .hints, $(SPEC_FILES))
 verify: $(addsuffix -verify, $(SPEC_FILES))
@@ -28,6 +27,13 @@ all-ver: verify
 all: test
 test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe hmac.exe hkdf.exe ed25519.exe
 
+
+noise.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Noise.fst
+	mkdir -p noise-ml
+	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Noise --odir noise-ml $^
+	@echo 'let _ = test()' >> noise-ml/Spec_Noise.ml
+	$(OCAMLOPT) -I noise-ml noise-ml/Spec_Lib_IntTypes.ml noise-ml/Spec_Lib_RawIntTypes.ml noise-ml/Spec_Lib_IntSeq.ml noise-ml/Spec_Noise.ml -o noise.exe
+	./noise.exe
 
 chacha20.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.CTR.fst Spec.Chacha20.fst tests/Spec.Chacha20.Test.fst
 	mkdir -p chacha20-ml
