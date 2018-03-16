@@ -149,18 +149,18 @@ let test5_expected = List.Tot.map u8_from_UInt8 [
 
 let test () =
 
-  IO.print_string "\nTEST 1\n"
-  // let test1_input_len : size_nat = List.Tot.length test1_input in
-  // let test1_input : lbytes test1_input_len = createL test1_input in
+  IO.print_string "\nTEST 1\n";
+  let test1_input_len : size_nat = List.Tot.length test1_input in
+  let test1_input : lbytes test1_input_len = createL test1_input in
 
-  // let test1_expected : lbytes 32 = createL test1_expected in
-  // let test1_result : lbytes 32 = Spec.Gimli.gimli st in
-  // let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
+  let test1_expected : lbytes 32 = createL test1_expected in
+  let test1_result : lbytes 32 = Spec.Gimli.hash 32 test1_input_len test1_input in
+  let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
 
-  // IO.print_string "\nExpected Gimli : ";
-  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected);
-  // IO.print_string "\nComputed Gimli : ";
-  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result);
+  IO.print_string "\nExpected Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected);
+  IO.print_string "\nComputed Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result);
 
-  // if result1 then IO.print_string "\nGimli Test1: Success!\n"
-  // else IO.print_string "\nGimli Test1: Failure :(\n"
+  if result1 then IO.print_string "\nGimli Test1: Success!\n"
+  else IO.print_string "\nGimli Test1: Failure :(\n"
