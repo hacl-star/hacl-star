@@ -120,7 +120,12 @@ let blake2b_internal dd d ll kk nn =
 
 val blake2b : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * bytes_in_block } ->  d:lbytes ll ->  kk:size_nat{kk<=64} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 64} -> Tot (lbytes nn)
 
-let blake2b ll d kk k nn =
+let blake2b 
+  ll (* size of d in bytes *)
+  d (* data to hash *)
+  kk (* size of key in bytes *)
+  k (* key *) 
+  nn (* size of resulting hash in bytes *) =
   let data_blocks : size_nat = ((ll - 1) / bytes_in_block) + 1 in
   let padded_data_length : size_nat = data_blocks * bytes_in_block in
   let padded_data = create padded_data_length (u8 0) in
