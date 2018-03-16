@@ -35,7 +35,7 @@ let apply2_ext_st #d (#a:Type0) (#len:size_nat) (ext:lseq a len) (k1:d.key) (k2:
 let repeat_stateful #d (n:size_nat) (f:stateful d unit) : stateful d unit =
   fun s -> (),repeat n (fun s -> snd (f s)) s
 
-let repeat_range_stateful #d (min:size_nat) (max:size_nat{min <= max}) (f:i:size_nat{i >= min /\ i < max} -> stateful d unit) : stateful d unit =
+let repeat_range_stateful #d (min:size_nat) (max:size_nat{min <= max}) (f:(i:size_nat{i >= min /\ i < max} -> stateful d unit)) : stateful d unit =
   fun s -> (),repeat_range min max (fun i s -> snd (f i s)) s
 
 let copy #d k1 k2 : stateful d unit =

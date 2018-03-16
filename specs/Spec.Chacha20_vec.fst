@@ -17,6 +17,7 @@ let keylen = 32 (* in bytes *)
 let blocklen = 64  (* in bytes *)
 let noncelen = 12 (* in bytes *)
 
+type size_nat = nat
 type key = lbytes keylen
 type block = lbytes blocklen
 type nonce = lbytes noncelen

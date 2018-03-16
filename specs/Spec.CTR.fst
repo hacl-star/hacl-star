@@ -20,7 +20,7 @@ type cipher =
 
 
 val xor: #len:size_nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
-let xor #len x y = map2 (fun x y -> x ^. y) x y
+let xor #len x y = map2 (fun x y -> logxor #U8 x y) x y
 
 val counter_mode_blocks:
   enc: cipher ->

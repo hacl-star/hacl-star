@@ -9,14 +9,22 @@ open Spec.Lib.RawIntTypes
 let decr (x:size_nat{x > 0}) : size_nat = x - 1
 let incr (x:size_nat{x < max_size_t}) : size_nat = x + 1
 
-let lseq (a:Type0) (len:size_nat) =  s:list a {List.Tot.length s = len}
+let seq (a:Type0) =  s:list a {List.Tot.length s <= max_size_t}
+let length (#a:Type0) (l:seq a) = List.Tot.length l
+let lseq (a:Type0) (len:size_nat) = s:seq a {length s == len}
+
+let to_lseq #a (s:seq a) = s
+let to_lbytes (s:bytes) = s
+let to_seq #a #len (s:lseq a len) = s
+let to_bytes #len (s:lbytes len) = s
 
 val create_: #a:Type -> len:size_nat -> init:a -> Tot (lseq a len) (decreases (len))
 let rec create_ #a len x =
   if len = 0 then []
   else
     let t = create_ #a (decr len) x in
-    x :: t
+    x :: t 
+
 let create = create_
 
 let createL #a l = l
@@ -201,9 +209,8 @@ let rec nat_from_intseq_le_ #t #len (b:intseq t len)  =
     l + shift * n'
 
 let nat_from_intseq_le = nat_from_intseq_le_
-
-let nat_from_bytes_be = nat_from_intseq_be
-let nat_from_bytes_le = nat_from_intseq_le
+let nat_from_bytes_be = nat_from_intseq_be #U8
+let nat_from_bytes_le = nat_from_intseq_le #U8
 
 val nat_to_bytes_be_:
   len:size_nat -> n:nat{ n < pow2 (8 * len)} ->
@@ -272,6 +279,20 @@ let uints_from_bytes_be #t (#len:size_nat{len * numbytes t < pow2 32}) (b:lbytes
 
 let as_list #a #len l = l
 
+let rec split_blocks #t #len s bs = 
+    if bs < length(s) then
+      let h = sub s 0 bs in
+      let rem = sub s bs (len - bs) in
+      let t,l = split_blocks #t #(len - bs) rem bs in
+      h :: t, l
+    else 
+      [],s
+
+let rec concat_blocks #a #len #bs s l = 
+  match s with
+  | [] -> l
+  | h :: t -> List.Tot.append h (concat_blocks #a #(len - bs) #bs t l) 
+  
 (*
 val map_block_: #a:Type -> #b:Type -> min:size_nat -> max:size_nat{min <= max} ->
 		blocksize:size_nat{max * blocksize <= max_size_t} -> 

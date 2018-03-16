@@ -2,23 +2,22 @@ include ../Makefile.include
 
 .PHONY=all test
 
-FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lib/fst --include $(HACL_HOME)/specs/lemmas
+FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lib/fst --include $(HACL_HOME)/specs/lemmas --expose_interfaces
 
 SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.CTR.fst \
 		Spec.Curve25519.fst \
 		Spec.Curve448.fst \
+		Spec.GaloisField.fst \
 		Spec.GF128.fst \
-		Spec.Lib.fst \
 		Spec.Poly1305.fst \
 		Spec.Salsa20.fst \
 		Spec.SHA2.fst \
 		Spec.HMAC.fst \
 		Spec.Ed25519.fst \
-		Spec.HSalsa20.fst \
-		Spec.GaloisField.fst \
-		Spec.Chacha20_vec.fst
+		Spec.Chacha20_vec.fst \
+		Spec.HSalsa20.fst 
 
 hints: $(addsuffix .hints, $(SPEC_FILES))
 verify: $(addsuffix -verify, $(SPEC_FILES))

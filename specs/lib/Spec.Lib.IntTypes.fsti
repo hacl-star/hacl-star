@@ -141,8 +141,7 @@ val decr: #t:inttype -> a:uint_t t -> Pure (uint_t t)
 inline_for_extraction
 val logxor: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
 inline_for_extraction
-val logand: #t:inttype -> a:uint_t t  ->
-b:uint_t t -> uint_t t
+val logand: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
 inline_for_extraction
 val logor: #t:inttype -> a:uint_t t  ->
 b:uint_t t -> uint_t t

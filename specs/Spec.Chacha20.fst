@@ -1,9 +1,9 @@
 module Spec.Chacha20
+
 open FStar.Mul
 open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
-
 
 #set-options "--max_fuel 0 --z3rlimit 100"
 
@@ -98,3 +98,4 @@ let chacha20_cipher =
 
 let chacha20_encrypt_bytes key nonce counter len m =
   Spec.CTR.counter_mode chacha20_cipher key nonce counter len m
+

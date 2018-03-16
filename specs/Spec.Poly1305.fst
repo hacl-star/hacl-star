@@ -60,13 +60,14 @@ let finish (st:state) : tag =
   nat_to_bytes_le 16 n
 
 let encode_r (rb:block) : elem =
+  let (&.) = logand #U8 in
   let rb = rb.[3] <- rb.[3] &. u8 15 in
   let rb = rb.[7] <- rb.[7] &. u8 15 in
   let rb = rb.[11] <- rb.[11] &. u8 15 in
   let rb = rb.[15] <- rb.[15] &. u8 15 in
   let rb = rb.[4] <- rb.[4] &. u8 252 in
-  let rb = rb.[8] <- rb.[8] &. u8 252 in
-  let rb = rb.[12] <- rb.[12] &. u8 252 in
+  let rb : lseq uint8 16 = rb.[8] <- rb.[8] &. u8 252 in
+  let rb : lseq uint8 16 = rb.[12] <- rb.[12] &. u8 252 in
   nat_from_bytes_le rb
 
 let poly1305_init (k:key) : state =
