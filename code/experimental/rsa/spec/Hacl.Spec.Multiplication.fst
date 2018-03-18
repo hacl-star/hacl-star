@@ -17,8 +17,8 @@ let mul_wide a b = u128_from_UInt128 (FStar.UInt128.mul_wide (u64_to_UInt64 a) (
 
 val bn_mul_by_limb_addj_f: a_i:uint64 -> l:uint64 -> c:uint64 -> r_ij:uint64 -> Tot (tuple2 uint64 uint64)
 let bn_mul_by_limb_addj_f a_i l c r_ij =
-  assume (uint_v a_i * uint_v l + uint_v c + uint_v r_ij < pow2 128);
-  let res = mul_wide a_i l +! to_u128 c +! to_u128 r_ij in
+  assume (uint_v #U64 a_i * uint_v #U64 l + uint_v #U64 c + uint_v #U64 r_ij < pow2 128);
+  let res = add #U128 (add #U128 (mul_wide a_i l) (to_u128 #U64 c)) (to_u128 #U64 r_ij) in
   let r = to_u64 res in
   let c' = to_u64 (res >>. u32 64) in
   (c', r)
@@ -135,8 +135,8 @@ let rec karatsuba_ pow2_i iLen aLen a b tmp res =
       let b1 = sub b pow2_i0 1 in
 	         
       let c1 = mul_wide a1.[0] b1.[0] in
-      let res = res.[pow2_i] <- to_u64 c1 in
-      let res = res.[pow2_i + 1] <- to_u64 (c1 >>. u32 64) in
+      let res = res.[pow2_i] <- to_u64 #U128 c1 in
+      let res = res.[pow2_i + 1] <- to_u64 (shift_right #U128 c1 (u32 64)) in
 
       let tmp1Len = pow2_i0 + 1 in
       let tmp1Len2 = tmp1Len + tmp1Len in

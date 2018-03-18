@@ -50,13 +50,13 @@ let rec mod_inv_u64_ alpha beta ub vb i =
     let ub = ((ub ^. beta_if_u_is_odd) >>. (u32 1)) +. (ub &. beta_if_u_is_odd) in
 
     let alpha_if_u_is_odd = alpha &. u_is_odd in
-    let vb = (vb >>. (u32 1)) +. alpha_if_u_is_odd in
+    let vb = (shift_right #U64 vb (u32 1)) +. alpha_if_u_is_odd in
     mod_inv_u64_ alpha beta ub vb (i + 1) end 
   else vb
 
 val mod_inv_u64: n0:uint64 -> Tot uint64
 let mod_inv_u64 n0 =
-  let alpha = (u64 1) <<. (u32 63) in
+  let alpha = shift_left #U64 (u64 1) (u32 63) in
   let beta = n0 in
 
   let ub = u64 1 in

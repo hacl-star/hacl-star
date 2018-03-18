@@ -22,6 +22,9 @@ let lt_u64 a b = FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
 val le_u64: a:uint64 -> b:uint64 -> Tot bool
 let le_u64 a b = FStar.UInt64.(u64_to_UInt64 a <=^ u64_to_UInt64 b)
 
+val eq_u8: a:uint8 -> b:uint8 -> Tot bool
+let eq_u8 a b = FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
+
 val blocks: x:size_nat{x > 0} -> m:size_nat{m > 0} -> r:size_nat{r > 0 /\ x <= m * r}
 let blocks x m = (x - 1) / m + 1
 

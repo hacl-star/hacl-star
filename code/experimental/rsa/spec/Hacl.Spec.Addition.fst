@@ -12,14 +12,14 @@ type carry = uint64
 
 val addcarry_u64: c:carry -> a:uint64 -> b:uint64 -> Tot (tuple2 carry uint64)
 let addcarry_u64 c a b =
-  let tmp = to_u128 c +! to_u128 a +! to_u128 b in
+  let tmp = add #U128 (to_u128 #U64 c) (add #U128 (to_u128 #U64 a) (to_u128 #U64 b)) in
   let res = to_u64 tmp in
   let c' = to_u64 (tmp >>. u32 64) in
   (c', res)
   
 val subborrow_u64: c:carry -> a:uint64 -> b:uint64 -> Tot (tuple2 carry uint64)
 let subborrow_u64 c a b =
-  let res = a -. b -. c in
+  let res = sub_mod #U64 (sub_mod #U64 a b) c in
   let c' =
     if eq_u64 c (u64 1)
     then (if le_u64 a b then u64 1 else u64 0)
@@ -77,4 +77,24 @@ let bn_add_carry aLen a bLen b res =
   let (c', res') = bn_add_ aLen a bLen b 0 (u64 0) res' in
   let res = update_sub res 0 aLen res' in
   res.[aLen] <- c'
+
+val bn_sub_u64_:
+  aLen:size_nat{aLen > 0} ->
+  a:lseqbn aLen -> carry:uint64 -> i:size_nat ->
+  res:lseqbn aLen -> Tot (lseqbn aLen)
+  (decreases (aLen - i))
+let rec bn_sub_u64_ aLen a carry i res =
+  if (i < aLen) then begin
+    let t1 = a.[i] in
+    let res_i = t1 -. carry in
+    let res = res.[i] <- res_i in
+    let carry = if (lt_u64 t1 carry) then u64 1 else u64 0 in
+    bn_sub_u64_ aLen a carry (i + 1) res
+  end else res
+    
+val bn_sub_u64:
+  aLen:size_nat{aLen > 0} ->
+  a:lseqbn aLen -> b:uint64 ->
+  res:lseqbn aLen -> Tot (lseqbn aLen)
+let bn_sub_u64 aLen a b res = bn_sub_u64_ aLen a b 0 res
 
