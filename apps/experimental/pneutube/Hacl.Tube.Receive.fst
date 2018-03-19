@@ -68,7 +68,6 @@ let get_fh_stat fh = fh.stat
 
 
 module HS = FStar.HyperStack
-module HH = FStar.HyperHeap
 
 #reset-options "--max_fuel 0 --z3rlimit 500"
 
