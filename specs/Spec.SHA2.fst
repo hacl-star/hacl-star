@@ -45,6 +45,7 @@ let _sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[9]) ^. ((x >>>. p.opTable.[10
 let size_block_w = 16
 let size_hash_w = 8
 let size_block p :size_nat = size_block_w * numbytes p.wt
+let size_hash p :size_nat = p.size_hash
 
 (* Definition: Maximum input size in bytes *)
 let max_input p : n:nat = (maxint (lenType p) + 1) / 8
@@ -101,6 +102,12 @@ let shuffle_core p (wsTable:intseq p.wt p.kSize) (t:size_nat{t < p.kSize}) (hash
 (* Definition of the full shuffling function *)
 let shuffle (p:parameters) (wsTable:intseq p.wt p.kSize) (hash:hash_w p) : Tot (hash_w p) =
   repeati p.kSize (shuffle_core p wsTable) hash
+
+(* Definition of the core compression function *)
+let compress (p:parameters) (block:lbytes (size_block p)) (hash0:hash_w p) : Tot (hash_w p) =
+  let wsTable = ws p (uints_from_bytes_be block) in
+  let hash1 = shuffle p wsTable hash0 in
+  map2 (fun x y -> x +. y) hash0 hash1
 
 (* Definition of the function returning the number of padding blocks for a single input block *)
 let number_blocks_padding_single p (len:size_nat{len < size_block p}) : size_nat =
@@ -162,20 +169,19 @@ noeq type state (p:parameters) =
 let init (p:parameters) : Tot (state p) =
   {hash = p.h0; blocks = create (2 * size_block p) (nat_to_uint 0); len_block = 0; n = 0}
 
-(* Definition of the core compression function *)
-let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p) : Tot (st1:state p(*{st1.n = st.n + 1 /\ st1.len_block = st.len_block*}*)) =
-  let wsTable = ws p (uints_from_bytes_be block) in
-  let hash1 = shuffle p wsTable st.hash in
-  let hash2 = map2 (fun x y -> x +. y) st.hash hash1 in
-  {st with hash = hash2}
+(* Definition of the single block update function *)
+let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p{(st.n + 1) * (size_block p) <= max_input p /\ st.n + 1 <= max_size_t}) : Tot (st1:state p)(*{st1.n = st.n + 1 /\ st1.len_block = st.len_block})*) =
+    {st with n = st.n + 1; hash = compress p block st.hash }
 
 (* Definition of the compression function iterated over multiple blocks *)
-let update_multi (p:parameters) (n:size_nat{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p{st.n + n <= max_size_t}) : Tot (st1:state p{st1.n = st.n + n /\ st1.len_block = st.len_block}) =
+let update_multi (p:parameters) (n:size_nat{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p{st.n + n <= max_size_t}) : Tot (st1:state p)(* {st1.n = st.n + n})*) =
   let bl = size_block p in
-  let old_n = st.n in
-  let old_len_block = st.len_block in
-  let st = repeati n (fun i -> update_block p (sub blocks (bl * i) bl)) st in
-  {st with len_block = old_len_block; n = old_n + n}
+  let h =
+    repeati n (fun i h ->
+      let block = sub blocks (i * bl) bl in
+      compress p block h
+    ) st.hash in
+  {st with n = st.n + n; hash = h}
 
 (* Definition of the function for the partial block compression *)
 let update_last (p:parameters) (len:size_nat) (last:lbytes len) (st:state p{len < size_block p /\ (st.n * size_block p) + len <= max_size_t})
@@ -239,7 +245,6 @@ let hash (p:parameters) (len:size_nat{len < max_input p /\ (size_block p * numbe
   let st = init p in
   let st = update_multi p n blocks st in
   finish p st.hash
-
 
 ///
 /// Parameters for all instances of SHA2
@@ -371,20 +376,20 @@ let parameters512 : parameters =
 /// Instances of SHA2
 ///
 
-let hash_w224 = hash_w parameters224
-let hash_w256 = hash_w parameters256
-let hash_w384 = hash_w parameters384
-let hash_w512 = hash_w parameters512
+let state224 = state parameters224
+let state256 = state parameters256
+let state384 = state parameters384
+let state512 = state parameters512
 
 let size_block224 = size_block parameters224
 let size_block256 = size_block parameters256
 let size_block384 = size_block parameters384
 let size_block512 = size_block parameters512
 
-let size_hash224 = parameters224.size_hash
-let size_hash256 = parameters256.size_hash
-let size_hash384 = parameters384.size_hash
-let size_hash512 = parameters512.size_hash
+let size_hash224 = size_hash parameters224
+let size_hash256 = size_hash parameters256
+let size_hash384 = size_hash parameters384
+let size_hash512 = size_hash parameters512
 
 let max_input224 = max_input parameters224
 let max_input256 = max_input parameters256
