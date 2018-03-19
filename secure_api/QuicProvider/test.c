@@ -21,7 +21,7 @@ void coverage(void)
   printf("==== coverage ====\n");
 
   char hash[64] = {0};
-  char input[] = {};
+  char input[1] = {0};
   printf("SHA256('') =\n");
   quic_crypto_hash(TLS_hash_SHA256, hash, input, 0);
   dump(hash, 32);
