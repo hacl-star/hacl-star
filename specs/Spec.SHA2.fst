@@ -109,6 +109,12 @@ let compress (p:parameters) (block:lbytes (size_block p)) (hash0:hash_w p) : Tot
   let hash1 = shuffle p wsTable hash0 in
   map2 (fun x y -> x +. y) hash0 hash1
 
+(* Definition of the truncation function *)
+let truncate (p:parameters) (hash:hash_w p) : lbytes (size_hash p) =
+  let hash_final = uints_to_bytes_be hash in
+  let h = slice hash_final 0 p.size_hash in
+  h
+
 (* Definition of the function returning the number of padding blocks for a single input block *)
 let number_blocks_padding_single p (len:size_nat{len < size_block p}) : size_nat =
   if len < size_block p - numbytes (lenType p) then 1 else 2
@@ -165,6 +171,10 @@ noeq type state (p:parameters) =
     n:size_nat;
   }
 
+(* Ghost function to access the abstract state from the interface *)
+let get_st_n #p (st:state p) = st.n
+let get_st_len_block #p (st:state p) = st.len_block
+
 (* Definition of the initialization function for convenience *)
 let init (p:parameters) : Tot (state p) =
   {hash = p.h0; blocks = create (2 * size_block p) (nat_to_uint 0); len_block = 0; n = 0}
@@ -190,10 +200,8 @@ let update_last (p:parameters) (len:size_nat) (last:lbytes len) (st:state p{len 
   update_multi p (number_blocks_padding_single p len) blocks st
 
 (* Definition of the finalization function *)
-let finish p (hash:hash_w p) : lbytes p.size_hash =
-  let hash_final = uints_to_bytes_be hash in
-  let h = slice hash_final 0 p.size_hash in
-  h
+let finish p (st:state p) : lbytes (size_hash p) =
+  truncate p st.hash
 
 (* Definition of the core compression function *)
 let update' (p:parameters) (len:size_nat) (input:lbytes len) (st:state p{let n = len / size_block p in st.n + n + 1 <= max_size_t}) : Tot (state p) =
@@ -244,7 +252,7 @@ let hash (p:parameters) (len:size_nat{len < max_input p /\ (size_block p * numbe
   let blocks = pad p 0 len input in
   let st = init p in
   let st = update_multi p n blocks st in
-  finish p st.hash
+  finish p st
 
 ///
 /// Parameters for all instances of SHA2
