@@ -144,11 +144,10 @@ open FStar.Mul
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 
-private let triple (a:HH.rid) (b:HH.rid) (c:HH.rid) = Set.union (Set.singleton a) (Set.union (Set.singleton b) (Set.singleton c))
+private let triple (a:HS.rid) (b:HS.rid) (c:HS.rid) = Set.union (Set.singleton a) (Set.union (Set.singleton b) (Set.singleton c))
 
 type uint8_p = b:uint8_p{frameOf b <> file_rgn /\ frameOf b <> socket_rgn}
 

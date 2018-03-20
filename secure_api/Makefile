@@ -1,15 +1,9 @@
 HACL_HOME=..
 
 # The main Makefile that knows which combinations of targets are possible/valid.
-all: check
+all:
 	rm -f .depend.*
 	$(MAKE) runtime_switch vale_aes_concrete_id hacl_aes_concrete_id vale_aes_abstract_id hacl_aes_abstract_id
-
-check:
-ifeq (,$(findstring shortest-stem,$(.FEATURES)))
-	@echo "ERROR: This Makefile requires GNU Make >= 3.82"
-	@exit 1
-endif
 
 # The following targets are not parallel and must occur at most once in
 # parallel:

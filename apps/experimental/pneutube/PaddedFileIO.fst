@@ -5,7 +5,6 @@ open FStar.HyperStack.All
 module ST = FStar.HyperStack.ST
 
 open FStar.Seq
-open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.Buffer
 open Hacl.Cast
@@ -20,9 +19,8 @@ module U64 = FStar.UInt64
 module H64 =  Hacl.UInt64
 module B   = FStar.Buffer
 module HS  = FStar.HyperStack
-module HH  = FStar.HyperHeap
 
-assume val file_rgn: r:rid{is_eternal_region r}
+assume val file_rgn: r:rid{ST.is_eternal_region r}
 type fh_ref = fb:buffer file_handle{length fb = 1 /\ frameOf fb = file_rgn}
 
 
