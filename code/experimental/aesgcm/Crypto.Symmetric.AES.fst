@@ -361,8 +361,8 @@ private val access: sb:sbox -> idx:byte -> STL byte
   (requires (fun h -> live h sb))
   (ensures  (fun h0 _ h1 -> h1 == h0))
 [@
-  (CPrologue "#ifdef MSC_VER\n// Work around a /Ox code-gen bug in AES key expansion, in the MSVC compiler\n#pragma optimize(\"\", off)\n#pragma optimize(\"s\", on)\n#endif")
-  (CEpilogue "#ifdef MSC_VER\n#pragma optimize(\"\", on)\n#endif")
+  (CPrologue "#ifdef _MSC_VER\n// Work around a /Ox code-gen bug in AES key expansion, in the MSVC compiler\n#pragma optimize(\"\", off)\n#pragma optimize(\"s\", on)\n#endif")
+  (CEpilogue "#ifdef _MSC_VER\n#pragma optimize(\"\", on)\n#endif")
 ]
 let access sbox i =
   if Flag.aes_ct then access_aux sbox i 0ul 0uy
