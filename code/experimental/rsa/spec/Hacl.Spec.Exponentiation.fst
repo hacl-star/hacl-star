@@ -105,16 +105,20 @@ let mod_exp nLen pow2_i iLen modBits n a bBits b res =
   
   //let aM = sub st (4 * rLen) rLen in
   //let accM = sub st (5 * rLen) rLen in
-  let res1 = sub st (6 * rLen) rLen in
+  //let res1 = sub st (6 * rLen) rLen in  
   //let st_exp = sub st (4 * rLen) (2 * rLen) in
   //let st_kara = sub st (7 * rLen) karaLen in
   //let st' = sub st (7 * rLen) (2 * rLen) in
 
   let n1 = update_sub n1 0 nLen n in
+  let st = update_sub st 0 rLen n1 in  
   let a1 = update_sub a1 0 nLen a in
-  
+  let st = update_sub st (2 * rLen) rLen a1 in
+
   let acc = acc.[0] <- u64 1 in
+  let st = update_sub st (3 * rLen) rLen acc in
   let r2 = bn_pow2_mod_n modBits rLen n1 exp2 r2 in// r2 = r * r % n
+  let st = update_sub st rLen rLen r2 in
   let n0 = n.[0] in
   let nInv_u64 = mod_inv_u64 n0 in // n * nInv = 1 (mod (pow2 64))
   let res1 = mod_exp_mont rLen pow2_i iLen bBits b nInv_u64 st in

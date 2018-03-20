@@ -37,7 +37,7 @@ let text_to_nat len input res =
   let tmp = create tmpLen (u8 0) in
   let tmpLen' = tmpLen - ind in
   assume (tmpLen' = len);
-  let tmp' = update_sub tmp ind tmpLen' input in
+  let tmp = update_sub tmp ind tmpLen' input in
   text_to_nat_ tmpLen tmp num_words res 0
 
 val nat_to_text_:

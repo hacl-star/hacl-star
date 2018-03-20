@@ -45,8 +45,10 @@ let rec mgf_sha256_ count_max accLen stLen st counter =
      let c = c.[2] <- to_u8 #U32 (u32 counter >>. u32 8) in
      let c = c.[3] <- to_u8 #U32 (u32 counter) in
      assert_norm (mgfseed_counter_len < max_input_len_sha256);
+     let mgfseed_counter = update_sub mgfseed_counter hLen 4 c in
      let mHash = hash_sha256 mgfseed_counter_len mgfseed_counter mHash in
      let acc = update_sub acc (hLen * counter) hLen mHash in
+     let st = update_sub st (mgfseed_counter_len + hLen) accLen acc in
      mgf_sha256_ count_max accLen stLen st (counter + 1)
   end else acc
 
@@ -61,10 +63,10 @@ let mgf_sha256 mgfseed len res =
     let mgfseed_counter_len:size_nat = hLen + 4 in
     let stLen:size_nat = mgfseed_counter_len + hLen + accLen in
     let st = create stLen (u8 0) in
-    let mgfseed_counter = sub st 0 mgfseed_counter_len in
-    let mfseed_counter = update_sub mgfseed_counter 0 hLen mgfseed in
+    //let mgfseed_counter = sub st 0 mgfseed_counter_len in
+    let st = update_sub st 0 hLen mgfseed in
     //let mHash = sub st mgfseed_counter_len hLen in
-    let acc = sub st (mgfseed_counter_len + hLen) accLen in
+    //let acc = sub st (mgfseed_counter_len + hLen) accLen in
     let acc = mgf_sha256_ count_max accLen stLen st 0 in
     let acc' = sub acc 0 len in
     update_sub res 0 len acc'

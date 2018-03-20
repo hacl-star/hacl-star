@@ -70,7 +70,7 @@ let pss_encode msBits sLen salt msgLen msg emLen em =
   then begin
     let em' = sub em 1 (emLen - 1) in
     let em' = pss_encode_ sLen salt msgLen msg (emLen - 1) em' in 
-    update_sub em 0 (emLen - 1) em' end
+    update_sub em 1 (emLen - 1) em' end
   else begin
     let em = pss_encode_ sLen salt msgLen msg emLen em in
     let shift' = 8 - msBits in
@@ -181,6 +181,7 @@ let rsa_sign nLen pow2_i iLen modBits eBits dBits pLen qLen skey rBlind sLen sal
   let stLen:size_nat = n2Len + pqLen + pqLen + 1 in
   let em = create k (u8 0) in
   let em = pss_encode msBits sLen salt msgLen msg k em in
+
   let tmp = create stLen (u64 0) in
     
   let m = sub tmp 0 nLen in
@@ -191,6 +192,7 @@ let rsa_sign nLen pow2_i iLen modBits eBits dBits pLen qLen skey rBlind sLen sal
   let dLen':size_nat  = pLen + qLen + 1 in
   let d' = sub tmp (n2Len + pqLen) dLen' in
   let m = text_to_nat k em m in
+
   let p1 = bn_sub_u64 pLen p (u64 1) p1 in // p1 = p - 1
   let q1 = bn_sub_u64 qLen q (u64 1) q1 in // q1 = q - 1
   let phi_n = bn_mul pLen p1 qLen q1 phi_n in // phi_n = p1 * q1
@@ -227,9 +229,10 @@ let rsa_verify nLen pow2_i iLen modBits eBits pkey sLen sgnt msgLen msg =
   let tmp = create n2Len (u64 0) in
   let s = sub tmp nLen nLen in
   let s = text_to_nat k sgnt s in
-  let em = create k (u8 0) in
+  let tmp = update_sub tmp nLen nLen s in
   let m = sub tmp 0 nLen in
   let s = sub tmp nLen nLen in
+  let em = create k (u8 0) in
 
   if (bn_is_less nLen s nLen n) then begin
     let m = mod_exp nLen pow2_i iLen modBits n s eBits e m in
