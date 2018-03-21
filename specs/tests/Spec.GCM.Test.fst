@@ -94,33 +94,156 @@ let test3_expected = List.Tot.map u8_from_UInt8 [
 let test3_c_length: size_nat = 60
 let test3_aad_length: size_nat = 20
 
-let test () =
-  let output = GCM.ghash test1_c_length test1_ciphertext test1_aad_length test1_aad test1_hash_key in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test1_expected in
-  IO.print_string   "Expected tag: ";
-  let test_expected : lbytes key_length = createL test1_expected in
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
-  IO.print_string "\nComputed tag: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
-  if result then IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :(\n";
+(* Test 4 *)
 
-  let output = GCM.ghash test2_c_length test2_ciphertext test2_aad_length test2_aad test2_hash_key in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test2_expected in
-  IO.print_string   "Expected tag: ";
-  let test_expected : lbytes key_length = createL test2_expected in
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
-  IO.print_string "\nComputed tag: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
-  if result then IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :(\n";
+let test4_hash_key = List.Tot.map u8_from_UInt8 [
+  0xb8uy; 0x3buy; 0x53uy; 0x37uy; 0x08uy; 0xbfuy; 0x53uy; 0x5duy; 0x0auy;
+  0xa6uy; 0xe5uy; 0x29uy; 0x80uy; 0xd5uy; 0x3buy; 0x78uy
+]
 
-  let output = GCM.ghash test3_c_length test3_ciphertext test3_aad_length test3_aad test3_hash_key in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test3_expected in
+let test4_ciphertext = List.Tot.map u8_from_UInt8 [
+  0x61uy; 0x35uy; 0x3buy; 0x4cuy; 0x28uy; 0x06uy; 0x93uy; 0x4auy; 0x77uy;
+  0x7fuy; 0xf5uy; 0x1fuy; 0xa2uy; 0x2auy; 0x47uy; 0x55uy; 0x69uy; 0x9buy;
+  0x2auy; 0x71uy; 0x4fuy; 0xcduy; 0xc6uy; 0xf8uy; 0x37uy; 0x66uy; 0xe5uy;
+  0xf9uy; 0x7buy; 0x6cuy; 0x74uy; 0x23uy; 0x73uy; 0x80uy; 0x69uy; 0x00uy;
+  0xe4uy; 0x9fuy; 0x24uy; 0xb2uy; 0x2buy; 0x09uy; 0x75uy; 0x44uy; 0xd4uy;
+  0x89uy; 0x6buy; 0x42uy; 0x49uy; 0x89uy; 0xb5uy; 0xe1uy; 0xebuy; 0xacuy;
+  0x0fuy; 0x07uy; 0xc2uy; 0x3fuy; 0x45uy; 0x98uy
+]
+
+let test4_aad = List.Tot.map u8_from_UInt8 [
+  0xfeuy; 0xeduy; 0xfauy; 0xceuy; 0xdeuy; 0xaduy; 0xbeuy; 0xefuy; 0xfeuy;
+  0xeduy; 0xfauy; 0xceuy; 0xdeuy; 0xaduy; 0xbeuy; 0xefuy; 0xabuy; 0xaduy;
+  0xdauy; 0xd2uy
+]
+
+let test4_expected = List.Tot.map u8_from_UInt8 [
+  0xdfuy; 0x58uy; 0x6buy; 0xb4uy; 0xc2uy; 0x49uy; 0xb9uy; 0x2cuy; 0xb6uy;
+  0x92uy; 0x28uy; 0x77uy; 0xe4uy; 0x44uy; 0xd3uy; 0x7buy
+]
+
+let test4_c_length: size_nat = 60
+let test4_aad_length: size_nat = 20
+
+(* Test 5 *)
+
+let test5_hash_key = List.Tot.map u8_from_UInt8 [
+  0xb8uy; 0x3buy; 0x53uy; 0x37uy; 0x08uy; 0xbfuy; 0x53uy; 0x5duy; 0x0auy;
+  0xa6uy; 0xe5uy; 0x29uy; 0x80uy; 0xd5uy; 0x3buy; 0x78uy
+]
+
+let test5_ciphertext = List.Tot.map u8_from_UInt8 [
+  0x8cuy; 0xe2uy; 0x49uy; 0x98uy; 0x62uy; 0x56uy; 0x15uy; 0xb6uy; 0x03uy;
+  0xa0uy; 0x33uy; 0xacuy; 0xa1uy; 0x3fuy; 0xb8uy; 0x94uy; 0xbeuy; 0x91uy;
+  0x12uy; 0xa5uy; 0xc3uy; 0xa2uy; 0x11uy; 0xa8uy; 0xbauy; 0x26uy; 0x2auy;
+  0x3cuy; 0xcauy; 0x7euy; 0x2cuy; 0xa7uy; 0x01uy; 0xe4uy; 0xa9uy; 0xa4uy;
+  0xfbuy; 0xa4uy; 0x3cuy; 0x90uy; 0xccuy; 0xdcuy; 0xb2uy; 0x81uy; 0xd4uy;
+  0x8cuy; 0x7cuy; 0x6fuy; 0xd6uy; 0x28uy; 0x75uy; 0xd2uy; 0xacuy; 0xa4uy;
+  0x17uy; 0x03uy; 0x4cuy; 0x34uy; 0xaeuy; 0xe5uy
+]
+
+let test5_aad = List.Tot.map u8_from_UInt8 [
+  0xfeuy; 0xeduy; 0xfauy; 0xceuy; 0xdeuy; 0xaduy; 0xbeuy; 0xefuy; 0xfeuy;
+  0xeduy; 0xfauy; 0xceuy; 0xdeuy; 0xaduy; 0xbeuy; 0xefuy; 0xabuy; 0xaduy;
+  0xdauy; 0xd2uy
+]
+
+let test5_expected = List.Tot.map u8_from_UInt8 [
+  0x1cuy; 0x5auy; 0xfeuy; 0x97uy; 0x60uy; 0xd3uy; 0x93uy; 0x2fuy; 0x3cuy;
+  0x9auy; 0x87uy; 0x8auy; 0xacuy; 0x3duy; 0xc3uy; 0xdeuy
+]
+
+let test5_c_length: size_nat = 60
+let test5_aad_length: size_nat = 20
+
+(* Test 6 *)
+
+let test6_hash_key = List.Tot.map u8_from_UInt8 [
+  0xaauy; 0xe0uy; 0x69uy; 0x92uy; 0xacuy; 0xbfuy; 0x52uy; 0xa3uy; 0xe8uy;
+  0xf4uy; 0xa9uy; 0x6euy; 0xc9uy; 0x30uy; 0x0buy; 0xd7uy
+]
+
+let test6_ciphertext = List.Tot.map u8_from_UInt8 []
+
+let test6_aad = List.Tot.map u8_from_UInt8 []
+
+let test6_expected = List.Tot.map u8_from_UInt8 [
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy
+]
+
+let test6_c_length: size_nat = 0
+let test6_aad_length: size_nat = 0
+
+(* Test 7 *)
+
+let test7_hash_key = List.Tot.map u8_from_UInt8 [
+  0xaauy; 0xe0uy; 0x69uy; 0x92uy; 0xacuy; 0xbfuy; 0x52uy; 0xa3uy; 0xe8uy;
+  0xf4uy; 0xa9uy; 0x6euy; 0xc9uy; 0x30uy; 0x0buy; 0xd7uy
+]
+
+let test7_ciphertext = List.Tot.map u8_from_UInt8 [
+  0x98uy; 0xe7uy; 0x24uy; 0x7cuy; 0x07uy; 0xf0uy; 0xfeuy; 0x41uy; 0x1cuy;
+  0x26uy; 0x7euy; 0x43uy; 0x84uy; 0xb0uy; 0xf6uy; 0x00uy
+]
+
+let test7_aad = List.Tot.map u8_from_UInt8 []
+
+let test7_expected = List.Tot.map u8_from_UInt8 [
+  0xe2uy; 0xc6uy; 0x3fuy; 0x0auy; 0xc4uy; 0x4auy; 0xd0uy; 0xe0uy; 0x2euy;
+  0xfauy; 0x05uy; 0xabuy; 0x67uy; 0x43uy; 0xd4uy; 0xceuy
+]
+
+let test7_c_length: size_nat = 16
+let test7_aad_length: size_nat = 0
+
+(* Test 8 (non-nist) *)
+
+let test8_hash_key = List.Tot.map u8_from_UInt8 [
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0xfcuy;
+  0xefuy; 0xefuy; 0x64uy; 0xffuy; 0xc4uy; 0x76uy; 0x6cuy
+]
+
+let test8_ciphertext = List.Tot.map u8_from_UInt8 [
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0xffuy;
+  0xceuy; 0xf9uy; 0xebuy; 0xbfuy; 0xfduy; 0xbduy; 0x8buy
+]
+
+let test8_aad = List.Tot.map u8_from_UInt8 []
+
+let test8_expected = List.Tot.map u8_from_UInt8 [
+  0x35uy; 0x61uy; 0xe3uy; 0x4euy; 0x52uy; 0xd8uy; 0xb5uy; 0x98uy; 0xf9uy;
+  0x93uy; 0x79uy; 0x82uy; 0x51uy; 0x2fuy; 0xffuy; 0x27uy
+]
+
+let test8_c_length: size_nat = 16
+let test8_aad_length: size_nat = 0
+
+val test_v:
+  expected:lbytes ghash_length ->
+  text_len:size_nat ->
+  text:lbytes text_len ->
+  aad_len:size_nat ->
+  aad:lbytes aad_len ->
+  k:lbytes key_length ->
+  FStar.All.ML unit
+let test_v expected text_len text aad_len aad k =
+  let output = GCM.ghash text_len text aad_len aad k in
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
   IO.print_string   "Expected tag: ";
-  let test_expected : lbytes key_length = createL test3_expected in
+  let test_expected : lbytes key_length = createL expected in
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
   IO.print_string "\nComputed tag: ";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
   if result then IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n"
+
+let test () =
+  test_v test1_expected test1_c_length test1_ciphertext test1_aad_length test1_aad test1_hash_key;
+  test_v test2_expected test2_c_length test2_ciphertext test2_aad_length test2_aad test2_hash_key;
+  test_v test3_expected test3_c_length test3_ciphertext test3_aad_length test3_aad test3_hash_key;
+  test_v test4_expected test4_c_length test4_ciphertext test4_aad_length test4_aad test4_hash_key;
+  test_v test5_expected test5_c_length test5_ciphertext test5_aad_length test5_aad test5_hash_key;
+  test_v test6_expected test6_c_length test6_ciphertext test6_aad_length test6_aad test6_hash_key;
+  test_v test7_expected test7_c_length test7_ciphertext test7_aad_length test7_aad test7_hash_key;
+  test_v test8_expected test8_c_length test8_ciphertext test8_aad_length test8_aad test8_hash_key

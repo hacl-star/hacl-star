@@ -17,7 +17,7 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.HMAC.fst \
 		Spec.Ed25519.fst \
 		Spec.Chacha20_vec.fst \
-		Spec.HSalsa20.fst 
+		Spec.HSalsa20.fst
 
 hints: $(addsuffix .hints, $(SPEC_FILES))
 verify: $(addsuffix -verify, $(SPEC_FILES))
@@ -72,7 +72,7 @@ gf128.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fs
 
 gcm.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.GF128.fst Spec.GCM.fst tests/Spec.GCM.Test.fst
 	mkdir -p gcm-ml
-	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.GF128 --extract_module Spec.GCM --extract_module Spec.GCM.Test --odir gcm-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.GF128 --extract_module Spec.GCM --extract_module Spec.GCM.Test --odir gcm-ml $^
 	@echo 'let _ = test()' >> gcm-ml/Spec_GCM_Test.ml
 	$(OCAMLOPT) -I gcm-ml $(OCAML_INCLUDES) gcm-ml/Spec_Lib_IntTypes.ml gcm-ml/Spec_Lib_IntSeq.ml gcm-ml/Spec_GaloisField.ml gcm-ml/Spec_GF128.ml gcm-ml/Spec_GCM.ml gcm-ml/Spec_GCM_Test.ml -o gcm.exe
 	./gcm.exe
