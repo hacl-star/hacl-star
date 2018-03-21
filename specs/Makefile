@@ -2,23 +2,22 @@ include ../Makefile.include
 
 .PHONY=all test
 
-FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lib/fst --include $(HACL_HOME)/specs/lemmas
+FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lib/fst --include $(HACL_HOME)/specs/lemmas --expose_interfaces
 
 SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.CTR.fst \
 		Spec.Curve25519.fst \
 		Spec.Curve448.fst \
+		Spec.GaloisField.fst \
 		Spec.GF128.fst \
-		Spec.Lib.fst \
 		Spec.Poly1305.fst \
 		Spec.Salsa20.fst \
 		Spec.SHA2.fst \
 		Spec.HMAC.fst \
 		Spec.Ed25519.fst \
-		Spec.HSalsa20.fst \
-		Spec.GaloisField.fst \
-		Spec.Chacha20_vec.fst
+		Spec.Chacha20_vec.fst \
+		Spec.HSalsa20.fst 
 
 hints: $(addsuffix .hints, $(SPEC_FILES))
 verify: $(addsuffix -verify, $(SPEC_FILES))
@@ -28,6 +27,13 @@ all-ver: verify
 all: test
 test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe hmac.exe hkdf.exe ed25519.exe
 
+
+noise.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Noise.fst
+	mkdir -p noise-ml
+	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Noise --odir noise-ml $^
+	@echo 'let _ = test()' >> noise-ml/Spec_Noise.ml
+	$(OCAMLOPT) -I noise-ml noise-ml/Spec_Lib_IntTypes.ml noise-ml/Spec_Lib_RawIntTypes.ml noise-ml/Spec_Lib_IntSeq.ml noise-ml/Spec_Noise.ml -o noise.exe
+	./noise.exe
 
 chacha20.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.CTR.fst Spec.Chacha20.fst tests/Spec.Chacha20.Test.fst
 	mkdir -p chacha20-ml
@@ -120,6 +126,28 @@ keccak.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/f
 	@echo 'let _ = test()' >> keccak-ml/Spec_Keccak_Test.ml
 	$(OCAMLOPT) -I keccak-ml keccak-ml/Spec_Lib_IntTypes.ml keccak-ml/Spec_Lib_RawIntTypes.ml keccak-ml/Spec_Lib_IntSeq.ml keccak-ml/Spec_Lib_Stateful.ml keccak-ml/Spec_Keccak.ml keccak-ml/Spec_Keccak_Test.ml -o keccak.exe
 	./keccak.exe
+
+blake2s.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.Blake2s.fst tests/Spec.Blake2s.Test.fst
+	mkdir -p blake2s-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2s --extract_module Spec.Blake2s.Test --odir blake2s-ml $^
+	@echo 'let _ = test()' >> blake2s-ml/Spec_Blake2s_Test.ml
+	$(OCAMLOPT) -I blake2s-ml blake2s-ml/Spec_Lib_IntTypes.ml blake2s-ml/Spec_Lib_RawIntTypes.ml blake2s-ml/Spec_Lib_IntSeq.ml blake2s-ml/Spec_Lib_Stateful.ml blake2s-ml/Spec_Blake2s.ml blake2s-ml/Spec_Blake2s_Test.ml -o blake2s.exe
+	./blake2s.exe
+
+blake2b.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.Blake2b.fst tests/Spec.Blake2b.Test.fst
+	mkdir -p blake2b-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2b --extract_module Spec.Blake2b.Test --odir blake2b-ml $^
+	@echo 'let _ = test()' >> blake2b-ml/Spec_Blake2b_Test.ml
+	$(OCAMLOPT) -I blake2b-ml blake2b-ml/Spec_Lib_IntTypes.ml blake2b-ml/Spec_Lib_RawIntTypes.ml blake2b-ml/Spec_Lib_IntSeq.ml blake2b-ml/Spec_Lib_Stateful.ml blake2b-ml/Spec_Blake2b.ml blake2b-ml/Spec_Blake2b_Test.ml -o blake2b.exe
+	./blake2b.exe
+
+argon2i.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
+	mkdir -p argon2i-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2b --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
+	@echo 'let _ = test()' >> argon2i-ml/Spec_Argon2i_Test.ml
+	$(OCAMLOPT) -I argon2i-ml argon2i-ml/Spec_Lib_IntTypes.ml argon2i-ml/Spec_Lib_RawIntTypes.ml argon2i-ml/Spec_Lib_IntSeq.ml argon2i-ml/Spec_Lib_Stateful.ml argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
+	./argon2i.exe
+
 
 hmac.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
 	mkdir -p hmac-ml

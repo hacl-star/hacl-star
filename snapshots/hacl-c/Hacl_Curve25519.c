@@ -189,14 +189,110 @@ Hacl_Bignum_Fmul_mul_shift_reduce_(FStar_UInt128_t *output, uint64_t *input, uin
   Hacl_Bignum_Fproduct_sum_scalar_multiplication_(output, input, input2i);
 }
 
+
 inline static void Hacl_Bignum_Fmul_fmul(uint64_t *output, uint64_t *input, uint64_t *input21)
+{
+  uint64_t x0 = input[0] | (input[1] << 51);
+  uint64_t x1 = input[1] >> 13 | (input[2] << 51);
+  uint64_t x2 = input[2] >> 13 | (input[3] << 51);
+  uint64_t x3 = input[3] >> 13 ;
+
+  uint64_t y0 = input21[0] | (input21[1] << 51);
+  uint64_t y1 = input21[1] >> 13 | (input21[2] << 51);
+  uint64_t y2 = input21[2] >> 13 | (input21[3] << 51);
+  uint64_t y3 = input21[3] >> 13 ;
+
+  uint128_t z00 = (uint128_t)y0 * x0;
+  uint128_t z01 = (uint128_t)y0 * x1;
+  uint128_t z02 = (uint128_t)y0 * x2;
+  uint128_t z03 = (uint128_t)y0 * x3;
+
+  uint128_t red3 = (uint128_t)x3 * 38;
+  uint128_t red2 = (uint128_t)x2 * 38;
+  uint128_t red1 = (uint128_t)x1 * 38;
+  uint64_t red3_l = (uint64_t) red3;
+  uint64_t red3_h = (uint64_t)(red3 >> 64);
+  uint64_t red2_l = (uint64_t) red2;
+  uint64_t red2_h = (uint64_t)(red2 >> 64);
+  uint64_t red1_l = (uint64_t) red1;
+  uint64_t red1_h = (uint64_t)(red1 >> 64);
+
+  uint128_t z10 = (uint128_t)y1 * red3l;
+  uint128_t z11 = (uint128_t)y1 * x0;
+  uint128_t z11_ = (uint128_t)y1 * red3h;
+  uint128_t z12 = (uint128_t)y1 * x1;
+  uint128_t z13 = (uint128_t)y1 * x2;
+
+
+  uint128_t z20 = (uint128_t)y2 * red2l;
+  uint128_t z21 = (uint128_t)y1 * red3l;
+  uint128_t z21_ = (uint128_t)y1 * red2h;
+  uint128_t z22 = (uint128_t)y1 * x0;
+  uint128_t z22_ = (uint128_t)y1 * red3h;
+  uint128_t z23 = (uint128_t)y1 * x1;
+
+  
+  uint128_t z30 = (uint128_t)y2 * red1l;
+  uint128_t z31 = (uint128_t)y1 * red2l;
+  uint128_t z31_ = (uint128_t)y1 * red1h;
+  uint128_t z32 = (uint128_t)y1 * red3l;
+  uint128_t z32_ = (uint128_t)y1 * red2h;
+  uint128_t z33 = (uint128_t)y1 * x0;
+  uint128_t z33_ = (uint128_t)y1 * red3h;
+
+  uint64_t out1[8];
+  char c = 0;
+  c = _addcarry_u64(c,(uint64_t)z00,(uint64_t)z10,&out1[0]);
+  c = _addcarry_u64(c,(uint64_t)(z00>>64),(uint64_t)(z10>>64),&out1[1]);
+  c = _addcarry_u64(c,(uint64_t)z01,(uint64_t)z11,&out1[2]);
+  c = _addcarry_u64(c,(uint64_t)(z01>>64),(uint64_t)(z11>>64),&out1[3]);
+  c = _addcarry_u64(c,(uint64_t)z02,(uint64_t)z12,&out1[4]);
+  c = _addcarry_u64(c,(uint64_t)(z02>>64),(uint64_t)(z12>>64),&out1[5]);
+  c = _addcarry_u64(c,(uint64_t)z03,(uint64_t)z13,&out1[6]);
+  c = _addcarry_u64(c,(uint64_t)(z03>>64),(uint64_t)(z13>>64),&out1[7]);
+
+  uint64_t out2[8];
+  char d = 0;
+  d = _addcarry_u64(c,(uint64_t)z20,(uint64_t)z30,&out2[0]);
+  d = _addcarry_u64(c,(uint64_t)(z20>>64),(uint64_t)(z30>>64),&out2[1]);
+  d = _addcarry_u64(c,(uint64_t)z21,(uint64_t)z31,&out2[2]);
+  d = _addcarry_u64(c,(uint64_t)(z21>>64),(uint64_t)(z31>>64),&out2[3]);
+  d = _addcarry_u64(c,(uint64_t)z22,(uint64_t)z32,&out2[4]);
+  d = _addcarry_u64(c,(uint64_t)(z22>>64),(uint64_t)(z32>>64),&out2[5]);
+  d = _addcarry_u64(c,(uint64_t)z23,(uint64_t)z33,&out2[6]);
+  d = _addcarry_u64(c,(uint64_t)(z23>>64),(uint64_t)(z33>>64),&out2[7]);
+
+  uin64_t top = c + d;
+  c = 0;
+  c = _addcarry_u64(c,(uint64_t)out1[0],(uint64_t)out2[0],&out1[0]);
+  c = _addcarry_u64(c,(uint64_t)out1[1],(uint64_t)out2[1],&out1[1]);
+  c = _addcarry_u64(c,(uint64_t)out1[2],(uint64_t)out2[2],&out1[2]);
+  c = _addcarry_u64(c,(uint64_t)out1[3],(uint64_t)out2[3],&out1[3]);
+  c = _addcarry_u64(c,(uint64_t)out1[4],(uint64_t)out2[4],&out1[4]);
+  c = _addcarry_u64(c,(uint64_t)out1[5],(uint64_t)out2[5],&out1[5]);
+  c = _addcarry_u64(c,(uint64_t)out1[6],(uint64_t)out2[6],&out1[6]);
+  c = _addcarry_u64(c,(uint64_t)out1[7],(uint64_t)out2[7],&out1[7]);
+
+  top += c;
+  c = 0;
+  c = _addcarry_u64(c,(uint64_t)out1[1],(uint64_t)out2[1],&out1[1]);
+  c = _addcarry_u64(c,(uint64_t)out1[2],(uint64_t)out2[2],&out1[2]);
+  c = _addcarry_u64(c,(uint64_t)out1[3],(uint64_t)out2[3],&out1[3]);
+  c = _addcarry_u64(c,(uint64_t)out1[4],(uint64_t)out2[4],&out1[4]);
+  c = _addcarry_u64(c,(uint64_t)out1[5],(uint64_t)out2[5],&out1[5]);
+  c = _addcarry_u64(c,(uint64_t)out1[6],(uint64_t)out2[6],&out1[6]);
+  c = _addcarry_u64(c,(uint64_t)out1[7],(uint64_t)out2[7],&out1[7]);
+
+
+  
+}
+
+  
+inline static void Hacl_Bignum_Fmul_fmul_old(uint64_t *output, uint64_t *input, uint64_t *input21)
 {
   uint64_t tmp[5U] = { 0U };
   memcpy(tmp, input, (uint32_t)5U * sizeof input[0U]);
-  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
-  FStar_UInt128_t t[5U];
-  for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    t[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
+  FStar_UInt128_t t[5U] = {0};
   Hacl_Bignum_Fmul_mul_shift_reduce_(t, tmp, input21);
   Hacl_Bignum_Fproduct_carry_wide_(t);
   FStar_UInt128_t b4 = t[4U];
@@ -298,20 +394,14 @@ Hacl_Bignum_Fsquare_fsquare_times_(uint64_t *input, FStar_UInt128_t *tmp, uint32
 inline static void
 Hacl_Bignum_Fsquare_fsquare_times(uint64_t *output, uint64_t *input, uint32_t count1)
 {
-  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
-  FStar_UInt128_t t[5U];
-  for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    t[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
+  FStar_UInt128_t t[5U] = {0};
   memcpy(output, input, (uint32_t)5U * sizeof input[0U]);
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count1);
 }
 
 inline static void Hacl_Bignum_Fsquare_fsquare_times_inplace(uint64_t *output, uint32_t count1)
 {
-  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
-  FStar_UInt128_t t[5U];
-  for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    t[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
+  FStar_UInt128_t t[5U] = {0};
   Hacl_Bignum_Fsquare_fsquare_times_(output, t, count1);
 }
 
@@ -424,10 +514,7 @@ inline static void Hacl_Bignum_fdifference(uint64_t *a, uint64_t *b)
 
 inline static void Hacl_Bignum_fscalar(uint64_t *output, uint64_t *b, uint64_t s)
 {
-  KRML_CHECK_SIZE(FStar_UInt128_uint64_to_uint128((uint64_t)0U), (uint32_t)5U);
-  FStar_UInt128_t tmp[5U];
-  for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    tmp[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
+  FStar_UInt128_t tmp[5U] = {0};
   {
     uint64_t xi = b[0U];
     tmp[0U] = FStar_UInt128_mul_wide(xi, s);

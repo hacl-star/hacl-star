@@ -33,18 +33,11 @@ let lenType p = match p.wt with
 (* Definition: Number of bytes required to store the total length *)
 let lenSize p = numbytes (lenType p)
 
-(* Definition of permutation functions *)
-let _Ch p (x:uint_t p.wt) (y:uint_t p.wt) (z:uint_t p.wt) = ((x &. y) ^. ((~. x) &. z))
-let _Maj p (x:uint_t p.wt) (y:uint_t p.wt) (z:uint_t p.wt) = (x &. y) ^. ((x &. z) ^. (y &. z))
-let _Sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[0]) ^. ((x >>>. p.opTable.[1]) ^. (x >>>. p.opTable.[2]))
-let _Sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[3]) ^. ((x >>>. p.opTable.[4]) ^. (x >>>. p.opTable.[5]))
-let _sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[6]) ^. ((x >>>. p.opTable.[7]) ^. (x >>. p.opTable.[8]))
-let _sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[9]) ^. ((x >>>. p.opTable.[10]) ^. (x >>. p.opTable.[11]))
-
 (* Definition: Algorithm constants *)
 let size_block_w = 16
 let size_hash_w = 8
 let size_block p :size_nat = size_block_w * numbytes p.wt
+let size_hash p :size_nat = p.size_hash
 
 (* Definition: Maximum input size in bytes *)
 let max_input p : n:nat = (maxint (lenType p) + 1) / 8
@@ -53,12 +46,20 @@ let max_input p : n:nat = (maxint (lenType p) + 1) / 8
 type block_w p = b:intseq p.wt 16
 type hash_w p = b:intseq p.wt size_hash_w
 
+(* Definition of permutation functions *)
+let _Ch p (x:uint_t p.wt) (y:uint_t p.wt) (z:uint_t p.wt) = ((x &. y) ^. ((~. x) &. z))
+let _Maj p (x:uint_t p.wt) (y:uint_t p.wt) (z:uint_t p.wt) = (x &. y) ^. ((x &. z) ^. (y &. z))
+let _Sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[0]) ^. ((x >>>. p.opTable.[1]) ^. (x >>>. p.opTable.[2]))
+let _Sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[3]) ^. ((x >>>. p.opTable.[4]) ^. (x >>>. p.opTable.[5]))
+let _sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[6]) ^. ((x >>>. p.opTable.[7]) ^. (x >>. p.opTable.[8]))
+let _sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[9]) ^. ((x >>>. p.opTable.[10]) ^. (x >>. p.opTable.[11]))
+
 (* Definition of the scheduling function (part 1) *)
-let step_ws0 p (b:block_w p) (i:size_nat{i >= 0 /\ i < 16}) (s:intseq p.wt p.kSize) : (t:intseq p.wt p.kSize) =
+let step_ws0 p (b:block_w p) (i:size_nat{i < 16}) (s:intseq p.wt p.kSize) : Tot (t:intseq p.wt p.kSize) =
   s.[i] <- b.[i]
 
 (* Definition of the scheduling function (part 2) *)
-let step_ws1 p (i:size_nat{i >= 16 /\ i < p.kSize}) (s:intseq p.wt p.kSize) : (t:intseq p.wt p.kSize) =
+let step_ws1 p (i:size_nat{i >= 16 /\ i < p.kSize}) (s:intseq p.wt p.kSize) : Tot (t:intseq p.wt p.kSize) =
   let t16 = s.[i - 16] in
   let t15 = s.[i - 15] in
   let t7  = s.[i - 7] in
@@ -102,19 +103,17 @@ let shuffle_core p (wsTable:intseq p.wt p.kSize) (t:size_nat{t < p.kSize}) (hash
 let shuffle (p:parameters) (wsTable:intseq p.wt p.kSize) (hash:hash_w p) : Tot (hash_w p) =
   repeati p.kSize (shuffle_core p wsTable) hash
 
-(* Definition of the initialization function for convenience *)
-let init (p:parameters) = p.h0
-
 (* Definition of the core compression function *)
-let update_block (p:parameters) (block:lbytes (size_block p)) (hash:hash_w p) : Tot (hash_w p) =
+let compress (p:parameters) (block:lbytes (size_block p)) (hash0:hash_w p) : Tot (hash_w p) =
   let wsTable = ws p (uints_from_bytes_be block) in
-  let hash1 = shuffle p wsTable hash in
-  map2 (fun x y -> x +. y) hash hash1
+  let hash1 = shuffle p wsTable hash0 in
+  map2 (fun x y -> x +. y) hash0 hash1
 
-(* Definition of the compression function iterated over multiple blocks *)
-let update_multi (p:parameters) (n:size_nat{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (hash:hash_w p) : Tot (hash_w p) =
-  let bl = size_block p in
-  repeati n (fun i -> update_block p (sub blocks (bl * i) bl)) hash
+(* Definition of the truncation function *)
+let truncate (p:parameters) (hash:hash_w p) : lbytes (size_hash p) =
+  let hash_final = uints_to_bytes_be hash in
+  let h = slice hash_final 0 p.size_hash in
+  h
 
 (* Definition of the function returning the number of padding blocks for a single input block *)
 let number_blocks_padding_single p (len:size_nat{len < size_block p}) : size_nat =
@@ -162,37 +161,98 @@ let pad p (n:size_nat) (len:size_nat{len < max_input p /\ (size_block p * number
   let padding = update_slice padding pos_fb plen rem_blocks in
   padding
 
+(* Definition of the SHA2 state *)
+let len_block_nat (p:parameters) = l:size_nat{l < size_block p}
+noeq type state (p:parameters) =
+  {
+    hash:intseq p.wt size_hash_w;
+    blocks:intseq U8 (2 * size_block p);
+    len_block:len_block_nat p;
+    n:size_nat;
+  }
+
+(* Ghost function to access the abstract state from the interface *)
+let get_st_n #p (st:state p) = st.n
+let get_st_len_block #p (st:state p) = st.len_block
+
+(* Definition of the initialization function for convenience *)
+let init (p:parameters) : Tot (state p) =
+  {hash = p.h0; blocks = create (2 * size_block p) (nat_to_uint 0); len_block = 0; n = 0}
+
+(* Definition of the single block update function *)
+let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p{(st.n + 1) * (size_block p) <= max_input p /\ st.n + 1 <= max_size_t}) : Tot (st1:state p)(*{st1.n = st.n + 1 /\ st1.len_block = st.len_block})*) =
+    {st with n = st.n + 1; hash = compress p block st.hash }
+
+(* Definition of the compression function iterated over multiple blocks *)
+let update_multi (p:parameters) (n:size_nat{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p{st.n + n <= max_size_t}) : Tot (st1:state p)(* {st1.n = st.n + n})*) =
+  let bl = size_block p in
+  let h =
+    repeati n (fun i h ->
+      let block = sub blocks (i * bl) bl in
+      compress p block h
+    ) st.hash in
+  {st with n = st.n + n; hash = h}
+
 (* Definition of the function for the partial block compression *)
-let update_last p (n:size_nat) (len:size_nat{len < size_block p /\ len + n * size_block p <= max_input p}) (last:lbytes len) (hash:hash_w p)
-: Tot (hash_w p) =
-  let blocks = pad_single p n len last in
-  update_multi p (number_blocks_padding_single p len) blocks hash
+let update_last (p:parameters) (len:size_nat) (last:lbytes len) (st:state p{len < size_block p /\ (st.n * size_block p) + len <= max_size_t})
+: Tot (state p) =
+  let blocks = pad_single p st.n len last in
+  update_multi p (number_blocks_padding_single p len) blocks st
 
 (* Definition of the finalization function *)
-let finish p (hash:hash_w p) : lbytes p.size_hash =
-  let hash_final = uints_to_bytes_be hash in
+let finish p (st:state p) : lbytes (size_hash p) =
+  truncate p st.hash
+
+(* Definition of the core compression function *)
+let update' (p:parameters) (len:size_nat) (input:lbytes len) (st:state p{let n = len / size_block p in st.n + n + 1 <= max_size_t}) : Tot (state p) =
+  if st.len_block + len < size_block p then begin
+    let pblock = update_sub st.blocks st.len_block len input in
+    {st with blocks = pblock; len_block = st.len_block + len} end
+  else begin
+    let prev_n = st.n in
+    // Fill the first part of the partial block and run update
+    let l1 = size_block p - st.len_block in
+    let rem1 = sub input 0 l1 in
+    let block = sub st.blocks 0 (size_block p) in
+    let block = update_sub block st.len_block l1 rem1 in
+    let st = update_block p block st in
+    let st = {st with n = prev_n + 1} in
+    // Handle full blocks in the rest of the input data
+    let l2 : size_nat = len - l1 in
+    let rem2 = sub input l1 l2 in
+    let n : size_nat = l2 / size_block p in
+    let r : size_nat = l2 % size_block p in
+    let blocks = sub #uint8 #l2 rem2 0 (n * (size_block p)) in
+    let st = update_multi p n blocks st in
+    // Handle the remainder of the input
+    let rem3 = sub #uint8 #l2 rem2 (n * (size_block p)) r in
+    let pblock = update_sub st.blocks 0 r rem3 in
+    {st with blocks = pblock; len_block = r}
+  end
+
+(* Definition of the finalization function *)
+let finish' (p:parameters) (st:state p{st.n + number_blocks_padding_single p st.len_block <= max_size_t}) : lbytes p.size_hash =
+  let pblock = sub st.blocks 0 st.len_block in
+  let blocks = pad p st.n st.len_block pblock in
+  assert(st.n + number_blocks_padding_single p st.len_block <= max_size_t);
+  let st = update_multi p (number_blocks_padding_single p st.len_block) blocks st in
+  let hash_final = uints_to_bytes_be st.hash in
   let h = slice hash_final 0 p.size_hash in
   h
 
 (* Definition of the SHA2 ontime function based on incremental calls *)
-let hash' p (len:size_nat{len < max_input p}) (input:lbytes len) : lbytes p.size_hash =
-  let nb = len / size_block p in
-  let nr = len % size_block p in
-  let nblocks8 = nb * size_block p in
-  let l0 = slice input 0 nblocks8 in
-  let l1 = slice input nblocks8 len in
-  let hash = update_multi p nb l0 p.h0 in
-  let hash = update_last p nb nr l1 hash in
-  finish p hash
+let hash' (p:parameters) (len:size_nat{len < max_input p}) (input:lbytes len) : lbytes p.size_hash =
+  let st = init p in
+  let st = update' p len input st in
+  finish' p st
 
 (* Definition of the original SHA2 onetime function *)
-let hash p (len:size_nat{len < max_input p /\ (size_block p * number_blocks_padding p len) <= max_size_t}) (input:lbytes len) : lbytes p.size_hash =
+let hash (p:parameters) (len:size_nat{len < max_input p /\ (size_block p * number_blocks_padding p len) <= max_size_t}) (input:lbytes len) : lbytes p.size_hash =
   let n = number_blocks_padding p len in
   let blocks = pad p 0 len input in
-  finish p (update_multi p n blocks p.h0)
-
-
-
+  let st = init p in
+  let st = update_multi p n blocks st in
+  finish p st
 
 ///
 /// Parameters for all instances of SHA2
@@ -324,20 +384,20 @@ let parameters512 : parameters =
 /// Instances of SHA2
 ///
 
-let hash_w224 = hash_w parameters224
-let hash_w256 = hash_w parameters256
-let hash_w384 = hash_w parameters384
-let hash_w512 = hash_w parameters512
+let state224 = state parameters224
+let state256 = state parameters256
+let state384 = state parameters384
+let state512 = state parameters512
 
 let size_block224 = size_block parameters224
 let size_block256 = size_block parameters256
 let size_block384 = size_block parameters384
 let size_block512 = size_block parameters512
 
-let size_hash224 = parameters224.size_hash
-let size_hash256 = parameters256.size_hash
-let size_hash384 = parameters384.size_hash
-let size_hash512 = parameters512.size_hash
+let size_hash224 = size_hash parameters224
+let size_hash256 = size_hash parameters256
+let size_hash384 = size_hash parameters384
+let size_hash512 = size_hash parameters512
 
 let max_input224 = max_input parameters224
 let max_input256 = max_input parameters256
@@ -349,25 +409,15 @@ let init256 = init parameters256
 let init384 = init parameters384
 let init512 = init parameters512
 
-let update_block224 = update_block parameters224
-let update_block256 = update_block parameters256
-let update_block384 = update_block parameters384
-let update_block512 = update_block parameters512
+let update224 = update' parameters224
+let update256 = update' parameters256
+let update384 = update' parameters384
+let update512 = update' parameters512
 
-let update_multi224 = update_multi parameters224
-let update_multi256 = update_multi parameters256
-let update_multi384 = update_multi parameters384
-let update_multi512 = update_multi parameters512
-
-let update_last224 = update_last parameters224
-let update_last256 = update_last parameters256
-let update_last384 = update_last parameters384
-let update_last512 = update_last parameters512
-
-let finish224 = finish parameters224
-let finish256 = finish parameters256
-let finish384 = finish parameters384
-let finish512 = finish parameters512
+let finish224 = finish' parameters224
+let finish256 = finish' parameters256
+let finish384 = finish' parameters384
+let finish512 = finish' parameters512
 
 let hash224 = hash' parameters224
 let hash256 = hash' parameters256

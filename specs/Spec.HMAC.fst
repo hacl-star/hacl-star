@@ -50,19 +50,19 @@ let init' (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) =
   hash_w0,key
 
 
-let update_block (a:Hash.algorithm) (data:lbytes (Hash.size_block a)) (hash:Hash.hash_w a) =
+let update_block (a:Hash.algorithm) (data:lbytes (Hash.size_block a)) (hash:Hash.state a) =
   Hash.update_block a data hash
 
 
-let update_multi (a:Hash.algorithm) (n:size_nat{n * Hash.size_block a <= max_size_t}) (data:lbytes (n * Hash.size_block a)) (hash:Hash.hash_w a) =
+let update_multi (a:Hash.algorithm) (n:size_nat{n * Hash.size_block a <= max_size_t}) (data:lbytes (n * Hash.size_block a)) (hash:Hash.state a) =
   Hash.update_multi a n data hash
 
 
-let update_last (a:Hash.algorithm) (n:size_nat) (len:size_nat{len < Hash.size_block a /\ len + n * Hash.size_block a <= Hash.max_input a}) (last:lbytes len) (hash:Hash.hash_w a) =
-  Hash.update_last a n len last hash
+let update_last (a:Hash.algorithm) (n:size_nat) (len:size_nat{len < Hash.size_block a /\ len + n * Hash.size_block a <= Hash.max_input a}) (last:lbytes len) (hash:Hash.state a) =
+  Hash.update_last a len last hash
 
 
-let finish (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (hash:Hash.hash_w a) =
+let finish (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (hash:Hash.state a) =
 
   (* Define opad *)
   let opad = create (Hash.size_block a) (u8 0x5c) in
