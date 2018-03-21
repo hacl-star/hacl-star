@@ -80,7 +80,7 @@ let mod_exp_mont rLen pow2_i iLen bBits b nInv_u64 st =
   from_mont rLen pow2_i iLen n1 nInv_u64 accM st' res1
 
 val mod_exp:
-  nLen:size_nat ->
+  nLen:size_nat{128 * (nLen + 1) < max_size_t} ->
   pow2_i:size_nat{9 * (1 + nLen) + 4 * pow2_i < max_size_t /\ (1 + nLen) < pow2_i} ->
   iLen:size_nat{iLen < pow2_i / 2 /\ iLen + (1 + nLen) = pow2_i} ->
   modBits:size_nat{0 < modBits /\ nLen = bits_to_bn modBits} ->
@@ -90,7 +90,6 @@ val mod_exp:
   
 let mod_exp nLen pow2_i iLen modBits n a bBits b res =
   let rLen:size_nat = nLen + 1 in
-  assume (128 * rLen < max_size_t);
   let exp_r:size_nat = 64 * rLen in
   let exp2:size_nat = exp_r + exp_r in
   

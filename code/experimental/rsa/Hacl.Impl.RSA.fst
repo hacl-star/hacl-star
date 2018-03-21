@@ -43,6 +43,7 @@ val pss_encode_:
     [@"c_inline"]
 let pss_encode_ #sLen #msgLen #emLen ssLen salt mmsgLen msg eemLen em =
     let m1_size:size_t = add #SIZE (add #SIZE (size 8) hLen) ssLen in
+    assert_norm (v m1_size < max_size_t);
     let db_size:size_t = sub #SIZE (sub #SIZE eemLen hLen) (size 1) in
     
     assume (sLen + v hLen + 8 + 2 * emLen < max_size_t);
@@ -120,7 +121,9 @@ val pss_verify_:
 let pss_verify_ #sLen #msgLen #emLen ssLen msBits eemLen em mmsgLen msg =
     let pad_size:size_t = sub #SIZE (sub #SIZE (sub #SIZE eemLen ssLen) hLen) (size 1) in
     let db_size:size_t = sub #SIZE (sub #SIZE eemLen hLen) (size 1) in
+    assert_norm (v db_size < max_size_t);
     let m1_size:size_t = add #SIZE (add #SIZE (size 8) hLen) ssLen in
+    assert_norm (v m1_size < max_size_t);
     
     assume (2 * emLen +  8 + v hLen  < max_size_t);
     assume (4 + 2 * v hLen + v hLen * v (blocks db_size hLen) < max_size_t);
@@ -236,8 +239,7 @@ let rsa_sign #sLen #msgLen #nLen pow2_i iLen modBits eBits dBits pLen qLen skey 
     let p = Buffer.sub #uint64 #(v skeyLen) #(v pLen) skey (add #SIZE (add #SIZE nLen eLen) dLen) pLen in
     let q = Buffer.sub #uint64 #(v skeyLen) #(v qLen) skey (add #SIZE ((add #SIZE (add #SIZE nLen eLen) dLen)) pLen) qLen in
     
-    assume (2 * v nLen + 2 * (v pLen + v qLen) + 1 < max_size_t);
-    assume (v nLen = v (get_size_nat k));    
+    assume (2 * v nLen + 2 * (v pLen + v qLen) + 1 < max_size_t);   
     assume (8 * v nLen < max_size_t);
     let n2Len = add #SIZE nLen nLen in
     let pqLen = add #SIZE pLen qLen in
@@ -249,25 +251,27 @@ let rsa_sign #sLen #msgLen #nLen pow2_i iLen modBits eBits dBits pLen qLen skey 
        pss_encode msBits ssLen salt mmsgLen msg k em;
       	
        alloc #uint64 #unit #(v stLen) stLen (u64 0) [BufItem skey; BufItem em] [BufItem sgnt]
-	(fun h0 _ h1 -> True)
-	(fun tmp ->
-	   let m = Buffer.sub #uint64 #(v stLen) #(v nLen) tmp (size 0) nLen in
-	   let s = Buffer.sub #uint64 #(v stLen) #(v nLen) tmp nLen nLen in
+       (fun h0 _ h1 -> True)
+       (fun tmp ->
+           let m = Buffer.sub #uint64 #(v stLen) #(v nLen) tmp (size 0) nLen in
+           let s = Buffer.sub #uint64 #(v stLen) #(v nLen) tmp nLen nLen in
            let phi_n = Buffer.sub #uint64 #(v stLen) #(v pqLen) tmp n2Len pqLen in
-	   let p1 = Buffer.sub #uint64 #(v stLen) #(v pLen) tmp (add #SIZE n2Len pqLen) pLen in
-	   let q1 = Buffer.sub #uint64 #(v stLen) #(v qLen) tmp (add #SIZE (add #SIZE n2Len pqLen) pLen) qLen in
-	   let dLen' = add #SIZE (add #SIZE pLen qLen) (size 1) in
-	   let d' = Buffer.sub #uint64 #(v stLen) #(v dLen') tmp (add #SIZE n2Len pqLen) dLen' in admit();
-	   assume (disjoint m em);
-	   text_to_nat k em m;
-	   bn_sub_u64 pLen p (u64 1) p1; // p1 = p - 1
-	   bn_sub_u64 qLen q (u64 1) q1; // q1 = q - 1
-	   bn_mul pLen p1 qLen q1 phi_n; // phi_n = p1 * q1
-	   bn_mul_u64 pqLen phi_n rBlind d'; //d' = phi_n * rBlind
-	   bn_add dLen' d' dLen d d'; //d' = d' + d
-	   mod_exp pow2_i iLen modBits nLen n m (mul #SIZE dLen' (size 64)) d' s;
-	   nat_to_text k s sgnt
-	)
+           let p1 = Buffer.sub #uint64 #(v stLen) #(v pLen) tmp (add #SIZE n2Len pqLen) pLen in
+           let q1 = Buffer.sub #uint64 #(v stLen) #(v qLen) tmp (add #SIZE (add #SIZE n2Len pqLen) pLen) qLen in
+           let dLen':size_t = add #SIZE (add #SIZE pLen qLen) (size 1) in
+           let d' = Buffer.sub #uint64 #(v stLen) #(v dLen') tmp (add #SIZE n2Len pqLen) dLen' in admit();
+           assume (disjoint m em);
+           text_to_nat k em m;
+           bn_sub_u64 pLen p (u64 1) p1; // p1 = p - 1
+           bn_sub_u64 qLen q (u64 1) q1; // q1 = q - 1
+           bn_mul pLen p1 qLen q1 phi_n; // phi_n = p1 * q1
+           bn_mul_u64 pqLen phi_n rBlind d'; //d' = phi_n * rBlind
+           assume (v dLen <= v dLen' /\ v dLen' * 64 < max_size_t);
+           bn_add dLen' d' dLen d d'; //d' = d' + d
+           assume (v nLen = v (bits_to_bn modBits));
+           mod_exp pow2_i iLen modBits nLen n m (mul #SIZE dLen' (size 64)) d' s;
+           nat_to_text k s sgnt
+        )
     )
 
 val rsa_verify:
@@ -281,9 +285,9 @@ val rsa_verify:
     sgnt:lbytes (v (blocks modBits (size 8))) ->
     mmsgLen:size_t{v mmsgLen == msgLen /\ msgLen < pow2 61} -> msg:lbytes msgLen -> Stack bool
     (requires (fun h -> live h msg /\ live h sgnt /\ live h pkey /\ disjoint msg sgnt))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1)) // /\ modifies0 h0 h1))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies0 h0 h1))
 
-    #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+    #reset-options "--z3rlimit 750 --max_fuel 0 --max_ifuel 0"
     
 let rsa_verify #sLen #msgLen #nLen pow2_i iLen modBits eBits pkey ssLen sgnt mmsgLen msg =
     let k = blocks modBits (size 8) in
@@ -296,31 +300,27 @@ let rsa_verify #sLen #msgLen #nLen pow2_i iLen modBits eBits pkey ssLen sgnt mms
     let n = Buffer.sub #uint64 #(v pkeyLen) #(v nLen) pkey (size 0) nLen in
     let e = Buffer.sub #uint64 #(v pkeyLen) #(v eLen) pkey nLen eLen in
 
-    assume (8 * v nLen < max_size_t);
-    assume (v nLen + v nLen < max_size_t);
     let n2Len:size_t = add #SIZE nLen nLen in
 
     alloc #uint64 #bool #(v n2Len) n2Len (u64 0) [BufItem pkey; BufItem msg; BufItem sgnt] []
     (fun h0 _ h1 -> True)
     (fun tmp ->
-	let s = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp nLen nLen in
-	disjoint_sub_lemma1 tmp sgnt nLen nLen;
-	text_to_nat k sgnt s;
-
-	alloc #uint8 #bool #(v k) k (u8 0) [BufItem pkey; BufItem msg] [BufItem tmp]
-	(fun h0 _ h1 -> True)
-	(fun em ->
+        alloc #uint8 #bool #(v k) k (u8 0) [BufItem pkey; BufItem msg; BufItem sgnt] [BufItem tmp]
+        (fun h0 _ h1 -> True)
+	(fun em ->	
             let m = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp (size 0) nLen in
-	    let s = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp nLen nLen in
+            let s = Buffer.sub #uint64 #(v n2Len) #(v nLen) tmp nLen nLen in
+            disjoint_sub_lemma1 tmp sgnt nLen nLen;
+            text_to_nat k sgnt s;
 	    
-	    assume (disjoint s n);
+            assume (disjoint s n);
 	    let res = 
-	      if (bn_is_less nLen s nLen n) then begin
-	         mod_exp pow2_i iLen modBits nLen n s eBits e m;
-		 disjoint_sub_lemma1 tmp em (size 0) nLen;
-		 nat_to_text k m em;
-		 pss_verify #sLen #msgLen #(v k) ssLen msBits k em mmsgLen msg end
-	      else false in
-	    res
+              if (bn_is_less nLen s nLen n) then begin
+                 mod_exp pow2_i iLen modBits nLen n s eBits e m;
+                 disjoint_sub_lemma1 tmp em (size 0) nLen;
+                 nat_to_text k m em;
+                 pss_verify #sLen #msgLen #(v k) ssLen msBits k em mmsgLen msg end
+              else false in admit();
+            res
        )
     )

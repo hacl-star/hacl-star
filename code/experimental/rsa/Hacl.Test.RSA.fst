@@ -58,9 +58,9 @@ let ctest x0 iLen modBits n pkeyBits e skeyBits d pTLen p qTLen q rBlindTLen rBl
     
     let nTLen = bits_to_text modBits in
     let sgnt:lbytes (v nTLen) = Buffer.create nTLen (u8 0) in
-    rsa_pss_sign pow2_i iLen modBits pkeyBits skeyBits pLen qLen skey rBlind0 saltLen salt msgLen msg sgnt;
+    rsa_pss_sign #(v saltLen) #(v msgLen) #(v nLen) pow2_i iLen modBits pkeyBits skeyBits pLen qLen skey rBlind0 saltLen salt msgLen msg sgnt;
     let check_sgnt = eq_b nTLen sgnt sgnt_expected in
-    let verify_sgnt = rsa_pss_verify #(v saltLen) #(v msgLen) pow2_i iLen modBits pkeyBits pkey saltLen sgnt msgLen msg in
+    let verify_sgnt = rsa_pss_verify #(v saltLen) #(v msgLen) #(v nLen) pow2_i iLen modBits pkeyBits pkey saltLen sgnt msgLen msg in
     check_sgnt && verify_sgnt
 
 val test1: unit -> Stack bool

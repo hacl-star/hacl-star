@@ -49,7 +49,7 @@ let text_to_nat #len clen input res =
     (fun h0 _ h1 -> True)
     (fun tmp ->
       let tmp_Len = sub #SIZE tmpLen ind in
-      assume (v tmp_Len = v clen);
+      //assume (v tmp_Len = v clen);
       let tmp_:lbuffer uint8 len = Buffer.sub #uint8 #(v tmpLen) #(v tmp_Len) tmp ind tmp_Len in
       copy #uint8 #len clen input tmp_;
       text_to_nat_ tmpLen tmp num_words res (size 0)
@@ -95,7 +95,7 @@ let nat_to_text #len clen input res =
     (fun tmp ->
       nat_to_text_ num_words input tmpLen tmp (size 0);
       let tmp_Len = sub #SIZE tmpLen ind in
-      assume (v tmp_Len = v clen);
+      //assume (v tmp_Len = v clen);
       let tmp_:lbuffer uint8 (v tmp_Len) = Buffer.sub tmp ind tmp_Len in
       copy #uint8 #len clen tmp_ res
     )

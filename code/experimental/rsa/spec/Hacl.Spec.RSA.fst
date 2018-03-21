@@ -145,7 +145,7 @@ let pss_verify sLen msBits emLen em msgLen msg =
   end
 
 val rsa_sign:
-  nLen:size_nat{nLen > 0} ->
+  nLen:size_nat{0 < nLen /\ 128 * (nLen + 1) < max_size_t} ->
   pow2_i:size_nat{9 * (1 + nLen) + 4 * pow2_i < max_size_t /\ (1 + nLen) < pow2_i} ->
   iLen:size_nat{iLen < pow2_i / 2 /\ iLen + (1 + nLen) = pow2_i} ->
   modBits:size_nat{0 < modBits /\ nLen = bits_to_bn modBits} ->
@@ -175,7 +175,6 @@ let rsa_sign nLen pow2_i iLen modBits eBits dBits pLen qLen skey rBlind sLen sal
   let q = sub skey (nLen + eLen + dLen + pLen) qLen in
     
   assume (2 * nLen + 2 * (pLen + qLen) + 1 < max_size_t);
-  assume (8 * nLen < max_size_t);
   let n2Len = nLen + nLen in
   let pqLen = pLen + qLen in
   let stLen:size_nat = n2Len + pqLen + pqLen + 1 in
@@ -204,7 +203,7 @@ let rsa_sign nLen pow2_i iLen modBits eBits dBits pLen qLen skey rBlind sLen sal
   nat_to_text k s sgnt
 
 val rsa_verify:
-  nLen:size_nat{nLen > 0} ->
+  nLen:size_nat{0 < nLen /\ 128 * (nLen + 1) < max_size_t} ->
   pow2_i:size_nat{9 * (1 + nLen) + 4 * pow2_i < max_size_t /\ (1 + nLen) < pow2_i} ->
   iLen:size_nat{iLen < pow2_i / 2 /\ iLen + (1 + nLen) = pow2_i} ->
   modBits:size_nat{0 < modBits /\ nLen = bits_to_bn modBits} ->

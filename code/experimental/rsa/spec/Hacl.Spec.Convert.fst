@@ -36,7 +36,7 @@ let text_to_nat len input res =
   let ind = if (m = 0) then 0 else 8 - m in
   let tmp = create tmpLen (u8 0) in
   let tmpLen' = tmpLen - ind in
-  assume (tmpLen' = len);
+  //assume (tmpLen' = len);
   let tmp = update_sub tmp ind tmpLen' input in
   text_to_nat_ tmpLen tmp num_words res 0
 
@@ -68,6 +68,6 @@ let nat_to_text len input res =
   let tmp = create tmpLen (u8 0) in
   let tmp = nat_to_text_ num_words input tmpLen tmp 0 in
   let tmpLen' = tmpLen - ind in
-  assume (tmpLen' = len);
+  //assume (tmpLen' = len);
   let tmp' = sub tmp ind tmpLen' in
   let res = update_sub res 0 len tmp' in res
