@@ -142,6 +142,14 @@ blake2b.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/
 	$(OCAMLOPT) -I blake2b-ml blake2b-ml/Spec_Lib_IntTypes.ml blake2b-ml/Spec_Lib_RawIntTypes.ml blake2b-ml/Spec_Lib_IntSeq.ml blake2b-ml/Spec_Lib_Stateful.ml blake2b-ml/Spec_Blake2b.ml blake2b-ml/Spec_Blake2b_Test.ml -o blake2b.exe
 	./blake2b.exe
 
+argon2i.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
+	mkdir -p argon2i-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2b --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
+	@echo 'let _ = test()' >> argon2i-ml/Spec_Argon2i_Test.ml
+	$(OCAMLOPT) -I argon2i-ml argon2i-ml/Spec_Lib_IntTypes.ml argon2i-ml/Spec_Lib_RawIntTypes.ml argon2i-ml/Spec_Lib_IntSeq.ml argon2i-ml/Spec_Lib_Stateful.ml argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
+	./argon2i.exe
+
+
 hmac.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
 	mkdir -p hmac-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
