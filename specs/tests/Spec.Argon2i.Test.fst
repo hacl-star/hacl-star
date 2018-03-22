@@ -30,7 +30,7 @@ let key_list = List.Tot.map u8_from_UInt8 [
 let key : lbytes 8 = assert_norm (List.Tot.length key_list = 8);createL key_list
 
 let associated_data_list = List.Tot.map u8_from_UInt8 [
-  0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 
+  0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy;
   0x04uy; 0x04uy; 0x04uy; 0x04uy
 ]
 
@@ -62,14 +62,14 @@ let test () =
   let k_len = 8 in
   let k = key in
   let output : lbytes 32 =
-    Spec.Argon2i.argon2i p_len p s_len s lanes t_len m iterations x_len x k_len k 
+    Spec.Argon2i.argon2i p_len p s_len s lanes t_len m iterations x_len x k_len k
   in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected output in
   IO.print_string "\nResult   ARGON2i: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list output);
+  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list output);
 
   IO.print_string "\nExpected ARGON2i: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list expected);
 
   if result then IO.print_string "\nARGON2i Test1 : Success!\n"
   else IO.print_string "\nARGON2i Test1: Failure :(\n"
