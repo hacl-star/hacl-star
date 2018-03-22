@@ -8,12 +8,6 @@ open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
 open FStar.All
 
-let print_debug (s : string) (n:size_nat) (t : lbytes n) =
-   IO.print_string s;
-   List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a));IO.print_string " ") (as_list t);
-
-   IO.print_string "\n"
-
 let version_number : uint8 = assert_norm (0x13 < maxint (U8));u8 0x13
 let argon_type = 1
 let block_size = 1024
@@ -33,7 +27,7 @@ val concat_and_hash :
   iterations:size_nat ->
   x_len:size_nat -> x:lbytes x_len ->
   k_len:size_nat{k_len + p_len + s_len + x_len + 11*$4 <= max_size_t - 2*$line_size} -> k:lbytes k_len ->
-  ML (lbytes 64)
+  Tot (lbytes 64)
 let concat_and_hash p_len p s_len s lanes t_len m iterations x_len x k_len k =
   (* This is basically a big concatenation *)
   let lanes_as_word = uint_to_bytes_le #U32 (u32 lanes) in
@@ -88,7 +82,7 @@ let h' t_len x_len x =
     let output = create (compute_variable_length_output_size t_len) (u8 0) in
     let v1 = h t_with_x_len t_with_x 64 in
     let output = update_slice output 0 32 (sub v1 0 32)  in
-    let (output,vlast) = repeati (r-1) (fun i (output,vprevious) ->
+    let (output,vlast) = repeati r (fun i (output,vprevious) ->
       let i = i + 1 in (* we did the first iteration outside the loop *)
       let v = h 64 vprevious 64 in
       (update_slice output (i*$32) ((i+1)*$32) (sub v 0 32),v)
@@ -117,33 +111,36 @@ let permutation_matrix_index_to_offset (i:idx) : Tot size_nat =
    else
      8*$(i/2)
 
-let apply_g (v:lbytes 128) (i1:idx) (i2:idx) (i3:idx) (i4:idx) : Tot (lbytes line_size) =
-  let o1 = permutation_matrix_index_to_offset i1 in
-  let o2 = permutation_matrix_index_to_offset i2 in
-  let o3 = permutation_matrix_index_to_offset i3 in
-  let o4 = permutation_matrix_index_to_offset i4 in
-  let a = uint_from_bytes_be #U64 (sub v o1 8) in
-  let b = uint_from_bytes_be #U64 (sub v o2 8) in
-  let c = uint_from_bytes_be #U64 (sub v o3 8) in
-  let d = uint_from_bytes_be #U64 (sub v o4 8) in
+let apply_g (v:lseq uint64 16) (i1:idx) (i2:idx) (i3:idx) (i4:idx) : Tot (lseq uint64 16) =
+  let a : uint64 = index v i1 in
+  let b : uint64 = index v i2 in
+  let c : uint64 = index v i3 in
+  let d : uint64 = index v i4 in
   let (a,b,c,d) = g a b c d in
-  let v = update_slice v o1 (o1 + 8) (uint_to_bytes_be a) in
-  let v = update_slice v o2 (o2 + 8) (uint_to_bytes_be b) in
-  let v = update_slice v o3 (o3 + 8) (uint_to_bytes_be c) in
-  let v = update_slice v o4 (o4 + 8) (uint_to_bytes_be d) in
+  let v = upd v i1 a in
+  let v = upd v i2 b in
+  let v = upd v i3 c in
+  let v = upd v i4 d in
   v
 
 val argon_permute : input: lbytes line_size -> Tot (lbytes line_size)
 let argon_permute input =
-  let v : lbytes 128 = apply_g input 0 4 8 12 in
-  let v : lbytes 128 = apply_g v 1 5 9  13 in
-  let v : lbytes 128 = apply_g v 2 6 10 14 in
-  let v : lbytes 128 = apply_g v 3 7 11 15 in
-  let v : lbytes 128 = apply_g v 0 5 10 15 in
-  let v : lbytes 128 = apply_g v 1 6 11 12 in
-  let v : lbytes 128 = apply_g v 2 7 8  13 in
-  let v : lbytes 128 = apply_g v 3 4 9  14 in
-  v
+  let v : lseq uint64 16 = create 16 (u64 0) in
+  let v = repeati 8 (fun i v ->
+     let tmp1 : uint64 = uint_from_bytes_le #U64 (sub input (i*$16) 8) in
+     let tmp2 : uint64 = uint_from_bytes_le #U64 (sub input (i*$16 + 8) 8) in
+     let v = upd v (2*$i) tmp1 in
+     upd v (2*$i + 1) tmp2
+  ) v in
+  let v = apply_g v 0 4 8 12 in
+  let v = apply_g v 1 5 9  13 in
+  let v = apply_g v 2 6 10 14 in
+  let v = apply_g v 3 7 11 15 in
+  let v = apply_g v 0 5 10 15 in
+  let v = apply_g v 1 6 11 12 in
+  let v = apply_g v 2 7 8  13 in
+  let v = apply_g v 3 4 9  14 in
+  uints_to_bytes_le #U64 v
 
 
 let xor_matrices (x:lbytes block_size) (y:lbytes block_size) : Tot (lbytes block_size) =
@@ -201,38 +198,6 @@ let block_offset (lanes:size_nat{lanes <> 0}) (columns:size_nat{columns <> 0 /\ 
    assert (columns*$i + j <= columns*$lanes - 1);
    block_size*$(columns*$i + j)
 
-val map_indexes : iterations:size_nat -> r:size_nat -> lanes:size_nat -> columns:size_nat -> i:size_nat{i < lanes} -> j:size_nat{j < columns} -> Tot ((size_nat*size_nat))
-
-let map_indexes iterations r lanes columns i j =
-  let slice = j/4 in
-  let segment_length = columns/4 in
-  let g_arg_zero : lbytes block_size = create block_size (u8 0) in
-  let g_arg : lbytes block_size = update_slice g_arg_zero 0 8 (uint_to_bytes_le #U64 (u64 r)) in
-  let g_arg : lbytes block_size = update_slice g_arg 8 16 (uint_to_bytes_le #U64 (u64 i)) in
-  let g_arg : lbytes block_size = update_slice g_arg 16 24 (uint_to_bytes_le #U64 (u64 slice)) in
-  let g_arg : lbytes block_size = update_slice g_arg 24 32 (uint_to_bytes_le #U64 (u64 (lanes*$columns))) in
-  let g_arg : lbytes block_size = update_slice g_arg 32 40 (uint_to_bytes_le #U64 (u64 iterations)) in
-  let g_arg : lbytes block_size = update_slice g_arg 40 48 (uint_to_bytes_le #U64 (u64 argon_type)) in
-  let g_arg : lbytes block_size = update_slice g_arg 48 56 (uint_to_bytes_le #U64 (u64 ((j%4) + 1))) in
-  let result_block : lbytes block_size = argon_compress g_arg_zero g_arg in
-  let j1 = uint_to_nat (uint_from_bytes_le #U32 (sub result_block 0 4)) in
-  let j2 = uint_to_nat (uint_from_bytes_le #U32 (sub result_block 4 4)) in
-  let i' = if (r = 0 && j/4 = 0) then i else j2 % lanes in
-  let x = j1*$j1 / (pow2 32) in
-  let (first_available_block,available_blocks) =
-    (* All the blocks of the previous computed slices in selected lane, minus one if ours is first block of slice*)
-    if i' = j then
-      (* We select blocks in the same lane that we are computing *)
-      (0, slice*$segment_length - (if j%4 = 0 then 1 else 0))
-    else
-      (* We select blocks from a lane that we have already computed *)
-      (segment_length*$((slice+1) % 4), 3*$segment_length - (if j%4 = 0 then 1 else 0))
-  in
-  let y = (available_blocks*$x)/(pow2 32) in
-  let z = available_blocks - 1 - y in
-  let j' = (first_available_block + z) % columns in
-  (i',j')
-
 val xor_last_column : lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1} -> columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t} ->  mem:lbytes (lanes*$columns*$block_size) -> Tot (lbytes block_size)
 
 let xor_last_column lanes columns mem =
@@ -250,7 +215,7 @@ let concat_pseudo_rand_arg_block t i segment m' iterations ctr =
   let g_arg = update_slice g_arg 24 32 (uint_to_bytes_le #U64 (u64 m')) in
   let g_arg = update_slice g_arg 32 40 (uint_to_bytes_le #U64 (u64 iterations)) in
   let g_arg = update_slice g_arg 40 48 (uint_to_bytes_le #U64 (u64 argon_type)) in
-   update_slice g_arg 48 56 (uint_to_bytes_le #U64 (u64 ctr))
+  update_slice g_arg 48 56 (uint_to_bytes_le #U64 (u64 ctr))
 
 let concat_h0_j_i (h0:lbytes 64) (j:size_nat) (i:size_nat) : Tot (lbytes 72) =
    let output = create 72 (u8 0) in
@@ -272,31 +237,34 @@ let pseudo_random_generation (j1:size_nat) (r_size:size_nat) : Tot (n:size_nat{n
 
 val fill_segment : h0:lbytes 64 -> iterations:size_nat -> segment:size_nat{segment < 4} -> t_len:size_nat{1 <= t_len /\ t_len <= max_size_t - 64} -> lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1} -> columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t} -> t:size_nat{t < iterations} -> i:size_nat{i < lanes} -> memory: lbytes (lanes*$columns*$block_size) -> Tot (lbytes (lanes*$columns*$block_size))
 
-#reset-options "--z3rlimit 50 --max_fuel 1"
+#reset-options "--z3rlimit 100 --max_fuel 2"
 
 let fill_segment h0 iterations segment t_len lanes columns t i memory =
   let segment_length :size_nat = columns / 4 in
   let counter = 0 in
   let pseudo_rands_rounds: size_nat = segment_length / line_size + 1 in
-  let pseudo_rands_size : size_nat = pseudo_rands_rounds *$ line_size in
-  let pseudo_rands : lseq (uint32 * uint32) pseudo_rands_size =
+  let pseudo_rands_size : size_nat = pseudo_rands_rounds *$ line_size *$ 2 in
+  let pseudo_rands : lseq uint32 pseudo_rands_size =
     repeati pseudo_rands_rounds
-    (fun ctr (pseudo_rands :  lseq (uint32 * uint32) pseudo_rands_size)  ->
+    (fun ctr (pseudo_rands :  lseq uint32 pseudo_rands_size)  ->
       let zero_block = create block_size (u8 0) in
       let arg_block = argon_compress
 	zero_block
-	(concat_pseudo_rand_arg_block t i segment (lanes*$columns) iterations ctr)
+	(concat_pseudo_rand_arg_block t i segment (lanes*$columns) iterations (ctr+1))
       in
       let address_block = argon_compress zero_block arg_block in
-      pseudo_rands
-    ) (create pseudo_rands_size (u32 0,u32 0))
+      let addresses_list : lseq uint32 (2*$line_size) = uints_from_bytes_le #U32 address_block in
+      update_slice pseudo_rands (ctr*$line_size*$2) ((ctr+1)*$2*$line_size) addresses_list
+    ) (create pseudo_rands_size (u32 0))
   in
   repeati segment_length (fun idx (memory : lbytes (lanes*$columns*$block_size))  ->
     let j = segment *$ segment_length + idx in
-    if t = 0 && j < 2 then
-      update_block lanes columns i j memory (h' block_size 72 (concat_h0_j_i h0 j i))
-    else (
-      let j1,j2 = index pseudo_rands idx in
+    if t = 0 && j < 2 then (
+       let new_block = h' block_size 72 (concat_h0_j_i h0 j i) in
+       update_block lanes columns i j memory new_block
+    ) else (
+      let j1 = index pseudo_rands (2*$idx)  in
+      let j2 = index pseudo_rands (2*$idx+1)  in
       let i':(n:size_nat{n < lanes}) = if t = 0 && segment = 0 then i else ((uint_to_nat #U32 j2) % lanes) in
       let j':(n:size_nat{n < columns}) = (
 	let r_size:size_nat =
@@ -342,15 +310,13 @@ val argon2i :
   iterations:size_nat{iterations >= 1}  ->
   x_len:size_nat{x_len + 4 <= max_size_t - 2*$line_size} -> x:lbytes x_len ->
   k_len:size_nat{k_len + p_len + s_len + x_len + 11*$4 <= max_size_t - 2 *$line_size} -> k:lbytes k_len ->
-  ML (lbytes (compute_variable_length_output_size t_len))
+  Tot (lbytes (compute_variable_length_output_size t_len))
 
 let argon2i p_len p s_len s lanes t_len m iterations x_len x k_len k =
   let h0 = concat_and_hash p_len p s_len s lanes t_len m iterations x_len x k_len k in
   let four_lanes = 4*$lanes in
   let columns = 4*$(m / four_lanes) in
   let number_of_blocks = lanes*$columns in
-  IO.print_string "m': ";IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 number_of_blocks))); IO.print_string ", columns: ";
-  IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 columns))); IO.print_string "\n";
   let memory_size : size_nat = block_size*$number_of_blocks in
   let memory = create memory_size (u8 0) in
   assert (memory_size = columns*$lanes*$block_size);
