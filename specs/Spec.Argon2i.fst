@@ -228,11 +228,29 @@ let update_block (lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1}) (columns:s
   let offset : size_nat = block_offset lanes columns i j in
   update_slice memory offset (offset + block_size) block
 
+#reset-options "--z3rlimit 200 --max_fuel 4"
 
-let pseudo_random_generation (j1:size_nat) (r_size:size_nat) : Tot (n:size_nat{n<r_size}) =
-  admit (); (* TODO prove that this tricky arithmetic indeed works *)
-  let tmp: size_nat = (j1*$j1) / (pow2 32) in
-  let tmp: (n:size_nat{n < r_size}) = (r_size*$tmp) / (pow2 32) in
+let square_lemma (a:size_nat) (b:size_nat{a <= b}) : Lemma
+   (ensures (a *$ a <= b *$ b))
+   = ()
+
+let square_lemma_helper (a:size_nat{a <= (pow2 32) - 1}) : Lemma
+  (ensures (a *$ a <= ((pow2 32) - 1)*$((pow2 32) - 1)))
+  = square_lemma a ((pow2 32) - 1)
+
+let square_max_lemma (a:size_nat) : Lemma
+  (ensures (a *$ a <= max_size_t *$ max_size_t))
+  = square_lemma_helper a
+
+let pseudo_random_generation (j1:size_nat) (r_size:size_nat{r_size <> 0}) : Tot (n:size_nat{n<r_size}) =
+  let _ = square_max_lemma j1 in
+  assert (j1 *$ j1 <= max_size_t*$max_size_t);
+  assert (max_size_t*$max_size_t = (pow2 64) - (pow2 33) + 1);
+  let tmp : n:nat{n <= (pow2 64) - (pow2 33) + 1} = j1 *$ j1 in
+  let tmp : n:size_nat{n < max_size_t} = tmp / (pow2 32) in
+  assert (tmp*$r_size < max_size_t*$r_size);
+  let tmp : n:nat{n < max_size_t*$r_size} = tmp *$ r_size in
+  let tmp : n:size_nat{n < r_size} = tmp / (pow2 32) in
   r_size - 1 - tmp
 
 val fill_segment : h0:lbytes 64 -> iterations:size_nat -> segment:size_nat{segment < 4} -> t_len:size_nat{1 <= t_len /\ t_len <= max_size_t - 64} -> lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1} -> columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t} -> t:size_nat{t < iterations} -> i:size_nat{i < lanes} -> memory: lbytes (lanes*$columns*$block_size) -> Tot (lbytes (lanes*$columns*$block_size))
