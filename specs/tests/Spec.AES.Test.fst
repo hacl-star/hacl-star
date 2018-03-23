@@ -6,7 +6,7 @@ open Spec.Lib.IntSeq
 open Spec.AES
 
 let test_key = List.map u8 [
-  0x2b; 0x7e; 0x15; 0x16; 0x28; 0xae; 0xd2; 0xa6; 
+  0x2b; 0x7e; 0x15; 0x16; 0x28; 0xae; 0xd2; 0xa6;
   0xab; 0xf7; 0x15; 0x88; 0x09; 0xcf; 0x4f; 0x3c
 ]
 
@@ -60,8 +60,39 @@ let test_ciphertext2 = List.map u8 [
  0x51; 0x04; 0xA1; 0x06; 0x16; 0x8A; 0x72; 0xD9; 0x79; 0x0D; 0x41; 0xEE; 0x8E; 0xDA; 0xD3; 0x88; 0xEB; 0x2E; 0x1E; 0xFC; 0x46; 0xDA; 0x57; 0xC8; 0xFC; 0xE6; 0x30; 0xDF; 0x91; 0x41; 0xBE; 0x28
 ]
 
+let test1_key_block = List.map u8 [
+ 0x80; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00
+]
 
-let test() : FStar.All.ML unit = 
+let test1_plaintext_block = List.map u8 [
+ 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00
+]
+
+let test1_ciphertext_block = List.map u8 [
+ 0x0e; 0xdd; 0x33; 0xd3; 0xc6; 0x21; 0xe5; 0x46; 0x45; 0x5b; 0xd8; 0xba; 0x14; 0x18; 0xbe; 0xc8
+]
+
+let test2_key_block = List.map u8 [
+ 0xff; 0xff; 0xff; 0xff; 0xff; 0xf0; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00
+]
+
+let test2_plaintext_block = List.map u8 [
+ 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00
+]
+
+let test2_ciphertext_block = List.map u8 [
+ 0xe6; 0xc4; 0x80; 0x7a; 0xe1; 0x1f; 0x36; 0xf0; 0x91; 0xc5; 0x7d; 0x9f; 0xb6; 0x85; 0x48; 0xd1
+]
+
+let test3_key_block = List.map u8 [
+  0xfe; 0xff; 0xe9; 0x92; 0x86; 0x65; 0x73; 0x1c; 0x6d; 0x6a; 0x8f; 0x94; 0x67; 0x30; 0x83; 0x08
+]
+
+let test3_ciphertext_block = List.map u8 [
+ 0xb8; 0x3b; 0x53; 0x37; 0x08; 0xbf; 0x53; 0x5d; 0x0a; 0xa6; 0xe5; 0x29; 0x80; 0xd5; 0x3b; 0x78
+]
+
+let test() : FStar.All.ML unit =
   let seq = create 256 (u8 0) in
   let seqi = repeati #(lseq uint8 256) 256 (fun i s -> s.[i] <- u8 i) seq in
   (*
@@ -118,6 +149,37 @@ let test() : FStar.All.ML unit =
 //  let cip = map2 (logxor #U8) cip plain in
   IO.print_string "aes_cip computed:\n";
   FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #32 cip);
+  IO.print_string "\n";
+  IO.print_string "aes_cip expected:\n";
+  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
+  IO.print_string "\n";
+  (* test plain AES block function *)
+  let key = createL test1_key_block in
+  let plain = createL test1_plaintext_block in
+  let expected = createL test1_ciphertext_block in
+  let cip = aes128_encrypt_block key plain in
+  IO.print_string "aes_cip computed:\n";
+  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
+  IO.print_string "\n";
+  IO.print_string "aes_cip expected:\n";
+  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
+  IO.print_string "\n";
+  let key = createL test2_key_block in
+  let plain = createL test2_plaintext_block in
+  let expected = createL test2_ciphertext_block in
+  let cip = aes128_encrypt_block key plain in
+  IO.print_string "aes_cip computed:\n";
+  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
+  IO.print_string "\n";
+  IO.print_string "aes_cip expected:\n";
+  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
+  IO.print_string "\n";
+  let key = createL test3_key_block in
+  let plain = createL test2_plaintext_block in
+  let expected = createL test3_ciphertext_block in
+  let cip = aes128_encrypt_block key plain in
+  IO.print_string "aes_cip computed:\n";
+  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
   IO.print_string "\n";
   IO.print_string "aes_cip expected:\n";
   FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
