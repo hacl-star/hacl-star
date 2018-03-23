@@ -53,8 +53,7 @@ val gcm:
   aad:lbytes aad_len ->
   Tot Spec.GF128.tag
 let gcm k n m_len m aad_len aad =
-  (* TODO: tag_key is wrong *)
-  let tag_key = AES.aes128_encrypt_bytes k n 0 blocksize (create 16 0uy) in
+  let tag_key = AES.aes128_encrypt_bytes k n 1 blocksize (create 16 0uy) in
   let mac = ghash m_len m aad_len aad tag_key k in
   mac
 
@@ -65,11 +64,10 @@ val aead_encrypt:
   m:lbytes len ->
   aad_len:size_nat{(len + aad_len) / blocksize <= max_size_t} ->
   aad:lbytes aad_len ->
-  Tot (lbytes (blocksize))
+  Tot (lbytes (len + blocksize))
 let aead_encrypt k n len m aad_len aad =
-  (* The GCM setup sets the counter to 2 *)
   let c = AES.aes128_encrypt_bytes k n 2 len m in
-  let mac = gcm k n len m aad_len aad in
+  let mac = gcm k n len c aad_len aad in
   let result = create (len + blocksize) (u8 0) in
   let result = update_slice result 0 len c in
   let result = update_slice result len (len + blocksize) mac in
