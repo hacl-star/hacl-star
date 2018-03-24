@@ -91,9 +91,6 @@ test-native-sha2_512.exe: sha2-c/Hacl_SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o $(B
 # Blake2 (version s)
 #
 
-MODULES=
-TESTMODS=Hacl.Test.Blake2s
-
 BASE_OBJ = $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
 
 blake2s-c/out.krml: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
@@ -114,11 +111,6 @@ blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
 test-blake2s.exe: blake2s-c/Hacl_Blake2s.o blake2s-c/Hacl_Test_Blake2s.o $(BASE_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 	./test-blake2s.exe
-
-# test-blake2s.exe: blake2s-c/Hacl_Blake2s.o blake2s-c/Hacl_Test_Blake2s.o $(BASE_OBJ)
-# 	$(CC) -I ../../specs/lib/c -c ../../specs/lib/c/Spec_Lib_Print.c -o blake2s-c/Spec_Lib_Print.o
-# 	$(CC) -I ../../specs/lib/c -I $(KREMLIN_HOME)/kremlib -o $@ blake2s-c/Hacl_Test_Blake2s.c $^ #blake2s-c/Spec_Lib_Print.o
-# 	./test-blake2s.exe
 
 #
 # Clean
