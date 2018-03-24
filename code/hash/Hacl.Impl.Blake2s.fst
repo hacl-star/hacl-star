@@ -3,6 +3,7 @@ module Hacl.Impl.Blake2s
 open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
+open FStar.Tactics
 open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 
@@ -14,6 +15,11 @@ module ST = FStar.HyperStack.ST
 module LSeq = Spec.Lib.IntSeq
 module Spec = Spec.Blake2s
 
+
+///
+/// Helper functions
+///
+
 inline_for_extraction
 let v = size_v
 inline_for_extraction
@@ -21,11 +27,6 @@ let index (x:size_nat) = size x
 
 let op_String_Access #a #len m b = as_lseq #a #len b m
 
-(* Constants *)
-
-// inline_for_extraction
-// let normalized_sigma : list size_t =
-//   normalize_term (List.Tot.map Spec.Blake2s.size_sigma_list Spec.sigma_list)
 
 (* Lemmas *)
 let lemma_size_v_of_size_equal (s:size_nat) : Lemma (requires True)
@@ -35,8 +36,24 @@ let lemma_size_v_of_size_equal (s:size_nat) : Lemma (requires True)
 let lemma_sigma_equal (s0:list size_t) (s1:list size_nat) : Lemma (requires True)
   (ensures (List.Tot.map size_v s0 == s1)) = admit()
 
+let lemma_eq_lists (l0:list size_nat) (l1:list size_t) : Lemma
+  (requires (l1 == List.Tot.map size l0))
+  (ensures  (l0 == List.Tot.map size_v l1)) = admit()
 
-val update_sub: #a:Type -> #len:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len} -> x:lbuffer a (v n) ->
+let lemma_sub_live (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbuffer a len) (start:size_t) (n:size_t{v start + v n <= len /\ v n == olen}) (b2:lbuffer a olen) : Lemma
+  (requires (live h b1 /\ b2 == sub b1 start n))
+  (ensures  (live h b2)) = ()
+
+let lemma_sub_live2 (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbuffer a len) (start:size_t) (n:size_t{v start + v n <= len /\ v n == olen}) : Lemma
+  (requires (live h b1))
+  (ensures  (live h (sub #a #len #olen b1 start n))) = ()
+
+let lemma_sub_live3 (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbuffer a len) (start:size_t) (n:size_t{v start + v n <= len /\ v n == olen}) (b2:lbuffer a olen) : Lemma
+  (requires (live h b1 /\ b2 == sub b1 start n))
+  (ensures  (live h b2 /\ b2 == sub b1 start n)) = ()
+
+(* Functions to add to the libraries *)
+val update_sub: #a:Type0 -> #len:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len} -> x:lbuffer a (v n) ->
   Stack unit
     (requires (fun h -> live h i /\ live h x))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
@@ -45,6 +62,18 @@ let update_sub #a #len i start n x =
   let i' = sub i start n in
   copy n x i'
 
+
+///
+/// Blake2s
+///
+
+(* Definition of constants *)
+let sigma_list_size : list size_t =
+  synth
+    (fun () ->
+      solve_then
+      (fun () -> exact (quote (List.Tot.map size Spec.sigma_list)))
+    compute)
 
 (* Define algorithm parameters *)
 type init_vector = lbuffer uint32 8
@@ -64,6 +93,7 @@ let g1 (wv:working_vector) (a:idx) (b:idx) (r:rotval U32) :
   let wv_b = wv.(b) in
   wv.(a) <- (wv_a ^. wv_b) >>>. r
 
+
 let g2 (wv:working_vector) (a:idx) (b:idx) (x:uint32) :
   Stack unit
     (requires (fun h -> live h wv))
@@ -73,6 +103,7 @@ let g2 (wv:working_vector) (a:idx) (b:idx) (x:uint32) :
   let wv_a = wv.(a) in
   let wv_b = wv.(b) in
   wv.(a) <- add_mod #U32 (add_mod #U32 wv_a wv_b) x
+
 
 val blake2_mixing : wv:working_vector -> a:idx -> b:idx -> c:idx -> d:idx -> x:uint32 -> y:uint32 ->
   Stack unit
@@ -92,7 +123,7 @@ let blake2_mixing wv a b c d x y =
   g1 wv b c Spec.r4
 
 
-#set-options "--max_fuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --z3rlimit 10"
 
 val blake2_round1 : wv:working_vector -> m:message_block -> i:size_t -> sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
   Stack unit
@@ -102,16 +133,16 @@ val blake2_round1 : wv:working_vector -> m:message_block -> i:size_t -> sigma:lb
                          /\ h1.[wv] == Spec.blake2_round1 h0.[wv] h0.[m] (v i)))
 
 let blake2_round1 wv m i sigma =
-  let h0 = ST.get () in
   let i_mod_10 = size_mod i (size 10) in
   let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
+  let h0 = ST.get () in
   let s = sub #(n:size_t{v n < 16}) #160 #16 sigma start_idx (size 16) in
   let h1 = ST.get () in
-  // assert(
-  //   let s' : lseq (n:size_nat{n < 16}) 16 = Spec.Lib.IntSeq.sub Spec.Blake2s.sigma_list (v start_idx) 16 in
-  //   h1.[s] == s'
-  // );
-  assume(live h1 s);
+  assert(h0 == h1);
+  assert(live h1 sigma);
+  assert(as_lseq s h1 == as_lseq (sub #(n:size_t{v n < 16}) #160 #16 sigma start_idx (size 16)) h1);
+  lemma_sub_live3 #h1 #(n:size_t{v n < 16}) #160 #16 sigma start_idx (size 16) s;
+  // assert(live h1 s);
   blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
   blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(s.(size 2))) (m.(s.(size 3)));
   blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(s.(size 4))) (m.(s.(size 5)));
