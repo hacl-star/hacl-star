@@ -19,7 +19,7 @@ let v = size_v
 inline_for_extraction
 let index (x:size_nat) = size x
 
-let op_String_Access m b = as_lseq b m
+let op_String_Access #a #len m b = as_lseq #a #len b m
 
 (* Constants *)
 
@@ -107,10 +107,10 @@ let blake2_round1 wv m i sigma =
   let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
   let s = sub #(n:size_t{v n < 16}) #160 #16 sigma start_idx (size 16) in
   let h1 = ST.get () in
-  assert(
-    let s' : lseq (n:size_nat{n < 16}) 16 = Spec.Lib.IntSeq.sub Spec.Blake2s.sigma_list (v start_idx) 16 in
-    h1.[s] == s'
-  );
+  // assert(
+  //   let s' : lseq (n:size_nat{n < 16}) 16 = Spec.Lib.IntSeq.sub Spec.Blake2s.sigma_list (v start_idx) 16 in
+  //   h1.[s] == s'
+  // );
   assume(live h1 s);
   blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
   blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(s.(size 2))) (m.(s.(size 3)));

@@ -25,6 +25,7 @@ all-ci: ci
 all-hints: hints
 
 KREMLIN_ARGS+=-verbose \
+	-no-prefix C.Loops -no-prefix C.String \
 	-drop Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
 	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
@@ -86,41 +87,43 @@ test-native-sha2_384.exe: sha2-c/Hacl_SHA2_384.o sha2-c/Hacl_Test_SHA2_384.o $(B
 test-native-sha2_512.exe: sha2-c/Hacl_SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o $(BASE_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
+#
+# Blake2 (version s)
+#
 
-# blake2s-c/out.krml: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.Impl.Blake2s.fst Hacl.Test.Blake2s.fst
-# 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir blake2s-c -drop Spec.* \
-# 		-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst \
-# 		-bundle 'Hacl.Impl.Blake2s=Hacl.Impl.*,Spec.Lib.*' \
-# 		-skip-translation $^ -o $@
+MODULES=
+TESTMODS=Hacl.Test.Blake2s
 
-
-# blake2s-c.exe: blake2s-c/out.krml
-# 	mkdir -p blake2s-c
-# 	$(KREMLIN) $(KREMLIN_ARGS) -drop Spec.* -tmpdir blake2s-c  -no-prefix Hacl.Test.Blake2s \
-# 		-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst -I ../../specs/lib/c \
-# 		-bundle 'Hacl.Impl.Blake2s=Hacl.Impl.*,Spec.Lib.*' \
-# 		$^ -o $@
-# 	./$@
-
+BASE_OBJ = $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
 
 blake2s-c/out.krml: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir blake2s-c \
+	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--expose_interfaces" -tmpdir blake2s-c \
 	-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst \
 	-skip-translation $^
 
 blake2s-c/Hacl_Blake2s.c: blake2s-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
+	$(KREMLIN) $(KREMLIN_ARGS) -fparentheses -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
 	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	$^ -o $@
 
-BASE_OBJ = $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o
+blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir blake2s-c -skip-compilation -no-prefix Hacl.Test.Blake2s \
+	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
+	$^ -o $@
 
-
-test-blake2s.exe: blake2s-c/Hacl_Blake2s.o $(BASE_OBJ)
-	$(CC) -I ../../specs/lib/c -c ../../specs/lib/c/Spec_Lib_Print.c -o blake2s-c/Spec_Lib_Print.o
-	$(CC) -I ../../specs/lib/c -I $(KREMLIN_HOME)/kremlib -o $@ blake2s-c/Hacl_Test_Blake2s.c blake2s-c/Spec_Lib_Print.o $^
+test-blake2s.exe: blake2s-c/Hacl_Blake2s.o blake2s-c/Hacl_Test_Blake2s.o $(BASE_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
 	./test-blake2s.exe
+
+# test-blake2s.exe: blake2s-c/Hacl_Blake2s.o blake2s-c/Hacl_Test_Blake2s.o $(BASE_OBJ)
+# 	$(CC) -I ../../specs/lib/c -c ../../specs/lib/c/Spec_Lib_Print.c -o blake2s-c/Spec_Lib_Print.o
+# 	$(CC) -I ../../specs/lib/c -I $(KREMLIN_HOME)/kremlib -o $@ blake2s-c/Hacl_Test_Blake2s.c $^ #blake2s-c/Spec_Lib_Print.o
+# 	./test-blake2s.exe
+
+#
+# Clean
+#
 
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
-	rm -rf sha2-c sha2-*-c
+	rm -rf sha2-c sha2-*-c blake2s-c
