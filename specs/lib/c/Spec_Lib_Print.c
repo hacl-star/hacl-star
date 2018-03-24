@@ -6,6 +6,7 @@ void Spec_Lib_Print_print_bytes(uint32_t len, uint8_t* buffer) {
   for (int i = 0; i < len; i++){
     printf("%02x ", buffer[i]);
   }
+  printf("\n");
 }
 
 void Spec_Lib_Print_print_compare(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
