@@ -55,5 +55,6 @@ let main () =
   Hacl.Impl.Blake2s.blake2s test1_plaintext_len test1_plaintext test1_empty_len empty test1_expected_len test1_result;
 
   (* Display the result *)
-//  Spec.Lib.Print.print_compare (size 32) test1_expected test1_result;
+  Spec.Lib.Print.print_compare_display test1_expected_len test1_result test1_expected;
+
   C.EXIT_SUCCESS

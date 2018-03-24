@@ -91,7 +91,7 @@ test-native-sha2_512.exe: sha2-c/Hacl_SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o $(B
 # Blake2 (version s)
 #
 
-BASE_OBJ = $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
+BASE_OBJ = ../../specs/lib/c/Spec_Lib_Print.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
 
 blake2s-c/out.krml: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--expose_interfaces" -tmpdir blake2s-c \
