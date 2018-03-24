@@ -13,12 +13,17 @@ let argon_type = 1
 let block_size = 1024
 let line_size = 128
 
-val h : a_len:size_nat{0 < a_len /\ a_len <=max_size_t - 2 *$line_size} -> a:lbytes a_len -> nn:size_nat{1 <= nn /\ nn <= 64} -> Tot (lbytes nn)
+(** Wrapper for Blake2b hash function called without a secret key *)
+val h : a_len:size_nat{0 < a_len /\ a_len <=max_size_t - 2 *$line_size}
+  -> a:lbytes a_len
+  -> nn:size_nat{1 <= nn /\ nn <= 64}
+  -> Tot (lbytes nn)
 let h a_len a nn =
   let null_list = [] in
   let null_key : lbytes 0 = assert_norm (List.Tot.length null_list = 0); createL #uint8 null_list in
   Spec.Blake2b.blake2b a_len a 0 null_key nn
 
+(** Concats the parameters for Argon2i and hashes them to provide the initial buffer *)
 val concat_and_hash :
   p_len:size_nat -> p : lbytes p_len ->
   s_len:size_nat -> s: lbytes s_len ->
@@ -28,6 +33,7 @@ val concat_and_hash :
   x_len:size_nat -> x:lbytes x_len ->
   k_len:size_nat{k_len + p_len + s_len + x_len + 11*$4 <= max_size_t - 2*$line_size} -> k:lbytes k_len ->
   Tot (lbytes 64)
+
 let concat_and_hash p_len p s_len s lanes t_len m iterations x_len x k_len k =
   (* This is basically a big concatenation *)
   let lanes_as_word = uint_to_bytes_le #U32 (u32 lanes) in
@@ -63,12 +69,22 @@ let concat_and_hash p_len p s_len s lanes t_len m iterations x_len x k_len k =
 
 let ceil_32 (x:size_nat) : Tot size_nat = if x % 32 = 0 then x / 32 else x / 32  + 1
 
+(** Formula to get the output size of the variable-length hash function depending on the desired tag length *)
 let compute_variable_length_output_size (t_len:size_nat{t_len + 64 <= max_size_t}) : Tot (result:size_nat{result <= max_size_t}) =
   if t_len <= 64 then t_len else
+    (* For long tags we ceil to the next multiple of 64*)
     let r = (ceil_32 t_len) - 2 in
     32*$r + 64
 
-val h' : t_len:size_nat{1 <= t_len /\ t_len + 64 <= max_size_t} -> x_len:size_nat{x_len + 4 <= max_size_t - 2*$line_size} -> x:lbytes x_len -> Tot (lbytes (compute_variable_length_output_size t_len))
+
+(**
+Variable-length hash function used to shuffle the blocks in memory
+See section 3.2 of the Argon2 spec
+*)
+val h' : t_len:size_nat{1 <= t_len /\ t_len + 64 <= max_size_t}
+  -> x_len:size_nat{x_len + 4 <= max_size_t - 2*$line_size}
+  -> x:lbytes x_len
+  -> Tot (lbytes (compute_variable_length_output_size t_len))
 
 let h' t_len x_len x =
   let t_with_x_len : size_nat = x_len + 4 in
@@ -94,6 +110,10 @@ let low_bits x = to_u64 #U32 (to_u32 #U64 x)
 
 type idx = idx:size_nat{idx <= 15}
 
+(**
+Low-level compression function inspired by Blake2b
+See annex A of the Argon2 spec
+*)
 let g (a:uint64) (b:uint64) (c:uint64) (d:uint64) =
   let a = a +. b +. (u64 2) *. (low_bits a) *. (low_bits b) in
   let d = (d ^. a) >>>. (u32 32) in
@@ -105,12 +125,7 @@ let g (a:uint64) (b:uint64) (c:uint64) (d:uint64) =
   let b = (b ^. c) >>>. (u32 63) in
   (a,b,c,d)
 
-let permutation_matrix_index_to_offset (i:idx) : Tot size_nat =
-   if i % 2 = 0 then
-     8*$((i/2)+1)
-   else
-     8*$(i/2)
-
+(** Wrapper around g *)
 let apply_g (v:lseq uint64 16) (i1:idx) (i2:idx) (i3:idx) (i4:idx) : Tot (lseq uint64 16) =
   let a : uint64 = index v i1 in
   let b : uint64 = index v i2 in
@@ -123,6 +138,10 @@ let apply_g (v:lseq uint64 16) (i1:idx) (i2:idx) (i3:idx) (i4:idx) : Tot (lseq u
   let v = upd v i4 d in
   v
 
+(**
+Permuation function P that shuffles a 128-bytes line
+See annex A of the Argon2 spec
+*)
 val argon_permute : input: lbytes line_size -> Tot (lbytes line_size)
 let argon_permute input =
   let v : lseq uint64 16 = create 16 (u64 0) in
@@ -142,7 +161,7 @@ let argon_permute input =
   let v = apply_g v 3 4 9  14 in
   uints_to_bytes_le #U64 v
 
-
+(** Performs a XOR on two 1024-bytes blocks *)
 let xor_matrices (x:lbytes block_size) (y:lbytes block_size) : Tot (lbytes block_size) =
   let r = create block_size (u8 0) in
   repeati (block_size / 8) (fun i r ->
@@ -151,6 +170,7 @@ let xor_matrices (x:lbytes block_size) (y:lbytes block_size) : Tot (lbytes block
     ))
   ) r
 
+(** Extracts a columns of 64-bits words in a matrix as a 128-bytes line *)
 let extract_column_from_matrix (r: lbytes block_size) (j:size_nat{j < 8}) : Tot (lbytes line_size) =
   let output : lbytes line_size = create line_size (u8 0) in
   let output = repeati 8 (fun i output ->
@@ -160,12 +180,18 @@ let extract_column_from_matrix (r: lbytes block_size) (j:size_nat{j < 8}) : Tot 
   in
   output
 
-let update_column_to_matrix (col:lbytes line_size) (r:lbytes block_size) (j:size_nat{j < 8}) : Tot (lbytes block_size) =
+(** Updates a column of 64-bitts words according to the contents of a 128-bytes line*)
+let update_column_to_matrix (col:lbytes line_size) (r:lbytes block_size) (j:size_nat{j < 8})
+  : Tot (lbytes block_size) =
   repeati 8 (fun i (r:lbytes block_size) ->
     let r_offset = i*$line_size + j*$16 in
      update_slice r r_offset (r_offset + 16) (sub col (i*$16) 16)
   ) r
 
+(**
+Argon2i compression function G used to merge two blocks of data
+See section 3.4 of the Argon2 spec
+*)
 let argon_compress (x:lbytes block_size) (y:lbytes block_size) : Tot (lbytes block_size) =
   let r : lbytes block_size = create block_size (u8 0) in
   let r = xor_matrices x y in
@@ -185,20 +211,28 @@ let argon_compress (x:lbytes block_size) (y:lbytes block_size) : Tot (lbytes blo
   xor_matrices z r
 
 
-
+(** Pad a buffer with zeroes to a 1024-bytes length *)
 let fill_block (d_len: size_nat{d_len <= block_size}) (d: lbytes d_len) : Tot (lbytes block_size) =
   let output = create block_size (u8 0) in
   update_slice output 0 d_len d
 
 #reset-options "--z3rlimit 50 --max_fuel 1"
 
-let block_offset (lanes:size_nat{lanes <> 0}) (columns:size_nat{columns <> 0 /\ columns*$lanes*$block_size <= max_size_t}) (i:size_nat{i<lanes}) (j:size_nat{j<columns}) : Tot (result:size_nat{result <= (lanes*$columns - 1)*$block_size}) =
+(** Given a position in the matrix, resolve the offset in the buffer *)
+let block_offset
+  (lanes:size_nat{lanes <> 0}) (columns:size_nat{columns <> 0 /\ columns*$lanes*$block_size <= max_size_t})
+  (i:size_nat{i<lanes}) (j:size_nat{j<columns})
+  : Tot (result:size_nat{result <= (lanes*$columns - 1)*$block_size}) =
    assert (columns*$i <= columns*$(lanes - 1));
    assert (columns*$i + j <= columns*$(lanes - 1) + (columns - 1));
    assert (columns*$i + j <= columns*$lanes - 1);
    block_size*$(columns*$i + j)
 
-val xor_last_column : lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1} -> columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t} ->  mem:lbytes (lanes*$columns*$block_size) -> Tot (lbytes block_size)
+(** XORs all the buffer in the last column of the memory matrix to get a 128-bytes line *)
+val xor_last_column : lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1}
+  -> columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t}
+  ->  mem:lbytes (lanes*$columns*$block_size)
+  -> Tot (lbytes block_size)
 
 let xor_last_column lanes columns mem =
   let block = sub mem (block_offset lanes columns 0 (columns - 1)) block_size in
@@ -207,7 +241,10 @@ let xor_last_column lanes columns mem =
     xor_matrices block (sub mem (block_offset lanes columns i (columns - 1)) block_size)
   ) block
 
-let concat_pseudo_rand_arg_block t i segment m' iterations ctr =
+(** Crafts a buffer by concatenating loop parameters *)
+let concat_pseudo_rand_arg_block
+  (t:size_nat) (i:size_nat) (segment:size_nat) (m':size_nat) (iterations:size_nat) (ctr:size_nat)
+  : Tot (lbytes block_size) =
   let g_arg = create block_size (u8 0) in
   let g_arg = update_slice g_arg 0 8 (uint_to_bytes_le #U64 (u64 t)) in
   let g_arg = update_slice g_arg 8 16 (uint_to_bytes_le #U64 (u64 i)) in
@@ -217,34 +254,69 @@ let concat_pseudo_rand_arg_block t i segment m' iterations ctr =
   let g_arg = update_slice g_arg 40 48 (uint_to_bytes_le #U64 (u64 argon_type)) in
   update_slice g_arg 48 56 (uint_to_bytes_le #U64 (u64 ctr))
 
+(** Crafts the initialisation buffers for the first iteration of Argon2i *)
 let concat_h0_j_i (h0:lbytes 64) (j:size_nat) (i:size_nat) : Tot (lbytes 72) =
    let output = create 72 (u8 0) in
    let output = update_slice output 0 64 h0 in
    let output = update_slice output 64 68 (uint_to_bytes_le #U32 (u32 j)) in
    update_slice output 68 72 (uint_to_bytes_le #U32 (u32 i))
 
-
-let update_block (lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1}) (columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t}) (i:size_nat{i<lanes}) (j:size_nat{j<columns}) (memory:lbytes (lanes*$columns*$block_size)) (block:lbytes block_size) : Tot(lbytes(lanes*$columns*$block_size)) =
+(** Overwrite a block in memory with its new value *)
+let update_block
+  (lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1}) (columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t})
+  (i:size_nat{i<lanes}) (j:size_nat{j<columns}) (memory:lbytes (lanes*$columns*$block_size)) (block:lbytes block_size)
+  : Tot(lbytes(lanes*$columns*$block_size)) =
   let offset : size_nat = block_offset lanes columns i j in
   update_slice memory offset (offset + block_size) block
 
 #reset-options "--z3rlimit 200 --max_fuel 4"
 
-let pseudo_random_generation (j1:size_nat) (r_size:size_nat) : Tot (n:size_nat{n<r_size}) =
-  assume (j1*$j1 <= max_size_t*$max_size_t); (* For some reason F* cannot prove that obvious assertion... *)
-  assert (max_size_t *$ max_size_t = (pow2 64) - (pow2 33) + 1);
-  let tmp: r:nat{r <= (pow2 64) - (pow2 33) + 1} = j1*$j1 in
-  assert (((pow2 64) - (pow2 33) + 1) / (pow2 32) <= max_size_t - 1);
-  let tmp: r:nat{r < max_size_t } = tmp / (pow2 32) in
-  admit ();
- (* let tmp: r:uint64{uint_v r < max_size_t } = tmp >>. (u32 32) in
-  admit ();
-  let tmp: r:uint64{uint_v r <= r_size*$ max_size_t} =  (to_u64 r_size)*.tmp in
-  let tmp: r:uint64{uint_v r < r_size}  = tmp >>. (u32 32) in
-  let tmp: r:size_nat{r < r_size} = uint_to_nat tmp in*)
+(*
+    What follows is a sequence of lemmas somehow necessary for F* to prove the following result :
+      a : size_nat -> a * a <= max_size_t * max_size_t
+*)
+
+let square_lemma (a:size_nat) (b:size_nat{a <= b}) : Lemma
+   (ensures (a *$ a <= b *$ b))
+   = ()
+
+let square_lemma_helper (a:size_nat{a <= (pow2 32) - 1}) : Lemma
+  (ensures (a *$ a <= ((pow2 32) - 1)*$((pow2 32) - 1)))
+  = square_lemma a ((pow2 32) - 1)
+
+let square_max_lemma (a:size_nat) : Lemma
+  (ensures (a *$ a <= max_size_t *$ max_size_t))
+  = square_lemma_helper a
+
+(**
+Given a seed j1, chooses a number in the interval [0,r_size[
+See section 3.3 of the Argon2 spec
+*)
+let pseudo_random_generation (j1:size_nat) (r_size:size_nat{r_size <> 0}) : Tot (n:size_nat{n<r_size}) =
+  let _ = square_max_lemma j1 in
+  assert (j1 *$ j1 <= max_size_t*$max_size_t);
+  assert (max_size_t*$max_size_t = (pow2 64) - (pow2 33) + 1);
+  let tmp : n:nat{n <= (pow2 64) - (pow2 33) + 1} = j1 *$ j1 in
+  let tmp : n:size_nat{n < max_size_t} = tmp / (pow2 32) in
+  assert (tmp*$r_size < max_size_t*$r_size);
+  let tmp : n:nat{n < max_size_t*$r_size} = tmp *$ r_size in
+  let tmp : n:size_nat{n < r_size} = tmp / (pow2 32) in
   r_size - 1 - tmp
 
-val fill_segment : h0:lbytes 64 -> iterations:size_nat -> segment:size_nat{segment < 4} -> t_len:size_nat{1 <= t_len /\ t_len <= max_size_t - 64} -> lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1} -> columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t} -> t:size_nat{t < iterations} -> i:size_nat{i < lanes} -> memory: lbytes (lanes*$columns*$block_size) -> Tot (lbytes (lanes*$columns*$block_size))
+(**
+Updates all the blocks in a segment of the memory matrix
+See section 3.2 of the Argon2 spec
+*)
+val fill_segment : h0:lbytes 64
+  -> iterations:size_nat
+  -> segment:size_nat{segment < 4}
+  -> t_len:size_nat{1 <= t_len /\ t_len <= max_size_t - 64}
+  -> lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1}
+  -> columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t}
+  -> t:size_nat{t < iterations}
+  -> i:size_nat{i < lanes}
+  -> memory: lbytes (lanes*$columns*$block_size)
+  -> Tot (lbytes (lanes*$columns*$block_size))
 
 #reset-options "--z3rlimit 100 --max_fuel 2"
 
@@ -266,6 +338,10 @@ let fill_segment h0 iterations segment t_len lanes columns t i memory =
       update_slice pseudo_rands (ctr*$line_size*$2) ((ctr+1)*$2*$line_size) addresses_list
     ) (create pseudo_rands_size (u32 0))
   in
+  (*
+    Now pseudo_rands holds a large number of couples (j1,j2) which we will use to determine indexing
+
+  *)
   repeati segment_length (fun idx (memory : lbytes (lanes*$columns*$block_size))  ->
     let j = segment *$ segment_length + idx in
     if t = 0 && j < 2 then (
@@ -274,8 +350,11 @@ let fill_segment h0 iterations segment t_len lanes columns t i memory =
     ) else (
       let j1 = index pseudo_rands (2*$idx)  in
       let j2 = index pseudo_rands (2*$idx+1)  in
-      let i':(n:size_nat{n < lanes}) = if t = 0 && segment = 0 then i else ((uint_to_nat #U32 j2) % lanes) in
+      let i':(n:size_nat{n < lanes}) =
+	if t = 0 && segment = 0 then i else ((uint_to_nat #U32 j2) % lanes)
+      in
       let j':(n:size_nat{n < columns}) = (
+        (* r_size is the number of computed blocks that can be reference from (i,j) *)
 	let r_size:size_nat =
 	  if t = 0 then
 	    if segment = 0 || i = i' then
@@ -291,6 +370,7 @@ let fill_segment h0 iterations segment t_len lanes columns t i memory =
 	  else
 	    columns - segment_length
 	in
+	(* r_start is the offset of the beginning of the R set in the lane *)
 	let r_start:size_nat = if t <> 0 && segment <> 3 then (segment + 1)*$segment_length else 0 in
 	let j':size_nat = pseudo_random_generation (uint_to_nat #U32 j1) r_size in
 	(r_start + j') % columns
@@ -310,16 +390,19 @@ let fill_segment h0 iterations segment t_len lanes columns t i memory =
     )
   ) memory
 
-
-val argon2i :
-  p_len:size_nat -> p : lbytes p_len ->
-  s_len:size_nat{s_len >= 8} -> s: lbytes s_len ->
-  lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1} -> t_len:size_nat{t_len >= 4 /\ t_len <= max_size_t - 64} ->
-  m:size_nat{m >= (8*$lanes) /\ (m + 4*$lanes)*$1024 <= max_size_t} ->
-  iterations:size_nat{iterations >= 1}  ->
-  x_len:size_nat{x_len + 4 <= max_size_t - 2*$line_size} -> x:lbytes x_len ->
-  k_len:size_nat{k_len + p_len + s_len + x_len + 11*$4 <= max_size_t - 2 *$line_size} -> k:lbytes k_len ->
-  Tot (lbytes (compute_variable_length_output_size t_len))
+(**
+Argon2i password-hashing function
+This is the main entrypoint of the module
+*)
+val argon2i : p_len:size_nat -> p : lbytes p_len
+  -> s_len:size_nat{s_len >= 8} -> s: lbytes s_len
+  -> lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1}
+  -> t_len:size_nat{t_len >= 4 /\ t_len <= max_size_t - 64}
+  -> m:size_nat{m >= (8*$lanes) /\ (m + 4*$lanes)*$1024 <= max_size_t}
+  -> iterations:size_nat{iterations >= 1}
+  -> x_len:size_nat{x_len + 4 <= max_size_t - 2*$line_size} -> x:lbytes x_len
+  -> k_len:size_nat{k_len + p_len + s_len + x_len + 11*$4 <= max_size_t - 2 *$line_size} -> k:lbytes k_len
+  -> Tot (lbytes (compute_variable_length_output_size t_len))
 
 let argon2i p_len p s_len s lanes t_len m iterations x_len x k_len k =
   let h0 = concat_and_hash p_len p s_len s lanes t_len m iterations x_len x k_len k in
