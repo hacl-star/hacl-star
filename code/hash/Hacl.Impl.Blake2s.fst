@@ -41,7 +41,7 @@ let lemma_eq_lists (l0:list size_nat) (l1:list size_t) : Lemma
   (ensures  (l0 == List.Tot.map size_v l1)) = admit()
 
 let lemma_sub_live (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbuffer a len) (start:size_t) (n:size_t{v start + v n <= len /\ v n == olen}) (b2:lbuffer a olen) : Lemma
-  (requires (live h b1 /\ b2 == sub b1 start n))
+  (requires (live h b1 /\ b2 == sub #a #len #olen b1 start n))
   (ensures  (live h b2)) = ()
 
 let lemma_sub_live2 (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbuffer a len) (start:size_t) (n:size_t{v start + v n <= len /\ v n == olen}) : Lemma
@@ -49,8 +49,8 @@ let lemma_sub_live2 (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbu
   (ensures  (live h (sub #a #len #olen b1 start n))) = ()
 
 let lemma_sub_live3 (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbuffer a len) (start:size_t) (n:size_t{v start + v n <= len /\ v n == olen}) (b2:lbuffer a olen) : Lemma
-  (requires (live h b1 /\ b2 == sub b1 start n))
-  (ensures  (live h b2 /\ b2 == sub b1 start n)) = ()
+  (requires (live h b1 /\ b2 == sub #a #len #olen b1 start n))
+  (ensures  (live h b2 /\ b2 == sub #a #len #olen b1 start n)) = ()
 
 (* Functions to add to the libraries *)
 val update_sub: #a:Type0 -> #len:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len} -> x:lbuffer a (v n) ->

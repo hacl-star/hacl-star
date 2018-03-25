@@ -25,11 +25,11 @@ all-ci: ci
 all-hints: hints
 
 KREMLIN_ARGS+=-verbose \
-	-no-prefix C.Loops -no-prefix C.String \
+	-no-prefix C.Loops \
 	-drop Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
 	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
-	$(KREMLIN_TESTLIB) -ccopt -march=native
+	$(KREMLIN_TESTLIB) -add-include '"kremstr.h"' -ccopt -march=native
 
 MODULES=$(foreach N,256 384 512,Hacl.SHA2_$(N) Hacl.Impl.SHA2_$(N))
 TESTMODS=$(foreach N,256 384 512,Hacl.Test.SHA2_$(N))
