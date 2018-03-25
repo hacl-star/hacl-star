@@ -94,10 +94,8 @@ let rec bn_mult_by_limb_addj_carry #aLen aaLen a l carry i j resLen res =
   else begin
     let res_ij = res.(ij) in
     let (c', res_ij) = addcarry_u64 (u64 0) res_ij carry in
-    res.(ij) <- res_ij; c'
-    //let res_ij1 = res.(size_incr ij) in    
-    //res.(size_incr ij) <- add_mod #U64 res_ij1 c'
-    end
+    res.(ij) <- res_ij; 
+    c' end
       
 val mont_reduction_:
   #nLen:size_nat -> #rLen:size_nat{nLen < rLen} ->
@@ -119,8 +117,7 @@ let rec mont_reduction_ #nLen #rLen nnLen rrLen c n nInv_u64 i =
   end else begin
     let ci = c.(i) in
     let qi = mul_mod #U64 nInv_u64 ci in
-    let carry = bn_mult_by_limb_addj_carry nnLen n qi (u64 0) (size 0) i (add #SIZE nnLen rrLen) c in
-    ()
+    let carry = bn_mult_by_limb_addj_carry nnLen n qi (u64 0) (size 0) i (add #SIZE nnLen rrLen) c in ()
   end
 
 val mont_reduction:
@@ -154,19 +151,19 @@ val to_mont:
   Stack unit
     (requires (fun h -> live h n /\ live h r2 /\ live h a /\ live h aM /\ live h st_kara /\
                       disjoint st_kara a /\ disjoint st_kara r2 /\ disjoint st_kara n))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1)) // /\ modifies2 aM st_kara h0 h1))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 aM st_kara h0 h1))
   [@"c_inline"]
 let to_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 r2 a st_kara aM =
   let cLen = add #SIZE nnLen nnLen in
   let stLen = add #SIZE cLen (mul #SIZE (size 4) pow2_i) in
   let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
-  let tmp = Buffer.sub #uint64 #(v stLen) #(nLen + rLen) st_kara cLen (add #SIZE nnLen rrLen) in
-  assume (disjoint c a /\ disjoint c r2);
-  //bn_mul nnLen a nnLen r2 c; // c = a * r2
   karatsuba pow2_i nnLen a r2 st_kara; // c = a * r2
+  let tmp = Buffer.sub #uint64 #(v stLen) #(nLen + rLen) st_kara cLen (add #SIZE nnLen rrLen) in
   assume (disjoint tmp n);
-  mont_reduction #nLen #rLen nnLen rrLen n nInv_u64 c tmp aM // aM = c % n
-
+  let h0 = FStar.HyperStack.ST.get() in
+  mont_reduction #nLen #rLen nnLen rrLen n nInv_u64 c tmp aM; // aM = c % n
+  let h1 = FStar.HyperStack.ST.get() in
+  assume (modifies2 aM st_kara h0 h1)
 
 val from_mont:
   #nLen:size_nat -> #rLen:size_nat{nLen < rLen} ->
@@ -176,8 +173,7 @@ val from_mont:
   n:lbignum nLen -> nInv_u64:uint64 ->
   aM:lbignum nLen -> tmp:lbignum (nLen + rLen) -> a:lbignum nLen ->
   Stack unit
-    (requires (fun h -> live h n /\ live h a /\ live h aM /\ live h tmp /\ 
-                      disjoint tmp n))
+    (requires (fun h -> live h n /\ live h a /\ live h aM /\ live h tmp /\ disjoint tmp n))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 a tmp h0 h1))
   [@"c_inline"]
 let from_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 aM tmp a =

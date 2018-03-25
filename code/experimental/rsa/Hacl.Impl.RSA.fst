@@ -206,8 +206,7 @@ let pss_verify #sLen #msgLen #emLen ssLen msBits eemLen em mmsgLen msg =
 
 val rsa_sign:
     #sLen:size_nat -> #msgLen:size_nat -> #nLen:size_nat ->
-    pow2_i:size_t{9 * (1 + nLen) + 4 * v pow2_i < max_size_t /\ (1 + nLen) < v pow2_i} ->
-    iLen:size_t{v iLen < v pow2_i / 2 /\ v iLen + (1 + nLen) = v pow2_i} ->
+    pow2_i:size_t{6 * nLen + 4 * v pow2_i < max_size_t /\ nLen <= v pow2_i /\ nLen + 1 < 2 * v pow2_i} ->
     modBits:size_t{0 < v modBits /\ nLen = v (bits_to_bn modBits)} ->
     eBits:size_t{0 < v eBits /\ v eBits <= v modBits} ->
     dBits:size_t{0 < v dBits /\ v dBits <= v modBits} ->
@@ -221,9 +220,9 @@ val rsa_sign:
 	              disjoint msg salt /\ disjoint msg sgnt /\ disjoint sgnt salt))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 sgnt h0 h1))
 
-    #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
+    #reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0"
      
-let rsa_sign #sLen #msgLen #nLen pow2_i iLen modBits eBits dBits pLen qLen skey rBlind ssLen salt mmsgLen msg sgnt =
+let rsa_sign #sLen #msgLen #nLen pow2_i modBits eBits dBits pLen qLen skey rBlind ssLen salt mmsgLen msg sgnt =
     let k = blocks modBits (size 8) in
     let msBits = (size_decr modBits) %. size 8 in
 
@@ -240,7 +239,7 @@ let rsa_sign #sLen #msgLen #nLen pow2_i iLen modBits eBits dBits pLen qLen skey 
     let q = Buffer.sub #uint64 #(v skeyLen) #(v qLen) skey (add #SIZE ((add #SIZE (add #SIZE nLen eLen) dLen)) pLen) qLen in
     
     assume (2 * v nLen + 2 * (v pLen + v qLen) + 1 < max_size_t);   
-    assume (8 * v nLen < max_size_t);
+    //assume (8 * v nLen < max_size_t);
     let n2Len = add #SIZE nLen nLen in
     let pqLen = add #SIZE pLen qLen in
     let stLen:size_t = add #SIZE n2Len (add #SIZE (add #SIZE pqLen pqLen) (size 1)) in
@@ -276,8 +275,7 @@ let rsa_sign #sLen #msgLen #nLen pow2_i iLen modBits eBits dBits pLen qLen skey 
 
 val rsa_verify:
     #sLen:size_nat -> #msgLen:size_nat -> #nLen:size_nat ->
-    pow2_i:size_t{9 * (1 + nLen) + 4 * v pow2_i < max_size_t /\ (1 + nLen) < v pow2_i} ->
-    iLen:size_t{v iLen < v pow2_i / 2 /\ v iLen + (1 + nLen) = v pow2_i} ->
+    pow2_i:size_t{6 * nLen + 4 * v pow2_i < max_size_t /\ nLen <= v pow2_i /\ nLen + 1 < 2 * v pow2_i} ->
     modBits:size_t{0 < v modBits /\ nLen = v (bits_to_bn modBits)} ->
     eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\ nLen + v (bits_to_bn eBits) < max_size_t} ->
     pkey:lbignum (nLen + v (bits_to_bn eBits)) ->
@@ -289,7 +287,7 @@ val rsa_verify:
 
     #reset-options "--z3rlimit 750 --max_fuel 0 --max_ifuel 0"
     
-let rsa_verify #sLen #msgLen #nLen pow2_i iLen modBits eBits pkey ssLen sgnt mmsgLen msg =
+let rsa_verify #sLen #msgLen #nLen pow2_i modBits eBits pkey ssLen sgnt mmsgLen msg =
     let k = blocks modBits (size 8) in
     let msBits = (size_decr modBits) %. size 8 in
     //let nLen = bits_to_bn modBits in
