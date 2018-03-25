@@ -30,8 +30,8 @@ let mul_mod_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara aM bM resM =
   let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
   let tmp = Buffer.sub #uint64 #(v stLen) #(nLen + rLen) st_kara cLen (add #SIZE nnLen rrLen) in
   assume (disjoint c aM /\ disjoint c bM);
-  bn_mul nnLen aM nnLen bM c; // c = aM * bM
-  //karatsuba pow2_i iLen rrLen aM bM st_kara; // c = aM * bM
+  //bn_mul nnLen aM nnLen bM c; // c = aM * bM
+  karatsuba pow2_i nnLen aM bM st_kara; // c = aM * bM
   assume (disjoint tmp n);
   mont_reduction nnLen rrLen n nInv_u64 c tmp resM // resM = c % n 
 
