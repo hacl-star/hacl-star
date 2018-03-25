@@ -269,7 +269,7 @@ let rsa_sign #sLen #msgLen #nLen pow2_i iLen modBits eBits dBits pLen qLen skey 
            assume (v dLen <= v dLen' /\ v dLen' * 64 < max_size_t);
            bn_add dLen' d' dLen d d'; //d' = d' + d
            assume (v nLen = v (bits_to_bn modBits));
-           mod_exp pow2_i iLen modBits nLen n m (mul #SIZE dLen' (size 64)) d' s;
+           mod_exp pow2_i modBits nLen n m (mul #SIZE dLen' (size 64)) d' s;
            nat_to_text k s sgnt
         )
     )
@@ -316,7 +316,7 @@ let rsa_verify #sLen #msgLen #nLen pow2_i iLen modBits eBits pkey ssLen sgnt mms
             assume (disjoint s n);
 	    let res = 
               if (bn_is_less nLen s nLen n) then begin
-                 mod_exp pow2_i iLen modBits nLen n s eBits e m;
+                 mod_exp pow2_i modBits nLen n s eBits e m;
                  disjoint_sub_lemma1 tmp em (size 0) nLen;
                  nat_to_text k m em;
                  pss_verify #sLen #msgLen #(v k) ssLen msBits k em mmsgLen msg end

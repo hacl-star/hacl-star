@@ -80,7 +80,7 @@ let bn_mul_u64 #aLen aaLen a b res =
     let resLen = add #SIZE aaLen (size 1) in
     fill resLen res (u64 0);
     bn_mult_by_limb_addj #aLen aaLen a b (size 0) (size 0) resLen (u64 0) res
-
+(*)
 type sign =
      | Positive : sign
      | Negative : sign
