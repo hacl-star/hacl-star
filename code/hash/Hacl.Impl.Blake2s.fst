@@ -80,23 +80,25 @@ type idx = n:size_t{size_v n < 16}
 
 
 
-let g1 (wv:working_vector) (a:idx) (b:idx) (r:rotval U32) :
+val g1: wv:working_vector -> a:idx -> b:idx -> r:rotval U32 ->
   Stack unit
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
-                         /\ h1.[wv] == Spec.g1 h0.[wv] (v a) (v b) r)) =
+                         /\ h1.[wv] == Spec.g1 h0.[wv] (v a) (v b) r))
+let g1 wv a b r =
   let wv_a = wv.(a) in
   let wv_b = wv.(b) in
   wv.(a) <- (wv_a ^. wv_b) >>>. r
 
 
-let g2 (wv:working_vector) (a:idx) (b:idx) (x:uint32) :
+val g2: wv:working_vector -> a:idx -> b:idx -> x:uint32 ->
   Stack unit
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
-                         /\ h1.[wv] == Spec.g2 h0.[wv] (v a) (v b) x)) =
+                         /\ h1.[wv] == Spec.g2 h0.[wv] (v a) (v b) x))
+let g2 wv a b x =
   let wv_a = wv.(a) in
   let wv_b = wv.(b) in
   wv.(a) <- add_mod #U32 (add_mod #U32 wv_a wv_b) x
