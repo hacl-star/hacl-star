@@ -68,7 +68,7 @@ let update_sub #a #len i start n x =
 ///
 
 (* Definition of constants *)
-inline_for_extraction let sigma_list_size = normalize_term(List.Tot.map size Spec.sigma_list)
+inline_for_extraction let sigma_list_size = normalize_term(List.Tot.map size Spec.list_sigma)
 
 
 (* Define algorithm parameters *)
@@ -258,8 +258,8 @@ let blake2_compress s m offset flag const_iv const_sigma =
 
  let blake2s_internal dd d ll kk nn to_compress wv tmp res const_iv const_sigma =
   push_frame ();
-  assert_norm (List.Tot.length Spec.init_list = 8);
-  let h : lbuffer uint32 8 = createL Spec.init_list in
+  assert_norm (List.Tot.length Spec.list_init = 8);
+  let h : lbuffer uint32 8 = createL Spec.list_init in
   let kk_shift_8 = shift_left #U32 (size_to_uint32 kk) (u32 8) in
   h.(size 0) <- h.(size 0) ^. (u32 0x01010000) ^. (kk_shift_8) ^. size_to_uint32 nn;
 
@@ -296,7 +296,7 @@ let blake2s ll d kk k nn res =
   let data_length : size_t = add #SIZE (size Spec.bytes_in_block) padded_data_length in
   let len_st_u8 = add #SIZE (size 32) (add #SIZE padded_data_length (add #SIZE (size Spec.bytes_in_block) data_length)) in
   let len_st_u32 = size 32 in
-  let const_iv : lbuffer uint32 8 = createL Spec.init_list in
+  let const_iv : lbuffer uint32 8 = createL Spec.list_init in
   let const_sigma : lbuffer (n:size_t{size_v n < 16}) 160 = createL sigma_list_size in
   alloc #uint8 #unit #(v len_st_u8) len_st_u8 (u8 0) [BufItem d; BufItem k] [BufItem res]
   (fun h0 _ h1 -> True)
