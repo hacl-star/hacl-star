@@ -121,22 +121,24 @@ let blake2_compress1 v h m offset flag =
   v
 
 
-val blake2_compress2: working_vector -> hash_state -> message_block -> Tot hash_state
-let blake2_compress2 v h m =
-  let v = repeati rounds_in_f (fun i v -> blake2_round v m i) v in
-  let h = repeati 8
+val blake2_compress2: working_vector -> message_block -> Tot working_vector
+let blake2_compress2 v m = repeati rounds_in_f (fun i v -> blake2_round v m i) v
+
+
+val blake2_compress3: working_vector -> hash_state -> Tot hash_state
+let blake2_compress3 v h =
+  repeati 8
     (fun i h ->
       h.[i] <- h.[i] ^. v.[i] ^. v.[i+8]
     ) h
-  in
-  h
 
 
 val blake2_compress : hash_state -> message_block -> uint64 -> last_block_flag -> Tot hash_state
 let blake2_compress h m offset flag =
   let v = create 16 (u32 0) in
   let v = blake2_compress1 v h m offset flag in
-  let h = blake2_compress2 v h m in
+  let v = blake2_compress2 v m in
+  let h = blake2_compress3 v h in
   h
 
 

@@ -228,18 +228,30 @@ let blake2_compress1 wv s m offset flag const_iv =
 
 
 val blake2_compress2 :
-  wv:working_vector -> s:hash_state -> m:message_block -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  wv:working_vector -> m:message_block -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
   Stack unit
-    (requires (fun h -> live h s /\ live h m /\ live h wv))
+    (requires (fun h -> live h wv /\ live h m /\ live h const_sigma))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1
+                         /\ modifies1 wv h0 h1
+                         /\ h1.[wv] == Spec.blake2_compress2 h0.[wv] h0.[m]))
+
+let blake2_compress2 wv m const_sigma =
+  let h0 = ST.get () in
+  iteri (size Spec.rounds_in_f)
+    (fun i wv -> wv)
+    (fun i wv -> blake2_round wv m i const_sigma) wv
+
+
+val blake2_compress3 :
+  wv:working_vector -> s:hash_state -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  Stack unit
+    (requires (fun h -> live h s /\ live h wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies2 s wv h0 h1
-                         /\ h1.[s] == Spec.blake2_compress2 h0.[wv] h0.[s] h0.[m]))
+                         /\ h1.[s] == Spec.blake2_compress3 h0.[wv] h0.[s]))
 
-let blake2_compress2 wv s m const_sigma =
-  iteri (size Spec.rounds_in_f)
-    (fun i wv -> admit(); wv)
-    (fun i wv -> blake2_round wv m i const_sigma) wv;
-    iteri (size 8)
+let blake2_compress3 wv s const_sigma =
+  iteri (size 8)
     (fun i h -> h)
     (fun i h ->
       let i_plus_8 = add #SIZE i (size 8) in
@@ -247,6 +259,7 @@ let blake2_compress2 wv s m const_sigma =
       let hi = logxor #U32 hi_xor_wvi wv.(i_plus_8) in
       s.(i) <- hi
     ) s
+
 
 val blake2_compress :
   s:hash_state -> m:message_block ->
@@ -262,7 +275,8 @@ let blake2_compress s m offset flag const_iv const_sigma =
   (fun h0 _ h1 -> True)
   (fun wv ->
   blake2_compress1 wv s m offset flag const_iv;
-  blake2_compress2 wv s m const_sigma)
+  blake2_compress2 wv m const_sigma;
+  blake2_compress3 wv s const_sigma)
 
  val blake2s_internal:
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
