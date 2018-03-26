@@ -68,12 +68,8 @@ let update_sub #a #len i start n x =
 ///
 
 (* Definition of constants *)
-let sigma_list_size : list size_t =
-  synth
-    (fun () ->
-      solve_then
-      (fun () -> exact (quote (List.Tot.map size Spec.sigma_list)))
-    compute)
+inline_for_extraction let sigma_list_size = normalize_term(List.Tot.map size Spec.sigma_list)
+
 
 (* Define algorithm parameters *)
 type init_vector = lbuffer uint32 8
@@ -81,6 +77,7 @@ type working_vector = lbuffer uint32 16
 type message_block = lbuffer uint32 16
 type hash_state = lbuffer uint32 8
 type idx = n:size_t{size_v n < 16}
+
 
 
 let g1 (wv:working_vector) (a:idx) (b:idx) (r:rotval U32) :
@@ -300,7 +297,7 @@ let blake2s ll d kk k nn res =
   let len_st_u8 = add #SIZE (size 32) (add #SIZE padded_data_length (add #SIZE (size Spec.bytes_in_block) data_length)) in
   let len_st_u32 = size 32 in
   let const_iv : lbuffer uint32 8 = createL Spec.init_list in
-  let const_sigma : lbuffer (n:size_t{size_v n < 16}) 160 = createL Spec.sigma_list_size in
+  let const_sigma : lbuffer (n:size_t{size_v n < 16}) 160 = createL sigma_list_size in
   alloc #uint8 #unit #(v len_st_u8) len_st_u8 (u8 0) [BufItem d; BufItem k] [BufItem res]
   (fun h0 _ h1 -> True)
   (fun st_u8 ->
@@ -333,3 +330,4 @@ let blake2s ll d kk k nn res =
        end
     )
   )
+
