@@ -53,14 +53,15 @@ let lemma_sub_live3 (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbu
   (ensures  (live h b2 /\ b2 == sub #a #len #olen b1 start n)) = ()
 
 (* Functions to add to the libraries *)
-val update_sub: #a:Type0 -> #len:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len} -> x:lbuffer a (v n) ->
+val update_sub: #a:Type0 -> #len:size_nat -> #olen:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> o:lbuffer a olen ->
   Stack unit
-    (requires (fun h -> live h i /\ live h x))
+    (requires (fun h -> live h i /\ live h o))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
-                         /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[x]))
-let update_sub #a #len i start n x =
+                         /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[o]))
+
+let update_sub #a #len #olen i start n o =
   let i' = sub i start n in
-  copy n x i'
+  copy n o i'
 
 
 ///
@@ -70,12 +71,13 @@ let update_sub #a #len i start n x =
 (* Definition of constants *)
 inline_for_extraction let sigma_list_size = normalize_term(List.Tot.map size Spec.list_sigma)
 
+let size_hash_state : size_nat = 8
 
 (* Define algorithm parameters *)
 type init_vector = lbuffer uint32 8
 type working_vector = lbuffer uint32 16
 type message_block = lbuffer uint32 16
-type hash_state = lbuffer uint32 8
+type hash_state = lbuffer uint32 size_hash_state
 type idx = n:size_t{size_v n < 16}
 type sigma_t = lbuffer (n:size_t{size_v n < 16}) 160
 
@@ -182,23 +184,14 @@ val blake2_compress1 : wv:working_vector ->
   s:hash_state -> m:message_block ->
   offset:uint64 -> flag:Spec.last_block_flag -> const_iv:lbuffer uint32 8 ->
   Stack unit
-    (requires (fun h -> live h s /\ live h m /\ live h wv))
+    (requires (fun h -> live h s /\ live h m /\ live h wv /\ live h const_iv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.Blake2s.blake2_compress1 h0.[wv] h0.[s] h0.[m] offset flag))
 
 let blake2_compress1 wv s m offset flag const_iv =
-  // lemma_size_v_of_size_equal 8;
-  let type_s = size_v (size 8) in
-  let type_iv = size_v (size 8) in
-  let s : lbuffer uint32 type_s = s in
-  let const_iv : lbuffer uint32 type_s = const_iv in
   update_sub wv (size 0) (size 8) s;
   update_sub wv (size 8) (size 8) const_iv;
-  // let wv_1 = sub wv (size 0) (size 8) in
-  // let wv_2 = sub wv (size 8) (size 16) in admit();
-  // copy (size 8) s wv_1;
-  // copy (size 8) const_iv wv_2;
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 Spec.word_size) in
   let wv_12 = logxor #U32 wv.(size 12) low_offset in
