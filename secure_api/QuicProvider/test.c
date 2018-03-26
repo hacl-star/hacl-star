@@ -524,6 +524,10 @@ void exhaustive(void)
 
 int main(int argc, char **argv)
 {
+    // Reference arguments to avoid compiler errors
+    argc;
+    argv;
+
     coverage();
     exhaustive();
 
