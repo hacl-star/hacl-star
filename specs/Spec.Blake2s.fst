@@ -115,9 +115,12 @@ let blake2_compress1 v h m offset flag =
   let v = update_sub v 8 8 const_init in
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 word_size) in
-  let v = v.[12] <- v.[12] ^. low_offset in
-  let v = v.[13] <- v.[13] ^. high_offset in
-  let v = if flag then v.[14] <- v.[14] ^. (u32 0xFFFFFFFF) else v in
+  let v_12 = v.[12] ^. low_offset in
+  let v_13 = v.[13] ^. high_offset in
+  let v_14 = v.[14] ^. (u32 0xFFFFFFFF) in
+  let v = v.[12] <- v_12 in
+  let v = v.[13] <- v_13 in
+  let v = if flag then v.[14] <- v_14 else v in
   v
 
 

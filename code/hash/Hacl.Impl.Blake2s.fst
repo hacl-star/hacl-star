@@ -33,40 +33,18 @@ let lemma_size_v_of_size_equal (s:size_nat) : Lemma (requires True)
   (ensures (size_v (size s) == s))
   [SMTPat (size s)] = ()
 
-let lemma_sigma_equal (s0:list size_t) (s1:list size_nat) : Lemma (requires True)
-  (ensures (List.Tot.map size_v s0 == s1)) = admit()
-
-let lemma_eq_lists (l0:list size_nat) (l1:list size_t) : Lemma
-  (requires (l1 == List.Tot.map size l0))
-  (ensures  (l0 == List.Tot.map size_v l1)) = admit()
-
-let lemma_sub_live (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbuffer a len) (start:size_t) (n:size_t{v start + v n <= len /\ v n == olen}) (b2:lbuffer a olen) : Lemma
-  (requires (live h b1 /\ b2 == sub #a #len #olen b1 start n))
-  (ensures  (live h b2)) = ()
-
-let lemma_sub_live2 (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbuffer a len) (start:size_t) (n:size_t{v start + v n <= len /\ v n == olen}) : Lemma
-  (requires (live h b1))
-  (ensures  (live h (sub #a #len #olen b1 start n))) = ()
-
-let lemma_sub_live3 (#h:mem) (#a:Type0) (#len:size_nat) (#olen:size_nat) (b1:lbuffer a len) (start:size_t) (n:size_t{v start + v n <= len /\ v n == olen}) (b2:lbuffer a olen) : Lemma
-  (requires (live h b1 /\ b2 == sub #a #len #olen b1 start n))
-  (ensures  (live h b2 /\ b2 == sub #a #len #olen b1 start n)) = ()
 
 (* Functions to add to the libraries *)
 val update_sub: #a:Type0 -> #len:size_nat -> #olen:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> o:lbuffer a olen ->
   Stack unit
     (requires (fun h -> live h i /\ live h o))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
-                         /\ h0.[o] == h1.[o]
                          /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[o]))
 
 [@ "substitute"]
 let update_sub #a #len #olen i start n o =
-  let h0 = ST.get () in
   let i' = sub i start n in
-  copy n o i';
-  let h1 = ST.get () in
-  assume(h0.[o] == h1.[o])
+  copy n o i'
 
 
 ///
@@ -200,34 +178,17 @@ val blake2_compress1 : wv:working_vector ->
   offset:uint64 -> flag:Spec.last_block_flag -> const_iv:lbuffer uint32 8 ->
   Stack unit
     (requires (fun h -> live h s /\ live h m /\ live h wv /\ live h const_iv
-                   /\ as_list h.[const_iv] == Spec.list_init))
+                     /\ h.[const_iv] == Spec.const_init
+                     /\ disjoint wv s /\ disjoint wv m /\ disjoint wv const_iv
+                     /\ disjoint s wv /\ disjoint m wv /\ disjoint const_iv wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.Blake2s.blake2_compress1 h0.[wv] h0.[s] h0.[m] offset flag))
 
 [@ "substitute" ]
 let blake2_compress1 wv s m offset flag const_iv =
-  let h0 = ST.get () in
   update_sub wv (size 0) (size 8) s;
-  let h1 = ST.get () in
-  let v0 = normalize_term (v (size 0)) in
-  let v8 = normalize_term (v (size 8)) in
-  assume(h1.[const_iv] == h0.[const_iv]);
-  assume(h1.[m] == h0.[m]);
-  assert(h1.[s] == h0.[s]);
-  assert(live h1 wv);
-  assert(h1.[wv] == Spec.Lib.IntSeq.update_sub h0.[wv] (v (size 0)) 8 h0.[s]);
   update_sub wv (size 8) (size 8) const_iv;
-  let h2 = ST.get () in
-  assume(h2.[const_iv] == h1.[const_iv]);
-  assume(h2.[m] == h1.[m]);
-  assume(h2.[s] == h1.[s]);
-  assert(h2.[const_iv] == h0.[const_iv]);
-  assert(h2.[m] == h0.[m]);
-  assert(h2.[s] == h0.[s]);
-  assert(h2.[wv] == Spec.Lib.IntSeq.update_sub h1.[wv] v8 v8 h1.[const_iv]);
-  assert(h2.[wv] == Spec.Lib.IntSeq.update_sub (Spec.Lib.IntSeq.update_sub h0.[wv] v0 v8 h0.[s]) v8 v8 h1.[const_iv]);
-  //assert(Spec.Blake2s.blake2_compress1 h0.[wv] h0.[s] h0.[m] offset flag == Spec.Lib.IntSeq.update_sub (Spec.Lib.IntSeq.update_sub h0.[wv] v0 v8 h0.[s]) v8 v8 h1.[const_iv]);
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 Spec.word_size) in
   let wv_12 = logxor #U32 wv.(size 12) low_offset in
@@ -235,8 +196,7 @@ let blake2_compress1 wv s m offset flag const_iv =
   let wv_14 = logxor #U32 wv.(size 14) (u32 0xFFFFFFFF) in
   wv.(size 12) <- wv_12;
   wv.(size 13) <- wv_13;
- (if flag then wv.(size 14) <- wv_14);
- admit()
+ (if flag then wv.(size 14) <- wv_14)
 
 
 val blake2_compress2 :
