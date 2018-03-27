@@ -29,6 +29,7 @@ let op_String_Assignment #a #len = upd #a #len
 
 val repeat_range: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> Tot a) -> a -> Tot (a)
 val repeati: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> Tot a) -> a -> Tot (a)
+val repeati_ghost: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> GTot a) -> a -> GTot a
 val repeat: #a:Type -> n:size_nat -> (a -> Tot a) -> a -> Tot (a)
 
 
@@ -69,6 +70,7 @@ val uint_to_bytes_le: #t:inttype -> u:uint_t t -> lbytes (numbytes t)
 val uint_to_bytes_be: #t:inttype -> u:uint_t t -> lbytes (numbytes t)
 val uint_from_bytes_le: #t:inttype -> lbytes (numbytes t) -> u:uint_t t
 val uint_from_bytes_be: #t:inttype -> lbytes (numbytes t) -> u:uint_t t
+
 val uints_to_bytes_le: #t:inttype -> #len:size_nat{len `op_Multiply` numbytes t <= max_size_t} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
 val uints_to_bytes_be: #t:inttype -> #len:size_nat{len `op_Multiply` numbytes t <= max_size_t} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
 val uints_from_bytes_le: #t:inttype -> #len:size_nat{len `op_Multiply` numbytes t <= max_size_t} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len

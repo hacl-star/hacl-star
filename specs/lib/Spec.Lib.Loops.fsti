@@ -3,7 +3,8 @@ module Spec.Lib.Loops
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open Spec.Lib.IntTypes
-let v = size_v 
+
+let v = size_v
 
 inline_for_extraction
 val for:
