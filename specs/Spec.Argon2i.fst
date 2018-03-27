@@ -303,6 +303,80 @@ let pseudo_random_generation (j1:size_nat) (r_size:size_nat{r_size <> 0}) : Tot 
   let tmp : n:size_nat{n < r_size} = tmp / (pow2 32) in
   r_size - 1 - tmp
 
+let seeds_length
+  (lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1})
+  (columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t})
+  : size_nat =
+  let segment_length = columns / 4 in
+  let tmp :size_nat = segment_length / line_size + 1 in
+  tmp *$ line_size *$ 2
+
+val generate_seeds :
+  lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1}
+  -> columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t}
+  -> i:size_nat{i < lanes}
+  -> iterations:size_nat
+  -> t:size_nat{t < iterations}
+  -> segment:size_nat{segment < 4}
+  -> lseq uint32 (seeds_length lanes columns)
+
+let generate_seeds lanes columns i iterations t segment =
+  let segment_length = columns / 4 in
+  let pseudo_rands_rounds: size_nat = segment_length / line_size + 1 in
+  let pseudo_rands_size : size_nat = pseudo_rands_rounds *$ line_size *$ 2 in
+  repeati pseudo_rands_rounds
+    (fun ctr (pseudo_rands :  lseq uint32 pseudo_rands_size)  ->
+      let zero_block = create block_size (u8 0) in
+      let arg_block = argon_compress
+	zero_block
+	(concat_pseudo_rand_arg_block t i segment (lanes*$columns) iterations (ctr+1))
+      in
+      let address_block = argon_compress zero_block arg_block in
+      let addresses_list : lseq uint32 (2*$line_size) = uints_from_bytes_le #U32 address_block in
+      update_slice pseudo_rands (ctr*$line_size*$2) ((ctr+1)*$2*$line_size) addresses_list
+    ) (create pseudo_rands_size (u32 0))
+
+val map_indexes :
+  t:size_nat
+  -> segment:size_nat{segment < 4}
+  -> lanes:size_nat{lanes >= 1 /\ lanes <= pow2 24 - 1}
+  -> columns:size_nat{4 <= columns /\ lanes*$columns*$block_size <= max_size_t}
+  -> idx:size_nat{idx < columns / 4}
+  -> i:size_nat{i < lanes}
+  -> j:size_nat{j < columns /\ (t=0 ==> j >= 2) /\  j = segment *$ (columns / 4) + idx}
+  -> j1:uint32 -> j2:uint32
+  -> (i':size_nat{i' < lanes} * j':size_nat{j' < columns})
+
+let map_indexes t segment lanes columns idx i j j1 j2 =
+  let segment_length:(n:size_nat{1 <= n}) = columns / 4 in
+  let i':(n:size_nat{n < lanes}) =
+    if t = 0 && segment = 0 then i else ((uint_to_nat #U32 j2) % lanes)
+  in
+  let j':(n:size_nat{n < columns}) = (
+    (* r_size is the number of computed blocks that can be reference from (i,j) *)
+  //admit ();
+  let r_size:(n:size_nat{n <> 0}) =
+    if t = 0 then begin
+      if segment = 0 || i = i' then
+	j  - 1
+      else if idx = 0 then
+	segment*$segment_length - 1
+      else
+	segment*$segment_length
+    end else if i = i' then
+      columns - segment_length + idx - 1
+    else if idx = 0 then
+      columns - segment_length - 1
+    else
+      columns - segment_length
+  in
+  let r_start:size_nat = if t <> 0 && segment <> 3 then (segment + 1)*$segment_length else 0 in
+  let j':size_nat = pseudo_random_generation (uint_to_nat #U32 j1) r_size in
+    (r_start + j') % columns
+  )
+  in
+  (i',j')
+
 (**
 Updates all the blocks in a segment of the memory matrix
 See section 3.2 of the Argon2 spec
@@ -323,20 +397,8 @@ val fill_segment : h0:lbytes 64
 let fill_segment h0 iterations segment t_len lanes columns t i memory =
   let segment_length :size_nat = columns / 4 in
   let counter = 0 in
-  let pseudo_rands_rounds: size_nat = segment_length / line_size + 1 in
-  let pseudo_rands_size : size_nat = pseudo_rands_rounds *$ line_size *$ 2 in
-  let pseudo_rands : lseq uint32 pseudo_rands_size =
-    repeati pseudo_rands_rounds
-    (fun ctr (pseudo_rands :  lseq uint32 pseudo_rands_size)  ->
-      let zero_block = create block_size (u8 0) in
-      let arg_block = argon_compress
-	zero_block
-	(concat_pseudo_rand_arg_block t i segment (lanes*$columns) iterations (ctr+1))
-      in
-      let address_block = argon_compress zero_block arg_block in
-      let addresses_list : lseq uint32 (2*$line_size) = uints_from_bytes_le #U32 address_block in
-      update_slice pseudo_rands (ctr*$line_size*$2) ((ctr+1)*$2*$line_size) addresses_list
-    ) (create pseudo_rands_size (u32 0))
+  let pseudo_rands_size = seeds_length lanes columns in
+  let pseudo_rands = generate_seeds lanes columns i iterations t segment
   in
   (*
     Now pseudo_rands holds a large number of couples (j1,j2) which we will use to determine indexing
@@ -350,31 +412,7 @@ let fill_segment h0 iterations segment t_len lanes columns t i memory =
     ) else (
       let j1 = index pseudo_rands (2*$idx)  in
       let j2 = index pseudo_rands (2*$idx+1)  in
-      let i':(n:size_nat{n < lanes}) =
-	if t = 0 && segment = 0 then i else ((uint_to_nat #U32 j2) % lanes)
-      in
-      let j':(n:size_nat{n < columns}) = (
-        (* r_size is the number of computed blocks that can be reference from (i,j) *)
-	let r_size:size_nat =
-	  if t = 0 then
-	    if segment = 0 || i = i' then
-	      (assert_norm (t=0); j  - 1)
-	    else if idx = 0 then
-	      segment*$segment_length - 1
-	    else
-	      segment*$segment_length
-	  else if i = i' then
-	    columns - segment_length + idx - 1
-	  else if idx = 0 then
-	    columns - segment_length - 1
-	  else
-	    columns - segment_length
-	in
-	(* r_start is the offset of the beginning of the R set in the lane *)
-	let r_start:size_nat = if t <> 0 && segment <> 3 then (segment + 1)*$segment_length else 0 in
-	let j':size_nat = pseudo_random_generation (uint_to_nat #U32 j1) r_size in
-	(r_start + j') % columns
-      ) in
+      let (i',j') = map_indexes t segment lanes columns idx i j j1 j2 in
       let arg1 : lbytes block_size =
 	sub memory (block_offset lanes columns i ((j-1)%columns)) block_size
       in
