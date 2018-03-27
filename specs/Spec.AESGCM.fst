@@ -67,6 +67,9 @@ val aead_encrypt:
   aad:lbytes aad_len ->
   Tot (lbytes (len + blocksize))
 let aead_encrypt k n_len n len m aad_len aad =
+  let iv = if n_len = 12 then n else (
+    ghash n_len n (creat 0 0) 0 (create 16 0uy) k
+  ) in
   let c = AES.aes128_encrypt_bytes k n_len n 2 len m in
   let mac = gcm k n_len n len c aad_len aad in
   let result = create (len + blocksize) (u8 0) in

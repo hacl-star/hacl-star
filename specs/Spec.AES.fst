@@ -382,17 +382,20 @@ noeq type aes_state = {
   block:  lseq uint8 16;
 }
 
-let aes_init (k:block) (n_len:size_nat) (n:lseq uint8 n_len) : aes_state =
+let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lseq uint8 n_len) : aes_state =
   let input = create 16 (u8 0) in
-  let it = if n_len > 16 then 16 else n_len in
-  let input = repeati it (fun i b -> b.[i] <- n.[i]) input in
+  let input = repeati n_len (fun i b -> b.[i] <- n.[i]) input in
   let key_ex = key_expansion k in
   {key_ex = key_ex;
    block  = input}
 
+let inc_ctr (b: block) (ctr:size_nat): block =
+  let bint = uint_from_bytes_be b in
+  nat_to_bytes_be 16 (bint + ctr)
+
+
 let aes_set_counter (st:aes_state) (c:size_nat) : Tot aes_state =
-  let ctrby = nat_to_bytes_be 4 c in
-  let input = repeati 4 (fun i b -> b.[12+i] <- ctrby.[i]) st.block in
+  let input = inc_ctr st.block c in
   {st with block = input}
 
 let aes_key_block (st:aes_state) : Tot block =
