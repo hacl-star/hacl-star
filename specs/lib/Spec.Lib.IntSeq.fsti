@@ -23,7 +23,7 @@ val slice: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> fin:size_
 val update_sub: #a:Type -> #len:size_nat -> i:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}
 val update_slice: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> fin:size_nat{start <= fin /\ fin <= len} -> lseq a (fin - start) -> lseq a len
 
-let op_String_Access #a #len = index #a #len 
+let op_String_Access #a #len = index #a #len
 let op_String_Assignment #a #len = upd #a #len
 
 
@@ -81,9 +81,9 @@ val as_list: #a:Type -> #len:size_nat -> lseq a len -> l:list a{List.Tot.length 
 val concat_blocks: #a:Type -> #len:size_nat -> #bs:size_nat{bs > 0} -> lseq (lseq a bs) (len / bs) -> lseq a (len % bs) -> lseq a len
 
 (*
-val map_block: #a:Type -> #b:Type -> n:size_nat -> 
-		blocksize:size_nat{n `op_Multiply` blocksize <= max_size_t} -> 
-		(i:size_nat{i < n} -> lseq a blocksize -> lseq b blocksize) -> 
-		lseq a (n `op_Multiply` blocksize) -> 
+val map_block: #a:Type -> #b:Type -> n:size_nat ->
+		blocksize:size_nat{n `op_Multiply` blocksize <= max_size_t} ->
+		(i:size_nat{i < n} -> lseq a blocksize -> lseq b blocksize) ->
+		lseq a (n `op_Multiply` blocksize) ->
 		Tot (lseq b (n `op_Multiply` blocksize))
 *)

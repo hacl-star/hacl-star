@@ -79,8 +79,8 @@ inline_for_extraction val upd: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) ->
 		      (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
 			       /\ as_lseq #a #len b h1 == LSeq.upd #a #(len) (as_lseq #a #len b h0) (v i) x))
 
-inline_for_extraction let op_Array_Assignment = upd
-inline_for_extraction let op_Array_Access = index
+inline_for_extraction let op_Array_Assignment #a #len = upd #a #len
+inline_for_extraction let op_Array_Access #a #len = index #a #len
 
 val map: #a:Type -> #len:size_nat -> clen:size_t{v clen == len} -> f:(a -> Tot a) -> b:lbuffer a (len) -> Stack unit
 		      (requires (fun h0 -> live h0 b))
