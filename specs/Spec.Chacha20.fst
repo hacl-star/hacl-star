@@ -89,7 +89,7 @@ let chacha20_key_block (st:state) : Tot block =
   uints_to_bytes_le st'
 
 let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
-  let st = chacha20_init k n in
+  let st = chacha20_init k noncelen n in
   let st' = chacha20_core st in
   uints_to_bytes_le st'
 
