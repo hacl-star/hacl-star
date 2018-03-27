@@ -76,7 +76,7 @@ let setup (k:key) (n:nonce) (st:state) : Tot state =
   let st = update_sub st 13 3 (uints_from_bytes_le n) in
   st
 
-let chacha20_init (k:key) (n:nonce) : Tot state =
+let chacha20_init (k:key) (n_len:size_nat) (n:nonce) : Tot state =
   let st = create 16 (u32 0) in
   let st  = setup k n st in
   st
@@ -94,8 +94,7 @@ let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
   uints_to_bytes_le st'
 
 let chacha20_cipher =
-  Spec.CTR.Cipher state keylen noncelen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
+  Spec.CTR.Cipher state keylen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
 
 let chacha20_encrypt_bytes key nonce counter len m =
-  Spec.CTR.counter_mode chacha20_cipher key nonce counter len m
-
+  Spec.CTR.counter_mode chacha20_cipher key noncelen nonce counter len m

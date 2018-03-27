@@ -9,12 +9,9 @@ module AES = Spec.AES
 module GF = Spec.GF128
 
 let keylen: size_nat =   16
-(* TODO: nonce can have other lengths! *)
-let noncelen: size_nat = 12
 let blocksize: size_nat = 16
 
 type key = lbytes keylen
-type nonce = lbytes noncelen
 type bytes = s:seq UInt8.t{length s < pow2 32}
 
 (* TODO: rewrite with append *)
@@ -48,28 +45,30 @@ let ghash text_len text aad_len aad tag_k k =
 
 val gcm:
   k:key ->
-  n:nonce ->
+  n_len:size_nat ->
+  n:lbytes n_len ->
   m_len:size_nat ->
   m:lbytes m_len ->
   aad_len:size_nat ->
   aad:lbytes aad_len ->
   Tot Spec.GF128.tag
-let gcm k n m_len m aad_len aad =
-  let tag_key = AES.aes128_encrypt_bytes k n 1 blocksize (create 16 0uy) in
+let gcm k n_len n m_len m aad_len aad =
+  let tag_key = AES.aes128_encrypt_bytes k n_len n 1 blocksize (create 16 0uy) in
   let mac = ghash m_len m aad_len aad tag_key k in
-  tag_key
+  mac
 
 val aead_encrypt:
   k:key ->
-  n:nonce ->
+  n_len:size_nat ->
+  n:lbytes n_len ->
   len:size_nat{len + blocksize <= max_size_t} ->
   m:lbytes len ->
   aad_len:size_nat{(len + aad_len) / blocksize <= max_size_t} ->
   aad:lbytes aad_len ->
   Tot (lbytes (len + blocksize))
-let aead_encrypt k n len m aad_len aad =
-  let c = AES.aes128_encrypt_bytes k n 2 len m in
-  let mac = gcm k n len c aad_len aad in
+let aead_encrypt k n_len n len m aad_len aad =
+  let c = AES.aes128_encrypt_bytes k n_len n 2 len m in
+  let mac = gcm k n_len n len c aad_len aad in
   let result = create (len + blocksize) (u8 0) in
   let result = update_slice result 0 len c in
   let result = update_slice result len (len + blocksize) mac in

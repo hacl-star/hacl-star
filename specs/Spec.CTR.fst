@@ -10,10 +10,9 @@ noeq
 type cipher =
   | Cipher: state:Type ->
 	    key_len:size_nat ->
-	    nonce_len:size_nat ->
 	    counter_max:size_nat ->
 	    block_len:(x:size_nat{x>0}) ->
-	    init:(lbytes key_len -> lbytes nonce_len -> state) ->
+	    init:(lbytes key_len -> n_len:size_nat -> lbytes n_len -> state) ->
 	    set_counter:(state -> c:size_nat{c <= counter_max} -> state) ->
 	    key_block: (state -> lbytes block_len) ->
 	    cipher
@@ -44,15 +43,16 @@ let counter_mode_blocks enc st0 counter n plain =
 val counter_mode:
   enc: cipher ->
   k:lbytes enc.key_len ->
-  n:lbytes enc.nonce_len ->
+  n_len:size_nat ->
+  n:lbytes n_len ->
   c:size_nat{c <= enc.counter_max} ->
   len: size_nat{c + (len / enc.block_len) <= enc.counter_max}  ->
   plain:lbytes len  ->
   Tot (lbytes len)
-let counter_mode enc key nonce counter len plain =
+let counter_mode enc key n_len nonce counter len plain =
   let n      = len / enc.block_len in
   let rem    = len % enc.block_len in
-  let st0 = enc.init key nonce in
+  let st0 = enc.init key n_len nonce in
   let blocks = slice plain 0 (n * enc.block_len) in
   let cipher_blocks = counter_mode_blocks enc st0 counter n blocks in
   if rem = 0 then cipher_blocks
