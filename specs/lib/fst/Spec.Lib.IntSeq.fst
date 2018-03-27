@@ -23,7 +23,7 @@ let rec create_ #a len x =
   if len = 0 then []
   else
     let t = create_ #a (decr len) x in
-    x :: t 
+    x :: t
 
 let create = create_
 
@@ -95,9 +95,16 @@ let rec repeat_range_ #a min max f x =
   if min = max then x
   else repeat_range_ #a (incr min) max f (f min x)
 
+val repeat_range_ghost_: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (s:size_nat{s >= min /\ s < max} -> a -> GTot a) -> a -> GTot (a) (decreases (max - min))
+let rec repeat_range_ghost_ #a min max f x =
+  if min = max then x
+  else repeat_range_ghost_ #a (incr min) max f (f min x)
+
 
 let repeat_range = repeat_range_
+let repeat_range_ghost = repeat_range_ghost_
 let repeati #a = repeat_range #a 0
+let repeati_ghost #a = repeat_range_ghost #a 0
 let repeat #a n f x = repeat_range 0 n (fun i -> f) x
 
 
@@ -279,30 +286,35 @@ let uints_from_bytes_be #t (#len:size_nat{len * numbytes t < pow2 32}) (b:lbytes
 
 let as_list #a #len l = l
 
-let rec split_blocks #t #len s bs = 
+let rec concat #a #len1 #len2 s1 s2 =
+  match s2 with
+  | [] -> s1
+  | h :: t -> List.Tot.append h (concat #a #(len1 + 1) #(len2 - 1) s1 t)
+
+let rec split_blocks #t #len s bs =
     if bs < length(s) then
       let h = sub s 0 bs in
       let rem = sub s bs (len - bs) in
       let t,l = split_blocks #t #(len - bs) rem bs in
       h :: t, l
-    else 
+    else
       [],s
 
-let rec concat_blocks #a #len #bs s l = 
+let rec concat_blocks #a #len #bs s l =
   match s with
   | [] -> l
-  | h :: t -> List.Tot.append h (concat_blocks #a #(len - bs) #bs t l) 
-  
+  | h :: t -> List.Tot.append h (concat_blocks #a #(len - bs) #bs t l)
+
 (*
 val map_block_: #a:Type -> #b:Type -> min:size_nat -> max:size_nat{min <= max} ->
-		blocksize:size_nat{max * blocksize <= max_size_t} -> 
-		(i:size_nat{i >= min /\ i < max} -> lseq a blocksize -> lseq b blocksize) -> 
-		lseq a ((max - min) * blocksize) -> 
+		blocksize:size_nat{max * blocksize <= max_size_t} ->
+		(i:size_nat{i >= min /\ i < max} -> lseq a blocksize -> lseq b blocksize) ->
+		lseq a ((max - min) * blocksize) ->
 		Tot (lseq b ((max - min) * blocksize)) (decreases (max - min))
 let rec map_block_ #a #b min max sz f x =
   if min = max then []
-  else 
-    let h = slice x 0 sz in 
+  else
+    let h = slice x 0 sz in
     let t = slice x sz ((max - min) * sz) in
     let h' = f min h in
     let t' = map_block_ #a #b (min+1) max sz f t in

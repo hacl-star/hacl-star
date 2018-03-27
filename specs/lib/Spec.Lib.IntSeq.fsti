@@ -28,10 +28,10 @@ let op_String_Assignment #a #len = upd #a #len
 
 
 val repeat_range: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> Tot a) -> a -> Tot (a)
+val repeat_range_ghost: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> GTot a) -> a -> GTot (a)
 val repeati: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> Tot a) -> a -> Tot (a)
 val repeati_ghost: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> GTot a) -> a -> GTot a
 val repeat: #a:Type -> n:size_nat -> (a -> Tot a) -> a -> Tot (a)
-
 
 
 val fold_left_range: #a:Type -> #b:Type -> #len:size_nat -> min:size_nat -> max:size_nat{min <= max /\ max <= len} -> (i:size_nat{i >= min /\ i < max} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b)
