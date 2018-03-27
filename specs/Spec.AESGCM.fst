@@ -17,6 +17,8 @@ type key = lbytes keylen
 type nonce = lbytes noncelen
 type bytes = s:seq UInt8.t{length s < pow2 32}
 
+(* TODO: rewrite with append *)
+
 val ghash:
   text_len:size_nat ->
   text:lbytes text_len ->
@@ -55,7 +57,7 @@ val gcm:
 let gcm k n m_len m aad_len aad =
   let tag_key = AES.aes128_encrypt_bytes k n 1 blocksize (create 16 0uy) in
   let mac = ghash m_len m aad_len aad tag_key k in
-  mac
+  tag_key
 
 val aead_encrypt:
   k:key ->

@@ -727,6 +727,7 @@ val test_aesgcm:
   expected:lbytes (16 + text_len) ->
   FStar.All.ML unit
 let test_aesgcm text_len text aad_len aad n_len n k expected =
+  IO.print_string " ================================ CIPHER ===============================\n";
   let output = AEAD.aead_encrypt k n text_len text aad_len aad in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
   IO.print_string   "Expected ciphertext: ";
@@ -746,6 +747,7 @@ val test_ghash:
   k:lbytes key_length ->
   FStar.All.ML unit
 let test_ghash expected text_len text aad_len aad k =
+  IO.print_string " ================================ GHASH ===============================\n";
   let output = AEAD.ghash text_len text aad_len aad (create 16 0uy) k in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
   IO.print_string   "Expected tag: ";
@@ -757,7 +759,7 @@ let test_ghash expected text_len text aad_len aad k =
 else IO.print_string "\nFailure :(\n"
 
 let test () =
-  test_ghash test1_ghash test1_c_length test1_ciphertext test1_aad_length test1_aad test1_key;
+  (* test_ghash test1_ghash test1_c_length test1_ciphertext test1_aad_length test1_aad test1_key;
   test_aesgcm test1_msg_length test1_msg test1_aad_length test1_aad test1_nonce_length test1_nonce test1_key test1_expected;
   test_ghash test2_ghash test2_c_length test2_ciphertext test2_aad_length test2_aad test2_key;
   test_aesgcm test2_msg_length test2_msg test2_aad_length test2_aad test2_nonce_length test2_nonce test2_key test2_expected;
@@ -768,10 +770,10 @@ let test () =
   test_ghash test5_ghash test5_c_length test5_ciphertext test5_aad_length test5_aad test5_key;
   (* test_aesgcm test5_msg_length test5_msg test5_aad_length test5_aad test5_nonce_length test5_nonce test5_key test5_expected; *)
   test_ghash test6_ghash test6_c_length test6_ciphertext test6_aad_length test6_aad test6_key;
-  (* test_aesgcm test6_msg_length test6_msg test6_aad_length test6_aad test6_nonce_length test6_nonce test6_key test6_expected; *)
+  (* test_aesgcm test6_msg_length test6_msg test6_aad_length test6_aad test6_nonce_length test6_nonce test6_key test6_expected; *) *)
   test_ghash test7_ghash test7_c_length test7_ciphertext test7_aad_length test7_aad test7_key;
   test_aesgcm test7_msg_length test7_msg test7_aad_length test7_aad test7_nonce_length test7_nonce test7_key test7_expected;
-  test_ghash test8_ghash test8_c_length test8_ciphertext test8_aad_length test8_aad test8_key;
+  (* test_ghash test8_ghash test8_c_length test8_ciphertext test8_aad_length test8_aad test8_key;
   test_aesgcm test8_msg_length test8_msg test8_aad_length test8_aad test8_nonce_length test8_nonce test8_key test8_expected;
   test_ghash test9_ghash test9_c_length test9_ciphertext test9_aad_length test9_aad test9_key;
   test_aesgcm test9_msg_length test9_msg test9_aad_length test9_aad test9_nonce_length test9_nonce test9_key test9_expected;
@@ -794,5 +796,5 @@ let test () =
   test_ghash test18_ghash test18_c_length test18_ciphertext test18_aad_length test18_aad test18_key;
   (* test_aesgcm test18_msg_length test18_msg test18_aad_length test18_aad test18_nonce_length test18_nonce test18_key test18_expected; *)
   test_ghash test19_ghash test19_c_length test19_ciphertext test19_aad_length test19_aad test19_key;
-  (* test_aesgcm test19_msg_length test19_msg test19_aad_length test19_aad test19_nonce_length test19_nonce test19_key test19_expected; *)
+  (* test_aesgcm test19_msg_length test19_msg test19_aad_length test19_aad test19_nonce_length test19_nonce test19_key test19_expected; *) *)
   ()
