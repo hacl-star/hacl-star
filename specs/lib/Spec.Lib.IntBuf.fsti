@@ -59,7 +59,7 @@ inline_for_extraction val alloc: #a:Type0 -> #b:Type0 -> #len:size_nat -> clen:s
 		 writes:list bufitem ->
 		 spec:(h0:mem -> r:b -> h1:mem -> Type) ->
 		 impl:(buf:lbuffer a len -> Stack b
-			   (requires (fun h -> live h buf /\ live_list h reads /\ live_list h writes /\ disjoint_list buf reads /\ disjoint_list buf writes))
+			   (requires (fun h -> live h buf /\ as_lseq buf h == LSeq.create #a len init /\ live_list h reads /\ live_list h writes /\ disjoint_list buf reads /\ disjoint_list buf writes))
 			   (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
 						 modifies (BufItem buf :: writes) h0 h1 /\
 						 spec h0 r h1))) ->
@@ -126,6 +126,22 @@ val iteri: #a:Type -> #len:size_nat -> n:size_t -> spec:(i:size_nat{i < v n}  ->
 	    (requires (fun h0 -> live h0 input))
 	    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1 /\
 				  as_lseq #a #len input h1 ==  LSeq.repeati (v n) spec (as_lseq #a #len input h0)))
+
+inline_for_extraction 
+val loop: #a:Type0 -> #b:Type0 -> #len:size_nat -> n:size_t ->
+	  reads:list bufitem ->
+  	  spec:(h0:mem -> i:size_nat{i < v n} -> LSeq.lseq a len -> LSeq.lseq a len) ->
+ 	  impl:(i:size_t{v i < v n } -> buf:lbuffer a len -> Stack unit
+		   (requires (fun h -> live h buf /\ live_list h reads /\ disjoint_list buf reads))
+		   (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\
+					 modifies1 buf h0 h1 /\
+					 as_lseq #a #len buf h1 == spec h0 (v i) (as_lseq #a #len buf h0)))) ->
+     	  buf:lbuffer a len ->
+		    Stack unit
+		      (requires (fun h0 -> live h0 buf /\ live_list h0 reads /\ disjoint_list buf reads))
+		      (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
+					    modifies1 buf h0 h1 /\
+					    as_lseq #a #len buf h1 == LSeq.repeati (v n) (spec h0) (as_lseq #a #len buf h0)))
 
 inline_for_extraction
 val iter: #a:Type -> #len:size_nat -> n:size_t -> spec:(LSeq.lseq a (len) -> LSeq.lseq a (len)) ->

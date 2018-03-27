@@ -85,6 +85,12 @@ aes.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/
 	$(OCAMLOPT) -I aes-ml $(OCAML_INCLUDES) aes-ml/Spec_Lib_IntTypes.ml aes-ml/Spec_Lib_IntSeq.ml aes-ml/Spec_GaloisField.ml aes-ml/Spec_CTR.ml aes-ml/Spec_AES.ml aes-ml/Spec_AES_Test.ml -o aes.exe
 	./aes.exe
 
+aesgcm.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst Spec.GF128.fst Spec.AESGCM.fst tests/Spec.AESGCM.Test.fst
+	mkdir -p aesgcm-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --extract_module Spec.AESGCM  --extract_module Spec.AESGCM.Test --extract_module Spec.GF128 --odir aesgcm-ml $^
+	@echo 'let _ = test()' >> aesgcm-ml/Spec_AESGCM_Test.ml
+	$(OCAMLOPT) -I aesgcm-ml $(OCAML_INCLUDES) aesgcm-ml/Spec_Lib_IntTypes.ml aesgcm-ml/Spec_Lib_IntSeq.ml aesgcm-ml/Spec_GaloisField.ml aesgcm-ml/Spec_CTR.ml aesgcm-ml/Spec_AES.ml aesgcm-ml/Spec_GF128.ml aesgcm-ml/Spec_AESGCM.ml aesgcm-ml/Spec_AESGCM_Test.ml -o aesgcm.exe
+	./aesgcm.exe
 
 curve25519.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Curve25519.fst tests/Spec.Curve25519.Test.fst
 	mkdir -p curve25519-ml
