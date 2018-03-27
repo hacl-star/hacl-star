@@ -194,16 +194,13 @@ val chacha20_key_block0: b:lbuffer uint8 64 ->
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
                        /\ as_lseq b h1 == 
 			 Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0)))
+#reset-options "--z3rlimit 300"
 let chacha20_key_block0 b k n = 
-  alloc #_ #_ #32 (size 32) (u32 0) [BufItem k; BufItem n] [BufItem b]
+  alloc #_ #_ #16 (size 16) (u32 0) [BufItem k; BufItem n] [BufItem b]
   (fun h0 _ h1 -> as_lseq b h1 == Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0))
-  (fun buf -> let st = sub buf (size 0) (size 16) in
-	   let st' = sub buf (size 16) (size 16) in
-	   assert (disjoint buf k);
-	   assert (disjoint k st);
-	   setup st k n;
-	   chacha20_core st' st; 
-	   uint32s_to_bytes_le (size 16) b st')
+  (fun st -> setup st k n;
+	  chacha20_key_block b st)
+
 
 
 (*

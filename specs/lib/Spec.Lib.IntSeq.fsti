@@ -76,9 +76,12 @@ val uints_from_bytes_be: #t:inttype -> #len:size_nat{len `op_Multiply` numbytes 
 
 //The following function is primarily meant for testing, do not rely on it in code.
 val as_list: #a:Type -> #len:size_nat -> lseq a len -> l:list a{List.Tot.length l = len}
+val concat: #a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 < maxint SIZE} -> lseq a len1 -> lseq a len2 -> lseq a (len1 + len2)
+let (@|) #a #len1 #len2 s1 s2 = concat #a #len1 #len2 s1 s2
 
- val split_blocks: #a:Type -> #len:size_nat -> lseq a len -> bs:size_nat{bs > 0} -> tuple2 (lseq (lseq a bs) (len / bs)) (lseq a (len % bs))
+val split_blocks: #a:Type -> #len:size_nat -> lseq a len -> bs:size_nat{bs > 0} -> tuple2 (lseq (lseq a bs) (len / bs)) (lseq a (len % bs))
 val concat_blocks: #a:Type -> #len:size_nat -> #bs:size_nat{bs > 0} -> lseq (lseq a bs) (len / bs) -> lseq a (len % bs) -> lseq a len
+
 
 (*
 val map_block: #a:Type -> #b:Type -> n:size_nat ->
