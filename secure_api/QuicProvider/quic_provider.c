@@ -118,8 +118,7 @@ int MITLS_CALLCONV quic_crypto_hkdf_quic_label(quic_hash a, char *info, size_t *
   info[2] = (char)(label_len + 5);
   memcpy(info+3, "QUIC ", 5);
   memcpy(info+8, label, label_len);
-  info[8 + label_len] = 0;
-  *info_len = label_len + 9;
+  *info_len = label_len + 8;
 
   return 1;
 }
