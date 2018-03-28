@@ -145,11 +145,10 @@ snapshots/wireguard: snapshots-remove-intermediates
 
 
 SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
-	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) #\
-#	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* Makefile CMakeLists.txt)
+	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*)
 
 .snapshots/tezos/kremlib:
-	for f in kremlib.h kremlib_base.h FStar.h FStar.c; do \
+	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/tezos/$$f ; \
 	done
 
