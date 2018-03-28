@@ -102,8 +102,8 @@ let blake2_round2 v m i =
   v
 
 
-val blake2_round : working_vector -> message_block -> size_nat -> Tot working_vector
-let blake2_round v m i =
+val blake2_round : message_block -> size_nat -> working_vector -> Tot working_vector
+let blake2_round m i v =
   let v = blake2_round1 v m i in
   let v = blake2_round2 v m i in
   v
@@ -125,15 +125,19 @@ let blake2_compress1 v h m offset flag =
 
 
 val blake2_compress2: working_vector -> message_block -> Tot working_vector
-let blake2_compress2 v m = repeati rounds_in_f (fun i v -> blake2_round v m i) v
+let blake2_compress2 v m = repeati rounds_in_f (blake2_round m) v
+
+
+val blake2_compress3_inner: working_vector -> i:size_nat{i < 8} -> hash_state -> Tot hash_state
+let blake2_compress3_inner v i h =
+  let i_plus_8 = i + 8 in
+  let hi_xor_wvi = logxor #U32 h.[i] v.[i] in
+  let hi = logxor #U32 hi_xor_wvi v.[i_plus_8] in
+  h.[i] <- hi
 
 
 val blake2_compress3: working_vector -> hash_state -> Tot hash_state
-let blake2_compress3 v h =
-  repeati 8
-    (fun i h ->
-      h.[i] <- h.[i] ^. v.[i] ^. v.[i+8]
-    ) h
+let blake2_compress3 v h = repeati 8 (blake2_compress3_inner v) h
 
 
 val blake2_compress : hash_state -> message_block -> uint64 -> last_block_flag -> Tot hash_state

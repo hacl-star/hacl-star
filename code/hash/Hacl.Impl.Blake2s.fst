@@ -30,6 +30,21 @@ let lemma_size_v_of_size_equal (s:size_nat) : Lemma (requires True)
   (ensures (size_v (size s) == s))
   [SMTPat (size s)] = ()
 
+val lemma_repeati: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> i:size_nat{i < n} -> Lemma
+  (requires True)
+  (ensures  (f i (repeati #a i f init) == repeati #a (i + 1) f init))
+  [SMTPat (repeati #a (i + 1) f init)]
+
+let lemma_repeati #a n f init i = admit()
+
+val lemma_repeati_zero: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> Lemma
+  (requires True)
+  (ensures  (init == repeati #a 0 f init))
+  [SMTPat (repeati #a 0 f init)]
+
+let lemma_repeati_zero #a n f init = admit()
+
+
 val lemma_repeati_ghost_is_repeati: #a:Type -> n:size_nat -> (f:(i:size_nat{i < n}  -> a -> Tot a)) -> init:a -> Lemma
   (requires (True))
   (ensures  (repeati #a n f init == repeati_ghost #a n f init))
@@ -169,7 +184,7 @@ val blake2_round : wv:working_vector -> m:message_block -> i:size_t -> const_sig
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
                          /\ as_list h1.[const_sigma] == sigma_list_size
-                         /\ h1.[wv] == Spec.blake2_round h0.[wv] h0.[m] (v i)))
+                         /\ h1.[wv] == Spec.blake2_round h0.[m] (v i) h0.[wv]))
 
 [@ (CConst "const_sigma")]
 let blake2_round wv m i const_sigma =
@@ -214,51 +229,66 @@ val blake2_compress2 :
                          /\ modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_compress2 h0.[wv] h0.[m]))
 
-#set-options "--lax"
-
 [@ "substitute" ]
 let blake2_compress2 wv m const_sigma =
-  let h0 = ST.get () in
-  loop #uint32 #16 (size Spec.rounds_in_f)
-    ([BufItem m; BufItem const_sigma])
-    (fun h i wv -> Spec.blake2_round wv h.[m] i)
-    (fun i wv ->
-      let h0 = ST.get () in
-      assume(as_list h0.[const_sigma] == sigma_list_size);
-      blake2_round wv m i const_sigma;
-      let h1 = ST.get () in
-      assert(as_list h1.[const_sigma] == sigma_list_size);
-      assert(h1.[wv] == Spec.blake2_round h0.[wv] h0.[m] (v i));
-      admit()) wv
+  (**) let h0 = ST.get () in
+  Spec.Lib.Loops.for (size 0) (size Spec.rounds_in_f)
+  (**) (fun h i -> preserves_live h0 h
+  (**)        /\ modifies1 wv h0 h
+  (**)        /\ (let m0 = h0.[m] in
+  (**)           let wv0 = h0.[wv] in
+  (**)           h.[wv] == repeati i (Spec.blake2_round m0) wv0))
+  (fun i -> blake2_round wv m i const_sigma)
 
 
-#reset-options
+val blake2_compress3_inner :
+  wv:working_vector -> i:size_t{size_v i < 8} -> s:hash_state -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  Stack unit
+    (requires (fun h -> live h s /\ live h wv /\ live h const_sigma))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1
+                         /\ modifies1 s h0 h1
+                         /\ h1.[s] == Spec.blake2_compress3_inner h0.[wv] (v i) h0.[s]))
+
+[@ "substitute" ]
+let blake2_compress3_inner wv i s const_sigma =
+  let i_plus_8 = add #SIZE i (size 8) in
+  let hi_xor_wvi = logxor #U32 s.(i) wv.(i) in
+  let hi = logxor #U32 hi_xor_wvi wv.(i_plus_8) in
+  s.(i) <- hi
+
 
 val blake2_compress3 :
   wv:working_vector -> s:hash_state -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
   Stack unit
-    (requires (fun h -> live h s /\ live h wv))
+    (requires (fun h -> live h s /\ live h wv /\ live h const_sigma
+                     /\ as_list h.[const_sigma] == sigma_list_size
+                     /\ disjoint wv s /\ disjoint wv const_sigma
+                     /\ disjoint s wv /\ disjoint const_sigma wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies2 s wv h0 h1
                          /\ h1.[s] == Spec.blake2_compress3 h0.[wv] h0.[s]))
 
 [@ "substitute" ]
 let blake2_compress3 wv s const_sigma =
-  iteri (size 8)
-    (fun i h -> h)
-    (fun i h ->
-      let i_plus_8 = add #SIZE i (size 8) in
-      let hi_xor_wvi = logxor #U32 h.(i) wv.(i) in
-      let hi = logxor #U32 hi_xor_wvi wv.(i_plus_8) in
-      s.(i) <- hi
-    ) s
+  (**) let h0 = ST.get () in
+  Spec.Lib.Loops.for (size 0) (size 8)
+    (fun h i -> preserves_live h0 h
+            /\ modifies1 s h0 h
+            /\ (let s0 = h0.[s] in
+              let wv0 = h0.[wv] in
+              h.[s] == repeati i (Spec.blake2_compress3_inner wv0) s0))
+    (fun i -> blake2_compress3_inner wv i s const_sigma)
 
 
 val blake2_compress :
   s:hash_state -> m:message_block ->
   offset:uint64 -> f:Spec.last_block_flag -> const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
   Stack unit
-    (requires (fun h -> live h s /\ live h m))
+    (requires (fun h -> live h s /\ live h m /\ live h const_iv /\ live h const_sigma
+                         /\ as_list h.[const_sigma] == sigma_list_size
+                         /\ h.[const_iv] == Spec.const_init
+                         /\ disjoint s m /\ disjoint s const_sigma /\ disjoint s const_iv
+                         /\ disjoint m s /\ disjoint const_sigma s /\ disjoint const_iv s))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress h0.[s] h0.[m] offset f))
@@ -273,7 +303,7 @@ let blake2_compress s m offset flag const_iv const_sigma =
   blake2_compress3 wv s const_sigma)
 
 
- val blake2s_internal:
+val blake2s_internal:
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
    ll:size_t -> kk:size_t{size_v kk <= 32} -> nn:size_t{1 <= size_v nn /\ size_v nn <= 32} ->
