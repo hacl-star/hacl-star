@@ -89,34 +89,15 @@ HACL_RELEASE=1
 HACL_LICENSE?=$(HACL_HOME)/snapshots/licenses/MIT
 HACL_LICENSE_NSS?=$(HACL_HOME)/snapshots/licenses/APACHE2
 
-snapshots/hacl-c/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c vec128.h; do \
-		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
-	done
-
-snapshots/nss/kremlib:
-	for f in kremlib.h kremlib_base.h FStar.h FStar.c vec128.h; do \
-		(cat $(HACL_LICENSE_NSS) snapshots/kremlib/$$f ) > snapshots/nss/$$f ; \
-	done
-
-snapshots/nss/specs:
-	for f in Spec.Curve25519.fst Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst; do \
-		(cat $(HACL_LICENSE_NSS) specs/$$f ) > snapshots/nss/specs/$$f ; \
-	done
-
-snapshots/wireguard/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
-		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/wireguard/$$f ; \
-	done
-
-snapshots/tezos/kremlib:
-	for f in kremlib.h kremlib_base.h FStar.h FStar.c; do \
-		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/tezos/$$f ; \
-	done
 
 SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) \
 	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* vec128.h Makefile CMakeLists.txt)
+
+.snapshots/hacl-c/kremlib:
+	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c vec128.h; do \
+		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
+	done
 
 snapshots/hacl-c: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc
@@ -124,7 +105,17 @@ snapshots/hacl-c: snapshots-remove-intermediates
 	rm -rf snapshots/hacl-c
 	mkdir -p snapshots/hacl-c
 	cp $(SNAPSHOT_HACL_C_FILES) ./snapshots/hacl-c
-	$(MAKE) snapshots/hacl-c/kremlib
+	$(MAKE) .snapshots/hacl-c/kremlib
+
+.snapshots/nss/kremlib:
+	for f in kremlib.h kremlib_base.h FStar.h FStar.c vec128.h; do \
+		(cat $(HACL_LICENSE_NSS) snapshots/kremlib/$$f ) > snapshots/nss/$$f ; \
+	done
+
+.snapshots/nss/specs:
+	for f in Spec.Curve25519.fst Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst; do \
+		(cat $(HACL_LICENSE_NSS) specs/$$f ) > snapshots/nss/specs/$$f ; \
+	done
 
 snapshots/nss: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE_NSS)" snapshots/snapshot-gcc
@@ -137,19 +128,35 @@ snapshots/nss: snapshots-remove-intermediates
 	cp snapshots/snapshot-gcc/Hacl_Chacha20_Vec128.* snapshots/nss
 	cp snapshots/snapshot-gcc/Hacl_Poly1305_64.* snapshots/nss
 	cp snapshots/snapshot-gcc/Hacl_Poly1305_32.* snapshots/nss
-	$(MAKE) snapshots/nss/kremlib
-	$(MAKE) snapshots/nss/specs
+	$(MAKE) .snapshots/nss/kremlib
+	$(MAKE) .snapshots/nss/specs
+
+.snapshots/wireguard/kremlib:
+	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
+		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/wireguard/$$f ; \
+	done
 
 snapshots/wireguard: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" KOPTS="$(KOPTS) -fc89" snapshots/snapshot-gcc-unrolled
 	rm -rf snapshots/wireguard
 	mkdir -p snapshots/wireguard
 	cp snapshots/snapshot-gcc-unrolled/Hacl_Curve25519.* snapshots/wireguard
-	$(MAKE) snapshots/wireguard/kremlib
+	$(MAKE) .snapshots/wireguard/kremlib
+
 
 SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
-	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) \
-	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* Makefile CMakeLists.txt)
+	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*) #\
+#	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h FStar.* Makefile CMakeLists.txt)
+
+.snapshots/tezos/kremlib:
+	for f in kremlib.h kremlib_base.h FStar.h FStar.c; do \
+		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/tezos/$$f ; \
+	done
+
+.snapshots/tezos/experimental:
+	for f in Hacl_Unverified_Random.c Hacl_Unverified_Random.c; do \
+		(cat $(HACL_LICENSE) snapshots/experimental/$$f ) > snapshots/tezos/$$f ; \
+	done
 
 snapshots/tezos: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc
@@ -157,10 +164,11 @@ snapshots/tezos: snapshots-remove-intermediates
 	rm -rf snapshots/tezos
 	mkdir -p snapshots/tezos
 	cp $(SNAPSHOT_TEZOS_FILES) ./snapshots/tezos
-	$(MAKE) snapshots/tezos/kremlib
+	$(MAKE) .snapshots/tezos/kremlib
+	$(MAKE) .snapshots/tezos/experimental
 	mkdir -p snapshots/tezos/include
-	mv snapshots/tezos/*h snapshots/tezos/include
-	mv snapshots/api/HACL.Tezos.h .
+	mv snapshots/tezos/*.h snapshots/tezos/include
+	cp snapshots/api/HACL.Tezos.h snapshots/tezos/HACL.h
 
 #
 # Production target for Web Assembly
