@@ -294,5 +294,5 @@ let test () =
   test_ghash test5_ghash test5_c_length test5_ciphertext test5_aad_length test5_aad test5_key 5;
   test_aesgcm test5_msg_length test5_msg test5_aad_length test5_aad test5_nonce_length test5_nonce test5_key test5_expected 5;
   test_ghash test6_ghash test6_c_length test6_ciphertext test6_aad_length test6_aad test6_key 6;
-  (* test_aesgcm test6_msg_length test6_msg test6_aad_length test6_aad test6_nonce_length test6_nonce test6_key test6_expected 6; *)
+  test_aesgcm test6_msg_length test6_msg test6_aad_length test6_aad test6_nonce_length test6_nonce test6_key test6_expected 6;
   ()

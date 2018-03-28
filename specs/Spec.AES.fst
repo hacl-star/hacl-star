@@ -380,22 +380,22 @@ let aes128_encrypt_block (k:block) (m:block) : block =
 noeq type aes_state = {
   key_ex: lseq uint8 (11 `op_Multiply` 16);
   block:  lseq uint8 16;
+  ctr:    size_nat;
 }
 
 let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lseq uint8 n_len) : aes_state =
   let input = create 16 (u8 0) in
   let input = repeati n_len (fun i b -> b.[i] <- n.[i]) input in
   let key_ex = key_expansion k in
+  let ctr = if n_len = 12 then 0 else 1 in
   {key_ex = key_ex;
-   block  = input}
-
-let inc_ctr (b: block) (ctr:size_nat): block =
-  let bint = uint_from_bytes_be b in
-  nat_to_bytes_be 16 (bint + ctr)
-
+   block  = input;
+   ctr    = ctr}
 
 let aes_set_counter (st:aes_state) (c:size_nat) : Tot aes_state =
-  let input = inc_ctr st.block c in
+  let bint = nat_from_bytes_be st.block in
+  let ctr = c - st.ctr in
+  let input = nat_to_bytes_be 16 (bint + ctr) in
   {st with block = input}
 
 let aes_key_block (st:aes_state) : Tot block =

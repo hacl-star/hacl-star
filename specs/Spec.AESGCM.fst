@@ -65,13 +65,27 @@ val aead_encrypt:
   m:lbytes len ->
   aad_len:size_nat{(len + aad_len) / blocksize <= max_size_t} ->
   aad:lbytes aad_len ->
-  Tot (lbytes (len + blocksize))
+  Tot (lbytes (blocksize))
 let aead_encrypt k n_len n len m aad_len aad =
-  let iv = if n_len = 12 then n else (
-    ghash n_len n (creat 0 0) 0 (create 16 0uy) k
+  let iv_len = if n_len = 12 then 12 else 16 in
+  let iv: lbytes iv_len = if n_len = 12 then n else (
+    (* TODO: rewrite ghash to re-use code. this is an ugly hack *)
+    (* gmul input: IV || 0^(s+64) || ceil(len(IV))_64 *)
+    let n_padding:size_nat = (16 - (n_len % 16)) % 16 in
+    let n_padding = n_padding + 8 in
+    (* Build ghash input *)
+    let gmul_input_len = n_len + n_padding + 8 in
+    let gmul_input = create gmul_input_len (u8 0) in
+    let gmul_input = update_slice gmul_input 0 n_len n  in
+    (* padding is 0, so just skip those bytes *)
+    let n_len_bytes = nat_to_bytes_be 8 (n_len * 8) in
+    let gmul_input = update_slice gmul_input (n_len + n_padding) (n_len + n_padding + 8) n_len_bytes  in
+    let b0: GF.tag = AES.aes128_encrypt_block k (create 16 0uy) in
+    let h:lbytes 16 = GF.gmac gmul_input_len gmul_input b0 (create 16 0uy) in
+    h
   ) in
-  let c = AES.aes128_encrypt_bytes k n_len n 2 len m in
-  let mac = gcm k n_len n len c aad_len aad in
+  let c = AES.aes128_encrypt_bytes k iv_len iv 2 len m in
+  let mac = gcm k iv_len iv len c aad_len aad in
   let result = create (len + blocksize) (u8 0) in
   let result = update_slice result 0 len c in
   let result = update_slice result len (len + blocksize) mac in
