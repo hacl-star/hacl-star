@@ -6,6 +6,14 @@
 
 #include "quic_provider.h"
 
+#ifndef CDECL
+  #if _WIN32
+    #define CDECL __cdecl
+  #else
+    #define CDECL
+  #endif
+#endif
+
 void dump(char buffer[], size_t len)
 {
   size_t i;
@@ -501,7 +509,7 @@ void exhaustive(void)
     test_handshake_secrets();
 }
 
-int main(int argc, char **argv)
+int CDECL main(int argc, char **argv)
 {
     // Reference arguments to avoid compiler errors
     argc;
