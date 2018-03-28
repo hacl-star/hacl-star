@@ -160,7 +160,7 @@ snapshots/tezos: snapshots-remove-intermediates
 	$(MAKE) snapshots/tezos/kremlib
 	mkdir -p snapshots/tezos/include
 	mv snapshots/tezos/*h snapshots/tezos/include
-	mv snapshots/api/HACL.h .
+	mv snapshots/api/HACL.Tezos.h .
 
 #
 # Production target for Web Assembly
