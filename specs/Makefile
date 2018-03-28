@@ -17,7 +17,7 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.HMAC.fst \
 		Spec.Ed25519.fst \
 		Spec.Chacha20_vec.fst \
-		Spec.HSalsa20.fst 
+		Spec.HSalsa20.fst
 
 hints: $(addsuffix .hints, $(SPEC_FILES))
 verify: $(addsuffix -verify, $(SPEC_FILES))
@@ -70,13 +70,12 @@ gf128.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fs
 	$(OCAMLOPT) -I gf128-ml $(OCAML_INCLUDES) gf128-ml/Spec_Lib_IntTypes.ml gf128-ml/Spec_Lib_IntSeq.ml gf128-ml/Spec_GaloisField.ml gf128-ml/Spec_GF128.ml gf128-ml/Spec_GF128_Test.ml -o gf128.exe
 	./gf128.exe
 
-sbox.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.Sbox.fst
-	mkdir -p sbox-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module FStar.BitVector --extract_module Spec.GaloisField --extract_module Spec.Sbox --odir sbox-ml $^
-	@echo 'let _ = test()' >> sbox-ml/Spec_Sbox.ml
-	$(OCAMLOPT) -I sbox-ml $(OCAML_INCLUDES) sbox-ml/Spec_Lib_IntTypes.ml sbox-ml/Spec_Lib_IntSeq.ml sbox-ml/Spec_GaloisField.ml sbox-ml/Spec_Sbox.ml -o sbox.exe
-	./sbox.exe
-
+gcm.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.GF128.fst Spec.GCM.fst tests/Spec.GCM.Test.fst
+	mkdir -p gcm-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.GaloisField --extract_module Spec.GF128 --extract_module Spec.GCM --extract_module Spec.GCM.Test --odir gcm-ml $^
+	@echo 'let _ = test()' >> gcm-ml/Spec_GCM_Test.ml
+	$(OCAMLOPT) -I gcm-ml $(OCAML_INCLUDES) gcm-ml/Spec_Lib_IntTypes.ml gcm-ml/Spec_Lib_IntSeq.ml gcm-ml/Spec_GaloisField.ml gcm-ml/Spec_GF128.ml gcm-ml/Spec_GCM.ml gcm-ml/Spec_GCM_Test.ml -o gcm.exe
+	./gcm.exe
 
 aes.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst tests/Spec.AES.Test.fst
 	mkdir -p aes-ml
@@ -100,7 +99,7 @@ curve25519.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst l
 	./curve25519.exe
 
 
-kyber.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Kyber.fst 
+kyber.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Kyber.fst
 	mkdir -p kyber-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Kyber --odir kyber-ml $^
 	@echo 'let _ = test()' >> kyber-ml/Spec_Kyber.ml
