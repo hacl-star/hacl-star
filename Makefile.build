@@ -163,7 +163,7 @@ SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl
 	done
 
 .snapshots/tezos/experimental:
-	for f in Hacl_Unverified_Random.c Hacl_Unverified_Random.c; do \
+	for f in Hacl_Unverified_Random.h Hacl_Unverified_Random.c; do \
 		(cat $(HACL_LICENSE) snapshots/experimental/$$f ) > snapshots/tezos/$$f ; \
 	done
 
