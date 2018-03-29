@@ -3,9 +3,9 @@ module Hacl.Impl.Blake2s
 open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
+
 open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
-
 open Spec.Lib.IntBuf
 open Spec.Lib.IntBuf.Lemmas
 open Spec.Lib.IntBuf.LoadStore
@@ -26,9 +26,9 @@ let op_String_Access #a #len m b = as_lseq #a #len b m
 
 
 (* Lemmas *)
-let lemma_size_v_of_size_equal (s:size_nat) : Lemma (requires True)
-  (ensures (size_v (size s) == s))
-  [SMTPat (size s)] = ()
+// let lemma_size_v_of_size_equal (s:size_nat) : Lemma (requires True)
+//   (ensures (size_v (size s) == s))
+//   [SMTPat (size s)] = ()
 
 val lemma_repeati: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> i:size_nat{i < n} -> Lemma
   (requires True)
@@ -45,11 +45,11 @@ val lemma_repeati_zero: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> T
 let lemma_repeati_zero #a n f init = admit()
 
 
-val lemma_repeati_ghost_is_repeati: #a:Type -> n:size_nat -> (f:(i:size_nat{i < n}  -> a -> Tot a)) -> init:a -> Lemma
-  (requires (True))
-  (ensures  (repeati #a n f init == repeati_ghost #a n f init))
-  [SMTPat (repeati_ghost #a n f init)]
-let lemma_repeati_ghost_is_repeati #a n f init = admit()
+// val lemma_repeati_ghost_is_repeati: #a:Type -> n:size_nat -> (f:(i:size_nat{i < n}  -> a -> Tot a)) -> init:a -> Lemma
+//   (requires (True))
+//   (ensures  (repeati #a n f init == repeati_ghost #a n f init))
+//   [SMTPat (repeati_ghost #a n f init)]
+// let lemma_repeati_ghost_is_repeati #a n f init = admit()
 
 
 (* Functions to add to the libraries *)
@@ -232,13 +232,9 @@ val blake2_compress2 :
 [@ "substitute" ]
 let blake2_compress2 wv m const_sigma =
   (**) let h0 = ST.get () in
-  Spec.Lib.Loops.for (size 0) (size Spec.rounds_in_f)
-  (**) (fun h i -> preserves_live h0 h
-  (**)        /\ modifies1 wv h0 h
-  (**)        /\ (let m0 = h0.[m] in
-  (**)           let wv0 = h0.[wv] in
-  (**)           h.[wv] == repeati i (Spec.blake2_round m0) wv0))
-  (fun i -> blake2_round wv m i const_sigma)
+  loop #h0 (size Spec.rounds_in_f) wv
+    (fun h0 -> let m0 = h0.[m] in Spec.blake2_round m0)
+    (fun i -> blake2_round wv m i const_sigma)
 
 
 val blake2_compress3_inner :
@@ -256,6 +252,7 @@ let blake2_compress3_inner wv i s const_sigma =
   let hi = logxor #U32 hi_xor_wvi wv.(i_plus_8) in
   s.(i) <- hi
 
+#reset-options "--max_fuel 0 --z3rlimit 25"
 
 val blake2_compress3 :
   wv:working_vector -> s:hash_state -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
@@ -265,18 +262,14 @@ val blake2_compress3 :
                      /\ disjoint wv s /\ disjoint wv const_sigma
                      /\ disjoint s wv /\ disjoint const_sigma wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
-                         /\ modifies2 s wv h0 h1
+                         /\ modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress3 h0.[wv] h0.[s]))
 
 [@ "substitute" ]
 let blake2_compress3 wv s const_sigma =
   (**) let h0 = ST.get () in
-  Spec.Lib.Loops.for (size 0) (size 8)
-    (fun h i -> preserves_live h0 h
-            /\ modifies1 s h0 h
-            /\ (let s0 = h0.[s] in
-              let wv0 = h0.[wv] in
-              h.[s] == repeati i (Spec.blake2_compress3_inner wv0) s0))
+  loop #h0 (size 8) s
+    (fun h0 -> let wv0 = h0.[wv] in Spec.blake2_compress3_inner wv0)
     (fun i -> blake2_compress3_inner wv i s const_sigma)
 
 
@@ -295,13 +288,23 @@ val blake2_compress :
 
 [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2_compress s m offset flag const_iv const_sigma =
-  alloc #uint32 #unit #16 (size 16) (u32 0) [BufItem m] [BufItem s]
-  (fun h0 _ h1 -> True)
+  let h = ST.get () in
+  assert(live h s /\ live h m /\ live h const_iv /\ live h const_sigma
+        /\ as_list h.[const_sigma] == sigma_list_size
+        /\ h.[const_iv] == Spec.const_init
+        /\ disjoint s m /\ disjoint s const_sigma /\ disjoint s const_iv
+        /\ disjoint m s /\ disjoint const_sigma s /\ disjoint const_iv s);
+  assert(live_list h [BufItem m]);
+  assert(live_list h [BufItem s]);
+  let f h0 h1 = h1.[s] == Spec.Blake2s.blake2_compress h0.[s] h0.[m] offset flag in
+  alloc #_ #_ #16 (size 16) (u32 0) [BufItem m] [BufItem s]
+  (fun h0 _ h1 -> f h0 h1)
   (fun wv ->
-  blake2_compress1 wv s m offset flag const_iv;
-  blake2_compress2 wv m const_sigma;
-  blake2_compress3 wv s const_sigma)
-
+    assert(false);
+    // blake2_compress1 wv s m offset flag const_iv;
+    // blake2_compress2 wv m const_sigma;
+    // blake2_compress3 wv s const_sigma;
+    assert(false))
 
 val blake2s_internal:
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
@@ -391,4 +394,3 @@ let blake2s ll d kk k nn res =
       end
     )
   )
-
