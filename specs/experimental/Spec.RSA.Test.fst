@@ -9,6 +9,8 @@ open Spec.Lib.Stateful
 open Spec.RSA.Bignum
 open Spec.RSA
 
+open FStar.All
+
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
 
 (* RSASSA-PSS test vectors *)
@@ -26,11 +28,18 @@ let ctest x0 modBits nLen n eLen e dLen d pLen p qLen q msgLen msg sLen salt rBl
     let skey = Mk_rsa_privkey pkey d p q in
     
     let sgnt = rsa_sign x0 modBits skey rBlind sLen salt msgLen msg in
+   
+    IO.print_string "\n sgnt \n";
+    List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list sgnt);
+    IO.print_string "\n the expected sgnt \n";
+    List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list sgnt_expected);
+    IO.print_string "\n";
+
     let check_sgnt = eq_bytes nLen sgnt sgnt_expected in
     let verify_sgnt = rsa_verify x0 modBits pkey sLen sgnt msgLen msg in
     check_sgnt && verify_sgnt
 
-val test1: unit -> bool
+val test1: unit -> ML bool
 let test1() =
     let msg = List.Tot.map u8_from_UInt8 [
         0x85uy; 0x13uy; 0x84uy; 0xcduy; 0xfeuy; 0x81uy; 0x9cuy; 0x22uy; 0xeduy; 0x6cuy; 0x4cuy; 0xcbuy; 0x30uy; 0xdauy; 0xebuy; 0x5cuy;
@@ -90,7 +99,7 @@ let test1() =
     let sgnt_expected : lbytes 128 = createL sgnt_expected in
     ctest 11 1024 128 n 3 e 128 d 64 p 64 q 51 msg 20 salt 8 rBlind sgnt_expected
 
-val test2: unit -> bool
+val test2: unit -> ML bool
 let test2() =
     let n = List.Tot.map u8_from_UInt8 [
         0x01uy; 0xd4uy; 0x0cuy; 0x1buy; 0xcfuy; 0x97uy; 0xa6uy; 0x8auy; 0xe7uy; 0xcduy; 0xbduy; 0x8auy; 0x7buy; 0xf3uy; 0xe3uy; 0x4fuy;
@@ -165,7 +174,7 @@ let test2() =
     let sgnt_expected : lbytes 129 = createL sgnt_expected in
     ctest 11 1025 129 n 3 e 128 d 65 p 65 q 234 msg 20 salt 8 rBlind sgnt_expected
 
-val test3: unit -> bool
+val test3: unit -> ML bool
 let test3() = 
     let n = List.Tot.map u8_from_UInt8 [
         0xe6uy; 0xbduy; 0x69uy; 0x2auy; 0xc9uy; 0x66uy; 0x45uy; 0x79uy; 0x04uy; 0x03uy; 0xfduy; 0xd0uy; 0xf5uy; 0xbeuy; 0xb8uy; 0xb9uy;
@@ -244,7 +253,7 @@ let test3() =
     let sgnt_expected : lbytes 192 = createL sgnt_expected in
     ctest 11 1536 192 n 3 e 192 d 96 p 96 q 107 msg 20 salt 8 rBlind sgnt_expected
 
-val test4: unit -> bool
+val test4: unit -> ML bool
 let test4() = 
     let n = List.Tot.map u8_from_UInt8 [
         0xa5uy; 0xdduy; 0x86uy; 0x7auy; 0xc4uy; 0xcbuy; 0x02uy; 0xf9uy; 0x0buy; 0x94uy; 0x57uy; 0xd4uy; 0x8cuy; 0x14uy; 0xa7uy; 0x70uy;
@@ -340,5 +349,5 @@ let test4() =
     let sgnt_expected : lbytes 256 = createL sgnt_expected in
     ctest 12 2048 256 n 3 e 256 d 128 p 128 q 128 msg 20 salt 8 rBlind sgnt_expected
 
-val test: unit -> bool
+val test: unit -> ML bool
 let test() = test1() && test2() && test3() && test4()

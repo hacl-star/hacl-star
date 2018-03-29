@@ -100,234 +100,194 @@ let rec karatsuba x0 a b =
         c
     end
 
+val get_ci: c:bignum -> i:size_nat -> Tot (res:bignum{res < pow2 64})
+let rec get_ci c i =
+    if (i = 0) then c % pow2 64
+    else get_ci (c / pow2 64) (i - 1)
+
+let beta = pow2 64
+
+val beta_i: i:size_nat -> Tot (res:bignum{res = pow2 (64 * i) /\ res > 0})
+let beta_i i = pow2 (64 * i)
+
+val lemma_beta_mul_by_beta_i: i:size_nat{i + 1 < max_size_t} -> Lemma
+  (requires (True))
+  (ensures (beta * beta_i i == beta_i (i + 1)))
+let lemma_beta_mul_by_beta_i i = admit()
+
+val lemma_beta_ij_lq: i:size_nat -> j:size_nat -> Lemma
+    (requires (i <= j))
+    (ensures (beta_i i <= beta_i j))
+let lemma_beta_ij_lq i j = admit()
+
+val lemma_mul_lt: a:bignum -> b:bignum{b > 0} -> c:bignum{c > 0} -> Lemma
+    (requires (a < b))
+    (ensures (a * c < b * c))
+let lemma_mul_lt a b c = ()
+
+val mont_reduction_:
+    n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
+    exp_r:size_nat{exp_r + 1 < max_size_t} ->
+    c:bignum ->
+    i:size_nat{i <= exp_r}-> Pure bignum
+    (requires (True))
+    (ensures (fun res -> res % n == c % n /\ res < c + (beta_i exp_r) * n))
+    (decreases (exp_r - i))
+    #reset-options "--z3rlimit 150 --max_fuel 2"
+let rec mont_reduction_ n nInv_u64 exp_r c i =
+    if (i < exp_r) then begin
+      let qi = (nInv_u64 * (get_ci c i)) % beta in
+      assert (qi < beta);
+      let res = c + qi * (beta_i i) * n in
+      lemma_mod_plus c (qi * beta_i i) n;
+      lemma_mul_lt qi beta ((beta_i i) * n);
+      assert (res < c + beta * (beta_i i) * n);
+      lemma_beta_mul_by_beta_i i;
+      assert (res < c + (beta_i (i + 1)) * n);
+      lemma_beta_ij_lq (i + 1) exp_r;
+      assert (beta_i (i + 1) <= beta_i exp_r);
+      assert (res < c + (beta_i exp_r) * n);
+      mont_reduction_ n nInv_u64 exp_r res (i + 1)
+      end
+    else c
+
 val mont_reduction:
-    modBits:size_nat{1 < modBits} ->
-    r:nat{r = pow2 (modBits + 2) /\ 0 < r} ->
-    n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
-    c:nat{c < r * n} -> Pure (elem (n + n))
+    n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
+    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
+    c:bignum{c < r * n} -> Pure (elem (n + n))
     (requires (True))
     (ensures (fun res -> res % n == (c / r) % n))
-
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
-
-let mont_reduction modBits r n n' c =
-    let c1 = c % r in
-    assert (0 <= c1 /\ c1 <= r);
-    let m = (c1 * n') % r in
-    assert (0 <= m /\ m < r);
-    let m = r - m in
-    assert (0 < m /\ m <= r);
-    let res = (c + n * m) / r in
-    assert (res >= 0);
-    assert (c + n * m <= c + n * r);
-    lemma_div_le (c + n * m) (c + n * r) r;
-    //assert (res <= (c + n * r) / r);
-    division_addition_lemma c r n;
-    //assert (res <= c / r + n);
-    //assert (c < r * n);
-    division_addition_lemma 0 r n;
-    //assert (res < n + n);
-    lemma_mont_reduction res r c n m;
+    #reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
+let mont_reduction n nInv_u64 exp_r r c =
+    let tmp = mont_reduction_ n nInv_u64 exp_r c 0 in
+    assert (tmp % n == c % n /\ tmp < c + (beta_i exp_r) * n);
+    let res = tmp / r in
+    assert (res % n = (tmp / r) % n);
+    lemma_mod_mult_div_1 tmp r n;
+    assert ((tmp / r) % n == ((c % n) / r) % n);
+    lemma_mod_mult_div_1 c r n;
+    assert (res % n == (c / r) % n);
+    assert (tmp < r * n + r * n);
+    assert (tmp < r * (n + n));
+    division_addition_lemma 0 r (n + n);
+    assert (res < n + n);
     res
 
 val mul_mod_mont:
     x0:size_nat ->
-    modBits:size_nat{1 < modBits} ->
-    r:nat{r = pow2 (modBits + 2) /\ 0 < r} ->
-    n:nat{1 < n /\ 4 * n < r /\ r <= pow2 (pow2 x0)} -> n':bignum ->
+    n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
+    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
     a:elem (n + n) -> b:elem (n + n) -> Pure (elem (n + n))
     (requires (True))
     (ensures (fun res -> res % n == (a * b / r) % n))
-
-#reset-options "--z3rlimit 50 --max_fuel 0"
-
-let mul_mod_mont x0 modBits r n n' a b =
+let mul_mod_mont x0 n nInv_u64 exp_r r a b =
     //let c = karatsuba x0 a b in
     let c = a * b in
-    assert (c < 4 * n * n);
-    //assert (c < r * n);
-    mont_reduction modBits r n n' c
+    assume (c < r * n);
+    mont_reduction n nInv_u64 exp_r r c
 
 val to_mont:
-    modBits:size_nat{1 < modBits} ->
-    r:nat{r = pow2 (modBits + 2) /\ 0 < r} ->
-    n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
+    x0:size_nat ->
+    n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
+    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
     r2:elem n -> a:elem n -> Pure (elem (n + n))
     (requires (r2 == (r * r) % n))
     (ensures (fun res -> res % n == (a * r) % n))
 
-#reset-options "--z3rlimit 150 --max_fuel 0"
-
-let to_mont modBits r n n' r2 a =
+let to_mont x0 n nInv_u64 exp_r r r2 a =
     let c = a * r2 in
     assert (c == a * ((r * r) % n));
-    assert (c < 4 * n * n);
-    let res = mont_reduction modBits r n n' c in
+    assume (c < r * n);
+    let res = mont_reduction n nInv_u64 exp_r r c in
     assert (res % n == ((a * ((r * r) % n)) / r) % n);
     lemma_mod_div_simplify res a r n;
     res
 
 val from_mont:
-    modBits:size_nat{1 < modBits} ->
-    r:nat{r = pow2 (modBits + 2) /\ 0 < r} ->
-    n:nat{1 < n /\ 4 * n < r} -> n':bignum ->
+    x0:size_nat ->
+    n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
+    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
     a_r:elem (n + n) -> Pure (elem n)
     (requires (True))
     (ensures (fun res -> res == (a_r / r) % n))
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
-
-let from_mont modBits r n n' a_r =
-    let m = (a_r * n') % r in
-    assert (0 <= m /\ m < r);
-    let m = r - m in
-    assert (0 < m /\ m <= r);
-    let res = (a_r + n * m) / r in
-    assert (a_r + n * m <= a_r + n * r);
-    lemma_div_le (a_r + n * m) (a_r + n * r) r;
-    //assert (res <= (a_r + n * r) / r);
-    division_addition_lemma a_r r n;
-    //assert (res <= a_r / r + n);
-    small_division_lemma_1 a_r r;
-    //assert (res <= n);
-    lemma_mont_reduction_1 res r a_r n m;
+let from_mont x0 n nInv_u64 exp_r r a_r =
+    let tmp = mont_reduction_ n nInv_u64 exp_r a_r 0 in
+    assert (tmp % n == a_r % n /\ tmp < a_r + (beta_i exp_r) * n);
+    let res = tmp / r in
     res
 
-val is_bit_set: a:bignum -> ind:size_nat -> Tot bool
-let is_bit_set a ind = if (a / pow2 ind > 0) then true else false
+val mod_inv_u64_:
+  alpha:uint64 -> beta:uint64 -> ub:uint64 -> vb:uint64 -> i:size_nat{i <= 64} -> Tot uint64
+  (decreases (64 - i))
+let rec mod_inv_u64_ alpha beta ub vb i =
+  if (i < 64) then begin
+    let u_is_odd = u64 0 -. (ub &. u64 1) in
+    let beta_if_u_is_odd = beta &. u_is_odd in
+    let ub = ((ub ^. beta_if_u_is_odd) >>. (u32 1)) +. (ub &. beta_if_u_is_odd) in
 
-val degree_: a:bignum -> i:size_nat -> Tot size_nat (decreases i)
-let rec degree_ a i =
-  if i = 0 then 0
-  else
-    if is_bit_set a (i - 1) then i
-    else degree_ a (i - 1)
+    let alpha_if_u_is_odd = alpha &. u_is_odd in
+    let vb = (shift_right #U64 vb (u32 1)) +. alpha_if_u_is_odd in
+    mod_inv_u64_ alpha beta ub vb (i + 1) end 
+  else vb
 
-val degree: a:bignum -> aBits:size_nat -> Tot size_nat
-let degree a aBits = degree_ a aBits
+val mod_inv_u64: n0:uint64 -> Tot uint64
+let mod_inv_u64 n0 =
+  let alpha = shift_left #U64 (u64 1) (u32 63) in
+  let beta = n0 in
 
-val bn_lshift: a:bignum -> b:size_nat -> Tot bignum
-let bn_lshift a b = a * pow2 b
-
-val lemma_degree_decr_lt:
-    a:bignum -> da:size_nat -> b:bignum -> db:size_nat -> Lemma
-    (requires (a < b))
-    (ensures (da < db))
-let lemma_degree_decr_lt a da b db = admit()
-
-val lemma_degree_decr_le:
-    a:bignum -> da:size_nat -> b:bignum -> db:size_nat -> Lemma
-    (requires (a <= b))
-    (ensures (da <= db))
-let lemma_degree_decr_le a da b db = admit()
-
-// u >= v
-val shift_euclidean_mod_inv_:
-    du:size_nat -> u:bignum -> dv:size_nat{dv <= du} -> v:bignum{v <= u} ->
-    r:bignum -> s:bignum -> a:bignum -> m:bignum{s < m /\ r < m} -> Pure bignum
-    (requires (v % m == (s * a) % m /\ u % m == (r * a) % m))
-    (ensures (fun res -> v % m == (s * a) % m))
-    (decreases (du + dv))
-    
-#reset-options "--z3rlimit 50 --max_fuel 2"
-
-let rec shift_euclidean_mod_inv_ du u dv v r s a m =
-    if dv > 1 then begin
-      let f = du - dv in
-      let v_lshift_f = bn_lshift v f in
-      let f = if (u < v_lshift_f) then f - 1 else f in
-      let v_lshift_f = bn_lshift v f in
-      assume (0 < v_lshift_f /\ v_lshift_f <= u);
-      let u' = u - v_lshift_f in
-      assert (u' == u - v * (pow2 f));
-      
-      let tmp = (bn_lshift s f) % m in
-      let r' = if (r < tmp) then r + m - tmp else r - tmp in
-      assume (r' % m == (r - s * (pow2 f)) % m);
-      
-      assert (u % m - (pow2 f) * (v % m) == (r * a) % m - (pow2 f) * ((s * a) % m));
-      assume ((u - v * (pow2 f)) % m == (((r - s * (pow2 f)) % m) * a) % m);
-      assert (u' % m == ((r' % m) * a) % m);
-      assume (u' % m == (r'* a) % m);
-      
-      let du' = degree u' du in
-      lemma_degree_decr_lt u' du' u du;
-      if (u' < v) then begin
-        lemma_degree_decr_lt u' du' v dv;
-        shift_euclidean_mod_inv_ dv v du' u' s r' a m end
-      else begin
-        lemma_degree_decr_le v dv u' du';
-        shift_euclidean_mod_inv_ du' u' dv v r' s a m end
-      end
-    else begin
-      if dv = 0 then 0 // v = 0
-      else s // v = 1 ==> s = a^(-1) % m
-    end
-    
-//res = a^(-1) % m
-val shift_euclidean_mod_inv:
-    aBits:size_nat -> a:bignum -> 
-    mBits:size_nat{aBits < mBits} -> m:bignum{1 < m /\ a < m} -> Tot bignum
-let shift_euclidean_mod_inv aBits a mBits m =
-    shift_euclidean_mod_inv_ mBits m aBits a 0 1 a m
-
+  let ub = u64 1 in
+  let vb = u64 0 in
+  mod_inv_u64_ alpha beta ub vb 0
+  
 val mod_exp_:
     x0:size_nat ->
-    modBits:size_nat{1 < modBits /\ modBits < pow2 32} ->
-    r:nat{r = pow2 (modBits + 2) /\ r > 0} ->
-    n:nat{1 < n /\ 4 * n < r /\ r < pow2 (pow2 x0)} -> n':bignum ->
-    a:elem (n + n) -> b:nat -> acc:elem (n + n) -> Pure (elem (n + n))
+    n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
+    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
+    a:elem (n + n) -> b:bignum -> acc:elem (n + n) -> Pure (elem (n + n))
     (requires True)
     (ensures (fun res -> res % n == ((pow a b) * acc / pow r b) % n))
     (decreases b)
 
-#reset-options "--z3rlimit 150 --max_fuel 2"
-
-let rec mod_exp_ x0 modBits r n n' a b acc =
+let rec mod_exp_ x0 n nInv_u64 exp_r r a b acc =
     if b = 0
     then acc
     else begin
-        let a2 = mul_mod_mont x0 modBits r n n' a a in
+        let a2 = mul_mod_mont x0 n nInv_u64 exp_r r a a in
         let b2 = bn_div2 b in
         lemma_div_mod b 2;
         if (bn_is_even b) then begin
             assert (b = 2 * b2);
-            let res = mod_exp_ x0 modBits r n n' a2 b2 acc in
+	    let res = mod_exp_ x0 n nInv_u64 exp_r r a2 b2 acc in
             assert (res % n == ((pow a2 b2) * acc / pow r b2) % n); //from ind hypo
             lemma_mod_exp n a a2 b b2 acc r res;
             res end
         else begin
             assert (b = 2 * b2 + 1);
-            let acc' = mul_mod_mont x0 modBits r n n' a acc in
-            let res = mod_exp_ x0 modBits r n n' a2 b2 acc' in
+            let acc' = mul_mod_mont x0 n nInv_u64 exp_r r a acc in
+            let res = mod_exp_ x0 n nInv_u64 exp_r r a2 b2 acc' in
             assert (res % n == ((pow a2 b2) * acc' / pow r b2) % n); //from ind hypo
             lemma_mod_exp_1 n a a2 b b2 acc acc' r res;
             res end
         end
 
-val mod_exp:
-    x0:size_nat ->
-    modBits:size_nat{1 < modBits /\ modBits + 3 < pow2 32} ->
-    n:bignum{1 < n /\ n < pow2 modBits /\ pow2 (modBits + 2) < pow2 (pow2 x0)} ->
-    a:elem n -> b:bignum -> Pure (elem n)
-    (requires True)
-    (ensures (fun res -> res == (pow a b) % n))
-
-#reset-options "--z3rlimit 150 --max_fuel 0"
-
 let mod_exp x0 modBits n a b =
-    let r = pow2 (2 + modBits) in
-    lemma_r_n modBits r n;
-    let n' = shift_euclidean_mod_inv modBits n (3 + modBits) r in
+    let nLen = (modBits - 1) / 64 + 1 in
+    let exp_r = nLen + 1 in
+    let r = beta_i exp_r in
+    //lemma_r_n modBits r n;
+    let n0 = n % pow2 64 in
+    let n' = mod_inv_u64 (u64 n0) in
+    let nInv_u64 = uint_to_nat #U64 n' in
     let r2 = (r * r) % n in
-    let a_r = to_mont modBits r n n' r2 a in
-    let acc_r = to_mont modBits r n n' r2 1 in
-    let res_r = mod_exp_ x0 modBits r n n' a_r b acc_r in
-    lemma_mod_exp_2 n a a_r b acc_r r res_r;
-    let res = from_mont modBits r n n' res_r in
-    lemma_mod_mult_div_1 res_r r n;
-    lemma_mod_mult_div_1 ((pow a b) * r) r n;
-    multiple_division_lemma (pow a b) r;
+    let a_r = to_mont x0 n nInv_u64 exp_r r r2 a in
+    let acc_r = to_mont x0 n nInv_u64 exp_r r r2 1 in
+    let res_r = mod_exp_ x0 n nInv_u64 exp_r r a_r b acc_r in
+    //lemma_mod_exp_2 n a a_r b acc_r r res_r;
+    let res = from_mont x0 n nInv_u64 exp_r r res_r in
+    //lemma_mod_mult_div_1 res_r r n;
+    //lemma_mod_mult_div_1 ((pow a b) * r) r n;
+    //multiple_division_lemma (pow a b) r;
     res
 
 val rsa_blinding:
