@@ -148,3 +148,15 @@ let shake128 (inputByteLen:size_nat) (input:lbytes inputByteLen) (outputByteLen:
 
 let shake256 (inputByteLen:size_nat) (input:lbytes inputByteLen) (outputByteLen:size_nat) : lbytes outputByteLen =
   keccak 1088 512 inputByteLen input (u8 0x1F) outputByteLen
+
+let sha3_224 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 28 =
+  keccak 1152 448 inputByteLen input (u8 0x06) 28
+
+let sha3_256 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 32 =
+  keccak 1088 512 inputByteLen input (u8 0x06) 32
+
+let sha3_384 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 48 =
+  keccak 832 768 inputByteLen input (u8 0x06) 48
+
+let sha3_512 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 64 =
+  keccak 576 1024 inputByteLen input (u8 0x06) 64
