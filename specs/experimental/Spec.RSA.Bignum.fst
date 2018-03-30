@@ -111,8 +111,8 @@ val beta_i: i:size_nat -> Tot (res:bignum{res = pow2 (64 * i) /\ res > 0})
 let beta_i i = pow2 (64 * i)
 
 val lemma_beta_mul_by_beta_i: i:size_nat{i + 1 < max_size_t} -> Lemma
-  (requires (True))
-  (ensures (beta * beta_i i == beta_i (i + 1)))
+    (requires (True))
+    (ensures (beta * beta_i i == beta_i (i + 1)))
 let lemma_beta_mul_by_beta_i i = admit()
 
 val lemma_beta_ij_lq: i:size_nat -> j:size_nat -> Lemma
@@ -127,33 +127,33 @@ let lemma_mul_lt a b c = ()
 
 val mont_reduction_:
     n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
-    exp_r:size_nat{exp_r + 1 < max_size_t} ->
+    exp_r:size_nat{0 < exp_r /\ exp_r + 1 < max_size_t} ->
     c:bignum ->
     i:size_nat{i <= exp_r}-> Pure bignum
-    (requires (True))
-    (ensures (fun res -> res % n == c % n /\ res < c + (beta_i exp_r) * n))
+    (requires (True)) //c < c + (beta_i i) * n))
+    (ensures (fun res -> res % n == c % n /\ res < c + (beta_i i) * n))
     (decreases (exp_r - i))
     #reset-options "--z3rlimit 150 --max_fuel 2"
 let rec mont_reduction_ n nInv_u64 exp_r c i =
     if (i < exp_r) then begin
       let qi = (nInv_u64 * (get_ci c i)) % beta in
-      assert (qi < beta);
+      assert (0 <= qi /\ qi < beta);
       let res = c + qi * (beta_i i) * n in
-      lemma_mod_plus c (qi * beta_i i) n;
+      lemma_mod_plus c (qi * beta_i i) n; // res % n == c % n
       lemma_mul_lt qi beta ((beta_i i) * n);
       assert (res < c + beta * (beta_i i) * n);
       lemma_beta_mul_by_beta_i i;
-      assert (res < c + (beta_i (i + 1)) * n);
-      lemma_beta_ij_lq (i + 1) exp_r;
-      assert (beta_i (i + 1) <= beta_i exp_r);
-      assert (res < c + (beta_i exp_r) * n);
+      assert (res < c + (beta_i (i + 1)) * n); admit();
+      //lemma_beta_ij_lq (i + 1) exp_r;
+      //assert (beta_i (i + 1) <= beta_i exp_r);
+      //assert (res < c + (beta_i exp_r) * n);
       mont_reduction_ n nInv_u64 exp_r res (i + 1)
       end
     else c
 
 val mont_reduction:
     n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
-    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
+    exp_r:size_nat{0 < exp_r /\ exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
     c:bignum{c < r * n} -> Pure (elem (n + n))
     (requires (True))
     (ensures (fun res -> res % n == (c / r) % n))
@@ -166,7 +166,7 @@ let mont_reduction n nInv_u64 exp_r r c =
     lemma_mod_mult_div_1 tmp r n;
     assert ((tmp / r) % n == ((c % n) / r) % n);
     lemma_mod_mult_div_1 c r n;
-    assert (res % n == (c / r) % n);
+    //assert (res % n == (c / r) % n);
     assert (tmp < r * n + r * n);
     assert (tmp < r * (n + n));
     division_addition_lemma 0 r (n + n);
@@ -176,28 +176,28 @@ let mont_reduction n nInv_u64 exp_r r c =
 val mul_mod_mont:
     x0:size_nat ->
     n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
-    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
+    exp_r:size_nat{0 < exp_r /\ exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r /\ 4 * n < r} ->
     a:elem (n + n) -> b:elem (n + n) -> Pure (elem (n + n))
     (requires (True))
     (ensures (fun res -> res % n == (a * b / r) % n))
 let mul_mod_mont x0 n nInv_u64 exp_r r a b =
     //let c = karatsuba x0 a b in
     let c = a * b in
-    assume (c < r * n);
+    assert (c < 4 * n * n);
     mont_reduction n nInv_u64 exp_r r c
 
 val to_mont:
     x0:size_nat ->
     n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
-    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
+    exp_r:size_nat{0 < exp_r /\ exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r /\ 4 * n < r} ->
     r2:elem n -> a:elem n -> Pure (elem (n + n))
     (requires (r2 == (r * r) % n))
     (ensures (fun res -> res % n == (a * r) % n))
 
 let to_mont x0 n nInv_u64 exp_r r r2 a =
     let c = a * r2 in
+    assert (c < n * n);
     assert (c == a * ((r * r) % n));
-    assume (c < r * n);
     let res = mont_reduction n nInv_u64 exp_r r c in
     assert (res % n == ((a * ((r * r) % n)) / r) % n);
     lemma_mod_div_simplify res a r n;
@@ -206,7 +206,7 @@ let to_mont x0 n nInv_u64 exp_r r r2 a =
 val from_mont:
     x0:size_nat ->
     n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
-    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
+    exp_r:size_nat{0 < exp_r /\ exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r /\ 4 * n < r} ->
     a_r:elem (n + n) -> Pure (elem n)
     (requires (True))
     (ensures (fun res -> res == (a_r / r) % n))
@@ -215,40 +215,49 @@ let from_mont x0 n nInv_u64 exp_r r a_r =
     let tmp = mont_reduction_ n nInv_u64 exp_r a_r 0 in
     assert (tmp % n == a_r % n /\ tmp < a_r + (beta_i exp_r) * n);
     let res = tmp / r in
+    assert (res % n = (tmp / r) % n);
+    lemma_mod_mult_div_1 tmp r n;
+    assert ((tmp / r) % n == ((a_r % n) / r) % n);
+    lemma_mod_mult_div_1 a_r r n;
+    assert (tmp < r + r * n);
+    assert (tmp < r * (1 + n));
+    division_addition_lemma 0 r (1 + n);
+    assert (res < 1 + n); admit(); //todo: if res < n then small_modulo_lemma_1
     res
 
 val mod_inv_u64_:
-  alpha:uint64 -> beta:uint64 -> ub:uint64 -> vb:uint64 -> i:size_nat{i <= 64} -> Tot uint64
-  (decreases (64 - i))
+    alpha:uint64 -> beta:uint64 ->
+    ub:uint64 -> vb:uint64 -> i:size_nat{i <= 64} -> Tot uint64
+    (decreases (64 - i))
 let rec mod_inv_u64_ alpha beta ub vb i =
-  if (i < 64) then begin
-    let u_is_odd = u64 0 -. (ub &. u64 1) in
-    let beta_if_u_is_odd = beta &. u_is_odd in
-    let ub = ((ub ^. beta_if_u_is_odd) >>. (u32 1)) +. (ub &. beta_if_u_is_odd) in
+    if (i < 64) then begin
+      let u_is_odd = u64 0 -. (ub &. u64 1) in
+      let beta_if_u_is_odd = beta &. u_is_odd in
+      let ub = ((ub ^. beta_if_u_is_odd) >>. (u32 1)) +. (ub &. beta_if_u_is_odd) in
 
-    let alpha_if_u_is_odd = alpha &. u_is_odd in
-    let vb = (shift_right #U64 vb (u32 1)) +. alpha_if_u_is_odd in
-    mod_inv_u64_ alpha beta ub vb (i + 1) end 
-  else vb
+      let alpha_if_u_is_odd = alpha &. u_is_odd in
+      let vb = (shift_right #U64 vb (u32 1)) +. alpha_if_u_is_odd in
+      mod_inv_u64_ alpha beta ub vb (i + 1) end 
+    else vb
 
 val mod_inv_u64: n0:uint64 -> Tot uint64
 let mod_inv_u64 n0 =
-  let alpha = shift_left #U64 (u64 1) (u32 63) in
-  let beta = n0 in
+    let alpha = shift_left #U64 (u64 1) (u32 63) in
+    let beta = n0 in
 
-  let ub = u64 1 in
-  let vb = u64 0 in
-  mod_inv_u64_ alpha beta ub vb 0
+    let ub = u64 1 in
+    let vb = u64 0 in
+    mod_inv_u64_ alpha beta ub vb 0
   
 val mod_exp_:
     x0:size_nat ->
-    n:bignum{n > 0} -> nInv_u64:bignum{nInv_u64 < beta} ->
-    exp_r:size_nat{exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r} ->
+    n:bignum{n > 1} -> nInv_u64:bignum{nInv_u64 < beta} ->
+    exp_r:size_nat{0 < exp_r /\ exp_r + 1 < max_size_t} -> r:bignum{r == beta_i exp_r /\ 4 * n < r} ->
     a:elem (n + n) -> b:bignum -> acc:elem (n + n) -> Pure (elem (n + n))
     (requires True)
     (ensures (fun res -> res % n == ((pow a b) * acc / pow r b) % n))
     (decreases b)
-
+    #reset-options "--z3rlimit 150 --max_fuel 2"
 let rec mod_exp_ x0 n nInv_u64 exp_r r a b acc =
     if b = 0
     then acc
@@ -271,11 +280,17 @@ let rec mod_exp_ x0 n nInv_u64 exp_r r a b acc =
             res end
         end
 
+val mod_exp:
+    x0:size_nat -> modBits:size_nat{modBits > 0} ->
+    n:bignum{n > 1} -> a:elem n -> b:bignum -> Pure (elem n)
+    (requires True)
+    (ensures (fun res -> res == (pow a b) % n))
+    #reset-options "--z3rlimit 150 --max_fuel 0"
 let mod_exp x0 modBits n a b =
     let nLen = (modBits - 1) / 64 + 1 in
     let exp_r = nLen + 1 in
     let r = beta_i exp_r in
-    //lemma_r_n modBits r n;
+    assume (4 * n < r);
     let n0 = n % pow2 64 in
     let n' = mod_inv_u64 (u64 n0) in
     let nInv_u64 = uint_to_nat #U64 n' in
@@ -283,11 +298,11 @@ let mod_exp x0 modBits n a b =
     let a_r = to_mont x0 n nInv_u64 exp_r r r2 a in
     let acc_r = to_mont x0 n nInv_u64 exp_r r r2 1 in
     let res_r = mod_exp_ x0 n nInv_u64 exp_r r a_r b acc_r in
-    //lemma_mod_exp_2 n a a_r b acc_r r res_r;
+    lemma_mod_exp_2 n a a_r b acc_r r res_r;
     let res = from_mont x0 n nInv_u64 exp_r r res_r in
-    //lemma_mod_mult_div_1 res_r r n;
-    //lemma_mod_mult_div_1 ((pow a b) * r) r n;
-    //multiple_division_lemma (pow a b) r;
+    lemma_mod_mult_div_1 res_r r n;
+    lemma_mod_mult_div_1 ((pow a b) * r) r n;
+    multiple_division_lemma (pow a b) r;
     res
 
 val rsa_blinding:
