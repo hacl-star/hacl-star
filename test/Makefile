@@ -6,15 +6,17 @@ LIBSODIUM_HOME ?= $(HACL_HOME)/other_providers/libsodium/src/libsodium
 
 # Default snapshot. Variable can be overwritten to choose a snapshot
 SNAPSHOT_DIR = snapshots/hacl-c
+KREMLIB= $(HACL_HOME)/snapshots/kremlib
 
 #
 # Compiler and settings
 #
 
+#CC=clang
 CC=gcc-7
-KREMLIB= $(HACL_HOME)/snapshots/kremlib
-
 CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops --param max-unroll-times=20
+#CCOPTS = -Ofast -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon-fp-armv8 -fwrapv -fomit-frame-pointer -funroll-loops
+
 CFLAGS = $(CCOPTS) -I $(OPENSSL_HOME) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/crypto/ec \
 	-I $(OPENSSL_HOME)/crypto/include -I $(OPENSSL_HOME)/crypto/poly1305 \
 	-I $(LIBSODIUM_HOME)/include -L$(LIBSODIUM_HOME)/lib \
@@ -225,11 +227,21 @@ test-poly1305.exe:
 	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Poly1305_64.c test-files/test-poly.c -o test-poly1305.exe \
 		$(PERF_LIBS)
 
+test-poly1305-32.exe:
+	$(CC_BASE) $(HACL_HOME)/$(SNAPSHOT_DIR)/Hacl_Poly1305_32.c test-files/test-poly32.c -o test-poly1305-32.exe \
+		$(PERF_LIBS)
+
 test-unit-poly1305: test-poly1305.exe
 	./test-poly1305.exe unit-test
 
 test-perf-poly1305: test-poly1305.exe
 	./test-poly1305.exe perf
+
+test-unit-poly1305-32: test-poly1305-32.exe
+	./test-poly1305-32.exe unit-test
+
+test-perf-poly1305-32: test-poly1305-32.exe
+	./test-poly1305-32.exe perf
 
 #
 # Tests for Salsa20

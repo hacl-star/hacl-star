@@ -1,6 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
-#include "Random.h"
+#include "Hacl_Random.h"
 
 
 int32_t main()
@@ -17,9 +17,9 @@ int32_t main()
 
   printf("\nRandom (8 Bytes) = ");
   print_bytes((uint8_t*)&r64, 8);
-  
+
   printf("\nRandom (1024 Bytes) = ");
   print_bytes(r1024, 1024);
-  
+
   return exit_success;
 }

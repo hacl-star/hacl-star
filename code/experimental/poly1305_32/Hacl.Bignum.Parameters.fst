@@ -11,6 +11,7 @@ open Hacl.Cast
 
 open Hacl.Bignum.Constants
 
+
 (** The values of the prime for modular arithmetic **)
 inline_for_extraction let prime = prime
 
@@ -35,10 +36,10 @@ type seqelem_wide = s:Seq.seq wide{Seq.length s = len}
 
 (** Associates a weight in bits to each limb of the bigint *)
 inline_for_extraction val climb_size: l:FStar.UInt32.t{limb_size = FStar.UInt32.v l}
-inline_for_extraction let climb_size = assert_norm(pow2 32 > 44); 26ul
+inline_for_extraction let climb_size = assert_norm(pow2 32 > 26); 26ul
 
 val lemma_prime_limb_size: unit -> Lemma (pow2 (len * limb_size) > prime)
-let lemma_prime_limb_size () = assert_norm (pow2 (3 * 44) > pow2 130 - 5)
+let lemma_prime_limb_size () = assert_norm (pow2 (5 * 26) > pow2 130 - 5)
 
 open Hacl.UInt32
 
@@ -73,8 +74,8 @@ inline_for_extraction val limb_logor: a:limb -> b:limb -> Tot (c:limb{v c = UInt
 inline_for_extraction val limb_lognot: a:limb -> Tot (b:limb{v b = UInt.lognot (v a)})
 
 (* Shift operators *)
-inline_for_extraction val limb_shift_right: a:limb -> s:FStar.UInt32.t -> Tot (c:limb{FStar.UInt32.v s < limb_n ==> v c = (v a / (pow2 (FStar.UInt32.v s)))})
-inline_for_extraction val limb_shift_left: a:limb -> s:FStar.UInt32.t -> Tot (c:limb{FStar.UInt32.v s < limb_n ==> v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 limb_n)})
+inline_for_extraction val limb_shift_right: a:limb -> s:FStar.UInt32.t{FStar.UInt32.v s < limb_n} -> Tot (c:limb{v c = (v a / (pow2 (FStar.UInt32.v s)))})
+inline_for_extraction val limb_shift_left: a:limb -> s:FStar.UInt32.t{FStar.UInt32.v s < limb_n} -> Tot (c:limb{v c = ((v a * pow2 (FStar.UInt32.v s)) % pow2 limb_n)})
 
 inline_for_extraction val limb_eq_mask: a:limb -> b:limb -> Tot (c:limb{(v a = v b ==> v c = pow2 limb_n - 1) /\ (v a <> v b ==> v c = 0)})
 inline_for_extraction val limb_gte_mask: a:limb -> b:limb -> Tot (c:limb{(v a >= v b ==> v c = pow2 limb_n - 1) /\ (v a < v b ==> v c = 0)})
@@ -145,8 +146,8 @@ inline_for_extraction val wide_logor: a:wide -> b:wide -> Tot (c:wide{w c = UInt
 inline_for_extraction val wide_lognot: a:wide -> Tot (b:wide{w b = UInt.lognot (w a)})
 
 (* Shift operators *)
-inline_for_extraction val wide_shift_right: a:wide -> s:FStar.UInt32.t -> Tot (c:wide{FStar.UInt32.v s < wide_n ==> w c = (w a / (pow2 (FStar.UInt32.v s)))})
-inline_for_extraction val wide_shift_left: a:wide -> s:FStar.UInt32.t -> Tot (c:wide{FStar.UInt32.v s < wide_n ==> w c = ((w a * pow2 (FStar.UInt32.v s)) % pow2 wide_n)})
+inline_for_extraction val wide_shift_right: a:wide -> s:FStar.UInt32.t{FStar.UInt32.v s < limb_n} -> Tot (c:wide{w c = (w a / (pow2 (FStar.UInt32.v s)))})
+inline_for_extraction val wide_shift_left: a:wide -> s:FStar.UInt32.t{FStar.UInt32.v s < limb_n} -> Tot (c:wide{w c = ((w a * pow2 (FStar.UInt32.v s)) % pow2 wide_n)})
 
 inline_for_extraction val wide_eq_mask: a:wide -> b:wide -> Tot (c:wide{(w a = w b ==> w c = pow2 wide_n - 1) /\ (w a <> w b ==> w c = 0)})
 inline_for_extraction val wide_gte_mask: a:wide -> b:wide -> Tot (c:wide{(w a >= w b ==> w c = pow2 wide_n - 1) /\ (w a < w b ==> w c = 0)})
@@ -193,6 +194,8 @@ inline_for_extraction let wide_lte_mask a b = Hacl.UInt64.lte_mask a b
 inline_for_extraction let limb_to_wide x = sint32_to_sint64 x
 inline_for_extraction let wide_to_limb x = sint64_to_sint32 x
 
+#set-options "--z3rlimit 500 --max_fuel 0" 
+
 inline_for_extraction let mul_wide x y =
   Math.Lemmas.pow2_plus 32 32;
   Hacl.UInt64.mul (limb_to_wide x) (limb_to_wide y)
@@ -200,3 +203,14 @@ inline_for_extraction let mul_wide x y =
 inline_for_extraction let uint64_to_limb x = Math.Lemmas.modulo_lemma (FStar.UInt64.v x) (pow2 32);
   uint64_to_sint32 x
 inline_for_extraction let uint32_to_limb x = uint32_to_sint32 x
+
+inline_for_extraction let mask_26 : x:limb{v x = pow2 26 - 1} =
+  assert_norm (0x3ffffff < pow2 64);
+  assert_norm (0x3ffffff = pow2 26 - 1);
+  uint32_to_limb 0x3fffffful
+
+inline_for_extraction let mask_26_wide : x:wide{w x = pow2 26 - 1} =
+  limb_to_wide mask_26
+
+inline_for_extraction let climb_mask = mask_26
+inline_for_extraction let climb_mask_wide = mask_26_wide

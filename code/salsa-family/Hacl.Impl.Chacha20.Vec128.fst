@@ -41,7 +41,7 @@ let as_state h st =
   let st = as_seq h st in let op_String_Access = Seq.index in
   Seq.Create.create_4 (vec_as_seq (st.[0])) (vec_as_seq (st.[1])) (vec_as_seq (st.[2])) (vec_as_seq (st.[3]))
 
-[@ "c_inline"]
+[@ "substitute"]
 val line:
   st:state ->
   a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s > 0 /\ U32.v s < 32} ->
@@ -50,7 +50,7 @@ val line:
     (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st /\
       as_state h1 st == Spec.line (U32.v a) (U32.v b) (U32.v d) s (as_state h0 st)
       ))
-[@ "c_inline"]
+[@ "substitute"]
 let line st a b d s =
   let h0 = ST.get() in
   let sa = st.(a) in
@@ -186,7 +186,7 @@ val lemma_modifies_double_round3:
   st:state ->
   st':state{disjoint st st'} ->
   st'':state{disjoint st st' /\ disjoint st' st''} ->
-  Lemma (requires (live h0 st /\ live h0 st' /\ live h0 st'' /\ HyperStack.equal_domains h0 h1 /\ 
+  Lemma (requires (live h0 st /\ live h0 st' /\ live h0 st'' /\ HyperStack.equal_domains h0 h1 /\
     HyperStack.equal_domains h1 h2 /\ HyperStack.equal_domains h2 h3 /\
     modifies_1 st h0 h1 /\ modifies_1 st' h1 h2 /\ modifies_1 st'' h2 h3))
         (ensures (modifies_3 st st' st'' h0 h3))
@@ -592,8 +592,8 @@ val chacha20_sum3:
     (requires (fun h -> live h k0 /\ live h k1 /\ live h k2 /\ live h st /\ invariant log h st /\
       (match Ghost.reveal log with
       | MkLog k n ctr -> UInt32.v ctr < pow2 32 - 2 /\
-      as_state h k0 == Spec.rounds (Spec.setup k n (UInt32.v ctr)) /\ 
-      as_state h k1 == Spec.rounds (Spec.setup k n (UInt32.v ctr+1)) /\ 
+      as_state h k0 == Spec.rounds (Spec.setup k n (UInt32.v ctr)) /\
+      as_state h k1 == Spec.rounds (Spec.setup k n (UInt32.v ctr+1)) /\
       as_state h k2 == Spec.rounds (Spec.setup k n (UInt32.v ctr+2)) )))
     (ensures  (fun h0 updated_log h1 -> live h1 k0 /\ live h1 k1 /\ live h1 k2 /\ live h1 st /\
       invariant log h0 st /\
@@ -952,6 +952,7 @@ let lemma_uint32s_fragments3 st =
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
+[@ "substitute"]
 val store_4_vec:
   output:uint8_p{length output = 64} ->
   v0:vec -> v1:vec -> v2:vec -> v3:vec ->
@@ -960,6 +961,7 @@ val store_4_vec:
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1 /\
       reveal_sbytes (as_seq h1 output) == FStar.Seq.(Spec.Lib.uint32s_to_le 16 (vec_as_seq v0 @| vec_as_seq v1 @|
                                                                 vec_as_seq v2 @| vec_as_seq v3)) ))
+[@ "substitute"]
 let store_4_vec output v0 v1 v2 v3 =
   let o0 = (Buffer.sub output 0ul  16ul) in
   let o1 = (Buffer.sub output 16ul 16ul) in
@@ -1119,7 +1121,7 @@ val lemma_live_update3:
         (ensures (live h1 buf /\ live h0 buf /\ as_seq h0 buf == as_seq h1 buf))
 let lemma_live_update3 h0 h1 st k0 k1 k2 buf =
   ()
-  
+
 
 val log_incrn:
   log:log_t -> m:UInt32.t -> Tot (log':log_t{match Ghost.reveal log, Ghost.reveal log' with
@@ -1205,7 +1207,7 @@ let update3 log output plain st =
   lemma_modifies_0_0 h1 h1'' h2;
   assert(live h2 plain);
   chacha20_core3 log k0 k1 k2 st;
-  let h3 = ST.get() in  
+  let h3 = ST.get() in
   lemma_live_update3 h2 h3 st k0 k1 k2 plain;
   lemma_live_update3 h2 h3 st k0 k1 k2 output;
   assert(live h3 plain);
@@ -1244,7 +1246,7 @@ let update3 log output plain st =
   no_upd_lemma_1 h3 h4 o0 k2;
   no_upd_lemma_1 h3 h4 o0 st;
   assert(as_seq h4 p1 == as_seq h0 p1);
-  assert(let ctr = (Ghost.reveal log).ctr in 
+  assert(let ctr = (Ghost.reveal log).ctr in
          let n   = (Ghost.reveal log).n in
          let k   = (Ghost.reveal log).k in
          flat_state_bytes h4 k1 == (Spec.chacha20_cipher k n (U32.v ctr+1)));
@@ -1258,7 +1260,7 @@ let update3 log output plain st =
   no_upd_lemma_1 h4 h5 o1 p2;
   no_upd_lemma_1 h4 h5 o1 k2;
   no_upd_lemma_1 h4 h5 o1 st;
-  assert(let ctr = (Ghost.reveal log).ctr in 
+  assert(let ctr = (Ghost.reveal log).ctr in
          let n   = (Ghost.reveal log).n in
          let k   = (Ghost.reveal log).k in
          flat_state_bytes h5 k2 == (Spec.chacha20_cipher k n (U32.v ctr+2)));

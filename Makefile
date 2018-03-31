@@ -31,6 +31,7 @@ display:
 	@echo "- 'make extract-all' will give you all versions of the C snapshots available"
 	@echo "- 'make extract-production' will remove and regenerate all C production snapshots available"
 	@echo "- 'make extract-experimental' will generate C code for experimental primitives"
+	@echo "- 'make build-experimental' will use CMake to generate experimental libraries with experimental features (no verification)"
 
 
 #
@@ -74,6 +75,8 @@ verify-nss:
 	$(MAKE) ct -C code/poly1305
 	$(MAKE) verify -C code/poly1305
 	$(MAKE) Spec.Poly1305.fst-verify -C specs
+	$(MAKE) ct -C code/poly1305_32
+	$(MAKE) verify -C code/poly1305_32
 
 
 #
@@ -205,7 +208,7 @@ package: .package-banner
 # Undocumented targets
 #
 
-experimental:
+build-experimental:
 	@echo $(CYAN)"# Compiling the HACL* library (with experimental features)"$(NORMAL)
 	mkdir -p build-experimental && cd build-experimental; \
 	cmake $(CMAKE_COMPILER_OPTION) -DExperimental=ON .. && make
