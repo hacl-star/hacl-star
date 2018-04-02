@@ -194,11 +194,25 @@ inline_for_extraction let wide_lte_mask a b = Hacl.UInt64.lte_mask a b
 inline_for_extraction let limb_to_wide x = sint32_to_sint64 x
 inline_for_extraction let wide_to_limb x = sint64_to_sint32 x
 
-#set-options "--z3rlimit 500 --max_fuel 0" 
+#set-options "--z3rlimit 150 --max_fuel 0"
+
+(* Prove that two wides having values fitting limbs, fit a wide when multiplied *)
+let lemma_two_limbs_as_wide_fits_mul_wide (x:wide) (y:wide) : Lemma
+  (requires (FStar.UInt.size (w x) FStar.UInt32.n /\ FStar.UInt.size (w y) FStar.UInt32.n))
+  (ensures  (FStar.UInt.size (w x * w y) FStar.UInt64.n)) =
+  assert(w x <= pow2 32 - 1);
+  assert(w y <= pow2 32 - 1);
+  assert(w x * w y < pow2 64);
+  assert(FStar.UInt.size ((pow2 32 - 1) * (pow2 32 - 1)) FStar.UInt64.n);
+  assert(FStar.UInt.size (w x * w y) FStar.UInt64.n)
+
+#reset-options
 
 inline_for_extraction let mul_wide x y =
-  Math.Lemmas.pow2_plus 32 32;
-  Hacl.UInt64.mul (limb_to_wide x) (limb_to_wide y)
+  let x_wide = limb_to_wide x in
+  let y_wide = limb_to_wide y in
+  lemma_two_limbs_as_wide_fits_mul_wide x_wide y_wide;
+  Hacl.UInt64.mul x_wide y_wide
 
 inline_for_extraction let uint64_to_limb x = Math.Lemmas.modulo_lemma (FStar.UInt64.v x) (pow2 32);
   uint64_to_sint32 x
