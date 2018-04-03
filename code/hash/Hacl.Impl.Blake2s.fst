@@ -234,7 +234,7 @@ let blake2_compress2 wv m const_sigma =
   (**) let h0 = ST.get () in
   loop #h0 (size Spec.rounds_in_f) wv
     (fun h0 -> let m0 = h0.[m] in Spec.blake2_round m0)
-    (fun i -> blake2_round wv m i const_sigma)
+    (fun i wv -> blake2_round wv m i const_sigma)
 
 
 val blake2_compress3_inner :
@@ -270,7 +270,7 @@ let blake2_compress3 wv s const_sigma =
   (**) let h0 = ST.get () in
   loop #h0 (size 8) s
     (fun h0 -> let wv0 = h0.[wv] in Spec.blake2_compress3_inner wv0)
-    (fun i -> blake2_compress3_inner wv i s const_sigma)
+    (fun i s -> blake2_compress3_inner wv i s const_sigma)
 
 
 val blake2_compress :
