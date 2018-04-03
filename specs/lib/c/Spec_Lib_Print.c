@@ -26,7 +26,7 @@ void Spec_Lib_Print_print_compare_display(uint32_t len, uint8_t* buffer1, uint8_
   for (int i = 0; i < len; i++) {
     res |= buffer1[i] ^ buffer2[i];
   }
-  if (res = 0) {
+  if (res == 0) {
     printf("Success !\n");
   } else {
     printf("Failure !\n");
