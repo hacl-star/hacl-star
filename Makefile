@@ -110,7 +110,7 @@ extract-experimental: extract-c-code-experimental
 #
 
 .build-banner:
-	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
+	@echo $(CYAN)"# Compiling the HACL* library"$(NORMAL)
 
 build-make:
 	$(MAKE) build/libhacl.so
