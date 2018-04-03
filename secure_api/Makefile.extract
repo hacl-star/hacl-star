@@ -109,6 +109,7 @@ include .depend.$(IMPL_CHOICE)
 
 # Now we get parallel lax-checking, which is nice.
 %.checked.lax:
+	@mkdir -p $(CACHE_DIR)
 	$(FSTAR) $<
 	touch $@
 
