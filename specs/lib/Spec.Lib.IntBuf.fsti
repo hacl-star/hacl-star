@@ -161,7 +161,7 @@ val loop:
   n:size_t ->
   buf:lbuffer a len ->
   spec:(h:mem -> GTot (i:size_nat{i < v n} -> LSeq.lseq a len -> Tot (LSeq.lseq a len))) ->
-  impl:(i:size_t{v i < v n} -> Stack unit
+  impl:(i:size_t{v i < v n} -> buf:lbuffer a (len) -> Stack unit
     (requires (fun h -> loop_inv h0 h #a len (v n) buf spec (v i)))
 	 (ensures (fun _ _ h1 -> loop_inv h0 h1 #a len (v n) buf spec (v i + 1)))) ->
   Stack unit
