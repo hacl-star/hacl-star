@@ -108,8 +108,10 @@ EXTRACT='* -FStar -CryptoTypes'
 include .depend.$(IMPL_CHOICE)
 
 # Now we get parallel lax-checking, which is nice.
-%.checked.lax:
-	@mkdir -p $(CACHE_DIR)
+# cwinter: The order-only dependency makes sure that F* will not run until 
+# .depend.* is re-generated. Otherwise it can happen that this rule is executed
+# in parallel with the .depend rule, where this rule uses the old .depend file.
+%.checked.lax: | .depend.$(IMPL_CHOICE)
 	$(FSTAR) $<
 	touch $@
 
