@@ -67,7 +67,10 @@ type ctrT i = x:u32 {x <=^ maxCtr i}
 // The PRF domain: an IV and a counter.
 
 type domain (i:id) = { iv:Block.iv (cipherAlg_of_id i); ctr:ctrT i }
-let incr (i:id) (x:domain i {x.ctr <^ maxCtr i}) = { iv = x.iv; ctr = x.ctr +^ 1ul }
+
+let incr_by (#i:id) (x:domain i) (n:u32{UInt.size (v x.ctr + v n) 32 /\ x.ctr +^ n <=^ maxCtr i}) =
+  { iv = x.iv; ctr = x.ctr +^ n }
+let incr (i:id) (x:domain i {x.ctr <^ maxCtr i}) = incr_by x 1ul
 
 let above (#i:id) (x:domain i) (z:domain i) = x.iv == z.iv /\ x.ctr >=^ z.ctr
 
@@ -194,8 +197,9 @@ let gen rgn i =
   (* | _ ->  *)
     (* begin *)
     push_frame();
+    assume (witnessed (region_contains_pred rgn));
     let mac_rgn : (r:region{r `HS.extends` rgn}) = new_region rgn in
-    let key = Buffer.create 0uy (keylen i) in
+    let key = Buffer.rcreate_mm mac_rgn 0uy (keylen i) in
     Bytes.random (v (keylen i)) key;
     let h = ST.get() in
     let keystate = Buffer.rcreate rgn 0uy (statelen i) in
@@ -207,6 +211,7 @@ let gen rgn i =
         mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i)))
       else ()
       in
+    Buffer.rfree key;
     pop_frame();
     State #i #rgn #mac_rgn keystate table
     // no need to demand prf i so far.

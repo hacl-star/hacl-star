@@ -156,7 +156,7 @@ val bytes_of_uint32: output:bytes{length output >= 4} -> m:u32 -> STL unit
     /\ U8.v (get h1 output 1) = (U32.v m / pow2 8) % pow2 8
     /\ U8.v (get h1 output 2) = (U32.v m / pow2 16) % pow2 8
     /\ U8.v (get h1 output 3) = (U32.v m / pow2 24)  % pow2 8 ))
-let rec bytes_of_uint32 output x =
+let bytes_of_uint32 output x =
   let b0 = uint32_to_uint8 (x) in
   let b1 = uint32_to_uint8 ((x >>^ 8ul)) in
   let b2 = uint32_to_uint8 ((x >>^ 16ul)) in
@@ -171,18 +171,10 @@ let rec bytes_of_uint32 output x =
 val memset: b:bytes -> z:u8 -> len:u32 -> STL unit
   (requires (fun h -> live h b /\ v len = length b))
   (ensures  (fun h0 _ h1 -> 
-    live h1 b /\ modifies_1 b h0 h1 /\ 
+    live h1 b /\ modifies_1 b h0 h1 /\
     Seq.equal (as_seq h1 b) (Seq.create (v len) z)))
-let rec memset b z len =
-  if len = 0ul then ()
-  else
-  begin
-    let h0 = ST.get() in
-    let i = len -^ 1ul in
-    memset (offset b 1ul) z i; // we should swap these two lines for tail recursion
-    b.(0ul) <- z; 
-    let h1 = ST.get() in 
-    let s = as_seq h1 b in
-    assert(Seq.index s 0 = z); // ...but this fails in the absence of framing
-    assert(Seq.equal s (Seq.cons z (Seq.slice s 1 (v len))))
-  end
+let memset b z len =
+  let h0 = ST.get() in
+  C.Loops.for 0ul len (fun h1 i -> live h1 b /\ modifies_1 b h0 h1 /\ i <= Buffer.length b /\
+    (forall (j:nat{j < i}).{:pattern Seq.index (as_seq h1 b) j} Seq.index (as_seq h1 b) j == z))
+  (fun i -> b.(i) <- z)

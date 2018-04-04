@@ -36,7 +36,7 @@ private inline_for_extraction let ( <<< ) = rotate_left
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val constant_setup_:
   c:Buffer.buffer H32.t{length c = 4} ->
@@ -48,7 +48,7 @@ val constant_setup_:
          v (Seq.index s 1) = 0x3320646e /\
          v (Seq.index s 2) = 0x79622d32 /\
          v (Seq.index s 3) = 0x6b206574)))
-[@ "substitute"]
+[@ Substitute]
 let constant_setup_ st =
   st.(0ul)  <- (uint32_to_sint32 0x61707865ul);
   st.(1ul)  <- (uint32_to_sint32 0x3320646eul);
@@ -56,7 +56,7 @@ let constant_setup_ st =
   st.(3ul)  <- (uint32_to_sint32 0x6b206574ul)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val constant_setup:
   c:Buffer.buffer H32.t{length c = 4} ->
@@ -64,14 +64,14 @@ val constant_setup:
     (requires (fun h -> live h c))
     (ensures  (fun h0 _ h1 -> live h1 c /\ modifies_1 c h0 h1
       /\ reveal_h32s (as_seq h1 c) == Seq.Create.create_4 c0 c1 c2 c3))
-[@ "substitute"]
+[@ Substitute]
 let constant_setup st =
   constant_setup_ st;
   let h = ST.get() in
   Seq.lemma_eq_intro (reveal_h32s (as_seq h st)) (Seq.Create.create_4 c0 c1 c2 c3)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val keysetup:
   st:Buffer.buffer H32.t{length st = 8} ->
@@ -82,12 +82,12 @@ val keysetup:
       /\ (let s = reveal_h32s (as_seq h1 st) in
          let k = reveal_sbytes (as_seq h0 k) in
          s == Spec.Lib.uint32s_from_le 8 k)))
-[@ "substitute"]
+[@ Substitute]
 let keysetup st k =
   uint32s_from_le_bytes st k 8ul
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val ivsetup:
   st:buffer H32.t{length st = 3} ->
@@ -98,12 +98,12 @@ val ivsetup:
       /\ (let s = reveal_h32s (as_seq h1 st) in
          let iv = reveal_sbytes (as_seq h0 iv) in
          s == Spec.Lib.uint32s_from_le 3 iv) ))
-[@ "substitute"]
+[@ Substitute]
 let ivsetup st iv =
   uint32s_from_le_bytes st iv 3ul
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val ctrsetup:
   st:buffer H32.t{length st = 1} ->
@@ -113,7 +113,7 @@ val ctrsetup:
     (ensures  (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1
       /\ (let s = as_seq h1 st in
          s == Spec.Lib.singleton (uint32_to_sint32 ctr)) ))
-[@ "substitute"]
+[@ Substitute]
 let ctrsetup st ctr =
   st.(0ul) <- uint32_to_sint32 ctr;
   let h = ST.get() in
@@ -133,7 +133,7 @@ private let lemma_setup h st =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 val setup:
   st:state ->
   k:uint8_p{length k = 32 /\ disjoint st k} ->
@@ -146,7 +146,7 @@ val setup:
          let k = reveal_sbytes (as_seq h0 k) in
          let n = reveal_sbytes (as_seq h0 n) in
          s == setup k n (U32.v c))))
-[@ "c_inline"]
+[@ CInline]
 let setup st k n c =
   let h0 = ST.get() in
   let stcst = Buffer.sub st 0ul 4ul in
@@ -179,7 +179,7 @@ let setup st k n c =
 
 let idx = a:U32.t{U32.v a < 16}
 
-[@ "substitute"]
+[@ Substitute]
 private
 val line:
   st:state ->
@@ -190,7 +190,7 @@ val line:
       /\ (let st1 = reveal_h32s (as_seq h1 st) in
          let st0 = reveal_h32s (as_seq h0 st) in
          st1 == line (U32.v a) (U32.v b) (U32.v d) s st0)))
-[@ "substitute"]
+[@ Substitute]
 let line st a b d s =
   let sa = st.(a) in let sb = st.(b) in
   st.(a) <- sa +%^ sb;
@@ -199,7 +199,7 @@ let line st a b d s =
   st.(d) <- sda <<< s
 
 
-[@ "c_inline"]
+[@ CInline]
 private
 val quarter_round:
   st:state ->
@@ -209,7 +209,7 @@ val quarter_round:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == quarter_round (U32.v a) (U32.v b) (U32.v c) (U32.v d) s)))
-[@ "c_inline"]
+[@ CInline]
 let quarter_round st a b c d =
   line st a b d 16ul;
   line st c d b 12ul;
@@ -217,7 +217,7 @@ let quarter_round st a b c d =
   line st c d b 7ul
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val column_round:
   st:state ->
@@ -226,7 +226,7 @@ val column_round:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == column_round s)))
-[@ "substitute"]
+[@ Substitute]
 let column_round st =
   quarter_round st 0ul 4ul 8ul  12ul;
   quarter_round st 1ul 5ul 9ul  13ul;
@@ -234,7 +234,7 @@ let column_round st =
   quarter_round st 3ul 7ul 11ul 15ul
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val diagonal_round:
   st:state ->
@@ -243,7 +243,7 @@ val diagonal_round:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == diagonal_round s)))
-[@ "substitute"]
+[@ Substitute]
 let diagonal_round st =
   quarter_round st 0ul 5ul 10ul 15ul;
   quarter_round st 1ul 6ul 11ul 12ul;
@@ -251,7 +251,7 @@ let diagonal_round st =
   quarter_round st 3ul 4ul 9ul  14ul
 
 
-[@ "c_inline"]
+[@ CInline]
 private
 val double_round:
   st:buffer H32.t{length st = 16} ->
@@ -260,7 +260,7 @@ val double_round:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == double_round s)))
-[@ "c_inline"]
+[@ CInline]
 let double_round st =
     column_round st;
     diagonal_round st
@@ -268,7 +268,7 @@ let double_round st =
 
 #reset-options " --max_fuel 0 --z3rlimit 500"
 
-[@ "c_inline"]
+[@ CInline]
 val rounds:
   st:state ->
   Stack unit
@@ -276,7 +276,7 @@ val rounds:
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1
       /\ (let s = reveal_h32s (as_seq h0 st) in let s' = reveal_h32s (as_seq h1 st) in
          s' == Spec.Chacha20.rounds s)))
-[@ "c_inline"]
+[@ CInline]
 let rounds st =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
@@ -297,7 +297,7 @@ let rounds st =
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 val sum_states:
   st:state ->
   st':state{disjoint st st'} ->
@@ -306,12 +306,12 @@ val sum_states:
     (ensures  (fun h0 _ h1 -> live h0 st /\ live h1 st /\ live h0 st' /\ modifies_1 st h0 h1
       /\ (let s1 = as_seq h1 st in let s = as_seq h0 st in let s' = as_seq h0 st' in
          s1 == seq_map2 (fun x y -> H32.(x +%^ y)) s s')))
-[@ "c_inline"]
+[@ CInline]
 let sum_states st st' =
   in_place_map2 st st' 16ul (fun x y -> H32.(x +%^ y))
 
 
-[@ "c_inline"]
+[@ CInline]
 val copy_state:
   st:state ->
   st':state{disjoint st st'} ->
@@ -319,7 +319,7 @@ val copy_state:
     (requires (fun h -> live h st /\ live h st'))
     (ensures (fun h0 _ h1 -> live h1 st /\ live h0 st' /\ modifies_1 st h0 h1
       /\ (let s = as_seq h0 st' in let s' = as_seq h1 st in s' == s)))
-[@ "c_inline"]
+[@ CInline]
 let copy_state st st' =
   Buffer.blit st' 0ul st 0ul 16ul;
   let h = ST.get() in
@@ -392,7 +392,7 @@ let lemma_state_counter k n c = ()
 
 #reset-options "--max_fuel 0  --z3rlimit 400"
 
-[@ "c_inline"]
+[@ CInline]
 private
 val chacha20_core:
   log:log_t ->
@@ -409,7 +409,7 @@ val chacha20_core:
          (match Ghost.reveal log, Ghost.reveal updated_log with
          | MkLog k n, MkLog k' n' ->
              key == chacha20_core stv /\ k == k' /\ n == n'))))
-[@ "c_inline"]
+[@ CInline]
 let chacha20_core log k st ctr =
   let h_0 = ST.get() in
   st.(12ul) <- uint32_to_sint32 ctr;
@@ -426,7 +426,7 @@ let chacha20_core log k st ctr =
   Ghost.elift1 (fun l -> match l with | MkLog k n -> MkLog k n) log
 
 
-[@ "c_inline"]
+[@ CInline]
 val chacha20_block:
   log:log_t ->
   stream_block:uint8_p{length stream_block = 64} ->
@@ -440,7 +440,7 @@ val chacha20_block:
          match Ghost.reveal log, Ghost.reveal updated_log with
          | MkLog k n, MkLog k' n' ->
              block == chacha20_block k n (U32.v ctr) /\ k == k' /\ n == n')))
-[@ "c_inline"]
+[@ CInline]
 let chacha20_block log stream_block st ctr =
   (**) let hinit = ST.get() in
   push_frame();
@@ -462,19 +462,19 @@ let chacha20_block log stream_block st ctr =
   (**) Ghost.elift1 (fun l -> match l with | MkLog k n -> MkLog k n) log'
 
 
-[@ "c_inline"]
+[@ CInline]
 val alloc:
   unit ->
   StackInline state
     (requires (fun h -> True))
     (ensures (fun h0 st h1 -> (st `unused_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
       /\ Map.domain h1.h == Map.domain h0.h))
-[@ "c_inline"]
+[@ CInline]
 let alloc () =
   create (uint32_to_sint32 0ul) 16ul
 
 
-[@ "c_inline"]
+[@ CInline]
 val init:
   st:state ->
   k:uint8_p{length k = 32 /\ disjoint st k} ->
@@ -485,7 +485,7 @@ val init:
       /\ invariant log h1 st
       /\ (match Ghost.reveal log with MkLog k' n' -> k' == reveal_sbytes (as_seq h0 k)
            /\ n' == reveal_sbytes (as_seq h0 n))))
-[@ "c_inline"]
+[@ CInline]
 let init st k n =
   setup st k n 0ul;
   let h = ST.get() in
@@ -537,7 +537,7 @@ val lemma_chacha20_counter_mode_2:
   k:Spec.key -> n:Spec.nonce -> ctr:UInt32.t{UInt32.v ctr + (length input / 64) < pow2 32} -> Lemma
     (Spec.CTR.counter_mode_blocks chacha20_ctx chacha20_cipher k n (UInt32.v ctr)
                                   (reveal_sbytes (as_seq hi input))
-    == (let prefix, block = Seq.split (as_seq hi input) (UInt32.v len - 64) in    
+    == (let prefix, block = Seq.split (as_seq hi input) (UInt32.v len - 64) in
       Math.Lemmas.lemma_mod_plus (Seq.length prefix) 1 (64);
       Math.Lemmas.lemma_div_le (Seq.length prefix) (UInt32.v len) 64;
       Spec.CTR.Lemmas.lemma_div (UInt32.v len) (64);

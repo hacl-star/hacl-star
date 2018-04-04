@@ -476,7 +476,7 @@ let finish #i s a t =
     let h = ST.get() in
     Math.Lemmas.lemma_mod_plus_distr_l (PS_.selem (as_seq h a)) (little_endian (as_seq h t)) (pow2 128);
     let dummy_r = Buffer.create 0uL 3ul in
-    let dummy_m = Buffer.create 42uy 0ul in
+    let dummy_m = C.Nullity.null FStar.UInt8.t (* Buffer.create 42uy 0ul *) in
     let h' = ST.get() in
     PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.mk_state dummy_r a') t dummy_m 0uL s;
     let h'' = ST.get() in

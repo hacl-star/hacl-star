@@ -8,7 +8,7 @@ KRML=$(KRML_BIN) $(KREMLIN_ARGS) $(INCLUDES) -tmpdir tube \
 	-drop Prims,Hacl.Constants,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,FStar,Hacl.Cast # -ccopt '-Wno-pointer-sign'
 
 HINTS_ENABLED?=--use_hints
-FSTAR_INCLUDES=--include $(KREMLIN_HOME)/kremlib $(INCLUDE_DIRS)
+FSTAR_INCLUDES=--include $(KREMLIN_HOME)/kremlib $(addprefix --include ,$(INCLUDE_DIRS))
 FSTARB=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(FSTAR_INCLUDES)
 
 TUBE_FILES=Hacl.Tube.Receive.fst Hacl.Tube.Send.fst
@@ -34,6 +34,9 @@ tube-lax: Hacl.Tube.Receive.fst Hacl.Tube.Send.fst
 	$(FSTARB) $^
 %.fsti-verify: %.fsti
 	$(FSTARB) $^
+
+%.fsti-in:
+	@echo $(FSTAR_INCLUDES) $(HINTS_ENABLED) --debug yes
 
 all-ver: $(addsuffix -verify, $(TUBE_FILES))
 

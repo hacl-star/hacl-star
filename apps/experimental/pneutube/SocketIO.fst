@@ -4,7 +4,6 @@ open FStar.HyperStack.All
 
 module ST = FStar.HyperStack.ST
 
-open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.Buffer
 open FStar.UInt8
@@ -16,7 +15,6 @@ open PaddedFileIO
 module U64 = FStar.UInt64
 module H64 = Hacl.UInt64
 module HS = FStar.HyperStack
-module HH = FStar.HyperHeap
 
 
 (* The region in which sockets live *)

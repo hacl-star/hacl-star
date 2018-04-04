@@ -210,7 +210,7 @@ let constants_set_h_0 hash = hupd64_8 hash
 
 #reset-options " --max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val ws_part_1_core:
   ws_w    :uint64_p {length ws_w = v size_ws_w} ->
@@ -230,7 +230,7 @@ val ws_part_1_core:
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 let ws_part_1_core ws_w block_w t =
   (**) let h0 = ST.get() in
   (**) let h = ST.get() in
@@ -283,7 +283,7 @@ let ws_part_1 ws_w block_w =
 
 #reset-options " --max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val ws_part_2_core:
   ws_w    :uint64_p {length ws_w = v size_ws_w} ->
@@ -303,7 +303,7 @@ val ws_part_2_core:
 
 #reset-options " --max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 let ws_part_2_core ws_w block_w t =
   (**) let h0 = ST.get () in
   let t16 = ws_w.(t -^ 16ul) in

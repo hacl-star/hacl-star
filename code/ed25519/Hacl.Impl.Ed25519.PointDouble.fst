@@ -11,7 +11,7 @@ open Hacl.Impl.Ed25519.ExtPoint
 
 #reset-options "--max_fuel 0 --z3rlimit 10"
 
-(* Specification 
+(* Specification
 
 let point_double (p:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
@@ -31,7 +31,7 @@ let point_double (p:ext_point) : Tot ext_point =
 *)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val copy:
   a:buffer Hacl.UInt64.t{length a = 5} ->
@@ -40,7 +40,7 @@ val copy:
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h0 a == as_seq h1 b))
-[@ "substitute"]
+[@ Substitute]
 let copy a b =
   let h = ST.get() in
   blit a 0ul b 0ul 5ul;
@@ -148,7 +148,7 @@ let point_double_step_1 p tmp =
   ()
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_double_step_2:
   p:point ->

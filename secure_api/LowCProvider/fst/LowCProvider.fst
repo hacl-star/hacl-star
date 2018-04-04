@@ -1,14 +1,23 @@
+(* This module provides an interface to AEAD callable from F* projects that
+ * intend to be extracted to OCaml. This specific file is not extracted by F* to
+ * ML, but rather realized by hand in ML.
+ *
+ * This interface relies on CryptoTypes and FStar.Bytes and has no dependency on
+ * Platform. *)
 module LowCProvider
 
-module ST = FStar.HyperStack.ST
-
 open FStar.HyperStack.All
+open FStar.Bytes
+open CryptoTypes
 
-open Platform.Bytes
-open CoreCrypto
+// JP: for the C build, we currently do not ignore the client's id and DO pass it down to AEAD, so
+// we need the id to be in scope when we hit this module
+let dummy_dependency = Crypto.Indexing.id
 
 assume type aead_state: Type0
+
 assume val alg: aead_state -> GTot aead_cipher
+
 type aes_impl =
   | HaclAES
   | ValeAES
@@ -16,7 +25,7 @@ type aes_impl =
 assume val aead_create:
   a: aead_cipher ->
   aes_impl ->
-  k: lbytes (aeadKeySize a) -> 
+  k: lbytes (aeadKeySize a) ->
   EXT (st:aead_state{alg st = a})
 
 assume val aead_encrypt:
@@ -32,4 +41,3 @@ assume val aead_decrypt:
   ad:bytes ->
   cipher:bytes{length cipher >= aeadTagSize (alg st)} ->
   EXT (o:option bytes)
-

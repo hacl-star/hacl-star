@@ -31,10 +31,13 @@ type aesImpl =
 
 val id:Type0
 
-inline_for_extraction val aeadAlg_of_id: i:id -> Tot aeadAlg
-inline_for_extraction val macAlg_of_id: i:id -> Tot macAlg
-inline_for_extraction val cipherAlg_of_id: i:id -> Tot cipherAlg
-inline_for_extraction val aesImpl_of_id: i:id -> Tot aesImpl
+val aeadAlg_of_id: i:id -> Tot aeadAlg
+
+val macAlg_of_id: i:id -> Tot macAlg
+
+val cipherAlg_of_id: i:id -> Tot cipherAlg
+
+val aesImpl_of_id: i:id -> Tot aesImpl
 
 val aeadAlg_cipherAlg: i:id -> Lemma
   (requires True)
