@@ -512,8 +512,8 @@ void exhaustive(void)
 int CDECL main(int argc, char **argv)
 {
     // Reference arguments to avoid compiler errors
-    argc;
-    argv;
+    (void)argc;
+    (void)argv;
 
     coverage();
     exhaustive();
