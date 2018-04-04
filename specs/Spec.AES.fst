@@ -405,6 +405,11 @@ let aes_key_block (st:aes_state) : Tot block =
   let st = aes_init k n_len n in
   aes_key_block st *)
 
+let aes_key_block1 (k:block) (n:lseq uint8 12) : Tot block = 
+  let st = aes_init k n in
+  let st = aes_set_counter st 1 in
+  aes_key_block st
+
 let aes128_cipher =
   Spec.CTR.Cipher aes_state 16 max_size_t 16 aes_init aes_set_counter aes_key_block
 

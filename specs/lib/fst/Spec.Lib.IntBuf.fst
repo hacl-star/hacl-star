@@ -95,3 +95,11 @@ let iter #a #len n spec impl input =
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       impl input in
   Spec.Lib.Loops.for (size 0) n inv f'
+
+let loop #h0 #a #len n buf spec impl =
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= v n}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      impl j buf in
+  Spec.Lib.Loops.for (size 0) n inv f'

@@ -344,7 +344,6 @@ let sign_step_4 msg len tmp_bytes tmp_ints =
   let rs'  = Buffer.sub tmp_bytes 160ul 32ul in
   let apre = Buffer.sub tmp_bytes 224ul 64ul in
   let a      = Buffer.sub apre 0ul 32ul in
-  let prefix = Buffer.sub apre 32ul 32ul in
   let h0 = ST.get() in
   Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2 h rs' a'' msg len;
   let h1 = ST.get() in

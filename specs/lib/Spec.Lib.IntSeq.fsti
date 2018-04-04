@@ -28,9 +28,10 @@ let op_String_Assignment #a #len = upd #a #len
 
 
 val repeat_range: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> Tot a) -> a -> Tot (a)
+val repeat_range_ghost: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> GTot a) -> a -> GTot (a)
 val repeati: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> Tot a) -> a -> Tot (a)
+val repeati_ghost: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> GTot a) -> a -> GTot a
 val repeat: #a:Type -> n:size_nat -> (a -> Tot a) -> a -> Tot (a)
-
 
 
 val fold_left_range: #a:Type -> #b:Type -> #len:size_nat -> min:size_nat -> max:size_nat{min <= max /\ max <= len} -> (i:size_nat{i >= min /\ i < max} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b)
@@ -69,6 +70,7 @@ val uint_to_bytes_le: #t:inttype -> u:uint_t t -> lbytes (numbytes t)
 val uint_to_bytes_be: #t:inttype -> u:uint_t t -> lbytes (numbytes t)
 val uint_from_bytes_le: #t:inttype -> lbytes (numbytes t) -> u:uint_t t
 val uint_from_bytes_be: #t:inttype -> lbytes (numbytes t) -> u:uint_t t
+
 val uints_to_bytes_le: #t:inttype -> #len:size_nat{len `op_Multiply` numbytes t <= max_size_t} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
 val uints_to_bytes_be: #t:inttype -> #len:size_nat{len `op_Multiply` numbytes t <= max_size_t} -> intseq t len -> lbytes (len `op_Multiply` numbytes t)
 val uints_from_bytes_le: #t:inttype -> #len:size_nat{len `op_Multiply` numbytes t <= max_size_t} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
@@ -76,9 +78,12 @@ val uints_from_bytes_be: #t:inttype -> #len:size_nat{len `op_Multiply` numbytes 
 
 //The following function is primarily meant for testing, do not rely on it in code.
 val as_list: #a:Type -> #len:size_nat -> lseq a len -> l:list a{List.Tot.length l = len}
+val concat: #a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 < maxint SIZE} -> lseq a len1 -> lseq a len2 -> lseq a (len1 + len2)
+let (@|) #a #len1 #len2 s1 s2 = concat #a #len1 #len2 s1 s2
 
- val split_blocks: #a:Type -> #len:size_nat -> lseq a len -> bs:size_nat{bs > 0} -> tuple2 (lseq (lseq a bs) (len / bs)) (lseq a (len % bs))
+val split_blocks: #a:Type -> #len:size_nat -> lseq a len -> bs:size_nat{bs > 0} -> tuple2 (lseq (lseq a bs) (len / bs)) (lseq a (len % bs))
 val concat_blocks: #a:Type -> #len:size_nat -> #bs:size_nat{bs > 0} -> lseq (lseq a bs) (len / bs) -> lseq a (len % bs) -> lseq a len
+
 
 (*
 val map_block: #a:Type -> #b:Type -> n:size_nat ->

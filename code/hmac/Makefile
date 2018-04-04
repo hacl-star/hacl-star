@@ -40,11 +40,11 @@ KREMLIN_ARGS+= \
 		$(KREMLIN_TESTLIB)
 
 hmac-c/out.krml: Hacl.HMAC.SHA2_256.fst Hacl.Test.HMAC.SHA2_256.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation -no-prefix Hacl.HMAC.SHA2_256 \
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation \
 	$^ -o $@
 
 hmac-c/Hacl_HMAC_SHA2_256.c: hmac-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -no-prefix Hacl.HMAC.SHA2_256 \
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
 		$^ -o $@
 
 test-hmac_sha2_256.exe: hmac-c/out.krml
