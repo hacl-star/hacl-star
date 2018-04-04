@@ -100,9 +100,7 @@ FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst \
 EXTRACT='* -FStar -CryptoTypes'
 # Automatic dependency analysis; the hack forces this target to be rebuilt
 # whenever the value of $(IMPL_CHOICE) changes.
-.depend.$(IMPL_CHOICE):
-	mkdir -p $(OUTPUT_DIR)
-	mkdir -p $(CACHE_DIR)
+.depend.$(IMPL_CHOICE): | $(CACHE_DIR) $(OUTPUT_DIR)
 	$(FSTAR) --extract $(EXTRACT) --dep full $(FSTAR_FILES) > .depend.$(IMPL_CHOICE)
 
 include .depend.$(IMPL_CHOICE)
@@ -117,6 +115,9 @@ include .depend.$(IMPL_CHOICE)
 
 # F* doesn't recursively create directories for --odir
 $(OUTPUT_DIR):
+	mkdir -p $@
+
+$(CACHE_DIR):
 	mkdir -p $@
 
 # Filling out the right invocations to generate a .krml
