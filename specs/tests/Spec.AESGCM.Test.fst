@@ -251,13 +251,16 @@ let test_aesgcm text_len text aad_len aad n_len n k expected i =
   IO.print_string " ===============================\n";
   let output = AEAD.aead_encrypt k n_len n text_len text aad_len aad in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
-  IO.print_string   "Expected ciphertext: ";
-  let test_expected : lbytes key_length = createL expected in
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
-  IO.print_string "\nComputed ciphertext: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
-  if result then IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :(\n"
+  if result then IO.print_string "Success!\n"
+  else (
+    IO.print_string "Failure :(\n";
+    IO.print_string   "Expected ciphertext: ";
+    let test_expected : lbytes key_length = createL expected in
+    List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
+    IO.print_string "\nComputed ciphertext: ";
+    List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
+    IO.print_string "\n"
+  )
 
 val test_ghash:
   expected:lbytes AEAD.blocksize ->
@@ -271,16 +274,19 @@ val test_ghash:
 let test_ghash expected text_len text aad_len aad k i =
   IO.print_string " ================================ GHASH ";
   IO.print_string (UInt8.to_string (u8_to_UInt8 i));
-  IO.print_string " ===============================\n";
+  IO.print_string " ================================\n";
   let output = AEAD.ghash text_len text aad_len aad (create 16 0uy) k in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
-  IO.print_string   "Expected tag: ";
-  let test_expected : lbytes key_length = createL expected in
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
-  IO.print_string "\nComputed tag: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
-  if result then IO.print_string "\nSuccess!\n"
-else IO.print_string "\nFailure :(\n"
+  if result then IO.print_string "Success!\n"
+  else (
+    IO.print_string "Failure :(\n";
+    IO.print_string   "Expected tag: ";
+    let test_expected : lbytes key_length = createL expected in
+    List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
+    IO.print_string "\nComputed tag: ";
+    List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
+    IO.print_string "\n"
+  )
 
 let test () =
   test_ghash test1_ghash test1_c_length test1_ciphertext test1_aad_length test1_aad test1_key 1;
