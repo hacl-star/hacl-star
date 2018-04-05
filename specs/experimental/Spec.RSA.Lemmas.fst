@@ -108,29 +108,6 @@ let lemma_mod_div_simplify res a r n =
     paren_mul_left a r r;
     multiple_division_lemma (a * r) r
 
-val lemma_mont_reduction:
-    res:nat -> r:nat{r > 0} -> c:nat -> n:nat{n > 0} -> m:nat -> Lemma
-    (requires (res == (c + n * m) / r /\ res < n + n))
-    (ensures (res % n == (c / r) % n))
-    
-let lemma_mont_reduction res r c n m =
-    let res : nat = (c + n * m) / r in
-    assert (res % n == ((c + m * n) / r) % n);
-    lemma_mod_mult_div_1 (c + m * n) r n;
-    lemma_mod_plus c m n;
-    lemma_mod_mult_div_1 c r n
-
-val lemma_mont_reduction_1:
-    res:nat -> r:nat{r > 0} -> c:nat -> n:nat{n > 0} -> m:nat -> Lemma
-    (requires (res == (c + m * n) / r /\ res <= n))
-    (ensures (res == (c / r) % n))
-    
-let lemma_mont_reduction_1 res r c n m =
-    if res < n then begin
-        lemma_mont_reduction res r c n m;
-        small_modulo_lemma_1 res n end
-    else admit() //res = n ==> c = 0
-
 (* LEMMAS for modular exponentiation *)
 
 val lemma_mult_abc:
@@ -140,14 +117,21 @@ let lemma_mult_abc a b c = ()
 
 val lemma_r_n:
     modBits:nat{modBits > 0} -> r:nat{r > 0} -> n:nat{n > 0} -> Lemma
-    (requires (r == pow2 (modBits + 2) /\ n < pow2 modBits))
+    (requires (r == pow2 (64 * ((modBits - 1) / 64 + 2)) /\ n < pow2 modBits))
     (ensures (4 * n < r))
     
 let lemma_r_n modBits r n =
-    pow2_plus 2 modBits;
+    assert (4 * n < 4 * pow2 modBits);
     assert_norm (pow2 2 = 4);
-    pow2_lt_compat (2 + modBits) modBits;
-    assert (pow2 modBits < 4 * pow2 modBits);
+    pow2_plus 2 modBits;
+    assert (4 * n < pow2 (modBits + 2));
+    euclidean_division_definition (modBits - 1) 64;
+    assert (64 * ((modBits - 1) / 64) = modBits - 1 - (modBits - 1) % 64);
+    let exp2_r = 64 * ((modBits - 1) / 64 + 2) in
+    assert (exp2_r = 64 * ((modBits - 1) / 64) + 128);
+    assert (modBits + 63 < exp2_r);
+    pow2_lt_compat (modBits + 63) (modBits + 2);
+    pow2_lt_compat exp2_r (modBits + 63);
     assert (4 * n < r)
 
 val lemma_mod_exp:
@@ -178,7 +162,7 @@ val lemma_mod_exp_1:
                acc' % n == (a * acc / r) % n))
     (ensures (res % n == ((pow a (2 * b2 + 1)) * acc / pow r (2 * b2 + 1)) % n))
 
-#reset-options "--z3rlimit 150 --max_fuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
 let lemma_mod_exp_1 n a a2 b b2 acc acc' r res =
     assert (res % n == ((pow a2 b2) * acc' / pow r b2) % n);
@@ -303,7 +287,7 @@ val lemma_exp_blinding_0_q1:
     (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % p <> 0))
     (ensures ((pow m (d + r * phi_n)) % p == (pow m d) % p))
 
-#reset-options "--z3rlimit 300 --max_fuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 0"
 
 let lemma_exp_blinding_0_q1 n phi_n p q d m r =
     lemma_exp_blinding_q n phi_n q p m;
@@ -312,13 +296,14 @@ let lemma_exp_blinding_0_q1 n phi_n p q d m r =
     assert (res % p == (pow m (d + r * phi_n)) % p);
     lemma_pow m d (r * phi_n);
     assert (res % p == ((pow m d) * (pow m (r * phi_n))) % p);
+    lemma_mod_mul_distr_l (pow m (r * phi_n)) (pow m d) p;
     lemma_pow_pow m phi_n r;
     lemma_pow_mod (pow m phi_n) r p;
+    assert ((pow m (r * phi_n)) % p == (pow ((pow m phi_n) % p) r) % p);
     assert ((pow (pow m phi_n) r) % p == (pow 1 r) % p);
     lemma_pow_1 r;
     modulo_lemma 1 p;
-    lemma_mod_mul_distr_l (pow m (r * phi_n)) (pow m d) p;
-    assert (res % p == (pow m d) % p)
+    assert (res % p == ((pow m d) * 1) % p) 
 
 val lemma_exp_blinding_0_q:
     n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
