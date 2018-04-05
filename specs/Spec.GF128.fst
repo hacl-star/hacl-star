@@ -21,12 +21,13 @@ type key   = lbytes keysize
 let encode (len:size_nat{len <= blocksize}) (w:lbytes len) : Tot elem =
   let b = create blocksize (u8 0) in
   let b = update_slice b 0 len w  in
-  to_felem (nat_from_bytes_be b)
+  to_felem #gf128 (nat_from_bytes_be b)
 
 let decode (e:elem) : Tot block = nat_to_bytes_be blocksize (from_felem e)
 
 let update (r:elem ) (len:size_nat{len <= blocksize}) (w:lbytes len) (acc:elem) : Tot elem =
-    (encode len w `fadd` acc) `fmul` r
+    (* Using fmul_intel here for hardware implementation of fmul *)
+    (encode len w `fadd` acc) `fmul_intel` r
 
 val poly: len:size_nat -> text:lbytes len -> r:elem ->  Tot (a:elem)  (decreases len)
 let poly len text r =
