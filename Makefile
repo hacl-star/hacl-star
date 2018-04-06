@@ -154,7 +154,7 @@ world: .clean-banner .clean-git .clean-snapshots
 
 ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) .base
-#	$(MAKE) build-make
+	$(MAKE) build-make
 #	$(MAKE) test-all
 	$(MAKE) package
 
