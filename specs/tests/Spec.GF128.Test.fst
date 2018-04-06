@@ -71,31 +71,25 @@ let test3_gmul_c_length: size_nat = 16
 (* Full GCM tests *)
 
 let test () =
-  (* let x : lbytes key_length = createL test2_gmul_hash_key in
+  let x : lbytes key_length = createL test2_gmul_hash_key in
   let x_int = nat_from_bytes_be x in
   let y : lbytes key_length = createL test2_gmul_ciphertext in
   let y_int = nat_from_bytes_be y in
   IO.print_string (Printf.sprintf "%d" x_int);
-  IO.print_string "\n";
+  IO.print_string " * ";
   IO.print_string (Printf.sprintf "%d" y_int);
-  IO.print_string "\n"; *)
+  IO.print_string "\n";
 
   let a = GF.encode 16 test2_gmul_ciphertext in
-  let b = GF.encode 16 test1_gmul_hash_key in
+  let b = GF.encode 16 test2_gmul_hash_key in
   let output = GaloisField.fmul_intel #GF.gf128 a b in
   let out = createL (GF.decode output) in
-  (* let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test1_gmul_expected in
-  IO.print_string   "Expected hash: ";
-  let test_expected : lbytes key_length = createL test1_gmul_expected in
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected); *)
-  IO.print_string "\nComputed: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list out);
+  let out_int = nat_from_bytes_be out in
+  IO.print_string "Computed: ";
+  IO.print_string (Printf.sprintf "%d" out_int);
   IO.print_string "\n";
-  (* if result then IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :(\n"; *)
-  ()
 
-  (* let output = GF.gmul test1_gmul_c_length test1_gmul_ciphertext test1_gmul_hash_key in
+  let output = GF.gmul test1_gmul_c_length test1_gmul_ciphertext test1_gmul_hash_key in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test1_gmul_expected in
   IO.print_string   "Expected hash: ";
   let test_expected : lbytes key_length = createL test1_gmul_expected in
@@ -123,4 +117,5 @@ let test () =
   IO.print_string "\nComputed hash: ";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
   if result then IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :(\n" *)
+  else IO.print_string "\nFailure :(\n";
+  ()
