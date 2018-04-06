@@ -98,7 +98,7 @@ SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* 
 
 .snapshots/hacl-c/makefiles:
 	for f in CMakeLists.txt Makefile; do \
-		(cat $(HACL_LICENSE) snapshots/makefiles/$$f ) > snapshots/hacl-c/$$f ; \
+		cp snapshots/makefiles/$$f snapshots/hacl-c/$$f ; \
 	done
 
 .snapshots/hacl-c/kremlib:
@@ -157,7 +157,7 @@ SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl
 
 .snapshots/tezos/makefiles:
 	for f in CMakeLists.Tezos.txt; do \
-		(cat $(HACL_LICENSE) snapshots/makefiles/$$f ) > snapshots/tezos/$$f ; \
+		cp snapshots/makefiles/$$f snapshots/tezos/$$f ; \
 	done
 
 .snapshots/tezos/kremlib:
