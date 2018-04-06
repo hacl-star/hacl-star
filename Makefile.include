@@ -2,9 +2,11 @@ UNAME := $(shell uname)
 .DEFAULT_GOAL=all
 
 ifndef HACL_HOME
-  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+	HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+	HACL_HOME:=$(HACL_HOME:/=)
 else
-  HACL_HOME:=$(abspath $(HACL_HOME))
+	HACL_HOME:=$(abspath $(HACL_HOME))
+	HACL_HOME:=$(HACL_HOME:/=)
 endif
 
 ifndef FSTAR_HOME

@@ -3,9 +3,23 @@
 #
 
 ifndef HACL_HOME
-  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+	HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+	HACL_HOME:=$(HACL_HOME:/=)
 else
-  HACL_HOME:=$(abspath $(HACL_HOME))
+	HACL_HOME:=$(abspath $(HACL_HOME))
+	HACL_HOME:=$(HACL_HOME:/=)
+endif
+
+ifndef FSTAR_HOME
+	FSTAR_HOME:=$(abspath $(HACL_HOME)/dependencies/FStar)
+else
+	FSTAR_HOME:=$(abspath $(FSTAR_HOME))
+endif
+
+ifndef KREMLIN_HOME
+	KREMLIN_HOME:=$(abspath $(HACL_HOME)/dependencies/kremlin)
+else
+	KREMLIN_HOME:=$(abspath $(KREMLIN_HOME))
 endif
 
 .PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove .snapshots/hacl-c/kremlib .snapshots/nss/kremlib .snapshots/nss/specs
