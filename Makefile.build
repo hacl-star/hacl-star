@@ -10,7 +10,28 @@ else
 	HACL_HOME:=$(HACL_HOME:/=)
 endif
 
-.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove .snapshots/hacl-c/kremlib .snapshots/nss/kremlib .snapshots/nss/specs
+#
+# Compilers and tools
+#
+
+HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
+HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
+GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
+
+ifeq ($(OS),Windows_NT)
+  GCC=x86_64-w64-mingw32-gcc.exe
+else
+  GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
+  CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=$(GCC)
+  ENABLE_LTO=-flto
+endif
+GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
+
+#
+# Targets
+#
+
+.PHONY: snapshot-collect snapshots-all snapshots-update snapshots-remove .%
 
 #
 # Extraction target for the stateful code
@@ -314,20 +335,3 @@ build/libhacl32.a:
 	mkdir -p build
 	$(MAKE) snapshots/hacl-c/libhacl32.a
 	cp snapshots/hacl-c/libhacl32.a build
-
-#
-# Compilers and tools
-#
-
-HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
-HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
-GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
-
-ifeq ($(OS),Windows_NT)
-  GCC=x86_64-w64-mingw32-gcc.exe
-else
-  GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
-  CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=$(GCC)
-  ENABLE_LTO=-flto
-endif
-GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
