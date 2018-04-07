@@ -40,11 +40,11 @@ all:
 	$(MAKE) test-vale         # Previously not tested
 	$(MAKE) test-vale-asm     # Previously 'make compile-vale'
 	$(MAKE) test-provider-lowc
-	# $(MAKE) -C openssl-engine
 	$(MAKE) unit-tests-hacl-c  # Previously 'make unit-tests' for 'hacl-c'
-#	$(MAKE) unit-tests-32-hacl-c  # Previously 'make unit-tests' for 'hacl-c'
+	$(MAKE) unit-tests-32-hacl-c  # Previously 'make unit-tests' for 'hacl-c'
 
 # Improvements
+# $(MAKE) -C openssl-engine
 # $(MAKE) all-unit-tests
 # $(MAKE) all-unit-tests-32
 # $(MAKE) test-perf-all
