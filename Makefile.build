@@ -88,6 +88,14 @@ else
 endif
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
+snapshots/snapshot-gcc: clean-c-code
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
+	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc
+
+snapshots/snapshot-gcc-unrolled: clean-c-code
+	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
+	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
+
 snapshots/snapshot-compcert: clean-c-code
 	if $(HAS_CCOMP); then $(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-cc compcert -funroll-loops 5 -fnouint128 -fnostruct-passing" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
 	if $(HAS_CCOMP); then $(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-compcert; fi
@@ -96,13 +104,6 @@ snapshots/snapshot-msvc: clean-c-code
 	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
 	if $(HAS_CL); then $(MAKE) snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-msvc; fi
 
-snapshots/snapshot-gcc: clean-c-code
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
-	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc
-
-snapshots/snapshot-gcc-unrolled: clean-c-code
-	$(MAKE) -B extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
-	$(MAKE) -B snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
 #
 # Production targets for C code
