@@ -168,7 +168,7 @@ snapshots/wireguard: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" KOPTS="$(KOPTS) -fc89" snapshots/snapshot-gcc-unrolled
 	rm -rf snapshots/wireguard
 	mkdir -p snapshots/wireguard
-	cp $(WIREGUARD_FILES) snapshots/wireguard
+	cp $(SNAPSHOT_WIREGUARD_FILES) snapshots/wireguard
 	$(MAKE) .snapshots/wireguard/kremlib
 
 
