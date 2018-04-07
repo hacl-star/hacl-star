@@ -196,6 +196,7 @@ snapshots/tezos: snapshots-remove-intermediates
 	rm -rf snapshots/tezos
 	mkdir -p snapshots/tezos
 	cp $(SNAPSHOT_TEZOS_FILES) ./snapshots/tezos
+	$(MAKE) .snapshots/tezos/makefiles
 	$(MAKE) .snapshots/tezos/kremlib
 	$(MAKE) .snapshots/tezos/experimental
 	mkdir -p snapshots/tezos/include
