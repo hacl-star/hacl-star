@@ -264,6 +264,9 @@ snapshots-intermediates:
 snapshots-production:
 	$(MAKE) snapshots/hacl-c
 	$(MAKE) snapshots/nss
+	$(MAKE) snapshots/riot
+	$(MAKE) snapshots/wireguard
+	$(MAKE) snapshots/tezos
 
 snapshots-remove-intermediates:
 	rm -rf snapshots/snapshot*
@@ -271,6 +274,9 @@ snapshots-remove-intermediates:
 snapshots-remove-production:
 	rm -rf snapshots/hacl-c
 	rm -rf snapshots/nss
+	rm -rf snapshots/riot
+	rm -rf snapshots/wireguard
+	rm -rf snapshots/tezos
 
 #
 # Building the shared library
