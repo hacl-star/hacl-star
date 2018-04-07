@@ -11,7 +11,7 @@ SNAPSHOT_DIR = snapshots/hacl-c
 # Compiler and settings
 #
 
-CC = gcc-7
+CC ?= gcc-7
 CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops --param max-unroll-times=20
 #CCOPTS = -Ofast -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon-fp-armv8 -fwrapv -fomit-frame-pointer -funroll-loops
 
