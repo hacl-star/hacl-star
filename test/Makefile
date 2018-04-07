@@ -125,7 +125,7 @@ test-snapshot-gcc-unrolled-libhacl.so:
 test-hacl-c-libhacl.so:
 	$(MAKE) test-snapshot-libhacl.so SNAPSHOT_DIR=snapshots/hacl-c
 
-test-hacl-c-compcert:
+test-hacl-c-compcert-libhacl.so:
 	$(MAKE) test-snapshot-libhacl.so CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/hacl-c-compcert
 
 test-snapshot-gcc-libhacl32.so:
@@ -137,7 +137,7 @@ test-snapshot-gcc-unrolled-libhacl32.so:
 test-hacl-c-libhacl32.so:
 	$(MAKE) test-snapshot-libhacl32.so SNAPSHOT_DIR=snapshots/hacl-c
 
-test-hacl-c-compcert:
+test-hacl-c-compcert-libhacl32.so:
 	$(MAKE) test-snapshot-libhacl32.so CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/hacl-c-compcert
 
 test-libhacl.so:
