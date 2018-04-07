@@ -16,7 +16,6 @@ endif
 # Extraction target for the stateful code
 #
 
-# BB: Add extract-c-apps to extract-c when libsodium is on the build machine
 extract-c: extract-c-code extract-c-crypto # extract-c-apps
 
 extract-c-code:
