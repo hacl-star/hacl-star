@@ -4,7 +4,7 @@ MAINTAINER Benjamin Beurdouche <benjamin.beurdouche@inria.fr>
 # Based on the original F* formula with Daniel Fabian
 
 # Define versions of dependencies
-ENV opamv 4.04.2
+ENV opamv 4.05.0
 ENV z3v 4.5.1.1f29cebd4df6-x64-ubuntu-14.04
 ENV fstarv stable
 ENV kremlinv master

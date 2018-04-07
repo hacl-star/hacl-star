@@ -2,9 +2,11 @@ UNAME := $(shell uname)
 .DEFAULT_GOAL=all
 
 ifndef HACL_HOME
-  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+	HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+	HACL_HOME:=$(HACL_HOME:/=)
 else
-  HACL_HOME:=$(abspath $(HACL_HOME))
+	HACL_HOME:=$(abspath $(HACL_HOME))
+	HACL_HOME:=$(HACL_HOME:/=)
 endif
 
 ifndef FSTAR_HOME
@@ -76,11 +78,6 @@ ifdef HACL_LICENSE
   KREMLIN_ARGS+=-header $(HACL_LICENSE)
 endif
 
-# Linux specific compilation instruction for PneuTube
-ifeq ($(UNAME), Linux)
-  KREMLIN_ARGS+=-ccopt -D_GNU_SOURCE
-endif
-
 #
 # FStar
 #
@@ -135,7 +132,7 @@ endif
 GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
 
 #
-# HaCl* generalized targets
+# HACL* generalized targets
 #
 
 ml-lib:
