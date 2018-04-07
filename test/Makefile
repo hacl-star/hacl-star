@@ -144,13 +144,17 @@ test-libhacl.so:
 	$(MAKE) test-snapshot-gcc-libhacl.so
 	$(MAKE) test-snapshot-gcc-unrolled-libhacl.so
 	$(MAKE) test-hacl-c-libhacl.so
+ifeq ($(HAS_CCOMP),true)
 	$(MAKE) test-hacl-c-compcert-libhacl.so
+endif
 
 test-libhacl32.so:
 	$(MAKE) test-snapshot-gcc-libhacl32.so
 	$(MAKE) test-snapshot-gcc-unrolled-libhacl32.so
 	$(MAKE) test-hacl-c-libhacl32.so
+ifeq ($(HAS_CCOMP),true)
 	$(MAKE) test-hacl-c-compcert-libhacl32.so
+endif
 
 #
 # Building snapshots
