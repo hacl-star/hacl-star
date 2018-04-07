@@ -35,7 +35,7 @@ CCOMP_OPTS=-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOUR
 
 all:
 	$(MAKE) test-code           # Previously 'make -C ../code test'
-#	$(MAKE) test-libhacl.so     # Previously 'make unit-tests' for 'hacl-c'
+	$(MAKE) test-libhacl.so     # Previously 'make unit-tests' for 'hacl-c'
 #	$(MAKE) test-vale            # Previously not tested
 #	$(MAKE) test-vale-asm        # Previously 'make compile-vale'
 
