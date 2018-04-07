@@ -136,25 +136,11 @@ test-all:
 	$(MAKE) -C test
 
 #
-# World
-#
-
-.base: verify extract-specs extract-all
-
-world: .clean-banner .clean-git .clean-snapshots
-	$(MAKE) verify
-	$(MAKE) extract-specs
-	$(MAKE) extract-all
-	$(MAKE) build-make
-	$(MAKE) test-all
-	$(MAKE) package
-
-#
 # CI
 #
 
 ci: .clean-banner .clean-git .clean-snapshots
-	$(MAKE) .base
+	$(MAKE) verify extract-specs extract-all
 	$(MAKE) build-make
 	$(MAKE) test-all
 	$(MAKE) package
