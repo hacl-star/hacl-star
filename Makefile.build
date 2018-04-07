@@ -140,6 +140,23 @@ snapshots/nss: snapshots-remove-intermediates
 	$(MAKE) .snapshots/nss/specs
 
 
+SNAPSHOT_RIOT_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
+	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*)
+
+.snapshots/riot/kremlib:
+	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
+		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/riot/$$f ; \
+	done
+
+snapshots/riot: snapshots-remove-intermediates
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc
+	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc-unrolled
+	rm -rf snapshots/riot
+	mkdir -p snapshots/riot
+	cp $(SNAPSHOT_RIOT_FILES) ./snapshots/riot
+	$(MAKE) .snapshots/riot/kremlib
+
+
 SNAPSHOT_WIREGUARD_FILES = $(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519*)
 
 .snapshots/wireguard/kremlib:
