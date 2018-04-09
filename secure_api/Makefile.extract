@@ -109,7 +109,7 @@ include .depend.$(IMPL_CHOICE)
 # cwinter: The order-only dependency makes sure that F* will not run until 
 # .depend.* is re-generated. Otherwise it can happen that this rule is executed
 # in parallel with the .depend rule, where this rule uses the old .depend file.
-%.checked.lax: | .depend.$(IMPL_CHOICE)
+%.checked.lax: | .depend.$(IMPL_CHOICE) $(CACHE_DIR) $(OUTPUT_DIR)
 	$(FSTAR) $<
 	touch $@
 
@@ -121,7 +121,7 @@ $(CACHE_DIR):
 	mkdir -p $@
 
 # Filling out the right invocations to generate a .krml
-$(OUTPUT_DIR)/%.krml:
+$(OUTPUT_DIR)/%.krml: | $(OUTPUT_DIR)
 	$(FSTAR) \
           $(subst $(CACHE_DIR)/,,$(subst .checked.lax,,$<)) \
 	  --codegen Kremlin \
@@ -129,7 +129,7 @@ $(OUTPUT_DIR)/%.krml:
 
 # ... and a .ml file. Note: it's hard to put these in two separate
 # sub-directories because they share the --odir option of F*.
-$(OUTPUT_DIR)/%.ml:
+$(OUTPUT_DIR)/%.ml: | $(OUTPUT_DIR)
 	$(FSTAR) \
 	  $(subst $(CACHE_DIR)/,,$(subst .checked.lax,,$<)) \
 	  --codegen OCaml \
