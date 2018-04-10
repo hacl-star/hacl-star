@@ -42,7 +42,7 @@ typedef struct quic_key quic_key;
 // (5) erase all secrets used for derivation.
 
 // con_id must be 8 bytes, salt must be the version-specific 20 bytes initial salt
-int MITLS_CALLCONV quic_derive_handshake_secrets(/*out*/ quic_secret *client_hs, /*out*/ quic_secret *server_hs, const char *con_id, size_t con_id_len, const char *salt, size_t salt_len);
+int MITLS_CALLCONV quic_derive_handshake_secrets(/*out*/ quic_secret *client_hs, /*out*/ quic_secret *server_hs, const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len);
 int MITLS_CALLCONV quic_crypto_tls_derive_secret(/*out*/ quic_secret *derived, const quic_secret *secret, const char *label);
 int MITLS_CALLCONV quic_crypto_derive_key(/*out*/quic_key **key, const quic_secret *secret);
 
@@ -51,7 +51,7 @@ int MITLS_CALLCONV quic_crypto_derive_key(/*out*/quic_key **key, const quic_secr
 // and 32 bytes for AES-256 and ChaCha20.
 // Using quic_crypto_derive_key is recommended over quic_crypto_create
 // The created key must be freed with quic_crypto_free_key
-int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const char *raw_key, const char *iv);
+int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsigned char *raw_key, const unsigned char *iv);
 
 // AEAD-encrypts plain with additional data ad, using counter sn,
 // writing plain_len + 16 bytes to the output cipher. The input and
@@ -62,25 +62,25 @@ int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const char
 //
 // NB: NOT DOT ENCRYPT TWICE WITH THE SAME KEY AND SN
 //
-int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, /*out*/ char *cipher, uint64_t sn, const char *ad, uint32_t ad_len, const char *plain, uint32_t plain_len);
+int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, /*out*/ unsigned char *cipher, uint64_t sn, const unsigned char *ad, uint32_t ad_len, const unsigned char *plain, uint32_t plain_len);
 
 // AEAD-decrypts cipher and authenticate additional data ad, using
 // counter; when successful, writes cipher_len - 16 bytes to the
 // output plain. The input and output buffers must not overlap.
 //
-int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, /*out*/ char *plain, uint64_t sn, const char *ad, uint32_t ad_len, const char *cipher, uint32_t cipher_len);
+int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, /*out*/ unsigned char *plain, uint64_t sn, const unsigned char *ad, uint32_t ad_len, const unsigned char *cipher, uint32_t cipher_len);
 
 // Keys allocated by quic_crypto_derive_key and quic_crypto_create must be freed
 int MITLS_CALLCONV quic_crypto_free_key(quic_key *key);
 
 // Auxiliary crypto functions, possibly useful elsewhere in QUIC.
 // Hash, HMAC and HKDF only suport SHA256, SHA384, and SHA512
-int MITLS_CALLCONV quic_crypto_hash(quic_hash a, /*out*/ char *hash, const char *data, size_t data_len);
-int MITLS_CALLCONV quic_crypto_hmac(quic_hash a, /*out*/ char *mac, const char *key, uint32_t key_len, const char *data, uint32_t data_len);
+int MITLS_CALLCONV quic_crypto_hash(quic_hash a, /*out*/ unsigned char *hash, const unsigned char *data, size_t data_len);
+int MITLS_CALLCONV quic_crypto_hmac(quic_hash a, /*out*/ unsigned char *mac, const unsigned char *key, uint32_t key_len, const unsigned char *data, uint32_t data_len);
 
-int MITLS_CALLCONV quic_crypto_hkdf_extract(quic_hash a, /*out*/ char *prk, const char *salt, uint32_t salt_len, const char *ikm, uint32_t ikm_len);
-int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, /*out*/ char *okm, uint32_t okm_len, const char *prk, uint32_t prk_len, const char *info, uint32_t info_len);
-int MITLS_CALLCONV quic_crypto_hkdf_quic_label(quic_hash a, /*out*/ char *info, /*out*/ size_t *info_len, const char *label, uint16_t key_len);
-int MITLS_CALLCONV quic_crypto_hkdf_tls_label(quic_hash a, /*out*/ char *info, /*out*/ size_t *info_len, const char *label);
+int MITLS_CALLCONV quic_crypto_hkdf_extract(quic_hash a, /*out*/ unsigned char *prk, const unsigned char *salt, uint32_t salt_len, const unsigned char *ikm, uint32_t ikm_len);
+int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, /*out*/ unsigned char *okm, uint32_t okm_len, const unsigned char *prk, uint32_t prk_len, const unsigned char *info, uint32_t info_len);
+int MITLS_CALLCONV quic_crypto_hkdf_quic_label(quic_hash a, /*out*/ unsigned char *info, /*out*/ size_t *info_len, const char *label, uint16_t key_len);
+int MITLS_CALLCONV quic_crypto_hkdf_tls_label(quic_hash a, /*out*/ unsigned char *info, /*out*/ size_t *info_len, const char *label);
 
 #endif /* end of include guard:  */
