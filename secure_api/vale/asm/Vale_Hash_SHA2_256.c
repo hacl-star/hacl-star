@@ -27,7 +27,7 @@ void Vale_Hash_SHA2_256_update(uint32_t *state, uint8_t *data) {
     data, 0, SHA256_BLOCK_SIZE_B);
 }
 
-void Vale_Hash_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint32_t *len) {
+void Vale_Hash_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint32_t len) {
   sha256_main_i_SHA256_Update((sha256_main_i_SHA256Context *) state,
     data, 0, (uint64_t) len);
 }
