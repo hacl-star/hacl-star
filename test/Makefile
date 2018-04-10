@@ -80,12 +80,12 @@ test-snapshot-libhacl.so:
 	cp $(HACL_HOME)/$(SNAPSHOT_DIR)/libhacl.so .
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	$(CCOMP) $(CCOMP_OPTS) $(FSTARH_CCOMP) \
-		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
+		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/api -I $(HACL_HOME)/snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
 		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
 		libhacl.so -o unit_tests.exe
 else
 	$(CC) $(CCOPTS) \
-		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
+		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/api -I $(HACL_HOME)/snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
 		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
 		libhacl.so -o unit_tests.exe
 endif
@@ -102,12 +102,12 @@ test-snapshot-libhacl32.so:
 	cp $(HACL_HOME)/$(SNAPSHOT_DIR)/libhacl32.so .
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	$(CCOMP) $(CCOMP_OPTS) $(FSTARH_CCOMP) \
-		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I ../snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
+		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/api -I ../snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
 		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
 		libhacl32.so -o unit_tests32.exe
 else
 	$(CC) $(CFLAGS) -DKRML_NOUINT128  \
-		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I ../snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
+		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/api -I ../snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
 		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
 		libhacl32.so -o unit_tests32.exe
 endif
@@ -146,17 +146,25 @@ test-hacl-c-compcert-libhacl32.so:
 test-libhacl.so:
 	$(MAKE) test-snapshot-gcc-libhacl.so
 	$(MAKE) test-snapshot-gcc-unrolled-libhacl.so
-	$(MAKE) test-hacl-c-libhacl.so
 ifeq ($(HAS_CCOMP),true)
-	$(MAKE) test-hacl-c-compcert-libhacl.so
+	$(MAKE) test-snapshot-compcert-libhacl.so
+	$(MAKE) test-snapshot-compcert-unrolled-libhacl.so
+endif
+ifeq ($(HAS_MSVC),true)
+	$(MAKE) test-snapshot-msvc-libhacl.so
+	$(MAKE) test-snapshot-msvc-unrolled-libhacl.so
 endif
 
 test-libhacl32.so:
 	$(MAKE) test-snapshot-gcc-libhacl32.so
 	$(MAKE) test-snapshot-gcc-unrolled-libhacl32.so
-	$(MAKE) test-hacl-c-libhacl32.so
 ifeq ($(HAS_CCOMP),true)
-	$(MAKE) test-hacl-c-compcert-libhacl32.so
+	$(MAKE) test-snapshot-compcert-libhacl32.so
+	$(MAKE) test-snapshot-compcert-unrolled-libhacl32.so
+endif
+ifeq ($(HAS_MSVC),true)
+	$(MAKE) test-snapshot-msvc-libhacl32.so
+	$(MAKE) test-snapshot-msvc-unrolled-libhacl32.so
 endif
 
 #
