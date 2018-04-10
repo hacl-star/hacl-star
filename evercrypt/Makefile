@@ -33,8 +33,8 @@ SOURCES		= \
   $(CODE_DIR)/ed25519/ed25519-c/Ed25519.c \
   $(CODE_DIR)/poly1305/poly-c/Poly1305_64.c \
   $(CODE_DIR)/hmac/hmac-c/HMAC_SHA2_256.c \
-  $(CODE_DIR)/api/aead-c/Chacha20Poly1305.c \
-  #$(CODE_DIR)/poly1305/poly-c/AEAD_Poly1305_64.c \
+  $(CODE_DIR)/poly1305/poly-c/AEAD_Poly1305_64.c \
+  #$(CODE_DIR)/api/aead-c/Chacha20Poly1305.c \
 
 OBJS		= $(patsubst %.c,%.o,$(SOURCES)) $(VALE_OBJS)
 
