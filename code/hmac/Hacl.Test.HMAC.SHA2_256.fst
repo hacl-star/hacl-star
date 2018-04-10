@@ -6,8 +6,8 @@ module ST = FStar.HyperStack.ST
 
 open FStar.Buffer
 
-module Hash = Hacl.Hash.SHA2_256
-module MAC = HMAC_SHA2_256
+module Hash = Hacl.Impl.SHA2_256
+module HMAC = Hacl.HMAC.SHA2_256
 
 
 val test_1: unit -> ST unit
@@ -42,7 +42,7 @@ let test_1 () =
     ] in
 
   (* Call the hash function *)
-  MAC.hmac output key key_len data data_len;
+  HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.String.of_literal "Test 1") expected output Hash.size_hash;
@@ -89,7 +89,7 @@ let test_2 () =
     ] in
 
   (* Call the hash function *)
-  MAC.hmac output key key_len data data_len;
+  HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.String.of_literal "Test 2") expected output Hash.size_hash;
@@ -129,7 +129,7 @@ let test_3 () =
     ] in
 
   (* Call the hash function *)
-  MAC.hmac output key key_len data data_len;
+  HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.String.of_literal "Test 3") expected output Hash.size_hash;
@@ -174,7 +174,7 @@ let test_4 () =
     ] in
 
   (* Call the hash function *)
-  MAC.hmac output key key_len data data_len;
+  HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.String.of_literal "Test 4") expected output Hash.size_hash;
@@ -211,7 +211,7 @@ let test_5 () =
     ] in
 
   (* Call the hash function *)
-  MAC.hmac output key key_len data data_len;
+  HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.String.of_literal "Test 5") expected output 16ul;
@@ -254,7 +254,7 @@ let test_6 () =
     ] in
 
   (* Call the hash function *)
-  MAC.hmac output key key_len data data_len;
+  HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.String.of_literal "Test 6") expected output Hash.size_hash;
@@ -309,7 +309,7 @@ let test_7 () =
     ] in
 
   (* Call the hash function *)
-  MAC.hmac output key key_len data data_len;
+  HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
   TestLib.compare_and_print (C.String.of_literal "Test 7") expected output Hash.size_hash;

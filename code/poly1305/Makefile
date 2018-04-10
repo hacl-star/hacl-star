@@ -26,7 +26,7 @@ POLY1305_SPECIFIC= \
 	Hacl.Bignum.AddAndMultiply.fst \
 	Hacl.Impl.Poly1305_64.fst \
 	Hacl.Standalone.Poly1305_64.fst \
-	Poly1305_64.fst \
+	Hacl.Poly1305_64.fst \
 	Hacl.Spec.Poly1305_64.Lemmas1.fst \
 	AEAD.Poly1305_64.fst
 
@@ -44,7 +44,7 @@ FSTAR_INCLUDES+=--include ../bignum
 
 ct: $(addsuffix -lax, $(POLY1305_FILES))
 	# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
-	$(FSTAR) --lax --verify_all Poly1305_64.fst
+	$(FSTAR) --lax --verify_all Hacl.Poly1305_64.fst
 
 bignum-ver: $(addsuffix -reloc-verify, $(BIGNUM))
 specific-ver: $(addsuffix -verify, $(POLY1305_SPECIFIC))
@@ -78,30 +78,30 @@ depend:
 -include .depend
 
 # The F* -> out.krml step only depends on F* files.
-poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst Hacl.Test.Poly1305_64.fst
+poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
 # We need one invocation of kremlin for each bundle because of KreMLin bug #43
-poly-c/Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml
+poly-c/Hacl_Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
 		-drop AEAD_Poly1305_64 -no-prefix Hacl.Test.Poly1305_64 \
-		-bundle 'Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Poly1305_64' \
+		-bundle 'Hacl_Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Hacl_Poly1305_64' \
 	$^ -o $@
 
 poly-c/AEAD_Poly1305_64.c: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
-		-drop Poly1305_64,Hacl.Test.Poly1305_64 \
-		-bundle 'AEAD.Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,AEAD.Poly1305_64,Poly1305_64,Hacl.Spec.*' \
+		-drop Hacl.Poly1305_64,Hacl.Test.Poly1305_64 \
+		-bundle 'AEAD.Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,AEAD.Poly1305_64,Hacl_Poly1305_64,Hacl.Spec.*' \
 	$^ -o $@
 
 poly1305.exe: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) \
 		-drop AEAD_Poly1305_64 -no-prefix Hacl.Test.Poly1305_64 \
-		-bundle 'Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Poly1305_64' \
+		-bundle 'Hacl_Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Hacl_Poly1305_64' \
 		$^ -o $@
 	./$@
 
-extract-c: poly-c/Poly1305_64.c poly-c/AEAD_Poly1305_64.c
+extract-c: poly-c/Hacl_Poly1305_64.c poly-c/AEAD_Poly1305_64.c
 
 test: poly1305.exe
 

@@ -100,7 +100,7 @@ let sign__ signature secret msg len tmp_bytes tmp_ints =
   let rs'  = Buffer.sub tmp_bytes 160ul 32ul in
   let s'   = Buffer.sub tmp_bytes 192ul 32ul in
   let h0 = ST.get() in
-  sign_step_1 secret tmp_bytes tmp_ints;
+  sign_step_1 secret tmp_bytes;
   let h1 = ST.get() in
   no_upd_lemma_1 h0 h1 tmp_bytes msg;
   no_upd_lemma_1 h0 h1 tmp_bytes tmp_ints;

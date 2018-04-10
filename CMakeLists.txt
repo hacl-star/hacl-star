@@ -7,30 +7,32 @@ project (hacl)
 set(CMAKE_BUILD_TYPE Release)
 
 # Include directories
-include_directories($ENV{KREMLIN_HOME}/kremlib ./snapshots/hacl-c ./snapshots/hacl-c-experimental)
+include_directories(./snapshots/hacl-c ./snapshots/hacl-c-experimental)
 
 # Verified Files
 set(SOURCE_FILES_VERIFIED
    snapshots/hacl-c/kremlib.c
+   snapshots/hacl-c/FStar.c
    snapshots/hacl-c/Hacl_Policies.c
    snapshots/hacl-c/AEAD_Poly1305_64.c
-   snapshots/hacl-c/Chacha20.c
-   snapshots/hacl-c/Chacha20Poly1305.c
-   snapshots/hacl-c/Curve25519.c
-   snapshots/hacl-c/Ed25519.c
-   snapshots/hacl-c/Poly1305_64.c
-   snapshots/hacl-c/SHA2_256.c
-   snapshots/hacl-c/SHA2_384.c
-   snapshots/hacl-c/SHA2_512.c
-   snapshots/hacl-c/HMAC_SHA2_256.c
-   snapshots/hacl-c/Salsa20.c
+   snapshots/hacl-c/Hacl_Chacha20.c
+   snapshots/hacl-c/Hacl_Chacha20Poly1305.c
+   snapshots/hacl-c/Hacl_Curve25519.c
+   snapshots/hacl-c/Hacl_Ed25519.c
+   snapshots/hacl-c/Hacl_Poly1305_32.c
+   snapshots/hacl-c/Hacl_Poly1305_64.c
+   snapshots/hacl-c/Hacl_SHA2_256.c
+   snapshots/hacl-c/Hacl_SHA2_384.c
+   snapshots/hacl-c/Hacl_SHA2_512.c
+   snapshots/hacl-c/Hacl_HMAC_SHA2_256.c
+   snapshots/hacl-c/Hacl_Salsa20.c
    snapshots/hacl-c/NaCl.c)
 
 # Experimental Files
 set(SOURCE_FILES_EXPERIMENTAL
    snapshots/hacl-c-experimental/cpuid.c
    snapshots/hacl-c-experimental/drng.c
-   snapshots/hacl-c-experimental/Random.c)
+   snapshots/hacl-c-experimental/Hacl_Random.c)
 
 # Define a user variable to determinate if experimental files are build
 option(Experimental "Include experimental code in HaCl build" OFF)
@@ -43,7 +45,18 @@ else ()
 endif ()
 
 # Compilation options
-set(GCC_COVERAGE_COMPILE_FLAGS "-march=nativ -Wno-error=pointer-sign -Wno-error=incompatible-pointer-types -Wno-error=format= ")
+# set(CMAKE_C_FLAGS "-Wall -Wextra")
+
+# Compilation options depending on the architecture
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+   # 64 bits
+   if (MSVC)
+      set(CMAKE_C_FLAGS "-DKRML_NOUINT128")
+   endif()
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+   # 32 bits
+   set(CMAKE_C_FLAGS "-DKRML_NOUINT128")
+endif()
 
 # Generate both a static and a shared library
 add_library(hacl_static STATIC ${SOURCE_FILES})

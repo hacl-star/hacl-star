@@ -63,12 +63,12 @@ ED25519_SPECIFIC= \
 	Hacl.Impl.Ed25519.Verify.fst \
 	Hacl.Impl.Ed25519.SecretToPublic.fsti \
 	Hacl.Impl.Ed25519.SecretToPublic.fst \
-	Ed25519.fsti \
-	Ed25519.fst
+	Hacl.Ed25519.fsti \
+	Hacl.Ed25519.fst
 
 FSTS=   Hacl.Bignum25519.fst \
 	../hash/Hacl.Impl.SHA512.Ed25519.fst \
-	../hash/SHA2_512.fst \
+	../hash/Hacl.SHA2_512.fst \
 	Hacl.Impl.Load56.fst \
 	Hacl.Impl.Load51.fst \
 	Hacl.Impl.Store51.fst \
@@ -86,7 +86,7 @@ FSTS=   Hacl.Bignum25519.fst \
 	Hacl.Impl.Ed25519.Ladder.fst \
 	Hacl.Impl.Ed25519.PointEqual.fst \
 	Hacl.Impl.Ed25519.SecretToPublic.fst \
-	Ed25519.fst \
+	Hacl.Ed25519.fst \
 	Hacl.Test.Ed25519.fst
 
 # Files that are too slow and for which verification speed must improve
@@ -129,20 +129,20 @@ all-ci: ci
 KREMLIN_ARGS+=-tmpdir ed25519-c \
 		-I ../bignum -I ../curve25519 -I ../hash \
 		-drop C.Nullity,Hacl.Spec,Hacl.Spec.*,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.*,Prims,Spec.* \
-		-bundle Ed25519=Ed25519,Hacl.EC,Hacl.EC.*,Hacl.Impl.*,Hacl.Lib.*,Hacl.Bignum.*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Spec.*,SHA2_512,Hacl.Hash.*
+		-bundle "Hacl.Ed25519=Hacl.Ed25519,Hacl.EC,Hacl.EC.*,Hacl.Impl.*,Hacl.Lib.*,Hacl.Bignum.*,Hacl.Bignum25519,Hacl.Bignum,Hacl.Spec.*,Hacl.SHA2_512,Hacl.Hash.*"
 
 ed25519-c/out.krml: $(ED25519_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) $(FSTS) -skip-translation
 
-ed25519-c/Ed25519.c: ed25519-c/out.krml
+ed25519-c/Hacl_Ed25519.c: ed25519-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation
 
-extract-c:ed25519-c/Ed25519.c
+extract-c: ed25519-c/Hacl_Ed25519.c
 
 ed25519.exe: ed25519-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $^ \
 	 	-no-prefix 'Hacl.Test.Ed25519' $(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' \
-		-add-include '"Ed25519.h"' -o ed25519.exe
+		-add-include '"Hacl_Ed25519.h"' -o ed25519.exe
 
 test: ed25519.exe
 	./$^

@@ -120,6 +120,23 @@ bool unit_test_chacha20(){
   return pass;
 }
 
+bool unit_test_chacha20_vec128(){
+  int a;
+  bool pass = true;
+
+  uint8_t ciphertext[114];
+  memset(ciphertext, 0, 114 * sizeof ciphertext[0]);
+  uint32_t counter = (uint32_t )1;
+  chacha20_vec128(ciphertext,chacha_plaintext,114, chacha_key, chacha_nonce, counter);
+
+    a = memcmp(ciphertext, chacha_ciphertext, 114 * sizeof (uint8_t));
+    if (a != 0){
+      pass = false;
+      printf("Chacha20 Vec128 failed on RFC test of size 114\n.");
+    }
+  return pass;
+}
+
 bool unit_test_aead(){
   int a;
   bool pass = true;
@@ -533,6 +550,12 @@ int main(){
     printf("Unit tests for IETF Chacha20 succeeded\n");
   } else {
     printf("Unit tests for IETF Chacha20 *** FAILED ***\n");
+  }
+  res = res && unit_test_chacha20_vec128();
+  if (res == true) {
+    printf("Unit tests for IETF Chacha20 Vec128 succeeded\n");
+  } else {
+    printf("Unit tests for IETF Chacha20 Vec128 *** FAILED ***\n");
   }
   res = res && unit_test_aead();
   if (res == true) {

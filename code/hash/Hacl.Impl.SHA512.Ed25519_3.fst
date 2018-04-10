@@ -11,7 +11,7 @@ open FStar.HyperStack
 open FStar.Seq
 open FStar.Buffer
 
-open Hacl.Hash.SHA2_512
+open Hacl.Impl.SHA2_512
 open Hacl.Impl.SHA512.Ed25519_1
 open Hacl.Impl.SHA512.Ed25519_2
 

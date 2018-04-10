@@ -953,6 +953,7 @@ let lemma_uint32s_fragments3 st =
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
+[@ "substitute"]
 val store_4_vec:
   output:uint8_p{length output = 64} ->
   v0:vec -> v1:vec -> v2:vec -> v3:vec ->
@@ -961,6 +962,7 @@ val store_4_vec:
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1 /\
       reveal_sbytes (as_seq h1 output) == FStar.Seq.(Spec.Lib.uint32s_to_le 16 (vec_as_seq v0 @| vec_as_seq v1 @|
                                                                 vec_as_seq v2 @| vec_as_seq v3)) ))
+[@ "substitute"]
 let store_4_vec output v0 v1 v2 v3 =
   let o0 = (Buffer.sub output 0ul  16ul) in
   let o1 = (Buffer.sub output 16ul 16ul) in

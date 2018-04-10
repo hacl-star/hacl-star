@@ -4,14 +4,14 @@ MAINTAINER Benjamin Beurdouche <benjamin.beurdouche@inria.fr>
 # Based on the original F* formula with Daniel Fabian
 
 # Define versions of dependencies
-ENV opamv 4.04.2
+ENV opamv 4.05.0
 ENV z3v 4.5.1.1f29cebd4df6-x64-ubuntu-14.04
-ENV fstarv 787a4fb921ea2ceee65396bb8c6276d3de99a94e
-ENV kremlinv 32c177d6622badce550aa08c1158f8b824480531
+ENV fstarv stable
+ENV kremlinv master
 
 # Install required packages and set versions
 RUN apt-get -qq update
-RUN apt-get install --yes sudo wget libssl-dev libsqlite3-dev g++-5 gcc-5 m4 make opam pkg-config python libgmp3-dev unzip
+RUN apt-get install --yes sudo wget libssl-dev libsqlite3-dev g++-5 gcc-5 m4 make opam pkg-config python libgmp3-dev unzip cmake
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 200
 RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 200
 
@@ -52,12 +52,13 @@ ENV PATH "~/kremlin:$PATH"
 RUN opam config exec -- make
 WORKDIR /home/Work
 
-# Prepare and build HaCl*
+# Prepare and build HACL*
 ARG CACHEBUST=1
 RUN git clone https://github.com/mitls/hacl-star.git
 WORKDIR /home/Work/hacl-star
-RUN git checkout stable
+RUN git checkout master
 ENV FSTAR_HOME /home/Work/FStar
 ENV KREMLIN_HOME /home/Work/kremlin
-RUN opam config exec -- make extract
+RUN opam config exec -- make snapshots/hacl-c -j
+RUN opam config exec -- make build
 WORKDIR /home/Work

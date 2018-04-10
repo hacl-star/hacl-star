@@ -4,6 +4,8 @@
 *.exe.dSYM
 out.krml
 
+hacl-star.tar.gz
+
 build/
 build-experimental/
 
@@ -58,6 +60,7 @@ code/api/policies-c/
 code/curve25519/x25519-c/
 code/ed25519/ed25519-c/
 code/poly1305/poly-c/
+code/poly1305_32/poly-c/
 code/salsa-family/chacha-c/
 code/salsa-family/chacha-vec128/
 code/salsa-family/chacha-vec128-c/
@@ -70,9 +73,18 @@ secure_api/tmp-hacl/
 secure_api/tmp-vale/
 
 snapshots/hacl-c/bench.txt
+snapshots/hacl-c/libhacl.*
+snapshots/hacl-c/libhacl32.*
 snapshots/snapshot-gcc
 snapshots/snapshot-gcc-unrolled
+snapshots/snapshot-compcert
+snapshots/snapshot-compcert-unrolled
+snapshots/snapshot-msvc
+snapshots/snapshot-msvc-unrolled
 snapshots/nss
+snapshots/riot
+snapshots/wireguard
+snapshots/tezos
 
 doc/tutorial/0-coding-field-arithmetic-in-fstar/extracted_c/
 doc/tutorial/1-recursion-vs-loops/extracted_c/
