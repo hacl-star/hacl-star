@@ -125,11 +125,18 @@ test-snapshot-gcc-libhacl.so:
 test-snapshot-gcc-unrolled-libhacl.so:
 	$(MAKE) test-snapshot-libhacl.so SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
-test-hacl-c-libhacl.so:
-	$(MAKE) test-snapshot-libhacl.so SNAPSHOT_DIR=snapshots/hacl-c
+test-snapshot-compcert-libhacl.so:
+	$(MAKE) test-snapshot-libhacl.so CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/snapshot-compcert
 
-test-hacl-c-compcert-libhacl.so:
-	$(MAKE) test-snapshot-libhacl.so CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/hacl-c-compcert
+test-snapshot-compcert-unrolled-libhacl.so:
+	$(MAKE) test-snapshot-libhacl.so CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/snapshot-compcert-unrolled
+
+test-snapshot-msvc-libhacl.so:
+	$(MAKE) test-snapshot-libhacl.so CC=$(MSVC) CCOPTS="$(MSVC_OPTS)" SNAPSHOT_DIR=snapshots/snapshot-msvc
+
+test-snapshot-msvc-unrolled-libhacl.so:
+	$(MAKE) test-snapshot-libhacl.so CC=$(MSVC) CCOPTS="$(MSVC_OPTS)" SNAPSHOT_DIR=snapshots/snapshot-msvc-unrolled
+
 
 test-snapshot-gcc-libhacl32.so:
 	$(MAKE) test-snapshot-libhacl32.so SNAPSHOT_DIR=snapshots/snapshot-gcc
@@ -137,11 +144,19 @@ test-snapshot-gcc-libhacl32.so:
 test-snapshot-gcc-unrolled-libhacl32.so:
 	$(MAKE) test-snapshot-libhacl32.so SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
-test-hacl-c-libhacl32.so:
-	$(MAKE) test-snapshot-libhacl32.so SNAPSHOT_DIR=snapshots/hacl-c
+test-snapshot-compcert-libhacl32.so:
+	$(MAKE) test-snapshot-libhacl32.so CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/snapshot-compcert
 
-test-hacl-c-compcert-libhacl32.so:
-	$(MAKE) test-snapshot-libhacl32.so CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/hacl-c-compcert
+test-snapshot-compcert-unrolled-libhacl32.so:
+	$(MAKE) test-snapshot-libhacl32.so CC=$(CCOMP) CCOPTS="$(CCOMP_OPTS)" ADDITIONAL_FILES=$(FSTARH_CCOMP) SNAPSHOT_DIR=snapshots/snapshot-compcert-unrolled
+
+test-snapshot-msvc-libhacl32.so:
+	$(MAKE) test-snapshot-libhacl32.so CC=$(MSVC) CCOPTS="$(MSVC_OPTS)" SNAPSHOT_DIR=snapshots/snapshot-msvc
+
+test-snapshot-msvc-unrolled-libhacl32.so:
+	$(MAKE) test-snapshot-libhacl32.so CC=$(MSVC) CCOPTS="$(MSVC_OPTS)" SNAPSHOT_DIR=snapshots/snapshot-msvc-unrolled
+
+
 
 test-libhacl.so:
 	$(MAKE) test-snapshot-gcc-libhacl.so
