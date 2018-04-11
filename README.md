@@ -29,7 +29,7 @@ we highly recommand to consult the authors before using HACL* in production syst
 
 The primitives and constructions supported currently are:
 
-* Stream ciphers: Chacha20, Salsa20, XSalsa20
+* Stream ciphers: Chacha20, Salsa20
 * MACs: Poly1305, HMAC
 * Elliptic Curves: Curve25519
 * Elliptic Curves Signatures: Ed25519
@@ -124,6 +124,7 @@ like [Vale](https://github.com/project-everest/vale) for some primitives.
 
 The [code/experimental](code/experimental) directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
 * Randomness: System + RDRAND mixing
+* Stream cipher: XSalsa20
 * Encryption: AES-128, AES-256
 * MACs: GCM
 * Hash functions: Blake2s
