@@ -19,7 +19,7 @@ extraction to OCaml (`specs/`) and extraction to C (`code/`).
 In the case where you do want to perform F* verification and extraction
 installing some prerequisites is needed.
 
-0. A Docker image, in the root directory, is available to build the toolchain if you want.
+0. A Docker image is available, in the root directory, to build the toolchain if you want.
 
 1. Otherwise, there are few dependencies that must be manually installed on your
 machine before being able to verify or extract HACL* using the toolchain:
@@ -59,7 +59,8 @@ Calling `make` from the root directory will give you more information.
 
 ### HACL* master
 
-The HACL* repository has multiple branches: stable, master and
-feature branches. Feel free to install the cutting edge master.
-As it is under continuous integration, it should be working at
-all times.
+The HACL* repository has multiple branches: `stable`, `master` and
+feature branches. The main production branch is `master`; as it
+is under Continuous Integration for verification and code generation
+it should be working at all times. We maintain an old version of
+HACL* in the `stable` branch, but we do not recommand using it.
