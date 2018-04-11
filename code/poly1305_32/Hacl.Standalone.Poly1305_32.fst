@@ -96,7 +96,7 @@ val poly1305_blocks:
       /\ red_26 (as_seq h st.r)
       /\ (let r = as_seq h st.r in
          let acc = as_seq h st.h in
-         let log = reveal current_log in
+         let log = Ghost.reveal current_log in
          invariant (Spec.MkState r acc log)))
       ))
     (ensures  (fun h0 updated_log h1 -> P.(modifies_1 st.h h0 h1 /\ live_st h1 st /\ live_st h0 st /\ live h0 m
@@ -106,10 +106,10 @@ val poly1305_blocks:
       /\ red_y (as_seq h1 st.h)
       /\ (let r = as_seq h0 st.r in
          let acc = as_seq h0 st.h in
-         let log = reveal current_log in
+         let log = Ghost.reveal current_log in
          let r' = as_seq h1 st.r in
          let acc' = as_seq h1 st.h in
-         let log' = reveal updated_log in
+         let log' = Ghost.reveal updated_log in
          let m = as_seq h0 m in
          invariant (Spec.MkState r acc log)
          /\ invariant (Spec.MkState r' acc' log')
@@ -119,11 +119,11 @@ val poly1305_blocks:
 let rec poly1305_blocks log st m len =
   let h0 = ST.get() in
   if U64.(len =^ 0uL) then (
-    lemma_poly1305_blocks_spec_0 (Spec.MkState (as_seq h0 P.(st.r)) (as_seq h0 P.(st.h)) (reveal log)) (as_seq h0 m) len;
+    lemma_poly1305_blocks_spec_0 (Spec.MkState (as_seq h0 P.(st.r)) (as_seq h0 P.(st.h)) (Ghost.reveal log)) (as_seq h0 m) len;
     log
   )
   else (
-    lemma_poly1305_blocks_spec_1 (Spec.MkState (as_seq h0 P.(st.r)) (as_seq h0 P.(st.h)) (reveal log)) (as_seq h0 m) len;
+    lemma_poly1305_blocks_spec_1 (Spec.MkState (as_seq h0 P.(st.r)) (as_seq h0 P.(st.h)) (Ghost.reveal log)) (as_seq h0 m) len;
     cut (U64.v len >= 1);
     let block = Buffer.sub m 0ul 16ul in
     let tail  = Buffer.offset m 16ul in
@@ -135,10 +135,10 @@ let rec poly1305_blocks log st m len =
     (* let h1 = ST.get() in *)
     (* let acc   = MkState?.h st in *)
     (* let r     = MkState?.r st in *)
-    (* cut (reveal new_log == Seq.cons ((as_seq h0 block)) (reveal log)); *)
+    (* cut (Ghost.reveal new_log == Seq.cons ((as_seq h0 block)) (Ghost.reveal log)); *)
     (* Math.Lemmas.modulo_lemma (seval (as_seq h0 r)) (prime); *)
-    (* lemma_poly1305_blocks_spec_1 (as_seq h0 block) (reveal log) (reveal new_log) (Spec.selem (as_seq h0 acc)) (seval (as_seq h0 r)) (Spec.selem (as_seq h1 acc)); *)
-    (* append_cons_snoc (Spec.Poly1305.encode_bytes ((as_seq h0 m))) (as_seq h0 block) (reveal log); *)
+    (* lemma_poly1305_blocks_spec_1 (as_seq h0 block) (Ghost.reveal log) (Ghost.reveal new_log) (Spec.selem (as_seq h0 acc)) (seval (as_seq h0 r)) (Spec.selem (as_seq h1 acc)); *)
+    (* append_cons_snoc (Spec.Poly1305.encode_bytes ((as_seq h0 m))) (as_seq h0 block) (Ghost.reveal log); *)
     (* snoc_encode_bytes (as_seq h0 tail) (as_seq h0 block);     *)
     let len = U64.(len -^ 1uL) in
     poly1305_blocks new_log st tail len
@@ -159,7 +159,7 @@ val poly1305_partial:
       /\ live h0 kr /\ live h1 kr
       /\ (let r' = as_seq h1 st.r in
          let acc' = as_seq h1 st.h in
-         let log' = reveal updated_log in
+         let log' = Ghost.reveal updated_log in
          let m = as_seq h0 m in
          let k = as_seq h0 kr in
          invariant (Spec.MkState r' acc' log')
@@ -170,14 +170,14 @@ let poly1305_partial st input len kr =
   let init_log = P.poly1305_init_ st kr in
   let h0 = ST.get() in
   assert_norm(pow2 128 < pow2 130 - 5);
-  poly_def_0 (reveal init_log) (seval (as_seq h0 P.(st.r)));
-  (* cut (invariant (Spec.MkState (as_seq h0 P.(st.r)) (as_seq h0 P.(st.h)) (reveal log))); *)
+  poly_def_0 (Ghost.reveal init_log) (seval (as_seq h0 P.(st.r)));
+  (* cut (invariant (Spec.MkState (as_seq h0 P.(st.r)) (as_seq h0 P.(st.h)) (Ghost.reveal log))); *)
   let partial_log = poly1305_blocks init_log st input len in
   (* cut (invariant partial_st); *)
-  (* lemma_append_empty' (encode_bytes (reveal_sbytes input)) (MkState?.log init_st); *)
+  (* lemma_append_empty' (encode_bytes (Ghost.reveal_sbytes input)) (MkState?.log init_st); *)
   partial_log
 
-#set-options "--max_fuel 0 --max_ifuel 0 --using_facts_from Prims --using_facts_from FStar"
+#set-options "--max_fuel 0 --max_ifuel 0"
 let sum_modifications (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem)
   : Lemma (requires (live h0 b1 /\
                      live h0 b2 /\

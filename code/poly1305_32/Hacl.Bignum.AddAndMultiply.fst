@@ -32,8 +32,8 @@ module U64  = FStar.UInt64
 [@"c_inline"]
 val add_and_multiply:
   acc:felem ->
-  block:felem{disjoint acc block} ->
-  r:felem{disjoint acc r} ->
+  block:felem{Buffer.disjoint acc block} ->
+  r:felem{Buffer.disjoint acc r} ->
   Stack unit
     (requires (fun h -> live h acc /\ live h block /\ live h r
       /\ red_y (as_seq h acc) /\ red_26 (as_seq h block) /\ red_26 (as_seq h r)
