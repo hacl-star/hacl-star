@@ -70,10 +70,10 @@ If you only are interested in the latest version of the generated C code,
 or Web Assembly code, installing the toolchain is not required.
 In that scenario, only a recent C compiler and CMake are needed for building libraries.
 
-The latest version of the verified C code can be found is available
+The latest version of the verified C code is available
 in [snapshots/hacl-c](snapshots/hacl-c).
 
-The latest version of the Web Assembly code can be found is available
+The latest version of the Web Assembly code is available
 in [snapshots/hacl-c-wasm](snapshots/hacl-c-wasm).
 
 HACL* relies on [F*](https://github.com/FStarLang/FStar) (`stable` branch) and
@@ -123,8 +123,10 @@ like [Vale](https://github.com/project-everest/vale) for some primitives.
 # Experimental features
 
 The [code/experimental](code/experimental) directory includes other (partially verified) cryptographic primitives that will become part of the library in the near future:
+* Randomness: System + RDRAND mixing
 * Encryption: AES-128, AES-256
 * MACs: GCM
+* Hash functions: Blake2s
 * Key Derivation: HKDF
 * Signatures: RSA-PSS
 
