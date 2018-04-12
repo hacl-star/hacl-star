@@ -94,7 +94,9 @@ depend:
 x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
-x25519-c/Curve25519.c x25519-c/Hacl_Test_X25519.c: x25519-c/out.krml
+x25519-c/Hacl_Test_X25519.c: x25519-c/Curve25519.c
+
+x25519-c/Curve25519.c:  x25519-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -no-prefix Hacl.Test.X25519 \
 	 	-bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
 		-skip-compilation $^ -o $@
