@@ -44,6 +44,12 @@ val lemma_repeati_zero: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> T
 
 let lemma_repeati_zero #a n f init = admit()
 
+val lemma_size_to_uint32_equal_u32_of_v_of_size_t: x:size_t -> Lemma
+  (requires True)
+  (ensures (size_to_uint32 x == u32 (v x)))
+  [SMTPat (u32 (v x))]
+let lemma_size_to_uint32_equal_u32_of_v_of_size_t x = admit()
+
 
 // val lemma_repeati_ghost_is_repeati: #a:Type -> n:size_nat -> (f:(i:size_nat{i < n}  -> a -> Tot a)) -> init:a -> Lemma
 //   (requires (True))
@@ -326,31 +332,50 @@ val blake2s_internal1: hbuf:lbuffer uint32 8 ->
 
 [@ Substitute]
 let blake2s_internal1 hbuf kk nn =
+  let hbuf0 = hbuf.(size 0) in
   let kk_shift_8 = shift_left #U32 (size_to_uint32 kk) (u32 8) in
-  let h0 = hbuf.(size 0) ^. (u32 0x01010000) ^. (kk_shift_8) ^. size_to_uint32 nn in
-  hbuf.(size 0) <- h0
+  let hbuf0' = hbuf0 ^. (u32 0x01010000) ^. kk_shift_8 ^. size_to_uint32 nn in
+  hbuf.(size 0) <- hbuf0'
+
+
+val blake2s_internal2_: hbuf:lbuffer uint32 8 ->
+   dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
+   d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
+   to_compress:lbuffer uint32 16 ->
+   i:size_t{v i < v dd - 1} ->
+   const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+   Stack unit
+     (requires (fun h -> live h hbuf /\ live h d /\ live h to_compress
+                    /\ disjoint hbuf d /\ disjoint hbuf to_compress /\ disjoint hbuf const_iv /\ disjoint hbuf const_sigma
+                    /\ disjoint d hbuf /\ disjoint to_compress hbuf /\ disjoint const_iv hbuf /\ disjoint const_sigma hbuf))
+     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hbuf h0 h1
+                          /\ h1.[hbuf] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[hbuf]))
+
+[@ Substitute]
+let blake2s_internal2_ h dd d to_compress i const_iv const_sigma =
+  uint32s_from_bytes_le (size 16) to_compress (sub d (mul #SIZE i (size Spec.bytes_in_block)) (size Spec.bytes_in_block));
+  blake2_compress h to_compress (to_u64 #U32 (size_to_uint32 (mul #SIZE (size_incr i) (size Spec.block_bytes)))) false const_iv const_sigma//FIXME: i should have the u64 type
 
 
 val blake2s_internal2: hbuf:lbuffer uint32 8 ->
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
-   nn:size_t{1 <= size_v nn /\ size_v nn <= 32} ->
    to_compress:lbuffer uint32 16 ->
    const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
    Stack unit
-     (requires (fun h -> live h hbuf /\ live h d /\ live h to_compress))
-     (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
+     (requires (fun h -> live h hbuf /\ live h d /\ live h to_compress
+                    /\ disjoint hbuf d /\ disjoint hbuf to_compress /\ disjoint hbuf const_iv /\ disjoint hbuf const_sigma
+                    /\ disjoint d hbuf /\ disjoint to_compress hbuf /\ disjoint const_iv hbuf /\ disjoint const_sigma hbuf))
+     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hbuf h0 h1
+                          /\ h1.[hbuf] == Spec.blake2s_internal2 h0.[hbuf] (v dd) h0.[d]))
 
 [@ Substitute]
-let blake2s_internal2 h dd d nn to_compress const_iv const_sigma =
+let blake2s_internal2 h dd d to_compress const_iv const_sigma =
   if (dd >. size 1) then
     let idx = size_decr dd in
     iteri idx
     (fun i h -> h)
-    (fun i h ->
-      uint32s_from_bytes_le (size 16) to_compress (sub d (mul #SIZE i (size Spec.bytes_in_block)) (size Spec.bytes_in_block));
-      blake2_compress h to_compress (to_u64 #U32 (size_to_uint32 (mul #SIZE (size_incr i) (size Spec.block_bytes)))) false const_iv const_sigma//FIXME: i should have the u64 type
-    ) h
+    (fun i h -> blake2s_internal2_ h dd d to_compress i const_iv const_sigma) h
 
 
 val blake2s_internal3: hbuf:lbuffer uint32 8 ->
@@ -394,47 +419,9 @@ val blake2s_internal:
   assert_norm (List.Tot.length Spec.list_init = 8);
   let h : lbuffer uint32 8 = createL Spec.list_init in
   blake2s_internal1 h kk nn;
-  blake2s_internal2 h dd d nn to_compress const_iv const_sigma;
+  blake2s_internal2 h dd d to_compress const_iv const_sigma;
   blake2s_internal3 h dd d ll kk nn to_compress tmp res const_iv const_sigma;
   pop_frame ()
-
-
-// val blake2s_internal:
-//    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
-//    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
-//    ll:size_t -> kk:size_t{size_v kk <= 32} -> nn:size_t{1 <= size_v nn /\ size_v nn <= 32} ->
-//    to_compress:lbuffer uint32 16 -> wv:working_vector -> tmp:lbuffer uint8 32 -> res:lbuffer uint8 (size_v nn) ->
-//    const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
-//    Stack unit
-//      (requires (fun h -> live h d /\ live h to_compress /\ live h res /\ live h wv))
-//      (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
-
-// [@ (CConst "const_iv") (CConst "const_sigma")]
-//  let blake2s_internal dd d ll kk nn to_compress wv tmp res const_iv const_sigma =
-//   push_frame ();
-//   assert_norm (List.Tot.length Spec.list_init = 8);
-//   let h : lbuffer uint32 8 = createL Spec.list_init in
-//   blake2s_internal1 h kk nn;
-//   (if (dd >. size 1) then
-//     let idx = size_decr dd in
-//     iteri idx
-//     (fun i h -> h)
-//     (fun i h ->
-//       uint32s_from_bytes_le (size 16) to_compress (sub d (mul #SIZE i (size Spec.bytes_in_block)) (size Spec.bytes_in_block));
-//       blake2_compress h to_compress (to_u64 #U32 (size_to_uint32 (mul #SIZE (size_incr i) (size Spec.block_bytes)))) false const_iv const_sigma//FIXME: i should have the u64 type
-//     ) h
-//   );
-//   let offset:size_t = mul #SIZE (size_decr dd) (size 64) in
-//   uint32s_from_bytes_le (size 16) to_compress (sub d offset (size Spec.bytes_in_block));
-//   (if kk =. size 0 then
-//     blake2_compress h to_compress (to_u64 #U32 (size_to_uint32 ll)) true const_iv const_sigma
-//   else
-//     blake2_compress h to_compress (to_u64 #U32 (size_to_uint32 (add #SIZE ll (size Spec.block_bytes)))) true const_iv const_sigma
-//   );
-//   uint32s_to_bytes_le (size 8) tmp h;
-//   let tmp' = sub tmp (size 0) nn in
-//   copy nn tmp' res;
-//   pop_frame ()
 
 
 val blake2s :
