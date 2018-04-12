@@ -30,6 +30,28 @@ set(SOURCE_FILES_EXPERIMENTAL
    drng.c
    Random.c)
 
+# Public header files
+set(HEADER_FILES
+    AEAD_Poly1305_64.h
+    FStar.h
+    Hacl_Chacha20.h
+    Hacl_Chacha20Poly1305.h
+    Hacl_Chacha20_Vec128.h
+    Hacl_Curve25519.h
+    Hacl_Ed25519.h
+    Hacl_HMAC_SHA2_256.h
+    Hacl_Policies.h
+    Hacl_Poly1305_32.h
+    Hacl_Poly1305_64.h
+    Hacl_Salsa20.h
+    Hacl_SHA2_256.h
+    Hacl_SHA2_384.h
+    Hacl_SHA2_512.h
+    kremlib_base.h
+    kremlib.h
+    NaCl.h
+    vec128.h)
+
 # Define a user variable to determinate if experimental files are build
 option(Experimental "Include experimental code in HaCl build" OFF)
 
@@ -53,3 +75,11 @@ set_target_properties(hacl_shared PROPERTIES OUTPUT_NAME hacl)
 # Note: on Windows, depending on the build system,
 #       both static and shared can have the .lib extension
 #       (You can change the OUTPUT_NAME in that case...)
+
+set_target_properties(hacl_shared hacl_static PROPERTIES
+    PUBLIC_HEADER "${HEADER_FILES}")
+
+INSTALL(TARGETS hacl_shared hacl_static LIBRARY
+    DESTINATION "lib"
+    ARCHIVE DESTINATION "lib"
+    PUBLIC_HEADER DESTINATION "include/hacl")
