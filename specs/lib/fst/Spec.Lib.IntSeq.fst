@@ -284,8 +284,6 @@ let uints_from_bytes_be #t (#len:size_nat{len * numbytes t < pow2 32}) (b:lbytes
   let l = create #(uint_t t) len (nat_to_uint 0) in
   repeati len (fun i l -> l.[i] <- uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))) l
 
-let as_list #a #len l = l
-
 let rec concat #a #len1 #len2 s1 s2 =
   match s2 with
   | [] -> s1
@@ -305,22 +303,5 @@ let rec concat_blocks #a #len #bs s l =
   | [] -> l
   | h :: t -> List.Tot.append h (concat_blocks #a #(len - bs) #bs t l)
 
-(*
-val map_block_: #a:Type -> #b:Type -> min:size_nat -> max:size_nat{min <= max} ->
-		blocksize:size_nat{max * blocksize <= max_size_t} ->
-		(i:size_nat{i >= min /\ i < max} -> lseq a blocksize -> lseq b blocksize) ->
-		lseq a ((max - min) * blocksize) ->
-		Tot (lseq b ((max - min) * blocksize)) (decreases (max - min))
-let rec map_block_ #a #b min max sz f x =
-  if min = max then []
-  else
-    let h = slice x 0 sz in
-    let t = slice x sz ((max - min) * sz) in
-    let h' = f min h in
-    let t' = map_block_ #a #b (min+1) max sz f t in
-    let r = h' @ t' in
-    List.Tot.append_length h' t';
-    r
+let as_list #a #len l = l
 
-let map_block #a #b n sz f x = map_block_ #a #b 0 n sz f x
-*)

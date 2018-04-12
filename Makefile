@@ -110,10 +110,11 @@ extract-experimental: extract-c-code-experimental
 #
 
 .build-banner:
-	@echo $(CYAN)"# Compiling the HaCl* library"$(NORMAL)
+	@echo $(CYAN)"# Compiling the HACL* library"$(NORMAL)
 
 build-make:
 	$(MAKE) build/libhacl.so
+	$(MAKE) build/libhacl.a
 
 build-cmake:
 	mkdir -p build && cd build && cmake $(CMAKE_COMPILER_OPTION) .. && make
@@ -135,28 +136,16 @@ test-all:
 	$(MAKE) -C test
 
 #
-# World
-#
-
-.base: verify extract-specs extract-all
-
-world: .clean-banner .clean-git .clean-snapshots
-	$(MAKE) verify
-	$(MAKE) extract-specs
-	$(MAKE) extract-all
-	$(MAKE) build-make
-	$(MAKE) test-all
-	$(MAKE) package
-
-#
 # CI
 #
 
 ci: .clean-banner .clean-git .clean-snapshots
-	$(MAKE) .base
-	$(MAKE) build-make
-	$(MAKE) test-all
-	$(MAKE) package
+	$(MAKE) extract-specs
+	$(MAKE) -C test test-specs
+	# $(MAKE) verify extract-specs extract-all
+	# $(MAKE) build-make
+	# $(MAKE) test-all
+	# $(MAKE) package
 
 #
 # Clean

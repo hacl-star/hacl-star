@@ -1,4 +1,4 @@
-HACL_HOME     = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+HACL_HOME    ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 Z3_HOME      ?= $(HACL_HOME)/dependencies/z3
 FSTAR_HOME   ?= $(HACL_HOME)/dependencies/FStar
 KREMLIN_HOME ?= $(HACL_HOME)/dependencies/kremlin
