@@ -437,17 +437,31 @@ val blake2s_internal:
      (requires (fun h -> live h d /\ live h to_compress /\ live h wv /\ live h tmp /\ live h res /\ live h s /\ live h const_iv /\ live h const_sigma
                     /\ as_list h.[const_sigma] == sigma_list_size
                     /\ h.[const_iv] == Spec.const_init
+                    // Disjointness for res
                     /\ disjoint res d /\ disjoint res to_compress /\ disjoint res wv
-                    /\ disjoint res tmp /\ disjoint res s /\ disjoint res const_iv /\ disjoint res const_sigma
+                    /\ disjoint res tmp /\ disjoint res const_iv /\ disjoint res const_sigma
                     /\ disjoint d res /\ disjoint to_compress res /\ disjoint wv res
-                    /\ disjoint tmp res /\ disjoint s res /\ disjoint const_iv res /\ disjoint const_sigma res))
-     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1
+                    /\ disjoint tmp res /\ disjoint const_iv res /\ disjoint const_sigma res
+                    // Disjointness for s
+                    /\ disjoint s d /\ disjoint s to_compress /\ disjoint s wv
+                    /\ disjoint s tmp /\ disjoint s const_iv /\ disjoint s const_sigma
+                    /\ disjoint d s /\ disjoint to_compress s /\ disjoint wv s
+                    /\ disjoint tmp s /\ disjoint const_iv s /\ disjoint const_sigma s
+                    // Disjointness for res and s
+                    /\ disjoint res s /\ disjoint s res))
+     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 res s h0 h1
                           /\ h1.[res] == Spec.Blake2s.blake2s_internal (v dd) h0.[d] (v ll) (v kk) (v nn)))
 
 [@ (CConst "const_iv") (CConst "const_sigma")]
- let blake2s_internal dd d ll kk nn to_compress wv tmp res s const_iv const_sigma =
+let blake2s_internal dd d ll kk nn to_compress wv tmp res s const_iv const_sigma =
+  let h0 = ST.get () in
+  assume(h0.[s] == Spec.const_init);
   blake2s_internal1 s kk nn;
+  let h1 = ST.get () in
+  assume(as_list h1.[const_sigma] == sigma_list_size /\ h1.[const_iv] == Spec.const_init);
   blake2s_internal2 s dd d to_compress const_iv const_sigma;
+  let h2 = ST.get () in
+  assume(as_list h2.[const_sigma] == sigma_list_size /\ h2.[const_iv] == Spec.const_init);
   blake2s_internal3 s dd d ll kk nn to_compress tmp res const_iv const_sigma
 
 
