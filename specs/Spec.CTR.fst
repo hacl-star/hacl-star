@@ -35,6 +35,8 @@ let counter_mode_blocks enc st0 counter n plain =
   repeati n
     (fun i cipher ->
       let st = enc.set_counter st0 (counter + i) in
+      let start : size_nat = i * enc.block_len in
+      let fin : size_nat = (i+1) * enc.block_len in
       let b = slice plain (i * enc.block_len) ((i+1) * enc.block_len) in
       let k = enc.key_block st in
       let c = xor b k in
