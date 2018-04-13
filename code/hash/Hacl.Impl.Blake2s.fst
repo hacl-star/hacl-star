@@ -356,10 +356,11 @@ val blake2s_internal2_: s:lbuffer uint32 8 ->
 [@ Substitute]
 let blake2s_internal2_ s dd d m i const_iv const_sigma =
   let sub_d = sub d (mul #SIZE i (size Spec.bytes_in_block)) (size Spec.bytes_in_block) in
-  uint32s_from_bytes_le (size 16) m sub_d;
   assert(false);
+  admit();
+  uint32s_from_bytes_le (size 16) m sub_d;
   let offset = to_u64 #U32 (size_to_uint32 (mul #SIZE (i +. (size 1)) (size Spec.block_bytes))) in
-  blake2_compress s m offset false const_iv const_sigma//FIXME: i should have the u64 type
+  blake2_compress s m offset false const_iv const_sigma //FIXME: i should have the u64 type
 
 
 val blake2s_internal2: s:lbuffer uint32 8 ->
@@ -433,17 +434,34 @@ val blake2s_internal:
    to_compress:lbuffer uint32 16 -> wv:working_vector -> tmp:lbuffer uint8 32 -> res:lbuffer uint8 (size_v nn) ->
    const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
    Stack unit
-     (requires (fun h -> live h d /\ live h to_compress /\ live h res /\ live h wv))
-     (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
+     (requires (fun h -> live h d /\ live h to_compress /\ live h wv /\ live h tmp /\ live h res /\ live h const_iv /\ live h const_sigma
+                    /\ as_list h.[const_sigma] == sigma_list_size
+                    /\ h.[const_iv] == Spec.const_init
+                    /\ disjoint res d /\ disjoint res to_compress /\ disjoint res wv /\ disjoint res tmp /\ disjoint res const_iv /\ disjoint res const_sigma
+                    /\ disjoint d res /\ disjoint to_compress res /\ disjoint wv res /\ disjoint tmp res /\ disjoint const_iv res /\ disjoint const_sigma res))
+     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1
+                          /\ h1.[res] == Spec.Blake2s.blake2s_internal (v dd) h0.[d] (v ll) (v kk) (v nn)))
 
 [@ (CConst "const_iv") (CConst "const_sigma")]
  let blake2s_internal dd d ll kk nn to_compress wv tmp res const_iv const_sigma =
   push_frame ();
   assert_norm (List.Tot.length Spec.list_init = 8);
-  let h : lbuffer uint32 8 = createL Spec.list_init in
-  blake2s_internal1 h kk nn;
-  blake2s_internal2 h dd d to_compress const_iv const_sigma;
-  blake2s_internal3 h dd d ll kk nn to_compress tmp res const_iv const_sigma;
+  let s : lbuffer uint32 8 = createL Spec.list_init in
+  (**) let h0 = ST.get () in
+  blake2s_internal1 s kk nn;
+  assume(live h0 s /\ live h0 d /\ live h0 to_compress /\ live h0 const_iv /\ live h0 const_sigma
+       /\ as_list h0.[const_sigma] == sigma_list_size
+       /\ h0.[const_iv] == Spec.const_init
+       /\ disjoint s d /\ disjoint s to_compress /\ disjoint s const_iv /\ disjoint s const_sigma
+       /\ disjoint d s /\ disjoint to_compress s /\ disjoint const_iv s /\ disjoint const_sigma s);
+  blake2s_internal2 s dd d to_compress const_iv const_sigma;
+  (**) let h1 = ST.get () in
+  assume(live h1 s /\ live h1 d /\ live h1 to_compress /\ live h1 tmp /\ live h1 res /\ live h1 const_iv /\ live h1 const_sigma
+       /\ as_list h1.[const_sigma] == sigma_list_size
+       /\ h1.[const_iv] == Spec.const_init
+       /\ disjoint s d /\ disjoint s to_compress /\ disjoint s tmp /\ disjoint s res /\ disjoint s const_iv /\ disjoint s const_sigma
+       /\ disjoint d s /\ disjoint to_compress s /\ disjoint tmp s /\ disjoint res s /\ disjoint const_iv s /\ disjoint const_sigma s);
+  blake2s_internal3 s dd d ll kk nn to_compress tmp res const_iv const_sigma;
   pop_frame ()
 
 
