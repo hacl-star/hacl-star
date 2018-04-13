@@ -9,11 +9,11 @@ open Spec.Poly1305.Lemmas
 
 (* Field types and parameters *)
 let prime =  pow2 130 - 5
-type elem = e:nat{e >= 0 /\ e < prime}
-let fadd (e1:elem) (e2:elem) = (e1 + e2) % prime
-let fmul (e1:elem) (e2:elem) = (e1 * e2) % prime
-let zero : elem = 0
-let one  : elem = 1
+unfold type elem = nat_mod prime
+let to_elem (x:nat) : elem = x `modulo` prime 
+let from_elem (x:elem) : nat = nat_mod_v #prime x
+let zero : elem = to_elem 0
+
 
 (* Poly1305 parameters *)
 let blocksize : size_nat = 16
@@ -23,7 +23,7 @@ type tag   = lbytes blocksize
 type key   = lbytes keysize
 
 
-type state = {
+noeq type state = {
   r:elem;
   s:elem;
   acc:elem
@@ -36,8 +36,10 @@ let set_acc (st:state) (acc:elem) =
 let update1 (len:size_nat{len <= blocksize}) (b:lbytes len) (st:state) : state =
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
-  let n = pow2 (8 * len) `fadd` nat_from_bytes_le b in
-  set_acc st ((n `fadd` st.acc) `fmul` st.r)
+  let n = to_elem (pow2 (8 * len)) +. to_elem (nat_from_bytes_le b) in
+  let acc = (n +. st.acc) *. st.r in
+  set_acc st acc
+  
 
 
 let update_blocks (n:size_nat{n * blocksize <= max_size_t}) (text:lbytes (n * blocksize)) (st:state) : state =
@@ -56,7 +58,7 @@ let poly (len:size_nat) (text:lbytes len) (st:state) : state =
     update1 rem last st
 
 let finish (st:state) : tag =
-  let n = (st.acc + st.s) % pow2 128 in
+  let n = (from_elem st.acc + from_elem st.s) % pow2 128 in
   nat_to_bytes_le 16 n
 
 let encode_r (rb:block) : elem =
@@ -68,12 +70,12 @@ let encode_r (rb:block) : elem =
   let rb = rb.[4] <- rb.[4] &. u8 252 in
   let rb : lseq uint8 16 = rb.[8] <- rb.[8] &. u8 252 in
   let rb : lseq uint8 16 = rb.[12] <- rb.[12] &. u8 252 in
-  nat_from_bytes_le rb
+  to_elem (nat_from_bytes_le rb)
 
 let poly1305_init (k:key) : state =
   let r = encode_r (slice k 0 16) in
-  let s = nat_from_bytes_le (slice k 16 32) in
-  {r = r; s = s; acc = 0}
+  let s = to_elem (nat_from_bytes_le (slice k 16 32)) in
+  {r = r; s = s; acc = zero}
 
 let poly1305 (len:size_nat) (msg:lbytes len) (k:key) : tag =
   let st = poly1305_init k in

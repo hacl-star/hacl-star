@@ -55,8 +55,8 @@ let rounds : shuffle =
 
 let chacha20_core (s:state) : Tot state =
   let k = rounds s in
-  map2 (add_mod #U32) k s
-
+  map2 (+.) k s
+  
 (* state initialization *)
 inline_for_extraction
 let c0 = 0x61707865
