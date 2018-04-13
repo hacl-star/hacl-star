@@ -26,7 +26,7 @@ type idx = n:nat{n < 4}
 type shuffle = state -> Tot state
 
 let op_Plus_Percent_Hat (x:vec) (y:vec) : Tot vec =
-       map2 (add_mod #U32) x y
+       map2 (+.) x y
 
 let op_Hat_Hat (x:vec) (y:vec) : Tot vec =
        map2 (logxor #U32) x y

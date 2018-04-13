@@ -19,9 +19,10 @@ let uint_t (t:inttype) : Type0 =
   | U64 -> UInt64.t
   | U128 -> UInt128.t
   | SIZE -> UInt32.t
+  | NATm m -> n:nat{n < m}
 
 inline_for_extraction
-let uint_to_nat_ #t (x:uint_t t) =
+let uint_to_nat_ #t (x:uint_t t) : (n:nat{n <= maxint t}) =
   match t with
   | U8 -> UInt8.v x
   | U16 -> UInt16.v x
@@ -29,8 +30,9 @@ let uint_to_nat_ #t (x:uint_t t) =
   | U64 -> UInt64.v x
   | U128 -> UInt128.v x
   | SIZE -> UInt32.v x
+  | NATm m -> x
 
-let uint_v #t u = uint_to_nat_ u
+let uint_v #t u : nat = uint_to_nat_ u
 
 (* Declared in .fsti: uint8, uint16, uint32, uint64, uint128 *)
 
@@ -55,6 +57,9 @@ let u128_uLL x = x
 inline_for_extraction
 let size_ x : uint_t SIZE = UInt32.uint_to_t x
 
+inline_for_extraction
+let modulo_ x m : uint_t (NATm m) = x % m
+
 let nat_to_uint #t x : uint_t t =
   match t with
   | U8 -> u8 x
@@ -63,8 +68,9 @@ let nat_to_uint #t x : uint_t t =
   | U64 -> u64 x
   | U128 -> u128 x
   | SIZE -> size_ x
+  | NATm m -> modulo_ x m
 
-#reset-options "--z3rlimit 1000"
+#reset-options "--z3rlimit 100"
 let cast #t t' u  =
   match t, t' with
   | U8, U8 -> u
@@ -93,6 +99,8 @@ let cast #t t' u  =
   | U128, U32 -> FStar.Int.Cast.uint64_to_uint32 (FStar.UInt128.uint128_to_uint64 u)
   | U128, U128 -> u
 
+#reset-options "--z3rlimit 100"
+
 let add_mod #t a b =
   match t with
   | U8  -> (UInt8.add_mod a b)
@@ -101,7 +109,7 @@ let add_mod #t a b =
   | U64 -> (UInt64.add_mod a b)
   | U128 -> (UInt128.add_mod a b)
   | SIZE -> (UInt32.add_mod a b)
-
+  | NATm m -> (a + b) % m 
 
 let add #t a b =
   match t with
@@ -111,6 +119,7 @@ let add #t a b =
   | U64 -> (UInt64.add a b)
   | U128 -> (UInt128.add a b)
   | SIZE -> (UInt32.add a b)
+  | NATm m -> a + b
 
 let incr #t a =
   match t with
@@ -120,7 +129,7 @@ let incr #t a =
   | U64 -> (UInt64.add a 0x1uL)
   | U128 -> (UInt128.add a (UInt128.uint_to_t 1))
   | SIZE -> (UInt32.add a 0x1ul)
-
+  | NATm m -> a + 1
 
 
 let mul_mod #t a b =
@@ -130,7 +139,7 @@ let mul_mod #t a b =
   | U32 -> (UInt32.mul_mod a b)
   | U64 -> (UInt64.mul_mod a b)
   | SIZE -> (UInt32.mul_mod a b)
-
+  | NATm m -> (a `op_Multiply` b) % m
 
 let mul #t a b =
   match t with
@@ -139,6 +148,7 @@ let mul #t a b =
   | U32 -> (UInt32.mul a b)
   | U64 -> (UInt64.mul a b)
   | SIZE -> (UInt32.mul a b)
+  | NATm m -> a `op_Multiply` b
 
 let mul_wide a b = UInt128.mul_wide a b
 
@@ -150,6 +160,7 @@ let sub_mod #t a b =
   | U64 -> (UInt64.sub_mod a b)
   | U128 -> (UInt128.sub_mod a b)
   | SIZE -> (UInt32.sub_mod a b)
+  | NATm m -> (m + a - b) % m
 
 
 let sub #t a b =
@@ -160,6 +171,7 @@ let sub #t a b =
   | U64 -> (UInt64.sub a b)
   | U128 -> (UInt128.sub a b)
   | SIZE -> (UInt32.sub a b)
+  | NATm m -> a - b
 
 let decr #t a =
   match t with
@@ -169,7 +181,8 @@ let decr #t a =
   | U64 -> (UInt64.sub a 0x1uL)
   | U128 -> (UInt128.sub a (UInt128.uint_to_t 1))
   | SIZE -> (UInt32.sub a 0x1ul)
-
+  | NATm m -> a - 1
+  
 let logxor #t a b =
   match t with
   | U8 -> (UInt8.logxor a b)
@@ -301,22 +314,45 @@ let lte_mask_lemma #t a b d = admit()
 let size x = size_ x
 let size_v x = UInt32.v x
 let size_to_uint32 x = x
+let nat_mod_v #m x = x
+let modulo x m = modulo_ x m
 
-let size_incr x = add #SIZE x (size 1)
-let size_decr x = sub #SIZE x (size 1)
-let size_div x y = FStar.UInt32.div x y
-let size_mod x y = FStar.UInt32.rem x y
-let size_eq x y = FStar.UInt32.eq x y
-let size_lt x y = FStar.UInt32.lt x y
-let size_le x y = FStar.UInt32.lte x y
-let size_gt x y = FStar.UInt32.gt x y
-let size_ge x y = FStar.UInt32.gte x y
+let div #t x y = 
+  match t with
+  | SIZE -> FStar.UInt32.div x y
+  | NATm m -> x / y
 
-type bignum = nat
-let bn_v n = n
-let bn n = n
-let bn_add a b = a + b
-let bn_mul a b = a `op_Multiply` b
-let bn_sub a b = a - b
-let bn_mod a b = a % b
-let bn_div a b = a / b
+let mod #t x y =
+  match t with
+  | SIZE -> FStar.UInt32.rem x y
+  | NATm m -> x % y
+
+let eq #t x y = 
+  match t with
+  | SIZE -> FStar.UInt32.eq x y
+  | NATm m -> x = y
+
+let ne #t x y = 
+  match t with
+  | SIZE -> not (FStar.UInt32.eq x y)
+  | NATm m -> x <> y
+
+let lt #t x y = 
+  match t with
+  | SIZE -> FStar.UInt32.lt x y
+  | NATm m -> x < y
+
+let le #t x y = 
+  match t with
+  | SIZE -> FStar.UInt32.lte x y
+  | NATm m -> x <= y
+
+let gt #t x y = 
+  match t with
+  | SIZE -> FStar.UInt32.gt x y
+  | NATm m -> x > y
+
+let ge #t x y = 
+  match t with
+  | SIZE -> FStar.UInt32.gte x y
+  | NATm m -> x >= y
