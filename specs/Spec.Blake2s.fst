@@ -151,17 +151,24 @@ let blake2_compress h m offset flag =
 
 val blake2s_internal1 : h:intseq U32 8 -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (intseq U32 8)
 let blake2s_internal1 h kk nn =
-  let h = h.[0] <- h.[0] ^. (u32 0x01010000) ^. ((u32 kk) <<. (u32 8)) ^. (u32 nn) in
-  h
+  let h0 = h.[0] in
+  let h0' = h0 ^. (u32 0x01010000) ^. ((u32 kk) <<. (u32 8)) ^. (u32 nn) in
+  h.[0] <- h0'
 
-val blake2s_internal2 : h:intseq U32 8 -> dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> Tot (h:intseq U32 8)
-let blake2s_internal2 h dd d =
+
+val blake2s_internal2_: dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> i:size_nat{i < dd - 1} -> h:intseq U32 8 -> Tot (h:intseq U32 8)
+let blake2s_internal2_ dd d i h =
+  let sub_d = (sub d (i * bytes_in_block) bytes_in_block) in
+  let to_compress : intseq U32 16 = uints_from_bytes_le sub_d in
+  let offset = u64 ((i + 1) * block_bytes) in
+  blake2_compress h to_compress offset false
+
+
+val blake2s_internal2 : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> h:intseq U32 8 -> Tot (h:intseq U32 8)
+let blake2s_internal2 dd d h =
   if dd > 1 then
-  repeati (dd - 1) (fun i h ->
-	 let to_compress : intseq U32 16 =
-	 uints_from_bytes_le (sub d (i * bytes_in_block) bytes_in_block) in
-    blake2_compress h to_compress (u64 ((i + 1) * block_bytes)) false
-  ) h else h
+    repeati (dd - 1) (fun i h -> blake2s_internal2_ dd d i h) h
+  else h
 
 
 val blake2s_internal3 : h:intseq U32 8 -> dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
@@ -182,7 +189,7 @@ val blake2s_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} 
 let blake2s_internal dd d ll kk nn =
   let h = const_init in
   let h = blake2s_internal1 h kk nn in
-  let h = blake2s_internal2 h dd d in
+  let h = blake2s_internal2 dd d h in
   let k = blake2s_internal3 h dd d ll kk nn in
   k
 
