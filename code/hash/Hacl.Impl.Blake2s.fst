@@ -393,7 +393,8 @@ let blake2s_internal2_ s dd d to_compress i const_iv const_sigma =
     uint32s_from_bytes_le #16 (size 16) to_compress sub_d;
     (**) let h2 = ST.get () in
     (**) assume(h2.[sub_d] == (Spec.Lib.IntSeq.sub h0.[d] (v i * Spec.bytes_in_block) Spec.bytes_in_block));
-// BB. TODO: There is a bug in extraction if you uncomment the assert... WHYYYY ?
+// BB. TODO: There is a bug in extraction if you uncomment the assert...
+// Why is the implicit necessary ??? This should be erased before ext
 //    (**) assert(h2.[to_compress] == (Spec.Lib.IntSeq.uints_from_bytes_le h1.[sub_d]));
     let offset = to_u64 #U32 (size_to_uint32 (mul #SIZE (i +. (size 1)) (size Spec.block_bytes))) in
     (**) let h3 = ST.get () in
@@ -437,19 +438,18 @@ let blake2s_internal2_alloc s dd d i const_iv const_sigma =
 val blake2s_internal2: s:lbuffer uint32 8 ->
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
-   to_compress:lbuffer uint32 16 ->
    const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
    Stack unit
-     (requires (fun h -> live h s /\ live h d /\ live h to_compress /\ live h const_iv /\ live h const_sigma
+     (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
                     /\ as_list h.[const_sigma] == sigma_list_size
                     /\ h.[const_iv] == Spec.const_init
-                    /\ disjoint s d /\ disjoint s to_compress /\ disjoint s const_iv /\ disjoint s const_sigma
-                    /\ disjoint d s /\ disjoint to_compress s /\ disjoint const_iv s /\ disjoint const_sigma s))
+                    /\ disjoint s d /\ disjoint s const_iv /\ disjoint s const_sigma
+                    /\ disjoint d s /\ disjoint const_iv s /\ disjoint const_sigma s))
      (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
                           /\ h1.[s] == Spec.blake2s_internal2  (v dd) h0.[d] h0.[s]))
 
 [@ Substitute]
-let blake2s_internal2 s dd d to_compress const_iv const_sigma =
+let blake2s_internal2 s dd d const_iv const_sigma =
   (**) let h0 = ST.get () in
   if (dd >. size 1) then begin
     let idx = size_decr dd in
@@ -458,14 +458,17 @@ let blake2s_internal2 s dd d to_compress const_iv const_sigma =
             let d0 = h0.[d] in
             Spec.blake2s_internal2_ (v dd) d0)
     (fun i s ->
-      // let h0 = ST.get () in
+      let h0 = ST.get () in
       // assume(as_list h0.[const_sigma] == sigma_list_size /\ h0.[const_iv] == Spec.const_init);
-      assume(live h0 s /\ live h0 d /\ live h0 to_compress /\ live h0 const_iv /\ live h0 const_sigma
+      assume(live h0 s /\ live h0 d /\ live h0 const_iv /\ live h0 const_sigma
              /\ as_list h0.[const_sigma] == sigma_list_size
              /\ h0.[const_iv] == Spec.const_init
-             /\ disjoint s d /\ disjoint s to_compress /\ disjoint s const_iv /\ disjoint s const_sigma
-             /\ disjoint d s /\ disjoint to_compress s /\ disjoint const_iv s /\ disjoint const_sigma s);
-      blake2s_internal2_alloc s dd d i const_iv const_sigma) end
+             /\ disjoint s d /\ disjoint s const_iv /\ disjoint s const_sigma
+             /\ disjoint d s /\ disjoint const_iv s /\ disjoint const_sigma s);
+      blake2s_internal2_alloc s dd d i const_iv const_sigma;
+      let h1 = ST.get () in
+      assert(h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]); admit()
+      ) end
    else ()
 
 
@@ -532,7 +535,7 @@ let blake2s_internal dd d ll kk nn to_compress wv tmp res s const_iv const_sigma
   blake2s_internal1 s kk nn;
   let h1 = ST.get () in
   assume(as_list h1.[const_sigma] == sigma_list_size /\ h1.[const_iv] == Spec.const_init);
-  blake2s_internal2 s dd d to_compress const_iv const_sigma;
+  blake2s_internal2 s dd d const_iv const_sigma;
   let h2 = ST.get () in
   assume(as_list h2.[const_sigma] == sigma_list_size /\ h2.[const_iv] == Spec.const_init);
   blake2s_internal3 s dd d ll kk nn to_compress tmp res const_iv const_sigma
