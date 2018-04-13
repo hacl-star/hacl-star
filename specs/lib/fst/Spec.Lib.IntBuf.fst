@@ -11,6 +11,7 @@ module LSeq = Spec.Lib.IntSeq
 
 module Buf = FStar.Buffer
 module U32 = FStar.UInt32
+
 type lbuffer (a:Type0) (len:size_nat) = b:Buf.buffer a {Buf.length b == len}
 let sub #a #len #olen b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
@@ -26,6 +27,9 @@ let modifies = admit()
 let live_list = admit()
 let disjoint_list = admit()
 
+let index #a #len b i = Buf.index b (size_to_UInt32 i)
+let upd #a #len b i v = Buf.upd b (size_to_UInt32 i) v
+
 let create #a #len clen init = Buf.create init (size_to_UInt32 clen)
 let createL #a init = Buf.createL init
 
@@ -36,9 +40,18 @@ let alloc #a #b #len clen init read writes spec impl =
   pop_frame();
   r
 
-let index #a #len b i = Buf.index b (size_to_UInt32 i)
-let upd #a #len b i v = Buf.upd b (size_to_UInt32 i) v
-
+let salloc #a #b #len clen init read writes spec impl =
+  push_frame();
+  let buf = create clen init in
+  let r = impl buf in
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      upd #a #len buf j init in
+  Spec.Lib.Loops.for (size 0) clen inv f';
+  pop_frame();
+  r
 
 let map #a #len clen f b =
   let h0 = ST.get() in
@@ -94,4 +107,12 @@ let iter #a #len n spec impl input =
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       impl input in
+  Spec.Lib.Loops.for (size 0) n inv f'
+
+let loop #h0 #a #len n buf spec impl =
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= v n}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      impl j buf in
   Spec.Lib.Loops.for (size 0) n inv f'

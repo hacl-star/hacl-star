@@ -2082,7 +2082,7 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "assumption_FStar.Monotonic.HyperHeap.HasEq_rid",
+        "assumption_FStar.Monotonic.HyperHeap.HasEq_rid", "bool_inversion",
         "data_elim_FStar.Buffer.MkBuffer",
         "data_elim_FStar.Monotonic.HyperStack.MkRef",
         "data_elim_FStar.UInt32.Mk", "eq2-interp",
@@ -2195,7 +2195,7 @@
         "typing_FStar.Buffer.__proj__MkBuffer__item__length",
         "typing_FStar.Buffer.as_seq", "typing_FStar.Buffer.content",
         "typing_FStar.Buffer.length", "typing_FStar.Buffer.sel",
-        "typing_FStar.Map.domain",
+        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
         "typing_FStar.Monotonic.HyperStack.__proj__HS__item__h",
         "typing_FStar.Monotonic.HyperStack.sel",
         "typing_FStar.Seq.Base.create",

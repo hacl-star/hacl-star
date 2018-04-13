@@ -109,7 +109,6 @@ private let rec swap_conditional_ a b swap ctr =
     let i = U32.(ctr -^ 1ul) in
     swap_conditional_ a b swap i
   )
-  else ()
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 

@@ -67,10 +67,16 @@ val vec_add: s0:vec -> s0':vec -> Tot (s1:vec{
 val vec_xor: s0:vec -> s0':vec -> Tot (s1:vec{
   vec_as_seq s1 == Spec.Chacha20_vec.op_Hat_Hat (vec_as_seq s0) (vec_as_seq s0')})
 
+private val zero:  zero:vec{vec_as_seq zero == Seq.Create.create_4 0ul 0ul 0ul 0ul}
+private val one_le:  one:vec{vec_as_seq one == Seq.Create.create_4 1ul 0ul 0ul 0ul}
+private val two_le:  two:vec{vec_as_seq two == Seq.Create.create_4 2ul 0ul 0ul 0ul}
+
+val vec_increment: s0:vec -> Tot (s1:vec{
+  vec_as_seq s1 == Spec.Chacha20_vec.op_Plus_Percent_Hat (vec_as_seq s0) (vec_as_seq one_le)})
+
+val vec_zero: unit -> Tot (s1:vec{vec_as_seq s1 == vec_as_seq zero})
+
 inline_for_extraction let ( <<< ) (v:vec) (r:u32{U32.v r < 32}): Tot (vec) = vec_rotate_left v r
 inline_for_extraction let ( +%^ ) (v1:vec) (v2:vec): Tot (vec) = vec_add v1 v2
 inline_for_extraction let ( ^^ ) (v1:vec) (v2:vec): Tot (vec) = vec_xor v1 v2
 
-val zero:  zero:vec{vec_as_seq zero == Seq.Create.create_4 0ul 0ul 0ul 0ul}
-val one_le:  one:vec{vec_as_seq one == Seq.Create.create_4 1ul 0ul 0ul 0ul}
-val two_le:  two:vec{vec_as_seq two == Seq.Create.create_4 2ul 0ul 0ul 0ul}
