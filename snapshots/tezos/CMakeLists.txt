@@ -24,7 +24,8 @@ set(SOURCE_FILES_VERIFIED
    Hacl_SHA2_512.c
    Hacl_HMAC_SHA2_256.c
    Hacl_Salsa20.c
-   NaCl.c)
+   NaCl.c
+   Hacl_Unverified_Random.c)
 
 # Define a user variable to determinate if experimental files are build
 option(Experimental "Include experimental code in HaCl build" OFF)

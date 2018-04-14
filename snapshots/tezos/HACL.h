@@ -24,7 +24,7 @@
 #ifndef __HACL_H
 #define __HACL_H
 
-#include "Hacl_Unverifed_Random.h"
+#include "Hacl_Unverified_Random.h"
 
 #include "NaCl.h"
 #include "Hacl_Chacha20.h"
