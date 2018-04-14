@@ -214,6 +214,11 @@ SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl
 		cp snapshots/makefiles/$$f snapshots/tezos/$$f ; \
 	done
 
+.snapshots/tezos/haclnacl:
+	for f in haclnacl.h haclnacl.c; do \
+		(cat $(HACL_LICENSE) snapshots/api/$$f ) > snapshots/tezos/$$f ; \
+	done
+
 .snapshots/tezos/kremlib:
 	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/tezos/$$f ; \
@@ -235,7 +240,8 @@ snapshots/tezos: snapshots-remove-intermediates
 	$(MAKE) .snapshots/tezos/experimental
 	mkdir -p snapshots/tezos/include
 	mv snapshots/tezos/*.h snapshots/tezos/include
-	cp snapshots/tezos/CMakeLists.Tezos.txt snapshots/tezos/CMakeLists.txt
+	$(MAKE) .snapshots/tezos/haclnacl
+	cp snapshots/makefiles/CMakeLists.Tezos.txt snapshots/tezos/CMakeLists.txt
 	cp snapshots/api/HACL.Tezos.h snapshots/tezos/HACL.h
 
 #
