@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "HACL.h"
 #include "haclnacl.h"
 #include "tweetnacl.h"
 #include "hacl_test_utils.h"
@@ -127,7 +128,7 @@ bool unit_test_chacha20_vec128(){
   uint8_t ciphertext[114];
   memset(ciphertext, 0, 114 * sizeof ciphertext[0]);
   uint32_t counter = (uint32_t )1;
-  chacha20_vec128(ciphertext,chacha_plaintext,114, chacha_key, chacha_nonce, counter);
+  Hacl_Chacha20_Vec128(ciphertext,chacha_plaintext,114, chacha_key, chacha_nonce, counter);
 
     a = memcmp(ciphertext, chacha_ciphertext, 114 * sizeof (uint8_t));
     if (a != 0){
