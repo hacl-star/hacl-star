@@ -14,10 +14,11 @@ set(SOURCE_FILES_VERIFIED
    kremlib.c
    FStar.c
    Hacl_Policies.c
+   AEAD_Poly1305_64.c
    Hacl_Chacha20.c
+   Hacl_Chacha20Poly1305.c
    Hacl_Curve25519.c
    Hacl_Ed25519.c
-   Hacl_Poly1305_32.c
    Hacl_Poly1305_64.c
    Hacl_SHA2_256.c
    Hacl_SHA2_384.c
@@ -25,10 +26,8 @@ set(SOURCE_FILES_VERIFIED
    Hacl_HMAC_SHA2_256.c
    Hacl_Salsa20.c
    NaCl.c
+   haclnacl.c
    Hacl_Unverified_Random.c)
-
-# Define a user variable to determinate if experimental files are build
-option(Experimental "Include experimental code in HaCl build" OFF)
 
 # Final set of files to build the libraries upon
 set(SOURCE_FILES ${SOURCE_FILES_VERIFIED})
