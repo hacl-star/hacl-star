@@ -48,6 +48,7 @@ Hacl_Hash_Lib_LoadStore_uint64s_to_be_bytes(uint8_t *output, uint64_t *input, ui
 
 static void Hacl_Impl_SHA2_384_init(uint64_t *state)
 {
+  uint64_t *n1 = state + (uint32_t)168U;
   uint64_t *k1 = state;
   uint64_t *h_01 = state + (uint32_t)160U;
   uint64_t *p10 = k1;
@@ -175,6 +176,7 @@ static void Hacl_Impl_SHA2_384_init(uint64_t *state)
   p2[1U] = (uint64_t)0x8eb44a8768581511U;
   p2[2U] = (uint64_t)0xdb0c2e0d64f98fa7U;
   p2[3U] = (uint64_t)0x47b5481dbefa4fa4U;
+  n1[0U] = (uint64_t)0U;
 }
 
 static void Hacl_Impl_SHA2_384_update(uint64_t *state, uint8_t *data)
