@@ -5,12 +5,15 @@ HACL_HOME ?= ../..
 #
 # Compilation flags
 #
+
 # For Generic 64-bit
 CCOPTS = -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops
+
 # For Generic 32-bit
-#CCOPTS32 = -Ofast -mtune=generic -m32 -fwrapv -fomit-frame-pointer -funroll-loops
+CCOPTS32 = -Ofast -mtune=generic -m32 -fwrapv -fomit-frame-pointer -funroll-loops
+
 # For Raspberry Pi 3
-CCOPTS32 = -Ofast -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon-fp-armv8 -fwrapv -fomit-frame-pointer -funroll-loops
+#CCOPTS32 = -Ofast -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon-fp-armv8 -fwrapv -fomit-frame-pointer -funroll-loops
 
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
   LIBFLAGS=$(CCOPTS) $(CFLAGS)
@@ -56,7 +59,7 @@ libhacl.so: $(FILES)
 	  Hacl_Chacha20Poly1305.c -c -o Hacl_Chacha20Poly1305.o
 	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/test-files -I . -Wall \
 	  ../../test/test-files/hacl_test_utils.c \
-	  Hacl_Chacha20_Vec128.c Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  Hacl_Chacha20_Vec128.c Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../api/haclnacl.c \
 	  -o libhacl.so
 
 
@@ -87,7 +90,7 @@ libhacl.a: $(FILES)
 	  Hacl_Chacha20Poly1305.c -c -o Hacl_Chacha20Poly1305.o
 	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/test-files -I . -Wall \
 	  ../../test/test-files/hacl_test_utils.c \
-	  Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../api/haclnacl.c \
 	  -o libhacl.a
 
 #
@@ -119,7 +122,7 @@ libhacl32.so: $(FILES)
 	  Hacl_Chacha20Poly1305.c -c -o Hacl_Chacha20Poly1305.o
 	$(CC) -shared  $(LIBFLAGS32) -I ../../test/test-files -I . -Wall \
 	  ../../test/test-files/hacl_test_utils.c \
-	  FStar.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  FStar.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../api/haclnacl.c \
 	  -o libhacl32.so
 
 #
@@ -151,7 +154,7 @@ libhacl32.a: $(FILES)
 	  Hacl_Chacha20Poly1305.c -c -o Hacl_Chacha20Poly1305.o
 	$(CC) -shared  $(LIBFLAGS32) -I ../../test/test-files -I . -Wall \
 	  ../../test/test-files/hacl_test_utils.c \
-	  FStar.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.0 AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../../test/test-files/haclnacl.c \
+	  FStar.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.0 AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c ../../test/test-files/randombytes.c ../api/haclnacl.c \
 	  -o libhacl32.a
 
 unit-tests: libhacl.so
