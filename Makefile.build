@@ -206,7 +206,7 @@ snapshots/wireguard: snapshots-remove-intermediates
 	$(MAKE) .snapshots/wireguard/kremlib
 
 
-SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
+SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_* AEAD_Poly1305_64.* Hacl_Chacha20Poly1305.*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*)
 
 .snapshots/tezos/makefiles:
@@ -241,7 +241,7 @@ snapshots/tezos: snapshots-remove-intermediates
 	mkdir -p snapshots/tezos/include
 	mv snapshots/tezos/*.h snapshots/tezos/include
 	$(MAKE) .snapshots/tezos/haclnacl
-	cp snapshots/makefiles/CMakeLists.Tezos.txt snapshots/tezos/CMakeLists.txt
+	mv snapshots/tezos/CMakeLists.Tezos.txt snapshots/tezos/CMakeLists.txt
 	cp snapshots/api/HACL.Tezos.h snapshots/tezos/HACL.h
 
 #
