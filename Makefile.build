@@ -139,6 +139,16 @@ SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* 
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
 	done
 
+.snapshots/hacl-c/haclnacl:
+	for f in haclnacl.h haclnacl.c; do \
+		(cat $(HACL_LICENSE) snapshots/api/$$f ) > snapshots/hacl-c/$$f ; \
+	done
+
+.snapshots/hacl-c/experimental:
+	for f in Hacl_Unverified_Random.h Hacl_Unverified_Random.c; do \
+		(cat $(HACL_LICENSE) snapshots/experimental/$$f ) > snapshots/hacl-c/$$f ; \
+	done
+
 snapshots/hacl-c: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc-unrolled
@@ -147,6 +157,8 @@ snapshots/hacl-c: snapshots-remove-intermediates
 	cp $(SNAPSHOT_HACL_C_FILES) ./snapshots/hacl-c
 	$(MAKE) .snapshots/hacl-c/makefiles
 	$(MAKE) .snapshots/hacl-c/kremlib
+	$(MAKE) .snapshots/hacl-c/haclnacl
+	$(MAKE) .snapshots/hacl-c/experimental
 
 
 SNAPSHOT_NSS_FILES = \
