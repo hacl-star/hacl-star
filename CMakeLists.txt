@@ -26,7 +26,6 @@ set(SOURCE_FILES_VERIFIED
     snapshots/hacl-c/Hacl_SHA2_256.c
     snapshots/hacl-c/Hacl_SHA2_384.c
     snapshots/hacl-c/Hacl_SHA2_512.c
-    snapshots/hacl-c/kremlib.c
     snapshots/hacl-c/NaCl.c)
 
 # Trusted files
