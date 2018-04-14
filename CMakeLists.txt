@@ -43,6 +43,8 @@ set(SOURCE_FILES_EXPERIMENTAL
 
 # Public header files
 set(HEADER_FILES
+    snapshots/api/HACL.h
+    snapshots/api/haclnacl.h
     snapshots/hacl-c/AEAD_Poly1305_64.h
     snapshots/hacl-c/FStar.h
     snapshots/hacl-c/Hacl_Chacha20.h
