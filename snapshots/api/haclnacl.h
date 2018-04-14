@@ -1,63 +1,110 @@
+/**************************************************************************
+ * WARNING:
+ * This file is handwritten and MUST be reviewed properly before use
+ **************************************************************************/
+
 #include <inttypes.h>
 
-/* NaCl-like API */
-int crypto_onetimeauth(uint8_t *output, uint8_t *input, uint64_t input_len, uint8_t *key);
+#define crypto_auth_BYTES 32
+#define crypto_auth_KEYBYTES 32
 
-int crypto_onetimeauth_verify(uint8_t *output, uint8_t *input, uint64_t input_len, uint8_t *key);
+#define crypto_box_PUBLICKEYBYTES 32
+#define crypto_box_SECRETKEYBYTES 32
+#define crypto_box_BEFORENMBYTES 32
+#define crypto_box_NONCEBYTES 24
+#define crypto_box_ZEROBYTES 32
+#define crypto_box_BOXZEROBYTES 16
 
-int crypto_box_keypair(unsigned char *pk, unsigned char *sk);
+/* #define crypto_core_OUTPUTBYTES crypto_core_salsa20_OUTPUTBYTES */
+/* #define crypto_core_INPUTBYTES crypto_core_salsa20_INPUTBYTES */
+/* #define crypto_core_KEYBYTES crypto_core_salsa20_KEYBYTES */
+/* #define crypto_core_CONSTBYTES crypto_core_salsa20_CONSTBYTES */
 
-int crypto_box_beforenm(unsigned char *k, const unsigned char *pk,
-                        const unsigned char *sk)
-            __attribute__ ((warn_unused_result));
+#define crypto_hash_BYTES 64
 
-int crypto_scalarmult_base(unsigned char *q, const unsigned char *n);
+#define crypto_onetimeauth_BYTES 16
+#define crypto_onetimeauth_KEYBYTES 32
 
-int crypto_scalarmult(unsigned char *q, const unsigned char *n,
-                      const unsigned char *p)
-            __attribute__ ((warn_unused_result));
+#define crypto_scalarmult_BYTES 32
+#define crypto_scalarmult_SCALARBYTES 32
 
-int crypto_sign(uint8_t *signed_msg, long long unsigned int *signed_len, uint8_t *msg, uint64_t msg_len,
-            uint8_t *sk);
+#define crypto_secretbox_NONCEBYTES = 24
+#define crypto_secretbox_KEYBYTES   = 32
+#define crypto_secretbox_MACBYTES   = 16
+#define crypto_secretbox_ZEROBYTES 32
+#define crypto_secretbox_BOXZEROBYTES 16
 
-int crypto_sign_open(uint8_t *unsigned_msg, long long unsigned int *unsigned_msg_len,
-                     uint8_t *msg, uint64_t msg_len, uint8_t *pk);
+#define crypto_sign_BYTES 64
+#define crypto_sign_PUBLICKEYBYTES 32
+#define crypto_sign_SECRETKEYBYTES 64
 
-int crypto_sign_keypair(uint8_t pk[32], uint8_t sk[32]);
+#define crypto_stream_KEYBYTES 32
+#define crypto_stream_NONCEBYTES 24
 
-int crypto_sign_secret_to_public(uint8_t *pk, uint8_t *sk);
 
-int crypto_box(uint8_t *cipher, uint8_t *message, uint64_t msg_len, uint8_t *nonce,  uint8_t *pk, uint8_t *sk);
-
-int crypto_box_open(uint8_t *msg, uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *pk, uint8_t *sk);
-
-int crypto_box_afternm(uint8_t *cipher, uint8_t *msg, uint64_t msg_len, uint8_t *nonce, uint8_t *key);
-
-int crypto_box_open_afternm(uint8_t *msg, uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *key);
-
-int crypto_secretbox(uint8_t *cipher, uint8_t *msg, uint64_t msg_len, uint8_t *nonce, uint8_t *key);
-
-int crypto_secretbox_open(uint8_t *msg, uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *key);
-
-int crypto_stream(uint8_t *cipher, uint64_t cipher_len, uint8_t *nonce, uint8_t *key);
-
-int crypto_stream_xor(uint8_t *cipher, uint8_t *msg, uint64_t cipher_len, uint8_t *nonce, uint8_t *key);
+/* Base primitives */
 
 void chacha20(uint8_t *output, uint8_t *plain, uint32_t plain_len, uint8_t *key, uint8_t *nonce, uint32_t ctr);
-
-void
-chacha20_vec128(
-         uint8_t *output,
-         uint8_t *plain,
-         uint32_t plain_len,
-         uint8_t *key,
-         uint8_t *nonce,
-         uint32_t ctr
-		);
 
 uint32_t aead_chacha20_poly1305_encrypt(uint8_t *cipher,  uint8_t *mac,  uint8_t *msg, uint32_t msg_len,  uint8_t *aad,  uint32_t aad_len,  uint8_t *key,  uint8_t *nonce);
 
 uint32_t aead_chacha20_poly1305_decrypt(uint8_t *msg, uint8_t *cipher,  uint32_t msg_len,  uint8_t *mac,  uint8_t *aad,  uint32_t aad_len,  uint8_t *key,  uint8_t *nonce);
+
+
+/* NaCl-like API */
+
+int crypto_auth(unsigned char *output, const unsigned char *input, unsigned long long input_len,const unsigned char *key);
+
+int crypto_auth_verify(const unsigned char *tag, const unsigned char *input, unsigned long long input_len, const unsigned char *key);
+
+
+int crypto_box(unsigned char *cipher, const unsigned char *message, unsigned long long msg_len, const unsigned char *nonce,  const unsigned char *pk, const unsigned char *sk);
+
+int crypto_box_open(unsigned char *msg, const unsigned char *cipher, unsigned long long cipher_len, const unsigned char *nonce, const unsigned char *pk, const unsigned char *sk);
+
+int crypto_box_keypair(unsigned char *pk, unsigned char *sk);
+
+int crypto_box_beforenm(unsigned char *k, const unsigned char *pk, const unsigned char *sk) __attribute__ ((warn_unused_result));
+
+int crypto_box_afternm(unsigned char *cipher, const unsigned char *msg, unsigned long long msg_len, const unsigned char *nonce, const uint8_t *key);
+
+int crypto_box_open_afternm(unsigned char *msg, const unsigned char *cipher, unsigned long long cipher_len, const unsigned char *nonce, const unsigned char *key);
+
+
+// int crypto_core(unsigned char *, const unsigned char *, const unsigned char *, const unsigned char *);
+
+
+int crypto_hash(unsigned char *output, const unsigned char *input, unsigned long long input_len);
+
+
+int crypto_onetimeauth(unsigned char *output, const unsigned char *input, unsigned long long input_len, const unsigned char *key);
+
+int crypto_onetimeauth_verify(const unsigned char *tag, const unsigned char *input, unsigned long long input_len, const unsigned char *key);
+
+
+int crypto_scalarmult_base(unsigned char *q, const unsigned char *n);
+
+int crypto_scalarmult(unsigned char *q, const unsigned char *n, const unsigned char *p) __attribute__ ((warn_unused_result));
+
+
+int crypto_secretbox(unsigned char *cipher, const unsigned char *msg, unsigned long long msg_len, const unsigned char *nonce, const unsigned char *key);
+
+int crypto_secretbox_open(unsigned char *msg, const unsigned char *cipher, unsigned long long cipher_len, const unsigned char *nonce, const unsigned char *key);
+
+
+int crypto_sign(unsigned char *signed_msg, unsigned long long *signed_len, const unsigned char *msg, unsigned long long msg_len, const unsigned char *sk);
+
+int crypto_sign_open(unsigned char *unsigned_msg, unsigned long long *unsigned_msg_len, const unsigned char *msg, unsigned long long msg_len, const unsigned char *pk);
+
+int crypto_sign_keypair(unsigned char *pk, unsigned char *sk);
+
+int crypto_sign_secret_to_public(uint8_t *pk, uint8_t *sk);
+
+
+int crypto_stream(unsigned char *cipher, unsigned long long cipher_len, const unsigned char *nonce, const unsigned char *key);
+
+int crypto_stream_xor(unsigned char *cipher, const unsigned char *msg, unsigned long long cipher_len, const unsigned char *nonce, const unsigned char *key);
+
 
 /* Other API (mix between NaCl's original API and LibSodium's API) */
 
