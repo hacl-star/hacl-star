@@ -45,6 +45,9 @@ set(SOURCE_FILES_EXPERIMENTAL
 set(HEADER_FILES
     snapshots/api/HACL.h
     snapshots/api/haclnacl.h
+    snapshots/hacl-c/vec128.h
+    snapshots/hacl-c/kremlib_base.h
+    snapshots/hacl-c/kremlib.h
     snapshots/hacl-c/AEAD_Poly1305_64.h
     snapshots/hacl-c/FStar.h
     snapshots/hacl-c/Hacl_Chacha20.h
@@ -60,10 +63,7 @@ set(HEADER_FILES
     snapshots/hacl-c/Hacl_SHA2_256.h
     snapshots/hacl-c/Hacl_SHA2_384.h
     snapshots/hacl-c/Hacl_SHA2_512.h
-    snapshots/hacl-c/kremlib_base.h
-    snapshots/hacl-c/kremlib.h
-    snapshots/hacl-c/NaCl.h
-    snapshots/hacl-c/vec128.h)
+    snapshots/hacl-c/NaCl.h)
 
 # Define a user variable to determinate if experimental files are build
 option(Experimental "Include experimental code in HACL* build" OFF)
