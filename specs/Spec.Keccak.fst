@@ -117,7 +117,7 @@ let absorb (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
   s
 
 let squeeze (s:state)
-	    (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes < 200})
+	    (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
 	    (outputByteLen: size_nat)
 	    : lbytes outputByteLen =
   let output = create outputByteLen (u8 0) in
