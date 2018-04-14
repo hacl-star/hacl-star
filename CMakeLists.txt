@@ -97,7 +97,7 @@ add_library(hacl_static STATIC ${SOURCE_FILES})
 set_target_properties(hacl_static PROPERTIES OUTPUT_NAME hacl)
 
 add_library(hacl_shared SHARED ${SOURCE_FILES})
-set_target_properties( PROPERTIES OUTPUT_NAME hacl)
+set_target_properties(hacl_shared PROPERTIES OUTPUT_NAME hacl)
 
 set_target_properties(hacl_shared hacl_static PROPERTIES
     PUBLIC_HEADER "${HEADER_FILES}")
