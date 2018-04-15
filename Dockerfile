@@ -40,7 +40,7 @@ RUN git clone https://github.com/FStarLang/FStar.git
 WORKDIR /home/Work/FStar
 RUN git checkout ${fstarv}
 ENV PATH "~/FStar/bin:$PATH"
-RUN opam config exec -- make -C src/ocaml-output
+RUN opam config exec -- make -C src/ocaml-output -j
 RUN opam config exec -- make -C ulib/ml
 WORKDIR /home/Work
 
