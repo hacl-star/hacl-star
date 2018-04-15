@@ -6,9 +6,9 @@
 
 #include "haclnacl.h"
 #include "Hacl_Chacha20_Vec128.h"
+#include "Hacl_Unverified_Random.h"
 
 #include "tweetnacl.h"
-#include "hacl_test_utils.h"
 
 #define HACL_UNIT_TESTS_SIZE (1 * 1024)
 #define POLY_MACSIZE 16
