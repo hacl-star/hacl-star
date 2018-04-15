@@ -18,12 +18,12 @@ CPUID_ASSUMED_DIR = ../cpuid/c
 EXTERNAL_CODE   = c
 BUILD_DIR		 = build
 
-MODULES_ASSUMED = Hacl.Hardware.Intel.DRNG.Assumed
-MODULE          = Hacl.Random.DRNG
-MAIN            = Hacl.Test.Random.DRNG
+MODULES_ASSUMED = Hacl.Trusted.Random.Hardware.Assumed
+MODULE          = Hacl.Trusted.Random.Hardware
+MAIN            = Hacl.Test.Trusted.Random.Hardware
 
 INCLUDES        = $(KREMLIN_HOME)/kremlib
-EXTRACTED_FILES =  Prims.c FStar.c cpuid.c drng.c Hacl_Random_DRNG.c Hacl_Test_Random_DRNG.c
+EXTRACTED_FILES =  Prims.c FStar.c cpuid.c drng.c Hacl_Trusted_Random_Hardware.c Hacl_Test_Trusted_Random_Hardware.c
 
 
 # Targets
