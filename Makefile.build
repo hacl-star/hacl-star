@@ -59,7 +59,9 @@ SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
 SNAPSHOT_FILES= \
 	$(addprefix snapshots/api/, HACL.h) \
+	$(addprefix snapshots/api/, haclnacl.*) \
 	$(addprefix snapshots/makefiles/, Makefile) \
+	$(addprefix snapshots/experiemental/, Hacl_Untrusted_Random.*) \
 	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h testlib.* FStar.* vec128.h) \
 	$(addprefix code/poly1305/poly-c/, Hacl_Poly1305_64.* AEAD_Poly1305_64.*) \
 	$(addprefix code/poly1305_32/poly-c/, Hacl_Poly1305_32.*) \
