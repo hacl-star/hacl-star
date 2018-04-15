@@ -7,12 +7,12 @@ open FStar.Math.Lemmas
 ///
 
 type inttype =
- | U8 | U16 | U32 | U64 | U128 | SIZE 
+ | U8 | U16 | U32 | U64 | U128 | SIZE
  | NATm : m:pos -> inttype
 
-let machineint t = 
+let machineint t =
   match t with
-  | U8 
+  | U8
   | U16
   | U32
   | U64
@@ -58,13 +58,13 @@ val pow2_values: n:nat ->  Lemma (
     [SMTPat (pow2 n)]
 
 inline_for_extraction
-unfold let modulus (t:inttype) = 
+unfold let modulus (t:inttype) =
   match t with
-  | NATm m -> m 
-  | _ -> pow2 (bits t) 
+  | NATm m -> m
+  | _ -> pow2 (bits t)
 
 inline_for_extraction
-unfold let maxint (t:inttype) = 
+unfold let maxint (t:inttype) =
   modulus t - 1
 
 
@@ -408,4 +408,3 @@ let (>.) #t = gt #t
 
 inline_for_extraction
 let (>=.) #t = ge #t
-
