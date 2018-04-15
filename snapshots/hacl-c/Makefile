@@ -37,36 +37,23 @@ TWEETNACL_HOME ?= $(HACL_HOME)/other_providers/tweetnacl
 #
 
 libhacl.so: $(FILES)
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Salsa20.c -c -o Hacl_Salsa20.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Chacha20.c -c -o Hacl_Chacha20.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Chacha20_Vec128.c -c -o Hacl_Chacha20_Vec128.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Poly1305_32.c -c -o Hacl_Poly1305_32.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Poly1305_64.c -c -o Hacl_Poly1305_64.o
-	$(CC) $(LIBFLAGS) \
-	  AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_SHA2_256.c -c -o Hacl_SHA2_256.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_SHA2_384.c -c -o Hacl_SHA2_384.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_SHA2_512.c -c -o Hacl_SHA2_512.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_HMAC_SHA2_256.c -c -o Hacl_HMAC_SHA2_256.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Ed25519.c -c -o Hacl_Ed25519.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Curve25519.c -c -o Hacl_Curve25519.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Chacha20Poly1305.c -c -o Hacl_Chacha20Poly1305.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Unverified_Random.c -c -o Hacl_Unverified_Random.o
+	$(CC) $(LIBFLAGS) -c FStar.c -o FStar.o
+	$(CC) $(LIBFLAGS) -c Hacl_Salsa20.c -o Hacl_Salsa20.o
+	$(CC) $(LIBFLAGS) -c Hacl_Chacha20.c -o Hacl_Chacha20.o
+	$(CC) $(LIBFLAGS) -c Hacl_Chacha20_Vec128.c -o Hacl_Chacha20_Vec128.o
+	$(CC) $(LIBFLAGS) -c Hacl_Poly1305_32.c -o Hacl_Poly1305_32.o
+	$(CC) $(LIBFLAGS) -c Hacl_Poly1305_64.c -o Hacl_Poly1305_64.o
+	$(CC) $(LIBFLAGS) -c AEAD_Poly1305_64.c -o AEAD_Poly1305_64.o
+	$(CC) $(LIBFLAGS) -c Hacl_SHA2_256.c -o Hacl_SHA2_256.o
+	$(CC) $(LIBFLAGS) -c Hacl_SHA2_384.c -o Hacl_SHA2_384.o
+	$(CC) $(LIBFLAGS) -c Hacl_SHA2_512.c -o Hacl_SHA2_512.o
+	$(CC) $(LIBFLAGS) -c Hacl_HMAC_SHA2_256.c -o Hacl_HMAC_SHA2_256.o
+	$(CC) $(LIBFLAGS) -c Hacl_Ed25519.c -o Hacl_Ed25519.o
+	$(CC) $(LIBFLAGS) -c Hacl_Curve25519.c -o Hacl_Curve25519.o
+	$(CC) $(LIBFLAGS) -c Hacl_Chacha20Poly1305.c -o Hacl_Chacha20Poly1305.o
+	$(CC) $(LIBFLAGS) -c Hacl_Unverified_Random.c -o Hacl_Unverified_Random.o
 	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/test-files -I . -Wall \
-	  Hacl_Chacha20_Vec128.c Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
+	FStar.o  Hacl_Chacha20_Vec128.c Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
 	  -o libhacl.so
 
 
@@ -75,34 +62,21 @@ libhacl.so: $(FILES)
 #
 
 libhacl.a: $(FILES)
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Salsa20.c -c -o Hacl_Salsa20.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Chacha20.c -c -o Hacl_Chacha20.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Chacha20_Vec128.c -c -o Hacl_Chacha20_Vec128.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Poly1305_32.c -c -o Hacl_Poly1305_32.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Poly1305_64.c -c -o Hacl_Poly1305_64.o
-	$(CC) $(LIBFLAGS) \
-	  AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_SHA2_256.c -c -o Hacl_SHA2_256.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_SHA2_384.c -c -o Hacl_SHA2_384.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_SHA2_512.c -c -o Hacl_SHA2_512.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_HMAC_SHA2_256.c -c -o Hacl_HMAC_SHA2_256.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Ed25519.c -c -o Hacl_Ed25519.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Curve25519.c -c -o Hacl_Curve25519.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Chacha20Poly1305.c -c -o Hacl_Chacha20Poly1305.o
-	$(CC) $(LIBFLAGS) \
-	  Hacl_Unverified_Random.c -c -o Hacl_Unverified_Random.o
+	$(CC) $(LIBFLAGS) -c FStar.c -o FStar.o
+	$(CC) $(LIBFLAGS) -c Hacl_Salsa20.c -o Hacl_Salsa20.o
+	$(CC) $(LIBFLAGS) -c Hacl_Chacha20.c -o Hacl_Chacha20.o
+	$(CC) $(LIBFLAGS) -c Hacl_Chacha20_Vec128.c -o Hacl_Chacha20_Vec128.o
+	$(CC) $(LIBFLAGS) -c Hacl_Poly1305_32.c -o Hacl_Poly1305_32.o
+	$(CC) $(LIBFLAGS) -c Hacl_Poly1305_64.c -o Hacl_Poly1305_64.o
+	$(CC) $(LIBFLAGS) -c AEAD_Poly1305_64.c -o AEAD_Poly1305_64.o
+	$(CC) $(LIBFLAGS) -c Hacl_SHA2_256.c -o Hacl_SHA2_256.o
+	$(CC) $(LIBFLAGS) -c Hacl_SHA2_384.c -o Hacl_SHA2_384.o
+	$(CC) $(LIBFLAGS) -c Hacl_SHA2_512.c -o Hacl_SHA2_512.o
+	$(CC) $(LIBFLAGS) -c Hacl_HMAC_SHA2_256.c -o Hacl_HMAC_SHA2_256.o
+	$(CC) $(LIBFLAGS) -c Hacl_Ed25519.c -o Hacl_Ed25519.o
+	$(CC) $(LIBFLAGS) -c Hacl_Curve25519.c -o Hacl_Curve25519.o
+	$(CC) $(LIBFLAGS) -c Hacl_Chacha20Poly1305.c -o Hacl_Chacha20Poly1305.o
+	$(CC) $(LIBFLAGS) -c Hacl_Unverified_Random.c -o Hacl_Unverified_Random.o
 	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/test-files -I . -Wall \
 	  Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
 	  -o libhacl.a
@@ -112,38 +86,23 @@ libhacl.a: $(FILES)
 #
 
 libhacl32.so: $(FILES)
-	$(CC) $(LIBFLAGS32) \
-	  FStar.c -c -o FStar.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Salsa20.c -c -o Hacl_Salsa20.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Chacha20.c -c -o Hacl_Chacha20.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Chacha20_Vec128.c -c -o Hacl_Chacha20_Vec128.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Poly1305_32.c -c -o Hacl_Poly1305_32.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Poly1305_64.c -c -o Hacl_Poly1305_64.o
-	$(CC) $(LIBFLAGS32) \
-	  AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_SHA2_256.c -c -o Hacl_SHA2_256.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_SHA2_384.c -c -o Hacl_SHA2_384.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_SHA2_512.c -c -o Hacl_SHA2_512.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_HMAC_SHA2_256.c -c -o Hacl_HMAC_SHA2_256.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Ed25519.c -c -o Hacl_Ed25519.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Curve25519.c -c -o Hacl_Curve25519.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Chacha20Poly1305.c -c -o Hacl_Chacha20Poly1305.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Unverified_Random.c -c -o Hacl_Unverified_Random.o
+	$(CC) $(LIBFLAGS32) -c FStar.c -o FStar.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Salsa20.c -o Hacl_Salsa20.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20.c -o Hacl_Chacha20.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20_Vec128.c -o Hacl_Chacha20_Vec128.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Poly1305_32.c -o Hacl_Poly1305_32.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Poly1305_64.c -o Hacl_Poly1305_64.o
+	$(CC) $(LIBFLAGS32) -c AEAD_Poly1305_64.c -o AEAD_Poly1305_64.o
+	$(CC) $(LIBFLAGS32) -c Hacl_SHA2_256.c -o Hacl_SHA2_256.o
+	$(CC) $(LIBFLAGS32) -c Hacl_SHA2_384.c -o Hacl_SHA2_384.o
+	$(CC) $(LIBFLAGS32) -c Hacl_SHA2_512.c -o Hacl_SHA2_512.o
+	$(CC) $(LIBFLAGS32) -c Hacl_HMAC_SHA2_256.c -o Hacl_HMAC_SHA2_256.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Ed25519.c -o Hacl_Ed25519.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Curve25519.c -o Hacl_Curve25519.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20Poly1305.c -o Hacl_Chacha20Poly1305.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Unverified_Random.c -o Hacl_Unverified_Random.o
 	$(CC) -shared  $(LIBFLAGS32) -I ../../test/test-files -I . -Wall \
-	  FStar.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
+	FStar.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
 	  -o libhacl32.so
 
 #
@@ -151,50 +110,35 @@ libhacl32.so: $(FILES)
 #
 
 libhacl32.a: $(FILES)
-	$(CC) $(LIBFLAGS32) \
-	  FStar.c -c -o FStar.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Salsa20.c -c -o Hacl_Salsa20.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Chacha20.c -c -o Hacl_Chacha20.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Chacha20_Vec128.c -c -o Hacl_Chacha20_Vec128.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Poly1305_32.c -c -o Hacl_Poly1305_32.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Poly1305_64.c -c -o Hacl_Poly1305_64.o
-	$(CC) $(LIBFLAGS32) \
-	  AEAD_Poly1305_64.c -c -o AEAD_Poly1305_64.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_SHA2_256.c -c -o Hacl_SHA2_256.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_SHA2_384.c -c -o Hacl_SHA2_384.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_SHA2_512.c -c -o Hacl_SHA2_512.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_HMAC_SHA2_256.c -c -o Hacl_HMAC_SHA2_256.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Ed25519.c -c -o Hacl_Ed25519.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Curve25519.c -c -o Hacl_Curve25519.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Chacha20Poly1305.c -c -o Hacl_Chacha20Poly1305.o
-	$(CC) $(LIBFLAGS32) \
-	  Hacl_Unverified_Random.c -c -o Hacl_Unverified_Random.o
+	$(CC) $(LIBFLAGS32) -c FStar.c -o FStar.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Salsa20.c -o Hacl_Salsa20.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20.c -o Hacl_Chacha20.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20_Vec128.c -o Hacl_Chacha20_Vec128.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Poly1305_32.c -o Hacl_Poly1305_32.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Poly1305_64.c -o Hacl_Poly1305_64.o
+	$(CC) $(LIBFLAGS32) -c AEAD_Poly1305_64.c -o AEAD_Poly1305_64.o
+	$(CC) $(LIBFLAGS32) -c Hacl_SHA2_256.c -o Hacl_SHA2_256.o
+	$(CC) $(LIBFLAGS32) -c Hacl_SHA2_384.c -o Hacl_SHA2_384.o
+	$(CC) $(LIBFLAGS32) -c Hacl_SHA2_512.c -o Hacl_SHA2_512.o
+	$(CC) $(LIBFLAGS32) -c Hacl_HMAC_SHA2_256.c -o Hacl_HMAC_SHA2_256.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Ed25519.c -o Hacl_Ed25519.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Curve25519.c -o Hacl_Curve25519.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20Poly1305.c -o Hacl_Chacha20Poly1305.o
+	$(CC) $(LIBFLAGS32) -c Hacl_Unverified_Random.c -o Hacl_Unverified_Random.o
 	$(CC) -shared  $(LIBFLAGS32) -I ../../test/test-files -I . -Wall \
-	  FStar.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
+	FStar.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
 	  -o libhacl32.a
 
 
 unit-tests: libhacl.so
-	$(CC) $(CCOPTS) $(LIBFLAGS) \
+	$(CC) $(LIBFLAGS) \
 	-I . -I ../snapshots/kremlib -I ../../test/test-files/ -I $(TWEETNACL_HOME) \
 	$(TWEETNACL_HOME)/tweetnacl.c ../../test/test-files/unit_tests.c libhacl.so \
 	-o unit_tests.exe
 	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. ./unit_tests.exe
 
 unit-tests32: libhacl32.so
-	$(CC) $(CCOPTS32) $(LIBFLAGS32) \
+	$(CC) $(LIBFLAGS32) \
 	-I . -I ../snapshots/kremlib -I ../../test/test-files/ -I $(TWEETNACL_HOME) \
 	$(TWEETNACL_HOME)/tweetnacl.c ../../test/test-files/unit_tests.c libhacl32.so \
 	-o unit_tests32.exe
