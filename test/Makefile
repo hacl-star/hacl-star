@@ -81,12 +81,12 @@ test-snapshot-libhacl.so:
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	$(CCOMP) $(CCOMP_OPTS) $(FSTARH_CCOMP) \
 		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/api -I $(HACL_HOME)/snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
+		$(TWEETNACL_HOME)/tweetnacl.c test-files/unit_tests.c \
 		libhacl.so -o unit_tests.exe
 else
 	$(CC) $(CCOPTS) \
 		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/api -I $(HACL_HOME)/snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
+		$(TWEETNACL_HOME)/tweetnacl.c test-files/unit_tests.c \
 		libhacl.so -o unit_tests.exe
 endif
 ifeq ($(UNAME), Linux)
@@ -103,12 +103,12 @@ test-snapshot-libhacl32.so:
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	$(CCOMP) $(CCOMP_OPTS) $(FSTARH_CCOMP) \
 		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/api -I ../snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
+		$(TWEETNACL_HOME)/tweetnacl.c test-files/unit_tests.c \
 		libhacl32.so -o unit_tests32.exe
 else
 	$(CC) $(CFLAGS) -DKRML_NOUINT128  \
 		-I $(HACL_HOME)/$(SNAPSHOT_DIR) -I $(HACL_HOME)/snapshots/api -I ../snapshots/kremlib -I test-files/ -I $(TWEETNACL_HOME) \
-		$(TWEETNACL_HOME)/tweetnacl.c test-files/hacl_test_utils.c test-files/unit_tests.c \
+		$(TWEETNACL_HOME)/tweetnacl.c test-files/unit_tests.c \
 		libhacl32.so -o unit_tests32.exe
 endif
 ifeq ($(UNAME), Linux)
