@@ -178,7 +178,7 @@ val blake2_round1 : wv:working_vector -> m:message_block -> i:size_t -> const_si
 
 [@ Substitute ]
 let blake2_round1 wv m i const_sigma =
-  let i_mod_10 = size_mod i (size 10) in
+  let i_mod_10 = mod i (size 10) in
   let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
   let s = sub #(n:size_t{v n < 16}) #160 #16 const_sigma start_idx (size 16) in
   let h = ST.get () in
@@ -202,7 +202,7 @@ val blake2_round2 : wv:working_vector -> m:message_block -> i:size_t -> const_si
 
 [@ Substitute ]
 let blake2_round2 wv m i const_sigma =
-  let i_mod_10 = size_mod i (size 10) in
+  let i_mod_10 = mod i (size 10) in
   let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
   let s = sub #(n:size_t{v n < 16}) #160 #16 const_sigma start_idx (size 16) in
   admit();
@@ -254,7 +254,7 @@ let blake2_compress1 wv s m offset flag const_iv =
  (if flag then wv.(size 14) <- wv_14)
 
 
-#reset-options "--max_fuel 0 --z3rlimit 25"
+#reset-options "--max_fuel 0 --z3rlimit 150"
 
 val blake2_compress2 :
   wv:working_vector -> m:message_block -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
@@ -452,7 +452,7 @@ val blake2s_internal2: s:lbuffer uint32 8 ->
 let blake2s_internal2 s dd d const_iv const_sigma =
   (**) let h0 = ST.get () in
   if (dd >. size 1) then begin
-    let idx = size_decr dd in
+    let idx = dd -. (size 1) in
     loop #h0 idx s
     (fun h0 -> let s0 = h0.[s] in
             let d0 = h0.[d] in
@@ -489,7 +489,7 @@ val blake2s_internal3: s:lbuffer uint32 8 ->
 
 [@ Substitute]
 let blake2s_internal3 s dd d ll kk nn to_compress tmp res const_iv const_sigma =
-  let offset:size_t = mul #SIZE (size_decr dd) (size 64) in
+  let offset:size_t = mul #SIZE (dd -. (size 1)) (size 64) in
   let sub_d = sub d offset (size Spec.bytes_in_block) in
   assert(false);
   uint32s_from_bytes_le (size 16) to_compress sub_d;
@@ -550,7 +550,7 @@ val blake2s :
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1))
 
 let blake2s ll d kk k nn res =
-  let data_blocks : size_t = size_incr ((size_decr ll) /. (size Spec.bytes_in_block)) in
+  let data_blocks : size_t = size 1 +. ((ll -. (size 1)) /. (size Spec.bytes_in_block)) in
   let padded_data_length : size_t = mul #SIZE data_blocks (size Spec.bytes_in_block) in
   let data_length : size_t = add #SIZE (size Spec.bytes_in_block) padded_data_length in
   let len_st_u8 = add #SIZE (size 32) (add #SIZE padded_data_length (add #SIZE (size Spec.bytes_in_block) data_length)) in
@@ -589,7 +589,7 @@ let blake2s ll d kk k nn res =
 
 	       let data' = sub data (size Spec.bytes_in_block) padded_data_length in
           copy padded_data_length padded_data data';
-	       blake2s_internal (size_incr data_blocks) data' ll kk nn to_compress wv tmp res s const_iv const_sigma
+	       blake2s_internal (data_blocks +. (size 1)) data' ll kk nn to_compress wv tmp res s const_iv const_sigma
         end
       )
     )
