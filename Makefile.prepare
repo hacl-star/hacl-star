@@ -61,7 +61,7 @@ prepare-fstar: .prepare
 	git clone https://github.com/FStarLang/FStar.git
 	cd $(HACL_HOME)/dependencies/FStar && \
 	git checkout stable && \
-	opam config exec -- make -C src/ocaml-output && \
+	opam config exec -- make -C src/ocaml-output -j && \
 	opam config exec -- make -C ulib/ml
 	$(MAKE) .prepare-fstar-display-done
 
