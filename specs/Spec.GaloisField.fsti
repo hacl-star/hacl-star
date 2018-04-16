@@ -1,6 +1,12 @@
 module Spec.GaloisField
 
-val field: Type0
+open FStar.BitVector
+
+(* We represent GF(2^n) with irreducible polynomial x^n + p(x), deg(p) <= n-1
+   by GF n bv where bv is the big-endian bitvector for p(x)   *)
+type polynomial (degree:nat) = bv_t (degree + 1)
+type field' = | GF: bits:pos -> irred: polynomial (bits - 1) -> field'
+let field = field'
 
 val numbits: field -> pos
 val mk_field: bits:pos -> irred:nat{irred < pow2 bits} -> f:field{numbits f = bits}

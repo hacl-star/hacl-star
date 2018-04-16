@@ -1,16 +1,9 @@
 module Spec.GaloisField
 
 open FStar.Seq
-open FStar.BitVector
 open Spec.Lib.IntSeq
 open Spec.Lib.IntTypes
 open Spec.Lib.RawIntTypes
-
-(* We represent GF(2^n) with irreducible polynomial x^n + p(x), deg(p) <= n-1
-   by GF n bv where bv is the big-endian bitvector for p(x)   *)
-type polynomial (degree:nat) = bv_t (degree + 1)
-type field' = | GF: bits:pos -> irred: polynomial (bits - 1) -> field'
-let field = field'
 
 let numbits (f:field) = f.bits
 let mk_field bits irred = GF bits (UInt.to_vec #bits irred)
