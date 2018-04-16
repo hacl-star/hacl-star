@@ -168,6 +168,8 @@ let blake2_mixing wv a b c d x y =
   g1 wv b c Spec.r4
 
 
+#reset-options "--max_fuel 0 --z3rlimit 50"
+
 val blake2_round1 : wv:working_vector -> m:message_block -> i:size_t -> const_sigma:sigma_t ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ live h const_sigma
@@ -178,13 +180,16 @@ val blake2_round1 : wv:working_vector -> m:message_block -> i:size_t -> const_si
 
 [@ Substitute ]
 let blake2_round1 wv m i const_sigma =
-  let i_mod_10 = mod i (size 10) in
-  let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
+  let start_idx = (i %. (size 10)) *. (size 16) in
   let s = sub #(n:size_t{v n < 16}) #160 #16 const_sigma start_idx (size 16) in
-  let h = ST.get () in
-  assume(live h s);
-  admit();
+  (**) let h0 = ST.get () in
+  (**) assume(live h0 s);
   blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
+  (**) let h1 = ST.get () in
+  (**) admit();
+  (**) assert(h1.[wv] == Spec.blake2_mixing h0.[wv] 0 4 8 12
+  (**)  (let s0 = Spec.Lib.IntSeq.index (h0.[s]) 0 in Spec.Lib.IntSeq.index (h0.[m]) (size_v s0))
+  (**)  (let s0 = Spec.Lib.IntSeq.index (h0.[s]) 0 in Spec.Lib.IntSeq.index (h0.[m]) (size_v s0)));
   blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(s.(size 2))) (m.(s.(size 3)));
   blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(s.(size 4))) (m.(s.(size 5)));
   blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(s.(size 6))) (m.(s.(size 7)))
@@ -202,8 +207,7 @@ val blake2_round2 : wv:working_vector -> m:message_block -> i:size_t -> const_si
 
 [@ Substitute ]
 let blake2_round2 wv m i const_sigma =
-  let i_mod_10 = mod i (size 10) in
-  let start_idx = mul_mod #SIZE i_mod_10 (size 16) in
+  let start_idx = (i %. (size 10)) *. (size 16) in
   let s = sub #(n:size_t{v n < 16}) #160 #16 const_sigma start_idx (size 16) in
   admit();
   blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(s.(size 8))) (m.(s.(size 9)));
@@ -246,6 +250,7 @@ let blake2_compress1 wv s m offset flag const_iv =
   update_sub wv (size 8) (size 8) const_iv;
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 Spec.word_size) in
+  // BB. Note that using the ^. operator here would break extraction !
   let wv_12 = logxor #U32 wv.(size 12) low_offset in
   let wv_13 = logxor #U32 wv.(size 13) high_offset in
   let wv_14 = logxor #U32 wv.(size 14) (u32 0xFFFFFFFF) in
@@ -291,8 +296,9 @@ val blake2_compress3_inner :
 
 [@ Substitute ]
 let blake2_compress3_inner wv i s const_sigma =
-  let i_plus_8 = add #SIZE i (size 8) in
-  let hi_xor_wvi = logxor #U32 s.(i) wv.(i) in
+  let i_plus_8 = i +. (size 8) in
+  let hi_xor_wvi = s.(i) ^. wv.(i) in
+  // BB. Note that using the ^. operator here would break extraction !
   let hi = logxor #U32 hi_xor_wvi wv.(i_plus_8) in
   s.(i) <- hi
 
@@ -362,6 +368,7 @@ val blake2s_internal1: s:lbuffer uint32 8 ->
 [@ Substitute]
 let blake2s_internal1 s kk nn =
   let s0 = s.(size 0) in
+  // BB. Note that using the <<. operator here would break extraction !
   let kk_shift_8 = shift_left #U32 (size_to_uint32 kk) (u32 8) in
   let s0' = s0 ^. (u32 0x01010000) ^. kk_shift_8 ^. size_to_uint32 nn in
   s.(size 0) <- s0'
@@ -387,7 +394,7 @@ val blake2s_internal2_: s:lbuffer uint32 8 ->
 [@ Substitute]
 let blake2s_internal2_ s dd d to_compress i const_iv const_sigma =
     (**) let h0 = ST.get () in
-    let sub_d = sub d (mul #SIZE i (size Spec.bytes_in_block)) (size Spec.bytes_in_block) in
+    let sub_d = sub d (i *. (size Spec.bytes_in_block)) (size Spec.bytes_in_block) in
     (**) let h1 = ST.get () in
     (**) assert(h1.[sub_d] == (Spec.Lib.IntSeq.sub h0.[d] (v i * Spec.bytes_in_block) Spec.bytes_in_block));
     uint32s_from_bytes_le #16 (size 16) to_compress sub_d;
@@ -396,7 +403,7 @@ let blake2s_internal2_ s dd d to_compress i const_iv const_sigma =
 // BB. TODO: There is a bug in extraction if you uncomment the assert...
 // Why is the implicit necessary ??? This should be erased before ext
 //    (**) assert(h2.[to_compress] == (Spec.Lib.IntSeq.uints_from_bytes_le h1.[sub_d]));
-    let offset = to_u64 #U32 (size_to_uint32 (mul #SIZE (i +. (size 1)) (size Spec.block_bytes))) in
+    let offset = to_u64 #U32 (size_to_uint32 ((i +. (size 1)) *. (size Spec.block_bytes))) in
     (**) let h3 = ST.get () in
     (**) assume(offset == u64 ((v i + 1) * Spec.block_bytes));
     (**) assume(as_list h3.[const_sigma] == sigma_list_size /\ h3.[const_iv] == Spec.const_init);
@@ -489,7 +496,7 @@ val blake2s_internal3: s:lbuffer uint32 8 ->
 
 [@ Substitute]
 let blake2s_internal3 s dd d ll kk nn to_compress tmp res const_iv const_sigma =
-  let offset:size_t = mul #SIZE (dd -. (size 1)) (size 64) in
+  let offset:size_t = (dd -. (size 1)) *. (size 64) in
   let sub_d = sub d offset (size Spec.bytes_in_block) in
   assert(false);
   uint32s_from_bytes_le (size 16) to_compress sub_d;
@@ -551,9 +558,9 @@ val blake2s :
 
 let blake2s ll d kk k nn res =
   let data_blocks : size_t = size 1 +. ((ll -. (size 1)) /. (size Spec.bytes_in_block)) in
-  let padded_data_length : size_t = mul #SIZE data_blocks (size Spec.bytes_in_block) in
-  let data_length : size_t = add #SIZE (size Spec.bytes_in_block) padded_data_length in
-  let len_st_u8 = add #SIZE (size 32) (add #SIZE padded_data_length (add #SIZE (size Spec.bytes_in_block) data_length)) in
+  let padded_data_length : size_t = data_blocks *. (size Spec.bytes_in_block) in
+  let data_length : size_t = (size Spec.bytes_in_block) +. padded_data_length in
+  let len_st_u8 = (size 32) +. (padded_data_length +. ((size Spec.bytes_in_block) +. data_length)) in
   let len_st_u32 = size 32 in
   let const_iv : lbuffer uint32 8 = create_const_iv () in
   let const_sigma : lbuffer (n:size_t{size_v n < 16}) 160 = create_const_sigma () in
@@ -569,8 +576,8 @@ let blake2s ll d kk k nn res =
         copy (size 8) const_iv s;
         let tmp = sub st_u8 (size 0) (size 32) in
         let padded_data = sub #uint8 #(v len_st_u8) #(v padded_data_length) st_u8 (size 32) padded_data_length in
-        let padded_key = sub #uint8 #(v len_st_u8) #(Spec.bytes_in_block) st_u8 (add #SIZE (size 32) padded_data_length) (size Spec.bytes_in_block) in
-        let data = sub #uint8 #(v len_st_u8) #(v data_length) st_u8 (add #SIZE (size 32) (add #SIZE padded_data_length (size Spec.bytes_in_block))) data_length in
+        let padded_key = sub #uint8 #(v len_st_u8) #(Spec.bytes_in_block) st_u8 ((size 32) +. padded_data_length) (size Spec.bytes_in_block) in
+        let data = sub #uint8 #(v len_st_u8) #(v data_length) st_u8 ((size 32) +. (padded_data_length +. (size Spec.bytes_in_block))) data_length in
 
         let padded_data' = sub padded_data (size 0) ll in
         copy ll d padded_data';
