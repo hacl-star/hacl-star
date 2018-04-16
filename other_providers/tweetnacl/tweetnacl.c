@@ -4,7 +4,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <inttypes.h>
-#include "hacl_test_utils.h"
 
 #define FOR(i,n) for (i = 0;i < n;++i)
 #define sv static void
@@ -15,10 +14,7 @@ typedef unsigned long long u64;
 typedef long long i64;
 typedef i64 gf[16];
 
-void randombytes(u8 * x,u64 len) {
-  if (! (read_random_bytes(len, x)))
-    exit(1);
-}
+extern void randombytes(u8 * x,u64 len);
 
 static const u8
   _0[16],

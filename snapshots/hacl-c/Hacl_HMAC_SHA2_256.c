@@ -48,6 +48,7 @@ Hacl_Hash_Lib_LoadStore_uint32s_to_be_bytes(uint8_t *output, uint32_t *input, ui
 
 static void Hacl_Impl_SHA2_256_init(uint32_t *state)
 {
+  uint32_t *n1 = state + (uint32_t)136U;
   uint32_t *k1 = state;
   uint32_t *h_01 = state + (uint32_t)128U;
   uint32_t *p10 = k1;
@@ -152,6 +153,7 @@ static void Hacl_Impl_SHA2_256_init(uint32_t *state)
   p2[1U] = (uint32_t)0x9b05688cU;
   p2[2U] = (uint32_t)0x1f83d9abU;
   p2[3U] = (uint32_t)0x5be0cd19U;
+  n1[0U] = (uint32_t)0U;
 }
 
 static void Hacl_Impl_SHA2_256_update(uint32_t *state, uint8_t *data)

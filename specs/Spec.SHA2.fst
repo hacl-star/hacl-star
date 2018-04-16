@@ -21,10 +21,6 @@ noeq type parameters =
 	 size_hash: nat {0 < size_hash /\ size_hash <= 8 * numbytes wt} ->
 	 parameters
 
-(* Definition: Base types *)
-type lbytes (s:size_nat) = intseq U8 s
-type rotval (t:inttype) = r:uint32{uint_v #U32 r > 0 /\ uint_v #U32 r < bits t}
-
 (* Definition: Type for the total length encoded in the padding *)
 let lenType p = match p.wt with
 | U32 -> U64

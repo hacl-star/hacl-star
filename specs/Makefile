@@ -7,16 +7,16 @@ FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/li
 SPEC_FILES=	Spec.AES.fst \
 		Spec.AESGCM.fst \
 		Spec.Chacha20.fst \
-		Spec.Chacha20Poly1305.fst \
+		Spec.Poly1305.fst \
 		Spec.CTR.fst \
+		Spec.Chacha20Poly1305.fst \
 		Spec.Curve25519.fst \
 		Spec.Curve448.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
-		Spec.Poly1305.fst \
+		Spec.HMAC.fst \
 		Spec.Salsa20.fst \
 		Spec.SHA2.fst \
-		Spec.HMAC.fst \
 		Spec.Ed25519.fst \
 		Spec.Chacha20_vec.fst \
 		Spec.HSalsa20.fst
@@ -27,7 +27,7 @@ all-hints: hints
 all-ver: verify
 
 all: test
-test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe hmac.exe hkdf.exe ed25519.exe
+test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe ed25519.exe hmac.exe hkdf.exe
 
 
 noise.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Noise.fst
@@ -43,6 +43,13 @@ chacha20.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib
 	@echo 'let _ = test()' >> chacha20-ml/Spec_Chacha20_Test.ml
 	$(OCAMLOPT) -I chacha20-ml chacha20-ml/Spec_Lib_IntTypes.ml chacha20-ml/Spec_Lib_RawIntTypes.ml chacha20-ml/Spec_Lib_IntSeq.ml chacha20-ml/Spec_CTR.ml chacha20-ml/Spec_Chacha20.ml chacha20-ml/Spec_Chacha20_Test.ml -o chacha20.exe
 	./chacha20.exe
+
+chacha20_vec.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.CTR.fst Spec.Chacha20_vec.fst tests/Spec.Chacha20_vec.Test.fst
+	mkdir -p chacha20_vec-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq  --extract_module Spec.CTR --extract_module Spec.Chacha20_vec --extract_module Spec.Chacha20_vec.Test --odir chacha20_vec-ml $^
+	@echo 'let _ = test()' >> chacha20_vec-ml/Spec_Chacha20_vec_Test.ml
+	$(OCAMLOPT) -I chacha20_vec-ml chacha20_vec-ml/Spec_Lib_IntTypes.ml chacha20_vec-ml/Spec_Lib_RawIntTypes.ml chacha20_vec-ml/Spec_Lib_IntSeq.ml chacha20_vec-ml/Spec_CTR.ml chacha20_vec-ml/Spec_Chacha20_vec.ml chacha20_vec-ml/Spec_Chacha20_vec_Test.ml -o chacha20_vec.exe
+	./chacha20_vec.exe
 
 salsa20.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.CTR.fst Spec.Salsa20.fst tests/Spec.Salsa20.Test.fst
 	mkdir -p salsa20-ml

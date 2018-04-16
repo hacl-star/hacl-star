@@ -7,7 +7,9 @@ open Spec.Lib.IntTypes
 module LSeq = Spec.Lib.IntSeq
 
 
-unfold let v = size_v
+unfold
+let v = size_v
+
 inline_for_extraction val lbuffer: a:Type0 -> len:size_nat -> Type0
 inline_for_extraction val sub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> Tot (lbuffer a olen)
 let slice #a #len #olen (b:lbuffer a (len)) (start:size_t) (fin:size_t{v fin <= len /\ v start <= v fin /\ v fin - v start == olen}) = sub #a #len #olen b start (sub_mod #SIZE fin start)

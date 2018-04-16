@@ -140,8 +140,8 @@ let rec finv_ (#f:field) (s:felem f) (r:felem f) (v:felem f) (u:felem f) =
   let ds = degree s in
   if dr = 0 then u else
   if ds >= dr then
-    let s' = fadd s (shift_left_vec r (ds - dr)) in
-    let v' = fadd v (shift_left_vec u (ds - dr)) in
+    let s' : felem f = fadd s (shift_left_vec r (ds - dr)) in
+    let v' : felem f = fadd v (shift_left_vec u (ds - dr)) in
     finv_ #f s' r  v' u
   else
     let r' = s in
