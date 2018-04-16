@@ -18,5 +18,10 @@ val add_asso: #f:field -> a:felem f -> b:felem f -> c:felem f -> Lemma (a `fadd`
 val add_zero: #f:field -> a:felem f -> Lemma (a `fadd` zero == a)
 
 val fmul: #f:field -> a:felem f -> b:felem f -> c:felem f
+val fmul_intel:
+  #f:field{f.bits = 128 /\ f.irred = (UInt.to_vec #128 0xe1000000000000000000000000000000)} ->
+  a:felem f ->
+  b:felem f ->
+  c:felem f
 
-val finv: #f:field -> irr:felem f ->  a:felem f -> c:felem f
+(* val finv: #f:field -> irr:felem f ->  a:felem f -> c:felem f *)

@@ -134,7 +134,7 @@ let rec degree_ (#f:field) (a:felem f) (i:nat{i < f.bits}) =
 
 let degree #f a = degree_ #f a (f.bits - 1)
 
-val finv_: #f:field -> s:felem f -> r:felem f -> v:felem f -> u:felem f -> Tot (felem f) (decreases (degree r + degree s))
+(* val finv_: #f:field -> s:felem f -> r:felem f -> v:felem f -> u:felem f -> Tot (felem f) (decreases (degree r + degree s))
 let rec finv_ (#f:field) (s:felem f) (r:felem f) (v:felem f) (u:felem f) =
   let dr = degree r in
   let ds = degree s in
@@ -161,9 +161,10 @@ let finv (#f:field) (irr: felem f) (a:felem f) =
   let v = zero in
   let u = to_felem #f 1 in
   if dr = 0 then u else
+    (* TODO: ds-dr doesn't type check *)
     let s' = fadd s (shift_left_vec r (ds - dr)) in
     let v' = fadd v (shift_left_vec u (ds - dr)) in
-    finv_ #f s' r  v' u
+    finv_ #f s' r  v' u *)
 
 val fexp: #f:field -> a:felem f -> n:nat{n >= 1} -> Tot (felem f) (decreases n)
 let rec fexp #f a x =
