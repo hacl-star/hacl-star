@@ -31,7 +31,7 @@ module HS = FStar.HyperStack
 module MAC = Crypto.Symmetric.MAC
 
 
-//16-12-19 should go to HyperStack? 
+//16-12-19 should go to HyperStack?
 
 
 // should go elsewhere
@@ -42,7 +42,7 @@ type alg = macAlg
 let alg_of_id = macAlg_of_id
 
 (** Length of the single-use part of the key *)
-let keylen (i:id) = 
+let keylen (i:id) =
   match aeadAlg_of_id i with
   | AES_128_GCM       -> 16ul
   | AES_256_GCM       -> 16ul
@@ -56,7 +56,7 @@ let skeylen (i:id) =  // can't refine with {skeyed i} here
   | _                 ->  0ul // dummy; never allocated.
 
 (** Does the algorithm use a static key? *)
-let skeyed (i:id) = 
+let skeyed (i:id) =
   match aeadAlg_of_id i with
   | AES_128_GCM       -> true
   | AES_256_GCM       -> true
@@ -95,6 +95,8 @@ val akey_gen: r:erid -> i:id -> ST (akey r i)
 let akey_gen r i =
   if skeyed i then
     let k:skey r i = Buffer.rcreate r 0uy (skeylen i) in
+    // FIXME(adl) is this supposed to be random?
+    // e.g. Bytes.random (skeylen i) k;
     Just k
   else Nothing
 
@@ -111,6 +113,7 @@ val akey_coerce: r:erid -> i:id -> kb:lbuffer (UInt32.v (skeylen i)) -> ST (akey
     else h0 == h1))
 let akey_coerce r i kb =
   if skeyed i then
+    // FIXME(adl) leaks, but only once per AEAD instance
     let sk:skey r i = Buffer.rcreate r 0uy (skeylen i) in
     let h1 = ST.get () in
     Buffer.blit kb 0ul sk 0ul (skeylen i);
@@ -167,7 +170,7 @@ noeq type state (i:id) =
     log: log_ref i region ->
     state i
 
-let live_ak #r (#i:id) m (ak:akey r (fst i)) = 
+let live_ak #r (#i:id) m (ak:akey r (fst i)) =
   skeyed (fst i) ==> live m (get_skey #r #(fst i) ak)
 
 let mac_is_fresh (i:id) (region:erid) m0 (st:state i) m1 =
@@ -192,14 +195,18 @@ let genPost (i:id) (region:erid) m0 (st:state i) m1 =
 val alloc: region:erid -> i:id
   -> ak:akey region (fst i)
   // Could live in a different region, but this simplifies the spec
-  -> k:lbuffer (UInt32.v (keylen (fst i))){frameOf k == region}
+  // FIXME(adl): k should be stack allocated to avoid more memory leaks,
+  // relaxing the region condition
+  -> k:lbuffer (UInt32.v (keylen (fst i))) // {frameOf k == region}
   -> ST (state i)
   (requires (fun m0 -> live m0 k /\ live_ak m0 ak))
-  (ensures  (fun m0 st m1 -> 
-    genPost i region m0 st m1 /\ 
+  (ensures  (fun m0 st m1 ->
+    genPost i region m0 st m1 /\
     Buffer.modifies_1 k m0 m1))
 let alloc region i ak k =
   let h0 = ST.get () in
+  // FIXME(adl) these 2 allocations leak on every encryption!
+  // mitigated with unsound_free below
   let r = MAC.rcreate region i in
   let s = FStar.Buffer.rcreate region 0uy 16ul in
   let h1 = ST.get () in
@@ -244,6 +251,33 @@ let alloc region i ak k =
     State #i #region r s ()
     end
 
+// FIXME(adl) 09/04/2018
+// The allocation code above leaks memory because of ralloc
+// Unfortunately, r and s must be allocated in eternal regions because
+// they are stored in idealization tables. We can't let this allocation leak
+// because it is used for QUIC packet encryption, so we
+let unsound_free (i:id) (st:state i) : ST unit
+  (requires fun h0 -> True) // ~(safeHS i)
+  (ensures fun h0 () h1 -> h0 == h1)
+  =
+  assume false;
+  if not (mac1 (fst i)) then // OK to deallocate because the state is not stored in a table
+   begin
+    let State r s log = st in
+    FStar.Buffer.rfree s;
+    MAC.unsound_free r // despite the elemB abstraction in MAC this is a buffer
+   end
+
+(* Currently mitigated externally
+let unsound_free_akey (region:erid) (i:id) (ak:akey region (fst i)) : ST unit
+  (requires fun h0 -> True) // ~(safeHS i)
+  (ensures fun h0 () h1 -> h0 == h1)
+  =
+  assume false;
+  match ak with
+  | Nothing -> ()
+  | Just kb -> FStar.Buffer.rfree kb
+*)
 
 #set-options " --initial_ifuel 0 --max_ifuel 0"
 
@@ -255,27 +289,26 @@ val gen: region:erid -> i:id -> ak:akey region (fst i) -> ST (state i)
     modifies_ref region Set.empty m0 m1 ))
 let gen region i ak =
   let len = keylen (fst i) in
-  let k = FStar.Buffer.rcreate region 0uy len in
+  let k = FStar.Buffer.create 0uy len in
   let h1 = ST.get() in
   random (UInt32.v len) k;
-
   assert (live_ak h1 ak);
   let st =  alloc region i ak k in
-  let h3 = ST.get() in 
+  let h3 = ST.get() in
   lemma_reveal_modifies_1 k h1 h3;
   st
 
 val coerce: region:erid -> i:id{~(authId i)}
   -> ak:akey region (fst i)
-  -> k:lbuffer (UInt32.v (keylen (fst i))){frameOf k == region}
+  -> k:lbuffer (UInt32.v (keylen (fst i))) //{frameOf k == region}
   -> ST (state i)
   (requires (fun m0 -> live m0 k /\ live_ak m0 ak))
-  (ensures (fun m0 st m1 -> 
-    genPost i region m0 st m1 /\ 
+  (ensures (fun m0 st m1 ->
+    genPost i region m0 st m1 /\
     modifies_1 k m0 m1))
 let coerce region i ak k =
-  alloc region i ak k 
-  
+  alloc region i ak k
+
 
 (** Hash accumulators (several per instance)
 
@@ -381,7 +414,7 @@ noextract val sel_word: h:mem -> b:PL.wordB{live h b} -> GTot word
 let sel_word h b = as_seq h b
 
 (** Only used when mac_log is true *)
-private noextract val _read_word: len:u32 -> b:PL.wordB{length b == UInt32.v len} 
+private noextract val _read_word: len:u32 -> b:PL.wordB{length b == UInt32.v len}
   -> s:Seq.seq UInt8.t -> i:u32{UInt32.v i <= UInt32.v len} -> ST word
   (requires (fun h -> live h b /\ Seq.slice (sel_word h b) 0 (UInt32.v i) == s))
   (ensures  (fun h0 s h1 -> h0 == h1 /\ live h1 b /\ s == sel_word h1 b))
@@ -616,7 +649,7 @@ let verify #i st acc tag =
       MAC.frame_sel_elem h2 h3 st.r;
       MAC.frame_sel_elem h0 h2 acc.a;
       ST.recall #(log i) #log_cmp (ilog st.log);
-      modifies_verify_aux (ilog st.log) (alog acc) (MAC.as_buffer acc.a) computed 
+      modifies_verify_aux (ilog st.log) (alog acc) (MAC.as_buffer acc.a) computed
         h0 h1 h2 h3;
       let t = read_word 16ul computed in
       let vs = !(alog acc) in

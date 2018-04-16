@@ -107,6 +107,13 @@ val as_buffer: #i:id -> elemB i -> GTot (buffer_of (alg i))
 let as_buffer #i e =
   reveal_elemB e
 
+let unsound_free (#i:id) (e:elemB i) : ST unit
+  (requires fun h0 -> True)
+  (ensures fun h0 _ h1 -> h0 == h1)
+  =
+  assume false;
+  FStar.Buffer.rfree e
+
 val live: mem -> #i:id -> elemB i -> Type0
 let live h #i b = Buffer.live h (as_buffer b)
 
@@ -361,9 +368,9 @@ let poly_cons #i x xs r =
         assert (Seq.equal (text_to_PS_text (Seq.cons x xs))
                           (Seq.cons x (text_to_PS_text xs)));
   match alg i with
-  | POLY1305 -> 
+  | POLY1305 ->
 	poly_cons_ x (text_to_PS_text xs) r
-  | GHASH    -> 
+  | GHASH    ->
         GS.poly_cons x (text_to_PS_text xs) r;
         GS.add_comm (GS.poly (text_to_PS_text xs) r) (GS.encode x)
 
