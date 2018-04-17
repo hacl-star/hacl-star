@@ -4,10 +4,10 @@ If you only are interested in the latest version of the generated C code,
 or Web Assembly code, installing the toolchain is not required.
 In that scenario, only a recent C compiler and CMake are needed for building libraries.
 
-The latest version of the verified C code can be found is available
+The latest version of the verified C code is available
 in [snapshots/hacl-c](snapshots/hacl-c).
 
-The latest version of the Web Assembly code can be found is available
+The latest version of the Web Assembly code is available
 in [snapshots/hacl-c-wasm](snapshots/hacl-c-wasm).
 
 HACL* relies on [F*](https://github.com/FStarLang/FStar) (`stable` branch) and
@@ -19,7 +19,9 @@ extraction to OCaml (`specs/`) and extraction to C (`code/`).
 In the case where you do want to perform F* verification and extraction
 installing some prerequisites is needed.
 
-1. There are few dependencies that must be manually installed on your
+0. A Docker image is available, in the root directory, to build the toolchain if you want.
+
+1. Otherwise, there are few dependencies that must be manually installed on your
 machine before being able to verify or extract HACL* using the toolchain:
 - OPAM
 - CMake (if building libraries from C code)
@@ -57,7 +59,8 @@ Calling `make` from the root directory will give you more information.
 
 ### HACL* master
 
-The HACL* repository has multiple branches: stable, master and
-feature branches. Feel free to install the cutting edge master.
-As it is under continuous integration, it should be working at
-all times.
+The HACL* repository has multiple branches: `stable`, `master` and
+feature branches. The main production branch is `master`; as it
+is under Continuous Integration for verification and code generation
+it should be working at all times. We maintain an old version of
+HACL* in the `stable` branch, but we do not recommand using it.

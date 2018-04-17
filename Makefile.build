@@ -20,6 +20,7 @@ GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
 
 ifeq ($(OS),Windows_NT)
   GCC=x86_64-w64-mingw32-gcc.exe
+  MSVC=cl.exe
 else
   GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
   CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=$(GCC)
@@ -58,7 +59,9 @@ SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
 SNAPSHOT_FILES= \
 	$(addprefix snapshots/api/, HACL.h) \
+	$(addprefix snapshots/api/, haclnacl.*) \
 	$(addprefix snapshots/makefiles/, Makefile) \
+	$(addprefix snapshots/experimental/, Hacl_Unverified_Random.*) \
 	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h testlib.* FStar.* vec128.h) \
 	$(addprefix code/poly1305/poly-c/, Hacl_Poly1305_64.* AEAD_Poly1305_64.*) \
 	$(addprefix code/poly1305_32/poly-c/, Hacl_Poly1305_32.*) \
@@ -138,6 +141,16 @@ SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* 
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
 	done
 
+.snapshots/hacl-c/api:
+	for f in HACL.h haclnacl.h haclnacl.c; do \
+		(cat $(HACL_LICENSE) snapshots/api/$$f ) > snapshots/hacl-c/$$f ; \
+	done
+
+.snapshots/hacl-c/experimental:
+	for f in Hacl_Unverified_Random.h Hacl_Unverified_Random.c; do \
+		(cat $(HACL_LICENSE) snapshots/experimental/$$f ) > snapshots/hacl-c/$$f ; \
+	done
+
 snapshots/hacl-c: snapshots-remove-intermediates
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc
 	$(MAKE) HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)" snapshots/snapshot-gcc-unrolled
@@ -146,6 +159,8 @@ snapshots/hacl-c: snapshots-remove-intermediates
 	cp $(SNAPSHOT_HACL_C_FILES) ./snapshots/hacl-c
 	$(MAKE) .snapshots/hacl-c/makefiles
 	$(MAKE) .snapshots/hacl-c/kremlib
+	$(MAKE) .snapshots/hacl-c/api
+	$(MAKE) .snapshots/hacl-c/experimental
 
 
 SNAPSHOT_NSS_FILES = \
@@ -205,12 +220,17 @@ snapshots/wireguard: snapshots-remove-intermediates
 	$(MAKE) .snapshots/wireguard/kremlib
 
 
-SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
+SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_* AEAD_Poly1305_64.* Hacl_Chacha20Poly1305.*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*)
 
 .snapshots/tezos/makefiles:
 	for f in CMakeLists.Tezos.txt; do \
 		cp snapshots/makefiles/$$f snapshots/tezos/$$f ; \
+	done
+
+.snapshots/tezos/haclnacl:
+	for f in haclnacl.h haclnacl.c; do \
+		(cat $(HACL_LICENSE) snapshots/api/$$f ) > snapshots/tezos/$$f ; \
 	done
 
 .snapshots/tezos/kremlib:
@@ -234,7 +254,8 @@ snapshots/tezos: snapshots-remove-intermediates
 	$(MAKE) .snapshots/tezos/experimental
 	mkdir -p snapshots/tezos/include
 	mv snapshots/tezos/*.h snapshots/tezos/include
-	cp snapshots/tezos/CMakeLists.Tezos.txt snapshots/tezos/CMakeLists.txt
+	$(MAKE) .snapshots/tezos/haclnacl
+	mv snapshots/tezos/CMakeLists.Tezos.txt snapshots/tezos/CMakeLists.txt
 	cp snapshots/api/HACL.Tezos.h snapshots/tezos/HACL.h
 
 #

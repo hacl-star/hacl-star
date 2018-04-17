@@ -471,10 +471,7 @@ let alloc () = Buffer.create (u32_to_h32 0ul) size_state
 val init:
   state:uint32_p{length state = v size_state} ->
   Stack unit
-    (requires (fun h0 -> live h0 state
-              /\ (let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
-              let counter = Seq.index seq_counter 0 in
-              H32.v counter = 0)))
+    (requires (fun h0 -> live h0 state))
     (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
               /\ (let slice_k = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
               let slice_h_0 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in
@@ -493,8 +490,7 @@ let init state =
   let h_0 = Buffer.sub state pos_whash_w size_whash_w in
   constants_set_k k;
   constants_set_h_0 h_0;
-  (**) let h1 = ST.get () in
-  (**) no_upd_lemma_2 h0 h1 k h_0 n
+  upd n 0ul 0ul
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
