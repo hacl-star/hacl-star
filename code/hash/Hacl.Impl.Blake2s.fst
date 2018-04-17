@@ -46,12 +46,6 @@ val lemma_size_to_uint32_equal_u32_of_v_of_size_t: x:size_t -> Lemma
   [SMTPat (u32 (v x))]
 let lemma_size_to_uint32_equal_u32_of_v_of_size_t x = admit()
 
-// val lemma_modifies2_is_modifies1 : h0:mem -> h1:mem -> #a:Type -> #alen:size_t -> #b:Type -> #blen:size_t -> a:buffer a alen -> b:buffer b blen -> Lemma
-//   (requires (live h0 a /\ live h1 a /\ live b h0 /\ live b h1 /\ disjoint a b /\ disjoint b a /\ modifies2 a b h0 h1))
-//   (ensures  (preserves_live h0 h1 /\ modifies1 a h0 h1))
-
-
-
 // val lemma_repeati_ghost_is_repeati: #a:Type -> n:size_nat -> (f:(i:size_nat{i < n}  -> a -> Tot a)) -> init:a -> Lemma
 //   (requires (True))
 //   (ensures  (repeati #a n f init == repeati_ghost #a n f init))
@@ -97,12 +91,11 @@ inline_for_extraction let create_const_iv () =
 
 inline_for_extraction val create_const_sigma: unit -> StackInline sigma_t
   (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (ensures (fun h0 r h1 -> h1.[r] == Spec.sigma))
 
 inline_for_extraction let create_const_sigma () =
-  admit();
-  assert_norm(List.Tot.map size Spec.list_sigma == Spec.list_sigma_size);
-  createL Spec.list_sigma_size
+  assert_norm(List.Tot.length Spec.list_sigma = 160);
+  createL Spec.list_sigma
 
 
 (* Define algorithm functions *)
@@ -148,28 +141,26 @@ let blake2_mixing wv a b c d x y =
   g1 wv b c Spec.r4
 
 
-#reset-options "--max_fuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --z3rlimit 150"
 
 val blake2_round1 : wv:working_vector -> m:message_block -> i:size_t -> const_sigma:sigma_t ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ live h const_sigma
-                  /\ as_list h.[const_sigma] == Spec.list_sigma_size))
+                  /\ disjoint wv m /\ disjoint wv const_sigma
+                  /\ disjoint m wv /\ disjoint const_sigma wv
+                  /\ h.[const_sigma] == Spec.sigma))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
-                         /\ h1.[wv] == Spec.blake2_round1 h0.[wv] h0.[m] (v i)))
+                         /\ h1.[wv] == Spec.Blake2s.blake2_round1 h0.[wv] h0.[m] (v i)))
 
 [@ Substitute ]
 let blake2_round1 wv m i const_sigma =
-  let start_idx = (i %. (size 10)) *. (size 16) in
-  let s = sub #(n:size_t{v n < 16}) #160 #16 const_sigma start_idx (size 16) in
   (**) let h0 = ST.get () in
-  (**) assume(live h0 s);
+  let start_idx = (i %. (size 10)) *. (size 16) in
+  (**) assert(v start_idx == (size_v i % 10 ) * 16);
+  let s = sub const_sigma start_idx (size 16) in
+  (**) assert(as_lseq s h0 == LSeq.sub (as_lseq const_sigma h0) (v start_idx) 16);
   blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(s.(size 0))) (m.(s.(size 1)));
-  (**) let h1 = ST.get () in
-  (**) admit();
-  (**) assert(h1.[wv] == Spec.blake2_mixing h0.[wv] 0 4 8 12
-  (**)  (let s0 = Spec.Lib.IntSeq.index (h0.[s]) 0 in Spec.Lib.IntSeq.index (h0.[m]) (size_v s0))
-  (**)  (let s0 = Spec.Lib.IntSeq.index (h0.[s]) 0 in Spec.Lib.IntSeq.index (h0.[m]) (size_v s0)));
   blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(s.(size 2))) (m.(s.(size 3)));
   blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(s.(size 4))) (m.(s.(size 5)));
   blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(s.(size 6))) (m.(s.(size 7)))
@@ -178,7 +169,9 @@ let blake2_round1 wv m i const_sigma =
 val blake2_round2 : wv:working_vector -> m:message_block -> i:size_t -> const_sigma:sigma_t ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ live h const_sigma
-                   /\ as_list h.[const_sigma] == Spec.list_sigma_size))
+                  /\ disjoint wv m /\ disjoint wv const_sigma
+                  /\ disjoint m wv /\ disjoint const_sigma wv
+                  /\ h.[const_sigma] == Spec.sigma))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
                          // /\ h0.[m] == h1.[m]
@@ -187,9 +180,11 @@ val blake2_round2 : wv:working_vector -> m:message_block -> i:size_t -> const_si
 
 [@ Substitute ]
 let blake2_round2 wv m i const_sigma =
+  (**) let h0 = ST.get () in
   let start_idx = (i %. (size 10)) *. (size 16) in
-  let s = sub #(n:size_t{v n < 16}) #160 #16 const_sigma start_idx (size 16) in
-  admit();
+  (**) assert(v start_idx == (size_v i % 10 ) * 16);
+  let s = sub const_sigma start_idx (size 16) in
+  (**) assert(as_lseq s h0 == LSeq.sub (as_lseq const_sigma h0) (v start_idx) 16);
   blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(s.(size 8))) (m.(s.(size 9)));
   blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(s.(size 10))) (m.(s.(size 11)));
   blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(s.(size 12))) (m.(s.(size 13)));
@@ -201,7 +196,7 @@ val blake2_round : wv:working_vector -> m:message_block -> i:size_t -> const_sig
     (requires (fun h -> live h wv /\ live h m /\ live h const_sigma
                    /\ disjoint wv m /\ disjoint wv const_sigma
                    /\ disjoint m wv /\ disjoint const_sigma wv
-                   /\ as_list h.[const_sigma] == Spec.list_sigma_size))
+                   /\ h.[const_sigma] == Spec.sigma))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_round h0.[m] (v i) h0.[wv]))
@@ -245,7 +240,7 @@ val blake2_compress2 :
   wv:working_vector -> m:message_block -> const_sigma:sigma_t ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ live h const_sigma
-                   /\ as_list h.[const_sigma] == Spec.list_sigma_size
+                   /\ h.[const_sigma] == Spec.sigma
                    /\ disjoint wv m /\ disjoint wv const_sigma
                    /\ disjoint m wv /\ disjoint const_sigma wv))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
@@ -259,7 +254,7 @@ let blake2_compress2 wv m const_sigma =
     (fun h0 -> let m0 = h0.[m] in Spec.blake2_round m0)
     (fun i wv ->
       assume(live h0 wv /\ live h0 m /\ live h0 const_sigma
-           /\ List.Tot.map v (as_list h0.[const_sigma]) == Spec.list_sigma
+           /\ (as_list h0.[const_sigma]) == Spec.list_sigma
            /\ disjoint wv m /\ disjoint wv const_sigma
            /\ disjoint m wv /\ disjoint const_sigma wv);
       blake2_round wv m i const_sigma)
