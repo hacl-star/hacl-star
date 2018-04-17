@@ -196,7 +196,7 @@ let blake2_round2 wv m i const_sigma =
   blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(s.(size 14))) (m.(s.(size 15)))
 
 
-val blake2_round : wv:working_vector -> m:message_block -> i:size_t -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+val blake2_round : wv:working_vector -> m:message_block -> i:size_t -> const_sigma:sigma_t ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ live h const_sigma
                    /\ disjoint wv m /\ disjoint wv const_sigma
@@ -214,7 +214,7 @@ let blake2_round wv m i const_sigma =
 
 val blake2_compress1 : wv:working_vector ->
   s:hash_state -> m:message_block ->
-  offset:uint64 -> flag:Spec.last_block_flag -> const_iv:lbuffer uint32 8 ->
+  offset:uint64 -> flag:Spec.last_block_flag -> const_iv:init_vector ->
   Stack unit
     (requires (fun h -> live h s /\ live h m /\ live h wv /\ live h const_iv
                      /\ h.[const_iv] == Spec.const_init
@@ -242,7 +242,7 @@ let blake2_compress1 wv s m offset flag const_iv =
 #reset-options "--max_fuel 0 --z3rlimit 150"
 
 val blake2_compress2 :
-  wv:working_vector -> m:message_block -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  wv:working_vector -> m:message_block -> const_sigma:sigma_t ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ live h const_sigma
                    /\ as_list h.[const_sigma] == Spec.list_sigma_size
@@ -259,7 +259,7 @@ let blake2_compress2 wv m const_sigma =
     (fun h0 -> let m0 = h0.[m] in Spec.blake2_round m0)
     (fun i wv ->
       assume(live h0 wv /\ live h0 m /\ live h0 const_sigma
-           /\ as_list h0.[const_sigma] == Spec.list_sigma_size
+           /\ List.Tot.map v (as_list h0.[const_sigma]) == Spec.list_sigma
            /\ disjoint wv m /\ disjoint wv const_sigma
            /\ disjoint m wv /\ disjoint const_sigma wv);
       blake2_round wv m i const_sigma)
@@ -267,7 +267,7 @@ let blake2_compress2 wv m const_sigma =
 #reset-options "--max_fuel 0"
 
 val blake2_compress3_inner :
-  wv:working_vector -> i:size_t{size_v i < 8} -> s:hash_state -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  wv:working_vector -> i:size_t{size_v i < 8} -> s:hash_state -> const_sigma:sigma_t ->
   Stack unit
     (requires (fun h -> live h s /\ live h wv /\ live h const_sigma))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
@@ -285,7 +285,7 @@ let blake2_compress3_inner wv i s const_sigma =
 #reset-options "--max_fuel 0 --z3rlimit 25"
 
 val blake2_compress3 :
-  wv:working_vector -> s:hash_state -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  wv:working_vector -> s:hash_state -> const_sigma:sigma_t ->
   Stack unit
     (requires (fun h -> live h s /\ live h wv /\ live h const_sigma
                      /\ as_list h.[const_sigma] == Spec.list_sigma_size
@@ -312,7 +312,7 @@ let blake2_compress3 wv s const_sigma =
 
 val blake2_compress :
   s:hash_state -> m:message_block ->
-  offset:uint64 -> f:Spec.last_block_flag -> const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+  offset:uint64 -> f:Spec.last_block_flag -> const_iv:init_vector -> const_sigma:sigma_t ->
   Stack unit
     (requires (fun h -> live h s /\ live h m /\ live h const_iv /\ live h const_sigma
                          /\ as_list h.[const_sigma] == Spec.list_sigma_size
@@ -361,7 +361,7 @@ val blake2s_internal2_: s:lbuffer uint32 8 ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
    to_compress:lbuffer uint32 16 ->
    i:size_t{v i < v dd - 1} ->
-   const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+   const_iv:init_vector -> const_sigma:sigma_t ->
    Stack unit
      (requires (fun h -> live h s /\ live h d /\ live h to_compress /\ live h const_iv /\ live h const_sigma
                     /\ as_list h.[const_sigma] == Spec.list_sigma_size
@@ -394,7 +394,7 @@ val blake2s_internal2_alloc: s:lbuffer uint32 8 ->
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
    i:size_t{v i < v dd - 1} ->
-   const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+   const_iv:init_vector -> const_sigma:sigma_t ->
    Stack unit
      (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
                     /\ as_list h.[const_sigma] == Spec.list_sigma_size
@@ -425,7 +425,7 @@ let blake2s_internal2_alloc s dd d i const_iv const_sigma =
 val blake2s_internal2: s:lbuffer uint32 8 ->
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
-   const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+   const_iv:init_vector -> const_sigma:sigma_t ->
    Stack unit
      (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
                     /\ as_list h.[const_sigma] == Spec.list_sigma_size
@@ -464,7 +464,7 @@ val blake2s_internal3: s:lbuffer uint32 8 ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
    ll:size_t -> kk:size_t{size_v kk <= 32} -> nn:size_t{1 <= size_v nn /\ size_v nn <= 32} ->
    to_compress:lbuffer uint32 16 -> tmp:lbuffer uint8 32 -> res:lbuffer uint8 (size_v nn) ->
-   const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+   const_iv:init_vector -> const_sigma:sigma_t ->
    Stack unit
      (requires (fun h -> live h s /\ live h d /\ live h to_compress /\ live h tmp /\ live h res /\ live h const_iv /\ live h const_sigma
                     /\ as_list h.[const_sigma] == Spec.list_sigma_size
@@ -495,7 +495,7 @@ val blake2s_internal:
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
    ll:size_t -> kk:size_t{size_v kk <= 32} -> nn:size_t{1 <= size_v nn /\ size_v nn <= 32} ->
    to_compress:lbuffer uint32 16 -> wv:working_vector -> tmp:lbuffer uint8 32 -> res:lbuffer uint8 (size_v nn) -> s:lbuffer uint32 8 ->
-   const_iv:lbuffer uint32 8 -> const_sigma:lbuffer (n:size_t{size_v n < 16}) 160 ->
+   const_iv:init_vector -> const_sigma:sigma_t ->
    Stack unit
      (requires (fun h -> live h d /\ live h to_compress /\ live h wv /\ live h tmp /\ live h res /\ live h s /\ live h const_iv /\ live h const_sigma
                     /\ as_list h.[const_sigma] == Spec.list_sigma_size
