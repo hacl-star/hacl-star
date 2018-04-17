@@ -11,66 +11,61 @@ open Spec.Bignum.LL.Lib
 
 (* ADDITION *)
 val add_with_carry:
-    a:uint64 -> b:uint64 -> c:carry -> Pure (tuple2 carry uint64)
-    (requires (True))
-    (ensures (fun (c', r) -> uint_v r + uint_v c' * x_i 1 = uint_v a + uint_v b + uint_v c))
-
-#reset-options "--z3rlimit 50 --max_fuel 0"
-
+  a:uint64 -> b:uint64 -> c:carry -> Pure (tuple2 carry uint64)
+  (requires (True))
+  (ensures (fun (c', r) -> uint_v r + uint_v c' * x_i 1 = uint_v a + uint_v b + uint_v c))
+  #reset-options "--z3rlimit 50 --max_fuel 0"
 let add_with_carry a b c =
-    let tmp = to_u128 a +! to_u128 b +! to_u128 c in
-    let r = to_u64 tmp in
-    assert (uint_v r = (uint_v a + uint_v b + uint_v c) % pow2 64);
-    let c' = to_u64 (tmp >>. (u32 64)) in
-    assert (uint_v c' = (uint_v a + uint_v b + uint_v c) / pow2 64);
-    lemma_div_mod (uint_v a + uint_v b + uint_v c) (pow2 64);
-    assert_norm (x_i 1 = pow2 64);
-    (c', r)
+  let tmp = to_u128 a +! to_u128 b +! to_u128 c in
+  let r = to_u64 tmp in
+  assert (uint_v r = (uint_v a + uint_v b + uint_v c) % pow2 64);
+  let c' = to_u64 (tmp >>. (u32 64)) in
+  assert (uint_v c' = (uint_v a + uint_v b + uint_v c) / pow2 64);
+  lemma_div_mod (uint_v a + uint_v b + uint_v c) (pow2 64);
+  assert_norm (x_i 1 = pow2 64);
+  (c', r)
 
-val sum_:
-    len:size_nat{len > 0} -> a:lseqbn len -> b:lseqbn len ->
-    i:size_nat{i <= len} -> res:lseqbn len -> Pure (tuple2 carry (lseqbn len))
-    (requires (True))
-    (ensures (fun (c', res') -> eval_i len res' i + uint_v c' * x_i i == eval_i len a i + eval_i len b i))
-    (decreases i)
+val bn_add_pred:
+  len:size_nat{len > 0} -> a:lseqbn len -> b:lseqbn len -> i:size_nat{i <= len} -> tuple2 carry (lseqbn len) -> Tot Type0
+let bn_add_pred len a b i (c, res) = eval_i len res i + uint_v c * x_i i == eval_i len a i + eval_i len b i
 
-#reset-options "--z3rlimit 150 --max_fuel 2"
+val bn_add_f:
+  len:size_nat{len > 0} -> a:lseqbn len -> b:lseqbn len -> Tot (repeatable #(tuple2 carry (lseqbn len)) #len (bn_add_pred len a b))
+  #reset-options "--z3rlimit 150 --max_fuel 2"
+let bn_add_f len a b i (c, res) =
+  let (c', res_i) = add_with_carry a.[i] b.[i] c in
+  assert (uint_v res_i + uint_v c' * x_i 1 = uint_v a.[i] + uint_v b.[i] + uint_v c);
+  let res' = res.[i] <- res_i in
+  lemma_eval_i len res res' i;
+  assert (eval_i len res' (i + 1) == eval_i len res' i + (uint_v res'.[i]) * x_i i); //from eval_i
+  assert (eval_i len res' (i + 1) == eval_i len a i + eval_i len b i - uint_v c * x_i i + (uint_v a.[i] + uint_v b.[i] + uint_v c - uint_v c' * x_i 1) * x_i i); //expansion
+  assume (eval_i len res' (i + 1) == eval_i len a i + eval_i len b i - uint_v c * x_i i + uint_v a.[i] * x_i i + uint_v b.[i] * x_i i + uint_v c * x_i i - uint_v c' * x_i 1 * x_i i);
+  assert (eval_i len res' (i + 1) == eval_i len a i + eval_i len b i + uint_v a.[i] * x_i i + uint_v b.[i] * x_i i - uint_v c' * x_i 1 * x_i i);
+  assert (eval_i len res' (i + 1) + uint_v c' * x_i 1 * x_i i == eval_i len a (i + 1) + eval_i len b (i + 1));
+  lemma_mul_assoc (uint_v c') (x_i 1) (x_i i);
+  lemma_mult_x1_xi1 (i + 1) (x_i 1) (x_i i);
+  assert (eval_i len res' (i + 1) + uint_v c' * x_i (i + 1)  == eval_i len a (i + 1) + eval_i len b (i + 1));
+  (c', res')
 
-let rec sum_ len a b i res =
-    if i = 0 then
-       (u64 0, res)
-    else begin
-        let i1 = i - 1 in
-        let (c, r) = sum_ len a b i1 res in
-        //assert (eval_i len r i1 + uint_v #U64 c * x_i i1 == eval_i len a i1 + eval_i len b i1); // from rec ind hypo
-        let (c', res_i) = add_with_carry a.[i1] b.[i1] c in
-        //assert (uint_v #U64 res_i + uint_v #U64 c' * x_i 1 == uint_v #U64 a.[i1] + uint_v #U64 b.[i1] + uint_v #U64 c); // from add_with_carry
-        let res' = r.[i1] <- res_i in
-        lemma_eval_i len r res' i1;
-        //assert (eval_i len res' i1 == eval_i len r i1); // from upd
-        assert (eval_i len res' i == eval_i len res' i1 + (uint_v res'.[i1]) * x_i i1); //from eval_i
-        assert (eval_i len res' i == eval_i len a i1 + eval_i len b i1 - uint_v c * x_i i1 + (uint_v a.[i1] + uint_v b.[i1] + uint_v c - uint_v c' * x_i 1) * x_i i1); //expansion
-        assert (eval_i len res' i == eval_i len a i1 + eval_i len b i1 - uint_v c * x_i i1 + uint_v a.[i1] * x_i i1  + uint_v b.[i1] * x_i i1  + uint_v c * x_i i1  - uint_v c' * x_i 1 * x_i i1);
-        assert (eval_i len res' i == eval_i len a i1 + eval_i len b i1 + uint_v a.[i1] * x_i i1  + uint_v b.[i1] * x_i i1  - uint_v c' * x_i 1 * x_i i1);
-        assert (eval_i len res' i + uint_v c' * x_i 1 * x_i i1  == eval_i len a i + eval_i len b i);
-	lemma_mul_assoc (uint_v c') (x_i 1) (x_i i1);
-        lemma_mult_x1_xi1 i (x_i 1) (x_i i1);
-	assert (eval_i len res' i + uint_v c' * x_i i  == eval_i len a i + eval_i len b i);
-        (c', res')
-    end
+val bn_add_:
+  len:size_nat{len > 0} -> a:lseqbn len -> b:lseqbn len -> c:uint64 -> res:lseqbn len -> Pure (tuple2 carry (lseqbn len))
+  (requires (bn_add_pred len a b 0 (c, res)))
+  (ensures (fun (c', res') -> bn_add_pred len a b len (c', res')))
+let bn_add_ len a b c res =
+  repeati_inductive len (bn_add_pred len a b) (bn_add_f len a b) (c, res)
 
-val sum:
-    len:size_nat{len > 0} -> a:lseqbn len -> b:lseqbn len -> Pure (tuple2 carry (lseqbn len))
-    (requires (True))
-    (ensures (fun (c', res') -> eval_i len res' len + uint_v c' * x_i len = eval_i len a len + eval_i len b len))
-    
-let sum len a b =
-    let res = create len (u64 0) in
-    sum_ len a b len res
+val bn_add:
+  len:size_nat{len > 0} -> a:lseqbn len -> b:lseqbn len -> Pure (tuple2 carry (lseqbn len))
+  (requires True)
+  (ensures (fun (c', res') -> eval_i len res' len + uint_v c' * x_i len = eval_i len a len + eval_i len b len))
+let bn_add len a b =
+  let res = create len (u64 0) in
+  bn_add_ len a b (u64 0) res
 
+(*
 (* MULTIPLICATION *)
 
-val lemma_mult_add_add_64: 
+val lemma_mult_add_add_64:
     a:uint64 -> b:uint64 -> c:uint64 -> d:uint64 -> Lemma
     (uint_v a * uint_v b + uint_v c + uint_v d < pow2 128)
 
@@ -105,7 +100,7 @@ val mult_by_limb_addj_inner:
     len:size_nat -> a:lseqbn len -> l:uint64 -> i1:size_nat{i1 < len} ->
     j:size_nat -> resLen:size_nat{len + j < resLen} ->
     res:lseqbn resLen -> c1:carry -> r1:lseqbn resLen -> Pure (tuple2 carry (lseqbn resLen))
-    (requires (eval_i resLen r1 (i1 + j) + uint_v c1 * x_i (i1 + j) == eval_i resLen res (i1 + j) + eval_i len a i1 * uint_v l * x_i j /\ 
+    (requires (eval_i resLen r1 (i1 + j) + uint_v c1 * x_i (i1 + j) == eval_i resLen res (i1 + j) + eval_i len a i1 * uint_v l * x_i j /\
 	      uint_v res.[i1 + j] = uint_v r1.[i1 + j]))
     (ensures (fun (c', res') -> let i = i1 + 1 in
 	      eval_i resLen res' (i + j) + uint_v c' * x_i (i + j) == eval_i resLen res (i + j) + eval_i len a i * uint_v l * x_i j))
@@ -125,7 +120,7 @@ let mult_by_limb_addj_inner len a l i1 j resLen res c1 r1 =
             (uint_v a.[i1] * uint_v l + uint_v c1 + uint_v r1.[i1 + j] - uint_v c' * x_i 1) * x_i (i1 + j));
     lemma_distributivity_add_add_sub (uint_v a.[i1] * uint_v l) (uint_v c1) (uint_v r1.[i1 + j]) (uint_v c' * x_i 1) (x_i (i1 + j));
     lemma_mult_x1_xi1 (i + j) (x_i 1) (x_i (i1 + j));
-    assert (eval_i resLen res' (i + j) + uint_v c' * x_i (i + j) == 
+    assert (eval_i resLen res' (i + j) + uint_v c' * x_i (i + j) ==
             eval_i resLen res (i1 + j) + eval_i len a i1 * uint_v l * x_i j + uint_v a.[i1] * uint_v l * x_i (i1 + j) + uint_v r1.[i1 + j] * x_i (i1 + j));
     lemma_eval_incr resLen res (i + j);
     lemma_mult_xi_xj i1 j (x_i i1) (x_i j);
@@ -181,7 +176,7 @@ let mult_inner len a b resLen j1 r =
     lemma_distributivity_add_fold (eval len a) (eval_i len b j1) (uint_v b.[j1] * x_i j1);
     lemma_eval_incr len b j;
     assert (eval_i resLen r (len + j1) + eval len a * uint_v b.[j1] * x_i j1 == eval len a * eval_i len b j);
-    
+
     let (c', res') = mult_by_limb_addj len a b.[j1] j1 resLen r in
     assert (eval_i resLen res' (len + j1) + uint_v c' * x_i (len + j1) == eval len a * eval_i len b j);
     let res1 = res'.[len + j1] <- c' in
@@ -206,7 +201,7 @@ let rec mult_ len a b resLen j  =
     else begin
         let j1 = j - 1 in
         let r = mult_ len a b resLen j1 in
-        mult_inner len a b resLen j1 r 
+        mult_inner len a b resLen j1 r
     end
 
 val mult:
@@ -215,3 +210,4 @@ val mult:
     Tot (res':lseqbn resLen{eval resLen res' == eval len a * eval len b})
 
 let mult len a b resLen = mult_ len a b resLen len
+*)
