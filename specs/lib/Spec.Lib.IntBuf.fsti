@@ -167,7 +167,7 @@ val iter: #a:Type -> #len:size_nat -> n:size_t ->
 
 let loop_inv (h0:mem) (h1:mem) (#a:Type) (len:size_nat) (n:size_nat)  (buf:lbuffer a len)
   (spec:(h:mem -> GTot (i:size_nat{i < n} -> LSeq.lseq a len -> Tot (LSeq.lseq a len)))) (i:size_nat{i <= n}) : Type =
-  preserves_live h0 h1
+  live h0 buf /\ preserves_live h0 h1
   /\ modifies1 buf h0 h1
   /\ (let b0 = as_lseq #a #len buf h0 in
     let b1 = as_lseq #a #len buf h1 in
@@ -181,7 +181,7 @@ val loop:
   n:size_t ->
   buf:lbuffer a len ->
   spec:(h:mem -> GTot (i:size_nat{i < v n} -> LSeq.lseq a len -> Tot (LSeq.lseq a len))) ->
-  impl:(i:size_t{v i < v n} -> buf:lbuffer a (len) -> Stack unit
+  impl:(i:size_t{v i < v n} -> Stack unit
     (requires (fun h -> loop_inv h0 h #a len (v n) buf spec (v i)))
 	 (ensures (fun _ _ h1 -> loop_inv h0 h1 #a len (v n) buf spec (v i + 1)))) ->
   Stack unit

@@ -174,8 +174,6 @@ val blake2_round2 : wv:working_vector -> m:message_block -> i:size_t -> const_si
                   /\ h.[const_sigma] == Spec.sigma))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1
                          /\ modifies1 wv h0 h1
-                         // /\ h0.[m] == h1.[m]
-                         // /\ as_list h1.[const_sigma] == sigma_list_size
                          /\ h1.[wv] == Spec.blake2_round2 h0.[wv] h0.[m] (v i)))
 
 [@ Substitute ]
@@ -234,7 +232,7 @@ let blake2_compress1 wv s m offset flag const_iv =
  (if flag then wv.(size 14) <- wv_14)
 
 
-#reset-options "--max_fuel 0 --z3rlimit 150"
+#reset-options "--max_fuel 0 --z3rlimit 50"
 
 val blake2_compress2 :
   wv:working_vector -> m:message_block -> const_sigma:sigma_t ->
@@ -247,17 +245,18 @@ val blake2_compress2 :
                          /\ modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_compress2 h0.[wv] h0.[m]))
 
+
 [@ Substitute ]
 let blake2_compress2 wv m const_sigma =
   (**) let h0 = ST.get () in
+  let spec hi =
+    let m0 = hi.[m] in
+    Spec.blake2_round m0 in
   loop #h0 (size Spec.rounds_in_f) wv
-    (fun h0 -> let m0 = h0.[m] in Spec.blake2_round m0)
-    (fun i wv ->
-      assume(live h0 wv /\ live h0 m /\ live h0 const_sigma
-                   /\ h0.[const_sigma] == Spec.sigma
-                   /\ disjoint wv m /\ disjoint wv const_sigma
-                   /\ disjoint m wv /\ disjoint const_sigma wv);
-      blake2_round wv m i const_sigma)
+    spec
+    (fun i ->
+      blake2_round wv m i const_sigma;
+      lemma_repeati Spec.rounds_in_f (spec h0) h0.[wv] (v i))
 
 #reset-options "--max_fuel 0"
 
@@ -277,7 +276,6 @@ let blake2_compress3_inner wv i s const_sigma =
   let hi = logxor #U32 hi_xor_wvi wv.(i_plus_8) in
   s.(i) <- hi
 
-#reset-options "--max_fuel 0 --z3rlimit 25"
 
 val blake2_compress3 :
   wv:working_vector -> s:hash_state -> const_sigma:sigma_t ->
@@ -293,14 +291,10 @@ val blake2_compress3 :
 [@ Substitute ]
 let blake2_compress3 wv s const_sigma =
   (**) let h0 = ST.get () in
-  loop #h0 (size 8) s
-    (fun h0 -> let wv0 = h0.[wv] in Spec.blake2_compress3_inner wv0)
-    (fun i s ->
-      assume(live h0 s /\ live h0 wv /\ live h0 const_sigma
-           /\ h0.[const_sigma] == Spec.sigma
-           /\ disjoint wv s /\ disjoint wv const_sigma
-           /\ disjoint s wv /\ disjoint const_sigma wv);
-    blake2_compress3_inner wv i s const_sigma)
+  let spec hi = let wv0 = hi.[wv] in Spec.blake2_compress3_inner wv0 in
+  loop #h0 (size 8) s spec
+    (fun i -> blake2_compress3_inner wv i s const_sigma;
+           lemma_repeati 8 (spec h0) h0.[s] (v i))
 
 
 #reset-options "--max_fuel 0"
@@ -320,6 +314,7 @@ val blake2_compress :
 
 [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2_compress s m offset flag const_iv const_sigma =
+  (**) let hinit = ST.get () in
   let f h0 h1 = h1.[s] == Spec.Blake2s.blake2_compress h0.[s] h0.[m] offset flag in
   salloc #_ #_ #16 (size 16) (u32 0) [BufItem m; BufItem const_iv; BufItem const_sigma] [BufItem s]
   (fun h0 _ h1 -> f h0 h1)
@@ -399,8 +394,6 @@ val blake2s_internal2_alloc: s:lbuffer uint32 8 ->
      (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
                           /\ h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]))
 
-#reset-options "--z3rlimit 25"
-
 [@ Substitute]
 let blake2s_internal2_alloc s dd d i const_iv const_sigma =
   (**) let hi = ST.get () in
@@ -433,24 +426,17 @@ val blake2s_internal2: s:lbuffer uint32 8 ->
 [@ Substitute]
 let blake2s_internal2 s dd d const_iv const_sigma =
   (**) let h0 = ST.get () in
+  let spec hi =
+    let s0 = h0.[s] in
+    let d0 = h0.[d] in
+    Spec.blake2s_internal2_ (v dd) d0 in
   if (dd >. size 1) then begin
     let idx = dd -. (size 1) in
-    loop #h0 idx s
-    (fun h0 -> let s0 = h0.[s] in
-            let d0 = h0.[d] in
-            Spec.blake2s_internal2_ (v dd) d0)
-    (fun i s ->
-      let h0 = ST.get () in
-      // assume(as_list h0.[const_sigma] == sigma_list_size /\ h0.[const_iv] == Spec.const_init);
-      assume(live h0 s /\ live h0 d /\ live h0 const_iv /\ live h0 const_sigma
-             /\ h0.[const_sigma] == Spec.sigma
-             /\ h0.[const_iv] == Spec.const_init
-             /\ disjoint s d /\ disjoint s const_iv /\ disjoint s const_sigma
-             /\ disjoint d s /\ disjoint const_iv s /\ disjoint const_sigma s);
+    loop #h0 idx s spec
+    (fun i ->
       blake2s_internal2_alloc s dd d i const_iv const_sigma;
-      let h1 = ST.get () in
-      assert(h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]); admit()
-      ) end
+      lemma_repeati (v idx) (spec h0) h0.[s] (v i)
+    ) end
    else ()
 
 
