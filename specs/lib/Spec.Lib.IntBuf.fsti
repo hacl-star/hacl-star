@@ -36,6 +36,7 @@ inline_for_extraction val modifies3: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len
 inline_for_extraction val modifies: list bufitem -> mem -> mem -> GTot Type0
 inline_for_extraction val live_list: mem -> list bufitem -> GTot Type0
 inline_for_extraction val disjoint_list: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> list bufitem  -> GTot Type0
+inline_for_extraction val disjoints: list bufitem  -> GTot Type0
 
 inline_for_extraction val index: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> i:size_t{v i < len} ->
   Stack a
