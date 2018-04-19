@@ -38,17 +38,19 @@ val set: #id:eqtype -> #key_length:(n:nat{n<=32}) -> i:id -> lbytes key_length -
 let set #id #key_length i raw =
   Key raw false
 
-val get_ae_key_package: id:eqtype -> key_length:(n:nat{n<=32}) -> KEY.key_package #id key_length (key key_length #id)
-let get_ae_key_package id key_length =
+val create_ae_key_package: id:eqtype -> key_length:(n:nat{n<=32}) -> KEY.key_package #id key_length (key key_length #id)
+let create_ae_key_package id key_length =
   KEY.KP (hon #id #key_length) (get #id #key_length) (gen key_length) set
 
 
 // Definition AE package
 noeq type encryption_scheme (key_length:(n:nat{n<=32})) (nonce_length:(n:nat{n<=32})) =
   | ES:
+    valid_plain_length:(nat -> bool) ->
+    valid_cipher_length:(nat -> bool) ->
     gen: (unit -> lbytes key_length) ->
-    enc: (p:bytes -> k:lbytes key_length -> n:lbytes nonce_length -> c:bytes) ->
-    dec: (c:bytes -> k:lbytes key_length -> n:lbytes nonce_length -> option (p:bytes)) ->
+    enc: (p:bytes{valid_plain_length (Seq.length p)} -> k:lbytes key_length -> n:lbytes nonce_length -> c:bytes{valid_cipher_length (Seq.length c)}) ->
+    dec: (c:bytes{valid_cipher_length (Seq.length c)} -> k:lbytes key_length -> n:lbytes nonce_length -> option (p:bytes{valid_plain_length (Seq.length p)})) ->
 //    correctness: (p:bytes -> k:lbytes key_length -> n:lbytes nonce_length -> Lemma
 //    (requires True)
 //    (ensures (
@@ -59,13 +61,22 @@ noeq type encryption_scheme (key_length:(n:nat{n<=32})) (nonce_length:(n:nat{n<=
 //    ) ->
     encryption_scheme key_length nonce_length
 
-abstract noeq type ae_parameters (#id:eqtype) (#key_length:(n:nat{n<=32})) (kp:KEY.key_package #id key_length (key key_length #id)) (pp:plain_package) =
-  | GP:
-    nonce_length:(n:nat{n<=32}) ->
-    scheme: (encryption_scheme key_length nonce_length) ->
-    b:bool{get_flag pp = b} ->
-    ae_parameters #id #key_length kp pp
+abstract type flag = bool
+assume val b: flag
 
+noeq type ae_parameters =
+  | GP:
+    keylength:(n:nat{n<=32}) ->
+    nonce_length:(n:nat{n<=32}) ->
+//    b:flag ->
+    scheme: (encryption_scheme keylength nonce_length) ->
+    ae_parameters
+
+val get_ae_flagGT: aparams:ae_parameters -> GTot (b:Type0)
+let get_ae_flagGT aparams =
+  b2t b
+
+let valid_ae_plain_package (aparams:ae_parameters) (pp:plain_package) = pp == PP (get_ae_flagGT aparams) aparams.scheme.valid_plain_length
 //let nonce (#id:eqtype) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id #key_length key) (#pp:plain_package) (ap:ae_parameters kp pp) = lbytes ap.nonce_length
 let nonce (nl:(n:nat{n<=32})) = lbytes nl
 let ciphertext = bytes
@@ -78,31 +89,43 @@ let message_log_inv (#pp:plain_package) (#nonce_length:(n:nat{n<=32})) (#id:eqty
 let message_log (#pp:plain_package) (#id:eqtype) (rgn:erid) (nonce_length:(n:nat{n<=32})) (i:id) =
   MM.t rgn (message_log_key nonce_length) (message_log_range i pp nonce_length) (message_log_inv i)
 
-noeq abstract type ae_package (#pp:plain_package) (#id:eqtype) (#i:id) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id key_length (key key_length #id)) (ap:ae_parameters kp pp) =
+noeq abstract type ae_package (#id:eqtype) (#i:id) (#key_length:(n:nat{n<=32})) (kp:KEY.key_package #id key_length (key key_length #id)) (aparams:ae_parameters{aparams.keylength = key_length}) (pp:plain_package{valid_ae_plain_package aparams pp}) =
   | AE:
     rgn:erid ->
-    log:message_log #pp #id rgn ap.nonce_length i ->
-    ae_package #pp #id #i #key_length #kp ap
+    log:message_log #pp #id rgn aparams.nonce_length i ->
+    ae_package #id #i #key_length kp aparams pp
 
-let zero_bytes (n) : bytes = Seq.create n (UInt8.uint_to_t 0)
+val create_ae_package:(rgn:erid) -> (#id:eqtype) -> (#i:id) -> (#key_length:(n:nat{n<=32})) -> (kp:KEY.key_package #id key_length (key key_length #id)) -> (aparams:ae_parameters{aparams.keylength = key_length}) -> (pp:plain_package{valid_ae_plain_package aparams pp}) -> ST (ae_package #id #i #key_length kp aparams pp)
+  (requires (fun h0 -> True))
+  (ensures (fun h0 ap h1 ->
+    modifies (Set.singleton rgn) h0 h1
+  ))
+let create_ae_package (rgn:erid) (#id:eqtype) (#i:id) (#key_length:(n:nat{n<=32})) (kp:KEY.key_package #id key_length (key key_length #id)) (aparams:ae_parameters{aparams.keylength = key_length}) (pp:plain_package{valid_ae_plain_package aparams pp}) =
+  let rgn = new_region rgn in
+  let log = MM.alloc #rgn #(message_log_key aparams.nonce_length) #(message_log_range #id i pp aparams.nonce_length) #(message_log_inv #pp #aparams.nonce_length #id i) in
+  AE #id #i #key_length #kp #aparams #pp rgn log
 
-val encrypt: #id:eqtype -> #i:id -> #pp:plain_package -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package #id key_length (key key_length #id) -> #aparams:ae_parameters kp pp ->  ap:ae_package #pp #id #i aparams -> k:key key_length i -> n:nonce aparams.nonce_length -> p:protected_plain pp i -> ST ciphertext
+val zero_bytes: (valid_length:(n:nat -> bool)) -> (n:nat{valid_length n}) -> p:lbytes n{valid_length (Seq.length p)}
+let zero_bytes valid_length n = Seq.create n (UInt8.uint_to_t 0)
+
+#set-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 300"
+val encrypt: #id:eqtype -> #i:id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package #id key_length (key key_length #id) -> #aparams:ae_parameters{key_length = aparams.keylength} -> #pp:plain_package{ valid_ae_plain_package aparams pp} ->  ap:ae_package #id #i #key_length kp aparams pp -> k:key key_length i -> n:nonce aparams.nonce_length -> p:protected_plain pp i -> ST ciphertext
   (requires (fun h0 ->
     (forall c . MM.fresh ap.log (n,c) h0)
   ))
   (ensures (fun h0 c h1 ->
-    ((KEY.(kp.hon k) /\ aparams.b) ==>
-      (c = aparams.scheme.enc (zero_bytes (length p)) k.raw n))
-    /\ ((~(KEY.(kp.hon k)) \/ ~aparams.b) ==>
+    ((KEY.(kp.hon k) /\ get_ae_flagGT aparams) ==>
+      (c = aparams.scheme.enc (zero_bytes (pp.valid_length) (length p)) k.raw n))
+      // Not sure why I can't use aparams.b here instead of get_ae_flagGT...
+    /\ ((~(KEY.(kp.hon k)) \/ ~(get_ae_flagGT aparams)) ==>
       (c = aparams.scheme.enc (repr #pp kp k p) k.raw n))
     /\ witnessed (MM.contains ap.log (n,c) p)
     /\ modifies (Set.singleton ap.rgn) h0 h1
   ))
-let encrypt #id #i #pp #key_length #kp #aparams ap k n p =
+let encrypt #id #i #key_length #kp #aparams #pp ap k n p =
   let c =
-    if KEY.(kp.hon k) && aparams.b then
-      let p' = zero_bytes (length p) in
-      //let p' = zero_bytes (length p) in
+    if KEY.(kp.hon k) && b then
+      let p' = zero_bytes (pp.valid_length) (length p) in
       aparams.scheme.enc p' k.raw n
     else
       aparams.scheme.enc (repr #pp kp k p) k.raw n
@@ -111,33 +134,34 @@ let encrypt #id #i #pp #key_length #kp #aparams ap k n p =
   MM.extend ap.log (n,c) p;
   c
 
-val decrypt: #id:eqtype -> #i:id -> #pp:plain_package -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package #id key_length (key key_length #id) -> #aparams:ae_parameters kp pp -> ap:ae_package #pp #id #i aparams -> k:key key_length i -> n:nonce aparams.nonce_length -> c:ciphertext -> ST (option (p:protected_plain pp i))
+val decrypt: #id:eqtype -> #i:id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package #id key_length (key key_length #id) -> #aparams:ae_parameters{key_length = aparams.keylength} -> #pp:plain_package{valid_ae_plain_package aparams pp} -> ap:ae_package #id #i kp aparams pp -> k:key key_length i -> n:nonce aparams.nonce_length -> c:ciphertext{aparams.scheme.valid_cipher_length (Seq.length c)} -> ST (option (p:protected_plain pp i))
   (requires (fun h0 ->
     True
   ))
   (ensures (fun h0 p h1 ->
-    ((KEY.(kp.hon k) /\ aparams.b) ==>
+    ((KEY.(kp.hon k) /\ get_ae_flagGT aparams) ==>
       (match p with
        | Some p' -> MM.contains ap.log (n,c) p' h0
        | None -> MM.fresh ap.log (n,c) h0
       ))
-    /\ ((~(KEY.(kp.hon k)) \/ ~aparams.b) ==>
+    /\ ((~(KEY.(kp.hon k)) \/ ~(get_ae_flagGT aparams)) ==>
       (match aparams.scheme.dec c k.raw n with
        | Some p' -> Some? p /\ Some?.v p == coerce #pp kp k p'
        | None -> None? p
       ))
     /\ h0 == h1
   ))
-let decrypt #id #i #pp #key_length #kp #aparams ap k n c =
-  if KEY.(kp.hon k) && aparams.b then
-    match MM.lookup ap.log (n,c) with
+let decrypt #id #i #key_length #kp #aparams #pp ap k n c =
+  match KEY.(kp.hon k) && b with
+  | true ->
+    (match MM.lookup ap.log (n,c) with
     | Some p ->
       // No idea why we need this.
        let h0 = HyperStack.ST.get() in
        assert(MM.contains ap.log (n,c) p h0);
        Some p
-    | None -> None
-  else
+    | None -> None)
+  | false ->
     match aparams.scheme.dec c k.raw n with
     | Some p -> Some (coerce #pp kp k p)
     | None -> None

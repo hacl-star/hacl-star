@@ -13,14 +13,14 @@ module MM = FStar.Monotonic.Map
 
 assume val random_bytes: n:nat{n<=32} -> lbytes n
 
-noeq abstract type odh_parameters =
+noeq type odh_parameters =
   | OP:
   share_length:(n:nat{n<=32}) ->
   exponent_length:(n:nat{n<=32}) ->
   hash_length:(n:nat{n<=32}) ->
   generator:lbytes share_length ->
-  exponentiate:(lbytes share_length -> lbytes exponent_length -> lbytes share_length) ->
-  hash:(bytes -> lbytes hash_length) ->
+  exponentiate:(lbytes exponent_length -> lbytes share_length -> lbytes share_length) ->
+  hash:(lbytes share_length -> lbytes hash_length) ->
   odh_parameters
 
 abstract type share (oparam:odh_parameters) =
@@ -32,12 +32,12 @@ abstract type share (oparam:odh_parameters) =
 abstract type exponent (oparam:odh_parameters) =
   | EXP:
   raw_exp:lbytes oparam.exponent_length ->
-  sh:share oparam{sh.raw_sh = oparam.exponentiate oparam.generator raw_exp} ->
+  sh:share oparam{sh.raw_sh = oparam.exponentiate raw_exp oparam.generator} ->
   exponent oparam
 
 let gen_dh (oparam:odh_parameters) =
   let raw_exp = random_bytes oparam.exponent_length in
-  let raw_sh = oparam.exponentiate oparam.generator raw_exp in
+  let raw_sh = oparam.exponentiate raw_exp oparam.generator in
   let sh = SH raw_sh true in
   EXP raw_exp sh
 
@@ -45,7 +45,7 @@ let coerce_dh_sh  (oparam:odh_parameters) (raw_sh:lbytes oparam.share_length) =
   SH raw_sh false
 
 let coerce_dh_exp  (oparam:odh_parameters) (raw_exp:lbytes oparam.exponent_length) =
-  let raw_sh = oparam.exponentiate oparam.generator raw_exp in
+  let raw_sh = oparam.exponentiate raw_exp oparam.generator in
   let sh = SH raw_sh false in
   EXP raw_exp sh
 
@@ -80,12 +80,23 @@ let key_package_log_inv (key_type:(id -> Type0)) (f:MM.map' (key_package_log_key
 let key_package_log (rgn:erid) (key_type:(id -> Type0)) =
   MM.t rgn (key_package_log_key) (key_package_log_range key_type) (key_package_log_inv key_type)
 
+assume val b:bool
+
 noeq abstract type odh_package (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (kp:key_package key_length key_type) (oparam:odh_parameters{oparam.hash_length = key_length}) =
   | ODH:
   rgn:erid ->
   kp_log:key_package_log rgn key_type ->
-  b:bool ->
   odh_package #key_length #key_type kp oparam
+
+val create_odh_package: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (kp:key_package key_length key_type) -> (oparam:odh_parameters{oparam.hash_length = key_length}) -> (rgn:erid) -> ST (odh_package #key_length #key_type kp oparam)
+  (requires (fun h0 -> True))
+  (ensures (fun h0 op h1 ->
+    modifies (Set.singleton rgn) h0 h1
+  ))
+let create_odh_package (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (kp:key_package key_length key_type) (oparam:odh_parameters{oparam.hash_length = key_length}) (rgn:erid) =
+  let odh_rgn = new_region rgn in
+  let kp_log = MM.alloc #odh_rgn #key_package_log_key #(key_package_log_range key_type) #(key_package_log_inv key_type) in
+  ODH odh_rgn kp_log
 
 #set-options "--z3rlimit 300 --max_ifuel 2 --max_fuel 1"
 val dh_op: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> #op:odh_package kp oparam -> sh:share oparam -> exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh} -> ST (key_type (create_id sh exp.sh))
@@ -93,7 +104,7 @@ val dh_op: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key
   (ensures (fun h0 k h1 ->
     let i = create_id sh exp.sh in
     let both_honest = sh.h && exp.sh.h in
-    ((both_honest /\ op.b) ==>
+    ((both_honest /\ b) ==>
       (MM.defined op.kp_log i h0 ==>
         h0 == h1)
       /\ (MM.fresh op.kp_log i h0 ==>
@@ -101,14 +112,14 @@ val dh_op: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key
         /\ sel h1 op.kp_log == MM.upd (sel h0 op.kp_log) i k
         /\ modifies (Set.singleton op.rgn) h0 h1
         ))
-    /\ ((~both_honest \/ ~op.b) ==>
+    /\ ((~both_honest \/ ~b) ==>
       h0 == h1)
   ))
 
 let dh_op #key_length #key_type #kp #oparam #op sh exp =
   let both_honest = sh.h && exp.sh.h in
   let i = create_id sh exp.sh in
-  if both_honest && op.b then
+  if both_honest && b then
     (recall op.kp_log;
     match MM.lookup op.kp_log i with
     | None ->
@@ -118,4 +129,4 @@ let dh_op #key_length #key_type #kp #oparam #op sh exp =
     | Some k -> k)
   else
     (recall op.kp_log;
-    kp.set i (oparam.hash (oparam.exponentiate sh.raw_sh exp.raw_exp)))
+    kp.set i (oparam.hash (oparam.exponentiate exp.raw_exp sh.raw_sh)))
