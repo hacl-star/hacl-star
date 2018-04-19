@@ -11,7 +11,6 @@ let keylen = Spec.Salsa20.keylen
 let noncelen = Spec.HSalsa20.noncelen + Spec.Salsa20.noncelen
 type key = lbytes keylen
 type nonce = lbytes noncelen
-type bytes = seq UInt8.t
 type plain = p:bytes{Seq.length p / Spec.Salsa20.blocklen < pow2 32}
 type cipher = c:bytes{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32}
 type cipher_detached = plain
@@ -52,7 +51,7 @@ let secretbox_detached p k n =
 
 
 val secretbox_open_detached: c:cipher_detached ->
-    mac:Spec.Poly1305.tag -> k:key -> n:nonce -> Tot (option (p:plain{Seq.length p = Seq.length c}))
+    mac:Spec.Poly1305.tag -> k:key -> n:nonce -> Tot (option (p:plain))
 let secretbox_open_detached c mac k n =
     let (mk,ek,n) = secretbox_init k n in
     let xmac = Spec.Poly1305.poly1305 c mk in
@@ -70,7 +69,7 @@ let secretbox_easy p k n =
 
 
 val secretbox_open_easy: c:cipher ->
-    k:key -> n:nonce -> Tot (option (p:plain{Seq.length p = Seq.length c - 16}))
+    k:key -> n:nonce -> Tot (option (p:plain))
 let secretbox_open_easy c k n =
     let (mac,cipher) = split c 16 in
     secretbox_open_detached cipher mac k n
