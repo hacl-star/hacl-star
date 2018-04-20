@@ -16,6 +16,23 @@ module Spec = Spec.Blake2s
 
 
 ///
+/// WORK IN PROGRESS
+/// ----------------
+///
+/// 0. The code is proven until `blake2s_internal3`.
+///
+/// 1. Extraction needs to be restored, there is an issue with
+///    partially applied functions.
+///
+/// 2. Top-level allocations should be merged, these are done separately, and the
+///    code of the `internal` functions must be rewritten to pass a single buffers
+///    instead of multiple buffers that force modifies2, modifies3 ...
+///
+/// 3. Lemmata need to be proven and moved back to the libraries.
+///
+
+
+///
 /// Helper functions
 ///
 
