@@ -36,6 +36,7 @@ inline_for_extraction val modifies3: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len
 inline_for_extraction val modifies: list bufitem -> mem -> mem -> GTot Type0
 inline_for_extraction val live_list: mem -> list bufitem -> GTot Type0
 inline_for_extraction val disjoint_list: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> list bufitem  -> GTot Type0
+inline_for_extraction val disjoint_lists: list bufitem -> list bufitem  -> GTot Type0
 inline_for_extraction val disjoints: list bufitem  -> GTot Type0
 
 inline_for_extraction val index: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> i:size_t{v i < len} ->
@@ -101,10 +102,9 @@ inline_for_extraction val salloc: #a:Type0 -> #b:Type0 -> #len:size_nat -> clen:
 // Experiment
 let salloc'_inv (h0:mem) (h1:mem) (#a:Type) (#b:Type0) (len:size_nat)  (buf:lbuffer a len) (init:a) (reads:list bufitem) (writes:list bufitem)
   (spec:(h:mem -> b -> mem -> Type)) : Type =
-  lives h0 reads /\ lives h0 writes
+  live h0 buf /\ live_list h0 reads /\ live_list h0 writes
   /\ preserves_live h0 h1
   /\ disjoint_list buf reads /\ disjoint_list buf writes
-  /\ as_lseq #a #len buf h1 == LSeq.create #a len init
 
 inline_for_extraction val salloc':
   #h0:mem -> #a:Type0 -> #b:Type0 -> #len:size_nat ->
@@ -114,12 +114,12 @@ inline_for_extraction val salloc':
   writes:list bufitem ->
   spec:(h0:mem -> r:b -> h1:mem -> Type) ->
   impl:(buf:lbuffer a len -> Stack b
-    (requires (fun h -> salloc'_inv h0 h #a len buf init reads writes spec))
-	 (ensures (fun h0 r h1 -> salloc'_inv h0 h1 #a len buf init reads writes spec /\
-				              modifies (BufItem buf :: writes) h0 h1 /\
-						        spec h0 r h1))) ->
+    (requires (fun h -> h0 == h /\ salloc'_inv h0 h #a len buf init reads writes spec /\ as_lseq #a #len buf h == LSeq.create #a len init))
+	 (ensures (fun h0 r h1 -> salloc'_inv h0 h1 #a len buf init reads writes spec
+				              /\ modifies (BufItem buf :: writes) h0 h1
+						        /\ spec h0 r h1))) ->
   Stack b
-    (requires (fun h0 -> live_list h0 reads /\ live_list h0 writes /\ disjoints reads /\ disjoints writes))
+    (requires (fun h -> live_list h0 reads /\ live_list h0 writes /\ disjoint_lists reads writes))
     (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
 					           modifies writes h0 h1 /\
 					           spec h0 r h1))

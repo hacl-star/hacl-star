@@ -39,7 +39,7 @@ val uint32s_from_bytes_le:
   o:lbuffer uint32 len ->
   i:lbuffer uint8 (len `op_Multiply` 4) ->
   Stack unit
-	(requires (fun h0 -> live h0 o /\ live h0 i))
+	(requires (fun h0 -> live h0 o /\ live h0 i /\ disjoint o i))
 	(ensures (fun h0 _ h1 -> preserves_live h0 h1 /\
 			      modifies1 o h0 h1 /\
 			      as_lseq o h1 ==
