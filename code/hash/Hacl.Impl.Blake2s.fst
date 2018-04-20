@@ -368,51 +368,70 @@ let blake2s_internal2_ s dd d to_compress i const_iv const_sigma =
   blake2_compress s to_compress offset false const_iv const_sigma
 
 
-val blake2s_internal2_alloc: s:lbuffer uint32 8 ->
-   dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
-   d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
-   i:size_t{v i < v dd - 1} ->
-   const_iv:init_vector -> const_sigma:sigma_t ->
-   Stack unit
-     (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
-                    /\ h.[const_sigma] == Spec.sigma
-                    /\ h.[const_iv] == Spec.const_init
-                    /\ disjoint s d /\ disjoint s const_iv /\ disjoint s const_sigma
-                    /\ disjoint d s /\ disjoint const_iv s /\ disjoint const_sigma s))
-     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-                          /\ h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]))
+// val blake2s_internal2_alloc: s:lbuffer uint32 8 ->
+//    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
+//    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
+//    i:size_t{v i < v dd - 1} ->
+//    const_iv:init_vector -> const_sigma:sigma_t ->
+//    Stack unit
+//      (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
+//                     /\ h.[const_sigma] == Spec.sigma
+//                     /\ h.[const_iv] == Spec.const_init
+//                     /\ disjoint s d /\ disjoint s const_iv /\ disjoint s const_sigma
+//                     /\ disjoint d s /\ disjoint const_iv s /\ disjoint const_sigma s))
+//      (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
+//                           /\ h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]))
 
-[@ Substitute]
-let blake2s_internal2_alloc s dd d i const_iv const_sigma =
-  (**) let hi = ST.get () in
-  // let f h0 h1 = (h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]) in
-  salloc' #hi #_ #_ #16 (size 16) (u32 0) [BufItem d; BufItem const_iv; BufItem const_sigma] [BufItem s]
-  (fun h0 _ h1 -> (h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]))
-  (fun m ->
-    let h0 = ST.get () in
-    assert(h0.[const_sigma] == Spec.sigma /\ h0.[const_iv] == Spec.const_init);
-    blake2s_internal2_ s dd d m i const_iv const_sigma)
-    //let h1 = ST.get () in
-    // TODO: This is very wrong ! :)
-    // Lemmas on alloc() seem to trigger when impl is modifies1 but not when it is a modifies2.
-    // assume(modifies1 s h0 h1))
+// [@ Substitute]
+// let blake2s_internal2_alloc s dd d i const_iv const_sigma =
+//   (**) let hi = ST.get () in
+//   // let f h0 h1 = (h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]) in
+//   salloc' #hi #_ #_ #16 (size 16) (u32 0) [BufItem d; BufItem const_iv; BufItem const_sigma] [BufItem s]
+//   (fun h0 _ h1 -> (h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]))
+//   (fun m ->
+//     let h0 = ST.get () in
+//     assert(h0.[const_sigma] == Spec.sigma /\ h0.[const_iv] == Spec.const_init);
+//     blake2s_internal2_ s dd d m i const_iv const_sigma)
+//     //let h1 = ST.get () in
+//     // TODO: This is very wrong ! :)
+//     // Lemmas on alloc() seem to trigger when impl is modifies1 but not when it is a modifies2.
+//     // assume(modifies1 s h0 h1))
+
+
+// val blake2s_internal2: s:lbuffer uint32 8 ->
+//    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
+//    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) -> to_compress:lbuffer uint32 16 ->
+//    const_iv:init_vector -> const_sigma:sigma_t ->
+//    Stack unit
+//      (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
+//                     /\ h.[const_sigma] == Spec.sigma
+//                     /\ h.[const_iv] == Spec.const_init
+//                     /\ disjoint s d /\ disjoint s const_iv /\ disjoint s const_sigma
+//                     /\ disjoint d s /\ disjoint const_iv s /\ disjoint const_sigma s))
+//      (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
+//                           /\ h1.[s] == Spec.blake2s_internal2  (v dd) h0.[d] h0.[s]))
+
+
 
 
 val blake2s_internal2: s:lbuffer uint32 8 ->
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
+   to_compress:lbuffer uint32 16 ->
    const_iv:init_vector -> const_sigma:sigma_t ->
    Stack unit
-     (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
+     (requires (fun h -> live h s /\ live h d /\ live h to_compress /\ live h const_iv /\ live h const_sigma
                     /\ h.[const_sigma] == Spec.sigma
                     /\ h.[const_iv] == Spec.const_init
-                    /\ disjoint s d /\ disjoint s const_iv /\ disjoint s const_sigma
-                    /\ disjoint d s /\ disjoint const_iv s /\ disjoint const_sigma s))
-     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-                          /\ h1.[s] == Spec.blake2s_internal2  (v dd) h0.[d] h0.[s]))
+                    /\ disjoint s d /\ disjoint s to_compress /\ disjoint s const_iv /\ disjoint s const_sigma
+                    /\ disjoint d s /\ disjoint to_compress s /\ disjoint const_iv s /\ disjoint const_sigma s
+                    /\ disjoint d to_compress /\ disjoint to_compress d /\ disjoint to_compress const_sigma /\ disjoint const_sigma to_compress
+                    /\ disjoint to_compress const_iv /\ disjoint const_iv to_compress))
+     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 s to_compress h0 h1
+                          /\ h1.[s] == Spec.blake2s_internal2 (v dd) h0.[d] h0.[s]))
 
 [@ Substitute]
-let blake2s_internal2 s dd d const_iv const_sigma =
+let blake2s_internal2 s dd d to_compress const_iv const_sigma =
   (**) let h0 = ST.get () in
   let spec hi =
     let s0 = h0.[s] in
@@ -422,7 +441,7 @@ let blake2s_internal2 s dd d const_iv const_sigma =
     let idx = dd -. (size 1) in
     loop #h0 idx s spec
     (fun i ->
-      blake2s_internal2_alloc s dd d i const_iv const_sigma;
+      blake2s_internal2_ s dd d to_compress i const_iv const_sigma;
       lemma_repeati (v idx) (spec h0) h0.[s] (v i)
     ) end
    else ()
@@ -491,7 +510,7 @@ let blake2s_internal dd d ll kk nn to_compress wv tmp res s const_iv const_sigma
   blake2s_internal1 s kk nn;
   let h1 = ST.get () in
   assume(h1.[const_sigma] == Spec.sigma /\ h1.[const_iv] == Spec.const_init);
-  blake2s_internal2 s dd d const_iv const_sigma;
+  blake2s_internal2 s dd d to_compress const_iv const_sigma;
   let h2 = ST.get () in
   assume(h2.[const_sigma] == Spec.sigma /\ h2.[const_iv] == Spec.const_init);
   blake2s_internal3 s dd d ll kk nn to_compress tmp res const_iv const_sigma
