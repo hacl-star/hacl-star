@@ -106,6 +106,36 @@ val disjoint_list_lemma3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #l
 			(ensures (disjoint_list b0 [BufItem b1; BufItem b2; BufItem b3] == (disjoint b0 b1 /\ disjoint b0 b2 /\ disjoint b0 b3 /\ disjoint b1 b0 /\ disjoint b2 b0 /\ disjoint b3 b0)))
 			[SMTPat (disjoint_list b0 [BufItem b1; BufItem b2; BufItem b3])]
 
+val disjoint_lists_lemma_1_1: #a0:Type0 -> #a1:Type0 -> #len0:size_nat -> #len1:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0] [BufItem b1] == (disjoint b0 b1 /\ disjoint b1 b0) ))
+			[SMTPat (disjoint_lists [BufItem b0] [BufItem b1])]
+
+val disjoint_lists_lemma_2_1: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0; BufItem b1] [BufItem b2] == (disjoint b0 b2 /\ disjoint b2 b0 /\ disjoint b1 b2 /\ disjoint b2 b1)))
+			[SMTPat (disjoint_lists [BufItem b0; BufItem b1] [BufItem b2])]
+
+val disjoint_lists_lemma_1_2: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0] [BufItem b1; BufItem b2] == (disjoint b0 b1 /\ disjoint b1 b0 /\ disjoint b0 b2 /\ disjoint b2 b0)))
+			[SMTPat (disjoint_lists [BufItem b0] [BufItem b1; BufItem b2])]
+
+val disjoint_lists_lemma_2_2: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> #len3:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0; BufItem b1] [BufItem b2; BufItem b3] == (disjoint b0 b2 /\ disjoint b2 b0 /\ disjoint b0 b3 /\ disjoint b3 b0 /\ disjoint b1 b2 /\ disjoint b2 b1 /\ disjoint b1 b3 /\ disjoint b3 b1)))
+			[SMTPat (disjoint_lists [BufItem b0; BufItem b1] [BufItem b2; BufItem b3])]
+
+val disjoint_lists_lemma_3_1: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> #len3:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0; BufItem b1; BufItem b2] [BufItem b3] == (disjoint b0 b3 /\ disjoint b3 b0 /\ disjoint b1 b3 /\ disjoint b3 b1 /\ disjoint b2 b3 /\ disjoint b3 b2) ))
+			[SMTPat (disjoint_lists [BufItem b0; BufItem b1; BufItem b2] [BufItem b3])]
+
+val disjoint_lists_lemma_1_3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> #len3:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0] [BufItem b1; BufItem b2; BufItem b3] == (disjoint b0 b1 /\ disjoint b1 b0 /\ disjoint b0 b2 /\ disjoint b2 b0 /\ disjoint b0 b3 /\ disjoint b3 b0) ))
+			[SMTPat (disjoint_lists [BufItem b0] [BufItem b1; BufItem b2; BufItem b3])]
+
 val disjoints_lemma1: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> Lemma
 			(requires (True))
 			(ensures (disjoints [BufItem b] == (disjoint b b)))
