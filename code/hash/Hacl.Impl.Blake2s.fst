@@ -25,6 +25,10 @@ inline_for_extraction let index (x:size_nat) = size x
 let op_String_Access #a #len m b = as_lseq #a #len b m
 
 
+val lemma_cast_to_u64: x:uint32 -> Lemma
+  (requires (True))
+  (ensures  (to_u64 #U32 x == u64 (uint_v x)))
+let lemma_cast_to_u64 x = admit()
 
 val lemma_repeati: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> i:size_nat{i < n} -> Lemma
   (requires True)
@@ -307,23 +311,6 @@ val blake2_compress :
                          /\ modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress h0.[s] h0.[m] offset f))
 
-val disjoint_lists_lemma1: #a0:Type0 -> #a1:Type0 -> #len0:size_nat -> #len1:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> Lemma
-			(requires (True))
-			(ensures (disjoint_lists [BufItem b0] [BufItem b1] == (disjoint b0 b1 /\ disjoint b1 b0) ))
-			[SMTPat (disjoint_lists [BufItem b0] [BufItem b1])]
-
-val disjoint_lists_lemma2a: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> Lemma
-			(requires (True))
-			(ensures (disjoint_lists [BufItem b0; BufItem b1] [BufItem b2] == (disjoint b0 b2 /\ disjoint b2 b0 /\ disjoint b1 b2 /\ disjoint b2 b1)))
-			[SMTPat (disjoint_lists [BufItem b0; BufItem b1] [BufItem b2])]
-
-val disjoint_lists_lemma3a: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> #len3:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> Lemma
-			(requires (True))
-			(ensures (disjoint_lists [BufItem b0; BufItem b1; BufItem b2] [BufItem b3] == (disjoint b0 b3 /\ disjoint b3 b0 /\ disjoint b1 b3 /\ disjoint b3 b1 /\ disjoint b2 b3 /\ disjoint b3 b2) ))
-			[SMTPat (disjoint_lists [BufItem b0; BufItem b1; BufItem b2] [BufItem b3])]
-let disjoint_lists_lemma3a #a0 #a1 #a2 #a3 #len0 #len1 #len2 #len3 b0 b1 b2 b3 = admit()
-
-
 [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2_compress s m offset flag const_iv const_sigma =
   (**) let hinit = ST.get () in
@@ -375,8 +362,9 @@ val blake2s_internal2_: s:lbuffer uint32 8 ->
 let blake2s_internal2_ s dd d to_compress i const_iv const_sigma =
   let sub_d = sub d (i *. (size Spec.bytes_in_block)) (size Spec.bytes_in_block) in
   uint32s_from_bytes_le #16 (size 16) to_compress sub_d;
-  let offset = to_u64 #U32 (size_to_uint32 ((i +. (size 1)) *. (size Spec.block_bytes))) in
-  (**) assume(offset == u64 ((v i + 1) * Spec.block_bytes));
+  let offset32 = size_to_uint32 ((i +. (size 1)) *. (size Spec.block_bytes)) in
+  let offset = to_u64 #U32 offset32 in
+  lemma_cast_to_u64 offset32;
   blake2_compress s to_compress offset false const_iv const_sigma
 
 
@@ -398,16 +386,16 @@ val blake2s_internal2_alloc: s:lbuffer uint32 8 ->
 let blake2s_internal2_alloc s dd d i const_iv const_sigma =
   (**) let hi = ST.get () in
   // let f h0 h1 = (h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]) in
-  alloc #_ #_ #16 (size 16) (u32 0) [BufItem d; BufItem const_iv; BufItem const_sigma] [BufItem s]
+  salloc' #hi #_ #_ #16 (size 16) (u32 0) [BufItem d; BufItem const_iv; BufItem const_sigma] [BufItem s]
   (fun h0 _ h1 -> (h1.[s] == Spec.blake2s_internal2_ (v dd) h0.[d] (v i) h0.[s]))
   (fun m ->
     let h0 = ST.get () in
-    assume(h0.[const_sigma] == Spec.sigma /\ h0.[const_iv] == Spec.const_init);
-    blake2s_internal2_ s dd d m i const_iv const_sigma;
-    let h1 = ST.get () in
+    assert(h0.[const_sigma] == Spec.sigma /\ h0.[const_iv] == Spec.const_init);
+    blake2s_internal2_ s dd d m i const_iv const_sigma)
+    //let h1 = ST.get () in
     // TODO: This is very wrong ! :)
     // Lemmas on alloc() seem to trigger when impl is modifies1 but not when it is a modifies2.
-    assume(modifies1 s h0 h1))
+    // assume(modifies1 s h0 h1))
 
 
 val blake2s_internal2: s:lbuffer uint32 8 ->
