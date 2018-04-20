@@ -83,30 +83,13 @@ inline_for_extraction val alloc: #a:Type0 -> #b:Type0 -> #len:size_nat -> clen:s
 
 inline_for_extraction let palloc #a #b #len clen init reads writes spec impl = alloc #a #b #len clen init reads writes spec impl
 
-inline_for_extraction val salloc: #a:Type0 -> #b:Type0 -> #len:size_nat -> clen:size_t{v clen == len} -> init:a ->
-  reads:list bufitem ->
-  writes:list bufitem ->
-  spec:(h0:mem -> r:b -> h1:mem -> Type) ->
-  impl:(buf:lbuffer a len -> Stack b
-    (requires (fun h -> live h buf /\ as_lseq buf h == LSeq.create #a len init /\ live_list h reads /\ live_list h writes /\ disjoint_list buf reads /\ disjoint_list buf writes))
-	 (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
-				              modifies (BufItem buf :: writes) h0 h1 /\
-						        spec h0 r h1))) ->
-  Stack b
-    (requires (fun h0 -> live_list h0 reads /\ live_list h0 writes))
-    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
-					           modifies writes h0 h1 /\
-					           spec h0 r h1))
-
-
-// Experiment
-let salloc'_inv (h0:mem) (h1:mem) (#a:Type) (#b:Type0) (len:size_nat)  (buf:lbuffer a len) (init:a) (reads:list bufitem) (writes:list bufitem)
+let salloc_inv (h0:mem) (h1:mem) (#a:Type) (#b:Type0) (len:size_nat)  (buf:lbuffer a len) (init:a) (reads:list bufitem) (writes:list bufitem)
   (spec:(h:mem -> b -> mem -> Type)) : Type =
   live h0 buf /\ live_list h0 reads /\ live_list h0 writes
   /\ preserves_live h0 h1
   /\ disjoint_list buf reads /\ disjoint_list buf writes
 
-inline_for_extraction val salloc':
+inline_for_extraction val salloc:
   #h0:mem -> #a:Type0 -> #b:Type0 -> #len:size_nat ->
   clen:size_t{v clen == len} ->
   init:a ->
@@ -114,8 +97,8 @@ inline_for_extraction val salloc':
   writes:list bufitem ->
   spec:(h0:mem -> r:b -> h1:mem -> Type) ->
   impl:(buf:lbuffer a len -> Stack b
-    (requires (fun h -> h0 == h /\ salloc'_inv h0 h #a len buf init reads writes spec /\ as_lseq #a #len buf h == LSeq.create #a len init))
-	 (ensures (fun h0 r h1 -> salloc'_inv h0 h1 #a len buf init reads writes spec
+    (requires (fun h -> h0 == h /\ salloc_inv h0 h #a len buf init reads writes spec /\ as_lseq #a #len buf h == LSeq.create #a len init))
+	 (ensures (fun h0 r h1 -> salloc_inv h0 h1 #a len buf init reads writes spec
 				              /\ modifies (BufItem buf :: writes) h0 h1
 						        /\ spec h0 r h1))) ->
   Stack b
