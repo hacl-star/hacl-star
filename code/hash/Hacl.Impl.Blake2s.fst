@@ -28,7 +28,9 @@ module Spec = Spec.Blake2s
 ///    code of the `internal` functions must be rewritten to pass a single buffers
 ///    instead of multiple buffers that force modifies2, modifies3 ...
 ///
-/// 3. Lemmata need to be proven and moved back to the libraries.
+/// 3. Rewrite update_sub to be in the correct order.
+///
+/// 4. Lemmata need to be proven and moved back to the libraries.
 ///
 
 
@@ -83,16 +85,17 @@ let lemma_size_to_uint32_equal_u32_of_v_of_size_t x = admit()
 
 
 (* Functions to add to the libraries *)
-val update_sub: #a:Type0 -> #len:size_nat -> #olen:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> o:lbuffer a olen ->
+val update_sub: #a:Type0 -> #olen:size_nat -> #ilen:size_nat{ilen <= olen} -> o:lbuffer a olen -> start:size_t -> n:size_t{v start + v n <= olen /\ v n = ilen} -> i:lbuffer a ilen ->
   Stack unit
-    (requires (fun h -> live h i /\ live h o))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
-                         /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[o]))
+    (requires (fun h -> live h i /\ live h o /\ disjoint i o))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 o h0 h1
+                         /\ (let x = Spec.Lib.IntSeq.sub #a #olen h0.[o] (v start) (v n) in
+                           h1.[o] == Spec.Lib.IntSeq.update_sub #a #ilen h0.[i] (v start) (v n) x)))
 
 [@ Substitute]
-let update_sub #a #len #olen i start n o =
-  let i' = sub i start n in
-  copy n o i'
+let update_sub #a #olen #ilen o start n i =
+  let o' = sub o start n in
+  copy n i o'
 
 
 ///
