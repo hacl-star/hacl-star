@@ -27,7 +27,7 @@ let op_String_Access #a #len m b = as_lseq #a #len b m
 
 val lemma_cast_to_u64: x:uint32 -> Lemma
   (requires (True))
-  (ensures  (to_u64 #U32 x == u64 (uint_v x)))
+  (ensures  (to_u64 #U32 x == u64 (uint_v #U32 x)))
 let lemma_cast_to_u64 x = admit()
 
 val lemma_repeati: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> i:size_nat{i < n} -> Lemma
@@ -315,7 +315,7 @@ val blake2_compress :
 let blake2_compress s m offset flag const_iv const_sigma =
   (**) let hinit = ST.get () in
   let f h0 h1 = h1.[s] == Spec.Blake2s.blake2_compress h0.[s] h0.[m] offset flag in
-  salloc' #hinit #_ #_ #16 (size 16) (u32 0) [BufItem m; BufItem const_iv; BufItem const_sigma] [BufItem s]
+  salloc #hinit #_ #_ #16 (size 16) (u32 0) [BufItem m; BufItem const_iv; BufItem const_sigma] [BufItem s]
   (fun h0 _ h1 -> f h0 h1)
   (fun wv ->
     blake2_compress1 wv s m offset flag const_iv;
@@ -532,13 +532,16 @@ let blake2s ll d kk k nn res =
   let len_st_u32 = size 32 in
   let const_iv : lbuffer uint32 8 = create_const_iv () in
   let const_sigma : lbuffer (n:size_t{size_v n < 16}) 160 = create_const_sigma () in
-  salloc #uint8 #unit #(v len_st_u8) len_st_u8 (u8 0) [BufItem d; BufItem k] [BufItem res]
+  let h0 = ST.get () in
+  salloc #h0 #uint8 #unit #(v len_st_u8) len_st_u8 (u8 0) [BufItem d; BufItem k] [BufItem res]
   (fun h0 _ h1 -> True)
   (fun st_u8 ->
-    salloc #uint32 #unit #(v len_st_u32) len_st_u32 (u32 0) [BufItem d; BufItem k] [BufItem st_u8; BufItem res]
+    let h0 = ST.get () in
+    salloc #h0 #uint32 #unit #(v len_st_u32) len_st_u32 (u32 0) [BufItem d; BufItem k] [BufItem st_u8; BufItem res]
     (fun h0 _ h1 -> True)
     (fun st_u32 ->
-      salloc #uint32 #unit #8 (size 8) (u32 0) [BufItem d; BufItem k] [BufItem st_u8; BufItem res; BufItem st_u32]
+      let h0 = ST.get () in
+      salloc #h0 #uint32 #unit #8 (size 8) (u32 0) [BufItem d; BufItem k] [BufItem st_u8; BufItem res; BufItem st_u32]
       (fun h0 _ h1 -> True)
       (fun s ->
         copy (size 8) const_iv s;
