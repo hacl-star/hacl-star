@@ -444,6 +444,7 @@ let blake2s_internal2 s dd d to_compress const_iv const_sigma =
   end
 
 
+(* BB. This needs a serious rewrite as it would be a modifies 4...*)
 val blake2s_internal3: s:lbuffer uint32 8 ->
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
    d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
@@ -458,22 +459,27 @@ val blake2s_internal3: s:lbuffer uint32 8 ->
                     /\ disjoint d s /\ disjoint to_compress s /\ disjoint tmp s /\ disjoint res s /\ disjoint const_iv s /\ disjoint const_sigma s
                     /\ disjoint d to_compress /\ disjoint to_compress d /\ disjoint to_compress const_sigma /\ disjoint const_sigma to_compress
                     /\ disjoint to_compress const_iv /\ disjoint const_iv to_compress))
-     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1
+     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies [BufItem res; BufItem to_compress; BufItem tmp; BufItem s] h0 h1
                           /\ h1.[res] == Spec.blake2s_internal3 h0.[s] (v dd) h0.[d] (v ll) (v kk) (v nn)))
+
+(* BB. This needs a serious rewrite as it would be a modifies 4...*)
 
 [@ Substitute]
 let blake2s_internal3 s dd d ll kk nn to_compress tmp res const_iv const_sigma =
+  (**) let h0 = ST.get () in
   let offset:size_t = (dd -. (size 1)) *. (size 64) in
   let sub_d = sub d offset (size Spec.bytes_in_block) in
   uint32s_from_bytes_le (size 16) to_compress sub_d;
   (if kk =. size 0 then
     blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 ll)) true const_iv const_sigma
   else
-    blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 (add #SIZE ll (size Spec.block_bytes)))) true const_iv const_sigma
+    blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 (ll +. (size Spec.block_bytes)))) true const_iv const_sigma
   );
   uint32s_to_bytes_le (size 8) tmp s;
   let tmp' = sub tmp (size 0) nn in
-  copy nn tmp' res
+  copy nn tmp' res;
+  (**) let h1 = ST.get () in
+  assume(modifies [BufItem res; BufItem to_compress; BufItem tmp; BufItem s] h0 h1)
 
 
 val blake2s_internal:
