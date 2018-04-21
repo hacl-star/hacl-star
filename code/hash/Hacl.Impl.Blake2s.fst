@@ -83,20 +83,17 @@ let lemma_size_to_uint32_equal_u32_of_v_of_size_t x = admit()
 //   [SMTPat (repeati_ghost #a n f init)]
 // let lemma_repeati_ghost_is_repeati #a n f init = admit()
 
-
 (* Functions to add to the libraries *)
-val update_sub: #a:Type0 -> #olen:size_nat -> #ilen:size_nat{ilen <= olen} -> o:lbuffer a olen -> start:size_t -> n:size_t{v start + v n <= olen /\ v n = ilen} -> i:lbuffer a ilen ->
+val update_sub: #a:Type0 -> #len:size_nat -> #xlen:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == xlen} -> x:lbuffer a xlen ->
   Stack unit
-    (requires (fun h -> live h i /\ live h o /\ disjoint i o))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 o h0 h1
-                         /\ (let x = Spec.Lib.IntSeq.sub #a #olen h0.[o] (v start) (v n) in
-                           h1.[o] == Spec.Lib.IntSeq.update_sub #a #ilen h0.[i] (v start) (v n) x)))
+    (requires (fun h -> live h i /\ live h x))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
+                         /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[x]))
 
 [@ Substitute]
-let update_sub #a #olen #ilen o start n i =
-  let o' = sub o start n in
-  copy n i o'
-
+let update_sub #a #len #olen i start n x =
+  let i' = sub i start n in
+  copy n x i'
 
 ///
 /// Blake2s
