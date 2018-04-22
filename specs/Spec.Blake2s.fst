@@ -178,18 +178,22 @@ let blake2s_internal1 h kk nn =
   h.[0] <- h0'
 
 
-val blake2s_internal2_: dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> i:size_nat{i < dd - 1} -> h:intseq U32 8 -> Tot (h:intseq U32 8)
-let blake2s_internal2_ dd d i h =
+val blake2s_internal2_inner: dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> i:size_nat{i < dd - 1} -> h:intseq U32 8 -> Tot (h:intseq U32 8)
+let blake2s_internal2_inner dd d i h =
   let sub_d = (sub d (i * bytes_in_block) bytes_in_block) in
   let to_compress : intseq U32 16 = uints_from_bytes_le sub_d in
   let offset = u64 ((i + 1) * block_bytes) in
   blake2_compress h to_compress offset false
 
 
+val blake2s_internal2_loop : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> h:intseq U32 8 -> Tot (h:intseq U32 8)
+let blake2s_internal2_loop dd d h = repeati (dd - 1) (fun i h -> blake2s_internal2_inner dd d i h) h
+
+
 val blake2s_internal2 : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> h:intseq U32 8 -> Tot (h:intseq U32 8)
 let blake2s_internal2 dd d h =
   if dd > 1 then
-    repeati (dd - 1) (fun i h -> blake2s_internal2_ dd d i h) h
+    blake2s_internal2_loop dd d h
   else h
 
 
