@@ -78,40 +78,53 @@ let get_ae_flagGT aparams =
 
 let valid_ae_plain_package (aparams:ae_parameters) (pp:plain_package) = pp == PP (get_ae_flagGT aparams) aparams.scheme.valid_plain_length
 //let nonce (#id:eqtype) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id #key_length key) (#pp:plain_package) (ap:ae_parameters kp pp) = lbytes ap.nonce_length
-let nonce (nl:(n:nat{n<=32})) = lbytes nl
-let ciphertext = bytes
+let nonce (aparams:ae_parameters) = lbytes aparams.nonce_length
+let ciphertext (aparams:ae_parameters) = c:bytes{aparams.scheme.valid_cipher_length (Seq.length c)}
 
-let message_log_key (nonce_length:(n:nat{n<=32})) = (nonce nonce_length*ciphertext)
+let message_log_key (aparams:ae_parameters) = (nonce aparams*ciphertext aparams)
 let message_log_value (#id:eqtype) (i:id) (pp:plain_package) = protected_plain pp i
-let message_log_range (#id:eqtype) (i:id) (pp:plain_package) (nonce_length:(n:nat{n<=32})) (k:message_log_key nonce_length) = message_log_value i pp
-let message_log_inv (#pp:plain_package) (#nonce_length:(n:nat{n<=32})) (#id:eqtype) (i:id) (f:MM.map' (message_log_key nonce_length) (message_log_range i pp nonce_length)) = True
+let message_log_range (#id:eqtype) (i:id) (pp:plain_package) (aparams:ae_parameters) (k:message_log_key aparams) = message_log_value i pp
+let message_log_inv (#pp:plain_package) (#aparams:ae_parameters) (#id:eqtype) (i:id) (f:MM.map' (message_log_key aparams) (message_log_range i pp aparams)) = True
 
-let message_log (#pp:plain_package) (#id:eqtype) (rgn:erid) (nonce_length:(n:nat{n<=32})) (i:id) =
-  MM.t rgn (message_log_key nonce_length) (message_log_range i pp nonce_length) (message_log_inv i)
+let message_log (#pp:plain_package) (#id:eqtype) (rgn:erid) (aparams:ae_parameters) (i:id) =
+  MM.t rgn (message_log_key aparams) (message_log_range i pp aparams) (message_log_inv i)
 
 noeq abstract type ae_package (#id:eqtype) (#i:id) (#key_length:(n:nat{n<=32})) (kp:KEY.key_package #id key_length (key key_length #id)) (aparams:ae_parameters{aparams.keylength = key_length}) (pp:plain_package{valid_ae_plain_package aparams pp}) =
   | AE:
     rgn:erid ->
-    log:message_log #pp #id rgn aparams.nonce_length i ->
+    log:message_log #pp #id rgn aparams i ->
     ae_package #id #i #key_length kp aparams pp
+
+let get_ap_rgn (#id:eqtype) (#i:id) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id key_length (key key_length #id)) (#aparams:ae_parameters{aparams.keylength = key_length}) (#pp:plain_package{valid_ae_plain_package aparams pp}) (ap:ae_package #id #i #key_length kp aparams pp)= ap.rgn
+
+let recall_log (#id:eqtype) (#i:id) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id key_length (key key_length #id)) (#aparams:ae_parameters{aparams.keylength = key_length}) (#pp:plain_package{valid_ae_plain_package aparams pp}) (ap:ae_package #id #i #key_length kp aparams pp) = recall ap.log
+
+val get_ap_log: (#id:eqtype) -> (#i:id) -> (#key_length:(n:nat{n<=32})) -> (#kp:KEY.key_package #id key_length (key key_length #id)) -> (#aparams:ae_parameters{aparams.keylength = key_length}) -> (#pp:plain_package{valid_ae_plain_package aparams pp}) -> (ap:ae_package #id #i #key_length kp aparams pp) -> GTot (message_log #pp #id ap.rgn aparams i)
+let get_ap_log #id #i #key_length #kp #aparams #pp ap = ap.log
+
+let nonce_is_unique (#id:eqtype) (#i:id) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id key_length (key key_length #id)) (#aparams:ae_parameters{aparams.keylength = key_length}) (#pp:plain_package{valid_ae_plain_package aparams pp}) (ap:ae_package #id #i #key_length kp aparams pp) (n:nonce aparams) (h0:mem) =
+  forall c . MM.fresh ap.log (n,c) h0
 
 val create_ae_package:(rgn:erid) -> (#id:eqtype) -> (#i:id) -> (#key_length:(n:nat{n<=32})) -> (kp:KEY.key_package #id key_length (key key_length #id)) -> (aparams:ae_parameters{aparams.keylength = key_length}) -> (pp:plain_package{valid_ae_plain_package aparams pp}) -> ST (ae_package #id #i #key_length kp aparams pp)
   (requires (fun h0 -> True))
   (ensures (fun h0 ap h1 ->
     modifies (Set.singleton rgn) h0 h1
+    /\ (forall n . nonce_is_unique ap n h1)
+    /\ extends ap.rgn rgn
+    /\ contains h1 ap.log
   ))
 let create_ae_package (rgn:erid) (#id:eqtype) (#i:id) (#key_length:(n:nat{n<=32})) (kp:KEY.key_package #id key_length (key key_length #id)) (aparams:ae_parameters{aparams.keylength = key_length}) (pp:plain_package{valid_ae_plain_package aparams pp}) =
   let rgn = new_region rgn in
-  let log = MM.alloc #rgn #(message_log_key aparams.nonce_length) #(message_log_range #id i pp aparams.nonce_length) #(message_log_inv #pp #aparams.nonce_length #id i) in
+  let log = MM.alloc #rgn #(message_log_key aparams) #(message_log_range #id i pp aparams) #(message_log_inv #pp #aparams #id i) in
   AE #id #i #key_length #kp #aparams #pp rgn log
 
 val zero_bytes: (valid_length:(n:nat -> bool)) -> (n:nat{valid_length n}) -> p:lbytes n{valid_length (Seq.length p)}
 let zero_bytes valid_length n = Seq.create n (UInt8.uint_to_t 0)
 
 #set-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 300"
-val encrypt: #id:eqtype -> #i:id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package #id key_length (key key_length #id) -> #aparams:ae_parameters{key_length = aparams.keylength} -> #pp:plain_package{ valid_ae_plain_package aparams pp} ->  ap:ae_package #id #i #key_length kp aparams pp -> k:key key_length i -> n:nonce aparams.nonce_length -> p:protected_plain pp i -> ST ciphertext
+val encrypt: #id:eqtype -> #i:id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package #id key_length (key key_length #id) -> #aparams:ae_parameters{key_length = aparams.keylength} -> #pp:plain_package{ valid_ae_plain_package aparams pp} ->  ap:ae_package #id #i #key_length kp aparams pp -> k:key key_length i -> n:nonce aparams -> p:protected_plain pp i -> ST (ciphertext aparams)
   (requires (fun h0 ->
-    (forall c . MM.fresh ap.log (n,c) h0)
+    (nonce_is_unique ap n h0)
   ))
   (ensures (fun h0 c h1 ->
     ((KEY.(kp.hon k) /\ get_ae_flagGT aparams) ==>
@@ -120,6 +133,7 @@ val encrypt: #id:eqtype -> #i:id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_pa
     /\ ((~(KEY.(kp.hon k)) \/ ~(get_ae_flagGT aparams)) ==>
       (c = aparams.scheme.enc (repr #pp kp k p) k.raw n))
     /\ witnessed (MM.contains ap.log (n,c) p)
+    //TODO: Add precise description of log state here.
     /\ modifies (Set.singleton ap.rgn) h0 h1
   ))
 let encrypt #id #i #key_length #kp #aparams #pp ap k n p =
@@ -134,7 +148,7 @@ let encrypt #id #i #key_length #kp #aparams #pp ap k n p =
   MM.extend ap.log (n,c) p;
   c
 
-val decrypt: #id:eqtype -> #i:id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package #id key_length (key key_length #id) -> #aparams:ae_parameters{key_length = aparams.keylength} -> #pp:plain_package{valid_ae_plain_package aparams pp} -> ap:ae_package #id #i kp aparams pp -> k:key key_length i -> n:nonce aparams.nonce_length -> c:ciphertext{aparams.scheme.valid_cipher_length (Seq.length c)} -> ST (option (p:protected_plain pp i))
+val decrypt: #id:eqtype -> #i:id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package #id key_length (key key_length #id) -> #aparams:ae_parameters{key_length = aparams.keylength} -> #pp:plain_package{valid_ae_plain_package aparams pp} -> ap:ae_package #id #i kp aparams pp -> k:key key_length i -> n:nonce aparams -> c:ciphertext aparams -> ST (option (p:protected_plain pp i))
   (requires (fun h0 ->
     True
   ))

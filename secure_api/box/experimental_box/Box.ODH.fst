@@ -35,6 +35,18 @@ abstract type exponent (oparam:odh_parameters) =
   sh:share oparam{sh.raw_sh = oparam.exponentiate raw_exp oparam.generator} ->
   exponent oparam
 
+val sh_hon: #oparams:odh_parameters -> sh:share oparams -> GTot (b:bool{b=sh.h})
+let sh_hon #oparams sh = sh.h
+
+val exp_hon: #oparams:odh_parameters -> exp:exponent oparams -> GTot (b:bool{b=exp.sh.h})
+let exp_hon #oparams exp = exp.sh.h
+
+val get_exp_share: #oparams:odh_parameters -> e:exponent oparams -> sh:share oparams{e.sh = sh}
+let get_exp_share #oparams e = e.sh
+
+val get_share_raw: #oparams:odh_parameters -> sh:share oparams -> raw:lbytes oparams.share_length{raw = sh.raw_sh}
+let get_share_raw #oparams sh = sh.raw_sh
+
 let gen_dh (oparam:odh_parameters) =
   let raw_exp = random_bytes oparam.exponent_length in
   let raw_sh = oparam.exponentiate raw_exp oparam.generator in
@@ -82,16 +94,27 @@ let key_package_log (rgn:erid) (key_type:(id -> Type0)) =
 
 assume val b:bool
 
+val get_flag: unit -> GTot (flag:bool{flag = b})
+let get_flag() = b
+
 noeq abstract type odh_package (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (kp:key_package key_length key_type) (oparam:odh_parameters{oparam.hash_length = key_length}) =
   | ODH:
   rgn:erid ->
   kp_log:key_package_log rgn key_type ->
   odh_package #key_length #key_type kp oparam
 
+val get_op_rgn: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> (op:odh_package #key_length #key_type kp oparam) -> (rgn:erid{rgn = op.rgn})
+let get_op_rgn (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package #key_length #key_type kp oparam) = op.rgn
+
+val get_op_log: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> (op:odh_package #key_length #key_type kp oparam) -> GTot (log:key_package_log op.rgn key_type)
+let get_op_log (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package #key_length #key_type kp oparam) = op.kp_log
+
+
 val create_odh_package: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (kp:key_package key_length key_type) -> (oparam:odh_parameters{oparam.hash_length = key_length}) -> (rgn:erid) -> ST (odh_package #key_length #key_type kp oparam)
   (requires (fun h0 -> True))
   (ensures (fun h0 op h1 ->
     modifies (Set.singleton rgn) h0 h1
+    /\ extends op.rgn rgn
   ))
 let create_odh_package (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (kp:key_package key_length key_type) (oparam:odh_parameters{oparam.hash_length = key_length}) (rgn:erid) =
   let odh_rgn = new_region rgn in
@@ -99,7 +122,7 @@ let create_odh_package (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (k
   ODH odh_rgn kp_log
 
 #set-options "--z3rlimit 300 --max_ifuel 2 --max_fuel 1"
-val dh_op: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> #op:odh_package kp oparam -> sh:share oparam -> exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh} -> ST (key_type (create_id sh exp.sh))
+val dh_op: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> op:odh_package kp oparam -> sh:share oparam -> exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh} -> ST (key_type (create_id sh exp.sh))
   (requires (fun h0 -> True))
   (ensures (fun h0 k h1 ->
     let i = create_id sh exp.sh in
@@ -114,9 +137,10 @@ val dh_op: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key
         ))
     /\ ((~both_honest \/ ~b) ==>
       h0 == h1)
+    /\ (modifies (Set.singleton op.rgn) h0 h1 \/ h0 == h1)
   ))
 
-let dh_op #key_length #key_type #kp #oparam #op sh exp =
+let dh_op #key_length #key_type #kp #oparam op sh exp =
   let both_honest = sh.h && exp.sh.h in
   let i = create_id sh exp.sh in
   if both_honest && b then
