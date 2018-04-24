@@ -241,7 +241,7 @@ val blake2_compress1 : wv:working_vector ->
                          /\ modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.Blake2s.blake2_compress1 h0.[wv] h0.[s] h0.[m] offset flag))
 
-[@ Substitute ]
+//[@ Substitute ]
 let blake2_compress1 wv s m offset flag const_iv =
   update_sub wv (size 0) (size 8) s;
   update_sub wv (size 8) (size 8) const_iv;
@@ -270,17 +270,14 @@ val blake2_compress2 :
                          /\ h1.[wv] == Spec.blake2_compress2 h0.[wv] h0.[m]))
 
 
-[@ Substitute ]
+//[@ Substitute ]
 let blake2_compress2 wv m const_sigma =
   (**) let h0 = ST.get () in
-  let spec hi =
-    let m0 = hi.[m] in
-    Spec.blake2_round m0 in
   loop #h0 (size Spec.rounds_in_f) wv
-    spec
+    (fun hi ->  Spec.blake2_round hi.[m])
     (fun i ->
       blake2_round wv m i const_sigma;
-      lemma_repeati Spec.rounds_in_f (spec h0) h0.[wv] (v i))
+      lemma_repeati Spec.rounds_in_f (Spec.blake2_round h0.[m]) h0.[wv] (v i))
 
 #reset-options "--max_fuel 0"
 
@@ -292,7 +289,7 @@ val blake2_compress3_inner :
                          /\ modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress3_inner h0.[wv] (v i) h0.[s]))
 
-[@ Substitute ]
+//[@ Substitute ]
 let blake2_compress3_inner wv i s const_sigma =
   let i_plus_8 = i +. (size 8) in
   let hi_xor_wvi = s.(i) ^. wv.(i) in
@@ -312,13 +309,13 @@ val blake2_compress3 :
                          /\ modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress3 h0.[wv] h0.[s]))
 
-[@ Substitute ]
+//[@ Substitute ]
 let blake2_compress3 wv s const_sigma =
   (**) let h0 = ST.get () in
-  let spec hi = let wv0 = hi.[wv] in Spec.blake2_compress3_inner wv0 in
-  loop #h0 (size 8) s spec
+  loop #h0 (size 8) s
+    (fun hi -> Spec.blake2_compress3_inner hi.[wv]) 
     (fun i -> blake2_compress3_inner wv i s const_sigma;
-           lemma_repeati 8 (spec h0) h0.[s] (v i))
+           lemma_repeati 8 (Spec.blake2_compress3_inner h0.[wv]) h0.[s] (v i))
 
 
 #reset-options "--max_fuel 0"
@@ -339,9 +336,8 @@ val blake2_compress :
 [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2_compress s m offset flag const_iv const_sigma =
   (**) let hinit = ST.get () in
-  let f h0 h1 = h1.[s] == Spec.Blake2s.blake2_compress h0.[s] h0.[m] offset flag in
   salloc #hinit #_ #_ #16 (size 16) (u32 0) [BufItem m; BufItem const_iv; BufItem const_sigma] [BufItem s]
-  (fun h0 _ h1 -> f h0 h1)
+  (fun h0 _ h1 -> h1.[s] == Spec.Blake2s.blake2_compress h0.[s] h0.[m] offset flag)
   (fun wv ->
     blake2_compress1 wv s m offset flag const_iv;
     blake2_compress2 wv m const_sigma;
@@ -418,15 +414,12 @@ val blake2s_internal2_loop: s:lbuffer uint32 8 ->
 [@ Substitute]
 let blake2s_internal2_loop s dd d to_compress const_iv const_sigma =
   (**) let h0 = ST.get () in
-  let spec hi =
-    let s0 = h0.[s] in
-    let d0 = h0.[d] in
-    Spec.blake2s_internal2_inner (v dd) d0 in
   let idx = dd -. (size 1) in
-  loop #h0 idx s spec
+  loop #h0 idx s 
+  (fun hi ->  Spec.blake2s_internal2_inner (v dd) (hi.[d]))
   (fun i ->
      blake2s_internal2_inner s dd d to_compress i const_iv const_sigma;
-     lemma_repeati (v idx) (spec h0) h0.[s] (v i))
+     lemma_repeati (v idx) (Spec.blake2s_internal2_inner (v dd) h0.[d]) h0.[s] (v i))
 
 val blake2s_internal2: s:lbuffer uint32 8 ->
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
@@ -450,7 +443,7 @@ val blake2s_internal2: s:lbuffer uint32 8 ->
      (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 s to_compress h0 h1
                           /\ h1.[s] == Spec.blake2s_internal2 (v dd) h0.[d] h0.[s]))
 
-[@ Substitute]
+//[@ Substitute]
 let blake2s_internal2 s dd d to_compress const_iv const_sigma =
   (**) let h0 = ST.get () in
   if (dd >. size 1) then
@@ -481,7 +474,7 @@ val blake2s_internal3: s:lbuffer uint32 8 ->
 
 (* BB. This needs a serious rewrite as it would be a modifies 4...*)
 
-[@ Substitute]
+//[@ Substitute]
 let blake2s_internal3 s dd d ll kk nn to_compress tmp res const_iv const_sigma =
   (**) let h0 = ST.get () in
   let offset:size_t = (dd -. (size 1)) *. (size 64) in
