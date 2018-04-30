@@ -22,7 +22,7 @@ include Makefile.common
 
 # Warning: these are not always buildable, depending on IMPL_CHOICE...! Consult
 # the main Makefile for valid combinations.
-all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa $(DIST_DIR)/LowC.cma
+all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa # $(DIST_DIR)/LowC.cma
 
 ################################################################################
 # This Makefile ought to work with and without compiler support for UInt128    #
