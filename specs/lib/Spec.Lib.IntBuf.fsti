@@ -205,6 +205,36 @@ val loop:
                        b1 == LSeq.repeati #(LSeq.lseq a len) (v n) (spec h0) b0)))
 
 
+let loop2_inv (h0:mem) (h1:mem) (#a0:Type) (#a1:Type) (len0:size_nat) (len1:size_nat) (n:size_nat)  (buf0:lbuffer a0 len0) (buf1:lbuffer a1 len1)
+  (spec:(h:mem -> GTot (i:size_nat{i < n} -> LSeq.lseq a0 len0 -> Tot (LSeq.lseq a0 len0)))) (i:size_nat{i <= n}) : Type =
+  live h0 buf0 /\ live h0 buf1 /\ preserves_live h0 h1
+  /\ modifies2 buf0 buf1 h0 h1
+  /\ (let b0 = as_lseq #a0 #len0 buf0 h0 in
+    let b1 = as_lseq #a0 #len0 buf0 h1 in
+    b1 == LSeq.repeati #(LSeq.lseq a0 len0) i (spec h0) b0)
+
+inline_for_extraction
+val loop2:
+  #h0:mem ->
+  #a0:Type0 ->
+  #a1:Type0 ->
+  #len0:size_nat ->
+  #len1:size_nat ->
+  n:size_t ->
+  buf0:lbuffer a0 len0 ->
+  buf1:lbuffer a1 len1 ->
+  spec:(h:mem -> GTot (i:size_nat{i < v n} -> LSeq.lseq a0 len0 -> Tot (LSeq.lseq a0 len0))) ->
+  impl:(i:size_t{v i < v n} -> Stack unit
+    (requires (fun h -> loop2_inv h0 h #a0 #a1 len0 len1 (v n) buf0 buf1 spec (v i)))
+	 (ensures (fun _ _ h1 -> loop2_inv h0 h1 #a0 #a1 len0 len1 (v n) buf0 buf1 spec (v i + 1)))) ->
+  Stack unit
+	 (requires (fun h -> live h buf0 /\ live h buf1 /\ h0 == h))
+	 (ensures (fun _ _ h1 -> preserves_live h0 h1
+                       /\ modifies2 buf0 buf1 h0 h1
+                       /\ (let b0 = as_lseq #a0 #len0 buf0 h0 in
+                       let b1 = as_lseq #a0 #len0 buf0 h1 in
+                       b1 == LSeq.repeati #(LSeq.lseq a0 len0) (v n) (spec h0) b0)))
+
 
 
 (*
