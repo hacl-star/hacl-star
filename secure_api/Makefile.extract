@@ -22,7 +22,7 @@ include Makefile.common
 
 # Warning: these are not always buildable, depending on IMPL_CHOICE...! Consult
 # the main Makefile for valid combinations.
-all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa
+all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa # $(DIST_DIR)/LowC.cma
 
 ################################################################################
 # This Makefile ought to work with and without compiler support for UInt128    #
@@ -249,6 +249,7 @@ LowCProvider/lowc_stub.o: $(HEADERS) $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h
 
 OCAMLOPTS=-package fstarlib,zarith -g -I $(FSTAR_HOME)/ulib/ml
 OCAMLOPT=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind opt $(OCAMLOPTS)
+OCAMLC=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind ocamlc $(OCAMLOPTS)
 OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 
 # Then, we need to generate some .o ourselves, using ocamlopt to get all the
@@ -264,15 +265,24 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
 %.cmx: %.ml $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa
 	$(OCAMLOPT) -c $< -I LowCProvider -I $(DIST_DIR) -I $(OUTPUT_DIR) -I $(MLCRYPTO_HOME) -o $@
 
+%.cmo: %.ml $(FSTAR_HOME)/bin/fstarlib/fstarlib.cma
+	$(OCAMLC) -c $< -I LowCProvider -I $(DIST_DIR) -I $(OUTPUT_DIR) -I $(MLCRYPTO_HOME) -o $@
+
 # Note: we don't use ocamldep because this would need to happen after
 # extraction... meaning that the Makefile, no matter what, would always
 # re-extract to get the dependencies. Make it a separate target?
-.PHONY: $(MLCRYPTO_HOME)/CryptoTypes.cmx
+.PHONY: $(MLCRYPTO_HOME)/CryptoTypes.cmx $(MLCRYPTO_HOME)/CryptoTypes.cmo
 $(MLCRYPTO_HOME)/CryptoTypes.cmx:
+	$(MAKE) -C $(MLCRYPTO_HOME)
+
+$(MLCRYPTO_HOME)/CryptoTypes.cmo:
 	$(MAKE) -C $(MLCRYPTO_HOME)
 
 LowCProvider/LowCProvider.cmx: $(MLCRYPTO_HOME)/CryptoTypes.cmx
 LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
+
+LowCProvider/LowCProvider.cmo: $(MLCRYPTO_HOME)/CryptoTypes.cmo
+LowCProvider/Tests.cmo: LowCProvider/LowCProvider.cmo
 
 # Finally, ocamlmklib is smart enough to take all of these at once.
 $(DIST_DIR)/LowC.cmxa: \
@@ -286,6 +296,17 @@ $(DIST_DIR)/LowC.cmxa: \
 	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cmxa,%,$@)
 
+# Finally, ocamlmklib is smart enough to take all of these at once.
+$(DIST_DIR)/LowC.cma: \
+	  $(DIST_DIR)/uint128/uint128_wrapper.o \
+	  LowCProvider/LowCProvider.cmo \
+	  LowCProvider/HaclProvider.cmo \
+	  LowCProvider/lowc_stub.o \
+	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
+	  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
+	  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Curve25519.o \
+	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
+	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cma,%,$@)
 
 ################################################################################
 # 5. The LowC provider tests                                     	       #
