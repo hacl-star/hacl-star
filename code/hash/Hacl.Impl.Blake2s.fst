@@ -115,8 +115,6 @@ type sigma_elt = n:size_t{size_v n < 16}
 type sigma_t = lbuffer sigma_elt 160
 
 
-let len_st_u32 = size 32 +. size 8
-
 (* Definition of constants *)
 inline_for_extraction val create_const_iv: unit -> StackInline init_vector
   (requires (fun h -> True))
@@ -512,8 +510,6 @@ let blake2s_internal3 len_st_u32 st_u32 dd d ll kk nn res const_iv const_sigma =
 val blake2s_internal:
   len_st_u32: size_t{16 <= v (len_st_u32 -. size 8) /\ v (len_st_u32 -. size 8) <= 8} ->
   st_u32:lbuffer uint32 (v len_st_u32) ->
-  len_st_u8: size_t{32 <= v (len_st_u8)} ->
-  st_u8:lbuffer uint8 (v len_st_u8) ->
   dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
   d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
   ll:size_t -> kk:size_t{size_v kk <= 32} -> nn:size_t{1 <= size_v nn /\ size_v nn <= 32} ->
@@ -532,7 +528,7 @@ val blake2s_internal:
                          /\ h1.[res] == Spec.Blake2s.blake2s_internal (v dd) h0.[d] (v ll) (v kk) (v nn)))
 
 [@ (CConst "const_iv") (CConst "const_sigma")]
-let blake2s_internal len_st_u32 st_u32 len_st_u8 st_u8 dd d ll kk nn res const_iv const_sigma =
+let blake2s_internal len_st_u32 st_u32 dd d ll kk nn res const_iv const_sigma =
   let s = sub st_u32 (len_st_u32 -. size 8) (size 8) in
   let to_compress = sub st_u32 (size 0) (size 16) in
   blake2s_internal1 s kk nn;
@@ -552,6 +548,7 @@ let blake2s ll d kk k nn res =
   let data_blocks : size_t = size 1 +. ((ll -. (size 1)) /. (size Spec.bytes_in_block)) in
   let padded_data_length : size_t = data_blocks *. (size Spec.bytes_in_block) in
   let data_length : size_t = (size Spec.bytes_in_block) +. padded_data_length in
+  let len_st_u32 = size 32 +. size 8 in
   let len_st_u8 = (size 32) +. (padded_data_length +. ((size Spec.bytes_in_block) +. data_length)) in
   let const_iv : lbuffer uint32 8 = create_const_iv () in
   let const_sigma : lbuffer (n:size_t{size_v n < 16}) 160 = create_const_sigma () in
@@ -575,7 +572,7 @@ let blake2s ll d kk k nn res =
       copy ll d padded_data';
 
       if (kk =. size 0) then
-	     blake2s_internal len_st_u32 st_u32 len_st_u8 st_u8 data_blocks padded_data' ll kk nn res const_iv const_sigma
+	     blake2s_internal len_st_u32 st_u32 data_blocks padded_data' ll kk nn res const_iv const_sigma
       else begin
 	     let padded_key' = sub padded_key (size 0) kk in
 	     copy kk k padded_key';
@@ -585,7 +582,7 @@ let blake2s ll d kk k nn res =
 
 	     let data' = sub data (size Spec.bytes_in_block) padded_data_length in
         copy padded_data_length padded_data data';
-	     blake2s_internal len_st_u32 st_u32 len_st_u8 st_u8 (data_blocks +. (size 1)) data' ll kk nn res const_iv const_sigma
+	     blake2s_internal len_st_u32 st_u32 (data_blocks +. (size 1)) data' ll kk nn res const_iv const_sigma
       end
     )
   )
