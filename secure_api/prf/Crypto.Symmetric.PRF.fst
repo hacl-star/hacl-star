@@ -88,25 +88,25 @@ let range (mac_rgn:region) (i:id) (x:domain i): Type0 =
                           else lbytes (v (blocklen i))
 
 inline_for_extraction let iv_0 () = FStar.UInt128.uint64_to_uint128 0UL
-noextract let domain_sk0 (i:id) = x:domain i{x.ctr <^ ctr_0 i /\ x.iv == iv_0 () }
-noextract let domain_mac (i:id) = x:domain i{x.ctr == ctr_0 i}
-noextract let domain_otp (i:id) = x:domain i{x.ctr >^ ctr_0 i /\ safeId i}
-noextract let domain_blk (i:id) = x:domain i{x.ctr >^ ctr_0 i /\ ~ (safeId i)}
+let domain_sk0 (i:id) = x:domain i{x.ctr <^ ctr_0 i /\ x.iv == iv_0 () }
+let domain_mac (i:id) = x:domain i{x.ctr == ctr_0 i}
+let domain_otp (i:id) = x:domain i{x.ctr >^ ctr_0 i /\ safeId i}
+let domain_blk (i:id) = x:domain i{x.ctr >^ ctr_0 i /\ ~ (safeId i)}
 
 // explicit coercions
-noextract let sk0Range rgn (i:id) (x:domain_sk0 i) (z:range rgn i x) : CMA.skey rgn i = z
-noextract let macRange rgn (i:id) (x:domain_mac i) (z:range rgn i x) : smac rgn i x = z
-noextract let otpRange rgn (i:id) (x:domain_otp i) (z:range rgn i x) : otp i = z
-noextract let blkRange rgn (i:id) (x:domain_blk i) (z:range rgn i x) : block i = z
+let sk0Range rgn (i:id) (x:domain_sk0 i) (z:range rgn i x) : CMA.skey rgn i = z
+let macRange rgn (i:id) (x:domain_mac i) (z:range rgn i x) : smac rgn i x = z
+let otpRange rgn (i:id) (x:domain_otp i) (z:range rgn i x) : otp i = z
+let blkRange rgn (i:id) (x:domain_blk i) (z:range rgn i x) : block i = z
 
 noeq type entry (rgn:region) (i:id) =
   | Entry: x:domain i -> range:range rgn i x -> entry rgn i
 type table (rgn:region) (i:id) = Seq.seq (entry rgn i)
 
 // Doesn't extract because: polymorphic comparison
-noextract let is_entry_domain (#i:id) (#rgn:rid) (x:domain i) (e:entry rgn i) : Tot bool = e.x = x
+let is_entry_domain (#i:id) (#rgn:rid) (x:domain i) (e:entry rgn i) : Tot bool = e.x = x
 
-noextract let find (#rgn:region) (#i:id) (s:table rgn i) (x:domain i) : option (range rgn i x) =
+let find (#rgn:region) (#i:id) (s:table rgn i) (x:domain i) : option (range rgn i x) =
   match Seq.find_l (is_entry_domain x) s with
   | Some e -> Some e.range
   | None   -> None
