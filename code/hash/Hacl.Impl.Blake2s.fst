@@ -21,16 +21,9 @@ module Spec = Spec.Blake2s
 ///
 /// 0. The code is proven until `blake2s_internal3`.
 ///
-/// 1. Extraction needs to be restored, there is an issue with
-///    partially applied functions.
+/// 1. Rewrite update_sub to be in the correct order.
 ///
-/// 2. Top-level allocations should be merged, these are done separately, and the
-///    code of the `internal` functions must be rewritten to pass a single buffers
-///    instead of multiple buffers that force modifies2, modifies3 ...
-///
-/// 3. Rewrite update_sub to be in the correct order.
-///
-/// 4. Lemmata need to be proven and moved back to the libraries.
+/// 2. Lemmata need to be proven and moved back to the libraries.
 ///
 
 
@@ -474,6 +467,8 @@ val blake2s_internal3:
     (requires (fun h -> live h st_u32 /\ live h d /\ live h res /\ live h const_iv /\ live h const_sigma
                    /\ h.[const_sigma] == Spec.sigma
                    /\ h.[const_iv] == Spec.const_init
+
+                   /\ disjoint_lists [BufItem d; BufItem const_iv; BufItem const_sigma] [BufItem res; BufItem st_u32]
                    /\ disjoint st_u32 d /\ disjoint d st_u32
                    /\ disjoint st_u32 const_sigma /\ disjoint const_sigma st_u32
                    /\ disjoint st_u32 const_iv /\ disjoint const_iv st_u32))
@@ -501,6 +496,7 @@ let blake2s_internal3 len_st_u32 st_u32 dd d ll kk nn res const_iv const_sigma =
     else
       blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 (ll +. (size Spec.block_bytes)))) true const_iv const_sigma
     );
+    assert(false);
     uint32s_to_bytes_le (size 8) tmp s;
     let tmp' = sub tmp (size 0) nn in
     copy nn tmp' res
