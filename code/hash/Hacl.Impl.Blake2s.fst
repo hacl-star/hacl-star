@@ -313,7 +313,7 @@ val blake2_compress3 :
 let blake2_compress3 wv s const_sigma =
   (**) let h0 = ST.get () in
   loop #h0 (size 8) s
-    (fun hi -> Spec.blake2_compress3_inner hi.[wv]) 
+    (fun hi -> Spec.blake2_compress3_inner hi.[wv])
     (fun i -> blake2_compress3_inner wv i s const_sigma;
            lemma_repeati 8 (Spec.blake2_compress3_inner h0.[wv]) h0.[s] (v i))
 
@@ -415,7 +415,7 @@ val blake2s_internal2_loop: s:lbuffer uint32 8 ->
 let blake2s_internal2_loop s dd d to_compress const_iv const_sigma =
   (**) let h0 = ST.get () in
   let idx = dd -. (size 1) in
-  loop #h0 idx s 
+  loop #h0 idx s
   (fun hi ->  Spec.blake2s_internal2_inner (v dd) (hi.[d]))
   (fun i ->
      blake2s_internal2_inner s dd d to_compress i const_iv const_sigma;
