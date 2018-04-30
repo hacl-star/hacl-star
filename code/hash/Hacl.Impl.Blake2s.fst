@@ -554,38 +554,34 @@ let blake2s ll d kk k nn res =
   (fun h0 _ h1 -> True)
   (fun st_u8 ->
     let h0 = ST.get () in
-    salloc #h0 #uint32 #unit #(v len_st_u32) len_st_u32 (u32 0) [BufItem d; BufItem k] [BufItem st_u8; BufItem res]
+    salloc #h0 #uint32 #unit #(v len_st_u32 + 8) len_st_u32 (u32 0) [BufItem d; BufItem k] [BufItem st_u8; BufItem res]
     (fun h0 _ h1 -> True)
     (fun st_u32 ->
-      let h0 = ST.get () in
-      salloc #h0 #uint32 #unit #8 (size 8) (u32 0) [BufItem d; BufItem k] [BufItem st_u8; BufItem res; BufItem st_u32]
-      (fun h0 _ h1 -> True)
-      (fun s ->
-        copy (size 8) const_iv s;
-        let tmp = sub st_u8 (size 0) (size 32) in
-        let padded_data = sub #uint8 #(v len_st_u8) #(v padded_data_length) st_u8 (size 32) padded_data_length in
-        let padded_key = sub #uint8 #(v len_st_u8) #(Spec.bytes_in_block) st_u8 ((size 32) +. padded_data_length) (size Spec.bytes_in_block) in
-        let data = sub #uint8 #(v len_st_u8) #(v data_length) st_u8 ((size 32) +. (padded_data_length +. (size Spec.bytes_in_block))) data_length in
+      let s = sub st_u32 len_st_u32 (size 8) in
+      copy (size 8) const_iv s;
+      let tmp = sub st_u8 (size 0) (size 32) in
+      let padded_data = sub #uint8 #(v len_st_u8) #(v padded_data_length) st_u8 (size 32) padded_data_length in
+      let padded_key = sub #uint8 #(v len_st_u8) #(Spec.bytes_in_block) st_u8 ((size 32) +. padded_data_length) (size Spec.bytes_in_block) in
+      let data = sub #uint8 #(v len_st_u8) #(v data_length) st_u8 ((size 32) +. (padded_data_length +. (size Spec.bytes_in_block))) data_length in
 
-        let padded_data' = sub padded_data (size 0) ll in
-        copy ll d padded_data';
+      let padded_data' = sub padded_data (size 0) ll in
+      copy ll d padded_data';
 
-        let to_compress = sub st_u32 (size 0) (size 16) in
-        let wv = sub st_u32 (size 16) (size 16) in
+      let to_compress = sub st_u32 (size 0) (size 16) in
+      let wv = sub st_u32 (size 16) (size 16) in
 
-        if (kk =. size 0) then
-	       blake2s_internal data_blocks padded_data' ll kk nn to_compress wv tmp res s const_iv const_sigma
-        else begin
-	       let padded_key' = sub padded_key (size 0) kk in
-	       copy kk k padded_key';
+      if (kk =. size 0) then
+	     blake2s_internal data_blocks padded_data' ll kk nn to_compress wv tmp res s const_iv const_sigma
+      else begin
+	     let padded_key' = sub padded_key (size 0) kk in
+	     copy kk k padded_key';
 
-	       let data' = sub data (size 0) (size Spec.bytes_in_block) in
-	       copy (size Spec.bytes_in_block) padded_key data';
+	     let data' = sub data (size 0) (size Spec.bytes_in_block) in
+	     copy (size Spec.bytes_in_block) padded_key data';
 
-	       let data' = sub data (size Spec.bytes_in_block) padded_data_length in
-          copy padded_data_length padded_data data';
-	       blake2s_internal (data_blocks +. (size 1)) data' ll kk nn to_compress wv tmp res s const_iv const_sigma
-        end
-      )
+	     let data' = sub data (size Spec.bytes_in_block) padded_data_length in
+        copy padded_data_length padded_data data';
+	     blake2s_internal (data_blocks +. (size 1)) data' ll kk nn to_compress wv tmp res s const_iv const_sigma
+      end
     )
   )
