@@ -7,6 +7,7 @@ typedef uint64_t* transpose_t;
 
 //#define static static inline __attribute((always_inline))
 
+/*
 static  void to_transpose(transpose_t out, uint8_t* in) {
   for (int i = 0; i < 8; i++) {
     uint64_t u = 0;
@@ -19,8 +20,66 @@ static  void to_transpose(transpose_t out, uint8_t* in) {
     out[i] = u;
   }
 }
+*/
 
-static  void to_transpose_block(transpose_t out, uint8_t* in) {
+void transpose8x8_old(uint8_t* in,uint8_t* out) {
+  uint64_t x = 0;
+  uint64_t y = 0;
+  int i;
+
+  for (i = 7; i >= 0; i--)     // Load 8 bytes from the
+    x = (x << 8) ^ in[i];      // input array and pack
+                                // them into x.
+   y =  (x & 0x8040201008040201LL)        |
+       ((x & 0x4020100804020100LL) >>  7) |
+       ((x & 0x2010080402010000LL) >> 14) |
+       ((x & 0x1008040201000000LL) >> 21) |
+       ((x & 0x0804020100000000LL) >> 28) |
+       ((x & 0x0402010000000000LL) >> 35) |
+       ((x & 0x0201000000000000LL) >> 42) |
+       ((x & 0x0100000000000000LL) >> 49) |
+       ((x <<  7) & 0x4020100804020100LL) |
+       ((x << 14) & 0x2010080402010000LL) |
+       ((x << 21) & 0x1008040201000000LL) |
+       ((x << 28) & 0x0804020100000000LL) |
+       ((x << 35) & 0x0402010000000000LL) |
+       ((x << 42) & 0x0201000000000000LL) |
+       ((x << 49) & 0x0100000000000000LL);
+
+   for (i = 0; i <= 7; i++) {   // Store result into
+      out[i] = y; y = y >> 8;}  // output array B.
+}
+
+
+uint64_t transpose8x8(uint8_t* in) {
+  uint64_t x = 0;
+  uint64_t y = 0;
+  int i;
+
+  for (i = 7; i >= 0; i--)     // Load 8 bytes from the
+    x = (x << 8) ^ in[i];      // input array and pack
+                                // them into x.
+   y =  (x & 0x8040201008040201LL)        |
+       ((x & 0x4020100804020100LL) >>  7) |
+       ((x & 0x2010080402010000LL) >> 14) |
+       ((x & 0x1008040201000000LL) >> 21) |
+       ((x & 0x0804020100000000LL) >> 28) |
+       ((x & 0x0402010000000000LL) >> 35) |
+       ((x & 0x0201000000000000LL) >> 42) |
+       ((x & 0x0100000000000000LL) >> 49) |
+       ((x <<  7) & 0x4020100804020100LL) |
+       ((x << 14) & 0x2010080402010000LL) |
+       ((x << 21) & 0x1008040201000000LL) |
+       ((x << 28) & 0x0804020100000000LL) |
+       ((x << 35) & 0x0402010000000000LL) |
+       ((x << 42) & 0x0201000000000000LL) |
+       ((x << 49) & 0x0100000000000000LL);
+
+   return y;
+}
+
+/*
+static  void to_transpose_block_copy_old(transpose_t out, uint8_t* in) {
   for (int i = 0; i < 8; i++) {
     uint64_t u = 0;
     for (int j = 0; j < 16; j++) {
@@ -31,6 +90,69 @@ static  void to_transpose_block(transpose_t out, uint8_t* in) {
     }
     u ^= u << 16;
     u ^= u << 32;
+    out[i] = u;
+  }
+}
+static  void to_transpose_block_copy(transpose_t out, uint8_t* in) {
+  uint8_t trans[16] = {0};
+  transpose8x8(in,trans);
+  transpose8x8(in+8,trans+8);
+  for (int i = 0; i < 8; i++) {
+    uint64_t u = trans[i];
+    uint64_t u8 = trans[i+8];
+    u ^= u8 << 8;
+    u ^= u << 16;
+    u ^= u << 32;
+    out[i] = u;
+  }
+}
+
+
+static  void to_transpose_block(transpose_t out, uint8_t* in) {
+  uint8_t trans[16] = {0};
+  transpose8x8(in,trans);
+  transpose8x8(in+8,trans+8);
+  for (int i = 0; i < 8; i++) {
+    uint64_t u = trans[i];
+    uint64_t u8 = trans[i+8];
+    u ^= u8 << 8;
+    out[i] = u;
+  }
+}
+
+*/
+
+static  void to_transpose_block_copy(transpose_t out, uint8_t* in) {
+  uint64_t fst = transpose8x8(in);
+  uint64_t snd = transpose8x8(in+8);
+  for (int i = 0; i < 8; i++) {
+    uint64_t u = (fst >> (8*i)) & 0xff;
+    u ^= ((snd >> (8*i)) & 0xff) << 8;
+    u ^= u << 16;
+    u ^= u << 32;
+    out[i] = u;
+  }
+}
+
+static  void to_transpose_block(transpose_t out, uint8_t* in) {
+  uint64_t fst = transpose8x8(in);
+  uint64_t snd = transpose8x8(in+8);
+  for (int i = 0; i < 8; i++) {
+    uint64_t u = (fst >> (8*i)) & 0xff;
+    u ^= ((snd >> (8*i)) & 0xff) << 8;
+    out[i] = u;
+  }
+}
+
+static  void to_transpose_block_old(transpose_t out, uint8_t* in) {
+  for (int i = 0; i < 8; i++) {
+    uint64_t u = 0;
+    for (int j = 0; j < 16; j++) {
+       if (i > j)
+	u ^= (uint64_t)(in[j] & ((uint8_t)1 << i)) >> (i - j);
+      else
+	u ^= (uint64_t)(in[j] & ((uint8_t)1 << i)) << (j - i);
+    }
     out[i] = u;
   }
 }
@@ -283,9 +405,7 @@ static  void rounds(transpose_t st, uint64_t* key) {
     aes_enc(st,key+(8*i));
 }
 
-static void block_cipher(uint8_t* out, uint8_t* in, uint64_t* key) {
-  uint64_t st[8] = {0};
-  to_transpose(st,in);
+static void block_cipher(uint8_t* out, uint64_t* st, uint64_t* key) {
   uint64_t* k0 = key;
   uint64_t* k = key + 8;
   uint64_t* kn = key + (8 * 10);
@@ -319,41 +439,30 @@ static void key_expansion_step(transpose_t next, transpose_t prev, uint8_t rcon)
 }
 			
 static void key_expansion(uint64_t* out, uint8_t* key) {
-  to_transpose_block(out,key);
+  to_transpose_block_copy(out,key);
   for (int i = 1; i < 11; i++)
     key_expansion_step(out+(8*i),out+(8*i-8),rcon[i]);
 }
 
-static void aes128_block(uint8_t* out, uint64_t* kex, uint8_t* n, uint32_t c) {
-  uint8_t in[64] = {0};
-  uint8_t* curr = in;
-  memcpy(curr,n,12);
-  curr[12] = (uint8_t)(c >> 24);
-  curr[13] = (uint8_t)(c >> 16);
-  curr[14] = (uint8_t)(c >> 8);
-  curr[15] = (uint8_t)(c);
-  c = c + 1;
-  curr = curr + 16;
-  memcpy(curr,n,12);
-  curr[12] = (uint8_t)(c >> 24);
-  curr[13] = (uint8_t)(c >> 16);
-  curr[14] = (uint8_t)(c >> 8);
-  curr[15] = (uint8_t)(c);
-  c = c + 1;
-  curr = curr + 16;
-  memcpy(curr,n,12);
-  curr[12] = (uint8_t)(c >> 24);
-  curr[13] = (uint8_t)(c >> 16);
-  curr[14] = (uint8_t)(c >> 8);
-  curr[15] = (uint8_t)(c);
-  c = c + 1;
-  curr = curr + 16;
-  memcpy(curr,n,12);
-  curr[12] = (uint8_t)(c >> 24);
-  curr[13] = (uint8_t)(c >> 16);
-  curr[14] = (uint8_t)(c >> 8);
-  curr[15] = (uint8_t)(c);
-  block_cipher(out,in,kex);
+//#include "endianness.h"
+static void aes128_block(uint8_t* out, uint64_t* kex, uint64_t* nt, uint32_t c) {
+  uint8_t ctr[16] = {0};
+  for (int i = 0; i < 4; i++) {
+    uint32_t ci = c + i;
+    ctr[4*i] = ci >> 24;
+    ctr[4*i+1] = ci >> 16;
+    ctr[4*i+2] = ci >> 8;
+    ctr[4*i+3] = ci >> 0;
+    //    store32_be(ctr+(4*i),ci);
+  }
+  uint64_t st[8] = {0};
+  to_transpose_block(st,ctr);
+  for (int i = 0; i < 8; i++) {
+    uint64_t ci = st[i];
+    ci = ((ci & 0xf) << 12) ^ ((ci & 0xf0) << 24) ^ ((ci & 0xf00) << 36) ^ ((ci & 0xf000) << 48);
+    st[i] = ci ^ nt[i];
+  }
+  block_cipher(out,st,kex);
 }
 
 static void aes128_ctr(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* n, uint32_t c) {
@@ -361,10 +470,15 @@ static void aes128_ctr(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_
   uint64_t kex[8*11] = {0};
   key_expansion(kex,k);
 
+  uint8_t nb[16] = {0};
+  memcpy(nb,n,12);
+  uint64_t nt[8] = {0};
+  to_transpose_block_copy(nt,nb);
+  
   uint8_t kb[64] = {0};
   int blocks64 = in_len / 64;
   for (int i = 0; i < blocks64; i++) {
-    aes128_block(kb,kex,n,c+(4*i));
+    aes128_block(kb,kex,nt,c+(4*i));
     for (int j = 0; j < 64; j++)
       out[(64*i)+j] = in[(64*i)+j] ^ kb[j];
   }
@@ -374,7 +488,7 @@ static void aes128_ctr(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_
     out = out + (64 * blocks64);
     in  = in + (64 * blocks64);
     c = c + (4 * blocks64);
-    aes128_block(kb,kex,n,c);
+    aes128_block(kb,kex,nt,c);
     for (int j = 0; j < rem; j++)
       out[j] = in[j] ^ kb[j];
   }

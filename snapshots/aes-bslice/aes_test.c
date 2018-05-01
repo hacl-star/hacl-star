@@ -63,8 +63,10 @@ int main() {
   for (int i = 0; i < 32; i++)
     printf("%02x",exp[i]);
   printf("\n");
+
   uint64_t len = ROUNDS * SIZE;
   uint8_t* plain = malloc(len);
+  uint8_t* cipher = malloc(len);
   uint8_t key[16];
   uint8_t nonce[12];
   int fd = open("/dev/urandom", O_RDONLY);
@@ -87,8 +89,6 @@ int main() {
     printf("Error on reading, expected %" PRIu64 " bytes, got %" PRIu64 " bytes\n", (uint64_t)12, res);
     return 1;
   }
-
-  uint8_t cipher[len];
   cycles a,b;
   clock_t t1,t2;
   t1 = clock();
@@ -105,4 +105,5 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",len,(uint64_t)(b-a),(double)(b-a)/len);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",len,(uint64_t)(t2-t1),(double)(t2-t1)/len);
   free(plain);
+  free(cipher);
 }
