@@ -5,6 +5,8 @@ open Spec.Lib.IntTypes
 open Spec.Lib.RawIntTypes
 open Spec.Lib.IntSeq
 
+#set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+
 (* A specificationf for bitsliced AES. No optimizations. *)
 
 (* The GF(8) field, to be used to prove that the bitsliced spec implements AES:
@@ -332,19 +334,20 @@ let rec rcon_spec i =
   else two `fmul` rcon_spec (i - 1)
 *)
 
-let rcon_l = [u8 0x8d; u8 0x01; u8 0x02; u8 0x04; u8 0x08; u8 0x10; u8 0x20; u8 0x40; u8 0x80; u8 0x1b; u8 0x36]
+let rcon_l = List.Tot.map u8 [0x8d; 0x01; 0x02; 0x04; 0x08; 0x10; 0x20; 0x40; 0x80; 0x1b; 0x36]
 
 let rcon : lseq uint8 11 =
   assert_norm (List.Tot.length rcon_l = 11);
   createL #uint8 rcon_l
 
-let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 48}) : word =
+let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 44}) : word =
   let k = w1 in
   let k =
     if (i % 4 = 0) then
-       let k = rotate_word k in
        let k = sub_word k in
-       let rcon_i = rcon.[i / 4] in
+       let k = rotate_word k in
+       let index:nat = i / 4 in
+       let rcon_i = rcon.[index] in
        let k = k.[0] <- logxor #U8 rcon_i k.[0] in
        k
     else k in
@@ -363,6 +366,67 @@ let key_expansion (key:block) : (lseq uint8 (11 * 16)) =
 		       key_ex in
   key_ex
 
+let word_to_u128 (w:word) : uint128 =
+  to_u128 (uint_from_bytes_be #U32 w)
+
+// Maybe implement rotate_word and sub_word on uint?
+let mm_aeskeygenassist_si128 (key:uint128) (rcon:uint8) : (uint128) =
+  let tmp:uint128 = logand #U128 key (u128 0x0000000000000000FFFFFFFF00000000) in
+  let x_1 = to_u32 (shift_right #U128 tmp (u32 32)) in
+  let tmp:uint128 = logand #U128 key (u128 0xFFFFFFFF000000000000000000000000) in
+  let x_3:uint32 = to_u32 (shift_right #U128 tmp (u32 96)) in
+  let r_0 = sub_word (uint_to_bytes_le #U32 x_1) in
+  let r_1 = rotate_word r_0 in
+  let r_1 = r_1.[0] <- logxor #U8 r_1.[0] rcon in
+  let r_2 = sub_word (uint_to_bytes_le #U32 x_3) in
+  let r_3 = rotate_word r_2 in
+  let r_3 = r_3.[0] <- logxor #U8 r_3.[0] rcon in
+  let r:uint128 = shift_left #U128 (word_to_u128 r_3) (u32 96) |.
+                  shift_left #U128 (word_to_u128 r_2) (u32 64) |.
+                  shift_left #U128 (word_to_u128 r_1) (u32 31) |.
+                  word_to_u128 r_0 in
+  r
+
+let mm_shuffle_epi32 (key:uint128) : (key:uint128) =
+  // using 0xFF for imm8
+  let mask_32_1:uint128 = u128 0xFFFFFFFF000000000000000000000000 in
+  let tmp = logand #U128 key mask_32_1 in
+  let result = tmp |. tmp >>. (u32 32) |. tmp >>. (u32 64) |. tmp >>. (u32 96) in
+  result
+
+let intel_expand_key128 (key:uint128) (rcon:uint8) : uint128 =
+  let tmp_key = mm_aeskeygenassist_si128 key rcon in
+  let tmp_key = mm_shuffle_epi32(tmp_key) in
+  let tmp = key ^. (key <<. (u32 32)) in
+  let tmp = tmp ^. (tmp <<. (u32 32)) in
+  let tmp = tmp ^. (tmp <<. (u32 32)) in
+  let res = tmp ^. (shift_left #U128 tmp_key (u32 32)) in
+  res
+
+let intel_key_expansion (key:block) : (lseq uint8 (11 * 16)) =
+  let key_nats = create #uint128 11 (u128 0) in
+  let key_nats = key_nats.[0] <- (uint_from_bytes_le #U128 key) in
+  let key_nats = key_nats.[1] <- (intel_expand_key128 key_nats.[0] (u8 0x01)) in
+  let key_nats = key_nats.[2] <- (intel_expand_key128 key_nats.[1] (u8 0x02)) in
+  let key_nats = key_nats.[3] <- (intel_expand_key128 key_nats.[2] (u8 0x04)) in
+  let key_nats = key_nats.[4] <- (intel_expand_key128 key_nats.[3] (u8 0x08)) in
+  let key_nats = key_nats.[5] <- (intel_expand_key128 key_nats.[4] (u8 0x10)) in
+  let key_nats = key_nats.[6] <- (intel_expand_key128 key_nats.[5] (u8 0x20)) in
+  let key_nats = key_nats.[7] <- (intel_expand_key128 key_nats.[6] (u8 0x40)) in
+  let key_nats = key_nats.[8] <- (intel_expand_key128 key_nats.[7] (u8 0x80)) in
+  let key_nats = key_nats.[9] <- (intel_expand_key128 key_nats.[8] (u8 0x1B)) in
+  let key_nats = key_nats.[10] <- (intel_expand_key128 key_nats.[9] (u8 0x36)) in
+  // Write out keys.
+  let key_ex = create (11 * 16) (u8 0) in
+  let key_ex = repeat_range 0 44
+		       (fun i k -> update_slice k (i*4) ((i*4) + 4)
+        			(
+                let index:nat = i / 4 in
+                uint_to_bytes_le #U128 key_nats.[index]
+              )
+            )
+		       key_ex in
+  key_ex
 
 (* let aes128_block (k:block) (n:lseq uint8 12) (c:size_nat) : block =
   let ctrby = nat_to_bytes_be 4 c in
@@ -387,16 +451,20 @@ noeq type aes_state = {
 let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lseq uint8 n_len) : aes_state =
   let input = create 16 (u8 0) in
   let input = repeati n_len (fun i b -> b.[i] <- n.[i]) input in
-  let key_ex = key_expansion k in
+  let key_ex = intel_key_expansion k in
   let ctr = if n_len = 12 then 0 else 1 in
   {key_ex = key_ex;
    block  = input;
    ctr    = ctr}
 
+// TODO: make sure ctr doesn't overflow. This is a precondition that has to be assured by the caller.
 let aes_set_counter (st:aes_state) (c:size_nat) : Tot aes_state =
   let bint = nat_from_bytes_be st.block in
+  assert_norm(bint <= Prims.pow2 (8 * 16));
   let ctr = c - st.ctr in
-  let input = nat_to_bytes_be 16 (bint + ctr) in
+  let new_ctr = bint + ctr in
+  assert_norm(new_ctr >= 0 && new_ctr <= Prims.pow2 (8 * 16));
+  let input = nat_to_bytes_be 16 new_ctr in
   {st with block = input}
 
 let aes_key_block (st:aes_state) : Tot block =

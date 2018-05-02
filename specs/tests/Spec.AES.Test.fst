@@ -119,12 +119,16 @@ let test() : FStar.All.ML unit =
   let cip = aes128_encrypt_bytes key 12 nonce counter 16 plain in
 //  let cip = aes128_block key nonce counter in
 //  let cip = map2 (logxor #U8) cip plain in
-  IO.print_string "aes_cip computed:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
-  IO.print_string "\n";
-  IO.print_string "aes_cip expected:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
-  IO.print_string "\n";
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cip expected in
+  if result then IO.print_string "Success!\n"
+  else (
+    IO.print_string "aes_cip computed:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
+    IO.print_string "\n";
+    IO.print_string "aes_cip expected:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
+    IO.print_string "\n"
+  );
   let key = createL test_key1 in
   let nonce = createL test_nonce1 in
   let counter = test_counter1 in
@@ -133,12 +137,16 @@ let test() : FStar.All.ML unit =
   let cip = aes128_encrypt_bytes key 12 nonce counter 16 plain in
 //  let cip = aes128_block key nonce counter in
 //  let cip = map2 (logxor #U8) cip plain in
-  IO.print_string "aes_cip computed:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
-  IO.print_string "\n";
-  IO.print_string "aes_cip expected:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
-  IO.print_string "\n";
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cip expected in
+  if result then IO.print_string "Success!\n"
+  else (
+    IO.print_string "aes_cip computed:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
+    IO.print_string "\n";
+    IO.print_string "aes_cip expected:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
+    IO.print_string "\n"
+  );
   let key = createL test_key2 in
   let nonce = createL test_nonce2 in
   let counter = test_counter2 in
@@ -147,42 +155,58 @@ let test() : FStar.All.ML unit =
   let cip = aes128_encrypt_bytes key 12 nonce counter 32 plain in
 //  let cip = aes128_block key nonce counter in
 //  let cip = map2 (logxor #U8) cip plain in
-  IO.print_string "aes_cip computed:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #32 cip);
-  IO.print_string "\n";
-  IO.print_string "aes_cip expected:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
-  IO.print_string "\n";
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cip expected in
+  if result then IO.print_string "Success!\n"
+  else (
+    IO.print_string "aes_cip computed:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #32 cip);
+    IO.print_string "\n";
+    IO.print_string "aes_cip expected:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
+    IO.print_string "\n"
+  );
 
   (* test plain AES block function *)
   let key = createL test1_key_block in
   let plain = createL test1_plaintext_block in
   let expected = createL test1_ciphertext_block in
   let cip = aes128_encrypt_block key plain in
-  IO.print_string "aes_cip computed:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
-  IO.print_string "\n";
-  IO.print_string "aes_cip expected:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
-  IO.print_string "\n";
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cip expected in
+  if result then IO.print_string "Success!\n"
+  else (
+    IO.print_string "aes_cip computed:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
+    IO.print_string "\n";
+    IO.print_string "aes_cip expected:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
+    IO.print_string "\n"
+  );
   let key = createL test2_key_block in
   let plain = createL test2_plaintext_block in
   let expected = createL test2_ciphertext_block in
   let cip = aes128_encrypt_block key plain in
-  IO.print_string "aes_cip computed:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
-  IO.print_string "\n";
-  IO.print_string "aes_cip expected:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
-  IO.print_string "\n";
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cip expected in
+  if result then IO.print_string "Success!\n"
+  else (
+    IO.print_string "aes_cip computed:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
+    IO.print_string "\n";
+    IO.print_string "aes_cip expected:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
+    IO.print_string "\n"
+  );
   let key = createL test3_key_block in
   let plain = createL test2_plaintext_block in
   let expected = createL test3_ciphertext_block in
   let cip = aes128_encrypt_block key plain in
-  IO.print_string "aes_cip computed:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
-  IO.print_string "\n";
-  IO.print_string "aes_cip expected:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
-  IO.print_string "\n";
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cip expected in
+  if result then IO.print_string "Success!\n"
+  else (
+    IO.print_string "aes_cip computed:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 cip);
+    IO.print_string "\n";
+    IO.print_string "aes_cip expected:\n";
+    FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (as_list #uint8 #16 expected);
+    IO.print_string "\n"
+  );
   ()
