@@ -250,7 +250,7 @@ LowCProvider/lowc_stub.o: $(HEADERS) $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h
 OCAMLOPTS=-package fstarlib,zarith -g -I $(FSTAR_HOME)/ulib/ml
 OCAMLOPT=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind opt $(OCAMLOPTS)
 OCAMLC=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind ocamlc $(OCAMLOPTS)
-OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib $(OCAMLOPTS)
+OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib -g -I $(FSTAR_HOME)/ulib/ml
 
 # Then, we need to generate some .o ourselves, using ocamlopt to get all the
 # right include paths...
