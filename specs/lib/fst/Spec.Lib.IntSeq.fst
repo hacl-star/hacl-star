@@ -11,7 +11,6 @@ let incr (x:size_nat{x < max_size_t}) : size_nat = x + 1
 
 let seq (a:Type0) =  s:list a {List.Tot.length s <= max_size_t}
 let length (#a:Type0) (l:seq a) = List.Tot.length l
-let lseq (a:Type0) (len:size_nat) = s:seq a {length s == len}
 
 let to_lseq #a (s:seq a) = s
 let to_lbytes (s:bytes) = s
@@ -304,4 +303,3 @@ let rec concat_blocks #a #len #bs s l =
   | h :: t -> List.Tot.append h (concat_blocks #a #(len - bs) #bs t l)
 
 let as_list #a #len l = l
-
