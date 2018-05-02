@@ -35,7 +35,7 @@ SLOW=
 
 POLY1305_FILES=$(BIGNUM) $(POLY1305_SPECIFIC)
 
-FSTAR_INCLUDES+=--include ../bignum
+FSTAR_INCLUDES+=--include ../bignum --expose_interfaces
 
 # Parameters for interactive mode
 %.fst-in:

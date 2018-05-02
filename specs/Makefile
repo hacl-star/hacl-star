@@ -200,6 +200,14 @@ network.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/
 	$(OCAMLOPT) -I network-ml -I lib/ml lib/ml/Spec_Lib_IO_Tcp.ml network-ml/Spec_Lib_IntTypes.ml network-ml/Spec_Lib_RawIntTypes.ml network-ml/Spec_Lib_IntSeq.ml network-ml/Spec_Network_Test.ml -o network.exe
 	./network.exe
 
+rsapss.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
+	mkdir -p rsapss-ml
+	$(FSTAR)  --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSAPSS --extract_module Spec.RSAPSS.Test --odir rsapss-ml $^
+	@echo 'let _ = test()' >> rsapss-ml/Spec_RSAPSS_Test.ml
+	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) rsapss-ml/Spec_Lib_IntTypes.ml rsapss-ml/Spec_Lib_RawIntTypes.ml rsapss-ml/Spec_Lib_IntSeq.ml rsapss-ml/Spec_Lib_Stateful.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
+	./rsapss.exe
+
+
 clean:
 	$(MAKE) -C ../code/lib/ml clean
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
