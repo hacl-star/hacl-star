@@ -147,7 +147,7 @@ CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable 
 # repeat most of your program in every single compilation unit.
 $(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
 	$(KREMLIN_HOME)/krml $(KOPTS) -drop FStar.UInt128,FStar.Int.Cast.Full -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
-	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
+	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremlin/c_string.h"' \
 	  $(EXTRA)
 
 # Manually override the default argument for bundles, so as to provide a +
@@ -158,7 +158,7 @@ $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.c \
   $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h: BUNDLE=Crypto_HKDF+Crypto_HMAC
 
 # This is without the indexing id.
-$(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
+$(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"kremlin/testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
 
 
 ################################################################################
@@ -200,8 +200,9 @@ $(DIST_DIR)/copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
 $(DIST_DIR)/krml-test.exe: $(DIST_DIR)/uint128/uint128_wrapper.c $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES)) $($(IMPL_CHOICE)_EXTRA) $(DIST_DIR)/copied/testlib.c
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
-	    Crypto.AEAD.Main=Crypto.* -add-include '"kremstr.h"' -add-include \
-	  '"testlib.h"' -add-include '"kremlib.h"' -tmpdir $(OUTPUT_DIR) \
+	    Crypto.AEAD.Main=Crypto.* -add-include '"kremlin/c_string.h"' -add-include \
+	  '"kremlin/testlib.h"' -add-include '"kremlib.h"' -tmpdir $(OUTPUT_DIR) \
+	  -add-include '"kremlin/prims_int.h"' \
 	  $^ -o $@ \
 	  -I $(DIST_DIR)/uint128 -drop HaclProvider,LowCProvider,CryptoTypes
 

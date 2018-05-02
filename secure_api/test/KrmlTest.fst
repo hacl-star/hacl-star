@@ -343,7 +343,7 @@ let test_aes_gcm_4 () =
   assume(Buffer.length cipher = v (plainlen +^ 16ul));
   test_aes_gcm i 4ul k iv aadlen aad plainlen plain cipher
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -359,4 +359,4 @@ let main () =
   let _ = test_aes_gcm_3 () in
   C.String.print (C.String.of_literal "test_aes_gcm_4()\n");
   let _ = test_aes_gcm_4 () in
-  C.exit_success
+  C.EXIT_SUCCESS
