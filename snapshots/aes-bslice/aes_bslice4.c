@@ -2,129 +2,39 @@
 #include <stdlib.h> 
 #include <string.h> 
 #include <sys/types.h> 
+#include "endianness.h"
 
 typedef uint64_t* transpose_t;
 
 //#define static static inline __attribute((always_inline))
 
-/*
-static  void to_transpose(transpose_t out, uint8_t* in) {
-  for (int i = 0; i < 8; i++) {
-    uint64_t u = 0;
-    for (int j = 0; j < 64; j++) {
-      if (i > j)
-	u ^= (uint64_t)(in[j] & ((uint8_t)1 << i)) >> (i - j);
-      else
-	u ^= (uint64_t)(in[j] & ((uint8_t)1 << i)) << (j - i);
-    }
-    out[i] = u;
-  }
-}
-*/
-
-void transpose8x8_old(uint8_t* in,uint8_t* out) {
-  uint64_t x = 0;
+static uint64_t transpose64(uint64_t x) {
   uint64_t y = 0;
-  int i;
 
-  for (i = 7; i >= 0; i--)     // Load 8 bytes from the
-    x = (x << 8) ^ in[i];      // input array and pack
-                                // them into x.
-   y =  (x & 0x8040201008040201LL)        |
-       ((x & 0x4020100804020100LL) >>  7) |
-       ((x & 0x2010080402010000LL) >> 14) |
-       ((x & 0x1008040201000000LL) >> 21) |
-       ((x & 0x0804020100000000LL) >> 28) |
-       ((x & 0x0402010000000000LL) >> 35) |
-       ((x & 0x0201000000000000LL) >> 42) |
-       ((x & 0x0100000000000000LL) >> 49) |
-       ((x <<  7) & 0x4020100804020100LL) |
-       ((x << 14) & 0x2010080402010000LL) |
-       ((x << 21) & 0x1008040201000000LL) |
-       ((x << 28) & 0x0804020100000000LL) |
-       ((x << 35) & 0x0402010000000000LL) |
-       ((x << 42) & 0x0201000000000000LL) |
-       ((x << 49) & 0x0100000000000000LL);
-
-   for (i = 0; i <= 7; i++) {   // Store result into
-      out[i] = y; y = y >> 8;}  // output array B.
+  y =  (x & 0x8040201008040201LL)        |
+    ((x & 0x4020100804020100LL) >>  7) |
+    ((x & 0x2010080402010000LL) >> 14) |
+    ((x & 0x1008040201000000LL) >> 21) |
+    ((x & 0x0804020100000000LL) >> 28) |
+    ((x & 0x0402010000000000LL) >> 35) |
+    ((x & 0x0201000000000000LL) >> 42) |
+    ((x & 0x0100000000000000LL) >> 49) |
+    ((x <<  7) & 0x4020100804020100LL) |
+    ((x << 14) & 0x2010080402010000LL) |
+    ((x << 21) & 0x1008040201000000LL) |
+    ((x << 28) & 0x0804020100000000LL) |
+    ((x << 35) & 0x0402010000000000LL) |
+    ((x << 42) & 0x0201000000000000LL) |
+    ((x << 49) & 0x0100000000000000LL);
+  
+  return y;
 }
-
-
-uint64_t transpose8x8(uint8_t* in) {
-  uint64_t x = 0;
-  uint64_t y = 0;
-  int i;
-
-  for (i = 7; i >= 0; i--)     // Load 8 bytes from the
-    x = (x << 8) ^ in[i];      // input array and pack
-                                // them into x.
-   y =  (x & 0x8040201008040201LL)        |
-       ((x & 0x4020100804020100LL) >>  7) |
-       ((x & 0x2010080402010000LL) >> 14) |
-       ((x & 0x1008040201000000LL) >> 21) |
-       ((x & 0x0804020100000000LL) >> 28) |
-       ((x & 0x0402010000000000LL) >> 35) |
-       ((x & 0x0201000000000000LL) >> 42) |
-       ((x & 0x0100000000000000LL) >> 49) |
-       ((x <<  7) & 0x4020100804020100LL) |
-       ((x << 14) & 0x2010080402010000LL) |
-       ((x << 21) & 0x1008040201000000LL) |
-       ((x << 28) & 0x0804020100000000LL) |
-       ((x << 35) & 0x0402010000000000LL) |
-       ((x << 42) & 0x0201000000000000LL) |
-       ((x << 49) & 0x0100000000000000LL);
-
-   return y;
-}
-
-/*
-static  void to_transpose_block_copy_old(transpose_t out, uint8_t* in) {
-  for (int i = 0; i < 8; i++) {
-    uint64_t u = 0;
-    for (int j = 0; j < 16; j++) {
-       if (i > j)
-	u ^= (uint64_t)(in[j] & ((uint8_t)1 << i)) >> (i - j);
-      else
-	u ^= (uint64_t)(in[j] & ((uint8_t)1 << i)) << (j - i);
-    }
-    u ^= u << 16;
-    u ^= u << 32;
-    out[i] = u;
-  }
-}
-static  void to_transpose_block_copy(transpose_t out, uint8_t* in) {
-  uint8_t trans[16] = {0};
-  transpose8x8(in,trans);
-  transpose8x8(in+8,trans+8);
-  for (int i = 0; i < 8; i++) {
-    uint64_t u = trans[i];
-    uint64_t u8 = trans[i+8];
-    u ^= u8 << 8;
-    u ^= u << 16;
-    u ^= u << 32;
-    out[i] = u;
-  }
-}
-
-
-static  void to_transpose_block(transpose_t out, uint8_t* in) {
-  uint8_t trans[16] = {0};
-  transpose8x8(in,trans);
-  transpose8x8(in+8,trans+8);
-  for (int i = 0; i < 8; i++) {
-    uint64_t u = trans[i];
-    uint64_t u8 = trans[i+8];
-    u ^= u8 << 8;
-    out[i] = u;
-  }
-}
-
-*/
 
 static  void to_transpose_block_copy(transpose_t out, uint8_t* in) {
-  uint64_t fst = transpose8x8(in);
-  uint64_t snd = transpose8x8(in+8);
+  uint64_t fst = load64_le(in);
+  uint64_t snd = load64_le(in+8);
+  fst = transpose64(fst);
+  snd = transpose64(snd);
   for (int i = 0; i < 8; i++) {
     uint64_t u = (fst >> (8*i)) & 0xff;
     u ^= ((snd >> (8*i)) & 0xff) << 8;
@@ -135,8 +45,10 @@ static  void to_transpose_block_copy(transpose_t out, uint8_t* in) {
 }
 
 static  void to_transpose_block(transpose_t out, uint8_t* in) {
-  uint64_t fst = transpose8x8(in);
-  uint64_t snd = transpose8x8(in+8);
+  uint64_t fst = load64_le(in);
+  uint64_t snd = load64_le(in+8);
+  fst = transpose64(fst);
+  snd = transpose64(snd);
   for (int i = 0; i < 8; i++) {
     uint64_t u = (fst >> (8*i)) & 0xff;
     u ^= ((snd >> (8*i)) & 0xff) << 8;
@@ -144,18 +56,6 @@ static  void to_transpose_block(transpose_t out, uint8_t* in) {
   }
 }
 
-static  void to_transpose_block_old(transpose_t out, uint8_t* in) {
-  for (int i = 0; i < 8; i++) {
-    uint64_t u = 0;
-    for (int j = 0; j < 16; j++) {
-       if (i > j)
-	u ^= (uint64_t)(in[j] & ((uint8_t)1 << i)) >> (i - j);
-      else
-	u ^= (uint64_t)(in[j] & ((uint8_t)1 << i)) << (j - i);
-    }
-    out[i] = u;
-  }
-}
 
 static void from_transpose(uint8_t* out, transpose_t in) {
   for (int i = 0; i < 64; i++) {
@@ -168,6 +68,34 @@ static void from_transpose(uint8_t* out, transpose_t in) {
     }
     out[i] = u;
   }
+}
+
+static void from_transpose_new(uint8_t* out, transpose_t in) {
+
+  uint64_t t =
+    (in[0] & 0xff) ^
+    ((in[1] & 0xff)<<8) ^
+    ((in[2] & 0xff)<<16) ^
+    ((in[3] & 0xff)<<24) ^
+    ((in[4] & 0xff)<<32) ^
+    ((in[5] & 0xff)<<40) ^
+    ((in[6] & 0xff)<<48) ^
+    ((in[7] & 0xff)<<56);
+  t = transpose64(t);
+  store64_le(out,t);
+
+  t = 
+    ((in[0] & 0xff00)>>8) ^
+    ((in[1] & 0xff00)) ^
+    ((in[2] & 0xff00)<<8) ^
+    ((in[3] & 0xff00)<<16) ^
+    ((in[4] & 0xff00)<<24) ^
+    ((in[5] & 0xff00)<<32) ^
+    ((in[6] & 0xff00)<<40) ^
+    ((in[7] & 0xff00)<<48);
+  t = transpose64(t);
+  store64_le(out+8,t);
+  
 }
 
 static void subBytes(transpose_t st) {
@@ -444,7 +372,6 @@ static void key_expansion(uint64_t* out, uint8_t* key) {
     key_expansion_step(out+(8*i),out+(8*i-8),rcon[i]);
 }
 
-//#include "endianness.h"
 static void aes128_block(uint8_t* out, uint64_t* kex, uint64_t* nt, uint32_t c) {
   uint8_t ctr[16] = {0};
   for (int i = 0; i < 4; i++) {
