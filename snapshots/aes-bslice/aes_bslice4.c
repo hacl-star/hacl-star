@@ -56,46 +56,82 @@ static  void to_transpose_block(transpose_t out, uint8_t* in) {
   }
 }
 
-
 static void from_transpose(uint8_t* out, transpose_t in) {
-  for (int i = 0; i < 64; i++) {
-    uint8_t u = 0;
-    for (int j = 0; j < 8; j++) {
-      if (i > j)
-	u ^= (uint8_t)((uint64_t)(in[j] & ((uint64_t)1 << i)) >> (i - j));
-      else
-	u ^= (uint8_t)((uint64_t)(in[j] & ((uint64_t)1 << i)) << (j - i));
-    }
-    out[i] = u;
-  }
-}
+  uint64_t t0 = (in[0] & 0xffffffff) ^ (in[4] << 32);
+  uint64_t t1 = (in[1] & 0xffffffff) ^ (in[5] << 32);
+  uint64_t t2 = (in[2] & 0xffffffff) ^ (in[6] << 32);
+  uint64_t t3 = (in[3] & 0xffffffff) ^ (in[7] << 32);
 
-static void from_transpose_new(uint8_t* out, transpose_t in) {
-
-  uint64_t t =
-    (in[0] & 0xff) ^
-    ((in[1] & 0xff)<<8) ^
-    ((in[2] & 0xff)<<16) ^
-    ((in[3] & 0xff)<<24) ^
-    ((in[4] & 0xff)<<32) ^
-    ((in[5] & 0xff)<<40) ^
-    ((in[6] & 0xff)<<48) ^
-    ((in[7] & 0xff)<<56);
-  t = transpose64(t);
-  store64_le(out,t);
-
-  t = 
-    ((in[0] & 0xff00)>>8) ^
-    ((in[1] & 0xff00)) ^
-    ((in[2] & 0xff00)<<8) ^
-    ((in[3] & 0xff00)<<16) ^
-    ((in[4] & 0xff00)<<24) ^
-    ((in[5] & 0xff00)<<32) ^
-    ((in[6] & 0xff00)<<40) ^
-    ((in[7] & 0xff00)<<48);
-  t = transpose64(t);
-  store64_le(out+8,t);
   
+  uint64_t t4 = (in[4] & 0xffffffff00000000) ^ (in[0] >> 32);
+  uint64_t t5 = (in[5] & 0xffffffff00000000) ^ (in[1] >> 32);
+  uint64_t t6 = (in[6] & 0xffffffff00000000) ^ (in[2] >> 32);
+  uint64_t t7 = (in[7] & 0xffffffff00000000) ^ (in[3] >> 32);
+
+  uint64_t t0_ = t0;
+  uint64_t t1_ = t1;
+  uint64_t t2_ = t3;
+  uint64_t t3_ = t3;
+  uint64_t t4_ = t4;
+  uint64_t t5_ = t5;
+  uint64_t t6_ = t6;
+  uint64_t t7_ = t7;
+  
+  t0 = (t0 & 0x0000ffff0000ffff) ^ ((t2 & 0x0000ffff0000ffff) << 16);
+  t1 = (t1 & 0x0000ffff0000ffff) ^ ((t3 & 0x0000ffff0000ffff) << 16);
+  t2 = (t2 & 0xffff0000ffff0000) ^ ((t0_ & 0xffff0000ffff0000) >> 16);
+  t3 = (t3 & 0xffff0000ffff0000) ^ ((t1_ & 0xffff0000ffff0000) >> 16);
+  t4 = (t4 & 0x0000ffff0000ffff) ^ ((t6 & 0x0000ffff0000ffff) << 16);
+  t5 = (t5 & 0x0000ffff0000ffff) ^ ((t7 & 0x0000ffff0000ffff) << 16);
+  t6 = (t6 & 0xffff0000ffff0000) ^ ((t4_ & 0xffff0000ffff0000) >> 16);
+  t7 = (t7 & 0xffff0000ffff0000) ^ ((t5_ & 0xffff0000ffff0000) >> 16);
+
+  t0_ = t0;
+  t1_ = t1;
+  t2_ = t2;
+  t3_ = t3;
+  t4_ = t4;
+  t5_ = t5;
+  t6_ = t6;
+  t7_ = t7;
+
+  t0 = (t0 & 0x00ff00ff00ff00ff) ^ ((t1 & 0x00ff00ff00ff00ff) << 8);
+  t1 = (t1 & 0xff00ff00ff00ff00) ^ ((t0_ & 0xff00ff00ff00ff00) >> 8);
+  t2 = (t2 & 0x00ff00ff00ff00ff) ^ ((t3 & 0x00ff00ff00ff00ff) << 8);
+  t3 = (t3 & 0xff00ff00ff00ff00) ^ ((t2_ & 0xff00ff00ff00ff00) >> 8);
+  t4 = (t4 & 0x00ff00ff00ff00ff) ^ ((t5 & 0x00ff00ff00ff00ff) << 8);
+  t5 = (t5 & 0xff00ff00ff00ff00) ^ ((t4_ & 0xff00ff00ff00ff00) >> 8);
+  t6 = (t6 & 0x00ff00ff00ff00ff) ^ ((t7 & 0x00ff00ff00ff00ff) << 8);
+  t7 = (t7 & 0xff00ff00ff00ff00) ^ ((t6_ & 0xff00ff00ff00ff00) >> 8);
+
+  /* printf("t[0] = %" PRIx64 "\n",t0); */
+  /* printf("t[1] = %" PRIx64 "\n",t1); */
+  /* printf("t[2] = %" PRIx64 "\n",t2); */
+  /* printf("t[3] = %" PRIx64 "\n",t3); */
+  /* printf("t[4] = %" PRIx64 "\n",t4); */
+  /* printf("t[5] = %" PRIx64 "\n",t5); */
+  /* printf("t[6] = %" PRIx64 "\n",t6); */
+  /* printf("t[7] = %" PRIx64 "\n",t7); */
+  
+
+  t0 = transpose64(t0);
+  t1 = transpose64(t1);
+  t2 = transpose64(t2);
+  t3 = transpose64(t3);
+  t4 = transpose64(t4);
+  t5 = transpose64(t5);
+  t6 = transpose64(t6);
+  t7 = transpose64(t7);
+
+  store64_le(out,t0);
+  store64_le(out+8,t1);
+  store64_le(out+16,t2);
+  store64_le(out+24,t3);
+  store64_le(out+32,t4);
+  store64_le(out+40,t5);
+  store64_le(out+48,t6);
+  store64_le(out+56,t7);
+
 }
 
 static void subBytes(transpose_t st) {
@@ -374,14 +410,8 @@ static void key_expansion(uint64_t* out, uint8_t* key) {
 
 static void aes128_block(uint8_t* out, uint64_t* kex, uint64_t* nt, uint32_t c) {
   uint8_t ctr[16] = {0};
-  for (int i = 0; i < 4; i++) {
-    uint32_t ci = c + i;
-    ctr[4*i] = ci >> 24;
-    ctr[4*i+1] = ci >> 16;
-    ctr[4*i+2] = ci >> 8;
-    ctr[4*i+3] = ci >> 0;
-    //    store32_be(ctr+(4*i),ci);
-  }
+  for (int i = 0; i < 4; i++) 
+    store32_be(ctr+(4*i),c + i);
   uint64_t st[8] = {0};
   to_transpose_block(st,ctr);
   for (int i = 0; i < 8; i++) {
@@ -406,18 +436,20 @@ static void aes128_ctr(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_
   int blocks64 = in_len / 64;
   for (int i = 0; i < blocks64; i++) {
     aes128_block(kb,kex,nt,c+(4*i));
-    for (int j = 0; j < 64; j++)
-      out[(64*i)+j] = in[(64*i)+j] ^ kb[j];
+    for (int j = 0; j < 64; j++) {
+      out[64*i+j] = in[64*i+j] ^ kb[j];
+    }
   }
 
   int rem = in_len % 64;
   if (rem > 0) {
+    in = in + (64 * blocks64);
     out = out + (64 * blocks64);
-    in  = in + (64 * blocks64);
     c = c + (4 * blocks64);
     aes128_block(kb,kex,nt,c);
-    for (int j = 0; j < rem; j++)
+    for (int j = 0; j < rem; j++) {
       out[j] = in[j] ^ kb[j];
+    }
   }
 }
 

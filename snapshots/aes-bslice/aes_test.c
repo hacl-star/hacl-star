@@ -106,4 +106,5 @@ int main() {
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",len,(uint64_t)(t2-t1),(double)(t2-t1)/len);
   free(plain);
   free(cipher);
+  
 }
