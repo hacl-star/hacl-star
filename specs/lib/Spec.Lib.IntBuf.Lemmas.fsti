@@ -106,6 +106,7 @@ val disjoint_list_lemma3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #l
 			(ensures (disjoint_list b0 [BufItem b1; BufItem b2; BufItem b3] == (disjoint b0 b1 /\ disjoint b0 b2 /\ disjoint b0 b3 /\ disjoint b1 b0 /\ disjoint b2 b0 /\ disjoint b3 b0)))
 			[SMTPat (disjoint_list b0 [BufItem b1; BufItem b2; BufItem b3])]
 
+
 val disjoint_lists_lemma_1_1: #a0:Type0 -> #a1:Type0 -> #len0:size_nat -> #len1:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> Lemma
 			(requires (True))
 			(ensures (disjoint_lists [BufItem b0] [BufItem b1] == (disjoint b0 b1 /\ disjoint b1 b0) ))
@@ -135,6 +136,28 @@ val disjoint_lists_lemma_1_3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -
 			(requires (True))
 			(ensures (disjoint_lists [BufItem b0] [BufItem b1; BufItem b2; BufItem b3] == (disjoint b0 b1 /\ disjoint b1 b0 /\ disjoint b0 b2 /\ disjoint b2 b0 /\ disjoint b0 b3 /\ disjoint b3 b0) ))
 			[SMTPat (disjoint_lists [BufItem b0] [BufItem b1; BufItem b2; BufItem b3])]
+
+val disjoint_lists_lemma_1_4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #a4:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> #len3:size_nat -> #len4:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> b4:lbuffer a4 len4 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0] [BufItem b1; BufItem b2; BufItem b3; BufItem b4] == (disjoint b0 b1 /\ disjoint b1 b0 /\ disjoint b0 b2 /\ disjoint b2 b0 /\ disjoint b0 b3 /\ disjoint b3 b0 /\ disjoint b0 b4 /\ disjoint b4 b0) ))
+			[SMTPat (disjoint_lists [BufItem b0] [BufItem b1; BufItem b2; BufItem b3; BufItem b4])]
+
+val disjoint_lists_lemma_4_1: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #a4:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> #len3:size_nat -> #len4:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> b4:lbuffer a4 len4 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0; BufItem b1; BufItem b2; BufItem b3] [BufItem b4] == (disjoint b0 b4 /\ disjoint b4 b0 /\ disjoint b1 b4 /\ disjoint b4 b1 /\ disjoint b2 b4 /\ disjoint b4 b2 /\ disjoint b3 b4 /\ disjoint b4 b3) ))
+			[SMTPat (disjoint_lists [BufItem b0; BufItem b1; BufItem b2; BufItem b3] [BufItem b4])]
+
+val disjoint_lists_lemma_2_4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #a4:Type0 -> #a5:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> #len3:size_nat -> #len4:size_nat -> #len5:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> b4:lbuffer a4 len4 -> b5:lbuffer a5 len5 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0; BufItem b1] [BufItem b2; BufItem b3; BufItem b4; BufItem b5] == (disjoint b0 b2 /\ disjoint b2 b0 /\ disjoint b0 b3 /\ disjoint b3 b0 /\ disjoint b0 b4 /\ disjoint b4 b0 /\ disjoint b1 b2 /\ disjoint b2 b1 /\ disjoint b1 b3 /\ disjoint b3 b1 /\ disjoint b1 b4 /\ disjoint b4 b1) ))
+			[SMTPat (disjoint_lists [BufItem b0; BufItem b1] [BufItem b2; BufItem b3; BufItem b4; BufItem b5])]
+
+
+val disjoint_lists_lemma_4_2: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #a4:Type0 -> #a5:Type0 -> #len0:size_nat -> #len1:size_nat -> #len2:size_nat -> #len3:size_nat -> #len4:size_nat -> #len5:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> b4:lbuffer a4 len4 -> b5:lbuffer a5 len5 -> Lemma
+			(requires (True))
+			(ensures (disjoint_lists [BufItem b0; BufItem b1; BufItem b2; BufItem b3] [BufItem b4; BufItem b5] == (disjoint b0 b4 /\ disjoint b4 b0 /\ disjoint b1 b4 /\ disjoint b4 b1 /\ disjoint b2 b4 /\ disjoint b4 b2 /\ disjoint b3 b4 /\ disjoint b4 b3 /\ disjoint b0 b5 /\ disjoint b5 b0 /\ disjoint b1 b5 /\ disjoint b5 b1 /\ disjoint b2 b5 /\ disjoint b5 b2 /\ disjoint b3 b5 /\ disjoint b5 b3) ))
+			[SMTPat (disjoint_lists [BufItem b0; BufItem b1; BufItem b2; BufItem b3] [BufItem b4; BufItem b5])]
+
 
 val disjoints_lemma1: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> Lemma
 			(requires (True))
