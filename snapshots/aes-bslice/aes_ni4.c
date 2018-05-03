@@ -3,34 +3,39 @@
 #include <string.h>
 #include <sys/types.h>
 #include <wmmintrin.h>
+#include <smmintrin.h>
+#include "endianness.h"
 
 typedef __m128i* state_t;
 
-#define static static inline __attribute((always_inline))
 
-static void aes_enc(state_t st, state_t k) {
+static inline void aes_enc(state_t st, state_t k) {
   *st = _mm_aesenc_si128(*st,*k);
 }
 
-static void aes_enc_last(state_t st, state_t k) {
+static inline void aes_enc_last(state_t st, state_t k) {
   *st = _mm_aesenclast_si128(*st,*k);
 }
 
+#define INTERLEAVE 8
 static void rounds(state_t st, state_t key) {
-  for (int i = 0; i < 9; i++)
-    aes_enc(st,key+i);
+  for (int i = 0; i < 9; i++) 
+    for (int j = 0; j < INTERLEAVE; j++) 
+      aes_enc(st+j,key+i);
 }
 
-static void block_cipher(state_t out, state_t key) {
+static inline void block_cipher(state_t out, state_t key) {
   state_t k0 = key;
   state_t k = key + 1;
   state_t kn = key + 10;
-  *out = _mm_xor_si128(*out, *k0); 
+  for (int j = 0; j < INTERLEAVE; j++)
+    out[j] = _mm_xor_si128(out[j], *k0); 
   rounds(out,k);
-  aes_enc_last(out,kn);
+  for (int j = 0; j < INTERLEAVE; j++)
+    aes_enc_last(out+j,kn);
 }
 
-static void key_expansion_step(state_t next, state_t prev){
+static inline void key_expansion_step(state_t next, state_t prev){
   *next = _mm_shuffle_epi32(*next, _MM_SHUFFLE(3,3,3,3));
   __m128i key = *prev;
   key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
@@ -63,33 +68,45 @@ static void key_expansion(state_t out, uint8_t* key) {
   key_expansion_step(out+10,out+9);
 }
 
-static void aes128_block(uint8_t* out,state_t kex, uint8_t* n, uint32_t c) {
-  memcpy(out,n,12);
-  out[12] = (uint8_t)(c >> 24);
-  out[13] = (uint8_t)(c >> 16);
-  out[14] = (uint8_t)(c >> 8);
-  out[15] = (uint8_t)(c);
-  __m128i st = _mm_loadu_si128((__m128i*) out);
-  block_cipher(&st,kex);
-  _mm_storeu_si128((__m128i*) out,st);
+static inline void aes128_block(state_t out,state_t kex, __m128i nvec, uint32_t c) {
+  for (int i = 0; i < INTERLEAVE; i++)
+    out[i] = _mm_insert_epi32(nvec, __builtin_bswap32(c + i), 3);
+  block_cipher(out,kex);
 }
 
 static void aes128_ctr(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* n, uint32_t c) {
   __m128i kex[11] = {0};
   key_expansion(kex,k);
-  uint8_t kb[16] = {0};
-  int blocks = in_len / 16;
+  int blocksize = 16 * INTERLEAVE;
+  __m128i kb[INTERLEAVE] = {0};
+
+  uint8_t tmp_n[16];
+  memcpy(tmp_n,n,12);
+  __m128i nvec = _mm_loadu_si128((__m128i*) tmp_n);
+
+  int blocks = in_len / blocksize;
   for (int i = 0; i < blocks; i++) {
-    aes128_block(kb,kex,n,c+i);
-    for (int j = 0; j < 16; j++)
-      out[(16*i)+j] = in[(16*i)+j] ^ kb[j];
-  }
-  int rem = in_len % 16;
-  if (rem > 0) {
-      aes128_block(kb,kex,n,c+blocks);
-      for (int j = 0; j < rem; j++)
-	out[(16*blocks)+j] = in[(16*blocks)+j] ^ kb[j];
+    aes128_block(kb,kex,nvec,c+(INTERLEAVE*i));
+    for (int j = 0; j < INTERLEAVE; j++) {
+      kb[j] = _mm_xor_si128(kb[j],_mm_loadu_si128((__m128i*)&in[blocksize*i + 16*j]));
+      _mm_storeu_si128((__m128i*)&out[blocksize*i + 16*j],kb[j]);
     }
+  }
+
+  int rem = in_len % blocksize;
+  if (rem > 0) {
+    in = in + (blocksize * blocks);
+    out = out + (blocksize * blocks);
+    c = c + (INTERLEAVE * blocks);
+    aes128_block(kb,kex,nvec,c);
+    uint8_t tmp[blocksize];
+    for (int i = 0; i < INTERLEAVE; i++)
+      _mm_storeu_si128((__m128i*)&tmp[16*i],kb[i]);
+    for (int j = 0; j < rem; j++) {
+      out[j] = in[j] ^ tmp[j];
+    }
+  }
+      
 }
 
 void aes128_encrypt(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* n, uint32_t c) {
