@@ -32,8 +32,8 @@ static __inline__ cycles cpucycles_end(void)
 
 extern void aes128_encrypt(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* n, uint32_t c);
 
-#define ROUNDS 1024*10
-#define SIZE   5*1024
+#define ROUNDS 1024
+#define SIZE   8192
 
 int main() {
   int in_len = 32;
@@ -64,47 +64,32 @@ int main() {
     printf("%02x",exp[i]);
   printf("\n");
 
-  uint64_t len = ROUNDS * SIZE;
-  uint8_t* plain = malloc(len);
-  uint8_t* cipher = malloc(len);
+  uint64_t len = SIZE;
+  uint8_t plain[SIZE];
   uint8_t key[16];
   uint8_t nonce[12];
-  int fd = open("/dev/urandom", O_RDONLY);
-  if (fd == -1) {
-    printf("Cannot open /dev/urandom\n");
-    return 1;
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  memset(nonce,'N',12);
+
+  for (int j = 0; j < ROUNDS; j++) {
+    aes128_encrypt(plain,plain,SIZE,key,nonce,1);
   }
-  uint64_t res = read(fd, plain, len);
-  if (res < len) {
-    printf("Error on reading, expected %" PRIu64 " bytes, got %" PRIu64 " bytes\n", (uint64_t)len, res);
-    return 1;
-  }
-  res = read(fd, key, 16);
-  if (res < 16) {
-    printf("Error on reading, expected %" PRIu64 " bytes, got %" PRIu64 " bytes\n", (uint64_t)16, res);
-    return 1;
-  }
-  res = read(fd, nonce, 12);
-  if (res < 12) {
-    printf("Error on reading, expected %" PRIu64 " bytes, got %" PRIu64 " bytes\n", (uint64_t)12, res);
-    return 1;
-  }
+
   cycles a,b;
   clock_t t1,t2;
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    aes128_encrypt(cipher+(SIZE*j),plain+(SIZE*j),SIZE,key,nonce,1);
+    aes128_encrypt(plain,plain,SIZE,key,nonce,1);
   }
   b = cpucycles_end();
   t2 = clock();
-  for (uint64_t j = 0; j < len; j++){
-    res ^= cipher[j];
-  }
-  printf("result (ignore) : %llu\n",res);
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",len,(uint64_t)(b-a),(double)(b-a)/len);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",len,(uint64_t)(t2-t1),(double)(t2-t1)/len);
-  free(plain);
-  free(cipher);
+  double diff = (double)(t2 - t1)/CLOCKS_PER_SEC;
+
+  uint64_t count = ROUNDS * SIZE;
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)(b-a),(double)(b-a)/count);
+  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)(t2-t1),(double)(t2-t1)/count);
+  printf("bw %8.2f MB/s\n",(double)count/(diff * 1000000.0));
   
 }
