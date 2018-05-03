@@ -12,7 +12,7 @@ module R = Hacl.Hardware.Intel.DRNG
 
 
 (* Entry point *)
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -30,4 +30,4 @@ let main () =
   C.print_bytes result size;
 
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS

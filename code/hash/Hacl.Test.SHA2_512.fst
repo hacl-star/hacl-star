@@ -498,7 +498,7 @@ let test_6 () =
 
 
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -526,4 +526,4 @@ let main () =
   test_6();
 
   (* Exit the program *)
-  C.exit_success
+  C.EXIT_SUCCESS
