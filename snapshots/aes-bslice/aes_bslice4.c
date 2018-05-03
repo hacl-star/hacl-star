@@ -276,74 +276,33 @@ static void subBytes(transpose_t st) {
   st[6] = ~(t109 ^ t140); 
 }
 
-const uint64_t maskr[3]  = {
-  0x1110111011101110,
-  0x1100110011001100,
-  0x1000100010001000
-};
-
-const uint64_t maskl[3]  = {
-  0x0001000100010001,
-  0x0011001100110011,
-  0x0111011101110111 
-};
-
-static  void shiftRow(int i, int shift, transpose_t st){
-  uint64_t rm = maskr[shift-1] << i;
-  uint64_t lm = maskl[shift-1] << i;
-  uint64_t st_mask = (uint64_t)0x1111111111111111 << i;
-  uint64_t nst_mask = ~st_mask;
-  int sh = 4 * shift;
+static  void shiftRows(transpose_t st){
   for (int i = 0; i < 8; i++) {
-    uint64_t row1 = st[i] & rm;
-    uint64_t row2 = st[i] & lm;
-    row1 = (row1 >> sh) | (row2 << (16 - sh));
-    st[i] = (st[i] & nst_mask) ^ row1;
+    uint64_t curr = st[i];
+    curr = (curr & 0x1111111111111111) |
+      ((curr & 0x2220222022202220) >> 4) | 
+      ((curr & 0x0002000200020002) << 12) |
+      ((curr & 0x4400440044004400) >> 8) | 
+      ((curr & 0x0044004400440044) << 8) |
+      ((curr & 0x8000800080008000) >> 12) | 
+      ((curr & 0x0888088808880888) << 4);
+    st[i] =  curr;
   }
-}
-
-static  void shiftRows(transpose_t st) {
-  shiftRow(1,1,st);
-  shiftRow(2,2,st);
-  shiftRow(3,3,st);
-}
-
-static  void xtime(transpose_t st) {
-  uint64_t prev = st[0];
-  for (int i = 0; i < 7; i++) {
-    uint64_t p = st[i+1];
-    st[i+1] = prev;
-    prev = p;
-  }
-  st[0] = prev;
-  st[1] ^= prev;
-  st[3] ^= prev;
-  st[4] ^= prev;
-}  
-
-static void mixColumn(int c, transpose_t st) {
-  uint64_t st_mask = (uint64_t)0x000f000f000f000f << (4 * c);
-  uint64_t nst_mask = ~st_mask;
-  uint64_t st1[8] = {0};
-  uint64_t st2[8] = {0};
-  for (int i = 0; i < 8; i++) {
-    uint64_t col = st[i] & st_mask;
-    uint64_t col1 = ((uint64_t)(col >> 1) | (uint64_t)(col << 3)) & st_mask;
-    uint64_t col2 = ((uint64_t)(col >> 2) | (uint64_t)(col << 2)) & st_mask;
-    uint64_t col3 = ((uint64_t)(col >> 3) | (uint64_t)(col << 1)) & st_mask;
-    st1[i] = col ^ col1;
-    st2[i] = col1 ^ col2 ^ col3;
-  }
-  xtime(st1);
-  for (int i = 0; i < 8; i++) 
-    st[i] = (st[i] & nst_mask) ^ st2[i] ^ st1[i];
 }
 
 static  void mixColumns(transpose_t st) {
-  mixColumn(0,st);
-  mixColumn(1,st);
-  mixColumn(2,st);
-  mixColumn(3,st);
+  uint64_t rot_prev = 0;
+  for (int i = 0; i < 8; i++) {
+    uint64_t col = st[i];
+    uint64_t col01 = col ^ (((col & 0xeeeeeeeeeeeeeeee) >> 1) | ((col & 0x1111111111111111) << 3));
+    uint64_t col0123 = col01 ^ (((col01 & 0xcccccccccccccccc ) >> 2) | ((col01 & 0x3333333333333333) << 2));
+    st[i] ^= col0123 ^ rot_prev;
+    rot_prev = col01;
+  }
+  st[0] ^= rot_prev;
+  st[1] ^= rot_prev;
+  st[3] ^= rot_prev;
+  st[4] ^= rot_prev;
 }
 
 static  void addRoundKey(transpose_t st, transpose_t k) {
@@ -416,7 +375,8 @@ static void aes128_block(uint8_t* out, uint64_t* kex, uint64_t* nt, uint32_t c) 
   to_transpose_block(st,ctr);
   for (int i = 0; i < 8; i++) {
     uint64_t ci = st[i];
-    ci = ((ci & 0xf) << 12) ^ ((ci & 0xf0) << 24) ^ ((ci & 0xf00) << 36) ^ ((ci & 0xf000) << 48);
+    ci = (ci << 12) | (ci << 24) | (ci << 36) | (ci << 48);
+    ci = ci & 0xf000f000f000f000;
     st[i] = ci ^ nt[i];
   }
   block_cipher(out,st,kex);
