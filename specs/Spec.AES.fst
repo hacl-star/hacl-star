@@ -367,7 +367,20 @@ let key_expansion (key:block) : (lseq uint8 (11 * 16)) =
   key_ex
 
 let word_to_u128 (w:word) : uint128 =
-  to_u128 (uint_from_bytes_be #U32 w)
+  to_u128 (uint_from_bytes_le #U32 w)
+
+// TODO: this can probably be solved in a nicer way.
+let u128_to_bytes (u:uint128) : block =
+  let w0 = uint_to_bytes_le #U32 (to_u32 (shift_right #U128 u (u32 96))) in
+  let w1 = uint_to_bytes_le #U32 (to_u32 (shift_right #U128 u (u32 64))) in
+  let w2 = uint_to_bytes_le #U32 (to_u32 (shift_right #U128 u (u32 32))) in
+  let w3 = uint_to_bytes_le #U32 (to_u32 #U128 u) in
+  let r = create 16 (u8 0) in
+  let r = update_slice r 0 4 w3 in
+  let r = update_slice r 4 8 w2 in
+  let r = update_slice r 8 12 w1 in
+  let r = update_slice r 12 16 w0 in
+  r
 
 // Maybe implement rotate_word and sub_word on uint?
 let mm_aeskeygenassist_si128 (key:uint128) (rcon:uint8) : (uint128) =
@@ -383,7 +396,7 @@ let mm_aeskeygenassist_si128 (key:uint128) (rcon:uint8) : (uint128) =
   let r_3 = r_3.[0] <- logxor #U8 r_3.[0] rcon in
   let r:uint128 = shift_left #U128 (word_to_u128 r_3) (u32 96) |.
                   shift_left #U128 (word_to_u128 r_2) (u32 64) |.
-                  shift_left #U128 (word_to_u128 r_1) (u32 31) |.
+                  shift_left #U128 (word_to_u128 r_1) (u32 32) |.
                   word_to_u128 r_0 in
   r
 
@@ -400,7 +413,7 @@ let intel_expand_key128 (key:uint128) (rcon:uint8) : uint128 =
   let tmp = key ^. (key <<. (u32 32)) in
   let tmp = tmp ^. (tmp <<. (u32 32)) in
   let tmp = tmp ^. (tmp <<. (u32 32)) in
-  let res = tmp ^. (shift_left #U128 tmp_key (u32 32)) in
+  let res = logxor #U128 tmp tmp_key in
   res
 
 let intel_key_expansion (key:block) : (lseq uint8 (11 * 16)) =
@@ -418,11 +431,10 @@ let intel_key_expansion (key:block) : (lseq uint8 (11 * 16)) =
   let key_nats = key_nats.[10] <- (intel_expand_key128 key_nats.[9] (u8 0x36)) in
   // Write out keys.
   let key_ex = create (11 * 16) (u8 0) in
-  let key_ex = repeat_range 0 44
-		       (fun i k -> update_slice k (i*4) ((i*4) + 4)
+  let key_ex = repeat_range 0 11
+		       (fun i k -> update_slice k (i*16) ((i*16) + 16)
         			(
-                let index:nat = i / 4 in
-                uint_to_bytes_le #U128 key_nats.[index]
+                u128_to_bytes key_nats.[i]
               )
             )
 		       key_ex in
