@@ -20,3 +20,7 @@ import:
 
 clean:
 	rm -f *.a *.o *~
+
+benchmark: benchmark-aesgcm.c aesgcm-gcc.S
+	$(CC) -O3 aesgcm-gcc.S $< -o $@
+	nice -n -20 ./$@
