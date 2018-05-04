@@ -461,45 +461,35 @@ val blake2s_internal3: s:lbuffer uint32 8 ->
   res:lbuffer uint8 (size_v nn) ->
   const_iv:init_vector -> const_sigma:sigma_t ->
   Stack unit
-    (requires (fun h -> live h s /\ live h d /\ live h res /\ live h const_iv /\ live h const_sigma
+    (requires (fun h -> live h s /\ live h d /\ live h to_compress /\ live h res /\ live h const_iv /\ live h const_sigma
                    /\ h.[const_sigma] == Spec.sigma
                    /\ h.[const_iv] == Spec.const_init
+                   // Disjointness for s
                    /\ disjoint s d /\ disjoint d s
                    /\ disjoint s const_sigma /\ disjoint const_sigma s
-                   /\ disjoint s const_iv /\ disjoint const_iv s))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 s to_compress h0 h1))
-                         (* /\ (let s = sub  *)
-                         (* h1.[res] == Spec.blake2s_internal3 h0.[s] (v dd) h0.[d] (v ll) (v kk) (v nn))) *)
+                   /\ disjoint s const_iv /\ disjoint const_iv s
+                   // Disjointness for to_compress
+                   /\ disjoint to_compress d /\ disjoint d to_compress
+                   /\ disjoint to_compress res /\ disjoint res to_compress
+                   /\ disjoint to_compress const_iv /\ disjoint const_iv to_compress
+                   /\ disjoint to_compress const_sigma /\ disjoint const_sigma to_compress
+                   // Disjointness of s and to_compress
+                   /\ disjoint s to_compress /\ disjoint to_compress s
+                   ))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 s to_compress h0 h1
+                         /\ (let sub_d = Spec.Lib.IntSeq.sub h0.[d] ((v dd - 1) * 64) Spec.bytes_in_block in
+                           h1.[to_compress] == Spec.Lib.IntSeq.uints_from_bytes_le #U32 #16 sub_d)
+                         /\ h1.[s] == Spec.blake2s_internal3 h0.[s] (v dd) h0.[d] (v ll) (v kk) (v nn)))
 
 //[@ Substitute]
 let blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma =
-  (* let h0 = ST.get () in *)
-  (* salloc11 #h0 #uint32 #unit #_ #16 #_ (size 16) (u32 0) [BufItem d; BufItem const_iv; BufItem const_sigma] s *)
-  (* (fun h0 _ h1 -> True) *)
-  (* (fun to_compress -> *)
-   (* let s = sub st_u32 (size 16) (size 8) in *)
-   (* let to_compress = sub st_u32 (size 0) (size 16) in *)
-    let offset:size_t = (dd -. (size 1)) *. (size 64) in
-    let sub_d = sub d offset (size Spec.bytes_in_block) in
-
-    uint32s_from_bytes_le (size 16) to_compress sub_d;
-
-    let h = ST.get () in
-    (if kk =. size 0 then
-      (**) let h00 = ST.get () in
-      blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 ll)) true const_iv const_sigma;
-      (**) let h01 = ST.get () in
-      (**) lemma_modifies1_is_modifies2 s to_compress h00 h01
-    else
-      (**) let h10 = ST.get () in
-      blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 (ll +. (size Spec.block_bytes)))) true const_iv const_sigma;
-      (**) let h11 = ST.get () in
-      (**) lemma_modifies1_is_modifies2 s to_compress h10 h11
-    )
-    (* uint32s_to_bytes_le (size 8) tmp s; *)
-    (* let tmp' = sub tmp (size 0) nn in *)
-    (* copy nn tmp' res *)
-//   )
+  let offset:size_t = (dd -. (size 1)) *. (size 64) in
+  let sub_d = sub d offset (size Spec.bytes_in_block) in
+  uint32s_from_bytes_le (size 16) to_compress sub_d;
+  if kk =. size 0 then
+    blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 ll)) true const_iv const_sigma
+  else
+    blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 (ll +. (size Spec.block_bytes)))) true const_iv const_sigma
 
 
 val blake2s_internal:
