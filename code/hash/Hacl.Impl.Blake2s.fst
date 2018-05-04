@@ -63,6 +63,8 @@ val lemma_repeati: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a)
 
 let lemma_repeati #a n f init i = admit()
 
+#reset-options "--warn_error @276"
+
 val lemma_repeati_zero: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> Lemma
   (requires True)
   (ensures  (init == repeati #a 0 f init))
@@ -513,7 +515,7 @@ val blake2s_internal:
 [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2s_internal dd d ll kk nn res const_iv const_sigma =
   let h0 = ST.get () in
-  salloc21 #h0 #uint32 #uint8 #unit #uint8 #8 #32 #(v nn) (size 8) (size 32) (u32 0) (u8 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res
+  salloc21 #h0 #uint32 #uint8 #unit #uint8 #32 #8 #(v nn) (size 32) (size 8) (u8 0) (u32 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res
   (fun h0 _ h1 -> True)
   (fun st_u32 tmp ->
 
