@@ -513,21 +513,24 @@ val blake2s_internal:
 [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2s_internal dd d ll kk nn res const_iv const_sigma =
   let h0 = ST.get () in
-  salloc21 #h0 #uint32 #uint8 #unit #uint8 #8 #32 #(v nn) (size 8) (size 32) (u32 0) (u8 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res
-  (fun h0 _ h1 -> True)
-  (fun st_u32 tmp ->
+  salloc11 #h0 #uint8 #unit #_ #16 #_ (size 32) (u8 0) [BufItem const_iv; BufItem const_sigma] res
+  (fun h0 _ sv -> True)
+  (fun tmp ->
+    salloc11 #h0 #_ #_ #_ #16 #_ (size 24) (u32 0) [BufItem const_iv; BufItem const_sigma] res
+    (fun h0 _ sv -> True)
+    (fun st_u32 ->
 
-    let s = sub st_u32 (size 16) (size 8) in
-    let to_compress = sub st_u32 (size 0) (size 16) in
-    copy (size 8) const_iv s;
-    blake2s_internal1 s kk nn;
-    blake2s_internal2 s dd d to_compress const_iv const_sigma;
-    blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma;
+      let s = sub st_u32 (size 16) (size 8) in
+      let to_compress = sub st_u32 (size 0) (size 16) in
+      copy (size 8) const_iv s;
+      blake2s_internal1 s kk nn;
+      blake2s_internal2 s dd d to_compress const_iv const_sigma;
+      blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma;
 
-    uint32s_to_bytes_le (size 8) tmp s;
-    let tmp' = sub tmp (size 0) nn in
-    copy nn tmp' res
-  )
+      uint32s_to_bytes_le (size 8) tmp s;
+      let tmp' = sub tmp (size 0) nn in
+      copy nn tmp' res
+  ))
 
 
 #reset-options "--max_fuel 2 --z3rlimit 250"
