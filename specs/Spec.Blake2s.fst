@@ -187,7 +187,7 @@ let blake2s_internal2_inner dd d i h =
 
 
 val blake2s_internal2_loop : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> h:intseq U32 8 -> Tot (h:intseq U32 8)
-let blake2s_internal2_loop dd d h = repeati (dd - 1) (fun i h -> blake2s_internal2_inner dd d i h) h
+let blake2s_internal2_loop dd d h = repeati (dd - 1) (blake2s_internal2_inner dd d) h
 
 
 val blake2s_internal2 : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> h:intseq U32 8 -> Tot (h:intseq U32 8)

@@ -24,6 +24,10 @@ let creates1 (#a:Type0) (#len:size_nat) (b:lbuffer a (len)) (h0:mem) (h1:mem) : 
  (live h1 b /\
   (forall (a':Type0) (len':size_nat) (b':lbuffer a' (len')). {:pattern (live h0 b')} live h0 b' ==> (live h1 b' /\ disjoint b b'  /\ disjoint b' b)))
 
+let creates2 (#a0:Type0) (#a1:Type0) (#len0:size_nat) (#len1:size_nat) (b0:lbuffer a0 len0) (b1:lbuffer a1 len1) (h0:mem) (h1:mem) : GTot Type =
+ (live h1 b0 /\ live h1 b1 /\ disjoint b0 b1 /\
+  (forall (a':Type0) (len':size_nat) (b':lbuffer a' (len')). {:pattern (live h0 b')} live h0 b' ==> (live h1 b' /\ disjoint b0 b' /\ disjoint b' b0 /\ disjoint b' b1 /\ disjoint b1 b')))
+
 let rec creates (l:list bufitem) (h0:mem) (h1:mem) : GTot Type =
   match l with
   | [] -> True
@@ -89,6 +93,10 @@ let salloc_inv (h0:mem) (h1:mem) (#a:Type) (#b:Type0) (len:size_nat)  (buf:lbuff
   /\ preserves_live h0 h1
   /\ disjoint_list buf reads /\ disjoint_list buf writes
 
+    (* (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ creates1 r h0 h1 *)
+	 (*   		            /\ modifies1 r h0 h1 *)
+	 (*   			         /\ as_lseq r h1 == LSeq.createL #a init)) *)
+
 inline_for_extraction val salloc:
   #h0:mem -> #a:Type0 -> #b:Type0 -> #len:size_nat ->
   clen:size_t{v clen == len} ->
@@ -97,15 +105,57 @@ inline_for_extraction val salloc:
   writes:list bufitem ->
   spec:(h0:mem -> r:b -> h1:mem -> Type) ->
   impl:(buf:lbuffer a len -> Stack b
-    (requires (fun h -> h0 == h /\ salloc_inv h0 h #a len buf init reads writes spec /\ as_lseq #a #len buf h == LSeq.create #a len init))
-	 (ensures (fun h0 r h1 -> salloc_inv h0 h1 #a len buf init reads writes spec
-				              /\ modifies (BufItem buf :: writes) h0 h1
-						        /\ spec h0 r h1))) ->
+    (requires (fun h -> preserves_live h0 h /\ creates1 buf h0 h /\ modifies1 buf h0 h /\ as_lseq buf h == LSeq.create len init))// prsalloc_inv h0 h #a len buf init reads writes spec /\ as_lseq #a #len buf h == LSeq.create #a len init))
+	 (ensures (fun h00 r h11 -> preserves_live h00 h11 ///\ modifies1 h00 h11 /\ as_lseq buf h1 == LSeq.create len init //salloc_inv h0 h1 #a len buf init reads writes spec
+				              /\ modifies (BufItem buf :: writes) h00 h11
+						        /\ spec h00 r h11))) ->
   Stack b
     (requires (fun h -> live_list h0 reads /\ live_list h0 writes /\ disjoint_lists reads writes))
     (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
 					           modifies writes h0 h1 /\
 					           spec h0 r h1))
+
+
+inline_for_extraction val salloc11:
+  #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 -> #len:size_nat -> #wlen:size_nat ->
+  clen:size_t{v clen == len} ->
+  init:a ->
+  reads:list bufitem ->
+  write:lbuffer w wlen ->
+  spec:(h0:mem -> r:b -> h1:LSeq.lseq w wlen -> Type) ->
+  impl:(buf:lbuffer a len -> Stack b
+    (requires (fun h -> preserves_live h0 h /\ creates1 buf h0 h /\ modifies1 buf h0 h /\ as_lseq buf h == LSeq.create len init))
+	 (ensures (fun h00 r h11 -> preserves_live h00 h11
+				              /\ modifies2 buf write  h00 h11
+						        /\ spec h0 r (as_lseq write h11)))) ->
+  Stack b
+    (requires (fun h -> live_list h0 reads /\ live h0 write /\ disjoint_list write reads))
+    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
+					           modifies1 write h0 h1 /\
+					           spec h0 r (as_lseq write h1)))
+
+
+inline_for_extraction val salloc21:
+  #h0:mem -> #a0:Type0 -> #a1:Type0 -> #b:Type0 -> #w:Type0 -> #len0:size_nat -> #len1:size_nat -> #wlen:size_nat ->
+  clen0:size_t{v clen0 == len0} ->
+  clen1:size_t{v clen1 == len1} ->
+  init0:a0 ->
+  init1:a1 ->
+  reads:list bufitem ->
+  write:lbuffer w wlen ->
+  spec:(mem -> b -> LSeq.lseq w wlen -> Type) ->
+  impl:(buf0:lbuffer a0 len0 -> buf1:lbuffer a1 len1 -> Stack b
+    (requires (fun h -> preserves_live h0 h /\ creates2 buf0 buf1 h0 h /\ modifies2 buf0 buf1 h0 h
+                   /\ as_lseq buf0 h == LSeq.create #a0 len0 init0
+                   /\ as_lseq buf1 h == LSeq.create #a1 len1 init1))
+	 (ensures (fun h00 r h11 -> preserves_live h00 h11
+				              /\ modifies3 buf0 buf1 write h00 h11
+						        /\ spec h0 r (as_lseq write h11)))) ->
+  Stack b
+    (requires (fun h -> live_list h0 reads /\ live h0 write /\ disjoint_list write reads))
+    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
+					           modifies1 write h0 h1 /\
+					           spec h0 r (as_lseq write h1)))
 
 
 inline_for_extraction let op_Array_Assignment #a #len = upd #a #len
