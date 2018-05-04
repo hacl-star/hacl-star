@@ -28,14 +28,13 @@ all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa # $(DIST_DIR)/LowC.cma
 # This Makefile ought to work with and without compiler support for UInt128    #
 ################################################################################
 
-ifneq (,$(KRML_NOUINT128))
+ifneq (,$(EVEREST_WINDOWS))
 $(DIST_DIR)/uint128/FStar_UInt128.h: $(DIST_DIR)/uint128/kremlib0.h
 	mkdir -p $(dir $@)
 	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst \
 	  -tmpdir $(DIST_DIR)/uint128 -skip-compilation \
 	  -add-include '"kremlib0.h"' \
-	  -drop FStar.Int.Cast.Full \
 	  -bundle FStar.UInt128=FStar.*,Prims # -fnostruct-passing
 	touch $(subst .c,.h,$(@))
 
@@ -44,7 +43,7 @@ $(DIST_DIR)/uint128/kremlib0.h: cstubs/kremlib0.h
 	cp $< $@
 
 KOPTS+=-add-early-include '"FStar_UInt128.h"'
-KOPTS+=-fnouint128 -drop FStar.UInt128
+KOPTS+=-fnouint128 -drop FStar.UInt128 -falloca -ftail-calls
 CFLAGS+=-DKRML_NOUINT128 # -DKRML_NOSTRUCT_PASSING
 
 $(DIST_DIR)/uint128/uint128_wrapper.c: \
@@ -62,7 +61,11 @@ $(DIST_DIR)/uint128/FStar_UInt128.h:
 $(DIST_DIR)/uint128/uint128_wrapper.c:
 	mkdir -p $(dir $@)
 	touch $@
+
 endif
+
+# Convenience target for debugging.
+uint128: $(DIST_DIR)/uint128/FStar_UInt128.h
 
 ################################################################################
 # Main configurations                                    		       #
