@@ -68,7 +68,7 @@ KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
 ifdef HACL_NO_TESTLIB
   KREMLIN_TESTLIB=
 else
-  KREMLIN_TESTLIB=-add-include '"testlib.h"' $(KREMLIB)/testlib.c
+  KREMLIN_TESTLIB=-add-include '"kremlin/testlib.h"' $(KREMLIB)/testlib.c
 endif
 
 #

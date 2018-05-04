@@ -147,7 +147,9 @@ CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable 
 # repeat most of your program in every single compilation unit.
 $(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
 	$(KREMLIN_HOME)/krml $(KOPTS) -drop FStar.UInt128,FStar.Int.Cast.Full -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
-	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremlin/c_string.h"' \
+	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include \
+	  '"kremlin/c_string.h"' -add-include '"kremlin/prims_int.h"' \
+	  -add-include '"kremlin/prims_string.h"' \
 	  $(EXTRA)
 
 # Manually override the default argument for bundles, so as to provide a +
@@ -256,7 +258,7 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib -g -I $(FSTAR_HOME)/uli
 # Then, we need to generate some .o ourselves, using ocamlopt to get all the
 # right include paths...
 %.o: %.c
-	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -I $(MLCRYPTO_HOME) \
+	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/include -I $(MLCRYPTO_HOME) \
 	  -I $(TLS_FFI_DIR) -ccopt "-o $@" \
 	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) $(addprefix -ccopt ,$(CCOPTS)) \
 	  -I $(DIST_DIR)/uint128
