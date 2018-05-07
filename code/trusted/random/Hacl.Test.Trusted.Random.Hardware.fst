@@ -10,7 +10,7 @@ module Random = Hacl.Trusted.Random.Hardware
 let uint32_t = FStar.Int32.t
 
 (* Entry point *)
-val main: unit -> Stack uint32_t
+val main: unit -> Stack C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 
@@ -29,4 +29,4 @@ let main () =
   C.print_bytes result size;
 
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS

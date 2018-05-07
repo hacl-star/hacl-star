@@ -28,14 +28,13 @@ all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa # $(DIST_DIR)/LowC.cma
 # This Makefile ought to work with and without compiler support for UInt128    #
 ################################################################################
 
-ifneq (,$(KRML_NOUINT128))
+ifneq (,$(EVEREST_WINDOWS))
 $(DIST_DIR)/uint128/FStar_UInt128.h: $(DIST_DIR)/uint128/kremlib0.h
 	mkdir -p $(dir $@)
 	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst \
 	  -tmpdir $(DIST_DIR)/uint128 -skip-compilation \
 	  -add-include '"kremlib0.h"' \
-	  -drop FStar.Int.Cast.Full \
 	  -bundle FStar.UInt128=FStar.*,Prims # -fnostruct-passing
 	touch $(subst .c,.h,$(@))
 
@@ -44,7 +43,7 @@ $(DIST_DIR)/uint128/kremlib0.h: cstubs/kremlib0.h
 	cp $< $@
 
 KOPTS+=-add-early-include '"FStar_UInt128.h"'
-KOPTS+=-fnouint128 -drop FStar.UInt128
+KOPTS+=-fnouint128 -drop FStar.UInt128 -falloca -ftail-calls
 CFLAGS+=-DKRML_NOUINT128 # -DKRML_NOSTRUCT_PASSING
 
 $(DIST_DIR)/uint128/uint128_wrapper.c: \
@@ -62,7 +61,11 @@ $(DIST_DIR)/uint128/FStar_UInt128.h:
 $(DIST_DIR)/uint128/uint128_wrapper.c:
 	mkdir -p $(dir $@)
 	touch $@
+
 endif
+
+# Convenience target for debugging.
+uint128: $(DIST_DIR)/uint128/FStar_UInt128.h
 
 ################################################################################
 # Main configurations                                    		       #
@@ -147,7 +150,9 @@ CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable 
 # repeat most of your program in every single compilation unit.
 $(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
 	$(KREMLIN_HOME)/krml $(KOPTS) -drop FStar.UInt128,FStar.Int.Cast.Full -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
-	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremstr.h"' \
+	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include \
+	  '"kremlin/c_string.h"' -add-include '"kremlin/prims_int.h"' \
+	  -add-include '"kremlin/prims_string.h"' \
 	  $(EXTRA)
 
 # Manually override the default argument for bundles, so as to provide a +
@@ -158,7 +163,7 @@ $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.c \
   $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h: BUNDLE=Crypto_HKDF+Crypto_HMAC
 
 # This is without the indexing id.
-$(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
+$(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"kremlin/testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
 
 
 ################################################################################
@@ -200,8 +205,9 @@ $(DIST_DIR)/copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
 $(DIST_DIR)/krml-test.exe: $(DIST_DIR)/uint128/uint128_wrapper.c $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES)) $($(IMPL_CHOICE)_EXTRA) $(DIST_DIR)/copied/testlib.c
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
-	    Crypto.AEAD.Main=Crypto.* -add-include '"kremstr.h"' -add-include \
-	  '"testlib.h"' -add-include '"kremlib.h"' -tmpdir $(OUTPUT_DIR) \
+	    Crypto.AEAD.Main=Crypto.* -add-include '"kremlin/c_string.h"' -add-include \
+	  '"kremlin/testlib.h"' -add-include '"kremlib.h"' -tmpdir $(OUTPUT_DIR) \
+	  -add-include '"kremlin/prims_int.h"' \
 	  $^ -o $@ \
 	  -I $(DIST_DIR)/uint128 -drop HaclProvider,LowCProvider,CryptoTypes
 
@@ -255,7 +261,7 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib -g -I $(FSTAR_HOME)/uli
 # Then, we need to generate some .o ourselves, using ocamlopt to get all the
 # right include paths...
 %.o: %.c
-	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/kremlib -I $(MLCRYPTO_HOME) \
+	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/include -I $(MLCRYPTO_HOME) \
 	  -I $(TLS_FFI_DIR) -ccopt "-o $@" \
 	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) $(addprefix -ccopt ,$(CCOPTS)) \
 	  -I $(DIST_DIR)/uint128

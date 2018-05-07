@@ -24,4 +24,4 @@ let main () =
   | true -> C.String.print (C.String.of_literal " *         Feature: Digital Random Number Generator (RDSEED)\n")
   | false -> ());
 
-  C.exit_success
+  C.EXIT_SUCCESS

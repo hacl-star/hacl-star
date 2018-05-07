@@ -70,7 +70,7 @@ endif
 ifdef HACL_RELEASE
   KREMLIN_TESTLIB=
 else
-  KREMLIN_TESTLIB=-add-include '"testlib.h"' $(KREMLIB)/testlib.c
+  KREMLIN_TESTLIB=-add-include '"kremlin/testlib.h"' $(KREMLIB)/testlib.c
 endif
 
 # License header

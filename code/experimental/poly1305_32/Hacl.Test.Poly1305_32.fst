@@ -8,7 +8,7 @@ open FStar.Buffer
 open Hacl.Cast
 open Poly1305_32
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -38,4 +38,4 @@ let main () =
   crypto_onetimeauth mac plaintext len' key;
   TestLib.compare_and_print (C.String.of_literal "Poly1305-32bits") expected mac macsize;
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS

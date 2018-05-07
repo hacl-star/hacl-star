@@ -7,7 +7,7 @@ open FStar.HyperStack.All
 open FStar.Buffer
 module Salsa20=Hacl.Salsa20
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -50,4 +50,4 @@ let main () =
   TestLib.compare_and_print (C.String.of_literal "salsa20") expected3 (offset ciphertext 256ul) 64ul;
   TestLib.compare_and_print (C.String.of_literal "salsa20") expected4 (offset ciphertext 448ul) 64ul;
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS
