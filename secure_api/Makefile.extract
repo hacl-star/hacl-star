@@ -215,26 +215,26 @@ ifeq (,$(wildcard $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa))
   $(error FSTAR_HOME is $(FSTAR_HOME) and I cannot find $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa -- please run `make -C $(FSTAR_HOME)/ulib/ml`)
 endif
 
-ifeq (,$(wildcard $(CURVE_DIR)/Curve25519.c))
+ifeq (,$(wildcard $(CURVE_DIR)/Hacl_Curve25519.c))
   ifneq (,$(KRML_NOUINT128))
     $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
-      $(CURVE_DIR)/Curve25519.c -- please run `KOPTS="-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full -add-early-include '\"FStar_UInt128.h\"'" make -C $(CURVE_DIR)/.. extract-c`)
+      $(CURVE_DIR)/Hacl_Curve25519.c -- please run `KOPTS="-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full -add-early-include '\"FStar_UInt128.h\"'" make -C $(CURVE_DIR)/.. extract-c`)
   else
     $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
-      $(CURVE_DIR)/Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
+      $(CURVE_DIR)/Hacl_Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
   endif
 endif
 
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
-HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Curve25519.h $(CURVE_DIR)/FStar.h \
+HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Hacl_Curve25519.h $(CURVE_DIR)/FStar.h \
 	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h \
 	  $(DIST_DIR)/uint128/FStar_UInt128.h
 
 # Technically these dependency edges are only real for the KRML_NOUINT128 case.
 $(CURVE_DIR)/FStar.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CURVE_DIR)/Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(CURVE_DIR)/Hacl_Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(VALE_DIR)/Vale_Hash_SHA2_256.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(DIST_DIR)/uint128/FStar_UInt128.h
@@ -292,7 +292,7 @@ $(DIST_DIR)/LowC.cmxa: \
 	  LowCProvider/lowc_stub.o \
 	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
 	  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
-	  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Curve25519.o \
+	  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Hacl_Curve25519.o \
 	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cmxa,%,$@)
 
@@ -304,7 +304,7 @@ $(DIST_DIR)/LowC.cma: \
 	  LowCProvider/lowc_stub.o \
 	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
 	  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
-	  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Curve25519.o \
+	  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Hacl_Curve25519.o \
 	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cma,%,$@)
 

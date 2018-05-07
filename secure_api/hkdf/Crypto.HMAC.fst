@@ -22,11 +22,11 @@ module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
 module Spec_H256 = Spec.SHA2_256
-module H256 = Hacl.Hash.SHA2_256
+module H256 = Hacl.Impl.SHA2_256
 module Spec_H384 = Spec.SHA2_384
-module H384 = Hacl.Hash.SHA2_384
+module H384 = Hacl.Impl.SHA2_384
 module Spec_H512 = Spec.SHA2_512
-module H512 = Hacl.Hash.SHA2_512
+module H512 = Hacl.Impl.SHA2_512
 
 module Spec_HMAC256 = Spec.HMAC.SHA2_256
 
