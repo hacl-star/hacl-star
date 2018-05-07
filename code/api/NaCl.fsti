@@ -14,14 +14,14 @@ module U8  = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
-let crypto_box_NONCEBYTES     = 24
-let crypto_box_PUBLICKEYBYTES = 32
-let crypto_box_SECRETKEYBYTES = 32
-let crypto_box_MACBYTES       = 16
+noextract let crypto_box_NONCEBYTES     = 24
+noextract let crypto_box_PUBLICKEYBYTES = 32
+noextract let crypto_box_SECRETKEYBYTES = 32
+noextract let crypto_box_MACBYTES       = 16
 
-let crypto_secretbox_NONCEBYTES = 24
-let crypto_secretbox_KEYBYTES   = 32
-let crypto_secretbox_MACBYTES   = 16
+noextract let crypto_secretbox_NONCEBYTES = 24
+noextract let crypto_secretbox_KEYBYTES   = 32
+noextract let crypto_secretbox_MACBYTES   = 16
 
 
 val crypto_secretbox_detached:

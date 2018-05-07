@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 
 open FStar.Buffer
 
-module Chacha20=Chacha20
+module Chacha20=Hacl.Chacha20
 
 let len = 114ul
 

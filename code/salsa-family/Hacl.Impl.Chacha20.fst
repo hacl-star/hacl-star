@@ -146,6 +146,7 @@ val setup:
          let k = reveal_sbytes (as_seq h0 k) in
          let n = reveal_sbytes (as_seq h0 n) in
          s == setup k n (U32.v c))))
+
 [@ CInline]
 let setup st k n c =
   let h0 = ST.get() in
@@ -677,7 +678,7 @@ private
 val chacha20_counter_mode_blocks:
   output:uint8_p ->
   plain:uint8_p{disjoint output plain} ->
-  len:UInt32.t{64 * UInt32.v len = length output /\ length output = length plain} ->
+  num_blocks:UInt32.t{64 * UInt32.v num_blocks = length output /\ length output = length plain} ->
   log:log_t ->
   st:state{disjoint st output /\ disjoint st plain} ->
   ctr:UInt32.t{UInt32.v ctr + (length plain / 64) < pow2 32} ->
@@ -690,15 +691,15 @@ val chacha20_counter_mode_blocks:
          match Ghost.reveal log with | MkLog k n ->
          o == Spec.CTR.counter_mode_blocks chacha20_ctx chacha20_cipher k n (UInt32.v ctr) plain)))
 #reset-options "--max_fuel 0 --z3rlimit 200"
-let chacha20_counter_mode_blocks output plain len log st ctr =
+let chacha20_counter_mode_blocks output plain num_blocks log st ctr =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
-    live h1 output /\ invariant log h1 st /\ modifies_2 output st h0 h1 /\ 0 <= i /\ i <= UInt32.v len
+    live h1 output /\ invariant log h1 st /\ modifies_2 output st h0 h1 /\ 0 <= i /\ i <= UInt32.v num_blocks
     /\ (match Ghost.reveal log with | MkLog k n ->
       reveal_sbytes (Seq.slice (as_seq h1 output) 0 (64 * i))
       == Spec.CTR.counter_mode_blocks chacha20_ctx chacha20_cipher k n (UInt32.v ctr) (reveal_sbytes (Seq.slice (as_seq h0 plain) 0 (64 * i))))
   in
-  let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < v len ) }): Stack unit
+  let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < v num_blocks ) }): Stack unit
     (requires (fun h -> inv h (UInt32.v i)))
     (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
   = let h = ST.get() in
@@ -742,10 +743,10 @@ let chacha20_counter_mode_blocks output plain len log st ctr =
   lemma_chacha20_counter_mode_def_0 (Seq.slice (as_seq h0 plain) 0 0) (Ghost.reveal log).k (Ghost.reveal log).n ctr;
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 0) Seq.createEmpty;
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.createEmpty;
-  C.Loops.for 0ul len inv f';
+  C.Loops.for 0ul num_blocks inv f';
   let h = ST.get() in
-  Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (64 * UInt32.v len)) (as_seq h output);
-  Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 (64 * UInt32.v len)) (as_seq h plain)
+  Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (64 * UInt32.v num_blocks)) (as_seq h output);
+  Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 (64 * UInt32.v num_blocks)) (as_seq h plain)
 
 
 val chacha20_counter_mode:
@@ -783,7 +784,7 @@ let chacha20_counter_mode output plain len log st ctr =
     let _ = update_last output'' plain'' part_len log st FStar.UInt32.(ctr +^ blocks_len) in
     (**) let h' = ST.get() in
     (**) modifies_subbuffer_2 h1 h' output'' st output)
-  else 
+  else
     (**) lemma_modifies_sub_2 h1 h1 output st;
   let h = ST.get() in
   (**) lemma_modifies_2_trans output st h0 h1 h;

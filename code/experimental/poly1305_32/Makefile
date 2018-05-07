@@ -88,13 +88,13 @@ POLY1305_MODULES= \
 
 %.fst-verify: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe \
-		--include ../lib --include ../../bignum $^ --use_hints
+		--include ../../lib --include ../../bignum $^ --use_hints
 
 verify: $(addsuffix -verify, $(POLY1305_FILES))
 
 %.fst-hints: %.fst
 	$(FSTAR_HOME)/bin/fstar.exe \
-		--include ../lib --include ../../bignum $^ --record_hints
+		--include ../../lib --include ../../bignum $^ --record_hints
 
 hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 
