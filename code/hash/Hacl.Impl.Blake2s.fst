@@ -43,6 +43,8 @@ let op_String_Access #a #len m b = as_lseq #a #len b m
 val lemma_cast_to_u64: x:uint32 -> Lemma
   (requires (True))
   (ensures  (to_u64 #U32 x == u64 (uint_v #U32 x)))
+  [SMTPat (to_u64 #U32 x)]
+
 let lemma_cast_to_u64 x = admit()
 
 val lemma_modifies0_is_modifies2: #a0:Type -> #a1:Type -> #len0:size_nat -> #len1:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> h0:mem -> h1:mem -> Lemma
@@ -77,6 +79,18 @@ val lemma_size_to_uint32_equal_u32_of_v_of_size_t: x:size_t -> Lemma
   (ensures (size_to_uint32 x == u32 (v x)))
   [SMTPat (u32 (v x))]
 let lemma_size_to_uint32_equal_u32_of_v_of_size_t x = admit()
+
+
+val lemma_value_mixed_size_addition: x:size_t -> y:size_nat -> Lemma
+  (requires True)
+  (ensures (v (x +. (size y)) == v x + y))
+  [SMTPat (v (x +. (size y)) == v x + y)]
+let lemma_value_mixed_size_addition x y = admit()
+
+//  assume(v (ll +. (size Spec.block_bytes)) == v ll + Spec.block_bytes);
+
+
+
 
 // val lemma_repeati_ghost_is_repeati: #a:Type -> n:size_nat -> (f:(i:size_nat{i < n}  -> a -> Tot a)) -> init:a -> Lemma
 //   (requires (True))
@@ -487,11 +501,14 @@ val blake2s_internal3: s:lbuffer uint32 8 ->
 let blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma =
   let offset:size_t = (dd -. (size 1)) *. (size 64) in
   let sub_d = sub d offset (size Spec.bytes_in_block) in
-  uint32s_from_bytes_le (size 16) to_compress sub_d;
+  uints_from_bytes_le #U32 #16 to_compress sub_d;
+  let ll64 = to_u64 #U32 (size_to_uint32 ll) in
+  let ll_plus_block_bytes64 = to_u64 #U32 (size_to_uint32 (ll +. (size Spec.block_bytes))) in
+  (**) lemma_value_mixed_size_addition ll Spec.block_bytes;
   if kk =. size 0 then
-    blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 ll)) true const_iv const_sigma
+    blake2_compress s to_compress ll64 true const_iv const_sigma
   else
-    blake2_compress s to_compress (to_u64 #U32 (size_to_uint32 (ll +. (size Spec.block_bytes)))) true const_iv const_sigma
+    blake2_compress s to_compress ll_plus_block_bytes64 true const_iv const_sigma
 
 
 val blake2s_internal:
@@ -501,7 +518,7 @@ val blake2s_internal:
   res:lbuffer uint8 (size_v nn) ->
   const_iv:init_vector -> const_sigma:sigma_t ->
   Stack unit
-    (requires (fun h -> live h d /\ live h res  /\ live h const_iv /\ live h const_sigma
+    (requires (fun h -> live h d /\ live h res /\ live h const_iv /\ live h const_sigma
                    /\ h.[const_sigma] == Spec.sigma
                    /\ h.[const_iv] == Spec.const_init
                    // Disjointness for res
@@ -515,9 +532,10 @@ val blake2s_internal:
 [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2s_internal dd d ll kk nn res const_iv const_sigma =
   let h0 = ST.get () in
-  salloc21 #h0 #uint32 #uint8 #unit #uint8 #32 #8 #(v nn) (size 32) (size 8) (u8 0) (u32 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res
+  salloc21 #h0 #uint32 #uint8 #unit #uint8 #32 #8 #(v nn) (size 32) (size 8) (u32 0) (u8 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res
   (fun h0 _ h1 -> True)
   (fun st_u32 tmp ->
+    let h0 = ST.get () in
 
     let s = sub st_u32 (size 16) (size 8) in
     let to_compress = sub st_u32 (size 0) (size 16) in
@@ -526,11 +544,21 @@ let blake2s_internal dd d ll kk nn res const_iv const_sigma =
     blake2s_internal2 s dd d to_compress const_iv const_sigma;
     blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma;
 
-    uint32s_to_bytes_le (size 8) tmp s;
-    let tmp' = sub tmp (size 0) nn in
-    copy nn tmp' res
+    uint32s_to_bytes_le #8 (size 8) tmp s;
+    (* let tmp' = sub tmp (size 0) nn in *)
+    (* copy nn tmp' res; *)
+
+    let h1 = ST.get () in
+    assume(modifies3 st_u32 tmp res h0 h1)
   )
 
+
+(* let blake2s_internal dd d ll kk nn = *)
+(*   let h = const_init in *)
+(*   let h = blake2s_internal1 h kk nn in *)
+(*   let h = blake2s_internal2 dd d h in *)
+(*   let h = blake2s_internal3 h dd d ll kk nn in *)
+(*   sub (uints_to_bytes_le h) 0 nn *)
 
 #reset-options "--max_fuel 2 --z3rlimit 250"
 
