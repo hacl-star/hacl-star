@@ -501,7 +501,7 @@ val blake2s_internal3: s:lbuffer uint32 8 ->
 let blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma =
   let offset:size_t = (dd -. (size 1)) *. (size 64) in
   let sub_d = sub d offset (size Spec.bytes_in_block) in
-  uints_from_bytes_le #U32 #16 to_compress sub_d;
+  uint32s_from_bytes_le (size 16) to_compress sub_d;
   let ll64 = to_u64 #U32 (size_to_uint32 ll) in
   let ll_plus_block_bytes64 = to_u64 #U32 (size_to_uint32 (ll +. (size Spec.block_bytes))) in
   (**) lemma_value_mixed_size_addition ll Spec.block_bytes;
@@ -545,11 +545,11 @@ let blake2s_internal dd d ll kk nn res const_iv const_sigma =
     blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma;
 
     uint32s_to_bytes_le #8 (size 8) tmp s;
-    (* let tmp' = sub tmp (size 0) nn in *)
-    (* copy nn tmp' res; *)
+    let tmp' = sub tmp (size 0) nn in
+    copy nn tmp' res
 
-    let h1 = ST.get () in
-    assume(modifies3 st_u32 tmp res h0 h1)
+    (* let h1 = ST.get () in *)
+    (* assume(modifies3 st_u32 tmp res h0 h1) *)
   )
 
 
