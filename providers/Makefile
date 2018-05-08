@@ -132,9 +132,13 @@ CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter
 
 ifneq (,$(EVEREST_WINDOWS))
-ALL_GENERATED_FILES += ../secure_api/out/runtime_switch/uint128/FStar_UInt128.c
+FSTAR_UINT128	= ../secure_api/out/runtime_switch/uint128/FStar_UInt128.c
+ALL_GENERATED_FILES += $(FSTAR_UINT128)
 INCLUDE_DIRS	+= ../secure_api/out/runtime_switch/uint128
 CFLAGS		+= -DKRML_NOUINT128
+
+$(FSTAR_UINT128):
+	$(error Please run make -C ../secure_api before invoking this Makefile)
 endif
 
 # GNU Make manual section 4.14
