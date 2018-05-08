@@ -41,7 +41,7 @@ $(DIST_DIR)/uint128/FStar_UInt128.h:
 
 KOPTS+=-add-early-include '"FStar_UInt128.h"'
 KOPTS+=-fnouint128 -drop FStar.UInt128 -falloca -ftail-calls
-CFLAGS+=-DKRML_NOUINT128 # -DKRML_NOSTRUCT_PASSING
+CFLAGS+=-DKRML_NOUINT128 -DKRML_SEPARATE_UINT128 # -DKRML_NOSTRUCT_PASSING
 
 $(DIST_DIR)/copied/kremstr.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 else
