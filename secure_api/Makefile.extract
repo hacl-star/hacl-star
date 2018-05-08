@@ -29,27 +29,19 @@ all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa # $(DIST_DIR)/LowC.cma
 ################################################################################
 
 ifneq (,$(EVEREST_WINDOWS))
-$(DIST_DIR)/uint128/FStar_UInt128.h: $(DIST_DIR)/uint128/kremlib0.h
+$(DIST_DIR)/uint128/FStar_UInt128.h:
 	mkdir -p $(dir $@)
 	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst \
+	  -add-early-include '"kremlin/fstar_ints.h"' \
+	  -add-early-include '<stdbool.h>' \
 	  -tmpdir $(DIST_DIR)/uint128 -skip-compilation \
-	  -add-include '"kremlib0.h"' \
 	  -bundle FStar.UInt128=FStar.*,Prims # -fnostruct-passing
 	touch $(subst .c,.h,$(@))
-
-$(DIST_DIR)/uint128/kremlib0.h: cstubs/kremlib0.h
-	mkdir -p $(dir $@)
-	cp $< $@
 
 KOPTS+=-add-early-include '"FStar_UInt128.h"'
 KOPTS+=-fnouint128 -drop FStar.UInt128 -falloca -ftail-calls
 CFLAGS+=-DKRML_NOUINT128 # -DKRML_NOSTRUCT_PASSING
-
-$(DIST_DIR)/uint128/uint128_wrapper.c: \
-  cstubs/uint128_wrapper.c $(DIST_DIR)/uint128/FStar_UInt128.h
-	mkdir -p $(dir $@)
-	cp $< $@
 
 $(DIST_DIR)/copied/kremstr.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 else
@@ -57,11 +49,6 @@ $(DIST_DIR)/uint128/FStar_UInt128.h:
 	mkdir -p $(dir $@)
 	touch $@
 	touch $(subst .h,.c,$(@))
-
-$(DIST_DIR)/uint128/uint128_wrapper.c:
-	mkdir -p $(dir $@)
-	touch $@
-
 endif
 
 # Convenience target for debugging.
@@ -202,7 +189,7 @@ $(DIST_DIR)/copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
 
 # Note: this does not yet use the standalone C file because the test still
 # bypasses Crypto.AEAD.Main
-$(DIST_DIR)/krml-test.exe: $(DIST_DIR)/uint128/uint128_wrapper.c $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES)) $($(IMPL_CHOICE)_EXTRA) $(DIST_DIR)/copied/testlib.c
+$(DIST_DIR)/krml-test.exe: $(DIST_DIR)/uint128/FStar_UInt128.c $(ALL_KRML_FILES) $($(IMPL_CHOICE)_EXTRA) $(DIST_DIR)/copied/testlib.c
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
 	    Crypto.AEAD.Main=Crypto.* -add-include '"kremlin/c_string.h"' -add-include \
@@ -222,9 +209,9 @@ ifeq (,$(wildcard $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa))
 endif
 
 ifeq (,$(wildcard $(CURVE_DIR)/Hacl_Curve25519.c))
-  ifneq (,$(KRML_NOUINT128))
+  ifneq (,$(EVEREST_WINDOWS))
     $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
-      $(CURVE_DIR)/Hacl_Curve25519.c -- please run `KOPTS="-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full -add-early-include '\"FStar_UInt128.h\"'" make -C $(CURVE_DIR)/.. extract-c`)
+      $(CURVE_DIR)/Hacl_Curve25519.c -- please run `EVEREST_WINDOWS=1 make -C $(CURVE_DIR)/.. extract-c`)
   else
     $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
       $(CURVE_DIR)/Hacl_Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
@@ -239,6 +226,8 @@ HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Hacl_Curve25519.h $(
 	  $(DIST_DIR)/uint128/FStar_UInt128.h
 
 # Technically these dependency edges are only real for the KRML_NOUINT128 case.
+$(DIST_DIR)/uint128/FStar_UInt128.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(DIST_DIR)/uint128/FStar_UInt128.c: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(CURVE_DIR)/FStar.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(CURVE_DIR)/Hacl_Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128.h
@@ -290,28 +279,23 @@ LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
 LowCProvider/LowCProvider.cmo: $(MLCRYPTO_HOME)/CryptoTypes.cmo
 LowCProvider/Tests.cmo: LowCProvider/LowCProvider.cmo
 
+ARCHIVE_FILES= \
+    $(DIST_DIR)/uint128/FStar_UInt128.o \
+    LowCProvider/LowCProvider.cmx \
+    LowCProvider/HaclProvider.cmx \
+    LowCProvider/lowc_stub.o \
+    $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
+    $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
+    $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Hacl_Curve25519.o \
+    $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
+
+
 # Finally, ocamlmklib is smart enough to take all of these at once.
-$(DIST_DIR)/LowC.cmxa: \
-	  $(DIST_DIR)/uint128/uint128_wrapper.o \
-	  LowCProvider/LowCProvider.cmx \
-	  LowCProvider/HaclProvider.cmx \
-	  LowCProvider/lowc_stub.o \
-	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
-	  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
-	  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Hacl_Curve25519.o \
-	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
+$(DIST_DIR)/LowC.cmxa: $(ARCHIVE_FILES)
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cmxa,%,$@)
 
 # Finally, ocamlmklib is smart enough to take all of these at once.
-$(DIST_DIR)/LowC.cma: \
-	  $(DIST_DIR)/uint128/uint128_wrapper.o \
-	  LowCProvider/LowCProvider.cmo \
-	  LowCProvider/HaclProvider.cmo \
-	  LowCProvider/lowc_stub.o \
-	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
-	  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
-	  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Hacl_Curve25519.o \
-	  $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
+$(DIST_DIR)/LowC.cma: $(ARCHIVE_FILES)
 	$(OCAMLMKLIB) -I $(OUTPUT_DIR) $^ -o $(patsubst %.cma,%,$@)
 
 ################################################################################
@@ -338,7 +322,7 @@ $(QUICPROVIDER_DIR)/test.o: $(HEADERS) $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h
 $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) $(QUICPROVIDER_DIR)/quic_provider.o \
   $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
   $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
-  $(DIST_DIR)/copied/kremstr.o $(DIST_DIR)/uint128/uint128_wrapper.o
+  $(DIST_DIR)/copied/kremstr.o $(DIST_DIR)/uint128/FStar_UInt128.o
 	$(CC) $^ -o $@ $(QUICPROVIDER_SO_LDOPTS) -shared
 
 $(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)

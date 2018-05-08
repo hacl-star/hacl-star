@@ -63,6 +63,10 @@ $(OUTPUT_DIR)/%.krml: | .depend
 	touch $@
 
 # 2. Generation of the .c files
+ifneq (,$(EVEREST_WINDOWS))
+KOPTS+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
+  -add-early-include '"FStar_UInt128.h"'
+endif
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
