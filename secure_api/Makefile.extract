@@ -228,7 +228,6 @@ HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Hacl_Curve25519.h \
 # Technically these dependency edges are only real for the KRML_NOUINT128 case.
 $(DIST_DIR)/uint128/FStar_UInt128.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(DIST_DIR)/uint128/FStar_UInt128.c: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CURVE_DIR)/FStar.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(CURVE_DIR)/Hacl_Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(VALE_DIR)/Vale_Hash_SHA2_256.o: $(DIST_DIR)/uint128/FStar_UInt128.h
@@ -287,7 +286,7 @@ ARCHIVE_FILES= \
     $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
     $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
     $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Hacl_Curve25519.o \
-    $(CURVE_DIR)/FStar.o $($(IMPL_CHOICE)_EXTRA)
+    $($(IMPL_CHOICE)_EXTRA)
 
 
 # Finally, ocamlmklib is smart enough to take all of these at once.

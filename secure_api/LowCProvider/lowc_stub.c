@@ -28,7 +28,6 @@
 #include "Crypto_Symmetric_Bytes.h"
 #include "Crypto_HKDF_Crypto_HMAC.h"
 #include "Hacl_Curve25519.h"
-#include "FStar.h"
 
 typedef Crypto_AEAD_Invariant_aead_state AEAD_ST;
 typedef Crypto_Indexing_id ID;
