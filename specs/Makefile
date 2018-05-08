@@ -160,7 +160,7 @@ hmac_sha2_512.exe: Spec.HMAC.SHA2_512.fst
 ed25519.exe: Spec.SHA512.fst Spec.Ed25519.fst
 	$(MAKE) -C ../code/lib/ml
 	mkdir -p ed25519-spec
-	$(FSTAR_EXTRACT) --odir ed25519-spec $^
+	$(FSTAR_EXTRACT) --expose_interfaces --odir ed25519-spec $^
 	@echo 'let _ = print_string (if test() then "SUCCESS\n" else "FAILURE\n")' >> ed25519-spec/Spec_Ed25519.ml
 	$(OCAMLOPT) -I ed25519-spec  $(OCAML_INCLUDES) $(addprefix ed25519-spec/, FStar_Endianness.ml Spec_Loops.ml Spec_Lib.ml Spec_Curve25519.ml Seq_Create.ml Spec_SHA2_512.ml Spec_SHA512.ml Spec_Ed25519.ml) -o ed25519.exe
 	./ed25519.exe
