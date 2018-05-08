@@ -221,7 +221,7 @@ endif
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
-HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Hacl_Curve25519.h $(CURVE_DIR)/FStar.h \
+HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Hacl_Curve25519.h \
 	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h \
 	  $(DIST_DIR)/uint128/FStar_UInt128.h
 
