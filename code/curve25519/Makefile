@@ -94,11 +94,6 @@ depend:
 x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
-ifneq (,$(EVEREST_WINDOWS))
-KREMLIN_ARGS+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
-  -add-early-include '"FStar_UInt128.h"'
-endif
-
 x25519-c/Hacl_Test_X25519.c: x25519-c/Hacl_Curve25519.c
 
 x25519-c/Hacl_Curve25519.c:  x25519-c/out.krml

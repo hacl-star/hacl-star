@@ -63,6 +63,10 @@ $(OUTPUT_DIR)/%.krml: | .depend
 	touch $@
 
 # 2. Generation of the .c files
+ifneq (,$(EVEREST_WINDOWS))
+KOPTS+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
+  -add-early-include '"FStar_UInt128.h"'
+endif
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
@@ -115,6 +119,7 @@ EVERCRYPT_SOURCES = \
 # also captures the dependencies between these files.
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_C_FILES))
 
+
 ALL_SOURCES	= $(HACL_SOURCES) $(VALE_SOURCES) $(EVERCRYPT_SOURCES) $(ALL_GENERATED_FILES)
 ALL_OBJS	= $(patsubst %.c,%.o,$(ALL_SOURCES)) $(patsubst %.S,%.o,$(VALE_ASM))
 
@@ -122,8 +127,19 @@ INCLUDE_DIRS	= $(foreach c,$(ALL_SOURCES),$(dir $(c))) \
   $(HACL_HOME)/secure_api/out/runtime_switch/extracted \
   $(HACL_HOME)/snapshots/common $(KREMLIN_HOME)/include
 
+
 CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter
+
+ifneq (,$(EVEREST_WINDOWS))
+FSTAR_UINT128	= ../secure_api/out/runtime_switch/uint128/FStar_UInt128.c
+ALL_GENERATED_FILES += $(FSTAR_UINT128)
+INCLUDE_DIRS	+= ../secure_api/out/runtime_switch/uint128
+CFLAGS		+= -DKRML_NOUINT128
+
+$(FSTAR_UINT128):
+	$(error Please run make -C ../secure_api before invoking this Makefile)
+endif
 
 # GNU Make manual section 4.14
 %.d: %.c
