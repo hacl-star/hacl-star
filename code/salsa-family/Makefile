@@ -40,7 +40,7 @@ all-hints: hints
 all-ver: verify
 
 KREMLIN_ARGS+= \
-	-drop Prims,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Endianness,Hacl.Cast,Hacl.Spec.*,Spec.*,Seq.* \
+	-drop Prims,FStar,C.Loops.Spec.Loops,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Endianness,Hacl.Cast,Hacl.Spec.*,Spec.*,Seq.* \
 	$(KREMLIN_TESTLIB)
 
 
