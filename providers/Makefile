@@ -173,6 +173,6 @@ sample-project/sample-project.exe: sample-project/SampleProject.fst $(OUT_DIR)/l
 
 # 6. An OCaml library that exposes only the bytes-based interface, for now
 
-$(OUT_DIR)/evercrypt.cmxa: multiplexer/ml/EverCrypt.ml | $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)
+$(OUT_DIR)/evercrypt.cmxa: multiplexer/ml/EverCrypt_Bytes.ml | $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)
 	ocamlfind mklib -package ctypes,ctypes.foreign -ccopt -Wl,-levercrypt \
 	  -ccopt -Wl,-L. -o $(patsubst %.cmxa,%,$@) $^

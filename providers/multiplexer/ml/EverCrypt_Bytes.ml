@@ -2,6 +2,9 @@ open Ctypes
 open PosixTypes
 open Foreign
 
+(* This module implements EverCrypt.Bytes, using fstarlib's `type bytes =
+ * string`. *)
+
 (* See Santiago's comment in PKI.ml *)
 let () =
   if Sys.os_type = "Win32" then
