@@ -82,7 +82,7 @@ all-ci: bignum-ci specific-ci
 
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 KREMLIN_ARGS+=-I ../bignum -tmpdir x25519-c \
-	-drop Spec.*,Hacl.Spec.*,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims \
+	-drop FStar,Prims,C.Loops.Spec.Loops,Spec.*,Hacl.Spec.*,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	$(KREMLIN_TESTLIB)
 
 # Acknowledge the F* dependency graph
@@ -93,11 +93,6 @@ depend:
 
 x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
-
-ifneq (,$(EVEREST_WINDOWS))
-KREMLIN_ARGS+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
-  -add-early-include '"FStar_UInt128.h"'
-endif
 
 x25519-c/Hacl_Test_X25519.c: x25519-c/Hacl_Curve25519.c
 
