@@ -26,7 +26,12 @@ else ifeq ($(OS),Windows_NT)
   SO		= dll
 endif
 
-all: $(OUT_DIR)/libevercrypt.a $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)/evercrypt.cmxa
+# Manual staging...
+all:
+	$(MAKE) .depend
+	$(MAKE) all_
+
+all_: $(OUT_DIR)/libevercrypt.a $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)/evercrypt.cmxa
 
 test: sample-project/sample-project.exe
 	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. PATH=. ./$<
@@ -50,7 +55,7 @@ ROOTS		= EverCrypt.fst EverCrypt.Bytes.fsti
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract Kremlin > $@
 
--include .depend
+include .depend
 
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< && \
@@ -76,9 +81,8 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  && \
 	touch $@
 
-# Note: this relies on a GNU Make feature, and the rest of the Makefile is
-# evaluated only after we have extracted this file. No need to manually list all
-# the KreMLin outputs!
+# This will generate an error the first time this Makefile is invoked because
+# $(ALL_KRML_FILES) is empty. This is why we need to stage the `all` target.
 -include $(GENERATED_DIR)/Makefile.include
 
 
