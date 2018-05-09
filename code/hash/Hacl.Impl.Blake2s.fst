@@ -16,13 +16,11 @@ module Spec = Spec.Blake2s
 
 
 ///
-/// WORK IN PROGRESS
-/// ----------------
+/// STATUS
+/// ------
 ///
-/// 0. The code is proven until `blake2s_internal3`.
-///
+/// 0. The code is proven until `blake2s_internal`.
 /// 1. Rewrite update_sub to be in the correct order.
-///
 /// 2. Lemmata need to be proven and moved back to the libraries.
 ///
 
@@ -47,6 +45,7 @@ val lemma_cast_to_u64: x:uint32 -> Lemma
 
 let lemma_cast_to_u64 x = admit()
 
+
 val lemma_modifies0_is_modifies2: #a0:Type -> #a1:Type -> #len0:size_nat -> #len1:size_nat -> b0:lbuffer a0 len0 -> b1:lbuffer a1 len1 -> h0:mem -> h1:mem -> Lemma
   (requires (True))
   (ensures  (h0 == h1 ==> modifies2 b0 b1 h0 h1))
@@ -58,6 +57,7 @@ val lemma_modifies1_is_modifies2: #a0:Type -> #a1:Type -> #len0:size_nat -> #len
   (ensures  (modifies1 b0 h0 h1 ==> modifies2 b0 b1 h0 h1))
 let lemma_modifies1_is_modifies2 #a0 #a1 #len0 #len1 b0 b1 h0 h1 = admit()
 
+
 val lemma_repeati: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> i:size_nat{i < n} -> Lemma
   (requires True)
   (ensures  (f i (repeati #a i f init) == repeati #a (i + 1) f init))
@@ -65,7 +65,6 @@ val lemma_repeati: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a)
 
 let lemma_repeati #a n f init i = admit()
 
-#reset-options "--warn_error @276"
 
 val lemma_repeati_zero: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> Lemma
   (requires True)
@@ -73,6 +72,7 @@ val lemma_repeati_zero: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> T
   [SMTPat (repeati #a 0 f init)]
 
 let lemma_repeati_zero #a n f init = admit()
+
 
 val lemma_size_to_uint32_equal_u32_of_v_of_size_t: x:size_t -> Lemma
   (requires True)
@@ -87,16 +87,6 @@ val lemma_value_mixed_size_addition: x:size_t -> y:size_nat -> Lemma
   [SMTPat (v (x +. (size y)) == v x + y)]
 let lemma_value_mixed_size_addition x y = admit()
 
-//  assume(v (ll +. (size Spec.block_bytes)) == v ll + Spec.block_bytes);
-
-
-
-
-// val lemma_repeati_ghost_is_repeati: #a:Type -> n:size_nat -> (f:(i:size_nat{i < n}  -> a -> Tot a)) -> init:a -> Lemma
-//   (requires (True))
-//   (ensures  (repeati #a n f init == repeati_ghost #a n f init))
-//   [SMTPat (repeati_ghost #a n f init)]
-// let lemma_repeati_ghost_is_repeati #a n f init = admit()
 
 (* Functions to add to the libraries *)
 val update_sub: #a:Type0 -> #len:size_nat -> #xlen:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == xlen} -> x:lbuffer a xlen ->
@@ -109,6 +99,7 @@ val update_sub: #a:Type0 -> #len:size_nat -> #xlen:size_nat -> i:lbuffer a len -
 let update_sub #a #len #olen i start n x =
   let i' = sub i start n in
   copy n x i'
+
 
 ///
 /// Blake2s
@@ -271,8 +262,6 @@ let blake2_compress1 wv s m offset flag const_iv =
  (if flag then wv.(size 14) <- wv_14)
 
 
-#reset-options "--max_fuel 0 --z3rlimit 50"
-
 val blake2_compress2 :
   wv:working_vector -> m:message_block -> const_sigma:sigma_t ->
   Stack unit
@@ -294,7 +283,6 @@ let blake2_compress2 wv m const_sigma =
       blake2_round wv m i const_sigma;
       lemma_repeati Spec.rounds_in_f (Spec.blake2_round h0.[m]) h0.[wv] (v i))
 
-#reset-options "--max_fuel 0"
 
 val blake2_compress3_inner :
   wv:working_vector -> i:size_t{size_v i < 8} -> s:hash_state -> const_sigma:sigma_t ->
@@ -332,8 +320,6 @@ let blake2_compress3 wv s const_sigma =
     (fun i -> blake2_compress3_inner wv i s const_sigma;
            lemma_repeati 8 (Spec.blake2_compress3_inner h0.[wv]) h0.[s] (v i))
 
-
-#reset-options "--max_fuel 0"
 
 val blake2_compress :
   s:hash_state -> m:message_block ->
@@ -374,8 +360,6 @@ let blake2s_internal1 s kk nn =
   let s0' = s0 ^. (u32 0x01010000) ^. kk_shift_8 ^. size_to_uint32 nn in
   s.(size 0) <- s0'
 
-
-#reset-options "--max_fuel 0 --z3rlimit 25"
 
 val blake2s_internal2_inner: s:lbuffer uint32 8 ->
    dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
@@ -467,8 +451,6 @@ let blake2s_internal2 s dd d to_compress const_iv const_sigma =
   end
 
 
-#reset-options "--max_fuel 0 --z3rlimit 50"
-
 val blake2s_internal3: s:lbuffer uint32 8 ->
   dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
   d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
@@ -511,6 +493,8 @@ let blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma =
     blake2_compress s to_compress ll_plus_block_bytes64 true const_iv const_sigma
 
 
+#set-options "--max_fuel 0 --z3rlimit 25"
+
 val blake2s_internal:
   dd:size_t{0 < size_v dd /\ size_v dd * Spec.bytes_in_block <= max_size_t}  ->
   d:lbuffer uint8 (size_v dd * Spec.bytes_in_block) ->
@@ -532,35 +516,32 @@ val blake2s_internal:
 [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2s_internal dd d ll kk nn res const_iv const_sigma =
   let h0 = ST.get () in
-  salloc21 #h0 #uint32 #uint8 #unit #uint8 #32 #8 #(v nn) (size 32) (size 8) (u32 0) (u8 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res
+  salloc21 #h0 #unit #uint32 #uint8 #uint8 #32 #8 #(v nn) (size 32) (size 8) (u32 0) (u8 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res
   (fun h0 _ h1 -> True)
   (fun st_u32 tmp ->
-    let h0 = ST.get () in
-
     let s = sub st_u32 (size 16) (size 8) in
     let to_compress = sub st_u32 (size 0) (size 16) in
     copy (size 8) const_iv s;
     blake2s_internal1 s kk nn;
     blake2s_internal2 s dd d to_compress const_iv const_sigma;
     blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma;
-
-    uint32s_to_bytes_le #8 (size 8) tmp s;
+    let h = ST.get () in
+    assert(live h tmp);
+    assert(live h s);
+    assert(8 `op_Multiply` 4 <= max_size_t);
+    assert(size_v (size 8) == 8);
+    assert(32 == 8 `op_Multiply` 4);
+    assert(disjoint tmp s);
+    assert(disjoint s tmp);
+    uint32s_to_bytes_le #8 (size 8) tmp s; admit();
+    let h0' = ST.get () in
+    assert(modifies2 st_u32 tmp h0 h0'); admit();
     let tmp' = sub tmp (size 0) nn in
-    copy nn tmp' res
+    copy nn tmp' res;
+    let h1 = ST.get () in
+    assert(modifies3 res st_u32 tmp h0 h1); admit()
+  ); admit()
 
-    (* let h1 = ST.get () in *)
-    (* assume(modifies3 st_u32 tmp res h0 h1) *)
-  )
-
-
-(* let blake2s_internal dd d ll kk nn = *)
-(*   let h = const_init in *)
-(*   let h = blake2s_internal1 h kk nn in *)
-(*   let h = blake2s_internal2 dd d h in *)
-(*   let h = blake2s_internal3 h dd d ll kk nn in *)
-(*   sub (uints_to_bytes_le h) 0 nn *)
-
-#reset-options "--max_fuel 2 --z3rlimit 250"
 
 val blake2s :
   ll:size_t{0 < size_v ll /\ size_v ll <= max_size_t - 2 * Spec.bytes_in_block } ->
