@@ -121,7 +121,8 @@ let fresh_addresses (rid:HS.rid) (addrs:FStar.TSet.set address) (m0:HS.mem) (m1:
 (*                 | SomeRefs addrs -> TSet.complement addrs in *)
 (*               FStar.Heap.modifies_t mod_refs (Map.sel h0.h r) (Map.sel h1.h r))))) *)
 
-let fp = FStar.Ghost.erased FStar.Pointer.Base.loc
+noextract val fp' : Type u#0
+inline_for_extraction let fp = FStar.Ghost.erased fp' 
 val footprint     : #i:_ -> #rw:_ -> aead_state i rw -> GTot fp
 val modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0
 val preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0
@@ -276,7 +277,7 @@ val encrypt
                invariant st h /\
                (safeMac i ==> fresh_nonce n st h)))
   (ensures (fun h0 _ h1 ->
-               // modifies_fp FStar.Pointer.Base.(loc_union (footprint st) (loc_buffer cipher_tag)) h0 h1 /\
+               // modifies_fp FPLOC.(loc_union (footprint st) (loc_buffer cipher_tag)) h0 h1 /\
                enc_dec_liveness st aad plain cipher_tag h1 /\
                invariant st h1 /\
                (safeMac i ==>
@@ -300,5 +301,5 @@ val decrypt
   (ensures (fun h0 verified h1 ->
                invariant st h1 /\
                enc_dec_liveness st aad plain cipher_tag h1 /\
-               // modifies_fp FStar.Pointer.Base.(loc_union (footprint st) (loc_buffer (Plain.as_buffer plain))) h0 h1 /\
+               // modifies_fp FPLOC.(loc_union (footprint st) (loc_buffer (Plain.as_buffer plain))) h0 h1 /\
                (safeId i ==> entry_for_nonce n st h1 == Some (entry_of n aad plain cipher_tag h1))))
