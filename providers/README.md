@@ -30,19 +30,13 @@ On top of these three building blocks, we have:
 
 # status of primitives
 
-----------------------------------------------------------
-| primitive | hacl | vale | openssl | c/bytes | ml/bytes |
-----------------------------------------------------------
-| sha256    | yes  | yes  | no      | no      | no       |
-----------------------------------------------------------
-| sha384    | yes  | no   | no      | no      | no       |
-----------------------------------------------------------
-| sha512    | yes  | no   | no      | no      | no       |
-----------------------------------------------------------
-| curve     | yes  | no   | no      | yes     | yes      |
-----------------------------------------------------------
-| aes256gcm | no   | no   | yes     | no      | no       |
-----------------------------------------------------------
+ primitive | hacl | vale | openssl | c/bytes | ml/bytes 
+-----------|------|------|---------|---------|---------
+ sha256    | yes  | yes  | no      | no      | no
+ sha384    | yes  | no   | no      | no      | no
+ sha512    | yes  | no   | no      | no      | no
+ curve     | yes  | no   | no      | yes     | yes
+ aes256gcm | no   | no   | yes     | no      | no
 
 How to add a primitive:
 - EverCrypt.Specs.fsti, to be extended with suitable pre- and post-conditions
