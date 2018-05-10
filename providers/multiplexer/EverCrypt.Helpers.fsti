@@ -7,6 +7,7 @@ open FStar.HyperStack.ST
 inline_for_extraction noextract
 let (!$) = C.String.((!$))
 
+// TODO: use C.Failwith instead!
 inline_for_extraction
 let failwith msg =
   C.String.print msg;
