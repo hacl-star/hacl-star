@@ -33,6 +33,7 @@ let prf_region #i #rw st = Invariant.AEADState?.log_region st //TODO: FIXME!!
 let log #i #rw s h =
   HS.sel h (Invariant.st_ilog s)
 
+(*
 let fp' = FStar.Pointer.Base.loc
 // inline_for_extraction let fp = FStar.Ghost.erased fp'
 (* let footprint #i #rw s = TSet.empty //TODO: FIXME! *)
@@ -40,10 +41,13 @@ let fp' = FStar.Pointer.Base.loc
 let footprint #i #rw s = FStar.Ghost.hide FStar.Pointer.Base.loc_none        //TODO: FIXME!
 let modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0 = True  //TODO: FIXME!
 let preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0 = True //TODO: FIXME!
+*)
 
 let safelen (i:I.id) (n:nat) = Invariant.safelen i n (Invariant.otp_offset i)
 let invariant #i #rw s h = Invariant.inv s h
+(*
 let frame_invariant #i #rw st h0 h1 = admit() //TODO: FIXME!
+*)
 
 let gen i prf_rgn log_rgn =
     assume false;
