@@ -44,10 +44,30 @@ private let uint8_p  = Buffer.buffer uint8_ht
 // SHA-256
 //
 
+(* Define word size *)
+inline_for_extraction let size_word = 4ul // Size of the word in bytes
+
 (* Define algorithm parameters *)
-let size_hash = 8ul
-let size_block = 64ul
-let size_state = 137ul
+inline_for_extraction let size_hash_w   = 8ul // 8 words (Final hash output size)
+inline_for_extraction let size_block_w  = 16ul  // 16 words (Working data block size)
+inline_for_extraction let size_hash     = size_word *^ size_hash_w
+inline_for_extraction let size_block    = size_word *^ size_block_w
+inline_for_extraction let max_input_len = 2305843009213693952uL // 2^61 Bytes
+
+(* Sizes of objects in the state *)
+inline_for_extraction let size_k_w     = 64ul  // 2048 bits = 64 words of 32 bits (size_block)
+inline_for_extraction let size_ws_w    = size_k_w
+inline_for_extraction let size_whash_w = size_hash_w
+inline_for_extraction let size_count_w = 1ul  // 1 word
+inline_for_extraction let size_len_8   = 2ul *^ size_word
+
+inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
+
+(* Positions of objects in the state *)
+inline_for_extraction let pos_k_w      = 0ul
+inline_for_extraction let pos_ws_w     = size_k_w
+inline_for_extraction let pos_whash_w  = size_k_w +^ size_ws_w
+inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
 
 #reset-options "--max_fuel 0  --z3rlimit 10"
