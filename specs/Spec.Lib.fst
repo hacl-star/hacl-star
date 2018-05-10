@@ -76,6 +76,7 @@ let uint64_to_be (a:UInt64.t) : lbytes 8 =
     big_bytes 8ul (UInt64.v a)
 
 
+#reset-options "--z3rlimit 150"
 let lemma_uint32_from_le_inj (b:lbytes 4) (b':lbytes 4) : Lemma
   (requires (uint32_from_le b = uint32_from_le b'))
   (ensures  (b == b'))
