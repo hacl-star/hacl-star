@@ -31,7 +31,7 @@ val lemma_modifies_3:
   h5:HyperStack.mem ->
   h6:HyperStack.mem ->
   a:hint8_p -> b:hint8_p{disjoint a b} -> c:buffer Hacl.UInt64.t{disjoint b c /\ disjoint a c} ->
-  Lemma (requires (live h0 a /\ live h0 b /\ live h0 c /\ modifies_1 b h0 h1 /\ modifies_1 c h1 h2 /\ modifies_1 b h2 h3 /\ modifies_1 c h3 h4 /\ modifies_2 b c h4 h5 /\ modifies_1 a h5 h6 /\ HyperStack.equal_domains h0 h1 /\ HyperStack.equal_domains h1 h2 /\ HyperStack.equal_domains h2 h3 /\ HyperStack.equal_domains h3 h4 /\ HyperStack.equal_domains h4 h5 /\ HyperStack.equal_domains h5 h6))
+  Lemma (requires (live h0 a /\ live h0 b /\ live h0 c /\ modifies_1 b h0 h1 /\ modifies_1 c h1 h2 /\ modifies_1 b h2 h3 /\ modifies_1 c h3 h4 /\ modifies_2 b c h4 h5 /\ modifies_1 a h5 h6 /\ ST.equal_domains h0 h1 /\ ST.equal_domains h1 h2 /\ ST.equal_domains h2 h3 /\ ST.equal_domains h3 h4 /\ ST.equal_domains h4 h5 /\ ST.equal_domains h5 h6))
         (ensures (modifies_3 a b c h0 h6))
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
@@ -50,7 +50,7 @@ let lemma_modifies_3 h0 h1 h2 h3 h4 h5 h6 a b c =
 private
 val append_to_sig:
   signature:hint8_p{length signature = 64} ->
-  a:hint8_p{length a = 32 /\ disjoint a signature} -> 
+  a:hint8_p{length a = 32 /\ disjoint a signature} ->
   b:hint8_p{length b = 32 /\ disjoint b signature} ->
   Stack unit
     (requires (fun h -> live h signature /\ live h a /\ live h b))
@@ -68,11 +68,11 @@ let append_to_sig signature a b =
   let h2 = ST.get() in
   no_upd_lemma_1 h1 h2 (Buffer.sub signature 32ul 32ul) (Buffer.sub signature 0ul 32ul);
   Seq.lemma_eq_intro (as_seq h2 signature) FStar.Seq.(as_seq h0 a @| as_seq h0 b)
-  
+
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val sign__:
   signature:hint8_p{length signature = 64} ->
@@ -139,7 +139,7 @@ val lemma_modifies_3_to_modifies_2:
   b:buffer a -> b':buffer a' -> b'':buffer a'' ->
   Lemma (requires (live h0 b /\ live h0 b' /\ HyperStack.fresh_frame h0 h1 /\ modifies_0 h1 h2 /\
     b'' `unused_in` h1 /\ live h2 b'' /\ frameOf b'' = FStar.HyperStack.(h1.tip) /\ modifies_3 b b' b'' h2 h3 /\
-    HyperStack.popped h3 h4 /\ HyperStack.equal_domains h2 h3))
+    HyperStack.popped h3 h4 /\ ST.equal_domains h2 h3))
         (ensures (modifies_2 b b' h0 h4))
 
 #reset-options "--max_fuel 0 --z3rlimit 200"

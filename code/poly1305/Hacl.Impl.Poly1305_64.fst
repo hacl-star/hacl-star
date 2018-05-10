@@ -7,9 +7,9 @@ module ST = FStar.HyperStack.ST
 
 open FStar.Mul
 open FStar.HyperStack.ST
-open FStar.Ghost
 open FStar.Seq
 open FStar.HyperStack
+open FStar.Ghost
 open FStar.Endianness
 open FStar.Buffer
 

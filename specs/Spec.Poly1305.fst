@@ -32,7 +32,7 @@ type text = seq word
 let encode (w:word) =
   (pow2 (8 * length w)) `fadd` (little_endian w)
 
-let rec poly (txt:text) (r:e:elem) : Tot elem (decreases (length txt)) =
+let rec poly (txt:text) (r:elem) : Tot elem (decreases (length txt)) =
   if length txt = 0 then zero
   else
     let a = poly (Seq.tail txt) r in

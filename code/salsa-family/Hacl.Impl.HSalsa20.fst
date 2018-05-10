@@ -26,7 +26,7 @@ let state   = b:buffer h32{length b = 16}
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 val setup:
   st:state ->
   k:uint8_p{length k = 32 /\ disjoint st k} ->
@@ -38,7 +38,7 @@ val setup:
          let k = reveal_sbytes (as_seq h0 k) in
          let n = reveal_sbytes (as_seq h0 n) in
          s == setup k n)))
-[@ "c_inline"]
+[@ CInline]
 let setup st k n =
   let h0 = ST.get() in
   push_frame();

@@ -10,7 +10,6 @@ open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
-open FStar.Monotonic.RRef
 
 open FStar.Math.Lib
 open FStar.Math.Lemmas
@@ -19,7 +18,6 @@ open Crypto.Symmetric.Bytes
 open Crypto.Plain
 open Flag
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 module MAC = Crypto.Symmetric.MAC
@@ -34,7 +32,7 @@ open Crypto.AEAD.Invariant
 //AEAD.Encoding.accumulate wrapper
 ////////////////////////////////////////////////////////////////////////////////
 (** Fresh stack reference *)
-let fresh_sref (#a:Type0) h0 h1 (r:HS.reference a) =
+let fresh_sref (#a:Type0) h0 h1 (r:ST.reference a) =
   (r `HS.unused_in` h0) /\
   HS.frameOf r == HS.(h1.tip) /\
   h1 `HS.contains` r

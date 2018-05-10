@@ -32,7 +32,7 @@ let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
 
 *)
 
-[@ "substitute"]
+[@ Substitute]
 private
 val copy:
   a:buffer Hacl.UInt64.t{length a = 5} ->
@@ -41,7 +41,7 @@ val copy:
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h0 a == as_seq h1 b))
-[@ "substitute"]
+[@ Substitute]
 let copy a b =
   let h = ST.get() in
   blit a 0ul b 0ul 5ul;
@@ -52,7 +52,7 @@ let copy a b =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_add_step_1:
   p:point ->
@@ -96,7 +96,7 @@ val point_add_step_1:
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ "substitute"]
+[@ Substitute]
 private
 let point_add_step_1 p q tmp =
   let tmp1 = sub tmp 0ul 5ul in
@@ -119,7 +119,7 @@ let point_add_step_1 p q tmp =
   let h = ST.get() in
   lemma_red_513_is_red_53 (as_seq h tmp1);
   fdifference tmp2 y2;    // tmp2 = y2 - x2
-  fmul tmp3 tmp1 tmp2;    // tmp3 = a  
+  fmul tmp3 tmp1 tmp2;    // tmp3 = a
   copy y1 tmp1; // tmp1 = y1
   copy y2 tmp2; // tmp2 = y2
   fsum tmp1 x1;             // tmp1 = y1 + x1
@@ -129,7 +129,7 @@ let point_add_step_1 p q tmp =
   fmul tmp4 tmp1 tmp2
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_add_step_2:
   p:point ->
@@ -181,7 +181,7 @@ val point_add_step_2:
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ "substitute"]
+[@ Substitute]
 private
 let point_add_step_2 p q tmp =
   let tmp1 = sub tmp 0ul 5ul in
@@ -255,7 +255,7 @@ let point_add_step_2 p q tmp =
   ()
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_add_step_3:
   p:point ->
@@ -280,7 +280,7 @@ val point_add_step_3:
         let tmp6 = as_seq h (sub tmp 25ul 5ul) in
         red_513 x1 /\ red_513 y1 /\ red_513 z1 /\ red_513 t1 /\
         red_513 x2 /\ red_513 y2 /\ red_513 z2 /\ red_513 t2 /\
-        red_513 tmp1 /\ red_513 tmp2 /\ red_513 tmp3 /\ red_513 tmp4 /\ red_513 tmp5 /\ red_513 tmp6)   
+        red_513 tmp1 /\ red_513 tmp2 /\ red_513 tmp3 /\ red_513 tmp4 /\ red_513 tmp5 /\ red_513 tmp6)
      ))
     (ensures (fun h0 _ h1 -> live h0 p /\ live h0 q /\ modifies_1 tmp h0 h1 /\ live h1 tmp /\ live h0 tmp /\
       (
@@ -313,7 +313,7 @@ val point_add_step_3:
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ "substitute"]
+[@ Substitute]
 private
 let point_add_step_3 p q tmp =
   let tmp1 = sub tmp 0ul 5ul in
@@ -363,7 +363,7 @@ let point_add_step_3 p q tmp =
   ()
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_add_:
   out:point ->
@@ -405,7 +405,7 @@ val point_add_:
   ))
 
 #reset-options "--max_fuel 0 --z3rlimit 500"
-[@ "substitute"]
+[@ Substitute]
 private
 let point_add_ out p q tmp =
   point_add_step_1 p q tmp;

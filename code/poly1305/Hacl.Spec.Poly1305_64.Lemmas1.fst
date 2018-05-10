@@ -22,7 +22,7 @@ module U8 = FStar.UInt8
 private val append_empty: #a:Type -> s1:Seq.seq a -> s2:Seq.seq a -> Lemma
   (requires (Seq.length s1 == 0))
   (ensures  (Seq.append s1 s2 == s2))
-  [SMTPat (Seq.append s1 s2); SMTPatT (Seq.length s1 == 0)]
+  [SMTPat (Seq.append s1 s2); SMTPat (Seq.length s1 == 0)]
 let append_empty #a s1 s2 =
   Seq.lemma_eq_intro (Seq.append s1 s2) s2
 
@@ -48,7 +48,7 @@ let append_assoc #a s1 s2 s3 = ()
 private val encode_bytes_empty: txt:Seq.seq U8.t -> Lemma
     (requires Seq.length txt == 0)
     (ensures  encode_bytes (txt) == Seq.createEmpty)
-    [SMTPat (encode_bytes (txt)); SMTPatT (Seq.length txt == 0)]
+    [SMTPat (encode_bytes (txt)); SMTPat (Seq.length txt == 0)]
 let encode_bytes_empty txt = ()
 
 

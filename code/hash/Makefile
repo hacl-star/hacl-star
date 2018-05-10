@@ -25,7 +25,7 @@ all-ci: ci
 all-hints: hints
 
 KREMLIN_ARGS+=-verbose \
-	-drop Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+	-drop FStar,Prims,C.Loops.Spec.Loops,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
 	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
 	$(KREMLIN_TESTLIB) -ccopt -march=native
@@ -40,7 +40,7 @@ SPACE=$(empty) $(empty)
 COMMA=,
 
 sha2-c/out.krml: $(SHA2_FILES) $(addsuffix .fst,$(MODULES)) $(addsuffix .fst,$(TESTMODS))
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-translation $^
+	$(KREMLIN) $(KREMLIN_ARGS) -I interfaces -tmpdir sha2-c -skip-translation $^
 
 sha2-c/Hacl_SHA2_%.c: sha2-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation \

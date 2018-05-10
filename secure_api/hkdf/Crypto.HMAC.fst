@@ -8,7 +8,6 @@ open FStar.HyperStack
 open FStar.Buffer
 open Buffer.Utils
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 open FStar.UInt32
@@ -23,11 +22,11 @@ module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
 module Spec_H256 = Spec.SHA2_256
-module H256 = Hacl.Hash.SHA2_256
+module H256 = Hacl.Impl.SHA2_256
 module Spec_H384 = Spec.SHA2_384
-module H384 = Hacl.Hash.SHA2_384
+module H384 = Hacl.Impl.SHA2_384
 module Spec_H512 = Spec.SHA2_512
-module H512 = Hacl.Hash.SHA2_512
+module H512 = Hacl.Impl.SHA2_512
 
 module Spec_HMAC256 = Spec.HMAC.SHA2_256
 
@@ -37,9 +36,6 @@ private let uint32_p = Buffer.buffer uint32_t
 private let uint8_p  = Buffer.buffer uint8_t
 private let uint64_t = FStar.UInt64.t
 private let uint64_p = Buffer.buffer uint64_t
-
-type bytes = Seq.seq uint8_t
-type lbytes (n:nat) = b:bytes{Seq.length b = n}
 
 //
 // HMAC-SHA2-256

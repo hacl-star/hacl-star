@@ -12,7 +12,7 @@ open Hacl.Impl.Ed25519.ExtPoint
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 val make_g:
   g:point ->
   Stack unit
@@ -25,7 +25,7 @@ val make_g:
 let make_g g =
   assert_norm (pow2 51 = 0x8000000000000);
   assert_norm((0x00062d608f25d51a + pow2 51 * 0x000412a4b4f6592a + pow2 102 * 0x00075b7171a4b31d + pow2 153 * 0x0001ff60527118fe + pow2 204 * 0x000216936d3cd6e5) % (pow2 255 - 19) = Mktuple4?._1 Spec.Ed25519.g);
-  assert_norm((0x0006666666666658 + pow2 51 *  0x0004cccccccccccc + pow2 102 *  0x0001999999999999 + pow2 153 *  0x0003333333333333 + pow2 204 * 0x0006666666666666) % (pow2 255 - 19) = Mktuple4?._2 Spec.Ed25519.g);  
+  assert_norm((0x0006666666666658 + pow2 51 *  0x0004cccccccccccc + pow2 102 *  0x0001999999999999 + pow2 153 *  0x0003333333333333 + pow2 204 * 0x0006666666666666) % (pow2 255 - 19) = Mktuple4?._2 Spec.Ed25519.g);
   assert_norm((1 + pow2 51 * 0 + pow2 102 * 0 + pow2 153 * 0 + pow2 204 * 0) % (pow2 255 - 19) = Mktuple4?._3 Spec.Ed25519.g);
   assert_norm((0x00068ab3a5b7dda3 + pow2 51 * 0x00000eea2a5eadbb + pow2 102 * 0x0002af8df483c27e + pow2 153 * 0x000332b375274732 + pow2 204 * 0x00067875f0fd78b7) % (pow2 255 - 19) = Mktuple4?._4 Spec.Ed25519.g);
   let gx = Hacl.Impl.Ed25519.ExtPoint.getx g in

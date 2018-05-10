@@ -15,7 +15,6 @@ open FStar.HyperStack.All
 open FStar.UInt32
 open FStar.Ghost
 open Buffer.Utils
-open FStar.Monotonic.RRef
 
 open Crypto.Indexing
 open Crypto.Symmetric.Bytes
@@ -28,7 +27,6 @@ open Crypto.AEAD.Invariant
 (* open Crypto.AEAD.Wrappers *)
 open FStar.HyperStack.ST
 
-module HH       = FStar.HyperHeap
 module HS       = FStar.HyperStack
 module MAC      = Crypto.Symmetric.MAC
 module CMA      = Crypto.Symmetric.UF1CMA
@@ -50,6 +48,7 @@ val gen:
      (ensures  (fun h0 st h1 -> True))
 
 (** ref_as_aead_log: A coercion from a conditional log to the ideal case *)
+private
 let ref_as_aead_log (#r:rgn) (#i:id) (x:rref r (aead_entries i){safeMac i})
   : aead_log r i
   = x
@@ -62,7 +61,7 @@ let gen i rgn =
     if safeMac i 
     then ref_as_aead_log (ralloc rgn Seq.createEmpty)
     else () in
-  let ak = if CMA.skeyed i then Some (PRF.prf_sk0 #i prf) else None in 
+  let ak = if CMA.skeyed i then CMA.mk_akey (PRF.prf_sk0 #i prf) else CMA.mk_akey_null () in 
   AEADState #i #Writer #rgn log prf ak
 #reset-options
 
@@ -77,7 +76,7 @@ let coerce i rgn key =
   let prf = PRF.coerce rgn i key in
   if Flag.prf i then recall (PRF.itable i prf);
   let log : aead_log rgn i = () in
-  let ak = if CMA.skeyed i then Some (PRF.prf_sk0 #i prf) else None in 
+  let ak = if CMA.skeyed i then CMA.mk_akey (PRF.prf_sk0 #i prf) else CMA.mk_akey_null () in 
   AEADState #i #Writer #rgn log prf ak
 
 val genReader: #i:id -> st:aead_state i Writer -> ST (aead_state i Reader)

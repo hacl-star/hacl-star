@@ -28,7 +28,6 @@ module PS_ = Hacl.Spec.Poly1305_64
 module PS = Hacl.Spe.Poly1305_64
 module PL = Hacl.Impl.Poly1305_64
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 #set-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
@@ -108,6 +107,13 @@ val as_buffer: #i:id -> elemB i -> GTot (buffer_of (alg i))
 let as_buffer #i e =
   reveal_elemB e
 
+let unsound_free (#i:id) (e:elemB i) : ST unit
+  (requires fun h0 -> True)
+  (ensures fun h0 _ h1 -> h0 == h1)
+  =
+  assume false;
+  FStar.Buffer.rfree e
+
 val live: mem -> #i:id -> elemB i -> Type0
 let live h #i b = Buffer.live h (as_buffer b)
 
@@ -186,7 +192,7 @@ let frame_sel_elem h1 h2 #i b =
 
 #reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
 (** Create and initialize an element (used for r) *)
-val rcreate: rgn:HH.rid{HS.is_eternal_region rgn} -> i:id -> ST (elemB i)
+val rcreate: rgn:HS.rid{is_eternal_region rgn} -> i:id -> ST (elemB i)
   (requires (fun h0 -> True))
   (ensures  (fun h0 r h1 ->
     HS.modifies (Set.singleton rgn) h0 h1 /\
@@ -362,9 +368,9 @@ let poly_cons #i x xs r =
         assert (Seq.equal (text_to_PS_text (Seq.cons x xs))
                           (Seq.cons x (text_to_PS_text xs)));
   match alg i with
-  | POLY1305 -> 
+  | POLY1305 ->
 	poly_cons_ x (text_to_PS_text xs) r
-  | GHASH    -> 
+  | GHASH    ->
         GS.poly_cons x (text_to_PS_text xs) r;
         GS.add_comm (GS.poly (text_to_PS_text xs) r) (GS.encode x)
 
@@ -382,7 +388,7 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1 --split_cases 1"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1"
 let update #i r a w =
   begin
   match alg i with
@@ -477,7 +483,7 @@ let finish #i s a t =
     let h = ST.get() in
     Math.Lemmas.lemma_mod_plus_distr_l (PS_.selem (as_seq h a)) (little_endian (as_seq h t)) (pow2 128);
     let dummy_r = Buffer.create 0uL 3ul in
-    let dummy_m = Buffer.create 42uy 0ul in
+    let dummy_m = C.Nullity.null FStar.UInt8.t (* Buffer.create 42uy 0ul *) in
     let h' = ST.get() in
     PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.mk_state dummy_r a') t dummy_m 0uL s;
     let h'' = ST.get() in

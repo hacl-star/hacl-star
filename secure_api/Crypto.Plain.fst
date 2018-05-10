@@ -4,7 +4,6 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 
-open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.UInt32
@@ -87,7 +86,7 @@ let as_buffer_injective i l p = ()
 
 
 let live #i #l h (p:plainBuffer i l) = Buffer.live h (as_buffer p)
-private let live' = live (* live may be shadowed by Buffer.live in case of local open *)
+private let live' #i #l = live #i #l (* live may be shadowed by Buffer.live in case of local open *)
 
 // unconditional access in specs; rename to as_plain? 
 noextract val sel_plain: h:mem -> #i:id -> l:UInt32.t -> buf:plainBuffer i (v l) -> GTot (plain i (v l))
