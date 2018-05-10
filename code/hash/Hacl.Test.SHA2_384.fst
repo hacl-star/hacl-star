@@ -1,13 +1,10 @@
 module Hacl.Test.SHA2_384
 
-open FStar.HyperStack.All
-
-module ST = FStar.HyperStack.ST
-
 open FStar.Buffer
 open FStar.UInt32
+open FStar.HyperStack.All
 
-module Hash = SHA2_384
+module Hash = Hacl.SHA2_384
 
 
 val test_1a: unit -> ST unit
@@ -462,7 +459,7 @@ let test_6 () =
 
 
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -490,4 +487,4 @@ let main () =
   test_6();
 
   (* Exit the program *)
-  C.exit_success
+  C.EXIT_SUCCESS

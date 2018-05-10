@@ -14,7 +14,7 @@ let secret_expand expanded secret =
   assert_norm(pow2 32 = 0x100000000);
   assert_norm(pow2 125 = 0x20000000000000000000000000000000);
   let h0 = ST.get() in
-  SHA2_512.hash expanded secret 32ul;
+  Hacl.SHA2_512.hash expanded secret 32ul;
   let h = ST.get() in
   assert_norm(pow2 125 > 32);
   let h_low  = Buffer.sub expanded 0ul  32ul in

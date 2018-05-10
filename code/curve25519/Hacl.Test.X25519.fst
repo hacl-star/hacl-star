@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 
 open FStar.Buffer
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -60,4 +60,4 @@ let main () =
   let t2 = C.clock () in
   TestLib.print_clock_diff t1 t2;
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS

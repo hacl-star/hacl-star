@@ -6,13 +6,13 @@ open FStar.HyperStack.All
 
 open FStar.Buffer
 
-module Chacha20=Chacha20
+module Chacha20=Hacl.Chacha20
 
 let len = 114ul
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -67,4 +67,4 @@ let main () =
   Chacha20.chacha20 ciphertext plaintext len key nonce counter;
   TestLib.compare_and_print (C.String.of_literal "chacha20") expected ciphertext len;
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS

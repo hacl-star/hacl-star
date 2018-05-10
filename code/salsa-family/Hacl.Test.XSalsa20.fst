@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 
 open FStar.Buffer
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -72,4 +72,4 @@ let main () =
   Hacl.Symmetric.XSalsa20.crypto_stream_xsalsa20_xor ciphertext plaintext 163uL nonce key;
   TestLib.compare_and_print (C.String.of_literal "xsalsa20") expected (offset ciphertext 32ul) (FStar.UInt32.(len -^ 32ul));
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS

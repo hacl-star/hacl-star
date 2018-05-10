@@ -27,8 +27,7 @@
 #include "Crypto_AEAD_Main_Crypto_Indexing.h"
 #include "Crypto_Symmetric_Bytes.h"
 #include "Crypto_HKDF_Crypto_HMAC.h"
-#include "Curve25519.h"
-#include "FStar.h"
+#include "Hacl_Curve25519.h"
 
 typedef Crypto_AEAD_Invariant_aead_state AEAD_ST;
 typedef Crypto_Indexing_id ID;
@@ -209,7 +208,7 @@ CAMLprim value ocaml_crypto_scalarmult(value secret, value base) {
   uint8_t *out_p = (uint8_t *) String_val(out);
   uint8_t *secret_p = (uint8_t *) String_val(secret);
   uint8_t *base_p = (uint8_t *) String_val(base);
-  Curve25519_crypto_scalarmult(out_p, secret_p, base_p);
+  Hacl_Curve25519_crypto_scalarmult(out_p, secret_p, base_p);
   CAMLreturn(out);
 }
 

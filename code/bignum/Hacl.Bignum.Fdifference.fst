@@ -27,5 +27,5 @@ val fdifference_:
     (ensures (fun h0 _ h1 -> gte_limbs_c h0 a h0 b len /\ live h1 a /\ modifies_1 a h0 h1
       /\ as_seq h1 a == fdifference_spec (as_seq h0 a) (as_seq h0 b)))
 [@"substitute"]
-let rec fdifference_ a b =
+let fdifference_ a b =
   C.Loops.in_place_map2 a b clen (fun x y -> y -%^ x)
