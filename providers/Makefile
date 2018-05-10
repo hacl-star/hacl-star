@@ -171,7 +171,7 @@ $(OUT_DIR):
 
 # 4. Collecting all of the object files into a static and a dynamic library.
 
-LDFLAGS += -lcrypto -L$(OPENSSL_HOME)
+LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
 
 # Note: see
 # https://www.gnu.org/software/make/manual/html_node/Archive-Pitfalls.html#Archive-Pitfalls
