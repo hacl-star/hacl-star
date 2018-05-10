@@ -49,6 +49,10 @@ sha2-c/Hacl_SHA2_%.c: sha2-c/out.krml
 	 -bundle "Hacl.SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Impl.SHA2_$*,Hacl.SHA2_$*" \
 	 $^ -o $@
 
+# Linearize this step to avoid a race when these two target are both writing in
+# parallel into the Hacl.SHA2_$*.c file.
+sha2-c/Hacl_Test_SHA2_%.c: sha2-c/Hacl_SHA2_%.c
+
 sha2-c/Hacl_Test_SHA2_%.c: sha2-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation -no-prefix Hacl.Test.SHA2_$* \
 	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Impl.SHA2_$*,$(filter-out Hacl.SHA2_$*,$(MODULES)))) \
