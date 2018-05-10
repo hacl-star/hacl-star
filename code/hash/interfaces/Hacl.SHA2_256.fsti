@@ -12,8 +12,6 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
-open Hacl.Impl.SHA2_256
-
 
 (* Definition of aliases for modules *)
 module U8 = FStar.UInt8
@@ -28,7 +26,6 @@ module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2_256
-module Hash = Hacl.Impl.SHA2_256
 
 
 (* Definition of base types *)
@@ -48,9 +45,9 @@ private let uint8_p  = Buffer.buffer uint8_ht
 //
 
 (* Define algorithm parameters *)
-let size_hash = Hash.size_hash
-let size_block = Hash.size_block
-let size_state = Hash.size_state
+let size_hash = 8ul
+let size_block = 64ul
+let size_state = 137ul
 
 
 #reset-options "--max_fuel 0  --z3rlimit 10"

@@ -7,6 +7,9 @@ OUTPUT_DIR	= .output
 GENERATED_DIR	= generated
 OUT_DIR		= out
 
+HACL_CODE	= $(HACL_HOME)/code
+HACL_SPEC	= $(HACL_HOME)/specs
+
 # 0. The usual pseudo auto-configuration
 
 UNAME		= $(shell uname)
@@ -41,11 +44,13 @@ test: sample-project/sample-project.exe
 # - verify every F* file in parallel to generate .checked files
 # - extract each .checked file into a .krml file in parallel
 
+FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib multiplexer multiplexer/fst \
+  $(HACL_CODE)/lib/kremlin $(HACL_CODE)/hash/interfaces \
+  $(HACL_SPEC)
 FSTAR		= $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   --use_two_phase_tc true \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  --include $(KREMLIN_HOME)/kremlib --include multiplexer \
-  --include multiplexer/fst \
+  $(addprefix --include ,$(FSTAR_INCLUDES)) \
   --use_hints # --record_hints --hint_info
 
 ROOTS		= EverCrypt.fst EverCrypt.Bytes.fsti
@@ -101,18 +106,17 @@ VALE_ASM 	= $(addprefix $(VALE_DIR)/,\
 # branch where their compilation is restored.
 # - aead-c: kremlin seems to generate an extra argument, JK had a hack to sed
 #   the code in place
-HACL_DIR	= $(HACL_HOME)/code
 HACL_SOURCES	= \
-  $(HACL_DIR)/salsa-family/chacha-c/Hacl_Chacha20.c \
-  $(HACL_DIR)/salsa-family/salsa-c/Hacl_Salsa20.c \
-  $(addprefix $(HACL_DIR)/hash/sha2-c/Hacl_SHA2_,256.c 384.c 512.c) \
-  $(HACL_DIR)/curve25519/x25519-c/Hacl_Curve25519.c \
-  $(HACL_DIR)/ed25519/ed25519-c/Hacl_Ed25519.c \
-  $(HACL_DIR)/poly1305/poly-c/Hacl_Poly1305_64.c \
-  $(HACL_DIR)/hmac/hmac-c/Hacl_HMAC_SHA2_256.c \
-  $(HACL_DIR)/poly1305/poly-c/AEAD_Poly1305_64.c \
-  $(HACL_DIR)/salsa-family/chacha-vec128-c/Hacl_Chacha20_Vec128.c \
-  #$(HACL_DIR)/api/aead-c/Chacha20Poly1305.c \
+  $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \
+  $(HACL_CODE)/salsa-family/salsa-c/Hacl_Salsa20.c \
+  $(addprefix $(HACL_CODE)/hash/sha2-c/Hacl_SHA2_,256.c 384.c 512.c) \
+  $(HACL_CODE)/curve25519/x25519-c/Hacl_Curve25519.c \
+  $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
+  $(HACL_CODE)/poly1305/poly-c/Hacl_Poly1305_64.c \
+  $(HACL_CODE)/hmac/hmac-c/Hacl_HMAC_SHA2_256.c \
+  $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
+  $(HACL_CODE)/salsa-family/chacha-vec128-c/Hacl_Chacha20_Vec128.c \
+  #$(HACL_CODE)/api/aead-c/Chacha20Poly1305.c \
 
 EVERCRYPT_SOURCES = \
   $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c) \
@@ -171,7 +175,7 @@ $(OUT_DIR)/libevercrypt.$(SO): $(ALL_OBJS) | $(OUT_DIR)
 .PRECIOUS: %.o
 
 $(HACL_SOURCES):
-	$(error "Please run `make -j 8 -C $(HACL_DIR) extract-c` before invoking this Makefile")
+	$(error "Please run `make -j 8 -C $(HACL_CODE) extract-c` before invoking this Makefile")
 
 .PHONY: clean
 clean:
