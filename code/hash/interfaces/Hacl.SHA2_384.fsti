@@ -28,6 +28,9 @@ module Cast = Hacl.Cast
 module Spec = Spec.SHA2_384
 
 
+#reset-options "--max_fuel 0  --z3rlimit 100"
+
+
 (* Definition of base types *)
 private let uint8_t   = FStar.UInt8.t
 private let uint32_t  = FStar.UInt32.t
@@ -71,9 +74,6 @@ inline_for_extraction let pos_ws_w     = size_k_w
 inline_for_extraction let pos_whash_w  = size_k_w +^ size_ws_w
 inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
-
-
-#reset-options "--max_fuel 0  --z3rlimit 100"
 
 
 [@"c_inline"]
