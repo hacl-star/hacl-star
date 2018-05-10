@@ -41,7 +41,7 @@ SPACE=$(empty) $(empty)
 COMMA=,
 
 sha2-c/out.krml: $(SHA2_FILES) $(addsuffix .fst,$(MODULES)) $(addsuffix .fst,$(TESTMODS))
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-translation $^
+	$(KREMLIN) $(KREMLIN_ARGS) -I interfaces -tmpdir sha2-c -skip-translation $^
 
 sha2-c/Hacl_SHA2_%.c: sha2-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation \

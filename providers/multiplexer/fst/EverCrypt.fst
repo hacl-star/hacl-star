@@ -125,3 +125,9 @@ let x25519 dst secret base =
   | Hacl -> Hacl.x25519 dst secret base
   | Vale -> failwith !$"TODO: x25519/Vale"
   | OpenSSL -> failwith !$"TODO: x25519/OpenSSL"
+
+let aes256_gcm_encrypt cipher tag key iv plaintext len ad adlen =
+  match aes_gcm_impl with
+  | Hacl -> failwith !$"TODO: aes-gcm/hacl"
+  | Vale -> failwith !$"TODO: aes-gcm/vale"
+  | OpenSSL -> EverCrypt.OpenSSL.aes256_gcm_encrypt cipher tag key iv plaintext len ad adlen

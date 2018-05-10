@@ -12,8 +12,6 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
-open Hacl.Impl.SHA2_384
-
 
 (* Definition of aliases for modules *)
 module U8 = FStar.UInt8
@@ -28,7 +26,9 @@ module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2_384
-module Hash = Hacl.Impl.SHA2_384
+
+
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 
 (* Definition of base types *)
@@ -47,13 +47,33 @@ private let uint8_p  = Buffer.buffer uint8_ht
 // SHA-384
 //
 
+(* Define word size *)
+inline_for_extraction let size_word = 8ul // Size of the word in bytes
+
 (* Define algorithm parameters *)
-let size_hash = Hash.size_hash_final
-let size_block = Hash.size_block
-let size_state = Hash.size_state
+inline_for_extraction let size_hash_w   = 8ul // 8 words (Intermediate hash output size)
+inline_for_extraction let size_block_w  = 16ul  // 16 words (Working data block size)
+inline_for_extraction let size_hash     = size_word *^ size_hash_w
+inline_for_extraction let size_block    = size_word *^ size_block_w
+inline_for_extraction let size_hash_final_w = 6ul // 6 words (Final hash output size)
+inline_for_extraction let size_hash_final   = size_word *^ size_hash_final_w
 
 
-#reset-options "--max_fuel 0  --z3rlimit 100"
+(* Sizes of objects in the state *)
+inline_for_extraction let size_k_w     = 80ul  // 80 words of 64 bits (size_block)
+inline_for_extraction let size_ws_w    = size_k_w
+inline_for_extraction let size_whash_w = size_hash_w
+inline_for_extraction let size_count_w = 1ul  // 1 word
+inline_for_extraction let size_len_8   = 2ul *^ size_word
+
+inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
+
+(* Positions of objects in the state *)
+inline_for_extraction let pos_k_w      = 0ul
+inline_for_extraction let pos_ws_w     = size_k_w
+inline_for_extraction let pos_whash_w  = size_k_w +^ size_ws_w
+inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
+
 
 
 [@"c_inline"]
@@ -139,7 +159,7 @@ val update_last:
                   /\ (let seq_k = Seq.slice (as_seq h0 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
                   let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
                   let counter = Seq.index seq_counter 0 in
-                  let nb = U64.div len (u32_to_u64 size_block) in
+                  let nb = U64.div len (FStar.Int.Cast.uint32_to_uint64 size_block) in
                   Hacl.Spec.Endianness.reveal_h64s seq_k == Spec.k /\ H64.v counter < (pow2 64 - 2))))
         (ensures  (fun h0 r h1 -> live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1
                   /\ (let seq_hash_0 = Seq.slice (as_seq h0 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in

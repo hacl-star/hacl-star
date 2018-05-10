@@ -12,8 +12,6 @@ open Hacl.UInt8
 open Hacl.UInt32
 open FStar.UInt32
 
-open Hacl.Impl.SHA2_256
-
 
 (* Definition of aliases for modules *)
 module U8 = FStar.UInt8
@@ -28,7 +26,9 @@ module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
 
 module Spec = Spec.SHA2_256
-module Hash = Hacl.Impl.SHA2_256
+
+
+#reset-options "--max_fuel 0  --z3rlimit 100"
 
 
 (* Definition of base types *)
@@ -47,13 +47,31 @@ private let uint8_p  = Buffer.buffer uint8_ht
 // SHA-256
 //
 
+(* Define word size *)
+inline_for_extraction let size_word = 4ul // Size of the word in bytes
+
 (* Define algorithm parameters *)
-let size_hash = Hash.size_hash
-let size_block = Hash.size_block
-let size_state = Hash.size_state
+inline_for_extraction let size_hash_w   = 8ul // 8 words (Final hash output size)
+inline_for_extraction let size_block_w  = 16ul  // 16 words (Working data block size)
+inline_for_extraction let size_hash     = size_word *^ size_hash_w
+inline_for_extraction let size_block    = size_word *^ size_block_w
+inline_for_extraction let max_input_len = 2305843009213693952uL // 2^61 Bytes
 
+(* Sizes of objects in the state *)
+inline_for_extraction let size_k_w     = 64ul  // 2048 bits = 64 words of 32 bits (size_block)
+inline_for_extraction let size_ws_w    = size_k_w
+inline_for_extraction let size_whash_w = size_hash_w
+inline_for_extraction let size_count_w = 1ul  // 1 word
+inline_for_extraction let size_len_8   = 2ul *^ size_word
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
+
+(* Positions of objects in the state *)
+inline_for_extraction let pos_k_w      = 0ul
+inline_for_extraction let pos_ws_w     = size_k_w
+inline_for_extraction let pos_whash_w  = size_k_w +^ size_ws_w
+inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
+
 
 [@"c_inline"]
 val alloc:
@@ -63,8 +81,6 @@ val alloc:
     (ensures (fun h0 st h1 -> (st `unused_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
              /\ Map.domain h1.h == Map.domain h0.h))
 
-
-#reset-options "--max_fuel 0  --z3rlimit 30"
 
 val init:
   state:uint32_p{length state = v size_state} ->
@@ -79,8 +95,6 @@ val init:
               let seq_h_0 = Hacl.Spec.Endianness.reveal_h32s slice_h_0 in
               seq_k == Spec.k /\ seq_h_0 == Spec.h_0 /\ H32.v counter = 0)))
 
-
-#reset-options "--max_fuel 0  --z3rlimit 50"
 
 val update:
   state :uint32_p {length state = v size_state} ->
@@ -105,8 +119,6 @@ val update:
                   /\ H32.v counter_1 = H32.v counter_0 + 1 /\ H32.v counter_1 < pow2 32
                   /\ (Hacl.Spec.Endianness.reveal_h32s seq_hash_1 == Spec.update (Hacl.Spec.Endianness.reveal_h32s seq_hash_0) (Hacl.Spec.Endianness.reveal_sbytes seq_block)))))
 
-
-#reset-options "--max_fuel 0  --z3rlimit 100"
 
 val update_multi:
   state :uint32_p{length state = v size_state} ->
@@ -135,8 +147,6 @@ val update_multi:
                   Spec.update_multi (Hacl.Spec.Endianness.reveal_h32s seq_hash0) (Hacl.Spec.Endianness.reveal_sbytes seq_blocks) )))
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
-
 val update_last:
   state :uint32_p {length state = v size_state} ->
   data  :uint8_p  {disjoint state data} ->
@@ -157,8 +167,6 @@ val update_last:
                   (Hacl.Spec.Endianness.reveal_h32s seq_hash_1) == Spec.update_last (Hacl.Spec.Endianness.reveal_h32s seq_hash_0) prevlen seq_data)))
 
 
-#reset-options "--max_fuel 0  --z3rlimit 25"
-
 val finish:
   state :uint32_p{length state = v size_state} ->
   hash  :uint8_p{length hash = v size_hash /\ disjoint state hash} ->
@@ -169,8 +177,6 @@ val finish:
                   let seq_hash = Hacl.Spec.Endianness.reveal_sbytes (as_seq h1 hash) in
                   seq_hash = Spec.finish (Hacl.Spec.Endianness.reveal_h32s seq_hash_w))))
 
-
-#reset-options "--max_fuel 0  --z3rlimit 10"
 
 val hash:
   hash :uint8_p {length hash = v size_hash} ->
